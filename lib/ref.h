@@ -19,10 +19,19 @@
 #ifndef _REF_H_
 #define _REF_H_
 namespace Ref {
+  /*** \subsection{\texttt{<ref.h>}} */
+  /*** Defines namespace Ref, which implements reference cells. */
+
 extern struct Ref<`a> {`a v;};
+  /** A reference cell is a structure holding a single value. */
 typedef struct Ref<`a> @ ref_t<`a>;
+  /** The type [ref_t] is used to pass the cell by reference. */
 extern ref_t<`a> new_ref(`a);
+  /** [new_ref(x)] creates a new reference cell on the heap, with
+      initial contents [x], and returns a pointer to the new cell. */
 extern `a get(ref_t<`a>);
+  /** [get(c)] returns the value contained in the cell [c]. */
 extern void set(ref_t<`a>,`a);
+  /** [set(c,x)] updates the value in the cell [c] to [x]. */
 }
-#endif 
+#endif

@@ -416,8 +416,8 @@ static doc_t ppseq_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
   else return cat(pp(l->hd), text(sep), oline_doc(), ppseq_f(pp, sep,l->tl));
                   
 }
-doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
-  return tab(ppseq_f(pp,sep,l0));
+doc_t ppseq(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+  return tab(ppseq_f(pp,sep,l));
 }
 
 doc_t seq_f(string_t<`H> sep, list_t<doc_t,`H> l) {
@@ -440,8 +440,8 @@ doc_t seq_f(string_t<`H> sep, list_t<doc_t,`H> l) {
     //                                       new List(f(sep,l->tl),NULL)))));
   }
 }
-doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l0) {
-  return tab(seq_f(sep,l0));
+doc_t seq(string_t<`H> sep, list_t<doc_t,`H> l) {
+  return tab(seq_f(sep,l));
 }
 
 // Sequences broken by lines 
@@ -450,8 +450,8 @@ doc_t ppseql_f(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
   else if (l->tl==NULL) return pp(l->hd);
   else return cat(pp(l->hd), text(sep), line_doc(), ppseql_f(pp,sep,l->tl));
 }
-doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l0) {
-  return tab(ppseql_f(pp,sep,l0));
+doc_t ppseql(doc_t pp(`a), string_t<`H> sep, list_t<`a,`H> l) {
+  return tab(ppseql_f(pp,sep,l));
 }
 
 static doc_t seql_f(string_t<`H> sep, list_t<doc_t,`H> l) {

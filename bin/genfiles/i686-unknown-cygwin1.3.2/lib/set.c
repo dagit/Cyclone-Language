@@ -19,12 +19,12 @@ void Cyc_List_iter_c( void(* f)( void*, void*), void* env, struct Cyc_List_List*
 x); extern struct Cyc_List_List* Cyc_List_merge_sort( int(* less_eq)( void*,
 void*), struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; struct
 Cyc_Set_Set; extern struct Cyc_Set_Set* Cyc_Set_empty( int(* comp)( void*, void*));
-extern struct Cyc_Set_Set* Cyc_Set_rempty( struct _RegionHandle* rgn, int(* comp)(
+extern struct Cyc_Set_Set* Cyc_Set_rempty( struct _RegionHandle* r, int(* comp)(
 void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_singleton( int(* comp)( void*,
 void*), void* x); extern struct Cyc_Set_Set* Cyc_Set_from_list( int(* comp)(
-void*, void*), struct Cyc_List_List* x); extern struct Cyc_Set_Set* Cyc_Set_insert(
+void*, void*), struct Cyc_List_List* l); extern struct Cyc_Set_Set* Cyc_Set_insert(
 struct Cyc_Set_Set* s, void* elt); extern struct Cyc_Set_Set* Cyc_Set_rinsert(
-struct _RegionHandle* rgn, struct Cyc_Set_Set* s, void* elt); extern struct Cyc_Set_Set*
+struct _RegionHandle* r, struct Cyc_Set_Set* s, void* elt); extern struct Cyc_Set_Set*
 Cyc_Set_union_two( struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2); extern
 struct Cyc_Set_Set* Cyc_Set_intersect( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
 s2); extern struct Cyc_Set_Set* Cyc_Set_diff( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*

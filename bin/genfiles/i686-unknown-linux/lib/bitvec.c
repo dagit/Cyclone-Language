@@ -14,11 +14,11 @@ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty
 15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
 Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
 12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern void* Cyc_Dict_lookup(
-struct Cyc_Dict_Dict* d, void* key); extern int Cyc_Bitvec_get( struct
-_tagged_arr, int); extern void Cyc_Bitvec_set( struct _tagged_arr, int); extern
-void Cyc_Bitvec_clear( struct _tagged_arr, int); extern int Cyc_Bitvec_get_and_set(
-struct _tagged_arr, int); extern void Cyc_Bitvec_union_two( struct _tagged_arr
-dest, struct _tagged_arr src1, struct _tagged_arr src2); extern void Cyc_Bitvec_intersect_two(
+struct Cyc_Dict_Dict* d, void* k); extern int Cyc_Bitvec_get( struct _tagged_arr,
+int); extern void Cyc_Bitvec_set( struct _tagged_arr, int); extern void Cyc_Bitvec_clear(
+struct _tagged_arr, int); extern int Cyc_Bitvec_get_and_set( struct _tagged_arr,
+int); extern void Cyc_Bitvec_union_two( struct _tagged_arr dest, struct
+_tagged_arr src1, struct _tagged_arr src2); extern void Cyc_Bitvec_intersect_two(
 struct _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2);
 extern void Cyc_Bitvec_diff_two( struct _tagged_arr dest, struct _tagged_arr
 src1, struct _tagged_arr src2); extern int Cyc_Bitvec_compare_two( struct

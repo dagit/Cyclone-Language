@@ -22,155 +22,246 @@
 
 #include <list.h>
 
-// The entire interface is the same as SlowDict, except there is no
-// delete_present.
-// Mathieu : now a few more functions
-
-// TODO:  add region support
-
 namespace Dict {
+
+  /*** \subsection{\texttt{<dict.h>}}*/
+  /*** Defines namespace Dict, which implements polymorphic,
+       functional, finite maps whose domain must have a total order.
+       We follow the conventions of the Objective Caml Dict library as
+       much as possible.
+
+       The interface is a superset of SlowDict, except that
+       [delete_present] is not supported. */
+
   using List {
 
 extern struct Dict<`a,`b,`r::R>;
 typedef struct Dict<`a,`b,`r> @`r dict_t<`a,`b,`r>;
+/** A value of type [dict_t<`a,`b,`r>] is a dictionary that maps
+    keys of type [`a] to values of type [`b]; the dictionary
+    datatypes live in region [`r]. */
 
-// Raised when a key is present but not expected (e.g., insert_new) 
 extern xtunion exn {extern Present};
-// Raised when a key is not present but expected (e.g., lookup) 
+/** [Present] is thrown when a key is present but not expected. */
 extern xtunion exn {extern Absent};
+/** [Absent] is thrown when a key is absent but should be present. */
 
-// Given a comparison function, return an empty dict. 
-extern dict_t<`a,`b> empty(int comp(`a,`a));
-extern dict_t<`a,`b,`r> rempty(region_t<`r>,int comp(`a,`a));
+extern dict_t<`a,`b> empty(int cmp(`a,`a));
+/** [empty(cmp)] returns an empty dictionary, allocated on the
+    heap. [cmp] should be a comparison function on keys: [cmp(k1,k2)]
+    should return a number less than, equal to, or greater than 0
+    according to whether [k1] is less than, equal to, or greater than
+    [k2] in the ordering on keys. */
+extern dict_t<`a,`b,`r> rempty(region_t<`r>,int cmp(`a,`a));
+/** [rempty(r,cmp)] is like [empty(cmp)] except that the dictionary is
+    allocated in the region with handle [r]. */
 
-// Determine whether a dict is empty 
 extern bool is_empty(dict_t d);
+/** [is_empty(d)] returns true if [d] is empty, and returns false
+    otherwise. */
 
-// Return true if entry indexed by key is present, false otherwise 
-extern bool member(dict_t<`a> d,`a key);
+extern bool member(dict_t<`a> d,`a k);
+/** [member(d,k)] returns true if [k] is mapped to some value in [d],
+    and returns false otherwise. */
 
-// Inserts a key/data pair into a dictionary, replacing any existing
-// pair with the same key. 
-extern dict_t<`a,`b,`r> insert(dict_t<`a,`b,`r> d,`a key,`b data);
+extern dict_t<`a,`b,`r> insert(dict_t<`a,`b,`r> d,`a k,`b v);
+/** [insert(d,k,v)] returns a dictionary with the same mappings as
+    [d], except that [k] is mapped to [v].  The dictionary [d] is not
+    modified. */
 
-// Inserts a key/data pair into a dictionary, raising Present if
-// there is any existing pair with the same key.
-extern dict_t<`a,`b,`r> insert_new(dict_t<`a,`b,`r> d,`a key,`b data);
+extern dict_t<`a,`b,`r> insert_new(dict_t<`a,`b,`r> d,`a k,`b v);
+/** [insert_new(d,k,v)] is like [insert(d,k,v)], except that it throws
+    [Present] if [k] is already mapped to some value in [d]. */
 
-// Insert a list of key/data pairs into a dictionary, replacing
-// duplicate keys.
 extern dict_t<`a,`b,`r> inserts(dict_t<`a,`b,`r> d,
-                                    list_t<$(`a,`b)@> kds);
+                                list_t<$(`a,`b)@> l);
+/** [inserts(d,l)] inserts each key, value pair into [d], returning
+    the resulting dictionary. */
 
-// Return a dictionary containing exactly one key/data pair. 
-extern dict_t<`a,`b> singleton(int comp(`a,`a),`a key,`b data);
+extern dict_t<`a,`b> singleton(int cmp(`a,`a),`a k,`b v);
+/** [singleton(cmp,k,v)] returns a new heap-allocated dictionary with
+    a single mapping, from [k] to [v]. */
 extern dict_t<`a,`b,`r> rsingleton(region_t<`r>,
-                                      int comp(`a,`a),`a key,`b data);
+                                   int cmp(`a,`a),`a k,`b v);
+/** [rsingleton(r,cmp,k,v)] is like [singleton(cmp,k,v)], except the
+    resulting dictionary is allocated in the region with handle
+    [r]. */
 
-// Lookup a key in the dictionary, returning its associated data. If the key
-// is not present, raise Absent.
-extern `b lookup(dict_t<`a,`b> d,`a key);
+extern `b lookup(dict_t<`a,`b> d,`a k);
+/** [lookup(d,k)] returns the value associated with key [k] in [d], or
+    throws [Absent] if [k] is not mapped to any value. */
+extern Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a k);
+/** [lookup_opt(d,k)] returns [NULL] if [k] is not mapped to any value
+    in [d], and returns a non-NULL, heap-allocated option containing
+    the value [k] is mapped to in [d] otherwise. */
+extern `b*`r rlookup_opt(region_t<`r>,dict_t<`a,`b> d,`a k);
+/** [rlookup_opt(r,d,k)] is like [lookup_opt(d,k)] except that any
+    option returned will be allocated in the region with handle
+    [r]. */
+extern bool lookup_bool(dict_t<`a,`b> d, `a k, `b @ans);
+/** If [d] maps [k] to a value, then [lookup_bool(d,k,ans)] assigns
+    that value to [*ans] and returns true; otherwise, it returns
+    false. */
 
-// Same as lookup but doesnt raise an exception -- rather, returns an option.
-extern Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a key);
-
-// A third version of lookup that if present assigns through its third param
-// and returns true, else returns false.
-extern bool lookup_bool(dict_t<`a,`b> d, `a key, `b @`r ans_place);
-
-// Yet another version of lookup that allocates the option in a region
-extern `b*`res rlookup_opt(region_t<`res>,dict_t<`a,`b> d,`a key);
-
-// Fold a function f across the dictionary yielding an accumulator. 
 extern `c fold(`c f(`a,`b,`c),dict_t<`a,`b> d,`c accum);
-// Same but fold an unboxed closure across the dictionary
-extern `c fold_c(`c f(`d,`a,`b,`c),`d env,dict_t<`a,`b> dict,`c accum);
+/** If [d] has keys [k1], \ldots, [kn] and mapping to values [v1],
+    \ldots, [vn], then [fold(f,d,accum)] returns [f(k1,v1, \cdots
+    f(kn,vn,accum)\cdots)]. */
+extern `c fold_c(`c f(`d,`a,`b,`c),`d env,dict_t<`a,`b> d,`c accum);
+/** [fold_c(f,env,d,accum)] is like [fold(f,d,accum)] except that [f]
+    takes closure [env] as its first argument. */
 
-// Apply function f to every element in the dictionary.  Ignore result. 
 extern void app(`c f(`a,`b),dict_t<`a,`b> d);
-// Same but apply an unboxed closure across the dictionary
+/** [app(f,d)] applies [f] to every key/value pair in [d]; the results
+    of the applications are discarded.  Note that [f] cannot return
+    [void]. */
 extern void app_c(`c f(`d,`a,`b),`d env,dict_t<`a,`b> d);
-// void versions of the above
-extern void iter(void f(`a,`b),dict_t<`a,`b> d);
-extern void iter_c(void f(`c,`a,`b),`c env,dict_t<`a,`b> d);
+/** [app_c(f,env,d)] is like [app(f,d)] except that [f] takes closure
+    [env] as its first argument. */
 
-// the next 3 all raise Absent if an element of d1 is not in d2
+extern void iter(void f(`a,`b),dict_t<`a,`b> d);
+/** [iter(f,d)] is like [app(f,d)] except that [f] returns [void]. */
+extern void iter_c(void f(`c,`a,`b),`c env,dict_t<`a,`b> d);
+/** [iter_c(f,env,d)] is like [app_c(f,env,d)] except that [f] returns
+    [void]. */
+
 extern void iter2(void (@f)(`b,`b),dict_t<`a,`b> d1,dict_t<`a,`b> d2);
+/** For every key [k] in the domain of both [d1] and [d2],
+    [iter2(f,d1,d2)] performs [f(lookup(d1,k), lookup(d2,k))].  If
+    there is any key present in [d1] but not [d2], then [Absent] is
+    thrown. */
 extern void iter2_c(void (@f)(`c,`b,`b), `c env,
 		    dict_t<`a,`b> d1, dict_t<`a,`b> d2);
-extern `c fold2_c(`c (@f)(`d,`a,`b1,`b2,`c), `d inner_env,
+/** [iter2_c] is like [iter] except that [f] takes a closure as its
+    first argument. */
+extern `c fold2_c(`c (@f)(`d,`a,`b1,`b2,`c), `d env,
 		  dict_t<`a,`b1> d1, dict_t<`a,`b2> d2, `c accum);
+/** If [k1], \ldots, [kn] are the keys of [d1], then
+    [fold2_c(f,env,d1,d2,accum)] returns
+    [f(env,k1,lookup(k1,d1),lookup(k1,d2), \cdots\
+    f(env,kn,lookup(kn,d1),lookup(kn,d2),accum)\cdots)]. If
+    there is any key present in [d1] but not [d2], then [Absent] is
+    thrown. */
 
-
-// make a copy of a dictionary into a new region -- same as rmap'ing
-// the identity function -- useful to do something like a union into
-// a new region
-extern dict_t<`a,`b,`r2> rcopy(region_t<`r2>, dict_t<`a,`b>);
+extern dict_t<`a,`b,`r> rcopy(region_t<`r>, dict_t<`a,`b>);
+/** [rcopy(r,d)] returns a copy of [d], newly allocated in the region
+    with handle [r]. */
 extern dict_t<`a,`b> copy(dict_t<`a,`b>);
+/** [copy(r,d)] returns a copy of [d], newly allocated on the heap. */
 
-
-// Given a function that maps 'b values to 'c values, convert an
-// dict_t<'a,'b> to a dict_t<'a,'c> by applying the function to each
-// data item.
 extern dict_t<`a,`c> map(`c f(`b),dict_t<`a,`b> d);
-extern dict_t<`a,`c,`r2> rmap(region_t<`r2>,
-                                 `c f(`b),dict_t<`a,`b> d);
-// Same but map an unboxed closure across the dictionary
+/** [map(f,d)] applies [f] to each value in [d], and returns a new
+    dictionary with the results as values: for every binding of a key
+    [k] to a value [v] in [d], the result binds [k] to [f(v)].  The
+    returned dictionary is allocated on the heap.  */
+extern dict_t<`a,`c,`r> rmap(region_t<`r>,
+                             `c f(`b),
+                             dict_t<`a,`b> d);
+/** [rmap(r,f,d)] is like [map(f,d)], except the resulting dictionary
+    is allocated in the region with handle [r]. */
 extern dict_t<`a,`c> map_c(`c f(`d,`b),`d env,dict_t<`a,`b> d);
-extern dict_t<`a,`c,`r2> rmap_c(region_t<`r2>, `c f(`d,`b),`d env,
-                                    dict_t<`a,`b> d);
+/** [map_c(f,env,d)] is like [map(f,d)] except that [f] takes a
+    closure [env] as its first argument. */
+extern dict_t<`a,`c,`r> rmap_c(region_t<`r>, `c f(`d,`b),`d env,
+                               dict_t<`a,`b> d);
+/** [rmap_c(r,f,env,d)] is like [map_c(f,env,d)] except that the
+    resulting dictionary is allocated in the region with handle
+    [r]. */
 
-// Combine two dicts. Domain is union of old domains.  For values in both
-// dictionaries, compute new value using f.
-extern dict_t<`a,`b,`r2> union_two(`b f(`b,`b),
-                                       dict_t<`a,`b> d1,
-                                       dict_t<`a,`b,`r2> d2);
+extern dict_t<`a,`b,`r> union_two(`b f(`b,`b),
+                                   dict_t<`a,`b> d1,
+                                   dict_t<`a,`b,`r> d2);
+/** [union_two(f,d1,d2)] returns a new dictionary with a binding for
+    every key in [d1] or [d2].  If a key appears in both [d1] and
+    [d2], its value in the result is obtained by applying [f] to the
+    two values.  Note that the resulting dictionary is allocated in
+    the same region as [d2].  (We don't use [union] as the name of the
+    function, because [union] is a keyword in Cyclone.) */
 
-extern dict_t<`a,`b,`r1> intersect(`b (@f)(`b,`b),
-                                       dict_t<`a,`b,`r1> d1, 
-                                       dict_t<`a,`b,`r1> d2);
+extern dict_t<`a,`b,`r> intersect(`b (@f)(`b,`b),
+                                  dict_t<`a,`b,`r> d1,
+                                  dict_t<`a,`b,`r> d2);
+/** [intersect(f,d1,d2)] returns a new dictionary with a binding for
+    every key in both [d1] or [d2].  For every key appearing in both
+    [d1] and [d2], its value in the result is obtained by applying [f]
+    to the two values.  Note that the input dictionaries and result
+    must be allocated in the same region. */
 
-extern dict_t<`a,`b,`r1> intersect_c(`b (@f)(`c,`b,`b), `c env,
-                                         dict_t<`a,`b,`r1> d1, 
-                                         dict_t<`a,`b,`r1> d2);
+extern dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`b,`b), `c env,
+                                     dict_t<`a,`b,`r> d1,
+                                     dict_t<`a,`b,`r> d2);
+/** [intersect_c(f,env,d1,d2)] is like [intersect(f,d1,d2)], except
+    that [f] takes a closure [env] as its first argument. */
 
-extern bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b,`r> d);
-
+extern bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b> d);
+/** [forall_c(f,env,d)] returns true if [f(env,k,v)] returns true for
+    every key [k] and associated value [v] in [d], and returns false
+    otherwise. */
 extern bool forall_intersect(bool f(`a,`b,`b), dict_t<`a,`b> d1,
 			     dict_t<`a,`b> d2);
-// Return a key/data pair (in this case -- the first one in the dict).
-// If the dict is empty, raise Absent.
+/** [forall_intersect(f,d1,d2)] returns true if [f(k,v1,v2)] returns
+    true for every key [k] appearing in both [d1] and [d2], where [v1]
+    is the value of [k] in [d1], and [v2] is the value of [k] in [d2];
+    and it returns false otherwise.  */
+
 extern $(`a,`b)@ choose(dict_t<`a,`b> d);
+/** [choose(d)] returns a key/value pair from [d]; if [d] is empty,
+    [Absent] is thrown.  The resulting pair is allocated on the
+    heap. */
 extern $(`a,`b)@`r rchoose(region_t<`r>,dict_t<`a,`b> d);
+/** [rchoose(r,d)] is like [choose(d)], except the resulting pair is
+    allocated in the region with handle [r]. */
 
-// Return an association list containing all the elements
 extern list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d);
+/** [to_list(d)] returns a list of the key/value pairs in [d],
+    allocated on the heap. */
 extern list_t<$(`a,`b)@`r,`r> rto_list(region_t<`r>,dict_t<`a,`b> d);
-
-// pretty inefficient...
-extern dict_t<`a,`b> filter_c(bool f(`c,`a,`b), `c env, 
-                                 dict_t<`a,`b> d);
-
-extern dict_t<`a,`b,`r2> rfilter_c(region_t<`r2>,
-                                      bool f(`c,`a,`b), `c env, 
-                                      dict_t<`a,`b> d);
+/** [rto_list(r,d)] is like [to_list(d)], except that the resulting
+    list is allocated in the region with handle [r]. */
 
 extern dict_t<`a,`b> filter(bool f(`a,`b), dict_t<`a,`b> d);
-extern dict_t<`a,`b,`r2> rfilter(region_t<`r2>,
-                                    bool f(`a,`b), dict_t<`a,`b> d);
-// returns d1 - d2
-extern dict_t<`a,`b> difference(dict_t<`a,`b> d1, 
-                                   dict_t<`a,`b> d2); 
+/** [filter(f,d)] returns a dictionary that has a binding of [k] to
+    [v] for every binding of [k] to [v] in [d] such that [f(k,v)]
+    returns true.  The resulting dictionary is allocated on the heap. */
+extern dict_t<`a,`b,`r> rfilter(region_t<`r>,
+                                bool f(`a,`b), dict_t<`a,`b> d);
+/** [rfilter(r,f,d)] is like [filter(f,d)], except that the resulting
+    dictionary is allocated in the region with handle [r]. */
+extern dict_t<`a,`b> filter_c(bool f(`c,`a,`b), `c env,
+                              dict_t<`a,`b> d);
+/** [filter_c(f,env,d)] is like [filter(f,d)] except that [f] takes a
+    closure [env] as its first argument. */
+extern dict_t<`a,`b,`r> rfilter_c(region_t<`r>,
+                                  bool f(`c,`a,`b), `c env,
+                                  dict_t<`a,`b> d);
+/** [rfilter_c(r,f,env,d)] is like [filter_c(f,env,d)], except that
+    the resulting dictionary is allocated in the region with handle
+    [r]. */
 
+extern dict_t<`a,`b> difference(dict_t<`a,`b> d1, dict_t<`a,`b> d2);
+/** [difference(d1,d2)] returns a dictionary that has a binding of [k]
+    to [v] for every binding of [k] to [v] in [d1] where [k] is not in
+    [d2].  (Note that the values of [d2] are not relevant to
+    [difference(d1,d2)].)  The resulting dictionary is allocated on
+    the heap. */
 extern dict_t<`a,`b,`r> rdifference(region_t<`r>,
-                                       dict_t<`a,`b> d1, 
-                                       dict_t<`a,`b> d2); 
+                                    dict_t<`a,`b> d1,
+                                    dict_t<`a,`b> d2);
+/** [rdifference(d1,d2)] is like [difference(d1,d2)], except that the
+    resulting dictionary is allocated in the region with handle
+    [r]. */
 
 extern dict_t<`a,`b> delete(dict_t<`a,`b>, `a);
-extern dict_t<`a,`b,`r2> rdelete(region_t<`r2>, dict_t<`a,`b>, `a);
-// similar but result is in same region -- a bit faster when the object
-// isn't actually in the region
+/** [delete(d,k)] returns a dictionary with the same bindings as [d],
+    except that any binding of [k] is removed.  The resulting
+    dictionary is allocated on the heap. */
+extern dict_t<`a,`b,`r> rdelete(region_t<`r>, dict_t<`a,`b>, `a);
+/** [rdelete(r,d,k)] is like [delete(d,k)] except that the result is
+    allocated in the region with handle [r]. */
 extern dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r>, `a);
-
+/** [rdelete_same(d,k)] is like [delete(d,k)], except that the
+    resulting dictionary is allocated in the same region as the input
+    dictionary [d].  This can be faster than [delete(d,k)] because it
+    avoids a copy when [k] is not a member of [d]. */
 }}
 #endif

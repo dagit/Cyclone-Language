@@ -19,7 +19,7 @@
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
 
-#include <core.h>
+#include <core.h> // for string_t, stringptr_t
 
 // TODO: add region support
 

@@ -24,14 +24,11 @@
 
 // Note these arrays never shrink in size.
 
-#include <core.h>
 namespace Xarray {
 
   /*** \subsection{\texttt{<xarray.h>}} */
   /*** Defines namespace Xarray, which implements a datatype of
        extensible arrays. */
-
-using Core;
 
 struct Xarray<`a::B> {
   `a ?elmts;

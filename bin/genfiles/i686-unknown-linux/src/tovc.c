@@ -18,10 +18,10 @@ struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
 Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u];
 struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
 unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
-struct _RegionHandle*, int(* comp)( void*, void*)); extern int Cyc_Dict_member(
-struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
-struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
-struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same(
+struct _RegionHandle*, int(* cmp)( void*, void*)); extern int Cyc_Dict_member(
+struct Cyc_Dict_Dict* d, void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* k, void* v); extern void* Cyc_Dict_lookup( struct
+Cyc_Dict_Dict* d, void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same(
 struct Cyc_Dict_Dict*, void*); extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*,
 struct _tagged_arr*); struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[
 19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
@@ -463,10 +463,10 @@ else{ goto _LL42;} _LL42: if(*(( int*) _temp0) ==  Cyc_Absyn_Enum_e){ goto _LL43
 else{ goto _LL44;} _LL44: if(*(( int*) _temp0) ==  Cyc_Absyn_UnresolvedMem_e){
 _LL98: _temp97=(( struct Cyc_Absyn_UnresolvedMem_e_struct*) _temp0)->f2; goto
 _LL45;} else{ goto _LL46;} _LL46: goto _LL47; _LL3: if((( int(*)( struct Cyc_Dict_Dict*
-d, struct _tagged_arr* key)) Cyc_Dict_member)( env.varmap, _temp51)){( void*)( e->r=(
+d, struct _tagged_arr* k)) Cyc_Dict_member)( env.varmap, _temp51)){( void*)( e->r=(
 void*)(( void*)((( struct Cyc_Absyn_Exp*(*)( struct Cyc_Dict_Dict* d, struct
-_tagged_arr* key)) Cyc_Dict_lookup)( env.varmap, _temp51))->r)); continue;} for(
-0; env.boundvars !=  0; env.boundvars=(( struct Cyc_List_List*) _check_null( env.boundvars))->tl){
+_tagged_arr* k)) Cyc_Dict_lookup)( env.varmap, _temp51))->r)); continue;} for( 0;
+env.boundvars !=  0; env.boundvars=(( struct Cyc_List_List*) _check_null( env.boundvars))->tl){
 if( Cyc_Std_zstrptrcmp( _temp51,(*(( struct Cyc_Absyn_Vardecl*)(( struct Cyc_List_List*)
 _check_null( env.boundvars))->hd)->name).f2) ==  0){ return;}} for( 0; env.all_locals
 !=  0; env.all_locals=(( struct Cyc_List_List*) _check_null( env.all_locals))->tl){
@@ -689,9 +689,9 @@ if(*(( int*) _temp223) ==  Cyc_Absyn_Enum_e){ goto _LL266;} else{ goto _LL267;}
 _LL267: if(*(( int*) _temp223) ==  Cyc_Absyn_UnresolvedMem_e){ _LL321: _temp320=((
 struct Cyc_Absyn_UnresolvedMem_e_struct*) _temp223)->f2; goto _LL268;} else{
 goto _LL269;} _LL269: goto _LL270; _LL226: if((( int(*)( struct Cyc_Dict_Dict* d,
-struct _tagged_arr* key)) Cyc_Dict_member)( varmap, _temp274)){( void*)( e->r=(
+struct _tagged_arr* k)) Cyc_Dict_member)( varmap, _temp274)){( void*)( e->r=(
 void*)(( void*)((( struct Cyc_Absyn_Exp*(*)( struct Cyc_Dict_Dict* d, struct
-_tagged_arr* key)) Cyc_Dict_lookup)( varmap, _temp274))->r));} return; _LL228:
+_tagged_arr* k)) Cyc_Dict_lookup)( varmap, _temp274))->r));} return; _LL228:
 return; _LL230: return; _LL232: Cyc_Tovc_apply_varmap( varmap, _temp280);
 _temp282= _temp278; goto _LL234; _LL234: for( 0; _temp282 !=  0; _temp282=((
 struct Cyc_List_List*) _check_null( _temp282))->tl){ Cyc_Tovc_apply_varmap(
@@ -742,10 +742,10 @@ int*) _temp354) ==  Cyc_Absyn_Var_d){ _LL361: _temp360=(( struct Cyc_Absyn_Var_d
 _temp354)->f1; goto _LL357;} else{ goto _LL358;} _LL358: goto _LL359; _LL357: {
 struct _tagged_arr* _temp362=(* _temp360->name).f2; struct _tuple0* _temp363=
 Cyc_Toc_temp_var(); _temp360->name= _temp363; env.varmap=(( struct Cyc_Dict_Dict*(*)(
-struct Cyc_Dict_Dict* d, struct _tagged_arr* key, struct Cyc_Absyn_Exp* data))
-Cyc_Dict_insert)( env.varmap, _temp362, Cyc_Absyn_var_exp( _temp363, 0)); if(
-_temp360->initializer !=  0){ Cyc_Tovc_apply_varmap( env.varmap,( struct Cyc_Absyn_Exp*)
-_check_null( _temp360->initializer));{ void* _temp364=( void*)(( struct Cyc_Absyn_Exp*)
+struct Cyc_Dict_Dict* d, struct _tagged_arr* k, struct Cyc_Absyn_Exp* v)) Cyc_Dict_insert)(
+env.varmap, _temp362, Cyc_Absyn_var_exp( _temp363, 0)); if( _temp360->initializer
+!=  0){ Cyc_Tovc_apply_varmap( env.varmap,( struct Cyc_Absyn_Exp*) _check_null(
+_temp360->initializer));{ void* _temp364=( void*)(( struct Cyc_Absyn_Exp*)
 _check_null( _temp360->initializer))->r; _LL366: if(*(( int*) _temp364) ==  Cyc_Absyn_UnresolvedMem_e){
 goto _LL367;} else{ goto _LL368;} _LL368: goto _LL369; _LL367: { struct _tuple0*
 tmp= Cyc_Toc_temp_var(); struct Cyc_Absyn_Stmt* body= Cyc_Absyn_declare_stmt(
@@ -970,7 +970,7 @@ Cyc_Tovc_stmt_to_vc(({ struct Cyc_Tovc_ToExpEnv _temp616; _temp616.rgn= rgn;
 _temp616.all_locals=(( struct Cyc_List_List*(*)( struct _RegionHandle*, struct
 Cyc_List_List* src)) Cyc_List_rcopy)( rgn,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
 _check_null( _temp606->param_vardecls))->v); _temp616.varmap=(( struct Cyc_Dict_Dict*(*)(
-struct _RegionHandle*, int(* comp)( struct _tagged_arr*, struct _tagged_arr*)))
+struct _RegionHandle*, int(* cmp)( struct _tagged_arr*, struct _tagged_arr*)))
 Cyc_Dict_rempty)( rgn, Cyc_Std_zstrptrcmp); _temp616.encloser= _temp606->body;
 _temp616.gen_ds= _temp615; _temp616;}), _temp606->body); _temp578=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)(* _temp615,

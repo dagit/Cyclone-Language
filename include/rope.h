@@ -18,12 +18,12 @@
 
 #ifndef _ROPE_H_
 #define _ROPE_H_
-#include <core.h>
+#include <core.h> // for string_t, mstring_t
 #include <list.h>
 
 namespace Rope {
 
-  /*** \section{\texttt{<rope.h>}} */
+  /*** \subsection{\texttt{<rope.h>}} */
   /*** Defines namespace Rope, which implements character arrays that
        can be concatenated in constant time. */
 

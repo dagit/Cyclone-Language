@@ -23,88 +23,117 @@
 #include <list.h>
 
 namespace SlowDict {
+
+  /*** \subsection{\texttt{<slowdict.h>}}*/
+  /*** Defines namespace SlowDict, which implements polymorphic,
+       functional, finite maps whose domain must have a total order.
+       We follow the conventions of the Objective Caml Dict library as
+       much as possible.
+
+       The basic functionality is the same as Dict, except that
+       SlowDict supports [delete_present]; but region support still
+       needs to be added, and some functions are missing, as well. */
+
 using List;
-
-// slowdict.h:   defines polymorphic, functional, finite maps from types 'a to 
-//           'b, where the domain must have a total order.  Follows the
-//           conventions of the Ocaml dict library as much as possible.
-// unlike Dict, we support delete.
-
-// TODO: add region support
 
 extern struct Dict<`a,`b>;
 typedef struct Dict<`a,`b> @ dict_t<`a,`b>;
+/** A value of type [dict_t<`a,`b>] is a dictionary that maps
+    keys of type [`a] to values of type [`b]. */
 
-// Raised when a key is present but not expected (e.g., insert_new) 
 extern xtunion exn {extern Present};
-// Raised when a key is not present but expected (e.g., lookup) 
+/** [Present] is thrown when a key is present but not expected. */
 extern xtunion exn {extern Absent};
+/** [Absent] is thrown when a key is absent but should be present. */
 
-// Given a comparison function, return an empty dict. 
-extern dict_t<`a,`b> empty(int comp(`a,`a));
+extern dict_t<`a,`b> empty(int cmp(`a,`a));
+/** [empty(cmp)] returns an empty dictionary, allocated on the
+    heap. [cmp] should be a comparison function on keys: [cmp(k1,k2)]
+    should return a number less than, equal to, or greater than 0
+    according to whether [k1] is less than, equal to, or greater than
+    [k2] in the ordering on keys. */
 
-// Determine whether a dict is empty 
-extern bool is_empty(dict_t<`a,`b> d);
+extern bool is_empty(dict_t d);
+/** [is_empty(d)] returns true if [d] is empty, and returns false
+    otherwise. */
 
-// Return true if entry indexed by key is present, false otherwise 
-extern bool member(dict_t<`a,`b> d,`a key);
+extern bool member(dict_t<`a> d,`a k);
+/** [member(d,k)] returns true if [k] is mapped to some value in [d],
+    and returns false otherwise. */
 
-// Inserts a key/data pair into a dictionary, replacing any existing
-// pair with the same key. 
-extern dict_t<`a,`b> insert(dict_t<`a,`b> d,`a key,`b data);
+extern dict_t<`a,`b> insert(dict_t<`a,`b> d,`a k,`b v);
+/** [insert(d,k,v)] returns a dictionary with the same mappings as
+    [d], except that [k] is mapped to [v].  The dictionary [d] is not
+    modified. */
 
-// Inserts a key/data pair into a dictionary, raising Present if
-// there is any existing pair with the same key.
-extern dict_t<`a,`b> insert_new(dict_t<`a,`b> d,`a key,`b data);
+extern dict_t<`a,`b> insert_new(dict_t<`a,`b> d,`a k,`b v);
+/** [insert_new(d,k,v)] is like [insert(d,k,v)], except that it throws
+    [Present] if [k] is already mapped to some value in [d]. */
 
-// Insert a list of key/data pairs into a dictionary, replacing
-// duplicate keys.
-extern dict_t<`a,`b> 
-  inserts(dict_t<`a,`b> d,list_t<$(`a,`b)@> kds);
+extern dict_t<`a,`b> inserts(dict_t<`a,`b> d,list_t<$(`a,`b)@> l);
+/** [inserts(d,l)] inserts each key, value pair into [d], returning
+    the resulting dictionary. */
 
-// Return a dictionary containing exactly one key/data pair. 
-extern dict_t<`a,`b> singleton(int comp(`a,`a),`a key,`b data);
+extern dict_t<`a,`b> singleton(int cmp(`a,`a),`a k,`b v);
+/** [singleton(cmp,k,v)] returns a new heap-allocated dictionary with
+    a single mapping, from [k] to [v]. */
 
-// Lookup a key in the dictionary, returning its associated data. If the key
-// is not present, raise Absent.
-extern `b lookup(dict_t<`a,`b> d,`a key);
+extern `b lookup(dict_t<`a,`b> d,`a k);
+/** [lookup(d,k)] returns the value associated with key [k] in [d], or
+    throws [Absent] if [k] is not mapped to any value. */
+extern Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a k);
+/** [lookup_opt(d,k)] returns [NULL] if [k] is not mapped to any value
+    in [d], and returns a non-NULL, heap-allocated option containing
+    the value [k] is mapped to in [d] otherwise. */
 
-// Same as lookup but doesnt raise an exception -- rather, returns an
-// option.
-extern Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a key);
+extern dict_t<`a,`b> delete(dict_t<`a,`b> d,`a k);
+/** [delete(d,k)] returns a dictionary with the same bindings as [d],
+    except that any binding of [k] is removed.  The resulting
+    dictionary is allocated on the heap. */
 
-// Delete a key/pair from the dict if present. 
-extern dict_t<`a,`b> delete(dict_t<`a,`b> d,`a key);
+extern dict_t<`a,`b> delete_present(dict_t<`a,`b> d,`a k);
+  /** [delete_present(d,k)] is like [delete(d,k)], except that
+      [Absent] is thrown if [k] has no binding in [d]. */
 
-// Delete a key/pair from the dict.  Raise Absent if key doesn't exist 
-extern dict_t<`a,`b> delete_present(dict_t<`a,`b> d,`a key);
-
-// Fold a function f across the dictionary yielding an accumulator. 
 extern `c fold(`c f(`a,`b,`c),dict_t<`a,`b> d,`c accum);
-// Same but fold an unboxed closure across the dictionary
-extern `c fold_c(`c f(`d,`a,`b,`c),`d env, dict_t<`a,`b> dict,`c accum);
+/** If [d] has keys [k1], \ldots, [kn] and mapping to values [v1],
+    \ldots, [vn], then [fold(f,d,accum)] returns [f(k1,v1, \cdots
+    f(kn,vn,accum)\cdots)]. */
+extern `c fold_c(`c f(`d,`a,`b,`c),`d env, dict_t<`a,`b> d,`c accum);
+/** [fold_c(f,env,d,accum)] is like [fold(f,d,accum)] except that [f]
+    takes closure [env] as its first argument. */
 
-// Apply function f to every element in the dictionary.  Ignore result. 
 extern void app(`c f(`a,`b),dict_t<`a,`b> d);
-// Same but apply an unboxed closure across the dictionary
+/** [app(f,d)] applies [f] to every key/value pair in [d]; the results
+    of the applications are discarded.  Note that [f] cannot return
+    [void]. */
 extern void app_c(`c f(`d,`a,`b),`d env,dict_t<`a,`b> d);
-// void versions of the above
+/** [app_c(f,env,d)] is like [app(f,d)] except that [f] takes closure
+    [env] as its first argument. */
+
 extern void iter(void f(`a,`b),dict_t<`a,`b> d);
+/** [iter(f,d)] is like [app(f,d)] except that [f] returns [void]. */
 extern void iter_c(void f(`c,`a,`b),`c env,dict_t<`a,`b> d);
+/** [iter_c(f,env,d)] is like [app_c(f,env,d)] except that [f] returns
+    [void]. */
 
-// Given a function that maps 'b values to 'c values, convert an
-// dict_t<'a,'b> to a dict_t<'a,'c> by applying the function to each
-// data item.
 extern dict_t<`a,`c> map(`c f(`b),dict_t<`a,`b> d);
-// Same but map an unboxed closure across the dictionary
+/** [map(f,d)] applies [f] to each value in [d], and returns a new
+    dictionary with the results as values: for every binding of a key
+    [k] to a value [v] in [d], the result binds [k] to [f(v)].  The
+    returned dictionary is allocated on the heap.  */
 extern dict_t<`a,`c> map_c(`c f(`d,`b),`d env,dict_t<`a,`b> d);
+/** [map_c(f,env,d)] is like [map(f,d)] except that [f] takes a
+    closure [env] as its first argument. */
 
-// Return a key/data pair (in this case -- the first one in the dict).
-// If the dict is empty, raise Absent.
 extern $(`a,`b)@ choose(dict_t<`a,`b> d);
+/** [choose(d)] returns a key/value pair from [d]; if [d] is empty,
+    [Absent] is thrown.  The resulting pair is allocated on the
+    heap. */
 
-// Return an association list containing all the elements
 extern list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d);
+/** [to_list(d)] returns a list of the key/value pairs in [d],
+    allocated on the heap. */
 
 }
 #endif

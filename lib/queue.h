@@ -19,43 +19,56 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
 
+#include <core.h> // for bool
+
 namespace Queue {
 
-// queue.h:  defines generic imperative queues and various operations
-//           following the conventions of the Ocaml queue library as much
-//           as possible.  
+  /*** \subsection{\texttt{<queue.h>}} */
+  /*** Defines namespace Queue, which implements generic imperative
+       queues and various operations following the conventions of the
+       Objective Caml queue library as much as possible.  */
 
 extern struct Queue<`a,`r::R>;
 typedef struct Queue<`a,`r> @`r queue_t<`a,`r>;
+  /** A value of type [queue_t<`a,`r>] is a first-in, first-out queue
+      of elements of type [`a]; the queue data structures are
+      allocated in region [`r]. */
 
-// true when the queue is empty
 extern bool is_empty(queue_t);
+  /** [is_empty(q)] returns true if [q] contains no elements, and
+      returns false otherwise. */
 
-// raised by queue_take and queue_peek
-extern xtunion exn { extern Empty };
-
-// create a new queue
 extern queue_t create();
+  /** [create()] allocates a new, empty queue on the heap and returns it. */
 
-// insert an element into the rear of the queue (side effect)
 extern void add(queue_t<`a,`H>,`a x);
+  /** [add(q,x)] adds [x] to the end of [q] (by side effect). */
 extern void radd(region_t<`r>, queue_t<`a,`r>,`a x);
+  /** [radd(r,q,x)] is like [add(q,x)] except that the queue lives in
+      the region with handle [r]. */
 
-// get and remove an element from the front of the queue (side effect)
+extern xtunion exn { extern Empty };
+  /** [Empty] is an exception raised by [take] and [peek]. */
 extern `a take(queue_t<`a>);
-
-// return the first element in the queue without removing it
+  /** [take(q)] removes the element from the front on [q] and returns
+      it; if [q] is empty, exception [Empty] is thrown. */
 extern `a peek(queue_t<`a>);
+  /** [peek(q)] returns the element at the front of [q], without
+      removing it from [q].  If [q] is empty, exception [Empty] is
+      thrown. */
 
-// clear out the entire queue (side effect)
 extern void clear(queue_t<`a>);
+  /** [clear(q)] removes all elements from [q]. */
 
-// return the number of lements in the queue
 extern int length(queue_t<`a>);
+  /** [length(q)] returns the number of elements in [q]. */
 
-// apply f to each element in the queue from the front to the back
 extern void iter(void f(`a), queue_t<`a>);
+  /** [iter(f,q)] applies [f] to each element of [q], from first to
+      last.  Note that [f] must return [void]. */
 extern void app(`b f(`a), queue_t<`a>);
+  /** [app(f,q)] applies [f] to each element of [q], from first to
+      last.  Note that [f] must return a value of kind [M]. */
 
 }
 

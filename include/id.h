@@ -24,43 +24,53 @@
 #include <cstdio.h>
 
 namespace Id {
+
+  /*** \subsection{\texttt{<id.h>}} */
+  /*** Defines a namespace Id that implements a datatype of
+       identifiers for use in compilers, type checkers, etc. */
+
 using Core;
 using Std;
 
-// id.h:    defines an identifiers used in compilers, type-checkers, etc.
-
-// identifiers are abstract (though there's not much to them)
 extern struct id;
 typedef struct id @Id;
+  /** [Id] is the abstract type of identifiers. */
 
-// make an id that is equal to other id's with the same string and int
 extern Id id_make(string_t<`H>,int);
+  /** [id_make(s,n)] returns a new identifier with name [s] and number
+      [n].  Two identifiers are equal if they have the same name and
+      number. */
 
-// make an id with input string, but not equal to any other id
 extern Id id_new(string_t<`H>);
+  /** [id_new(s)] returns an identifier with name [s] and a fresh number. */
 
-// Generate a new unique id from an existing one.
 extern Id id_renew(Id);
+  /** [id_renew(id)] returns a fresh identifier with the same name as
+      [id]. */
 
-// make an id with input string, equal to other ids with this string and int -1
 extern Id id_of_string(string_t<`H>);
+  /** [id_of_string(s)] returns an identifier with name [s] and number
+      -1. */
 
-// same as id_new
 extern Id id_unique(string_t<`H>);
+  /** [id_unique(s)] is the same as [id_new(s)]. */
 
-// return string and int portions concatenated with a '$' in-between
 extern mstring_t id_to_string(Id);
+  /** [id_to_string(id)] returns a string representation of [id]: its
+      string and number separated by \$. */
 
-// print an identifier to FILE
 extern void id_prn(FILE @,Id);
+  /** [id_prn(f,id)] prints a string representation of [id] to [f]. */
 
-// return string portion of an id
 extern mstring_t id_to_source(Id);
+  /** [id_to_source(id)] returns the name of [id]. */
 
-// defines a total ordering on ids, return 0 if equal, -1 if first arg is first,
-//                                                     +1 if second arg is first
 extern int id_compare(Id,Id);
-
+  /** [id_compare] is a comparison function on identifiers:
+      [id_compare(id1,id2)] returns a number less than, equal to, or
+      greater than 0 according to whether [id1] is less than, equal
+      to, or greater than [id2] in the total ordering on
+      identifiers. */
 }
 
 #endif

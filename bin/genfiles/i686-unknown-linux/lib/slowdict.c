@@ -18,22 +18,22 @@ struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct
 Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ; extern int
 Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
 extern unsigned char Cyc_SlowDict_Present[ 12u]; extern unsigned char Cyc_SlowDict_Absent[
-11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* comp)( void*,
+11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* cmp)( void*,
 void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d); extern
-int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* key); extern struct
-Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict* d, void* key,
-void* data); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new( struct
-Cyc_SlowDict_Dict* d, void* key, void* data); extern struct Cyc_SlowDict_Dict*
-Cyc_SlowDict_inserts( struct Cyc_SlowDict_Dict* d, struct Cyc_List_List* kds);
-extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_singleton( int(* comp)( void*,
-void*), void* key, void* data); extern void* Cyc_SlowDict_lookup( struct Cyc_SlowDict_Dict*
-d, void* key); extern struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict*
-d, void* key); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete( struct Cyc_SlowDict_Dict*
-d, void* key); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete_present(
-struct Cyc_SlowDict_Dict* d, void* key); extern void* Cyc_SlowDict_fold( void*(*
-f)( void*, void*, void*), struct Cyc_SlowDict_Dict* d, void* accum); extern void*
+int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* k); extern struct
+Cyc_SlowDict_Dict* Cyc_SlowDict_insert( struct Cyc_SlowDict_Dict* d, void* k,
+void* v); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new( struct Cyc_SlowDict_Dict*
+d, void* k, void* v); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_inserts(
+struct Cyc_SlowDict_Dict* d, struct Cyc_List_List* l); extern struct Cyc_SlowDict_Dict*
+Cyc_SlowDict_singleton( int(* cmp)( void*, void*), void* k, void* v); extern
+void* Cyc_SlowDict_lookup( struct Cyc_SlowDict_Dict* d, void* k); extern struct
+Cyc_Core_Opt* Cyc_SlowDict_lookup_opt( struct Cyc_SlowDict_Dict* d, void* k);
+extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete( struct Cyc_SlowDict_Dict*
+d, void* k); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_delete_present(
+struct Cyc_SlowDict_Dict* d, void* k); extern void* Cyc_SlowDict_fold( void*(* f)(
+void*, void*, void*), struct Cyc_SlowDict_Dict* d, void* accum); extern void*
 Cyc_SlowDict_fold_c( void*(* f)( void*, void*, void*, void*), void* env, struct
-Cyc_SlowDict_Dict* dict, void* accum); extern void Cyc_SlowDict_app( void*(* f)(
+Cyc_SlowDict_Dict* d, void* accum); extern void Cyc_SlowDict_app( void*(* f)(
 void*, void*), struct Cyc_SlowDict_Dict* d); extern void Cyc_SlowDict_app_c(
 void*(* f)( void*, void*, void*), void* env, struct Cyc_SlowDict_Dict* d);
 extern void Cyc_SlowDict_iter( void(* f)( void*, void*), struct Cyc_SlowDict_Dict*

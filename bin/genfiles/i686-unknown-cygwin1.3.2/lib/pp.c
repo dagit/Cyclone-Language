@@ -51,24 +51,24 @@ struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d, int w); extern
 struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct Cyc_PP_Doc* Cyc_PP_blank_doc();
 extern struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct Cyc_PP_Doc* Cyc_PP_oline_doc();
 extern struct Cyc_PP_Doc* Cyc_PP_text( struct _tagged_arr s); extern struct Cyc_PP_Doc*
-Cyc_PP_textptr( struct _tagged_arr* s); extern struct Cyc_PP_Doc* Cyc_PP_hyperlink(
+Cyc_PP_textptr( struct _tagged_arr* p); extern struct Cyc_PP_Doc* Cyc_PP_hyperlink(
 struct _tagged_arr shrt, struct _tagged_arr full); extern struct Cyc_PP_Doc* Cyc_PP_nest(
 int k, struct Cyc_PP_Doc* d); extern struct Cyc_PP_Doc* Cyc_PP_cat( struct
 _tagged_arr); extern struct Cyc_PP_Doc* Cyc_PP_cats( struct Cyc_List_List*
 doclist); extern struct Cyc_PP_Doc* Cyc_PP_cats_arr( struct _tagged_arr docs);
-extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc* d, struct Cyc_PP_Doc*
+extern struct Cyc_PP_Doc* Cyc_PP_doc_union( struct Cyc_PP_Doc* d1, struct Cyc_PP_Doc*
 d2); extern struct Cyc_PP_Doc* Cyc_PP_tab( struct Cyc_PP_Doc* d); extern struct
-Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr
-sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_seq( struct
-_tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_ppseql(
+Cyc_PP_Doc* Cyc_PP_seq( struct _tagged_arr sep, struct Cyc_List_List* l); extern
+struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*), struct
+_tagged_arr sep, struct Cyc_List_List* l); extern struct Cyc_PP_Doc* Cyc_PP_seql(
+struct _tagged_arr sep, struct Cyc_List_List* l0); extern struct Cyc_PP_Doc* Cyc_PP_ppseql(
 struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr sep, struct Cyc_List_List*
-l0); extern struct Cyc_PP_Doc* Cyc_PP_seql( struct _tagged_arr sep, struct Cyc_List_List*
-l0); extern struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr start, struct
-_tagged_arr stop, struct _tagged_arr sep, struct Cyc_List_List* ss); extern
+l); extern struct Cyc_PP_Doc* Cyc_PP_group( struct _tagged_arr start, struct
+_tagged_arr stop, struct _tagged_arr sep, struct Cyc_List_List* l); extern
 struct Cyc_PP_Doc* Cyc_PP_groupl( struct _tagged_arr start, struct _tagged_arr
-stop, struct _tagged_arr sep, struct Cyc_List_List* ss); extern struct Cyc_PP_Doc*
+stop, struct _tagged_arr sep, struct Cyc_List_List* l); extern struct Cyc_PP_Doc*
 Cyc_PP_egroup( struct _tagged_arr start, struct _tagged_arr stop, struct
-_tagged_arr sep, struct Cyc_List_List* ss); struct Cyc_Xarray_Xarray{ struct
+_tagged_arr sep, struct Cyc_List_List* l); struct Cyc_Xarray_Xarray{ struct
 _tagged_arr elmts; int num_elmts; } ; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
 extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
 struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
@@ -419,8 +419,8 @@ pp, sep,(( struct Cyc_List_List*) _check_null( l))->tl); _temp156[ 2u]= Cyc_PP_o
 _temp156[ 1u]= Cyc_PP_text( sep); _temp156[ 0u]= pp(( void*)(( struct Cyc_List_List*)
 _check_null( l))->hd); Cyc_PP_cat( _tag_arr( _temp156, sizeof( struct Cyc_PP_Doc*),
 4u));});}}} struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(* pp)( void*),
-struct _tagged_arr sep, struct Cyc_List_List* l0){ return Cyc_PP_tab( Cyc_PP_ppseq_f(
-pp, sep, l0));} struct Cyc_PP_Doc* Cyc_PP_seq_f( struct _tagged_arr sep, struct
+struct _tagged_arr sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_ppseq_f(
+pp, sep, l));} struct Cyc_PP_Doc* Cyc_PP_seq_f( struct _tagged_arr sep, struct
 Cyc_List_List* l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if((( struct
 Cyc_List_List*) _check_null( l))->tl ==  0){ return( struct Cyc_PP_Doc*)((
 struct Cyc_List_List*) _check_null( l))->hd;} else{ struct Cyc_PP_Doc* sep2= Cyc_PP_text(
@@ -433,8 +433,8 @@ _temp159->hd=( void*) sep2; _temp159->tl=({ struct Cyc_List_List* _temp160=(
 struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp160->hd=(
 void*) oline; _temp160->tl= _temp158; _temp160;}); _temp159;}); _temp157=
 _temp158;} return Cyc_PP_cats( l);}}} struct Cyc_PP_Doc* Cyc_PP_seq( struct
-_tagged_arr sep, struct Cyc_List_List* l0){ return Cyc_PP_tab( Cyc_PP_seq_f( sep,
-l0));} struct Cyc_PP_Doc* Cyc_PP_ppseql_f( struct Cyc_PP_Doc*(* pp)( void*),
+_tagged_arr sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_seq_f( sep,
+l));} struct Cyc_PP_Doc* Cyc_PP_ppseql_f( struct Cyc_PP_Doc*(* pp)( void*),
 struct _tagged_arr sep, struct Cyc_List_List* l){ if( l ==  0){ return Cyc_PP_nil_doc();}
 else{ if((( struct Cyc_List_List*) _check_null( l))->tl ==  0){ return pp(( void*)((
 struct Cyc_List_List*) _check_null( l))->hd);} else{ return({ struct Cyc_PP_Doc*
@@ -443,7 +443,7 @@ _check_null( l))->tl); _temp161[ 2u]= Cyc_PP_line_doc(); _temp161[ 1u]= Cyc_PP_t
 sep); _temp161[ 0u]= pp(( void*)(( struct Cyc_List_List*) _check_null( l))->hd);
 Cyc_PP_cat( _tag_arr( _temp161, sizeof( struct Cyc_PP_Doc*), 4u));});}}} struct
 Cyc_PP_Doc* Cyc_PP_ppseql( struct Cyc_PP_Doc*(* pp)( void*), struct _tagged_arr
-sep, struct Cyc_List_List* l0){ return Cyc_PP_tab( Cyc_PP_ppseql_f( pp, sep, l0));}
+sep, struct Cyc_List_List* l){ return Cyc_PP_tab( Cyc_PP_ppseql_f( pp, sep, l));}
 static struct Cyc_PP_Doc* Cyc_PP_seql_f( struct _tagged_arr sep, struct Cyc_List_List*
 l){ if( l ==  0){ return Cyc_PP_nil_doc();} else{ if((( struct Cyc_List_List*)
 _check_null( l))->tl ==  0){ return( struct Cyc_PP_Doc*)(( struct Cyc_List_List*)
