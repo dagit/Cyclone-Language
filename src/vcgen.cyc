@@ -346,6 +346,8 @@ assn_info_t new_assn_info(void){
 $(assn_t, assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
   let result = Hashtable::lookup_opt(*assn_info, e);
   if (result == NULL){
+    //wangyl: we don't know any info about vcgen here, so the ctxt
+    //should be true and the assertion we need to prove should be false
     return $(&true_assn, &false_assn);
   }else{
     return **result;

@@ -45,7 +45,7 @@ using Absynpp;
 #endif
 
 
-//#define PERFORMANCE_DEBUG
+#define PERFORMANCE_DEBUG
 using Absyn;
 using Warn;
 using Core;
@@ -535,10 +535,11 @@ void insert_checks(List::list_t<decl_t,`H> tds,
     do_decl(nv,tds->hd);
 #ifdef PERFORMANCE_DEBUG
   //wangyl performance comparison
-  fprintf(stderr, "************insert_checks*************\n");
-  fprintf(stderr, "vcgen and reln agree for %d times\n", same_result);
-  fprintf(stderr, "vcgen elminate %d that reln couldn't\n", vcgen_eliminate);
-  fprintf(stderr, "reln eliminate %d that vcgen couldn't\n", reln_eliminate);
-  fprintf(stderr, "**************************************\n");
+  printf( "************insert_checks*************\n");
+  printf( "vcgen and reln agree for %d times\n", same_result);
+  printf( "vcgen elminate %d that reln couldn't\n", vcgen_eliminate);
+  printf( "reln eliminate %d that vcgen couldn't\n", reln_eliminate);
+  printf( "reln eliminated %d out of %d total\n", bounds_checks_eliminated, total_bounds_checks);
+  printf( "**************************************\n");
 #endif
 }

@@ -159,6 +159,7 @@ static distance_t lookup_col(row_t n, term_t j) {
 // if the distance is infinite.
 static dist_t* lookup_distance(row_t i, bool is_signed, term_t j) {
   static dist_t zero = Dist{0, NULL};
+  if (i == NULL) return NULL;
   if (cmp_term(i->source,j) == 0) 
     return &zero; // same term always at distance 0
   let ds = lookup_col(i,j);
@@ -199,19 +200,42 @@ static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_t_n
 
 // FIX: 32-bit dependency!
 #define MAXINT  (2147483647)
-#define MININT  (-2147483648)
+//#define MININT  (-2147483648)
+#define MININT (-MAXINT-1)
+#define MAXUINT (0xFFFFFFFF)
 
-//returns $(false, c1+c2) if there is no overflow in computing c1+c2
-//returns $(true, MAXINT) if there is overflow (c1+c2 > MAXINT)
-//returns $(true, MININT) if there is underflow (c1+c2 < MININT)
-static $(bool, int) is_sum_overflow(int c1, int c2){
-  let sum = c1 + c2;
-  //c1 and c2 has the same sign, but sum has a different sign, 
-  if ((~(c1 ^ c2) & (sum ^ c1)) >> 31){
-    if (sum >> 31) return $(true, (int)MAXINT);
-    else return $(true, (int)MININT);
+
+typedef $(bool, int) overflow_info_t;
+
+typedef enum Operator{
+  PLUS,
+  MINUS,
+} operator_t;
+
+
+//checking if the sum or difference of two signed integers overflowed
+//assuming size of intger as sizeofint (32), assumming the highest bit
+//as the sign bit.
+#define sizeofint 32;
+static overflow_info_t is_overflow(int c1, operator_t op,int c2){
+  switch (op){
+  case PLUS:
+    let sum = c1 + c2;
+    if ((~(c1 ^ c2) & (sum ^ c1)) >> 31){
+      //overflow happened
+      if (sum > 0) return $(true, MININT); //an underflow
+      else return $(true, MAXINT); //an overflow
+    } else return $(false, sum); //no overflow
+  case MINUS:
+    let dif = c1 - c2;
+    if (((c1^c2) & (c1 ^ dif)) >> 31){
+      //overflow happened
+      if (dif > 0) return $(true, MININT); //an underflow
+      else return $(true, MAXINT); //an overflow
+    } else return $(false, dif); //no overflow
+  default:
+    Tcutil::impos("Pratt_Prover: bad operator in overflow check");
   }
-  return $(false, c1+c2);
 }
 
 // add an edge to a graph and close it off to find shortest paths.
@@ -231,30 +255,22 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
     return true;
   dist_t* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
-  // FIX -- distance could overflow
   if (ji_dist != NULL){
-    int sum = ji_dist->length + dist;
-    if(( ~((ji_dist->length) ^ dist) & (sum ^ dist)) >> 31){
-      // overflow happened, the two operands have the same sign while the sum
-      // has a different sign bit from the operand
-      if (dist >> 31){
-	//both operands are negative, then the sum is actually negative, the 
-	//graph is inconsistent with the new edge.
-	return false;
-      }
-      //both operands are positive, the sum should be positive
-      //even if it overflowed to look like negative
-      else return true; 
-    }else{
-      // no overflow, so just check the sum as we used to.
-      if (sum < 0)
-	return false; 
+    let $(overflow, sum) = is_overflow(ji_dist->length, PLUS, dist);
+    if (sum < 0){
+      //underflowed or not, there is a negative loop indeed
+      return false;
+    }else if (overflow && sum > 0){
+      //the edge will create a very positive loop and the 
+      //weight of the loop will overflow, so we will have to 
+      //ignore the edge (by not adding it)
+      return true;
     }
+    //all other cases, proceed by adding the edge into the graph.
   }
 
-  // update shortest path for each pair of nodes
+  // adding a new edge, update shortest path
   let jrow = lookup_row(g,j);
-  bool overflow;
   for (let ks = g->rows; ks != NULL; ks = ks->next) {
     let k = ks->source;
     let ki_dist = lookup_distance(ks,is_signed,i);
@@ -268,61 +284,41 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
       let jl_dist = lookup_distance(jrow,is_signed,l);
       if (jl_dist == NULL) continue;//no new path through ij
 
-      overflow = false;
-      int sum1, sum2;
-      int new_dist;
-      if((ki_dist->length ^ dist) >> 31){
-	//two operands with different signs, no overflow;
-	sum1 = ki_dist->length+dist;
-	sum2 = jl_dist->length;
-      }else if ((dist ^ jl_dist->length) >> 31){
-	//two operands with different signs, no overflow;
-	sum1 = dist + jl_dist->length;
-	sum2 = ki_dist->length;
-      }else{
-	// *ki_dist, dist and jl_dist all have the same sign
-	//might overflow here, need to check:
-	sum1 = ki_dist->length+dist;
-	if ((sum1 ^ dist) >>31) overflow = true;
-	sum2 = jl_dist->length;
-      }
-      //positive overflow, has to throw out the edge.
-      if (overflow && sum1 < 0) continue;
-      //negative overflow, could assign MININT;
-      if (overflow && sum1 >= 0) {
-	insert_distance(ks, is_signed, l, (int)MININT, NULL);
-	continue;
-      }
-      new_dist = sum1 + sum2;
-      if ((sum1 ^ sum2) >> 31){
-	//sum1 and sum2 have different signs, no overflow here
-	//nothing needs to be done
-	overflow = false;
+      // computing w(kj) = w(ki) + w(ij)
+      bool final;
+      int sum;
+      let $(of1, sum1) = is_overflow(ki_dist->length, PLUS, dist);
+      if (!of1){
+	//computing w(kl) = w(kj) + w(jl)
+	let $(of2, sum2) = is_overflow(sum1, PLUS, jl_dist->length);
+	final = of2;
+	sum = sum2;
       }else {
-	//sum1 and sum2 have the same sign, might overflow here
-	if (sum1 < 0 && new_dist > 0){
-	  //underflow happened, 
-	  //new dist is less than MININT
-	  new_dist = (int)MININT;
-	  overflow = false;
-	}else if (sum1 > 0 && new_dist < 0){
-	  overflow = true;
-	  //new dist is bigger than MAXINT, overflow happened
+	//now we know that ki_dist, ij_dist have the same sign
+	//that's the only way the sum can cause overflow
+	let $(of1, sum1) = is_overflow(ki_dist->length, PLUS, jl_dist->length);
+	if (!of1){
+	  let $(of2, sum2) = is_overflow(sum1, PLUS, dist);
+	  final = of2;
+	  sum = sum;
+	}else {
+	  //now we know that ki_dist, ij_dist, jl_dist have the same sign
+	  //that's the only way both of1's are true
+	  final = true;
+	  if (dist < 0){
+	    //it's an underflow, because everything is negative
+	    sum = MININT;
+	  }else{
+	    //it's an overflow, everything is too big 
+	    sum = MAXINT;
+	  }
 	}
       }
-      if (kl_dist == NULL){
-	if (!overflow) {
-	  //when distance is too big to be represented by int,
-	  //just throw out the edge.
-	  insert_distance(ks,is_signed,l,new_dist, NULL);
-	}
-      } else if (kl_dist->length > new_dist && !overflow) {
-	//when the distance is too small to be represented by int,
-	//it 's actually sound to replace it with an edge with
-	//greater weight to get a distance representable by int
-	kl_dist->length = new_dist;
-	//the shortest path is not simple edge any more
-	kl_dist->prim = NULL;
+      if (!final || (sum < 0)){
+	//either ther is no overflow in computing the sums,
+	//or there is an underflow, so the true_sum < MININT
+	if ((kl_dist == NULL) || (kl_dist->length > sum))
+	  insert_distance(ks,is_signed,l,sum, NULL);
       }
     }
   }
@@ -345,7 +341,6 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   let $(c1,okay1) = eval_term(t1);
   let $(c2,okay2) = eval_term(t2);
   let origin = AssnDef::prim(t1, p, t2);
-
   // FIX: NOT SURE IF ANY OF THIS IS RIGHT -- MUST WORRY ABOUT
   // OVERFLOW ISSUES!
   if (okay1 && okay2) {
@@ -361,6 +356,8 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     // we have t1 p c2 -- add constraints of the form t1 - Zero p c2
     switch (p) {
     case ULt: 
+      //no unsigned integer t could satisfy t u< 0
+      if (c2 == 0) return false;
       c2 = c2 - 1; 
       fallthru;
     case ULte:
@@ -369,36 +366,72 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
 	if (!add_edge(g,false,t1,zero(),(int)c2, origin)) return false;
 	// since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
 	return add_edge(g,true,t1,zero(),(int)c2, NULL);
+      } else {// t u<= c2, and (int)c2 s< 0
+	dist_t *c1 = lookup_distance(lookup_row(g, t1), true, zero());
+	if (c1 != NULL && c1->length <= -1){
+	  return add_edge(g, true, t1, zero(), (int)c2, NULL);
+	}
       }
-      break;
+      return true;
     case SLt: 
+      //no signed integer t could satisfy t s< MININT
+      if (c2 == MININT) return false;
       c2 = c2 - 1;
       fallthru;
     case SLte:
+      // the value of (int)c2 should be representable by an integer.
       if (!add_edge(g,true,t1,zero(),(int)c2, origin)) return false;
-      // if c2 is positive then t1 S<= c2 implies t1 U<= c2
-      //      if (c2 <= (unsigned)MAXINT)
-      //	return add_edge(g,false,t1,zero(),(int)c2, NULL);
-      // above conclusion is not true
-      else return true;
+      if ((int)c2 > 0){
+	// 0 - t s<= c1  impies t >= -c1
+	dist_t * c1 = lookup_distance(lookup_row(g, zero()), true, t1);
+	if (c1 != NULL && c1->length <= 0) // then t >= -c1 >= 0, so t>=0
+	  // 0 <= t s<= c2, then t u<= c2
+	  return add_edge(g, false, t1, zero(), (int)c2, NULL);
+      }
+      return true;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
   } else if (okay1) {
     // we have c1 p t2 -- add constraints of the form zero - t2 p -c1
-    // FIX:  NOT CHECKING FOR OVERFLOW ISSUES HERE.
     switch (p) {
     case ULt: 
+      //no unsigned integer t could be greater than the biggest unsigned
+      if (c1 == MAXUINT) return false;
       c1 = c1 + 1;
       fallthru;
     case ULte:
-      int k = -((int)c1);
-      return add_edge(g,false,zero(),t2,k, origin);
+      //c1 u<= t2
+      if (c1 > MAXINT) {
+	//MAXINT u< c1 u<= t u<= MAXUINT, 
+	// (int)c1 s<= t s<= -1
+	if (!add_edge(g, true, t2, zero(), -1, NULL)) return false;
+	int k = -((int)c1);
+	if (k > 0){
+	  if (!add_edge(g, true, zero(), t2, k, NULL)) return false;
+	}
+      }
+      if (c1 <= MAXINT + 1u){
+	//-c1 can be representable by a signed int
+	int k = -((int)c1);
+	return add_edge(g,false,zero(),t2,k, origin);
+      }
+      return true;
     case SLt: 
+      //no signed integer could be greater than the biggest signed int
+      if (c1 == MAXINT) return false;
       c1 = c1 + 1;
       fallthru;
     case SLte:
-      int k = -((int)c1);
-      return add_edge(g,true,zero(),t2,k, origin);
+      // MININT s<= t doesn't provide much information
+      if (c1 == MININT) return true;
+      else{
+	int k = -((int)c1);
+	if ((int)c1 >=0){
+	  //0 s<= c1 s<= t2
+	  if (!add_edge(g, false, zero(), t2, k, NULL)) return false;
+	}
+	return add_edge(g,true,zero(),t2,k, origin);
+      }
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
   }
@@ -427,6 +460,7 @@ datatype exn.TooLarge too_large = TooLarge;
 //FIX: add a way for the user to control this.
 unsigned int max_paths = 17;
 unsigned int max_paths_seen = 0;
+unsigned int max_parallel_assn = 4;
 
 // given a set of graphs gs representing A1 or A2 or ... or An
 // and given assertion a, compute the set of graphs representing
@@ -515,6 +549,9 @@ static bool consistent(assn_t a) {
 // see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
 bool constraint_prove(assn_t ctxt, assn_t a) {
   assn_t b = and(ctxt,not(a));
+  //wangyl DEBUGGING:
+  //fprintf(stderr, "##### trying to prove: ######\n");
+  //fprintf(stderr, "%s ###=>### %s\n", assn2string(ctxt), assn2string(a));
   return !consistent(b);
 }
 
@@ -584,6 +621,7 @@ term_t int2term(bool is_signed, int c){
   e->topt = Absyn::int_type(s, Absyn::Int_sz);
   return cnst(e);
 }
+
 assn_t edge2assn(term_t source, term_t target, int weight, bool is_signed){
   let s = is_signed ? SLte : ULte;
   let s1 = is_signed? SLt: ULt;
@@ -630,15 +668,18 @@ assn_t row2assn(row_t r){
   }
   return a;
 }
+
 assn_t merge_assn(assn_t a1, assn_t a2){
     //turn a1 or a2 to DNF normal form, represented by a set of graphs
   let g = cgraph(true_graph(), or(a1,a2));
-  if (g == NULL) return &AssnDef::false_assn;
-
-  let row = g->rows;
-  for(let row1 = g->next; row1 != NULL; row1 = row1->next){
-    row = or2rows(row, row1->rows);
+  if (g == NULL) return &false_assn;
+  if (num_graphs(g) > max_parallel_assn){
+    let row = g->rows;
+    for(let row1 = g->next; row1 != NULL; row1 = row1->next){
+      row = or2rows(row, row1->rows);
+    }
+    return row2assn(row);
+  }else{
+    return or(a1, a2);
   }
-
-  return row2assn(row);
 }
