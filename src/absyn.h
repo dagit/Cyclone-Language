@@ -987,6 +987,7 @@ namespace Absyn {
   extern exp_t primop_exp(primop_t, list_t<exp_t,`H> es, seg_t);
   extern exp_t prim1_exp(primop_t, exp_t, seg_t);
   extern exp_t prim2_exp(primop_t, exp_t, exp_t, seg_t);
+  extern exp_t swap_exp(exp_t, exp_t, seg_t);
   extern exp_t add_exp(exp_t, exp_t, seg_t);
   extern exp_t times_exp(exp_t, exp_t, seg_t);
   extern exp_t divide_exp(exp_t, exp_t, seg_t);

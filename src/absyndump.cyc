@@ -305,7 +305,7 @@ void dumptvar(tvar_t tv) {
 void dumpkindedtvar(tvar_t tv) {
   dump_str(tv->name);
   switch (compress_kb(tv->kind)) {
-  case &Eq_kb(&Kind{.kind = BoxKind, .aliasqual = Aliased}):
+  case &Eq_kb(&Kind(BoxKind,Aliasable)):
   case &Less_kb(_,_): 
   case &Unknown_kb(_): dump("::?"); break;
   case &Eq_kb(k): dump("::"); dumpkind(k); break;

@@ -372,11 +372,11 @@ bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
   case &VoidType: return false;
   case &VarType(tv):
-    switch (tvar_kind(tv,&bk)) {
-    case &Kind{.kind = BoxKind,...}: return true;
+    switch (tvar_kind(tv,&bk)->kind) {
+    case BoxKind: return true;
     default:      return false;
     }
-  case &Evar(&Opt{&Kind{.kind = BoxKind,...}},_,_,_): return true; // Possible?
+  case &Evar(&Opt{&Kind(BoxKind,_)},_,_,_): return true; // Possible?
   case &Evar(_,_,_,_): return false;
   case &DatatypeType(_): return true;
   case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(_,tuf)},_}):

@@ -51,6 +51,8 @@ extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
 // still share and if the identity is set on type variables,
 // they will share, otherwise they won't.
 extern type_t copy_type(type_t t);
+// deep copy of an expression; uses copy_type above, so same rules apply
+extern exp_t deep_copy_exp(exp_t);
 
 // returns true if kind k1 is a sub-kind of k2
 extern bool kind_leq(kind_t k1, kind_t k2);
@@ -62,7 +64,7 @@ extern kind_t typ_kind(type_t t);
 extern bool kind_eq(kind_t k1, kind_t k2);
 extern type_t compress(type_t t);
 extern void unchecked_cast(tenv_t, exp_t, type_t, coercion_t);
-extern bool coerce_arg(tenv_t, exp_t, type_t); 
+extern bool coerce_arg(tenv_t, exp_t, type_t, bool@ alias_coercion); 
 extern bool coerce_assign(tenv_t, exp_t, type_t);
 extern bool coerce_to_bool(tenv_t, exp_t);
 extern bool coerce_list(tenv_t, type_t, list_t<exp_t>);
@@ -74,6 +76,11 @@ extern bool coerceable(type_t); // true if numeric or character
 extern bool silent_castable(tenv_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
 extern coercion_t castable(tenv_t,seg_t,type_t,type_t);
+
+// used to alias the given expression, assumed to have non-Aliasable type
+extern $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
+// prints a warning when an alias coercion is inserted
+extern bool warn_alias_coerce;
 
 extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);

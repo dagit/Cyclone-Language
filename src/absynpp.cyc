@@ -425,8 +425,7 @@ doc_t tps2doc(list_t<type_t> ts) {
 doc_t ktvar2doc(tvar_t tv) {
   switch (compress_kb(tv->kind)) {
   case &Unknown_kb(_): 
-  case &Eq_kb(&Kind{.kind = BoxKind, .aliasqual = Aliasable}): 
-    return textptr(tv->name);
+  case &Eq_kb(&Kind(BoxKind,Aliasable)): return textptr(tv->name);
   case &Less_kb(_,k):   fallthru(k);
   case &Eq_kb(k):       return cat(textptr(tv->name), text("::"), kind2doc(k));
   }

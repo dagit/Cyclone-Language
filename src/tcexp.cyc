@@ -340,6 +340,8 @@ static type_t tcVar(tenv_t te, seg_t loc, exp_t e, qvar_t q, binding_t b) {
 static 
 void check_format_args(tenv_t<`g,`r> te, exp_t fmt, 
                        opt_t<list_t<exp_t>> opt_args,
+		       int arg_cnt,
+		       list_t<int> @alias_arg_exps,
                        region_t<`temp> temp,
 		       list_t<type_t,`temp> 
                          type_getter(region_t<`temp>,tenv_t<`g,`r>,string_t,seg_t)) {
@@ -369,15 +371,18 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
     let args = opt_args->v;
     // check that each expression has the right type
     for (; desc_types != NULL && args != NULL; 
-	 desc_types = desc_types->tl, args = args->tl) {
+	 desc_types = desc_types->tl, args = args->tl, arg_cnt++) {
+      bool alias_coercion = false;
       type_t t = desc_types->hd;
       exp_t  e = args->hd;
       tcExp(te,&t,e);
-      if (!coerce_arg(te,e,t)) {
+      if (!coerce_arg(te,e,t,&alias_coercion)) {
         terr(e->loc,"descriptor has type \n%s\n but argument has type \n%s",
              typ2string(t), typ2string(e->topt->v));
         explain_failure();
       }
+      if (alias_coercion)
+	*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
       TEMP_RGN(te, temp) {
         if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e))
           terr(args->hd->loc,UNIQUE_ERR_MSG);
@@ -860,7 +865,9 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (coerce_arg(te,e,t2)) {
+    // MWH: ignores potential to insert alias coercions
+    bool bogus = false;
+    if (coerce_arg(te,e,t2,&bogus)) {
       return fields->hd;
     } 
   }
@@ -872,10 +879,12 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
 // e(es)
 static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		       list_t<exp_t> args,
-		       vararg_call_info_t *@vararg_call_info) {
+		       vararg_call_info_t *@vararg_call_info,
+		       list_t<int> @alias_arg_exps) {
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
   let es = args;
+  let arg_cnt = 0;
   TEMP_RGN(te_orig, ter) {
     let te = new_block(ter,loc,te_orig); // needed for regions of params
     tcExp(te,NULL,e);
@@ -892,28 +901,35 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
       // Check that the bounds on the pointer aren't 0
       check_nonzero_bound(loc,b);
       switch (compress(t1)) {
-        case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
-                              rgn_po,atts}): 
-          //FIX: handle tvars??
-          // unify the result type with the expected type to get better
-          // information while type-checking the arguments.
-          if (topt != NULL) unify(res_typ,*topt);
+      case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
+			    rgn_po,atts}): 
+	//FIX: handle tvars??
+	// unify the result type with the expected type to get better
+	// information while type-checking the arguments.
+	if (topt != NULL) unify(res_typ,*topt);
         // check that each argument has the right type or can be coerced to it
         while ((es != NULL) && (args_info != NULL)) {
-          exp_t e1 = es->hd;
+	  // apply alias coercions if present
+	  bool alias_coercion = false;
+	  exp_t e1 = es->hd;
           type_t t2 = (*args_info->hd)[2];
           tcExp(te, &t2, e1);
-          if (!coerce_arg(te,e1,t2)) {
+          if (!coerce_arg(te,e1,t2,&alias_coercion)) {
             terr(e1->loc,
-                 "actual argument has type \n\t%s\n but formal has type \n\t%s.",
+                 "actual argument has type \n"
+		 "\t%s\n but formal has type \n\t%s.",
                  typ2string(e1->topt->v),typ2string(t2));
             unify(e1->topt->v,t2);
             explain_failure();
           }
+	  // note alias inferences
+	  if (alias_coercion)
+	    *alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
 	  if (is_noalias_pointer_or_aggr(ter,t2) && !is_noalias_path(ter,e1))
 	    terr(e1->loc,UNIQUE_ERR_MSG);
           es = es->tl;
           args_info = args_info->tl;
+	  arg_cnt++;
         }
         // Note -- we deal with too few or too many args below.  Here, we
         // check for a format attribute -- important to do this early on
@@ -935,10 +951,14 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
               TEMP_RGN(te_orig, temp) {
                 switch (ft) {
                 case Printf_ft:
-                  check_format_args(te,fmt_arg,fmt_args,temp,Formatstr::get_format_typs);
+                  check_format_args(te,fmt_arg,fmt_args,
+				    arg_start_pos - 1,alias_arg_exps,
+				    temp,Formatstr::get_format_typs);
                   break;
                 case Scanf_ft:
-                  check_format_args(te,fmt_arg,fmt_args,temp,Formatstr::get_scanf_typs);
+                  check_format_args(te,fmt_arg,fmt_args,
+				    arg_start_pos - 1,alias_arg_exps,
+				    temp,Formatstr::get_scanf_typs);
                   break;
                 }
               }
@@ -966,16 +986,20 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             
             if (!inject) {
               // all the rest of the arguments are the same type
-              for (; es != NULL; es = es->tl) {
+              for (; es != NULL; es = es->tl, arg_cnt++) {
+		bool alias_coercion = false;
                 exp_t e1 = es->hd;
                 vci->num_varargs++;
                 tcExp(te, &vt, e1);
-                if (!coerce_arg(te,e1,vt)) {
+                if (!coerce_arg(te,e1,vt,&alias_coercion)) {
                   terr(loc,"vararg requires type %s but argument has type %s",
                        typ2string(vt),typ2string(e1->topt->v));
                   explain_failure();
                 }
-		if (is_noalias_pointer_or_aggr(ter,vt) && !is_noalias_path(ter,e1))
+		if (alias_coercion)
+		  *alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
+		if (is_noalias_pointer_or_aggr(ter,vt) &&
+		    !is_noalias_path(ter,e1))
 		  terr(e1->loc,UNIQUE_ERR_MSG);
               }
             } else {
@@ -1043,9 +1067,10 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 
 // throw e1
 static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
+  bool bogus = false;
   let exception_type = exn_typ();
   tcExp(te,&exception_type,e); 
-  if (!coerce_arg(te,e,exception_type))
+  if (!coerce_arg(te,e,exception_type,&bogus))
     terr(loc,"expected %s but found %s",typ2string(exception_type),
          typ2string(e->topt->v));
   return wildtyp(lookup_opt_type_vars(te));
@@ -1511,10 +1536,11 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 	break;
       }
       for(; es != NULL; es = es->tl, ts = ts->tl) {
+	bool bogus = false;
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
         // try to coerce the argument to the result type
-        coerce_arg(te,es->hd,(*ts->hd)[1]);
+        coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
 	fields = new List(new $((*ts->hd)[0], es->hd->topt->v), fields);
       }
       done = true;
@@ -1726,10 +1752,11 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields =
     resolve_aggregate_designators(rgn,loc,args,ad->kind,ad->impl->fields);
   for(; fields != NULL; fields = fields->tl) {
+    bool bogus = false;
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
-    if (!coerce_arg(te,field_exp,inst_fieldtyp)) {
+    if (!coerce_arg(te,field_exp,inst_fieldtyp,&bogus)) {
       terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
            *(field->name),((ad->kind == StructA) ? "struct" : "union"),
            qvar2string(*tn),typ2string(inst_fieldtyp),
@@ -1758,9 +1785,10 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields = 
         resolve_aggregate_designators(rgn,loc,args,StructA,fs);
       for (; fields != NULL; fields = fields->tl) {
+	bool bogus = false;
         let &$(field,field_exp) = fields->hd;
         tcExpInitializer(te, &field->type, field_exp);
-        if (!coerce_arg(te,field_exp,field->type)) {
+        if (!coerce_arg(te,field_exp,field->type,&bogus)) {
           terr(field_exp->loc,"field %s of struct expects type %s != %s",
                *(field->name),typ2string(field->type),
                typ2string(field_exp->topt->v));
@@ -1794,10 +1822,11 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   }
   list_t<$(tqual_t,type_t)@> ts = tuf->typs;
   for(; es != NULL && ts != NULL; es = es->tl, ts = ts->tl) {
+    bool bogus = false;
     exp_t  e = es->hd;
     type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
-    if (!coerce_arg(te,e,t)) {
+    if (!coerce_arg(te,e,t,&bogus)) {
       terr(e->loc,"datatype constructor %s expects argument of type %s "
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
@@ -2370,6 +2399,57 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
   return e->topt->v;
 }
 
+// used to insert alias statements for particular arguments to the
+// function call expression e, listed in alias_arg_exps.  The fn_exp
+// argument is a copy of e (before it was typechecked), so we modify
+// that, and then update the expression e.  Assumes that
+// alias_arg_exps is sorted in ascending order.
+static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
+			       list_t<int> alias_arg_exps) {
+  TEMP_RGN(te, r) {
+    let decls = NULL;
+    // first update the function's arguments to include the coercions
+    switch (fn_exp->r) {
+    case &FnCall_e(_,es,_):
+      switch (e->r) {
+      case &FnCall_e(_,es2,_): // for getting the types
+	let arg_exps = alias_arg_exps;
+	let arg_cnt = 0;
+	while (arg_exps != NULL) {
+	  while (arg_cnt != arg_exps->hd) {
+	    if (es == NULL)
+	      Tcutil::impos(aprintf("bad count %d/%d for alias coercion!",
+				    arg_cnt, arg_exps->hd));
+	    arg_cnt++;
+	    es = es->tl;
+	    es2 = es2->tl;
+	  }
+	  // create the coercion here
+	  let $(d,ve) = insert_alias(es->hd,copy_type(es2->hd->topt->v));
+	  es->hd = ve;   // update the argument expression
+	  decls = rnew (r) List(d, decls); // note the alias decl
+	  arg_exps = arg_exps->tl;
+	}
+	break;
+      default: Tcutil::impos("not a function call!");
+      }
+      break;
+    default: Tcutil::impos("not a function call!");
+    }
+    // wrap function call with alias statements introducing
+    // fresh type vars
+    while (decls != NULL) {
+      let d = decls->hd;
+      fn_exp = stmt_exp(decl_stmt(d,exp_stmt(fn_exp,e->loc),e->loc),e->loc);
+      decls = decls->tl;
+    }
+    // update the current expression to be the newly created one
+    //   and re-typecheck
+    e->topt = NULL;
+    e->r = fn_exp->r;
+  }
+}
+
  // Type-check the expression -- don't do any implicit instantiation.
 static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   seg_t loc = e->loc;
@@ -2419,7 +2499,29 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &SeqExp_e(e1,e2):
     t = tcSeqExp(te,loc,topt,e1,e2); break;
   case &FnCall_e(e1,es,*vci):
-    t = tcFnCall(te,loc,topt,e1,es,vci); break;
+    // For function invocations, we might introduce alias statements
+    // automatically.  So that we can re-typecheck this introduced
+    // syntax, we need to make a deep copy of the function call, and
+    // then use this copy to insert the syntax and re-typecheck.
+    list_t<int> alias_arg_exps = NULL;
+    bool ok = true;
+    exp_t fn_exp;
+    try { 
+      fn_exp = deep_copy_exp(e);
+    } catch {
+    case &Core::Failure(s):
+      ok = false;
+      fn_exp = e;
+      break;
+    }
+    t = tcFnCall(te,loc,topt,e1,es,vci,&alias_arg_exps);
+    if (alias_arg_exps != NULL && ok) {
+      alias_arg_exps = imp_rev(alias_arg_exps);
+      insert_alias_stmts(te, e, fn_exp, alias_arg_exps);
+      tcExpNoInst(te,topt,e);
+      return;
+    }
+    break;
   case &Throw_e(e1):
     t = tcThrow(te,loc,topt,e1); break;
   case &Instantiate_e(e2,ts):

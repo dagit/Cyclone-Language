@@ -295,6 +295,111 @@ type_t copy_type(type_t t) {
   }
 }
 
+// copies an expression and eliminates any typechecking annotations
+#define DC deep_copy_exp
+// static vardecl_t copy_vardecl(vardecl_t v) {
+//   let &Vardecl(s,n,q,t,eopt,r,atts,esc) = v;
+//   let eopt1 = eopt;
+//   if (eopt != NULL) eopt1 = DC(eopt);
+//   let r1 = r;
+//   if (r != NULL) r1 = new Opt(r->v);
+//   return new Vardecl(s,n,q,copy_type(t),eopt1,r1,atts,esc);
+// }
+static designator_t copy_designator(designator_t d) {
+  switch (d) {
+  case &ArrayElement(e): return new ArrayElement(DC(e));
+  case &FieldName(v): return d;
+  }
+}
+static $(list_t<designator_t>,exp_t)@
+copy_eds($(list_t<designator_t>,exp_t)@ e) {
+  return new $(map(copy_designator,e[0][0]),DC(e[0][1]));
+}
+// does a deep copy, but not of vardecls, bindings
+exp_t deep_copy_exp(exp_t e) {
+  switch (e->r) {
+  case &Const_e(c): return const_exp(c,e->loc);
+  case &Var_e(qv,b): return varb_exp(qv,b,e->loc);
+  case &UnknownId_e(qv): return unknownid_exp(qv,e->loc);
+  case &Primop_e(p, es): return primop_exp(p, map(DC,es),e->loc);
+  case &AssignOp_e(e1,po,e2): 
+    return assignop_exp(DC(e1),po ? new Opt(po->v) : NULL,DC(e2),e->loc);
+  case &Increment_e(e1,i): return increment_exp(DC(e1),i,e->loc);
+  case &Conditional_e(e1,e2,e3):
+    return conditional_exp(DC(e1),DC(e2),DC(e3),e->loc);
+  case &And_e(e1,e2): return and_exp(DC(e1),DC(e2),e->loc);
+  case &Or_e(e1,e2): return or_exp(DC(e1),DC(e2),e->loc);
+  case &SeqExp_e(e1,e2): return seq_exp(DC(e1),DC(e2),e->loc);
+  case &UnknownCall_e(e1,es): return unknowncall_exp(DC(e1),map(DC,es),e->loc);
+  case &FnCall_e(e1,es,vci):
+    switch (vci) {
+    case &VarargCallInfo(n,is,vai):
+      let &VarargInfo(nm,tq,t,i) = vai;
+      return new_exp(new FnCall_e
+		     (DC(e1),map(DC,es),
+		      new VarargCallInfo
+		      (n,is,new VarargInfo(nm,tq,copy_type(t),i))),
+		     e->loc);
+    default:
+      return new_exp(new FnCall_e(DC(e1),map(DC,es),vci),e->loc);
+    }
+  case &Throw_e(e1): return throw_exp(DC(e1),e->loc);
+  case &NoInstantiate_e(e1): return noinstantiate_exp(DC(e1),e->loc);
+  case &Instantiate_e(e1,ts):
+    return instantiate_exp(DC(e1),map(Tcutil::copy_type,ts),e->loc);
+  case &Cast_e(t,e1,b,c):
+    return cast_exp(Tcutil::copy_type(t),DC(e1),b,c,e->loc);
+  case &Address_e(e1): return address_exp(DC(e1),e->loc);
+  case &New_e(eo,e1): 
+    exp_opt_t eo1 = eo; if (eo != NULL) eo1 = DC(eo);
+    return New_exp(eo1,DC(e1),e->loc);
+  case &Sizeoftyp_e(t): return sizeoftyp_exp(Tcutil::copy_type(t),e->loc);
+  case &Sizeofexp_e(e1): return sizeofexp_exp(DC(e1),e->loc);
+  case &Offsetof_e(t,ofs):
+    return offsetof_exp(Tcutil::copy_type(t),ofs,e->loc);
+  case &Deref_e(e1): return deref_exp(DC(e1),e->loc);
+  case &AggrMember_e(e1,n,f1,f2):
+    return new_exp(new AggrMember_e(DC(e1),n,f1,f2),e->loc);
+  case &AggrArrow_e(e1,n,f1,f2):
+    return new_exp(new AggrArrow_e(DC(e1),n,f1,f2),e->loc);
+  case &Subscript_e(e1,e2): return subscript_exp(DC(e1),DC(e2),e->loc);
+  case &Tuple_e(es): return tuple_exp(map(DC,es),e->loc);
+  case &CompoundLit_e(&$(vopt,tq,t),eds):
+    opt_t<var_t> vopt1 = vopt;
+    if (vopt != NULL) vopt1 = new Opt(vopt->v);
+    return new_exp(new CompoundLit_e(new $(vopt1,tq,copy_type(t)),
+				     map(copy_eds,eds)),e->loc);
+  case &Array_e(eds): return new_exp(new Array_e(map(copy_eds,eds)),e->loc);
+  case &Comprehension_e(vd,e1,e2,b):
+    return new_exp(new Comprehension_e(vd,DC(e1),DC(e2),b),e->loc);
+  case &Aggregate_e(n,ts,eds,agr):
+    return new_exp(new Aggregate_e(n,map(copy_type,ts),map(copy_eds,eds),agr),
+		   e->loc);
+  case &AnonStruct_e(t,eds):
+    return new_exp(new AnonStruct_e(copy_type(t),map(copy_eds,eds)),e->loc);
+  case &Datatype_e(es,dtd,dtf):
+    return new_exp(new Datatype_e(map(DC,es),dtd,dtf),e->loc);
+  case &Enum_e(qv,ed,ef): return e;
+  case &AnonEnum_e(qv,t,ef): 
+    return new_exp(new AnonEnum_e(qv,copy_type(t),ef),e->loc);
+  case &Malloc_e(MallocInfo(ic,r,t,n,res)):
+    let e2 = copy_exp(e);
+    exp_opt_t r1 = r; if (r != NULL) r1 = DC(r);
+    type_t *t1 = t; if (t != NULL) t1 = new copy_type(*t);
+    e2->r = new Malloc_e(MallocInfo(ic,r1,t1,n,res));
+    return e2;
+  case &Swap_e(e1,e2): return swap_exp(DC(e1),DC(e2),e->loc);
+  case &UnresolvedMem_e(nopt,eds):
+    opt_t<typedef_name_t> nopt1 = nopt;
+    if (nopt != NULL) nopt1 = new Opt(nopt->v);
+    return new_exp(new UnresolvedMem_e(nopt1,map(copy_eds,eds)),e->loc);
+  case &StmtExp_e(_):
+    throw new Core::Failure("deep_copy: statement expressions unsupported");
+  case &Tagcheck_e(e1, fn): return new_exp(new Tagcheck_e(DC(e1),fn),e->loc);
+  case &Valueof_e(t): return valueof_exp(Tcutil::copy_type(t),e->loc);
+  }
+}
+
 // Our lattice looks like this:
 //          AbsType   EffKind  RgnKind  * Top
 //             V                          V V   
@@ -2045,7 +2150,12 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
 					     empty_conref(), 
 					     empty_conref(),NULL)));
     e1->topt->v = t1;
-    return coerce_arg(te, e1, t2);
+    bool bogus = false;
+    bool retv = coerce_arg(te, e1, t2, &bogus);
+    if (bogus != false) 
+      impos("zero_to_null resulted in an alias coercion on %s at %s\n",
+	    exp2string(e1), string_of_segment(e1->loc));
+    return retv;
   }
   return false;
 }
@@ -2059,10 +2169,69 @@ string_t coercion2string(coercion_t c) {
   }
 }
 
+static bool is_nonunique_region(type_t r);
+
+bool warn_alias_coerce = false;
+
+// returns a pair by doing the following
+// (1) gensym's a variable name and creates an expression with that variable
+// (2) generates an alias statement that defines that variable as aliasing
+// the given expression, using the given tvar as the region
+$(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
+  static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Tcutil::rk);
+
+  // generate a fresh variable to alias the given expression to
+  static int counter = 0;
+  qvar_t v = new $(Loc_n, new aprintf("__aliasvar%d",counter++));
+  vardecl_t vd = new_vardecl(v,&VoidType_val,NULL);
+  exp_t ve = varb_exp(v,new Local_b(vd),e->loc);
+
+  // generate a fresh region variable for it and the cast expression
+  tvar_t tv = new_tvar(&rgn_kb);
+  switch (compress(e_typ)) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(*r,_,_,_,_))):
+    *r = new VarType(tv); break;
+  default: break;
+  }
+  e->topt = NULL;
+  e = cast_exp(e_typ,e,false,Unknown_coercion,e->loc);
+  
+  // generate the alias decl
+  decl_t d = alias_decl(e,tv,vd,e->loc);
+  
+  return $(d,ve);
+}
+
+// returns true if we could insert an alias construct around the context
+// of the expression with type has_typ to avoid consuming it
+static bool can_insert_alias(exp_t e, type_t e_typ,
+			     type_t wants_typ, seg_t loc) {
+  // check if the given expression is a pointer into a no-alias region
+  region r;
+  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ)) {
+    // check if the expected type is a pointer type not into the
+    // unique region (i.e.  it will be consumed) and not the heap
+    // region; FIX: can we add in any polymorphism here?
+    switch (compress(wants_typ)) {
+    case &PointerType(PtrInfo(_,_,PtrAtts(r2,_,_,_,_))):
+      switch (compress(r2)) {
+      case &HeapRgn: return false;
+      default: return is_nonunique_region(r2);
+      }
+    case &TypedefType(_,_,_,_):
+      impos("got typedef %s in can_insert_alias at %s\n",
+	    typ2string(compress(wants_typ)), string_of_segment(loc));
+    default: return false;
+    }
+  }
+  return false;
+}
+
 // coerce e to have type t -- used in function call and explicit fallthru
-bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
+bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
   type_t t1 = compress(e->topt->v);
   coercion_t c;
+  bool do_alias_coercion = false;
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try arithmetic conversions
@@ -2073,25 +2242,42 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
 	   typ2string(t1), typ2string(t2));
     unchecked_cast(te,e,t2,No_coercion);
     return true;
-  } else if (silent_castable(te,e->loc,t1,t2)) {
-    unchecked_cast(te,e,t2,Other_coercion);
-    return true;
-  } else if (zero_to_null(te,t2,e)) { 
-    return true;
-  } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
-    unchecked_cast(te,e,t2,c);
-    // we warn for null-checks in the flow analysis now
-    if (c != NonNull_to_Null)
-      warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
-    return true;
-  } else return false;
+  } else {
+    // check if we can do an alias coercion; if so, make sure it otherwise
+    // typechecks before performing the coercion (for better error
+    // reporting).
+    if (can_insert_alias(e,t1,t2,e->loc)) {
+      if (warn_alias_coerce)
+	warn(e->loc,"implicit alias coercion for %s:%s to %s",
+	     exp2string(e), typ2string(t1), typ2string(t2));
+      *alias_coercion = true;
+    }
+
+    if (silent_castable(te,e->loc,t1,t2)) {
+      unchecked_cast(te,e,t2,Other_coercion);
+      return true;
+    } else if (zero_to_null(te,t2,e)) {
+      return true;
+    } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
+      unchecked_cast(te,e,t2,c);
+      // we warn for null-checks in the flow analysis now
+      if (c != NonNull_to_Null)
+	warn(e->loc,"implicit cast from %s to %s",
+	     typ2string(t1),typ2string(t2));
+      return true;
+    } 
+    else return false;
+  }
 }
 
 // coerce e to have type t -- used in assignment operations.  Neither
 // gcc nor VC++ issue warnings for losing precision here, but I think
 // it may be appropriate.
 bool coerce_assign(tenv_t te, exp_t e, type_t t) {
-  return coerce_arg(te,e,t);
+  // even if we can coerce the assignment, we don't bother because
+  // the scope will be too small.
+  bool bogus = false;
+  return coerce_arg(te,e,t,&bogus);
 }
 
 bool coerceable(type_t t) {
@@ -3542,7 +3728,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       b->hd->identity = new_tvar_id();
       cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
       switch (compress_kb(b->hd->kind)) {
-      case &Eq_kb(&Kind{.kind = MemKind,...}):
+      case &Eq_kb(&Kind(MemKind,_)):
 	terr(loc,"function attempts to abstract Mem type variable %s",
 	     *b->hd->name); break;
       default: break;
@@ -4383,14 +4569,28 @@ bool is_tagged_pointer_typ(type_t t) {
 /* Routines for dealing with non-aliasing pointers */
 /***************************************************/
 
+// FIX: code duplication with is_noalias_region below.
+static bool is_nonunique_region(type_t r) {
+  switch (compress(r)) {
+  case &UniqueRgn: return false;
+  case &VarType(tv):
+    let k = tvar_kind(tv,&rk);
+    if (k->kind == RgnKind && k->aliasqual == Unique)
+      return false;
+    break;
+  default: break;
+  }
+  return true;
+}
+
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
-static bool is_noalias_region(type_t r) {
+static bool is_noalias_region(type_t r, bool must_be_unique) {
   switch (compress(r)) {
   case &UniqueRgn: return true;
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&rk);
-    if ((k == RgnKind) && (a == Unique || a == Top)) {
+    if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique))) {
       switch (compress_kb(tv->kind)) {
       case &Less_kb(*x,&Kind(RgnKind,Top)):
         *x = new Opt(new Less_kb(NULL,&rk));
@@ -4405,10 +4605,10 @@ static bool is_noalias_region(type_t r) {
 
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet solidly bounded
-bool is_noalias_pointer(type_t t) {
+static bool is_noalias_pointer_aux(type_t t, bool must_be_unique) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
-    return is_noalias_region(r);
+    return is_noalias_region(r,must_be_unique);
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&bk);
     switch (k) {
@@ -4429,6 +4629,7 @@ bool is_noalias_pointer(type_t t) {
   default: return false;
   }
 }
+bool is_noalias_pointer(type_t t) { return is_noalias_pointer_aux(t,false); }
 
 bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
   let t = compress(t);
@@ -4513,7 +4714,8 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e) {
   case &Var_e(_,&Global_b(...)): return false;
   case &AggrArrow_e(e1,...): fallthru(e1);
   case &Deref_e(e1): 
-    return is_noalias_pointer(e1->topt->v) && is_noalias_path_aux(r,e1);
+    return is_noalias_pointer_aux(e1->topt->v,true) &&
+           is_noalias_path_aux(r,e1);
   case &AggrMember_e(e1,f,...): return is_noalias_path_aux(r,e1);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {

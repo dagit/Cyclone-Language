@@ -181,10 +181,10 @@ static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
 
 ////////////////// Functions for creating abstract syntax //////////////////
 
-// a way to gensym an enum name
-static int enum_counter = 0;
 // FIX:  need to guarantee this won't conflict with a user name
 qvar_t gensym_enum() {
+  // a way to gensym an enum name
+  static int enum_counter = 0;
   return new $(Rel_n(NULL), 
 	       new (string_t)aprintf("__anonymous_enum_%d__", enum_counter++));
 }
@@ -2747,7 +2747,7 @@ assignment_expression:
 | unary_expression assignment_operator assignment_expression
     { $$=^$(assignop_exp($1,$2,$3,LOC(@1,@3))); }
 | unary_expression SWAP assignment_expression
-    { $$=^$(new_exp(new Swap_e($1,$3), LOC(@1,@3))); }
+    { $$=^$(swap_exp($1,$3,LOC(@1,@3))); }
 ;
 
 assignment_operator:

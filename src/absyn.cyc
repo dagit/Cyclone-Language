@@ -521,6 +521,9 @@ exp_t prim1_exp(primop_t p, exp_t e, seg_t loc) {
 exp_t prim2_exp(primop_t p, exp_t e1, exp_t e2, seg_t loc) {
   return primop_exp(p, new List(e1,new List(e2,NULL)), loc);
 }
+exp_t swap_exp(exp_t e1, exp_t e2, seg_t loc) {
+  return new_exp(new Swap_e(e1,e2),loc);
+}
 exp_t add_exp(exp_t e1,exp_t e2,seg_t loc)   {return prim2_exp(Plus,e1,e2,loc);}
 exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times,e1,e2,loc);}
 exp_t divide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Div,e1,e2,loc);}

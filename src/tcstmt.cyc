@@ -174,9 +174,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         break;
       }
     } else {
+      // don't introduce alias expressions here; would be useless
+      bool bogus = false;
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
-      if (!coerce_arg(te,e,t)) {
+      if (!coerce_arg(te,e,t,&bogus)) {
         terr(s0->loc, "returns value of type %s but requires %s",
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
@@ -255,8 +257,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       List::map_c(make_inst_var,lookup_type_vars(te),tvs);
     let ts = cmap_c(heap_region,substitute,instantiation,ts_orig);
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
+      // don't introduce alias expression here, would be useless
+      bool bogus = false;
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(te,es->hd,ts->hd)) {
+      if(!coerce_arg(te,es->hd,ts->hd,&bogus)) {
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
              typ2string(es->hd->topt->v), typ2string(ts->hd));
@@ -571,6 +575,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te2 = set_encloser(r,te2,s); // for substatements inside of s
 
           // check the body
+	  let tvs = lookup_type_vars(te2);
           tcStmt(te2,s,false);
         }
         NewControlFlow::set_encloser(s0,get_encloser(te));
