@@ -526,57 +526,59 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
   *sdp = new Structdecl(sd->sc, sd->name, tvs, null, null);
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
-  list_t<field_name_t> prev_fields = null;
-  for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
-    let &Structfield(fn,tq,t,width,atts) = fs->hd;
-    if (List::mem(String::zstrptrcmp,prev_fields,fn))
+  region sprev_rgn {
+    glist_t<field_name_t,`sprev_rgn> prev_fields = null;
+    for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
+      let &Structfield(fn,tq,t,width,atts) = fs->hd;
+      if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in struct",*fn));
-    // add the field to previous fields only if it's not an empty name
-    // (empty names arise for bitfield padding.)
-    if (String::strcmp(*fn,"") != 0)
-      prev_fields = new List(fn,prev_fields);
-    check_type(loc,te,tvs,MemKind,t);
-    // if width is non-null then t must be of integral type
-    if (width != null) {
-      unsigned int w = 0;
-      if (!Tcutil::is_const_exp(te,width->v))
-        terr(loc,xprintf("bitfield %s does not have constant width",*fn));
-      else w = Evexp::eval_const_uint_exp(width->v);
-      switch (compress(t)) {
-      case &IntType(_,b): 
-        switch (b) {
-        case B1:
-          if (w > 8) terr(loc,"bitfield larger than type");
+      // add the field to previous fields only if it's not an empty name
+      // (empty names arise for bitfield padding.)
+      if (String::strcmp(*fn,"") != 0)
+        prev_fields = rnew(sprev_rgn) List(fn,prev_fields);
+      check_type(loc,te,tvs,MemKind,t);
+      // if width is non-null then t must be of integral type
+      if (width != null) {
+        unsigned int w = 0;
+        if (!Tcutil::is_const_exp(te,width->v))
+          terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+        else w = Evexp::eval_const_uint_exp(width->v);
+        switch (compress(t)) {
+        case &IntType(_,b): 
+          switch (b) {
+          case B1:
+            if (w > 8) terr(loc,"bitfield larger than type");
+            break;
+          case B2:
+            if (w > 16) terr(loc,"bitfield larger than type");
+            break;
+          case B4:
+            if (w > 32) terr(loc,"bitfield larger than type");
+            break;
+          case B8:
+            if (w > 64) terr(loc,"bitfield larger than type");
+            break;
+          }
           break;
-        case B2:
-          if (w > 16) terr(loc,"bitfield larger than type");
-          break;
-        case B4:
-          if (w > 32) terr(loc,"bitfield larger than type");
-          break;
-        case B8:
-          if (w > 64) terr(loc,"bitfield larger than type");
+        default: 
+          terr(loc,xprintf("bitfield %s must have integral type but "
+                           "has type %s",*fn,typ2string(t)));
           break;
         }
-        break;
-      default: 
-        terr(loc,xprintf("bitfield %s must have integral type but "
-                         "has type %s",*fn,typ2string(t)));
-        break;
       }
-    }
-    // check that we have only packed or aligned attributes
-    for (; atts != null; atts = atts->tl) {
-      switch (atts->hd) {
-      case Packed_att: continue;
-      case &Aligned_att(_): continue;
-      default: terr(loc,xprintf("bad attribute %s in struct %s, member %s",
-                                attribute2string(atts->hd), *v, *fn));
-      break;
-                                
+      // check that we have only packed or aligned attributes
+      for (; atts != null; atts = atts->tl) {
+        switch (atts->hd) {
+        case Packed_att: continue;
+        case &Aligned_att(_): continue;
+        default: terr(loc,xprintf("bad attribute %s in struct %s, member %s",
+                                  attribute2string(atts->hd), *v, *fn));
+        break;
+        
+        }
       }
+      // FIX: check for consistent tquals?
     }
-    // FIX: check for consistent tquals?
   }
   // add the constructor to the environment
   ge->ordinaries = Dict::insert(ge->ordinaries,  v,
@@ -734,60 +736,61 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   let udp = Dict::lookup(ge->uniondecls, v);
   *udp = new Uniondecl(ud->sc, ud->name, tvs, null, null);
   // check fields, rejecting ill-formed types, bad fields, and duplicates
-  list_t<field_name_t> prev_fields = null;
-  list_t<type_t> prev_types = null;
-  for (let fs = ud->fields->v; fs != null; fs = fs->tl) {
-    let &Structfield(fn,tq,t,width,atts) = fs->hd;
-    if (List::mem(String::zstrptrcmp,prev_fields,fn))
+  region uprev_rgn {
+    glist_t<field_name_t,`uprev_rgn> prev_fields = null;
+    for (let fs = ud->fields->v; fs != null; fs = fs->tl) {
+      let &Structfield(fn,tq,t,width,atts) = fs->hd;
+      if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in union",*fn));
-    prev_fields = new List(fn,prev_fields);
-    check_type(loc,te,tvs,MemKind,t);
-    // if width is non-null then t must be of integral type
-    if (width != null) {
-      unsigned int w = 0;
-      if (!Tcutil::is_const_exp(te,width->v))
-        terr(loc,xprintf("bitfield %s does not have constant width",*fn));
-      else w = Evexp::eval_const_uint_exp(width->v);
-      switch (compress(t)) {
-      case &IntType(_,b): 
-        switch (b) {
-        case B1:
-          if (w > 8) terr(loc,"bitfield larger than type");
+      prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
+      check_type(loc,te,tvs,MemKind,t);
+      // if width is non-null then t must be of integral type
+      if (width != null) {
+        unsigned int w = 0;
+        if (!Tcutil::is_const_exp(te,width->v))
+          terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+        else w = Evexp::eval_const_uint_exp(width->v);
+        switch (compress(t)) {
+        case &IntType(_,b): 
+          switch (b) {
+          case B1:
+            if (w > 8) terr(loc,"bitfield larger than type");
+            break;
+          case B2:
+            if (w > 16) terr(loc,"bitfield larger than type");
+            break;
+          case B4:
+            if (w > 32) terr(loc,"bitfield larger than type");
+            break;
+          case B8:
+            if (w > 64) terr(loc,"bitfield larger than type");
+            break;
+          }
           break;
-        case B2:
-          if (w > 16) terr(loc,"bitfield larger than type");
-          break;
-        case B4:
-          if (w > 32) terr(loc,"bitfield larger than type");
-          break;
-        case B8:
-          if (w > 64) terr(loc,"bitfield larger than type");
+        default: 
+          terr(loc,xprintf("bitfield %s must have integral type but "
+                           "has type %s",*fn,typ2string(t)));
           break;
         }
-        break;
-      default: 
-        terr(loc,xprintf("bitfield %s must have integral type but "
-                         "has type %s",*fn,typ2string(t)));
-        break;
       }
-    }
-    // check that the type t only consists of "bits" -- later we may
-    // want to allow a more permissive form of unions.
-    if (!bits_only(t))
-      terr(loc,xprintf("%s has a type that is possibly incompatible with "
-                       "other members of union %s",*fn,*v));
-    // check that we have only packed or aligned attributes
-    for (; atts != null; atts = atts->tl) {
-      switch (atts->hd) {
-      case Packed_att: continue;
-      case &Aligned_att(_): continue;
-      default: terr(loc,xprintf("bad attribute %s in union %s, member %s",
-                                attribute2string(atts->hd), *v, *fn));
-      break;
-                                
+      // check that the type t only consists of "bits" -- later we may
+      // want to allow a more permissive form of unions.
+      if (!bits_only(t))
+        terr(loc,xprintf("%s has a type that is possibly incompatible with "
+                         "other members of union %s",*fn,*v));
+      // check that we have only packed or aligned attributes
+      for (; atts != null; atts = atts->tl) {
+        switch (atts->hd) {
+        case Packed_att: continue;
+        case &Aligned_att(_): continue;
+        default: terr(loc,xprintf("bad attribute %s in union %s, member %s",
+                                  attribute2string(atts->hd), *v, *fn));
+        break;
+        
+        }
       }
+      // FIX: check for consistent tquals?
     }
-    // FIX: check for consistent tquals?
   }
   // undo our clobbering with the abstract version
   *udp = ud;

@@ -495,6 +495,16 @@ doc_t ntyp2doc(type_t t) {
                (n==null) ? nil_doc() : qvar2doc((qvar_t)n),
                tps2doc(ts));
     break;
+  case &AnonStructType(fs):
+    s = cat3(text("struct {"),
+             nest(2, structfields2doc(fs)),
+             text("}"));
+    break;
+  case &AnonUnionType(fs):
+    s = cat3(text("union {"),
+             nest(2, structfields2doc(fs)),
+             text("}"));
+    break;
   case &EnumType(n,_):
     s = cat2(text("enum "),qvar2doc(n)); break;
   case &TypedefType(n,ts,topt):
@@ -666,6 +676,7 @@ int exp_prec(exp_t e) {
   case &Array_e(_):             fallthru;
   case &Comprehension_e(_,_,_): fallthru;
   case &Struct_e(_,_,_,_):      fallthru;
+  case &AnonStruct_e(_,_):      fallthru;
   case &Tunion_e(_,_,_,_,_):    fallthru;
   case &Enum_e(_,_,_):          fallthru;
   case &Malloc_e(_,_):          return 140;
@@ -813,6 +824,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Struct_e(n,_,des,_):
     s = cat2(qvar2doc(n),
              group("{","}",",",List::map(de2doc,des)));
+    break;
+  case &AnonStruct_e(_,des):
+    s = group("{","}",",",List::map(de2doc,des));
     break;
   case &Tunion_e(_,_,es,_,ef): 
     if (es == null)

@@ -558,10 +558,8 @@ bool is_lvalue(exp_t e) {
   }
 }
 
-struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var_t v) {
-  if (fields == null) 
-    return null;
-  for(_ fs = fields->v; fs != null; fs = fs->tl) {
+struct Structfield * lookup_field(list_t<structfield_t> fields, var_t v) {
+  for(_ fs = fields; fs != null; fs = fs->tl) {
     let f = fs->hd;
     if (String::zstrptrcmp(f->name,v) == 0)
       return f;
@@ -570,10 +568,10 @@ struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var_t v) 
 }
 
 struct Structfield * lookup_struct_field(structdecl_t sd, var_t v) {
-  return lookup_field(sd->fields,v);
+  return (sd->fields == null) ? null : lookup_field(sd->fields->v,v);
 }
 struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
-  return lookup_field(ud->fields,v);
+  return (ud->fields == null) ? null : lookup_field(ud->fields->v,v);
 }
 
 $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@> ts, int i) {

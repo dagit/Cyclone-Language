@@ -355,11 +355,13 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // types are both translate to LeafPI.
     bool both_leaf = true;
     switch(e1->topt->v) {
+    case &AnonStructType(_): fallthru;
     case &StructType(_,_,_): fallthru;
     case &TupleType(_):      both_leaf = false; break;
     default: break;
     }
     switch(e->topt->v) {
+    case &AnonStructType(_): fallthru;
     case &StructType(_,_,_): fallthru;
     case &TupleType(_):      both_leaf = false; break;
     default: break;
@@ -506,8 +508,10 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_,_,_}):
       switch(Tcutil::compress(t2)) {
+      case &AnonStructType(_): fallthru;
       case &StructType(_,_,_):
 	return descend_path(env,e,e1);
+      case &AnonUnionType(_): fallthru;
       case &UnionType(_,_,_):
 	let syn1 = abstract_exp(env,e1);
 	syn1.lvalues = use_it_list();
@@ -520,8 +524,10 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // FIX: See comment above w.r.t. unions.
   case &StructMember_e(e1,_):
     switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonStructType(_): fallthru;
     case &StructType(_,_,_):
       return descend_path(env,e,e1);
+    case &AnonUnionType(_): fallthru;
     case &UnionType(_,_,_):
       let syn1 = abstract_exp(env,e1);
       syn1.lvalues = use_it_list();
@@ -580,6 +586,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     }
 
     // Very similar to Tuple_e (see comments above)
+  case &AnonStruct_e(_,des): fallthru(des);
   case &Struct_e(_,_,des,_): 
     switch(env.access_path) {
       // common case

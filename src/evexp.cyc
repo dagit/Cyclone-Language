@@ -164,8 +164,10 @@ unsigned int szof(type_t t, seg_t loc) {
     let sd = *sdp;
     if(sd->fields == null)
       terr(loc,"cannot apply sizeof to abstract struct type");
+    fallthru(sd->fields->v);
+  case &AnonStructType(fs):
     unsigned int s = 0;
-    for(let fs = sd->fields->v; fs != null; fs = fs->tl)
+    for(; fs != null; fs = fs->tl)
       s += szof(fs->hd->type,loc);
     return s;
   case &UnionType(_,ts,udp):
@@ -175,8 +177,10 @@ unsigned int szof(type_t t, seg_t loc) {
     let ud = *udp;
     if (ud->fields == null)
       terr(loc,"cannot apply sizeof to abstract union type");
+    fallthru(ud->fields->v);
+  case &AnonUnionType(fs):
     unsigned int s = 0;
-    for (let fs = ud->fields->v; fs != null; fs =fs->tl) {
+    for (; fs != null; fs =fs->tl) {
       unsigned int i = szof(fs->hd->type,loc);
       s = (s > i) ? s : i;
     }

@@ -106,6 +106,10 @@ static string _push_handler_string = "_push_handler";
 static stringptr _push_handler_sp = (&_push_handler_string);
 static string _pop_handler_string = "_pop_handler";
 static stringptr _pop_handler_sp = (&_pop_handler_string);
+static string _push_region_string = "_push_region";
+static stringptr _push_region_sp = (&_push_region_string);
+static string _pop_region_string = "_pop_region";
+static stringptr _pop_region_sp = (&_pop_region_string);
 static string handler_string = "handler";
 static stringptr handler_sp = (&handler_string);
 static string _npop_handler_string = "_npop_handler";
@@ -120,8 +124,6 @@ static string Cyc_rnew_string_string = "Cyc_rnew_string";
 static stringptr Cyc_rnew_string_sp = (&Cyc_rnew_string_string);
 static string _region_handle_string = "_RegionHandle";
 static stringptr _region_handle_sp = (&_region_handle_string);
-static string _free_region_string = "_free_region";
-static stringptr _free_region_sp = (&_free_region_string);
 static string _new_region_string = "_new_region";
 static stringptr _new_region_sp = (&_new_region_string);
 
@@ -284,6 +286,14 @@ static type_t typ_to_c_array(type_t t) {
     return typ_to_c(t);
   }
 }
+static type_t typ_to_c(type_t t); 
+
+static structfield_t structfield_to_c(structfield_t f) {
+  // FIX: should the width be translated?  shouldn't it already be a constant?
+  return new Structfield{.name=f->name, .tq=f->tq, .type = typ_to_c(f->type),
+                            .width=f->width, .attributes=f->attributes};
+}
+
 static type_t typ_to_c(type_t t) {
   switch (t) {
   case VoidType:               return t;
@@ -343,6 +353,12 @@ static type_t typ_to_c(type_t t) {
     tqs = List::map(typ_to_c_f,tqs);
     let n = add_tuple_type(tqs);
     return strct(n);
+  // FIX: we may have to actually declare these things and use them
+  // consistently to make GCC happy.
+  case &AnonStructType(fs): 
+    return new AnonStructType(List::map(structfield_to_c,fs));
+  case &AnonUnionType(fs):
+    return new AnonUnionType(List::map(structfield_to_c,fs));
   case &UnionType(tdnopt,_,_): 
     if (tdnopt == null) unimp("anonymous union");
     // just drop the type arguments and translate the nested types
@@ -405,6 +421,11 @@ static bool atomic_typ(type_t t) {
     // note even without this we'll allocate Position::seg_t with atomic.
   case &StructType(_,_,_): return false;
   case &TunionType(_):     return false;
+  case &AnonStructType(fs): fallthru(fs);
+  case &AnonUnionType(fs):
+    for (; fs != null; fs = fs->tl)
+      if (!atomic_typ(fs->hd->type)) return false;
+    return true;
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
     return tuf->typs == null;
     // FIX: could make this true now since we only allow bits in unions,
@@ -432,6 +453,12 @@ static bool is_void_star(type_t t) {
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
+  case &AnonUnionType(fs): fallthru(fs);
+  case &AnonStructType(fs):
+    let field = lookup_field(fs,f);
+    if (field == null) 
+      toc_impos(xprintf("is_poly_field: bad field %s",*field->name));
+    return is_void_star(field->type);
   case &StructType(tdn,_,&sd):
     if(tdn == null)
       toc_impos("StructType name not properly set");
@@ -1003,6 +1030,10 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, stmt_t s, 
                                  bool e1_already_translated);
 
+static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
+                               list_t<$(list_t<designator_t>,exp_t)@> dles,
+                               stmt_t s);
+
 // code to initialize an array
 static stmt_t init_array(env_t nv, exp_t lhs, 
                          list_t<$(list_t<designator_t>,exp_t)@> dles0,
@@ -1038,6 +1069,9 @@ static stmt_t init_array(env_t nv, exp_t lhs,
     case &Comprehension_e(vd,g1,g2):
       s = init_comprehension(nv, lval, vd, g1, g2, s, false);
       break;
+    case &AnonStruct_e(st,dles):
+      s = init_anon_struct(nv, lval, st, dles, s);
+      break;
     default:
       exp_to_c(nv,e1);
       s = seq_stmt(assign_stmt(subscript_exp(lhs,e_index,DL),e1,DL),s,DL);
@@ -1071,6 +1105,9 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   case &Comprehension_e(vd2,g1,g2):
     body = init_comprehension(nv2, lval, vd2, g1,g2, skip_stmt(DL), false);
     break;
+  case &AnonStruct_e(st,dles):
+    body = init_anon_struct(nv, lval, st, dles, skip_stmt(DL));
+    break;
   default:
     exp_to_c(nv2,e2);
     body = assign_stmt(lval,e2,DL);
@@ -1080,6 +1117,45 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   // note that we get rid of the const on the index variable x1 here
   s = seq_stmt(declare_stmt(max,uint_t,e1,
                             declare_stmt(x1,uint_t,null,s2,DL),DL),s,DL);
+  return s;
+}
+
+static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
+                               list_t<$(list_t<designator_t>,exp_t)@> dles,
+                               stmt_t s) {
+
+  for(let es = List::rev(dles); es != null; es = es->tl) {
+    let &$(ds,e) = es->hd;
+    if(ds == null)
+      toc_impos("empty designator list");
+    if(ds->tl != null) 
+      toc_impos("too many designators in anonymous struct");
+    switch (ds->hd) {
+    case &FieldName(f):
+      exp_t lval = structmember_exp(lhs,f,DL);
+      switch (e->r) {
+      case &Array_e(dles):
+        s = init_array(nv, lval, dles, s);
+        break;
+      case &Comprehension_e(vd,e1,e2):
+        s = init_comprehension(nv, lval, vd, e1, e2, s, false);
+        break;
+      case &AnonStruct_e(st2,dles):
+        s = init_anon_struct(nv, lval, st2, dles, s);
+        break;
+      default:
+        exp_to_c(nv,e);
+        // cast to void* if necessary
+        if (is_poly_field(struct_type,f))
+          e = cast_exp(void_star_typ(),e,DL);
+        // FIX: deal with nested arrays and comprehensions
+        s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
+        break;
+      }
+      break;
+    default: throw toc_impos("array designator in struct");
+    }
+  }
   return s;
 }
 
@@ -1169,6 +1245,9 @@ static exp_t init_struct(env_t nv, type_t struct_type,
         case &Comprehension_e(vd,e1,e2):
           s = init_comprehension(nv, lval, vd, e1, e2, s, false);
           break;
+        case &AnonStruct_e(st,dles):
+          s = init_anon_struct(nv, lval, st, dles, s);
+          break;
         default:
           exp_to_c(nv,e);
           // cast to void* if necessary
@@ -1185,6 +1264,8 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   }
   return make_struct(nv, x, strctq(tdn), s, pointer, rgnopt, is_atomic);
 }
+
+
 
 // functions for passing to lvalue_assign (see below)
 static exp_t assignop_lvalue(exp_t el, $(opt_t<primop_t>,exp_t)@ pr) {
@@ -1932,7 +2013,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	(structdecl_t)((sd == null) ? toc_impos(xprintf("no structdecl %s",qvar2string(tdn))) : sd);
       region rgn {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
-                                                      (structdecl_t)sd2);
+                                                      ((structdecl_t)sd2)->fields->v);
       for (; fields != null; fields = fields->tl) {
 	let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
@@ -1947,7 +2028,30 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
     }
     break;
-
+  case &AnonStruct_e(st,dles):
+    list_t<structfield_t> fs;
+    switch (compress(st)) {
+    case &AnonStructType(afs): fs = afs; break;
+    default: 
+      fs = toc_impos(xprintf("anon struct has type %s",typ2string(st))); 
+      break;
+    }
+    region rgn {
+      let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, fs);
+      for (; fields != null; fields = fields->tl) {
+        let &$(field,fieldexp) = fields->hd;
+        let fieldtyp = field->type;
+        exp_to_c(nv,fieldexp);
+        if (is_void_star(fieldtyp))
+          fieldexp->r = cast_exp(void_star_typ(), 
+                                 new_exp(fieldexp->r,DL),DL)->r;
+      }
+      //for (let es = dles; es != null; es = es->tl)
+      //  exp_to_c(nv,es->hd[1]);
+      e->r = unresolvedmem_exp(null,dles,DL)->r;
+    }
+    break;
+  
   case &Tunion_e(_,_,null,tud,tuf):
     qvar_t qv = tuf->name;
     // non-value-carrying constructor -- just use the constructor name
@@ -2648,68 +2752,36 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 					       handler_stmt, DL),DL),DL),DL)->r;
       return;
     case &Region_s(tv, vd, body):
+      // NOTE:  _npop_handler has to deal with regions as well as exceptions
       // { struct _RegionHandle rh = _new_region();
       //   struct _RegionHandle *x = &rh;
-      //   struct handler_cons h;
-      //   _push_handler(&h);
-      //   exn e = (exn)setjmp(h.handler);
-      //   if (!e) {
-      //     body; 
-      //     _free_region(&rh);
-      //     _pop_handler();
-      //   } else {
-      //     _free_region(&rh);
-      //     throw(e);
-      //   }
+      //   _push_rgn(x);
+      //   body; 
+      //   _pop_region(&rh);
       // }
       type_t rh_struct_typ = strct(_region_handle_sp);
       type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
       type_t h_typ = strct(_handler_cons_sp);
-      type_t e_typ = typ_to_c(exn_typ);
       qvar_t rh_var = temp_var();
       qvar_t x_var = vd->name;
-      qvar_t h_var = temp_var();
-      qvar_t e_var = temp_var();
       exp_t  rh_exp = var_exp(rh_var,DL);
       exp_t  x_exp = varb_exp(x_var,new Local_b(vd),DL);
-      exp_t  h_exp = var_exp(h_var,DL);
-      exp_t  e_exp = var_exp(e_var,DL);
-      exp_t pushhandler_exp = var_exp(new $(abs_ns, _push_handler_sp),DL);
-      exp_t setjmp_exp = var_exp(new $(abs_ns, setjmp_sp), DL);
-      exp_t pophandler_exp = var_exp(new $(abs_ns, _pop_handler_sp),DL);
-      exp_t freeregion_exp = var_exp(new $(abs_ns, _free_region_sp),DL);
+      exp_t pushregion_exp = var_exp(new $(abs_ns, _push_region_sp),DL);
+      exp_t popregion_exp = var_exp(new $(abs_ns, _pop_region_sp),DL);
       exp_t newregion_exp = var_exp(new $(abs_ns, _new_region_sp),DL);
       exp_t addr_rh_exp = address_exp(rh_exp,DL);
       exp_t newregion_call = fncall_exp(newregion_exp, null, DL);
-      // FIX: what happens upon break/continue?!?!
+      exp_t popregion_call = fncall_exp(popregion_exp, 
+                                        new List(addr_rh_exp,null),DL);
+      exp_t pushregion_call = fncall_exp(pushregion_exp,
+                                         new List(x_exp,null), DL);
       stmt_to_c(add_varmap(nv,x_var,x_exp),body);
-      let free_region_stmt = 
-        exp_stmt(fncall_exp(freeregion_exp,new List(addr_rh_exp,null),DL),DL);
-      let tryandpop_stmt = 
-        seq_stmt(body,
-                 seq_stmt(free_region_stmt,
-                          exp_stmt(fncall_exp(pophandler_exp,null,DL),DL),DL),
-                 DL);
-      let rethrow_stmt = 
-        seq_stmt(free_region_stmt,exp_stmt(newthrow_exp(e_exp),DL),DL);
-      let if_stmt = 
-        ifthenelse_stmt(prim1_exp(Not,e_exp,DL),
-                        tryandpop_stmt,rethrow_stmt,DL);
-      let setjmp_call = 
-        cast_exp(typ_to_c(exn_typ),
-                 fncall_exp(setjmp_exp,
-                            new List(structmember_exp(h_exp,handler_sp,DL),
-                                     null),DL),DL);
-      let push_stmt = 
-        exp_stmt(fncall_exp(pushhandler_exp,new List(address_exp(h_exp,DL),
-                                                     null),DL),DL);
+      stmt_t s2 = seq_stmt(body,exp_stmt(popregion_call,DL),DL);
+      s2 = seq_stmt(exp_stmt(pushregion_call,DL),s2,DL);
       s->r = 
         declare_stmt(rh_var, rh_struct_typ, newregion_call,
-        declare_stmt(x_var, rh_struct_ptr_typ, addr_rh_exp,
-        declare_stmt(h_var, h_typ, null,
-        seq_stmt(push_stmt, 
-        declare_stmt(e_var, e_typ, setjmp_call, if_stmt, DL),
-                 DL),DL),DL),DL)->r;
+                     declare_stmt(x_var, rh_struct_ptr_typ, addr_rh_exp,
+                                  s2,DL),DL)->r;
       return;
     }
   }

@@ -26,7 +26,7 @@ extern void dumppat(pat_t);
 extern void dumpstmt(stmt_t);
 extern void dumpdecl(decl_t);
 extern void dumptqtd(tqual_t, type_t, void f(`a), `a);
-
+extern void dumpstructfields(list_t<structfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
@@ -305,6 +305,10 @@ void dumpntyp(type_t t) {
   case &UnionType(null,ts,_):   dump("union"); dumptps(ts); return;
   case &UnionType(n,  ts,_):
     dump("union"); dumpqvar((qvar_t)n); dumptps(ts); return;
+  case &AnonStructType(fs):
+    dump("struct {"); dumpstructfields(fs); dump("}"); return;
+  case &AnonUnionType(fs):
+    dump("union {"); dumpstructfields(fs); dump("}"); return;
   case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
   case &RgnHandleType(rgn):
     dumprgn(rgn); return;
@@ -496,6 +500,10 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Struct_e(n,_,des,_):
     dumpqvar(n);
+    group(dumpde,des,"{","}",",");
+    break;
+
+  case &AnonStruct_e(_,des):
     group(dumpde,des,"{","}",",");
     break;
 

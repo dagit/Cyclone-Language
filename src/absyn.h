@@ -252,6 +252,8 @@ namespace Absyn {
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *); // MemKind
     UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *); // MemKind 
+    AnonStructType(list_t<structfield_t>); // MemKind
+    AnonUnionType(list_t<structfield_t>); // MemKind
     EnumType(typedef_name_t,struct Enumdecl *); // BoxKind
     RgnHandleType(type_t);   // BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
@@ -354,6 +356,7 @@ namespace Absyn {
     Comprehension_e(vardecl_t,exp_t,exp_t); // much of vardecl is known
     Struct_e(typedef_name_t,opt_t<list_t<type_t>>,
 	     list_t<$(list_t<designator_t>,exp_t)@>, struct Structdecl *);
+    AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
     Tunion_e(opt_t<list_t<type_t>>,opt_t<list_t<type_t>>,list_t<exp_t>,
              tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
@@ -736,7 +739,7 @@ namespace Absyn {
   extern type_t pointer_expand(type_t);
   extern bool is_lvalue(exp_t);
 
-  extern struct Structfield *lookup_field(opt_t<list_t<structfield_t>>,var_t);
+  extern struct Structfield *lookup_field(list_t<structfield_t>,var_t);
   extern struct Structfield *lookup_struct_field(structdecl_t,var_t);
   extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
   extern $(tqual_t,type_t) *lookup_tuple_field(list_t<$(tqual_t,type_t)@>,int);

@@ -10,8 +10,8 @@ CYCLEX:=../bin/cyclex.exe
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX:=
 
-CFLAGS:=-fwritable-strings -I..
-#CFLAGS:=-g -fwritable-strings -I..
+#CFLAGS:=-fwritable-strings -I..
+CFLAGS:=-g -fwritable-strings -I..
 #CFLAGS:=-pg -fwritable-strings -I..
 #CFLAGS:=-O -fwritable-strings -I..
 
@@ -20,7 +20,8 @@ CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 # uh, the precore_c.h building doesn't work with the ugly printer :-)
 CYC_FLAGS_PP := -tc -toc -pp
 
-CYC_FLAGS:= -tc -toc -up -I . 
+#CYC_FLAGS:= -tc -toc -up -I . 
+CYC_FLAGS:= -tc -toc -pp -I . 
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

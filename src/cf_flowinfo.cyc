@@ -95,6 +95,7 @@ path_info_t typ_to_unesc_none_pinfo(type_t t) {
       d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
     }
     return new TuplePI(d);
+  case &AnonStructType(fs): fallthru(fs);
   case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     let d = Dict::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl) {

@@ -342,6 +342,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 			unimp_msg_part));
 
   case &Region_s(tv,vd,s):
+    // Same KLUDGE as with TryCatch_s -- we need a next statement that is
+    // not outside of the handler.
+    s->r = seq_stmt(new_stmt(s->r,s->loc), skip_stmt(s->loc), s->loc)->r;
     if (new_block)
       te = Tcenv::new_block(s0->loc,te);
     let &Vardecl(_,_,_,t,_,*rgn_ptr,_) = vd;

@@ -54,16 +54,23 @@ struct _tagged_string xprintf(char *fmt, ...) {
   return result;
 }
 
-// Exceptions
-
 // Need one of these per thread (we don't have threads)
-static struct _handler_cons *_current_handler = NULL;
+static struct _RuntimeStack *_current_handler = NULL;
 
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
 void _push_handler(struct _handler_cons * new_handler) {
-  new_handler->tail = _current_handler;
-  _current_handler  = new_handler;
+  //fprintf(stderr,"pushing handler %x\n",(unsigned int)new_handler);  
+  new_handler->s.tag = 0;
+  new_handler->s.next = _current_handler;
+  _current_handler  = (struct _RuntimeStack *)new_handler;
+}
+
+void _push_region(struct _RegionHandle * r) {
+  //fprintf(stderr,"pushing region %x\n",(unsigned int)r);  
+  r->s.tag = 1;
+  r->s.next = _current_handler;
+  _current_handler  = (struct _RuntimeStack *)r;
 }
 
 // set _current_handler to it's n+1'th tail
@@ -79,16 +86,36 @@ void _npop_handler(int n) {
       fprintf(stderr,"internal error: empty handler stack\n");
       exit(1);
     } 
-    _current_handler = _current_handler->tail;
+    if (_current_handler->tag == 1) {
+      //fprintf(stderr,"popping region %x\n",(unsigned int)_current_handler);
+      _free_region((struct _RegionHandle *)_current_handler);
+      //} else {
+      //fprintf(stderr,"popping handler %x\n",(unsigned int)_current_handler);
+    }
+    _current_handler = _current_handler->next;
   }
 }
 
 void _pop_handler() {
+  if (_current_handler == NULL || _current_handler->tag != 0) {
+    fprintf(stderr,"internal error: _pop_handler");
+    exit(1);
+  }
+  _npop_handler(0);
+}
+void _pop_region() {
+  if (_current_handler == NULL || _current_handler->tag != 1) {
+    fprintf(stderr,"internal error: _pop_region");
+    exit(1);
+  }
   _npop_handler(0);
 }
 void throw(void* e) {
-  struct _handler_cons * my_handler = _current_handler;
-  _npop_handler(0);
+  struct _handler_cons *my_handler;
+  while (_current_handler->tag != 0)
+    _pop_region();
+  my_handler = (struct _handler_cons *)_current_handler;
+  _pop_handler();
   longjmp(my_handler->handler,(int)e);
 }
 void _throw(void* e) {
@@ -222,6 +249,8 @@ struct _RegionHandle _new_region() {
     throw(Null_Exception);
   }
   p->next = NULL;
+  r.s.tag = 1;
+  r.s.next = NULL;
   r.curr = p;
   r.offset = ((char *)p) + sizeof(struct _RegionPage);
   r.last_plus_one = r.offset + default_region_page_size;

@@ -1350,17 +1350,16 @@ enum_declaration_list:
 /* parsing of struct and union specifiers. */
 struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}' 
-    { decl_t d;
+    { type_t t;
       switch ($1) {
       case Struct_su:
-        d = struct_decl(Public,null,null,new Opt($3),null,LOC(@1,@4));
+        t = new AnonStructType($3);
 	break;
       case Union_su:
-        d = union_decl(Public,null,null,new Opt($3),null,LOC(@1,@4));
+        t = new AnonUnionType($3);
 	break;
       }
-      $$=^$(new Decl_spec(d));
-      unimp2("anonymous structs/unions",LOC(@1,@4));
+      $$=^$(new Type_spec(t,LOC(@1,@4)));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union qual_opt_identifier type_params_opt

@@ -234,8 +234,12 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       // FIX:? I think topt could cause a failure as a result of the unify
       if(topt != null) unify(t,*topt);
       *topt_ref = new Opt(all_typs); // side effect
+      if (sd->fields == null) {
+        terr(p->loc,"can't destructure an abstract struct");
+        break;
+      }
       glist_t<$(structfield_t,pat_t)@`rgn,`rgn> fields =
-	resolve_struct_designators(rgn,p->loc,dps,sd);
+	resolve_struct_designators(rgn,p->loc,dps,sd->fields->v);
       for(; fields != null; fields = fields->tl) {
 	let &$(field,pat)     = fields->hd;
 	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);

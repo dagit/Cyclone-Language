@@ -124,6 +124,9 @@ static void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t 
       terr(loc,"Compiler bug: struct type not properly set");
     e->r = new Struct_e((typedef_name_t)tdnopt,null,des,*sdp);
     break;
+  case &AnonStructType(_):
+    e->r = new AnonStruct_e(t,des);
+    break;
   default:
     // guess it is an array
     e->r = new Array_e(des);
@@ -537,6 +540,16 @@ static void check_writable(tenv_t te, exp_t e) {
         (sd == null) ? null : lookup_struct_field((structdecl_t) *sd, f);
       if (sf == null || !sf->tq.q_const) return;
       break;
+    case &AnonUnionType(fs): fallthru(fs);
+    case &AnonStructType(fs):
+      struct Structfield *sf = lookup_field(fs, f);
+      if (sf == null || !sf->tq.q_const) return;
+      break;
+    case &UnionType(_,_,ud):
+      struct Structfield *sf = 
+        (ud == null) ? null : lookup_union_field((uniondecl_t) *ud, f);
+      if (sf == null || !sf->tq.q_const) return;
+      break;
     default: break;
     }
     break;
@@ -547,6 +560,16 @@ static void check_writable(tenv_t te, exp_t e) {
       case &StructType(_,_,sd):
         struct Structfield *sf = 
           (sd == null) ? null : lookup_struct_field((structdecl_t) *sd,f);
+        if (sf == null || !sf->tq.q_const) return;
+        break;
+      case &UnionType(_,_,ud):
+        struct Structfield *sf = 
+          (ud == null) ? null : lookup_union_field((uniondecl_t) *ud,f);
+        if (sf == null || !sf->tq.q_const) return;
+        break;
+      case &AnonStructType(fs): fallthru(fs);
+      case &AnonUnionType(fs): 
+        struct Structfield *sf = lookup_field(fs, f);
         if (sf == null || !sf->tq.q_const) return;
         break;
       default: break;
@@ -837,6 +860,17 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
       t2 = rsubstitute(rgn,inst,finfo->type);
     }
     return t2;
+  case &AnonStructType(fs):
+    let finfo = lookup_field(fs,f);
+    if (finfo == null)
+      return expr_err(te,loc,xprintf("struct has no %s field",*f));
+    return finfo->type;
+  case &AnonUnionType(fs):
+    let finfo = lookup_field(fs,f);
+    if (finfo == null)
+      return expr_err(te,loc,xprintf("union has no %s field",*f));
+    return finfo->type;
+    
   case &UnionType(tdnopt,ts,&ud):
     if (tdnopt == null)
       return expr_err(te,loc,"unresolved union type (COMPILER ERROR)");
@@ -894,6 +928,16 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, fiel
       let t3   = substitute(inst,finfo->type);
       check_rgn_accessible(te,loc,rt);
       return t3;
+    case &AnonStructType(fs):
+      let finfo = lookup_field(fs,f);
+      if (finfo == null)
+	return expr_err(te,loc,xprintf("struct has no %s field",*f));
+      return finfo->type;
+    case &AnonUnionType(fs):
+      let finfo = lookup_field(fs,f);
+      if (finfo == null)
+	return expr_err(te,loc,xprintf("union has no %s field",*f));
+      return finfo->type;
     default:
       return expr_err(te,loc, xprintf("expecting struct pointer, found %s",
 				      typ2string(t)));
@@ -1116,8 +1160,12 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
   if (topt != null) unify(res_typ,*topt);
   *otyps = new Opt(typs);
   // make sure each argument has the right type
+  if (sd->fields == null) {
+    terr(loc,"can't build abstract struct");
+    return res_typ;
+  }
   glist_t<$(structfield_t,exp_t)@`rgn,`rgn> fields =
-    resolve_struct_designators(rgn,loc,args,sd);
+    resolve_struct_designators(rgn,loc,args,sd->fields->v);
   for(; fields != null; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
@@ -1130,6 +1178,29 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
   }
   return res_typ;
   }
+}
+
+static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts, 
+                           list_t<$(list_t<designator_t>,exp_t)@> args) {
+  region rgn {
+    switch (compress(ts)) {
+    case &AnonStructType(fs):
+      glist_t<$(structfield_t,exp_t)@`rgn,`rgn> fields = 
+        resolve_struct_designators(rgn,loc,args,fs);
+      for (; fields != null; fields = fields->tl) {
+        let &$(field,field_exp) = fields->hd;
+        tcExpInitializer(te, &field->type, field_exp);
+        if (!coerce_arg(te,field_exp,field->type))
+          terr(field_exp->loc,
+               xprintf("field %s of struct expects type %s != %s",
+                       *(field->name),typ2string(field->type),
+                       typ2string(field_exp->topt->v)));
+      }
+      break;
+    default: impos("tcAnonStruct:  not an AnonStructType"); break;
+    }
+  }
+  return ts;
 }
 
 // f(es)   where f is a tunion and is ef->name
@@ -1560,6 +1631,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcComprehension(te,loc,topt,vd,e1,e2); break;
   case &Struct_e(*tn,*otyps,args,*sd_opt):
     t = tcStruct(te,loc,topt,tn,otyps,args,sd_opt); break;
+  case &AnonStruct_e(ts,args):
+    t = tcAnonStruct(te,loc,ts,args); break;
   case &Tunion_e(*all_ref,*exist_ref,es,tud,tuf):
     t = tcTunion(te,loc,topt,e,all_ref,exist_ref,es,tud,tuf); break;
   case &Enum_e(q,ed,ef):
