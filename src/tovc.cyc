@@ -722,7 +722,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Let_d(_,_,_): 
     case &Letv_d(_):        
     case &Region_d(...):
-    case &Alias_d(...):
+//     case &Alias_d(...):
     case &Aggr_d(_):
     case &Datatype_d(_):
     case &Enum_d(_):        

@@ -32,7 +32,12 @@ using Absyn;
 using Tcenv;
 
 struct TcPatResult {
-  $(list_t<tvar_t>,list_t<$(type_t,type_t)@>) * tvars_and_bounds_opt;
+  $(list_t<$(tvar_t,bool)@>,list_t<$(type_t,type_t)@>) * tvars_and_bounds_opt;
+  // tvars_and_bounds_opt is a list of tvars and outlives constraints
+  // to add to the environment of the statement in the scope of the
+  // pattern.  These can arise either from an unpacked existential or
+  // an alias pattern.  If the bool for a tvar is true, then this
+  // is a newly-introduced region from an alias pattern.
   list_t<$(vardecl_t *,exp_opt_t)@> patvars;
   // patvars is a list of pattern variables and expressions, with
   // the following meaning: for each list element $(v,e):

@@ -676,9 +676,9 @@ absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
   let Place{root,fields} = *place;
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
-    switch($(ans,fields->hd)) {
-    case $(&NamedLocation(_,&Aggregate(is_union,d2)), fname):
-      fallthru(is_union,d2,fname);
+    retry: switch($(ans,fields->hd)) {
+    case $(&NamedLocation(_,rval), fname):
+      ans = rval; goto retry;
     case $(&Aggregate(is_union,d2), fname):
       ans = d2[fname];
       break;
@@ -855,9 +855,6 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
     let &Place{root,fs} = place;
     struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place, all_changed);
     absRval_t newval= assign_place_outer(&env,fs,0,Dict::lookup(d,root),r);
-    // XXX here, we have to grab the places that were changed, and add
-    // them to all_changed.  Don't think we have to worry about
-    // escaping here.
     return escape_these(fenv, env.pile, all_changed, Dict::insert(d, root, newval));
   }
 }
@@ -906,8 +903,9 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(_,&NamedLocation(n2,r2)): return join_absRval(env,a,r1,r2);
 
   case $(&Consumed(e1,i1,r1),&Consumed(e2,i2,r2)):
-    if (e1 == e2 && i1 == i2)
-      return rnew(rgn) Consumed(e1,i1,join_absRval(env,a,r1,r2));
+    if (e1 == e2)
+      return rnew(rgn) Consumed(e1,i1 > i2 ? i1 : i2,
+				join_absRval(env,a,r1,r2));
     switch (r1) {
     case &AddressOf(p): add_place(env->pile,p); break;
     default: break;
@@ -1226,6 +1224,21 @@ bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2) {
     return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
       Relations::relns_approx(r1,r2);
   }
+}
+
+$(absRval_t<`r>,list_t<vardecl_t,`rgn>) unname_rval(region_t<`rgn> rgn,
+						    absRval_t<`r> rv) {
+  list_t names = NULL;
+  bool done = false;
+  while (!done) {
+    switch (rv) {
+    case &NamedLocation(vd,rv2):
+      names = rnew (rgn) List(vd,names); rv = rv2; break;
+    default:
+      done = true; break;
+    }
+  }
+  return $(rv,names);
 }
 
 void print_initlevel(initlevel_t il) {

@@ -27,9 +27,6 @@ fail1.cyc:128: pattern type `EM133 *`ETR132 does not match definition type int
 fail1.cyc:133: expecting dynregion_t<`ER134,`ER135> but found int
 fail1.cyc:138: type mismatch: int *`r2 != int *`r
   `r and `r2 are not compatible. (variable types are not the same)
-fail1.cyc:143: alias declaration requires initializer
-fail1.cyc:148: bad scope for alias declaration
-fail1.cyc:154: cannot declare a qualified local variable
 fail1.cyc:160: bad storage class for inner function
 fail1.cyc:168: explicit namespace not allowed on inner function declaration
 fail1.cyc:174: bad attribute packed for function

@@ -121,7 +121,7 @@ static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
 static $(string_t,short,bool) rw_array[] = {
   $("__attribute__", ATTRIBUTE, true),
   $("abstract", ABSTRACT, false),
-  $("alias", ALIAS, false),
+//   $("alias", ALIAS, false),
   $("auto", AUTO, true),
   $("break", BREAK, true),
   $("calloc", CALLOC, false),

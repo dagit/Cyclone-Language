@@ -86,8 +86,8 @@ streambuff_t<`r> alloc_stb(region_t<`r::TR> rgnhdr,
     return alloc_stb_with(rgnhdr, typ, device, priority, DataBuff{0,NULL});
   else {
     let buf2 = rmalloc(Core::refcnt_region,n);
-    // FIX: why doesn't automatic alias insertion work?
-    { alias <`r2>char ? @nozeroterm `r2 abuf2 = buf2;
+    // FIX: automatic alias insertion fails because memcpy is a macro ...
+    { let alias <`r2>char ? @nozeroterm `r2 abuf2 = buf2;
       memcpy(abuf2,buf,n);
     }
     return alloc_stb_with(rgnhdr, typ, device, priority,
@@ -108,7 +108,7 @@ streambuff_t<`r> stb_clone(region_t<`r::TR> rgn, streambuff_t stb) {
 			 .bufs = { for i < n : DataBuff{bufs[i].ofs,NULL}} };
   // copy the data buffers
   char ? @nozeroterm `RC buf = NULL;
-  { alias <`r2> streambuff_t<`r2> astb = newstb;
+  { let alias <`r2> streambuff_t<`r2> astb = newstb;
     let &StreamBuff{<`j> .numbufs=nn,.bufs=bufsn,...} = astb;
     myassert (nn == n); // dumb array bounds checker
     for (unsigned int i = 0; i<n; i++) {
@@ -137,7 +137,7 @@ streambuff_t<`r> stb_copy(region_t<`r::TR> rgnhdr,
  // copy all buffers into a single buffer
  char ? @nozeroterm newb = rmalloc(Core::refcnt_region,len);
  {
-   alias <`y>char ? @nozeroterm `y newbuf = newb;
+   let alias <`y>char ? @nozeroterm `y newbuf = newb;
    unsigned int idx = 0;
    char ? @nozeroterm `RC buf = NULL;
    for (unsigned int i =0; i<n; i++) { // iterator
@@ -145,9 +145,10 @@ streambuff_t<`r> stb_copy(region_t<`r::TR> rgnhdr,
      if (buf != NULL) {
        // FIX: get this to work with memcpy instead
        let szb = numelts(buf);
-       let nb = szb - bufs[i].ofs;
+//        unsigned int nb = szb - bufs[i].ofs;
+       let nb = szb - bufs[i].ofs; // breaks bounds checks
        if (nb > ofs) {
-	 alias <`x>char ? @nozeroterm `x b = buf;
+	 let alias <`x>char ? @nozeroterm `x b = buf;
 	 _memcpy(&newbuf[idx],b+bufs[i].ofs+ofs,nb-ofs,sizeof(char));
 	 idx = idx + nb - ofs;
 	 // 	for (unsigned int j = bufs[i].ofs; j<szb; j++)
@@ -170,13 +171,14 @@ streambuff_t<`r> stb_copy(region_t<`r::TR> rgnhdr,
 streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
   char ? @nozeroterm `RC buf = NULL;
   streambuff_opt_t<`U> newstb = NULL;
-  { alias <`r>streambuff_t<`r> stb2 = stb;
+  { let alias <`r>streambuff_t<`r> stb2 = stb;
     let &StreamBuff{<`i> .numbufs=n, .bufs=bufs,
 		       .priority=prio, .device=dev,
 		       .typ=t } = stb2;
     if (n == 1) {
       if (bufs[0].buf != NULL) {
-	let szb = numelts(bufs[0].buf);
+// 	unsigned int szb = numelts(bufs[0].buf);
+	let szb = numelts(bufs[0].buf); // bounds checks fail
 	if (bufs[0].ofs + ofs > szb)
 	  throw new Core::Invalid_argument("ofs > sz");
 	bufs[0].ofs = bufs[0].ofs + ofs;
@@ -192,7 +194,8 @@ streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
       // look for the start of the buffers to copy over
       for (i=0; i<n; i++) {
 	if (bufs[i].buf != NULL) {
-	  let szb = numelts(bufs[i].buf);
+	  let szb = numelts(bufs[i].buf); // bounds checks fails
+// 	  unsigned int szb = numelts(bufs[i].buf);
 	  let bofs = bufs[i].ofs;
 	  // ok, we've found the offset.  Now modify the offset in this
 	  // buf and copy over the rest next...
@@ -213,7 +216,7 @@ streambuff_t<`U> stb_rest(int ofs, streambuff_t<`U> stb) {
       // being used.  also free the original stb
       if (newstb == NULL)
 	throw new Core::Invalid_argument("ofs exceeds length");
-      { alias <`r2>struct StreamBuff *`r2 stb2 = newstb;
+      { let alias <`r2>struct StreamBuff *`r2 stb2 = newstb;
         let &StreamBuff{<`j> .numbufs=n2, .bufs=bufs2,...} = stb2;
 	unsigned int j, k;
 	// first free the unused buffers in the old stb
@@ -255,7 +258,7 @@ streambuff_t<`r> stb_prepend(region_t<`r::TR> rgn, streambuff_t stb,
 			 .bufs = { for i < m : DataBuff{0,NULL}} };
   // copy the data buffers
   char ? @nozeroterm `RC buf = NULL;
-  { alias <`r2> streambuff_t<`r2> astb = newstb;
+  { let alias <`r2> streambuff_t<`r2> astb = newstb;
     let &StreamBuff{<`j> .numbufs=nn,.bufs=bufsn,...} = astb;
     let fatbufs = Core::mkfat(bufsn,sizeof(databuf_t<`RC>),nn);
     fatbufs[0].buf = nbuf;
@@ -284,7 +287,7 @@ int stb_with_buffer(streambuff_t stb, int idx,
   if (idx < n) {
     int retval;
     buf :=: bufs[idx].buf;
-    { alias <`r2>char ? @nozeroterm `r2 abuf = buf;
+    { let alias <`r2>char ? @nozeroterm `r2 abuf = buf;
       retval = f(env, abuf + bufs[idx].ofs);
     }
     buf :=: bufs[idx].buf;
@@ -293,3 +296,4 @@ int stb_with_buffer(streambuff_t stb, int idx,
   else
     throw new Core::Invalid_argument("bad index");
 }
+

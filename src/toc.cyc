@@ -73,7 +73,7 @@ namespace Toc;
 // padding for variable-length array allocations
 #define PAD_BYTES sizeof(double)
 
-//#define BCE_DEBUG
+// #define BCE_DEBUG
 bool warn_bounds_checks = false;
 bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
@@ -1296,7 +1296,7 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
           typ2string(a_typ),exp2string(i));
-  fprintf(stderr,"relns: ["); Relations::print_relns(relns);
+  fprintf(stderr,"relns: ["); Relations::print_relns(stderr,relns);
   fprintf(stderr,"]\n");
 #endif
   // if a has type T*{x} or T[x], then we can pretend like it's
@@ -3820,6 +3820,10 @@ xlate_pat(env_t<`rgn> nv,
           list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
+  case &AliasVar_p(_,&Vardecl(_,x,_,_,_,_,_,_)):
+    let p2 = new_pat(&Wild_p_val,0);
+    p2->topt = p->topt;
+    fallthru(x,p2);
   case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
     // v = r (and substitute v for x) and continue matching p2 against r
     qvar_t v = temp_var();
@@ -4388,19 +4392,20 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                      DL),DL),DL)->r;
         }
         return;
-      case &Alias_d(tv,vd):
-        // Handle this like a variable declaration
-        qvar_t old_name = vd->name;
-        qvar_t new_name = temp_var();
-        vd->name = new_name;
-        s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
-        TOC_RGN(nv, temp) {
-          let nv2 =
-            add_varmap(temp,nv,old_name,
-                       varb_exp(new_name,new Local_b(vd),DL));
-          local_decl_to_c(nv2, nv, vd, s1);
-        }
-        return;
+	// MWH: made obsolete by alias patterns
+//       case &Alias_d(tv,vd):
+//         // Handle this like a variable declaration
+//         qvar_t old_name = vd->name;
+//         qvar_t new_name = temp_var();
+//         vd->name = new_name;
+//         s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
+//         TOC_RGN(nv, temp) {
+//           let nv2 =
+//             add_varmap(temp,nv,old_name,
+//                        varb_exp(new_name,new Local_b(vd),DL));
+//           local_decl_to_c(nv2, nv, vd, s1);
+//         }
+//         return;
 
       default: impos("bad nested declaration within function");
       }
@@ -4952,7 +4957,7 @@ static void decltypes_to_c(decl_t d) {
   case &ExternC_d(_):
   case &ExternCinclude_d(_,_):
   case &Region_d(...):
-  case &Alias_d(...):
+//   case &Alias_d(...):
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
   case &Porton_d:
@@ -5035,8 +5040,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       toc_impos("letdecl at toplevel");
     case &Region_d(...):
       toc_impos("region decl at toplevel");
-    case &Alias_d(...):
-      toc_impos("alias decl at toplevel");
+//     case &Alias_d(...):
+//       toc_impos("alias decl at toplevel");
     case &Aggr_d(sd):
       aggrdecl_to_c(sd,true);
       break;

@@ -1045,7 +1045,8 @@ using Parse;
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
-%token ALIAS NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
+// %token ALIAS
+%token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
 %token NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL EXTENSIBLE_QUAL RESETABLE_QUAL
@@ -1361,7 +1362,7 @@ declaration:
     $$ = ^$(new List(region_decl(tv,vd,one,four,LOC(@1,@5)),NULL));
   }
 /* Cyc: alias <r>t v = e; */
-| ALIAS '<' TYPE_VAR '>' declaration 
+/* | ALIAS '<' TYPE_VAR '>' declaration 
   { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
     list_t<decl_t> ds = $5;
     if (ds == NULL || ds->tl != NULL) 
@@ -1376,6 +1377,7 @@ declaration:
       $$ = ^$(NULL);
     }
   }
+*/
 ;
 
 resetable_qual_opt:
@@ -2746,6 +2748,15 @@ pattern:
         err("expecting `as'",SLOC(@2));
       $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),&VoidType_val,NULL),
                               $3),SLOC(@1))); 
+    }
+| IDENTIFIER '<' TYPE_VAR '>' type_name IDENTIFIER
+    { if (strcmp($1,"alias") != 0) 
+        err("expecting `alias'",SLOC(@2));
+      let location = LOC(@1,@6);
+      tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
+      vardecl_t vd = new_vardecl(new $(Loc_n, new $6),
+				 type_name_to_type($5,SLOC(@5)),NULL);
+      $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
     }
 | '$' '(' tuple_pattern_list ')'
     { let $(ps, dots) = *($3);

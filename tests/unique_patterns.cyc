@@ -6,6 +6,16 @@ struct s1<`r> {
   int y;
 };
 
+struct s2<`r> {
+  struct s1<`r> *`r ps;
+  int *`r x;
+};
+
+struct s3<`r> {
+  struct s2<`r> s;
+  int * x;
+};
+
 void func1(struct s1<`U> @`U s) {
   int y = 0;
   { let &s1{.p=p,...} = s; // consumes s->p
@@ -28,10 +38,51 @@ void func1a(struct s1<`U> @`U s) {
   return;
 }
 
-struct s2<`r> {
-  struct s1<`r> *`r ps;
-  int *`r x;
-};
+void func1b(struct s1<`U> @`U s) {
+  int y = 0;
+  { let &s1{.p=p,...} = s; // consumes s->p
+    y = *p;
+    s->p = new 1;
+    Core::ufree(s->p);
+  } // does not unconsume s->p; name changed
+//   Core::ufree(s->p); // fails
+  Core::ufree(s);
+  return;
+}
+
+void func1c(struct s1<`U> @`U s) {
+  { let &s1{.p=p,...} = s; // consumes s->p
+    s->p = p;
+//     Core::ufree(s->p); // fails
+  } // does not unconsume s->p, but already ok
+  Core::ufree(s->p);
+  Core::ufree(s);
+  return;
+}
+
+// basic alias patterns
+void func1d(struct s1<`U> @`U s) {
+  { let &s1{.p=alias <`r>int *`r p,...} = s; // consumes s->p
+    int * p2 = p;
+    int * p3 = p; 
+//     s->p = new 1; // fails
+  } // unconsumes s->p
+  Core::ufree(s->p);
+  Core::ufree(s);
+}
+
+void func1e(struct s1<`U> *`U s) {
+  switch (s) {
+  case &s1{.p=alias <`r>int *`r p,...}:
+    int * p2 = p;
+    int * p3 = p; 
+//     s->p = new 1; // fails
+    break;
+  case NULL: break;
+  } // unconsumes s->p
+  Core::ufree(s->p);
+  Core::ufree(s);
+}
 
 void func2a(struct s2<`U> @`U s) {
   { let &s2{.ps=ps,...} = s; // consumes s->ps
@@ -66,11 +117,6 @@ void func3a(struct s2<`U> s) {
   Core::ufree(s.ps);
 }
 
-struct s3<`r> {
-  struct s2<`r> s;
-  int * x;
-};
-
 void func3b(struct s3<`U> @`U s) {
   int z;
 //   { let &s3{.s=xs as s2{.ps=ps,...},...} = s; // fails
@@ -83,6 +129,43 @@ void func3b(struct s3<`U> @`U s) {
   } // xs is *not* unconsumed
 //   Core::ufree(s->s.ps); // fails
 }
+
+// void func3ca(struct s3<`U> *`U s) {
+//   int z;
+//   switch (s) {
+//   case &s3{.s=s2{.ps=ps,...},.x=x}:
+//     z = *ps->p + *x;
+// //     Core::ufree(ps); // causes failure below
+//     switch (ps) {
+//     case &s1{.p=p,...}: break;
+//     default: break;
+//     }
+//     goto lab;
+//   default:
+//     z = 0;
+//   }
+//  lab:
+//   { switch (s) {
+//     case &s3{.s=s2{.ps=ps,...},...}:
+//       switch (ps) {
+//       case &s1{.p=p,...}:
+//         z += *p;
+//         goto lab2;
+//       default: break;
+//       }
+//       break;
+//   default: break;
+//   }
+//   lab2:
+// //     Core::ufree(s->s.ps); // fail
+//     goto lab3;
+//   }
+//   lab3:
+//   Core::ufree(s->s.ps->p);
+//   Core::ufree(s->s.ps);
+//   Core::ufree(s->s.x);
+//   Core::ufree(s);
+// }
 
 void func3c(struct s3<`U> *`U s) {
   int z;
@@ -129,4 +212,29 @@ void func4b() {
   Core::ufree(s->s.ps);
   Core::ufree(s->s.x);
   Core::ufree(s);
+}
+
+int main() {
+  bool null_ok = true;
+  func1(new s1{new 1,1});
+  func1a(new s1{new 1,1});
+  func1b(new s1{new 1,1});
+  func1c(new s1{new 1,1});
+  func1d(new s1{new 1,1});
+
+  func2a(new s2{new s1{new 1,1},NULL});
+
+  try { func2b(new s2{new s1{new 1,1},NULL}); null_ok = false; } 
+  catch { default: null_ok = null_ok && true; break; }
+  
+  func3a(s2{new s1{new 1,1},new 1});
+  func3b(new s3{s2{new s1{new 1,1},new 1},new 5});
+
+  try { func3c(NULL); null_ok = false; } 
+  catch { default: null_ok = null_ok && true; break; }
+
+  func4b();
+  if (!null_ok)
+    fprintf(stderr,"unique_patterns: failed to perform some null checks\n");
+  return 0;
 }

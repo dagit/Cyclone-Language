@@ -702,6 +702,7 @@ namespace Absyn {
     Wild_p; // _ 
     // for Var_p and Reference_p only name field is right until tcPat is called
     Var_p(vardecl_t,pat_t); // x as p (x when p is Wild_p)
+    AliasVar_p(tvar_t, vardecl_t);  // alias <`r> T x
     Reference_p(vardecl_t,pat_t);// *x as p (*x when p is Wild_p)
     TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
     Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
@@ -867,8 +868,8 @@ namespace Absyn {
     // region<`r> h;  or  region [resetable] <`r> h;   or
     // region h = open(e).  When bool is true, resetable.  When exp_opt_t
     // is present, it's an open.
-    Alias_d(tvar_t, vardecl_t);  // open for unique pointer
-    // alias<`r> T x = e;
+//     Alias_d(tvar_t, vardecl_t);  // open for unique pointer
+    // alias<`r> T x = e;  MWH: made obsolete by alias patterns
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Datatype_d(datatypedecl_t);    // datatype Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
@@ -1101,7 +1102,7 @@ namespace Absyn {
   extern decl_t let_decl(pat_t p, exp_t e, seg_t loc);
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
   extern decl_t region_decl(tvar_t,vardecl_t,bool,exp_opt_t,seg_t); 
-  extern decl_t alias_decl(tvar_t,vardecl_t,seg_t);
+  extern decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
   extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,

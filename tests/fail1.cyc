@@ -5,17 +5,17 @@
  */
 void f1(int x) {
   // alias requires pointer type
-  alias<`r> int *`r y = x;
+  let alias<`r> int *`r y = x;
 }
 
 void f2(int *`U x) {
   // alias requires pointer type
-  alias<`r> int y = x;
+  let alias<`r> int y = x;
 }
 
 void f3(int *`U x) {
   // cannot alias value of type int*`U to int*`H*`U
-  alias<`r> int*`H*`r y = x;
+  let alias<`r> int*`H*`r y = x;
 }
 
 int* f4() {
@@ -138,22 +138,22 @@ void f23(int*`r2 x,region_t<`r> r) {
   x = rnew(r) 3;
 }
 
-void f24(int *`U x) {
-  // alias declaration requires initializer
-  alias<`r> int*`r y;
-}
+// void f24(int *`U x) {
+//   // alias declaration requires initializer
+//   alias<`r> int*`r y;
+// }
 
-void f25(int *`U x) {
-  // bad scope for alias declaration
-  alias<`r> static int*`r y = x;
-}
+// void f25(int *`U x) {
+//   // bad scope for alias declaration
+//   alias<`r> static int*`r y = x;
+// }
 
-namespace Foo {
-void f26(int *`U x) {
-  // cannot declare a qualified local variable
-  alias<`r> int*`r Foo::y = x;
-}
-}
+// namespace Foo {
+// void f26(int *`U x) {
+//   // cannot declare a qualified local variable
+//   alias<`r> int*`r Foo::y = x;
+// }
+// }
 
 void f27() {
   // bad storage class for inner function

@@ -226,6 +226,10 @@ static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
 
 #define DL 0
 
+static $(tvar_t,bool)@ add_false(tvar_t tv) {
+  return new $(tv,false);
+}
+
 static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt, 
                                type_opt_t rgn_pat, bool allow_ref_pat,
 			       exp_opt_t access_exp) {
@@ -259,6 +263,32 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     }
     set_vd(new vd, access_exp, &res.patvars, pat_promote_array(te,t,rgn_pat));
     break;
+  case &AliasVar_p(tv,vd):
+    TEMP_RGN(te, r2) {
+      tenv_t te2 = add_type_vars(r2,p->loc,te,rlist(r2,tv));
+      if(res.tvars_and_bounds_opt==NULL)
+	res.tvars_and_bounds_opt = new $(NULL,NULL);
+      (*res.tvars_and_bounds_opt)[0] = 
+	append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
+      check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
+    }
+    // Now we repeat checks for the Var_p case above (except the var's type)
+    //   this is the type of the access expression
+    if (topt != NULL) t = *topt;
+    else              t = any_type(lookup_type_vars(te),topt);
+    switch (compress(t)) {
+    case &ArrayType(_):
+      if (rgn_pat == NULL || !allow_ref_pat)
+        terr(p->loc, "array reference would point into unknown/unallowed region");
+      break;
+    default:
+      if (!kind_leq(typ_kind(t),&tmk))
+        terr(p->loc, "pattern would point to an abstract member");
+      break;
+    }
+    set_vd(new vd, access_exp, &res.patvars, vd->type);
+    break;
+
   case &Reference_p(vd,p2):
     res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
@@ -298,7 +328,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     if(res.tvars_and_bounds_opt==NULL)
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
-      new List(tv,(*res.tvars_and_bounds_opt)[0]);
+      new List(new $(tv,false),(*res.tvars_and_bounds_opt)[0]);
     t = uint_typ; // this is what we match against
     break;
 
@@ -517,7 +547,7 @@ DONT_PROMOTE:
           if(res.tvars_and_bounds_opt==NULL)
             res.tvars_and_bounds_opt = new $(NULL,NULL);
           (*res.tvars_and_bounds_opt)[0] = 
-            append((*res.tvars_and_bounds_opt)[0],exist_ts);
+            append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
           (*res.tvars_and_bounds_opt)[1] = 
             append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
           let rpo_inst = NULL;
@@ -659,6 +689,34 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
   return ans;
 }
 
+// we're aliasing an expression of type old_type, temporarily
+// assigning it the type new_type where some occurrences of
+// unique regions are replaced with tv.
+static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
+                                 tvar_t tv, type_t new_type, 
+                                 exp_t initializer) {
+  list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
+  if (subtype(tenv, assump, old_type, new_type)) {
+    // next, check that the types are pointer types
+
+    // MWH: removed this check because it was causing the the type of
+    // the rhs of the alias to no longer be unique, foiling the flow
+    // analysis.  However, without this cast we might not properly
+    // insert computational coercions, such as converting from ? to *.
+    // Seems like we need to have unchecked_cast take a parameter
+    // that includes whether or not to leave the region variables alone.
+    // 
+//     unchecked_cast(tenv,initializer,new_type,Other_coercion);
+    switch $(compress(new_type),compress(new_type)) {
+    case $(&PointerType(pold), &PointerType(pnew)): break;
+    default: terr(loc,"alias requires pointer type"); break;
+    }
+  } else {
+    terr(loc,"cannot alias value of type %s to type %s",
+         typ2string(old_type), typ2string(new_type));
+  }
+}
+
 // This makes sure that any mentioned region is accessible, and that
 // reference patterns are not used on unique pointers
 void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
@@ -718,6 +776,27 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
     }
     check_pat_regions_rec(te,p2,did_noalias_deref,patvars);
     return;
+  case &AliasVar_p(tv,vd):
+    for (_ x = patvars; x != NULL; x=x->tl) {
+      let &$(vdopt,eopt) = x->hd;
+      // NOTE: if eopt == NULL, we must be within a datatype, in which
+      // case we disallow the alias, since we must know the path
+      if (vdopt != NULL && *vdopt == vd) {
+	if (eopt == NULL)
+	  terr(p->loc,"Cannot alias pattern expression");
+	else {
+	  TEMP_RGN(te, r) {
+	    tenv_t te2 = add_type_vars(r,p->loc,te,rlist(r,tv));
+	    te2 = add_region(r, te2, new VarType(tv), false, true);
+//       check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
+	    check_alias_coercion(te2,p->loc,(type_t)eopt->topt,tv,
+				 vd->type,(exp_t)eopt);
+	  }
+	}
+	break;
+      }
+    }
+    break;
   default: return;
   }
 }
@@ -891,6 +970,7 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   simple_pat_t<`r> s;
   switch (p->r) {
   case &Wild_p:          
+  case &AliasVar_p(_,_):
   case &TagInt_p(_,_):  s = rnew(r) Any; break;
   case &Null_p:         s = null_pat(r,p); break;
   case &Int_p(sn,i):    s = int_pat(r,i,p); break;

@@ -60,9 +60,9 @@ void copy_test() {
   assert(stb_noaliases(stb));
   assert(stb_noaliases(stb2));
   unsigned int stb_addr, stb3_addr;
-  { alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb3 = stb_rest(3,stb); // "lo"
-  { alias <`r> streambuff_t<`r> x = stb3; stb3_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb3; stb3_addr = (unsigned int)x; }
   assert(stb_addr == stb3_addr);
   assert(stb_size(stb3) == 3);
   stb_free_unique(stb3);
@@ -78,9 +78,9 @@ void clone_test() {
   assert(!stb_noaliases(stb2));
   let stb3 = stb_clone(Core::unique_region,stb);
   unsigned int stb_addr, stb4_addr;
-  { alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb4 = stb_rest(3,stb);
-  { alias <`r> streambuff_t<`r> x = stb4; stb4_addr = (unsigned int)x; }
+  { let alias <`r> streambuff_t<`r> x = stb4; stb4_addr = (unsigned int)x; }
   assert(stb_size(stb4) == 3);
   assert(stb_size(stb3) == stb_size(stb2));
   assert(!stb_cmp(stb3,stb2));

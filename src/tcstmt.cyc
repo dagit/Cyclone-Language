@@ -73,10 +73,13 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
   let TcPatResult(p,vse) = pat_res;
   let $(vs,_) = List::split(vse);
-  let tvs = (p==NULL) ? NULL : (*p)[0];
+  let tvs = (p==NULL) ? NULL : map(fst,(*p)[0]);
   let bds = (p==NULL) ? NULL : (*p)[1];
+  let rgns = (p==NULL) ? NULL : map(fst,filter(snd,(*p)[0]));
   TEMP_RGN(te,r) {
     tenv_t te2 = add_type_vars(r,loc,te,tvs);
+    for (; rgns != NULL; rgns=rgns->tl)
+      te2 = add_region(r,te2,new VarType(rgns->hd),false,true);
     te2 = new_outlives_constraints(r,te2,bds,loc);
     if(new_block)
       te2 = Tcenv::new_block(r,loc,te2);
@@ -369,7 +372,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let p = scs->hd->pattern;
         let pat_res = tcPat(te,p,&t,e);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-          : (*pat_res.tvars_and_bounds_opt)[0];
+          : map(fst,(*pat_res.tvars_and_bounds_opt)[0]);
         if (!unify((type_t)p->topt,t)) { // allow silent_castable?
           terr(scs->hd->loc, "switch on type %s, but case expects type %s",
                typ2string(t), typ2string((type_t)p->topt));
@@ -415,8 +418,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let p = scs->hd->pattern;
         let exception_type = exn_typ();
         let pat_res = tcPat(te,p,&exception_type,NULL);
+	// MWH: should I be including the fresh regions for
+	//   alias in fallthrus?
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-          : (*pat_res.tvars_and_bounds_opt)[0];
+          : map(fst,(*pat_res.tvars_and_bounds_opt)[0]);
         if (!unify((type_t)p->topt,exception_type))
           terr(scs->hd->loc, "expected datatype exn@ but found %s",
                typ2string((type_t)p->topt));
@@ -558,6 +563,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	let e = *exp;
 	switch (p->r) {
 	case &Var_p(...): 
+	case &AliasVar_p(...): 
 	case &UnknownId_p(...): break;
 	default:
 	  if (!is_var_exp(e)) {
@@ -580,6 +586,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcExpInitializer(te,NULL,e);
         //FIX: can pass region if e an lvalue
         type_t pat_type = (type_t)e->topt;
+	//XXX: need to check that e is a unique path?
         let pat_res = tcPat(te,p,&pat_type,e);
         *vds = new Opt(pat_res.patvars);
         if (!unify((type_t)p->topt,(type_t)e->topt)
@@ -664,47 +671,48 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         return;
 
         // alias <`r> T x = e;
-      case &Alias_d(tv,vd):
-        TEMP_RGN(te, r) {
-          // establish tv as a reasonable region variable
-          //       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
-          tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
-          te2 = add_region(r, te2, new VarType(tv), false, true);
-          check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
-          let e = vd->initializer;
-          if (e == NULL) {
-            terr(s0->loc,"alias declaration requires initializer");
-            return;
-          }
-          if (vd->sc != Public) 
-            terr(d->loc,"bad scope for alias declaration");
-          vd->rgn = Tcenv::curr_rgn(te);
-          switch ((*vd->name)[0]) {
-          case {.Loc_n = _}: break;
-          case {.Rel_n = NULL}: (*vd->name)[0] = Loc_n; break;
-          default: terr(d->loc, "cannot declare a qualified local variable");
-            (*vd->name)[0] = Loc_n; break;
-          }
-          vd->tq.real_const = extract_const_from_typedef(s0->loc,
-                                                         vd->tq.print_const,
-                                                         vd->type);
-          te2 = add_local_var(r,s0->loc, te2, vd);
-          te2 = set_encloser(r,te2,s); // for substatements inside of s
-          // FIX? could take vd->type and munge it to get a topt...
-          // NOTE: we type-check e in the old environment (without the tvar)
-          // which means that we better pick a fresh variable for the vd
-          // to ensure that there's no circularity in the definition!
-          tcExpInitializer(te,NULL,e);
+	// MWH: made obsolete by alias patterns
+//       case &Alias_d(tv,vd):
+//         TEMP_RGN(te, r) {
+//           // establish tv as a reasonable region variable
+//           //       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
+//           tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
+//           te2 = add_region(r, te2, new VarType(tv), false, true);
+//           check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
+//           let e = vd->initializer;
+//           if (e == NULL) {
+//             terr(s0->loc,"alias declaration requires initializer");
+//             return;
+//           }
+//           if (vd->sc != Public) 
+//             terr(d->loc,"bad scope for alias declaration");
+//           vd->rgn = Tcenv::curr_rgn(te);
+//           switch ((*vd->name)[0]) {
+//           case {.Loc_n = _}: break;
+//           case {.Rel_n = NULL}: (*vd->name)[0] = Loc_n; break;
+//           default: terr(d->loc, "cannot declare a qualified local variable");
+//             (*vd->name)[0] = Loc_n; break;
+//           }
+//           vd->tq.real_const = extract_const_from_typedef(s0->loc,
+//                                                          vd->tq.print_const,
+//                                                          vd->type);
+//           te2 = add_local_var(r,s0->loc, te2, vd);
+//           te2 = set_encloser(r,te2,s); // for substatements inside of s
+//           // FIX? could take vd->type and munge it to get a topt...
+//           // NOTE: we type-check e in the old environment (without the tvar)
+//           // which means that we better pick a fresh variable for the vd
+//           // to ensure that there's no circularity in the definition!
+//           tcExpInitializer(te,NULL,e);
 
-          // need to check the compatibility of the expression's
-          // type with the variable's
-          check_alias_coercion(te2,d->loc,(type_t)e->topt,tv,vd->type,e);
+//           // need to check the compatibility of the expression's
+//           // type with the variable's
+//           check_alias_coercion(te2,d->loc,(type_t)e->topt,tv,vd->type,e);
 
-          // check the body
-          tcStmt(te2,s,false);
-        }
-        NewControlFlow::set_encloser(s0,get_encloser(te));
-        return;
+//           // check the body
+//           tcStmt(te2,s,false);
+//         }
+//         NewControlFlow::set_encloser(s0,get_encloser(te));
+//         return;
 
       case &Fn_d(fd): 
         // FIX: much of this code is the same as in Tc::tcFndecl

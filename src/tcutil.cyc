@@ -2383,10 +2383,10 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   }
   //fprintf(stderr,"after unifying, type is %s\n",typ2string(e_typ));
   e->topt = NULL;
-  vd->initializer = e;
+  vd->initializer = NULL;
 
   // generate the alias decl
-  decl_t d = alias_decl(tv,vd,e->loc);
+  decl_t d = alias_decl(tv,vd,e,e->loc);
 
   return $(d,ve);
 }

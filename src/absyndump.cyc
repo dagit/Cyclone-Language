@@ -83,7 +83,7 @@ void dumpexp(exp_t);
 void dumpexp_prec(int,exp_t);
 void dumppat(pat_t);
 void dumpstmt(stmt_t,bool expstmt);
-void dumpvardecl(vardecl_t,Position::seg_t);
+void dumpvardecl(vardecl_t,Position::seg_t,bool do_semi);
 void dumpdecl(decl_t);
 void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a);
 void dumptqtd(tqual_t, type_t, void f(`a), `a);
@@ -1033,6 +1033,11 @@ void dumppat(pat_t p) {
   case &Float_p(x,_): dump(x); break;
   case &Var_p(vd,&Pat{.r = &Wild_p,...}): dumpqvar(vd->name); break;
   case &Var_p(vd,p2): dumpqvar(vd->name); dump(" as "); dumppat(p2); break;
+  case &AliasVar_p(tv,vd): 
+    dump("alias");
+    dump("<"); dumptvar(tv); dump(">" );
+    dumpvardecl(vd,p->loc,false);
+    break;
   case &Tuple_p(ts,dots):     
     string_t term = dots ? ", ...)" : ")";
     group(dumppat,ts,"$(",term,","); break;
@@ -1163,7 +1168,7 @@ static bool is_char_ptr(type_t t) {
   }
 }
 
-void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
+void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
   let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
   switch(c_compiler){
   case Gcc_c:
@@ -1211,7 +1216,7 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
     dump_char('=');
     dumpexp((exp_t)initializer);
   }
-  dump_semi();
+  if (do_semi) dump_semi();
 }
 
 static void dump_aggrdecl(aggrdecl_t ad) {
@@ -1264,7 +1269,7 @@ void dumpdecl(decl_t d) {
   dumploc(d->loc);
   switch(d->r) {
   case &Var_d(vd):
-    dumpvardecl(vd,d->loc);
+    dumpvardecl(vd,d->loc,true);
     break;
   case &Fn_d(fd):
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
@@ -1327,11 +1332,11 @@ void dumpdecl(decl_t d) {
     }
     dump_semi();
     break;
-  case &Alias_d(tv,vd):
-    dump("alias"); 
-    dump("<"); dumptvar(tv); dump(">" );
-    dumpvardecl(vd,d->loc);
-    break;
+//   case &Alias_d(tv,vd):
+//     dump("alias"); 
+//     dump("<"); dumptvar(tv); dump(">" );
+//     dumpvardecl(vd,d->loc,true);
+//     break;
 
   case &Typedef_d(td):
     // JGM: commenting out because abstract typdefs don't get printed
@@ -1492,7 +1497,7 @@ static void dump_decl_interface(decl_t d) {
     vd->initializer = NULL;
     if (vd->sc == Public)
       dump("extern ");
-    dumpvardecl(vd,d->loc);
+    dumpvardecl(vd,d->loc,true);
     dump("\n");
     vd->initializer = init;
     break;

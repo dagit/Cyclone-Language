@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest)
+EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest unique_patterns)
 
 all: $(EXES) failtest
 	./test_regions
@@ -26,6 +26,7 @@ all: $(EXES) failtest
 	./require
 	./test_getopt -abc123
 	./streambufftest
+	./unique_patterns
 
 # tests things that should be type errors
 failtest:

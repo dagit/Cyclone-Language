@@ -173,6 +173,8 @@ extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, bool no_ini
 extern absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t<`r>);
 extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t<`r> r, bool @needs_unconsume);
 extern absRval_t<`r> make_unique_unconsumed(flow_env_t<`r> fenv, absRval_t<`r> r);
+extern $(absRval_t<`r>,List::list_t<Absyn::vardecl_t,`rgn>)
+  unname_rval(region_t<`rgn> rgn, absRval_t<`r> rv);
 
 extern initlevel_t initlevel(flow_env_t,flowdict_t<`r> d, absRval_t<`r> r);
 extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);
@@ -190,7 +192,6 @@ extern void print_flow(flow_t f);
 
 // debugging
 // #define DEBUG_FLOW
-#define SANITY
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)
