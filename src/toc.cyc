@@ -360,7 +360,7 @@ struct functionSet _zero_arr_inplace_plus_post_functionSet = {
 // choose which function to call based on argument type
 static exp_t getFunctionType(struct functionSet @fS, type_t t) {
   exp_t function;
-  switch(t) {
+  switch(Tcutil::compress(t)) {
   case &IntType(_,sz):
     switch(sz) {
     case Char_sz:  function = fS->fchar;  break;
@@ -382,12 +382,12 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
     function = fS->fvoidstar;
     break;
   default:
-    throw new Impossible("impossible expression type (not int, float, double, or pointer)");
+    throw new Impossible(aprintf("impossible expression type %s (not int, float, double, or pointer)",typ2string(t)));
   }
   return function;
 }
 exp_t getFunction(struct functionSet @fS, exp_t arr) {
-  return getFunctionType(fS, compress(arr->topt->v));
+  return getFunctionType(fS, arr->topt->v);
 }
 exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
   switch (compress(arr->topt->v)) {
