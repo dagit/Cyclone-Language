@@ -1813,12 +1813,10 @@ TRY_AGAIN
 socklen_t
 }
 epilogue {
-  #ifdef __APPLE__
-  /* Not defined in OS X so we guess :-( */
+  /* Not defined in OS X or cygwin so we guess :-( */
   #ifndef _in_port_t_def_
   #define _in_port_t_def_
   typedef unsigned short in_port_t;
-  #endif
   #endif
 }
 epilogue {
@@ -1879,7 +1877,7 @@ cycstub gethostbyname {
       Cstring @h_aliases;
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
       short h_addrtype;
-      short h_length; B  // always 4
+      short h_length; // always 4
 #else
       int h_addrtype;
       int h_length;   // always 4
@@ -1991,8 +1989,7 @@ epilogue {
   */
 }
 epilogue {
-  #ifdef __APPLE__
-  /* These aren't defined in OS X so we guess :-( */
+  /* These aren't defined in OS X or Cygwin so we guess :-( */
   #ifndef _in_port_t_def_
   #define _in_port_t_def_
   typedef unsigned short in_port_t;
@@ -2000,7 +1997,6 @@ epilogue {
   #ifndef _in_addr_t_def_
   #define _in_addr_t_def_
   typedef unsigned int in_addr_t;
-  #endif
   #endif
 }
 // Not sure why these were here -- they aren't according to POSIX
