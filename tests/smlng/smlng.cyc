@@ -1,5 +1,6 @@
 #include <core.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "smlng.h"
 #include "tag_elim.h"
 #include "timer.h"
@@ -182,27 +183,26 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 extern void validate_docs(buf_t,doc_t,doc_t);
 
 int main(int argc, char ??argv) {
-  //if(argc < 2) {
-  //fprintf(stderr, "pass a time limit on the command-line");
-  //return 1;
-  //}
-  // TagElim::up_opt_test();
-  //start_timer(argv[1]);
-  //time_test(argv[1]);
+  string_t tlimit = Stdlib::getenv("TLIMIT");
+  if (tlimit == null) {
+    fprintf(stderr,"please set the TLIMIT environment variable\n");
+    exit(1);
+  }
+  start_timer(tlimit);
   buf_t b = init_buf();
-  doc_t d = get_docs(init_context,b,stdin);
-  // doc_t orig = copy_doc(d);
-  // fprintf(stderr,"copy: ");
-  // validate_docs(b,d,orig); // checks the validator (one direction)
-  //  doc_t d2 = new Text(new {for i < 3: 'a'});
-  //  validate_docs(d,d2);
-  //    d = down_opt(init_context,d);
-      //	       fprintf(stderr,"down: ");
-      //       validate_docs(b,d,orig);
-	       /*  let $(d,_) = TagElim::up_opt(d);
-  fprintf(stderr,"up: ");
-  validate_docs(d,orig);*/
+  fprintf(stderr,"getting docs\n"); fflush(stderr);
+  doc_t orig = get_docs(init_context,b,stdin);
+  fprintf(stderr,"copying docs\n"); fflush(stderr);
+  doc_t d = copy_doc(orig);
+  fprintf(stderr,"up_opt\n"); fflush(stderr);
+  let $(d2, _) = TagElim::up_opt(d);
+  d = d2;
+  fprintf(stderr,"dumping docs\n"); fflush(stderr);
   dump(b,d);
+  let t = check_time();
+  fprintf(stderr,"time left: %d sec out of %s sec\n",t,tlimit); fflush(stderr);
+  //fprintf(stderr,"validating docs\n",t); fflush(stderr);
+  //validate_docs(b,d,orig);
   return 0;
 }
 

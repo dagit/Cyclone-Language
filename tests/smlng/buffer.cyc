@@ -5,9 +5,13 @@ namespace Buffer;
 // Buffers for reading text
 #define DEF_BUFSIZE 1024
 
+typedef struct Primbuf {
+  char v[DEF_BUFSIZE];
+} @primbuf_t;
+
 typedef struct BufList {
   struct BufList* next;
-  char data[DEF_BUFSIZE];
+  primbuf_t data; // broken out to get data to be atomic
 } *buflist_t;
 
 struct Buf {
@@ -15,15 +19,17 @@ struct Buf {
   struct BufList @curr;  // pointer to current buffer to dump chars
   unsigned int offset;   // offset into current buffer where to dump next char
   unsigned int position; // absolute position within buffer of last char
+  struct BufList @seek_buf; // used when doing sequential writing
+  unsigned int seek_pos;    // used when doing sequential writing
 };
 
 buf_t init_buf() {
-  let bl = new BufList{null, {for i < DEF_BUFSIZE : '0'}};
-  return new Buf {bl, bl, 0, 0};
+  let bl = new BufList{null, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
+  return new Buf {bl, bl, 0, 0, bl, 0};
 }
 
 static void grow_buf(buf_t b) {
-  struct BufList @bl = new BufList{null, {for i < DEF_BUFSIZE : '0'}};
+  struct BufList @bl = new BufList{null, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
   b->curr->next = bl;
   b->curr = bl;
   b->offset = 0;
@@ -31,7 +37,7 @@ static void grow_buf(buf_t b) {
 
 void add_char(buf_t b, char c) {
   if (b->offset >= DEF_BUFSIZE) grow_buf(b);
-  b->curr->data[b->offset++] = c;
+  b->curr->data->v[b->offset++] = c;
   b->position++;
 }
 
@@ -40,13 +46,24 @@ unsigned int position(buf_t b) {
 }
 
 void write_buf(FILE @f, buf_t b, unsigned int start) {
-  struct BufList @bl = b->first;
+  struct BufList @bl;
+
+  if (b->seek_pos < start) {
+    bl = b->seek_buf;
+    start -= b->seek_pos;
+  } else {
+    bl = b->first;
+    b->seek_buf = bl;
+    b->seek_pos = 0;
+  }
+
   while (start > DEF_BUFSIZE) {
     start -= DEF_BUFSIZE;
-    bl = (struct BufList @)bl->next;
+    b->seek_buf = bl = (struct BufList @)bl->next;
+    b->seek_pos += DEF_BUFSIZE;
   }
   while (true) {
-    char c = bl->data[start++];
+    char c = bl->data->v[start++];
     if (c == '\0') return;
     fputc(c,f);
     if (start >= DEF_BUFSIZE) {
@@ -64,7 +81,7 @@ unsigned int size(buf_t b, unsigned int start) {
     bl = (struct BufList @)bl->next;
   }
   while (true) {
-    char c = bl->data[start++];
+    char c = bl->data->v[start++];
     if (c == '\0') return sum;
     sum++;
     if (start >= DEF_BUFSIZE) {
@@ -80,6 +97,6 @@ char get_char(buf_t b, unsigned int start) {
     start -= DEF_BUFSIZE;
     bl = (struct BufList @)bl->next;
   }
-  return bl->data[start];
+  return bl->data->v[start];
 }
 

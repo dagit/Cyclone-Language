@@ -17,7 +17,7 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -I../../lib -B../../lib -g
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -50,6 +50,6 @@ buffer.cyc: buffer.h
 parser.cyc: parser.h buffer.h smlng.h
 
 clean:
-	rm -f smlng.o smlng.c tag_elim.o tag_elim.c timer.o timer.c ast_validate.o ast_validate.c buffer.o
-	rm -f decorate.o generate.o validate.o
+	rm -f smlng.o tag_elim.o timer.o ast_validate.o buffer.o parser.o generate.o validate.o
+	rm -f smlng.c tag_elim.c timer.c ast_validate.c buffer.c parser.c generate.c validate.c
 	rm -f *~ *.exe *.output *.stackdump

@@ -20,7 +20,7 @@ void start_timer(string_t limit) {
   if(total_secs < MINIMUM_TIME)
     fprintf(stderr,"Something is really wrong, we have less than 180 seconds");
   death_time = Time::time(null);
-  fprintf(stderr,"Start time: %d\n Limit: %d\n", death_time, total_secs);
+  // fprintf(stderr,"Start time: %d\n Limit: %d\n", death_time, total_secs);
   death_time += total_secs;
 }
 
