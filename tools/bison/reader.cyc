@@ -2086,6 +2086,7 @@ readgram()
   if (nrules == 0)
     fatal("no rules in the input grammar");
 
+#ifdef NOTDEF
   if (typed == 0	/* JF put out same default YYSTYPE as YACC does */
       && !value_components_used)
     {
@@ -2096,7 +2097,7 @@ readgram()
       if (fdefines)
 	fprintf((FILE @)fdefines, "#ifndef YYSTYPE\n#define YYSTYPE int\n#endif\n");
     }
-
+#endif
   /* Report any undefined symbols and consider them nonterminals.  */
 
   for (bp = firstsymbol; bp; bp = bp->next)

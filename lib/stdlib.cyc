@@ -153,5 +153,5 @@ namespace Std {
 }
 
 // A no-op. 
-  void free(`a::A * ptr) {}
+  void free(`a::A ? ptr) {}
 }
