@@ -71,11 +71,13 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
       synth.s.sz    = sz;
       break;
     case U_tag:
-      OPT(u3);
+      if(synth.s.u3)
+	useless = true;
       if(synth.s.u2)
 	synth.s.u3 = true;
       if(synth.s.u1)
 	synth.s.u2 = true;
+      synth.s.u1 = true;
       break;
     }
 #undef OPT
@@ -88,9 +90,15 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
 
 void tag_elim_test() {
   unsigned char ? s = new {for i < 3: 'a'};
-  doc_t d1 = new Tagged(B_tag, new Tagged(B_tag, new Text(s)));
+  doc_t d1 = new Tagged(U_tag, new Tagged(U_tag, new Text(s)));
+  doc_t d2 =  new Tagged(U_tag, new Tagged(U_tag, d1));
   dump(d1);
   Stdio::fputs("\n\n", Stdio::stdout);
   d1 = tag_elim(d1)[0];
   dump(d1);
+  Stdio::fputs("\n\n", Stdio::stdout);
+  dump(d2);
+  Stdio::fputs("\n\n", Stdio::stdout);
+  d2 = tag_elim(d2)[0];
+  dump(d2);
 }
