@@ -2625,7 +2625,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         // give an error here if targs is non-empty
         if (targs != NULL) {
           terr(loc,"please declare parameterized %s %s before using",
-               (is_x ? (const char ?)"xtunion" : "tunion"), qvar2string(n));
+               (is_x ? (buffer_t)"xtunion" : "tunion"), qvar2string(n));
           return cvtenv;
         }        
         break;

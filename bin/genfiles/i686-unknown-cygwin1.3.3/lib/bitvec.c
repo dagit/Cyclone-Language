@@ -317,10 +317,9 @@ Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
 struct Cyc_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_ShortPtr_pa_struct{
-int tag;short*f1;};struct Cyc_Buffer_pa_struct{int tag;struct _tagged_arr f1;};struct
-Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;};struct Cyc_ShortPtr_sa_struct{int
-tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct
-Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
+int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;};struct Cyc_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
 unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};
 struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};int
@@ -419,8 +418,8 @@ _tmp17="bitvec.cyc";_tag_arr(_tmp17,sizeof(char),_get_zero_arr_size(_tmp17,11));
 sizeof(int),i))!= -1)return 0;}}{int i=words * 32;for(0;i < sz;i ++){if(!Cyc_Bitvec_get(
 bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec){{int
 i=0;for(0;i < 32 * _get_arr_size(bvec,sizeof(int));++ i){({struct Cyc_Int_pa_struct
-_tmp1A;_tmp1A.tag=1;_tmp1A.f1=(int)((unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0));{
-void*_tmp18[1]={& _tmp1A};Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,
-sizeof(char),_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({
+_tmp1A;_tmp1A.tag=1;_tmp1A.f1=(unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0);{void*
+_tmp18[1]={& _tmp1A};Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,sizeof(
+char),_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({
 void*_tmp1B[0]={};Cyc_printf(({const char*_tmp1C="\n";_tag_arr(_tmp1C,sizeof(char),
 _get_zero_arr_size(_tmp1C,2));}),_tag_arr(_tmp1B,sizeof(void*),0));});}

@@ -325,12 +325,12 @@ int __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_
 struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
 int tag;struct _tagged_arr f1;};struct Cyc_Int_pa_struct{int tag;unsigned int f1;};
 struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_ShortPtr_pa_struct{int tag;
-short*f1;};struct Cyc_Buffer_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned int*f1;};struct _tagged_arr Cyc_aprintf(struct _tagged_arr,struct
-_tagged_arr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr
-f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+short*f1;};struct Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;};struct _tagged_arr
+Cyc_aprintf(struct _tagged_arr,struct _tagged_arr);struct Cyc_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};
+struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
 extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
 char*tag;struct _tagged_arr f1;};struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];
@@ -606,18 +606,18 @@ env.rgn,*((struct Cyc_Set_Set**)env.freevars),_tmp1B);return;}}(int)_throw((void
 struct Cyc_Core_Impossible_struct*_tmp1D=_cycalloc(sizeof(*_tmp1D));_tmp1D[0]=({
 struct Cyc_Core_Impossible_struct _tmp1E;_tmp1E.tag=Cyc_Core_Impossible;_tmp1E.f1=(
 struct _tagged_arr)({struct Cyc_String_pa_struct _tmp21;_tmp21.tag=0;_tmp21.f1=(
-struct _tagged_arr)*((struct _tagged_arr*)_tmp4);{void*_tmp1F[1]={& _tmp21};Cyc_aprintf(({
-const char*_tmp20="unbound variable %s found in box_free_vars_exp";_tag_arr(
-_tmp20,sizeof(char),_get_zero_arr_size(_tmp20,47));}),_tag_arr(_tmp1F,sizeof(
-void*),1));}});_tmp1E;});_tmp1D;}));_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_LL4:
-return;_LL5: if(*((int*)_tmp0)!= 0)goto _LL7;_LL6: return;_LL7: if(*((int*)_tmp0)!= 
-9)goto _LL9;_tmp5=((struct Cyc_Absyn_FnCall_e_struct*)_tmp0)->f1;_tmp6=((struct Cyc_Absyn_FnCall_e_struct*)
-_tmp0)->f2;_LL8: Cyc_Tovc_box_free_vars_exp(env,_tmp5);_tmp7=_tmp6;goto _LLA;_LL9:
-if(*((int*)_tmp0)!= 3)goto _LLB;_tmp7=((struct Cyc_Absyn_Primop_e_struct*)_tmp0)->f2;
-_LLA: for(0;_tmp7 != 0;_tmp7=_tmp7->tl){Cyc_Tovc_box_free_vars_exp(env,(struct Cyc_Absyn_Exp*)
-_tmp7->hd);}return;_LLB: if(*((int*)_tmp0)!= 6)goto _LLD;_tmp8=((struct Cyc_Absyn_Conditional_e_struct*)
-_tmp0)->f1;_tmp9=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f2;_tmpA=((
-struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f3;_LLC: Cyc_Tovc_box_free_vars_exp(
+struct _tagged_arr)((struct _tagged_arr)*((struct _tagged_arr*)_tmp4));{void*_tmp1F[
+1]={& _tmp21};Cyc_aprintf(({const char*_tmp20="unbound variable %s found in box_free_vars_exp";
+_tag_arr(_tmp20,sizeof(char),_get_zero_arr_size(_tmp20,47));}),_tag_arr(_tmp1F,
+sizeof(void*),1));}});_tmp1E;});_tmp1D;}));_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;
+_LL4: return;_LL5: if(*((int*)_tmp0)!= 0)goto _LL7;_LL6: return;_LL7: if(*((int*)
+_tmp0)!= 9)goto _LL9;_tmp5=((struct Cyc_Absyn_FnCall_e_struct*)_tmp0)->f1;_tmp6=((
+struct Cyc_Absyn_FnCall_e_struct*)_tmp0)->f2;_LL8: Cyc_Tovc_box_free_vars_exp(env,
+_tmp5);_tmp7=_tmp6;goto _LLA;_LL9: if(*((int*)_tmp0)!= 3)goto _LLB;_tmp7=((struct
+Cyc_Absyn_Primop_e_struct*)_tmp0)->f2;_LLA: for(0;_tmp7 != 0;_tmp7=_tmp7->tl){Cyc_Tovc_box_free_vars_exp(
+env,(struct Cyc_Absyn_Exp*)_tmp7->hd);}return;_LLB: if(*((int*)_tmp0)!= 6)goto _LLD;
+_tmp8=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f1;_tmp9=((struct Cyc_Absyn_Conditional_e_struct*)
+_tmp0)->f2;_tmpA=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f3;_LLC: Cyc_Tovc_box_free_vars_exp(
 env,_tmpA);_tmpB=_tmp8;_tmpC=_tmp9;goto _LLE;_LLD: if(*((int*)_tmp0)!= 23)goto _LLF;
 _tmpB=((struct Cyc_Absyn_Subscript_e_struct*)_tmp0)->f1;_tmpC=((struct Cyc_Absyn_Subscript_e_struct*)
 _tmp0)->f2;_LLE: _tmpD=_tmpB;_tmpE=_tmpC;goto _LL10;_LLF: if(*((int*)_tmp0)!= 7)

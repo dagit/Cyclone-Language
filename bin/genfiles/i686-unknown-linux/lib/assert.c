@@ -319,20 +319,19 @@ typedef struct{int __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_f
 Cyc_fpos_t;struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;
 struct Cyc_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_ShortPtr_pa_struct{
-int tag;short*f1;};struct Cyc_Buffer_pa_struct{int tag;struct _tagged_arr f1;};struct
-Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_fflush(struct Cyc___cycFILE*);
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _tagged_arr,struct _tagged_arr);struct
-Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;
-unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
+int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_fflush(
+struct Cyc___cycFILE*);int Cyc_fprintf(struct Cyc___cycFILE*,struct _tagged_arr,
+struct _tagged_arr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
 int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr
 f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
 extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
 char*tag;struct _tagged_arr f1;};void*Cyc___assert_fail(struct _tagged_arr assertion,
 struct _tagged_arr file,unsigned int line){({struct Cyc_String_pa_struct _tmp4;_tmp4.tag=
-0;_tmp4.f1=(struct _tagged_arr)assertion;{struct Cyc_Int_pa_struct _tmp3;_tmp3.tag=
-1;_tmp3.f1=line;{struct Cyc_String_pa_struct _tmp2;_tmp2.tag=0;_tmp2.f1=(struct
-_tagged_arr)file;{void*_tmp0[3]={& _tmp2,& _tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({
-const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_arr(_tmp1,sizeof(char),
-_get_zero_arr_size(_tmp1,31));}),_tag_arr(_tmp0,sizeof(void*),3));}}}});Cyc_fflush((
-struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}
+0;_tmp4.f1=(struct _tagged_arr)((struct _tagged_arr)assertion);{struct Cyc_Int_pa_struct
+_tmp3;_tmp3.tag=1;_tmp3.f1=line;{struct Cyc_String_pa_struct _tmp2;_tmp2.tag=0;
+_tmp2.f1=(struct _tagged_arr)((struct _tagged_arr)file);{void*_tmp0[3]={& _tmp2,&
+_tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
+_tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,31));}),_tag_arr(_tmp0,
+sizeof(void*),3));}}}});Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}

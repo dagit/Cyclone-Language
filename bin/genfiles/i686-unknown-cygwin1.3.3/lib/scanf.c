@@ -317,38 +317,38 @@ quot;int rem;}Cyc_ldiv_t;double atof(const char*);int strtol(char*,char**,int);
 unsigned int strtoul(char*,char**,int);struct Cyc___cycFILE;extern struct Cyc___cycFILE*
 Cyc_stdin;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;
 struct _tagged_arr f1;};struct Cyc_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Buffer_pa_struct{
-int tag;struct _tagged_arr f1;};struct Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;}
-;int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;
-};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
-int tag;struct _tagged_arr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};
-struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
-tag;struct _tagged_arr f1;};int Cyc_fscanf(struct Cyc___cycFILE*,struct _tagged_arr,
-struct _tagged_arr);int Cyc_getc(struct Cyc___cycFILE*);int Cyc_scanf(struct
-_tagged_arr,struct _tagged_arr);int Cyc_sscanf(struct _tagged_arr,struct _tagged_arr,
-struct _tagged_arr);int Cyc_ungetc(int,struct Cyc___cycFILE*);int Cyc_vfscanf(struct
-Cyc___cycFILE*,struct _tagged_arr,struct _tagged_arr);int Cyc_vsscanf(struct
-_tagged_arr,struct _tagged_arr,struct _tagged_arr);extern char Cyc_FileCloseError[19];
-extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;struct
-_tagged_arr f1;};static struct _tagged_arr Cyc___sccl(char*tab,struct _tagged_arr fmt);
-static short*Cyc_va_arg_short_ptr(void*a){void*_tmp0=a;short*_tmp1;unsigned short*
-_tmp2;_LL1: if(*((int*)_tmp0)!= 0)goto _LL3;_tmp1=((struct Cyc_ShortPtr_sa_struct*)
-_tmp0)->f1;_LL2: return _tmp1;_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_tmp2=((struct
-Cyc_UShortPtr_sa_struct*)_tmp0)->f1;_LL4: return(short*)_tmp2;_LL5:;_LL6:(int)
-_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp3=_cycalloc(sizeof(*
-_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;
-_tmp4.f1=({const char*_tmp5="scan expects short pointer";_tag_arr(_tmp5,sizeof(
-char),_get_zero_arr_size(_tmp5,27));});_tmp4;});_tmp3;}));_LL0:;}static int*Cyc_va_arg_int_ptr(
-void*a){void*_tmp6=a;int*_tmp7;unsigned int*_tmp8;_LL8: if(*((int*)_tmp6)!= 2)
-goto _LLA;_tmp7=((struct Cyc_IntPtr_sa_struct*)_tmp6)->f1;_LL9: return _tmp7;_LLA:
-if(*((int*)_tmp6)!= 3)goto _LLC;_tmp8=((struct Cyc_UIntPtr_sa_struct*)_tmp6)->f1;
-_LLB: return(int*)_tmp8;_LLC:;_LLD:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp9=_cycalloc(sizeof(*_tmp9));_tmp9[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmpA;_tmpA.tag=Cyc_Core_Invalid_argument;_tmpA.f1=({const char*_tmpB="scan expects int pointer";
-_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,25));});_tmpA;});_tmp9;}));
-_LL7:;}static struct _tagged_arr Cyc_va_arg_string_ptr(void*a){void*_tmpC=a;struct
-_tagged_arr _tmpD;_LLF: if(*((int*)_tmpC)!= 4)goto _LL11;_tmpD=((struct Cyc_StringPtr_sa_struct*)
+int tag;double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned int*f1;};int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};
+struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};int
+Cyc_fscanf(struct Cyc___cycFILE*,struct _tagged_arr,struct _tagged_arr);int Cyc_getc(
+struct Cyc___cycFILE*);int Cyc_scanf(struct _tagged_arr,struct _tagged_arr);int Cyc_sscanf(
+struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int Cyc_ungetc(int,struct
+Cyc___cycFILE*);int Cyc_vfscanf(struct Cyc___cycFILE*,struct _tagged_arr,struct
+_tagged_arr);int Cyc_vsscanf(struct _tagged_arr,struct _tagged_arr,struct
+_tagged_arr);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];
+struct Cyc_FileOpenError_struct{char*tag;struct _tagged_arr f1;};static struct
+_tagged_arr Cyc___sccl(char*tab,struct _tagged_arr fmt);static short*Cyc_va_arg_short_ptr(
+void*a){void*_tmp0=a;short*_tmp1;unsigned short*_tmp2;_LL1: if(*((int*)_tmp0)!= 0)
+goto _LL3;_tmp1=((struct Cyc_ShortPtr_sa_struct*)_tmp0)->f1;_LL2: return _tmp1;_LL3:
+if(*((int*)_tmp0)!= 1)goto _LL5;_tmp2=((struct Cyc_UShortPtr_sa_struct*)_tmp0)->f1;
+_LL4: return(short*)_tmp2;_LL5:;_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;_tmp4.f1=({const char*_tmp5="scan expects short pointer";
+_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,27));});_tmp4;});_tmp3;}));
+_LL0:;}static int*Cyc_va_arg_int_ptr(void*a){void*_tmp6=a;int*_tmp7;unsigned int*
+_tmp8;_LL8: if(*((int*)_tmp6)!= 2)goto _LLA;_tmp7=((struct Cyc_IntPtr_sa_struct*)
+_tmp6)->f1;_LL9: return _tmp7;_LLA: if(*((int*)_tmp6)!= 3)goto _LLC;_tmp8=((struct
+Cyc_UIntPtr_sa_struct*)_tmp6)->f1;_LLB: return(int*)_tmp8;_LLC:;_LLD:(int)_throw((
+void*)({struct Cyc_Core_Invalid_argument_struct*_tmp9=_cycalloc(sizeof(*_tmp9));
+_tmp9[0]=({struct Cyc_Core_Invalid_argument_struct _tmpA;_tmpA.tag=Cyc_Core_Invalid_argument;
+_tmpA.f1=({const char*_tmpB="scan expects int pointer";_tag_arr(_tmpB,sizeof(char),
+_get_zero_arr_size(_tmpB,25));});_tmpA;});_tmp9;}));_LL7:;}static struct
+_tagged_arr Cyc_va_arg_string_ptr(void*a){void*_tmpC=a;struct _tagged_arr _tmpD;
+_LLF: if(*((int*)_tmpC)!= 4)goto _LL11;_tmpD=((struct Cyc_StringPtr_sa_struct*)
 _tmpC)->f1;_LL10: return _tmpD;_LL11:;_LL12:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmpE=_cycalloc(sizeof(*_tmpE));_tmpE[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmpF;_tmpF.tag=Cyc_Core_Invalid_argument;_tmpF.f1=({const char*_tmp10="scan expects char pointer";

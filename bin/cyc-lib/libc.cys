@@ -2428,11 +2428,10 @@ hstub {
   // vararg for printf functions.  The functions themselves are defined
   // in printf.cyc.
   extern tunion PrintArg<`r::R> {
-    String_pa(const char ?`r);
+    String_pa(const char ?NOZEROTERM`r);
     Int_pa(unsigned long);
     Double_pa(double);
     ShortPtr_pa(short @`r);
-    Buffer_pa(const char ?NOZEROTERM`r);
     IntPtr_pa(unsigned long @`r);
   };
   typedef tunion `r PrintArg<`r> parg_t<`r>;

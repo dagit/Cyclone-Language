@@ -79,12 +79,11 @@ using Core;
 
 // vararg union for printf, fprintf, sprintf 
 tunion PrintArg<`r::R> {
-  String_pa(const char ?`r);
+  String_pa(const char ?NOZEROTERM`r);
   Int_pa(unsigned long);
   //  Float_pa(float);
   Double_pa(double);
   ShortPtr_pa(short @`r);
-  Buffer_pa(const char ?NOZEROTERM`r);
   IntPtr_pa(unsigned long @`r);
 };
 
@@ -95,7 +94,6 @@ static string_t parg2string(parg_t x) {
     // case &Float_pa(_): return "float";
   case &Double_pa(_): return "double";
   case &ShortPtr_pa(_): return "short *";
-  case &Buffer_pa(_): return "buffer";
   case &IntPtr_pa(_): return "unsigned long *";
   }
 }
@@ -160,7 +158,7 @@ static unsigned long @`r va_arg_int_ptr(parg_t<`r>? ap) {
 }
 
 // Extract a "string" vararg.
-static const char ?`r va_arg_string(parg_t<`r>? ap) {
+static const buffer_t<`r> va_arg_string(parg_t<`r>? ap) {
   switch (*ap) {
   case &String_pa(s): return s;
   default: throw badarg("printf expected string");
@@ -523,42 +521,18 @@ reswitch:	which_cp = 0;
 			ch = 'x';
 			goto nosign;
 		case 's':
-                        switch (*ap) {
-                        case &String_pa(s):
-                          which_cp = 2; cp2 = s;
-                          if (cp2 == NULL) cp2 = "(NULL)";
-                          if (prec >= 0) {
-				/*
-				 * can't use strlen; can only look for the
-				 * NUL in the first `prec' characters, and
-				 * strlen() will go further.
-				 */
-				const char ? p = my_memchr(cp2, 0, prec);
-				if (p != NULL) {
-                                  size = p - cp2;
-                                  if (size > prec)
-                                    size = prec;
-				} else
-                                  size = prec;
-                          } else
-                            size = strlen(cp2);
-                          break;
-                        case &Buffer_pa(b):
-                          which_cp = 3; cp3 = b;
-                          if (prec >= 0) {
-                            const char ?NOZEROTERM p = my_nzmemchr(cp3,0,prec);
-                            if (p != NULL) {
-                              size = p - cp3;
-                              if (size > prec)
-                                size = prec;
-                            } else
+                        buffer_t b = va_arg_string(ap); ap++;
+                        which_cp = 3; cp3 = b;
+                        if (prec >= 0) {
+                          const char ?NOZEROTERM p = my_nzmemchr(cp3,0,prec);
+                          if (p != NULL) {
+                            size = p - cp3;
+                            if (size > prec)
                               size = prec;
                           } else
-                            size = my_strlen(cp3);
-                          break;
-                        default: throw badarg("printf expected string");
-                        }
-                        ap++;
+                            size = prec;
+                        } else
+                          size = my_strlen(cp3);
 			sign = '\0';
 			break;
 		case 'U':

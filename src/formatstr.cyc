@@ -296,9 +296,11 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
          terr(loc,"length modifiers not allowed with %%s");
          return NULL;
        }
+       // We make this a buffer_t (i.e., NOZEROTERM) because more things
+       // will then match.
        type_t ptr = tagged_typ(char_typ, 
                                new_evar(&rk,new Opt(lookup_type_vars(te))),
-                               const_tqual(), empty_conref());
+                               const_tqual(), false_conref);
        typs = new List(ptr,typs);
       break;
     case 'p':

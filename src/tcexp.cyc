@@ -299,7 +299,15 @@ void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
   case &Const_e(&String_c(s)): fallthru(s);
   case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_)):
     desc_types = type_getter(te,s,fmt->loc); break;
-  default: return; // without a string literal argument, we can't check the args
+  default: 
+    // without a string literal argument, we can't check the args against
+    // the format string, but we still have to check they are type-correct.
+    if (opt_args != NULL) {
+      let args = opt_args->v;
+      for (; args != NULL; args = args->tl)
+        tcExp(te,NULL,args->hd);
+    }
+    return; 
   }
   if (opt_args != NULL) {
     let args = opt_args->v;
@@ -308,6 +316,7 @@ void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
 	 desc_types = desc_types->tl, args = args->tl) {
       type_t t = desc_types->hd;
       exp_t  e = args->hd;
+      tcExp(te,&t,e);
       if (!coerce_arg(te,e,t)) {
         terr(e->loc,"descriptor has type \n%s\n but argument has type \n%s",
              typ2string(t), typ2string(e->topt->v));
@@ -770,6 +779,38 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
         es = es->tl;
         args_info = args_info->tl;
       }
+      // Note -- we deal with too few or too many args below.  Here, we
+      // check for a format attribute -- important to do this early on
+      // so that we get the right types for things
+      bool args_already_checked = false;
+      for (_ a = atts; a != NULL; a = a->tl) {
+        switch (a->hd) {
+        case &Format_att(ft,fmt_arg_pos,arg_start_pos):
+          try {
+            // get the format descriptor string
+            let fmt_arg = List::nth(args,fmt_arg_pos - 1);
+            // get the varargs
+            opt_t<list_t<exp_t>> fmt_args;
+            if (arg_start_pos == 0)
+              fmt_args = NULL;
+            else
+              fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
+            args_already_checked = true;
+            switch (ft) {
+            case Printf_ft:
+              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_format_typs);
+              break;
+            case Scanf_ft:
+              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_scanf_typs);
+              break;
+            }
+          } catch {
+          case Nth: terr(loc,"bad format arguments"); break;
+          }
+          break;
+        default: break;
+        }
+      }
       if (args_info != NULL) terr(loc,"too few arguments for function");
       // if we have left-over arguments, then check for varargs
       else if (es != NULL || c_vararg || cyc_vararg != NULL) {
@@ -816,7 +857,9 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
                 for (; es != NULL; es = es->tl) {
                   vci->num_varargs++;
                   exp_t e1 = es->hd;
-                  tcExp(te,NULL,e1);
+                  // must be careful not to type-check twice
+                  if (!args_already_checked)
+                    tcExp(te,NULL,e1); 
                   let f = tcInjection(te,e1,vt,rgn,inst,fields);
                   if (f != NULL)
                     vci->injectors = 
@@ -828,34 +871,6 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
             default: terr(loc,"bad inject vararg type"); break;
             }
           }
-        }
-      }
-      // check for a format attribute
-      for (_ a = atts; a != NULL; a = a->tl) {
-        switch (a->hd) {
-        case &Format_att(ft,fmt_arg_pos,arg_start_pos):
-          try {
-            // get the format descriptor string
-            let fmt_arg = List::nth(args,fmt_arg_pos - 1);
-            // get the varargs
-            opt_t<list_t<exp_t>> fmt_args;
-            if (arg_start_pos == 0)
-              fmt_args = NULL;
-            else
-              fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
-            switch (ft) {
-            case Printf_ft:
-              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_format_typs);
-              break;
-            case Scanf_ft:
-              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_scanf_typs);
-              break;
-            }
-          } catch {
-          case Nth: terr(loc,"bad format arguments"); break;
-          }
-          break;
-        default: break;
         }
       }
       // Check that the effect of the function is compatible with the current
@@ -1621,7 +1636,7 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
     }
   }
   terr(loc,"%s cannot be used with type %s\n\t(type needs initialization)",
-       allow_zero ? ((string_t)"calloc") : "malloc", typ2string(t));
+       allow_zero ? ((string_t)"calloc") : (string_t)"malloc", typ2string(t));
 }
 
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt, 

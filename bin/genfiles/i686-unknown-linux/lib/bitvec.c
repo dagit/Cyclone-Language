@@ -319,30 +319,29 @@ unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{int _
 Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;
 struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
 _tagged_arr f1;};struct Cyc_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Buffer_pa_struct{
-int tag;struct _tagged_arr f1;};struct Cyc_IntPtr_pa_struct{int tag;unsigned int*f1;}
-;struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _tagged_arr
-f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};int
-Cyc_printf(struct _tagged_arr,struct _tagged_arr);extern char Cyc_FileCloseError[19];
-extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;struct
-_tagged_arr f1;};struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[
-11];void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);struct _tuple0{void*f1;
-void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*
-d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict*d);
-struct _tagged_arr Cyc_Bitvec_new_empty(int);struct _tagged_arr Cyc_Bitvec_new_full(
-int);struct _tagged_arr Cyc_Bitvec_new_copy(struct _tagged_arr);struct _tagged_arr
-Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*d,int(*f)(void*),int sz,struct Cyc_List_List*);
-struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(struct _tagged_arr bvec,int sz);void
-Cyc_Bitvec_print_bvec(struct _tagged_arr bvec);int Cyc_Bitvec_get(struct _tagged_arr,
-int);void Cyc_Bitvec_set(struct _tagged_arr,int);void Cyc_Bitvec_clear(struct
-_tagged_arr,int);int Cyc_Bitvec_get_and_set(struct _tagged_arr,int);void Cyc_Bitvec_clear_all(
-struct _tagged_arr);void Cyc_Bitvec_set_all(struct _tagged_arr);int Cyc_Bitvec_all_set(
-struct _tagged_arr bvec,int sz);void Cyc_Bitvec_union_two(struct _tagged_arr dest,
-struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_intersect_two(struct
-_tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_diff_two(
+int tag;double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned int*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _tagged_arr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};
+struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _tagged_arr f1;};int Cyc_printf(struct _tagged_arr,struct _tagged_arr);
+extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
+char*tag;struct _tagged_arr f1;};struct Cyc_Dict_Dict;extern char Cyc_Dict_Present[12];
+extern char Cyc_Dict_Absent[11];void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,void*k);
+struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct
+_RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(struct
+_RegionHandle*,struct Cyc_Dict_Dict*d);struct _tagged_arr Cyc_Bitvec_new_empty(int);
+struct _tagged_arr Cyc_Bitvec_new_full(int);struct _tagged_arr Cyc_Bitvec_new_copy(
+struct _tagged_arr);struct _tagged_arr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*d,
+int(*f)(void*),int sz,struct Cyc_List_List*);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
+struct _tagged_arr bvec,int sz);void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec);
+int Cyc_Bitvec_get(struct _tagged_arr,int);void Cyc_Bitvec_set(struct _tagged_arr,
+int);void Cyc_Bitvec_clear(struct _tagged_arr,int);int Cyc_Bitvec_get_and_set(
+struct _tagged_arr,int);void Cyc_Bitvec_clear_all(struct _tagged_arr);void Cyc_Bitvec_set_all(
+struct _tagged_arr);int Cyc_Bitvec_all_set(struct _tagged_arr bvec,int sz);void Cyc_Bitvec_union_two(
+struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_intersect_two(
+struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);void Cyc_Bitvec_diff_two(
 struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2);int Cyc_Bitvec_compare_two(
 struct _tagged_arr src1,struct _tagged_arr src2);void*Cyc___assert_fail(struct
 _tagged_arr assertion,struct _tagged_arr file,unsigned int line);int Cyc_Bitvec_get(
@@ -421,8 +420,8 @@ _tmp17="bitvec.cyc";_tag_arr(_tmp17,sizeof(char),_get_zero_arr_size(_tmp17,11));
 sizeof(int),i))!= -1)return 0;}}{int i=words * 32;for(0;i < sz;i ++){if(!Cyc_Bitvec_get(
 bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec){{int
 i=0;for(0;i < 32 * _get_arr_size(bvec,sizeof(int));++ i){({struct Cyc_Int_pa_struct
-_tmp1A;_tmp1A.tag=1;_tmp1A.f1=(int)((unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0));{
-void*_tmp18[1]={& _tmp1A};Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,
-sizeof(char),_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({
+_tmp1A;_tmp1A.tag=1;_tmp1A.f1=(unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0);{void*
+_tmp18[1]={& _tmp1A};Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,sizeof(
+char),_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({
 void*_tmp1B[0]={};Cyc_printf(({const char*_tmp1C="\n";_tag_arr(_tmp1C,sizeof(char),
 _get_zero_arr_size(_tmp1C,2));}),_tag_arr(_tmp1B,sizeof(void*),0));});}

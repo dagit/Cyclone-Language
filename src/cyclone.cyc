@@ -1147,12 +1147,12 @@ int main(int argc, string_t<`H> ?`H argv) {
     return 1;
   }
 
+  string_t outfile_str = "";
+  if (output_file != NULL)
+    outfile_str = aprintf(" -o %s",sh_escape_string(*output_file));
+
   let cccmd =
-    aprintf("%s %s %s%s%s",
-	    comp,
-            (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
-            ccargs_string,
-	    stdlib_string,
+    aprintf("%s %s %s%s%s",comp,outfile_str,ccargs_string,stdlib_string,
             libargs_string);
   if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
   if (system((const char @)cccmd) != 0) {
