@@ -358,19 +358,19 @@ return s1==s2;}
 struct _fat_ptr Cyc_Position_string_of_loc(unsigned loc){
 struct Cyc_Lineno_Pos*pos=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)loc);
 if(Cyc_Position_use_gcc_style_location)
-return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(({const char*_Tmp3="%s:%d";_tag_fat(_Tmp3,sizeof(char),6U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
-return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)pos->col;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_aprintf(({const char*_Tmp4="%s:(%d:%d)";_tag_fat(_Tmp4,sizeof(char),11U);}),_tag_fat(_Tmp3,sizeof(void*),3));});}
+return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)pos->logical_file);_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(_tag_fat("%s:%d",sizeof(char),6U),_tag_fat(_Tmp2,sizeof(void*),2));});
+return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)pos->logical_file);_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)pos->col;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_aprintf(_tag_fat("%s:(%d:%d)",sizeof(char),11U),_tag_fat(_Tmp3,sizeof(void*),3));});}
 # 51
 static struct _fat_ptr Cyc_Position_string_of_pos_pr(struct Cyc_Lineno_Pos*pos){
 if(Cyc_Position_use_gcc_style_location)
-return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(({const char*_Tmp3="%s:%d";_tag_fat(_Tmp3,sizeof(char),6U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
-return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=pos->logical_file;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)pos->col;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_aprintf(({const char*_Tmp4="%s:(%d:%d)";_tag_fat(_Tmp4,sizeof(char),11U);}),_tag_fat(_Tmp3,sizeof(void*),3));});}
+return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)pos->logical_file);_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(_tag_fat("%s:%d",sizeof(char),6U),_tag_fat(_Tmp2,sizeof(void*),2));});
+return({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)pos->logical_file);_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)pos->line_no;_Tmp2;});struct Cyc_Int_pa_PrintArg_struct _Tmp2=({struct Cyc_Int_pa_PrintArg_struct _Tmp3;_Tmp3.tag=1,_Tmp3.f1=(unsigned long)pos->col;_Tmp3;});void*_Tmp3[3];_Tmp3[0]=& _Tmp0,_Tmp3[1]=& _Tmp1,_Tmp3[2]=& _Tmp2;Cyc_aprintf(_tag_fat("%s:(%d:%d)",sizeof(char),11U),_tag_fat(_Tmp3,sizeof(void*),3));});}
 # 57
 struct _fat_ptr Cyc_Position_string_of_segment(unsigned s){
 return Cyc_Position_string_of_loc(s);}
 # 61
 static struct Cyc_Lineno_Pos*Cyc_Position_new_pos (void){
-return({struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tmp0->logical_file=({const char*_Tmp1="";_tag_fat(_Tmp1,sizeof(char),1U);}),({struct _fat_ptr _Tmp1=Cyc_Core_new_string(0U);_Tmp0->line=_Tmp1;}),_Tmp0->line_no=0,_Tmp0->col=0;_Tmp0;});}
+return({struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tmp0->logical_file=_tag_fat("",sizeof(char),1U),({struct _fat_ptr _Tmp1=Cyc_Core_new_string(0U);_Tmp0->line=_Tmp1;}),_Tmp0->line_no=0,_Tmp0->col=0;_Tmp0;});}
 # 65
 struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs){
 # 67
@@ -394,13 +394,13 @@ void Cyc_Position_post_error(struct Cyc_Position_Error*e){
 Cyc_Position_error_b=1;
 Cyc_fflush(Cyc_stdout);
 if(Cyc_Position_first_error){
-Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="\n";_tag_fat(_Tmp0,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_fprintf(Cyc_stderr,_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 Cyc_Position_first_error=0;}
 # 113
 if(Cyc_Position_num_errors <= Cyc_Position_max_errors)
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_Position_string_of_segment(e->seg);_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=e->desc;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,({const char*_Tmp3="%s: %s\n";_tag_fat(_Tmp3,sizeof(char),8U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=(struct _fat_ptr)((struct _fat_ptr)Cyc_Position_string_of_segment(e->seg));_Tmp1.f1=_Tmp2;});_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)((struct _fat_ptr)e->desc);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s\n",sizeof(char),8U),_tag_fat(_Tmp2,sizeof(void*),2));});
 if(Cyc_Position_num_errors==Cyc_Position_max_errors)
-Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="Too many error messages!\n";_tag_fat(_Tmp0,sizeof(char),26U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_fprintf(Cyc_stderr,_tag_fat("Too many error messages!\n",sizeof(char),26U),_tag_fat(0U,sizeof(void*),0));
 Cyc_fflush(Cyc_stderr);
 ++ Cyc_Position_num_errors;}
 # 122
@@ -411,5 +411,5 @@ struct _fat_ptr Cyc_Position_get_position_file (void){return Cyc_Position_source
 struct _fat_ptr Cyc_Position_get_line_directive(unsigned s){
 struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)s);
 if(pos_s!=0)
-return({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)pos_s->line_no;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=pos_s->logical_file;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(({const char*_Tmp3="\n#line %d \"%s\"\n";_tag_fat(_Tmp3,sizeof(char),16U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
+return({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)pos_s->line_no;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)((struct _fat_ptr)pos_s->logical_file);_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_aprintf(_tag_fat("\n#line %d \"%s\"\n",sizeof(char),16U),_tag_fat(_Tmp2,sizeof(void*),2));});
 return _tag_fat(0,0,0);}

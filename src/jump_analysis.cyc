@@ -258,7 +258,6 @@ static void anal_stmt(senv_t env, stmt_t s) {
     }
     anal_stmt(env,s1);
     break; 
-
   }
 }
 

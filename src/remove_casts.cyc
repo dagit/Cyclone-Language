@@ -1,0 +1,73 @@
+/* Post-translation unnecessary-cast removal
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// This is an optional pass that removes unnecessary casts, making the output
+// a bit smaller and more readable.
+// It runs on C code, not Cyclone code.
+
+#include "remove_casts.h"
+using Absyn;
+namespace RemoveCasts;
+
+static bool remove_visit_f2(bool ignore, stmt_t s) {
+  switch(s->r) {
+  case &Exp_s(e): // incorrect in statment-expression, see that case below
+    switch(e->r) {
+    case &Cast_e(_,e1,...): *e = *e1; break;
+    default: break;
+    }
+    return true;
+  default: return true;
+  }
+}
+static bool remove_visit_f1(bool ignore, exp_t e) {
+  switch(e->r) {
+  case &Cast_e(t,e1,...): 
+    // remove struct/union casts 
+    visit_exp(remove_visit_f1,remove_visit_f2,ignore,e1);
+    switch(compress(t)) {
+    case &AppType(&AggrCon(_),NULL): *e = *e1; return false;
+    default: return false;
+    }
+  case &StmtExp_e(s):
+    while(true) 
+      switch(s->r) {
+      case &Exp_s(e): 
+	visit_exp(remove_visit_f1,remove_visit_f2,true,e); 
+	return false;
+      case &Seq_s(s1,s2):
+	visit_stmt(remove_visit_f1,remove_visit_f2,true,s1);
+	s = s2;
+	continue;
+      case &Decl_s(_,s1): s=s1; continue; //FIX (optional): skipping initializer
+      default: break;
+      }
+    return false;
+  default: return true;
+  }
+}
+List::list_t<Absyn::decl_t> remove_casts(List::list_t<Absyn::decl_t,`H> tds) {
+  for(let tds2 = tds; tds2 != NULL; tds2 = tds2->tl)
+    switch(tds2->hd->r) {
+    case &Fn_d(fd):
+      visit_stmt(remove_visit_f1,remove_visit_f2,true,fd->body); break;
+    default: break;
+    }
+  return tds;
+}

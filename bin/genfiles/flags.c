@@ -341,8 +341,8 @@ extern int Cyc_Flags_warn_all_null_deref;
 # 81
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
 # 95 "flags.h"
-enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_TempRename =12U,Cyc_Flags_EvalOrder =13U,Cyc_Flags_CCompiler =14U,Cyc_Flags_AllPasses =15U};
-# 113
+enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_TempRename =12U,Cyc_Flags_CastRemoval =13U,Cyc_Flags_EvalOrder =14U,Cyc_Flags_CCompiler =15U,Cyc_Flags_AllPasses =16U};
+# 114
 extern enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass;
 # 25 "flags.cyc"
 int Cyc_Flags_compile_for_boot=0;
@@ -389,4 +389,4 @@ void Cyc_Flags_set_cfonly (void){
 Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 6?Cyc_Flags_stop_after_pass: 6U;}
 # 68
 void Cyc_Flags_set_toconly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 13?Cyc_Flags_stop_after_pass: 13U;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 14?Cyc_Flags_stop_after_pass: 14U;}

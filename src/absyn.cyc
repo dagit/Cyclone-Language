@@ -1003,7 +1003,6 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
   case &Enum_e(...):
   case &AnonEnum_e(...):        
   case &Valueof_e(...):
-  case &Asm_e(...):
   case &Offsetof_e(...):    
   case &Sizeoftype_e(...): break;
     
@@ -1063,7 +1062,14 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
     visit_exp(f1,f2,env,e2);
     break;
 
-  case &StmtExp_e(s): visit_stmt(f1,f2,env,s);
+  case &StmtExp_e(s): visit_stmt(f1,f2,env,s); break;
+
+  case &Asm_e(_,_,sl1,sl2,_):
+    for(; sl1 != NULL; sl1 = sl1->tl)
+      visit_exp(f1,f2,env,(*sl1->hd)[1]);
+    for(; sl2 != NULL; sl2 = sl2->tl)
+      visit_exp(f1,f2,env,(*sl2->hd)[1]);
+    break;
   }
 }
 static void visit_scs(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, 
@@ -1105,6 +1111,7 @@ void visit_stmt(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, stmt_t s){
       break;
     case &Fn_d(fd): visit_stmt(f1,f2,env,fd->body); break;
     case &Let_d(_,_,e,_): visit_exp(f1,f2,env,e); break;
+    case &Region_d(_,_,eo): if(eo) visit_exp(f1,f2,env,eo); break;
     default: break;
     }
     visit_stmt(f1,f2,env,s1);

@@ -2113,13 +2113,17 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  }
 	  // If p2 is not zero-terminated and not const, then we subtract
 	  // one from the size so that no one can write the last location.
+	  bool use_temp = (arg3!=e2);
 	  if (!zt2 && !p2.elt_tq.real_const)
 	    arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
 	  let arg2 = sizeoftype_exp(typ_to_c(p2.elt_type),DL);
-	  let tg_exp = fncall_exp_dl(_tag_fat_e,x_exp,arg2,arg3);
-	  let s = exp_stmt(tg_exp,DL);
-	  s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
-	  e->r = stmt_exp_r(s);
+	  if(use_temp) {
+	    let tg_exp = fncall_exp_dl(_tag_fat_e,x_exp,arg2,arg3);
+	    let s = exp_stmt(tg_exp,DL);
+	    s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
+	    e->r = stmt_exp_r(s);
+	  } else 
+	    e->r = fncall_exp_r(_tag_fat_e,e1,arg2,arg3);
 	} else
 	  // build the t ? struct
 	  e->r = fncall_exp_r(_tag_fat_e, e1,
@@ -4093,10 +4097,6 @@ static bool types_to_c_f1(bool ignore, exp_t e) {
   case &Malloc_e(*m):
     if (m->elt_type != NULL)
       m->elt_type = new (typ_to_c(*m->elt_type));
-    break;
-  case &Asm_e(_,_,o,i,_):
-    asm_iolist_types_toc(o);
-    asm_iolist_types_toc(i);
     break;
   default: break;
   }

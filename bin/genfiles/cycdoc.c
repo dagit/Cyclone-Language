@@ -457,7 +457,7 @@ state=*((const int*)_check_known_subscript_notnull(Cyc_lex_default,15U,sizeof(in
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action==-1)
-(void*)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=({const char*_Tmp1="empty token";_tag_fat(_Tmp1,sizeof(char),12U);});_Tmp0;}));else{
+_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=_tag_fat("empty token",sizeof(char),12U);_Tmp0;}));else{
 # 90
 return lbuf->lex_last_action;}}else{
 # 93
@@ -470,12 +470,12 @@ switch((int)lexstate){case 0:  {
 int start=lexbuf->lex_start_pos + 5;
 int len=(lexbuf->lex_curr_pos - lexbuf->lex_start_pos)- 7;
 return({struct _tuple12*_Tmp0=_cycalloc(sizeof(struct _tuple12));({int _Tmp1=Cyc_Lexing_lexeme_start(lexbuf);_Tmp0->f1=_Tmp1;}),({
-void*_Tmp1=(void*)({struct Cyc_Standalone_Comment_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Standalone_Comment_struct));_Tmp2->tag=1,({struct _fat_ptr _Tmp3=Cyc_substring(lexbuf->lex_buffer,start,(unsigned long)len);_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f2=_Tmp1;});_Tmp0;});}case 1:  {
+void*_Tmp1=(void*)({struct Cyc_Standalone_Comment_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_Standalone_Comment_struct));_Tmp2->tag=1,({struct _fat_ptr _Tmp3=Cyc_substring((struct _fat_ptr)lexbuf->lex_buffer,start,(unsigned long)len);_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f2=_Tmp1;});_Tmp0;});}case 1:  {
 # 56
 int start=lexbuf->lex_start_pos + 4;
 int len=(lexbuf->lex_curr_pos - lexbuf->lex_start_pos)- 6;
 return({struct _tuple12*_Tmp0=_cycalloc(sizeof(struct _tuple12));({int _Tmp1=Cyc_Lexing_lexeme_start(lexbuf);_Tmp0->f1=_Tmp1;}),({
-void*_Tmp1=(void*)({struct Cyc_MatchDecl_Comment_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_MatchDecl_Comment_struct));_Tmp2->tag=0,({struct _fat_ptr _Tmp3=Cyc_substring(lexbuf->lex_buffer,start,(unsigned long)len);_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f2=_Tmp1;});_Tmp0;});}case 2:
+void*_Tmp1=(void*)({struct Cyc_MatchDecl_Comment_struct*_Tmp2=_cycalloc(sizeof(struct Cyc_MatchDecl_Comment_struct));_Tmp2->tag=0,({struct _fat_ptr _Tmp3=Cyc_substring((struct _fat_ptr)lexbuf->lex_buffer,start,(unsigned long)len);_Tmp2->f1=_Tmp3;});_Tmp2;});_Tmp0->f2=_Tmp1;});_Tmp0;});}case 2:
 # 60 "cycdoc.cyl"
  return 0;case 3:
 # 61 "cycdoc.cyl"
@@ -483,7 +483,7 @@ void*_Tmp1=(void*)({struct Cyc_MatchDecl_Comment_struct*_Tmp2=_cycalloc(sizeof(s
  lexbuf->refill_buff(lexbuf);
 return Cyc_token_rec(lexbuf,lexstate);};
 # 65
-(void*)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=({const char*_Tmp1="some action didn't return!";_tag_fat(_Tmp1,sizeof(char),27U);});_Tmp0;}));}
+_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=_tag_fat("some action didn't return!",sizeof(char),27U);_Tmp0;}));}
 # 67
 struct _tuple12*Cyc_token(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_token_rec(lexbuf,0);}
 # 65 "cycdoc.cyl"
@@ -540,10 +540,10 @@ Cyc_cyclone_file=s;}
 static void Cyc_dumpdecl(struct Cyc_Absyn_Decl*d,struct _fat_ptr comment){
 Cyc_dump_begin();
 # 151
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_PP_string_of_doc(Cyc_Absynpp_decl2doc(d),50);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_printf(({const char*_Tmp2="%s";_tag_fat(_Tmp2,sizeof(char),3U);}),_tag_fat(_Tmp1,sizeof(void*),1));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=(struct _fat_ptr)((struct _fat_ptr)Cyc_PP_string_of_doc(Cyc_Absynpp_decl2doc(d),50));_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_printf(_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp1,sizeof(void*),1));});
 Cyc_dump_middle();
 Cyc_pr_comment(Cyc_stdout,comment);
-Cyc_printf(({const char*_Tmp0="\n";_tag_fat(_Tmp0,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_printf(_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 Cyc_dump_end();}
 # 159
 static int Cyc_is_other_special(char c){
@@ -577,7 +577,7 @@ if(single_quotes==0 && other_special==0)
 return s;
 # 195
 if(single_quotes==0)
-return Cyc_strconcat_l(({struct _fat_ptr*_Tmp0[3];({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=({const char*_Tmp3="'";_tag_fat(_Tmp3,sizeof(char),2U);});_Tmp2;});_Tmp0[0]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=s;_Tmp2;});_Tmp0[1]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=({const char*_Tmp3="'";_tag_fat(_Tmp3,sizeof(char),2U);});_Tmp2;});_Tmp0[2]=_Tmp1;});Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _fat_ptr*),3));}));{
+return Cyc_strconcat_l(({struct _fat_ptr*_Tmp0[3];({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[0]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=(struct _fat_ptr)s;_Tmp2;});_Tmp0[1]=_Tmp1;}),({struct _fat_ptr*_Tmp1=({struct _fat_ptr*_Tmp2=_cycalloc(sizeof(struct _fat_ptr));*_Tmp2=_tag_fat("'",sizeof(char),2U);_Tmp2;});_Tmp0[2]=_Tmp1;});Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _fat_ptr*),3));}));{
 # 199
 unsigned long len2=(len + (unsigned long)single_quotes)+ (unsigned long)other_special;
 struct _fat_ptr s2=({unsigned _Tmp0=(len2 + 1U)+ 1U;_tag_fat(({char*_Tmp1=_cycalloc_atomic(_check_times(_Tmp0,sizeof(char)));({{unsigned _Tmp2=len2 + 1U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]='\000';}_Tmp1[_Tmp2]=0;}0;});_Tmp1;}),sizeof(char),_Tmp0);});
@@ -595,7 +595,7 @@ static struct _fat_ptr*Cyc_sh_escape_stringptr(struct _fat_ptr*sp){
 return({struct _fat_ptr*_Tmp0=_cycalloc(sizeof(struct _fat_ptr));({struct _fat_ptr _Tmp1=Cyc_sh_escape_string(*sp);*_Tmp0=_Tmp1;});_Tmp0;});}
 # 219
 static struct Cyc_Lineno_Pos*Cyc_new_pos (void){
-return({struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tmp0->logical_file=({const char*_Tmp1="";_tag_fat(_Tmp1,sizeof(char),1U);}),({struct _fat_ptr _Tmp1=Cyc_Core_new_string(0U);_Tmp0->line=_Tmp1;}),_Tmp0->line_no=0,_Tmp0->col=0;_Tmp0;});}struct _tuple13{int f1;struct Cyc_Lineno_Pos*f2;};
+return({struct Cyc_Lineno_Pos*_Tmp0=_cycalloc(sizeof(struct Cyc_Lineno_Pos));_Tmp0->logical_file=_tag_fat("",sizeof(char),1U),({struct _fat_ptr _Tmp1=Cyc_Core_new_string(0U);_Tmp0->line=_Tmp1;}),_Tmp0->line_no=0,_Tmp0->col=0;_Tmp0;});}struct _tuple13{int f1;struct Cyc_Lineno_Pos*f2;};
 # 222
 static struct _tuple13*Cyc_start2pos(int x){
 return({struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f1=x,({struct Cyc_Lineno_Pos*_Tmp1=Cyc_new_pos();_Tmp0->f2=_Tmp1;});_Tmp0;});}
@@ -648,17 +648,18 @@ return Cyc_List_imp_rev(result);}struct _tuple15{int f1;struct Cyc_Absyn_Decl*f2
 static void Cyc_process_file(struct _fat_ptr filename){
 struct _fat_ptr basename=Cyc_Filename_chop_extension(filename);
 # 283
-const char*preprocfile=(const char*)_check_null(_untag_fat_ptr(Cyc_strconcat(basename,({const char*_Tmp0=".cyp";_tag_fat(_Tmp0,sizeof(char),5U);})),sizeof(char),1U));
+const char*preprocfile=(const char*)_check_null(_untag_fat_ptr(Cyc_strconcat(basename,_tag_fat(".cyp",sizeof(char),5U)),sizeof(char),1U));
 struct _fat_ptr cycargs_string=({
-struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=({const char*_Tmp4="";_tag_fat(_Tmp4,sizeof(char),1U);});_Tmp3;});_Tmp1->hd=_Tmp2;}),({
+struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));({struct _fat_ptr*_Tmp2=({struct _fat_ptr*_Tmp3=_cycalloc(sizeof(struct _fat_ptr));*_Tmp3=(struct _fat_ptr)_tag_fat("",sizeof(char),1U);_Tmp3;});_Tmp1->hd=_Tmp2;}),({
 struct Cyc_List_List*_Tmp2=({(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struct _fat_ptr*),struct Cyc_List_List*))Cyc_List_map;})(Cyc_sh_escape_stringptr,Cyc_List_rev(Cyc_cycargs));_Tmp1->tl=_Tmp2;});_Tmp1;});
 # 285
-Cyc_str_sepstr(_Tmp0,({const char*_Tmp1=" ";_tag_fat(_Tmp1,sizeof(char),2U);}));});
-# 288
-const char*cmd=(const char*)_check_null(_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=Cyc_cyclone_file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=cycargs_string;_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,({struct _fat_ptr _Tmp4=Cyc_sh_escape_string(({const char*_Tmp5=preprocfile;_tag_fat((void*)_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));}));_Tmp3.f1=_Tmp4;});_Tmp3;});struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=Cyc_sh_escape_string(filename);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[4];_Tmp4[0]=& _Tmp0,_Tmp4[1]=& _Tmp1,_Tmp4[2]=& _Tmp2,_Tmp4[3]=& _Tmp3;Cyc_aprintf(({const char*_Tmp5="%s %s -E -o %s -x cyc %s";_tag_fat(_Tmp5,sizeof(char),25U);}),_tag_fat(_Tmp4,sizeof(void*),4));}),sizeof(char),1U));
+Cyc_str_sepstr(_Tmp0,
+# 287
+_tag_fat(" ",sizeof(char),2U));});
+const char*cmd=(const char*)_check_null(_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)Cyc_cyclone_file);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=(struct _fat_ptr)((struct _fat_ptr)cycargs_string);_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,({struct _fat_ptr _Tmp4=(struct _fat_ptr)((struct _fat_ptr)Cyc_sh_escape_string(({const char*_Tmp5=preprocfile;_tag_fat((void*)_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));})));_Tmp3.f1=_Tmp4;});_Tmp3;});struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=(struct _fat_ptr)((struct _fat_ptr)Cyc_sh_escape_string(filename));_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[4];_Tmp4[0]=& _Tmp0,_Tmp4[1]=& _Tmp1,_Tmp4[2]=& _Tmp2,_Tmp4[3]=& _Tmp3;Cyc_aprintf(_tag_fat("%s %s -E -o %s -x cyc %s",sizeof(char),25U),_tag_fat(_Tmp4,sizeof(void*),4));}),sizeof(char),1U));
 # 293
 if(system(cmd)!=0){
-Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="\nError: preprocessing\n";_tag_fat(_Tmp0,sizeof(char),23U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_fprintf(Cyc_stderr,_tag_fat("\nError: preprocessing\n",sizeof(char),23U),_tag_fat(0U,sizeof(void*),0));
 return;}
 # 298
 Cyc_Position_reset_position(({const char*_Tmp0=preprocfile;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}));{
@@ -702,7 +703,7 @@ struct _tuple12*_Tmp3=(struct _tuple12*)lineno_comments->hd;void*_Tmp4;int _Tmp5
 struct _fat_ptr _Tmp6;if(*((int*)comment)==1){_Tmp6=((struct Cyc_Standalone_Comment_struct*)comment)->f1;{struct _fat_ptr cmt=_Tmp6;
 # 342
 Cyc_pr_comment(Cyc_stdout,cmt);
-Cyc_printf(({const char*_Tmp7="\n";_tag_fat(_Tmp7,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_printf(_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 lineno_comments=lineno_comments->tl;
 goto _LL9;}}else{_Tmp6=((struct Cyc_MatchDecl_Comment_struct*)comment)->f1;{struct _fat_ptr cmt=_Tmp6;
 # 347
@@ -731,36 +732,42 @@ int Cyc_main(int argc,struct _fat_ptr argv){
 GC_blacklist_warn_clear();{
 # 381
 struct Cyc_List_List*options=({struct _tuple17*_Tmp0[5];({
-struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=({const char*_Tmp3="-cyclone";_tag_fat(_Tmp3,sizeof(char),9U);}),_Tmp2->f2=0,_Tmp2->f3=({const char*_Tmp3=" <file>";_tag_fat(_Tmp3,sizeof(char),8U);}),({
-void*_Tmp3=(void*)({struct Cyc_Arg_String_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_String_spec_Arg_Spec_struct));_Tmp4->tag=5,_Tmp4->f1=Cyc_set_cyclone_file;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=({const char*_Tmp3="Use <file> as the cyclone compiler";_tag_fat(_Tmp3,sizeof(char),35U);});_Tmp2;});
+struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=_tag_fat("-cyclone",sizeof(char),9U),_Tmp2->f2=0,_Tmp2->f3=_tag_fat(" <file>",sizeof(char),8U),({
+void*_Tmp3=(void*)({struct Cyc_Arg_String_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_String_spec_Arg_Spec_struct));_Tmp4->tag=5,_Tmp4->f1=Cyc_set_cyclone_file;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=
+_tag_fat("Use <file> as the cyclone compiler",sizeof(char),35U);_Tmp2;});
 # 382
 _Tmp0[0]=_Tmp1;}),({
 # 385
-struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=({const char*_Tmp3="-w";_tag_fat(_Tmp3,sizeof(char),3U);}),_Tmp2->f2=0,_Tmp2->f3=({const char*_Tmp3=" <width>";_tag_fat(_Tmp3,sizeof(char),9U);}),({
-void*_Tmp3=(void*)({struct Cyc_Arg_Int_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Int_spec_Arg_Spec_struct));_Tmp4->tag=6,_Tmp4->f1=Cyc_set_width;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=({const char*_Tmp3="Use <width> as the max width for printing declarations";_tag_fat(_Tmp3,sizeof(char),55U);});_Tmp2;});
+struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=_tag_fat("-w",sizeof(char),3U),_Tmp2->f2=0,_Tmp2->f3=_tag_fat(" <width>",sizeof(char),9U),({
+void*_Tmp3=(void*)({struct Cyc_Arg_Int_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Int_spec_Arg_Spec_struct));_Tmp4->tag=6,_Tmp4->f1=Cyc_set_width;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=
+_tag_fat("Use <width> as the max width for printing declarations",sizeof(char),55U);_Tmp2;});
 # 385
 _Tmp0[1]=_Tmp1;}),({
 # 388
-struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=({const char*_Tmp3="-D";_tag_fat(_Tmp3,sizeof(char),3U);}),_Tmp2->f2=1,_Tmp2->f3=({const char*_Tmp3="<name>[=<value>]";_tag_fat(_Tmp3,sizeof(char),17U);}),({
-void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=({const char*_Tmp3="Pass definition to preprocessor";_tag_fat(_Tmp3,sizeof(char),32U);});_Tmp2;});
+struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=_tag_fat("-D",sizeof(char),3U),_Tmp2->f2=1,_Tmp2->f3=_tag_fat("<name>[=<value>]",sizeof(char),17U),({
+void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=
+_tag_fat("Pass definition to preprocessor",sizeof(char),32U);_Tmp2;});
 # 388
 _Tmp0[2]=_Tmp1;}),({
 # 391
-struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=({const char*_Tmp3="-I";_tag_fat(_Tmp3,sizeof(char),3U);}),_Tmp2->f2=1,_Tmp2->f3=({const char*_Tmp3="<dir>";_tag_fat(_Tmp3,sizeof(char),6U);}),({
-void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=({const char*_Tmp3="Add to the list of directories to search for include files";_tag_fat(_Tmp3,sizeof(char),59U);});_Tmp2;});
+struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=_tag_fat("-I",sizeof(char),3U),_Tmp2->f2=1,_Tmp2->f3=_tag_fat("<dir>",sizeof(char),6U),({
+void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=
+_tag_fat("Add to the list of directories to search for include files",sizeof(char),59U);_Tmp2;});
 # 391
 _Tmp0[3]=_Tmp1;}),({
 # 394
-struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=({const char*_Tmp3="-B";_tag_fat(_Tmp3,sizeof(char),3U);}),_Tmp2->f2=1,_Tmp2->f3=({const char*_Tmp3="<file>";_tag_fat(_Tmp3,sizeof(char),7U);}),({
-void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=({const char*_Tmp3="Add to the list of directories to search for compiler files";_tag_fat(_Tmp3,sizeof(char),60U);});_Tmp2;});
+struct _tuple17*_Tmp1=({struct _tuple17*_Tmp2=_cycalloc(sizeof(struct _tuple17));_Tmp2->f1=_tag_fat("-B",sizeof(char),3U),_Tmp2->f2=1,_Tmp2->f3=_tag_fat("<file>",sizeof(char),7U),({
+void*_Tmp3=(void*)({struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_Tmp4=_cycalloc(sizeof(struct Cyc_Arg_Flag_spec_Arg_Spec_struct));_Tmp4->tag=1,_Tmp4->f1=Cyc_add_cycarg;_Tmp4;});_Tmp2->f4=_Tmp3;}),_Tmp2->f5=
+_tag_fat("Add to the list of directories to search for compiler files",sizeof(char),60U);_Tmp2;});
 # 394
 _Tmp0[4]=_Tmp1;});Cyc_List_list(_tag_fat(_Tmp0,sizeof(struct _tuple17*),5));});
 # 399
-Cyc_Arg_parse(options,Cyc_add_other,Cyc_no_other,({const char*_Tmp0="Options:";_tag_fat(_Tmp0,sizeof(char),9U);}),argv);
+Cyc_Arg_parse(options,Cyc_add_other,Cyc_no_other,_tag_fat("Options:",sizeof(char),9U),argv);
 # 401
 if(Cyc_cycdoc_files==0){
-Cyc_Arg_usage(options,({const char*_Tmp0="Usage: cycdoc [options] file1 file2 ...\nOptions:";_tag_fat(_Tmp0,sizeof(char),49U);}));
-# 405
+Cyc_Arg_usage(options,
+# 404
+_tag_fat("Usage: cycdoc [options] file1 file2 ...\nOptions:",sizeof(char),49U));
 exit(1);}
 # 410
 Cyc_PP_tex_output=1;

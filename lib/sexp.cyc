@@ -848,9 +848,3 @@ Visitor_t<`b,`a,`r> default_visitor(`b (@`H def)(`a,Object_t,visitor_t<`b,`a,`r>
   v.visit_default = def;
   return v;
 }
-
-
-
-
-
-

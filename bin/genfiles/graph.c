@@ -407,7 +407,7 @@ return 0;else{_Tmp1=*_Tmp0;{struct Cyc_Set_Set*sourceTargets=_Tmp1;
 return Cyc_Set_member(sourceTargets,target);}};}struct _tuple0{void*f1;struct Cyc_Set_Set*f2;};
 # 112
 void Cyc_Graph_print(struct Cyc___cycFILE*f,struct Cyc_Dict_Dict g,void(*nodeprint)(struct Cyc___cycFILE*,void*)){
-Cyc_fprintf(f,({const char*_Tmp0="digraph {\n";_tag_fat(_Tmp0,sizeof(char),11U);}),_tag_fat(0U,sizeof(void*),0));{
+Cyc_fprintf(f,_tag_fat("digraph {\n",sizeof(char),11U),_tag_fat(0U,sizeof(void*),0));{
 struct Cyc_List_List*edges=Cyc_Dict_to_list(g);
 for(1;(unsigned)edges;edges=edges->tl){
 struct _tuple0*_Tmp0=(struct _tuple0*)edges->hd;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=_Tmp0->f2;{void*s=_Tmp2;struct Cyc_Set_Set*ts=_Tmp1;
@@ -415,15 +415,15 @@ struct Cyc_List_List*tslist=Cyc_Graph_to_list(ts);
 if((unsigned)tslist)
 for(1;(unsigned)tslist;tslist=tslist->tl){
 nodeprint(f,s);
-Cyc_fprintf(f,({const char*_Tmp3=" -> ";_tag_fat(_Tmp3,sizeof(char),5U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_fprintf(f,_tag_fat(" -> ",sizeof(char),5U),_tag_fat(0U,sizeof(void*),0));
 nodeprint(f,tslist->hd);
-Cyc_fprintf(f,({const char*_Tmp3=";\n";_tag_fat(_Tmp3,sizeof(char),3U);}),_tag_fat(0U,sizeof(void*),0));}else{
+Cyc_fprintf(f,_tag_fat(";\n",sizeof(char),3U),_tag_fat(0U,sizeof(void*),0));}else{
 # 126
-Cyc_fprintf(f,({const char*_Tmp3="node ";_tag_fat(_Tmp3,sizeof(char),6U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_fprintf(f,_tag_fat("node ",sizeof(char),6U),_tag_fat(0U,sizeof(void*),0));
 nodeprint(f,s);
-Cyc_fprintf(f,({const char*_Tmp3="; // no targets\n";_tag_fat(_Tmp3,sizeof(char),17U);}),_tag_fat(0U,sizeof(void*),0));}}}
+Cyc_fprintf(f,_tag_fat("; // no targets\n",sizeof(char),17U),_tag_fat(0U,sizeof(void*),0));}}}
 # 131
-Cyc_fprintf(f,({const char*_Tmp0="}\n";_tag_fat(_Tmp0,sizeof(char),3U);}),_tag_fat(0U,sizeof(void*),0));}}
+Cyc_fprintf(f,_tag_fat("}\n",sizeof(char),3U),_tag_fat(0U,sizeof(void*),0));}}
 # 141 "graph.cyc"
 static struct Cyc_List_List*Cyc_Graph_sourcesOf(struct Cyc_Dict_Dict g,void*node){
 struct Cyc_List_List*result=0;

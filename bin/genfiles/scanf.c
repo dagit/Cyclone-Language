@@ -348,35 +348,35 @@ static short*Cyc_va_arg_short_ptr(void*a){
 void*_Tmp0;switch(*((int*)a)){case 0: _Tmp0=((struct Cyc_ShortPtr_sa_ScanfArg_struct*)a)->f1;{short*p=_Tmp0;
 return p;}case 1: _Tmp0=((struct Cyc_UShortPtr_sa_ScanfArg_struct*)a)->f1;{unsigned short*p=_Tmp0;
 return(short*)p;}default:
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects short pointer";_tag_fat(_Tmp2,sizeof(char),27U);});_Tmp1;}));};}
+ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects short pointer",sizeof(char),27U);_Tmp1;}));};}
 # 147
 static int*Cyc_va_arg_int_ptr(void*a){
 void*_Tmp0;switch(*((int*)a)){case 2: _Tmp0=((struct Cyc_IntPtr_sa_ScanfArg_struct*)a)->f1;{int*p=_Tmp0;
 return p;}case 3: _Tmp0=((struct Cyc_UIntPtr_sa_ScanfArg_struct*)a)->f1;{unsigned*p=_Tmp0;
 return(int*)p;}default:
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects int pointer";_tag_fat(_Tmp2,sizeof(char),25U);});_Tmp1;}));};}
+ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects int pointer",sizeof(char),25U);_Tmp1;}));};}
 # 155
 static struct _fat_ptr Cyc_va_arg_string_ptr(void*a){
 struct _fat_ptr _Tmp0;switch(*((int*)a)){case 4: _Tmp0=((struct Cyc_StringPtr_sa_ScanfArg_struct*)a)->f1;{struct _fat_ptr p=_Tmp0;
 return _fat_ptr_decrease_size(p,sizeof(char),1U);}case 7: _Tmp0=((struct Cyc_CharPtr_sa_ScanfArg_struct*)a)->f1;{struct _fat_ptr p=_Tmp0;
 return p;}default:
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects char pointer";_tag_fat(_Tmp2,sizeof(char),26U);});_Tmp1;}));};}
+ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects char pointer",sizeof(char),26U);_Tmp1;}));};}
 # 163
 static double*Cyc_va_arg_double_ptr(void*a){
 void*_Tmp0;if(*((int*)a)==5){_Tmp0=((struct Cyc_DoublePtr_sa_ScanfArg_struct*)a)->f1;{double*p=_Tmp0;
 return p;}}else{
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects double pointer";_tag_fat(_Tmp2,sizeof(char),28U);});_Tmp1;}));};}
+_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects double pointer",sizeof(char),28U);_Tmp1;}));};}
 # 170
 static float*Cyc_va_arg_float_ptr(void*a){
 void*_Tmp0;if(*((int*)a)==6){_Tmp0=((struct Cyc_FloatPtr_sa_ScanfArg_struct*)a)->f1;{float*p=_Tmp0;
 return p;}}else{
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects float pointer";_tag_fat(_Tmp2,sizeof(char),27U);});_Tmp1;}));};}
+_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects float pointer",sizeof(char),27U);_Tmp1;}));};}
 # 177
 static struct _fat_ptr Cyc_va_arg_char_ptr(void*a){
 struct _fat_ptr _Tmp0;switch(*((int*)a)){case 7: _Tmp0=((struct Cyc_CharPtr_sa_ScanfArg_struct*)a)->f1;{struct _fat_ptr p=_Tmp0;
 return p;}case 4: _Tmp0=((struct Cyc_StringPtr_sa_ScanfArg_struct*)a)->f1;{struct _fat_ptr p=_Tmp0;
 return _fat_ptr_decrease_size(p,sizeof(char),1U);}default:
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=({const char*_Tmp2="scan expects char pointer";_tag_fat(_Tmp2,sizeof(char),26U);});_Tmp1;}));};}
+ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp1=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp1->tag=Cyc_Core_Invalid_argument,_Tmp1->f1=_tag_fat("scan expects char pointer",sizeof(char),26U);_Tmp1;}));};}
 # 188
 int Cyc__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*),int(*_IO_peekc)(void*),void*fp,struct _fat_ptr fmt0,struct _fat_ptr ap,int*errp){
 # 198
@@ -678,7 +678,7 @@ continue;case 3:
  if(width==0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
 flags |=704U;
-for(p=({char*_Tmp0=buf;_tag_fat(_Tmp0,sizeof(char),351U);});width!=0;-- width){
+for(p=_tag_fat(buf,sizeof(char),351U);width!=0;-- width){
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
 switch((int)c){case 48:
@@ -772,13 +772,13 @@ if(flags & 1)
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ++ nassigned;}
 # 684
-nread +=(p.curr - ({char*_Tmp0=buf;_tag_fat(_Tmp0,sizeof(char),351U);}).curr)/ sizeof(char);
+nread +=(p.curr - _tag_fat(buf,sizeof(char),351U).curr)/ sizeof(char);
 goto _LL47;case 4:
 # 689
  if(width==0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
 flags |=960U;
-for(p=({char*_Tmp0=buf;_tag_fat(_Tmp0,sizeof(char),351U);});width!=0;-- width){
+for(p=_tag_fat(buf,sizeof(char),351U);width!=0;-- width){
 c=_IO_peekc(fp);
 # 698
 switch((int)c){case 48:
@@ -849,10 +849,10 @@ if(flags & 1)
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ++ nassigned;}
 # 774
-nread +=(p.curr - ({char*_Tmp0=buf;_tag_fat(_Tmp0,sizeof(char),351U);}).curr)/ sizeof(char);
+nread +=(p.curr - _tag_fat(buf,sizeof(char),351U).curr)/ sizeof(char);
 goto _LL47;default:
 # 777
-(void*)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=({const char*_Tmp1="scanf3";_tag_fat(_Tmp1,sizeof(char),7U);});_Tmp0;}));}_LL47:;}
+ _throw((void*)({struct Cyc_Core_Impossible_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Impossible_exn_struct));_Tmp0->tag=Cyc_Core_Impossible,_Tmp0->f1=_tag_fat("scanf3",sizeof(char),7U);_Tmp0;}));}_LL47:;}
 # 781
 eof_failure:
  ++ seen_eof;

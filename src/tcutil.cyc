@@ -280,19 +280,6 @@ bool is_bits_only_type(type_t t) {
   }
 }
 
-void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3))) {
-  Warn::verr(loc,fmt,ap);
-}
-`a impos(string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,1,2), noreturn)) {
-  Warn::vimpos(fmt,ap);
-}
-void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3))) {
-  Warn::vwarn(sg, fmt, ap);
-}
-
 //fast type-variable comparison -- can only be used when a tvar has an identity.
 int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity - tv2->identity);
@@ -1052,6 +1039,12 @@ static int type_case_number(type_t t) {
   case &AppType(c,_):         return 12 + tycon2int(c);
   }
 }
+static int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
+  if(a1 == a2) return 0;
+  if(a1 == NULL && a2 != NULL) return -1;
+  if(a1 != NULL && a2 == NULL) return 1;
+  return cmp((_@)a1,(_@)a2);
+}
 static int enumfield_cmp(enumfield_t e1, enumfield_t e2) {
   let qc = qvar_cmp(e1->name,e2->name);
   if(qc != 0) return qc;
@@ -1106,12 +1099,6 @@ int tycon_cmp(tycon_t t1, tycon_t t2) {
   }
 }
 
-int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
-  if(a1 == a2) return 0;
-  if(a1 == NULL && a2 != NULL) return -1;
-  if(a1 != NULL && a2 == NULL) return 1;
-  return cmp((_@)a1,(_@)a2);
-}
 static int tqual_cmp(tqual_t tq1, tqual_t tq2) {
   let i1 = tq1.real_const + (tq1.q_volatile << 1) + (tq1.q_restrict << 2);
   let i2 = tq2.real_const + (tq2.q_volatile << 1) + (tq2.q_restrict << 2);
@@ -1255,6 +1242,12 @@ int typecmp(type_t t1, type_t t2) {
 
   case $(&ValueofType(e1), &ValueofType(e2)): fallthru(e1,e2);
   case $(&TypeofType(e1),  &TypeofType(e2)):  return Evexp::uint_exp_cmp(e1,e2);
+    
+  case $(&TypedefType(n1,ts1,_,def1), &TypedefType(n2,ts2,_,def2)):
+    if(def1 != NULL && def2 != NULL)
+      Warn::impos2("typecmp: compress did not remove typedefs");
+    int i = qvar_cmp(n1,n2); if(i != 0) return i;
+    return list_cmp(typecmp,ts1,ts2);
   default: Warn::impos2("Unmatched case in typecmp");
   }
 }

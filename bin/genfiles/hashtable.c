@@ -457,12 +457,12 @@ void Cyc_Hashtable_print_table_map(struct Cyc_Hashtable_Table*t,void(*prn_key)(v
 struct _fat_ptr odata=t->tab;
 int osize=(int)_get_fat_size(odata,sizeof(struct Cyc_List_List*));
 int i=0;for(0;i < osize;++ i){
-({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)i;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_printf(({const char*_Tmp2="%d: ";_tag_fat(_Tmp2,sizeof(char),5U);}),_tag_fat(_Tmp1,sizeof(void*),1));});
+({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)i;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_printf(_tag_fat("%d: ",sizeof(char),5U),_tag_fat(_Tmp1,sizeof(void*),1));});
 {struct Cyc_List_List*iter=*((struct Cyc_List_List**)_check_fat_subscript(odata,sizeof(struct Cyc_List_List*),i));for(0;iter!=0;iter=iter->tl){
-Cyc_printf(({const char*_Tmp0="(";_tag_fat(_Tmp0,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_printf(_tag_fat("(",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 prn_key(((struct _tuple0*)iter->hd)[0].f1);
-Cyc_printf(({const char*_Tmp0=",";_tag_fat(_Tmp0,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));
+Cyc_printf(_tag_fat(",",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));
 prn_val(((struct _tuple0*)iter->hd)[0].f2);
-Cyc_printf(({const char*_Tmp0=") ";_tag_fat(_Tmp0,sizeof(char),3U);}),_tag_fat(0U,sizeof(void*),0));}}
+Cyc_printf(_tag_fat(") ",sizeof(char),3U),_tag_fat(0U,sizeof(void*),0));}}
 # 193
-Cyc_printf(({const char*_Tmp0="\n";_tag_fat(_Tmp0,sizeof(char),2U);}),_tag_fat(0U,sizeof(void*),0));}}
+Cyc_printf(_tag_fat("\n",sizeof(char),2U),_tag_fat(0U,sizeof(void*),0));}}

@@ -186,11 +186,10 @@ static type_t type_name_to_type($(var_opt_t,tqual_t,type_t)@ tqt,
   return t;
 }
 ////////////////// Collapsing pointer qualifiers ///////////////////////////
-static $(booltype_t nullable,ptrbound_t bound,
-         booltype_t zeroterm,rgntype_t rgn,booltype_t autoreleased) 
-  collapse_pointer_quals(seg_t loc, booltype_t nullable, 
-                         ptrbound_t bound, rgntype_t rgn, 
-                         pointer_quals_t pqs) {
+static type_modifier_t<`r> 
+make_pointer_mod(region_t<`r> r, ptrloc_t loc, 
+		 booltype_t nullable, ptrbound_t bound, rgntype_t rgn,
+		 pointer_quals_t pqs, tqual_t tqs) {
   // for now, the last qualifier wins and overrides previous ones
   booltype_t zeroterm = Tcutil::any_bool(NULL);
   booltype_t autoreleased = Tcutil::any_bool(NULL);
@@ -206,14 +205,14 @@ static $(booltype_t nullable,ptrbound_t bound,
     case &Numelts_ptrqual(e):      bound = thin_bounds_exp(e);   break;
     case &Region_ptrqual(t):         rgn = t;                    break;
     }
-  return $(nullable,bound,zeroterm,rgn,autoreleased);
+  return rnew(r) Pointer_mod(PtrAtts(rgn,nullable,bound,zeroterm,
+				     loc,autoreleased),
+			     tqs);
 }
 
 ////////////////// Functions for creating abstract syntax //////////////////
 
-// FIX:  need to guarantee this won't conflict with a user name
-static qvar_t gensym_enum() {
-  // a way to gensym an enum name
+static qvar_t gensym_enum() { // a way to gensym an enum name
   static int enum_counter = 0;
   return new $(Rel_n(NULL), 
 	       new (string_t)aprintf("__anonymous_enum_%d__", enum_counter++));
@@ -434,8 +433,7 @@ static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
   case &VarType(&Tvar(_,_,*cptr)): 
     switch(Kinds::compress_kb(*cptr)) {
     case &Unknown_kb(_): 
-      *cptr = leq ? new Less_kb(NULL,k) : Kinds::kind_to_bound(k);
-      return;
+      *cptr = leq ? new Less_kb(NULL,k) : Kinds::kind_to_bound(k); return;
     default: return;
     }
   default: return;
@@ -1834,9 +1832,9 @@ one_pointer:
     let $(ploc,nullable,bound) = *$1;
     if (Flags::porting_c_code)
       ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),.zt_loc=SLOC(@2)};
-    let $(nullable,bound,zeroterm,rgn_opt,autoreleased) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
-    ans = rnew(yyr) List(rnew(yyr) Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc,autoreleased),$5), ans);
-    $$ = ^$(ans);
+    let mod = make_pointer_mod(yyr,ptrloc,nullable,bound,$3,$2,$5);
+    ans = rnew(yyr) List(mod, ans);
+    $$=^$(ans);
   }
 
 pointer_quals:
@@ -2396,8 +2394,7 @@ pattern:
 | '&' pattern         { $$=^$(new_pat(new Pointer_p($2),LOC(@1,@2))); }
 | constant
   { exp_t e = $1;
-    switch (e->r) {
-    /* FIX: need patterns for wchar_t */
+    switch (e->r) { // FIX: need patterns for wchar_t
     case &Const_e({.Char_c = $(s,i)}): 
       $$=^$(new_pat(new Char_p(i),e->loc)); break;
     case &Const_e({.Short_c = $(s,i)}):

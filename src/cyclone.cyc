@@ -30,6 +30,7 @@
 #include "remove_aggregates.h"
 #include "remove_labels.h"
 #include "rename_temps.h"
+#include "remove_casts.h"
 #include "toseqc.h"
 #include "tovc.h"
 #include "low_treeshake.h"
@@ -508,6 +509,9 @@ list_t<Absyn::decl_t> do_removelabs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_temprename(bool ignore,list_t<Absyn::decl_t,`H> tds) {
   return RenameTemps::rename(tds);
 }
+list_t<Absyn::decl_t> do_castremove(bool ignore,list_t<Absyn::decl_t,`H> tds) {
+  return RemoveCasts::remove_casts(tds);
+}
 
 list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return Toseqc::toseqc(tds);
@@ -885,6 +889,8 @@ static void process_file(string_t<`H> filename) {
   // renaming of temporaries
   if(!compile_failure && Flags::stop_after_pass >= Flags::TempRename)
     tds = do_stage("renaming temporaries",tds,do_temprename,true,tds);
+  if(!compile_failure && Flags::stop_after_pass >= Flags::CastRemoval)
+    tds = do_stage("removing casts",tds,do_castremove,true,tds);
  // removal of gcc extensions (tovc is an antiquated name)
   if (!compile_failure && (Flags::tovc_r || elim_se_r))
     tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);

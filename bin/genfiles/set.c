@@ -634,7 +634,7 @@ return Cyc_Set_setcmp(s1,s2)==0;}char Cyc_Set_Absent[7U]="Absent";
 struct Cyc_Set_Absent_exn_struct Cyc_Set_Absent_val={Cyc_Set_Absent};
 # 389
 void*Cyc_Set_choose(struct Cyc_Set_Set*s){
-if(s->nodes==0)(void*)_throw((void*)& Cyc_Set_Absent_val);
+if(s->nodes==0)_throw(& Cyc_Set_Absent_val);
 return _check_null(s->nodes)->hd;}
 # 394
 int Cyc_Set_iter_f(struct Cyc_List_List**elts_left,void**dest){

@@ -191,21 +191,7 @@ static void rename_decl(decl_t d) {
     (*ed->name)[1] = new remove_user_prefix(*(*ed->name)[1]); break;
   case &Typedef_d(td):
     (*td->name)[1] = new remove_user_prefix(*(*td->name)[1]); break;
-
-  case &Fn_d(_):
-  case &Var_d(_):
-  case &Region_d(...):
-  case &Datatype_d(_):
-  case &Let_d(...):
-  case &Letv_d(_):
-  case &Namespace_d(...):
-  case &Using_d(...):
-  case &ExternC_d(...):
-  case &ExternCinclude_d(...):
-  case &Porton_d:
-  case &Portoff_d:
-  case &Tempeston_d:
-  case &Tempestoff_d:
+  default:
     fprintf(stderr,"Error in .cys file: bad user-defined type definition\n");
     exit(1);
   }
@@ -870,10 +856,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   return 1; }
 
 {
-
-//  static void pr(stringptr_t sptr) {
-//    log(" %s\n",*sptr);
-//  }
 
   /* Type for representing dependencies */
   typedef Hashtable::table_t<stringptr_t<`H,`H>,

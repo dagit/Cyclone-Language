@@ -566,26 +566,8 @@ static void exp_to_vc(toexpenv_t env, exp_t e) {
     return;
 
   case &Asm_e(...): return;
-
-  case &Assert_e(...): bad_form = "Assert_e"; break;
-  case &Pragma_e(...): bad_form = "Pragma_e"; break;
-  case &Throw_e(...): bad_form = "Throw_e"; break;
-  case &New_e(...): bad_form = "New_e"; break;
-  case &Tuple_e(...): bad_form = "Tuple_e"; break;
-  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
-  case &Array_e(...): bad_form = "Array_e"; break;
-  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
-  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
-  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
-  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
-//   case &AnonEnum_e(...): bad_form = "AnonEnum_e"; break;
-  case &Datatype_e(...): bad_form = "Datatype_e"; break;
-  case &Malloc_e(...): bad_form = "Malloc_e"; break;
-  case &Swap_e(...): bad_form = "Swap_e"; break;
-  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
-  case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  default: Warn::impos2("bad expression after translation to C: ",e);
   }
-  Warn::impos2("bad exp form ",bad_form,"(exp=|",e,"|) after xlation to C");
 }
 
 static void stmt_to_vc(toexpenv_t env, stmt_t s) {

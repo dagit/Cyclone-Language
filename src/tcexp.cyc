@@ -713,9 +713,9 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
     if (is_fat_pointer_type_elt(t,&telt) ||
         (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!Kinds::kind_leq(type_kind(telt),&Kinds::tmk))
-        terr(e->loc,"can't perform arithmetic on abstract pointer type");
+        Warn::err(e->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t,true))
-        terr(e->loc,"can't perform arithmetic on unique pointer");
+        Warn::err(e->loc,"can't perform arithmetic on unique pointer");
     } else
       Warn::err2(e->loc,"expecting arithmetic or ? type but found ",t);
   }
@@ -882,7 +882,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                           cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
                           ret_var,_}):
 	if(tvars != NULL || rgn_po != NULL)
-	  terr(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
+	  Warn::err(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
       if (topt != NULL) Unify::unify(res_typ,*topt);
@@ -1041,7 +1041,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   bool bogus = false;
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
-  if (!coerce_arg(curr_rgnpo(te),e,exception_type,&bogus))
+  if (!castable(curr_rgnpo(te),loc,(type_t)e->topt,exception_type))
     Warn::err2(loc,"expected ",exception_type," but found ",e->topt);
   if (topt != NULL) 
     return *topt;
@@ -1130,7 +1130,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
       let eopt = get_bounds_exp(bounds_one(),bds);
       if (eopt != NULL)  // FIX: DJG: looks fishy should e be eopt on next line?
         if (Evexp::eval_const_uint_exp(e)[0] == 1)
-          warn(loc,"cast from ? pointer to * pointer will lose size information");
+          Warn::warn(loc,"cast from ? pointer to * pointer will lose size information");
     }
     fallthru;
   default: return t;
@@ -1294,13 +1294,13 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 	break;
       case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
 	if(List::length(tuf->typs) < n)
-	  terr(loc,"datatype field has too few components: %d < %d",
-	       List::length(tuf->typs),n);
+	  Warn::err2(loc,"datatype field has too few components: ",
+	       List::length(tuf->typs)," < ", n);
 	else {
 	  if (n != 0)
 	    t = (*List::nth(tuf->typs,n-1))[1];
 	  else if (l->tl != NULL)
-	    terr(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
+	    Warn::err2(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
 	}
 	bad_type = false;
 	break;
@@ -1444,12 +1444,12 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
 	  if (known_j) {
 	    let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
 	    if (known_i && j > i && i != 1) 
-              terr(loc,"subscript will fail at run-time");
+              Warn::err(loc,"subscript will fail at run-time");
 	  }
 	}
       }
       if (emit_warning)
-	warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
+	Warn::warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
     } else {
       // for nozero-terminated pointers
       if (is_const_exp(e2)) {
@@ -1552,7 +1552,7 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   if (zero_term) {
     let e = List::nth(es, num_es - 1);
     if (!Tcutil::is_zero(e))
-      terr(e->loc,"zero-terminated array doesn't end with zero.");
+      Warn::err(e->loc,"zero-terminated array doesn't end with zero.");
   }
   sz_exp->topt = uint_type;
   res_t2 = array_type(res,

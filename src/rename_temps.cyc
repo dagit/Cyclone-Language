@@ -20,9 +20,6 @@
 // This is an optional pass that reuses names for temporary variables.
 // It runs on C code, not Cyclone code.
 
-// While we're at it, we also remove casts to struct types, which are illegal
-// in ANSI C and in gcc are always no-ops (casts to same type)
-
 #include <dict.h>
 #include "warn.h"
 #include "rename_temps.h"
@@ -62,23 +59,6 @@ static bool rename_visit_f1(env_t env, exp_t e) {
     if(is_temp_var(qv))
       *b = Dict::lookup(env->d,qv);
     return false;
-
-  case &Cast_e(t,e1,...): 
-    // this little opt has nothing to do with temp renaming, but why not?
-    rename_exp(env,e1);
-    switch(compress(t)) {
-    case &AppType(&AggrCon(ai),NULL): e->r = e1->r; break;
-    default: break;
-    }
-    return false;
-
-  case &Asm_e(_,_,sl1,sl2,_): // ???
-    for(; sl1 != NULL; sl1 = sl1->tl)
-      rename_exp(env,(*sl1->hd)[1]);
-    for(; sl2 != NULL; sl2 = sl2->tl)
-      rename_exp(env,(*sl2->hd)[1]);
-    return false;
-
   default: return true;
   }
 }

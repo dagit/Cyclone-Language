@@ -22,7 +22,7 @@ LDFLAGS=
 SIZEOF_WCHAR_T=4
 WCHAR_T_UNSIGNED=0
 
-HAVE_PTHREAD=yes
+HAVE_PTHREAD=no
 
 SHELL=/bin/sh
 A=a
@@ -150,6 +150,7 @@ CYCLONE_SRCS:=absyn\
          tovc\
 	 low_treeshake\
 	 rename_temps\
+	 remove_casts\
          interface\
 	 cifc\
 	 tcdecl\

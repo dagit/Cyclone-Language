@@ -23,9 +23,10 @@
 
 // code for constructing a callgraph -- more properly, we construct a
 // callgraph_t that for each (defined) function f, maps f to the set
-// of (defined) functions S such that each member g of S appears within
-// f.  Note that g may not be actually called by f.  We also have to
-// build a map from qvars to top-level function definitions so that
+// of (defined) functions S such that each member g of S appears
+// within f.  Note that g may not be actually called by f and f may
+// call an h not in S if a caller passes a pointer to h.  We also have
+// to build a map from qvars to top-level function definitions so that
 // when we see a free occurrence of f, we can map it to its function
 // definition (in case f was defined earlier using a prototype.)
 namespace Callgraph;
@@ -43,172 +44,68 @@ typedef Hashtable::table_t<qvar_t,fndecl_t> fndefns_t;
 // these next few functions take the mapping from qvars to function
 // declarations (fds), some syntax, and an accumulator set of function
 // declarations, and insert any free occurrence of a function f that
-// occurs within the syntax, returning the updated set.
-static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t, fndecl_set_t s);
-static fndecl_set_t cg_exp(fndefns_t fds, exp_t, fndecl_set_t s);
-
-static fndecl_set_t cg_exps(fndefns_t fds, list_t<exp_t> es, fndecl_set_t s) {
-  for (; es != NULL; es = es->tl)
-    s = cg_exp(fds,es->hd,s);
+// occurs within the syntax.
+static bool visit_cg_f1($(fndefns_t,fndecl_set_t)@ env, exp_t e) {
+  let name;
+  switch(e->r) {
+  case &Var_e(&Funname_b(fd)): name = fd->name; break;
+  case &Var_e(&Global_b(vd)):  name = vd->name; break;
+  default: return true;
+  }
+  let &$(fds,s) = env;
+  try {
+    // we don't want to enter any extern "C include" functions --
+    // these don't occur in the fds set.
+    s = Set::insert(s,Hashtable::lookup(fds,name));
+    *env = $(fds,s);
+  } catch { case &Core::Not_found: break; }
+  return false;
+}
+static bool visit_cg_f2($(fndefns_t,fndecl_set_t)@ env, stmt_t s) {
+  return true;
+}
+static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t e, fndecl_set_t s) {
+  let env = $(fds,s);
+  visit_stmt(visit_cg_f1,visit_cg_f2,&env,e);
   return s;
 }
 
-static fndecl_set_t cg_exp(fndefns_t fds, exp_t e, fndecl_set_t s) {
-  switch (e->r) {
-  case &Var_e(&Funname_b(fd)): 
-    try {
-      // we don't want to enter any extern "C include" functions --
-      // these don't occur in the fds set.
-      return Set::insert(s,Hashtable::lookup(fds,fd->name));
-    } catch {
-    case &Core::Not_found: return s;
-    }
-  case &Var_e(&Global_b(vd)):
-    try {
-      return Set::insert(s,Hashtable::lookup(fds,vd->name));
-    } catch {
-    case &Core::Not_found: return s;
-    }
-  case &Var_e(_):         case &Const_e(_):       case &Pragma_e(_):
-  case &Sizeoftype_e(_):  case &Sizeofexp_e(_):   case &Offsetof_e(...):
-  case &Enum_e(...):      case &AnonEnum_e(...):  case &Valueof_e(_):
-  case &Asm_e(...):       case &Extension_e(...): return s;
-  case &Primop_e(_,es):   return cg_exps(fds,es,s);
-  case &And_e(e1,e2):               fallthru(e1,e2);
-  case &Or_e(e1,e2):                fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):            fallthru(e1,e2);
-  case &Swap_e(e1,e2):              fallthru(e1,e2);
-  case &Subscript_e(e1,e2):         fallthru(e1,e2);
-  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
-  case &AssignOp_e(e1,_,e2):        return cg_exp(fds,e2,cg_exp(fds,e1,s));
-  case &Throw_e(e,_):                 fallthru(e);
-  case &NoInstantiate_e(e):           fallthru(e);
-  case &Instantiate_e(e,...):         fallthru(e);
-  case &Cast_e(_,e,...):              fallthru(e);
-  case &Address_e(e):                 fallthru(e);
-  case &Deref_e(e):                   fallthru(e);
-  case &AggrMember_e(e,...):          fallthru(e);
-  case &AggrArrow_e(e,...):           fallthru(e);
-  case &Tagcheck_e(e,...):            fallthru(e);
-  case &Assert_e(e):                  fallthru(e);
-  case &ComprehensionNoinit_e(e,...): fallthru(e);
-  case &Increment_e(e,_):             return cg_exp(fds,e,s);
-  case &Conditional_e(e1,e2,e3): 
-    return cg_exp(fds,e3,cg_exp(fds,e2,cg_exp(fds,e1,s)));
-  case &FnCall_e(e,es,...):      return cg_exps(fds,es,cg_exp(fds,e,s));
-  case &Malloc_e(mi):  fallthru(mi.rgn,mi.num_elts);
-  case &New_e(eopt,e): 
-    return cg_exp(fds,e,(eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s));
-  case &Datatype_e(es,...): fallthru(es);
-  case &Tuple_e(es):        return cg_exps(fds,es,s);
-  case &UnresolvedMem_e(_,dles): fallthru(dles);
-  case &CompoundLit_e(_,dles):   fallthru(dles);
-  case &Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &AnonStruct_e(_,dles):    fallthru(dles);
-  case &Array_e(dles):
-    for (; dles != NULL; dles = dles->tl) {
-      let &$(_,e) = dles->hd;
-      s = cg_exp(fds,e,s);
-    }
-    return s;
-  case &StmtExp_e(stmt): return cg_stmt(fds,stmt,s);
-  }
-}
-
-static fndecl_set_t cg_decl(fndefns_t fds, decl_t d, fndecl_set_t s) {
-  switch (d->r) {
-  case &Var_d(vd):
-    let eopt = vd->initializer;
-    return (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
-  case &Let_d(_,_,e,_): return cg_exp(fds,e,s);
-  case &Letv_d(vds):
-    for (; vds != NULL; vds = vds->tl) {
-      let eopt = vds->hd->initializer;
-      s = (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
-    }
-    return s;
-  case &Region_d(_,vd,eopt):
-    s = (vd->initializer == NULL) ? s : cg_exp(fds,(exp_t)vd->initializer,s);
-    return (eopt == NULL) ? s : cg_exp(fds,(exp_t)eopt,s);
-  default: return s;
-  }
-}
-
-static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t stmt, fndecl_set_t s) {
-  switch (stmt->r) {
-  case &Break_s:
-  case &Continue_s:
-  case &Goto_s(_):
-  case &Skip_s: return s;
-  case &Exp_s(e): return cg_exp(fds,e,s);
-  case &Seq_s(s1,s2): return cg_stmt(fds,s2,cg_stmt(fds,s1,s));
-  case &Return_s(eopt): return (eopt != NULL) ? cg_exp(fds,(exp_t)eopt,s) : s;
-  case &IfThenElse_s(e,s1,s2): 
-    return cg_stmt(fds,s2,cg_stmt(fds,s1,cg_exp(fds,e,s)));
-  case &While_s($(e,_),s1): return cg_stmt(fds,s1,cg_exp(fds,e,s));
-  case &For_s(e1,$(e2,_),$(e3,_),s1):
-    return cg_stmt(fds,s1,cg_exp(fds,e3,cg_exp(fds,e2,cg_exp(fds,e1,s))));
-  case &Switch_s(e,scs,_):
-    s = cg_exp(fds,e,s);
-    for (; scs != NULL; scs = scs->tl)
-      // pattern and &&-clause cannot have function call in it...
-      s = cg_stmt(fds,scs->hd->body,s);
-    return s;
-  case &Fallthru_s(es,_): return cg_exps(fds,es,s);
-  case &Decl_s(d,s1): return cg_stmt(fds,s1,cg_decl(fds,d,s));
-  case &Do_s(s1,$(e,_)): return cg_exp(fds,e,cg_stmt(fds,s1,s));
-  case &TryCatch_s(s1,scs,...):
-    s = cg_stmt(fds,s1,s);
-    for (; scs != NULL; scs = scs->tl)
-      // pattern and &&-clause cannot have function call in it...
-      s = cg_stmt(fds,scs->hd->body,s);
-    return s;
-  case &Label_s(_,s1): return cg_stmt(fds,s1,s);
-  }
-}
-
 static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {return (int)fd1 - (int)fd2;}
+static int hash_fndecl(fndecl_t fd) { return (int)fd; }
 
 static callgraph_t cg_topdecls(fndefns_t fds, callgraph_t cg, list_t<decl_t> ds) {
   let mt = Set::empty(fndecl_cmp);
-  for (let ds = ds; ds != NULL; ds = ds->tl) {
+  for (let ds = ds; ds != NULL; ds = ds->tl)
     switch (ds->hd->r) {
     case &Fn_d(fd): 
-      cg = Graph::add_edges(cg, fd, cg_stmt(fds,fd->body,mt)); 
-      break;
+      cg = Graph::add_edges(cg, fd, cg_stmt(fds,fd->body,mt)); break;
     case &Using_d(_,ds): fallthru(ds);
     case &Namespace_d(_,ds): cg = cg_topdecls(fds,cg,ds); break;
     default: break;
     }
-  }
   return cg;
 }
 
 // build the map from qvars to fndecls.
 static callgraph_t enter_fndecls(fndefns_t fds, callgraph_t cg, 
                                  list_t<decl_t> ds) {
-  for (let ds = ds; ds != NULL; ds = ds->tl) {
+  for (let ds = ds; ds != NULL; ds = ds->tl)
     switch (ds->hd->r) {
     case &Fn_d(f): 
       Hashtable::insert(fds,f->name,f); 
       cg = Graph::add_node(cg,f);
       break;
     case &Using_d(_,ds): fallthru(ds);
-    case &Namespace_d(_,ds): 
-      cg = enter_fndecls(fds,cg,ds); break;
+    case &Namespace_d(_,ds): cg = enter_fndecls(fds,cg,ds); break;
     default: break;
     }
-  }
   return cg;
 }
 
-static int hash_fndecl(fndecl_t fd) { return (int)fd; }
-
 callgraph_t compute_callgraph(list_t<decl_t> ds) {
   // build a map from qvars to function declarations
-  fndefns_t fd = Hashtable::create(51, qvar_cmp, hash_qvar);
-  callgraph_t cg = Graph::empty(fndecl_cmp);
-  cg = enter_fndecls(fd, cg, ds);
+  fndefns_t   fd = Hashtable::create(51, qvar_cmp, hash_qvar);
+  callgraph_t cg = enter_fndecls(fd,Graph::empty(fndecl_cmp),ds);
   // compute the callgraph
   cg = cg_topdecls(fd,cg,ds);
   return cg;

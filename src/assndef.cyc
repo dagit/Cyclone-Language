@@ -251,8 +251,7 @@ static term_t eval_binop(Absyn::primop_t p, unsigned i, unsigned j){
   case Absyn::Bitand: return uint(i & j);
   case Absyn::Bitor: return uint(i | j);
   case Absyn::Bitxor: return uint(i ^ j);
-  default: 
-    Tcutil::impos("Error in evaluating binop");
+  default: Warn::impos("Error in evaluating binop");
   }
 }
 // for a binop p that is both commutative and associative
@@ -288,7 +287,7 @@ static term_t flatten_merge(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t 
   // termlist is (tn, tn-1, ..., t2, t1) where ti >= t(i-1).
   let termlist = List::imp_merge(inv_cmp_term, tlist1, tlist2);
   if (termlist == NULL){
-    Tcutil::impos(" commutative associative operator has no non constant operators!");
+    Warn::impos(" commutative associative operator has no non constant operators!");
   }
   term_t t = termlist->hd;
   termlist = termlist -> tl;

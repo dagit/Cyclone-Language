@@ -26,11 +26,6 @@ namespace Tcutil {
 using List;
 using Absyn;
 
-///////////////////  Warnings and Error messages ///////////////////////
-`a impos(string_t,...inject parg_t)__attribute__((format(printf,1,2),noreturn));
-void terr(seg_t, string_t,...inject parg_t)__attribute__((format(printf,2,3)));
-void warn(seg_t, string_t,...inject parg_t)__attribute__((format(printf,2,3)));
-
 ////////////////  Predicates and Destructors for Types /////////////////
 // Pure predicates
 bool is_void_type(type_t);       // void
@@ -249,6 +244,5 @@ type_t any_bounds(list_t<tvar_t,`H>);
   // fairly semantic equivalence
   bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
   int tycon_cmp(tycon_t,tycon_t);
-  int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r, `a*`r);
 }
 #endif

@@ -37,9 +37,9 @@ datacon(exn,Unify);
 // Variables set to indicate where a failure occurs
 static $(type_opt_t,type_opt_t) ts_failure = $(NULL,NULL);
 static $(bool,bool) tqs_const = $(false,false); // optional for ts_failure
-static const char ? failure_reason = NULL; // why the unification failed
+static const char * failure_reason = NULL; // why the unification failed
 
-static void fail_because(const char?`H reason) __attribute__((noreturn)) {
+static void fail_because(const char*`H reason) __attribute__((noreturn)) {
   failure_reason = reason;
   throw &Unify_val;
 }
@@ -53,12 +53,12 @@ void explain_failure() {
   fflush(stderr);
 
   // for qualifier mismatches, there's no need to print out the types
-  if (strcmp("(qualifiers don't match)", failure_reason) == 0) {
-    fprintf(stderr, "  %s\n",failure_reason);
+  if (strcmp("qualifiers don't match", failure_reason) == 0) {
+    fprintf(stderr, "  (%s)\n",failure_reason);
     return;
   }
   // for effects, we need to tell the pretty printer to print them out
-  if (strcmp("(function effects do not match)", failure_reason) == 0) {
+  if (strcmp("function effects do not match", failure_reason) == 0) {
     let p = Absynpp::tc_params_r;
     p.print_all_effects = true;
     Absynpp::set_params(&p);
@@ -93,7 +93,7 @@ void explain_failure() {
   if (failure_reason != NULL) {
     if (pos+strlen(failure_reason) >= 80)
       fprintf(stderr,"\n\t");
-    fprintf(stderr,"%s",failure_reason);
+    fprintf(stderr,"(%s)",failure_reason);
   }
   fprintf(stderr,"\n");
   fflush(stderr);
@@ -137,11 +137,11 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   switch (t) {
   case &VarType(tv):
     if (!List::mem(Tcutil::fast_tvar_cmp,env,tv))
-      fail_because("(type variable would escape scope)");
+      fail_because("type variable would escape scope");
     break;
   case &Evar(_,rg,_,*sopt):
     if (t == evar) 
-      fail_because("(occurs check)");
+      fail_because("occurs check");
     if (rg != NULL)
       Warn::impos2("occurs check: constrained Evar in compressed type");
     // check to see if sopt is a subset of env
@@ -244,7 +244,7 @@ static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
       || (tq1.q_restrict != tq2.q_restrict)) {
     ts_failure  = $(t1,t2);
     tqs_const = $(tq1.real_const,tq2.real_const);
-    failure_reason = "(qualifiers don't match)";
+    failure_reason = "qualifiers don't match";
     throw &Unify_val;
   }
   // clear these flags for error reporting purpose
@@ -294,7 +294,7 @@ static void unify_it(type_t t1, type_t t2) {
     else if(Kinds::kind_leq((*kind2opt)->v,(*kind1opt)->v))
       *kind1opt = *kind2opt;
     else
-      fail_because("(kinds are incompatible)");
+      fail_because("kinds are incompatible");
     *t2r = t1;
     // list intersection, trying to avoid allocation
     let s1 = (*s1opt)->v;
@@ -345,9 +345,9 @@ static void unify_it(type_t t1, type_t t2) {
 	unify(c,bounds_one()); // FIX? should be unify_it??
 	*ref1_ref = t2;
 	return;
-      default: fail_because("(kinds are incompatible)");
+      default: fail_because("kinds are incompatible");
       }
-    default: fail_because("(kinds are incompatible)");
+    default: fail_because("kinds are incompatible");
     }
 
   case $(&Evar(...),_): // t2 is an evar, t1 is not, so swap
@@ -360,19 +360,19 @@ static void unify_it(type_t t1, type_t t2) {
   case $(&AppType(&RgnsCon,_), _):
   case $(_, &AppType(&RgnsCon,_)):
     if (!unify_effect(t1,t2)) 
-      fail_because("(effects don't unify)");
+      fail_because("effects don't unify");
     return;
 
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
     if (Tcutil::tycon_cmp(c1,c2) != 0) 
-      fail_because("(different type constructors)");
+      fail_because("different type constructors");
     unify_list(ts1,ts2);
     return;
 
   case $(&VarType(tv2),&VarType(tv1)):
     // identities should be resolved
     if (tv2->identity != tv1->identity) 
-      fail_because("(variable types are not the same)");
+      fail_because("variable types are not the same");
     return;
 
   case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_,rel2))),
@@ -382,16 +382,16 @@ static void unify_it(type_t t1, type_t t2) {
     let orig_failure = failure_reason;
     if (!unify(zt1,zt2)) {
       ts_failure = $(t1,t2);
-      fail_because("(not both zero terminated)");
+      fail_because("not both zero terminated");
     }
     if (!unify(rel1,rel2)) {
       ts_failure = $(t1,t2);
-      fail_because("(not both autoreleased)");
+      fail_because("not both autoreleased");
     }
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
     if (!unify(b1,b2)) {
       ts_failure = $(t1,t2);
-      fail_because("(different pointer bounds)");
+      fail_because("different pointer bounds");
     }
     // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress(b1)) {
@@ -399,24 +399,24 @@ static void unify_it(type_t t1, type_t t2) {
       failure_reason = orig_failure;
       return;
     default: 
-      failure_reason = "(incompatible pointer types)";
+      failure_reason = "incompatible pointer types";
       unify_it(null1a,null2a);
       return;
     }
 
   case $(&ValueofType(e1), &ValueofType(e2)):
     if (!Evexp::same_uint_const_exp(e1,e2))
-      fail_because("(cannot prove expressions are the same)");
+      fail_because("cannot prove expressions are the same");
     return;
 
   case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}),
          &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2,_})):
     unify_it(t1a,t2a);
     unify_tqual(tq1a,t1a,tq2a,t2a);
-    failure_reason = "(not both zero terminated)";
+    failure_reason = "not both zero terminated";
     unify_it(zt1,zt2);
     if(!unify_const_exp_opt(e1,e2))
-      fail_because("(different array sizes)");
+      fail_because("different array sizes");
     return;
 
   case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req2,req_relns2,ens2,ens_relns2,argvds2,return_value2}),
@@ -425,11 +425,11 @@ static void unify_it(type_t t1, type_t t2) {
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
       if (tvs2 == NULL) 
-	fail_because("(second function type has too few type variables)");
+	fail_because("second function type has too few type variables");
       let kb1 = tvs1->hd->kind;
       let kb2 = tvs2->hd->kind;
       if (!unify_kindbound(kb1,kb2))
-	fail_because(aprintf("(type var %s has different kinds %s and %s)",
+	fail_because(aprintf("type var %s has different kinds %s and %s",
 			     Absynpp::tvar2string(tvs1->hd),
 			     Kinds::kind2string(Kinds::tvar_kind(tvs1->hd,
 								 &Kinds::bk)),
@@ -440,7 +440,7 @@ static void unify_it(type_t t1, type_t t2) {
       tvs2 = tvs2->tl;
     }
     if (tvs2 != NULL)
-      fail_because("(second function type has too many type variables)");
+      fail_because("second function type has too many type variables");
     if (inst != NULL) {
       unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
 				   cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,
@@ -463,19 +463,19 @@ static void unify_it(type_t t1, type_t t2) {
     }
     ts_failure = $(t1,t2);
     if (args1 != NULL || args2 != NULL)
-      fail_because("(function types have different number of arguments)");
+      fail_because("function types have different number of arguments");
     if (c_vararg1 != c_vararg2)
-      fail_because("(only one function type takes C varargs)");
+      fail_because("only one function type takes C varargs");
     // unify any cyclone varargs
     switch ($(cyc_vararg1, cyc_vararg2)) {
     case $(NULL,NULL): break;
     case $(NULL,_):
-    case $(_,NULL): fail_because("(only one function type takes varargs)");
+    case $(_,NULL): fail_because("only one function type takes varargs");
     case $(&VarargInfo{n1,tq1,tp1,i1}, &VarargInfo{n2,tq2,tp2,i2}):
       unify_it(tp1,tp2);
       unify_tqual(tq1,tp1,tq2,tp2);
       if (i1 != i2)
-        fail_because("(only one function type injects varargs)");
+        fail_because("only one function type injects varargs");
     }
     // It's important to unify the effects and po after the arguments and
     // result so that the effects are pinned down as much as possible.
@@ -488,19 +488,19 @@ static void unify_it(type_t t1, type_t t2) {
       bad_effect = !unify_effect(eff1,eff2);
     ts_failure = $(t1,t2);
     if(bad_effect)
-      fail_because(aprintf("(function effects (%s,%s) do not match)", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",  
+      fail_because(aprintf("function effects (%s,%s) do not match", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",  
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!Atts::equiv_fn_atts(atts2,atts1))
-      fail_because("(function types have different attributes)");
+      fail_because("function types have different attributes");
     if (!Tcutil::same_rgn_po(rpo2,rpo1))
-      fail_because("(function types have different region lifetime orderings)");
+      fail_because("function types have different region lifetime orderings");
     // FIX: need to use pratt prover or something like it here -- also,
     // we'll need to substitute for the return_value and argvds to get
     // this right...
     if (!check_logical_equivalence(req_relns1,req_relns2))
-      fail_because("(@requires clauses not equivalent)");
+      fail_because("@requires clauses not equivalent");
     if (!check_logical_equivalence(ens_relns1,ens_relns2))
-      fail_because("(@ensures clauses not equivalent)");
+      fail_because("@ensures clauses not equivalent");
     return;
 
   case $(&TupleType(ts2), &TupleType(ts1)):
@@ -513,34 +513,34 @@ static void unify_it(type_t t1, type_t t2) {
     if (ts1 == NULL && ts2 == NULL) 
       return;
     ts_failure = $(t1,t2);
-    fail_because("(tuple types have different numbers of components)");
+    fail_because("tuple types have different numbers of components");
 
   case $(&AnonAggrType(k2,fs2), &AnonAggrType(k1,fs1)):
     if(k1 != k2)
-      fail_because("(struct and union type)"); 
+      fail_because("struct and union type"); 
     for (; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl) {
       let f1 = fs1->hd;
       let f2 = fs2->hd;
       if (strptrcmp(f1->name,f2->name) != 0)
-        fail_because("(different member names)");
+        fail_because("different member names");
       unify_it(f1->type, f2->type);
       unify_tqual(f1->tq, f1->type, f2->tq, f2->type);
       ts_failure = $(t1,t2);
       if (!Atts::same_atts(f1->attributes,f2->attributes))
-        fail_because("(different attributes on member)");
+        fail_because("different attributes on member");
       if(!unify_const_exp_opt(f1->width,f2->width))
-        fail_because("(different bitfield widths on member)");
+        fail_because("different bitfield widths on member");
       if(!unify_const_exp_opt(f1->requires_clause,f2->requires_clause))
-        fail_because("(different @requires clauses on member)");
+        fail_because("different @requires clauses on member");
     }
     if (fs1 != NULL || fs2 != NULL) 
-      fail_because("(different number of members)");
+      fail_because("different number of members");
     return;
 
   case $(&TypedefType(_,ts1,td1,_),&TypedefType(_,ts2,td2,_)):
     if (td1 != td2)
-      fail_because("(different abstract typedefs)");
-    failure_reason = "(type parameters to typedef differ)";
+      fail_because("different abstract typedefs");
+    failure_reason = "type parameters to typedef differ";
     unify_list(ts1,ts2);
     return;
   default: throw &Unify_val; // caller in charge failure_reason

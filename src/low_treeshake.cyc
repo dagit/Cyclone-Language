@@ -90,12 +90,6 @@ static bool build_tables_visit_f1(env_t env, exp_t e) {
   case &Offsetof_e(t,_): fallthru(t);
   case &Sizeoftype_e(t): fallthru(t);
   case &Cast_e(t,...): build_tables_type(env,t); return true;
-  case &Asm_e(_,_,sl1,sl2,_): // ???
-    for(; sl1 != NULL; sl1 = sl1->tl)
-      build_tables_exp(env,(*sl1->hd)[1]);
-    for(; sl2 != NULL; sl2 = sl2->tl)
-      build_tables_exp(env,(*sl2->hd)[1]);
-    return false;
   default: return true;
   }
 }

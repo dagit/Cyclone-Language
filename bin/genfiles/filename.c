@@ -332,14 +332,14 @@ extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 35 "filename.cyc"
 struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr s1,struct _fat_ptr s2){
-return({struct _fat_ptr _Tmp0=s1;Cyc_strconcat(_Tmp0,Cyc_strconcat(({const char*_Tmp1="/";_tag_fat(_Tmp1,sizeof(char),2U);}),s2));});}
+return({struct _fat_ptr _Tmp0=(struct _fat_ptr)s1;Cyc_strconcat(_Tmp0,Cyc_strconcat(_tag_fat("/",sizeof(char),2U),s2));});}
 # 39
 struct _fat_ptr Cyc_Filename_chop_extension(struct _fat_ptr filename){
 int i=(int)(_get_fat_size(filename,sizeof(char))- 1U);
 while(i >= 0 &&(int)*((const char*)_check_fat_subscript(filename,sizeof(char),i))!=46){
 -- i;}
 if(i < 0)
-(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="chop_extension";_tag_fat(_Tmp1,sizeof(char),15U);});_Tmp0;}));
+_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("chop_extension",sizeof(char),15U);_Tmp0;}));
 return Cyc_substring(filename,0,(unsigned long)i);}
 # 50
 struct _fat_ptr Cyc_Filename_dirname(struct _fat_ptr filename){

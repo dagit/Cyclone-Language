@@ -2973,7 +2973,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   _ atts;
   switch(compress((type_t)fd->cached_type)) {
   case &FnType(FnInfo{.attributes = as,...}): atts = as; break;
-  default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
+  default: Warn::impos("check_fun: non-function type cached with fndecl_t");
   }
   list_t<place_t> noconsume_roots = get_noconsume_params(fd->param_vardecls->v,atts);
   // DAN: Sanity checking used to be split and duplicated with 

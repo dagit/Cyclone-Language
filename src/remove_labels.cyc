@@ -20,17 +20,14 @@
 #include "remove_labels.h"
 #include <cycboot.h>
 #include <string.h>
-
 using List;
 using Absyn;
-
 namespace RemoveLabels;
 
 static struct LabelBin {
-    list_t<var_t> label_gotos;     /* used label names */
-    list_t<stmt_t> label_stmts;    /* pointers to the stmt_t that potentially need removing */
+  list_t<var_t> label_gotos;     /* used label names */
+  list_t<stmt_t> label_stmts;    /* pointers to the stmt_t that potentially need removing */
 };
-
 typedef struct LabelBin @ labelbin_t;
 
 static void remove_with_labelbin(labelbin_t lb) {
@@ -44,129 +41,39 @@ static void remove_with_labelbin(labelbin_t lb) {
 	if(strptrcmp(label_iter->hd, label) == 0) label_used = true;
 	label_iter = label_iter->tl;
       }
-      if(!label_used) {
+      if(!label_used)
 	*statement = *s; 
-      }
       break;
-    case _: break;
+    default: break;
     }
   }
 }
 
-static void build_labelbin(labelbin_t lb, stmt_t statement) {
-    switch(statement->r) {
-    case &Skip_s:           
-    case &Break_s:
-    case &Continue_s:    
-    case &Return_s(...):    
-    case &Fallthru_s(...): // ignore case ; assuming this switch_clause does not introduce new switches not already found in Switch_s
-        break; // also at this point there are no more fallthru since we are at C code
-
-    case &Exp_s(e1):    
-      do_nested_statement(e1, lb, build_labelbin, true);
-      break;
-
-    case &Seq_s(s1, s2): 
-      build_labelbin(lb, s1);
-      build_labelbin(lb, s2);
-      break;
-
-    case &IfThenElse_s(e1, s1, s2):
-      do_nested_statement(e1, lb, build_labelbin, true);
-      build_labelbin(lb, s1);
-      build_labelbin(lb, s2); 
-      break;
-
-    case &Goto_s(vt):             
-      if(lb->label_gotos == NULL) lb->label_gotos = new List{vt, NULL};
-      else lb->label_gotos = new List{vt, lb->label_gotos};
-      break;
-
-    case &Label_s(_, s1): 
-      if(lb->label_stmts == NULL) lb->label_stmts = new List{statement, NULL};
-      else lb->label_stmts = new List{statement, lb->label_stmts};
-      build_labelbin(lb, s1);
-      break;
-
-    case &For_s(e1,$(e2,_),$(e3,_),s1): 
-      do_nested_statement(e1, lb, build_labelbin, true);
-      do_nested_statement(e2, lb, build_labelbin, true);
-      do_nested_statement(e3, lb, build_labelbin, true);
-      build_labelbin(lb, s1);
-      break;
-
-    case &While_s($(e1,_),s1): 
-      do_nested_statement(e1, lb, build_labelbin, true);
-      build_labelbin(lb, s1);
-      break;
-
-    case &Decl_s(d, s1): 
-      switch(d->r) {
-      case &Var_d(vdt):
-	if(vdt->initializer) 
-	  do_nested_statement(vdt->initializer, lb, build_labelbin, true);
-	break;
-      case &Let_d(...): // no let in C
-      case &Letv_d(...): // no nested let in C                 
-      case &Region_d(...): // no region in C                                                 
-      case &Aggr_d(...): // aggregate types inside functions will NOT have initializers                
-      case &Datatype_d(...): // no dataypes in C             
-      case &Enum_d(...): // enum's inside functions (in fact for all enums) initializers will be integer constants                 
-      case &Typedef_d(...): // typedef inside functions will not have experssions to evaluate             
-      case _:
-            break;
-      }        
-      build_labelbin(lb, s1);
-      break;
-
-    case &Do_s(s1, $(e1,_)):
-      build_labelbin(lb, s1);
-      do_nested_statement(e1, lb, build_labelbin, true);
-      break; 
-
-    case &TryCatch_s(s1, scl, _):   
-      build_labelbin(lb, s1); 
-      for(; scl != NULL; scl = scl->tl)
-	build_labelbin(lb, (scl->hd)->body); // assume scl->hd is non-null
-      break;
-
-    case &Switch_s(e1, scl, _):     
-      do_nested_statement(e1, lb, build_labelbin, true);
-      for(; scl != NULL; scl = scl->tl)
-	build_labelbin(lb, (scl->hd)->body); // assume scl->hd is non-null
-      break;
-    }
+static bool visit_label_f1(labelbin_t lb, exp_t e) {
+  return true;
 }
-
+static bool visit_label_f2(labelbin_t lb, stmt_t s) {
+  switch(s->r) {
+  case &Goto_s(vt):             
+    lb->label_gotos = new List{vt, lb->label_gotos}; return true;
+  case &Label_s(...): 
+    lb->label_stmts = new List{s, lb->label_stmts}; return true;
+  default: return true;
+  }
+}
 static void anal_decl(list_t<decl_t> tds) {
   for(; tds != NULL; tds = tds->tl) 
     switch (tds->hd->r) {
     case &Fn_d(fndt):                  
       labelbin_t lb = new LabelBin{NULL, NULL};
-      build_labelbin(lb, fndt->body);
+      visit_stmt(visit_label_f1,visit_label_f2,lb,fndt->body);
       remove_with_labelbin(lb);       
       break;
-    case &Var_d(...): // top level variable declarations will not have braced-group (StmtExp), only inside function
-    case &Let_d(...): 
-    case &Letv_d(...): 
-    case &Region_d(...): 
-    case &Aggr_d(...): 
-    case &Datatype_d(...): 
-    case &Enum_d(...): 
-    case &Typedef_d(...): 
-    case &Porton_d:
-    case &Portoff_d:
-    case &Tempeston_d:
-    case &Tempestoff_d: break;
+    case &ExternCinclude_d(tds1,tds2,...): anal_decl(tds1); fallthru(tds2);
     case &Using_d(_, tds): fallthru(tds);          
     case &ExternC_d(tds): fallthru(tds);   
-    case &Namespace_d(_, tds):
-      anal_decl(tds);
-      break;
-    case &ExternCinclude_d(tds1, tds2, _, _): 
-      anal_decl(tds1);
-      anal_decl(tds2);
-      break;
+    case &Namespace_d(_, tds): anal_decl(tds); break;
+    default: break; // top-level vars can't have stmt-exps in them
     }
 }
 
@@ -174,4 +81,3 @@ List::list_t<Absyn::decl_t> remove_unused_labels(List::list_t<Absyn::decl_t,`H> 
     anal_decl(tds);
     return tds;
 }
-

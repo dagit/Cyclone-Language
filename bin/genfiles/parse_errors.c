@@ -330,7 +330,7 @@ extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);
 extern void exit(int);
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 130 "flags.h"
+# 131 "flags.h"
 extern int Cyc_Flags_print_parser_state_and_token;
 # 27 "parse.h"
 struct _fat_ptr Cyc_token2string(int);struct Cyc_Yyltype{int timestamp;int first_line;int first_column;int last_line;int last_column;};
@@ -341,7 +341,7 @@ static struct Cyc_ParseErrors_ParseState Cyc_ParseErrors_msg_table[111U]={{130,3
 # 19 "parse_errors.cyc"
 void Cyc_yyerror(struct _fat_ptr s,int state,int token){
 if(Cyc_Flags_print_parser_state_and_token){
-({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)state;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)token;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_printf(({const char*_Tmp3="parse error: state [%d], token [%d]\n";_tag_fat(_Tmp3,sizeof(char),37U);}),_tag_fat(_Tmp2,sizeof(void*),2));});
+({struct Cyc_Int_pa_PrintArg_struct _Tmp0=({struct Cyc_Int_pa_PrintArg_struct _Tmp1;_Tmp1.tag=1,_Tmp1.f1=(unsigned long)state;_Tmp1;});struct Cyc_Int_pa_PrintArg_struct _Tmp1=({struct Cyc_Int_pa_PrintArg_struct _Tmp2;_Tmp2.tag=1,_Tmp2.f1=(unsigned long)token;_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_printf(_tag_fat("parse error: state [%d], token [%d]\n",sizeof(char),37U),_tag_fat(_Tmp2,sizeof(void*),2));});
 exit(1);}
 # 27
 {unsigned i=0U;for(0;i < 111U;++ i){
@@ -354,6 +354,6 @@ s=Cyc_ParseErrors_msg_table[(int)i].msg;}}}{
 # 35
 struct _fat_ptr ts=Cyc_token2string(token);
 if((char*)ts.curr!=(char*)_tag_fat(0,0,0).curr)
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=Cyc_token2string(token);_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,({const char*_Tmp3="%s (found %s instead)";_tag_fat(_Tmp3,sizeof(char),22U);}),_tag_fat(_Tmp2,sizeof(void*),2));});else{
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)s);_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,({struct _fat_ptr _Tmp3=(struct _fat_ptr)((struct _fat_ptr)Cyc_token2string(token));_Tmp2.f1=_Tmp3;});_Tmp2;});void*_Tmp2[2];_Tmp2[0]=& _Tmp0,_Tmp2[1]=& _Tmp1;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,_tag_fat("%s (found %s instead)",sizeof(char),22U),_tag_fat(_Tmp2,sizeof(void*),2));});else{
 # 39
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=s;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,({const char*_Tmp2="%s ";_tag_fat(_Tmp2,sizeof(char),4U);}),_tag_fat(_Tmp1,sizeof(void*),1));});}}}
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)s);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_Warn_err((unsigned)Cyc_yylloc.first_line,_tag_fat("%s ",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});}}}

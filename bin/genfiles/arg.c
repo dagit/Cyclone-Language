@@ -365,13 +365,13 @@ if(Cyc_strcmp(x,(*((struct _tuple0*)l->hd)).f1)==0)
 return(*((struct _tuple0*)l->hd)).f4;}
 l=l->tl;}
 # 80
-(void*)_throw((void*)({struct Cyc_Core_Not_found_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Not_found_exn_struct));_Tmp0->tag=Cyc_Core_Not_found;_Tmp0;}));}
+_throw((void*)({struct Cyc_Core_Not_found_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Not_found_exn_struct));_Tmp0->tag=Cyc_Core_Not_found;_Tmp0;}));}
 # 89
 static struct _fat_ptr Cyc_Arg_Justify_break_line(struct Cyc_Buffer_t*b,int howmuch,struct _fat_ptr s){
 if((char*)s.curr==(char*)_tag_fat(0,0,0).curr)return _tag_fat(0,0,0);
 if(howmuch < 0)howmuch=0;{
 unsigned long len=Cyc_strlen(s);
-len <= _get_fat_size(s,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(({const char*_Tmp0="len <= numelts(s)";_tag_fat(_Tmp0,sizeof(char),18U);}),({const char*_Tmp0="arg.cyc";_tag_fat(_Tmp0,sizeof(char),8U);}),93U);
+len <= _get_fat_size(s,sizeof(char))?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("len <= numelts(s)",sizeof(char),18U),_tag_fat("arg.cyc",sizeof(char),8U),93U);
 if((unsigned long)howmuch > len){
 Cyc_Buffer_add_string(b,s);
 return _tag_fat(0,0,0);}{
@@ -422,44 +422,44 @@ desc=Cyc_Arg_Justify_break_line(b,margin - indent,desc);
 if((char*)desc.curr!=(char*)_tag_fat(0,0,0).curr)
 Cyc_Buffer_add_string(b,indentstr);else{
 # 158
-Cyc_Buffer_add_string(b,({const char*_Tmp0="\n";_tag_fat(_Tmp0,sizeof(char),2U);}));}}
+Cyc_Buffer_add_string(b,_tag_fat("\n",sizeof(char),2U));}}
 # 160
 return;}}}
 # 164
 void Cyc_Arg_usage(struct Cyc_List_List*speclist,struct _fat_ptr errmsg){
 # 166
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=errmsg;_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,({const char*_Tmp2="%s\n";_tag_fat(_Tmp2,sizeof(char),4U);}),_tag_fat(_Tmp1,sizeof(void*),1));});{
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=(struct _fat_ptr)((struct _fat_ptr)errmsg);_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s\n",sizeof(char),4U),_tag_fat(_Tmp1,sizeof(void*),1));});{
 struct Cyc_Buffer_t*b=Cyc_Buffer_create(1024U);
 while(speclist!=0){
-({struct Cyc_Buffer_t*_Tmp0=b;struct _fat_ptr _Tmp1=
-Cyc_strconcat((*((struct _tuple0*)speclist->hd)).f1,(*((struct _tuple0*)speclist->hd)).f3);
+({struct Cyc_Buffer_t*_Tmp0=b;struct _fat_ptr _Tmp1=(struct _fat_ptr)
+Cyc_strconcat((struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f1,(struct _fat_ptr)(*((struct _tuple0*)speclist->hd)).f3);
 # 169
 Cyc_Arg_Justify_justify_b(_Tmp0,12,72,_Tmp1,(*((struct _tuple0*)speclist->hd)).f5);});
 # 172
 speclist=speclist->tl;}
 # 174
-({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=Cyc_Buffer_contents(b);_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,({const char*_Tmp2="%s";_tag_fat(_Tmp2,sizeof(char),3U);}),_tag_fat(_Tmp1,sizeof(void*),1));});}}
+({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,({struct _fat_ptr _Tmp2=(struct _fat_ptr)((struct _fat_ptr)Cyc_Buffer_contents(b));_Tmp1.f1=_Tmp2;});_Tmp1;});void*_Tmp1[1];_Tmp1[0]=& _Tmp0;Cyc_fprintf(Cyc_stderr,_tag_fat("%s",sizeof(char),3U),_tag_fat(_Tmp1,sizeof(void*),1));});}}
 # 177
 int Cyc_Arg_current=0;
 static struct _fat_ptr Cyc_Arg_args={(void*)0,(void*)0,(void*)(0 + 0)};
 # 180
 static void Cyc_Arg_stop(int prog_pos,void*e,struct Cyc_List_List*speclist,struct _fat_ptr errmsg){
 # 183
-struct _fat_ptr progname=(unsigned)prog_pos < _get_fat_size(Cyc_Arg_args,sizeof(struct _fat_ptr))?((struct _fat_ptr*)Cyc_Arg_args.curr)[prog_pos]:({const char*_Tmp0="(?)";_tag_fat(_Tmp0,sizeof(char),4U);});
+struct _fat_ptr progname=(unsigned)prog_pos < _get_fat_size(Cyc_Arg_args,sizeof(struct _fat_ptr))?((struct _fat_ptr*)Cyc_Arg_args.curr)[prog_pos]: _tag_fat("(?)",sizeof(char),4U);
 {struct _fat_ptr _Tmp0;struct _fat_ptr _Tmp1;struct _fat_ptr _Tmp2;switch(*((int*)e)){case 0: _Tmp2=((struct Cyc_Arg_Unknown_Arg_error_struct*)e)->f1;{struct _fat_ptr s=_Tmp2;
 # 186
-if(Cyc_strcmp(s,({const char*_Tmp3="-help";_tag_fat(_Tmp3,sizeof(char),6U);}))!=0)
-({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=progname;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=s;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,({const char*_Tmp6="%s: unknown option `%s'.\n";_tag_fat(_Tmp6,sizeof(char),26U);}),_tag_fat(_Tmp5,sizeof(void*),2));});
+if(Cyc_strcmp(s,_tag_fat("-help",sizeof(char),6U))!=0)
+({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)((struct _fat_ptr)progname);_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)s);_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: unknown option `%s'.\n",sizeof(char),26U),_tag_fat(_Tmp5,sizeof(void*),2));});
 goto _LL0;}case 1: _Tmp2=((struct Cyc_Arg_Missing_Arg_error_struct*)e)->f1;{struct _fat_ptr s=_Tmp2;
 # 190
-({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=progname;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=s;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,({const char*_Tmp6="%s: option `%s' needs an argument.\n";_tag_fat(_Tmp6,sizeof(char),36U);}),_tag_fat(_Tmp5,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)((struct _fat_ptr)progname);_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)s);_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: option `%s' needs an argument.\n",sizeof(char),36U),_tag_fat(_Tmp5,sizeof(void*),2));});
 goto _LL0;}case 3: _Tmp2=((struct Cyc_Arg_Wrong_Arg_error_struct*)e)->f1;_Tmp1=((struct Cyc_Arg_Wrong_Arg_error_struct*)e)->f2;_Tmp0=((struct Cyc_Arg_Wrong_Arg_error_struct*)e)->f3;{struct _fat_ptr flag=_Tmp2;struct _fat_ptr cmd=_Tmp1;struct _fat_ptr t=_Tmp0;
 # 193
-({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=progname;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=cmd;_Tmp5;});struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=flag;_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,_Tmp7.f1=t;_Tmp7;});void*_Tmp7[4];_Tmp7[0]=& _Tmp3,_Tmp7[1]=& _Tmp4,_Tmp7[2]=& _Tmp5,_Tmp7[3]=& _Tmp6;Cyc_fprintf(Cyc_stderr,({const char*_Tmp8="%s: wrong argument `%s'; option `%s' expects %s.\n";_tag_fat(_Tmp8,sizeof(char),50U);}),_tag_fat(_Tmp7,sizeof(void*),4));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)((struct _fat_ptr)progname);_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)cmd);_Tmp5;});struct Cyc_String_pa_PrintArg_struct _Tmp5=({struct Cyc_String_pa_PrintArg_struct _Tmp6;_Tmp6.tag=0,_Tmp6.f1=(struct _fat_ptr)((struct _fat_ptr)flag);_Tmp6;});struct Cyc_String_pa_PrintArg_struct _Tmp6=({struct Cyc_String_pa_PrintArg_struct _Tmp7;_Tmp7.tag=0,_Tmp7.f1=(struct _fat_ptr)((struct _fat_ptr)t);_Tmp7;});void*_Tmp7[4];_Tmp7[0]=& _Tmp3,_Tmp7[1]=& _Tmp4,_Tmp7[2]=& _Tmp5,_Tmp7[3]=& _Tmp6;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: wrong argument `%s'; option `%s' expects %s.\n",sizeof(char),50U),_tag_fat(_Tmp7,sizeof(void*),4));});
 # 195
 goto _LL0;}default: _Tmp2=((struct Cyc_Arg_Message_Arg_error_struct*)e)->f1;{struct _fat_ptr s=_Tmp2;
 # 197
-({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=progname;_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=s;_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,({const char*_Tmp6="%s: %s.\n";_tag_fat(_Tmp6,sizeof(char),9U);}),_tag_fat(_Tmp5,sizeof(void*),2));});
+({struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=(struct _fat_ptr)((struct _fat_ptr)progname);_Tmp4;});struct Cyc_String_pa_PrintArg_struct _Tmp4=({struct Cyc_String_pa_PrintArg_struct _Tmp5;_Tmp5.tag=0,_Tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)s);_Tmp5;});void*_Tmp5[2];_Tmp5[0]=& _Tmp3,_Tmp5[1]=& _Tmp4;Cyc_fprintf(Cyc_stderr,_tag_fat("%s: %s.\n",sizeof(char),9U),_tag_fat(_Tmp5,sizeof(void*),2));});
 goto _LL0;}}_LL0:;}
 # 200
 Cyc_Arg_usage(speclist,errmsg);
@@ -485,7 +485,7 @@ if(!anonflagfun(s)){
 return;}else{
 # 229
 ++ Cyc_Arg_current;
-continue;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;(void*)_rethrow(exn);}};}}}
+continue;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}};}}}
 # 233
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){
 {void*_Tmp2;switch(*((int*)action)){case 0: _Tmp2=((struct Cyc_Arg_Unit_spec_Arg_Spec_struct*)action)->f1;{void(*f)(void)=_Tmp2;
@@ -510,8 +510,8 @@ goto _LL5;}case 6: _Tmp2=((struct Cyc_Arg_Int_spec_Arg_Spec_struct*)action)->f1;
 # 254
 struct _fat_ptr arg=*((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),Cyc_Arg_current + 1));
 int n=0;
-if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=& n;_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_sscanf(arg,({const char*_Tmp5="%d";_tag_fat(_Tmp5,sizeof(char),3U);}),_tag_fat(_Tmp4,sizeof(void*),1));})!=1){
-({int _Tmp3=initpos;void*_Tmp4=(void*)({struct Cyc_Arg_Wrong_Arg_error_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_Arg_Wrong_Arg_error_struct));_Tmp5->tag=3,_Tmp5->f1=s,_Tmp5->f2=arg,_Tmp5->f3=({const char*_Tmp6="an integer";_tag_fat(_Tmp6,sizeof(char),11U);});_Tmp5;});struct Cyc_List_List*_Tmp5=speclist;Cyc_Arg_stop(_Tmp3,_Tmp4,_Tmp5,errmsg);});
+if(({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp3=({struct Cyc_IntPtr_sa_ScanfArg_struct _Tmp4;_Tmp4.tag=2,_Tmp4.f1=& n;_Tmp4;});void*_Tmp4[1];_Tmp4[0]=& _Tmp3;Cyc_sscanf(arg,_tag_fat("%d",sizeof(char),3U),_tag_fat(_Tmp4,sizeof(void*),1));})!=1){
+({int _Tmp3=initpos;void*_Tmp4=(void*)({struct Cyc_Arg_Wrong_Arg_error_struct*_Tmp5=_cycalloc(sizeof(struct Cyc_Arg_Wrong_Arg_error_struct));_Tmp5->tag=3,_Tmp5->f1=s,_Tmp5->f2=arg,_Tmp5->f3=_tag_fat("an integer",sizeof(char),11U);_Tmp5;});struct Cyc_List_List*_Tmp5=speclist;Cyc_Arg_stop(_Tmp3,_Tmp4,_Tmp5,errmsg);});
 _npop_handler(0);return;}
 # 260
 f(n);
@@ -526,12 +526,12 @@ goto _LL5;}}_LL5:;}
 # 234
 ;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;struct _fat_ptr _Tmp4;if(((struct Cyc_Arg_Bad_exn_struct*)_Tmp2)->tag==Cyc_Arg_Bad){_Tmp4=((struct Cyc_Arg_Bad_exn_struct*)_Tmp2)->f1;{struct _fat_ptr s2=_Tmp4;
 # 271
-({int _Tmp5=initpos;void*_Tmp6=(void*)({struct Cyc_Arg_Message_Arg_error_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Arg_Message_Arg_error_struct));_Tmp7->tag=2,_Tmp7->f1=s2;_Tmp7;});struct Cyc_List_List*_Tmp7=speclist;Cyc_Arg_stop(_Tmp5,_Tmp6,_Tmp7,errmsg);});goto _LL16;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;(void*)_rethrow(exn);}}_LL16:;}}}
+({int _Tmp5=initpos;void*_Tmp6=(void*)({struct Cyc_Arg_Message_Arg_error_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Arg_Message_Arg_error_struct));_Tmp7->tag=2,_Tmp7->f1=s2;_Tmp7;});struct Cyc_List_List*_Tmp7=speclist;Cyc_Arg_stop(_Tmp5,_Tmp6,_Tmp7,errmsg);});goto _LL16;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL16:;}}}
 # 273
 ++ Cyc_Arg_current;}else{
 # 276
 {struct _handler_cons _Tmp0;_push_handler(& _Tmp0);{int _Tmp1=0;if(setjmp(_Tmp0.handler))_Tmp1=1;if(!_Tmp1){anonfun(s);;_pop_handler();}else{void*_Tmp2=(void*)Cyc_Core_get_exn_thrown();void*_Tmp3;struct _fat_ptr _Tmp4;if(((struct Cyc_Arg_Bad_exn_struct*)_Tmp2)->tag==Cyc_Arg_Bad){_Tmp4=((struct Cyc_Arg_Bad_exn_struct*)_Tmp2)->f1;{struct _fat_ptr s2=_Tmp4;
 # 278
-({int _Tmp5=initpos;void*_Tmp6=(void*)({struct Cyc_Arg_Message_Arg_error_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Arg_Message_Arg_error_struct));_Tmp7->tag=2,_Tmp7->f1=s2;_Tmp7;});struct Cyc_List_List*_Tmp7=speclist;Cyc_Arg_stop(_Tmp5,_Tmp6,_Tmp7,errmsg);});goto _LL1B;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;(void*)_rethrow(exn);}}_LL1B:;}}}
+({int _Tmp5=initpos;void*_Tmp6=(void*)({struct Cyc_Arg_Message_Arg_error_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Arg_Message_Arg_error_struct));_Tmp7->tag=2,_Tmp7->f1=s2;_Tmp7;});struct Cyc_List_List*_Tmp7=speclist;Cyc_Arg_stop(_Tmp5,_Tmp6,_Tmp7,errmsg);});goto _LL1B;}}else{_Tmp3=_Tmp2;{void*exn=_Tmp3;_rethrow(exn);}}_LL1B:;}}}
 # 280
 ++ Cyc_Arg_current;}}}}

@@ -1008,7 +1008,6 @@ namespace Absyn {
   exp_t subscript_exp(exp_t, exp_t, seg_t);
   exp_t tuple_exp(list_t<exp_t,`H>, seg_t);
   exp_t stmt_exp(stmt_t, seg_t);
-  exp_t null_pointer_exn_exp(seg_t);
   exp_t array_exp(list_t<exp_t,`H>, seg_t);
   exp_t valueof_exp(type_t, seg_t);
   exp_t asm_exp(bool, string_t<`H>, list_t<$(string_t<`H>,exp_t)@`H,`H>,
