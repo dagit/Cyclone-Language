@@ -227,6 +227,14 @@ abssyn_t malloc_and_init(absenv_t env, exp e, absexp_t es_exp, absexp_t useexp){
   return mkSyn_tf(ansexp,null,make_assigns(env,mkAddressOp(mkMallocOp(e))));
 }
 
+abssyn_t descend_path(absenv_t env, exp path_e, exp inner_e) {
+  env.access_path = new{List(path_e,env.access_path)}; 
+  let syn1 = abstract_exp(env,inner_e);
+  if(syn1.lvalues == null)
+    syn1.lvalues = use_it_list();
+  return syn1;
+}
+
 absop_t destruct_path(absenv_t env, absop_t absop) {
   for(list_t<exp> path = env.access_path; path != null; path = path->tl)
     switch (path->hd->r) {
@@ -381,8 +389,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     switch(Tcutil::compress(e1->topt->v)) {
     // we track aggregate paths through tuples
     case TupleType(_):
-      env.access_path = new{List(e,env.access_path)};
-      return abstract_exp(env, e1);
+      return descend_path(env,e,e1);
     default:
     // initialized arrays must have initialized elts. result is a legal lhs.
       return use_exp_unordered(env, new{List(e1, new{List(e2,null)})},
@@ -455,26 +462,45 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       if(syn1.lvalues == null)
 	syn1.lvalues = use_it_list();
       return syn1;
-    default: break; 
+    default: 
+      return descend_path(env,e,e1);
     }
-    fallthru(e1);
 
-    // FIX: e1 could be a union, not a struct
-  case StructArrow_e(e1,_): fallthru(e1);
-
-    // FIX: e1 could be a union, not a struct
+    // FIX: For now, unions must be fully initialized to be refined to a variant
+    // Similarly, you can only assign fully initialized things to them
+    // and those things escape, so we return no lvalues.
+  case StructArrow_e(e1,_): 
+    switch(Tcutil::compress(e1->topt->v)) {
+    case PointerType(PtrInfo{t2,_,_,_,_}):
+      switch(Tcutil::compress(t2)) {
+      case StructType(_,_,_):
+	return descend_path(env,e,e1);
+      case UnionType(_,_,_):
+	let syn1 = abstract_exp(use_it_env(env),e1);
+	syn1.lvalues = use_it_list();
+	return syn1;
+      default: break;
+      }
+      fallthru;
+    default: throw Impossible("NewControlFlow: bad type in StructArrow");
+    }
+    // FIX: See comment above w.r.t. unions.
   case StructMember_e(e1,_):
-    env.access_path = new{List(e,env.access_path)}; 
-    let syn1 = abstract_exp(env,e1);
-    if(syn1.lvalues == null)
+    switch(Tcutil::compress(e1->topt->v)) {
+    case StructType(_,_,_):
+      return descend_path(env,e,e1);
+    case UnionType(_,_,_):
+      let syn1 = abstract_exp(use_it_env(env),e1);
       syn1.lvalues = use_it_list();
-    return syn1;
+      return syn1;
+    default: throw Impossible("NewControlFlow: bad type in StructMember");
+    }
 
     // All complicated b/c of x = $(1,2) which has to translate to
     // unordered x[0] = 1, x[1]=2.
     // Also need to look at access path b/c of y = $(1,2)[0].
     // Very similar to Struct_e
-   case Tuple_e(es): 
+  case Tuple_e(es): 
     switch(env.access_path) {
     // common case
     case null:

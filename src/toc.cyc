@@ -1552,7 +1552,6 @@ static void exp_to_c(env nv, exp e) {
     unimp("compoundlit");
     break;
   case Array_e(heap_allocate,dles0):
-    // FIX: May be susceptible to gcc bug!
     if (nv->toplevel || !heap_allocate) {
       // {e1,...,en}
       e->r = unresolvedmem_exp(null,dles0,DL)->r;
@@ -1561,6 +1560,7 @@ static void exp_to_c(env nv, exp e) {
 	exp_to_c(nv,e);
       }
     } else {
+      // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
       // ({ t *x = (t*)(malloc(sizeof(t)*length(dles0)));
       //    x[d1] = e1; ... x[dn] = en; x; })
       let x = temp_var();
