@@ -155,6 +155,11 @@ static void set_stop_after_objectfile() {
   add_ccarg("-c");
 }
 
+static void set_nocppprecomp() {
+  add_cpparg("-no-cpp-precomp");
+  add_ccarg("-no-cpp-precomp");
+}
+
 static void set_nocyc() {
   add_cyc_namespace_r = false;
   add_ccarg("-DNO_CYC_PREFIX");
@@ -800,6 +805,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-use-cpp",false,"<path>",
                new String_spec(set_cpp),
                "Indicate which preprocessor to use"),
+         new $("-no-cpp-precomp",false,"",
+               new Unit_spec(set_nocppprecomp),
+               "Don't do smart preprocessing (mac only)"),
          new $("-nocyc",false,"",
                new Unit_spec(set_nocyc),
                "Don't add implicit namespace Cyc"),
