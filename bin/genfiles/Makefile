@@ -23,7 +23,7 @@ install_a: $(ARCH)/lib/libcyc_a.a
 # architecture-specific targets
 
 $(ARCH):
-	extract_patch $(PATH_ARCH) $(ARCH)
+	./extract_patch $(PATCH_ARCH) $(ARCH)
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
 	ar rc $@ $^

@@ -54,7 +54,7 @@ $(CYC_LIB_PATH)/gc.a:
 
 # After building all of the source, install it in the user-defined 
 # directories.  Also, keep a record of what was copied for later uninstall.
-install: inc_install lib_install bin_install
+install: build inc_install lib_install bin_install
 uninstall: inc_uninstall lib_uninstall bin_uninstall
 
 ifdef INC_INSTALL
