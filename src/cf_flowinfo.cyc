@@ -1327,6 +1327,8 @@ bool contains_region(killrgn_t rgn, type_t t) {
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): fallthru(t2);
   case &AccessEff(t2):     fallthru(t2);
   case &RgnsEff(t2):       return contains_region(rgn,t2);
+  case &DynRgnType(t1,t2): 
+    return contains_region(rgn,t1) || contains_region(rgn,t2);
   // careful: we don't want to kill any region handles to the region in
   // question.
   case &RgnHandleType(t2): return false;

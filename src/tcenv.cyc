@@ -166,8 +166,8 @@ static struct SharedFenv<`f::R> {
   type_t                              return_typ;
   Dict::dict_t<var_t,stmt_t,`f>       seen_labels;
   Dict::dict_t<var_t,list_t<stmt_t,`H>,`f> needed_labels;
-  list_t<$(type_t,type_t,rgn_po_t,seg_t)@`f,`f> delayed_effect_checks;
-  list_t<$(rgn_po_t,list_t<$(type_t,type_t)@>,seg_t)@`f,`f> delayed_constraint_checks;
+  list_t<$(type_t,type_t,rgn_po_t<`f>,seg_t)@`f,`f> delayed_effect_checks;
+  list_t<$(rgn_po_t<`f>,list_t<$(type_t,type_t)@>,seg_t)@`f,`f> delayed_constraint_checks;
 };
 // Region notes:  needed_labels has a heap-list in the co-domain because
 // these get attached to abstract syntax.  The list<$(type,type)@> pair in
@@ -189,7 +189,7 @@ abstract struct Fenv<`r::R> {
   <`f::R,`c::R> : {`f} > `r, {`c} > `r
   struct SharedFenv<`f> @`f shared;
   list_t<tvar_t> type_vars; //type variables that can occur free
-  rgn_po_t            region_order; // partial order on region variables 
+  rgn_po_t<`f>        region_order; // partial order on region variables 
   bindings_t<`r>      locals;
   stmt_t              encloser;  // nearest stmt with a binder or a try
   ctrl_env_t<`c,`r>   ctrl_env;
@@ -840,7 +840,7 @@ tenv_t<`g,`r> set_encloser(region_t<`r> r, tenv_t<`g,`r2> te, stmt_t s :
 }
 
 tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn, 
-                         bool resetable : {`r2} > `r) {
+                         bool resetable, bool opened : {`r2} > `r) {
                          
   tvar_t tv;
   switch (compress(rgn)) {
@@ -850,7 +850,7 @@ tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn,
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,in_notreadctxt} = 
     *get_fenv(te,"add_region");
-  region_order = add_youngest(region_order, tv, resetable);
+  region_order = add_youngest(shared->frgn, region_order, tv, resetable, opened);
   capability = new JoinEff(new List(new AccessEff(rgn),
                                     new List(capability,NULL)));
   let fe = 
@@ -869,7 +869,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   type_t block_typ = new VarType(block_rgn);
   type_vars = new List(block_rgn, type_vars);
   Tcutil::check_unique_tvars(loc,type_vars);
-  region_order = add_youngest(region_order, block_rgn, false);
+  region_order = add_youngest(shared->frgn, region_order, block_rgn, false, false);
   capability = new JoinEff(new List(new AccessEff(block_typ), new List(capability,NULL)));
   curr_rgn = block_typ;
   let fe = 
@@ -893,7 +893,8 @@ tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
     *get_fenv(te,"new_outlives_constraints");
   for(; cs != NULL; cs = cs->tl)
     region_order = 
-      add_outlives_constraint(region_order,(*cs->hd)[0],(*cs->hd)[1]);
+      add_outlives_constraint(shared->frgn, 
+                              region_order,(*cs->hd)[0],(*cs->hd)[1]);
   let fe = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
                  encloser,ctrl_env,capability,curr_rgn,in_notreadctxt};
@@ -1019,7 +1020,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
              new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po,fd->effect->v,rgn0);
+  let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,fd->effect->v,rgn0);
   type_t param_rgn = new VarType(rgn0);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
@@ -1071,10 +1072,10 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
        };
 }
 
-fenv_t<`r> nested_fenv(region_t<`r> r,seg_t loc, fenv_t<`r2> old_fenv, 
-                       fndecl_t fd : {`r2} > `r) {
+fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let &Fenv{<`f,`c> .locals = old_locals, .region_order = rgn_po, 
-               .type_vars = type_vars, ...} = old_fenv;
+               .type_vars = type_vars, .shared = shared, ...} = old_fenv;
+  let r = shared->frgn;
   let locals = (bindings_t<`r>)old_locals;
   tvar_t rgn0 = 
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
@@ -1083,8 +1084,8 @@ fenv_t<`r> nested_fenv(region_t<`r> r,seg_t loc, fenv_t<`r2> old_fenv,
   // add in all of the region vars
   for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
     if (tvar_kind(tvars->hd) == RgnKind)
-      rgn_po = add_youngest(rgn_po, tvars->hd, false);
-  rgn_po = add_youngest(rgn_po, rgn0, false);
+      rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
+  rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);

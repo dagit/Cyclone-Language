@@ -695,7 +695,7 @@ doc_t ntyp2doc(type_t t) {
 		text("("),
 		text(aprintf("%d",i)),
 		(!print_full_evars || tvs == NULL) ?
-		text("") : tvars2doc(tvs->v),
+		nil_doc() : tvars2doc(tvs->v),
 		text(")::"),k == NULL ? question() : kind2doc(k->v));
       }
     }
@@ -800,6 +800,9 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &RgnHandleType(t):
     s = cat(text("region_t<"),rgn2doc(t),text(">")); break;
+  case &DynRgnType(t1,t2):
+    s = cat(text("dynregion_t<"),rgn2doc(t1),text(","),rgn2doc(t2),
+            text(">")); break;
   case &TypeInt(t):
     s = text(aprintf("`%d",t)); break;
   case &TagType(t):
@@ -1028,7 +1031,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &AssignOp_e(e1,popt,e2):
     s = cat(exp2doc_prec(myprec,e1),
             text(" "),
-            (popt == NULL) ? text("") : prim2doc(popt->v),
+            (popt == NULL) ? nil_doc() : prim2doc(popt->v),
             text("= "),
             exp2doc_prec(myprec,e2));
     break;
@@ -1442,13 +1445,16 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             rb());
     break;
-  case &Region_s(tv,vd,resetable,s1):
+  case &Region_s(tv,vd,resetable,open_exp_opt,s1):
     s = cat(text("region"),
-            resetable ? text("") : text("[resetable]"),
+            resetable ? nil_doc() : text("[resetable]"),
             text("<"),
             textptr(get_name(tv)),
             text(">" ),
             qvar2doc(vd->name),
+            ((open_exp_opt != NULL) ? 
+             cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
+             nil_doc()),
             lb(),
             line_doc(),
             nest(2,stmt2doc(s1)),
@@ -1587,7 +1593,7 @@ doc_t vardecl2doc(vardecl_t vd) {
           scope2doc(sc),
           tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
           (initializer == NULL)
-          ? text("")
+          ? nil_doc()
           : cat(text(" = "),exp2doc((exp_t)initializer)),
           text(";"));
   return s;

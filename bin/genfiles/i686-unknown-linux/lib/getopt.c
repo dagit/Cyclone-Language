@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -659,71 +668,73 @@ extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};typedef struct{int __count;union{unsigned int __wch;char __wchb[
-4];}__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;
-typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;
-struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
-Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
-unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct _dynforward_ptr,
-struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
-extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
-char*tag;struct _dynforward_ptr f1;};typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);char*
-getenv(const char*);enum Cyc___anonymous_enum_368__{Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON
- = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF
- = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO
- = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS
- = 13,Cyc__PC_REC_INCR_XFER_SIZE  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE
- = 16,Cyc__PC_REC_XFER_ALIGN  = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX
- = 19};enum Cyc___anonymous_enum_370__{Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS
- = 1};extern struct _dynforward_ptr Cyc_optarg;extern int Cyc_optind;extern int Cyc_opterr;
-extern int Cyc_optopt;struct Cyc_option{struct _dynforward_ptr name;int has_arg;int*
-flag;int val;};int Cyc_getopt(int __argc,struct _dynforward_ptr __argv,struct
-_dynforward_ptr __shortopts);int Cyc__getopt_internal(int __argc,struct
-_dynforward_ptr __argv,struct _dynforward_ptr __shortopts,struct _dynforward_ptr
-__longopts,int*__longind,int __long_only);struct Cyc_List_List{void*hd;struct Cyc_List_List*
-tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int
-Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct
-_dynforward_ptr s2);int Cyc_strncmp(struct _dynforward_ptr s1,struct _dynforward_ptr
-s2,unsigned int len);struct _dynforward_ptr Cyc_strchr(struct _dynforward_ptr s,char c);
-struct _dynforward_ptr Cyc_optarg;int Cyc_optind=1;int Cyc___getopt_initialized;
-static struct _dynforward_ptr Cyc_nextchar;int Cyc_opterr=1;int Cyc_optopt=(int)'?';
-enum Cyc_ordering_tag{Cyc_REQUIRE_ORDER  = 0,Cyc_PERMUTE  = 1,Cyc_RETURN_IN_ORDER
- = 2};static enum Cyc_ordering_tag Cyc_ordering;static struct _dynforward_ptr Cyc_posixly_correct;
-static int Cyc_first_nonopt;static int Cyc_last_nonopt;static int Cyc_nonoption_flags_max_len;
-static int Cyc_nonoption_flags_len;static int Cyc_original_argc;static int Cyc_original_argv;
-static void  __attribute__((unused )) Cyc_store_args_and_env(int argc,struct
-_dynforward_ptr argv){Cyc_original_argc=argc;Cyc_original_argv=(int)((struct
-_dynforward_ptr*)_check_null(_untag_dynforward_ptr(argv,sizeof(struct
-_dynforward_ptr),1)));}static void Cyc_exchange(struct _dynforward_ptr argv){int
-bottom=Cyc_first_nonopt;int middle=Cyc_last_nonopt;int top=Cyc_optind;struct
-_dynforward_ptr tem;while(top > middle  && middle > bottom){if(top - middle > middle - 
-bottom){int len=middle - bottom;register int i;for(i=0;i < len;i ++){tem=*((struct
-_dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),
-bottom + i));*((struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(
-struct _dynforward_ptr),bottom + i))=*((struct _dynforward_ptr*)
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];typedef
+struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
+typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
+Cyc_fpos_t;struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;
+struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct
+_dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*
+f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dynforward_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
+18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};typedef
+struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;void*
+abort();void exit(int);char*getenv(const char*);enum Cyc___anonymous_enum_368__{
+Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
+ = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
+ = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
+ = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
+ = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
+ = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_370__{
+Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};extern struct
+_dynforward_ptr Cyc_optarg;extern int Cyc_optind;extern int Cyc_opterr;extern int Cyc_optopt;
+struct Cyc_option{struct _dynforward_ptr name;int has_arg;int*flag;int val;};int Cyc_getopt(
+int __argc,struct _dynforward_ptr __argv,struct _dynforward_ptr __shortopts);int Cyc__getopt_internal(
+int __argc,struct _dynforward_ptr __argv,struct _dynforward_ptr __shortopts,struct
+_dynforward_ptr __longopts,int*__longind,int __long_only);struct Cyc_List_List{void*
+hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
+8];unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+_dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_strncmp(struct _dynforward_ptr
+s1,struct _dynforward_ptr s2,unsigned int len);struct _dynforward_ptr Cyc_strchr(
+struct _dynforward_ptr s,char c);struct _dynforward_ptr Cyc_optarg;int Cyc_optind=1;
+int Cyc___getopt_initialized;static struct _dynforward_ptr Cyc_nextchar;int Cyc_opterr=
+1;int Cyc_optopt=(int)'?';enum Cyc_ordering_tag{Cyc_REQUIRE_ORDER  = 0,Cyc_PERMUTE
+ = 1,Cyc_RETURN_IN_ORDER  = 2};static enum Cyc_ordering_tag Cyc_ordering;static
+struct _dynforward_ptr Cyc_posixly_correct;static int Cyc_first_nonopt;static int Cyc_last_nonopt;
+static int Cyc_nonoption_flags_max_len;static int Cyc_nonoption_flags_len;static int
+Cyc_original_argc;static int Cyc_original_argv;static void  __attribute__((unused )) 
+Cyc_store_args_and_env(int argc,struct _dynforward_ptr argv){Cyc_original_argc=argc;
+Cyc_original_argv=(int)((struct _dynforward_ptr*)_check_null(
+_untag_dynforward_ptr(argv,sizeof(struct _dynforward_ptr),1)));}static void Cyc_exchange(
+struct _dynforward_ptr argv){int bottom=Cyc_first_nonopt;int middle=Cyc_last_nonopt;
+int top=Cyc_optind;struct _dynforward_ptr tem;while(top > middle  && middle > bottom){
+if(top - middle > middle - bottom){int len=middle - bottom;register int i;for(i=0;i < 
+len;i ++){tem=*((struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(
+struct _dynforward_ptr),bottom + i));*((struct _dynforward_ptr*)
+_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),bottom + i))=*((
+struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(struct
+_dynforward_ptr),(top - (middle - bottom))+ i));*((struct _dynforward_ptr*)
 _check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),(top - (middle - 
-bottom))+ i));*((struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(
-struct _dynforward_ptr),(top - (middle - bottom))+ i))=tem;}top -=len;}else{int len=
-top - middle;register int i;for(i=0;i < len;i ++){tem=*((struct _dynforward_ptr*)
-_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),bottom + i));*((
+bottom))+ i))=tem;}top -=len;}else{int len=top - middle;register int i;for(i=0;i < len;
+i ++){tem=*((struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(
+struct _dynforward_ptr),bottom + i));*((struct _dynforward_ptr*)
+_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),bottom + i))=*((
 struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(struct
-_dynforward_ptr),bottom + i))=*((struct _dynforward_ptr*)
-_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),middle + i));*((
-struct _dynforward_ptr*)_check_dynforward_subscript(argv,sizeof(struct
-_dynforward_ptr),middle + i))=tem;}bottom +=len;}}Cyc_first_nonopt +=Cyc_optind - 
-Cyc_last_nonopt;Cyc_last_nonopt=Cyc_optind;}static struct _dynforward_ptr Cyc__getopt_initialize(
-int argc,struct _dynforward_ptr argv,struct _dynforward_ptr optstring){Cyc_first_nonopt=(
-Cyc_last_nonopt=Cyc_optind);Cyc_nextchar=_tag_dynforward(0,0,0);Cyc_posixly_correct=({
-char*_tmp0=getenv((const char*)"POSIXLY_CORRECT");_tag_dynforward(_tmp0,sizeof(
-char),_get_zero_arr_size(_tmp0,1));});if(*((const char*)
-_check_dynforward_subscript(optstring,sizeof(char),0))== '-'){Cyc_ordering=Cyc_RETURN_IN_ORDER;
+_dynforward_ptr),middle + i));*((struct _dynforward_ptr*)
+_check_dynforward_subscript(argv,sizeof(struct _dynforward_ptr),middle + i))=tem;}
+bottom +=len;}}Cyc_first_nonopt +=Cyc_optind - Cyc_last_nonopt;Cyc_last_nonopt=Cyc_optind;}
+static struct _dynforward_ptr Cyc__getopt_initialize(int argc,struct _dynforward_ptr
+argv,struct _dynforward_ptr optstring){Cyc_first_nonopt=(Cyc_last_nonopt=Cyc_optind);
+Cyc_nextchar=_tag_dynforward(0,0,0);Cyc_posixly_correct=({char*_tmp0=getenv((
+const char*)"POSIXLY_CORRECT");_tag_dynforward(_tmp0,sizeof(char),
+_get_zero_arr_size(_tmp0,1));});if(*((const char*)_check_dynforward_subscript(
+optstring,sizeof(char),0))== '-'){Cyc_ordering=Cyc_RETURN_IN_ORDER;
 _dynforward_ptr_inplace_plus(& optstring,sizeof(char),1);}else{if(*((const char*)
 _check_dynforward_subscript(optstring,sizeof(char),0))== '+'){Cyc_ordering=Cyc_REQUIRE_ORDER;
 _dynforward_ptr_inplace_plus(& optstring,sizeof(char),1);}else{if(Cyc_posixly_correct.curr

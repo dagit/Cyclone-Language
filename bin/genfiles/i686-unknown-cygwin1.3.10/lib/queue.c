@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -658,22 +667,23 @@ char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
-Cyc_List_Nth[8];struct Cyc_List_List*Cyc_List_rfilter_c(struct _RegionHandle*r,int(*
-f)(void*,void*),void*env,struct Cyc_List_List*x);struct Cyc_Queue_Queue;int Cyc_Queue_is_empty(
-struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*Cyc_Queue_create();void Cyc_Queue_add(
-struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(struct _RegionHandle*,struct Cyc_Queue_Queue*,
-void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_rpush(
-struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x);extern char Cyc_Queue_Empty[
-10];void*Cyc_Queue_take(struct Cyc_Queue_Queue*);void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);
-void Cyc_Queue_clear(struct Cyc_Queue_Queue*);void Cyc_Queue_remove(struct Cyc_Queue_Queue*,
-void*);int Cyc_Queue_length(struct Cyc_Queue_Queue*);struct Cyc_List_List*Cyc_Queue_rfilter_c(
-struct _RegionHandle*,int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q);void
-Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(void*(*
-f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
-front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
-q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty\000";
+_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion{
+struct _DynRegionHandle*dynregion;};extern char Cyc_Core_Open_Region[16];extern char
+Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_List_List*
+Cyc_List_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_List_List*
+x);struct Cyc_Queue_Queue;int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*
+Cyc_Queue_create();void Cyc_Queue_add(struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(
+struct _RegionHandle*,struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*
+q,void*x);void Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*
+x);extern char Cyc_Queue_Empty[10];void*Cyc_Queue_take(struct Cyc_Queue_Queue*);
+void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);void Cyc_Queue_clear(struct Cyc_Queue_Queue*);
+void Cyc_Queue_remove(struct Cyc_Queue_Queue*,void*);int Cyc_Queue_length(struct Cyc_Queue_Queue*);
+struct Cyc_List_List*Cyc_Queue_rfilter_c(struct _RegionHandle*,int(*f)(void*,void*),
+void*env,struct Cyc_Queue_Queue*q);void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);
+void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{
+struct Cyc_List_List*front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(
+struct Cyc_Queue_Queue*q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty\000";
 struct Cyc_Queue_Queue*Cyc_Queue_create(){return({struct Cyc_Queue_Queue*_tmp0=
 _cycalloc(sizeof(*_tmp0));_tmp0->front=0;_tmp0->rear=0;_tmp0->len=0;_tmp0;});}
 void Cyc_Queue_radd(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct

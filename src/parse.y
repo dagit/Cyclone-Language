@@ -872,7 +872,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw
+%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw DYNREGION_T
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -911,6 +911,7 @@ using Parse;
 %type <exp_t> logical_or_expression conditional_expression
 %type <exp_t> assignment_expression expression constant_expression
 %type <exp_t> initializer array_initializer
+%type <exp_opt_t> open_exp_opt
 %type <list_t<exp_t>> argument_expression_list argument_expression_list0
 %type <list_t<$(list_t<designator_t>,exp_t)@>> initializer_list
 %type <primop_t> unary_operator 
@@ -1361,6 +1362,12 @@ type_specifier_notypedef:
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
+| DYNREGION_T '<' any_type_name right_angle
+  { let t2 = new_evar(new Opt(RgnKind), NULL);
+    $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
+  }
+| DYNREGION_T '<' any_type_name ',' any_type_name right_angle
+  { $$=^$(type_spec(new DynRgnType($3,$5), LOC(@1,@6))); }
 | SIZEOF_T '<' any_type_name right_angle
     { $$=^$(type_spec(new SizeofType($3),LOC(@1,@4))); }
 | TAG_T '<' any_type_name right_angle
@@ -2076,10 +2083,10 @@ statement:
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
                                                new RgnHandleType(t),NULL),
-                                false,$6),
+                                false,NULL,$6),
                    LOC(@1,@6)));
   }
-| REGION IDENTIFIER statement
+| REGION IDENTIFIER open_exp_opt statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@2,@2));
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), NULL,
@@ -2087,7 +2094,7 @@ statement:
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $2),
                                                new RgnHandleType(t),NULL),
-                                false,$3),
+                                false,$3,$4),
                    LOC(@1,@3)));
   }
 | REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER statement
@@ -2099,7 +2106,7 @@ statement:
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $8),
                                                new RgnHandleType(t),NULL),
-                                true,$9),
+                                true,NULL,$9),
                    LOC(@1,@9)));
   }
 | REGION '[' IDENTIFIER ']' IDENTIFIER statement
@@ -2112,12 +2119,21 @@ statement:
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
                                                new RgnHandleType(t),NULL),
-                                true,$6),
+                                true,NULL,$6),
                    LOC(@1,@6)));
   }
 /* Cyc: reset_region(e) statement */
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
+;
+
+open_exp_opt:
+  /* empty */ { $$=^$(NULL); }
+| '=' IDENTIFIER '(' expression ')' 
+  { if (zstrcmp($2,"open") != 0)
+      err("expecting `open'",LOC(@2,@2));
+    $$=^$($4);
+  }
 ;
 
 /* Cyc: Unlike C, we do not treat case and default statements as labeled */

@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -659,23 +668,24 @@ char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct _dynforward_ptr Cyc_Filename_concat(struct
-_dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_Filename_chop_extension(
-struct _dynforward_ptr);struct _dynforward_ptr Cyc_Filename_dirname(struct
-_dynforward_ptr);struct _dynforward_ptr Cyc_Filename_basename(struct
-_dynforward_ptr);int Cyc_Filename_check_suffix(struct _dynforward_ptr,struct
-_dynforward_ptr);struct _dynforward_ptr Cyc_Filename_gnuify(struct _dynforward_ptr);
-struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
-18];extern char Cyc_List_Nth[8];struct _dynforward_ptr Cyc_strconcat(struct
-_dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_substring(struct
-_dynforward_ptr,int ofs,unsigned int n);struct _dynforward_ptr Cyc_Filename_concat(
-struct _dynforward_ptr s1,struct _dynforward_ptr s2){return Cyc_strconcat((struct
-_dynforward_ptr)s1,(struct _dynforward_ptr)Cyc_strconcat(({const char*_tmp0="/";
-_tag_dynforward(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,2));}),(struct
-_dynforward_ptr)s2));}struct _dynforward_ptr Cyc_Filename_chop_extension(struct
-_dynforward_ptr filename){int i=(int)(_get_dynforward_size(filename,sizeof(char))- 
-1);while(i >= 0  && *((const char*)_check_dynforward_subscript(filename,sizeof(char),
-i))!= '.'){-- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct
+_dynforward_ptr Cyc_Filename_concat(struct _dynforward_ptr,struct _dynforward_ptr);
+struct _dynforward_ptr Cyc_Filename_chop_extension(struct _dynforward_ptr);struct
+_dynforward_ptr Cyc_Filename_dirname(struct _dynforward_ptr);struct _dynforward_ptr
+Cyc_Filename_basename(struct _dynforward_ptr);int Cyc_Filename_check_suffix(struct
+_dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_Filename_gnuify(
+struct _dynforward_ptr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct
+_dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
+_dynforward_ptr Cyc_substring(struct _dynforward_ptr,int ofs,unsigned int n);struct
+_dynforward_ptr Cyc_Filename_concat(struct _dynforward_ptr s1,struct _dynforward_ptr
+s2){return Cyc_strconcat((struct _dynforward_ptr)s1,(struct _dynforward_ptr)Cyc_strconcat(({
+const char*_tmp0="/";_tag_dynforward(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,
+2));}),(struct _dynforward_ptr)s2));}struct _dynforward_ptr Cyc_Filename_chop_extension(
+struct _dynforward_ptr filename){int i=(int)(_get_dynforward_size(filename,sizeof(
+char))- 1);while(i >= 0  && *((const char*)_check_dynforward_subscript(filename,
+sizeof(char),i))!= '.'){-- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=({const char*_tmp3="chop_extension";
 _tag_dynforward(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,15));});_tmp2;});

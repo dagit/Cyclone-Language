@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -658,28 +667,29 @@ char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};char*string_to_Cstring(struct _dynforward_ptr);struct
-_dynforward_ptr Cstring_to_string(char*);struct _dynforward_ptr ntCsl_to_ntsl(char**);
-struct Cyc_group{struct _dynforward_ptr gr_name;struct _dynforward_ptr gr_passwd;
-unsigned int gr_gid;struct _dynforward_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(
-struct _dynforward_ptr name);struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(
-struct _dynforward_ptr user,unsigned int group);int Cyc_setgroups(struct
-_dynforward_ptr groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;
-unsigned int gr_gid;char**gr_mem;};struct Cyc_Cgrp_Cgroup*getgrnam(char*const name);
-struct Cyc_Cgrp_Cgroup*getgrgid(unsigned int gid);int initgroups(char*user,
-unsigned int group);int setgroups(unsigned int n,const unsigned int*groups);struct
-Cyc_group*Cyc_getgrnam(struct _dynforward_ptr name){struct Cyc_Cgrp_Cgroup*src=
-getgrnam(string_to_Cstring(name));return(unsigned int)src?({struct Cyc_group*
-_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->gr_name=(struct _dynforward_ptr)
-Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(struct _dynforward_ptr)
-Cstring_to_string(src->gr_passwd);_tmp0->gr_gid=src->gr_gid;_tmp0->gr_mem=
-ntCsl_to_ntsl(src->gr_mem);_tmp0;}): 0;}struct Cyc_group*Cyc_getgrgid(unsigned int
-gid){struct Cyc_Cgrp_Cgroup*src=getgrgid(gid);return(unsigned int)src?({struct Cyc_group*
-_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->gr_name=(struct _dynforward_ptr)
-Cstring_to_string(src->gr_name);_tmp1->gr_passwd=(struct _dynforward_ptr)
-Cstring_to_string(src->gr_passwd);_tmp1->gr_gid=src->gr_gid;_tmp1->gr_mem=
-ntCsl_to_ntsl(src->gr_mem);_tmp1;}): 0;}int Cyc_initgroups(struct _dynforward_ptr
-user,unsigned int group){return initgroups(string_to_Cstring(user),group);}int Cyc_setgroups(
-struct _dynforward_ptr groups){return setgroups(_get_dynforward_size(groups,sizeof(
-unsigned int)),(const unsigned int*)_check_null(_untag_dynforward_ptr(groups,
-sizeof(unsigned int),1)));}
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char*
+string_to_Cstring(struct _dynforward_ptr);struct _dynforward_ptr Cstring_to_string(
+char*);struct _dynforward_ptr ntCsl_to_ntsl(char**);struct Cyc_group{struct
+_dynforward_ptr gr_name;struct _dynforward_ptr gr_passwd;unsigned int gr_gid;struct
+_dynforward_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(struct _dynforward_ptr name);
+struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(struct
+_dynforward_ptr user,unsigned int group);int Cyc_setgroups(struct _dynforward_ptr
+groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
+char**gr_mem;};struct Cyc_Cgrp_Cgroup*getgrnam(char*const name);struct Cyc_Cgrp_Cgroup*
+getgrgid(unsigned int gid);int initgroups(char*user,unsigned int group);int
+setgroups(unsigned int n,const unsigned int*groups);struct Cyc_group*Cyc_getgrnam(
+struct _dynforward_ptr name){struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(
+name));return(unsigned int)src?({struct Cyc_group*_tmp0=_cycalloc(sizeof(*_tmp0));
+_tmp0->gr_name=(struct _dynforward_ptr)Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(
+struct _dynforward_ptr)Cstring_to_string(src->gr_passwd);_tmp0->gr_gid=src->gr_gid;
+_tmp0->gr_mem=ntCsl_to_ntsl(src->gr_mem);_tmp0;}): 0;}struct Cyc_group*Cyc_getgrgid(
+unsigned int gid){struct Cyc_Cgrp_Cgroup*src=getgrgid(gid);return(unsigned int)src?({
+struct Cyc_group*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->gr_name=(struct
+_dynforward_ptr)Cstring_to_string(src->gr_name);_tmp1->gr_passwd=(struct
+_dynforward_ptr)Cstring_to_string(src->gr_passwd);_tmp1->gr_gid=src->gr_gid;
+_tmp1->gr_mem=ntCsl_to_ntsl(src->gr_mem);_tmp1;}): 0;}int Cyc_initgroups(struct
+_dynforward_ptr user,unsigned int group){return initgroups(string_to_Cstring(user),
+group);}int Cyc_setgroups(struct _dynforward_ptr groups){return setgroups(
+_get_dynforward_size(groups,sizeof(unsigned int)),(const unsigned int*)
+_check_null(_untag_dynforward_ptr(groups,sizeof(unsigned int),1)));}

@@ -40,6 +40,16 @@ extern void exit(int);
 // First, definitions for things declared in cyc_include.h
 //////////////////////////////////////////////////////////
 
+/* Dynamic regions:  When ref_count > 0, the region is opened.  When
+ * handle is NULL, the region has been freed. */
+struct _DynRegionHandle {
+  int ref_count;
+  struct _RegionHandle *handle;
+  /* link to other dynamic regions occuring within the same region --
+   * used so we can free sub-regions when an outer region is freed. */
+  struct _DynRegionHandle *next;
+};
+
 // FIX: makes alignment and pointer-size assumptions
 // FIX: what about -nocyc???
 char Cyc_Null_Exception_tag[] = "\0\0\0\0Cyc_Null_Exception";
@@ -54,6 +64,12 @@ struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
 char Cyc_Bad_alloc_tag[] = "\0\0\0\0Cyc_Bad_alloc";
 struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc_tag };
 struct _xtunion_struct * Cyc_Bad_alloc = &Cyc_Bad_alloc_struct;
+char Cyc_Core_Free_Region_tag[] = "\0\0\0\0Cyc_Core_Free_Region";
+struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region_tag };
+struct _xtunion_struct * Cyc_Core_Free_Region = &Cyc_Core_Free_Region_struct;
+char Cyc_Core_Open_Region_tag[] = "\0\0\0\0Cyc_Core_Open_Region";
+struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region_tag };
+struct _xtunion_struct * Cyc_Core_Open_Region = &Cyc_Core_Open_Region_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -74,6 +90,10 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   unsigned int p = n*t;
   // the collector does not zero things when you call malloc atomic...
   void *res = GC_malloc_atomic(p);
+  if (res == NULL) {
+    fprintf(stderr,"GC_calloc_atomic failure");
+    _throw_badalloc;
+  }
   bzero(res,p);
   return res;
 }
@@ -99,6 +119,13 @@ void _push_region(struct _RegionHandle * r) {
   _current_handler  = (struct _RuntimeStack *)r;
 }
 
+void _push_dynregion(struct _DynRegionFrame *d) {
+  //fprintf(stderr,"pushing dynregion %x\n",(unsigned int)d);  
+  d->s.tag = 2;
+  d->s.next = _current_handler;
+  _current_handler = (struct _RuntimeStack *)d;
+}
+
 // set _current_handler to it's n+1'th tail
 // Invariant: result is non-null
 void _npop_handler(int n) {
@@ -122,6 +149,14 @@ void _npop_handler(int n) {
 #endif
       //} else {
       //fprintf(stderr,"popping handler %x\n",(unsigned int)_current_handler);
+    } else if (_current_handler->tag == 2) {
+      // fprintf(stderr,"popping dynregion %x\n",(unsigned int)_current_handler);
+      struct _DynRegionFrame *f = (struct _DynRegionFrame *)_current_handler;
+      f->x->ref_count--;
+      if (f->x->ref_count < 0) {
+        fprintf(stderr,"internal error: _npop_handler made dynamic region reference count negative");
+        exit(1);
+      }
     }
     _current_handler = _current_handler->next;
   }
@@ -141,6 +176,13 @@ void _pop_region() {
   }
   _npop_handler(0);
 }
+void _pop_dynregion() {
+  if (_current_handler == NULL || _current_handler->tag != 2) {
+    fprintf(stderr,"internal error: _pop_dynregion");
+    exit(1);
+  }
+  _npop_handler(0);
+}
 
 #ifndef __linux__
 int backtrace(int *array, int size) { return 0; }
@@ -151,8 +193,12 @@ static struct _handler_cons top_handler;
 static int in_backtrace = 0; // avoid infinite exception chain
 void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
-  while (_current_handler->tag != 0)
-    _pop_region();
+  while (_current_handler->tag != 0) {
+    if (_current_handler->tag == 1)
+      _pop_region();
+    else if (_current_handler->tag == 2) 
+      _pop_dynregion();
+  }
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
   _exn_thrown = e;
@@ -347,7 +393,7 @@ struct _RegionHandle _new_region(const char *);
 static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
-#define CYC_MIN_REGION_PAGE_SIZE 20
+#define CYC_MIN_REGION_PAGE_SIZE 60
 
 // controls the default page size for a region
 static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
@@ -477,6 +523,24 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
 }
 
 
+static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
+  struct _RegionPage *p;
+  unsigned int page_size = 
+    default_region_page_size < s ? s : default_region_page_size;
+  p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
+                                      page_size,1);
+#ifdef CYC_REGION_PROFILE
+  p->total_bytes = sizeof(struct _RegionPage) + page_size;
+  p->free_bytes = page_size;
+#endif
+  if (p == NULL) 
+    _throw_badalloc();
+  p->next = NULL;
+  r->curr = p;
+  r->offset = ((char *)p) + sizeof(struct _RegionPage);
+  r->last_plus_one = r->offset + page_size;
+}
+
 // allocate s bytes within region r
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   void *result;
@@ -492,7 +556,11 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   }
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  if (s > (r->last_plus_one - r->offset)) 
+  // if no page yet, then fetch one
+  if (r->curr == 0) 
+    _get_first_region_page(r,s);
+  // else check for space on the current page
+  else if (s > (r->last_plus_one - r->offset)) 
     grow_region(r,s);
   result = (void *)r->offset;
   r->offset = r->offset + s;
@@ -520,7 +588,10 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
   }
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  if (s > (r->last_plus_one - r->offset))
+  // if no page yet, then fetch one
+  if (r->curr == 0)
+    _get_first_region_page(r,s);
+  else if (s > (r->last_plus_one - r->offset))
     grow_region(r,s);
   result = (void *)r->offset;
   r->offset = r->offset + s;
@@ -531,33 +602,101 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
   return result;
 }
 
+/* Open a dynamic region -- throws an exception when the handle
+ * is NULL or the region is already opened.
+ */
+struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f, 
+                                      struct _DynRegionHandle *h) {
+  struct _RegionHandle *res = h->handle;
+  if (res == NULL)
+    throw(Cyc_Core_Open_Region);
+  h->ref_count++;
+  f->x = h;
+  _push_dynregion(f);
+  return res;
+}
+
+/* Frees a dynamic region -- throws an exception when the region
+ * has already been freed or is open.
+ */
+void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
+  if (x->ref_count != 0 || x->handle == NULL) 
+    throw(Cyc_Core_Free_Region);
+  _free_region(x->handle);
+  x->handle = NULL;
+}
+
+/* Same as above, but returns 0 when it fails, 1 when it succeeds */
+int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
+  if (x->ref_count != 0 || x->handle == NULL) 
+    return 0;
+  _free_region(x->handle);
+  x->handle = NULL;
+  return 1;
+}
+
+/* Allocate a new dynamic region in region r */
+struct _DynRegionHandle *Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
+  struct _DynRegionHandle *res = 
+    _region_malloc(r, sizeof(struct _DynRegionHandle));
+  struct _RegionHandle *d = 
+    _region_malloc(r, sizeof(struct _RegionHandle));
+  res->handle = d;
+  res->ref_count = 0;
+  /* link this dynregion into r's list of sub-regions so we can 
+   * free the dynregion when r is freed -- note that the Heap and
+   * Unique regions end up generating free-floating sub-regions
+   * that are reclaimed by the collector... */
+  if (r != NULL) {
+    res->next = r->sub_regions;
+    r->sub_regions = res;
+  }
+  *d = _new_region(NULL);
+  return res;
+}
+
 // allocate a new page and return a region handle for a new region.
 struct _RegionHandle _new_region(const char *rgn_name) {
   struct _RegionHandle r;
-  struct _RegionPage *p;
+
+  /* we're now lazy about allocating a region page */
+  //struct _RegionPage *p;
 
   // we use calloc to make sure the memory is zero'd
-  p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
-                                      default_region_page_size,1);
-  if (p == NULL) 
-    _throw_badalloc();
-  p->next = NULL;
+  //p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
+  //                                  default_region_page_size,1);
+  //if (p == NULL) 
+  //  _throw_badalloc();
+  //p->next = NULL;
 #ifdef CYC_REGION_PROFILE
-  p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
-  p->free_bytes = default_region_page_size;
+  //p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
+  //p->free_bytes = default_region_page_size;
   r.name = rgn_name;
 #endif
   r.s.tag = 1;
   r.s.next = NULL;
-  r.curr = p;
-  r.offset = ((char *)p) + sizeof(struct _RegionPage);
-  r.last_plus_one = r.offset + default_region_page_size;
+  r.curr = 0;
+  r.offset = 0;
+  r.last_plus_one = 0;
+  r.sub_regions = NULL;
+  //r.offset = ((char *)p) + sizeof(struct _RegionPage);
+  //r.last_plus_one = r.offset + default_region_page_size;
   return r;
 }
 
 // free all the resources associated with a region (except the handle)
 void _free_region(struct _RegionHandle *r) {
-  struct _RegionPage *p = r->curr;
+  struct _DynRegionHandle *d;
+  struct _RegionPage *p;
+
+  /* free sub regions */
+  d = r->sub_regions;
+  while (d != NULL) {
+    Cyc_Core_try_free_dynregion(d);
+    d = d->next;
+  }
+  /* free pages */
+  p = r->curr;
   while (p != NULL) {
     struct _RegionPage *n = p->next;
     GC_free(p);

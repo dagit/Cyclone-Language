@@ -366,6 +366,7 @@ bool okay_szofarg(type_t t) {
     return (e != NULL); 
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
+  case &DynRgnType(_,_): return true;
   case &AggrType(AggrInfo(info,_)):
     _ ad;
     switch(info) {

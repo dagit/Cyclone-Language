@@ -94,7 +94,7 @@ extern `a env_err(string_t msg) __attribute__((noreturn));
 extern tenv_t<`r,`r> tc_init(region_t<`r>);
 extern genv_t<`r> empty_genv(region_t<`r>);
 extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);
-extern fenv_t<`r> nested_fenv(region_t<`r>,seg_t,fenv_t<`r2> old_fenv, fndecl_t new_fn : {`r2} > `r);
+extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
 
 extern tenv_t<`r> enter_ns(region_t<`r>,tenv_t, var_t);
 
@@ -158,7 +158,7 @@ extern tenv_t<`g,`r> new_outlives_constraints(region_t<`r>, tenv_t<`g,`r2> te, l
 
 extern type_t curr_rgn(tenv_t);
 
-extern tenv_t<`g,`r> add_region(region_t<`r>, tenv_t<`g,`r2> te, type_t r, bool resetable : {`r2} > `r);
+extern tenv_t<`g,`r> add_region(region_t<`r>, tenv_t<`g,`r2> te, type_t r, bool resetable, bool opened : {`r2} > `r);
 // Check that the region is in the current capability
 extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
 // Check that the region is in the current capability and is resetable

@@ -44,6 +44,11 @@ char ?`r rnew_string(region_t<`r> r, unsigned int i) {
   return rcalloc(r,i,sizeof(char));
 }
 
+struct NewRegion new_dynregion() {
+  return rnew_dynregion(heap_region);
+}
+
+
 bool true_f(`a x)  {  return true;  }
 bool false_f(`a x) {  return false; }
 

@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -659,21 +668,23 @@ extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct _dynforward_ptr wrap_Cbuffer_as_buffer(char*,
-unsigned int);struct Cyc_in_addr{unsigned int s_addr;};unsigned int Cyc_htonl(
-unsigned int x);unsigned short Cyc_htons(unsigned short x);unsigned int Cyc_ntohl(
-unsigned int x);unsigned short Cyc_ntohs(unsigned short x);unsigned int __stub_htonl(
-unsigned int x);unsigned short __stub_htons(unsigned short x);unsigned int
-__stub_ntohl(unsigned int x);unsigned short __stub_ntohs(unsigned short x);
-unsigned int Cyc_htonl(unsigned int x){return __stub_htonl(x);}unsigned short Cyc_htons(
-unsigned short x){return __stub_htons(x);}unsigned int Cyc_ntohl(unsigned int x){
-return __stub_ntohl(x);}unsigned short Cyc_ntohs(unsigned short x){return
-__stub_ntohs(x);}struct Cyc_dirent{unsigned long d_ino;long d_off;unsigned short
-d_reclen;unsigned char d_type;char d_name[256];};struct Cyc___cycDIR;int Cyc_closedir(
-struct Cyc___cycDIR*);struct Cyc___cycDIR*Cyc_opendir(const char*);struct Cyc_dirent*
-Cyc_readdir(struct Cyc___cycDIR*);void Cyc_rewinddir(struct Cyc___cycDIR*);void Cyc_seekdir(
-struct Cyc___cycDIR*,long);long Cyc_telldir(struct Cyc___cycDIR*);struct Cyc_Cdirent___abstractDIR;
-struct Cyc___cycDIR{struct Cyc_Cdirent___abstractDIR*dir;};int closedir(struct Cyc_Cdirent___abstractDIR*
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct
+_dynforward_ptr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
+unsigned int s_addr;};unsigned int Cyc_htonl(unsigned int x);unsigned short Cyc_htons(
+unsigned short x);unsigned int Cyc_ntohl(unsigned int x);unsigned short Cyc_ntohs(
+unsigned short x);unsigned int __stub_htonl(unsigned int x);unsigned short
+__stub_htons(unsigned short x);unsigned int __stub_ntohl(unsigned int x);
+unsigned short __stub_ntohs(unsigned short x);unsigned int Cyc_htonl(unsigned int x){
+return __stub_htonl(x);}unsigned short Cyc_htons(unsigned short x){return
+__stub_htons(x);}unsigned int Cyc_ntohl(unsigned int x){return __stub_ntohl(x);}
+unsigned short Cyc_ntohs(unsigned short x){return __stub_ntohs(x);}struct Cyc_dirent{
+unsigned long d_ino;long d_off;unsigned short d_reclen;unsigned char d_type;char
+d_name[256];};struct Cyc___cycDIR;int Cyc_closedir(struct Cyc___cycDIR*);struct Cyc___cycDIR*
+Cyc_opendir(const char*);struct Cyc_dirent*Cyc_readdir(struct Cyc___cycDIR*);void
+Cyc_rewinddir(struct Cyc___cycDIR*);void Cyc_seekdir(struct Cyc___cycDIR*,long);
+long Cyc_telldir(struct Cyc___cycDIR*);struct Cyc_Cdirent___abstractDIR;struct Cyc___cycDIR{
+struct Cyc_Cdirent___abstractDIR*dir;};int closedir(struct Cyc_Cdirent___abstractDIR*
 d);int Cyc_closedir(struct Cyc___cycDIR*d){return closedir(d->dir);}struct Cyc_Cdirent___abstractDIR*
 opendir(const char*);static char _tmp1[32]="opendir called with NULL string";static
 struct Cyc_Core_Failure_struct Cyc___opendir_failure={Cyc_Core_Failure,{_tmp1,

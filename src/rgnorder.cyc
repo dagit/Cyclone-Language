@@ -38,24 +38,25 @@ struct RgnInfo {
   type_t these_outlive; // EffKind
   bool   resetable;
 };
-struct RgnPO {
-  Dict::dict_t<tvar_t, struct RgnInfo@> d;
+struct RgnPO<`r::R> {
+  Dict::dict_t<tvar_t, struct RgnInfo@`r,`r> d;
   type_t these_outlive_heap; // EffKind
   tvar_t youngest_unresettable; // fact: there always is one
 };
 
 // Note: Evars get constrained to HeapRgn!
 // Note: assumes not resettable
-rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn) {
-  let ans = new *po;
+rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po, 
+                                     type_t eff, type_t rgn) {
+  let ans = rnew(r) *po;
   switch(compress(rgn)) {
   case &VarType(tv):
     let d = po->d;
     if(Dict::member(d,tv)) {
       let old = Dict::lookup(d,tv)->these_outlive;
-      d = Dict::insert(d,tv,new RgnInfo(new JoinEff(list(eff,old)), false));
+      d = Dict::insert(d,tv,rnew(r) RgnInfo(new JoinEff(list(eff,old)), false));
     } else
-      d = Dict::insert(d,tv,new RgnInfo(eff,false));
+      d = Dict::insert(d,tv,rnew(r) RgnInfo(eff,false));
     ans->d = d;
     return ans;
   case &Evar(_,_,_,_):
@@ -68,33 +69,34 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn) {
   }
 }
 
-rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool resettable) {
+rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool resettable, bool opened) {
   // sanity check
-  if(Dict::member(po->d,rgn))
+  if(!opened && Dict::member(po->d,rgn))
     impos("RgnOrder::add_youngest: repeated region");
-  let ans = new *po;
+  let ans = rnew(r) *po;
   let eff = new AccessEff(new VarType(po->youngest_unresettable));
-  ans->d = Dict::insert(po->d, rgn, new RgnInfo(eff, resettable));
-  if(!resettable)
+  ans->d = Dict::insert(po->d, rgn, rnew(r) RgnInfo(eff, resettable));
+  if(!resettable); //  && !opened
     ans->youngest_unresettable = rgn;
   return ans;
 }
 
-rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
-		       type_t effect, tvar_t fst_rgn) {
+rgn_po_t<`r> initial_fn_po(region_t<`r> r,
+                           list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
+                           type_t effect, tvar_t fst_rgn) {
   // put all region tvs in the dict and make fst_rgn outlive all tvs
-  Dict::dict_t<_,struct RgnInfo@`H> d = Dict::empty(tvar_cmp);
+  Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     switch(tvar_kind(tvs2->hd)) {
     case RgnKind: 
-      d = Dict::insert(d,tvs2->hd,new RgnInfo(empty_effect,false)); break;
+      d = Dict::insert(d,tvs2->hd,rnew(r) RgnInfo(empty_effect,false)); break;
     default: break;
     }
-  d = Dict::insert(d, fst_rgn, new RgnInfo(effect,false));
+  d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect,false));
   // add in the explicit partial order -- no longer detects cycles
-  let ans = new RgnPO(d,empty_effect,fst_rgn);
+  let ans = rnew(r) RgnPO(d,empty_effect,fst_rgn);
   for(; po != NULL; po = po->tl)
-    ans = add_outlives_constraint(ans, (*po->hd)[0], (*po->hd)[1]);
+    ans = add_outlives_constraint(r, ans, (*po->hd)[0], (*po->hd)[1]);
   return ans;
 }
 

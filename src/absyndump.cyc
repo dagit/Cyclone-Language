@@ -479,7 +479,10 @@ void dumpntyp(type_t t) {
   case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
   case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
-  case &RgnHandleType(rgn): dumprgn(rgn); return;
+  case &RgnHandleType(rgn): 
+    dump("region_t<"); dumprgn(rgn); dump(">"); return;
+  case &DynRgnType(r1,r2): dump("dynregion_t<"); dumprgn(r1);
+    dump(","); dumprgn(r2); dump(">"); return;
   case &TypeInt(i): dump(aprintf("`%d",i)); return;
   case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
   case UniqueRgn: dump("`U"); break;
@@ -867,10 +870,15 @@ void dumpstmt(stmt_t s) {
     dumpswitchclauses(ss); dump_char('}');
     break;
 
-  case &Region_s(tv,vd,resetable,ss):
+  case &Region_s(tv,vd,resetable,eopt,ss):
     dumploc(s->loc); dump("region"); 
     if (resetable) dump("[resetable]");
     dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+    if (eopt != NULL) {
+      dump(" = open(");
+      dumpexp((exp_t)eopt);
+      dump(")");
+    }
     dump("{"); dumpstmt(ss); dump("}");
     break;
   case &ResetRegion_s(e):

@@ -1108,6 +1108,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     break;
     // conceivably we might have to marshal these somehow... how?
   case &RgnHandleType(_): 
+  case &DynRgnType(_,_): 
   case UniqueRgn:           
   case HeapRgn:           
   case &AccessEff(_):     

@@ -151,6 +151,33 @@ extern region_t<`U> unique_region;
 extern void ufree(`a::A ?-`U ptr);
   /** [ufree] frees a unique pointer. */
 
+  /** The [NewRegion] struct is used to return a new dynamic region.  The
+      region is allocated as a sub-region of [r2]. */
+extern struct NewRegion<`r2::R> {
+  <`r1::R>
+  dynregion_t<`r1,`r2> dynregion;
+};
+  /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
+      within [r2]. */
+extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
+  /** A call to [new_dynregion()] returns a new dynamic region allocated
+      in the heap. */
+extern struct NewRegion new_dynregion();
+  /** The [Open_Region] exception is thrown when one attempts to open 
+      a dynamic region that is either already open or has been freed. */
+extern xtunion exn { extern Open_Region };
+  /** The [Free_Region] exception is thrown when one attempts to free
+      a dynamic region that is either open or has already been freed. */
+extern xtunion exn { extern Free_Region };
+  /** A call to [free_dynregion(d)] attempts to free the storage associated
+      with the dynamic region handle d.  If d has been opened or d has already
+      been freed, then the exception [Free_Region] is thrown. */
+extern void free_dynregion(dynregion_t<`r1,`r2>);
+  /** A call to [try_free_dynregion(d)] attempts to free the storage associated
+      with the dynamic region handle d.  If d has been opened or d has already
+      been freed, then it returns 0, and otherwise returns 1 upon success. */
+extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
+
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring<`H> string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns NULL

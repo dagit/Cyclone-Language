@@ -353,6 +353,7 @@ namespace Absyn {
     AnonEnumType(list_t<enumfield_t>); // MemKind
     SizeofType(type_t); // AnyKind -> BoxKind
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
+    DynRgnType(type_t,type_t); // RgnKing * RgnKind -> BoxKind
     // An abbreviation -- the type_t* contains the definition iff any
     TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_t*);
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
@@ -568,7 +569,10 @@ namespace Absyn {
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
-    Region_s(tvar_t, vardecl_t, bool, stmt_t); // region<`r> h {s}
+    Region_s(tvar_t, vardecl_t, bool, exp_opt_t, stmt_t); 
+    // region<`r> h {s} or resetable region<`r> h {s} or 
+    // region h = open(e) { s }.
+    // When bool is true, resetable.  When exp_opt_t is present, an open.
     ResetRegion_s(exp_t); // reset_region(e)
   };
   // statements with auxiliary info

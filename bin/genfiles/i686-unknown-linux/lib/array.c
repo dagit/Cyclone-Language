@@ -56,9 +56,15 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+  struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #endif
+};
+
+struct _DynRegionFrame {
+  struct _RuntimeStack s;
+  struct _DynRegionHandle *x;
 };
 
 extern struct _RegionHandle _new_region(const char *);
@@ -66,6 +72,9 @@ extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 extern void   _reset_region(struct _RegionHandle *);
+extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
+                                             struct _DynRegionHandle *h);
+extern void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -658,42 +667,44 @@ char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct _dynforward_ptr
-Cyc_List_to_array(struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_from_array(
-struct _dynforward_ptr arr);void Cyc_Array_qsort(int(*)(void**,void**),struct
-_dynforward_ptr x,int len);void Cyc_Array_msort(int(*)(void**,void**),struct
-_dynforward_ptr x,int len);struct _dynforward_ptr Cyc_Array_from_list(struct Cyc_List_List*
-l);struct Cyc_List_List*Cyc_Array_to_list(struct _dynforward_ptr x);struct
-_dynforward_ptr Cyc_Array_copy(struct _dynforward_ptr x);struct _dynforward_ptr Cyc_Array_map(
-void*(*f)(void*),struct _dynforward_ptr x);struct _dynforward_ptr Cyc_Array_map_c(
-void*(*f)(void*,void*),void*env,struct _dynforward_ptr x);void Cyc_Array_imp_map(
-void*(*f)(void*),struct _dynforward_ptr x);void Cyc_Array_imp_map_c(void*(*f)(void*,
-void*),void*env,struct _dynforward_ptr x);extern char Cyc_Array_Array_mismatch[19];
-struct _dynforward_ptr Cyc_Array_map2(void*(*f)(void*,void*),struct _dynforward_ptr
-x,struct _dynforward_ptr y);void Cyc_Array_app(void*(*f)(void*),struct
-_dynforward_ptr x);void Cyc_Array_app_c(void*(*f)(void*,void*),void*env,struct
-_dynforward_ptr x);void Cyc_Array_iter(void(*f)(void*),struct _dynforward_ptr x);
-void Cyc_Array_iter_c(void(*f)(void*,void*),void*env,struct _dynforward_ptr x);void
-Cyc_Array_app2(void*(*f)(void*,void*),struct _dynforward_ptr x,struct
-_dynforward_ptr y);void Cyc_Array_app2_c(void*(*f)(void*,void*,void*),void*env,
-struct _dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_iter2(void(*f)(void*,
-void*),struct _dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_iter2_c(void(*
-f)(void*,void*,void*),void*env,struct _dynforward_ptr x,struct _dynforward_ptr y);
-void*Cyc_Array_fold_left(void*(*f)(void*,void*),void*accum,struct _dynforward_ptr
-x);void*Cyc_Array_fold_left_c(void*(*f)(void*,void*,void*),void*env,void*accum,
-struct _dynforward_ptr x);void*Cyc_Array_fold_right(void*(*f)(void*,void*),struct
-_dynforward_ptr x,void*accum);void*Cyc_Array_fold_right_c(void*(*f)(void*,void*,
-void*),void*env,struct _dynforward_ptr x,void*accum);struct _dynforward_ptr Cyc_Array_rev_copy(
-struct _dynforward_ptr x);void Cyc_Array_imp_rev(struct _dynforward_ptr x);int Cyc_Array_forall(
-int(*pred)(void*),struct _dynforward_ptr x);int Cyc_Array_forall_c(int(*pred)(void*,
-void*),void*env,struct _dynforward_ptr x);int Cyc_Array_exists(int(*pred)(void*),
-struct _dynforward_ptr x);int Cyc_Array_exists_c(int(*pred)(void*,void*),void*env,
-struct _dynforward_ptr x);struct _tuple0{void*f1;void*f2;};struct _dynforward_ptr Cyc_Array_zip(
-struct _dynforward_ptr x,struct _dynforward_ptr y);struct _tuple1{struct
-_dynforward_ptr f1;struct _dynforward_ptr f2;};struct _tuple1 Cyc_Array_split(struct
-_dynforward_ptr x);int Cyc_Array_memq(struct _dynforward_ptr l,void*x);int Cyc_Array_mem(
-int(*cmp)(void*,void*),struct _dynforward_ptr l,void*x);struct _dynforward_ptr Cyc_Array_extract(
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
+Cyc_List_Nth[8];struct _dynforward_ptr Cyc_List_to_array(struct Cyc_List_List*x);
+struct Cyc_List_List*Cyc_List_from_array(struct _dynforward_ptr arr);void Cyc_Array_qsort(
+int(*)(void**,void**),struct _dynforward_ptr x,int len);void Cyc_Array_msort(int(*)(
+void**,void**),struct _dynforward_ptr x,int len);struct _dynforward_ptr Cyc_Array_from_list(
+struct Cyc_List_List*l);struct Cyc_List_List*Cyc_Array_to_list(struct
+_dynforward_ptr x);struct _dynforward_ptr Cyc_Array_copy(struct _dynforward_ptr x);
+struct _dynforward_ptr Cyc_Array_map(void*(*f)(void*),struct _dynforward_ptr x);
+struct _dynforward_ptr Cyc_Array_map_c(void*(*f)(void*,void*),void*env,struct
+_dynforward_ptr x);void Cyc_Array_imp_map(void*(*f)(void*),struct _dynforward_ptr x);
+void Cyc_Array_imp_map_c(void*(*f)(void*,void*),void*env,struct _dynforward_ptr x);
+extern char Cyc_Array_Array_mismatch[19];struct _dynforward_ptr Cyc_Array_map2(void*(*
+f)(void*,void*),struct _dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_app(
+void*(*f)(void*),struct _dynforward_ptr x);void Cyc_Array_app_c(void*(*f)(void*,
+void*),void*env,struct _dynforward_ptr x);void Cyc_Array_iter(void(*f)(void*),
+struct _dynforward_ptr x);void Cyc_Array_iter_c(void(*f)(void*,void*),void*env,
+struct _dynforward_ptr x);void Cyc_Array_app2(void*(*f)(void*,void*),struct
+_dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_app2_c(void*(*f)(void*,
+void*,void*),void*env,struct _dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_iter2(
+void(*f)(void*,void*),struct _dynforward_ptr x,struct _dynforward_ptr y);void Cyc_Array_iter2_c(
+void(*f)(void*,void*,void*),void*env,struct _dynforward_ptr x,struct
+_dynforward_ptr y);void*Cyc_Array_fold_left(void*(*f)(void*,void*),void*accum,
+struct _dynforward_ptr x);void*Cyc_Array_fold_left_c(void*(*f)(void*,void*,void*),
+void*env,void*accum,struct _dynforward_ptr x);void*Cyc_Array_fold_right(void*(*f)(
+void*,void*),struct _dynforward_ptr x,void*accum);void*Cyc_Array_fold_right_c(void*(*
+f)(void*,void*,void*),void*env,struct _dynforward_ptr x,void*accum);struct
+_dynforward_ptr Cyc_Array_rev_copy(struct _dynforward_ptr x);void Cyc_Array_imp_rev(
+struct _dynforward_ptr x);int Cyc_Array_forall(int(*pred)(void*),struct
+_dynforward_ptr x);int Cyc_Array_forall_c(int(*pred)(void*,void*),void*env,struct
+_dynforward_ptr x);int Cyc_Array_exists(int(*pred)(void*),struct _dynforward_ptr x);
+int Cyc_Array_exists_c(int(*pred)(void*,void*),void*env,struct _dynforward_ptr x);
+struct _tuple0{void*f1;void*f2;};struct _dynforward_ptr Cyc_Array_zip(struct
+_dynforward_ptr x,struct _dynforward_ptr y);struct _tuple1{struct _dynforward_ptr f1;
+struct _dynforward_ptr f2;};struct _tuple1 Cyc_Array_split(struct _dynforward_ptr x);
+int Cyc_Array_memq(struct _dynforward_ptr l,void*x);int Cyc_Array_mem(int(*cmp)(void*,
+void*),struct _dynforward_ptr l,void*x);struct _dynforward_ptr Cyc_Array_extract(
 struct _dynforward_ptr x,int start,int*len_opt);void Cyc_Array_qsort(int(*less_eq)(
 void**,void**),struct _dynforward_ptr arr,int len){int base_ofs=0;void*temp;int sp[40];
 int sp_ofs;int i;int j;int limit_ofs;if((base_ofs < 0  || base_ofs + len > 

@@ -109,6 +109,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("default", DEFAULT, true),
   $("do", DO, true),
   $("double", DOUBLE, true),
+  $("dynregion_t", DYNREGION_T, false),
   $("else", ELSE, true),
   $("enum", ENUM, true),
   $("export", EXPORT, false),

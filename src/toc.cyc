@@ -117,6 +117,8 @@ MAKE_STRING(val);
 MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
 MAKE_STRING(_RegionHandle);
+MAKE_STRING(_DynRegionHandle);
+MAKE_STRING(_DynRegionFrame);
 
 // some pre-allocated qvars -- use foo_e for exp that is var "foo"
 #define MAKE_VAR(str)\
@@ -178,6 +180,9 @@ MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
+MAKE_VAR(_open_dynregion);
+MAKE_VAR(_push_dynregion);
+MAKE_VAR(_pop_dynregion);
 MAKE_VAR(_reset_region);
 MAKE_VAR(_throw_arraybounds);
 // MAKE_VAR(_tagged_ptr_decrease_size);
@@ -501,6 +506,9 @@ static type_t typ_to_c(type_t t) {
   case &TagType(_): return uint_typ; // must be unsigned!
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
+  case &DynRgnType(_,_):
+    // could be shared
+    return cstar_typ(strct(_DynRegionHandle_sp),mt_tq);
   case &TypeInt(_): 
     toc_impos("Toc::typ_to_c: type translation passed a type integer");
   case HeapRgn:
@@ -3563,14 +3571,22 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                           handler_stmt,DL),DL),DL),DL),DL),DL)->r;
       }
       return;
-    case &Region_s(tv, vd, resetable, body):
+    case &Region_s(tv, vd, resetable, open_exp_opt, body):
       // NOTE:  _npop_handler has to deal with regions as well as exceptions
+      // When open_exp_opt is NULL:
       // { struct _RegionHandle rh = _new_region();
       //   struct _RegionHandle *x = &rh;
       //   _push_region(x);
       //   body; 
       //   _pop_region(x);
       // }
+      // When open_exp_opt is not NULL:
+      // { struct _DynRegionFrame f;
+      //   struct _RegionHandle *x = _open_dynregion(&f,open_exp_opt);
+      //   body;
+      //   _pop_dynregion();
+      // }
+      // Note that _open_dynregion implicitly pushes the dynregion.
       type_t rh_struct_typ     = strct(_RegionHandle_sp);
       type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
       qvar_t rh_var = temp_var();
@@ -3581,17 +3597,30 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       region temp {
         stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
       }
-
-      s->r = 
-	declare_stmt(rh_var,rh_struct_typ, 
-		     fncall_exp(_new_region_e,
-				new List(string_exp(qvar2string(x_var),DL),
-					 NULL),DL),
-	declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
-  	seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
-        seq_stmt(body,
-		 exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
-		 DL),DL),DL),DL)->r;
+      if (open_exp_opt == NULL) {
+        s->r = 
+	  declare_stmt(rh_var,rh_struct_typ, 
+		       fncall_exp(_new_region_e,
+			  	  new List(string_exp(qvar2string(x_var),DL),
+					   NULL),DL),
+  	  declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
+  	  seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
+          seq_stmt(body,
+		   exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
+		   DL),DL),DL),DL)->r;
+      } else {
+        exp_to_c(nv, (exp_t)open_exp_opt);
+        s->r = 
+          declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL, 
+	  declare_stmt(x_var, rh_struct_ptr_typ,
+		       fncall_exp(_open_dynregion_e,
+                                  list(address_exp(rh_exp,DL),
+                                       (exp_t)open_exp_opt),
+                                  DL),
+          seq_stmt(body,
+		   exp_stmt(fncall_exp(_pop_dynregion_e,  list(x_exp), DL),DL),
+		   DL),DL),DL)->r;
+      }
       return;
     case &ResetRegion_s(e):
       exp_to_c(nv,e);
@@ -4077,7 +4106,7 @@ static void stmttypes_to_c(stmt_t s) {
   case &Fallthru_s(_,_):
   case &Label_s(_,_):
   case &TryCatch_s(_,_):
-  case &Region_s(_,_,_,_):
+  case &Region_s(_,_,_,_,_):
   case &ResetRegion_s(_): Tcutil::terr(s->loc,"Cyclone statement in C code");
     break;
   }

@@ -466,7 +466,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         fd->fn_vardecl = vd;
         te = add_local_var(decl_rgn,d->loc,te,vd);
         fenv_t old_fenv = (fenv_t)te->le;
-        te->le = nested_fenv(decl_rgn,d->loc,old_fenv,fd);
+        te->le = nested_fenv(d->loc,old_fenv,fd);
         tcStmt(te,fd->body,false);
         check_delayed_effects(te);
         check_delayed_constraints(te);
@@ -490,7 +490,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
-  case &Region_s(tv,vd,resetable,s):
+  case &Region_s(tv,vd,resetable,open_opt,s):
     // Same KLUDGE as with TryCatch_s -- we need a next statement that is
     // not outside of the handler.
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
@@ -501,14 +501,33 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         te2 = Tcenv::new_block(r,s0->loc,te);
       else 
         te2 = Tcenv::copy_tenv(r,te);
-      let &Vardecl(_,_,_,t,_,*rgn_ptr,_,_) = vd;
+      let &Vardecl(_,_,_,*t,_,*rgn_ptr,_,_) = vd;
       let curr_bl = Tcenv::curr_rgn(te2);
-      type_t rgn_typ = new VarType(tv);
       *rgn_ptr = new Opt(curr_bl); // side effect
-      te2 = add_type_vars(r,s0->loc,te2,new List(tv,NULL));
-      check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,t);
-      te2 = add_region(r, te2, rgn_typ, resetable);
-      if (!unify(t,new RgnHandleType(rgn_typ)))
+      type_t rgn_typ;
+      if (open_opt != NULL) {
+        exp_t open_exp = (exp_t)open_opt;
+        let tenv_tvs = lookup_type_vars(te);
+        rgn_typ = new_evar(&rk,new Opt(tenv_tvs));
+        type_t rgn2_typ = new_evar(&rk,new Opt(tenv_tvs));
+        type_t expected = new DynRgnType(rgn_typ,rgn2_typ);
+        *t = new RgnHandleType(rgn_typ);
+        if (!unify(tcExp(te,&expected,open_exp), expected)) {
+          terr(open_exp->loc,"expecting %s but found %s",
+               typ2string(expected),
+               typ2string(open_exp->topt->v));
+        }
+        // check that we have access to rgn2
+        check_rgn_accessible(te,open_exp->loc,rgn2_typ);
+        // FIX: should signal an error if rgn1 is accessible...
+        te2 = add_region(r, te2, rgn_typ, false, true);
+      } else {
+        rgn_typ = new VarType(tv);
+        te2 = add_type_vars(r,s0->loc,te2,new List(tv,NULL));
+        te2 = add_region(r, te2, rgn_typ, resetable, true);
+      }
+      check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,*t);
+      if (!unify(*t,new RgnHandleType(rgn_typ)))
         impos("region stmt: type of region handle is wrong!");
       tcStmt(set_encloser(r,add_local_var(r,s->loc,enter_try(r,te2),vd),s0),s,
              false);

@@ -966,6 +966,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &RgnHandleType(_):
       fprintf(stderr,"Error: unexpected RgnHandleType\n");
       exit(1); return;
+    case &DynRgnType(_,_):
+      fprintf(stderr,"Error: unexpected DynRgnType\n");
+      exit(1); return;
     case HeapRgn:
       fprintf(stderr,"Error: unexpected HeapRgn\n");
       exit(1); return;

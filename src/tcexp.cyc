@@ -1726,6 +1726,7 @@ static bool zeroable_type(type_t t) {
     return true;
   case &AnonEnumType(_): return true; // FIX: explicit tags?
   case &TypedefType(_,_,_,_): return false;
+  case &DynRgnType(_,_): return false;
   case &RgnHandleType(_): return false;
 
   case &TypeInt(_):

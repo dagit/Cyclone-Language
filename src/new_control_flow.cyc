@@ -1747,7 +1747,13 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
 
   case &Label_s(_,s): outflow = anal_stmt(env,inflow,s); break;
 
-  case &Region_s(tv,vd,resetable,s):
+  case &Region_s(tv,vd,resetable,exp_opt,s):
+    if (exp_opt != NULL) {
+      let e = (exp_t)exp_opt;
+      let $(f,r) = anal_Rexp(env,inflow,e);
+      f = consume_unique_rvals(e->loc,f);
+      inflow = use_Rval(env,e->loc,f,r);
+    }
     let vds = List(vd,NULL);
     inflow = add_vars(inflow,&vds,unknown_all,s->loc);
     outflow = anal_stmt(env,inflow,s);
@@ -1846,7 +1852,7 @@ static void postpass(stmt_t s) {
   case &Do_s(s1,$(_,s2)):      fallthru(s1,s2);
   case &IfThenElse_s(_,s1,s2): postpass(s1); fallthru(s2);
 
-  case &Region_s(_,_,_,s1): fallthru(s1);
+  case &Region_s(_,_,_,_,s1): fallthru(s1);
   case &Label_s(_,s1):      fallthru(s1);
   case &Decl_s(_,s1):       postpass(s1); return;
 
