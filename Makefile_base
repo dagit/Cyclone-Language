@@ -83,4 +83,4 @@ buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) libcycboo
 	$(CC) $(CFLAGS) -c $(CPPFLAGS) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) $< -o $@
 
 %.$(O): %.cyc 
-	$(CYCC) $(CYCFLAGS) -c -Iinclude -I$(CYCDIR)/include -I$(CYCDIR)/lib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<
+	$(CYCC) $(CYCFLAGS) -c -I. -Iinclude -I$(CYCDIR)/include -I$(CYCDIR)/lib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<

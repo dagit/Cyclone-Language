@@ -1580,9 +1580,9 @@ attribute:
     let m = cnst2uint(SLOC(@7),$7);
     attribute_t a = &Cdecl_att_val;
     if (zstrcmp(s,"format") == 0 || zstrcmp(s,"__format__") == 0)
-      if (zstrcmp(t,"printf") == 0)
+      if (zstrcmp(t,"printf") == 0 || zstrcmp(t,"__printf__") == 0)
         a = new Format_att(Printf_ft,n,m);
-      else if (zstrcmp(t,"scanf") == 0)
+      else if (zstrcmp(t,"scanf") == 0 || zstrcmp(t,"__scanf__") == 0)
         a = new Format_att(Scanf_ft,n,m);
       else
         Warn::err(SLOC(@3),"unrecognized format type"); 

@@ -51,9 +51,9 @@ list_t<`a,`r> tl(List_t<`a::TB,`r> x) {
 
 // allows one to write rlist(r,e1,e2,...,en) to create a list
 // out of e1,e2,...,en.
-list_t<`a,`r> rlist(region_t<`r> r, ... `a argv) {
-  list_t result = NULL;
-  for (int i = numelts(argv) - 1; i >= 0; i--) 
+list_t<`a,`r> rlist(region_t<`r::TR> r, ... `a argv) {
+  List::list_t result = NULL;
+  for (unsigned int i = numelts(argv) - 1; i < numelts(argv); i--) 
     result = rnew(r) List{argv[i],result};
   return result;
 }

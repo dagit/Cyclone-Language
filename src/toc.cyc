@@ -1428,17 +1428,23 @@ static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
     t  = struct_typ;
     eo = NULL;
   }
+  exp_t res;
   if (do_declare) {
     switch (x->r) {
-    case &Var_e(b): return stmt_exp(declare_stmt(binding2qvar(b),t,eo,s,DL),DL);
+    case &Var_e(b): 
+      res = stmt_exp(declare_stmt(binding2qvar(b),t,eo,s,DL),DL);
+      res->topt = t;
+      return res;
     default: toc_impos("bogus x to make_struct");
     }
   }
   else {
     if (eo != NULL)
-      return stmt_exp(seq_stmt(exp_stmt(assign_exp(x,eo,DL),DL),s,DL),DL);
+      res = stmt_exp(seq_stmt(exp_stmt(assign_exp(x,eo,DL),DL),s,DL),DL);
     else
-      return stmt_exp(s,DL);
+      res = stmt_exp(s,DL);
+    res->topt = t;
+    return res;
   }
 }
 
@@ -1967,7 +1973,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
     // now make the struct
     let res = make_struct(nv,xexp,aggr_typ,s,pointer,rgnopt,is_atomic,
 			  do_declare);
-    res->topt = struct_type;
+    res->topt = pointer ? cstar_typ(struct_type,mt_tq) : struct_type;
     return res;
   }
 }
@@ -2519,6 +2525,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
 	  e1->r = aggrmember_exp_r(new_exp(e1->r,DL),curr_sp);
 	  e2->r = aggrmember_exp_r(new_exp(e2->r,DL),curr_sp);
+	  e1->topt = e2->topt = cstar_typ(uchar_typ,mt_tq);
 	  e->r  = divide_exp(copy_exp(e),
 			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
@@ -2540,10 +2547,16 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t t1 = old_typs->hd;
       type_t t2 = old_typs->tl->hd;
       type_t elt_typ = &VoidType_val; // bogus until next call
-      if (is_tagged_pointer_typ_elt(t1,&elt_typ))
-	e1->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),member_exp(new_exp(e1->r,DL),curr_sp,DL));
-      if (is_tagged_pointer_typ(t2))
-	e2->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),member_exp(new_exp(e2->r,DL),curr_sp,DL));
+      if (is_tagged_pointer_typ_elt(t1,&elt_typ)) {
+	let t = cstar_typ(typ_to_c(elt_typ),mt_tq);
+	e1->r = cast_it_r(t,member_exp(new_exp(e1->r,DL),curr_sp,DL));
+	e1->topt = t;
+      }
+      if (is_tagged_pointer_typ(t2)) {
+	let t = cstar_typ(typ_to_c(elt_typ),mt_tq);
+	e2->r = cast_it_r(t,member_exp(new_exp(e2->r,DL),curr_sp,DL));
+	e2->topt = t;
+      }
       break;
     default: break; //skip
     }
@@ -2713,7 +2726,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e3);
     break;
   case &And_e(e1,e2):
-    exp_to_c(nv,e1);
+   exp_to_c(nv,e1);
     exp_to_c(nv,e2);
     break;
   case &Or_e(e1,e2):
@@ -3031,7 +3044,9 @@ DynCast:
     case $(&PointerType(p1), &IntType(_,_)):
       switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
       case &DynEither_b: // cast t? to int -- cast curr field to int
-	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp); break;
+	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp);
+	e1->topt = new_typ_c;
+	break;
       default: break;
       }
       break;
@@ -3057,7 +3072,9 @@ DynCast:
       if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
-      e->r = init_tuple(nv, true, NULL, es)->r;
+      let e2 = init_tuple(nv, true, NULL, es);
+      e->r = e2->r;
+      e->topt = e2->topt;
       break;
     default: // it's actually an address-of.
       set_lhs(nv,true);
@@ -3128,7 +3145,9 @@ DynCast:
       break;
     case &Tuple_e(es):
       // try to avoid the GCC bug
-      e->r = init_tuple(nv, true, rgnopt, es)->r;
+      let e2 = init_tuple(nv, true, rgnopt, es);
+      e->r = e2->r;
+      e->topt = e2->topt;
       break;
     default:
       // treated just like an array of size 1
@@ -3449,8 +3468,11 @@ DynCast:
     set_lhs(nv,old_lhs);
     break;
   case &Tuple_e(es):
-    if(!is_toplevel(nv))
-      e->r = init_tuple(nv,false,NULL,es)->r;
+    if(!is_toplevel(nv)) {
+      let e2 = init_tuple(nv,false,NULL,es);
+      e->r = e2->r;
+      e->topt = e2->topt;
+    }
     else {
       // At top-level use an initializer
       // $(e1,...,en) -> {e1,...,en}
@@ -5278,6 +5300,18 @@ static int destroy_labels(region_t<`d> d, struct TocState<`d>@`d ts) {
   return 0;
 }
 
+void finish() {
+  toc_state_t ts = NULL;
+  ts :=: toc_state;
+  let TocStateWrap{dyn, s} = *ts;
+  open_region(dyn, s, destroy_labels);
+  Core::free_rckey(dyn);
+  Core::ufree(ts);
+
+  gpop_tables  = NULL;
+  fn_pop_table = NULL;
+}
+
 // The entry point:  translate the list of Cyclone declarations to
 // a list of C declarations.
 list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
@@ -5291,15 +5325,5 @@ list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
   fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
 	  bounds_checks_eliminated, total_bounds_checks);
 #endif
-  // free the state
-  toc_state_t ts = NULL;
-  ts :=: toc_state;
-  let TocStateWrap{dyn, s} = *ts;
-  open_region(dyn, s, destroy_labels);
-  Core::free_rckey(dyn);
-  Core::ufree(ts);
-
-  gpop_tables  = NULL;
-  fn_pop_table = NULL;
   return imp_rev(result_decls);
 }

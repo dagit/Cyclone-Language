@@ -96,22 +96,22 @@ bin/buildlib$(EXE): $(BB)/buildlib$(EXE)
 
 define rmake
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F)
 endef
 
 define rmake-aprof
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DCYC_REGION_PROFILE $(CFLAGS)" CYCFLAGS="-pa $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DCYC_REGION_PROFILE $(CFLAGS)" CYCFLAGS="-pa $(CYCFLAGS)" $(@F)
 endef
 
 define rmake-gprof
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-pg $(CFLAGS)" CYCFLAGS="-pg $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-pg $(CFLAGS)" CYCFLAGS="-pg $(CYCFLAGS)" $(@F)
 endef
 
 define rmake-nocheck
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS)" CYCFLAGS="--nochecks $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS)" CYCFLAGS="--nochecks $(CYCFLAGS)" $(@F)
 endef
 
 $(BB)/libcycboot.a:
@@ -349,22 +349,22 @@ BTARGET=-b $(target)
 
 define rmake-target
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base $(@F) CFLAGS="$(BTARGET) $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)"
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base $(@F) CFLAGS="$(BTARGET) $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) $(CYCFLAGS)"
 endef
 
 define rmake-target-aprof
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DCYC_REGION_PROFILE $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pa $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DCYC_REGION_PROFILE $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pa $(CYCFLAGS)" $(@F)
 endef
 
 define rmake-target-gprof
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -pg $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pg $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -pg $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) -pg $(CYCFLAGS)" $(@F)
 endef
 
 define rmake-target-nocheck
 @mkdir -p $(@D)
-make -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="$(BTARGET) -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(TARGET_CFLAGS)" CYCFLAGS="$(BTARGET) --nochecks $(CYCFLAGS)" $(@F)
 endef
 
 $(BT)/libcycboot.a:

@@ -1,5 +1,5 @@
-/* Translate Cyclone abstract syntax to C abstract syntax.
-   Copyright (C) 2001 Greg Morrisett
+/* Ensure left-to-right evaluation order.
+   Copyright (C) 2004 Michael Hicks.
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it
@@ -17,32 +17,14 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
+#ifndef TOSEQC_H
+#define TOSEQC_H
 
-#ifndef _TOC_H_
-#define _TOC_H_
-
-#include <hashtable.h>
 #include "absyn.h"
 
-namespace Toc {
-using List;
-using Absyn;
+namespace Toseqc {
 
-typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
+extern List::list_t<Absyn::decl_t> toseqc(List::list_t<Absyn::decl_t,`H> decls);
 
-// translate the declarations to C
-extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
-			  list_t<decl_t> ds);
-
-// translate a Cyclone type to a C type (functionally)
-type_t typ_to_c(type_t t);
-  void finish(); // call this when done with a batch of typ_to_c calls
-
-// this is just for Tovc and tcStmt
-extern qvar_t temp_var();
-extern stringptr_t ?globals;
-
-extern bool warn_bounds_checks;
-extern bool warn_all_null_deref;
 }
 #endif

@@ -54,7 +54,7 @@ namespace List {
   extern list_t<`a> list(... `a);
   /** [list(x1,...,xn)] builds a heap-allocated list with elements
       [x1] through [xn]. */
-  extern list_t<`a,`r> rlist(region_t<`r>,... `a);
+  extern list_t<`a,`r> rlist(region_t<`r::TR>,... `a);
   /** [rlist(r, x1,...,xn)] builds a list with elements [x1] through
       [xn], allocated in the region with handle [r]. */
 

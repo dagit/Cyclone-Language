@@ -881,7 +881,7 @@ struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found}
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
 if(o == 0)
 return 0;
-return({struct Cyc_Core_Opt*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->v=f(o->v);_tmp1;});}
+return({struct Cyc_Core_Opt*_tmp1=_cycalloc(sizeof(*_tmp1));({void*_tmp7=f(o->v);_tmp1->v=_tmp7;});_tmp1;});}
 # 40
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
 return({unsigned int _tmp2=i;char*_tmp3=_cyccalloc_atomic(sizeof(char),_tmp2);_tag_dyneither(_tmp3,sizeof(char),_tmp2);});}

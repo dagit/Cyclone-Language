@@ -1,0 +1,460 @@
+/* Force left-to-right evaluation order.
+   Copyright (C) 2004 Michael Hicks.
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <dict.h>
+#include <string.h>
+#include "absynpp.h" // debugging
+#include "warn.h"
+#include "tcutil.h"
+#include "toc.h"
+#include "toseqc.h"
+
+using Core;
+using List;
+using Absyn;
+namespace Toseqc;
+
+#define DL 0
+
+enum SideEffect { Const, NoEffect, ExnEffect, AnyEffect };
+// NoEffect refers to pure expressions, ExnEffect refers to functions that
+// could throw exceptions but are otherwise pure; AnyEffect is everything else.
+
+static string_t eff_to_string(enum SideEffect e) {
+  switch (e) {
+  case Const: return "Const";
+  case NoEffect: return "NoEffect";
+  case ExnEffect: return "ExnEffect";
+  case AnyEffect: return "AnyEffect";
+  }
+}
+
+static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2) {
+  switch ($(e1,e2)) {
+  case $(AnyEffect,_): return AnyEffect;
+  case $(_,AnyEffect): return AnyEffect;
+    // Two ExnEffects mean that order matters, so we promote to AnyEffect
+  case $(ExnEffect,ExnEffect): return AnyEffect;
+  case $(ExnEffect,_): return ExnEffect;
+  case $(_,ExnEffect): return ExnEffect;
+  case $(NoEffect,_): return NoEffect;
+  case $(_,NoEffect): return NoEffect;
+  case $(Const,Const): return Const;
+  }
+}
+
+/* These functions have no side-effects whatsoever */
+static string_t pure_funs[] = {
+  "_get_dyneither_size",
+  "_get_zero_arr_size_char",
+  "_get_zero_arr_size_short",
+  "_get_zero_arr_size_int",
+  "_get_zero_arr_size_float",
+  "_get_zero_arr_size_double",
+  "_get_zero_arr_size_longdouble",
+  "_get_zero_arr_size_voidstar"
+};
+/* These functions might throw exceptions but have no other side-effects */
+static string_t exn_effect_funs[] = {
+  "_check_null",
+  "_check_known_subscript_null",
+  "_check_known_subscript_notnull",
+  "_check_dyneither_subscript",
+  "_untag_dyneither_ptr"
+};
+static enum SideEffect fun_effect(string_t fn) {
+  for (int i = 0; i<numelts(pure_funs); i++) {
+    if (!strcmp(pure_funs[i],fn)) return NoEffect;
+  }
+  for (int i = 0; i<numelts(exn_effect_funs); i++) {
+    if (!strcmp(exn_effect_funs[i],fn)) return ExnEffect;
+  }
+  return AnyEffect;
+}
+
+static enum SideEffect exp_effect(exp_t e);
+static enum SideEffect stmt_effect(stmt_t s);
+static enum SideEffect exps_effect(list_t<exp_t> es) {
+  enum SideEffect res = Const;
+//   static int level = 0;
+//   printf("==>exps_effect %d\n",level++);
+  for (_ x = es; x != NULL; x=x->tl) {
+    let eres = exp_effect(x->hd);
+    res = join_side_effect(eres,res);
+//     printf("Effect |%s| = %s, join=%s\n",Absynpp::exp2string(x->hd),
+// 	   eff_to_string(eres),eff_to_string(res));
+    if (res == AnyEffect) {
+//       printf("<==exps_effect %d\n",--level);
+      return res;
+    }
+  }
+//   printf("<==exps_effect %d\n",--level);
+  return res;
+}
+
+// FIX: could use is_const_exp in Tcutil to better effect?
+static enum SideEffect exp_effect(exp_t e) {
+  string_t bad_form = "";
+  switch (e->r) {
+  case &Const_e(_):
+  case &Sizeoftyp_e(_):  
+  case &Offsetof_e(_,_): 
+  case &AnonEnum_e(...):
+  case &Enum_e(...): return Const;
+  case &Var_e(_): return NoEffect;
+
+  case &AssignOp_e(...):
+  case &Asm_e(...): return AnyEffect;
+
+  case &FnCall_e(e,...):
+    switch (e->r) {
+    case &Var_e(&Funname_b(d)): return fun_effect(Absynpp::qvar2string(d->name));
+    case &Var_e(&Global_b(vd)): return fun_effect(Absynpp::qvar2string(vd->name));
+    case &Var_e(&Unresolved_b(v)): return fun_effect(Absynpp::qvar2string(v));
+    default:
+      return AnyEffect;
+    }
+    
+  case &UnresolvedMem_e(_,dles):
+    let $(_,es) = List::split(dles);
+    fallthru(es);
+
+  case &Primop_e(_, es):
+    return exps_effect(es);
+
+  case &Conditional_e(e1,e2,e3):
+    return exps_effect(list(e1,e2,e3));
+
+  case &Subscript_e(e1,e2):   fallthru(e1,e2);
+  case &And_e(e1,e2):         fallthru(e1,e2);
+  case &Or_e(e1,e2):          fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):
+    return exps_effect(list(e1,e2));
+
+  case &NoInstantiate_e(e1):  fallthru(e1);
+  case &Instantiate_e(e1,_):  fallthru(e1);
+  case &Cast_e(_,e1,_,_):     fallthru(e1);
+  case &Address_e(e1):        fallthru(e1);
+  case &Sizeofexp_e(e1):      fallthru(e1);
+  case &Deref_e(e1):          fallthru(e1);
+  case &AggrMember_e(e1,...): fallthru(e1); 
+  case &AggrArrow_e(e1,...):  fallthru(e1);
+  case &Increment_e(e1,_):
+    return exp_effect(e1);
+
+  case &StmtExp_e(s):
+    return stmt_effect(s);
+
+  case &Throw_e(...): bad_form = "Throw_e"; break;
+  case &New_e(...): bad_form = "New_e"; break;
+  case &Tuple_e(...): bad_form = "Tuple_e"; break;
+  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
+  case &Array_e(...): bad_form = "Array_e"; break;
+  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
+  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
+  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
+  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
+  case &Datatype_e(...): bad_form = "Datatype_e"; break;
+  case &Malloc_e(...): bad_form = "Malloc_e"; break;
+  case &Swap_e(...): bad_form = "Swap_e"; break;
+  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
+  case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  }
+  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
+			       bad_form, Absynpp::exp2string(e)));
+}
+static enum SideEffect stmt_effect(stmt_t s) {
+  // This is just the recursive descent; we are not under a StmtExp.
+  enum SideEffect res = Const;
+  while(true) {
+    switch (s->r) {
+    case &Skip_s: return res;
+    case &Exp_s(e): return join_side_effect(res,exp_effect(e));
+
+    case &Label_s(_,s2):
+      s = s2;
+      continue;
+    case &Seq_s(s1,s2):
+      res = join_side_effect(res,stmt_effect(s1));
+      s = s2;
+      continue;
+
+    case &Break_s:    
+    case &Continue_s: 
+    case &Goto_s(_):
+    case &Return_s(_):
+    case &IfThenElse_s(...):
+    case &While_s(...):
+    case &For_s(...):
+    case &Do_s(...):
+    case &Decl_s(...):
+    case &Switch_s(...): return AnyEffect;
+    default: throw new Impossible("bad stmt after xlation to C");
+    }
+  }
+}
+
+static void stmt_to_seqc(stmt_t s);
+static void exp_to_seqc(exp_t s);
+
+/* This takes a list of expressions [es] and reorders them to ensure
+   left-to-right evaluation order.  This works by (1) creating a new
+   compound statement that declares fresh local variables initializes
+   them to the generated code for each; and (2) updates the original
+   expressions in place to refer to the new variables.  The generated
+   statement is returned, along with a pointer to the innermost
+   statement, that should be replaced by the caller with the relevant
+   expression/statement.
+
+   As a small optimization, we don't bother generating code
+   (i.e. creating new fresh variables) for constants and variables.
+   We could extend this optimization to all effect-free expressions.
+   If the optimization results in no locals being declared, we don't
+   return any statement.
+*/
+static void exps_to_seqc(exp_t e, list_t<exp_t> es, bool is_assign) {
+  // Convert each of the expressions
+  List::iter(exp_to_seqc,es);
+
+  // See if we need to fix the order of the current expressions
+  if (List::length(es) <= 1 || exps_effect(es) != AnyEffect) return;
+
+  // Create local declarations for each expression.  Note that we
+  // don't have to do this for the last expression in the list.
+  stmt_t stmt = exp_stmt(copy_exp(e),e->loc);
+  bool did_skip = false;
+  bool did_convert_lval = false;
+  for (_ x = List::rev(es); x != NULL; x=x->tl) {
+    let e1 = x->hd;
+    // Don't bother translating any constant expressions.  Note that if
+    // this is an assignment, the lhs will never be constant.
+    if (Tcutil::is_const_exp(e1)) continue;
+
+    // Since we reversed the list, we skip the first non-constant expression,
+    // since this will be the last to be evaluated in the generated code.
+    // If this is an assignment, it should be an lvalue 
+    if (!did_skip) {
+      did_skip = true;
+      if (is_assign && !is_lvalue(e1)) {
+	// FIX: Should take the address of it here, and then
+	// dereference the other argument.  I'm lazy ...
+	Warn::impos("Toseqc: assigning to non-lvalues not implemented");
+      }
+      continue;
+    }
+
+    // Variable expression
+    let v = Toc::temp_var();
+    let ve = var_exp(v,e1->loc);
+
+    // Add to the declaration
+    let e2 = new_exp(e1->r,e1->loc);
+    e2->annot = e1->annot;
+    e2->topt = e1->topt;
+
+    type_t t = (e2->topt == NULL) ? new TypeofType(e2) : Toc::typ_to_c((type_t)e2->topt);
+//     printf("linearizing |%s|(%x) (|%s| ===> |%s|)\n",Absynpp::exp2string(e2),e2,
+// 	   e2->topt == NULL ? "NONE" : Absynpp::typ2string(e2->topt),
+// 	   Absynpp::typ2string(t));
+    stmt = declare_stmt(v,t,e2,stmt,e->loc);
+
+    // Update the expression to be the variable
+    e1->r = ve->r;
+  }
+
+  // Turn the original expression into a statement expression
+  e->r = stmt_exp(stmt,e->loc)->r;
+//   printf("final expression: |%s|\n",Absynpp::exp2string(e));
+//   fflush(stdout);    
+}
+
+static void exp_to_seqc(exp_t e) {
+  string_t bad_form = "";
+  switch (e->r) {
+  case &Const_e(_): return;
+  case &Var_e(_): return;
+
+  case &FnCall_e(e1,es,...):
+    // optimization: function designators cannot be side-effected
+    exp_to_seqc(e1); fallthru(es);
+  case &Primop_e(_, es):
+    exps_to_seqc(e,es,false);
+    return;
+
+  case &Subscript_e(e1,e2):   fallthru(e1,e2);
+  case &AssignOp_e(e1, _, e2):
+    // we do assignment statements right to left
+    exps_to_seqc(e,list(e2,e1),true);
+    return;
+
+  case &Conditional_e(e1,e2,e3):
+    exp_to_seqc(e3);          fallthru(e1,e2);
+  case &And_e(e1,e2):         fallthru(e1,e2);
+  case &Or_e(e1,e2):          fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):
+    exp_to_seqc(e2);          fallthru(e1);
+
+  case &NoInstantiate_e(e1):  fallthru(e1);
+  case &Instantiate_e(e1,_):  fallthru(e1);
+  case &Cast_e(_,e1,_,_):     fallthru(e1);
+  case &Address_e(e1):        fallthru(e1);
+  case &Sizeofexp_e(e1):      fallthru(e1);
+  case &Deref_e(e1):          fallthru(e1);
+  case &AggrMember_e(e1,...): fallthru(e1); 
+  case &AggrArrow_e(e1,...):  fallthru(e1);
+  case &Increment_e(e1,_):
+    exp_to_seqc(e1);
+    return;
+
+  case &Sizeoftyp_e(_):  
+  case &Offsetof_e(_,_): 
+  case &AnonEnum_e(...):
+  case &Enum_e(...): return;
+
+  case &UnresolvedMem_e(_,dles):
+    let $(_,es) = List::split(dles);
+    exps_to_seqc(e,es,false);
+    return;
+
+  case &StmtExp_e(s):
+    stmt_to_seqc(s);
+    return;
+
+  case &Asm_e(...): return;
+
+  case &Throw_e(...): bad_form = "Throw_e"; break;
+  case &New_e(...): bad_form = "New_e"; break;
+  case &Tuple_e(...): bad_form = "Tuple_e"; break;
+  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
+  case &Array_e(...): bad_form = "Array_e"; break;
+  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
+  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
+  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
+  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
+//   case &AnonEnum_e(...): bad_form = "AnonEnum_e"; break;
+  case &Datatype_e(...): bad_form = "Datatype_e"; break;
+  case &Malloc_e(...): bad_form = "Malloc_e"; break;
+  case &Swap_e(...): bad_form = "Swap_e"; break;
+  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
+  case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  }
+  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
+			       bad_form, Absynpp::exp2string(e)));
+}
+
+static void stmt_to_seqc(stmt_t s) {
+  // This is just the recursive descent; we are not under a StmtExp.
+  while(true) {
+    switch (s->r) {
+    case &Skip_s:         
+    case &Break_s:    
+    case &Continue_s: 
+    case &Goto_s(_):   return;
+    case &Label_s(_,s2):
+      s = s2;
+      continue;
+    case &Return_s(eopt):
+      if (eopt == NULL)
+	return;
+      fallthru((exp_t)eopt);
+    case &Exp_s(e):
+      exp_to_seqc(e);
+      // Compress out extra indirection if we create a statement expression
+//       switch (e->r) {
+//       case &StmtExp_e(s2):
+// 	s->r = s2->r;
+// 	break;
+//       default: break;
+//       }
+      return;
+    case &Seq_s(s1,s2):
+      stmt_to_seqc(s1);
+      s = s2;
+      continue;
+    case &IfThenElse_s(e,s1,s2):
+      exp_to_seqc(e);
+      stmt_to_seqc(s1);
+      s = s2;
+      continue;
+    case &While_s($(e,_),s2):
+      exp_to_seqc(e);
+      s = s2;
+      continue;
+    case &For_s(e1,$(e2,_),$(e3,_),s2):
+      exp_to_seqc(e1);
+      exp_to_seqc(e2);
+      exp_to_seqc(e3);
+      s = s2;
+      continue;
+    case &Do_s(s2,$(e,_)):
+      exp_to_seqc(e);
+      s = s2;
+      continue;
+    case &Switch_s(e,scs,_):
+      // most switches have been translated away -- only C switches remain.
+      // there should be no where clauses, so ignore them.
+      exp_to_seqc(e);
+      for (; scs != NULL; scs = scs->tl)
+	stmt_to_seqc(scs->hd->body);
+      return;
+    case &Decl_s(d,s2):
+      switch (d->r) {
+      case &Var_d(vd):
+	if (vd->initializer != NULL)
+	  exp_to_seqc((exp_t)vd->initializer);
+	s = s2;
+	continue;
+      default: break;
+      }
+      fallthru;
+    default: throw new Impossible("bad stmt after xlation to C");
+    }
+  }
+}
+
+list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
+  let old_ds = ds;
+//   Toc::init(true);
+  for (; old_ds != NULL; old_ds = old_ds->tl) {
+    let next_d = old_ds->hd;
+    switch (next_d->r) {
+    case &Fn_d(fd):
+      stmt_to_seqc(fd->body);
+      break;
+    case &Var_d(_):         
+    case &Let_d(...): 
+    case &Letv_d(_):        
+    case &Region_d(...):
+    case &Aggr_d(_):
+    case &Datatype_d(_):
+    case &Enum_d(_):        
+    case &Typedef_d(_):
+      break;
+    case &Namespace_d(_,ds2): fallthru(ds2);
+    case &Using_d(_,ds2):     fallthru(ds2);
+    case &ExternC_d(ds2):     fallthru(ds2);
+    case &ExternCinclude_d(ds2,_):
+    case &Porton_d:
+    case &Portoff_d:
+      throw new Impossible("nested translation unit after translation to C");
+    }
+  }
+  return ds;
+}
+

@@ -1725,7 +1725,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	      flow_t<`r> f,
 	      absRval_t<`r> r,
 	      bool passthrough_consumes,
-	      bool expanded_place,
+	      bool expanded_place_possibly_null,
               list_t<int,`r> flds) {
   let fenv = env->fenv;
   switch(Tcutil::compress((type_t)e->topt)) {
@@ -1743,7 +1743,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	e->annot = new NotZero(copy_relns(Core::heap_region,relns)); break;
       case &AddressOf(&Place(root,flds2)):
 	// if this place was expanded out, we can't be sure it's non-zero
-	if (expanded_place) {
+	if (expanded_place_possibly_null) {
 	  DEBUG_PRINT("--requiring null check on expanded place for %s\n",
 		      exp2string(e));
 	  e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
@@ -1844,6 +1844,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	anal_Lexp(env,inflow,
 		  Tcutil::is_noalias_pointer((type_t)e1->topt,true),
 		  passthrough_consumes,e1);
+      let possibly_null = true;
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
 	let old_rval = lookup_place(fd,p);
@@ -1856,6 +1857,9 @@ static $(flow_t<`r>,absLval_t<`r>)
 	  // We don't have to indicate this is an expanded location
 	  // because we would have inserted the check on a prior path.
 	  return anal_derefL(env,f,e1,f,old_rval,passthrough_consumes,false,flds);
+	case &NotZeroAll:
+	case &NotZeroThis:
+	  possibly_null = false; fallthru;
         default:
 	  DEBUG_PRINT("expanding unique %s found place ",exp2string(e1));
 	  DEBUG_PRINT_F(print_place,p);
@@ -1881,7 +1885,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	  // Because we expanded this out, we can't rely on it to be not
 	  // null, so we indicate as much to anal_derefL
           return anal_derefL(env,outflow,e1,outflow,res,passthrough_consumes,
-			     true,flds);
+			     possibly_null,flds);
         }
       default: break;
       }

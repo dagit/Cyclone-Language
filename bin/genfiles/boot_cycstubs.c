@@ -980,16 +980,16 @@ int Cyc_putw(int x,struct Cyc___cycFILE*f){
 return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[14]="FileOpenError";
 # 166
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
-struct Cyc___cycFILE*f=Cyc_fopen((const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1)),(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1)));
+struct Cyc___cycFILE*f=({const char*_tmp12=(const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1));Cyc_fopen(_tmp12,(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1)));});
 if(f == 0){
 struct _dyneither_ptr fn=({unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));char*_tmpB=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpA + 1));struct _dyneither_ptr _tmpD=_tag_dyneither(_tmpB,sizeof(char),_tmpA + 1);{unsigned int _tmpC=_tmpA;unsigned int i;for(i=0;i < _tmpC;i ++){_tmpB[i]=(char)((const char*)fname.curr)[(int)i];}_tmpB[_tmpC]=(char)0;}_tmpD;});
-(int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8[0]=({struct Cyc_FileOpenError_exn_struct _tmp9;_tmp9.tag=Cyc_FileOpenError;_tmp9.f1=fn;_tmp9;});_tmp8;}));}
+(int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp8=_cycalloc(sizeof(*_tmp8));({struct Cyc_FileOpenError_exn_struct _tmp13=({struct Cyc_FileOpenError_exn_struct _tmp9;_tmp9.tag=Cyc_FileOpenError;_tmp9.f1=fn;_tmp9;});_tmp8[0]=_tmp13;});_tmp8;}));}
 # 172
 return f;}
 # 175
 struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError};
 void Cyc_file_close(struct Cyc___cycFILE*f){
-if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
+if(({Cyc_fclose(f)!= 0;}))(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
 char* getcwd(char*buf,unsigned long size);static char _tmp10[29]="getcwd: invalid buf argument";
 # 185
