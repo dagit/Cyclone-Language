@@ -1048,11 +1048,11 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 65 "tcutil.h"
 void*Cyc_Tcutil_compress(void*t);
-# 300 "tcutil.h"
+# 301 "tcutil.h"
 int Cyc_Tcutil_is_temp_tvar(struct Cyc_Absyn_Tvar*);
-# 302
+# 303
 void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*);
-# 341
+# 342
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 54 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;

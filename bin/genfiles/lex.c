@@ -857,16 +857,16 @@ struct _dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dyneither_ptr
 # 73
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
 # 107 "string.h"
-struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Xarray_Xarray{struct _RegionHandle*r;struct _dyneither_ptr elmts;int num_elmts;};
-# 39 "xarray.h"
+struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
+# 38 "xarray.h"
 typedef struct Cyc_Xarray_Xarray*Cyc_Xarray_xarray_t;
-# 43
+# 42
 void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);
-# 52
+# 51
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*,int,void*);
-# 67
+# 66
 void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
-# 70
+# 69
 int Cyc_Xarray_add_ind(struct Cyc_Xarray_Xarray*,void*);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};
 # 32 "lineno.h"
 typedef struct Cyc_Lineno_Pos*Cyc_Lineno_pos_t;extern char Cyc_Position_Exit[5];struct Cyc_Position_Exit_exn_struct{char*tag;};
@@ -1040,7 +1040,7 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 42 "tcutil.h"
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 341 "tcutil.h"
+# 342 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 43 "lex.cyl"
 void Cyc_yyerror(struct _dyneither_ptr s){

@@ -1017,7 +1017,7 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 38 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 341 "tcutil.h"
+# 342 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct _tuple10{void*f1;void*f2;};struct Cyc_Tcexp_TestEnv{struct _tuple10*eq;int isTrue;};
 # 39 "tcexp.h"
 typedef struct Cyc_Tcexp_TestEnv Cyc_Tcexp_testenv_t;

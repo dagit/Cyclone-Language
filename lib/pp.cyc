@@ -113,6 +113,7 @@ static void dump_out(FILE @f, alist_t<stringptr_t> al) {
       break;
     }
   }
+  Xarray::reuse(xarr);
 }
 
 // Dump a doc to a file descriptor

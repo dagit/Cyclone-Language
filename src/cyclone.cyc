@@ -938,6 +938,7 @@ static void process_file(string_t<`H> filename) {
   if (system((const char @)cmd) != 0) {
     compile_failure = true;
     fprintf(stderr,"\nError: preprocessing\n");
+    if (!stop_after_cpp_r) remove_file(preprocfile);
     return;
   }
   if (stop_after_cpp_r) return;

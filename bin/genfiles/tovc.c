@@ -1033,9 +1033,9 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 65 "tcutil.h"
 void*Cyc_Tcutil_compress(void*t);
-# 167
+# 168
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 341 "tcutil.h"
+# 342 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 35 "toc.h"
 struct _tuple0*Cyc_Toc_temp_var();

@@ -1012,15 +1012,15 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 104
+# 105
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 158
+# 159
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 263 "tcutil.h"
+# 264 "tcutil.h"
 int Cyc_Tcutil_is_noalias_pointer(void*t);
-# 309
+# 310
 int Cyc_Tcutil_bits_only(void*t);
-# 341
+# 342
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

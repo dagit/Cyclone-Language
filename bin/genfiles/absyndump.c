@@ -1018,7 +1018,7 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 341 "tcutil.h"
+# 342 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 27 "cyclone.h"
 enum Cyc_Cyclone_C_Compilers{Cyc_Cyclone_Gcc_c  = 0,Cyc_Cyclone_Vc_c  = 1};

@@ -30,13 +30,12 @@ namespace Xarray {
   /*** Defines namespace Xarray, which implements a datatype of
        extensible arrays. */
 
-struct Xarray<`a::B,`r::R> {
-  region_t<`r> r;
-  `a ?`r elmts;
+struct Xarray<`a::B> {
+  `a ?`U elmts;
   int num_elmts;
 };
 
-typedef struct Xarray<`a,`r> @`r xarray_t<`a,`r>;
+typedef struct Xarray<`a> @`r xarray_t<`a,`r>;
   /** An [xarray_t] is an extensible array. */
 extern int length(xarray_t<`a>);
   /** [length(a)] returns the length of extensible array [a]. */

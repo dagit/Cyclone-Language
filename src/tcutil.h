@@ -72,6 +72,7 @@ extern bool coerce_uint_typ(tenv_t, exp_t);
 extern bool coerce_sint_typ(tenv_t, exp_t);
 extern bool coerce_use(tenv_t, exp_t, type_t);
 extern bool coerceable(type_t); // true if numeric or character
+extern bool is_arithmetic_type(type_t); // true if an arithmetic type
 // true when expressions of type t1 can be implicitly cast to t2
 extern bool silent_castable(tenv_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first

@@ -1056,52 +1056,52 @@ void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void*Cyc_Tcutil_compress(void*t);
 # 68
 int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*);
-# 94
+# 95
 int Cyc_Tcutil_is_function_type(void*t);
-# 102
+# 103
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 106
+# 107
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ek;
-# 109
+# 110
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 137
+# 138
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 151
+# 152
 void Cyc_Tcutil_explain_failure();
-# 153
+# 154
 int Cyc_Tcutil_unify(void*,void*);
-# 167
+# 168
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 177
+# 178
 void Cyc_Tcutil_check_bitfield(unsigned int loc,struct Cyc_Tcenv_Tenv*te,void*field_typ,struct Cyc_Absyn_Exp*width,struct _dyneither_ptr*fn);
-# 207 "tcutil.h"
+# 208 "tcutil.h"
 void Cyc_Tcutil_check_valid_toplevel_type(unsigned int,struct Cyc_Tcenv_Tenv*,void*);
-# 209
+# 210
 void Cyc_Tcutil_check_fndecl_valid_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 217
+# 218
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,void*);
-# 221
+# 222
 void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
-# 273
+# 274
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 298
+# 299
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 309
+# 310
 int Cyc_Tcutil_bits_only(void*t);
-# 312
+# 313
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 319
+# 320
 int Cyc_Tcutil_supports_default(void*);
-# 330
+# 331
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 334
+# 335
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 341
+# 342
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

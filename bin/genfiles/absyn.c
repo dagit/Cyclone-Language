@@ -1243,15 +1243,15 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 102
+# 103
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
-# 104
+# 105
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 129
+# 130
 extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
-# 137
+# 138
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 341 "tcutil.h"
+# 342 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 25 "cyclone.h"
 extern int Cyc_Cyclone_tovc_r;
@@ -1508,12 +1508,12 @@ static struct _dyneither_ptr Cyc_Absyn_Array_bounds_str={_tmp5B,_tmp5B,_tmp5B + 
 static struct _dyneither_ptr Cyc_Absyn_Match_Exception_str={_tmp5C,_tmp5C,_tmp5C + 16};static struct _tuple0 Cyc_Absyn_Match_Exception_pr={{.Abs_n={2,0}},& Cyc_Absyn_Match_Exception_str};struct _tuple0*Cyc_Absyn_Match_Exception_name=& Cyc_Absyn_Match_Exception_pr;static struct Cyc_Absyn_Datatypefield Cyc_Absyn_Match_Exception_tuf_v={& Cyc_Absyn_Match_Exception_pr,0,0,Cyc_Absyn_Extern};struct Cyc_Absyn_Datatypefield*Cyc_Absyn_Match_Exception_tuf=& Cyc_Absyn_Match_Exception_tuf_v;static char _tmp5D[10]="Bad_alloc";
 static struct _dyneither_ptr Cyc_Absyn_Bad_alloc_str={_tmp5D,_tmp5D,_tmp5D + 10};static struct _tuple0 Cyc_Absyn_Bad_alloc_pr={{.Abs_n={2,0}},& Cyc_Absyn_Bad_alloc_str};struct _tuple0*Cyc_Absyn_Bad_alloc_name=& Cyc_Absyn_Bad_alloc_pr;static struct Cyc_Absyn_Datatypefield Cyc_Absyn_Bad_alloc_tuf_v={& Cyc_Absyn_Bad_alloc_pr,0,0,Cyc_Absyn_Extern};struct Cyc_Absyn_Datatypefield*Cyc_Absyn_Bad_alloc_tuf=& Cyc_Absyn_Bad_alloc_tuf_v;
 # 346
-static struct Cyc_List_List Cyc_Absyn_exn_l0={& Cyc_Absyn_Null_Exception_tuf_v,0};
-static struct Cyc_List_List Cyc_Absyn_exn_l1={& Cyc_Absyn_Array_bounds_tuf_v,& Cyc_Absyn_exn_l0};
-static struct Cyc_List_List Cyc_Absyn_exn_l2={& Cyc_Absyn_Match_Exception_tuf_v,& Cyc_Absyn_exn_l1};
-static struct Cyc_List_List Cyc_Absyn_exn_l3={& Cyc_Absyn_Bad_alloc_tuf_v,& Cyc_Absyn_exn_l2};
+static struct Cyc_List_List Cyc_Absyn_exn_l0={(void*)& Cyc_Absyn_Null_Exception_tuf_v,0};
+static struct Cyc_List_List Cyc_Absyn_exn_l1={(void*)& Cyc_Absyn_Array_bounds_tuf_v,& Cyc_Absyn_exn_l0};
+static struct Cyc_List_List Cyc_Absyn_exn_l2={(void*)& Cyc_Absyn_Match_Exception_tuf_v,& Cyc_Absyn_exn_l1};
+static struct Cyc_List_List Cyc_Absyn_exn_l3={(void*)& Cyc_Absyn_Bad_alloc_tuf_v,& Cyc_Absyn_exn_l2};
 # 351
-static struct Cyc_Core_Opt Cyc_Absyn_exn_ol={& Cyc_Absyn_exn_l3};
+static struct Cyc_Core_Opt Cyc_Absyn_exn_ol={(void*)& Cyc_Absyn_exn_l3};
 static struct Cyc_Absyn_Datatypedecl Cyc_Absyn_exn_tud_v={Cyc_Absyn_Extern,& Cyc_Absyn_exn_name_v,0,& Cyc_Absyn_exn_ol,1};
 # 354
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud=& Cyc_Absyn_exn_tud_v;
@@ -1539,7 +1539,7 @@ struct _tuple0*Cyc_Absyn_datatype_scanf_arg_qvar=& Cyc_Absyn_datatype_scanf_arg_
 # 383
 static struct _dyneither_ptr Cyc_Absyn_uniquergn_str={_tmp62,_tmp62,_tmp62 + 14};static char _tmp63[5]="Core";
 static struct _dyneither_ptr Cyc_Absyn_Core_str={_tmp63,_tmp63,_tmp63 + 5};
-static struct Cyc_List_List Cyc_Absyn_uniquergn_nmspace={& Cyc_Absyn_Core_str,0};
+static struct Cyc_List_List Cyc_Absyn_uniquergn_nmspace={(void*)& Cyc_Absyn_Core_str,0};
 # 387
 static struct _tuple0 Cyc_Absyn_uniquergn_qvar_p={{.Abs_n={2,& Cyc_Absyn_uniquergn_nmspace}},& Cyc_Absyn_uniquergn_str};
 # 389

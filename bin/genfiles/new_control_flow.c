@@ -1014,21 +1014,21 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 98
+# 99
 void*Cyc_Tcutil_pointer_elt_type(void*t);
-# 158
+# 159
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 167
+# 168
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 231 "tcutil.h"
+# 232 "tcutil.h"
 int Cyc_Tcutil_is_bound_one(union Cyc_Absyn_Constraint*b);
-# 263
+# 264
 int Cyc_Tcutil_is_noalias_pointer(void*t);
-# 273
+# 274
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 326
+# 327
 int Cyc_Tcutil_is_noreturn(void*);
-# 341
+# 342
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct _tuple11{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple11 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct Cyc_CfFlowInfo_VarRoot_CfFlowInfo_Root_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_CfFlowInfo_MallocPt_CfFlowInfo_Root_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;};struct Cyc_CfFlowInfo_InitParam_CfFlowInfo_Root_struct{int tag;int f1;void*f2;};

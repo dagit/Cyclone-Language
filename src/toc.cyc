@@ -3439,13 +3439,15 @@ DynCast:
           for (let fields2 = fields; fields2 != NULL; fields2 = fields2->tl) {
             if((*fields2->hd)[0] == sdfields->hd) {
               let &$(field,fieldexp) = fields2->hd;
-              let fieldtyp = field->type;
-              let fieldexp_typ = (type_t)fieldexp->topt;
+              let fieldtyp = typ_to_c(field->type);
+              let fieldexp_typ = typ_to_c((type_t)fieldexp->topt);
               exp_to_c(nv,fieldexp);
-              if (is_void_star_or_boxed_tvar(fieldtyp) && 
-                  !is_pointer_or_boxed_tvar(fieldexp_typ))
-                fieldexp->r =
-                  cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
+              // must cast when the types don't match up 
+              if (!unify(fieldtyp, fieldexp_typ)) 
+                // unless they are both arithmetic types -- C can handle this.
+                if (!is_arithmetic_type(fieldtyp) ||
+                    !is_arithmetic_type(fieldexp_typ))
+                fieldexp = cast_it(fieldtyp, copy_exp(fieldexp));
               newdles = new List(new $(NULL,fieldexp), newdles);
               break;
             }
@@ -5034,7 +5036,10 @@ list_t<decl_t> toc(list_t<decl_t> ds) {
             bounds_checks_eliminated, total_bounds_checks);
 #endif
     // free the state
-    let TocState{.dyn = dyn,...} = *toc_state;
+    let TocState{.dyn = dyn,.temp_labels = tls, ...} = *toc_state;
+    { region d = open(dyn);
+      Xarray::reuse(tls);
+    }
     Core::free_dynregion(dyn);
   }
   return imp_rev(result_decls);
