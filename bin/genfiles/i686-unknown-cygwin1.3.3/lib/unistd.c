@@ -229,23 +229,24 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_option{ struct _tagged_arr name; int
-has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
-extern int close( int); extern void _exit( int); extern int getpid(); extern int
-getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
-unsigned short, unsigned short); extern int fsync( int); extern int ftruncate(
-int, int); extern int dup( int); extern int dup2( int, int); extern
-unsigned short getuid(); extern int setuid( unsigned short uid); extern
-unsigned short geteuid(); extern int seteuid( unsigned short euid); extern
-unsigned short getgid(); extern int setgid( unsigned short gid); extern
-unsigned short getegid(); extern int setegid( unsigned short egid); extern int
-nice( int); extern int pause(); extern int pipe( int* filedes); extern int lseek(
-int filedes, int offset, int whence); extern unsigned int sleep( unsigned int);
-int Cyc_Std_access( struct _tagged_arr, int); int Cyc_Std_chdir( struct
-_tagged_arr); int Cyc_Std_chown( struct _tagged_arr, unsigned short,
-unsigned short); struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
-unsigned int size); int Cyc_Std_execl( struct _tagged_arr path, struct
-_tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
+int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
+tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
+__z); struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag;
+int val; } ; extern unsigned int alarm( unsigned int seconds); extern int close(
+int); extern void _exit( int); extern int getpid(); extern int getppid(); extern
+int fork(); extern int fchdir( int); extern int fchown( int, unsigned short,
+unsigned short); extern int fsync( int); extern int ftruncate( int, int); extern
+int dup( int); extern int dup2( int, int); extern unsigned short getuid();
+extern int setuid( unsigned short uid); extern unsigned short geteuid(); extern
+int seteuid( unsigned short euid); extern unsigned short getgid(); extern int
+setgid( unsigned short gid); extern unsigned short getegid(); extern int setegid(
+unsigned short egid); extern int nice( int); extern int pause(); extern int pipe(
+int* filedes); extern int lseek( int filedes, int offset, int whence); extern
+unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
+int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
+unsigned short, unsigned short); struct _tagged_arr Cyc_Std_getcwd( struct
+_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
+struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
 _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
 struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
 int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int

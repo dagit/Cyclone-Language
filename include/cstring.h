@@ -73,6 +73,7 @@ extern mstring_t<`r> rstr_sepstr(region_t<`r>,list_t<stringptr_t>,string_t);
 extern mstring_t<`r> strcpy(mstring_t<`r> dest,string_t src); 
 extern mstring_t<`r> strncpy(mstring_t<`r>,string_t,size_t);
 extern mstring_t<`r> zstrncpy(mstring_t<`r>,string_t,size_t);
+#define memcpy(d,s,z) *(d) = *(s) /* hack for now; won't work for strings */
 // Allocating
 extern mstring_t     expand(string_t s, size_t sz); /* like realloc */
 extern mstring_t<`r> rexpand(region_t<`r>,string_t s, size_t sz);

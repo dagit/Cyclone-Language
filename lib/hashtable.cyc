@@ -133,6 +133,15 @@ void iter(void f(`a,`b), table_t<`a,`b> t) {
       f(iter->hd[0][0],iter->hd[0][1]);
 }
 
+void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env)
+{
+  list_t<$(`a,`b)@> ?odata   = t->tab;
+  int             osize    = odata.size;
+  for (int i = 0; i<osize; i++) 
+    for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
+      f(iter->hd[0][0],iter->hd[0][1],env);
+}  
+
 // debugging
 void print_table_map(table_t<`a,`b> t, 
                      void prn_key(`a), void prn_val(`b)){

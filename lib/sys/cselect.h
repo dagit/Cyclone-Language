@@ -23,7 +23,7 @@ typedef	struct _types_fd_set {
 #define	FD_ISSET(n,p) ((p)->fds_bits[(n)/NFDBITS] & (1L << ((n) % NFDBITS)))
 #define	FD_ZERO(p) for(int i=0;i<howmany(FD_SETSIZE,NFDBITS);i++)(p)->fds_bits[i]=0
 
-int select(int n, fd_set *readfds, fd_set *writefds,
-           fd_set *exceptfds, struct timeval *timeout);
+extern "C" int select(int n, fd_set *readfds, fd_set *writefds,
+		      fd_set *exceptfds, struct timeval *timeout);
 }
 #endif

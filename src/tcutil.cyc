@@ -3227,9 +3227,6 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
       if (!cnst_exp(te,false,es->hd))
         return false;
     return true;
-    // eventually -- should support comprehensions for initializers
-  //case Comprehension_e(vd,e1,e2):
-  //return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
   default:
     return false;
   }

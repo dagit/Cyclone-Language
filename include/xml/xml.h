@@ -73,7 +73,7 @@ tunion content {
 // various routines to help document processing */
 
 EXTERN_DEFINITION 
-xtunion exn { EXTERN_DEFINITION procXMLdocFailed };
+xtunion exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
   /** [procXMLdocFailed] is thrown if one of the following routines
       fails to process the document as specified. **/
 
@@ -95,6 +95,12 @@ getElemData(content_t doc, string_t tagname);
       single element with tag [tag], and returns the contents and
       attributes of that element.  On error, a [parseConfigFailed]
       exception is thrown.  **/
+
+extern list_t<content_t,`r> 
+clearWhitespaceContent(list_t<content_t,`r> docs);
+  /** [clearWhitespaceContent(docs)] removes all occurences of
+      Chardata variants in docs that have only whitespace
+      content. **/
 
 }
 

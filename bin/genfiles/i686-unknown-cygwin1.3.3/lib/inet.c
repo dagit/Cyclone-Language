@@ -229,9 +229,11 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in=
-0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
-} ; static const int Cyc_Std_SA_socklenptr= 1; struct Cyc_Std_SA_socklenptr_struct{
+int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
+tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
+__z); struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in= 0;
+struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1; }
+; static const int Cyc_Std_SA_socklenptr= 1; struct Cyc_Std_SA_socklenptr_struct{
 int tag; unsigned int* f1; } ; static const int Cyc_Std_SA_socklen= 2; struct
 Cyc_Std_SA_socklen_struct{ int tag; unsigned int f1; } ; extern int socket( int
 domain, int type, int protocol); extern int socketpair( int domain, int type,

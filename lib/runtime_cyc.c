@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h> // for memcpy
 #include <stdarg.h>
-#include <errno.h>
+// #include <errno.h>
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.  Note, it now includes
@@ -31,7 +31,7 @@
 
 extern void exit(int);
 
-int *__errno(void) { return &errno; }
+// int *__errno(void) { return &errno; }
 
 //////////////////////////////////////////////////////////
 // First, definitions for things declared in cyc_include.h

@@ -1225,7 +1225,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
   return res_t2;
 }
 
- // {for x < e1 : e2}
+ // {for [te] < [bound] : [body]}
 static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
                               vardecl_t vd,exp_t bound,exp_t body) {
   tcExp(te,NULL,bound);
@@ -1240,13 +1240,6 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
   if (te->le != NULL) {
     te = Tcenv::new_block(loc,te);
     te = add_local_var(loc, te, vd);
-  } else {
-    // both the bound and the body must be constant expressions at the
-    // top-level.  
-    if (!is_const_exp(te,bound))
-      terr(bound->loc,"bound is not constant");
-    if (!is_const_exp(te,body))
-      terr(bound->loc,"body is not constant");
   }
   _ pinfo;
   let topt2 = NULL;
@@ -1269,6 +1262,14 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
    }
    // type-check the body in the new environment
    type_t t = tcExp(te,topt2,body);
+   if (te->le == NULL) {
+     // both the bound and the body must be constant expressions at the
+     // top-level.  
+     if (!is_const_exp(te,bound))
+       terr(bound->loc,"bound is not constant");
+     if (!is_const_exp(te,body))
+       terr(bound->loc,"body is not constant");
+   }
    return new ArrayType(t,(tqopt == NULL) ? empty_tqual() : *tqopt, bound);
 }
 

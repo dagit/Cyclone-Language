@@ -110,14 +110,6 @@ static bool is_cyclone_sourcefile(string_t s) {
   else return (strcmp(s+(len-4),".cyc") == 0);
 }
 
-static list_t<stringptr_t> cyclone_lib_path = NULL;
-static void add_cyclone_lib_path(string_t s) {
-  let len = strlen(s);
-  if (len <= 2) return;
-  let dir = (string_t)substring(s,2,len-2);
-  cyclone_lib_path = new List(new dir,cyclone_lib_path);
-}
-
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
 static void add_ccarg(string_t<`H> s) {
@@ -125,6 +117,14 @@ static void add_ccarg(string_t<`H> s) {
 }
 static void add_ccarg2(string_t<`H> flag,string_t<`H> arg) {
   ccargs = new List(new arg, new List(new flag,ccargs));
+}
+
+static list_t<stringptr_t> cyclone_lib_path = NULL;
+static void add_cyclone_lib_path(string_t s) {
+  let len = strlen(s);
+  if (len <= 2) return;
+  let dir = (string_t)substring(s,2,len-2);
+  cyclone_lib_path = new List(new dir,cyclone_lib_path);
 }
 
 // Ideally we would simply pass library args as ccargs, preserving
@@ -874,6 +874,9 @@ int main(int argc, string_t<`H> ?`H argv) {
   string_t def_lib_path = Cstring_to_string(Cdef_lib_path);
   if (strlen(def_lib_path) > 0)
     cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
+  /* Look for other cyclone libraries during linking */
+  if (cyclone_lib_path != NULL)
+    add_ccarg2((string_t)"-L",*cyclone_lib_path->hd);
   cyclone_lib_path = List::imp_rev(cyclone_lib_path);
   /* The absolute file name is kept in a global variable */
   cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");
@@ -896,7 +899,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
   libargs = rev(libargs);
   let libargs_string = str_sepstr(new List(new ((string_t)""),
-                                                   List::map(sh_escape_stringptr,libargs)), " ");
+					   List::map(sh_escape_stringptr,libargs)), " ");
 
   let stdlib;
   let stdlib_string;
@@ -994,8 +997,8 @@ int main(int argc, string_t<`H> ?`H argv) {
 	    comp,
             (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
-            stdlib_string,
-            libargs_string);
+            libargs_string,
+	    stdlib_string);
   if (v_r) fprintf(stderr,"%s\n",cccmd);
   if (system(string_to_Cstring(cccmd)) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");

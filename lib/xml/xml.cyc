@@ -19,6 +19,8 @@
 #define _XML_CYC
 #include "xml.h"
 #include <string.h>
+#include <ctype.h>
+#include <stdio.h>
 
 namespace Xml;
 
@@ -33,20 +35,45 @@ getElemData(content_t doc, string_t tagname)
 {
   switch (doc) {
   case &Element(e):
+    _ elem;
     switch (e) {
     case &StartEnd(nm,atrs,content):
       if (!strcmp(nm,tagname)) {
 	return $(content,atrs);
       }
+      elem = nm;
       break;
-    default:
-      break;
+    case &Empty(nm,attrs):
+      if (!strcmp(nm,tagname)) {
+	return $(NULL,attrs);
+      }
+      elem = nm;
     }
-    break;
-  default:
-    break;
+    throw new 
+      procXMLdocFailed
+      (strconcat
+       (strconcat
+	(strconcat
+	 ((string_t)"getElemData: tag = ",tagname),
+	 (string_t)" != "),
+	elem));
+
+  case &Chardata(c):
+    throw new 
+      procXMLdocFailed(strconcat((string_t)"Chardata is not Elem ",tagname));
+  case &Reference(_):
+    throw new 
+      procXMLdocFailed(strconcat((string_t)"Reference is not Elem ",tagname));
+  case &Cdsect(_):
+    throw new 
+      procXMLdocFailed(strconcat((string_t)"Cdsect is not Elem ",tagname));
+  case &Pi(_):
+    throw new 
+      procXMLdocFailed(strconcat((string_t)"Pi is not Elem ",tagname));
+  case &Comment(_):
+    throw new 
+      procXMLdocFailed(strconcat((string_t)"Comment is not Elem ",tagname));
   }
-  throw procXMLdocFailed;
 }
 
 /* [getAttributes(a,n)] returns the attribute values from [a] that
@@ -64,10 +91,12 @@ getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
 	res = new List(val,res);
       }
       else
-	throw procXMLdocFailed;
+	throw new procXMLdocFailed
+	  (strconcat((string_t)"Failed to match attribute ",*(names->hd)));
     }
     else
-      throw procXMLdocFailed;
+      throw new procXMLdocFailed
+	(strconcat((string_t)"Attribute is missing: ",*(names->hd)));
     names = names->tl;
     atrs = atrs->tl;
   }
@@ -81,5 +110,44 @@ attvalue_t getAttribute(attribute_t atr, name nm) {
   if (!strcmp(anm,nm))
     return aval;
   else
-    throw procXMLdocFailed;
+    throw new procXMLdocFailed
+      (strconcat((string_t)"Failed to match attribute ",nm));
+}
+
+/* [clearWhitespaceContent(d)] removes all Chardata doc's that
+   are sub-docs of [d] that consist only of whitespace. 
+   Modifies the tree in-place. */
+list_t<content_t,`r> clearWhitespaceContent(list_t<content_t,`r> docs) {
+  if (docs != NULL) {
+    switch (docs->hd) {
+    case &Element(elem):
+      switch (elem) {
+      case &StartEnd(nm,atts,*subdocs):
+	let res_subdocs = clearWhitespaceContent(*subdocs);
+	*subdocs = res_subdocs;
+	break;
+      default:
+	break;
+      }
+      break;
+
+    case &Chardata(s):
+      bool hasNonSpace = false;
+      int len = strlen(s);
+      for (int i = 0; i<len && !hasNonSpace; i++)
+	if (isspace(s[i]) == 0) hasNonSpace = true;
+      if (!hasNonSpace)
+	return clearWhitespaceContent(docs->tl);
+      break;
+      
+    case &Reference(_):
+    case &Cdsect(_):
+    case &Pi(_):
+    case &Comment(_):
+      break;
+    }
+    let tl = clearWhitespaceContent(docs->tl);
+    docs->tl = tl;
+  }
+  return docs;
 }

@@ -27,5 +27,13 @@ struct timeval {
   long tv_usec;
 };
 
+struct timezone {
+  int tz_minuteswest;
+  int tz_dsttime;
+};
+
+extern "C" int gettimeofday(struct timeval @__p,struct timezone *__z);
+
 }
+
 #endif

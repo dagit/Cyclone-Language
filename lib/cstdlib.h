@@ -28,11 +28,12 @@
 
 /* Get size_t from <stddef.h> */
 #include <cstddef.h>
+#include <core.h>
 
 namespace Std {
 extern "C" {
 
-int system(Cstring);
+extern int system(Cstring);
 
 /* Returned by `div'.  */
 typedef struct _Div

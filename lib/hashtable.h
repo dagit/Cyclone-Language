@@ -70,6 +70,9 @@ extern int hash_stringptr(stringptr_t p);
 extern void iter(void f(`a,`b), table_t<`a,`b> t);
   /** [iter(f,t)] applies [f] to each key/value pair in [t]. */
 
+extern void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env);
+  /** [iter\_c(f,t,e)] calls [f(k,v,e)] for each key/value pair [(k,v)]. */
+
 // debugging
 extern 
 void print_table_map(table_t<`a,`b> t, void prn_key(`a), 
