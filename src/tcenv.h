@@ -168,10 +168,6 @@ extern bool in_lhs(tenv_t te);
 extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
                                      
-
-extern stmt_t get_encloser(tenv_t);
-extern tenv_t<`g,`r> set_encloser(region_t<`r>,tenv_t<`g,`r2>,stmt_t:{`r2}>`r);
-
 extern tenv_t<`g,`r> new_block(region_t<`r>,seg_t,tenv_t<`g,`r2>:{`r2}>`r);
 extern tenv_t<`g,`r> new_named_block(region_t<`r>,seg_t,tenv_t<`g,`r2>,tvar_t name:{`r2}>`r);
 extern tenv_t<`g,`r> new_outlives_constraints(region_t<`r>, tenv_t<`g,`r2> te, list_t<$(type_t,type_t)@> cs, seg_t loc:{`r2}>`r);

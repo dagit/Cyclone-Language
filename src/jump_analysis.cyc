@@ -38,6 +38,7 @@
 #include <hashtable.h>
 #include "absyn.h"
 #include "tcutil.h"
+#include "tcpat.h"
 #include "jump_analysis.h"
 using Absyn;
 using List;
@@ -48,6 +49,7 @@ static datatype Jumpee {
   CaseEnd_j;
   FnEnd_j;
   Stmt_j(stmt_t);
+  Fallthru_j(switch_clause_t); // pat_vars are funky
   Return_j;
   Lab_j(var_t);
 };
@@ -59,6 +61,7 @@ datacon(Jumpee,Return_j);
 
 static struct SaveEnv {
   int            try_depth;
+  int            pat_var_depth;
   list_t<stmt_t> enclosers;
 };
 typedef struct SaveEnv save_env_t;
@@ -163,7 +166,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   }
 }
 static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
-  // encloser for clause changes only if it has pattern-vars, which the
+  // encloser and pat_var_depth changes only if it has pattern-vars, which the
   // type-checker sets up for us!
   env.break_stmt = env.next_stmt;
   env.next_stmt  = &CaseEnd_j_val;
@@ -172,10 +175,12 @@ static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
     let wc = sc->where_clause;
     if(wc != NULL)
       anal_exp(env,wc);
-    bool has_vars = sc->pat_vars->v != NULL; // kludgy?
-    if(has_vars)
-      env=add_encloser(sc->body,env);
-    anal_stmt(env,sc->body);
+    let env1 = env;
+    if(Tcpat::has_vars(sc->pat_vars)) {
+      env1=add_encloser(sc->body,env1);
+      ++env1.save_env.pat_var_depth;
+    }
+    anal_stmt(env1,sc->body);
   }
 }
 static void anal_stmt(senv_t env, stmt_t s) {
@@ -254,7 +259,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
   case &Fallthru_s(es,clauseopt): 
     // assuming type-checker (still) sets clauseopt!!
     anal_exps(env,es);
-    env.fenv->jumpers = new List(new $(s,new Stmt_j((*clauseopt)->body)),
+    env.fenv->jumpers = new List(new $(s,new Fallthru_j(*clauseopt)),
 				 env.fenv->jumpers);
     break; 
   case &Switch_s(e,scs,_): 
@@ -271,11 +276,14 @@ static void anal_stmt(senv_t env, stmt_t s) {
     // in C, declaration is in scope in initializer, but shouldn't matter here
     // unlike type-checker, we do not group adjacent declarations as one block
     // since all we are worried about is that you do not jump into scope.
-    let env = add_encloser(s,env);
+    env = add_encloser(s,env);
     switch(d->r) {
     case &Region_d(_,_,_,eo): 
-      // we push an exception handler!
-      if(eo != NULL) anal_exp(env,eo);
+      // we push an exception handler and count this as a pattern?!
+      if(eo != NULL) {
+	anal_exp(env,eo);
+	++env.save_env.pat_var_depth;
+      }
       if(!no_regions)
 	++env.save_env.try_depth;
       break;
@@ -285,7 +293,10 @@ static void anal_stmt(senv_t env, stmt_t s) {
     case &Fn_d(fd): // no jumping out of inner functions
       anal_fd(env.fenv->tables,fd); 
       break; 
-    case &Let_d(_,_,e,_): anal_exp(env,e); break;
+    case &Let_d(_,_,e,_): // assume pattern always has vars (so can't jump in)
+      anal_exp(env,e); 
+      ++env.save_env.pat_var_depth;
+      break;
 
     case &Letv_d(...):
     case &Typedef_d(...):
@@ -299,7 +310,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
     case &Namespace_d(_,_): // ???
     case &Using_d(_,_): break; // ???
     }
-    anal_stmt(add_encloser(s,env),s1);
+    anal_stmt(env,s1);
     break; 
 
   case &ResetRegion_s(e): anal_exp(env,e); break;
@@ -315,19 +326,21 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 		     .continue_stmt = &NotLoop_j_val,
 		     .break_stmt    = &NotLoop_j_val,
 		     .next_stmt     = &FnEnd_j_val,
-		     .save_env = SaveEnv{.try_depth = 0,
-					 .enclosers = NULL }};
+		     .save_env = SaveEnv{.try_depth     = 0,
+					 .pat_var_depth = 0,
+					 .enclosers     = NULL }};
   anal_stmt(senv,fd->body);
 
-  table_t<stmt_t,int>            pop_table  = make_ptr_table();
-  //  table_t<stmt_t,list_t<stmt_t>> pred_table = make_ptr_table();
-  table_t<stmt_t,stmt_opt_t>     succ_table = make_ptr_table();
+  table_t<stmt_t,int>        pop_table     = make_ptr_table();
+  table_t<stmt_t,stmt_opt_t> succ_table    = make_ptr_table();
+  table_t<stmt_t,int>        pat_pop_table = make_ptr_table();
 
   let stmt_info = fenv->stmt_info;
   for(let jumpers=fenv->jumpers; jumpers!=NULL; jumpers=jumpers->tl) {
     let &$(src_stmt,dest) = jumpers->hd;
-    let &SaveEnv{.try_depth=src_depth,.enclosers=src_enclose} = 
-      Hashtable::lookup(stmt_info,src_stmt);
+    let &SaveEnv{.try_depth=src_trydepth,
+		 .pat_var_depth=src_pvdepth,
+		 .enclosers=src_enclose}= Hashtable::lookup(stmt_info,src_stmt);
       switch (dest) {
       case &NotLoop_j: 
 	Tcutil::terr(src_stmt->loc,"jump has no target"); 
@@ -340,7 +353,8 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	Hashtable::insert(succ_table,src_stmt,NULL);
 	fallthru;
       case &Return_j:
-	Hashtable::insert(pop_table,src_stmt,src_depth);
+	Hashtable::insert(pop_table,    src_stmt,src_trydepth);
+	Hashtable::insert(pat_pop_table,src_stmt,src_pvdepth);
 	break;
       case &Lab_j(lab): 
 	let dest_stmt;
@@ -365,19 +379,29 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	}
 	fallthru(dest_stmt);
       case &Stmt_j(dest_stmt): 
-	let &SaveEnv{.try_depth=dest_depth,...} = 
+	let &SaveEnv{.try_depth=dest_trydepth,.pat_var_depth=dest_pvdepth,...}= 
 	  Hashtable::lookup(stmt_info, dest_stmt);
-        Hashtable::insert(pop_table,  src_stmt, src_depth - dest_depth);
+        Hashtable::insert(pop_table, src_stmt, src_trydepth - dest_trydepth);
+        Hashtable::insert(pat_pop_table, src_stmt, src_pvdepth - dest_pvdepth);
 	Hashtable::insert(succ_table, src_stmt, dest_stmt);
-// 	let l = NULL;
-// 	Hashtable::try_lookup(pred_table, dest_stmt, &l);
-// 	Hashtable::insert(pred_table, dest_stmt, new List(src_stmt,l));
+	break; 
+      case &Fallthru_j(dest_clause): 
+	let &SaveEnv{.try_depth=dest_trydepth,.pat_var_depth=dest_pvdepth,...}= 
+	  Hashtable::lookup(stmt_info, dest_clause->body);
+        Hashtable::insert(pop_table, src_stmt, src_trydepth - dest_trydepth);
+	int pv_pop;
+	if(Tcpat::has_vars(dest_clause->pat_vars))
+	  pv_pop = 1 + src_pvdepth - dest_pvdepth;
+	else
+	  pv_pop = src_pvdepth - dest_pvdepth;
+        Hashtable::insert(pat_pop_table, src_stmt, pv_pop);
+	Hashtable::insert(succ_table, src_stmt, dest_clause->body);
 	break; 
       }
   }
- L: Hashtable::insert(tables->pop_tables, fd,pop_table);
-  //    Hashtable::insert(tables->pred_tables,fd,pred_table);
-    Hashtable::insert(tables->succ_tables,fd,succ_table);
+ L: Hashtable::insert(tables->pop_tables,    fd,pop_table);
+    Hashtable::insert(tables->succ_tables,   fd,succ_table);
+    Hashtable::insert(tables->pat_pop_tables,fd,pat_pop_table);
 }
 
 static void jump_analysis_iter(jump_anal_res_t tables, list_t<decl_t,`H> tds) {
@@ -404,9 +428,9 @@ static void jump_analysis_iter(jump_anal_res_t tables, list_t<decl_t,`H> tds) {
 }
 
 jump_anal_res_t jump_analysis(list_t<decl_t,`H> tds) {
-  let tables = new Jump_Anal_Result{.pop_tables  = make_ptr_table(), 
-				    // .pred_tables = make_ptr_table(),
-				    .succ_tables = make_ptr_table()};
+  let tables = new Jump_Anal_Result{.pop_tables     = make_ptr_table(), 
+				    .succ_tables    = make_ptr_table(),
+                                    .pat_pop_tables = make_ptr_table()};
   jump_analysis_iter(tables,tds);
   return tables;
 }

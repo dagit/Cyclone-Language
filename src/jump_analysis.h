@@ -29,12 +29,18 @@ using Absyn;
 
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 
-// pred_tables is commented out because nobody is using it right now!
-// NULL in the range of a succ_table means destination is end of function
+// pop_tables: used by code-gen for how many exception handlers to pop
+//     before doing a jump
+// pat_pop_tables: used by flow-analysis on a jump for 
+//     unconsuming unique pointers matched against.  The int is how 
+//     many patterns with binding variables (so pattern 34 and _ don't count) 
+//     are jumped out of
+// succ_tables: used by flow-analysis to determine successor of a jump.
+//     NULL in the range of a succ_table means destination is end of function
 struct Jump_Anal_Result {
-  table_t<fndecl_t,table_t<stmt_t,int>>            pop_tables;
-  //  table_t<fndecl_t,table_t<stmt_t,list_t<stmt_t>>> pred_tables;
-  table_t<fndecl_t,table_t<stmt_t,stmt_opt_t>>     succ_tables;
+  table_t<fndecl_t,table_t<stmt_t,int>>        pop_tables;
+  table_t<fndecl_t,table_t<stmt_t,stmt_opt_t>> succ_tables;
+  table_t<fndecl_t,table_t<stmt_t,int>>        pat_pop_tables;
 };
 typedef struct Jump_Anal_Result @jump_anal_res_t;
 

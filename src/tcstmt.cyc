@@ -63,10 +63,6 @@ static void simplify_unused_result_exp(exp_t e) {
   }
 }
   
-static void decorate_stmt(tenv_t te, stmt_t s) {
-  NewControlFlow::set_encloser(s, get_encloser(te));
-}
-
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
@@ -91,14 +87,8 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
     }
     if(where_opt != NULL)
       tcTest(te2,(exp_t)where_opt,"switch clause guard");
-
-    if(vs != NULL)
-      te2 = set_encloser(r,te2,s); // for substatements inside of s
     tcStmt(te2,s,false); // pattern vars are in a different region from body ??
-    // The encloser of s is not s, so reset it properly.
   }
-  if(vs != NULL)
-    NewControlFlow::set_encloser(s,get_encloser(te));
 }
 
 static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
@@ -137,8 +127,6 @@ static qvar_t stmt_temp_var() {
 //       anywhere because they end regions.
 void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   
-  decorate_stmt(te,s0);
-
   switch (s0->r) {
 
   case &Skip_s: return;
@@ -203,14 +191,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &While_s($(e,cont_s),s):
-    decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
     tcStmt(te,s,true);
     return;
 
   case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
-    decorate_stmt(te,guard_s);
-    decorate_stmt(te,cont_s);
     tcExp(te,NULL,e1);
     tcTest(te,e2,"for loop");
     TEMP_RGN(te, r) {
@@ -221,7 +206,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Do_s(s,$(e,cont_s)):
-    decorate_stmt(te,cont_s);
     tcStmt(te,s,true);
     tcTest(te,e,"do loop");
     return;
@@ -265,8 +249,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   // Note: NewControlFlow requires we add the label with s, not s0 !!
-  //       (That way, we can use switch_clause bodies and stmtExp stmt's
-  //       as enclosers and get the right behavior!!!)
   case &Label_s(l,s): 
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
@@ -347,9 +329,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
 		    s->loc)->r;
 
-    // must set encloser b/c cannot goto into a handler.
     TEMP_RGN(te,r) {
-      tcStmt(set_encloser(r,te,s0),s,true);
+      tcStmt(te,s,true);
     }
 
     // add a default case that re-throws the exception
@@ -502,7 +483,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             explain_failure();
           }
         }
-        tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
+        tcStmt(te2,s,false);
         return;
 
       case &Let_d(p,*vds,*exp,*dtp):
@@ -574,7 +555,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
           te2 = add_local_var(decl_rgn,s->loc,te2,vd);
         }
-        tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
+        tcStmt(te2,s,false);
         return;
 
       case &Region_d(tv,vd,resetable,open_exp_opt):
@@ -617,7 +598,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
-        tcStmt(set_encloser(decl_rgn,add_local_var(decl_rgn,s->loc,te2,vd),s0),s,false);
+        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
         return;
 
       case &Fn_d(fd): 
@@ -656,7 +637,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         check_delayed_effects(te);
         check_delayed_constraints(te);
         te->le = old_fenv;
-        tcStmt(set_encloser(decl_rgn,te,s0),s,false);
+        tcStmt(te,s,false);
         return;
       case &Namespace_d(n,tds): unimp_msg_part = "namespace";    break;
       case &Using_d(q,tds):     unimp_msg_part = "using";  break; //FIX: allow

@@ -28,9 +28,6 @@
 
 // The previous pass (type-checking) sets up:
 // * decorating each stmt with CFAnnot
-// * setting all the encloser fields (note the list ends with a self-loop,
-//   not a NULL!
-// (The latter two activities are performed via calls to set_encloser.)
 
 #include <core.h>
 #include <list.h>
@@ -70,19 +67,12 @@ typedef Position::seg_t     seg_t;
 bool warn_lose_unique = false;
 //////////////////////////// Statement Decoration //////////////////////////
 struct CFStmtAnnot {
-  stmt_t encloser; // for checking goto-scope -- no other use
   int    visited;  // for detecting need to iterate
   // we now use a separate hash table for the flow info
   // flow_t flow;     // flow to merge in when we check again
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
 @extensible datatype AbsynAnnot { static CFAnnot(cf_stmt_annot_t); };
-
-// to be used by the type-checking pass to get things set up for us
-// must be called on EVERY stmt in the abstract syntax (even the dummy ones)
-void set_encloser(stmt_t enclosee, stmt_t encloser) {
-  enclosee->annot = new CFAnnot(CFStmtAnnot(encloser, 0));
-}
 
 ///////////////////////////// Analysis ///////////////////////////////
 
@@ -95,7 +85,8 @@ void set_encloser(stmt_t enclosee, stmt_t encloser) {
 // Note: for *(e1 ? e2 : e3) we're requiring e2 and e3 to be all-init.
 struct AnalEnv<`r::R> {
   JumpAnalysis::jump_anal_res_t all_tables;
-  Hashtable::table_t<stmt_t,stmt_opt_t>     succ_table;
+  Hashtable::table_t<stmt_t,stmt_opt_t> succ_table;
+  Hashtable::table_t<stmt_t,int>        pat_pop_table;
   region_t<`r>  r;
   flow_env_t<`r> fenv;
   bool          iterate_again; // set to true when a visited flow is updated
@@ -135,10 +126,12 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
 static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow, 
 				       list_t<exp_t> es);
 
+// on first call, must have been never visited (yuck, should just get
+// this annotation out of the abstract syntax!)
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
   case &CFAnnot(*x): return x;
-  default: throw new Core::Impossible("ControlFlow -- wrong stmt annotation");
+  default: s->annot = new CFAnnot(CFStmtAnnot(0)); return get_stmt_annot(s);
   }
 }
 
@@ -2468,9 +2461,12 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
 					     loc,exp_loc);
     flow_t clause_outflow;
     let old_unique_pat_vars = env->unique_pat_vars;
-    env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(false,body,roots,es),
-			old_unique_pat_vars);
+    // FIX ME!
+    if(Tcpat::has_vars(vds_opt)) { 
+      env->unique_pat_vars = 
+	rnew(env->r) List(rnew (env->r) $(false,body,roots,es),
+			  old_unique_pat_vars);
+    }
     if(where_opt != NULL) {
       exp_t wexp = (exp_t)where_opt;
       let $(ft,ff) = anal_test(env,clause_inflow,wexp);
@@ -2556,45 +2552,14 @@ static void check_dropped_unique(analenv_t<`r> env, flow_t<`r> inflow,
 // outside their scope, attempt to unconsume them in [inflow], and
 // return the resulting flow.
 static flow_t<`r> unconsume_pat_vars(analenv_t<`r> env,
+				     stmt_t src,
 				     flow_t<`r> inflow,
 				     stmt_t dest) {
-  bool keep_going = true;
-  for (_ x = env->unique_pat_vars; x != NULL && keep_going; x=x->tl) {
+  int num_pop = Hashtable::lookup(env->pat_pop_table,src);
+  for (_ x = env->unique_pat_vars; num_pop > 0; x=x->tl, --num_pop) {
     let &$(is_open,pat_stmt,roots,es) = x->hd;
-    keep_going = false;
-
-    // now see if [dest] is outside of [pat_stmt].  We do this
-    // by continuing to follow the list of enclosing statements
-    // until we either see it, or reach the end of the function.
-//     DEBUG_PRINT("unconsume_pat_vars: pat_stmt=(%x) %s\n  dest=(%x) %s\n",
-// 		(unsigned int)pat_stmt, stmt2string(pat_stmt),
-// 		(unsigned int)dest, stmt2string(dest));
-//     if (roots != NULL) {
-//       DEBUG_PRINT("  first root=");
-//       DEBUG_PRINT_F(print_place,roots->hd);
-//       DEBUG_PRINT("\n");
-//     }
-//     if (es != NULL)
-//       DEBUG_PRINT("  first exp=%s\n",exp2string(es->hd));
-    let curr_encloser = get_stmt_annot((stmt_t)dest)->encloser;
-//     DEBUG_PRINT("unconsume_pat_vars: first encloser=(%x) %s\n",
-// 		(unsigned int)curr_encloser,stmt2string(curr_encloser));
-    while(curr_encloser != pat_stmt) {
-      let next_encloser = get_stmt_annot(curr_encloser)->encloser;
-      if(next_encloser == curr_encloser) { // function body is own encloser
-	// didn't see pat_stmt, so we've exited its scope;
-	// therefore, try to unconsume 
-	inflow = unconsume_params(env,roots,es,is_open,inflow,dest->loc);
-	keep_going = true;
-	break;
-      }
-      curr_encloser = next_encloser;
-//       DEBUG_PRINT("unconsume_pat_vars: curr encloser=(%x) %s\n",
-// 		  (unsigned int)curr_encloser,
-// 		  stmt2string(curr_encloser));
-    }
+    inflow = unconsume_params(env,roots,es,is_open,inflow,dest->loc);
   }
-//   DEBUG_PRINT("unconsume_pat_vars: exiting\n");
   return inflow;
 } 
 
@@ -2692,7 +2657,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
       // attempt to unconsume any bound pattern variables
-      inflow = unconsume_pat_vars(env,inflow,(stmt_t)destclause->body);
+      inflow = unconsume_pat_vars(env,s,inflow,(stmt_t)destclause->body);
       // The gunk is because the next case's binding vars are still in scope!
       let vds = Tcutil::filter_nulls(List::split(destclause->pat_vars->v)[0]);
       f = add_vars(fenv,f,vds,fenv->unknown_all,s->loc,false);
@@ -2741,7 +2706,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     let dest = Hashtable::lookup(env->succ_table,s);
     if(dest==NULL)
       Tcutil::terr(s->loc,"jump has no target (should be impossible)");
-    inflow = unconsume_pat_vars(env,inflow,(stmt_t)dest);
+    inflow = unconsume_pat_vars(env,s,inflow,(stmt_t)dest);
     DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);
     return BottomFL();
@@ -2786,8 +2751,9 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     let $(roots,es) = get_unconsume_pat_vars(env->fenv->r,vds);
     inflow = initialize_pat_vars(fenv,env,inflow,vds,roots != NULL,loc,e->loc);
     let old_unique_pat_vars = env->unique_pat_vars;
+    // we always assume vars are bound (as does jump-analysis)
     env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(false,s,roots,es),old_unique_pat_vars);
+      rnew(env->r) List(rnew(env->r) $(false,s,roots,es),old_unique_pat_vars);
     DEBUG_PRINT("flow for let body is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -2849,6 +2815,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     let vds = List(vd,NULL);
     f = add_vars(fenv,f,&vds,fenv->unknown_all,loc,false);
     // process the statement
+    // we always assume vars are bound (as does jump-analysis)
     let old_unique_pat_vars = env->unique_pat_vars;
     env->unique_pat_vars = 
       rnew(env->r) List(rnew (env->r) $(true,s,roots,es),old_unique_pat_vars);
@@ -3041,6 +3008,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   analenv_t env = 
     rnew(frgn) AnalEnv(tables,
 		       Hashtable::lookup(tables->succ_tables,fd),
+		       Hashtable::lookup(tables->pat_pop_tables,fd),
 		       frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,
 		       NULL,param_roots,noconsume_roots,
 		       flow_table,fd->ensures_relns);

@@ -116,6 +116,8 @@ extern bool check_let_pat_exhaustive(seg_t,tenv_t,pat_t p,
 extern void check_catch_overlap(seg_t,tenv_t,list_t<switch_clause_t>,
                                 decision_opt_t@);
 extern void print_decision_tree(decision_t);
+
+extern bool has_vars(Core::opt_t<list_t<$(vardecl_t*,exp_opt_t)@>> pat_vars);
 }
 
 #endif

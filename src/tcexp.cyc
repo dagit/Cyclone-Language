@@ -2455,11 +2455,9 @@ bool in_stmt_exp = false;
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
   TEMP_RGN(te, r) {
     bool old_stmt_exp_state = in_stmt_exp;
-    Tcstmt::tcStmt(clear_abstract_val_ok(r,set_encloser(r,te,s)),s,true);
+    Tcstmt::tcStmt(clear_abstract_val_ok(r,te),s,true);
     in_stmt_exp = old_stmt_exp_state;
   }
-  // The encloser of s is not s, so reset it properly.
-  NewControlFlow::set_encloser(s,get_encloser(te));
   // The type is the type of the expression that ends the statment.
   while(true)
     switch (s->r) {

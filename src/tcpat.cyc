@@ -1883,3 +1883,10 @@ void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs,
     }
   }
 }
+
+bool has_vars(Core::opt_t<list_t<$(vardecl_t*,exp_opt_t)@>> pat_vars) {
+  for(let l = pat_vars->v; l != NULL; l = l->tl)
+    if((*l->hd)[0] != NULL)
+      return true;
+  return false;
+}

@@ -29,9 +29,6 @@
 
 namespace NewControlFlow {
 
-// to be used by the type-checking pass to get things set up for us
-extern void set_encloser(Absyn::stmt_t enclosee, Absyn::stmt_t encloser);
-
 // the entry point
 extern void cf_check(JumpAnalysis::jump_anal_res_t tables,
 		     List::list_t<Absyn::decl_t> ds);

@@ -1014,7 +1014,7 @@ static void process_file(string_t<`H> filename) {
   }
 
   let jump_tables;
-  region tc_rgn; {
+  { region tc_rgn; 
     let te = Tcenv::tc_init(tc_rgn); // Must declare BEFORE the goto 
     if (parseonly_r) goto PRINTC;
 

@@ -101,7 +101,7 @@ static void dump_out(FILE @f, alist_t<stringptr_t> al) {
   int last = 0;
   while(last >= 0) {
     switch(Xarray::get(xarr,last)) {
-    case &Empty(_):     --last;                    break;
+    case &Empty(_):  --last; break;
     case &Single(s): --last; fprintf(f,"%s",*s); break;
     case &Append(a1,a2): 
       Xarray::set(xarr,last,a2); 

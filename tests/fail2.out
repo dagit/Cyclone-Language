@@ -1,5 +1,10 @@
 
 fail2.cyc:3: goto enters local scope or exception handler
 fail2.cyc:9: goto enters local scope or exception handler
+fail2.cyc:14: jump has no target
+fail2.cyc:19: jump has no target
+fail2.cyc:27: break causes outer switch to implicitly fallthru
+fail2.cyc:34: label L undefined
+fail2.cyc:39: repated label
 
 COMPILATION FAILED!

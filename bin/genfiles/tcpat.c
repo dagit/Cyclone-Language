@@ -1139,9 +1139,9 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(struct Cyc_Tcenv_Tenv*te);
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_type_vars(struct _RegionHandle*,unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*);
-# 185
+# 181
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_region(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*te,void*r,int resetable,int opened);
-# 187
+# 183
 void Cyc_Tcenv_check_rgn_accessible(struct Cyc_Tcenv_Tenv*,unsigned int,void*rgn);
 # 38 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
@@ -1231,7 +1231,9 @@ int Cyc_Tcpat_check_let_pat_exhaustive(unsigned int,struct Cyc_Tcenv_Tenv*,struc
 # 116
 void Cyc_Tcpat_check_catch_overlap(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*,void**);
 # 118
-void Cyc_Tcpat_print_decision_tree(void*);struct _tuple14{unsigned int f1;int f2;};
+void Cyc_Tcpat_print_decision_tree(void*);
+# 120
+int Cyc_Tcpat_has_vars(struct Cyc_Core_Opt*pat_vars);struct _tuple14{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple14 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct _tuple15{struct Cyc_List_List*f1;struct Cyc_Absyn_Pat*f2;};
 # 52 "tcpat.cyc"
@@ -2682,3 +2684,9 @@ struct _tuple22*_tmp41D=(struct _tuple22*)_tmp41A->hd;struct _tuple22*_tmp41E=_t
 if(!_tmp41F){
 ({void*_tmp421=0;Cyc_Tcutil_terr(_tmp420,({const char*_tmp422="redundant pattern (check for misspelled constructors in earlier patterns)";_tag_dyneither(_tmp422,sizeof(char),74);}),_tag_dyneither(_tmp421,sizeof(void*),0));});
 break;}};}};}
+# 1887
+int Cyc_Tcpat_has_vars(struct Cyc_Core_Opt*pat_vars){
+{struct Cyc_List_List*_tmp423=(struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(pat_vars))->v;for(0;_tmp423 != 0;_tmp423=_tmp423->tl){
+if((*((struct _tuple16*)_tmp423->hd)).f1 != 0)
+return 1;}}
+return 0;}
