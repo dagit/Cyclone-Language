@@ -70,10 +70,13 @@ extern int current;
 
 extern void parse(speclist_t<`r1,`r2> specs, 
                   void anonfun(string_t<`H>), 
+                  bool anonflagfun(string_t<`H>), 
                   string_t errmsg, string_t<`H> ?`H args);
-  /** [parse(s,f,err,args)] parses the arguments, given in the string
-      array [args], using the speclist [s].  Arguments not matching a
-      flag are passed to [f].  If an error should occur, the usage
+  /** [parse(s,f,g,err,args)] parses the arguments, given in the
+      string array [args], using the speclist [s].  Arguments not
+      matching a flag are passed to [f].  Arguments not matching a
+      flag appearing in the specs call [g]; if [g] returns false, the
+      flag is not understood.  If an error should occur, the usage
       string is printed, prepended with the given [err] string. */
 }
 

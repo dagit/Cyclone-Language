@@ -203,6 +203,7 @@ static void stop(int prog_pos, datatype error @e,
 
 void parse(speclist_t<`r1,`r2> speclist,
            void anonfun(string_t<`H>),
+           bool anonflagfun(string_t<`H>),
 	   string_t errmsg,
 	   string_t<`H> ?`H orig_args) {
   args = orig_args;
@@ -218,7 +219,16 @@ void parse(speclist_t<`r1,`r2> speclist,
       spec_t action;
       try action = lookup(speclist, s);
       catch {
-      case &Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
+      case &Not_found:
+	// check if this is a catchall flag
+	if (!anonflagfun(s)) {
+	  stop(initpos, new Unknown(s), speclist, errmsg);
+	  return;
+	}
+	else {
+	  ++current;
+	  continue;
+	}
       }
       try
 	switch (action) {

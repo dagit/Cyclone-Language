@@ -137,6 +137,9 @@ rule token "$(int,comment_t)*" = parse
   static void add_other(string_t<`H> s) {
     cycdoc_files = new List(new s,cycdoc_files);
   }
+  static bool no_other(string_t<`H> s) {
+    return false;
+  }
   static list_t<stringptr_t> cycargs = NULL;
   static void add_cycarg(string_t<`H> s) {
     cycargs = new List(new s,cycargs);
@@ -400,7 +403,7 @@ rule token "$(int,comment_t)*" = parse
                  "Add to the list of directories to search for compiler files")
            );
 
-    Arg::parse(options, add_other, "Options:", argv);
+    Arg::parse(options, add_other, no_other, "Options:", argv);
 
     if (cycdoc_files == NULL) {
       Arg::usage(options,

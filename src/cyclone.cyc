@@ -343,8 +343,14 @@ string_t make_base_filename(string_t<`r> s, string_t<`r>* output_file) {
 // Cyclone files given on the command line
 static list_t<stringptr_t> cyclone_files = NULL;
 // Like add_ccarg but intercepts .cyc files for special handling
+static bool gcc_optarg = 0;
 static void add_other(string_t<`H> s) {
-  if (intype == CYCLONEFILE || is_cyclone_sourcefile(s)) {
+  // for the case that we received a gcc option that has an argument
+  if (gcc_optarg > 0) {
+    add_ccarg(s);
+    gcc_optarg--;
+  }
+  else if (intype == CYCLONEFILE || is_cyclone_sourcefile(s)) {
     // For processing by Cyclone
     cyclone_files = new List(new s,cyclone_files);
 
@@ -354,6 +360,42 @@ static void add_other(string_t<`H> s) {
     add_ccarg(cfile);
   }
   else add_ccarg(s);
+}
+
+// This handles non-Cyclone flags, simply passing them through to gcc
+// We have a table of well-known flags; others are 
+static bool assume_gcc_flag = true;
+static bool add_other_flag(string_t<`H> s) {
+  static struct { const char ?flag; int optargs; } known_gcc_flags[] = {
+    { "-s", 0 },
+    { "-O", 0 },
+    { "-O0", 0 },
+    { "-O2", 0 },
+    { "-O3", 0 },
+    { "-fomit-frame-pointer", 0 },
+    { "-fno-builtin", 0 },
+    { "-g", 0 },
+    { "-pg", 0 },
+    { "-p", 0 },
+    { "-static", 0 }
+  };
+  if (assume_gcc_flag)
+    add_ccarg(s);
+  else {
+    for (int i = 0; i<numelts(known_gcc_flags); i++) {
+      if (!strcmp(known_gcc_flags[i].flag,s)) {
+	add_ccarg(s);
+	gcc_optarg = known_gcc_flags[i].optargs;
+	break;
+      }
+    }
+    return false;
+  }
+  return true;
+}
+
+static void noassume_gcc_flag() {
+  assume_gcc_flag = false;
 }
 
 static void remove_file(string_t<`H> s) {
@@ -1174,36 +1216,6 @@ int main(int argc, string_t<`H> ?`H argv) {
 	 rnew(r)$("-x",false," <language>",
                rnew(r)String_spec(set_inputtype),
                "Specify <language> for the following input files"),
-         rnew(r)$("-s",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Remove all symbol table and relocation info from executable"),
-         rnew(r)$("-O0",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Don't optimize"),
-         rnew(r)$("-O",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Optimize"),
-         rnew(r)$("-O2",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "A higher level of optimization"),
-         rnew(r)$("-O3",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Even more optimization"),
-         rnew(r)$("-fomit-frame-pointer",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Omit frame pointer (gcc option)"),
-         rnew(r)$("-fno-builtin",false,"",
-               rnew(r)Flag_spec(add_cpp_and_ccarg),
-               "Suppress builtin code sequence expansions (gcc option)"),
-         rnew(r)$("-g",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Compile for debugging"),
-         rnew(r)$("-p",false,"",
-               rnew(r)Flag_spec(add_ccarg),
-               "Compile for profiling with prof"),
-         rnew(r)$("-pg",false,"",
-               rnew(r)Unit_spec(set_pg),
-               "Compile for profiling with gprof"),
          rnew(r)$("-pa",false,"",
                rnew(r)Unit_spec(set_pa),
                "Compile for profiling with aprof"),
@@ -1383,12 +1395,15 @@ int main(int argc, string_t<`H> ?`H argv) {
                     "don't stop after only a few errors."),
           rnew(r) $("--parsestate",false, "",
                     rnew(r)Set_spec(&ParseErrors::print_state_and_token),
-                    "print the parse state and token on a syntax error")
+                    "print the parse state and token on a syntax error"),
+	  rnew (r) $("-known-gcc-flags-only",false,"",
+		     rnew(r)Unit_spec(noassume_gcc_flag),
+		     "do not assume that unknown flags should be passed to gcc")
          );
 
   string_t optstring = "Options:";
   Arg::current = 0;
-  Arg::parse(options, add_other, optstring, bargs);
+  Arg::parse(options, add_other, add_other_flag, optstring, bargs);
   // Having processed -B and -b, we can now construct the exec-path
   // and arch-path
   if (target_arch == NULL) target_arch = Cstring_to_string(Carch);
@@ -1427,11 +1442,11 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
   if (args_from_specs_file != NULL) {
     Arg::current = 0;
-    Arg::parse(options, add_other, optstring, args_from_specs_file);
+    Arg::parse(options, add_other, add_other_flag, optstring, args_from_specs_file);
   }
   // Finally parse the other command-line arguments
   Arg::current = 0;
-  Arg::parse(options, add_other, optstring, otherargs);
+  Arg::parse(options, add_other, add_other_flag, optstring, otherargs);
   if (strcmp(cpp,"") == 0) {
     // If cpp string is not explicitly set, use the default.
     // NB the -w suppresses preprocessor warnings.  It's needed

@@ -986,7 +986,7 @@ typedef struct Cyc_List_List*Cyc_Arg_speclist_t;
 # 66
 void Cyc_Arg_usage(struct Cyc_List_List*,struct _dyneither_ptr);
 # 71
-void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _dyneither_ptr),struct _dyneither_ptr errmsg,struct _dyneither_ptr args);struct Cyc_Buffer_t;
+void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _dyneither_ptr),int(*anonflagfun)(struct _dyneither_ptr),struct _dyneither_ptr errmsg,struct _dyneither_ptr args);struct Cyc_Buffer_t;
 # 46 "buffer.h"
 typedef struct Cyc_Buffer_t*Cyc_Buffer_T;
 # 49
@@ -2836,78 +2836,79 @@ static struct Cyc_List_List*Cyc_spec_files=0;
 static void Cyc_add_spec_file(struct _dyneither_ptr s){
 struct Cyc_List_List*_tmp75C;Cyc_spec_files=((_tmp75C=_cycalloc(sizeof(*_tmp75C)),((_tmp75C->hd=(const char*)_untag_dyneither_ptr(s,sizeof(char),1),((_tmp75C->tl=Cyc_spec_files,_tmp75C))))));}
 # 1806
+static int Cyc_no_other(struct _dyneither_ptr s){return 0;}
 static void Cyc_set_GATHER(){
 Cyc_mode=Cyc_GATHER;}
-# 1809
+# 1810
 static void Cyc_set_GATHERSCRIPT(){
 Cyc_mode=Cyc_GATHERSCRIPT;}
-# 1812
+# 1813
 static void Cyc_set_FINISH(){
 Cyc_mode=Cyc_FINISH;}
-# 1815
+# 1816
 static void Cyc_add_cpparg(struct _dyneither_ptr s){
 struct _dyneither_ptr*_tmp75F;struct Cyc_List_List*_tmp75E;Cyc_cppargs=((_tmp75E=_cycalloc(sizeof(*_tmp75E)),((_tmp75E->hd=((_tmp75F=_cycalloc(sizeof(*_tmp75F)),((_tmp75F[0]=s,_tmp75F)))),((_tmp75E->tl=Cyc_cppargs,_tmp75E))))));}
-# 1818
+# 1819
 static int Cyc_badparse=0;
 static void Cyc_unsupported_option(struct _dyneither_ptr s){
 {const char*_tmp763;void*_tmp762[1];struct Cyc_String_pa_PrintArg_struct _tmp761;(_tmp761.tag=0,((_tmp761.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)s),((_tmp762[0]=& _tmp761,Cyc_fprintf(Cyc_stderr,((_tmp763="Unsupported option %s\n",_tag_dyneither(_tmp763,sizeof(char),23))),_tag_dyneither(_tmp762,sizeof(void*),1)))))));}
 Cyc_badparse=1;}
-# 1823
+# 1824
 static void Cyc_set_machine(struct _dyneither_ptr s){
 {const char*_tmp764;Cyc_add_cpparg(((_tmp764="-b",_tag_dyneither(_tmp764,sizeof(char),3))));}
 Cyc_add_cpparg(s);}
-# 1831
+# 1832
 void GC_blacklist_warn_clear();struct _tuple26{struct _dyneither_ptr f1;int f2;struct _dyneither_ptr f3;void*f4;struct _dyneither_ptr f5;};
 int Cyc_main(int argc,struct _dyneither_ptr argv){
 GC_blacklist_warn_clear();{
-# 1835
+# 1836
 struct _tuple26*_tmp7F5;const char*_tmp7F4;const char*_tmp7F3;struct Cyc_Arg_String_spec_Arg_Spec_struct _tmp7F2;struct Cyc_Arg_String_spec_Arg_Spec_struct*_tmp7F1;const char*_tmp7F0;struct _tuple26*_tmp7EF;const char*_tmp7EE;const char*_tmp7ED;struct Cyc_Arg_Unit_spec_Arg_Spec_struct _tmp7EC;struct Cyc_Arg_Unit_spec_Arg_Spec_struct*_tmp7EB;const char*_tmp7EA;struct _tuple26*_tmp7E9;const char*_tmp7E8;const char*_tmp7E7;struct Cyc_Arg_Unit_spec_Arg_Spec_struct _tmp7E6;struct Cyc_Arg_Unit_spec_Arg_Spec_struct*_tmp7E5;const char*_tmp7E4;struct _tuple26*_tmp7E3;const char*_tmp7E2;const char*_tmp7E1;struct Cyc_Arg_Unit_spec_Arg_Spec_struct _tmp7E0;struct Cyc_Arg_Unit_spec_Arg_Spec_struct*_tmp7DF;const char*_tmp7DE;struct _tuple26*_tmp7DD;const char*_tmp7DC;const char*_tmp7DB;struct Cyc_Arg_Set_spec_Arg_Spec_struct _tmp7DA;struct Cyc_Arg_Set_spec_Arg_Spec_struct*_tmp7D9;const char*_tmp7D8;struct _tuple26*_tmp7D7;const char*_tmp7D6;const char*_tmp7D5;struct Cyc_Arg_String_spec_Arg_Spec_struct _tmp7D4;struct Cyc_Arg_String_spec_Arg_Spec_struct*_tmp7D3;const char*_tmp7D2;struct _tuple26*_tmp7D1;const char*_tmp7D0;const char*_tmp7CF;struct Cyc_Arg_Set_spec_Arg_Spec_struct _tmp7CE;struct Cyc_Arg_Set_spec_Arg_Spec_struct*_tmp7CD;const char*_tmp7CC;struct _tuple26*_tmp7CB;const char*_tmp7CA;const char*_tmp7C9;struct Cyc_Arg_Flag_spec_Arg_Spec_struct _tmp7C8;struct Cyc_Arg_Flag_spec_Arg_Spec_struct*_tmp7C7;const char*_tmp7C6;struct _tuple26*_tmp7C5[8];struct Cyc_List_List*options=
 (_tmp7C5[7]=(
-# 1860
+# 1861
 (_tmp7CB=_cycalloc(sizeof(*_tmp7CB)),((_tmp7CB->f1=((_tmp7CA="-",_tag_dyneither(_tmp7CA,sizeof(char),2))),((_tmp7CB->f2=1,((_tmp7CB->f3=((_tmp7C9="",_tag_dyneither(_tmp7C9,sizeof(char),1))),((_tmp7CB->f4=(void*)(
 (_tmp7C7=_cycalloc(sizeof(*_tmp7C7)),((_tmp7C7[0]=((_tmp7C8.tag=1,((_tmp7C8.f1=Cyc_add_cpparg,_tmp7C8)))),_tmp7C7)))),((_tmp7CB->f5=(
 (_tmp7C6="",_tag_dyneither(_tmp7C6,sizeof(char),1))),_tmp7CB)))))))))))),((_tmp7C5[6]=(
-# 1857
+# 1858
 (_tmp7D1=_cycalloc(sizeof(*_tmp7D1)),((_tmp7D1->f1=((_tmp7D0="-v",_tag_dyneither(_tmp7D0,sizeof(char),3))),((_tmp7D1->f2=0,((_tmp7D1->f3=((_tmp7CF="",_tag_dyneither(_tmp7CF,sizeof(char),1))),((_tmp7D1->f4=(void*)(
 (_tmp7CD=_cycalloc(sizeof(*_tmp7CD)),((_tmp7CD[0]=((_tmp7CE.tag=3,((_tmp7CE.f1=& Cyc_verbose,_tmp7CE)))),_tmp7CD)))),((_tmp7D1->f5=(
 (_tmp7CC="Verbose operation",_tag_dyneither(_tmp7CC,sizeof(char),18))),_tmp7D1)))))))))))),((_tmp7C5[5]=(
-# 1854
+# 1855
 (_tmp7D7=_cycalloc(sizeof(*_tmp7D7)),((_tmp7D7->f1=((_tmp7D6="-b",_tag_dyneither(_tmp7D6,sizeof(char),3))),((_tmp7D7->f2=0,((_tmp7D7->f3=((_tmp7D5=" <machine>",_tag_dyneither(_tmp7D5,sizeof(char),11))),((_tmp7D7->f4=(void*)(
 (_tmp7D3=_cycalloc(sizeof(*_tmp7D3)),((_tmp7D3[0]=((_tmp7D4.tag=5,((_tmp7D4.f1=Cyc_set_machine,_tmp7D4)))),_tmp7D3)))),((_tmp7D7->f5=(
 (_tmp7D2="Set the target machine for compilation to <machine>",_tag_dyneither(_tmp7D2,sizeof(char),52))),_tmp7D7)))))))))))),((_tmp7C5[4]=(
-# 1848
+# 1849
 (_tmp7DD=_cycalloc(sizeof(*_tmp7DD)),((_tmp7DD->f1=((_tmp7DC="-setjmp",_tag_dyneither(_tmp7DC,sizeof(char),8))),((_tmp7DD->f2=0,((_tmp7DD->f3=((_tmp7DB="",_tag_dyneither(_tmp7DB,sizeof(char),1))),((_tmp7DD->f4=(void*)(
 (_tmp7D9=_cycalloc(sizeof(*_tmp7D9)),((_tmp7D9[0]=((_tmp7DA.tag=3,((_tmp7DA.f1=& Cyc_do_setjmp,_tmp7DA)))),_tmp7D9)))),((_tmp7DD->f5=(
-# 1853
+# 1854
 (_tmp7D8="Produce the jmp_buf and setjmp declarations on the standard output, for use by the Cyclone compiler special file cyc_setjmp.h.  Cannot be used with -gather, -gatherscript, or specfiles.",_tag_dyneither(_tmp7D8,sizeof(char),186))),_tmp7DD)))))))))))),((_tmp7C5[3]=(
-# 1845
+# 1846
 (_tmp7E3=_cycalloc(sizeof(*_tmp7E3)),((_tmp7E3->f1=((_tmp7E2="-finish",_tag_dyneither(_tmp7E2,sizeof(char),8))),((_tmp7E3->f2=0,((_tmp7E3->f3=((_tmp7E1="",_tag_dyneither(_tmp7E1,sizeof(char),1))),((_tmp7E3->f4=(void*)(
 (_tmp7DF=_cycalloc(sizeof(*_tmp7DF)),((_tmp7DF[0]=((_tmp7E0.tag=0,((_tmp7E0.f1=Cyc_set_FINISH,_tmp7E0)))),_tmp7DF)))),((_tmp7E3->f5=(
 (_tmp7DE="Produce Cyclone headers from pre-gathered C library info",_tag_dyneither(_tmp7DE,sizeof(char),57))),_tmp7E3)))))))))))),((_tmp7C5[2]=(
-# 1842
+# 1843
 (_tmp7E9=_cycalloc(sizeof(*_tmp7E9)),((_tmp7E9->f1=((_tmp7E8="-gatherscript",_tag_dyneither(_tmp7E8,sizeof(char),14))),((_tmp7E9->f2=0,((_tmp7E9->f3=((_tmp7E7="",_tag_dyneither(_tmp7E7,sizeof(char),1))),((_tmp7E9->f4=(void*)(
 (_tmp7E5=_cycalloc(sizeof(*_tmp7E5)),((_tmp7E5[0]=((_tmp7E6.tag=0,((_tmp7E6.f1=Cyc_set_GATHERSCRIPT,_tmp7E6)))),_tmp7E5)))),((_tmp7E9->f5=(
 (_tmp7E4="Produce a script to gather C library info",_tag_dyneither(_tmp7E4,sizeof(char),42))),_tmp7E9)))))))))))),((_tmp7C5[1]=(
-# 1839
+# 1840
 (_tmp7EF=_cycalloc(sizeof(*_tmp7EF)),((_tmp7EF->f1=((_tmp7EE="-gather",_tag_dyneither(_tmp7EE,sizeof(char),8))),((_tmp7EF->f2=0,((_tmp7EF->f3=((_tmp7ED="",_tag_dyneither(_tmp7ED,sizeof(char),1))),((_tmp7EF->f4=(void*)(
 (_tmp7EB=_cycalloc(sizeof(*_tmp7EB)),((_tmp7EB[0]=((_tmp7EC.tag=0,((_tmp7EC.f1=Cyc_set_GATHER,_tmp7EC)))),_tmp7EB)))),((_tmp7EF->f5=(
 (_tmp7EA="Gather C library info but don't produce Cyclone headers",_tag_dyneither(_tmp7EA,sizeof(char),56))),_tmp7EF)))))))))))),((_tmp7C5[0]=(
-# 1836
+# 1837
 (_tmp7F5=_cycalloc(sizeof(*_tmp7F5)),((_tmp7F5->f1=((_tmp7F4="-d",_tag_dyneither(_tmp7F4,sizeof(char),3))),((_tmp7F5->f2=0,((_tmp7F5->f3=((_tmp7F3=" <file>",_tag_dyneither(_tmp7F3,sizeof(char),8))),((_tmp7F5->f4=(void*)(
 (_tmp7F1=_cycalloc(sizeof(*_tmp7F1)),((_tmp7F1[0]=((_tmp7F2.tag=5,((_tmp7F2.f1=Cyc_set_output_dir,_tmp7F2)))),_tmp7F1)))),((_tmp7F5->f5=(
 (_tmp7F0="Set the output directory to <file>",_tag_dyneither(_tmp7F0,sizeof(char),35))),_tmp7F5)))))))))))),((struct Cyc_List_List*(*)(struct _dyneither_ptr))Cyc_List_list)(_tag_dyneither(_tmp7C5,sizeof(struct _tuple26*),8)))))))))))))))));
-# 1864
-{const char*_tmp7F6;Cyc_Arg_parse(options,Cyc_add_spec_file,((_tmp7F6="Options:",_tag_dyneither(_tmp7F6,sizeof(char),9))),argv);}
+# 1865
+{const char*_tmp7F6;Cyc_Arg_parse(options,Cyc_add_spec_file,Cyc_no_other,((_tmp7F6="Options:",_tag_dyneither(_tmp7F6,sizeof(char),9))),argv);}
 if((((Cyc_badparse  || 
 !Cyc_do_setjmp  && Cyc_spec_files == 0) || 
 Cyc_do_setjmp  && Cyc_spec_files != 0) || 
 Cyc_do_setjmp  && Cyc_mode == Cyc_GATHER) || 
 Cyc_do_setjmp  && Cyc_mode == Cyc_GATHERSCRIPT){
 {const char*_tmp7F7;Cyc_Arg_usage(options,(
-# 1872
+# 1873
 (_tmp7F7="Usage: buildlib [options] specfile1 specfile2 ...\nOptions:",_tag_dyneither(_tmp7F7,sizeof(char),59))));}
 return 1;}
-# 1876
+# 1877
 if(Cyc_mode == Cyc_GATHERSCRIPT){
 if(Cyc_verbose){
 const char*_tmp7FA;void*_tmp7F9;(_tmp7F9=0,Cyc_fprintf(Cyc_stderr,((_tmp7FA="Creating BUILDLIB.sh\n",_tag_dyneither(_tmp7FA,sizeof(char),22))),_tag_dyneither(_tmp7F9,sizeof(void*),0)));}
@@ -2915,59 +2916,59 @@ Cyc_script_file=Cyc_fopen("BUILDLIB.sh","w");
 if(!((unsigned int)Cyc_script_file)){
 {const char*_tmp7FD;void*_tmp7FC;(_tmp7FC=0,Cyc_fprintf(Cyc_stderr,((_tmp7FD="Could not create file BUILDLIB.sh\n",_tag_dyneither(_tmp7FD,sizeof(char),35))),_tag_dyneither(_tmp7FC,sizeof(void*),0)));}
 exit(1);}
-# 1884
+# 1885
 {const char*_tmp800;void*_tmp7FF;(_tmp7FF=0,Cyc_prscript(((_tmp800="#!/bin/sh\n",_tag_dyneither(_tmp800,sizeof(char),11))),_tag_dyneither(_tmp7FF,sizeof(void*),0)));}{
 const char*_tmp803;void*_tmp802;(_tmp802=0,Cyc_prscript(((_tmp803="GCC=\"gcc\"\n",_tag_dyneither(_tmp803,sizeof(char),11))),_tag_dyneither(_tmp802,sizeof(void*),0)));};}
-# 1889
+# 1890
 if(Cyc_force_directory_prefixes(Cyc_output_dir) || Cyc_force_directory(Cyc_output_dir)){
 {const char*_tmp807;void*_tmp806[1];struct Cyc_String_pa_PrintArg_struct _tmp805;(_tmp805.tag=0,((_tmp805.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp806[0]=& _tmp805,Cyc_fprintf(Cyc_stderr,((_tmp807="Error: could not create directory %s\n",_tag_dyneither(_tmp807,sizeof(char),38))),_tag_dyneither(_tmp806,sizeof(void*),1)))))));}
 return 1;}
-# 1893
+# 1894
 if(Cyc_verbose){
 const char*_tmp80B;void*_tmp80A[1];struct Cyc_String_pa_PrintArg_struct _tmp809;(_tmp809.tag=0,((_tmp809.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp80A[0]=& _tmp809,Cyc_fprintf(Cyc_stderr,((_tmp80B="Output directory is %s\n",_tag_dyneither(_tmp80B,sizeof(char),24))),_tag_dyneither(_tmp80A,sizeof(void*),1)))))));}
-# 1896
+# 1897
 if(Cyc_mode == Cyc_GATHERSCRIPT){
 {const char*_tmp80F;void*_tmp80E[1];struct Cyc_String_pa_PrintArg_struct _tmp80D;(_tmp80D.tag=0,((_tmp80D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp80E[0]=& _tmp80D,Cyc_prscript(((_tmp80F="cd %s\n",_tag_dyneither(_tmp80F,sizeof(char),7))),_tag_dyneither(_tmp80E,sizeof(void*),1)))))));}{
 const char*_tmp812;void*_tmp811;(_tmp811=0,Cyc_prscript(((_tmp812="echo | $GCC -E -dM - -o INITMACROS.h\n",_tag_dyneither(_tmp812,sizeof(char),38))),_tag_dyneither(_tmp811,sizeof(void*),0)));};}
-# 1901
+# 1902
 if(!Cyc_gathering()){
-# 1904
+# 1905
 {const char*_tmp813;Cyc_log_file=Cyc_fopen((const char*)_untag_dyneither_ptr(Cyc_Filename_concat(Cyc_output_dir,((_tmp813="BUILDLIB.LOG",_tag_dyneither(_tmp813,sizeof(char),13)))),sizeof(char),1),"w");}
 if(!((unsigned int)Cyc_log_file)){
 {const char*_tmp817;void*_tmp816[1];struct Cyc_String_pa_PrintArg_struct _tmp815;(_tmp815.tag=0,((_tmp815.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp816[0]=& _tmp815,Cyc_fprintf(Cyc_stderr,((_tmp817="Error: could not create log file in directory %s\n",_tag_dyneither(_tmp817,sizeof(char),50))),_tag_dyneither(_tmp816,sizeof(void*),1)))))));}
 return 1;}
-# 1910
+# 1911
 if(!Cyc_do_setjmp){
-# 1912
+# 1913
 {const char*_tmp818;Cyc_cstubs_file=Cyc_fopen((const char*)_untag_dyneither_ptr(Cyc_Filename_concat(Cyc_output_dir,((_tmp818="cstubs.c",_tag_dyneither(_tmp818,sizeof(char),9)))),sizeof(char),1),"w");}
 if(!((unsigned int)Cyc_cstubs_file)){
 {const char*_tmp81C;void*_tmp81B[1];struct Cyc_String_pa_PrintArg_struct _tmp81A;(_tmp81A.tag=0,((_tmp81A.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp81B[0]=& _tmp81A,Cyc_fprintf(Cyc_stderr,((_tmp81C="Error: could not create cstubs.c in directory %s\n",_tag_dyneither(_tmp81C,sizeof(char),50))),_tag_dyneither(_tmp81B,sizeof(void*),1)))))));}
 return 1;}
-# 1919
+# 1920
 {const char*_tmp81D;Cyc_cycstubs_file=Cyc_fopen((const char*)_untag_dyneither_ptr(Cyc_Filename_concat(Cyc_output_dir,((_tmp81D="cycstubs.cyc",_tag_dyneither(_tmp81D,sizeof(char),13)))),sizeof(char),1),"w");}
 if(!((unsigned int)Cyc_cycstubs_file)){
 {const char*_tmp821;void*_tmp820[1];struct Cyc_String_pa_PrintArg_struct _tmp81F;(_tmp81F.tag=0,((_tmp81F.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_output_dir),((_tmp820[0]=& _tmp81F,Cyc_fprintf(Cyc_stderr,((_tmp821="Error: could not create cycstubs.c in directory %s\n",_tag_dyneither(_tmp821,sizeof(char),52))),_tag_dyneither(_tmp820,sizeof(void*),1)))))));}
-# 1924
+# 1925
 return 1;}{
-# 1926
+# 1927
 const char*_tmp824;void*_tmp823;(_tmp823=0,Cyc_fprintf((struct Cyc___cycFILE*)_check_null(Cyc_cycstubs_file),((_tmp824="#include <core.h>\nusing Core;\n\n",_tag_dyneither(_tmp824,sizeof(char),32))),_tag_dyneither(_tmp823,sizeof(void*),0)));};}}{
-# 1933
+# 1934
 const char*outdir=(const char*)_untag_dyneither_ptr(Cyc_output_dir,sizeof(char),1);
 if(Cyc_do_setjmp  && Cyc_process_setjmp(outdir))
 return 1;else{
-# 1939
+# 1940
 for(0;Cyc_spec_files != 0;Cyc_spec_files=((struct Cyc_List_List*)_check_null(Cyc_spec_files))->tl){
 if(Cyc_process_specfile((const char*)((struct Cyc_List_List*)_check_null(Cyc_spec_files))->hd,outdir)){
 {const char*_tmp827;void*_tmp826;(_tmp826=0,Cyc_fprintf(Cyc_stderr,((_tmp827="FATAL ERROR -- QUIT!\n",_tag_dyneither(_tmp827,sizeof(char),22))),_tag_dyneither(_tmp826,sizeof(void*),0)));}
 exit(1);}}}
-# 1947
+# 1948
 if(Cyc_mode == Cyc_GATHERSCRIPT)
 Cyc_fclose((struct Cyc___cycFILE*)_check_null(Cyc_script_file));else{
-# 1950
+# 1951
 if(!Cyc_gathering()){
 Cyc_fclose((struct Cyc___cycFILE*)_check_null(Cyc_log_file));
 if(!Cyc_do_setjmp){
 Cyc_fclose((struct Cyc___cycFILE*)_check_null(Cyc_cstubs_file));
 Cyc_fclose((struct Cyc___cycFILE*)_check_null(Cyc_cycstubs_file));}}}
-# 1958
+# 1959
 return 0;};};}

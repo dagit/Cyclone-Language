@@ -1803,6 +1803,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   static void add_spec_file(string_t<`H> s) {
     spec_files = new List((const char @)s,spec_files);
   }
+  static bool no_other(string_t<`H> s) { return false; }
   static void set_GATHER() {
     mode = GATHER;
   }
@@ -1861,7 +1862,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  new Flag_spec(add_cpparg),
                  "")
            );
-    Arg::parse(options, add_spec_file, "Options:", argv);
+    Arg::parse(options, add_spec_file, no_other, "Options:", argv);
     if (badparse
         || (!do_setjmp && spec_files == NULL)
         || (do_setjmp && spec_files != NULL)
