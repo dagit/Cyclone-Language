@@ -45,9 +45,9 @@ LC_FLAG =
 # for cross-compiling
 CPP_FLAG := -use-cpp '$(CYCDIR)/config/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
 
-CYC_FLAGS := -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG) $(CPP_FLAG)
-#CYC_FLAGS := -g -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
-#CYC_FLAGS := -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+CYC_FLAGS += -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG) $(CPP_FLAG)
+#CYC_FLAGS += -g -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+#CYC_FLAGS += -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
 
 LIBR:=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 

@@ -1,3 +1,11 @@
+# architecture specific defines
+CYCDIR=/home/mharris/cyclone
+ARCH=i686-unknown-linux
+INC_INSTALL=/home/mharris/cyclone/include
+BIN_INSTALL=
+LIB_INSTALL=/home/mharris/cyclone/bin/cyc-lib
+ALL_ARCHS=i686-unknown-cygwin1.3.2 i686-unknown-linux 
+
 # -*- Makefile -*-
 
 CC=gcc
@@ -73,7 +81,8 @@ CYCLONE_LIBS:=arg\
 	unistd\
         xarray
 
-CYCLONE_H:=arg.h\
+CYCLONE_H:=$(wildcard arch/*.h)\
+	arg.h\
 	arpa/cinet.h\
 	arpa/inet.h\
 	array.h\

@@ -21,4 +21,3 @@
 #define __i386__ 1
 #define linux 1
 #define __unix__ 1
-#define i686_unknown_linux 1

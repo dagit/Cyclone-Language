@@ -54,28 +54,9 @@ typedef long fpos_t;  //FIX: __off_t in linux
    Some things throughout the library rely on this being -1.  */
 #define	EOF	(-1)
 
-/* CAREFUL: the constants TMP_MAX FOPEN_MAX FILENAME_MAX
-   L_tmpnam L_cuserid L_ctermid
-   are platform-dependent, and some can lead to buffer overflows
-   if incorrect */
-#ifdef __CYGWIN__
-/* Cygwin */
-#define TMP_MAX 26
-#define FOPEN_MAX 20
-#define FILENAME_MAX 1024
-#define L_tmpnam FILENAME_MAX
-#define L_cuserid 9
-#define L_ctermid 16
-#else
-/* Linux */
-#define TMP_MAX 238328
-#define FOPEN_MAX 16
-#define FILENAME_MAX 4095
-#define L_tmpnam 20
-#define L_cuserid 9
-#define L_ctermid 9
-#endif
-
+#define _EXTRACT_STDIOCONSTS
+#include _PLATFORM_INCLUDES_
+#undef _EXTRACT_STDIOCONSTS
 
 /* The possibilities for the third argument to `fseek'.
    These values should not be changed.  */

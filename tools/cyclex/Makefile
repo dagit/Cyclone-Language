@@ -17,7 +17,7 @@ CYCC=$(CYCDIR)/bin/cyclone$(EXE)
 CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)
 
 LC_FLAG =
-CYC_FLAGS = -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
 
 SRCS=syntax parser_tab lexer lexgen compact output main
 

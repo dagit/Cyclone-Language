@@ -151,6 +151,7 @@ update: cyclone_src
 	@if [ ! -f "lib/.target" -o "`cat lib/.target`" != "$(TARGET)" ]; then echo "Attempting to update $(TARGET) with files built for `cat lib/.target`"; exit 1; fi
 	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/$(TARGET)/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/$(TARGET)/lib/$$i)) done
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
+	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
 	@cmp -s lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/$(TARGET)/lib/$(C_RUNTIME))
 	@cmp -s lib/precore_c.h bin/genfiles/$(TARGET)/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/$(TARGET)/lib/precore_c.h)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)

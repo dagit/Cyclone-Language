@@ -82,7 +82,6 @@ if [ ! -f "arch/${ARCH}" ]; then
   read resp
   if [ "$resp" = "y" ]; then
     echo | gcc -E -dM - > arch/$ARCH
-    echo "#define $ARCH 1 " | sed -e 's/-/_/g' | sed -e 's/\./_/g' >> arch/$ARCH
     if [ $? != 0 ]; then
       echo "error creating arch #defines file"
       exit 1

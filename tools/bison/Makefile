@@ -34,7 +34,7 @@ BISONDIR=$(shell pwd)
 
 CYCC = $(CYCDIR)/bin/cyclone$(EXE)
 LC_FLAG = #-g
-CYC_FLAGS = -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
 
 # names of parser files
 PFILE=cycbison.simple

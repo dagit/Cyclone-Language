@@ -8,7 +8,7 @@ CYCC=../../bin/$(CYCCOMP)
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CYC_FLAGS=-I../../lib -B../../lib
+CYC_FLAGS+=-I../../lib -B../../lib
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
