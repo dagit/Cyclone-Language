@@ -1303,7 +1303,8 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 }
 
  // *e
-static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
+static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_opt_t orig_e, 
+                      exp_t e) {
   te = clear_lhs(clear_notreadctxt(te));
   tcExp(te,NULL,e);
   type_t t = compress((type_t)e->topt);
@@ -1326,6 +1327,9 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
       case &FnType(...):
         if (Flags::tc_aggressive_warn)
           Warn::warn2(loc,"unnecessary dereference for function type");
+        // get rid of extra deref to avoid messing things up down the line.
+        if (orig_e != NULL)
+          orig_e->r = e->r;
         return t;
       default: Warn::err2(loc,"cannot dereference abstract pointer type");
       }
@@ -1400,7 +1404,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			  exp_t e, field_name_t f,
                           bool @is_tagged, bool @is_read) {
   // it's up to tcAggrMember2 to deal with values of kind A
-  type_t t2 = tcDeref(enter_abstract_val_ok(te),loc,NULL,e);
+  type_t t2 = tcDeref(enter_abstract_val_ok(te),loc,NULL,NULL,e);
   return tcAggrMember2(te,loc,topt,t2,f,is_tagged,is_read);
 }
 
@@ -2521,7 +2525,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Sizeofexp_e(e1):       fallthru(tcExpNoPromote(te, NULL, e1));
   case &Sizeoftype_e(t1):      t = tcSizeof(te,loc,topt,t1); break;
   case &Offsetof_e(t1,l):      t = tcOffsetof(te,loc,topt,t1,l); break;
-  case &Deref_e(e1):           t = tcDeref(te,loc,topt,e1); break;
+  case &Deref_e(e1):           t = tcDeref(te,loc,topt,e,e1); break;
   case &AggrMember_e(e1,f,*is_tagged,*is_read):
     t = tcAggrMember(te,loc,topt,e1,f,is_tagged,is_read); break;
   case &AggrArrow_e(e1,f,*is_tagged,*is_read):
