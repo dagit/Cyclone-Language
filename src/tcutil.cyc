@@ -1117,8 +1117,12 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	okay = false; break;
       }
     }
+    // element types have to be compatible
     okay = okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ);
-    okay = okay && unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ);
+    // first region must outlive the second
+    okay = okay && (unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ) || 
+                    region_outlives(te,pinfo_a.rgn_typ,pinfo_b.rgn_typ));
+    // can only move from non-const to const or stay same
     okay = okay && (!pinfo_a.tq.q_const || pinfo_b.tq.q_const);
     return okay;
 
@@ -1146,15 +1150,16 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
        return false;
 
   // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
-  //   field f carries values and r1==r2 or r1=='H
+  //   field f carries values and r1==r2 or r1 outlives r2
   case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}),
 	 &TunionType(TunionInfo{&KnownTunion(tud2),ts2,r2})):
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
     case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf1),ts1}):
       //n1,ts1,f1,_,tufd}):
-      // regions must unify or source must be `H
-      if (!unify(rt_a,r2) && rt_a != HeapRgn) return false;
+      // regions must unify or rt_a must outlive r2
+      if (!unify(rt_a,r2) && !region_outlives(te,rt_a,r2))
+        return false;
       // pointer must be non-null(@) -- note could allow * but would have
       // to insert a bounds check?
       if (!unify_conrefs(intcmp,null_a,new_conref(false))) return false;
@@ -1324,12 +1329,9 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, type
     if (!unify_conrefs(intcmp,null_a,null_b) 
 	&& conref_val(null_a) && !conref_val(null_b)) 
       return false;
-    // if rt_a is not the heap, then rt_b must be the same (can relax this
-    // later to a more general "outlives" relationship)
-    switch (rt_a) {
-    case HeapRgn: break;
-    default: unify(rt_a,rt_b); break;
-    }
+    // rt_a must outlive rt_b
+    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b))
+      return false;
     // need to check that the bounds match up
     if (!unify_conrefs(boundscmp,b_a,b_b)) {
       switch ($(conref_val(b_a),conref_val(b_b))) {

@@ -20,8 +20,8 @@ double cos _PARAMS((double));
 double sin _PARAMS((double));
 double tan _PARAMS((double));
 double tanh _PARAMS((double));
-double frexp _PARAMS((double, int *));
-double modf _PARAMS((double, double *));
+double frexp _PARAMS((double, int *`r));
+double modf _PARAMS((double, double *`r));
 double ceil _PARAMS((double));
 double fabs _PARAMS((double));
 double floor _PARAMS((double));
@@ -74,9 +74,9 @@ double acosh _PARAMS((double));
 double atanh _PARAMS((double));
 double remainder _PARAMS((double, double));
 double gamma _PARAMS((double));
-double gamma_r _PARAMS((double, int *));
+double gamma_r _PARAMS((double, int *`r));
 double lgamma _PARAMS((double));
-double lgamma_r _PARAMS((double, int *));
+double lgamma_r _PARAMS((double, int *`r));
 double erf _PARAMS((double));
 double erfc _PARAMS((double));
 double y0 _PARAMS((double));
@@ -103,8 +103,8 @@ float cosf _PARAMS((float));
 float sinf _PARAMS((float));
 float tanf _PARAMS((float));
 float tanhf _PARAMS((float));
-float frexpf _PARAMS((float, int *));
-float modff _PARAMS((float, float *));
+float frexpf _PARAMS((float, int *`r));
+float modff _PARAMS((float, float *`r));
 float ceilf _PARAMS((float));
 float fabsf _PARAMS((float));
 float floorf _PARAMS((float));
@@ -147,9 +147,9 @@ float acoshf _PARAMS((float));
 float atanhf _PARAMS((float));
 float remainderf _PARAMS((float, float));
 float gammaf _PARAMS((float));
-float gammaf_r _PARAMS((float, int *));
+float gammaf_r _PARAMS((float, int *`r));
 float lgammaf _PARAMS((float));
-float lgammaf_r _PARAMS((float, int *));
+float lgammaf_r _PARAMS((float, int *`r));
 float erff _PARAMS((float));
 float erfcf _PARAMS((float));
 float y0f _PARAMS((float));
@@ -182,7 +182,7 @@ struct __exception
   int err;
 };
 
-int matherr _PARAMS((struct __exception *e));
+int matherr _PARAMS((struct __exception *`r e));
 
 /* Values for the type field of struct exception.  */
 

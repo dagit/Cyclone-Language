@@ -366,39 +366,16 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     switch (b->v) {
     case &Eq_constr(Unknown_b): return t1;
     case &Eq_constr(&Upper_b(ub)):
-      let ub_v = Evexp::eval_const_uint_exp(ub);
-      n = compress_conref(n);
-      bool is_nullable;
-      switch (n->v) {
-      case &Eq_constr(is_null): 
-	// must insert cast so that null check occurs here
-	if (is_null) {
-	  let new_t1 = new PointerType(PtrInfo{et,r,new_conref(false),tq,b});
-	  warn(e1->loc,xprintf("coercing from %s to %s",typ2string(t1),
-			       typ2string(new_t1)));
-	  unchecked_cast(te, e1, new_t1);
-	}	 
-	break;
-      default: 
-	n->v = new Eq_constr(false); break;
-      }
-      if (is_const_exp(te,e2)) {
-	// FIX:  should be evaluate signed int exp!
-	let e2_v = Evexp::eval_const_uint_exp(e2);
-	if (ub_v < e2_v) {
-	  e2_v = ub_v;
-	  warn(e1->loc,xprintf("pointer arithmetic is out of bounds"));
-	}
-	let new_bound = uint_exp(ub_v - e2_v,null);
-	new_bound->topt = new Opt(uint_t);
-	// subtract off the upper bound in the result type
-	return new PointerType(PtrInfo{et,r,new_conref(false),tq,
-					 new_conref(new Upper_b(new_bound))});
-      } else {
-	terr(e1->loc,"cannot statically check pointer arithmetic.\n "
-	     "  suggest you cast the first expression to a ? type.");
-	return t1;
-      }
+      // we have to allow pointer arithmetic that might go out of bounds
+      // here.  Consider:
+      //   int buf[10] = {...};
+      //   *((buf + 11) - 10)
+      // This should not generate an exception.  So the best we can do
+      // is coerce e1 to a ? type.
+      let new_t1 = new PointerType(PtrInfo{et,r,new_conref(true),
+                                           tq,new_conref(Unknown_b)});
+      unchecked_cast(te, e1, new_t1);
+      return new_t1;
     default:
       b->v = new Eq_constr(Unknown_b); return t1;
     }
@@ -755,26 +732,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == null || typs->tl != null || tvs != null) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (silent_castable(te,e->loc,t1,t2)) {
-      unchecked_cast(te,e,t2);
-      return fields->hd;
-    }
-  }
-  /* JGM: this has so many bad interactions I'm ruling it out -- 
-   * that simply means you need to have enough constructors to
-   * cover your varargs or else do the casting at the call site.
-  // last resort -- coerce if possible
-  for (fields = fs; fields != null; fields = fields->tl) {
-    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
-    // should have exactly one argument and I don't want to deal with
-    // existential types
-    if (typs == null || typs->tl != null || tvs != null) continue;
-    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
-    // I hate doing this because it has side-effects, but oh well...
-    if (coerce_arg(te,e,t2)) 
+    if (coerce_arg(te,e,t2))
       return fields->hd;
   }
-  */
   terr(e->loc,xprintf("can't find a field in %s to inject a value of type %s",
                       typ2string(tu), typ2string(t1)));
   return null;
