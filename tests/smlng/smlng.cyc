@@ -410,9 +410,9 @@ int main(int argc, char ??argv) {
   fprintf(stderr,"%d\ndynamic_regions...", check_time()); fflush(stderr);
   let $(d2,TagElim::DynSynth(sz,col)) = TagElim::dynamic_regions(d);
   d = d2;
-  if(sz)
+  if(sz) {
     d = dynamic_size(d);
-  if(col)
+    }if(col)
     d = dynamic_color(d);
   } catch {
   case e: 

@@ -9,7 +9,7 @@ using Stdio;
 using List;
 
 #define MAX_COST 0x7FFF // see below!!!
-#define INPUT_SIZE 15 // make bigger when not testing! (but not too big :-( )
+#define INPUT_SIZE 20 // make bigger when not testing! (but not too big :-( )
 #define VAL_WIDTH 11
 
 // slower to use smaller types because of local vars of wrong size I think.
@@ -184,7 +184,6 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
 	    }
 	  //  fprintf(stderr,"\n#(%d,%d,%d,%d) = %d#", i,j,s,min_ind,min_cost);
 	  S(i,j,s) = MAKE_ENTRY(min_cost,min_ind);
-	  //  fprintf(stderr,"#");
 	}
     // copied from unflatten_size -- should share
     val_t  left_val  = num_vals-1;

@@ -468,7 +468,7 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
 }
 
 // Here we find regions suitable for passing to the dynamic programming code.
-// We should try MUCH harder to extend these regions, but for now we'll at 
+// We should try harder to extend these regions, but for now we'll at 
 // leat be able to nail code that only has sizes or colors.  We can try
 // to finesse other tags later.
 struct DynSynth {
@@ -484,23 +484,83 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
   case &Spc(_): fallthru;
   case &Text(_): return $(doc,DynSynth(true,true));
   case &Seq(*dsp):
-    // need to do much better here -- splitting a sequence
-    // but right now I feel like hacking the dynamic programming instead
     dyn_synth_t synth = DynSynth(true,true);
-    for(list_t<doc_t> ds = *dsp; ds != null; ds = ds->tl) {
-      let $(d2,DynSynth(sz,col)) = dynamic_regions(ds->hd);
-      ds->hd = d2;
-      synth.only_sizes  &= sz;
-      synth.only_colors &= col;
+    // now with sequence splitting: find maximal regions with only sizes/colors
+    flatten_top_seq(doc);
+    int only_sizes  = 0;
+    int only_colors = 0;
+    list_t<doc_t> ds   = *dsp;
+    list_t<doc_t> prev = null;
+    list_t<doc_t> prev_start_sizes  = null; // not prev at beginning 
+    list_t<doc_t> prev_start_colors = null; // not prev at beginning 
+    while(ds != null) {
+      //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
+      let $(newd, inner_synth) = dynamic_regions(ds->hd);
+      ds->hd = newd; // destructive here
+      synth.only_sizes  &= inner_synth.only_sizes;
+      synth.only_colors &= inner_synth.only_colors;
+      if(only_sizes > 2 && !inner_synth.only_sizes) {
+	if(prev_start_sizes == null) {
+	  // beginning of sequence -- split differently
+	  prev->tl = null;
+	  doc_t d = dynamic_size(new Seq(*dsp));
+	  *dsp = new List(d, ds);
+	  prev_start_sizes = prev_start_colors = *dsp;
+	} else {
+	  list_t<doc_t> start = prev_start_sizes->tl;
+	  prev_start_sizes->tl = null;
+	  prev->tl = null;
+	  doc_t d = dynamic_size(new Seq(start));
+	  prev_start_sizes = prev_start_colors = new List(d,ds);
+	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
+	}
+	only_sizes = 0;
+	only_colors = inner_synth.only_colors ? only_colors + 1 : 0;
+      } else if(only_colors > 2 && !inner_synth.only_colors) {
+	if(prev_start_colors == null) {
+	  // beginning of sequence -- split differently
+	  prev->tl = null;
+	  doc_t d = dynamic_color(new Seq(*dsp));
+	  *dsp = new List(d, ds);
+	  prev_start_sizes = prev_start_colors = *dsp;
+	  only_sizes  = synth.only_sizes;
+	  only_colors = synth.only_colors;
+	} else {
+	  list_t<doc_t> start = prev_start_colors->tl;
+	  prev_start_colors->tl = null;
+	  prev->tl = null;
+	  doc_t d = dynamic_color(new Seq(start));
+	  prev_start_sizes = prev_start_colors = new List(d,ds);
+	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
+	}
+	only_colors = 0;
+	only_sizes = inner_synth.only_sizes  ? only_sizes  + 1 : 0;
+      } else {
+	if(only_sizes == 0 && inner_synth.only_sizes && prev != null)
+	  prev_start_sizes = prev;
+	if(only_colors == 0 && inner_synth.only_colors && prev != null)
+	  prev_start_colors = prev;
+	only_sizes  = inner_synth.only_sizes  ? only_sizes  + 1 : 0;
+	only_colors = inner_synth.only_colors ? only_colors + 1 : 0;
+      }
+      prev = ds;
+      ds = ds->tl;
+    }
+    //    fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
+    if(only_sizes > 2 && prev_start_sizes != null) {
+      list_t<doc_t> start = prev_start_sizes->tl;
+      prev_start_sizes->tl = null;
+      *dsp = new List(new Seq(*dsp), 
+	     new List(dynamic_size(new Seq(start)),null));
+    }
+    else if(only_colors > 2 && prev_start_colors != null) {
+      list_t<doc_t> start = prev_start_colors->tl;
+      prev_start_colors->tl = null;
+      *dsp = new List(new Seq(*dsp), 
+	     new List(dynamic_color(new Seq(start)),null));
     }
     return $(doc,synth);
-    /* dyn_synth_t prev_synth = DynSynth(true,true);
-    list_t<doc_t> ds   = *dsp;
-    list_t<doc_t> prev = ds;
-    for(; ds != null; ds = ds->tl) {
-      let pr = dynamic_regions(ds->hd);
-      ds->hd = pr[0];
-    */
+	
   case &Tagged(tag,*d):
     let $(d2,DynSynth(sz,col)) = dynamic_regions(*d);
     *d = d2;
