@@ -210,16 +210,31 @@ static list_t<var_t> outer_namespace(list_t<var_t> ns) {
   return List::rev(List::rev(ns)->tl);
 }
 
+static bool same_namespace(list_t<var_t,`H> n1, list_t<var_t,`H> n2) {
+  if (n1 == n2) return true;
+  for (; n1 != null; n1 = n1->tl) {
+    if (n2 == null) return false;
+    if (String::zstrptrcmp(n1->hd,n2->hd) != 0) return false;
+    n2 = n2->tl;
+  }
+  if (n2 != null) return false;
+  return true;
+}
+
 // FIX: We should eagerly detect repeats by having one big dict
 // that we recompute on namespace and using boundaries
 static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
-			 var_t v, list_t<list_t<var_t,`H>,`H> nss) {
+			 var_t v, 
+			 list_t<var_t,`H> cns,
+			 list_t<list_t<var_t,`H>,`H> nss) {
   for(; nss != null; nss = nss->tl) {
-    genv_t ge2 = Dict::lookup(te->ae,nss->hd);
-    try {
-      lookup(ge2,v);
-      Tcutil::terr(loc,"%s is ambiguous",*v);
-    } catch { case Dict::Absent: break; }
+    if (!same_namespace(cns,nss->hd)) {
+      genv_t ge2 = Dict::lookup(te->ae,nss->hd);
+      try {
+	lookup(ge2,v);
+	Tcutil::terr(loc,"%s is ambiguous",*v);
+      } catch { case Dict::Absent: break; }
+    }
   }
   return;
 }
@@ -231,7 +246,7 @@ static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
     // Check current namespace
     try {
       `a result = lookup(ge,v);
-      check_repeat(te, loc, lookup, v, ge->availables);
+      check_repeat(te, loc, lookup, v, cns, ge->availables);
       return result;
     } catch { case Dict::Absent: break; }
     // Check available namespaces
@@ -239,7 +254,7 @@ static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
 	`a result = lookup(ge2,v);
-	check_repeat(te, loc, lookup, v, nss->tl);
+	check_repeat(te, loc, lookup, v, nss->hd, nss->tl);
 	return result;
       } catch { case Dict::Absent: break; }
     }

@@ -991,7 +991,17 @@ static void cf_analyze_switch_clauses(analenv_t env,
       body_outflow = cf_analyze_stmt(env, body, body_inflow);
     switch(body_outflow) {
     case BottomFL: break;
-    default: Tcutil::terr(body->loc, "switch clause may implicitly fallthru");
+    default: 
+      // no need for a break/fallthru for the last case
+      if (scs->tl != null) {
+	// if there are pattern variables in the next case, then an explicit
+	// fallthru is needed
+	if (scs->tl->hd->pat_vars->v != null)
+	  Tcutil::terr(body->loc, "switch clause may implicitly fallthru");
+	// otherwise issue a warning
+	else 
+	  Tcutil::warn(body->loc, "switch clause may implicitly fallthru");
+      }
       break;
     }
   }

@@ -292,44 +292,24 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       typs = new List(sint_t,typs);
       break;
     case 's':
-// FIX: temporarily we don't allow any variations on %s.  To do that
-// we'd have to modify toc.cyc
-      if (flags != null) {
-        terr(loc,"flags '%s' not allowed with %%s",String::implode(flags));
-        return null;
-      }
-      if (width != null) {
-        terr(loc,"width '%s' not allowed with %%s",String::implode(width));
-        return null;
-      }
-      if (precision != null) {
-        terr(loc,"precision '%s' not allowed with %%s",
-             String::implode(precision));
-        return null;
-      }
-      if (lenmod != null) {
-        terr(loc,"length modifier '%s' not allowed with %%s",
-                         String::implode(lenmod));
-        return null;
-      }
-//       // Only flag '-' is allowed for %s
-//       for (_ f = flags; f != null; f = f->tl)
-//         if (f->hd != '-') {
-//           terr(loc,"a flag not allowed with %%s");
-//           return null;
-//         }
-//       // We don't allow any length modifiers for %s;
-//       // in particular, we don't allow l (wchar_t[?])
-//       if (lenmod != null) {
-//         terr(loc,"length modifiers not allowed with %%s");
-//         return null;
-//       }
+       // Only flag '-' is allowed for %s
+       for (_ f = flags; f != null; f = f->tl)
+         if (f->hd != '-') {
+           terr(loc,"a flag not allowed with %%s");
+           return null;
+         }
+       // We don't allow any length modifiers for %s;
+       // in particular, we don't allow l (wchar_t[?])
+       if (lenmod != null) {
+         terr(loc,"length modifiers not allowed with %%s");
+         return null;
+       }
       typs = new List(const_string_typ(new_evar(&rk,new Opt(lookup_type_vars(te)))),typs);
       break;
     case 'p':
-      // We don't support pointer printing
-      terr(loc,"%%p not supported");
-      return null;
+      // Note:  we require pointers to be cast to integers
+      typs = new List(uint_t,typs);
+      break;
     case 'n':
       for (_ f = flags; f != null; f = f->tl)
         if (f->hd == '#' || f->hd == '0') {
@@ -566,6 +546,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       }
       typs = new List(t,typs);
       break;
+      //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       terr(loc,"%%c is not supported");
       return null;

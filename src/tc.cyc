@@ -90,6 +90,10 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
     case &Const_e(&String_c(s)):
       t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,null));
       break;
+    case &Comprehension_e(_,e,_):
+    // FIX: need to copy e here!
+      t = vd->type = new ArrayType(telt,tq,e); 
+      break;
     case &UnresolvedMem_e(_,es): fallthru(es);
     case &Array_e(es):
       t = vd->type = new ArrayType(telt,tq,uint_exp(List::length(es),null));

@@ -66,14 +66,20 @@ struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
 tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct
-Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max; extern int abs(
-int); extern int atexit( void(* __func)()); extern struct Cyc_Stdlib__Div div(
-int __numer, int __denom); extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int
-__denom); extern int rand(); extern void srand( unsigned int __seed); extern int
-rand_r( unsigned int* __seed); extern struct _tagged_arr Cyc_Stdlib_getenv(
-struct _tagged_arr); extern int Cyc_String_strlen( struct _tagged_arr s); extern
-int Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern
-struct _tagged_arr Cyc_String_strconcat( struct _tagged_arr, struct _tagged_arr);
+Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max
+ __attribute__(( dllimport )) ; extern int abs( int)  __attribute__(( cdecl )) ;
+extern int atexit( void(* __func)())  __attribute__(( cdecl )) ; extern struct
+Cyc_Stdlib__Div div( int __numer, int __denom)  __attribute__(( cdecl )) ;
+extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom)  __attribute__((
+cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern void srand(
+unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r( unsigned int*
+__seed)  __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl
+)) ; extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern
+int grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
+ __attribute__(( cdecl )) ; extern struct _tagged_arr Cyc_Stdlib_getenv( struct
+_tagged_arr); extern int Cyc_String_strlen( struct _tagged_arr s); extern int
+Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern struct
+_tagged_arr Cyc_String_strconcat( struct _tagged_arr, struct _tagged_arr);
 extern struct _tagged_arr Cyc_String_strconcat_l( struct Cyc_List_List*); extern
 struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*, struct
 _tagged_arr); extern struct _tagged_arr Cyc_String_substring( struct _tagged_arr,

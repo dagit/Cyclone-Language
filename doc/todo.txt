@@ -4,15 +4,9 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
-* using Foo; using Foo; causes "amgiguous" problems.
-
 * fix warning that we get when compiling tc.cyc
 
 * can't cast char?? to const char? const ? (or whatever it is.)
-
-* int foo[] = { 0,0,0 } works but int foo[] = { for i < 3 : 0 }
-  doesn't
-
 
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in
@@ -44,8 +38,6 @@ BUG FIXES and UNSOUNDNESSES:
 
 * error messages are confusing now that typedefs have hidden parameters.
 
-* Type-checker must disallow x -= y where x and y are pointers.
-
 * We rely on C to catch incomplete types, such as 
   struct X {
     struct X x;
@@ -63,7 +55,8 @@ function declarations are only allowed at top-level.
 
 * are we treating void properly?
 
-* Implementations of exceptions and backtrace() assume sizeof(void *)
+* Implementation of polymorphism assumes sizeof(void *) == sizeof(int).
+  Implementations of exceptions and backtrace() assume sizeof(void *)
   == sizeof(int) Also we don't follow C's rules about variables live
   across longjmp being declared volatile and setjmp only appearing in
   guards.
@@ -108,21 +101,6 @@ function declarations are only allowed at top-level.
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries
-
-* Some better way to deal with effects for function pointer types.
-  It makes sense to do what we do now (i.e., insert an effect tyvar)
-  for function definitions or function arguments or function results,
-  but it doesn't make sense for fields within structs or elsewhere.
-  For instance, when we declare a function variable, it's not clear
-  that we should do what we do.  Rather, we should perhaps insert an
-  evar?  
-
-* We don't allow enough pointer arithmetic.  For instance, we don't
-  allow the following:
-
-    int x[35] = {....}
-
-      x+1
 
 * default array initializers within a function: e.g., int x[4];  Actually,
   for bits-only things, we should only issue a warning if they're used

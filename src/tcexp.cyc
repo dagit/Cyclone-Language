@@ -637,10 +637,11 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
                       typ2string(t1), typ2string(t2));
   } else {
     let p        = po->v;
-    // FIX: x -= y not allowed when y is a pointer b/c x-y has type unsigned int
     let t_result = tcBinPrimop(te,loc,null,p,e1,e2);
-    if (!(unify(t_result,t1) || coerceable(t_result)))
-      return expr_err(te,loc, "Cannot use this operator in an assignment");
+    if (!(unify(t_result,t1) || coerceable(t_result) && coerceable(t1)))
+      return expr_err(te,loc, "Cannot use this operator in an assignment when "
+		      "the arguments have types %s and %s",typ2string(t1),
+		      typ2string(t2));
     return t_result;
   }
   return t2;
