@@ -11,6 +11,8 @@ using Stdio;
 using Buffer;
 using Parser;
 
+bool is_change = true;
+
 string_t start_tags[] = {
   "<0>", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>",
   "<B>", "<EM>", "<I>", "<PL>", "<S>", "<TT>", "<U>", "<r>", "<g>",
@@ -24,7 +26,7 @@ string_t end_tags[] = {
 
 extern tunion Document;
 tunion Document {
-  Seq(doc_t ?);
+  Seq(doc_t ?, int); // int is bound (b/c we split sequences sometimes)
   Text(unsigned int);
   Tagged(tag_t,doc_t);
 };
@@ -43,14 +45,14 @@ bool is_white(char c) {
 doc_t copy_doc(doc_t d) {
   switch(d) {
   case &Text(i): return new Text(i);
+  case &Seq(ds,bd): return new Seq(new {for i<bd: copy_doc(ds[i])},bd);
   case &Tagged(t,d): return new Tagged(t,d);
-  case &Seq(ds): return new Seq(new {for i<ds.size: copy_doc(ds[i])});
   }
 }
 
 void dump(buf_t b, doc_t d) {
   switch (d) {
-  case &Seq(ds): for (; ds.size != 0; ds++) dump(b,ds[0]); break;
+  case &Seq(ds,bd): for (int i=0; i<bd; ++i) dump(b,ds[i]); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
     fputs(start_tags[tag],stdout); dump(b,d); fputs(end_tags[tag],stdout);
@@ -61,9 +63,9 @@ void dump(buf_t b, doc_t d) {
 int doc_size(buf_t b,doc_t d) {
   int sum = 0;
   switch (d) {
-  case &Seq(ds):
-    for (; ds != null; ds++)
-      sum += doc_size(b,*ds); 
+  case &Seq(ds,bd):
+    for (int i=0; i<bd; ++i)
+      sum += doc_size(b,ds[i]); 
     break;
   case &Text(i): sum += Buffer::size(b,i); break;
   case &Tagged(tag,d):
@@ -78,9 +80,9 @@ int doc_size(buf_t b,doc_t d) {
 int num_texts(doc_t d) {
   int sum = 0;
   switch (d) {
-  case &Seq(ds):
-    for (; ds != null; ds++)
-      sum += num_texts(*ds);
+  case &Seq(ds,bd):
+    for (int i=0; i<bd; ++i)
+      sum += num_texts(ds[i]); 
     break;
   case &Text(s): ++sum; break;
   case &Tagged(tag,d):
@@ -108,43 +110,45 @@ context_t init_context = {
 // gets rid of redundant tags in a top-down fashion
 doc_t down_opt(context_t ctxt, doc_t d) {
   switch (d) {
-  case &Seq(ds):
-    for (; ds.size != 0; ds++)
-      *ds = down_opt(ctxt,*ds);
+  case &Seq(ds,bd):
+    for (int i=0; i<bd; ++i)
+      ds[i] = down_opt(ctxt,ds[i]);
     return d;
   case &Text(_): return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
-      if (ctxt.B) return down_opt(ctxt,*d2);
+      if (ctxt.B) {is_change = true; return down_opt(ctxt,*d2);}
       ctxt.B = true; 
       break;
     case EM_tag:
-      if (ctxt.S) return down_opt(ctxt,*d2); 
+      if (ctxt.S) {is_change = true; return down_opt(ctxt,*d2);} 
       ctxt.EM = !ctxt.EM; 
       break;
     case I_tag:
-      if (ctxt.I) return down_opt(ctxt,*d2);
+      if (ctxt.I) {is_change = true; return down_opt(ctxt,*d2);}
       ctxt.I = true;
       break;
     case PL_tag:
       // PL clears the U, B, EM, I, S, and TT attributes
-      if (ctxt.U == 0 && !ctxt.B && !ctxt.EM && !ctxt.I && !ctxt.S && !ctxt.TT)
+      if (ctxt.U == 0 && !ctxt.B && !ctxt.EM && !ctxt.I && !ctxt.S && !ctxt.TT){
+	is_change = true;
         return down_opt(ctxt,*d2);
+      }
       ctxt.U = 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
       ctxt.S = false; ctxt.TT = false;
       break;
     case S_tag:
-      if (ctxt.S) return down_opt(ctxt,*d2);
+      if (ctxt.S) {is_change=true; return down_opt(ctxt,*d2);}
       ctxt.S = true;
       ctxt.EM = false; // S hides the EM attribute
       break;
     case TT_tag:
-      if (ctxt.TT) return down_opt(ctxt,*d2);
+      if (ctxt.TT) {is_change=true; return down_opt(ctxt,*d2);}
       ctxt.TT = true;
       break;
     case U_tag:
-      if (ctxt.U == 3) return down_opt(ctxt,*d2);
+      if (ctxt.U == 3){is_change=true; return down_opt(ctxt,*d2);}
       ctxt.U++;
       break;
     case Zero:
@@ -158,7 +162,9 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     case Eight:
     case Nine:
       char sz = (char)tag;
-      if (ctxt.size == sz) return down_opt(ctxt,*d2);
+      if (ctxt.size == sz) {
+	is_change=true; return down_opt(ctxt,*d2);
+      }
       ctxt.size = sz;
       break;
     case r_tag:
@@ -170,7 +176,8 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     case k_tag:
     case w_tag:
       char color = (char)tag;
-      if (ctxt.color == color) return down_opt(ctxt,*d2);
+      if (ctxt.color == color) 
+	{is_change=true; return down_opt(ctxt,*d2);}
       ctxt.color = color;
       break;
     default: throw new Impossible("down_opt");
@@ -197,17 +204,22 @@ int main(int argc, char ??argv) {
   }
   start_timer(tlimit);
   buf_t b = init_buf();
-  fprintf(stderr,"getting docs... "); fflush(stderr);
+  fprintf(stderr,"getting docs..."); fflush(stderr);
   doc_t orig = get_docs(init_context,b,stdin);
-  fprintf(stderr,"%d\ncopying docs... ",check_time()); fflush(stderr);
+  fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   doc_t d = copy_doc(orig);
-  fprintf(stderr,"%d\nup_opt... ",check_time()); fflush(stderr);
-  let $(d2, _) = TagElim::up_opt(b,d);
-  d = d2;
-  fprintf(stderr,"%d\ndumping docs... ",check_time()); fflush(stderr);
+  is_change = true;
+  while(is_change) {
+    is_change = false;
+    fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
+    let $(d2, _) = TagElim::up_opt(b,d);
+    fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
+    d = down_opt(init_context,d2);
+  }
+  fprintf(stderr,"%d\ndumping docs...",check_time()); fflush(stderr);
   dump(b,d);
   let t = check_time();
-  fprintf(stderr,"%d\ntime left: %d sec out of %s sec\n",t,t,tlimit); fflush(stderr);
+  fprintf(stderr,"time left: %d sec out of %s sec\n",t,tlimit); fflush(stderr);
   //fprintf(stderr,"validating docs\n",t); fflush(stderr);
   //validate_docs(b,d,orig);
   return 0;

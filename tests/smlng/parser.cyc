@@ -246,6 +246,6 @@ doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
     result = to_array(imp_rev(docs));
   }
   if (result.size == 1) return *result;
-  else return new Seq(result);
+  else return new Seq(result,result.size);
 }
   

@@ -12,9 +12,8 @@ namespace TagElim;
 // gets the top-down things.  (Eg. This pass makes <r><r>x</r><r><y></r> into
 // <r>x</r><r><y></r> instead of <r>xy</r>)
 struct SynthS {
-  bool sz: 1;
   bool bold: 1;
-  bool emph: 1;
+  //  bool emph: 1;
   bool ital: 1;
   bool strong: 1;
   bool plain: 1;
@@ -23,26 +22,67 @@ struct SynthS {
   bool u2: 1; // invariant: true if u3 is true
   bool u3: 1;
   bool color: 1;
+  bool sz: 1;
+  int sizes: 10; // 0 at bit n means n DOES get used as a size
+  int colors: 8; // 0 at bit n means n DOES get used as a color
+  // ONLY 4 BITS OF ROOM LEFT!!!
 };
+// sizoef struct SynthS must stay less than 32 for this trick!
 union Synth {
   struct SynthS s;
-  unsigned short i;
+  unsigned int i;
 };
+
+synth_t all_ones;
 
 // currently destructive (of doc), but could easily be made functional
 $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
+  all_ones.i = ~0;
   switch(doc) {
-  case &Seq(ds): 
-    synth_t synth;
-    if(ds.size == 0) {
-      synth.i = ~0;
+  case &Seq(*dsp,*bdp): 
+    synth_t synth = all_ones;
+    if(*bdp == 0)
       return $(doc,synth);
-    }
-    synth.i = (unsigned short)~0;
-    for(int i=0; i < ds.size; ++i) {
-      let $(newd, inner_synth) = up_opt(b, ds[i]);
-      ds[i] = newd; // destructive here
-      synth.i = (short)(synth.i & inner_synth.i); // cast avoids warning
+    for(int i=0; i < *bdp; ++i) {
+      let $(newd, inner_synth) = up_opt(b, (*dsp)[i]);
+      (*dsp)[i] = newd; // destructive here
+      short split_tag = 0;
+      bool  do_split  = false;
+      // if size is guarded look for a size that appears in synth & inner_synth
+      if(synth.s.sz & inner_synth.s.sz 
+	 && ~(synth.s.sizes | inner_synth.s.sizes)) {
+	do_split = true;
+	// a bit-twiddle trick may be called for here
+	int sizes = synth.s.sizes | inner_synth.s.sizes;
+	// ASSUMES Zero is least and colors are consecutive.  Very destructive.
+	split_tag = Zero;
+	while(sizes & 1 != 0) {
+	  sizes >>= 1;
+	  ++split_tag;
+	}
+      }
+      if(!do_split && synth.s.color & inner_synth.s.color
+	 && ~(synth.s.colors | inner_synth.s.colors)) {
+	do_split = true;
+	// a bit-twiddle trick may be called for here
+	int sizes = synth.s.sizes | inner_synth.s.sizes;
+	// ASSUMES r_tag is least and colors are consecutive.  Very destructive.
+	split_tag = r_tag;
+	while(sizes & 1 != 0) {
+	  sizes >>= 1;
+	  ++split_tag;
+	}
+      }
+      if(do_split) {
+	// This is crazy -- we're splitting the sequence in place!
+	doc_t ? before_ds = new {for k < 2: newd};
+	before_ds[0] = new Seq(*dsp,i);
+	(*dsp)[i] = new Tagged(split_tag,new Seq(before_ds,2));
+	*dsp += i;
+	*bdp -= i;
+	i = 0;
+      }
+      synth.i = synth.i & inner_synth.i;
     }
     return $(doc,synth);
   case &Text(pos): 
@@ -50,7 +90,9 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
     //    if(Buffer::get_char(b, pos) == '\0')
     //      synth.i = ~0;
     //    else
-      synth.i = 0;
+    synth.i = 0;
+    synth.s.sizes  = ~0;
+    synth.s.colors = ~0;
     return $(doc,synth);
   case &Tagged(tag,d):
     let $(d2, synth) = up_opt(b, d);
@@ -59,12 +101,20 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
     switch(tag) {
     case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
     case Six: case  Seven: case  Eight: case  Nine:
-      OPT(sz); break;
+      OPT(sz);
+      // assumes Zero is least tag and they're consecutive
+      if(!useless)
+	synth.s.sizes = ~(1 << (tag - Zero));
+      break;
     case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
     case y_tag: case k_tag: case w_tag:
-      OPT(color); break;
+      OPT(color); 
+      // assumes r_tag is least tag and they're consecutive
+      if(!useless)
+	synth.s.sizes = ~(1 << (tag - r_tag));
+      break;
     case B_tag:  OPT(bold); break;
-    case EM_tag: break; // this toggles! (what to do?)
+    case EM_tag: useless = synth.s.strong; break;
     case I_tag:  OPT(ital); break;
     case S_tag:  OPT(strong); break;
     case TT_tag: OPT(tt); break;
@@ -72,9 +122,11 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       OPT(plain);
       int color = synth.s.color;
       int sz    = synth.s.sz;
-      synth.i = (unsigned short)~0; 
+      int sizes = synth.s.sizes;
+      synth.i = ~0; 
       synth.s.color = color;
       synth.s.sz    = sz;
+      synth.s.sizes = sizes;
       break;
     case U_tag:
       if(synth.s.u3)
@@ -97,24 +149,3 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   }
 }
 
-/*
-void up_opt_test1(buf_t b, doc_t d) {
-  Stdio::fputs("\n\n", Stdio::stdout);
-  dump(b,d);
-  d = up_opt(d)[0];
-  Stdio::fputs("\n\n", Stdio::stdout);
-  dump(b,d);
-}
-
-void up_opt_test() {
-  unsigned char ? s = new {'a','b','c'};
-  doc_t d1 = new Tagged(U_tag, new Tagged(PL_tag, new Text(s)));
-  doc_t d2 = new Tagged(r_tag, new Tagged(w_tag, d1));
-  doc_t d3 = new Seq(new {d2,d1,d2});
-  doc_t d4 = new Tagged(U_tag,new Tagged(b_tag,d3));
-  up_opt_test1(d1);
-  up_opt_test1(d2);
-  up_opt_test1(d3);
-  up_opt_test1(d4);
-}
-*/

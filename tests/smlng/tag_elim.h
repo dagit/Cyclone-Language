@@ -6,9 +6,8 @@
 
 namespace TagElim {
 extern struct SynthS {
-  bool sz: 1;
   bool bold: 1;
-  bool emph: 1;
+  //  bool emph: 1;
   bool ital: 1;
   bool strong: 1;
   bool plain: 1;
@@ -17,13 +16,15 @@ extern struct SynthS {
   bool u2: 1; // invariant: true if u3 is true
   bool u3: 1;
   bool color: 1;
+  bool sz: 1;
+  int sizes: 10; // 0 at bit n means n DOES get used as a size
+  int colors: 8; // 0 at bit n means n DOES get used as a color
 };
 extern union Synth {
   struct SynthS s;
-  unsigned short i;
+  unsigned int i;
 };
 typedef union Synth synth_t; // not a pointer
-  //extern void up_opt_test();
 extern $(doc_t, synth_t) up_opt(Buffer::buf_t, doc_t);
 }
 

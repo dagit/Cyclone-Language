@@ -17,14 +17,14 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -O2
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
   smlng$(EXE) generate$(EXE) validate$(EXE) decorate$(EXE)
 
-smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o ast_validate.o
+smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o 
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
@@ -50,6 +50,6 @@ buffer.cyc: buffer.h
 parser.cyc: parser.h buffer.h smlng.h
 
 clean:
-	rm -f smlng.o tag_elim.o timer.o ast_validate.o buffer.o parser.o generate.o validate.o
-	rm -f smlng.c tag_elim.c timer.c ast_validate.c buffer.c parser.c generate.c validate.c
+	rm -f smlng.o tag_elim.o timer.o buffer.o parser.o generate.o validate.o
+	rm -f smlng.c tag_elim.c timer.c buffer.c parser.c generate.c validate.c
 	rm -f *~ *.exe *.output *.stackdump

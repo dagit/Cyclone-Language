@@ -1,6 +1,9 @@
 #ifndef _SMLNG_H_
 #define _SMLNG_H_
 #include "buffer.h"
+
+extern int is_change;
+
 /*
 enum Tag { Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
            B_tag, EM_tag, I_tag, PL_tag, S_tag, TT_tag, U_tag, r_tag,
@@ -38,7 +41,7 @@ typedef short tag_t;
 extern tunion Document;
 typedef tunion Document doc_t;
 extern tunion Document {
-  Seq(doc_t ?);
+  Seq(doc_t ?, int); // bound because we split arrays in place
   Text(unsigned int);
   Tagged(tag_t,doc_t);
 };
