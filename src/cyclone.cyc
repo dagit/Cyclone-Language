@@ -462,7 +462,7 @@ static void process_file(string_t<`H> filename) {
   string_t stdinc_string;
   string_t def_inc_path = Cstring_to_string(Cdef_inc_path);
   if (strlen(def_inc_path) > 0)
-    stdinc_string = aprintf("-I%s",def_inc_path);
+    stdinc_string = aprintf(" -I%s",def_inc_path);
   else
     stdinc_string = "";
   let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");

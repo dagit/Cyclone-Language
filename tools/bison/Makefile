@@ -25,8 +25,7 @@
 # along with Bison; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-CYCDIR = ../..
-include $(CYCDIR)/Makefile.inc
+include ../../Makefile.inc
 PROG = cycbison$(EXE)
 BINDIR = $(CYCDIR)/bin
 

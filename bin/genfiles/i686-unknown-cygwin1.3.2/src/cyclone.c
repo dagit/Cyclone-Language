@@ -815,8 +815,8 @@ stdinc_string; struct _tagged_arr def_inc_path=( struct _tagged_arr)
 Cstring_to_string( Cdef_inc_path); if( Cyc_std_strlen( def_inc_path) >  0){
 stdinc_string=( struct _tagged_arr)({ struct Cyc_std_String_pa_struct _temp141;
 _temp141.tag= Cyc_std_String_pa; _temp141.f1=( struct _tagged_arr) def_inc_path;{
-void* _temp140[ 1u]={& _temp141}; Cyc_std_aprintf( _tag_arr("-I%s", sizeof(
-unsigned char), 5u), _tag_arr( _temp140, sizeof( void*), 1u));}});} else{
+void* _temp140[ 1u]={& _temp141}; Cyc_std_aprintf( _tag_arr(" -I%s", sizeof(
+unsigned char), 6u), _tag_arr( _temp140, sizeof( void*), 1u));}});} else{
 stdinc_string= _tag_arr("", sizeof( unsigned char), 1u);}{ struct _tagged_arr
 _temp142= Cyc_std_getenv( _tag_arr("CYCLONE_INCLUDE_PATH", sizeof( unsigned char),
 21u)); if( _temp142.curr != ( _tag_arr( 0u, 0u, 0u)).curr){ struct Cyc_List_List*
