@@ -50,13 +50,17 @@ function egrep_path {
 #   will fail)
 #
 function get_cc {
-  for comp in gcc cc; do
-    CC=`which $comp 2> /dev/null`
-    if [ -n "$CC" -a -x "$CC" ]; then
-      CC=$comp
-      break
-    fi
-  done
+  if [ "$TYPE" = "apple" ]; then
+    CC="cc -no-cpp-precomp"
+  else
+    for comp in gcc cc; do
+      CC=`which $comp 2> /dev/null`
+      if [ -n "$CC" -a -x "$CC" ]; then
+        CC=$comp
+        break
+      fi
+    done
+  fi
   if [ -n "$CC" ]; then
     echo $CC
   else
@@ -69,9 +73,6 @@ function get_cc {
 #
 function get_cflags {
   CFLAGS=
-  if [ "$TYPE" = "apple" ]; then
-    CFLAGS=-no-cpp-precomp
-  fi
   echo $CFLAGS
 }
 
