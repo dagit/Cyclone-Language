@@ -1946,8 +1946,17 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // element types have to be equal or t1's element type must be a 
     // pointer-sub-type of t2's element type (e.g., t1 = datatype D.C
     // and t2 = datatype D) and the t2 pointer must be const or abstract.
+
+    // FIX: we can only allow ptrsubtype when the pointer has a bound of
+    // 1, is not fat, and is not zero-terminated!
+    let deep_subtype =  
+      unify_conrefs(unify_it_bounds,
+                    pinfo_b.ptr_atts.bounds,bounds_one_conref) && 
+      (!conref_constr(false,pinfo_b.ptr_atts.zero_term));
+    //fprintf(stderr,"3.5: deep_subtype = %d\n",deep_subtype);
+
     okay = okay && (unify(pinfo_a.elt_typ,pinfo_b.elt_typ) ||
-                    ((pinfo_b.elt_tq.real_const || kind_leq(&ak,typ_kind(pinfo_b.elt_typ))) && ptrsubtype(te,NULL,pinfo_a.elt_typ,pinfo_b.elt_typ)));
+                    (deep_subtype && (pinfo_b.elt_tq.real_const || kind_leq(&ak,typ_kind(pinfo_b.elt_typ))) && ptrsubtype(te,NULL,pinfo_a.elt_typ,pinfo_b.elt_typ)));
     //fprintf(stderr,"4: okay = %d\n",okay);                                
     return okay;
 
@@ -2324,39 +2333,81 @@ bool coerceable(type_t t) {
 // but doing so is tricky because we have to get the padding and
 // alignment right.  This seems to be particularly weird on the
 // x86 -- I need to find precise documentation on it before we do this.
-static $(tqual_t,type_t)@`r flatten_typ_f($(list_t<$(tvar_t,type_t)@`r,`r>,
-                                             region_t<`r>)@ env,aggrfield_t x){
-  let $(inst,r) = *env;
+static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
+                                                   bool flatten,
+                                                   tenv_t te,
+                                                   type_t t1);
+static list_t<$(tqual_t,type_t)@`r,`r> 
+  flatten_typ_f($(list_t<$(tvar_t,type_t)@`r,`r>,
+                  region_t<`r>, tenv_t, bool)@ env,aggrfield_t x){
+  let $(inst,r,te,flatten) = *env;
   //fprintf(stderr,"flattening field %s with real_const = %d and const = %d\n",*x->name,x->tq.real_const,x->tq.print_const);
-  return rnew(r) $(x->tq,rsubstitute(r,inst,x->type));
+  let t = rsubstitute(r,inst,x->type);
+  let ts = flatten_typ(r,flatten,te,t);
+  if (List::length(ts) == 1) 
+    return rnew(r) List{rnew(r) $(x->tq,t),NULL};
+  else return ts;
 }
-static $(tqual_t,type_t)@`r rcopy_tqt(region_t<`r> r,$(tqual_t,type_t)@ x) {
+static list_t<$(tqual_t,type_t)@`r,`r> 
+  rcopy_tqt($(region_t<`r>,tenv_t,bool)@ env,$(tqual_t,type_t)@ x) {
+  let $(r,te,flatten) = *env;
   let $(tq,t) = *x;
-  return rnew(r) $(tq,t);
+  let ts = flatten_typ(r,flatten,te,t);
+  if (List::length(ts) == 1) 
+    return rnew(r) List{rnew(r) $(tq,t),NULL};
+  else return ts;
 }
 static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
+                                                   bool flatten,
                                                    tenv_t te,
                                                    type_t t1) {
-  t1 = compress(t1);
-  switch (t1) {
-  case &VoidType: return NULL;
-  case &TupleType(tqs): 
-    return rmap_c(r,rcopy_tqt,r,tqs);// FIX: recursively flatten here
-  case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
-    // FIX: too strict with existentials and constraints??
-    if(ad->kind==UnionA || ad->impl==NULL 
-       || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
-      return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
-    let inst = List::rzip(r,r,ad->tvs,ts);
-    // FIX: recursively flatten here (if alignment allows??)
-    $(list_t<_,`r>,region_t<`r>) env = $(inst,r);
-    return List::rmap_c(r,flatten_typ_f,&env,ad->impl->fields);
-  case &AnonAggrType(StructA,fs):
-    // FIX: recursively flatten here (if alignment allows??)
-    $(list_t<_,`r>,region_t<`r>) env = $(NULL,r);
-    return List::rmap_c(r,flatten_typ_f,&env,fs);
-  default: return rnew(r) List(rnew(r) $(const_tqual(NULL),t1),NULL);
+  if (flatten) {
+    t1 = compress(t1);
+    switch (t1) {
+    case &VoidType: return NULL;
+    case &TupleType(tqs): 
+      let env = $(r,te,flatten);
+      // we can flatten only the first component recursively
+      switch (tqs) {
+      case NULL: return NULL;
+      case &List{hd,tl}:
+        let hd2 = rcopy_tqt(&env,hd);
+        env[2] = false;
+        let tl2 = rmap_c(r,rcopy_tqt,&env,tqs);
+        let temp = rnew(r) List{hd2,tl2};
+        return rflatten(r,rnew (r) List{hd2,tl2});
+      }
+    case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
+      // FIX: too strict with existentials and constraints??
+      if(ad->kind==UnionA || ad->impl==NULL 
+         || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
+        return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+      let inst = List::rzip(r,r,ad->tvs,ts);
+      $(list_t<_,`r>,region_t<`r>,_,bool) env = $(inst,r,te,flatten);
+      switch (ad->impl->fields) {
+      case NULL: return NULL;
+      case &List{hd,tl}:
+        let hd2 = flatten_typ_f(&env,hd);
+        env[3] = false;
+        let tl2 = List::rmap_c(r,flatten_typ_f,&env,tl);
+        let tts = rnew(r) List{hd2,tl2};
+        return List::rflatten(r,tts);
+      }
+    case &AnonAggrType(StructA,fs):
+      $(list_t<_,`r>,region_t<`r>,_,bool) env = $(NULL,r,te,flatten);
+      switch (fs) {
+      case NULL: return NULL;
+      case &List{hd,tl}:
+        let hd2 = flatten_typ_f(&env,hd);
+        env[3] = false;
+        let tl2 = List::rmap_c(r,flatten_typ_f,&env,tl);
+        let tts = rnew(r) List{hd2,tl2};
+        return rflatten(r,tts);
+      }
+    default: break; 
+    }
   }
+  return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
 }
 
 // Returns true when attribute list a1 can be safely cast to a2
@@ -2377,6 +2428,14 @@ static bool sub_attributes(attributes_t a1, attributes_t a2) {
   return true;
 }
 
+static bool isomorphic(type_t t1, type_t t2) {
+  switch ($(compress(t1),compress(t2))) {
+  case $(&IntType(_,b1), &IntType(_, b2)): 
+    return b1 == b2 || (b1 == Int_sz && b2 == Long_sz) || 
+      (b1 == Long_sz && b2 == Int_sz);
+  default: return false;
+  }
+}
 
 // FIX: the subtyping environment needs to take into account the
 // qualifiers on the pointers.
@@ -2421,10 +2480,20 @@ static bool subtype(tenv_t te,
       }
     }
     // check that qualifiers are the same or that t2's is at least const
-    if (!q_b.real_const && q_a.real_const) return false;
+    // (or it's element type is abstract).
+    if (!q_b.real_const && q_a.real_const) {
+      if (!kind_leq(&ak,typ_kind(t_b)))
+        return false;
+    }
+    // Note, we can only allow ptrsubtype when the second pointer has a 
+    // bound of 1, is not fat, and is not zero-terminated!
+    let deep_subtype =  
+      unify_conrefs(unify_it_bounds,b_b,bounds_one_conref) && 
+      (!conref_constr(false,zt_b));
+
     //fprintf(stderr,"subtype: got here on %s and %s\n",typ2string(t1), typ2string(t2));
     // now check that t_a is a pointer sub-type of t_b
-    return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
+    return (deep_subtype && ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b)) || (unify(t1,t2)) || isomorphic(t1,t2);
 
   case $(&DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(dd1,df)},ts1}), &DatatypeType(DatatypeInfo{{.KnownDatatype = &dd2}, ts2})):
     // we're casting a datatype field to a datatype which is okay
@@ -2495,14 +2564,6 @@ static bool subtype(tenv_t te,
   }
 }
 
-static bool isomorphic(type_t t1, type_t t2) {
-  switch ($(compress(t1),compress(t2))) {
-  case $(&IntType(_,b1), &IntType(_, b2)): 
-    return b1 == b2 || (b1 == Int_sz && b2 == Long_sz) || 
-      (b1 == Long_sz && b2 == Int_sz);
-  default: return false;
-  }
-}
 
 // is t1* <= t2*?
 //   we flatten t1 and t2 into structurally equivalent tuple types 
@@ -2513,16 +2574,16 @@ static bool isomorphic(type_t t1, type_t t2) {
 static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
   //fprintf(stderr,"ptrsubtype %s and %s\n",typ2string(t1),typ2string(t2));
   TEMP_RGN(te, temp) {
-    list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(temp,te,t1);
-    list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(temp,te,t2);
+    list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(temp,true,te,t1);
+    list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(temp,true,te,t2);
     for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
       if (tqs1 == NULL) return false;
       let &$(tq1,t1a) = tqs1->hd;
       let &$(tq2,t2a) = tqs2->hd;
       //fprintf(stderr,"tq1.real_const = %d, tq2.real_const = %d\n",tq1.real_const,tq2.real_const);              
       if (tq1.real_const && !tq2.real_const) return false;
-      //fprintf(stderr,"ptrsubtype: qualifiers okay\n");
-      if ((tq2.real_const || kind_leq(&ak,typ_kind(t1a)))
+      //fprintf(stderr,"ptrsubtype: qualifiers okay, looking at %s and %s\n",typ2string(t1a),typ2string(t2a));
+      if ((tq2.real_const || kind_leq(&ak,typ_kind(t2a)))
            && subtype(te,assume,t1a,t2a)) { 
         //fprintf(stderr,"ptrsubtype: t2 is const (or abstract) and %s <= %s\n",typ2string(t1a),typ2string(t2a));
         continue;
@@ -2535,6 +2596,7 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
         //fprintf(stderr,"ptrsubtype: %s isomorphic to %s\n",typ2string(t1a),typ2string(t2a));                
         continue;
       }
+      //fprintf(stderr,"not related!\n");
       return false;
     }
     return true;
@@ -2589,9 +2651,15 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       // cast when the types are equal, isomorphic, or the the second
       // type is void.  (void is effectively abstract, but I'm too scared
       // to make it thus...)
+
+      // Note, we can only allow ptrsubtype when the second pointer has a 
+      // bound of 1, is not fat, and is not zero-terminated!
+      let deep_castable = 
+        unify_conrefs(unify_it_bounds,b_b,bounds_one_conref) && 
+        (!conref_constr(false,zt_b));
+
       let ptrsub = quals_okay && 
-        (((q_b.real_const || kind_leq(&ak,typ_kind(t_b))) && 
-         ptrsubtype(te,assump,t_a,t_b)) ||
+        ((deep_castable && ptrsubtype(te,assump,t_a,t_b)) ||
          unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,&VoidType_val));
       //fprintf(stderr,"ptrsub is %d\n",ptrsub);
       t1_failure = t1;
@@ -2618,7 +2686,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       if (conref_def(false,null_a) && !conref_def(false,null_b))
         coercion = NonNull_to_Null;
 
-      //fprintf(stderr,"bounds_ok = %d, zeroterm_ok = %d, ptrsub = %d, bitcase = %d\n",bounds_ok,zeroterm_ok,ptrsub,bitcase);
+        //fprintf(stderr,"bounds_ok = %d, zeroterm_ok = %d, ptrsub = %d, bitcase = %d\n",bounds_ok,zeroterm_ok,ptrsub,bitcase);
 
       if (bounds_ok && zeroterm_ok && (ptrsub || bitcase) && 
           (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b)))

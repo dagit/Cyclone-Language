@@ -913,6 +913,46 @@ typedef list_t<work_stack_frame_t<`r>,`r> work_stack_t<`r>;
 static enum Answer { Yes, No, Maybe };
 typedef enum Answer answer_t;
 
+static void print_tab(int i) {
+  for (; i != 0; i--) {
+    fprintf(stderr," ");
+  }
+}
+
+static void print_con(con_t c) {
+  let n = c->name;
+  switch (n) {
+  case {.Name_v = s}: fprintf(stderr,"%s",s); break;
+  case {.Int_v = i}: fprintf(stderr,"%d",i); break;
+  }
+}
+
+static void print_dec_tree(decision_t<`rhs> d, void print_rhs(`rhs), int tab) {
+  switch (d) {
+  case &Success(rhs): 
+    print_tab(tab);
+    fprintf(stderr,"Success("); print_rhs(rhs); fprintf(stderr,")\n");
+    break;
+  case &Failure(_): fprintf(stderr,"Failure\n"); break;
+  case &IfEq(a,c,left,right):
+    print_tab(tab);
+    fprintf(stderr,"Access[");
+    for (; a != NULL; a = a->tl) { 
+      fprintf(stderr,"%d",a->hd);
+      if (a->tl != NULL) fprintf(stderr,",");
+    }
+    fprintf(stderr,"],");
+    print_con(c);
+    fprintf(stderr,",\n");
+    print_dec_tree(left,print_rhs,tab+7);
+    print_dec_tree(right,print_rhs,tab+7);
+  }
+}
+
+static void print_swrhs($(bool,seg_t)@`r x) {
+  return;
+}
+
 // Add c to a set of negative constructors for a term description.
 // Assumes that td is a negative term description, that c is not
 // already in the set, and that adding c does not cover all of the
@@ -1281,6 +1321,7 @@ static void not_exhaust_err(region_t<`r> r, seg_t loc, term_desc_t<`r> desc) {
 static void rule_occurs(int dummy, $(bool,seg_t)@ rhs) {
   (*rhs)[0] = true;
 }
+
 void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
   // We represent "pat && e" as (simple_pat,i) where i is a unique integer.
   // We represent patterns without where clauses as (simple_pat,_).
@@ -1296,8 +1337,11 @@ void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs)
                         &ex_done);
   for (; match_rules != NULL; match_rules = match_rules->tl) {
     let &$(_,&$(b,loc2)) = match_rules->hd;
-    if (!b)
-      terr(loc2,"redundant pattern");
+    if (!b) {
+      terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)"); 
+      //print_dec_tree(dec_tree, print_swrhs, 0);
+      break; // only give one error
+    }
   }
   }
 }
@@ -1332,6 +1376,7 @@ bool check_let_pat_exhaustive(seg_t loc,tenv_t te,pat_t p) {
   }
 }
 
+
 // Check that the patterns in a catch switch are non-overlapping.
 // There's an implicit "re-throw on wild" pattern here, so no need
 // to check for exhaustiveness.
@@ -1354,8 +1399,10 @@ void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
                           &ex_done);
     for (; match_rules != NULL; match_rules = match_rules->tl) {
       let &$(_,&$(b,loc2)) = match_rules->hd;
-      if (!b)
-        terr(loc2,"redundant pattern");
+      if (!b) {
+        terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)");
+        break; // only give one error
+      }
     }
   }
 }
