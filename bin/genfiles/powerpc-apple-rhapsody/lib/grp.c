@@ -729,20 +729,17 @@ groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
 char**gr_mem;};struct Cyc_Cgrp_Cgroup*getgrnam(char*const name);struct Cyc_Cgrp_Cgroup*
 getgrgid(unsigned int gid);int initgroups(char*user,unsigned int group);int
 setgroups(unsigned long n,const unsigned int*groups);struct Cyc_group*Cyc_getgrnam(
-struct _dyneither_ptr name);struct Cyc_group*Cyc_getgrnam(struct _dyneither_ptr name){
-struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(name));struct Cyc_group*
-_tmp2;return(unsigned int)src?(_tmp2=_cycalloc(sizeof(*_tmp2)),((_tmp2->gr_name=(
-struct _dyneither_ptr)Cstring_to_string(src->gr_name),((_tmp2->gr_passwd=(struct
-_dyneither_ptr)Cstring_to_string(src->gr_passwd),((_tmp2->gr_gid=src->gr_gid,((
-_tmp2->gr_mem=ntCsl_to_ntsl(src->gr_mem),_tmp2))))))))): 0;}struct Cyc_group*Cyc_getgrgid(
-unsigned int gid);struct Cyc_group*Cyc_getgrgid(unsigned int gid){struct Cyc_Cgrp_Cgroup*
-src=getgrgid(gid);struct Cyc_group*_tmp3;return(unsigned int)src?(_tmp3=_cycalloc(
-sizeof(*_tmp3)),((_tmp3->gr_name=(struct _dyneither_ptr)Cstring_to_string(src->gr_name),((
-_tmp3->gr_passwd=(struct _dyneither_ptr)Cstring_to_string(src->gr_passwd),((_tmp3->gr_gid=
-src->gr_gid,((_tmp3->gr_mem=ntCsl_to_ntsl(src->gr_mem),_tmp3))))))))): 0;}int Cyc_initgroups(
-struct _dyneither_ptr user,unsigned int group);int Cyc_initgroups(struct
-_dyneither_ptr user,unsigned int group){return initgroups(string_to_Cstring(user),
-group);}int Cyc_setgroups(struct _dyneither_ptr groups);int Cyc_setgroups(struct
-_dyneither_ptr groups){return setgroups(_get_dyneither_size(groups,sizeof(
+struct _dyneither_ptr name){struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(
+name));return(unsigned int)src?({struct Cyc_group*_tmp0=_cycalloc(sizeof(*_tmp0));
+_tmp0->gr_name=(struct _dyneither_ptr)Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(
+struct _dyneither_ptr)Cstring_to_string(src->gr_passwd);_tmp0->gr_gid=src->gr_gid;
+_tmp0->gr_mem=ntCsl_to_ntsl(src->gr_mem);_tmp0;}): 0;}struct Cyc_group*Cyc_getgrgid(
+unsigned int gid){struct Cyc_Cgrp_Cgroup*src=getgrgid(gid);return(unsigned int)src?({
+struct Cyc_group*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->gr_name=(struct
+_dyneither_ptr)Cstring_to_string(src->gr_name);_tmp1->gr_passwd=(struct
+_dyneither_ptr)Cstring_to_string(src->gr_passwd);_tmp1->gr_gid=src->gr_gid;_tmp1->gr_mem=
+ntCsl_to_ntsl(src->gr_mem);_tmp1;}): 0;}int Cyc_initgroups(struct _dyneither_ptr
+user,unsigned int group){return initgroups(string_to_Cstring(user),group);}int Cyc_setgroups(
+struct _dyneither_ptr groups){return setgroups(_get_dyneither_size(groups,sizeof(
 unsigned int)),(const unsigned int*)_check_null(_untag_dyneither_ptr(groups,
 sizeof(unsigned int),1)));}

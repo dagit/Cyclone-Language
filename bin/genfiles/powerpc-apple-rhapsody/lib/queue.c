@@ -736,42 +736,32 @@ struct _RegionHandle*,int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q);vo
 Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(void*(*
 f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
 front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
-q);int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*q){return q->front == 0;}char Cyc_Queue_Empty[
-6]="Empty";struct Cyc_Queue_Empty_struct Cyc_Queue_Empty_val={Cyc_Queue_Empty};
-struct Cyc_Queue_Queue*Cyc_Queue_create();struct Cyc_Queue_Queue*Cyc_Queue_create(){
-struct Cyc_Queue_Queue*_tmp5;return(_tmp5=_cycalloc(sizeof(*_tmp5)),((_tmp5->front=
-0,((_tmp5->rear=0,((_tmp5->len=0,_tmp5)))))));}void Cyc_Queue_radd(struct
-_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_radd(struct
-_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*_tmp6;struct
-Cyc_List_List*cell=(_tmp6=_region_malloc(r,sizeof(*_tmp6)),((_tmp6->hd=(void*)x,((
-_tmp6->tl=0,_tmp6)))));if(q->front == 0){q->front=cell;q->rear=cell;}else{((
-struct Cyc_List_List*)_check_null(q->rear))->tl=cell;q->rear=cell;}++ q->len;}void
-Cyc_Queue_add(struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_add(struct Cyc_Queue_Queue*
-q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void Cyc_Queue_rpush(struct
-_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_rpush(struct
-_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){{struct Cyc_List_List*_tmp7;q->front=((
-_tmp7=_region_malloc(r,sizeof(*_tmp7)),((_tmp7->hd=(void*)x,((_tmp7->tl=q->front,
-_tmp7))))));}if(q->rear == 0)q->rear=q->front;++ q->len;}void Cyc_Queue_push(struct
-Cyc_Queue_Queue*q,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_rpush(
-Cyc_Core_heap_region,q,x);}void*Cyc_Queue_take(struct Cyc_Queue_Queue*q);void*Cyc_Queue_take(
-struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)& Cyc_Queue_Empty_val);
+q){return q->front == 0;}char Cyc_Queue_Empty[6]="Empty";struct Cyc_Queue_Empty_struct
+Cyc_Queue_Empty_val={Cyc_Queue_Empty};struct Cyc_Queue_Queue*Cyc_Queue_create(){
+return({struct Cyc_Queue_Queue*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->front=0;
+_tmp1->rear=0;_tmp1->len=0;_tmp1;});}void Cyc_Queue_radd(struct _RegionHandle*r,
+struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*cell=({struct Cyc_List_List*
+_tmp2=_region_malloc(r,sizeof(*_tmp2));_tmp2->hd=(void*)x;_tmp2->tl=0;_tmp2;});
+if(q->front == 0){q->front=cell;q->rear=cell;}else{((struct Cyc_List_List*)
+_check_null(q->rear))->tl=cell;q->rear=cell;}++ q->len;}void Cyc_Queue_add(struct
+Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void Cyc_Queue_rpush(
+struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){q->front=({struct Cyc_List_List*
+_tmp3=_region_malloc(r,sizeof(*_tmp3));_tmp3->hd=(void*)x;_tmp3->tl=q->front;
+_tmp3;});if(q->rear == 0)q->rear=q->front;++ q->len;}void Cyc_Queue_push(struct Cyc_Queue_Queue*
+q,void*x){Cyc_Queue_rpush(Cyc_Core_heap_region,q,x);}void*Cyc_Queue_take(struct
+Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)& Cyc_Queue_Empty_val);
 else{void*_tmp4=(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;q->front=((
 struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front == 0)q->rear=0;-- q->len;
-return _tmp4;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q);void*Cyc_Queue_peek(
-struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)& Cyc_Queue_Empty_val);
-else{return(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;}}void Cyc_Queue_clear(
-struct Cyc_Queue_Queue*q);void Cyc_Queue_clear(struct Cyc_Queue_Queue*q){q->front=0;
-q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v);void Cyc_Queue_remove(
-struct Cyc_Queue_Queue*q,void*v){struct Cyc_List_List*x;struct Cyc_List_List*y;for((
-x=q->front,y=0);x != 0;(y=x,x=x->tl)){if((void*)x->hd == v){-- q->len;if(q->front == 
-x)q->front=x->tl;else{((struct Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear
-== x)q->rear=y;break;}}}struct Cyc_List_List*Cyc_Queue_rfilter_c(struct
-_RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q);struct Cyc_List_List*
+return _tmp4;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)
+_throw((void*)& Cyc_Queue_Empty_val);else{return(void*)((struct Cyc_List_List*)
+_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*q){q->front=
+0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v){
+struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(y=x,x=x->tl)){
+if((void*)x->hd == v){-- q->len;if(q->front == x)q->front=x->tl;else{((struct Cyc_List_List*)
+_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}struct Cyc_List_List*
 Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct
 Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(r,f,env,q->front);}int Cyc_Queue_length(
-struct Cyc_Queue_Queue*q);int Cyc_Queue_length(struct Cyc_Queue_Queue*q){return(int)
-q->len;}void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*q);void Cyc_Queue_iter(
-void(*f)(void*),struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x
-!= 0;x=x->tl){f((void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*
-q);void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*q){struct Cyc_List_List*
-x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
+struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(void(*f)(void*),
+struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((
+void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*q){
+struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
