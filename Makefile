@@ -299,7 +299,7 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
 	$(RM) bin/cyc-lib/*libcyc*.a
-	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cycdoc buildlib cycbison cyclex cycflex aprof))
+	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
 	$(RM) *~ amon.out
 	$(RM) include/cstdio.h include/csignal.h lib/cstdio.h lib/csignal.h
 
