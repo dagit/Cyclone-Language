@@ -2033,9 +2033,12 @@ semaphore.h:
 setjmp.h:
 ;
 
+// Not supported:
 signal.h:
-omitvariables { sigaction }
 include {
+sigaction
+sa_sigaction
+sa_handler
 sig_atomic_t
 pid_t
 SIGEV_NONE
@@ -2139,116 +2142,83 @@ hstub sigrelse {
   extern "C" int sigrelse(int);
 }
 hstub {
-  extern enum SigBuiltin {
-    SIG_DFL,
-    SIG_ERR,
-    SIG_IGN
+  typedef void (@sigarg_t)(int);
+  extern void SIG_DFL(int);
+  extern void SIG_ERR(int);
+  extern void SIG_IGN(int);
   #ifdef _SIG_HOLD_def_
-    , SIG_HOLD // Rare
+  extern void SIG_HOLD(int); // Rare
   #endif
-  };
-  extern datatype SigArg {
-    __SIG_BUILTIN(enum SigBuiltin);
-    __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
-  };
-  typedef datatype SigArg @`r sigarg_t<`r>;
-}
-cycstub {
-  #include <signal.h>
 }
 hstub sigset {
   extern sigarg_t sigset(int, sigarg_t);
 }
-cycstub {
+cycstub sigset {
   namespace Csignal {
+    extern "C" void *sigset(void *arg);
     extern "C" sigarg_t sigset_SIG_DFL(int);
     extern "C" sigarg_t sigset_SIG_ERR(int);
     extern "C" sigarg_t sigset_SIG_IGN(int);
   #ifdef _SIG_HOLD_def_
     extern "C" sigarg_t sigset_SIG_HOLD(int);
   #endif
-    extern "C" sigarg_t sigset_SIG_HANDLER(int, void (@`H)(int));
-    // for the use of the C sigset stubs
-    sigarg_t make_SIG_DFL() {
-      return new __SIG_BUILTIN(SIG_DFL);
-    }
-    sigarg_t make_SIG_ERR() {
-      return new __SIG_BUILTIN(SIG_ERR);
-    }
-    sigarg_t make_SIG_IGN() {
-      return new __SIG_BUILTIN(SIG_ERR);
-    }
-  #ifdef _SIG_HOLD_def_
-    sigarg_t make_SIG_HOLD() {
-      return new __SIG_BUILTIN(SIG_HOLD);
-    }
-  #endif
-    sigarg_t make_SIG_HANDLER(void (@`H f)(int)) {
-      return new __SIG_HANDLER(f);
-    }
+    extern "C" sigarg_t sigset_SIG_HANDLER(int, sigarg_t);
   }
-}
-cycstub sigset {
   sigarg_t sigset(int a, sigarg_t b) {
-    switch (b) {
-    case &__SIG_BUILTIN(SIG_DFL):
-      return Csignal::sigset_SIG_DFL(a);
-    case &__SIG_BUILTIN(SIG_ERR):
-      return Csignal::sigset_SIG_ERR(a);
+    if (b == SIG_DFL)  return Csignal::sigset_SIG_DFL(a);
+    if (b == SIG_ERR)  return Csignal::sigset_SIG_ERR(a);
   #ifdef _SIG_HOLD_def_
-    case &__SIG_BUILTIN(SIG_HOLD):
-      return Csignal::sigset_SIG_HOLD(a);
+    if (b == SIG_HOLD) return Csignal::sigset_SIG_HOLD(a);
   #endif
-    case &__SIG_BUILTIN(SIG_IGN):
-      return Csignal::sigset_SIG_IGN(a);
-    case &__SIG_HANDLER(f):
-      return Csignal::sigset_SIG_HANDLER(a,f);
-    }
+    if (b == SIG_IGN)  return Csignal::sigset_SIG_IGN(a);
+    return Csignal::sigset_SIG_HANDLER(a,b);
   }
 }
 cstub {
   #include <signal.h>
   typedef void *Cyc_sigarg_t;
-  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_DFL();
-  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_ERR();
-  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_IGN();
-  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HOLD();
-  extern Cyc_sigarg_t Cyc_Csignal_make_SIG_HANDLER(void (*)(int));
-  Cyc_sigarg_t sig_wrap(void (*f)(int)) {
-    if (f == SIG_DFL)
-      return Cyc_Csignal_make_SIG_DFL();
-    if (f == SIG_ERR)
-      return Cyc_Csignal_make_SIG_ERR();
-    if (f == SIG_IGN)
-      return Cyc_Csignal_make_SIG_IGN();
+  void Cyc_SIG_DFL(int ignore) { return; }
+  void Cyc_SIG_ERR(int ignore) { return; }
+  void Cyc_SIG_IGN(int ignore) { return; }
   #ifdef SIG_HOLD
-    if (f == SIG_HOLD)
-      return Cyc_Csignal_make_SIG_HOLD();
+  void Cyc_SIG_HOLD(int ignore) { return; }
   #endif
-      return Cyc_Csignal_make_SIG_HANDLER(f);
+ 
+  // This takes a C sighandler_t and turns it into a Cyclone sigarg_t
+  Cyc_sigarg_t sigarg_wrap(void (*f)(int)) {
+    if (f == SIG_DFL)  return Cyc_SIG_DFL;
+    if (f == SIG_ERR)  return Cyc_SIG_ERR;
+    if (f == SIG_IGN)  return Cyc_SIG_IGN;
+  #ifdef SIG_HOLD
+    if (f == SIG_HOLD) return Cyc_SIG_HOLD;
+  #endif
+    return f;
+  }
+
+  // This takes a Cyclone sigarg_t and turns it into a C sighandler_t
+  void (*sigarg_unwrap(Cyc_sigarg_t f))(int) {
+    if (f == Cyc_SIG_DFL)  return SIG_DFL;
+    if (f == Cyc_SIG_ERR)  return SIG_ERR;
+    if (f == Cyc_SIG_IGN)  return SIG_IGN;
+  #ifdef SIG_HOLD
+    if (f == Cyc_SIG_HOLD) return SIG_HOLD;
+  #endif
+    return f;
   }
 }
 cstub sigset {
-  Cyc_sigarg_t sigset_SIG_DFL(int a) {
-    return sig_wrap(sigset(a,SIG_DFL));
-  }
-  Cyc_sigarg_t sigset_SIG_ERR(int a) {
-    return sig_wrap(sigset(a,SIG_ERR));
-  }
-  Cyc_sigarg_t sigset_SIG_IGN(int a) {
-    return sig_wrap(sigset(a,SIG_IGN));
-  }
+  Cyc_sigarg_t sigset_SIG_DFL(int a) { return sigarg_wrap(sigset(a,SIG_DFL)); }
+  Cyc_sigarg_t sigset_SIG_ERR(int a) { return sigarg_wrap(sigset(a,SIG_ERR)); }
+  Cyc_sigarg_t sigset_SIG_IGN(int a) { return sigarg_wrap(sigset(a,SIG_IGN)); }
 #ifdef SIG_HOLD
-  Cyc_sigarg_t sigset_SIG_HOLD(int a) {
-    return sig_wrap(sigset(a,SIG_HOLD));
-  }
+  Cyc_sigarg_t sigset_SIG_HOLD(int a) { return sigarg_wrap(sigset(a,SIG_HOLD)); }
 #endif
   Cyc_sigarg_t sigset_SIG_HANDLER(int a, void (*f)(int)) {
-    return sig_wrap(sigset(a,f));
+    return sigarg_wrap(sigset(a,f));
   }
 }
 hstub signal {
-  extern sigarg_t signal(int, ... inject sigarg_t);
+  extern sigarg_t signal(int, sigarg_t);
 }
 cycstub signal {
   namespace Csignal {
@@ -2258,52 +2228,67 @@ cycstub signal {
     extern "C" sigarg_t signal_SIG_HOLD(int);
 #endif
     extern "C" sigarg_t signal_SIG_IGN(int);
-    extern "C" sigarg_t signal_SIG_HANDLER(int, void (@`H)(int));
+    extern "C" sigarg_t signal_SIG_HANDLER(int, sigarg_t);
   }
-  static datatype exn.Failure __signal_failure =
-    Failure("signal called with the wrong number of arguments");
-  sigarg_t signal(int a, ... inject sigarg_t b) {
-    if (numelts(b) != 1)
-      throw &__signal_failure;
-    switch (b[0]) {
-    case &__SIG_BUILTIN(SIG_DFL): return Csignal::signal_SIG_DFL(a);
-    case &__SIG_BUILTIN(SIG_ERR): return Csignal::signal_SIG_ERR(a);
+  sigarg_t signal(int a, sigarg_t b) {
+    if (b == SIG_DFL) return Csignal::signal_SIG_DFL(a);
+    if (b == SIG_ERR) return Csignal::signal_SIG_ERR(a);
 #ifdef _SIG_HOLD_def_
-    case &__SIG_BUILTIN(SIG_HOLD): return Csignal::signal_SIG_HOLD(a);
+    if (b == SIG_HOLD) return Csignal::signal_SIG_HOLD(a);
 #endif
-    case &__SIG_BUILTIN(SIG_IGN): return Csignal::signal_SIG_IGN(a);
-    case &__SIG_HANDLER(f):
-      return Csignal::signal_SIG_HANDLER(a,f);
-    }
+    if (b == SIG_IGN) return Csignal::signal_SIG_IGN(a);
+    return Csignal::signal_SIG_HANDLER(a,b);
   }
 }
 cstub signal {
-  Cyc_sigarg_t signal_SIG_DFL(int a) {
-    return sig_wrap(signal(a,SIG_DFL));
-  }
-  Cyc_sigarg_t signal_SIG_ERR(int a) {
-    return sig_wrap(signal(a,SIG_ERR));
-  }
+  Cyc_sigarg_t signal_SIG_DFL(int a) { return sigarg_wrap(signal(a,SIG_DFL)); }
+  Cyc_sigarg_t signal_SIG_ERR(int a) { return sigarg_wrap(signal(a,SIG_ERR)); }
+  Cyc_sigarg_t signal_SIG_IGN(int a) { return sigarg_wrap(signal(a,SIG_IGN)); }
   #ifdef SIG_HOLD
-  Cyc_sigarg_t signal_SIG_HOLD(int a) {
-    return sig_wrap(signal(a,SIG_HOLD));
-  }
+  Cyc_sigarg_t signal_SIG_HOLD(int a) { return sigarg_wrap(signal(a,SIG_HOLD)); }
   #endif
-  Cyc_sigarg_t signal_SIG_IGN(int a) {
-    return sig_wrap(signal(a,SIG_IGN));
-  }
   Cyc_sigarg_t signal_SIG_HANDLER(int a, void (*f)(int)) {
-    return sig_wrap(signal(a,f));
+    return sigarg_wrap(signal(a,f));
   }
 }
-hstub {
-  // If we do 
-  // include { sigaction }
-  // in Linux we pull in a bad type
+hstub sigaction {
+  extern int sigaction(int, struct sigaction *, struct sigaction *);
+  extern "C" struct sigaction fresh_sigaction();
+}
+cycstub sigaction {
+  namespace Csignal {
+    extern "C" int sigaction(int, const struct sigaction *,
+		             struct sigaction *);
+    extern "C" int sigaction_wrap(struct sigaction *);
+    extern "C" int sigaction_unwrap(struct sigaction *);
+  }
+  int sigaction(int sig, struct sigaction *act,
+		struct sigaction *oact) {
+    if (act != NULL) Csignal::sigaction_unwrap(act);
+    int ret = Csignal::sigaction(sig,act,oact);
+    // we really don't have to do this, since the compiler won't
+    // let the user read out of these fields anyway ...
+    if (act != NULL) Csignal::sigaction_wrap(act);
+    if (oact != NULL) Csignal::sigaction_wrap(oact);
+    return ret;
+  }
+}
+cstub sigaction {
+  #include <string.h>
+  #include <stdio.h>
 
-  // FIX: struct sigaction needs to be fixed so that field
-  // sa_handler has type sigarg_t
-  //extern "C" sigaction(int, const struct sigaction *, struct sigaction *);
+  struct sigaction *sigaction_wrap(struct sigaction *f) {
+    f->sa_handler = sigarg_wrap(f->sa_handler);
+  }
+  struct sigaction *sigaction_unwrap(struct sigaction *f) {
+    f->sa_handler = sigarg_unwrap(f->sa_handler);
+  }
+  // hack to allow a user to initialize a sigaction
+  struct sigaction fresh_sigaction() {
+    struct sigaction sa;
+    bzero(&sa,sizeof(struct sigaction));
+    return sa;
+  }
 }
 ;
 
@@ -3575,12 +3560,19 @@ include {
 size_t
 off_t
 PROT_READ
+PROT_WRITE
+PROT_EXEC
+PROT_NONE
 MAP_SHARED
 MAP_PRIVATE
+MAP_FIXED
+MAP_GROWSDOWN
+MAP_ANONYMOUS
+MAP_ANON
 }
 hstub {
-  // We leave out many of the functions/flags, and just allow
-  // mapping in read-only, shared files and unmapping them.
+  // We leave out some of the functions/flags, including mapping
+  // in executable content, or fixing the address of the mapped memory
 
   // So that we can properly return a char ? pointer, we define
   // MAP_FAILED as NULL
@@ -3588,9 +3580,9 @@ hstub {
 
   // The traditional first arg to mmap should be 0 anyway, so don't
   // even bother to pass it to us.
-  extern const char ? @nozeroterm mmap(char ? @nozeroterm, size_t length, 
-                                     int prot, int flags, 
-		                     int fd, off_t offset);
+  extern char ? @nozeroterm mmap(char ? @nozeroterm, size_t length, 
+	                         int prot, int flags, 
+		                 int fd, off_t offset);
 
   extern int munmap(const char ? @nozeroterm start, size_t length);
 }
@@ -3604,20 +3596,26 @@ cycstub mmap {
   }
   static datatype exn.Failure __mmap_failure =
     Failure("mmap called with illegal start/prot/flags");
-  const char ? @nozeroterm mmap(char ? @nozeroterm ignored,
-			      size_t length, int prot, 
-		              int flags, int fd, off_t offset) {
-    if (ignored == NULL &&
-        prot == PROT_READ &&
-        (flags == MAP_PRIVATE || flags == MAP_SHARED))
+  char ? @nozeroterm mmap(char ? @nozeroterm ignored,
+			  size_t length, int prot, 
+		          int flags, int fd, off_t offset) {
+    if (prot == PROT_EXEC ||
+        ((flags & MAP_PRIVATE) && (flags & MAP_SHARED))
+#if defined(__linux__)	
+    || (flags & MAP_GROWSDOWN)
+#endif
+	)
+      throw &__mmap_failure;
+    else if (flags & MAP_FIXED) // don't support mapping to fixed addresses
+      return NULL;
+    else
       return wrap_Cbuffer_as_buffer
         (Cmman::__stub_mmap(NULL, length, prot, flags, fd, offset),
          length);
-    else
-      throw &__mmap_failure;
   }
   // Is it unsafe to ask the user for the size?  I'd like to take it
   // from the char? type, but that could have been cast around...
+  // We might also consider nulling out the pointer.
   int munmap(const char ? @nozeroterm start, size_t length) {
     // We definitely do NOT want to copy the "string"
     return Cmman::munmap((const char * @nozeroterm)start, length);
@@ -4247,6 +4245,9 @@ uid_t
 gid_t
 off_t
 time_t
+st_atime
+st_mtime
+st_ctime
 S_IFMT
 S_IFBLK
 S_IFCHR

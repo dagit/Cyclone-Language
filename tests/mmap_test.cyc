@@ -1,0 +1,97 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
+
+/***********************************************************************/
+/* Test for writing to a mmapped file                                  */
+/***********************************************************************/
+
+#define FILE_LENGTH 0x100
+
+/* Return a uniformly random number in the range [low,high].  */
+
+int random_range (unsigned const low, unsigned const high)
+{
+  unsigned const range = high - low + 1;
+  return low + (int) (((double) range) * rand () / (RAND_MAX + 1.0));
+}
+
+int write_file (const char ?filename, char ?@nozeroterm file_memory) 
+{
+  int fd;
+  int v = random_range(-100,100);
+
+  /* Seed the random number generator.  */
+  srand (time (NULL));
+
+  /* Prepare a file large enough to hold an unsigned integer.  */
+  fd = open (filename, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  lseek (fd, FILE_LENGTH+1, SEEK_SET);
+  write (fd, "", 1);
+  lseek (fd, 0, SEEK_SET);
+
+  /* Create the memory-mapping.  */
+  /* Note that the file_memory argument should get ignored. */
+  file_memory = mmap (file_memory, FILE_LENGTH, PROT_WRITE, MAP_SHARED, fd, 0);
+  close (fd);
+  if (numelts(file_memory) < FILE_LENGTH) {
+    fprintf(stderr,"Failed to map the correct size: got %d != %d\n",
+	    numelts(file_memory), FILE_LENGTH);
+    return 0;
+  }
+  /* Write a random integer to memory-mapped area.  */
+  sprintf(file_memory, "%d\n", v);
+  /* Release the memory (unnecessary since the program exits).  */
+  munmap (file_memory, FILE_LENGTH);
+
+  /* Check that the file contents are actually what was written */
+  FILE * f = fopen(filename,"r");
+  int x;
+  fscanf(f,"%d",&x);
+  fclose(f);
+  if (x == v) return 1;
+  else return 0;
+}
+
+/***********************************************************************/
+/* (Failure) Test for trying to fix the address to read/write          */
+/***********************************************************************/
+
+int fail_fixed(const char ?filename) {
+  int fd;
+  char? @nozeroterm file_memory = strdup("foo");
+
+  fd = open (filename, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  file_memory = mmap (file_memory, FILE_LENGTH, PROT_WRITE,
+		      MAP_SHARED | MAP_FIXED, fd, 0);
+  close (fd);
+  
+  if (file_memory != NULL)
+    return 0;
+  else
+    return 1;  
+}
+
+void fail(const char ?err) __attribute__((noreturn)) {
+  fprintf(stderr,"Test failed: %s\n",err);
+  exit(1);
+}
+
+int main (int argc, char? const ? argv)
+{
+  int retc;
+  char? @nozeroterm file_memory = strdup("foo");
+
+  retc = write_file(argv[1], NULL);
+  if (!retc) fail("could not write mmapped file properly");
+  retc = write_file(argv[1], file_memory);
+  if (!retc) fail("could not write mmapped file properly (bogus address)");
+  retc = fail_fixed(argv[1]);
+  if (!retc) fail("does not handle MAP_FIXED flag properly");
+  return 0;
+}

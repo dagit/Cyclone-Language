@@ -1,0 +1,80 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <signal.h>
+
+/* Should print:
+
+got a sigusr1!
+got a sigusr2!
+ignored sigterm
+Terminated
+
+where the "Terminated" on the last line is the indication from the shell,
+and so might be empty or something similar.
+*/
+
+void sigusr1(int dummy) {
+  fprintf(stderr,"got a sigusr1!\n");
+}
+
+void sigusr2(int dummy) {
+  fprintf(stderr,"got a sigusr2!\n");
+}
+
+void init_signals(void)
+{
+    struct sigaction sa = fresh_sigaction();
+
+    sa.sa_flags = 0;
+
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGUSR1);
+    sigaddset(&sa.sa_mask, SIGUSR2);
+
+    sa.sa_handler = sigusr1;
+    sigaction(SIGUSR1, &sa, NULL);
+
+    sa.sa_handler = sigusr2;
+    sigaction(SIGUSR2, &sa, NULL);
+}
+
+void init_signals2(void)
+{
+    struct sigaction sa = fresh_sigaction();
+
+    sa.sa_flags = 0;
+
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGTERM);
+
+    sa.sa_handler = SIG_IGN;
+    sigaction(SIGTERM, &sa, NULL);
+}
+
+void init_signals3(void)
+{
+    struct sigaction sa = fresh_sigaction();
+
+    sa.sa_flags = 0;
+
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&sa.sa_mask, SIGTERM);
+
+    sa.sa_handler = SIG_DFL;
+    sigaction(SIGTERM, &sa, NULL);
+}
+
+void main() {
+  init_signals();
+  raise(SIGUSR1);
+  raise(SIGUSR2);
+
+  init_signals2();
+  raise(SIGTERM); // should ignore
+  
+  printf("ignored sigterm\n");
+
+  init_signals3();
+  raise(SIGTERM); // should kill
+  printf("oops--should die\n");
+}
