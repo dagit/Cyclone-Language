@@ -21,7 +21,7 @@ BEGIN 	   { nidx = 0; tidx = 0; }
 	     # printf("%s,%s = %g\n",name,prefix,median);
 	     times[name,prefix] = median;
 	   }
-END 	   { printf ("newgraph\n\n");
+END 	   { printf ("newgraph clip\n\n");
 	     filld = 1.0 / tidx;
 	     fill = 0.0;
 	     group_delta = 8;
@@ -49,8 +49,8 @@ END 	   { printf ("newgraph\n\n");
 	       printf ("%d %g ",x + incr + j * bar_delta,avg);
 	       printf ("\n\n");
 	     }
-	     printf ("yaxis min 0 label : normalized elapsed time\n");
-	     printf ("xaxis min 0\n  no_auto_hash_labels no_auto_hash_marks\n");
+	     printf ("yaxis min 0 max 20 size 2 label : normalized elapsed time\n");
+	     printf ("xaxis min 0 max 650 size 5.5\n  no_auto_hash_labels no_auto_hash_marks\n");
 	     printf ("  hash_labels rotate -90 vjt hjl\n");
 	     x = group_delta + (tidx / 2);
 	     for (i=0;i<nidx;i++) {
@@ -61,5 +61,6 @@ END 	   { printf ("newgraph\n\n");
 	     }
 	     printf ("hash_at %d hash_label at %d : average\n",
 		     x + incr,x + incr);
+	     printf ("\nlegend x 50 y 18\n");
            } 
   

@@ -1,4 +1,4 @@
-// $Id: prodcons.java,v 1.1 2004-09-06 19:33:45 mwh Exp $
+// $Id: prodcons.java,v 1.2 2004-09-10 03:58:43 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 // Producer-Consumer Example by Bill Lear
 // Adapted from http://java.sun.com/docs/books/tutorial/essential/threads
@@ -83,7 +83,9 @@ public class prodcons {
     public static void main(String[] args) {
         int count = 1;
         try { count = Integer.parseInt(args[0]); } catch (Exception e) { }
+	//@START
         new prodcons(count).run();
+	//@END
     }
 
     private Producer m_producer;

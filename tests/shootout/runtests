@@ -42,6 +42,7 @@ function getargs {
     matrix) echo 300;;
     moments) echo 150;;
     nestedloop) echo 16;;
+    prodcons) echo 100000;;
     random) echo 900000;;
     regexmatch) echo 9000;;
     reversefile) echo 20;;

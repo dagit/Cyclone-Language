@@ -467,7 +467,7 @@ int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
 int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct _dyneither_ptr*);
 # 73
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-# 108 "string.h"
+# 109 "string.h"
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
 # 42 "xarray.h"
 void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);

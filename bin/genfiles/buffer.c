@@ -435,7 +435,7 @@ unsigned long Cyc_strlen(struct _dyneither_ptr s);
 # 72 "string.h"
 struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-# 108 "string.h"
+# 109 "string.h"
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Buffer_t{struct _dyneither_ptr buffer;unsigned position;unsigned length;struct _dyneither_ptr initial_buffer;};
 # 48 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){

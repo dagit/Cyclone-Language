@@ -9,6 +9,8 @@
 TMP=/tmp/test$$
 TMP2=/tmp/testinput$$
 
+JAVAOPTS=-server
+
 # Args
 
 if [ $# -lt 4 ]; then
@@ -48,9 +50,9 @@ rm -f $TMP
 cd $DIR
 while [ "$i" != "$N" ]; do
   if [ -n "$INPUTFILE" ]; then
-    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $CMD $ARG 2>> $TMP 1> /dev/null < $INPUTFILE
+    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $JAVAOPTS $CMD $ARG 2>> $TMP 1> /dev/null < $INPUTFILE
   else
-    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $CMD $ARG 2>> $TMP 1> /dev/null
+    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $JAVAOPTS $CMD $ARG 2>> $TMP 1> /dev/null
   fi
   i=`expr $i + 1`
 done

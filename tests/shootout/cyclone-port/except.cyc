@@ -8,28 +8,30 @@
 
 int HI = 0, LO = 0;
 
-datatype exn { Hi_exception(int); };
-datatype exn { Lo_exception(int); };
+datatype exn { Hi_exception; };
+datatype exn { Lo_exception; };
+datatype exn.Hi_exception hi_exception = Hi_exception;
+datatype exn.Lo_exception lo_exception = Lo_exception;
 
 void blowup (int n) {
     if (n & 1) {
-        throw new Lo_exception(1);
+        throw &lo_exception;
     } else {
-	throw new Hi_exception(1);
+	throw &hi_exception;
     }
 }
 
 void lo_function (volatile int n) {
     try blowup(n);
     catch {
-    case &Lo_exception(_): LO++; break;
+    case &Lo_exception: LO++; break;
     }
 }
 
 void hi_function (volatile int n) {
     try lo_function(n);
     catch {
-    case &Hi_exception(_): HI++; break;
+    case &Hi_exception: HI++; break;
     }
 }
 

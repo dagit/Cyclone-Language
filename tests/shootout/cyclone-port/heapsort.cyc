@@ -19,7 +19,7 @@ gen_random(double max) {
 }
 
 void
-heapsort(int n, double ?ra) {
+do_heapsort(int n, double ?ra) {
     int i, j;
     int ir = n;
     int l = (n >> 1) + 1;
@@ -57,17 +57,16 @@ main(int argc, char ??argv) {
     int i;
     START_TIME
     /* create an array of N random doubles */
-    { region r;
-      double ?`r ary;
-      ary = (double ?`r)rmalloc(r,(N+1) * sizeof(double));
-      for (i=1; i <=N; i++) {
-        ary[i] = gen_random(1);
-      }
-
-      heapsort(N, ary);
-      
-      printf("%.10f\n", ary[N]);
+    double ? ary;
+    ary = malloc((N+1) * sizeof(double));
+    for (i=1; i <=N; i++) {
+      ary[i] = gen_random(1);
     }
+
+    do_heapsort(N, ary);
+      
+    printf("%.10f\n", ary[N]);
+
     END_TIME
     return(0);
 }

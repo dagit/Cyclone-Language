@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "simple_hash_cyc.h"
+#include "cyc-simple_hash_cyc.h"
 #include "timer.h"
 
 int cmp_hash(struct ht_node *`H const @`H a, struct ht_node *`H const @`H b) {

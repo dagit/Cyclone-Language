@@ -487,7 +487,7 @@ struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr)
 struct _dyneither_ptr Cyc_strconcat_l(struct Cyc_List_List*);
 # 66
 struct _dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dyneither_ptr);
-# 108 "string.h"
+# 109 "string.h"
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};
 # 34 "lineno.h"
 void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr filename,struct Cyc_List_List*places);

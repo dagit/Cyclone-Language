@@ -15,18 +15,18 @@
 
 pthread_mutex_t mutex;
 pthread_cond_t control;
-void producer(int *arg);
-void consumer(int *arg);
+int producer(int *arg);
+int consumer(int *arg);
 int count, data, consumed, produced;
 
 
 int
-main(int argc, char *argv[]) {
+main(int argc, char ??argv) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     pthread_t t1, t2;
 
     START_TIME
-    
+
     count = data = consumed = produced = 0;
 
     if (pthread_mutex_init(&mutex, NULL)) {
@@ -38,12 +38,12 @@ main(int argc, char *argv[]) {
 	exit(1);
     }
     if (pthread_create(&t1, (pthread_attr_t *)NULL,
-		       (void * (*)(void *))producer, (void *)&n)) {
+		       producer, &n)) {
 	perror("pthread_create");
 	exit(1);
     }
     if (pthread_create(&t2, (pthread_attr_t *)NULL,
-		       (void * (*)(void *))consumer, (void *)&n)) {
+		       consumer, &n)) {
 	perror("pthread_create");
 	exit(1);
     }
@@ -58,7 +58,7 @@ main(int argc, char *argv[]) {
 }
 
 
-void producer(int *arg) {
+int producer(int *arg) {
     int i, n = *arg;
     for (i=1; i<=n; i++) {
 	pthread_mutex_lock(&mutex);
@@ -71,10 +71,11 @@ void producer(int *arg) {
 	pthread_mutex_unlock(&mutex);
 	produced++;
     }
+    return 0;
 }
  
 
-void consumer(int *arg) {
+int consumer(int *arg) {
     int i = 0, n = *arg;
     while (1) {
 	pthread_mutex_lock(&mutex);
@@ -86,7 +87,7 @@ void consumer(int *arg) {
 	pthread_cond_signal(&control);
 	pthread_mutex_unlock(&mutex);
 	consumed++;
-	if (i == n) return;
+	if (i == n) return 0;
     }
 }
 

@@ -10,23 +10,14 @@
 
 #define STUFF "hello\n"
 
-char ?`U strrealloc(char ?buf, unsigned sz) {
-  char ?`U res = calloc(sz,sizeof(char));
-  unsigned i = numelts(buf);
-  for (unsigned j = 0; j < i; j++)
-    res[j] = buf[j];
-  return res;
-}
-
 int
 main(int argc, char ?argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int i, buflen = 32;
+    char ?strbuf, ?strend;
     int stufflen;
     START_TIME
-    { region r;
-    char ?`r strbuf = rcalloc(r,buflen, sizeof(char));
-    char ?strend;
+    strbuf = calloc(buflen, sizeof(char));
     strend = strbuf;
     stufflen = strlen(STUFF);
 
@@ -34,7 +25,7 @@ main(int argc, char ?argv[]) {
     for (i=0; i<n; i++) {
 	if (((strbuf+buflen)-strend) < (stufflen+1)) {
 	    buflen = 2*buflen;
-	    strbuf = strrealloc(strbuf, buflen);
+	    strbuf = realloc_str(strbuf, buflen);
 	    if (!strbuf) { perror("realloc strbuf"); exit(1); }
 	    strend = strbuf + strlen(strbuf);
 	}
@@ -43,7 +34,6 @@ main(int argc, char ?argv[]) {
 	strend += stufflen;
     }
     fprintf(stdout, "%d\n", strlen(strbuf));
-    }
     END_TIME
     return(0);
 }

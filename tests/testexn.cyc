@@ -1,11 +1,12 @@
 #include <core.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
-typedef unsigned long int pthread_t;
-extern "C" int pthread_create(pthread_t *, void*, void *(*_start)(int), int);
-extern "C" int pthread_join(pthread_t, void**);
+#ifdef __linux__
 extern "C" int pthread_yield(void);
+#endif
+
 using Core;
 
 datatype exn {OneException};
@@ -37,7 +38,9 @@ void foo(int i) {
   if (yields < 0) yields = -yields;
   for (int j = 0; j<yields; j++) {
     for (int i = 0; i<busywait; i++);
+#ifdef __linux__
     pthread_yield();
+#endif
   }
   if (i%10 == 1) throw &e1_val;
   if (i%10 == 2) throw &e2_val;
@@ -56,7 +59,9 @@ static int exn_caught[100];
 void* runthread(int i) {
   try {
     if(i%3 == 0)
+#ifdef __linux__
       pthread_yield();
+#endif
     foo(i);
     exn_caught[i] = -3;
   }

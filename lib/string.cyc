@@ -393,27 +393,29 @@ mstring_t expand(buffer_t s, size_t sz) {
   return rexpand(heap_region,s,sz);
 }
 
-mstring_t<`r> rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz)
-  __attribute__((consume(2)))
-{
+mstring_t<`r> cond_rrealloc_str(region_t<`r::TR> r, mstring_t<`r> str, size_t sz) {
   size_t maxsizeP = numelts(str);
+  let res = NULL;
 
   if (maxsizeP == 0) {
     maxsizeP = (30>sz)?30:sz;	/* arbitrary */
-    str = rnew_string(r,maxsizeP);
-    str[0] = '\000';
+    res = rnew_string(r,maxsizeP);
+    res[0] = '\000';
   }
   else if (sz > maxsizeP) {
     maxsizeP = (maxsizeP * 2 > sz * 5 / 4)?(maxsizeP * 2):(sz * 5 / 4);
-    let alias <`x>char ? @nozeroterm`x dst = str;
-    dst = rexpand(r, dst, maxsizeP);
+    { let alias <`x>char ? @nozeroterm`x dst = str;
+      res = rexpand(r, dst, maxsizeP); 
+    }
   }
 
-  return str;
+  return res;
 }
 
 mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
-  return rrealloc_str(heap_region,str,sz);
+  let res = cond_rrealloc_str(heap_region,str,sz);
+  if (res == NULL) return str;
+  else return res;
 }
 
 

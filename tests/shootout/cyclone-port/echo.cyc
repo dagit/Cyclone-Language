@@ -1,6 +1,5 @@
-// Derived from:
-
-/*
+/* -*- mode: c -*-
+ * echo.gcc
  * http://www.bagley.org/~doug/shootout/
  */
 
@@ -19,7 +18,6 @@
 //typedef int (@SOCKACTION_P)(int fd, const xtunion sockaddr addr);
 #define DATA "Hello there sailor\n"
 
-// Annoying to have to declare `r...
 void myabort (const char ?`r m) { fprintf(stderr, "%s\n", m); exit(1); }
 void sysabort (string_t m) { perror(m); exit(1); }
 
@@ -32,8 +30,7 @@ namespace Cfuns {
 }
 
 int 
-genericSock(int port,
-	    int action<`r::R>(int, ... inject SA<`r>),
+genericSock(int port, int action<`r::R>(int, ... inject SA<`r>),
             string_t actionExceptionText) {
     int ss, optval = 1;
     struct sockaddr_in sin;    

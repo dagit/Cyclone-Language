@@ -496,11 +496,11 @@ struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr)
 struct _dyneither_ptr Cyc_strconcat_l(struct Cyc_List_List*);
 # 66
 struct _dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dyneither_ptr);
-# 103 "string.h"
+# 104 "string.h"
 struct _dyneither_ptr Cyc_strdup(struct _dyneither_ptr src);
-# 108
+# 109
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);
-# 119
+# 120
 struct _dyneither_ptr Cyc_strchr(struct _dyneither_ptr s,char c);
 # 30 "filename.h"
 struct _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr,struct _dyneither_ptr);

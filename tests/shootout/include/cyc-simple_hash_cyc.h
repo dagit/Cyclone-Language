@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 
+namespace Cstr {
+  extern "C" int strcmp(const char @s, const char @t);
+}
+
 #define ht_num_primes 28
 
 static unsigned long ht_prime_list[ht_num_primes] = {
@@ -134,23 +138,11 @@ void ht_destroy(struct ht_ht @ht) {
 #endif /* HT_DEBUG */
 }
 
-static inline int mystrcmp(const char @s1, const char @s2) {
-  while (1) {
-    char c1 = *s1;
-    char c2 = *s2;
-    if (c1 != c2) return 1;
-    if (c1 == 0) return 0;
-    else ++s1;
-    if (c2 == 0) return 0;
-    else ++s2;
-  }
-}
-
 inline struct ht_node *ht_find(struct ht_ht @ht, const char @key) {
     int hash_code = ht_hashcode(ht, key);
     struct ht_node *node = ht->tbl[hash_code];
     while (node) {
-	if (mystrcmp(key, node->key) == 0) return(node);
+	if (Cstr::strcmp(key, node->key) == 0) return(node);
 	node = node->next;
     }
     return((struct ht_node *)NULL);
@@ -161,7 +153,7 @@ inline struct ht_node @ht_find_new(struct ht_ht @ht, char ? key) {
     int hash_code = ht_hashcode(ht, k);
     struct ht_node *prev = 0, *node = ht->tbl[hash_code];
     while (node) {
-	if (mystrcmp(k, node->key) == 0) return(node);
+	if (Cstr::strcmp(k, node->key) == 0) return(node);
 	prev = node;
 	node = node->next;
 #ifdef HT_DEBUG

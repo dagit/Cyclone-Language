@@ -24,6 +24,8 @@ cyclone_override {
 }
 export { new_list }
 
+
+
 int main() {
   struct list *x = new list{new 1,NULL};
   struct list *y = new list{new 1,NULL};

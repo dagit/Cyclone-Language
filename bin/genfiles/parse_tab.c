@@ -469,7 +469,7 @@ int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct _dyneither_ptr*);
 struct _dyneither_ptr Cyc_strcat(struct _dyneither_ptr dest,struct _dyneither_ptr src);
 # 71
 struct _dyneither_ptr Cyc_strcpy(struct _dyneither_ptr dest,struct _dyneither_ptr src);
-# 108 "string.h"
+# 109 "string.h"
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Position_Error;
 # 26 "warn.h"
 void Cyc_Warn_vwarn(unsigned loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);

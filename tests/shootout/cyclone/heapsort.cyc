@@ -17,13 +17,12 @@ gen_random(double max) {
 }
 
 void
-heapsort(int n, double ?ra) {
+do_heapsort(int n, double ?ra) {
     int i, j;
     int ir = n;
     int l = (n >> 1) + 1;
     double rra;
     double @ra_one = &ra[1];
-    //unsigned sz = numelts(ra);
 
     for (;;) {
 	if (l > 1) {
@@ -65,9 +64,9 @@ main(int argc, char ??argv) {
         ary[i] = gen_random(1);
     }
 
-    heapsort(N, ary);
+    do_heapsort(N, ary);
 
-    printf("%.10g\n", ary[N]);
+    printf("%.10f\n", ary[N]);
 
     free(ary);
     END_TIME

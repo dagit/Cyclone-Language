@@ -22,7 +22,7 @@ int main() {
     unsigned char ?pp, ?pe;
     START_TIME
     /* Fill tables */
-    for (unsigned cnt = 0; cnt < 256; cnt++) ws[cnt] = 0;
+    for (unsigned c = 0; c < 256; c++) ws[c] = 0;
 
     /* also: ws['\r']=ws['\v']=ws['\f']= */
     ws[' ']=ws['\t']=ws['\n']=1;
@@ -35,8 +35,8 @@ int main() {
 	b_cnt += cnt;
         char ?@nozeroterm mybuf = (char ?@nozeroterm)buff;
         assert(cnt <= numelts(mybuf));
-        for (unsigned pp=0; pp < cnt; pp++) {
-            long x = ws[mybuf[pp]];
+        for (unsigned ppi=0; ppi < cnt; ppi++) {
+            long x = ws[mybuf[ppi]];
 	    tcnt += x ^ was_sp;
 	    was_sp = x & 0xFFFF;
 	}

@@ -1,5 +1,4 @@
 /* -*- mode: c -*-
- * $Id: spellcheck.cyc,v 1.2 2004-09-07 20:33:17 mwh Exp $
  * http://www.bagley.org/~doug/shootout/
  * with help from Brad Knotwell
  */
@@ -8,24 +7,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "simple_hash_cyc.h"
+#include <assert.h>
+#include "cyc-simple_hash_cyc.h"
 #include "timer.h"
 
 #define MAXLINELEN 128
 
-char ?strrealloc(char ?buf, unsigned sz) {
-  char ?res = calloc(sz,sizeof(char));
-  unsigned i = numelts(buf);
-  for (unsigned j = 0; j < i; j++)
-    res[j] = buf[j];
-  return res;
-}
-
 struct ht_ht *dict = NULL;
 
-int handleInput(FILE *input,void (*hashManipFn)(char ?))
+int handleInput(FILE @input,void (*hashManipFn)(char ?))
 {
-    int wordbufsize = 80,i = 0;
+    int wordbufsize = 80;
+    unsigned i = 0;
     char ? cp, ? wordbuf;
     char line[MAXLINELEN+1] @zeroterm;
     
@@ -44,7 +37,7 @@ int handleInput(FILE *input,void (*hashManipFn)(char ?))
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbufsize *= 2;
-		    if((wordbuf = strrealloc(wordbuf, wordbufsize + 1)) == NULL)
+		    if((wordbuf = realloc_str(wordbuf, wordbufsize + 1)) == NULL)
                         return(fprintf(stderr, "realloc\n"), 0);
 		}
 	    }

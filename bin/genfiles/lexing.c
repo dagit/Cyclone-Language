@@ -440,7 +440,7 @@ struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _dyneith
 struct _dyneither_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*,struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 73 "string.h"
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-# 103 "string.h"
+# 104 "string.h"
 struct _dyneither_ptr Cyc_strdup(struct _dyneither_ptr src);char Cyc_Lexing_Error[6U]="Error";
 # 77 "lexing.cyc"
 static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
