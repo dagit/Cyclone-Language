@@ -1,0 +1,86 @@
+# NB: CYCDIR, CYCC, EXEC_PREFIX imported from Makefile
+
+include $(CYCDIR)/Makefile.inc
+VPATH=$(CYCDIR)/bin/genfiles:$(CYCDIR)/lib:$(CYCDIR)/lib/xml
+
+libcycboot.a: $(O_BOOT_LIBS) boot_cstubs.$(O) boot_cycstubs.$(O)
+	-$(RM) $@
+	ar rc $@ $^
+	$(RANLIB) $@
+
+libcyc.a: include/cstubs.$(O) include/cycstubs.$(O) $(O_BOOT_LIBS) $(O_LIBS)
+	-$(RM) $@
+	ar rc $@ $^
+	$(RANLIB) $@
+
+libxml.a: xml.$(O) xmlparse_tab.$(O) xmlscan.$(O) xmldump.$(O)
+	-$(RM) $@
+	ar rc $@ $^
+	$(RANLIB) $@
+
+xmlparse_tab.cyc: xmlparse.y
+	$(CYCDIR)/bin/cycbison$(EXE) -d $< -o $@
+xmlparse_tab.h: xmlparse.y
+	$(CYCDIR)/bin/cycbison$(EXE) -d $< -o xmlparse_tab.cyc
+xmlscan.cyc: xmlparse_tab.h
+xmlscan.cyc: xmlscan.cyl
+	$(CYCDIR)/bin/cyclex$(EXE) $< $@
+
+# FIX: precore_c.h should be pre-req
+include/cstubs.c: include/cycstubs.cyc include/precore_c.h
+
+# FIX: the rule creates a bunch of header files but the header
+# files aren't targets, so, dependencies are wrong and make can
+# get confused.
+# NB: the -B is needed so buildlib can find the cycspecs file
+# FIX: buildlib should be pre-req
+include/cycstubs.cyc: $(CYCDIR)/bin/cyc-lib/libc.cys
+	$(CYCDIR)/bin/buildlib -B$(CYCDIR)/bin/lib/cyc-lib -d $(@D) $<
+
+include/precore_c.h: $(CYCDIR)/include/core.h
+#  $(CYCDIR)/bin/cyclone$(EXE) \ # FIX: should be pre-req
+#  $(CYCDIR)/bin/lib/cyc-lib/$(build)/cycspecs 
+	$(CYCC) -B$(EXEC_PREFIX) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
+
+nogc.a: nogc.$(O) $(CYCDIR)/bin/genfiles/malloc.c
+	-$(RM) $@
+	ar rc $@ $<
+	$(RANLIB) $@
+
+runtime_cyc.a: $(O_RUNTIME)
+	-$(RM) $@
+	ar rc $@ $^
+	$(RANLIB) $@
+
+# NB: use of $(build) prevents cross compilation, but we don't know
+# how to cross compile the garbage collector anyway...
+cyclone$(EXE): $(O_SRCS) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+# NB: use of $(build) prevents cross compilation, but install_path is only
+# used by cyclone, cycdoc, and buildlib, which we don't cross compile.
+# FIX: the wchar stuff should be moved to the cycspecs file
+install_path.c: $(CYCDIR)/Makefile.inc
+	 (echo "char *Carch = \"$(build)\";"; \
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
+	  echo "char *Cversion = \"$(VERSION)\";"; \
+	  echo "int Wchar_t_unsigned = $(WCHAR_T_UNSIGNED);"; \
+	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
+
+cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) libcycboot.a runtime_cyc.a $(CYCDIR)/bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# NB: the invocation
+#    $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG))
+# expands to $(OPTFLAG) if the target is not in $(O_NOOPT_SRCS),
+# and to the empty string otherwise.  We use it to turn off optimization
+# for files where it is expensive (parse_tab.o).
+
+%.$(O): %.c
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) $< -o $@
+
+%.$(O): %.cyc 
+	$(CYCC) $(CYCFLAGS) -c -Iinclude -I$(CYCDIR)/include -I$(CYCDIR)/lib/xml -B$(EXEC_PREFIX) $(if $(findstring $(notdir $@), $(O_NOOPT_SRCS)), , $(OPTFLAG)) -o $@ $<

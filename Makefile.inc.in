@@ -5,11 +5,6 @@ target=@target@
 CC=@CC@
 CFLAGS=@CFLAGS@
 TARGET_CFLAGS=@TARGET_CFLAGS@
-ifeq ($(build),$(target))
-BTARGET=
-else
-BTARGET=-b $(target)
-endif
 CYCDIR=@abs_srcdir@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
