@@ -379,9 +379,9 @@ doc_t noncallatt2doc(attribute_t att) {
 doc_t callconv2doc(attributes_t atts) { // for MS only
   for(; atts != null; atts = atts->tl)
     switch(atts->hd) {
-    case Stdcall_att:  return text("_stdcall");
-    case Cdecl_att:    return text("_cdecl");
-    case Fastcall_att: return text("_fastcall");
+    case Stdcall_att:  return text("_stdcall ");
+    case Cdecl_att:    return text("_cdecl ");
+    case Fastcall_att: return text("_fastcall ");
     default: break;
     }
   return nil_doc();
@@ -390,7 +390,7 @@ doc_t callconv2doc(attributes_t atts) { // for MS only
 doc_t noncallconv2doc(attributes_t atts) { // for MS only
   bool hasatt = false;
    for(_ atts2 = atts; atts2 != null; atts2 = atts2->tl)
-    switch(atts->hd) {
+    switch(atts2->hd) {
     case Stdcall_att:  break;
     case Cdecl_att:    break;
     case Fastcall_att: break;
@@ -1435,7 +1435,7 @@ doc_t decl2doc(decl_t d) {
     else
       inlinedoc = nil_doc();
     doc_t scopedoc  = scope2doc(fd->sc);
-    doc_t beforenamedoc = to_VC ? callconv2doc(fd->attributes) : attsdoc;
+    doc_t beforenamedoc = (to_VC ? callconv2doc(fd->attributes) : attsdoc);
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(Tqual(false,false,false), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
@@ -1490,10 +1490,11 @@ doc_t decl2doc(decl_t d) {
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
     doc_t sn = typedef_name2doc(name);
-    s = cat((to_VC ? atts2doc(atts) : nil_doc()),
+    doc_t attsdoc   = atts2doc(atts);
+    doc_t beforenamedoc = (to_VC ? callconv2doc(atts) : attsdoc);
+    s = cat((to_VC ? attsdoc : nil_doc()),
 	    scope2doc(sc),
-            tqtd2doc(tq,type,new Opt(sn)),
-	    (!to_VC ? atts2doc(atts) : nil_doc()),
+            tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
             (initializer == null)
             ? text("")
             : cat(text(" = "),exp2doc((exp_t)initializer)),

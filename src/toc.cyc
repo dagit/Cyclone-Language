@@ -313,15 +313,15 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  dropping noreturn and const attributes b/c C is complaining.
+    // (Dan needs them in MSVC...)
     let new_atts = atts;
     let new_atts = null;
-    for (; atts != null; atts = atts->tl) {
+    for (; atts != null; atts = atts->tl)
       switch (atts->hd) {
       case Noreturn_att: fallthru;
       case Const_att   : continue;
       default: new_atts = new List(atts->hd,new_atts); break;
       }
-    }
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != null) {
       let t = typ_to_c(tagged_typ(cyc_vararg->type,cyc_vararg->rgn,mt_tq));
@@ -2757,11 +2757,7 @@ static void uniondecl_to_c(uniondecl_t u) {
       seen_defn_before = true;
   }
 
-  u->sc =
-    // C does not like extern or static on union declarations -- this avoids
-    // a gcc warning
-    (u->sc == Extern || u->sc == (scope_t)Static || u->sc == ExternC) ? 
-    Public : scope_to_c(u->sc);
+  u->sc   = Public; // gcc warns if we have Extern or Static on a union
   u->tvs  = null;
   u->name = new Opt(n);
   if (u->fields != null)
@@ -2892,14 +2888,15 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
       let tag_decl = new_vardecl(f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
       result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-      xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, f->name, f->sc != Extern);
+      xtunion_fields_so_far->v = 
+	Dict::insert(xtunion_fields_so_far->v, f->name, f->sc != Extern);
       if(f->typs != null) {
 	list_t<structfield_t> fields = null;
 	int i = 1;
 	for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
 	  let field_n = new ((string_t)xprintf("f%d",i));
-	  let newf    = new Structfield(field_n,(*tqts->hd)[0],
-					typ_to_c_array((*tqts->hd)[1]),null,null);
+	  let newf = new Structfield(field_n,(*tqts->hd)[0],
+				     typ_to_c_array((*tqts->hd)[1]),null,null);
 	  fields = new List(newf,fields);
 	}
 	fields = new List(new Structfield(tag_sp,mt_tq,
@@ -2932,18 +2929,14 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 
 static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
   let n = ed->name;
-  ed->sc = 
-    // C does not like extern or static on struct declarations -- this avoids
-    // a gcc warning
-    (ed->sc == Extern || ed->sc == Static || 
-     ed->sc == ExternC) ? Public : scope_to_c(ed->sc);
+  ed->sc = Public; // gcc warns if we have Extern or Static on an enum
+
   if(ed->fields != null)
-    for (let fs = ed->fields->v; fs != null; fs = fs->tl) {
+    for (let fs = ed->fields->v; fs != null; fs = fs->tl)
       if (fs->hd->tag != null) {
 	unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
 	fs->hd->tag = uint_exp(i,null);
       }
-    }
 }
 
 // let declarations -- tricky

@@ -3607,13 +3607,11 @@ Cyc_Core_Opt*) _check_null( Cyc_Toc_unions_so_far))->v=( void*)(( struct Cyc_Dic
 struct Cyc_Dict_Dict* d, struct _tagged_arr* key, struct Cyc_Absyn_Uniondecl*
 data)) Cyc_Dict_insert)(( struct Cyc_Dict_Dict*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Toc_unions_so_far))->v,(* _temp2584).f2, u)); seen_defn_before=
-0;} else{ seen_defn_before= 1;}}( void*)( u->sc=( void*)(((( void*) u->sc ==(
-void*) Cyc_Absyn_Extern? 1:( void*) u->sc ==( void*) Cyc_Absyn_Static)? 1:( void*)
-u->sc ==( void*) Cyc_Absyn_ExternC)?( void*) Cyc_Absyn_Public: Cyc_Toc_scope_to_c((
-void*) u->sc))); u->tvs= 0; u->name=({ struct Cyc_Core_Opt* _temp2589=( struct
-Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2589->v=( void*)
-_temp2584; _temp2589;}); if( u->fields != 0){ if( seen_defn_before){ u->fields=
-0;} else{ struct Cyc_List_List* _temp2590=( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
+0;} else{ seen_defn_before= 1;}}( void*)( u->sc=( void*)(( void*) Cyc_Absyn_Public));
+u->tvs= 0; u->name=({ struct Cyc_Core_Opt* _temp2589=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2589->v=( void*) _temp2584;
+_temp2589;}); if( u->fields != 0){ if( seen_defn_before){ u->fields= 0;} else{
+struct Cyc_List_List* _temp2590=( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
 _check_null( u->fields))->v; goto _LL2591; _LL2591: for( 0; _temp2590 != 0;
 _temp2590=(( struct Cyc_List_List*) _check_null( _temp2590))->tl){( void*)(((
 struct Cyc_Absyn_Structfield*)(( struct Cyc_List_List*) _check_null( _temp2590))->hd)->type=(
@@ -3786,9 +3784,7 @@ Cyc_Dict_insert)(( struct Cyc_Dict_Dict*)(( struct Cyc_Core_Opt*) _check_null(
 Cyc_Toc_xtunion_fields_so_far))->v, f->name, 1));}} goto _LL2637; _LL2643: goto
 _LL2637; _LL2637:;}}}}}} static void Cyc_Toc_enumdecl_to_c( struct Cyc_Toc_Env*
 nv, struct Cyc_Absyn_Enumdecl* ed){ struct _tuple0* _temp2688= ed->name; goto
-_LL2689; _LL2689:( void*)( ed->sc=( void*)(((( void*) ed->sc ==( void*) Cyc_Absyn_Extern?
-1:( void*) ed->sc ==( void*) Cyc_Absyn_Static)? 1:( void*) ed->sc ==( void*) Cyc_Absyn_ExternC)?(
-void*) Cyc_Absyn_Public: Cyc_Toc_scope_to_c(( void*) ed->sc))); if( ed->fields
+_LL2689; _LL2689:( void*)( ed->sc=( void*)(( void*) Cyc_Absyn_Public)); if( ed->fields
 != 0){ struct Cyc_List_List* _temp2690=( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
 _check_null( ed->fields))->v; goto _LL2691; _LL2691: for( 0; _temp2690 != 0;
 _temp2690=(( struct Cyc_List_List*) _check_null( _temp2690))->tl){ if((( struct

@@ -74,7 +74,9 @@ extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _pop_region();
 
+#ifndef _throw
 extern int _throw(void * e);
+#endif
 
 extern struct _xtunion_struct *_exn_thrown;
 
