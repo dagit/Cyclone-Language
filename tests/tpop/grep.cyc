@@ -9,8 +9,9 @@
 
 using Stdio;
 using Core;
+using String;
 
-int grep(string, FILE*, string);
+int grep(string, FILE@, string);
 int match(string, string);
 int matchhere(string, string);
 int matchstar(int, string, string);
@@ -42,15 +43,13 @@ int main(int argc, string? argv)
 }
 
 /* grep: search for regexp in file */
-int grep(string regexp, FILE *f, string name)
+int grep(string regexp, FILE @f, string name)
 {
   int n, nmatch;
-  string buf = String::expand("",BUFSIZ);
-  /*string buf = {for i < BUFSIZ: '\0'};*/
-  printf("foo\n");
+  string buf = expand("",BUFSIZ);
 
   nmatch = 0;
-  while (fgets(buf, f) != true) {
+  while (fgets(buf, BUFSIZ, f) != null) {
     n = String::strlen(buf);
     
     if (n > 0 && buf[n-1] == '\n')
@@ -62,17 +61,16 @@ int grep(string regexp, FILE *f, string name)
       printf("%s\n", buf);
     }
   }
-  printf ("bar\n");
   return nmatch;
 }
 
 /* matchhere: search for regexp at beginning of text */
 int matchhere(string regexp, string text)
 {
-  if (regexp[0] == '\0')
+  if (strlen(regexp) == 0)
     return 1;
-  if (regexp[1] == '*')
-    return matchstar(regexp[0], regexp+2, text);
+  /*  if (regexp[1] == '*')
+      return matchstar(regexp[0], regexp+2, text);*/
   if (regexp[0] == '$' && regexp[1] == '\0')
     return *text == '\0';
   if (*text!='\0' && (regexp[0]=='.' || regexp[0]==*text))

@@ -9,9 +9,14 @@
 
 #include "string.h"
 #include "stdio.h"
+#include "time.h"
+#include "stdlib.h"
+
 using Stdio;
 using Core;
 using String;
+using Stdlib;
+using Time;
 
 #define NPREF	(2)	/* number of prefix words */
 #define NHASH	(4093)	/* size of state hash table array */
@@ -44,23 +49,6 @@ State	**statetab = null;
 char NONWORD[] = "\n";  /* cannot appear as real word */
 
 /* temporary stubs */
-long int time(long int* ip)
-{
-  if(ip != null) *ip = 0;
-  return 0;
-}
-
-int srand_seed;
-void srand(unsigned int seed)
-{
-  srand_seed = seed;
-}
-
-int rand()
-{
-  return srand_seed * 47 + 8191;
-}
-
 `a ? memmove(`a ? dest, `a ? src, size_t n)
 {/* minor assumption: n is a multiple of sizeof('a) == 4  */
   /* Here n is a number of bytes to copy.  
@@ -90,7 +78,7 @@ int main(void)
   int c;
   long seed;
 
-  seed = time(null);
+  seed = Time::time(null);
   
   srand(seed);
   for (i = 0; i < NPREF; i++)	/* set up initial prefix */
@@ -104,6 +92,7 @@ int main(void)
 const int MULTIPLIER = 31;  /* for hash() */
 
 /* hash: compute hash value for array of NPREF strings */
+/* uses underlying c string implementation; fix */
 unsigned int hash(string*{NPREF} s)
 {
   unsigned int h;
@@ -112,9 +101,11 @@ unsigned int hash(string*{NPREF} s)
 
   h = 0;
   for (i = 0; i < NPREF; i++)
-    for (p = (unsigned char * ) s[i]; *p != '\0'; p++)
-      h = MULTIPLIER * h + *p;
-  return h % NHASH;
+    {
+      for (p = (unsigned char * ) s[i]; *p != '\0'; p++)
+	h = MULTIPLIER * h + *p;
+    }
+      return h % NHASH;
 }
 
 /* lookup: search for prefix; create if requested. */
@@ -171,7 +162,7 @@ void build(string*{NPREF} prefix, FILE @f)
   /* FIX: this doesn't work in Cyclone; no sprintf */
   /* sprintf(fmt, "%%%ds", sizeof(buf)-1); */
   /* this terminates on error/EOF, not just EOF, like the fscanf version did */
-  while (fgets(buf,f) != true)
+  while (fgets(buf,100,f) != null)
     add(prefix, strdup(buf));
 }
 

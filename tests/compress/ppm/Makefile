@@ -19,11 +19,11 @@ CYC_FLAGS=-I ../../../lib -tc -toc -pp
 
 LIB=../../../bin/$(OUT_PREFIX)$(CYCLIB)
 
-encode: bit_output.o arithmetic_encode.o adaptive_model.o encode.o
-	gcc -g -o encode bit_output.o arithmetic_encode.o adaptive_model.o encode.o  ../../../bin/cyclib.a ../../../bin/gc.a
+encode: arithcode.o model.o encode.o
+	gcc -g -o $@ arithcode.o model.o encode.o ../../../bin/cyclib.a ../../../bin/gc.a
 
-decode: bit_input.o arithmetic_decode.o adaptive_model.o decode.o
-	gcc -g -o decode bit_input.o arithmetic_decode.o adaptive_model.o decode.o  ../../../bin/cyclib.a ../../../bin/gc.a
+decode: arithcode.o model.o decode.o
+	gcc -g -o $@ arithcode.o model.o decode.o  ../../../bin/cyclib.a ../../../bin/gc.a
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c : %.cyc $(CYCC)

@@ -1,0 +1,6 @@
+This is the adaptive arithmetic coding software by R. M. Neal that 
+is contained in the following reference:
+
+  Witten, I. H., Neal, R. M., and Cleary, J. G. (1987) 
+    ``Arithmetic coding for data compression'', Communications 
+    of the ACM, vol. 30, no. 6 (June).
