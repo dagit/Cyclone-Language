@@ -2,6 +2,8 @@ Todo list:
 
 CONFIGURATION BUGS:
 ------------------
+* just a bullet
+
 * when building on an architecture that uses a .patch file, need to
   not remove the bin/genfiles directory after it's been extracted
   and built.  This currently screws up make install.
