@@ -72,7 +72,6 @@ namespace AssnDef{
   term_t fresh_var();
 
   int cmp_term(term_t t1, term_t t2);
-  bool same_term(term_t t1, term_t t2);
 
   ///////////////////// Assertions /////////////////////
   typedef datatype Assn @assn_t;

@@ -79,7 +79,7 @@ term_t one() {
   
 term_t var(vardecl_t vd) { return new Var(vd); }
 
-inline bool is_commutative(Absyn::primop_t p) {
+inline static bool is_commutative(Absyn::primop_t p) {
   switch (p) {
   case Absyn::Plus:
   case Absyn::Times:
@@ -127,7 +127,7 @@ int cmp_term(term_t t1, term_t t2) {
   }
 }
 
-bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
+static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 
 ///////////////////// Assertions /////////////////////
 
@@ -145,7 +145,7 @@ datatype Assn {
 
 // inner loop for calculating the size of an assertion -- we
 // take care to figure out the size as a dag and not a tree.
-unsigned int 
+static unsigned int 
   assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
   LOOP:
   if (memq(*prev,a)) return c;
@@ -171,10 +171,10 @@ unsigned int
 }
 
 // counter used for reporting purposes
-unsigned int max_assn_size = 0;
+static unsigned int max_assn_size = 0;
 
 // calculate the size of an assertion
-unsigned int assn_size(assn_t a) {
+static unsigned int assn_size(assn_t a) {
   list_t<assn_t,`H> prev = NULL;
   let c = assn_size_loop(a,0,&prev);
   if (c > max_assn_size) {
@@ -185,7 +185,7 @@ unsigned int assn_size(assn_t a) {
 
 // calculate a string representation (and total tree node count) for an
 // assertion.  the prec field (precedent) is used to avoid some parens.
-string_t a2string(assn_t a, int prec, int@ size) {
+static string_t a2string(assn_t a, int prec, int@ size) {
   switch (a) {
   case &True: return "true";
   case &False: return "false";
@@ -241,7 +241,7 @@ datatype Assn.False false_assn = False;
 // that want to lookup.  That could happen if we had a different 
 // type for hashtable lookup (as we did with dictionaries.)
 
-int assnhash(datatype Assn @a) {
+static int assnhash(datatype Assn @a) {
   switch (a) {
   case &False: return 0;
   case &True: return 1;
@@ -257,7 +257,7 @@ int assnhash(datatype Assn @a) {
 
 // compare two assertions for structural equality -- does not assume
 // the components have been hash-consed, but probably could.
-int assncmp(datatype Assn @a1, datatype Assn @a2) {
+static int assncmp(datatype Assn @a1, datatype Assn @a2) {
  LOOP:
   if (a1 == a2) return 0;
   switch $(a1,a2) {
@@ -303,7 +303,7 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
 // a hash-table to hold all of the assertion nodes to maximize
 // sharing.  we also record whether or not a node has delayed
 // substitutions or kills within it.
-struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
+static struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
 *hash_cons_table = NULL;
 
 void reset_hash_cons_table(void){
