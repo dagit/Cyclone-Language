@@ -43,7 +43,7 @@ namespace Dict {
 using List;
 
 extern struct T<`a::B,`b::B,`r::R>;
-typedef struct T<`a,`b,`r> *`r tree<`a,`b,`r>;
+typedef struct T<`a,`b,`r> const *`r tree<`a,`b,`r>;
 extern struct Dict<`a,`b,`r::R> {
   int (@`H rel)(`a,`a);
   region_t<`r> r;

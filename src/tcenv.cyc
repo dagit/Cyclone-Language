@@ -147,7 +147,7 @@ datacon(Jumpee,CaseEnd_j);
 datacon(Jumpee,FnEnd_j);
 
 
-typedef $(switch_clause_t, list_t<tvar_t>, clist_t<type_t,`r>)*`r 
+typedef $(switch_clause_t, list_t<tvar_t>, clist_t<type_t,`r>) const *`r 
 ftclause_t<`r>;
 
 static struct CtrlEnv<`r::R> {
@@ -187,9 +187,9 @@ static struct SharedFenv<`f::R> {
 struct Bindings<`r::R> {
   var_t v;
   binding_t b;
-  struct Bindings<`r> *`r const tl;
+  struct Bindings<`r> const *`r const tl;
 };
-typedef struct Bindings<`r> *`r const bindings_t<`r>;
+typedef struct Bindings<`r> const *`r const bindings_t<`r>;
 
 // Local function environments -- this is getting a bit out of hand, no?
 abstract struct Fenv<`r::R> {
@@ -740,10 +740,10 @@ void process_goto(tenv_t te, stmt_t s, var_t l, stmt_opt_t @sopt) {
   }
 }
 
-$(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)*`r const
+$(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r> te,stmt_t s, switch_clause_t *@ clauseopt){
   let &Fenv{<`f,`c> .ctrl_env=ctrl_env,...} = get_fenv(te,"process_fallthru");
-  let ans = ($(_,_,clist_t<_,`r>)*`r const)ctrl_env->fallthru_clause;
+  let ans = ($(_,_,clist_t<_,`r>)const *`r const)ctrl_env->fallthru_clause;
   if(ans != NULL) {
     (*ans)[0]->body->non_local_preds = 
       new List(s, (*ans)[0]->body->non_local_preds);
@@ -789,8 +789,7 @@ tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
                     .continue_stmt = rnew(r) Stmt_j(continue_dest),
                     .break_stmt = ctrl_env->next_stmt,
                     .next_stmt = rnew(r) Stmt_j(continue_dest),
-                    .fallthru_clause = 
-                       (ftclause_t<`r>)ctrl_env->fallthru_clause,
+                    .fallthru_clause = ctrl_env->fallthru_clause,
                     .try_depth = ctrl_env->try_depth};
   fenv_t<`r> new_fenv = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,

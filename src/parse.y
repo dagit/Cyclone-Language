@@ -95,7 +95,6 @@ datatype Type_specifier {
   Short_spec(seg_t);
   Long_spec(seg_t);
   Type_spec(type_t,seg_t);    // int, `a, list_t<`a>, etc.
-  Decl_spec(decl_t);
 };
 typedef datatype Type_specifier @type_specifier_t;
 
@@ -125,7 +124,7 @@ struct Abstractdeclarator {
 typedef struct Abstractdeclarator @abstractdeclarator_t;
 
 ////////////////////////// forward references //////////////////////
-static $(type_t,opt_t<decl_t>)
+static type_t
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc);
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   apply_tms(tqual_t,type_t,list_t<attribute_t,`H>,list_t<type_modifier_t>);
@@ -239,7 +238,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(opt_t<var_t>,tqual_t,type_
       case &Evar(_,*z,_,_):
         // using an evar here will mess things up since the evar will be
         // duplicated.  So, we pin the evar down to a type variable instead.
-        stringptr_t nm = new aprintf("`%s",*v);
+        stringptr_t nm = new ((string_t)aprintf("`%s",*v));
         *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::ik)}));
         break;
       default: break;
@@ -248,7 +247,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(opt_t<var_t>,tqual_t,type_
       // while we're at it, give any anonymous regions_t's a name that
       // corresponds to the variable.
     case &$(&Opt(v),_,&RgnHandleType(&Evar(_,*z,_,_))): 
-      stringptr_t nm = new aprintf("`%s",*v);
+      stringptr_t nm = new ((string_t)aprintf("`%s",*v));
       *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::rk)}));
       break;
     default: break;
@@ -488,13 +487,11 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
       default: err("bad storage class on function",loc); break;
       }
   }
-  let $(t,decl_opt) = collapse_type_specifiers(tss,loc);
+  let t = collapse_type_specifiers(tss,loc);
   let $(fn_tqual,fn_type,x,out_atts) = apply_tms(tq,t,atts,d->tms);
   // what to do with the left-over attributes out_atts?  I'm just
   // going to append them to the function declaration and let the
   // type-checker deal with it.
-  if (decl_opt != NULL)
-    Tcutil::warn(loc,"nested type declaration within function prototype");
   if (x != NULL)
     // Example:   `a f<`b><`a>(`a x) {...}
     // Here info[2] will be the list `b.
@@ -536,17 +533,11 @@ static string_t msg3 =
   "type specifier includes more than one declaration";
 static string_t msg4 = 
   "sign specifier may appear only once within a type specifier";
-// Given a type-specifier list, determines the type and any declared
-// structs, unions, enums, or datatypes.  Most of this is just collapsing
-// combinations of [un]signed, short, long, int, char, etc.  We're
-// probably more permissive than is strictly legal here.  For
-// instance, one can write "unsigned const int" instead of "const
-// unsigned int" and so forth.  I don't think anyone will care...
-// (famous last words)
-static $(type_t,opt_t<decl_t>)
+// Given a type-specifier list, determines the type.  Most of this is 
+// just collapsing combinations of [un]signed, short, long, int, char, 
+// etc.  
+static type_t
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc) {
-
-  opt_t<decl_t> declopt = NULL;    // any hidden declarations
 
   bool      seen_type = false;
   bool      seen_sign = false;
@@ -604,34 +595,6 @@ static $(type_t,opt_t<decl_t>)
       // the rest is is necessary if it's long and harmless if long long
       seen_size = true;
       break;
-    case &Decl_spec(d):
-      // we've got a type declaration embedded in here -- return
-      // the declaration as well as a copy of the type -- this allows
-      // us to declare structs as a side effect inside typedefs
-      // Note: Leave the last fields NULL so check_valid_type knows the type
-      //       has not been checked.
-      last_loc = d->loc;
-      if (declopt == NULL && !seen_type) {
-	seen_type = true;
-        switch (d->r) {
-        case &Aggr_d(ad):
-          let args = List::map(tvar2typ,List::map(copy_tvar,ad->tvs));
-          t = new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name,NULL),args));
-          if (ad->impl!=NULL) declopt = new Opt(d);
-	  break;
-        case &Datatype_d(tud):
-          let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
-          t = new DatatypeType(DatatypeInfo(KnownDatatype(new tud),args));
-	  if(tud->fields != NULL) declopt = new Opt(d);
-	  break;
-        case &Enum_d(ed):
-          t = new EnumType(ed->name,NULL);
-          declopt = new Opt(d);
-          break;
-        default: abort(d->loc,"bad declaration within type specifier");
-        }
-      } else err(msg3,d->loc);
-      break;
     }
 
   // it's okay to not have an explicit type as long as we have some
@@ -660,7 +623,7 @@ static $(type_t,opt_t<decl_t>)
       default: err("size qualifier on non-integral type",last_loc); break;
       }
   }
-  return $(t, declopt);
+  return t;
 }
 
 static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@`r,`r>
@@ -774,12 +737,8 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 
 // given a specifier-qualifier list, warn and ignore about any nested type
 // definitions and return the collapsed type.
-// FIX: We should somehow deal with the nested type definitions.
 type_t speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
-  let $(t,decls_opt) = collapse_type_specifiers(tss,loc);
-  if(decls_opt != NULL)
-    Tcutil::warn(loc,"ignoring nested type declaration(s) in specifier list");
-  return t;
+  return collapse_type_specifiers(tss,loc);
 }
 
 // convert an (optional) variable, tqual, type, and type
@@ -861,61 +820,49 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       break;
     }
 
-  // Collapse the type specifiers to get the base type and any
-  // nested declarations
-  let ts_info = collapse_type_specifiers(tss,loc);
+  // Collapse the type specifiers to get the base type.
+  let base_type = collapse_type_specifiers(tss,loc);
   if (declarators == NULL) {
-    // here we have a type declaration -- either a struct, union,
+    // here we should have a type declaration -- either a struct, union,
     // or datatype as in: "struct Foo { ... };"
-    let $(t,declopt) = ts_info;
-    if (declopt != NULL) {
-      decl_t d = declopt->v;
-      switch (d->r) {
-      case &Enum_d(ed):
-        ed->sc = s;
-        if (atts != NULL) err("bad attributes on enum",loc); 
-	break;
-      case &Aggr_d(ad): ad->sc = s; ad->attributes = atts; break;
-      case &Datatype_d(tud):
-        tud->sc = s;
-        if (atts != NULL) err("bad attributes on datatype",loc); 
-	break;
-      default: err("bad declaration",loc); return NULL;
-      }
-      return new List(d,NULL);
-    } else {
-      switch (t) {
-        // FIX: we're not doing anything with the @tagged qualifier here...
-      case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
-	let ts2 = List::map_c(typ2tvar,loc,ts);
-	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
-	if (atts != NULL) err("bad attributes on type declaration",loc);
-	return new List(new_decl(new Aggr_d(ad),loc),NULL);
-      case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
-	if(atts != NULL) err("bad attributes on datatype", loc);
-	return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
-      case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
-        let ts2 = List::map_c(typ2tvar,loc,ts);
-        let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
-        if (atts != NULL) err("bad attributes on datatype",loc);
-        return new List(tud,NULL);
-      case &EnumType(n,_):
-        let ed = new Enumdecl{s,n,NULL};
-        if (atts != NULL) err("bad attributes on enum",loc);
-        return new List(new Decl(new Enum_d(ed),loc),NULL);
-      case &AnonEnumType(fs):
-        // someone's written:  enum {A,B,C}; which is a perfectly good
-        // way to declare symbolic constants A, B, and C.
-        let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
-        if (atts != NULL) err("bad attributes on enum",loc);
-        return new List(new Decl(new Enum_d(ed),loc),NULL);
-      default: err("missing declarator",loc); return NULL;
-      }
+    switch (base_type) {
+    case &TypeDeclType(&{.r = &Aggr_td(ad),...},_): 
+      ad->attributes = List::append(ad->attributes,atts);
+      return new List(new_decl(new Aggr_d(ad),loc),NULL);
+    case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+      if (atts != NULL) err("attributes on enum not supported",loc);
+      return new List(new_decl(new Enum_d(ed),loc),NULL);
+    case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+      if (atts != NULL) err("attributes on datatypes not supported",loc);
+      return new List(new_decl(new Datatype_d(dd),loc),NULL);
+    case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
+      let ts2 = List::map_c(typ2tvar,loc,ts);
+      let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
+      if (atts != NULL) err("bad attributes on type declaration",loc);
+      return new List(new_decl(new Aggr_d(ad),loc),NULL);
+    case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
+      if(atts != NULL) err("bad attributes on datatype", loc);
+      return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
+    case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
+      let ts2 = List::map_c(typ2tvar,loc,ts);
+      let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
+      if (atts != NULL) err("bad attributes on datatype",loc);
+      return new List(tud,NULL);
+    case &EnumType(n,_):
+      let ed = new Enumdecl{s,n,NULL};
+      if (atts != NULL) err("bad attributes on enum",loc);
+      return new List(new Decl(new Enum_d(ed),loc),NULL);
+    case &AnonEnumType(fs):
+      // someone's written:  enum {A,B,C}; which is a perfectly good
+      // way to declare symbolic constants A, B, and C.
+      let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
+      if (atts != NULL) err("bad attributes on enum",loc);
+      return new List(new Decl(new Enum_d(ed),loc),NULL);
+    default: err("missing declarator",loc); return NULL;
     }
   } else {
     // declarators != NULL
-    type_t t = ts_info[0];
-    let fields = apply_tmss(mkrgn,tq,t,declarators,atts);
+    let fields = apply_tmss(mkrgn,tq,base_type,declarators,atts);
     if (istypedef) {
       // we can have a nested struct, union, or datatype
       // declaration within the typedef as in:
@@ -923,25 +870,9 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       if (!exps_empty)
 	err("initializer in typedef declaration",loc);
       list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
-      if (ts_info[1] != NULL) {
-        decl_t d = ts_info[1]->v;
-        switch (d->r) {
-        case &Aggr_d(ad):
-          ad->sc = s; ad->attributes = atts; atts = NULL; break;
-        case &Datatype_d(tud): tud->sc = s; break;
-        case &Enum_d(ed):    ed->sc  = s; break;
-        default:
-          err("declaration within typedef is not a struct, union, or datatype",
-              loc);
-	  break;
-        }
-        decls = new List(d,decls);
-      }
       return decls;
     } else {
       // here, we have a bunch of variable declarations
-      if (ts_info[1] != NULL)
-        unimp("nested type declaration within declarator",loc);
       list_t<decl_t> decls = NULL;
       for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
 	let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
@@ -1606,12 +1537,14 @@ type_qualifier:
 /* parsing of enum specifiers */
 enum_specifier:
   ENUM qual_opt_identifier '{' enum_declaration_list '}'
-  { $$=^$(new Decl_spec(new Decl{new Enum_d(new Enumdecl(Public,$2,new Opt($4))),
-                                 LOC(@1,@5)})); }
+  { let ed = new TypeDecl{new Enum_td(new Enumdecl(Public,$2,new Opt($4))),
+                           LOC(@1,@5)};
+    $$=^$(type_spec(new TypeDeclType(ed,NULL),LOC(@1,@5)));
+  }
 | ENUM qual_opt_identifier
   { $$=^$(type_spec(new EnumType($2,NULL),LOC(@1,@2))); }
 | ENUM '{' enum_declaration_list '}'
-  { $$=^$(new Type_spec(new AnonEnumType($3),LOC(@1,@4))); }
+  { $$=^$(type_spec(new AnonEnumType($3),LOC(@1,@4))); }
 ;
 
 /* enum fields */
@@ -1639,9 +1572,10 @@ struct_or_union_specifier:
     { 
       let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
       let exist_ts = List::map_c(typ2tvar,LOC(@6,@6),$6);
-      $$=^$(new Decl_spec(aggr_decl($2, Public, $3, ts,
-				    aggrdecl_impl(exist_ts,$7,$8,true), NULL,
-				    LOC(@1,@9))));
+      let td = aggr_tdecl($2, Public, $3, ts, 
+                          aggrdecl_impl(exist_ts,$7,$8,true), NULL,
+                          LOC(@1,@9));
+      $$ = ^$(type_spec(new TypeDeclType(td,NULL), LOC(@1,@9)));
     }
 | struct_or_union struct_union_name type_params_opt '{' 
     type_params_opt optional_rgn_order 
@@ -1649,9 +1583,10 @@ struct_or_union_specifier:
     { 
       let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
-      $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts,
-				    aggrdecl_impl(exist_ts,$6,$7,false), NULL,
-				    LOC(@1,@8))));
+      let td = aggr_tdecl($1, Public, $2, ts, 
+                          aggrdecl_impl(exist_ts,$6,$7,false), NULL,
+                          LOC(@1,@8));
+      $$ = ^$(type_spec(new TypeDeclType(td,NULL), LOC(@1,@8)));
     }
 | TAGGED_QUAL struct_or_union struct_union_name type_params_opt 
     { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($2,$3,new Opt(true)),$4)),
@@ -1792,6 +1727,11 @@ struct_declarator:
       $$=^$(new $((new Declarator(new $(Rel_n(NULL),new ""), NULL)),
                   (exp_opt_t)$2));
     }
+| /* empty */ 
+    { // HACK: give the field an empty name -- see elsewhere in the
+      // compiler where we use this invariant
+      $$=^$(new $((new Declarator(new $(Rel_n(NULL),new ""), NULL)),NULL));
+    }
 | declarator_withtypedef ':' constant_expression
     { $$=^$(new $($1,(exp_opt_t)$3)); }
 ;
@@ -1801,8 +1741,9 @@ datatype_specifier:
   qual_datatype qual_opt_identifier type_params_opt '{' datatypefield_list '}'
     { let is_extensible = $1;
       let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$ = ^$(new Decl_spec(datatype_decl(Public,$2,ts,new Opt($5), 
-                                          is_extensible,LOC(@1,@6))));
+      let dd = datatype_tdecl(Public,$2,ts,new Opt($5), 
+                              is_extensible,LOC(@1,@6));
+      $$ = ^$(type_spec(new TypeDeclType(dd,NULL),LOC(@1,@6)));
     }
 | qual_datatype qual_opt_identifier type_params_opt 
     { let is_extensible = $1;

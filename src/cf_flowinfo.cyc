@@ -1483,6 +1483,7 @@ void print_flow(flow_t f) {
 // that we can allocate stuff in the region.  
 bool contains_region(killrgn_t rgn, type_t t) {
   switch (Tcutil::compress(t)) {
+  case &TypeDeclType(...): // really an error -- should be compressed out
   case &VoidType: // these cases can't contain rgn
   case &IntType(_,_):    
   case &FloatType:        

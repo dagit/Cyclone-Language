@@ -32,17 +32,11 @@ static enum Color { R, B };
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 abstract struct T<`a::B,`b::B,`r::R> {
   enum Color color;
-  struct T<`a,`b,`r> *`r const left;
-  struct T<`a,`b,`r> *`r const right;
+  struct T<`a,`b,`r> const *`r const left;
+  struct T<`a,`b,`r> const *`r const right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
 };
-typedef struct T<`a,`b,`r> @`r Tree_t<`a,`b,`r>;
-
-abstract struct Dict<`a,`b,`r::R> {
-  int (@`H rel)(`a,`a);
-  region_t<`r> r;
-  tree<`a,`b,`r> t;
-};
+typedef struct T<`a,`b,`r> const @`r Tree_t<`a,`b,`r>;
 
 dict_t<`a,`b,`r> rempty(region_t<`r> r,int (@`H comp)(`a,`a)) {
   return Dict(comp,r,NULL);
@@ -59,7 +53,9 @@ dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) {
 }
 
 dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) {
-  return Dict{d.rel, r, (tree<`a,`b,`r>)d.t};
+  struct T<`a,`b,`r2> const * t = d.t;
+  struct T<`a,`b,`r> const * t2 = t;
+  return Dict{d.rel, r, t2};
 }
 
 bool is_empty(dict_t<`a,`b,`r> d) {
@@ -168,83 +164,89 @@ dict_t<`a,`b,`r> inserts(dict_t<`a,`b,`r> d,
   return d;
 }
 
-static `c fold_tree(`c f(`a,`b,`c), struct T<`a,`b,`r> @`r t, `c accum) {
+static `c fold_tree(`c f(`a,`b,`c), struct T<`a,`b,`r> const @`r t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
-  if(left  != NULL) accum = fold_tree(f,(struct T<`a,`b,`r>@`r)left,accum);
+  if(left  != NULL) accum = fold_tree(f,left,accum);
   accum = f(key, val, accum);
-  if(right != NULL) accum = fold_tree(f,(struct T<`a,`b,`r>@`r)right,accum);
+  if(right != NULL) accum = fold_tree(f,right,accum);
   return accum;
 }
 
 `c fold(`c f(`a,`b,`c),dict_t<`a,`b,`r> d,`c accum) {
-  if(d.t == NULL)
+  let t = d.t;
+  if(t == NULL)
     return accum;
-  return fold_tree(f, (struct T<`a,`b,`r>@`r)(d.t), accum);
+  return fold_tree(f, t, accum);
 }
 
 static `c fold_tree_c(`c f(`d,`a,`b,`c),   `d env,
-                      struct T<`a,`b,`r> @`r t, `c accum) {
+                      struct T<`a,`b,`r> const @`r t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
   if(left  != NULL) 
-    accum = fold_tree_c(f,env,(struct T<`a,`b,`r>@`r)left,accum);
+    accum = fold_tree_c(f,env,left,accum);
   accum = f(env, key, val, accum);
   if(right != NULL) 
-    accum = fold_tree_c(f,env,(struct T<`a,`b,`r>@`r)right,accum);
+    accum = fold_tree_c(f,env,right,accum);
   return accum;
 }
 
 `c fold_c(`c f(`d,`a,`b,`c),`d env,dict_t<`a,`b,`r> d,`c accum) {
-  if(d.t == NULL)
+  let t = d.t;
+  if(t == NULL)
     return accum;
-  return fold_tree_c(f, env, (struct T<`a,`b,`r>@`r)(d.t), accum);
+  return fold_tree_c(f, env, t, accum);
 }
 
-static void app_tree(`c f(`a,`b), struct T<`a,`b,`r> @`r t) {
+static void app_tree(`c f(`a,`b), struct T<`a,`b,`r> const @`r t) {
   let &T(_,left,right,$(key,val)) = t;
-  if(left  != NULL) app_tree(f,(struct T<`a,`b,`r>@`r)left);
+  if(left  != NULL) app_tree(f,left);
   f(key, val);
-  if(right != NULL) app_tree(f,(struct T<`a,`b,`r>@`r)right);
+  if(right != NULL) app_tree(f,right);
 }
 
 void app(`c f(`a,`b),dict_t<`a,`b,`r> d) {
-  if(d.t != NULL)
-    app_tree(f,(struct T<`a,`b,`r>@`r)(d.t));
+  let t = d.t;
+  if(t != NULL)
+    app_tree(f,t);
 }
 
-static void app_tree_c(`c f(`d,`a,`b), `d env, struct T<`a,`b,`r>@`r t){
+static void app_tree_c(`c f(`d,`a,`b), `d env, struct T<`a,`b,`r> const @`r t){
   let &T(_,left,right,$(key,val)) = t;
-  if(left  != NULL) app_tree_c(f,env,(struct T<`a,`b,`r>@`r)left);
+  if(left  != NULL) app_tree_c(f,env,left);
   f(env, key, val);
-  if(right != NULL) app_tree_c(f,env,(struct T<`a,`b,`r>@`r)right);
+  if(right != NULL) app_tree_c(f,env,right);
 }
 
 void app_c(`c f(`d,`a,`b),`d env, dict_t<`a,`b,`r> d) {
-  if(d.t != NULL)
-    app_tree_c(f,env,(struct T<`a,`b,`r>@`r)(d.t));
+  let t = d.t;
+  if(t != NULL)
+    app_tree_c(f,env,t);
 }
 
-static void iter_tree(void f(`a,`b), struct T<`a,`b,`r> @`r t) {
+static void iter_tree(void f(`a,`b), struct T<`a,`b,`r> const @`r t) {
   let &T(_,left,right,$(key,val)) = t;
-  if(left  != NULL) iter_tree(f,(struct T<`a,`b,`r>@`r)left);
+  if(left  != NULL) iter_tree(f,left);
   f(key, val);
-  if(right != NULL) iter_tree(f,(struct T<`a,`b,`r>@`r)right);
+  if(right != NULL) iter_tree(f,right);
 }
 
 void iter(void f(`a,`b),dict_t<`a,`b,`r> d) {
-  if(d.t != NULL)
-    iter_tree(f,(struct T<`a,`b,`r>@`r)(d.t));
+  let t = d.t;
+  if(t != NULL)
+    iter_tree(f,t);
 }
 
-static void iter_tree_c(void f(`c,`a,`b), `c env, struct T<`a,`b,`r>@`r t){
+static void iter_tree_c(void f(`c,`a,`b), `c env, struct T<`a,`b,`r> const @`r t){
   let &T(_,left,right,$(key,val)) = t;
-  if(left  != NULL) iter_tree_c(f,env,(struct T<`a,`b,`r>@`r)left);
+  if(left  != NULL) iter_tree_c(f,env,left);
   f(env, key, val);
-  if(right != NULL) iter_tree_c(f,env,(struct T<`a,`b,`r>@`r)right);
+  if(right != NULL) iter_tree_c(f,env,right);
 }
 
 void iter_c(void f(`c,`a,`b),`c env, dict_t<`a,`b,`r> d) {
-  if(d.t != NULL)
-    iter_tree_c(f,env,(struct T<`a,`b,`r>@`r)(d.t));
+  let t = d.t;
+  if(t != NULL)
+    iter_tree_c(f,env,t);
 }
 
 static void count_elem(int @cnt, `a a, `b b) {
@@ -317,20 +319,19 @@ dict_t<`a,`b> copy(dict_t<`a,`b,`r> d) {
 }
 
 static tree<`a,`c,`r> map_tree(region_t<`r> r, `c f(`b), 
-                               struct T<`a,`b,`r2>@`r2 t) {
+                               struct T<`a,`b,`r2> const @`r2 t) {
   let &T(c,left,right,$(key,val)) = t;
-  let new_left = 
-    left == NULL ? NULL : map_tree(r,f,(struct T<`a,`b,`r2>@`r2)left);
+  let new_left  = (left == NULL) ? ((tree)NULL) : map_tree(r,f,left);
   let new_val   = f(val);
-  let new_right = 
-    right == NULL ? NULL : map_tree(r,f,(struct T<`a,`b,`r2>@`r2)right);
+  let new_right = (right == NULL) ? ((tree)NULL) : map_tree(r,f,right);
   return rnew(r) T(c,new_left,new_right,$(key,new_val));
 }
 
 dict_t<`a,`c,`r> rmap(region_t<`r> r,`c f(`b),dict_t<`a,`b,`r2> d) {
-  if(d.t == NULL)
+  let t = d.t;
+  if(t == NULL)
     return Dict(d.rel,r,NULL);
-  return Dict(d.rel,r,map_tree(r,f,(struct T<`a,`b,`r2>@`r2)(d.t)));
+  return Dict(d.rel,r,map_tree(r,f,t));
 }
 
 dict_t<`a,`c> map(`c f(`b),dict_t<`a,`b,`r2> d) {
@@ -338,21 +339,22 @@ dict_t<`a,`c> map(`c f(`b),dict_t<`a,`b,`r2> d) {
 }
 
 static tree<`a,`c,`r> map_tree_c(region_t<`r> r, `c f(`d,`b), `d env, 
-                                 struct T<`a,`b,`r2>@`r2 t) {
+                                 struct T<`a,`b,`r2> const @`r2 t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left  = 
-    left  == NULL ? NULL : map_tree_c(r,f,env,(struct T<`a,`b,`r2>@`r2)left);
+    left  == NULL ? ((tree)NULL) : map_tree_c(r,f,env,(struct T<`a,`b,`r2>const @`r2)left);
   let new_val   = f(env,val);
   let new_right = 
-    right == NULL ? NULL : map_tree_c(r,f,env,(struct T<`a,`b,`r2>@`r2)right);
+    right == NULL ? ((tree)NULL) : map_tree_c(r,f,env,(struct T<`a,`b,`r2>const @`r2)right);
   return rnew(r) T(c,new_left,new_right,$(key,new_val));
 } 
 
 dict_t<`a,`c,`r> rmap_c(region_t<`r> r,`c f(`d,`b),`d env,
                            dict_t<`a,`b,`r2> d) {
-  if(d.t == NULL)
+  let t = d.t;
+  if(t == NULL)
     return Dict(d.rel,r,NULL);
-  return Dict(d.rel,r,map_tree_c(r,f,env,(struct T<`a,`b,`r2>@`r2)(d.t)));
+  return Dict(d.rel,r,map_tree_c(r,f,env,t));
 }
 
 dict_t<`a,`c> map_c(`c f(`d,`b), `d env, dict_t<`a,`b,`r> d) {
@@ -365,18 +367,19 @@ $(`a,`b)@`r rchoose(region_t<`r> r,dict_t<`a,`b,`r2> d) {
   return rnew(r) $(d.t->key_val[0], d.t->key_val[1]);
 }
 
-static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b,`r>@`r t){
+static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b,`r> const @`r t){
   let &T(_,left,right,$(key,val)) = t;
   return 
-       (left  == NULL || forall_tree_c(f,env,(struct T<`a,`b,`r>@`r)left))
+       (left  == NULL || forall_tree_c(f,env,left))
     && f(env,key,val) 
-    && (right == NULL || forall_tree_c(f,env,(struct T<`a,`b,`r>@`r)right));
+    && (right == NULL || forall_tree_c(f,env,right));
 }
 
 bool forall_c(bool f(`c,`a,`b), `c env, dict_t<`a,`b,`r> d) {
-  if(d.t == NULL)
+  let t = d.t;
+  if(t == NULL)
     return true;
-  return forall_tree_c(f, env, (struct T<`a,`b,`r>@`r)d.t);
+  return forall_tree_c(f, env, t);
 }
 
 static bool forall_intersect_f($(bool (@)(`a,`b,`b),
@@ -423,17 +426,19 @@ dict_t<`a,`b,`r1> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
 dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
 				 dict_t<`a,`b,`r> d1, 
 				 dict_t<`a,`b,`r> d2) {
-  if ((int)d1.t == (int)d2.t || d2.t == NULL) return d2;
-  let ans_tree = NULL;
+  let t2 = d2.t;
+  if (t2 == NULL) return d2;
+  if ((int)d1.t == (int)t2) return d2;
+  tree ans_tree = NULL;
   region temp; {
     // resizing array used as queue (array means fewer mallocs)
-    Tree_t<`a,`b,`r> ? queue = rnew(temp) {for i < 16 : (Tree_t<`a,`b,`r>)d2.t};
+    Tree_t<`a,`b,`r> ? queue = rnew(temp) {for i < 16 : (Tree_t)t2};
     int ind = 0;
     while(ind != -1) {
       let &T(_,l,r,$(k,v)) = queue[ind--];
       if(ind + 2 >= numelts(queue))
         queue = rnew(temp) {for i < numelts(queue)*2 : 
-                            i < numelts(queue) ? queue[i] : (Tree_t<`a,`b,`r>)d2.t};
+                            i < numelts(queue) ? queue[i] : (Tree_t<`a,`b,`r>)t2};
       if(l != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)l;
       if(r != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)r;
       if(Dict::member(d1,k))

@@ -63,6 +63,9 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
 extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t> fs);
 extern doc_t vardecl2doc(vardecl_t vd);
+extern doc_t aggrdecl2doc(aggrdecl_t ad);
+extern doc_t enumdecl2doc(enumdecl_t ad);
+extern doc_t datatypedecl2doc(datatypedecl_t ad);
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
 
@@ -835,6 +838,12 @@ doc_t ntyp2doc(type_t t) {
   case &AccessEff(_):
   case &JoinEff(_):
     s = eff2doc(t); break;
+  case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
+    s = aggrdecl2doc(ad); break;
+  case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+    s = enumdecl2doc(ed); break;
+  case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+    s = datatypedecl2doc(dd); break;
   }
   return s;
 }
@@ -1663,6 +1672,64 @@ doc_t export2doc($(Position::seg_t,qvar_t,bool)@ x) {
   return qvar2doc(v);
 }
 
+doc_t aggrdecl2doc(aggrdecl_t ad) {
+  if (ad->impl==NULL)
+    return cat(scope2doc(ad->sc),
+               aggr_kind2doc(ad->kind),
+               qvar2bolddoc(ad->name),
+               ktvars2doc(ad->tvs));
+  else
+    return cat(scope2doc(ad->sc),
+               aggr_kind2doc(ad->kind),
+               qvar2bolddoc(ad->name),
+               ktvars2doc(ad->tvs),
+               blank_doc(),lb(),
+               ktvars2doc(ad->impl->exist_vars),
+               (ad->impl->rgn_po==NULL ? nil_doc() : 
+                cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
+               nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
+               line_doc(),
+               rb(),
+               atts2doc(ad->attributes));
+}
+
+doc_t datatypedecl2doc(datatypedecl_t dd) {
+  let &Datatypedecl(sc,name,tvs,fields,is_x) = dd;
+  if (fields==NULL)
+    return cat(scope2doc(sc),
+               (is_x ? text("@extensible") : blank_doc()),
+               text("datatype "),
+               (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
+               ktvars2doc(tvs));
+  else
+    return cat(scope2doc(sc),
+               (is_x ? text("@extensible ") : blank_doc()),
+               text("datatype "),
+               (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
+               ktvars2doc(tvs),
+               blank_doc(),lb(),
+               nest(2, cat(line_doc(),datatypefields2doc(fields->v))),
+               line_doc(),
+               rb());
+}
+
+doc_t enumdecl2doc(enumdecl_t ed) {
+  let &Enumdecl{sc,n,fields} = ed;
+  if (fields == NULL)
+    return cat(scope2doc(sc),
+               text("enum "),
+               typedef_name2bolddoc(n));
+
+  else
+    return cat(scope2doc(sc),
+               text("enum "),
+               qvar2bolddoc(n),
+               blank_doc(),lb(),
+               nest(2, cat(line_doc(),enumfields2doc(fields->v))),
+               line_doc(),
+               rb());
+}
+
 doc_t decl2doc(decl_t d) {
   doc_t s;
   switch (d->r) {
@@ -1706,26 +1773,7 @@ doc_t decl2doc(decl_t d) {
     break;
     
   case &Aggr_d(ad):
-    if (ad->impl==NULL)
-      s = cat(scope2doc(ad->sc),
-	      aggr_kind2doc(ad->kind),
-	      qvar2bolddoc(ad->name),
-              ktvars2doc(ad->tvs),
-              text(";"));
-    else
-      s = cat(scope2doc(ad->sc),
-	      aggr_kind2doc(ad->kind),
-	      qvar2bolddoc(ad->name),
-              ktvars2doc(ad->tvs),
-              blank_doc(),lb(),
-              ktvars2doc(ad->impl->exist_vars),
-              (ad->impl->rgn_po==NULL ? nil_doc() : 
-	       cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
-	      nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
-	      line_doc(),
-              rb(),
-              atts2doc(ad->attributes),
-              text(";"));
+    s = cat(aggrdecl2doc(ad),text(";"));
     break;
   case &Var_d(vd):
     s = vardecl2doc(vd);
@@ -1745,25 +1793,8 @@ doc_t decl2doc(decl_t d) {
     s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
             qvar2doc(vd->name),text(" = "),exp2doc(e),text(";"));
     break;
-  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x)):
-    if (fields==NULL)
-      s = cat(scope2doc(sc),
-              (is_x ? text("@extensible") : blank_doc()),
-              text("datatype "),
-              (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
-              ktvars2doc(tvs),
-              text(";"));
-    else
-      s = cat(scope2doc(sc),
-              (is_x ? text("@extensible ") : blank_doc()),
-              text("datatype "),
-              (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
-              ktvars2doc(tvs),
-              blank_doc(),lb(),
-              nest(2, cat(line_doc(),datatypefields2doc(fields->v))),
-              line_doc(),
-              rb(),
-              text(";"));
+  case &Datatype_d(dd):
+    s = cat(datatypedecl2doc(dd),text(";"));
     break;
   case &Let_d(p,_,e):
     s = cat(text("let "),
@@ -1775,21 +1806,8 @@ doc_t decl2doc(decl_t d) {
   case &Letv_d(vds):
     s = cat(text("let "), ids2doc(vds), text(";"));
     break;
-  case &Enum_d(&Enumdecl{sc,n,fields}):
-    if (fields == NULL)
-      s = cat(scope2doc(sc),
-              text("enum "),
-              typedef_name2bolddoc(n),
-              text(";"));
-    else
-      s = cat(scope2doc(sc),
-              text("enum "),
-              qvar2bolddoc(n),
-              blank_doc(),lb(),
-              nest(2, cat(line_doc(),enumfields2doc(fields->v))),
-              line_doc(),
-              rb(),
-              text(";"));
+  case &Enum_d(ed):
+    s = cat(enumdecl2doc(ed),text(";"));
     break;
   case &Typedef_d(td):
     type_t t;

@@ -161,7 +161,7 @@ static int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity - tv2->identity);
 }
 
-// compress out any evars or typedefs
+// compress out any evars or typedefs or type declarations
 type_t compress(type_t t) {
   switch (t) {
   case &Evar(_,NULL,_,_): 
@@ -181,9 +181,11 @@ type_t compress(type_t t) {
   case &ValueofType(e):
     Evexp::eval_const_uint_exp(e);
     switch (e->r) {
-    case &Valueof_e(t2): return t2;
+    case &Valueof_e(t2): return compress(t2);
     default: return t;
     }
+  case &TypeDeclType(_,&t): 
+    return compress(t);
   default: return t;
   }
 }
@@ -231,6 +233,9 @@ static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
 }
 static enumfield_t copy_enumfield(enumfield_t f) {
   return new Enumfield{f->name,f->tag,f->loc};
+}
+static type_t tvar2type(tvar_t t) {
+  return new VarType(copy_tvar(t));
 }
 type_t copy_type(type_t t) {
   switch (compress(t)) {
@@ -292,6 +297,15 @@ type_t copy_type(type_t t) {
   case &AccessEff(t): return new AccessEff(copy_type(t));
   case &JoinEff(ts): return new JoinEff(copy_types(ts));
   case &RgnsEff(t): return new RgnsEff(copy_type(t));
+  // For these cases, we don't want to duplicate the definition
+  case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
+    let targs = List::map(tvar2type,ad->tvs);
+    return new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name,false),targs));
+  case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+    return new EnumType(ed->name,NULL);
+  case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+    let targs = List::map(tvar2type,dd->tvs);
+    return new DatatypeType(DatatypeInfo{UnknownDatatype(UnknownDatatypeInfo{dd->name,false}),targs});
   }
 }
 
@@ -447,25 +461,25 @@ bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
   case $(&Eq_kb(k1), &Eq_kb(k2)): return k1 == k2;
   case $(&Less_kb(*x,k2), &Eq_kb(k1)): 
     if (kind_leq(k1,k2)) {
-      *x = new kb2;
+      *x = new Opt(kb2);
       return true;
     } else return false;
   case $(&Eq_kb(k1), &Less_kb(*x,k2)):
     if (kind_leq(k1,k2)) {
-      *x = new kb1;
+      *x = new Opt(kb1);
       return true;
     } else return false;
   case $(&Less_kb(*x,k1), &Less_kb(*y,k2)):
     if (kind_leq(k1,k2)) {
-      *y = new kb1;
+      *y = new Opt(kb1);
       return true;
     } else if (kind_leq(k2,k1)) {
-      *x = new kb2;
+      *x = new Opt(kb2);
       return true;
     } else return false;
   case $(&Unknown_kb(*x), y): fallthru(y,x);
   case $(y, &Unknown_kb(*x)):
-    *x = new y;
+    *x = new Opt(y);
     return true;
   }
 }
@@ -531,6 +545,9 @@ kind_t typ_kind(type_t t) {
     if (td == NULL || td->kind == NULL)
       impos("typ_kind: typedef found: %s", typ2string(t));
     return td->kind->v;
+  case &TypeDeclType(&{.r = &Aggr_td(_),...},_): return &ak;
+  case &TypeDeclType(&{.r = &Enum_td(_),...},_): return &bk;
+  case &TypeDeclType(&{.r = &Datatype_td(_),...},_): return &ak;
   case &AccessEff(_):     
   case &JoinEff(_):       
   case &RgnsEff(_): return &ek;
@@ -856,6 +873,7 @@ static type_t rgns_of(type_t t) {
   case &RgnsEff(t2): return rgns_of(t2);
   case &TypedefType(_,ts,_,_): 
     return normalize_effect(new JoinEff(map(rgns_of,ts)));
+  case &TypeDeclType(...): impos("typedecl in rgns_of");
   }
 }
 
@@ -1614,6 +1632,7 @@ static int type_case_number(type_t t) {
   case &TagType(_): return 26;
   case &DynRgnType(_,_): return 27;
   case &ValueofType(_): return 28;
+  case &TypeDeclType(...): return 29;
   }
 }
 // the real work of comparison
@@ -1873,6 +1892,7 @@ static bool ptrsubtype(tenv_t te,
 // to do various coercions.  We only do coercions that don't have
 // a failure here.  
 bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
+  //fprintf(stderr,"silent_castable %s and %s\n",typ2string(t1),typ2string(t2));
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
@@ -1908,12 +1928,15 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
         break;
       }
     }
+    //fprintf(stderr,"1: okay = %d\n",okay);
     // can only move from non-const to const or stay same
     okay = okay && (!pinfo_a.elt_tq.real_const || pinfo_b.elt_tq.real_const);
+    //fprintf(stderr,"2: okay = %d\n",okay);
     // first region must outlive the second
     okay = 
       okay && (unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn) || 
 	       region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn));
+    //fprintf(stderr,"3: okay = %d\n",okay);
     // must preserve zero-termination or second pointer must be const
     okay = okay && (unify_conrefs(intcmp,
 				  pinfo_a.ptr_atts.zero_term,
@@ -1922,11 +1945,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
                         pinfo_b.elt_tq.real_const));
     // element types have to be equal or t1's element type must be a 
     // pointer-sub-type of t2's element type (e.g., t1 = datatype D.C
-    // and t2 = datatype D.)
+    // and t2 = datatype D) and the t2 pointer must be const or abstract.
     okay = okay && (unify(pinfo_a.elt_typ,pinfo_b.elt_typ) ||
-                    ptrsubtype(te,NULL,pinfo_a.elt_typ,pinfo_b.elt_typ));
-                                
-                                
+                    ((pinfo_b.elt_tq.real_const || kind_leq(&ak,typ_kind(pinfo_b.elt_typ))) && ptrsubtype(te,NULL,pinfo_a.elt_typ,pinfo_b.elt_typ)));
+    //fprintf(stderr,"4: okay = %d\n",okay);                                
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),
@@ -2063,7 +2085,7 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
   impos("kind_to_opt: bad kind %s\n",Absynpp::kind2string(ka));
 }
 
-static kindbound_t@ kind_to_b(kind_t ka) {
+static kindbound_t @ kind_to_b(kind_t ka) {
   static datatype KindBound.Eq_kb ab_v = Eq_kb(&ak);
   static datatype KindBound.Eq_kb mb_v = Eq_kb(&mk);
   static datatype KindBound.Eq_kb bb_v = Eq_kb(&bk);
@@ -2135,7 +2157,8 @@ kindbound_t kind_to_bound(kind_t k) {
   return *kind_to_b(k);
 }
 opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
-  return (opt_t<kindbound_t>)(kind_to_b(k));
+  // FIX: avoid allocation
+  return new Opt(kind_to_bound(k));
 }
 
 // if e1 is zero, and t2 a pointer type, changes e1 to NULL and
@@ -2181,7 +2204,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
 
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
-  qvar_t v = new $(Loc_n, new aprintf("__aliasvar%d",counter++));
+  qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
   vardecl_t vd = new_vardecl(v,&VoidType_val,NULL);
   exp_t ve = varb_exp(v,new Local_b(vd),e->loc);
 
@@ -2260,6 +2283,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
     } else if (zero_to_null(te,t2,e)) {
       return true;
     } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
+      //fprintf(stderr,"found them to be castable\n");
       unchecked_cast(te,e,t2,c);
       // we warn for null-checks in the flow analysis now
       if (c != NonNull_to_Null)
@@ -2303,6 +2327,7 @@ bool coerceable(type_t t) {
 static $(tqual_t,type_t)@`r flatten_typ_f($(list_t<$(tvar_t,type_t)@`r,`r>,
                                              region_t<`r>)@ env,aggrfield_t x){
   let $(inst,r) = *env;
+  //fprintf(stderr,"flattening field %s with real_const = %d and const = %d\n",*x->name,x->tq.real_const,x->tq.print_const);
   return rnew(r) $(x->tq,rsubstitute(r,inst,x->type));
 }
 static $(tqual_t,type_t)@`r rcopy_tqt(region_t<`r> r,$(tqual_t,type_t)@ x) {
@@ -2395,8 +2420,11 @@ static bool subtype(tenv_t te,
       default: return false;
       }
     }
+    // check that qualifiers are the same or that t2's is at least const
+    if (!q_b.real_const && q_a.real_const) return false;
+    //fprintf(stderr,"subtype: got here on %s and %s\n",typ2string(t1), typ2string(t2));
+    // now check that t_a is a pointer sub-type of t_b
     return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
-                      
 
   case $(&DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(dd1,df)},ts1}), &DatatypeType(DatatypeInfo{{.KnownDatatype = &dd2}, ts2})):
     // we're casting a datatype field to a datatype which is okay
@@ -2483,6 +2511,7 @@ static bool isomorphic(type_t t1, type_t t2) {
 //   and for each field, either (a) both t1 and t2 have qualifier "const"
 //   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
 static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
+  //fprintf(stderr,"ptrsubtype %s and %s\n",typ2string(t1),typ2string(t2));
   TEMP_RGN(te, temp) {
     list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(temp,te,t1);
     list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(temp,te,t2);
@@ -2490,11 +2519,23 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
       if (tqs1 == NULL) return false;
       let &$(tq1,t1a) = tqs1->hd;
       let &$(tq2,t2a) = tqs2->hd;
-      // FIX: we need to take any qualifiers into account on typedefs
-      if (tq2.real_const && subtype(te,assume,t1a,t2a)) continue;
-      else if (unify(t1a,t2a)) continue;
-      else if (isomorphic(t1a,t2a)) continue;
-      else return false;
+      //fprintf(stderr,"tq1.real_const = %d, tq2.real_const = %d\n",tq1.real_const,tq2.real_const);              
+      if (tq1.real_const && !tq2.real_const) return false;
+      //fprintf(stderr,"ptrsubtype: qualifiers okay\n");
+      if ((tq2.real_const || kind_leq(&ak,typ_kind(t1a)))
+           && subtype(te,assume,t1a,t2a)) { 
+        //fprintf(stderr,"ptrsubtype: t2 is const (or abstract) and %s <= %s\n",typ2string(t1a),typ2string(t2a));
+        continue;
+      }
+      if (unify(t1a,t2a)) {
+        //fprintf(stderr,"ptrsubtype: %s unifies with %s\n",typ2string(t1a),typ2string(t2a));
+        continue;
+      }
+      if (isomorphic(t1a,t2a)) {
+        //fprintf(stderr,"ptrsubtype: %s isomorphic to %s\n",typ2string(t1a),typ2string(t2a));                
+        continue;
+      }
+      return false;
     }
     return true;
   }
@@ -2514,6 +2555,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return No_coercion;
   t1 = compress(t1);
   t2 = compress(t2);
+  //fprintf(stderr,"checking castable %s and %s\n",typ2string(t1),typ2string(t2));
   if(t2==&VoidType_val)
     return No_coercion;
   switch (t2) {
@@ -2534,11 +2576,24 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     switch (t2) {
     case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_))):
+      //fprintf(stderr,"checking castable pointers, q_a.real_const = %d, q_b.real_const = %d\n",q_a.real_const, q_b.real_const);
+      //fprintf(stderr,"type_kind(%s) = %s, kind_leq = %d\n",typ2string(t_b),kind2string(typ_kind(t_b)), kind_leq(&ak,typ_kind(t_b)));
       coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
-      // FIX: we need to take any qualifiers into account on typedefs
-      let ptrsub =
-	ptrsubtype(te,assump,t_a,t_b) && (!q_a.real_const || q_b.real_const);
+      let quals_okay = (q_b.real_const || !q_a.real_const);
+      //fprintf(stderr,"quals_okay = %d\n",quals_okay);
+      // Can this get any more complicated?!??!?!?!?
+      // First, we allow deep subtyping here if q_b is const or t_b is 
+      // abtract (makes it effectively const since you can't write to it
+      // and this is needed for datatypes).  But we also allow you to 
+      // cast when the types are equal, isomorphic, or the the second
+      // type is void.  (void is effectively abstract, but I'm too scared
+      // to make it thus...)
+      let ptrsub = quals_okay && 
+        (((q_b.real_const || kind_leq(&ak,typ_kind(t_b))) && 
+         ptrsubtype(te,assump,t_a,t_b)) ||
+         unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,&VoidType_val));
+      //fprintf(stderr,"ptrsub is %d\n",ptrsub);
       t1_failure = t1;
       t2_failure = t2;
       bool zeroterm_ok = unify_conrefs(intcmp,zt_a,zt_b) || !conref_val(zt_b);
@@ -2562,6 +2617,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	}
       if (conref_def(false,null_a) && !conref_def(false,null_b))
         coercion = NonNull_to_Null;
+
+      //fprintf(stderr,"bounds_ok = %d, zeroterm_ok = %d, ptrsub = %d, bitcase = %d\n",bounds_ok,zeroterm_ok,ptrsub,bitcase);
 
       if (bounds_ok && zeroterm_ok && (ptrsub || bitcase) && 
           (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b)))
@@ -2993,6 +3050,7 @@ type_t rsubstitute(region_t<`r> rgn,
   case &JoinEff(es):  
     let new_es = substs(rgn,inst,es);
     return new_es == es ? t : new JoinEff(new_es);
+  case &TypeDeclType(...): impos("found typedecltype in rsubs");
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
@@ -3374,6 +3432,23 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     default: break;
     }
     break;
+
+    // Here, we have a nested type declaration -- we check it and
+    // enter it in the environment, and then check an instantiation
+    // of that type.
+  case &TypeDeclType(&{.r = td,...},*topt):
+    type_t new_t = copy_type(compress(t));
+    switch (td) {
+    case &Aggr_td(ad):
+      Tc::tcAggrdecl(te,Dict::lookup(te->ae,te->ns),loc,ad); break;
+    case &Enum_td(ed):
+      Tc::tcEnumdecl(te,Dict::lookup(te->ae,te->ns),loc,ed); break;
+    case &Datatype_td(dd):
+      Tc::tcDatatypedecl(te,Dict::lookup(te->ae,te->ns),loc,dd); break;
+    }
+    *topt = new new_t;
+    return i_check_valid_type(loc,te,cvtenv,expected_kind,new_t,put_in_effect);
+
   case &AnonEnumType(fs):
     // Note: this code is duplicated almost exactly in tc.cyc
     genv_t ge = Dict::lookup(te->ae,te->ns);
@@ -4104,7 +4179,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       case NULL: s = aprintf("%s ref=NULL",s); break;
       case &Opt(t): s = aprintf("%s ref=%s",s,typ2string(t)); break;
       }
-      fprintf(stderr,"evar info: %s\n",s); break;
+      //fprintf(stderr,"evar info: %s\n",s); 
+      break;
     default: break;
     }
     terr(loc,"type %s has kind %s but as used here needs kind %s",

@@ -48,7 +48,7 @@ void yyerror(string_t<`H> s) {
 
 namespace Lex {
 
-static struct Trie<`r::R>;
+struct Trie<`r::R>;
 typedef struct Trie<`r> *`r trie_t<`r>;
 @tagged union TrieChildren<`r::R> {
   int Zero;
@@ -62,7 +62,7 @@ union TrieChildren<`r> One(int i,trie_t<`r> t) {
 union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
   return TrieChildren{.Many = ts}; 
 }
-static struct Trie<`r::R> {
+struct Trie<`r::R> {
   union TrieChildren<`r> children;
   int                 shared_str; // meaning depends on which trie -- see below
 };

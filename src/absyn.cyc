@@ -741,6 +741,13 @@ decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 					   .impl=i, .attributes = atts}),
 		  loc);
 }
+type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
+		 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+		 attributes_t atts, seg_t loc) {
+  return new TypeDecl(new Aggr_td(new Aggrdecl {.kind = k, .sc=s, .name=n, 
+                                                .tvs=ts, .impl=i, 
+                                                   .attributes = atts}),loc);
+}
 decl_t struct_decl(scope_t s,typedef_name_t n,
 		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
                    attributes_t atts, seg_t loc) {
@@ -756,6 +763,13 @@ decl_t datatype_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
                    bool is_extensible, seg_t loc){
   return new_decl(new Datatype_d(new Datatypedecl(s,n,ts,fs,is_extensible)),
                   loc);
+}
+type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
+                           opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+                           bool is_extensible, seg_t loc){
+  return new TypeDecl(new Datatype_td(new Datatypedecl(s,n,ts,fs,
+                                                       is_extensible)),
+                      loc);
 }
 
 // We treat function types in argument or return position as an

@@ -362,6 +362,19 @@ namespace Absyn {
     seg_t     zt_loc;         // location of zeroterm qualifier
   };
 
+  // could allow datatype decls in here as well
+  EXTERN_ABSYN datatype Raw_typedecl {
+    Aggr_td(aggrdecl_t);
+    Enum_td(enumdecl_t); 
+    Datatype_td(datatypedecl_t);
+  };
+  typedef datatype Raw_typedecl @raw_type_decl_t;
+  EXTERN_ABSYN struct TypeDecl {
+    raw_type_decl_t r;
+    seg_t           loc;
+  };
+  typedef struct TypeDecl @type_decl_t;
+
   // Note: The last fields of AggrType, TypedefType, and the decl 
   // are set by check_valid_type which most of the compiler assumes
   // has been called.  Doing so avoids the need for some code to have and use
@@ -407,6 +420,10 @@ namespace Absyn {
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
     RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind
+    // A struct, union, or enum declaration nested within a type -- we
+    // enter the declaration into the environment and then only use the
+    // type_t part from then on.  
+    TypeDeclType(type_decl_t,type_t*); 
   };
   extern_datacon(Type,HeapRgn);
   extern_datacon(Type,UniqueRgn);
@@ -1080,6 +1097,9 @@ namespace Absyn {
   extern decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 			  list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
 			  attributes_t atts, seg_t loc);
+  extern type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
+                                list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
+                                attributes_t atts, seg_t loc);
   extern decl_t struct_decl(scope_t s, typedef_name_t n,
 			    list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
                             attributes_t atts, seg_t loc);
@@ -1091,6 +1111,11 @@ namespace Absyn {
                               opt_t<list_t<datatypefield_t,`H>,`H> fs, 
                               bool is_extensible, 
                               seg_t loc);
+  extern type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, 
+                                    list_t<tvar_t,`H> ts,
+                                    opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+                                    bool is_extensible, 
+                                    seg_t loc);
 
   extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,
                              type_t ret_typ, 

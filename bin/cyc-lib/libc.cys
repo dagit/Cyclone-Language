@@ -3722,12 +3722,14 @@ hstub {
      same name.  Our current scheme for omitting repeated declarations does
      not use separate namespaces for structs and typedefs, so the typedef
      is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
+  /* JGM:  had to comment this out for now
   #ifdef __types_fd_set_def_
   #ifndef __cygwin_fd_set_hack
   #define __cygwin_fd_set_hack
   typedef struct _types_fd_set _types_fd_set;
   #endif
   #endif
+  */
 }
 hstub {
   /* FIX: OS X and *BSD and Solaris define a struct fd_set and then a typedef
@@ -4399,12 +4401,14 @@ hstub {
      same name.  Our current scheme for omitting repeated declarations does
      not use separate namespaces for structs and typedefs, so the typedef
      is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
+  /* JGM: had to comment this out for now
   #ifdef __types_fd_set_def_
   #ifndef __cygwin_fd_set_hack
   #define __cygwin_fd_set_hack
   typedef struct _types_fd_set _types_fd_set;
   #endif
   #endif
+  */
 }
 hstub {
   /* FIX: OS X and OpenBSD define a struct fd_set and then a typedef

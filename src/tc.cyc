@@ -854,7 +854,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       // FIX? I'm just being lazy here, but who wants a sizeof in their tag?
       let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
       if(!known)
-	terr(loc,"Cyclone enum tags cannot use sizeof or offsetof");
+	terr(loc,"Cyclone enum tags cannot use sizeof or offsetof or other enum tags");
       tag_count = t1+1;
       
       (*f->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));

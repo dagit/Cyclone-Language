@@ -690,8 +690,8 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};int Cyc_open(const
 char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_struct{
-int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
-;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};
+struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
 tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 int tag;unsigned long*f1;};int Cyc_fclose(struct Cyc___cycFILE*);int Cyc_feof(struct
 Cyc___cycFILE*);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fgetc(struct Cyc___cycFILE*);

@@ -36,8 +36,8 @@ using Dict;
 using Absyn;
 using Position;
 
-extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> *`r const tl; };
-typedef struct CList<`a,`r> *`r const clist_t<`a,`r>;
+extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> const *`r const tl; };
+typedef struct CList<`a,`r> const *`r const clist_t<`a,`r>;
 
 // Used to tell what an ordinary identifer refers to 
 extern datatype Resolved {
@@ -163,7 +163,7 @@ extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
 extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);
 extern void process_goto(tenv_t,stmt_t,var_t,stmt_opt_t@);
 
-extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)*`r const
+extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)const*`r const
 process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
                                      
 

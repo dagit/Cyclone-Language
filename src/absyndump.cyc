@@ -431,6 +431,10 @@ static void dumpeff(type_t t) {
   dump_char('}');
 }
 
+static void dump_aggrdecl(aggrdecl_t);
+static void dump_enumdecl(enumdecl_t);
+static void dump_datatypedecl(datatypedecl_t);
+
 // Convert a normalized typ to a doc
 void dumpntyp(type_t t) {
   switch (t) {
@@ -518,6 +522,12 @@ void dumpntyp(type_t t) {
     dump(","); dumprgn(r2); dump(">"); return;
   case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
   case &UniqueRgn: dump("`U"); break;
+  case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
+    dump_aggrdecl(ad); return;
+  case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+    dump_enumdecl(ed); return;
+  case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+    dump_datatypedecl(dd); return;
   case &HeapRgn: 
   case &AccessEff(_): 
   case &RgnsEff(_): 
@@ -1118,6 +1128,49 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
   dump_semi();
 }
 
+static void dump_aggrdecl(aggrdecl_t ad) {
+  dumpscope(ad->sc);
+  dumpaggr_kind(ad->kind);
+  dumpqvar(ad->name);
+  dumptvars(ad->tvs);
+  if(ad->impl == NULL) return;
+  else {
+    dump_char('{');
+    if(ad->impl->exist_vars != NULL)
+      egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
+    if(ad->impl->rgn_po != NULL) {
+      dump_char(':');
+      dump_rgnpo(ad->impl->rgn_po);
+    }
+    dumpaggrfields(ad->impl->fields);
+    dump("}");
+    dumpatts(ad->attributes);
+  }
+}
+static void dump_enumdecl(enumdecl_t ed) {
+  let &Enumdecl{sc,nm,fields} = ed;
+  dumpscope(sc);
+  dump("enum ");
+  dumpqvar(nm);
+  if (fields != NULL) {
+    dump_char('{');
+    dumpenumfields(fields->v);
+    dump_nospace("}");
+  }
+}
+static void dump_datatypedecl(datatypedecl_t dd) {
+  let &Datatypedecl(sc,name,tvs,fields,is_x) = dd;
+  dumpscope(sc);
+  if (is_x) dump("@extensible ");
+  dump("datatype ");
+  dumpqvar(name);
+  dumptvars(tvs);
+  if(fields != NULL) {
+    dump_char('{');
+    dumpdatatypefields(fields->v);
+    dump_nospace("}");
+  }
+}
 
 void dumpdecl(decl_t d) {
   switch(d->r) {
@@ -1154,52 +1207,14 @@ void dumpdecl(decl_t d) {
     dump_char('}');
     break;
   case &Aggr_d(ad):
-    dumpscope(ad->sc);
-    dumpaggr_kind(ad->kind);
-    dumpqvar(ad->name);
-    dumptvars(ad->tvs);
-    if(ad->impl == NULL)
-      dump_semi();
-    else {
-      dump_char('{');
-      if(ad->impl->exist_vars != NULL)
-	egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
-      if(ad->impl->rgn_po != NULL) {
-	dump_char(':');
-	dump_rgnpo(ad->impl->rgn_po);
-      }
-      dumpaggrfields(ad->impl->fields);
-      dump("}");
-      dumpatts(ad->attributes);
-      dump(";");
-    }
+    dump_aggrdecl(ad); dump_semi();
     break;
-  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x)):
-    dumpscope(sc);
-    if (is_x) dump("@extensible ");
-    dump("datatype ");
-    dumpqvar(name);
-    dumptvars(tvs);
-    if(fields == NULL)
-      dump_semi();
-    else  {
-      dump_char('{');
-      dumpdatatypefields(fields->v);
-      dump_nospace("};");
-    }
+  case &Datatype_d(dd):
+    dump_datatypedecl(dd); dump_semi();
     break;
-  case &Enum_d(&Enumdecl{sc,nm,fields}):
-    dumpscope(sc);
-    dump("enum ");
-    dumpqvar(nm);
-    if (fields == NULL)
-      dump_semi();
-    else {
-      dump_char('{');
-      dumpenumfields(fields->v);
-      dump_nospace("};");
-    }
-    return;
+  case &Enum_d(ed): 
+    dump_enumdecl(ed); dump_semi();
+    break;
   case &Let_d(p,_,e):
     dump("let");
     dumppat(p);

@@ -523,8 +523,10 @@ static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
 ///////////////////////////////////////////////////////////////
 //         Convert a Cyclone type to a C type                //
 ///////////////////////////////////////////////////////////////
-static type_t typ_to_c(type_t t); // forward declaration
-
+static type_t typ_to_c(type_t t); // forward declarations
+static void enumdecl_to_c(enumdecl_t ed); 
+static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_result_decls);
+static void datatypedecl_to_c(datatypedecl_t tud);
 static $(opt_t<var_t,`r>,tqual_t,type_t)@ 
 arg_to_c($(opt_t<var_t,`r>,tqual_t,type_t)@ a) {
   let $(x,y,z) = *a;
@@ -689,6 +691,17 @@ static type_t typ_to_c(type_t t) {
     toc_impos("Toc::typ_to_c: type translation passed an effect");
   case &ValueofType(_):
     toc_impos("Toc::typ_to_c: type translation passed a valueof_t");
+  case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
+    aggrdecl_to_c(ad,true); 
+    if (ad->kind==UnionA)
+      return aggrdecl_type(ad->name,unionq_typ);
+    else return aggrdecl_type(ad->name,strctq);
+  case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+    enumdecl_to_c(ed); 
+    return t;
+  case &TypeDeclType(&{.r = &Datatype_td(dd),...},t):
+    datatypedecl_to_c(dd);
+    return typ_to_c(*t);
   }
 }
 
@@ -4012,7 +4025,7 @@ static scope_t scope_to_c(scope_t s) {
 //   ...
 //   struct _union_Foo_mn { int tag; Tn val; };
 //   union Foo { struct _union_Foo_m1 m1; ... struct _union_Foo_mn mn; };
-static void aggrdecl_to_c(aggrdecl_t ad) {
+static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
   let n = ad->name;
   let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
   region d = open(dyn); {
@@ -4077,7 +4090,8 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
       }
       new_ad->impl->fields = List::imp_rev(new_fields);
     }
-    result_decls = new List(new Decl(new Aggr_d(new_ad),DL),result_decls);
+    if (add_to_decls)
+      result_decls = new List(new Decl(new Aggr_d(new_ad),DL),result_decls);
   }
 }
 
@@ -4212,7 +4226,7 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
   }
 }
 
-static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
+static void enumdecl_to_c(enumdecl_t ed) {
   ed->sc = Public; // gcc warns if we have Extern or Static on an enum
   if(ed->fields != NULL)
     enumfields_to_c(ed->fields->v);
@@ -4368,7 +4382,7 @@ static void decltypes_to_c(decl_t d) {
       (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     }
     break;
-  case &Aggr_d(ad): aggrdecl_to_c(ad); break;
+  case &Aggr_d(ad): aggrdecl_to_c(ad,true); break;
   case &Enum_d(ed): 
     if (ed->fields != NULL) 
       for (let fs = ed->fields->v; fs != NULL; fs = fs->tl) {
@@ -4471,8 +4485,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
     case &Alias_d(...):
       toc_impos("alias decl at toplevel");
     case &Aggr_d(sd):
-      aggrdecl_to_c(sd);
-      // result_decls = new List(d,result_decls);
+      aggrdecl_to_c(sd,true);
       break;
     case &Datatype_d(tud):
       if(tud->is_extensible)
@@ -4481,7 +4494,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 	datatypedecl_to_c(tud);
       break;
     case &Enum_d(ed):
-      enumdecl_to_c(nv,ed);
+      enumdecl_to_c(ed);
       result_decls = new List(d,result_decls);
       break;
     case &Typedef_d(td):

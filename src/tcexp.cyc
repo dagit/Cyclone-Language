@@ -640,9 +640,58 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
   return t;
 }
 
+static bool check_writable_aggr(seg_t loc, type_t t) {
+  let t = compress(t);
+  switch (t) {
+  case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
+    fallthru(ad->impl->fields);
+  case &AnonAggrType(_,fs):
+    for (; fs != NULL; fs = fs->tl) {
+      let f = fs->hd;
+      if (f->tq.real_const) {
+        terr(loc, "attempt to over-write an aggregate with const member %s",*f->name);
+        return false;
+      }
+      if (!check_writable_aggr(loc,f->type)) return false;
+    }
+    return true;
+  case &DatatypeFieldType({{.KnownDatatypefield = $(_,df)},_}):
+    for (let fs = df->typs; fs != NULL; fs = fs->tl) {
+      let &$(tq,t) = fs->hd;
+      if (tq.real_const) {
+        terr(loc, "attempt to over-write a datatype field (%s) with a const member",qvar2string(df->name));
+        return false;
+      }
+      if (!check_writable_aggr(loc,t)) return false;
+    }
+    return true;
+  case &ArrayType({elt_type,tq,...}):
+    if (tq.real_const) {
+      terr(loc, "attempt to over-write a const array");
+      return false;
+    }
+    return check_writable_aggr(loc,elt_type);
+  case &TupleType(fs):
+    for (; fs != NULL; fs = fs->tl) {
+      let &$(tq,t) = fs->hd;
+      if (tq.real_const) {
+        terr(loc, "attempt to over-write a tuple field with a const member");
+        return false;
+      }
+      if (!check_writable_aggr(loc,t)) return false;
+    }
+    return true;
+  default: return true;
+  }
+}
+
+
 // check that e is not a const expression -- assumes e is already
 // an lvalue and is type-checked
 static void check_writable(tenv_t te, exp_t e) {
+  // if e's type is an aggregate, tuple, etc. with const members, 
+  // then it's not a valid updateable lvalue
+  if (!check_writable_aggr(e->loc,e->topt->v)) return;
   switch (e->r) {
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
@@ -1886,6 +1935,7 @@ static bool zeroable_type(type_t t) {
   case &DynRgnType(_,_): return false;
   case &RgnHandleType(_): return false;
 
+  case &TypeDeclType(...):
   case &ValueofType(_):
   case &HeapRgn:
   case &UniqueRgn:
@@ -2328,10 +2378,10 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   // so check for uniqueness
   TEMP_RGN(te, temp) {
     if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e)) {
-      fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
-              topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
-              Absynpp::typ2string(e->topt->v),
-              Absynpp::exp2string(e));
+      //fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
+      //        topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
+      //        Absynpp::typ2string(e->topt->v),
+      //        Absynpp::exp2string(e));
       terr(e->loc,UNIQUE_ERR_MSG);
     }
   }

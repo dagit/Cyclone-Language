@@ -959,6 +959,46 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       add_target(v);
       return;
 
+    case &TypeDeclType(&{.r = &Aggr_td(x),...},_):
+      // TREVOR:  look at me please
+      // same as in scan_decl below, but I doubt this is doing what you want 
+      let &$(_,v) = x->name;
+      current_source = v;
+      if (x->impl) {
+        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
+          let f = fs->hd;
+          scan_type(f->type);
+          scan_exp_opt(f->width);
+        }
+        // That takes care of what the decl depends on.  Now must add
+        // that each field depends on the decl.
+        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
+          // FIX!!
+        }
+      }
+      return;
+
+    case &TypeDeclType(&{.r = &Enum_td(x),...},_):
+      // TREVOR:  look at me please
+      // same as in scan_decl below, but I doubt this is doing what you want 
+      let &$(_,v) = x->name;
+      current_source = v;
+      if (x->fields) {
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          let f = fs->hd;
+          scan_exp_opt(f->tag);
+        }
+        // That takes care of what the decl depends on.  Now must add
+        // that each field depends on the decl.
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          // FIX!!
+        }
+      }
+      return;
+
+    case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+      fprintf(stderr,"Error: unexpected Datatype declaration\n");
+      exit(1); return;
     case &Evar(_,_,_,_):
       fprintf(stderr,"Error: unexpected Evar\n");
       exit(1); return;

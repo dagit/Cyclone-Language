@@ -43,7 +43,7 @@ struct group *getgrnam(string_t name) {
   struct Cgrp::Cgroup *src = Cgrp::getgrnam(s2c(name));
   char *?gr_mem = (char *?)src->gr_mem;
   unsigned n = numelts(gr_mem);
-  mstring_t ? mem = new {for i < n : gr_mem[i]};
+  char ?? mem = new {for i < n : (char ?)gr_mem[i]};
   return src ? new group{.gr_name = c2s(src->gr_name),
                              .gr_passwd = c2s(src->gr_passwd),
                              .gr_gid = src->gr_gid,
@@ -55,7 +55,7 @@ struct group *getgrgid(gid_t gid) {
   struct Cgrp::Cgroup *src = Cgrp::getgrgid(gid);
   char *?gr_mem = (char *?)src->gr_mem;
   unsigned n = numelts(gr_mem);
-  mstring_t ? mem = new {for i < n : gr_mem[i]};
+  mstring_t ? mem = new {for i < n : (mstring_t)gr_mem[i]};
   return src ? new group{.gr_name = c2s(src->gr_name),
                              .gr_passwd = c2s(src->gr_passwd),
                              .gr_gid = src->gr_gid,

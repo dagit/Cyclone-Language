@@ -417,6 +417,7 @@ bool okay_szofarg(type_t t) {
     return true;
   case &EnumType(_,_):
   case &AnonEnumType(_): return true;
+  case &TypeDeclType(...):
   case &HeapRgn: 
   case &UniqueRgn: 
   case &JoinEff(_):

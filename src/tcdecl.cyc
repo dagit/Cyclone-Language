@@ -59,6 +59,8 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
 
 static void merge_scope_err(scope_t s0, scope_t s1, string_t t, string_t v, 
 			    seg_t loc, string_t * msg) {
+  string_t s0_str = (s0 == Public) ? "public" : scope2string(s0);
+  string_t s1_str = (s1 == Public) ? "public" : scope2string(s1);
   merr(loc, msg, "%s %s is %s whereas expected scope is %s",
        t, v, scope2string(s1), scope2string(s0));
 }
@@ -68,8 +70,10 @@ $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
   switch ($(s0,s1)) {
     // ExternC is compatible with ExternC 
   case $(ExternC, ExternC): break;
-    // ExternC is compatible with Extern if externCmerge is true 
+    // ExternC is compatible with Public or Extern when externCmerge is true 
+  case $(ExternC, Public): fallthru;
   case $(ExternC, Extern): fallthru;
+  case $(Public, ExternC): fallthru;
   case $(Extern, ExternC): if (externCmerge) break;
     fallthru;
   case $(ExternC, _): fallthru;
