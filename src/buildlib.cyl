@@ -1381,15 +1381,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
                      " ");
-        char @cmd = (char @)aprintf("%s -E -dM -o %s -x c %s %s",
-				    GCC,macrosfile,cppargs_string,cppinfile);
+        char @cmd = (char @)aprintf("%s %s -E -dM -o %s -x c %s",
+				    GCC,cppargs_string,macrosfile,cppinfile);
         if (verbose)
           fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s -E -o %s -x c %s %s",
-				GCC,declsfile,cppargs_string,cppinfile);
+          cmd = (char @)aprintf("%s %s -E -o %s -x c %s",
+				GCC,cppargs_string,declsfile,cppinfile);
           if (verbose)
             fprintf(stderr,"%s\n",cmd);
           system(cmd); // if err, no declsfile created, and we'll handle later

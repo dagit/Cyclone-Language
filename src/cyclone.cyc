@@ -1575,7 +1575,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     outfile_str = aprintf(" -o %s",sh_escape_string(*output_file));
 
   let cccmd =
-    aprintf("%s %s %s%s%s",comp,outfile_str,ccargs_string,stdlib_string,
+    aprintf("%s %s%s %s%s",comp,ccargs_string,outfile_str,stdlib_string,
             libargs_string);
   if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
   if (system((const char @)cccmd) != 0) {
