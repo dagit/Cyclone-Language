@@ -1,5 +1,5 @@
 /* -*- mode: c -*-
- * $Id: fibo.gcc,v 1.1 2001-07-30 20:20:33 tjim Exp $
+ * fibo.gcc
  * http://www.bagley.org/~doug/shootout/
  */
 

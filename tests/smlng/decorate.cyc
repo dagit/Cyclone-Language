@@ -15,7 +15,7 @@ int main(int argc, char ??argv) {
   let f = stdin;
   if (argc == 2) {
     FILE *fa = fopen(argv[1],"r");
-    if (fa == null) {
+    if (fa == NULL) {
       fprintf(stderr,"Error: can't open %s\n",argv[1]);
       exit(1);
     }

@@ -11,7 +11,7 @@ char x7;
 float x8;
 //int @x9; // int@ != int*
 int *x10;
-float *x11 = null;
+float *x11 = NULL;
 int f4(int x) { return x; }
 int f5(int x,int y) { return x+y; }
 //int f6(int x,float y) { return x+y; } // returns float not int
@@ -19,7 +19,7 @@ int f7(int x,float y) { return (int)(x+y); } // should the cast be implicit?
 //int f8() { int x; return x; } // x might not be initialized
 int f9() { int x=13; return x; }
 //int f10() { return y; } // unbound identifier y
-//int f11() { int x=13; int *x=null; return x; } // returns wrong type
+//int f11() { int x=13; int *x=NULL; return x; } // returns wrong type
 int f12(int x) { if (x < 23) return x; else return 0; }
 //int f13(int x) { if (x < 23) return x; } // might not return int
 void f14(int x) {
@@ -90,7 +90,7 @@ int f42(enum e1 x) {switch (x) {case E1: return 1; case E2: return 2;}}
 //void f45(enum e2 x) {switch (x) {case E3: 1;}} // too few args for E3
 int f46($(int,int) *x) {
   switch (x) {
-  case null: return 1;
+  case NULL: return 1;
   case &$(y,z): return y+z;
   }
 }

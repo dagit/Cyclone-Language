@@ -60,7 +60,7 @@ static void flatten_vals(doc_t doc, $(doc_t,val_t) ?@`r doc_arr,
     flatten_vals(d,doc_arr,curr_pos,tag-lowest_val,lowest_val,vals_occur);
     return;
   case &Seq(ds): 
-    for(; ds != null; ds = ds->tl)
+    for(; ds != NULL; ds = ds->tl)
       flatten_vals(ds->hd,doc_arr,curr_pos,curr_val,lowest_val,vals_occur);
     return;
   }
@@ -115,12 +115,12 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
 				   lowest_val,num_vals,vals_occur);
   if(left_val == right_val && left_val != outer_val)
     return new Tagged(left_val + lowest_val, 
-		      new Seq(new List(left_doc, new List(right_doc, null))));
+		      new Seq(new List(left_doc, new List(right_doc, NULL))));
   if(left_val != outer_val)
     left_doc = new Tagged(left_val + lowest_val, left_doc);
   if(right_val != outer_val)
     right_doc = new Tagged(right_val + lowest_val ,right_doc);
-  return new Seq(new List(left_doc, new List(right_doc, null)));
+  return new Seq(new List(left_doc, new List(right_doc, NULL)));
 }
 
 // FIX: do something quick when we're out of time
@@ -135,7 +135,7 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals,
   int curr_pos = 0;
   flatten_vals(doc, &doc_arr, &curr_pos, num_vals-1, lowest_val, vals_occur);
   int arr_size = curr_pos;
-  list_t<doc_t> ans = null;
+  list_t<doc_t> ans = NULL;
   bool after_initcolor = shift;
   curr_pos = 0;
   while(curr_pos < arr_size) {

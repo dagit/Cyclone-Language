@@ -54,7 +54,7 @@ inline int ht_hashcode(struct ht_ht @ht, const char ?`r key) {
 //ANNOYING to have to declare `r
 struct ht_node @ht_node_create(char ?`r key) {
     char ?newkey;
-    if ((newkey = strdup(key)) == null) {
+    if ((newkey = strdup(key)) == NULL) {
 	perror("strdup newkey");
 	exit(1);
     }
@@ -62,7 +62,7 @@ struct ht_node @ht_node_create(char ?`r key) {
       new ht_node {
         .key = newkey,
         .val = 0,
-        .next = (struct ht_node *)null
+        .next = (struct ht_node *)NULL
       };
     return(node);
 }
@@ -73,9 +73,9 @@ struct ht_ht @ht_create(int size) {
     struct ht_ht @ht =
       new ht_ht{
         .size = ht_prime_list[i],
-        .tbl = new {for i<ht_prime_list[i]: null},
+        .tbl = new {for i<ht_prime_list[i]: NULL},
         .iter_index = 0,
-        .iter_next = null,
+        .iter_next = NULL,
         .items = 0
       };
 #ifdef HT_DEBUG
@@ -133,13 +133,13 @@ inline struct ht_node *ht_find(struct ht_ht @ht, const char ?`r key) {
 	if (strcmp(key, node->key) == 0) return(node);
 	node = node->next;
     }
-    return((struct ht_node *)null);
+    return((struct ht_node *)NULL);
 }
 
 //ANNOYING to have to declare `r
 inline struct ht_node @ht_find_new(struct ht_ht @ht, char ?`r key) {
     int hash_code = ht_hashcode(ht, key);
-    struct ht_node *prev = null, *node = ht->tbl[hash_code];
+    struct ht_node *prev = NULL, *node = ht->tbl[hash_code];
     while (node) {
 	if (strcmp(key, node->key) == 0) return(node);
 	prev = node;
@@ -176,12 +176,12 @@ inline struct ht_node *ht_next(struct ht_ht @ht) {
 	    }
 	}
     }
-    return((struct ht_node *)null);
+    return((struct ht_node *)NULL);
 }
 
 inline struct ht_node *ht_first(struct ht_ht @ht) {
     ht->iter_index = 0;
-    ht->iter_next = (struct ht_node *)null;
+    ht->iter_next = (struct ht_node *)NULL;
     return(ht_next(ht));
 }
 

@@ -1,5 +1,5 @@
 /* -*- mode: c -*-
- * $Id: nestedloop.gcc,v 1.1 2001-07-30 20:20:33 tjim Exp $
+ * nestedloop.gcc
  * http://www.bagley.org/~doug/shootout/
  */
 

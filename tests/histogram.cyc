@@ -74,7 +74,7 @@ int main(int argc, string_t ?argv) {
     }
     int count;
     try {
-      count = to_int(buf,null);
+      count = to_int(buf,NULL);
     } catch {
     default: fprintf(stderr,"bad integer %s\n",buf); return -1;
     }

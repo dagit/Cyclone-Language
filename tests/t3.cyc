@@ -31,7 +31,7 @@ extern unsigned int length<`a>(list<`a> x);
 
 unsigned int length<`a>(list<`a> x) {
   unsigned int i = (unsigned int)0;
-  for (; x != null; x = x->tl, i++) ; // skip
+  for (; x != NULL; x = x->tl, i++) ; // skip
   return i;
 }
 

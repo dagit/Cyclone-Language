@@ -17,7 +17,7 @@ unsigned int num_texts(doc_t d) {
   case &Spc(s): return 1;
   case &Seq(ds):
     unsigned int s = 0;
-    for (; ds != null; ds=ds->tl)
+    for (; ds != NULL; ds=ds->tl)
       s += num_texts(ds->hd); 
     return s;
   case &Tagged(tag,d):
@@ -97,7 +97,7 @@ static void flat_arr(ctxt_t ctxt, doc_t d, $(ctxt_t,doc_t) ?a,
     *pos = *pos + 1;
     break;
   case &Seq(ds):
-    for (; ds != null; ds = ds->tl)
+    for (; ds != NULL; ds = ds->tl)
       flat_arr(ctxt,ds->hd,a,pos);
     break;
   case &Tagged(t,d):
@@ -130,7 +130,7 @@ static unsigned int merge_same($(ctxt_t,doc_t)?`r a, unsigned int sz) {
     for (_ j = i+1; j < sz; j++) {
       let $(c2,d2) = a[j];
       if (same_ctxt(c,c2)) {
-        d = new Seq(new List(d,new List(d2,null)));
+        d = new Seq(new List(d,new List(d2,NULL)));
         i++;
       } else {
         i = j-1;
@@ -230,7 +230,7 @@ static $(ctxt_t,doc_t) merge_doc(ctxt_t c1,doc_t d1,ctxt_t c2,doc_t d2,
       c3.color = c2.color;
     } 
   }
-  return $(c3,new Seq(new List(d1,new List(d2,null))));
+  return $(c3,new Seq(new List(d1,new List(d2,NULL))));
 }
 
 

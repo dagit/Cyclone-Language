@@ -87,7 +87,7 @@ tunion finish {
 typedef tunion finish dump_finish_t;
 void dump_iter(buf_t b, doc_t d) {
   List::list_t<dump_finish_t> fs = List::list(new DocSeq(List::list(d)));
-  while (fs != null) {
+  while (fs != NULL) {
     let f = fs->hd;
     fs = fs->tl;
     switch (f) {
@@ -99,7 +99,7 @@ void dump_iter(buf_t b, doc_t d) {
       }
       break;
     case &DocSeq(docs):
-      while (docs != null) {
+      while (docs != NULL) {
         let d2 = docs->hd;
         docs = docs->tl;
         switch (d2) {
@@ -112,7 +112,7 @@ void dump_iter(buf_t b, doc_t d) {
                                 new List::List(new EndTag(tag),
                                                new List::List(new DocSeq(docs),
                                                               fs)));
-            docs = null; // To get out of the inner while loop
+            docs = NULL; // To get out of the inner while loop
           } catch {
           default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
           }
@@ -131,7 +131,7 @@ void dump_iter(buf_t b, doc_t d) {
 /* Old version of dump: simple but can go over stack limit */
 void dump_rec(buf_t b, doc_t d) {
   switch (d) {
-  case &Seq(ds): for (; ds != null; ds=ds->tl) dump_rec(b,ds->hd); break;
+  case &Seq(ds): for (; ds != NULL; ds=ds->tl) dump_rec(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Spc(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
@@ -152,7 +152,7 @@ int doc_size(buf_t b,doc_t d) {
   int sum = 0;
   switch (d) {
   case &Seq(ds):
-    for (; ds != null; ds=ds->tl)
+    for (; ds != NULL; ds=ds->tl)
       sum += doc_size(b,ds->hd); 
     break;
   case &Text(i): sum += Buffer::size(b,i); break;
@@ -172,7 +172,7 @@ unsigned int num_texts(doc_t d) {
   unsigned int sum = 0;
   switch (d) {
   case &Seq(ds):
-    for (; ds != null; ds=ds->tl)
+    for (; ds != NULL; ds=ds->tl)
       sum += num_texts(ds->hd); 
     break;
   case &Text(s): ++sum; break;
@@ -189,7 +189,7 @@ unsigned int num_tags(doc_t d) {
   switch (d) {
   case &Seq(ds):
     unsigned int sum = 0;
-    for (; ds != null; ds=ds->tl)
+    for (; ds != NULL; ds=ds->tl)
       sum += num_tags(ds->hd); 
     return sum;
   case &Tagged(_,d):
@@ -217,13 +217,13 @@ context_t init_context = {
 /*filtering out Mt's in a list of docs
  *used in remove_Mt(doc_t d) */
 static List::list_t<doc_t> filter_Mt(List::list_t<doc_t,`H> ds){
-  while(ds != null && ds->hd == Mt)
+  while(ds != NULL && ds->hd == Mt)
     ds = ds->tl;
-  if(ds == null)
-    return null;
+  if(ds == NULL)
+    return NULL;
   let prev = ds;
   let ds2 = ds->tl;
-  for(; ds2 != null; ds2 = ds2->tl) {
+  for(; ds2 != NULL; ds2 = ds2->tl) {
     if(ds2->hd == Mt)
       prev->tl = ds2->tl;
     else
@@ -234,7 +234,7 @@ static List::list_t<doc_t> filter_Mt(List::list_t<doc_t,`H> ds){
 }
 
 // for deep-nesting and no stack overflow
-static list_t<doc_t> down_workstack = null;
+static list_t<doc_t> down_workstack = NULL;
 
 //getting rid of Mt branches
 doc_t remove_Mt_rec(doc_t d){
@@ -248,11 +248,11 @@ doc_t remove_Mt_rec(doc_t d){
   switch(d){
   case &Seq(ds):
     let oldds = ds;
-    for(; ds!=null; ds=ds->tl)
+    for(; ds!=NULL; ds=ds->tl)
       ds->hd = remove_Mt_rec(ds->hd);
     ds = filter_Mt(oldds);
-    if (ds==null) return Mt;
-    if (ds->tl==null) return ds->hd;//size 1
+    if (ds==NULL) return Mt;
+    if (ds->tl==NULL) return ds->hd;//size 1
     return new Seq(ds);
   case &Text(_): return d;
   case &Spc(_):  return d;
@@ -266,7 +266,7 @@ doc_t remove_Mt_rec(doc_t d){
 
 doc_t remove_Mt(doc_t d) {
   doc_t ans = remove_Mt_rec(d);
-  while(down_workstack != null) {
+  while(down_workstack != NULL) {
     doc_t next = down_workstack->hd;
     down_workstack = down_workstack->tl;
     remove_Mt_rec(next);
@@ -287,7 +287,7 @@ doc_t down_opt_rec(context_t ctxt, doc_t d) {
 #endif
   switch (d) {
   case &Seq(ds):
-    for (; ds!=null; ds=ds->tl)
+    for (; ds!=NULL; ds=ds->tl)
       ds->hd = down_opt_rec(ctxt,ds->hd);
     return d;
   case &Text(_): return d;
@@ -314,7 +314,7 @@ doc_t down_opt_rec(context_t ctxt, doc_t d) {
             is_change = true;
             ds->hd = down_opt_rec(ctxt,*d3);
             let tail_doc = down_opt_rec(ctxt,new Tagged(EM_tag, new Seq(ds->tl)));
-            ds->tl = new List::List(tail_doc,null);
+            ds->tl = new List::List(tail_doc,NULL);
             return new Seq(ds);
           }
           break;
@@ -331,10 +331,10 @@ doc_t down_opt_rec(context_t ctxt, doc_t d) {
             case &Tagged(tag_in_EM,*d3):
               if (tag_in_EM==EM_tag){
                 is_change = true;
-                previous->tl = null;
+                previous->tl = NULL;
                 let head_docs = down_opt_rec(ctxt,new Tagged(EM_tag,new Seq(ds)));
                 let last_doc = down_opt_rec(ctxt, *d3);
-                ds = new List::List(head_docs,new List::List(last_doc,null));
+                ds = new List::List(head_docs,new List::List(last_doc,NULL));
                 return new Seq(ds);
               }
               break;
@@ -415,7 +415,7 @@ doc_t down_opt_rec(context_t ctxt, doc_t d) {
 
 doc_t down_opt(context_t ctxt, doc_t d) {
   doc_t ans = down_opt_rec(ctxt,d);
-  while(down_workstack != null) {
+  while(down_workstack != NULL) {
     fprintf(stderr,"#");
     doc_t next = down_workstack->hd;
     down_workstack = down_workstack->tl;
@@ -431,8 +431,8 @@ struct Q {
 };
 
 struct Q qappend(struct Q q1, struct Q q2) {
-  if (q1.last == null) return q2;
-  else if (q2.last == null) return q1;
+  if (q1.last == NULL) return q2;
+  else if (q2.last == NULL) return q1;
   else {
     q1.last->tl = q2.first;
     q1.last = q2.last;
@@ -445,23 +445,23 @@ struct Q qappend(struct Q q1, struct Q q2) {
 struct Q flattenit(doc_t d) {
   switch (d) {
   case &Seq(ds):
-    struct Q q = {null,null};
-    List::list_t<doc_t> ds1, ds_tot = null;
-    for (; ds != null; ds = ds->tl) 
+    struct Q q = {NULL,NULL};
+    List::list_t<doc_t> ds1, ds_tot = NULL;
+    for (; ds != NULL; ds = ds->tl) 
       q = qappend(q,flattenit(ds->hd));
     return q;
   case &Text(i): 
-    let x = new List::List(d,null);
+    let x = new List::List(d,NULL);
     return Q{x,x};
   case &Spc(i): 
-    let x = new List::List(d,null);
+    let x = new List::List(d,NULL);
     return Q{x,x};
   case &Tagged(tag,d):
     struct Q q = flattenit(d);
-    for (_ x = q.first; x != null; x = x->tl) 
+    for (_ x = q.first; x != NULL; x = x->tl) 
       x->hd = new Tagged(tag,x->hd);
     return q;
-  case Mt: return Q{null,null};
+  case Mt: return Q{NULL,NULL};
   }
 }  
 
@@ -485,7 +485,7 @@ int main(int argc, char ?`H ?`H argv) {
 
   if (argc <= 1) {
     tlimit = Stdlib::getenv("TLIMIT");
-    if (tlimit == null) {
+    if (tlimit == NULL) {
       fprintf(stderr,"please set the TLIMIT environment variable\n"
 	      "or give a time limit command argument.\n");
       exit(1);
@@ -494,7 +494,7 @@ int main(int argc, char ?`H ?`H argv) {
     tlimit = argv[1];
     if (argc >= 3) {
       FILE *g = fopen(argv[2],"r");
-      if (g != null) f = (FILE @)g;
+      if (g != NULL) f = (FILE @)g;
     }
   }
   start_timer(tlimit);

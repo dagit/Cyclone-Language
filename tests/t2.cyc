@@ -71,7 +71,7 @@ int f46(point_opt p) {
   case &Point{.x=x,.y=y,.z=Yellow}: return 1;
   case &Point{.x=x,.y=y,.z=z} where (x <= y): return 2;
   case &Point{.x=x,.y=y,.z=z}: return 3;
-  case null: return 4;
+  case NULL: return 4;
     // default: return 4;
   }
 }

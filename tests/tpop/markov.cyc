@@ -44,7 +44,7 @@ void build(string_t<`H>*{NPREF} prefix, FILE@);
 void generate(int nwords);
 void add(string_t<`H>*{NPREF} prefix, string_t<`H> word);
 
-State	??statetab = null;
+State	??statetab = NULL;
 
 const char NONWORD[] = "\n";  /* cannot appear as real word */
 
@@ -71,14 +71,14 @@ const char NONWORD[] = "\n";  /* cannot appear as real word */
 int main(void)
 {
   int i, nwords = MAXGEN;
-  string_t*{NPREF} prefix = new{for i < NPREF:(string_t)null};  /* current input prefix */
+  string_t*{NPREF} prefix = new{for i < NPREF:(string_t)NULL};  /* current input prefix */
 
-  statetab = new {for i < NHASH : null};	/*initialize*/
+  statetab = new {for i < NHASH : NULL};	/*initialize*/
   
   int c;
   long seed;
 
-  seed = Time::time(null);
+  seed = Time::time(NULL);
   
   srand(seed);
   for (i = 0; i < NPREF; i++)	/* set up initial prefix */
@@ -109,7 +109,7 @@ unsigned int hash(string_t*{NPREF} s)
 }
 
 /* lookup: search for prefix; create if requested. */
-/*  returns pointer if present or created; null if not. */
+/*  returns pointer if present or created; NULL if not. */
 /*  creation doesn't strdup so strings mustn't change later. */
 State* lookup(string_t<`H> *{NPREF} prefix, int create)
 {
@@ -117,7 +117,7 @@ State* lookup(string_t<`H> *{NPREF} prefix, int create)
   State *sp;
 
   h = hash(prefix);
-  for (sp = (State *)statetab[h]; sp != null; sp = sp->next) {
+  for (sp = (State *)statetab[h]; sp != NULL; sp = sp->next) {
     for (i = 0; i < NPREF; i++)
       if (strcmp(prefix[i], sp->pref[i]) != 0)
 	break;
@@ -125,7 +125,7 @@ State* lookup(string_t<`H> *{NPREF} prefix, int create)
       return sp;
   }
   if (create) {
-    sp = new _State{.pref={prefix[0],prefix[1]},.suf=null,.next=statetab[h]};
+    sp = new _State{.pref={prefix[0],prefix[1]},.suf=NULL,.next=statetab[h]};
     statetab[h] = sp;
   }
   return sp;
@@ -162,7 +162,7 @@ void build(string_t<`H> *{NPREF} prefix, FILE @f)
   /* FIX: this doesn't work in Cyclone; no sprintf */
   /* sprintf(fmt, "%%%ds", sizeof(buf)-1); */
   /* this terminates on error/EOF, not just EOF, like the fscanf version did */
-  while (fgets(buf,100,f) != null)
+  while (fgets(buf,100,f) != NULL)
     add(prefix, strdup(buf));
 }
 
@@ -171,7 +171,7 @@ void generate(int nwords)
 {
   State *sp;
   Suffix *suf;
-  string_t*{NPREF} prefix = new {for i < NPREF:(string_t)null};
+  string_t*{NPREF} prefix = new {for i < NPREF:(string_t)NULL};
   string_t w = "";
   int i, nmatch;
 
@@ -180,10 +180,10 @@ void generate(int nwords)
 
   for (i = 0; i < nwords; i++) {
     sp = lookup(prefix, 0);
-    if (sp == null)
+    if (sp == NULL)
       printf("internal error: lookup failed\n");
     nmatch = 0;
-    for (suf = sp->suf; suf != null; suf = suf->next)
+    for (suf = sp->suf; suf != NULL; suf = suf->next)
       if (rand() % ++nmatch == 0) /* prob = 1/nmatch */
 	w = suf->word;
     if (nmatch == 0)

@@ -1,7 +1,7 @@
 // Modified because simple_hash.h has moved to the current directory
 
 /* -*- mode: c -*-
- * $Id: hash2.gcc,v 1.1 2001-07-30 20:20:33 tjim Exp $
+ * hash2.gcc
  * http://www.bagley.org/~doug/shootout/
  */
 

@@ -29,7 +29,7 @@ xarray<`a> create_empty<`a>() {
 // the >> vs. >> problem
 int fufufu() {
   int i = 4 >> 1;
-  List::list<List::list<int>> z = null;
+  List::list<List::list<int>> z = NULL;
   return i;
 }
 

@@ -225,7 +225,7 @@ static bool check_redundant(context_t @`r ctxt, tag_t tag) {
 
 /* returns a list of docs in reverse order. */
 static list_t<doc_t> local_get_docs(context_t ctxt, buf_t b, FILE @f) {
-  list_t<doc_t> docs = null, ds = null;
+  list_t<doc_t> docs = NULL, ds = NULL;
   int c = GETC(f);
   while (true) {
     if (c == EOF) break;
@@ -246,8 +246,8 @@ static list_t<doc_t> local_get_docs(context_t ctxt, buf_t b, FILE @f) {
 	   2) it avoids allocating doc_t's, converting to/from arrays, etc.
 	      in favor of concatentating lists */
 	if (!redundant) {
-          if (ds != null) {
-            if (ds->tl == null) /* length == 1 */ {
+          if (ds != NULL) {
+            if (ds->tl == NULL) /* length == 1 */ {
   	      doc_t d = new Tagged(tag,ds->hd);
               docs = new List(d,docs);
             }
@@ -272,9 +272,9 @@ static list_t<doc_t> local_get_docs(context_t ctxt, buf_t b, FILE @f) {
   
 doc_t parse_rec(context_t ctxt, buf_t b, FILE @f) {
   list_t<doc_t> docs = imp_rev(local_get_docs(ctxt,b,f));
-  if(docs == null)
+  if(docs == NULL)
     return Mt;
-  if(docs->tl == null)
+  if(docs->tl == NULL)
     return docs->hd;
   else 
     return new Seq(docs);
@@ -290,13 +290,13 @@ static tag_t get_endtag_nocheck(FILE @f) {
   return get_tag(f);
 }
 list_t<doc_t> get_nest(context_t ctxt, buf_t b, FILE @f) {
-  list_t<doc_t,`H> ds = null;
+  list_t<doc_t,`H> ds = NULL;
   unsigned int count = 0; /* Invariant: count is length of ds */
 
   /* Maintain a stack with an elt for each level of nesting.
      The elt tells how many elts were on ds on entry to the nest,
      plus whether the tag is redundant. */
-  list_t<$(unsigned int,context_t)@> nest = null;
+  list_t<$(unsigned int,context_t)@> nest = NULL;
   int c = GETC(f);
   //  printf("Starting parse, c = %c\n",c);
   while (true) {
@@ -333,7 +333,7 @@ list_t<doc_t> get_nest(context_t ctxt, buf_t b, FILE @f) {
             //            printf("Picking up %d docs\n",howmany);
             //            printf("Num avail: %d\n",List::length(ds));
             //            printf("Count: %d\n",count);
-            let docs = null;
+            let docs = NULL;
             for (; howmany>0; howmany--) {
               //              printf("tick");
               docs = new List(ds->hd,docs);
@@ -370,9 +370,9 @@ list_t<doc_t> get_nest(context_t ctxt, buf_t b, FILE @f) {
 
 doc_t parse_iter(context_t ctxt, buf_t b, FILE @f) {
   list_t<doc_t> docs = imp_rev(get_nest(ctxt,b,f));
-  if(docs == null)
+  if(docs == NULL)
     return Mt;
-  if(docs->tl == null)
+  if(docs->tl == NULL)
     return docs->hd;
   else 
     return new Seq(docs);

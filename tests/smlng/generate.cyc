@@ -111,18 +111,18 @@ int random(int n) {
 }
 
 /* Manage a stack of tags */
-List::list_t<int> stack = null;
+List::list_t<int> stack = NULL;
 
 void push(int tag) {
   stack = new List::List(tag,stack);
 }
 
 bool empty() {
-  return (stack == null);
+  return (stack == NULL);
 }
 
 int pop() {
-  if (stack == null) {
+  if (stack == NULL) {
     fprintf(stderr,"Internal error: pop on empty stack\n");
     exit(1);
   }
@@ -216,7 +216,7 @@ selt_t delta(context_t before,context_t after,selt_t tag_stack) {
   /* To get to original color or size, close all tags */
   if (((CL(before) != CL(after)) && CL(after) == 8) ||
       ((SZ(before) != SZ(after)) && SZ(after) == 10)) {
-    for (; tag_stack != null; tag_stack = tag_stack->tl) {
+    for (; tag_stack != NULL; tag_stack = tag_stack->tl) {
       let &$(ctxt,tag) = tag_stack->hd;
       printf(end_tag_strings[tag]);
       before = ctxt;
@@ -303,7 +303,7 @@ selt_t delta(context_t before,context_t after,selt_t tag_stack) {
 void random_generate1() {
   context_t outside_ctxt = setCL(setSZ(0x0000,10),8);
   let ctxts = new { for i<len : random_context() };
-  let tag_stack = null;
+  let tag_stack = NULL;
   let ctxt = outside_ctxt;
   for (int i = 0; i < len; i++) {
     tag_stack = delta(ctxt,ctxts[i],tag_stack);
@@ -312,7 +312,7 @@ void random_generate1() {
     else printf("x");
   }
   tag_stack = delta(ctxt,outside_ctxt,tag_stack);
-  for (; tag_stack != null; tag_stack = tag_stack->tl) {
+  for (; tag_stack != NULL; tag_stack = tag_stack->tl) {
     let &$(ctxt,tag) = tag_stack->hd;
     printf(end_tag_strings[tag]);
   }
@@ -398,7 +398,7 @@ int main(int argc, char ??argv) {
   //  fprintf(stderr,"Length is %d and algorithm is %d\n",len,algorithm);
 
   /* initialize random number generator */
-  let t = new Time::time(null);
+  let t = new Time::time(NULL);
   if (*t<0) {
     fprintf(stderr,"Error: the time is not available\n");
     exit(1);

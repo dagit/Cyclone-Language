@@ -20,7 +20,7 @@ int main(int argc, char ?`H ?`H argv) {
 
   FILE @f1;
   let f1a = fopen(argv[1],"r");
-  if (f1a == null) {
+  if (f1a == NULL) {
     printf("Error: can't open %s\n",argv[1]);
     exit(1);
   }
@@ -28,7 +28,7 @@ int main(int argc, char ?`H ?`H argv) {
   let f2 = stdin;
   if (argc == 3) {
     let f2a = fopen(argv[2],"r");
-    if (f2a == null) {
+    if (f2a == NULL) {
       printf("Error: can't open %s\n",argv[2]);
       exit(1);
     }

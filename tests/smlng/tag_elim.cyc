@@ -54,7 +54,7 @@ synth_t init;
 // Never used except to avoid stack overflow.  Will miss optimizations
 // right "on the edge", but it is *extremely* unlikely that we won't get
 // it in another pass.
-static list_t<doc_t> work_list = null;
+static list_t<doc_t> work_list = NULL;
 
 // currently destructive (of doc), but could easily be made functional
 $(doc_t, synth_t) up_opt_rec(doc_t doc) {
@@ -75,16 +75,16 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
     init.s = SynthS(1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
     synth_t synth      = init;
     synth_t prev_synth = init;
-    if(ds == null) {
+    if(ds == NULL) {
       synth.s.mt_doc = 1;
       return $(Mt,synth);
     }
-    if(ds->tl == null) {
+    if(ds->tl == NULL) {
       return up_opt_rec(ds->hd);
     }
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
-    while(ds != null) {
+    while(ds != NULL) {
       let $(newd, inner_synth) = up_opt_rec(ds->hd);
       ds->hd = newd; // destructive here
       if(inner_synth.s.mt_doc) {
@@ -94,7 +94,7 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
       }
       // look for reasons to split the sequence and wrap with a redundant tag
       // so the ensuing down optimization can remove the inner tags
-      list_t<int> split_tags = null; // no need to be heap-allocated
+      list_t<int> split_tags = NULL; // no need to be heap-allocated
       if(prev_synth.s.bold_seen && inner_synth.s.bold_seen)
 	split_tags = new List(B_tag, split_tags);
       if(prev_synth.s.ital_seen && inner_synth.s.ital_seen)
@@ -129,18 +129,18 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
 
       synth.i = synth.i & inner_synth.i;
 
-      if(split_tags != null) { //subtle: won't happen on first loop iteration
+      if(split_tags != NULL) { //subtle: won't happen on first loop iteration
 	// IN PLACE sequence splitting
 	let next = ds->tl;
-	ds->tl = null;
+	ds->tl = NULL;
 	doc_t d = new Seq(prev);
-	for(; split_tags != null; split_tags = split_tags->tl)
+	for(; split_tags != NULL; split_tags = split_tags->tl)
 	  d = new Tagged(split_tags->hd, d);
 	if(prev == *dsp) {
 	  *dsp = prevprev = prev = new List(d,next);
 	} else {
 	  prev = new List(d,next);
-	  prevprev->tl = null;
+	  prevprev->tl = NULL;
 	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
@@ -233,7 +233,7 @@ $(doc_t, synth_t) up_opt_rec(doc_t doc) {
 
 $(doc_t, synth_t) up_opt(doc_t doc) {
   let ans = up_opt_rec(doc);
-  while(work_list != null) {
+  while(work_list != NULL) {
     fprintf(stderr,"?");
     doc_t next = work_list->hd;
     work_list = work_list->tl;
@@ -246,9 +246,9 @@ $(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
   switch(d) {
   case &Seq(*dsp):
     list_t<doc_t> * prev = dsp;
-    for(list_t<doc_t> ds = *dsp; ds != null; ds = ds->tl) {
+    for(list_t<doc_t> ds = *dsp; ds != NULL; ds = ds->tl) {
       let $(start,end) = flatten_top_seq(ds->hd);
-      if(start != null) {
+      if(start != NULL) {
 	*prev = start;
 	*end  = ds->tl;
 	prev  = end;
@@ -259,7 +259,7 @@ $(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
   case &Text(_): fallthru;
   case &Spc(_): fallthru;
   case &Tagged(_,_): fallthru;
-  case Mt: return $(null,null);
+  case Mt: return $(NULL,NULL);
   }
 }
 
@@ -311,7 +311,7 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
       int start_from_back = 0;
       int num_from_back   = 0;
       let ds2 = ds;
-      for(; ds2 != null; ds2 = ds2->tl) {
+      for(; ds2 != NULL; ds2 = ds2->tl) {
 	++start_from_back;
 	let pr = up_shuffle_rec(ds2->hd);
 	ds2->hd = pr[0];
@@ -322,9 +322,9 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
 	else
 	  break;
       }
-      if(ds2 != null)
+      if(ds2 != NULL)
 	ds2 = ds2->tl;
-      for(; ds2 != null; ds2 = ds2->tl) {
+      for(; ds2 != NULL; ds2 = ds2->tl) {
 	let pr = up_shuffle_rec(ds2->hd);
 	ds2->hd = pr[0];
 	if(pr[1].color && is_color)
@@ -340,9 +340,9 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
       if(num_from_front == 0 && num_from_back == 0) {
 	return $(d,ShuffleSynth(is_color,is_size));
       }
-      list_t<doc_t> front_docs  = null;
-      list_t<doc_t> middle_docs = null;
-      list_t<doc_t> back_docs   = null;
+      list_t<doc_t> front_docs  = NULL;
+      list_t<doc_t> middle_docs = NULL;
+      list_t<doc_t> back_docs   = NULL;
       let ds3 = ds;
       if(num_from_front > 0) {
 	front_docs = ds;
@@ -352,14 +352,14 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
 	  ds3 = ds3->tl;
 	}
 	middle_docs = ds3->tl;
-	ds3->tl = null;
+	ds3->tl = NULL;
 	ds3 = middle_docs;
       } else
 	middle_docs = ds;
       while(--start_from_back)
 	ds3 = ds3->tl;
       back_docs = ds3->tl;
-      ds3->tl = null;
+      ds3->tl = NULL;
       *dsp = middle_docs;
       // FIX: don't generate so much gunk here
       return $(new Seq(new List(new Seq(front_docs), new List(d, back_docs))),
@@ -376,7 +376,7 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
       // but could help on short examples
   case &Seq(ds): 
     flatten_top_seq(d);
-    for(; ds != null; ds = ds->tl)
+    for(; ds != NULL; ds = ds->tl)
       ds->hd = up_shuffle_rec(ds->hd)[0];
     return $(d,ShuffleSynth(0,0));
 
@@ -385,7 +385,7 @@ $(doc_t,shuffle_synth_t) up_shuffle_rec(doc_t d) {
 
 $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
   let ans = up_shuffle_rec(d);
-  while(work_list != null) {
+  while(work_list != NULL) {
     fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
     doc_t next = work_list->hd;
     work_list = work_list->tl;
@@ -428,7 +428,7 @@ doc_t nuke_under(doc_t doc, int ulevel) {
     *dp = nuke_under(*dp,ulevel);
     return doc;
   case &Seq(ds):
-    for(; ds != null; ds = ds->tl)
+    for(; ds != NULL; ds = ds->tl)
       ds->hd = nuke_under(ds->hd,ulevel);
     return doc;
   case Mt: return Mt;
@@ -462,15 +462,15 @@ $(doc_t,under_synth_t) under_elim_rec(doc_t doc) {
   case &Seq(*dsp):
     // FIX: SHARE THIS LOGIC WITH OTHER PASSES
     let ds = *dsp;
-    if(ds == null)
+    if(ds == NULL)
       return $(Mt,UnderSynth(0,true)); // okay to set all_plain?!?!
-    else if(ds->tl == null)
+    else if(ds->tl == NULL)
       return under_elim_rec(ds->hd);
     under_synth_t synth = UnderSynth(0,false);
     under_synth_t prev_synth = synth;
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
-    while(ds != null) {
+    while(ds != NULL) {
       let $(newd, inner_synth) = under_elim_rec(ds->hd);
       ds->hd = newd; // destructive here
 
@@ -497,7 +497,7 @@ $(doc_t,under_synth_t) under_elim_rec(doc_t doc) {
 	ds->hd   = nuke_under(ds->hd,   ulevel);
 	// IN PLACE sequence splitting
 	let next = ds->tl;
-	ds->tl = null;
+	ds->tl = NULL;
 	doc_t d = new Seq(prev);
 	for(; ulevel > 0; --ulevel)
 	  d = new Tagged(U_tag,d);
@@ -506,7 +506,7 @@ $(doc_t,under_synth_t) under_elim_rec(doc_t doc) {
 	  *dsp = prevprev = prev = new List(d,next);
 	} else {
 	  prev = new List(d,next);
-	  prevprev->tl = null;
+	  prevprev->tl = NULL;
 	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
@@ -526,7 +526,7 @@ $(doc_t,under_synth_t) under_elim_rec(doc_t doc) {
 
 $(doc_t,under_synth_t) under_elim(doc_t d) {
   let ans = under_elim_rec(d);
-  while(work_list != null) {
+  while(work_list != NULL) {
     fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
     doc_t next = work_list->hd;
     work_list = work_list->tl;
@@ -567,10 +567,10 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
     int only_sizes  = 0;
     int only_colors = 0;
     list_t<doc_t,`H> ds   = *dsp;
-    list_t<doc_t,`H> prev = null;
-    list_t<doc_t,`H> prev_start_sizes  = null; // not prev at beginning 
-    list_t<doc_t,`H> prev_start_colors = null; // not prev at beginning 
-    while(ds != null) {
+    list_t<doc_t,`H> prev = NULL;
+    list_t<doc_t,`H> prev_start_sizes  = NULL; // not prev at beginning 
+    list_t<doc_t,`H> prev_start_colors = NULL; // not prev at beginning 
+    while(ds != NULL) {
       //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
       let $(newd, inner_synth) = dynamic_regions_rec(ds->hd,shift,win_size);
       ds->hd = newd; // destructive here
@@ -579,16 +579,16 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
       synth.num_size_docs  += inner_synth.num_size_docs;
       synth.num_color_docs += inner_synth.num_color_docs;
       if(only_sizes > 2 && !inner_synth.only_sizes) {
-	if(prev_start_sizes == null) {
+	if(prev_start_sizes == NULL) {
 	  // beginning of sequence -- split differently
-	  prev->tl = null;
+	  prev->tl = NULL;
 	  doc_t d = dynamic_size(new Seq(*dsp), shift, win_size);
 	  *dsp = new List(d, ds);
 	  prev_start_sizes = prev_start_colors = *dsp;
 	} else {
 	  list_t<doc_t> start = prev_start_sizes->tl;
-	  prev_start_sizes->tl = null;
-	  prev->tl = null;
+	  prev_start_sizes->tl = NULL;
+	  prev->tl = NULL;
 	  doc_t d = dynamic_size(new Seq(start), shift, win_size);
 	  prev_start_sizes = prev_start_colors = new List(d,ds);
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
@@ -597,9 +597,9 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
 	only_colors = 
 	  inner_synth.only_colors ? only_colors + inner_synth.num_color_docs :0;
       } else if(only_colors > 2 && !inner_synth.only_colors) {
-	if(prev_start_colors == null) {
+	if(prev_start_colors == NULL) {
 	  // beginning of sequence -- split differently
-	  prev->tl = null;
+	  prev->tl = NULL;
 	  doc_t d = dynamic_color(new Seq(*dsp), shift, win_size);
 	  *dsp = new List(d, ds);
 	  prev_start_sizes = prev_start_colors = *dsp;
@@ -607,8 +607,8 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
 	  only_colors = synth.only_colors;
 	} else {
 	  list_t<doc_t> start = prev_start_colors->tl;
-	  prev_start_colors->tl = null;
-	  prev->tl = null;
+	  prev_start_colors->tl = NULL;
+	  prev->tl = NULL;
 	  doc_t d = dynamic_color(new Seq(start), shift, win_size);
 	  prev_start_sizes = prev_start_colors = new List(d,ds);
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
@@ -617,9 +617,9 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
 	only_sizes = 
 	  inner_synth.only_sizes  ? only_sizes + inner_synth.num_size_docs : 0;
       } else {
-	if(only_sizes == 0 && inner_synth.only_sizes && prev != null)
+	if(only_sizes == 0 && inner_synth.only_sizes && prev != NULL)
 	  prev_start_sizes = prev;
-	if(only_colors == 0 && inner_synth.only_colors && prev != null)
+	if(only_colors == 0 && inner_synth.only_colors && prev != NULL)
 	  prev_start_colors = prev;
 	only_sizes  = 
 	  inner_synth.only_sizes  ? only_sizes + inner_synth.num_size_docs : 0;
@@ -630,17 +630,17 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
       ds = ds->tl;
     }
     //    fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
-    if(only_sizes > 2 && prev_start_sizes != null && !synth.only_sizes) {
+    if(only_sizes > 2 && prev_start_sizes != NULL && !synth.only_sizes) {
       list_t<doc_t> start = prev_start_sizes->tl;
-      prev_start_sizes->tl = null;
+      prev_start_sizes->tl = NULL;
       *dsp = new List(new Seq(*dsp), 
-	     new List(dynamic_size(new Seq(start), shift, win_size),null));
+	     new List(dynamic_size(new Seq(start), shift, win_size),NULL));
     }
-    else if(only_colors > 2 && prev_start_colors != null && !synth.only_colors){
+    else if(only_colors > 2 && prev_start_colors != NULL && !synth.only_colors){
       list_t<doc_t> start = prev_start_colors->tl;
-      prev_start_colors->tl = null;
+      prev_start_colors->tl = NULL;
       *dsp = new List(new Seq(*dsp), 
-	     new List(dynamic_color(new Seq(start), shift, win_size),null));
+	     new List(dynamic_color(new Seq(start), shift, win_size),NULL));
     }
     if(!synth.only_sizes)
       synth.num_size_docs = 0;
@@ -679,7 +679,7 @@ $(doc_t,dyn_synth_t) dynamic_regions_rec(doc_t doc, bool shift, int win_size) {
 
 $(doc_t,dyn_synth_t) dynamic_regions(doc_t d, bool shift, int win_size) {
   let ans = dynamic_regions_rec(d,shift,win_size);
-  while(work_list != null) {
+  while(work_list != NULL) {
     fprintf(stderr,"\nstack-overflow: up_shuffle, recovering");
     doc_t next = work_list->hd;
     work_list = work_list->tl;

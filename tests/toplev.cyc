@@ -40,7 +40,7 @@ void blah() {
 }
 
 void (@bbb)() = blah;
-void (*ccc)() = null;
+void (*ccc)() = NULL;
 
 typedef enum Day {Sun, Mon, Tue, Wed, Thu, Fri, Sat} day;
 

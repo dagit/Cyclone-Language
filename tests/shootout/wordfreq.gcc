@@ -1,5 +1,5 @@
 /* -*- mode: c -*-
- * $Id: wordfreq.gcc,v 1.1 2001-07-30 20:20:33 tjim Exp $
+ * wordfreq.gcc
  * http://www.bagley.org/~doug/shootout/
  */
 
@@ -8,7 +8,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../Include/simple_hash.h"
+#include "simple_hash.h"
 
 typedef int (*comparator)(const void *, const void *);
 

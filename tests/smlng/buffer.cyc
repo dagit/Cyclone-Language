@@ -24,12 +24,12 @@ struct Buf {
 };
 
 buf_t init_buf() {
-  let bl = new BufList{null, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
+  let bl = new BufList{NULL, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
   return new Buf {bl, bl, 0, 0, bl, 0};
 }
 
 static void grow_buf(buf_t b) {
-  struct BufList @bl = new BufList{null, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
+  struct BufList @bl = new BufList{NULL, new Primbuf {{for i < DEF_BUFSIZE : '0'}}};
   b->curr->next = bl;
   b->curr = bl;
   b->offset = 0;

@@ -24,7 +24,7 @@ int main(int argc, string_t ? argv)
     fprintf(stderr,"usage: strings filenames\n");
   else {
     for (i = 1; i < argc; i++) {
-      if ((fin = fopen(argv[i], "rb")) == null)
+      if ((fin = fopen(argv[i], "rb")) == NULL)
 	fprintf(stderr,"can't open %s:\n", argv[i]);
       else {
 	strings(argv[i], fin);

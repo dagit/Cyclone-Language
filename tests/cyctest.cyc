@@ -66,10 +66,10 @@ void eqstrings(string_t s1,string_t s2) {
 }
 
 int test_list_cmp(int cmp(`a,`a),list_t<`a> x,list_t<`a> y) {
-  if (x == null)
-    if (y == null) return 0;
+  if (x == NULL)
+    if (y == NULL) return 0;
     else return -1;
-  if (y == null) return 1;
+  if (y == NULL) return 1;
   int c = cmp(x->hd,y->hd);
   if (c != 0) return c;
   return test_list_cmp(cmp,x->tl,y->tl);
@@ -175,15 +175,15 @@ void continue_in_try_test() {
 void list_test() {
   test_begin("List");
   // x = list from 1 to 10, backwards
-  list_t<int> x = null;
+  list_t<int> x = NULL;
   for (int i=1; i<11; i++) x = new List(i,x);
   // xrev = list from 1 to 10, forwards
-  list_t<int> xrev = null;
+  list_t<int> xrev = NULL;
   for (int i=1; i<11; i++) xrev = new List(11-i,xrev);
   okfail(0==test_list_cmp(int_cmp,List::rev(x),xrev));
 
   // xrev2 = [1;1;2;2; ...;10;10]
-  list_t<int> xrev2 = null;
+  list_t<int> xrev2 = NULL;
   for (int i=1; i<11; i++) xrev2 = new List(11-i,new List(11-i,xrev2));
   // test mergesort and append
   okfail(0==test_list_cmp(int_cmp,xrev2,
@@ -195,21 +195,21 @@ void list_test() {
                                                    List::filter(odd,xrev2)))));
 
   // increment x in place
-  for (list_t<int> y = x; y != null; y=y->tl)
+  for (list_t<int> y = x; y != NULL; y=y->tl)
     y->hd = y->hd + 1;
   // xplus = list from 2 to 11, backwards
-  list_t<int> xplus = null;
+  list_t<int> xplus = NULL;
   for (int i=1; i<11; i++) xplus = new List(i+1,xplus);
   okfail(0==test_list_cmp(int_cmp,x,xplus));
 
   // FIX:  casts are required for typechecking.  Should string constants
   // have type char? or char[sz] ??
-  let slist = new List(allocstr("hello"),new List(allocstr("world"),null));
+  let slist = new List(allocstr("hello"),new List(allocstr("world"),NULL));
   let rlist = List::rev(slist);
   okfail(0==test_list_cmp(String::strptrcmp,slist,List::rev(rlist)));
 
-  list_t<int> xx = null;
-  list_t<int> yy = null;
+  list_t<int> xx = NULL;
+  list_t<int> yy = NULL;
   // xx = list from 1 to 10, backwards
   for (int i=1; i<11; i++) xx = new List(i,xx);
   // yy = list of 10 11's
@@ -263,7 +263,7 @@ void array_test() {
   int x = 4;
   int ?z4 = Array::map(add2,Array::extract(z2,2,&x));
   Array::imp_map(add2,z4);
-  okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
+  okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,NULL)));
   $(int,int) ?z5 = new {for i < 10 : $((int)(i),(int)(i)) };
   okfail(10==z5.size);
   $(int ?,int ?) pair = Array::split(z5);
@@ -350,7 +350,7 @@ void set_test() {
   okfail(Set::member(Set::delete(x,9),-2));
   okfail(!Set::member(x,4));
   okfail(test_list_cmp(int_cmp,Set::elements(x),
-                  new List(-2,new List(2,new List(9,new List(11,null))))) == 0);
+                  new List(-2,new List(2,new List(9,new List(11,NULL))))) == 0);
   okfail(Set::subset(x2,x));
   okfail(!Set::subset(x,x2));
   okfail(Set::subset(x,x));
@@ -361,7 +361,7 @@ void set_test() {
   okfail(Set::member(Set::diff(x,x2),11));
   okfail(!Set::member(Set::diff(x,x2),9));
   let x3 = Set::from_list(int_cmp,
-                          new List(11,new List(99,null)));
+                          new List(11,new List(99,NULL)));
   okfail(!Set::subset(x3,x));
   okfail(!Set::subset(x,x3));
   okfail(Set::cardinality(Set::union_two(x,x3))==5);
@@ -379,7 +379,7 @@ void set_test() {
                   new List(allocstr("hello"),
                         new List(allocstr("quartz"),
                               new List(allocstr("sphinx"),
-                                    new List(allocstr("world"),null))))) == 0);
+                                    new List(allocstr("world"),NULL))))) == 0);
   test_end();;
 }
 
@@ -433,20 +433,20 @@ void string_test() {
 
   test_begin("String");
 
-  okfailn(1,String::to_int("1234",null) == 1234);
-  okfailn(2,String::to_int("-1234",null) == -1234);
-  okfailn(3,String::to_int("  -1234   ",null) == -1234);
+  okfailn(1,String::to_int("1234",NULL) == 1234);
+  okfailn(2,String::to_int("-1234",NULL) == -1234);
+  okfailn(3,String::to_int("  -1234   ",NULL) == -1234);
   int x = 1;
   okfailn(4,String::to_int("-1234  ",&x) == 1234);
   okfailn(5,x == 5);
-  okfailn(6,String::to_double("0",null) == 0.0);
-  okfailn(7,String::to_double(".0",null) == 0.0);
-  okfailn(8,String::to_double("1.",null) == 1.0);
-  okfailn(9,(String::to_double("3.14159",null) - 3.14159) < 0.000000001);
-  okfailn(10,(String::to_double("-3.14159",null) - -3.14159) < 0.000000001);
-  okfailn(11,(String::to_double("3.14e3",null) - 3.14e3) < 0.000000001);
-  okfailn(12,(String::to_double("3.14e-3",null) - 3.14e-3) < 0.000000001);
-  okfailn(13,(String::to_double("  \t3.14e-3",null) - 3.14e-3) < 0.000000001);
+  okfailn(6,String::to_double("0",NULL) == 0.0);
+  okfailn(7,String::to_double(".0",NULL) == 0.0);
+  okfailn(8,String::to_double("1.",NULL) == 1.0);
+  okfailn(9,(String::to_double("3.14159",NULL) - 3.14159) < 0.000000001);
+  okfailn(10,(String::to_double("-3.14159",NULL) - -3.14159) < 0.000000001);
+  okfailn(11,(String::to_double("3.14e3",NULL) - 3.14e3) < 0.000000001);
+  okfailn(12,(String::to_double("3.14e-3",NULL) - 3.14e-3) < 0.000000001);
+  okfailn(13,(String::to_double("  \t3.14e-3",NULL) - 3.14e-3) < 0.000000001);
 
   okfailn(14,String::strcmp("hello","world") < 0);
   okfailn(15,String::strcmp("hello","hello") == 0);
@@ -457,16 +457,16 @@ void string_test() {
                         "hello.bar")==0);
   // FIX:  polymorphism requires the cast char[sz]->char?
   okfail(String::strcmp(String::strconcat_l(new List(allocstr("hello "),
-                                                  new List(allocstr("world"),null))),
+                                                  new List(allocstr("world"),NULL))),
                         "hello world")==0);
   okfail(String::strcmp(String::str_sepstr(new List(allocstr("hello"),
-                                                 new List(allocstr("world"),null)),
+                                                 new List(allocstr("world"),NULL)),
                                            "**"),
                         "hello**world")==0);
   // FIX:  polymorphism requires the cast char->int
   okfail(String::strcmp(String::implode(new List((int)'a',
                                               new List((int)'b',
-                                                    new List((int)'c',null)))),
+                                                    new List((int)'c',NULL)))),
                         "abc")==0);
   switch ((char)String::explode("abc")->tl->hd) {
   case 'a': fail(); break;
@@ -499,9 +499,9 @@ void string_test() {
   okfail(String::strcmp(s2,"fobaar")==0);
   okfail(String::strcmp(s2,"xxxfobaar"+3)==0);
   okfail(String::strcmp(String::strchr((mstring_t)s2+1,'a'),"aar")==0);
-  okfail(String::strchr((mstring_t)s2+2,'z')==null);
+  okfail(String::strchr((mstring_t)s2+2,'z')==NULL);
   okfail(String::strcmp(String::strrchr((mstring_t)s2+1,'a'),"ar")==0);
-  okfail(String::strrchr((mstring_t)s2+2,'o')==null);
+  okfail(String::strrchr((mstring_t)s2+2,'o')==NULL);
   okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,4)==0);
   okfail(String::strncmp((mstring_t)s2+1,"xxxobaax"+3,5)!=0);
   okfail(Strings::strncasecmp((mstring_t)s2+1,"xxxObAax"+3,4)==0);
@@ -519,7 +519,7 @@ string_t bad_strrchr(string_t<`H> s, char c) {
     if (s[i] == c)
       return &s[i];
   }
-  return null;
+  return NULL;
 }
 void bad_test() {
   test_begin("KNOWN TO BE BAD");
@@ -563,7 +563,7 @@ void rope_test() {
   Rope::rope_t r = Rope::from_string("hello world*");
   let r2 = Rope::concat(r,r);
   let r3 = Rope::concatl(new List(Rope::from_string("xx"),
-                               new List(Rope::from_string("yy"),null)));
+                               new List(Rope::from_string("yy"),NULL)));
   okfail(Rope::length(r) == String::strlen("hello world*"));
   okfail(Rope::length(r2) == 2*String::strlen("hello world*"));
   okfail(Rope::cmp(r,r2) != 0);
@@ -650,7 +650,7 @@ void bitvec_test() {
   okfail(!Bitvec::get(b1,2));
   let l1 = Bitvec::to_sorted_list(b1,24);
   okfail(0==test_list_cmp(int_cmp,l1,
-			  new List(3,new List(4,null))));
+			  new List(3,new List(4,NULL))));
   bitvec_t b2 = Bitvec::new_full(24);
   bitvec_t b3 = Bitvec::new_empty(24);
   Bitvec::intersect_two(b3,b1,b2);
@@ -744,12 +744,12 @@ void fn_test() {
   okfail(apply(addp,new $(1,2)) == 3);
   okfail(apply(apply(addc,1),2) == 3);
   okfail(apply(addu,new $(1,2)) == 3);
-  list_t<int> xs = null;
+  list_t<int> xs = NULL;
   for (int i = 0; i < 10; i ++)
     xs = new List(i,xs);
   xs = map_fn(apply(addc,2),xs);
   bool okay = true;
-  for (int i = 11; xs != null; xs = xs->tl, i--) {
+  for (int i = 11; xs != NULL; xs = xs->tl, i--) {
     if (xs->hd != i) okay = false;
   }
   okfail(okay);
@@ -848,7 +848,7 @@ void arg_test(string_t<`H> ?`H args) {
     arg_t c = new $("-c",false,"",(spec_t)(new Clear_spec(c_foo)),"clear");
     arg_t i = new $("-i",false,"",(spec_t)(new Int_spec(i_foo)),"int");
     arg_t r = new $("-r",false,"",(spec_t)(new Rest_spec(r_foo)),"rest");
-    parse(new List(u,new List(s,new List(c,new List(i,new List(r,null))))),
+    parse(new List(u,new List(s,new List(c,new List(i,new List(r,NULL))))),
           a_foo,
           "Usage:",
 	  args);
