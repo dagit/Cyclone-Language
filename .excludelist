@@ -20,3 +20,4 @@ cyclone/tests/smlng/005-icfp2000.txt
 cyclone/tests/smlng/006-exhaustive.txt
 cyclone/tests/smlng/example.txt
 cyclone/tests/smlng/example3.txt
+cyclone/tests/tpop
