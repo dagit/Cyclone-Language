@@ -1698,10 +1698,18 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 }
 
 // Compound literals, e.g., (struct foo){3,"abc"}
-static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t * topt,
-                             $(var_opt_t,tqual_t,type_t)@ t,
-                             list_t<$(list_t<designator_t>,exp_t)@> des) {
-  return expr_err(te,loc,topt,"tcCompoundLit");
+static type_t tcCompoundLit(tenv_t te, seg_t loc, exp_t orig_exp,
+                            type_t * topt,
+                            $(var_opt_t,tqual_t,type_t)@ targ,
+                            list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des) {
+  // treat this similar to casting an initializer
+  let &$(_,_,t) = targ;
+  check_type(loc,te,lookup_type_vars(te),
+	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
+  orig_exp->r = new UnresolvedMem_e(NULL,des);
+  resolve_unresolved_mem(te,loc,&t,orig_exp,des);
+  tcExpNoInst(te,topt,orig_exp);
+  return (type_t)orig_exp->topt;
 }
 
  ///////////////////// Array ({e1,...,en}) /////////////////////////
@@ -2756,7 +2764,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Tuple_e(es):
     t = tcTuple(te,loc,topt,es); break;
   case &CompoundLit_e(t1,des):
-    t = tcCompoundLit(te,loc,topt,t1,des); break;
+    t = tcCompoundLit(te,loc,e,topt,t1,des); break;
   case &Array_e(des):
     // tcArray expects us to pass in an optional element type, not
     // the array type.  See also tcNew.

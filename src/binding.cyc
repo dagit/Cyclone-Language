@@ -527,13 +527,14 @@ void resolve_exp(env_t env, exp_t e) {
   case &Offsetof_e(t,_): fallthru(t);
   case &Sizeoftype_e(t): resolve_type(e->loc,env,t); return; 
 
+  case &CompoundLit_e(&$(_,_,t),dles):
+    resolve_type(e->loc,env,t);
+    fallthru(dles);
+    
   case &Array_e(dles): 
     for(; dles != NULL; dles = dles->tl)
       resolve_exp(env,(*dles->hd)[1]);
     return;
-
-  case &CompoundLit_e(...): 
-    err(e->loc, "binding: compound literals unimplemented"); return;
 
     // cases that should arise only if we run binding more than once
   case &AnonEnum_e(t,ef): resolve_type(e->loc,env,t); return;
