@@ -232,13 +232,27 @@ update_all_archs:
 update_devel_archs:
 	$(MAKE) update_all_archs ALL_ARCHS="$(DEVEL_ARCHS)"
 
-# affected by CYCC and OUT_PREFIX
+# a little testing (much more is in the tests directory)
 test:
-	$(MAKE) -C tests
+	$(MAKE) -C tests CYCFLAGS="-g -save-c -pp"
+test_bin:
+	$(MAKE) -C tests\
+         CYCC=$(CYCDIR)/bin/cyclone$(EXE)\
+         CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
+         CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib"
+test_src:
+	$(MAKE) -C tests\
+         CYCC=$(CYCDIR)/src/cyclone$(EXE)\
+         CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
+         CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/lib -B$(CYCDIR)/lib"
 
+# cleaning
 clean_src:
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
+
+clean_test:
+	$(MAKE) clean -C tests
 
 # affected by OUT_PREFIX
 clean_src_prefix:

@@ -1,101 +1,67 @@
 
-# Note: We're not doing anything with t.cyc t2.cyc t3.cyc t4.cyc 
-#       testcases.cyc and toplev.cyc.  Should we be?
-
 include ../Makefile.inc
 
+# Override these variables to test different compilers/libraries (bootstrapping)
+# (see targets test, test_bin, and test_src in parent directory's Makefile)
+CYCC=cyclone$(EXE)
+CYCBISON=cycbison$(EXE)
+CYCFLAGS=
 
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)
+	./test_regions
+	./cyctest
+	./foo < foo_input
+	./histogram histogram.txt
+	./test_getopt -abc123
 
-# Choose which variables you want depending on the compiler you need
-# for the compiler in src
-ifdef devel
-CYC_BIN_PATH := $(CYCDIR)/src
-CYC_LIB_PATH := $(CYCDIR)/lib
-CYC_INC_PATH := $(CYCDIR)/lib
-else
-# for the compiler in bin
-CYC_BIN_PATH := $(CYCDIR)/bin
-CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
-CYC_INC_PATH := $(CYCDIR)/include
-endif
+hello$(EXE): hello.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Override this variables to use a bootstrapped compiler (you may want
-# an absolute path)
-CYCC=$(CYC_BIN_PATH)/$(CYCCOMP)
+merge_sort$(EXE): merge_sort.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
+test_regions$(EXE): test_regions.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Override this prefix to check the compiler on itself w/o clobbering files
-OUT_PREFIX=
+cyctest$(EXE): cyctest.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lm
 
-LC_FLAG=
-override CYC_FLAGS += $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g -save-c -pp
+foo$(EXE): foo_tab.o foo.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-LIB=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
+foo_tab.o : foo_tab.cyc
+	$(CYCC) $(CYCFLAGS) -c $<
 
-all: $(CYCC) $(LIB) \
-  $(OUT_PREFIX)cyctest$(EXE) \
-  $(OUT_PREFIX)foo$(EXE) \
-  $(OUT_PREFIX)hello$(EXE) \
-  $(OUT_PREFIX)test_regions$(EXE) \
-  $(OUT_PREFIX)histogram$(EXE) \
-  $(OUT_PREFIX)finger$(EXE) \
-  $(OUT_PREFIX)test_getopt$(EXE) \
-	./$(OUT_PREFIX)test_regions
-	./$(OUT_PREFIX)cyctest
-	./$(OUT_PREFIX)foo < foo_input
-	./$(OUT_PREFIX)histogram histogram.txt
-	./$(OUT_PREFIX)test_getopt -abc123
-
-$(OUT_PREFIX)hello$(EXE): $(OUT_PREFIX)hello.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-#	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
-
-$(OUT_PREFIX)merge_sort$(EXE): $(OUT_PREFIX)merge_sort.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-
-$(OUT_PREFIX)test_regions$(EXE): $(OUT_PREFIX)test_regions.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-
-$(OUT_PREFIX)cyctest$(EXE): $(OUT_PREFIX)cyctest.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS) -lm
-
-$(OUT_PREFIX)foo$(EXE): $(OUT_PREFIX)foo_tab.o $(OUT_PREFIX)foo.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
-
-$(OUT_PREFIX)foo_tab.o : $(OUT_PREFIX)foo_tab.cyc
-	$(CYCC) $(CYC_FLAGS) -c $<
-
-$(OUT_PREFIX)foo_tab.cyc : foo.y $(CYCBISON)
+foo_tab.cyc : foo.y
 	$(CYCBISON) -v -d $< -o $@
 
-$(OUT_PREFIX)foo_tab.h : foo.y $(CYCBISON)
+foo_tab.h : foo.y
 	$(CYCBISON) -v -d $< -o $@
 
-$(OUT_PREFIX)histogram$(EXE): $(OUT_PREFIX)histogram.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+histogram$(EXE): histogram.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(OUT_PREFIX)finger$(EXE): $(OUT_PREFIX)finger.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS) $(NET_LD_FLAGS)
+finger$(EXE): finger.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) $(NET_LD_FLAGS)
 
-$(OUT_PREFIX)test_getopt$(EXE): $(OUT_PREFIX)test_getopt.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+test_getopt$(EXE): test_getopt.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(OUT_PREFIX)unsafe_cast.o: $(OUT_PREFIX)unsafe_cast.c
+unsafe_cast.o: unsafe_cast.c
 	$(CC) -c $< -o $@
 
-$(OUT_PREFIX)typerep_test$(EXE): $(OUT_PREFIX)typerep_test.o 
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+typerep_test$(EXE): typerep_test.o 
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(OUT_PREFIX)genrep_test$(EXE):  $(OUT_PREFIX)genrep_test.o $(OUT_PREFIX)muttrep.o
-	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+genrep_test$(EXE):  genrep_test.o muttrep.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.o : %.cyc $(CYCC)
-	$(CYCC) $(CYC_FLAGS) -c $< 
+%.o : %.cyc
+	$(CYCC) $(CYCFLAGS) -c $< 
 
 clean_prefix:
-	$(RM) $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe)
+	$(RM) hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe
 
 clean:
 	$(RM) *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o *typerep.[oc] *typerep_test.[oc] unsafe_cast.o
