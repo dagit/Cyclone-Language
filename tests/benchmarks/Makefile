@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 CYCC := ../../bin/$(CYCCOMP)
 
-PROGS := fib hanoi shuffle
+PROGS := fib hanoi shuffle nsieve
 
 #CYCFLAGS := -O3
 #CFLAGS   := -O3
@@ -63,5 +63,11 @@ run-shuffle:
 	@echo Psuedorandom Numbers
 	time ./shuffle-orig 156 > /dev/null
 	time ./shuffle      156 > /dev/null
+	@echo
+
+run-nsieve:
+	@echo Sieve of Eratosthenes
+	time ./nsieve-orig 0 > /dev/null
+	time ./nsieve      0 > /dev/null
 	@echo
 
