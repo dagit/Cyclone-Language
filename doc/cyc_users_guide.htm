@@ -3,8 +3,6 @@
 <head>
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
 <title>Cyclone Version 1</title>
 </head>
 
@@ -38,13 +36,13 @@ Project<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Subtyping">Subtyping and Coercions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#Datatype Enums:">Datatype Enums</a><br>
+    <a href="#Tagged Unions:">Tagged Unions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Pattern Matching:">Pattern Matching</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Let Declarations:">Let Declarations</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="#Extensible Enums (xenums):">Extensible Enums</a><br>
+    <a href="#Extensible Tagged Unions (xtunions):">Extensible Tagged Unions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Polymorphic Functions:">Polymorphic Functions</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -69,6 +67,7 @@ goals in mind:
     rules out things like buffer overflows and format string attacks
     (which can lead to crashes).  To achieve safety, Cyclone uses a
     combination of static type checking, extended static checking,
+    control and data-flow analysis, 
     dynamic checking, and specially prepared libraries.</li>
 
   <li><b>Support as much of C as possible</b> --- Cyclone should share as much
@@ -80,7 +79,9 @@ goals in mind:
 
 <p>
 The intended user of Cyclone is someone who is either (a) writing
-systems code, or (b) needs to port C code to a safe environment.&nbsp;
+systems code and needs the control over data representations and
+memory management afforded by C, or (b) needs to port C code to a 
+safe environment.&nbsp;
 Though languages such as Java, ML, or Scheme are safe, they do not
 give the control over data representations, memory management, calling
 conventions, etc., that C does.&nbsp; Hence, they are often unsuitable
@@ -97,15 +98,18 @@ control.&nbsp;&nbsp;
 <p>
 Of course, the two goals above are in direct conflict and thus we also see
 Cyclone as a driver for new research into safe, low-level languages.&nbsp; For
-instance, right now, Cyclone supports a fairly rich form of stack allocation
-based on the Tofte-Talpin region type system.  This ensures that you never
-try to access a stack-allocated object outside of the lifetime of the object.
-However, all heap-allocated memory in Cyclone is reclaimed via (conservative)
-garbage collection.&nbsp; This is safe, but prevents systems programmers
-from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
-One of the big research goals of Cyclone is to introduce new typing
-abstractions, such as linear types or regions, that support programmer control
-over heap memory management without sacrificing safety.
+instance, originally, all heap-allocated data in Cyclone were reclaimed
+via a conservative garbage collector.  Though the garbage collector ensured
+safety by preventing programs from accessing deallocated objects, it also
+kept Cyclone from
+being used in latency-critical or space-sensitive applications such
+as network protocols or device drivers.  To address this shortcoming,
+we have added a region-based memory management system based on
+the work of Tofte and Talpin.  The region-based memory manager allows
+you some real-time control over memory management and can significantly
+reduce space overheads when compared to a conventional garbage collector.
+Furthermore, the region type system ensures the same safety properties
+as a collector:  objects cannot be accessed outside of their lifetimes.
 </p>
 
 <p>
@@ -185,7 +189,9 @@ are at Cornell and AT&amp;T.&nbsp;
 In particular, Trevor Jim and I have worked out most of the initial
 design and implementation.&nbsp; Dan Grossman is working on version
 2.0 of the system which should add support for a number of other
-features and clean up the type-checker considerably.&nbsp; Fred Smith,
+features and clean up the type-checker considerably.&nbsp; Mathieu
+Baudet has developed the link-checker.  
+James Cheney, Fred Smith,
 Dave Walker, and Stephanie Weirich have contributed greatly through
 discussions, if not code.&nbsp; Jeff Vinocur, Nathan Lutchansky,
 Matthew Harris, Kate Oliver, and Hubert Chao have also made many 
@@ -198,14 +204,18 @@ project.&nbsp;&nbsp;
 <h2><a name="Installing Cyclone">Installing Cyclone</a></h2>
 <p>
 Cyclone currently only runs on 32-bit machines, and has only been tested on
-Win32 and Linux platforms.&nbsp; Other platforms might or might not work.&nbsp;
-There are definitely 32-bit dependencies, so the system will not work on a
-64-bit machine without major surgery.&nbsp; To install and use Cyclone, you'll
+Win32 (Cygnus) and Linux (Red Hat 6.2) platforms.&nbsp; Other platforms might 
+or  might not work.&nbsp;  Right now, 
+there are a few 32-bit dependencies in the compiler, so the system will 
+probably not work on a 64-bit machine without some changes.&nbsp; 
+</p>
+To install and use Cyclone, you'll
 need to use the Gnu utilities, including GCC (the Gnu C compiler) and
 Gnu-Make.&nbsp; For Win32, you should first install the latest version of the 
 <a href="http://cygwin.com/">Cygwin</a>
 utilities to do the build, and make sure that the Cygwin bin directory is on
-your path.
+your path.  We use some features of GCC extensively, so Cyclone definitely
+will not build with another C compiler.  
 </p>
 
 <p>
@@ -220,8 +230,10 @@ cyclone/
              lib/
              src/
      doc/
+        web/
      gc/
      lib/
+        xml/
      src/
      tests/
      tools/
@@ -250,32 +262,44 @@ is also written in C and can be found in the gc/ directory (this was obtained
 directly from<a href="http://www.hpl.hp.com/personal/Hans_Boehm/gc/"> Hans Boehm's GC page</a>.)&nbsp;
 The rest of the code is written in Cyclone.&nbsp; However, the directory bin/genfiles
 contains the C code that the Cyclone compiler produces when run on itself.&nbsp;
-This is what allows you to build the initial executable.&nbsp;&nbsp;</p>
+This is what allows you to build the initial executable.&nbsp;&nbsp;
+</p>
+
 <p>Once you've built the compiler from the C courses, you can use it to compile
-the Cyclone code in lib/, src/, tests/, or tools/cyclex.&nbsp; To do so, simply
-type &quot;make cyclone_src&quot;.&nbsp; This will use the Cyclone compiler to
-compile all of the files in these directories and place the resulting
-executables in the appropriate directory.&nbsp; (It will <i>not</i> overwrite
-the binaries in the bin/ directory.)&nbsp; If you want to make a change to the
-compiler and then start using the change, you can type &quot;make update&quot;
+the Cyclone code in lib/, src/, tests/, or tools/cyclex.&nbsp; To do
+so, simply type &quot;make cyclone_src&quot;.&nbsp; This will use the
+Cyclone compiler to compile all of the files in these directories and
+place the resulting executables in the appropriate directory.&nbsp;
+(It will <i>not</i> overwrite the binaries in the bin/
+directory.)&nbsp; If you want to make a change to the compiler and
+then start using the change, you can type &quot;make update&quot;
 which will update the genfiles/ with any different C files that you
-generated.&nbsp; Then you can type &quot;make cyclone&quot; to bootstrap with
-the new code.</p>
+generated.&nbsp; Then you can type &quot;make cyclone&quot; to
+bootstrap with the new code.  </p>
+
 <hr>
 <h2><a name="Using Cyclone">Using Cyclone</a></h2>
-<p>Once you've successfully installed Cyclone, you can use it to compile Cyclone
-programs to C, and then use GCC to compile the resulting code to machine
+
+<p>Once you've successfully installed Cyclone, you can use it to compile 
+Cyclone programs to C, and then use GCC to compile the resulting code to 
+machine
 code.&nbsp; Typically, if one wants to compile the file foo.cyc to an object
-file foo.o, one would write:</p>
-<pre>  cyclone -tc -toc -pp -o foo.c foo.cyc 
-  gcc -c foo.c</pre>
+file foo.o, one would write:
+</p>
+<pre>  cyclone -tc -toc -pp -I /cyclone/lib -o foo.c foo.cyc 
+  gcc -c -I /cyclone foo.c</pre>
 <p>The &quot;tc&quot; flag tells Cyclone to type-check the code, the &quot;toc&quot;
-flag tells it to translate the code to C, and the &quot;pp&quot; flag says to
+flag tells it to translate the code to C, the -I flag tells the Cyclone
+pre-processor to look in the directory cyclone/lib for include files,
+and the &quot;pp&quot; flag says to
 pretty print the resulting C code.  The output is directed via the
 &quot;-o&quot; flag to the file foo.c.&nbsp;  (When no output is specified
 it is sent to standard out.)&nbsp;  In the example above,
 this would type-check foo.cyc, translate it to C, and then print the output to
-foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o</p>
+foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o making
+sure to pass -I /cyclone to the pre-processor so that it can find the
+.h files needed to compile the code.
+</p>
 <p>Note that Cyclone runs the C pre-processor on the file before actually
 compiling it (just as with C).&nbsp;&nbsp;</p>
 <p>The cyclone compiler takes the following command line arguments:</p>
@@ -288,7 +312,6 @@ compiling it (just as with C).&nbsp;&nbsp;</p>
   <li>-pp: pretty-print the code</li>
   <li>-up: ugly-print the code</li>
   <li>-D <i>defn</i>: pass a definition to the pre-processor (as in C)</li>
-  <li>-check_null:&nbsp; generate explicit tests for null (currently broken)</li>
   <li>-noexpandtypedefs:&nbsp; do not expand type-defs during pretty-printing</li>
   <li>-q:&nbsp; quiet (do not print &quot;Compiling file: foo.....&quot; progress indicator; prints nothing unless error)</li>
   <li>-v:&nbsp; verbose (replace the progress indicator with verbose listing of each stage) -- this overrides -q</li>
@@ -314,16 +337,12 @@ program:</p>
   <b>using</b> Stdio;
 
   
-  int <b>main</b>() {
-    <font color="#FF0000"><i>// Get the command line arguments as an array of strings.
-    // The first string is the name of the program.</i></font>
-    string ?args = std_args();  
-   
+  int <b>main</b>(int argc, string ? argv) {
     <i><font color="#FF0000">// if there was no argument to the program, raise an error.</font></i>
-    <b>if</b> (args.size &lt;= 1) 
-      <b>throw</b> Failure(&quot;<font color="#0000FF">missing name!</font>&quot;);
+    <b>if</b> (argc &lt;= 1) 
+      <b>throw new</b> Failure(&quot;<font color="#0000FF">missing name!</font>&quot;);
     <b>else</b>
-      <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,args[1]);
+      <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,argv[1]);
   }
   </pre>
 
@@ -336,13 +355,15 @@ version of stdio and in this case, is needed to support the printf.
 The declaration &quot;using Core;&quot; opens up the Core
 namespace to make the operations in Core immediately available to the
 following code.&nbsp; Similarly, opening Stdio makes those definitions
-in Stdio available.  The declaration &quot;int main() {
+in Stdio available.  The declaration &quot;int main(int argc, char ?? argv) {
 ... }&quot; declares the &quot;main&quot; function for the Cyclone
-program, which takes no arguments and returns an integer result.&nbsp; 
+program, which takes two arguments 
+and returns an integer result.&nbsp; 
 
-<p>The first line of the main function declares a variable
-&quot;args&quot; to be a checked pointer to an array of strings
-(written &quot;string ?&quot;.)  The &quot;?&quot; type constructor is
+<p>
+The second argument to main (argv) is declared as a <i>checked pointer</i>
+to an array of strings (written &quot;string ?&quot;.)  
+The &quot;?&quot; type constructor is
 similar to &quot;*&quot; in C in that it supports subscripting,
 dereferencing, pointer arithmetic, etc.  However, all dereferences are
 checked to ensure that the current pointer value is in range.  The
@@ -351,10 +372,10 @@ representation of a normal pointer, as extra information is needed to
 support the bounds check.
 
 <p>
-The declaration on the first line also initializes args by calling the
-function std_args() which is part of the Core namespace.&nbsp; After
-initializing args, the function checks to see if the size (in terms of
-the number of elements in the array) of args is less than or equal to
+Just as in C, main is called by the Cyclone runtime system and passed
+argc (a count of the number of command-line arguments to the program)
+and argv (the name of the program and the command-line arguments.)  Once
+invoked, this version of main checks to see if argc is less than or equal to
 1.&nbsp; If so, a failure is signalled by throwing the Failure
 exception (with an argument string reading &quot;missing
 name!&quot;).&nbsp; Otherwise, the program prints to standard output
@@ -365,12 +386,12 @@ argument to the program.&nbsp;&nbsp;</p>
 contains the code above.&nbsp; If you change into the tests directory,
 then you can compile the file to C by typing:</p> 
 
-<pre> cyclone -I ../lib -tc -toc -pp hello.cyc &gt; hello.c</pre> 
+<pre> ../bin/cyclone -I ../lib -tc -toc -pp hello.cyc &gt; hello.c</pre> 
 
-<p>(This assumes that you have the bin directory on your path.)&nbsp;
+<p>
 This should produce the file hello.c.&nbsp; You can look at the C code
 to see what it looks like.&nbsp; Most of it is definitions that are
-imported from core.h.&nbsp; The part that corresponds to the Cyclone
+imported from core.h or stdio.h.&nbsp; The part that corresponds to the Cyclone
 code will be found at the bottom. The code is pretty similar to the
 Cyclone code except that you can see that there is extra gunk that
 corresponds to an array bounds check, and extra gunk to deal with the
@@ -379,9 +400,10 @@ checked pointers, etc.</p>
 <p>After generating hello.c, you can use GCC to
 compile it to an executable.&nbsp; To do so, you need to make sure
 that the file cyc_include.h is accessible, and to link against the
-cyclib.a and gclib.a libraries.&nbsp; Here's an example of this:</p>
+cyclib.a and gclib.a libraries.&nbsp; Here's an example of what you
+would type using Win32 and Cygnus:</p>
 
-<pre> gcc -I .. -o hello.exe hello.c ..\bin\cyclib.a ..\bin\gc.a</pre>
+<pre> gcc -I .. -o hello.exe hello.c ../bin/cyclib.a ../bin/gc.a</pre>
 
 <p>This will produce an executable program hello.exe.&nbsp; Typing
 &quot;hello&quot; under Win32 (&quot;hello.exe&quot; resp. under Unix)
@@ -415,7 +437,8 @@ of the GCC and C-99 extensions that make writing code a bit
 easier.&nbsp; Variables need not be declared at the top of a block, a
 declaration can appear within a for-statement, expressions can have statements
 nested inside them, etc.&nbsp; Cyclone also adds support for ML or Haskell-style
-algebraic datatypes and pattern matching.&nbsp; Datatypes can seriously lift the
+algebraic datatypes (also known as <i>tagged unions</i>) 
+and pattern matching.&nbsp; Datatypes can seriously lift the
 level of abstraction for code, and pattern matching can be an effective tool for
 ensuring that all cases in a tricky test are covered.&nbsp;&nbsp;</p>
 <p>In addition, Cyclone adds advanced typing support in the form of (a)
@@ -585,24 +608,25 @@ More on this later...
 try</code>/<code>catch</code> statements similar to
 Java.&nbsp; (We'll probably add support for finally clauses at some
 point.)&nbsp; This is one way to avoid the error-prone and type-unsafe approach in C of
-returning a value (e.g., -1) to indicate an error.&nbsp; (An alternative way is to return a possibly-null pointer, or an appropritate enum value.)&nbsp;  Exception values are a special case of
-extensible datatype enums (xenums) described below.&nbsp; The following example
+returning a value (e.g., -1) to indicate an error.&nbsp; (An alternative way is to return a possibly-null pointer, or an appropritate tunion value.)&nbsp;  Exception values are a special case of
+extensible tagged unions (<a href ="#Extensible Tagged Unions (xtunions):">xtunions</a>) 
+described below.&nbsp; The following example
 shows how to declare a couple of exceptions, how to throw an exception, and how
 to catch an exception:</p>
-<pre>  <b>xenum </b>exn { NotFound(string); }  <i><font color="#FF0000">// NotFound takes a string as an argument</font></i>
-  <b>xenum </b>exn { Foo; }              <i><font color="#FF0000"> // Foo takes no arguments</font></i></pre>
+<pre>  <b>xtunion </b>exn { NotFound(string); }  <i><font color="#FF0000">// NotFound takes a string as an argument</font></i>
+  <b>xtunion </b>exn { Foo; }              <i><font color="#FF0000"> // Foo takes no arguments</font></i></pre>
 <pre>  <b>void </b>bar() {
     <b>if</b> (coin_toss()) 
-      <b>throw</b> Foo;
+      <b>throw new</b> Foo;
     <b>else</b> <b>if</b> (!lookup(&quot;<font color="#0000FF">friday</font>&quot;))
-      <b>throw</b> NotFound(&quot;<font color="#0000FF">friday isn't here</font>&quot;);
+      <b>throw new</b> NotFound(&quot;<font color="#0000FF">friday isn't here</font>&quot;);
   }</pre>
 <pre>  <b>void</b> foo() {
     <b>try</b> {
       bar();
     } <b>catch</b> {
-    <b>case</b> NotFound(s):  <b>fprintf</b>(stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
-    <b>case</b> Foo: <b>fprintf</b>(stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
+    <b>case</b> &amp;NotFound(s):  <b>fprintf</b>(stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
+    <b>case</b> &amp;Foo: <b>fprintf</b>(stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
     }
     <b>printf</b>(&quot;<font color="#0000FF">no exception raised.\n</font>&quot;);
   }</pre>
@@ -665,19 +689,22 @@ however, that these casts must be explicit.</p>
 <p>We expect to add more support for subtyping in the future (e.g., subtyping on
 function pointers, bounded subtyping, etc.)</p>
 <hr>
-<h4><a name="Datatype Enums:">Datatype Enums:</a></h4>
-<p>Enums in Cyclone are more like datatypes in ML.&nbsp; In particular, they can
+<h4><a name="Tagged Unions:">Tagged Unions:</a></h4>
+<p>Cyclone's tagged unions (tunionx) are based on the algebraic datatypes that
+first appeared in functional languages such as Hope, Miranda, ML, and 
+Haskell.&nbsp; They provide a safe way for building data structures 
+that contain possibly many different types and can
 be used to build algebraic or inductively defined structures, such a lists,
-trees, graphs, etc.&nbsp; For instance, the following enum declarations give a
+trees, graphs, etc.&nbsp; For instance, the following tunion declarations give a
 way to construct abstract syntax trees for a simple calculator language:</p>
-<pre>  <b>enum </b>operator { Plus, Times, Minus, Divide }</pre>
-<pre>  <b>enum </b>absyn {
+<pre>  <b>tunion </b>operator { Plus, Times, Minus, Divide }</pre>
+<pre>  <b>tunion </b>absyn {
     Integer(int);
-    Term(<b>enum</b> absyn, <b>enum</b> operator, <b>enum</b> absyn);
+    Term(<b>tunion</b> absyn, <b>tunion</b> operator, <b>tunion</b> absyn);
   }</pre>
-<pre>  <b>enum </b>absyn e1 = Term(Integer(3),Plus,Integer(4));
-  <b>enum </b>absyn e2 = Term(e1,Times,Integer(5));</pre>
-<p>The operator definition is like a normal enum -- it just defines symbolic
+<pre>  <b>tunion </b>absyn e1 = <b>new</b> Term(<b>new</b> Integer(3),Plus,<b>new</b> Integer(4));
+  <b>tunion </b>absyn e2 = <b>new</b> Term(e1,Times,<b>new</b> Integer(5));</pre>
+<p>The operator definition is like an enum -- it just defines symbolic
 constants for Plus, Times, Minus, and Divide.&nbsp; The absyn definition defines
 an inductive tree-like data type for abstract syntax.&nbsp; The Integer
 constructor takes an int argument and returns an absyn value.&nbsp; The Term
@@ -685,41 +712,36 @@ constructor takes an abstract syntax tree, an operator, and an abstract syntax
 tree and returns a new abstract syntax tree.&nbsp; So, for example, e1 is a tree
 representing the term &quot;3 + 4&quot; while e2 is a tree representing the term
 &quot;(3 + 4) * 5&quot;.&nbsp;&nbsp;</p>
-<p>Internally, enum constructors are either represented as an integer value (as
+<p>Internally, tunion constructors are either represented as an integer value (as
 with Plus, Times, Minus, and Divide) or a pointer to an object containing a <i>tag</i>
 and the arguments to the constructor.&nbsp; The object is always allocated on
 the heap.&nbsp; To traverse the tree, we use pattern matching, again in the
 style of functional languages such as ML or Haskell.</p>
-<p>Why did we choose to extend enums instead of adding a datatype declaration (a
-la ML)?&nbsp; We wanted to minimize the number of keywords that we added to the
-language, so adding an explicit datatype declaration and keyword was not seen as
-desirable.&nbsp; In addition, enums already provided primitive symbolic
-names.&nbsp;&nbsp;</p>
-<p>In the future, we plan to make the representation of enums explicit and to
+<p>In the future, we plan to make the representation of tunions explicit and to
 allow programmers to control tag placement and do explicit tests on the tag to
 refine the type of an object in a more traditional, data-flow fashion.&nbsp; We
-will probably keep the enum construct as is for convenience.</p>
+will probably keep the tunion construct as is for convenience.</p>
 <hr>
 <h4><a name="Pattern Matching:">Pattern Matching:</a></h4>
 <p>Pattern matching in Cyclone generalizes the switch construct of C allowing
 you to not only test integral values, but also to test structured values such as
 the abstract syntax trees above.&nbsp; For example, the following function takes
 in an abstract syntax tree and prints the tree to stdout:</p>
-<pre>  <b>void</b> print_absyn(<b>enum</b> absyn tree) {
+<pre>  <b>void</b> print_absyn(<b>tunion</b> absyn tree) {
      <b>switch</b> (tree) {
-     <b>case</b> Integer(i)       : <b>printf</b>(&quot;<font color="#0000FF">%d</font>&quot;,i); <b>break</b>;
-     <b>case</b> Term(t1,Plus,t2) : <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;<font color="#0000FF">+</font>&quot;); 
-                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
-     <b>case</b> Term(t1,Times,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;<font color="#0000FF">*</font>&quot;); 
-                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
-     <b>case</b> Term(t1,Minus,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;<font color="#0000FF">-</font>&quot;);
-                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
-     <b>case</b> Term(t1,Divide,t2):<b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;<font color="#0000FF">/</font>&quot;);
-                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> &amp;Integer(i)       : <b>printf</b>(&quot;<font color="#0000FF">%d</font>&quot;,i); <b>break</b>;
+     <b>case</b> &amp;Term(t1,Plus,t2) : <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                              <b>printf</b>(&quot;<font color="#0000FF">+</font>&quot;); 
+                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> &amp;Term(t1,Times,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                              <b>printf</b>(&quot;<font color="#0000FF">*</font>&quot;); 
+                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> &amp;Term(t1,Minus,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                              <b>printf</b>(&quot;<font color="#0000FF">-</font>&quot;);
+                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> &amp;Term(t1,Divide,t2):<b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                              <b>printf</b>(&quot;<font color="#0000FF">/</font>&quot;);
+                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
   }</pre>
 <p>Note that patterns introduce and initialize new variables local to a given
 case.&nbsp; For instance, in the Integer case above, the pattern variable i is
@@ -746,11 +768,11 @@ last thing in the case.&nbsp; If you want to fallthru to a case that defines new
 variables, then you need to give values for those variables.&nbsp; For instance,
 in the following code:</p>
 <pre>
-  <b>void</b> foo(<b>enum</b> absyn tree) {
+  <b>void</b> foo(<b>tunion</b> absyn tree) {
      <b>switch</b> (tree) {
-     <b>case</b> Integer(i)       : printf(&quot;<font color="#0000FF">%d </font>&quot;,i); <b>break</b>;
-     <b>case</b> Term(t1,Plus,t2) : printf(&quot;<font color="#0000FF">It's a plus \n</font>&quot;); <b>fallthru</b>(t2,Plus,t1);
-     <b>case</b> Term(t1,op,t2)   : foo(t1); foo(t2); <b>break</b>;
+     <b>case</b> &amp;Integer(i)       : printf(&quot;<font color="#0000FF">%d </font>&quot;,i); <b>break</b>;
+     <b>case</b> &amp;Term(t1,Plus,t2) : printf(&quot;<font color="#0000FF">It's a plus \n</font>&quot;); <b>fallthru</b>(t2,Plus,t1);
+     <b>case</b> &amp;Term(t1,op,t2)   : foo(t1); foo(t2); <b>break</b>;
   }</pre>
 <p>if we pass it a tree Term(Integer(3),Plus,Integer(4)) then we will see
 &quot;It's a plus 4 3 &quot;, but if we pass it
@@ -776,15 +798,15 @@ pass a tuple to a function, then you can extract the components as follows:</p>
     <b>return</b> (x+y+z);
   }</pre>
 <hr>
-<h4><a name="Extensible Enums (xenums):">Extensible Enums (xenums):</a></h4>
-<p>Extensible enums (xenums) are just like enums except that you can add new
-constructors anytime you want.&nbsp; Thus, enums are &quot;closed world&quot;
-datatypes, whereas xenums are &quot;open world&quot; datatypes.&nbsp; Both are
+<h4><a name="Extensible Tagged Unions (xtunions):">Extensible Tagged Unions (xtunions):</a></h4>
+<p>Extensible tunions (xtunions) are just like tunions except that you can add new
+constructors anytime you want.&nbsp; Thus, tunions are &quot;closed world&quot;
+datatypes, whereas xtunions are &quot;open world&quot; datatypes.&nbsp; Both are
 useful.&nbsp; For instance, with a close world representation of abstract syntax
 trees, when we write a function such as print_absyn, we can be sure that we've
 covered all of the cases.&nbsp; However, if we want an extensible setting, where
 programmers are adding new kinds of nodes all the time, then it's useful to use
-xenums.&nbsp; Right now, we really only use xenums in the parser (for various
+xtunions.&nbsp; Right now, we really only use xtunions in the parser (for various
 semantic values) and for exceptions.&nbsp; We might add better subtyping support
 for them so that you can extend them depth-wise as well as
 width-wise.&nbsp;&nbsp;</p>
@@ -838,7 +860,7 @@ type variables are those that can be treated uniformly.&nbsp; This ensures that
 we can use the same code for different types.&nbsp; The general rule is that
 values of the types that instantiate a type variable must fit into a machine
 word and must be passed in general-purpose (as opposed to floating-point)
-registers.&nbsp; Examples of such types include int, pointer, enum, and xenum
+registers.&nbsp; Examples of such types include int, pointer, tunion, and xtunion
 types.&nbsp; Other types, including char, short, long long, float,
 double, struct, and tuple types violate this rule and thus values of
 these types cannot be passed to a
@@ -859,24 +881,25 @@ it.&nbsp;</p>
 <hr>
 <h4><a name="Polymorphic Data Structures:">Polymorphic Data Structures:</a></h4>
 <p>Just as function definitions can be parameterized by types, so can struct
-definitions, enum definitions, and even typedefs.&nbsp; For instance, the
+definitions, tunion definitions, and even typedefs.&nbsp; For instance, the
 following struct definition is used in the standard library for lists:</p>
-<pre>  <b>struct</b> cons&lt;`a&gt; {`a hd; <b>struct</b> cons&lt;`a&gt; *tl; };
-  <b>typedef</b> <b>struct</b> cons&lt;`a&gt; *list&lt;`a&gt;;</pre>
-<p>Here, we've declared a struct cons parameterized by a type `a.&nbsp; The hd
+<pre>  <b>struct</b> List&lt;`a&gt; {`a hd; <b>struct</b> List&lt;`a&gt; *tl; };
+  <b>typedef</b> <b>struct</b> List&lt;`a&gt; *list_t&lt;`a&gt;;</pre>
+<p>Here, we've declared a struct List parameterized by a type `a.&nbsp; The hd
 field contains an element of type `a and the tl field contains a (possibly null)
-pointer to a struct cons with elements of type `a.&nbsp; We then define
-list&lt;`a&gt; as an abbreviation for struct cons&lt;`a&gt;*.&nbsp; So, for
+pointer to a struct List with elements of type `a.&nbsp; We then define
+list_t&lt;`a&gt; as an abbreviation for struct List&lt;`a&gt;*.&nbsp; So, for
 instance, we can declare both integer and string lists like this:</p>
-<pre>  list&lt;int&gt; ilist = &amp;cons{1,&amp;cons{2,null}};
-  list&lt;string&gt; slist = &amp;cons{.hd=&quot;<font color="#0000FF">foo</font>&quot;,.tl=&amp;cons{&quot;<font color="#0000FF">bar</font>&quot;,null}};</pre>
-<p>Note that we use &quot;&amp;&quot; like &quot;new&quot; in C++ to allocate a
-new struct cons on the heap and return a pointer to the resulting (initialized)
-cons object.&nbsp; Note also that the field designator (&quot;.hd&quot;,
+<pre>  list_t&lt;int&gt; ilist = <b>new</b> List{1,<b>new</b> List{2,null}};
+  list_t&lt;string&gt; slist = <b>new</b> List{.hd = &quot;<font color="#0000FF">foo</font>&quot;,.tl = <b>new</b> List{&quot;<font color="#0000FF">bar</font>&quot;,null}};</pre>
+<p>Note that we use &quot;new&quot; as in C++ to allocate a
+new struct List on the heap and return a pointer to the resulting (initialized)
+List object.&nbsp; Note also that the field designator (&quot;.hd&quot;,
 &quot;.tl&quot;) are optional.</p>
 <p>Once you have polymorphic data structures, you can write lots of useful
 polymorphic code and use it over and over again.&nbsp; For instance, the
-standard list library includes functions for mapping over a list, looking up
+standard list library (see lib/list.h) 
+includes functions for mapping over a list, looking up
 items in a list, concatenating two lists, copying lists, sorting lists,
 etc.&nbsp;&nbsp;</p>
 <hr>
@@ -885,7 +908,7 @@ etc.&nbsp;&nbsp;</p>
 In Cyclone, the way this is accomplished is by declaring a struct that
 encapsulates the implementation type, and by adding the &quot;abstract&quot;
 qualifier to the struct definition.&nbsp; For instance, if we write:</p>
-<pre>  <b>abstract </b><b>struct</b> Queue&lt;`a&gt; { list&lt;`a&gt; front, rear; };</pre>
+<pre>  <b>abstract </b><b>struct</b> Queue&lt;`a&gt; { list_t&lt;`a&gt; front, rear; };</pre>
 <p>then this declares a polymorphic Queue implementation that is abstract.&nbsp;
 The definition of the struct is available within the unit that declares the
 Queue, but will not be made available to the outside world.&nbsp; (This will be
@@ -894,9 +917,9 @@ together.)&nbsp; Typically, the provider of the Queue abstraction would write in
 an interface file:</p>
 <pre>  <b>extern struct </b>Queue&lt;`a&gt;;</pre>
 <p>The abstract keyword in the implementation ensures that the definition does
-not leak to a client.&nbsp; One can also declare enums to be abstract, though I
-find it more useful to always use a struct to encapsulate the enum, and make the
-enum static, and the struct abstract.&nbsp; That way, clients are always given
+not leak to a client.&nbsp; One can also declare tunions to be abstract, though I
+find it more useful to always use a struct to encapsulate the tunion, and make the
+tunion static, and the struct abstract.&nbsp; That way, clients are always given
 an abstract struct to manipulate.&nbsp;&nbsp;</p>
 <p>Typedefs cannot be made abstract.&nbsp; As in C, typedefs are type
 abbreviations and are expanded at compile time.&nbsp; If we chose to make them
@@ -904,7 +927,7 @@ abbreviations and are expanded at compile time.&nbsp; If we chose to make them
 restriction, similar to the restrictions on type variables.&nbsp; To simplify
 the language, we chose to make structs abstract.&nbsp;&nbsp;</p>
 <p>It's also possible to code up &quot;first-class&quot; abstract data types
-using enums or xenums.&nbsp; Individual [x]enum constructors can be
+using tunions or xtunions.&nbsp; Individual [x]tunion constructors can be
 parameterized by additional type variables that are local to the
 type-constructor.&nbsp; (From a type-theoretic point of view, these are
 existentially-quantified variables.)&nbsp; I won't bother to say a lot more
@@ -923,7 +946,8 @@ the standard library which implement first-class closures.</p>
   <li>Cyclone requires every function to declare a return type
     (the implicit <tt>int</tt> for the return type of a function
     is removed).</li>
-  <li>Cyclone requires the format argument of the printf functions to
+  <li>Cyclone requires the format argument of the printf, fprintf,
+    and sprintf functions to
     be a string constant.  This is so that we can statically protect
     against format string attacks.
     <i>(We should support dynamic checks too!)</i>
@@ -931,39 +955,71 @@ the standard library which implement first-class closures.</p>
   <li>Cyclone does not allow user-defined vararg functions.
     <i>(We should support this too.)</i></li>
   <li>Cyclone does not permit some of the casts that are allowed in C.
-    Incorrect casts in C can lead to crashes.</li>
+    Incorrect casts in C can lead to crashes.  In general, you should
+    be able to cast something from one type to another as long as the
+    underlying representations are compatible. </li>
   <li>Cyclone does not support pointer arithmetic on <tt>*</tt> or
     <tt>@</tt>; pointers.    Pointer arithmetic is not unsafe in
     itself, but it can lead to unsafe code when the resulting pointer
-    is assigned or dereferenced.</li>
+    is assigned or dereferenced.  You can cast the <tt>*</tt> or <tt>@</tt> 
+    value to a <tt>?</tt> value and then do the pointer arithmetic
+    instead.</li>
   <li>Cyclone inserts a NULL check when a <tt>*</tt> pointer
     is dereferenced and it cannot determine statically that the
     pointer is not NULL.  This prevents segmentation faults.</li>
   <li>Cyclone requires any function that is supposed to return a
     non-<tt>void</tt> value to execute a <tt>return</tt>
-    statement on every possible execution path.  This is needed to
+    statement (or throw an exception) 
+    on every possible execution path.  This is needed to
     ensure that the value returned from the function has the right type,
     and is not just a random value left in a register or on the stack.</li>
-  <li>Cyclone does not currently support <tt>malloc</tt>.
-  <i>(But this is coming soon!)</i>.  Instead we have a variety of
-    mechanisms for safely allocating, initializing, and reclaiming memory.</li>
+  <li>Unions in Cyclone can only hold &quot;bits&quot;.  In particular,
+    they can hold combinations of chars, ints, shorts, longs, floats,
+    doubles, structs of bits, or tuples of bits.  Pointer types are
+    not supported.  This avoids the situation where an arbitrary bit pattern
+    is cast to a pointer and then dereferenced.  If you want to use
+    multiple types, then use tagged unions (tunions.)
+  <li>Cyclone only supports a limited form of <tt>malloc</tt> which is baked
+    in.  Tuples, tunions, and structs can all be allocated via malloc
+    but this requires writing explicitly:  malloc(sizeof(t)) where t is
+    the type of the value that you are allocating.
   <li>Cyclone performs a static analysis to ensure that every variable
+    and every struct field 
     is initialized before it is used.  This prevents a random stack
-    value from being used improperly.</li>
+    value from being used improperly.  The analysis is somewhat conservative
+    so you may need to initialize things earlier than you would do in C.
+    For instance, currently, Cyclone does not support initializing a struct
+    in a procedure separate from the one that does the allocation.</li>
   <li>Cyclone does not permit <tt>goto</tt>s from one scope into another.
     C warns against this practice, as it can cause crashes; Cyclone
     rules it out entirely.</li>
   <li>Cyclone places some limitations on the form of
     <tt>switch</tt> statements that rule out crashes like those
-    caused by unrestricted <tt>goto</tt>.</li>
-  <li>Cyclone places some restrictions on <tt>union</tt>s for
-    safety reasons.  <i>(In fact we currently rule them out entirely,
-    but we should support them soon.)</i></li>
-  <li>Cyclone places some restrictions on linking for safety reasons.</li>
-  <li>Cyclone requires that every case in a <tt>switch</tt>
-    explicitly <tt>fallthru</tt> or <tt>break</tt>.</li>
+    caused by unrestricted <tt>goto</tt>.  Furthermore, Cyclone prevents
+    you from accidentally falling through from one case to another.  
+    To fall through, you must explicitly use the <b>fallthru</b> keyword.
+    Otherwise, you must explicitly break, goto, continue, return, or
+    throw an exception.
+  </li>
+  <li>In the near future, Cyclone will place some restrictions on linking 
+      for safety reasons.  In particular, if you import a variable or function
+      with one type, then it must be exported by another file with that type.
+      In addition, access to C code will be restricted based on a notion of
+      security <i>roles</i>.</li>
   <li>Cyclone has some new keywords (<tt>let</tt>,
     <tt>abstract</tt>, etc.) that can no longer be used as identifiers.</li>
+  <li>Cyclone prevents you from using pointers to stack-allocated objects 
+    as freely
+    as in C to avoid security holes.  
+    The reason is that each declaration block is placed in a
+    conceptual &quot;region&quot; and the type system tracks the region
+    into which a pointer points.  
+  <li>Cyclone currently does not support nested type declarations within
+    a function.  All struct, union, enum, tunion, xtunion, and typedef
+    definitions must be at the top-level.</li>
+  <li>Cyclone does not allow you to explicitly <tt>free</tt> a heap-
+    allocated object.  Instead, you can either use the region mechanism
+    or rely upon the conservative garbage collector to reclaim the space.
 </ul>
 
 <hr>
@@ -977,7 +1033,7 @@ start symbol is <i>translation-unit</i>.
 <b>Quick links:</b>
 <a href=#declaration><i>declaration</i></a>,
 <a href=#struct-or-union-specifier><i>struct-or-union-specifier</i></a>,
-<a href=#enum-specifier><i>enum-specifier</i></a>,
+<a href=#tunion-specifier><i>tunion-specifier</i></a>,
 <a href=#declarator><i>declarator</i></a>,
 <a href=#statement><i>statement</i></a>,
 <a href=#pattern><i>pattern</i></a>,
@@ -1067,7 +1123,7 @@ namespace <i>identifier</i></font>
   <code>extern</code>
   <code>typedef</code><br>
 <font color=red>
-  <code>abstract</code> &nbsp;&nbsp;&nbsp;<font color="#008000">// makes struct or enum declarations abstract </font>
+  <code>abstract</code> &nbsp;&nbsp;&nbsp;<font color="#008000">// makes struct or tunion declarations abstract </font>
 </font>
 <br>
 </ul>
@@ -1090,7 +1146,7 @@ are not yet supported)
   <code>signed</code><br>
   <code>unsigned</code>
   <i>struct-or-union-specifier</i>
-  <i>enum-specifier</i><br>
+  <i>tunion-specifier</i><br>
   <i>typedef-name</i> <font color=red><i>type-params<sub>opt</sub></i></font>
   <br> 
   <font color=red>
@@ -1175,15 +1231,15 @@ are not yet supported)
   <i>declarator<sub>opt</sub></i> <code>:</code> <i>constant-expression</i><br>
 </ul>
 <br>
-<a name=enum-specifier></a>
-<i>enum-specifier</i>:<br>
+<a name=tunion-specifier></a>
+<i>tunion-specifier</i>:<br>
 <ul>
-  <code>enum</code> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
-  <code>enum</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
-  <code>enum</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
+  <code>tunion</code> <code>{</code> <i>tunionerator-list</i> <code>}</code><br>
+  <code>tunion</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
+  <code>tunion</code> <i>identifier</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
 <font color=red>
-  <code>xenum</code> <i>identifier</i> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
-  <code>xenum</code> <i>identifier</i><br>
+  <code>xtunion</code> <i>identifier</i> <code>{</code> <i>enumerator-list</i> <code>}</code><br>
+  <code>xtunion</code> <i>identifier</i><br>
 </font>
 </ul>
 <br>
