@@ -4,8 +4,13 @@ include ../Makefile.inc
 # Override these variables, as well as CYCFLAGS, to test different
 #   compilers/libraries (probably because you are bootstrapping the compiler) 
 # (see targets test, test_bin, and test_src in parent directory's Makefile)
-CYCC=cyclone$(EXE)
 CYCBISON=cycbison$(EXE)
+ifndef devel
+CYCC=cyclone$(EXE)
+else
+CYCC=../src/cyclone$(EXE)
+CYCFLAGS=-I../lib -B../lib
+endif
 
 all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)
 	./test_regions

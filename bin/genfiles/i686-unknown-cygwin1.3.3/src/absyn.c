@@ -771,23 +771,22 @@ struct _tuple3{ struct Cyc_Absyn_Tqual f1; void* f2; } ; extern struct _tuple3*
 Cyc_Absyn_lookup_tuple_field( struct Cyc_List_List*, int); extern struct
 _tagged_arr Cyc_Absyn_attribute2string( void*); extern int Cyc_Absyn_fntype_att(
 void* a); extern struct _tagged_arr* Cyc_Absyn_fieldname( int); extern void Cyc_Absyn_print_decls(
-struct Cyc_List_List*); struct Cyc_Set_Set; extern unsigned char Cyc_Set_Absent[
-11u]; static const int Cyc_Typerep_Var= 0; struct Cyc_Typerep_Var_struct{ int
-tag; struct _tagged_arr* f1; } ; static const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{
-int tag; unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static
-const int Cyc_Typerep_Double= 1; static const int Cyc_Typerep_ThinPtr= 2; struct
-Cyc_Typerep_ThinPtr_struct{ int tag; unsigned int f1; void* f2; } ; static const
-int Cyc_Typerep_FatPtr= 3; struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1;
-} ; static const int Cyc_Typerep_Tuple= 4; struct _tuple4{ unsigned int f1; void*
-f2; } ; struct Cyc_Typerep_Tuple_struct{ int tag; unsigned int f1; struct
-_tagged_arr f2; } ; static const int Cyc_Typerep_TUnion= 5; struct Cyc_Typerep_TUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_XTUnion= 6;
-struct _tuple5{ struct _tagged_arr f1; void* f2; } ; struct Cyc_Typerep_XTUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_Union= 7;
-struct Cyc_Typerep_Union_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{ int tag;
-struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App= 9;
-struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
+struct Cyc_List_List*); static const int Cyc_Typerep_Var= 0; struct Cyc_Typerep_Var_struct{
+int tag; struct _tagged_arr* f1; } ; static const int Cyc_Typerep_Int= 1; struct
+Cyc_Typerep_Int_struct{ int tag; unsigned int f1; } ; static const int Cyc_Typerep_Float=
+0; static const int Cyc_Typerep_Double= 1; static const int Cyc_Typerep_ThinPtr=
+2; struct Cyc_Typerep_ThinPtr_struct{ int tag; unsigned int f1; void* f2; } ;
+static const int Cyc_Typerep_FatPtr= 3; struct Cyc_Typerep_FatPtr_struct{ int
+tag; void* f1; } ; static const int Cyc_Typerep_Tuple= 4; struct _tuple4{
+unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{ int tag;
+unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
+5; struct Cyc_Typerep_TUnion_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Typerep_XTUnion= 6; struct _tuple5{ struct _tagged_arr f1; void*
+f2; } ; struct Cyc_Typerep_XTUnion_struct{ int tag; struct _tagged_arr f1; } ;
+static const int Cyc_Typerep_Union= 7; struct Cyc_Typerep_Union_struct{ int tag;
+struct _tagged_arr f1; } ; static const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{
+int tag; struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App=
+9; struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
 unsigned int Cyc_Typerep_size_type( void* rep); extern void* Cyc_decls_rep;
 extern struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment_rep; extern
 int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct Cyc_Cstdio___sFILE;
@@ -810,9 +809,10 @@ int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
 Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
 int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
-int tag; float* f1; } ; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
-12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; static const int Cyc_Tcenv_VarRes=
-0; struct Cyc_Tcenv_VarRes_struct{ int tag; void* f1; } ; static const int Cyc_Tcenv_StructRes=
+int tag; float* f1; } ; struct Cyc_Set_Set; extern unsigned char Cyc_Set_Absent[
+11u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
+unsigned char Cyc_Dict_Absent[ 11u]; static const int Cyc_Tcenv_VarRes= 0;
+struct Cyc_Tcenv_VarRes_struct{ int tag; void* f1; } ; static const int Cyc_Tcenv_StructRes=
 1; struct Cyc_Tcenv_StructRes_struct{ int tag; struct Cyc_Absyn_Structdecl* f1;
 } ; static const int Cyc_Tcenv_TunionRes= 2; struct Cyc_Tcenv_TunionRes_struct{
 int tag; struct Cyc_Absyn_Tuniondecl* f1; struct Cyc_Absyn_Tunionfield* f2; } ;
@@ -833,7 +833,7 @@ Cyc_Tcenv_Hidden_struct{ int tag; void* f1; void* f2; } ; struct Cyc_Tcenv_Tenv{
 struct Cyc_List_List* ns; struct Cyc_Dict_Dict* ae; struct Cyc_Core_Opt* le; } ;
 extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void* Cyc_Tcutil_impos(
 struct _tagged_arr fmt, struct _tagged_arr ap); extern void* Cyc_Tcutil_compress(
-void* t); extern void Cyc_Marshal_print_type( void* rep, void** val); static int
+void* t); extern void Cyc_Marshal_print_type( void* rep, void* val); static int
 Cyc_Absyn_zstrlist_cmp( struct Cyc_List_List* ss1, struct Cyc_List_List* ss2){
 return(( int(*)( int(* cmp)( struct _tagged_arr*, struct _tagged_arr*), struct
 Cyc_List_List* l1, struct Cyc_List_List* l2)) Cyc_List_list_cmp)( Cyc_Std_zstrptrcmp,

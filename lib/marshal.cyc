@@ -25,6 +25,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <marshal.h>
+#include <set.h>
+#include <dict.h>
 
 using Typerep;
 using Marshal;
@@ -34,8 +36,65 @@ extern "C" `b unsafe_cast<`b,`a>(`a x);
 
 namespace Marshal;
 
+// utilities for addressing
+typedef Set::set_t<unsigned int> addr_set_t;
+typedef $(Dict::dict_t<unsigned int,int>,int) addr_index_t;
+typedef $(unsigned int?, int) addr_table_t;
+
+static int uint_cmp(unsigned int a, unsigned int b) {
+  if(a == b) return 0;
+  else if (a < b) return 1;
+  else return -1;
+}
+
+addr_set_t empty_addr_set () {
+  return Set::empty(uint_cmp);
+}
+
+// returns whether elt is a member, inserts if it's not
+$(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
+  return new $(Set::member(set,val), Set::insert(set,val));
+}
 
 
+addr_index_t empty_addr_index() {
+  return $(Dict::empty(uint_cmp),0);
+}
+
+$(int, addr_index_t)@ lookup_insert(addr_index_t index, unsigned int val) {
+  let $(dict,n) = index;
+  let indopt = Dict::lookup_opt(dict,val);
+  if(indopt != NULL) {
+    return new $(indopt->v, index);
+  }
+  else {
+    return new $(-1, $(Dict::insert(dict,val,n),n+1));
+  }
+}
+
+addr_table_t empty_addr_table() {
+  return $(NULL,0);
+}
+
+addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
+  let $(vec,n) = tbl;
+  if(vec == NULL) {
+    vec = new {for j < 1: i};
+    return $(vec,1);
+  } else if(vec.size == n) {
+    vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
+    vec[n] = i;
+    return $(vec,n+1);
+  }
+  else { 
+    vec[n] = i;
+    return $(vec,n+1);
+  }
+}
+
+unsigned int table_lookup(addr_table_t tbl, int i) {
+  return tbl[0][i];
+}
 /*-------------------------------------------------------------------------*/
 /* Invariant: val points to a value of the type that rep represents      
  * env contains all addresses of tunion or pointer types
@@ -44,7 +103,7 @@ namespace Marshal;
  * we look it up to make sure that it's not a repeat
  */
 addr_set_t
-print_type_base(typestruct_t rep, addr_set_t env, `a @ val) 
+print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val) 
 {
   switch (rep) {
   case &Int(sz):
@@ -210,7 +269,7 @@ print_type_base(typestruct_t rep, addr_set_t env, `a @ val)
   return env;
 }
 
-void print_type(typestruct_t ts, `a@ val) {
+void print_type(typestruct_t ts, `a::A@ val) {
   try{
   print_type_base(ts,empty_addr_set(),val);
   } catch {
@@ -219,6 +278,387 @@ void print_type(typestruct_t ts, `a@ val) {
     throw new Core::Failure(s);
   }
 }
+
+// FIX: getw returns -1==EOF both when EOF is reached and when the next wird is a -1.  Write put/get{8,16,32} functions using fread, fwrite.  Redo using those.
+
+/* Writes a type out as binary out to a FILE* */
+/*-------------------------------------------------------------------------*/
+/* Invariant: val points to a value of the type that rep represents      
+ * env contains all addresses of tunion or pointer types
+ * (these are the only possible sources of sharing/cycles)
+ * before we follow a dereference through a pointer or tunion, 
+ * we look it up to make sure that it's not a repeat
+ */
+addr_index_t
+write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val) 
+{
+  switch (rep) {
+  case &Int(sz):
+    switch (sz) {
+    case 8:
+      char @x = unsafe_cast(val);
+      fputc(*x,fp);
+      break;
+    case 16:
+      short @x = unsafe_cast(val);
+      putw(*x,fp);
+      break;
+    case 32:
+      int @x = unsafe_cast(val);
+      putw(*x,fp);
+      break;
+    default:
+      fprintf(stderr,"write_type_base: illegal int size %d bits\n", sz);
+      exit(1);
+    }
+    break;
+  
+  case Float:
+    float@ x = unsafe_cast(val);
+    fwrite( (char?)(float?)x, sizeof(float), 1, fp);
+    break;
+  
+  case Double:
+    double@ x = unsafe_cast(val);
+    fwrite( (char?)(double?)x, sizeof(double), 1, fp);
+    break;
+
+  case &ThinPtr(sz,typ):
+    // val is a pointer to a pointer to whatever typ represents
+    int *x = unsafe_cast(val); 
+    int y = *x;
+    let &$(mem,env2) = lookup_insert(env,y);
+    env = env2;
+    putw(mem,fp);
+    putw( (y != 0) ? 1 : 0, fp);
+    if(mem == -1 && y != 0) {
+      int typ_szb = size_type(typ);
+      for (int i = 0; i<sz; i++) {
+	env = write_type_base(typ,env, fp, (`a@)unsafe_cast(y));
+	y += typ_szb;
+      }
+    }
+    break;
+
+  case &FatPtr(typ):
+    $(unsigned int, unsigned int, unsigned int) @`H x = unsafe_cast(val);
+    unsigned int typ_szb = size_type(typ);
+    unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
+    unsigned int pos = (curr-base)/typ_szb;
+    unsigned int sz = (last_plus_one - base)/typ_szb;
+    let &$(mem,env2) = lookup_insert(env,base);
+    env = env2;
+    putw(mem,fp);
+    putw( (base != 0) ? 1 : 0, fp);
+    putw(pos,fp);
+    putw(sz,fp);
+    if(mem == -1 && base != 0) { // not yet shared
+      for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
+	env = write_type_base(typ, env, fp, (`a@)unsafe_cast(i));
+      }
+    }
+    break;
+
+  case &Tuple(_,l):
+    int x = unsafe_cast(val); 
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x + ofs;
+      env = write_type_base(typ, env, fp, (`a@)unsafe_cast(x_ofs));
+    }
+    break;
+
+  case &TUnion(l):
+    /* get the tag */
+    unsigned int@ tagp = unsafe_cast(val);
+    if (*tagp < 1024) {
+      putw(*tagp-1025,fp); // since mem ranges from -1 to FFFFFFFF
+    }
+    else {
+      let &$(mem,env2) = lookup_insert(env,*tagp);
+      env = env2;
+      putw(mem,fp);
+      if(mem == -1) {
+	unsigned int @x = unsafe_cast(*tagp);
+	unsigned int tag = *x;
+	putw(tag,fp);
+	/* figure out which variant it is */
+	typestruct_t typ = get_unionbranch(tag,l);
+	env = write_type_base(typ, env, fp, x);
+      }
+    }
+    break;
+    
+
+  case &XTUnion(l):
+    // val is a pointer to a xtunion, which is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
+    unsigned int@ xtunionp = unsafe_cast(val);
+    let &$(mem,env2) = lookup_insert(env,*xtunionp);
+    env = env2;
+    putw(mem,fp);
+    if(mem == -1) {
+      // get the pointer to the name string "\0\0\0\0Name"
+      unsigned int* xtstructp = unsafe_cast(*xtunionp);
+      if(*xtstructp != 0) {
+	fputc(1,fp);
+	Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	fprintf(fp,"%s",xtname);
+	fputc(0,fp);
+	typestruct_t typ = get_xtunionbranch(xtname,l);
+	env = write_type_base(typ, env, fp, (_@)xtstructp);
+      }
+      else {
+	fputc(0,fp);
+	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	fprintf(fp,"%s",xtname);
+	fputc(0,fp);
+      }
+    }
+    break;
+
+
+
+    // messy...better to just do a flat write somehow
+  case &Union(l): 
+    int sz = size_type(rep);
+    // Claim: impossible that env actually changes here.
+    env = write_type_base(new Tuple(sz,new {for i < sz: new $(i,new Int(8))}), env, fp, val);
+    break;
+    
+
+  default: throw new Core::Failure("Unhandled case in write_type_base");
+  }
+  return env;
+}
+
+#define MAXXTUNIONSIZE 100
+
+void write_type(typestruct_t ts, FILE@ fp, `a::A@ val) {
+  try{
+  write_type_base(ts,empty_addr_index(),fp, val);
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Core::Failure(%s)\n",s);
+    throw new Core::Failure(s);
+  }
+}
+
+void fscanntstring(FILE@ fp, mstring_t s) {
+  int c;
+  int i = 0;
+  while((c = fgetc(fp)) && (c != EOF)) {
+    s[i] = (char)c;
+    i++;
+  }
+  s[i] = 0;
+}
+
+addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@ result) {
+  switch(rep) {
+  case &Int(sz):
+    switch(sz) {
+    case 8:
+      char@ x = unsafe_cast(result);
+      *x = (char)fgetc(fp); // beware EOF
+      break;
+    case 16:
+      short@ x = unsafe_cast(result);
+      *x = (short)getw(fp);
+      break;
+    case 32:
+      int@ x = unsafe_cast(result);
+      *x = getw(fp);
+      break;
+    default:
+      throw new Core::Failure("read_type_base: illegal int size bits");
+    }
+    break;
+  case Float:
+    char? x = new {for i < sizeof(float):0};
+    fread(x,sizeof(float),1,fp);
+    float@ xx = unsafe_cast((_*) x);
+    float@ y = unsafe_cast(result);
+    *y = *xx;
+    break;
+    
+    
+  case Double:
+    char? x = new {for i < sizeof(double):0};
+    fread(x,sizeof(double),1,fp);
+    double@ xx = unsafe_cast((_*) x);
+    double@ y = unsafe_cast(result);
+    *y = *xx;
+    break;
+
+  case &ThinPtr(sz,typ):
+    int mem = getw(fp);
+    int nonnull = getw(fp);
+    if(mem == -1) { // not shared; read in value
+      int typ_szb = size_type(typ);
+      // allocate block
+      char? buf = nonnull ? new {for i < sz*typ_szb: 0} : NULL;  
+      // add to table
+      unsigned int bufptr = nonnull ?  (unsigned int)(_*)buf : 0;
+      unsigned int@ x = unsafe_cast(result);
+      *x=bufptr;
+      env = table_insert(env,bufptr);
+      // fill it in
+      if(nonnull) {
+	int y = bufptr;
+	for(int i = 0; i < sz; i++) {
+	  env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
+	  y += typ_szb;
+	}
+      }
+    } else { // return pointer to shared thing
+      unsigned int@ x = unsafe_cast(result);
+      *x = table_lookup(env,mem);
+    }
+    break;
+
+  case &FatPtr(typ):
+    int mem = getw(fp);
+    int nonnull = getw(fp);
+    int pos = getw(fp);
+    int sz = getw(fp);
+    int typ_szb = size_type(typ);
+    if(mem == -1) { // not shared; read in value
+      // allocate block
+      char? buf = nonnull ? new {for i < sz*typ_szb: 0} : NULL;  
+      // add to table
+      unsigned int bufptr = nonnull ? (unsigned int)(_*)buf : 0;
+      $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
+      (*x)[0] = bufptr;
+      (*x)[1] = bufptr+pos*typ_szb;
+      (*x)[2] = bufptr + sz*typ_szb;
+      env = table_insert(env,bufptr);
+      // fill it in
+      if(nonnull) {
+	int y = bufptr;
+	for(int i = 0; i < sz; i++) {
+	  env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
+	  y += typ_szb;
+	}
+      }
+    } else { // return pointer to shared thing
+      $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
+      (*x)[0] = table_lookup(env,mem);
+      (*x)[1] = (*x)[0] + typ_szb * pos;
+      (*x)[2] = (*x)[0] + typ_szb * sz;
+    }
+    break;
+
+  case &Tuple(_,l):
+    unsigned int x = unsafe_cast(result);
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs, typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      env = read_type_base(typ,env,fp,(`a@)unsafe_cast(x_ofs));
+    }
+    break;
+
+  case &TUnion(l): 
+    int tagmem = getw(fp);
+    if(tagmem < -1) {
+      int tag = tagmem+1025;
+      unsigned int@ x = unsafe_cast(result);
+      *x=tag;
+    } else {
+      int mem = tagmem;
+      if(mem == -1) {
+	int tag = getw(fp);
+	// figure out which variant it is
+	typestruct_t typ = get_unionbranch(tag,l);
+	// allocate memory for new tuple
+	char? buf = new {for i < size_type(typ) : 0};
+	unsigned int bufptr = (unsigned int)(_*)buf;
+	// add to table
+	env = table_insert(env,bufptr);
+	// assign to result
+	unsigned int@ x = unsafe_cast(result);
+	*x=bufptr;
+	// fill in buf
+	env = read_type_base(typ, env, fp, (`a@)unsafe_cast(bufptr));
+      } else {
+	// look up the corresponding pointer and fill in result
+	unsigned int@ x = unsafe_cast(result);
+	*x = table_lookup(env,mem);
+      }
+    }
+    break;
+
+    // somewhat messy
+    // suboptimal because it allocates and links in a new string for every tag encountered.  these strings already statically live in the program, so instead it would be better to use them directly.
+    // plan:  build a list of pointers to the tagname strings in l.
+    // read one character at a time, iterate through the list and remove 
+    // every pointer that doesn't match.
+    // if we hit \0 on both the (unique) remaining string and the input
+    // then we have a match, otherwise we have to fail with "don't know 
+    // what to do here"
+  case &XTUnion(l):
+    int mem = getw(fp);
+    if(mem == -1) {
+      char nonnull = (char)fgetc(fp);// need to be careful about EOF!
+      mstring_t s = new {for i < MAXXTUNIONSIZE : 0};
+      mstring_t xtname = s+4;
+      fscanntstring(fp,xtname);
+      if(nonnull) {
+	// figure out what branch
+	typestruct_t typ = get_xtunionbranch(xtname, l);
+	// allocate a new blob of the right size
+	char? buf = new {for i < size_type(typ): 0};
+	unsigned int bufptr = (unsigned int)(_*)buf;
+	// add to table
+	env = table_insert(env, bufptr);
+	// assign to result
+	unsigned int@ x = unsafe_cast(result);
+	*x = bufptr;
+	// fill in buf
+	env=read_type_base(typ, env, fp, (`a@)unsafe_cast(bufptr));
+	// this is wrong because when we write out the tag the second time (as part of typ) we just write \0, so when we read it back in we just read in the \0 again
+	// the right thing is to not duplicate the tag; fix this in typerep and here (and everywhere in (x)tunion code)
+	// for now, the fix is to shoehorn s into buf
+	unsigned int@ tagptr = unsafe_cast(bufptr);
+	*tagptr = (unsigned int)(_*)s;
+      } else { // build a non-data carrying xtunion: a pointer to NULL followed by an untagged pointer to 0000Tagname.
+	unsigned int@ x = unsafe_cast(result);
+	*x = (unsigned int)(_*)s;
+	env = table_insert(env, *x);
+      }
+    } else {
+      // look up the corresponding pointer and fill in result
+      unsigned int@ x = unsafe_cast(result);
+      *x = table_lookup(env,mem);
+    }
+    break;
+  case &Union(l): 
+    int sz = size_type(rep);
+    // Claim: impossible that env actually changes here.
+    env = read_type_base(new Tuple(sz,new {for i < sz: new $(i,new Int(8))}), env, fp, result);
+    break;
+    
+  default: throw new Core::Failure("Unhandled case in read_type_base");
+  }
+  return env;
+}
+
+// warning: pretty nasty
+`a::A@ read_type(typestruct_t ts, FILE@ fp) {
+  try{
+    char? buf = new {for i < size_type(ts):0}; // allocate buf for type
+    `a::A@`H result = unsafe_cast( (_*) buf); // result should point to the beginning of buf/s storage, not to the tagged array triple
+    read_type_base(ts,$(NULL,0),fp,result);
+    return result;
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Core::Failure(%s)\n",s);
+    throw new Core::Failure(s);
+  }
+}
+
+
 
 #if 0
 void

@@ -316,23 +316,23 @@ struct Cyc_Position_Segment; extern struct Cyc_Position_Segment* Cyc_Position_se
 int, int); static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse=
 1; static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
 _tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct
-Cyc_Set_Set; extern unsigned char Cyc_Set_Absent[ 11u]; static const int Cyc_Typerep_Var=
-0; struct Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static
-const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag;
-unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double=
-1; static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{
-int tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
-struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1; } ; static const int Cyc_Typerep_Tuple=
-4; struct _tuple1{ unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{
-int tag; unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
-5; struct Cyc_Typerep_TUnion_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Typerep_XTUnion= 6; struct _tuple2{ struct _tagged_arr f1; void*
-f2; } ; struct Cyc_Typerep_XTUnion_struct{ int tag; struct _tagged_arr f1; } ;
-static const int Cyc_Typerep_Union= 7; struct Cyc_Typerep_Union_struct{ int tag;
-struct _tagged_arr f1; } ; static const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{
-int tag; struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App=
-9; struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
+_tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; static
+const int Cyc_Typerep_Var= 0; struct Cyc_Typerep_Var_struct{ int tag; struct
+_tagged_arr* f1; } ; static const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{
+int tag; unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static
+const int Cyc_Typerep_Double= 1; static const int Cyc_Typerep_ThinPtr= 2; struct
+Cyc_Typerep_ThinPtr_struct{ int tag; unsigned int f1; void* f2; } ; static const
+int Cyc_Typerep_FatPtr= 3; struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1;
+} ; static const int Cyc_Typerep_Tuple= 4; struct _tuple1{ unsigned int f1; void*
+f2; } ; struct Cyc_Typerep_Tuple_struct{ int tag; unsigned int f1; struct
+_tagged_arr f2; } ; static const int Cyc_Typerep_TUnion= 5; struct Cyc_Typerep_TUnion_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_XTUnion= 6;
+struct _tuple2{ struct _tagged_arr f1; void* f2; } ; struct Cyc_Typerep_XTUnion_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_Union= 7;
+struct Cyc_Typerep_Union_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{ int tag;
+struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App= 9;
+struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
 unsigned int Cyc_Typerep_size_type( void* rep); struct Cyc_Std_tm{ int tm_sec;
 int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
 tm_yday; int tm_isdst; } ; extern void tzset(); extern int time( int* t); extern
@@ -696,9 +696,10 @@ print_externC_stmts: 1; int print_full_evars: 1; int generate_line_directives: 1
 int use_curr_namespace: 1; struct Cyc_List_List* curr_namespace; } ; extern
 struct _tagged_arr Cyc_Absynpp_typ2string( void*); extern struct _tagged_arr Cyc_Absynpp_typ2cstring(
 void*); extern unsigned int Cyc_Evexp_eval_const_uint_exp( struct Cyc_Absyn_Exp*
-e); static const int Cyc_Tcenv_VarRes= 0; struct Cyc_Tcenv_VarRes_struct{ int
-tag; void* f1; } ; static const int Cyc_Tcenv_StructRes= 1; struct Cyc_Tcenv_StructRes_struct{
-int tag; struct Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Tcenv_TunionRes=
+e); struct Cyc_Set_Set; extern unsigned char Cyc_Set_Absent[ 11u]; static const
+int Cyc_Tcenv_VarRes= 0; struct Cyc_Tcenv_VarRes_struct{ int tag; void* f1; } ;
+static const int Cyc_Tcenv_StructRes= 1; struct Cyc_Tcenv_StructRes_struct{ int
+tag; struct Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Tcenv_TunionRes=
 2; struct Cyc_Tcenv_TunionRes_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1;
 struct Cyc_Absyn_Tunionfield* f2; } ; static const int Cyc_Tcenv_EnumRes= 3;
 struct Cyc_Tcenv_EnumRes_struct{ int tag; struct Cyc_Absyn_Enumdecl* f1; struct

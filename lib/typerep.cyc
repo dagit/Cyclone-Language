@@ -33,29 +33,20 @@ using Dict;
 namespace Typerep;
 
 
-static int int_cmp(unsigned int a, unsigned int b) {
-  if(a == b) return 0;
-  else if (a < b) return 1;
-  else return -1;
-}
-
-addr_set_t empty_addr_set () {
-  return Set::empty(int_cmp);
-}
-
 
 /*-------------------------------------------------------------------------*/
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
+// FIX: currently includes the leading tag, this is wasteful
 tunion `r Typestruct
 get_unionbranch(unsigned int tag,
 		$(unsigned int,tunion `r Typestruct)@ ? l)
 {
-//    fprintf(stderr,"looking for tag %d\n",tag);
+  //fprintf(stderr,"looking for tag %d\n",tag);
   for (int i = 0; i < l.size; i++) {
     let $(btag,typ) = *(l[i]);
-//      fprintf(stderr,"  checking tag %d\n",btag);
+    //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
       return typ;
   }
@@ -105,19 +96,14 @@ size_type(typestruct_t rep)
     }
     return max;
   case &Var(_): return sizeof(void*); // everything of mem kind has same size as void*
-  case &Forall(_,rep): return sizeof(rep);
-  case &App(rep,_): return sizeof(rep);
+  case &Forall(_,rep): return size_type(*rep);
+  case &App(rep,_): return size_type(rep);
 
     //  default: throw new Core::Failure("Unhandled case in size_type");
   }
 }
 
 
-
-// returns whether elt is a member, inserts if it's not
-$(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
-  return new $(Set::member(set,val), Set::insert(set,val));
-}
 
 
 /*-------------------------------------------------------------------------*/

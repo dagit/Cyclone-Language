@@ -272,67 +272,57 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Set_Set; extern struct
-Cyc_Set_Set* Cyc_Set_empty( int(* cmp)( void*, void*)); extern struct Cyc_Set_Set*
-Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_member(
-struct Cyc_Set_Set* s, void* elt); extern unsigned char Cyc_Set_Absent[ 11u];
-static const int Cyc_Typerep_Var= 0; struct Cyc_Typerep_Var_struct{ int tag;
-struct _tagged_arr* f1; } ; static const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{
-int tag; unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static
-const int Cyc_Typerep_Double= 1; static const int Cyc_Typerep_ThinPtr= 2; struct
-Cyc_Typerep_ThinPtr_struct{ int tag; unsigned int f1; void* f2; } ; static const
-int Cyc_Typerep_FatPtr= 3; struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1;
-} ; static const int Cyc_Typerep_Tuple= 4; struct _tuple0{ unsigned int f1; void*
-f2; } ; struct Cyc_Typerep_Tuple_struct{ int tag; unsigned int f1; struct
-_tagged_arr f2; } ; static const int Cyc_Typerep_TUnion= 5; struct Cyc_Typerep_TUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_XTUnion= 6;
-struct _tuple1{ struct _tagged_arr f1; void* f2; } ; struct Cyc_Typerep_XTUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_Union= 7;
-struct Cyc_Typerep_Union_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{ int tag;
-struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App= 9;
-struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); static const int Cyc_Typerep_Var=
+0; struct Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static
+const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag;
+unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double=
+1; static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{
+int tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
+struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1; } ; static const int Cyc_Typerep_Tuple=
+4; struct _tuple0{ unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{
+int tag; unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
+5; struct Cyc_Typerep_TUnion_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Typerep_XTUnion= 6; struct _tuple1{ struct _tagged_arr f1; void*
+f2; } ; struct Cyc_Typerep_XTUnion_struct{ int tag; struct _tagged_arr f1; } ;
+static const int Cyc_Typerep_Union= 7; struct Cyc_Typerep_Union_struct{ int tag;
+struct _tagged_arr f1; } ; static const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{
+int tag; struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App=
+9; struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
 extern void Cyc_Typerep_print_typestruct( void* rep); extern void Cyc_Typerep_xmlize_typestruct(
-void* rep); extern void* Cyc_Typerep_normalize( void* ts); extern struct Cyc_Set_Set*
-Cyc_Typerep_empty_addr_set(); struct _tuple2{ int f1; struct Cyc_Set_Set* f2; }
-; extern struct _tuple2* Cyc_Typerep_member_insert( struct Cyc_Set_Set*,
-unsigned int); extern void* Cyc_Typerep_get_unionbranch( unsigned int tag,
-struct _tagged_arr l); extern void* Cyc_Typerep_get_xtunionbranch( struct
-_tagged_arr tag, struct _tagged_arr l); unsigned int Cyc_Typerep_size_type( void*
-rep); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE; extern unsigned char
-Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u];
-struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{ int
-tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{
-int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern int Cyc_Std_printf( struct _tagged_arr fmt,
-struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+void* rep); extern void* Cyc_Typerep_normalize( void* ts); extern void* Cyc_Typerep_get_unionbranch(
+unsigned int tag, struct _tagged_arr l); extern void* Cyc_Typerep_get_xtunionbranch(
+struct _tagged_arr tag, struct _tagged_arr l); unsigned int Cyc_Typerep_size_type(
+void* rep); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE; extern
+unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
+18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
+Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
+2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
+3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; extern int Cyc_Std_printf( struct _tagged_arr fmt, struct _tagged_arr);
+static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{ int
+tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
 int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
 Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
 3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
 int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
 _tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
 int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
-int tag; float* f1; } ; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
-12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict*
-Cyc_Dict_empty( int(* cmp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
-struct Cyc_Dict_Dict* d, void* k, void* v); extern void* Cyc_Dict_lookup( struct
-Cyc_Dict_Dict* d, void* k); extern int Cyc_Std_strcmp( struct _tagged_arr s1,
-struct _tagged_arr s2); static int Cyc_Typerep_int_cmp( unsigned int a,
-unsigned int b){ if( a ==  b){ return 0;} else{ if( a <  b){ return 1;} else{
-return - 1;}}} struct Cyc_Set_Set* Cyc_Typerep_empty_addr_set(){ return(( struct
-Cyc_Set_Set*(*)( int(* cmp)( unsigned int, unsigned int))) Cyc_Set_empty)( Cyc_Typerep_int_cmp);}
-void* Cyc_Typerep_get_unionbranch( unsigned int tag, struct _tagged_arr l){{ int
-i= 0; for( 0; i <  _get_arr_size( l, sizeof( struct _tuple0*)); i ++){ void*
-_temp2; unsigned int _temp4; struct _tuple0 _temp0=*(*(( struct _tuple0**)
-_check_unknown_subscript( l, sizeof( struct _tuple0*), i))); _LL5: _temp4=
-_temp0.f1; goto _LL3; _LL3: _temp2= _temp0.f2; goto _LL1; _LL1: if( _temp4 == 
-tag){ return _temp2;}}}( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
+} ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
+unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_empty(
+int(* cmp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct
+Cyc_Dict_Dict* d, void* k, void* v); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict*
+d, void* k); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
+_tagged_arr s2); void* Cyc_Typerep_get_unionbranch( unsigned int tag, struct
+_tagged_arr l){{ int i= 0; for( 0; i <  _get_arr_size( l, sizeof( struct _tuple0*));
+i ++){ void* _temp2; unsigned int _temp4; struct _tuple0 _temp0=*(*(( struct
+_tuple0**) _check_unknown_subscript( l, sizeof( struct _tuple0*), i))); _LL5:
+_temp4= _temp0.f1; goto _LL3; _LL3: _temp2= _temp0.f2; goto _LL1; _LL1: if(
+_temp4 ==  tag){ return _temp2;}}}( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp6=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp6[ 0]=({ struct Cyc_Core_Failure_struct _temp7; _temp7.tag= Cyc_Core_Failure;
 _temp7.f1= _tag_arr("Could not find tag in TUnion", sizeof( unsigned char), 29u);
@@ -375,445 +365,440 @@ sizeof( void*); _LL33: return sizeof( void*); _LL35: { int max= 0;{ int i= 0;
 for( 0; i <  _get_arr_size( _temp46, sizeof( void**)); i ++){ unsigned int
 _temp52= Cyc_Typerep_size_type(*(*(( void***) _check_unknown_subscript( _temp46,
 sizeof( void**), i)))); max=( int)( max <  _temp52? _temp52:( unsigned int) max);}}
-return( unsigned int) max;} _LL37: return sizeof( void*); _LL39: return sizeof(
-_temp48); _LL41: return sizeof( _temp50); _LL17:;} struct _tuple2* Cyc_Typerep_member_insert(
-struct Cyc_Set_Set* set, unsigned int val){ return({ struct _tuple2* _temp53=(
-struct _tuple2*) _cycalloc( sizeof( struct _tuple2)); _temp53->f1=(( int(*)(
-struct Cyc_Set_Set* s, unsigned int elt)) Cyc_Set_member)( set, val); _temp53->f2=((
-struct Cyc_Set_Set*(*)( struct Cyc_Set_Set* s, unsigned int elt)) Cyc_Set_insert)(
-set, val); _temp53;});} void Cyc_Typerep_print_typestruct( void* rep){ void*
-_temp54= rep; struct _tagged_arr* _temp80; unsigned int _temp82; void* _temp84;
-unsigned int _temp86; void* _temp88; struct _tagged_arr _temp90; unsigned int
-_temp92; struct _tagged_arr _temp94; struct _tagged_arr _temp96; struct
-_tagged_arr _temp98; void** _temp100; struct _tagged_arr _temp102; struct
-_tagged_arr _temp104; void* _temp106; _LL56: if(( unsigned int) _temp54 >  2u?*((
-int*) _temp54) ==  Cyc_Typerep_Var: 0){ _LL81: _temp80=(( struct Cyc_Typerep_Var_struct*)
-_temp54)->f1; goto _LL57;} else{ goto _LL58;} _LL58: if(( unsigned int) _temp54
->  2u?*(( int*) _temp54) ==  Cyc_Typerep_Int: 0){ _LL83: _temp82=(( struct Cyc_Typerep_Int_struct*)
-_temp54)->f1; goto _LL59;} else{ goto _LL60;} _LL60: if( _temp54 == ( void*) Cyc_Typerep_Float){
-goto _LL61;} else{ goto _LL62;} _LL62: if( _temp54 == ( void*) Cyc_Typerep_Double){
-goto _LL63;} else{ goto _LL64;} _LL64: if(( unsigned int) _temp54 >  2u?*(( int*)
-_temp54) ==  Cyc_Typerep_ThinPtr: 0){ _LL87: _temp86=(( struct Cyc_Typerep_ThinPtr_struct*)
-_temp54)->f1; goto _LL85; _LL85: _temp84=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
-_temp54)->f2; goto _LL65;} else{ goto _LL66;} _LL66: if(( unsigned int) _temp54
->  2u?*(( int*) _temp54) ==  Cyc_Typerep_FatPtr: 0){ _LL89: _temp88=( void*)((
-struct Cyc_Typerep_FatPtr_struct*) _temp54)->f1; goto _LL67;} else{ goto _LL68;}
-_LL68: if(( unsigned int) _temp54 >  2u?*(( int*) _temp54) ==  Cyc_Typerep_Tuple:
-0){ _LL93: _temp92=(( struct Cyc_Typerep_Tuple_struct*) _temp54)->f1; goto _LL91;
-_LL91: _temp90=(( struct Cyc_Typerep_Tuple_struct*) _temp54)->f2; goto _LL69;}
-else{ goto _LL70;} _LL70: if(( unsigned int) _temp54 >  2u?*(( int*) _temp54) == 
-Cyc_Typerep_TUnion: 0){ _LL95: _temp94=(( struct Cyc_Typerep_TUnion_struct*)
-_temp54)->f1; goto _LL71;} else{ goto _LL72;} _LL72: if(( unsigned int) _temp54
->  2u?*(( int*) _temp54) ==  Cyc_Typerep_XTUnion: 0){ _LL97: _temp96=(( struct
-Cyc_Typerep_XTUnion_struct*) _temp54)->f1; goto _LL73;} else{ goto _LL74;} _LL74:
-if(( unsigned int) _temp54 >  2u?*(( int*) _temp54) ==  Cyc_Typerep_Union: 0){
-_LL99: _temp98=(( struct Cyc_Typerep_Union_struct*) _temp54)->f1; goto _LL75;}
-else{ goto _LL76;} _LL76: if(( unsigned int) _temp54 >  2u?*(( int*) _temp54) == 
-Cyc_Typerep_Forall: 0){ _LL103: _temp102=(( struct Cyc_Typerep_Forall_struct*)
-_temp54)->f1; goto _LL101; _LL101: _temp100=(( struct Cyc_Typerep_Forall_struct*)
-_temp54)->f2; goto _LL77;} else{ goto _LL78;} _LL78: if(( unsigned int) _temp54
->  2u?*(( int*) _temp54) ==  Cyc_Typerep_App: 0){ _LL107: _temp106=( void*)((
-struct Cyc_Typerep_App_struct*) _temp54)->f1; goto _LL105; _LL105: _temp104=((
-struct Cyc_Typerep_App_struct*) _temp54)->f2; goto _LL79;} else{ goto _LL55;}
-_LL57:({ struct Cyc_Std_String_pa_struct _temp109; _temp109.tag= Cyc_Std_String_pa;
-_temp109.f1=( struct _tagged_arr)* _temp80;{ void* _temp108[ 1u]={& _temp109};
+return( unsigned int) max;} _LL37: return sizeof( void*); _LL39: return Cyc_Typerep_size_type(*
+_temp48); _LL41: return Cyc_Typerep_size_type( _temp50); _LL17:;} void Cyc_Typerep_print_typestruct(
+void* rep){ void* _temp53= rep; struct _tagged_arr* _temp79; unsigned int
+_temp81; void* _temp83; unsigned int _temp85; void* _temp87; struct _tagged_arr
+_temp89; unsigned int _temp91; struct _tagged_arr _temp93; struct _tagged_arr
+_temp95; struct _tagged_arr _temp97; void** _temp99; struct _tagged_arr _temp101;
+struct _tagged_arr _temp103; void* _temp105; _LL55: if(( unsigned int) _temp53 > 
+2u?*(( int*) _temp53) ==  Cyc_Typerep_Var: 0){ _LL80: _temp79=(( struct Cyc_Typerep_Var_struct*)
+_temp53)->f1; goto _LL56;} else{ goto _LL57;} _LL57: if(( unsigned int) _temp53
+>  2u?*(( int*) _temp53) ==  Cyc_Typerep_Int: 0){ _LL82: _temp81=(( struct Cyc_Typerep_Int_struct*)
+_temp53)->f1; goto _LL58;} else{ goto _LL59;} _LL59: if( _temp53 == ( void*) Cyc_Typerep_Float){
+goto _LL60;} else{ goto _LL61;} _LL61: if( _temp53 == ( void*) Cyc_Typerep_Double){
+goto _LL62;} else{ goto _LL63;} _LL63: if(( unsigned int) _temp53 >  2u?*(( int*)
+_temp53) ==  Cyc_Typerep_ThinPtr: 0){ _LL86: _temp85=(( struct Cyc_Typerep_ThinPtr_struct*)
+_temp53)->f1; goto _LL84; _LL84: _temp83=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
+_temp53)->f2; goto _LL64;} else{ goto _LL65;} _LL65: if(( unsigned int) _temp53
+>  2u?*(( int*) _temp53) ==  Cyc_Typerep_FatPtr: 0){ _LL88: _temp87=( void*)((
+struct Cyc_Typerep_FatPtr_struct*) _temp53)->f1; goto _LL66;} else{ goto _LL67;}
+_LL67: if(( unsigned int) _temp53 >  2u?*(( int*) _temp53) ==  Cyc_Typerep_Tuple:
+0){ _LL92: _temp91=(( struct Cyc_Typerep_Tuple_struct*) _temp53)->f1; goto _LL90;
+_LL90: _temp89=(( struct Cyc_Typerep_Tuple_struct*) _temp53)->f2; goto _LL68;}
+else{ goto _LL69;} _LL69: if(( unsigned int) _temp53 >  2u?*(( int*) _temp53) == 
+Cyc_Typerep_TUnion: 0){ _LL94: _temp93=(( struct Cyc_Typerep_TUnion_struct*)
+_temp53)->f1; goto _LL70;} else{ goto _LL71;} _LL71: if(( unsigned int) _temp53
+>  2u?*(( int*) _temp53) ==  Cyc_Typerep_XTUnion: 0){ _LL96: _temp95=(( struct
+Cyc_Typerep_XTUnion_struct*) _temp53)->f1; goto _LL72;} else{ goto _LL73;} _LL73:
+if(( unsigned int) _temp53 >  2u?*(( int*) _temp53) ==  Cyc_Typerep_Union: 0){
+_LL98: _temp97=(( struct Cyc_Typerep_Union_struct*) _temp53)->f1; goto _LL74;}
+else{ goto _LL75;} _LL75: if(( unsigned int) _temp53 >  2u?*(( int*) _temp53) == 
+Cyc_Typerep_Forall: 0){ _LL102: _temp101=(( struct Cyc_Typerep_Forall_struct*)
+_temp53)->f1; goto _LL100; _LL100: _temp99=(( struct Cyc_Typerep_Forall_struct*)
+_temp53)->f2; goto _LL76;} else{ goto _LL77;} _LL77: if(( unsigned int) _temp53
+>  2u?*(( int*) _temp53) ==  Cyc_Typerep_App: 0){ _LL106: _temp105=( void*)((
+struct Cyc_Typerep_App_struct*) _temp53)->f1; goto _LL104; _LL104: _temp103=((
+struct Cyc_Typerep_App_struct*) _temp53)->f2; goto _LL78;} else{ goto _LL54;}
+_LL56:({ struct Cyc_Std_String_pa_struct _temp108; _temp108.tag= Cyc_Std_String_pa;
+_temp108.f1=( struct _tagged_arr)* _temp79;{ void* _temp107[ 1u]={& _temp108};
 Cyc_Std_printf( _tag_arr("Var(%s)", sizeof( unsigned char), 8u), _tag_arr(
-_temp108, sizeof( void*), 1u));}}); goto _LL55; _LL59:({ struct Cyc_Std_Int_pa_struct
-_temp111; _temp111.tag= Cyc_Std_Int_pa; _temp111.f1=( int) _temp82;{ void*
-_temp110[ 1u]={& _temp111}; Cyc_Std_printf( _tag_arr("Int(%d)", sizeof(
-unsigned char), 8u), _tag_arr( _temp110, sizeof( void*), 1u));}}); goto _LL55;
-_LL61:({ void* _temp112[ 0u]={}; Cyc_Std_printf( _tag_arr("Float", sizeof(
-unsigned char), 6u), _tag_arr( _temp112, sizeof( void*), 0u));}); goto _LL55;
-_LL63:({ void* _temp113[ 0u]={}; Cyc_Std_printf( _tag_arr("Double", sizeof(
-unsigned char), 7u), _tag_arr( _temp113, sizeof( void*), 0u));}); goto _LL55;
-_LL65:({ struct Cyc_Std_Int_pa_struct _temp115; _temp115.tag= Cyc_Std_Int_pa;
-_temp115.f1=( int) _temp86;{ void* _temp114[ 1u]={& _temp115}; Cyc_Std_printf(
-_tag_arr("ThinPtr(%d,", sizeof( unsigned char), 12u), _tag_arr( _temp114,
-sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct( _temp84);({ void*
-_temp116[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof( unsigned char), 2u),
-_tag_arr( _temp116, sizeof( void*), 0u));}); goto _LL55; _LL67:({ void* _temp117[
+_temp107, sizeof( void*), 1u));}}); goto _LL54; _LL58:({ struct Cyc_Std_Int_pa_struct
+_temp110; _temp110.tag= Cyc_Std_Int_pa; _temp110.f1=( int) _temp81;{ void*
+_temp109[ 1u]={& _temp110}; Cyc_Std_printf( _tag_arr("Int(%d)", sizeof(
+unsigned char), 8u), _tag_arr( _temp109, sizeof( void*), 1u));}}); goto _LL54;
+_LL60:({ void* _temp111[ 0u]={}; Cyc_Std_printf( _tag_arr("Float", sizeof(
+unsigned char), 6u), _tag_arr( _temp111, sizeof( void*), 0u));}); goto _LL54;
+_LL62:({ void* _temp112[ 0u]={}; Cyc_Std_printf( _tag_arr("Double", sizeof(
+unsigned char), 7u), _tag_arr( _temp112, sizeof( void*), 0u));}); goto _LL54;
+_LL64:({ struct Cyc_Std_Int_pa_struct _temp114; _temp114.tag= Cyc_Std_Int_pa;
+_temp114.f1=( int) _temp85;{ void* _temp113[ 1u]={& _temp114}; Cyc_Std_printf(
+_tag_arr("ThinPtr(%d,", sizeof( unsigned char), 12u), _tag_arr( _temp113,
+sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct( _temp83);({ void*
+_temp115[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof( unsigned char), 2u),
+_tag_arr( _temp115, sizeof( void*), 0u));}); goto _LL54; _LL66:({ void* _temp116[
 0u]={}; Cyc_Std_printf( _tag_arr("FatPtr(", sizeof( unsigned char), 8u),
-_tag_arr( _temp117, sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct(
-_temp88);({ void* _temp118[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof(
-unsigned char), 2u), _tag_arr( _temp118, sizeof( void*), 0u));}); goto _LL55;
-_LL69:({ struct Cyc_Std_Int_pa_struct _temp120; _temp120.tag= Cyc_Std_Int_pa;
-_temp120.f1=( int) _temp92;{ void* _temp119[ 1u]={& _temp120}; Cyc_Std_printf(
-_tag_arr("Tuple(%d,[", sizeof( unsigned char), 11u), _tag_arr( _temp119, sizeof(
-void*), 1u));}});{ int i= 0; for( 0; i <  _get_arr_size( _temp90, sizeof( struct
-_tuple0*)); i ++){ void* _temp123; unsigned int _temp125; struct _tuple0
-_temp121=*(*(( struct _tuple0**) _check_unknown_subscript( _temp90, sizeof(
-struct _tuple0*), i))); _LL126: _temp125= _temp121.f1; goto _LL124; _LL124:
-_temp123= _temp121.f2; goto _LL122; _LL122:({ struct Cyc_Std_Int_pa_struct
-_temp128; _temp128.tag= Cyc_Std_Int_pa; _temp128.f1=( int) _temp125;{ void*
-_temp127[ 1u]={& _temp128}; Cyc_Std_printf( _tag_arr("$(%d,", sizeof(
-unsigned char), 6u), _tag_arr( _temp127, sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct(
-_temp123);({ struct Cyc_Std_Int_pa_struct _temp130; _temp130.tag= Cyc_Std_Int_pa;
-_temp130.f1=( int)(( unsigned int)(( int)( i !=  _get_arr_size( _temp90, sizeof(
-struct _tuple0*)) -  1?',':' ')));{ void* _temp129[ 1u]={& _temp130}; Cyc_Std_printf(
-_tag_arr(")%c", sizeof( unsigned char), 4u), _tag_arr( _temp129, sizeof( void*),
-1u));}});}}({ void* _temp131[ 0u]={}; Cyc_Std_printf( _tag_arr(" ]", sizeof(
-unsigned char), 3u), _tag_arr( _temp131, sizeof( void*), 0u));}); goto _LL55;
-_LL71:({ void* _temp132[ 0u]={}; Cyc_Std_printf( _tag_arr("TUnion(", sizeof(
-unsigned char), 8u), _tag_arr( _temp132, sizeof( void*), 0u));});{ int i= 0;
-for( 0; i <  _get_arr_size( _temp94, sizeof( struct _tuple0*)); i ++){ void*
-_temp135; unsigned int _temp137; struct _tuple0 _temp133=*(*(( struct _tuple0**)
-_check_unknown_subscript( _temp94, sizeof( struct _tuple0*), i))); _LL138:
-_temp137= _temp133.f1; goto _LL136; _LL136: _temp135= _temp133.f2; goto _LL134;
-_LL134:({ struct Cyc_Std_Int_pa_struct _temp140; _temp140.tag= Cyc_Std_Int_pa;
-_temp140.f1=( int) _temp137;{ void* _temp139[ 1u]={& _temp140}; Cyc_Std_printf(
-_tag_arr("$(%d,", sizeof( unsigned char), 6u), _tag_arr( _temp139, sizeof( void*),
-1u));}}); Cyc_Typerep_print_typestruct( _temp135);({ struct Cyc_Std_Int_pa_struct
-_temp142; _temp142.tag= Cyc_Std_Int_pa; _temp142.f1=( int)(( unsigned int)(( int)(
-i !=  _get_arr_size( _temp94, sizeof( struct _tuple0*)) -  1?',':' ')));{ void*
-_temp141[ 1u]={& _temp142}; Cyc_Std_printf( _tag_arr(")%c", sizeof(
-unsigned char), 4u), _tag_arr( _temp141, sizeof( void*), 1u));}});}}({ void*
-_temp143[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof( unsigned char), 3u),
-_tag_arr( _temp143, sizeof( void*), 0u));}); goto _LL55; _LL73:({ void* _temp144[
+_tag_arr( _temp116, sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct(
+_temp87);({ void* _temp117[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof(
+unsigned char), 2u), _tag_arr( _temp117, sizeof( void*), 0u));}); goto _LL54;
+_LL68:({ struct Cyc_Std_Int_pa_struct _temp119; _temp119.tag= Cyc_Std_Int_pa;
+_temp119.f1=( int) _temp91;{ void* _temp118[ 1u]={& _temp119}; Cyc_Std_printf(
+_tag_arr("Tuple(%d,[", sizeof( unsigned char), 11u), _tag_arr( _temp118, sizeof(
+void*), 1u));}});{ int i= 0; for( 0; i <  _get_arr_size( _temp89, sizeof( struct
+_tuple0*)); i ++){ void* _temp122; unsigned int _temp124; struct _tuple0
+_temp120=*(*(( struct _tuple0**) _check_unknown_subscript( _temp89, sizeof(
+struct _tuple0*), i))); _LL125: _temp124= _temp120.f1; goto _LL123; _LL123:
+_temp122= _temp120.f2; goto _LL121; _LL121:({ struct Cyc_Std_Int_pa_struct
+_temp127; _temp127.tag= Cyc_Std_Int_pa; _temp127.f1=( int) _temp124;{ void*
+_temp126[ 1u]={& _temp127}; Cyc_Std_printf( _tag_arr("$(%d,", sizeof(
+unsigned char), 6u), _tag_arr( _temp126, sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct(
+_temp122);({ struct Cyc_Std_Int_pa_struct _temp129; _temp129.tag= Cyc_Std_Int_pa;
+_temp129.f1=( int)(( unsigned int)(( int)( i !=  _get_arr_size( _temp89, sizeof(
+struct _tuple0*)) -  1?',':' ')));{ void* _temp128[ 1u]={& _temp129}; Cyc_Std_printf(
+_tag_arr(")%c", sizeof( unsigned char), 4u), _tag_arr( _temp128, sizeof( void*),
+1u));}});}}({ void* _temp130[ 0u]={}; Cyc_Std_printf( _tag_arr(" ]", sizeof(
+unsigned char), 3u), _tag_arr( _temp130, sizeof( void*), 0u));}); goto _LL54;
+_LL70:({ void* _temp131[ 0u]={}; Cyc_Std_printf( _tag_arr("TUnion(", sizeof(
+unsigned char), 8u), _tag_arr( _temp131, sizeof( void*), 0u));});{ int i= 0;
+for( 0; i <  _get_arr_size( _temp93, sizeof( struct _tuple0*)); i ++){ void*
+_temp134; unsigned int _temp136; struct _tuple0 _temp132=*(*(( struct _tuple0**)
+_check_unknown_subscript( _temp93, sizeof( struct _tuple0*), i))); _LL137:
+_temp136= _temp132.f1; goto _LL135; _LL135: _temp134= _temp132.f2; goto _LL133;
+_LL133:({ struct Cyc_Std_Int_pa_struct _temp139; _temp139.tag= Cyc_Std_Int_pa;
+_temp139.f1=( int) _temp136;{ void* _temp138[ 1u]={& _temp139}; Cyc_Std_printf(
+_tag_arr("$(%d,", sizeof( unsigned char), 6u), _tag_arr( _temp138, sizeof( void*),
+1u));}}); Cyc_Typerep_print_typestruct( _temp134);({ struct Cyc_Std_Int_pa_struct
+_temp141; _temp141.tag= Cyc_Std_Int_pa; _temp141.f1=( int)(( unsigned int)(( int)(
+i !=  _get_arr_size( _temp93, sizeof( struct _tuple0*)) -  1?',':' ')));{ void*
+_temp140[ 1u]={& _temp141}; Cyc_Std_printf( _tag_arr(")%c", sizeof(
+unsigned char), 4u), _tag_arr( _temp140, sizeof( void*), 1u));}});}}({ void*
+_temp142[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof( unsigned char), 3u),
+_tag_arr( _temp142, sizeof( void*), 0u));}); goto _LL54; _LL72:({ void* _temp143[
 0u]={}; Cyc_Std_printf( _tag_arr("XTUnion(", sizeof( unsigned char), 9u),
-_tag_arr( _temp144, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp96, sizeof( struct _tuple1*)); i ++){ void* _temp147; struct
-_tagged_arr _temp149; struct _tuple1 _temp145=*(*(( struct _tuple1**)
-_check_unknown_subscript( _temp96, sizeof( struct _tuple1*), i))); _LL150:
-_temp149= _temp145.f1; goto _LL148; _LL148: _temp147= _temp145.f2; goto _LL146;
-_LL146:({ struct Cyc_Std_String_pa_struct _temp152; _temp152.tag= Cyc_Std_String_pa;
-_temp152.f1=( struct _tagged_arr) _tagged_arr_plus( _temp149, sizeof(
-unsigned char), 4);{ void* _temp151[ 1u]={& _temp152}; Cyc_Std_printf( _tag_arr("$(%s,",
-sizeof( unsigned char), 6u), _tag_arr( _temp151, sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct(
-_temp147);({ struct Cyc_Std_Int_pa_struct _temp154; _temp154.tag= Cyc_Std_Int_pa;
-_temp154.f1=( int)(( unsigned int)(( int)( i !=  _get_arr_size( _temp96, sizeof(
-struct _tuple1*)) -  1?',':' ')));{ void* _temp153[ 1u]={& _temp154}; Cyc_Std_printf(
-_tag_arr(")%c", sizeof( unsigned char), 4u), _tag_arr( _temp153, sizeof( void*),
-1u));}});}}({ void* _temp155[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof(
-unsigned char), 3u), _tag_arr( _temp155, sizeof( void*), 0u));}); goto _LL55;
-_LL75:({ void* _temp156[ 0u]={}; Cyc_Std_printf( _tag_arr("Union(", sizeof(
-unsigned char), 7u), _tag_arr( _temp156, sizeof( void*), 0u));});{ int i= 0;
-for( 0; i <  _get_arr_size( _temp98, sizeof( void**)); i ++){ Cyc_Typerep_print_typestruct(*(*((
-void***) _check_unknown_subscript( _temp98, sizeof( void**), i))));({ struct Cyc_Std_Int_pa_struct
-_temp158; _temp158.tag= Cyc_Std_Int_pa; _temp158.f1=( int)(( unsigned int)(( int)(
-i !=  _get_arr_size( _temp98, sizeof( void**)) -  1?',':' ')));{ void* _temp157[
-1u]={& _temp158}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char), 3u),
-_tag_arr( _temp157, sizeof( void*), 1u));}});}}({ void* _temp159[ 0u]={}; Cyc_Std_printf(
-_tag_arr(")", sizeof( unsigned char), 2u), _tag_arr( _temp159, sizeof( void*), 0u));});
-goto _LL55; _LL77:({ void* _temp160[ 0u]={}; Cyc_Std_printf( _tag_arr("Forall([",
-sizeof( unsigned char), 9u), _tag_arr( _temp160, sizeof( void*), 0u));});{ int i=
-0; for( 0; i <  _get_arr_size( _temp102, sizeof( struct _tagged_arr*)); i ++){({
-void* _temp161[ 0u]={}; Cyc_Std_printf(*(*(( struct _tagged_arr**)
-_check_unknown_subscript( _temp102, sizeof( struct _tagged_arr*), i))), _tag_arr(
-_temp161, sizeof( void*), 0u));});({ struct Cyc_Std_Int_pa_struct _temp163;
-_temp163.tag= Cyc_Std_Int_pa; _temp163.f1=( int)(( unsigned int)(( int)( i != 
-_get_arr_size( _temp102, sizeof( struct _tagged_arr*)) -  1?',':' ')));{ void*
-_temp162[ 1u]={& _temp163}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char),
-3u), _tag_arr( _temp162, sizeof( void*), 1u));}});}}({ void* _temp164[ 0u]={};
-Cyc_Std_printf( _tag_arr("],", sizeof( unsigned char), 3u), _tag_arr( _temp164,
-sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct(* _temp100);({ void*
-_temp165[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof( unsigned char), 2u),
-_tag_arr( _temp165, sizeof( void*), 0u));}); goto _LL55; _LL79:({ void* _temp166[
+_tag_arr( _temp143, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
+_get_arr_size( _temp95, sizeof( struct _tuple1*)); i ++){ void* _temp146; struct
+_tagged_arr _temp148; struct _tuple1 _temp144=*(*(( struct _tuple1**)
+_check_unknown_subscript( _temp95, sizeof( struct _tuple1*), i))); _LL149:
+_temp148= _temp144.f1; goto _LL147; _LL147: _temp146= _temp144.f2; goto _LL145;
+_LL145:({ struct Cyc_Std_String_pa_struct _temp151; _temp151.tag= Cyc_Std_String_pa;
+_temp151.f1=( struct _tagged_arr) _tagged_arr_plus( _temp148, sizeof(
+unsigned char), 4);{ void* _temp150[ 1u]={& _temp151}; Cyc_Std_printf( _tag_arr("$(%s,",
+sizeof( unsigned char), 6u), _tag_arr( _temp150, sizeof( void*), 1u));}}); Cyc_Typerep_print_typestruct(
+_temp146);({ struct Cyc_Std_Int_pa_struct _temp153; _temp153.tag= Cyc_Std_Int_pa;
+_temp153.f1=( int)(( unsigned int)(( int)( i !=  _get_arr_size( _temp95, sizeof(
+struct _tuple1*)) -  1?',':' ')));{ void* _temp152[ 1u]={& _temp153}; Cyc_Std_printf(
+_tag_arr(")%c", sizeof( unsigned char), 4u), _tag_arr( _temp152, sizeof( void*),
+1u));}});}}({ void* _temp154[ 0u]={}; Cyc_Std_printf( _tag_arr(" )", sizeof(
+unsigned char), 3u), _tag_arr( _temp154, sizeof( void*), 0u));}); goto _LL54;
+_LL74:({ void* _temp155[ 0u]={}; Cyc_Std_printf( _tag_arr("Union(", sizeof(
+unsigned char), 7u), _tag_arr( _temp155, sizeof( void*), 0u));});{ int i= 0;
+for( 0; i <  _get_arr_size( _temp97, sizeof( void**)); i ++){ Cyc_Typerep_print_typestruct(*(*((
+void***) _check_unknown_subscript( _temp97, sizeof( void**), i))));({ struct Cyc_Std_Int_pa_struct
+_temp157; _temp157.tag= Cyc_Std_Int_pa; _temp157.f1=( int)(( unsigned int)(( int)(
+i !=  _get_arr_size( _temp97, sizeof( void**)) -  1?',':' ')));{ void* _temp156[
+1u]={& _temp157}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char), 3u),
+_tag_arr( _temp156, sizeof( void*), 1u));}});}}({ void* _temp158[ 0u]={}; Cyc_Std_printf(
+_tag_arr(")", sizeof( unsigned char), 2u), _tag_arr( _temp158, sizeof( void*), 0u));});
+goto _LL54; _LL76:({ void* _temp159[ 0u]={}; Cyc_Std_printf( _tag_arr("Forall([",
+sizeof( unsigned char), 9u), _tag_arr( _temp159, sizeof( void*), 0u));});{ int i=
+0; for( 0; i <  _get_arr_size( _temp101, sizeof( struct _tagged_arr*)); i ++){({
+void* _temp160[ 0u]={}; Cyc_Std_printf(*(*(( struct _tagged_arr**)
+_check_unknown_subscript( _temp101, sizeof( struct _tagged_arr*), i))), _tag_arr(
+_temp160, sizeof( void*), 0u));});({ struct Cyc_Std_Int_pa_struct _temp162;
+_temp162.tag= Cyc_Std_Int_pa; _temp162.f1=( int)(( unsigned int)(( int)( i != 
+_get_arr_size( _temp101, sizeof( struct _tagged_arr*)) -  1?',':' ')));{ void*
+_temp161[ 1u]={& _temp162}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char),
+3u), _tag_arr( _temp161, sizeof( void*), 1u));}});}}({ void* _temp163[ 0u]={};
+Cyc_Std_printf( _tag_arr("],", sizeof( unsigned char), 3u), _tag_arr( _temp163,
+sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct(* _temp99);({ void*
+_temp164[ 0u]={}; Cyc_Std_printf( _tag_arr(")", sizeof( unsigned char), 2u),
+_tag_arr( _temp164, sizeof( void*), 0u));}); goto _LL54; _LL78:({ void* _temp165[
 0u]={}; Cyc_Std_printf( _tag_arr("App(", sizeof( unsigned char), 5u), _tag_arr(
-_temp166, sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct( _temp106);({
-void* _temp167[ 0u]={}; Cyc_Std_printf( _tag_arr(",[", sizeof( unsigned char), 3u),
-_tag_arr( _temp167, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp104, sizeof( void*)); i ++){ Cyc_Typerep_print_typestruct(*((
-void**) _check_unknown_subscript( _temp104, sizeof( void*), i)));({ struct Cyc_Std_Int_pa_struct
-_temp169; _temp169.tag= Cyc_Std_Int_pa; _temp169.f1=( int)(( unsigned int)(( int)(
-i !=  _get_arr_size( _temp104, sizeof( void*)) -  1?',':' ')));{ void* _temp168[
-1u]={& _temp169}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char), 3u),
-_tag_arr( _temp168, sizeof( void*), 1u));}});}}({ void* _temp170[ 0u]={}; Cyc_Std_printf(
-_tag_arr("])", sizeof( unsigned char), 3u), _tag_arr( _temp170, sizeof( void*),
-0u));}); goto _LL55; _LL55:;} void Cyc_Typerep_xmlize_typestruct( void* rep){
-void* _temp171= rep; struct _tagged_arr* _temp197; unsigned int _temp199; void*
-_temp201; unsigned int _temp203; void* _temp205; struct _tagged_arr _temp207;
-unsigned int _temp209; struct _tagged_arr _temp211; struct _tagged_arr _temp213;
-struct _tagged_arr _temp215; void** _temp217; struct _tagged_arr _temp219;
-struct _tagged_arr _temp221; void* _temp223; _LL173: if(( unsigned int) _temp171
->  2u?*(( int*) _temp171) ==  Cyc_Typerep_Var: 0){ _LL198: _temp197=(( struct
-Cyc_Typerep_Var_struct*) _temp171)->f1; goto _LL174;} else{ goto _LL175;} _LL175:
-if(( unsigned int) _temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_Int: 0){
-_LL200: _temp199=(( struct Cyc_Typerep_Int_struct*) _temp171)->f1; goto _LL176;}
-else{ goto _LL177;} _LL177: if( _temp171 == ( void*) Cyc_Typerep_Float){ goto
-_LL178;} else{ goto _LL179;} _LL179: if( _temp171 == ( void*) Cyc_Typerep_Double){
-goto _LL180;} else{ goto _LL181;} _LL181: if(( unsigned int) _temp171 >  2u?*((
-int*) _temp171) ==  Cyc_Typerep_ThinPtr: 0){ _LL204: _temp203=(( struct Cyc_Typerep_ThinPtr_struct*)
-_temp171)->f1; goto _LL202; _LL202: _temp201=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
-_temp171)->f2; goto _LL182;} else{ goto _LL183;} _LL183: if(( unsigned int)
-_temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_FatPtr: 0){ _LL206: _temp205=(
-void*)(( struct Cyc_Typerep_FatPtr_struct*) _temp171)->f1; goto _LL184;} else{
-goto _LL185;} _LL185: if(( unsigned int) _temp171 >  2u?*(( int*) _temp171) == 
-Cyc_Typerep_Tuple: 0){ _LL210: _temp209=(( struct Cyc_Typerep_Tuple_struct*)
-_temp171)->f1; goto _LL208; _LL208: _temp207=(( struct Cyc_Typerep_Tuple_struct*)
-_temp171)->f2; goto _LL186;} else{ goto _LL187;} _LL187: if(( unsigned int)
-_temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_TUnion: 0){ _LL212: _temp211=((
-struct Cyc_Typerep_TUnion_struct*) _temp171)->f1; goto _LL188;} else{ goto
-_LL189;} _LL189: if(( unsigned int) _temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_XTUnion:
-0){ _LL214: _temp213=(( struct Cyc_Typerep_XTUnion_struct*) _temp171)->f1; goto
-_LL190;} else{ goto _LL191;} _LL191: if(( unsigned int) _temp171 >  2u?*(( int*)
-_temp171) ==  Cyc_Typerep_Union: 0){ _LL216: _temp215=(( struct Cyc_Typerep_Union_struct*)
-_temp171)->f1; goto _LL192;} else{ goto _LL193;} _LL193: if(( unsigned int)
-_temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_Forall: 0){ _LL220: _temp219=((
-struct Cyc_Typerep_Forall_struct*) _temp171)->f1; goto _LL218; _LL218: _temp217=((
-struct Cyc_Typerep_Forall_struct*) _temp171)->f2; goto _LL194;} else{ goto
-_LL195;} _LL195: if(( unsigned int) _temp171 >  2u?*(( int*) _temp171) ==  Cyc_Typerep_App:
-0){ _LL224: _temp223=( void*)(( struct Cyc_Typerep_App_struct*) _temp171)->f1;
-goto _LL222; _LL222: _temp221=(( struct Cyc_Typerep_App_struct*) _temp171)->f2;
-goto _LL196;} else{ goto _LL172;} _LL174:({ struct Cyc_Std_String_pa_struct
-_temp226; _temp226.tag= Cyc_Std_String_pa; _temp226.f1=( struct _tagged_arr)*
-_temp197;{ void* _temp225[ 1u]={& _temp226}; Cyc_Std_printf( _tag_arr("<Var name=\"%s\"/>",
-sizeof( unsigned char), 17u), _tag_arr( _temp225, sizeof( void*), 1u));}}); goto
-_LL172; _LL176:({ struct Cyc_Std_Int_pa_struct _temp228; _temp228.tag= Cyc_Std_Int_pa;
-_temp228.f1=( int) _temp199;{ void* _temp227[ 1u]={& _temp228}; Cyc_Std_printf(
-_tag_arr("<Int sz=\"%d\"/>", sizeof( unsigned char), 15u), _tag_arr( _temp227,
-sizeof( void*), 1u));}}); goto _LL172; _LL178:({ void* _temp229[ 0u]={}; Cyc_Std_printf(
-_tag_arr("<Float/>", sizeof( unsigned char), 9u), _tag_arr( _temp229, sizeof(
-void*), 0u));}); goto _LL172; _LL180:({ void* _temp230[ 0u]={}; Cyc_Std_printf(
-_tag_arr("<Double/>", sizeof( unsigned char), 10u), _tag_arr( _temp230, sizeof(
-void*), 0u));}); goto _LL172; _LL182:({ struct Cyc_Std_Int_pa_struct _temp232;
-_temp232.tag= Cyc_Std_Int_pa; _temp232.f1=( int) _temp203;{ void* _temp231[ 1u]={&
-_temp232}; Cyc_Std_printf( _tag_arr("<ThinPtr sz=\"%d\">", sizeof( unsigned char),
-18u), _tag_arr( _temp231, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
-_temp201);({ void* _temp233[ 0u]={}; Cyc_Std_printf( _tag_arr("</ThinPtr",
-sizeof( unsigned char), 10u), _tag_arr( _temp233, sizeof( void*), 0u));}); goto
-_LL172; _LL184:({ void* _temp234[ 0u]={}; Cyc_Std_printf( _tag_arr("<FatPtr>",
-sizeof( unsigned char), 9u), _tag_arr( _temp234, sizeof( void*), 0u));}); Cyc_Typerep_xmlize_typestruct(
-_temp205);({ void* _temp235[ 0u]={}; Cyc_Std_printf( _tag_arr("</FatPtr>",
-sizeof( unsigned char), 10u), _tag_arr( _temp235, sizeof( void*), 0u));}); goto
-_LL172; _LL186:({ struct Cyc_Std_Int_pa_struct _temp237; _temp237.tag= Cyc_Std_Int_pa;
-_temp237.f1=( int) _temp209;{ void* _temp236[ 1u]={& _temp237}; Cyc_Std_printf(
-_tag_arr("<Tuple sz=\"%d\">", sizeof( unsigned char), 16u), _tag_arr( _temp236,
-sizeof( void*), 1u));}});{ int i= 0; for( 0; i <  _get_arr_size( _temp207,
-sizeof( struct _tuple0*)); i ++){ void* _temp240; unsigned int _temp242; struct
-_tuple0 _temp238=*(*(( struct _tuple0**) _check_unknown_subscript( _temp207,
-sizeof( struct _tuple0*), i))); _LL243: _temp242= _temp238.f1; goto _LL241;
-_LL241: _temp240= _temp238.f2; goto _LL239; _LL239:({ struct Cyc_Std_Int_pa_struct
-_temp245; _temp245.tag= Cyc_Std_Int_pa; _temp245.f1=( int) _temp242;{ void*
-_temp244[ 1u]={& _temp245}; Cyc_Std_printf( _tag_arr("<Component ofs=\"%d\">",
-sizeof( unsigned char), 21u), _tag_arr( _temp244, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
-_temp240);({ void* _temp246[ 0u]={}; Cyc_Std_printf( _tag_arr("</Component>",
-sizeof( unsigned char), 13u), _tag_arr( _temp246, sizeof( void*), 0u));});}}({
-void* _temp247[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tuple>", sizeof(
-unsigned char), 9u), _tag_arr( _temp247, sizeof( void*), 0u));}); goto _LL172;
-_LL188:({ void* _temp248[ 0u]={}; Cyc_Std_printf( _tag_arr("<TUnion>", sizeof(
-unsigned char), 9u), _tag_arr( _temp248, sizeof( void*), 0u));});{ int i= 0;
-for( 0; i <  _get_arr_size( _temp211, sizeof( struct _tuple0*)); i ++){ void*
-_temp251; unsigned int _temp253; struct _tuple0 _temp249=*(*(( struct _tuple0**)
-_check_unknown_subscript( _temp211, sizeof( struct _tuple0*), i))); _LL254:
-_temp253= _temp249.f1; goto _LL252; _LL252: _temp251= _temp249.f2; goto _LL250;
-_LL250:({ struct Cyc_Std_Int_pa_struct _temp256; _temp256.tag= Cyc_Std_Int_pa;
-_temp256.f1=( int) _temp253;{ void* _temp255[ 1u]={& _temp256}; Cyc_Std_printf(
-_tag_arr("<Tag tag=\"%d\">", sizeof( unsigned char), 15u), _tag_arr( _temp255,
-sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct( _temp251);({ void*
-_temp257[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tag>", sizeof( unsigned char), 7u),
-_tag_arr( _temp257, sizeof( void*), 0u));});}}({ void* _temp258[ 0u]={}; Cyc_Std_printf(
-_tag_arr("</Tunion>", sizeof( unsigned char), 10u), _tag_arr( _temp258, sizeof(
-void*), 0u));}); goto _LL172; _LL190:({ void* _temp259[ 0u]={}; Cyc_Std_printf(
-_tag_arr("<XTUnion>", sizeof( unsigned char), 10u), _tag_arr( _temp259, sizeof(
-void*), 0u));});{ int i= 0; for( 0; i <  _get_arr_size( _temp213, sizeof( struct
-_tuple1*)); i ++){ void* _temp262; struct _tagged_arr _temp264; struct _tuple1
-_temp260=*(*(( struct _tuple1**) _check_unknown_subscript( _temp213, sizeof(
-struct _tuple1*), i))); _LL265: _temp264= _temp260.f1; goto _LL263; _LL263:
-_temp262= _temp260.f2; goto _LL261; _LL261:({ struct Cyc_Std_String_pa_struct
-_temp267; _temp267.tag= Cyc_Std_String_pa; _temp267.f1=( struct _tagged_arr)
-_tagged_arr_plus( _temp264, sizeof( unsigned char), 4);{ void* _temp266[ 1u]={&
-_temp267}; Cyc_Std_printf( _tag_arr("<Tag tag=\"%s\">", sizeof( unsigned char),
-15u), _tag_arr( _temp266, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
-_temp262);({ void* _temp268[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tag>", sizeof(
-unsigned char), 7u), _tag_arr( _temp268, sizeof( void*), 0u));});}}({ void*
-_temp269[ 0u]={}; Cyc_Std_printf( _tag_arr("</XTunion>", sizeof( unsigned char),
-11u), _tag_arr( _temp269, sizeof( void*), 0u));}); goto _LL172; _LL192:({ void*
-_temp270[ 0u]={}; Cyc_Std_printf( _tag_arr("<Union>", sizeof( unsigned char), 8u),
-_tag_arr( _temp270, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp215, sizeof( void**)); i ++){({ void* _temp271[ 0u]={}; Cyc_Std_printf(
-_tag_arr("<Case>", sizeof( unsigned char), 7u), _tag_arr( _temp271, sizeof( void*),
+_temp165, sizeof( void*), 0u));}); Cyc_Typerep_print_typestruct( _temp105);({
+void* _temp166[ 0u]={}; Cyc_Std_printf( _tag_arr(",[", sizeof( unsigned char), 3u),
+_tag_arr( _temp166, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
+_get_arr_size( _temp103, sizeof( void*)); i ++){ Cyc_Typerep_print_typestruct(*((
+void**) _check_unknown_subscript( _temp103, sizeof( void*), i)));({ struct Cyc_Std_Int_pa_struct
+_temp168; _temp168.tag= Cyc_Std_Int_pa; _temp168.f1=( int)(( unsigned int)(( int)(
+i !=  _get_arr_size( _temp103, sizeof( void*)) -  1?',':' ')));{ void* _temp167[
+1u]={& _temp168}; Cyc_Std_printf( _tag_arr("%c", sizeof( unsigned char), 3u),
+_tag_arr( _temp167, sizeof( void*), 1u));}});}}({ void* _temp169[ 0u]={}; Cyc_Std_printf(
+_tag_arr("])", sizeof( unsigned char), 3u), _tag_arr( _temp169, sizeof( void*),
+0u));}); goto _LL54; _LL54:;} void Cyc_Typerep_xmlize_typestruct( void* rep){
+void* _temp170= rep; struct _tagged_arr* _temp196; unsigned int _temp198; void*
+_temp200; unsigned int _temp202; void* _temp204; struct _tagged_arr _temp206;
+unsigned int _temp208; struct _tagged_arr _temp210; struct _tagged_arr _temp212;
+struct _tagged_arr _temp214; void** _temp216; struct _tagged_arr _temp218;
+struct _tagged_arr _temp220; void* _temp222; _LL172: if(( unsigned int) _temp170
+>  2u?*(( int*) _temp170) ==  Cyc_Typerep_Var: 0){ _LL197: _temp196=(( struct
+Cyc_Typerep_Var_struct*) _temp170)->f1; goto _LL173;} else{ goto _LL174;} _LL174:
+if(( unsigned int) _temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_Int: 0){
+_LL199: _temp198=(( struct Cyc_Typerep_Int_struct*) _temp170)->f1; goto _LL175;}
+else{ goto _LL176;} _LL176: if( _temp170 == ( void*) Cyc_Typerep_Float){ goto
+_LL177;} else{ goto _LL178;} _LL178: if( _temp170 == ( void*) Cyc_Typerep_Double){
+goto _LL179;} else{ goto _LL180;} _LL180: if(( unsigned int) _temp170 >  2u?*((
+int*) _temp170) ==  Cyc_Typerep_ThinPtr: 0){ _LL203: _temp202=(( struct Cyc_Typerep_ThinPtr_struct*)
+_temp170)->f1; goto _LL201; _LL201: _temp200=( void*)(( struct Cyc_Typerep_ThinPtr_struct*)
+_temp170)->f2; goto _LL181;} else{ goto _LL182;} _LL182: if(( unsigned int)
+_temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_FatPtr: 0){ _LL205: _temp204=(
+void*)(( struct Cyc_Typerep_FatPtr_struct*) _temp170)->f1; goto _LL183;} else{
+goto _LL184;} _LL184: if(( unsigned int) _temp170 >  2u?*(( int*) _temp170) == 
+Cyc_Typerep_Tuple: 0){ _LL209: _temp208=(( struct Cyc_Typerep_Tuple_struct*)
+_temp170)->f1; goto _LL207; _LL207: _temp206=(( struct Cyc_Typerep_Tuple_struct*)
+_temp170)->f2; goto _LL185;} else{ goto _LL186;} _LL186: if(( unsigned int)
+_temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_TUnion: 0){ _LL211: _temp210=((
+struct Cyc_Typerep_TUnion_struct*) _temp170)->f1; goto _LL187;} else{ goto
+_LL188;} _LL188: if(( unsigned int) _temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_XTUnion:
+0){ _LL213: _temp212=(( struct Cyc_Typerep_XTUnion_struct*) _temp170)->f1; goto
+_LL189;} else{ goto _LL190;} _LL190: if(( unsigned int) _temp170 >  2u?*(( int*)
+_temp170) ==  Cyc_Typerep_Union: 0){ _LL215: _temp214=(( struct Cyc_Typerep_Union_struct*)
+_temp170)->f1; goto _LL191;} else{ goto _LL192;} _LL192: if(( unsigned int)
+_temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_Forall: 0){ _LL219: _temp218=((
+struct Cyc_Typerep_Forall_struct*) _temp170)->f1; goto _LL217; _LL217: _temp216=((
+struct Cyc_Typerep_Forall_struct*) _temp170)->f2; goto _LL193;} else{ goto
+_LL194;} _LL194: if(( unsigned int) _temp170 >  2u?*(( int*) _temp170) ==  Cyc_Typerep_App:
+0){ _LL223: _temp222=( void*)(( struct Cyc_Typerep_App_struct*) _temp170)->f1;
+goto _LL221; _LL221: _temp220=(( struct Cyc_Typerep_App_struct*) _temp170)->f2;
+goto _LL195;} else{ goto _LL171;} _LL173:({ struct Cyc_Std_String_pa_struct
+_temp225; _temp225.tag= Cyc_Std_String_pa; _temp225.f1=( struct _tagged_arr)*
+_temp196;{ void* _temp224[ 1u]={& _temp225}; Cyc_Std_printf( _tag_arr("<Var name=\"%s\"/>",
+sizeof( unsigned char), 17u), _tag_arr( _temp224, sizeof( void*), 1u));}}); goto
+_LL171; _LL175:({ struct Cyc_Std_Int_pa_struct _temp227; _temp227.tag= Cyc_Std_Int_pa;
+_temp227.f1=( int) _temp198;{ void* _temp226[ 1u]={& _temp227}; Cyc_Std_printf(
+_tag_arr("<Int sz=\"%d\"/>", sizeof( unsigned char), 15u), _tag_arr( _temp226,
+sizeof( void*), 1u));}}); goto _LL171; _LL177:({ void* _temp228[ 0u]={}; Cyc_Std_printf(
+_tag_arr("<Float/>", sizeof( unsigned char), 9u), _tag_arr( _temp228, sizeof(
+void*), 0u));}); goto _LL171; _LL179:({ void* _temp229[ 0u]={}; Cyc_Std_printf(
+_tag_arr("<Double/>", sizeof( unsigned char), 10u), _tag_arr( _temp229, sizeof(
+void*), 0u));}); goto _LL171; _LL181:({ struct Cyc_Std_Int_pa_struct _temp231;
+_temp231.tag= Cyc_Std_Int_pa; _temp231.f1=( int) _temp202;{ void* _temp230[ 1u]={&
+_temp231}; Cyc_Std_printf( _tag_arr("<ThinPtr sz=\"%d\">", sizeof( unsigned char),
+18u), _tag_arr( _temp230, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
+_temp200);({ void* _temp232[ 0u]={}; Cyc_Std_printf( _tag_arr("</ThinPtr",
+sizeof( unsigned char), 10u), _tag_arr( _temp232, sizeof( void*), 0u));}); goto
+_LL171; _LL183:({ void* _temp233[ 0u]={}; Cyc_Std_printf( _tag_arr("<FatPtr>",
+sizeof( unsigned char), 9u), _tag_arr( _temp233, sizeof( void*), 0u));}); Cyc_Typerep_xmlize_typestruct(
+_temp204);({ void* _temp234[ 0u]={}; Cyc_Std_printf( _tag_arr("</FatPtr>",
+sizeof( unsigned char), 10u), _tag_arr( _temp234, sizeof( void*), 0u));}); goto
+_LL171; _LL185:({ struct Cyc_Std_Int_pa_struct _temp236; _temp236.tag= Cyc_Std_Int_pa;
+_temp236.f1=( int) _temp208;{ void* _temp235[ 1u]={& _temp236}; Cyc_Std_printf(
+_tag_arr("<Tuple sz=\"%d\">", sizeof( unsigned char), 16u), _tag_arr( _temp235,
+sizeof( void*), 1u));}});{ int i= 0; for( 0; i <  _get_arr_size( _temp206,
+sizeof( struct _tuple0*)); i ++){ void* _temp239; unsigned int _temp241; struct
+_tuple0 _temp237=*(*(( struct _tuple0**) _check_unknown_subscript( _temp206,
+sizeof( struct _tuple0*), i))); _LL242: _temp241= _temp237.f1; goto _LL240;
+_LL240: _temp239= _temp237.f2; goto _LL238; _LL238:({ struct Cyc_Std_Int_pa_struct
+_temp244; _temp244.tag= Cyc_Std_Int_pa; _temp244.f1=( int) _temp241;{ void*
+_temp243[ 1u]={& _temp244}; Cyc_Std_printf( _tag_arr("<Component ofs=\"%d\">",
+sizeof( unsigned char), 21u), _tag_arr( _temp243, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
+_temp239);({ void* _temp245[ 0u]={}; Cyc_Std_printf( _tag_arr("</Component>",
+sizeof( unsigned char), 13u), _tag_arr( _temp245, sizeof( void*), 0u));});}}({
+void* _temp246[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tuple>", sizeof(
+unsigned char), 9u), _tag_arr( _temp246, sizeof( void*), 0u));}); goto _LL171;
+_LL187:({ void* _temp247[ 0u]={}; Cyc_Std_printf( _tag_arr("<TUnion>", sizeof(
+unsigned char), 9u), _tag_arr( _temp247, sizeof( void*), 0u));});{ int i= 0;
+for( 0; i <  _get_arr_size( _temp210, sizeof( struct _tuple0*)); i ++){ void*
+_temp250; unsigned int _temp252; struct _tuple0 _temp248=*(*(( struct _tuple0**)
+_check_unknown_subscript( _temp210, sizeof( struct _tuple0*), i))); _LL253:
+_temp252= _temp248.f1; goto _LL251; _LL251: _temp250= _temp248.f2; goto _LL249;
+_LL249:({ struct Cyc_Std_Int_pa_struct _temp255; _temp255.tag= Cyc_Std_Int_pa;
+_temp255.f1=( int) _temp252;{ void* _temp254[ 1u]={& _temp255}; Cyc_Std_printf(
+_tag_arr("<Tag tag=\"%d\">", sizeof( unsigned char), 15u), _tag_arr( _temp254,
+sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct( _temp250);({ void*
+_temp256[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tag>", sizeof( unsigned char), 7u),
+_tag_arr( _temp256, sizeof( void*), 0u));});}}({ void* _temp257[ 0u]={}; Cyc_Std_printf(
+_tag_arr("</Tunion>", sizeof( unsigned char), 10u), _tag_arr( _temp257, sizeof(
+void*), 0u));}); goto _LL171; _LL189:({ void* _temp258[ 0u]={}; Cyc_Std_printf(
+_tag_arr("<XTUnion>", sizeof( unsigned char), 10u), _tag_arr( _temp258, sizeof(
+void*), 0u));});{ int i= 0; for( 0; i <  _get_arr_size( _temp212, sizeof( struct
+_tuple1*)); i ++){ void* _temp261; struct _tagged_arr _temp263; struct _tuple1
+_temp259=*(*(( struct _tuple1**) _check_unknown_subscript( _temp212, sizeof(
+struct _tuple1*), i))); _LL264: _temp263= _temp259.f1; goto _LL262; _LL262:
+_temp261= _temp259.f2; goto _LL260; _LL260:({ struct Cyc_Std_String_pa_struct
+_temp266; _temp266.tag= Cyc_Std_String_pa; _temp266.f1=( struct _tagged_arr)
+_tagged_arr_plus( _temp263, sizeof( unsigned char), 4);{ void* _temp265[ 1u]={&
+_temp266}; Cyc_Std_printf( _tag_arr("<Tag tag=\"%s\">", sizeof( unsigned char),
+15u), _tag_arr( _temp265, sizeof( void*), 1u));}}); Cyc_Typerep_xmlize_typestruct(
+_temp261);({ void* _temp267[ 0u]={}; Cyc_Std_printf( _tag_arr("</Tag>", sizeof(
+unsigned char), 7u), _tag_arr( _temp267, sizeof( void*), 0u));});}}({ void*
+_temp268[ 0u]={}; Cyc_Std_printf( _tag_arr("</XTunion>", sizeof( unsigned char),
+11u), _tag_arr( _temp268, sizeof( void*), 0u));}); goto _LL171; _LL191:({ void*
+_temp269[ 0u]={}; Cyc_Std_printf( _tag_arr("<Union>", sizeof( unsigned char), 8u),
+_tag_arr( _temp269, sizeof( void*), 0u));});{ int i= 0; for( 0; i < 
+_get_arr_size( _temp214, sizeof( void**)); i ++){({ void* _temp270[ 0u]={}; Cyc_Std_printf(
+_tag_arr("<Case>", sizeof( unsigned char), 7u), _tag_arr( _temp270, sizeof( void*),
 0u));}); Cyc_Typerep_xmlize_typestruct(*(*(( void***) _check_unknown_subscript(
-_temp215, sizeof( void**), i))));({ void* _temp272[ 0u]={}; Cyc_Std_printf(
-_tag_arr("</Case>", sizeof( unsigned char), 8u), _tag_arr( _temp272, sizeof(
-void*), 0u));});}}({ void* _temp273[ 0u]={}; Cyc_Std_printf( _tag_arr("</Union>",
-sizeof( unsigned char), 9u), _tag_arr( _temp273, sizeof( void*), 0u));}); goto
-_LL172; _LL194:({ void* _temp274[ 0u]={}; Cyc_Std_printf( _tag_arr("<Forall vars=\"",
-sizeof( unsigned char), 15u), _tag_arr( _temp274, sizeof( void*), 0u));});{ int
-i= 0; for( 0; i <  _get_arr_size( _temp219, sizeof( struct _tagged_arr*)); i ++){
-if( i !=  0){({ void* _temp275[ 0u]={}; Cyc_Std_printf( _tag_arr(", ", sizeof(
-unsigned char), 3u), _tag_arr( _temp275, sizeof( void*), 0u));});}({ void*
-_temp276[ 0u]={}; Cyc_Std_printf(*(*(( struct _tagged_arr**)
-_check_unknown_subscript( _temp219, sizeof( struct _tagged_arr*), i))), _tag_arr(
-_temp276, sizeof( void*), 0u));});}}({ void* _temp277[ 0u]={}; Cyc_Std_printf(
-_tag_arr("\">", sizeof( unsigned char), 3u), _tag_arr( _temp277, sizeof( void*),
-0u));}); Cyc_Typerep_xmlize_typestruct(* _temp217);({ void* _temp278[ 0u]={};
+_temp214, sizeof( void**), i))));({ void* _temp271[ 0u]={}; Cyc_Std_printf(
+_tag_arr("</Case>", sizeof( unsigned char), 8u), _tag_arr( _temp271, sizeof(
+void*), 0u));});}}({ void* _temp272[ 0u]={}; Cyc_Std_printf( _tag_arr("</Union>",
+sizeof( unsigned char), 9u), _tag_arr( _temp272, sizeof( void*), 0u));}); goto
+_LL171; _LL193:({ void* _temp273[ 0u]={}; Cyc_Std_printf( _tag_arr("<Forall vars=\"",
+sizeof( unsigned char), 15u), _tag_arr( _temp273, sizeof( void*), 0u));});{ int
+i= 0; for( 0; i <  _get_arr_size( _temp218, sizeof( struct _tagged_arr*)); i ++){
+if( i !=  0){({ void* _temp274[ 0u]={}; Cyc_Std_printf( _tag_arr(", ", sizeof(
+unsigned char), 3u), _tag_arr( _temp274, sizeof( void*), 0u));});}({ void*
+_temp275[ 0u]={}; Cyc_Std_printf(*(*(( struct _tagged_arr**)
+_check_unknown_subscript( _temp218, sizeof( struct _tagged_arr*), i))), _tag_arr(
+_temp275, sizeof( void*), 0u));});}}({ void* _temp276[ 0u]={}; Cyc_Std_printf(
+_tag_arr("\">", sizeof( unsigned char), 3u), _tag_arr( _temp276, sizeof( void*),
+0u));}); Cyc_Typerep_xmlize_typestruct(* _temp216);({ void* _temp277[ 0u]={};
 Cyc_Std_printf( _tag_arr("</Forall>", sizeof( unsigned char), 10u), _tag_arr(
-_temp278, sizeof( void*), 0u));}); goto _LL172; _LL196:({ void* _temp279[ 0u]={};
+_temp277, sizeof( void*), 0u));}); goto _LL171; _LL195:({ void* _temp278[ 0u]={};
 Cyc_Std_printf( _tag_arr("<App>", sizeof( unsigned char), 6u), _tag_arr(
-_temp279, sizeof( void*), 0u));}); Cyc_Typerep_xmlize_typestruct( _temp223);{
-int i= 0; for( 0; i <  _get_arr_size( _temp221, sizeof( void*)); i ++){ if( i != 
-0){({ void* _temp280[ 0u]={}; Cyc_Std_printf( _tag_arr(", ", sizeof(
-unsigned char), 3u), _tag_arr( _temp280, sizeof( void*), 0u));});} Cyc_Typerep_xmlize_typestruct(*((
-void**) _check_unknown_subscript( _temp221, sizeof( void*), i)));}}({ void*
-_temp281[ 0u]={}; Cyc_Std_printf( _tag_arr("</App>", sizeof( unsigned char), 7u),
-_tag_arr( _temp281, sizeof( void*), 0u));}); goto _LL172; _LL172:;} static void*
-Cyc_Typerep_normalize_env( struct Cyc_Dict_Dict* env, void* ts){ void* _temp282=
-ts; struct _tagged_arr* _temp308; void* _temp310; unsigned int _temp312; void*
-_temp314; struct _tagged_arr _temp316; unsigned int _temp318; struct _tagged_arr
-_temp320; struct _tagged_arr _temp322; struct _tagged_arr _temp324; void**
-_temp326; struct _tagged_arr _temp328; struct _tagged_arr _temp330; void*
-_temp332; _LL284: if(( unsigned int) _temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_Var:
-0){ _LL309: _temp308=(( struct Cyc_Typerep_Var_struct*) _temp282)->f1; goto
-_LL285;} else{ goto _LL286;} _LL286: if(( unsigned int) _temp282 >  2u?*(( int*)
-_temp282) ==  Cyc_Typerep_Int: 0){ goto _LL287;} else{ goto _LL288;} _LL288: if(
-_temp282 == ( void*) Cyc_Typerep_Float){ goto _LL289;} else{ goto _LL290;}
-_LL290: if( _temp282 == ( void*) Cyc_Typerep_Double){ goto _LL291;} else{ goto
-_LL292;} _LL292: if(( unsigned int) _temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_ThinPtr:
-0){ _LL313: _temp312=(( struct Cyc_Typerep_ThinPtr_struct*) _temp282)->f1; goto
-_LL311; _LL311: _temp310=( void*)(( struct Cyc_Typerep_ThinPtr_struct*) _temp282)->f2;
-goto _LL293;} else{ goto _LL294;} _LL294: if(( unsigned int) _temp282 >  2u?*((
-int*) _temp282) ==  Cyc_Typerep_FatPtr: 0){ _LL315: _temp314=( void*)(( struct
-Cyc_Typerep_FatPtr_struct*) _temp282)->f1; goto _LL295;} else{ goto _LL296;}
-_LL296: if(( unsigned int) _temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_Tuple:
-0){ _LL319: _temp318=(( struct Cyc_Typerep_Tuple_struct*) _temp282)->f1; goto
-_LL317; _LL317: _temp316=(( struct Cyc_Typerep_Tuple_struct*) _temp282)->f2;
-goto _LL297;} else{ goto _LL298;} _LL298: if(( unsigned int) _temp282 >  2u?*((
-int*) _temp282) ==  Cyc_Typerep_TUnion: 0){ _LL321: _temp320=(( struct Cyc_Typerep_TUnion_struct*)
-_temp282)->f1; goto _LL299;} else{ goto _LL300;} _LL300: if(( unsigned int)
-_temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_XTUnion: 0){ _LL323: _temp322=((
-struct Cyc_Typerep_XTUnion_struct*) _temp282)->f1; goto _LL301;} else{ goto
-_LL302;} _LL302: if(( unsigned int) _temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_Union:
-0){ _LL325: _temp324=(( struct Cyc_Typerep_Union_struct*) _temp282)->f1; goto
-_LL303;} else{ goto _LL304;} _LL304: if(( unsigned int) _temp282 >  2u?*(( int*)
-_temp282) ==  Cyc_Typerep_Forall: 0){ _LL329: _temp328=(( struct Cyc_Typerep_Forall_struct*)
-_temp282)->f1; goto _LL327; _LL327: _temp326=(( struct Cyc_Typerep_Forall_struct*)
-_temp282)->f2; goto _LL305;} else{ goto _LL306;} _LL306: if(( unsigned int)
-_temp282 >  2u?*(( int*) _temp282) ==  Cyc_Typerep_App: 0){ _LL333: _temp332=(
-void*)(( struct Cyc_Typerep_App_struct*) _temp282)->f1; goto _LL331; _LL331:
-_temp330=(( struct Cyc_Typerep_App_struct*) _temp282)->f2; goto _LL307;} else{
-goto _LL283;} _LL285: return(( void*(*)( struct Cyc_Dict_Dict* d, struct
-_tagged_arr* k)) Cyc_Dict_lookup)( env,( struct _tagged_arr*) _temp308); _LL287:
-goto _LL289; _LL289: goto _LL291; _LL291: return ts; _LL293: return( void*)({
-struct Cyc_Typerep_ThinPtr_struct* _temp334=( struct Cyc_Typerep_ThinPtr_struct*)
-_cycalloc( sizeof( struct Cyc_Typerep_ThinPtr_struct)); _temp334[ 0]=({ struct
-Cyc_Typerep_ThinPtr_struct _temp335; _temp335.tag= Cyc_Typerep_ThinPtr; _temp335.f1=
-_temp312; _temp335.f2=( void*) Cyc_Typerep_normalize_env( env, _temp310);
-_temp335;}); _temp334;}); _LL295: return( void*)({ struct Cyc_Typerep_FatPtr_struct*
-_temp336=( struct Cyc_Typerep_FatPtr_struct*) _cycalloc( sizeof( struct Cyc_Typerep_FatPtr_struct));
-_temp336[ 0]=({ struct Cyc_Typerep_FatPtr_struct _temp337; _temp337.tag= Cyc_Typerep_FatPtr;
-_temp337.f1=( void*) Cyc_Typerep_normalize_env( env, _temp314); _temp337;});
-_temp336;}); _LL297: { struct _tagged_arr _temp338=({ unsigned int _temp354=
-_get_arr_size( _temp316, sizeof( struct _tuple0*)); struct _tuple0** _temp355=(
-struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*), _temp354));
-struct _tagged_arr _temp357= _tag_arr( _temp355, sizeof( struct _tuple0*),
-_get_arr_size( _temp316, sizeof( struct _tuple0*)));{ unsigned int _temp356=
-_temp354; unsigned int i; for( i= 0; i <  _temp356; i ++){ _temp355[ i]= 0;}};
-_temp357;});{ int i= 0; for( 0; i <  _get_arr_size( _temp316, sizeof( struct
-_tuple0*)); i ++){ struct _tuple0 _temp341; void* _temp342; unsigned int
-_temp344; struct _tuple0* _temp339=*(( struct _tuple0**)
-_check_unknown_subscript( _temp316, sizeof( struct _tuple0*), i)); _temp341=*
-_temp339; _LL345: _temp344= _temp341.f1; goto _LL343; _LL343: _temp342= _temp341.f2;
-goto _LL340; _LL340:*(( struct _tuple0**) _check_unknown_subscript( _temp338,
-sizeof( struct _tuple0*), i))=({ struct _tuple0* _temp346=( struct _tuple0*)
-_cycalloc( sizeof( struct _tuple0)); _temp346->f1= _temp344; _temp346->f2= Cyc_Typerep_normalize_env(
-env, _temp342); _temp346;});}}{ struct _tagged_arr _temp347=({ unsigned int
-_temp350= _get_arr_size( _temp316, sizeof( struct _tuple0*)); struct _tuple0**
-_temp351=( struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*),
-_temp350)); struct _tagged_arr _temp353= _tag_arr( _temp351, sizeof( struct
-_tuple0*), _get_arr_size( _temp316, sizeof( struct _tuple0*)));{ unsigned int
-_temp352= _temp350; unsigned int i; for( i= 0; i <  _temp352; i ++){ _temp351[ i]=(
+_temp278, sizeof( void*), 0u));}); Cyc_Typerep_xmlize_typestruct( _temp222);{
+int i= 0; for( 0; i <  _get_arr_size( _temp220, sizeof( void*)); i ++){ if( i != 
+0){({ void* _temp279[ 0u]={}; Cyc_Std_printf( _tag_arr(", ", sizeof(
+unsigned char), 3u), _tag_arr( _temp279, sizeof( void*), 0u));});} Cyc_Typerep_xmlize_typestruct(*((
+void**) _check_unknown_subscript( _temp220, sizeof( void*), i)));}}({ void*
+_temp280[ 0u]={}; Cyc_Std_printf( _tag_arr("</App>", sizeof( unsigned char), 7u),
+_tag_arr( _temp280, sizeof( void*), 0u));}); goto _LL171; _LL171:;} static void*
+Cyc_Typerep_normalize_env( struct Cyc_Dict_Dict* env, void* ts){ void* _temp281=
+ts; struct _tagged_arr* _temp307; void* _temp309; unsigned int _temp311; void*
+_temp313; struct _tagged_arr _temp315; unsigned int _temp317; struct _tagged_arr
+_temp319; struct _tagged_arr _temp321; struct _tagged_arr _temp323; void**
+_temp325; struct _tagged_arr _temp327; struct _tagged_arr _temp329; void*
+_temp331; _LL283: if(( unsigned int) _temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_Var:
+0){ _LL308: _temp307=(( struct Cyc_Typerep_Var_struct*) _temp281)->f1; goto
+_LL284;} else{ goto _LL285;} _LL285: if(( unsigned int) _temp281 >  2u?*(( int*)
+_temp281) ==  Cyc_Typerep_Int: 0){ goto _LL286;} else{ goto _LL287;} _LL287: if(
+_temp281 == ( void*) Cyc_Typerep_Float){ goto _LL288;} else{ goto _LL289;}
+_LL289: if( _temp281 == ( void*) Cyc_Typerep_Double){ goto _LL290;} else{ goto
+_LL291;} _LL291: if(( unsigned int) _temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_ThinPtr:
+0){ _LL312: _temp311=(( struct Cyc_Typerep_ThinPtr_struct*) _temp281)->f1; goto
+_LL310; _LL310: _temp309=( void*)(( struct Cyc_Typerep_ThinPtr_struct*) _temp281)->f2;
+goto _LL292;} else{ goto _LL293;} _LL293: if(( unsigned int) _temp281 >  2u?*((
+int*) _temp281) ==  Cyc_Typerep_FatPtr: 0){ _LL314: _temp313=( void*)(( struct
+Cyc_Typerep_FatPtr_struct*) _temp281)->f1; goto _LL294;} else{ goto _LL295;}
+_LL295: if(( unsigned int) _temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_Tuple:
+0){ _LL318: _temp317=(( struct Cyc_Typerep_Tuple_struct*) _temp281)->f1; goto
+_LL316; _LL316: _temp315=(( struct Cyc_Typerep_Tuple_struct*) _temp281)->f2;
+goto _LL296;} else{ goto _LL297;} _LL297: if(( unsigned int) _temp281 >  2u?*((
+int*) _temp281) ==  Cyc_Typerep_TUnion: 0){ _LL320: _temp319=(( struct Cyc_Typerep_TUnion_struct*)
+_temp281)->f1; goto _LL298;} else{ goto _LL299;} _LL299: if(( unsigned int)
+_temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_XTUnion: 0){ _LL322: _temp321=((
+struct Cyc_Typerep_XTUnion_struct*) _temp281)->f1; goto _LL300;} else{ goto
+_LL301;} _LL301: if(( unsigned int) _temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_Union:
+0){ _LL324: _temp323=(( struct Cyc_Typerep_Union_struct*) _temp281)->f1; goto
+_LL302;} else{ goto _LL303;} _LL303: if(( unsigned int) _temp281 >  2u?*(( int*)
+_temp281) ==  Cyc_Typerep_Forall: 0){ _LL328: _temp327=(( struct Cyc_Typerep_Forall_struct*)
+_temp281)->f1; goto _LL326; _LL326: _temp325=(( struct Cyc_Typerep_Forall_struct*)
+_temp281)->f2; goto _LL304;} else{ goto _LL305;} _LL305: if(( unsigned int)
+_temp281 >  2u?*(( int*) _temp281) ==  Cyc_Typerep_App: 0){ _LL332: _temp331=(
+void*)(( struct Cyc_Typerep_App_struct*) _temp281)->f1; goto _LL330; _LL330:
+_temp329=(( struct Cyc_Typerep_App_struct*) _temp281)->f2; goto _LL306;} else{
+goto _LL282;} _LL284: return(( void*(*)( struct Cyc_Dict_Dict* d, struct
+_tagged_arr* k)) Cyc_Dict_lookup)( env,( struct _tagged_arr*) _temp307); _LL286:
+goto _LL288; _LL288: goto _LL290; _LL290: return ts; _LL292: return( void*)({
+struct Cyc_Typerep_ThinPtr_struct* _temp333=( struct Cyc_Typerep_ThinPtr_struct*)
+_cycalloc( sizeof( struct Cyc_Typerep_ThinPtr_struct)); _temp333[ 0]=({ struct
+Cyc_Typerep_ThinPtr_struct _temp334; _temp334.tag= Cyc_Typerep_ThinPtr; _temp334.f1=
+_temp311; _temp334.f2=( void*) Cyc_Typerep_normalize_env( env, _temp309);
+_temp334;}); _temp333;}); _LL294: return( void*)({ struct Cyc_Typerep_FatPtr_struct*
+_temp335=( struct Cyc_Typerep_FatPtr_struct*) _cycalloc( sizeof( struct Cyc_Typerep_FatPtr_struct));
+_temp335[ 0]=({ struct Cyc_Typerep_FatPtr_struct _temp336; _temp336.tag= Cyc_Typerep_FatPtr;
+_temp336.f1=( void*) Cyc_Typerep_normalize_env( env, _temp313); _temp336;});
+_temp335;}); _LL296: { struct _tagged_arr _temp337=({ unsigned int _temp353=
+_get_arr_size( _temp315, sizeof( struct _tuple0*)); struct _tuple0** _temp354=(
+struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*), _temp353));
+struct _tagged_arr _temp356= _tag_arr( _temp354, sizeof( struct _tuple0*),
+_get_arr_size( _temp315, sizeof( struct _tuple0*)));{ unsigned int _temp355=
+_temp353; unsigned int i; for( i= 0; i <  _temp355; i ++){ _temp354[ i]= 0;}};
+_temp356;});{ int i= 0; for( 0; i <  _get_arr_size( _temp315, sizeof( struct
+_tuple0*)); i ++){ struct _tuple0 _temp340; void* _temp341; unsigned int
+_temp343; struct _tuple0* _temp338=*(( struct _tuple0**)
+_check_unknown_subscript( _temp315, sizeof( struct _tuple0*), i)); _temp340=*
+_temp338; _LL344: _temp343= _temp340.f1; goto _LL342; _LL342: _temp341= _temp340.f2;
+goto _LL339; _LL339:*(( struct _tuple0**) _check_unknown_subscript( _temp337,
+sizeof( struct _tuple0*), i))=({ struct _tuple0* _temp345=( struct _tuple0*)
+_cycalloc( sizeof( struct _tuple0)); _temp345->f1= _temp343; _temp345->f2= Cyc_Typerep_normalize_env(
+env, _temp341); _temp345;});}}{ struct _tagged_arr _temp346=({ unsigned int
+_temp349= _get_arr_size( _temp315, sizeof( struct _tuple0*)); struct _tuple0**
+_temp350=( struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*),
+_temp349)); struct _tagged_arr _temp352= _tag_arr( _temp350, sizeof( struct
+_tuple0*), _get_arr_size( _temp315, sizeof( struct _tuple0*)));{ unsigned int
+_temp351= _temp349; unsigned int i; for( i= 0; i <  _temp351; i ++){ _temp350[ i]=(
 struct _tuple0*) _check_null(*(( struct _tuple0**) _check_unknown_subscript(
-_temp338, sizeof( struct _tuple0*),( int) i)));}}; _temp353;}); return( void*)({
-struct Cyc_Typerep_Tuple_struct* _temp348=( struct Cyc_Typerep_Tuple_struct*)
-_cycalloc( sizeof( struct Cyc_Typerep_Tuple_struct)); _temp348[ 0]=({ struct Cyc_Typerep_Tuple_struct
-_temp349; _temp349.tag= Cyc_Typerep_Tuple; _temp349.f1= _temp318; _temp349.f2=(
-struct _tagged_arr) _temp347; _temp349;}); _temp348;});}} _LL299: { struct
-_tagged_arr _temp358=({ unsigned int _temp374= _get_arr_size( _temp320, sizeof(
-struct _tuple0*)); struct _tuple0** _temp375=( struct _tuple0**) _cycalloc(
-_check_times( sizeof( struct _tuple0*), _temp374)); struct _tagged_arr _temp377=
-_tag_arr( _temp375, sizeof( struct _tuple0*), _get_arr_size( _temp320, sizeof(
-struct _tuple0*)));{ unsigned int _temp376= _temp374; unsigned int i; for( i= 0;
-i <  _temp376; i ++){ _temp375[ i]= 0;}}; _temp377;});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp320, sizeof( struct _tuple0*)); i ++){ struct _tuple0
-_temp361; void* _temp362; unsigned int _temp364; struct _tuple0* _temp359=*((
-struct _tuple0**) _check_unknown_subscript( _temp320, sizeof( struct _tuple0*),
-i)); _temp361=* _temp359; _LL365: _temp364= _temp361.f1; goto _LL363; _LL363:
-_temp362= _temp361.f2; goto _LL360; _LL360:*(( struct _tuple0**)
-_check_unknown_subscript( _temp358, sizeof( struct _tuple0*), i))=({ struct
-_tuple0* _temp366=( struct _tuple0*) _cycalloc( sizeof( struct _tuple0));
-_temp366->f1= _temp364; _temp366->f2= Cyc_Typerep_normalize_env( env, _temp362);
-_temp366;});}}{ struct _tagged_arr _temp367=({ unsigned int _temp370=
-_get_arr_size( _temp320, sizeof( struct _tuple0*)); struct _tuple0** _temp371=(
-struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*), _temp370));
-struct _tagged_arr _temp373= _tag_arr( _temp371, sizeof( struct _tuple0*),
-_get_arr_size( _temp320, sizeof( struct _tuple0*)));{ unsigned int _temp372=
-_temp370; unsigned int i; for( i= 0; i <  _temp372; i ++){ _temp371[ i]=( struct
-_tuple0*) _check_null(*(( struct _tuple0**) _check_unknown_subscript( _temp358,
-sizeof( struct _tuple0*),( int) i)));}}; _temp373;}); return( void*)({ struct
-Cyc_Typerep_TUnion_struct* _temp368=( struct Cyc_Typerep_TUnion_struct*)
-_cycalloc( sizeof( struct Cyc_Typerep_TUnion_struct)); _temp368[ 0]=({ struct
-Cyc_Typerep_TUnion_struct _temp369; _temp369.tag= Cyc_Typerep_TUnion; _temp369.f1=(
-struct _tagged_arr) _temp367; _temp369;}); _temp368;});}} _LL301: { struct
-_tagged_arr _temp378=({ unsigned int _temp394= _get_arr_size( _temp322, sizeof(
-struct _tuple1*)); struct _tuple1** _temp395=( struct _tuple1**) _cycalloc(
-_check_times( sizeof( struct _tuple1*), _temp394)); struct _tagged_arr _temp397=
-_tag_arr( _temp395, sizeof( struct _tuple1*), _get_arr_size( _temp322, sizeof(
-struct _tuple1*)));{ unsigned int _temp396= _temp394; unsigned int i; for( i= 0;
-i <  _temp396; i ++){ _temp395[ i]= 0;}}; _temp397;});{ int i= 0; for( 0; i < 
-_get_arr_size( _temp322, sizeof( struct _tuple1*)); i ++){ struct _tuple1
-_temp381; void* _temp382; struct _tagged_arr _temp384; struct _tuple1* _temp379=*((
-struct _tuple1**) _check_unknown_subscript( _temp322, sizeof( struct _tuple1*),
-i)); _temp381=* _temp379; _LL385: _temp384= _temp381.f1; goto _LL383; _LL383:
-_temp382= _temp381.f2; goto _LL380; _LL380:*(( struct _tuple1**)
-_check_unknown_subscript( _temp378, sizeof( struct _tuple1*), i))=({ struct
-_tuple1* _temp386=( struct _tuple1*) _cycalloc( sizeof( struct _tuple1));
-_temp386->f1= _temp384; _temp386->f2= Cyc_Typerep_normalize_env( env, _temp382);
-_temp386;});}}{ struct _tagged_arr _temp387=({ unsigned int _temp390=
-_get_arr_size( _temp322, sizeof( struct _tuple1*)); struct _tuple1** _temp391=(
-struct _tuple1**) _cycalloc( _check_times( sizeof( struct _tuple1*), _temp390));
-struct _tagged_arr _temp393= _tag_arr( _temp391, sizeof( struct _tuple1*),
-_get_arr_size( _temp322, sizeof( struct _tuple1*)));{ unsigned int _temp392=
-_temp390; unsigned int i; for( i= 0; i <  _temp392; i ++){ _temp391[ i]=( struct
-_tuple1*) _check_null(*(( struct _tuple1**) _check_unknown_subscript( _temp378,
-sizeof( struct _tuple1*),( int) i)));}}; _temp393;}); return( void*)({ struct
-Cyc_Typerep_XTUnion_struct* _temp388=( struct Cyc_Typerep_XTUnion_struct*)
-_cycalloc( sizeof( struct Cyc_Typerep_XTUnion_struct)); _temp388[ 0]=({ struct
-Cyc_Typerep_XTUnion_struct _temp389; _temp389.tag= Cyc_Typerep_XTUnion; _temp389.f1=(
-struct _tagged_arr) _temp387; _temp389;}); _temp388;});}} _LL303: { struct
-_tagged_arr _temp398=({ unsigned int _temp407= _get_arr_size( _temp324, sizeof(
-void**)); void*** _temp408=( void***) _cycalloc( _check_times( sizeof( void**),
-_temp407)); struct _tagged_arr _temp410= _tag_arr( _temp408, sizeof( void**),
-_get_arr_size( _temp324, sizeof( void**)));{ unsigned int _temp409= _temp407;
-unsigned int i; for( i= 0; i <  _temp409; i ++){ _temp408[ i]= 0;}}; _temp410;});{
-int i= 0; for( 0; i <  _get_arr_size( _temp324, sizeof( void**)); i ++){*(( void***)
-_check_unknown_subscript( _temp398, sizeof( void**), i))=({ void** _temp399=(
-void**) _cycalloc( sizeof( void*)); _temp399[ 0]= Cyc_Typerep_normalize_env( env,*(*((
-void***) _check_unknown_subscript( _temp324, sizeof( void**), i)))); _temp399;});}}{
-struct _tagged_arr _temp400=({ unsigned int _temp403= _get_arr_size( _temp324,
-sizeof( void**)); void*** _temp404=( void***) _cycalloc( _check_times( sizeof(
-void**), _temp403)); struct _tagged_arr _temp406= _tag_arr( _temp404, sizeof(
-void**), _get_arr_size( _temp324, sizeof( void**)));{ unsigned int _temp405=
-_temp403; unsigned int i; for( i= 0; i <  _temp405; i ++){ _temp404[ i]=( void**)
-_check_null(*(( void***) _check_unknown_subscript( _temp398, sizeof( void**),(
-int) i)));}}; _temp406;}); return( void*)({ struct Cyc_Typerep_Union_struct*
-_temp401=( struct Cyc_Typerep_Union_struct*) _cycalloc( sizeof( struct Cyc_Typerep_Union_struct));
-_temp401[ 0]=({ struct Cyc_Typerep_Union_struct _temp402; _temp402.tag= Cyc_Typerep_Union;
-_temp402.f1=( struct _tagged_arr) _temp400; _temp402;}); _temp401;});}} _LL305:
-return( void*)({ struct Cyc_Typerep_Forall_struct* _temp411=( struct Cyc_Typerep_Forall_struct*)
-_cycalloc( sizeof( struct Cyc_Typerep_Forall_struct)); _temp411[ 0]=({ struct
-Cyc_Typerep_Forall_struct _temp412; _temp412.tag= Cyc_Typerep_Forall; _temp412.f1=
-_temp328; _temp412.f2=({ void** _temp413=( void**) _cycalloc( sizeof( void*));
-_temp413[ 0]= Cyc_Typerep_normalize_env( env,* _temp326); _temp413;}); _temp412;});
-_temp411;}); _LL307: { void* _temp414= Cyc_Typerep_normalize_env( env, _temp332);
-void** _temp420; struct _tagged_arr _temp422; _LL416: if(( unsigned int)
-_temp414 >  2u?*(( int*) _temp414) ==  Cyc_Typerep_Forall: 0){ _LL423: _temp422=((
-struct Cyc_Typerep_Forall_struct*) _temp414)->f1; goto _LL421; _LL421: _temp420=((
-struct Cyc_Typerep_Forall_struct*) _temp414)->f2; goto _LL417;} else{ goto
-_LL418;} _LL418: goto _LL419; _LL417: if( _get_arr_size( _temp330, sizeof( void*))
-!=  _get_arr_size( _temp422, sizeof( struct _tagged_arr*))){( int) _throw(( void*)({
-struct Cyc_Core_Failure_struct* _temp424=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp424[ 0]=({ struct Cyc_Core_Failure_struct
-_temp425; _temp425.tag= Cyc_Core_Failure; _temp425.f1= _tag_arr("app appiled wrong number of arguments",
-sizeof( unsigned char), 38u); _temp425;}); _temp424;}));}{ int i= 0; for( 0; i < 
-_get_arr_size( _temp330, sizeof( void*)); i ++){ env=(( struct Cyc_Dict_Dict*(*)(
+_temp337, sizeof( struct _tuple0*),( int) i)));}}; _temp352;}); return( void*)({
+struct Cyc_Typerep_Tuple_struct* _temp347=( struct Cyc_Typerep_Tuple_struct*)
+_cycalloc( sizeof( struct Cyc_Typerep_Tuple_struct)); _temp347[ 0]=({ struct Cyc_Typerep_Tuple_struct
+_temp348; _temp348.tag= Cyc_Typerep_Tuple; _temp348.f1= _temp317; _temp348.f2=(
+struct _tagged_arr) _temp346; _temp348;}); _temp347;});}} _LL298: { struct
+_tagged_arr _temp357=({ unsigned int _temp373= _get_arr_size( _temp319, sizeof(
+struct _tuple0*)); struct _tuple0** _temp374=( struct _tuple0**) _cycalloc(
+_check_times( sizeof( struct _tuple0*), _temp373)); struct _tagged_arr _temp376=
+_tag_arr( _temp374, sizeof( struct _tuple0*), _get_arr_size( _temp319, sizeof(
+struct _tuple0*)));{ unsigned int _temp375= _temp373; unsigned int i; for( i= 0;
+i <  _temp375; i ++){ _temp374[ i]= 0;}}; _temp376;});{ int i= 0; for( 0; i < 
+_get_arr_size( _temp319, sizeof( struct _tuple0*)); i ++){ struct _tuple0
+_temp360; void* _temp361; unsigned int _temp363; struct _tuple0* _temp358=*((
+struct _tuple0**) _check_unknown_subscript( _temp319, sizeof( struct _tuple0*),
+i)); _temp360=* _temp358; _LL364: _temp363= _temp360.f1; goto _LL362; _LL362:
+_temp361= _temp360.f2; goto _LL359; _LL359:*(( struct _tuple0**)
+_check_unknown_subscript( _temp357, sizeof( struct _tuple0*), i))=({ struct
+_tuple0* _temp365=( struct _tuple0*) _cycalloc( sizeof( struct _tuple0));
+_temp365->f1= _temp363; _temp365->f2= Cyc_Typerep_normalize_env( env, _temp361);
+_temp365;});}}{ struct _tagged_arr _temp366=({ unsigned int _temp369=
+_get_arr_size( _temp319, sizeof( struct _tuple0*)); struct _tuple0** _temp370=(
+struct _tuple0**) _cycalloc( _check_times( sizeof( struct _tuple0*), _temp369));
+struct _tagged_arr _temp372= _tag_arr( _temp370, sizeof( struct _tuple0*),
+_get_arr_size( _temp319, sizeof( struct _tuple0*)));{ unsigned int _temp371=
+_temp369; unsigned int i; for( i= 0; i <  _temp371; i ++){ _temp370[ i]=( struct
+_tuple0*) _check_null(*(( struct _tuple0**) _check_unknown_subscript( _temp357,
+sizeof( struct _tuple0*),( int) i)));}}; _temp372;}); return( void*)({ struct
+Cyc_Typerep_TUnion_struct* _temp367=( struct Cyc_Typerep_TUnion_struct*)
+_cycalloc( sizeof( struct Cyc_Typerep_TUnion_struct)); _temp367[ 0]=({ struct
+Cyc_Typerep_TUnion_struct _temp368; _temp368.tag= Cyc_Typerep_TUnion; _temp368.f1=(
+struct _tagged_arr) _temp366; _temp368;}); _temp367;});}} _LL300: { struct
+_tagged_arr _temp377=({ unsigned int _temp393= _get_arr_size( _temp321, sizeof(
+struct _tuple1*)); struct _tuple1** _temp394=( struct _tuple1**) _cycalloc(
+_check_times( sizeof( struct _tuple1*), _temp393)); struct _tagged_arr _temp396=
+_tag_arr( _temp394, sizeof( struct _tuple1*), _get_arr_size( _temp321, sizeof(
+struct _tuple1*)));{ unsigned int _temp395= _temp393; unsigned int i; for( i= 0;
+i <  _temp395; i ++){ _temp394[ i]= 0;}}; _temp396;});{ int i= 0; for( 0; i < 
+_get_arr_size( _temp321, sizeof( struct _tuple1*)); i ++){ struct _tuple1
+_temp380; void* _temp381; struct _tagged_arr _temp383; struct _tuple1* _temp378=*((
+struct _tuple1**) _check_unknown_subscript( _temp321, sizeof( struct _tuple1*),
+i)); _temp380=* _temp378; _LL384: _temp383= _temp380.f1; goto _LL382; _LL382:
+_temp381= _temp380.f2; goto _LL379; _LL379:*(( struct _tuple1**)
+_check_unknown_subscript( _temp377, sizeof( struct _tuple1*), i))=({ struct
+_tuple1* _temp385=( struct _tuple1*) _cycalloc( sizeof( struct _tuple1));
+_temp385->f1= _temp383; _temp385->f2= Cyc_Typerep_normalize_env( env, _temp381);
+_temp385;});}}{ struct _tagged_arr _temp386=({ unsigned int _temp389=
+_get_arr_size( _temp321, sizeof( struct _tuple1*)); struct _tuple1** _temp390=(
+struct _tuple1**) _cycalloc( _check_times( sizeof( struct _tuple1*), _temp389));
+struct _tagged_arr _temp392= _tag_arr( _temp390, sizeof( struct _tuple1*),
+_get_arr_size( _temp321, sizeof( struct _tuple1*)));{ unsigned int _temp391=
+_temp389; unsigned int i; for( i= 0; i <  _temp391; i ++){ _temp390[ i]=( struct
+_tuple1*) _check_null(*(( struct _tuple1**) _check_unknown_subscript( _temp377,
+sizeof( struct _tuple1*),( int) i)));}}; _temp392;}); return( void*)({ struct
+Cyc_Typerep_XTUnion_struct* _temp387=( struct Cyc_Typerep_XTUnion_struct*)
+_cycalloc( sizeof( struct Cyc_Typerep_XTUnion_struct)); _temp387[ 0]=({ struct
+Cyc_Typerep_XTUnion_struct _temp388; _temp388.tag= Cyc_Typerep_XTUnion; _temp388.f1=(
+struct _tagged_arr) _temp386; _temp388;}); _temp387;});}} _LL302: { struct
+_tagged_arr _temp397=({ unsigned int _temp406= _get_arr_size( _temp323, sizeof(
+void**)); void*** _temp407=( void***) _cycalloc( _check_times( sizeof( void**),
+_temp406)); struct _tagged_arr _temp409= _tag_arr( _temp407, sizeof( void**),
+_get_arr_size( _temp323, sizeof( void**)));{ unsigned int _temp408= _temp406;
+unsigned int i; for( i= 0; i <  _temp408; i ++){ _temp407[ i]= 0;}}; _temp409;});{
+int i= 0; for( 0; i <  _get_arr_size( _temp323, sizeof( void**)); i ++){*(( void***)
+_check_unknown_subscript( _temp397, sizeof( void**), i))=({ void** _temp398=(
+void**) _cycalloc( sizeof( void*)); _temp398[ 0]= Cyc_Typerep_normalize_env( env,*(*((
+void***) _check_unknown_subscript( _temp323, sizeof( void**), i)))); _temp398;});}}{
+struct _tagged_arr _temp399=({ unsigned int _temp402= _get_arr_size( _temp323,
+sizeof( void**)); void*** _temp403=( void***) _cycalloc( _check_times( sizeof(
+void**), _temp402)); struct _tagged_arr _temp405= _tag_arr( _temp403, sizeof(
+void**), _get_arr_size( _temp323, sizeof( void**)));{ unsigned int _temp404=
+_temp402; unsigned int i; for( i= 0; i <  _temp404; i ++){ _temp403[ i]=( void**)
+_check_null(*(( void***) _check_unknown_subscript( _temp397, sizeof( void**),(
+int) i)));}}; _temp405;}); return( void*)({ struct Cyc_Typerep_Union_struct*
+_temp400=( struct Cyc_Typerep_Union_struct*) _cycalloc( sizeof( struct Cyc_Typerep_Union_struct));
+_temp400[ 0]=({ struct Cyc_Typerep_Union_struct _temp401; _temp401.tag= Cyc_Typerep_Union;
+_temp401.f1=( struct _tagged_arr) _temp399; _temp401;}); _temp400;});}} _LL304:
+return( void*)({ struct Cyc_Typerep_Forall_struct* _temp410=( struct Cyc_Typerep_Forall_struct*)
+_cycalloc( sizeof( struct Cyc_Typerep_Forall_struct)); _temp410[ 0]=({ struct
+Cyc_Typerep_Forall_struct _temp411; _temp411.tag= Cyc_Typerep_Forall; _temp411.f1=
+_temp327; _temp411.f2=({ void** _temp412=( void**) _cycalloc( sizeof( void*));
+_temp412[ 0]= Cyc_Typerep_normalize_env( env,* _temp325); _temp412;}); _temp411;});
+_temp410;}); _LL306: { void* _temp413= Cyc_Typerep_normalize_env( env, _temp331);
+void** _temp419; struct _tagged_arr _temp421; _LL415: if(( unsigned int)
+_temp413 >  2u?*(( int*) _temp413) ==  Cyc_Typerep_Forall: 0){ _LL422: _temp421=((
+struct Cyc_Typerep_Forall_struct*) _temp413)->f1; goto _LL420; _LL420: _temp419=((
+struct Cyc_Typerep_Forall_struct*) _temp413)->f2; goto _LL416;} else{ goto
+_LL417;} _LL417: goto _LL418; _LL416: if( _get_arr_size( _temp329, sizeof( void*))
+!=  _get_arr_size( _temp421, sizeof( struct _tagged_arr*))){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp423=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp423[ 0]=({ struct Cyc_Core_Failure_struct
+_temp424; _temp424.tag= Cyc_Core_Failure; _temp424.f1= _tag_arr("app appiled wrong number of arguments",
+sizeof( unsigned char), 38u); _temp424;}); _temp423;}));}{ int i= 0; for( 0; i < 
+_get_arr_size( _temp329, sizeof( void*)); i ++){ env=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, struct _tagged_arr* k, void* v)) Cyc_Dict_insert)( env,*((
-struct _tagged_arr**) _check_unknown_subscript( _temp422, sizeof( struct
-_tagged_arr*), i)),*(( void**) _check_unknown_subscript( _temp330, sizeof( void*),
-i)));}} return Cyc_Typerep_normalize_env( env,* _temp420); _LL419:( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp426=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp426[ 0]=({ struct Cyc_Core_Failure_struct
-_temp427; _temp427.tag= Cyc_Core_Failure; _temp427.f1= _tag_arr("app misapplied",
-sizeof( unsigned char), 15u); _temp427;}); _temp426;})); _LL415:;} _LL283:;} int
+struct _tagged_arr**) _check_unknown_subscript( _temp421, sizeof( struct
+_tagged_arr*), i)),*(( void**) _check_unknown_subscript( _temp329, sizeof( void*),
+i)));}} return Cyc_Typerep_normalize_env( env,* _temp419); _LL418:( int) _throw((
+void*)({ struct Cyc_Core_Failure_struct* _temp425=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp425[ 0]=({ struct Cyc_Core_Failure_struct
+_temp426; _temp426.tag= Cyc_Core_Failure; _temp426.f1= _tag_arr("app misapplied",
+sizeof( unsigned char), 15u); _temp426;}); _temp425;})); _LL414:;} _LL282:;} int
 Cyc_Typerep_name_order( struct _tagged_arr* s1, struct _tagged_arr* s2){ return
 Cyc_Std_strcmp(* s1,* s2);} void* Cyc_Typerep_normalize( void* ts){ return Cyc_Typerep_normalize_env(((
 struct Cyc_Dict_Dict*(*)( int(* cmp)( struct _tagged_arr*, struct _tagged_arr*)))

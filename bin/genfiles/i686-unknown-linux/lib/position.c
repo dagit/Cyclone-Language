@@ -324,13 +324,12 @@ struct Cyc_Position_Segment* loc); extern unsigned int Cyc_Std_strlen( struct
 _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
 _tagged_arr s2); extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr,
 struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_substring(
-struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Set_Set; extern
-unsigned char Cyc_Set_Absent[ 11u]; static const int Cyc_Typerep_Var= 0; struct
-Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static const int
-Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag; unsigned int f1; } ;
-static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double= 1;
-static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{ int
-tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
+struct _tagged_arr, int ofs, unsigned int n); static const int Cyc_Typerep_Var=
+0; struct Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static
+const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag;
+unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double=
+1; static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{
+int tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
 struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1; } ; static const int Cyc_Typerep_Tuple=
 4; struct _tuple0{ unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{
 int tag; unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
