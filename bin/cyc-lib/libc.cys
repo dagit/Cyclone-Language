@@ -3718,6 +3718,8 @@ hstub {
      declarations does not use separate namespaces for structs and
      typedefs, so the typedef is omitted by mistake.  This ugly hack
      fixes it for now. */
+  /* JGM: we now support defining a struct fd_set and a typedef with
+     the same name, so I'm commenting these out for now.
   #ifndef __fd_set_hack
   #define __fd_set_hack
   #ifdef __OpenBSD__
@@ -3730,6 +3732,7 @@ hstub {
   typedef struct fd_set fd_set;
   #endif
   #endif
+  */
 }
 hstub pselect {
   extern int pselect(int a, fd_set *b, fd_set *c, fd_set *d,

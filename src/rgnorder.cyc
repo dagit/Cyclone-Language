@@ -347,7 +347,9 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
 	} else 
-	  impos(aprintf("RgnOrder: type variable %s not in dict",*tv->name));
+          // JGM:  just returning false here to avoid a cascading error
+          return false;
+	  // impos(aprintf("RgnOrder: type variable %s not in dict",*tv->name));
       }
       return false;
     default: return false;
