@@ -177,7 +177,7 @@ static void check_unique_root($(analenv_t<`r>,seg_t,flowdict_t<`r>)@ckenv,
   switch (root) {
   case &VarRoot(vd):
     if (!Dict::lookup_bool(new_fd,root,&rval) &&
-        Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
+        Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
     retry:switch (rval) {
       case &NamedLocation(_,r): rval = r; goto retry;
       case &Consumed(...):
@@ -383,7 +383,7 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
       check_nounique(env,loc,elt_type,lookup_place(d,p));
       break;
     default:
-      if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,elt_type))
+      if (Tcutil::is_noalias_pointer_or_aggr(elt_type))
 	Tcutil::warn(loc,"argument may contain live alias-free pointers");
       return use_Rval(env,loc,inflow,r);
     }
@@ -738,7 +738,7 @@ static $(flow_t<`r>,absRval_t<`r>)
       relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
       if (warn_lose_unique &&
-         Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,(type_t)lexp->topt)){
+         Tcutil::is_noalias_pointer_or_aggr((type_t)lexp->topt)){
         // check to see if we're over-writing a unique pointer
 	let $(rv,_) = unname_rval(fenv->r,lookup_place(indict,p));
 	switch (rv) {
@@ -847,10 +847,8 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 	    break;
 
 	  default:
-	    if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,
-						   (type_t)ve->topt) &&
-		!Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,
-						    (*vd)->type))
+	    if (Tcutil::is_noalias_pointer_or_aggr((type_t)ve->topt) &&
+		!Tcutil::is_noalias_pointer_or_aggr((*vd)->type))
 	      aerr(exp_loc,"aliased pattern expression not an l-value: %s",
 		   exp2string(ve));
 	    // Otherwise, there just isn't a place for it, either because
@@ -953,7 +951,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 //   DEBUG_PRINT("++is_local_var_rooted_path=%s\n",
 // 	      is_local_var_rooted_path(e) ? "true" : "false");
 //   DEBUG_PRINT("++is_noalias_ptr_or_aggr=%s\n",
-// 	      Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt) ?
+// 	      Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt) ?
 // 	      "true" : "False");
 //   DEBUG_PRINT("++type=%s\n",Absynpp::typ2string((type_t)e->topt));
   DEBUG_PRINT("}\n");
@@ -970,10 +968,10 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 //   DEBUG_PRINT("++is_local_rooted_path=%s\n",
 // 	      is_local_var_rooted_path(e) ? "yes" : "no");
 //   DEBUG_PRINT("++is_noalias_pointer_or_aggr=%s\n",
-// 	      Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)
+// 	      Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)
 // 	      ? "yes" : "no");	      
   if (copy_ctxt && is_local_var_rooted_path(e,false) &&
-      Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
+      Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
     DEBUG_PRINT("copy of unique pointer(s)\n");
     // if e is a copy of a unique pointer, then we want to treat this
     // as if it were:
@@ -1086,7 +1084,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     return $(f,fenv->unknown_all);
 
   case &AssignOp_e(l,&_,r):
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -1117,7 +1115,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &AssignOp_e(e1,NULL,e2):
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -1884,7 +1882,7 @@ static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow,
   DEBUG_PRINT("BEGIN expanding unique places\n");
   for (_ x = es; x != NULL; x = x->tl) {
     if (is_local_var_rooted_path(x->hd,true) &&
-	Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)x->hd->topt)) {
+	Tcutil::is_noalias_pointer_or_aggr((type_t)x->hd->topt)) {
       let $(f,_) = anal_Lexp(env,inflow,true,false,x->hd);
       inflow = f;
     }
@@ -2072,7 +2070,7 @@ static void check_for_unused_unique($(seg_t,analenv_t<`r>,flowdict_t<`r>)@ ckenv
   let &$(loc,env,fd) = ckenv;
   switch (root) {
   case &VarRoot(vd):
-    if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
+    if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
       let $(rval,_) = unname_rval(env->fenv->r,rval);
       switch (rval) {
       case &Consumed(...):
@@ -2164,7 +2162,7 @@ static $(bool,absRval_opt_t<`r>) noconsume_place_ok(analenv_t<`r> env,
       if (vd == n) {
 	rval = r;
 	// if a unique pointer, make sure not consumed
-	if (Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
+	if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
 	  // see if I consumed the variable directly
 	  if (is_unique_consumed(bogus_exp,bogus_int,rval,&bogus_bool)) {
 	    if (!do_unconsume)
@@ -2188,7 +2186,7 @@ static $(bool,absRval_opt_t<`r>) noconsume_place_ok(analenv_t<`r> env,
       break;
 	
     default:
-      if (!Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type))
+      if (!Tcutil::is_noalias_pointer_or_aggr(vd->type))
 	varok = true;
       else if (!do_unconsume)
 	aerr(loc, "function parameter %s with attribute "
@@ -2298,7 +2296,7 @@ static flow_t<`r> unconsume_exp(analenv_t<`r> env,
 	// if this is an alias expression, then overwriting the
 	// original is an error (for now)
 	if (ropt != NULL &&
-	    !Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
+	    !Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
 	  aerr(loc,"aliased expression %s was overwritten",
 	       exp2string(unconsume_exp));
 	  // CODE SAVED FROM OLD ALIAS STUFF BELOW
@@ -2427,7 +2425,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
 static void check_dropped_unique_vd($(analenv_t<`r>, flowdict_t<`r>, seg_t)@ vdenv,
                                      Absyn::vardecl_t vd) {
   let &$(env,fd,loc) = vdenv;
-  if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
+  if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
     // FIX: avoid allocation of var-root
     datatype Root.VarRoot vdroot = VarRoot(vd);
     //let root = rnew(env->fenv->r) VarRoot(vd);

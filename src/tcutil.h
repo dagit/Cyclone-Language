@@ -267,12 +267,12 @@ extern bool is_noalias_pointer(type_t t, bool must_be_unique);
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate.  The
 // region is used for allocating temporary stuff.
-extern bool is_noalias_path(region_t<`r>, exp_t e);
+extern bool is_noalias_path(exp_t e);
 
 // returns true if this expression is an aggregate that contains
 // non-aliasable pointers or is itself a non-aliasable pointer
 // The region is used for allocating temporary stuff
-extern bool is_noalias_pointer_or_aggr(region_t<`temp>, type_t t);
+extern bool is_noalias_pointer_or_aggr(type_t t);
 
 // Ensure e is an lvalue or function designator -- return whether
 // or not &e is const and what region e is in.

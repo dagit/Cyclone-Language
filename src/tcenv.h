@@ -63,8 +63,6 @@ typedef struct Tenv@ tenv_t;
 
 extern `a env_err(string_t msg) __attribute__((noreturn));
 
-#define TEMP_RGN(te,x) let x = heap_region;
-
 extern tenv_t tc_init();
 extern fenv_t new_fenv(seg_t,fndecl_t);
 extern fenv_t nested_fenv(seg_t,fenv_t old_fenv, fndecl_t new_fn);

@@ -142,8 +142,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string((type_t)e->topt), typ2string(t));
         explain_failure();
       }
-      if (is_noalias_pointer_or_aggr(heap_region,t) 
-	  && !is_noalias_path(heap_region,e))
+      if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
 	terr(e->loc,UNIQUE_ERR_MSG);
     }
     return;
@@ -212,8 +211,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         explain_failure();
       }
       // JGM: no test case
-      if (is_noalias_pointer_or_aggr(heap_region,ts->hd) &&
-	  !is_noalias_path(heap_region,es->hd))
+      if (is_noalias_pointer_or_aggr(ts->hd) && !is_noalias_path(es->hd))
 	terr(es->hd->loc,UNIQUE_ERR_MSG);
     }
     if (es != NULL)
@@ -256,8 +254,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
-    if (is_noalias_pointer_or_aggr(heap_region,t) 
-	&& !is_noalias_path(heap_region,e))
+    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
       terr(e->loc,UNIQUE_ERR_MSG);
     let te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {

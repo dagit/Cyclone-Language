@@ -68,58 +68,56 @@ static void fnTypeAttsOverlap(seg_t loc, int i,
 	 lst1[1], lst2[1], i);
 }
 static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
-  TEMP_RGN(te, temp) {
-    $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
-    $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
-    $(list_t<int>,string_t) noconsume_params     = $(NULL,"noconsume");
-    switch (compress(t)) {
-    case &FnType(FnInfo{.attributes=atts,.args=args,...}):
-      int nargs = List::length(args);
-      for ( ; atts != NULL; atts = atts->tl) {
-	switch(atts->hd) {
-	case &Initializes_att(i):
-	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	  fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
-	  fnTypeAttsOverlap(loc,i,init_params,noconsume_params);
-	  let &$(_,_,t) = List::nth(args,i-1);
-          string_t s = "initializes attribute allowed only on";
-	  switch(Tcutil::compress(t)) {
-	  case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
-	    if(conref_val(nullable))
-	      terr(loc,"%s non-null pointers",s);
-            if(!is_bound_one(bd))
-	      terr(loc,"%s pointers of size 1",s);
-            if(conref_def(false,zt))
-	      terr(loc,"%s pointers to non-zero-terminated arrays",s);
-	    break;
-          default:
-	    terr(loc,"%s pointers",s);
-          }
-	  init_params[0] = rnew(temp) List(i,init_params[0]); 
+  $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
+  $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
+  $(list_t<int>,string_t) noconsume_params     = $(NULL,"noconsume");
+  switch (compress(t)) {
+  case &FnType(FnInfo{.attributes=atts,.args=args,...}):
+    int nargs = List::length(args);
+    for ( ; atts != NULL; atts = atts->tl) {
+      switch(atts->hd) {
+      case &Initializes_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
+	fnTypeAttsOverlap(loc,i,init_params,noconsume_params);
+	let &$(_,_,t) = List::nth(args,i-1);
+	string_t s = "initializes attribute allowed only on";
+	switch(Tcutil::compress(t)) {
+	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
+	  if(conref_val(nullable))
+	    terr(loc,"%s non-null pointers",s);
+	  if(!is_bound_one(bd))
+	    terr(loc,"%s pointers of size 1",s);
+	  if(conref_def(false,zt))
+	    terr(loc,"%s pointers to non-zero-terminated arrays",s);
 	  break;
-	case &Noliveunique_att(i):
-	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	  fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
-	  fnTypeAttsOverlap(loc,i,nolive_unique_params,noconsume_params);
-	  let &$(_,_,t) = List::nth(args,i-1);
-	  if (!is_noalias_pointer(t,false))
-	    terr(loc,"noliveunique attribute allowed only on unique pointers");
-	  nolive_unique_params[0] = rnew(temp) List(i,nolive_unique_params[0]);
-	  break;
-	case &Noconsume_att(i):
-	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	  fnTypeAttsOverlap(loc,i,noconsume_params,init_params);
-	  fnTypeAttsOverlap(loc,i,noconsume_params,nolive_unique_params);
-	  let &$(_,_,t) = List::nth(args,i-1);
-          // XXX other restrictions?  E.g. not on arrays or fat pointers?
-	  noconsume_params[0] = rnew(temp) List(i,noconsume_params[0]); 
-	  break;
-	default: break;
+	default:
+	  terr(loc,"%s pointers",s);
 	}
+	init_params[0] = new List(i,init_params[0]); 
+	break;
+      case &Noliveunique_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
+	fnTypeAttsOverlap(loc,i,nolive_unique_params,noconsume_params);
+	let &$(_,_,t) = List::nth(args,i-1);
+	if (!is_noalias_pointer(t,false))
+	  terr(loc,"noliveunique attribute allowed only on unique pointers");
+	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
+	break;
+      case &Noconsume_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	fnTypeAttsOverlap(loc,i,noconsume_params,init_params);
+	fnTypeAttsOverlap(loc,i,noconsume_params,nolive_unique_params);
+	let &$(_,_,t) = List::nth(args,i-1);
+	// XXX other restrictions?  E.g. not on arrays or fat pointers?
+	noconsume_params[0] = new List(i,noconsume_params[0]); 
+	break;
+      default: break;
       }
-      break;
-    default: impos("fnTypeAttsOK: not a function type");
     }
+    break;
+  default: impos("fnTypeAttsOK: not a function type");
   }
 }
 
@@ -694,12 +692,10 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, seg_t loc,
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, &tmk, false, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
-      TEMP_RGN(te, temp) {
-        if (is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
-          terr(f->loc, 
-               "noalias pointers in datatypes are not allowed (%s)",
-               qvar2string(f->name)); //FIX ?      
-      }
+      if (is_noalias_pointer_or_aggr((*typs->hd)[1]))
+	terr(f->loc, 
+	     "noalias pointers in datatypes are not allowed (%s)",
+	     qvar2string(f->name)); //FIX ?      
       (*typs->hd)[0].real_const = 
         extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
                                    (*typs->hd)[1]);

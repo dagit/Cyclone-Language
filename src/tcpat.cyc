@@ -234,7 +234,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       break;
     }
     else {
-      if (is_noalias_pointer_or_aggr(heap_region,t))
+      if (is_noalias_pointer_or_aggr(t))
 	terr(p->loc, "* pattern cannot take the address of an alias-free path");
     }
     exp_opt_t new_access_exp = NULL;
@@ -464,24 +464,23 @@ DONT_PROMOTE:
 
       var_tvs = imp_rev(var_tvs);
 
-      TEMP_RGN(te, r2) {
-        tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
+      tenv_t te2 = add_type_vars(p->loc,te,exist_ts);
+      
+      let tenv_tvs = lookup_type_vars(te2);
+      let env = $(tenv_tvs,rgn);
+      let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
+      let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
+      let all_typs   = List::map(snd,all_inst);
+      let exist_typs = List::map(snd,exist_inst);
+      let inst       = List::rappend(rgn,all_inst,exist_inst);
 
-        let tenv_tvs = lookup_type_vars(te2);
-        let env = $(tenv_tvs,rgn);
-        let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
-        let exist_inst = List::rzip(rgn,rgn,ad->impl->exist_vars,var_tvs);
-        let all_typs   = List::map(snd,all_inst);
-        let exist_typs = List::map(snd,exist_inst);
-        let inst       = List::rappend(rgn,all_inst,exist_inst);
-
-        if(exist_ts != NULL || ad->impl->rgn_po != NULL) {
-          if(res.tvars_and_bounds_opt==NULL)
-            res.tvars_and_bounds_opt = new $(NULL,NULL);
-          (*res.tvars_and_bounds_opt)[0] = 
-            append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
-          (*res.tvars_and_bounds_opt)[1] = 
-            append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
+      if(exist_ts != NULL || ad->impl->rgn_po != NULL) {
+	if(res.tvars_and_bounds_opt==NULL)
+	  res.tvars_and_bounds_opt = new $(NULL,NULL);
+	(*res.tvars_and_bounds_opt)[0] = 
+	  append((*res.tvars_and_bounds_opt)[0],map(add_false,exist_ts));
+	(*res.tvars_and_bounds_opt)[1] = 
+	  append((*res.tvars_and_bounds_opt)[1],outlives_constraints);
           let rpo_inst = NULL;
           for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
             rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
@@ -490,107 +489,104 @@ DONT_PROMOTE:
           rpo_inst = imp_rev(rpo_inst);
           (*res.tvars_and_bounds_opt)[1] = 
             append((*res.tvars_and_bounds_opt)[1],rpo_inst);
-        }
+      }
 
-        *tsp = all_typs;
-        t = new AggrType(AggrInfo(KnownAggr(new ad),*tsp));
-        if (dots && ad->kind == UnionA) 
-          warn(p->loc,"`...' pattern not allowed in union pattern");
-        else if (dots) {
-          // fill in wild patterns for the missing fields
-          let ldps = List::length(dps);
-          let lfields = List::length(ad->impl->fields);
-          if (ldps < lfields) {
-            list_t<$(list_t<designator_t>,pat_t)@> wild_dps = NULL;
-            for (int i = 0; i < lfields - ldps; i++) 
-              wild_dps = new List(new $(NULL,wild_pat(p->loc)), wild_dps);
-            *dps_p = List::imp_append(dps,wild_dps);
-            dps = *dps_p;
-          } else if (ldps == lfields)
-            warn(p->loc,"unnecessary ... in struct pattern");
-        }
-        list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
-          resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
-        for(; fields != NULL; fields = fields->tl) {
-          let &$(field,pat)     = fields->hd;
-          let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
-          //inst_fieldtyp = pat_promote_array(te,inst_fieldtyp,rgn_pat);
-	  exp_opt_t new_access_exp = NULL;
-	  if (access_exp)
-	    new_access_exp = aggrmember_exp(access_exp,field->name,DL);
-          res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,
-					     allow_ref_pat,new_access_exp));
-          // must unify here or the type we gave pat won't ever get checked
-          // against the exp we're matching against.  Even if we succeed now,
-          // we could be constraining so as to catch an error later.
-          if (!unify((type_t)pat->topt,inst_fieldtyp))
-            terr(p->loc,"field %s of %s pattern expects type %s != %s",
-                 *field->name, aggr_str, typ2string(inst_fieldtyp), 
-                 typ2string((type_t)pat->topt));
-	  if (new_access_exp) new_access_exp->topt = pat->topt;
-        }
+      *tsp = all_typs;
+      t = new AggrType(AggrInfo(KnownAggr(new ad),*tsp));
+      if (dots && ad->kind == UnionA) 
+	warn(p->loc,"`...' pattern not allowed in union pattern");
+      else if (dots) {
+	// fill in wild patterns for the missing fields
+	let ldps = List::length(dps);
+	let lfields = List::length(ad->impl->fields);
+	if (ldps < lfields) {
+	  list_t<$(list_t<designator_t>,pat_t)@> wild_dps = NULL;
+	  for (int i = 0; i < lfields - ldps; i++) 
+	    wild_dps = new List(new $(NULL,wild_pat(p->loc)), wild_dps);
+	  *dps_p = List::imp_append(dps,wild_dps);
+	  dps = *dps_p;
+	} else if (ldps == lfields)
+	  warn(p->loc,"unnecessary ... in struct pattern");
+      }
+      list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
+	resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
+      for(; fields != NULL; fields = fields->tl) {
+	let &$(field,pat)     = fields->hd;
+	let inst_fieldtyp     = rsubstitute(rgn,inst,field->type);
+	//inst_fieldtyp = pat_promote_array(te,inst_fieldtyp,rgn_pat);
+	exp_opt_t new_access_exp = NULL;
+	if (access_exp)
+	  new_access_exp = aggrmember_exp(access_exp,field->name,DL);
+	res = combine_results(res,tcPatRec(te2,pat,&inst_fieldtyp,rgn_pat,
+					   allow_ref_pat,new_access_exp));
+	// must unify here or the type we gave pat won't ever get checked
+	// against the exp we're matching against.  Even if we succeed now,
+	// we could be constraining so as to catch an error later.
+	if (!unify((type_t)pat->topt,inst_fieldtyp))
+	  terr(p->loc,"field %s of %s pattern expects type %s != %s",
+	       *field->name, aggr_str, typ2string(inst_fieldtyp), 
+	       typ2string((type_t)pat->topt));
+	if (new_access_exp) new_access_exp->topt = pat->topt;
       }
     }
     break;
 
   case &Datatype_p(tud,tuf,*ps_p,dots): 
     let ps = *ps_p;
-    TEMP_RGN(te, rgn) {
-      list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
+    list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
-      let tenv_tvs = lookup_type_vars(te);
-      let env      = $(tenv_tvs,rgn);
-      let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
-      let all_typs = List::map(snd,inst);
-      t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
-                                                  all_typs});
-      if (dots) {
-        // fill in wild patterns for the missing fields
-        let lps = List::length(ps);
-        let ltqts = List::length(tqts);
-        if (lps < ltqts) {
-          list_t<pat_t> wild_ps = NULL;
-          for (int i = 0; i < ltqts - lps; i++) 
-            wild_ps = new List(wild_pat(p->loc), wild_ps);
-          *ps_p = List::imp_append(ps,wild_ps);
-          ps = *ps_p;
-        } else if (lps == ltqts)
-          warn(p->loc,"unnecessary ... in datatype field %s",
-               qvar2string(tud->name));
-      }
-      for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
-	let p2 = ps->hd;
-	// Note:  we don't pass in ptr_rgn here because for value-carrying
-	// constructors, the pointer's region is passed down as rgn_pat.
-	let field_typ = rsubstitute(rgn, inst, (*tqts->hd)[1]);
-	// set just the expression here to indicate that the entire
-	// datatype must be escaped/consumed
-	if (access_exp)
-	  set_vd(NULL, access_exp, &res.patvars, char_typ /* dummy */);
-	res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,
-					   allow_ref_pat,NULL));
-	// must unify here or the type we gave pat won't ever get checked
-	// against the exp we're matching against.  Even if we succeed now,
-	// we could be constraining so as to catch an error later.
-	if (!unify((type_t)p2->topt,field_typ))
-	  terr(p2->loc, "%s expects argument type %s, not %s",
-               qvar2string(tuf->name), typ2string(field_typ),
-               typ2string((type_t)p2->topt));
-      }
-      if (ps != NULL)
-	terr(p->loc,"too many arguments for datatype constructor %s",
-             qvar2string(tuf->name));
-      if (tqts != NULL)
-	terr(p->loc,"too few arguments for datatype constructor %s",
-	     qvar2string(tuf->name));
+    let tenv_tvs = lookup_type_vars(te);
+    let env      = $(tenv_tvs,heap_region);
+    let inst     = List::map_c(r_make_inst_var,&env,tud->tvs);
+    let all_typs = List::map(snd,inst);
+    t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
+						all_typs});
+    if (dots) {
+      // fill in wild patterns for the missing fields
+      let lps = List::length(ps);
+      let ltqts = List::length(tqts);
+      if (lps < ltqts) {
+	list_t<pat_t> wild_ps = NULL;
+	for (int i = 0; i < ltqts - lps; i++) 
+	  wild_ps = new List(wild_pat(p->loc), wild_ps);
+	*ps_p = List::imp_append(ps,wild_ps);
+	ps = *ps_p;
+      } else if (lps == ltqts)
+	warn(p->loc,"unnecessary ... in datatype field %s",
+	     qvar2string(tud->name));
     }
+    for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
+      let p2 = ps->hd;
+      // Note:  we don't pass in ptr_rgn here because for value-carrying
+      // constructors, the pointer's region is passed down as rgn_pat.
+      let field_typ = substitute(inst, (*tqts->hd)[1]);
+      // set just the expression here to indicate that the entire
+      // datatype must be escaped/consumed
+      if (access_exp)
+	set_vd(NULL, access_exp, &res.patvars, char_typ /* dummy */);
+      res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,
+					 allow_ref_pat,NULL));
+      // must unify here or the type we gave pat won't ever get checked
+      // against the exp we're matching against.  Even if we succeed now,
+      // we could be constraining so as to catch an error later.
+      if (!unify((type_t)p2->topt,field_typ))
+	terr(p2->loc, "%s expects argument type %s, not %s",
+	     qvar2string(tuf->name), typ2string(field_typ),
+	     typ2string((type_t)p2->topt));
+    }
+    if (ps != NULL)
+      terr(p->loc,"too many arguments for datatype constructor %s",
+	   qvar2string(tuf->name));
+    if (tqts != NULL)
+      terr(p->loc,"too few arguments for datatype constructor %s",
+	   qvar2string(tuf->name));
     break;
 
-  case &Aggr_p(NULL,_,_,_):
-  case &Aggr_p(&AggrInfo({.UnknownAggr = _},_),_,_,_):
+  case &Aggr_p(NULL,...):
+  case &Aggr_p(&AggrInfo({.UnknownAggr = _},_),...):
   case &UnknownId_p(_):         
   case &Exp_p(_):
-  case &UnknownCall_p(_,_,_): 
+  case &UnknownCall_p(...): 
     t = wildtyp(lookup_opt_type_vars(te)); break;
   }
  tcpat_end:
@@ -602,21 +598,19 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
 		     exp_opt_t pat_var_exp) {
   let ans = tcPatRec(te,p,topt,NULL,false,pat_var_exp);
   // caller will check tvar uniqueness when adding to environment
-  TEMP_RGN(te, r) {
-    let $(vs1,_) = List::rsplit(r,r,ans.patvars);
-    let vs = NULL;
-    for (_ x = vs1; x != NULL; x=x->tl)
-      if (x->hd != NULL) vs = rnew (r) List(*x->hd,vs);
-    check_unique_vars(List::rmap(r, get_name, vs), p->loc,
-		      "pattern contains a repeated variable");
-    // go through and deep copy the access expressions if they
-    // are not == to pat_var_exp; this prevents bad sharing
-    // of annotations added in the flow analysis
-    for (_ x = ans.patvars; x != NULL; x=x->tl) {
-      let &$(vdopt,*expopt) = x->hd;
-      if (*expopt != NULL && *expopt != pat_var_exp)
-	*expopt = deep_copy_exp(true,(exp_t)*expopt);
-    }
+  let $(vs1,_) = List::split(ans.patvars);
+  let vs = NULL;
+  for (_ x = vs1; x != NULL; x=x->tl)
+    if (x->hd != NULL) vs = new List(*x->hd,vs);
+  check_unique_vars(List::map(get_name, vs), p->loc,
+		    "pattern contains a repeated variable");
+  // go through and deep copy the access expressions if they
+  // are not == to pat_var_exp; this prevents bad sharing
+  // of annotations added in the flow analysis
+  for (_ x = ans.patvars; x != NULL; x=x->tl) {
+    let &$(vdopt,*expopt) = x->hd;
+    if (*expopt != NULL && *expopt != pat_var_exp)
+      *expopt = deep_copy_exp(true,(exp_t)*expopt);
   }
   return ans;
 }
@@ -710,7 +704,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       if (vdopt != NULL && *vdopt == vd && eopt != NULL) {
 	switch (((exp_t)eopt)->r) {
 	case &Address_e(e):
-	  if (is_noalias_pointer_or_aggr(heap_region, (type_t)e->topt))
+	  if (is_noalias_pointer_or_aggr((type_t)e->topt))
 	    terr(p->loc,"reference pattern not allowed on alias-free pointers");
 	  break;
 	default:
@@ -770,23 +764,20 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 void check_pat_regions(tenv_t te, pat_t p,
 		       list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
   check_pat_regions_rec(te,p,false,patvars);
-  TEMP_RGN(te, r) {  
-    for (_ x = patvars; x != NULL; x=x->tl) {
-      let &$(vdopt,eopt) = x->hd;
-      if (eopt != NULL) {
-	let e = (exp_t)eopt;
+  for (_ x = patvars; x != NULL; x=x->tl) {
+    let &$(vdopt,eopt) = x->hd;
+    if (eopt != NULL) {
+      let e = (exp_t)eopt;
 // 	fprintf(stderr,"checking exp=|%s|:%s\n",
 // 		exp2string(e), typ2string((type_t)e->topt));
-	if (is_noalias_pointer_or_aggr(r,(type_t)e->topt) &&
-	    !is_noalias_path(r,e))
-	  // FIX: need better location information
-	  terr(p->loc,"pattern %s dereferences a alias-free pointer from a "
-	       "non-unique path",
-	       vdopt != NULL ? (const char ? @nozeroterm)
-	                        aprintf("for variable %s",
-					qvar2string((*vdopt)->name)) 
-	       : "");
-      }
+      if (is_noalias_pointer_or_aggr((type_t)e->topt) && !is_noalias_path(e))
+	// FIX: need better location information
+	terr(p->loc,"pattern %s dereferences a alias-free pointer from a "
+	     "non-unique path",
+	     vdopt != NULL ? (const char ? @nozeroterm)
+	     aprintf("for variable %s",
+		     qvar2string((*vdopt)->name)) 
+	     : "");
     }
   }
 }
