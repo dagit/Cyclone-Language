@@ -334,49 +334,49 @@ MAGIC
 ;
 
 ctype.h:
-epilogue isalnum {
+epilogue {
   extern "C" int isalnum(int);
 }
-epilogue isalpha {
+epilogue {
   extern "C" int isalpha(int);
 }
-epilogue isascii {
+epilogue {
   extern "C" int isascii(int);
 }
-epilogue iscntrl {
+epilogue {
   extern "C" int iscntrl(int);
 }
-epilogue isdigit {
+epilogue {
   extern "C" int isdigit(int);
 }
-epilogue isgraph {
+epilogue {
   extern "C" int isgraph(int);
 }
-epilogue islower {
+epilogue {
   extern "C" int islower(int);
 }
-epilogue isprint {
+epilogue {
   extern "C" int isprint(int);
 }
-epilogue ispunct {
+epilogue {
   extern "C" int ispunct(int);
 }
-epilogue isspace {
+epilogue {
   extern "C" int isspace(int);
 }
-epilogue isupper {
+epilogue {
   extern "C" int isupper(int);
 }
-epilogue isxdigit {
+epilogue {
   extern "C" int isxdigit(int);
 }
-epilogue toascii {
+epilogue {
   extern "C" int toascii(int);
 }
-epilogue tolower {
+epilogue {
   extern "C" int tolower(int);
 }
-epilogue toupper {
+epilogue {
   extern "C" int toupper(int);
 }
 epilogue _tolower {
@@ -2093,12 +2093,11 @@ epilogue {
 }
 cycstub {
   #include <csignal.h>
-  namespace Std;
 }
 epilogue sigset {
   extern sigarg_t sigset(int, sigarg_t);
 }
-cycstub sigset {
+cycstub {
   namespace Csignal {
     extern "C" sigarg_t sigset_SIG_DFL(int);
     extern "C" sigarg_t sigset_SIG_ERR(int);
@@ -2126,6 +2125,8 @@ cycstub sigset {
       return new __SIG_HANDLER(f);
     }
   }
+}
+cycstub sigset {
   sigarg_t sigset(int a, sigarg_t b) {
     switch (b) {
     case &__SIG_BUILTIN(SIG_DFL):
@@ -2145,7 +2146,6 @@ cycstub sigset {
 }
 cstub {
   #include <signal.h>
-
   typedef void *Cyc_Std_sigarg_t;
   extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_DFL();
   extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_ERR();
@@ -2187,7 +2187,7 @@ cstub sigset {
 }
 epilogue signal {
   #ifndef __CYGWIN__
-  extern sigarg_t signal(int, sigarg_t);
+  sigarg_t signal(int, ... inject sigarg_t);
   #endif
 }
 cycstub signal {
@@ -2379,6 +2379,11 @@ cycstub {
   #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
   #endif
 }
+prologue {
+  namespace Cstdio {
+    extern "C" struct __abstractFILE;    // needed by tmp.cyc
+  }
+}
 cycstub {
   namespace Cstdio {
     extern "C" struct __abstractFILE;
@@ -2387,6 +2392,10 @@ cycstub {
   abstract struct __cycFILE { // must match defn in c stub
     Cstdio::__cFILE @file;
   };
+}
+epilogue {
+  // fromCfile needed by tmp.cyc
+  extern FILE *`H fromCfile(struct Cstdio::__abstractFILE *`H cf);
 }
 cstub {
   #include <stdio.h>
@@ -2987,14 +2996,15 @@ epilogue tmpfile {
   extern FILE *tmpfile(void);
 }
 cycstub tmpfile {
-  namespace Cstdio {
-    extern "C" __cFILE *tmpfile(void);
-  }
-  extern FILE *tmpfile(void) {
-    let cf = Cstdio::tmpfile();
-    // FIX: get rid of the heap allocation
-    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
-  }
+// currently in tmp.cyc
+//  namespace Cstdio {
+//    extern "C" __cFILE *tmpfile(void);
+//  }
+//  extern FILE *tmpfile(void) {
+//    let cf = Cstdio::tmpfile();
+//    // FIX: get rid of the heap allocation
+//    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
+//  }
 }
 epilogue tmpnam {
   // Note, tmpnam is considered insecure because in between the call
@@ -3009,18 +3019,19 @@ epilogue tmpnam {
   extern char ?`H tmpnam(char ?`H);
 }
 cycstub tmpnam {
-  extern char ?`r strcpy(char ?`r,const char ?); 
-  // Instead of putting this in the stub file, we should just
-  // have a separate file for it.  That way the linker can leave
-  // it out if it isn't used, preventing a warning about the
-  // security problem.
-  namespace Cstdio {
-    extern "C" Cstring tmpnam(Cstring);
-  }
-  char ?`H tmpnam(char ?`H s) {
-    char ?name = static_c2s(Cstdio::tmpnam(NULL));
-    return s ? strcpy(s, name) : name;
-  }
+// currently defined in tmp.cyc
+//  extern char ?`r strcpy(char ?`r,const char ?); 
+//  // Instead of putting this in the stub file, we should just
+//  // have a separate file for it.  That way the linker can leave
+//  // it out if it isn't used, preventing a warning about the
+//  // security problem.
+//  namespace Cstdio {
+//    extern "C" Cstring tmpnam(Cstring);
+//  }
+//  char ?`H tmpnam(char ?`H s) {
+//    char ?name = static_c2s(Cstdio::tmpnam(NULL));
+//    return s ? strcpy(s, name) : name;
+//  }
 }
 epilogue ungetc {
   extern int ungetc(int, FILE @);
@@ -3095,11 +3106,50 @@ epilogue {
   //  extern void file_delete(const char ?);
   //  extern void file_length(const char ?);
 
-  // these two provided in runtime_cyc.c
+  // these two provided in c stubs
   extern int file_string_read(FILE @, char ?dest, int dest_offset, 
                               int max_count);
   extern int file_string_write(FILE @, const char ?src, int src_offset, 
                                int max_count);
+}
+cstub {
+  FILE *_sfile_to_file(struct Cyc_Std___cycFILE *sf) {
+    if(!sf) {
+      fprintf(stderr,"Attempt to access null file descriptor.\n");
+      exit(255);
+    }
+    if(!sf->file)
+      throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
+    return sf->file;
+  }
+  int Cyc_Std_file_string_read(struct Cyc_Std___cycFILE *sf, 
+                                 struct _tagged_arr dest,
+                                 int dest_offset, int max_count) {
+    unsigned char *new_curr = dest.curr + dest_offset;
+    size_t sz = dest.last_plus_one - new_curr;
+    FILE *fd = _sfile_to_file(sf);
+    if (new_curr < dest.base || new_curr >= dest.last_plus_one)
+      throw(Cyc_Null_Exception);
+    if(dest_offset + max_count > sz) {
+      fprintf(stderr,"Attempt to read off end of string.\n");
+      exit(255);
+    }
+    return fread(new_curr, 1, max_count, fd);
+  }
+  int Cyc_Std_file_string_write(struct Cyc_Std___cycFILE *sf, 
+                                  struct _tagged_arr src,
+                                  int src_offset, int max_count) {
+    size_t sz = src.last_plus_one - src.curr;
+    unsigned char *new_curr = src.curr + src_offset;
+    FILE *fd = _sfile_to_file(sf);
+    if (new_curr < src.base || new_curr >= src.last_plus_one)
+      throw(Cyc_Null_Exception);
+    if(src_offset + max_count > sz) {
+      fprintf(stderr,"Attempt to write off end of string.\n");
+      exit(255);
+    } 
+    return fwrite(new_curr, 1, max_count, fd);
+  }
 }
 cycstub {
   xtunion exn { 
@@ -3258,7 +3308,8 @@ epilogue erand48 {
   extern "C" double erand48(unsigned short @{3});
 }
 epilogue exit {
-  extern "C" void exit(int);
+// currently causes ambiguity
+//  extern "C" void exit(int);
 }
 epilogue free {
   extern void free(`a::A ?);
@@ -5461,13 +5512,16 @@ epilogue {
   /* optarg is omitted */
 }
 epilogue optind {
-  extern "C" int optind;
+// Conflict with hand-coded getopt.h so not supported yet
+//  extern "C" int optind;
 }
 epilogue opterr {
-  extern "C" int opterr;
+// Conflict with hand-coded getopt.h so not supported yet
+//  extern "C" int opterr;
 }
 epilogue optopt {
-  extern "C" int optopt;
+// Conflict with hand-coded getopt.h so not supported yet
+//  extern "C" int optopt;
 }
 ;
 
