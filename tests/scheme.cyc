@@ -4,7 +4,7 @@
 #include <list.h>
 using Core;
 using List;
-namespace Scheme;
+namespace Scheme {
 //////////////////////////////////////////////////////////////////////
 // Dynamic region interface
 //////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ datatype Object<`r> {
 
 // expressions:
 // e ::= x | i | #t | #f | nil | <string> | primop | (e e1 ... en) | 
-//      (lambda (x1 ... xn) e) | (if e1 e2 e3) | (e1,e2) | #(e1 ... en) 
+//      (lambda (x1 ... xn) e) | (if e1 e2 e3) | (set! x e)
 datatype Exp {
   Var_e(const char ?,unsigned int depth, unsigned int offset);  
   Int_e(int);
@@ -259,9 +259,9 @@ static state_t<`r> step(region_t<`r> r, state_t<`r> arg) {
     // application
     case {.apply_frame = $(es,off,vs)}:
       vs[off] = v;
+      off = off + 1;
       // see if we have more arguments to evaluate
       if (off < numelts(es)) {
-        off = off + 1;
         arg.result.expr = es[off];
         fr->frame.apply_frame = $(es,off,vs);
         fr->next = arg.stack;
@@ -412,6 +412,7 @@ typedef struct MachineState@`U mach_state_t;
 // except that it drops all unreachable objects, and destroy the 
 // old machine state.
 static struct MachineState gc(struct MachineState ms) {
+  fprintf(stderr,"major gc...");
   let MachineState{<`r> key, counter, state} = ms;
   // generate the to-space from the old-space's counter
   let CounterRgn{new_key, new_counter} = next_key(counter);
@@ -438,6 +439,7 @@ static struct MachineState gc(struct MachineState ms) {
     }
   }
   free_ukey(key); // free the old space
+  fprintf(stderr,"done.\n");
   return ms;     // return the new machine state
 }
 
@@ -457,18 +459,8 @@ static struct MachineState init_state(exp_t e) {
 }
 
 // how many steps we take before performing a GC
-#define GC_STEP 10
+#define GC_STEP 2
 
-// the main loop of the interpreter -- run for GC_STEP steps
-// doing one reduction per step.  The steps update the stack,
-// environment, and expression to be evaluated.
-static state_t<`r> trampoline(region_t<`r> r,state_t<`r> state) {
-  for (int i = 0; i < GC_STEP; i++) {
-    state = step(r, state);
-  }
-  return state;
-}
-                                                
 // the toplevel -- creates an initial abstract machine state,
 // and then enters a loop which does the trampoline followed
 // by a gc.  
@@ -478,13 +470,19 @@ int toplevel(exp_t e) {
     while (true) {
       let MachineState{<`r> key, counter, state} = ms;
       { region r = open(key);
-        state = trampoline(r, state);
-        ms = MachineState{key,counter,state};
-        ms = gc(ms);
+        for (int i = 0; i < GC_STEP; i++) {
+          state = step(r, state);
+        }
       }
+        // BUG!!! key should be consumed here
+        // so ms should not be fully defined here
+        // so gc shouldn't be able to be called.
+      ms = MachineState{key,counter,state};
+      ms = gc(ms);
     }
   } catch {
   case &Finished(i): printf("The result is %d\n",i); return i;
+  case ex: rethrow(ex);
   }
 }
 
@@ -547,7 +545,7 @@ static object_t<`r> minus(region_t<`r> r, object_t<`r>?`r p) {
 
 // * primop
 object_t<`r> times(region_t<`r> r, object_t<`r>?`r p) {
-  int prod = 0;
+  int prod = 1;
   unsigned n = numelts(p);
   for (unsigned i = 0; i < numelts(p); i++)
     switch (p[i]) {
@@ -648,4 +646,34 @@ static void deb(region_t<`r> r,list_t<const char?`H?`H@`r,`r> d, exp_t e) {
 static void debruijn(exp_t e) {
   region r;
   deb(r, initial_static_env(r), e);
+}
+
+//////////////////////////////////////////////////////////////////////
+// abstract syntax constructors 
+//////////////////////////////////////////////////////////////////////
+typedef const char ? str_t;
+exp_t VAR(str_t x) { return new Var_e(x,0,0); }
+exp_t NUM(int i) { return new Int_e(i); }
+exp_t STR(str_t x) { return new String_e(x); }
+exp_t SET(str_t x, exp_t e) { return new Set_e(x,0,0,e); }
+exp_t IF(exp_t e1, exp_t e2, exp_t e3) { return new If_e(e1,e2,e3); }
+exp_t LET(str_t x, exp_t e1, exp_t e2) {
+  return new Apply_e(new {new Lambda_e(new {x},e2), e1});
+}
+exp_t LAM(str_t ?`H args, exp_t body) {
+  return new Lambda_e(args,body);
+}
+exp_t APP(...exp_t es) {
+  return new Apply_e(new {for i < numelts(es) : es[i]});
+}
+
+exp_t prog() {
+  return APP(VAR("*"),NUM(2),NUM(3));
+}
+}
+using Scheme;
+int main() {
+  exp_t e = prog();
+  debruijn(e);
+  return toplevel(e);
 }
