@@ -70,7 +70,7 @@ $(OUT_PREFIX)test_getopt$(EXE): $(OUT_PREFIX)test_getopt.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.o : %.cyc
+$(OUT_PREFIX)%.o : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 
 clean_prefix:
