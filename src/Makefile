@@ -91,7 +91,7 @@ ifndef ARCH
 $(error "ARCH must be defined if TARGET is. TARGET is neeeded only for cross-compiling.)");
 endif
 ifdef OUT_PREFIX
-$(error "There is no reason to cross-compile with an OUT_PREFIX. $(TARGET)")
+$(error "There is no reason to cross-compile with an OUT_PREFIX.")
 endif
 CONFIGDIR := $(CYCDIR)/config
 TARGETDIR := ../$(TARGET)/

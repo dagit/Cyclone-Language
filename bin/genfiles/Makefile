@@ -1,7 +1,49 @@
 include ../../Makefile.inc
 
+# FIX: removing install_path.c and install_path.o every time isn't right.
+
+# I don't why these need to be repeated here, but they do
+CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
+CYC_BIN_PATH=$(CYCDIR)/bin
+
+CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
+
+install: install_lib install_comp
+
+install_lib: $(ARCH)/lib/$(CYCLIB) $(ARCH)/lib/nogc.a
+	cp $^ $(CYC_LIB_PATH)
+install_a: $(ARCH)/lib/libcyc_a.a
+	cp $^ $(CYC_LIB_PATH)
+install_comp: $(ARCH)/src/cyclone$(EXE)
+	cp $^ $(CYC_BIN_PATH)
+
+$(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
+	-rm -f $@
+	ar rcs $@ $^
+$(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
+	-rm -f $@
+	ar rcs $@ $^
+$(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
+	-rm -f $@
+	ar rcs $@ $^
+$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(ARCH)/src/install_path.c:
+	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	  echo "char *Carch = \"$(ARCH)\";"; \
+	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > install_path_tmp
+	@(cmp -s $@ install_path_tmp || cp install_path_tmp $@)
+	$(RM) install_path_tmp
+
+clean_arch:
+	rm -f $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o)
+	rm -f $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
+
 clean:
 	for arch in $(ALL_ARCHS); \
-	do $(MAKE) -C $$arch clean; \
+	do $(MAKE) clean_arch ARCH=$$arch; \
 	done
 
+a_%.o: %.c
+	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<

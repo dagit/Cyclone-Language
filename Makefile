@@ -38,7 +38,7 @@ build: $(CYC_LIB_PATH)/gc.a cyclone tools
 
 # This target builds off the C files in bin/genfiles
 cyclone:
-	$(MAKE) install -C bin/genfiles/$(ARCH)
+	$(MAKE) install -C bin/genfiles
 
 tools:
 	$(MAKE) install -C tools/bison

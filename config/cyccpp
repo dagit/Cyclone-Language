@@ -23,6 +23,5 @@ shift
 
 ARCHDIR=$CYCDIR/config/arch
 
-echo $CPP -include $SOURCE.undef -include $TARGET $* > stderr
 $CPP -include $SOURCE.undef -include $TARGET $*
 fi
