@@ -455,7 +455,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Address_e(e1):
     dump_char('&'); dumpexp_prec(myprec,e1); break;
 
-  case &New_e(e1):
+  case &New_e(ropt,e1):
     dump("new "); dumpexp_prec(myprec,e1); break;
 
   case &Sizeoftyp_e(t):
@@ -511,8 +511,14 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Enum_e(n,_,_): dumpqvar(n); break;
 
-  case &Malloc_e(t):
-    dump("malloc(sizeof(");
+  case &Malloc_e(ropt,t):
+    if (ropt != null) {
+      dump("rmalloc(");
+      dumpexp((exp_t)ropt); dump(",");
+    } else {
+      dump("malloc(");
+    }
+    dump("sizeof(");
     dumptyp(t); 
     dump("))");
     break;
@@ -632,6 +638,11 @@ void dumpstmt(stmt_t s) {
   case &TryCatch_s(s1,ss):
     dump("try"); dumpstmt(s1); dump("catch {");
     dumpswitchclauses(ss); dump_char('}');
+    break;
+
+  case &Region_s(tv,vd,ss):
+    dump("region<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+    dump("{"); dumpstmt(ss); dump("}");
     break;
   }
 }

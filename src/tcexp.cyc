@@ -213,6 +213,15 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
           e->topt = new Opt(t);
           unchecked_cast(te, e, *topt);
           t = *topt;
+        } else {
+          // maybe it's going in a different region
+          t = atb_typ(uchar_t, new_evar(RgnKind), empty_tqual(), 
+                      new Upper_b(elen));
+          if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+            e->topt = new Opt(t);
+            unchecked_cast(te, e, *topt);
+            t = *topt;
+          }
         }
         break;
       default: break;
@@ -1138,7 +1147,24 @@ static type_t tcXTunion(tenv_t te, seg_t loc, type_t *`r topt,
                              qvar2string(ef->name)));
   return res;
 }
-static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
+static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt, 
+                       type_t t) {
+  type_t rgn = HeapRgn;
+  if (ropt != null) {
+    // check that the region handle is still valid
+    type_t expected_type = new RgnHandleType(new_evar(RgnKind));
+    type_t handle_type = tcExp(te,&expected_type,(exp_t)ropt);
+    switch (compress(handle_type)) {
+    case &RgnHandleType(r): 
+      rgn = r;
+      check_rgn_accessible(te,loc,rgn);
+      break;
+    default:
+      terr(ropt->loc,xprintf("expecting region_t type but found %s",
+                             typ2string(handle_type)));
+      break;
+    }
+  }
   check_type(loc,te,lookup_type_vars(te),MemKind,t);
   // Don't yet support existential types (to do it, add to TunionFieldInfo
   // and XTunionFieldInfo and here generate fresh evars).
@@ -1160,7 +1186,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
       break;
     default: break;
     }
-  return ptr_maker(t,HeapRgn,empty_tqual());
+  return ptr_maker(t,rgn,empty_tqual());
 }
 // ({ s })
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t *`r topt, stmt_t s) {
@@ -1188,7 +1214,25 @@ static type_t tcFill(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 }
 
 // new e
-static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, exp_t e1) {
+static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, 
+                    exp_opt_t rgn_handle, exp_t e, exp_t e1) {
+  type_t rgn = HeapRgn;
+  if (rgn_handle != null) {
+    // check that the region handle is still valid
+    type_t expected_type = new RgnHandleType(new_evar(RgnKind));
+    type_t handle_type = tcExp(te,&expected_type,(exp_t)rgn_handle);
+    switch (compress(handle_type)) {
+    case &RgnHandleType(r): 
+      rgn = r;
+      check_rgn_accessible(te,loc,rgn);
+      break;
+    default:
+      terr(rgn_handle->loc,xprintf("expecting region_t type but found %s",
+                                   typ2string(handle_type)));
+      break;
+    }
+  }
+
   switch (e1->r) {
   case &Comprehension_e(vd,ebound,egen):
     // note that tcComprehension expects us to pass in the pointer type,
@@ -1199,7 +1243,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, exp_t e1) {
       bounds_t b = 
         is_const_exp(te,ebound) ? (bounds_t)(new Upper_b(ebound)) : Unknown_b;
       type_t res_typ = 
-        new PointerType(PtrInfo{et_arr,HeapRgn,empty_conref(),tq_arr,
+        new PointerType(PtrInfo{et_arr,rgn,empty_conref(),tq_arr,
                                 new_conref(b)});
       if (topt != null) {
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
@@ -1229,7 +1273,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, exp_t e1) {
     type_t res_typ;
     switch (compress(t_array)) {
     case &ArrayType(et,tq,sz): 
-      res_typ = new PointerType(PtrInfo{et,HeapRgn,empty_conref(),tq,
+      res_typ = new PointerType(PtrInfo{et,rgn,empty_conref(),tq,
                                         new_conref(new Upper_b((exp_t)sz))});
       if (topt != null) {
         // try unifying res_typ and topt -- if that fails, then see if we
@@ -1250,9 +1294,9 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, exp_t e1) {
     // here I'm going to guess that the user wants a char ?@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_typ(uchar_t, HeapRgn, empty_tqual(), Unknown_b);
+    let topt2 = atb_typ(uchar_t, rgn, empty_tqual(), Unknown_b);
     let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, HeapRgn, empty_tqual(), new Upper_b(uint_exp(1,null)));
+    return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,null)));
   default:
     // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
     // Note that we could simplify everything by rewriting the expression
@@ -1272,7 +1316,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, exp_t e1) {
     }
     let telt = tcExp(te,topt2,e1);
     type_t res_typ =
-      new PointerType(PtrInfo{telt,HeapRgn,empty_conref(),
+      new PointerType(PtrInfo{telt,rgn,empty_conref(),
                               empty_tqual(),
                               new_conref(new Upper_b(uint_exp(1,null)))});
     if (topt != null) {
@@ -1425,8 +1469,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcCast(te,loc,topt,t1,e1); break;
   case &Address_e(e1):
     t = tcAddress(te,loc,topt,e1); break;
-  case &New_e(e1):
-    t = tcNew(te,loc,topt,e,e1); break;
+  case &New_e(rgn_handle,e1):
+    t = tcNew(te,loc,topt,rgn_handle,e,e1); break;
   case &Sizeofexp_e(e1):
     let t1 = tcExpNoPromote(te, null, e1);
     t = tcSizeof(te,loc,topt,t1); break;
@@ -1471,8 +1515,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcXTunion(te,loc,topt,exist_ref,es,xd,ef); break;
   case &Enum_e(q,ed,ef):
     t = new EnumType(ed->name,ed); break;
-  case &Malloc_e(t2):
-    t = tcMalloc(te,loc,topt,t2); break;
+  case &Malloc_e(ropt,t2):
+    t = tcMalloc(te,loc,topt,ropt,t2); break;
   }
   e->topt = new Opt(t);
 }

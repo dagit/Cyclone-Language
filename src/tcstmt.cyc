@@ -42,7 +42,7 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar_t> tvs,
   let ropt = new Opt(Tcenv::curr_rgn(te2));
   for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
-    vs2->hd->region = ropt;
+    vs2->hd->rgn = ropt;
   }
 
   if(where_opt != null)
@@ -327,6 +327,21 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
 			unimp_msg_part));
+
+  case &Region_s(tv,vd,s):
+    if (new_block)
+      te = Tcenv::new_block(s0->loc,te);
+    let &Vardecl(_,_,_,t,_,_,*rgn_ptr,_) = vd;
+    let curr_bl = Tcenv::curr_rgn(te);
+    type_t rgn_typ = new VarType(tv);
+    *rgn_ptr = new Opt(curr_bl); // side effect
+    te = add_type_vars(s0->loc,te,new List(tv,null));
+    check_type(s0->loc,te,lookup_type_vars(te),BoxKind,t);
+    te = add_region(te, rgn_typ);
+    if (!unify(t,new RgnHandleType(rgn_typ)))
+      impos("region stmt: type of region handle is wrong!");
+    tcStmt(set_encloser(add_local_var(s->loc,enter_try(te),vd),s0),s,false);
+    return;
 
   case &Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
   case &Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX

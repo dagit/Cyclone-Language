@@ -313,8 +313,9 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     }
     return malloc_and_init(env, e, es_exp, useexp);
 
-  case &Malloc_e(t):
+  case &Malloc_e(eopt,t):
     add_malloc_root(env, e, t);
+    // FIX: JGM: doesn't deal with eopt!
     return mkSyn_tf(mkMallocAE(e), null, 
 		    make_assigns(env,mkAddressOp(mkMallocOp(e))));
 
@@ -392,7 +393,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 			       use_it_list());
     }
 
-  case &New_e(e1):
+  case &New_e(eopt,e1):
     switch (e1->r) {
       // For structs and tuples, we follow what happens with Address_e below.
     case &Struct_e(_,_,_,_): fallthru;
@@ -402,6 +403,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
       let inner_env = change_lhs(env, new List(malloc_op,null));
       inner_env.access_path = null; 
       let AbsSynOne(inner,assigns) = meet_absexp(abstract_exp(inner_env, e1));
+      // FIX: JGM: doesn't deal with eopt!!!
       let ans = malloc_and_init(env, e, inner, assigns);
       // this is rather bizarre case...
       if(env.access_path != null)
@@ -422,7 +424,11 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 	}
       return ans;
     default:
-      return use_exp_unordered(env, new List(e1,null), null);
+      if (eopt == null)
+        return use_exp_unordered(env, new List(e1,null), null);
+      else 
+        return use_exp_unordered(env, new List((exp_t)eopt,
+                                               new List(e1,null)), null);
     }
   case &Address_e(e1):
     //This might really be a malloc-and-initialize
@@ -896,6 +902,16 @@ void cf_prepass(absenv_t env, stmt_t s) {
     let ael = cf_prepass_scs(env,scs);
     cf_set_absexps(s,ael);
     return;
+  case &Region_s(tv,vd,body):
+    // FIX: JGM -- I'm guessing here...
+    add_var_root(env,vd);
+    // the region handle is implicitly initialized, so I'm treating
+    // it like a constant (see abstract_exp above).
+    let ae = abstract_exp_top(env,uint_exp(0,null));
+    cf_set_absexps(s, new List(ae, null));
+    cf_prepass(env,body);
+    return;
+    
   }
 }
 
@@ -1112,6 +1128,13 @@ flow_info_t cf_analyze_stmt(analenv_t env, Absyn::stmt_t s, flow_info_t in_flow)
     return cf_analyze_stmt(env, s, body_inflow);
 
   case &Label_s(_,s): return cf_analyze_stmt(env,s,in_flow);
+
+  case &Region_s(tv,vd,s):
+    let vds = new List{vd,null};
+    let body_inflow = add_vardecls_flow(env, in_flow, vds);
+    body_inflow = add_init_vars_flow(env, body_inflow, vds);
+    return cf_analyze_stmt(env, s, body_inflow);
+
   default: throw new Core::Impossible("cf_analyze_stmt -- bad stmt syntax"
                                       " or unimplemented stmt form");
   }
@@ -1137,6 +1160,7 @@ void cf_postpass(stmt_t s) {
   case &Do_s(s1,$(_,s2)): 
     cf_postpass(s2);
     fallthru(s1);
+  case &Region_s(_,_,s1): fallthru(s1);
   case &Label_s(_,s1): fallthru(s1);
   case &Decl_s(_,s1):    
     cf_postpass(s1);

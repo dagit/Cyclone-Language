@@ -711,6 +711,14 @@ tenv_t set_encloser(tenv_t te, stmt_t s) {
   return put_fenv(te,fe);
 }
 
+tenv_t add_region(tenv_t te, type_t r) {
+  if (te->le == null) env_err("Tcenv::add_region: unexpected add_region");
+  fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
+  fe->capability = new JoinEff(new List(new AccessEff(r),
+                                        new List(fe->capability,null)));
+  return put_fenv(te,fe);
+}
+
 tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   if (te->le == null) env_err("Tcenv: unexpected new_block");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
@@ -779,7 +787,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
 			 .type = (*args->hd)[2],
 			 .initializer = null, 
                          .shadow = 0, 
-                         .region = new{Opt(param_rgn)}, 
+                         .rgn = new{Opt(param_rgn)}, 
                          .attributes = null}};
     vds = new{List(vd, vds)};
     locals = Dict::insert(locals, (*args->hd)[0], new Param_b(vd));

@@ -19,11 +19,16 @@ CYC_FLAGS=-I ../lib -tc -toc -pp
 
 LIB=../bin/$(OUT_PREFIX)$(CYCLIB)
 
-all: $(OUT_PREFIX)cyctest $(OUT_PREFIX)foo $(OUT_PREFIX)hello
+all: $(OUT_PREFIX)cyctest $(OUT_PREFIX)foo $(OUT_PREFIX)hello \
+     $(OUT_PREFIX)test_regions
+	./$(OUT_PREFIX)test_regions
 	./$(OUT_PREFIX)cyctest
 	./$(OUT_PREFIX)foo < foo_input
 
 $(OUT_PREFIX)hello: $(OUT_PREFIX)hello.o $(LIB)
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
+
+$(OUT_PREFIX)test_regions: $(OUT_PREFIX)test_regions.o $(LIB)
 	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
 $(OUT_PREFIX)cyctest: $(OUT_PREFIX)cyctest.o $(LIB)
@@ -48,4 +53,5 @@ clean_prefix:
 
 clean:
 	rm -f *hello.o *hello.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c 
+	rm -f *test_regions.o *test_regions.c
 	rm -f *~ *.exe *.output *.stackdump

@@ -263,7 +263,7 @@ namespace Absyn {
     StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *); // MemKind
     UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *);  // MemKind 
     EnumType(typedef_name_t,struct Enumdecl *);                    // BoxKind
-    RgnHandleType(type_t);   // BoxKind -- mem?  
+    RgnHandleType(type_t);   // BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>);
     HeapRgn;                 // RgnKind
@@ -350,7 +350,7 @@ namespace Absyn {
     Instantiate_e(exp_t,list_t<type_t>);
     Cast_e(type_t,exp_t);
     Address_e(exp_t);
-    New_e(exp_t);
+    New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t);
     Sizeofexp_e(exp_t);
     Deref_e(exp_t);
@@ -368,7 +368,7 @@ namespace Absyn {
              tuniondecl_t,tunionfield_t);
     XTunion_e(opt_t<list_t<type_t>>,list_t<exp_t>,xtuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
-    Malloc_e(type_t);
+    Malloc_e(exp_opt_t, type_t); // first expression is region -- null is heap
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
     StmtExp_e(stmt_t);
@@ -405,6 +405,7 @@ namespace Absyn {
     Label_s(var_t,stmt_t); 
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
+    Region_s(tvar_t, vardecl_t, stmt_t);
   };
 
   EXTERN_DEFINITION struct Stmt {
@@ -472,7 +473,7 @@ namespace Absyn {
     type_t             type;
     exp_opt_t          initializer; // ignored for non-local variables
     int                shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
-    opt_t<type_t>      region;      // filled in by type-checker
+    opt_t<type_t>      rgn;         // filled in by type-checker
     // attributes can include just about anything...but the type-checker
     // must ensure that they are properly accounted for.  For instance,
     // functions cannot be aligned or packed.  And non-functions cannot
@@ -641,7 +642,7 @@ namespace Absyn {
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp_t new_exp(raw_exp_t, seg_t);
-  extern exp_t New_exp(exp_t, seg_t); // New_e
+  extern exp_t New_exp(exp_opt_t rgn_handle, exp_t, seg_t); // New_e
   extern exp_t copy_exp(exp_t);
   extern exp_t const_exp(cnst_t, seg_t);
   extern exp_t null_exp(seg_t);

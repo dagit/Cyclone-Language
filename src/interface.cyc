@@ -219,7 +219,7 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool) @ env, var_t x, $(resolved
 	.type = (fd -> cached_typ) -> v,
 	.initializer = null,
 	.shadow = 0,
-	.region = null,
+	.rgn = null,
 	.attributes = null
       };
       check_fun_definition = false; // the body of the function is defined

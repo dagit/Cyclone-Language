@@ -10,9 +10,6 @@ struct _tagged_string { char *curr; char *base; char *last_plus_one; };
 extern struct _tagged_string xprintf(char *fmt, ...);
 
 ///////////////////// Exceptions
-//struct _enum_struct { int tag; };
-//struct _xenum_struct { char *tag; };
-//typedef struct _xtunion_struct *exn;
 struct _tunion_struct { int tag; };
 struct _xtunion_struct { char *tag; };
 typedef struct _xtunion_struct *exn;
@@ -34,8 +31,25 @@ extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _throw(exn e);
 
+// Allocation
 extern void *GC_malloc(int);
 extern void *GC_malloc_atomic(int);
 extern char *Cyc_new_string(char *);
+
+// Regions
+struct _RegionPage {
+  struct _RegionPage *next;
+  char data[0];
+};
+
+struct _RegionHandle {
+  struct _RegionPage *curr;
+  char               *offset;
+  char               *last_plus_one;
+};
+
+extern struct _RegionHandle _new_region();
+extern void * _region_malloc(struct _RegionHandle *, unsigned int);
+extern void _free_region(struct _RegionHandle *);
 
 #endif

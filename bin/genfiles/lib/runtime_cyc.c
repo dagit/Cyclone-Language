@@ -207,14 +207,94 @@ int f_close(FILE *fd) {
   return fclose(fd);
 }
 */
-///////////////////////////////////////////////
-
-
 #include <stdio.h>
 
 FILE *Cyc_Stdio_stdin; 
 FILE *Cyc_Stdio_stdout;
 FILE *Cyc_Stdio_stderr;
+
+///////////////////////////////////////////////
+// Regions
+
+// minimum page size for a region
+#define CYC_MIN_REGION_PAGE_SIZE 128
+
+// controls the default page size for a region
+static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
+
+// set the default region page size -- returns false and has no effect 
+// if s is not at least CYC_MIN_REGION_PAGE_SIZE
+bool Cyc_set_default_region_page_size(size_t s) {
+  if (s < CYC_MIN_REGION_PAGE_SIZE) 
+    return 0;
+  default_region_page_size = s;
+  return 1;
+}
+
+// allocate a new page and return a region handle for a new region.
+struct _RegionHandle _new_region() {
+  struct _RegionHandle r;
+  struct _RegionPage *p = 
+    (struct _RegionPage *)GC_malloc(sizeof(struct _RegionPage) + 
+                                    default_region_page_size);
+  if (p == NULL) {
+    fprintf(stderr,"_new_region failure");
+    throw(Null_Exception);
+  }
+  p->next = NULL;
+  r.curr = p;
+  r.offset = ((char *)p) + sizeof(struct _RegionPage);
+  r.last_plus_one = r.offset + default_region_page_size;
+  return r;
+}
+
+static void grow_region(struct _RegionHandle *r, unsigned int s) {
+  struct _RegionPage *p;
+  unsigned int prev_size, next_size;
+
+  prev_size = r->last_plus_one - 
+    ((char *)r->curr + sizeof(struct _RegionPage));
+  next_size = prev_size * 2;
+
+  if (next_size < s) 
+    next_size = s + default_region_page_size;
+
+  p = GC_malloc(sizeof(struct _RegionPage) + next_size);
+  if (p == NULL) {
+    fprintf(stderr,"grow_region failure");
+    throw(Null_Exception);
+  }
+  p->next = r->curr;
+  r->curr = p;
+  r->offset = ((char *)p) + sizeof(struct _RegionPage);
+  r->last_plus_one = r->offset + next_size;
+}
+
+#define MIN_ALIGNMENT (sizeof(double))
+
+// allocate s bytes within region r
+void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
+  void *result;
+  // round s up to the nearest MIN_ALIGNMENT value
+  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+  if (s > (r->last_plus_one - r->offset))
+    grow_region(r,s);
+  result = (void *)r->offset;
+  r->offset = r->offset + s;
+  return result;
+}
+
+extern void _free_region(struct _RegionHandle *r) {
+  struct _RegionPage *p = r->curr;
+  while (p != NULL) {
+    struct _RegionPage *n = p->next;
+    GC_free(p);
+    p = n;
+  }
+  r->curr = 0;
+  r->offset = 0;
+  r->last_plus_one = 0;
+}
 
 // argc is redundant
 struct _tagged_argv { 

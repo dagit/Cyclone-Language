@@ -235,8 +235,8 @@ type_t unionq_typ(qvar_t name) {
 exp_t new_exp(raw_exp_t r, seg_t loc) {
   return new Exp{.topt=null, .r=r, .loc=loc};
 }
-exp_t New_exp(exp_t e, seg_t loc) {
-  return new_exp(new New_e(e), loc);
+exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
+  return new_exp(new New_e(rgn_handle,e), loc);
 }
 exp_t copy_exp(exp_t e) {
   return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
@@ -446,12 +446,12 @@ decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc) {
 }
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .shadow=0, .region=null, 
+                        .type=t, .initializer=init, .shadow=0, .rgn=null, 
                         .attributes=null};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .shadow=0, .region=null,
+                        .type=t, .initializer=init, .shadow=0, .rgn=null,
                         .attributes=null};
 }
 decl_t struct_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,

@@ -113,6 +113,15 @@ static string Match_Exception_string = "Match_Exception";
 static stringptr Match_Exception_sp = (&Match_Exception_string);
 static string Cyc_new_string_string = "Cyc_new_string";
 static stringptr Cyc_new_string_sp = (&Cyc_new_string_string);
+static string Cyc_rnew_string_string = "Cyc_rnew_string";
+static stringptr Cyc_rnew_string_sp = (&Cyc_rnew_string_string);
+static string _region_handle_string = "_RegionHandle";
+static stringptr _region_handle_sp = (&_region_handle_string);
+static string _free_region_string = "_free_region";
+static stringptr _free_region_sp = (&_free_region_string);
+static string _new_region_string = "_new_region";
+static stringptr _new_region_sp = (&_new_region_string);
+
 
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
@@ -305,9 +314,19 @@ static type_t typ_to_c(type_t t) {
   case &FnType(FnInfo{_,_,t2,args,vararg,atts}):
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
-    // FIX:  I'm dropping the attributes here, but is that right?
+    // FIX:  I'm dropping attributes like noreturn and const because C
+    // complains otherwise.
+    let new_atts = null;
+    for (; atts != null; atts = atts->tl) {
+      switch (atts->hd) {
+      case Cdecl_att   : fallthru;
+      case Noreturn_att: fallthru;
+      case Const_att   : continue;
+      default: new_atts = new List(atts->hd,new_atts); break;
+      }
+    }
     return new FnType(FnInfo{null,null,typ_to_c(t2),
-                               List::map(arg_to_c,args),vararg,null});
+                               List::map(arg_to_c,args),vararg,new_atts});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -328,8 +347,7 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments and translate the nested types
     return new TypedefType(tdn,null, new Opt(typ_to_c_array(topt->v)));
   case &RgnHandleType(t):
-    // presumably the runtime will cast this as necessary
-    return void_star_typ();
+    return cstar_typ(strct(_region_handle_sp),mt_tq);
   case HeapRgn:
     return toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &AccessEff(_):
@@ -493,6 +511,14 @@ static exp_t malloc_exp(type_t t,exp_t s) {
   if (atomic_typ(t))
     return malloc_atomic(s);
   return malloc_ptr(s);
+}
+
+// region malloc something
+static string _region_malloc_string = "_region_malloc";
+static $(nmspace_t,var_t) region_malloc_var = 
+  $((nmspace_t)&abs_ns_value,&_region_malloc_string);
+static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
+  return fncall_exp(var_exp(&region_malloc_var,DL),new List(rgn, new List(s, null)),DL);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -944,14 +970,20 @@ static $(list_t<designator_t>,exp_t)@ add_designator(env_t nv, exp_t e) {
   return new{$(null,e)};
 }
 
-static exp_t make_struct(qvar_t x, type_t struct_typ, stmt_t s,
-		       bool pointer, bool is_atomic) {
+static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
+                         bool pointer, exp_opt_t rgnopt, bool is_atomic) {
   exp_opt_t eo;
   type_t       t;
-  if(pointer) {
+  if (pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeoftyp_exp(struct_typ,DL);
-    eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
+    if (rgnopt == null)
+      eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
+    else {
+      exp_t r = (exp_t)rgnopt;
+      exp_to_c(nv, r);
+      eo = cast_exp(t, rmalloc_exp(r,se), DL);
+    }
   } else {
     t  = struct_typ;
     eo = null;
@@ -961,7 +993,8 @@ static exp_t make_struct(qvar_t x, type_t struct_typ, stmt_t s,
 
 // Would be nice to share more code with init_struct
 // but the designators get in the way.
-static exp_t init_tuple(env_t nv, bool pointer, list_t<exp_t> es) {
+static exp_t init_tuple(env_t nv, bool pointer, 
+                        exp_opt_t rgnopt, list_t<exp_t> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
   // &$(e1,...,en) -> ({ t * x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
   let tqs = List::map(tup_to_c,es);
@@ -981,12 +1014,13 @@ static exp_t init_tuple(env_t nv, bool pointer, list_t<exp_t> es) {
     s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,new {xprintf("f%d",i)},
 					    DL),es->hd, DL), DL), s, DL);
   }
-  return make_struct(x,strct(n),s,pointer,is_atomic);
+  return make_struct(nv,x,strct(n),s,pointer,rgnopt,is_atomic);
 }
 
-static exp_t init_struct(env_t nv,type_t struct_type,
-		       bool pointer,list_t<$(list_t<designator_t>,exp_t)@> dles, 
-		       typedef_name_t tdn) {
+static exp_t init_struct(env_t nv, type_t struct_type,
+                         bool pointer, exp_opt_t rgnopt, 
+                         list_t<$(list_t<designator_t>,exp_t)@> dles, 
+                         typedef_name_t tdn) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
   let s    = exp_stmt(xexp,DL);
@@ -1030,7 +1064,7 @@ static exp_t init_struct(env_t nv,type_t struct_type,
       default: throw toc_impos("array designator in struct");
       }
   }
-  return make_struct(x, strctq(tdn), s, pointer, is_atomic);
+  return make_struct(nv, x, strctq(tdn), s, pointer, rgnopt, is_atomic);
 }
 
 // functions for passing to lvalue_assign (see below)
@@ -1225,19 +1259,21 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     case Plus:
       // Need to deal with pointer arithmetic
+      // FIX: at top-level, we allow ((t ?)x)+1 where x is an array and
+      // this should be translated appropriately..
       if (is_tagged_pointer_typ(old_typ)) {
-	// ({ struct tagged_ptr temp = e1;
-	//    temp.curr += e2; temp; })
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
-	let temp = temp_var();
-	let temp_typ = typ_to_c(old_typ);
-	let s = exp_stmt(var_exp(temp,DL),DL);
-	let e3 = structmember_exp(var_exp(temp,DL),curr_sp,DL);
-	let e4 = assignop_exp(e3,new Opt(Plus),e2,DL);
-	s = seq_stmt(exp_stmt(e4,DL),s,DL);
-	s = declare_stmt(temp,temp_typ,e1,s,DL);
-	e->r = stmt_exp(s,DL)->r;
+        // ({ struct tagged_ptr temp = e1;
+        //    temp.curr += e2; temp; })
+        let temp = temp_var();
+        let temp_typ = typ_to_c(old_typ);
+        let s = exp_stmt(var_exp(temp,DL),DL);
+        let e3 = structmember_exp(var_exp(temp,DL),curr_sp,DL);
+        let e4 = assignop_exp(e3,new Opt(Plus),e2,DL);
+        s = seq_stmt(exp_stmt(e4,DL),s,DL);
+        s = declare_stmt(temp,temp_typ,e1,s,DL);
+        e->r = stmt_exp(s,DL)->r;
       }
       break;
     case Minus:
@@ -1405,13 +1441,13 @@ static void exp_to_c(env_t nv, exp_t e) {
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
-      e->r = init_struct(nv, e1->topt->v, true, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, true, null, es, tdn)->r;
       break;
     case &Tuple_e(es):
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
-      e->r = init_tuple(nv, true, es)->r;
+      e->r = init_tuple(nv, true, null, es)->r;
       break;
     default: // it's actually an address-of.
       exp_to_c(nv,e1);
@@ -1422,7 +1458,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     }
     break;
-  case &New_e(e1):
+  case &New_e(rgnopt,e1):
     if (nv->toplevel)
       unimp(xprintf("%s: new at top-level", 
                     Position::string_of_segment(e1->loc)));
@@ -1473,15 +1509,30 @@ static void exp_to_c(env_t nv, exp_t e) {
       let ptr_typ = cstar_typ(elt_typ,mt_tq);
       let e2 = times_exp(sizeoftyp_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
-      let e1 = malloc_exp(old_elt_typ,e2);
+      exp_t e1;
+      if (rgnopt == null) {
+        e1 = malloc_exp(old_elt_typ,e2);
+      } else {
+        exp_t r = (exp_t)rgnopt;
+        exp_to_c(nv,r);
+        e1 = rmalloc_exp(r,e2);
+      }
       let e0 = cast_exp(ptr_typ,e1,DL);
       e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
       break;
     case &Const_e(&String_c(s)):
-      // Cyc_new_string(s)
-      e->r = fncall_exp(var_exp(new $(abs_ns,Cyc_new_string_sp),DL),
-                        new List(new_exp(new Const_e(new String_c(s)),DL),
-                                 null),DL)->r;
+      // Cyc_new_string(s) or Cyc_rnew_string(r,s)
+      if (rgnopt == null) 
+        e->r = fncall_exp(var_exp(new $(abs_ns,Cyc_new_string_sp),DL),
+                          new List(new_exp(new Const_e(new String_c(s)),DL),
+                                   null),DL)->r;
+      else {
+        exp_t r = (exp_t)rgnopt;
+        exp_to_c(nv,r);
+        e->r = fncall_exp(var_exp(new $(abs_ns,Cyc_rnew_string_sp),DL),
+                          new List(new_exp(new Const_e(new String_c(s)),DL),
+                                   null),DL)->r;
+      }
       break;
     case &Comprehension_e(vd,e1,e2):
       // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
@@ -1522,10 +1573,17 @@ static void exp_to_c(env_t nv, exp_t e) {
       // FIX:  casts needed on exp_opts
       list_t<$(qvar_t,type_t,exp_opt_t)@> decls =
         new List(new $(max,uint_t,(exp_opt_t)e1),null);
-      exp_t ainit = cast_exp(ptr_typ,
-                           malloc_exp(old_elt_typ,
-                                      times_exp(sizeoftyp_exp(elt_typ,DL),
-                                                var_exp(max,DL),DL)),DL);
+      exp_t ai;
+      if (rgnopt == null)
+        ai = malloc_exp(old_elt_typ,times_exp(sizeoftyp_exp(elt_typ,DL),
+                                              var_exp(max,DL),DL));
+      else {
+        exp_t r = (exp_t)rgnopt;
+        exp_to_c(nv,r);
+        ai = rmalloc_exp(r,times_exp(sizeoftyp_exp(elt_typ,DL),
+                                     var_exp(max,DL),DL));
+      }
+      exp_t ainit = cast_exp(ptr_typ,ai,DL);
       decls = new List(new $(a,ptr_typ,(exp_opt_t)ainit),decls);
       decls = new List(new $(x1,uint_t,null),decls);
       if (is_tagged_ptr) {
@@ -1551,11 +1609,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     case &Struct_e(tdn,_,es,_):
       // try to avoid the GCC bug
-      e->r = init_struct(nv, e1->topt->v, true, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, true, rgnopt, es, tdn)->r;
       break;
     case &Tuple_e(es):
       // try to avoid the GCC bug
-      e->r = init_tuple(nv, true, es)->r;
+      e->r = init_tuple(nv, true, rgnopt, es)->r;
       break;
     default:
       // treated just like an array of size 1
@@ -1572,7 +1630,14 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t elt_typ=typ_to_c(old_elt_typ);
       let ptr_typ = cstar_typ(elt_typ,mt_tq);
       let e2 = sizeoftyp_exp(elt_typ,DL);
-      let e1 = malloc_exp(old_elt_typ,e2);
+      exp_t e1;
+      if (rgnopt == null) 
+        e1 = malloc_exp(old_elt_typ,e2);
+      else {
+        exp_t r = (exp_t)rgnopt;
+        exp_to_c(nv,r);
+        e1 = rmalloc_exp(r,e2);
+      }
       let e0 = cast_exp(ptr_typ,e1,DL);
       e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
       break;
@@ -1727,7 +1792,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Tuple_e(es):
     if(!nv->toplevel)
-      e->r = init_tuple(nv,false,es)->r;
+      e->r = init_tuple(nv,false,null,es)->r;
     else {
       // At top-level must use designators
       // $(e1,...,en) -> (struct _tuple_type_n){.f1=e1,...,.fn=en}
@@ -1771,7 +1836,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)
-      e->r = init_struct(nv,old_typ,false,dles,tdn)->r;
+      e->r = init_struct(nv,old_typ,false,null,dles,tdn)->r;
     else {
       // At top-level must use designators
       let n = tdn;
@@ -1904,9 +1969,15 @@ static void exp_to_c(env_t nv, exp_t e) {
 
   case &Enum_e(_,_,_): break;
 
-  case &Malloc_e(t): 
+  case &Malloc_e(rgnopt,t): 
     type_t t_c = typ_to_c(t);
-    e->r = malloc_exp(t, sizeoftyp_exp(t_c,DL))->r;
+    if (rgnopt != null) {
+      exp_t rgn = (exp_t)rgnopt;
+      exp_to_c(nv,rgn);
+      e->r = rmalloc_exp(rgn, sizeoftyp_exp(t_c,DL))->r;
+    } else {
+      e->r = malloc_exp(t, sizeoftyp_exp(t_c,DL))->r;
+    }
     break;
 
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
@@ -2527,6 +2598,70 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 			       ifthenelse_stmt(prim1_exp(Not, e_exp,DL),
 					       tryandpop_stmt,
 					       handler_stmt, DL),DL),DL),DL)->r;
+      return;
+    case &Region_s(tv, vd, body):
+      // { struct _RegionHandle rh = _new_region();
+      //   struct _RegionHandle *x = &rh;
+      //   struct handler_cons h;
+      //   _push_handler(&h);
+      //   exn e = (exn)setjmp(h.handler);
+      //   if (!e) {
+      //     body; 
+      //     _free_region(&rh);
+      //     _pop_handler();
+      //   } else {
+      //     _free_region(&rh);
+      //     throw(e);
+      //   }
+      // }
+      type_t rh_struct_typ = strct(_region_handle_sp);
+      type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
+      type_t h_typ = strct(_handler_cons_sp);
+      type_t e_typ = typ_to_c(exn_typ);
+      qvar_t rh_var = temp_var();
+      qvar_t x_var = vd->name;
+      qvar_t h_var = temp_var();
+      qvar_t e_var = temp_var();
+      exp_t  rh_exp = var_exp(rh_var,DL);
+      exp_t  x_exp = varb_exp(x_var,new Local_b(vd),DL);
+      exp_t  h_exp = var_exp(h_var,DL);
+      exp_t  e_exp = var_exp(e_var,DL);
+      exp_t pushhandler_exp = var_exp(new $(abs_ns, _push_handler_sp),DL);
+      exp_t setjmp_exp = var_exp(new $(abs_ns, setjmp_sp), DL);
+      exp_t pophandler_exp = var_exp(new $(abs_ns, _pop_handler_sp),DL);
+      exp_t freeregion_exp = var_exp(new $(abs_ns, _free_region_sp),DL);
+      exp_t newregion_exp = var_exp(new $(abs_ns, _new_region_sp),DL);
+      exp_t addr_rh_exp = address_exp(rh_exp,DL);
+      exp_t newregion_call = fncall_exp(newregion_exp, null, DL);
+      // FIX: what happens upon break/continue?!?!
+      stmt_to_c(add_varmap(nv,x_var,x_exp),body);
+      let free_region_stmt = 
+        exp_stmt(fncall_exp(freeregion_exp,new List(addr_rh_exp,null),DL),DL);
+      let tryandpop_stmt = 
+        seq_stmt(body,
+                 seq_stmt(free_region_stmt,
+                          exp_stmt(fncall_exp(pophandler_exp,null,DL),DL),DL),
+                 DL);
+      let rethrow_stmt = 
+        seq_stmt(free_region_stmt,exp_stmt(newthrow_exp(e_exp),DL),DL);
+      let if_stmt = 
+        ifthenelse_stmt(prim1_exp(Not,e_exp,DL),
+                        tryandpop_stmt,rethrow_stmt,DL);
+      let setjmp_call = 
+        cast_exp(typ_to_c(exn_typ),
+                 fncall_exp(setjmp_exp,
+                            new List(structmember_exp(h_exp,handler_sp,DL),
+                                     null),DL),DL);
+      let push_stmt = 
+        exp_stmt(fncall_exp(pushhandler_exp,new List(address_exp(h_exp,DL),
+                                                     null),DL),DL);
+      s->r = 
+        declare_stmt(rh_var, rh_struct_typ, newregion_call,
+        declare_stmt(x_var, rh_struct_ptr_typ, addr_rh_exp,
+        declare_stmt(h_var, h_typ, null,
+        seq_stmt(push_stmt, 
+        declare_stmt(e_var, e_typ, setjmp_call, if_stmt, DL),
+                 DL),DL),DL),DL)->r;
       return;
     }
   }

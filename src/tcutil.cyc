@@ -2211,11 +2211,11 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       }
     case &Local_b(vd):  
       switch (compress(e->topt->v)) {
-      case &ArrayType(_,_,_): return $(true, vd->region->v);
-      default: return $(vd->tq->q_const, vd->region->v);
+      case &ArrayType(_,_,_): return $(true, vd->rgn->v);
+      default: return $(vd->tq->q_const, vd->rgn->v);
       }
     case &Pat_b(vd):   fallthru(vd);
-    case &Param_b(vd): return $(vd->tq->q_const, vd->region->v);
+    case &Param_b(vd): return $(vd->tq->q_const, vd->rgn->v);
     }
   case &StructMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region

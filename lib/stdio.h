@@ -78,32 +78,32 @@ extern int	remove(string);
 extern int	rename(string, string);
 extern FILE *	tmpfile();
 // extern string	tmpnam(string);
-extern int	fclose(FILE *);
-extern int	fflush(FILE *);
-extern FILE *	freopen(string, string, FILE *);
+extern int	fclose(FILE @);
+extern int	fflush(FILE @);
+extern FILE *	freopen(string, string, FILE @);
 //extern void	setbuf(FILE *, string);
 //extern int	setvbuf(FILE *, string, int, size_t);
-extern int	fgetc(FILE *);
-extern bool     fgets(string, FILE *);
-extern int	fputc(int, FILE *);
-extern int	fputs(string, FILE *);
-extern int	getc(FILE *);
+extern int	fgetc(FILE @);
+extern bool     fgets(string, FILE @);
+extern int	fputc(int, FILE @);
+extern int	fputs(string, FILE @);
+extern int	getc(FILE @);
 //extern int	getchar();
 // extern string     gets(string); // unsafe!
-extern int	putc(int, FILE *);
+extern int	putc(int, FILE @);
   //extern int	putchar(int);
 extern int	puts(string);
-extern int	ungetc(int, FILE *);
+extern int	ungetc(int, FILE @);
   //extern size_t	fread(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
   //extern size_t	fwrite(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
-extern int	fgetpos(FILE *, fpos_t *);
-extern int	fseek(FILE *, long, int);
-extern int	fsetpos(FILE *, fpos_t *);
-extern long	ftell(FILE *);
-extern void	rewind(FILE *);
-extern void	clearerr(FILE *);
-extern int	feof(FILE *);
-extern int	ferror(FILE *);
+extern int	fgetpos(FILE @, fpos_t @);
+extern int	fseek(FILE @, long, int);
+extern int	fsetpos(FILE @, fpos_t @);
+extern long	ftell(FILE @);
+extern void	rewind(FILE @);
+extern void	clearerr(FILE @);
+extern int	feof(FILE @);
+extern int	ferror(FILE @);
 extern void     perror(string);
 extern FILE *	fopen(string _name , string _type);
 
@@ -112,13 +112,13 @@ extern FILE *	fopen(string _name , string _type);
 //
 
 extern FILE *	fdopen(int, string);
-extern int	fileno(FILE *);
-extern int	getw(FILE *);
-extern int	pclose(FILE *);
+extern int	fileno(FILE @);
+extern int	getw(FILE @);
+extern int	pclose(FILE @);
 extern FILE *   popen(string, string);
-extern int	putw(int, FILE *);
-extern void     setbuffer(FILE *, string, int);
-extern int	setlinebuf(FILE *);
+extern int	putw(int, FILE @);
+extern void     setbuffer(FILE @, string, int);
+extern int	setlinebuf(FILE @);
 
 #define	getchar()	getc(stdin)
 #define	putchar(x)	putc(x, stdout)
@@ -139,9 +139,9 @@ extern void file_close(FILE @);
 extern void file_delete(string);
 extern void file_length(string);
 // these two provided in cyc_runtime.c
-extern int file_string_read(FILE *fd, string dest, int dest_offset, 
+extern int file_string_read(FILE @fd, string dest, int dest_offset, 
 			    int max_count);
-extern int file_string_write(FILE *fd, string src, int src_offset, 
+extern int file_string_write(FILE @fd, string src, int src_offset, 
 			     int max_count);
 }
 #endif

@@ -505,7 +505,7 @@ doc_t ntyp2doc(type_t t) {
     s = cat2(qvar2doc(n),tps2doc(ts));
     break;
   case &RgnHandleType(t):
-    s = rgn2doc(t);
+    s = cat3(text("region_t<"),rgn2doc(t),text(">"));
     break;
   case HeapRgn:
     s = rgn2doc(t); 
@@ -652,7 +652,7 @@ int exp_prec(exp_t e) {
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
   case &Cast_e(_,_):            return 120;
-  case &New_e(_):               return 15; // ???
+  case &New_e(_,_):             return 15; // ???
   case &Address_e(_):           return 130;
   case &Sizeoftyp_e(_):         return 130;
   case &Sizeofexp_e(_):         return 130;
@@ -668,7 +668,7 @@ int exp_prec(exp_t e) {
   case &Tunion_e(_,_,_,_,_):    fallthru;
   case &XTunion_e(_,_,_,_):     fallthru;
   case &Enum_e(_,_,_):          fallthru;
-  case &Malloc_e(_):            return 140;
+  case &Malloc_e(_,_):          return 140;
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
   case &Codegen_e(_):           return 140;
@@ -766,9 +766,12 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = cat2(text("&"),
              exp2doc_prec(myprec,e1));
     break;
-  case &New_e(e1):
-    s = cat2(text("new "),
-             exp2doc_prec(myprec,e1));
+  case &New_e(ropt,e1):
+    if (ropt == null)
+      s = cat2(text("new "),exp2doc_prec(myprec,e1));
+    else 
+      s = cat4(text("rnew("),exp2doc((exp_t)ropt),text(") "),
+               exp2doc_prec(myprec,e1));
     break;
   case &Sizeoftyp_e(t):
     s = cat3(text("sizeof("),
@@ -834,10 +837,14 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Enum_e(n,_,_):
     s = qvar2doc(n);
     break;
-  case &Malloc_e(t):
+  case &Malloc_e(eopt,t):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
-    s = cat3(text("malloc(sizeof("), typ2doc(t), text("))"));
+    if (eopt == null)
+      s = cat3(text("malloc(sizeof("), typ2doc(t), text("))"));
+    else 
+      s = cat6(text("rmalloc("),exp2doc((exp_t)eopt),text(","),
+               text("sizeof("),typ2doc(t),text("))"));
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always null from the parser
@@ -1240,6 +1247,17 @@ doc_t stmt2doc(stmt_t st) {
              text("} catch {"),
              line_doc(),
              nest(2,switchclauses2doc(ss)),
+             line_doc(),
+             text("}"));
+    break;
+  case &Region_s(tv,vd,s1):
+    s = cat9(text("region<"), 
+             textptr(get_name(tv)), 
+             text(">" ), 
+             qvar2doc(vd->name),
+             text("{"),
+             line_doc(),
+             nest(2,stmt2doc(s1)),
              line_doc(),
              text("}"));
     break;

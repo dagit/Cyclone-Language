@@ -1,0 +1,43 @@
+#include "core.h"
+using Core;
+
+extern void f1(region_t<`r> r);
+
+int @ `r f2(region_t<`r> r) {
+  int @ `r x = rnew(r) 3;
+  return x;
+}
+
+int @ `r f3(region_t<`r> r) {
+  int @ `r x = (int @ `r)rmalloc(r, sizeof(int));
+  *x = 3;
+  return x;
+}
+
+struct Point { int x; int y; };
+
+struct Point @ `r f4(region_t<`r> r) {
+  struct Point @ `r p = rmalloc(r, sizeof(struct Point));
+  p->x = 0;
+  p->y = 1;
+  return p;
+}
+
+int f5() {
+  int z = 0;
+  for (int j = 0; j < 20000; j++) {
+    region<`r> x {
+      for (int i = 0; i < 200; i++) {
+        let p = rnew(x) Point(i,i+1);
+        let s = rnew(x) "hello";
+        z = p->x + p->y + *(f3(x));
+      }
+    }
+  }
+  return z;
+}
+
+int main(int argc, string ?argv) {
+  f5();
+  return 0;
+}

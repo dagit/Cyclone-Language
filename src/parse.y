@@ -895,6 +895,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
 %token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF MALLOC
+%token REGION_T REGION RNEW RMALLOC
 // double and triple-character tokens 
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1312,6 +1313,8 @@ type_specifier:
     { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
                                                 LOC(@3,@3),List::imp_rev($3))),
                       LOC(@1,@4))); }
+| REGION_T '<' any_type_name '>'
+    { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */
@@ -1955,6 +1958,25 @@ statement:
 | selection_statement   { $$=$!1; }
 | iteration_statement   { $$=$!1; }
 | jump_statement        { $$=$!1; }
+/* Cyc: region statements */
+| REGION '<' TYPE_VAR '>' IDENTIFIER statement
+  { if (zstrcmp($3,"`H") == 0) 
+      err("bad occurrence of heap region `H",LOC(@3,@3));
+    tvar_t tv = new Tvar(new $3,new_conref(RgnKind));
+    type_t t = new VarType(tv);
+    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $5),
+                                               new RgnHandleType(t),null),$6),
+                   LOC(@1,@6)));
+  }
+| REGION IDENTIFIER statement
+  { if (zstrcmp($2,"H") == 0) 
+      err("bad occurrence of heap region `H",LOC(@3,@3));
+    tvar_t tv = new Tvar(new xprintf("'%s",$2),new_conref(RgnKind));
+    type_t t = new VarType(tv);
+    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $2),
+                                               new RgnHandleType(t),null),$3),
+                   LOC(@1,@3)));
+  }
 /* Cyc: cut and splice */
 | CUT statement         { $$=^$(new_stmt(new Cut_s($2),LOC(@1,@2))); }
 | SPLICE statement      { $$=^$(new_stmt(new Splice_s($2),LOC(@1,@2))); }
@@ -2254,9 +2276,13 @@ conditional_expression:
     { $$=^$(throw_exp($2,LOC(@1,@2))); }
 /* Cyc: expressions to build heap-allocated objects and arrays, throw */
 | NEW array_initializer
-    { $$=^$(New_exp($2,LOC(@1,@3))); }
+    { $$=^$(New_exp(null,$2,LOC(@1,@3))); }
 | NEW logical_or_expression
-    { $$=^$(New_exp($2,LOC(@1,@3))); }
+    { $$=^$(New_exp(null,$2,LOC(@1,@3))); }
+| RNEW '(' expression ')' array_initializer
+    { $$=^$(New_exp($3,$5,LOC(@1,@5))); }
+| RNEW '(' expression ')' logical_or_expression
+    { $$=^$(New_exp($3,$5,LOC(@1,@5))); }
 ;
 
 constant_expression:
@@ -2371,8 +2397,12 @@ unary_expression:
 | format_primop '(' argument_expression_list ')'
     { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
-{ $$=^$(new_exp(new Malloc_e(speclist2typ((*$5)[1],LOC(@5,@5))), 
+{ $$=^$(new_exp(new Malloc_e(null,speclist2typ((*$5)[1],LOC(@5,@5))), 
                 LOC(@1,@7))); }
+| RMALLOC '(' assignment_expression ',' SIZEOF '(' specifier_qualifier_list ')' ')'
+{ $$=^$(new_exp(new Malloc_e($3,speclist2typ((*$7)[1],LOC(@7,@7))), 
+                LOC(@1,@9))); }
+
 ;
 
 format_primop:
