@@ -710,12 +710,12 @@ string_t attribute2string(attribute_t a) {
 // returns true when a is an attribute for function types
 bool fntype_att(attribute_t a) {
   switch (a) {
-  case &Regparm_att(_):    fallthru;
-  case Fastcall_att:       fallthru;
-  case Stdcall_att:        fallthru;
-  case Cdecl_att:          fallthru;
-  case Noreturn_att:       fallthru;
-  case &Format_att(_,_,_): fallthru;
+  case &Regparm_att(_):    
+  case Fastcall_att:       
+  case Stdcall_att:        
+  case Cdecl_att:          
+  case Noreturn_att:       
+  case &Format_att(_,_,_): 
   case Const_att:          return true;
   default: return false;
   }

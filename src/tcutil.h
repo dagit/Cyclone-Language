@@ -158,6 +158,8 @@ extern void check_nonzero_bound(seg_t, conref_t<bounds_t>);
 // Check that bounds are greater than i -- constrain to i+1 if necessary
 extern void check_bound(seg_t, unsigned int i, conref_t<bounds_t>);
 
+extern bool is_bound_one(conref_t<bounds_t> b);
+
 extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
 
 extern list_t<$(structfield_t,`a)@`r,`r> 

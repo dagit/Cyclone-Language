@@ -21,8 +21,9 @@
 #define CFABSEXP_H
 
 #include <list.h>
-#include "absyn.h"
+#include <dict.h>
 #include <position.h>
+#include "absyn.h"
 #include "cf_flowinfo.h"
 #include "new_control_flow.h"
 
@@ -34,8 +35,9 @@ using NewControlFlow;
 extern xtunion exn {extern BadAbsexp};
 
 extern tunion Absexp;
-extern tunion Absexpgroup { OrderedG; UnorderedG; OneofG };
 extern tunion Absop;
+extern tunion Absexpgroup { OrderedG; UnorderedG; OneofG };
+
 typedef tunion Absexp      absexp_t;
 typedef tunion Absexpgroup absexpgroup_t;
 typedef tunion Absop       absop_t;
@@ -43,16 +45,16 @@ typedef tunion Absop       absop_t;
 extern void check_absexp(absexp_t);
 extern string_t absexp2string(absexp_t ae, int depth);
 
-// new invariant: for any function, MallocAE(e) should occur at most once
-// for any e.
+// invariant: for any function, MallocAE(e) should occur at most once for any e.
 
 // Violating the restrictions listed below causes BadAbsexp to be thrown.
 extern absop_t mkUnknownOp();
-extern absop_t mkAddressOp(absop_t ao);//ao must be Local, Member, or Malloc
-extern absop_t mkLocalOp(vardecl_t vd);
-extern absop_t mkMemberOp(absop_t ao,field_name_t f);//ao can't be Address or Unknown
-extern absop_t mkMallocOp(exp_t e);
-extern absop_t mkDerefOp(absop_t ao);//ao must be Local, Member, or Deref
+extern absop_t mkLocalOp(vardecl_t);
+extern absop_t mkMallocOp(exp_t);
+extern absop_t mkDictOp(Dict::dict_t<field_name_t,absop_t,`H>);
+extern absop_t mkAddressOp(absop_t);//op must be Local, Member, or Malloc
+extern absop_t mkMemberOp(absop_t,field_name_t f);//op can't be Address or Unknown
+extern absop_t mkDerefOp(absop_t);//ao must be Local, Member, or Deref
 
 extern absexp_t mkBottomAE();
 extern absexp_t mkSkipAE();
@@ -60,6 +62,12 @@ extern absexp_t mkUseAE(absop_t ao);
 extern absexp_t mkAssignAE(absop_t l, absop_t r);
 extern absexp_t mkMallocAE(exp_t e);
 extern absexp_t mkStmtAE(stmt_t s);
+extern absexp_t mkComprehensionAE(vardecl_t vd, 
+				  absexp_t  size_true_exp,
+				  absexp_t  size_false_exp,
+				  absop_t   size_aop, // assigned to vd
+				  absexp_t  body_exp, 
+				  absop_t   body_op); // body_op used
 extern absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2);
 extern absexp_t mkGroupAE_l(absexpgroup_t g, List::list_t<absexp_t,`H> ael);
 

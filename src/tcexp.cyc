@@ -1127,14 +1127,8 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt,
       check_bound(loc,Evexp::eval_const_uint_exp(e2),b);
     else {
       // an easy warning that helps when porting C code
-      switch(compress_conref(b)->v) {
-	// could really pointer compare with Absyn::bounds_one, but maybe
-	// we created some other ones, so let's be careful
-      case &Eq_constr(&Upper_b(&Exp(_,&Const_e(&Int_c(Unsigned,1)),_))):
+      if(is_bound_one(b))
 	warn(e1->loc,"subscript applied to pointer to one object");
-	break;
-      default: break;
-      }
       check_nonzero_bound(loc,b);
     }
     check_rgn_accessible(te,loc,rt);

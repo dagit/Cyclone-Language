@@ -1774,6 +1774,7 @@ bool is_temp_tvar(tvar_t t) {
 }
 
 void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`txxx"
+  printf("%s", *(t->name));
   if (! is_temp_tvar(t)) return;
   let s = strconcat("`", *(t -> name));
   s[1] = 't';
@@ -3176,11 +3177,18 @@ void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
   check_bound(loc, 0, b);
 }
 
+bool is_bound_one(conref_t<bounds_t> b) {
+  switch(compress_conref(b)->v) {
+  case &Eq_constr(&Upper_b(e)): return Evexp::eval_const_uint_exp(e)==1;
+  default: return false;
+  }
+}
+
 bool bits_only(type_t t) {
   switch (compress(t)) {
-  case VoidType: return true;
-  case &IntType(_,_): return true;
-  case FloatType: return true;
+  case VoidType: 
+  case &IntType(_,_): 
+  case FloatType: 
   case DoubleType: return true;
   case &EnumType(_,_): return false; //could be true but for pattern exhaustion!
   case &ArrayType(t,_,_): return bits_only(t);

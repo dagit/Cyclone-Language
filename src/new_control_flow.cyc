@@ -65,20 +65,22 @@ using CfFlowInfo;
 using CfAbsexp;
 namespace NewControlFlow;
 
+typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
+
 //////////////////////////// Statement Decoration //////////////////////////
 
 // What the absexps field means for different statement variants:
 // (It's a consistent "left to right" reading of the contained expressions.)
 // * Exp: list has length 1, abstraction of exp.
 // * Return: if eopt != NULL, list has length 1, abstraction of exp.
-// * IfThenElse: list has length 2, abstraction of guard when-true/when-false
-// * While:      list has length 2, abstraction of guard when-true/when-false
-// * Do:         list has length 2, abstraction of guard when-true/when-false
+// * If, While, Do: list has length 2: abstraction of when-true/when-false,
+//                  each including use of guard
 // * For(e1,e2,e3): list has length 4:
-//                    abstraction of e1, e2 when-true, e2 when-false, e3
+//                    abstraction of e1, e2 when-true, e2 when-false,
+//                    abstraction of e3
 // * Fallthru(es): list has length 1, unordered of abstraction of es
 // * Decl: if there's an initializer expression, list is its abstraction
-// * Switch: list has length >= 1, abstraction of guard, then abstractions
+// * Switch: list has odd length >= 1, abstraction of guard, then abstractions
 //      of any where_clause's when-true when-false in the order of the cases
 // * TryCatch: abstractions of any where_clause's when-true when-false 
 //              in the order of the cases
@@ -97,345 +99,228 @@ xtunion StmtAnnot { CFAnnot(cf_stmt_annot_t); };
 void set_encloser(stmt_t enclosee, stmt_t encloser) {
   enclosee->annot = new CFAnnot(CFStmtAnnot(encloser, 0, BottomFL, NULL));
 }
-
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
   case &CFAnnot(*x): return x;
   default: throw new Impossible("ControlFlow -- wrong stmt annotation");
   }
 }
-
-void cf_set_absexps(stmt_t s, list_t<absexp_t,`H> ael) {
+static void cf_set_absexps(stmt_t s, list_t<absexp_t,`H> ael) {
   get_stmt_annot(s)->absexps = ael;
 }
 
 ///////////////////////// Translation Environment /////////////////////////
-// Note: We could avoid repeated lhsides using a set, but only strange code
-//       has more than one lhside anyway.
-struct SharedAbsEnv {
+// could just make globals (so prepass wouldn't be re-entrant -- who cares?)
+static struct AbsEnv {
   pinfo_dict_t<local_root_t> all_roots; // all path_info leaves are Uninit
-  list_t<vardecl_t> comprehension_vars; // damn binding vars in expressions!  
 };
-struct AbsEnv {
-  struct SharedAbsEnv @ shared; // could be a stack pointer
-  list_t<absop_t>       lhsides; 
-  list_t<exp_t>         access_path; // stays "normalized"
-};
-typedef struct AbsEnv absenv_t; // NOT a pointer!
-struct AbsSynOne {
-  absexp_t inner_exp;
-  absexp_t assigns; // delay to get ordering right (eg. malloc-and-init)
-};
-typedef struct AbsSynOne abssyn_one_t;
-struct AbsSyn {
-  abssyn_one_t    when_true;
-  abssyn_one_t    when_false;
-  list_t<absop_t> lvalues;
+typedef struct AbsEnv @ absenv_t;
+static struct AbsSyn {
+  absexp_t when_true_exp;
+  absexp_t when_false_exp;
+  absop_t  absop;
 };
 typedef struct AbsSyn abssyn_t; // NOT a pointer!
 
-/////////////////////////// Utilities ///////////////////////////////////
-
-void add_var_root(absenv_t env, vardecl_t vd) {
-  env.shared->all_roots = Dict::insert_new(env.shared->all_roots,
-					   new VarRoot(vd),
-					   typ_to_unesc_none_pinfo(vd->type));
+static void add_var_root(absenv_t env, vardecl_t vd) {
+  env->all_roots = Dict::insert_new(env->all_roots,
+				    new VarRoot(vd),
+				    typ_to_unesc_none_pinfo(vd->type));
 }
 // Note: The type is the type of the object, not the pointer to the object.
-void add_malloc_root(absenv_t env, exp_t e, type_t t) {
-  env.shared->all_roots = Dict::insert_new(env.shared->all_roots,
-					   new MallocPt(e),
-					   typ_to_unesc_none_pinfo(t));
+static void add_malloc_root(absenv_t env, exp_t e, type_t t) {
+  env->all_roots = Dict::insert_new(env->all_roots,
+				    new MallocPt(e),
+				    typ_to_unesc_none_pinfo(t));
 }
-
-absenv_t change_lhs(absenv_t src, list_t<absop_t,`H> new_lhs) {
-  return AbsEnv(src.shared, new_lhs, src.access_path);
-}
-static list_t<absop_t> unknown_list = NULL; 
-static list_t<absop_t> use_it_list() {
-  if(unknown_list == NULL)
-    unknown_list = new List(mkUnknownOp(),NULL);
-  return unknown_list;
-}
-// return an environment that will require any expressions translated
-// under it to be fully initialized (b/c they w/o any access path will
-// be assigned to an unknown lvalue).
-// It should be sound, but perhaps conservative to drop the access path here.
-absenv_t use_it_env(absenv_t src) {
-  let ans = change_lhs(src, use_it_list());
-  ans.access_path = NULL;
-  return ans;
-}
-
-// FIX
-// By delaying the assignments (as necessary to have 0 or 1 in a function
-// argument), we are losing the guard correlation.  Really need a general 
-// solution to undefined eval order and when_true/when_false.
-abssyn_one_t meet_absexp(abssyn_t syn) {
-  let AbsSyn(AbsSynOne(inn_tr,ass_tr),AbsSynOne(inn_f,ass_f),_)=syn;
-  let inn = (inn_tr==inn_f) ? inn_tr : mkGroupAE(OneofG,inn_tr,inn_f);
-  let ass = (ass_tr==ass_f) ? ass_tr : mkGroupAE(OneofG,ass_tr,ass_f);
-  return AbsSynOne(inn,ass);
-}
-abssyn_t mkSyn_tf(absexp_t ae, list_t<absop_t,`H> lvals, absexp_t assigns) {
-  let one_way = AbsSynOne(ae,assigns);
-  return AbsSyn(one_way,one_way,lvals);
+static absexp_t meet_absexp(abssyn_t syn) {
+  if(syn.when_true_exp == syn.when_false_exp)
+    return syn.when_true_exp;
+  return mkGroupAE(OneofG, syn.when_true_exp, syn.when_false_exp);
 }
 
 ///////////////////////// Expression Translation //////////////////////////
 
-// Note: We may want to trim lhsides to avoid repeats (such as UnknownOp).
-// Note: More than one lhside indicates we should make a OneofG.
-absexp_t make_assigns(absenv_t env, absop_t ae) {
-  if(env.lhsides == NULL)
-    return mkSkipAE();
-  if(env.lhsides->tl == NULL)
-    return mkAssignAE(env.lhsides->hd, ae);
-  let l = NULL;
-  for(_ lhsides = env.lhsides; lhsides != NULL; lhsides = lhsides->tl)
-    l = new  List(mkAssignAE(lhsides->hd, ae), l);
-  return mkGroupAE_l(OneofG, l);
-}
-
 abssyn_t abstract_exp(absenv_t env, exp_t  e);
 void     cf_prepass  (absenv_t env, stmt_t s); 
 
-// WARNING: Should only be called when each element of es is used,
-//          there are no synthesized lvalues, and the overall exp
-//          is fully initialized. 
-// Note: the lvalues aren't "used" (don't escape) until after all es
-//       are evaluated.
-abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t,`H> es, list_t<absop_t,`H> lhs) {
-  absenv_t elt_env  = use_it_env(env);
-  absexp_t es_exp   = mkSkipAE();
-  absexp_t uses_exp = mkSkipAE();
-  for(; es != NULL; es = es->tl) {
-    let syn = abstract_exp(elt_env, es->hd);
-    let AbsSynOne(inner,assigns) = meet_absexp(syn);
-    es_exp   = mkGroupAE(UnorderedG, inner,   es_exp);
-    uses_exp = mkGroupAE(UnorderedG, assigns, uses_exp);
-  }
-  return mkSyn_tf(mkGroupAE(OrderedG, es_exp, uses_exp),
-		  lhs,
-		  make_assigns(env,mkUnknownOp()));
+static absexp_t use_exp(absenv_t env, exp_t e) {
+  let syn = abstract_exp(env,e);
+  return mkGroupAE(OrderedG, meet_absexp(syn), mkUseAE(syn.absop));
 }
 
-abssyn_t descend_path(absenv_t env, exp_t path_e, exp_t inner_e) {
-  env.access_path = new List(path_e,env.access_path); 
-  let syn1 = abstract_exp(env,inner_e);
-  if(syn1.lvalues == NULL)
-    syn1.lvalues = use_it_list();
-  return syn1;
-}
-
-absop_t destruct_path(absenv_t env, absop_t absop) {
-  for(list_t<exp_t> path = env.access_path; path != NULL; path = path->tl)
-    switch (path->hd->r) {
-    case &Address_e(_): 
-      // address can only appear last and we can't be an lvalue.
-      assert(path->tl == NULL);
-      return mkAddressOp(absop);
-    case &Deref_e(_):          absop = mkDerefOp(absop); break;
-    case &StructArrow_e(_,f):  absop = mkDerefOp(absop); fallthru(f);
-    case &StructMember_e(_,f): absop = mkMemberOp(absop, f); break;
-    case &Subscript_e(_,e2):    
-      let i = Evexp::eval_const_uint_exp(e2);
-      absop = mkMemberOp(absop,fieldname(i));
-      break;
-    default: 
-      throw new Impossible("abstract_exp: unexpected acces path element");
-    }
-  return absop;
+// To be used when each element of es is used, and the result is unknown. 
+// FIX: es need to be used before all es evaluate, but don't need to escape
+//      until afterwards (think about function call, eg. f(x, y=x=e)).
+//      We're sound but too restrictive as is (nobody will care I bet)
+// FIX: for primops, they're ints, so no need to escape.  More generally,
+//      don't need to escape when the "destination" type is int.
+static abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t,`H> es) {
+  let aexp = mkGroupAE_l(UnorderedG, List::map_c(use_exp, env, es));
+  return AbsSyn(aexp,aexp,mkUnknownOp());
 }
 
 // Used by the Malloc_e and New_e cases (caller adds malloc root)
+// Note: we admit that the evaluation of rgn_exp happens before the evaluation
+// of init_exp.
+// Note: We don't bother to "use" rgn_exp b/c we know its initialized.
 abssyn_t abstract_malloc(absenv_t env, exp_t outer_e,
 			 exp_opt_t rgn_exp, exp_opt_t init_exp) {
   let malloc_op = mkMallocOp(outer_e);
-  let inner     = mkSkipAE();
-  let assigns   = mkSkipAE();
+  absexp_t ans_aexp = mkSkipAE();
   if(init_exp != NULL) {
-    let inner_env = change_lhs(env, new List(malloc_op,NULL));
-    inner_env.access_path = NULL;
-    let AbsSynOne(init_inner,init_assigns) = 
-      meet_absexp(abstract_exp(inner_env, (exp_t)init_exp));
-    inner   = init_inner;
-    assigns = init_assigns;
+    let init_syn = abstract_exp(env, (exp_t)init_exp);
+    ans_aexp = mkGroupAE(OrderedG, meet_absexp(init_syn),
+			 mkAssignAE(malloc_op, init_syn.absop));
   }
-  if(rgn_exp != NULL) {
-    let r_syn = abstract_exp(use_it_env(env), (exp_t)rgn_exp);
-    let AbsSynOne(r_inner,r_assigns) = meet_absexp(r_syn);
-    inner   = mkGroupAE(UnorderedG, inner,   r_inner);
-    assigns = mkGroupAE(UnorderedG, assigns, r_assigns);
-  }
-  let ansexp = mkGroupAE(OrderedG, mkMallocAE(outer_e),
-			 mkGroupAE(OrderedG, inner, assigns));
-  let ans = mkSyn_tf(ansexp, NULL, make_assigns(env, mkAddressOp(malloc_op)));
-  // these are rather bizarre cases...
-  if(env.access_path != NULL)
-    switch(env.access_path->hd->r) {
-      // FIX: x[0] should be the same as *x, but not for arrays...
-    case &Deref_e(_): 
-      env.access_path = env.access_path->tl;
-      ans.lvalues = new List(destruct_path(env, malloc_op),NULL);
-      break;
-    case &StructArrow_e(e2,f):
-      env.access_path = new List(structmember_exp(e2,f,NULL),
-				 env.access_path->tl); 
-      ans.lvalues = new List(destruct_path(env, malloc_op),NULL);
-      break;
-    default: throw new Core::Impossible("bad malloc access path");
-    }
-  return ans;
+  ans_aexp = mkGroupAE(OrderedG, mkMallocAE(outer_e), ans_aexp);
+  if(rgn_exp != NULL)
+    ans_aexp = 
+      mkGroupAE(OrderedG, meet_absexp(abstract_exp(env, (exp_t)rgn_exp)), 
+		ans_aexp);
+  // Cute: the result of a malloc is not false (we raise an exception)
+  return AbsSyn(ans_aexp, mkBottomAE(), mkAddressOp(malloc_op));
 }
 
 abssyn_t abstract_exp(absenv_t env, exp_t e) {
   switch(e->r) {
 
-
+    // C doesn't allow "memory-kind casts", which is good because then
+    // we'd have to translate the dictionary domains and that's a pain.
+    // But it SHOULD BE THE CASE that the source and destination types
+    // are both "leaf types", so there is no problem.
+  case &Cast_e(_,e1):        fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return abstract_exp(env, e1);
 
   // these things are fully initialized non-lvalues that "jump one way"
-  case &Const_e(&Int_c(Signed,0)): 
-    assert(env.access_path==NULL);
-    return AbsSyn(AbsSynOne(mkBottomAE(), mkBottomAE()),
-		  AbsSynOne(mkSkipAE(),   make_assigns(env,mkUnknownOp())),
-		  NULL);
+  case &Const_e(Null_c):
+  case &Const_e(&Int_c(Signed,0)):
+    return AbsSyn(mkBottomAE(), mkSkipAE(),   mkUnknownOp());
   case &Const_e(&Int_c(Signed,1)): 
-    assert(env.access_path==NULL);
-    return AbsSyn(AbsSynOne(mkSkipAE(),   make_assigns(env,mkUnknownOp())),
-		  AbsSynOne(mkBottomAE(), mkBottomAE()),
-		  NULL);
+    return AbsSyn(mkSkipAE(),   mkBottomAE(), mkUnknownOp());
 
-  // these things are fully initialized non-lvalues, no access-path concerns
-  case &Sizeofexp_e(_):  fallthru; // ANSI C: the exp is NOT evaluated
-  case &Sizeoftyp_e(_):  fallthru;
-  case &Offsetof_e(_,_): fallthru;
-  case &Const_e(_):      fallthru;
-  case &Enum_e(_,_,_):   fallthru;
-  case &Var_e(_,&Funname_b(_)): 
-    return mkSyn_tf(mkSkipAE(), NULL,          make_assigns(env,mkUnknownOp()));
-    // globals are fully initialized lvalues. B/c fully init, ignore acess path
+  // these things are fully initialized non-lvalues that could be true or false
+  case &Const_e(_): 
+  case &Sizeofexp_e(_): // note the exp is NOT evaluated
+  case &Sizeoftyp_e(_):  
+  case &Offsetof_e(_,_): 
+  case &Enum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
+  case &Var_e(_,&Funname_b(_)):
+    // globals are lvalues, but are escaped and fully initializaed
   case &Var_e(_,&Global_b(_)):
-    return mkSyn_tf(mkSkipAE(), use_it_list(), make_assigns(env,mkUnknownOp()));
+    return AbsSyn(mkSkipAE(), mkSkipAE(), mkUnknownOp());
 
-  // locals can be uninit. 
-  // We take the access-path and use it to make the rvalue and lvalue.
-  // NOTE: abstract this when we want the same for malloc points.
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)):
-    absop_t absop = destruct_path(env,mkLocalOp(vd));
-    // if path ends with &, we needn't return the lvalue, but it doesn't hurt
-    // because the lvalues field should get ignored
-    return mkSyn_tf(mkSkipAE(), new List(absop,NULL), make_assigns(env,absop));
+  case &Var_e(_,&Pat_b(vd)): return AbsSyn(mkSkipAE(),mkSkipAE(),mkLocalOp(vd));
 
-    // The order here is subtle in order to get nested assignment right.
-    // There is no result lhs needed b/c = associates to the right.
-    // The lhs for the rhs must include Unknown if there's no other lhs.
-    // CHECK THIS -- changed when we started bubbling up
+    // There is no result lhs (= associates to the right).
+    // Note that because we make the absop be the left-hand-side, we could
+    // in theory lose precision on nested assignments, eg. x = y = z
+    // where z points to a known place but y has escaped.  I bet nobody notices
+    // and if they do, they can be told the rule and rewrite it y = x = z,
+    // which is the right thing to do if y has escaped.
   case &AssignOp_e(e1,NULL,e2):
     let syn1 = abstract_exp(env, e1);
-    let lhs  = syn1.lvalues == NULL ? use_it_list() : syn1.lvalues;
-    let syn2 = abstract_exp(change_lhs(env,lhs), e2);
-    let AbsSynOne(inner1,assigns1) = meet_absexp(syn1);
-    let AbsSynOne(inner2,assigns2) = meet_absexp(syn2);
-    let ansexp = mkGroupAE(OrderedG, 
-			   mkGroupAE(UnorderedG, inner1, inner2), 
-			   assigns2);
-    return mkSyn_tf(ansexp, NULL, assigns1);
+    let syn2 = abstract_exp(env, e2);
+    let aexp = 
+      mkGroupAE(OrderedG, 
+		mkGroupAE(UnorderedG, meet_absexp(syn1), meet_absexp(syn2)),
+		mkAssignAE(syn1.absop, syn2.absop));
+    return AbsSyn(aexp,aexp,syn1.absop);
 
-  // For e1+=e2 and company, we need to use e1 and e2 and this already
-  // destroys any aliasing, so there's nothing more to do???
-  // (Actually, perhaps e2 could still have "aliases", but we're dealing
-  // with ints, so it's a moot point.)
-  case &AssignOp_e(e1,_,e2):
-    return use_exp_unordered(env, new List(e1,new List(e2,NULL)), NULL);
- 
-  // The es must be initialized, the result is not a lhs.
-  // Note: We are possibly being conservative here b/c no primops
-  //     destroy aliases by assigning through pointers.  But then
-  //     again, none of them take multiple-level pointers, so it doesn't matter.
-  case &Primop_e(_,es): return use_exp_unordered(env, es, NULL);
-
-  case &Cast_e(_,e1):     
-    // In general, we don't want to translate paths, so we want to just
-    // be conservative and require e1 to be fully initialized and make it
-    // escape.  Unfortunately, the type-checker has put in lots of annoying
-    // casts that don't concern us or the programmer and we don't want
-    // those to get in the way.  So we are more aggressive if the two
-    // types are both translate to LeafPI.
-    bool both_leaf = true;
-    switch(e1->topt->v) {
-    case &AnonStructType(_): fallthru;
-    case &StructType(_,_,_): fallthru;
-    case &TupleType(_):      both_leaf = false; break;
-    default: break;
-    }
-    switch(e->topt->v) {
-    case &AnonStructType(_): fallthru;
-    case &StructType(_,_,_): fallthru;
-    case &TupleType(_):      both_leaf = false; break;
-    default: break;
-    }
-    if(both_leaf)
-      return abstract_exp(env,e1);
-    return use_exp_unordered(env, new List(e1,NULL), env.lhsides);
-
-  // The e1 must be initialized (clearly it's consumed).
-  // The es must be initialized.
-  // And all the pointers may get assigned through.
-  // Both are taken care of by using the es prior to the call yet after
-  // argument evaluation.
-  // The result is an UnknownROp since who knows where it came from.
-  // FIX: look for the init qualifier once we have that!
-  //      In this case, we'll do a *e; e = UnknownROp for each such param.
-  //      Note: The callee cannot mess with aliases through x b/c it
-  //            doesn't know anything about how much it's initialized.
-  case &FnCall_e(e1,es,_): 
-    return use_exp_unordered(env, new List(e1,es), NULL);
-
-  case &Subscript_e(e1,e2):
-    // FIX: x[0] is just like *x, so must cancel out & !!!
-    switch(Tcutil::compress(e1->topt->v)) {
-    // we track aggregate paths through tuples
-    case &TupleType(_):
-      return descend_path(env,e,e1);
-    default:
-    // initialized arrays must have initialized elts. result is a legal lhs.
-      return use_exp_unordered(env, new List(e1, new List(e2,NULL)),
-			       use_it_list());
-    }
+  // FIX: do init qualifier (callee can't muck with aliases in that case)
+  case &FnCall_e(e1,es,_): return use_exp_unordered(env, new List(e1,es));
+  case &AssignOp_e(e1,_,e2): fallthru(new List(e1, new List(e2, NULL)));
+  case &Primop_e(_,es): return use_exp_unordered(env, es);
 
   case &Address_e(e1):
-    bool is_malloc = false;
-    //This might really be a malloc-and-initialize
+    // If this is really a malloc-and-initialize, do something totally different
     switch(e1->r) {
-    case &Struct_e(_,_,_,_): fallthru;
-    case &Tuple_e(_): is_malloc = true; break;
-    default: break;
+    case &Struct_e(_,_,_,_): 
+    case &Tuple_e(_): 
+      add_malloc_root(env, e, e1->topt->v);
+      return abstract_malloc(env, e, NULL, e1);
+    default:
+      let syn1 = abstract_exp(env,e1);
+      let aexp = meet_absexp(syn1);
+      return AbsSyn(aexp,aexp,mkAddressOp(syn1.absop));
     }
-    if(is_malloc)
-      fallthru(NULL,e1);
 
-    // it's actually an address-of
-    switch(env.access_path) {
-      // common case:
-    case NULL: 
-      env.access_path = new List(e,env.access_path); 
+  case &Subscript_e(e1,e2):
+    switch(Tcutil::compress(e1->topt->v)) {
+
+    case &TupleType(_): // we track aggregate paths through tuples
+      // we know e2 is a constant int, but if the type-checker ever gets
+      // more lenient, then we need to call abstract_exp(env,e2)!!!
+      let syn1 = abstract_exp(env,e1);
+      let aexp = meet_absexp(syn1);
+      let field = fieldname(Evexp::eval_const_uint_exp(e2));
+      return AbsSyn(aexp,aexp,mkMemberOp(syn1.absop,field));
+      
+    default: 
+      // FIX: add special-case: treat x[0] just like *x (instead of using
+      //      e1, make a DerefOp)
+
+      // initialized arrays have initialized elements and things assigned
+      // to elements are "used".
+      return use_exp_unordered(env, new List(e1, new List(e2,NULL)));
+    }
+
+  case &Deref_e(e1):
+    let syn1 = abstract_exp(env,e1);
+    let aexp = meet_absexp(syn1); // don't just meet when we do null-checks
+    absop_t absop; 
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t2,_,_,_,bd)):
+      if(Tcutil::is_bound_one(bd))
+	absop = mkDerefOp(syn1.absop);
+      else {
+	aexp  = mkGroupAE(OrderedG, aexp, mkUseAE(syn1.absop));
+	absop = mkUnknownOp();
+      }
       break;
-      // bizarre cases:
-    case &List(&Exp(_,&Subscript_e(_,e2),_),tl): // x[0] same as *x
-      assert(Evexp::eval_const_uint_exp(e2) == 0);
-      fallthru(tl);
-    case &List(&Exp(_,&Deref_e(_),_),tl): env.access_path = tl; break;
-    case &List(&Exp(_,&StructArrow_e(e2,f),_),tl):
-      env.access_path = new List(structmember_exp(e2,f,NULL),tl); break;
-    default: throw new Impossible("abstract_exp: bad access path for &");
-    }
+    default: throw new Impossible("NewControlFlow: bad type in Deref");
+    }    
+    return AbsSyn(aexp,aexp,absop);
 
-    return abstract_exp(env,e1);
+    // KLUDGE: Our treatment of UNIONS does not require all memory to
+    // be written before its read (because different variants can have
+    // different size and alignment), but so long as unions are only bits,
+    // memory safety is not compromised.
+  case &StructArrow_e(e1,fname):
+    let syn1 = abstract_exp(env,e1);
+    let aexp = meet_absexp(syn1); // don't just meet when we do null-checks
+    absop_t absop; 
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t2,_,_,_,bd)):
+      if(Tcutil::is_bound_one(bd)) {
+	switch(Tcutil::compress(t2)) {
+	case &UnionType(_,_,_):
+	case &AnonUnionType(_): absop = mkDerefOp(syn1.absop); break;
+	default: absop = mkMemberOp(mkDerefOp(syn1.absop),fname);
+	}
+      } else {
+	aexp  = mkGroupAE(OrderedG, aexp, mkUseAE(syn1.absop));
+	absop = mkUnknownOp();
+      }
+      break;
+    default: throw new Impossible("NewControlFlow: bad type in StructArrow");
+    }    
+    return AbsSyn(aexp,aexp,absop);
+
+    // same KLUDGE as in previous case
+  case &StructMember_e(e1,fname):
+    let syn1 = abstract_exp(env,e1);
+    let aexp = meet_absexp(syn1);
+    absop_t absop;
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &AnonUnionType(_): 
+    case &UnionType(_,_,_): absop = syn1.absop; break;
+    default: absop = mkMemberOp(syn1.absop,fname);
+    }
+    return AbsSyn(aexp,aexp,absop);
 
   case &New_e(eopt,e1):
     add_malloc_root(env, e, e1->topt->v);
@@ -445,273 +330,110 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     add_malloc_root(env, e, t);
     return abstract_malloc(env, e, eopt, NULL);
 
-  case &Deref_e(e1):
-    if(Tcutil::is_tagged_pointer_typ(e1->topt->v))
-      return use_exp_unordered(env, new List(e1,NULL), use_it_list());
-    // only other complication is cancelling out *& or * new.
-    switch(env.access_path) {
-    case &List(&Exp(_,&Address_e(_),_),tl): 
-      env.access_path = tl; 
-      let syn1 = abstract_exp(env,e1);
-      if(syn1.lvalues == NULL)
-	syn1.lvalues = use_it_list();
-      return syn1;
-    default: 
-      return descend_path(env,e,e1);
-    }
-
-    // FIX: For now, unions must be fully initialized to be refined to a variant
-    // Similarly, you can only assign fully initialized things to them
-    // and those things escape, so we return no lvalues.
-  case &StructArrow_e(e1,_): 
-    if(Tcutil::is_tagged_pointer_typ(e1->topt->v))
-      return use_exp_unordered(env, new List(e1,NULL), use_it_list());
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{t2,_,_,_,_}):
-      switch(Tcutil::compress(t2)) {
-      case &AnonStructType(_): fallthru;
-      case &StructType(_,_,_):
-	return descend_path(env,e,e1);
-      case &AnonUnionType(_): fallthru;
-      case &UnionType(_,_,_):
-	let syn1 = abstract_exp(env,e1);
-	syn1.lvalues = use_it_list();
-	return syn1;
-      default: break;
-      }
-      fallthru;
-    default: throw new Impossible("NewControlFlow: bad type in StructArrow");
-    }
-    // FIX: See comment above w.r.t. unions.
-  case &StructMember_e(e1,_):
-    switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonStructType(_): fallthru;
-    case &StructType(_,_,_):
-      return descend_path(env,e,e1);
-    case &AnonUnionType(_): fallthru;
-    case &UnionType(_,_,_):
-      let syn1 = abstract_exp(env,e1);
-      syn1.lvalues = use_it_list();
-      return syn1;
-    default: throw new Impossible("NewControlFlow: bad type in StructMember");
-    }
-
-    // All complicated b/c of x = $(1,2) which has to translate to
-    // unordered x[0] = 1, x[1]=2.
-    // Also need to look at access path b/c of y = $(1,2)[0].
-    // Very similar to Struct_e
   case &Tunion_e(_,_,es,_,_): 
-    assert(env.access_path == NULL);
+    // FIX: can distinguish zero/non-zero tags
     if(es == NULL)
-      return mkSyn_tf(mkSkipAE(),use_it_list(),make_assigns(env,mkUnknownOp()));
+      return AbsSyn(mkSkipAE(),mkSkipAE(),mkUnknownOp());
     fallthru(es);
 
   case &Tuple_e(es): 
-    switch(env.access_path) {
-    // common case
-    case NULL:
-      let ansexp    = mkSkipAE();
-      let assignexp = mkSkipAE();
-      for(int j=0; es != NULL; es = es->tl, ++j) {
-	let ith_lvals = NULL;
-	for(_ ls = env.lhsides; ls != NULL; ls = ls->tl)
-	  if(isUnknownOp(ls->hd))
-	    ith_lvals = new List(mkUnknownOp(),ith_lvals); 
-	  else 
-	    ith_lvals = new List(mkMemberOp(ls->hd, fieldname(j)), ith_lvals);
-	let ith_syn = abstract_exp(change_lhs(env,ith_lvals), es->hd);
-	let AbsSynOne(ith_inner,ith_assigns) = meet_absexp(ith_syn);
-	ansexp    = mkGroupAE(UnorderedG, ansexp,    ith_inner);
-	assignexp = mkGroupAE(UnorderedG, assignexp, ith_assigns);
-      }
-      return mkSyn_tf(ansexp, NULL, assignexp);
-
-    // bizarre case
-    case &List(&Exp(_,&Subscript_e(_,e2),_),tl):
-      int i = Evexp::eval_const_uint_exp(e2);
-      let other_env = change_lhs(env,NULL);
-      other_env.access_path = NULL;
-      env.access_path = tl;
-      let ansexp    = mkSkipAE();
-      let assignexp = mkSkipAE();
-      for(int j=0; es != NULL; es = es->tl, ++j) {
-	if(i==j) {
-	  let AbsSynOne(jth_inner,jth_assigns) = 
-	    meet_absexp(abstract_exp(env,es->hd));
-	  assignexp = jth_assigns;
-	  ansexp    = mkGroupAE(UnorderedG, ansexp, jth_inner);
-	} else {
-	  let AbsSynOne(jth_inner,jth_assigns) = 
-	    meet_absexp(abstract_exp(other_env,es->hd));
-	  ansexp = mkGroupAE(UnorderedG, ansexp, jth_inner);
-	}
-      }
-      return mkSyn_tf(ansexp, new List(mkUnknownOp(),NULL), assignexp);
-
-    default: 
-      throw new Impossible("abstract_exp: unexpected access path to Tuple");
+    list_t<absexp_t> arg_aexps = NULL;
+    dict_t<field_name_t,absop_t> absop_dict = Dict::empty(Std::zstrptrcmp);
+    for(int j=0; es != NULL; es = es->tl, ++j) {
+      let syn = abstract_exp(env,es->hd);
+      arg_aexps = new List(meet_absexp(syn), arg_aexps);
+      absop_dict = Dict::insert(absop_dict, fieldname(j), syn.absop);
     }
+    let aexp = mkGroupAE_l(UnorderedG, arg_aexps);
+    return AbsSyn(aexp,aexp,mkDictOp(absop_dict));
 
-    // Very similar to Tuple_e (see comments above)
   case &AnonStruct_e(_,des): fallthru(des);
   case &Struct_e(_,_,des,_): 
-    switch(env.access_path) {
-      // common case
-    case NULL:
-      let ansexp    = mkSkipAE();
-      let assignexp = mkSkipAE();
-      for(; des != NULL; des = des->tl) {
-	let ith_lvals = NULL;
-	for(_ ls = env.lhsides; ls != NULL; ls = ls->tl)
-	  if(isUnknownOp(ls->hd))
-	    ith_lvals = new List(mkUnknownOp(),ith_lvals); 
-	  else 
-	    for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
-	      switch (ds->hd) {
-	      case &ArrayElement(_): 
-                throw new Impossible("bad struct designator");
-	      case &FieldName(f):
-		ith_lvals = 
-                  new List(mkMemberOp(ls->hd, f), ith_lvals);
-		break;
-	      }
-	let ith_topt = &(*des->hd)[1]->topt->v;
-	let ith_syn = abstract_exp(change_lhs(env,ith_lvals), (*des->hd)[1]);
-	let AbsSynOne(ith_inner,ith_assigns) = meet_absexp(ith_syn);
-	ansexp    = mkGroupAE(UnorderedG, ansexp,    ith_inner);
-	assignexp = mkGroupAE(UnorderedG, assignexp, ith_assigns);
-      }
-      return mkSyn_tf(ansexp, NULL, assignexp);
-      // bizarre case
-    case &List(&Exp(_,&StructMember_e(_,f),_),tl):
-      let other_env = change_lhs(env,NULL);
-      other_env.access_path = NULL;
-      env.access_path = tl;
-      let ansexp    = mkSkipAE();
-      let assignexp = mkSkipAE();
-      for(; des != NULL; des = des->tl) {
-	bool used = false;
-	for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
-	  switch (ds->hd) {
-	  case &ArrayElement(_): throw new Impossible("bad struct designator");
-	  case &FieldName(f2):
-	    if(Std::zstrptrcmp(f,f2)==0)
-	      used = true;
-	    break;
-	  }
-	if(used) {
-	  let AbsSynOne(next_inner,next_assigns) = 
-	    meet_absexp(abstract_exp(env, (*des->hd)[1]));
-	  assignexp = next_assigns;
-	  ansexp    = mkGroupAE(UnorderedG, ansexp, next_inner);
-	} else {
-	  let AbsSynOne(next_inner,next_assigns) = 
-	    meet_absexp(abstract_exp(other_env, (*des->hd)[1]));
-	  ansexp = mkGroupAE(UnorderedG, ansexp, next_inner);
+    // multiple designators are a pain (and I don't think they parse anyway)
+    list_t<absexp_t> arg_aexps = NULL;
+    dict_t<field_name_t,absop_t> absop_dict = Dict::empty(Std::zstrptrcmp);
+    for(; des != NULL; des = des->tl) {
+      let syn = abstract_exp(env,(*des->hd)[1]);
+      arg_aexps = new List(meet_absexp(syn), arg_aexps);
+      for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
+	switch (ds->hd) {
+	case &ArrayElement(_): throw new Impossible("bad struct designator");
+	case &FieldName(f): absop_dict = Dict::insert(absop_dict, f, syn.absop);
 	}
-      }
-      return mkSyn_tf(ansexp, NULL, assignexp);
-
-    default: 
-      throw new Impossible("abstract_exp: unexpected access path to Struct");
     }
+    let aexp = mkGroupAE_l(UnorderedG, arg_aexps);
+    return AbsSyn(aexp,aexp,mkDictOp(absop_dict));
 
   // We don't track through arrays, so all array elements must be 
-  // fully initialized.  The result is an initialized.
-  case &Array_e(l): return use_exp_unordered(env, map(snd,l), NULL);
+  // fully initialized.  Hence the result is fully initialized.
+  case &Array_e(l): return use_exp_unordered(env, map(snd,l));
     
-  case &Increment_e(e1,_): // note: e1 must be an lvalue
-    // we don't care about lvalues here, just use what's there
-    // Note we allow (++x)->f for x a tagged array; x must be fully initialized
-    return use_exp_unordered(env, new List(e1,NULL), NULL);
+  case &Increment_e(e1,_): 
+    // Note: Since e1 is either an int or a tagged array, "using" it won't
+    // cause any additional loss of precision.
+    return use_exp_unordered(env, new List(e1,NULL));
 
   case &Throw_e(e1): 
-    // notice we don't need to synthesize any assigns.
-    let esyn  = abstract_exp(use_it_env(env),e1);
-    return mkSyn_tf(mkGroupAE(OrderedG, 
-			      meet_absexp(esyn).inner_exp, 
-			      mkBottomAE()),
-		    NULL,
-		    mkSkipAE());
-		      
-    // Note: We are being conservative here, requiring e2 and e3 to
-    //       be eagerly used because it is a pain to "bubble out"
-    //       the different options.  The issues are too complicated
-    //       to explain here, I'm afraid.  Just trust me that we're
-    //       being sound yet conservative here (such as in Cast, but
-    //       for different reasons.)
-    // Note: According to K&R, this is not a legal lhs.  I think gcc
-    // supports it, in which case, it's easy to append e2 and e3's lvalues,
+    let aexp = mkGroupAE(OrderedG, use_exp(env,e1), mkBottomAE());
+    return AbsSyn(aexp,aexp,mkUnknownOp());
+
+    // Here's where we greatly simplify by being a tiny bit more conservative,
+    // by always returning UnknownOp.
+    // FIX: don't escape on the "int cases", which includes guards and
+    //      null-checks (and always on e1?? -- depends on type of && and ||)
+    // Note: I think gcc supports ? : as a left-hand-side but we don't.
   case &Conditional_e(e1,e2,e3):
-    let AbsSyn(e1t, e1f, _) = abstract_exp(use_it_env(env), e1);
-    let AbsSyn(e2t, e2f, _) = abstract_exp(use_it_env(env), e2); // !!!
-    let AbsSyn(e3t, e3f, _) = abstract_exp(use_it_env(env), e3); // !!!
-    let true_exp = 
-      mkGroupAE(OneofG,
-		mkGroupAE(OrderedG,
-			  mkGroupAE(OrderedG, e1t.inner_exp, e1t.assigns),
-			  mkGroupAE(OrderedG, e2t.inner_exp, e2t.assigns)),
-		mkGroupAE(OrderedG,
-			  mkGroupAE(OrderedG, e1f.inner_exp, e1f.assigns),
-			  mkGroupAE(OrderedG, e3t.inner_exp, e3t.assigns)));
-    let false_exp =
-      mkGroupAE(OneofG,
-		mkGroupAE(OrderedG,
-			  mkGroupAE(OrderedG, e1t.inner_exp, e1t.assigns),
-			  mkGroupAE(OrderedG, e2f.inner_exp, e2f.assigns)),
-		mkGroupAE(OrderedG,
-			  mkGroupAE(OrderedG, e1f.inner_exp, e1f.assigns),
-			  mkGroupAE(OrderedG, e3f.inner_exp, e3f.assigns)));
-    return AbsSyn(AbsSynOne(true_exp,  make_assigns(env, mkUnknownOp())),
-		  AbsSynOne(false_exp, make_assigns(env, mkUnknownOp())),
-		  NULL);
+    let syn1 = abstract_exp(env,e1);
+    let syn2 = abstract_exp(env,e2);
+    let syn3 = abstract_exp(env,e3);
+    let use_1true_aexp = 
+      mkGroupAE(OrderedG, syn1.when_true_exp,  mkUseAE(syn1.absop));
+    let use_1false_aexp =
+      mkGroupAE(OrderedG, syn1.when_false_exp, mkUseAE(syn1.absop));
+    let use2 = mkUseAE(syn2.absop);
+    let use3 = mkUseAE(syn3.absop);
+    let true_aexp = 
+      mkGroupAE(OneofG, 
+		mkGroupAE(OrderedG, use_1true_aexp,  
+			  mkGroupAE(OrderedG, syn2.when_true_exp,  use2)),
+		mkGroupAE(OrderedG, use_1false_aexp, 
+			  mkGroupAE(OrderedG, syn3.when_true_exp,  use3)));
+    let false_aexp = 
+      mkGroupAE(OneofG, 
+		mkGroupAE(OrderedG, use_1true_aexp,  
+			  mkGroupAE(OrderedG, syn2.when_false_exp, use2)),
+		mkGroupAE(OrderedG, use_1false_aexp, 
+			  mkGroupAE(OrderedG, syn3.when_false_exp, use3)));
+    return AbsSyn(true_aexp, false_aexp, mkUnknownOp());
 
   // Technically we're being too conservative here because we could
   // have different when_true/when_false on the last expression.
   // Given that that's a pain to deal with, it would take rather
-  // convoluted code to matter, lots of such code could be written with
-  // SeqExp_e (and all of it if you hoist declarations), I won't bother.
-    // In fact, we'll be more conservative, since normally the last exp
-    // will use local variables which make no sense as a delayed assign,
-    // so we essentially make the last expression escape immediately.
+  // convoluted code to matter, lots of such code could be written
+  // with SeqExp_e, I won't bother.
   case &StmtExp_e(s):
-    let env2 = change_lhs(env,NULL);
-    env2.access_path = NULL;
-    cf_prepass(env2,s);
+    cf_prepass(env,s);
     // The strange part is we need to use the last expression
-    // so we re-do the last statement
-    // in order to get this right.  A more aggressive treatment would still
-    // need this in order to get the access path and lhsides right,
-    // eg. ({foo x = e; x})->tl
+    // so we re-do the last statement in order to get this right. 
     let last_s = s;
     while(true)
       switch(last_s->r) {
       case &Seq_s(s1,s2): last_s = s2; continue;
       case &Decl_s(d,s1): last_s = s1; continue;
       case &Exp_s(e):     
-	let syn = abstract_exp(use_it_env(env),e);
-	let AbsSynOne(inner,assigns) = meet_absexp(syn);
-	get_stmt_annot(last_s)->absexps->hd = mkGroupAE(OrderedG,inner,assigns);
-	return mkSyn_tf(mkStmtAE(s), NULL, make_assigns(env,mkUnknownOp()));
+	let absop = abstract_exp(env,e).absop;
+	let aexp = mkStmtAE(s);
+	return AbsSyn(aexp,aexp,absop);
       default: throw new Impossible("abstract_exp: ill-formed StmtExp");
       }
 
-  case &SeqExp_e(e1,e2):
-    let env1 = change_lhs(env,NULL);
-    env1.access_path = NULL;
-    let syn1 = abstract_exp(env1,e1);
-    let syn2 = abstract_exp(env,e2);
-    let syn1meet = meet_absexp(syn1);
-    return // syn1meet should have no assigns
-      AbsSyn(AbsSynOne(mkGroupAE(OrderedG,
-				 syn1meet.inner_exp,
-				 syn2.when_true.inner_exp),
-		       syn2.when_true.assigns),
-	     AbsSynOne(mkGroupAE(OrderedG,
-				 syn1meet.inner_exp,
-				 syn2.when_false.inner_exp),
-		       syn2.when_false.assigns),
-	     NULL); // not a legal lhs
+  case &SeqExp_e(e1,e2): // note: it's fine for e1 to be uninitialized
+    let syn1  = abstract_exp(env,e1);
+    let syn2  = abstract_exp(env,e2);
+    let aexp1 = meet_absexp(syn1);
+    return AbsSyn(mkGroupAE(OrderedG, aexp1, syn2.when_true_exp),
+		  mkGroupAE(OrderedG, aexp1, syn2.when_false_exp),
+		  syn2.absop);
 
     // Note: the second exp might never get executed
     // Note: array elements must be fully initialized
@@ -721,39 +443,39 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // that's a pain, so we hoist them to the whole function)
     // (This hoisting is only for the analysis and is for sorta obscure reasons)
   case &Comprehension_e(vd,e1,e2):
-    assert(env.access_path==NULL);
     add_var_root(env,vd);
-    env.shared->comprehension_vars = 
-      new List(vd,env.shared->comprehension_vars);
-    let elt_env = use_it_env(env);
-    let AbsSynOne(inner1,assigns1) = meet_absexp(abstract_exp(elt_env,e1));
-    let AbsSynOne(inner2,assigns2) = meet_absexp(abstract_exp(elt_env,e2));
-    let ansexp = mkGroupAE(OrderedG, inner1,
-		 mkGroupAE(OrderedG, assigns1,
-		 mkGroupAE(OrderedG, mkAssignAE(mkLocalOp(vd), mkUnknownOp()),
-		   mkGroupAE(OneofG, mkGroupAE(OrderedG,inner2,assigns2),
-			     mkSkipAE()))));
-    return mkSyn_tf(ansexp, NULL, make_assigns(env, mkUnknownOp()));
+    let syn1 = abstract_exp(env,e1);
+    let syn2 = abstract_exp(env,e2);
+    let aexp = mkComprehensionAE(vd,
+				 syn1.when_true_exp,
+				 syn1.when_false_exp,
+				 syn1.absop,
+				 meet_absexp(syn2),
+				 syn2.absop);
+    return AbsSyn(aexp,aexp,mkUnknownOp());
 
-  case &Var_e(_,Unresolved_b): fallthru;
-  case &UnknownId_e(_):        fallthru;
-  case &UnknownCall_e(_,_):    fallthru;
-  case &UnresolvedMem_e(_,_):  fallthru;
-  case &CompoundLit_e(_,_):    fallthru;
-  case &Codegen_e(_):          fallthru;
+  case &Var_e(_,Unresolved_b): 
+  case &UnknownId_e(_):        
+  case &UnknownCall_e(_,_):    
+  case &UnresolvedMem_e(_,_):  
+  case &CompoundLit_e(_,_):    
+  case &Codegen_e(_):          
   case &Fill_e(_): throw new Impossible("abstract_exp, unexpected exp form");
   }
 }
 
-absexp_t abstract_exp_top(absenv_t env, exp_t e) {
-  let AbsSynOne(inner,assigns) = meet_absexp(abstract_exp(env,e));
-  return mkGroupAE(OrderedG, inner, assigns);
+// FIX: no need for escape points-to b/c guards are treated as ints
+static $(absexp_t,absexp_t) abstract_guard(absenv_t env, exp_t e) {
+  let syn = abstract_exp(env,e);
+  let use = mkUseAE(syn.absop);
+  if(syn.when_true_exp == syn.when_false_exp) {
+    let aexp = mkGroupAE(OrderedG, syn.when_true_exp, use);
+    return $(aexp,aexp);
+  }
+  return $(mkGroupAE(OrderedG, syn.when_true_exp,  use),
+	   mkGroupAE(OrderedG, syn.when_false_exp, use));
 }
-$(absexp_t,absexp_t) abstract_guard(absenv_t env, exp_t e) {
-  let syn = abstract_exp(use_it_env(env),e);
-  return $(mkGroupAE(OrderedG,syn.when_true.inner_exp, syn.when_true.assigns),
-	   mkGroupAE(OrderedG,syn.when_false.inner_exp,syn.when_false.assigns));
-}
+
 
 list_t<absexp_t> cf_prepass_scs(absenv_t env, list_t<switch_clause_t> scs) {
   let ans = NULL;
@@ -773,16 +495,10 @@ list_t<absexp_t> cf_prepass_scs(absenv_t env, list_t<switch_clause_t> scs) {
 }
 
 void cf_prepass(absenv_t env, stmt_t s) {
-  assert(env.lhsides == NULL);
-  assert(env.access_path == NULL);
-
   switch(s->r) {
-  case Skip_s: 
-    return;
-  case &Exp_s(e): 
-    let ae = abstract_exp_top(env,e);
-    //    printf("%s\n", absexp2string(ae,0));
-    cf_set_absexps(s,new List(ae,NULL)); 
+  case Skip_s: return;
+  case &Exp_s(e): // e need not be initialized
+    cf_set_absexps(s,new List(meet_absexp(abstract_exp(env,e)),NULL)); 
     return;
   case &Seq_s(s1,s2): 
     cf_prepass(env,s1); 
@@ -790,9 +506,8 @@ void cf_prepass(absenv_t env, stmt_t s) {
     return;
     // FIX: When we have init qualifier, use all init parameters on return.
   case &Return_s(NULL): return;
-  case &Return_s(e): 
-    let ae = abstract_exp_top(use_it_env(env),(exp_t)e);
-    cf_set_absexps(s,new List(ae,NULL)); 
+  case &Return_s(e): // e must be initialized
+    cf_set_absexps(s,new List(use_exp(env,(exp_t)e),NULL)); 
     return;
   case &IfThenElse_s(e,s1,s2):
     let $(when_true,when_false) = abstract_guard(env,e);
@@ -800,15 +515,15 @@ void cf_prepass(absenv_t env, stmt_t s) {
     cf_prepass(env,s1);
     cf_prepass(env,s2);
     return;
-  case &Do_s(s1,$(e,cont)): fallthru(e,cont,s1); // order irrelevant in this pass
+  case &Do_s(s1,$(e,cont)): fallthru(e,cont,s1); //order irrelevant in this pass
   case &While_s($(e,cont),s1):
     let $(when_true,when_false) = abstract_guard(env,e);
     cf_set_absexps(s,new List(when_true,new List(when_false,NULL)));
     cf_prepass(env,s1);
     return;
-  case &Break_s(_):    return;
+  case &Break_s(_):    
   case &Continue_s(_): return;
-  case &Goto_s(_,NULL): throw new Impossible("cf_prepass: goto w/o destination");
+  case &Goto_s(_,NULL): throw new Impossible("cf_prepass: goto w/o dest");
   case &Goto_s(_,dest): 
     // check we don't jump into scope -- this is totally orthogonal to 
     // the rest of control-flow checking, so we get it out of the way
@@ -823,32 +538,28 @@ void cf_prepass(absenv_t env, stmt_t s) {
       my_encloser = next_encloser;
     } 
     return;
-  case &For_s(e1,$(e2,guard),$(e3,cont),s1):
-    let ae1 = abstract_exp_top(env,e1);
+  case &For_s(e1,$(e2,guard),$(e3,cont),s1): //e1,e3 need not be init
+    let ae1 = meet_absexp(abstract_exp(env,e1));
     let $(when_true,when_false) = abstract_guard(env,e2);
-    let ae3 = abstract_exp_top(env,e3);
+    let ae3 = meet_absexp(abstract_exp(env,e3));
     cf_set_absexps(s, list(ae1, when_true, when_false, ae3));
     cf_prepass(env,s1);
     return;
-  case &Switch_s(e,scs):
-    // FIX: interpret patterns
-    let ae  = abstract_exp_top(use_it_env(env),e);
-    let ael = cf_prepass_scs(env,scs);
-    cf_set_absexps(s, new List(ae, ael));
+  case &Switch_s(e,scs): // e must be init (FIX: interpret patterns)
+    cf_set_absexps(s, new List(use_exp(env,e), cf_prepass_scs(env,scs)));
     return;
 
   case &Fallthru_s(es,_): // FIX: interpret patterns
-    let AbsSynOne(inner,assigns) = meet_absexp(use_exp_unordered(env,es,NULL));
-    let ae  = mkGroupAE(OrderedG, inner, assigns);
-    cf_set_absexps(s, new List(ae,NULL));
+    cf_set_absexps(s, new List(meet_absexp(use_exp_unordered(env,es)), NULL));
     return;
 
   case &Decl_s(&Decl(&Var_d(vd),_),s1):
     add_var_root(env,vd);
     if(vd->initializer != NULL) {
-      let init_env = change_lhs(env, new List(mkLocalOp(vd), NULL));
-      let ae = abstract_exp_top(init_env, (exp_t)vd->initializer);
-      cf_set_absexps(s, new List(ae, NULL));
+      let syn = abstract_exp(env,(exp_t)vd->initializer);
+      let aexp = mkGroupAE(OrderedG, meet_absexp(syn),
+			   mkAssignAE(mkLocalOp(vd), syn.absop));
+      cf_set_absexps(s, new List(aexp, NULL));
     }
     cf_prepass(env,s1);
     return;
@@ -857,8 +568,7 @@ void cf_prepass(absenv_t env, stmt_t s) {
     // FIX: in short term, need to special-case let x = e !!!
     for(; vds != NULL; vds = vds->tl)
       add_var_root(env,vds->hd);
-    let ae = abstract_exp_top(use_it_env(env),e);
-    cf_set_absexps(s, new List(ae, NULL));
+    cf_set_absexps(s, new List(use_exp(env,e), NULL));
     cf_prepass(env,s1);
     return;
   case &Decl_s(&Decl(&Letv_d(vds),_),s1):
@@ -871,17 +581,16 @@ void cf_prepass(absenv_t env, stmt_t s) {
     return;
   case &TryCatch_s(s1,scs):
     cf_prepass(env,s1);
-    let ael = cf_prepass_scs(env,scs);
-    cf_set_absexps(s,ael);
+    cf_set_absexps(s,cf_prepass_scs(env,scs));
     return;
   case &Region_s(tv,vd,body):
     add_var_root(env,vd);
     cf_prepass(env,body);
     return;
-  case &Decl_s(_,_):    fallthru;
-  case &SwitchC_s(_,_): fallthru;
-  case &Cut_s(_):       fallthru;
-  case &Splice_s(_):    throw new Impossible("cf_prepass: bad stmt form");
+  case &Decl_s(_,_):    
+  case &SwitchC_s(_,_): 
+  case &Cut_s(_):       
+  case &Splice_s(_): throw new Impossible("cf_prepass: bad stmt form");
   }
 }
 
@@ -917,12 +626,10 @@ static void update_flow(analenv_t env, stmt_t s, flow_info_t flow) {
   let annot = get_stmt_annot(s);
   let new_flow = join_flow(env->all_changed, flow, annot->flow);
   if(!flow_lessthan_approx(new_flow, annot->flow)) {
-    //    printf("?");
     annot->flow = new_flow;
     if(annot->visited == iteration_num)
       iterate_cf_check = true;
   }
-  //  printf("!");
 }
 
 static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_info_t in_flow, 
@@ -955,7 +662,7 @@ static flow_info_t add_init_vars_flow(analenv_t env, flow_info_t flow,
 static flow_info_t add_vardecls_flow(analenv_t env, flow_info_t flow,
 				     list_t<vardecl_t,`r> vds) {
   switch(flow) {
-  case BottomFL:   return BottomFL;
+  case BottomFL: return BottomFL;
   case &InitsFL(d): 
     for(; vds != NULL; vds = vds->tl) {
       let root = new VarRoot(vds->hd);
@@ -1021,7 +728,6 @@ static flow_info_t cf_analyze_switch_clauses(analenv_t env,
 }
 
 flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
-  // printf(" ");
   let annot = pre_stmt_check(env,in_flow,s);
   in_flow = annot->flow;
   let aes = annot->absexps;
@@ -1048,9 +754,7 @@ flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
     let e_inflow = pre_stmt_check(env,in_flow,cont)->flow;
     let $(true_flow,false_flow) = cf_evalguard(env, e->loc, aes, e_inflow);
     let body_outflow = cf_analyze_stmt(env, body, true_flow);
-    //    printf("X");
     update_flow(env, cont, body_outflow);
-    //    printf("Y");
     return false_flow;
   case &Do_s(body,$(e,cont)):
     let body_outflow = cf_analyze_stmt(env, body, in_flow);
@@ -1182,20 +886,17 @@ void cf_postpass(stmt_t s) {
 //////////////////////////// Top-level ////////////////////////////////
 void cf_check_fun(fndecl_t fd) {
   //  fprintf(Stdio::stderr,"%s",*(*fd->name)[1]);
-  absenv_t absenv = AbsEnv(new SharedAbsEnv(Dict::empty(local_root_cmp), NULL),
-			   NULL, NULL);
+  absenv_t absenv = new AbsEnv(Dict::empty(local_root_cmp));
   let arg_vds = fd->param_vardecls->v;
   for(_ vds = arg_vds; vds != NULL; vds = vds->tl)
     add_var_root(absenv, vds->hd);
   cf_prepass(absenv,fd->body);
-  let AbsEnv(&SharedAbsEnv(roots,comprehension_vars),_,_) = absenv;
 
   // TO DO: account for init qualifier (add ThisIL for those params and
   //        check them on return and on fall off void)
-  let analenv = new AnalEnv(roots, false, BottomFL, NULL);
+  let analenv = new AnalEnv(absenv->all_roots, false, BottomFL, NULL);
   flow_info_t in_flow = new InitsFL(Dict::empty(local_root_cmp));
   in_flow = add_init_vars_flow(analenv, in_flow, arg_vds);
-  in_flow = add_vardecls_flow(analenv, in_flow, comprehension_vars);
 
   flow_info_t out_flow = in_flow;
   iteration_num    = 0;
