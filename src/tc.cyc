@@ -145,9 +145,11 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       let e = (exp_t)vd->initializer;
       // type-check the initializer
       let t2 = Tcexp::tcExpInitializer(te,&t,e);
-      if (!coerce_assign(te,e,t))
+      if (!coerce_assign(te,e,t)) {
         terr(loc,"%s is declared with type %s but initialized with type %s",
              qvar2string(vd->name), typ2string(t), typ2string(t2));
+        explain_failure();
+      }
       // reject non-constant initializers
       if (!Tcutil::is_const_exp(te,e))
         terr(loc,"initializer is not a constant expression");

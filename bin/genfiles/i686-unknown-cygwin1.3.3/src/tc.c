@@ -623,11 +623,11 @@ struct _tagged_arr fmt, struct _tagged_arr ap); extern void Cyc_Tcutil_warn(
 struct Cyc_Position_Segment*, struct _tagged_arr fmt, struct _tagged_arr ap);
 extern void* Cyc_Tcutil_compress( void* t); extern int Cyc_Tcutil_coerce_assign(
 struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Exp*, void*); extern int Cyc_Tcutil_is_function_type(
-void* t); extern void* Cyc_Tcutil_fndecl2typ( struct Cyc_Absyn_Fndecl*); extern
-void Cyc_Tcutil_check_bitfield( struct Cyc_Position_Segment* loc, struct Cyc_Tcenv_Tenv*
-te, void* field_typ, struct Cyc_Absyn_Exp* width, struct _tagged_arr* fn);
-extern void Cyc_Tcutil_check_valid_toplevel_type( struct Cyc_Position_Segment*,
-struct Cyc_Tcenv_Tenv*, void*); extern void Cyc_Tcutil_check_fndecl_valid_type(
+void* t); extern void Cyc_Tcutil_explain_failure(); extern void* Cyc_Tcutil_fndecl2typ(
+struct Cyc_Absyn_Fndecl*); extern void Cyc_Tcutil_check_bitfield( struct Cyc_Position_Segment*
+loc, struct Cyc_Tcenv_Tenv* te, void* field_typ, struct Cyc_Absyn_Exp* width,
+struct _tagged_arr* fn); extern void Cyc_Tcutil_check_valid_toplevel_type(
+struct Cyc_Position_Segment*, struct Cyc_Tcenv_Tenv*, void*); extern void Cyc_Tcutil_check_fndecl_valid_type(
 struct Cyc_Position_Segment*, struct Cyc_Tcenv_Tenv*, struct Cyc_Absyn_Fndecl*);
 extern void Cyc_Tcutil_check_type( struct Cyc_Position_Segment*, struct Cyc_Tcenv_Tenv*,
 struct Cyc_List_List* bound_tvars, void* k, int allow_evars, void*); extern void
@@ -773,14 +773,14 @@ _temp103; _temp103.tag= Cyc_Std_String_pa; _temp103.f1=( struct _tagged_arr) Cyc
 t);{ struct Cyc_Std_String_pa_struct _temp102; _temp102.tag= Cyc_Std_String_pa;
 _temp102.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( vd->name);{ void*
 _temp101[ 3u]={& _temp102,& _temp103,& _temp104}; Cyc_Tcutil_terr( loc, _tag_arr("%s is declared with type %s but initialized with type %s",
-sizeof( unsigned char), 57u), _tag_arr( _temp101, sizeof( void*), 3u));}}}});}
-if( ! Cyc_Tcutil_is_const_exp( te, _temp99)){({ void* _temp105[ 0u]={}; Cyc_Tcutil_terr(
-loc, _tag_arr("initializer is not a constant expression", sizeof( unsigned char),
-41u), _tag_arr( _temp105, sizeof( void*), 0u));});}}} else{ for( 0; atts !=  0;
-atts=(( struct Cyc_List_List*) _check_null( atts))->tl){ void* _temp106=( void*)((
-struct Cyc_List_List*) _check_null( atts))->hd; _LL108: if(( unsigned int)
-_temp106 >  16u?*(( int*) _temp106) ==  Cyc_Absyn_Regparm_att: 0){ goto _LL109;}
-else{ goto _LL110;} _LL110: if( _temp106 == ( void*) Cyc_Absyn_Stdcall_att){
+sizeof( unsigned char), 57u), _tag_arr( _temp101, sizeof( void*), 3u));}}}});
+Cyc_Tcutil_explain_failure();} if( ! Cyc_Tcutil_is_const_exp( te, _temp99)){({
+void* _temp105[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("initializer is not a constant expression",
+sizeof( unsigned char), 41u), _tag_arr( _temp105, sizeof( void*), 0u));});}}}
+else{ for( 0; atts !=  0; atts=(( struct Cyc_List_List*) _check_null( atts))->tl){
+void* _temp106=( void*)(( struct Cyc_List_List*) _check_null( atts))->hd; _LL108:
+if(( unsigned int) _temp106 >  16u?*(( int*) _temp106) ==  Cyc_Absyn_Regparm_att:
+0){ goto _LL109;} else{ goto _LL110;} _LL110: if( _temp106 == ( void*) Cyc_Absyn_Stdcall_att){
 goto _LL111;} else{ goto _LL112;} _LL112: if( _temp106 == ( void*) Cyc_Absyn_Cdecl_att){
 goto _LL113;} else{ goto _LL114;} _LL114: if( _temp106 == ( void*) Cyc_Absyn_Fastcall_att){
 goto _LL115;} else{ goto _LL116;} _LL116: if( _temp106 == ( void*) Cyc_Absyn_Noreturn_att){

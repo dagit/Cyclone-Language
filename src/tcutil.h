@@ -79,6 +79,10 @@ extern bool is_function_type(type_t t);
 
 extern type_t max_arithmetic_type(type_t, type_t);
 
+// explain_failure() explains why unify failed and at what particular types.
+// Output goes to stderr.
+extern void explain_failure();
+
 extern bool unify(type_t, type_t);
 extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
   // could also have a version with two regions, but doesn't seem useful

@@ -22,6 +22,11 @@
    codegen and fill
    compound literals
    generalized array and struct designators
+   JGMFIX: lousy error messages...
+   EXPLAIN DELTA -- need to explain the difference in rich types
+   other instances of typ2string should (outside of EXPLAIN DELTA)
+     should be pretty-printed in a more user-friendly manner (i.e.,
+     leave off effects, regions, etc. unless they're relevant.)
  */
 
 #include "absyn.h"
@@ -121,7 +126,8 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
       }
     } catch {
     case Dict::Absent:
-      terr(e1->loc, "unbound identifier %s",qvar2string(q));
+      // print out error message later when type-checking the fn call
+      // terr(e1->loc, "unbound identifier %s",qvar2string(q));
       e->r = new FnCall_e(e1,es,NULL);
       return;
     }
@@ -267,7 +273,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
 static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
   case Unresolved_b:
-    return expr_err(te,loc,"unresolved identifier: %s",qvar2string(q));
+    return expr_err(te,loc,"undeclared identifier: %s",qvar2string(q));
   case &Global_b(vd):
     q[0] = vd->name[0];
     return vd->type;
@@ -302,9 +308,11 @@ static void check_format_args(tenv_t te, exp_t fmt,
            args = args->tl) {
       type_t t = desc_types->hd;
       exp_t e = args->hd;
-      if (!coerce_arg(te,e,t))
-        terr(e->loc,"descriptor has type %s but argument has type %s",
+      if (!coerce_arg(te,e,t)) {
+        terr(e->loc,"descriptor has type %s but argument has type %s:",
              typ2string(t), typ2string(e->topt->v));
+        explain_failure();
+      }
     }
     // check arity
     if (desc_types != NULL)
@@ -350,6 +358,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt,
 // Note: promoter must return false for any non-arithmetic type.
 static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2, 
 			   bool checker(exp_t)) {
+  // JGMFIX: lousy error messages...
   if (!checker(e1)) {
     terr(e1->loc,"type %s cannot be used here",typ2string(e1->topt->v));
     return wildtyp(new Opt(lookup_type_vars(te)));
@@ -397,15 +406,19 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2 = e2->topt->v;
   if (is_tagged_pointer_typ(t1)) {
     if (is_tagged_pointer_typ(t2)) {
-      if (!unify(t1, t2))
+      if (!unify(t1, t2)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
              typ2string(e1->topt->v),typ2string(e2->topt->v));
+        explain_failure();
+      }
       return sint_t;
     } else {
-      if (!coerce_sint_typ(te, e2))
+      if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
+        explain_failure();
+      }
       return t1;
     }
   } else return tcArithBinop(te, e1, e2, is_numeric);
@@ -441,6 +454,7 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     }
     terr(loc,"comparison not allowed between %s and %s",
          typ2string(t1),typ2string(t2));
+    explain_failure();
     return wildtyp(new Opt(lookup_type_vars(te)));
   }
 }
@@ -580,7 +594,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Instantiate_e(e1,_): check_writable(te,e1); return;
   default: break;
   }
-  terr(e->loc, "attempt to write a read-only location");
+  terr(e->loc, "attempt to write a const location: %s", exp2string(e));
 }
 
 static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
@@ -607,9 +621,11 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
   type_t t = new_evar(&mk,new Opt(lookup_type_vars(te)));
   let l1 = new List(e3,NULL);
   let l2 = new List(e2,l1);
-  if (!coerce_list(te,t,l2))
+  if (!coerce_list(te,t,l2)) {
     terr(loc,"conditional clause types do not match: %s != %s",
          typ2string(e2->topt->v),typ2string(e3->topt->v));
+    explain_failure();
+  }
   return t;
 }
 
@@ -633,16 +649,23 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
     return expr_err(te,loc,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
-    if (!coerce_assign(te,e2,t1))
-      return expr_err(te,loc,"type mismatch: %s != %s",
-                      typ2string(t1), typ2string(t2));
+    if (!coerce_assign(te,e2,t1)) {
+      let result = expr_err(te,loc,"type mismatch: %s != %s",
+                            typ2string(t1), typ2string(t2));
+      explain_failure();
+      return result;
+    }
   } else {
     let p        = po->v;
     let t_result = tcBinPrimop(te,loc,NULL,p,e1,e2);
-    if (!(unify(t_result,t1) || coerceable(t_result) && coerceable(t1)))
-      return expr_err(te,loc, "Cannot use this operator in an assignment when "
+    if (!(unify(t_result,t1) || coerceable(t_result) && coerceable(t1))) {
+      let result = 
+        expr_err(te,loc, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),
 		      typ2string(t2));
+      explain_failure();
+      return result;
+    }
     return t_result;
   }
   return t1;
@@ -730,9 +753,11 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
         exp_t e1 = es->hd;
         type_t t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
-        if (!coerce_arg(te,e1,t2))
-          terr(loc,"actual argument has type %s but formal has type %s",
+        if (!coerce_arg(te,e1,t2)) {
+          terr(e1->loc,"actual argument has type %s but formal has type %s",
                typ2string(e1->topt->v),typ2string(t2));
+          explain_failure();
+        }
         es = es->tl;
         args_info = args_info->tl;
       }
@@ -757,9 +782,11 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               exp_t e1 = es->hd;
               vci->num_varargs++;
               tcExp(te, &vt, e1);
-              if (!coerce_arg(te,e1,vt))
+              if (!coerce_arg(te,e1,vt)) {
                 terr(loc,"vararg requires type %s but argument has type %s",
                      typ2string(vt),typ2string(e1->topt->v));
+                explain_failure();
+              }
             }
           } else {
             // this is trickier, we have to match up the type of the
@@ -882,9 +909,12 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   tcExp(te,NULL,e);
   type_t t2 = e->topt->v;
-  if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t))
-    return expr_err(te,loc,"cannot cast %s to %s",
-                    typ2string(t2), typ2string(t));
+  if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t)) {
+    let result = expr_err(te,loc,"cannot cast %s to %s",
+                          typ2string(t2), typ2string(t));
+    explain_failure();
+    return result;
+  }
   return t;
 }
 
@@ -1221,9 +1251,9 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t *`r topt, list_t<exp_t> es) {
   if(topt != NULL)
     switch (compress(*topt)) {
     case &TupleType(ts):
-      // FIX: topt should never cause failure, just guides coercions.
       if(length(ts) != length(es)) {
-	terr(loc,"tuple expression has the wrong number of fields");
+        // topt should never cause failure, just guides coercions.
+	// terr(loc,"tuple expression has the wrong number of fields");
 	break;
       }
       for(; es != NULL; es = es->tl, ts = ts->tl) {
@@ -1270,6 +1300,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
     tcExpInitializer(te,elt_topt,es2->hd);
 
   if (!coerce_list(te,res,es))
+    // JGMFIX: lousy error messages...
     terr(es->hd->loc,"elements of array do not all have the same type (%s)",
          typ2string(res));
   // check that any designators make sense
@@ -1401,10 +1432,12 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     let &$(field,field_exp) = fields->hd;
     let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
-    if (!coerce_arg(te,field_exp,inst_fieldtyp))
+    if (!coerce_arg(te,field_exp,inst_fieldtyp)) {
       terr(field_exp->loc,"field %s of struct %s expects type %s != %s",
            *(field->name),qvar2string(*tn),typ2string(inst_fieldtyp),
            typ2string(field_exp->topt->v));
+      explain_failure();
+    }
   }
   return res_typ;
   }
@@ -1420,10 +1453,12 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,field_exp) = fields->hd;
         tcExpInitializer(te, &field->type, field_exp);
-        if (!coerce_arg(te,field_exp,field->type))
+        if (!coerce_arg(te,field_exp,field->type)) {
           terr(field_exp->loc,"field %s of struct expects type %s != %s",
                *(field->name),typ2string(field->type),
                typ2string(field_exp->topt->v));
+          explain_failure();
+        }
       }
       break;
     default: impos("tcAnonStruct:  not an AnonStructType"); break;
@@ -1477,11 +1512,13 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
     exp_t  e = es->hd;
     type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
-    if (!coerce_arg(te,e,t))
+    if (!coerce_arg(te,e,t)) {
       terr(e->loc,"tunion constructor %s expects argument of type %s "
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
            (e->topt == NULL) ? (string_t)"?" : typ2string(e->topt->v));
+      explain_failure();
+    }
   }
   if (es != NULL)
     return expr_err(te,es->hd->loc,

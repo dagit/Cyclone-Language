@@ -651,7 +651,8 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
     try return lookup_ordinary_global(te,loc,q);    
     catch {
     case Dict::Absent: 
-      terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
+      // Print out the error message elsewhere.
+      // terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
       return new VarRes(Unresolved_b);
     }
   }

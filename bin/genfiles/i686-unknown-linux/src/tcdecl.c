@@ -623,16 +623,17 @@ Cyc_Tcenv_Outermost_struct{ int tag; void* f1; } ; static const int Cyc_Tcenv_Fr
 int Cyc_Tcenv_Hidden= 2; struct Cyc_Tcenv_Hidden_struct{ int tag; void* f1; void*
 f2; } ; struct Cyc_Tcenv_Tenv{ struct Cyc_List_List* ns; struct Cyc_Dict_Dict*
 ae; struct Cyc_Core_Opt* le; } ; extern unsigned char Cyc_Tcutil_TypeErr[ 12u];
-extern int Cyc_Tcutil_unify( void*, void*); extern void* Cyc_Tcutil_substitute(
-struct Cyc_List_List*, void*); extern int Cyc_Tcutil_equal_tqual( struct Cyc_Absyn_Tqual
-tq1, struct Cyc_Absyn_Tqual tq2); extern int Cyc_Tcutil_same_atts( struct Cyc_List_List*,
-struct Cyc_List_List*); struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc;
-struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int qvar_to_Cids: 1; int
-add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int rewrite_temp_tvars: 1;
-int print_all_tvars: 1; int print_all_kinds: 1; int print_using_stmts: 1; int
-print_externC_stmts: 1; int print_full_evars: 1; int use_curr_namespace: 1;
-struct Cyc_List_List* curr_namespace; } ; extern struct _tagged_arr Cyc_Absynpp_typ2string(
-void*); extern struct _tagged_arr Cyc_Absynpp_ckind2string( struct Cyc_Absyn_Conref*);
+extern void Cyc_Tcutil_explain_failure(); extern int Cyc_Tcutil_unify( void*,
+void*); extern void* Cyc_Tcutil_substitute( struct Cyc_List_List*, void*);
+extern int Cyc_Tcutil_equal_tqual( struct Cyc_Absyn_Tqual tq1, struct Cyc_Absyn_Tqual
+tq2); extern int Cyc_Tcutil_same_atts( struct Cyc_List_List*, struct Cyc_List_List*);
+struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{
+int expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
+int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
+print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
+print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
+curr_namespace; } ; extern struct _tagged_arr Cyc_Absynpp_typ2string( void*);
+extern struct _tagged_arr Cyc_Absynpp_ckind2string( struct Cyc_Absyn_Conref*);
 extern struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); extern
 struct _tagged_arr Cyc_Absynpp_scope2string( void* sc); unsigned char Cyc_Tcdecl_Incompatible[
 17u]="\000\000\000\000Incompatible"; void Cyc_Tcdecl_merr( struct Cyc_Position_Segment*
@@ -837,19 +838,20 @@ _temp168; _temp168.tag= Cyc_Std_String_pa; _temp168.f1=( struct _tagged_arr) t;{
 void* _temp167[ 5u]={& _temp168,& _temp169,& _temp170,& _temp171,& _temp172};
 Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s : type mismatch on field %s: %s != %s",
 sizeof( unsigned char), 44u), _tag_arr( _temp167, sizeof( void*), 5u));}}}}}});
-_temp93= 0;}}}} if( _temp121 !=  0){({ struct Cyc_Std_String_pa_struct _temp176;
-_temp176.tag= Cyc_Std_String_pa; _temp176.f1=( struct _tagged_arr)*(( struct Cyc_Absyn_Structfield*)((
-struct Cyc_List_List*) _check_null( _temp121))->hd)->name;{ struct Cyc_Std_String_pa_struct
-_temp175; _temp175.tag= Cyc_Std_String_pa; _temp175.f1=( struct _tagged_arr)
-_temp92;{ struct Cyc_Std_String_pa_struct _temp174; _temp174.tag= Cyc_Std_String_pa;
-_temp174.f1=( struct _tagged_arr) t;{ void* _temp173[ 3u]={& _temp174,& _temp175,&
-_temp176}; Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s is missing field %s",
-sizeof( unsigned char), 26u), _tag_arr( _temp173, sizeof( void*), 3u));}}}});
-_temp93= 0;} if( _temp116 !=  0){({ struct Cyc_Std_String_pa_struct _temp180;
-_temp180.tag= Cyc_Std_String_pa; _temp180.f1=( struct _tagged_arr)*(( struct Cyc_Absyn_Structfield*)((
-struct Cyc_List_List*) _check_null( _temp116))->hd)->name;{ struct Cyc_Std_String_pa_struct
-_temp179; _temp179.tag= Cyc_Std_String_pa; _temp179.f1=( struct _tagged_arr)
-_temp92;{ struct Cyc_Std_String_pa_struct _temp178; _temp178.tag= Cyc_Std_String_pa;
+Cyc_Tcutil_explain_failure(); _temp93= 0;}}}} if( _temp121 !=  0){({ struct Cyc_Std_String_pa_struct
+_temp176; _temp176.tag= Cyc_Std_String_pa; _temp176.f1=( struct _tagged_arr)*((
+struct Cyc_Absyn_Structfield*)(( struct Cyc_List_List*) _check_null( _temp121))->hd)->name;{
+struct Cyc_Std_String_pa_struct _temp175; _temp175.tag= Cyc_Std_String_pa;
+_temp175.f1=( struct _tagged_arr) _temp92;{ struct Cyc_Std_String_pa_struct
+_temp174; _temp174.tag= Cyc_Std_String_pa; _temp174.f1=( struct _tagged_arr) t;{
+void* _temp173[ 3u]={& _temp174,& _temp175,& _temp176}; Cyc_Tcdecl_merr( loc,
+msg, _tag_arr("%s %s is missing field %s", sizeof( unsigned char), 26u),
+_tag_arr( _temp173, sizeof( void*), 3u));}}}}); _temp93= 0;} if( _temp116 !=  0){({
+struct Cyc_Std_String_pa_struct _temp180; _temp180.tag= Cyc_Std_String_pa;
+_temp180.f1=( struct _tagged_arr)*(( struct Cyc_Absyn_Structfield*)(( struct Cyc_List_List*)
+_check_null( _temp116))->hd)->name;{ struct Cyc_Std_String_pa_struct _temp179;
+_temp179.tag= Cyc_Std_String_pa; _temp179.f1=( struct _tagged_arr) _temp92;{
+struct Cyc_Std_String_pa_struct _temp178; _temp178.tag= Cyc_Std_String_pa;
 _temp178.f1=( struct _tagged_arr) t;{ void* _temp177[ 3u]={& _temp178,& _temp179,&
 _temp180}; Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s has extra field %s",
 sizeof( unsigned char), 25u), _tag_arr( _temp177, sizeof( void*), 3u));}}}});
@@ -938,21 +940,21 @@ _temp216.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp215;
 _temp215.tag= Cyc_Std_String_pa; _temp215.f1=( struct _tagged_arr) t;{ void*
 _temp214[ 5u]={& _temp215,& _temp216,& _temp217,& _temp218,& _temp219}; Cyc_Tcdecl_merr(
 loc, msg, _tag_arr("%s %s, field %s: parameter type mismatch %s != %s", sizeof(
-unsigned char), 50u), _tag_arr( _temp214, sizeof( void*), 5u));}}}}}}); _temp193=
-0;}}} if( ! _temp193){ return 0;} if(( void*) f0->sc !=  _temp195){ struct Cyc_Absyn_Tunionfield*
-_temp220=({ struct Cyc_Absyn_Tunionfield* _temp221=( struct Cyc_Absyn_Tunionfield*)
-_cycalloc( sizeof( struct Cyc_Absyn_Tunionfield)); _temp221[ 0]=* f0; _temp221;});(
-void*)((( struct Cyc_Absyn_Tunionfield*) _check_null( _temp220))->sc=( void*)
-_temp195); return _temp220;} else{ return( struct Cyc_Absyn_Tunionfield*) f0;}}}}}
-static int Cyc_Tcdecl_substitute_tunionfield_f1( struct _tagged_arr* name,
-struct Cyc_Absyn_Tvar* x){ return Cyc_Std_strptrcmp( x->name, name) ==  0;}
-static struct _tuple7* Cyc_Tcdecl_substitute_tunionfield_f2( struct Cyc_List_List*
-inst, struct _tuple7* x){ struct _tuple7 _temp224; void* _temp225; struct Cyc_Absyn_Tqual
-_temp227; struct _tuple7* _temp222= x; _temp224=* _temp222; _LL228: _temp227=
-_temp224.f1; goto _LL226; _LL226: _temp225= _temp224.f2; goto _LL223; _LL223:
-return({ struct _tuple7* _temp229=( struct _tuple7*) _cycalloc( sizeof( struct
-_tuple7)); _temp229->f1= _temp227; _temp229->f2= Cyc_Tcutil_substitute( inst,
-_temp225); _temp229;});} static struct Cyc_Absyn_Tunionfield* Cyc_Tcdecl_substitute_tunionfield(
+unsigned char), 50u), _tag_arr( _temp214, sizeof( void*), 5u));}}}}}}); Cyc_Tcutil_explain_failure();
+_temp193= 0;}}} if( ! _temp193){ return 0;} if(( void*) f0->sc !=  _temp195){
+struct Cyc_Absyn_Tunionfield* _temp220=({ struct Cyc_Absyn_Tunionfield* _temp221=(
+struct Cyc_Absyn_Tunionfield*) _cycalloc( sizeof( struct Cyc_Absyn_Tunionfield));
+_temp221[ 0]=* f0; _temp221;});( void*)((( struct Cyc_Absyn_Tunionfield*)
+_check_null( _temp220))->sc=( void*) _temp195); return _temp220;} else{ return(
+struct Cyc_Absyn_Tunionfield*) f0;}}}}} static int Cyc_Tcdecl_substitute_tunionfield_f1(
+struct _tagged_arr* name, struct Cyc_Absyn_Tvar* x){ return Cyc_Std_strptrcmp( x->name,
+name) ==  0;} static struct _tuple7* Cyc_Tcdecl_substitute_tunionfield_f2(
+struct Cyc_List_List* inst, struct _tuple7* x){ struct _tuple7 _temp224; void*
+_temp225; struct Cyc_Absyn_Tqual _temp227; struct _tuple7* _temp222= x; _temp224=*
+_temp222; _LL228: _temp227= _temp224.f1; goto _LL226; _LL226: _temp225= _temp224.f2;
+goto _LL223; _LL223: return({ struct _tuple7* _temp229=( struct _tuple7*)
+_cycalloc( sizeof( struct _tuple7)); _temp229->f1= _temp227; _temp229->f2= Cyc_Tcutil_substitute(
+inst, _temp225); _temp229;});} static struct Cyc_Absyn_Tunionfield* Cyc_Tcdecl_substitute_tunionfield(
 struct Cyc_List_List* d0tvs, struct Cyc_List_List* d1tvs, struct Cyc_List_List*
 inst1, struct Cyc_Absyn_Tunionfield* f1){ struct Cyc_Absyn_Tunionfield* _temp230=({
 struct Cyc_Absyn_Tunionfield* _temp240=( struct Cyc_Absyn_Tunionfield*)
@@ -1180,11 +1182,12 @@ _temp389.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp388;
 _temp388.tag= Cyc_Std_String_pa; _temp388.f1=( struct _tagged_arr) t;{ void*
 _temp387[ 4u]={& _temp388,& _temp389,& _temp390,& _temp391}; Cyc_Tcdecl_merr(
 loc, msg, _tag_arr("%s %s has type %s instead of %s", sizeof( unsigned char), 32u),
-_tag_arr( _temp387, sizeof( void*), 4u));}}}}}); _temp380= 0;} if( ! Cyc_Tcutil_equal_tqual(
-tq0, tq1)){({ struct Cyc_Std_String_pa_struct _temp394; _temp394.tag= Cyc_Std_String_pa;
-_temp394.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp393;
-_temp393.tag= Cyc_Std_String_pa; _temp393.f1=( struct _tagged_arr) t;{ void*
-_temp392[ 2u]={& _temp393,& _temp394}; Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s has different type qualifiers",
+_tag_arr( _temp387, sizeof( void*), 4u));}}}}}); Cyc_Tcutil_explain_failure();
+_temp380= 0;} if( ! Cyc_Tcutil_equal_tqual( tq0, tq1)){({ struct Cyc_Std_String_pa_struct
+_temp394; _temp394.tag= Cyc_Std_String_pa; _temp394.f1=( struct _tagged_arr) v;{
+struct Cyc_Std_String_pa_struct _temp393; _temp393.tag= Cyc_Std_String_pa;
+_temp393.f1=( struct _tagged_arr) t;{ void* _temp392[ 2u]={& _temp393,& _temp394};
+Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s has different type qualifiers",
 sizeof( unsigned char), 36u), _tag_arr( _temp392, sizeof( void*), 2u));}}});
 _temp380= 0;} if( ! Cyc_Tcutil_same_atts( atts0, atts1)){({ struct Cyc_Std_String_pa_struct
 _temp397; _temp397.tag= Cyc_Std_String_pa; _temp397.f1=( struct _tagged_arr) v;{

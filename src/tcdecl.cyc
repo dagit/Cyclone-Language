@@ -196,6 +196,7 @@ merge_struct_or_union_decl(structdecl_t d0, structdecl_t d1,
       if(! check_type(t0, subst_t1)) {
 	merr(loc, msg, "%s %s : type mismatch on field %s: %s != %s", 
 	     t, v, *fn0, typ2string(t0), typ2string(subst_t1));
+        explain_failure();
 	res = false;
       }
     }
@@ -290,6 +291,7 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
     if (! check_type((*typs0->hd)[1], subst_t1)) {
       merr(loc, msg, "%s %s, field %s: parameter type mismatch %s != %s",
 	   t, v, name, typ2string((*typs0->hd)[1]), typ2string(subst_t1));
+      explain_failure();
       res = false;
     }
   }
@@ -576,6 +578,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   if (! check_type(t0, t1)) {
     merr(loc, msg, "%s %s has type %s instead of %s",
 	 t, v, typ2string(t1), typ2string(t0));
+    explain_failure();
     res = false;
   }
 

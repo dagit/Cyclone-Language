@@ -3448,8 +3448,8 @@ yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -  1)]); _temp1572=*
 _temp1570; _LL1574: _temp1573= _temp1572.f2; goto _LL1571; _LL1571: { void* a;
 if( Cyc_Std_zstrcmp( _temp1569, _tag_arr("regparm", sizeof( unsigned char), 8u))
 ==  0? 1: Cyc_Std_zstrcmp( _temp1569, _tag_arr("__regparm__", sizeof(
-unsigned char), 12u)) ==  0){ if( _temp1573 <=  0? 1: _temp1573 >  3){ Cyc_Parse_err(
-_tag_arr("regparm requires value between 1 and 3", sizeof( unsigned char), 39u),
+unsigned char), 12u)) ==  0){ if( _temp1573 <  0? 1: _temp1573 >  3){ Cyc_Parse_err(
+_tag_arr("regparm requires value between 0 and 3", sizeof( unsigned char), 39u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset -  1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset -  1)]).last_line));} a=( void*)({ struct Cyc_Absyn_Regparm_att_struct*

@@ -122,9 +122,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     } else {
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
-      if (!coerce_arg(te,e,t))
+      if (!coerce_arg(te,e,t)) {
 	terr(s0->loc, "returns value of type %s but requires %s",
              typ2string(e->topt->v), typ2string(t));
+        explain_failure();
+      }
       switch (compress(t)) {
       case VoidType: terr(s0->loc,"function returns void expression"); break;
       default: break;
@@ -178,10 +180,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     ts = List::map_c(substitute,instantiation,ts);
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(te,es->hd,ts->hd))
+      if(!coerce_arg(te,es->hd,ts->hd)) {
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
              typ2string(es->hd->topt->v), typ2string(ts->hd));
+        explain_failure();
+      }
     }
     if (es != NULL)
       terr(s0->loc, "too many arguments to explicit fallthru");
@@ -212,9 +216,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let p = scs->hd->pattern;
       // FIX: can pass region if e is an lvalue
       let $(new_tvs,vds) = tcPat(te,p,&t,NULL);
-      if (!unify(p->topt->v,t))
+      if (!unify(p->topt->v,t)) {
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
              typ2string(t), typ2string(p->topt->v));
+        explain_failure();
+      }
       else
 	check_pat_regions(te,p);
       scs->hd->pat_vars = new Opt(vds);
@@ -345,9 +351,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// te is only used by is_const_exp for globals and function names
 	if(!is_local && !is_const_exp(te,(exp_t)initializer))
 	  terr(d->loc, "initializer needs to be a constant expression");
-        if (!coerce_assign(te2,(exp_t)initializer,t))
+        if (!coerce_assign(te2,(exp_t)initializer,t)) {
 	  terr(d->loc, "%s declared with type %s, initialized with type %s",
                *x, typ2string(t), typ2string(initializer->topt->v));
+          explain_failure();
+        }
       }
       tcStmt(set_encloser(te2,s0),s,false);
       return;
@@ -361,9 +369,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *vds = new Opt(x);
       if (topt != NULL && !unify(p->topt->v,topt->v))
         terr(d->loc,"type of pattern does not match declared type");
-      if (!unify(p->topt->v,e->topt->v))
+      if (!unify(p->topt->v,e->topt->v)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
              typ2string(p->topt->v),typ2string(e->topt->v));
+        explain_failure();
+      }
       else
 	check_pat_regions(te,p);
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect

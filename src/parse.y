@@ -1229,8 +1229,8 @@ attribute:
     let &$(_,n) = $3;
     attribute_t a;
     if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
-      if (n <= 0 || n > 3) err("regparm requires value between 1 and 3",
-                               LOC(@3,@3));
+      if (n < 0 || n > 3) err("regparm requires value between 0 and 3",
+                              LOC(@3,@3));
       a = new Regparm_att(n);
     } else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
       if (n < 0) err("aligned requires positive power of two",
