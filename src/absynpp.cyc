@@ -687,6 +687,7 @@ int exp_prec(exp_t e) {
   case &Address_e(_):           return 130;
   case &Sizeoftyp_e(_):         return 130;
   case &Sizeofexp_e(_):         return 130;
+  case &Offsetof_e(_,_):        return 130;
   case &Deref_e(_):             return 130;
   case &StructMember_e(_,_):    return 140;
   case &StructArrow_e(_,_):     return 140; // ???
@@ -796,17 +797,13 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       s = cat(text("rnew("),exp2doc((exp_t)ropt),text(") "),
               exp2doc_prec(myprec,e1));
     break;
-  case &Sizeoftyp_e(t):
-    s = cat(text("sizeof("),
-            typ2doc(t),
-            text(")"));
-    break;
-  case &Sizeofexp_e(e1):
-    s = cat(text("sizeof("),exp2doc(e1),text(")"));
+  case &Sizeoftyp_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
+  case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
+  case &Offsetof_e(t,n): 
+    s = cat(text("offsetof("), typ2doc(t), text(","), textptr(n), text(")"));
     break;
   case &Deref_e(e1):
-    s = cat(text("*"),
-            exp2doc_prec(myprec,e1));
+    s = cat(text("*"), exp2doc_prec(myprec,e1));
     break;
   case &StructMember_e(e1,n):
     s = cat(exp2doc_prec(myprec,e1), text("."), textptr(n));

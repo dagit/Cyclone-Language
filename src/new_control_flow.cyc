@@ -292,10 +292,11 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 		  null);
 
   // these things are fully initialized non-lvalues, no access-path concerns
-  case &Sizeofexp_e(_): fallthru; // ANSI C: the exp is NOT evaluated
-  case &Sizeoftyp_e(_): fallthru;
-  case &Const_e(_):     fallthru;
-  case &Enum_e(_,_,_):  fallthru;
+  case &Sizeofexp_e(_):  fallthru; // ANSI C: the exp is NOT evaluated
+  case &Sizeoftyp_e(_):  fallthru;
+  case &Offsetof_e(_,_): fallthru;
+  case &Const_e(_):      fallthru;
+  case &Enum_e(_,_,_):   fallthru;
   case &Var_e(_,&Funname_b(_)): 
     return mkSyn_tf(mkSkipAE(), null,          make_assigns(env,mkUnknownOp()));
     // globals are fully initialized lvalues. B/c fully init, ignore acess path

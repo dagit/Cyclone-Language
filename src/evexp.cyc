@@ -1,8 +1,11 @@
 // Routines for evaluating expressions that should be "constant".
 
+// FIX: Add appropriate support for float, double, and long long
+
 #include <core.h>
 #include <list.h>
 #include <position.h>
+
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
@@ -21,26 +24,20 @@ void exp_err(seg_t loc, string_t msg) {
   Position::post_error(Position::mk_err_elab(loc, xprintf("Exp_err: %s",msg)));
 }
 
-// forward references
-extern cnst_t promote_const(cnst_t cn);
-extern cnst_t eval_const_exp(exp_t e);
-extern cnst_t eval_const_unprimop(primop_t p,exp_t e);
-extern cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2);
-extern cnst_t eval_sizeof(type_t t, seg_t loc);
+cnst_t eval_const_exp(exp_t e); // forward reference for mutual recursion
 
-unsigned int eval_const_uint_exp(exp_t e) {
-  switch (promote_const(eval_const_exp(e))) {
-  case &Int_c(_,i): return (unsigned int)i;
-  default:         exp_err(e->loc,"expecting unsigned int"); return 0u;
-  }
-}
-
-// FIX: What about LongLong?
 cnst_t promote_const(cnst_t cn) {
   switch (cn) {
   case &Char_c(sn,c):  return new Int_c(sn,(int)c);
   case &Short_c(sn,s): return new Int_c(sn,(int)s); 
   default:             return cn;
+  }
+}
+
+unsigned int eval_const_uint_exp(exp_t e) {
+  switch (promote_const(eval_const_exp(e))) {
+  case &Int_c(_,i): return (unsigned int)i;
+  default:         exp_err(e->loc,"expecting unsigned int"); return 0u;
   }
 }
 
@@ -53,175 +50,86 @@ bool eval_const_bool_exp(exp_t e) {
   }
 }
 
-// The main routine -- side-effects the expression e, overwriting its
-// r field with the resulting constant (only if there's no error)
-cnst_t eval_const_exp(exp_t e) {
-  cnst_t cn;
-  switch (e->r) {
-  case &Const_e(c): return c; // return eagerly to avoid allocation
-  case &Conditional_e(e1,e2,e3):
-    cn = (eval_const_bool_exp(e1) ? eval_const_exp(e2) : eval_const_exp(e3));
-    break;
-  case &Primop_e(p,es):
-    if (es == null) {
-      exp_err(e->loc,"bad static expression (no args to primop)");
-      return new Int_c(Signed,0);
-    }
-    if (es->tl == null) 
-      cn = eval_const_unprimop(p,es->hd);
-    else if (es->tl->tl != null) {
-      exp_err(e->loc,"bad static expression (too many args to primop)");
-      return new Int_c(Signed,0);
-    } else 
-      cn = eval_const_binprimop(p,es->hd,es->tl->hd);
-    break;
-  case &Sizeoftyp_e(t):
-    cn = eval_sizeof(t,e->loc);
-    break;
-  case &Sizeofexp_e(e1):
-    cn = eval_sizeof(e1->topt->v,e1->loc);
-    break;
-  case &Cast_e(t,e2):
-    // FIX: this needs to be generalized
-    cn = eval_const_exp(e2);
-    switch ($(compress(t),cn)) {
-    case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
-    case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
-    case $(&IntType(sn,sz),&Int_c(sn2,x)): 
-      if(sn != sn2)
-	cn = new Int_c(sn,x); 
-      break;
-    default:
-      exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
-      return new Int_c(Signed,0);
-    }
-    break;
-  case &Enum_e(_,_,ef):
-    return eval_const_exp((exp_t)ef->tag);
-  default: 
-    exp_err(e->loc,"bad static expression");
-    return new Int_c(Signed,0);
-  }
-  e->r = new Const_e(cn);
-  return cn;
-}
-
 // called by tcSizeof (which ignores result) and eval_szof.
 // Note in the latter case, this code really needs to be in sync with the
 // type translation to C.
 // Note that a StructType better be checked so we can get the structdecl
-unsigned int szof(type_t t, seg_t loc) {
+bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
-  case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
+  case VoidType: return false;
   case &VarType(tv):
     switch (conref_val(tv->kind)) {
-    case BoxKind: return 4u;
-    case AnyKind: 
-      fallthru;
-    case MemKind: 
-      terr(loc,"cannot apply sizeof to a non-boxed type variable"); return 0u;
-    case RgnKind:
-      terr(loc,"cannot apply sizeof to a region"); return 0u;
-    case EffKind:
-      terr(loc,"cannot apply sizeof to an effect"); return 0u;
+    case BoxKind: return true;
+    default:      return false;
     }
-  case &Evar(&Opt{BoxKind},_,_,_): return 4u; // Possible?
-  case &Evar(_,_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
-  case &TunionType(_):  return 4u;
+  case &Evar(&Opt{BoxKind},_,_,_): return true; // Possible?
+  case &Evar(_,_,_,_): return false;
+  case &TunionType(_): return true;
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(_,tuf),_}):
-    return 4u + szof(new TupleType(tuf->typs),loc);
-  case &TunionFieldType(_):
-    throw Tcutil::impos("unroslved tunionfield type in szof");
+    fallthru(tuf->typs);
+  case &TupleType(tqs):
+    for (; tqs != null; tqs = tqs->tl)
+      if(!okay_szofarg((*tqs->hd)[1]))
+	return false;
+    return true;
+
+  case &TunionFieldType(_): return false;
+
   case &PointerType(PtrInfo{_,_,_,_,b}):  
     switch (compress_conref(b)->v) {
-    case &Eq_constr(Unknown_b): return 12u;
-    case &Eq_constr(_): return 4u;
-    default: 
-      terr(loc,"bounds information not known for pointer type"); return 0u;
+    case &Eq_constr(Unknown_b): return true;
+    case &Eq_constr(_): return true;
+    default: return false;
     }
-  case &IntType(_,B1): return 1u;
-  case &IntType(_,B2): return 1u;
-  case &IntType(_,B4): return 1u;
-  case &IntType(_,B8): return 1u;
-  case FloatType:     return 4u;
-  case DoubleType:    return 8u;
-  case &ArrayType(t2,_,e): 
-    // FIX: insert padding for alignment
-    if (e == null) 
-      terr(loc, "cannot apply sizeof to an array of unknown size");
-    return szof(t2,loc) * eval_const_uint_exp((exp_t)e);
-  case &FnType(_): terr(loc, "cannot apply sizeof to function type"); return 0u;
-  case &TupleType(tqs):
-    // FIX: we need to insert padding to ensure alignment
-    unsigned int s = 0;
-    for (; tqs != null; tqs = tqs->tl)
-      s += szof((*tqs->hd)[1],loc);
-    return s;
-  case &RgnHandleType(_): return 4u;
-  case &StructType(_,ts,sdp):
-    // FIX: we need to insert padding to ensure alignment and deal
-    // with packed and aligned attributes.
+  case &IntType(_,_): return true;
+  case FloatType:     return true;
+  case DoubleType:    return true;
+  case &ArrayType(t2,_,e): // assume e constant checked elsewhere
+    return (e != null); 
+  case &FnType(_): return false;
+  case &RgnHandleType(_): return true;
+  case &StructType(_,_,sdp):
     if(sdp == null)
       return Tcutil::impos("szof on unchecked StructType");
     let sd = *sdp;
     if(sd->fields == null)
-      terr(loc,"cannot apply sizeof to abstract struct type");
+      return false;
     fallthru(sd->fields->v);
   case &AnonStructType(fs):
-    unsigned int s = 0;
     for(; fs != null; fs = fs->tl)
-      s += szof(fs->hd->type,loc);
-    return s;
+      if(!okay_szofarg(fs->hd->type))
+	return false;
+    return true;
   case &UnionType(_,ts,udp):
-    // FIX:  need to deal with padding and alignment
     if (udp == null)
       return Tcutil::impos("szof on unchecked UnionType");
     let ud = *udp;
     if (ud->fields == null)
-      terr(loc,"cannot apply sizeof to abstract union type");
+      return false;
     fallthru(ud->fields->v);
   case &AnonUnionType(fs):
-    unsigned int s = 0;
-    for (; fs != null; fs =fs->tl) {
-      unsigned int i = szof(fs->hd->type,loc);
-      s = (s > i) ? s : i;
-    }
-    return s;
-  case &EnumType(_,_): return 4u;
-  case HeapRgn: terr(loc, "cannot apply sizoef to a region"); return 0u;
+    for(; fs != null; fs = fs->tl)
+      if(!okay_szofarg(fs->hd->type))
+	return false;
+    return true;
+  case &EnumType(_,_): return true;
+  case HeapRgn: return false;
+  case &JoinEff(_):   return false;
+  case &AccessEff(_): return false;
+
   case &TypedefType(_,_,_): 
     return Tcutil::impos(xprintf("szof typedeftype %s",typ2string(t)));
-  case &JoinEff(_): fallthru;
-  case &AccessEff(_): terr(loc, "cannot apply sizoef to an effect"); return 0u;
-  }
-}
-
-cnst_t eval_sizeof(type_t t,seg_t loc) {
-  return new Int_c(Unsigned,(int)szof(t,loc));
-}
-
-bool is_arith_const(cnst_t cn) {
-  switch (cn) {
-  case &Char_c(_,_): return true;
-  case &Int_c(_,_):  return true;
-  case &Float_c(_):  return true;
-  default: return false;
   }
 }
 
 cnst_t eval_const_unprimop(primop_t p,exp_t e) {
   cnst_t cn = promote_const(eval_const_exp(e));
   switch ($(p,cn)) {
-  case $(Plus,_): 
-    if (!is_arith_const(cn)) 
-      exp_err(e->loc,"expecting arithmetic constant");
-    return cn;
+  case $(Plus,_): return cn;
   case $(Minus,  &Int_c(s,i)):   return new Int_c(Signed,  -i);
-  case $(Minus,  &Short_c(s,i)): return new Short_c(Signed,-i);
-  case $(Minus,  &Char_c(s,i)):  return new Char_c(Signed, -i);
+  case $(Bitnot, &Int_c(s,i)):   return new Int_c(Unsigned,~i);
   case $(Not,    &Int_c(_,i)):   return new Int_c(Signed,  i == 0 ? 1 : 0);
   case $(Not,    Null_c)     :   return new Int_c(Signed,  1);
-  case $(Bitnot, &Int_c(s,i)):   return new Int_c(Unsigned,~i);
   default: 
     exp_err(e->loc,"bad constant expression");
     return cn;
@@ -294,4 +202,60 @@ cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   if(use_u3) return new Int_c(Unsigned, (int)u3);
   if(use_b3) return new Int_c(Signed, b3 ? 1 : 0);
   throw new Unreachable("Evexp::eval_const_binop");
+}
+
+// The main routine -- side-effects the expression e, overwriting its
+// r field with the resulting constant (only if there's no error)
+cnst_t eval_const_exp(exp_t e) {
+  cnst_t cn;
+  switch (e->r) {
+  case &Const_e(c): return c; // return eagerly to avoid allocation
+  case &Conditional_e(e1,e2,e3):
+    cn = (eval_const_bool_exp(e1) ? eval_const_exp(e2) : eval_const_exp(e3));
+    break;
+  case &Primop_e(p,es):
+    if (es == null) {
+      exp_err(e->loc,"bad static expression (no args to primop)");
+      return new Int_c(Signed,0);
+    }
+    if (es->tl == null) 
+      cn = eval_const_unprimop(p,es->hd);
+    else if (es->tl->tl != null) {
+      exp_err(e->loc,"bad static expression (too many args to primop)");
+      return new Int_c(Signed,0);
+    } else 
+      cn = eval_const_binprimop(p,es->hd,es->tl->hd);
+    break;
+  case &Sizeoftyp_e(_): fallthru;
+  case &Sizeofexp_e(_):
+    exp_err(e->loc, 
+	    "sizeof(...) is not an integral constant expression in Cyclone");
+    return new Int_c(Signed,0);
+  case &Offsetof_e(_,_):
+    exp_err(e->loc, 
+	    "offsetof(...) is not an integral constant expression in Cyclone");
+    return new Int_c(Signed,0);
+  case &Cast_e(t,e2):
+    // FIX: this needs to be generalized
+    cn = eval_const_exp(e2);
+    switch ($(compress(t),cn)) {
+    case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
+    case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
+    case $(&IntType(sn,sz),&Int_c(sn2,x)): 
+      if(sn != sn2)
+	cn = new Int_c(sn,x); 
+      break;
+    default:
+      exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
+      return new Int_c(Signed,0);
+    }
+    break;
+  case &Enum_e(_,_,ef):
+    return eval_const_exp((exp_t)ef->tag);
+  default: 
+    exp_err(e->loc,"bad static expression");
+    return new Int_c(Signed,0);
+  }
+  e->r = new Const_e(cn);
+  return cn;
 }

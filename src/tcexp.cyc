@@ -484,10 +484,6 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
   // to solve the general problem.
   if (p == (primop_t)Minus && List::length(es) == 1)
     return tcExp(te,topt,es->hd);
-  // FIX: sizeof(f) where f is a function (or expression of function type)
-  // should not be allowed.  So for sizeof(e), we should not call tcExp on e,
-  // because that will do pointer generation (convert a function to a pointer
-  // to a function).  Instead we should call tcexpNoInst.
   tcExpList(te,es);
   type_t t;
   switch (p) {
@@ -990,12 +986,36 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
  // sizeof t
 static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
   check_type(loc,te,lookup_type_vars(te),MemKind,t);
-  Evexp::szof(t,loc); // just ignore result -- posts error for bad type
+  if(!Evexp::okay_szofarg(t))
+    terr(loc, xprintf("sizeof applied to type %s, which has unknown size here",
+		      typ2string(t)));
+  return uint_t; // FIX: use topt
+}
+
+// offsetof(t,n)
+// FIX: check if t is allowed to be a union type
+static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt, 
+			 type_t t, field_name_t n) {
+  check_type(loc,te,lookup_type_vars(te),MemKind,t);
+  bool bad_type = true;
+  switch(compress(t)) {
+  case &StructType(_,_,sdp):
+    if(sdp == null)
+      return Tcutil::impos("offsetof on unchecked StructType");
+    if((*sdp)->fields == null)
+      break;
+    fallthru;
+  case &AnonStructType(_):
+    bad_type = false;
+    break;
+  default: break;
+  }
+  if(bad_type)
+    terr(loc, xprintf("%s is not a known struct type", typ2string(t)));
   return uint_t;
 }
 
  // *e
- // FIX: check static region capability, also in arrow, subscript
 static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   tcExp(te,null,e);
   type_t t = compress(e->topt->v);
@@ -1004,7 +1024,6 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     return t2;
-  // FIX:  should support constant sized arrays (bound > 0) and tagged arrays.
   default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
 					  typ2string(t)));
   }
@@ -1777,6 +1796,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcSizeof(te,loc,topt,t1); break;
   case &Sizeoftyp_e(t1):
     t = tcSizeof(te,loc,topt,t1); break;
+  case &Offsetof_e(t1,n):
+    t = tcOffsetof(te,loc,topt,t1,n); break;
   case &Deref_e(e1):
     t = tcDeref(te,loc,topt,e1); break;
   case &StructMember_e(e1,f):

@@ -40,6 +40,7 @@ static bool tc_r       = false;
 static bool ic_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
+static bool stop_after_asmfile_r = false;
 static bool tovc_r     = false;
 static bool v_r        = false;
 static bool save_temps_r = false;
@@ -102,6 +103,11 @@ static void set_produce_dependencies() {
 static void set_stop_after_objectfile() {
   stop_after_objectfile_r = true;
   add_ccarg("-c");
+}
+
+static void set_stop_after_asmfile() {
+  stop_after_asmfile_r = true;
+  add_ccarg("-S");
 }
 
 // Cyclone files given on the command line
@@ -463,7 +469,7 @@ int main(int argc, string_t ? argv) {
                  "    Compile for prof"),
          new $("-pg",new Flag_spec(add_ccarg),
                   "   Compile for gprof"),
-         new $("-S",new Flag_spec(add_ccarg),
+         new $("-S",new Unit_spec(set_stop_after_asmfile),
                  "    Stop after producing assembly code"),
          new $("-M",new Unit_spec(set_produce_dependencies),
                  "    Produce dependencies"),
@@ -542,7 +548,7 @@ int main(int argc, string_t ? argv) {
   let ccargs_string = String::str_sepstr(rev(ccargs), " ");
   let libargs_string = String::str_sepstr(new List(new ((string_t)""),rev(libargs)), " ");
   let stdlib_string;
-  if (stop_after_objectfile_r)
+  if (stop_after_asmfile_r || stop_after_objectfile_r)
     stdlib_string = (string_t)"";
   else {
     let cyclib = find(cyclone_exec_prefix_path,"cyclib.a");

@@ -479,11 +479,24 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
 
   case &UseAE(ao): 
     let pinfo = eval_absop_r(pinfo_dict, ao);
-    if(!isAllInit(pinfo_dict, pinfo)) {
-      Tcutil::terr(loc, xprintf("%s must be fully initialized to be used here",
-				absop2string(ao)));
-      return BottomFL; // attempt to avoid cascaded messages
-    }
+    if(!isAllInit(pinfo_dict, pinfo))
+      // only warn for bits (currently necessary for using unions), if only
+      // warn, must not return BottomFL.
+      // NOT good enough: we must warn when all reachable uninit things are
+      //  bits_only
+      switch (ao) {
+      case &LocalOp(vd): 
+	if(Tcutil::bits_only(vd->type)) {
+	  Tcutil::warn(loc, xprintf("pointer-free %s may not be fully "
+				    "initialized", *(*vd->name)[1]));
+	  break;
+	}
+	fallthru;
+      default:
+	Tcutil::terr(loc, xprintf("%s must be fully initialized "
+				  "to be used here", absop2string(ao)));
+	return BottomFL; // attempt to avoid cascaded messages
+      }
 
     let out_dict = escape_pointsto(pinfo, pinfo_dict);
     if(out_dict == pinfo_dict) return in_flow;

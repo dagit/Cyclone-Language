@@ -528,6 +528,11 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Sizeofexp_e(e1):
     dump("sizeof("); dumpexp_prec(myprec,e1); dump_char(')'); break;
 
+  case &Offsetof_e(t,n):
+    dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);
+    dump_char(')'); 
+    break;
+
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
 

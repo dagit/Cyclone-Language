@@ -111,6 +111,7 @@ static $(string_t,short) rw_array[] = {
   $("namespace", NAMESPACE),
   $("new", NEW),
   $("null", NULL_kw),
+  $("offsetof", OFFSETOF),
   $("printf", PRINTF),
   $("region_t",REGION_T),
   $("region",REGION),

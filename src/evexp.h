@@ -10,7 +10,9 @@ using Absyn;
 using Position;
 
 extern unsigned int eval_const_uint_exp(exp_t e);
-extern unsigned int szof(type_t t, seg_t loc);
+
+  // only in this module for historical reasons
+extern bool okay_szofarg(type_t t);
 
 }
 #endif

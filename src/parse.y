@@ -899,8 +899,8 @@ using Parse;
 // ANSI C keywords
 %token AUTO REGISTER STATIC EXTERN TYPEDEF VOID CHAR SHORT INT LONG FLOAT
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
-%token STRUCT UNION CASE DEFAULT INLINE
-%token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN SIZEOF ENUM
+%token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
+%token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
@@ -2467,6 +2467,8 @@ unary_expression:
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'       { $$=^$(sizeoftyp_exp((*$3)[2],LOC(@1,@4))); }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
+| OFFSETOF '(' type_name ',' IDENTIFIER ')' 
+   { $$=^$(offsetof_exp((*$3)[2],new $5,LOC(@1,@6))); }
 /* Cyc: throw, printf, fprintf, sprintf */
 | format_primop '(' argument_expression_list ')'
     { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
@@ -2504,7 +2506,7 @@ postfix_expression:
 | postfix_expression '(' argument_expression_list ')'
     { $$=^$(unknowncall_exp($1,$3,LOC(@1,@4))); }
 | postfix_expression '.' IDENTIFIER
-    { $$=^$(structmember_exp($1,new {$3},LOC(@1,@3))); }
+    { $$=^$(structmember_exp($1,new $3,LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
     { qvar_t q = $3;

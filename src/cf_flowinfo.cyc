@@ -174,7 +174,7 @@ bool isAllInit_f($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env, `a a,
   return isAllInit_pinfo(env,path);
 }
 bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
-	       path_info_t path) {
+		     path_info_t path) {
   switch(path) {
   case &LeafPI(is):   return isAllInit_is(env,is);
   case &TuplePI(d2):  return Dict::forall_c(isAllInit_f,env,d2);

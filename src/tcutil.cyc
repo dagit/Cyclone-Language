@@ -2855,12 +2855,15 @@ bool bits_only(type_t t) {
 
 // FIX: there are other expressions we could allow, such as
 // &(x->y) or &(x[0]) that we do not support here...
+// RENAME
+// Actually need to distinguish two kinds of constant expressions, as in ANSI C
+// This is now sort of for top-level expressions
 static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   switch (e->r) {
-  case &Const_e(_):  return true;
-  case &Sizeoftyp_e(t): return true;
-  case &Sizeofexp_e(e1): return cnst_exp(te,true,e1);
-  case &Enum_e(_,_,_): return true;
+  case &Const_e(_):     return true;
+  case &Sizeoftyp_e(_): return true;
+  case &Sizeofexp_e(_): return true; // exp is not evaluated
+  case &Enum_e(_,_,_):  return true;
   case &Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"
     // Ignore unbound variables b/c should be reported elsewhere
@@ -2886,7 +2889,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Cast_e(t,e2):
     // FIX:  We cannot allow casts w/ run-time effect b/c C will complain!
     return cnst_exp(te,var_okay,e2);
-  case &Address_e(e2):
+  case &Address_e(e2): 
     return cnst_exp(te,true,e2);
   case &Comprehension_e(_,e1,e2):
     return cnst_exp(te,false,e1) && cnst_exp(te,false,e2);

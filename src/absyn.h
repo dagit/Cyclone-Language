@@ -384,6 +384,7 @@ namespace Absyn {
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t);
     Sizeofexp_e(exp_t);
+    Offsetof_e(type_t,field_name_t);
     Deref_e(exp_t);
     StructMember_e(exp_t,field_name_t); // also union member
     StructArrow_e(exp_t,field_name_t);  // also union arrow
@@ -732,6 +733,7 @@ namespace Absyn {
   extern exp_t address_exp(exp_t, seg_t);
   extern exp_t sizeoftyp_exp(type_t t, seg_t);
   extern exp_t sizeofexp_exp(exp_t e, seg_t);
+  extern exp_t offsetof_exp(type_t, field_name_t, seg_t);
   extern exp_t deref_exp(exp_t, seg_t);
   extern exp_t structmember_exp(exp_t, field_name_t, seg_t);
   extern exp_t structarrow_exp(exp_t, field_name_t, seg_t);

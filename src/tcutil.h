@@ -105,7 +105,7 @@ extern void check_contains_assign(exp_t);
 // * ensures that for any free evar in the type, it can only be 
 //   constrained with types whose free variables are contained in the
 //   set of free variables returned.
-  //extern list_t<tvar_t> check_valid_type(seg_t,tenv_t,list_t<tvar_t>,kind_t k,type_t);
+  // extern list_t<tvar_t> check_valid_type(seg_t,tenv_t,list_t<tvar_t>,kind_t k,type_t);
 // Similar to the above except that (a) there are no bound type variables,
 // (b) for function types, we bind the free type variables, (c) the expected
 // kind defaults to MemKind.

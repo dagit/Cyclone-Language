@@ -169,8 +169,11 @@ typedef unsigned short nlink_t;
 #	define	FD_SETSIZE	64
 #  endif
 
+// FIX: HACK -- In Cyclone, sizeof(t) is not an integral constant, so
+//      here we're assuming sizeof(long)==4
 typedef	long	fd_mask;
-#  define	NFDBITS	(sizeof (fd_mask) * NBBY)	/* bits per mask */
+//#  define	NFDBITS	(sizeof (fd_mask) * NBBY)	/* bits per mask */
+#  define	NFDBITS	(4                * NBBY)	/* bits per mask */
 #  ifndef	howmany
 #	define	howmany(x,y)	(((x)+((y)-1))/(y))
 #  endif

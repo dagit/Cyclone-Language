@@ -1889,8 +1889,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     }
     break;
-  case &Sizeoftyp_e(t): e->r = new Sizeoftyp_e(typ_to_c_array(t)); break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
+  case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
+  case &Offsetof_e(t,n): e->r = new Offsetof_e(typ_to_c_array(t),n); break;
   case &Deref_e(e1):
     type_t e1_typ = compress(e1->topt->v);
     exp_to_c(nv, e1);
@@ -2000,9 +2001,6 @@ static void exp_to_c(env_t nv, exp_t e) {
         // where _check_unknown_subscript has been cast to take a tagged
         // pointer of the correct type and return ta2
         // NOTE: could avoid more allocation here
-        // NOTE: we could eagerly evalute the sizeof(ta) if Evexp::szof were
-        //   right.  Also, I was getting a an unset structdecl pointer
-        //   (presumably because some type was translated to C too early?)
         let argtyps = list(new $(null,mt_tq,typ_to_c(e1->topt->v)),
                            new $(null,mt_tq,uint_t),
                            new $(null,mt_tq,uint_t));
@@ -2112,9 +2110,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  // where _check_unknown_subscript has been cast to take a tagged
 	  // pointer of the correct type and return ta2
 	  // NOTE: could avoid more allocation here
-	  // NOTE: we could eagerly evalute the sizeof(ta) if Evexp::szof were
-	  //   right.  Also, I was getting a an unset structdecl pointer
-	  //   (presumably because some type was translated to C too early?)
 	  let argtyps = list(new $(null,mt_tq,typ_to_c(e1->topt->v)),
                              new $(null,mt_tq,uint_t),
                              new $(null,mt_tq,uint_t));

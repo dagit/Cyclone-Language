@@ -298,8 +298,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         break;
       default: break;
       }
-
-      check_type(s0->loc,te,lookup_type_vars(te),MemKind,t);
+      
+      // type safety demands static variables are closed (like globals)
+      // (the error message may be confusing b/c it *looks* like tyvars
+      //  are in scope)
+      let bound_vars = (sc == Static) ? null : lookup_type_vars(te);
+      check_type(s0->loc,te,bound_vars,MemKind,t);
       let te2 = add_local_var(s->loc,te,vd);
       if (initializer != null) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
