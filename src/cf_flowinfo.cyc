@@ -88,6 +88,9 @@ static mstringptr_t place2string(place_t p) {
 
 // Note: We don't have to worry about instantiating polymorphic struct fields
 //       b/c they can't be instantiated with aggregates.
+// BUT that means fields instantiated with int still must be initialized.
+// Sorry, but it's a pain.
+// Also, not sure why enums aren't bits_only.
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
@@ -113,7 +116,7 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
     }
     return new Aggregate(d);
 
-  default: return leafval;
+  default: return Tcutil::bits_only(t) ? unknown_all : leafval;
   }
 }
 

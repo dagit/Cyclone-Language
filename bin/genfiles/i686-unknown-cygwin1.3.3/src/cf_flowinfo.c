@@ -603,14 +603,14 @@ Cyc_Tcenv_Hidden_struct{ int tag; void* f1; void* f2; } ; struct Cyc_Tcenv_Tenv{
 struct Cyc_List_List* ns; struct Cyc_Dict_Dict* ae; struct Cyc_Core_Opt* le; } ;
 extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
 struct Cyc_Position_Segment*, struct _tagged_arr fmt, struct _tagged_arr ap);
-extern void* Cyc_Tcutil_compress( void* t); static const int Cyc_CfFlowInfo_VarRoot=
-0; struct Cyc_CfFlowInfo_VarRoot_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;
-} ; static const int Cyc_CfFlowInfo_MallocPt= 1; struct Cyc_CfFlowInfo_MallocPt_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_CfFlowInfo_Place{ void* root;
-struct Cyc_List_List* fields; } ; static const int Cyc_CfFlowInfo_NoneIL= 0;
-static const int Cyc_CfFlowInfo_ThisIL= 1; static const int Cyc_CfFlowInfo_AllIL=
-2; unsigned char Cyc_CfFlowInfo_IsZero[ 11u]="\000\000\000\000IsZero";
-unsigned char Cyc_CfFlowInfo_NotZero[ 12u]="\000\000\000\000NotZero";
+extern void* Cyc_Tcutil_compress( void* t); extern int Cyc_Tcutil_bits_only(
+void* t); static const int Cyc_CfFlowInfo_VarRoot= 0; struct Cyc_CfFlowInfo_VarRoot_struct{
+int tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_MallocPt=
+1; struct Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+struct Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List* fields; } ;
+static const int Cyc_CfFlowInfo_NoneIL= 0; static const int Cyc_CfFlowInfo_ThisIL=
+1; static const int Cyc_CfFlowInfo_AllIL= 2; unsigned char Cyc_CfFlowInfo_IsZero[
+11u]="\000\000\000\000IsZero"; unsigned char Cyc_CfFlowInfo_NotZero[ 12u]="\000\000\000\000NotZero";
 unsigned char Cyc_CfFlowInfo_UnknownZ[ 13u]="\000\000\000\000UnknownZ"; static
 const int Cyc_CfFlowInfo_PlaceL= 0; struct Cyc_CfFlowInfo_PlaceL_struct{ int tag;
 struct Cyc_CfFlowInfo_Place* f1; } ; static const int Cyc_CfFlowInfo_UnknownL= 0;
@@ -756,21 +756,22 @@ v)) Cyc_Dict_insert)( d, _temp94, Cyc_CfFlowInfo_typ_to_absrval( _temp92,
 leafval));}} return( void*)({ struct Cyc_CfFlowInfo_Aggregate_struct* _temp96=(
 struct Cyc_CfFlowInfo_Aggregate_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_Aggregate_struct));
 _temp96[ 0]=({ struct Cyc_CfFlowInfo_Aggregate_struct _temp97; _temp97.tag= Cyc_CfFlowInfo_Aggregate;
-_temp97.f1= d; _temp97;}); _temp96;});} _LL67: return leafval; _LL57:;} static
-int Cyc_CfFlowInfo_prefix_of_member( struct Cyc_CfFlowInfo_Place* place, struct
-Cyc_Set_Set* set){{ struct Cyc_List_List* _temp98=(( struct Cyc_List_List*(*)(
-struct Cyc_Set_Set* s)) Cyc_Set_elements)( set); for( 0; _temp98 !=  0; _temp98=
-_temp98->tl){ struct Cyc_CfFlowInfo_Place* _temp99=( struct Cyc_CfFlowInfo_Place*)
-_temp98->hd; if( Cyc_CfFlowInfo_root_cmp(( void*) place->root,( void*) _temp99->root)
-!=  0){ continue;}{ struct Cyc_List_List* _temp100= place->fields; struct Cyc_List_List*
-_temp101= _temp99->fields; for( 0; _temp100 !=  0? _temp101 !=  0: 0;( _temp100=
-_temp100->tl, _temp101= _temp101->tl)){ if( Cyc_Std_zstrptrcmp(( struct
-_tagged_arr*) _temp100->hd,( struct _tagged_arr*) _temp101->hd) !=  0){ break;}}
-if( _temp100 ==  0){ return 1;}}}} return 0;} struct Cyc_CfFlowInfo_EscPile{
-struct _RegionHandle* rgn; struct Cyc_List_List* places; } ; static void Cyc_CfFlowInfo_add_place(
-struct Cyc_CfFlowInfo_EscPile* pile, struct Cyc_CfFlowInfo_Place* place){ if( !((
-int(*)( int(* compare)( struct Cyc_CfFlowInfo_Place*, struct Cyc_CfFlowInfo_Place*),
-struct Cyc_List_List* l, struct Cyc_CfFlowInfo_Place* x)) Cyc_List_mem)( Cyc_CfFlowInfo_place_cmp,
+_temp97.f1= d; _temp97;}); _temp96;});} _LL67: return Cyc_Tcutil_bits_only( t)?
+Cyc_CfFlowInfo_unknown_all: leafval; _LL57:;} static int Cyc_CfFlowInfo_prefix_of_member(
+struct Cyc_CfFlowInfo_Place* place, struct Cyc_Set_Set* set){{ struct Cyc_List_List*
+_temp98=(( struct Cyc_List_List*(*)( struct Cyc_Set_Set* s)) Cyc_Set_elements)(
+set); for( 0; _temp98 !=  0; _temp98= _temp98->tl){ struct Cyc_CfFlowInfo_Place*
+_temp99=( struct Cyc_CfFlowInfo_Place*) _temp98->hd; if( Cyc_CfFlowInfo_root_cmp((
+void*) place->root,( void*) _temp99->root) !=  0){ continue;}{ struct Cyc_List_List*
+_temp100= place->fields; struct Cyc_List_List* _temp101= _temp99->fields; for( 0;
+_temp100 !=  0? _temp101 !=  0: 0;( _temp100= _temp100->tl, _temp101= _temp101->tl)){
+if( Cyc_Std_zstrptrcmp(( struct _tagged_arr*) _temp100->hd,( struct _tagged_arr*)
+_temp101->hd) !=  0){ break;}} if( _temp100 ==  0){ return 1;}}}} return 0;}
+struct Cyc_CfFlowInfo_EscPile{ struct _RegionHandle* rgn; struct Cyc_List_List*
+places; } ; static void Cyc_CfFlowInfo_add_place( struct Cyc_CfFlowInfo_EscPile*
+pile, struct Cyc_CfFlowInfo_Place* place){ if( !(( int(*)( int(* compare)(
+struct Cyc_CfFlowInfo_Place*, struct Cyc_CfFlowInfo_Place*), struct Cyc_List_List*
+l, struct Cyc_CfFlowInfo_Place* x)) Cyc_List_mem)( Cyc_CfFlowInfo_place_cmp,
 pile->places, place)){ pile->places=({ struct Cyc_List_List* _temp102=( struct
 Cyc_List_List*) _region_malloc( pile->rgn, sizeof( struct Cyc_List_List));
 _temp102->hd=( void*) place; _temp102->tl= pile->places; _temp102;});}} static

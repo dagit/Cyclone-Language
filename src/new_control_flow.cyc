@@ -145,7 +145,6 @@ static flow_t add_vars(flow_t inflow,list_t<vardecl_t> vds,absRval_t leafval) {
   case &ReachableFL(d): 
     for(; vds != NULL; vds = vds->tl) {
       let root = new VarRoot(vds->hd);
-      // FIX: use typ_to_absrval or something
       d = Dict::insert(d,root,typ_to_absrval(vds->hd->type,leafval));
     }
     return new ReachableFL(d);

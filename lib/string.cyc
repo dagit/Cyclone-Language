@@ -288,9 +288,7 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, string_t separator) {
   return rstr_sepstr(heap_region,strs,separator);
 }
 ///////////////////////// COPYING
-// Destructively copy at most n characters from src into dest, starting
-// at the given offsets
-// (C version does not take offsets)
+// Destructively copy at most n characters from src into dest
 mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
   // Range checking
   let destSz = dest.size;

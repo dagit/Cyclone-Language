@@ -1,5 +1,5 @@
 # Current parameters.
-CC='cyclone'
+CC='/home/danieljg/cyclone/bin/cyclone.exe'
 CCOPT='-pg'
 LBOPT=''
 BINDIR='/usr/bin'
