@@ -619,17 +619,17 @@ Cyc_Absynpp_c_params_r; extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r
 extern void Cyc_Absynpp_decllist2file( struct Cyc_List_List* tdl, struct Cyc_Std___sFILE*
 f); extern struct Cyc_PP_Doc* Cyc_Absynpp_decl2doc( struct Cyc_Absyn_Decl* d);
 extern struct _tagged_arr Cyc_Absynpp_typ2string( void*); extern struct
-_tagged_arr Cyc_Absynpp_kind2string( void*); extern struct _tagged_arr Cyc_Absynpp_ckind2string(
-struct Cyc_Absyn_Conref*); extern struct _tagged_arr Cyc_Absynpp_exp2string(
-struct Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_stmt2string(
-struct Cyc_Absyn_Stmt*); extern struct _tagged_arr Cyc_Absynpp_qvar2string(
-struct _tuple0*); extern struct _tagged_arr Cyc_Absynpp_qvar2cstring( struct
-_tuple0*); extern struct _tagged_arr Cyc_Absynpp_decllist2string( struct Cyc_List_List*
-tdl); extern struct _tagged_arr Cyc_Absynpp_prim2string( void* p); extern struct
-_tagged_arr Cyc_Absynpp_pat2string( struct Cyc_Absyn_Pat* p); extern struct
-_tagged_arr Cyc_Absynpp_scope2string( void* sc); extern struct _tagged_arr Cyc_Absynpp_cyc_string;
-extern struct _tagged_arr* Cyc_Absynpp_cyc_stringptr; extern int Cyc_Absynpp_exp_prec(
-struct Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_char_escape(
+_tagged_arr Cyc_Absynpp_typ2cstring( void*); extern struct _tagged_arr Cyc_Absynpp_kind2string(
+void*); extern struct _tagged_arr Cyc_Absynpp_ckind2string( struct Cyc_Absyn_Conref*);
+extern struct _tagged_arr Cyc_Absynpp_exp2string( struct Cyc_Absyn_Exp*); extern
+struct _tagged_arr Cyc_Absynpp_stmt2string( struct Cyc_Absyn_Stmt*); extern
+struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); extern struct
+_tagged_arr Cyc_Absynpp_decllist2string( struct Cyc_List_List* tdl); extern
+struct _tagged_arr Cyc_Absynpp_prim2string( void* p); extern struct _tagged_arr
+Cyc_Absynpp_pat2string( struct Cyc_Absyn_Pat* p); extern struct _tagged_arr Cyc_Absynpp_scope2string(
+void* sc); extern struct _tagged_arr Cyc_Absynpp_cyc_string; extern struct
+_tagged_arr* Cyc_Absynpp_cyc_stringptr; extern int Cyc_Absynpp_exp_prec( struct
+Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_char_escape(
 unsigned char); extern struct _tagged_arr Cyc_Absynpp_string_escape( struct
 _tagged_arr); extern struct _tagged_arr Cyc_Absynpp_prim2str( void* p); extern
 int Cyc_Absynpp_is_declaration( struct Cyc_Absyn_Stmt* s); struct _tuple3{
@@ -2805,16 +2805,18 @@ struct Cyc_Absyn_Exp* e){ return Cyc_PP_string_of_doc( Cyc_Absynpp_exp2doc( e),
 return Cyc_PP_string_of_doc( Cyc_Absynpp_stmt2doc( s), 72);} struct _tagged_arr
 Cyc_Absynpp_typ2string( void* t){ return Cyc_PP_string_of_doc( Cyc_Absynpp_typ2doc(
 t), 72);} struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0* v){ return
-Cyc_PP_string_of_doc( Cyc_Absynpp_qvar2doc( v), 72);} struct _tagged_arr Cyc_Absynpp_qvar2cstring(
-struct _tuple0* v){ int old_qvar_to_Cids= Cyc_Absynpp_qvar_to_Cids; Cyc_Absynpp_qvar_to_Cids=
-1;{ struct _tagged_arr s= Cyc_Absynpp_qvar2string( v); Cyc_Absynpp_qvar_to_Cids=
-old_qvar_to_Cids; return s;}} struct _tagged_arr Cyc_Absynpp_prim2string( void*
-p){ return Cyc_PP_string_of_doc( Cyc_Absynpp_prim2doc( p), 72);} struct
-_tagged_arr Cyc_Absynpp_pat2string( struct Cyc_Absyn_Pat* p){ return Cyc_PP_string_of_doc(
-Cyc_Absynpp_pat2doc( p), 72);} struct _tagged_arr Cyc_Absynpp_scope2string( void*
-sc){ void* _temp1609= sc; _LL1611: if( _temp1609 == ( void*) Cyc_Absyn_Static){
-goto _LL1612;} else{ goto _LL1613;} _LL1613: if( _temp1609 == ( void*) Cyc_Absyn_Public){
-goto _LL1614;} else{ goto _LL1615;} _LL1615: if( _temp1609 == ( void*) Cyc_Absyn_Extern){
+Cyc_PP_string_of_doc( Cyc_Absynpp_qvar2doc( v), 72);} struct _tagged_arr Cyc_Absynpp_typ2cstring(
+void* t){ int old_qvar_to_Cids= Cyc_Absynpp_qvar_to_Cids; int old_add_cyc_prefix=
+Cyc_Absynpp_add_cyc_prefix; Cyc_Absynpp_qvar_to_Cids= 1; Cyc_Absynpp_add_cyc_prefix=
+0;{ struct _tagged_arr s= Cyc_Absynpp_typ2string( t); Cyc_Absynpp_qvar_to_Cids=
+old_qvar_to_Cids; Cyc_Absynpp_add_cyc_prefix= old_add_cyc_prefix; return s;}}
+struct _tagged_arr Cyc_Absynpp_prim2string( void* p){ return Cyc_PP_string_of_doc(
+Cyc_Absynpp_prim2doc( p), 72);} struct _tagged_arr Cyc_Absynpp_pat2string(
+struct Cyc_Absyn_Pat* p){ return Cyc_PP_string_of_doc( Cyc_Absynpp_pat2doc( p),
+72);} struct _tagged_arr Cyc_Absynpp_scope2string( void* sc){ void* _temp1609=
+sc; _LL1611: if( _temp1609 == ( void*) Cyc_Absyn_Static){ goto _LL1612;} else{
+goto _LL1613;} _LL1613: if( _temp1609 == ( void*) Cyc_Absyn_Public){ goto
+_LL1614;} else{ goto _LL1615;} _LL1615: if( _temp1609 == ( void*) Cyc_Absyn_Extern){
 goto _LL1616;} else{ goto _LL1617;} _LL1617: if( _temp1609 == ( void*) Cyc_Absyn_ExternC){
 goto _LL1618;} else{ goto _LL1619;} _LL1619: if( _temp1609 == ( void*) Cyc_Absyn_Abstract){
 goto _LL1620;} else{ goto _LL1610;} _LL1612: return _tag_arr("static", sizeof(

@@ -309,7 +309,7 @@ static void check_format_args(tenv_t te, exp_t fmt,
       type_t t = desc_types->hd;
       exp_t e = args->hd;
       if (!coerce_arg(te,e,t)) {
-        terr(e->loc,"descriptor has type %s but argument has type %s:",
+        terr(e->loc,"descriptor has type \n%s\n but argument has type \n%s",
              typ2string(t), typ2string(e->topt->v));
         explain_failure();
       }
@@ -756,7 +756,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
         type_t t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
         if (!coerce_arg(te,e1,t2)) {
-          terr(e1->loc,"actual argument has type %s but formal has type %s",
+          terr(e1->loc,"actual argument has type \n%s\n but formal has type \n%s",
                typ2string(e1->topt->v),typ2string(t2));
           explain_failure();
         }

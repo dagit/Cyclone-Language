@@ -1068,8 +1068,8 @@ struct Cyc_Std_String_pa_struct _temp379; _temp379.tag= Cyc_Std_String_pa;
 _temp379.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( _temp286);{ struct Cyc_Std_String_pa_struct
 _temp378; _temp378.tag= Cyc_Std_String_pa; _temp378.f1=( struct _tagged_arr)*
 _temp293;{ void* _temp377[ 3u]={& _temp378,& _temp379,& _temp380}; Cyc_Tcutil_terr(
-_temp125->loc, _tag_arr("%s declared with type %s, initialized with type %s",
-sizeof( unsigned char), 51u), _tag_arr( _temp377, sizeof( void*), 3u));}}}});
+_temp125->loc, _tag_arr("%s declared with type \n%s\n but initialized with type \n%s",
+sizeof( unsigned char), 57u), _tag_arr( _temp377, sizeof( void*), 3u));}}}});
 Cyc_Tcutil_explain_failure();}} Cyc_Tcstmt_tcStmt( Cyc_Tcenv_set_encloser(
 _temp374, s0), _temp123, 0); return;}}}} _LL230: { struct Cyc_Core_Opt* _temp381=*
 _temp260; Cyc_Tcexp_tcExpInitializer( te, 0, _temp256);* _temp260= _temp256->topt;{

@@ -62,6 +62,13 @@ EXTERN_TYPEREP tunion Typestruct {
       we can just check the tunion pointer to see if it's a tag).
   **/
   TUnion($(unsigned int, tunion Typestruct)@?);
+  /** [XTUnion(fields)] is an xtunion type, where each element of
+      the array [fields] is a pair [(tag,ts)] of a tag value [tag]
+      and a Typestruct [ts] representing the type of the tagged data.
+      Tag-only fields are not included in the array (since
+      we can just check the xtunion pointer to see if it's a tag).
+  **/
+  XTUnion($(string_t<`H>, tunion Typestruct)@?);
   /** [Union(fields)] is a union type, where each element of
       the array [fields] is a Typestruct represnting the data
       for a possible case of the union.
@@ -81,11 +88,11 @@ EXTERN_TYPEREP tunion Typestruct {
   App(tunion Typestruct, tunion Typestruct?);
 };
   
-typedef tunion Typestruct typestruct_t;
+typedef tunion `r Typestruct typestruct_t<`r>;
   
 extern void print_typestruct(typestruct_t rep);
 extern void xmlize_typestruct(typestruct_t rep);
-extern typestruct_t normalize(typestruct_t ts);
+extern typestruct_t<`H> normalize(typestruct_t<`H> ts);
 }
 
 #endif

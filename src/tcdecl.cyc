@@ -576,7 +576,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
 
   // check type
   if (! check_type(t0, t1)) {
-    merr(loc, msg, "%s %s has type %s instead of %s",
+    merr(loc, msg, "%s %s has type \n%s\n instead of \n%s\n",
 	 t, v, typ2string(t1), typ2string(t0));
     explain_failure();
     res = false;

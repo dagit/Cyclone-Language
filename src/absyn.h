@@ -138,10 +138,6 @@ namespace Absyn {
   EXTERN_ABSYN struct Tqual { 
     bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
-  // This is essentially the same ?
-  /*  EXTERN_ABSYN struct Tqual { 
-      char q_const; char q_volatile; char q_restrict; 
-      };*/
 
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
 
@@ -819,5 +815,9 @@ namespace Absyn {
 
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
+
+  // for testing typerep; temporary
+  extern void print_decls(list_t<decl_t>);
 }
+
 #endif

@@ -28,8 +28,8 @@
 namespace Marshal {
 
 
-extern void print_type(Typerep::typestruct_t rep, `a@ val);
-extern void xmlize_type(Typerep::typestruct_t rep, `a@ val);
+extern void print_type(tunion Typerep::Typestruct rep, `a@ val);
+  //extern void xmlize_type(tunion Typerep::Typestruct rep, `a@ val);
 
 }
 

@@ -19,24 +19,41 @@
 /* This file defines the low-level representation of Cyclone data
    for implementing generic marshallers. */
 
+#include <set.h>
 #include <typerep.h>
 #include <stdio.h>
-#include "marshal.h"
+#include <string.h>
+#include <ctype.h>
+#include <marshal.h>
 
 using Typerep;
 using Marshal;
+
 
 extern "C" `b unsafe_cast<`b,`a>(`a x);
 
 namespace Marshal;
 
+typedef Set::set_t<unsigned int> addr_set_t;
+
+static int int_cmp(unsigned int a, unsigned int b) {
+  if(a == b) return 0;
+  else if (a < b) return 1;
+  else return -1;
+}
+
+static addr_set_t empty_addr_set () {
+  return Set::empty(int_cmp);
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
-static typestruct_t
+static tunion `r Typestruct
 get_unionbranch(unsigned int tag,
-		$(unsigned int,tunion Typestruct)@ ? l)
+		$(unsigned int,tunion `r Typestruct)@ ? l)
 {
 //    fprintf(stderr,"looking for tag %d\n",tag);
   for (int i = 0; i < l.size; i++) {
@@ -49,13 +66,33 @@ get_unionbranch(unsigned int tag,
   throw new Core::Failure("Could not find tag in TUnion");
 }
 
+
+/*-------------------------------------------------------------------------*/
+/* given a tag and a list of typereps, each assumed to be a TUnionField,
+   look up the tag in the list and return the corresponding type
+   (assumed to be a tuple) */
+static tunion `r Typestruct
+get_xtunionbranch(string_t<`H> tag,
+		$(string_t<`H>,tunion `r Typestruct)@ ? l)
+{
+  //fprintf(stderr,"looking for tag %s (%x)\n",tag,(int)tag);
+  for (int i = 0; i < l.size; i++) {
+    let $(btag,typ) = *(l[i]);
+    //fprintf(stderr,"  checking tag %s (%x)\n",btag,(int)btag);
+    if (strcmp(btag,tag) == 0)
+      return typ;
+  }
+  //fprintf(stderr,"didn't find it\n");
+  throw new Core::Failure("Could not find tag in XTUnion");
+}
+
 /*-------------------------------------------------------------------------*/
 /* returns the size, in bytes, of the toplevel type */
-unsigned int 
+static unsigned int 
 size_type(typestruct_t rep) 
 {
   switch (rep) {
-  case &Int(szbits): return (szbits>>2);
+  case &Int(szbits): return (szbits>>3);
   case Float: return sizeof(float);
   case Double: return sizeof(double);
   case &ThinPtr(_,_): return sizeof(void *);
@@ -74,58 +111,30 @@ size_type(typestruct_t rep)
   }
 }
 
-/*-------------------------------------------------------------------------*/
-/* Given a pointer to a value (the pointer type here is unsigned int), 
-   and the type of the value pointed to, print the type */
-void
-print_ptr_type(typestruct_t typ,
-	       unsigned int val)
-{
-  switch (typ) {
-  /* All FLAT types go through unchanged */
-  case &Int(_):
-  case Float:
-  case Double:
-  case &FatPtr(_):
-  case &Tuple(_,_):
-    int @ptr = unsafe_cast(val);
-//      printf("FLAT type ->%x ",val);
-//      print_typestruct(typ);
-    print_type(typ, ptr); 
-    return;
-  
-  /* All POINTER types need an additional dereference */
-  case &ThinPtr(_,_):
-  case &TUnion(_):
-    int @@ptr = unsafe_cast(val);
-//      printf("PTR type ->%x ",val);
-//      print_typestruct(typ);
-    print_type(typ, *ptr);
-    return;
-  case &Union(_):
-    throw new Core::Failure("Cannot print Unions");
-  default: throw new Core::Failure("Unhandled case in print_ptr_type");
-  }
-  
+
+
+// returns whetner elt is a member, inserts if it's not
+$(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
+  return new $(Set::member(set,val), Set::insert(set,val));
 }
 
 /*-------------------------------------------------------------------------*/
-/* Invariant: In the case that the type [rep] is already a pointer
-   type (i.e. has kind B), then it matches [val]'s structure exactly.
-   If [rep] is not normally pointer type, then we assume that val is a
-   pointer to a value of that type. */
-void 
-print_type(typestruct_t rep, `a @ val) 
+/* Invariant: val points to a value of the type that rep represents      
+ * env contains all addresses of tunion or pointer types
+ * (these are the only possible sources of sharing/cycles)
+ * before we follow a dereference through a pointer or tunion, 
+ * we look it up to make sure that it's not a repeat
+ */
+addr_set_t
+print_type_base(typestruct_t rep, addr_set_t env, `a @ val) 
 {
-    
   switch (rep) {
-
-  /* FLAT type; assume we have a pointer to it */
   case &Int(sz):
     switch (sz) {
     case 8:
       char @x = unsafe_cast(val);
-      printf("%c",*x);
+      if(isprint(*x)) printf("'%c'",*x);
+      else printf("'\\%d'",*x);
       break;
     case 16:
       short @x = unsafe_cast(val);
@@ -136,99 +145,160 @@ print_type(typestruct_t rep, `a @ val)
       printf("%d",*x);
       break;
     default:
-      fprintf(stderr,"print_type: illegal int size %d bits\n", sz);
+      fprintf(stderr,"print_type_base: illegal int size %d bits\n", sz);
       exit(1);
     }
     break;
-
-  /* FLAT type; assume we have a pointer to it */
+  
   case Float:
     float @x = unsafe_cast(val);
     printf ("%f",*x);
     break;
-
-  /* FLAT type; assume we have a pointer to it */
+  
   case Double:
     double @x = unsafe_cast(val);
     printf ("%f",*x);
     break;
 
-  /* POINTER type */
   case &ThinPtr(sz,typ):
-    printf("{ ");
-    int x = unsafe_cast(val); /* x is a pointer to the buffer */
-    if (x != 0) {
-      int typ_szb = size_type(typ);
-      for (int i = 0; i<sz; i++) {
-	print_ptr_type(typ,x);
-	if (i != (sz-1))
-	  printf(", ");
-	x += typ_szb;
+    // val is a pointer to a pointer to whatever typ represents
+    int *x = unsafe_cast(val); 
+    int y = *x;
+    let &$(mem,env2) = member_insert(env,y);
+    env = env2;
+    if(!mem) {
+      printf("{(@%x) ",y);
+      if (y != 0) {
+	int typ_szb = size_type(typ);
+	for (int i = 0; i<sz; i++) {
+	  env = print_type_base(typ,env, (`a@)unsafe_cast(y));
+	  if (i != (sz-1))
+	    printf(", ");
+	  y += typ_szb;
+	}
       }
+      else printf ("NULL");
+      printf(" }");
     }
-    else printf ("NULL");
-    printf(" }");
+    else {
+      printf("(#%x)",y);
+    }
     break;
 
-  /* FLAT type; assume we have a pointer to it */
   case &FatPtr(typ): 
-    /* x is a pointer to the three-tuple for the array */
     $(unsigned int, unsigned int, unsigned int) @`H x = unsafe_cast(val);
     unsigned int typ_szb = size_type(typ);
     unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
-
-    printf("[ ");
-    for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
-      print_ptr_type(typ, i);
-      if ((i+typ_szb) < last_plus_one)
-	printf(", ");
+    let &$(mem,env2) = member_insert(env,base);
+    env = env2;
+    if(!mem) {
+      printf("[(@%x) ",base);
+      for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
+	env = print_type_base(typ, env, (`a@)unsafe_cast(i));
+	if ((i+typ_szb) < last_plus_one)
+	  printf(", ");
+      }
+      printf(" ]");
     }
-    printf(" ]");
+    else {
+      printf("(#%x)",base);
+    }
     break;
 
-  /* FLAT type; assume we have a pointer to it */
   case &Tuple(_,l):
     printf("$( ");
-    int x = unsafe_cast(val); /* x is a pointer to the buffer */
-//      printf("%x -> Tuple\n",x);
+    int x = unsafe_cast(val); 
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-//        printf ("ofs = %d, x_ofs = %x, typ =",ofs,x_ofs);
-//        print_typestruct(typ);
-//        printf("\n");
-      print_ptr_type(typ, /* env, */ x_ofs);
+      env = print_type_base(typ, env, (`a@)unsafe_cast(x_ofs));
       if (i != (l.size-1))
 	printf(", ");
     }
     printf(" )");
     break;
 
-  /* POINTER type */
   case &TUnion(l):
     printf("&[( ");
     /* get the tag */
-    unsigned int tag = unsafe_cast(val);
-    if (tag < 1024) {
-      printf("%d",tag);
+    unsigned int@ tagp = unsafe_cast(val);
+    if (*tagp < 1024) {
+      printf("%d",*tagp);
     }
     else {
-      unsigned int @x = unsafe_cast(val);
-      tag = *x;
-      /* figure out which variant it is */
-      typestruct_t typ = get_unionbranch(tag,l);
-      /* recurse; don't need to go through print_ptr_type because
-	 we know we have a pointer to the TUnionField */
-      print_type(typ, /* env, */ val);
+      let &$(mem,env2) = member_insert(env,*tagp);
+      env = env2;
+      if(!mem) {
+	printf("(@%x)",*tagp);
+	unsigned int @x = unsafe_cast(*tagp);
+	unsigned int tag = *x;
+	/* figure out which variant it is */
+	typestruct_t typ = get_unionbranch(tag,l);
+	env = print_type_base(typ, env, x);
+      }
+      else {
+	printf("(#%x)",*tagp);
+      }
     }
     printf(" )]");
     break;
-  case &Union(_):
-    throw new Core::Failure("Cannot print Unions");
-  default: throw new Core::Failure("Unhandled case in print_type");
+
+  case &XTUnion(l):
+    // val is a pointer to a xtunion, hich is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
+    unsigned int@ xtunionp = unsafe_cast(val);
+    let &$(mem,env2) = member_insert(env,*xtunionp);
+    env = env2;
+    if(!mem) {
+      printf("(@%x)",*xtunionp);
+      // get the pointer to the name string "\0\0\0\0Name"
+      unsigned int* xtstructp = unsafe_cast(*xtunionp);
+      if(*xtstructp != 0) {
+	Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	printf("&%s[( ",xtname);
+	/* figure out which variant it is */
+	typestruct_t typ = get_xtunionbranch(xtname,l);
+	env = print_type_base(typ, env, (_@)xtstructp);
+      }
+      else {
+	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	printf("&%s[( ",xtname);
+      }
+    }
+    else {
+      printf("(#%x)",*xtunionp);
+    }
+    printf(" )]");
+    break;
+
+  case &Union(l):
+    printf("[[");
+    // Print out each case; safe because no pointers
+    for(int i = 0; i < l.size; i++) {
+      print_type_base(*l[i],env,val);
+      if(i < l.size-1) printf(" | ");
+    }
+    printf("]]");
+    break;
+    
+
+  default: throw new Core::Failure("Unhandled case in print_type_base");
+  }
+  return env;
+}
+
+void print_type(typestruct_t ts, `a@ val) {
+  try{
+  print_type_base(ts,empty_addr_set(),val);
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Core::Failure(%s)\n",s);
+    throw new Core::Failure(s);
   }
 }
 
+#if 0
 void
 xmlize_ptr_type(typestruct_t typ,
 	       unsigned int val)
@@ -263,6 +333,7 @@ xmlize_ptr_type(typestruct_t typ,
 }
 
 // Emits an XML form of a value with given typerep'd type
+
 
 
 void 
@@ -363,8 +434,6 @@ xmlize_type(typestruct_t rep, `a @ val)
       tag = *x;
       /* figure out which variant it is */
       typestruct_t typ = get_unionbranch(tag,l);
-      /* recurse; don't need to go through print_ptr_type because
-	 we know we have a pointer to the TUnionField */
       printf("<tunion tag=\"%d\">", 1024+tag); // better idea?  
       xmlize_type(typ, /* env, */ val);
       printf("</tunion>");
@@ -377,69 +446,5 @@ xmlize_type(typestruct_t rep, `a @ val)
   }
   
 }
-
-/*--- SLOP ---*/
-
-/* Given a representation and a pointer to a value of that representation,
-   print it out */
-//  void
-//  print_rep(typerep_t @ rep, `a @ val) 
-//  {
-//    print_type(rep->typ, rep->env, val);
-//  }
-
-/*-------------------------------------------------------------------------*/
-/* Generate some C code and call gcc to determine the structure layout.
-   Returns a list of offsets for the fields. */
-
-//  extern string_t get_Ctype(typestruct_t typ);
-
-//  list_t<stringptr_t,`H>
-//  fold_getCtype(typestruct_t typ, list_t<stringptr_t,`H> Ctyps)
-//  {
-//    stringptr_t Ctyp = new (get_Ctype(typ));
-//    return new List{Ctyp,Ctyps};
-//  }  
-
-//  string_t
-//  get_Ctype(typestruct_t typ) 
-//  {
-//    switch (typ) {
-//    case &Int(sz): 
-//      if (sizeof(char) == sz) return "char";
-//      else if (sizeof(short) == sz) return "short";
-//      else if (sizeof(int) == sz) return "int";
-//      else {
-//        fprintf(stderr,"Unsupported int size %d\n",sz);
-//        exit(1);
-//        return "";
-//      }
-//    case Float: return "float";
-//    case Double: return "double";
-//    case &ThinPtr(_,_): return "void *";
-//    case &FatPtr(_): return "struct _tagged_arr";
-//  //    case &Tuple(l): 
-//  //      list_t<stringptr_t> typs = fold_right(fold_size_type,l,NULL);
-    
-//      /* XXX need to do lookup for Name */
-//      /* XXX How to deal with unions?  Seems like we don't know what
-//         the size is based on the type---need to see the actual
-//         tag at runtime */
-//    default:
-//      fprintf(stderr,"Unsupported type\n");
-//      exit(1);
-//      return "";
-//    }
-//  }    
-
-/*-------------------------------------------------------------------------*/
-//  extern unsigned int size_type(typestruct_t);
-
-//  static unsigned int 
-//  fold_size_type($(unsigned int, typestruct_t)@ rep, 
-//  	       unsigned int accum) 
-//  {
-//    unsigned int sz = size_type(rep);
-//    return sz + accum;
-//  }
-  
+ 
+#endif

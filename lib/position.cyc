@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <position.h>
 #include <string.h>
-namespace Position;
+#include <positionrep.h>
+
+namespace Position {
 using Core;
 using List;
 
@@ -30,6 +32,7 @@ xtunion exn {Exit};
 /////////// Location tracking///////////
 static string_t source = ""; // initialized by overall control
 struct Segment { int start; int end; };
+
 
 seg_t segment_of_abs(int start, int end) { return new Segment(start,end); }
 seg_t segment_join(seg_t s1, seg_t s2) { 
@@ -209,3 +212,8 @@ void reset_position(string_t<`H> s)    { source = s; error_b = false; }
 void set_position_file(string_t<`H> s) { source = s; error_b = false; }
 string_t get_position_file() { return source; }
 
+}
+
+using Typerep;
+
+tunion Typestruct segment_rep = __gen(struct Position::Segment);

@@ -42,7 +42,7 @@ tunion context {
   Normal
 };
 
-extern void setContext(tunion context c);
+extern void setContext(tunion `H context c);
 
 extern tunion context getContext();
 

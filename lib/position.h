@@ -27,7 +27,6 @@ namespace Position {
   using Core;
   using List;
   using Lineno;
-
   extern xtunion exn {extern Exit};
 
   extern void   reset_position(string_t<`H>);
@@ -63,5 +62,8 @@ namespace Position {
   extern bool print_context;
   extern void post_error(error_t);
   extern bool error_p();
+
 }
+
+
 #endif 

@@ -1174,8 +1174,8 @@ t1);{ struct Cyc_Std_String_pa_struct _temp389; _temp389.tag= Cyc_Std_String_pa;
 _temp389.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp388;
 _temp388.tag= Cyc_Std_String_pa; _temp388.f1=( struct _tagged_arr) t;{ void*
 _temp387[ 4u]={& _temp388,& _temp389,& _temp390,& _temp391}; Cyc_Tcdecl_merr(
-loc, msg, _tag_arr("%s %s has type %s instead of %s", sizeof( unsigned char), 32u),
-_tag_arr( _temp387, sizeof( void*), 4u));}}}}}); Cyc_Tcutil_explain_failure();
+loc, msg, _tag_arr("%s %s has type \n%s\n instead of \n%s\n", sizeof(
+unsigned char), 36u), _tag_arr( _temp387, sizeof( void*), 4u));}}}}}); Cyc_Tcutil_explain_failure();
 _temp380= 0;} if( ! Cyc_Tcutil_equal_tqual( tq0, tq1)){({ struct Cyc_Std_String_pa_struct
 _temp394; _temp394.tag= Cyc_Std_String_pa; _temp394.f1=( struct _tagged_arr) v;{
 struct Cyc_Std_String_pa_struct _temp393; _temp393.tag= Cyc_Std_String_pa;

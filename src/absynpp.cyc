@@ -1800,11 +1800,15 @@ string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
-string_t qvar2cstring(qvar_t v) {
+string_t typ2cstring(type_t t) {
   bool old_qvar_to_Cids = qvar_to_Cids;
+  bool old_add_cyc_prefix = add_cyc_prefix;
   qvar_to_Cids = true;
-  string_t s = qvar2string(v);
+  add_cyc_prefix = false;
+  string_t s = typ2string(t);
   qvar_to_Cids = old_qvar_to_Cids;
+  add_cyc_prefix = old_add_cyc_prefix;
+  //  printf("for %s, add_cyc_prefix = %s, qvar_to_cids = %s\n", s, add_cyc_prefix ? "true " : "false", qvar_to_Cids ? "true " : "false");
   return s;
 }
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}

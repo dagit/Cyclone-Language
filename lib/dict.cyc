@@ -504,7 +504,7 @@ dict_t<`a,`b> difference(dict_t<`a,`b,`r1> d1,
 
 static bool delete_f($(int (@`H)(`a,`a;`e), `a) @ `r env, `a x, `b y) {
   let &$(rel, x0) = env;
-  return (rel(x0, x) == 0);
+  return (rel(x0, x) != 0);
 }
 
 dict_t<`a,`b,`r2> rdelete(region_t<`r2> r2,dict_t<`a,`b,`r1> d, `a x) {

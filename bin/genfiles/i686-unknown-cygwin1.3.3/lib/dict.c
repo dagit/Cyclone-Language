@@ -780,7 +780,7 @@ d2);} struct _tuple9{ int(* f1)( void*, void*); void* f2; } ; static int Cyc_Dic
 struct _tuple9* env, void* x, void* y){ struct _tuple9 _temp419; void* _temp420;
 int(* _temp422)( void*, void*); struct _tuple9* _temp417= env; _temp419=*
 _temp417; _LL423: _temp422= _temp419.f1; goto _LL421; _LL421: _temp420= _temp419.f2;
-goto _LL418; _LL418: return _temp422( _temp420, x) ==  0;} struct Cyc_Dict_Dict*
+goto _LL418; _LL418: return _temp422( _temp420, x) !=  0;} struct Cyc_Dict_Dict*
 Cyc_Dict_rdelete( struct _RegionHandle* r2, struct Cyc_Dict_Dict* d, void* x){
 if( ! Cyc_Dict_member( d, x)){ return Cyc_Dict_rcopy( r2, d);}{ struct _tuple9
 _temp424=({ struct _tuple9 _temp425; _temp425.f1= d->rel; _temp425.f2= x;

@@ -45,6 +45,7 @@ CYCLONE_LIBS:=arg\
         lexing\
         lineno\
         list\
+	marshal\
 	mman\
         netdb\
         in\
@@ -110,6 +111,7 @@ CYCLONE_H:=arg.h\
 	lexing.h\
 	lineno.h\
 	list.h\
+	marshal.h\
 	math.h\
 	netdb.h\
 	netinet/cin.h\

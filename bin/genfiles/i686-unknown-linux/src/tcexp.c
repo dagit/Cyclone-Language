@@ -1041,8 +1041,8 @@ Cyc_Std_String_pa_struct _temp286; _temp286.tag= Cyc_Std_String_pa; _temp286.f1=
 struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e->topt))->v);{ struct Cyc_Std_String_pa_struct _temp285; _temp285.tag=
 Cyc_Std_String_pa; _temp285.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{
-void* _temp284[ 2u]={& _temp285,& _temp286}; Cyc_Tcutil_terr( e->loc, _tag_arr("descriptor has type %s but argument has type %s:",
-sizeof( unsigned char), 49u), _tag_arr( _temp284, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}
+void* _temp284[ 2u]={& _temp285,& _temp286}; Cyc_Tcutil_terr( e->loc, _tag_arr("descriptor has type \n%s\n but argument has type \n%s",
+sizeof( unsigned char), 51u), _tag_arr( _temp284, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}
 if( desc_types !=  0){({ void* _temp287[ 0u]={}; Cyc_Tcutil_terr( fmt->loc,
 _tag_arr("too few arguments", sizeof( unsigned char), 18u), _tag_arr( _temp287,
 sizeof( void*), 0u));});} if( _temp283 !=  0){({ void* _temp288[ 0u]={}; Cyc_Tcutil_terr(((
@@ -1517,8 +1517,8 @@ _temp717.tag= Cyc_Std_String_pa; _temp717.f1=( struct _tagged_arr) Cyc_Absynpp_t
 t2);{ struct Cyc_Std_String_pa_struct _temp716; _temp716.tag= Cyc_Std_String_pa;
 _temp716.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e1->topt))->v);{ void* _temp715[ 2u]={& _temp716,& _temp717}; Cyc_Tcutil_terr(
-e1->loc, _tag_arr("actual argument has type %s but formal has type %s", sizeof(
-unsigned char), 51u), _tag_arr( _temp715, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
+e1->loc, _tag_arr("actual argument has type \n%s\n but formal has type \n%s",
+sizeof( unsigned char), 54u), _tag_arr( _temp715, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
 _temp672=(( struct Cyc_List_List*) _check_null( _temp672))->tl; _temp707=((
 struct Cyc_List_List*) _check_null( _temp707))->tl;} if( _temp707 !=  0){({ void*
 _temp718[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("too few arguments for function",

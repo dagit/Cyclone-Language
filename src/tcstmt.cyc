@@ -352,7 +352,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	if(!is_local && !is_const_exp(te,(exp_t)initializer))
 	  terr(d->loc, "initializer needs to be a constant expression");
         if (!coerce_assign(te2,(exp_t)initializer,t)) {
-	  terr(d->loc, "%s declared with type %s, initialized with type %s",
+	  terr(d->loc, "%s declared with type \n%s\n but initialized with type \n%s",
                *x, typ2string(t), typ2string(initializer->topt->v));
           explain_failure();
         }

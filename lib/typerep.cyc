@@ -88,6 +88,16 @@ print_typestruct(typestruct_t rep)
     }    
     printf(" )");
     break;
+  case &XTUnion(l):
+    printf("XTUnion(");
+    for (int i = 0; i < l.size; i++) {
+      let $(tag,typ) = *(l[i]);
+      printf ("$(%s,",tag+4);
+      print_typestruct(typ);
+      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+    }    
+    printf(" )");
+    break;
  case &Union(l):
    printf("Union(");
    for (int i = 0; i < l.size; i++) {
@@ -175,6 +185,16 @@ xmlize_typestruct(typestruct_t rep)
     }    
     printf("</Tunion>");
     break;
+  case &XTUnion(l):
+    printf("<XTUnion>");
+    for (int i = 0; i < l.size; i++) {
+      let $(tag,typ) = *(l[i]);
+      printf ("<Tag tag=\"%s\">",tag+4);
+      xmlize_typestruct(typ);
+      printf ("</Tag>");
+    }    
+    printf("</XTunion>");
+    break;
  case &Union(l):
    printf("<Union>");
    for (int i = 0; i < l.size; i++) {
@@ -208,9 +228,9 @@ xmlize_typestruct(typestruct_t rep)
 // something wron with this
 
 
-static typestruct_t 
-normalize_env(dict_t<name_t,typestruct_t,`H> env,
-	      typestruct_t ts) {
+static typestruct_t<`H>
+normalize_env(dict_t<name_t,typestruct_t<`H>,`H> env,
+	      typestruct_t<`H> ts) {
   switch (ts) {
   case &Var(name): 
     return Dict::lookup(env,(string_t@`H)name);
@@ -244,6 +264,17 @@ normalize_env(dict_t<name_t,typestruct_t,`H> env,
     return new TUnion((_?)newfields2);
 
 
+  case &XTUnion(fields):
+    let newfields = new {for i < fields.size: NULL};
+    for(int i = 0; i < fields.size; i++) {
+      let &$(x,tsi) = fields[i];
+      newfields[i] = new $(x,normalize_env(env,tsi));
+    }
+    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    
+    return new XTUnion((_?)newfields2);
+
+
   case &Union(tss):
     let newfields = new{for i < tss.size:NULL};
     for(int i = 0; i < tss.size; i++) {
@@ -274,7 +305,7 @@ int name_order(name_t s1, name_t s2) {
   return strcmp(*s1,*s2);
 }
 
-typestruct_t normalize(typestruct_t ts) {
+typestruct_t<`H> normalize(typestruct_t<`H> ts) {
   return normalize_env(Dict::empty(name_order),ts);
 }			  
 
