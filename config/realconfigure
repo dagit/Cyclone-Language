@@ -99,7 +99,7 @@ function egrep_path {
 function get_cc {
   CC=gcc
   if [ "$TYPE" = "apple" ]; then
-    CC="cc -no-cpp-precomp -Wno-long-double"
+    CC="gcc2 -no-cpp-precomp -Wno-long-double"
   else
     for comp in gcc cc; do
       CC=`$WHICH $comp 2> /dev/null`
