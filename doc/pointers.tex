@@ -1,236 +1,253 @@
 \section{Pointers}
 \label{sec:pointers}
 
-As in C, Cyclone pointers are just addresses.  Operations on pointers,
+As in C, one should think of Cyclone pointers as just addresses.  
+Operations on pointers,
 such as \texttt{*x}, \texttt{x->f}, and \texttt{x[e]}, behave the same
 as in C, with the exception that run-time checks sometimes precede
 memory accesses.  (Exactly when and where these checks occur is
 described below.)  However, Cyclone prevents memory errors such as
-dereferencing dangling pointers, so it may reject legal C operations
-on pointers.
+dereferencing dangling pointers or indexing outside an array's bounds, 
+so it may reject some operations on pointers that C would accept.
 
-In order to enforce memory safety, Cyclone pointer types contain more
-information than their C counterparts.  In addition to the type of the
-object pointed to, pointer types indicate:
+In order to enforce memory safety and distinguish between different
+uses of pointers, Cyclone pointer types include additional qualifiers
+when compared to their C counterparts.  These qualifiers are 
+described briefly below and in more detail throughout this section:
 
 \begin{itemize}
-\item \hyperlink{pointer_null}{Whether a value of the type may be
-    \texttt{NULL}}
-\item \hyperlink{pointer_bound}{The (minimum) number of objects pointed to}
-\item \hyperlink{pointer_region}{The region into which the pointer
-    points}
-\item Whether the pointed-to memory is zero-terminated (to be documented).
+\item \texttt{@nullable}:  Pointers with this qualifier may be \texttt{NULL}.
+This qualifier is present by default and overridden by the \texttt{@notnull}
+qualifier.  A dereference of a \texttt{@nullable} pointer will generally
+be preceded by a \texttt{NULL}-check.  
+
+\item \texttt{@notnull}:  Pointers with this qualifier may never be 
+\texttt{NULL}, and thus never need to be checked for \texttt{NULL}
+upon dereference.  This qualifier is not present by default and must be
+put in explicitly.  The qualifier may be abbreviated by using ``\texttt{@}''
+in place of the usual pointer ``\texttt{*}''.  So, for instance,
+the type ``\texttt{int *@notnull}'' can be abbreviated by 
+``\texttt{int @}''.  Currently, the \texttt{@nonnull} qualifier cannot be 
+used on pointers with the \texttt{@fat} qualifier.  
+
+\item \texttt{@thin}:  Pointers with this qualifier have the same
+representation as in C (i.e., a single machine word.)  However,
+arithmetic on thin pointers is not supported except when the
+pointer is also qualified as \texttt{@zeroterm} (see below).  
+This qualifier is present by default and overridden by the \texttt{@fat} 
+qualifier.
+
+\item \texttt{@fat}:  Pointers with this qualifier consist of a
+thin pointer plus additional information needed to support safe
+pointer arithmetic and dereferencing.  (The current implementation
+uses three words in total.)  Each dereference of a fat
+pointer incurs both a \texttt{NULL}-check and a bounds check to
+ensure that the pointer points to a valid object.  The 
+\texttt{@fat} qualifier
+cannot be used with the \texttt{@nonnull} or \texttt{@numelts}
+qualifiers (though we expect to change this in the future.)  
+The \texttt{numelts} operation may be applied to fat pointers to
+determine the number of elements in the (forward) sequence that
+may be safely dereferenced.  Finally, the qualifier may be 
+abbreviated by using ``\texttt{?}''
+in place of the usual pointer ``\texttt{*}''.  So, for instance,
+the type ``\texttt{int *@fat}'' can be abbreviated by 
+``\texttt{int ?}''.  
+
+\item \texttt{@numelts(e)}:  The term \texttt{e} must be a \emph{static}
+expression (i.e., a constant expression or one involving \texttt{valueof})
+and indicates an upper bound on the number of objects that
+that the pointer refers to.  For example, if \texttt{p} has type
+\texttt{T *@numelts(42)}, then either \texttt{p} is \texttt{NULL}
+or else for $0 \leq \texttt{i} < \texttt{e}$, the expression 
+\texttt{p[i]} is guaranteed to
+contain a \texttt{T} object.  This qualifier may not be used 
+in conjunction with \texttt{@fat}.  If omitted on a \texttt{@thin}
+pointer, then \texttt{@numelts(1)} is inserted by default.  This
+qualifier can be abbreviated by writing the bounds expression \texttt{e}
+in curly braces.  For instance, the type ``\texttt{int *@numelts(42)}''
+can be abbreviated by ``\texttt{int *\{42\}}''.
+
+\item \texttt{@zeroterm}:  This qualifier is used for zero-terminated
+sequences, such as C-style strings, and provides an alternative to
+fat pointers for doing safe pointer arithmetic without knowing 
+bounds statically.  This qualifier can only be used on pointers whose
+element type admits zero or \texttt{NULL} as a value, including
+integral types, and \texttt{@nullable} pointer types.  Arithmetic
+in the forward direction is possible with zero-terminated pointers
+(e.g., \texttt{p++}) as is a subscript with a positive index
+(e.g., \texttt{p[i]}).  However, the compiler inserts code to ensure
+that the index does not step over the final zero.  When updating
+a zero-terminated array, the compiler also ensures that the final
+zero is not overwritten with a non-zero value.  It is generally best
+to coerce a thin, zero-terminated pointer to a fat, zero-terminated
+pointer to avoid these overheads.  This qualifier is 
+only present by default for \texttt{char} pointers.  It can be
+overridden with the \texttt{@nozeroterm} qualifier.  This qualifier
+may also be used on array types.
+
+\item \texttt{@nozeroterm}:  
+This qualifier is present by default
+on all pointer types except for \texttt{char} pointers.  It is
+used to override the implicit \texttt{@zeroterm} qualfier for
+\texttt{char} pointers.  This qualifier may also be used on array types.
+
+\item \texttt{@region(`r)}:  This qualifier is used to indicate the
+region into which a pointer points (in this case region \texttt{`r}).
+The qualifier may be abbreviated by simply writing the region name
+after any other Cyclone qualifiers.  
+For instance, the type ``\texttt{int *@nonnull @region{`r}}''
+may be abbreviated as ``\texttt{int @`r}''.  The rules about default
+region annotations are context-dependent and therefore described below.
 \end{itemize}
 
-For example, the type \verb|int *{7}`H| is for possibly-null
-pointers to seven \texttt{int} objects in the heap.  The syntax and
-semantics of all this additional pointer information is now explained.
-Then we introduce a new type for \hyperlink{pointer_unknown}{arrays of
-  unknown size}.  Pointer arithmetic is allowed only on this last
-collection of types.  Throughout, we mention planned improvements.  We
-end with a \hyperlink{pointer_summary}{summary}.
+\subsection{Pointer Subtyping}
 
-\subsection*{\hypertarget{pointer_null}{Whether a value of the type may be
-    \texttt{NULL}}}
+Some pointer types may be safely used in contexts where another
+pointer type is expected.  In particular, \texttt{T*@notnull} is a
+subtype of \texttt{T*@nullable} which means that a not-null pointer
+can be passed anywhere a possibly-null pointer is expected.
 
-Cyclone's type system distinguishes between pointers that may be
-\texttt{NULL} and those that may not.
+Similarly, a \texttt{T*@numelts(42)} pointer can be passed anywhere a
+\texttt{T*@numelts(30)} pointer is expected, because the former
+describes sequences that have at least 42 elements, which satisifes
+the constraint that it has at least 30 elements.
 
-\paragraph{Syntax and Semantics} The syntax is straightforward:
-The \texttt{*} character is for pointers that may be \texttt{NULL} (as in
-C), and the \texttt{@} character is for pointers that may not be
-\texttt{NULL}.  So ``\texttt{int * x = NULL;}'' is accepted, but
-``\texttt{int @ x = NULL;}'' is not.
-
-
-\paragraph{Subtyping}
-For any type \texttt{t}, the type \texttt{t@} is a subtype of \texttt{t*}.
-The type of \texttt{malloc(sizeof(t))} is \texttt{t@}, as is \texttt{new e}
-where \texttt{e} has type \texttt{t}.  Hence in the declaration,
-``\texttt{int *x = malloc(sizeof(int))}'', there is an implicit legal
-cast from \texttt{t@} to \texttt{t*}.  Note that even when \texttt{t1} is a
-subtype of \texttt{t2}, the type \texttt{t1*} is not necessarily a subtype
-of \texttt{t2*}, nor is \texttt{t1@} necessarily a subtype of \texttt{t2@}.
-For example, \texttt{int@@} is not a subtype of \texttt{int*@}.  This
-illegal code shows why:
-
+In addition, \texttt{T*@region(`r)} is a subtype of \texttt{T*@region(`s)}
+when region \texttt{`r} \emph{outlives} region \texttt{`s}.  The
+heap region (\texttt{`H}) outlives every region so you can safely
+use a heap pointer anywhere another region is expected.  Outer
+blocks and outer regions outlive inner blocks and regions.  For
+example the following code is type-correct:
 \begin{verbatim}
-  void f(int @@ x) {
-    int *@ y = x; // would be legal were int *@ a subtype of int @@
-    *y = NULL;    // legal because *y has type int *
-    **x;          // seg faults even though the type of *x is int @
+  void foo(int x) {
+    int *@region(`foo) y = &x;
+    L:{
+      int *@region(`L) z = y;
+    }
+  }
+\end{verbatim}
+because region \texttt{`foo} outlives region \texttt{`L}.  By
+default, regions passed in to a function outlive any regions
+defined in the function (because they will live across the
+function call).  Finally, you can specify outlives relations
+among region parameters within a function's prototype.  The
+following code specifies that input region \texttt{`r} outlives
+input region \texttt{`s} so it's safe to treat \texttt{`r} pointers
+as if they were \texttt{`s} pointers:
+\begin{verbatim}
+  void bar(int *@region(`r) x,
+           int *@region(`s) y : {`r} > `s);
+\end{verbatim}
+In general, the outlives relation is specified after the function
+arguments by separating the relations with a colon (\texttt{:}) and
+giving a comma-separated list of primitive outlives relations.
+These outlives relations are of the form ``\texttt{\{`r1,...,`rn\} > `r}''
+and specify that region \texttt{`r} outlives all of the regions
+\texttt{`r1} through \texttt{`rn}.
+
+Finally, when \texttt{T} is a subtype of \texttt{S}, then
+\texttt{T*} is a subtype of \texttt{const S*}.  So, for
+instance, if we declare:
+\begin{verbatim}
+// nullable int pointers
+typedef int * nintptr_t;
+// not-nullable int pointers
+typedef int *@notnull intptr_t;
+\end{verbatim}
+then \texttt{intptr_t *} is a subtype of \texttt{const nintptr_t *}.
+Note, however, that ``\texttt{const}'' is important to get this
+kind of deep subtyping.  
+
+The following example shows what could go wrong if we allowed
+deep subtyping without the \texttt{const}:
+\begin{verbatim}
+  void f(int *@notnull *@notnull x) {
+    int *@nullable *@notnull y = x; 
+    // would be legal if int *@nullable *@notnull 
+    // was a subtype of int *@notnull *@notnull.
+    *y = NULL;    
+    // legal because *y has type int *@nullable
+    **x;          
+    // seg faults even though the type of *x is 
+    // int *@notnull
   }
 \end{verbatim}
 
-You can explicitly cast a value of type \texttt{t*} to
-\texttt{t@}.  Doing so will perform a run-time check.  The
-cast can be omitted, but the compiler emits a warning and performs the
-run-time check.  Because the current implementation does not
-consider tests to change a \texttt{t*} to \texttt{t@}, such casts are
-sometimes necessary to avoid spurious warnings, such as in this code:
+\subsection{Pointer Coercions}
 
+In addition to pointer subtyping, Cyclone provides a number of
+\emph{coercions} which allow you to convert a pointer value from one
+type to another.  For instance, you can coerce a thin pointer
+with 42 elements to a fat pointer:
 \begin{verbatim}
-  extern void f(int @);
-
-  void g(int * x) {
-    if (x != NULL)
-       f((int @)x);
+  int arr[42];
+  int *@thin @numelts(42) p = arr;
+  int *@fat pfat = p;
+\end{verbatim}
+As another example, you can coerce a thin, zero-terminated pointer
+to a fat, zero-terminated pointer:
+\begin{verbatim}
+  int strlen(char *@zeroterm s) {
+    char *@fat @zeroterm sfat = s;
+    return numelts(s);
   }
 \end{verbatim}
+In both cases, the compiler inserts code to convert from the
+thin representation to an appropriate fat representation.  In
+the former case, the bounds information can be calculated
+statically.  In the latter case, the bounds information is
+calculated dynamically (by looking for the zero that terminates
+the sequence.)  In both cases, the coercion is guaranteed to
+succeed, so the compiler does not emit a warning.
 
-\paragraph{Implementation}
-A run-time null check is a simple comparison.  If it fails (i.e., the
-value is \texttt{NULL}), the exception \texttt{Null_Exception} is thrown.
-A check is inserted whenever a \texttt{t*} is (explicitly or implicitly)
-cast to a \texttt{t@}.  Casting \texttt{t@} to \texttt{t*} has no run-time
-effect.
+In other cases, a coercion can cause a run-time exception to be
+thrown.  For instance, if you attempt to coerce a \texttt{@nullable}
+pointer to a \texttt{@notnull} pointer, and the value happens to be
+\texttt{NULL}, then the exception \texttt{Null_Exception} is thrown.
+In general, the compiler will warn you when you try to coerce
+from one pointer representation to another where a run-time
+check must be inserted, and that check might fail.  A dataflow
+analysis is used to avoid some warnings, but in general,
+it's not smart enough to get rid of all of them.  In these
+cases, you can explicitly cast the pointer from one representation
+to the other, and the compiler will not generate a warning
+(though it will still insert the run-time check to ensure
+safety.)
 
-Safety demands that if \texttt{x} may be \texttt{NULL}, then \texttt{*e},
-\texttt{e.f}, \texttt{e->f}, and \texttt{e[e2]} are translated such that we
-first check that \texttt{e} is not \texttt{NULL}.  \texttt{e} is only
-evaluated once.  To guarantee there is no check at
-run-time, use \texttt{@} instead of \texttt{*}.  For example, the
-function on the left performs one check whereas the one on the right
-performs three (both throw \texttt{Null_Exception} if passed
-\texttt{NULL}):
-
-\begin{verbatim}
-  int sum3(int *{3} x) {           int sum3(int *{3} x) {
-    int @{3} y = x;                  return x[0]+x[1]+x[2];
-    return y[0]+y[1]+y[2];         }
-  }
-\end{verbatim}
-
-However, a dataflow analysis eliminates many redundant null-checks.
-C's under-specified order-of-evaluation can reduce the effectiveness
-of the analysis, as in the example on the right above.  But in the
-current implementation, the following example has only one check:
-\begin{verbatim}
-int sum3(int *{3} x) {
-  int ans = x[0];
-  ans += x[1];
-  ans += x[2];
-  return ans;
-}
-\end{verbatim}
-
-Note that \texttt{\&e->f} and \texttt{\&e[e2]} check (if necessary) that
-\texttt{e} is not \texttt{NULL} even though these constructs do not read
-through \texttt{e}.
-
-\paragraph{Future}
-
+Here is a list of some of the coercions that are possible:
 \begin{itemize}
-\item We already use a dataflow analysis to avoid inserting provably
-  unnecessary null-checks.  However, this analysis does not suppress
-  spurious warnings about implicit casts from \texttt{t*} even when it
-  knows the cast cannot fail.  Instead, it just produces faster code.
-\item For debugging purposes, we may have \texttt{Null_Exception}
-  carry source-position information.
+\item \texttt{T} can be coerced to \texttt{S} when \texttt{T} is a subtype of
+\texttt{S}.
+\item \texttt{T*@nullable} 
+can be coerced to \texttt{T*@notnull} but might
+throw an exception at run-time.
+\item \texttt{T*@thin@numelts(c)} can be coerced to \texttt{T*@fat}
+when \texttt{c} is a constant expression.
+\item \texttt{T*@fat} can be coerced to \texttt{T*@thin @numelts(c)} 
+when \texttt{c} is a constant expression, but might throw an exception
+at run-time.
+\item \texttt{T*@thin@zeroterm} 
+can be coerced to \texttt{T*@fat@zeroterm}
+and vice versa.  
+\item \texttt{T*@thin@zeroterm} can be coerced to \texttt{const T*@fat@nozeroterm}.  
+\item \texttt{T*@thin@zeroterm} can be coerced to \texttt{T*@fat@nozeroterm}, but access to the trailing zero is lost.  
 \end{itemize}
 
-\subsection*{\hypertarget{pointer_bound}{The number of objects pointed to}}
+\subsection{Default Region Qualifiers}
 
-\paragraph{Syntax and Semantics}
-The type \verb|t@{37}| (similarly \verb|t*{37}|) describes pointers to
-37 \texttt{t} values.  In other words, if \texttt{x} has type
-\verb|t@{37}|, then \texttt{x[e]} is safe so long as \texttt{e} is between
-0 and 36, inclusive.  If the \verb|{n}| is omitted, it is implicitly
-\verb|{1}|.  Currently, the number must be a compile-time
-constant---see below for arrays of unknown size.
-
-We are taking pains not to say \verb|t@{37}| describes an array of 37
-\texttt{t} values because C (and therefore Cyclone) distinguishes arrays
-and pointers in certain contexts.  For example, a local declaration
-``\verb|t@{37}| \texttt{x;}'' allocates space on the stack for a pointer
-(which must hold a pointer to 37 \texttt{t} values) whereas
-``\texttt{t x[37];}'' allocates space on the stack for 37 \texttt{t}
-values.
-
-
-\paragraph{Subtyping}
-Pointers to more objects are subtypes of pointers to fewer objects (of
-the same type).  An explicit cast is not necessary.  Put another way,
-we could say \verb|t@{37}| describes pointers to at least 37 \texttt{t}
-values.
-
-
-\paragraph{Implementation}
-The length information is not present at run-time, except implicitly
-in run-time checks.  That is, if \texttt{e} has type \verb|t @{37}|, the
-compiler translates \texttt{e[e2]} to check that \texttt{e2} is less than
-37.  \texttt{e2} is evaluated only once.  If \texttt{e2} is a constant
-expression, there is no run-time check.  If \texttt{e2} is a constant
-expression not less than 37, it is a compile-time error.
-
-\paragraph{Future}
-In the future, the bounds information on a pointer will not have to be
-a compile-time constant.  For example, you will be able to write
-
-\begin{verbatim}
-  void f(tag_t<`n> n) {}
-    int *{`n} arr = new {for i < n : 37};
-    ...
-  }
-\end{verbatim}
-
-Currently, pointer arithmetic is only allowed on types of the form
-\texttt{t?}.  Soon we will allow adding a compile-time constant \texttt{c}
-to \verb|t@{n}| (for example), with the type of the result being
-\verb|t@{n-c}|.  It will be a compile-time error if \texttt{c > n}.
-
-\subsection*{\hypertarget{pointer_region}{The region into which the
-    pointer points}}
-
-\paragraph{Syntax and Semantics} The type \texttt{t@`r}
-describes pointers into region \texttt{`r}.  All regions start with the
-\texttt{`} character so that they are not confused with identifiers.  If
-the region is omitted, the compiler inserts one.  The region inserted
-depends on where the type occurs, as described below.
-
-The heap region (written \texttt{`H}) conceptually lives forever; in
-practice, it is garbage-collected.
-
-Every block (i.e., local scope) is a region.  If you label a block
-with \texttt{L:}, then the region's name is \texttt{`L}.  Similarly, the
-parameters to a function \texttt{f} are in a region named \texttt{`f}.
-Thanks to region inference, you can point into regions without explicit
-names.  For example, you can say \texttt{int *x = \&y} if \texttt{y} is a
-local variable in an unlabeled block.  Conceptually, the compiler
-creates a label for the block and fills in the corresponding region
-name for you.  (The output need not actually have a label.)
-
-Because every pointer has a type and every pointer type has a region,
-a pointer cannot be mutated so that it points into a different region
-than it did before the assignment.  Often subtyping (see below) is
-sufficient, but in some cases it is necessary to rewrite C code to use
-different variables for pointers into different regions.  Note that
-there is no way for a global variable to hold a stack pointer.
-
-Functions are implicitly polymorphic over the regions of their
-arguments.  For example, \texttt{void f(int *`r);} is a prototype that
-can be passed a pointer into any \emph{accessible} region.  That is,
-it can be passed a stack pointer or a heap pointer, so long as it is
-not passed a dangling pointer.  
-Note that our example function \texttt{f} could not possibly assign its
-argument to a global, whereas \texttt{void g(int *`H);} could.  On the
-other hand, \texttt{g} cannot be passed a stack pointer.
-
-The rules the compiler uses for filling in regions when they are
-omitted from pointer types are numerous, but they are designed to
-avoid clutter in the common case:
+The rules the compiler uses for filling in \texttt{@region} qualifiers
+when they are omitted from pointer types are a little complicated, but
+they are designed to avoid clutter in the common case:
 \begin{itemize}
-\item In function-argument types, a fresh region name is used.
+\item In function-argument types, a fresh (polymorphic) region name is used.
 \item In function-return types, \texttt{`H} is used.
 \item In type definitions, including \texttt{typedef}, \texttt{`H} is used.
 \item In function bodies, unification is used to infer the region
 based on how the location assigned the pointer type is used in the
 function.
 \end{itemize}
-In the future, we intend to change the rule for \texttt{typedef} so
-that the meaning can be different at each \emph{use} of the
-\texttt{typedef}, as dictated by the other rules.  Until then, be
-warned that 
+Thus, be warned that 
 \begin{verbatim}
 typedef int * foo_t;
 void g(foo_t);
@@ -239,112 +256,44 @@ is different than
 \begin{verbatim}
 void g(int *);
 \end{verbatim}
-Also, note that these rules are exactly the same as the rules for
-omitted regions in instantiations of parameterized types.
+The reason is clear when we fill in the default region qualifiers.
+In the first case, we have:
+\begin{verbatim}
+typedef int *@region(`H) foo_t;
+void g(foo_t);
+\end{verbatim}
+whereas in the second case we have:
+\begin{verbatim}
+void g(int *@region(`r));
+\end{verbatim}
 
-\paragraph{Subtyping} \texttt{t *`r1} is a subtype of \texttt{t *`r2}
-if \texttt{`r1} is known to \emph{outlive} \texttt{`r2}.  In
-particular, you can always cast a heap pointer to a pointer into
-another region.
+\subsection{Static Expression Bounds}
 
-\paragraph{Implementation} A pointer's region is not stored with the
-pointer at run-time.  So there is no way to ask for the region into
-which a pointer points.  For stack regions there is no region object
-at run-time \emph{per se}, just the stack space for the objects.  As
-is normal with region-based systems, Cyclone does not prevent dangling
-pointers.  Rather, it prevents \emph{dereferencing} dangling pointers.
-But this point is subtle.
-
-\subsection*{\hypertarget{pointer_unknown}{Pointers to an Unknown
-    Number of Objects---The \texttt{t ?} Types}}
-
-So far, we have not provided a way to point to a number of objects
-when the number is not known at compile-time.
-
-\paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
-to objects of type \texttt{t}.  Such types may be assigned
-\texttt{NULL}.  They may be annotated with a region, which (as with other
-pointer types) is the region into which the pointer points.  Omitted
-region annotations are filled in by the compiler.  Clearly,
-explicit bounds information makes no sense for these types.  If
-\texttt{e} has type \texttt{t ?}, then
-\texttt{e.size} has type \texttt{int} and is the number of objects pointed
-to by type \texttt{t}.  (Actually, \texttt{e.size} is allowed for any
-pointer type, but for other pointers it is evaluated at compile-time.)
-The meaning of operations on \texttt{t ?} objects is best explained in
-terms of the implementation.
-
-\paragraph{Implementation} Unlike with types like \verb|t*{37}|,
-the implementation stores bounds information with objects of type
-\texttt{t ?}.  Currently, a \texttt{t ?} object occupies three machine
-words.  Conceptually, the object maintains the starting address of the
-collection of objects pointed to, the length of the collection, and
-the current value of the pointer used for accessing memory.  Pointer
-arithmetic may cause the access pointer to be out-of-bounds; no error
-occurs at this point.  On the other hand, a subscript operation
-\texttt{e1[e2]} where \texttt{e1} has type \texttt{t?} checks that the
-access-pointer of \texttt{e1} plus \texttt{e2} is within bounds of
-\texttt{e1}.  Both \texttt{e1} and \texttt{e2} are evaluated once.  If the
-bound is violated the exception \texttt{Null_Exception} is thrown.
-
-When an object of type \texttt{t?} is assigned to, it gets the bounds
-information from the ``right-hand side'' of the assignment.  So
-\texttt{x=y} copies all of \texttt{y}'s fields to the fields of \texttt{x}.
-Similarly \texttt{x = y + 17}, copies \texttt{y}'s fields and then adds 17
-to \texttt{x}'s access pointer.  Finally, \texttt{x++} just increments
-\texttt{x}'s access pointer.  As in C, pointer arithmetic is limited to
-addition of constants and subtraction.  The result of pointer
-subtraction has type \texttt{unsigned int}, so there is no bounds
-information.
-
-Even though, \texttt{t ?} types are implemented as multi-word values,
-comparison operations (e.g., \texttt{==}) are defined on them---the
-comparison is performed on the access pointers.
-
-Conversions to/from \texttt{t ? `r} types from/to \verb|t*{n}`r| and
-\verb|t@{n}`r| types exist.  Converting to a \texttt{t?} type just uses
-the \texttt{t*} or \texttt{t@}'s static type information to initialize the
-bounds information.  The cast may be implicit; no warning is given.
-Converting to a \texttt{t*} or \texttt{t@} type incurs a run-time check
-that the access pointer has a value such that the target type's bounds
-information is sound.  If so, the access pointer is returned, else the
-exception \texttt{Null_Exception} is thrown.  Implicit casts of this form
-cause the compiler to give a warning.
-
-
-\paragraph{Future} We may add a ``cannot be NULL'' version of these types
-for sake of completeness.  More significantly, we intend to allow
-user-defined types to have certain fields describe the bounds
-information for other fields, rather than relying on types built into
-the language.
-
-\subsection*{\hypertarget{pointer_summary}{Summary and Discussion}}
-A pointer type has one of the following forms, where \texttt{t} is a
-type and \texttt{n} is a constant unsigned expression:
-
-\begin{itemize}
-\item \verb|t *{n}`r|, a possibly \texttt{NULL} pointer to \texttt{n}
-  elements of type \texttt{t} in region \texttt{`r}
-\item \verb|t @{n}`r|, a non-\texttt{NULL} pointer to \texttt{n} elements
-  of type \texttt{t} in region \texttt{`r}
-\item \texttt{t ? `r}, a pointer to an unknown number of elements of type
-  \texttt{t} in region \texttt{`r}.  Implemented as a multi-word object.
-\end{itemize}
-If \verb|{n}| is omitted, it is \verb|{1}|.  If the region is omitted,
-the compiler inserts one.  The region inserted depends on where the
-type is written.
-
-The easiest way to port code is to replace uses of \texttt{t *} with
-\texttt{t ?}.  Of course, this technique does not address region
-annotations.  Functions that can take only heap pointers (because the
-pointers escape into data structures, for example) will need to add
-\texttt{`H} annotations for the relevant parameters.
-
-Of course, using \texttt{t?} delays errors until run-time and is less
-efficient.  Using \texttt{t@} is the most efficient and
-guarantees that \texttt{Null_Exception} will not be thrown.
-
-Currently, code performing pointer arithmetic must use \texttt{t?}.
+The bound for the \texttt{@numelts} qualifier 
+must be a \emph{static} expression.  A static
+expression is either a constant expression, or an expression involving
+\texttt{valueof(T)} for a type-level expression \texttt{T}.  The
+\texttt{valueof} construct is used to connect the value of a run-time
+integer to the static bound on an array.  For example, the following
+function takes in an integer \texttt{num} and pointer to a sequence
+of \texttt{num} integers and returns the sum of the sequence:
+\begin{verbatim}
+  int sum(tag_t<`n> num, 
+          int *@notnull @numelts(valueof(`n)) p) {
+    int a = 0;
+    for (unsigned i = 0; i < num; i++) 
+      a += p[i];
+  }
+\end{verbatim}
+The type of \texttt{num} is specified as \texttt{tag_t<`n>}.  This
+simply means that \texttt{num} holds an integer value, called \texttt{`n},
+and the number of elements of \texttt{p} is equal to \texttt{n}.  
+This form of dependency is common enough that it can be abbreviated
+as follows:
+\begin{verbatim}
+  int sum(tag_t num, int p[num]);
+\end{verbatim}
+and the compiler will fill in the missing information.  
 
 % Local Variables:
 % TeX-master: "main-screen"
