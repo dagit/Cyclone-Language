@@ -61,6 +61,8 @@ typedef tunion Typestruct typestruct_t;
 
 extern void print_type(typestruct_t rep, `a@ val);
 extern void print_typestruct(typestruct_t rep);
+extern void xmlize_type(typestruct_t rep, `a@ val);
+extern void xmlize_typestruct(typestruct_t rep);
 
 }
 

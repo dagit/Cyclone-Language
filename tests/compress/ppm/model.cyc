@@ -241,7 +241,7 @@ int symbol;
 void dumpString( fp, str, pos, len )
 /* Dump the string STR starting at position POS. */
 FILE @fp;
-char *str;
+char ?str;
 int pos;
 int len;
 {
@@ -281,7 +281,7 @@ int d;
       while (s != NIL) {
 	sym = Symbols [s].Symbol;
 	sptr = Symbols [s].Sptr;
-	dumpTrieStr [d] = sym;
+	dumpTrieStr [d] = (char)sym;
 	dumpTrie( fp, sptr, d+1 );
 	s = Symbols [s].Snext;
       }
@@ -488,7 +488,7 @@ int lbnd, hbnd, totl;
 	arithmetic_encode( lbnd, hbnd, totl );
 }
 
-int arith_decode_target( totl )
+unsigned int arith_decode_target( totl )
 /* Arithmetically decodes the target. */
 int totl;
 {
@@ -943,7 +943,7 @@ int decode_symbol()
     /* Find the symbol based on the predicted context */
     symbol = decode_context( pContext );
 
-    Input [inputPos] = symbol;
+    Input [inputPos] = (char)symbol;
     update( symbol );
 
     if (debugLevel > 2)
@@ -972,7 +972,7 @@ int max;
     int cc;
 
     while ((cc = getc( fp )) != EOF) {
-	Input [p++] = cc;
+	Input [p++] = (char)cc;
 	if ((max > 0) && (p >= max))
 	    break;
     }

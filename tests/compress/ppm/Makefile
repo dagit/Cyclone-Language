@@ -11,6 +11,8 @@ CYCC=$(CYCDIR)/bin/$(CYCCOMP)
 
 override CYC_FLAGS += -I$(CYCDIR)/lib -B$(CYCDIR)/lib 
 
+all: encode$(EXE) decode$(EXE)
+
 encode$(EXE): arithcode.o model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 

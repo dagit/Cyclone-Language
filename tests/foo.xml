@@ -1,0 +1,14 @@
+<?xml version="1.0"?> 
+<?xml-stylesheet type="text/xsl" href="cyc.xsl"?>
+<tunion tag="2">
+ <tuple>
+  <int size="32">2</int>
+  <int size="32">1</int>
+  <tunion tag="1">
+   <tuple>
+    <int size="32">1</int>
+    <float>1.245000</float>
+   </tuple>
+  </tunion>
+ </tuple>
+</tunion>

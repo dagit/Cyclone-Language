@@ -8,6 +8,8 @@ CYCC := $(CYCDIR)/bin/$(CYCCOMP)
 
 override CYC_FLAGS += -I$(CYCDIR)/lib -B$(CYCDIR)/lib
 
+all: encode$(EXE) decode$(EXE)
+
 encode$(EXE): bit_output.o arithmetic_encode.o adaptive_model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 

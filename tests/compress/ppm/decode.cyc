@@ -17,9 +17,9 @@ void decode_file()
         putchar( symbol );
 }
 
-void main(argc,argv)
+void main(argc, argv)
 int argc;
-string? argv;
+string_t? argv;
 {
 
     argv++;

@@ -79,6 +79,38 @@ $(unsigned int,tunion Typestruct)@
   elems_Foo_arr[3] = { &elem_Foo2, &elem_Foo3, &elem_Foo4 };
 tunion Typestruct.TUnion foo_rep = TUnion(($(unsigned int,tunion Typestruct)@ ?)elems_Foo_arr);
 
+typedef struct Intlist {
+  unsigned int val;
+  struct Intlist * next;
+} intlist_t;
+
+extern tunion Typestruct.Tuple list_rep;
+tunion Typestruct.ThinPtr listptr_rep = ThinPtr(1,(tunion Typestruct)&list_rep);
+$(unsigned int,tunion Typestruct) list_arr1 = $((unsigned int)0, (tunion Typestruct)&int_tag);
+$(unsigned int,tunion Typestruct) list_arr2 = $((unsigned int)4,(tunion Typestruct)&listptr_rep);
+$(unsigned int,tunion Typestruct)@ 
+  elems_list_arr[2] = { &list_arr1, &list_arr2};
+tunion Typestruct.Tuple list_rep = Tuple(8, ($(unsigned int, tunion Typestruct)@?) elems_list_arr);
+
+extern struct Inttree;
+typedef struct Inttree inttree_t;
+
+struct Inttree {
+  unsigned int val;
+  inttree_t * left;
+  inttree_t * right;
+};
+
+extern tunion Typestruct.Tuple tree_rep;
+tunion Typestruct.ThinPtr treeptr_rep = ThinPtr(1,(tunion Typestruct)&tree_rep);
+$(unsigned int,tunion Typestruct) tree_arr1 = $((unsigned int)0, (tunion Typestruct)&int_tag);
+$(unsigned int,tunion Typestruct) tree_arr2 = $((unsigned int)4,(tunion Typestruct)&treeptr_rep);
+$(unsigned int,tunion Typestruct) tree_arr3 = $((unsigned int)8,(tunion Typestruct)&treeptr_rep);
+$(unsigned int,tunion Typestruct)@ 
+  elems_tree_arr[3] = { &tree_arr1, &tree_arr2, &tree_arr3};
+tunion Typestruct.Tuple tree_rep = Tuple(12, ($(unsigned int, tunion Typestruct)@?) elems_tree_arr);
+
+
 extern "C" `b unsafe_cast<`b,`a>(`a x);
 
 void do_print(tunion Foo f) {
@@ -87,18 +119,92 @@ void do_print(tunion Foo f) {
   printf("\n");
 }
 
+void do_xmlize(tunion Foo f) {
+  int @foo = unsafe_cast(f);
+  xmlize_type((tunion Typestruct)&foo_rep,foo);
+  printf("\n");
+}
+void do_print2(intlist_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("NULL");
+  else print_type((tunion Typestruct)&list_rep,foo);
+  printf("\n");
+}
+
+void do_xmlize2(intlist_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("<null/>");
+  else xmlize_type((tunion Typestruct)&list_rep,foo);
+  printf("\n");
+}
+void do_print3(inttree_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("NULL");
+  else print_type((tunion Typestruct)&tree_rep,foo);
+  printf("\n");
+}
+
+void do_xmlize3(inttree_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("<null/>");
+  else xmlize_type((tunion Typestruct)&tree_rep,foo);
+  printf("\n");
+}
+
 void main() {
   tunion Foo f;
 
   f = Foo1;
   do_print(f);
+  do_xmlize(f);
 
   f = new Foo2(1,2);
   do_print(f);
+  do_xmlize(f);
 
   f = new Foo3(1.245);
   do_print(f);
+  do_xmlize(f);
 
   f = new Foo4(1,f);
   do_print(f);
+  do_xmlize(f);
+
+
+  struct Intlist * g = NULL;
+  do_print2(g);
+  do_xmlize2(g);
+  g = new Intlist{.val=(unsigned int)6,.next=NULL};
+ 
+  do_print2(g);
+  do_xmlize2(g);
+
+  g = new Intlist{.val=(unsigned int)5,.next=new Intlist{.val=(unsigned int)6,.next=new Intlist{.val = (unsigned int)7, .next=NULL}}};
+
+
+  do_print2(g);
+  do_xmlize2(g);
+
+
+  inttree_t* h = NULL;
+  
+  h = new Inttree{.val=4,.left=h,.right=h};
+  h = new Inttree{.val=5,.left=h,.right=h};
+  do_print3(h->left->left);
+  do_xmlize3(h->left->left);
+  do_print3(h->left);
+  do_xmlize3(h->left);
+
+  do_print3(h);
+  do_xmlize3(h);
+
+  
+  //demonstration that cycles break things
+  /*
+    intlist_t * cycle = new Intlist{.val = (unsigned int) 6, .next = NULL};
+  h->next = cycle;
+  do_print2(cycle);
+  do_xmlize2(cycle);
+  */
 }
+

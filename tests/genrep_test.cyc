@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include "typerep.h"
+
+using Typerep;
+
+tunion Typestruct int_rep = gen(void);
+
+/* Example types */
+typedef tunion Foo {
+  Foo1;
+  Foo2(int,int);
+  Foo3(float);
+  Foo4(int,tunion Foo);
+#define Foo1_tag 0
+#define Foo2_tag 0
+#define Foo3_tag 1
+#define Foo4_tag 2
+} foo_t;
+
+typedef struct Intlist {
+  unsigned int val;
+  struct Intlist * next;
+} intlist_t;
+
+
+extern struct Inttree;
+typedef struct Inttree inttree_t;
+
+struct Inttree {
+  unsigned int val;
+  inttree_t * left;
+  inttree_t * right;
+};
+
+
+/*
+tunion Typestruct foo_rep = gen(foo_t);
+tunion Typestruct list_rep = gen(intlist_t);
+tunion Typestruct tree_rep = gen(inttree_t);
+*/
+
+extern "C" `b unsafe_cast<`b,`a>(`a x);
+
+void do_print(tunion Foo f) {
+  int @foo = unsafe_cast(f);
+  print_type((tunion Typestruct)&foo_rep,foo);
+  printf("\n");
+}
+
+void do_xmlize(tunion Foo f) {
+  int @foo = unsafe_cast(f);
+  xmlize_type((tunion Typestruct)&foo_rep,foo);
+  printf("\n");
+}
+void do_print2(intlist_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("NULL");
+  else print_type((tunion Typestruct)&list_rep,foo);
+  printf("\n");
+}
+
+void do_xmlize2(intlist_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("<null/>");
+  else xmlize_type((tunion Typestruct)&list_rep,foo);
+  printf("\n");
+}
+void do_print3(inttree_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("NULL");
+  else print_type((tunion Typestruct)&tree_rep,foo);
+  printf("\n");
+}
+
+void do_xmlize3(inttree_t* f) {
+  int @foo = unsafe_cast(f);
+  if(foo == NULL) printf("<null/>");
+  else xmlize_type((tunion Typestruct)&tree_rep,foo);
+  printf("\n");
+}
+
+void main() {
+  /*  tunion Foo f;
+
+  f = Foo1;
+  do_print(f);
+  do_xmlize(f);
+
+  f = new Foo2(1,2);
+  do_print(f);
+  do_xmlize(f);
+
+  f = new Foo3(1.245);
+  do_print(f);
+  do_xmlize(f);
+
+  f = new Foo4(1,f);
+  do_print(f);
+  do_xmlize(f);
+
+
+  struct Intlist * g = NULL;
+  do_print2(g);
+  do_xmlize2(g);
+  g = new Intlist{.val=(unsigned int)6,.next=NULL};
+ 
+  do_print2(g);
+  do_xmlize2(g);
+
+  g = new Intlist{.val=(unsigned int)5,.next=new Intlist{.val=(unsigned int)6,.next=new Intlist{.val = (unsigned int)7, .next=NULL}}};
+
+
+  do_print2(g);
+  do_xmlize2(g);
+
+
+  inttree_t* h = NULL;
+  do_print3(h);
+  do_xmlize3(h);
+  
+  inttree_t* h = new Inttree{.val=5,.left=NULL,.right=NULL};
+  do_print3(h);
+  do_xmlize3(h);
+  inttree_t* h = new Inttree{.val=5,.left=new Inttree{.val=4,.left=NULL,.right=NULL},.right=new Inttree{.val=6,.left=NULL,.right=NULL}};
+  do_print3(h);
+  do_xmlize3(h);
+*/
+  
+  //demonstration that cycles break things
+  /*
+    intlist_t * cycle = new Intlist{.val = (unsigned int) 6, .next = NULL};
+  h->next = cycle;
+  do_print2(cycle);
+  do_xmlize2(cycle);
+  */
+}
+

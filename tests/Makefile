@@ -86,6 +86,10 @@ $(OUT_PREFIX)typerep_test$(EXE): $(OUT_PREFIX)unsafe_cast.o \
   $(OUT_PREFIX)typerep.o $(OUT_PREFIX)typerep_test.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
+$(OUT_PREFIX)genrep_test$(EXE): $(OUT_PREFIX)unsafe_cast.o \
+  $(OUT_PREFIX)typerep.o $(OUT_PREFIX)genrep_test.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -c $< 
