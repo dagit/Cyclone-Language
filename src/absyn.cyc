@@ -206,9 +206,9 @@ MAKE_INT_TYPE(nlong_type,     None,     Long_sz);
 MAKE_INT_TYPE(slonglong_type, Signed,   LongLong_sz);
 MAKE_INT_TYPE(ulonglong_type, Unsigned, LongLong_sz);
 MAKE_INT_TYPE(nlonglong_type, None,     LongLong_sz);
-MAKE_FLOAT_TYPE(float_type, 1);
-MAKE_FLOAT_TYPE(double_type, 2);
-MAKE_FLOAT_TYPE(long_double_type, 3);
+MAKE_FLOAT_TYPE(float_type, 0);
+MAKE_FLOAT_TYPE(double_type, 1);
+MAKE_FLOAT_TYPE(long_double_type, 2);
 
 MAKE_NULLARY_TYPE(empty_effect,JoinCon); // see kludge in join_eff below
 
