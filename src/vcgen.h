@@ -24,7 +24,7 @@
 #include "jump_analysis.h"
 
 namespace Vcgen {
-  extern void vcgen_topdecls(JumpAnalysis::jump_anal_res_t tables, 
-                             List::list_t<Absyn::decl_t> ds);
+  extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
+			    Absyn::fndecl_t fd);
 }
 #endif

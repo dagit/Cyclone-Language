@@ -1,0 +1,387 @@
+#include "assndef.h"
+#include <list.h>
+
+using AssnDef;
+using List;
+
+namespace PrattProver;
+//////////////////// Constraint Solving //////////////////
+// We use a variation of the Pratt algorithm here where we keep
+// track of a signed distance and an unsigned distance between terms 
+// and find the minimal length signed and unsigned paths between any 
+// two terms.  If we ever get a negative-length cycle,
+// then the constraints are inconsistent.  
+//
+// We represent a conjunction of constraints as a sparse matrix of
+// the distances.  We consider distance(i,j) == 0 implicitly, and
+// otherwise, if (i,j) are not in the graph, the distance is infinite.
+//
+// To deal with an entire assertion, we must collect a set of graphs.
+// representing alternative states.  This effectively converts the 
+// assertion to DNF which is an exponential blowup.  To avoid running
+// out of time or memory, we limit the blowup according to the
+// variable max_paths.
+
+// The edges in the graph record both signed and unsigned distance
+// values, but only one of them may be valid, or both of them may
+// be valid.
+typedef enum DistanceInfo { 
+  Unsigned_valid = 1,
+  Signed_valid = 2,
+  Both_valid = 3,
+} distance_info_t;
+
+typedef struct Distance {
+  struct Distance *next;  // ptr to next entry in sparse matrix
+  term_t t1;
+  term_t t2;
+  distance_info_t dinfo;  // whether unsigned_dist or signed_dist are valid.
+  int    unsigned_dist;
+  int    signed_dist;
+} *distance_t;
+
+typedef struct Graph {
+  struct Graph *next;    // ptr to next graph in disjunction
+  list_t<term_t> nodes;
+  distance_t distance;
+} graph_t;
+
+// print out a set of graphs
+static void print_graphs(graph_t* gs) {
+  fprintf(stderr,"Graphs:\n");
+  for (; gs != NULL; gs = gs->next) {
+    fprintf(stderr,"\t{");
+    for (let ds = gs->distance; ds != NULL; ds = ds->next) {
+      if (ds->dinfo == Both_valid) {
+        fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->unsigned_dist,term2string(ds->t1),
+                term2string(ds->t2),ds->signed_dist);
+      } else if (ds->dinfo == Signed_valid) {
+        fprintf(stderr,"%s - %s S<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->signed_dist);
+      } else {
+        fprintf(stderr,"%s - %s U<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->unsigned_dist);
+      }
+      if (ds->next != NULL) fprintf(stderr,",");
+    }
+    fprintf(stderr,"}\n");
+  }
+}
+
+// determine the number of graphs
+static unsigned int num_graphs(graph_t *`H gs) {
+  unsigned n = 0;
+  for (; gs != NULL; gs = gs->next)
+    ++n;
+  return n;
+}
+
+// represents "true" -- a singleton graph with no edges (everything
+// is infinitely far apart.)
+static graph_t @true_graph() { return new Graph{NULL,NULL,NULL};}
+
+// used in copying of graphs
+static distance_t copy_distance(distance_t ds) {
+  distance_t res = NULL;
+  for (; ds != NULL; ds = ds->next) {
+    let newds = new *ds;
+    newds->next = res;
+    res = newds;
+  }
+  return res;
+}
+
+// copies a whole set of graphs -- used when we have a disjunction
+static graph_t *copy_graph(graph_t * g) {
+  graph_t *res = NULL;
+  for (; g != NULL; g = g->next) {
+    res = new Graph{res,g->nodes,copy_distance(g->distance)};
+  }
+  return res;
+}
+
+// appends to sets of graphs -- could be smarter and try to remove
+// duplicates...
+static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
+  if (g1 == NULL) return g2;
+  if (g2 == NULL) return g1;
+  graph_t @p = g1;
+  for (let x = p->next; x != NULL; p = x, x=p->next) /* skip */ ;
+  p->next = g2;
+  return g1;
+}
+
+// add a node to a single graph if not already present
+static void add_node(graph_t @g, term_t n) {
+  if (!List::mem(cmp_term,g->nodes,n))
+    g->nodes = new List{n,g->nodes};
+}
+
+// lookup the distance between two nodes in the graph -- returns NULL
+// if the distance is infinite.
+static int* lookup_distance(graph_t @g, bool is_signed, term_t i, term_t j) {
+  static int zero = 0;
+  if (cmp_term(i,j) == 0) return &zero; // same term always at distance 0
+  for (let ds = g->distance; ds != NULL; ds = ds->next) {
+    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
+      if (is_signed && (ds->dinfo & Signed_valid))
+        return &ds->signed_dist;
+      else if (!is_signed && (ds->dinfo & Unsigned_valid))
+        return &ds->unsigned_dist;
+      else
+        return NULL;
+    }
+  }
+  return NULL;
+}
+
+// Assumes the signed or unsigned edge is not already in the graph.
+// Inserts the edge as appropriate.  Must look through the Distance
+// list to see if there's already an entry for i and j and update
+// it instead of adding a new Distance node.
+static void insert_distance(graph_t @g, bool is_signed, term_t i, term_t j, int dist) {
+  if (cmp_term(i,j) == 0) return; // same term always at distance 0
+  for (let ds = g->distance; ds != NULL; ds = ds->next) {
+    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
+      if (is_signed) { 
+        ds->dinfo |= Signed_valid;
+        ds->signed_dist = dist;
+      } else {
+        ds->dinfo |= Unsigned_valid;
+        ds->unsigned_dist = dist;
+      }
+      return;
+    }
+  }
+  g->distance = new Distance{g->distance,i,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
+}
+
+// add an edge to a graph and close it off to find shortest paths.
+// returns true if the resulting graph remains consistent and false
+// otherwise.
+// FIX: MUST WORRY ABOUT OVERFLOW ISSUES
+static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
+  add_node(g,i);
+  add_node(g,j);
+  int* ij_dist = lookup_distance(g,is_signed,i,j);
+  // if we already have a shorter path, then this constraint is redundant
+  if (ij_dist != NULL && *ij_dist < dist) 
+    return true;
+  int* ji_dist = lookup_distance(g,is_signed,j,i);
+  // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
+  // FIX -- distance could overflow
+  if (ji_dist != NULL && (*ji_dist + dist) < 0)
+    return false; 
+  // update shortest path for each pair of nodes
+  for (let ks = g->nodes; ks != NULL; ks = ks->tl) {
+    let k = ks->hd;
+    let ki_dist = lookup_distance(g,is_signed,k,i);
+    if (ki_dist == NULL) continue;
+    for (let ls = g->nodes; ls != NULL; ls = ls->tl) {
+      let l = ls->hd;
+      let jl_dist = lookup_distance(g,is_signed,j,l);
+      if (jl_dist != NULL) {
+        let kl_dist = lookup_distance(g,is_signed,k,l);
+        // FIX -- distance could overflow
+        let new_dist = *ki_dist + dist + *jl_dist;
+        if (kl_dist == NULL) {
+          insert_distance(g,is_signed,k,l,new_dist);
+        } else if (*kl_dist > new_dist) {
+          *kl_dist = new_dist;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+static $(unsigned int,bool) eval_term(term_t t) {
+  switch (t) {
+  case &Const(e): return Evexp::eval_const_uint_exp(e);
+  default: return $(0,false);
+  }
+}
+
+// FIX: 32-bit dependency!
+#define MAXINT (0x7fffffff)
+
+// convert a primitive assertion to a constraint and add it to the graph.
+// returns true if the resulting graph remains consistent, false otherwise.
+static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
+  // first see if t1 or t2 is a constant as we can put in better
+  // constraints then.
+  let $(c1,okay1) = eval_term(t1);
+  let $(c2,okay2) = eval_term(t2);
+
+  // FIX: NOT SURE IF ANY OF THIS IS RIGHT -- MUST WORRY ABOUT
+  // OVERFLOW ISSUES!
+  if (okay1 && okay2) {
+    // we have c1 p c2 -- reduce to true or false immediately.
+    switch (p) {
+    case ULt: return (c1 < c2);
+    case SLt: return ((int)c1) < ((int)c2);
+    case ULte: return (c1 <= c2);
+    case SLte: return ((int)c1) <= ((int)c2);
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  } else if (okay2) {
+    // we have t1 p c2 -- add constraints of the form t1 - Zero p c2
+    switch (p) {
+    case ULt: 
+      c2 = c2 - 1; 
+      fallthru;
+    case ULte:
+    // must check that c2 can be represented by an int.
+      if (c2 <= (unsigned)MAXINT) {
+        if (!add_edge(g,false,t1,zero(),(int)c2)) return false;
+        // since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
+        return add_edge(g,true,t1,zero(),(int)c2);
+      }
+      break;
+    case SLt: 
+      c2 = c2 - 1;
+      fallthru;
+    case SLte:
+      if (!add_edge(g,true,t1,zero(),(int)c2)) return false;
+      // if c2 is positive then t1 S<= c2 implies t1 U<= c2
+      if (c2 <= (unsigned)MAXINT)
+        return add_edge(g,false,t1,zero(),(int)c2);
+      else return true;
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  } else if (okay1) {
+    // we have c1 p t2 -- add constraints of the form zero - t2 p -c1
+    // FIX:  NOT CHECKING FOR OVERFLOW ISSUES HERE.
+    switch (p) {
+    case ULt: 
+      c1 = c1 + 1;
+      fallthru;
+    case ULte:
+      int k = -((int)c1);
+      return add_edge(g,false,zero(),t2,k);
+    case SLt: 
+      c1 = c1 + 1;
+      fallthru;
+    case SLte:
+      int k = -((int)c1);
+      return add_edge(g,true,zero(),t2,k);
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  }
+  // nothing special about the terms -- have to add them as standard
+  // sort of constraints.
+  switch (p) {
+  case ULt:
+    // add t1 - t2 U<= -1
+    return add_edge(g,false,t1,t2,-1);
+  case ULte:
+    // add t1 - t2 U<= 0
+    return add_edge(g,false,t1,t2,0);
+  case SLt:
+    // add t1 - t2 S<= -1
+    return add_edge(g,true,t1,t2,-1);
+  case SLte: 
+    // add t1 - t2 S<= 0
+    return add_edge(g,true,t1,t2,0);
+  default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
+  }
+}
+
+datatype exn { TooLarge };
+datatype exn.TooLarge too_large = TooLarge;
+
+//FIX: add a way for the user to control this.
+unsigned int max_paths = 33;
+unsigned int max_paths_seen = 0;
+
+// given a set of graphs gs representing A1 or A2 or ... or An
+// and given assertion a, compute the set of graphs representing
+// (A1 or A2 ... or An) and a.  This is written with explicit
+// tail-calls to be as fast as possible.  If we end up with two
+// many disjuncts, then we throw an exception to back out of the
+// whole thing.  
+static graph_t *cgraph(graph_t *`H gs, assn_t a) {
+ LOOP:
+  //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
+  //print_graphs(gs);
+  if (gs == NULL) return gs; // already inconsistent
+  switch (a) {
+  case &True: break;         // gs and true == gs
+  case &False: gs = NULL; break; // gs and false == false
+  case &And(a1,a2): 
+    gs = cgraph(gs,a2);  // gs and (a1 and a2) == (gs and a2) and a1
+    a = a1;
+    goto LOOP;
+  case &Or(a1,a2):
+    unsigned int n = num_graphs(gs);
+    if (max_paths_seen < n) max_paths_seen = n;
+    // too many disjuncts -- give up.  
+    if (n >= max_paths) throw &too_large; // could just set gs = true_graph(); 
+    // must copy the graphs since we mutate them in place
+    graph_t *gs1 = gs;
+    graph_t *gs2 = copy_graph(gs);
+    // compute (gs and a1)
+    gs1 = cgraph(gs1,a1);
+    // compute (gs and a2)
+    gs2 = cgraph(gs2,a2);
+    // return (gs and a1) or (gs and a2)
+    gs = graph_append(gs1,gs2);
+    break;
+  case &Prim(t1,Neq,t2): 
+    // must handle neq specially as t1 < t2 or t2 < t1 (both signed
+    // and unsigned.)
+    a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
+    goto LOOP;
+  case &Prim(t1,Eq,t2):
+    // explode t1 == t2 into t1 <= t2 and t2 <= t1 (both signed and unsigned)
+    a = and(and(and(slte(t1,t2),slte(t2,t1)),ulte(t1,t2)),ulte(t2,t1));
+    goto LOOP;
+  case &Prim(t1,p,t2):
+    // add the primitive relation to each graph, pruning out the
+    // inconsistent ones.
+    graph_t *prev = NULL;
+    for (let g = gs; g != NULL; g = g->next) {
+      if (!add_constraint(g,t1,p,t2)) {
+        if (prev == NULL) {
+          gs = g->next;
+        } else {
+          prev->next = g->next;
+        }
+      } else {
+        prev = g;
+      }
+    }
+    break;
+  default: 
+    // reduce any substitutions and go around the loop.
+    a = reduce(a);
+    goto LOOP;
+  }
+  // return the set of graphs
+  return gs;
+}
+
+// check to see if an assertion is consistent using the constraint solver.
+// if it returns false, then the assertion is definitely inconsistent.
+// if it returns true, then the assertion might be consistent.
+static bool consistent(assn_t a) {
+  try {
+    // start with just an empty graph (true) and then add in a
+    graph_t ?gs = cgraph(true_graph(),a);
+    // if we get back an empty list of disjuncts (false) then
+    // the graph is not consistent.
+    return (gs != NULL);
+  } catch {
+    // if the graph has too many paths in it, we'll end up here.
+    // we must conservatively assume that the assertion is consistent.
+  case &TooLarge: return true;
+  }
+}
+
+// see if ctxt |- a by trying to prove that ctxt and not(a) is inconsistent.
+bool constraint_prove(assn_t ctxt, assn_t a) {
+  assn_t b = and(ctxt,not(a));
+  return !consistent(b);
+}
+

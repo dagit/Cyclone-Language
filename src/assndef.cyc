@@ -1,0 +1,750 @@
+/* Computing Strongest Post-conditions
+   Copyright (C) 2003 Greg Morrisett
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+/* this file contains the definition of assertions, the terms used in
+   assertions as well as utilities on them (such as comparison, debugging
+   printing etc.). */
+
+#include "assndef.h"
+
+
+namespace AssnDef;
+using List;
+using Hashtable;
+///////////////////// Terms /////////////////////
+
+
+datatype Term {
+  Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
+  Var(vardecl_t);
+  LogicVar(vardecl_opt_t,int);
+  Primop(Absyn::primop_t,list_t<term_t>);
+  Cast(Absyn::type_t, term_t);
+};
+
+string_t term2string(term_t t) {
+  switch (t) {
+  case &Const(e): return Absynpp::exp2string(e);
+  case &Var(vd): return Absynpp::qvar2string(vd->name);
+  case &LogicVar(NULL,i): return aprintf("_X%d",i);
+  case &LogicVar(vd,i): return aprintf("_%s%d",Absynpp::qvar2string(vd->name),i);
+  case &Primop(p,&List{t1,&List{t2,NULL}}): 
+    return aprintf("(%s%s%s)",term2string(t1),
+                   Absynpp::prim2string(p),term2string(t2));
+  case &Primop(p,&List{t,_}):
+    return aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t));
+  case &Cast(tp,tm):
+    return aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(t));
+  default: Warn::impos("term2string primop args");
+  }
+}
+
+term_t cnst(Absyn::exp_t e) { return new Const(e); }
+term_t zero() {
+  static term_opt_t z = NULL;
+  if (z == NULL) {
+    let e = Absyn::int_exp(Absyn::None,0,0);
+    e->topt = Absyn::int_type(Absyn::None,Absyn::Int_sz);
+    let r = cnst(e);
+    z = r;
+    return r;
+  } else return (term_t)z;
+}
+term_t one() {
+  static term_opt_t n = NULL;
+  if (n == NULL) {
+    let e = Absyn::int_exp(Absyn::None,1,0);
+    e->topt = Absyn::int_type(Absyn::None,Absyn::Int_sz);
+    let r = cnst(e);
+    n = r;
+    return r;
+  } else return (term_t)n;
+}
+  
+term_t var(vardecl_t vd) { return new Var(vd); }
+
+inline bool is_commutative(Absyn::primop_t p) {
+  switch (p) {
+  case Absyn::Plus:
+  case Absyn::Times:
+  case Absyn::Eq:
+  case Absyn::Neq:
+  case Absyn::Bitand:
+  case Absyn::Bitor:
+  case Absyn::Bitxor: return true;
+  default: return false;
+  }
+}
+term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
+  return new Primop(p,ts);
+}
+term_t cast(Absyn::type_t tp, term_t tm) {
+  return new Cast(tp,tm);
+}
+term_t fresh_var() {
+  static int counter = 0;
+  return new LogicVar(NULL,counter++);
+}
+
+int cmp_term(term_t t1, term_t t2) {
+  switch $(t1,t2) {
+  case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
+  case $(&Const(_),_): return -1;
+  case $(_,&Const(_)): return 1;
+  case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
+  case $(&Var(_),_): return -1;
+  case $(_,&Var(_)): return 1;
+  case $(&LogicVar(vd1,i),&LogicVar(vd2,j)): 
+    if (vd1 == vd2) return (i - j);
+    return (int)vd1 - (int)vd2;
+  case $(&LogicVar(_,_),_): return -1;
+  case $(_,&LogicVar(_,_)): return 1;
+  case $(&Cast(tp1,tm1),&Cast(tp2,tm2)):
+    int c = Tcutil::typecmp(tp1,tp2);
+    if (c != 0) return c;
+    return cmp_term(tm1,tm2);
+  case $(&Cast(...),_): return -1;
+  case $(_,&Cast(...)): return 1;
+  case $(&Primop(p1,ts1),&Primop(p2,ts2)):
+    if (p1 != p2) return (int)p1 - (int)p2;
+    return list_cmp(cmp_term, ts1, ts2);
+  }
+}
+
+bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
+
+///////////////////// Assertions /////////////////////
+
+
+
+datatype Assn {
+  True;
+  False;
+  Prim(term_t,prim_reln_t,term_t);
+  And(assn_t,assn_t);
+  Or(assn_t,assn_t);
+  Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
+  Kill(assn_t); // replace all escaping variables with fresh logic variables
+};
+
+// inner loop for calculating the size of an assertion -- we
+// take care to figure out the size as a dag and not a tree.
+unsigned int 
+  assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
+  LOOP:
+  if (memq(*prev,a)) return c;
+  *prev = new List(a,*prev);
+  switch (a) {
+  case &True:  return c;
+  case &False: return c;
+  case &Prim(...): return 1+c;
+  case &And(a1,a2): fallthru(a1,a2);
+  case &Or(a1,a2): 
+    c = assn_size_loop(a2,1+c,prev);
+    a = a1;
+    goto LOOP;
+  case &Subst(vd,t,a1):
+    ++c;
+    a = a1;
+    goto LOOP;
+  case &Kill(a1): 
+    ++c;
+    a = a1;
+    goto LOOP;
+  }
+}
+
+// counter used for reporting purposes
+unsigned int max_assn_size = 0;
+
+// calculate the size of an assertion
+unsigned int assn_size(assn_t a) {
+  list_t<assn_t,`H> prev = NULL;
+  let c = assn_size_loop(a,0,&prev);
+  if (c > max_assn_size) {
+    max_assn_size = c;
+  }
+  return c;
+}
+
+// calculate a string representation (and total tree node count) for an
+// assertion.  the prec field (precedent) is used to avoid some parens.
+string_t a2string(assn_t a, int prec, int@ size) {
+  switch (a) {
+  case &True: return "true";
+  case &False: return "false";
+  case &Prim(t1,p,t2):
+    *size += 1;
+    string_t ps;
+    switch (p) {
+    case Eq: ps = "=="; break;
+    case Neq: ps = "!="; break;
+    case SLt: ps = "S<"; break;
+    case SLte: ps = "S<="; break;
+    case ULt: ps = "U<"; break;
+    case ULte: ps = "U<="; break;
+    default: Warn::impos("assn2string primop");
+    }
+    return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));
+  case &Or(a1,a2): 
+    *size += 1;
+    if (prec <= 5)
+      return aprintf("%s || %s",a2string(a1,5,size),a2string(a2,5,size));
+    else 
+      return aprintf("(%s || %s)",a2string(a1,5,size),a2string(a2,5,size));
+  case &And(a1,a2): 
+    *size += 1;
+    return aprintf("%s && %s",a2string(a1,10,size),a2string(a2,10,size));
+  case &Subst(vd,t,a):
+    *size += 1;
+    return aprintf("Subst[%s:=%s](%s)",Absynpp::qvar2string(vd->name),
+                   term2string(t),a2string(a,0,size));
+  case &Kill(a):
+    *size += 1;
+    return aprintf("Kill(%s)",a2string(a,0,size));
+  }
+}
+
+int tree_size = 0;
+
+// convert an assertion to a string.
+string_t assn2string(assn_t a) {
+  tree_size = 0;
+  return a2string(a,0,&tree_size);
+}
+
+// assertion constants for true and false
+datatype Assn.True true_assn = True;
+datatype Assn.False false_assn = False;
+
+//////////////////////////////////////////////////////////////
+// hash-consing to try to preserve as much sharing as we
+// can -- has a nice impact on performance (much better than
+// lazy substitution), but alas, we still end up allocating a lot.  
+// It would be better if we didn't have to allocate the thing 
+// that want to lookup.  That could happen if we had a different 
+// type for hashtable lookup (as we did with dictionaries.)
+
+int assnhash(datatype Assn @a) {
+  switch (a) {
+  case &False: return 0;
+  case &True: return 1;
+  case &Prim(t1,p,t2): 
+    return (unsigned int)t1 ^ (unsigned int)p ^ (unsigned int)t2;
+  case &And(a1,a2): return (unsigned int)a1 ^ (unsigned int)a2;
+  case &Or(a1,a2): return ((unsigned int)a1 ^ (unsigned int)a2) | 1;
+  case &Subst(vd,t,a): return ((unsigned int)a ^ (unsigned int)vd ^
+                               (unsigned int)t) | 3;
+  case &Kill(a): return (unsigned int)a + 37;
+  }
+}
+
+// compare two assertions for structural equality -- does not assume
+// the components have been hash-consed, but probably could.
+int assncmp(datatype Assn @a1, datatype Assn @a2) {
+ LOOP:
+  if (a1 == a2) return 0;
+  switch $(a1,a2) {
+  case $(&True,&True): return 0;
+  case $(&True,_): return -1;
+  case $(_,&True): return 1;
+  case $(&False,&False): return 0;
+  case $(&False,_): return -1;
+  case $(_,&False): return 1;
+  case $(&Or(a11,a12),&Or(a21,a22)): fallthru(a11,a12,a21,a22);
+  case $(&And(a11,a12),&And(a21,a22)): 
+    int c = assncmp(a11,a21);
+    if (c != 0) return c;
+    a1 = a12;
+    a2 = a22;
+    goto LOOP;
+  case $(&Or(_,_),_): return -1;
+  case $(_,&Or(_,_)): return 1;
+  case $(&And(_,_),_): return -1;
+  case $(_,&And(_,_)): return 1;
+  case $(&Prim(t11,p1,t12),&Prim(t21,p2,t22)):
+    int c = (int)p1 - (int)p2;
+    if (c != 0) return c;
+    c = cmp_term(t11,t21);
+    if (c != 0) return c;
+    return cmp_term(t12,t22);
+  case $(&Prim(...),_): return -1;
+  case $(_,&Prim(...)): return 1;
+  case $(&Kill(a1),&Kill(a2)): return assncmp(a1,a2);
+  case $(&Kill(_),_): return -1;
+  case $(_,&Kill(_)): return 1;
+  case $(&Subst(vd1,t1,a11),&Subst(vd2,t2,a22)):
+    int c = (int)vd1 - (int)vd2;
+    if (c != 0) return c;
+    c = cmp_term(t1,t2);
+    if (c != 0) return c;
+    a1 = a11;
+    a2 = a22;
+    goto LOOP;
+  }
+}
+
+// a hash-table to hold all of the assertion nodes to maximize
+// sharing.  we also record whether or not a node has delayed
+// substitutions or kills within it.
+struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
+*hash_cons_table = NULL;
+
+// lookup an assertion to see if it has delayed substitutions or
+// kills with in it.  
+bool is_reduced(assn_t a) {
+  if (hash_cons_table == NULL) return false;
+  let resopt = Hashtable::lookup_opt((Hashtable::table_t)hash_cons_table,a);
+  if (resopt == NULL) return false;
+  let &$(_,b) = *resopt;
+  return b;
+}
+
+// shallow copy of an assertion from region `r to the heap and 
+// simultaneously determine whether or not the assertion is
+// reduced so that we can put the information in the table.
+static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
+  switch (a) {
+  case &True: return $(&true_assn,true);
+  case &False: return $(&false_assn,false);
+  case &And(a1,a2): 
+    return $(new And(a1,a2),is_reduced(a1) && is_reduced(a2));
+  case &Or(a1,a2): 
+    return $(new Or(a1,a2),is_reduced(a1) && is_reduced(a2));
+  case &Prim(t1,p,t2): return $(new Prim(t1,p,t2),true);
+  case &Subst(vd1,t1,a1): return $(new Subst(vd1,t1,a1),false);
+  case &Kill(a): return $(new Kill(a),false);
+  }
+}
+
+// given an assertion node, look it up in the hash-table.  If it's
+// not already there, then make a shallow copy and enter it (along
+// with info regarding whether or not it's been reduced) into the
+// hash table.
+assn_t hash_cons(datatype Assn@`r a) {
+  Hashtable::table_t h;
+  if (hash_cons_table == NULL) {
+    h = Hashtable::create(123, assncmp, assnhash);
+    hash_cons_table = h;
+    // make sure true and false are in the table so we can
+    // ask if they are reduced.
+    Hashtable::insert(h,&true_assn,new $(&true_assn,true));
+    Hashtable::insert(h,&false_assn,new $(&false_assn,true));
+  } else 
+    h = (Hashtable::table_t)hash_cons_table;
+  let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
+  if (resopt == NULL) {
+    let $(res,reduced) = copy_assn(a);
+    Hashtable::insert(h,res,new $(res,reduced));
+    return res;
+  } else {
+    let &$(res,_) = *resopt;
+    return res;
+  }
+}
+
+// build a kill node.
+assn_t kill(assn_t a) {
+  switch (a) {
+  case &True: 
+  case &False:
+  case &Kill(_): return a; // Kill(Kill(a)) = Kill(a)
+  default:
+    let p = Kill(a);
+    return hash_cons(&p);
+  }
+}
+
+// build an and node.
+assn_t and(assn_t a1, assn_t a2) {
+  if (a1 == a2) return a1;
+  switch $(a1,a2) {
+  case $(&True,_): return a2;
+  case $(_,&True): return a1;
+  case $(&False,_): return a1;
+  case $(_,&False): return a2;
+  default: 
+    // Sort the two operands so that we're more likely to share.
+    // Note that we could do more than this and, for instance,
+    // right-associate and's but this doesn't seem to be a win.
+    if ((int)a1 > (int)a2)
+      a1 :=: a2;
+    let a = And(a1,a2);
+    return hash_cons(&a);
+  }
+}
+
+// build an or-node.
+assn_t or(assn_t a1, assn_t a2) {
+  if (a1 == a2) return a1;
+  switch $(a1,a2) {
+  case $(&True,_): return a1;
+  case $(_,&True): return a2;
+  case $(&False,_): return a2;
+  case $(_,&False): return a1;
+  default: 
+    // sort the operands and hash-cons.
+    if ((int)a1 > (int)a2)
+      a1 :=: a2;
+    let a = Or(a1,a2);
+    return hash_cons(&a);
+  }
+}
+
+// build a lazy substitution node.  
+assn_t subst(vardecl_t x, term_t newx, assn_t a) {
+  switch (a) {
+  case &True:
+  case &False: return a;
+  default:
+    let p = Subst(x,newx,a); 
+    return hash_cons(&p);
+  }
+}
+
+// build a primitive relation node.
+assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
+  let ptr = Prim(t1,p,t2);
+  return hash_cons(&ptr);
+}
+
+// some macros and functions for particular primitive relations.
+#define prim_assn(p,P) assn_t p(term_opt_t t1, term_opt_t t2) { \
+  if (t1 == NULL || t2 == NULL) return &true_assn; \
+  return prim((term_t)t1,P,(term_t)t2); \
+}
+prim_assn(eq,Eq)
+prim_assn(neq,Neq)
+prim_assn(slt,SLt)
+prim_assn(slte,SLte)
+prim_assn(ult,ULt)
+prim_assn(ulte,ULte)
+#define sgte(t1,t2) (slte(t2,t1))
+#define ugte(t1,t2) (ulte(t2,t1))
+#define sgt(t1,t2) (slt(t2,t1))
+#define ugt(t1,t2) (ult(t2,t1))
+
+
+
+
+// compute negation of assertion -- unfortunately requires
+// reducing the assertion (i.e., getting rid of Subst and Kill
+// nodes.)
+assn_t not(assn_t a) {
+  switch (a) {
+  case &True: return &false_assn;
+  case &False: return &true_assn;
+  case &And(a1,a2): return or(not(a1),not(a2));
+  case &Or(a1,a2): return and(not(a1),not(a2));
+  case &Prim(t1,p,t2):
+    switch (p) {
+    case Eq : return neq(t1,t2);
+    case Neq: return eq(t1,t2);
+    case SLt : return sgte(t1,t2);
+    case SLte: return sgt(t1,t2);
+    case ULt : return ugte(t1,t2);
+    case ULte: return ugt(t1,t2);
+    default: Warn::impos("Vcgen::invert: non-primop");
+    }
+  case &Subst(...): return not(reduce(a));
+  case &Kill(...): return not(reduce(a));
+  }
+}
+
+////// Push Through Subst and Kill nodes ////
+// These functions take care of eliminating all of the Kill and
+// Subst nodes in an assertion in one pass.  It is, unfortunately,
+// something that requires crawling over the tree, not just the dag.
+// However, we could improve things by memoizing the results, since
+// it's likely that we'll hit the same substitutions for various
+// assertion nodes.  The problem is that we will generally have
+// different environments built up when we run into them.
+
+// Both reduce_term and reduce_assn take in a substitution for 
+// non-escaping variables, as well as a pointer to a substitution
+// for escaping variables.  We want to reduce Kill(a) to something
+// like substitute fresh logic variables for each escaping variable
+// in a.  We do this by accumulating a substitution for the escaping
+// variables as we go.  So, the esc_subst pointer is non-NULL when
+// we are under a Kill node.
+
+// TRY: we could try using dictionaries here instead of lists.
+term_t 
+reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
+            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+  switch (t) {
+  case &Const(_):
+  case &LogicVar(...): return t;
+  case &Cast(tp,tm):
+    let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
+    if (tm != tm2) return cast(tp,tm2);
+    else return t;
+  case &Primop(p,ts):
+    list_t<term_t> res = NULL;
+    bool change = false;
+    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
+      let old_term = ptr->hd;
+      let new_term = reduce_term(old_term,non_esc_subst,esc_subst);
+      res = new List{new_term,res};
+      if (new_term != old_term) change = true;
+    }
+    if (!change) return t;
+    return primop(p,imp_rev(res));
+  case &Var(vd):
+    if (vd->escapes && esc_subst != NULL) {
+      // it's an escaping variable and we're under a Kill node.
+      // see if we've already assigned it a fresh variable in the esc_subst.
+      let s = *esc_subst;
+      for (; s != NULL; s = s->tl) {
+        let $(vd2,t2) = *s->hd;
+        if (vd2 == vd) return t;
+      }
+      // if not, then assign it a fresh variable and record it in the
+      // esc_subst.
+      let t = fresh_var();
+      *esc_subst = new List{new $(vd,t),*esc_subst};
+      return fresh_var();
+    } else if (!vd->escapes) {
+      // it's a non-escaping variable -- look it up in non_esc_subst.
+      for (; non_esc_subst != NULL; non_esc_subst = non_esc_subst->tl) {
+        let $(vd2,t2) = *non_esc_subst->hd;
+        if (vd == vd2) return t2;
+      }
+    }
+    return t;
+  }
+}
+
+assn_t 
+reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst, 
+            list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
+ LOOP:
+  switch (a) {
+  case &True:
+  case &False: return a;
+  case &Prim(t1,p,t2):
+    let newt1 = reduce_term(t1,non_esc_subst,esc_subst);
+    let newt2 = reduce_term(t2,non_esc_subst,esc_subst);
+    if (t1 == newt1 && t2 == newt2) return a;
+    return prim(newt1,p,newt2);
+  case &And(a1,a2):
+    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst);
+    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst);
+    if (a1 == newa1 && a2 == newa2) return a;
+    return and(newa1,newa2);
+  case &Or(a1,a2):
+    let newa1 = reduce_assn(a1,non_esc_subst,esc_subst);
+    let newa2 = reduce_assn(a2,non_esc_subst,esc_subst);
+    if (a1 == newa1 && a2 == newa2) return a;
+    return or(newa1,newa2);
+  case &Kill(a): 
+    // start a new esc_subst for a.  not sure this is necessary
+    // when esc_subst is non-null...
+    list_t<$(vardecl_t,term_t)@> new_esc_subst = NULL;
+    return reduce_assn(a,non_esc_subst,&new_esc_subst);
+  case &Subst(vd,t,a1):
+    // add vd->t to the non_esc_subst
+    t = reduce_term(t,non_esc_subst,esc_subst);
+    non_esc_subst = new List(new $(vd,t),non_esc_subst);
+    a = a1;
+    goto LOOP;
+  }
+}
+
+// get rid of all Kill and Subst nodes.
+assn_t reduce(assn_t a) {
+  // check to see if we've already eliminated them.
+  if (is_reduced(a)) return a;
+  return reduce_assn(a,NULL,NULL);
+}
+
+// a one-shot substitution -- needed in the assignment code below.
+term_t subst_term(term_t t, vardecl_t x, term_t newx) {
+  switch (t) {
+  case &Var(vd):
+    if (vd == x) return newx;
+    return t;
+  case &Primop(p,ts):
+    list_t<term_t> res = NULL;
+    bool change = false;
+    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
+      let old_term = ptr->hd;
+      let new_term = subst_term(old_term,x,newx);
+      res = new List{new_term,res};
+      if (new_term != old_term) change = true;
+    }
+    if (!change) return t;
+    return primop(p,imp_rev(res));
+  case &Cast(tp,tm):
+    let tm2 = subst_term(tm,x,newx);
+    if (tm != tm2) return cast(tp,tm2);
+    else return t;
+  case &Const(_):
+  case &LogicVar(...): return t;
+  }
+}
+
+// an eager kill for terms (we don't bother to do terms lazily, only assns)
+term_t kill_mem_term(term_t t) {
+  let esc_subst = NULL;
+  return reduce_term(t,NULL,&esc_subst);
+}
+
+
+/////////////////// Assertion Factoring //////////////////
+// This code isn't currently used but may be useful.  The
+// basic idea is to try to pull the common conjuncts out
+// to a wider scope.  Eg..,  (A & B & C) || (A & D & C) 
+// should factor into (A & C) & (B || D).  
+
+// intersect two lists of assertions returning the common
+// assertions, and the remainders of the two lists.  Assumes
+// the assertions are in sorted order.
+void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
+                      list_t<assn_t,`H>@common,
+                      list_t<assn_t,`H>@res1,
+                      list_t<assn_t,`H>@res2) {
+  while (true) {
+    switch $(a1s,a2s) {
+    case $(NULL,NULL): return;
+    case $(_,NULL): *res1 = List::revappend(a1s,*res1); return;
+    case $(NULL,_): *res2 = List::revappend(a2s,*res2); return;
+    default: 
+      int c = assncmp(a1s->hd,a2s->hd);
+      if (c == 0) {
+        *common = new List(a1s->hd,*common);
+        a1s = a1s->tl;
+        a2s = a2s->tl;
+      } else if (c < 0) {
+        *res1 = new List(a1s->hd,*res1);
+        a1s = a1s->tl;
+      } else {
+        *res2 = new List(a2s->hd,*res2);
+        a2s = a2s->tl;
+      }
+    }
+  }
+}
+
+$(list_t<assn_t> common, list_t<assn_t> res1, list_t<assn_t> res2) 
+  intersect_assns(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s) {
+  let common = NULL;
+  let res1 = NULL;
+  let res2 = NULL;
+  intersect(a1s,a2s,&common,&res1,&res2);
+  return $(List::imp_rev(common),List::imp_rev(res1),List::imp_rev(res2));
+}
+
+// pull out the common primitive relations, but avoid duplicating
+// things in forming the full cross-product
+$(list_t<assn_t>,assn_t) factor(assn_t a) {
+  switch (a) {
+  case &True: return $(NULL,&true_assn);
+  case &False: return $(NULL,&false_assn);
+  case &Prim(...): return $(new List{a,NULL},&true_assn);
+  case &And(a1,a2):
+    let $(c1s,a1) = factor(a1);
+    let $(c2s,a2) = factor(a2);
+    return $(List::merge(assncmp,c1s,c2s),and(a1,a2));
+  case &Or(a1,a2):
+    let $(c1s,a1) = factor(a1);
+    let $(c2s,a2) = factor(a2);
+    let $(cs,c1s,c2s) = intersect_assns(c1s,c2s);
+    return $(cs,or(List::fold_left(and,a1,c1s),List::fold_left(and,a2,c2s)));
+  default: return $(NULL,a);
+  }
+}
+
+assn_t factor_assn(assn_t a) {
+  //unsigned int asize = assn_size(a);
+  let $(cs,a) = factor(a);
+  a = List::fold_left(and,a,cs);
+  //unsigned int newsize = assn_size(a);
+  //fprintf(stderr,"factor before %d after %d\n",asize,newsize);
+  //fprintf(stderr,"%s\n",assn2string(a));
+  return a;
+}
+
+
+////////// Syntactic Implication for Assertions //////////////
+// returns true when ctxt |- t1 p t2
+// uses only very local, syntactic matching.
+bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
+ LOOP:
+  switch (ctxt) {
+  case &False: return true;
+  case &True: return false;
+  case &And(a1,a2): 
+    if (find_ctxt(a1,t1,p1,u1)) return true;
+    ctxt = a2;
+    goto LOOP;
+  case &Or(a1,a2): 
+    if (!find_ctxt(a1,t1,p1,u1)) return false;
+    ctxt = a2;
+    goto LOOP;
+  case &Prim(t2,p2,u2):
+    switch $(p2,p1) {
+    case $(Neq,Neq):
+    case $(Eq,Eq): 
+    case $(Eq,SLte):
+    case $(Eq,ULte):
+      return (same_term(t1,t2) && same_term(u1,u2) ||
+              same_term(t1,u2) && same_term(u1,t2));
+    case $(SLt,Neq): 
+    case $(ULt,Neq): 
+      return (same_term(t1,t2) && same_term(u1,u2) ||
+              same_term(t1,u2) && same_term(u1,t2));
+    case $(SLt,SLt):
+    case $(ULt,ULt):
+    case $(SLt,SLte): 
+    case $(ULt,ULte): 
+    case $(SLte,SLte):
+    case $(ULte,ULte):
+      return same_term(t1,t2) && same_term(u1,u2);
+    default: return false;
+    }
+  default: 
+    ctxt = reduce(ctxt);
+    goto LOOP;
+  }
+}
+
+// returns true when ctxt |- a
+// uses only very local, syntactic matching.
+bool simple_prove(assn_t ctxt, assn_t a) {
+ LOOP:
+  if (ctxt == a) return true;
+  switch (a) {
+  case &True: return true;
+  case &False: return false;
+  case &And(a1,a2): 
+    if (!simple_prove(ctxt,a1)) return false;
+    a = a2;
+    goto LOOP;
+  case &Or(a1,a2): 
+    if (simple_prove(ctxt,a1)) return true;
+    a = a2;
+    goto LOOP;
+  case &Prim(t1,p,t2): return find_ctxt(ctxt,t1,p,t2); 
+  default: 
+    a = reduce(a);
+    goto LOOP;
+  }
+}
+

@@ -473,11 +473,11 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
   return tds;
 }
 
-bool do_vcgen(JumpAnalysis::jump_anal_res_t tables,
-              list_t<Absyn::decl_t,`H> tds) {
-  Vcgen::vcgen_topdecls(tables,tds);
-  return true;
-}
+// bool do_vcgen(JumpAnalysis::jump_anal_res_t tables,
+//               list_t<Absyn::decl_t,`H> tds) {
+//   Vcgen::vcgen_topdecls(tables,tds);
+//   return true;
+// }
 
 bool do_insert_checks(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   InsertChecks::insert_checks(tds);
@@ -836,8 +836,8 @@ static void process_file(string_t<`H> filename) {
     tds = do_stage("control-flow checking",tds,do_cfcheck,(_@)jump_tables,tds);
 
   // Verification-condition generation (optional for now -- vcgen_r)
-  if (!compile_failure && vcgen_r && Flags::stop_after_pass >= Flags::VCGen)
-    do_stage("verification condition generation",tds,do_vcgen,(_@)jump_tables,true);
+  //   if (!compile_failure && vcgen_r && Flags::stop_after_pass >= Flags::VCGen)
+  //     do_stage("verification condition generation",tds,do_vcgen,(_@)jump_tables,true);
   
   // check-insertion
   if(!compile_failure && Flags::stop_after_pass >= Flags::CheckInsertion)
