@@ -202,6 +202,11 @@ static void add_cyclone_exec_path(string_t s) {
 // libcyc.a, then we get a "multiple definitions of main" error, via
 // libmain.c.  So, we separate out the library args from the ccargs
 // so that we can force libcyc.a to appear first.
+//
+// We treat Cyclone libraries differently from C libraries.  As a hack,
+// we place any library that begins with prefix "cyc" in the ccargs,
+// otherwise in the libargs.  Should probably change the XML library
+// to begin with the cyc prefix.
 static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
   if (strcmp(s,"-lxml") == 0)
@@ -209,6 +214,8 @@ static void add_libarg(string_t<`H> s) {
       add_ccarg(s);
     else
       add_ccarg("-lxml_a");
+  else if (strncmp(s,"-lcyc",5) == 0)
+    add_ccarg(s);
   else
     libargs = new List(new s,libargs);
 }
