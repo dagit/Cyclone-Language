@@ -351,7 +351,7 @@ static void check_nounique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r>
     fallthru(tuf->typs,ad);
   case $(&TupleType(tqts),&Aggregate(_,ad)):
     unsigned sz = List::length(tqts);
-    for (int i = 0; i < sz; i++) {
+    for (int i = 0; i < sz; i++, tqts = tqts->tl) {
       check_nounique(env,loc,(*tqts->hd)[1],ad[i]);
     }
     return;
