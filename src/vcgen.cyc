@@ -56,10 +56,9 @@
 
    * We need to extend terms to account for casts/coercions.
    * We need to make a distinction between signed and unsigned comparisons.
-   * We need to take pre/post-conditions of functions into account.
-   * We need to add @assert(-) expressions so that users can write their
-     own static assertions.  The hope would be that these could be used to
-     find smarter loop invariants or to collapse down a big disjunction.
+   * We need to replace the relations stuff in the type-checker (e.g.,
+     subtyping) with calls to manipulate the @requires/@ensures stuff
+     in here.
    * We need to have a "throttle" for controlling assertion size.  Sooner
      or later we will run into iterated if's/diamond control-flow patterns
      that will result in a zillion disjunctions.  Although we share the
@@ -70,7 +69,10 @@
    * We should take pattern matching tests into account for a switch.
    * We shouldn't kill unique variables.
    * We should only kill "type-compatible" expressions on an update.
-
+     For instance, we don't need to kill pointer variables if we're
+     assigning an integer value.  Note that if we had terms like
+     *t or t.f or t->f or t1[t2] then we'd have to kill any of those
+     though...
    * We should make the simple thm. prover a bit smarter.
    * We should perhaps try to simplify the assertions to remove
      redundancies?
@@ -94,6 +96,7 @@
 namespace Vcgen;
 using List;
 typedef Absyn::type_t type_t;
+typedef Absyn::type_opt_t type_opt_t;
 typedef Absyn::vardecl_t vardecl_t;
 typedef Absyn::vardecl_opt_t vardecl_opt_t;
 typedef Absyn::exp_t exp_t;
@@ -101,6 +104,9 @@ typedef Absyn::decl_t decl_t;
 typedef Absyn::stmt_t stmt_t;
 typedef Absyn::stmt_opt_t stmt_opt_t;
 typedef Absyn::switch_clause_t switch_clause_t;
+typedef Absyn::var_opt_t var_opt_t;
+typedef Absyn::tqual_t tqual_t;
+typedef Absyn::exp_opt_t exp_opt_t;
 ////// Forward Declaration for Environments /////
 struct Env;
 typedef struct Env @env_t;
@@ -611,7 +617,6 @@ static term_t kill_mem_term(term_t t) {
 }
 
 ////////// Implication for Assertions //////////////
-
 // returns true when ctxt |- t1 p t2
 // uses only very local, syntactic matching.
 // assumes ctxt is reduced.
@@ -870,6 +875,7 @@ static void update_return(env_t env, term_opt_t t, assn_t a) {
   let shared = env->shared;
   if (shared->res_term != NULL || t != NULL) {
     let v = fresh_var();
+    shared->res_term = v;
     shared->res_assn = 
       or(and(a,eq(v,t)),and(shared->res_assn,eq(v,shared->res_term)));
   } else {
@@ -909,8 +915,7 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain);
 static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a);
 
 #ifdef VCGEN_DEBUG
-//#define vcgen_rexp(env,e,a) vcgen_rexp_debug(env,e,a)
-#define vcgen_rexp(env,e,a) vcgen_rexp_nodebug(env,e,a)
+#define vcgen_rexp(env,e,a) vcgen_rexp_debug(env,e,a)
 #define vcgen_stmt(env,s,a) vcgen_stmt_debug(env,s,a)
 static unsigned int indent = 0;
 static void print_tabs() {
@@ -1274,6 +1279,51 @@ static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   }
 }
 
+// extract the arguments, requires, and ensures clause for a function from
+// its type.
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures_info(Absyn::fn_info_t @fi) {
+  return $(fi->args,fi->requires_clause,fi->ensures_clause,fi->return_value);
+}
+
+static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, exp_opt_t req, exp_opt_t ens, vardecl_opt_t ret_value) get_requires_and_ensures(type_opt_t topt) {
+  if (topt != NULL) {
+    type_t t = Tcutil::pointer_elt_type((type_t)topt);
+    switch (t) {
+    case &Absyn::FnType(*fi): return get_requires_and_ensures_info(fi);
+    default: break;
+    }
+  } 
+  return $(NULL,NULL,NULL,NULL);
+}
+
+static void check_requires(env_t env, list_t<term_t> inputs,
+                           list_t<$(var_opt_t,tqual_t,type_t)@> args,
+                           assn_t a, exp_opt_t reqopt) {
+  if (reqopt != NULL) {
+    exp_t req = (exp_t)reqopt;
+    // pretend like we're assigning the actual values to the parameter
+    // values
+    for (; args != NULL && inputs != NULL; args = args->tl, inputs = inputs->tl) {
+      let &$(vopt,tq,t) = args->hd;
+      if (vopt != NULL) {
+        // have to fake up a vardecl
+        Absyn::qvar_t qv = new $(Absyn::Loc_n,(Absyn::var_t)vopt);
+        let vd = new Absyn::Vardecl {.sc = Absyn::Public,
+                                     .name = qv,.varloc = 0,.tq = tq,
+                                     .type = t,.initializer = NULL,
+                                     .rgn = NULL,.attributes = NULL,
+                                     .escapes = false};
+          a = and(a,eq(new Var(vd),inputs->hd));
+        }
+    }
+    // FIX? varargs.
+    let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
+    if (!implies(a,at))
+      Warn::err(req->loc, "cannot prove @requires %s from %s",
+                assn2string(reduce(at)), assn2string(reduce(a)));
+  }
+}
+
 static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
   return lt;
 }
@@ -1357,17 +1407,29 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(_,a) = vcgen_rexp(env,e1,ain);
     return vcgen_rexp(env,e2,a);
   case &Absyn::FnCall_e(e,es,...):
-    ain = vcgen_rexps_nosave(env,es,ain);
-    let $(_,a2) = vcgen_rexp(env,e,ain);
+    let $(ts,a) = vcgen_rexps_always(env,es,ain);
+    let $(_,a2) = vcgen_rexp(env,e,a);
+    // check @requires clause on function
+    let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures(e->topt);
+    check_requires(env,ts,args,a2,reqopt);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
     a2 = kill(a2);
-    // FIX: take pre- and post-condition into account
-    // must update exception handler.
     update_try_assn(env,a2);
     // noreturn functions don't return...
     if (Tcutil::is_noreturn_fn_type((type_t)e->topt)) a2 = &false_assn;
-    return $(NULL,a2);
+    if (ensopt == NULL) 
+      return $(NULL,a2);
+    exp_t ensures = (exp_t)ensopt;
+    // add in the @ensures clause for the result
+    let $(at,_) = vcgen_test(env,ensures,a2);
+    if (ret_value != NULL) {
+      let v = fresh_var();
+      // FIX: substitute ts for formal parameters
+      at = subst((vardecl_t)ret_value,v,at);
+      return $(v,at);
+    } 
+    return $(NULL,at);
   case &Absyn::Throw_e(e,_):
     let $(_,a) = vcgen_rexp(env,e,ain);
     update_try_assn(env,a);
@@ -1487,7 +1549,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     let $(at,_) = vcgen_test(env,e1,&true_assn);
     if (!implies(ain,at)) 
       Warn::err(e->loc, "cannot prove @assert from %s",
-                assn2string(ain));
+                assn2string(reduce(ain)));
     return $(one(),and(ain,at));
   }
 }
@@ -1500,8 +1562,30 @@ void vcgen_topdecls(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t> 
       //fprintf(stderr,"Vcgen function %s\n",Absynpp::qvar2string(fd->name));
       //fprintf(stderr,"---------------------------------------\n");
       let env = initial_env(tables,fd);
-      // FIX: put in pre-condition and check post-condition
-      vcgen_stmt(env,fd->body,&true_assn);
+      assn_t a = &true_assn;
+      // put in the requires clause as an assumption.
+      let $(args,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
+      if (reqopt != NULL) {
+        // hope the vards in here point to the vardecls in the fn...
+        a = vcgen_test(env,(exp_t)reqopt,a)[0];
+      }
+      vcgen_stmt(env,fd->body,a);
+      // check the requires clause
+      if (ensopt != NULL) {
+        exp_t ens = (exp_t)ensopt;
+        let $(at,_) = vcgen_test(env,ens,&true_assn);
+        let senv = env->shared;
+        let res_assn_opt = senv->res_assn;
+        assn_t res_assn = &false_assn;
+        if (res_assn_opt != NULL) res_assn = ((assn_t)res_assn_opt);
+        string_t str = "NULL";
+        if (senv->res_term != NULL) str = term2string((term_t)senv->res_term);
+        if (ret_value != NULL && senv->res_term) 
+          res_assn = and(res_assn,eq(new Var((vardecl_t)ret_value),senv->res_term));
+        if (!implies(res_assn,at))
+          Warn::err(ens->loc, "cannot prove the @ensures clause %s from %s",
+                    assn2string(reduce(at)),assn2string(reduce(res_assn)));
+      }
       hash_cons_table = NULL; // collect table
       break;
     case &Absyn::Namespace_d(_,ds): fallthru(ds);

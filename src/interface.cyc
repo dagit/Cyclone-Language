@@ -254,7 +254,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &TypedefType(_,_,_, t) && t != NULL:
     return check_public_type(ae, seen, obj, name, (type_t)t);
 
-  case &FnType(FnInfo(_,_,_,ret,args,_,cyc_varargs,_,_,_,_,_,_)):
+  case &FnType(FnInfo(_,_,_,ret,args,_,cyc_varargs,_,_,_,_,_,_,_)):
     // FIX: need to check requires and ensures clauses?
     bool b = check_public_type_list(ae, seen, obj, name, get_type2, args)
       && check_public_type(ae, seen, obj, name, ret);

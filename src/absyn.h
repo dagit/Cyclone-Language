@@ -275,6 +275,8 @@ namespace Absyn {
     // post-condition on return from function
     exp_opt_t                                ensures_clause;
     Relations::relns_t                       ensures_relns;
+    // the variable used in the @ensures clause for the return value
+    vardecl_opt_t                            return_value;
   };
 
   // information for datatypes

@@ -265,7 +265,7 @@ void resolve_type(seg_t, env_t,  type_t);
 void resolve_rgnpo(seg_t, env_t, list_t<$(type_t,type_t)@>);
 void resolve_scs(env_t,   list_t<switch_clause_t>);
 void resolve_aggrfields(seg_t, env_t, list_t<aggrfield_t>);
-void resolve_function_stuff(seg_t loc, env_t env, fn_info_t i);
+static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i);
 void resolve_asm_iolist(env_t, list_t<$(string_t, exp_t)@> l);
 list_t<vardecl_t> get_fun_vardecls(bool, seg_t, env_t, 
 				   list_t<$(var_opt_t,tqual_t,type_t)@>, 
@@ -613,25 +613,26 @@ list_t<vardecl_t> get_fun_vardecls(bool need_va_name,
   return vds;
 }
 
-void resolve_function_stuff(seg_t loc, env_t env, fn_info_t i) {
-  if(i.effect != NULL)
-    resolve_type(loc,env,(type_t)i.effect);
-  resolve_type(loc,env,i.ret_type);
-  for(let args=i.args; args != NULL; args = args->tl)
+static void resolve_function_stuff(seg_t loc, env_t env, fn_info_t @i) {
+  if(i->effect != NULL)
+    resolve_type(loc,env,(type_t)i->effect);
+  resolve_type(loc,env,i->ret_type);
+  for(let args=i->args; args != NULL; args = args->tl)
     resolve_type(loc,env,(*args->hd)[2]);
-  if(i.cyc_varargs != NULL)
-    resolve_type(loc,env,i.cyc_varargs->type);
-  resolve_rgnpo(loc,env,i.rgn_po);
-  if(i.requires_clause != NULL)
-    resolve_exp(env,(exp_t)i.requires_clause);
-  if(i.ensures_clause != NULL) {
+  if(i->cyc_varargs != NULL)
+    resolve_type(loc,env,i->cyc_varargs->type);
+  resolve_rgnpo(loc,env,i->rgn_po);
+  if(i->requires_clause != NULL)
+    resolve_exp(env,(exp_t)i->requires_clause);
+  if(i->ensures_clause != NULL) {
     // return_value is a dummy var in scope only here
     let locs = *env->local_vars;
     let v    = new "return_value";
-    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), i.ret_type, NULL);
+    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), i->ret_type, NULL);
+    i->return_value = vd;
     *env->local_vars = Dict::insert(*env->local_vars, v,
 				    new VarRes(new Local_b(vd)));
-    resolve_exp(env,(exp_t)i.ensures_clause);
+    resolve_exp(env,(exp_t)i->ensures_clause);
     *env->local_vars = locs;
   }
 }
@@ -778,11 +779,11 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
     resolve_type(loc,env,t1);
     if(eo!=NULL) resolve_exp(env,(exp_t)eo);
     return;
-  case &FnType(i):
+  case &FnType(*i):
     // FIX?: efficiency note: we do a lot of work for the very unusual case
     //       that there's a requires/ensures clause or a parameter type that
     //       mentions a parameter name
-    let vds = get_fun_vardecls(false, loc, env, i.args, i.cyc_varargs);
+    let vds = get_fun_vardecls(false, loc, env, i->args, i->cyc_varargs);
 
     let old_locals = env->local_vars; // non-NULL only for nested functions
     if(old_locals != NULL) 
@@ -975,7 +976,7 @@ void resolve_decl(env_t env, decl_t d) {
       *env->local_vars = Dict::insert(*env->local_vars,(*vds1->hd->name)[1],
 				      new VarRes(new Param_b(vds1->hd)));
 
-    resolve_function_stuff(loc, env, fd->i);
+    resolve_function_stuff(loc, env, &fd->i);
 
     if(old_locals != NULL) { 
       // in scope of inner and outer function

@@ -712,7 +712,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       *eptr = uint_exp(1,0);
     }
     break;
-  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts,req,*req_relns,ens,*ens_relns}):
+  case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts,req,*req_relns,ens,*ens_relns,_}):
     // This is an unusual and complicated case because (a) we may have to
     // bind type variables here, (b) we may have to calculate the effect.
 

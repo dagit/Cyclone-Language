@@ -406,7 +406,7 @@ type_t copy_type(type_t t) {
   case &ArrayType(ArrayInfo{et,tq,eo,zt,ztl}):
     return new ArrayType(ArrayInfo{copy_type(et),tq,deep_copy_exp_opt(true,eo),
 				     copy_type(zt),ztl});
-  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts,req,req_rlns,ens,ens_rlns}):
+  case &FnType(FnInfo{tvs,effopt,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts,req,req_rlns,ens,ens_rlns,ret_val}):
     let tvs2 = List::map(copy_tvar,tvs);
     type_opt_t effopt2 = (effopt == NULL) ? NULL : copy_type(effopt);
     let rt2 = copy_type(rt);
@@ -424,9 +424,15 @@ type_t copy_type(type_t t) {
     let req_rlns2 = Relations::copy_relns(heap_region, req_rlns);
     let ens2 = deep_copy_exp_opt(true,ens);
     let ens_rlns2 = Relations::copy_relns(heap_region, ens_rlns);
+    vardecl_opt_t ret_val2 = NULL;
+    if (ret_val != NULL) {
+      ret_val2 = new (*ret_val);
+      ret_val2->type = copy_type(ret_val2->type);
+      if (ret_val2->rgn) ret_val2->rgn = copy_type((type_t)ret_val2->rgn);
+    }
     return new FnType(FnInfo{tvs2,effopt2,rt_tq,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,atts2,req2,req_rlns2,
-                               ens2,ens_rlns2});
+                               ens2,ens_rlns2,ret_val2});
   case &TupleType(tqts):    return new TupleType(List::map(copy_tqt,tqts));
   case &AnonAggrType(k,fs): return new AnonAggrType(k,List::map(copy_field,fs));
   case &ValueofType(e):     return new ValueofType(e); // FIX: should copy e
@@ -814,7 +820,7 @@ static type_t rgns_of(type_t t) {
     return normalize_effect(rgns_of(et));
   case &AnonAggrType(_,fs):
     return normalize_effect(join_eff(map(rgns_of_field,fs)));
-  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,_,_,_,_,_}):
+  case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rpo,_,_,_,_,_,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
     // effect.  So, if the effect is smaller than the argument or return
     // types, they won't show up.  This saves us from a lot of complication
@@ -892,7 +898,8 @@ static type_t dummy_fntype(type_t eff) {
                                  .attributes = NULL, .requires_clause = NULL,
                                  .requires_relns = NULL,
                                  .ensures_clause = NULL,
-                                 .ensures_relns = NULL});
+                                 .ensures_relns = NULL,
+                                 .return_value = NULL});
   return atb_type(fntype,heap_rgn_type,empty_tqual(0),bounds_one(),false_type);
 }
 
@@ -2625,7 +2632,7 @@ type_t rsubstitute(region_t<`r> rgn,
       return t;
     return pointer_type(PtrInfo(new_t1,tq,PtrAtts(new_r,n,new_b,new_zt,NULL)));
   case &FnType(FnInfo{vs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts,
-                        req,_,ens,_}):
+                        req,_,ens,_,ret_value}):
     // FIX: capture???
     for (let p = vs; p != NULL; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,var_type(p->hd)),inst);
@@ -2661,7 +2668,7 @@ type_t rsubstitute(region_t<`r> rgn,
     let ens_relns2 = extract_relns(args2,ens2);
     return new FnType(FnInfo{vs,eff2,rtq,rsubstitute(rgn,inst,rtyp),args2,
 			       c_varargs,cyc_varargs2,rgn_po2,atts,
-			       req2,req_relns2,ens2,ens_relns2});
+			       req2,req_relns2,ens2,ens_relns2,ret_value});
   case &TupleType(tqts):
     list_t<type_t,`r> ts2 = NULL;
     bool change = false;

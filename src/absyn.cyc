@@ -817,7 +817,8 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
                               .requires_clause = req,
                               .requires_relns = NULL,
                               .ensures_clause = ens,
-                              .ensures_relns = NULL});
+                              .ensures_relns = NULL,
+                              .return_value = NULL});
 }
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;
 //   function pointers can't be unique at the moment
