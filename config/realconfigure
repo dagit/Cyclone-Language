@@ -259,7 +259,7 @@ ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
 CFLAGS=${CFLAGS}
 NET_LD_FLAGS=${LD_FLAGS}
-SHELL=${SHELL}
+SHELL=${CONFIGSHELL}
 
 EOF
 cat Makefile.inc.in) > Makefile.inc
