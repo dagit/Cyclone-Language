@@ -4039,8 +4039,8 @@ p[1].l.first_column=yylloc.first_column;
 p[1].l.last_line=p[0].l.last_line;
 p[1].l.last_column=p[0].l.last_column;}else{
 # 399
-((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset].l.last_line=(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(yyvsp_offset + yylen)- 1))).l.last_line;
-((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset].l.last_column=(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(yyvsp_offset + yylen)- 1))).l.last_column;}
+({unsigned _Tmp1=(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(yyvsp_offset + yylen)- 1))).l.last_line;(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),yyvsp_offset))).l.last_line=_Tmp1;});
+((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset].l.last_column=((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1].l.last_column;}
 # 409
 yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,549U,sizeof(short),yyn));
 # 411
@@ -4085,7 +4085,7 @@ if((int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,6839U,sizeof(short)
 Cyc_strcat(msg,count==0?
 _tag_fat(", expecting `",sizeof(char),14U):
  _tag_fat(" or `",sizeof(char),6U));
-Cyc_strcat(msg,Cyc_yytname[x]);
+Cyc_strcat(msg,*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_yytname,321U,sizeof(struct _fat_ptr),x)));
 Cyc_strcat(msg,_tag_fat("'",sizeof(char),2U));
 ++ count;}}}
 # 459

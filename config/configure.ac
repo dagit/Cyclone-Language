@@ -92,7 +92,7 @@ if [[ "$target" = "arm-gba-elf" ]]; then
   # because the cross gcc is called arm-elf-gcc, not arm-unknown-elf-gcc-3.2
   target="arm-elf"
   TARGET_CC="arm-elf-gcc"
-  TARGET_CFLAGS=-mthumb -mthumb-interwork
+  TARGET_CFLAGS="-mthumb -mthumb-interwork"
   TARGET_AR="arm-elf-ar"
   TARGET_RANLIB="arm-elf-ranlib"
 fi

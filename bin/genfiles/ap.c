@@ -726,7 +726,7 @@ carry=({int _Tmp0=_check_null(z)->size;struct _fat_ptr _Tmp1=z->digits;const cha
 # 367
 carry==0?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;})(_tag_fat("carry == 0",sizeof(char),11U),_tag_fat("ap.cyc",sizeof(char),7U),367U);
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits==1 &&(int)((unsigned char*)z->digits.curr)[0]==0 ||(int)sign!=45)?1: -1;
+z->sign=(z->ndigits==1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))==0 ||(int)sign!=45)?1: -1;
 return z;}
 # 372
 char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base){
