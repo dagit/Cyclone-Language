@@ -5,7 +5,6 @@
 
 #include "stdio.h"
 #include "string.h"
-#include "character.h"
 
 using Stdio;
 using Core;

@@ -8,7 +8,7 @@
 #include "queue.h"
 #include "rope.h"
 #include "dict.h"
-#include "character.h"
+#include "ctype.h"
 #include "xarray.h"
 #include "bitvec.h"
 #include "ref.h"
@@ -25,7 +25,7 @@ using List;
 using Set;
 using Dict;
 using Hashtable;
-using Character;
+using Ctype;
 using Xarray;
 using Bitvec;
 using Ref;
@@ -570,8 +570,8 @@ void rope_test() {
   test_end();;
 }
 
-void character_test() {
-  test_begin("Character");
+void ctype_test() {
+  test_begin("Ctype");
   okfail(isupper('A'));
   okfail(!isupper('a'));
   okfail(!isupper('9'));
@@ -1044,7 +1044,7 @@ int main(int argc, string ? args) {
   buffer_test();
   queue_test();
   rope_test();
-  character_test();
+  ctype_test();
   xarray_test();
   bitvec_test();
   ref_test();

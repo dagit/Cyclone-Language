@@ -1,7 +1,7 @@
 
 #include "core.h"
 #include "list.h"
-#include "character.h"
+#include "ctype.h"
 #include "string.h"
 #include "position.h"
 #include "absyn.h"
@@ -55,7 +55,7 @@ parse_conversionspecification(string s, int i) {
   } else {
     for (; i<len; i++) {
       c = s[i];
-      if (Character::isdigit(c)) width = new List((int)c,width);
+      if (Ctype::isdigit(c)) width = new List((int)c,width);
       else break;
     }
   }
@@ -76,7 +76,7 @@ parse_conversionspecification(string s, int i) {
     } else {
       for (; i<len; i++) {
         c = s[i];
-        if (Character::isdigit(c)) precision = new List((int)c,precision);
+        if (Ctype::isdigit(c)) precision = new List((int)c,precision);
         else break;
       }
     }
@@ -389,7 +389,7 @@ parse_inputformat(string s, int i) {
   let width = null;
   for (; i<len; i++) {
     c = s[i];
-    if (Character::isdigit(c)) width = new List((int)c,width);
+    if (Ctype::isdigit(c)) width = new List((int)c,width);
     else break;
   }
   if (i>=len) return null;

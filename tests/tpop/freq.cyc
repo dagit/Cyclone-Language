@@ -4,11 +4,11 @@
 /* Ported to Cyclone by James Cheney, April 2001 */
 
 #include "stdio.h"
-#include "character.h"
+#include "ctype.h"
 
 using Core;
 using Stdio;
-using Character;
+using Ctype;
 
 /* freq main: display byte frequency counts */
 int main(void)

@@ -34,9 +34,21 @@ struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; typedef struct Cyc
 Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern int Cyc_List_length( struct Cyc_List_List*
 x); extern char Cyc_List_List_empty[ 15u]; extern char Cyc_List_List_mismatch[
-18u]; extern char Cyc_List_Nth[ 8u]; extern int Cyc_Character_isdigit( char c);
-extern int Cyc_Character_isspace( char c); extern char Cyc_Character_toupper(
-char c); struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
+18u]; extern char Cyc_List_Nth[ 8u]; typedef int Cyc___int32_t; typedef
+unsigned int Cyc___uint32_t; extern int isalnum( int __c)  __attribute__(( cdecl
+)) ; extern int isalpha( int __c)  __attribute__(( cdecl )) ; extern int iscntrl(
+int __c)  __attribute__(( cdecl )) ; extern int isdigit( int __c)
+ __attribute__(( cdecl )) ; extern int isgraph( int __c)  __attribute__(( cdecl
+)) ; extern int islower( int __c)  __attribute__(( cdecl )) ; extern int isprint(
+int __c)  __attribute__(( cdecl )) ; extern int ispunct( int __c)
+ __attribute__(( cdecl )) ; extern int isspace( int __c)  __attribute__(( cdecl
+)) ; extern int isupper( int __c)  __attribute__(( cdecl )) ; extern int
+isxdigit( int __c)  __attribute__(( cdecl )) ; extern int tolower( int __c)
+ __attribute__(( cdecl )) ; extern int toupper( int __c)  __attribute__(( cdecl
+)) ; extern int isascii( int __c)  __attribute__(( cdecl )) ; extern int toascii(
+int __c)  __attribute__(( cdecl )) ; extern int _tolower( int __c)
+ __attribute__(( cdecl )) ; extern int _toupper( int __c)  __attribute__(( cdecl
+)) ; struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE Cyc_Stdio_FILE;
 typedef int Cyc_Stdio_fpos_t; extern char Cyc_Stdio_FileCloseError[ 19u]; extern
 char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{ char*
 tag; struct _tagged_string f1; } ; extern unsigned int Cyc_String_strlen( struct
@@ -131,8 +143,8 @@ _tagged_string _temp4= s;( unsigned int)( _temp4.last_plus_one - _temp4.curr);})
 i ++){ if(*(( char*(*)( struct _tagged_string, unsigned int, unsigned int))
 _check_unknown_subscript)( s, sizeof( char), i) =='\000'){ break;}} return(
 unsigned int)( i - ofs);}} static int Cyc_String_case_cmp( char c1, char c2){
-return c1 - c2;} static int Cyc_String_nocase_cmp( char c1, char c2){ return Cyc_String_case_cmp(
-Cyc_Character_toupper( c1), Cyc_Character_toupper( c2));} static int Cyc_String_cmp(
+return c1 - c2;} static int Cyc_String_nocase_cmp( char c1, char c2){ return Cyc_String_case_cmp((
+char) toupper(( int) c1),( char) toupper(( int) c2));} static int Cyc_String_cmp(
 struct _tagged_string s1, int ofs1, unsigned int len1, struct _tagged_string s2,
 int ofs2, unsigned int len2, int(* f)( char, char)){ unsigned int min_length=
 len1 < len2? len1: len2; int i= - 1; while( ++ i < min_length) { int diff= f(*((
@@ -447,21 +459,20 @@ _check_null( chars))->tl;} return s;} int Cyc_String_to_int( struct
 _tagged_string s, int* offset){ int ans= 0; int sn= 1; int digit_seen= 0; int i=
 offset == 0? 0:*(( int*) _check_null( offset)); while( i <({ struct
 _tagged_string _temp119= s;( unsigned int)( _temp119.last_plus_one - _temp119.curr);})?
-Cyc_Character_isspace(*(( char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) { i ++;} if(
-i <({ struct _tagged_string _temp120= s;( unsigned int)( _temp120.last_plus_one
-- _temp120.curr);})?*(( char*(*)( struct _tagged_string, unsigned int,
-unsigned int)) _check_unknown_subscript)( s, sizeof( char), i) =='-': 0){ i ++;
-sn= - 1;} while( i <({ struct _tagged_string _temp121= s;( unsigned int)(
-_temp121.last_plus_one - _temp121.curr);})? Cyc_Character_isspace(*(( char*(*)(
-struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
-sizeof( char), i)): 0) { i ++;} while( i <({ struct _tagged_string _temp122= s;(
-unsigned int)( _temp122.last_plus_one - _temp122.curr);})? Cyc_Character_isdigit(*((
+isspace(( int)*(( char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( s, sizeof( char), i)): 0) { i ++;} if( i <({ struct
+_tagged_string _temp120= s;( unsigned int)( _temp120.last_plus_one - _temp120.curr);})?*((
 char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( s, sizeof( char), i)): 0) { digit_seen= 1; ans= ans *
-10 +( int)(*(( char*(*)( struct _tagged_string, unsigned int, unsigned int))
-_check_unknown_subscript)( s, sizeof( char), i) -'0'); i ++;} ans= ans * sn; if(
-! digit_seen){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
+_check_unknown_subscript)( s, sizeof( char), i) =='-': 0){ i ++; sn= - 1;}
+while( i <({ struct _tagged_string _temp121= s;( unsigned int)( _temp121.last_plus_one
+- _temp121.curr);})? isspace(( int)*(( char*(*)( struct _tagged_string,
+unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) {
+i ++;} while( i <({ struct _tagged_string _temp122= s;( unsigned int)( _temp122.last_plus_one
+- _temp122.curr);})? isdigit(( int)*(( char*(*)( struct _tagged_string,
+unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) {
+digit_seen= 1; ans= ans * 10 +( int)(*(( char*(*)( struct _tagged_string,
+unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i) -'0');
+i ++;} ans= ans * sn; if( ! digit_seen){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp123=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp123[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp124; _temp124.tag= Cyc_Core_InvalidArg;
 _temp124.f1=({ char* _temp125="String::to_int"; struct _tagged_string _temp126;
@@ -471,14 +482,14 @@ _check_null( offset))= i;} return ans;} double Cyc_String_to_double( struct
 _tagged_string s, int* offset){ double ans=( double) 0.0; int sn= 1; int
 digit_seen= 0; int i= offset == 0? 0:*(( int*) _check_null( offset)); while( i <({
 struct _tagged_string _temp127= s;( unsigned int)( _temp127.last_plus_one -
-_temp127.curr);})? Cyc_Character_isspace(*(( char*(*)( struct _tagged_string,
+_temp127.curr);})? isspace(( int)*(( char*(*)( struct _tagged_string,
 unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) {
 i ++;} if( i <({ struct _tagged_string _temp128= s;( unsigned int)( _temp128.last_plus_one
 - _temp128.curr);})?*(( char*(*)( struct _tagged_string, unsigned int,
 unsigned int)) _check_unknown_subscript)( s, sizeof( char), i) =='-': 0){ i ++;
 sn= - 1;} while( i <({ struct _tagged_string _temp129= s;( unsigned int)(
-_temp129.last_plus_one - _temp129.curr);})? Cyc_Character_isdigit(*(( char*(*)(
-struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
+_temp129.last_plus_one - _temp129.curr);})? isdigit(( int)*(( char*(*)( struct
+_tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
 sizeof( char), i)): 0) { digit_seen= 1; ans= ans * 10.0 +( double)(*(( char*(*)(
 struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
 sizeof( char), i) -'0'); i ++;} if( i <({ struct _tagged_string _temp130= s;(
@@ -486,7 +497,7 @@ unsigned int)( _temp130.last_plus_one - _temp130.curr);})?*(( char*(*)( struct
 _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,
 sizeof( char), i) =='.': 0){ i ++;{ double divisor=( double) 0.1; while( i <({
 struct _tagged_string _temp131= s;( unsigned int)( _temp131.last_plus_one -
-_temp131.curr);})? Cyc_Character_isdigit(*(( char*(*)( struct _tagged_string,
+_temp131.curr);})? isdigit(( int)*(( char*(*)( struct _tagged_string,
 unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) {
 digit_seen= 1; ans= ans +( double)(*(( char*(*)( struct _tagged_string,
 unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i) -'0')
@@ -509,7 +520,7 @@ _tagged_string _temp138= s;( unsigned int)( _temp138.last_plus_one - _temp138.cu
 char*(*)( struct _tagged_string, unsigned int, unsigned int))
 _check_unknown_subscript)( s, sizeof( char), i) =='+': 0){ i ++;}} while( i <({
 struct _tagged_string _temp139= s;( unsigned int)( _temp139.last_plus_one -
-_temp139.curr);})? Cyc_Character_isdigit(*(( char*(*)( struct _tagged_string,
+_temp139.curr);})? isdigit(( int)*(( char*(*)( struct _tagged_string,
 unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( char), i)): 0) {
 digit_seen= 1; exponent= exponent * 10 +( int)(*(( char*(*)( struct
 _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( s,

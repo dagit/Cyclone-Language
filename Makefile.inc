@@ -10,7 +10,6 @@ endif
 CYCLONE_LIBS:=arg\
          bitvec\
          buffer\
-         character\
          core\
          slowdict\
          dict\

@@ -2,7 +2,7 @@
 
 #include "core.h"
 #include "list.h"
-#include "character.h"
+#include "ctype.h"
 #include "string.h"
 #include "stdio.h" // for size_t
 #include "math.h" //  for pow
@@ -40,7 +40,7 @@ static int case_cmp(char c1, char c2) {
 }
 
 static int nocase_cmp(char c1, char c2) {
-  return case_cmp(Character::toupper(c1),Character::toupper(c2));
+  return case_cmp((char)Ctype::toupper(c1),(char)Ctype::toupper(c2));
 }
 
 static int cmp(string s1, int ofs1, size_t len1,
@@ -491,16 +491,16 @@ int to_int(string s, int *`r offset) {
   int i = (offset == null) ? 0 : *offset;
 
   // skip any white space
-  while (i < s.size && Character::isspace(s[i])) i++;
+  while (i < s.size && Ctype::isspace(s[i])) i++;
   // check for a sign
   if (i < s.size && s[i] == '-') {
     i++;
     sn = -1;
   }
   // skip any white space
-  while (i < s.size && Character::isspace(s[i])) i++;
+  while (i < s.size && Ctype::isspace(s[i])) i++;
   // parse digits
-  while (i < s.size && Character::isdigit(s[i])) {
+  while (i < s.size && Ctype::isdigit(s[i])) {
     digit_seen = true;
     ans = (ans * 10) + (int)(s[i] - '0');
     i++;
@@ -522,14 +522,14 @@ double to_double(string s, int *`r offset) {
   int i = (offset == null) ? 0 : *offset;
   
   // skip any white space
-  while (i < s.size && Character::isspace(s[i])) i++;
+  while (i < s.size && Ctype::isspace(s[i])) i++;
   // check for a sign
   if (i < s.size && s[i] == '-') {
     i++;
     sn = -1;
   }
   // get mantissa
-  while (i < s.size && Character::isdigit(s[i])) {
+  while (i < s.size && Ctype::isdigit(s[i])) {
     digit_seen = true;
     ans = (ans * 10.0) + (double)(s[i] - '0');
     i++;
@@ -539,7 +539,7 @@ double to_double(string s, int *`r offset) {
     i++;
     // get fractional part
     double divisor = 0.1;
-    while (i < s.size && Character::isdigit(s[i])) {
+    while (i < s.size && Ctype::isdigit(s[i])) {
       digit_seen = true;
       ans = ans + (((double)(s[i] - '0')) * divisor);
       divisor = divisor / 10.0;
@@ -559,7 +559,7 @@ double to_double(string s, int *`r offset) {
       exp_sign = -1;
     } else if (i < s.size && s[i] == '+') i++;
     // get exponent
-    while (i < s.size && Character::isdigit(s[i])) {
+    while (i < s.size && Ctype::isdigit(s[i])) {
       digit_seen = true;
       exponent = exponent * 10 + ((int)(s[i] - '0'));
       i++;

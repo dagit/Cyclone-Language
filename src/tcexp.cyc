@@ -8,7 +8,6 @@
 
 #include "absyn.h"
 #include "string.h"
-#include "character.h"
 #include "position.h"
 #include "absynpp.h"
 #include "tcenv.h"

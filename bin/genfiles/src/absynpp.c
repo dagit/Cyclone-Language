@@ -52,12 +52,12 @@ struct Cyc_PP_Ppstate; typedef struct Cyc_PP_Ppstate* Cyc_PP_ppstate_t; struct
 Cyc_PP_Out; typedef struct Cyc_PP_Out* Cyc_PP_out_t; struct Cyc_PP_Doc; typedef
 struct Cyc_PP_Doc* Cyc_PP_doc_t; extern void Cyc_PP_file_of_doc( struct Cyc_PP_Doc*
 d, int w, struct Cyc_Stdio___sFILE* f); extern struct _tagged_string Cyc_PP_string_of_doc(
-struct Cyc_PP_Doc* d, int w); extern struct Cyc_PP_Doc* Cyc_PP_text( struct
-_tagged_string s); extern struct Cyc_PP_Doc* Cyc_PP_textptr( struct
-_tagged_string* s); extern struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern struct
-Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct Cyc_PP_Doc* Cyc_PP_nest( int k,
-struct Cyc_PP_Doc* d); struct _tagged_ptr0{ struct Cyc_PP_Doc** curr; struct Cyc_PP_Doc**
-base; struct Cyc_PP_Doc** last_plus_one; } ; extern struct Cyc_PP_Doc* Cyc_PP_cat(
+struct Cyc_PP_Doc* d, int w); extern struct Cyc_PP_Doc* Cyc_PP_nil_doc(); extern
+struct Cyc_PP_Doc* Cyc_PP_line_doc(); extern struct Cyc_PP_Doc* Cyc_PP_text(
+struct _tagged_string s); extern struct Cyc_PP_Doc* Cyc_PP_textptr( struct
+_tagged_string* s); extern struct Cyc_PP_Doc* Cyc_PP_nest( int k, struct Cyc_PP_Doc*
+d); struct _tagged_ptr0{ struct Cyc_PP_Doc** curr; struct Cyc_PP_Doc** base;
+struct Cyc_PP_Doc** last_plus_one; } ; extern struct Cyc_PP_Doc* Cyc_PP_cat(
 struct _tagged_ptr0); extern struct Cyc_PP_Doc* Cyc_PP_ppseq( struct Cyc_PP_Doc*(*
 pp)( void*), struct _tagged_string sep, struct Cyc_List_List* l0); extern struct
 Cyc_PP_Doc* Cyc_PP_ppseql( struct Cyc_PP_Doc*(* pp)( void*), struct
