@@ -31,7 +31,6 @@ using Core;
 using Warn; // put Warn first so Absyn shadows
 using Absyn;
 using Tcutil;
-using Tcenv;
 namespace Tctyp;
 
 // bool indicates whether the element should go in an effect
@@ -42,7 +41,7 @@ typedef list_t<$(type_t,bool)@> free_evars_t;
 static struct CVTEnv {
   // passed down:
   seg_t loc;
-  tenv_t te;
+  Tcenv::tenv_t te;
   list_t<tvar_t> kind_env;  // used to get consistent id's and kinds for tvars
   bool fn_result;           // whether we are in a function result
   bool generalize_evars;    // whether we replace evars with fresh tvars
@@ -52,9 +51,34 @@ static struct CVTEnv {
 };
 typedef struct CVTEnv cvtenv_t;
 
-typedef Relations::relns_t relns_t;
-
-static var_t fst_fdarg($(var_opt_t,tqual_t,`c)@ t) { return (var_t)(*t)[0]; }
+// Checks that a type is well-formed and lives in kind expected_kind.
+// Takes as input a location (for error reporting), a type environment
+// (for looking up struct, enum, datatype, etc. decls), a check-valid-type
+// environment (explained below), an expected kind, and the type itself t.
+// It returns a check-valid-type-env as a result.
+//
+// In addition to checking that the type is valid, the routine needs
+// to compute the set of free type variables and free evars in the
+// type, and to constrain their kinds appropriately.  Normally, this
+// would be coded by passing a kind_env down, and returning free_vars
+// and free_evars as a result.  However, to cut down on allocation,
+// we pass in the free variables of surrounding types and just add
+// any new free variables to the result.  This way, we can calculate
+// all of the free variables for a term in a store-passing style.
+// The only situation where this breaks down is where we have binders
+// as is the case for function types (see below).
+//
+// This also performs the following side-effects which most of the
+// rest of the compiler rightly assumes have occurred:
+// * expand typedefs
+// * set pointers (or Known* variants) to declarations for
+//   StructType, UnionType, DatatypeType, DatatypeFieldType
+// * set the kind field of type variables: we use the expected kind
+//   initially, but if later constraints force a more constrained kind,
+//   then we move to the more constrained kind.  This is why we propagate
+//   around the set of
+// * add default effects for function types
+static cvtenv_t i_check_type(cvtenv_t, kind_t, type_t, bool, bool);
 
 // assumes es is a list of evars, and e is an evar.  Adds in e only
 // if not already present.  The booleans here indicate whether a
@@ -86,34 +110,19 @@ static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
     impos2("bound tvar id for ",tv," is NULL");
   return new List(tv,tvs);
 }
-static list_t<tvar_t> remove_bound_tvars(list_t<tvar_t> tvs,
-					 list_t<tvar_t> btvs) {
-  list_t<tvar_t> r = NULL;
+static list_t<`a> remove_bound_tvars(list_t<`a> tvs, list_t<tvar_t> btvs,
+				     tvar_t (@get)(`a)) {
+  list_t<`a> r = NULL;
   for (; tvs != NULL; tvs = tvs->tl) {
     _ b = btvs;
     for (; b != NULL; b = b->tl)
-      if (tvs->hd->identity == b->hd->identity)
+      if (get(tvs->hd)->identity == b->hd->identity)
         break;
     if (b==NULL) 
       r = new List(tvs->hd,r);
   }
   r = imp_rev(r);
   return r;
-}
-static free_tvars_t remove_bound_tvars_bool(free_tvars_t tvs,
-					    list_t<tvar_t> btvs) {
-  list_t<$(tvar_t,bool)@> res = NULL;
-  for (; tvs != NULL; tvs = tvs->tl) {
-    let $(tv,_) = *tvs->hd;
-    _ b = btvs;
-    for (; b != NULL; b = b->tl)
-      if (tv->identity == b->hd->identity)
-        break;
-    if (b==NULL) 
-      res = new List(tvs->hd,res);
-  }
-  res = imp_rev(res);
-  return res;
 }
 
 // we can constrain the region evars to HeapRgn and the
@@ -237,6 +246,45 @@ static free_tvars_t fast_add_free_tvar_bool(free_tvars_t tvs, tvar_t tv,bool b){
   return new List(new $(tv,b),tvs);
 }
 
+// This is called *after* type-checking the expression to see that
+// it's of type int, under the assumption that every valueof(T) in e is
+// well-formed and T is of kind Int.  We must now make sure that these
+// assumptions hold and extract the free type variables occurring within T.
+static cvtenv_t i_check_type_level_exp(exp_t e, cvtenv_t env) {
+  env.loc = e->loc;
+  switch (e->r) {
+  case &Const_e(_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
+  case &Pragma_e(...):
+  case &Var_e(...): break;
+  case &Primop_e(_,es):
+    for (; es != NULL; es = es->tl)
+      env = i_check_type_level_exp(es->hd,env);
+    break;
+  case &Conditional_e(e1,e2,e3):
+    env = i_check_type_level_exp(e1,env);
+    fallthru(e2,e3);
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2):  fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):
+    env = i_check_type_level_exp(e1,env);
+    env = i_check_type_level_exp(e2,env);
+    break;
+  case &Cast_e(t,e1,_,_):
+    env = i_check_type_level_exp(e1,env);
+    env = i_check_type(env,&tak,t,true,false);
+    break;
+  case &Offsetof_e(t,_): fallthru(t);
+  case &Sizeoftype_e(t): env = i_check_type(env,&tak,t,true,false); break;
+  case &Valueof_e(t):    env = i_check_type(env,&ik,t,true,false);  break;
+  case &Sizeofexp_e(e):  fallthru(e);
+  case &Extension_e(e):  env = i_check_type_level_exp(e,env); break;
+  default: impos2("bad expression in Tctyp::i_check_type_level_exp");
+  }
+  return env;
+}
+
 static bool typedef_tvar_is_ptr_rgn(tvar_t tvar, struct Typedefdecl *td) {
   if(td==NULL)
     return true;
@@ -252,11 +300,7 @@ static bool typedef_tvar_is_ptr_rgn(tvar_t tvar, struct Typedefdecl *td) {
   }
 }
 
-static cvtenv_t i_check_valid_type_level_exp(exp_t, cvtenv_t);
-static cvtenv_t i_check_valid_type(cvtenv_t, kind_t, type_t, bool, bool);
-
-static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
-			     kind_t expected_kind,
+static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind, kind_t expected_kind,
 			     struct Typedefdecl *td) {
   switch (compress_kb(tvar->kind)) {
   case &Less_kb(_,&Kind(RgnKind,Top)):
@@ -279,16 +323,37 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
   default: return tvar_kind(tvar,def_kind);
   }
 }
-static cvtenv_t complete_type_inst(cvtenv_t env, list_t<type_t,`H> @ targsp, 
-				   list_t<tvar_t,`H> tvs, kind_t expected_kind,
-				   bool allow_abs_aggr) {
-  // *targsp is mutated appropriately
+static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp, 
+				list_t<tvar_t,`H> tvs, kind_t expected_kind,
+				bool allow_abs_aggr, qvar_t typname,
+				struct Typedefdecl *td) {
+  // *targsp is mutated appropriately for implicit instantiation
+  let targs = *targsp;
+  for (; targs != NULL && tvs != NULL; targs = targs->tl,tvs = tvs->tl) {
+    type_t t = targs->hd;
+    tvar_t tv = tvs->hd;
+    // special case for recursive type where the parameters kinds
+    // have not yet been figured out.
+    switch $(compress_kb(tv->kind),t) {
+    case $(&Unknown_kb(_), &VarType(tv2)):
+      env.kind_env  = add_free_tvar(env.loc, env.kind_env, tv2);
+      env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
+      continue;
+    default: break;
+    }
+    kind_t k = tvar_kind(tv,&bk);
+    env = i_check_type(env,k,t,true,allow_abs_aggr);
+    check_no_qual(env.loc,t);
+  }
+  if (targs != NULL)
+    err2(env.loc,"too many type arguments for ", typname);
+  // take care of implicit instantiation
   list_t<type_t> hidden_ts = NULL;
   for (; tvs != NULL; tvs = tvs->tl) {
     type_t e = new_evar(NULL,NULL);
     hidden_ts = new List(e,hidden_ts);
-    kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, NULL);
-    env = i_check_valid_type(env,k,e,true,allow_abs_aggr);
+    kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, td);
+    env = i_check_type(env,k,e,true,allow_abs_aggr);
   }
   *targsp = imp_append(*targsp,imp_rev(hidden_ts));
   return env;
@@ -304,64 +369,32 @@ static void check_field_atts(seg_t loc, stringptr_t<`H> fn, attributes_t atts) {
 }
 
 // check that a @requires/@ensures clause is well-formed and satisfiable
-static $(cvtenv_t,relns_t) check_clause(cvtenv_t env, 
-					string_t<`H> clause_name, 
-					exp_opt_t clause) {
-  relns_t relns = NULL;
-  if (clause != NULL) {
-    Tcexp::tcExp(env.te,NULL,clause);
-    if (!is_integral(clause))
-      err2(env.loc, clause_name," clause has type ",clause->topt,
-	   " instead of integral type");
-    env = i_check_valid_type_level_exp(clause,env);
-    relns = Relations::exp2relns(heap_region,clause);
-    if (!Relations::consistent_relations(relns))
-      err2(clause->loc, 
-	   clause_name," clause '", clause, "' may be unsatisfiable");
-  }
+static $(cvtenv_t,Relations::relns_t) check_clause(cvtenv_t env, 
+						   string_t<`H> clause_name, 
+						   exp_opt_t clause) {
+  if(clause==NULL)
+    return $(env,NULL);
+  Tcexp::tcExp(env.te,NULL,clause);
+  if (!is_integral(clause))
+    err2(env.loc, clause_name," clause has type ",clause->topt,
+	 " instead of integral type");
+  env = i_check_type_level_exp(clause,env);
+  let relns = Relations::exp2relns(heap_region,clause);
+  if (!Relations::consistent_relations(relns))
+    err2(clause->loc, clause_name," clause '",clause,"' may be unsatisfiable");
   return $(env,relns);
 }
 
-// Checks that a type is well-formed and lives in kind expected_kind.
-// Takes as input a location (for error reporting), a type environment
-// (for looking up struct, enum, datatype, etc. decls), a check-valid-type
-// environment (explained below), an expected kind, and the type itself t.
-// It returns a check-valid-type-env as a result.
-//
-// In addition to checking that the type is valid, the routine needs
-// to compute the set of free type variables and free evars in the
-// type, and to constrain their kinds appropriately.  Normally, this
-// would be coded by passing a kind_env down, and returning free_vars
-// and free_evars as a result.  However, to cut down on allocation,
-// we pass in the free variables of surrounding types and just add
-// any new free variables to the result.  This way, we can calculate
-// all of the free variables for a term in a store-passing style.
-// The only situation where this breaks down is where we have binders
-// as is the case for function types (see below).
-//
-// This also performs the following side-effects which most of the
-// rest of the compiler rightly assumes have occurred:
-// * expand typedefs
-// * set pointers (or Known* variants) to declarations for
-//   StructType, UnionType, DatatypeType, DatatypeFieldType
-// * set the kind field of type variables: we use the expected kind
-//   initially, but if later constraints force a more constrained kind,
-//   then we move to the more constrained kind.  This is why we propagate
-//   around the set of
-// * add default effects for function types
-
 // helper function to check aggregates
-static cvtenv_t i_check_valid_aggr(cvtenv_t env,
-				   kind_t expected_kind, 
-				   aggr_info_t @info,
-				   types_t @targs,
-				   bool allow_abs_aggr) {
+static cvtenv_t i_check_aggr(cvtenv_t env, kind_t expected_kind,
+			     aggr_info_t @info, types_t @targs, 
+			     bool allow_abs_aggr) {
   let CVTEnv(loc,te,...) = env;
   switch(*info) {
   case {.UnknownAggr = $(k,n,tgd)}:
     aggrdecl_t @ adp;
     try {
-      adp = lookup_aggrdecl(te,loc,n);
+      adp = Tcenv::lookup_aggrdecl(te,loc,n);
       let ad = *adp;
       if (ad->kind != k) {
         if (ad->kind == StructA)
@@ -369,18 +402,15 @@ static cvtenv_t i_check_valid_aggr(cvtenv_t env,
         else
           err2(loc,"expecting union ", n, "instead of struct ", n);
       }
-      if (tgd && tgd->v) {
-        if (!ad->impl || !ad->impl->tagged)
-          err2(loc,"@tagged qualfiers don't agree on union ", n);
-      }
+      if (tgd && tgd->v && (!ad->impl || !ad->impl->tagged))
+	err2(loc,"@tagged qualfiers don't agree on union ", n);
       // FIX: what to do about tgd?
       *info = KnownAggr(adp);
     } catch { case &Dict::Absent:
       // add as an abstract type declaration
       // FIX: use the correct namespace by examining the qvar_t n
-      let ad = new Aggrdecl{k,Extern,n,NULL,NULL,NULL,false};
-      Tc::tcAggrdecl(te,loc,ad);
-      adp = lookup_aggrdecl(te,loc,n);
+      Tc::tcAggrdecl(te,loc,new Aggrdecl{k,Extern,n,NULL,NULL,NULL,false});
+      adp = Tcenv::lookup_aggrdecl(te,loc,n);
       *info = KnownAggr(adp);
       // give an error here if targs is non-empty:
       if (*targs != NULL) {
@@ -391,56 +421,31 @@ static cvtenv_t i_check_valid_aggr(cvtenv_t env,
     }
     fallthru(*adp);
   case {.KnownAggr = &ad}:
-    list_t<tvar_t> tvs = ad->tvs;
-    list_t<type_t> ts = *targs;
-    for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
-      let tv = tvs->hd;
-      let t = ts->hd;
-      // special case code in the situation where we have a recursive
-      // type and the type parameters kinds have not yet been figured
-      // out.
-      switch $(compress_kb(tv->kind),t) {
-      case $(&Unknown_kb(_), &VarType(tv2)):
-        env.kind_env  = add_free_tvar(loc, env.kind_env, tv2);
-        env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
-        continue;
-      default: break;
-      }
-      kind_t k = tvar_kind(tvs->hd,&bk);
-      env = i_check_valid_type(env,k,ts->hd,true,allow_abs_aggr);
-      check_no_qual(loc,ts->hd);
-    }
-    if (ts != NULL)
-      err2(loc,"too many parameters for ", ad);
-    env = complete_type_inst(env,targs,tvs,expected_kind,allow_abs_aggr);
-    if (allow_abs_aggr && 
-        ad->impl == NULL && !kind_leq(&ak, expected_kind)) {
+    env = check_type_inst(env,targs,ad->tvs,
+			  expected_kind,allow_abs_aggr,ad->name,NULL);
+    if (allow_abs_aggr && ad->impl == NULL && !kind_leq(&ak, expected_kind))
       // this must be later resolved as having at least the expected kind!
       // For now, we just force that to be &mk.  And come back to check that
       // it is later.
       ad->expected_mem_kind = true;
-    }
+    return env;
   }
-  return env;
 }
 
 // helper function to check datatypes
-static cvtenv_t i_check_valid_datatype(cvtenv_t env,
-				       kind_t expected_kind, 
-				       datatype_info_t @info,
-				       types_t @targsp,
-				       bool allow_abs_aggr) {
+static cvtenv_t i_check_datatype(cvtenv_t env, kind_t expected_kind, 
+				 datatype_info_t @info, types_t @targsp,
+				 bool allow_abs_aggr) {
   let CVTEnv(loc,te,...) = env;
   let targs = *targsp;
   switch(*info) {
   case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}:
     datatypedecl_t@ tudp;
-    try tudp = lookup_datatypedecl(te,loc,n);// FIX: lookup_xdatatypedecl needed?
+    try tudp = Tcenv::lookup_datatypedecl(te,loc,n);//FIX: lookup_xdatatypedecl?
     catch { case &Dict::Absent:
       // declare the datatype for the user
-      let tud = new Datatypedecl{Extern, n, NULL, NULL, is_x};
-      Tc::tcDatatypedecl(te, loc, tud);
-      tudp = lookup_datatypedecl(te,loc,n);
+      Tc::tcDatatypedecl(te,loc,new Datatypedecl{Extern, n, NULL, NULL, is_x});
+      tudp = Tcenv::lookup_datatypedecl(te,loc,n);
       // give an error here if targs is non-empty
       if (targs != NULL) {
         err2(loc,"declare parameterized datatype ", n, " before using");
@@ -455,43 +460,19 @@ static cvtenv_t i_check_valid_datatype(cvtenv_t env,
     *info = KnownDatatype(tudp);
     fallthru(*tudp);
   case {.KnownDatatype = &tud}:
-    // check the type arguments are well-formed
-    list_t<tvar_t> tvs = tud->tvs;
-    for (; targs != NULL && tvs != NULL; targs = targs->tl,tvs = tvs->tl) {
-      type_t t = targs->hd;
-      tvar_t tv = tvs->hd;
-      // special case for recursive type where the parameters kinds
-      // have not yet been figured out.
-      switch $(compress_kb(tv->kind),t) {
-      case $(&Unknown_kb(_), &VarType(tv2)):
-        env.kind_env  = add_free_tvar(loc, env.kind_env, tv2);
-        env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
-        continue;
-      default: break;
-      }
-      kind_t k = tvar_kind(tv,&bk);
-      env = i_check_valid_type(env,k,t,true,allow_abs_aggr);
-      check_no_qual(loc,t);
-    }
-    if (targs != NULL)
-      err2(loc,"too many type arguments for datatype ",tud->name);
-    env = complete_type_inst(env,targsp,tvs,expected_kind,allow_abs_aggr);
-    break;
+    return check_type_inst(env,targsp,tud->tvs,
+			   expected_kind,allow_abs_aggr,tud->name,NULL);
   }
-  return env;
 }
 
 // helper function check datatype fields
-static cvtenv_t i_check_valid_datatype_field(cvtenv_t env,
-					     kind_t expected_kind, 
-					     datatype_field_info_t @info,
-					     types_t targs,
-					     bool allow_abs_aggr) {
-  let CVTEnv(loc,te,...) = env;
+static cvtenv_t i_check_datatype_field(cvtenv_t env, kind_t expected_kind,
+				       datatype_field_info_t @info,
+				       types_t @targsp, bool allow_abs_aggr) {
   switch(*info) {
   case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
     // lookup should not fail because of binding phase
-    datatypedecl_t  tud = *lookup_datatypedecl(te,loc,tname);
+    datatypedecl_t  tud = *Tcenv::lookup_datatypedecl(env.te,env.loc,tname);
     datatypefield_t tuf;
     // binding phase also checked the field exists in the tud
     // we wait to bind it for uniformity with structs, which are delayed
@@ -506,37 +487,21 @@ static cvtenv_t i_check_valid_datatype_field(cvtenv_t env,
     *info = KnownDatatypefield(tud,tuf);
     fallthru(tud,tuf);
   case {.KnownDatatypefield = $(tud,tuf)}:
-    // check the type arguments are well-formed
-    list_t<tvar_t> tvs = tud->tvs;
-    for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
-      type_t t = targs->hd;
-      tvar_t tv = tvs->hd;
-      // special case for recursive type where the parameters kinds
-      // have not yet been figured out.
-      switch $(compress_kb(tv->kind),t) {
-      case $(&Unknown_kb(_), &VarType(tv2)):
-        env.kind_env  = add_free_tvar(loc, env.kind_env, tv2);
-        env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
-        continue;
-      default: break;
-      }
-      kind_t k = tvar_kind(tv,&bk);
-      env = i_check_valid_type(env,k,t,true,allow_abs_aggr);
-      check_no_qual(loc,t);
-    }
-    if (targs != NULL)
-      err2(loc,"too many type arguments for datatype ",tud->name,".",tuf->name);
-    if (tvs != NULL)
-      err2(loc,"too few type arguments for datatype ",tud->name,".",tuf->name);
-    break;
+    return check_type_inst(env,targsp,tud->tvs,expected_kind,allow_abs_aggr,
+			   tuf->name,NULL);//FIX? tud->name not in error message
   }
-  return env;
 }
 
-static cvtenv_t i_check_valid_type_app(cvtenv_t env,
-				       kind_t expected_kind, tycon_t c, 
-				       types_t@ targsp,
-				       bool put_in_effect, bool allow_abs_aggr){
+static cvtenv_t i_check_unary_app(cvtenv_t env, kind_t k, types_t ts, 
+				  bool put_in_effect, string_t<`H> s) {
+  if(length(ts) != 1)
+    impos2(s," has wrong number of arguments");
+  return i_check_type(env,k,ts->hd,put_in_effect,true);
+}
+
+static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind, 
+				 tycon_t c, types_t@ targsp,
+				 bool put_in_effect, bool allow_abs_aggr){
   let CVTEnv(loc,te,...) = env;
   let ts = *targsp;
   switch (c) {
@@ -550,15 +515,15 @@ static cvtenv_t i_check_valid_type_app(cvtenv_t env,
     return env;
   case &JoinCon: 
     for (; ts != NULL; ts = ts->tl)
-      env = i_check_valid_type(env,&ek,ts->hd,true,true);
+      env = i_check_type(env,&ek,ts->hd,true,true);
     return env;
   case &EnumCon(n,*edp): // FIX: do this in binding phase
     if (ts != NULL) impos2("enum applied to argument(s)");
     if (*edp == NULL || (*edp)->fields == NULL) {
-      try *edp = *lookup_enumdecl(te,loc,n);
+      try *edp = *Tcenv::lookup_enumdecl(te,loc,n);
       catch {case &Dict::Absent:
         Tc::tcEnumdecl(te,loc,new Enumdecl{Extern,n,NULL});
-        *edp = *lookup_enumdecl(te,loc,n);
+        *edp = *Tcenv::lookup_enumdecl(te,loc,n);
         break;
       }
     }
@@ -581,38 +546,28 @@ static cvtenv_t i_check_valid_type_app(cvtenv_t env,
       tag_count = 1 + Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
     }
     return env;
-  case &RgnsCon:
-    if (length(ts) != 1) impos2("regions has wrong number of arguments");
-    return i_check_valid_type(env,&tak,ts->hd,true,true);
-  case &RgnHandleCon:
-    if (length(ts) != 1) impos2("region_t has wrong number of arguments");
-    return i_check_valid_type(env,&trk,ts->hd,true,true);
-  case &AccessCon:
-    if (length(ts) != 1) impos2("access has wrong number of arguments");
-    return i_check_valid_type(env,&trk,ts->hd,true,true);
-  case &TagCon:
-    if (length(ts) != 1) impos2("tag_t has wrong number of arguments");
-    return i_check_valid_type(env,&ik,ts->hd,false,true);
-  case &ThinCon:
-    if (length(ts) != 1) impos2("@thin has wrong number of arguments");
-    return i_check_valid_type(env,&ik,ts->hd,false,true);
+  case &RgnsCon:      return i_check_unary_app(env,&tak,ts,true,"regions");
+  case &RgnHandleCon: return i_check_unary_app(env,&trk,ts,true,"region_t");
+  case &AccessCon:    return i_check_unary_app(env,&trk,ts,true,"access");
+  case &TagCon:       return i_check_unary_app(env,&ik,ts,false,"tag_t");
+  case &ThinCon:      return i_check_unary_app(env,&ik,ts,false,"@thin");
   case &AggrCon(*info):
-    return i_check_valid_aggr(env,expected_kind,info,targsp,allow_abs_aggr);
+    return i_check_aggr(env,expected_kind,info,targsp,allow_abs_aggr);
   case &DatatypeCon(*info):
-    return i_check_valid_datatype(env,expected_kind,info,targsp,allow_abs_aggr);
+    return i_check_datatype(env,expected_kind,info,targsp,allow_abs_aggr);
   case &DatatypeFieldCon(*info):
-    return i_check_valid_datatype_field(env,expected_kind,info,ts,allow_abs_aggr);
+    return i_check_datatype_field(env,expected_kind,info,targsp,allow_abs_aggr);
   }
 }
 
 
-static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
-				   bool put_in_effect, bool allow_abs_aggr) {
+static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
+			     bool put_in_effect, bool allow_abs_aggr) {
   let CVTEnv(loc,te,...) = env;
   switch (compress(t)) {
   case &AppType(c,*targsp):
-    env = i_check_valid_type_app(env,expected_kind,c,targsp,
-				 put_in_effect,allow_abs_aggr);
+    env = i_check_type_app(env,expected_kind,c,targsp,
+			   put_in_effect,allow_abs_aggr);
     break;
   case &Evar(*k,*ref,_,_):
     // if we have some latitude with moving the type var, do it here
@@ -673,14 +628,13 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
       Tc::tcDatatypedecl(te,loc,dd); break;
     }
     *topt = new new_typ;
-    return i_check_valid_type(env,expected_kind,new_typ,put_in_effect,
-			      allow_abs_aggr);
+    return i_check_type(env,expected_kind,new_typ,put_in_effect,allow_abs_aggr);
 
   case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_type,nullable,b,zt,_))):
     // FIX: check that tqual is valid?
     bool is_zero_terminated;
     // note that here, we allow AnyKind types under the pointer
-    env = i_check_valid_type(env,&tak,t1,true,true);
+    env = i_check_type(env,&tak,t1,true,true);
     tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
     kind_t k;
     switch (expected_kind->aliasqual) {
@@ -689,11 +643,11 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
     case Top: 
     default:        k = &trk; break;
     }
-    env = i_check_valid_type(env,k,rgn_type,true,true);
+    env = i_check_type(env,k,rgn_type,true,true);
     // if zero_term is unconstrained, then set it to false unless
     // we have [signed] char */@/? {n}.
-    env = i_check_valid_type(env,&boolk,zt,false,true);
-    env = i_check_valid_type(env,&boolk,nullable,false,true);
+    env = i_check_type(env,&boolk,zt,false,true);
+    env = i_check_type(env,&boolk,nullable,false,true);
     Unify::unify(zt, is_char_type(t1) ? true_type : false_type);
     is_zero_terminated = type2bool(false,zt);
     if (is_zero_terminated) {
@@ -702,7 +656,7 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
         err2(loc,"cannot have a pointer to zero-terminated ",t1," elements");
     }
     // check the bound -- unify with bounds one to force bound to zero
-    env = i_check_valid_type(env,&ptrbk,b,false,allow_abs_aggr);
+    env = i_check_type(env,&ptrbk,b,false,allow_abs_aggr);
     let e = get_bounds_exp(bounds_one(),b);
     if (e != NULL) {
       let $(sz,known) = Evexp::eval_const_uint_exp(e);
@@ -714,22 +668,22 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
-    Tcexp::tcExp(allow_valueof(te),NULL,e);
+    Tcexp::tcExp(Tcenv::allow_valueof(te),NULL,e);
     if (!coerce_uint_type(e))
       err2(loc,"valueof_t requires an int expression");
-    env = i_check_valid_type_level_exp(e,env);
+    env = i_check_type_level_exp(e,env);
     break;
   case &TypeofType(e):
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
-    Tcexp::tcExp(allow_valueof(te),NULL,e);
+    Tcexp::tcExp(Tcenv::allow_valueof(te),NULL,e);
     break;
   case &ArrayType(ArrayInfo{t1,*tqp,*eptr,zt,ztl}):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
-    env = i_check_valid_type(env,&tmk,t1,true,allow_abs_aggr);
+    env = i_check_type(env,&tmk,t1,true,allow_abs_aggr);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     // if zero_term is unconstrained, then set it to false.
     bool is_zero_terminated = force_type2bool(false, zt);
@@ -747,10 +701,10 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
         warn2(loc,"array bound defaults to 1 here");
       *eptr = e = uint_exp(1,0);
     }
-    Tcexp::tcExp(allow_valueof(te),NULL,e);
+    Tcexp::tcExp(Tcenv::allow_valueof(te),NULL,e);
     if (!coerce_uint_type(e))
       err2(loc,"array bounds expression is not an unsigned int");
-    env = i_check_valid_type_level_exp(e,env);
+    env = i_check_type_level_exp(e,env);
     let $(sz,known) = Evexp::eval_const_uint_exp(e);
     // FIX: if we have an unknown size then it might not be zero-terminated!
     if (is_zero_terminated && known && sz < 1)
@@ -767,31 +721,29 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
 
     // attributes: check that the attributes are function type attributes
     // and that at most one of {stdcall, cdecl, fastcall} is there.
-    int  num_convs = 0;
-    int  num_formats = 0;
-    bool is_cdecl    = false;
-    bool is_stdcall  = false;
-    bool is_fastcall = false;
+    int num_formats = 0;
+    int is_cdecl    = 0;
+    int is_stdcall  = 0;
+    int is_fastcall = 0;
     enum Format_Type ft = Printf_ft;
     int fmt_desc_arg = -1;
     int fmt_arg_start = -1;
-    for (; atts != NULL; atts = atts->tl) {
-      if (!fntype_att(atts->hd))
-	err2(loc,"bad function type attribute ",atts->hd);
+    for (; atts != NULL; atts = atts->tl)
       switch(atts->hd) {
-      case &Stdcall_att:  if(!is_stdcall) {is_stdcall=true;  ++num_convs;}break;
-      case &Cdecl_att:    if(!is_cdecl)   {is_cdecl=true;    ++num_convs;}break;
-      case &Fastcall_att: if(!is_fastcall){is_fastcall=true; ++num_convs;}break;
+      case &Stdcall_att:  is_stdcall  = 1; break;
+      case &Cdecl_att:    is_cdecl    = 1; break;
+      case &Fastcall_att: is_fastcall = 1; break;
       case &Format_att(fmttype,i,j):
 	++num_formats;
 	ft = fmttype;
 	fmt_desc_arg = i;
 	fmt_arg_start = j;
         break;
-      default: break;
+      default: 
+	if (!fntype_att(atts->hd))
+	  err2(loc,"bad function type attribute ",atts->hd);
       }
-    }
-    if(num_convs > 1)
+    if((is_stdcall + is_cdecl + is_fastcall) > 1)
       err2(loc,"function can't have multiple calling conventions");
     if (num_formats > 1)  
       err2(loc,"function can't have multiple format attributes");
@@ -804,232 +756,230 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
       env.kind_env = add_bound_tvar(env.kind_env,b->hd);
       switch (compress_kb(b->hd->kind)) {
       case &Eq_kb(&Kind(MemKind,_)):
-	err2(loc,"function abstracts Mem type variable ", *b->hd->name); break;
+	err2(loc,"function abstracts Mem type variable ", b->hd); break;
       default: break;
       }
     }
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
-    let new_env =
-      CVTEnv{env.loc,env.te,env.kind_env,true,env.generalize_evars,NULL,NULL};
-    new_env = i_check_valid_type(new_env,&tmk,tr,true,true);
+    _ new_env = CVTEnv{loc,te,env.kind_env,true,env.generalize_evars,NULL,NULL};
+    new_env = i_check_type(new_env,&tmk,tr,true,true);
     rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
     new_env.fn_result = false;
-      // results and arguments of functions cannot be abstract mem types
-      // FIX?: should check that variables are unique and that tquals are ok
-      for (_ a = args; a != NULL; a = a->tl) {
-        let trip = a->hd;
-        let t = (*trip)[2];
-        new_env = i_check_valid_type(new_env,&tmk,t,true,true);
-        let ec = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
-        (*trip)[1].real_const = ec;
-        // after resolving t, it may be an array type.  if so, as an argument
-        // to a function, we need to convert it to a pointer type.
-	if (is_array_type(t)) {
-          // create a new region variable for the pointer
-          let ptr_rgn = new_evar(NULL,NULL);
-          new_env = i_check_valid_type(new_env,&rk,ptr_rgn,true,true);
-          (*trip)[2] = promote_array(t,ptr_rgn,false);
+    // results and arguments of functions cannot be abstract mem types
+    // FIX?: should check that variables are unique and that tquals are ok
+    for (_ a = args; a != NULL; a = a->tl) {
+      let trip = a->hd;
+      let t = (*trip)[2];
+      new_env = i_check_type(new_env,&tmk,t,true,true);
+      let ec = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
+      (*trip)[1].real_const = ec;
+      // after resolving t, it may be an array type.  if so, as an argument
+      // to a function, we need to convert it to a pointer type.
+      if (is_array_type(t)) {
+	// create a new region variable for the pointer
+	let ptr_rgn = new_evar(NULL,NULL);
+	new_env = i_check_type(new_env,&rk,ptr_rgn,true,true);
+	(*trip)[2] = promote_array(t,ptr_rgn,false);
+      }
+    }
+    // varargs
+    if (cyc_vararg != NULL) {
+      if (c_vararg) impos2("both c_vararg and cyc_vararg"); // sanity
+      let VarargInfo{_,_,vt,vi} = *cyc_vararg;
+      new_env = i_check_type(new_env,&tmk,vt,true,true);
+      cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
+      // if inject, then check the type is an appropriate datatype
+      if (vi)
+	switch (compress(vt)) {
+	case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_}}):
+	  switch (compress(et)) {
+	  case &AppType(&DatatypeCon(...),_):
+	    if (force_type2bool(false,zt))
+	      err2(loc,"can't inject into a zeroterm pointer");
+	    if (!Unify::unify(bounds_one(),bs)) 
+	      err2(loc,"can't inject into a fat pointer to datatype");
+	    break;
+	  default: err2(loc,"can't inject a non-datatype type"); break;
+	  }
+	  break;
+	default: err2(loc,"expecting a datatype pointer type"); break;
 	}
-      }
-      // varargs
-      if (cyc_vararg != NULL) {
-        if (c_vararg) impos2("both c_vararg and cyc_vararg"); // sanity
-        let VarargInfo{_,_,vt,vi} = *cyc_vararg;
-        new_env = i_check_valid_type(new_env,&tmk,vt,true,true);
-        cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
-        // if inject, then check the type is an appropriate datatype
-        if (vi)
-          switch (compress(vt)) {
-          case &PointerType(PtrInfo{et,_,PtrAtts{_,_,bs,zt,_}}):
-            switch (compress(et)) {
-            case &AppType(&DatatypeCon(...),_):
-              if (force_type2bool(false,zt))
-                err2(loc,"can't inject into a zeroterm pointer");
-              if (!Unify::unify(bounds_one(),bs)) 
-                err2(loc,"can't inject into a fat pointer to datatype");
-              break;
-            default: err2(loc,"can't inject a non-datatype type"); break;
-            }
-            break;
-          default: err2(loc,"expecting a datatype pointer type"); break;
-          }
-      }
-      // check the format attribute is consistent
-      if (num_formats > 0) {
-        let num_args = List::length(args);
-        if (fmt_desc_arg < 0 || fmt_desc_arg > num_args || fmt_arg_start < 0 ||
-            // when no varargs, fmt_arg_start should be 0
-            (cyc_vararg == NULL && !c_vararg && fmt_arg_start != 0) ||
-            ((cyc_vararg != NULL || c_vararg) && 
-             fmt_arg_start != num_args + 1)) // wrong??
-          err2(loc,"bad format descriptor");
-        else {
-          // check that fmt_desc_arg is a string in some region
-          let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
-          //can't use unification because evars aren't properly nailed down yet...
-          switch (compress(t)) {
-          case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_))):
-            // FIX:  zero-termination?
-            if (!is_char_type(et)) 
-              err2(loc,"format descriptor is not a string");
-            else {
-              let e = get_bounds_exp(bounds_one(),b);
-              if (e == NULL && c_vararg)
-                err2(loc,"format descriptor is not a char * type"); 
-              else if (e != NULL && !c_vararg)
-                err2(loc,"format descriptor is not a char ? type"); 
-            }
-            break;
-          default: err2(loc,"format descriptor is not a string type"); break;
-          }
-          if (fmt_arg_start != 0 && !c_vararg) {
-            // check the type of the varargs is either datatype PrintArg or
-            // datatype ScanfArg according to ft.
-            // FIX: shouldn't we just do this once when the declaration is made?
-           bool problem;
-           switch ($(ft,compress(pointer_elt_type(cyc_vararg->type)))) {
-           case $(Printf_ft, &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
-	     problem = (qvar_cmp(tud->name,datatype_print_arg_qvar()) != 0); 
-	     break;
-           case $(Scanf_ft,  &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
-	     problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar()) != 0); 
-	     break;
-           default:
-	     problem = true; 
-	     break;
-	   }
-	   if (problem)
-	     err2(loc,"format attribute and vararg types don't match");
-          }
-        }
-      }
-      // check the region partial order
-      // FIX:  we need to ensure there are no circular dependencies...
-      //       actually, allow circularities, but forbid effect variables
-      for (_ rpo = rgn_po; rpo != NULL; rpo = rpo->tl) {
-        let &$(r1,r2) = rpo->hd;
-        new_env = i_check_valid_type(new_env,&ek,r1,true,true);
-        new_env = i_check_valid_type(new_env,&trk,r2,true,true);
-      }
-      // check the @requires clause -- we build a bogus function environment
-      // to make it possible to enter the parameters as variables that can
-      // be mentioned in the @requires clause.  
-      let fenv = bogus_fenv(tr, args);
-      let old_te = new_env.te;
-      new_env.te = new Tenv{te->ns,te->ae, fenv, true, te->in_extern_c_include, 
-			    te->in_tempest,te->tempest_generalize, 
-			    te->in_extern_c_inc_repeat};
-      let $(nenv,req_rs) = check_clause(new_env,"@requires",req);
-      new_env = nenv;
-      *req_relns = req_rs;
-      List::iter_c(replace_rops, args, req_rs);
-      let $(nenv,ens_rs) = check_clause(new_env,"@ensures",ens);
-      new_env = nenv;
-      *ens_relns = ens_rs;
-      List::iter_c(replace_rops, args, ens_rs);
-      new_env.te = old_te;
-      // finally, the effect -- usually inferred
-      if (*eff != NULL)
-        new_env = i_check_valid_type(new_env,&ek,(type_t)(*eff),true,true);
+    }
+    // check the format attribute is consistent
+    if (num_formats > 0) {
+      let num_args = List::length(args);
+      if (fmt_desc_arg < 0 || fmt_desc_arg > num_args || fmt_arg_start < 0 ||
+	  // when no varargs, fmt_arg_start should be 0
+	  (cyc_vararg == NULL && !c_vararg && fmt_arg_start != 0) ||
+	  ((cyc_vararg != NULL || c_vararg) && 
+	   fmt_arg_start != num_args + 1)) // wrong??
+	err2(loc,"bad format descriptor");
       else {
-        list_t<type_t> effect = NULL;
-        // Add in any free region or effect variables to the effect.
-        // This is why we need a "new_env" above -- we only want the
-        // type variables that actually occur in the function type
-        // as opposed to elsewhere.
-        for (_ tvs = new_env.free_vars; tvs != NULL; tvs = tvs->tl) {
-          let $(tv,put_in_eff) = *tvs->hd;
-          if (!put_in_eff) continue; // skip variables that shouldn't go in effs
-          switch (compress_kb(tv->kind)) {
-            // Coerce Top RgnKind to RgnKind if an upper bound
-          case &Less_kb(*f,r) && r->kind == RgnKind:
-	    if (r->aliasqual == Top) {
-	      *f = kind_to_bound_opt(&rk); fallthru(r);
-	    }
-            *f = kind_to_bound_opt(r); fallthru(r);
-          case &Eq_kb(r) && r->kind == RgnKind:
-            effect = new List(access_eff(var_type(tv)),effect); break;
-          case &Less_kb(_,&Kind(BoolKind,_)):
-          case &Less_kb(_,&Kind(PtrBndKind,_)):
-          case &Less_kb(_,&Kind(IntKind,_)):
-          case &Eq_kb(&Kind(BoolKind,_)): 
-          case &Eq_kb(&Kind(PtrBndKind,_)): 
-          case &Eq_kb(&Kind(IntKind,_)): break;
-          case &Less_kb(*f,&Kind(EffKind,_)):
-            *f = kind_to_bound_opt(&ek); fallthru;
-          case &Eq_kb(&Kind(EffKind,_)):
-            effect = new List(var_type(tv),effect); break;
-          case &Unknown_kb(*f):
-            *f = new Opt(new Less_kb(NULL,&ak)); fallthru;
-          default:
-            // add regions(`a) to the default effect for every type variable `a.
-            effect = new List(regionsof_eff(var_type(tv)), effect); break;
-          }
-        }
-        // Better add in any evars too:
-        for (_ ts = new_env.free_evars; ts != NULL; ts = ts->tl) {
-          let $(tv,put_in_eff) = *ts->hd;
-          if (!put_in_eff) continue; // skip variables that shouldn't go in effs
-          switch (type_kind(tv)) {
-          case &Kind(RgnKind,_):
-	    effect = new List(access_eff(tv), effect); break;
-          case &Kind(EffKind,_):
-	    effect = new List(tv, effect); break;
-          case &Kind(IntKind,_): break;
-          default: effect = new List(regionsof_eff(tv), effect); break;
-          }
-        }
-        *eff = join_eff(effect); // used to reverse list (twice)
-      }
-      // Warn if afterwards any kind is still unconstrained and set it to
-      // BoxKind. In addition, drive any MemKind or AnyKind bounded type
-      // variables to BoxKind to ensure that we don't abstract a MemKind
-      // variable.  Also drive Top kinds to Aliasable.
-      if (*btvs != NULL)
-        for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
-          switch (compress_kb(bs->hd->kind)) {
-          case &Unknown_kb(*f):
-	    warn2(loc,"type variable ",bs->hd," unconstrained, assuming boxed");
-	    *f = kind_to_bound_opt(&bk);  
-	    break;
-	  case &Less_kb(*f,k):
-	    switch(k) {
-	    case &Kind(BoxKind,Top):
-	    case &Kind(MemKind,Top):
-	    case &Kind(MemKind,Aliasable):
-	    case &Kind(AnyKind,Top):
-	    case &Kind(AnyKind,Aliasable): *f = kind_to_bound_opt(&bk);  break;
-	    case &Kind(MemKind,Unique):
-	    case &Kind(AnyKind,Unique):    *f = kind_to_bound_opt(&ubk); break;
-	    case &Kind(RgnKind,Top):       *f = kind_to_bound_opt(&rk);  break;
-	    default:                       *f = kind_to_bound_opt(k);    break;
-    	    }
-	    break;
-          case &Eq_kb(&Kind(MemKind,_)):
-            err2(loc,"functions can't abstract M types"); break;
-          default: break;
-          }
+	// check that fmt_desc_arg is a string in some region
+	let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
+	//can't use unification because evars aren't properly nailed down yet...
+	switch (compress(t)) {
+	case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,_,_))):
+	  // FIX:  zero-termination?
+	  if (!is_char_type(et)) 
+	    err2(loc,"format descriptor is not a string");
+	  else {
+	    let e = get_bounds_exp(bounds_one(),b);
+	    if (e == NULL && c_vararg)
+	      err2(loc,"format descriptor is not a char * type"); 
+	    else if (e != NULL && !c_vararg)
+	      err2(loc,"format descriptor is not a char ? type"); 
+	  }
+	  break;
+	default: err2(loc,"format descriptor is not a string type"); break;
 	}
-      // remove the bound vars from the kind environment and the list of free vars
-      env.kind_env = remove_bound_tvars(new_env.kind_env,*btvs);
-      new_env.free_vars = remove_bound_tvars_bool(new_env.free_vars,*btvs);
-      // add the free vars in to the set of all free vars
+	if (fmt_arg_start != 0 && !c_vararg) {
+	  // check the type of the varargs is either datatype PrintArg or
+	  // datatype ScanfArg according to ft.
+	  // FIX: shouldn't we just do this once when the declaration is made?
+	  bool problem;
+	  switch ($(ft,compress(pointer_elt_type(cyc_vararg->type)))) {
+	  case $(Printf_ft, &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
+	    problem = (qvar_cmp(tud->name,datatype_print_arg_qvar()) != 0);
+	    break;
+	  case $(Scanf_ft,  &AppType(&DatatypeCon({.KnownDatatype = &tud}),_)):
+	    problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar()) != 0); 
+	    break;
+	  default:
+	    problem = true; 
+	    break;
+	  }
+	  if (problem)
+	    err2(loc,"format attribute and vararg types don't match");
+	}
+      }
+    }
+    // check the region partial order
+    // FIX:  we need to ensure there are no circular dependencies...
+    //       actually, allow circularities, but forbid effect variables
+    for (_ rpo = rgn_po; rpo != NULL; rpo = rpo->tl) {
+      let &$(r1,r2) = rpo->hd;
+      new_env = i_check_type(new_env,&ek,r1,true,true);
+      new_env = i_check_type(new_env,&trk,r2,true,true);
+    }
+    // check the @requires clause -- we build a bogus function environment
+    // to make it possible to enter the parameters as variables that can
+    // be mentioned in the @requires clause.  
+    let fenv = Tcenv::bogus_fenv(tr, args);
+    let old_te = new_env.te;
+    new_env.te = new Tcenv::Tenv{te->ns,te->ae, fenv, true, 
+				 te->in_extern_c_include, 
+				 te->in_tempest,te->tempest_generalize, 
+				 te->in_extern_c_inc_repeat};
+    let $(nenv,req_rs) = check_clause(new_env,"@requires",req);
+    new_env = nenv;
+    *req_relns = req_rs;
+    List::iter_c(replace_rops, args, req_rs);
+    let $(nenv,ens_rs) = check_clause(new_env,"@ensures",ens);
+    new_env = nenv;
+    *ens_relns = ens_rs;
+    List::iter_c(replace_rops, args, ens_rs);
+    new_env.te = old_te;
+    // finally, the effect -- usually inferred
+    if (*eff != NULL)
+      new_env = i_check_type(new_env,&ek,(type_t)(*eff),true,true);
+    else {
+      list_t<type_t> effect = NULL;
+      // Add in any free region or effect variables to the effect.
+      // This is why we need a "new_env" above -- we only want the
+      // type variables that actually occur in the function type
+      // as opposed to elsewhere.
       for (_ tvs = new_env.free_vars; tvs != NULL; tvs = tvs->tl) {
-        let $(t,b) = *tvs->hd;
-        env.free_vars = fast_add_free_tvar_bool(env.free_vars,t,b);
+	let $(tv,put_in_eff) = *tvs->hd;
+	if (!put_in_eff) continue; // skip variables that shouldn't go in effs
+	switch (compress_kb(tv->kind)) {
+	  // Coerce Top RgnKind to RgnKind if an upper bound
+	case &Less_kb(*f,r) && r->kind == RgnKind:
+	  if (r->aliasqual == Top) {
+	    *f = kind_to_bound_opt(&rk); fallthru(r);
+	  }
+	  *f = kind_to_bound_opt(r); fallthru(r);
+	case &Eq_kb(r) && r->kind == RgnKind:
+	  effect = new List(access_eff(var_type(tv)),effect); break;
+	case &Less_kb(_,&Kind(BoolKind,_)):
+	case &Less_kb(_,&Kind(PtrBndKind,_)):
+	case &Less_kb(_,&Kind(IntKind,_)):
+	case &Eq_kb(&Kind(BoolKind,_)): 
+	case &Eq_kb(&Kind(PtrBndKind,_)): 
+	case &Eq_kb(&Kind(IntKind,_)): break;
+	case &Less_kb(*f,&Kind(EffKind,_)):
+	  *f = kind_to_bound_opt(&ek); fallthru;
+	case &Eq_kb(&Kind(EffKind,_)):
+	  effect = new List(var_type(tv),effect); break;
+	case &Unknown_kb(*f):
+	  *f = new Opt(new Less_kb(NULL,&ak)); fallthru;
+	default:
+	  // add regions(`a) to the default effect for every type variable `a.
+	  effect = new List(regionsof_eff(var_type(tv)), effect); break;
+	}
       }
-      // add the free evars in to the set of all free evars
-      for (_ evs = new_env.free_evars; evs != NULL; evs = evs->tl) {
-        let $(e,b) = *evs->hd;
-        env.free_evars = add_free_evar(env.free_evars,e,b);
+      // Better add in any evars too:
+      for (_ ts = new_env.free_evars; ts != NULL; ts = ts->tl) {
+	let $(tv,put_in_eff) = *ts->hd;
+	if (!put_in_eff) continue; // skip variables that shouldn't go in effs
+	switch (type_kind(tv)) {
+	case &Kind(RgnKind,_): effect = new List(access_eff(tv), effect); break;
+	case &Kind(EffKind,_): effect = new List(tv, effect); break;
+	case &Kind(IntKind,_): break;
+	default: effect = new List(regionsof_eff(tv), effect); break;
+	}
       }
+      *eff = join_eff(effect); // used to reverse list (twice)
+    }
+    // Warn if afterwards any kind is still unconstrained and set it to
+    // BoxKind. In addition, drive any MemKind or AnyKind bounded type
+    // variables to BoxKind to ensure that we don't abstract a MemKind
+    // variable.  Also drive Top kinds to Aliasable.
+    if (*btvs != NULL)
+      for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
+	switch (compress_kb(bs->hd->kind)) {
+	case &Unknown_kb(*f):
+	  warn2(loc,"type variable ",bs->hd," unconstrained, assuming boxed");
+	  *f = kind_to_bound_opt(&bk);  
+	  break;
+	case &Less_kb(*f,k):
+	  switch(k) {
+	  case &Kind(BoxKind,Top):
+	  case &Kind(MemKind,Top):
+	  case &Kind(MemKind,Aliasable):
+	  case &Kind(AnyKind,Top):
+	  case &Kind(AnyKind,Aliasable): *f = kind_to_bound_opt(&bk);  break;
+	  case &Kind(MemKind,Unique):
+	  case &Kind(AnyKind,Unique):    *f = kind_to_bound_opt(&ubk); break;
+	  case &Kind(RgnKind,Top):       *f = kind_to_bound_opt(&rk);  break;
+	  default:                       *f = kind_to_bound_opt(k);    break;
+	  }
+	  break;
+	case &Eq_kb(&Kind(MemKind,_)):
+	  err2(loc,"functions can't abstract M types"); break;
+	default: break;
+	}
+      }
+    // remove the bound vars from the kind environment and the list of free vars
+    env.kind_env = remove_bound_tvars(new_env.kind_env,*btvs,identity);
+    new_env.free_vars = remove_bound_tvars(new_env.free_vars,*btvs,fst);
+    // add the free vars in to the set of all free vars
+    for (_ tvs = new_env.free_vars; tvs != NULL; tvs = tvs->tl) {
+      let $(t,b) = *tvs->hd;
+      env.free_vars = fast_add_free_tvar_bool(env.free_vars,t,b);
+    }
+    // add the free evars in to the set of all free evars
+    for (_ evs = new_env.free_evars; evs != NULL; evs = evs->tl) {
+      let $(e,b) = *evs->hd;
+      env.free_evars = add_free_evar(env.free_evars,e,b);
+    }
     break;
 
   case &TupleType(tq_ts):
     for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
       let p = tq_ts->hd;
-      env = i_check_valid_type(env,&tmk,(*p)[1],true,false);
+      env = i_check_type(env,&tmk,(*p)[1],true,false);
       (*p)[0].real_const =
         extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
     }
@@ -1044,7 +994,7 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	err2(loc,"duplicate field ",*fn);
       if (strcmp(*fn,"") != 0)
 	prev_fields = new List(fn,prev_fields);
-      env = i_check_valid_type(env,&tmk,t,true,false);
+      env = i_check_type(env,&tmk,t,true,false);
       tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
       check_bitfield(loc,t,width,fn);
       check_field_atts(loc,fn,atts);
@@ -1052,11 +1002,11 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	// FIX: check that this requires clause does not overlap with others?
 	if(k!=UnionA)
 	  err2(loc,"@requires clause is only allowed on union members");
-	Tcexp::tcExp(allow_valueof(te),NULL,requires_clause);
+	Tcexp::tcExp(Tcenv::allow_valueof(te),NULL,requires_clause);
 	if (!is_integral(requires_clause))
 	  err2(loc,"@requires clause has type ", requires_clause->topt, 
 	       " instead of integral type");
-	env = i_check_valid_type_level_exp(requires_clause,env);
+	env = i_check_type_level_exp(requires_clause,env);
       }
     }
     break;
@@ -1064,39 +1014,22 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
   case &TypedefType(tdn,*targs_ref,*tdopt,*toptp):
     // NB: since we called compress *toptp == NULL
     typedefdecl_t td;
-    try td = lookup_typedefdecl(te,loc,tdn);
+    try td = Tcenv::lookup_typedefdecl(te,loc,tdn);
     catch { case &Dict::Absent:
       err2(loc,"unbound typedef name ",tdn);
       return env;
     }
     *tdopt = td;
-    list_t<tvar_t> tvs = td->tvs;
-    list_t<type_t> ts = *targs_ref;
-    list_t<$(tvar_t,type_t)@> inst = NULL;
-    // check type arguments
-    for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
-      kind_t k = tvar_inst_kind(tvs->hd, &tbk, expected_kind, td);
-      env = i_check_valid_type(env,k,ts->hd,true,allow_abs_aggr);
-      check_no_qual(loc,ts->hd);
-      inst = new List(new $(tvs->hd,ts->hd),inst);
-    }
-    if (ts != NULL)
-      err2(loc,"too many parameters for typedef ",tdn);
-    if (tvs != NULL) {
-      list_t<type_t> hidden_ts = NULL;
-      // fill in missing type parameters
-      for (; tvs != NULL; tvs = tvs->tl) {
- 	kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, td);
- 	type_t e = new_evar(NULL,NULL);
- 	hidden_ts = new List(e,hidden_ts);
- 	env = i_check_valid_type(env,k,e,true,allow_abs_aggr);
- 	inst = new List(new $(tvs->hd,e),inst);
-      }
-      // add the hidden type arguments back in so error messages are decent
-      *targs_ref = imp_append(*targs_ref,imp_rev(hidden_ts));
-     }
-    if (td->defn != NULL)
+    env = check_type_inst(env,targs_ref,td->tvs,
+			  expected_kind,allow_abs_aggr,tdn,td);
+    if (td->defn != NULL) { // don't use zip in case we had too many args
+      list_t<$(tvar_t,type_t)@> inst = NULL;
+      let tvs = td->tvs;
+      let ts = *targs_ref;
+      for(; tvs != NULL; tvs=tvs->tl, ts=ts->tl)
+	inst = new List(new $(tvs->hd,ts->hd),inst);
       *toptp = substitute(inst,(type_t)td->defn);
+    }
     break;
   }
   if (!kind_leq(type_kind(t), expected_kind)) {
@@ -1106,53 +1039,10 @@ static cvtenv_t i_check_valid_type(cvtenv_t env, kind_t expected_kind, type_t t,
   return env;
 }
 
-// This is called *after* type-checking the expression to see that
-// it's of type int, under the assumption that every valueof(T) in e is
-// well-formed and T is of kind Int.  We must now make sure that these
-// assumptions are true and extract the free type variables occurring
-// within T.
-static cvtenv_t i_check_valid_type_level_exp(exp_t e, cvtenv_t env) {
-  env.loc = e->loc;
-  switch (e->r) {
-  case &Const_e(_):
-  case &Enum_e(...):
-  case &AnonEnum_e(...):
-  case &Pragma_e(...):
-  case &Var_e(...): break;
-  case &Primop_e(_,es):
-    for (; es != NULL; es = es->tl)
-      env = i_check_valid_type_level_exp(es->hd,env);
-    break;
-  case &Conditional_e(e1,e2,e3):
-    env = i_check_valid_type_level_exp(e1,env);
-    fallthru(e2,e3);
-  case &And_e(e1,e2): fallthru(e1,e2);
-  case &Or_e(e1,e2):  fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):
-    env = i_check_valid_type_level_exp(e1,env);
-    env = i_check_valid_type_level_exp(e2,env);
-    break;
-  case &Cast_e(t,e1,_,_):
-    env = i_check_valid_type_level_exp(e1,env);
-    env = i_check_valid_type(env,&tak,t,true,false);
-    break;
-  case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftype_e(t):
-    env = i_check_valid_type(env,&tak,t,true,false); break;
-  case &Valueof_e(t):
-    env = i_check_valid_type(env,&ik,t,true,false); break;
-  case &Sizeofexp_e(e): fallthru(e);
-  case &Extension_e(e):
-    env = i_check_valid_type_level_exp(e,env); break;
-  default: impos2("bad expression in Tctyp::i_check_valid_type_level_exp");
-  }
-  return env;
-}
-
 static cvtenv_t check_valid_type(cvtenv_t cvt, kind_t expected_kind,
 				 bool allow_abs_aggr, type_t t) {
   let kind_env = cvt.kind_env;
-  cvt = i_check_valid_type(cvt,expected_kind,t,true,allow_abs_aggr);
+  cvt = i_check_type(cvt,expected_kind,t,true,allow_abs_aggr);
 
   for (_ vs = cvt.free_vars; vs != NULL; vs = vs->tl)
     cvt.kind_env = fast_add_free_tvar(kind_env,(*vs->hd)[0]);
@@ -1182,17 +1072,15 @@ static cvtenv_t check_valid_type(cvtenv_t cvt, kind_t expected_kind,
   return cvt;
 }
 
-
-
 // Same as check_valid_type except that for function types, we check
 // that either the bound type variables are empty (in which case we
 // plug them in) or else the free type variables are contained in the
 // list of the bound type variables and have the right kinds.
-void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
+void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   bool generalize_evars = 
     is_function_type(t) && (!te->in_tempest || te->tempest_generalize);
   kind_t expected_kind = is_function_type(t) ? &tak : &tmk;
-  let te_vars = lookup_type_vars(te);
+  let te_vars = Tcenv::lookup_type_vars(te);
   let cvt = check_valid_type(CVTEnv{loc,te,
 				    te_vars,false,generalize_evars,NULL,NULL},
 			     expected_kind, true, t);
@@ -1256,7 +1144,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
 // we do is build a FnType and then check that it is well-formed
 // which has the side effect of giving us the effect and any
 // bound type variables.
-void check_fndecl_valid_type(seg_t loc, tenv_t te, fndecl_t fd) {
+void check_fndecl_valid_type(seg_t loc, Tcenv::tenv_t te, fndecl_t fd) {
   type_t t = fndecl2type(fd);
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
@@ -1270,22 +1158,24 @@ void check_fndecl_valid_type(seg_t loc, tenv_t te, fndecl_t fd) {
     break;
   default: impos2("check_fndecl_valid_type: not a FnType");
   }
-  check_unique_vars(map(fst_fdarg,fd->i.args), loc,
-		    "function declaration has repeated parameter");
+  let argnames = NULL;
+  for(let args = fd->i.args; args != NULL; args = args->tl)
+    argnames = new List((var_t)(*args->hd)[0], argnames);
+  check_unique_vars(argnames,loc,"function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
   fd->cached_type = t;
 }
 
 // Same as check_valid_type except that we ensure the free type variables
 // are drawn from the given set of bound type variables.
-void check_type(seg_t loc, tenv_t te, list_t<tvar_t,`H> bound_tvars,
+void check_type(seg_t loc, Tcenv::tenv_t te, list_t<tvar_t,`H> bound_tvars,
                 kind_t expected_kind, bool allow_evars, bool allow_abs_aggr,
                 type_t t) {
   let cvt = check_valid_type(CVTEnv{loc,te,bound_tvars,false,false,NULL,NULL},
 			     expected_kind, allow_abs_aggr, t);
-  let free_tvars = remove_bound_tvars(map(fst,cvt.free_vars), bound_tvars);
-  for (_ fs = free_tvars; fs != NULL; fs = fs->tl)
-    err2(loc,"unbound type variable ",fs->hd," in type ",t);
+  let free_tvs= remove_bound_tvars(map(fst,cvt.free_vars),bound_tvars,identity);
+  for (; free_tvs != NULL; free_tvs = free_tvs->tl)
+    err2(loc,"unbound type variable ",free_tvs->hd," in type ",t);
   if (!allow_evars)
     check_free_evars(cvt.free_evars,t,loc);
 }
