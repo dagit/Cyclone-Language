@@ -56,9 +56,12 @@ ifndef NO_XML_LIB
 	$(MAKE) -C lib/xml install 
 endif
 
-aprof: $(CYC_LIB_PATH)/libcyc_a.a \
+aprof: $(CYC_LIB_PATH)/libcycboot_a.a \
+  $(CYC_LIB_PATH)/libcyc_a.a \
   $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
-	$(MAKE) -C tools/aprof  install 
+	$(MAKE) -C tools/aprof install
+
+cyclone_a: aprof $(CYC_BIN_PATH)/cyclone_a$(EXE)
 
 gprof: $(CYC_LIB_PATH)/libcyc_pg.a \
   $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
@@ -73,6 +76,13 @@ $(CYC_BIN_PATH)/cyclone$(EXE): \
   $(addprefix bin/genfiles/, $(O_SRCS) install_path.$(O)) \
   $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(CYC_BIN_PATH)/cyclone_a$(EXE): \
+  $(addprefix bin/genfiles/, $(A_SRCS) install_path.$(O)) \
+  $(CYC_LIB_PATH)/libcycboot_a.a \
+  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -134,9 +144,17 @@ $(CYC_LIB_PATH)/$(CYCBOOTLIB): \
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-# probably unnecessary
-%.$(O): %.c
-	$(CC) -c -o $@ $(CFLAGS) $<
+$(CYC_LIB_PATH)/libcycboot_a.a: \
+  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
+  bin/genfiles/boot_cstubs_a.$(O) \
+  bin/genfiles/boot_cycstubs_a.$(O)
+	-$(RM) $@
+	ar rc $@ \
+	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
+	  bin/genfiles/boot_cstubs_a.$(O) \
+	  bin/genfiles/boot_cycstubs_a.$(O)
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
 
 %.$(O): %.cyc bin/cyclone$(EXE)
 	bin/cyclone$(EXE) -c -Iinclude -I$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include -B$(CYC_LIB_PATH)/cyc-lib -o $@ $<
