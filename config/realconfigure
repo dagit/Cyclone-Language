@@ -28,6 +28,7 @@ fi
 # functions to find appropriate helper programs
 #
 TMPFILE=/tmp/cyconfig$$
+RES=
 
 # diff_path <arch>
 #   given the architecture, outputs a suitable version of diff
@@ -49,7 +50,7 @@ function diff_path {
     fi
   fi
   rm -f $TMPFILE
-  echo $DIFF
+  RES=$DIFF
 }
 
 # egrep_path <arch>
@@ -66,7 +67,7 @@ function egrep_path {
       echo "  file include/arch/$1.h may be incorrect/incomplete"
     fi
   fi
-  echo $EGREP
+  RES=$EGREP
 }
 
 # finds a suitable version of cc, along with special flags
@@ -74,6 +75,7 @@ function egrep_path {
 #   will fail)
 #
 function get_cc {
+  CC=gcc
   if [ "$TYPE" = "apple" ]; then
     CC="cc -no-cpp-precomp"
   else
@@ -85,12 +87,11 @@ function get_cc {
       fi
     done
   fi
-  if [ -n "$CC" ]; then
-    echo $CC
-  else
-    echo "Could not find gcc on this system"
+  if [ -z "$CC" ]; then
+    echo "Could not find gcc or cc on this system"
     exit 1
   fi
+  RES=$CC
 }
 
 # sets up default Cyclone load flags
@@ -100,7 +101,7 @@ function get_ldflags {
   if [ "$TYPE" = "sun" ]; then
     LDFLAGS="-lnsl -lsocket -lresolv"
   fi
-  echo $LDFLAGS
+  RES=$LDFLAGS
 }
 
 # when setting up a new architecture, figures out the default
@@ -191,7 +192,8 @@ function cleanup {
 }
 
 # figure out cc to use
-CC=`get_cc`
+get_cc
+CC=$RES
 
 cd config
 
@@ -212,7 +214,8 @@ if [ ! -f "arch/${ARCH}" ]; then
       cleanup
     fi
     echo "Creating architecture-specific include file"
-    EGREP=`egrep_path ${ARCH}`
+    egrep_path ${ARCH}
+    EGREP=$RES
     export EGREP
     export CC
     ./arch_include > ${CYCDIR}/lib/arch/${ARCH}.h
@@ -264,8 +267,10 @@ chkdir "include files" $incdir
 ALL_ARCHS=`cd arch; \ls -1 | grep -v undef | grep -v CVS | awk '{printf("%s ",$1);}'`
 
 # get default load flags
-LD_FLAGS=`get_ldflags`
-DIFF=`diff_path`
+get_ldflags
+LD_FLAGS=$RES
+diff_path
+DIFF=$RES
 
 # write the config Makefile
 cd ..
