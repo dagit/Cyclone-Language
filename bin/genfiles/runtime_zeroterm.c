@@ -225,10 +225,8 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
 /* Decrease the upper bound on a fat pointer by numelts where sz is
    the size of the pointer's type.  Note that this can't be a macro
    if we're to get initializers right. */
-struct
- _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
+struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr x,
+				       unsigned int sz, unsigned int numelts) {
   unsigned delta = sz * numelts;
   /* Don't let someone decrease the size so much that it wraps around.
    * This is crucial to get NULL right. */

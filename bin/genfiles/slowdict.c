@@ -28,7 +28,7 @@ struct _RuntimeStack {
 #endif
 
 /* Tagged arrays */
-struct _dyneither_ptr {
+struct _fat_ptr {
   unsigned char *curr; 
   unsigned char *base; 
   unsigned char *last_plus_one; 
@@ -256,15 +256,15 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _check_dyneither_subscript(arr,elt_sz,index) ({ \
-  struct _dyneither_ptr _cus_arr = (arr); \
+#define _check_fat_subscript(arr,elt_sz,index) ({ \
+  struct _fat_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   _cus_ans; })
 #else
-#define _check_dyneither_subscript(arr,elt_sz,index) ({ \
-  struct _dyneither_ptr _cus_arr = (arr); \
+#define _check_fat_subscript(arr,elt_sz,index) ({ \
+  struct _fat_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
@@ -274,18 +274,18 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _cus_ans; })
 #endif
 
-#define _tag_dyneither(tcurr,elt_sz,num_elts) ({ \
-  struct _dyneither_ptr _tag_arr_ans; \
+#define _tag_fat(tcurr,elt_sz,num_elts) ({ \
+  struct _fat_ptr _tag_arr_ans; \
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   /* JGM: if we're tagging NULL, ignore num_elts */ \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base ? (_tag_arr_ans.base + (elt_sz) * (num_elts)) : 0; \
   _tag_arr_ans; })
 
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
-#define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
-  struct _dyneither_ptr _arr = (arr); \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+  struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
       _curr != (unsigned char *)0) \
@@ -293,33 +293,33 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _curr; })
 #endif
 
-#define _get_dyneither_size(arr,elt_sz) \
-  ({struct _dyneither_ptr _get_arr_size_temp = (arr); \
+#define _get_fat_size(arr,elt_sz) \
+  ({struct _fat_ptr _get_arr_size_temp = (arr); \
     unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
     unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
     (_get_arr_size_curr < _get_arr_size_temp.base || \
      _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
 
-#define _dyneither_ptr_plus(arr,elt_sz,change) ({ \
-  struct _dyneither_ptr _ans = (arr); \
+#define _fat_ptr_plus(arr,elt_sz,change) ({ \
+  struct _fat_ptr _ans = (arr); \
   _ans.curr += ((int)(elt_sz))*(change); \
   _ans; })
 
-#define _dyneither_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
-  struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
+#define _fat_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _fat_ptr * _arr_ptr = (arr_ptr); \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   *_arr_ptr; })
 
-#define _dyneither_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
-  struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
-  struct _dyneither_ptr _ans = *_arr_ptr; \
+#define _fat_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _fat_ptr * _arr_ptr = (arr_ptr); \
+  struct _fat_ptr _ans = *_arr_ptr; \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
 /* This is not a macro since initialization order matters.  Defined in
    runtime_zeroterm.c. */
-extern struct _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
+extern struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr x,
   unsigned int sz,
   unsigned int numelts);
 
@@ -423,7 +423,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 168 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Splay_node;struct Cyc_Splay_noderef{struct Cyc_Splay_node*v;};struct Cyc_Splay_Leaf_Splay_tree_struct{int tag;int f1;};struct Cyc_Splay_Node_Splay_tree_struct{int tag;struct Cyc_Splay_noderef*f1;};struct Cyc_Splay_node{void*key;void*data;void*left;void*right;};
 # 49 "splay.h"
@@ -509,7 +509,7 @@ void*Cyc_SlowDict_lookup(struct Cyc_SlowDict_Dict*d,void*key){
 if(Cyc_Splay_splay(d->reln,key,d->tree)){
 void*_tmp1C=d->tree;void*_tmp1D=_tmp1C;struct Cyc_Splay_noderef*_tmp20;if(((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp1D)->tag == 1U){_LL1: _tmp20=((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp1D)->f1;_LL2:
  return(_tmp20->v)->data;}else{_LL3: _LL4:
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp1F=_cycalloc(sizeof(*_tmp1F));_tmp1F->tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp65=({const char*_tmp1E="Dict::lookup";_tag_dyneither(_tmp1E,sizeof(char),13U);});_tmp1F->f1=_tmp65;});_tmp1F;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp1F=_cycalloc(sizeof(*_tmp1F));_tmp1F->tag=Cyc_Core_Impossible,({struct _fat_ptr _tmp65=({const char*_tmp1E="Dict::lookup";_tag_fat(_tmp1E,sizeof(char),13U);});_tmp1F->f1=_tmp65;});_tmp1F;}));}_LL0:;}
 # 123
 (int)_throw((void*)& Cyc_SlowDict_Absent_val);}
 # 126
@@ -517,7 +517,7 @@ struct Cyc_Core_Opt*Cyc_SlowDict_lookup_opt(struct Cyc_SlowDict_Dict*d,void*key)
 if(Cyc_Splay_splay(d->reln,key,d->tree)){
 void*_tmp21=d->tree;void*_tmp22=_tmp21;struct Cyc_Splay_noderef*_tmp26;if(((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp22)->tag == 1U){_LL1: _tmp26=((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp22)->f1;_LL2:
  return({struct Cyc_Core_Opt*_tmp23=_cycalloc(sizeof(*_tmp23));_tmp23->v=(_tmp26->v)->data;_tmp23;});}else{_LL3: _LL4:
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp25=_cycalloc(sizeof(*_tmp25));_tmp25->tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp66=({const char*_tmp24="Dict::lookup";_tag_dyneither(_tmp24,sizeof(char),13U);});_tmp25->f1=_tmp66;});_tmp25;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp25=_cycalloc(sizeof(*_tmp25));_tmp25->tag=Cyc_Core_Impossible,({struct _fat_ptr _tmp66=({const char*_tmp24="Dict::lookup";_tag_fat(_tmp24,sizeof(char),13U);});_tmp25->f1=_tmp66;});_tmp25;}));}_LL0:;}
 # 132
 return 0;}
 # 135
@@ -526,7 +526,7 @@ static int Cyc_SlowDict_get_largest(void*x,void*y){return 1;}
 struct Cyc_SlowDict_Dict*Cyc_SlowDict_delete(struct Cyc_SlowDict_Dict*d,void*key){
 if(Cyc_Splay_splay(d->reln,key,d->tree)){
 void*_tmp27=d->tree;void*_tmp28=_tmp27;struct Cyc_Splay_noderef*_tmp37;if(((struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp28)->tag == 0U){_LL1: _LL2:
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp2A=_cycalloc(sizeof(*_tmp2A));_tmp2A->tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp67=({const char*_tmp29="Dict::lookup";_tag_dyneither(_tmp29,sizeof(char),13U);});_tmp2A->f1=_tmp67;});_tmp2A;}));}else{_LL3: _tmp37=((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp28)->f1;_LL4: {
+(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp2A=_cycalloc(sizeof(*_tmp2A));_tmp2A->tag=Cyc_Core_Impossible,({struct _fat_ptr _tmp67=({const char*_tmp29="Dict::lookup";_tag_fat(_tmp29,sizeof(char),13U);});_tmp2A->f1=_tmp67;});_tmp2A;}));}else{_LL3: _tmp37=((struct Cyc_Splay_Node_Splay_tree_struct*)_tmp28)->f1;_LL4: {
 # 142
 struct Cyc_Splay_node*n=_tmp37->v;
 void*_tmp2B=n->left;void*_tmp2C=_tmp2B;struct Cyc_Splay_noderef*_tmp36;if(((struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp2C)->tag == 0U){_LL6: _LL7:

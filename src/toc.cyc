@@ -160,11 +160,11 @@ static `res use_toc_state(`a arg,
   toc_state_t ts = NULL;
   ts :=: toc_state;
   let TocStateWrap{<`dyn> dyn, s} = *ts;
-  let dyn2 = alias_refptr(dyn);
+  let dyn2 = alias_refptr(dyn); 
   *ts = TocStateWrap{dyn,s};
   ts :=: toc_state;
   let res;
-  {region h = open(dyn2);
+  {region h = open(dyn2); 
   let env = $(s, arg);
   res = f(h,&env);}
   free_rckey(dyn2); // should be equivalent to drop_refptr
@@ -234,11 +234,11 @@ MAKE_VAR(_npop_handler);
 MAKE_VAR(_check_null);
 MAKE_VAR(_check_known_subscript_null);
 MAKE_VAR(_check_known_subscript_notnull);
-MAKE_VAR(_check_dyneither_subscript);
-MAKE_VAR(_dyneither_ptr);
-MAKE_VAR(_tag_dyneither);
-MAKE_VAR(_untag_dyneither_ptr);
-MAKE_VAR(_get_dyneither_size);
+MAKE_VAR(_check_fat_subscript);
+MAKE_VAR(_fat_ptr);
+MAKE_VAR(_tag_fat);
+MAKE_VAR(_untag_fat_ptr);
+MAKE_VAR(_get_fat_size);
 MAKE_VAR(_get_zero_arr_size); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_get_zero_arr_size_char);
 MAKE_VAR(_get_zero_arr_size_short);
@@ -247,7 +247,7 @@ MAKE_VAR(_get_zero_arr_size_float);
 MAKE_VAR(_get_zero_arr_size_double);
 MAKE_VAR(_get_zero_arr_size_longdouble);
 MAKE_VAR(_get_zero_arr_size_voidstar);
-MAKE_VAR(_dyneither_ptr_plus);
+MAKE_VAR(_fat_ptr_plus);
 MAKE_VAR(_zero_arr_plus);     // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_plus_char);
 MAKE_VAR(_zero_arr_plus_short);
@@ -256,7 +256,7 @@ MAKE_VAR(_zero_arr_plus_float);
 MAKE_VAR(_zero_arr_plus_double);
 MAKE_VAR(_zero_arr_plus_longdouble);
 MAKE_VAR(_zero_arr_plus_voidstar);
-MAKE_VAR(_dyneither_ptr_inplace_plus);
+MAKE_VAR(_fat_ptr_inplace_plus);
 MAKE_VAR(_zero_arr_inplace_plus); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_inplace_plus_char);
 MAKE_VAR(_zero_arr_inplace_plus_short);
@@ -265,7 +265,7 @@ MAKE_VAR(_zero_arr_inplace_plus_float);
 MAKE_VAR(_zero_arr_inplace_plus_double);
 MAKE_VAR(_zero_arr_inplace_plus_longdouble);
 MAKE_VAR(_zero_arr_inplace_plus_voidstar);
-MAKE_VAR(_dyneither_ptr_inplace_plus_post);
+MAKE_VAR(_fat_ptr_inplace_plus_post);
 MAKE_VAR(_zero_arr_inplace_plus_post); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_inplace_plus_post_char);
 MAKE_VAR(_zero_arr_inplace_plus_post_short);
@@ -285,7 +285,7 @@ MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
 MAKE_VAR(_throw_arraybounds);
-MAKE_VAR(_dyneither_ptr_decrease_size);
+MAKE_VAR(_fat_ptr_decrease_size);
 MAKE_VAR(_throw_match);
 MAKE_VAR(_rethrow);
 MAKE_VAR(_fast_region_malloc);
@@ -305,7 +305,7 @@ type_t void_star_type() {
 static type_t dyneither_ptr_type() {
   static type_opt_t dpt = NULL;
   if (dpt == NULL)
-    dpt = aggr_type(UnknownAggr(StructA,&_dyneither_ptr_pr,NULL),NULL);
+    dpt = aggr_type(UnknownAggr(StructA,&_fat_ptr_pr,NULL),NULL);
   return (type_t)dpt;
 }
 static type_t rgn_type() {
@@ -1288,7 +1288,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       type_t newt = cstar_type(ta1,tq);
       exp_t  ind = index ? index : uint_exp(0,DL);
       ptr->r = cast_it_r(newt,
-			fncall_exp_dl(_check_dyneither_subscript_e,
+			fncall_exp_dl(_check_fat_subscript_e,
 				      new_exp(ptr->r,DL),
 				      sizeoftype_exp(ta1,DL),
 				      ind));
@@ -1553,7 +1553,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
       ea->annot = &InsertChecks::NoCheck_val;
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
-    xinit = fncall_exp_dl(_dyneither_ptr_plus_e,
+    xinit = fncall_exp_dl(_fat_ptr_plus_e,
 			  ea,sizeoftype_exp(typ_to_c(elt_type),DL),eb);
     break;
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
@@ -1603,7 +1603,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                          sizeoftype_exp(typ_to_c(elt_type),DL));
     let oneexp = uint_exp(1,DL);
     exp_t xsize;
-    xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
+    xsize = prim2_exp(Eq,fncall_exp(_get_fat_size_e,xsizeargs,DL),
                       oneexp,DL);
     // start assembling the statement
     let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
@@ -1759,7 +1759,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
       else
-	e->r = fncall_exp_r(_tag_dyneither_e,zero,zero,zero);
+	e->r = fncall_exp_r(_tag_fat_e,zero,zero,zero);
     } else {
       e->r = (raw_exp_t)(&zero_exp);
     }
@@ -1780,7 +1780,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         let eopt = get_bounds_exp(bounds_one(),bound);
         if (eopt == NULL) {
           // retrieve (last_plus_one - curr) via runtime call
-	  e->r = fncall_exp_r(_get_dyneither_size_e,
+	  e->r = fncall_exp_r(_get_fat_size_e,
 			      es->hd,sizeoftype_exp(typ_to_c(elt_type),DL));
         } else {
           let e2 = eopt;
@@ -1816,7 +1816,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
         if (eopt == NULL)
-          e->r = fncall_exp_r(_dyneither_ptr_plus_e,
+          e->r = fncall_exp_r(_fat_ptr_plus_e,
 			     e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2);
         else if (force_type2bool(false,zt))
 	  e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),e1,eopt,e2);
@@ -1839,7 +1839,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  e->r  = divide_exp(copy_exp(e),
 			     sizeoftype_exp(typ_to_c(elt_type),DL),DL)->r;
 	} else
-	  e->r = fncall_exp_r(_dyneither_ptr_plus_e,
+	  e->r = fncall_exp_r(_fat_ptr_plus_e,
 			      e1,sizeoftype_exp(typ_to_c(elt_type),DL),
 			      prim1_exp(Minus,e2,DL));
       }
@@ -1912,7 +1912,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       _ fn_e;
       int change = 1;
       fn_e = (incr==PostInc || incr==PostDec) ?
-        _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
+        _fat_ptr_inplace_plus_post_e : _fat_ptr_inplace_plus_e;
       if (incr == PreDec || incr == PostDec)
         change = -1;
       e->r = fncall_exp_r(fn_e, push_address_exp(e2),
@@ -2009,7 +2009,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         }
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
-        let fn_e = _dyneither_ptr_inplace_plus_e;
+        let fn_e = _fat_ptr_inplace_plus_e;
         e->r = fncall_exp_r(fn_e,push_address_exp(e1),
 			    sizeoftype_exp(typ_to_c(elt_typ),DL),
 			    change);
@@ -2085,7 +2085,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,es->hd);
 	new_args = new List(es->hd, new_args);
       }
-      new_args = new List(fncall_exp_dl(_tag_dyneither_e,
+      new_args = new List(fncall_exp_dl(_tag_fat_e,
 					argvexp,
 					sizeoftype_exp(cva_type,DL),
 					num_varargs_exp),
@@ -2268,13 +2268,13 @@ static void exp_to_c(env_t nv, exp_t e) {
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
             }
             let arg2 = sizeoftype_exp(typ_to_c(p2.elt_type),DL);
-            let tg_exp = fncall_exp_dl(_tag_dyneither_e,x_exp,arg2,arg3);
+            let tg_exp = fncall_exp_dl(_tag_fat_e,x_exp,arg2,arg3);
             let s = exp_stmt(tg_exp,DL);
             s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
             e->r = stmt_exp_r(s);
           } else
             // build the t ? struct
-            e->r = fncall_exp_r(_tag_dyneither_e, 
+            e->r = fncall_exp_r(_tag_fat_e, 
 				e1,
 				sizeoftype_exp(typ_to_c(p2.elt_type),DL),
 				e2);
@@ -2296,7 +2296,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
-	let ptr_exp = fncall_exp_dl(_untag_dyneither_ptr_e,
+	let ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
 				    e1,
 				    sizeoftype_exp(typ_to_c(p1.elt_type),DL),
 				    new_e2);
@@ -2311,7 +2311,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (is_toplevel(nv)) // FIX: move to InsertChecks
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
-          e->r = fncall_exp_r(_dyneither_ptr_decrease_size_e,
+          e->r = fncall_exp_r(_fat_ptr_decrease_size_e,
                               e1,sizeoftype_exp(typ_to_c(p1.elt_type),DL),
 			      uint_exp(1,DL));
         }
@@ -2391,7 +2391,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     exp_t answer;
     if(is_dyneither_ptr(old_typ))
-      answer = fncall_exp_dl(_tag_dyneither_e, 
+      answer = fncall_exp_dl(_tag_fat_e, 
 			     copy_exp(xexp),
 			     sizeoftype_exp(elt_typ,DL),
 			     (lenexp ? lenexp : uint_exp(1,DL)));
@@ -2819,7 +2819,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     if (is_fat) {
       exp_t elt_sz = is_calloc ? sizeoftype_exp(t_c,DL) : uint_exp(1,DL);
-      exp_t rexp = fncall_exp_dl(_tag_dyneither_e,pexp,elt_sz,num_elts2);
+      exp_t rexp = fncall_exp_dl(_tag_fat_e,pexp,elt_sz,num_elts2);
       stmt_t s = declare_stmt((qvar_t)x, uint_type, num_elts, 
 			      exp_stmt(rexp,DL),DL);
       e->r = stmt_exp_r(s);
@@ -4343,16 +4343,16 @@ static void init() {
     &_check_null_str,
     &_check_known_subscript_null_str,
     &_check_known_subscript_notnull_str,
-    &_check_dyneither_subscript_str,
-    &_tag_dyneither_str,
-    &_untag_dyneither_ptr_str,
-    &_get_dyneither_size_str,
+    &_check_fat_subscript_str,
+    &_tag_fat_str,
+    &_untag_fat_ptr_str,
+    &_get_fat_size_str,
     &_get_zero_arr_size_str, // FIX: whole function set
-    &_dyneither_ptr_plus_str,
+    &_fat_ptr_plus_str,
     &_zero_arr_plus_str,     
-    &_dyneither_ptr_inplace_plus_str,
+    &_fat_ptr_inplace_plus_str,
     &_zero_arr_inplace_plus_str, // FIX: whole function set
-    &_dyneither_ptr_inplace_plus_post_str,
+    &_fat_ptr_inplace_plus_post_str,
     &_zero_arr_inplace_plus_post_str, // FIX: whole function set
     &_cycalloc_str,
     &_cyccalloc_str,
@@ -4365,7 +4365,7 @@ static void init() {
     &_push_region_str,
     &_pop_region_str,
     &_throw_arraybounds_str,
-    &_dyneither_ptr_decrease_size_str,
+    &_fat_ptr_decrease_size_str,
     &_throw_match_str,
     &_fast_region_malloc_str,
   };

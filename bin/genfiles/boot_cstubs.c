@@ -41,7 +41,7 @@ static struct Cyc_Null_Exception_exn_struct exn_val = {Cyc_Null_Exception};
     return sf->file;
   }
   int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
-                                 struct _dyneither_ptr dest,
+                                 struct _fat_ptr dest,
                                  int dest_offset, int max_count) {
     unsigned char *new_curr = dest.curr + dest_offset;
     size_t sz = dest.last_plus_one - new_curr;
@@ -55,7 +55,7 @@ static struct Cyc_Null_Exception_exn_struct exn_val = {Cyc_Null_Exception};
     return fread(new_curr, 1, max_count, fd);
   }
   int Cyc_file_string_write(struct Cyc___cycFILE *sf, 
-                                  struct _dyneither_ptr src,
+                                  struct _fat_ptr src,
                                   int src_offset, int max_count) {
     size_t sz = src.last_plus_one - src.curr;
     unsigned char *new_curr = src.curr + src_offset;

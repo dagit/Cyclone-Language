@@ -62,7 +62,7 @@ static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2) 
 
 /* These functions have no side-effects whatsoever */
 static string_t pure_funs[] = {
-  "_get_dyneither_size",
+  "_get_fat_size",
   "_get_zero_arr_size_char",
   "_get_zero_arr_size_short",
   "_get_zero_arr_size_int",
@@ -76,8 +76,8 @@ static string_t exn_effect_funs[] = {
   "_check_null",
   "_check_known_subscript_null",
   "_check_known_subscript_notnull",
-  "_check_dyneither_subscript",
-  "_untag_dyneither_ptr",
+  "_check_fat_subscript",
+  "_untag_fat_ptr",
   "_region_malloc"
 };
 static enum SideEffect fun_effect(string_t fn) {

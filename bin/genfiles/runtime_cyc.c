@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include "runtime_internal.h"
 
-/* struct _dyneither_ptr Cstring_to_string(Cstring s) { */
-/*   struct _dyneither_ptr str; */
+/* struct _fat_ptr Cstring_to_string(Cstring s) { */
+/*   struct _fat_ptr str; */
 /*   if (s == NULL) { */
 /*     str.base = str.curr = str.last_plus_one = NULL; */
 /*   } */
@@ -44,8 +44,8 @@
 /* } */
 
 // no longer copying the C string (see above if this is bogus)
-static struct _dyneither_ptr Cstring_to_string(Cstring s) {
-  struct _dyneither_ptr str;
+static struct _fat_ptr Cstring_to_string(Cstring s) {
+  struct _fat_ptr str;
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
   }
@@ -59,9 +59,9 @@ static struct _dyneither_ptr Cstring_to_string(Cstring s) {
 
 // argc is redundant
 struct _tagged_argv { 
-  struct _dyneither_ptr *base;
-  struct _dyneither_ptr *curr;
-  struct _dyneither_ptr *last_plus_one;
+  struct _fat_ptr *base;
+  struct _fat_ptr *curr;
+  struct _fat_ptr *last_plus_one;
 };
 
 // Define struct __cycFILE, and initialize stdin, stdout, stderr
@@ -72,7 +72,7 @@ struct Cyc___cycFILE { // must match defn in boot_cstubs.c and boot_cycstubs.cyc
   *Cyc_stdout = &Cyc_stdout_v,
   *Cyc_stderr = &Cyc_stderr_v;
 
-extern int Cyc_main(int argc, struct _dyneither_ptr argv);
+extern int Cyc_main(int argc, struct _fat_ptr argv);
 extern char *_set_top_handler(); // defined in runtime_exception.c
 
 /* #ifdef _HAVE_PTHREAD_ */
@@ -107,10 +107,10 @@ int main(int argc, char **argv) {
   // NULL to the end of the argv so that people can step through argv
   // until they hit NULL.  
   {struct _tagged_argv args;
-  struct _dyneither_ptr args_p;
+  struct _fat_ptr args_p;
   int i, result;
   args.curr = 
-    (struct _dyneither_ptr *)GC_malloc((argc+1)*sizeof(struct _dyneither_ptr));
+    (struct _fat_ptr *)GC_malloc((argc+1)*sizeof(struct _fat_ptr));
   args.base = args.curr;
   args.last_plus_one = args.curr + argc + 1;
   for(i = 0; i < argc; ++i)

@@ -223,7 +223,7 @@ int Cyc_Core_refptr_count(unsigned char *ptr) {
 
 // Need to use a fat pointer here, so that we preserve the bounds
 // information when aliasing.
-struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
+struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr ptr) {
   int *cnt = get_refcnt(ptr.base);
   if (cnt != NULL) *cnt = *cnt + 1;
 /*   errprintf("refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */

@@ -149,7 +149,7 @@ CYCDOC_SRCS:=cycdoc\
 	absyn\
 	tcutil\
 	rgnorder\
-        relations\
+        relations-ap\
 	tcenv\
 	tcexp\
         binding\
@@ -160,7 +160,7 @@ CYCDOC_SRCS:=cycdoc\
 	toc\
 	cifc\
 	tcdecl\
-        pratt\
+        pratt-ap\
         jump_analysis\
 	new_control_flow\
 	insert_checks\
@@ -177,7 +177,7 @@ BUILDLIB_SRCS:=buildlib\
 	parse_tab\
 	tcutil\
 	absynpp\
-        relations\
+        relations-ap\
         callgraph\
 	tc\
 	cifc\
@@ -190,7 +190,7 @@ BUILDLIB_SRCS:=buildlib\
 	rgnorder\
 	tcenv\
 	tcpat\
-        pratt\
+        pratt-ap\
         jump_analysis\
 	new_control_flow\
 	insert_checks\

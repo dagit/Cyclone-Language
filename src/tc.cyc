@@ -1056,9 +1056,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     return (*Dict::lookup(env->ordinaries,vd->name))[1];
   case &ExternC_d(*ds2p): fallthru(ds2p);
   case &Using_d(_,*ds2p): fallthru(ds2p);
-  case &Namespace_d(_,*ds2p):
-    *ds2p = treeshake_f(env,*ds2p);
-    return true;
+  case &Namespace_d(_,*ds2p): *ds2p = treeshake_f(env,*ds2p); return true;
   case &ExternCinclude_d(*ds2p,_,_): 
     bool in_cinclude = env->in_cinclude;
     env->in_cinclude = true;

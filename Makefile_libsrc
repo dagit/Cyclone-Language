@@ -104,12 +104,7 @@ OTHER_CYCFLAGS += -noregions
 endif
 
 $(CYCCOMP): $(O_SRCS) install_path.$(O) $(LIBR)
-ifdef MS
-#FIX: Ignore fewer flags.
-	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
-else
 	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(O_SRCS) install_path.$(O) $(LDFLAGS)
-endif
 
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LIBR)
 	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LDFLAGS)

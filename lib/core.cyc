@@ -80,12 +80,12 @@ $(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
 extern "C include" {
   `a::A ? Cyc_Core_mkfat(__nn_cyclone_internal_array_t<`a,`i,`r> arr, sizeof_t<`a> s,
 		__cyclone_internal_singleton<`i> n) {
-    struct _dyneither_ptr res;
+    struct _fat_ptr res;
     res.curr = arr;
     res.base = arr;
     res.last_plus_one = arr + s*n;
     return res;
-  }
+    } 
   __cyclone_internal_array_t<`a,`i,`r>
   Cyc_Core_arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz) {
     // check that the multiplication cannot overflow
@@ -102,7 +102,7 @@ extern "C include" {
     return dyn.curr;
   } 
   struct ThinRes<`a,`r> Cyc_Core_mkthin(`a ?`r dyn, sizeof_t<`a> sz) {
-    unsigned bd = _get_dyneither_size(dyn,sz);
+    unsigned bd = _get_fat_size(dyn,sz);
     struct Cyc_Core_ThinRes res;
     res.arr = dyn.curr;
     res.nelts = bd;

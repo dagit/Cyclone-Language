@@ -28,7 +28,7 @@ struct _RuntimeStack {
 #endif
 
 /* Tagged arrays */
-struct _dyneither_ptr {
+struct _fat_ptr {
   unsigned char *curr; 
   unsigned char *base; 
   unsigned char *last_plus_one; 
@@ -256,15 +256,15 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _check_dyneither_subscript(arr,elt_sz,index) ({ \
-  struct _dyneither_ptr _cus_arr = (arr); \
+#define _check_fat_subscript(arr,elt_sz,index) ({ \
+  struct _fat_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   _cus_ans; })
 #else
-#define _check_dyneither_subscript(arr,elt_sz,index) ({ \
-  struct _dyneither_ptr _cus_arr = (arr); \
+#define _check_fat_subscript(arr,elt_sz,index) ({ \
+  struct _fat_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
@@ -274,18 +274,18 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _cus_ans; })
 #endif
 
-#define _tag_dyneither(tcurr,elt_sz,num_elts) ({ \
-  struct _dyneither_ptr _tag_arr_ans; \
+#define _tag_fat(tcurr,elt_sz,num_elts) ({ \
+  struct _fat_ptr _tag_arr_ans; \
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   /* JGM: if we're tagging NULL, ignore num_elts */ \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base ? (_tag_arr_ans.base + (elt_sz) * (num_elts)) : 0; \
   _tag_arr_ans; })
 
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
-#define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
-  struct _dyneither_ptr _arr = (arr); \
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
+  struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
       _curr != (unsigned char *)0) \
@@ -293,33 +293,33 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _curr; })
 #endif
 
-#define _get_dyneither_size(arr,elt_sz) \
-  ({struct _dyneither_ptr _get_arr_size_temp = (arr); \
+#define _get_fat_size(arr,elt_sz) \
+  ({struct _fat_ptr _get_arr_size_temp = (arr); \
     unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
     unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
     (_get_arr_size_curr < _get_arr_size_temp.base || \
      _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
 
-#define _dyneither_ptr_plus(arr,elt_sz,change) ({ \
-  struct _dyneither_ptr _ans = (arr); \
+#define _fat_ptr_plus(arr,elt_sz,change) ({ \
+  struct _fat_ptr _ans = (arr); \
   _ans.curr += ((int)(elt_sz))*(change); \
   _ans; })
 
-#define _dyneither_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
-  struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
+#define _fat_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
+  struct _fat_ptr * _arr_ptr = (arr_ptr); \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   *_arr_ptr; })
 
-#define _dyneither_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
-  struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
-  struct _dyneither_ptr _ans = *_arr_ptr; \
+#define _fat_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
+  struct _fat_ptr * _arr_ptr = (arr_ptr); \
+  struct _fat_ptr _ans = *_arr_ptr; \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
 /* This is not a macro since initialization order matters.  Defined in
    runtime_zeroterm.c. */
-extern struct _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
+extern struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr x,
   unsigned int sz,
   unsigned int numelts);
 
@@ -423,9 +423,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};
 # 146 "core.h"
-extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
+extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 165
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 168
@@ -475,9 +475,9 @@ struct _tuple1 Cyc_List_rsplit3(struct _RegionHandle*r3,struct _RegionHandle*r4,
 # 354
 struct Cyc_List_List*Cyc_List_delete_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x);
 # 367
-struct _dyneither_ptr Cyc_List_rto_array(struct _RegionHandle*r,struct Cyc_List_List*x);
+struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r,struct Cyc_List_List*x);
 # 374
-struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _dyneither_ptr arr);
+struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_ptr arr);
 # 380
 struct Cyc_List_List*Cyc_List_rtabulate(struct _RegionHandle*r,int n,void*(*f)(int));
 struct Cyc_List_List*Cyc_List_rtabulate_c(struct _RegionHandle*r,int n,void*(*f)(void*,int),void*env);
@@ -501,16 +501,16 @@ return x->hd;}
 struct Cyc_List_List*Cyc_List_tl(struct Cyc_List_List*x){
 return x->tl;}
 # 54
-struct Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _dyneither_ptr argv){
+struct Cyc_List_List*Cyc_List_rlist(struct _RegionHandle*r,struct _fat_ptr argv){
 struct Cyc_List_List*result=0;
-{unsigned i=_get_dyneither_size(argv,sizeof(void*))- (unsigned)1;for(0;i < _get_dyneither_size(argv,sizeof(void*));-- i){
+{unsigned i=_get_fat_size(argv,sizeof(void*))- (unsigned)1;for(0;i < _get_fat_size(argv,sizeof(void*));-- i){
 result=({struct Cyc_List_List*_tmp0=_region_malloc(r,sizeof(*_tmp0));_tmp0->hd=((void**)argv.curr)[(int)i],_tmp0->tl=result;_tmp0;});}}
 return result;}
 # 63
-struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr argv){
+struct Cyc_List_List*Cyc_List_list(struct _fat_ptr argv){
 struct Cyc_List_List*result=0;
-{int i=(int)(_get_dyneither_size(argv,sizeof(void*))- (unsigned)1);for(0;i >= 0;-- i){
-result=({struct Cyc_List_List*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->hd=*((void**)_check_dyneither_subscript(argv,sizeof(void*),i)),_tmp1->tl=result;_tmp1;});}}
+{int i=(int)(_get_fat_size(argv,sizeof(void*))- (unsigned)1);for(0;i >= 0;-- i){
+result=({struct Cyc_List_List*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->hd=*((void**)_check_fat_subscript(argv,sizeof(void*),i)),_tmp1->tl=result;_tmp1;});}}
 return result;}
 # 71
 struct Cyc_List_List*Cyc_List_rcopy(struct _RegionHandle*r2,struct Cyc_List_List*x){
@@ -1083,25 +1083,25 @@ x=_tmp26;}
 # 798
 return 0;}
 # 802
-struct _dyneither_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){
+struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){
 int s;
-struct _dyneither_ptr arr;
+struct _fat_ptr arr;
 # 806
 s=Cyc_List_length(x);
-arr=({unsigned _tmp2A=(unsigned)s;void**_tmp29=({struct _RegionHandle*_tmp4F=r2;_region_malloc(_tmp4F,_check_times(_tmp2A,sizeof(void*)));});({{unsigned _tmp38=(unsigned)s;unsigned i;for(i=0;i < _tmp38;++ i){({void*_tmp50=({void*_tmp28=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp28;});_tmp29[i]=_tmp50;});}}0;});_tag_dyneither(_tmp29,sizeof(void*),_tmp2A);});
+arr=({unsigned _tmp2A=(unsigned)s;void**_tmp29=({struct _RegionHandle*_tmp4F=r2;_region_malloc(_tmp4F,_check_times(_tmp2A,sizeof(void*)));});({{unsigned _tmp38=(unsigned)s;unsigned i;for(i=0;i < _tmp38;++ i){({void*_tmp50=({void*_tmp28=((struct Cyc_List_List*)_check_null(x))->hd;x=x->tl;_tmp28;});_tmp29[i]=_tmp50;});}}0;});_tag_fat(_tmp29,sizeof(void*),_tmp2A);});
 # 810
 return arr;}
 # 813
-struct _dyneither_ptr Cyc_List_to_array(struct Cyc_List_List*x){
+struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x){
 return Cyc_List_rto_array(Cyc_Core_heap_region,x);}
 # 818
-struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _dyneither_ptr arr){
+struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_ptr arr){
 struct Cyc_List_List*ans=0;
-{int i=(int)(_get_dyneither_size(arr,sizeof(void*))- (unsigned)1);for(0;i >= 0;-- i){
-ans=({struct Cyc_List_List*_tmp2B=_region_malloc(r2,sizeof(*_tmp2B));_tmp2B->hd=*((void**)_check_dyneither_subscript(arr,sizeof(void*),i)),_tmp2B->tl=ans;_tmp2B;});}}
+{int i=(int)(_get_fat_size(arr,sizeof(void*))- (unsigned)1);for(0;i >= 0;-- i){
+ans=({struct Cyc_List_List*_tmp2B=_region_malloc(r2,sizeof(*_tmp2B));_tmp2B->hd=*((void**)_check_fat_subscript(arr,sizeof(void*),i)),_tmp2B->tl=ans;_tmp2B;});}}
 return ans;}
 # 825
-struct Cyc_List_List*Cyc_List_from_array(struct _dyneither_ptr arr){
+struct Cyc_List_List*Cyc_List_from_array(struct _fat_ptr arr){
 return Cyc_List_rfrom_array(Cyc_Core_heap_region,arr);}
 # 829
 struct Cyc_List_List*Cyc_List_rtabulate(struct _RegionHandle*r,int n,void*(*f)(int)){

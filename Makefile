@@ -128,7 +128,7 @@ endef
 
 define rmake-gprof
 @mkdir -p $(@D)
-$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-pg $(CFLAGS)" CYCFLAGS="-pg $(CYCFLAGS)" $(@F)
+$(MAKE) -C $(@D) -f $(CYCDIR)/Makefile_base CFLAGS="-pg $(CFLAGS)" CYCFLAGS="-pg $(CYCFLAGS)" OTHER_CYCFLAGS="-pg $(OTHER_CYCFLAGS)" $(@F)
 endef
 
 define rmake-nocheck
