@@ -215,6 +215,8 @@ namespace Absyn {
     // cyc_varargs is non-null, then c_varargs is false.
     bool                                     c_varargs;
     vararg_info_t*                           cyc_varargs;
+    // partial order on region parameters
+    list_t<$(type_t,type_t)@>                rgn_po;
     // function type attributes can include regparm(n), stdcall xor cdecl,
     // noreturn, and const.
     attributes_t                             attributes; 
@@ -293,7 +295,8 @@ namespace Absyn {
     WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, // args and types
               bool,                                    // c_varargs
               vararg_info_t *,                         // cyc_varargs
-              opt_t<type_t>);                          // effect
+              opt_t<type_t>,                           // effect
+              list_t<$(type_t,type_t)@>);              // region partial order
   };
 
   EXTERN_ABSYN tunion Pointer_Sort {
@@ -523,6 +526,7 @@ namespace Absyn {
     list_t<$(var_t,tqual_t,type_t)@> args;
     bool                       c_varargs;
     vararg_info_t*             cyc_varargs;
+    list_t<$(type_t,type_t)@>  rgn_po; // partial order on region params
     stmt_t                     body;
     opt_t<type_t>              cached_typ; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
@@ -790,6 +794,7 @@ namespace Absyn {
                              list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                              bool c_varargs, 
                              vararg_info_t *cyc_varargs,
+                             list_t<$(type_t,type_t)@> rgn_po,
                              attributes_t);
   extern type_t pointer_expand(type_t);
   extern bool is_lvalue(exp_t);

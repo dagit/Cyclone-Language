@@ -33,7 +33,7 @@ static string_t * tc_msg = &tc_msg_c;
 // function type.  
 static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   switch (compress(t)) {
-  case &FnType(FnInfo{_,_,_,_,_,_,*fnatts}):
+  case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
     let res_atts = null;
     for (; atts != null; atts = atts->tl) {
       switch (atts->hd) {

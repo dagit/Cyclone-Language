@@ -783,7 +783,8 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
     switch (compress(t1)) {
-    case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,atts}): 
+    case &FnType(FnInfo{tvars,eff,res_typ,args_info,c_vararg,cyc_vararg,
+                          rgn_po,atts}): 
       //FIX: handle tvars??
 
       // unify the result type with the expected type to get better
@@ -870,6 +871,9 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
       // Check that the effect of the function is compatible with the current
       // capability.
       Tcenv::check_effect_accessible(te, loc, eff->v);
+      // Check that the partial-order on region lifetimes required by the
+      // function is compatible with the current region partial order
+      Tcenv::check_rgn_partial_order(te, loc, rgn_po);
       return res_typ;
     default: return expr_err(te,loc,"expected pointer to function");
     }
@@ -896,7 +900,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
   switch (t1) {
   case &PointerType(PtrInfo{t0,rt,x,tq,b}):
     switch (compress(t0)) {
-    case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
+    case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
       list_t<$(tvar_t,type_t)@> instantiation = null;
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
@@ -908,7 +912,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
       type_t new_fn_typ = 
         substitute(instantiation,
                    new FnType(FnInfo{null,eff,rtyp,args,c_varargs,
-                                     cyc_varargs,atts}));
+                                     cyc_varargs,rpo,atts}));
       type_t new_typ = new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
       return new_typ;
     default: break;
@@ -1685,7 +1689,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
-      case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
+      case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
 	if (tvs != null)    // then, instantiate if necessary
 	  region rgn {
            let env = $(lookup_type_vars(te),rgn);
@@ -1695,7 +1699,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
 	   type_t ftyp = rsubstitute(rgn, inst,
 				     new FnType(FnInfo{null,eff,rtyp,args,
 						       c_varargs,cyc_varargs,
-                                                       atts}));
+                                                       rpo,atts}));
 	   type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	   exp_t  inner   = copy_exp(e);
 	   e->r    = new Instantiate_e(inner,ts);

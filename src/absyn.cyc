@@ -539,12 +539,14 @@ static
 type_t function_typ(list_t<tvar_t> tvs, opt_t<type_t> eff_typ, type_t ret_typ, 
                     list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, 
                     bool c_varargs, vararg_info_t *cyc_varargs,
+                    list_t<$(type_t,type_t)@> rgn_po,
                     attributes_t atts) {
   return new FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
                               .effect = eff_typ, 
                               .args = List::map(expand_arg,args), 
                               .c_varargs = c_varargs, 
                               .cyc_varargs = cyc_varargs,
+                              .rgn_po = rgn_po,
                               .attributes=atts});
 }
 type_t pointer_expand(type_t t) {

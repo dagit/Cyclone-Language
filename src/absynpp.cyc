@@ -38,7 +38,8 @@ extern doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
 extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
 extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
-                         opt_t<type_t> effopt);
+                         opt_t<type_t> effopt, 
+                         list_t<$(type_t,type_t)@> rgn_po);
 extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
 
 // Flag controlling whether typedefs are expanded during printing
@@ -331,8 +332,8 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case &WithTypes(args2,c_varargs,cyc_varargs,effopt):
-      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt));
+    case &WithTypes(args2,c_varargs,cyc_varargs,effopt,rgn_po):
+      return cat(rest,funargs2doc(args2,c_varargs,cyc_varargs,effopt,rgn_po));
     case &NoTypes(sl,loc):
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
@@ -547,52 +548,40 @@ doc_t vo2doc(opt_t<var_t> vo) {
   return (vo==null)?nil_doc():text(*(vo->v));
 }
 
+doc_t rgn_cmp2doc($(type_t,type_t)@ cmp) {
+  let &$(r1,r2) = cmp;
+  return cat(rgn2doc(r1),text(" < "),rgn2doc(r2));
+}
+
+doc_t rgnpo2doc(list_t<$(type_t,type_t)@> po) {
+  return group("","",",",List::map(rgn_cmp2doc,po));
+}
+
 doc_t funarg2doc($(opt_t<var_t>,tqual_t,type_t)@ t) {
   opt_t<doc_t> dopt = ((*t)[0]==null)?null:(new Opt(text(*((*t)[0]->v))));
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
 doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
-                  vararg_info_t *cyc_varargs, opt_t<type_t> effopt) {
+                  vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
+                  list_t<$(type_t,type_t)@> rgn_po) {
   let arg_docs = List::map(funarg2doc,args);
-  if (effopt == null) {
-    if (c_varargs)
-      return(group("(",")",",",
-                   List::append(arg_docs,
-                                new List(text("..."),null))));
-    else if (cyc_varargs != null) {
-      let vararg =
-        funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,cyc_varargs->type));
-      let d = cat(text("..."),typ2doc(cyc_varargs->rgn),
-                  cyc_varargs->inject ? text(" inject ") : text(""),
-                  vararg);
-      return group("(",")",",",List::append(arg_docs,new List(d,null)));
-
-    } else      // Not varargs
-      return(group("(",")",",",arg_docs));
-  } else {
-    if (c_varargs)
-      return(group("(",")",";",
-                   new List(group("","",",",
-                                  List::append(arg_docs,
-                                               new List(text("..."),null))),
-                            new List(eff2doc(effopt->v),null))));
-    else if (cyc_varargs != null) {
-      let vararg =
-        funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,cyc_varargs->type));
-      let d = cat(text("..."),typ2doc(cyc_varargs->rgn),
-                  cyc_varargs->inject ? text(" inject ") : text(""),
-                  vararg);
-      return(group("(",")",";",
-                   new List(group("","",",",
-                                  List::append(arg_docs,
-                                               new List(d,null))),
-                            new List(eff2doc(effopt->v),null))));
-    } else
-      return(group("(",")",";",
-                   new List(group("","",",",arg_docs),
-                            new List(eff2doc(effopt->v),null))));
+  doc_t eff_doc;
+  if (c_varargs) 
+    arg_docs = List::append(arg_docs,new List(text("..."),null));
+  else if (cyc_varargs != null) {
+    let varargs_doc = cat(text("..."),typ2doc(cyc_varargs->rgn),
+                          cyc_varargs->inject ? text(" inject ") : text(""),
+                          funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,
+                                           cyc_varargs->type)));
+    arg_docs = List::append(arg_docs,new List(varargs_doc,null));
   }
+  let arg_doc = group("","",",",arg_docs);
+  if (effopt != null) 
+    arg_doc = cat(arg_doc,text(";"),eff2doc(effopt->v));
+  if (rgn_po != null) 
+    arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
+  return cat(text("("),arg_doc,text(")"));
 }
 
 $(opt_t<var_t>,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
@@ -1316,7 +1305,9 @@ doc_t decl2doc(decl_t d) {
                                  fd->effect,
                                  fd->ret_type,
                                  List::map(arg_mk_opt,fd->args),
-                                 fd->c_varargs, fd->cyc_varargs,null});
+                                 fd->c_varargs, fd->cyc_varargs,
+                                 fd->rgn_po,
+                                 null});
     doc_t attsdoc   = atts2doc(fd->attributes);
     doc_t inlinedoc;
     if(fd->is_inline)
@@ -1543,7 +1534,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     type_modifier_t tm = new Pointer_mod(ps,rgntyp,tq);
     return $(tq3, t3, (list_t<type_modifier_t>)(new List(tm,tml3)));
 
-  case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,fn_atts}):
+  case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
+                        rgn_po,fn_atts}):
     if (! print_all_tvars) {
       // don't print default effects
       if (effopt == null
@@ -1571,7 +1563,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     if (fn_atts != null)
       tms = new List(new Attributes_mod(null,fn_atts),tms);
     tms = new List(new Function_mod(new WithTypes(args,c_varargs,
-                                                  cyc_varargs,effopt)),tms);
+                                                  cyc_varargs,effopt,
+                                                  rgn_po)),tms);
     if (typvars != null)
       tms = new List(new TypeParams_mod(typvars,null,true),tms);
     return $(tq3,t3,tms);

@@ -344,7 +344,7 @@ static type_t typ_to_c(type_t t) {
   case FloatType:    return t;
   case DoubleType:   return t;
   case &ArrayType(t2,tq,e):   return new ArrayType(typ_to_c_array(t2),tq,e);
-  case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,atts}):
+  case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  I'm dropping attributes like noreturn and const because C
@@ -366,7 +366,7 @@ static type_t typ_to_c(type_t t) {
       new_args = List::imp_append(new_args,new List(vararg,null));
     }
     return new FnType(FnInfo{null,null,typ_to_c(t2),new_args,
-                               c_vararg,null,new_atts});
+                               c_vararg,null,null,new_atts});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
@@ -2006,8 +2006,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         let argtyps = list(new $(null,mt_tq,typ_to_c(e1->topt->v)),
                            new $(null,mt_tq,uint_t),
                            new $(null,mt_tq,uint_t));
-        let fntyp = cstar_typ(new FnType(FnInfo(null,null,ta2, 
-                                                argtyps, false, null, null)),
+        let fntyp = cstar_typ(new FnType(FnInfo(null,null,ta2, argtyps, 
+                                                false, null, null, null)),
                               mt_tq);
         exp_t fnexp = cast_exp(fntyp,
                                var_exp(_check_unknown_subscript_qv,DL),DL);
@@ -2118,8 +2118,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  let argtyps = list(new $(null,mt_tq,typ_to_c(e1->topt->v)),
                              new $(null,mt_tq,uint_t),
                              new $(null,mt_tq,uint_t));
-	  let fntyp = cstar_typ(new FnType(FnInfo(null,null,ta2, 
-						  argtyps, false, null, null)),
+	  let fntyp = cstar_typ(new FnType(FnInfo(null,null,ta2, argtyps,
+						  false, null, null, null)),
 				mt_tq);
 	  exp_t fnexp = cast_exp(fntyp,
 				 var_exp(_check_unknown_subscript_qv,DL),DL);
@@ -3059,6 +3059,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 static void fndecl_to_c(env_t nv, fndecl_t f) {
   f->tvs      = null;
   f->effect   = null;
+  f->rgn_po   = null;
   f->ret_type = typ_to_c(f->ret_type);
   for (let args=f->args; args != null; args = args->tl) {
     (*args->hd)[2] = typ_to_c((*args->hd)[2]);

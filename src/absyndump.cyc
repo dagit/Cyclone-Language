@@ -366,9 +366,16 @@ void dumpvaropt(opt_t<var_t> vo) {
 void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
+void dump_rgncmp($(type_t,type_t)@ cmp) {
+  let &$(r1,r2) = cmp;
+  dumptyp(r1); dump_char('<'); dumptyp(r2);
+}
+void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
+  dump_sep(dump_rgncmp,rgn_po,",");
+}
 void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs, 
-                 vararg_info_t *cyc_varargs,
-                 opt_t<type_t> effopt) {
+                 vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
+                 list_t<$(type_t,type_t)@> rgn_po) {
   dump_char('(');
   for (; args != null; args = args->tl) {
     dumpfunarg(args->hd);
@@ -386,6 +393,10 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
   if (effopt != null) {
     dump_semi();
     dumpeff(effopt->v);
+  }
+  if (rgn_po != null) {
+    dump_char(':');
+    dump_rgnpo(rgn_po);
   }
   dump_char(')');
 }
@@ -833,7 +844,8 @@ void dumpdecl(decl_t d) {
     dumpscope(fd->sc);
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
-                                 fd->c_varargs, fd->cyc_varargs,null});
+                                 fd->c_varargs, fd->cyc_varargs,
+                                 fd->rgn_po, null});
     dumptqtd(Tqual(false,false,false),t,
 	     Absynpp::to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
@@ -1024,8 +1036,8 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     case Carray_mod: dump("[]"); break;
     case &ConstArray_mod(e):
       dump_char('['); dumpexp(e); dump_char(']'); break;
-    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt)):
-      dumpfunargs(args,c_varargs,cyc_varargs,effopt); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po); break;
     case &Function_mod(&NoTypes(sl,loc)):
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,loc,print_kinds): 

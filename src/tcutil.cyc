@@ -135,7 +135,10 @@ static structfield_t copy_field(structfield_t f) {
   return new Structfield{f->name,f->tq,copy_type(f->type),f->width,
                            f->attributes};
 }
-
+static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
+  let &$(r1,r2) = x;
+  return new $(copy_type(r1),copy_type(r2));
+}
 type_t copy_type(type_t t) {
   switch (compress(t)) {
   case VoidType: return t;
@@ -160,7 +163,7 @@ type_t copy_type(type_t t) {
   case &ArrayType(et,tq,eopt): 
     // FIX: should really copy eopt
     return new ArrayType(copy_type(et),tq,eopt);
-  case &FnType(FnInfo{tvs,effopt,rt,args,c_varargs,cyc_varargs,atts}):
+  case &FnType(FnInfo{tvs,effopt,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
     let tvs2 = List::map(copy_tvar,tvs);
     let effopt2 = (effopt == null) ? null : new Opt(copy_type(effopt->v));
     let rt2 = copy_type(rt);
@@ -172,9 +175,10 @@ type_t copy_type(type_t t) {
       cyc_varargs2 = new VarargInfo{cv->name,cv->tq,copy_type(cv->type),
                                     copy_type(cv->rgn),cv->inject};
     }
+    let rgn_po2 = List::map(copy_rgncmp,rgn_po);
     let atts2 = atts;
     return new FnType(FnInfo{tvs2,effopt2,rt2,args2,c_varargs2,
-                               cyc_varargs2,atts2});
+                               cyc_varargs2,rgn_po2,atts2});
   case &TupleType(tqts):
     return new TupleType(List::map(copy_tqt,tqts));
   case &StructType(tdnopt,ts,_):
@@ -311,7 +315,7 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
   case &PointerType(pinfo): 
     occurs(evar,env,pinfo.elt_typ); occurs(evar,env,pinfo.rgn_typ); break;
   case &ArrayType(t2,_,_): occurs(evar,env,t2); break;
-  case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,atts}): 
+  case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
     if (eff != null) occurs(evar,env,eff->v);
     occurs(evar,env,rt);
     for(; args != null; args = args->tl)
@@ -319,6 +323,11 @@ static void occurs(type_t evar, list_t<tvar_t> env, type_t t) {
     if (cyc_varargs != null) {
       let VarargInfo(_,_,t,r,_) = *cyc_varargs;
       occurs(evar,env,t); occurs(evar,env,r);
+    }
+    for (; rgn_po != null; rgn_po = rgn_po->tl) {
+      let &$(r1,r2) = rgn_po->hd;
+      occurs(evar,env,r1);
+      occurs(evar,env,r2);
     }
     break;
   case &TupleType(args):
@@ -665,6 +674,35 @@ static bool unify_effect(type_t e1, type_t e2) {
   }
 }
 
+// returns true when rpo1 is a sub-partial order of rpo2.  By this
+// we mean that every inequation in rpo1 is also in rpo2, or else
+// the inequation in rpo is of the form `H <= t.  Note that
+// this might constrain region variables.  Note also that we don't
+// do any sort of transitive closure to figure out causalities.
+// FIX:  this isn't complete or efficient by far...
+static bool sub_rgnpo(list_t<$(type_t,type_t)@> rpo1, 
+                      list_t<$(type_t,type_t)@> rpo2) {
+  for (_ r1 = rpo1; r1 != null; r1 = r1->tl) {
+    let &$(t1a,t1b) = r1->hd;
+    bool found = (t1a == HeapRgn);
+    for (_ r2 = rpo2; r2 != null && !found; r2 = r2->tl) {
+      let &$(t2a,t2b) = r2->hd;
+      if (unify(t1a,t2a) && unify(t1b,t2b)) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
+// see if two region partial-orders are the same
+static bool same_rgn_po(list_t<$(type_t,type_t)@> rpo1, 
+                        list_t<$(type_t,type_t)@> rpo2) {
+  return (sub_rgnpo(rpo1,rpo2) && sub_rgnpo(rpo2,rpo1));
+}
+
 // the real work of unification
 void unify_it(type_t t1, type_t t2) {
   t1 = compress(t1);
@@ -820,8 +858,8 @@ void unify_it(type_t t1, type_t t2) {
       return;
     break;
 
-  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,atts2}), 
-         &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,atts1})):
+  case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
+         &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
     bool done = false;
     region rgn {
     glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = null;
@@ -834,10 +872,10 @@ void unify_it(type_t t1, type_t t2) {
     if (tvs2 != null) break;
     if (inst != null) {
       unify_it(new FnType(FnInfo{null,eff1,rt1,args1,c_vararg1,cyc_vararg1,
-                                   atts1}),
+                                   rpo1,atts1}),
 	       rsubstitute(rgn, inst,
 			   new FnType(FnInfo{null,eff2,rt2,args2,c_vararg2,
-					       cyc_vararg2,atts2})));
+					       cyc_vararg2,rpo2,atts2})));
       done = true;
     } 
     }
@@ -864,8 +902,8 @@ void unify_it(type_t t1, type_t t2) {
       break;
     }
     if (bad_cyc_vararg) break;
-    // It's important to unify the effects after the arguments and result
-    // so that the effects are pinned down as much as possible.
+    // It's important to unify the effects and po after the arguments and 
+    // result so that the effects are pinned down as much as possible.
     bool bad_effect = false;
     switch($(eff1,eff2)) {
     case $(null,null): break;
@@ -876,6 +914,8 @@ void unify_it(type_t t1, type_t t2) {
     if(bad_effect)
       break;
     if (!same_atts(atts2,atts1)) 
+      break;
+    if (!same_rgn_po(rpo2,rpo1))
       break;
     return;
 
@@ -1520,7 +1560,8 @@ type_t fndecl2typ(fndecl_t fd) {
     }
     return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                List::map(fndecl2typ_f, fd->args),
-                               fd->c_varargs, fd->cyc_varargs, fn_type_atts});
+                               fd->c_varargs, fd->cyc_varargs, 
+                               fd->rgn_po, fn_type_atts});
   };
   return (fd->cached_typ->v);
 }
@@ -1539,7 +1580,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rt,args,c_varargs,cyc_varargs,atts}):
+  case &FnType(FnInfo{tvs,effect,rt,args,c_varargs,cyc_varargs,rgn_rpo,atts}):
     fd->tvs = tvs;
     fd->effect = effect;
     break;
@@ -1611,7 +1652,7 @@ type_t rsubstitute(region_t<`r> rgn,
     if(new_t1 == t1 && new_r == r)
       return t;
     return new PointerType(PtrInfo(new_t1,new_r,n,tq,b));
-  case &FnType(FnInfo{vs,eff,rtyp,args,c_varargs,cyc_varargs,atts}):
+  case &FnType(FnInfo{vs,eff,rtyp,args,c_varargs,cyc_varargs,rgn_po,atts}):
     for (let p = vs; p != null; p = p->tl)
       inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
     let $(qs,ts) = List::rsplit(rgn,rgn, 
@@ -1639,9 +1680,17 @@ type_t rsubstitute(region_t<`r> rgn,
       else 
         cyc_varargs2 = new VarargInfo{n,tq,t2,r2,i};
     }
+    list_t<$(type_t,type_t)@> rgn_po2;
+    let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
+    let rpo2a = substs(rgn,inst,rpo1a);
+    let rpo2b = substs(rgn,inst,rpo1b);
+    if (rpo2a == rpo1a && rpo2b == rpo1b) 
+      rgn_po2 = rgn_po;
+    else 
+      rgn_po2 = List::zip(rpo2a,rpo2b);
     return 
       new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,c_varargs,
-                          cyc_varargs2,atts});
+                          cyc_varargs2,rgn_po2,atts});
   case &TupleType(tqts):
     let ts  = List::rmap(rgn,snd_tqt,tqts);
     let ts2 = substs(rgn,inst,ts);
@@ -2026,7 +2075,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       terr(loc,"array bounds expression is not an unsigned int");
     Evexp::eval_const_uint_exp((exp_t)e); // check that e is of constant size
     break;
-  case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,atts}):
+  case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
     // check that the attributes are function type attributes
     // and that at most one of {stdcall, cdecl, fastcall} is there.
     int  num_convs = 0;
@@ -2113,6 +2162,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           break;
         }
       }
+    }
+    // check the region partial order
+    // FIX:  we need to ensure there are no circular dependencies...
+    for (_ rpo = rgn_po; rpo != null; rpo = rpo->tl) {
+      let &$(r1,r2) = rpo->hd;
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,r1);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,r2);
     }
     if (*eff != null) {
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,(*eff)->v);
@@ -2437,7 +2493,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   }
   if (free_tvars != null) {
     switch (compress(t)) {
-    case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,atts}):
+    case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
       if (*btvs == null)
         *btvs = free_tvars;
       else if (free_tvars != null) {

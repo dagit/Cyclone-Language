@@ -477,6 +477,14 @@ static bool region_ancestor(rgn_po_t ancestors, tvar_t r) {
   return false;
 }
 
+static struct RgnPO @find_region_in_po(rgn_po_t po, tvar_t r) {
+  for (; po != null; po = po->tl) {
+    if (tvar_cmp(po->hd->tvar,r) == 0) return po->hd;
+  }
+  return env_err(xprintf("can't find region variable %s in po",
+                         typ2string(new VarType(r))));
+}
+
 // does r1 outlive r2?
 static bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
   rgn_po_t r2_ancestors;
@@ -487,13 +495,39 @@ static bool check_region_outlives(rgn_po_t po, tvar_t r1, tvar_t r2) {
 
 // given the list of type-variables for a function, build the initial
 // partial order for the region variables.  The po should have each
-// reach being incomparable (i.e., have an empty set of ancestors.)
-static rgn_po_t initial_region_po(list_t<tvar_t> tvs) {
+// region being incomparable (i.e., have an empty set of ancestors.)
+// then add in the partial order given and check that it's consistent
+// and that there are no circularities.  
+static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
+                                  list_t<$(type_t,type_t)@> po) {
   rgn_po_t result = null;
   for (; tvs != null; tvs = tvs->tl) {
     tvar_t tv = tvs->hd;
     if (tvar_kind(tv) == RgnKind) {
       result = new List(new RgnPO{.tvar=tv, .ancestors=null},result);
+    }
+  }
+  for (; po != null; po = po->tl) {
+    switch (*(po->hd)) {
+    case $(HeapRgn,_): break; // every region is implicitly a descendant of `H
+    case $(&VarType(r1),&VarType(r2)):
+      // r2 has r1 as an ancestor.  Make sure that r1 and r2 aren't the
+      // same region, and that r1 doesn't have r2 as an ancestor.
+      if (tvar_cmp(r1,r2) == 0 || check_region_outlives(result,r2,r1))
+        terr(loc,xprintf("bad region lifetime assertion (circularity):%s < %s",
+                         typ2string(new VarType(r1)), 
+                         typ2string(new VarType(r2))));
+      else {
+        // go find r1's po entry and add it to r2's po entry
+        let r1 = find_region_in_po(result,r1);
+        let r2 = find_region_in_po(result,r2);
+        r2->ancestors = new List(r1,r2->ancestors);
+      }
+      break;
+    case $(t1,t2):
+      terr(loc,xprintf("bad region lifetime assertion:: %s < %s",
+                       typ2string(t1), typ2string(t2)));
+      break;
     }
   }
   return result;
@@ -829,6 +863,18 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
                       typ2string(capability), typ2string(eff)));
 }
 
+// Check that a function call's region partial order is compatible
+// with the current region partial order
+void check_rgn_partial_order(tenv_t te, seg_t loc, 
+                             list_t<$(type_t,type_t)@> po) {
+  for (; po != null; po = po->tl) {
+    let &$(r1,r2) = po->hd;
+    if (!region_outlives(te, r1, r2))
+      terr(loc, xprintf("function requires that region %s outlive %s",
+                        typ2string(r1),typ2string(r2)));
+  }
+}
+
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   Dict::dict_t<var_t,binding_t> locals = Dict::empty(String::zstrptrcmp);
   tvar_t rgn0 = 
@@ -837,7 +883,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
              new_conref(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = add_region_po(initial_region_po(fd->tvs),rgn0);
+  let rgn_po = add_region_po(initial_region_po(loc,fd->tvs,fd->rgn_po),rgn0);
   type_t param_rgn = new VarType(rgn0);
   let vds = null;
   for(let args = fd->args; args != null; args = args->tl) {

@@ -129,5 +129,9 @@ extern void check_effect_accessible(tenv_t te, seg_t loc, type_t eff);
 extern type_t parameter_rgn(tenv_t);
 // Returns true when region r1 outlives region r2 -- assumes r1 <> r2
 extern bool region_outlives(tenv_t, type_t r1, type_t r2);
+// Checks that for each pair of regions (r1,r2), r1 outlives r2 under
+// the current partial order on region lifetimes in the environment.
+extern void check_rgn_partial_order(tenv_t te, seg_t loc, 
+                                    list_t<$(type_t,type_t)@> po);
 }
 #endif
