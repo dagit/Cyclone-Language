@@ -355,6 +355,13 @@ $(assn_t, assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
 }
 
 static void insert_assn_info(assn_info_t assn_info, Absyn::exp_t e, $(AssnDef::assn_t, AssnDef::assn_t) @`H ctxt_assn){
+#ifdef VCGEN_DEBUG
+  fprintf(stderr, "###################\n");
+  fprintf(stderr, "expression: %s\n", Absynpp::exp2string(e));
+  fprintf(stderr, "ctxt assns : %s \n", AssnDef::assn2string((*ctxt_assn)[0]));
+  fprintf(stderr, "toprove assn : %s \n", AssnDef::assn2string((*ctxt_assn)[1]));
+  fprintf(stderr, "###################\n");
+#endif
   Hashtable::insert(*assn_info, e, ctxt_assn);
   return;
 }
@@ -447,7 +454,7 @@ static assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
     indent -= 2;
     print_tabs();
     let str = assn2string(aout);
-    fprintf(stderr,"stmt %s, post(%d/%d)=%s\n",stmt2shortstring(s),assn_size(aout),tree_size,str);
+    //    fprintf(stderr,"stmt %s, post(%d/%d)=%s\n",stmt2shortstring(s),assn_size(aout),tree_size,str);
     return aout;
   }
 }
@@ -996,8 +1003,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       // vice versa.  We might be able to get away with 
       // dropping other casts (e.g., char->int) but we'll be
       // conservative now.
+#ifdef VCGEN_DEBUG
+      fprintf(stderr, "\n\n tp = %s\n", Absynpp::typ2string(tp));
+      fprintf(stderr, "type(e) = %s\n", Absynpp::typ2string(e->topt));
+#endif
       switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
       case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
+#ifdef VCGEN_DEBUG
+	fprintf(stderr, "cast: (tp) e where (tp) could be removed if %d == %d\n",
+		s1, s2);
+#endif
+	//wangyl: a hack to tell compiler that long and int have the same size
+	//FIX: this is machine dependent!
+	s1 = (s1 == Absyn::Long_sz? Absyn::Int_sz:s1);
+	s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s1);
         if (s1 == s2) return $(t,a);
         break;
       default: break;
@@ -1039,30 +1058,27 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
     default:
-      update_try_assn(env, ain);
-      assn_t additional;
-      if (t1 == NULL){
-	additional = &true_assn;
-      }else{
-	exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
-	term_t bndterm;
-	assn_t bndassn;
-	bndterm = primop(Absyn::Numelts, list(t1));
-	bndassn = &true_assn;
-	if (bound != NULL){
-	  let $(bndt, bnda) = vcgen_rexp(env, bound, &true_assn);
-	  if (bndt != NULL){
-	    bndterm=bndt;
-	    bndassn = bnda;
-	  }
+      // wangyl: try_assn should be updated by a2.
+      //      update_try_assn(env, ain);
+      update_try_assn(env, a2);
+      term_t term_numelts, term_typebound;
+      
+      // we don't know t1, can't really infer anything about the bound
+      if (t1 == NULL) break;
+      // we don't know t2, can't really infer anything about the bound
+      if (t2 == NULL) break;
+      
+      term_numelts = primop(Absyn::Numelts, list(t1));
+      exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
+      if (bound != NULL){
+	if (Tcutil::is_const_exp(bound)){
+	  term_typebound = cnst(bound);
+	  a2 = and(a2, eq(term_numelts, term_typebound));
 	}
-	//wangyl getting a better term for the array bound.
-	if (bndassn != &true_assn) fprintf(stderr, "side effect in bound\n");
-	additional = ult(t2,bndterm);
       }
-      if(additional != &true_assn)
-	insert_assn_info(env->assn_info, e1, new $(a2, additional));
-      a2 = and(a2,additional);
+      let inbound_assn = ult(t2, term_numelts);
+      insert_assn_info(env->assn_info, e1, new $(a2, inbound_assn));
+      a2 = and(a2,inbound_assn);
     }
     return $(NULL,a2);
 

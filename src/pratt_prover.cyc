@@ -55,6 +55,13 @@ typedef struct Graph {
   row_t rows;
 } graph_t;
 
+
+// FIX: 32-bit dependency!
+#define MAXINT  (2147483647)
+//#define MININT  (-2147483648)
+#define MININT (-MAXINT-1)
+#define MAXUINT (0xFFFFFFFF)
+
 // print out a set of graphs
 static void print_graphs(graph_t* gs) {
   fprintf(stderr,"Graphs:\n");
@@ -135,12 +142,22 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
   return g1;
 }
 
+static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_t_nullable);
+
 // add a row to a single graph if not already present
 static void add_node(graph_t @g, term_t n) {
   for (let ns = g->rows; ns != NULL; ns = ns->next) {
     if (cmp_term(ns->source,n) == 0) return;
   }
   g->rows = new Row{g->rows,n,NULL};
+  switch (n){
+  case &Primop(Absyn::Numelts, _):
+    add_edge(g, false, n, zero(), MAXINT-1, NULL);
+    add_edge(g, true, n, zero(), MAXINT-1, NULL);
+    break;
+  default:
+    break;
+  }
 }
 
 static row_t lookup_row(graph_t @g, term_t i) {
@@ -198,11 +215,6 @@ static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_t_n
   i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,d,d};
 }
 
-// FIX: 32-bit dependency!
-#define MAXINT  (2147483647)
-//#define MININT  (-2147483648)
-#define MININT (-MAXINT-1)
-#define MAXUINT (0xFFFFFFFF)
 
 
 typedef $(bool, int) overflow_info_t;
