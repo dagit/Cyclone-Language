@@ -263,28 +263,24 @@ unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Cstdio___sFILE;struct Cyc_S
 extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
 18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
 extern int Cyc_Std_file_string_read(struct Cyc_Std___sFILE*fd,struct _tagged_arr dest,
-int dest_offset,int max_count);static const int Cyc_Std_String_pa=0;struct Cyc_Std_String_pa_struct{
-int tag;struct _tagged_arr f1;};static const int Cyc_Std_Int_pa=1;struct Cyc_Std_Int_pa_struct{
-int tag;unsigned int f1;};static const int Cyc_Std_Double_pa=2;struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};static const int Cyc_Std_ShortPtr_pa=3;struct Cyc_Std_ShortPtr_pa_struct{
-int tag;short*f1;};static const int Cyc_Std_IntPtr_pa=4;struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};static const int Cyc_Std_ShortPtr_sa=0;struct Cyc_Std_ShortPtr_sa_struct{
-int tag;short*f1;};static const int Cyc_Std_UShortPtr_sa=1;struct Cyc_Std_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};static const int Cyc_Std_IntPtr_sa=2;struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};static const int Cyc_Std_UIntPtr_sa=3;struct Cyc_Std_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};static const int Cyc_Std_StringPtr_sa=4;struct Cyc_Std_StringPtr_sa_struct{
-int tag;struct _tagged_arr f1;};static const int Cyc_Std_DoublePtr_sa=5;struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};static const int Cyc_Std_FloatPtr_sa=6;struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};extern unsigned char Cyc_Lexing_Error[10];struct Cyc_Lexing_Error_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Lexing_lexbuf{void(*
-refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _tagged_arr
-lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int
-lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
-int(*read_fun)(struct _tagged_arr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
-struct _tagged_arr lex_base;struct _tagged_arr lex_backtrk;struct _tagged_arr
-lex_default;struct _tagged_arr lex_trans;struct _tagged_arr lex_check;};extern struct
-Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _tagged_arr,int,
-void*),void*);extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*);
+int dest_offset,int max_count);struct Cyc_Std_String_pa_struct{int tag;struct
+_tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
+int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{
+int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};
+struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};extern
+unsigned char Cyc_Lexing_Error[10];struct Cyc_Lexing_Error_struct{unsigned char*
+tag;struct _tagged_arr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
+void*refill_state;struct _tagged_arr lex_buffer;int lex_buffer_len;int lex_abs_pos;
+int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int
+lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct
+_tagged_arr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct
+_tagged_arr lex_base;struct _tagged_arr lex_backtrk;struct _tagged_arr lex_default;
+struct _tagged_arr lex_trans;struct _tagged_arr lex_check;};extern struct Cyc_Lexing_lexbuf*
+Cyc_Lexing_from_function(int(*read_fun)(struct _tagged_arr,int,void*),void*);
+extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___sFILE*);
 extern struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _tagged_arr);extern
 struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);extern unsigned char
 Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);extern int Cyc_Lexing_lexeme_start(

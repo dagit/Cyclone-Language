@@ -93,7 +93,7 @@ static int fresh_label_counter = 0;
 xtunion exn {Toc_Unimplemented};
 xtunion exn {Toc_Impossible};
 static `a unimp(string_t fmt, ... inject parg_t<`r2> ap) 
-  __attribute__((format(printf,1,2)))
+  __attribute__((format(printf,1,2), noreturn))
 {
   vfprintf(stderr,fmt,ap);
   fprintf(stderr,"\n");
@@ -101,7 +101,7 @@ static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
   throw Toc_Unimplemented;
 }
 static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap) 
-  __attribute__((format(printf,1,2)))
+  __attribute__((format(printf,1,2), noreturn))
 {
   vfprintf(stderr,fmt,ap);
   fprintf(stderr,"\n");
@@ -198,7 +198,7 @@ static bool is_nullable(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,b,_,_}):
     return conref_def(false,b);
-  default: toc_impos("is_nullable"); return false;
+  default: toc_impos("is_nullable");
   }
 }
 
@@ -246,7 +246,29 @@ qvar_t temp_var() {
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
 static var_t fresh_label() {
-  return new (string_t)aprintf("_LL%d",temp_var_counter++);
+  return new (string_t)aprintf("_LL%X",fresh_label_counter++);
+}
+
+// These two functions should never be used for xtunions. Should memoize?
+// Note the former used to use static const int variables, but couldn't
+// at top-level.
+static exp_t tunion_tag(tuniondecl_t td, qvar_t name, bool carries_value) {
+  int ans = 0;
+  let fs  = td->fields->v;
+  while(qvar_cmp(name,fs->hd->name)!=0) {
+    if((carries_value && fs->hd->typs != NULL)
+       || (!carries_value && fs->hd->typs == NULL))
+      ++ans;
+    fs = fs->tl;
+  }
+  return uint_exp(ans,DL);    
+}
+static int num_void_tags(tuniondecl_t td) {
+  int ans = 0;
+  for(let fs = td->fields->v; fs != NULL; fs = fs->tl)
+    if(fs->hd->typs == NULL)
+      ++ans;
+  return ans;    
 }
 
 ///////////////////////////////////////////////////////////////
@@ -309,7 +331,7 @@ static type_t typ_to_c(type_t t) {
     if (tvar_kind(tv) == AnyKind) return VoidType;
     else return void_star_typ(); // map `a to void *
   case &TunionType(TunionInfo{&KnownTunion(_),_,_}): return void_star_typ();
-  case &TunionType(_): throw impos("unresolved TunionType");
+  case &TunionType(_): toc_impos("unresolved TunionType");
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
     // for tunion fields that carry no arguments, it's an unsigned int
     // for xtunion fields that carry no argument, it's a char *.
@@ -318,7 +340,7 @@ static type_t typ_to_c(type_t t) {
       if(tud->is_xtunion) return star_typ(uchar_t,HeapRgn,mt_tq);
       else return uint_t;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
-  case &TunionFieldType(_): throw impos("unresolved TunionFieldType");
+  case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo{t2,_,_,tq,bnds}):
     // t2? maps to struct tagged_arr.
     // t2* and t2@ map to t2*.  Regions are irrelevant.
@@ -376,21 +398,21 @@ static type_t typ_to_c(type_t t) {
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,topt):
-    if (topt == NULL) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
+    if (topt == NULL) toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
     return new TypedefType(tdn,NULL, new Opt(typ_to_c_array(topt->v)));
   case &SizeofType(_): 
     return uint_t;
   case &RgnHandleType(t):
     return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
-  case HeapRgn: 
-    return toc_impos("Toc::typ_to_c: type translation passed the heap region");
+  case HeapRgn:
+    toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &AccessEff(_):
-    return toc_impos("Toc::typ_to_c: type translation passed the access eff");
+    toc_impos("Toc::typ_to_c: type translation passed the access eff");
   case &JoinEff(_):
-    return toc_impos("Toc::typ_to_c: type translation passed the join eff");
+    toc_impos("Toc::typ_to_c: type translation passed the join eff");
   case &RgnsEff(_):
-    return toc_impos("Toc::typ_to_c: type translation passed the regions eff");
+    toc_impos("Toc::typ_to_c: type translation passed the regions eff");
   }
 }
 
@@ -436,15 +458,13 @@ static bool atomic_typ(type_t t) {
     return true;
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
-  case &TunionType(_):    return false;
+  case &TunionType(_):    
     // FIX: could make this true now since we only allow bits in unions,
     // but it would be an evil bug to track down if we had to deal with this.
-  case &UnionType(_,_,_): return false; 
-  case &PointerType(_):   return false;
+  case &UnionType(_,_,_): 
+  case &PointerType(_):   
   case &RgnHandleType(_): return false;
-  default:
-    toc_impos("atomic_typ:  bad type %s",typ2string(t));
-    return false;
+  default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
   }
 }
 
@@ -464,7 +484,7 @@ static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
   case &StructType(_,_,&sd):
     if (sd->fields == NULL)
-      throw toc_impos("is_poly_field: struct missing fields");
+      toc_impos("is_poly_field: struct missing fields");
     fallthru(sd->fields->v);
   case &AnonStructType(fs):
     let field = lookup_field(fs,f);
@@ -472,9 +492,9 @@ static bool is_poly_field(type_t t, field_name_t f) {
       toc_impos("is_poly_field: bad field %s",*f);
     return is_void_star(field->type);
   // unions currently permit only bits, so no polytypes
-  case &AnonUnionType(_): return false;
+  case &AnonUnionType(_): 
   case &UnionType(_,_,_): return false;
-  default: throw toc_impos("is_poly_field: bad type %s",typ2string(t));
+  default: toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
 
@@ -487,9 +507,7 @@ static bool is_poly_project(exp_t e) {
   case &StructArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_,_,_}): return is_poly_field(t,f);
-    default: 
-      toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
-      return false;
+    default: toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
     }
   default: return false;
   }
@@ -616,8 +634,7 @@ static env_t clear_toplevel(env_t e) {
 // The type allows y to be a general exp, but in practice it is always a var_exp
 static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
   switch ((*x)[0]) {
-  case &Rel_n(_):
-    throw toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
+  case &Rel_n(_): toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
   env_t ans = copy_env(e);
@@ -904,9 +921,7 @@ static stmt_t init_array(env_t nv, exp_t lhs,
         exp_to_c(nv,e3);
         e_index = e3;
         break;
-      case &FieldName(_):
-        e_index = unimp("field name designators in array");
-        break;
+      case &FieldName(_): unimp("field name designators in array");
       }
     }
     exp_t lval = subscript_exp(lhs,e_index,DL);
@@ -997,7 +1012,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
         break;
       }
       break;
-    default: throw toc_impos("array designator in struct");
+    default: toc_impos("array designator in struct");
     }
   }
   return s;
@@ -1076,7 +1091,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
             s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
                          s, DL);
             break;
-          default: throw toc_impos("array designator in struct");
+          default: toc_impos("array designator in struct");
           }
         // FIX:  need to deal with nested arrays, comprehensions, etc.
         exp_to_c(nv,e);
@@ -1106,7 +1121,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
             break;
           }
           break;
-        default: throw toc_impos("array designator in struct");
+        default: toc_impos("array designator in struct");
         }
       }
     }
@@ -1192,16 +1207,14 @@ static $(list_t<designator_t>,exp_t)@ make_dle(exp_t e) {
 static struct PtrInfo get_ptr_type(type_t t) {
   switch (compress(t)) {
   case &PointerType(p): return p;
-  default: throw impos("get_ptr_typ: not a pointer!");
+  default: toc_impos("get_ptr_typ: not a pointer!");
   }
 }
 
 static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
-  if(e->topt == NULL) {
+  if(e->topt == NULL)
     toc_impos("exp_to_c: no type for %s",exp2string(e));
-    return;
-  }
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e(Null_c):
@@ -1223,10 +1236,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     try e->r = Dict::lookup(nv->varmap,qv)->r;
     catch { case Dict::Absent:
        toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
-       return;
     }
     break;
-  case &UnknownId_e(qv): toc_impos("unknownid"); break;
+  case &UnknownId_e(qv): toc_impos("unknownid");
   case &Primop_e(p,es):
     // Save Cyclone types -- needed for pointer arith stuff
     let old_typs = List::map(get_cyc_typ,es);
@@ -1256,7 +1268,6 @@ static void exp_to_c(env_t nv, exp_t e) {
       default: 
 	toc_impos("size primop applied to non-array %s (%s)",
                   typ2string(arg->topt->v),typ2string(arg->topt->v)); 
-	return;
       }
       break;
     case Plus:
@@ -1349,7 +1360,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	switch(popt->v) {
 	case Plus:  change = e2; break;
 	case Minus: change = prim1_exp(Minus,e2,DL); break;
-	default:    throw impos("bad t ? pointer arithmetic"); break;
+	default:    toc_impos("bad t ? pointer arithmetic");
 	}
 	done = true;
 	// FIX: Is e1 definitely still an lvalue? Probably not!!
@@ -1424,6 +1435,11 @@ static void exp_to_c(env_t nv, exp_t e) {
      
       // make the declarations and prepend them
       if(vai->inject) {
+	tuniondecl_t tud;
+	switch(compress(vai->type)) {
+	case &TunionType(TunionInfo(&KnownTunion(&x),_,_)): tud = x; break;
+	default: toc_impos("toc: unknown tunion in vararg with inject");
+	}
 	qvar_t ?`r vs = rnew(r) {for i < num_varargs : temp_var()};
 	// declare argv = {&v1,&v2,...,&vnum_varargs}
 	let array_args = NULL;
@@ -1452,7 +1468,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 				   arg,DL),
 		       s,DL);
           s = seq_stmt(assign_stmt(structmember_exp(varexp,tag_sp,DL),
-				   var_exp(qv,DL),DL),
+				   tunion_tag(tud,qv,true),DL),
 		       s,DL);
           s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
 			   s,DL);
@@ -1620,7 +1636,6 @@ static void exp_to_c(env_t nv, exp_t e) {
       default:
 	old_elt_typ =
           toc_impos("exp_to_c:new array expression doesn't have ptr type");
-        break;
       }
       type_t elt_typ=typ_to_c(old_elt_typ);
       let ptr_typ = cstar_typ(elt_typ,mt_tq);
@@ -1651,9 +1666,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case &PointerType(PtrInfo{et,_,_,tq,b}):
         is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
         break;
-      default:
-        toc_impos("exp_to_c: comprehension not an array type");
-        break;
+      default: toc_impos("exp_to_c: comprehension not an array type");
       }
       qvar_t max = temp_var();
       qvar_t a = temp_var();
@@ -1764,13 +1777,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
-  case &Gentyp_e(_,_): throw toc_impos("__gen() in code generator"); 
+  case &Gentyp_e(_,_): toc_impos("__gen() in code generator"); 
   case &Offsetof_e(t,&StructField(n)): e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
   case &Offsetof_e(t,&TupleIndex(n)): 
     switch(compress(t)) {
     case &StructType(_,_,stdeclp): 
       if(stdeclp == NULL || (*stdeclp)->fields == NULL)
-	throw toc_impos("struct fields must be known");
+	toc_impos("struct fields must be known");
       fallthru((*stdeclp)->fields->v);
     case &AnonStructType(fields):
       let nth_field = List::nth(fields,n);
@@ -1778,7 +1791,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     case &UnionType(_,_,udeclp): 
       if(udeclp == NULL || (*udeclp)->fields == NULL)
-	throw toc_impos("union fields must be known");
+	toc_impos("union fields must be known");
       fallthru((*udeclp)->fields->v);
     case &AnonUnionType(fields):
       let nth_field = List::nth(fields,n);
@@ -1793,7 +1806,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       else
 	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n)));
       break;
-    default: throw toc_impos("impossible type for offsetof tuple index");
+    default: toc_impos("impossible type for offsetof tuple index");
     }
     break;
   case &Deref_e(e1):
@@ -1820,7 +1833,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       }
       break;
-    default: toc_impos("exp_to_c: Deref: non-pointer"); break;
+    default: toc_impos("exp_to_c: Deref: non-pointer");
     }
     break;
   case &StructMember_e(e1,f):
@@ -1932,9 +1945,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       }
       break;
-    default:
-      toc_impos("exp_to_c: Subscript on non-tuple/array/tuple ptr");
-      break;
+    default: toc_impos("exp_to_c: Subscript on non-tuple/array/tuple ptr");
     }
     break;
   case &Tuple_e(es):
@@ -2013,7 +2024,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     list_t<structfield_t,`H> fs;
     switch (compress(st)) {
     case &AnonStructType(afs): fs = afs; break;
-    default: fs = toc_impos("anon struct has type %s",typ2string(st)); break;
+    default: toc_impos("anon struct has type %s",typ2string(st));
     }
     region rgn {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, fs);
@@ -2034,22 +2045,9 @@ static void exp_to_c(env_t nv, exp_t e) {
   
   case &Tunion_e(_,_,NULL,tud,tuf):
     qvar_t qv = tuf->name;
-    // non-value-carrying constructor -- just use the constructor name
-    // (see tuniondecl_to_c below)
-    if (tud->is_xtunion || !nv->toplevel)
-      e->r = var_exp(qv,DL)->r;
-    else {
-      // FIX: we should get the tag from a centralized place and we
-      // might as well use it everywhere.
-      // we can't use the variable name at toplevel
-      int tag_count = 0;
-      let fields = (tud->fields == NULL) ? NULL : tud->fields->v;
-      while (qvar_cmp(qv,fields->hd->name) != 0) {
-	if (fields->hd->typs == NULL) tag_count++;
-	fields = fields->tl;
-      }
-      e->r = uint_exp(tag_count,DL)->r;
-    }
+    // non-value-carrying constructor
+    exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,false);
+    e->r = tag_exp->r;
     break;
   case &Tunion_e(_,_,es,tud,tuf):
     let qv   = tuf->name;
@@ -2058,23 +2056,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     let x = temp_var();
     let xexp = var_exp(x,DL);
     let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
+    exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,true);
     // we have to do this differently for the toplevel
     if (nv->toplevel) {
       // {i, e1, ... , en};
-      exp_t tag_exp;
-      if(tud->is_xtunion) {
-	tag_exp = var_exp(qv,DL);
-      } else {
-	// FIX: we should get the tag from a centralized place and we
-	// might as well use it everywhere.
-	int tag_count = 0;
-	let fields    = (tud->fields == NULL) ? NULL : tud->fields->v;
-	while (qvar_cmp(qv,fields->hd->name) != 0) {
-	  if (fields->hd->typs != NULL) tag_count++;
-	  fields = fields->tl;
-	}
-	tag_exp = uint_exp(tag_count,DL);
-      }
       list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = NULL;
       for(; es != NULL; es = es->tl, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
@@ -2092,8 +2077,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // ({ struct qv_tag x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
       // Due to GCC bug we can't just use a struct expression.
       let rev_assign =
-	new List(assign_stmt(structmember_exp(xexp,tag_sp,DL),
-                             var_exp(qv,DL),DL),
+	new List(assign_stmt(structmember_exp(xexp,tag_sp,DL), tag_exp, DL),
                  NULL);
       for (int i = 1; es != NULL; es = es->tl, i++, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
@@ -2160,10 +2144,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
 
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
-  case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
-  case &CompoundLit_e(_,_):   unimp("compoundlit");       break;
-  case &Codegen_e(fd):        unimp("codegen");           break;
-  case &Fill_e(_):            unimp("fill");              break;
+  case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
+  case &CompoundLit_e(_,_):   unimp("compoundlit");
+  case &Codegen_e(fd):        unimp("codegen");
+  case &Fill_e(_):            unimp("fill");
   }
 }
 
@@ -2242,11 +2226,15 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     break;
 
   case &Tunion_p(tud,tuf,ts,NULL):
-    // when ps == NULL:  if (r == qv) goto succ_lab else goto fail_lab;
+    // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
     // Note: This should be correct for tunion and xtunion!
-    exp_t cmp_exp = var_exp(tuf->name,DL);
-    if(!tud->is_xtunion)
-      cmp_exp = cast_exp(void_star_typ(),cmp_exp,DL);
+    exp_t cmp_exp;
+    if(tud->is_xtunion)
+      cmp_exp = var_exp(tuf->name,DL);
+    else {
+      cmp_exp = tunion_tag(tud,tuf->name,false);
+      r = cast_exp(sint_t,r,DL);
+    }
     s = if_eq_goto_stmt(r, cmp_exp, succ_lab, fail_lab);
     break;
 
@@ -2300,18 +2288,12 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 			  seq_stmts(ss,DL),
 			  goto_stmt(fail_lab,DL), DL);
     } else {
-      unsigned int max_tag = 0;
-      for (let fs = tud->fields->v; fs != NULL; fs = fs->tl) {
-	let f = fs->hd;
-	if (f->typs == NULL) {
-	  max_tag++;
-	}
-      }
+      int max_tag = num_void_tags(tud);
       exp_t max_tag_exp = uint_exp(max_tag,DL);
       exp_t e3 = cast_exp(cstar_typ(sint_t,mt_tq), r,DL);
       exp_t e1 = deref_exp(e3,DL);
       exp_t e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
-      exp_t e  = var_exp(tuf->name,DL);
+      exp_t e  = tunion_tag(tud,tuf->name,true);
       test_exp = (max_tag>0) ? and_exp(e5,eq_exp(e1,e,DL),DL) : eq_exp(e1,e,DL);
     }
     s = ifthenelse_stmt(test_exp,
@@ -2410,9 +2392,9 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     else
       s = s3;
     break;
-  case &UnknownId_p(_):         s = toc_impos("unknownid");     break;
-  case &UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
-  case &UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
+  case &UnknownId_p(_):         toc_impos("unknownid");
+  case &UnknownCall_p(_,_,_):   toc_impos("unknowncall");
+  case &UnknownFields_p(_,_,_): toc_impos("unknownfields");
   }
   return $(nv,decls,s);
 }
@@ -2574,7 +2556,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s);
 ///////////////////////////////////////////////////////////////
 stmt_t make_npop_handler(int n) {
   return exp_stmt(fncall_exp(_npop_handler_e,
-			     new{List(uint_exp(n-1,DL),NULL)}, DL), DL);
+			     new List(uint_exp(n-1,DL),NULL), DL), DL);
 }
 void do_npop_before(int n, stmt_t s) { // mutates s as necessary!
   if(n > 0)
@@ -2649,7 +2631,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       return;
     case &Fallthru_s(es,dest_clause):
       if(nv->fallthru_info == NULL)
-	throw toc_impos("fallthru in unexpected place"); 
+	toc_impos("fallthru in unexpected place"); 
       let &$(l,vs,other_vmap) = nv->fallthru_info->v;
       stmt_t s2 = goto_stmt(l, DL);
       // reset handler (after the es evaluation)
@@ -2837,9 +2819,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 		 exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
 		 DL),DL),DL),DL)->r;
       return;
-    case &SwitchC_s(_,_): toc_impos("switchC_s"); return;
-    case &Cut_s(_):       unimp("cut");    return;
-    case &Splice_s(_):    unimp("splice"); return;
+    case &SwitchC_s(_,_): toc_impos("switchC_s");
+    case &Cut_s(_):       unimp("cut");
+    case &Splice_s(_):    unimp("splice");
     }
   }
 }
@@ -2991,16 +2973,18 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
     tunionfield_t f = fields->hd;
     if (f->typs == NULL) {
       // Declare an integer constant for the unboxed field
-      exp_opt_t eopt = signed_int_exp(tag_count++,DL);
+      /*      exp_opt_t eopt = signed_int_exp(tag_count++,DL);
       vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
       vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
+      */
     } else {
       // Declare an integer constant for the tag and a struct for the field
-      exp_opt_t eopt = signed_int_exp(box_count++,DL);
+      /*      exp_opt_t eopt = signed_int_exp(box_count++,DL);
       vardecl_t vd   = static_vardecl(f->name, sint_t, eopt);
       vd->tq = Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
+      */
       // compute the fields for the struct, adding in a tag field
       let fs = NULL;
       int i  = 1;
@@ -3213,7 +3197,6 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
     case &Let_d(_,_,_,_,_): 
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
-      break;
     case &Struct_d(sd):
       structdecl_to_c(sd);
       result_decls = new List(d,result_decls);

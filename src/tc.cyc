@@ -966,6 +966,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
       (*nsenv)[1] = Set::insert((*nsenv)[1], name); // we'll remove it later from ge->ordinaries
     }
     return needed;
+  case &ExternC_d(*ds2p): fallthru(ds2p);
   case &Using_d(_,*ds2p): fallthru(ds2p);
   case &Namespace_d(_,*ds2p):
     *ds2p = treeshake_f(env,*ds2p);
@@ -974,8 +975,7 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   }
 }
 
-// Mathieu : all this would be really nicer if we had local functions...
-static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, _ y) {
+static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, `a y) {
   return !Set::member(set, x);
 }
 

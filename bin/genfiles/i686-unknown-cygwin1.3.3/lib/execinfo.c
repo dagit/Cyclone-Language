@@ -263,30 +263,25 @@ unsigned char*tag;struct _tagged_arr f1;};int Cyc_Execinfo_backtrace(struct
 _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;
 extern unsigned char Cyc_Std_FileCloseError[19];extern unsigned char Cyc_Std_FileOpenError[
 18];struct Cyc_Std_FileOpenError_struct{unsigned char*tag;struct _tagged_arr f1;};
-static const int Cyc_Std_String_pa=0;struct Cyc_Std_String_pa_struct{int tag;struct
-_tagged_arr f1;};static const int Cyc_Std_Int_pa=1;struct Cyc_Std_Int_pa_struct{int
-tag;unsigned int f1;};static const int Cyc_Std_Double_pa=2;struct Cyc_Std_Double_pa_struct{
-int tag;double f1;};static const int Cyc_Std_ShortPtr_pa=3;struct Cyc_Std_ShortPtr_pa_struct{
-int tag;short*f1;};static const int Cyc_Std_IntPtr_pa=4;struct Cyc_Std_IntPtr_pa_struct{
-int tag;unsigned int*f1;};static const int Cyc_Std_ShortPtr_sa=0;struct Cyc_Std_ShortPtr_sa_struct{
-int tag;short*f1;};static const int Cyc_Std_UShortPtr_sa=1;struct Cyc_Std_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};static const int Cyc_Std_IntPtr_sa=2;struct Cyc_Std_IntPtr_sa_struct{
-int tag;int*f1;};static const int Cyc_Std_UIntPtr_sa=3;struct Cyc_Std_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};static const int Cyc_Std_StringPtr_sa=4;struct Cyc_Std_StringPtr_sa_struct{
-int tag;struct _tagged_arr f1;};static const int Cyc_Std_DoublePtr_sa=5;struct Cyc_Std_DoublePtr_sa_struct{
-int tag;double*f1;};static const int Cyc_Std_FloatPtr_sa=6;struct Cyc_Std_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
-int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
-it_interval;struct Cyc_Std_timeval it_value;};typedef struct {unsigned int __val[64];
-}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
-int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;struct Cyc_Std_rlimit{unsigned int
-rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{struct Cyc_Std_timeval
-ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int
-ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int
-ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};void(*Cyc_Std_signal(
-int sig,void(*func)(int)))(int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,
-int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(
-sizeof(struct Cyc_Core_Failure_struct));_tmp0[0]=({struct Cyc_Core_Failure_struct
+struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
+int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
+Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int
+tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct
+Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{
+int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_timeval{
+int tv_sec;int tv_usec;};struct Cyc_Std_timezone{int tz_minuteswest;int tz_dsttime;};
+struct Cyc_Std_itimerval{struct Cyc_Std_timeval it_interval;struct Cyc_Std_timeval
+it_value;};typedef struct {unsigned int __val[64];}Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t
+Cyc_Std_sigset_t;struct Cyc_Std_timespec{int tv_sec;int tv_nsec;};struct Cyc_Std_timeval;
+struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};struct Cyc_Std_rusage{
+struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;int ru_maxrss;int
+ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int
+ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;
+int ru_nivcsw;};void(*Cyc_Std_signal(int sig,void(*func)(int)))(int);int Cyc_Execinfo_backtrace(
+struct _tagged_arr array,int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*
+_tmp0=_cycalloc(sizeof(struct Cyc_Core_Failure_struct));_tmp0[0]=({struct Cyc_Core_Failure_struct
 _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",
 sizeof(unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
 return 1;}

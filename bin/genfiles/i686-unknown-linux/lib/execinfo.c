@@ -266,23 +266,18 @@ int Cyc_Std_getc(struct Cyc_Std___sFILE*__stream);extern int Cyc_Std_putc(int __
 struct Cyc_Std___sFILE*__stream);extern struct Cyc_Std___sFILE*Cyc_Std_fdopen(int
 __fd,struct _tagged_arr __modes);extern unsigned char Cyc_Std_FileCloseError[19];
 extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-unsigned char*tag;struct _tagged_arr f1;};static const int Cyc_Std_String_pa=0;struct
-Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};static const int Cyc_Std_Int_pa=
-1;struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};static const int Cyc_Std_Double_pa=
-2;struct Cyc_Std_Double_pa_struct{int tag;double f1;};static const int Cyc_Std_ShortPtr_pa=
-3;struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};static const int Cyc_Std_IntPtr_pa=
-4;struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int Cyc_Std_fprintf(
-struct Cyc_Std___sFILE*,struct _tagged_arr fmt,struct _tagged_arr);extern int Cyc_Std_printf(
-struct _tagged_arr fmt,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_aprintf(
-struct _tagged_arr fmt,struct _tagged_arr);static const int Cyc_Std_ShortPtr_sa=0;
-struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};static const int Cyc_Std_UShortPtr_sa=
-1;struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};static const int Cyc_Std_IntPtr_sa=
-2;struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};static const int Cyc_Std_UIntPtr_sa=
-3;struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};static const int Cyc_Std_StringPtr_sa=
-4;struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};static const int
-Cyc_Std_DoublePtr_sa=5;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};
-static const int Cyc_Std_FloatPtr_sa=6;struct Cyc_Std_FloatPtr_sa_struct{int tag;
-float*f1;};struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
+struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
+Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
+tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int
+Cyc_Std_fprintf(struct Cyc_Std___sFILE*,struct _tagged_arr fmt,struct _tagged_arr);
+extern int Cyc_Std_printf(struct _tagged_arr fmt,struct _tagged_arr);extern struct
+_tagged_arr Cyc_Std_aprintf(struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
+int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
+_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_Std_timeval{int tv_sec;int tv_usec;};struct Cyc_Std_timezone{
 int tz_minuteswest;int tz_dsttime;};struct Cyc_Std_itimerval{struct Cyc_Std_timeval
 it_interval;struct Cyc_Std_timeval it_value;};typedef struct {unsigned int __val[64];
 }Cyc_Std___sigset_t;typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;struct Cyc_Std_timespec{
@@ -294,18 +289,9 @@ ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv
 ru_nsignals;int ru_nvcsw;int ru_nivcsw;};extern int waitpid(int pid,int*status,int
 options);void(*Cyc_Std_signal(int sig,void(*func)(int)))(int);extern int kill(int,
 int);struct Cyc_Std_option{struct _tagged_arr name;int has_arg;int*flag;int val;};
-extern unsigned int alarm(unsigned int seconds);extern int close(int);extern void _exit(
-int);extern int getpid();extern int getppid();extern int fork();extern int fchdir(int);
-extern int fchown(int,unsigned int,unsigned int);extern int fsync(int);extern int
-ftruncate(int,int);extern int dup(int);extern int dup2(int,int);extern int setsid();
-extern int getsid(int pid);extern unsigned int getuid();extern int setuid(unsigned int
-uid);extern unsigned int geteuid();extern int seteuid(unsigned int euid);extern
-unsigned int getgid();extern int setgid(unsigned int gid);extern unsigned int getegid();
-extern int setegid(unsigned int egid);extern int nice(int);extern int pause();extern int
-pipe(int*filedes);extern int lseek(int filedes,int offset,int whence);extern
-unsigned int sleep(unsigned int);extern int isatty(int);extern int daemon(int nochdir,
-int noclose);int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
-_tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
+extern int close(int);extern int getpid();extern int fork();extern int dup2(int,int);
+extern int pipe(int*filedes);int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(
+struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);
 struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size);int Cyc_Std_execl(
 struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execlp(
 struct _tagged_arr file,struct _tagged_arr arg0,struct _tagged_arr argv);int Cyc_Std_execve(
@@ -327,9 +313,9 @@ int tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild
 pipe(fromchild)){return 1;}self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[
 0],0)== - 1? 1: dup2(fromchild[1],1)== - 1){return 1;}({struct _tagged_arr _tmp2[4];
 _tmp2[3]=(struct _tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct
-Cyc_Std_Int_pa_struct _tmp4;_tmp4.tag=Cyc_Std_Int_pa;_tmp4.f1=(int)((unsigned int)
-self_pid);{void*_tmp3[1]={& _tmp4};Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",
-sizeof(unsigned char),13),_tag_arr(_tmp3,sizeof(void*),1));}});_tmp2[1]=_tag_arr("-e",
+Cyc_Std_Int_pa_struct _tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{
+void*_tmp3[1]={& _tmp4};Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(
+unsigned char),13),_tag_arr(_tmp3,sizeof(void*),1));}});_tmp2[1]=_tag_arr("-e",
 sizeof(unsigned char),3);_tmp2[0]=_tag_arr("--functions",sizeof(unsigned char),
 12);Cyc_Std_execlp(_tag_arr("addr2line",sizeof(unsigned char),10),_tag_arr("addr2line",
 sizeof(unsigned char),10),_tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return
@@ -340,8 +326,8 @@ struct Cyc_Std___sFILE*)_check_null(f);});struct Cyc_Std___sFILE*r=({struct Cyc_
 f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(unsigned char),2));if(!((
 unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___sFILE*)_check_null(
 f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)20);{int c=0;
-for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=Cyc_Std_Int_pa;
-_tmp6.f1=(unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
+for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
+unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
 sizeof(unsigned char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}Cyc_Std_fflush((
 struct Cyc_Std___sFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 sizeof(unsigned char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;

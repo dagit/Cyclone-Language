@@ -264,25 +264,21 @@ unsigned char*tag;struct _tagged_arr f1;};extern struct _RegionHandle*Cyc_Core_h
 extern struct _tagged_arr wrap_Cstring_as_string(unsigned char*,unsigned int);
 struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern int Cyc_List_length(
 struct Cyc_List_List*x);extern unsigned char Cyc_List_List_mismatch[18];extern
-unsigned char Cyc_List_Nth[8];extern int isalnum(int);extern int isalpha(int);extern
-int isascii(int);extern int iscntrl(int);extern int isdigit(int);extern int isgraph(int);
-extern int islower(int);extern int isprint(int);extern int ispunct(int);extern int
-isspace(int);extern int isupper(int);extern int isxdigit(int);extern int toascii(int);
-extern int tolower(int);extern int toupper(int);extern int _tolower(int);extern int
-_toupper(int);extern struct _tagged_arr Cyc_Std_strerror(int);extern unsigned int Cyc_Std_strlen(
-struct _tagged_arr s);extern int Cyc_Std_strcmp(struct _tagged_arr s1,struct
-_tagged_arr s2);extern int Cyc_Std_strptrcmp(struct _tagged_arr*s1,struct _tagged_arr*
-s2);extern int Cyc_Std_strncmp(struct _tagged_arr s1,struct _tagged_arr s2,
-unsigned int len);extern int Cyc_Std_zstrcmp(struct _tagged_arr,struct _tagged_arr);
-extern int Cyc_Std_zstrncmp(struct _tagged_arr s1,struct _tagged_arr s2,unsigned int n);
-extern int Cyc_Std_zstrptrcmp(struct _tagged_arr*,struct _tagged_arr*);extern int Cyc_Std_strcasecmp(
-struct _tagged_arr,struct _tagged_arr);extern int Cyc_Std_strncasecmp(struct
-_tagged_arr s1,struct _tagged_arr s2,unsigned int len);extern struct _tagged_arr Cyc_Std_strcat(
-struct _tagged_arr dest,struct _tagged_arr src);extern struct _tagged_arr Cyc_Std_strconcat(
-struct _tagged_arr,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_rstrconcat(
-struct _RegionHandle*,struct _tagged_arr,struct _tagged_arr);extern struct
-_tagged_arr Cyc_Std_strconcat_l(struct Cyc_List_List*);extern struct _tagged_arr Cyc_Std_rstrconcat_l(
-struct _RegionHandle*,struct Cyc_List_List*);extern struct _tagged_arr Cyc_Std_str_sepstr(
+unsigned char Cyc_List_Nth[8];extern int toupper(int);extern struct _tagged_arr Cyc_Std_strerror(
+int);extern unsigned int Cyc_Std_strlen(struct _tagged_arr s);extern int Cyc_Std_strcmp(
+struct _tagged_arr s1,struct _tagged_arr s2);extern int Cyc_Std_strptrcmp(struct
+_tagged_arr*s1,struct _tagged_arr*s2);extern int Cyc_Std_strncmp(struct _tagged_arr
+s1,struct _tagged_arr s2,unsigned int len);extern int Cyc_Std_zstrcmp(struct
+_tagged_arr,struct _tagged_arr);extern int Cyc_Std_zstrncmp(struct _tagged_arr s1,
+struct _tagged_arr s2,unsigned int n);extern int Cyc_Std_zstrptrcmp(struct _tagged_arr*,
+struct _tagged_arr*);extern int Cyc_Std_strcasecmp(struct _tagged_arr,struct
+_tagged_arr);extern int Cyc_Std_strncasecmp(struct _tagged_arr s1,struct _tagged_arr
+s2,unsigned int len);extern struct _tagged_arr Cyc_Std_strcat(struct _tagged_arr dest,
+struct _tagged_arr src);extern struct _tagged_arr Cyc_Std_strconcat(struct _tagged_arr,
+struct _tagged_arr);extern struct _tagged_arr Cyc_Std_rstrconcat(struct _RegionHandle*,
+struct _tagged_arr,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_strconcat_l(
+struct Cyc_List_List*);extern struct _tagged_arr Cyc_Std_rstrconcat_l(struct
+_RegionHandle*,struct Cyc_List_List*);extern struct _tagged_arr Cyc_Std_str_sepstr(
 struct Cyc_List_List*,struct _tagged_arr);extern struct _tagged_arr Cyc_Std_rstr_sepstr(
 struct _RegionHandle*,struct Cyc_List_List*,struct _tagged_arr);extern struct
 _tagged_arr Cyc_Std_strcpy(struct _tagged_arr dest,struct _tagged_arr src);extern

@@ -274,22 +274,17 @@ struct Cyc_Hashtable_Table*t,void*env);extern void Cyc_Hashtable_print_table_map
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*));struct
 Cyc_Cstdio___sFILE;struct Cyc_Std___sFILE;extern unsigned char Cyc_Std_FileCloseError[
 19];extern unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
-unsigned char*tag;struct _tagged_arr f1;};static const int Cyc_Std_String_pa=0;struct
-Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};static const int Cyc_Std_Int_pa=
-1;struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};static const int Cyc_Std_Double_pa=
-2;struct Cyc_Std_Double_pa_struct{int tag;double f1;};static const int Cyc_Std_ShortPtr_pa=
-3;struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};static const int Cyc_Std_IntPtr_pa=
-4;struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int Cyc_Std_printf(
-struct _tagged_arr fmt,struct _tagged_arr);static const int Cyc_Std_ShortPtr_sa=0;
-struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};static const int Cyc_Std_UShortPtr_sa=
-1;struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};static const int Cyc_Std_IntPtr_sa=
-2;struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};static const int Cyc_Std_UIntPtr_sa=
-3;struct Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};static const int Cyc_Std_StringPtr_sa=
-4;struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;};static const int
-Cyc_Std_DoublePtr_sa=5;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};
-static const int Cyc_Std_FloatPtr_sa=6;struct Cyc_Std_FloatPtr_sa_struct{int tag;
-float*f1;};struct Cyc_Hashtable_Table{int(*cmp)(void*,void*);int(*hash)(void*);
-int max_len;struct _tagged_arr tab;};struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
+struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
+Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
+tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};extern int
+Cyc_Std_printf(struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
+int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
+_tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_Hashtable_Table{int(*cmp)(void*,void*);int(*hash)(
+void*);int max_len;struct _tagged_arr tab;};struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
 int sz,int(*cmp)(void*,void*),int(*hash)(void*)){struct Cyc_List_List*mt=0;return({
 struct Cyc_Hashtable_Table*_tmp0=_cycalloc(sizeof(struct Cyc_Hashtable_Table));
 _tmp0->cmp=cmp;_tmp0->hash=hash;_tmp0->max_len=3;_tmp0->tab=({unsigned int _tmp1=(
@@ -350,8 +345,8 @@ _check_known_subscript_notnull(1,0)]).f1,(((struct _tuple0*)iter->hd)[
 _check_known_subscript_notnull(1,0)]).f2,env);}}}void Cyc_Hashtable_print_table_map(
 struct Cyc_Hashtable_Table*t,void(*prn_key)(void*),void(*prn_val)(void*)){struct
 _tagged_arr odata=t->tab;int osize=(int)_get_arr_size(odata,sizeof(struct Cyc_List_List*));
-int i=0;for(0;i < osize;i ++){({struct Cyc_Std_Int_pa_struct _tmpE;_tmpE.tag=Cyc_Std_Int_pa;
-_tmpE.f1=(int)((unsigned int)i);{void*_tmpD[1]={& _tmpE};Cyc_Std_printf(_tag_arr("%d: ",
+int i=0;for(0;i < osize;i ++){({struct Cyc_Std_Int_pa_struct _tmpE;_tmpE.tag=1;_tmpE.f1=(
+int)((unsigned int)i);{void*_tmpD[1]={& _tmpE};Cyc_Std_printf(_tag_arr("%d: ",
 sizeof(unsigned char),5),_tag_arr(_tmpD,sizeof(void*),1));}});{struct Cyc_List_List*
 iter=((struct Cyc_List_List**)odata.curr)[i];for(0;iter != 0;iter=iter->tl){({void*
 _tmpF[0]={};Cyc_Std_printf(_tag_arr("(",sizeof(unsigned char),2),_tag_arr(_tmpF,
