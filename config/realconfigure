@@ -54,7 +54,7 @@ function diff_path {
   DIFF="diff"
   # make sure it's GNU diff
   $DIFF --version > $TMPFILE 2>&1
-  grep GNU $TMPFILE
+  grep GNU $TMPFILE > /dev/null
   if [ $? != 0 ]; then
     if [ "$TYPE" = "sun" ]; then
       f="/usr/local/gnu/diffutils-2.6/bin/diff"
