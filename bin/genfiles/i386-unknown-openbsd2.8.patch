@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Sep 28 20:07:59 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Tue Oct  2 18:07:29 2001
+*** i686-unknown-linux/lib/execinfo.c	Mon Oct  1 13:00:44 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Wed Oct  3 13:00:36 2001
 ***************
 *** 230,331 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
