@@ -409,7 +409,7 @@ struct _fat_ptr _tmp4=t->tab;struct _fat_ptr tab=_tmp4;
 struct Cyc_List_List*_tmp5=({struct Cyc_List_List**_tmp33=(struct Cyc_List_List**)tab.curr;_tmp33[(int)({unsigned _tmp32=(unsigned)((t->hash))(key);_tmp32 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});struct Cyc_List_List*l=_tmp5;
 int(*_tmp6)(void*,void*)=t->cmp;int(*cmp)(void*,void*)=_tmp6;
 for(1;l != 0;l=l->tl){
-struct _tuple0*_tmp7=(struct _tuple0*)l->hd;struct _tuple0*_stmttmp0=_tmp7;struct _tuple0*_tmp8=_stmttmp0;void**_tmpA;void*_tmp9;_tmp9=_tmp8->f1;_tmpA=(void**)& _tmp8->f2;{void*k=_tmp9;void**v=_tmpA;
+struct _tuple0*_tmp7=(struct _tuple0*)l->hd;struct _tuple0*_stmttmp0=_tmp7;struct _tuple0*_tmp8=_stmttmp0;void*_tmpA;void*_tmp9;_tmp9=_tmp8->f1;_tmpA=(void**)& _tmp8->f2;{void*k=_tmp9;void**v=(void**)_tmpA;
 if(cmp(key,k)== 0)return v;}}
 # 69
 return 0;}
@@ -419,7 +419,7 @@ void**Cyc_Hashtable_lookup_other_opt(struct Cyc_Hashtable_Table*t,void*key,int(*
 struct _fat_ptr _tmpB=t->tab;struct _fat_ptr tab=_tmpB;
 struct Cyc_List_List*_tmpC=({struct Cyc_List_List**_tmp35=(struct Cyc_List_List**)tab.curr;_tmp35[(int)({unsigned _tmp34=(unsigned)hash(key);_tmp34 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});struct Cyc_List_List*l=_tmpC;
 for(1;l != 0;l=l->tl){
-struct _tuple0*_tmpD=(struct _tuple0*)l->hd;struct _tuple0*_stmttmp1=_tmpD;struct _tuple0*_tmpE=_stmttmp1;void**_tmp10;void*_tmpF;_tmpF=_tmpE->f1;_tmp10=(void**)& _tmpE->f2;{void*k=_tmpF;void**v=_tmp10;
+struct _tuple0*_tmpD=(struct _tuple0*)l->hd;struct _tuple0*_stmttmp1=_tmpD;struct _tuple0*_tmpE=_stmttmp1;void*_tmp10;void*_tmpF;_tmpF=_tmpE->f1;_tmp10=(void**)& _tmpE->f2;{void*k=_tmpF;void**v=(void**)_tmp10;
 if(cmp(key,k)== 0)return v;}}
 # 84
 return 0;}

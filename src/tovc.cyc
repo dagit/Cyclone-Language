@@ -135,7 +135,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
       //     (bound or free), throw exception
       for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
 	if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0) {
-	  throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
+	  Warn::impos2("unbound variable ",*v," found in box_free_vars_exp");
 	}
       
       //FJS: if it's neither a local var or a global var, assume it is from the header file
@@ -250,7 +250,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
     }
     return NULL;
 
-  default: throw new Impossible("bad exp form in Tocv::box_free_vars_exp");
+  default: Warn::impos2("bad exp form in Tocv::box_free_vars_exp");
   }
 }
 
@@ -445,13 +445,13 @@ static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
     apply_varmap(env.varmap,e);
     return e;
   case &Seq_s(s1,s2): 
-     /* don't inline to avoid order of evaluation differences */
+    // don't inline to avoid order of evaluation differences (but we're l-r now)
     let s1_new = stmt_to_exp(env,s1);
     let s2_new = stmt_to_exp(env,s2);
     return seq_exp(s1_new, s2_new, DL);
   case &IfThenElse_s(e,s1,s2): 
     apply_varmap(env.varmap,e);
-     /* don't inline to avoid order of evaluation differences */
+    // don't inline to avoid order of evaluation differences (but we're l-r now)
     let s1_new = stmt_to_exp(env,s1);
     let s2_new = stmt_to_exp(env,s2);
     return conditional_exp(e, s1_new, s2_new, DL);
@@ -508,9 +508,9 @@ static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
   }
 }
 
-static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s); // mutual recursion
+static void stmt_to_vc(toexpenv_t, stmt_t); // mutual recursion
 
-static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
+static void exp_to_vc(toexpenv_t env, exp_t e) {
   string_t bad_form = "";
   switch (e->r) {
   case &Const_e(_): return;
@@ -587,11 +587,10 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
-  throw new Impossible(aprintf("bad exp form %s (exp=|%s|) after xlation to C",
-			       bad_form, Absynpp::exp2string(e)));
+  Warn::impos2("bad exp form ",bad_form,"(exp=|",e,"|) after xlation to C");
 }
 
-static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
+static void stmt_to_vc(toexpenv_t env, stmt_t s) {
   // This is just the recursive descent; we are not under a StmtExp.
   while(true) {
     env.encloser = s;
@@ -606,7 +605,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
     case &Return_s(eopt):
       if (eopt == NULL)
 	return;
-      fallthru((exp_t)eopt);
+      fallthru(eopt);
     case &Exp_s(e):
       exp_to_vc(env, e);
       return;
@@ -701,29 +700,23 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                              // but not this field.  Since fndecl2typ uses the cached
                              // type if possible, we need to clear it.
       // FIX: if the param_vardecls are NULL then it's a good sign that 
-      // this was an extern "C include" function, so I'm just leaving it 
-      // alone...
+      // this was an extern "C include" function, so I'm leaving it alone...
       if (fd->param_vardecls != NULL) { // else case will fallthru
-        region rgn; {
-          let gen_ds = rnew(rgn) NULL;
-          if (fd->param_vardecls == NULL) {
-            fprintf(stderr,"No param vardecls for function %s\n",
-                    *(*fd->name)[1]); fflush(stderr);
-          }
-          stmt_to_vc(ToExpEnv(rgn,
-                              rcopy(rgn,fd->param_vardecls->v),
-                              Dict::rempty(rgn,strptrcmp), // ptr eq possible?
-                              fd->body,
-                              gen_ds), 
-                     fd->body);
-          if (*gen_ds != NULL) {
-            vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-                                        Tcutil::fndecl2type(fd), NULL, NULL, 
-					fd->i.attributes, false,(fd->body!=NULL)};
-            new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
-            new_ds = append(*gen_ds,new_ds);
-          }
-        }
+        region rgn;
+	let gen_ds = rnew(rgn) NULL;
+	stmt_to_vc(ToExpEnv(rgn,
+			    rcopy(rgn,fd->param_vardecls->v),
+			    Dict::rempty(rgn,strptrcmp),
+			    fd->body,
+			    gen_ds), 
+		   fd->body);
+	if (*gen_ds != NULL) {
+	  vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
+				      Tcutil::fndecl2type(fd), NULL, NULL, 
+				      fd->i.attributes, false,(fd->body!=NULL)};
+	  new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
+	  new_ds = append(*gen_ds,new_ds);
+	}
       }
       fallthru;
     case &Var_d(_):         
@@ -734,10 +727,10 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Datatype_d(_):
     case &Enum_d(_):        
     case &Typedef_d(_): new_ds = new List(next_d, new_ds); break;
-    case &Namespace_d(_,ds2): fallthru(ds2);
-    case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2):     fallthru(ds2);
-    case &ExternCinclude_d(ds2,...):
+    case &Namespace_d(...):
+    case &Using_d(...):    
+    case &ExternC_d(...):  
+    case &ExternCinclude_d(...):
     case &Porton_d:
     case &Portoff_d:
     case &Tempeston_d:

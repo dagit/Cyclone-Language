@@ -24,8 +24,6 @@
 // representation details of the analysis and type system.
 
 // TO DO: 
-// * change toc.cyc to check dynamically that a flag is set by cases
-//   that look at non-nocheck.
 // * use flow-analysis info uniformly in Cast_e and zeroterm-assign cases
 // * move tagged-union nonsense over to here??
 // * move zeroterm nonsense over to here??
@@ -91,8 +89,7 @@ static env_t toplevel_env(JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
   return Env(tables, NULL,false,true, do_vcgen);
 }
 
-static env_t 
-fn_body_env(env_t nv) {
+static env_t fn_body_env(env_t nv) {
   return Env(nv.tables, nv.assn_info, false,false, nv.vcgen_r);
 }
 
@@ -419,8 +416,7 @@ static void do_exp(env_t nv, exp_t e) {
     do_exp(nv,e1);
     break;
   case &Malloc_e(MallocInfo(_,rgnopt,_,sizeexp,_,_)):
-    // FIX: we shouldn't be able to calloc a zero-terminated array of
-    // size less than 1.
+    // FIX: we shouldn't be able to calloc a zero-terminated array of size < 1.
     e->annot = &NoCheck_val;
     do_exp_opt(nv,rgnopt);
     do_exp(nv,sizeexp);
@@ -451,7 +447,7 @@ static void do_exp(env_t nv, exp_t e) {
     do_exp(nv,e1);
     do_exp(nv,e2);
     break;
-  case &Array_e(dles): fallthru(dles);
+  case &Array_e(dles):           fallthru(dles);
   case &Aggregate_e(_,_,dles,_): fallthru(dles);
   case &AnonStruct_e(_,dles):
     e->annot = &NoCheck_val;
@@ -472,9 +468,8 @@ static void do_decl(env_t nv, decl_t d) {
   case &Fn_d(fd): 
     let nv = fn_body_env(nv);
     nv.assn_info = Vcgen::new_assn_info();
-    if (nv.vcgen_r){
+    if (nv.vcgen_r)
       Vcgen::vcgen_fundecl(nv.tables, fd, nv.assn_info);
-    }
     do_stmt(nv,fd->body); 
     break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    

@@ -1397,12 +1397,10 @@ attributes_opt:
 attributes:
   ATTRIBUTE '(' '(' attribute_list ')' ')' { $$=$!4; }
 ;
-
 attribute_list:
   attribute { $$=^$(new List($1,NULL)); };
 | attribute ',' attribute_list { $$=^$(new List($1,$3)); }
 ;
-
 attribute:
   IDENTIFIER { $$ = ^$(Atts::parse_nullary_att(SLOC(@1),$1)); }
 | CONST      { $$ = ^$(&Atts::Const_att_val); } // because const a keyword!
@@ -1436,7 +1434,7 @@ type_specifier_notypedef:
 | DOUBLE    { $$=^$(type_spec(double_type,SLOC(@1))); }
 | SIGNED    { $$=^$(signed_spec(SLOC(@1))); }
 | UNSIGNED  { $$=^$(unsigned_spec(SLOC(@1))); }
-| enum_specifier { $$=$!1; }
+| enum_specifier            { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
 /* GCC extension */
 | TYPEOF '(' expression ')' { $$=^$(type_spec(typeof_type($3),LOC(@1,@4))); }
@@ -1445,9 +1443,9 @@ type_specifier_notypedef:
 /* Cyc: added datatypes */
 | datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
-| type_var { $$=^$(type_spec($1, SLOC(@1))); }
+| type_var           { $$=^$(type_spec($1, SLOC(@1))); }
 /* Cyc: everything below here is an addition */
-| '_'      { $$=^$(type_spec(new_evar(NULL,NULL),SLOC(@1))); }
+| '_'                { $$=^$(type_spec(new_evar(NULL,NULL),SLOC(@1))); }
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(Kinds::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | '$' '(' parameter_list ')'

@@ -34,7 +34,6 @@
 //  in scope in the initializer.  (It's not for let-expressions, but alas we
 //  already compiled those away.)
 
-#include <dict.h>
 #include "warn.h"
 #include "toc.h" // for temp_var and Dest
 #include "tcutil.h" // for is_array
@@ -47,8 +46,6 @@ namespace RemoveAggrs;
 #define DL 0
 
 static void massage_toplevel_aggr(exp_opt_t e) {
-  if(e==NULL)
-    return;
   // DO ME -- still being done in toc.cyc (may intersperse with non-toplevel?)
 }
 
@@ -208,12 +205,12 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     case Other: Warn::impos("remove-aggrs: comprehension in bad position");
     default: break;
     }
-    qvar_t max = Toc::temp_var();
-    qvar_t i   = vd->name;
-    exp_t ea = assign_exp(var_exp(i,DL),signed_int_exp(0,DL),DL);
-    exp_t eb = lt_exp(var_exp(i,DL),var_exp(max,DL),DL);
-    exp_t ec = increment_exp(var_exp(i,DL),PreInc,DL);
-    exp_t lval = subscript_exp((exp_t)env.dest,var_exp(i,DL),DL);
+    qvar_t max  = Toc::temp_var();
+    qvar_t i    = vd->name;
+    exp_t  ea   = assign_exp(var_exp(i,DL),signed_int_exp(0,DL),DL);
+    exp_t  eb   = lt_exp(var_exp(i,DL),var_exp(max,DL),DL);
+    exp_t  ec   = increment_exp(var_exp(i,DL),PreInc,DL);
+    exp_t  lval = subscript_exp((exp_t)env.dest,var_exp(i,DL),DL);
     remove_aggrs_exp(Env(AggrField,copy_exp(lval)),body);
     stmt_t s = for_stmt(ea,eb,ec,exp_stmt(body,DL),DL);
     if(zero_term) { 

@@ -28,7 +28,6 @@
 #include "evexp.h"
 using Core;
 using List;
-
 namespace Absyn;
 
 // return a negative, zero, or positive int according to whether the
@@ -56,7 +55,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   case $({.Loc_n = _},{.Loc_n = _}): return 0;
   case $({.Rel_n = x1},{.Rel_n = x2}): return strlist_cmp(x1,x2);
   case $({.Abs_n = x1},{.Abs_n = x2}): return strlist_cmp(x1,x2);
-  case $({.C_n = x1},{.C_n = x2}): return strlist_cmp(x1,x2);
+  case $({.C_n = x1},{.C_n = x2}):     return strlist_cmp(x1,x2);
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n < C_n
   case $({.Loc_n = _},_): return -1;
   case $(_,{.Loc_n = _}): return 1;
@@ -350,13 +349,11 @@ qvar_t uniquergn_qvar() {
   return (qvar_t)q;
 }
 exp_t uniquergn_exp() {
-  let t = rgn_handle_type(unique_rgn_type);
-  return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, .r = 
-                    new Var_e(new Global_b(new Vardecl(Extern, 
-                                                       uniquergn_qvar(),
-                                                       0, empty_tqual(0), t, 
-                                                       NULL, NULL, NULL, 
-                                                       false, false)))};
+  let t  = rgn_handle_type(unique_rgn_type);
+  let vd = new_vardecl(0,uniquergn_qvar(),t,NULL);
+  vd->sc = Extern;
+  return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, 
+		 .r = new Var_e(new Global_b(vd))};
 }
 
 // pointers
@@ -487,15 +484,15 @@ exp_t signed_int_exp(int i, seg_t loc) {
   static datatype Raw_exp.Const_e szero = Const_e(Cnst{.Int_c = $(Signed,0)});
   static datatype Raw_exp.Const_e sone  = Const_e(Cnst{.Int_c = $(Signed,1)});
   if (i == 0) return new_exp(&szero, loc);
-  else if (i == 1) return new_exp(&sone, loc);
+  if (i == 1) return new_exp(&sone, loc);
   return int_exp(Signed,i,loc);
 }
 exp_t uint_exp(unsigned int i, seg_t loc) {
   static datatype Raw_exp.Const_e uzero = Const_e(Cnst{.Int_c =$(Unsigned,0)});
   static datatype Raw_exp.Const_e uone  = Const_e(Cnst{.Int_c = $(Unsigned,1)});
   if (i == 0) return new_exp(&uzero, loc);
-  else if (i == 1) return new_exp(&uone,loc);
-  else return int_exp(Unsigned,i,loc);
+  if (i == 1) return new_exp(&uone,loc);
+  return int_exp(Unsigned,i,loc);
 }
 exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
 exp_t true_exp(seg_t loc)  { return bool_exp(true,  loc); }
@@ -598,7 +595,7 @@ exp_t sizeofexp_exp(exp_t e, seg_t loc) {
 exp_t offsetof_exp(type_t t, list_t<offsetof_field_t,`H> ofs, seg_t loc) {
   return new_exp(new Offsetof_e(t,ofs), loc);
 }
-exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
+exp_t deref_exp(exp_t e, seg_t loc) { return new_exp(new Deref_e(e), loc); }
 exp_t aggrmember_exp(exp_t e, field_name_t n, seg_t loc) {
   return new_exp(new AggrMember_e(e,n,false,false), loc); 
 }
@@ -626,7 +623,7 @@ exp_t asm_exp(bool volatile_kw, string_t<`H> tmpl,
 exp_t extension_exp(exp_t e, seg_t loc) {
   return new_exp(new Extension_e(e), loc);
 }
-exp_t assert_exp(exp_t e, seg_t loc) {
+exp_t assert_exp(exp_t e, seg_t loc) { 
   return new_exp(new Assert_e(e), loc);
 }
 
@@ -634,8 +631,7 @@ exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
   let dles = NULL;
   for (; es != NULL; es = es->tl)
     dles = new List(new $(NULL,es->hd),dles);
-  dles = List::imp_rev(dles);
-  return new_exp(new Array_e(dles),loc);
+  return new_exp(new Array_e(imp_rev(dles)),loc);
 }
 exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
                         list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles,
@@ -649,15 +645,15 @@ stmt_t new_stmt(raw_stmt_t s, seg_t loc) {
 static datatype Raw_stmt.Skip_s     Skip_s_val     = Skip_s;
 static datatype Raw_stmt.Break_s    Break_s_val    = Break_s;
 static datatype Raw_stmt.Continue_s Continue_s_val = Continue_s;
-stmt_t skip_stmt    (seg_t loc) { return new_stmt(&Skip_s_val,     loc); }
-stmt_t break_stmt   (seg_t loc) { return new_stmt(&Break_s_val,    loc); }
-stmt_t continue_stmt(seg_t loc) { return new_stmt(&Continue_s_val, loc); }
-stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
+stmt_t skip_stmt    (seg_t loc)    { return new_stmt(&Skip_s_val,     loc); }
+stmt_t break_stmt   (seg_t loc)    { return new_stmt(&Break_s_val,    loc); }
+stmt_t continue_stmt(seg_t loc)    { return new_stmt(&Continue_s_val, loc); }
+stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),    loc); }
 stmt_t return_stmt(exp_opt_t e,seg_t loc){return new_stmt(new Return_s(e),loc);}
 stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
-  if (ss == NULL) return skip_stmt(loc);
-  else if (ss->tl == NULL) return ss->hd;
-  else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
+  if (ss     == NULL) return skip_stmt(loc);
+  if (ss->tl == NULL) return ss->hd;
+  return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
 stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
   switch ($(s1->r,s2->r)) {
@@ -728,17 +724,14 @@ decl_t alias_decl(tvar_t tv,vardecl_t vd,exp_t e,seg_t loc) {
 }
 
 vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Public, .name=x, .varloc = varloc,
-			.tq=empty_tqual(0),
-                        .type=t, .initializer=init, .rgn=NULL, 
-                        .attributes=NULL, .escapes=false, 
-			.is_proto=false};
+  return new Vardecl{.sc=Public, .name=x, .varloc = varloc, 
+		     .tq=empty_tqual(0), .type=t, .initializer=init, .rgn=NULL,
+                     .attributes=NULL, .escapes=false, .is_proto=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Static, .name=x, .varloc = 0,.tq=empty_tqual(0),
-                        .type=t, .initializer=init, .rgn=NULL,
-                        .attributes=NULL, .escapes=false,
-			.is_proto=false};
+  let ans = new_vardecl(0,x,t,init);
+  ans->sc = Static;
+  return ans;
 }
 struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				    list_t<$(type_t,type_t)@`H,`H> po,
@@ -822,11 +815,9 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
 //   function pointers can't be unique at the moment
 type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (compress(t)) {
-  case &FnType(_): return at_type(t,
-                                  fresh_evar ? 
-                                  new_evar(new Opt(&Kinds::rk), NULL) 
-				  : heap_rgn_type,
-                                  empty_tqual(0),false_type,false_type);
+  case &FnType(_): 
+    let rtyp = fresh_evar ? new_evar(new Opt(&Kinds::rk), NULL) : heap_rgn_type;
+    return at_type(t,rtyp,empty_tqual(0),false_type,false_type);
   default: return t;
   }
 }
@@ -834,9 +825,8 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
 // These are the lvalues of C:
 //    exp      where
 //    ---------------------------
-//    name     name is a variable -- and not a function name or array!
+//    name     name is a variable -- and not a function name or array
 //    e[k]
-//    (e)      e is an lvalue
 //    e.name   e is an lvalue
 //    e->name
 //    *e
@@ -846,7 +836,7 @@ bool is_lvalue(exp_t e) {
   switch (e->r) {
   case &Var_e(&Funname_b(_)): return false;
   case &Var_e(&Global_b(vd)): fallthru(vd);
-  case &Var_e(&Local_b(vd)):
+  case &Var_e(&Local_b(vd)): 
     switch (compress(vd->type)) {
     case &ArrayType(_): return false;
     default: return true; 
@@ -854,11 +844,11 @@ bool is_lvalue(exp_t e) {
   case &Var_e(...):    
   case &AggrArrow_e(...):   
   case &Deref_e(...):           
-  case &Subscript_e(...):    return true;
+  case &Subscript_e(...):      return true;
   case &AggrMember_e(e1,...):  return is_lvalue(e1);
   case &Instantiate_e(e1,...): return is_lvalue(e1);
-  case &NoInstantiate_e(e1): return is_lvalue(e1);
-  default:                   return false;
+  case &NoInstantiate_e(e1):   return is_lvalue(e1);
+  default:                     return false;
   }
 }
 
@@ -1001,7 +991,7 @@ bool type2bool(bool def, type_t t) {
 
 // returns false if e may have side effects.  used to check
 // &&-clauses in switches and @assert(-) expressions.
-// FIX: rules out statement expressions?
+// FIX?: rules out statement expressions
 bool no_side_effects_exp(exp_t e) {
   switch (e->r) {
   case &FnCall_e(...)   : 
@@ -1072,41 +1062,38 @@ void do_nested_statement(exp_t e, `a env, void (@f)(`a, stmt_t), bool szeof) {
 
   case &Const_e(...):
   case &Var_e(...): // binding_t is a vardecl_t we have already looked at
-  case &Pragma_e(...):  // won't have
+  case &Pragma_e(...): 
   case &Enum_e(...):
   case &AnonEnum_e(...):        
   case &Valueof_e(...):
   case &Asm_e(...):
   case &Offsetof_e(...):    
-  case &Sizeoftype_e(...):
-    break;
+  case &Sizeoftype_e(...): break;
 
-  case &Extension_e(e1): fallthru(e1);  
-  case &Assert_e(e1): fallthru(e1);
-  case &Increment_e(e1,_): fallthru(e1);
-  case &Throw_e(e1,_): fallthru(e1);
-  case &NoInstantiate_e(e1): fallthru(e1);
-  case &Instantiate_e(e1,_): fallthru(e1);
-  case &Cast_e(_,e1,_,_): fallthru(e1);
-  case &Address_e(e1): fallthru(e1);
-  case &Deref_e(e1): fallthru(e1);
-  case &AggrMember_e(e1,...): fallthru(e1);
+  case &Extension_e(e1):               fallthru(e1);  
+  case &Assert_e(e1):                  fallthru(e1);
+  case &Increment_e(e1,_):             fallthru(e1);
+  case &Throw_e(e1,_):                 fallthru(e1);
+  case &NoInstantiate_e(e1):           fallthru(e1);
+  case &Instantiate_e(e1,_):           fallthru(e1);
+  case &Cast_e(_,e1,_,_):              fallthru(e1);
+  case &Address_e(e1):                 fallthru(e1);
+  case &Deref_e(e1):                   fallthru(e1);
+  case &AggrMember_e(e1,...):          fallthru(e1);
   case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
-  case &Tagcheck_e(e1, _): fallthru(e1);
-  case &AggrArrow_e(e1,...):
-    do_nested_statement(e1, env, f, szeof);
-    break;
+  case &Tagcheck_e(e1, _):             fallthru(e1);
+  case &AggrArrow_e(e1,...): do_nested_statement(e1, env, f, szeof); break;
     
   case &Sizeofexp_e(e): 
     if(szeof) do_nested_statement(e, env, f, szeof); 
     break;
 
   case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
-  case &And_e(e1,e2): fallthru(e1,e2);
-  case &Or_e(e1,e2): fallthru(e1,e2);
-  case &SeqExp_e(e1,e2): fallthru(e1,e2);
-  case &Subscript_e(e1,e2): fallthru(e1,e2);
-  case &Swap_e(e1,e2): fallthru(e1,e2);
+  case &And_e(e1,e2):        fallthru(e1,e2);
+  case &Or_e(e1,e2):         fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
+  case &Subscript_e(e1,e2):  fallthru(e1,e2);
+  case &Swap_e(e1,e2):       fallthru(e1,e2);
   case &Comprehension_e(_,e1,e2,_): // ignore vardecl_t because "i" can not be set with a complex expression
     do_nested_statement(e1, env, f, szeof);
     do_nested_statement(e2, env, f, szeof);
@@ -1124,16 +1111,16 @@ void do_nested_statement(exp_t e, `a env, void (@f)(`a, stmt_t), bool szeof) {
     do_nested_statement(e1, env, f, szeof);
     break;
     
-  case &Array_e(ldt): fallthru(ldt);
-  case &CompoundLit_e(_, ldt): fallthru(ldt);
+  case &Array_e(ldt):            fallthru(ldt);
+  case &CompoundLit_e(_, ldt):   fallthru(ldt);
   case &UnresolvedMem_e(_, ldt): fallthru(ldt);
-  case &Aggregate_e(_,_,ldt,_): fallthru(ldt);
+  case &Aggregate_e(_,_,ldt,_):  fallthru(ldt);
   case &AnonStruct_e(_, ldt):
     for(; ldt != NULL; ldt = ldt->tl)
       do_nested_statement((*ldt->hd)[1], env, f, szeof);
     break;
 
-  case &Tuple_e(lexp): fallthru(lexp);
+  case &Tuple_e(lexp):    fallthru(lexp);
   case &Primop_e(_,lexp): fallthru(lexp);
   case &Datatype_e(lexp,_,_):
     for(; lexp!=NULL; lexp=lexp->tl)

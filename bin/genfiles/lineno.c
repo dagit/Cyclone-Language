@@ -447,7 +447,7 @@ if(c == 256)lbuf->lex_eof_reached=0;}}}
 # 84
 enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
-{int _tmp2=lexstate;switch(_tmp2){case 0:
+{int _tmp2=lexstate;switch((int)_tmp2){case 0:
 # 49 "lineno.cyl"
  return Cyc_Lineno_LINEDEF;case 1:
 # 50 "lineno.cyl"

@@ -694,7 +694,9 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Address_e(e1):   dump_char('&');   dumpexp_prec(myprec,e1);     break;
   case &Deref_e(e1):     dump_char('*');   dumpexp_prec(myprec,e1);     break;
-  case &New_e(ropt,e1):  dump("new");      dumpexp_prec(myprec,e1);     break;
+  case &New_e(ropt,e1):  
+    // FIX: use ropt!
+    dump("new");      dumpexp_prec(myprec,e1);     break;
   case &Sizeoftype_e(t): dump("sizeof(");  dumptyp(t);  dump_char(')'); break;
   case &Sizeofexp_e(e1): dump("sizeof(");  dumpexp(e1); dump_char(')'); break;
   case &Valueof_e(t):    dump("valueof("); dumptyp(t);  dump_char(')'); break;
@@ -1325,9 +1327,9 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
       break;
     case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens)):
       dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens); break;
-    case &Function_mod(&NoTypes(sl,loc)):
+    case &Function_mod(&NoTypes(sl,_)):
       group(dump_str,sl,"(",")",","); break;
-    case &TypeParams_mod(ts,loc,print_kinds): 
+    case &TypeParams_mod(ts,_,print_kinds): 
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
     case &Attributes_mod(_,atts): dumpatts(atts); break;
     case &Pointer_mod(_,_): Warn::impos("dumptms");

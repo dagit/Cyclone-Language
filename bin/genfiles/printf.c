@@ -434,12 +434,12 @@ return(double)ld;}default:
 (int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)((struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmpC1;_tmpC1.tag=0,({struct _fat_ptr _tmpC5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)_check_fat_subscript(ap,sizeof(void*),0U))));_tmpC1.f1=_tmpC5;});_tmpC1;});void*_tmp1C[1];_tmp1C[0]=& _tmp1E;({struct _fat_ptr _tmpC6=({const char*_tmp1D="printf expected double but found %s";_tag_fat(_tmp1D,sizeof(char),36U);});Cyc_aprintf(_tmpC6,_tag_fat(_tmp1C,sizeof(void*),1));});})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
-void*_tmp1F=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp5=_tmp1F;void*_tmp20=_stmttmp5;short*_tmp21;if(*((int*)_tmp20)== 4){_tmp21=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp20)->f1;{short*p=_tmp21;
+void*_tmp1F=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp5=_tmp1F;void*_tmp20=_stmttmp5;void*_tmp21;if(*((int*)_tmp20)== 4){_tmp21=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp20)->f1;{short*p=_tmp21;
 return p;}}else{
 (int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp22="printf expected short pointer";_tag_fat(_tmp22,sizeof(char),30U);})));};}
 # 152
 static unsigned long*Cyc_va_arg_int_ptr(struct _fat_ptr ap){
-void*_tmp23=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp6=_tmp23;void*_tmp24=_stmttmp6;unsigned long*_tmp25;if(*((int*)_tmp24)== 5){_tmp25=((struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp24)->f1;{unsigned long*p=_tmp25;
+void*_tmp23=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp6=_tmp23;void*_tmp24=_stmttmp6;void*_tmp25;if(*((int*)_tmp24)== 5){_tmp25=((struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp24)->f1;{unsigned long*p=_tmp25;
 return p;}}else{
 (int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp26="printf expected int pointer";_tag_fat(_tmp26,sizeof(char),28U);})));};}
 # 160
@@ -567,7 +567,7 @@ sign='\000';
 # 372
 rflag: ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
 reswitch: which_cp=0;
-{int _tmp2B=ch;switch(_tmp2B){case 32:
+{int _tmp2B=ch;switch((int)_tmp2B){case 32:
 # 381
  if(!((int)sign))
 sign=' ';
@@ -721,7 +721,7 @@ cp=_fat_ptr_plus(({char*_tmp35=buf;_tag_fat(_tmp35,sizeof(char),349U);}),sizeof(
 if(_ulong != (unsigned long)0 || prec != 0){
 struct _fat_ptr xdigs;
 # 574
-enum Cyc_BASE _tmp36=base;switch(_tmp36){case Cyc_OCT:
+enum Cyc_BASE _tmp36=base;switch((int)_tmp36){case Cyc_OCT:
 # 576
  do{
 ({struct _fat_ptr _tmp37=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((char*)_check_fat_subscript(_tmp37,sizeof(char),0U));char _tmp39=(char)((_ulong & (unsigned long)7)+ (unsigned long)'0');if(_get_fat_size(_tmp37,sizeof(char))== 1U &&(_tmp38 == 0 && _tmp39 != 0))_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});
@@ -892,7 +892,7 @@ for(p=_fat_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr &
 tmp=modf(integer / (double)10,& integer);
 ({struct _fat_ptr _tmp78=_fat_ptr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)_check_fat_subscript(_tmp78,sizeof(char),0U));char _tmp7A=(char)((int)((tmp + .01)* (double)10)+ (int)'0');if(_get_fat_size(_tmp78,sizeof(char))== 1U &&(_tmp79 == 0 && _tmp7A != 0))_throw_arraybounds();*((char*)_tmp78.curr)=_tmp7A;});}
 # 800
-{int _tmp7B=fmtch;switch(_tmp7B){case 102:
+{int _tmp7B=fmtch;switch((int)_tmp7B){case 102:
  goto _LL4;case 70: _LL4:
 # 803
  if(expcnt)
@@ -1047,7 +1047,7 @@ ans=Cyc_vprintf(fmt,ap);
 return ans;}struct _tuple0{struct _fat_ptr*f1;unsigned long*f2;};
 # 992
 static int Cyc_putc_string(int c,struct _tuple0*sptr_n){
-struct _tuple0*_tmpBA=sptr_n;unsigned long*_tmpBC;struct _fat_ptr*_tmpBB;_tmpBB=_tmpBA->f1;_tmpBC=_tmpBA->f2;{struct _fat_ptr*sptr=_tmpBB;unsigned long*nptr=_tmpBC;
+struct _tuple0*_tmpBA=sptr_n;void*_tmpBC;void*_tmpBB;_tmpBB=_tmpBA->f1;_tmpBC=_tmpBA->f2;{struct _fat_ptr*sptr=_tmpBB;unsigned long*nptr=_tmpBC;
 struct _fat_ptr s=*sptr;
 unsigned long n=*nptr;
 if(n == (unsigned long)0)return - 1;
