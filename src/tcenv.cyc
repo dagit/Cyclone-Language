@@ -115,7 +115,8 @@ enum Unassigned {
 };
 
 enum Jumpee { 
-  NotAllowed_j;
+  NotLoop_j;
+  CaseEnd_j;
   FnEnd_j;
   Stmt_j(stmt);
 };
@@ -427,14 +428,14 @@ bool process_continue(tenv te, stmt s) {
   if (te->le == null) env_err("Tcenv: unexpected process_continue");
   let fe = get_fenv(te);
   switch (fe->ctrl_env->continue_stmt) {
-  case NotAllowed_j: return false;
-  case FnEnd_j:      return true; // impossible in source language actually
+  case NotLoop_j:  terr(s->loc, "continue not in a loop"); return false;
+  case CaseEnd_j:  throw env_err("Tcenv: continue dest is CaseEnd");
+  case FnEnd_j:    throw env_err("Tcenv: continue dest is CaseEnd");
   case Stmt_j(s2):
     s2->non_local_preds = &cons(s,s2->non_local_preds);
     switch (s->r) {
     case Continue_s(*so): *so = &Opt(s2); return true;
-    default: 
-      return env_err("Tcenv: process_continue given a non-continue");
+    default: throw env_err("Tcenv: process_continue given a non-continue");
     }
   }
 }
@@ -442,8 +443,20 @@ bool process_break(tenv te, stmt s) {
   if (te->le == null) env_err("Tcenv: unexpected process_break");
   fenv fe = get_fenv(te);
   switch (fe->ctrl_env->break_stmt) {
-  case NotAllowed_j: return false;
-  case FnEnd_j:      return true; 
+  case NotLoop_j: terr(s->loc, "break not in a loop or switch"); return false;
+  case FnEnd_j:   
+    // Note doing this here is more conservative than in control-flow.
+    // Eg: while(true) if(false) break; else return 0;
+    // But it's a pain to do in control flow because there is not stmt dest
+    if(fe->shared->return_typ != VoidType) {
+      terr(s->loc, "break causes function not to return a value"); 
+      return false;
+    }
+    return true;
+  case CaseEnd_j:
+    // Analogous comment to previous case applies.
+    terr(s->loc, "break causes outer switch clause to implicitly fallthru");
+    return false;
   case Stmt_j(s2):
     s2->non_local_preds = &cons(s,s2->non_local_preds);
     switch (s->r) {
@@ -533,7 +546,7 @@ tenv set_in_switch(tenv te) {
 		  &CtrlEnv(fe->ctrl_env->continue_stmt,
 			   fe->ctrl_env->next_stmt, // break goes to next
 			   fe->ctrl_env->fallthru_stmt,
-			   fe->ctrl_env->next_stmt));
+			   CaseEnd_j)); // prevent nested break to fallthru
   return put_fenv(te,fe2);
 }
 
@@ -598,8 +611,8 @@ fenv new_fenv(fndecl fd) {
  	       .type_vars     = fd->tvs, // assumed unique
 	       .locals        = locals,  // assumed unique
 	       .encloser      = fd->body, // careful -- self loop at top!!!
-	       .ctrl_env      = &CtrlEnv(NotAllowed_j,
-					 NotAllowed_j,
+	       .ctrl_env      = &CtrlEnv(NotLoop_j,
+					 NotLoop_j,
 					 null,
 					 FnEnd_j)};
 }

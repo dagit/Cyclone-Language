@@ -136,7 +136,7 @@ synth tcStmt(tenv te, stmt s0) {
   case Break_s(_):
     if (process_break(te,s0))
       return forward_jump_synth(te);
-    terr(s0->loc,"break outside of loop/switch");
+    // error message reported by process_break for sake of specificty
     return skip_synth(te);
 
   case Continue_s(_):
@@ -157,8 +157,8 @@ synth tcStmt(tenv te, stmt s0) {
     check_contains_assign(e2);
     let esyn2 = tcExp(te,&Opt(sint_t),e2);
     if (!coerce_to_bool(te,e2))
-      terr(e2->loc,xprintf("test of for loop has type %s instead of integral or * type",
-			   typ2string(synth_typ(esyn2))));
+      terr(e2->loc,xprintf("test of for loop has type %s instead of integral "
+			   "or * type", typ2string(synth_typ(esyn2))));
     let $(true_te,_) = bool_layer_synth(te,esyn2);
     let te_body = set_in_loop(true_te,cont_s);
     let ssyn    = tcStmt(te_body,s);

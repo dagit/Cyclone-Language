@@ -413,8 +413,8 @@ bool is_boxed_type(typ t) {
 typ make_unboxed_type(typ t) {
   switch (compress(t)) {
   case IntType(sn,sz,bx): return (bx == Unboxed) ? t : IntType(sn,sz,Unboxed);
-  case FloatType(_):      return float_t;
-  case DoubleType(_):     return double_t;
+  case FloatType(_):      return Float_t;
+  case DoubleType(_):     return Double_t;
   default:                return t;
   }
 }
@@ -750,7 +750,6 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
       return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
     default: return false;
     }
-    break;
   // can cast a numeric type or bool to any numeric type
   case IntType(_,_,_): return coerceable(t2);
   case FloatType(_) : return coerceable(t2);
