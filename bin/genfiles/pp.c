@@ -708,20 +708,20 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz);inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
-sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-return 0;return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
-int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14];
-struct Cyc_List_List_mismatch_struct{char*tag;};extern char Cyc_List_Nth[4];struct
-Cyc_List_Nth_struct{char*tag;};unsigned long Cyc_strlen(struct _dyneither_ptr s);
-int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct _dyneither_ptr*);struct
-_dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dyneither_ptr);struct
-Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*
-cmp)(void*,void*),int(*hash)(void*));void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*
-t,void*key,void*val);void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*
-key);int Cyc_Hashtable_hash_stringptr(struct _dyneither_ptr*p);struct Cyc_Fn_Function{
+char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
+unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
+ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
+ || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}struct Cyc_List_List{void*
+hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);extern char
+Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*tag;};extern
+char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};unsigned long Cyc_strlen(
+struct _dyneither_ptr s);int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct
+_dyneither_ptr*);struct _dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct
+_dyneither_ptr);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
+int sz,int(*cmp)(void*,void*),int(*hash)(void*));void Cyc_Hashtable_insert(struct
+Cyc_Hashtable_Table*t,void*key,void*val);void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*
+t,void*key);int Cyc_Hashtable_hash_stringptr(struct _dyneither_ptr*p);struct Cyc_Fn_Function{
 void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
 void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*
 Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);extern int Cyc_PP_tex_output;struct

@@ -238,10 +238,12 @@ static mstringptr_t place2string(place_t p) {
 // forward declaration
 static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
+				      bool no_init_bits_only,
                                       type_t t, absRval_t<`r> leafval);
 
 aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
                                       list_t<struct Aggrfield@> fs, 
+				      bool no_init_bits_only,
                                       absRval_t<`r> leafval) {
   // we treat bitfields as if always initialized -- those are fields with
   // names that are of size 1 ("\0").
@@ -250,7 +252,7 @@ aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
   for(int i = 0; i < sz; i++, fs = fs->tl) {
     let &Aggrfield(n,_,t2,_,_) = fs->hd;
     if(numelts(*n) != 1) 
-      d[i] = i_typ_to_absrval(fenv, false, t2,leafval);
+      d[i] = i_typ_to_absrval(fenv, false, no_init_bits_only, t2,leafval);
   }
   return d;
 }
@@ -271,16 +273,18 @@ static aggrdict_t<`r> substitute_aggrfields_to_aggrdict(flow_env_t<`r> fenv,
                                                         list_t<tvar_t> tvs,
                                                         list_t<type_t> targs,
                                                         list_t<aggrfield_t> fs,
+							bool no_init_bits_only,
                                                         absRval_t<`r> leafval){
   region temp;
   list_t<$(tvar_t,type_t)@`temp,`temp> inst = List::rzip(temp,temp,tvs,targs);
   let env = $(temp,inst);
   list_t<struct Aggrfield@`temp,`temp> subs_fs = rmap_c(temp,substitute_field,&env,fs);
-  return aggrfields_to_aggrdict(fenv,subs_fs,leafval);
+  return aggrfields_to_aggrdict(fenv,subs_fs,no_init_bits_only,leafval);
 }
 
 static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
+				      bool no_init_bits_only,
                                       type_t t, absRval_t<`r> leafval) {
   if(is_nontagged_union_type(t))
     return fenv->unknown_all;
@@ -296,10 +300,10 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     // by index, not name.  Avoids creating the field names...
     aggrdict_t d = rnew(fenv->r) { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) { 
-      d[i] = i_typ_to_absrval(fenv,false,(*tqts->hd)[1],leafval);
+      d[i] = i_typ_to_absrval(fenv,false,no_init_bits_only,(*tqts->hd)[1],leafval);
       tqts = tqts->tl;
     }
-    return rnew(fenv->r) Aggregate(false,d);
+    return rnew(fenv->r) Aggregate(UnionRInfo(false,-1),d);
   case &AggrType(AggrInfo(info,targs)):
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL)
@@ -307,14 +311,16 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     let fields = ad->impl->fields;
     if (targs == NULL) fallthru(ad->kind,fields);
     return rnew(fenv->r) 
-      Aggregate(ad->kind == UnionA, 
-                substitute_aggrfields_to_aggrdict(fenv,ad->tvs,targs,fields,leafval));
+      Aggregate(UnionRInfo(ad->kind==UnionA,-1),substitute_aggrfields_to_aggrdict(fenv,ad->tvs,targs,fields,ad->kind==UnionA,leafval));
   case &AnonAggrType(k,fs):
-    return rnew(fenv->r) Aggregate(k == UnionA, aggrfields_to_aggrdict(fenv,fs,leafval));
+    DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
+		Absynpp::typ2string(t));
+    DEBUG_PRINT_F(print_absrval,leafval);
+    return rnew(fenv->r) Aggregate(UnionRInfo(k==UnionA,-1),aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things -- 
     // here, we initialize them at translation by putting a 0 in at the end.
-    return (allow_zeroterm && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
+    return (allow_zeroterm && !no_init_bits_only && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
   case &TagType(t): return leafval;
   case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) && !conref_def(false,nbl):
     switch(leafval) {
@@ -326,11 +332,11 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
   default: break;
   }
   
-  return Tcutil::bits_only(t) ? fenv->unknown_all : leafval;
+  return (!no_init_bits_only && Tcutil::bits_only(t)) ? fenv->unknown_all : leafval;
 }
 
-absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, absRval_t<`r> leafval) {
-  return i_typ_to_absrval(fenv, true, t, leafval);
+absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, bool no_init_bits_only, absRval_t<`r> leafval) {
+  return i_typ_to_absrval(fenv, true, no_init_bits_only, t, leafval);
 }
 
 bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r) {
@@ -352,14 +358,14 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
   if (Tcutil::is_noalias_pointer(t)) 
     return rnew(fenv->r) Consumed(consumer,iteration,r);
   switch $(Tcutil::compress(t),r) {
-  case $(&TupleType(tqts),&Aggregate(_,d)):
+  case $(&TupleType(tqts),&Aggregate(b,d)):
     let sz = numelts(d);
     aggrdict_t d2 = rnew(fenv->r) { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) {
       d2[i] = make_unique_consumed(fenv,(*tqts->hd)[1],consumer,iteration,d[i]);
       tqts = tqts->tl;
     }
-    return rnew(fenv->r) Aggregate(false,d2);
+    return rnew(fenv->r) Aggregate(b,d2);
   case $(&AggrType(AggrInfo(info,_)),&Aggregate(b,d)):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL) return r;
@@ -419,7 +425,7 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   switch(r) {
   case &Consumed(_,_,r): add_places(pile,r); return;
   case &AddressOf(p): add_place(pile, p); return;
-  case &Aggregate(is_union,d): 
+  case &Aggregate(b,d): 
     for (int i = 0; i < numelts(d); i++) 
       add_places(pile, d[i]);
     return;
@@ -433,10 +439,12 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
 static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
                                         absRval_t<`r> old_val) {
   switch(old_val) {
-  case &Aggregate(is_union,d): 
+  case &Aggregate(UnionRInfo(is_union,_),d): 
     aggrdict_t d2 = rnew(r) { for i < numelts(d) : 
                               insert_place_inner(r,new_val,d[i]) };
-    return rnew(r) Aggregate(is_union,d2);
+    // we eliminate the distinction as to which field was last
+    // written since we're changing the values of things
+    return rnew(r) Aggregate(UnionRInfo(is_union,-1),d2);
   default: return new_val;
   }
 }
@@ -456,7 +464,7 @@ static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
 // processing an aggregate, it will recursively iterate over the
 // fields [fs], functionally updating entries in the aggregate
 // dictionary [d] as it unwinds, avoiding changes if pointer equality
-// is maintained.
+// is maintained.  
 static absRval_t<`r> insert_place_outer(region_t<`r> r,
                                         list_t<int> fs,
                                         absRval_t<`r> old_val, 
@@ -464,11 +472,11 @@ static absRval_t<`r> insert_place_outer(region_t<`r> r,
   if(fs==NULL) 
     return insert_place_inner(r,new_val,old_val);
   switch($(fs,old_val)) {
-  case $(&List(hd,tl),&Aggregate(is_union,d)):
+  case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,_),d)):
     let new_child = insert_place_outer(r,tl,d[hd],new_val);
     let new_d = aggr_dict_insert(r, d, hd,new_child);
     if (new_d == d) return old_val;
-    else return rnew(r) Aggregate(is_union,new_d);
+    else return rnew(r) Aggregate(UnionRInfo(is_union,-1),new_d);
   default: throw new Core::Impossible("bad insert place");
   }
 }
@@ -528,18 +536,23 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   initlevel_t this_ans;
   if(acc == NoneIL) return NoneIL;
   switch(r) {
-  case &Aggregate(true,d): // union case
-    // if one of the members is AllIL then we're okay
+  case &Aggregate(UnionRInfo{.is_union = true, .fieldnum = f }, d): // union case
+    // if one of the members is AllIL then we're okay; if we know the
+    // field, then it better be the known field that's initialized
     let sz = numelts(d);
     this_ans = NoneIL;
-    for (int i = 0; i < sz; i++) {
-      if (initlevel_rec(env,d[i],AllIL) == AllIL) {
-        this_ans = AllIL;
-        break;
+    if (f == -1) {
+      for (int i = 0; i < sz; i++) {
+	if (initlevel_rec(env,d[i],AllIL) == AllIL) {
+	  this_ans = AllIL;
+	  break;
+	}
       }
     }
+    else if (initlevel_rec(env,d[f],AllIL) == AllIL)
+      this_ans = AllIL;
     break;
-  case &Aggregate(false,d): // struct case -- they all have to be init'd
+  case &Aggregate(UnionRInfo{.is_union = false, ...},d): // struct case -- they all have to be init'd
     let sz = numelts(d);
     this_ans = AllIL;
     for (int i = 0; i < sz; i++) 
@@ -590,11 +603,15 @@ static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
   case &Consumed(_,_,r): return is_rval_unescaped(rval);
-  case &Aggregate(is_union,d): 
-    unsigned sz = numelts(d);
-    for (int i = 0; i < sz; i++) 
-      if (!is_rval_unescaped(d[i])) return false;
-    return true;
+  case &Aggregate(UnionRInfo(is_union,field_no),d): 
+    if (is_union && field_no != -1)
+      return !is_rval_unescaped(d[field_no]);
+    else {
+      unsigned sz = numelts(d);
+      for (int i = 0; i < sz; i++) 
+	if (!is_rval_unescaped(d[i])) return false;
+      return true;
+    }
   default:            return true;
   }
 }
@@ -664,11 +681,11 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
                                          absRval_t<`r2> newval) {
   if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
-  case $(&List(hd,tl),&Aggregate(is_union,d)):
+  case $(&List(hd,tl),&Aggregate(UnionRInfo(is_union,fldnum),d)):
     let new_child = assign_place_outer(env,tl,d[hd],newval);
     let new_child_agg = aggr_dict_insert(env->fenv->r, d, hd, new_child);
-    if (new_child_agg == d) return oldval;
-    else return rnew(env->fenv->r) Aggregate(is_union,new_child_agg);
+    if (new_child_agg == d && (!is_union || fldnum == hd)) return oldval;
+    return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),new_child_agg);
   default: throw new Core::Impossible("bad assign place");
   }
 }
@@ -1323,8 +1340,12 @@ void print_absrval(absRval_t rval) {
     fprintf(stderr,")"); break;
   case &AddressOf(p): fprintf(stderr,"AddrOf("); print_place(p); 
     fprintf(stderr,")"); break;
-  case &Aggregate(is_union,d): 
-    if (is_union) fprintf(stderr,"AggrUnion{");
+  case &Aggregate(UnionRInfo(is_union,f),d): 
+    if (is_union) {
+      fprintf(stderr,"AggrUnion{");
+      if (f != -1)
+	fprintf(stderr,"tag == %d;",f);
+    }
     else fprintf(stderr,"AggrStruct{");
     for (int i = 0; i < numelts(d); i++) {
       print_absrval(d[i]);
@@ -1435,7 +1456,7 @@ static void kill_root($(flow_env_t<`r>, flowdict_t<`r>,killrgn_t)@ env, root_t<`
     // if the variable's type contains the region
     if (contains_region(rgn,vd->type))
       // set it to uninitialized in the new dictionary
-      rval = typ_to_absrval(fenv, vd->type, fenv->unknown_none);
+      rval = typ_to_absrval(fenv, vd->type, false,fenv->unknown_none);
     *fd = Dict::insert(*fd,root,rval);
     break;
   case &MallocPt(_,t): 

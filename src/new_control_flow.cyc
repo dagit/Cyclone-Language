@@ -235,7 +235,7 @@ static flow_t<`r> add_vars(flow_env_t<`r> fenv,
     for(; vds != NULL; vds = vds->tl) {
       let root = rnew(fenv->r) VarRoot(vds->hd);
       DEBUG_PRINT("adding variable %s\n",qvar2string(vds->hd->name));
-      d = Dict::insert(d,root,typ_to_absrval(fenv,vds->hd->type,leafval));
+      d = Dict::insert(d,root,typ_to_absrval(fenv,vds->hd->type,false,leafval));
     }
     return ReachableFL(d,relns);
   }
@@ -470,7 +470,7 @@ static $(flow_t<`r>,absRval_t<`r>)
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt,_))):
     switch(f) {
     case {.BottomFL = _}: 
-      return $(f,typ_to_absrval(env->fenv,elttype,env->fenv->unknown_all));
+      return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
     case {.ReachableFL = $(outdict,relns)}:
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd)) {
@@ -515,7 +515,7 @@ static $(flow_t<`r>,absRval_t<`r>)
 	case &Zero: 
 	  e->annot = &IsZero_val;
 	  return $(BottomFL(),typ_to_absrval(env->fenv,elttype,
-                                           env->fenv->unknown_all));
+					     false,env->fenv->unknown_all));
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
 	default: 
           switch (e->r) {
@@ -549,9 +549,9 @@ static $(flow_t<`r>,absRval_t<`r>)
         }
 	fallthru;
       case AllIL:  
-        return $(f,typ_to_absrval(env->fenv,elttype,env->fenv->unknown_all));
+        return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
       case ThisIL: 
-        return $(f,typ_to_absrval(env->fenv,elttype,env->fenv->unknown_none));
+        return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_none));
       }
     }
   default: throw new Core::Impossible("right deref of non-pointer-type");
@@ -693,7 +693,7 @@ anal_stmt_exp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, stmt_t s) {
         case NoneIL: leaf = fenv->unknown_none; break;
         case ThisIL: leaf = fenv->unknown_this; break;
         }
-        let old_rval_approx = typ_to_absrval(fenv,t,leaf);
+        let old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
         f = use_Rval(env,e->loc,f,old_rval);
         let vds = List(vd,NULL);
         f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
@@ -824,7 +824,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Enum_e(_,_,_): return $(inflow, fenv->unknown_all);
 
   case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
-    return $(inflow, typ_to_absrval(fenv,e->topt->v, fenv->unknown_all));
+    return $(inflow, typ_to_absrval(fenv,e->topt->v, false,fenv->unknown_all));
 
     // FIX: avoid allocation of VarRoot
     // Note: if Esc we return that even though it isn't an absRval.  That's
@@ -929,7 +929,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Throw_e(e1):
     let $(f,r) = anal_Rexp(env,true,inflow,e1);
     use_Rval(env,e1->loc,f,r); // result irrelevant so long as initialized
-    return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+    return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
 
   case &FnCall_e(e1,es,_): 
     ANAL_RGN(env,temp) {
@@ -989,7 +989,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
               case &PointerType(PtrInfo(t,_,_)):
                 ans_d = assign_place(fenv, es->hd->loc, ans_d, 
                                      env->all_changed,
-                                     p, typ_to_absrval(fenv,t,fenv->esc_all));
+                                     p, typ_to_absrval(fenv,t,false,fenv->esc_all));
                 break;
               default: Tcutil::impos("anal_Rexp:bad type for initialized arg");
               }
@@ -1004,9 +1004,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       }
       // if the called function doesn't return, we get BottomFL out
       if (Tcutil::is_noreturn(e1->topt->v)) 
-        return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+        return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
       else 
-        return $(outflow,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+        return $(outflow,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
     }
   case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
     root_t    root      = rnew(fenv->r) MallocPt(exp,e->topt->v);
@@ -1014,8 +1014,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
     absRval_t place_val;
     if(isfat) place_val = fenv->notzeroall;
-    else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,fenv->zero);
-    else place_val = typ_to_absrval(fenv,*topt,fenv->unknown_none);
+    else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
+    else place_val = typ_to_absrval(fenv,*topt,false,fenv->unknown_none);
     flow_t    outflow;
     update_place_set(env->all_changed,place,NULL);
     if(eopt!=NULL) {
@@ -1119,10 +1119,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
     if(is_nontagged_union_type(e1->topt->v))
-      return $(f,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
+      return $(f,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all)); 
     switch (r) {
-    case &Aggregate(is_union,rdict):
+    case &Aggregate(UnionRInfo(is_union,fnum),rdict):
       let field_no = get_field_index(e1->topt->v,field);
+      if (is_union && fnum != -1 && fnum != field_no)
+	return $(f, typ_to_absrval(fenv,e->topt->v,true,fenv->unknown_none));
       return $(f,rdict[field_no]);
     default: 
       throw new Core::Impossible(aprintf("anal_Rexp: AggrMember: %s",
@@ -1130,9 +1132,25 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     }
 
   case &Tagcheck_e(e1,field):
-    // similar to above, but result is a non-zero integer
+    // similar to above, but result is a non-zero integer unless the
+    // field is already known
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    return $(f,fenv->unknown_all);
+    if(is_nontagged_union_type(e1->topt->v))
+      return $(f,fenv->unknown_all);
+    switch (r) {
+    case &Aggregate(UnionRInfo(is_union,fnum),rdict):
+      let field_no = get_field_index(e1->topt->v,field);
+      if (is_union && fnum != -1)
+	if (fnum != field_no)
+	  return $(f, fenv->zero);
+	else
+	  return $(f, fenv->notzeroall);
+      else
+	return $(f,fenv->unknown_all);
+    default: 
+      throw new Core::Impossible(aprintf("anal_Rexp: TagCheck_e: %s",
+                                         Absynpp::exp2string(e)));
+    }
     
   case &AggrArrow_e(e1,field,...): // composition of * and ., of course
     let $(f1,r1) = anal_Rexp(env,false,inflow,e1);
@@ -1144,10 +1162,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     switch(Tcutil::compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t2,_,_}):
       if(is_nontagged_union_type(t2))
-	return $(f2,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
+	return $(f2,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all)); 
       switch (r2) {
-      case &Aggregate(is_union,rdict):
+      case &Aggregate(UnionRInfo(is_union,fnum),rdict):
         let field_no = get_field_index(t2,field);
+	if (is_union && fnum != -1 && fnum != field_no)
+	  return $(f2, typ_to_absrval(fenv,e->topt->v,true,fenv->unknown_none));
         return $(f2,rdict[field_no]);
       default: throw new Core::Impossible("anal_Rexp: AggrArrow");
       }  
@@ -1197,7 +1217,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       switch(Tcutil::compress(e1->topt->v)) {
       case &TupleType(tqts):
         switch(rvals->hd) {
-        case &Aggregate(is_union,rdict): 
+        case &Aggregate(_,rdict): 
           unsigned int i = Evexp::eval_const_uint_exp(e2)[0];
           return $(f2,rdict[i]);
         default: throw new Core::Impossible("anal_Rexp: Subscript");
@@ -1223,7 +1243,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
                  rvals = rvals->tl;
                  temp; })};
 
-      return $(f, rnew(env->r) Aggregate(false,aggrdict));
+      return $(f, rnew(env->r) Aggregate(UnionRInfo(false,-1),aggrdict));
     }
   case &AnonStruct_e(_,des): 
     list_t<Absyn::aggrfield_t> fs;
@@ -1236,15 +1256,16 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rmap(temp,Core::snd,des),true,true);
-      
-      aggrdict_t aggrdict = aggrfields_to_aggrdict(fenv,fs,fenv->unknown_all);
+      aggrdict_t aggrdict =
+	aggrfields_to_aggrdict(fenv,fs,kind==UnionA,kind==UnionA ? fenv->unknown_none : fenv->unknown_all);
+      int field_no = -1;
       for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
         for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
           switch (ds->hd) {
           case &ArrayElement(_): throw new Core::Impossible("anal_Rexp:Aggregate_e");
           case &FieldName(fld): 
             // find the field and update the aggrdict imperatively
-            let field_no = get_field_index_fs(fs,fld);
+            field_no = get_field_index_fs(fs,fld);
             aggrdict[field_no] = rvals->hd;
             // if this is a union, require this to be initialized
             if (kind == UnionA) {
@@ -1252,7 +1273,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
               f = use_Rval(env,e->loc,f,rvals->hd);
             }
           }
-      return $(f, rnew(env->r) Aggregate(kind == UnionA, aggrdict));
+      return $(f, rnew(env->r) Aggregate(UnionRInfo(kind == UnionA,field_no), aggrdict));
     }
   case &Aggregate_e(_,_,_,_):
     throw new Core::Impossible("anal_Rexp:missing aggrdeclimpl");
@@ -1262,7 +1283,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       let $(outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
       for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
         outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-      return $(outflow,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+      return $(outflow,typ_to_absrval(fenv,e->topt->v,false,fenv->unknown_all));
     }
   case &Comprehension_e(vd,e1,e2,zt): 
 
@@ -1453,7 +1474,7 @@ static $(flow_t<`r>,absLval_t<`r>)
         default:
           initlevel_t il = initlevel(fenv,fd,rval);
           absRval_t leaf = (il == AllIL) ? fenv->unknown_all : fenv->unknown_none;
-          absRval_t new_rval = typ_to_absrval(fenv,Tcutil::pointer_elt_type(e1->topt->v),leaf);
+          absRval_t new_rval = typ_to_absrval(fenv,Tcutil::pointer_elt_type(e1->topt->v),false,leaf);
           root_t new_root = rnew(fenv->r) MallocPt(e,e->topt->v);
           place_t place = rnew(fenv->r) Place{new_root,NULL};
           absRval_t res = rnew(fenv->r) AddressOf(place);
@@ -2020,7 +2041,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       case NoneIL: leaf = fenv->unknown_none; break;
       case ThisIL: leaf = fenv->unknown_this; break;
       }
-      let old_rval_approx = typ_to_absrval(fenv,t,leaf);
+      let old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
       f = use_Rval(env,e->loc,f,old_rval);
       let vds = List(vd,NULL);
       f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
@@ -2220,7 +2241,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
         type_t elttype = Tcutil::pointer_elt_type(t);
         let rval = 
           make_unique_consumed(fenv,elttype,bogus_exp,-1,
-                               typ_to_absrval(fenv,elttype,fenv->unknown_all));
+                               typ_to_absrval(fenv,elttype,false,fenv->unknown_all));
         let r = rnew(frgn) InitParam(j,t);
         let rp = rnew(frgn) Place(r,NULL);
         d = Dict::insert(d,r,rval);
@@ -2247,7 +2268,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
 			 " to non-zero-terminated arrays");
 	  let r = rnew(frgn) InitParam(j,t);
 	  let rp = rnew(frgn) Place(r,NULL);
-	  d = Dict::insert(d,r,typ_to_absrval(fenv,t,fenv->esc_none));
+	  d = Dict::insert(d,r,typ_to_absrval(fenv,t,false,fenv->esc_none));
 	  d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
 	  param_roots = rnew(frgn) List(rp,param_roots);
 	  break;

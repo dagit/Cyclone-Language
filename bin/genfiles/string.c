@@ -709,11 +709,11 @@ char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_stru
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
 extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
 extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned long);static void* 
-arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz);inline static void* 
-arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz
->> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr
-== 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
+struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned long);static void*Cyc_Core_arrcast(
+struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz);inline static void*Cyc_Core_arrcast(
+struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)
+return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 
+0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
 struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct
 Cyc_List_List*x);extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
 char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};char*

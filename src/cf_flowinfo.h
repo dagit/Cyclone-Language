@@ -113,6 +113,11 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R>;
 typedef datatype AbsRVal<`r> @`r absRval_t<`r>;
 typedef Dict::dict_t<root_t<`r>,absRval_t<`r>,`r> flowdict_t<`r>;
 typedef absRval_t<`r> ?`r aggrdict_t<`r>;
+EXTERN_CFFLOW struct UnionRInfo {
+  bool is_union;  // true iff this aggregate represents a union
+  int fieldnum;   // last field written, if known; -1 otherwise
+};
+typedef struct UnionRInfo union_rinfo_t;
 EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   Zero;      // the value is zero and initialized
   NotZeroAll; // the value is not zero & everything reachable from it is init
@@ -123,7 +128,7 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   AddressOf(place_t<`r,`r>); // I am a pointer to this place (implies not zero)
   // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
-  Aggregate(bool is_union, aggrdict_t<`r>);
+  Aggregate(union_rinfo_t, aggrdict_t<`r>);
   Consumed(Absyn::exp_t consumer, int iteration, absRval_t<`r> oldvalue);
 };
 
@@ -178,8 +183,8 @@ extern int get_field_index_fs(List::list_t<Absyn::aggrfield_t> fs,
 extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
 
-extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<struct Absyn::Aggrfield@>, absRval_t<`r>);
-extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, absRval_t<`r> leafval);
+extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<struct Absyn::Aggrfield@>, bool no_init_bits_only, absRval_t<`r>);
+extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, bool no_init_bits_only, absRval_t<`r> leafval);
 extern absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t<`r>);
 extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t<`r> r);
 

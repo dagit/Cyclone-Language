@@ -1000,6 +1000,27 @@ void sig_test() {
 #endif
 }
 
+@tagged union foo { int w; int z; };
+void escape_it(union foo @f) { }
+void tagged_union_test() {
+  test_begin("Tagged unions");
+  union foo fx = {.z = 1 };
+  union foo @ f = new fx;
+  f->z = 1;
+  if (tagcheck(f->w)) {
+    printf("woo hoo %d\n",f->w); // not reached
+  }
+  escape_it(f);
+  okfail (tagcheck(f->w) == false);
+  okfail (f->z == 1);
+  fx.z = 2;
+  int z = 0;
+  z :=: fx.z;
+  okfail (fx.z == 0);
+  okfail (z == 2);
+  test_end();
+}
+
 int main(int argc, string_t<`H> ?`H args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
@@ -1044,6 +1065,7 @@ int main(int argc, string_t<`H> ?`H args) {
     letv_test();
     sig_test();
     scanf_test(); // commented out because sscanf is insecure
+    tagged_union_test();
   } catch {
   case &Array_bounds:
     fflush(stdout);
