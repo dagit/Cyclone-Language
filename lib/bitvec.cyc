@@ -44,22 +44,22 @@ bool get_and_set(BITVEC bvec, int pos) {
   return ans;
 }
 void union_two(BITVEC dest, BITVEC src1, BITVEC src2) {
-  int len = sizeof(dest);
+  int len = dest.size;
   for(int i=0; i<len; ++i)
     dest[i] = src1[i] | src2[i];
 }
 void intersect_two(BITVEC dest, BITVEC src1, BITVEC src2) {
-  int len = sizeof(dest);
+  int len = dest.size;
   for(int i=0; i<len; ++i)
     dest[i] = (src1[i] & src2[i]);
 } 
 void diff_two(BITVEC dest, BITVEC src1, BITVEC src2) {
- int len = sizeof(dest);
+ int len = dest.size;
  for(int i=0; i<len; ++i)
     dest[i] = src1[i] & ~src2[i];
 } 
 bool compare_two(BITVEC src1, BITVEC src2) {
-  int len = sizeof(src1);
+  int len = src1.size;
   for (int i=0; i<len; ++i)
     if (src1[i] != src2[i])
       return false;
@@ -76,7 +76,7 @@ BITVEC new_full(int sz) {
   return ans;
 }
 BITVEC new_copy(BITVEC old) {
-  BITVEC copy = new_empty(sizeof(old));
+  BITVEC copy = new_empty(old.size);
   union_two(copy,copy,old);
   return copy;
 }
@@ -100,12 +100,12 @@ List::list<int> to_sorted_list(BITVEC bvec,int sz) {
 }  
   
 void clear_all(BITVEC bvec) {
-  int len = sizeof(bvec);
+  int len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0;
 }
 void set_all(BITVEC bvec) {
-  int len = sizeof(bvec);
+  int len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0xFFFFFFFF;
 }
@@ -125,7 +125,7 @@ bool all_set(BITVEC bvec, int sz) {
 
 // for debugging
 void print_bvec(BITVEC bvec) {
-  for (int i=0; i<INTSZ*(sizeof(bvec)); ++i)
+  for (int i=0; i<INTSZ*(bvec.size); ++i)
     printf("%d",get(bvec,i)?1:0);
   printf("\n");
 }

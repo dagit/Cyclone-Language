@@ -66,8 +66,8 @@ int list_cmp<`a>(int cmp(`a,`a),list<`a> x,list<`a> y) {
 }
 
 int array_cmp<`a>(int cmp(`a,`a),`a x[?],`a y[?]) {
-  int sx = sizeof(x);
-  int sy = sizeof(y);
+  int sx = x.size;
+  int sy = y.size;
   if (sx > sy) return 1;
   if (sx < sy) return -1;
   int c;
@@ -253,7 +253,7 @@ void array_test() {
   Array::imp_map(add2,z4);
   okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
   $(int,int) z5[?] = new {for i < 10 : $((int)(i),(int)(i)) };
-  okfail(10==sizeof(z5));
+  okfail(10==z5.size);
   $(int [?],int [?]) pair = Array::split(z5);
   okfail(0==array_cmp(int_cmp,pair[0],pair[1]));
   test_end();

@@ -535,7 +535,7 @@ Core::Opt_t<`a> check_unique<`a>(int compare(`a,`a),list<`a> x) {
 // makes a new list with ith element arr[i]
 list<`a> from_array<`a>(`a arr[?]) {
   list<`a> ans = null;
-  for(unsigned int i = sizeof(arr)-1; i >= 0; --i)
+  for(unsigned int i = arr.size-1; i >= 0; --i)
     ans = &cons(arr[i],ans);
   return ans;
 }
