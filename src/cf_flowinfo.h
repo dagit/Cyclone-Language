@@ -54,7 +54,11 @@ EXTERN_CFFLOW struct Place<`r::R> {
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
-EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL };
+EXTERN_CFFLOW tunion InitLevel { 
+  NoneIL, // may not be initialized
+  ThisIL, // this is initialized, but things it points to may not be
+  AllIL   // initialized, and everything it points to is initialized
+};
 typedef tunion InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
@@ -95,18 +99,20 @@ typedef tunion AbsRVal absRval_t;
 typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
 typedef Dict::dict_t<Absyn::field_name_t,absRval_t> aggrdict_t;
 EXTERN_CFFLOW tunion AbsRVal {
-  Zero;
-  NotZeroAll;
-  NotZeroThis;
-  UnknownR(initlevel_t);
+  Zero;      // the value is zero and initialized
+  NotZeroAll; // the value is not zero & everything reachable from it is init
+  NotZeroThis; // the value is not zero, it is initialized, but not necessarily
+               // what it points to
+  UnknownR(initlevel_t); // don't know what the value is
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
-  AddressOf(place_t);
+  AddressOf(place_t); // I am a pointer to this place (implies not zero)
   // TagCmps forgets zero-ness which technically is bad but shouldn't
   // matter in practice (why would an array index also be used in tests?)
   // and joins punt to UnknownR/Esc when comparing a TagCmp w/ something else
   // Can always add zero-ness as another field.
   TagCmps(List::list_t<tag_cmp_t>);
-  Aggregate(aggrdict_t);
+  Aggregate(aggrdict_t); // if you're a struct or tuple, you should always
+  // evaluate to an Aggregate in the abstract interpretation (tunion?)
 };
 
 // Note: It would be correct to make the domain of the flowdict_t

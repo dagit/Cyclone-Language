@@ -67,6 +67,7 @@ namespace Toc;
 
 //#define BCE_DEBUG
 bool warn_bounds_checks = false;
+bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
 unsigned bounds_checks_eliminated = 0;
 
@@ -2190,11 +2191,14 @@ static void exp_to_c(env_t nv, exp_t e) {
       case &Upper_b(_):
 	bool do_null_check = need_null_check(e1);
 	exp_to_c(nv,e1);
-        if (do_null_check)
+        if (do_null_check) {
+          if (warn_all_null_deref)
+            warn(e->loc, "inserted null check due to dereference");
 	  // *((t *)_check_null(e))
           e1->r = cast_it(typ_to_c(e1_typ),
 			   fncall_exp(_check_null_e,
 				      new List(copy_exp(e1),NULL),DL))->r;
+        }
         // Note that a null check is sufficient for zero-terminated arrays
         // too, because we guarantee that there's something to read here,
         // even if it's just a 0.  Note that writes are handled specially
@@ -2233,6 +2237,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	if (j < 1)
 	  impos("exp_to_c:  AggrArrow_e on pointer of size 0");
 	if (do_null_check) {
+          if (warn_all_null_deref)
+            warn(e->loc, "inserted null check due to dereference");
 	  // ((t *)_check_null(e))->f
 	  e->r = aggrarrow_exp(cast_it(typ_to_c(e1->topt->v),
                                        fncall_exp(_check_null_e,
@@ -2307,14 +2313,16 @@ static void exp_to_c(env_t nv, exp_t e) {
           e->r = deref_exp(cast_it(ta2,
                                     fncall_exp(_zero_arr_plus_e,
                                                list(e1,esz,e2),DL)),DL)->r;
-	else if(possibly_null)
+	else if(possibly_null) {
+          if (warn_all_null_deref)
+            warn(e->loc, "inserted null check due to dereference");
 	  // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)
 	  e->r = deref_exp(cast_it(ta2,
 				    fncall_exp(_check_known_subscript_null_e,
 					       list(e1,esz,
 						    sizeoftyp_exp(ta1,DL),
 						    e2),DL)),DL)->r;
-	else
+	} else
 	  // e1[_check_known_subscript_notnull(esz,e2)]
 	  e2->r = fncall_exp(_check_known_subscript_notnull_e,
 			     list(esz,copy_exp(e2)),DL)->r;

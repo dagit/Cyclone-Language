@@ -102,11 +102,11 @@ int state;
   register int i;
   register int k;
   register int rule;
-  register core *statep;
+  register core @statep;
   register short ?sp;
   register short ?sp1;
 
-  statep = state_table[state];
+  statep = (core @)state_table[state];
   k = statep->nitems;
 
   if (k == 0) return;

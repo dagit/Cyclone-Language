@@ -24,9 +24,6 @@ underconstrain the constant NULL and the unused type of x differently.
   run into at least one situation where something panic'd but I can't
   reproduce it right now.  
 
-* there's a bug in control-flow checking of catch-phrases.  If you leave
-  the "break" off of a case, then it re-raises the exception.
-
 * not inserting defaults for types in xtunion variant types?
 
 * we allow enum constructors to shadow other enum constructors even though
@@ -70,10 +67,10 @@ underconstrain the constant NULL and the unused type of x differently.
 We complain that g isn't initialized.  We should complain that
 function declarations are only allowed at top-level.
 
-* Translation of lvalues is still broken because we put in casts
-(and leave wrong casts) in places we shouldn't.
+* Should break out initializers and lvalues so that the syntax is
+respected properly (e.g., shouldn't be casting lvalues).  
 
-* are we treating void properly?
+* Should change code generator so it doesn't rely upon GCC extensions.
 
 * Implementation of polymorphism assumes sizeof(void *) == sizeof(int).
   Implementations of exceptions and backtrace() assume sizeof(void *)
@@ -91,16 +88,8 @@ function declarations are only allowed at top-level.
   to be shadowed by identifiers (or other typedefs).  Our lexer
   doesn't have quite the right infrastructure for this.
 
-* there are unsoundnesses w.r.t. the way we type-check the left-hand-sides
-  of certain operations (e.g., x++.)  Part of the problem is that we allow
-  implicit coercion from an enum to an integral type.  
-
 * we need to do a bounds check on enum assignments.  Also, the pattern
   matcher assumes that there are no duplicate tags for enums.
-
-* The whole sub-typing machinery needs to be re-examined to
-  make sure that it is sound.  In particular, alignment issues are
-  a concern.
 
 * namespace issues:  we treat `namespace Foo {extern "C" int x;}' as if
   x is translated as Cyc_Foo_x but it's translated as "x".  We should
@@ -186,11 +175,16 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
+* need dynamic (i.e., first-class) region support.
+
+* reference counting on regions?
+
+* linear pointers?
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
 * better type error messages:  it would be good to drop region information
-  when it's not germaine to the error.  
+  when it's not germaine to the error (e.g., regions).
 
 * dependent types for arrays (and lots more?)
 
@@ -226,6 +220,9 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * we should add template-like mechanisms for generating code at
   compile (or run?) time.  That would allow us to abstract over
   Mem types.
+
+* we should support more things as in LCLint:
+  * check that people actually look at the return code for a function?
 
 THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------

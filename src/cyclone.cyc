@@ -43,6 +43,7 @@ namespace Lex {
 }
 namespace Toc {
   bool warn_bounds_checks;
+  bool warn_all_null_deref;
 }
 
 using Core;
@@ -219,6 +220,11 @@ static void set_pg() {
 static void set_stop_after_asmfile() {
   stop_after_asmfile_r = true;
   add_ccarg("-S");
+}
+
+static void set_all_warnings() {
+  Toc::warn_bounds_checks = true;
+  Toc::warn_all_null_deref = true;
 }
 
 /* This only works enough to support cycdoc so far */
@@ -905,6 +911,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-b",false,"<arch>",
                new String_spec(set_target_arch),
                "Set target architecture; implies -stopafter-toc"),
+         new $("-Wall",false,"",
+               new Unit_spec(set_all_warnings),
+               "Turn on all warnings"),
          new $("-E",false,"",
                new Set_spec(&stop_after_cpp_r),
                "Stop after preprocessing"),
@@ -986,6 +995,9 @@ int main(int argc, string_t<`H> ?`H argv) {
 	 new $("-warnboundschecks", false, "",
 	       new Set_spec(&Toc::warn_bounds_checks),
 	       "Warn when bounds checks can't be eliminated"),
+	 new $("-warnnullchecks", false, "",
+	       new Set_spec(&Toc::warn_all_null_deref),
+	       "Warn when any null check can't be eliminated"),
 	 new $("-noregister", false, "",
 	       new Set_spec(&Parse::no_register),
 	       "Treat register storage class as public"),

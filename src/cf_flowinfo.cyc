@@ -145,7 +145,12 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
       }
     case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_}}) 
       && !conref_def(false,nbl):
-        return NotZeroAll;
+      switch(leafval) {
+      case &UnknownR(ThisIL): return NotZeroThis;
+      case &UnknownR(AllIL): return NotZeroAll;
+      default: break;
+      }
+      break;
     default: break;
     }
   
