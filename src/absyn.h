@@ -20,6 +20,10 @@
 #ifndef _ABSYN_H_
 #define _ABSYN_H_
 
+// This file defines the abstract syntax used by the Cyclone compiler
+// and related tools.  It is the crucial set of data structures that 
+// weave through the compiler.  
+
 // The abstract syntax has (at last count) three different "stages":
 // A. Result of parsing
 // B. Result of type-checking
@@ -67,19 +71,29 @@ namespace Absyn {
   using List;
   using Position;
 
-  typedef stringptr_t<`H,`H> field_name_t;
-  typedef stringptr_t<`H,`H> var_t;
-  typedef stringptr_t<`H,`H> tvarname_t;
-  extern tunion Nmspace;
-  typedef tunion Nmspace nmspace_t;
-  typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
-  typedef qvar_t typedef_name_t;
-  typedef qvar_opt_t typedef_name_opt_t;
   
-  // forward declarations
+  typedef stringptr_t<`H,`H> field_name_t; // field names (for structs, etc.)
+  typedef stringptr_t<`H,`H> var_t;        // variables are string pointers
+  typedef stringptr_t<`H,`H> tvarname_t;   // type variables
+
+  // Name spaces
+  EXTERN_ABSYN tunion Nmspace {
+    Loc_n,                // Local name
+    Rel_n(list_t<var_t>), // Relative name
+    Abs_n(list_t<var_t>)  // Absolute name
+  };
+  typedef tunion Nmspace nmspace_t;
+
+  // Qualified variables
+  typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
+  typedef qvar_t typedef_name_t;         // typedef names
+  typedef qvar_opt_t typedef_name_opt_t; 
+  
+  // forward declarations -- see below
   extern struct Conref<`a>;
   extern tunion Constraint<`a>;
-  
+
+  // typedef's -- in general, we define foo_t to be struct Foo@ or tunion Foo.
   typedef tunion Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
   typedef tunion Size_of size_of_t;
@@ -129,18 +143,24 @@ namespace Absyn {
   typedef struct Structfield @structfield_t;
   typedef tunion OffsetofField offsetof_field_t;
 
-  EXTERN_ABSYN tunion Nmspace {
-    Loc_n,                // Local name
-    Rel_n(list_t<var_t>), // Relative name
-    Abs_n(list_t<var_t>)  // Absolute name
+  // scopes for declarations 
+  EXTERN_ABSYN tunion Scope { 
+    Static,    // definition is local to the compilation unit
+    Abstract,  // definition is exported only abstractly (structs only)
+    Public,    // definition is exported in full glory (most things)
+    Extern,    // definition is provided elsewhere
+    ExternC    // definition is provided elsewhere by C code 
   };
-  EXTERN_ABSYN tunion Scope { Static, Abstract, Public, Extern, ExternC };
+
+  // type qualifiers -- const, volatile, and restrict
   EXTERN_ABSYN struct Tqual { 
     bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
 
+  // byte sizes -- 1, 2, 4, or 8 bytes
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
 
+  // Used to classify type terms.  
   EXTERN_ABSYN tunion Kind { 
     // BoxKind <= MemKind <= AnyKind
     AnyKind,      // kind of all types, including abstract structs
@@ -150,30 +170,40 @@ namespace Absyn {
     RgnKind,      // regions
     EffKind       // effects
   };
+
+  // signed or unsigned qualifiers on integral types
   EXTERN_ABSYN tunion Sign { Signed, Unsigned };
+
+  // constraint refs are used during unification to figure out what
+  // something should be when it's under-specified
   EXTERN_ABSYN struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_ABSYN tunion Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
   };
+
+  // type variables
   EXTERN_ABSYN struct Tvar {
-    tvarname_t name;
-    int       *identity; // for alpha-conversion
-    conref_t<kind_t> kind;
+    tvarname_t name;       // the user-level name of the type variable
+    int       *identity;   // for alpha-conversion -- unique
+    conref_t<kind_t> kind; // the kind of the type variable
   };
 
+  // used to distinguish ? pointers from *{c} or @{c} pointers
   EXTERN_ABSYN tunion Bounds {
     Unknown_b;      // t?
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
   };
 
+  // information about a pointer type
   EXTERN_ABSYN struct PtrInfo {
-    type_t             elt_typ;   // typ of value to which pointer points
+    type_t             elt_typ;   // type of value to which pointer points
     rgntype_t          rgn_typ;   // region of value to which pointer points
     conref_t<bool>     nullable;  // * or @
-    tqual_t            tq;
+    tqual_t            tq;        // determines whether the elts are const
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
   };
 
+  // information about vararg functions
   EXTERN_ABSYN struct VarargInfo {
     opt_t<var_t> name;
     tqual_t tq;
@@ -181,11 +211,14 @@ namespace Absyn {
     bool    inject;
   };
 
+  // information for functions
   EXTERN_ABSYN struct FnInfo {
-    list_t<tvar_t>                           tvars;
-    opt_t<type_t>                            effect; // null => default effect
-    type_t                                   ret_typ;
-    list_t<$(opt_t<var_t>,tqual_t,type_t)@>  args;
+    list_t<tvar_t>  tvars;   // abstracted type variables
+    // effect describes those regions that must be live to call the fn
+    opt_t<type_t>   effect;  // null => default effect
+    type_t          ret_typ; // return type
+    // arguments are optionally named
+    list_t<$(opt_t<var_t>,tqual_t,type_t)@>  args; 
     // if c_varargs is true, then cyc_varargs == null, and if 
     // cyc_varargs is non-null, then c_varargs is false.
     bool                                     c_varargs;
@@ -193,27 +226,30 @@ namespace Absyn {
     // partial order on region parameters
     list_t<$(type_t,type_t)@>                rgn_po;
     // function type attributes can include regparm(n), noreturn, const
-    // and at most one of cdecl, stdcall, and fastcall
+    // and at most one of cdecl, stdcall, and fastcall.  See gcc info
+    // for documentation on attributes.
     attributes_t                             attributes; 
   };
 
+  // information for [x]tunion's
   EXTERN_ABSYN struct UnknownTunionInfo {
-    qvar_t name;
-    bool   is_xtunion;
+    qvar_t name;       // name of the [x]tunion
+    bool   is_xtunion; // true -> xtunion, false -> tunion
   };
   EXTERN_ABSYN tunion TunionInfoU {
-    UnknownTunion(struct UnknownTunionInfo);
-    KnownTunion(tuniondecl_t@);
+    UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
+    KnownTunion(tuniondecl_t@);              // know definition
   };
   EXTERN_ABSYN struct TunionInfo {
-    tunion TunionInfoU tunion_info;
-    list_t<type_t>     targs;
-    rgntype_t          rgn;
+    tunion TunionInfoU tunion_info; // we either know the definition or not
+    list_t<type_t>     targs;       // type parameters
+    rgntype_t          rgn;         // region into which tunion points
   };
+  // information for [x]tunion Foo.Bar
   EXTERN_ABSYN struct UnknownTunionFieldInfo {
-    qvar_t tunion_name;
-    qvar_t field_name;
-    bool   is_xtunion;
+    qvar_t tunion_name;   // name of the [x]tunion 
+    qvar_t field_name;    // name of the tunion field
+    bool   is_xtunion;    // true -> xtunion, false -> tunion
   };
   EXTERN_ABSYN tunion TunionFieldInfoU {
     UnknownTunionfield(struct UnknownTunionFieldInfo);
@@ -241,11 +277,11 @@ namespace Absyn {
     // The list of tvars is the set of free type variables that can
     // occur in the type to which the evar is constrained.  
     Evar(opt_t<kind_t>,opt_t<type_t>,int,opt_t<list_t<tvar_t>>); 
-    VarType(tvar_t); // kind induced by tvar
-    TunionType(tunion_info_t);
-    TunionFieldType(tunion_field_info_t);
-    PointerType(ptr_info_t); // BoxKind when not Unknown_b
-    IntType(sign_t,size_of_t); // MemKind unless B4
+    VarType(tvar_t); // type variables, kind induced by tvar
+    TunionType(tunion_info_t); // [x]tunion Foo
+    TunionFieldType(tunion_field_info_t); // [x]tunion Foo.Bar
+    PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
+    IntType(sign_t,size_of_t); // char, short, int.  MemKind unless B4
     FloatType;  // MemKind
     DoubleType; // MemKind
     ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */); // MemKind
@@ -253,21 +289,26 @@ namespace Absyn {
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *); // MemKind
     UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *); // MemKind 
+    EnumType(typedef_name_t,struct Enumdecl *); // MemKind
+    // We treat anonymous structs, unions, and enums slightly differently
+    // than C.  In particular, we treat structurally equivalent types as
+    // equal, whereas C requires a name for each type and uses by-name
+    // equivalence only.
     AnonStructType(list_t<structfield_t>); // MemKind
     AnonUnionType(list_t<structfield_t>); // MemKind
-    EnumType(typedef_name_t,struct Enumdecl *); // MemKind
     AnonEnumType(list_t<enumfield_t>); // MemKind
-    RgnHandleType(type_t);   // BoxKind
+    RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>);
-    HeapRgn;                 // RgnKind
-    AccessEff(type_t);       // RgnKind -> EffKind
-    JoinEff(list_t<type_t>); // EffKind list -> EffKind
-    RgnsEff(type_t);         // AnyKind -> EffKind
+    HeapRgn;                 // The heap region.  RgnKind 
+    AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
+    JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
+    RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind
   };
 
+  // used when parsing/pretty-printing function definitions.
   EXTERN_ABSYN tunion Funcparams {
-    NoTypes(list_t<var_t>,seg_t);
+    NoTypes(list_t<var_t>,seg_t); // K&R style.  
     // bool is true when c_varargs, opt_t<typ> is effect
     WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, // args and types
               bool,                                    // c_varargs
@@ -276,18 +317,21 @@ namespace Absyn {
               list_t<$(type_t,type_t)@>);              // region partial order
   };
 
+  // used when parsing/pretty-printing pointers
   EXTERN_ABSYN tunion Pointer_Sort {
     NonNullable_ps(exp_t), // exp is upper bound
     Nullable_ps(exp_t),    // exp is upper bound
     TaggedArray_ps
   };
 
+  // Used in attributes below.
   EXTERN_ABSYN tunion Format_Type {
     Printf_ft, Scanf_ft
   };
 
-  // GCC attributes that we currently try to support:  this definitions
-  // is only used for parsing and pretty-printing.  
+  // GCC attributes that we currently try to support:  this definition
+  // is only used for parsing and pretty-printing.  See GCC info pages
+  // for details.
   EXTERN_ABSYN tunion Attribute {
     Regparm_att(int); 
     Stdcall_att;      
@@ -313,9 +357,10 @@ namespace Absyn {
                int);  // first arg to type-check
   };
 
+  // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN tunion Type_modifier {
-    Carray_mod; 
-    ConstArray_mod(exp_t);
+    Carray_mod; // []
+    ConstArray_mod(exp_t); // [c]
     // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
     Pointer_mod(tunion Pointer_Sort,type_t,tqual_t); 
     Function_mod(funcparams_t);
@@ -323,160 +368,179 @@ namespace Absyn {
     Attributes_mod(seg_t,attributes_t);
   };
 
+  // Constants
   EXTERN_ABSYN tunion Cnst {
-    Char_c(sign_t,char);
-    Short_c(sign_t,short);
-    Int_c(sign_t,int);
-    LongLong_c(sign_t,long long);
-    Float_c(string_t);
-    String_c(string_t); 
-    Null_c;
+    Char_c(sign_t,char);          // chars
+    Short_c(sign_t,short);        // shorts
+    Int_c(sign_t,int);            // ints
+    LongLong_c(sign_t,long long); // long-longs
+    Float_c(string_t);            // floats -- where's doubles?
+    String_c(string_t);           // strings
+    Null_c;                       // NULL
   };
 
+  // Primitive operations
   EXTERN_ABSYN tunion Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
     Size
   };
 
+  // ++x, x++, --x, x-- respectively
   EXTERN_ABSYN tunion Incrementor { PreInc, PostInc, PreDec, PostDec };
 
+  // information about a call to a vararg function
   EXTERN_ABSYN struct VarargCallInfo {
     int                   num_varargs;
     list_t<tunionfield_t> injectors;
     vararg_info_t        @vai;
   };
 
+  // information for offsetof
   EXTERN_ABSYN tunion OffsetofField {
     StructField(field_name_t);
     TupleIndex(unsigned int);
   };
 
+  // "raw" expressions -- don't include location info or type
   EXTERN_ABSYN tunion Raw_exp {
-    Const_e(cnst_t);
-    Var_e(qvar_t,binding_t); 
-    UnknownId_e(qvar_t);
-    Primop_e(primop_t,list_t<exp_t>);
-    AssignOp_e(exp_t,opt_t<primop_t>,exp_t);
-    Increment_e(exp_t,incrementor_t);
-    Conditional_e(exp_t,exp_t,exp_t);
-    SeqExp_e(exp_t,exp_t);
-    UnknownCall_e(exp_t,list_t<exp_t>);
+    Const_e(cnst_t); // constants
+    Var_e(qvar_t,binding_t); // variables -- binding_t gets filled in
+    UnknownId_e(qvar_t);     // used only during parsing
+    Primop_e(primop_t,list_t<exp_t>); // application of primitive
+    AssignOp_e(exp_t,opt_t<primop_t>,exp_t); // e1 = e2, e1 += e2, etc.
+    Increment_e(exp_t,incrementor_t);  // e++, ++e, --e, e--
+    Conditional_e(exp_t,exp_t,exp_t);  // e1 ? e2 : e3
+    SeqExp_e(exp_t,exp_t);             // e1, e2
+    UnknownCall_e(exp_t,list_t<exp_t>); // used during parsing
     // the vararg_call_info_t is non-null only if this is a vararg call
     // and is set during type-checking and used only for code generation.
-    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *);
-    Throw_e(exp_t);
-    NoInstantiate_e(exp_t);
-    Instantiate_e(exp_t,list_t<type_t>);
-    Cast_e(type_t,exp_t);
-    Address_e(exp_t);
+    FnCall_e(exp_t,list_t<exp_t>,vararg_call_info_t *); // fn call
+    Throw_e(exp_t); // throw
+    NoInstantiate_e(exp_t); // e@<>
+    Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn
+    Cast_e(type_t,exp_t); // (t)e
+    Address_e(exp_t); // &e
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
-    Sizeoftyp_e(type_t);
-    Sizeofexp_e(exp_t);
-    Offsetof_e(type_t,offsetof_field_t);
-    Gentyp_e(list_t<tvar_t>, type_t);
-    Deref_e(exp_t);
-    StructMember_e(exp_t,field_name_t); // also union member
-    StructArrow_e(exp_t,field_name_t);  // also union arrow
-    Subscript_e(exp_t,exp_t);
-    Tuple_e(list_t<exp_t>);
+    Sizeoftyp_e(type_t); // sizeof(t)
+    Sizeofexp_e(exp_t); // sizeof(e)
+    Offsetof_e(type_t,offsetof_field_t); // offsetof(t,e)
+    Gentyp_e(list_t<tvar_t>, type_t); // type-rep stuff
+    Deref_e(exp_t); // *e
+    StructMember_e(exp_t,field_name_t); // e.f, also union member
+    StructArrow_e(exp_t,field_name_t);  // e->f, also union arrow
+    Subscript_e(exp_t,exp_t); // e1[e2]
+    Tuple_e(list_t<exp_t>); // $(e1,...,en)
     CompoundLit_e($(opt_t<var_t>,tqual_t,type_t)@,
-                  list_t<$(list_t<designator_t>,exp_t)@>);
-    Array_e(list_t<$(list_t<designator_t>,exp_t)@>);
+                  list_t<$(list_t<designator_t>,exp_t)@>); 
+    Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
+    // {for i < e1 : e2}
     Comprehension_e(vardecl_t,exp_t,exp_t); // much of vardecl is known
+    // Foo{.x1=e1,...,.xn=en}
     Struct_e(typedef_name_t,opt_t<list_t<type_t>>,
 	     list_t<$(list_t<designator_t>,exp_t)@>, struct Structdecl *);
+    // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
+    // Foo(e1,...,en)
     Tunion_e(opt_t<list_t<type_t>>,opt_t<list_t<type_t>>,list_t<exp_t>,
              tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
+    // rmalloc(h, sizeof(t)) or malloc(sizeof(t))
     Malloc_e(exp_opt_t, type_t); // first expression is region -- null is heap
+    // will resolve into array, struct, etc.
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
-    StmtExp_e(stmt_t);
-    Codegen_e(fndecl_t);
-    Fill_e(exp_t);
+    StmtExp_e(stmt_t); // ({s;e})
+    Codegen_e(fndecl_t); // code generation stuff -- not used
+    Fill_e(exp_t);       // code generation stuff -- not used
   };
 
+  // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
-    opt_t<type_t> topt;
-    raw_exp_t     r;
-    seg_t         loc;
-    absyn_annot_t annot;
+    opt_t<type_t> topt;  // type of expression -- filled in by type-checker
+    raw_exp_t     r;     // the real expression
+    seg_t         loc;   // the location in the source code
+    absyn_annot_t annot; // used during analysis
   };
 
   // The $(exp,stmt) in loops are just a hack for holding the
   // non-local predecessors of the exp.  The stmt should always be Skip_s
   // and only the non_local_preds field is interesting.
   EXTERN_ABSYN tunion Raw_stmt {
-    Skip_s;
-    Exp_s(exp_t);
-    Seq_s(stmt_t,stmt_t);
-    Return_s(exp_opt_t);
-    IfThenElse_s(exp_t,stmt_t,stmt_t);
-    While_s($(exp_t,stmt_t),stmt_t);
+    Skip_s;   // ;
+    Exp_s(exp_t);  // e
+    Seq_s(stmt_t,stmt_t); // s1;s2
+    Return_s(exp_opt_t); // return; and return e;
+    IfThenElse_s(exp_t,stmt_t,stmt_t); // if (e) then s1 else s2;
+    While_s($(exp_t,stmt_t),stmt_t); // while (e) s;
     Break_s(stmt_opt_t);    // stmt is dest, set by type-checking
     Continue_s(stmt_opt_t); // stmt is dest, set by type-checking
     Goto_s(var_t,stmt_opt_t); // stmt is dest, set by type-checking
     For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
-    Switch_s(exp_t,list_t<switch_clause_t>); 
-    SwitchC_s(exp_t,list_t<switchC_clause_t>);
+    Switch_s(exp_t,list_t<switch_clause_t>);  // cyclone switch 
+    SwitchC_s(exp_t,list_t<switchC_clause_t>); // C switch
     // next case set by type-checking
     Fallthru_s(list_t<exp_t>,switch_clause_t *);
-    Decl_s(decl_t,stmt_t);
-    Cut_s(stmt_t);
-    Splice_s(stmt_t);
-    Label_s(var_t,stmt_t); 
+    Decl_s(decl_t,stmt_t); // declarations
+    Cut_s(stmt_t);    // code generation stuff -- not used
+    Splice_s(stmt_t); // code generation stuff -- not used
+    Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
-    Region_s(tvar_t, vardecl_t, stmt_t);
+    Region_s(tvar_t, vardecl_t, stmt_t); // region<`r> h {s}
   };
 
+  // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
-    raw_stmt_t     r;
-    seg_t          loc;
+    raw_stmt_t     r;               // raw statement
+    seg_t          loc;             // location in source code
     list_t<stmt_t> non_local_preds; // set by type-checking, should go in the
                                     // appropriate CFStmtAnnot, not here!
-    int            try_depth;
-    absyn_annot_t  annot;
+    int            try_depth;       // used by code generator
+    absyn_annot_t  annot;           // used by analysis
   };
 
+  // raw patterns
   EXTERN_ABSYN tunion Raw_pat {
-    Wild_p;
-    Var_p(vardecl_t); // only name field is right until tcPat is called
-    Null_p;
-    Int_p(sign_t,int);
-    Char_p(char);
-    Float_p(string_t);
-    Tuple_p(list_t<pat_t>);
-    Pointer_p(pat_t);
-    Reference_p(vardecl_t); // only name field is right until tcpat is called
+    Wild_p; // _ 
+    Var_p(vardecl_t); // x.  only name field is right until tcPat is called
+    Null_p; // NULL
+    Int_p(sign_t,int); // 3
+    Char_p(char);      // 'a'
+    Float_p(string_t); // 3.1415
+    Tuple_p(list_t<pat_t>); // $(p1,...,pn)
+    Pointer_p(pat_t); // &p
+    // *p. only name field is right until tcpat is called
+    Reference_p(vardecl_t); 
     Struct_p(structdecl_t,opt_t<list_t<type_t>>,list_t<tvar_t>,
 	     list_t<$(list_t<designator_t>,pat_t)@>);
     Tunion_p(tuniondecl_t, tunionfield_t, list_t<tvar_t>, list_t<pat_t>);
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
-    UnknownId_p(qvar_t);
-    UnknownCall_p(qvar_t,list_t<tvar_t>,list_t<pat_t>);
+    UnknownId_p(qvar_t); // the rest are resolved by tcpat
+    UnknownCall_p(qvar_t,list_t<tvar_t>,list_t<pat_t>); 
     UnknownFields_p(qvar_t,list_t<tvar_t>,
                     list_t<$(list_t<designator_t>,pat_t)@>);
   };
 
+  // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
-    raw_pat_t      r;
-    opt_t<type_t>  topt;
-    seg_t          loc;
+    raw_pat_t      r;    // raw pattern
+    opt_t<type_t>  topt; // type -- filled in by tcpat
+    seg_t          loc;  // location in source code
   };
 
+  // cyclone switch clauses
   EXTERN_ABSYN struct Switch_clause {
-    pat_t                    pattern;
+    pat_t                    pattern;  // pattern
     opt_t<list_t<vardecl_t>> pat_vars; // set by type-checker, used downstream
-    exp_opt_t                where_clause;
-    stmt_t                   body;
-    seg_t                    loc;
+    exp_opt_t                where_clause; // case p & e: -- the e part
+    stmt_t                   body;     // corresponding statement
+    seg_t                    loc;      // location in source code
   };
 
+  // C switch clauses
   EXTERN_ABSYN struct SwitchC_clause {
     exp_opt_t cnst_exp; // KLUDGE: null => default (parser ensures it's last)
     stmt_t    body;
@@ -485,23 +549,25 @@ namespace Absyn {
 
   // only local and pat cases need to worry about shadowing
   EXTERN_ABSYN tunion Binding {
-    Unresolved_b; 
-    Global_b(vardecl_t);
+    Unresolved_b;       // don't know -- error or uninitialized
+    Global_b(vardecl_t); // global variable
     Funname_b(fndecl_t);// good distinction between functions and function ptrs
-    Param_b(vardecl_t);
-    Local_b(vardecl_t);
-    Pat_b(vardecl_t); // may use a specialized type later
+    Param_b(vardecl_t); // local function parameter
+    Local_b(vardecl_t); // local variable
+    Pat_b(vardecl_t); // pattern variable.  may use a specialized type later
   };
 
+  // Variable declarations.
   // re-factor this so different kinds of vardecls only have what they
   // need.  Makes this a struct with an tunion componenent (Global, Pattern,
   // Param, Local)
   EXTERN_ABSYN struct Vardecl {
-    scope_t            sc; 
-    qvar_t             name;
-    tqual_t            tq;
-    type_t             type;
-    exp_opt_t          initializer; // ignored for non-local variables
+    scope_t            sc;          // static, extern, etc.
+    qvar_t             name;        // variable name
+    tqual_t            tq;          // const, volatile, etc.
+    type_t             type;        // type of variable
+    exp_opt_t          initializer; // optional initializer -- 
+                                    // ignored for non-local variables
     opt_t<type_t>      rgn;         // filled in by type-checker
     // attributes can include just about anything...but the type-checker
     // must ensure that they are properly accounted for.  For instance,
@@ -510,18 +576,19 @@ namespace Absyn {
     attributes_t       attributes; 
   };
 
+  // Function declarations.
   EXTERN_ABSYN struct Fndecl {
-    scope_t                    sc;
-    bool                       is_inline;
-    qvar_t                     name;
-    list_t<tvar_t>             tvs; 
+    scope_t                    sc;         // static, extern, etc.
+    bool                       is_inline;  // inline flag
+    qvar_t                     name;       // function name
+    list_t<tvar_t>             tvs;        // bound type variables
     opt_t<type_t>              effect;     // null => default effect
-    type_t                     ret_type;
-    list_t<$(var_t,tqual_t,type_t)@> args;
-    bool                       c_varargs;
-    vararg_info_t*             cyc_varargs;
+    type_t                     ret_type;   // return type
+    list_t<$(var_t,tqual_t,type_t)@> args; // arguments & their quals and types
+    bool                       c_varargs;   // C vararg?
+    vararg_info_t*             cyc_varargs; // non-null if Cyclone vararg
     list_t<$(type_t,type_t)@>  rgn_po; // partial order on region params
-    stmt_t                     body;
+    stmt_t                     body;   // body of function
     opt_t<type_t>              cached_typ; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
     // any attributes except aligned or packed
@@ -539,15 +606,15 @@ namespace Absyn {
   // for structs and tunions, we should really memoize the string to 
   // field-number mapping!
   EXTERN_ABSYN struct Structdecl {
-    scope_t                      sc;
-    opt_t<typedef_name_t>        name;
-    list_t<tvar_t>               tvs;
-    opt_t<list_t<structfield_t>> fields;
-    attributes_t                 attributes;
+    scope_t                      sc;  // abstract possible here
+    opt_t<typedef_name_t>        name; // struct name
+    list_t<tvar_t>               tvs;  // bound type variables
+    opt_t<list_t<structfield_t>> fields; // fields
+    attributes_t                 attributes; 
   };
 
   EXTERN_ABSYN struct Uniondecl {
-    scope_t                      sc;
+    scope_t                      sc;   // similar to above
     opt_t<typedef_name_t>        name;
     list_t<tvar_t>               tvs;
     opt_t<list_t<structfield_t>> fields;
@@ -555,14 +622,14 @@ namespace Absyn {
   };
 
   EXTERN_ABSYN struct Tunionfield {
-    qvar_t                     name;
+    qvar_t                     name; 
     list_t<tvar_t>             tvs;
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
     scope_t                    sc; // only relevant for xtunions
   };
 
-  EXTERN_ABSYN struct Tuniondecl {
+  EXTERN_ABSYN struct Tuniondecl { 
     scope_t        sc;
     typedef_name_t name;
     list_t<tvar_t> tvs;
@@ -588,25 +655,27 @@ namespace Absyn {
     type_t           defn;
   };
 
+  // raw declarations
   EXTERN_ABSYN tunion Raw_decl {
-    Var_d(vardecl_t);
-    Fn_d(fndecl_t);
-    Let_d(pat_t,
+    Var_d(vardecl_t);  // variables: t x = e
+    Fn_d(fndecl_t);    // functions  t f(t1 x1,...,tn xn) { ... }
+    Let_d(pat_t,       // let p = e
           opt_t<list_t<vardecl_t>>, // set by type-checker, used downstream
           opt_t<type_t>,
           exp_t,
           bool); // true => exhaustive
-    Letv_d(list_t<vardecl_t>);
-    Struct_d(structdecl_t);
-    Union_d(uniondecl_t);
-    Tunion_d(tuniondecl_t);
-    Enum_d(enumdecl_t);
-    Typedef_d(typedefdecl_t);
-    Namespace_d(var_t,list_t<decl_t>);
-    Using_d(qvar_t,list_t<decl_t>);
-    ExternC_d(list_t<decl_t>);
+    Letv_d(list_t<vardecl_t>); // multi-let
+    Struct_d(structdecl_t);    // struct Foo { ... }
+    Union_d(uniondecl_t);      // union Foo { ... }
+    Tunion_d(tuniondecl_t);    // [x]tunion Bar { ... }
+    Enum_d(enumdecl_t);        // enum Baz { ... }
+    Typedef_d(typedefdecl_t);  // typedef t n
+    Namespace_d(var_t,list_t<decl_t>); // namespace Foo { ... }
+    Using_d(qvar_t,list_t<decl_t>);  // using Foo { ... }
+    ExternC_d(list_t<decl_t>); // extern "C" { ... }
   };
 
+  // declarations w/ auxiliary info
   EXTERN_ABSYN struct Decl {
     raw_decl_t r;
     seg_t      loc;
@@ -618,6 +687,10 @@ namespace Absyn {
   };
 
   EXTERN_ABSYN xtunion AbsynAnnot { EXTERN_ABSYN EmptyAnnot; };
+
+  ///////////////////////////////////////////////////////////////////
+  // Operations and Constructors for Abstract Syntax
+  ///////////////////////////////////////////////////////////////////
 
   // compare variables 
   extern int qvar_cmp(qvar_t, qvar_t);
@@ -675,12 +748,19 @@ namespace Absyn {
   // pointers
   extern exp_t exp_unsigned_one; // good for sharing
   extern tunion Bounds bounds_one; // Upper(1) (good for sharing)
+  // t *{e}`r
   extern type_t starb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);
+  // t @{e}`r
   extern type_t atb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);
+  // t *`r
   extern type_t star_typ(type_t t, type_t rgn, tqual_t tq);// bounds = Upper(1)
+  // t @`r
   extern type_t at_typ(type_t t, type_t rgn, tqual_t tq);  // bounds = Upper(1)
-  extern type_t cstar_typ(type_t t, tqual_t tq); // *t -- always heap
+  // t*`H
+  extern type_t cstar_typ(type_t t, tqual_t tq); 
+  // t?`r
   extern type_t tagged_typ(type_t t, type_t rgn, tqual_t tq);
+  // void*
   extern type_t void_star_typ();
   extern opt_t<type_t> void_star_typ_opt();
   // structs
@@ -806,17 +886,23 @@ namespace Absyn {
                              vararg_info_t *`H cyc_varargs,
                              list_t<$(type_t,type_t)@`H,`H> rgn_po,
                              attributes_t);
+  // turn t[] into t? as appropriate
   extern type_t pointer_expand(type_t);
+  // returns true when the expression is a valid left-hand-side
   extern bool is_lvalue(exp_t);
 
+  // find a struct field by name from a list of fields
   extern struct Structfield *lookup_field(list_t<structfield_t,`H>,var_t);
+  // find a struct field by name from a struct declaration
   extern struct Structfield *lookup_struct_field(structdecl_t,var_t);
+  // find a union field by name from a union declaration
   extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
+  // find a tuple field form a list of qualifiers and types
   extern $(tqual_t,type_t) *lookup_tuple_field(list_t<$(tqual_t,type_t)@`H,`H>,int);
+  // turn an attribute into a string
   extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
   extern bool fntype_att(attribute_t a);
-
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
 

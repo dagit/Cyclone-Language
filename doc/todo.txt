@@ -21,7 +21,8 @@ BUG FIXES and UNSOUNDNESSES:
 
 * FIX all of the FIX things.
 
-* can't cast char?? to const char? const ? (or whatever it is.)
+* can't cast char?? to const char? const ? (or whatever it is.)  I think
+  in general we're not tracking all of the qualifiers where we need to...
 
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in

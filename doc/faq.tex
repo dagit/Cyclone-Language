@@ -39,7 +39,6 @@
 \hyperlink{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}\\
 \hyperlink{faq:list}{What does \texttt{struct List<`a,`r::R>} mean?}\\
 \hyperlink{faq:tagged}{What are \texttt{tunion} and \texttt{xtunion}?}\\
-\hyperlink{faq:structfp}{How do I make a struct with function-pointer fields?}\\
 \hyperlink{faq:abstract}{What is \texttt{abstract}?}\\
 \hyperlink{faq:keywords}{What are the Cyclone keywords?}\\
 \hyperlink{faq:namespace}{What are \texttt{namespace} and \texttt{using}?}\\
@@ -319,18 +318,6 @@ Cyclone compiler determine what type the underlying value actually
 has, thus helping to ensure safety.
 \end{faqa}
 
-\begin{faqa}{faq:structfp}{How do I make a struct with function-pointer fields?}
-Follow this arcane format:
-\begin{verbatim}
-  struct S<`e1::E, `e2::E> {
-    void f1(int,int; `e1);
-    int f2(; `e2);
-  };
-  typedef S<{},{}> s_t;
-\end{verbatim}
-You will find more explanation where we discuss memory management.
-\end{faqa}
-
 \begin{faqa}{faq:abstract}{What is \texttt{abstract}?}
 \texttt{abstract} is a storage-class specifier, like \texttt{static}
 or \texttt{extern}.  When attached to a top-level type declaration, it
@@ -564,7 +551,9 @@ run-time types.
 
 \begin{faqa}{faq:vararg}{Can I use varargs?}
 Yes, Cyclone has a way of supporting variable-argument functions.  It
-is not quite the same as C's, but it is safe.
+is not quite the same as C's, but it is safe.  For instance, we have
+written type-safe versions of printf and scanf all within Cyclone.
+See the documentation on varargs for more information.
 \end{faqa}
 
 \begin{faqa}{faq:typesinfunctions}{Why can't I declare types within functions?}
@@ -657,10 +646,12 @@ know any constant expression of that type.
 
 \begin{faqa}{faq:threads}{Are there threads?}
 Cyclone does not yet have a threads library and some of the libraries
-are not re-entrant.  However, it should be fine to call Cyclone code
-from multiple C threads (provided the garbage collector is correctly
-configured).  In the future, we will support threads directly as well
-as static analysis for preventing data races.
+are not re-entrant.  In addition, because Cyclone uses unboxed structs
+of three words
+to represent fat pointers, and updating them is not an atomic operation,
+it's possible to introduce unsoundnesses by adding concurrent threads.
+However, in the future, we plan to provide support for threads and
+a static analysis for preventing these and other forms of data races.
 \end{faqa}
 
 \begin{faqa}{faq:setjmp}{Can I use \texttt{setjmp} and \texttt{longjmp}?}
@@ -835,9 +826,9 @@ in a way that is guaranteed safe.
 Our compiler is not as smart as you are.  It does not realize that you
 have tested for \texttt{NULL}, and it insists on a check (the cast)
 just to be sure.  You can leave the cast implicit, but the compiler
-will emit a warning.  In the future, we may define a flow-analysis to
-omit spurious warning.  Because of aliasing and undefined evaluation
-order, a sound analysis is non-trivial.
+will emit a warning.  We are currently working to incorporate a flow
+analysis to omit spurious warning.  Because of aliasing, threads, and 
+undefined evaluation order, a sound analysis is non-trivial.
 \end{faqa}
 
 \begin{faqa}{faq:memkind}{Why can't a function parameter or struct field have type \texttt{`a::M}?} 
@@ -924,10 +915,9 @@ chance to add it.
 You need a platform that has gcc 2.9, GNU make, ar, sed, and the
 ability to build the Boehm-Demers-Weiser garbage collector.
 Furthermore, the size of \texttt{int} and all C pointers must be the
-same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), and Linux
-(insert distributions here).  We have built slightly older versions on
-Solaris and OpenBSD---we hope to ``officially'' support these
-platforms soon.
+same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), and Linux.
+We have built slightly older versions on Solaris and OpenBSD, and
+Mac OS X.
 \end{faqa}
 
 \begin{faqa}{faq:libs}{Why aren't there more libraries?}
