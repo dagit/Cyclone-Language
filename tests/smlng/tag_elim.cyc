@@ -480,7 +480,7 @@ struct DynSynth {
 
 // probably need to avoid calling dynamic_size/color for very small trivial
 // problems.
-$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
+$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc, bool shift, int win_size) {
   switch(doc) {
   case Mt: fallthru;
   case &Spc(_): fallthru;
@@ -497,7 +497,7 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
     list_t<doc_t> prev_start_colors = null; // not prev at beginning 
     while(ds != null) {
       //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
-      let $(newd, inner_synth) = dynamic_regions(ds->hd);
+      let $(newd, inner_synth) = dynamic_regions(ds->hd,shift,win_size);
       ds->hd = newd; // destructive here
       synth.only_sizes     &= inner_synth.only_sizes;
       synth.only_colors    &= inner_synth.only_colors;
@@ -507,14 +507,14 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
 	if(prev_start_sizes == null) {
 	  // beginning of sequence -- split differently
 	  prev->tl = null;
-	  doc_t d = dynamic_size(new Seq(*dsp));
+	  doc_t d = dynamic_size(new Seq(*dsp), shift, win_size);
 	  *dsp = new List(d, ds);
 	  prev_start_sizes = prev_start_colors = *dsp;
 	} else {
 	  list_t<doc_t> start = prev_start_sizes->tl;
 	  prev_start_sizes->tl = null;
 	  prev->tl = null;
-	  doc_t d = dynamic_size(new Seq(start));
+	  doc_t d = dynamic_size(new Seq(start), shift, win_size);
 	  prev_start_sizes = prev_start_colors = new List(d,ds);
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
 	}
@@ -525,7 +525,7 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
 	if(prev_start_colors == null) {
 	  // beginning of sequence -- split differently
 	  prev->tl = null;
-	  doc_t d = dynamic_color(new Seq(*dsp));
+	  doc_t d = dynamic_color(new Seq(*dsp), shift, win_size);
 	  *dsp = new List(d, ds);
 	  prev_start_sizes = prev_start_colors = *dsp;
 	  only_sizes  = synth.only_sizes;
@@ -534,7 +534,7 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
 	  list_t<doc_t> start = prev_start_colors->tl;
 	  prev_start_colors->tl = null;
 	  prev->tl = null;
-	  doc_t d = dynamic_color(new Seq(start));
+	  doc_t d = dynamic_color(new Seq(start), shift, win_size);
 	  prev_start_sizes = prev_start_colors = new List(d,ds);
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
 	}
@@ -555,17 +555,17 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
       ds = ds->tl;
     }
     //    fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
-    if(only_sizes > 2 && prev_start_sizes != null) {
+    if(only_sizes > 2 && prev_start_sizes != null && !synth.only_sizes) {
       list_t<doc_t> start = prev_start_sizes->tl;
       prev_start_sizes->tl = null;
       *dsp = new List(new Seq(*dsp), 
-	     new List(dynamic_size(new Seq(start)),null));
+	     new List(dynamic_size(new Seq(start), shift, win_size),null));
     }
-    else if(only_colors > 2 && prev_start_colors != null) {
+    else if(only_colors > 2 && prev_start_colors != null && !synth.only_colors){
       list_t<doc_t> start = prev_start_colors->tl;
       prev_start_colors->tl = null;
       *dsp = new List(new Seq(*dsp), 
-	     new List(dynamic_color(new Seq(start)),null));
+	     new List(dynamic_color(new Seq(start), shift, win_size),null));
     }
     if(!synth.only_sizes)
       synth.num_size_docs = 0;
@@ -574,7 +574,8 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
     return $(doc,synth);
 	
   case &Tagged(tag,*d):
-    let $(d2,DynSynth(num_sz,num_col,sz,col)) = dynamic_regions(*d);
+    let $(d2,DynSynth(num_sz,num_col,sz,col)) = 
+      dynamic_regions(*d,shift,win_size);
     *d = d2;
     switch(tag) {
       // try harder here -- we should be able to say true for size and
@@ -582,19 +583,19 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
     case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
     case Six: case  Seven: case  Eight: case  Nine:
       if(col && num_col > 2) {
-	*d = dynamic_color(d2);
+	*d = dynamic_color(d2, shift, win_size);
       }
       return $(doc,DynSynth((sz ? num_sz+1 : 0), 0, sz,false));
     case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
     case y_tag: case k_tag: case w_tag:
       if(sz && num_sz > 2)
-	*d = dynamic_size(d2);
+	*d = dynamic_size(d2, shift, win_size);
       return $(doc,DynSynth(0,(col ? num_col+1 : 0),false,col));
     default:
       if(sz && num_sz > 2)
-	*d = dynamic_size(d2);
+	*d = dynamic_size(d2, shift, win_size);
       else if(col && num_col > 2) {
-	*d = dynamic_color(d2);
+	*d = dynamic_color(d2, shift, win_size);
       }
       return $(doc,DynSynth(0,0,false,false));
     }

@@ -15,6 +15,7 @@ using Stdio;
 using Buffer;
 using Parser;
 using String;
+using TagElim;
 
 bool is_change = true;
 
@@ -163,6 +164,18 @@ unsigned int num_texts(doc_t d) {
   case Mt: break;
   }
   return sum;
+}
+unsigned int num_tags(doc_t d) {
+  switch (d) {
+  case &Seq(ds):
+    unsigned int sum = 0;
+    for (; ds != null; ds=ds->tl)
+      sum += num_tags(ds->hd); 
+    return sum;
+  case &Tagged(_,d):
+    return num_tags(d) + 1;
+  default: return 0;
+  }
 }
 
 
@@ -462,14 +475,47 @@ int main(int argc, char ??argv) {
       round_num = 0;
     }
   }
-  //not sure how much time we need, notice we wait until cheaper things have run
-  fprintf(stderr,"%d\ndynamic_regions...", check_time()); fflush(stderr);
-  let $(d2,TagElim::DynSynth(num_sz,num_col,sz,col)) = TagElim::dynamic_regions(d);
-  d = d2;
-  if(sz && num_sz > 2) {
-    d = dynamic_size(d);
-    }if(col && num_col > 2)
-    d = dynamic_color(d);
+
+  // notice we wait until cheaper things have run
+  // don't put any optimizations after this -- it tries to hog the time
+  // BTW, it's expensive to keep flattening and unflattening the sequences,
+  // but it's nice to iterate way out here.
+  int  window_size = 10;
+  int  tag_count = num_tags(d);
+  int  useless_passes  = 0;
+  int  useless_doubles = 0; // allow two?
+  while(true) {
+    fprintf(stderr,"%d\ndynamic_regions %d %d...", 
+	    check_time(), window_size, tag_count); 
+    fflush(stderr);
+    // toggle the shift -- dont' bother
+    //shift_window = !shift_window;
+
+    // FIX: pass window size and shift_window
+    // run the optimization
+    int start_time = check_time();
+    let $(d2,DynSynth(num_sz,num_col,sz,col)) = 
+      dynamic_regions(d,false,window_size);
+    //    fprintf(stderr, "X %d", num_sz);
+    d = d2;
+    if(sz && num_sz > 2) {
+      d = dynamic_size(d,false,window_size);
+    } if(col && num_col > 2)
+      d = dynamic_color(d,false,window_size);
+
+    // check for progress, if so continue with wider window
+    int new_tag_count = num_tags(d);
+    int end_time = check_time();
+    if(new_tag_count < tag_count) {
+      useless_passes = useless_doubles = 0;
+      tag_count = new_tag_count;
+      window_size += 10;
+      // see if we have time, 4 is not the right thing!
+      if((4*(start_time - end_time)) > end_time - 7)
+	break;
+    } else
+      break;
+  }
   } catch {
   case e: 
     fprintf(stderr, "...uncaught exception! dumping anyway...");
@@ -480,8 +526,7 @@ int main(int argc, char ??argv) {
   dump_iter(b,d);
   let t = check_time();
   fprintf(stderr,"time left: %d sec out of %s sec\n",t,tlimit); fflush(stderr);
-  //fprintf(stderr,"validating docs\n",t); fflush(stderr);
-  //validate_docs(b,d,orig);
+
   return 0;
 }
 

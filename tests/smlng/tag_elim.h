@@ -56,7 +56,9 @@ extern struct DynSynth {
 };
 typedef struct DynSynth dyn_synth_t;
 
-$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc);
+$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc,
+				     bool shift_window,
+				     int window_size);
 
 }
 #endif

@@ -9,7 +9,6 @@ using Stdio;
 using List;
 
 #define MAX_COST 0x7FFF // see below!!!
-#define INPUT_SIZE 20 // make bigger when not testing! (but not too big :-( )
 #define VAL_WIDTH 11
 
 // slower to use smaller types because of local vars of wrong size I think.
@@ -37,34 +36,34 @@ typedef $(cost_t,pos_t) entry_t;
 #define MAKE_ENTRY(c,p) ($((c),(p)))
 #define COST_OF_ENTRY(e) ((e)[0])
 #define POS_OF_ENTRY(e)  ((e)[1])
-static entry_t size_table[INPUT_SIZE*INPUT_SIZE*VAL_WIDTH];
+static entry_t size_table[MAX_WINDOW_SIZE*MAX_WINDOW_SIZE*VAL_WIDTH];
 
-#define S(i,j,s) (size_table[(i)*INPUT_SIZE*VAL_WIDTH + (j)*VAL_WIDTH + (s)])
+#define S(i,j,s) (size_table[(i)*MAX_WINDOW_SIZE*VAL_WIDTH + (j)*VAL_WIDTH + (s)])
 //$(int,int) size_table[INPUT_SIZE][INPUT_SIZE][NUM_SIZES];
 //#define S(i,j,s) size_table[i][j][s]
 
 // curr_pos must be an int -- this is for the entire sequence
 static void flatten_vals(doc_t doc, $(doc_t,val_t) ?@`r doc_arr, 
-			 int @`r curr_pos, val_t lowest_val, val_t num_vals,
-			 bool @{VAL_WIDTH}`r vals_occur) {
-  doc_t next_doc;
-  val_t next_val;
+			 int @`r curr_pos, val_t curr_val,
+			 val_t lowest_val, bool @{VAL_WIDTH}`r vals_occur) {
   switch(doc) {
-  case Mt:             return;
-  case &Spc(_):        fallthru;
-  case &Text(_):       next_doc = doc; next_val = num_vals - 1;    break;
-  case &Tagged(tag,d): next_doc = d;   next_val = tag - lowest_val; break;
+  case Mt: return;
+  case &Spc(_): fallthru;
+  case &Text(_):       
+    if(*curr_pos == (*doc_arr).size)
+      *doc_arr = new {for i < (*doc_arr).size*2: 
+		      i < (*doc_arr).size ? (*doc_arr)[i] : $(Mt,0)};
+    vals_occur[curr_val] = true;
+    (*doc_arr)[(*curr_pos)++] = $(doc,curr_val);
+    return;
+  case &Tagged(tag,d): 
+    flatten_vals(d,doc_arr,curr_pos,tag-lowest_val,lowest_val,vals_occur);
+    return;
   case &Seq(ds): 
     for(; ds != null; ds = ds->tl)
-      flatten_vals(ds->hd,doc_arr,curr_pos,lowest_val,num_vals,vals_occur);
+      flatten_vals(ds->hd,doc_arr,curr_pos,curr_val,lowest_val,vals_occur);
     return;
   }
-  if(*curr_pos == (*doc_arr).size)
-    *doc_arr = new {for i < (*doc_arr).size*2: 
-		    i < (*doc_arr).size ? (*doc_arr)[i] : $(Mt,0)};
-  vals_occur[next_val] = true;
-  (*doc_arr)[(*curr_pos)++] = $(next_doc,next_val);
-  return;
 }
 
 // TO DO: Decide where the size/recomoputation trade-offs are
@@ -125,31 +124,45 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
 }
 
 // FIX: do something quick when we're out of time
-static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
-  $(doc_t,val_t) ? doc_arr = new {for i < INPUT_SIZE : $(Mt,0)};
+static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals,
+				 bool shift, int window_size) {
+  if(window_size > MAX_WINDOW_SIZE) {
+    fprintf(stderr, "window size got too big!!!!");
+    return doc;
+  }
+  $(doc_t,val_t) ? doc_arr = new {for i < 20 : $(Mt,0)}; // resizes
   bool vals_occur[VAL_WIDTH] = {for i < VAL_WIDTH : false};
   int curr_pos = 0;
-  flatten_vals(doc, &doc_arr, &curr_pos, lowest_val, num_vals, vals_occur);
+  flatten_vals(doc, &doc_arr, &curr_pos, num_vals-1, lowest_val, vals_occur);
   int arr_size = curr_pos;
   list_t<doc_t> ans = null;
+  bool after_initcolor = shift;
   curr_pos = 0;
   while(curr_pos < arr_size) {
     //    fprintf(stderr,"!%d %d!",curr_pos,arr_size);
+    //    fprintf(stderr, "X %d ", check_time());
 
     // skip any initial-value
     while(curr_pos < arr_size && doc_arr[curr_pos][1] == num_vals - 1) {
+      after_initcolor = true;
       ans = new List(doc_arr[curr_pos][0], ans);
       ++curr_pos;
     }
 
     if(curr_pos == arr_size)
       break;
-    // get an initial-value-free chunk, no larger than INPUT_SIZE
 
+    // get an initial-value-free chunk, no larger than window_size
     int input_size = 1;
+    // for first one and after init color, shift the window
+    int limit = window_size;
+    if(after_initcolor && shift) {
+      after_initcolor = false;
+      limit /= 2;
+    }
     while(curr_pos+input_size < arr_size 
 	  && doc_arr[curr_pos+input_size][1] != num_vals - 1
-	  && input_size < INPUT_SIZE)
+	  && input_size < limit)
       ++input_size;
 
     // need to check time in here!!!
@@ -211,11 +224,11 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
   }
   return new Seq(imp_rev(ans));
 }
-doc_t dynamic_size(doc_t doc) {
-  return dynamic_doit(doc, Zero, Nine-Zero+2);
+doc_t dynamic_size(doc_t doc, bool shift, int window_size) {
+  return dynamic_doit(doc, Zero, Nine-Zero+2, shift, window_size);
 }
 
-doc_t dynamic_color(doc_t doc) {
-  return dynamic_doit(doc, r_tag, w_tag-r_tag+2);
+doc_t dynamic_color(doc_t doc, bool shift, int window_size) {
+  return dynamic_doit(doc, r_tag, w_tag-r_tag+2, shift, window_size);
 }
 
