@@ -46,6 +46,9 @@
    such cases we might be able to derive the type from a function
    that uses it; we currently just take a guess.
 
+   Some systems define typedefs with macros -- e.g., socklen_t in
+   cygwin.
+
  */
 
 #include <core.h>

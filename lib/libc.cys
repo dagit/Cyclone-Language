@@ -3811,7 +3811,10 @@ epilogue {
   /* Many architectures don't define this :-( */
   #ifndef _socklen_t_def_
   #define _socklen_t_def_
+  #ifndef socklen_t
+  /* Cygwin #defines socklen_t */
   typedef int socklen_t;
+  #endif
   #endif
 }
 epilogue {

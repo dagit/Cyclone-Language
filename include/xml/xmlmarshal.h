@@ -24,7 +24,7 @@
 #define _XMLMARSHAL_H_
 
 #include <typerep.h>
-#include <xml/xml.h>
+#include "xml.h"
 
 namespace XmlMarshal {
 
@@ -32,5 +32,4 @@ extern Xml::content_t to_xml(tunion Typerep::Typestruct rep, `a::A@ val);
 extern `a::A@ from_xml(tunion Typerep::Typestruct rep, Xml::content_t);
 
 }
-
 #endif // _XMLMARSHAL_H_
