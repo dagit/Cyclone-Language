@@ -372,12 +372,24 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
   case $(&Offsetof_e(t1,f1), &Offsetof_e(t2,f2)):
     let c1 = typecmp(t1,t2);
     if(c1 != 0) return c1;
-    switch($(f1,f2)) {
-    case $(&StructField(_),&TupleIndex(_)): return -1;
-    case $(&TupleIndex(_),&StructField(_)): return 1;
-    case $(&StructField(fn1),&StructField(fn2)): return strptrcmp(fn1,fn2);
-    case $(&TupleIndex(i1),&TupleIndex(i2)): return i1-i2;
-    }
+    let l1 = List::length(f1);
+    let l2 = List::length(f2);
+    if (l1 < l2) return -1;
+    if (l2 < l1) return 1;
+    for (;f1 != NULL && f2 != NULL; f1=f1->tl, f2=f2->tl)
+      switch($(f1->hd,f2->hd)) {
+      case $(&StructField(_),&TupleIndex(_)): return -1;
+      case $(&TupleIndex(_),&StructField(_)): return 1;
+      case $(&StructField(fn1),&StructField(fn2)): 
+	int c = strptrcmp(fn1,fn2);
+	if (c != 0) return c;
+	break;
+      case $(&TupleIndex(i1),&TupleIndex(i2)): 
+	int c = i1-i2;
+	if (c != 0) return c;
+	break;
+      }
+    return 0;
   case $(&Cast_e(t1,e1a,_,_), &Cast_e(t2,e2a,_,_)):
     let c1 = typecmp(t1,t2);
     if(c1 != 0) return c1;

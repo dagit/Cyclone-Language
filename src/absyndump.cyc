@@ -770,13 +770,19 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(')'); 
     break;
 
-  case &Offsetof_e(t,&StructField(n)):
-    dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);
-    dump_char(')'); 
-    break;
-
-  case &Offsetof_e(t,&TupleIndex(n)):
-    dump("offsetof("); dumptyp(t); dump_char(','); dump(aprintf("%d",n));
+  case &Offsetof_e(t,l):
+    dump("offsetof("); dumptyp(t); dump_char(','); 
+    for (; l != NULL; l=l->tl) {
+      switch (l->hd) {
+      case &StructField(n):
+	dump_nospace(*n);
+	break;
+      case &TupleIndex(n):
+	dump(aprintf("%d",n));
+	break;
+      }
+      if (l->tl != NULL) dump_char('.');
+    }
     dump_char(')'); 
     break;
 

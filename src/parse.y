@@ -1089,6 +1089,7 @@ using Parse;
 %type <string_t<`H>> STRING WSTRING WCHARACTER_CONSTANT field_name
 %type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@`H> pointer_null_and_bound
 %type <conref_t<bounds_t>> pointer_bound
+%type <list_t<offsetof_field_t,`H>> field_expression
 %type <exp_t> primary_expression postfix_expression unary_expression
 %type <exp_t> cast_expression constant multiplicative_expression
 %type <exp_t> additive_expression shift_expression relational_expression
@@ -2681,14 +2682,8 @@ unary_pattern:
   }
 | SIZEOF unary_expression
   { $$=^$(exp_pat(sizeofexp_exp($2,LOC(@1,@2)))); }
-| OFFSETOF '(' type_name ',' field_name ')'
-   { $$=^$(exp_pat(offsetof_exp((*$3)[2],
-                                new StructField(new $5),LOC(@1,@6)))); }
-/* not checking sign here...*/
-| OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-   { let t = type_name_to_type($3,SLOC(@3));
-     $$=^$(exp_pat(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6)))); 
-   }
+| OFFSETOF '(' type_name ',' field_expression ')'
+    { $$=^$(exp_pat(offsetof_exp((*$3)[2],List::imp_rev($5),LOC(@1,@6)))); }
 // disallow malloc, rmalloc, and cmalloc -- not constant expressions
 ;
 
@@ -2974,15 +2969,10 @@ unary_expression:
     $$=^$(sizeoftyp_exp(t,LOC(@1,@4))); 
   }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
-| OFFSETOF '(' type_name ',' field_name ')' 
+| OFFSETOF '(' type_name ',' field_expression ')' 
    { let t = type_name_to_type($3,SLOC(@3));
-     $$=^$(offsetof_exp(t,new StructField(new $5),LOC(@1,@6))); 
+     $$=^$(offsetof_exp(t,List::imp_rev($5),LOC(@1,@6))); 
    }
-/* not checking sign here...*/
-| OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-  { let t = type_name_to_type($3,SLOC(@3));
-     $$=^$(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6))); 
-    }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
 | MALLOC '(' assignment_expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
@@ -3040,6 +3030,19 @@ postfix_expression:
     { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'
     { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
+;
+
+field_expression:
+  field_name
+    { $$=^$(new List::List(new StructField(new $1),NULL)); }
+/* not checking sign here...*/
+| INTEGER_CONSTANT
+    { $$ = ^$(new List(new TupleIndex($1[1]),NULL)); }
+| field_expression '.' field_name
+    { $$ = ^$(new List(new StructField(new $3),$1)); }
+/* not checking sign here...*/
+| field_expression '.' INTEGER_CONSTANT
+    { $$ = ^$(new List(new TupleIndex($3[1]),$1)); }
 ;
 
 primary_expression:

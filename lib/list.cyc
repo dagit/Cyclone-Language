@@ -534,6 +534,15 @@ bool exists_c(bool pred(`a,`b),`a env,list_t<`b> x) {
   return(x != NULL);
 }
 
+`c *`r find_c(`c::TA *`r pred(`a,`b),`a env,list_t<`b> x) {
+  `c *v = NULL;
+  for (; x != NULL; x=x->tl) {
+    v = pred(env,x->hd);
+    if (v) break;
+  }
+  return v;
+}
+
 // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
 // Throws List_mismatch if the lengths are not the same.
 list_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,

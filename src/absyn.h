@@ -607,7 +607,7 @@ namespace Absyn {
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t); // sizeof(t)
     Sizeofexp_e(exp_t); // sizeof(e)
-    Offsetof_e(type_t,offsetof_field_t); // offsetof(t,e)
+    Offsetof_e(type_t,list_t<offsetof_field_t>); // offsetof(t,e)
     Deref_e(exp_t); // *e
     // For the next two cases, the is_read field determines whether
     // or not the expression is in a "read" (as opposed to write)
@@ -1048,7 +1048,7 @@ namespace Absyn {
   extern exp_t address_exp(exp_t, seg_t);
   extern exp_t sizeoftyp_exp(type_t t, seg_t);
   extern exp_t sizeofexp_exp(exp_t e, seg_t);
-  extern exp_t offsetof_exp(type_t, offsetof_field_t, seg_t);
+  extern exp_t offsetof_exp(type_t, list_t<offsetof_field_t,`H>, seg_t);
   extern exp_t deref_exp(exp_t, seg_t);
   extern exp_t aggrmember_exp(exp_t, field_name_t, seg_t);
   extern exp_t aggrarrow_exp(exp_t, field_name_t, seg_t);

@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <assert.h>
+
+struct foo {
+  int i1;
+  double d;
+  int i2;
+};
+
+struct bar {
+  int i3;
+  struct foo f;
+  int i4;
+};
+
+int main() {
+  printf("offsetof(bar,f.d)=%d\n",offsetof(struct bar,f.d));
+  printf("offsetof(bar,i4)=%d\n",offsetof(struct bar,i4));
+  printf("offsetof(bar,0)=%d\n",offsetof(struct bar,0));
+  printf("offsetof(foo,d)=%d\n",offsetof(struct foo,d));
+
+  // errors that should be flagged by the compiler
+//   printf("offsetof(bar,f.d)=%d\n",offsetof(struct bar,f.d.x));
+//   printf("offsetof(bar,f.d)=%d\n",offsetof(struct bar,f.x));
+
+  return 0;
+}

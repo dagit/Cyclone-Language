@@ -1151,11 +1151,18 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Tagcheck_e(e,f):
     s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")"));
     break;
-  case &Offsetof_e(t,&StructField(n)):
-    s = cat(text("offsetof("), typ2doc(t), text(","), textptr(n), text(")"));
-    break;
-  case &Offsetof_e(t,&TupleIndex(n)):
-    s = cat(text("offsetof("), typ2doc(t), text(","), text(aprintf("%d",n)), text(")"));
+  case &Offsetof_e(t,l):
+    s = cat(text("offsetof("), typ2doc(t), text(","));
+    for (;l != NULL; l = l->tl)
+      switch (l->hd) {
+      case &StructField(n): s = cat(s,textptr(n),
+				    l->tl != NULL ? text(".") : nil_doc());
+	break;
+      case &TupleIndex(n):  s = cat(s,text(aprintf("%d",n)),
+				    l->tl != NULL ? text(".") : nil_doc());
+	break;
+      }
+    s = cat(s,text(")"));
     break;
   case &Deref_e(e1):
     s = cat(text("*"), exp2doc_prec(myprec,e1));

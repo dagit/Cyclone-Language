@@ -1525,7 +1525,7 @@ static exp_t make_variable_struct(env_t nv, qvar_t x,
 				  exp_opt_t rgnopt, bool is_atomic,
 				  field_name_t index,
 				  exp_t num) {
-  let se = offsetof_exp(struct_typ,new StructField(index),DL);
+  let se = offsetof_exp(struct_typ,new List(new StructField(index),NULL),DL);
   let elt_typ = aggr_lookup_field(struct_typ,index);
   if (elt_typ == NULL)
     impos("make_variable_struct: couldn't find field type for offsetof");
@@ -3117,30 +3117,43 @@ DynCast:
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c(t));  break;
-  case &Offsetof_e(t,&StructField(n)):
-    e->r = new Offsetof_e(typ_to_c(t),new StructField(n)); break;
-  case &Offsetof_e(t,&TupleIndex(n)):
-    switch(compress(t)) {
-    case &AggrType(AggrInfo(info,_)):
-      let ad = get_known_aggrdecl(info);
-      if(ad->impl==NULL)
-	toc_impos("struct fields must be known");
-      fallthru(ad->impl->fields);
-    case &AnonAggrType(_,fields):
-      let nth_field = List::nth(fields,n);
-      e->r = new Offsetof_e(typ_to_c(t),new StructField(nth_field->name));
-      break;
-    case &TupleType(_):
-      e->r = new Offsetof_e(typ_to_c(t),new StructField(fieldname(n+1)));
-      break;
-    case &DatatypeFieldType(_):
-      if(n == 0)
-	e->r = new Offsetof_e(typ_to_c(t),new StructField(tag_sp));
-      else
-	e->r = new Offsetof_e(typ_to_c(t),new StructField(fieldname(n)));
-      break;
-    default: toc_impos("impossible type for offsetof tuple index");
+  case &Offsetof_e(t,fs):
+    let t2 = t;
+    let l = fs;
+    for (; l != NULL; l=l->tl) {
+      switch (l->hd) {
+      case &StructField(n): break;
+      case &TupleIndex(n):
+	switch(compress(t2)) {
+	case &AggrType(AggrInfo(info,_)):
+	  let ad = get_known_aggrdecl(info);
+	  if(ad->impl==NULL)
+	    toc_impos("struct fields must be known");
+	  fallthru(ad->impl->fields);
+	case &AnonAggrType(_,fields):
+	  let nth_field = List::nth(fields,n);
+	  l->hd = new StructField(nth_field->name);
+	  t2 = nth_field->type;
+	  break;
+	case &TupleType(ts):
+	  l->hd = new StructField(fieldname(n+1));
+	  t2 = (*List::nth(ts,n))[1];
+	  break;
+	case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
+	  if(n == 0)
+	    l->hd = new StructField(tag_sp);
+	  else {
+	    t2 = (*List::nth(tuf->typs,n-1))[1];
+	    l->hd = new StructField(fieldname(n));
+	  }
+	  break;
+	default: toc_impos("impossible type for offsetof tuple index");
+	  break;
+	}
+	break;
+      }
     }
+    e->r = new Offsetof_e(typ_to_c(t),fs);
     break;
   case &Deref_e(e1):
     let old_lhs = in_lhs(nv);

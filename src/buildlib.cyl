@@ -850,7 +850,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return;
     case &Offsetof_e(t1,f):
       scan_type(t1,dep);
-      switch (f) {
+      // FIX: add targets for nested fields too?
+      switch (f->hd) {
       case &StructField(fn): add_target(fn); break;
       case &TupleIndex(_): break;
       }        

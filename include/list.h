@@ -250,6 +250,11 @@ namespace List {
   /** [exists_c] is a version of [exists] where the function
       argument requires a closure as its first argument. */
 
+  extern `c *`r find_c(`c::TA *`r pred(`a,`b),`a env,list_t<`b> x);
+  /** [find_c] iterates over the given list and returns the first element
+      for which [pred] does not return NULL.  Otherwise it returns
+      NULL. */
+
   extern list_t<$(`a,`b)@`H,`H> zip(list_t<`a> x,list_t<`b> y);
   /** If [x] has elements [x1] through [xn], and [y] has elements [y1]
       through [yn], then [zip(x,y)] returns a new heap-allocated array

@@ -1399,68 +1399,102 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
   return uint_typ;
 }
 
-bool structfield_has_name(field_name_t n, aggrfield_t sf) {
-  return (strcmp(*n,*sf->name) == 0);
+type_opt_t structfield_type(field_name_t n, aggrfield_t sf) {
+  if (strcmp(*n,*sf->name) == 0) return sf->type;
+  else return NULL;
 }
 
 // offsetof(t,n)
-// FIX: check that n is actually a field of f (currently caught by gcc)
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
-			 type_t t, offsetof_field_t n) {
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
-  check_no_qual(loc,t);
-  switch(n) {
-  case &StructField(n):
-    bool bad_type = true;
-    switch(compress(t)) {
-    case &AggrType(AggrInfo({.KnownAggr = adp},_)):
-      if((*adp)->impl == NULL)
+			 type_t t_orig, list_t<offsetof_field_t> fs) {
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,t_orig);
+  check_no_qual(loc,t_orig);
+  let l = fs;
+  let t = t_orig;
+  for (; l != NULL; l = l->tl) {
+    let n = l->hd;
+    switch(n) {
+    case &StructField(n):
+      bool bad_type = true;
+      switch(compress(t)) {
+      case &AggrType(AggrInfo({.KnownAggr = adp},_)):
+	if((*adp)->impl == NULL) break;
+	type_opt_t t2 = find_c(structfield_type,n,(*adp)->impl->fields);
+	if (!t2)
+	  terr(loc,"no field of struct/union has name %s",*n);
+	else
+	  t = (type_t)t2;
+	bad_type = false;
 	break;
-      if(!exists_c(structfield_has_name,n,(*adp)->impl->fields))
-	terr(loc,"no field of struct/union has name %s",*n);
-      bad_type = false;
-      break;
-    case &AnonAggrType(_,fields):
-      if(!exists_c(structfield_has_name,n,fields))
-	terr(loc,"no field of struct/union has name %s",*n);
-      bad_type = false;
-      break;
-    default: break;
-    }
-    if(bad_type)
-      terr(loc, "%s is not a known struct/union type", typ2string(t));
-    break;
-  case &TupleIndex(n):
-    bool bad_type = true;
-    switch(compress(t)) {
-    case &AggrType(AggrInfo({.KnownAggr = adp},_)):
-      if((*adp)->impl == NULL)
+      case &AnonAggrType(_,fields):
+	type_opt_t t2 = find_c(structfield_type,n,fields);
+	if (!t2)
+	  terr(loc,"no field of struct/union has name %s",*n);
+	else
+	  t = (type_t)t2;
+	bad_type = false;
 	break;
-      fallthru((*adp)->impl->fields);
-    case &AnonAggrType(_,fields):
-      if(List::length(fields) <= n)
-	Tcutil::terr(loc,"struct/union has too few components: %d <= %d",
-		     List::length(fields),n);
-      bad_type = false;
+      default: break;
+      }
+      if(bad_type) {
+	if (l == fs)
+	  terr(loc, "%s is not a known struct/union type", typ2string(t));
+	else {
+	  let s = aprintf("(%s)",typ2string(t_orig));
+	  list_t x;
+	  for (x = fs; x != l; x=x->tl)
+	    switch (x->hd) {
+	    case &StructField(n):
+	      s = aprintf("%s.%s",s,*n); break;
+	    case &TupleIndex(n):
+	      s = aprintf("%s.%d",s,n); break;
+	    }
+	  terr(loc,"%s == %s is not a struct/union type",s,typ2string(t));
+	}
+      }
       break;
-    case &TupleType(l):
-      if(List::length(l) <= n)
-	Tcutil::terr(loc,"tuple has too few components: %d <= %d",
-		     List::length(l),n);
-      bad_type = false;
+    case &TupleIndex(n):
+      bool bad_type = true;
+      switch(compress(t)) {
+      case &AggrType(AggrInfo({.KnownAggr = adp},_)):
+	if((*adp)->impl == NULL)
+	break;
+	fallthru((*adp)->impl->fields);
+      case &AnonAggrType(_,fields):
+	if(List::length(fields) <= n)
+	  Tcutil::terr(loc,"struct/union has too few components: %d <= %d",
+		       List::length(fields),n);
+	else
+	  t = List::nth(fields,n)->type;
+	bad_type = false;
+	break;
+      case &TupleType(l):
+	if(List::length(l) <= n)
+	  Tcutil::terr(loc,"tuple has too few components: %d <= %d",
+		       List::length(l),n);
+	else
+	  t = (*List::nth(l,n))[1];
+	bad_type = false;
+	break;
+      case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
+	if(List::length(tuf->typs) < n)
+	  Tcutil::terr(loc,"datatype field has too few components: %d < %d",
+		       List::length(tuf->typs),n);
+	else {
+	  if (n != 0)
+	    t = (*List::nth(tuf->typs,n-1))[1];
+	  else if (l->tl != NULL)
+	    Tcutil::terr(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
+	}
+	bad_type = false;
+	break;
+      default: break;
+      }
+      if(bad_type)
+	terr(loc, "%s is not a known type", typ2string(t));
       break;
-    case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
-      if(List::length(tuf->typs) < n)
-	Tcutil::terr(loc,"datatype field has too few components: %d < %d",
-		     List::length(tuf->typs),n);
-      bad_type = false;
-      break;
-    default: break;
     }
-    if(bad_type)
-      terr(loc, "%s is not a known type", typ2string(t));
-    break;
   }
   return uint_typ;
 }
@@ -2819,8 +2853,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcSizeof(te,loc,topt,t1); break;
   case &Sizeoftyp_e(t1):
     t = tcSizeof(te,loc,topt,t1); break;
-  case &Offsetof_e(t1,n):
-    t = tcOffsetof(te,loc,topt,t1,n); break;
+  case &Offsetof_e(t1,l):
+    t = tcOffsetof(te,loc,topt,t1,l); break;
   case &Deref_e(e1):
     t = tcDeref(te,loc,topt,e1); break;
   case &AggrMember_e(e1,f,*is_tagged,*is_read):
