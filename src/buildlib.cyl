@@ -411,28 +411,16 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 { fprintf((FILE @)slurp_out," %d ",sizeof_inaddr);
   log("Warning: sizeof(struct inaddr) inlined\n");
   return 1; }
-| " malloc "
+| "*" ws* "malloc" ws* "("
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
-{ fputs(" __IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
+{ fputs("*__IGNORE_FOR_CYCLONE_MALLOC(",(FILE @)slurp_out);
   log("Warning: declaration of malloc sidestepped\n");
   return 1; }
-| "*malloc "
-/* malloc is a Cyclone keyword so our parser can't handle a malloc
-   declaration. */
-{ fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
-  log("Warning: declaration of malloc sidestepped\n");
-  return 1; }
-| " calloc "
+| "*" ws* "calloc" ws* "("
 /* calloc is a Cyclone keyword so our parser can't handle a calloc
    declaration. */
-{ fputs(" __IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
-  log("Warning: declaration of calloc sidestepped\n");
-  return 1; }
-| "*calloc "
-/* calloc is a Cyclone keyword so our parser can't handle a calloc
-   declaration. */
-{ fputs("*__IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
+{ fputs("*__IGNORE_FOR_CYCLONE_CALLOC(",(FILE @)slurp_out);
   log("Warning: declaration of calloc sidestepped\n");
   return 1; }
 | "*region" /* Used in OS X in mach/vm_map.h, conflicts with our keyword */
@@ -1609,23 +1597,24 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
   }
 
-  int process_specfile(string_t file,string_t dir) {
+  void process_specfile(string_t file,string_t dir) {
     let maybe = fopen(file,"r");
-    if (!maybe) return 1;
+    if (!maybe) {
+      fprintf(stderr,"Error: could not open %s\n", file);
+      return;
+    }
     let in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,omit_symbols,
              prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
-      if (process_file(headerfile,dir,start_symbols,omit_symbols,
-                       prologue,epilogue,cstubs,cycstubs)) {
-        fclose(in_file);
-        return 1;
-      }
+      process_file(headerfile,dir,start_symbols,omit_symbols, 
+                   prologue,epilogue,cstubs,cycstubs);
+      // FIX: we ignore the error code from process_file.  It would
+      // be better to make sure there is an empty header file created.
     }
     fclose(in_file);
-    return 0;
   }
 
   int getsize(const char ?dir, const char ?includes, const char ?type) {

@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.7/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Thu Jan  3 13:28:46 2002
---- sparc-sun-solaris2.7/lib/cycstubs.c	Thu Jan  3 14:51:14 2002
+*** i686-unknown-linux/lib/cycstubs.c	Mon Dec 31 15:21:34 2001
+--- sparc-sun-solaris2.7/lib/cycstubs.c	Fri Jan  4 20:37:06 2002
 ***************
 *** 287,299 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
@@ -82,8 +82,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.7
   _tagged_arr __filename,struct _tagged_arr __modes);struct Cyc_Std___cycFILE*Cyc_Std_freopen(
   struct _tagged_arr,struct _tagged_arr,struct Cyc_Std___cycFILE*);void Cyc_Std_setbuf(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Thu Jan  3 13:28:47 2002
---- sparc-sun-solaris2.7/lib/execinfo.c	Thu Jan  3 14:51:14 2002
+*** i686-unknown-linux/lib/execinfo.c	Mon Dec 31 15:21:35 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Fri Jan  4 20:37:06 2002
 ***************
 *** 257,336 ****
   extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
@@ -193,8 +193,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! _tmp1.f1=_tag_arr("backtrace: unsupported except under Linux",sizeof(
 ! unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Thu Jan  3 13:28:47 2002
---- sparc-sun-solaris2.7/lib/getopt.c	Thu Jan  3 14:51:14 2002
+*** i686-unknown-linux/lib/getopt.c	Mon Dec 31 15:21:35 2001
+--- sparc-sun-solaris2.7/lib/getopt.c	Fri Jan  4 20:37:06 2002
 ***************
 *** 274,307 ****
   struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{int
@@ -264,8 +264,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/l
   Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
   static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.7/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Thu Jan  3 13:28:50 2002
---- sparc-sun-solaris2.7/src/buildlib.c	Thu Jan  3 14:51:14 2002
+*** i686-unknown-linux/src/buildlib.c	Fri Jan  4 20:32:34 2002
+--- sparc-sun-solaris2.7/src/buildlib.c	Fri Jan  4 20:37:07 2002
 ***************
 *** 326,351 ****
   struct Cyc_Buffer_t*,unsigned char);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
