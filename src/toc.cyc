@@ -203,17 +203,6 @@ MAKE_STRING(_RegionHandle);
   static struct Exp          str##_ev  = Exp{NULL,&str##_re,0,&EmptyAnnot_val};\
   static exp_t               str##_e   = &str##_ev
 
-// FIX: does not match with globals, but first one (str) should be removed
-#define MAKE_ZEROTERM_VERSIONS(str)\
-  MAKE_VAR(str);\
-  MAKE_VAR(str##_char);\
-  MAKE_VAR(str##_short);\
-  MAKE_VAR(str##_int);\
-  MAKE_VAR(str##_float);\
-  MAKE_VAR(str##_double);\
-  MAKE_VAR(str##_longdouble);\
-  MAKE_VAR(str##_voidstar)
-
 MAKE_VAR(_throw);
 MAKE_VAR(setjmp);
 MAKE_VAR(_push_handler);
@@ -229,13 +218,17 @@ MAKE_VAR(_tag_fat);
 MAKE_VAR(_untag_fat_ptr);
 MAKE_VAR(_get_fat_size);
 MAKE_VAR(_fat_ptr_decrease_size);
-MAKE_ZEROTERM_VERSIONS(_get_zero_arr_size);
+MAKE_VAR(_get_zero_arr_size_char);
+MAKE_VAR(_get_zero_arr_size_other);
 MAKE_VAR(_fat_ptr_plus);
-MAKE_ZEROTERM_VERSIONS(_zero_arr_plus);
+MAKE_VAR(_zero_arr_plus_char);
+MAKE_VAR(_zero_arr_plus_other);
 MAKE_VAR(_fat_ptr_inplace_plus);
-MAKE_ZEROTERM_VERSIONS(_zero_arr_inplace_plus);
+MAKE_VAR(_zero_arr_inplace_plus_char);
+MAKE_VAR(_zero_arr_inplace_plus_other);
 MAKE_VAR(_fat_ptr_inplace_plus_post);
-MAKE_ZEROTERM_VERSIONS(_zero_arr_inplace_plus_post);
+MAKE_VAR(_zero_arr_inplace_plus_post_char);
+MAKE_VAR(_zero_arr_inplace_plus_post_other);
 MAKE_VAR(_cycalloc);
 MAKE_VAR(_cyccalloc);
 MAKE_VAR(_cycalloc_atomic);
@@ -356,50 +349,10 @@ static exp_t member_exp(exp_t e, field_name_t f, seg_t loc) {
   }
 }
 
-// functionSets are used to call the appropriate function from
-// cyc_include.h by casing on the type of the arguments
-struct functionSet {
-  exp_t fchar;
-  exp_t fshort;
-  exp_t fint;
-  exp_t ffloat;
-  exp_t fdouble;
-  exp_t flongdouble;
-  exp_t fvoidstar;
-};
-#define MAKE_FUNCTION_SET(op)\
-struct functionSet op ## _functionSet = functionSet {\
-  .fchar       = & op ## _char_ev,\
-  .fshort      = & op ## _short_ev,\
-  .fint        = & op ## _int_ev,\
-  .ffloat      = & op ## _float_ev,\
-  .fdouble     = & op ## _double_ev,\
-  .flongdouble = & op ## _longdouble_ev,\
-  .fvoidstar   = & op ## _voidstar_ev\
-}
-MAKE_FUNCTION_SET(_zero_arr_plus);
-MAKE_FUNCTION_SET(_zero_arr_inplace_plus);
-MAKE_FUNCTION_SET(_zero_arr_inplace_plus_post);
-MAKE_FUNCTION_SET(_get_zero_arr_size);
-
-// choose which function to call based on argument type
-static exp_t getFunctionType(struct functionSet @fS, type_t t) {
-  switch(compress(t)) {
-  case &AppType(&IntCon(_,Char_sz),_):  return fS->fchar;
-  case &AppType(&IntCon(_,Short_sz),_): return fS->fshort;
-  case &AppType(&IntCon(_,Int_sz),_):   return fS->fint;
-  case &AppType(&FloatCon(0),_):        return fS->ffloat;
-  case &AppType(&FloatCon(1),_):        return fS->fdouble;
-  case &AppType(&FloatCon(_),_):        return fS->flongdouble;
-  case &PointerType(_):                 return fS->fvoidstar;
-  default:
-    toc_impos("expression type ", t, " (not int, float, double, or pointer)");
-  }
-}
-static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
-  switch (compress((type_t)arr->topt)) {
-  case &PointerType(PtrInfo{.elt_type = et,...}): return getFunctionType(fS,et);
-  default: toc_impos("impossible type (not pointer)");
+static bool isCharStar(exp_t e) {
+  switch (compress((type_t)e->topt)) {
+  case &PointerType(pi): return Tcutil::is_char_type(pi.elt_type);
+  default: return false;
   }
 }
 
@@ -1220,9 +1173,14 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 	} else {
 	  // get the right run-time function (always does a null-check)
 	  // *((ta2)_zero_arr_plus(e1, esz, e2)
-          fn_e = getFunctionRemovePointer(&_zero_arr_plus_functionSet,ptr);
-          ptr->r = cast_it_r(cstar_type(ta1,tq),
-			     fncall_exp_dl(fn_e,new_exp(ptr->r,0),bd,ind));
+	  if(isCharStar(ptr))
+	    ptr->r = fncall_exp_r(_zero_arr_plus_char_e,
+				   new_exp(ptr->r,0),bd,ind);
+	  else
+	    ptr->r = cast_it_r(typ_to_c(old_typ),
+			       fncall_exp_dl(_zero_arr_plus_other_e,
+					     sizeoftype_exp(pointer_elt_type(typ_to_c(old_typ)),DL),
+					     new_exp(ptr->r,0),bd,ind));
 	  ans = true;
 	}
       }
@@ -1676,9 +1634,12 @@ static void exp_to_c(env_t nv, exp_t e) {
 			      es->hd,sizeoftype_exp(typ_to_c(elt_type),DL));
         else if (force_type2bool(false,zt)) {
           // when zero-terminated, we have to call "strlen"
-	  exp_t function_e =
-	    getFunctionRemovePointer(&_get_zero_arr_size_functionSet, es->hd);
-	  e->r = fncall_exp_r(function_e,es->hd,eopt);
+	  if(isCharStar(es->hd))
+	    e->r = fncall_exp_r(_get_zero_arr_size_char_e,es->hd,eopt);
+	  else
+	    e->r = fncall_exp_r(_get_zero_arr_size_other_e,
+				sizeoftype_exp(typ_to_c(pointer_elt_type(old_types->hd)),DL),
+				es->hd,eopt);
 	} else if (force_type2bool(false,nbl)) {
 	  if (!Evexp::c_can_eval(eopt))
 	    Warn::err2(e->loc,"can't calculate numelts");
@@ -1705,8 +1666,14 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (eopt == NULL)
           e->r = fncall_exp_r(_fat_ptr_plus_e,
 			     e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2);
-        else if (force_type2bool(false,zt))
-	  e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),e1,eopt,e2);
+        else if (force_type2bool(false,zt)) {
+	  if(isCharStar(e1)) 
+	    e->r = fncall_exp_r(_zero_arr_plus_char_e,e1,eopt,e2);
+	  else
+	    e->r = fncall_exp_r(_zero_arr_plus_other_e,
+				sizeoftype_exp(typ_to_c(pointer_elt_type(old_types->hd)),DL),
+				eopt,e2);
+	}
         break;
       default: break;
       }
@@ -1822,9 +1789,15 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = stmt_exp(declare_stmt(x,t,xexp,s,DL),DL)->r;
       } else {
         // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1) (does null check)
-        let fnSet = &_zero_arr_inplace_plus_post_functionSet;
-        exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
-        e->r = fncall_exp_r(fn_e, push_address_exp(e2), signed_int_exp(1,DL));
+	if(isCharStar(e2))
+	  e->r = fncall_exp_r(_zero_arr_inplace_plus_post_char_e,
+			      push_address_exp(e2),signed_int_exp(1,DL));
+	else
+	  e->r = cast_it_r(typ_to_c(e2_cyc_typ),
+			   fncall_exp_dl(_zero_arr_inplace_plus_post_other_e,
+					 sizeoftype_exp(pointer_elt_type(typ_to_c(e2_cyc_typ)),DL),
+					 push_address_exp(e2),
+					 signed_int_exp(1,DL)));
       }
     } else if(elt_typ == void_type && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
@@ -1899,7 +1872,14 @@ static void exp_to_c(env_t nv, exp_t e) {
         switch (popt->v) {
         case Plus:
           done = true;
-          e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),e1,e2);
+	  if(isCharStar(e1))
+	    e->r = fncall_exp_r(_zero_arr_inplace_plus_char_e,
+				e1,e2);
+	  else
+	    e->r = cast_it_r(typ_to_c(e1_old_typ),
+			     fncall_exp_dl(_zero_arr_inplace_plus_other_e,
+					   sizeoftype_exp(pointer_elt_type(typ_to_c(e1_old_typ)),DL),
+					   e1,e2));
           break;
         default: toc_impos("bad zero-terminated pointer arithmetic");
         }
@@ -2119,11 +2099,15 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  default:
 	    // if what we're casting has a known size > 1 then
 	    // we use it instead of calculating the size at run-time
+	    x_exp = cast_it(void_star_type(),x_exp);
 	    if (valid && i != 1)
 	      arg3 = e2;
+	    else if(isCharStar(e1))
+	      arg3 = fncall_exp_dl(_get_zero_arr_size_char_e,x_exp,e2);
 	    else
-	      arg3 = fncall_exp_dl(getFunctionRemovePointer(&_get_zero_arr_size_functionSet,e1),
-				   cast_it(void_star_type(),x_exp),e2);
+	      arg3 = fncall_exp_dl(_get_zero_arr_size_other_e,
+				   sizeoftype_exp(pointer_elt_type(typ_to_c(old_t2)),DL),
+				   x_exp,e2);
 	    break;
 	  }
 	  // If p2 is not zero-terminated and not const, then we subtract
@@ -4327,13 +4311,17 @@ void init() {
     &_tag_fat_str,
     &_untag_fat_ptr_str,
     &_get_fat_size_str,
-    &_get_zero_arr_size_str, // FIX: whole function set
+    &_get_zero_arr_size_char_str, 
+    &_get_zero_arr_size_other_str, 
     &_fat_ptr_plus_str,
-    &_zero_arr_plus_str,
+    &_zero_arr_plus_char_str,
+    &_zero_arr_plus_other_str,
     &_fat_ptr_inplace_plus_str,
-    &_zero_arr_inplace_plus_str, // FIX: whole function set
+    &_zero_arr_inplace_plus_char_str,
+    &_zero_arr_inplace_plus_other_str,
     &_fat_ptr_inplace_plus_post_str,
-    &_zero_arr_inplace_plus_post_str, // FIX: whole function set
+    &_zero_arr_inplace_plus_post_char_str,
+    &_zero_arr_inplace_plus_post_other_str,
     &_cycalloc_str,
     &_cyccalloc_str,
     &_cycalloc_atomic_str,

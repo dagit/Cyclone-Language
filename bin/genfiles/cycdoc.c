@@ -129,14 +129,8 @@ extern char Cyc_Bad_alloc[];
   if (!_cks_ptr) _throw_null(); \
   _cks_ptr + (elt_sz)*_index; })
 #endif
-#define _zero_arr_plus_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_char_fn _zero_arr_plus_fn
-#define _zero_arr_plus_short_fn _zero_arr_plus_fn
-#define _zero_arr_plus_int_fn _zero_arr_plus_fn
-#define _zero_arr_plus_float_fn _zero_arr_plus_fn
-#define _zero_arr_plus_double_fn _zero_arr_plus_fn
-#define _zero_arr_plus_longdouble_fn _zero_arr_plus_fn
-#define _zero_arr_plus_voidstar_fn _zero_arr_plus_fn
+#define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_other_fn(t_sz,orig_x,orig_sz,orig_i,f,l)((orig_x)+(orig_i))
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
@@ -153,83 +147,33 @@ extern char Cyc_Bad_alloc[];
 /* _zero_arr_plus_*_fn(x,sz,i,filename,lineno) adds i to zero-terminated ptr
    x that has at least sz elements */
 char* _zero_arr_plus_char_fn(char*,unsigned,int,const char*,unsigned);
-short* _zero_arr_plus_short_fn(short*,unsigned,int,const char*,unsigned);
-int* _zero_arr_plus_int_fn(int*,unsigned,int,const char*,unsigned);
-float* _zero_arr_plus_float_fn(float*,unsigned,int,const char*,unsigned);
-double* _zero_arr_plus_double_fn(double*,unsigned,int,const char*,unsigned);
-long double* _zero_arr_plus_longdouble_fn(long double*,unsigned,int,const char*, unsigned);
-void** _zero_arr_plus_voidstar_fn(void**,unsigned,int,const char*,unsigned);
+void* _zero_arr_plus_other_fn(unsigned,void*,unsigned,int,const char*,unsigned);
 #endif
 
 /* _get_zero_arr_size_*(x,sz) returns the number of elements in a
    zero-terminated array that is NULL or has at least sz elements */
-int _get_zero_arr_size_char(const char*,unsigned);
-int _get_zero_arr_size_short(const short*,unsigned);
-int _get_zero_arr_size_int(const int*,unsigned);
-int _get_zero_arr_size_float(const float*,unsigned);
-int _get_zero_arr_size_double(const double*,unsigned);
-int _get_zero_arr_size_longdouble(const long double*,unsigned);
-int _get_zero_arr_size_voidstar(const void**,unsigned);
+unsigned _get_zero_arr_size_char(const char*,unsigned);
+unsigned _get_zero_arr_size_other(unsigned,const void*,unsigned);
 
 /* _zero_arr_inplace_plus_*_fn(x,i,filename,lineno) sets
    zero-terminated pointer *x to *x + i */
 char* _zero_arr_inplace_plus_char_fn(char**,int,const char*,unsigned);
-short* _zero_arr_inplace_plus_short_fn(short**,int,const char*,unsigned);
-int* _zero_arr_inplace_plus_int(int**,int,const char*,unsigned);
-float* _zero_arr_inplace_plus_float_fn(float**,int,const char*,unsigned);
-double* _zero_arr_inplace_plus_double_fn(double**,int,const char*,unsigned);
-long double* _zero_arr_inplace_plus_longdouble_fn(long double**,int,const char*,unsigned);
-void** _zero_arr_inplace_plus_voidstar_fn(void***,int,const char*,unsigned);
-/* like the previous functions, but does post-addition (as in e++) */
 char* _zero_arr_inplace_plus_post_char_fn(char**,int,const char*,unsigned);
-short* _zero_arr_inplace_plus_post_short_fn(short**x,int,const char*,unsigned);
-int* _zero_arr_inplace_plus_post_int_fn(int**,int,const char*,unsigned);
-float* _zero_arr_inplace_plus_post_float_fn(float**,int,const char*,unsigned);
-double* _zero_arr_inplace_plus_post_double_fn(double**,int,const char*,unsigned);
-long double* _zero_arr_inplace_plus_post_longdouble_fn(long double**,int,const char *,unsigned);
-void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned);
+// note: must cast result in toc.cyc
+void* _zero_arr_inplace_plus_other_fn(unsigned,void**,int,const char*,unsigned);
+void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsigned);
 #define _zero_arr_plus_char(x,s,i) \
   (_zero_arr_plus_char_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_short(x,s,i) \
-  (_zero_arr_plus_short_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_int(x,s,i) \
-  (_zero_arr_plus_int_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_float(x,s,i) \
-  (_zero_arr_plus_float_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_double(x,s,i) \
-  (_zero_arr_plus_double_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_longdouble(x,s,i) \
-  (_zero_arr_plus_longdouble_fn(x,s,i,__FILE__,__LINE__))
-#define _zero_arr_plus_voidstar(x,s,i) \
-  (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_inplace_plus_char(x,i) \
   _zero_arr_inplace_plus_char_fn((char**)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_short(x,i) \
-  _zero_arr_inplace_plus_short_fn((short **)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_int(x,i) \
-  _zero_arr_inplace_plus_int_fn((int **)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_float(x,i) \
-  _zero_arr_inplace_plus_float_fn((float **)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_double(x,i) \
-  _zero_arr_inplace_plus_double_fn((double **)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_longdouble(x,i) \
-  _zero_arr_inplace_plus_longdouble_fn((long double **)(x),i,__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_voidstar(x,i) \
-  _zero_arr_inplace_plus_voidstar_fn((void ***)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_post_char(x,i) \
-  _zero_arr_inplace_plus_post_char_fn((char **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_short(x,i) \
-  _zero_arr_inplace_plus_post_short_fn((short **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_int(x,i) \
-  _zero_arr_inplace_plus_post_int_fn((int **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_float(x,i) \
-  _zero_arr_inplace_plus_post_float_fn((float **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_double(x,i) \
-  _zero_arr_inplace_plus_post_double_fn((double **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_longdouble(x,i) \
-  _zero_arr_inplace_plus_post_longdouble_fn((long double **)(x),(i),__FILE__,__LINE__)
-#define _zero_arr_inplace_plus_post_voidstar(x,i) \
-  _zero_arr_inplace_plus_post_voidstar_fn((void***)(x),(i),__FILE__,__LINE__)
+  _zero_arr_inplace_plus_post_char_fn((char**)(x),(i),__FILE__,__LINE__)
+#define _zero_arr_plus_other(t,x,s,i) \
+  (_zero_arr_plus_other_fn(t,x,s,i,__FILE__,__LINE__))
+#define _zero_arr_inplace_plus_other(t,x,i) \
+  _zero_arr_inplace_plus_other_fn(t,(void***)(x),i,__FILE__,__LINE__)
+#define _zero_arr_inplace_plus_post_otherr(t,x,i) \
+  _zero_arr_inplace_plus_post_other_fn(t,(void***)(x),(i),__FILE__,__LINE__)
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
@@ -706,13 +650,13 @@ struct Cyc_List_List*_Tmp2=({(struct Cyc_List_List*(*)(struct _fat_ptr*(*)(struc
 # 285
 Cyc_str_sepstr(_Tmp0,({const char*_Tmp1=" ";_tag_fat(_Tmp1,sizeof(char),2U);}));});
 # 288
-const char*cmd=(const char*)_check_null(_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=Cyc_cyclone_file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=cycargs_string;_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,({struct _fat_ptr _Tmp4=Cyc_sh_escape_string(({const char*_Tmp5=preprocfile;_tag_fat(_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));}));_Tmp3.f1=_Tmp4;});_Tmp3;});struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=Cyc_sh_escape_string(filename);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[4];_Tmp4[0]=& _Tmp0,_Tmp4[1]=& _Tmp1,_Tmp4[2]=& _Tmp2,_Tmp4[3]=& _Tmp3;Cyc_aprintf(({const char*_Tmp5="%s %s -E -o %s -x cyc %s";_tag_fat(_Tmp5,sizeof(char),25U);}),_tag_fat(_Tmp4,sizeof(void*),4));}),sizeof(char),1U));
+const char*cmd=(const char*)_check_null(_untag_fat_ptr(({struct Cyc_String_pa_PrintArg_struct _Tmp0=({struct Cyc_String_pa_PrintArg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=Cyc_cyclone_file;_Tmp1;});struct Cyc_String_pa_PrintArg_struct _Tmp1=({struct Cyc_String_pa_PrintArg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=cycargs_string;_Tmp2;});struct Cyc_String_pa_PrintArg_struct _Tmp2=({struct Cyc_String_pa_PrintArg_struct _Tmp3;_Tmp3.tag=0,({struct _fat_ptr _Tmp4=Cyc_sh_escape_string(({const char*_Tmp5=preprocfile;_tag_fat((void*)_Tmp5,sizeof(char),_get_zero_arr_size_char((void*)_Tmp5,1U));}));_Tmp3.f1=_Tmp4;});_Tmp3;});struct Cyc_String_pa_PrintArg_struct _Tmp3=({struct Cyc_String_pa_PrintArg_struct _Tmp4;_Tmp4.tag=0,({struct _fat_ptr _Tmp5=Cyc_sh_escape_string(filename);_Tmp4.f1=_Tmp5;});_Tmp4;});void*_Tmp4[4];_Tmp4[0]=& _Tmp0,_Tmp4[1]=& _Tmp1,_Tmp4[2]=& _Tmp2,_Tmp4[3]=& _Tmp3;Cyc_aprintf(({const char*_Tmp5="%s %s -E -o %s -x cyc %s";_tag_fat(_Tmp5,sizeof(char),25U);}),_tag_fat(_Tmp4,sizeof(void*),4));}),sizeof(char),1U));
 # 293
 if(system(cmd)!=0){
 Cyc_fprintf(Cyc_stderr,({const char*_Tmp0="\nError: preprocessing\n";_tag_fat(_Tmp0,sizeof(char),23U);}),_tag_fat(0U,sizeof(void*),0));
 return;}
 # 298
-Cyc_Position_reset_position(({const char*_Tmp0=preprocfile;_tag_fat(_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}));{
+Cyc_Position_reset_position(({const char*_Tmp0=preprocfile;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}));{
 struct Cyc___cycFILE*in_file=_check_null(Cyc_fopen(preprocfile,"r"));
 Cyc_Lex_lex_init(1);{
 struct Cyc_List_List*decls=Cyc_Parse_parse_file(in_file);
@@ -721,7 +665,7 @@ Cyc_file_close(in_file);
 decls=Cyc_flatten_decls(decls);{
 # 306
 struct Cyc_List_List*poss=({(struct Cyc_List_List*(*)(struct _tuple13*(*)(int),struct Cyc_List_List*))Cyc_List_map;})(Cyc_start2pos,({(struct Cyc_List_List*(*)(int(*)(struct Cyc_Absyn_Decl*),struct Cyc_List_List*))Cyc_List_map;})(Cyc_decl2start,decls));
-Cyc_Lineno_poss_of_abss(({const char*_Tmp0=preprocfile;_tag_fat(_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}),poss);
+Cyc_Lineno_poss_of_abss(({const char*_Tmp0=preprocfile;_tag_fat((void*)_Tmp0,sizeof(char),_get_zero_arr_size_char((void*)_Tmp0,1U));}),poss);
 remove(preprocfile);{
 struct Cyc_List_List*pos_decls=({struct Cyc_List_List*_Tmp0=({(struct Cyc_List_List*(*)(struct Cyc_Lineno_Pos*(*)(struct _tuple13*),struct Cyc_List_List*))Cyc_List_map;})(({(struct Cyc_Lineno_Pos*(*)(struct _tuple13*))Cyc_Core_snd;}),poss);Cyc_List_zip(_Tmp0,decls);});
 # 311
