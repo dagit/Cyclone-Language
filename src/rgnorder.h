@@ -34,6 +34,7 @@ typedef struct RgnPO @ rgn_po_t;
 
 rgn_po_t initial_fn_po(list_t<tvar_t> tvs, 
 		       list_t<$(type_t,type_t)@> po,
+		       type_t effect,
 		       tvar_t fst_rgn);
 rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn);
 rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool resetable);

@@ -17,7 +17,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-
 #include <core.h>
 #include <stdio.h>
 #include "absyn.h"
@@ -712,21 +711,21 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
 static bool type_in_effect(bool constrain, type_t t, type_t e) {
   t = compress(t);
   switch (compress(e)) {
-  case &AccessEff(_): 
-    return false;
+  case &AccessEff(_): return false;
   case &JoinEff(es): 
     for (; es != NULL; es = es->tl) 
-      if (type_in_effect(constrain, t, es->hd)) return true;
+      if (type_in_effect(constrain, t, es->hd)) 
+	return true;
     return false;
   case &RgnsEff(t2):
     t2 = compress(t2);
     if (t == t2) return true;
     if (constrain) return unify(t,t2);
     switch (rgns_of(t)) {
-    case &RgnsEff(t2):
-      switch ($(t,compress(t2))) {
+    case &RgnsEff(t3):
+      switch ($(compress(t3),t2)) {
       case $(&VarType(tv1),&VarType(tv2)): return unify(t,t2);
-      default: return t == t2;
+      default: return t3 == t2;
       }
     case e2: return type_in_effect(constrain,t,e2);
     }
@@ -1768,7 +1767,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     }
     return false;
 
-  case $(&SizeofType(_),&IntType(_,B4)): return true;
+  case $(&SizeofType(_),&IntType(_,B4)):
   case $(&TagType(_),&IntType(_,B4)): return true;
 
   default: return unify(t1,t2);
@@ -2194,11 +2193,9 @@ type_t fndecl2typ(fndecl_t fd) {
     // First, separate the function type attributes from the rest
     // of the attributes and update the function declaration appropriately.
     let fn_type_atts = NULL;
-    for (_ atts = fd->attributes; atts != NULL; atts = atts->tl) {
-      if (fntype_att(atts->hd)) {
+    for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
+      if (fntype_att(atts->hd))
         fn_type_atts = new List(atts->hd,fn_type_atts); 
-      } 
-    }
     return new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                List::map(fndecl2typ_f, fd->args),
                                fd->c_varargs, fd->cyc_varargs, 
@@ -3044,7 +3041,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
     if (tvs != NULL) {
       list_t<type_t> hidden_ts = NULL;
-      // too few parameters plug them in for the user using evars
+      // too few parameters -- plug them in for the user using evars
       for (; tvs != NULL; tvs = tvs->tl) {
         kind_t k = tvar_kind(tvs->hd);
         type_t e = new_evar(NULL,NULL);
@@ -3060,15 +3057,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       *toptp = new Opt(new_typ);
     }
     break;
-  case HeapRgn:
-    break;
+  case HeapRgn: break;
   case &RgnHandleType(t2): fallthru(t2);
   case &AccessEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2);
-    break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2); break;
   case &RgnsEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t2);
-    break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t2); break;
   case &JoinEff(ts):
     for (; ts != NULL; ts = ts->tl)
       cvtenv = i_check_valid_type(loc,te,cvtenv,EffKind,ts->hd);
@@ -3184,12 +3178,12 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,rt,args,c_varargs,cyc_varargs,rgn_rpo,atts}):
+  case &FnType(FnInfo{tvs,effect,_,_,_,_,_,_}):
     fd->tvs = tvs;
     fd->effect = effect;
     break;
   default: impos("check_fndecl_valid_type: not a FnType");
-  };
+  }
   // check for repeated paramater names (not allowed in C and makes no sense)
   region r {
     check_unique_vars(rmap(r,fst_fdarg,fd->args), loc, 

@@ -709,22 +709,21 @@ _tmp21)->f1;_LL1E: {struct Cyc_Absyn_Conref*_tmp24=Cyc_Absyn_compress_conref(*
 _tmp23);*_tmp23=_tmp24;return _tmp24;}_LL18:;}void*Cyc_Absyn_conref_val(struct Cyc_Absyn_Conref*
 x){void*_tmp25=(void*)(Cyc_Absyn_compress_conref(x))->v;void*_tmp26;_LL20: if(
 _tmp25 <= (void*)1?1:*((int*)_tmp25)!= 0)goto _LL22;_tmp26=(void*)((struct Cyc_Absyn_Eq_constr_struct*)
-_tmp25)->f1;_LL21: return _tmp26;_LL22:;_LL23:({void*_tmp27[0]={};((int(*)(struct
-_tagged_arr fmt,struct _tagged_arr ap))Cyc_Tcutil_impos)(_tag_arr("conref_val",
-sizeof(char),11),_tag_arr(_tmp27,sizeof(void*),0));});_LL1F:;}void*Cyc_Absyn_conref_def(
-void*y,struct Cyc_Absyn_Conref*x){void*_tmp28=(void*)(Cyc_Absyn_compress_conref(x))->v;
-void*_tmp29;_LL25: if(_tmp28 <= (void*)1?1:*((int*)_tmp28)!= 0)goto _LL27;_tmp29=(
-void*)((struct Cyc_Absyn_Eq_constr_struct*)_tmp28)->f1;_LL26: return _tmp29;_LL27:;
-_LL28: return y;_LL24:;}void*Cyc_Absyn_compress_kb(void*k){void*_tmp2A=k;struct Cyc_Core_Opt*
-_tmp2B;struct Cyc_Core_Opt*_tmp2C;struct Cyc_Core_Opt*_tmp2D;struct Cyc_Core_Opt
-_tmp2E;void*_tmp2F;void**_tmp30;struct Cyc_Core_Opt*_tmp31;struct Cyc_Core_Opt
-_tmp32;void*_tmp33;void**_tmp34;_LL2A: if(*((int*)_tmp2A)!= 0)goto _LL2C;_LL2B:
-goto _LL2D;_LL2C: if(*((int*)_tmp2A)!= 1)goto _LL2E;_tmp2B=((struct Cyc_Absyn_Unknown_kb_struct*)
-_tmp2A)->f1;if(_tmp2B != 0)goto _LL2E;_LL2D: goto _LL2F;_LL2E: if(*((int*)_tmp2A)!= 2)
-goto _LL30;_tmp2C=((struct Cyc_Absyn_Less_kb_struct*)_tmp2A)->f1;if(_tmp2C != 0)
-goto _LL30;_LL2F: return k;_LL30: if(*((int*)_tmp2A)!= 1)goto _LL32;_tmp2D=((struct
-Cyc_Absyn_Unknown_kb_struct*)_tmp2A)->f1;if(_tmp2D == 0)goto _LL32;_tmp2E=*_tmp2D;
-_tmp2F=(void*)_tmp2E.v;_tmp30=(void**)&(*((struct Cyc_Absyn_Unknown_kb_struct*)
+_tmp25)->f1;_LL21: return _tmp26;_LL22:;_LL23:({void*_tmp27[0]={};Cyc_Tcutil_impos(
+_tag_arr("conref_val",sizeof(char),11),_tag_arr(_tmp27,sizeof(void*),0));});
+_LL1F:;}void*Cyc_Absyn_conref_def(void*y,struct Cyc_Absyn_Conref*x){void*_tmp28=(
+void*)(Cyc_Absyn_compress_conref(x))->v;void*_tmp29;_LL25: if(_tmp28 <= (void*)1?1:*((
+int*)_tmp28)!= 0)goto _LL27;_tmp29=(void*)((struct Cyc_Absyn_Eq_constr_struct*)
+_tmp28)->f1;_LL26: return _tmp29;_LL27:;_LL28: return y;_LL24:;}void*Cyc_Absyn_compress_kb(
+void*k){void*_tmp2A=k;struct Cyc_Core_Opt*_tmp2B;struct Cyc_Core_Opt*_tmp2C;struct
+Cyc_Core_Opt*_tmp2D;struct Cyc_Core_Opt _tmp2E;void*_tmp2F;void**_tmp30;struct Cyc_Core_Opt*
+_tmp31;struct Cyc_Core_Opt _tmp32;void*_tmp33;void**_tmp34;_LL2A: if(*((int*)_tmp2A)
+!= 0)goto _LL2C;_LL2B: goto _LL2D;_LL2C: if(*((int*)_tmp2A)!= 1)goto _LL2E;_tmp2B=((
+struct Cyc_Absyn_Unknown_kb_struct*)_tmp2A)->f1;if(_tmp2B != 0)goto _LL2E;_LL2D:
+goto _LL2F;_LL2E: if(*((int*)_tmp2A)!= 2)goto _LL30;_tmp2C=((struct Cyc_Absyn_Less_kb_struct*)
+_tmp2A)->f1;if(_tmp2C != 0)goto _LL30;_LL2F: return k;_LL30: if(*((int*)_tmp2A)!= 1)
+goto _LL32;_tmp2D=((struct Cyc_Absyn_Unknown_kb_struct*)_tmp2A)->f1;if(_tmp2D == 0)
+goto _LL32;_tmp2E=*_tmp2D;_tmp2F=(void*)_tmp2E.v;_tmp30=(void**)&(*((struct Cyc_Absyn_Unknown_kb_struct*)
 _tmp2A)->f1).v;_LL31: _tmp34=_tmp30;goto _LL33;_LL32: if(*((int*)_tmp2A)!= 2)goto
 _LL29;_tmp31=((struct Cyc_Absyn_Less_kb_struct*)_tmp2A)->f1;if(_tmp31 == 0)goto
 _LL29;_tmp32=*_tmp31;_tmp33=(void*)_tmp32.v;_tmp34=(void**)&(*((struct Cyc_Absyn_Less_kb_struct*)

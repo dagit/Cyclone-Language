@@ -80,26 +80,16 @@ rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool resettable) {
 }
 
 rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
-		       tvar_t fst_rgn) {
+		       type_t effect, tvar_t fst_rgn) {
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   Dict::dict_t<_,struct RgnInfo@`H> d = Dict::empty(tvar_cmp);
-  let fst_these_outlive = NULL;
-  for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    tvar_t tv = tvs2->hd;
-    type_t t  = new VarType(tv);
-    type_t e;
-    switch(tvar_kind(tv)) {
-    case RgnKind:
-      d = Dict::insert(d, tv, new RgnInfo(empty_effect,false));
-      e = new AccessEff(t);
-      break;
-    case EffKind: e = t; break; // going away soon
-    default: e = new RgnsEff(t); break;
+  for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
+    switch(tvar_kind(tvs2->hd)) {
+    case RgnKind: 
+      d = Dict::insert(d,tvs2->hd,new RgnInfo(empty_effect,false)); break;
+    default: break;
     }
-    fst_these_outlive = new List(e, fst_these_outlive);
-  }
-  d = Dict::insert(d, fst_rgn,
-		   new RgnInfo(new JoinEff(fst_these_outlive),false));
+  d = Dict::insert(d, fst_rgn, new RgnInfo(effect,false));
   // add in the explicit partial order -- no longer detects cycles
   let ans = new RgnPO(d,empty_effect,fst_rgn);
   for(; po != NULL; po = po->tl)

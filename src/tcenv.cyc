@@ -860,7 +860,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
              new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po,rgn0);
+  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po,fd->effect->v,rgn0);
   type_t param_rgn = new VarType(rgn0);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {

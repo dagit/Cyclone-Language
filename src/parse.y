@@ -2172,9 +2172,9 @@ conditional_expression:
     { $$=^$(throw_exp($2,LOC(@1,@2))); }
 /* Cyc: expressions to build heap-allocated objects and arrays */
 | NEW array_initializer
-    { $$=^$(New_exp(NULL,$2,LOC(@1,@3))); }
+    { $$=^$(New_exp(NULL,$2,LOC(@1,@2))); }
 | NEW logical_or_expression
-    { $$=^$(New_exp(NULL,$2,LOC(@1,@3))); }
+    { $$=^$(New_exp(NULL,$2,LOC(@1,@2))); }
 | RNEW '(' expression ')' array_initializer
     { $$=^$(New_exp($3,$5,LOC(@1,@5))); }
 | RNEW '(' expression ')' logical_or_expression

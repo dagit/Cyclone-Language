@@ -86,7 +86,7 @@ struct Out {
 struct Doc {
   int mwo;           // min width, w/o newline
   int mw;            // min width, w/newline
-  fn_t<ppstate_t,out_t,{}> f; // thunk for doing a step of pretty printing
+  fn_t<ppstate_t,out_t,`H> f; // thunk for doing a step of pretty printing
 };
 
 static void dump_out(FILE @f, alist_t<stringptr_t> al) {

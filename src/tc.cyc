@@ -241,7 +241,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
   // move any function type attributes into the function's type
   fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   // check that packed and aligned don't show up in the attributes
-  for (_ atts = fd->attributes; atts != NULL; atts = atts->tl) {
+  for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
     case Packed_att:
     case &Aligned_att(_): 
@@ -249,7 +249,6 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
       break;
     default: break;
     }
-  }
 
   // due to recursion, add function to environment before checking body
   try {

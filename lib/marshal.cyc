@@ -165,7 +165,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
       if (y != 0) {
 	int typ_szb = size_type(typ);
 	for (int i = 0; i<sz; i++) {
-	  env = fprint_type_base(typ,env, fp,(`a@)unsafe_cast(y));
+	  env = fprint_type_base(typ,env, fp,unsafe_cast@<_,`a@>(y));
 	  if (i != (sz-1))
 	    fprintf(fp,", ");
 	  y += typ_szb;
@@ -188,7 +188,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     if(!mem) {
       fprintf(fp,"[(@%x) ",base);
       for (addr_t i = base; i<last_plus_one; i += typ_szb) {
-	env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(i));
+	env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(i));
 	if ((i+typ_szb) < last_plus_one)
 	  fprintf(fp,", ");
       }
@@ -207,7 +207,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
       let $(ofs,nm,typ) = *(l[i]);
       fprintf(fp,"%s=",nm);
       int x_ofs = x + ofs;
-      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
+      env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
       if (i != (l.size-1))
 	fprintf(fp,", ");
     }
@@ -220,7 +220,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
+      env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
       if (i != (l.size-1))
 	fprintf(fp,", ");
     }
@@ -235,7 +235,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     for (int i = 1; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
+      env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
       if (i != (l.size-1))
 	fprintf(fp,", ");
     }
@@ -466,7 +466,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
       env = index_insert(env,y);
       int typ_szb = size_type(typ);
       for (int i = 0; i<sz; i++) {
-	env = write_type_base(typ,env, fp, (`a@)unsafe_cast(y));
+	env = write_type_base(typ,env, fp, unsafe_cast@<_,`a@>(y));
 	y += typ_szb;
       }
     }
@@ -485,7 +485,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     if(!index_member(env,mem)) {
       env=index_insert(env,base);
       for (addr_t i = base; i<last_plus_one; i += typ_szb) {
-	env = write_type_base(typ, env, fp, (`a@)unsafe_cast(i));
+	env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(i));
       }
     }
     break;
@@ -495,7 +495,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     for (int i = 0; i < l.size; i++) {
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = write_type_base(typ, env, fp, (`a@)unsafe_cast(x_ofs));
+      env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
     }
     break;
 
@@ -504,7 +504,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = write_type_base(typ, env, fp, (`a@)unsafe_cast(x_ofs));
+      env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
     }
     break;
 
@@ -513,7 +513,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = write_type_base(typ, env, fp, (`a@)unsafe_cast(x_ofs));
+      env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
     }
     break;
 
@@ -653,7 +653,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
       // fill it in
       int y = bufptr;
       for(int i = 0; i < sz; i++) {
-	env = rread_type_base(r,typ,env,fp,(`a@)unsafe_cast(y));
+	env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(y));
 	y += typ_szb;
       }
     } else { // return pointer to shared thing
@@ -680,7 +680,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
       // fill it in
       int y = bufptr;
       for(int i = 0; i < sz; i++) {
-	env = rread_type_base(r,typ,env,fp,(`a@)unsafe_cast(y));
+	env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(y));
 	y += typ_szb;
       }
     } else { // return pointer to shared thing
@@ -696,7 +696,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
     for(int i = 0; i < l.size; i++) {
       let $(ofs, _,typ) = *(l[i]);
       int x_ofs = x+ofs;
-      env = rread_type_base(r,typ,env,fp,(`a@)unsafe_cast(x_ofs));
+      env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
    } 
     break;
 
@@ -705,7 +705,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
     for(int i = 0; i < l.size; i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
-      env = rread_type_base(r,typ,env,fp,(`a@)unsafe_cast(x_ofs));
+      env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
     } 
     break;
 
@@ -714,7 +714,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
     for(int i = 0; i < l.size; i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
-      env = rread_type_base(r,typ,env,fp,(`a@)unsafe_cast(x_ofs));
+      env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
     } 
     break;
 
@@ -741,7 +741,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
 	// fill in buf
 	addr_t@ tagptr = unsafe_cast(bufptr);
 	*tagptr = tag;
-	env = rread_type_base(r,typ, env, fp, (`a@)unsafe_cast(bufptr+off));
+	env = rread_type_base(r,typ, env, fp, unsafe_cast@<_,`a@>(bufptr+off));
       } else {
 	// look up the corresponding pointer and fill in result
 	addr_t@ x = unsafe_cast(result);
@@ -779,7 +779,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
 	// fill in buf
 	addr_t@ tagptr = unsafe_cast(bufptr);
 	*tagptr = (addr_t)(_*)s;
-	env=rread_type_base(r,typ, env, fp, (`a@)unsafe_cast(bufptr+off));
+	env=rread_type_base(r,typ, env, fp, unsafe_cast@<_,`a@>(bufptr+off));
       } else { // build a non-data carrying xtunion: a pointer to NULL followed by an untagged pointer to 0000Tagname.
 	addr_t@ x = unsafe_cast(result);
 	*x = (addr_t)(_*)s;
@@ -884,7 +884,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
       int x = addr;
       int y = bufptr;
       for(int i = 0; i < sz; i++) {
-	env = rcopy_type_base(r,typ,env,(`a@)unsafe_cast(x),(`a@)unsafe_cast(y));
+	env = rcopy_type_base(r,typ,env,unsafe_cast@<_,`a@>(x),unsafe_cast@<_,`a@>(y));
 	x += typ_szb;
 	y += typ_szb;
       } 
@@ -908,7 +908,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
       int y = base;
       int z = bufptr;
       for(int i = 0; i < size; i++) {
-	env = rcopy_type_base(r,typ,env,(`a@)unsafe_cast(y),(`a@)unsafe_cast(z));
+	env = rcopy_type_base(r,typ,env,unsafe_cast@<_,`a@>(y),unsafe_cast@<_,`a@>(z));
 	y += typ_szb;
 	z += typ_szb;
       } 
@@ -922,7 +922,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
-      env = rcopy_type_base(r,typ, env, (`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      env = rcopy_type_base(r,typ, env, unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
     }
     break;
 
@@ -933,7 +933,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
-      env = rcopy_type_base(r,typ, env, (`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      env = rcopy_type_base(r,typ, env, unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
     }
     break;
 
@@ -944,7 +944,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
-      env = rcopy_type_base(r,typ, env, (`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      env = rcopy_type_base(r,typ, env, unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
     }
     break;
 
@@ -1001,7 +1001,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
 	*tagptr = xtnamep;
 	`a@ xoff = unsafe_cast(*val0+off);
 	
-	env=rcopy_type_base(r,typ, env, xoff, (`a@)unsafe_cast(bufptr+off));
+	env=rcopy_type_base(r,typ, env, xoff, unsafe_cast@<_,`a@>(bufptr+off));
 	// add to table
 	env = Dict::insert(env, addr,bufptr);
       } else { // build a non-data carrying xtunion: a pointer to NULL followed by an untagged pointer to 0000Tagname.
@@ -1152,7 +1152,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
       int ya = addry;
       order_t ord = Eq_ord;
       for(int i = 0; i < sz; i++) {
-	let $( ord2,env2) = leq_eq_type(typ,env,(`a@)unsafe_cast(xa),(`a@)unsafe_cast(ya));
+	let $( ord2,env2) = leq_eq_type(typ,env,unsafe_cast@<_,`a@>(xa),unsafe_cast@<_,`a@>(ya));
 	ord = order_lex(ord,ord2);
 	env = env2;
 	xa += typ_szb;
@@ -1202,7 +1202,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
       order_t ord = Eq_ord;
       // know xsize <= ysize
       for(int i = 0; i < xsize; i++) {
-	let $(ord2,env2) = leq_eq_type(typ,env,(`a@)unsafe_cast(xb),(`a@)unsafe_cast(yb));
+	let $(ord2,env2) = leq_eq_type(typ,env,unsafe_cast@<_,`a@>(xb),unsafe_cast@<_,`a@>(yb));
 	ord = order_lex(ord,ord2);
 	env = env2;
 	xb += typ_szb;
@@ -1221,7 +1221,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;
-      let $(ord2,env2) = leq_eq_type(typ,env,(`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      let $(ord2,env2) = leq_eq_type(typ,env,unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
       ord = order_lex(ord,ord2);
       env = env2;
     }
@@ -1235,7 +1235,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;
-      let $(ord2,env2) = leq_eq_type(typ,env,(`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      let $(ord2,env2) = leq_eq_type(typ,env,unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
       ord = order_lex(ord,ord2);
       env = env2;
     }
@@ -1250,7 +1250,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;
-      let $(ord2,env2) = leq_eq_type(typ,env,(`a@)unsafe_cast(x_ofs), (`a@)unsafe_cast(y_ofs));
+      let $(ord2,env2) = leq_eq_type(typ,env,unsafe_cast@<_,`a@>(x_ofs), unsafe_cast@<_,`a@>(y_ofs));
       ord = order_lex(ord,ord2);
       env = env2;
     }
