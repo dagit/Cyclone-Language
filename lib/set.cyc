@@ -19,7 +19,7 @@ using List;
  * first elt is greater than the second elt.  The list of nodes is
  * always maintained in sorted order with no duplicates.
  */
-abstract struct Set<`a,`r,`e> {
+abstract struct Set<`a,`r::R,`e::E> {
   int (@compare)(`a,`a;`e);
   int cardinality;
   glist_t<`a,`r> nodes;

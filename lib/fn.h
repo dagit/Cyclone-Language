@@ -11,7 +11,7 @@
 
 namespace Fn {
 
-extern enum Function<`arg,`res,`eff> {
+extern enum Function<`arg,`res,`eff::E> {
   Fun<`env>(`res (@)(`env,`arg;`eff), `env)
 };
 

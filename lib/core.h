@@ -31,7 +31,7 @@ extern `c third($(`a,`b,`c)@);
 extern `a identity(`a);
 extern int intcmp(int,int);
 extern int charcmp(char,char);
-extern int ptrcmp(`a::M @ `r, `a::M @ `r); 
+extern int ptrcmp(`a::A @ `r, `a::A @ `r); 
 extern xenum exn { InvalidArg(string) };
 extern xenum exn { Failure(string) };
 extern xenum exn { Impossible(string) };

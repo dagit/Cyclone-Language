@@ -244,7 +244,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
         terr(d->loc, "cannot declare a qualified local variable");
         break;
       }
-      check_valid_type(s0->loc,te,lookup_type_vars(te),t);
+      check_type(s0->loc,te,lookup_type_vars(te),MemKind,t);
       if (initializer != null) {
 	// special case -- fill in the size for t[] arrays
 	switch (compress(t)) {

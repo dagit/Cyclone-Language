@@ -18,7 +18,7 @@ static struct T<`a::B,`b::B> {
 };
 typedef struct T<`a,`b> * tree<`a,`b>;
 
-abstract struct Dict<`a,`b,`e> {
+abstract struct Dict<`a,`b,`e::E> {
   int (@rel)(`a,`a;`e);
   tree<`a,`b> t;
 };
@@ -269,7 +269,7 @@ intersect_f($(`b f(`b,`b;{}), hdict_t<`a,`b,`e>, hdict_t<`a,`b,`e>) @ trip,
 }
 */
 
-struct IntArg<`a,`b,`e1,`e2> {
+struct IntArg<`a,`b,`e1::E,`e2::E> {
   `b (@f)(`b,`b;`e1);
   hdict_t<`a,`b,`e2> d1;
   hdict_t<`a,`b,`e2> d2;

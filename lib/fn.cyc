@@ -14,7 +14,7 @@ namespace Fn;
 // unifier...or my ability to figure out what effects to put
 // on things.
 
-enum Function<`arg,`res,`e1> {
+enum Function<`arg,`res,`e1::E> {
   Fun<`env>(`res (@)(`env,`arg;`e1), `env)
 };
 

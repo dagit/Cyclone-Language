@@ -106,51 +106,6 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
   }
 }
 
-//Note: must be called after check_valid_type.  So we shouldn't
-//      find an unconstrained Evar or a Typedef or such.
-static bool ok_field_type(seg_t loc, tenv te, typ t) {
-  switch (compress(t)) {
-  case VarType(&$(_,RgnKind)): throw Impossible("Region var in ok_field_type");
-  case VarType(&$(_,EffKind)): throw Impossible("Effect var in ok_field_type");
-  case VarType(&$(_,BoxKind)): return true;
-  case VarType(&$(_,_))      : return false;
-
-  case FnType(_)              : return false;
-  case RgnHandleType(_)       : return false; // FIX at some point
-  case UnionType              : return false;
-
-    // hmm, maybe void fields should be rejected
-  case VoidType:             return true;
-  case IntType(_,_):         return true;
-  case FloatType:            return true;
-  case DoubleType:           return true;
-  case ArrayType(_,_,_):     return true;
-  case PointerType(_):       return true;
-  case EnumType(_,_,_):      return true;
-  case XenumType(_,_):       return true;
-
-  case TupleType(tq_ts):
-    for (; tq_ts != null; tq_ts = tq_ts->tl)
-      if(!ok_field_type(loc, te, (*tq_ts->hd)[1]))
-	return false;
-    return true;
-  case StructType(tdnopt,_,sdp):
-    if (tdnopt == null)
-      return false;
-      // Every structdecl entered in te already has ok fields,
-      // so we only need to check whether the struct is abstract.
-      // NB, check_valid_type is called before this, so tdn is
-      // an absolute name.
-    return (*sdp)->fields != null;
-
-  case Evar(_,_,_):        throw Impossible("Evar in ok_field_type");
-  case TypedefType(_,_,_): throw Impossible("Typedef in ok_field_type");
-  case HeapRgn:        throw Impossible("HeapRgn in ok_field_type");
-  case AccessEff(_): throw Impossible("AccessEffect in ok_field_type");
-  case JoinEff(_): throw Impossible("JoinEffect in ok_field_type");
-  }
-}
-
 // FIX:  we should really check that static or public function prototypes
 // are eventually declared.  However, C will catch this for us, so I'm
 // not bothering to do this now.
@@ -200,6 +155,10 @@ static bool is_function_type(typ t) {
 
 static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
   var   v  = (*vd->name)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking vardecl %s",*v); 
+  fflush(stderr);
+#endif
   typ   t  = vd->type;
   scope sc = vd->sc;
 
@@ -266,6 +225,10 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
 
 static void tcFndecl(tenv te, genv_t ge, seg_t loc, fndecl fd) {
   var   v  = (*fd->name)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking fndecl %s",*v);
+  fflush(stderr);
+#endif
   scope sc = fd->sc;
 
   // reject explicitly qualified name
@@ -302,6 +265,10 @@ static void tcFndecl(tenv te, genv_t ge, seg_t loc, fndecl fd) {
 
 static void tcTypedefdecl(tenv te, genv_t ge, seg_t loc, typedefdecl td) {
   var v = (*td->name)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking typedefdecl %s",*v);
+  fflush(stderr);
+#endif
   // reject explicitly qualified name
   switch ((*td->name)[0]) {
   case Rel_n(null): break;
@@ -319,7 +286,7 @@ static void tcTypedefdecl(tenv te, genv_t ge, seg_t loc, typedefdecl td) {
   (*td->name)[0] = Abs_n(te->ns);
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
-  check_type(loc,te,td->tvs,true,td->defn);
+  check_type(loc,te,td->tvs,AnyKind,td->defn);
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
@@ -334,6 +301,23 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
     return;
   }
   var        v   = (*sd->name->v)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking structdecl %s",*v);
+  fflush(stderr);
+#endif
+  // disallow MemKinds and set unconstrained kinds to BoxKind
+  for(_ tvs2 = sd->tvs; tvs2 != null; tvs2 = tvs2->tl) {
+    let c = compress_conref(tvs2->hd->kind);
+    switch (c->v) {
+    case No_constr:
+      c->v = Eq_constr(BoxKind); continue;
+    case Eq_constr(MemKind):
+      terr(loc,xprintf("struct %s attempts to abstract type "
+                       "variable %s of kind M",*v,
+                       *tvs2->hd->name)); continue;
+    default: continue;
+    }
+  }
   list_t<tvar> tvs = sd->tvs;
   // reject explicitly qualified name
   switch ((*sd->name->v)[0]) {
@@ -354,11 +338,6 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
     // add the declaration to the environment, then go check the fields
     ge->structdecls = Dict::insert(ge->structdecls, v, (structdecl@)(&$(sd)));
     if(sd->fields == null) {
-      for(; tvs != null; tvs = tvs->tl)
-	switch((*tvs->hd)[1]) {
-	case UnresolvedKind: (*tvs->hd)[1] = BoxKind; break;
-	default: break;
-	}
       return;
     }
     break;
@@ -366,10 +345,25 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
   case &Opt(sdp): // a redeclaration
     let sd2  = *sdp;
     let tvs2 = sd2->tvs;
-    // reject if type-arity is different
+    // reject if different number of type variables or different kinds
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of struct %s "
 		       "has a different number of type parameters", *v));
+    let x1 = tvs;
+    let x2 = tvs2;
+    for (; x1 != null; x1 = x1->tl, x2=x2->tl) {
+      let c1 = compress_conref(x1->hd->kind);
+      let c2 = compress_conref(x2->hd->kind);
+      // if the kind of the type variable is unconstrained, then set it to
+      // the kind of in the previous declaration.
+      if (c1->v == No_constr && c1 != c2)
+        c1->v = Forward_constr(c2);
+      // check that the kinds are the same
+      if (conref_val(c1) != conref_val(c2))
+        terr(loc,xprintf("redeclaration of struct %s has a different kind "
+                         "(%s) for type parameter %s (%s)", *v, 
+                         ckind2string(c1), *x1->hd->name, ckind2string(c2)));
+    }
     // reject if scopes are inconsistent
     sd->sc = scope_redecl_okay(sd->sc, sd->fields, sd2->sc, sd2->fields,
 			       loc, "struct", v);
@@ -397,7 +391,7 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
 	  terr(loc, xprintf("redeclaration of struct %s: qualifier mismatch on"
 			    " field %s", *v, *fn1));
 	// important side-effects on t1
-	check_valid_type(loc, te, tvs, t1);
+	check_type(loc, te, tvs, MemKind, t1);
 	typ subst_t2 = substitute(inst,t2);
 	if(!unify(t1,subst_t2)) // FIX: unify definitely seems wrong here
 	  terr(loc,xprintf("redeclaration of struct %s: type mismatch on field"
@@ -428,9 +422,7 @@ static void tcStructdecl(tenv te, genv_t ge, seg_t loc, structdecl sd) {
     if (List::mem(String::zstrptrcmp,prev_fields,fn))
 	terr(loc,xprintf("duplicate field %s in struct",*fn));
     prev_fields = &List(fn,prev_fields);
-    check_valid_type(loc,te,tvs,t);
-    if (!ok_field_type(loc,te,t))
-      terr(loc,xprintf("fields of type %s are not allowed",typ2string(t)));
+    check_type(loc,te,tvs,MemKind,t);
     // FIX: check for consistent tquals?
   }
   // add the constructor to the environment
@@ -447,7 +439,22 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
     return;
   }
   var        v   = (*ed->name->v)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking enumdecl %s",*v);
+  fflush(stderr);
+#endif
   list_t<tvar> tvs = ed->tvs;
+  // disallow MemKinds and set unconstrained kinds to BoxKind
+  for(_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
+    conref<kind_t> c = compress_conref(tvs2->hd->kind);
+    switch (c->v) {
+    case No_constr: c->v = Eq_constr(BoxKind); break;
+    case Eq_constr(MemKind): 
+      terr(loc,xprintf("enum %s attempts to abstract type "
+                       "variable %s of kind M",*v,*tvs2->hd->name)); break;
+    default: break;
+    }
+  }
   // reject explicitly qualified name
   switch ((*ed->name->v)[0]) {
   case Rel_n(null): break;
@@ -468,11 +475,6 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
     // add the declaration to the environment, then go check the fields
     ge->enumdecls = Dict::insert(ge->enumdecls, v, (enumdecl@)(&$(ed)));
     if(ed->fields == null) {
-      for(; tvs != null; tvs = tvs->tl)
-	switch((*tvs->hd)[1]) {
-	case UnresolvedKind: (*tvs->hd)[1] = BoxKind; break;
-	default: break;
-	}
       return;
     }
     break;
@@ -480,10 +482,23 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
   case &Opt(edp):
     let ed2  = *edp;
     let tvs2 = ed2->tvs;
-    // reject if type-arity is different
+    // reject if type-arity is different or kinds are different
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of enum %s "
 		       "has a different number of type parameters", *v));
+    let x1 = tvs;
+    let x2 = tvs2;
+    for (; x1 != null; x1 = x1->tl, x2=x2->tl) {
+      let c1 = compress_conref(x1->hd->kind);
+      let c2 = compress_conref(x2->hd->kind);
+      if (c1->v == No_constr && c1 != c2)
+        c1->v = Forward_constr(c2);
+      if (conref_val(c1)  != conref_val(c2))
+        terr(loc,xprintf("redeclaration of enum %s has a different kind "
+                         "(%s) for type parameter %s (%s)", *v, 
+                         ckind2string(c1), *x1->hd->name, ckind2string(c2)));
+    }
+
     // reject if scopes are different
     ed->sc = scope_redecl_okay(ed->sc, ed->fields, ed2->sc, ed2->fields,
 			       loc, "enum", v);
@@ -494,6 +509,7 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
     case $(null,_):    ed->fields = ed2->fields; ed->tvs = tvs2; return;
     case $(_,   _):
       // both declare fields, so they must agree (with renaming w.r.t. tyvars)
+      // FIX: check the kinds match up?
       list_t<$(tvar,typ)@> inst = null;
       for(let tvs0 = tvs; tvs0 != null; tvs0 = tvs0->tl, tvs2 = tvs2->tl)
 	inst = &List(&$(tvs2->hd,VarType(tvs0->hd)), inst);
@@ -509,8 +525,8 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
 	list_t<tvar> alltvs = List::append(tvs, f1s->hd->tvs);
 	check_unique_tvars(f1s->hd->loc,alltvs);
 	for(let typs = f1s->hd->typs; typs != null; typs = typs->tl) {
-	  let t = (*typs->hd)[1];
-	  check_valid_type(f1s->hd->loc,te,alltvs,t);
+          let t = (*typs->hd)[1];
+	  check_type(f1s->hd->loc,te,alltvs,MemKind,t);
 	}
 	// now we can check against previous definition of field
 	field_redecl_okay(f1s->hd, f2s->hd, inst, te, "enum", v);
@@ -543,11 +559,23 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
     prev_fields = &List((*f->name)[1],prev_fields);
     if (f->tag != null)
       Evexp::eval_const_uint_exp((exp)f->tag);
+    for (_ tvs = f->tvs; tvs != null; tvs = tvs->tl) {
+      let tv = tvs->hd;
+      let c = compress_conref(tv->kind);
+      switch (c->v) {
+      case No_constr: c->v = Eq_constr(BoxKind); break;
+      case Eq_constr(MemKind): 
+        terr(loc,xprintf("field %s abstracts type variable of "
+                         "kind M", *(*f->name)[1])); break;
+      // FIX:  should we allow existentials over regions or effects?
+      default: break;
+      }
+    }
     list_t<tvar> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
     for (list_t<$(tqual,typ)@> typs = f->typs; typs != null; typs=typs->tl) {
       let t = (*typs->hd)[1];
-      check_valid_type(f->loc,te,alltvs,t);
+      check_type(f->loc,te,alltvs,MemKind,t);
     }
     // FIX: check valid tquals?
     (*f->name)[0] = Abs_n(te->ns);
@@ -564,6 +592,10 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
 // FIX: ensure the types are packable (see comment with tcStructdecl).
 static void tcXenumdecl(tenv te, genv_t ge, seg_t loc, xenumdecl xd) {
   var v = (*xd->name)[1];
+#ifdef DEBUG
+  fprintf(stderr,"type-checking xenumdecl %s",*v);
+  fflush(stderr);
+#endif
   opt_t<xenumdecl@> xd2o;
   try xd2o = lookup_xenumdecl(te,loc,xd->name);
   catch { case Dict::Absent:
@@ -617,11 +649,23 @@ static void tcXenumdecl(tenv te, genv_t ge, seg_t loc, xenumdecl xd) {
       break;
     }
     // reject if there is an ill-formed type
+    for (_ tvs = f->tvs; tvs != null; tvs = tvs->tl) {
+      let tv = tvs->hd;
+      let c = compress_conref(tv->kind);
+      switch (c->v) {
+      case No_constr: c->v = Eq_constr(BoxKind); break;
+      case Eq_constr(MemKind): 
+        terr(loc,xprintf("field %s abstracts type variable of "
+                         "kind M", *(*f->name)[1])); break;
+      // FIX: should we allow existentials over regions and effects?
+      default: break;
+      }
+    }
     list_t<tvar>tvs = f->tvs;
     check_unique_tvars(loc,tvs);
     for(let typs = f->typs; typs != null; typs = typs->tl) {
       let t = (*typs->hd)[1];
-      check_valid_type(f->loc,te,tvs,t);
+      check_type(f->loc,te,tvs,MemKind,t);
     }
     // notice we now allow duplicates, they just have to have the same type
     // also, we can be totally re-ordered from a different declaration

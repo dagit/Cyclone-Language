@@ -15,7 +15,7 @@ namespace List {
   //           as possible.  Also, a reasonable attempt to make things as
   //           space efficient as possible, while remaining "functional".
 
-  struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
   typedef struct List<`a,`r> *`r glist_t<`a,`r>;
   typedef struct List<`a,`H> *list_t<`a>;
   typedef struct List<`a,`H> @List_t<`a>;

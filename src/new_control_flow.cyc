@@ -346,14 +346,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
       syn1.lvalues = use_it_list();
     return syn1;
 
-  case StructArrow_e(e1,f):
-    fallthru(e1,f);
-    env.access_path = new{List(e,env.access_path)}; 
-    let syn1 = abstract_exp(env,e1);
-    if(syn1.lvalues == null)
-      syn1.lvalues = use_it_list();
-    return syn1;
-
+  case StructArrow_e(e1,f): fallthru(e1,f);
   case StructMember_e(e1,f):
     env.access_path = new{List(e,env.access_path)}; 
     let syn1 = abstract_exp(env,e1);

@@ -28,11 +28,8 @@ extern Core::opt_t<set_t<var>> empty_var_set;
 
 // returns the type of a function declaration
 extern typ fd_type(fndecl fd); 
-
+extern kind_t typ_kind(typ t);
 extern typ compress(typ t);
-extern conref<`a> compress_conref(conref<`a> x);
-extern `a conref_val(conref<`a> x);
-extern kind_t typ_kind(typ);
 extern void unchecked_cast(tenv, exp, typ);
 extern bool coerce_arg(tenv, exp, typ); 
 extern bool coerce_assign(tenv, exp, typ);
@@ -72,19 +69,38 @@ extern $(tvar,typ)@ make_inst_var(tvar);
 // prints a warning when an expression contains an assignment
 extern void check_contains_assign(exp);
 
-// Check that the type is valid assuming that the free type variables are
-// drawn from the given list.  As a side-effect, expand any typedefs and
-// calculate any default effects.
-extern void check_valid_type(seg_t,tenv,list_t<tvar>,typ);
-// Same as above, but allow abstract mem types (`a::M or an abstract struct)
-extern void check_type(seg_t,tenv,list_t<tvar>,bool abs_type_okay,typ);
+
+// Checks that a type is well-formed and lives in kind k.
+// This adds to the input list of free type variables any new free 
+// variables that arise.  This allows us to calculate free variables 
+// of types in a bottom-up fashion and then check that they are all bound 
+// at the top-level.
+//
+// This also performs the following side-effects which most of the 
+// rest of the compiler rightfully assumes have occurred:
+// * expand typedefs
+// * set pointers to declarations for StructType, EnumType, and XenumType
+// * change relative type names to absolute type names
+// * set the kind field of type variables: we use the expected kind
+//   initially, but if later constraints force a more constrained kind,
+//   then we move to the more constrained kind.  To achieve this, we very
+//   carefully share all of the free occurrences of the type variable 
+//   in the type data structure.
+// * add default effects for function types -- the default effect
+//   causes a fresh EffKind type variable e to be generated, and
+//   consists of e and any free effect or region variables within
+//   the function type.  
+extern list_t<tvar> check_valid_type(seg_t,tenv,list_t<tvar>,kind_t k,typ);
 // Similar to the above except that (a) there are no bound type variables,
-// and (b) for function types, we bind the free type variables.
+// (b) for function types, we bind the free type variables, (c) the expected
+// kind defaults to MemKind.
 extern void check_valid_toplevel_type(seg_t,tenv,typ);
 // Special cased for function declarations
 extern void check_fndecl_valid_type(seg_t,tenv,fndecl);
-extern void check_valid_kinded_type(seg_t loc, tenv te, list_t<tvar> 
-                                    bound_tvars, kind_t k, typ t);
+// Same as check_valid_type but ensures that the resulting free variables
+// are compatible with a set of bound type variables.  Note that this has
+// the side effect of constraining the kinds of the bound type variables.
+extern void check_type(seg_t, tenv, list_t<tvar> bound_tvars, kind_t k,typ);
 
 extern void check_unique_vars(list_t<var> vs, seg_t loc, string err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar>);

@@ -1,154 +1,158 @@
-Todo now:
+Todo list:
 
-* Try to avoid using so many lists in the abstract syntax --
-  we should use arrays (e.g., for CompoundLit_e, Array_e,
-  Struct_e, Enum_e, Xenum_e, and UnresolvedMem_e, Switch_s, etc.)
+BUG FIXES and UNSOUNDNESSES:
+----------------------------
+* FIX all of the FIX things.
 
-* allows a cast between a "struct cons<exp>*" and "exp@?" !!!
-  at least it gives a warning...  Actually, this may be right.
+* are we treating void properly?
 
-* need to add support for explicit malloc and initialization.
+* "sizeof e" doesn't do the right thing.  (It's treated as e.size instead
+  of the actual size of e.)
 
+* link-checking:  we need to spit out an internal interface for each
+  module and check for consistency at link-time.  Note that we should
+  also check that main has the right type.  We should have the compiler
+  hash and sign the code and interface so that we can detect tampering
+  with the code or interface at link-time.
+
+* Are we treating static variables (within a fun
+* we're too restrictive about typedef names -- C really treats them as
+  a separate namespace, but our parser depends crucially on the lexer
+  making a distinction between typedef names and other identifiers.
+
+* there are unsoundnesses w.r.t. the way we type-check the left-hand-sides
+  of certain operations (e.g., x++.)  Part of the problem is that we allow
+  implicit coercion from an enum to an integral type.  
+
+MISSING THINGS NEEDED TO PORT REAL CODE:
+----------------------------------------
 * need to add GCC-style attributes for functions, structs, variables, etc.
 
-* nested functions (closures -- with RTCG approach to get calling convention
-  right.)
+* Need to port more C libraries
 
-* need explicit kind syntax and someway to explicitly name a stack
-  region.
+* We should add unions in, and allow them when the different variants
+  don't contain pointers or abstract types.  Ultimately, we should support
+  dependent types so that enums can be coded in terms of unions.
 
-* we should support not having to explicitly abstract type variables
-  in functions, prototypes, structs, etc.
+* default array initializers, at top level and local, e.g., int x[4];
 
-* when we have a pattern:
+* nested type declarations? nested exception declarations? nested using?
 
-  case PointerType(PtrInfo{*elttype,_,_,_,_}):
+* bit fields within structs
 
-  then elttype isn't compiled correctly
+* structs and enums without a name
 
-* if we write:
+* long long, short, float, and double constants (including 12s, 3l, etc.)
 
-  let slist = &cons((string)"hello",null)
 
-  then we do not get a type-error, in spite of the fact that we're
-  instantiating a boxed type variable with an unboxed type (char[?]).
-
-* "sizeof e" doesn't do the right thing.
-
-* we don't verify that main has the right type -- this should probably
-  be done by link-checking...
+THINGS NEEDED TO SIMPLIFY PORTING:
+----------------------------------
+* need to add support for explicit malloc and initialization.
 
 * get rid of null, replace with 0 (requires clever overloading)
 
-* We need to re-do the pattern match compilation -- we should take
-  advantage of the decision tree built during type-checking.
-
-* We should add unions in, and allow them when the different variants
-  don't contain pointers or abstract types.
-
-* Are we treating static variables (within a function) correctly w.r.t.
-  definite assignment?
-
-* We should add anonymous structs.
-
-* We should fix all of the FIX things in the code.
-
-* We should get the documentation in shape.
-
-* We should allow more deep casts (e.g., function pointers).
-
-* Maybe we should port bison to cyclone.
-
-* Maybe we should start on the porting tool.
-
-* More libraries
-
-* ought to be able to treat the arguments to an enum constructor as a tuple
-  in a pattern...
-
-* need to start putting user's guide together.
-
-* lots of places where we're not sure what to do with the type qualifiers
-
-* should hack the popcorn front-end to spit out cyclone (or a close
-  approximation thereof.)
-
-* need to spit out an "interface" file for each .cyc file.  The interface
-  should list all of the imported types and values, and all of the exported
-  types and values.  At link-time, we should suck in all of these and make
-  sure they're consistent.
+* we should start on the porting tool -- use region inference to
+  figure out the "right" interface for code.
 
 * new { for i < x : ' ' }
   causes core dump for negative x.  (Not surprising -- x is treated as
   unsigned so that's a really big number and likely, malloc is returning
   null which we're not checking for when we allocate...)
 
-* default array initializers, at top level and local, e.g., int x[4];
-
-* functions should not be allowed as fields of enums or tuples, e.g.,
-    $(int (int),bool) x;
-    enum foo { Bar(int (int)) };
-  Anyway the translation fails to go through gcc
-
-* multi-level initializers, e.g., {{0,1},{2,3}}
-
-* more general casts, e.g., char[4] to int[1]
-
-* better constant expressions (no doubles? no longs?)
+* better formatting support in printf & friends (i.e., deal with full
+  %-specifiers)  
 
 * varargs (...) (integrate with printf, fprintf, xprintf?)
 
-* scanf, sprintf, and any other vararg functions?
+* multi-level initializers, e.g., {{0,1},{2,3}}
 
-* better (deeper) coercions and casts -- perhaps a more general notion of
-  subtyping and isomorphism?
+* better constant expressions (no doubles? no longs?)
 
-* compound literals
+* compound literals, more designators for arrays literals, better 
+  designators for structs
 
-* more designators for arrays literals
+* better evaluation in evexp.pop
 
-* better designators for structs
+THINGS NEEDED TO MAKE REGIONS MORE REAL:
+----------------------------------------
+* Need to modify enum's to support region-allocation.  
 
-* qualifiers for arguments to enum/xenum constructors?
+* Need to add letregion, syntax for region handles, and a way to
+  allocate into a region (as opposed to the heap.)
 
-* xenum redeclarations in another namespace handled right?
+* Need to add a way to explicitly name the regions corresponding
+  to declaration blocks.
 
-* better implementation of unresolved mem
+THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
+--------------------------------------------------
+* dependent types for arrays (and lots more?)
 
-* deal with inline?
+* nested functions (closures -- with RTCG approach to get calling convention
+  right.)
 
-* are we treating void properly?
+* typedefs should allow any type as an argument -- check well-formedness
+  again after expanding the definition.  For instance, I'd like to be able
+  to write:  typedef `a array<`a>[]; and typedef `a *opt<`a>; and 
+  typedef `a *ptr<`a>; etc.
+
+* better comprehensions/iterators
+
+* We should add anonymous structs (and enums)?
+
+* We should allow more deep casts (e.g., function pointers) and have
+  generally better support for casting between compatible representations.
+  e.g., char[4] to int[1] (note not sound on architectures that require
+  word alignment.)
+
+* We should allow partial instantiations of polymorphic routines.
+
+* ought to be able to treat the arguments to an enum constructor as a tuple
+  in a pattern...
+
+* qualifiers for arguments to enum/xenum constructors?  on tuples?
 
 * cut, fill, codegen, splice
 
 * Support qualified identifier declarations (instead of just uses).
 
-* nested functions (nested type declarations? nested exception declarations?
-  nested using?)
+* as patterns.  views and abstract patterns.  
 
-* static local variables
-
-* long long, short, float, and double constants (including 12s, 3l, etc.)
-
-* as patterns
-
-* better evaluation in evexp.pop
-
-* builtin list syntax: list(e1,e2,...,en) -- also for patterns
+* builtin list syntax: list(e1,e2,...,en)? -- also for patterns
 
 * string append operator (++)?
 
-* qualifiers on tuples (how)?
+THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
+--------------------------------------------------------------
+* Try to avoid using so many lists in the abstract syntax --
+  we should use arrays (e.g., for CompoundLit_e, Array_e,
+  Struct_e, Enum_e, Xenum_e, and UnresolvedMem_e, Switch_s, etc.)
 
+* We need to re-do the pattern match compilation -- we should take
+  advantage of the decision tree built during type-checking.
+
+MISCELLANEOUS
+-------------
+* allows a cast between a "struct cons<exp>*" and "exp@?" !!!
+  at least it gives a warning...  Actually, this may be right.
+
+* We should get the documentation in shape.
+
+* Maybe we should port bison to cyclone.
+
+* need to start putting user's guide together.
+
+* new { for i < x : ' ' }
+  causes core dump for negative x.  (Not surprising -- x is treated as
+  unsigned so that's a really big number and likely, malloc is returning
+  null which we're not checking for when we allocate...)
+
+* better implementation of unresolved mem
+
+<<<<<<< todo.txt
+* deal with inline?
+=======
 * translation to C is busted with -noexpandtypedefs because we hoist
 tuples to the top (before typedef declarations)
+>>>>>>> 1.16
 
-Todo later:
 
-* dependent types for arrays (and lots more?)
-* anonymous structs and enums
-* bit fields within structs
-* unions (in the C sense)
-* subtyping
-* better comprehensions/iterators
-* calling conventions for functions (C vs Cyclone)

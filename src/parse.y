@@ -277,11 +277,11 @@ static bool is_typeparam(type_modifier tm) {
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.  
-static typ id2type(string s, kind_t k) {
+static typ id2type(string s, conref<kind_t> k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else 
-    return VarType(&$(new {s},k));
+    return VarType(&Tvar(new {s},k));
 }
 
 /* convert a list of types to a list of typevars -- the parser can't
@@ -748,16 +748,17 @@ static list_t<decl> make_declarations(decl_spec_t ds,
 static kind_t id_to_kind(string s, seg_t loc) {
   if (strlen(s) != 1) { 
     err(xprintf("bad kind: %s",s), loc); 
-    return UnresolvedKind;
+    return BoxKind;
   } else {
     switch (s[0]) {
+    case 'A': return AnyKind;
     case 'M': return MemKind;
     case 'B': return BoxKind;
     case 'R': return RgnKind;
     case 'E': return EffKind;
     default: 
       err(xprintf("bad kind: %s",s), loc); 
-      return UnresolvedKind;
+      return BoxKind;
     }
   }
 }
@@ -1076,9 +1077,9 @@ type_specifier:
 | enum_specifier { $$=$!1; }
 /* Cyc: added optional type parameters to typedef'd names */
 | TYPE_VAR 
-  { $$=^$(type_spec(id2type($1,UnresolvedKind), LOC(@1,@1))); }
+  { $$=^$(type_spec(id2type($1,empty_conref()), LOC(@1,@1))); }
 | TYPE_VAR COLON_COLON kind 
-   { $$=^$(type_spec(id2type($1,$3),LOC(@1,@3))); }
+   { $$=^$(type_spec(id2type($1,new_conref($3)),LOC(@1,@3))); }
 | QUAL_TYPEDEF_NAME type_params_opt
     { $$=^$(type_spec(TypedefType($1,$2,null),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
@@ -1394,10 +1395,10 @@ pointer_char:
 rgn_opt:
     /* empty */ { $$ = ^$(HeapRgn); }
 | TYPE_VAR      
-  { $$ = ^$(id2type($1,RgnKind)); }
+  { $$ = ^$(id2type($1,new_conref(RgnKind))); }
 | TYPE_VAR COLON_COLON kind
   { if ($3 != RgnKind) err("expecting region kind\n",LOC(@3,@3));
-    $$ = ^$(id2type($1,RgnKind)); 
+    $$ = ^$(id2type($1,new_conref(RgnKind))); 
   }
 | '_' { $$ = ^$(new_evar(RgnKind)); }
 ;
@@ -1429,25 +1430,25 @@ atomic_effect:
   '{' '}'                   { $$=^$(null); }
 | '{' region_set '}'        { $$=$!2; }
 | TYPE_VAR                  
-  { $$=^$(&List(id2type($1,EffKind),null)); }
+  { $$=^$(&List(id2type($1,new_conref(EffKind)),null)); }
 | TYPE_VAR COLON_COLON kind 
   { if ($3 != EffKind) err("expecing effect kind (E)",LOC(@3,@3));
-    $$=^$(&List(id2type($1,EffKind),null));
+    $$=^$(&List(id2type($1,new_conref(EffKind)),null));
   }
 ; 
 
 /* CYC:  new */
 region_set:
   TYPE_VAR 
-  { $$=^$(&List(AccessEff(id2type($1,RgnKind)),null)); }
+  { $$=^$(&List(AccessEff(id2type($1,new_conref(RgnKind))),null)); }
 | TYPE_VAR ',' region_set 
-  { $$=^$(&List(AccessEff(id2type($1,RgnKind)),$3)); }
+  { $$=^$(&List(AccessEff(id2type($1,new_conref(RgnKind))),$3)); }
 | TYPE_VAR COLON_COLON kind 
   { if ($3 != RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(&List(AccessEff(id2type($1,RgnKind)),null)); }
+    $$=^$(&List(AccessEff(id2type($1,new_conref(RgnKind))),null)); }
 | TYPE_VAR COLON_COLON kind ',' region_set 
   { if ($3 != RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(&List(AccessEff(id2type($1,RgnKind)),$5)); }
+    $$=^$(&List(AccessEff(id2type($1,new_conref(RgnKind))),$5)); }
 ;
 
 /* NB: returns list in reverse order */

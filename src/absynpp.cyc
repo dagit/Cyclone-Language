@@ -55,6 +55,8 @@ extern doc_t enumfields2doc(list_t<enumfield> fields);
 
 // Flag controlling whether typedefs are expanded during printing
 bool expand_typedefs = false;
+// Flag controlling whether to print all kinds
+bool print_all_kinds = false;
 
 // Flag controlling how to print identifiers (better performance (???) than
 // re-writing them all in Toc).
@@ -169,15 +171,23 @@ doc_t tqual2doc(tqual tq) {
 
 string kind2string(kind_t k) {
   switch (k) {
-  case MemKind: return "M";
-  case BoxKind: return "B";
-  case RgnKind: return "R";
-  case EffKind: return "E";
-  case UnresolvedKind: return "?";
+  case AnyKind:        return "A";
+  case MemKind:        return "M";
+  case BoxKind:        return "B";
+  case RgnKind:        return "R";
+  case EffKind:        return "E";
+  }
+}
+
+string ckind2string(conref<kind_t> c) {
+  switch (compress_conref(c)->v) {
+  case Eq_constr(k): return kind2string(k);
+  default: return "?";
   }
 }
 
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
+doc_t ckind2doc(conref<kind_t> c) { return text(ckind2string(c)); }
 
 doc_t group(string start, string stop, string sep, list_t<doc_t> ss) {
   return cat3(text(start),
@@ -204,20 +214,27 @@ doc_t tps2doc(list_t<typ> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
 }
 
-doc_t tvars2doc(list_t<tvar> tvs) {
-  return egroup("<",">",",",List::map(textptr,List::map(fst,tvs)));
-}
-
 doc_t ktvar2doc(tvar tv) {
-  let $(n,k) = *tv;
-  switch (k) {
-  case BoxKind: return textptr(n);
-  default: return cat3(textptr(n), text("::"), kind2doc(k));
+  switch (compress_conref(tv->kind)->v) {
+  case Eq_constr(BoxKind): return textptr(tv->name);
+  case Eq_constr(k):
+    return cat3(textptr(tv->name), text("::"), kind2doc(k));
+  default: return cat2(textptr(tv->name), text("::?"));
   }
 }
 
 doc_t kinded_tvars2doc(list_t<tvar> tvs) {
   return egroup("<",">",",",List::map(ktvar2doc,tvs));
+}
+
+static tvarname_t get_name(tvar tv) {
+  return tv->name;
+}
+
+doc_t tvars2doc(list_t<tvar> tvs) {
+  if (print_all_kinds)
+    return kinded_tvars2doc(tvs);
+  return egroup("<",">",",",List::map(textptr,List::map(get_name,tvs)));
 }
 
 doc_t arg2doc($(tqual,typ)@ t) {
@@ -336,14 +353,17 @@ doc_t ntyp2doc(typ t) {
     if (topt != null)
       // This is an error case, topt should be null in a normalized type
       return(ntyp2doc(topt->v));
-    else s = cat5(text("?"),
-                  kind2doc(k),
+    else s = cat5(text("%"),
                   text("("),
                   text(xprintf("%d",i)),
-                  text(")"));
+                  text(")::"),
+                  kind2doc(k));
     break;
-  case VarType(&$(v,k)):
-    s=text(*v); break;//FIX: sometimes need explicit kinds!
+  case VarType(tv):
+    if (print_all_kinds)
+      s = cat3(textptr(tv->name),text("::"),ckind2doc(tv->kind));
+    else 
+      s=textptr(tv->name); break;//FIX: sometimes need explicit kinds!
   case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),

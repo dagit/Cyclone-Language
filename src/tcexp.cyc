@@ -238,7 +238,8 @@ static typ tcConst(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
     break;
   case Null_c:
     // FIX: take advantage of topt
-    t = PointerType(PtrInfo(wildtyp(), new_evar(RgnKind), new_conref(true),
+    t = PointerType(PtrInfo(new_evar(MemKind), 
+                            new_evar(RgnKind), new_conref(true),
 			    empty_tqual(), empty_conref()));
     break;
   }
@@ -537,10 +538,10 @@ static typ tcConditional(tenv te, seg_t loc, typ *`r topt,
   tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  typ t = wildtyp();
-  let l1 = List(e3,null);
-  let l2 = List(e2,&l1);
-  if (!coerce_list(te,t,&l2))
+  typ t = new_evar(MemKind);
+  let l1 = &List(e3,null);
+  let l2 = &List(e2,l1);
+  if (!coerce_list(te,t,l2))
     terr(loc,xprintf("conditional clause types do not match: %s != %s",
 			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return t;
@@ -660,8 +661,8 @@ static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
       for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
-	kind_t k = (*tvars->hd)[1];
-	check_valid_kinded_type(loc,te,lookup_type_vars(te),k,ts->hd);
+	kind_t k = conref_val(tvars->hd->kind);
+	check_type(loc,te,lookup_type_vars(te),k,ts->hd);
 	instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
       }
       typ new_fn_typ = 
@@ -679,7 +680,7 @@ static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
 
 // (t)e
 static typ tcCast(tenv te, seg_t loc, typ *`r topt, typ t, exp e) {
-  check_valid_type(loc,te,lookup_type_vars(te),t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,t);
   tcExp(te,null,e);
   typ t2 = e->topt->v;
   if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t))
@@ -743,7 +744,7 @@ static typ tcAddress(tenv te, seg_t loc, typ *`r topt, exp e) {
 
  // sizeof t
 static typ tcSizeof(tenv te, seg_t loc, typ *`r topt, typ t) {
-  check_valid_type(loc,te,lookup_type_vars(te),t);
+  check_type(loc,te,lookup_type_vars(te),MemKind,t);
   Evexp::szof(t,loc); // just ignore result -- posts error for bad type
   return uint_t;
 }
@@ -906,7 +907,7 @@ static typ tcCompoundLit(tenv te, seg_t loc, typ *`r topt,
 static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
                    list_t<$(list_t<designator>,exp)@> des) {
   list_t<exp> es = List::map(snd,des);
-  typ res      = wildtyp();
+  typ res      = new_evar(MemKind);
   let sz_rexp  = Const_e(Int_c(Unsigned,List::length(es)));
   exp sz_exp   = new_exp(sz_rexp,loc);
   sz_exp->topt = &Opt(uint_t);

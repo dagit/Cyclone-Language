@@ -15,7 +15,7 @@ namespace Queue;
 
 using List;
 
-struct Queue<`a,`r> { glist_t<`a,`r> front; glist_t<`a,`r> rear; };
+struct Queue<`a,`r::R> { glist_t<`a,`r> front; glist_t<`a,`r> rear; };
 
 // true when the queue is empty
 bool is_empty(gqueue_t<`a,`r> q)  {

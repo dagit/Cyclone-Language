@@ -35,7 +35,10 @@ int qvar_cmp(qvar q1, qvar q2) {
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
   case $(Loc_n,    Loc_n):     break;
-  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
+  case $(Rel_n(x1),Rel_n(x2)): //fallthru(x1,x2);
+    int i = zstrlist_cmp(x1,x2);
+    if (i != 0) return i;
+    break;
   case $(Abs_n(x1),Abs_n(x2)):
     int i = zstrlist_cmp(x1,x2);
     if (i != 0) return i;
@@ -50,7 +53,7 @@ int qvar_cmp(qvar q1, qvar q2) {
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar tv1, tvar tv2) {
-  return String::zstrptrcmp((*tv1)[0],(*tv2)[0]);
+  return String::zstrptrcmp(tv1->name,tv2->name);
 }
 
 static int new_type_counter = 0;
@@ -59,7 +62,7 @@ typ new_evar(kind_t k) {
   return Evar(k,null,new_type_counter++);
 }
 typ wildtyp() {
-  return new_evar(UnresolvedKind); 
+  return new_evar(MemKind); 
 }
 
 tqual combine_tqual(tqual x,tqual y) {
@@ -88,6 +91,26 @@ conref<`a> new_conref(`a x) {
 }
 conref<`a> empty_conref() {
   return &Conref{.v = No_constr};
+}
+
+// compress a conref
+conref<`a> compress_conref(conref<`a> x) {
+  switch (x->v) {
+  case No_constr:    return x;
+  case Eq_constr(_): return x;
+  case Forward_constr(*y):
+    let z = compress_conref(*y);
+    *y = z;
+    return z;
+  }
+}
+
+`a conref_val(conref<`a> x) {
+  switch (compress_conref(x)->v) {
+  case Eq_constr(v): return v;
+  default:
+    return Tcutil::impos("conref_val");
+  }
 }
 
 //////////////////////////// Types ///////////////////////////////

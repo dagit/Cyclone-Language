@@ -114,13 +114,18 @@ cnst_t eval_const_exp(exp e) {
 unsigned int szof(typ t, seg_t loc) {
   switch (Tcutil::compress(t)) {
   case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
-  case VarType(&$(_,BoxKind)): return 4u;
-  case VarType(&$(_,RgnKind)): 
-    terr(loc,"cannot apply sizeof to a region"); return 0u;
-  case VarType(&$(_,EffKind)): 
-    terr(loc,"cannot apply sizeof to an effect"); return 0u;
-  case VarType(&$(_,_)): 
-    terr(loc,"cannot apply sizeof to unknown type"); return 0u;
+  case VarType(tv):
+    switch (conref_val(tv->kind)) {
+    case BoxKind: return 4u;
+    case AnyKind: 
+      fallthru;
+    case MemKind: 
+      terr(loc,"cannot apply sizeof to a non-boxed type variable"); return 0u;
+    case RgnKind:
+      terr(loc,"cannot apply sizeof to a region"); return 0u;
+    case EffKind:
+      terr(loc,"cannot apply sizeof to an effect"); return 0u;
+    }
   case Evar(BoxKind,_,_): return 4u; // Possible?
   case Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
   case EnumType(_,_,_):  return 4u;

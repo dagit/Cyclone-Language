@@ -152,11 +152,11 @@ void dumpscope(scope sc) {
 
 void dumpkind(kind_t k) {
   switch (k) {
-  case MemKind: dump_char('M'); return;
-  case BoxKind: dump_char('B'); return;
-  case RgnKind: dump_char('R'); return;
-  case EffKind: dump_char('E'); return;
-  case UnresolvedKind: dump_char('?'); return;
+  case AnyKind       : dump("A"); return;
+  case MemKind       : dump("M"); return;
+  case BoxKind       : dump("B"); return;
+  case RgnKind       : dump("R"); return;
+  case EffKind       : dump("E"); return;
   }
 }
 
@@ -164,13 +164,14 @@ void dumptps(list_t<typ> ts) {
   egroup(dumptyp,ts,"<",">",",");
 }
 void dumptvar(tvar tv) {
-  dump_str((*tv)[0]); 
+  dump_str(tv->name);
 }
 void dumpkindedtvar(tvar tv) {
-  dump_str((*tv)[0]); 
-  switch ((*tv)[1]) {
-  case BoxKind: break;
-  case k: dump("::"); dumpkind(k); break;
+  dump_str(tv->name);
+  switch (compress_conref(tv->kind)->v) {
+  case Eq_constr(BoxKind): break;
+  case Eq_constr(k): dump("::"); dumpkind(k); break;
+  default: dump("::?"); break;
   }
 }
 void dumptvars(list_t<tvar> tvs) {
@@ -244,8 +245,8 @@ void dumpntyp(typ t) {
   case FnType(_)       : return;
   case PointerType(_)  : return;
   case VoidType:         dump("void"); return;
-  case VarType(&$(v,k)): dump_str(v); return; // FIX: may want explicit kinds
-  case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
+  case VarType(tv): dump_str(tv->name); return; // FIX: may want explicit kinds
+  case Evar(k,null,i): dump("%"); dumpkind(k); dump(xprintf("(%d)",i)); return;
   case Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
   case EnumType(null,ts,_):dump("enum");                    dumptps(ts); return;
   case EnumType(n,  ts,_): dump("enum"); dumpqvar((qvar)n); dumptps(ts); return;
@@ -764,14 +765,14 @@ void dumptms(list_t<type_modifier> tms, void f(`a), `a a) {
     dump_char('@'); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
   case Pointer_mod(TaggedArray_ps, HeapRgn,  tq2):
     dump_char('?'); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(Nullable_ps(ue),  VarType(&$(r,k)), tq2):
-    dump_char('*'); dump_upperbound(ue); dump_str(r);
+  case Pointer_mod(Nullable_ps(ue),  VarType(tv), tq2):
+    dump_char('*'); dump_upperbound(ue); dump_str(tv->name);
     dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps(ue), VarType(&$(r,k)), tq2):
+  case Pointer_mod(NonNullable_ps(ue), VarType(tv), tq2):
     dump_char('@'); dump_upperbound(ue);
-    dump_str(r); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(TaggedArray_ps, VarType(&$(r,k)), tq2):
-    dump_char('?'); dump_str(r); dumptms(tms->tl,f,a); return;
+    dump_str(tv->name); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(TaggedArray_ps, VarType(tv), tq2):
+    dump_char('?'); dump_str(tv->name); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
   default:

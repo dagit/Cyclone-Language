@@ -58,6 +58,7 @@ namespace Absyn {
   typedef qvar_opt_t typedef_name_opt_t;
   
   // forward declarations
+  extern struct Tvar;
   extern enum Scope;
   extern struct Tqual;
   extern enum Size_of;
@@ -99,7 +100,7 @@ namespace Absyn {
   typedef struct Tqual @tqual;
   typedef enum Size_of size_of_t;
   typedef enum Kind kind_t;
-  typedef $(tvarname_t,kind_t)@ tvar; // resolved kind via in-place mutation
+  typedef struct Tvar @tvar; 
   typedef enum Sign sign_t;
   typedef struct Conref<`a> @conref<`a>;
   typedef enum Constraint<`a> constraint_t<`a>;
@@ -144,16 +145,23 @@ namespace Absyn {
   EXTERN_DEFINITION enum Size_of { B1, B2, B4, B8 };
 
   EXTERN_DEFINITION enum Kind { 
-    MemKind,       // kind of all types
-    BoxKind,       // types whose values go in a gp register
-    RgnKind,       // regions
-    EffKind,       // effects
-    UnresolvedKind
+    // BoxKind <= MemKind <= AnyKind <= UnresolvedKind
+    // EffKind <== UnresolvedKind, RgnKind <= UnresolvedKind
+    AnyKind,      // kind of all types, including abstract structs
+    MemKind,      // same as AnyType but excludes abstract structs
+    BoxKind,      // same as MemKind but excludes types whose 
+                  //   values do not go in a general purpose register
+    RgnKind,      // regions
+    EffKind       // effects
   };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
   EXTERN_DEFINITION struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
+  };
+  EXTERN_DEFINITION struct Tvar {
+    tvarname_t name;
+    conref<kind_t> kind;
   };
 
   EXTERN_DEFINITION enum Bounds {
@@ -461,13 +469,15 @@ namespace Absyn {
   extern int varlist_cmp(list_t<var>, list_t<var>);
   extern int tvar_cmp(tvar, tvar); // WARNING: ignores the kinds
 
-  ///////////////////////// Constructors ////////////////////////////
+  ///////////////////////// Qualifiers ////////////////////////////
   extern tqual combine_tqual(tqual x,tqual y);
   extern tqual empty_tqual();
   
   //////////////////////////// Constraints /////////////////////////
   extern conref<`a> new_conref(`a x); 
   extern conref<`a> empty_conref();
+  extern conref<`a> compress_conref(conref<`a> x);
+  extern `a conref_val(conref<`a> x);
 
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind 

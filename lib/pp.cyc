@@ -317,8 +317,9 @@ doc_t concats(list_t<doc_t> doclist) {
   else return concat(doclist->hd,concats(doclist->tl));
 }
 
-static out_t concats_arr_f(doc_t ?docs, ppstate_t st) {
+static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   list_t<out_t> os = null;
+  doc_t ?docs = *docs_ptr;
   int sz = docs.size;
   for (int i=0; i < sz; ++i) {
     doc_t d = docs[i];
@@ -350,7 +351,7 @@ doc_t concats_arr(doc_t ?docs) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return &Doc(mw,mwo,make_fn(concats_arr_f,docs));
+  return &Doc(mw,mwo,make_fn(concats_arr_f,new {docs}));
 }
 
 static out_t doc_union_f($(doc_t,doc_t) @clo, ppstate_t st) {

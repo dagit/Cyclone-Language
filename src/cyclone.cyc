@@ -238,33 +238,56 @@ void compile_file(string filename) {
 }
 
 int main() {
+  list_t<$(string,spec_t,string)@> options = 
+    &List{new {$("-nocyc",Clear_spec(add_cyc_namespace),
+                 "does not add implicit namespace Cyc")},
+    &List{new {$("-q",Set_spec(q),"compile quietly")},
+    &List{new {$("-v",Set_spec(v), 
+                 "print compilation stages verbosely")},
+    &List{new {$("-check_null",Unit_spec(set_check_null), 
+                 "turn on null-checking in generated C code")},
+    &List{new {$("-D",String_spec(add_define), 
+                 "pass definition to pre-processor")},
+    &List{new {$("-I",String_spec(add_include), "include directory")}, 
+    &List{new {$("-toc",Set_spec(toc), "translate to C")},
+    &List{new {$("-tc",Set_spec(tc), "type check")},
+    &List{new {$("-noremoveunused",Set_spec(noshake),
+                 "don't remove externed variables that aren't used")},
+    &List{new {$("-noexpandtypedefs",Set_spec(noexpand),
+                 "don't expand typedefs in pretty printing")},
+    &List{new {$("-up",Set_spec(up), "ugly print")},
+    &List{new {$("-pp",Set_spec(pp), "pretty print")},
+    &List{new {$("-o",String_spec(set_out_file_name),
+                 "Output file name")}, null}}}}}}}}}}}}};
+
+  /*
   $(string,spec_t,string) specs[13] = 
-                {$("-nocyc",Clear_spec(add_cyc_namespace),
-		   "does not add implicit namespace Cyc"),
-		 $("-q",Set_spec(q),
-		   "compile quietly"),
-		 $("-v",Set_spec(v), 
-		   "print compilation stages verbosely"),
-		 $("-check_null",Unit_spec(set_check_null), 
-		   "turn on null-checking in generated C code"),
-		 $("-D",String_spec(add_define), 
-		   "pass definition to pre-processor"),
-		 $("-I",String_spec(add_include), 
-		   "include directory"), 
-		 $("-toc",Set_spec(toc), 
-		   "translate to C"),
-		 $("-tc",Set_spec(tc), 
-		   "type check"),
-		 $("-noremoveunused",Set_spec(noshake),
-		   "don't remove externed variables that aren't used"),
-		 $("-noexpandtypedefs",Set_spec(noexpand),
-		   "don't expand typedefs in pretty printing"),
-		 $("-up",Set_spec(up), 
-		   "ugly print"),
-		 $("-pp",Set_spec(pp), 
-		   "pretty print"),
-		 $("-o",String_spec(set_out_file_name),
-		 "output file name")};
+    {$("-nocyc",Clear_spec(add_cyc_namespace),
+       "does not add implicit namespace Cyc"),
+     $("-q",Set_spec(q),
+       "compile quietly"),
+     $("-v",Set_spec(v), 
+       "print compilation stages verbosely"),
+     $("-check_null",Unit_spec(set_check_null), 
+       "turn on null-checking in generated C code"),
+     $("-D",String_spec(add_define), 
+       "pass definition to pre-processor"),
+     $("-I",String_spec(add_include), 
+       "include directory"), 
+     $("-toc",Set_spec(toc), 
+       "translate to C"),
+     $("-tc",Set_spec(tc), 
+       "type check"),
+     $("-noremoveunused",Set_spec(noshake),
+       "don't remove externed variables that aren't used"),
+     $("-noexpandtypedefs",Set_spec(noexpand),
+       "don't expand typedefs in pretty printing"),
+     $("-up",Set_spec(up), 
+       "ugly print"),
+     $("-pp",Set_spec(pp), 
+       "pretty print"),
+     $("-o",String_spec(set_out_file_name),
+       "Output file name")};
   let l1  = List(&specs[0], null);
   let l2  = List(&specs[1], &l1);
   let l3  = List(&specs[2], &l2);
@@ -279,6 +302,7 @@ int main() {
   let l12 = List(&specs[11],&l11);
   let l13 = List(&specs[12],&l12);
   let options = &l13;
+*/
 		 
   Arg::parse(options, compile_file, "Options:");
 

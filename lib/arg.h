@@ -7,7 +7,7 @@
 namespace Arg {
 extern xenum exn {Error, Bad(string)};
 
-extern enum Spec<`e> {
+extern enum Spec<`e::E> {
   Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false

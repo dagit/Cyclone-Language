@@ -46,23 +46,23 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
 
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
-  case Wild_p:      t = wildtyp(); break;
+  case Wild_p:      t = new_evar(MemKind); break;
   case Int_p(s,i):  t = (s == Unsigned) ? uint_t : sint_t; break;
   case Char_p(c):   t = uchar_t; break;
   case Float_p(s):  t = float_t; break;
   case Null_p:
-    t = PointerType(PtrInfo{wildtyp(),wildtyp(),
+    t = PointerType(PtrInfo{new_evar(AnyKind),new_evar(RgnKind),
 			    new_conref(true),empty_tqual(),empty_conref()}); 
     break;
   case Var_p(vd):
-    t = wildtyp();
+    t = new_evar(MemKind);
     vd->type   = t;
     vd->tq     = empty_tqual();
     vd->shadow = 0; // FIX?!?!?
     v_result = &List(vd,v_result);
     break;
   case Reference_p(vd):
-    t = wildtyp();
+    t = new_evar(MemKind);
     if(region_opt == null) {
       terr(p->loc, "* pattern would point into an unknown region");
       break;
@@ -77,7 +77,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
   case Pointer_p(p2):
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    typ ptr_rgn = wildtyp();
+    typ ptr_rgn = new_evar(RgnKind);
     let &$(sub_tvs,sub_vs) = tcPat(te,p2,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
