@@ -873,12 +873,9 @@ struct Aggrfield * lookup_decl_field(aggrdecl_t ad, var_t v) {
 }
 
 $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, int i) {
-  for(; i != 0; --i, ts=ts->tl)
-    if(ts == NULL)
-      return NULL;
-  if(ts == NULL)
-    return NULL;
-  return ts->hd;
+  for(; i != 0 && ts != NULL; --i, ts=ts->tl)
+    ; //skip
+  return (ts==NULL) ? NULL : ts->hd;
 }
 
 string_t<`H> *decl_name(decl_t decl) {
@@ -905,34 +902,13 @@ string_t<`H> *decl_name(decl_t decl) {
 
 // returns the decl from the list having the given name
 struct Decl *lookup_decl(list_t<decl_t> decls, stringptr_t<`H> name) {
-  _* dname;
   for (; decls != NULL; decls = decls->tl) {
-    dname = decl_name(decls->hd);
+    let dname = decl_name(decls->hd);
     if (dname && !strptrcmp(dname,name))
       return decls->hd;
   }
   return NULL;
 }
-
-datacon(Attribute,Stdcall_att);      
-datacon(Attribute,Cdecl_att);        
-datacon(Attribute,Fastcall_att);
-datacon(Attribute,Noreturn_att);     
-datacon(Attribute,Const_att);
-datacon(Attribute,Packed_att);
-datacon(Attribute,Nocommon_att);
-datacon(Attribute,Shared_att);
-datacon(Attribute,Unused_att);
-datacon(Attribute,Weak_att);
-datacon(Attribute,Dllimport_att);
-datacon(Attribute,Dllexport_att);
-datacon(Attribute,No_instrument_function_att);
-datacon(Attribute,Constructor_att);
-datacon(Attribute,Destructor_att);
-datacon(Attribute,No_check_memory_usage_att);
-datacon(Attribute,Pure_att);
-datacon(Attribute,Always_inline_att);
-datacon(Attribute,No_throw_att);
 
 stringptr_t fieldname(int i) {
   // cache strings used for field names f0,f1,f2,...
@@ -962,8 +938,7 @@ aggrdecl_t get_known_aggrdecl(union AggrInfo info) {
 bool is_nontagged_nonrequire_union_type(type_t t) {
   switch(compress(t)) {
   case &AnonAggrType(UnionA,fs):     
-    if (fs == NULL) return true;
-    return (fs->hd->requires_clause == NULL);
+    return fs == NULL || fs->hd->requires_clause == NULL;
   case &AppType(&AggrCon(info),_):
     switch (info) {
     case {.KnownAggr = &ad}: 
@@ -971,8 +946,7 @@ bool is_nontagged_nonrequire_union_type(type_t t) {
       let impl = ad->impl;
       if (impl->tagged) return false;
       let fields = impl->fields;
-      if (fields == NULL) return true;
-      return (fields->hd->requires_clause == NULL);
+      return fields == NULL || fields->hd->requires_clause == NULL;
     case {.UnknownAggr = $(k,_,NULL)}: return k == UnionA;
     case {.UnknownAggr = $(k,_,&Opt(b))}: return k == UnionA && !b;
     }
@@ -981,9 +955,8 @@ bool is_nontagged_nonrequire_union_type(type_t t) {
 }
 bool is_require_union_type(type_t t) {
   switch(compress(t)) {
-  case &AnonAggrType(UnionA,fs):     
-    if (fs == NULL) return false;
-    return (fs->hd->requires_clause != NULL);
+  case &AnonAggrType(UnionA,fs):
+    return fs != NULL && fs->hd->requires_clause != NULL;
   case &AppType(&AggrCon(info),_):
     switch (info) {
     case {.KnownAggr = &ad}: 
@@ -991,10 +964,8 @@ bool is_require_union_type(type_t t) {
       let impl = ad->impl;
       if (impl->tagged) return false;
       let fields = impl->fields;
-      if (fields == NULL) return false;
-      return (fields->hd->requires_clause != NULL);
-    case {.UnknownAggr = $(k,_,NULL)}: return false;
-    case {.UnknownAggr = $(k,_,&Opt(b))}: return false;
+      return fields != NULL && fields->hd->requires_clause != NULL;
+    case {.UnknownAggr = $(k,...)}: return false;
     }
   default: return false;
   }
@@ -1022,7 +993,7 @@ var_t designatorlist_to_fieldname(list_t<designator_t> ds) {
 
 bool type2bool(bool def, type_t t) {
   switch (compress(t)) {
-  case &AppType(&TrueCon,_): return true;
+  case &AppType(&TrueCon,_):  return true;
   case &AppType(&FalseCon,_): return false;
   default: return def;
   }

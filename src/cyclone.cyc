@@ -426,7 +426,7 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   return ans;
 }
 
-list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t,`H> ignore) {
+list_t<Absyn::decl_t> do_parse(FILE @`H f, list_t<Absyn::decl_t,`H> ignore) {
   Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
   Lex::pos_init();
   list_t<Absyn::decl_t> ans = NULL;

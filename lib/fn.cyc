@@ -24,12 +24,7 @@
 
 namespace Fn;
 
-// JGM: you'll note that a lot of explicit abstraction and
-// instantiation is necessary due to the shortcomings of the
-// unifier...or my ability to figure out what effects to put
-// on things.
-
-struct Function<`arg,`res,`bd::R> { <`env::B> : regions(`env) > `bd
+struct Function<`arg,`res,`bd> { <`env> : regions(`env) > `bd
   `res (@`bd f)(`env,`arg);
   `env env;
 };
@@ -39,7 +34,7 @@ fn_t<`arg,`res,`bd> make_fn(`res (@`bd f)(`env,`arg), `env x : regions(`env) > `
   return new Function(f,x);
 }
 
-static `res fp_apply(`res (@`bd f)(`arg), `arg x) {
+static `res fp_apply(`res (@f)(`arg), `arg x) {
   return f(x);
 }
 
@@ -50,11 +45,10 @@ fn_t<`arg,`res,`bd> fp2fn(`res (@`bd f)(`arg) : regions($(`arg,`res)) > `bd) {
 
 // apply closure f to argument x
 `res apply(fn_t<`arg,`res> f, `arg x) {
-  let &Function{<`env> code,env} = f;
+  let &Function{code,env} = f;
   return code(env,x);
 }
 
-// heh, heh, heh:  try explaining this to your Mom...
 static `c fn_compose($(fn_t<`b,`c,`bd>, fn_t<`a,`b,`bd>)@`H f_and_g,`a arg) {
   let &$(f,g) = f_and_g;
   return apply(f,apply(g,arg));
@@ -97,6 +91,5 @@ List::list_t<`b,`H> map_fn(fn_t<`a,`b,`bd> f,List::list_t<`a> x) {
   List::list_t res = NULL;
   for (; x != NULL; x = x->tl) 
     res = new List::List(apply(f,x->hd), res);
-  res = List::imp_rev(res);
-  return res;
+  return List::imp_rev(res);
 }

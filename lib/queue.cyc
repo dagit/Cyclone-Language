@@ -86,29 +86,23 @@ void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
 `a take(queue_t<`a> q) {
   if (q->front == NULL)
     throw &Empty_val;
-  else {
-    let x = q->front->hd;
-    q->front = q->front->tl;
-    if (q->front == NULL) {  // necessary to ensure last cell is
-      q->rear = NULL;        // garbage collected
-    }
-    q->len--;
-    return x;
-  }
+  let x = q->front->hd;
+  q->front = q->front->tl;
+  if (q->front == NULL)  // necessary to ensure last cell is
+    q->rear = NULL;        // garbage collected
+  q->len--;
+  return x;
 }
 
 `a noalias_take(queue_t<`a::TB> q, `a null_elem) __attribute__((consume(2))) {
   if (q->front == NULL)
     throw &Empty_val;
-  else {
-    null_elem :=: q->front->hd;
-    q->front = q->front->tl;
-    if (q->front == NULL) {  // necessary to ensure last cell is
-      q->rear = NULL;        // garbage collected
-    }
-    q->len--;
-    return null_elem;
-  }
+  null_elem :=: q->front->hd;
+  q->front = q->front->tl;
+  if (q->front == NULL)  // necessary to ensure last cell is
+    q->rear = NULL;        // garbage collected
+  q->len--;
+  return null_elem;
 }
 
 `a *`U ptr_take(queue_t<`a::TA *`U> q) {
@@ -118,10 +112,8 @@ void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2))) {
 // return the first element in the queue without removing it
 `a peek(queue_t<`a> q) {
   if (q->front == NULL)
-    throw &Empty_val; // FIX: toc problems if we try to return this.
-  else {
-    return(q->front->hd);
-  }
+    throw &Empty_val; 
+  return q->front->hd;
 }
 
 // clear out the entire queue (side effect)
@@ -134,7 +126,7 @@ void clear(queue_t<`a::TB> q) {
 // remove a specific member (side effect)
 void remove(queue_t<`a,`r> q,`a v) {
   list_t<`a,`r> x, y;
-  for (x = q->front, y = NULL; x != NULL; y = x, x = x->tl) {
+  for (x = q->front, y = NULL; x != NULL; y = x, x = x->tl)
     if (x->hd == v) {
       q->len--;
       // fix pointers at the front of the q
@@ -143,12 +135,10 @@ void remove(queue_t<`a,`r> q,`a v) {
       else
 	y->tl = x->tl;
       // fix pointers at the rear
-      if (q->rear == x) {
+      if (q->rear == x)
 	q->rear = y;
-      }
       break;
     }      
-  }
 }
 
 `a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
@@ -170,33 +160,26 @@ void remove(queue_t<`a,`r> q,`a v) {
     if (ok) break; 
   } while (!is_empty(q)); 
 
-  if (ok)
-    x = ptr_take(saveq);
-  else
-    x = NULL;
+  x = ok ? ptr_take(saveq) : NULL;
 
-  // put back any elements that didn't match
+  // put back any elements that didn't match and return
   while (!is_empty(saveq))
     rpush(r,q,ptr_take(saveq));
-  // return the result
   return x;
 }
 
 
 // return the number of elements in the queue
 int length(queue_t<`a::TB> q) {
-//    return(List::length(q->front));
   return q->len;
 }
 
 // apply f to each element in the queue from the front to the back
 void iter(void f(`a), queue_t<`a> q) {
-  for (list_t<`a> x = q->front; x != NULL; x = x->tl) {
+  for (list_t<`a> x = q->front; x != NULL; x = x->tl)
     f(x->hd);
-  }
 }
 void app(`b f(`a), queue_t<`a> q) {
-  for (list_t<`a> x = q->front; x != NULL; x = x->tl) {
+  for (list_t<`a> x = q->front; x != NULL; x = x->tl)
     f(x->hd);
-  }
 }

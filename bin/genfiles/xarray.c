@@ -373,7 +373,7 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 178
-void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
+void Cyc_Core_ufree(void*);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
 # 40 "xarray.h"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 # 51
@@ -387,13 +387,13 @@ void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
 # 75
 struct _fat_ptr Cyc_Xarray_rto_array(struct _RegionHandle*,struct Cyc_Xarray_Xarray*);
 # 81
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*,struct _fat_ptr arr);
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*,struct _fat_ptr);
 # 89
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*,struct Cyc_Xarray_Xarray*,struct Cyc_Xarray_Xarray*);
 # 110
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*,void*(*f)(void*),struct Cyc_Xarray_Xarray*);
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*,void*(*)(void*),struct Cyc_Xarray_Xarray*);
 # 117
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*,void*(*f)(void*,void*),void*,struct Cyc_Xarray_Xarray*);
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*,void*(*)(void*,void*),void*,struct Cyc_Xarray_Xarray*);
 # 25 "xarray.cyc"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*xarr){
 return xarr->num_elmts;}

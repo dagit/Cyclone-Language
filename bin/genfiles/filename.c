@@ -375,7 +375,7 @@ extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion
 # 62 "string.h"
 extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 # 109 "string.h"
-extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int ofs,unsigned long n);
+extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 35 "filename.cyc"
 struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr s1,struct _fat_ptr s2){
 return({struct _fat_ptr _tmp16=(struct _fat_ptr)s1;Cyc_strconcat(_tmp16,(struct _fat_ptr)({struct _fat_ptr _tmp15=({const char*_tmp0="/";_tag_fat(_tmp0,sizeof(char),2U);});Cyc_strconcat(_tmp15,(struct _fat_ptr)s2);}));});}

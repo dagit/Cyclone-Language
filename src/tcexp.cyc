@@ -1694,7 +1694,7 @@ static bool ensure_typqual_nothrow(type_t t) {
   case &FnType(*i):
     return List::mem(Atts::attribute_cmp,
 		     i->attributes,
-		     &No_throw_att_val);
+		     &Atts::No_throw_att_val);
   case &PointerType(*pi): 
     return ensure_typqual_nothrow(pi->elt_type);
   default:
@@ -1809,7 +1809,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
 		      field_exp->topt);
     bool nothrow_fld =  List::mem(Atts::attribute_cmp,
 				  field->attributes,
-				  &No_throw_att_val);
+				  &Atts::No_throw_att_val);
     if(nothrow_fld && !ensure_nothrow_initializer(field_exp)) {
       Warn::err2(field_exp->loc, "field ", *(field->name), " can only hold a no_throw function");
     }

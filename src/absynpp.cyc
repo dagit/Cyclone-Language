@@ -32,33 +32,33 @@ using List;
 namespace Absynpp;
 
 // forward references
-doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
-doc_t switchclauses2doc(list_t<switch_clause_t> cs);
+doc_t dp2doc($(list_t<designator_t>,pat_t)@);
+doc_t switchclauses2doc(list_t<switch_clause_t>);
 doc_t typ2doc(type_t);
-doc_t aggrfields2doc(list_t<aggrfield_t> fields);
+doc_t aggrfields2doc(list_t<aggrfield_t>);
 doc_t scope2doc(scope_t);
 doc_t stmt2doc(stmt_t,bool expstmt,list_t<qvar_t,`H> varsinblock);
 doc_t exp2doc(exp_t);
-doc_t exp2doc_prec(int inprec, exp_t e);
-doc_t exps2doc_prec(int inprec, list_t<exp_t> es);
+doc_t exp2doc_prec(int inprec, exp_t);
+doc_t exps2doc_prec(int inprec, list_t<exp_t>);
 doc_t qvar2doc(qvar_t);
 doc_t typedef_name2doc(qvar_t);
 doc_t cnst2doc(cnst_t);
 doc_t prim2doc(primop_t);
-doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es);
-doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
-doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
+doc_t primapp2doc(int inprec, primop_t, list_t<exp_t>);
+doc_t de2doc($(list_t<designator_t>,exp_t)@);
+doc_t tqtd2doc(tqual_t, type_t, opt_t<doc_t>);
 doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 		  bool c_varargs,vararg_info_t *cyc_varargs,
 		  type_opt_t effopt,
 		  list_t<$(type_t,type_t)@> rgn_po,
 		  exp_opt_t requires, exp_opt_t ensures);
-doc_t datatypefields2doc(list_t<datatypefield_t> fields);
+doc_t datatypefields2doc(list_t<datatypefield_t>);
 doc_t enumfields2doc(list_t<enumfield_t> fs);
-doc_t vardecl2doc(vardecl_t vd);
-doc_t aggrdecl2doc(aggrdecl_t ad);
-doc_t enumdecl2doc(enumdecl_t ad);
-doc_t datatypedecl2doc(datatypedecl_t ad);
+doc_t vardecl2doc(vardecl_t);
+doc_t aggrdecl2doc(aggrdecl_t);
+doc_t enumdecl2doc(enumdecl_t);
+doc_t datatypedecl2doc(datatypedecl_t);
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
 

@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "absynpp.h"
+#include "attributes.h"
 #include "evexp.h"
 #include "warn.h"
 #include "kinds.h"
@@ -1101,15 +1102,15 @@ static void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
     bool is_cp = is_char_ptr(type);
     let $(tq,t,tms) = Absynpp::to_tms(temp,tq,type);
     // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
-    attribute_t call_conv = &Unused_att_val;
+    attribute_t call_conv = &Atts::Unused_att_val;
     for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
       switch(tms2->hd) {
       case &Attributes_mod(_,atts):
 	for(; atts != NULL; atts = atts->tl)
 	  switch(atts->hd) {
-	  case &Stdcall_att:  call_conv = &Stdcall_att_val;  break;
-	  case &Cdecl_att:    call_conv = &Cdecl_att_val;    break;
-	  case &Fastcall_att: call_conv = &Fastcall_att_val; break;
+	  case &Stdcall_att:  call_conv = &Atts::Stdcall_att_val;  break;
+	  case &Cdecl_att:    call_conv = &Atts::Cdecl_att_val;    break;
+	  case &Fastcall_att: call_conv = &Atts::Fastcall_att_val; break;
 	  default: break;
 	  }
 	break;

@@ -481,7 +481,7 @@ struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError}
 void Cyc_file_close(struct Cyc___cycFILE*f){
 if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
-extern char*getcwd(char*buf,unsigned long size);static char _tmp8[29U]="getcwd: invalid buf argument";
+extern char*getcwd(char*,unsigned long);static char _tmp8[29U]="getcwd: invalid buf argument";
 # 185
 static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp8,_tmp8,_tmp8 + 29U}};
 # 187

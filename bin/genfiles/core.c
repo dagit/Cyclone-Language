@@ -375,7 +375,7 @@ struct _RegionHandle*Cyc_Core_current_handle (void);extern char Cyc_Core_Invalid
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 201
-struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*h,struct _fat_ptr ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
+struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*,struct _fat_ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34

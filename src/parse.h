@@ -21,14 +21,15 @@
 #include "absyn.h"
 using Core {
 namespace Parse {
-  List::list_t<Absyn::decl_t> parse_file(FILE @f);
+  List::list_t<Absyn::decl_t> parse_file(FILE @`H);
   extern datatype exn {extern Exit};
 }
   string_t token2string(int token);
 #ifdef ALL_PARSE_H
 using Absyn {
 using List {
-  struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
+  namespace Parse {
+  extern struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
   typedef struct FlatList<`a,`r> *`r flat_list_t<`a,`r>;
   extern struct Type_specifier {
     bool Signed_spec     : 1;
@@ -38,47 +39,44 @@ using List {
     bool Long_Long_spec  : 1;
     bool Valid_type_spec : 1;
     type_t Type_spec;
-    Position::seg_t loc;
+    seg_t loc;
   };
   typedef struct Type_specifier type_specifier_t;
-  struct Declarator<`yy::R> {
+  extern struct Declarator<`yy> {
     qvar_t id;
+    seg_t  varloc;
     list_t<type_modifier_t<`yy>,`yy> tms;
   };
   typedef struct Declarator<`yy> declarator_t<`yy>;
   typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t),`yy> declarator_list_t<`yy>;
+  typedef flat_list_t<declarator_t<`yy>,`r> declarators_t<`r,`yy>;
 
-  extern enum Storage_class {
+  enum Storage_class {
     Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, 
-      Abstract_sc
+      Abstract_sc, None_sc
   };
   typedef enum Storage_class storage_class_t;
   extern struct Declaration_spec {
-    storage_class_t*         sc;
-    tqual_t                  tq;
-    type_specifier_t         type_specs;
-    bool                     is_inline;
-    list_t<attribute_t>      attributes;
+    storage_class_t  sc;
+    tqual_t          tq;
+    type_specifier_t type_specs;
+    bool             is_inline;
+    attributes_t     attributes;
   };
   typedef struct Declaration_spec decl_spec_t;
-  struct Abstractdeclarator<`yy::R> {
+  extern struct Abstractdeclarator<`yy> {
     list_t<type_modifier_t<`yy>,`yy> tms;
   };
   typedef struct Abstractdeclarator<`yy> abstractdeclarator_t<`yy>;
-
-  extern datatype Pointer_qual {
-    Numelts_ptrqual(exp_t);
-    Region_ptrqual(type_t);
-    Thin_ptrqual;
-    Fat_ptrqual;
-    Zeroterm_ptrqual;
-    Nozeroterm_ptrqual;
-    Notnull_ptrqual;
-    Nullable_ptrqual;
-  };
   typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
   typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
+  typedef exp_t (@`H exp_maker_fun_t)(exp_t,exp_t,seg_t);
+  }
+#ifndef IS_PARSE_Y
+  using Parse {
 #include "parse_tab.h"
+  }
+#endif
 }}
 #endif 
 }

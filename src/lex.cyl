@@ -792,7 +792,7 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
  case STRING: 
  case WSTRING: 
  case IDENTIFIER: 
- case TYPEDEF_NAME: *yylval = YYSTYPE{.String_tok=Lex::token_string}; break;
+ case TYPEDEF_NAME:     *yylval = YYSTYPE{.String_tok=Lex::token_string}; break;
  case QUAL_IDENTIFIER: 
  case QUAL_TYPEDEF_NAME:  *yylval = YYSTYPE{.QualId_tok=Lex::token_qvar}; break;
  case INTEGER_CONSTANT:   *yylval = YYSTYPE{.Int_tok=Lex::token_int};     break;

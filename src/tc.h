@@ -26,11 +26,11 @@ namespace Tc {
 using Absyn;
 using Tcenv;
 
-void tc(tenv_t te, bool var_default_init, List::list_t<decl_t,`H> ds);
+void tc(tenv_t, bool var_default_init, List::list_t<decl_t,`H>);
 
   // if called, must be after tc is called
   // removes extern variables that are never referred to
-List::list_t<decl_t> treeshake(tenv_t te, List::list_t<decl_t>);
+List::list_t<decl_t> treeshake(tenv_t, List::list_t<decl_t>);
 
 // internal functions needed by tcutil
 void tcAggrdecl(tenv_t, seg_t, aggrdecl_t);

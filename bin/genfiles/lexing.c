@@ -377,15 +377,15 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
 # 276 "cycboot.h"
-extern int Cyc_file_string_read(struct Cyc___cycFILE*,struct _fat_ptr dest,int dest_offset,int max_count);struct Cyc_timeval{long tv_sec;long tv_usec;};extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _fat_ptr lex_base;struct _fat_ptr lex_backtrk;struct _fat_ptr lex_default;struct _fat_ptr lex_trans;struct _fat_ptr lex_check;};
+extern int Cyc_file_string_read(struct Cyc___cycFILE*,struct _fat_ptr,int,int);struct Cyc_timeval{long tv_sec;long tv_usec;};extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _fat_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _fat_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _fat_ptr lex_base;struct _fat_ptr lex_backtrk;struct _fat_ptr lex_default;struct _fat_ptr lex_trans;struct _fat_ptr lex_check;};
 # 75 "lexing.h"
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _fat_ptr,int,void*),void*);
+struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*)(struct _fat_ptr,int,void*),void*);
 # 81
 struct _fat_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*,struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 73 "string.h"
 extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
 # 104 "string.h"
-extern struct _fat_ptr Cyc_strdup(struct _fat_ptr src);char Cyc_Lexing_Error[6U]="Error";
+extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);char Cyc_Lexing_Error[6U]="Error";
 # 73 "lexing.cyc"
 static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
 static struct _fat_ptr Cyc_Lexing_aux_buffer={(void*)Cyc_Lexing_aux_buffer_v,(void*)Cyc_Lexing_aux_buffer_v,(void*)(Cyc_Lexing_aux_buffer_v + 1U)};
@@ -432,13 +432,13 @@ static int Cyc_Lexing_read_from_file(struct _fat_ptr aux,int n,struct Cyc___cycF
 return Cyc_file_string_read(f,aux,0,n);}
 # 123
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*f){
-return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*read_fun_state))Cyc_Lexing_from_function)(Cyc_Lexing_read_from_file,f);}
+return((struct Cyc_Lexing_lexbuf*(*)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*))Cyc_Lexing_from_function)(Cyc_Lexing_read_from_file,f);}
 # 127
 static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){
 lbuf->lex_eof_reached=1;}
 # 131
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _fat_ptr s){
-return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->refill_buff=(void(*)(struct Cyc_Lexing_lexbuf*lbuf))Cyc_Lexing_set_eof,_tmp2->refill_state=(void*)0,({
+return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->refill_buff=(void(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_set_eof,_tmp2->refill_state=(void*)0,({
 # 134
 struct _fat_ptr _tmpF=Cyc_strdup((struct _fat_ptr)s);_tmp2->lex_buffer=_tmpF;}),_tmp2->lex_buffer_len=(int)
 _get_fat_size(s,sizeof(char)),_tmp2->lex_abs_pos=0,_tmp2->lex_start_pos=0,_tmp2->lex_curr_pos=0,_tmp2->lex_last_pos=0,_tmp2->lex_last_action=0,_tmp2->lex_eof_reached=1;_tmp2;});}

@@ -17,9 +17,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-/* TO DO: still doing fallthru-destinations by mutating abstract syntax.
-   Then again, we might just have the type-checker keep doing that
-*/
+// TO DO: still doing fallthru-destinations by mutating abstract syntax.
+// Then again, we might just have the type-checker keep doing that
 
 /* This small pass does work previously strewn about type-checking
    and control-flow analysis (and is now in-between them):
@@ -79,9 +78,9 @@ static struct StmtEnv { // assuming fallthru clauses set by type-checker
 };
 typedef struct StmtEnv senv_t;
 
-static void anal_exp(senv_t env, exp_t e);
-static void anal_stmt(senv_t env, stmt_t s);
-static void anal_fd(jump_anal_res_t tables, fndecl_t fd);
+static void anal_exp(senv_t, exp_t);
+static void anal_stmt(senv_t, stmt_t);
+static void anal_fd(jump_anal_res_t, fndecl_t);
 
 static int hash_ptr(`a s) {
   return (int)s;
@@ -308,8 +307,8 @@ static void anal_stmt(senv_t env, stmt_t s) {
     case &Tempestoff_d:
     case &ExternC_d(...):
     case &ExternCinclude_d(...): 
-    case &Namespace_d(_,_): // ???
-    case &Using_d(_,_): break; // ???
+    case &Namespace_d(...): // ???
+    case &Using_d(...): break; // ???
     }
     anal_stmt(env,s1);
     break; 
@@ -359,8 +358,7 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
       case &Lab_j(lab): 
 	let dest_stmt;
 	try dest_stmt = Hashtable::lookup(fenv->labels, lab);
-	catch { 
-	case &Core::Not_found: 
+	catch { case &Core::Not_found: 
 	  Warn::err2(src_stmt->loc, "label ", *lab, " undefined"); 
 	  goto L;
 	}
@@ -381,9 +379,9 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
       case &Stmt_j(dest_stmt): 
 	let &SaveEnv{.try_depth=dest_trydepth,.pat_var_depth=dest_pvdepth,...}= 
 	  Hashtable::lookup(stmt_info, dest_stmt);
-        Hashtable::insert(pop_table, src_stmt, src_trydepth - dest_trydepth);
-        Hashtable::insert(pat_pop_table, src_stmt, src_pvdepth - dest_pvdepth);
-	Hashtable::insert(succ_table, src_stmt, dest_stmt);
+        Hashtable::insert(pop_table,    src_stmt, src_trydepth - dest_trydepth);
+        Hashtable::insert(pat_pop_table,src_stmt, src_pvdepth  - dest_pvdepth);
+	Hashtable::insert(succ_table,   src_stmt, dest_stmt);
 	break; 
       case &Fallthru_j(dest_clause): 
 	let &SaveEnv{.try_depth=dest_trydepth,.pat_var_depth=dest_pvdepth,...}= 

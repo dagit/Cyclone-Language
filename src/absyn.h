@@ -16,17 +16,12 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #ifndef _ABSYN_H_
 #define _ABSYN_H_
-
 
 // These macros are useful for declaring globally shared data constructors.  
 #define extern_datacon(T,C) extern datatype T.C C##_val
 #define datacon(T,C) datatype T.C C##_val = C
-#define datacon1(T,C,e) datatype T.C C##_val = C(e)
-#define datacon2(T,C,e1,e2) datatype T.C C##_val = C(e1,e2)
-#define datacon3(T,C,e1,e2,e3) datatype T.C C##_val = C(e1,e2,e3)
 
 // This file defines the abstract syntax used by the Cyclone compiler
 // and related tools.  It is the crucial set of data structures that 
@@ -95,7 +90,7 @@ namespace Absyn {
   extern nmspace_t Loc_n;
   nmspace_t Rel_n(list_t<var_t,`H>);
   // Abs_n(ns) when C_scope is false, C_n(ns) when C_scope is true
-  nmspace_t Abs_n(list_t<var_t,`H> ns, bool C_scope); 
+  nmspace_t Abs_n(list_t<var_t,`H>, bool C_scope); 
 
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
@@ -414,9 +409,7 @@ namespace Absyn {
   // Used in attributes below.
   EXTERN_ABSYN enum Format_Type { Printf_ft, Scanf_ft };
 
-  // GCC attributes that we currently try to support:  this definition
-  // is only used for parsing and pretty-printing.  See GCC info pages
-  // for details.
+  // See GCC info pages for GCC attributes we try to support; see attributes.cyc
   EXTERN_ABSYN datatype Attribute {
     Regparm_att(int); 
     Stdcall_att;      
@@ -450,28 +443,8 @@ namespace Absyn {
     No_throw_att;
   };
 
-  extern_datacon(Attribute,Stdcall_att);      
-  extern_datacon(Attribute,Cdecl_att);        
-  extern_datacon(Attribute,Fastcall_att);
-  extern_datacon(Attribute,Noreturn_att);     
-  extern_datacon(Attribute,Const_att);
-  extern_datacon(Attribute,Packed_att);
-  extern_datacon(Attribute,Nocommon_att);
-  extern_datacon(Attribute,Shared_att);
-  extern_datacon(Attribute,Unused_att);
-  extern_datacon(Attribute,Weak_att);
-  extern_datacon(Attribute,Dllimport_att);
-  extern_datacon(Attribute,Dllexport_att);
-  extern_datacon(Attribute,No_instrument_function_att);
-  extern_datacon(Attribute,Constructor_att);
-  extern_datacon(Attribute,Destructor_att);
-  extern_datacon(Attribute,No_check_memory_usage_att);
-  extern_datacon(Attribute,Pure_att);
-  extern_datacon(Attribute,Always_inline_att);
-  extern_datacon(Attribute,No_throw_att);
-
   // Type modifiers are used for parsing/pretty-printing
-  EXTERN_ABSYN datatype Type_modifier<`r::R> {
+  EXTERN_ABSYN datatype Type_modifier<`r> {
     Carray_mod(booltype_t,seg_t); // [], booltype controls zero-term
     ConstArray_mod(exp_t,booltype_t,seg_t); // [c], booltype controls zero-term
     Pointer_mod(ptr_atts_t,tqual_t); // qualifer for the point (**not** elts)
@@ -923,7 +896,7 @@ namespace Absyn {
   extern type_t schar_type, sshort_type, sint_type, slong_type, slonglong_type;
   // float, double, long double, wchar_t
   extern type_t float_type, double_type, long_double_type, wchar_type();
-  type_t gen_float_type(unsigned i);
+  type_t gen_float_type(unsigned);
   // regions
   extern rgntype_t heap_rgn_type, unique_rgn_type, refcnt_rgn_type;
   // empty effect
@@ -940,9 +913,9 @@ namespace Absyn {
     access_eff(rgntype_t),
     join_eff(list_t<type_t,`H>),
     regionsof_eff(type_t),
-    enum_type(typedef_name_t n, struct Enumdecl *`H d),
+    enum_type(typedef_name_t, struct Enumdecl *`H),
     anon_enum_type(list_t<enumfield_t,`H>),
-    builtin_type(string_t<`H> s, kind_t k),
+    builtin_type(string_t<`H>, kind_t),
     typedef_type(typedef_name_t,list_t<type_t,`H>,struct Typedefdecl*`H ,type_opt_t);
 
   // exception name and type
@@ -1133,7 +1106,7 @@ namespace Absyn {
   // returns true when the expression is a valid left-hand-side
   bool is_lvalue(exp_t);
   // returns true when the expression has no side effects
-  bool no_side_effects_exp(exp_t e);
+  bool no_side_effects_exp(exp_t);
 
   // find a field by name from a list of fields
   struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);

@@ -371,16 +371,16 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 # 171 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 178
-void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};struct Cyc_Buffer_t;
+void Cyc_Core_ufree(void*);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};struct Cyc_Buffer_t;
 # 83 "buffer.h"
-void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _fat_ptr,int offset,int len);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _fat_ptr,int,int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
-extern unsigned long Cyc_strlen(struct _fat_ptr s);
+extern unsigned long Cyc_strlen(struct _fat_ptr);
 # 72 "string.h"
 extern struct _fat_ptr Cyc_strncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
 extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned long);
 # 109 "string.h"
-extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int ofs,unsigned long n);struct Cyc_Buffer_t{struct _fat_ptr buffer;unsigned position;unsigned length;struct _fat_ptr initial_buffer;};
+extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct Cyc_Buffer_t{struct _fat_ptr buffer;unsigned position;unsigned length;struct _fat_ptr initial_buffer;};
 # 48 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){
 if(n > (unsigned)0){
@@ -411,7 +411,7 @@ int len=(int)({struct _fat_ptr _tmp15=buf;struct _fat_ptr _tmp16;_LL1: _tmp16=_t
 ({struct _fat_ptr _tmp11=buf;struct _fat_ptr _tmp12=b->buffer;buf=_tmp12;b->buffer=_tmp11;});
 if(({char*_tmp3A=(char*)buf.curr;_tmp3A != (char*)(_tag_fat(0,0,0)).curr;})){
 ({struct _fat_ptr _tmp13=buf;struct _fat_ptr _tmp14=b->buffer;buf=_tmp14;b->buffer=_tmp13;});
-((void(*)(char*ptr))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));
+((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));
 return 0;}
 # 84
 b->position=0U;
@@ -431,7 +431,7 @@ struct _fat_ptr _tmp17=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp17;
 ({struct _fat_ptr _tmp18=b->initial_buffer;struct _fat_ptr _tmp19=buf;b->initial_buffer=_tmp19;buf=_tmp18;});
 b->length=_get_fat_size(buf,sizeof(char))- (unsigned)1;
 ({struct _fat_ptr _tmp1A=b->buffer;struct _fat_ptr _tmp1B=buf;b->buffer=_tmp1B;buf=_tmp1A;});
-((void(*)(char*ptr))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
+((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
 # 106
 return;}
 # 109
@@ -450,7 +450,7 @@ struct _fat_ptr _tmp1D=new_buffer;struct _fat_ptr _tmp1E;_LL1: _tmp1E=_tmp1D;_LL
 if(({char*_tmp3E=(char*)(b->initial_buffer).curr;_tmp3E == (char*)(_tag_fat(0,0,0)).curr;}))
 ({struct _fat_ptr _tmp1F=b->initial_buffer;struct _fat_ptr _tmp20=b->buffer;b->initial_buffer=_tmp20;b->buffer=_tmp1F;});
 ({struct _fat_ptr _tmp21=b->buffer;struct _fat_ptr _tmp22=new_buffer;b->buffer=_tmp22;new_buffer=_tmp21;});
-((void(*)(char*ptr))Cyc_Core_ufree)((char*)_untag_fat_ptr(new_buffer,sizeof(char),1U + 1U));
+((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(new_buffer,sizeof(char),1U + 1U));
 b->length=new_len;
 return;}
 # 129

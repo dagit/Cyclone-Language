@@ -390,39 +390,39 @@ extern long strtol(char*,char**,int);
 # 317
 extern unsigned long strtoul(char*,char**,int);struct Cyc_timeval{long tv_sec;long tv_usec;};
 # 126 "scanf.cyc"
-static struct _fat_ptr Cyc___sccl(char*tab,struct _fat_ptr fmt);
+static struct _fat_ptr Cyc___sccl(char*,struct _fat_ptr);
 # 139
 static short*Cyc_va_arg_short_ptr(void*a){
-void*_tmp0=a;unsigned short*_tmp1;short*_tmp2;switch(*((int*)_tmp0)){case 0U: _LL1: _tmp2=((struct Cyc_ShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL2: {short*p=_tmp2;
-return p;}case 1U: _LL3: _tmp1=((struct Cyc_UShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL4: {unsigned short*p=_tmp1;
+void*_tmp0=a;unsigned short*_tmp1;short*_tmp2;switch(*((int*)_tmp0)){case 0: _LL1: _tmp2=((struct Cyc_ShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL2: {short*p=_tmp2;
+return p;}case 1: _LL3: _tmp1=((struct Cyc_UShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL4: {unsigned short*p=_tmp1;
 return(short*)p;}default: _LL5: _LL6:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp37=({const char*_tmp3="scan expects short pointer";_tag_fat(_tmp3,sizeof(char),27U);});_tmp4->f1=_tmp37;});_tmp4;}));}_LL0:;}
 # 147
 static int*Cyc_va_arg_int_ptr(void*a){
-void*_tmp5=a;unsigned*_tmp6;int*_tmp7;switch(*((int*)_tmp5)){case 2U: _LL1: _tmp7=((struct Cyc_IntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL2: {int*p=_tmp7;
-return p;}case 3U: _LL3: _tmp6=((struct Cyc_UIntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL4: {unsigned*p=_tmp6;
+void*_tmp5=a;unsigned*_tmp6;int*_tmp7;switch(*((int*)_tmp5)){case 2: _LL1: _tmp7=((struct Cyc_IntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL2: {int*p=_tmp7;
+return p;}case 3: _LL3: _tmp6=((struct Cyc_UIntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL4: {unsigned*p=_tmp6;
 return(int*)p;}default: _LL5: _LL6:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp9=_cycalloc(sizeof(*_tmp9));_tmp9->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp38=({const char*_tmp8="scan expects int pointer";_tag_fat(_tmp8,sizeof(char),25U);});_tmp9->f1=_tmp38;});_tmp9;}));}_LL0:;}
 # 155
 static struct _fat_ptr Cyc_va_arg_string_ptr(void*a){
-void*_tmpA=a;struct _fat_ptr _tmpB;struct _fat_ptr _tmpC;switch(*((int*)_tmpA)){case 4U: _LL1: _tmpC=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL2: {struct _fat_ptr p=_tmpC;
-return _fat_ptr_decrease_size(p,sizeof(char),1U);}case 7U: _LL3: _tmpB=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL4: {struct _fat_ptr p=_tmpB;
+void*_tmpA=a;struct _fat_ptr _tmpB;struct _fat_ptr _tmpC;switch(*((int*)_tmpA)){case 4: _LL1: _tmpC=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL2: {struct _fat_ptr p=_tmpC;
+return _fat_ptr_decrease_size(p,sizeof(char),1U);}case 7: _LL3: _tmpB=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL4: {struct _fat_ptr p=_tmpB;
 return p;}default: _LL5: _LL6:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp39=({const char*_tmpD="scan expects char pointer";_tag_fat(_tmpD,sizeof(char),26U);});_tmpE->f1=_tmp39;});_tmpE;}));}_LL0:;}
 # 163
 static double*Cyc_va_arg_double_ptr(void*a){
-void*_tmpF=a;double*_tmp10;if(((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_tmpF)->tag == 5U){_LL1: _tmp10=((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_tmpF)->f1;_LL2: {double*p=_tmp10;
+void*_tmpF=a;double*_tmp10;if(*((int*)_tmpF)== 5){_LL1: _tmp10=((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_tmpF)->f1;_LL2: {double*p=_tmp10;
 return p;}}else{_LL3: _LL4:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp12=_cycalloc(sizeof(*_tmp12));_tmp12->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp3A=({const char*_tmp11="scan expects double pointer";_tag_fat(_tmp11,sizeof(char),28U);});_tmp12->f1=_tmp3A;});_tmp12;}));}_LL0:;}
 # 170
 static float*Cyc_va_arg_float_ptr(void*a){
-void*_tmp13=a;float*_tmp14;if(((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_tmp13)->tag == 6U){_LL1: _tmp14=((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_tmp13)->f1;_LL2: {float*p=_tmp14;
+void*_tmp13=a;float*_tmp14;if(*((int*)_tmp13)== 6){_LL1: _tmp14=((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_tmp13)->f1;_LL2: {float*p=_tmp14;
 return p;}}else{_LL3: _LL4:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp16=_cycalloc(sizeof(*_tmp16));_tmp16->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp3B=({const char*_tmp15="scan expects float pointer";_tag_fat(_tmp15,sizeof(char),27U);});_tmp16->f1=_tmp3B;});_tmp16;}));}_LL0:;}
 # 177
 static struct _fat_ptr Cyc_va_arg_char_ptr(void*a){
-void*_tmp17=a;struct _fat_ptr _tmp18;struct _fat_ptr _tmp19;switch(*((int*)_tmp17)){case 7U: _LL1: _tmp19=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL2: {struct _fat_ptr p=_tmp19;
-return p;}case 4U: _LL3: _tmp18=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL4: {struct _fat_ptr p=_tmp18;
+void*_tmp17=a;struct _fat_ptr _tmp18;struct _fat_ptr _tmp19;switch(*((int*)_tmp17)){case 7: _LL1: _tmp19=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL2: {struct _fat_ptr p=_tmp19;
+return p;}case 4: _LL3: _tmp18=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL4: {struct _fat_ptr p=_tmp18;
 return _fat_ptr_decrease_size(p,sizeof(char),1U);}default: _LL5: _LL6:
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp3C=({const char*_tmp1A="scan expects char pointer";_tag_fat(_tmp1A,sizeof(char),26U);});_tmp1B->f1=_tmp3C;});_tmp1B;}));}_LL0:;}
 # 188
@@ -452,12 +452,12 @@ static short basefix[17U]={10,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 # 223
 nassigned=0;
 nread=0;
-for(0;1;0){
+for(1;1;1){
 c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
 if(c == 0)
 goto done;
 if(isspace(c)){
-for(0;1;0){
+for(1;1;1){
 c=_IO_getc(fp);
 if(c == -1){
 ++ seen_eof;
@@ -477,7 +477,7 @@ width=(long long)0;
 flags=0;
 # 252
 again: c=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
-{int _tmp1C=c;switch(_tmp1C){case 37U: _LL1: _LL2:
+{int _tmp1C=c;switch(_tmp1C){case 37: _LL1: _LL2:
 # 255
  literal:
  n=_IO_getc(fp);
@@ -488,85 +488,85 @@ _IO_ungetc(n,fp);
 goto match_failure;}
 # 263
 ++ nread;
-continue;case 42U: _LL3: _LL4:
+continue;case 42: _LL3: _LL4:
 # 267
  if(flags)goto control_failure;
 flags=8;
-goto again;case 108U: _LL5: _LL6:
+goto again;case 108: _LL5: _LL6:
 # 271
  if(flags & ~(8 | 64))goto control_failure;
 flags |=1;
-goto again;case 76U: _LL7: _LL8:
+goto again;case 76: _LL7: _LL8:
 # 275
  if(flags & ~(8 | 64))goto control_failure;
 flags |=2;
-goto again;case 104U: _LL9: _LLA:
+goto again;case 104: _LL9: _LLA:
 # 279
  if(flags & ~(8 | 64))goto control_failure;
 flags |=4;
-goto again;case 48U: _LLB: _LLC:
+goto again;case 48: _LLB: _LLC:
 # 283
- goto _LLE;case 49U: _LLD: _LLE: goto _LL10;case 50U: _LLF: _LL10: goto _LL12;case 51U: _LL11: _LL12: goto _LL14;case 52U: _LL13: _LL14: goto _LL16;case 53U: _LL15: _LL16:
- goto _LL18;case 54U: _LL17: _LL18: goto _LL1A;case 55U: _LL19: _LL1A: goto _LL1C;case 56U: _LL1B: _LL1C: goto _LL1E;case 57U: _LL1D: _LL1E:
+ goto _LLE;case 49: _LLD: _LLE: goto _LL10;case 50: _LLF: _LL10: goto _LL12;case 51: _LL11: _LL12: goto _LL14;case 52: _LL13: _LL14: goto _LL16;case 53: _LL15: _LL16:
+ goto _LL18;case 54: _LL17: _LL18: goto _LL1A;case 55: _LL19: _LL1A: goto _LL1C;case 56: _LL1B: _LL1C: goto _LL1E;case 57: _LL1D: _LL1E:
  if(flags & ~(8 | 64))goto control_failure;
 flags |=64;
 width=(width * (long long)10 + (long long)c)- (long long)'0';
-goto again;case 68U: _LL1F: _LL20:
+goto again;case 68: _LL1F: _LL20:
 # 298 "scanf.cyc"
  flags |=1;
-goto _LL22;case 100U: _LL21: _LL22:
+goto _LL22;case 100: _LL21: _LL22:
 # 301
  c=3;
 use_strtoul=0;
 base=10;
-goto _LL0;case 105U: _LL23: _LL24:
+goto _LL0;case 105: _LL23: _LL24:
 # 307
  c=3;
 use_strtoul=0;
 base=0;
-goto _LL0;case 79U: _LL25: _LL26:
+goto _LL0;case 79: _LL25: _LL26:
 # 313
  flags |=1;
-goto _LL28;case 111U: _LL27: _LL28:
+goto _LL28;case 111: _LL27: _LL28:
 # 316
  c=3;
 use_strtoul=1;
 base=8;
-goto _LL0;case 117U: _LL29: _LL2A:
+goto _LL0;case 117: _LL29: _LL2A:
 # 322
  c=3;
 use_strtoul=1;
 base=10;
-goto _LL0;case 88U: _LL2B: _LL2C:
+goto _LL0;case 88: _LL2B: _LL2C:
 # 327
- goto _LL2E;case 120U: _LL2D: _LL2E:
+ goto _LL2E;case 120: _LL2D: _LL2E:
  flags |=256;
 c=3;
 use_strtoul=1;
 base=16;
-goto _LL0;case 69U: _LL2F: _LL30:
+goto _LL0;case 69: _LL2F: _LL30:
 # 334
- goto _LL32;case 70U: _LL31: _LL32: goto _LL34;case 101U: _LL33: _LL34: goto _LL36;case 102U: _LL35: _LL36: goto _LL38;case 103U: _LL37: _LL38:
+ goto _LL32;case 70: _LL31: _LL32: goto _LL34;case 101: _LL33: _LL34: goto _LL36;case 102: _LL35: _LL36: goto _LL38;case 103: _LL37: _LL38:
  c=4;
-goto _LL0;case 115U: _LL39: _LL3A:
+goto _LL0;case 115: _LL39: _LL3A:
 # 339
  c=2;
-goto _LL0;case 91U: _LL3B: _LL3C:
+goto _LL0;case 91: _LL3B: _LL3C:
 # 343
  fmt=Cyc___sccl(ccltab,fmt);
 flags |=32;
 c=1;
-goto _LL0;case 99U: _LL3D: _LL3E:
+goto _LL0;case 99: _LL3D: _LL3E:
 # 349
  flags |=32;
 c=0;
-goto _LL0;case 112U: _LL3F: _LL40:
+goto _LL0;case 112: _LL3F: _LL40:
 # 354
  flags |=16 | 256;
 c=3;
 use_strtoul=1;
 base=16;
-goto _LL0;case 110U: _LL41: _LL42:
+goto _LL0;case 110: _LL41: _LL42:
 # 361
  if(flags & 8)
 continue;
@@ -577,7 +577,7 @@ if(flags & 1)
 # 368
 ({int _tmp3F=nread;*Cyc_va_arg_int_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)))=_tmp3F;});}}
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
-continue;case 0U: _LL43: _LL44:
+continue;case 0: _LL43: _LL44:
 # 376
  nassigned=-1;
 goto done;default: _LL45: _LL46:
@@ -601,13 +601,13 @@ n=_IO_peekc(fp);
 if(n == -1)
 goto eof_failure;}}{
 # 415
-int _tmp1D=c;switch(_tmp1D){case 0U: _LL48: _LL49:
+int _tmp1D=c;switch(_tmp1D){case 0: _LL48: _LL49:
 # 421
  if(width == (long long)0)
 width=(long long)1;
 if(flags & 8){
 long long sum=(long long)0;
-for(0;width > (long long)0;0){
+for(1;width > (long long)0;1){
 n=_IO_getc(fp);
 if(n == -1 && width != (long long)0)
 goto eof_failure;else{
@@ -622,7 +622,7 @@ nread +=sum;}else{
 # 438
 long long sum=(long long)0;
 struct _fat_ptr _tmp1E=Cyc_va_arg_char_ptr(*((void**)_check_fat_subscript(ap,sizeof(void*),0U)));struct _fat_ptr z=_tmp1E;_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
-for(0;width > (long long)0;0){
+for(1;width > (long long)0;1){
 n=_IO_getc(fp);
 if(n == -1 && width != (long long)0)
 goto eof_failure;else{
@@ -638,7 +638,7 @@ _fat_ptr_inplace_plus(& z,sizeof(char),1);
 nread +=sum;
 ++ nassigned;}
 # 456
-goto _LL47;case 1U: _LL4A: _LL4B:
+goto _LL47;case 1: _LL4A: _LL4B:
 # 460
  if(width == (long long)0)
 width=(long long)4294967295U;
@@ -684,7 +684,7 @@ if(_get_fat_size(p5,sizeof(char))== (unsigned)0)goto eof_failure;
 ++ nassigned;}}
 # 505
 nread +=n;
-goto _LL47;case 2U: _LL4C: _LL4D:
+goto _LL47;case 2: _LL4C: _LL4D:
 # 510
  if(width == (long long)0)
 width=(long long)4294967295U;
@@ -721,7 +721,7 @@ if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
 nread +=(p3.curr - p2.curr)/ sizeof(char);
 ++ nassigned;}}
 # 547
-continue;case 3U: _LL4E: _LL4F:
+continue;case 3: _LL4E: _LL4F:
 # 551
  if(width == (long long)0 || width > (long long)(sizeof(buf)- (unsigned)1))
 width=(long long)(sizeof(buf)- 1U);
@@ -729,7 +729,7 @@ flags |=(64 | 128)| 512;
 for(p=({char*_tmp21=buf;_tag_fat(_tmp21,sizeof(char),351U);});width != (long long)0;-- width){
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
-{int _tmp22=c;switch(_tmp22){case 48U: _LL55: _LL56:
+{int _tmp22=c;switch(_tmp22){case 48: _LL55: _LL56:
 # 575 "scanf.cyc"
  if(base == 0){
 base=8;
@@ -739,38 +739,38 @@ if(flags & 512)
 flags &=~((64 | 512)| 128);else{
 # 582
 flags &=~((64 | 256)| 128);}
-goto ok;case 49U: _LL57: _LL58:
+goto ok;case 49: _LL57: _LL58:
 # 586
- goto _LL5A;case 50U: _LL59: _LL5A: goto _LL5C;case 51U: _LL5B: _LL5C: goto _LL5E;case 52U: _LL5D: _LL5E: goto _LL60;case 53U: _LL5F: _LL60:
- goto _LL62;case 54U: _LL61: _LL62: goto _LL64;case 55U: _LL63: _LL64:
+ goto _LL5A;case 50: _LL59: _LL5A: goto _LL5C;case 51: _LL5B: _LL5C: goto _LL5E;case 52: _LL5D: _LL5E: goto _LL60;case 53: _LL5F: _LL60:
+ goto _LL62;case 54: _LL61: _LL62: goto _LL64;case 55: _LL63: _LL64:
  base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
 flags &=~((64 | 256)| 128);
-goto ok;case 56U: _LL65: _LL66:
+goto ok;case 56: _LL65: _LL66:
 # 593
- goto _LL68;case 57U: _LL67: _LL68:
+ goto _LL68;case 57: _LL67: _LL68:
  base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
 if(base <= 8)
 goto _LL54;
 flags &=~((64 | 256)| 128);
-goto ok;case 65U: _LL69: _LL6A:
+goto ok;case 65: _LL69: _LL6A:
 # 601
- goto _LL6C;case 66U: _LL6B: _LL6C: goto _LL6E;case 67U: _LL6D: _LL6E: goto _LL70;case 68U: _LL6F: _LL70: goto _LL72;case 69U: _LL71: _LL72:
- goto _LL74;case 70U: _LL73: _LL74: goto _LL76;case 97U: _LL75: _LL76: goto _LL78;case 98U: _LL77: _LL78: goto _LL7A;case 99U: _LL79: _LL7A:
- goto _LL7C;case 100U: _LL7B: _LL7C: goto _LL7E;case 101U: _LL7D: _LL7E: goto _LL80;case 102U: _LL7F: _LL80:
+ goto _LL6C;case 66: _LL6B: _LL6C: goto _LL6E;case 67: _LL6D: _LL6E: goto _LL70;case 68: _LL6F: _LL70: goto _LL72;case 69: _LL71: _LL72:
+ goto _LL74;case 70: _LL73: _LL74: goto _LL76;case 97: _LL75: _LL76: goto _LL78;case 98: _LL77: _LL78: goto _LL7A;case 99: _LL79: _LL7A:
+ goto _LL7C;case 100: _LL7B: _LL7C: goto _LL7E;case 101: _LL7D: _LL7E: goto _LL80;case 102: _LL7F: _LL80:
 # 605
  if(base <= 10)
 goto _LL54;
 flags &=~((64 | 256)| 128);
-goto ok;case 43U: _LL81: _LL82:
+goto ok;case 43: _LL81: _LL82:
 # 611
- goto _LL84;case 45U: _LL83: _LL84:
+ goto _LL84;case 45: _LL83: _LL84:
  if(flags & 64){
 flags &=~ 64;
 goto ok;}
 # 616
-goto _LL54;case 120U: _LL85: _LL86:
+goto _LL54;case 120: _LL85: _LL86:
 # 619
- goto _LL88;case 88U: _LL87: _LL88:
+ goto _LL88;case 88: _LL87: _LL88:
  if(flags & 256 &&({char*_tmp40=(char*)(_fat_ptr_plus(p,sizeof(char),- 1)).curr;_tmp40 == buf;})){
 base=16;
 flags &=~ 256;
@@ -821,7 +821,7 @@ _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 ++ nassigned;}
 # 684
 ({int _tmp46=({unsigned char*_tmp45=p.curr;_tmp45 - ({char*_tmp29=buf;_tag_fat(_tmp29,sizeof(char),351U);}).curr;})/ sizeof(char);nread +=_tmp46;});
-goto _LL47;case 4U: _LL50: _LL51:
+goto _LL47;case 4: _LL50: _LL51:
 # 689
  if(width == (long long)0 || width > (long long)(sizeof(buf)- (unsigned)1))
 width=(long long)(sizeof(buf)- 1U);
@@ -829,27 +829,27 @@ flags |=((64 | 128)| 256)| 512;
 for(p=({char*_tmp2A=buf;_tag_fat(_tmp2A,sizeof(char),351U);});width != (long long)0;-- width){
 c=_IO_peekc(fp);
 # 698
-{int _tmp2B=c;switch(_tmp2B){case 48U: _LL8C: _LL8D:
+{int _tmp2B=c;switch(_tmp2B){case 48: _LL8C: _LL8D:
 # 700
- goto _LL8F;case 49U: _LL8E: _LL8F: goto _LL91;case 50U: _LL90: _LL91: goto _LL93;case 51U: _LL92: _LL93: goto _LL95;case 52U: _LL94: _LL95:
- goto _LL97;case 53U: _LL96: _LL97: goto _LL99;case 54U: _LL98: _LL99: goto _LL9B;case 55U: _LL9A: _LL9B: goto _LL9D;case 56U: _LL9C: _LL9D:
- goto _LL9F;case 57U: _LL9E: _LL9F:
+ goto _LL8F;case 49: _LL8E: _LL8F: goto _LL91;case 50: _LL90: _LL91: goto _LL93;case 51: _LL92: _LL93: goto _LL95;case 52: _LL94: _LL95:
+ goto _LL97;case 53: _LL96: _LL97: goto _LL99;case 54: _LL98: _LL99: goto _LL9B;case 55: _LL9A: _LL9B: goto _LL9D;case 56: _LL9C: _LL9D:
+ goto _LL9F;case 57: _LL9E: _LL9F:
  flags &=~(64 | 128);
-goto fok;case 43U: _LLA0: _LLA1:
+goto fok;case 43: _LLA0: _LLA1:
 # 706
- goto _LLA3;case 45U: _LLA2: _LLA3:
+ goto _LLA3;case 45: _LLA2: _LLA3:
  if(flags & 64){
 flags &=~ 64;
 goto fok;}
 # 711
-goto _LL8B;case 46U: _LLA4: _LLA5:
+goto _LL8B;case 46: _LLA4: _LLA5:
 # 713
  if(flags & 256){
 flags &=~(64 | 256);
 goto fok;}
 # 717
-goto _LL8B;case 101U: _LLA6: _LLA7:
- goto _LLA9;case 69U: _LLA8: _LLA9:
+goto _LL8B;case 101: _LLA6: _LLA7:
+ goto _LLA9;case 69: _LLA8: _LLA9:
 # 720
  if((flags & (128 | 512))== 512){
 flags=(flags & ~(512 | 256)| 64)| 128;
@@ -933,13 +933,13 @@ if(c == 0)
 return _fat_ptr_plus(fmt,sizeof(char),- 1);
 # 829 "scanf.cyc"
 v=1 - v;
-for(0;1;0){
+for(1;1;1){
 *((char*)_check_known_subscript_notnull(tab,256U,sizeof(char),c))=(char)v;
 doswitch:
  n=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));{
-int _tmp35=n;switch(_tmp35){case 0U: _LL1: _LL2:
+int _tmp35=n;switch(_tmp35){case 0: _LL1: _LL2:
 # 837
- return _fat_ptr_plus(fmt,sizeof(char),- 1);case 45U: _LL3: _LL4:
+ return _fat_ptr_plus(fmt,sizeof(char),- 1);case 45: _LL3: _LL4:
 # 858 "scanf.cyc"
  n=(int)*((const char*)_check_fat_subscript(fmt,sizeof(char),0U));
 if(n == (int)']' || n < c){
@@ -952,7 +952,7 @@ do{
 # 873
 goto doswitch;
 # 881
-goto _LL0;case 93U: _LL5: _LL6:
+goto _LL0;case 93: _LL5: _LL6:
 # 884
  return fmt;default: _LL7: _LL8:
 # 887
@@ -981,7 +981,7 @@ int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 920
 struct _fat_ptr src=(struct _fat_ptr)src1;
 int err=0;
-return((int(*)(int(*_IO_getc)(struct _fat_ptr*),int(*_IO_ungetc)(int,struct _fat_ptr*),int(*_IO_peekc)(struct _fat_ptr*),struct _fat_ptr*fp,struct _fat_ptr fmt0,struct _fat_ptr ap,int*errp))Cyc__IO_vfscanf)(Cyc_string_getc,Cyc_string_ungetc,Cyc_string_peekc,& src,fmt,ap,& err);}
+return((int(*)(int(*)(struct _fat_ptr*),int(*)(int,struct _fat_ptr*),int(*)(struct _fat_ptr*),struct _fat_ptr*,struct _fat_ptr,struct _fat_ptr,int*))Cyc__IO_vfscanf)(Cyc_string_getc,Cyc_string_ungetc,Cyc_string_peekc,& src,fmt,ap,& err);}
 # 926
 int Cyc_sscanf(struct _fat_ptr src,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 929
@@ -995,7 +995,7 @@ return c;}
 int Cyc_vfscanf(struct Cyc___cycFILE*stream,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 942
 int err=0;
-return((int(*)(int(*_IO_getc)(struct Cyc___cycFILE*),int(*_IO_ungetc)(int,struct Cyc___cycFILE*),int(*_IO_peekc)(struct Cyc___cycFILE*),struct Cyc___cycFILE*fp,struct _fat_ptr fmt0,struct _fat_ptr ap,int*errp))Cyc__IO_vfscanf)(Cyc_getc,Cyc_ungetc,Cyc_peekc,stream,fmt,ap,& err);}
+return((int(*)(int(*)(struct Cyc___cycFILE*),int(*)(int,struct Cyc___cycFILE*),int(*)(struct Cyc___cycFILE*),struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr,int*))Cyc__IO_vfscanf)(Cyc_getc,Cyc_ungetc,Cyc_peekc,stream,fmt,ap,& err);}
 # 946
 int Cyc_fscanf(struct Cyc___cycFILE*stream,struct _fat_ptr fmt,struct _fat_ptr ap){
 # 949

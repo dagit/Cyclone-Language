@@ -6,7 +6,7 @@ CC=gcc
 CFLAGS=-march=i686
 TARGET_CC=gcc -b i686-pc-linux-gnu
 TARGET_CFLAGS=-march=i686
-CYCDIR=/tmp/cyclone
+CYCDIR=/homes/gws/djg/cyclone
 prefix=/homes/gws/djg
 exec_prefix=${prefix}
 INC_INSTALL=${prefix}/include/cyclone

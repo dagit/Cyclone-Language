@@ -373,19 +373,19 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 # 171
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
-extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
+extern int Cyc_List_length(struct Cyc_List_List*);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 117
-extern void Cyc_List_app(void*(*f)(void*),struct Cyc_List_List*x);
+extern void Cyc_List_app(void*(*)(void*),struct Cyc_List_List*);
 # 133
-extern void Cyc_List_iter(void(*f)(void*),struct Cyc_List_List*x);
+extern void Cyc_List_iter(void(*)(void*),struct Cyc_List_List*);
 # 135
-extern void Cyc_List_iter_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*x);
+extern void Cyc_List_iter_c(void(*)(void*,void*),void*,struct Cyc_List_List*);
 # 210
-extern struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Set_Set;
+extern struct Cyc_List_List*Cyc_List_merge_sort(int(*)(void*,void*),struct Cyc_List_List*);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*,void*);};struct Cyc_Set_Set;
 # 100 "set.h"
-int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
+int Cyc_Set_member(struct Cyc_Set_Set*,void*);
 # 106
-int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
+int Cyc_Set_setcmp(struct Cyc_Set_Set*,struct Cyc_Set_Set*);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
 # 37 "set.cyc"
 struct Cyc_Set_Set*Cyc_Set_empty(int(*comp)(void*,void*)){
 return({struct Cyc_Set_Set*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->cmp=comp,_tmp0->cardinality=0,_tmp0->nodes=0;_tmp0;});}
@@ -403,7 +403,7 @@ int Cyc_Set_is_empty(struct Cyc_Set_Set*s){
 return s->cardinality == 0;}
 # 58
 static int Cyc_Set_member_b(int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
-for(0;n != 0;n=n->tl){
+for(1;n != 0;n=n->tl){
 int i=cmp(elt,n->hd);
 if(i == 0)return 1;
 if(i < 0)return 0;}
@@ -649,7 +649,7 @@ int card=s1->cardinality;
 # 344
 if(x2 == 0)return s1;
 # 346
-for(0;x2 != 0;x2=x2->tl){
+for(1;x2 != 0;x2=x2->tl){
 void*elt=x2->hd;
 if(Cyc_Set_member_b(comp,x1,elt)){
 -- card;

@@ -75,13 +75,13 @@ namespace Interface {
   void print(i_t, FILE @);
 
   // load from a text file
-  i_t parse(FILE @);
+  i_t parse(FILE @`H);
 
   // binary save to a file
   void save(i_t, FILE @);
 
   // load from a text file
-  i_t load(FILE @);
+  i_t load(FILE @`H);
 }
 
 typedef Interface::i_t interface_t;

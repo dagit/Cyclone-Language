@@ -389,29 +389,29 @@ extern char*getenv(const char*);struct Cyc_timeval{long tv_sec;long tv_usec;};st
 # 171 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 178 "list.h"
-extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+extern struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 336
-extern void*Cyc_List_assoc_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x);
+extern void*Cyc_List_assoc_cmp(int(*)(void*,void*),struct Cyc_List_List*,void*);
 # 364
-extern struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x);
+extern struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*);
 # 38 "string.h"
-extern unsigned long Cyc_strlen(struct _fat_ptr s);
+extern unsigned long Cyc_strlen(struct _fat_ptr);
 # 49 "string.h"
-extern int Cyc_strcmp(struct _fat_ptr s1,struct _fat_ptr s2);
-extern int Cyc_strptrcmp(struct _fat_ptr*s1,struct _fat_ptr*s2);
-extern int Cyc_strncmp(struct _fat_ptr s1,struct _fat_ptr s2,unsigned long len);
+extern int Cyc_strcmp(struct _fat_ptr,struct _fat_ptr);
+extern int Cyc_strptrcmp(struct _fat_ptr*,struct _fat_ptr*);
+extern int Cyc_strncmp(struct _fat_ptr,struct _fat_ptr,unsigned long);
 # 62
 extern struct _fat_ptr Cyc_strconcat(struct _fat_ptr,struct _fat_ptr);
 # 104 "string.h"
-extern struct _fat_ptr Cyc_strdup(struct _fat_ptr src);
+extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
 # 109
-extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int ofs,unsigned long n);
+extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);
 # 30 "filename.h"
 extern struct _fat_ptr Cyc_Filename_concat(struct _fat_ptr,struct _fat_ptr);extern char Cyc_Arg_Bad[4U];struct Cyc_Arg_Bad_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Arg_Error[6U];struct Cyc_Arg_Error_exn_struct{char*tag;};struct Cyc_Arg_Unit_spec_Arg_Spec_struct{int tag;void(*f1)(void);};struct Cyc_Arg_Flag_spec_Arg_Spec_struct{int tag;void(*f1)(struct _fat_ptr);};struct Cyc_Arg_FlagString_spec_Arg_Spec_struct{int tag;void(*f1)(struct _fat_ptr,struct _fat_ptr);};struct Cyc_Arg_Set_spec_Arg_Spec_struct{int tag;int*f1;};struct Cyc_Arg_Clear_spec_Arg_Spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_Arg_Spec_struct{int tag;void(*f1)(struct _fat_ptr);};struct Cyc_Arg_Int_spec_Arg_Spec_struct{int tag;void(*f1)(int);};struct Cyc_Arg_Rest_spec_Arg_Spec_struct{int tag;void(*f1)(struct _fat_ptr);};
 # 69 "arg.h"
 extern int Cyc_Arg_current;
 # 71
-extern void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _fat_ptr),int(*anonflagfun)(struct _fat_ptr),struct _fat_ptr errmsg,struct _fat_ptr args);
+extern void Cyc_Arg_parse(struct Cyc_List_List*,void(*)(struct _fat_ptr),int(*)(struct _fat_ptr),struct _fat_ptr,struct _fat_ptr);
 # 29 "specsfile.h"
 struct _fat_ptr Cyc_Specsfile_target_arch;
 # 31
@@ -443,7 +443,7 @@ char strvalue[4096U];
 struct Cyc___cycFILE*spec_file=Cyc_fopen((const char*)_check_null(_untag_fat_ptr(file,sizeof(char),1U)),"r");
 # 65
 if(spec_file == 0){
-({struct Cyc_String_pa_PrintArg_struct _tmp7=({struct Cyc_String_pa_PrintArg_struct _tmp57;_tmp57.tag=0U,_tmp57.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp57;});void*_tmp5[1U];_tmp5[0]=& _tmp7;({struct Cyc___cycFILE*_tmp66=Cyc_stderr;struct _fat_ptr _tmp65=({const char*_tmp6="Error opening spec file %s\n";_tag_fat(_tmp6,sizeof(char),28U);});Cyc_fprintf(_tmp66,_tmp65,_tag_fat(_tmp5,sizeof(void*),1U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmp7=({struct Cyc_String_pa_PrintArg_struct _tmp57;_tmp57.tag=0,_tmp57.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp57;});void*_tmp5[1];_tmp5[0]=& _tmp7;({struct Cyc___cycFILE*_tmp66=Cyc_stderr;struct _fat_ptr _tmp65=({const char*_tmp6="Error opening spec file %s\n";_tag_fat(_tmp6,sizeof(char),28U);});Cyc_fprintf(_tmp66,_tmp65,_tag_fat(_tmp5,sizeof(void*),1));});});
 Cyc_fflush(Cyc_stderr);
 return 0;}
 # 71
@@ -453,7 +453,7 @@ c=Cyc_fgetc(spec_file);
 if(isspace(c))continue;
 if(c == (int)'*')break;
 if(c != -1){
-({struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp59;_tmp59.tag=0U,_tmp59.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp59;});struct Cyc_Int_pa_PrintArg_struct _tmpB=({struct Cyc_Int_pa_PrintArg_struct _tmp58;_tmp58.tag=1U,_tmp58.f1=(unsigned long)c;_tmp58;});void*_tmp8[2U];_tmp8[0]=& _tmpA,_tmp8[1]=& _tmpB;({struct Cyc___cycFILE*_tmp68=Cyc_stderr;struct _fat_ptr _tmp67=({const char*_tmp9="Error reading spec file %s: unexpected character '%c'\n";_tag_fat(_tmp9,sizeof(char),55U);});Cyc_fprintf(_tmp68,_tmp67,_tag_fat(_tmp8,sizeof(void*),2U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp59;_tmp59.tag=0,_tmp59.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp59;});struct Cyc_Int_pa_PrintArg_struct _tmpB=({struct Cyc_Int_pa_PrintArg_struct _tmp58;_tmp58.tag=1,_tmp58.f1=(unsigned long)c;_tmp58;});void*_tmp8[2];_tmp8[0]=& _tmpA,_tmp8[1]=& _tmpB;({struct Cyc___cycFILE*_tmp68=Cyc_stderr;struct _fat_ptr _tmp67=({const char*_tmp9="Error reading spec file %s: unexpected character '%c'\n";_tag_fat(_tmp9,sizeof(char),55U);});Cyc_fprintf(_tmp68,_tmp67,_tag_fat(_tmp8,sizeof(void*),2));});});
 # 80
 Cyc_fflush(Cyc_stderr);}
 # 82
@@ -464,7 +464,7 @@ JUST_AFTER_STAR:
 while(1){
 c=Cyc_fgetc(spec_file);
 if(c == -1){
-({struct Cyc_String_pa_PrintArg_struct _tmpE=({struct Cyc_String_pa_PrintArg_struct _tmp5A;_tmp5A.tag=0U,_tmp5A.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5A;});void*_tmpC[1U];_tmpC[0]=& _tmpE;({struct Cyc___cycFILE*_tmp6A=Cyc_stderr;struct _fat_ptr _tmp69=({const char*_tmpD="Error reading spec file %s: unexpected EOF\n";_tag_fat(_tmpD,sizeof(char),44U);});Cyc_fprintf(_tmp6A,_tmp69,_tag_fat(_tmpC,sizeof(void*),1U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmpE=({struct Cyc_String_pa_PrintArg_struct _tmp5A;_tmp5A.tag=0,_tmp5A.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5A;});void*_tmpC[1];_tmpC[0]=& _tmpE;({struct Cyc___cycFILE*_tmp6A=Cyc_stderr;struct _fat_ptr _tmp69=({const char*_tmpD="Error reading spec file %s: unexpected EOF\n";_tag_fat(_tmpD,sizeof(char),44U);});Cyc_fprintf(_tmp6A,_tmp69,_tag_fat(_tmpC,sizeof(void*),1));});});
 # 92
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}
@@ -476,7 +476,7 @@ break;}
 *((char*)_check_known_subscript_notnull(strname,256U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 256){
-({struct Cyc_String_pa_PrintArg_struct _tmp11=({struct Cyc_String_pa_PrintArg_struct _tmp5B;_tmp5B.tag=0U,_tmp5B.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5B;});void*_tmpF[1U];_tmpF[0]=& _tmp11;({struct Cyc___cycFILE*_tmp6C=Cyc_stderr;struct _fat_ptr _tmp6B=({const char*_tmp10="Error reading spec file %s: string name too long\n";_tag_fat(_tmp10,sizeof(char),50U);});Cyc_fprintf(_tmp6C,_tmp6B,_tag_fat(_tmpF,sizeof(void*),1U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmp11=({struct Cyc_String_pa_PrintArg_struct _tmp5B;_tmp5B.tag=0,_tmp5B.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5B;});void*_tmpF[1];_tmpF[0]=& _tmp11;({struct Cyc___cycFILE*_tmp6C=Cyc_stderr;struct _fat_ptr _tmp6B=({const char*_tmp10="Error reading spec file %s: string name too long\n";_tag_fat(_tmp10,sizeof(char),50U);});Cyc_fprintf(_tmp6C,_tmp6B,_tag_fat(_tmpF,sizeof(void*),1));});});
 # 105
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}}
@@ -503,9 +503,9 @@ if((c == -1 || c == (int)'\n')|| c == (int)'\r'){*((char*)_check_known_subscript
 *((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
-({struct Cyc_String_pa_PrintArg_struct _tmp19=({struct Cyc_String_pa_PrintArg_struct _tmp5D;_tmp5D.tag=0U,_tmp5D.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5D;});struct Cyc_String_pa_PrintArg_struct _tmp1A=({struct Cyc_String_pa_PrintArg_struct _tmp5C;_tmp5C.tag=0U,({
+({struct Cyc_String_pa_PrintArg_struct _tmp19=({struct Cyc_String_pa_PrintArg_struct _tmp5D;_tmp5D.tag=0,_tmp5D.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp5D;});struct Cyc_String_pa_PrintArg_struct _tmp1A=({struct Cyc_String_pa_PrintArg_struct _tmp5C;_tmp5C.tag=0,({
 # 131
-struct _fat_ptr _tmp72=(struct _fat_ptr)_tag_fat(strname,sizeof(char),256U);_tmp5C.f1=_tmp72;});_tmp5C;});void*_tmp17[2U];_tmp17[0]=& _tmp19,_tmp17[1]=& _tmp1A;({struct Cyc___cycFILE*_tmp74=Cyc_stderr;struct _fat_ptr _tmp73=({const char*_tmp18="Error reading spec file %s: value of %s too long\n";_tag_fat(_tmp18,sizeof(char),50U);});Cyc_fprintf(_tmp74,_tmp73,_tag_fat(_tmp17,sizeof(void*),2U));});});
+struct _fat_ptr _tmp72=(struct _fat_ptr)_tag_fat(strname,sizeof(char),256U);_tmp5C.f1=_tmp72;});_tmp5C;});void*_tmp17[2];_tmp17[0]=& _tmp19,_tmp17[1]=& _tmp1A;({struct Cyc___cycFILE*_tmp74=Cyc_stderr;struct _fat_ptr _tmp73=({const char*_tmp18="Error reading spec file %s: value of %s too long\n";_tag_fat(_tmp18,sizeof(char),50U);});Cyc_fprintf(_tmp74,_tmp73,_tag_fat(_tmp17,sizeof(void*),2));});});
 Cyc_fflush(Cyc_stderr);
 goto CLEANUP_AND_RETURN;}}
 # 137
@@ -561,15 +561,15 @@ if(j < 4096)
 l=({struct Cyc_List_List*_tmp22=_cycalloc(sizeof(*_tmp22));({struct _fat_ptr*_tmp7C=({struct _fat_ptr*_tmp21=_cycalloc(sizeof(*_tmp21));({struct _fat_ptr _tmp7B=(struct _fat_ptr)Cyc_strdup(_tag_fat(buf,sizeof(char),4096U));*_tmp21=_tmp7B;});_tmp21;});_tmp22->hd=_tmp7C;}),_tmp22->tl=l;_tmp22;});}
 # 192
 DONE:
- l=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(l);
+ l=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(l);
 l=({struct Cyc_List_List*_tmp25=_cycalloc(sizeof(*_tmp25));({struct _fat_ptr*_tmp7E=({struct _fat_ptr*_tmp24=_cycalloc(sizeof(*_tmp24));({struct _fat_ptr _tmp7D=({const char*_tmp23="";_tag_fat(_tmp23,sizeof(char),1U);});*_tmp24=_tmp7D;});_tmp24;});_tmp25->hd=_tmp7E;}),_tmp25->tl=l;_tmp25;});{
-struct _fat_ptr _tmp26=((struct _fat_ptr(*)(struct Cyc_List_List*x))Cyc_List_to_array)(l);struct _fat_ptr ptrarray=_tmp26;
+struct _fat_ptr _tmp26=((struct _fat_ptr(*)(struct Cyc_List_List*))Cyc_List_to_array)(l);struct _fat_ptr ptrarray=_tmp26;
 struct _fat_ptr _tmp27=({unsigned _tmp29=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));struct _fat_ptr*_tmp28=_cycalloc(_check_times(_tmp29,sizeof(struct _fat_ptr)));({{unsigned _tmp5E=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));unsigned k;for(k=0;k < _tmp5E;++ k){_tmp28[k]=*((struct _fat_ptr**)ptrarray.curr)[(int)k];}}0;});_tag_fat(_tmp28,sizeof(struct _fat_ptr),_tmp29);});struct _fat_ptr result=_tmp27;
 return result;}}}
 # 200
 struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*specs,struct _fat_ptr spec_name){
 struct _handler_cons _tmp2A;_push_handler(& _tmp2A);{int _tmp2C=0;if(setjmp(_tmp2A.handler))_tmp2C=1;if(!_tmp2C){
-{struct _fat_ptr _tmp2D=*((struct _fat_ptr*(*)(int(*cmp)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*l,struct _fat_ptr*x))Cyc_List_assoc_cmp)(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0U);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found){_LL1: _LL2:
+{struct _fat_ptr _tmp2D=*((struct _fat_ptr*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_assoc_cmp)(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found){_LL1: _LL2:
 # 205
  return _tag_fat(0,0,0);}else{_LL3: _tmp2F=_tmp2E;_LL4: {void*exn=_tmp2F;(int)_rethrow(exn);}}_LL0:;}}}
 # 209
@@ -579,11 +579,11 @@ struct _fat_ptr Cyc_Specsfile_def_lib_path={(void*)0,(void*)0,(void*)(0 + 0)};
 static struct Cyc_List_List*Cyc_Specsfile_also_subdir(struct Cyc_List_List*dirs,struct _fat_ptr subdir){
 # 216
 struct Cyc_List_List*_tmp30=0;struct Cyc_List_List*l=_tmp30;
-for(0;dirs != 0;dirs=dirs->tl){
+for(1;dirs != 0;dirs=dirs->tl){
 l=({struct Cyc_List_List*_tmp31=_cycalloc(sizeof(*_tmp31));_tmp31->hd=(struct _fat_ptr*)dirs->hd,_tmp31->tl=l;_tmp31;});
 l=({struct Cyc_List_List*_tmp33=_cycalloc(sizeof(*_tmp33));({struct _fat_ptr*_tmp80=({struct _fat_ptr*_tmp32=_cycalloc(sizeof(*_tmp32));({struct _fat_ptr _tmp7F=(struct _fat_ptr)Cyc_Filename_concat(*((struct _fat_ptr*)dirs->hd),subdir);*_tmp32=_tmp7F;});_tmp32;});_tmp33->hd=_tmp80;}),_tmp33->tl=l;_tmp33;});}
 # 221
-l=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(l);
+l=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(l);
 return l;}
 # 236 "specsfile.cyc"
 struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*specs,void(*anonfun)(struct _fat_ptr),int(*anonflagfun)(struct _fat_ptr),struct _fat_ptr errmsg,struct _fat_ptr argv){
@@ -624,7 +624,7 @@ if(Cyc_strlen((struct _fat_ptr)Cyc_Specsfile_def_lib_path)> (unsigned long)0)
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp40=_cycalloc(sizeof(*_tmp40));
 ({struct _fat_ptr*_tmp8E=({struct _fat_ptr*_tmp3F=_cycalloc(sizeof(*_tmp3F));({struct _fat_ptr _tmp8D=(struct _fat_ptr)({struct _fat_ptr _tmp8C=Cyc_Specsfile_def_lib_path;Cyc_Filename_concat(_tmp8C,({const char*_tmp3E="cyc-lib";_tag_fat(_tmp3E,sizeof(char),8U);}));});*_tmp3F=_tmp8D;});_tmp3F;});_tmp40->hd=_tmp8E;}),_tmp40->tl=Cyc_Specsfile_cyclone_exec_path;_tmp40;});
 # 295
-Cyc_Specsfile_cyclone_exec_path=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_Specsfile_cyclone_exec_path);
+Cyc_Specsfile_cyclone_exec_path=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(Cyc_Specsfile_cyclone_exec_path);
 Cyc_Specsfile_cyclone_arch_path=Cyc_Specsfile_also_subdir(Cyc_Specsfile_cyclone_exec_path,Cyc_Specsfile_target_arch);
 return otherargs;}}}
 # 301
@@ -636,7 +636,7 @@ Cyc_fclose(f);return 1;}}
 # 310
 static struct _fat_ptr*Cyc_Specsfile_find(struct Cyc_List_List*dirs,struct _fat_ptr file){
 if(({char*_tmp90=(char*)file.curr;_tmp90 == (char*)(_tag_fat(0,0,0)).curr;}))return 0;
-for(0;dirs != 0;dirs=dirs->tl){
+for(1;dirs != 0;dirs=dirs->tl){
 struct _fat_ptr _tmp4D=*((struct _fat_ptr*)dirs->hd);struct _fat_ptr dir=_tmp4D;
 if(({char*_tmp91=(char*)dir.curr;_tmp91 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== (unsigned long)0)continue;{
 struct _fat_ptr s=(struct _fat_ptr)Cyc_Filename_concat(dir,file);
@@ -646,7 +646,7 @@ return 0;}
 # 322
 static struct _fat_ptr Cyc_Specsfile_sprint_list(struct Cyc_List_List*dirs){
 struct _fat_ptr tmp=({const char*_tmp51="";_tag_fat(_tmp51,sizeof(char),1U);});
-for(0;dirs != 0;dirs=dirs->tl){
+for(1;dirs != 0;dirs=dirs->tl){
 struct _fat_ptr _tmp4F=*((struct _fat_ptr*)dirs->hd);struct _fat_ptr dir=_tmp4F;
 if(({char*_tmp92=(char*)dir.curr;_tmp92 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== (unsigned long)0)continue;
 dir=(struct _fat_ptr)({struct _fat_ptr _tmp93=(struct _fat_ptr)dir;Cyc_strconcat(_tmp93,({const char*_tmp50=":";_tag_fat(_tmp50,sizeof(char),2U);}));});
@@ -657,8 +657,8 @@ return tmp;}
 static struct _fat_ptr Cyc_Specsfile_do_find(struct Cyc_List_List*dirs,struct _fat_ptr file){
 struct _fat_ptr*_tmp52=Cyc_Specsfile_find(dirs,file);struct _fat_ptr*f=_tmp52;
 if(f == 0){
-({struct Cyc_String_pa_PrintArg_struct _tmp55=({struct Cyc_String_pa_PrintArg_struct _tmp63;_tmp63.tag=0U,_tmp63.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp63;});struct Cyc_String_pa_PrintArg_struct _tmp56=({struct Cyc_String_pa_PrintArg_struct _tmp62;_tmp62.tag=0U,({
-struct _fat_ptr _tmp94=(struct _fat_ptr)((struct _fat_ptr)Cyc_Specsfile_sprint_list(dirs));_tmp62.f1=_tmp94;});_tmp62;});void*_tmp53[2U];_tmp53[0]=& _tmp55,_tmp53[1]=& _tmp56;({struct Cyc___cycFILE*_tmp96=Cyc_stderr;struct _fat_ptr _tmp95=({const char*_tmp54="Error: can't find internal compiler file %s in path %s\n";_tag_fat(_tmp54,sizeof(char),56U);});Cyc_fprintf(_tmp96,_tmp95,_tag_fat(_tmp53,sizeof(void*),2U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmp55=({struct Cyc_String_pa_PrintArg_struct _tmp63;_tmp63.tag=0,_tmp63.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp63;});struct Cyc_String_pa_PrintArg_struct _tmp56=({struct Cyc_String_pa_PrintArg_struct _tmp62;_tmp62.tag=0,({
+struct _fat_ptr _tmp94=(struct _fat_ptr)((struct _fat_ptr)Cyc_Specsfile_sprint_list(dirs));_tmp62.f1=_tmp94;});_tmp62;});void*_tmp53[2];_tmp53[0]=& _tmp55,_tmp53[1]=& _tmp56;({struct Cyc___cycFILE*_tmp96=Cyc_stderr;struct _fat_ptr _tmp95=({const char*_tmp54="Error: can't find internal compiler file %s in path %s\n";_tag_fat(_tmp54,sizeof(char),56U);});Cyc_fprintf(_tmp96,_tmp95,_tag_fat(_tmp53,sizeof(void*),2));});});
 Cyc_fflush(Cyc_stderr);
 return _tag_fat(0,0,0);}
 # 341

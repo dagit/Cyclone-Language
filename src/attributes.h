@@ -21,6 +21,33 @@
 #include "absyn.h"
 namespace Atts {
   using Absyn;
+
+  extern_datacon(Attribute,Stdcall_att);      
+  extern_datacon(Attribute,Cdecl_att);        
+  extern_datacon(Attribute,Fastcall_att);
+  extern_datacon(Attribute,Noreturn_att);     
+  extern_datacon(Attribute,Const_att);
+  extern_datacon(Attribute,Packed_att);
+  extern_datacon(Attribute,Nocommon_att);
+  extern_datacon(Attribute,Shared_att);
+  extern_datacon(Attribute,Unused_att);
+  extern_datacon(Attribute,Weak_att);
+  extern_datacon(Attribute,Dllimport_att);
+  extern_datacon(Attribute,Dllexport_att);
+  extern_datacon(Attribute,No_instrument_function_att);
+  extern_datacon(Attribute,Constructor_att);
+  extern_datacon(Attribute,Destructor_att);
+  extern_datacon(Attribute,No_check_memory_usage_att);
+  extern_datacon(Attribute,Pure_att);
+  extern_datacon(Attribute,Always_inline_att);
+  extern_datacon(Attribute,No_throw_att);
+
+  // parsing: locations just in case of errors
+attribute_t parse_nullary_att(seg_t, string_t);
+attribute_t parse_unary_att(seg_t sloc, string_t s, seg_t eloc, exp_t e);
+attribute_t parse_format_att(seg_t loc, seg_t s2loc, string_t s1, string_t s2, 
+			     unsigned u1, unsigned u2);
+
 // does the function (or fn pointer) type have the "noreturn" attribute?
 bool is_noreturn_fn_type(type_t);
 // are the lists of attributes the same?  doesn't require the same order

@@ -43,7 +43,7 @@ struct Jump_Anal_Result {
 };
 typedef struct Jump_Anal_Result @jump_anal_res_t;
 
-jump_anal_res_t jump_analysis(list_t<decl_t,`H> tds);
+jump_anal_res_t jump_analysis(list_t<decl_t,`H>);
 
 }
 #endif

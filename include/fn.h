@@ -15,8 +15,6 @@
    License along with this library; see the file COPYING.LIB.  If not,
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
-
-
 #ifndef _FN_H_
 #define _FN_H_
 
@@ -35,7 +33,7 @@ namespace Fn {
        type, but you need them to have the same type; you can do this
        by hiding the environment from the type of the pair. */
 
-extern struct Function<`arg,`res,`bd::R> { <`env::B> : regions(`env) > `bd
+extern struct Function<`arg,`res,`bd> { <`env> : regions(`env) > `bd
   `res (@`bd f)(`env,`arg);
   `env env;
 };
@@ -51,11 +49,11 @@ extern fn_t<`arg,`res,`bd> make_fn(`res (@`bd f)(`env,`arg),`env x :regions(`env
 extern fn_t<`arg,`res,`bd> fp2fn(`res (@`bd f)(`arg) : regions($(`arg,`res)) > `bd);
   /** [fp2fn(f)] converts a function pointer to a closure. */
 
-extern `res apply(fn_t<`arg,`res> f, `arg x);
+extern `res apply(fn_t<`arg,`res>, `arg);
   /** [apply(f,x)] applies closure [f] to argument [x] (taking care of
       the hidden environment in the process). */
 
-extern fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd> g, fn_t<`b,`c,`bd> f 
+extern fn_t<`a,`c,`bd> compose(fn_t<`a,`b,`bd>, fn_t<`b,`c,`bd> 
 			       : regions($(`a,`b,`c)) > `bd);
   /** [compose(g,f)] returns the composition of closures [f] and [g];
       [apply(compose(g,f),x)] has the same effect as
@@ -74,7 +72,7 @@ extern fn_t<$(`a,`b)@,`c,`bd> uncurry(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f
       if [x] points to a pair [\$(x1,x2)], then [apply(uncurry(f),x)]
       has the same effect as [apply(apply(f,x1),x2)]. */
 
-extern List::list_t<`b> map_fn(fn_t<`a,`b> f,List::list_t<`a> x);
+extern List::list_t<`b> map_fn(fn_t<`a,`b>,List::list_t<`a>);
   /** [map_fn(f,x)] maps the closure [f] on the list [x]: if [x] has
       elements [x1] through [xn], then [map_fn(f,x)] returns a new
       heap-allocated list with elements [apply(f,x1)] through

@@ -25,6 +25,120 @@ using List;
 using Absyn;
 namespace Atts;
 
+datacon(Attribute,Stdcall_att);      
+datacon(Attribute,Cdecl_att);        
+datacon(Attribute,Fastcall_att);
+datacon(Attribute,Noreturn_att);     
+datacon(Attribute,Const_att);
+datacon(Attribute,Packed_att);
+datacon(Attribute,Nocommon_att);
+datacon(Attribute,Shared_att);
+datacon(Attribute,Unused_att);
+datacon(Attribute,Weak_att);
+datacon(Attribute,Dllimport_att);
+datacon(Attribute,Dllexport_att);
+datacon(Attribute,No_instrument_function_att);
+datacon(Attribute,Constructor_att);
+datacon(Attribute,Destructor_att);
+datacon(Attribute,No_check_memory_usage_att);
+datacon(Attribute,Pure_att);
+datacon(Attribute,Always_inline_att);
+datacon(Attribute,No_throw_att);
+
+static attribute_t bad_attribute(seg_t loc) {
+  Warn::err(loc,"unrecognized attribute");
+  return &Atts::Cdecl_att_val; // just return something
+}
+
+attribute_t parse_nullary_att(seg_t loc, string_t s) {
+  static datatype Attribute.Aligned_att att_aligned = Aligned_att(NULL);
+  static $(string_t,datatype Attribute @) att_map[] = {
+    $("stdcall", &Atts::Stdcall_att_val),
+    $("cdecl", &Atts::Cdecl_att_val),
+    $("fastcall", &Atts::Fastcall_att_val),
+    $("noreturn", &Atts::Noreturn_att_val),
+    $("const", &Atts::Const_att_val), // a keyword, but __const__ possible
+    $("aligned", (datatype Attribute @)&att_aligned), // WARNING: sharing!
+    $("packed", &Atts::Packed_att_val),
+    $("shared", &Atts::Shared_att_val),
+    $("unused", &Atts::Unused_att_val),
+    $("weak", &Atts::Weak_att_val),
+    $("dllimport", &Atts::Dllimport_att_val),
+    $("dllexport", &Atts::Dllexport_att_val),
+    $("no_instrument_function", &Atts::No_instrument_function_att_val),
+    $("constructor", &Atts::Constructor_att_val),
+    $("destructor", &Atts::Destructor_att_val),
+    $("no_check_memory_usage", &Atts::No_check_memory_usage_att_val),
+    $("pure",&Atts::Pure_att_val),
+    $("always_inline",&Atts::Always_inline_att_val),
+    $("no_throw",&Atts::No_throw_att_val)
+    };
+  // drop the surrounding __ in s, if it's there
+  if(numelts(s) > 4 && s[0]=='_' && s[1]=='_'
+     && s[numelts(s)-2]=='_' && s[numelts(s)-3]=='_')
+    s = substring(s,2,numelts(s)-5);
+  int i=0;
+  for(; i < numelts(att_map); ++i)
+    if(strcmp(s,att_map[i][0]) == 0)
+      return att_map[i][1];
+  return bad_attribute(loc);
+}
+
+static int exp2int(seg_t loc, exp_t e) {
+  switch (e->r) {
+  case &Const_e({.Int_c = $(_,i)}): return i;
+  default: 
+    Warn::err(loc,"expecting integer constant");
+    return 0;
+  }
+}
+static string_t exp2string(seg_t loc, exp_t e) {
+  switch (e->r) {
+  case &Const_e({.String_c = s}): return s;
+  default: 
+    Warn::err(loc,"expecting string constant");
+    return NULL;
+  }
+}
+
+attribute_t parse_unary_att(seg_t sloc, string_t s, seg_t eloc, exp_t e) {
+  attribute_t a;
+  if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0)
+    return new Aligned_att(e);
+  if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
+    return new Section_att(exp2string(eloc,e));
+  if (zstrcmp(s,"__mode__") == 0)
+    return new Mode_att(exp2string(eloc,e));
+  if (zstrcmp(s,"alias") == 0)
+    return new Alias_att(exp2string(eloc,e));
+  int n = exp2int(eloc,e);
+  if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
+    if (n < 0 || n > 3) 
+      Warn::err(eloc,"regparm requires value between 0 and 3");
+    return new Regparm_att(n);
+  } 
+  if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) 
+    return new Initializes_att(n);
+  if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0)
+    return new Noliveunique_att(n);
+  if(zstrcmp(s,"consume")==0 || zstrcmp(s,"__consume__")==0) 
+    return new Consume_att(n);
+  Warn::err(sloc,"unrecognized attribute");
+  return bad_attribute(sloc);
+}
+
+attribute_t parse_format_att(seg_t loc, seg_t s2loc, string_t s1, string_t s2, 
+			     unsigned u1, unsigned u2) {
+  if (!(zstrcmp(s1,"format") == 0) && !(zstrcmp(s1,"__format__") == 0))
+    return bad_attribute(loc);
+  if (zstrcmp(s2,"printf") == 0 || zstrcmp(s2,"__printf__") == 0)
+    return new Format_att(Printf_ft,u1,u2);
+  if (zstrcmp(s2,"scanf") == 0 || zstrcmp(s2,"__scanf__") == 0)
+    return new Format_att(Scanf_ft,u1,u2);
+  Warn::err(loc,"unrecognized format type");
+  return &Atts::Cdecl_att_val; // just return something
+}
+
 // returns true when a function type or pointer to a function includes
 // the noreturn attribute.
 bool is_noreturn_fn_type(type_t t) {

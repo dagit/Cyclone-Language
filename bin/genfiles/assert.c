@@ -381,7 +381,7 @@ extern void exit(int);struct Cyc_timeval{long tv_sec;long tv_usec;};
 # 26 "assert.cyc"
 void*Cyc___assert_fail(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line){
 # 30
-({struct Cyc_String_pa_PrintArg_struct _tmp2=({struct Cyc_String_pa_PrintArg_struct _tmp7;_tmp7.tag=0U,_tmp7.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp7;});struct Cyc_Int_pa_PrintArg_struct _tmp3=({struct Cyc_Int_pa_PrintArg_struct _tmp6;_tmp6.tag=1U,_tmp6.f1=line;_tmp6;});struct Cyc_String_pa_PrintArg_struct _tmp4=({struct Cyc_String_pa_PrintArg_struct _tmp5;_tmp5.tag=0U,_tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)assertion);_tmp5;});void*_tmp0[3U];_tmp0[0]=& _tmp2,_tmp0[1]=& _tmp3,_tmp0[2]=& _tmp4;({struct Cyc___cycFILE*_tmp9=Cyc_stderr;struct _fat_ptr _tmp8=({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_fat(_tmp1,sizeof(char),31U);});Cyc_fprintf(_tmp9,_tmp8,_tag_fat(_tmp0,sizeof(void*),3U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmp2=({struct Cyc_String_pa_PrintArg_struct _tmp7;_tmp7.tag=0,_tmp7.f1=(struct _fat_ptr)((struct _fat_ptr)file);_tmp7;});struct Cyc_Int_pa_PrintArg_struct _tmp3=({struct Cyc_Int_pa_PrintArg_struct _tmp6;_tmp6.tag=1,_tmp6.f1=line;_tmp6;});struct Cyc_String_pa_PrintArg_struct _tmp4=({struct Cyc_String_pa_PrintArg_struct _tmp5;_tmp5.tag=0,_tmp5.f1=(struct _fat_ptr)((struct _fat_ptr)assertion);_tmp5;});void*_tmp0[3];_tmp0[0]=& _tmp2,_tmp0[1]=& _tmp3,_tmp0[2]=& _tmp4;({struct Cyc___cycFILE*_tmp9=Cyc_stderr;struct _fat_ptr _tmp8=({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_fat(_tmp1,sizeof(char),31U);});Cyc_fprintf(_tmp9,_tmp8,_tag_fat(_tmp0,sizeof(void*),3));});});
 # 32
 Cyc_fflush(Cyc_stderr);
 exit(- 1);}

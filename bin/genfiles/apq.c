@@ -374,23 +374,23 @@ extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);struct Cyc_S
 extern struct Cyc_AP_T*Cyc_AP_zero;
 extern struct Cyc_AP_T*Cyc_AP_one;
 # 10
-extern struct Cyc_AP_T*Cyc_AP_fromint(long x);
-extern struct Cyc_AP_T*Cyc_AP_fromstr(const char*str,int base);
+extern struct Cyc_AP_T*Cyc_AP_fromint(long);
+extern struct Cyc_AP_T*Cyc_AP_fromstr(const char*,int);
 # 13
-extern char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base);
-extern struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x);
-extern struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x);
-extern struct Cyc_AP_T*Cyc_AP_add(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-extern struct Cyc_AP_T*Cyc_AP_sub(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-extern struct Cyc_AP_T*Cyc_AP_mul(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-extern struct Cyc_AP_T*Cyc_AP_div(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
+extern char*Cyc_AP_tostr(struct Cyc_AP_T*,int);
+extern struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_add(struct Cyc_AP_T*,struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_sub(struct Cyc_AP_T*,struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_mul(struct Cyc_AP_T*,struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_div(struct Cyc_AP_T*,struct Cyc_AP_T*);
 # 32
-extern int Cyc_AP_cmp(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
+extern int Cyc_AP_cmp(struct Cyc_AP_T*,struct Cyc_AP_T*);
 # 34
-extern struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-extern struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
+extern struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*,struct Cyc_AP_T*);
+extern struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*,struct Cyc_AP_T*);
 # 7 "apq.h"
-struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*n,struct Cyc_AP_T*d);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
+struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*,struct Cyc_AP_T*);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
 # 13 "apq.cyc"
 struct Cyc_APQ_T*Cyc_reduce(struct Cyc_APQ_T*q){
 if(Cyc_AP_cmp(((struct Cyc_APQ_T*)_check_null(q))->d,Cyc_AP_zero)< 0){
@@ -435,7 +435,7 @@ return Cyc_reduce(q);}
 struct _fat_ptr Cyc_APQ_tostr(struct Cyc_APQ_T*q,int base){
 if(Cyc_AP_cmp(((struct Cyc_APQ_T*)_check_null(q))->d,Cyc_AP_one)== 0)
 return({char*_tmp6=Cyc_AP_tostr(q->n,base);_tag_fat(_tmp6,sizeof(char),_get_zero_arr_size_char((void*)_tmp6,1U));});
-return({struct Cyc_String_pa_PrintArg_struct _tmp9=({struct Cyc_String_pa_PrintArg_struct _tmp19;_tmp19.tag=0U,({struct _fat_ptr _tmp23=(struct _fat_ptr)({char*_tmpC=Cyc_AP_tostr(q->n,base);_tag_fat(_tmpC,sizeof(char),_get_zero_arr_size_char((void*)_tmpC,1U));});_tmp19.f1=_tmp23;});_tmp19;});struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp18;_tmp18.tag=0U,({struct _fat_ptr _tmp24=(struct _fat_ptr)({char*_tmpB=Cyc_AP_tostr(q->d,base);_tag_fat(_tmpB,sizeof(char),_get_zero_arr_size_char((void*)_tmpB,1U));});_tmp18.f1=_tmp24;});_tmp18;});void*_tmp7[2U];_tmp7[0]=& _tmp9,_tmp7[1]=& _tmpA;({struct _fat_ptr _tmp25=({const char*_tmp8="%s/%s";_tag_fat(_tmp8,sizeof(char),6U);});Cyc_aprintf(_tmp25,_tag_fat(_tmp7,sizeof(void*),2U));});});}
+return({struct Cyc_String_pa_PrintArg_struct _tmp9=({struct Cyc_String_pa_PrintArg_struct _tmp19;_tmp19.tag=0,({struct _fat_ptr _tmp23=(struct _fat_ptr)({char*_tmpC=Cyc_AP_tostr(q->n,base);_tag_fat(_tmpC,sizeof(char),_get_zero_arr_size_char((void*)_tmpC,1U));});_tmp19.f1=_tmp23;});_tmp19;});struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp18;_tmp18.tag=0,({struct _fat_ptr _tmp24=(struct _fat_ptr)({char*_tmpB=Cyc_AP_tostr(q->d,base);_tag_fat(_tmpB,sizeof(char),_get_zero_arr_size_char((void*)_tmpB,1U));});_tmp18.f1=_tmp24;});_tmp18;});void*_tmp7[2];_tmp7[0]=& _tmp9,_tmp7[1]=& _tmpA;({struct _fat_ptr _tmp25=({const char*_tmp8="%s/%s";_tag_fat(_tmp8,sizeof(char),6U);});Cyc_aprintf(_tmp25,_tag_fat(_tmp7,sizeof(void*),2));});});}
 # 64
 struct Cyc_APQ_T*Cyc_APQ_neg(struct Cyc_APQ_T*q){
 return({struct Cyc_AP_T*_tmp26=Cyc_AP_neg(((struct Cyc_APQ_T*)_check_null(q))->n);Cyc_APQ_fromAP(_tmp26,q->d);});}

@@ -72,8 +72,8 @@ struct Xdatatypefielddecl *
   // sort the list of fields, trying to merge the duplicate
   // *res is set to false if something's wrong
 List::list_t<datatypefield_t>
-sort_xdatatype_fields(List::list_t<datatypefield_t,`H> f, bool @ res,
-		      var_t v, seg_t, string_t * msg);
+sort_xdatatype_fields(List::list_t<datatypefield_t,`H>, bool @ res,
+		      var_t, seg_t, string_t * msg);
 }
 
 #endif /* _TCDECL_H_ */

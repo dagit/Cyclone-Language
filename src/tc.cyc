@@ -215,7 +215,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   // move any function type attributes into the function's type
   bool nothrow = List::mem(Atts::attribute_cmp,
 			   fd->i.attributes,
-			   &No_throw_att_val);
+			   &Atts::No_throw_att_val);
   fd->i.attributes = Atts::transfer_fn_type_atts(t,fd->i.attributes);
   Atts::fnTypeAttsOK(loc, t);
   

@@ -1,5 +1,5 @@
 /* Force left-to-right evaluation order.
-   Copyright (C) 2004 Michael Hicks.
+   Copyright (C) 2004 Michael Hicks, Dan Grossman
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it
@@ -80,17 +80,37 @@ static enum SideEffect fun_effect(qvar_t qv) {
   }
 }
 
-static enum SideEffect exp_effect(exp_t e);
-static enum SideEffect stmt_effect(stmt_t s);
+static enum SideEffect exp_effect(exp_t);
+static enum SideEffect stmt_effect(stmt_t);
 static enum SideEffect exps_effect(list_t<exp_t> es) {
   enum SideEffect res = Const;
-  for (_ x = es; x != NULL; x=x->tl) {
-    let eres = exp_effect(x->hd);
-    res = join_side_effect(eres,res);
-    if (res == AnyEffect)
-      return res;
-  }
+  for (; es != NULL && res != AnyEffect; es=es->tl) // stop early on AnyEffect
+    res = join_side_effect(exp_effect(es->hd),res);
   return res;
+}
+
+static `a unexpected_form(exp_t e) __attribute__((noreturn)) {
+  string_t bad_form;
+  switch(e->r) {
+  case &Pragma_e(...): bad_form = "Pragma_e"; break;
+  case &Throw_e(...): bad_form = "Throw_e"; break;
+  case &New_e(...): bad_form = "New_e"; break;
+  case &Tuple_e(...): bad_form = "Tuple_e"; break;
+  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
+  case &Array_e(...): bad_form = "Array_e"; break;
+  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
+  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
+  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
+  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
+  case &Datatype_e(...): bad_form = "Datatype_e"; break;
+  case &Malloc_e(...): bad_form = "Malloc_e"; break;
+  case &Swap_e(...): bad_form = "Swap_e"; break;
+  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
+  case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  case &Assert_e(...): bad_form = "Assert_e"; break;
+  default: bad_form = "huh??? Unexpected-form"; break;
+  }
+  Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
 
 // FIX: could use is_const_exp in Tcutil to better effect?
@@ -116,10 +136,7 @@ static enum SideEffect exp_effect(exp_t e) {
     default: return AnyEffect;
     }
     
-  case &UnresolvedMem_e(_,dles):
-    let $(_,es) = List::split(dles);
-    fallthru(es);
-
+  case &UnresolvedMem_e(_,dles): fallthru(map(snd,dles));
   case &Primop_e(_, es): return exps_effect(es);
 
   case &Conditional_e(e1,e2,e3): return exps_effect(list(e1,e2,e3));
@@ -141,28 +158,12 @@ static enum SideEffect exp_effect(exp_t e) {
 
   case &StmtExp_e(s): return stmt_effect(s);
 
-  case &Pragma_e(...): bad_form = "Pragma_e"; break;
-  case &Throw_e(...): bad_form = "Throw_e"; break;
-  case &New_e(...): bad_form = "New_e"; break;
-  case &Tuple_e(...): bad_form = "Tuple_e"; break;
-  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
-  case &Array_e(...): bad_form = "Array_e"; break;
-  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
-  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
-  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
-  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
-  case &Datatype_e(...): bad_form = "Datatype_e"; break;
-  case &Malloc_e(...): bad_form = "Malloc_e"; break;
-  case &Swap_e(...): bad_form = "Swap_e"; break;
-  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
-  case &Valueof_e(...): bad_form = "Valueof_e"; break;
-  case &Assert_e(...): bad_form = "Assert_e"; break;
+  default: unexpected_form(e);
   }
-  Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
 static enum SideEffect stmt_effect(stmt_t s) {
   enum SideEffect res = Const;
-  while(true) {
+  while(true)
     switch (s->r) {
     case &Skip_s:   return res;
     case &Exp_s(e): return join_side_effect(res,exp_effect(e));
@@ -185,7 +186,6 @@ static enum SideEffect stmt_effect(stmt_t s) {
     case &Switch_s(...): return AnyEffect;
     default: Warn::impos2("bad stmt after xlation to C");
     }
-  }
 }
 
 /* Runtime system functions introduced in toc.cyc are unresolved bindings;
@@ -197,8 +197,8 @@ static bool is_toc_var(exp_t e) {
   }
 }
 
-static void stmt_to_seqc(stmt_t s);
-static void exp_to_seqc(exp_t s);
+static void stmt_to_seqc(stmt_t);
+static void exp_to_seqc(exp_t);
 
 /* This takes a list of expressions [es] and reorders them to ensure
    left-to-right evaluation order.  This works by (1) creating a new
@@ -268,7 +268,6 @@ static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
 }
 
 static void exp_to_seqc(exp_t e) {
-  string_t bad_form;
   switch (e->r) {
   case &Const_e(_):
   case &Var_e(_): return;
@@ -308,38 +307,18 @@ static void exp_to_seqc(exp_t e) {
   case &AnonEnum_e(...):
   case &Enum_e(...): return;
 
-  case &UnresolvedMem_e(_,dles):
-    let $(_,es) = List::split(dles);
-    exps_to_seqc(e,es);
-    return;
+  case &UnresolvedMem_e(_,dles): exps_to_seqc(e,map(snd,dles)); return;
 
   case &StmtExp_e(s): stmt_to_seqc(s); return;
 
   case &Asm_e(...): return;
-
-  case &Pragma_e(...): bad_form = "Pragma_e"; break;
-  case &Throw_e(...): bad_form = "Throw_e"; break;
-  case &New_e(...): bad_form = "New_e"; break;
-  case &Tuple_e(...): bad_form = "Tuple_e"; break;
-  case &CompoundLit_e(...): bad_form = "CompoundLit_e"; break;
-  case &Array_e(...): bad_form = "Array_e"; break;
-  case &Comprehension_e(...): bad_form = "Comprehension_e"; break;
-  case &ComprehensionNoinit_e(...): bad_form = "ComprehensionNoinit_e"; break;
-  case &Aggregate_e(...): bad_form = "Aggregate_e"; break;
-  case &AnonStruct_e(...): bad_form = "AnonStruct_e"; break;
-  case &Datatype_e(...): bad_form = "Datatype_e"; break;
-  case &Malloc_e(...): bad_form = "Malloc_e"; break;
-  case &Swap_e(...): bad_form = "Swap_e"; break;
-  case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
-  case &Valueof_e(...): bad_form = "Valueof_e"; break;
-  case &Assert_e(...): bad_form = "Assert_e"; break;
+  default: unexpected_form(e);
   }
-  Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
 
 static void stmt_to_seqc(stmt_t s) {
   // This is just the recursive descent; we are not under a StmtExp.
-  while(true) {
+  while(true)
     switch (s->r) {
     case &Skip_s:         
     case &Break_s:    
@@ -388,7 +367,7 @@ static void stmt_to_seqc(stmt_t s) {
     case &Decl_s(d,s2):
       switch (d->r) {
       case &Var_d(vd):
-	if (vd->initializer != NULL) {
+	if (vd->initializer != NULL)
 	  // DJG: the aggregate-removal phase could make this unnecessary,
 	  // but it's unclear if that's the best thing to do
 	  switch (vd->initializer->r) {
@@ -404,8 +383,8 @@ static void stmt_to_seqc(stmt_t s) {
 	    //              {e1,e2} })
 	    // this form causes gcc to barf.
 	    case &UnresolvedMem_e(_,dles):
-	      let $(_,es) = List::split(dles);
-	      let laststmt = exps_to_seqc((exp_t)vd->initializer,es); 
+	      let laststmt = exps_to_seqc((exp_t)vd->initializer,
+					  map(snd,dles)); 
 	      // If nothing needed to be translated, then we're done
 	      if (laststmt == NULL) break;
 	      // Otherwise, vd->initializer is now of the form
@@ -436,7 +415,6 @@ static void stmt_to_seqc(stmt_t s) {
 	    exp_to_seqc((exp_t)vd->initializer); 
 	    break;
 	  }
-	}
 	s = s2;
 	continue;
       default: break;
@@ -444,25 +422,23 @@ static void stmt_to_seqc(stmt_t s) {
       fallthru;
     default: Warn::impos2("bad stmt after xlation to C");
     }
-  }
 }
 
 list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
-  let old_ds = ds;
-  for (; old_ds != NULL; old_ds = old_ds->tl)
+  for (let old_ds = ds; old_ds != NULL; old_ds = old_ds->tl)
     switch (old_ds->hd->r) {
     case &Fn_d(fd): 
-      if(fd->orig_scope == ExternC)
-	break;
-      stmt_to_seqc(fd->body); break;
+      if(fd->orig_scope != ExternC)
+	stmt_to_seqc(fd->body); 
+      break;
     case &Var_d(_):         
+    case &Aggr_d(_):
+    case &Enum_d(_):        
+    case &Typedef_d(_): break;
+    case &Datatype_d(_):
     case &Let_d(...): 
     case &Letv_d(_):        
     case &Region_d(...):
-    case &Aggr_d(_):
-    case &Datatype_d(_):
-    case &Enum_d(_):        
-    case &Typedef_d(_): break;
     case &Namespace_d(...):
     case &Using_d(...):
     case &ExternC_d(_):
