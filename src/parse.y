@@ -2299,12 +2299,10 @@ primary_expression:
 | '(' expression ')'
     { $$= $!2; }
 /* Cyc: stop instantiation */
-| qual_opt_identifier LEFT_RIGHT
-    { $$=^$(noinstantiate_exp(new_exp(new UnknownId_e($1), LOC(@1,@1)),
-			      LOC(@1,@2)));}
-| qual_opt_identifier '@' '<' type_name_list right_angle
-    { $$=^$(instantiate_exp(new_exp(new UnknownId_e($1),LOC(@1,@1)),
-			    List::imp_rev($4),LOC(@1,@5))); }
+| primary_expression LEFT_RIGHT
+    { $$=^$(noinstantiate_exp($1, LOC(@1,@2)));}
+| primary_expression '@' '<' type_name_list right_angle
+    { $$=^$(instantiate_exp($1, List::imp_rev($4),LOC(@1,@5))); }
 /* Cyc: tuple expressions */
 | '$' '(' argument_expression_list ')'
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }

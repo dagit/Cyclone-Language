@@ -16,11 +16,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-
 #ifndef _DICT_H_
 #define _DICT_H_
 
 #include <list.h>
+#include <iter.h>
 
 namespace Dict {
 
@@ -39,7 +39,7 @@ namespace Dict {
        Namespace Dict implements a superset of namespace SlowDict,
        except that [delete_present] is not supported. */
 
-  using List {
+using List;
 
 extern struct Dict<`a,`b,`r::R>;
 typedef struct Dict<`a,`b,`r> @`r dict_t<`a,`b,`r>;
@@ -63,8 +63,7 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int cmp(`a,`a));
     allocated in the region with handle [r]. */
 
 extern bool is_empty(dict_t d);
-/** [is_empty(d)] returns true if [d] is empty, and returns false
-    otherwise. */
+/** [is_empty(d)] returns true if [d] is empty, and returns false otherwise. */
 
 extern bool member(dict_t<`a> d,`a k);
 /** [member(d,k)] returns true if [k] is mapped to some value in [d],
@@ -210,10 +209,9 @@ extern bool forall_intersect(bool f(`a,`b,`b), dict_t<`a,`b> d1,
     is the value of [k] in [d1], and [v2] is the value of [k] in [d2];
     and it returns false otherwise.  */
 
-extern $(`a,`b)@ choose(dict_t<`a,`b> d);
+extern $(`a,`b)@`r rchoose(region_t<`r> r,dict_t<`a,`b> d);
 /** [choose(d)] returns a key/value pair from [d]; if [d] is empty,
-    [Absent] is thrown.  The resulting pair is allocated on the
-    heap. */
+    [Absent] is thrown. */
 extern $(`a,`b)@`r rchoose(region_t<`r>,dict_t<`a,`b> d);
 /** [rchoose(r,d)] is like [choose(d)], except the resulting pair is
     allocated in the region with handle [r]. */
@@ -269,5 +267,10 @@ extern dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r>, `a);
     resulting dictionary is allocated in the same region as the input
     dictionary [d].  This can be faster than [delete(d,k)] because it
     avoids a copy when [k] is not a member of [d]. */
-}}
+
+extern Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn, 
+						  dict_t<`a,`b,`r2> d);
+  /** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
+      is allocated in [rgn] where n is the number of elements in d*/
+}
 #endif

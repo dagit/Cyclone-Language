@@ -1161,10 +1161,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       curr = Set::insert(curr,init->hd);
     let delta = curr;
 
+    let sptr = new "";
     while (Set::cardinality(delta) > 0) {
       let next = emptyset;
-      for (let z = Set::elements(delta); z != NULL; z = z->tl)
-        next = Set::union_two(next,find(t,z->hd));
+      let iter = Set::make_iter(Core::heap_region,delta);
+      while(Iter::next(iter,&sptr))
+        next = Set::union_two(next,find(t,sptr));
       delta = Set::diff(next,curr);
       curr = Set::union_two(curr,delta);
     }

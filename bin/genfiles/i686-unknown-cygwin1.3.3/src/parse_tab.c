@@ -571,36 +571,40 @@ is_xtunion,struct Cyc_Position_Segment*loc);void*Cyc_Absyn_function_typ(struct C
 tvs,struct Cyc_Core_Opt*eff_typ,void*ret_typ,struct Cyc_List_List*args,int
 c_varargs,struct Cyc_Absyn_VarargInfo*cyc_varargs,struct Cyc_List_List*rgn_po,
 struct Cyc_List_List*);struct _tagged_arr Cyc_Absyn_attribute2string(void*);int Cyc_Absyn_fntype_att(
-void*a);struct Cyc_Set_Set;extern unsigned char Cyc_Set_Absent[11];struct Cyc_Dict_Dict;
-extern unsigned char Cyc_Dict_Present[12];extern unsigned char Cyc_Dict_Absent[11];
-struct Cyc_Tcenv_VarRes_struct{int tag;void*f1;};struct Cyc_Tcenv_AggrRes_struct{
-int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Tcenv_TunionRes_struct{int tag;
-struct Cyc_Absyn_Tuniondecl*f1;struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Tcenv_EnumRes_struct{
-int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_struct{
-int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_Genv{struct Cyc_Set_Set*
-namespaces;struct Cyc_Dict_Dict*aggrdecls;struct Cyc_Dict_Dict*tuniondecls;struct
-Cyc_Dict_Dict*enumdecls;struct Cyc_Dict_Dict*typedefs;struct Cyc_Dict_Dict*
-ordinaries;struct Cyc_List_List*availables;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Stmt_j_struct{
-int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Tcenv_Outermost_struct{int tag;void*f1;
-};struct Cyc_Tcenv_Frame_struct{int tag;void*f1;void*f2;};struct Cyc_Tcenv_Hidden_struct{
-int tag;void*f1;void*f2;};struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict*
-ae;struct Cyc_Core_Opt*le;};void Cyc_Tcutil_warn(struct Cyc_Position_Segment*,
-struct _tagged_arr fmt,struct _tagged_arr ap);void*Cyc_Tcutil_copy_type(void*t);void*
-Cyc_Tcutil_compress(void*t);void Cyc_Lex_register_typedef(struct _tuple1*s);void
-Cyc_Lex_enter_namespace(struct _tagged_arr*);void Cyc_Lex_leave_namespace();void
-Cyc_Lex_enter_using(struct _tuple1*);void Cyc_Lex_leave_using();struct Cyc_Parse_Signed_spec_struct{
-int tag;struct Cyc_Position_Segment*f1;};struct Cyc_Parse_Unsigned_spec_struct{int
-tag;struct Cyc_Position_Segment*f1;};struct Cyc_Parse_Short_spec_struct{int tag;
-struct Cyc_Position_Segment*f1;};struct Cyc_Parse_Long_spec_struct{int tag;struct
-Cyc_Position_Segment*f1;};struct Cyc_Parse_Type_spec_struct{int tag;void*f1;struct
-Cyc_Position_Segment*f2;};struct Cyc_Parse_Decl_spec_struct{int tag;struct Cyc_Absyn_Decl*
-f1;};struct Cyc_Parse_Declaration_spec{struct Cyc_Core_Opt*sc;struct Cyc_Absyn_Tqual
-tq;struct Cyc_List_List*type_specs;int is_inline;struct Cyc_List_List*attributes;};
-struct Cyc_Parse_Declarator{struct _tuple1*id;struct Cyc_List_List*tms;};struct Cyc_Parse_Abstractdeclarator{
-struct Cyc_List_List*tms;};struct _tuple4{void*f1;struct Cyc_Core_Opt*f2;};static
-struct _tuple4 Cyc_Parse_collapse_type_specifiers(struct Cyc_List_List*ts,struct Cyc_Position_Segment*
-loc);struct _tuple5{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;struct
-Cyc_List_List*f4;};static struct _tuple5 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual,
+void*a);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
+struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;extern unsigned char Cyc_Set_Absent[
+11];struct Cyc_Dict_Dict;extern unsigned char Cyc_Dict_Present[12];extern
+unsigned char Cyc_Dict_Absent[11];struct _tuple4{void*f1;void*f2;};struct _tuple4*
+Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple4*Cyc_Dict_rchoose(
+struct _RegionHandle*,struct Cyc_Dict_Dict*d);struct Cyc_Tcenv_VarRes_struct{int tag;
+void*f1;};struct Cyc_Tcenv_AggrRes_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};
+struct Cyc_Tcenv_TunionRes_struct{int tag;struct Cyc_Absyn_Tuniondecl*f1;struct Cyc_Absyn_Tunionfield*
+f2;};struct Cyc_Tcenv_EnumRes_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*
+f2;};struct Cyc_Tcenv_AnonEnumRes_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*
+f2;};struct Cyc_Tcenv_Genv{struct Cyc_Set_Set*namespaces;struct Cyc_Dict_Dict*
+aggrdecls;struct Cyc_Dict_Dict*tuniondecls;struct Cyc_Dict_Dict*enumdecls;struct
+Cyc_Dict_Dict*typedefs;struct Cyc_Dict_Dict*ordinaries;struct Cyc_List_List*
+availables;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Stmt_j_struct{int tag;struct Cyc_Absyn_Stmt*
+f1;};struct Cyc_Tcenv_Outermost_struct{int tag;void*f1;};struct Cyc_Tcenv_Frame_struct{
+int tag;void*f1;void*f2;};struct Cyc_Tcenv_Hidden_struct{int tag;void*f1;void*f2;};
+struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict*ae;struct Cyc_Core_Opt*
+le;};void Cyc_Tcutil_warn(struct Cyc_Position_Segment*,struct _tagged_arr fmt,struct
+_tagged_arr ap);void*Cyc_Tcutil_copy_type(void*t);void*Cyc_Tcutil_compress(void*t);
+void Cyc_Lex_register_typedef(struct _tuple1*s);void Cyc_Lex_enter_namespace(struct
+_tagged_arr*);void Cyc_Lex_leave_namespace();void Cyc_Lex_enter_using(struct
+_tuple1*);void Cyc_Lex_leave_using();struct Cyc_Parse_Signed_spec_struct{int tag;
+struct Cyc_Position_Segment*f1;};struct Cyc_Parse_Unsigned_spec_struct{int tag;
+struct Cyc_Position_Segment*f1;};struct Cyc_Parse_Short_spec_struct{int tag;struct
+Cyc_Position_Segment*f1;};struct Cyc_Parse_Long_spec_struct{int tag;struct Cyc_Position_Segment*
+f1;};struct Cyc_Parse_Type_spec_struct{int tag;void*f1;struct Cyc_Position_Segment*
+f2;};struct Cyc_Parse_Decl_spec_struct{int tag;struct Cyc_Absyn_Decl*f1;};struct Cyc_Parse_Declaration_spec{
+struct Cyc_Core_Opt*sc;struct Cyc_Absyn_Tqual tq;struct Cyc_List_List*type_specs;int
+is_inline;struct Cyc_List_List*attributes;};struct Cyc_Parse_Declarator{struct
+_tuple1*id;struct Cyc_List_List*tms;};struct Cyc_Parse_Abstractdeclarator{struct
+Cyc_List_List*tms;};struct _tuple5{void*f1;struct Cyc_Core_Opt*f2;};static struct
+_tuple5 Cyc_Parse_collapse_type_specifiers(struct Cyc_List_List*ts,struct Cyc_Position_Segment*
+loc);struct _tuple6{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;struct
+Cyc_List_List*f4;};static struct _tuple6 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual,
 void*,struct Cyc_List_List*,struct Cyc_List_List*);struct Cyc_Core_Opt*Cyc_Parse_lbuf=
 0;static struct Cyc_List_List*Cyc_Parse_parse_result=0;static void Cyc_Parse_err(
 struct _tagged_arr msg,struct Cyc_Position_Segment*sg){Cyc_Position_post_error(Cyc_Position_mk_err_parse(
@@ -620,12 +624,12 @@ _cycalloc(sizeof(*_tmp4));_tmp4[0]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_s
 _tmp6;_tmp6.tag=1;_tmp6.f1=(int)((unsigned int)Cyc_Parse_enum_counter ++);{void*
 _tmp5[1]={& _tmp6};Cyc_Std_aprintf(_tag_arr("__anonymous_enum_%d__",sizeof(
 unsigned char),22),_tag_arr(_tmp5,sizeof(void*),1));}});_tmp4;});_tmp3;});}
-struct _tuple6{struct _tuple1*f1;struct Cyc_Absyn_Tqual f2;void*f3;struct Cyc_List_List*
-f4;struct Cyc_List_List*f5;};struct _tuple7{struct _tuple6*f1;struct Cyc_Absyn_Exp*
+struct _tuple7{struct _tuple1*f1;struct Cyc_Absyn_Tqual f2;void*f3;struct Cyc_List_List*
+f4;struct Cyc_List_List*f5;};struct _tuple8{struct _tuple7*f1;struct Cyc_Absyn_Exp*
 f2;};static struct Cyc_Absyn_Aggrfield*Cyc_Parse_make_aggr_field(struct Cyc_Position_Segment*
-loc,struct _tuple7*field_info){struct _tuple7 _tmpA;struct _tuple6*_tmpB;struct
-_tuple6 _tmpC;struct _tuple1*_tmpD;struct Cyc_Absyn_Tqual _tmpE;void*_tmpF;struct Cyc_List_List*
-_tmp10;struct Cyc_List_List*_tmp11;struct Cyc_Absyn_Exp*_tmp12;struct _tuple7*_tmp9=
+loc,struct _tuple8*field_info){struct _tuple8 _tmpA;struct _tuple7*_tmpB;struct
+_tuple7 _tmpC;struct _tuple1*_tmpD;struct Cyc_Absyn_Tqual _tmpE;void*_tmpF;struct Cyc_List_List*
+_tmp10;struct Cyc_List_List*_tmp11;struct Cyc_Absyn_Exp*_tmp12;struct _tuple8*_tmp9=
 field_info;_tmpA=*_tmp9;_tmpB=_tmpA.f1;_tmpC=*_tmpB;_tmpD=_tmpC.f1;_tmpE=_tmpC.f2;
 _tmpF=_tmpC.f3;_tmp10=_tmpC.f4;_tmp11=_tmpC.f5;_tmp12=_tmpA.f2;if(_tmp10 != 0)Cyc_Parse_err(
 _tag_arr("bad type params in struct field",sizeof(unsigned char),32),loc);if(Cyc_Absyn_is_qvar_qualified(
@@ -647,9 +651,9 @@ void*)0:(void*)({struct Cyc_Absyn_Upper_b_struct*_tmp1B=_cycalloc(sizeof(*_tmp1B
 _tmp1B[0]=({struct Cyc_Absyn_Upper_b_struct _tmp1C;_tmp1C.tag=0;_tmp1C.f1=(struct
 Cyc_Absyn_Exp*)_check_null(_tmp19);_tmp1C;});_tmp1B;}));_LL3:;_LL4: return t;_LL0:;}
 static void Cyc_Parse_arg_array2ptr(struct _tuple2*x){(*x).f3=Cyc_Parse_array2ptr((*
-x).f3,1);}struct _tuple8{struct Cyc_Absyn_Tqual f1;void*f2;};static struct _tuple8*
+x).f3,1);}struct _tuple9{struct Cyc_Absyn_Tqual f1;void*f2;};static struct _tuple9*
 Cyc_Parse_get_tqual_typ(struct Cyc_Position_Segment*loc,struct _tuple2*t){return({
-struct _tuple8*_tmp1D=_cycalloc(sizeof(*_tmp1D));_tmp1D->f1=(*t).f2;_tmp1D->f2=(*
+struct _tuple9*_tmp1D=_cycalloc(sizeof(*_tmp1D));_tmp1D->f1=(*t).f2;_tmp1D->f2=(*
 t).f3;_tmp1D;});}static struct Cyc_Absyn_Vardecl*Cyc_Parse_decl2vardecl(struct Cyc_Absyn_Decl*
 d){void*_tmp1E=(void*)d->r;struct Cyc_Absyn_Vardecl*_tmp1F;_LL6: if(*((int*)_tmp1E)
 != 0)goto _LL8;_tmp1F=((struct Cyc_Absyn_Var_d_struct*)_tmp1E)->f1;_LL7: return
@@ -744,7 +748,7 @@ _tmp43);_tmp54.f2=0;_tmp54.f3=0;_tmp54.f4=0;_tmp54.f5=0;_tmp54;});_tmp53;}));
 _tmp52;});_tmp51;}));_tmp50->tl=0;_tmp50;});}_LL2A:;}goto _LL29;_LL28:;_LL29:
 return({struct Cyc_List_List*_tmp55=_cycalloc(sizeof(*_tmp55));_tmp55->hd=(void*)((
 void*)tms->hd);_tmp55->tl=Cyc_Parse_oldstyle2newstyle(tms->tl,tds,loc);_tmp55;});
-_LL25:;}}struct _tuple9{struct _tagged_arr*f1;struct Cyc_Absyn_Tqual f2;void*f3;};
+_LL25:;}}struct _tuple10{struct _tagged_arr*f1;struct Cyc_Absyn_Tqual f2;void*f3;};
 static struct Cyc_Absyn_Fndecl*Cyc_Parse_make_function(struct Cyc_Core_Opt*dso,
 struct Cyc_Parse_Declarator*d,struct Cyc_List_List*tds,struct Cyc_Absyn_Stmt*body,
 struct Cyc_Position_Segment*loc){if(tds != 0)d=({struct Cyc_Parse_Declarator*_tmp56=
@@ -759,9 +763,9 @@ Cyc_Parse_Declaration_spec*)dso->v)->sc))->v;_LL35: if((int)_tmp57 != 1)goto _LL
 _LL36: sc=(void*)3;goto _LL34;_LL37: if((int)_tmp57 != 3)goto _LL39;_LL38: sc=(void*)0;
 goto _LL34;_LL39:;_LL3A: Cyc_Parse_err(_tag_arr("bad storage class on function",
 sizeof(unsigned char),30),loc);goto _LL34;_LL34:;}}{void*_tmp59;struct Cyc_Core_Opt*
-_tmp5A;struct _tuple4 _tmp58=Cyc_Parse_collapse_type_specifiers(tss,loc);_tmp59=
+_tmp5A;struct _tuple5 _tmp58=Cyc_Parse_collapse_type_specifiers(tss,loc);_tmp59=
 _tmp58.f1;_tmp5A=_tmp58.f2;{struct Cyc_Absyn_Tqual _tmp5C;void*_tmp5D;struct Cyc_List_List*
-_tmp5E;struct Cyc_List_List*_tmp5F;struct _tuple5 _tmp5B=Cyc_Parse_apply_tms(tq,
+_tmp5E;struct Cyc_List_List*_tmp5F;struct _tuple6 _tmp5B=Cyc_Parse_apply_tms(tq,
 _tmp59,atts,d->tms);_tmp5C=_tmp5B.f1;_tmp5D=_tmp5B.f2;_tmp5E=_tmp5B.f3;_tmp5F=
 _tmp5B.f4;if(_tmp5A != 0)({void*_tmp60[0]={};Cyc_Tcutil_warn(loc,_tag_arr("nested type declaration within function prototype",
 sizeof(unsigned char),50),_tag_arr(_tmp60,sizeof(void*),0));});if(_tmp5E != 0)({
@@ -779,11 +783,11 @@ _tuple2 _tmp6F;struct Cyc_Core_Opt*_tmp70;struct Cyc_Absyn_Tqual _tmp71;void*_tm
 struct _tuple2*_tmp6E=(struct _tuple2*)_tmp6D->hd;_tmp6F=*_tmp6E;_tmp70=_tmp6F.f1;
 _tmp71=_tmp6F.f2;_tmp72=_tmp6F.f3;if(_tmp70 == 0){Cyc_Parse_err(_tag_arr("missing argument variable in function prototype",
 sizeof(unsigned char),48),loc);_tmp6C=({struct Cyc_List_List*_tmp73=_cycalloc(
-sizeof(*_tmp73));_tmp73->hd=({struct _tuple9*_tmp74=_cycalloc(sizeof(*_tmp74));
+sizeof(*_tmp73));_tmp73->hd=({struct _tuple10*_tmp74=_cycalloc(sizeof(*_tmp74));
 _tmp74->f1=_init_tag_arr(_cycalloc(sizeof(struct _tagged_arr)),"?",sizeof(
 unsigned char),2);_tmp74->f2=_tmp71;_tmp74->f3=_tmp72;_tmp74;});_tmp73->tl=
 _tmp6C;_tmp73;});}else{_tmp6C=({struct Cyc_List_List*_tmp76=_cycalloc(sizeof(*
-_tmp76));_tmp76->hd=({struct _tuple9*_tmp77=_cycalloc(sizeof(*_tmp77));_tmp77->f1=(
+_tmp76));_tmp76->hd=({struct _tuple10*_tmp77=_cycalloc(sizeof(*_tmp77));_tmp77->f1=(
 struct _tagged_arr*)_tmp70->v;_tmp77->f2=_tmp71;_tmp77->f3=_tmp72;_tmp77;});
 _tmp76->tl=_tmp6C;_tmp76;});}}}return({struct Cyc_Absyn_Fndecl*_tmp78=_cycalloc(
 sizeof(*_tmp78));_tmp78->sc=(void*)sc;_tmp78->name=d->id;_tmp78->tvs=_tmp64;
@@ -802,7 +806,7 @@ unsigned char _tmp7C[50]="type specifier includes more than one declaration";
 static struct _tagged_arr Cyc_Parse_msg3={_tmp7C,_tmp7C,_tmp7C + 50};static
 unsigned char _tmp7D[60]="sign specifier may appear only once within a type specifier";
 static struct _tagged_arr Cyc_Parse_msg4={_tmp7D,_tmp7D,_tmp7D + 60};static struct
-_tuple4 Cyc_Parse_collapse_type_specifiers(struct Cyc_List_List*ts,struct Cyc_Position_Segment*
+_tuple5 Cyc_Parse_collapse_type_specifiers(struct Cyc_List_List*ts,struct Cyc_Position_Segment*
 loc){struct Cyc_Core_Opt*declopt=0;int seen_type=0;int seen_sign=0;int seen_size=0;
 void*t=(void*)0;void*sz=(void*)2;void*sgn=(void*)0;struct Cyc_Position_Segment*
 last_loc=loc;for(0;ts != 0;ts=ts->tl){void*_tmp7E=(void*)ts->hd;void*_tmp7F;
@@ -886,20 +890,20 @@ if(_tmpA5 <= (void*)3?1:*((int*)_tmpA5)!= 6)goto _LL65;_LL64: t=(void*)({struct 
 _tmpA9=_cycalloc_atomic(sizeof(*_tmpA9));_tmpA9[0]=({struct Cyc_Absyn_DoubleType_struct
 _tmpAA;_tmpAA.tag=6;_tmpAA.f1=1;_tmpAA;});_tmpA9;});goto _LL60;_LL65:;_LL66: Cyc_Parse_err(
 _tag_arr("size qualifier on non-integral type",sizeof(unsigned char),36),
-last_loc);goto _LL60;_LL60:;}}return({struct _tuple4 _tmpAB;_tmpAB.f1=t;_tmpAB.f2=
+last_loc);goto _LL60;_LL60:;}}return({struct _tuple5 _tmpAB;_tmpAB.f1=t;_tmpAB.f2=
 declopt;_tmpAB;});}static struct Cyc_List_List*Cyc_Parse_apply_tmss(struct Cyc_Absyn_Tqual
 tq,void*t,struct Cyc_List_List*ds,struct Cyc_List_List*shared_atts){if(ds == 0)
 return 0;{struct Cyc_Parse_Declarator*_tmpAC=(struct Cyc_Parse_Declarator*)ds->hd;
 struct _tuple1*_tmpAD=_tmpAC->id;struct Cyc_Absyn_Tqual _tmpAF;void*_tmpB0;struct
-Cyc_List_List*_tmpB1;struct Cyc_List_List*_tmpB2;struct _tuple5 _tmpAE=Cyc_Parse_apply_tms(
+Cyc_List_List*_tmpB1;struct Cyc_List_List*_tmpB2;struct _tuple6 _tmpAE=Cyc_Parse_apply_tms(
 tq,t,shared_atts,_tmpAC->tms);_tmpAF=_tmpAE.f1;_tmpB0=_tmpAE.f2;_tmpB1=_tmpAE.f3;
 _tmpB2=_tmpAE.f4;return({struct Cyc_List_List*_tmpB3=_cycalloc(sizeof(*_tmpB3));
-_tmpB3->hd=({struct _tuple6*_tmpB4=_cycalloc(sizeof(*_tmpB4));_tmpB4->f1=_tmpAD;
+_tmpB3->hd=({struct _tuple7*_tmpB4=_cycalloc(sizeof(*_tmpB4));_tmpB4->f1=_tmpAD;
 _tmpB4->f2=_tmpAF;_tmpB4->f3=_tmpB0;_tmpB4->f4=_tmpB1;_tmpB4->f5=_tmpB2;_tmpB4;});
 _tmpB3->tl=Cyc_Parse_apply_tmss(_tmpAF,Cyc_Tcutil_copy_type(t),ds->tl,
-shared_atts);_tmpB3;});}}static struct _tuple5 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual
+shared_atts);_tmpB3;});}}static struct _tuple6 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual
 tq,void*t,struct Cyc_List_List*atts,struct Cyc_List_List*tms){if(tms == 0)return({
-struct _tuple5 _tmpB5;_tmpB5.f1=tq;_tmpB5.f2=t;_tmpB5.f3=0;_tmpB5.f4=atts;_tmpB5;});{
+struct _tuple6 _tmpB5;_tmpB5.f1=tq;_tmpB5.f2=t;_tmpB5.f3=0;_tmpB5.f4=atts;_tmpB5;});{
 void*_tmpB6=(void*)tms->hd;struct Cyc_Absyn_Exp*_tmpB7;void*_tmpB8;struct Cyc_List_List*
 _tmpB9;struct Cyc_Position_Segment*_tmpBA;void*_tmpBB;void*_tmpBC;struct Cyc_Absyn_Tqual
 _tmpBD;struct Cyc_Position_Segment*_tmpBE;struct Cyc_List_List*_tmpBF;_LL68: if((
@@ -941,7 +945,7 @@ _tagged_arr ap))Cyc_Parse_abort)(_tmpCA,_tag_arr("function declaration without p
 sizeof(unsigned char),45),_tag_arr(_tmpCF,sizeof(void*),0));});_LL74:;}_LL6E: if(
 _tmpB6 <= (void*)1?1:*((int*)_tmpB6)!= 3)goto _LL70;_tmpB9=((struct Cyc_Absyn_TypeParams_mod_struct*)
 _tmpB6)->f1;_tmpBA=((struct Cyc_Absyn_TypeParams_mod_struct*)_tmpB6)->f2;_LL6F:
-if(tms->tl == 0)return({struct _tuple5 _tmpD0;_tmpD0.f1=tq;_tmpD0.f2=t;_tmpD0.f3=
+if(tms->tl == 0)return({struct _tuple6 _tmpD0;_tmpD0.f1=tq;_tmpD0.f2=t;_tmpD0.f3=
 _tmpB9;_tmpD0.f4=atts;_tmpD0;});({void*_tmpD1[0]={};((int(*)(struct Cyc_Position_Segment*
 sg,struct _tagged_arr fmt,struct _tagged_arr ap))Cyc_Parse_abort)(_tmpBA,_tag_arr("type parameters must appear before function arguments in declarator",
 sizeof(unsigned char),68),_tag_arr(_tmpD1,sizeof(void*),0));});_LL70: if(_tmpB6 <= (
@@ -964,14 +968,14 @@ t,_tmpBC,tq),atts,tms->tl);_LL7E:;}_LL72: if(_tmpB6 <= (void*)1?1:*((int*)_tmpB6
 _tmpBF=((struct Cyc_Absyn_Attributes_mod_struct*)_tmpB6)->f2;_LL73: return Cyc_Parse_apply_tms(
 tq,t,Cyc_List_append(atts,_tmpBF),tms->tl);_LL67:;}}void*Cyc_Parse_speclist2typ(
 struct Cyc_List_List*tss,struct Cyc_Position_Segment*loc){void*_tmpDA;struct Cyc_Core_Opt*
-_tmpDB;struct _tuple4 _tmpD9=Cyc_Parse_collapse_type_specifiers(tss,loc);_tmpDA=
+_tmpDB;struct _tuple5 _tmpD9=Cyc_Parse_collapse_type_specifiers(tss,loc);_tmpDA=
 _tmpD9.f1;_tmpDB=_tmpD9.f2;if(_tmpDB != 0)({void*_tmpDC[0]={};Cyc_Tcutil_warn(loc,
 _tag_arr("ignoring nested type declaration(s) in specifier list",sizeof(
 unsigned char),54),_tag_arr(_tmpDC,sizeof(void*),0));});return _tmpDA;}static
 struct Cyc_Absyn_Decl*Cyc_Parse_v_typ_to_typedef(struct Cyc_Position_Segment*loc,
-struct _tuple6*t){struct _tuple6 _tmpDE;struct _tuple1*_tmpDF;struct Cyc_Absyn_Tqual
+struct _tuple7*t){struct _tuple7 _tmpDE;struct _tuple1*_tmpDF;struct Cyc_Absyn_Tqual
 _tmpE0;void*_tmpE1;struct Cyc_List_List*_tmpE2;struct Cyc_List_List*_tmpE3;struct
-_tuple6*_tmpDD=t;_tmpDE=*_tmpDD;_tmpDF=_tmpDE.f1;_tmpE0=_tmpDE.f2;_tmpE1=_tmpDE.f3;
+_tuple7*_tmpDD=t;_tmpDE=*_tmpDD;_tmpDF=_tmpDE.f1;_tmpE0=_tmpDE.f2;_tmpE1=_tmpDE.f3;
 _tmpE2=_tmpDE.f4;_tmpE3=_tmpDE.f5;Cyc_Lex_register_typedef(_tmpDF);if(_tmpE3 != 0)
 Cyc_Parse_err((struct _tagged_arr)({struct Cyc_Std_String_pa_struct _tmpE5;_tmpE5.tag=
 0;_tmpE5.f1=(struct _tagged_arr)Cyc_Absyn_attribute2string((void*)_tmpE3->hd);{
@@ -1007,8 +1011,8 @@ _LL85;_LL93: s=(void*)1;goto _LL85;_LL85:;}{struct Cyc_List_List*_tmpF2;struct C
 _tmpF3;struct _tuple0 _tmpF1=((struct _tuple0(*)(struct Cyc_List_List*x))Cyc_List_split)(
 ids);_tmpF2=_tmpF1.f1;_tmpF3=_tmpF1.f2;{int exps_empty=1;{struct Cyc_List_List*es=
 _tmpF3;for(0;es != 0;es=es->tl){if((struct Cyc_Absyn_Exp*)es->hd != 0){exps_empty=0;
-break;}}}{struct _tuple4 _tmpF4=Cyc_Parse_collapse_type_specifiers(_tmpEE,loc);if(
-_tmpF2 == 0){void*_tmpF6;struct Cyc_Core_Opt*_tmpF7;struct _tuple4 _tmpF5=_tmpF4;
+break;}}}{struct _tuple5 _tmpF4=Cyc_Parse_collapse_type_specifiers(_tmpEE,loc);if(
+_tmpF2 == 0){void*_tmpF6;struct Cyc_Core_Opt*_tmpF7;struct _tuple5 _tmpF5=_tmpF4;
 _tmpF6=_tmpF5.f1;_tmpF7=_tmpF5.f2;if(_tmpF7 != 0){struct Cyc_Absyn_Decl*d=(struct
 Cyc_Absyn_Decl*)_tmpF7->v;{void*_tmpF8=(void*)d->r;struct Cyc_Absyn_Enumdecl*
 _tmpF9;struct Cyc_Absyn_Aggrdecl*_tmpFA;struct Cyc_Absyn_Tuniondecl*_tmpFB;_LL95:
@@ -1085,7 +1089,7 @@ sizeof(unsigned char),19),loc);return 0;_LL9D:;}}else{void*t=_tmpF4.f1;struct Cy
 _tmp127=Cyc_Parse_apply_tmss(_tmpED,t,_tmpF2,_tmpEF);if(istypedef){if(!
 exps_empty)Cyc_Parse_err(_tag_arr("initializer in typedef declaration",sizeof(
 unsigned char),35),loc);{struct Cyc_List_List*decls=((struct Cyc_List_List*(*)(
-struct Cyc_Absyn_Decl*(*f)(struct Cyc_Position_Segment*,struct _tuple6*),struct Cyc_Position_Segment*
+struct Cyc_Absyn_Decl*(*f)(struct Cyc_Position_Segment*,struct _tuple7*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_v_typ_to_typedef,loc,
 _tmp127);if(_tmpF4.f2 != 0){struct Cyc_Absyn_Decl*d=(struct Cyc_Absyn_Decl*)(_tmpF4.f2)->v;{
 void*_tmp128=(void*)d->r;struct Cyc_Absyn_Aggrdecl*_tmp129;struct Cyc_Absyn_Tuniondecl*
@@ -1105,9 +1109,9 @@ sizeof(unsigned char),28),_tag_arr(_tmp12D,sizeof(void*),1));}}),loc);return
 decls;}}else{if(_tmpF4.f2 != 0)Cyc_Parse_unimp(_tag_arr("nested type declaration within declarator",
 sizeof(unsigned char),42),loc);{struct Cyc_List_List*decls=0;{struct Cyc_List_List*
 _tmp12F=_tmp127;for(0;_tmp12F != 0;(_tmp12F=_tmp12F->tl,_tmpF3=_tmpF3->tl)){
-struct _tuple6 _tmp131;struct _tuple1*_tmp132;struct Cyc_Absyn_Tqual _tmp133;void*
-_tmp134;struct Cyc_List_List*_tmp135;struct Cyc_List_List*_tmp136;struct _tuple6*
-_tmp130=(struct _tuple6*)_tmp12F->hd;_tmp131=*_tmp130;_tmp132=_tmp131.f1;_tmp133=
+struct _tuple7 _tmp131;struct _tuple1*_tmp132;struct Cyc_Absyn_Tqual _tmp133;void*
+_tmp134;struct Cyc_List_List*_tmp135;struct Cyc_List_List*_tmp136;struct _tuple7*
+_tmp130=(struct _tuple7*)_tmp12F->hd;_tmp131=*_tmp130;_tmp132=_tmp131.f1;_tmp133=
 _tmp131.f2;_tmp134=_tmp131.f3;_tmp135=_tmp131.f4;_tmp136=_tmp131.f5;if(_tmp135 != 
 0)({void*_tmp137[0]={};Cyc_Tcutil_warn(loc,_tag_arr("bad type params, ignoring",
 sizeof(unsigned char),26),_tag_arr(_tmp137,sizeof(void*),0));});if(_tmpF3 == 0)({
@@ -1165,23 +1169,23 @@ unsigned char Cyc_Exp_tok[12]="\000\000\000\000Exp_tok";struct Cyc_Exp_tok_struc
 unsigned char*tag;struct Cyc_Absyn_Exp*f1;};unsigned char Cyc_FieldPatternList_tok[
 25]="\000\000\000\000FieldPatternList_tok";struct Cyc_FieldPatternList_tok_struct{
 unsigned char*tag;struct Cyc_List_List*f1;};unsigned char Cyc_FieldPattern_tok[21]="\000\000\000\000FieldPattern_tok";
-struct _tuple10{struct Cyc_List_List*f1;struct Cyc_Absyn_Pat*f2;};struct Cyc_FieldPattern_tok_struct{
-unsigned char*tag;struct _tuple10*f1;};unsigned char Cyc_FnDecl_tok[15]="\000\000\000\000FnDecl_tok";
+struct _tuple11{struct Cyc_List_List*f1;struct Cyc_Absyn_Pat*f2;};struct Cyc_FieldPattern_tok_struct{
+unsigned char*tag;struct _tuple11*f1;};unsigned char Cyc_FnDecl_tok[15]="\000\000\000\000FnDecl_tok";
 struct Cyc_FnDecl_tok_struct{unsigned char*tag;struct Cyc_Absyn_Fndecl*f1;};
 unsigned char Cyc_IdList_tok[15]="\000\000\000\000IdList_tok";struct Cyc_IdList_tok_struct{
 unsigned char*tag;struct Cyc_List_List*f1;};unsigned char Cyc_InitDeclList_tok[21]="\000\000\000\000InitDeclList_tok";
 struct Cyc_InitDeclList_tok_struct{unsigned char*tag;struct Cyc_List_List*f1;};
-unsigned char Cyc_InitDecl_tok[17]="\000\000\000\000InitDecl_tok";struct _tuple11{
+unsigned char Cyc_InitDecl_tok[17]="\000\000\000\000InitDecl_tok";struct _tuple12{
 struct Cyc_Parse_Declarator*f1;struct Cyc_Absyn_Exp*f2;};struct Cyc_InitDecl_tok_struct{
-unsigned char*tag;struct _tuple11*f1;};unsigned char Cyc_InitializerList_tok[24]="\000\000\000\000InitializerList_tok";
+unsigned char*tag;struct _tuple12*f1;};unsigned char Cyc_InitializerList_tok[24]="\000\000\000\000InitializerList_tok";
 struct Cyc_InitializerList_tok_struct{unsigned char*tag;struct Cyc_List_List*f1;};
-unsigned char Cyc_Int_tok[12]="\000\000\000\000Int_tok";struct _tuple12{void*f1;
-int f2;};struct Cyc_Int_tok_struct{unsigned char*tag;struct _tuple12*f1;};
+unsigned char Cyc_Int_tok[12]="\000\000\000\000Int_tok";struct _tuple13{void*f1;
+int f2;};struct Cyc_Int_tok_struct{unsigned char*tag;struct _tuple13*f1;};
 unsigned char Cyc_Kind_tok[13]="\000\000\000\000Kind_tok";struct Cyc_Kind_tok_struct{
 unsigned char*tag;void*f1;};unsigned char Cyc_ParamDeclListBool_tok[26]="\000\000\000\000ParamDeclListBool_tok";
-struct _tuple13{struct Cyc_List_List*f1;int f2;struct Cyc_Absyn_VarargInfo*f3;struct
+struct _tuple14{struct Cyc_List_List*f1;int f2;struct Cyc_Absyn_VarargInfo*f3;struct
 Cyc_Core_Opt*f4;struct Cyc_List_List*f5;};struct Cyc_ParamDeclListBool_tok_struct{
-unsigned char*tag;struct _tuple13*f1;};unsigned char Cyc_ParamDeclList_tok[22]="\000\000\000\000ParamDeclList_tok";
+unsigned char*tag;struct _tuple14*f1;};unsigned char Cyc_ParamDeclList_tok[22]="\000\000\000\000ParamDeclList_tok";
 struct Cyc_ParamDeclList_tok_struct{unsigned char*tag;struct Cyc_List_List*f1;};
 unsigned char Cyc_ParamDecl_tok[18]="\000\000\000\000ParamDecl_tok";struct Cyc_ParamDecl_tok_struct{
 unsigned char*tag;struct _tuple2*f1;};unsigned char Cyc_PatternList_tok[20]="\000\000\000\000PatternList_tok";
@@ -1194,8 +1198,8 @@ void*f1;};unsigned char Cyc_Primopopt_tok[18]="\000\000\000\000Primopopt_tok";
 struct Cyc_Primopopt_tok_struct{unsigned char*tag;struct Cyc_Core_Opt*f1;};
 unsigned char Cyc_QualId_tok[15]="\000\000\000\000QualId_tok";struct Cyc_QualId_tok_struct{
 unsigned char*tag;struct _tuple1*f1;};unsigned char Cyc_QualSpecList_tok[21]="\000\000\000\000QualSpecList_tok";
-struct _tuple14{struct Cyc_Absyn_Tqual f1;struct Cyc_List_List*f2;struct Cyc_List_List*
-f3;};struct Cyc_QualSpecList_tok_struct{unsigned char*tag;struct _tuple14*f1;};
+struct _tuple15{struct Cyc_Absyn_Tqual f1;struct Cyc_List_List*f2;struct Cyc_List_List*
+f3;};struct Cyc_QualSpecList_tok_struct{unsigned char*tag;struct _tuple15*f1;};
 unsigned char Cyc_Rgnorder_tok[17]="\000\000\000\000Rgnorder_tok";struct Cyc_Rgnorder_tok_struct{
 unsigned char*tag;struct Cyc_List_List*f1;};unsigned char Cyc_Scope_tok[14]="\000\000\000\000Scope_tok";
 struct Cyc_Scope_tok_struct{unsigned char*tag;void*f1;};unsigned char Cyc_Short_tok[
@@ -1225,12 +1229,12 @@ unsigned char*tag;struct Cyc_Absyn_Tqual f1;};unsigned char Cyc_TypeSpecifier_to
 22]="\000\000\000\000TypeSpecifier_tok";struct Cyc_TypeSpecifier_tok_struct{
 unsigned char*tag;void*f1;};unsigned char Cyc_Type_tok[13]="\000\000\000\000Type_tok";
 struct Cyc_Type_tok_struct{unsigned char*tag;void*f1;};unsigned char Cyc_YY1[8]="\000\000\000\000YY1";
-struct Cyc_YY1_struct{unsigned char*tag;struct _tuple13*f1;};unsigned char Cyc_YYINITIALSVAL[
+struct Cyc_YY1_struct{unsigned char*tag;struct _tuple14*f1;};unsigned char Cyc_YYINITIALSVAL[
 18]="\000\000\000\000YYINITIALSVAL";unsigned char Cyc_Okay_tok[13]="\000\000\000\000Okay_tok";
 static unsigned char _tmp146[15]="$(sign_t,int)@";static struct Cyc_Core_Failure_struct
 Cyc_yyfail_Int_tok={Cyc_Core_Failure,{_tmp146,_tmp146,_tmp146 + 15}};struct
-_tuple12*Cyc_yyget_Int_tok(void*yy1){struct _tuple12*yyzzz;{void*_tmp147=yy1;
-struct _tuple12*_tmp148;_LLBB: if(*((void**)_tmp147)!= Cyc_Int_tok)goto _LLBD;
+_tuple13*Cyc_yyget_Int_tok(void*yy1){struct _tuple13*yyzzz;{void*_tmp147=yy1;
+struct _tuple13*_tmp148;_LLBB: if(*((void**)_tmp147)!= Cyc_Int_tok)goto _LLBD;
 _tmp148=((struct Cyc_Int_tok_struct*)_tmp147)->f1;_LLBC: yyzzz=_tmp148;goto _LLBA;
 _LLBD:;_LLBE:(int)_throw((void*)& Cyc_yyfail_Int_tok);_LLBA:;}return yyzzz;}static
 unsigned char _tmp14A[5]="char";static struct Cyc_Core_Failure_struct Cyc_yyfail_Char_tok={
@@ -1318,8 +1322,8 @@ yyzzz;{void*_tmp17F=yy1;struct Cyc_List_List*_tmp180;_LL101: if(*((void**)_tmp17
 _tmp17F)->f1;_LL102: yyzzz=_tmp180;goto _LL100;_LL103:;_LL104:(int)_throw((void*)&
 Cyc_yyfail_PatternList_tok);_LL100:;}return yyzzz;}static unsigned char _tmp182[31]="$(list_t<designator_t>,pat_t)@";
 static struct Cyc_Core_Failure_struct Cyc_yyfail_FieldPattern_tok={Cyc_Core_Failure,{
-_tmp182,_tmp182,_tmp182 + 31}};struct _tuple10*Cyc_yyget_FieldPattern_tok(void*yy1){
-struct _tuple10*yyzzz;{void*_tmp183=yy1;struct _tuple10*_tmp184;_LL106: if(*((void**)
+_tmp182,_tmp182,_tmp182 + 31}};struct _tuple11*Cyc_yyget_FieldPattern_tok(void*yy1){
+struct _tuple11*yyzzz;{void*_tmp183=yy1;struct _tuple11*_tmp184;_LL106: if(*((void**)
 _tmp183)!= Cyc_FieldPattern_tok)goto _LL108;_tmp184=((struct Cyc_FieldPattern_tok_struct*)
 _tmp183)->f1;_LL107: yyzzz=_tmp184;goto _LL105;_LL108:;_LL109:(int)_throw((void*)&
 Cyc_yyfail_FieldPattern_tok);_LL105:;}return yyzzz;}static unsigned char _tmp186[39]="list_t<$(list_t<designator_t>,pat_t)@>";
@@ -1350,8 +1354,8 @@ struct Cyc_DeclSpec_tok_struct*)_tmp193)->f1;_LL11B: yyzzz=_tmp194;goto _LL119;
 _LL11C:;_LL11D:(int)_throw((void*)& Cyc_yyfail_DeclSpec_tok);_LL119:;}return yyzzz;}
 static unsigned char _tmp196[27]="$(declarator_t,exp_opt_t)@";static struct Cyc_Core_Failure_struct
 Cyc_yyfail_InitDecl_tok={Cyc_Core_Failure,{_tmp196,_tmp196,_tmp196 + 27}};struct
-_tuple11*Cyc_yyget_InitDecl_tok(void*yy1){struct _tuple11*yyzzz;{void*_tmp197=yy1;
-struct _tuple11*_tmp198;_LL11F: if(*((void**)_tmp197)!= Cyc_InitDecl_tok)goto
+_tuple12*Cyc_yyget_InitDecl_tok(void*yy1){struct _tuple12*yyzzz;{void*_tmp197=yy1;
+struct _tuple12*_tmp198;_LL11F: if(*((void**)_tmp197)!= Cyc_InitDecl_tok)goto
 _LL121;_tmp198=((struct Cyc_InitDecl_tok_struct*)_tmp197)->f1;_LL120: yyzzz=
 _tmp198;goto _LL11E;_LL121:;_LL122:(int)_throw((void*)& Cyc_yyfail_InitDecl_tok);
 _LL11E:;}return yyzzz;}static unsigned char _tmp19A[35]="list_t<$(declarator_t,exp_opt_t)@>";
@@ -1446,8 +1450,8 @@ _tmp1CF)->f1;_LL166: yyzzz=_tmp1D0;goto _LL164;_LL167:;_LL168:(int)_throw((void*
 Cyc_yyfail_TunionFieldList_tok);_LL164:;}return yyzzz;}static unsigned char _tmp1D2[
 50]="$(tqual_t,list_t<type_specifier_t>,attributes_t)@";static struct Cyc_Core_Failure_struct
 Cyc_yyfail_QualSpecList_tok={Cyc_Core_Failure,{_tmp1D2,_tmp1D2,_tmp1D2 + 50}};
-struct _tuple14*Cyc_yyget_QualSpecList_tok(void*yy1){struct _tuple14*yyzzz;{void*
-_tmp1D3=yy1;struct _tuple14*_tmp1D4;_LL16A: if(*((void**)_tmp1D3)!= Cyc_QualSpecList_tok)
+struct _tuple15*Cyc_yyget_QualSpecList_tok(void*yy1){struct _tuple15*yyzzz;{void*
+_tmp1D3=yy1;struct _tuple15*_tmp1D4;_LL16A: if(*((void**)_tmp1D3)!= Cyc_QualSpecList_tok)
 goto _LL16C;_tmp1D4=((struct Cyc_QualSpecList_tok_struct*)_tmp1D3)->f1;_LL16B:
 yyzzz=_tmp1D4;goto _LL169;_LL16C:;_LL16D:(int)_throw((void*)& Cyc_yyfail_QualSpecList_tok);
 _LL169:;}return yyzzz;}static unsigned char _tmp1D6[14]="list_t<var_t>";static
@@ -1471,8 +1475,8 @@ struct Cyc_ParamDeclList_tok_struct*)_tmp1DF)->f1;_LL17A: yyzzz=_tmp1E0;goto _LL
 _LL17B:;_LL17C:(int)_throw((void*)& Cyc_yyfail_ParamDeclList_tok);_LL178:;}return
 yyzzz;}static unsigned char _tmp1E2[107]="$(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, bool,vararg_info_t *,opt_t<type_t>, list_t<$(type_t,type_t)@>)@";
 static struct Cyc_Core_Failure_struct Cyc_yyfail_YY1={Cyc_Core_Failure,{_tmp1E2,
-_tmp1E2,_tmp1E2 + 107}};struct _tuple13*Cyc_yyget_YY1(void*yy1){struct _tuple13*
-yyzzz;{void*_tmp1E3=yy1;struct _tuple13*_tmp1E4;_LL17E: if(*((void**)_tmp1E3)!= 
+_tmp1E2,_tmp1E2 + 107}};struct _tuple14*Cyc_yyget_YY1(void*yy1){struct _tuple14*
+yyzzz;{void*_tmp1E3=yy1;struct _tuple14*_tmp1E4;_LL17E: if(*((void**)_tmp1E3)!= 
 Cyc_YY1)goto _LL180;_tmp1E4=((struct Cyc_YY1_struct*)_tmp1E3)->f1;_LL17F: yyzzz=
 _tmp1E4;goto _LL17D;_LL180:;_LL181:(int)_throw((void*)& Cyc_yyfail_YY1);_LL17D:;}
 return yyzzz;}static unsigned char _tmp1E6[15]="list_t<type_t>";static struct Cyc_Core_Failure_struct
@@ -1824,7 +1828,7 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 198,170,0,97,99,156,0,204,196,205,405,0,404,68,69,0,174,0,176,67,0,0,357,0,313,
 347,0,314,315,0,0,0,0,0,0,0,0,0,350,351,0,0,0,0,353,354,352,141,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,301,302,303,304,305,306,307,308,309,310,300,0,355,0,374,
-375,0,0,0,384,84,0,142,18,0,20,0,93,95,181,180,14,81,90,0,0,101,102,104,84,108,
+375,0,0,0,384,0,84,142,18,0,20,0,93,95,181,180,14,81,90,0,0,101,102,104,84,108,
 84,117,0,0,0,0,0,0,0,270,271,272,0,0,274,0,0,226,227,0,0,0,0,238,234,94,236,232,
 230,0,163,0,0,0,169,157,164,128,0,0,0,158,130,0,131,127,148,137,136,85,0,48,47,0,
 45,80,318,78,74,285,0,23,0,0,0,0,191,292,294,0,286,0,0,199,98,100,0,158,0,208,0,
@@ -1835,7 +1839,7 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 291,194,0,293,190,192,287,0,200,171,213,0,207,210,0,158,0,209,0,356,0,0,183,0,
 187,378,379,0,361,0,0,0,0,0,0,0,0,348,386,0,0,371,369,0,0,103,106,0,107,120,117,
 117,0,0,0,0,0,0,0,0,0,0,244,275,0,0,0,16,158,0,167,165,0,158,0,0,0,0,44,46,193,
-295,212,215,0,216,211,0,0,0,184,188,0,0,0,0,316,317,360,388,0,391,312,387,0,385,
+295,212,215,0,216,211,0,0,0,184,188,0,0,0,0,316,317,360,388,0,391,312,385,387,0,
 82,0,116,115,239,0,244,254,0,0,0,0,0,0,0,0,0,0,0,0,276,0,0,152,168,160,151,156,0,
 49,50,214,359,358,0,189,362,0,0,376,0,0,0,250,0,0,256,0,0,0,264,0,0,0,0,0,0,0,0,
 243,0,224,0,158,0,0,0,0,377,121,240,0,0,0,241,255,257,258,0,266,265,0,260,0,0,0,
@@ -1846,138 +1850,140 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 60,126,112,450,478,61,479,441,579,433,437,438,296,272,163,81,82,494,390,495,496,
 467,468,153,274,275,480,303,254,255,256,257,258,259,715,769,260,261,287,288,470,
 471,262,263,372,192,459,193,194,195,196,197,198,199,200,201,202,203,204,205,206,
-207,511,512,208,209,63,110,159,307};static short Cyc_yypact[826]={1968,- -32768,-
--32768,- -32768,- -32768,- 20,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,25,158,
-823,- -32768,137,43,- -32768,- -32768,35,51,- -32768,141,- -32768,- -32768,- -32768,531,
-- -32768,88,138,146,- -32768,- -32768,1852,- -32768,105,149,- -32768,522,25,25,25,-
--32768,- -32768,258,- -32768,90,2330,180,28,7,- -32768,137,165,170,223,2455,- -32768,
-137,182,- -32768,75,- -32768,- -32768,- -32768,2417,- -32768,232,214,274,2417,268,272,
-278,- 4,- -32768,- -32768,4724,4724,132,330,4895,4281,4281,- -32768,1852,2083,1852,
-2083,- -32768,298,312,- -32768,2266,2455,2455,2455,4895,- -32768,- -32768,165,-
--32768,137,- -32768,- 71,387,1244,- -32768,2330,522,- -32768,1788,4724,2953,- -32768,
-180,25,- -32768,- -32768,4724,- -32768,2083,377,- -32768,343,381,389,137,385,2417,-
--32768,- -32768,- -32768,- -32768,404,4281,165,2417,394,178,25,25,230,- -32768,- 37,-
-37,- -32768,- -32768,- -32768,- -32768,- -32768,553,207,- -32768,4509,396,- -32768,4281,
-4357,398,400,403,418,425,428,440,165,4585,4585,- -32768,- -32768,- -32768,- -32768,
-1608,446,4661,4661,- -32768,4661,- -32768,- -32768,450,- -32768,- 30,479,445,447,457,
-221,20,281,- 50,97,- -32768,872,4661,348,- -32768,- -32768,0,483,- -32768,486,- -32768,
-488,- -32768,531,3036,2330,- -32768,- -32768,- -32768,- -32768,495,4895,- -32768,614,
-480,165,137,491,- -32768,498,- 10,501,2538,503,523,527,529,3119,2538,45,547,2538,
-2538,13,521,- -32768,- -32768,552,1367,1367,522,1367,- -32768,- -32768,- -32768,560,-
--32768,- -32768,- -32768,103,- -32768,- -32768,- -32768,561,576,- -32768,66,565,574,
-217,575,571,- 28,- -32768,582,225,- 28,597,23,137,- -32768,4281,598,- -32768,- -32768,
-322,- -32768,252,746,350,4724,- -32768,595,601,4895,4895,2205,3202,46,- -32768,189,
-- -32768,66,- -32768,- -32768,- -32768,884,- -32768,670,- -32768,- -32768,4895,1608,-
--32768,4895,- -32768,- -32768,2621,- -32768,629,4281,2144,4281,4281,4281,4281,4281,
-602,1608,- -32768,- -32768,1367,603,359,4281,- -32768,- -32768,- -32768,- -32768,4661,
-4281,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,4661,
-4661,4661,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,4281,- -32768,132,- -32768,- -32768,3285,132,4281,- -32768,
-165,600,- -32768,- -32768,1852,- -32768,1852,- -32768,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,4281,610,608,- -32768,605,165,- -32768,165,490,4281,616,
-4281,4281,692,1490,625,- -32768,- -32768,- -32768,261,683,- -32768,3368,2394,- -32768,
-- -32768,2538,637,2538,1726,- -32768,- -32768,2266,- -32768,- -32768,- -32768,4281,-
--32768,4895,631,204,- -32768,- -32768,619,- -32768,638,639,4795,574,- -32768,4724,-
--32768,- -32768,- -32768,- -32768,225,- -32768,1852,- -32768,641,642,645,- -32768,-
--32768,- -32768,- -32768,- -32768,2417,- -32768,132,4281,2417,164,- -32768,- -32768,-
--32768,220,- -32768,42,658,- -32768,- -32768,- -32768,652,574,653,- -32768,648,189,
-4780,4724,3451,- -32768,- -32768,- -32768,657,659,673,- -32768,- -32768,229,3036,407,
-661,531,411,663,665,667,415,4895,672,662,4433,- -32768,- -32768,676,678,479,299,
-445,447,457,221,20,20,281,281,281,281,- 50,- 50,97,97,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,681,- -32768,215,2870,4724,- -32768,- -32768,- -32768,- -32768,
-614,4281,4895,- -32768,- -32768,- -32768,685,137,276,420,4281,435,437,674,3534,3617,
-293,- -32768,- -32768,687,690,686,693,- -32768,677,- -32768,2330,- -32768,- -32768,694,
-4724,- -32768,695,66,708,- -32768,- -32768,151,- -32768,571,- -32768,- -32768,- -32768,
-395,713,23,- -32768,- -32768,679,- -32768,- -32768,- -32768,- -32768,746,- -32768,-
--32768,- -32768,715,- -32768,- -32768,716,574,- 28,- -32768,710,723,162,719,- -32768,
-2704,- -32768,- -32768,- -32768,2330,- -32768,4281,799,4281,4357,725,723,727,2870,-
--32768,- -32768,4281,4281,- -32768,- -32768,304,- 28,- -32768,- -32768,731,- -32768,730,
-67,490,2538,442,737,2538,4281,3700,302,3783,313,3866,540,- -32768,741,4281,752,-
--32768,574,77,- -32768,- -32768,749,574,4895,739,742,743,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,744,- -32768,- -32768,747,750,4281,- -32768,- -32768,3036,467,
-757,740,- -32768,629,- -32768,- -32768,342,- -32768,- -32768,- -32768,2870,- -32768,-
--32768,4895,- -32768,- -32768,827,762,540,- -32768,469,2538,474,3949,2538,489,4032,
-4115,325,2417,754,765,- -32768,336,2538,- -32768,- -32768,763,- -32768,694,777,-
--32768,- -32768,- -32768,- -32768,- -32768,340,- -32768,- -32768,4895,844,- -32768,2787,
-494,2538,594,769,772,- -32768,2538,2538,534,- -32768,2538,2538,543,2538,549,4198,-
-14,1367,- -32768,4281,- -32768,638,574,767,4281,770,774,- -32768,- -32768,- -32768,
-4281,764,778,- -32768,- -32768,- -32768,- -32768,2538,- -32768,- -32768,2538,- -32768,
-2538,2538,570,4281,998,- -32768,573,- -32768,- -32768,785,345,776,4895,357,1367,-
--32768,- -32768,- -32768,- -32768,- -32768,2538,364,540,- -32768,2538,779,- -32768,-
--32768,780,1121,- -32768,- -32768,998,- -32768,- -32768,- -32768,783,594,- -32768,540,
-- -32768,- -32768,- -32768,- -32768,878,881,- -32768};static short Cyc_yypgoto[114]={-
--32768,92,- -32768,558,- -32768,- -32768,- -32768,- -32768,- -32768,- 53,- 39,- 57,-
--32768,113,- 41,317,- -32768,85,- -32768,- 13,- -32768,- -32768,- 111,- -32768,200,-
--32768,361,- -32768,- -32768,- -32768,675,664,124,- -32768,- -32768,365,- -32768,-
--32768,41,- -32768,- -32768,6,- 40,64,- -32768,- -32768,848,- -32768,- 94,26,- 116,- 422,
-152,333,334,612,- 419,- 88,- 292,797,- -32768,- 207,- 155,- 515,- 284,- -32768,456,- 177,-
-76,- 114,- 118,- 204,- 32,- -32768,- -32768,12,- 216,- -32768,- 583,- 631,- -32768,- -32768,
-- 22,775,327,- -32768,179,59,- -32768,- 142,- 367,- 154,583,584,589,581,590,341,184,
-338,339,- 52,455,- -32768,- -32768,- -32768,- 325,- -32768,- -32768,8,885,- -32768,- 354,
-- 153};static short Cyc_yytable[5003]={119,83,308,162,117,271,335,466,62,133,389,
-154,155,321,322,279,576,124,118,125,533,582,489,633,536,318,285,270,542,1,69,84,
-304,85,302,425,426,129,428,229,453,304,90,312,62,342,119,220,221,222,117,62,535,
-138,103,599,62,601,142,253,782,119,108,252,114,264,356,62,357,120,128,64,548,549,
-151,151,136,445,151,305,306,405,113,84,124,343,113,380,84,306,350,351,565,406,
-151,783,146,483,592,147,381,32,421,62,62,62,62,483,151,151,591,690,454,111,382,
-219,151,31,507,740,228,422,446,65,34,266,451,62,352,434,265,36,86,338,339,94,340,
-353,490,62,491,573,458,87,416,136,598,84,417,299,489,191,210,373,506,84,443,300,
-305,88,32,119,104,105,106,264,435,310,- 114,62,151,457,150,150,- 178,295,150,817,
-636,31,- 178,720,277,674,32,821,34,211,212,213,214,91,150,305,253,253,111,253,252,
-252,802,252,430,408,95,96,150,150,431,415,358,151,419,420,150,161,301,473,812,
-359,360,156,266,280,62,311,31,157,819,89,392,226,399,34,62,822,719,402,92,278,
-432,722,16,17,18,161,93,31,97,98,269,156,677,458,34,- 156,678,157,68,427,- 156,62,
-487,297,298,448,594,499,150,469,131,125,32,129,464,465,391,253,65,294,151,252,
-137,121,151,151,151,65,122,614,136,123,484,348,349,436,151,485,32,84,486,151,151,
-140,151,575,529,530,531,150,227,313,314,466,230,90,269,62,151,62,431,596,442,458,
-290,597,132,632,623,682,612,436,62,299,613,139,162,787,39,40,41,300,449,39,40,41,
-291,31,226,354,355,463,119,33,34,35,559,431,107,482,562,119,336,301,141,566,431,
-143,605,583,119,606,723,311,117,640,330,144,150,391,145,641,150,150,150,501,502,
-503,570,567,604,569,651,62,150,62,510,215,431,150,150,707,150,458,431,693,681,
-431,630,694,682,151,710,374,375,376,150,216,431,414,151,476,477,161,752,634,461,
-462,401,151,431,532,151,161,160,756,510,584,161,571,590,431,487,735,593,431,805,
-736,282,761,431,377,682,675,472,462,627,658,378,379,62,295,431,509,431,663,808,
-686,687,431,84,151,151,811,84,731,510,540,231,541,281,695,283,510,665,666,667,
-681,692,286,572,284,151,289,336,548,549,293,659,317,295,323,497,324,500,617,325,
-62,504,150,336,615,431,119,585,618,431,264,150,622,431,326,514,1,642,431,151,150,
-327,681,150,328,1,151,521,522,523,524,784,644,431,645,431,329,586,608,701,431,
-161,337,399,341,62,344,1,391,762,161,537,639,119,151,713,714,117,345,161,801,346,
-150,150,732,431,741,431,469,347,809,743,431,400,538,657,553,383,555,556,384,560,
-386,150,403,816,747,431,818,393,391,765,314,546,404,547,436,407,84,409,759,161,
-737,700,31,410,703,807,1,767,768,34,316,31,99,319,319,150,36,411,34,412,219,423,
-150,332,333,36,39,40,41,774,431,319,319,31,319,39,40,41,777,431,34,418,151,- 175,
-779,431,424,309,- 175,- 175,150,319,429,- 175,217,300,432,39,40,41,439,226,1,391,
-742,799,431,746,803,431,444,685,698,699,440,151,391,757,305,691,519,520,753,525,
-526,447,527,528,253,452,460,474,252,475,31,342,505,766,508,539,543,34,772,773,
-544,545,775,776,36,778,554,151,84,557,395,561,563,253,39,40,41,252,568,578,643,
-574,577,253,648,650,319,252,391,795,580,587,796,588,797,798,150,589,253,32,391,
-253,252,600,602,252,31,603,609,611,625,610,616,34,810,619,- 204,620,813,621,309,-
-204,- 204,624,646,151,- 204,628,300,150,629,70,631,638,652,161,653,654,670,655,269,
-656,391,660,319,683,319,319,319,319,319,319,319,319,319,319,319,319,319,319,319,
-319,319,662,668,150,672,673,161,676,626,684,704,706,679,709,688,712,689,696,697,
-717,31,72,702,73,74,716,718,34,721,724,734,725,726,727,75,319,728,76,77,729,738,
-464,465,730,78,733,70,739,754,79,80,755,760,758,763,770,771,788,793,790,804,150,
-791,824,794,806,825,498,814,815,1,745,820,394,749,751,388,7,8,9,10,11,12,13,14,
-15,16,17,18,19,20,669,637,127,635,786,661,71,72,664,73,74,488,273,34,319,22,292,
-595,671,513,75,517,515,76,77,781,27,28,516,785,78,518,0,109,789,79,80,29,30,0,
-792,0,361,362,363,364,365,366,367,368,369,370,0,0,0,800,0,319,0,0,0,0,0,0,267,0,
-0,31,371,0,0,0,32,33,34,35,0,269,0,0,0,309,- 156,0,37,38,0,- 156,0,300,0,39,40,41,
-319,2,3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,713,714,21,164,165,232,0,
-233,234,235,236,237,238,239,240,22,166,23,167,241,0,168,24,242,0,0,27,28,243,169,
-170,244,245,171,172,173,174,29,30,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,
-319,0,0,0,0,0,0,0,319,0,247,179,180,181,182,32,33,34,35,0,248,116,0,0,183,0,0,37,
-250,0,0,0,0,0,185,0,0,186,0,187,188,0,0,0,0,189,190,2,3,4,115,6,7,8,9,10,11,12,
+207,511,512,208,209,63,110,159,307};static short Cyc_yypact[826]={2042,- -32768,-
+-32768,- -32768,- -32768,- 36,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
+-32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- 25,104,
+536,- -32768,113,- 32,- -32768,- -32768,24,36,- -32768,78,- -32768,- -32768,- -32768,209,
+- -32768,72,103,120,- -32768,- -32768,1926,- -32768,- 58,90,- -32768,137,- 25,- 25,- 25,-
+-32768,- -32768,312,- -32768,325,2512,218,132,1,- -32768,113,174,208,212,2637,-
+-32768,113,240,- -32768,16,- -32768,- -32768,- -32768,708,- -32768,285,316,333,708,
+311,329,354,146,- -32768,- -32768,4906,4906,198,374,4977,4463,4463,- -32768,1926,
+2157,1926,2157,- -32768,364,378,- -32768,2448,2637,2637,2637,4977,- -32768,- -32768,
+174,- -32768,113,- -32768,229,398,1318,- -32768,2512,137,- -32768,869,4906,3135,-
+-32768,218,- 25,- -32768,- -32768,4906,- -32768,2157,388,- -32768,394,400,401,113,404,
+708,- -32768,- -32768,- -32768,- -32768,416,4463,174,708,423,121,- 25,- 25,142,- -32768,
+12,12,- -32768,- -32768,- -32768,- -32768,- -32768,670,166,- -32768,4691,440,- -32768,
+4463,4539,442,454,470,486,493,503,515,174,4767,4767,- -32768,- -32768,- -32768,-
+-32768,1682,518,4843,4843,- -32768,4843,- -32768,- -32768,523,- -32768,- 47,553,513,
+516,527,291,71,286,261,40,- -32768,710,4843,569,- 27,- -32768,548,549,- -32768,552,-
+-32768,555,- -32768,209,3218,2512,- -32768,- -32768,- -32768,- -32768,557,4977,-
+-32768,397,570,174,113,575,- -32768,573,31,578,2720,582,589,593,596,3301,2720,88,
+585,2720,2720,11,581,- -32768,- -32768,595,1441,1441,137,1441,- -32768,- -32768,-
+-32768,598,- -32768,- -32768,- -32768,161,- -32768,- -32768,- -32768,594,611,- -32768,
+49,599,597,192,600,586,- 3,- -32768,602,409,- 3,604,4,113,- -32768,4463,607,- -32768,
+- -32768,411,- -32768,228,1056,415,4906,- -32768,605,608,4977,4977,2387,3384,43,-
+-32768,379,- -32768,49,- -32768,- -32768,- -32768,2279,- -32768,242,- -32768,- -32768,
+4977,1682,- -32768,4977,- -32768,- -32768,2803,- -32768,636,4463,2218,4463,4463,4463,
+4463,4463,609,1682,- -32768,- -32768,1441,618,427,4463,- -32768,- -32768,- -32768,-
+-32768,4843,4463,4843,4843,4843,4843,4843,4843,4843,4843,4843,4843,4843,4843,
+4843,4843,4843,4843,4843,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,
+- -32768,- -32768,- -32768,- -32768,4463,- -32768,198,- -32768,- -32768,3467,198,4463,-
+-32768,615,174,- -32768,- -32768,1926,- -32768,1926,- -32768,- -32768,- -32768,- -32768,
+- -32768,- -32768,- -32768,4463,616,619,- -32768,620,174,- -32768,174,529,4463,622,
+4463,4463,697,1564,629,- -32768,- -32768,- -32768,268,689,- -32768,3550,2576,- -32768,
+- -32768,2720,638,2720,1800,- -32768,- -32768,2448,- -32768,- -32768,- -32768,4463,-
+-32768,4977,630,124,- -32768,- -32768,621,- -32768,640,631,4962,597,- -32768,4906,-
+-32768,- -32768,- -32768,- -32768,409,- -32768,1926,- -32768,641,635,642,- -32768,-
+-32768,- -32768,- -32768,- -32768,708,- -32768,198,4463,708,232,- -32768,- -32768,-
+-32768,202,- -32768,44,647,- -32768,- -32768,- -32768,639,597,644,- -32768,633,379,
+1862,4906,3633,- -32768,- -32768,- -32768,646,648,663,- -32768,- -32768,271,3218,435,
+653,209,446,651,656,657,450,4977,659,664,4615,- -32768,- -32768,660,665,553,201,
+513,516,527,291,71,71,286,286,286,286,261,261,40,40,- -32768,- -32768,- -32768,-
+-32768,- -32768,- -32768,672,- -32768,171,4906,3052,- -32768,- -32768,- -32768,- -32768,
+397,4463,4977,- -32768,- -32768,- -32768,667,113,282,458,4463,463,467,674,3716,3799,
+287,- -32768,- -32768,680,700,692,703,- -32768,686,- -32768,2512,- -32768,- -32768,706,
+4906,- -32768,705,49,699,- -32768,- -32768,155,- -32768,586,- -32768,- -32768,- -32768,
+406,704,4,- -32768,- -32768,698,- -32768,- -32768,- -32768,- -32768,1056,- -32768,-
+-32768,- -32768,709,- -32768,- -32768,713,597,- 3,- -32768,711,722,205,701,- -32768,
+2886,- -32768,- -32768,- -32768,2512,- -32768,4463,799,4463,4539,721,722,724,3052,-
+-32768,- -32768,4463,4463,- -32768,- -32768,- 3,347,- -32768,- -32768,730,- -32768,732,
+80,529,2720,478,733,2720,4463,3882,298,3965,331,4048,563,- -32768,737,4463,750,-
+-32768,597,48,- -32768,- -32768,747,597,4977,738,740,741,- -32768,- -32768,- -32768,-
+-32768,- -32768,- -32768,742,- -32768,- -32768,744,745,4463,- -32768,- -32768,3218,483,
+748,749,- -32768,636,- -32768,- -32768,350,- -32768,- -32768,- -32768,- -32768,3052,-
+-32768,4977,- -32768,- -32768,824,753,563,- -32768,495,2720,497,4131,2720,499,4214,
+4297,334,708,746,755,- -32768,336,2720,- -32768,- -32768,756,- -32768,706,768,-
+-32768,- -32768,- -32768,- -32768,- -32768,349,- -32768,- -32768,4977,838,- -32768,2969,
+505,2720,591,764,767,- -32768,2720,2720,511,- -32768,2720,2720,556,2720,558,4380,-
+29,1441,- -32768,4463,- -32768,640,597,762,4463,765,769,- -32768,- -32768,- -32768,
+4463,761,770,- -32768,- -32768,- -32768,- -32768,2720,- -32768,- -32768,2720,- -32768,
+2720,2720,560,4463,1019,- -32768,562,- -32768,- -32768,783,361,771,4977,359,1441,-
+-32768,- -32768,- -32768,- -32768,- -32768,2720,376,563,- -32768,2720,787,- -32768,-
+-32768,789,1195,- -32768,- -32768,1019,- -32768,- -32768,- -32768,790,591,- -32768,563,
+- -32768,- -32768,- -32768,- -32768,874,895,- -32768};static short Cyc_yypgoto[114]={-
+-32768,28,- -32768,572,- -32768,- -32768,- -32768,- -32768,- -32768,- 53,- 37,- 57,-
+-32768,299,- 41,308,- -32768,85,- -32768,- 13,- -32768,- -32768,- 111,- -32768,102,-
+-32768,352,- -32768,- -32768,- -32768,683,676,- 67,- -32768,- -32768,357,- -32768,-
+-32768,0,- -32768,- -32768,- 30,- 23,- 70,- -32768,- -32768,842,- -32768,- 99,- 31,- 116,-
+400,147,323,330,603,- 397,- 89,- 275,788,- -32768,- 207,- 161,- 516,- 277,- -32768,443,-
+180,- 76,- 114,- 62,- 200,- 61,- -32768,- -32768,- 5,- 217,- -32768,- 633,- 589,- -32768,-
+-32768,- 22,766,314,- -32768,213,221,- -32768,- 154,- 368,- 149,577,568,576,579,567,
+320,227,319,337,87,652,- -32768,- -32768,- -32768,- 345,- -32768,- -32768,8,861,-
+-32768,- 282,- 139};static short Cyc_yytable[5085]={119,83,162,335,117,271,90,321,62,
+133,389,154,155,318,466,279,308,124,103,322,118,453,270,634,161,113,285,542,342,
+113,69,84,535,85,425,426,125,428,576,489,226,95,96,582,62,782,119,220,221,222,
+117,62,120,138,161,64,62,86,142,253,380,119,108,252,114,264,304,62,343,740,128,
+94,565,65,151,151,136,599,151,601,783,304,301,84,124,548,549,381,84,266,302,311,
+533,454,151,32,536,592,219,312,421,483,445,62,62,62,62,111,151,151,690,483,434,
+265,306,- 178,151,507,295,422,228,- 178,405,211,212,213,214,62,305,306,458,310,87,
+1,406,490,446,491,1,62,451,350,351,32,88,136,299,84,598,435,802,506,720,358,300,
+84,443,226,573,280,305,119,359,360,305,264,89,489,812,62,151,457,150,150,408,91,
+150,636,819,352,415,- 114,591,419,420,822,266,416,353,97,98,417,150,31,253,253,
+399,253,252,252,34,252,31,92,68,674,150,150,449,34,1,151,227,392,150,32,230,473,
+32,817,93,31,294,427,62,575,31,821,34,301,476,477,161,34,62,36,99,402,436,311,36,
+458,161,1,432,299,146,161,291,147,39,40,41,300,269,39,40,41,719,- 156,430,62,487,
+722,- 156,448,431,499,150,469,313,314,338,339,436,340,431,253,330,90,151,252,129,
+632,151,151,151,156,125,614,136,269,373,157,156,677,151,442,31,84,157,151,151,
+596,151,34,431,597,131,150,630,458,36,191,210,132,65,62,151,62,466,121,39,40,41,
+623,122,463,678,123,401,31,62,431,594,162,682,129,34,229,137,- 204,464,465,277,
+309,- 204,- 204,104,105,106,- 204,119,300,354,355,559,161,290,787,567,119,569,348,
+349,566,161,562,605,583,119,606,612,431,117,161,613,356,150,357,585,640,150,150,
+150,604,651,641,139,723,570,458,431,62,150,62,336,707,1,150,150,31,150,431,295,
+140,681,33,34,35,143,151,107,540,31,541,150,161,682,32,151,34,571,141,633,278,16,
+17,18,151,710,111,151,752,144,756,431,584,391,431,590,431,487,295,593,529,530,
+531,694,297,298,735,695,414,431,736,145,658,761,682,62,686,805,215,431,663,431,
+675,808,617,84,151,151,687,84,731,692,65,160,226,586,431,484,216,539,811,31,485,
+681,231,486,281,151,34,693,665,666,667,659,282,36,283,546,284,547,289,395,62,286,
+150,39,40,41,119,399,461,462,264,150,472,462,482,39,40,41,151,293,150,336,681,
+150,509,431,151,548,549,497,784,500,615,431,391,504,317,336,323,436,501,502,503,
+618,431,62,762,622,431,514,324,510,639,119,151,642,431,117,657,801,644,431,150,
+150,645,431,325,70,469,809,521,522,523,524,700,701,431,703,713,714,732,431,326,
+150,816,537,532,818,627,327,161,510,741,431,743,431,747,431,84,328,759,737,765,
+314,807,219,767,768,774,431,553,329,555,556,337,560,150,341,71,72,344,73,74,161,
+150,34,345,374,375,376,346,510,75,698,699,76,77,742,510,347,746,382,78,383,151,
+572,384,79,80,386,757,393,150,777,431,779,431,799,431,803,431,519,520,400,1,377,
+525,526,403,404,766,410,378,379,407,772,773,151,409,775,776,418,778,423,753,411,
+527,528,412,217,253,424,429,432,252,305,439,444,452,440,608,460,475,474,342,505,
+795,447,543,796,391,797,798,151,84,508,538,544,554,253,557,561,545,252,563,568,
+574,578,580,253,577,810,588,252,32,813,600,587,603,70,589,602,150,609,253,611,
+610,253,252,619,616,252,31,391,620,621,624,628,625,34,643,638,- 175,629,648,650,
+309,- 175,- 175,631,646,151,- 175,652,300,150,39,40,41,361,362,363,364,365,366,367,
+368,369,370,654,31,72,653,73,74,655,656,34,269,660,662,668,679,670,75,371,672,76,
+77,316,673,150,319,319,78,626,676,684,688,79,80,689,332,333,696,683,702,391,697,
+716,319,319,718,319,721,685,724,725,726,727,391,728,729,691,733,738,739,734,754,
+755,319,760,704,706,758,709,763,712,770,771,788,717,790,793,794,791,804,824,806,
+150,7,8,9,10,11,12,13,14,15,16,17,18,19,20,814,730,815,820,825,498,669,637,388,
+394,635,127,391,664,786,22,661,488,273,595,671,515,292,518,109,391,27,28,513,745,
+516,0,749,751,517,0,0,29,30,0,0,0,0,0,0,319,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+267,0,391,268,0,0,0,0,32,33,781,35,0,269,785,0,0,0,0,789,37,38,0,0,0,792,0,0,0,0,
+0,0,0,0,0,0,0,0,0,319,800,319,319,319,319,319,319,319,319,319,319,319,319,319,
+319,319,319,319,0,0,0,0,0,0,0,0,0,2,3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,
+19,20,713,714,21,164,165,232,319,233,234,235,236,237,238,239,240,22,166,23,167,
+241,0,168,24,242,0,0,27,28,243,169,170,244,245,171,172,173,174,29,30,246,175,0,
+176,0,177,178,0,0,0,0,0,0,0,70,0,0,0,0,0,0,0,0,0,0,0,0,0,247,179,180,181,182,32,
+33,34,35,319,248,116,0,0,183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,187,188,0,0,0,0,
+189,190,31,72,0,73,74,0,0,34,0,0,0,0,0,0,75,319,0,76,77,0,0,464,465,0,78,0,0,0,0,
+79,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,319,2,3,4,115,6,7,8,9,10,11,12,
 13,14,15,16,17,18,19,20,767,768,21,164,165,232,0,233,234,235,236,237,238,239,240,
 22,166,23,167,241,0,168,24,242,0,0,27,28,243,169,170,244,245,171,172,173,174,29,
-30,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,247,179,180,
-181,182,32,33,34,35,0,248,116,0,0,183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,187,188,
-0,0,0,0,189,190,2,3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,164,
-165,232,0,233,234,235,236,237,238,239,240,22,166,23,167,241,0,168,24,242,0,0,27,
-28,243,169,170,244,245,171,172,173,174,29,30,246,175,0,176,0,177,178,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,247,179,180,181,182,32,33,34,35,0,248,116,249,0,
-183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,187,188,0,0,0,0,189,190,2,3,4,115,6,7,8,9,
-10,11,12,13,14,15,16,17,18,19,20,0,0,21,164,165,232,0,233,234,235,236,237,238,
+30,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,319,0,0,0,0,0,0,0,319,0,247,179,
+180,181,182,32,33,34,35,0,248,116,0,0,183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,187,
+188,0,0,0,0,189,190,2,3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,
+164,165,232,0,233,234,235,236,237,238,239,240,22,166,23,167,241,0,168,24,242,0,0,
+27,28,243,169,170,244,245,171,172,173,174,29,30,246,175,0,176,0,177,178,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,247,179,180,181,182,32,33,34,35,0,248,116,249,
+0,183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,187,188,0,0,0,0,189,190,2,3,4,115,6,7,8,
+9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,164,165,232,0,233,234,235,236,237,238,
 239,240,22,166,23,167,241,0,168,24,242,0,0,27,28,243,169,170,244,245,171,172,173,
 174,29,30,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,247,
 179,180,181,182,32,33,34,35,0,248,116,0,0,183,0,0,37,250,0,0,0,0,0,185,0,0,186,0,
@@ -1994,7 +2000,7 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 173,174,29,30,0,175,0,176,0,177,178,0,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,
 0,0,0,0,31,179,180,181,182,32,33,34,35,0,22,0,0,0,183,0,0,37,250,0,0,27,28,0,185,
 0,0,186,0,187,188,0,29,30,0,189,190,- 8,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-17,18,19,20,267,0,21,268,0,0,0,0,32,33,0,35,0,269,0,22,0,23,0,0,37,38,24,0,25,26,
+17,18,19,20,267,0,21,0,0,0,0,0,32,33,0,35,0,269,0,22,0,23,0,0,37,38,24,0,25,26,
 27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,31,0,0,0,0,32,33,34,35,0,0,0,- 8,0,36,0,0,37,38,0,0,0,0,0,39,40,41,- 8,1,0,2,
 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,22,
@@ -2003,248 +2009,264 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 0,0,0,39,40,41,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,
 0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,0,24,0,25,26,27,28,0,0,0,0,0,0,0,0,0,29,30,0,1,0,
 2,3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,31,0,0,0,0,32,33,
-34,35,22,0,0,- 8,0,36,0,24,37,38,0,27,28,0,0,39,40,41,0,0,0,0,29,30,0,0,0,0,0,0,0,
+34,35,22,0,0,- 8,0,36,0,24,37,38,0,27,28,0,0,39,40,41,0,0,0,0,29,30,0,1,0,0,0,0,0,
 0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,0,31,0,0,0,0,32,33,34,35,22,0,
-0,0,0,36,0,0,37,38,0,27,28,0,0,39,40,41,0,0,0,0,29,30,0,0,0,2,3,4,115,6,7,8,9,10,
-11,12,13,14,15,16,17,18,19,20,0,0,21,267,0,0,0,0,0,0,0,32,33,0,35,22,269,23,0,0,
-299,0,24,37,38,0,27,28,300,0,39,40,41,0,0,0,0,29,30,0,0,0,0,0,0,2,3,4,115,6,7,8,
-9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,32,33,0,35,0,0,116,22,217,23,
-0,0,37,38,24,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,0,0,2,3,4,115,6,7,8,9,
-10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,32,33,0,35,0,0,116,22,0,23,0,0,
-37,38,24,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,70,0,0,2,3,4,115,6,7,8,9,10,11,12,
-13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,32,33,0,35,22,0,0,0,0,0,0,24,37,
-38,0,27,28,0,31,72,0,73,74,0,0,34,29,30,0,0,0,0,75,0,0,76,77,0,0,0,0,0,78,0,0,0,
-0,79,80,0,0,0,0,0,0,0,0,0,0,0,0,32,33,0,35,0,0,0,0,0,0,0,0,37,38,164,165,232,0,
-233,234,235,236,237,238,239,240,0,166,0,167,241,0,168,0,242,0,0,0,0,243,169,170,
-244,245,171,172,173,174,0,0,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,247,179,180,181,182,0,0,34,0,0,248,116,0,0,183,0,0,0,184,164,165,0,
-0,0,185,0,492,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,
-171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,31,179,180,181,182,0,0,34,0,0,0,320,493,0,183,0,0,0,184,164,165,464,465,0,
-185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,
-173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,
-179,180,181,182,0,0,34,0,0,0,320,680,0,183,0,0,0,184,164,165,464,465,0,185,0,0,
-186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,
-0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,
-181,182,0,0,34,0,0,0,320,764,0,183,0,0,0,184,164,165,464,465,0,185,0,0,186,0,187,
-188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,
-0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,
-34,0,0,0,320,0,0,183,0,0,0,184,164,165,464,465,0,185,0,0,186,0,187,188,0,166,0,
-167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,
-178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,
-0,0,183,0,0,0,184,164,165,0,0,276,185,0,0,186,0,187,188,0,166,0,167,189,190,168,
-0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,320,0,0,183,0,0,0,
-184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,
-169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,413,0,0,0,183,0,0,0,184,164,165,0,
-0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,
+0,0,0,36,0,0,37,38,0,27,28,0,0,39,40,41,0,0,0,0,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,267,0,0,31,0,0,0,0,32,33,34,35,0,269,0,0,0,309,- 156,0,37,
+38,0,- 156,0,300,0,39,40,41,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,2,3,4,
+115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,267,0,0,0,0,0,0,0,32,33,0,35,
+22,269,23,0,0,299,0,24,37,38,0,27,28,300,0,39,40,41,0,0,0,0,29,30,0,0,0,0,0,0,2,
+3,4,115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,32,33,0,35,0,0,
+116,22,217,23,0,0,37,38,24,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,0,0,2,3,4,
+115,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,32,33,0,35,0,0,116,
+22,0,23,0,0,37,38,24,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,2,3,4,115,6,7,8,9,
+10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,32,33,0,35,22,0,0,0,0,0,
+0,24,37,38,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,33,0,35,0,0,0,0,0,0,0,0,37,38,164,165,232,0,233,
+234,235,236,237,238,239,240,0,166,0,167,241,0,168,0,242,0,0,0,0,243,169,170,244,
+245,171,172,173,174,0,0,246,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,247,179,180,181,182,0,0,34,0,0,248,116,0,0,183,0,0,0,184,164,165,0,0,0,
+185,0,492,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,
 172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,0,0,0,184,164,165,0,0,481,185,0,0,186,
-0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,
-0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,
-182,0,0,34,0,0,0,0,0,0,183,534,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,
-0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,
-177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,
-0,0,0,0,183,564,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,
-168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,0,0,
-0,184,164,165,0,0,607,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,
-0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,647,0,0,0,183,0,0,0,184,164,165,
-0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,
-171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,31,179,180,181,182,0,0,34,0,0,649,0,0,0,183,0,0,0,184,164,165,0,0,0,185,0,0,
-186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,
-0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,
-181,182,0,0,34,0,0,0,0,0,0,183,705,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,
-166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,
-0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,
-0,0,0,0,0,183,708,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,
-190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,711,0,0,0,
-183,0,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,
-0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,744,0,0,184,
-164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,
-170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,748,0,0,184,164,165,0,0,0,
-185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,
-173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,
-179,180,181,182,0,0,34,0,0,0,0,0,0,183,750,0,0,184,164,165,0,0,0,185,0,0,186,0,
+31,179,180,181,182,0,0,34,0,0,0,320,493,0,183,0,0,0,184,164,165,464,465,0,185,0,
+0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,
+174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,
+180,181,182,0,0,34,0,0,0,320,680,0,183,0,0,0,184,164,165,464,465,0,185,0,0,186,0,
 187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,
 175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,
-0,0,34,0,0,0,0,0,0,183,780,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,
+0,0,34,0,0,0,320,764,0,183,0,0,0,184,164,165,464,465,0,185,0,0,186,0,187,188,0,
+166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,
+0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,
+0,0,320,0,0,183,0,0,0,184,164,165,464,465,0,185,0,0,186,0,187,188,0,166,0,167,
+189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,
+183,0,0,0,184,164,165,0,0,276,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,
+0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,320,0,0,183,0,0,0,184,
+164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,
+170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,413,0,0,0,183,0,0,0,184,164,165,0,0,0,
+185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,
+173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,
+179,180,181,182,0,0,34,0,0,0,0,0,0,183,0,0,0,184,164,165,0,0,481,185,0,0,186,0,
+187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,
+175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,
+0,0,34,0,0,0,0,0,0,183,534,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,
 167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,
 178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,
-164,165,183,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,190,0,169,
-170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,320,164,165,183,0,0,0,184,0,0,0,0,0,
+0,0,183,564,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,
+0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,0,0,0,
+184,164,165,0,0,607,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,
+169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,647,0,0,0,183,0,0,0,184,164,165,0,
+0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,
+172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+31,179,180,181,182,0,0,34,0,0,649,0,0,0,183,0,0,0,184,164,165,0,0,0,185,0,0,186,
+0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,
+0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,
+182,0,0,34,0,0,0,0,0,0,183,705,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,
+0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,
+177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,
+0,0,0,0,183,708,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,
+168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,711,0,0,0,183,0,
+0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,
+0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,744,0,0,184,164,165,
+0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,
+171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,31,179,180,181,182,0,0,34,0,0,0,0,0,0,183,748,0,0,184,164,165,0,0,0,185,0,0,
+186,0,187,188,0,166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,
+0,0,0,175,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,
+181,182,0,0,34,0,0,0,0,0,0,183,750,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,
+166,0,167,189,190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,
+0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,
+0,0,0,0,0,183,780,0,0,184,164,165,0,0,0,185,0,0,186,0,187,188,0,166,0,167,189,
+190,168,0,0,0,0,0,0,0,169,170,0,0,171,172,173,174,0,0,0,175,0,176,0,177,178,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,164,165,
+183,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,190,0,169,170,0,0,
+171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,31,179,180,181,182,0,0,34,0,0,0,320,164,165,183,0,0,0,184,0,0,0,0,0,185,166,0,
+186,0,187,188,0,0,0,0,189,190,0,169,170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,
+178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,
+626,164,165,183,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,190,0,
+169,170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,164,165,315,0,0,0,184,0,0,0,0,0,
 185,166,0,186,0,187,188,0,0,0,0,189,190,0,169,170,0,0,171,172,173,174,0,0,0,0,0,
 176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,
-34,0,0,0,626,164,165,183,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,
-190,0,169,170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,0,164,165,315,0,0,0,184,0,0,
-0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,190,0,169,170,0,0,171,172,173,174,0,0,
-0,0,0,176,0,177,178,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,31,179,180,181,182,
-0,0,34,0,0,0,0,164,165,331,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,
-189,190,0,169,170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,7,8,9,10,11,
-12,13,14,15,16,17,18,19,20,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,22,0,0,183,0,
-0,0,184,0,0,0,27,28,185,0,0,186,0,187,188,0,0,29,30,189,190,148,7,8,9,10,11,12,
-13,14,15,16,17,18,19,20,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,32,33,0,35,0,
-0,149,0,0,0,27,28,37,38,22,0,0,0,0,0,0,29,30,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,
-0,0,0,0,0,0,0,0,0,267,0,0,0,0,0,0,0,32,33,0,35,0,269,0,581,0,0,0,0,37,38,0,32,33,
-0,35,0,0,0,0,0,0,0,0,37,38,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,33,0,35,0,0,0,0,0,0,0,0,
-37,38};static short Cyc_yycheck[5003]={57,23,155,91,57,121,183,291,0,66,217,87,88,
-168,168,129,435,58,57,59,374,443,314,538,378,167,137,121,395,1,22,23,69,25,152,
-251,252,108,254,110,17,69,36,161,36,75,103,104,105,106,103,43,377,75,48,474,48,
-479,80,116,74,118,54,116,56,118,116,59,118,57,62,91,5,6,87,88,68,105,91,116,117,
-91,56,75,125,115,60,87,80,117,70,71,417,103,107,109,100,301,465,103,100,94,89,95,
-96,97,98,311,121,122,464,626,89,106,114,103,129,89,334,702,112,108,275,98,96,119,
-279,119,108,63,118,103,89,185,186,43,188,117,315,131,317,433,284,108,99,137,104,
-139,103,103,442,92,93,205,331,147,272,111,116,108,94,218,49,50,51,218,100,161,
-101,161,183,282,87,88,99,149,91,808,545,89,105,104,123,605,94,816,96,95,96,97,98,
-103,107,116,251,252,106,254,251,252,783,254,99,235,99,100,121,122,105,241,113,
-224,244,245,129,91,152,293,801,122,123,89,216,131,216,161,89,95,811,88,218,107,
-226,96,226,818,658,229,100,126,89,663,17,18,19,121,100,89,99,100,99,89,90,395,96,
-104,610,95,100,253,109,253,303,150,151,278,102,324,183,291,100,311,94,108,110,
-111,217,334,98,101,293,334,100,103,297,298,299,98,108,496,282,111,103,72,73,269,
-309,108,94,291,111,314,315,89,317,101,358,359,360,224,110,104,105,597,114,309,99,
-309,331,311,105,101,105,465,145,105,103,112,505,613,101,305,324,103,105,103,424,
-759,113,114,115,111,278,113,114,115,146,89,224,68,69,99,409,95,96,97,409,105,100,
-300,99,418,183,299,90,418,105,99,484,445,427,485,664,309,427,99,176,105,293,320,
-102,105,297,298,299,326,327,328,427,421,484,423,99,385,309,387,337,99,105,314,
-315,99,317,545,105,101,613,105,109,105,694,424,99,65,66,67,331,105,105,240,433,
-297,298,299,99,539,104,105,228,442,105,372,445,309,104,99,377,450,314,427,462,
-105,483,101,466,105,101,105,105,109,105,103,736,606,104,105,508,573,110,111,452,
-435,105,104,105,581,109,622,622,105,462,484,485,109,466,682,417,385,91,387,103,
-634,101,424,89,90,91,694,630,104,431,102,505,89,315,5,6,103,574,103,474,103,323,
-103,325,499,103,499,329,424,331,104,105,570,450,104,105,570,433,104,105,103,343,
-1,104,105,539,442,103,736,445,103,1,546,350,351,352,353,754,104,105,104,105,103,
-452,486,104,105,424,103,544,101,544,74,1,496,733,433,379,551,617,574,22,23,617,
-120,442,783,121,484,485,104,105,104,105,597,119,793,104,105,100,381,570,404,101,
-406,407,101,409,101,505,100,808,104,105,811,101,538,104,105,400,103,402,577,103,
-597,103,723,484,697,642,89,89,645,791,1,22,23,96,164,89,99,167,168,539,103,99,96,
-99,617,109,546,177,178,103,113,114,115,104,105,185,186,89,188,113,114,115,104,
-105,96,103,664,99,104,105,103,103,104,105,574,205,101,109,102,111,89,113,114,115,
-104,546,1,613,705,104,105,708,104,105,104,621,640,641,109,697,626,718,116,629,
-348,349,713,354,355,112,356,357,754,101,101,105,754,101,89,75,103,738,104,108,99,
-96,743,744,105,109,747,748,103,750,103,733,713,30,109,99,42,783,113,114,115,783,
-94,94,554,103,116,793,558,559,284,793,682,774,104,103,777,104,779,780,664,105,
-808,94,694,811,808,104,104,811,89,112,104,89,101,105,104,96,799,105,99,105,803,
-105,103,104,105,104,103,791,109,104,111,697,105,38,104,101,100,664,99,104,112,99,
-99,117,736,101,342,619,344,345,346,347,348,349,350,351,352,353,354,355,356,357,
-358,359,360,108,104,733,104,104,697,112,100,25,646,647,108,649,104,651,104,101,
-103,655,89,90,100,92,93,99,89,96,94,105,105,104,104,104,103,395,104,106,107,104,
-28,110,111,679,113,103,38,100,109,118,119,101,90,105,25,101,99,105,109,104,90,
-791,103,0,101,104,0,324,104,104,1,707,104,224,710,711,216,8,9,10,11,12,13,14,15,
-16,17,18,19,20,21,589,546,60,544,758,577,89,90,581,92,93,305,121,96,465,37,147,
-467,597,342,103,346,344,106,107,752,48,49,345,756,113,347,- 1,54,761,118,119,59,
-60,- 1,767,- 1,76,77,78,79,80,81,82,83,84,85,- 1,- 1,- 1,782,- 1,508,- 1,- 1,- 1,- 1,- 1,- 1,
-86,- 1,- 1,89,102,- 1,- 1,- 1,94,95,96,97,- 1,99,- 1,- 1,- 1,103,104,- 1,106,107,- 1,109,- 1,
-111,- 1,113,114,115,545,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,
-24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,
-51,52,53,54,55,56,57,58,59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,622,- 1,- 1,- 1,- 1,- 1,- 1,- 1,630,- 1,89,90,91,92,93,94,95,96,97,- 1,99,100,- 1,- 1,
-103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,3,
-4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,- 1,29,30,31,32,
-33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,51,52,53,54,55,56,57,58,59,
-60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,99,100,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,-
-1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,3,4,5,6,7,8,9,10,11,12,13,14,15,
-16,17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,
-43,44,45,- 1,- 1,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,
-97,- 1,99,100,101,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,
-- 1,- 1,- 1,124,125,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,
-26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,51,52,
-53,54,55,56,57,58,59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,99,100,- 1,- 1,103,- 1,- 1,
-106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,3,4,5,6,7,8,
-9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,37,38,39,40,- 1,- 1,43,44,- 1,- 1,- 1,48,49,- 1,51,52,- 1,- 1,55,56,57,58,59,60,- 1,62,
-- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,
-90,91,92,93,94,95,96,97,- 1,99,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,-
-1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,
-- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,- 1,40,- 1,- 1,43,- 1,- 1,- 1,- 1,48,49,
-- 1,51,52,- 1,- 1,55,56,57,58,59,60,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,- 1,100,- 1,- 1,
-103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,8,
-9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,37,38,- 1,40,- 1,- 1,43,- 1,- 1,- 1,- 1,48,49,- 1,51,52,- 1,- 1,55,56,57,58,59,60,- 1,62,
-- 1,64,- 1,66,67,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,89,
-90,91,92,93,94,95,96,97,- 1,37,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,48,49,- 1,113,- 1,-
-1,116,- 1,118,119,- 1,59,60,- 1,124,125,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
-17,18,19,20,21,86,- 1,24,89,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,99,- 1,37,- 1,39,- 1,- 1,106,
-107,44,- 1,46,47,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,
-96,97,- 1,- 1,- 1,101,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,114,115,0,1,- 1,3,4,5,
-6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,44,- 1,46,47,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,
+34,0,0,0,0,164,165,331,0,0,0,184,0,0,0,0,0,185,166,0,186,0,187,188,0,0,0,0,189,
+190,0,169,170,0,0,171,172,173,174,0,0,0,0,0,176,0,177,178,0,0,0,7,8,9,10,11,12,
+13,14,15,16,17,18,19,20,0,0,0,0,31,179,180,181,182,0,0,34,0,0,0,22,0,0,183,0,0,0,
+184,0,0,0,27,28,185,0,0,186,0,187,188,0,0,29,30,189,190,148,7,8,9,10,11,12,13,14,
+15,16,17,18,19,20,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,32,33,0,35,0,0,149,
+0,0,0,27,28,37,38,22,0,0,0,0,0,0,29,30,0,0,27,28,0,0,0,0,0,0,0,0,0,29,30,0,0,0,0,
+0,0,0,0,0,0,581,0,0,0,0,0,0,0,32,33,0,35,0,0,0,0,0,0,0,0,37,38,0,32,33,0,35,0,0,
+0,0,0,0,0,0,37,38};static short Cyc_yycheck[5085]={57,23,91,183,57,121,36,168,0,66,
+217,87,88,167,291,129,155,58,48,168,57,17,121,539,91,56,137,395,75,60,22,23,377,
+25,251,252,59,254,435,314,107,99,100,443,36,74,103,104,105,106,103,43,57,75,121,
+91,48,89,80,116,87,118,54,116,56,118,69,59,115,702,62,43,417,98,87,88,68,474,91,
+479,109,69,152,75,125,5,6,114,80,119,152,161,374,89,107,94,378,465,103,161,89,
+301,105,95,96,97,98,106,121,122,626,311,63,118,117,99,129,334,149,108,112,105,91,
+95,96,97,98,119,116,117,284,161,108,1,103,315,275,317,1,131,279,70,71,94,108,137,
+103,139,104,100,783,331,104,113,111,147,272,224,433,131,116,218,122,123,116,218,
+88,442,801,161,183,282,87,88,235,103,91,545,811,108,241,101,464,244,245,818,216,
+99,117,99,100,103,107,89,251,252,226,254,251,252,96,254,89,100,100,605,121,122,
+278,96,1,224,110,218,129,94,114,293,94,808,100,89,101,253,216,101,89,816,96,299,
+297,298,299,96,226,103,99,229,269,309,103,395,309,1,89,103,100,314,146,103,113,
+114,115,111,99,113,114,115,658,104,99,253,303,663,109,278,105,324,183,291,104,
+105,185,186,305,188,105,334,176,309,293,334,108,112,297,298,299,89,311,496,282,
+99,205,95,89,90,309,105,89,291,95,314,315,101,317,96,105,105,100,224,109,465,103,
+92,93,103,98,309,331,311,597,103,113,114,115,505,108,99,610,111,228,89,324,105,
+102,424,613,108,96,110,100,99,110,111,123,103,104,105,49,50,51,109,409,111,68,69,
+409,424,145,759,421,418,423,72,73,418,433,99,484,445,427,485,101,105,427,442,105,
+116,293,118,450,99,297,298,299,484,99,105,103,664,427,545,105,385,309,387,183,99,
+1,314,315,89,317,105,435,89,613,95,96,97,99,424,100,385,89,387,331,484,695,94,
+433,96,427,90,538,126,17,18,19,442,99,106,445,99,105,99,105,450,217,105,462,105,
+483,474,466,358,359,360,101,150,151,101,105,240,105,105,102,573,109,736,452,622,
+101,99,105,581,105,606,109,499,462,484,485,622,466,682,630,98,104,546,452,105,
+103,105,382,109,89,108,695,91,111,103,505,96,633,89,90,91,574,105,103,101,400,
+102,402,89,109,499,104,424,113,114,115,570,544,104,105,570,433,104,105,300,113,
+114,115,538,103,442,315,736,445,104,105,546,5,6,323,754,325,104,105,320,329,103,
+331,103,577,326,327,328,104,105,544,733,104,105,343,103,337,551,617,574,104,105,
+617,570,783,104,105,484,485,104,105,103,38,597,793,350,351,352,353,642,104,105,
+645,22,23,104,105,103,505,808,379,372,811,508,103,664,377,104,105,104,105,104,
+105,597,103,723,697,104,105,791,617,22,23,104,105,404,103,406,407,103,409,538,
+101,89,90,74,92,93,697,546,96,120,65,66,67,121,417,103,640,641,106,107,705,424,
+119,708,100,113,101,664,431,101,118,119,101,718,101,574,104,105,104,105,104,105,
+104,105,348,349,100,1,103,354,355,100,103,738,89,110,111,103,743,744,697,103,747,
+748,103,750,109,713,99,356,357,99,102,754,103,101,89,754,116,104,104,101,109,486,
+101,101,105,75,103,774,112,99,777,496,779,780,733,713,104,108,105,103,783,30,99,
+109,783,42,94,103,94,104,793,116,799,104,793,94,803,104,103,112,38,105,104,664,
+104,808,89,105,811,808,105,104,811,89,539,105,105,104,104,101,96,554,101,99,105,
+558,559,103,104,105,104,103,791,109,100,111,697,113,114,115,76,77,78,79,80,81,82,
+83,84,85,104,89,90,99,92,93,99,117,96,99,101,108,104,108,112,103,102,104,106,107,
+164,104,733,167,168,113,100,112,25,104,118,119,104,177,178,101,619,100,613,103,
+99,185,186,89,188,94,621,105,104,104,104,626,104,104,629,103,28,100,105,109,101,
+205,90,646,647,105,649,25,651,101,99,105,655,104,109,101,103,90,0,104,791,8,9,10,
+11,12,13,14,15,16,17,18,19,20,21,104,679,104,104,0,324,589,546,216,224,544,60,
+682,581,758,37,577,305,121,467,597,344,147,347,54,695,48,49,342,707,345,- 1,710,
+711,346,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,284,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,86,- 1,736,89,- 1,- 1,- 1,- 1,94,95,752,97,- 1,99,756,- 1,- 1,- 1,- 1,761,
+106,107,- 1,- 1,- 1,767,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,342,782,344,345,346,
+347,348,349,350,351,352,353,354,355,356,357,358,359,360,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,395,29,30,
+31,32,33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,51,52,53,54,55,56,57,
+58,59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,38,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,465,99,100,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,
+- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,89,90,- 1,92,93,- 1,- 1,96,- 1,
+- 1,- 1,- 1,- 1,- 1,103,508,- 1,106,107,- 1,- 1,110,111,- 1,113,- 1,- 1,- 1,- 1,118,119,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,545,3,4,5,6,7,8,9,10,11,
+12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,
+39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,- 1,64,- 1,
+66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,622,- 1,- 1,- 1,- 1,- 1,- 1,- 1,630,- 1,89,90,91,
+92,93,94,95,96,97,- 1,99,100,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,
+- 1,118,119,- 1,- 1,- 1,- 1,124,125,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
+- 1,- 1,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,
+49,50,51,52,53,54,55,56,57,58,59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,99,100,101,
+- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,
+3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,
+32,33,34,35,36,37,38,39,40,41,- 1,43,44,45,- 1,- 1,48,49,50,51,52,53,54,55,56,57,58,
+59,60,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,99,100,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,-
+1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,3,4,5,6,7,8,9,10,11,12,13,14,
+15,16,17,18,19,20,21,- 1,- 1,24,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,39,40,- 1,
+- 1,43,44,- 1,- 1,- 1,48,49,- 1,51,52,- 1,- 1,55,56,57,58,59,60,- 1,62,- 1,64,- 1,66,67,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,
+96,97,- 1,99,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,-
+1,- 1,- 1,- 1,124,125,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,25,26,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,- 1,40,- 1,- 1,43,- 1,- 1,- 1,- 1,48,49,- 1,51,52,- 1,- 1,55,
+56,57,58,59,60,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,97,- 1,- 1,100,- 1,- 1,103,- 1,- 1,106,107,-
+1,- 1,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,8,9,10,11,12,13,14,15,
+16,17,18,19,20,21,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,- 1,40,- 1,- 1,
+43,- 1,- 1,- 1,- 1,48,49,- 1,51,52,- 1,- 1,55,56,57,58,59,60,- 1,62,- 1,64,- 1,66,67,- 1,- 1,
+8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,94,95,96,
+97,- 1,37,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,48,49,- 1,113,- 1,- 1,116,- 1,118,119,- 1,
+59,60,- 1,124,125,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,86,- 1,
+24,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,99,- 1,37,- 1,39,- 1,- 1,106,107,44,- 1,46,47,48,49,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,- 1,- 1,- 1,101,- 1,
+103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,114,115,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,
+15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,
+- 1,- 1,44,- 1,46,47,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,
+96,97,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,114,115,1,- 1,3,4,5,6,7,
+8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
+1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,44,- 1,46,47,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,
+1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,89,- 1,-
+1,- 1,- 1,94,95,96,97,37,- 1,- 1,101,- 1,103,- 1,44,106,107,- 1,48,49,- 1,- 1,113,114,115,
+- 1,- 1,- 1,- 1,59,60,- 1,1,- 1,- 1,- 1,- 1,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
+- 1,- 1,- 1,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,37,- 1,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,
+48,49,- 1,- 1,113,114,115,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,86,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,- 1,99,- 1,
+- 1,- 1,103,104,- 1,106,107,- 1,109,- 1,111,- 1,113,114,115,8,9,10,11,12,13,14,15,16,
+17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,
+12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,86,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,37,99,
+39,- 1,- 1,103,- 1,44,106,107,- 1,48,49,111,- 1,113,114,115,- 1,- 1,- 1,- 1,59,60,- 1,- 1,-
+1,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,-
+1,- 1,94,95,- 1,97,- 1,- 1,100,37,102,39,- 1,- 1,106,107,44,- 1,- 1,- 1,48,49,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
+19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,- 1,100,37,- 1,39,- 1,- 1,106,107,44,
+- 1,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,12,
+13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,37,- 1,- 1,
+- 1,- 1,- 1,- 1,44,106,107,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,
-113,114,115,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,44,- 1,46,47,48,49,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-21,- 1,- 1,24,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,37,- 1,- 1,101,- 1,103,- 1,44,106,
-107,- 1,48,49,- 1,- 1,113,114,115,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,8,9,10,
-11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,89,- 1,- 1,- 1,- 1,94,95,96,97,37,
-- 1,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,48,49,- 1,- 1,113,114,115,- 1,- 1,- 1,- 1,59,60,- 1,- 1,
-- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,86,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,94,95,- 1,97,37,99,39,- 1,- 1,103,- 1,44,106,107,- 1,48,49,111,- 1,113,114,115,-
-1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
-20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,- 1,100,37,102,39,- 1,- 1,106,107,44,-
-1,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,3,4,5,6,7,8,9,
-10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,- 1,
-100,37,- 1,39,- 1,- 1,106,107,44,- 1,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,38,
-- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,94,95,- 1,97,37,- 1,- 1,- 1,- 1,- 1,- 1,44,106,107,- 1,48,49,- 1,89,90,- 1,92,93,
-- 1,- 1,96,59,60,- 1,- 1,- 1,- 1,103,- 1,- 1,106,107,- 1,- 1,- 1,- 1,- 1,113,- 1,- 1,- 1,- 1,118,
-119,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,106,
-107,25,26,27,- 1,29,30,31,32,33,34,35,36,- 1,38,- 1,40,41,- 1,43,- 1,45,- 1,- 1,- 1,- 1,
-50,51,52,53,54,55,56,57,58,- 1,- 1,61,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,99,100,- 1,- 1,
-103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,32,116,- 1,118,119,- 1,38,- 1,40,124,125,43,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,
-- 1,- 1,100,101,- 1,103,- 1,- 1,- 1,107,25,26,110,111,- 1,113,- 1,- 1,116,- 1,118,119,- 1,
-38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,
-64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,
-91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,101,- 1,103,- 1,- 1,- 1,107,25,26,110,111,- 1,113,- 1,-
-1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,
+- 1,94,95,- 1,97,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,106,107,25,26,27,- 1,29,30,31,32,33,34,35,
+36,- 1,38,- 1,40,41,- 1,43,- 1,45,- 1,- 1,- 1,- 1,50,51,52,53,54,55,56,57,58,- 1,- 1,61,62,
+- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,
+90,91,92,93,- 1,- 1,96,- 1,- 1,99,100,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,
+32,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,
 57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,101,- 1,103,- 1,- 1,- 1,107,25,
 26,110,111,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,101,- 1,
 103,- 1,- 1,- 1,107,25,26,110,111,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,
 43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,
-- 1,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,112,113,- 1,- 1,116,- 1,118,119,- 1,
-38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,
-64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,
-91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,
-116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,
-58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,
-- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,
-- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,-
-1,107,25,26,- 1,- 1,112,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,
-- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,
-125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,
-- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,
+- 1,- 1,- 1,100,101,- 1,103,- 1,- 1,- 1,107,25,26,110,111,- 1,113,- 1,- 1,116,- 1,118,119,-
+1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,-
+1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,
+90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,- 1,- 1,103,- 1,- 1,- 1,107,25,26,110,111,- 1,113,- 1,
+- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,
+57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,
+- 1,- 1,112,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,- 1,- 1,103,
+- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,-
+1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,
+99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,
+124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,
+67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,
+- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,112,113,- 1,- 1,116,- 1,118,
 119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,
 62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,112,113,-
+89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,-
 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,
 56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,
+- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,
+26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,-
+1,- 1,- 1,107,25,26,- 1,- 1,112,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,-
+1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,
+99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,
+124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,
+67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,
+- 1,- 1,96,- 1,- 1,99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,
+119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,
+62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,-
+1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,
+56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,
 26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,99,- 1,- 1,- 1,103,-
@@ -2257,50 +2279,37 @@ static short Cyc_yyr1[406]={0,126,127,127,127,127,127,127,127,128,128,129,129,12
 - 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,
 119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,
 62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-89,90,91,92,93,- 1,- 1,96,- 1,- 1,99,- 1,- 1,- 1,103,- 1,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,
-- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,
-57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,
-- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,
-52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,
-- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,
-- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,
-124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,
-67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,
-- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,
-119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,
-62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,- 1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,
-- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,
-64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,
-91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,25,26,103,- 1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,
-116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,
-- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,
-92,93,- 1,- 1,96,- 1,- 1,- 1,100,25,26,103,- 1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,
-- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,
-66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,
-93,- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,- 1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,
-118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,
-67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,
-- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,- 1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,118,
-119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,
-- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,
-96,- 1,- 1,- 1,37,- 1,- 1,103,- 1,- 1,- 1,107,- 1,- 1,- 1,48,49,113,- 1,- 1,116,- 1,118,119,- 1,
-- 1,59,60,124,125,63,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,8,9,10,11,12,13,
-14,15,16,17,18,19,20,21,37,94,95,- 1,97,- 1,- 1,100,- 1,- 1,- 1,48,49,106,107,37,- 1,- 1,
-- 1,- 1,- 1,- 1,59,60,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,86,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,99,- 1,86,- 1,- 1,- 1,- 1,106,107,
-- 1,94,95,- 1,97,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,106,107,8,9,10,11,12,13,14,15,16,17,18,19,
-20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,106,107};unsigned char Cyc_Yyimpossible[17]="\000\000\000\000Yyimpossible";
-unsigned char Cyc_Yystack_overflow[21]="\000\000\000\000Yystack_overflow";void Cyc_yyerror(
+89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,26,- 1,- 1,- 1,113,-
+1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,- 1,- 1,55,
+56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,- 1,- 1,103,104,- 1,- 1,107,25,
+26,- 1,- 1,- 1,113,- 1,- 1,116,- 1,118,119,- 1,38,- 1,40,124,125,43,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+51,52,- 1,- 1,55,56,57,58,- 1,- 1,- 1,62,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,-
+1,- 1,- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,
+- 1,- 1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,25,26,103,- 1,- 1,
+- 1,107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,-
+1,55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,100,25,26,103,- 1,- 1,- 1,
+107,- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,
+55,56,57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,- 1,- 1,- 1,107,
+- 1,- 1,- 1,- 1,- 1,113,38,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,
+57,58,- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,- 1,25,26,103,- 1,- 1,- 1,107,- 1,- 1,
+- 1,- 1,- 1,113,38,- 1,116,- 1,118,119,- 1,- 1,- 1,- 1,124,125,- 1,51,52,- 1,- 1,55,56,57,58,
+- 1,- 1,- 1,- 1,- 1,64,- 1,66,67,- 1,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,-
+1,- 1,- 1,89,90,91,92,93,- 1,- 1,96,- 1,- 1,- 1,37,- 1,- 1,103,- 1,- 1,- 1,107,- 1,- 1,- 1,48,
+49,113,- 1,- 1,116,- 1,118,119,- 1,- 1,59,60,124,125,63,8,9,10,11,12,13,14,15,16,17,
+18,19,20,21,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,37,94,95,- 1,97,- 1,- 1,100,
+- 1,- 1,- 1,48,49,106,107,37,- 1,- 1,- 1,- 1,- 1,- 1,59,60,- 1,- 1,48,49,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,59,60,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,86,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,95,- 1,97,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,106,107,- 1,94,95,- 1,97,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,106,107};
+unsigned char Cyc_Yyimpossible[17]="\000\000\000\000Yyimpossible";unsigned char
+Cyc_Yystack_overflow[21]="\000\000\000\000Yystack_overflow";void Cyc_yyerror(
 struct _tagged_arr);int Cyc_yylex();static int Cyc_yychar=(int)'\000';void*Cyc_yylval=(
-void*)Cyc_YYINITIALSVAL;static int Cyc_yynerrs=0;struct _tuple15{struct _tagged_arr
+void*)Cyc_YYINITIALSVAL;static int Cyc_yynerrs=0;struct _tuple16{struct _tagged_arr
 f1;void*f2;};static unsigned char _tmp389[8]="stdcall";static unsigned char _tmp38A[
 6]="cdecl";static unsigned char _tmp38B[9]="fastcall";static unsigned char _tmp38C[9]="noreturn";
 static unsigned char _tmp38D[6]="const";static unsigned char _tmp38E[8]="aligned";
@@ -2309,50 +2318,49 @@ static unsigned char _tmp391[7]="unused";static unsigned char _tmp392[5]="weak";
 static unsigned char _tmp393[10]="dllimport";static unsigned char _tmp394[10]="dllexport";
 static unsigned char _tmp395[23]="no_instrument_function";static unsigned char
 _tmp396[12]="constructor";static unsigned char _tmp397[11]="destructor";static
-unsigned char _tmp398[22]="no_check_memory_usage";struct _tuple16{void*f1;void*f2;
-};struct _tuple17{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*f2;};int Cyc_yyparse(){
-int yystate;int yyn=0;int yyerrstatus;int yychar1=0;int yyssp_offset;short*yyss=(
-short*)({unsigned int _tmp839=10000;short*_tmp83A=(short*)_cycalloc_atomic(
-_check_times(sizeof(short),_tmp839));{unsigned int _tmp83B=_tmp839;unsigned int i;
-for(i=0;i < _tmp83B;i ++){_tmp83A[i]=(short)0;}}_tmp83A;});int yyvsp_offset;void**
-yyvs=(void**)({unsigned int _tmp836=10000;void**_tmp837=(void**)_cycalloc(
-_check_times(sizeof(void*),_tmp836));{unsigned int _tmp838=_tmp836;unsigned int i;
-for(i=0;i < _tmp838;i ++){_tmp837[i]=Cyc_yylval;}}_tmp837;});int yylsp_offset;
-struct Cyc_Yyltype*yyls=(struct Cyc_Yyltype*)({unsigned int _tmp833=10000;struct Cyc_Yyltype*
-_tmp834=(struct Cyc_Yyltype*)_cycalloc_atomic(_check_times(sizeof(struct Cyc_Yyltype),
-_tmp833));{unsigned int _tmp835=_tmp833;unsigned int i;for(i=0;i < _tmp835;i ++){
-_tmp834[i]=Cyc_yynewloc();}}_tmp834;});int yystacksize=10000;void*yyval=Cyc_yylval;
-int yylen;yystate=0;yyerrstatus=0;Cyc_yynerrs=0;Cyc_yychar=- 2;yyssp_offset=- 1;
-yyvsp_offset=0;yylsp_offset=0;yynewstate: yyss[_check_known_subscript_notnull(
-10000,++ yyssp_offset)]=(short)yystate;if(yyssp_offset >= yystacksize - 1){if(
-yystacksize >= 10000){Cyc_yyerror(_tag_arr("parser stack overflow",sizeof(
-unsigned char),22));(int)_throw((void*)Cyc_Yystack_overflow);}}goto yybackup;
-yybackup: yyn=(int)Cyc_yypact[yystate];if(yyn == - 32768)goto yydefault;if(Cyc_yychar
-== - 2)Cyc_yychar=Cyc_yylex();if(Cyc_yychar <= 0){yychar1=0;Cyc_yychar=0;}else{
-yychar1=(Cyc_yychar > 0?Cyc_yychar <= 353: 0)?(int)Cyc_yytranslate[
-_check_known_subscript_notnull(354,Cyc_yychar)]: 240;}yyn +=yychar1;if((yyn < 0?1:
-yyn > 5002)?1: Cyc_yycheck[yyn]!= yychar1)goto yydefault;yyn=(int)Cyc_yytable[yyn];
-if(yyn < 0){if(yyn == - 32768)goto yyerrlab;yyn=- yyn;goto yyreduce;}else{if(yyn == 0)
-goto yyerrlab;}if(yyn == 825)return 0;if(Cyc_yychar != 0)Cyc_yychar=- 2;yyvs[
-_check_known_subscript_notnull(10000,++ yyvsp_offset)]=Cyc_yylval;yyls[
-_check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;if(yyerrstatus
-!= 0)yyerrstatus --;yystate=yyn;goto yynewstate;yydefault: yyn=(int)Cyc_yydefact[
-yystate];if(yyn == 0)goto yyerrlab;yyreduce: yylen=(int)Cyc_yyr2[yyn];if(yylen > 0)
-yyval=yyvs[_check_known_subscript_notnull(10000,(yyvsp_offset + 1)- yylen)];
-switch(yyn){case 1: _LL1B9: yyval=yyvs[yyvsp_offset];Cyc_Parse_parse_result=Cyc_yyget_DeclList_tok(
-yyvs[yyvsp_offset]);break;case 2: _LL1BA: yyval=(void*)({struct Cyc_DeclList_tok_struct*
-_tmp302=_cycalloc(sizeof(*_tmp302));_tmp302[0]=({struct Cyc_DeclList_tok_struct
-_tmp303;_tmp303.tag=Cyc_DeclList_tok;_tmp303.f1=((struct Cyc_List_List*(*)(struct
-Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_imp_append)(Cyc_yyget_DeclList_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_DeclList_tok(
-yyvs[yyvsp_offset]));_tmp303;});_tmp302;});break;case 3: _LL1BB: yyval=(void*)({
-struct Cyc_DeclList_tok_struct*_tmp304=_cycalloc(sizeof(*_tmp304));_tmp304[0]=({
-struct Cyc_DeclList_tok_struct _tmp305;_tmp305.tag=Cyc_DeclList_tok;_tmp305.f1=({
-struct Cyc_List_List*_tmp306=_cycalloc(sizeof(*_tmp306));_tmp306->hd=({struct Cyc_Absyn_Decl*
-_tmp307=_cycalloc(sizeof(*_tmp307));_tmp307->r=(void*)((void*)({struct Cyc_Absyn_Using_d_struct*
-_tmp308=_cycalloc(sizeof(*_tmp308));_tmp308[0]=({struct Cyc_Absyn_Using_d_struct
-_tmp309;_tmp309.tag=9;_tmp309.f1=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp309.f2=Cyc_yyget_DeclList_tok(
+unsigned char _tmp398[22]="no_check_memory_usage";struct _tuple17{struct Cyc_List_List*
+f1;struct Cyc_Absyn_Exp*f2;};int Cyc_yyparse(){int yystate;int yyn=0;int yyerrstatus;
+int yychar1=0;int yyssp_offset;short*yyss=(short*)({unsigned int _tmp835=10000;
+short*_tmp836=(short*)_cycalloc_atomic(_check_times(sizeof(short),_tmp835));{
+unsigned int _tmp837=_tmp835;unsigned int i;for(i=0;i < _tmp837;i ++){_tmp836[i]=(
+short)0;}}_tmp836;});int yyvsp_offset;void**yyvs=(void**)({unsigned int _tmp832=
+10000;void**_tmp833=(void**)_cycalloc(_check_times(sizeof(void*),_tmp832));{
+unsigned int _tmp834=_tmp832;unsigned int i;for(i=0;i < _tmp834;i ++){_tmp833[i]=Cyc_yylval;}}
+_tmp833;});int yylsp_offset;struct Cyc_Yyltype*yyls=(struct Cyc_Yyltype*)({
+unsigned int _tmp82F=10000;struct Cyc_Yyltype*_tmp830=(struct Cyc_Yyltype*)
+_cycalloc_atomic(_check_times(sizeof(struct Cyc_Yyltype),_tmp82F));{unsigned int
+_tmp831=_tmp82F;unsigned int i;for(i=0;i < _tmp831;i ++){_tmp830[i]=Cyc_yynewloc();}}
+_tmp830;});int yystacksize=10000;void*yyval=Cyc_yylval;int yylen;yystate=0;
+yyerrstatus=0;Cyc_yynerrs=0;Cyc_yychar=- 2;yyssp_offset=- 1;yyvsp_offset=0;
+yylsp_offset=0;yynewstate: yyss[_check_known_subscript_notnull(10000,++
+yyssp_offset)]=(short)yystate;if(yyssp_offset >= yystacksize - 1){if(yystacksize >= 
+10000){Cyc_yyerror(_tag_arr("parser stack overflow",sizeof(unsigned char),22));(
+int)_throw((void*)Cyc_Yystack_overflow);}}goto yybackup;yybackup: yyn=(int)Cyc_yypact[
+yystate];if(yyn == - 32768)goto yydefault;if(Cyc_yychar == - 2)Cyc_yychar=Cyc_yylex();
+if(Cyc_yychar <= 0){yychar1=0;Cyc_yychar=0;}else{yychar1=(Cyc_yychar > 0?Cyc_yychar
+<= 353: 0)?(int)Cyc_yytranslate[_check_known_subscript_notnull(354,Cyc_yychar)]:
+240;}yyn +=yychar1;if((yyn < 0?1: yyn > 5084)?1: Cyc_yycheck[yyn]!= yychar1)goto
+yydefault;yyn=(int)Cyc_yytable[yyn];if(yyn < 0){if(yyn == - 32768)goto yyerrlab;yyn=
+- yyn;goto yyreduce;}else{if(yyn == 0)goto yyerrlab;}if(yyn == 825)return 0;if(Cyc_yychar
+!= 0)Cyc_yychar=- 2;yyvs[_check_known_subscript_notnull(10000,++ yyvsp_offset)]=
+Cyc_yylval;yyls[_check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;
+if(yyerrstatus != 0)yyerrstatus --;yystate=yyn;goto yynewstate;yydefault: yyn=(int)
+Cyc_yydefact[yystate];if(yyn == 0)goto yyerrlab;yyreduce: yylen=(int)Cyc_yyr2[yyn];
+if(yylen > 0)yyval=yyvs[_check_known_subscript_notnull(10000,(yyvsp_offset + 1)- 
+yylen)];switch(yyn){case 1: _LL1B9: yyval=yyvs[yyvsp_offset];Cyc_Parse_parse_result=
+Cyc_yyget_DeclList_tok(yyvs[yyvsp_offset]);break;case 2: _LL1BA: yyval=(void*)({
+struct Cyc_DeclList_tok_struct*_tmp302=_cycalloc(sizeof(*_tmp302));_tmp302[0]=({
+struct Cyc_DeclList_tok_struct _tmp303;_tmp303.tag=Cyc_DeclList_tok;_tmp303.f1=((
+struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_imp_append)(
+Cyc_yyget_DeclList_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
+Cyc_yyget_DeclList_tok(yyvs[yyvsp_offset]));_tmp303;});_tmp302;});break;case 3:
+_LL1BB: yyval=(void*)({struct Cyc_DeclList_tok_struct*_tmp304=_cycalloc(sizeof(*
+_tmp304));_tmp304[0]=({struct Cyc_DeclList_tok_struct _tmp305;_tmp305.tag=Cyc_DeclList_tok;
+_tmp305.f1=({struct Cyc_List_List*_tmp306=_cycalloc(sizeof(*_tmp306));_tmp306->hd=({
+struct Cyc_Absyn_Decl*_tmp307=_cycalloc(sizeof(*_tmp307));_tmp307->r=(void*)((
+void*)({struct Cyc_Absyn_Using_d_struct*_tmp308=_cycalloc(sizeof(*_tmp308));
+_tmp308[0]=({struct Cyc_Absyn_Using_d_struct _tmp309;_tmp309.tag=9;_tmp309.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp309.f2=Cyc_yyget_DeclList_tok(
 yyvs[yyvsp_offset]);_tmp309;});_tmp308;}));_tmp307->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
 yylsp_offset]).last_line);_tmp307;});_tmp306->tl=0;_tmp306;});_tmp305;});_tmp304;});
@@ -2628,7 +2636,7 @@ _tmp382;_tmp382.tag=Cyc_AttributeList_tok;_tmp382.f1=({struct Cyc_List_List*
 _tmp383=_cycalloc(sizeof(*_tmp383));_tmp383->hd=(void*)Cyc_yyget_Attribute_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp383->tl=Cyc_yyget_AttributeList_tok(
 yyvs[yyvsp_offset]);_tmp383;});_tmp382;});_tmp381;});break;case 47: _LL1E7: {
-static struct Cyc_Absyn_Aligned_att_struct att_aligned={1,- 1};static struct _tuple15
+static struct Cyc_Absyn_Aligned_att_struct att_aligned={1,- 1};static struct _tuple16
 att_map[16]={{{_tmp389,_tmp389,_tmp389 + 8},(void*)0},{{_tmp38A,_tmp38A,_tmp38A + 
 6},(void*)1},{{_tmp38B,_tmp38B,_tmp38B + 9},(void*)2},{{_tmp38C,_tmp38C,_tmp38C + 
 9},(void*)3},{{_tmp38D,_tmp38D,_tmp38D + 6},(void*)4},{{_tmp38E,_tmp38E,_tmp38E + 
@@ -2659,8 +2667,8 @@ break;}}case 48: _LL1E8: yyval=(void*)({struct Cyc_Attribute_tok_struct*_tmp39A=
 _cycalloc(sizeof(*_tmp39A));_tmp39A[0]=({struct Cyc_Attribute_tok_struct _tmp39B;
 _tmp39B.tag=Cyc_Attribute_tok;_tmp39B.f1=(void*)((void*)4);_tmp39B;});_tmp39A;});
 break;case 49: _LL1E9: {struct _tagged_arr _tmp39C=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]);struct _tuple12 _tmp39E;
-int _tmp39F;struct _tuple12*_tmp39D=Cyc_yyget_Int_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]);struct _tuple13 _tmp39E;
+int _tmp39F;struct _tuple13*_tmp39D=Cyc_yyget_Int_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp39E=*_tmp39D;_tmp39F=
 _tmp39E.f2;{void*a;if(Cyc_Std_zstrcmp(_tmp39C,_tag_arr("regparm",sizeof(
 unsigned char),8))== 0?1: Cyc_Std_zstrcmp(_tmp39C,_tag_arr("__regparm__",sizeof(
@@ -2707,8 +2715,8 @@ _tmp3AB.f1=(void*)a;_tmp3AB;});_tmp3AA;});break;}case 51: _LL1EB: {struct
 _tagged_arr _tmp3AC=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 7)]);struct _tagged_arr _tmp3AD=Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 5)]);int _tmp3AF;struct
-_tuple12 _tmp3AE=*Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]);_tmp3AF=_tmp3AE.f2;{int _tmp3B1;struct _tuple12 _tmp3B0=*Cyc_yyget_Int_tok(
+_tuple13 _tmp3AE=*Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]);_tmp3AF=_tmp3AE.f2;{int _tmp3B1;struct _tuple13 _tmp3B0=*Cyc_yyget_Int_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp3B1=_tmp3B0.f2;{
 void*a=(void*)1;if(Cyc_Std_zstrcmp(_tmp3AC,_tag_arr("format",sizeof(
 unsigned char),7))== 0?1: Cyc_Std_zstrcmp(_tmp3AC,_tag_arr("__format__",sizeof(
@@ -2801,7 +2809,7 @@ _tmp3DA=_cycalloc(sizeof(*_tmp3DA));_tmp3DA[0]=({struct Cyc_TypeSpecifier_tok_st
 _tmp3DB;_tmp3DB.tag=Cyc_TypeSpecifier_tok;_tmp3DB.f1=(void*)Cyc_Parse_type_spec((
 void*)({struct Cyc_Absyn_TupleType_struct*_tmp3DC=_cycalloc(sizeof(*_tmp3DC));
 _tmp3DC[0]=({struct Cyc_Absyn_TupleType_struct _tmp3DD;_tmp3DD.tag=9;_tmp3DD.f1=((
-struct Cyc_List_List*(*)(struct _tuple8*(*f)(struct Cyc_Position_Segment*,struct
+struct Cyc_List_List*(*)(struct _tuple9*(*f)(struct Cyc_Position_Segment*,struct
 _tuple2*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(
 Cyc_Parse_get_tqual_typ,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
@@ -2993,16 +3001,16 @@ yyvsp_offset]);_tmp43A->tl=Cyc_yyget_InitDeclList_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp43A;});_tmp439;});
 _tmp438;});break;case 94: _LL216: yyval=(void*)({struct Cyc_InitDecl_tok_struct*
 _tmp43B=_cycalloc(sizeof(*_tmp43B));_tmp43B[0]=({struct Cyc_InitDecl_tok_struct
-_tmp43C;_tmp43C.tag=Cyc_InitDecl_tok;_tmp43C.f1=({struct _tuple11*_tmp43D=
+_tmp43C;_tmp43C.tag=Cyc_InitDecl_tok;_tmp43C.f1=({struct _tuple12*_tmp43D=
 _cycalloc(sizeof(*_tmp43D));_tmp43D->f1=Cyc_yyget_Declarator_tok(yyvs[
 yyvsp_offset]);_tmp43D->f2=0;_tmp43D;});_tmp43C;});_tmp43B;});break;case 95:
 _LL217: yyval=(void*)({struct Cyc_InitDecl_tok_struct*_tmp43E=_cycalloc(sizeof(*
 _tmp43E));_tmp43E[0]=({struct Cyc_InitDecl_tok_struct _tmp43F;_tmp43F.tag=Cyc_InitDecl_tok;
-_tmp43F.f1=({struct _tuple11*_tmp440=_cycalloc(sizeof(*_tmp440));_tmp440->f1=Cyc_yyget_Declarator_tok(
+_tmp43F.f1=({struct _tuple12*_tmp440=_cycalloc(sizeof(*_tmp440));_tmp440->f1=Cyc_yyget_Declarator_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp440->f2=(struct
 Cyc_Absyn_Exp*)Cyc_yyget_Exp_tok(yyvs[yyvsp_offset]);_tmp440;});_tmp43F;});
-_tmp43E;});break;case 96: _LL218: {struct _tuple14 _tmp442;struct Cyc_Absyn_Tqual
-_tmp443;struct Cyc_List_List*_tmp444;struct Cyc_List_List*_tmp445;struct _tuple14*
+_tmp43E;});break;case 96: _LL218: {struct _tuple15 _tmp442;struct Cyc_Absyn_Tqual
+_tmp443;struct Cyc_List_List*_tmp444;struct Cyc_List_List*_tmp445;struct _tuple15*
 _tmp441=Cyc_yyget_QualSpecList_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]);_tmp442=*_tmp441;_tmp443=_tmp442.f1;_tmp444=_tmp442.f2;
 _tmp445=_tmp442.f3;{struct Cyc_List_List*_tmp447;struct Cyc_List_List*_tmp448;
@@ -3016,21 +3024,21 @@ struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_zip)(Cyc_Parse_apply_tms
 _tmp443,_tmp449,_tmp447,_tmp445),_tmp448);yyval=(void*)({struct Cyc_AggrFieldDeclList_tok_struct*
 _tmp44B=_cycalloc(sizeof(*_tmp44B));_tmp44B[0]=({struct Cyc_AggrFieldDeclList_tok_struct
 _tmp44C;_tmp44C.tag=Cyc_AggrFieldDeclList_tok;_tmp44C.f1=((struct Cyc_List_List*(*)(
-struct Cyc_Absyn_Aggrfield*(*f)(struct Cyc_Position_Segment*,struct _tuple7*),
+struct Cyc_Absyn_Aggrfield*(*f)(struct Cyc_Position_Segment*,struct _tuple8*),
 struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_make_aggr_field,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).last_line),_tmp44A);_tmp44C;});_tmp44B;});break;}}}case 97:
 _LL219: yyval=(void*)({struct Cyc_QualSpecList_tok_struct*_tmp44D=_cycalloc(
 sizeof(*_tmp44D));_tmp44D[0]=({struct Cyc_QualSpecList_tok_struct _tmp44E;_tmp44E.tag=
-Cyc_QualSpecList_tok;_tmp44E.f1=({struct _tuple14*_tmp44F=_cycalloc(sizeof(*
+Cyc_QualSpecList_tok;_tmp44E.f1=({struct _tuple15*_tmp44F=_cycalloc(sizeof(*
 _tmp44F));_tmp44F->f1=Cyc_Absyn_empty_tqual();_tmp44F->f2=({struct Cyc_List_List*
 _tmp450=_cycalloc(sizeof(*_tmp450));_tmp450->hd=(void*)Cyc_yyget_TypeSpecifier_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp450->tl=0;
 _tmp450;});_tmp44F->f3=Cyc_yyget_AttributeList_tok(yyvs[yyvsp_offset]);_tmp44F;});
 _tmp44E;});_tmp44D;});break;case 98: _LL21A: yyval=(void*)({struct Cyc_QualSpecList_tok_struct*
 _tmp451=_cycalloc(sizeof(*_tmp451));_tmp451[0]=({struct Cyc_QualSpecList_tok_struct
-_tmp452;_tmp452.tag=Cyc_QualSpecList_tok;_tmp452.f1=({struct _tuple14*_tmp453=
+_tmp452;_tmp452.tag=Cyc_QualSpecList_tok;_tmp452.f1=({struct _tuple15*_tmp453=
 _cycalloc(sizeof(*_tmp453));_tmp453->f1=(*Cyc_yyget_QualSpecList_tok(yyvs[
 yyvsp_offset])).f1;_tmp453->f2=({struct Cyc_List_List*_tmp454=_cycalloc(sizeof(*
 _tmp454));_tmp454->hd=(void*)Cyc_yyget_TypeSpecifier_tok(yyvs[
@@ -3040,12 +3048,12 @@ yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(*Cyc_yyget_QualSp
 yyvs[yyvsp_offset])).f3);_tmp453;});_tmp452;});_tmp451;});break;case 99: _LL21B:
 yyval=(void*)({struct Cyc_QualSpecList_tok_struct*_tmp455=_cycalloc(sizeof(*
 _tmp455));_tmp455[0]=({struct Cyc_QualSpecList_tok_struct _tmp456;_tmp456.tag=Cyc_QualSpecList_tok;
-_tmp456.f1=({struct _tuple14*_tmp457=_cycalloc(sizeof(*_tmp457));_tmp457->f1=Cyc_yyget_TypeQual_tok(
+_tmp456.f1=({struct _tuple15*_tmp457=_cycalloc(sizeof(*_tmp457));_tmp457->f1=Cyc_yyget_TypeQual_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp457->f2=0;
 _tmp457->f3=Cyc_yyget_AttributeList_tok(yyvs[yyvsp_offset]);_tmp457;});_tmp456;});
 _tmp455;});break;case 100: _LL21C: yyval=(void*)({struct Cyc_QualSpecList_tok_struct*
 _tmp458=_cycalloc(sizeof(*_tmp458));_tmp458[0]=({struct Cyc_QualSpecList_tok_struct
-_tmp459;_tmp459.tag=Cyc_QualSpecList_tok;_tmp459.f1=({struct _tuple14*_tmp45A=
+_tmp459;_tmp459.tag=Cyc_QualSpecList_tok;_tmp459.f1=({struct _tuple15*_tmp45A=
 _cycalloc(sizeof(*_tmp45A));_tmp45A->f1=Cyc_Absyn_combine_tqual(Cyc_yyget_TypeQual_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),(*Cyc_yyget_QualSpecList_tok(
 yyvs[yyvsp_offset])).f1);_tmp45A->f2=(*Cyc_yyget_QualSpecList_tok(yyvs[
@@ -3068,12 +3076,12 @@ yyvsp_offset]);_tmp462->tl=Cyc_yyget_InitDeclList_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp462;});_tmp461;});
 _tmp460;});break;case 104: _LL220: yyval=(void*)({struct Cyc_InitDecl_tok_struct*
 _tmp463=_cycalloc(sizeof(*_tmp463));_tmp463[0]=({struct Cyc_InitDecl_tok_struct
-_tmp464;_tmp464.tag=Cyc_InitDecl_tok;_tmp464.f1=({struct _tuple11*_tmp465=
+_tmp464;_tmp464.tag=Cyc_InitDecl_tok;_tmp464.f1=({struct _tuple12*_tmp465=
 _cycalloc(sizeof(*_tmp465));_tmp465->f1=Cyc_yyget_Declarator_tok(yyvs[
 yyvsp_offset]);_tmp465->f2=0;_tmp465;});_tmp464;});_tmp463;});break;case 105:
 _LL221: yyval=(void*)({struct Cyc_InitDecl_tok_struct*_tmp466=_cycalloc(sizeof(*
 _tmp466));_tmp466[0]=({struct Cyc_InitDecl_tok_struct _tmp467;_tmp467.tag=Cyc_InitDecl_tok;
-_tmp467.f1=({struct _tuple11*_tmp468=_cycalloc(sizeof(*_tmp468));_tmp468->f1=({
+_tmp467.f1=({struct _tuple12*_tmp468=_cycalloc(sizeof(*_tmp468));_tmp468->f1=({
 struct Cyc_Parse_Declarator*_tmp469=_cycalloc(sizeof(*_tmp469));_tmp469->id=({
 struct _tuple1*_tmp46A=_cycalloc(sizeof(*_tmp46A));_tmp46A->f1=Cyc_Absyn_rel_ns_null;
 _tmp46A->f2=_init_tag_arr(_cycalloc(sizeof(struct _tagged_arr)),"",sizeof(
@@ -3081,7 +3089,7 @@ unsigned char),1);_tmp46A;});_tmp469->tms=0;_tmp469;});_tmp468->f2=(struct Cyc_A
 Cyc_yyget_Exp_tok(yyvs[yyvsp_offset]);_tmp468;});_tmp467;});_tmp466;});break;
 case 106: _LL222: yyval=(void*)({struct Cyc_InitDecl_tok_struct*_tmp46C=_cycalloc(
 sizeof(*_tmp46C));_tmp46C[0]=({struct Cyc_InitDecl_tok_struct _tmp46D;_tmp46D.tag=
-Cyc_InitDecl_tok;_tmp46D.f1=({struct _tuple11*_tmp46E=_cycalloc(sizeof(*_tmp46E));
+Cyc_InitDecl_tok;_tmp46D.f1=({struct _tuple12*_tmp46E=_cycalloc(sizeof(*_tmp46E));
 _tmp46E->f1=Cyc_yyget_Declarator_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]);_tmp46E->f2=(struct Cyc_Absyn_Exp*)Cyc_yyget_Exp_tok(yyvs[
 yyvsp_offset]);_tmp46E;});_tmp46D;});_tmp46C;});break;case 107: _LL223: {struct Cyc_List_List*
@@ -3194,7 +3202,7 @@ _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 yylsp_offset]).last_line);_tmp4A7->sc=(void*)Cyc_yyget_Scope_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp4A7;});_tmp4A6;});
 _tmp4A5;});break;case 121: _LL231: {struct Cyc_List_List*_tmp4A8=((struct Cyc_List_List*(*)(
-struct _tuple8*(*f)(struct Cyc_Position_Segment*,struct _tuple2*),struct Cyc_Position_Segment*
+struct _tuple9*(*f)(struct Cyc_Position_Segment*,struct _tuple2*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_get_tqual_typ,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((struct Cyc_List_List*(*)(
@@ -3240,9 +3248,9 @@ _tmp4BA[0]=({struct Cyc_Absyn_ConstArray_mod_struct _tmp4BB;_tmp4BB.tag=0;_tmp4B
 Cyc_yyget_Exp_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
 _tmp4BB;});_tmp4BA;}));_tmp4B9->tl=(Cyc_yyget_Declarator_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms;_tmp4B9;});_tmp4B8;});
-_tmp4B7;});_tmp4B6;});break;case 128: _LL238: {struct _tuple13 _tmp4BD;struct Cyc_List_List*
+_tmp4B7;});_tmp4B6;});break;case 128: _LL238: {struct _tuple14 _tmp4BD;struct Cyc_List_List*
 _tmp4BE;int _tmp4BF;struct Cyc_Absyn_VarargInfo*_tmp4C0;struct Cyc_Core_Opt*_tmp4C1;
-struct Cyc_List_List*_tmp4C2;struct _tuple13*_tmp4BC=Cyc_yyget_YY1(yyvs[
+struct Cyc_List_List*_tmp4C2;struct _tuple14*_tmp4BC=Cyc_yyget_YY1(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp4BD=*_tmp4BC;_tmp4BE=
 _tmp4BD.f1;_tmp4BF=_tmp4BD.f2;_tmp4C0=_tmp4BD.f3;_tmp4C1=_tmp4BD.f4;_tmp4C2=
 _tmp4BD.f5;yyval=(void*)({struct Cyc_Declarator_tok_struct*_tmp4C3=_cycalloc(
@@ -3422,7 +3430,7 @@ _tmp51B;_tmp51B.tag=Cyc_TypeQual_tok;_tmp51B.f1=Cyc_Absyn_combine_tqual(Cyc_yyge
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_TypeQual_tok(
 yyvs[yyvsp_offset]));_tmp51B;});_tmp51A;});break;case 150: _LL24E: yyval=(void*)({
 struct Cyc_YY1_struct*_tmp51C=_cycalloc(sizeof(*_tmp51C));_tmp51C[0]=({struct Cyc_YY1_struct
-_tmp51D;_tmp51D.tag=Cyc_YY1;_tmp51D.f1=({struct _tuple13*_tmp51E=_cycalloc(
+_tmp51D;_tmp51D.tag=Cyc_YY1;_tmp51D.f1=({struct _tuple14*_tmp51E=_cycalloc(
 sizeof(*_tmp51E));_tmp51E->f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
 Cyc_List_imp_rev)(Cyc_yyget_ParamDeclList_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]));_tmp51E->f2=0;_tmp51E->f3=
@@ -3430,7 +3438,7 @@ _check_known_subscript_notnull(10000,yyvsp_offset - 2)]));_tmp51E->f2=0;_tmp51E-
 yyvsp_offset - 1)]);_tmp51E->f5=Cyc_yyget_Rgnorder_tok(yyvs[yyvsp_offset]);
 _tmp51E;});_tmp51D;});_tmp51C;});break;case 151: _LL24F: yyval=(void*)({struct Cyc_YY1_struct*
 _tmp51F=_cycalloc(sizeof(*_tmp51F));_tmp51F[0]=({struct Cyc_YY1_struct _tmp520;
-_tmp520.tag=Cyc_YY1;_tmp520.f1=({struct _tuple13*_tmp521=_cycalloc(sizeof(*
+_tmp520.tag=Cyc_YY1;_tmp520.f1=({struct _tuple14*_tmp521=_cycalloc(sizeof(*
 _tmp521));_tmp521->f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
 Cyc_yyget_ParamDeclList_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 4)]));_tmp521->f2=1;_tmp521->f3=0;_tmp521->f4=Cyc_yyget_TypeOpt_tok(
@@ -3444,7 +3452,7 @@ _tmp527=({struct Cyc_Absyn_VarargInfo*_tmp52B=_cycalloc(sizeof(*_tmp52B));_tmp52
 _tmp524;_tmp52B->tq=_tmp525;_tmp52B->type=(void*)_tmp526;_tmp52B->inject=Cyc_yyget_Bool_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]);_tmp52B;});yyval=(
 void*)({struct Cyc_YY1_struct*_tmp528=_cycalloc(sizeof(*_tmp528));_tmp528[0]=({
-struct Cyc_YY1_struct _tmp529;_tmp529.tag=Cyc_YY1;_tmp529.f1=({struct _tuple13*
+struct Cyc_YY1_struct _tmp529;_tmp529.tag=Cyc_YY1;_tmp529.f1=({struct _tuple14*
 _tmp52A=_cycalloc(sizeof(*_tmp52A));_tmp52A->f1=0;_tmp52A->f2=0;_tmp52A->f3=
 _tmp527;_tmp52A->f4=Cyc_yyget_TypeOpt_tok(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 1)]);_tmp52A->f5=Cyc_yyget_Rgnorder_tok(yyvs[yyvsp_offset]);
@@ -3457,7 +3465,7 @@ _tmp535=_cycalloc(sizeof(*_tmp535));_tmp535->name=_tmp52E;_tmp535->tq=_tmp52F;
 _tmp535->type=(void*)_tmp530;_tmp535->inject=Cyc_yyget_Bool_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]);_tmp535;});yyval=(void*)({
 struct Cyc_YY1_struct*_tmp532=_cycalloc(sizeof(*_tmp532));_tmp532[0]=({struct Cyc_YY1_struct
-_tmp533;_tmp533.tag=Cyc_YY1;_tmp533.f1=({struct _tuple13*_tmp534=_cycalloc(
+_tmp533;_tmp533.tag=Cyc_YY1;_tmp533.f1=({struct _tuple14*_tmp534=_cycalloc(
 sizeof(*_tmp534));_tmp534->f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
 Cyc_List_imp_rev)(Cyc_yyget_ParamDeclList_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 6)]));_tmp534->f2=0;_tmp534->f3=
@@ -3491,7 +3499,7 @@ _tmp546;});_tmp545;});break;case 159: _LL257: yyval=yyvs[yyvsp_offset];break;cas
 160: _LL258: yyval=(void*)({struct Cyc_Rgnorder_tok_struct*_tmp547=_cycalloc(
 sizeof(*_tmp547));_tmp547[0]=({struct Cyc_Rgnorder_tok_struct _tmp548;_tmp548.tag=
 Cyc_Rgnorder_tok;_tmp548.f1=({struct Cyc_List_List*_tmp549=_cycalloc(sizeof(*
-_tmp549));_tmp549->hd=({struct _tuple16*_tmp54A=_cycalloc(sizeof(*_tmp54A));
+_tmp549));_tmp549->hd=({struct _tuple4*_tmp54A=_cycalloc(sizeof(*_tmp54A));
 _tmp54A->f1=Cyc_Parse_id2type(Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),(void*)({struct Cyc_Absyn_Eq_kb_struct*
 _tmp54D=_cycalloc(sizeof(*_tmp54D));_tmp54D[0]=({struct Cyc_Absyn_Eq_kb_struct
@@ -3503,7 +3511,7 @@ _tmp54C;});_tmp54B;}));_tmp54A;});_tmp549->tl=0;_tmp549;});_tmp548;});_tmp547;})
 break;case 161: _LL259: yyval=(void*)({struct Cyc_Rgnorder_tok_struct*_tmp54F=
 _cycalloc(sizeof(*_tmp54F));_tmp54F[0]=({struct Cyc_Rgnorder_tok_struct _tmp550;
 _tmp550.tag=Cyc_Rgnorder_tok;_tmp550.f1=({struct Cyc_List_List*_tmp551=_cycalloc(
-sizeof(*_tmp551));_tmp551->hd=({struct _tuple16*_tmp552=_cycalloc(sizeof(*_tmp552));
+sizeof(*_tmp551));_tmp551->hd=({struct _tuple4*_tmp552=_cycalloc(sizeof(*_tmp552));
 _tmp552->f1=Cyc_Parse_id2type(Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]),(void*)({struct Cyc_Absyn_Eq_kb_struct*
 _tmp555=_cycalloc(sizeof(*_tmp555));_tmp555[0]=({struct Cyc_Absyn_Eq_kb_struct
@@ -3571,8 +3579,8 @@ Cyc_ParamDeclList_tok;_tmp575.f1=({struct Cyc_List_List*_tmp576=_cycalloc(sizeof
 _tmp576));_tmp576->hd=Cyc_yyget_ParamDecl_tok(yyvs[yyvsp_offset]);_tmp576->tl=
 Cyc_yyget_ParamDeclList_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]);_tmp576;});_tmp575;});_tmp574;});break;case 174: _LL266: {
-struct _tuple14 _tmp578;struct Cyc_Absyn_Tqual _tmp579;struct Cyc_List_List*_tmp57A;
-struct Cyc_List_List*_tmp57B;struct _tuple14*_tmp577=Cyc_yyget_QualSpecList_tok(
+struct _tuple15 _tmp578;struct Cyc_Absyn_Tqual _tmp579;struct Cyc_List_List*_tmp57A;
+struct Cyc_List_List*_tmp57B;struct _tuple15*_tmp577=Cyc_yyget_QualSpecList_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp578=*_tmp577;
 _tmp579=_tmp578.f1;_tmp57A=_tmp578.f2;_tmp57B=_tmp578.f3;{struct Cyc_Parse_Declarator
 _tmp57D;struct _tuple1*_tmp57E;struct Cyc_List_List*_tmp57F;struct Cyc_Parse_Declarator*
@@ -3581,7 +3589,7 @@ _tmp57D.id;_tmp57F=_tmp57D.tms;{void*_tmp580=Cyc_Parse_speclist2typ(_tmp57A,Cyc_
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));struct Cyc_Absyn_Tqual
 _tmp582;void*_tmp583;struct Cyc_List_List*_tmp584;struct Cyc_List_List*_tmp585;
-struct _tuple5 _tmp581=Cyc_Parse_apply_tms(_tmp579,_tmp580,_tmp57B,_tmp57F);
+struct _tuple6 _tmp581=Cyc_Parse_apply_tms(_tmp579,_tmp580,_tmp57B,_tmp57F);
 _tmp582=_tmp581.f1;_tmp583=_tmp581.f2;_tmp584=_tmp581.f3;_tmp585=_tmp581.f4;if(
 _tmp584 != 0)Cyc_Parse_err(_tag_arr("parameter with bad type params",sizeof(
 unsigned char),31),Cyc_Position_segment_of_abs((yyls[yylsp_offset]).first_line,(
@@ -3599,8 +3607,8 @@ struct Cyc_ParamDecl_tok_struct*_tmp588=_cycalloc(sizeof(*_tmp588));_tmp588[0]=(
 struct Cyc_ParamDecl_tok_struct _tmp589;_tmp589.tag=Cyc_ParamDecl_tok;_tmp589.f1=({
 struct _tuple2*_tmp58A=_cycalloc(sizeof(*_tmp58A));_tmp58A->f1=_tmp586;_tmp58A->f2=
 _tmp582;_tmp58A->f3=_tmp583;_tmp58A;});_tmp589;});_tmp588;});break;}}}}case 175:
-_LL267: {struct _tuple14 _tmp58D;struct Cyc_Absyn_Tqual _tmp58E;struct Cyc_List_List*
-_tmp58F;struct Cyc_List_List*_tmp590;struct _tuple14*_tmp58C=Cyc_yyget_QualSpecList_tok(
+_LL267: {struct _tuple15 _tmp58D;struct Cyc_Absyn_Tqual _tmp58E;struct Cyc_List_List*
+_tmp58F;struct Cyc_List_List*_tmp590;struct _tuple15*_tmp58C=Cyc_yyget_QualSpecList_tok(
 yyvs[yyvsp_offset]);_tmp58D=*_tmp58C;_tmp58E=_tmp58D.f1;_tmp58F=_tmp58D.f2;
 _tmp590=_tmp58D.f3;{void*_tmp591=Cyc_Parse_speclist2typ(_tmp58F,Cyc_Position_segment_of_abs((
 yyls[yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));if(_tmp590 != 0)({
@@ -3611,15 +3619,15 @@ struct Cyc_ParamDecl_tok_struct*_tmp593=_cycalloc(sizeof(*_tmp593));_tmp593[0]=(
 struct Cyc_ParamDecl_tok_struct _tmp594;_tmp594.tag=Cyc_ParamDecl_tok;_tmp594.f1=({
 struct _tuple2*_tmp595=_cycalloc(sizeof(*_tmp595));_tmp595->f1=0;_tmp595->f2=
 _tmp58E;_tmp595->f3=_tmp591;_tmp595;});_tmp594;});_tmp593;});break;}}case 176:
-_LL268: {struct _tuple14 _tmp597;struct Cyc_Absyn_Tqual _tmp598;struct Cyc_List_List*
-_tmp599;struct Cyc_List_List*_tmp59A;struct _tuple14*_tmp596=Cyc_yyget_QualSpecList_tok(
+_LL268: {struct _tuple15 _tmp597;struct Cyc_Absyn_Tqual _tmp598;struct Cyc_List_List*
+_tmp599;struct Cyc_List_List*_tmp59A;struct _tuple15*_tmp596=Cyc_yyget_QualSpecList_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp597=*_tmp596;
 _tmp598=_tmp597.f1;_tmp599=_tmp597.f2;_tmp59A=_tmp597.f3;{void*_tmp59B=Cyc_Parse_speclist2typ(
 _tmp599,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).last_line));struct Cyc_List_List*_tmp59C=(Cyc_yyget_AbstractDeclarator_tok(
 yyvs[yyvsp_offset]))->tms;struct Cyc_Absyn_Tqual _tmp59E;void*_tmp59F;struct Cyc_List_List*
-_tmp5A0;struct Cyc_List_List*_tmp5A1;struct _tuple5 _tmp59D=Cyc_Parse_apply_tms(
+_tmp5A0;struct Cyc_List_List*_tmp5A1;struct _tuple6 _tmp59D=Cyc_Parse_apply_tms(
 _tmp598,_tmp59B,_tmp59A,_tmp59C);_tmp59E=_tmp59D.f1;_tmp59F=_tmp59D.f2;_tmp5A0=
 _tmp59D.f3;_tmp5A1=_tmp59D.f4;if(_tmp5A0 != 0)({void*_tmp5A2[0]={};Cyc_Tcutil_warn(
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
@@ -3767,7 +3775,7 @@ _tmp5EE=(*Cyc_yyget_QualSpecList_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 1)])).f3;struct Cyc_Absyn_Tqual _tmp5EF=(*Cyc_yyget_QualSpecList_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])).f1;struct Cyc_List_List*
 _tmp5F0=(Cyc_yyget_AbstractDeclarator_tok(yyvs[yyvsp_offset]))->tms;struct
-_tuple5 _tmp5F1=Cyc_Parse_apply_tms(_tmp5EF,_tmp5ED,_tmp5EE,_tmp5F0);if(_tmp5F1.f3
+_tuple6 _tmp5F1=Cyc_Parse_apply_tms(_tmp5EF,_tmp5ED,_tmp5EE,_tmp5F0);if(_tmp5F1.f3
 != 0)({void*_tmp5F2[0]={};Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((yyls[
 yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line),_tag_arr("bad type params, ignoring",
 sizeof(unsigned char),26),_tag_arr(_tmp5F2,sizeof(void*),0));});if(_tmp5F1.f4 != 
@@ -3869,9 +3877,9 @@ _tmp631;_tmp631.tag=1;_tmp631.f1=0;_tmp631.f2=0;_tmp631.f3=0;_tmp631.f4=Cyc_yyge
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp631.f5=Cyc_yyget_Rgnorder_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp631;});_tmp630;}));
 _tmp62F;});_tmp62E;}));_tmp62D->tl=0;_tmp62D;});_tmp62C;});_tmp62B;});_tmp62A;});
-break;case 213: _LL28D: {struct _tuple13 _tmp633;struct Cyc_List_List*_tmp634;int
+break;case 213: _LL28D: {struct _tuple14 _tmp633;struct Cyc_List_List*_tmp634;int
 _tmp635;struct Cyc_Absyn_VarargInfo*_tmp636;struct Cyc_Core_Opt*_tmp637;struct Cyc_List_List*
-_tmp638;struct _tuple13*_tmp632=Cyc_yyget_YY1(yyvs[_check_known_subscript_notnull(
+_tmp638;struct _tuple14*_tmp632=Cyc_yyget_YY1(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 1)]);_tmp633=*_tmp632;_tmp634=_tmp633.f1;_tmp635=_tmp633.f2;
 _tmp636=_tmp633.f3;_tmp637=_tmp633.f4;_tmp638=_tmp633.f5;yyval=(void*)({struct
 Cyc_AbstractDeclarator_tok_struct*_tmp639=_cycalloc(sizeof(*_tmp639));_tmp639[0]=({
@@ -3898,9 +3906,9 @@ yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp648.f5=Cyc_yyg
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp648;});_tmp647;}));
 _tmp646;});_tmp645;}));_tmp644->tl=(Cyc_yyget_AbstractDeclarator_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms;_tmp644;});_tmp643;});
-_tmp642;});_tmp641;});break;case 215: _LL28F: {struct _tuple13 _tmp64A;struct Cyc_List_List*
+_tmp642;});_tmp641;});break;case 215: _LL28F: {struct _tuple14 _tmp64A;struct Cyc_List_List*
 _tmp64B;int _tmp64C;struct Cyc_Absyn_VarargInfo*_tmp64D;struct Cyc_Core_Opt*_tmp64E;
-struct Cyc_List_List*_tmp64F;struct _tuple13*_tmp649=Cyc_yyget_YY1(yyvs[
+struct Cyc_List_List*_tmp64F;struct _tuple14*_tmp649=Cyc_yyget_YY1(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp64A=*_tmp649;_tmp64B=
 _tmp64A.f1;_tmp64C=_tmp64A.f2;_tmp64D=_tmp64A.f3;_tmp64E=_tmp64A.f4;_tmp64F=
 _tmp64A.f5;yyval=(void*)({struct Cyc_AbstractDeclarator_tok_struct*_tmp650=
@@ -4474,11 +4482,11 @@ _tmp743->tl=Cyc_yyget_PatternList_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]);_tmp743;});_tmp742;});_tmp741;});break;case 292: _LL2DC: yyval=(
 void*)({struct Cyc_FieldPattern_tok_struct*_tmp744=_cycalloc(sizeof(*_tmp744));
 _tmp744[0]=({struct Cyc_FieldPattern_tok_struct _tmp745;_tmp745.tag=Cyc_FieldPattern_tok;
-_tmp745.f1=({struct _tuple10*_tmp746=_cycalloc(sizeof(*_tmp746));_tmp746->f1=0;
+_tmp745.f1=({struct _tuple11*_tmp746=_cycalloc(sizeof(*_tmp746));_tmp746->f1=0;
 _tmp746->f2=Cyc_yyget_Pattern_tok(yyvs[yyvsp_offset]);_tmp746;});_tmp745;});
 _tmp744;});break;case 293: _LL2DD: yyval=(void*)({struct Cyc_FieldPattern_tok_struct*
 _tmp747=_cycalloc(sizeof(*_tmp747));_tmp747[0]=({struct Cyc_FieldPattern_tok_struct
-_tmp748;_tmp748.tag=Cyc_FieldPattern_tok;_tmp748.f1=({struct _tuple10*_tmp749=
+_tmp748;_tmp748.tag=Cyc_FieldPattern_tok;_tmp748.f1=({struct _tuple11*_tmp749=
 _cycalloc(sizeof(*_tmp749));_tmp749->f1=Cyc_yyget_DesignatorList_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp749->f2=Cyc_yyget_Pattern_tok(
 yyvs[yyvsp_offset]);_tmp749;});_tmp748;});_tmp747;});break;case 294: _LL2DE: yyval=(
@@ -4925,91 +4933,82 @@ yyls[yylsp_offset]).last_line));_tmp806;});_tmp805;});break;case 383: _LL337: yy
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;case 384: _LL338:
 yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp807=_cycalloc(sizeof(*_tmp807));
 _tmp807[0]=({struct Cyc_Exp_tok_struct _tmp808;_tmp808.tag=Cyc_Exp_tok;_tmp808.f1=
-Cyc_Absyn_noinstantiate_exp(Cyc_Absyn_new_exp((void*)({struct Cyc_Absyn_UnknownId_e_struct*
-_tmp809=_cycalloc(sizeof(*_tmp809));_tmp809[0]=({struct Cyc_Absyn_UnknownId_e_struct
-_tmp80A;_tmp80A.tag=2;_tmp80A.f1=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp80A;});_tmp809;}),
-Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line)),Cyc_Position_segment_of_abs((yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-yylsp_offset]).last_line));_tmp808;});_tmp807;});break;case 385: _LL339: yyval=(
-void*)({struct Cyc_Exp_tok_struct*_tmp80B=_cycalloc(sizeof(*_tmp80B));_tmp80B[0]=({
-struct Cyc_Exp_tok_struct _tmp80C;_tmp80C.tag=Cyc_Exp_tok;_tmp80C.f1=Cyc_Absyn_instantiate_exp(
-Cyc_Absyn_new_exp((void*)({struct Cyc_Absyn_UnknownId_e_struct*_tmp80D=_cycalloc(
-sizeof(*_tmp80D));_tmp80D[0]=({struct Cyc_Absyn_UnknownId_e_struct _tmp80E;_tmp80E.tag=
-2;_tmp80E.f1=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 4)]);_tmp80E;});_tmp80D;}),Cyc_Position_segment_of_abs((yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 4)]).last_line)),Cyc_List_imp_rev(
-Cyc_yyget_TypeList_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),
-Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 4)]).first_line,(yyls[yylsp_offset]).last_line));_tmp80C;});
-_tmp80B;});break;case 386: _LL33A: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp80F=
-_cycalloc(sizeof(*_tmp80F));_tmp80F[0]=({struct Cyc_Exp_tok_struct _tmp810;_tmp810.tag=
-Cyc_Exp_tok;_tmp810.f1=Cyc_Absyn_tuple_exp(Cyc_yyget_ExpList_tok(yyvs[
+Cyc_Absyn_noinstantiate_exp(Cyc_yyget_Exp_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-yylsp_offset]).last_line));_tmp810;});_tmp80F;});break;case 387: _LL33B: yyval=(
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
+yylsp_offset]).last_line));_tmp808;});_tmp807;});break;case 385: _LL339: yyval=(
+void*)({struct Cyc_Exp_tok_struct*_tmp809=_cycalloc(sizeof(*_tmp809));_tmp809[0]=({
+struct Cyc_Exp_tok_struct _tmp80A;_tmp80A.tag=Cyc_Exp_tok;_tmp80A.f1=Cyc_Absyn_instantiate_exp(
+Cyc_yyget_Exp_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),
+Cyc_List_imp_rev(Cyc_yyget_TypeList_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)])),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
+yylsp_offset]).last_line));_tmp80A;});_tmp809;});break;case 386: _LL33A: yyval=(
+void*)({struct Cyc_Exp_tok_struct*_tmp80B=_cycalloc(sizeof(*_tmp80B));_tmp80B[0]=({
+struct Cyc_Exp_tok_struct _tmp80C;_tmp80C.tag=Cyc_Exp_tok;_tmp80C.f1=Cyc_Absyn_tuple_exp(
+Cyc_yyget_ExpList_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
+Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 3)]).first_line,(yyls[yylsp_offset]).last_line));_tmp80C;});
+_tmp80B;});break;case 387: _LL33B: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp80D=
+_cycalloc(sizeof(*_tmp80D));_tmp80D[0]=({struct Cyc_Exp_tok_struct _tmp80E;_tmp80E.tag=
+Cyc_Exp_tok;_tmp80E.f1=Cyc_Absyn_new_exp((void*)({struct Cyc_Absyn_Struct_e_struct*
+_tmp80F=_cycalloc(sizeof(*_tmp80F));_tmp80F[0]=({struct Cyc_Absyn_Struct_e_struct
+_tmp810;_tmp810.tag=28;_tmp810.f1=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)]);_tmp810.f2=Cyc_yyget_TypeList_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp810.f3=((struct
+Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_InitializerList_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]));_tmp810.f4=0;
+_tmp810;});_tmp80F;}),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
+yylsp_offset]).last_line));_tmp80E;});_tmp80D;});break;case 388: _LL33C: yyval=(
 void*)({struct Cyc_Exp_tok_struct*_tmp811=_cycalloc(sizeof(*_tmp811));_tmp811[0]=({
-struct Cyc_Exp_tok_struct _tmp812;_tmp812.tag=Cyc_Exp_tok;_tmp812.f1=Cyc_Absyn_new_exp((
-void*)({struct Cyc_Absyn_Struct_e_struct*_tmp813=_cycalloc(sizeof(*_tmp813));
-_tmp813[0]=({struct Cyc_Absyn_Struct_e_struct _tmp814;_tmp814.tag=28;_tmp814.f1=
-Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]);
-_tmp814.f2=Cyc_yyget_TypeList_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]);_tmp814.f3=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
-Cyc_List_imp_rev)(Cyc_yyget_InitializerList_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]));_tmp814.f4=0;_tmp814;});
-_tmp813;}),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 4)]).first_line,(yyls[yylsp_offset]).last_line));_tmp812;});
-_tmp811;});break;case 388: _LL33C: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp815=
-_cycalloc(sizeof(*_tmp815));_tmp815[0]=({struct Cyc_Exp_tok_struct _tmp816;_tmp816.tag=
-Cyc_Exp_tok;_tmp816.f1=Cyc_Absyn_stmt_exp(Cyc_yyget_Stmt_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-yylsp_offset]).last_line));_tmp816;});_tmp815;});break;case 389: _LL33D: yyval=(
-void*)({struct Cyc_ExpList_tok_struct*_tmp817=_cycalloc(sizeof(*_tmp817));_tmp817[
-0]=({struct Cyc_ExpList_tok_struct _tmp818;_tmp818.tag=Cyc_ExpList_tok;_tmp818.f1=((
-struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_ExpList_tok(
-yyvs[yyvsp_offset]));_tmp818;});_tmp817;});break;case 390: _LL33E: yyval=(void*)({
-struct Cyc_ExpList_tok_struct*_tmp819=_cycalloc(sizeof(*_tmp819));_tmp819[0]=({
-struct Cyc_ExpList_tok_struct _tmp81A;_tmp81A.tag=Cyc_ExpList_tok;_tmp81A.f1=({
-struct Cyc_List_List*_tmp81B=_cycalloc(sizeof(*_tmp81B));_tmp81B->hd=Cyc_yyget_Exp_tok(
-yyvs[yyvsp_offset]);_tmp81B->tl=0;_tmp81B;});_tmp81A;});_tmp819;});break;case 391:
-_LL33F: yyval=(void*)({struct Cyc_ExpList_tok_struct*_tmp81C=_cycalloc(sizeof(*
-_tmp81C));_tmp81C[0]=({struct Cyc_ExpList_tok_struct _tmp81D;_tmp81D.tag=Cyc_ExpList_tok;
-_tmp81D.f1=({struct Cyc_List_List*_tmp81E=_cycalloc(sizeof(*_tmp81E));_tmp81E->hd=
-Cyc_yyget_Exp_tok(yyvs[yyvsp_offset]);_tmp81E->tl=Cyc_yyget_ExpList_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp81E;});_tmp81D;});
-_tmp81C;});break;case 392: _LL340: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp81F=
-_cycalloc(sizeof(*_tmp81F));_tmp81F[0]=({struct Cyc_Exp_tok_struct _tmp820;_tmp820.tag=
-Cyc_Exp_tok;_tmp820.f1=Cyc_Absyn_int_exp((*Cyc_yyget_Int_tok(yyvs[yyvsp_offset])).f1,(*
+struct Cyc_Exp_tok_struct _tmp812;_tmp812.tag=Cyc_Exp_tok;_tmp812.f1=Cyc_Absyn_stmt_exp(
+Cyc_yyget_Stmt_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
+Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 4)]).first_line,(yyls[yylsp_offset]).last_line));_tmp812;});
+_tmp811;});break;case 389: _LL33D: yyval=(void*)({struct Cyc_ExpList_tok_struct*
+_tmp813=_cycalloc(sizeof(*_tmp813));_tmp813[0]=({struct Cyc_ExpList_tok_struct
+_tmp814;_tmp814.tag=Cyc_ExpList_tok;_tmp814.f1=((struct Cyc_List_List*(*)(struct
+Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_ExpList_tok(yyvs[yyvsp_offset]));
+_tmp814;});_tmp813;});break;case 390: _LL33E: yyval=(void*)({struct Cyc_ExpList_tok_struct*
+_tmp815=_cycalloc(sizeof(*_tmp815));_tmp815[0]=({struct Cyc_ExpList_tok_struct
+_tmp816;_tmp816.tag=Cyc_ExpList_tok;_tmp816.f1=({struct Cyc_List_List*_tmp817=
+_cycalloc(sizeof(*_tmp817));_tmp817->hd=Cyc_yyget_Exp_tok(yyvs[yyvsp_offset]);
+_tmp817->tl=0;_tmp817;});_tmp816;});_tmp815;});break;case 391: _LL33F: yyval=(void*)({
+struct Cyc_ExpList_tok_struct*_tmp818=_cycalloc(sizeof(*_tmp818));_tmp818[0]=({
+struct Cyc_ExpList_tok_struct _tmp819;_tmp819.tag=Cyc_ExpList_tok;_tmp819.f1=({
+struct Cyc_List_List*_tmp81A=_cycalloc(sizeof(*_tmp81A));_tmp81A->hd=Cyc_yyget_Exp_tok(
+yyvs[yyvsp_offset]);_tmp81A->tl=Cyc_yyget_ExpList_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp81A;});_tmp819;});
+_tmp818;});break;case 392: _LL340: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp81B=
+_cycalloc(sizeof(*_tmp81B));_tmp81B[0]=({struct Cyc_Exp_tok_struct _tmp81C;_tmp81C.tag=
+Cyc_Exp_tok;_tmp81C.f1=Cyc_Absyn_int_exp((*Cyc_yyget_Int_tok(yyvs[yyvsp_offset])).f1,(*
 Cyc_yyget_Int_tok(yyvs[yyvsp_offset])).f2,Cyc_Position_segment_of_abs((yyls[
-yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));_tmp820;});_tmp81F;});
-break;case 393: _LL341: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp821=_cycalloc(
-sizeof(*_tmp821));_tmp821[0]=({struct Cyc_Exp_tok_struct _tmp822;_tmp822.tag=Cyc_Exp_tok;
-_tmp822.f1=Cyc_Absyn_char_exp(Cyc_yyget_Char_tok(yyvs[yyvsp_offset]),Cyc_Position_segment_of_abs((
-yyls[yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));_tmp822;});
-_tmp821;});break;case 394: _LL342: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp823=
-_cycalloc(sizeof(*_tmp823));_tmp823[0]=({struct Cyc_Exp_tok_struct _tmp824;_tmp824.tag=
-Cyc_Exp_tok;_tmp824.f1=Cyc_Absyn_float_exp(Cyc_yyget_String_tok(yyvs[
+yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));_tmp81C;});_tmp81B;});
+break;case 393: _LL341: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp81D=_cycalloc(
+sizeof(*_tmp81D));_tmp81D[0]=({struct Cyc_Exp_tok_struct _tmp81E;_tmp81E.tag=Cyc_Exp_tok;
+_tmp81E.f1=Cyc_Absyn_char_exp(Cyc_yyget_Char_tok(yyvs[yyvsp_offset]),Cyc_Position_segment_of_abs((
+yyls[yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));_tmp81E;});
+_tmp81D;});break;case 394: _LL342: yyval=(void*)({struct Cyc_Exp_tok_struct*_tmp81F=
+_cycalloc(sizeof(*_tmp81F));_tmp81F[0]=({struct Cyc_Exp_tok_struct _tmp820;_tmp820.tag=
+Cyc_Exp_tok;_tmp820.f1=Cyc_Absyn_float_exp(Cyc_yyget_String_tok(yyvs[
 yyvsp_offset]),Cyc_Position_segment_of_abs((yyls[yylsp_offset]).first_line,(yyls[
-yylsp_offset]).last_line));_tmp824;});_tmp823;});break;case 395: _LL343: yyval=(
-void*)({struct Cyc_Exp_tok_struct*_tmp825=_cycalloc(sizeof(*_tmp825));_tmp825[0]=({
-struct Cyc_Exp_tok_struct _tmp826;_tmp826.tag=Cyc_Exp_tok;_tmp826.f1=Cyc_Absyn_null_exp(
+yylsp_offset]).last_line));_tmp820;});_tmp81F;});break;case 395: _LL343: yyval=(
+void*)({struct Cyc_Exp_tok_struct*_tmp821=_cycalloc(sizeof(*_tmp821));_tmp821[0]=({
+struct Cyc_Exp_tok_struct _tmp822;_tmp822.tag=Cyc_Exp_tok;_tmp822.f1=Cyc_Absyn_null_exp(
 Cyc_Position_segment_of_abs((yyls[yylsp_offset]).first_line,(yyls[yylsp_offset]).last_line));
-_tmp826;});_tmp825;});break;case 396: _LL344: yyval=(void*)({struct Cyc_QualId_tok_struct*
+_tmp822;});_tmp821;});break;case 396: _LL344: yyval=(void*)({struct Cyc_QualId_tok_struct*
+_tmp823=_cycalloc(sizeof(*_tmp823));_tmp823[0]=({struct Cyc_QualId_tok_struct
+_tmp824;_tmp824.tag=Cyc_QualId_tok;_tmp824.f1=({struct _tuple1*_tmp825=_cycalloc(
+sizeof(*_tmp825));_tmp825->f1=Cyc_Absyn_rel_ns_null;_tmp825->f2=({struct
+_tagged_arr*_tmp826=_cycalloc(sizeof(*_tmp826));_tmp826[0]=Cyc_yyget_String_tok(
+yyvs[yyvsp_offset]);_tmp826;});_tmp825;});_tmp824;});_tmp823;});break;case 397:
+_LL345: yyval=yyvs[yyvsp_offset];break;case 398: _LL346: yyval=(void*)({struct Cyc_QualId_tok_struct*
 _tmp827=_cycalloc(sizeof(*_tmp827));_tmp827[0]=({struct Cyc_QualId_tok_struct
 _tmp828;_tmp828.tag=Cyc_QualId_tok;_tmp828.f1=({struct _tuple1*_tmp829=_cycalloc(
 sizeof(*_tmp829));_tmp829->f1=Cyc_Absyn_rel_ns_null;_tmp829->f2=({struct
 _tagged_arr*_tmp82A=_cycalloc(sizeof(*_tmp82A));_tmp82A[0]=Cyc_yyget_String_tok(
-yyvs[yyvsp_offset]);_tmp82A;});_tmp829;});_tmp828;});_tmp827;});break;case 397:
-_LL345: yyval=yyvs[yyvsp_offset];break;case 398: _LL346: yyval=(void*)({struct Cyc_QualId_tok_struct*
-_tmp82B=_cycalloc(sizeof(*_tmp82B));_tmp82B[0]=({struct Cyc_QualId_tok_struct
-_tmp82C;_tmp82C.tag=Cyc_QualId_tok;_tmp82C.f1=({struct _tuple1*_tmp82D=_cycalloc(
-sizeof(*_tmp82D));_tmp82D->f1=Cyc_Absyn_rel_ns_null;_tmp82D->f2=({struct
-_tagged_arr*_tmp82E=_cycalloc(sizeof(*_tmp82E));_tmp82E[0]=Cyc_yyget_String_tok(
-yyvs[yyvsp_offset]);_tmp82E;});_tmp82D;});_tmp82C;});_tmp82B;});break;case 399:
+yyvs[yyvsp_offset]);_tmp82A;});_tmp829;});_tmp828;});_tmp827;});break;case 399:
 _LL347: yyval=yyvs[yyvsp_offset];break;case 400: _LL348: yyval=yyvs[yyvsp_offset];
 break;case 401: _LL349: yyval=yyvs[yyvsp_offset];break;case 402: _LL34A: yyval=yyvs[
 yyvsp_offset];break;case 403: _LL34B: yyval=yyvs[yyvsp_offset];break;case 404: _LL34C:
@@ -5026,20 +5025,20 @@ _check_known_subscript_notnull(10000,(yylsp_offset + yylen)- 1)]).last_line;(yyl
 yylsp_offset]).last_column=(yyls[_check_known_subscript_notnull(10000,(
 yylsp_offset + yylen)- 1)]).last_column;}yyn=(int)Cyc_yyr1[yyn];yystate=Cyc_yypgoto[
 _check_known_subscript_notnull(114,yyn - 126)]+ yyss[yyssp_offset];if((yystate >= 
-0?yystate <= 5002: 0)?Cyc_yycheck[yystate]== yyss[yyssp_offset]: 0)yystate=(int)Cyc_yytable[
+0?yystate <= 5084: 0)?Cyc_yycheck[yystate]== yyss[yyssp_offset]: 0)yystate=(int)Cyc_yytable[
 yystate];else{yystate=(int)Cyc_yydefgoto[_check_known_subscript_notnull(114,yyn - 
 126)];}goto yynewstate;yyerrlab: if(yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[
-yystate];if(yyn > - 32768?yyn < 5002: 0){int sze=0;struct _tagged_arr msg;int x;int count;
+yystate];if(yyn > - 32768?yyn < 5084: 0){int sze=0;struct _tagged_arr msg;int x;int count;
 count=0;for(x=yyn < 0?- yyn: 0;x < 240 / sizeof(unsigned char*);x ++){if(Cyc_yycheck[
-_check_known_subscript_notnull(5003,x + yyn)]== x)(sze +=Cyc_Std_strlen(Cyc_yytname[
-x])+ 15,count ++);}msg=({unsigned int _tmp82F=(unsigned int)(sze + 15);
-unsigned char*_tmp830=(unsigned char*)_cycalloc_atomic(_check_times(sizeof(
-unsigned char),_tmp82F));struct _tagged_arr _tmp832=_tag_arr(_tmp830,sizeof(
-unsigned char),(unsigned int)(sze + 15));{unsigned int _tmp831=_tmp82F;
-unsigned int i;for(i=0;i < _tmp831;i ++){_tmp830[i]='\000';}}_tmp832;});Cyc_Std_strcpy(
+_check_known_subscript_notnull(5085,x + yyn)]== x)(sze +=Cyc_Std_strlen(Cyc_yytname[
+x])+ 15,count ++);}msg=({unsigned int _tmp82B=(unsigned int)(sze + 15);
+unsigned char*_tmp82C=(unsigned char*)_cycalloc_atomic(_check_times(sizeof(
+unsigned char),_tmp82B));struct _tagged_arr _tmp82E=_tag_arr(_tmp82C,sizeof(
+unsigned char),(unsigned int)(sze + 15));{unsigned int _tmp82D=_tmp82B;
+unsigned int i;for(i=0;i < _tmp82D;i ++){_tmp82C[i]='\000';}}_tmp82E;});Cyc_Std_strcpy(
 msg,_tag_arr("parse error",sizeof(unsigned char),12));if(count < 5){count=0;for(x=
 yyn < 0?- yyn: 0;x < 240 / sizeof(unsigned char*);x ++){if(Cyc_yycheck[
-_check_known_subscript_notnull(5003,x + yyn)]== x){Cyc_Std_strcat(msg,count == 0?
+_check_known_subscript_notnull(5085,x + yyn)]== x){Cyc_Std_strcat(msg,count == 0?
 _tag_arr(", expecting `",sizeof(unsigned char),14): _tag_arr(" or `",sizeof(
 unsigned char),6));Cyc_Std_strcat(msg,Cyc_yytname[x]);Cyc_Std_strcat(msg,
 _tag_arr("'",sizeof(unsigned char),2));count ++;}}}Cyc_yyerror((struct _tagged_arr)
@@ -5048,60 +5047,60 @@ yyerrlab1;yyerrlab1: if(yyerrstatus == 3){if(Cyc_yychar == 0)return 1;Cyc_yychar
 yyerrstatus=3;goto yyerrhandle;yyerrdefault: yyerrpop: if(yyssp_offset == 0)return 1;
 yyvsp_offset --;yystate=(int)yyss[_check_known_subscript_notnull(10000,--
 yyssp_offset)];yylsp_offset --;yyerrhandle: yyn=(int)Cyc_yypact[yystate];if(yyn == 
-- 32768)goto yyerrdefault;yyn +=1;if((yyn < 0?1: yyn > 5002)?1: Cyc_yycheck[yyn]!= 1)
+- 32768)goto yyerrdefault;yyn +=1;if((yyn < 0?1: yyn > 5084)?1: Cyc_yycheck[yyn]!= 1)
 goto yyerrdefault;yyn=(int)Cyc_yytable[yyn];if(yyn < 0){if(yyn == - 32768)goto
 yyerrpop;yyn=- yyn;goto yyreduce;}else{if(yyn == 0)goto yyerrpop;}if(yyn == 825)
 return 0;yyvs[_check_known_subscript_notnull(10000,++ yyvsp_offset)]=Cyc_yylval;
 yyls[_check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;goto
-yynewstate;}void Cyc_yyprint(int i,void*v){void*_tmp83C=v;struct _tuple12*_tmp83D;
-struct _tuple12 _tmp83E;int _tmp83F;unsigned char _tmp840;short _tmp841;struct
-_tagged_arr _tmp842;struct Cyc_Core_Opt*_tmp843;struct Cyc_Core_Opt*_tmp844;struct
-Cyc_Core_Opt _tmp845;struct _tagged_arr*_tmp846;struct _tuple1*_tmp847;struct
-_tuple1 _tmp848;void*_tmp849;struct _tagged_arr*_tmp84A;_LL351: if(*((void**)
-_tmp83C)!= Cyc_Int_tok)goto _LL353;_tmp83D=((struct Cyc_Int_tok_struct*)_tmp83C)->f1;
-_tmp83E=*_tmp83D;_tmp83F=_tmp83E.f2;_LL352:({struct Cyc_Std_Int_pa_struct _tmp84C;
-_tmp84C.tag=1;_tmp84C.f1=(int)((unsigned int)_tmp83F);{void*_tmp84B[1]={& _tmp84C};
+yynewstate;}void Cyc_yyprint(int i,void*v){void*_tmp838=v;struct _tuple13*_tmp839;
+struct _tuple13 _tmp83A;int _tmp83B;unsigned char _tmp83C;short _tmp83D;struct
+_tagged_arr _tmp83E;struct Cyc_Core_Opt*_tmp83F;struct Cyc_Core_Opt*_tmp840;struct
+Cyc_Core_Opt _tmp841;struct _tagged_arr*_tmp842;struct _tuple1*_tmp843;struct
+_tuple1 _tmp844;void*_tmp845;struct _tagged_arr*_tmp846;_LL351: if(*((void**)
+_tmp838)!= Cyc_Int_tok)goto _LL353;_tmp839=((struct Cyc_Int_tok_struct*)_tmp838)->f1;
+_tmp83A=*_tmp839;_tmp83B=_tmp83A.f2;_LL352:({struct Cyc_Std_Int_pa_struct _tmp848;
+_tmp848.tag=1;_tmp848.f1=(int)((unsigned int)_tmp83B);{void*_tmp847[1]={& _tmp848};
 Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%d",sizeof(unsigned char),3),_tag_arr(
-_tmp84B,sizeof(void*),1));}});goto _LL350;_LL353: if(*((void**)_tmp83C)!= Cyc_Char_tok)
-goto _LL355;_tmp840=((struct Cyc_Char_tok_struct*)_tmp83C)->f1;_LL354:({struct Cyc_Std_Int_pa_struct
-_tmp84E;_tmp84E.tag=1;_tmp84E.f1=(int)((unsigned int)((int)_tmp840));{void*
-_tmp84D[1]={& _tmp84E};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%c",sizeof(
-unsigned char),3),_tag_arr(_tmp84D,sizeof(void*),1));}});goto _LL350;_LL355: if(*((
-void**)_tmp83C)!= Cyc_Short_tok)goto _LL357;_tmp841=((struct Cyc_Short_tok_struct*)
-_tmp83C)->f1;_LL356:({struct Cyc_Std_Int_pa_struct _tmp850;_tmp850.tag=1;_tmp850.f1=(
-int)((unsigned int)((int)_tmp841));{void*_tmp84F[1]={& _tmp850};Cyc_Std_fprintf(
-Cyc_Std_stderr,_tag_arr("%ds",sizeof(unsigned char),4),_tag_arr(_tmp84F,sizeof(
-void*),1));}});goto _LL350;_LL357: if(*((void**)_tmp83C)!= Cyc_String_tok)goto
-_LL359;_tmp842=((struct Cyc_String_tok_struct*)_tmp83C)->f1;_LL358:({struct Cyc_Std_String_pa_struct
-_tmp852;_tmp852.tag=0;_tmp852.f1=(struct _tagged_arr)_tmp842;{void*_tmp851[1]={&
-_tmp852};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("\"%s\"",sizeof(unsigned char),
-5),_tag_arr(_tmp851,sizeof(void*),1));}});goto _LL350;_LL359: if(*((void**)_tmp83C)
-!= Cyc_Stringopt_tok)goto _LL35B;_tmp843=((struct Cyc_Stringopt_tok_struct*)
-_tmp83C)->f1;if(_tmp843 != 0)goto _LL35B;_LL35A:({void*_tmp853[0]={};Cyc_Std_fprintf(
-Cyc_Std_stderr,_tag_arr("NULL",sizeof(unsigned char),5),_tag_arr(_tmp853,sizeof(
-void*),0));});goto _LL350;_LL35B: if(*((void**)_tmp83C)!= Cyc_Stringopt_tok)goto
-_LL35D;_tmp844=((struct Cyc_Stringopt_tok_struct*)_tmp83C)->f1;if(_tmp844 == 0)
-goto _LL35D;_tmp845=*_tmp844;_tmp846=(struct _tagged_arr*)_tmp845.v;_LL35C:({
-struct Cyc_Std_String_pa_struct _tmp855;_tmp855.tag=0;_tmp855.f1=(struct
-_tagged_arr)*_tmp846;{void*_tmp854[1]={& _tmp855};Cyc_Std_fprintf(Cyc_Std_stderr,
-_tag_arr("\"%s\"",sizeof(unsigned char),5),_tag_arr(_tmp854,sizeof(void*),1));}});
-goto _LL350;_LL35D: if(*((void**)_tmp83C)!= Cyc_QualId_tok)goto _LL35F;_tmp847=((
-struct Cyc_QualId_tok_struct*)_tmp83C)->f1;_tmp848=*_tmp847;_tmp849=_tmp848.f1;
-_tmp84A=_tmp848.f2;_LL35E: {struct Cyc_List_List*_tmp856=0;{void*_tmp857=_tmp849;
-struct Cyc_List_List*_tmp858;struct Cyc_List_List*_tmp859;_LL362: if(_tmp857 <= (
-void*)1?1:*((int*)_tmp857)!= 0)goto _LL364;_tmp858=((struct Cyc_Absyn_Rel_n_struct*)
-_tmp857)->f1;_LL363: _tmp856=_tmp858;goto _LL361;_LL364: if(_tmp857 <= (void*)1?1:*((
-int*)_tmp857)!= 1)goto _LL366;_tmp859=((struct Cyc_Absyn_Abs_n_struct*)_tmp857)->f1;
-_LL365: _tmp856=_tmp859;goto _LL361;_LL366: if((int)_tmp857 != 0)goto _LL361;_LL367:
-goto _LL361;_LL361:;}for(0;_tmp856 != 0;_tmp856=_tmp856->tl){({struct Cyc_Std_String_pa_struct
-_tmp85B;_tmp85B.tag=0;_tmp85B.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_tmp856->hd);{void*_tmp85A[1]={& _tmp85B};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s::",
-sizeof(unsigned char),5),_tag_arr(_tmp85A,sizeof(void*),1));}});}({struct Cyc_Std_String_pa_struct
-_tmp85D;_tmp85D.tag=0;_tmp85D.f1=(struct _tagged_arr)*_tmp84A;{void*_tmp85C[1]={&
-_tmp85D};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s::",sizeof(unsigned char),5),
-_tag_arr(_tmp85C,sizeof(void*),1));}});goto _LL350;}_LL35F:;_LL360:({void*_tmp85E[
+_tmp847,sizeof(void*),1));}});goto _LL350;_LL353: if(*((void**)_tmp838)!= Cyc_Char_tok)
+goto _LL355;_tmp83C=((struct Cyc_Char_tok_struct*)_tmp838)->f1;_LL354:({struct Cyc_Std_Int_pa_struct
+_tmp84A;_tmp84A.tag=1;_tmp84A.f1=(int)((unsigned int)((int)_tmp83C));{void*
+_tmp849[1]={& _tmp84A};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%c",sizeof(
+unsigned char),3),_tag_arr(_tmp849,sizeof(void*),1));}});goto _LL350;_LL355: if(*((
+void**)_tmp838)!= Cyc_Short_tok)goto _LL357;_tmp83D=((struct Cyc_Short_tok_struct*)
+_tmp838)->f1;_LL356:({struct Cyc_Std_Int_pa_struct _tmp84C;_tmp84C.tag=1;_tmp84C.f1=(
+int)((unsigned int)((int)_tmp83D));{void*_tmp84B[1]={& _tmp84C};Cyc_Std_fprintf(
+Cyc_Std_stderr,_tag_arr("%ds",sizeof(unsigned char),4),_tag_arr(_tmp84B,sizeof(
+void*),1));}});goto _LL350;_LL357: if(*((void**)_tmp838)!= Cyc_String_tok)goto
+_LL359;_tmp83E=((struct Cyc_String_tok_struct*)_tmp838)->f1;_LL358:({struct Cyc_Std_String_pa_struct
+_tmp84E;_tmp84E.tag=0;_tmp84E.f1=(struct _tagged_arr)_tmp83E;{void*_tmp84D[1]={&
+_tmp84E};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("\"%s\"",sizeof(unsigned char),
+5),_tag_arr(_tmp84D,sizeof(void*),1));}});goto _LL350;_LL359: if(*((void**)_tmp838)
+!= Cyc_Stringopt_tok)goto _LL35B;_tmp83F=((struct Cyc_Stringopt_tok_struct*)
+_tmp838)->f1;if(_tmp83F != 0)goto _LL35B;_LL35A:({void*_tmp84F[0]={};Cyc_Std_fprintf(
+Cyc_Std_stderr,_tag_arr("NULL",sizeof(unsigned char),5),_tag_arr(_tmp84F,sizeof(
+void*),0));});goto _LL350;_LL35B: if(*((void**)_tmp838)!= Cyc_Stringopt_tok)goto
+_LL35D;_tmp840=((struct Cyc_Stringopt_tok_struct*)_tmp838)->f1;if(_tmp840 == 0)
+goto _LL35D;_tmp841=*_tmp840;_tmp842=(struct _tagged_arr*)_tmp841.v;_LL35C:({
+struct Cyc_Std_String_pa_struct _tmp851;_tmp851.tag=0;_tmp851.f1=(struct
+_tagged_arr)*_tmp842;{void*_tmp850[1]={& _tmp851};Cyc_Std_fprintf(Cyc_Std_stderr,
+_tag_arr("\"%s\"",sizeof(unsigned char),5),_tag_arr(_tmp850,sizeof(void*),1));}});
+goto _LL350;_LL35D: if(*((void**)_tmp838)!= Cyc_QualId_tok)goto _LL35F;_tmp843=((
+struct Cyc_QualId_tok_struct*)_tmp838)->f1;_tmp844=*_tmp843;_tmp845=_tmp844.f1;
+_tmp846=_tmp844.f2;_LL35E: {struct Cyc_List_List*_tmp852=0;{void*_tmp853=_tmp845;
+struct Cyc_List_List*_tmp854;struct Cyc_List_List*_tmp855;_LL362: if(_tmp853 <= (
+void*)1?1:*((int*)_tmp853)!= 0)goto _LL364;_tmp854=((struct Cyc_Absyn_Rel_n_struct*)
+_tmp853)->f1;_LL363: _tmp852=_tmp854;goto _LL361;_LL364: if(_tmp853 <= (void*)1?1:*((
+int*)_tmp853)!= 1)goto _LL366;_tmp855=((struct Cyc_Absyn_Abs_n_struct*)_tmp853)->f1;
+_LL365: _tmp852=_tmp855;goto _LL361;_LL366: if((int)_tmp853 != 0)goto _LL361;_LL367:
+goto _LL361;_LL361:;}for(0;_tmp852 != 0;_tmp852=_tmp852->tl){({struct Cyc_Std_String_pa_struct
+_tmp857;_tmp857.tag=0;_tmp857.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_tmp852->hd);{void*_tmp856[1]={& _tmp857};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s::",
+sizeof(unsigned char),5),_tag_arr(_tmp856,sizeof(void*),1));}});}({struct Cyc_Std_String_pa_struct
+_tmp859;_tmp859.tag=0;_tmp859.f1=(struct _tagged_arr)*_tmp846;{void*_tmp858[1]={&
+_tmp859};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s::",sizeof(unsigned char),5),
+_tag_arr(_tmp858,sizeof(void*),1));}});goto _LL350;}_LL35F:;_LL360:({void*_tmp85A[
 0]={};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("?",sizeof(unsigned char),2),
-_tag_arr(_tmp85E,sizeof(void*),0));});goto _LL350;_LL350:;}struct Cyc_List_List*
+_tag_arr(_tmp85A,sizeof(void*),0));});goto _LL350;_LL350:;}struct Cyc_List_List*
 Cyc_Parse_parse_file(struct Cyc_Std___cycFILE*f){Cyc_Parse_parse_result=0;Cyc_Parse_lbuf=({
-struct Cyc_Core_Opt*_tmp85F=_cycalloc(sizeof(*_tmp85F));_tmp85F->v=Cyc_Lexing_from_file(
-f);_tmp85F;});Cyc_yyparse();return Cyc_Parse_parse_result;}
+struct Cyc_Core_Opt*_tmp85B=_cycalloc(sizeof(*_tmp85B));_tmp85B->v=Cyc_Lexing_from_file(
+f);_tmp85B;});Cyc_yyparse();return Cyc_Parse_parse_result;}

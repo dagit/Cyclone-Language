@@ -19,6 +19,7 @@
 #include <core.h>
 #include <list.h>
 #include <dict.h>
+#include <stdio.h>
 
 namespace Dict;
 
@@ -28,7 +29,7 @@ static tunion Color { R, B };
 
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 static struct T<`a::B,`b::B,`r::R> {
-  tunion   Color color;
+  tunion Color color;
   struct T<`a,`b,`r> *`r   left;
   struct T<`a,`b,`r> *`r   right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
@@ -475,17 +476,17 @@ dict_t<`a,`b> filter(bool f(`a, `b), dict_t<`a,`b,`r1> d) {
 }
 
 
-static dict_t<`a,`b,`r2> filter_c_f($(bool (@) (`c, `a, `b), `c, 
-                                          region_t<`r2>) @ `r env,
-                                        `a x, `b y, dict_t<`a,`b,`r2> acc){
+static dict_t<`a,`b,`r2> filter_c_f($(bool (@) (`c, `a, `b), `c,
+				      region_t<`r2>) @ env,
+				    `a x, `b y, dict_t<`a,`b,`r2> acc){
   let &$(f, f_env, r2) = env;
   return (f(f_env, x, y)) ? insert(acc, x, y) : acc;
 }
 
 dict_t<`a,`b,`r2> rfilter_c(region_t<`r2> r2, bool f (`c, `a, `b), 
-                                `c f_env, dict_t<`a,`b,`r1> d) {
+			    `c f_env, dict_t<`a,`b,`r1> d) {
   let env = $(f, f_env,r2);
-  return fold_c(filter_c_f, &env, d, rempty(r2, d -> rel));
+  return fold_c(filter_c_f, &env, d, rempty(r2, d->rel));
 }
 dict_t<`a,`b> filter_c(bool f (`c, `a, `b), 
                            `c f_env, dict_t<`a,`b,`r1> d) {
@@ -526,3 +527,37 @@ dict_t<`a,`b,`r> rdelete_same(dict_t<`a,`b,`r> d, `a x) {
 dict_t<`a,`b> delete(dict_t<`a,`b,`r1> d, `a x) {
   return rdelete(Core::heap_region, d, x);
 }
+
+bool iter_f<`a,`b,`r1,`r2,`r3>($(tree<`a,`b,`r1> ?`r2,int) @`r2 stk, 
+			       $(`a,`b)@`r3 dest;
+                               {`r1,`r2,`r3}) {
+  let &$(stack,*indp) = stk;
+  let ind = *indp;
+  if(ind==-1)
+    return false; 
+  let t = stack[ind];
+  *dest = t->key_val;
+  --ind;
+  if(t->left)
+    stack[++ind] = t->left;
+  if(t->right)
+    stack[++ind] = t->right;
+  *indp = ind;
+  return true;
+}
+
+Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
+					   dict_t<`a,`b,`r2> d) {
+  // we exploit the balancing invariant to bound the array size
+  int half_max_size = 1;
+  let t = d->t;
+  while(t != NULL) {
+    t = t->left;
+    ++half_max_size;
+  }
+  t = d->t;
+  let stack = rnew(rgn) { for i < 2*half_max_size : t};
+  return Iter::Iter(rnew(rgn) $(stack, (t ? 0 : -1)),
+		    iter_f@<`a,`b,`r2,`r1><>);
+}
+

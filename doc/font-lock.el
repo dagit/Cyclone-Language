@@ -2426,7 +2426,7 @@ See also `c++-font-lock-extra-types'.")
 	(eval-when-compile
 	  (regexp-opt
 	   '("break" "continue" "do" "else" "for" "if" "return" "switch"
-	     "while" "asm" "catch" 
+	     "while" "asm" "catch" "region"
 	     ;;"delete" 
 	     "new" "sizeof" "this" "throw" "try"
 	     ;; Branko Cibej <branko.cibej@hermes.si> says this is new.
@@ -2448,7 +2448,7 @@ See also `c++-font-lock-extra-types'.")
        (c++-type-specs
 	(eval-when-compile
 	  (regexp-opt
-	   '("tunion" "xtunion"
+	   '("tunion" "xtunion" 
 	     "class" "public" "private" "protected" "typename"
 	     "struct" "union" "enum" "namespace" "using"
 	     ;; Eric Hopper <hopper@omnifarious.mn.org> says these are new.
@@ -2460,7 +2460,7 @@ See also `c++-font-lock-extra-types'.")
 	  (cons 
 	   (,@ (eval-when-compile
 		 (regexp-opt
-		  '("signed" "unsigned" "short" "long"
+		  '("signed" "unsigned" "short" "long" 
 		    "int" "char" "float" "double" "void"
 		    "bool" "complex"))))
 	   c++-font-lock-extra-types)

@@ -127,9 +127,11 @@ absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
   return Tcutil::bits_only(t) ? unknown_all : leafval;
 }
 
-static bool prefix_of_member(place_t place, Set::set_t<place_t> set) {
-  for(let elts = Set::elements(set); elts != NULL; elts = elts->tl) {
-    let place2 = elts->hd;
+static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
+			     Set::set_t<place_t<`r2,`r3>> set) {
+  let place2 = place;
+  let iter = Set::make_iter(r,set);
+  while(Iter::next(iter,&place2)) {
     if(root_cmp(place->root, place2->root) != 0)
       continue;
     let fs1 = place->fields;
@@ -480,12 +482,12 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   // quadratic because we'll do it "all the way down", but in practice
   // "all the way down" is small.
   if(changed1) {
-    if(!prefix_of_member(env->curr_place, env->chg2))
+    if(!prefix_of_member(env->joinenv.pile->rgn, env->curr_place, env->chg2))
       return r1;
     env->changed = One;
   }
   if(changed2) {
-    if(!prefix_of_member(env->curr_place, env->chg1))
+    if(!prefix_of_member(env->joinenv.pile->rgn, env->curr_place, env->chg1))
       return r2;
     env->changed = Two;
   }

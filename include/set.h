@@ -21,6 +21,7 @@
 #define _SET_H_
 
 #include <list.h>
+#include <iter.h>
 
 namespace Set {
 using List;
@@ -57,7 +58,6 @@ extern set_t<`a> singleton(int cmp(`a,`a),`a x);
 extern set_t<`a> from_list(int cmp(`a,`a),list_t<`a> l);
   /** [from_list(cmp,l)] creates a set on the heap; the elements of
       the set are the elements of the list [l]. */
-
 extern set_t<`a> insert(set_t<`a,`H> s,`a elt);
   /** [insert(s,elt)] returns a set containing all the elements of
       [s], plus [elt].  The set [s] is not modified. */
@@ -98,11 +98,6 @@ extern bool equals (set_t<`a> s1,set_t<`a> s2);
   /** [equals(s1,s2)] returns true if [s1] equals [s2] have the same
       elements, and returns false otherwise. */
 
-extern list_t<`a,`r> elements(set_t<`a,`r> s);
-  /** [elements(s)] returns a list of the elements of [s], in no
-      particular order.  Note that the returned list is allocated in
-      the same region as the set [s]. */
-
 extern `b fold(`b f(`a,`b),set_t<`a> s,`b accum);
   /** If [s] is a set with elements [x1] through [xn], then
       [fold(f,s,accum)] returns
@@ -129,6 +124,10 @@ extern xtunion exn {extern Absent};
 extern `a choose(set_t<`a> s);
   /** [choose(s)] returns some element of the set [s]; if the set is
       empty, [choose] throws [Absent]. */
+
+extern Iter::iter_t<`a,{`r1,`r2}> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s);
+  /** [make_iter(s)] returns an iterator over the set [s]; a constant of space
+      is allocated in [rgn] */
 
 }
 

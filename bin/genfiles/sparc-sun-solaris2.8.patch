@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.8/lib/cycstubs.c
 *** i686-unknown-linux/lib/cycstubs.c	Fri Dec 28 12:16:02 2001
---- sparc-sun-solaris2.8/lib/cycstubs.c	Fri Dec 28 12:20:38 2001
+--- sparc-sun-solaris2.8/lib/cycstubs.c	Sat Dec 29 17:36:54 2001
 ***************
 *** 287,299 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
@@ -83,7 +83,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c sparc-sun-solaris2.8
   struct _tagged_arr,struct _tagged_arr,struct Cyc_Std___cycFILE*);void Cyc_Std_setbuf(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.8/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Fri Dec 28 12:16:02 2001
---- sparc-sun-solaris2.8/lib/execinfo.c	Fri Dec 28 12:20:38 2001
+--- sparc-sun-solaris2.8/lib/execinfo.c	Sat Dec 29 17:36:54 2001
 ***************
 *** 257,336 ****
   extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
@@ -194,7 +194,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.8
 ! unsigned char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.8/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Fri Dec 28 12:16:02 2001
---- sparc-sun-solaris2.8/lib/getopt.c	Fri Dec 28 12:20:38 2001
+--- sparc-sun-solaris2.8/lib/getopt.c	Sat Dec 29 17:36:54 2001
 ***************
 *** 274,307 ****
   struct _tagged_arr Cyc_Std_getenv(struct _tagged_arr);struct Cyc_Std_timeval{int
@@ -264,10 +264,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.8/l
   Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
   static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.8/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Fri Dec 28 12:16:00 2001
---- sparc-sun-solaris2.8/src/buildlib.c	Fri Dec 28 12:20:36 2001
+*** i686-unknown-linux/src/buildlib.c	Sat Dec 29 16:52:36 2001
+--- sparc-sun-solaris2.8/src/buildlib.c	Sat Dec 29 17:36:54 2001
 ***************
-*** 322,347 ****
+*** 326,351 ****
   struct Cyc_Buffer_t*,unsigned char);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
   struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
   int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;
@@ -294,7 +294,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.8
   struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int fd,struct _tagged_arr buf,
   unsigned int count);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
   _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_write(
---- 322,344 ----
+--- 326,348 ----
   struct Cyc_Buffer_t*,unsigned char);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
   struct _tagged_arr);struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
   int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;};extern int timezone;

@@ -201,13 +201,6 @@ set_t<`a> delete(set_t<`a,`H> s,`a elt) {
   else return(s);
 }
 
-list_t<`a,`r> elements(set_t<`a,`r> s) {
-/* Note: For efficiency we don't copy, but that means clients can
-         screw up our invariants!
-*/
-  return(s->nodes);
-}
-
 /* Fold a function f across the set yielding an accumulator. */
 `b fold(`b f(`a,`b),set_t<`a> s,`b accum) {
   list_t n = s->nodes;
@@ -356,4 +349,16 @@ xtunion exn {Absent};
 `a choose(set_t<`a> s) {
   if (s->nodes == NULL) throw Absent;
   return(s->nodes->hd);
+}
+
+bool iter_f<`a,`r1,`r2,`r3>(list_t<`a,`r1> @`r2 elts_left, `a @`r3 dest;
+			    {`r1,`r2,`r3}) {
+  if(!*elts_left)
+    return false;
+  *dest = (*elts_left)->hd;
+  *elts_left = (*elts_left)->tl;
+  return true;
+}
+Iter::iter_t<`a,{`r1,`r2}> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s) {
+  return Iter::Iter(rnew(rgn) s->nodes, iter_f@<`a,`r2,`r1><>);
 }

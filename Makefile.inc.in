@@ -41,6 +41,7 @@ CYCLONE_LIBS:=arg\
         getopt1\
 	grp\
         hashtable\
+	iter\
         lexing\
         lineno\
         list\
@@ -101,6 +102,7 @@ CYCLONE_H:=arg.h\
 	getopt.h\
 	grp.h\
 	hashtable.h\
+	iter.h\
 	lexing.h\
 	lineno.h\
 	list.h\

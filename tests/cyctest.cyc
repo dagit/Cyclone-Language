@@ -326,6 +326,17 @@ void pattern_match_test() {
   test_end();;
 }
 
+list_t<`a> set_elements(set_t<`a> s) {
+  let ans = NULL;
+  if(Set::is_empty(s))
+    return NULL;
+  let a = Set::choose(s);
+  let iterator = Set::make_iter(Core::heap_region,s);
+  while(Iter::next(iterator,&a))
+    ans = new List(a,ans);
+  return List::rev(ans); // we're wrongly assuming Set's implementation!!!
+}
+
 void set_test() {
   // UNTESTED:
   // singleton
@@ -350,8 +361,8 @@ void set_test() {
   okfail(Set::member(x,-2));
   okfail(Set::member(Set::delete(x,9),-2));
   okfail(!Set::member(x,4));
-  okfail(test_list_cmp(int_cmp,Set::elements(x),
-                  new List(-2,new List(2,new List(9,new List(11,NULL))))) == 0);
+  okfail(test_list_cmp(int_cmp,set_elements(x),
+		       new List(-2,new List(2,new List(9,new List(11,NULL))))) == 0);
   okfail(Set::subset(x2,x));
   okfail(!Set::subset(x,x2));
   okfail(Set::subset(x,x));
@@ -376,7 +387,7 @@ void set_test() {
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
   s = Set::insert(s,allocstr("quartz"));
-  okfail(test_list_cmp(strptrcmp,Set::elements(s),
+  okfail(test_list_cmp(strptrcmp,set_elements(s),
                   new List(allocstr("hello"),
                         new List(allocstr("quartz"),
                               new List(allocstr("sphinx"),

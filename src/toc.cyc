@@ -18,21 +18,17 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 // Translation of Cyclone abstract syntax to C abstract syntax.
-// Assumes that the type-checker has been successfully run on
-// the Cyclone AST.  Uses lots of GCC-specific features (that should
-// be in C-9X) to simplify the translation -- in particular, we use
-// struct expressions "(struct foo){.f1=e1,.f2=e2,...,.fn=en}" and
-// statement expressions "({int temp = e;  temp++})".  The
-// latter is used for declaring temps needed in the translation
-// of expressions.  
+// Assumes that the type-checker has been successfully run on the
+// Cyclone AST.  Uses lots of GCC-specific features (that should be in
+// C-9X) to simplify the translation -- in particular, we use struct
+// expressions "(struct foo){.f1=e1,.f2=e2,...,.fn=en}" and statement
+// expressions "({int temp = e; temp++})".  The latter is used for
+// declaring temps needed in the translation of expressions.
 
 // The translation is mostly done in place in an imperative style
-// (i.e., we overwrite AST nodes) so it's fairly crucial that we
-// don't have sharing in the AST.  The one exception is that the
-// type translation is functional.
-
-// We need to figure out how to do the name mangling systematically,
-// especially for namespaces.
+// (i.e., we overwrite AST nodes) so it's fairly crucial that we don't
+// have sharing in the AST.  The one exception is that the type
+// translation is functional.
 
 // Look for "unimp" or comments that start with FIX: for missing
 // or broken pieces.
@@ -41,10 +37,6 @@
 
 // Note: Do NOT use unresolvedmem_exp except at top-level or you will break
 //  the Tovc module
-
-// Note: we generate lots of struct and tunion types that don't have pointers
-//       back to the corresponding decls.  The printer doesn't follow these
-//       pointers, else we need to set them.
 
 #include <core.h>
 #include <stdio.h>
@@ -876,12 +868,10 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
     if (rgnopt == NULL)
-      //eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
       eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
     else {
       exp_t r = (exp_t)rgnopt;
       exp_to_c(nv, r);
-      // eo = cast_exp(t, rmalloc_exp(r,se), DL);
       eo = rmalloc_exp(r,se);
     }
   } else {
@@ -1058,7 +1048,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
   }
 }
 
-static exp_t init_struct(env_t nv, type_t struct_type,
+static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
                          bool pointer, exp_opt_t rgnopt, 
                          list_t<$(list_t<designator_t>,exp_t)@> dles, 
                          typedef_name_t tdn) {
@@ -1069,6 +1059,11 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
 
   bool is_atomic = true;
+  aggrdecl_t ad;
+  switch(compress(struct_type)) {
+  case &AggrType(AggrInfo(info,_)): ad = get_known_aggrdecl(info); break;
+  default: toc_impos("init_struct: bad struct type");
+  }
 
   region r {
     for(let es = List::rrev(r,dles); es != NULL; es = es->tl) {
@@ -1095,7 +1090,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
         // FIX:  need to deal with nested arrays, comprehensions, etc.
         exp_to_c(nv,e);
         s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
-      } else{
+      } else
         switch (ds->hd) {
         case &FieldName(f):
           exp_t lval = lval_f(xexp,f,DL);
@@ -1109,9 +1104,12 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           default:
 	    bool was_ptr_type = is_pointer_type(e->topt->v);
             exp_to_c(nv,e);
-            // cast to void* if necessary (still does it more than needed)
+            // cast to void* to vaoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
 	      e = cast_exp(void_star_typ(),e,DL);
+	    // more warning avoidance -- watch out if existentials are common
+	    if(has_exists)
+	      e = cast_exp(lookup_decl_field(ad,f)->type,e,DL);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
             break;
@@ -1119,7 +1117,6 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           break;
         default: toc_impos("array designator in struct");
         }
-      }
     }
     return make_struct(nv, x, strctq(tdn), s, pointer, rgnopt, is_atomic);
   }
@@ -1592,11 +1589,11 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Address_e(e1):
     // When e1 is a struct or a tuple, this is really a "new".
     switch (e1->r) {
-    case &Struct_e(tdn,_,es,_):
+    case &Struct_e(tdn,ts,es,_):
       if (nv->toplevel)
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
-      e->r = init_struct(nv, e1->topt->v, true, NULL, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, ts != NULL, true, NULL, es, tdn)->r;
       break;
     case &Tuple_e(es):
       if (nv->toplevel)
@@ -1709,9 +1706,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = stmt_exp(s,DL)->r;
       }
       break;
-    case &Struct_e(tdn,_,es,_):
+    case &Struct_e(tdn,ts,es,_):
       // try to avoid the GCC bug
-      e->r = init_struct(nv, e1->topt->v, true, rgnopt, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, ts != NULL, true, rgnopt, es, tdn)->r;
       break;
     case &Tuple_e(es):
       // try to avoid the GCC bug
@@ -1748,11 +1745,12 @@ static void exp_to_c(env_t nv, exp_t e) {
 	       &PointerType(PtrInfo(_,_,_,_,be))):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
 	  case $(Unknown_b,&Upper_b(arr_sz)):
+	    exp_to_c(nv,e2);
 	    inner_mexp->r = sizeoftyp_exp(elt_typ,DL)->r;
 	    done = true;
 	    e->r = fncall_exp(_init_tag_arr_e,
-			      list(mexp,
-				   e2,sizeoftyp_exp(arr_typ,DL),arr_sz),
+			      list(mexp, e2,
+				   sizeoftyp_exp(typ_to_c(arr_typ),DL),arr_sz),
 			      DL)->r;
 	    break;
 	  default: break;
@@ -1976,11 +1974,11 @@ static void exp_to_c(env_t nv, exp_t e) {
         es = new List(new $(NULL,e2),es);
     e->r = unresolvedmem_exp(NULL,es,DL)->r;
     break;
-  case &Struct_e(tdn,_,dles,sd):
+  case &Struct_e(tdn,ts,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)
-      e->r = init_struct(nv,old_typ,false,NULL,dles,tdn)->r;
+      e->r = init_struct(nv,old_typ,ts != NULL,false,NULL,dles,tdn)->r;
     else {
       // At top-level must create an initializer.  For MSVC, sort fields
       // and drop initializers (sorting okay b/c we're at top-level)
@@ -2827,10 +2825,9 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
   if (ad->fields != NULL)
     if (seen_defn_before)
       ad->fields = NULL;
-    else {
+    else
       for (let fields = ad->fields->v; fields != NULL; fields = fields->tl)
         fields->hd->type = typ_to_c_array(fields->hd->type);
-    }
 }
 
 // tunion declarations -- tricky

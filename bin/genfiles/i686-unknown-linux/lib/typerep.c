@@ -288,19 +288,23 @@ unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr 
 ;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
 unsigned char Cyc_List_List_mismatch[18];extern unsigned char Cyc_List_Nth[8];
-struct Cyc_Dict_Dict;extern unsigned char Cyc_Dict_Present[12];extern unsigned char
-Cyc_Dict_Absent[11];int Cyc_Std_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);
-struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=typ;unsigned int _tmp1;
-struct _tagged_arr _tmp2;_LL1: if(_tmp0 <= (void*)2?1:*((int*)_tmp0)!= 4)goto _LL3;
-_tmp1=((struct Cyc_Typerep_Tuple_struct*)_tmp0)->f1;_tmp2=((struct Cyc_Typerep_Tuple_struct*)
-_tmp0)->f2;_LL2: if(_get_arr_size(_tmp2,sizeof(struct _tuple1*))< 2)goto _LL4;{int
-pos1=(int)(*(*((struct _tuple1**)_check_unknown_subscript(_tmp2,sizeof(struct
-_tuple1*),1)))).f1;struct _tagged_arr _tmp3=({unsigned int _tmp7=_get_arr_size(
-_tmp2,sizeof(struct _tuple1*))- 1;struct _tuple1**_tmp8=(struct _tuple1**)_cycalloc(
-_check_times(sizeof(struct _tuple1*),_tmp7));struct _tagged_arr _tmpB=_tag_arr(
-_tmp8,sizeof(struct _tuple1*),_get_arr_size(_tmp2,sizeof(struct _tuple1*))- 1);{
-unsigned int _tmp9=_tmp7;unsigned int i;for(i=0;i < _tmp9;i ++){_tmp8[i]=({struct
-_tuple1*_tmpA=_cycalloc(sizeof(*_tmpA));_tmpA->f1=(*(*((struct _tuple1**)
+struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
+struct Cyc_Iter_Iter,void*);struct Cyc_Dict_Dict;extern unsigned char Cyc_Dict_Present[
+12];extern unsigned char Cyc_Dict_Absent[11];struct _tuple5{void*f1;void*f2;};
+struct _tuple5*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict*d);
+struct _tuple5*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict*d);int
+Cyc_Std_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);struct _tuple4 Cyc_Typerep_tuple_tl(
+void*typ){void*_tmp0=typ;unsigned int _tmp1;struct _tagged_arr _tmp2;_LL1: if(_tmp0
+<= (void*)2?1:*((int*)_tmp0)!= 4)goto _LL3;_tmp1=((struct Cyc_Typerep_Tuple_struct*)
+_tmp0)->f1;_tmp2=((struct Cyc_Typerep_Tuple_struct*)_tmp0)->f2;_LL2: if(
+_get_arr_size(_tmp2,sizeof(struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((
+struct _tuple1**)_check_unknown_subscript(_tmp2,sizeof(struct _tuple1*),1)))).f1;
+struct _tagged_arr _tmp3=({unsigned int _tmp7=_get_arr_size(_tmp2,sizeof(struct
+_tuple1*))- 1;struct _tuple1**_tmp8=(struct _tuple1**)_cycalloc(_check_times(
+sizeof(struct _tuple1*),_tmp7));struct _tagged_arr _tmpB=_tag_arr(_tmp8,sizeof(
+struct _tuple1*),_get_arr_size(_tmp2,sizeof(struct _tuple1*))- 1);{unsigned int
+_tmp9=_tmp7;unsigned int i;for(i=0;i < _tmp9;i ++){_tmp8[i]=({struct _tuple1*_tmpA=
+_cycalloc(sizeof(*_tmpA));_tmpA->f1=(*(*((struct _tuple1**)
 _check_unknown_subscript(_tmp2,sizeof(struct _tuple1*),(int)(i + 1))))).f1 - pos1;
 _tmpA->f2=(*(*((struct _tuple1**)_check_unknown_subscript(_tmp2,sizeof(struct
 _tuple1*),(int)(i + 1))))).f2;_tmpA;});}}_tmpB;});return({struct _tuple4 _tmp4;

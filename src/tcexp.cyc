@@ -861,19 +861,19 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
     switch (compress(t0)) {
     case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
       list_t<$(tvar_t,type_t)@> instantiation = NULL;
-      if (List::length(ts) != List::length(tvars))
-	return expr_err(te,loc,"type instantiation mismatch");
-      for (; ts != NULL; ts = ts->tl, tvars = tvars->tl) {
+      // now allows partial instantiation
+      for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
 	kind_t k = tvar_kind(tvars->hd);
 	check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
+      if(ts != NULL)
+	return expr_err(te,loc,"too many type variables in instantiation");
       type_t new_fn_typ = 
         substitute(instantiation,
-                   new FnType(FnInfo{NULL,eff,rtyp,args,c_varargs,
+                   new FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,
                                      cyc_varargs,rpo,atts}));
-      type_t new_typ = new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
-      return new_typ;
+      return new PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
     default: break;
     }
     break;
