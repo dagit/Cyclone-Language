@@ -153,7 +153,7 @@ struct _handler_cons _temp43; _push_handler(& _temp43);{ struct _xenum_struct*
 _temp44=( struct _xenum_struct*) setjmp( _temp43.handler); if( ! _temp44){{
 struct _tagged_string _temp45=*(( struct _tagged_string*(*)( struct Cyc_Hashtable_Table*
 t, int key)) Cyc_Hashtable_lookup)(( struct Cyc_Hashtable_Table*) Cyc_PP_bhashtbl->v,
-i); _npop_handler( 0u); return _temp45;} _pop_handler();} else{ struct
+i); _npop_handler( 0u); return _temp45;}; _pop_handler();} else{ struct
 _xenum_struct* _temp47= _temp44; _LL49: if( _temp47->tag == Cyc_Core_Not_found_tag){
 goto _LL50;} else{ goto _LL51;} _LL51: goto _LL52; _LL50: { int num_tabs= i / 8;
 int num_spaces= i % 8; int total=( 1 + num_tabs) + num_spaces; struct
@@ -200,7 +200,7 @@ struct _xenum_struct*) setjmp( _temp76.handler); if( ! _temp77){{ struct Cyc_PP_
 _temp79=(( struct Cyc_PP_Doc*(*)( struct Cyc_Hashtable_Table* t, struct
 _tagged_string* key)) Cyc_Hashtable_lookup)( t,({ struct _tagged_string* _temp78=(
 struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp78[
-0]= s; _temp78;})); _npop_handler( 0u); return _temp79;} _pop_handler();} else{
+0]= s; _temp78;})); _npop_handler( 0u); return _temp79;}; _pop_handler();} else{
 struct _xenum_struct* _temp81= _temp77; _LL83: if( _temp81->tag == Cyc_Core_Not_found_tag){
 goto _LL84;} else{ goto _LL85;} _LL85: goto _LL86; _LL84: { struct Cyc_PP_Doc* d=
 Cyc_PP_text_doc( s);(( void(*)( struct Cyc_Hashtable_Table* t, struct

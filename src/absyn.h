@@ -330,6 +330,7 @@ namespace Absyn {
     seg_t        loc;
     list_t<stmt> non_local_preds; // set by type-checking, should go in the
                                   // appropriate CFStmtAnnot, not here!
+    int          try_depth;
     stmt_annot_t annot;
   };
 

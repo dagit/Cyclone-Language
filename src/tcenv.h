@@ -101,6 +101,8 @@ extern tenv_t set_fallthru(tenv_t te,
 			   switch_clause clause);
 extern tenv_t clear_fallthru(tenv_t);
 extern tenv_t set_next(tenv_t, jumpee_t);
+extern tenv_t enter_try(tenv_t te);
+extern int    get_try_depth(tenv_t te);
 
 // The next 4 all assign through their last arg
 extern void process_continue(tenv_t,stmt,stmt_opt@);

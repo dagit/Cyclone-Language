@@ -126,6 +126,7 @@ static struct CtrlEnv {
              // null => not allowed
   $(switch_clause, list_t<tvar>, list_t<typ>) * fallthru_clause; 
   jumpee_t next_stmt; // needed to calculate break_stmt
+  int      try_depth;
   // The next_stmt field needs to be correct only when we might enter
   // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
 };
@@ -143,8 +144,8 @@ static struct SharedFenv {
 // Local function environments -- this is getting a bit out of hand, no?
 struct Fenv {
   struct SharedFenv @   shared;
-  list_t<tvar>            type_vars; // type variables that can occur free
-  Dict::dict_t<var,binding_t> locals;// binding will be Param_b, Local_b, or Pat_b
+  list_t<tvar>            type_vars; //type variables that can occur free
+  Dict::dict_t<var,binding_t> locals;//binding one of Param_b, Local_b, or Pat_b
   stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
   typ                   capability; // current capability -- 
@@ -439,7 +440,7 @@ static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   ctrl_env_t c = f->ctrl_env;
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser,
 	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_clause,
-			c->next_stmt),
+			c->next_stmt, c->try_depth),
 	       f->capability, f->curr_rgn);
 }
 
@@ -554,7 +555,7 @@ void process_break(tenv te, stmt s, stmt_opt @sopt) {
 void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_goto");
   fenv_t fe    = get_fenv(te);
-  let      sopt2 = Dict::lookup_opt(fe->shared->seen_labels, l);
+  let    sopt2 = Dict::lookup_opt(fe->shared->seen_labels, l);
   if(sopt2 == null) {
     let needed = fe->shared->needed_labels;
     let slopt  = SlowDict::lookup_opt(needed, l);
@@ -605,6 +606,17 @@ tenv set_in_loop(tenv te, stmt continue_dest) {
   fe->ctrl_env->break_stmt    = fe->ctrl_env->next_stmt; // break goes to next
   fe->ctrl_env->next_stmt     = Stmt_j(continue_dest);   // next starts as cont
   return put_fenv(te,fe);
+}
+
+tenv_t enter_try(tenv_t te) {
+  if (te->le == null) env_err("Tcenv: unexpected enter_try");
+  fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
+  ++fe->ctrl_env->try_depth;
+  return put_fenv(te,fe);
+}
+int get_try_depth(tenv_t te) {
+  if (te->le == null) env_err("Tcenv: unexpected get_try_depth");
+  return get_fenv(te)->ctrl_env->try_depth;
 }
 
 // each non-last case must also call set_fallthru, here we just
@@ -738,7 +750,7 @@ fenv_t new_fenv(fndecl fd) {
  	       .type_vars   = &List(rgn0,fd->tvs), // assumed unique
 	       .locals      = locals,  // assumed unique
 	       .encloser    = fd->body, // careful -- self loop at top!!!
-	       .ctrl_env    = &CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j),
+	       .ctrl_env    = &CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j, 0),
                .capability  = JoinEff(&List(AccessEff(param_rgn),
                                             &List(fd->effect->v,null))),
                .curr_rgn    = param_rgn

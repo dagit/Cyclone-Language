@@ -123,7 +123,7 @@ char* _temp52= _temp50.curr + 0; if( _temp52 < _temp50.base? 1: _temp52 >=
 _temp50.last_plus_one){ _throw( Null_Exception);}* _temp52;}) ==( int)'-': 0){
 void* action;{ struct _handler_cons _temp53; _push_handler(& _temp53);{ struct
 _xenum_struct* _temp54=( struct _xenum_struct*) setjmp( _temp53.handler); if( !
-_temp54){ action= Cyc_Arg_lookup( speclist, s); _pop_handler();} else{ struct
+_temp54){ action= Cyc_Arg_lookup( speclist, s);; _pop_handler();} else{ struct
 _xenum_struct* _temp56= _temp54; _LL58: if( _temp56->tag == Cyc_Core_Not_found_tag){
 goto _LL59;} else{ goto _LL60;} _LL60: goto _LL61; _LL59: Cyc_Arg_stop( initpos,({
 struct Cyc_Arg_Unknown_struct* _temp62=( struct Cyc_Arg_Unknown_struct*)
@@ -161,7 +161,7 @@ _tagged_string* _temp97= _temp95.curr +( Cyc_Arg_current + 1); if( _temp97 <
 _temp95.base? 1: _temp97 >= _temp95.last_plus_one){ _throw( Null_Exception);}*
 _temp97;}); int n;{ struct _handler_cons _temp98; _push_handler(& _temp98);{
 struct _xenum_struct* _temp99=( struct _xenum_struct*) setjmp( _temp98.handler);
-if( ! _temp99){ n= Cyc_Core_int_of_string( arg); _pop_handler();} else{ struct
+if( ! _temp99){ n= Cyc_Core_int_of_string( arg);; _pop_handler();} else{ struct
 _xenum_struct* _temp101= _temp99; struct _tagged_string _temp107; _LL103: if((*((
 struct _xenum_struct*) _temp101)).tag == Cyc_Core_InvalidArg_tag){ _LL108:
 _temp107=(( struct Cyc_Core_InvalidArg_struct*) _temp101)->f1; goto _LL104;}
@@ -176,7 +176,7 @@ _LL106:( void) _throw( _temp101); _LL102:;}}} _temp87( n); ++ Cyc_Arg_current;
 goto _LL66;} _LL78: while( Cyc_Arg_current < l - 1) { _temp89(({ struct
 _tagged_ptr0 _temp112= Cyc_Arg_args; struct _tagged_string* _temp114= _temp112.curr
 +( Cyc_Arg_current + 1); if( _temp114 < _temp112.base? 1: _temp114 >= _temp112.last_plus_one){
-_throw( Null_Exception);}* _temp114;})); ++ Cyc_Arg_current;} goto _LL66; _LL66:;}
+_throw( Null_Exception);}* _temp114;})); ++ Cyc_Arg_current;} goto _LL66; _LL66:;};
 _pop_handler();} else{ struct _xenum_struct* _temp116= _temp64; struct
 _tagged_string _temp122; _LL118: if((*(( struct _xenum_struct*) _temp116)).tag
 == Cyc_Arg_Bad_tag){ _LL123: _temp122=(( struct Cyc_Arg_Bad_struct*) _temp116)->f1;
@@ -187,7 +187,7 @@ _temp124->f1= _temp122;( void*) _temp124;}), speclist, errmsg); goto _LL117;
 _LL121:( void) _throw( _temp116); _LL117:;}}} ++ Cyc_Arg_current;} else{{ struct
 _handler_cons _temp125; _push_handler(& _temp125);{ struct _xenum_struct*
 _temp126=( struct _xenum_struct*) setjmp( _temp125.handler); if( ! _temp126){
-anonfun( s); _pop_handler();} else{ struct _xenum_struct* _temp128= _temp126;
+anonfun( s);; _pop_handler();} else{ struct _xenum_struct* _temp128= _temp126;
 struct _tagged_string _temp134; _LL130: if((*(( struct _xenum_struct*) _temp128)).tag
 == Cyc_Arg_Bad_tag){ _LL135: _temp134=(( struct Cyc_Arg_Bad_struct*) _temp128)->f1;
 goto _LL131;} else{ goto _LL132;} _LL132: goto _LL133; _LL131: Cyc_Arg_stop(

@@ -27,8 +27,13 @@ using Tcexp;
 using Tcpat;
 using Stdio;
 
+static void decorate_stmt(tenv_t te, stmt s) {
+  NewControlFlow::set_encloser(s, get_encloser(te));
+  s->try_depth = get_try_depth(te);
+}
+
 // used to type-check Let_d, switch clauses, and catch clauses
-static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
+static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
 			  list_t<vardecl> vs, stmt s, exp_opt where_opt,
 			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
@@ -59,9 +64,9 @@ static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
 // rules.  We may revisit some of these semi-arbitrary decisions.)
 // Note: With these adjacency rules, you can't just throw skip statements in
 //       anywhere because they end regions.
-void tcStmt(tenv te, stmt s0, bool new_block) {
-
-  NewControlFlow::set_encloser(s0, get_encloser(te));
+void tcStmt(tenv_t te, stmt s0, bool new_block) {
+  
+  decorate_stmt(te,s0);
 
   switch (s0->r) {
 
@@ -117,14 +122,14 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     return;
 
   case While_s($(e,cont_s),s):
-    NewControlFlow::set_encloser(cont_s, get_encloser(te));
+    decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
     tcStmt(set_in_loop(te,cont_s),s,true);
     return;
 
   case For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
-    NewControlFlow::set_encloser(guard_s, get_encloser(te));
-    NewControlFlow::set_encloser(cont_s,  get_encloser(te));
+    decorate_stmt(te,guard_s);
+    decorate_stmt(te,cont_s);
     tcExp(te,null,e1);
     tcTest(te,e2,"for loop");
     te = set_in_loop(te,cont_s);
@@ -133,7 +138,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     return;
 
   case Do_s(s,$(e,cont_s)):
-    NewControlFlow::set_encloser(cont_s, get_encloser(te));
+    decorate_stmt(te,cont_s);
     tcStmt(set_in_loop(te,cont_s),s,true);
     tcTest(te,e,"do loop");
     return;
@@ -199,8 +204,14 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     return;
 
   case TryCatch_s(s,scs0):
+    // This is a KLUDGE so that we have a next statement that is not
+    // outside of the handler, eg. for try while(b) break; catch ...
+    // We have to do this b/c the translation to C uses the destinations
+    // to pop handlers.
+    s->r = seq_stmt(new_stmt(s->r,s->loc), skip_stmt(s->loc), s->loc)->r;
+
     // must set encloser b/c cannot goto into a handler.
-    tcStmt(set_encloser(te,s0),s,true);
+    tcStmt(set_encloser(enter_try(te),s0),s,true);
 
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);

@@ -109,7 +109,9 @@ static stringptr _pop_handler_sp = (&_pop_handler_string);
 static string handler_string = "handler";
 static stringptr handler_sp = (&handler_string);
 static string _npop_handler_string = "_npop_handler";
-static stringptr _npop_handler_sp = (&_npop_handler_string);
+static $(enum Nmspace, stringptr) _npop_handler_pr = 
+   $(Abs_n(null),&_npop_handler_string);
+static qvar _npop_handler_qv = &_npop_handler_pr;
 static string Match_Exception_string = "Match_Exception";
 static stringptr Match_Exception_sp = (&Match_Exception_string);
 static string Cyc_new_string_string = "Cyc_new_string";
@@ -394,7 +396,7 @@ static bool is_void_star(typ t) {
   case PointerType(PtrInfo{t2,_,_,_,_}):
     switch (compress(t2)) {
     case VoidType: return true;
-    default: return false;
+    default:       return false;
     }
   default: return false;
   }
@@ -468,8 +470,7 @@ static exp malloc_atomic(exp s) {
 static exp malloc_exp(typ t,exp s) {
   if (atomic_typ(t))
     return malloc_atomic(s);
-  else
-    return malloc_ptr(s);
+  return malloc_ptr(s);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -625,8 +626,8 @@ static exp untag_ptr_conv(bool toplevel,typ t1,exp sz,bool nullable,exp e) {
 static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
   for(list_t<conv> cs = conversion(t1,t2); cs != null; cs = cs->tl) {
     switch (cs->hd) {
-    case NullCheck(t):         e = null_check_conv(toplevel,t,e);        break;
-    case TagPtr(t,sz):         e = tag_ptr_conv(toplevel,t,sz,e); break;
+    case NullCheck(t): e = null_check_conv(toplevel,t,e); break;
+    case TagPtr(t,sz): e = tag_ptr_conv(toplevel,t,sz,e); break;
     case UntagPtr(tagged_ptr_typ,sz,nullable): 
       e = untag_ptr_conv(toplevel,tagged_ptr_typ,sz,nullable,e); break;
     }
@@ -645,16 +646,6 @@ static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
 // The varmap is used to map source identifiers to certain expressions.
 // This is primarily used in the pattern match compilation.
 //
-// to_pop_XXX where XXX is break, continue, or return, is the number
-//   of exception handlers to pop before XXX.
-// All the to_pop values are incremented on entry to try.
-// to_pop_return is set to zero at the beginning of functions.
-// to_pop_break is set to zero at do, for, while, and switch.
-// to_pop_continue is set to zero at do, for, and while.
-// to_pop_fallthru is set to zero at non-last case.
-// Note, a continue in a switch pops out to the nearest loop, it has
-// nothing to do with switch.  Fallthru is like a continue for a switch.
-//
 // Translation of fallthru(e1,...,en) is
 // varmap'(qv1) = trans(e1); ... varmap'(qvn) = trans(en);
 // goto fallthru_info->v[0]
@@ -669,10 +660,6 @@ static struct Env {
   opt_t<var> continue_lab;
   opt_t<$(var,list_t<qvar>,Dict::dict_t<qvar,exp>)@> fallthru_info;
   Dict::dict_t<qvar,exp> varmap;
-  int to_pop_break;
-  int to_pop_continue;
-  int to_pop_return;
-  int to_pop_fallthru;
   bool toplevel;
 };
 typedef struct Env @env;
@@ -683,10 +670,6 @@ static env empty_env() {
               .continue_lab    = null,
 	      .fallthru_info   = null,
               .varmap          = Dict::empty(qvar_cmp),
-              .to_pop_break    = 0,
-              .to_pop_continue = 0,
-              .to_pop_return   = 0,
-	      .to_pop_fallthru = 0,
 	      .toplevel        = true};
 }
 static env copy_env(env e) {
@@ -694,10 +677,6 @@ static env copy_env(env e) {
               .continue_lab    = e->continue_lab,
 	      .fallthru_info   = e->fallthru_info,
 	      .varmap          = e->varmap,
-	      .to_pop_break    = e->to_pop_break,
-              .to_pop_continue = e->to_pop_continue,
-              .to_pop_return   = e->to_pop_return,
-	      .to_pop_fallthru = e->to_pop_fallthru,
 	      .toplevel        = e->toplevel};
 }
 
@@ -712,10 +691,7 @@ static env clear_toplevel(env e) {
 static env add_varmap(env e, qvar x, exp y) {
   switch ((*x)[0]) {
   case Rel_n(_):
-    // A fail-safe.
-    throw
-      Impossible(xprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
-    break;
+    throw Impossible(xprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
   default: break;
   }
   env ans = copy_env(e);
@@ -729,18 +705,6 @@ static env loop_env(env e) {
   env ans = copy_env(e);
   ans->break_lab       = null;
   ans->continue_lab    = null;
-  ans->to_pop_break    = 0;
-  ans->to_pop_continue = 0;
-  return ans;
-}
-
-// env for try: increment exception handler pop counters
-static env try_env(env e) {
-  env ans = copy_env(e);
-  ans->to_pop_break++;
-  ans->to_pop_continue++;
-  ans->to_pop_return++;
-  ans->to_pop_fallthru++;
   return ans;
 }
 
@@ -759,8 +723,6 @@ static env non_last_switchclause_env(env e, var break_l, var fallthru_l,
   ans->fallthru_info   = &Opt(&$(fallthru_l,
 				 fallthru_vars,
 				 next_case_env->varmap));
-  ans->to_pop_break    = 0;
-  ans->to_pop_fallthru = 0;
   return ans;
 }
 
@@ -768,7 +730,6 @@ static env last_switchclause_env(env e, var break_l) {
   env ans = copy_env(e);
   ans->break_lab     = &Opt(break_l);
   ans->fallthru_info = null; // not allowed in last case
-  ans->to_pop_break  = 0;
   return ans;
 }
 
@@ -779,8 +740,6 @@ static env switch_as_switch_env(env e, var next_l) {
   env ans = copy_env(e);
   ans->break_lab       = null;
   ans->fallthru_info   = &Opt(&$(next_l,null,Dict::empty(qvar_cmp)));
-  ans->to_pop_break    = 0;
-  ans->to_pop_fallthru = 0;
   return ans;
 }
 
@@ -848,7 +807,7 @@ static exp printf_to_c(primop p, opt_t<exp> aopt,
 
   for (i=0; i<len; i++) {
     char c = fmt_str[i];
-    rev_fmt = &List((int)c,rev_fmt);
+    rev_fmt = &List(c,rev_fmt);
     if (c != '%') continue;
     let x = Formatstr::parse_conversionspecification(fmt_str,i+1);
     if (x == null) toc_impos("bad format string");
@@ -862,7 +821,7 @@ static exp printf_to_c(primop p, opt_t<exp> aopt,
                                                   &List(precision,
                                                         &List(lenmod,null))))),
                         rev_fmt);
-      rev_fmt = &List((int)c2,rev_fmt);
+      rev_fmt = &List(c2,rev_fmt);
       // * width or precision consumes an argument
       switch (width) {
       case &List(x,null) && x=='*':
@@ -897,9 +856,9 @@ static exp printf_to_c(primop p, opt_t<exp> aopt,
       // %s case.  Note, tcexp currently prohibits flags, width, precision,
       // and length modifiers for %s, so we don't handle them here;
       // we just insert size into format and args.
-      rev_fmt = &List((int)'.',rev_fmt);
-      rev_fmt = &List((int)'*',rev_fmt);
-      rev_fmt = &List((int)'s',rev_fmt);
+      rev_fmt = &List('.',rev_fmt);
+      rev_fmt = &List('*',rev_fmt);
+      rev_fmt = &List('s',rev_fmt);
       let temp = temp_var();
       rev_temps = &List(&$(temp,typs->hd,args->hd),rev_temps);
       let size_exp = 
@@ -951,7 +910,7 @@ static $(list_t<designator>,exp)@ add_designator(env nv, exp e) {
 static exp make_struct(qvar x, typ struct_typ, stmt s,
 		       bool pointer, bool is_atomic) {
   exp_opt eo;
-  typ        t;
+  typ     t;
   if(pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeof_exp(struct_typ,DL);
@@ -1328,10 +1287,7 @@ static void exp_to_c(env nv, exp e) {
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
     break;
-  case UnknownCall_e(e1,es):
-    exp_to_c(nv,e1);
-    List::iter_c(exp_to_c,nv,es);
-    break;
+  case UnknownCall_e(e1,es): fallthru(e1,es);
   case FnCall_e(e1,es):
     exp_to_c(nv,e1);
     List::iter_c(exp_to_c,nv,es);
@@ -2144,8 +2100,8 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list_t<switch_clause> scs)
   // decide if we can leave it as a switch
   bool leave_as_switch;
   switch (compress(t)) {
-  case IntType(_,_):         leave_as_switch = true;  break;
-  default:                   leave_as_switch = false; break;
+  case IntType(_,_): leave_as_switch = true;  break;
+  default:           leave_as_switch = false; break;
   }
   for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
     if(scs1->hd->pat_vars->v != null) {
@@ -2241,10 +2197,18 @@ static stmt letdecl_to_c(env nv, pat p, opt_t<typ> topt, exp e,
 			 bool exhaust, stmt s); // forward declaration
 static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top);
 
-
 ///////////////////////////////////////////////////////////////
 //              Translation of Statements                    //
 ///////////////////////////////////////////////////////////////
+stmt make_npop_handler(int n) {
+  return exp_stmt(fncall_exp(var_exp(_npop_handler_qv,DL),
+			     new{List(uint_exp(n-1,DL),null)}, DL), DL);
+}
+void do_npop_before(int n, stmt s) { // mutates s as necessary!
+  if(n > 0)
+    s->r = seq_stmt(make_npop_handler(n),new_stmt(s->r,DL),DL)->r;
+}
+
 // This is surprisingly straightforward... a good sign.
 static void stmt_to_c(env nv, stmt s) {
   // written to be self-tail recursive
@@ -2265,23 +2229,18 @@ static void stmt_to_c(env nv, stmt s) {
 	topt = &Opt(typ_to_c(eopt->topt->v));
 	exp_to_c(nv,(exp)eopt);
       }
-      // reset handler
+      // reset handler **after** evaluating expression
       // FIX:  share code between break, continue, return, fallthru
-      if (nv->to_pop_return != 0) {
-	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
-                                  &List(uint_exp(nv->to_pop_return-1,DL),null),
-                                  DL);
-	let call_stmt = exp_stmt(call_exp,DL);
-	// must run the expression before popping the handler
+      if (s->try_depth > 0) 
 	if (topt != null) {
 	  let x = temp_var();
 	  let retn_stmt = return_stmt(var_exp(x,DL),DL);
-	  s->r = declare_stmt(x,topt->v,eopt,seq_stmt(call_stmt,
-						      retn_stmt,DL),DL)->r;
+	  s->r = declare_stmt(x,topt->v, eopt,
+			      seq_stmt(make_npop_handler(s->try_depth),
+				       retn_stmt,DL),DL)->r;
 	} else {
-	  s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
+	  do_npop_before(s->try_depth,s);
 	}
-      }
       return;
     case IfThenElse_s(e,s1,s2):
       exp_to_c(nv,e);
@@ -2292,33 +2251,23 @@ static void stmt_to_c(env nv, stmt s) {
       exp_to_c(nv,e);
       stmt_to_c(loop_env(nv),s2);
       return;
-    case Break_s(_):
+    case Break_s(dest_opt): // dest is null when break to end of void function
       if (nv->break_lab != null)
 	s->r = goto_stmt(nv->break_lab->v, DL)->r;
       // reset handler
-      // FIX:  share code between break, continue, return, fallthru
-      if (nv->to_pop_break != 0) {
-	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
-                                  &List(uint_exp(nv->to_pop_break-1,DL),null),
-                                  DL);
-	let call_stmt = exp_stmt(call_exp,DL);
-	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
-      }
+      int dest_depth = dest_opt == null ? 0 : dest_opt->try_depth;
+      do_npop_before(s->try_depth - dest_depth, s);
       return;
-    case Continue_s(_):
+    case Continue_s(dest):
       if (nv->continue_lab != null)
 	s->r = goto_stmt(nv->continue_lab->v, DL)->r;
       // reset handler
-      // FIX:  share code between break, continue, return, fallthru
-      if (nv->to_pop_continue != 0) {
-	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
-                                  &List(uint_exp(nv->to_pop_continue-1,DL),null),
-                                  DL);
-	let call_stmt = exp_stmt(call_exp,DL);
-	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
-      }
+      do_npop_before(s->try_depth - dest->try_depth, s);
       return;
-    case Goto_s(_,_): return;
+    case Goto_s(_,dest): 
+      // reset handler (note: earlier checks prevent jump into handler)
+      do_npop_before(s->try_depth - dest->try_depth, s);
+      return;
     case For_s(e1,$(e2,_),$(e3,_),s2):
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3);
@@ -2327,12 +2276,13 @@ static void stmt_to_c(env nv, stmt s) {
     case Switch_s(e,scs):
       xlate_switch(nv,s,e,scs);
       return;
-    case Fallthru_s(es,_):
-      if(nv->fallthru_info == null) {
-	toc_impos("fallthru in unexpected place"); return;
-      }
+    case Fallthru_s(es,dest_clause):
+      if(nv->fallthru_info == null)
+	throw toc_impos("fallthru in unexpected place"); 
       let &$(l,vs,other_vmap) = nv->fallthru_info->v;
       stmt s2 = goto_stmt(l, DL);
+      // reset handler (after the es evaluation)
+      do_npop_before(s->try_depth - (*dest_clause)->body->try_depth, s2);
       let vs2 = List::rev(vs);
       let es2 = List::rev(es);
       for(; vs2 != null; vs2 = vs2->tl, es2 = es2->tl) {
@@ -2342,15 +2292,6 @@ static void stmt_to_c(env nv, stmt s) {
 		      s2,DL);
       }
       s->r = s2->r;
-      // reset handler
-      // FIX:  share code between break, continue, return, fallthru
-      if (nv->to_pop_fallthru != 0) {
-	let call_exp = fncall_exp(var_exp(&$(abs_ns,_npop_handler_sp),DL),
-                                  &List(uint_exp(nv->to_pop_fallthru-1,DL),null),
-                                  DL);
-	let call_stmt = exp_stmt(call_exp,DL);
-	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
-      }
       return;
     case Decl_s(d,s1):
       switch (d->r) {
@@ -2417,7 +2358,7 @@ static void stmt_to_c(env nv, stmt s) {
       nv = add_varmap(nv,e_var,e_exp);
 
       // translate the body
-      stmt_to_c(try_env(nv),body);
+      stmt_to_c(nv,body);
       let tryandpop_stmt = seq_stmt(body,
                                     exp_stmt(fncall_exp(pophandler_exp, null,
                                                         DL), DL),DL);
@@ -2811,7 +2752,7 @@ static $(env,list_t<decl>) decls_to_c(env nv, list_t<decl> ds, bool top) {
       res = xenumdecl_to_c(xd,res); break;
     case Typedef_d(td):
       td->name = td->name;
-      td->tvs = null;
+      td->tvs  = null;
       td->defn = typ_to_c_array(td->defn);
       res = &List(d,res);
       break;
@@ -2855,12 +2796,6 @@ list_t<decl> toc(list_t<decl> ds) {
   let $(_,ds) = decls_to_c(empty_env(),ds,true);
   // add the struct definitions for tuples and tagged arrays to the
   // beginning of the declarations.
-  while (added_decls != null) {
-    let temp = added_decls->tl;
-    added_decls->tl = ds;
-    ds = added_decls;
-    added_decls = temp;
-  }
-  return ds;
+  return imp_append(imp_rev(added_decls),ds);
 }
 

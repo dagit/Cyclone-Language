@@ -335,7 +335,8 @@ exp unresolvedmem_exp(opt_t<typedef_name_t> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt new_stmt(raw_stmt_t s, seg_t loc) { 
-  return &Stmt{.r=s, .loc=loc, .non_local_preds=null, .annot=EmptyAnnot }; }
+  return &Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
+	       .annot=EmptyAnnot }; }
 stmt skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,seg_t loc) { return new_stmt(Exp_s(e),loc); }
 stmt seq_stmts(list_t<stmt> ss, seg_t loc) {

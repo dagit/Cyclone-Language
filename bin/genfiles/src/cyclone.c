@@ -261,18 +261,19 @@ int Cyc_Absyn_Do_s_tag; struct Cyc_Absyn_Do_s_struct{ int tag; struct Cyc_Absyn_
 f1; struct _tuple2 f2;}; extern const int Cyc_Absyn_TryCatch_s_tag; struct Cyc_Absyn_TryCatch_s_struct{
 int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_List_List* f2;}; struct Cyc_Absyn_Stmt{
 void* r; struct Cyc_Position_Segment* loc; struct Cyc_List_List* non_local_preds;
-struct _xenum_struct* annot;}; extern void* Cyc_Absyn_Wild_p; extern const int
-Cyc_Absyn_Var_p_tag; struct Cyc_Absyn_Var_p_struct{ int tag; struct Cyc_Absyn_Vardecl*
-f1;}; extern void* Cyc_Absyn_Null_p; extern const int Cyc_Absyn_Int_p_tag;
-struct Cyc_Absyn_Int_p_struct{ int tag; void* f1; int f2;}; extern const int Cyc_Absyn_Char_p_tag;
-struct Cyc_Absyn_Char_p_struct{ int tag; char f1;}; extern const int Cyc_Absyn_Float_p_tag;
-struct Cyc_Absyn_Float_p_struct{ int tag; struct _tagged_string f1;}; extern
-const int Cyc_Absyn_Tuple_p_tag; struct Cyc_Absyn_Tuple_p_struct{ int tag;
-struct Cyc_List_List* f1;}; extern const int Cyc_Absyn_Pointer_p_tag; struct Cyc_Absyn_Pointer_p_struct{
-int tag; struct Cyc_Absyn_Pat* f1;}; extern const int Cyc_Absyn_Reference_p_tag;
-struct Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;};
-extern const int Cyc_Absyn_Struct_p_tag; struct Cyc_Absyn_Struct_p_struct{ int
-tag; struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
+int try_depth; struct _xenum_struct* annot;}; extern void* Cyc_Absyn_Wild_p;
+extern const int Cyc_Absyn_Var_p_tag; struct Cyc_Absyn_Var_p_struct{ int tag;
+struct Cyc_Absyn_Vardecl* f1;}; extern void* Cyc_Absyn_Null_p; extern const int
+Cyc_Absyn_Int_p_tag; struct Cyc_Absyn_Int_p_struct{ int tag; void* f1; int f2;};
+extern const int Cyc_Absyn_Char_p_tag; struct Cyc_Absyn_Char_p_struct{ int tag;
+char f1;}; extern const int Cyc_Absyn_Float_p_tag; struct Cyc_Absyn_Float_p_struct{
+int tag; struct _tagged_string f1;}; extern const int Cyc_Absyn_Tuple_p_tag;
+struct Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1;}; extern
+const int Cyc_Absyn_Pointer_p_tag; struct Cyc_Absyn_Pointer_p_struct{ int tag;
+struct Cyc_Absyn_Pat* f1;}; extern const int Cyc_Absyn_Reference_p_tag; struct
+Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;}; extern
+const int Cyc_Absyn_Struct_p_tag; struct Cyc_Absyn_Struct_p_struct{ int tag;
+struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
 f3; struct Cyc_List_List* f4;}; extern const int Cyc_Absyn_Enum_p_tag; struct
 Cyc_Absyn_Enum_p_struct{ int tag; struct _tuple0* f1; struct Cyc_Core_Opt* f2;
 struct Cyc_List_List* f3; struct Cyc_List_List* f4; struct Cyc_Absyn_Enumdecl*
@@ -502,7 +503,7 @@ struct _tagged_string mode, struct _tagged_string msg_part){ struct
 _handler_cons _temp5; _push_handler(& _temp5);{ struct _xenum_struct* _temp6=(
 struct _xenum_struct*) setjmp( _temp5.handler); if( ! _temp6){{ struct Cyc_Stdio___sFILE*
 _temp7=( struct Cyc_Stdio___sFILE*) Cyc_Stdio_file_open( filename, mode);
-_npop_handler( 0u); return _temp7;} _pop_handler();} else{ struct _xenum_struct*
+_npop_handler( 0u); return _temp7;}; _pop_handler();} else{ struct _xenum_struct*
 _temp9= _temp6; _LL11: goto _LL12; _LL13: goto _LL14; _LL12: Cyc_compile_failure=
 1;({ struct _tagged_string _temp15= msg_part; struct _tagged_string _temp16=
 filename; fprintf( Cyc_Stdio_stderr,"\nError: couldn't open %.*s %.*s\n",
@@ -525,7 +526,7 @@ _temp23.curr= _temp22; _temp23.base= _temp22; _temp23.last_plus_one= _temp22 + 1
 _temp23;})};( struct _xenum_struct*) _temp21;}); struct Cyc_List_List* ans= 0;{
 struct _handler_cons _temp24; _push_handler(& _temp24);{ struct _xenum_struct*
 _temp25=( struct _xenum_struct*) setjmp( _temp24.handler); if( ! _temp25){ ans=
-f( env, tds); _pop_handler();} else{ struct _xenum_struct* _temp27= _temp25;
+f( env, tds);; _pop_handler();} else{ struct _xenum_struct* _temp27= _temp25;
 struct _tagged_string _temp37; _LL29: if((*(( struct _xenum_struct*) _temp27)).tag
 == Cyc_Core_Impossible_tag){ _LL38: _temp37=(( struct Cyc_Core_Impossible_struct*)
 _temp27)->f1; goto _LL30;} else{ goto _LL31;} _LL31: if( _temp27->tag == Cyc_Dict_Absent_tag){

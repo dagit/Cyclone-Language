@@ -157,7 +157,7 @@ Cyc_Position_Nocontext_tag};( struct _xenum_struct*) _temp42;}));}{ struct Cyc_L
 pos_s; struct Cyc_Lineno_Pos* pos_e;{ struct _handler_cons _temp43;
 _push_handler(& _temp43);{ struct _xenum_struct* _temp44=( struct _xenum_struct*)
 setjmp( _temp43.handler); if( ! _temp44){ pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source,
-seg->start); pos_e= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->end);
+seg->start); pos_e= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->end);;
 _pop_handler();} else{ struct _xenum_struct* _temp46= _temp44; _LL48: goto _LL49;
 _LL50: goto _LL51; _LL49:( void) _throw(({ struct Cyc_Position_Nocontext_struct*
 _temp52=( struct Cyc_Position_Nocontext_struct*) GC_malloc_atomic( sizeof(
@@ -226,7 +226,7 @@ _tagged_string _temp94= marker_str; char* _temp96= _temp94.curr + i; if( _temp96
 < _temp94.base? 1: _temp96 >= _temp94.last_plus_one){ _throw( Null_Exception);}*
 _temp96='^';});}({ struct _tagged_string _temp97=(* x).f1; struct _tagged_string
 _temp98= marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n", _temp97.last_plus_one
-- _temp97.curr, _temp97.curr, _temp98.last_plus_one - _temp98.curr, _temp98.curr);});}
+- _temp97.curr, _temp97.curr, _temp98.last_plus_one - _temp98.curr, _temp98.curr);});};
 _pop_handler();} else{ struct _xenum_struct* _temp100= _temp87; _LL102: if(
 _temp100->tag == Cyc_Position_Nocontext_tag){ goto _LL103;} else{ goto _LL104;}
 _LL104: goto _LL105; _LL103: goto _LL101; _LL105:( void) _throw( _temp100);

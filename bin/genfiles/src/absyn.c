@@ -230,17 +230,18 @@ int tag; struct _tagged_string* f1; struct Cyc_Absyn_Stmt* f2;}; const int Cyc_A
 _tuple2 f2;}; const int Cyc_Absyn_TryCatch_s_tag= 16; struct Cyc_Absyn_TryCatch_s_struct{
 int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_List_List* f2;}; struct Cyc_Absyn_Stmt{
 void* r; struct Cyc_Position_Segment* loc; struct Cyc_List_List* non_local_preds;
-struct _xenum_struct* annot;}; void* Cyc_Absyn_Wild_p=( void*) 0; const int Cyc_Absyn_Var_p_tag=
-0; struct Cyc_Absyn_Var_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;}; void*
-Cyc_Absyn_Null_p=( void*) 1; const int Cyc_Absyn_Int_p_tag= 1; struct Cyc_Absyn_Int_p_struct{
-int tag; void* f1; int f2;}; const int Cyc_Absyn_Char_p_tag= 2; struct Cyc_Absyn_Char_p_struct{
-int tag; char f1;}; const int Cyc_Absyn_Float_p_tag= 3; struct Cyc_Absyn_Float_p_struct{
-int tag; struct _tagged_string f1;}; const int Cyc_Absyn_Tuple_p_tag= 4; struct
-Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1;}; const int Cyc_Absyn_Pointer_p_tag=
-5; struct Cyc_Absyn_Pointer_p_struct{ int tag; struct Cyc_Absyn_Pat* f1;}; const
-int Cyc_Absyn_Reference_p_tag= 6; struct Cyc_Absyn_Reference_p_struct{ int tag;
-struct Cyc_Absyn_Vardecl* f1;}; const int Cyc_Absyn_Struct_p_tag= 7; struct Cyc_Absyn_Struct_p_struct{
-int tag; struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
+int try_depth; struct _xenum_struct* annot;}; void* Cyc_Absyn_Wild_p=( void*) 0;
+const int Cyc_Absyn_Var_p_tag= 0; struct Cyc_Absyn_Var_p_struct{ int tag; struct
+Cyc_Absyn_Vardecl* f1;}; void* Cyc_Absyn_Null_p=( void*) 1; const int Cyc_Absyn_Int_p_tag=
+1; struct Cyc_Absyn_Int_p_struct{ int tag; void* f1; int f2;}; const int Cyc_Absyn_Char_p_tag=
+2; struct Cyc_Absyn_Char_p_struct{ int tag; char f1;}; const int Cyc_Absyn_Float_p_tag=
+3; struct Cyc_Absyn_Float_p_struct{ int tag; struct _tagged_string f1;}; const
+int Cyc_Absyn_Tuple_p_tag= 4; struct Cyc_Absyn_Tuple_p_struct{ int tag; struct
+Cyc_List_List* f1;}; const int Cyc_Absyn_Pointer_p_tag= 5; struct Cyc_Absyn_Pointer_p_struct{
+int tag; struct Cyc_Absyn_Pat* f1;}; const int Cyc_Absyn_Reference_p_tag= 6;
+struct Cyc_Absyn_Reference_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;};
+const int Cyc_Absyn_Struct_p_tag= 7; struct Cyc_Absyn_Struct_p_struct{ int tag;
+struct Cyc_Absyn_Structdecl* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
 f3; struct Cyc_List_List* f4;}; const int Cyc_Absyn_Enum_p_tag= 8; struct Cyc_Absyn_Enum_p_struct{
 int tag; struct _tuple0* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List* f3;
 struct Cyc_List_List* f4; struct Cyc_Absyn_Enumdecl* f5; struct Cyc_Absyn_Enumfield*
@@ -905,21 +906,21 @@ _temp194->f1= n; _temp194->f2= dles;( void*) _temp194;}), loc);} struct Cyc_Absy
 Cyc_Absyn_new_stmt( void* s, struct Cyc_Position_Segment* loc){ return({ struct
 Cyc_Absyn_Stmt* _temp195=( struct Cyc_Absyn_Stmt*) GC_malloc( sizeof( struct Cyc_Absyn_Stmt));
 _temp195->r=( void*) s; _temp195->loc= loc; _temp195->non_local_preds= 0;
-_temp195->annot=({ struct Cyc_Absyn_EmptyAnnot_struct* _temp196=( struct Cyc_Absyn_EmptyAnnot_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Absyn_EmptyAnnot_struct));* _temp196=(
-struct Cyc_Absyn_EmptyAnnot_struct){.tag= Cyc_Absyn_EmptyAnnot_tag};( struct
-_xenum_struct*) _temp196;}); _temp195;});} struct Cyc_Absyn_Stmt* Cyc_Absyn_skip_stmt(
-struct Cyc_Position_Segment* loc){ return Cyc_Absyn_new_stmt( Cyc_Absyn_Skip_s,
-loc);} struct Cyc_Absyn_Stmt* Cyc_Absyn_exp_stmt( struct Cyc_Absyn_Exp* e,
-struct Cyc_Position_Segment* loc){ return Cyc_Absyn_new_stmt(({ struct Cyc_Absyn_Exp_s_struct*
-_temp197=( struct Cyc_Absyn_Exp_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Exp_s_struct));
-_temp197->tag= Cyc_Absyn_Exp_s_tag; _temp197->f1= e;( void*) _temp197;}), loc);}
-struct Cyc_Absyn_Stmt* Cyc_Absyn_seq_stmts( struct Cyc_List_List* ss, struct Cyc_Position_Segment*
-loc){ if( ss == 0){ return Cyc_Absyn_skip_stmt( loc);} else{ if( ss->tl == 0){
-return( struct Cyc_Absyn_Stmt*) ss->hd;} else{ return Cyc_Absyn_seq_stmt((
-struct Cyc_Absyn_Stmt*) ss->hd, Cyc_Absyn_seq_stmts( ss->tl, loc), loc);}}}
-struct Cyc_Absyn_Stmt* Cyc_Absyn_return_stmt( struct Cyc_Absyn_Exp* e, struct
-Cyc_Position_Segment* loc){ return Cyc_Absyn_new_stmt(({ struct Cyc_Absyn_Return_s_struct*
+_temp195->try_depth= 0; _temp195->annot=({ struct Cyc_Absyn_EmptyAnnot_struct*
+_temp196=( struct Cyc_Absyn_EmptyAnnot_struct*) GC_malloc_atomic( sizeof( struct
+Cyc_Absyn_EmptyAnnot_struct));* _temp196=( struct Cyc_Absyn_EmptyAnnot_struct){.tag=
+Cyc_Absyn_EmptyAnnot_tag};( struct _xenum_struct*) _temp196;}); _temp195;});}
+struct Cyc_Absyn_Stmt* Cyc_Absyn_skip_stmt( struct Cyc_Position_Segment* loc){
+return Cyc_Absyn_new_stmt( Cyc_Absyn_Skip_s, loc);} struct Cyc_Absyn_Stmt* Cyc_Absyn_exp_stmt(
+struct Cyc_Absyn_Exp* e, struct Cyc_Position_Segment* loc){ return Cyc_Absyn_new_stmt(({
+struct Cyc_Absyn_Exp_s_struct* _temp197=( struct Cyc_Absyn_Exp_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Exp_s_struct)); _temp197->tag= Cyc_Absyn_Exp_s_tag;
+_temp197->f1= e;( void*) _temp197;}), loc);} struct Cyc_Absyn_Stmt* Cyc_Absyn_seq_stmts(
+struct Cyc_List_List* ss, struct Cyc_Position_Segment* loc){ if( ss == 0){
+return Cyc_Absyn_skip_stmt( loc);} else{ if( ss->tl == 0){ return( struct Cyc_Absyn_Stmt*)
+ss->hd;} else{ return Cyc_Absyn_seq_stmt(( struct Cyc_Absyn_Stmt*) ss->hd, Cyc_Absyn_seq_stmts(
+ss->tl, loc), loc);}}} struct Cyc_Absyn_Stmt* Cyc_Absyn_return_stmt( struct Cyc_Absyn_Exp*
+e, struct Cyc_Position_Segment* loc){ return Cyc_Absyn_new_stmt(({ struct Cyc_Absyn_Return_s_struct*
 _temp198=( struct Cyc_Absyn_Return_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Return_s_struct));
 _temp198->tag= Cyc_Absyn_Return_s_tag; _temp198->f1= e;( void*) _temp198;}), loc);}
 struct Cyc_Absyn_Stmt* Cyc_Absyn_ifthenelse_stmt( struct Cyc_Absyn_Exp* e,
