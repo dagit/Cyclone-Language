@@ -188,8 +188,17 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 %.$(O): %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
 	$(CC) -c -o $@ $(CFLAGS) -I. $<
 
-# These two rules always use -compile-for-boot, but we really shouldn't
-# use it for library files not in the minimal boot library.
+# The default rules for compiling .cyc files use the -compile-for-boot
+# flag, which causes #include <setjmp.h> to be used in all the
+# generated C files.  This makes the genfiles portable.  But,
+# we don't need this for non-compiler files (which won't end up
+# in bin/genfiles).  And for cycstubs.c, it would cause conflicts
+# because it would pull in extra C definitions that would conflict
+# with wrapper code we have in cycstubs.cyc.  So for just that file
+# we have another rule to omit -compile-for-boot (and so the
+# compiler special file cyc_setjmp.h will be used instead).
+cycstubs.c: cycstubs.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
+	$(CYCC) -c -o $@ $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<
 %.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<
 %.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
