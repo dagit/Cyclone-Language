@@ -984,9 +984,9 @@ void*Cyc_Absyn_float_typ(int);
 void*Cyc_Absyn_at_typ(void*t,void*rgn,struct Cyc_Absyn_Tqual tq,union Cyc_Absyn_Constraint*zero_term);
 # 983
 void*Cyc_Absyn_dyneither_typ(void*t,void*rgn,struct Cyc_Absyn_Tqual tq,union Cyc_Absyn_Constraint*zero_term);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-# 29 "iter.h"
+# 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
-# 30
+# 37
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 40 "set.h"
 typedef struct Cyc_Set_Set*Cyc_Set_set_t;extern char Cyc_Set_Absent[7];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Dict_T;

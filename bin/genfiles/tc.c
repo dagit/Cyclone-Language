@@ -1018,9 +1018,9 @@ struct _dyneither_ptr Cyc_Absynpp_typ2string(void*);
 struct _dyneither_ptr Cyc_Absynpp_kind2string(struct Cyc_Absyn_Kind*);
 # 70
 struct _dyneither_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-# 29 "iter.h"
+# 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
-# 30
+# 37
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 40 "set.h"
 typedef struct Cyc_Set_Set*Cyc_Set_set_t;

@@ -1190,9 +1190,9 @@ return Cyc_token_rec(lexbuf,lexstate);}{
 struct Cyc_Lexing_Error_exn_struct _tmpBB;const char*_tmpBA;struct Cyc_Lexing_Error_exn_struct*_tmpB9;(int)_throw((void*)((_tmpB9=_cycalloc(sizeof(*_tmpB9)),((_tmpB9[0]=((_tmpBB.tag=Cyc_Lexing_Error,((_tmpBB.f1=((_tmpBA="some action didn't return!",_tag_dyneither(_tmpBA,sizeof(char),27))),_tmpBB)))),_tmpB9)))));};}
 # 72
 struct _tuple20*Cyc_token(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_token_rec(lexbuf,0);}struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-# 29 "iter.h"
+# 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
-# 30
+# 37
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 40 "set.h"
 typedef struct Cyc_Set_Set*Cyc_Set_set_t;extern char Cyc_Set_Absent[7];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Dict_T;

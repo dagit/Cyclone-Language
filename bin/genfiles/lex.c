@@ -828,9 +828,9 @@ char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);
 int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*);
 # 87
 int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-# 29 "iter.h"
+# 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
-# 30
+# 37
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 40 "set.h"
 typedef struct Cyc_Set_Set*Cyc_Set_set_t;
