@@ -340,13 +340,14 @@ struct Cyc_Absyn_Conref* Cyc_Absyn_compress_conref( struct Cyc_Absyn_Conref* x);
 extern void* Cyc_Absyn_conref_val( struct Cyc_Absyn_Conref* x); extern void* Cyc_Absyn_new_evar(
 struct Cyc_Core_Opt* k, struct Cyc_Core_Opt* tenv); extern void* Cyc_Absyn_wildtyp(
 struct Cyc_Core_Opt*); extern void* Cyc_Absyn_uchar_t; extern void* Cyc_Absyn_ushort_t;
-extern void* Cyc_Absyn_uint_t; extern void* Cyc_Absyn_ulong_t; extern void* Cyc_Absyn_schar_t;
-extern void* Cyc_Absyn_sshort_t; extern void* Cyc_Absyn_sint_t; extern void* Cyc_Absyn_slong_t;
-extern void* Cyc_Absyn_float_t; extern void* Cyc_Absyn_exn_typ; extern void* Cyc_Absyn_string_typ(
-void* rgn); extern void* Cyc_Absyn_file_typ(); extern void* Cyc_Absyn_atb_typ(
-void* t, void* rgn, struct Cyc_Absyn_Tqual tq, void* b); extern void* Cyc_Absyn_star_typ(
-void* t, void* rgn, struct Cyc_Absyn_Tqual tq); extern void* Cyc_Absyn_at_typ(
-void* t, void* rgn, struct Cyc_Absyn_Tqual tq); extern struct Cyc_Absyn_Exp* Cyc_Absyn_new_exp(
+extern void* Cyc_Absyn_uint_t; extern void* Cyc_Absyn_ulonglong_t; extern void*
+Cyc_Absyn_schar_t; extern void* Cyc_Absyn_sshort_t; extern void* Cyc_Absyn_sint_t;
+extern void* Cyc_Absyn_slonglong_t; extern void* Cyc_Absyn_float_t; extern void*
+Cyc_Absyn_exn_typ; extern void* Cyc_Absyn_string_typ( void* rgn); extern void*
+Cyc_Absyn_file_typ(); extern void* Cyc_Absyn_atb_typ( void* t, void* rgn, struct
+Cyc_Absyn_Tqual tq, void* b); extern void* Cyc_Absyn_star_typ( void* t, void*
+rgn, struct Cyc_Absyn_Tqual tq); extern void* Cyc_Absyn_at_typ( void* t, void*
+rgn, struct Cyc_Absyn_Tqual tq); extern struct Cyc_Absyn_Exp* Cyc_Absyn_new_exp(
 void*, struct Cyc_Position_Segment*); extern struct Cyc_Absyn_Exp* Cyc_Absyn_copy_exp(
 struct Cyc_Absyn_Exp*); extern struct Cyc_Absyn_Exp* Cyc_Absyn_uint_exp(
 unsigned int, struct Cyc_Position_Segment*); extern void* Cyc_Absyn_pointer_expand(
@@ -659,8 +660,8 @@ _temp138)->f1; goto _LL151;} else{ goto _LL152;} _LL152: if( _temp138 ==( void*)
 Cyc_Absyn_Null_c){ goto _LL153;} else{ goto _LL139;} _LL141: t= _temp156 ==(
 void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uchar_t: Cyc_Absyn_schar_t; goto _LL139;
 _LL143: t= _temp160 ==( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_ushort_t: Cyc_Absyn_sshort_t;
-goto _LL139; _LL145: t= _temp164 ==( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_ulong_t:
-Cyc_Absyn_slong_t; goto _LL139; _LL147: t= Cyc_Absyn_float_t; goto _LL139;
+goto _LL139; _LL145: t= _temp164 ==( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_ulonglong_t:
+Cyc_Absyn_slonglong_t; goto _LL139; _LL147: t= Cyc_Absyn_float_t; goto _LL139;
 _LL149: if( topt == 0){ t= _temp170 ==( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uint_t:
 Cyc_Absyn_sint_t;} else{ void* _temp174= Cyc_Tcutil_compress(*(( void**)
 _check_null( topt))); void* _temp184; void* _temp186; void* _temp188; void*

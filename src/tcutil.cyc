@@ -1205,7 +1205,7 @@ static bool any_promote(tenv_t te, exp_t e) {
     case B4: 
       t = (sn == (sign_t)Unsigned) ? uint_t : sint_t; break;   // make unboxed
     case B8: 
-      t = (sn == (sign_t)Unsigned) ? ulong_t : slong_t; break; // make unboxed
+      t = (sn == (sign_t)Unsigned) ? ulonglong_t : slonglong_t; break; // make unboxed
     }
     break;
   case FloatType:  t = float_t;  break; // make unboxed
@@ -1477,9 +1477,9 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(FloatType,_):  fallthru;
   case $(_,FloatType):  return FloatType;
   case $(&IntType(Unsigned,B8),_): fallthru;
-  case $(_,&IntType(Unsigned,B8)): return ulong_t;
+  case $(_,&IntType(Unsigned,B8)): return ulonglong_t;
   case $(&IntType(Signed,B8),_):   fallthru;
-  case $(_,&IntType(Signed,B8)):   return slong_t;
+  case $(_,&IntType(Signed,B8)):   return slonglong_t;
   case $(&IntType(Unsigned,B4),_): fallthru;
   case $(_,&IntType(Unsigned,B4)): return uint_t;
   default: return sint_t;

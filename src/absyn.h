@@ -651,9 +651,9 @@ namespace Absyn {
   // list
   extern type_t wildtyp(opt_t<list_t<tvar_t>>);
   // unsigned types
-  extern type_t uchar_t, ushort_t, uint_t, ulong_t;
+  extern type_t uchar_t, ushort_t, uint_t, ulong_t, ulonglong_t;
   // signed types
-  extern type_t schar_t, sshort_t, sint_t, slong_t;
+  extern type_t schar_t, sshort_t, sint_t, slong_t, slonglong_t;
   // float, double
   extern type_t float_t, double_t;
   // exception name and type

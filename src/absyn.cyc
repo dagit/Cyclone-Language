@@ -131,22 +131,26 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 static tunion Type.IntType uchar_tt  = IntType(Unsigned,B1);
 static tunion Type.IntType ushort_tt = IntType(Unsigned,B2);
 static tunion Type.IntType uint_tt   = IntType(Unsigned,B4);
-static tunion Type.IntType ulong_tt  = IntType(Unsigned,B8);
+static tunion Type.IntType ulong_tt  = IntType(Unsigned,B4);
+static tunion Type.IntType ulonglong_tt  = IntType(Unsigned,B8);
 
 type_t uchar_t  = &uchar_tt;
 type_t ushort_t = &ushort_tt;
 type_t uint_t   = &uint_tt;
 type_t ulong_t  = &ulong_tt;
+type_t ulonglong_t  = &ulonglong_tt;
 // signed types
 static tunion Type.IntType schar_tt  = IntType(Signed,B1);
 static tunion Type.IntType sshort_tt = IntType(Signed,B2);
 static tunion Type.IntType sint_tt   = IntType(Signed,B4);
-static tunion Type.IntType slong_tt  = IntType(Signed,B8);
+static tunion Type.IntType slong_tt  = IntType(Signed,B4);
+static tunion Type.IntType slonglong_tt  = IntType(Signed,B8);
 
 type_t schar_t  = &schar_tt;
 type_t sshort_t = &sshort_tt;
 type_t sint_t   = &sint_tt;
 type_t slong_t  = &slong_tt;
+type_t slonglong_t = &slonglong_tt;
 // float, double
 type_t float_t  = FloatType;
 type_t double_t = DoubleType;
