@@ -1223,7 +1223,7 @@ rule mangle = parse
     }
     else {
       /* Put the skeleton in a temp file */
-      tmpskeletonfile = (const char *)tmpnam(NULL);
+      tmpskeletonfile = strdup((const char *)tmpnam(NULL));
       if (tmpskeletonfile) {
 	maybe = fopen(tmpskeletonfile,"w");
 	if (!maybe) {
@@ -1240,9 +1240,9 @@ rule mangle = parse
       fclose(out_file);
       theskeletonfile = tmpskeletonfile;
     }
-
+    
     /* Run flex */
-    let flexoutfile = (const char @)tmpnam(NULL);
+    let flexoutfile = strdup((const char @)tmpnam(NULL));
     let cmd = (const char @)aprintf("flex -S%s -o%s %s",
                       theskeletonfile,
                       flexoutfile,
@@ -1252,7 +1252,6 @@ rule mangle = parse
       if (tmpskeletonfile) remove(tmpskeletonfile);
       exit(1);
     }
-
     /* Mangle the output of flex */
     maybe = fopen(flexoutfile,"r");
     if (!maybe) {
@@ -1280,3 +1279,6 @@ rule mangle = parse
     return 0;
   }
 }
+
+
+
