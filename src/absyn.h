@@ -138,7 +138,7 @@ namespace Absyn {
   typedef struct Typedefdecl @typedefdecl_t;
   typedef struct Enumfield @enumfield_t;
   typedef struct Enumdecl @enumdecl_t;
-  typedef struct Vardecl @vardecl_t;
+  typedef struct Vardecl @vardecl_t, *vardecl_opt_t;
   typedef datatype Raw_decl @raw_decl_t;
   typedef struct Decl @decl_t;
   typedef datatype Designator @designator_t;

@@ -925,7 +925,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -1089,40 +1089,40 @@ struct Cyc_Absyn_Kind*Cyc_Tcutil_typ_kind(void*t);
 void*Cyc_Tcutil_compress(void*t);
 # 80
 int Cyc_Tcutil_coerceable(void*);
-# 110
+# 111
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
-# 119
+# 120
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 126
+# 127
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 extern struct Cyc_Core_Opt Cyc_Tcutil_ako;
-# 129
+# 130
 extern struct Cyc_Core_Opt Cyc_Tcutil_mko;
-# 133
+# 134
 extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
-# 160
+# 161
 int Cyc_Tcutil_unify(void*,void*);
-# 165
+# 166
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple12{struct Cyc_List_List*f1;struct _RegionHandle*f2;};struct _tuple13{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 192
+# 193
 struct _tuple13*Cyc_Tcutil_r_make_inst_var(struct _tuple12*,struct Cyc_Absyn_Tvar*);
-# 240 "tcutil.h"
+# 241 "tcutil.h"
 void Cyc_Tcutil_check_unique_vars(struct Cyc_List_List*vs,unsigned int loc,struct _dyneither_ptr err_msg);
-# 255
+# 256
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*rgn,unsigned int loc,struct Cyc_List_List*des,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);
-# 280
+# 281
 int Cyc_Tcutil_is_noalias_region(void*r,int must_be_unique);
-# 288
+# 289
 int Cyc_Tcutil_is_noalias_path(struct _RegionHandle*,struct Cyc_Absyn_Exp*e);
-# 293
+# 294
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 308
+# 309
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 327
+# 328
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 372
+# 373
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple0*eq;int isTrue;};

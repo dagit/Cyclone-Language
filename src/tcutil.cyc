@@ -2134,15 +2134,16 @@ bool rgn_of_pointer(type_t t, type_t @rgn) {
   }
 }
 
-// return true if t is a pointer type and/or has boxed kind.  Also return
-// dynamic pointer description, if a pointer
-bool is_pointer_or_boxed(type_t t, bool @is_dyneither_ptr) {
+// return true if t has boxed kind.
+bool is_boxed(type_t t) {
+  return typ_kind(t)->kind == BoxKind;
+}
+
+bool is_dyneither_ptr(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,_,_)}):
-    *is_dyneither_ptr = (conref_constr(bounds_one,b) == &DynEither_b_val);
-    return true;
-  default:
-    return typ_kind(t)->kind == BoxKind;
+    return (conref_def(bounds_one,b) == &DynEither_b_val);
+  default: return false;
   }
 }
 

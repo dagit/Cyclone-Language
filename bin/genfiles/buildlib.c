@@ -1003,7 +1003,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;

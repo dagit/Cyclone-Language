@@ -884,7 +884,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -1006,21 +1006,21 @@ typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;st
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 # 134 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};extern char Cyc_Tcutil_AbortTypeCheckingFunction[26];struct Cyc_Tcutil_AbortTypeCheckingFunction_exn_struct{char*tag;};
-# 145 "tcutil.h"
+# 146 "tcutil.h"
 int Cyc_Tcutil_unify_kindbound(void*,void*);
-# 158
+# 159
 void Cyc_Tcutil_explain_failure();
-# 160
+# 161
 int Cyc_Tcutil_unify(void*,void*);
-# 163
+# 164
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 253 "tcutil.h"
+# 254 "tcutil.h"
 int Cyc_Tcutil_equal_tqual(struct Cyc_Absyn_Tqual tq1,struct Cyc_Absyn_Tqual tq2);
-# 320
+# 321
 int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
-# 372
+# 373
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

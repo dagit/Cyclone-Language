@@ -874,7 +874,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -1075,13 +1075,13 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void*Cyc_Tcutil_compress(void*t);
 # 101
 int Cyc_Tcutil_is_function_type(void*t);
-# 111
+# 112
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 144
+# 145
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 372 "tcutil.h"
+# 373 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);extern char Cyc_Tcdecl_Incompatible[13];struct Cyc_Tcdecl_Incompatible_exn_struct{char*tag;};struct Cyc_Tcdecl_Xdatatypefielddecl{struct Cyc_Absyn_Datatypedecl*base;struct Cyc_Absyn_Datatypefield*field;};
 # 41 "tcdecl.h"
 typedef struct Cyc_Tcdecl_Xdatatypefielddecl*Cyc_Tcdecl_xdatatypefielddecl_t;

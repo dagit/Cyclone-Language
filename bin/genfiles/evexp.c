@@ -872,7 +872,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -978,17 +978,17 @@ void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
 # 71
 void*Cyc_Tcutil_compress(void*t);
-# 111
+# 112
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 160
+# 161
 int Cyc_Tcutil_unify(void*,void*);
-# 162
+# 163
 int Cyc_Tcutil_typecmp(void*,void*);
-# 165
+# 166
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 372 "tcutil.h"
+# 373 "tcutil.h"
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct _tuple10{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple10 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);

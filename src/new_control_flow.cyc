@@ -61,7 +61,6 @@ namespace NewControlFlow;
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t     seg_t;
-typedef struct Vardecl *`H  vardecl_opt_t;
 
 // flag controlling whether or not to warn when we lose unique pointers
 bool warn_lose_unique = false;

@@ -2470,8 +2470,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   default: break;
   }
   // check to see that the type is word-sized or a pointer
-  bool ign_1 = false;
-  if (!is_pointer_or_boxed(t1,&ign_1))
+  if (!is_boxed(t1) && !is_pointer_type(t1))
     terr(loc,"Swap not allowed for non-pointer or non-word-sized types.");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.

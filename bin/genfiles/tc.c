@@ -889,7 +889,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -1072,57 +1072,57 @@ int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*)
 int Cyc_Tcutil_is_integral(struct Cyc_Absyn_Exp*);
 # 101
 int Cyc_Tcutil_is_function_type(void*t);
-# 109
+# 110
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 113
+# 114
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ek;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ik;
-# 116
+# 117
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 144
+# 145
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 158
+# 159
 void Cyc_Tcutil_explain_failure();
-# 160
+# 161
 int Cyc_Tcutil_unify(void*,void*);
-# 187
+# 188
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 197
+# 198
 void Cyc_Tcutil_check_bitfield(unsigned int loc,struct Cyc_Tcenv_Tenv*te,void*field_typ,struct Cyc_Absyn_Exp*width,struct _dyneither_ptr*fn);
-# 227 "tcutil.h"
+# 228 "tcutil.h"
 void Cyc_Tcutil_check_valid_toplevel_type(unsigned int,struct Cyc_Tcenv_Tenv*,void*);
-# 229
+# 230
 void Cyc_Tcutil_check_fndecl_valid_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 237
+# 238
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,void*);
-# 241
+# 242
 void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
-# 251
+# 252
 int Cyc_Tcutil_is_bound_one(union Cyc_Absyn_Constraint*b);
-# 283
+# 284
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
-# 293
+# 294
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 313
+# 314
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 324
+# 325
 int Cyc_Tcutil_bits_only(void*t);
-# 327
+# 328
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 337
+# 338
 int Cyc_Tcutil_supports_default(void*);
-# 348
+# 349
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 352
+# 353
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 372
+# 373
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

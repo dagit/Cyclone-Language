@@ -2228,6 +2228,22 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
   }
 }
 
+static bool is_tagged_union_project_impl(type_t t, field_name_t f,
+					 int @f_tag, type_t @ tagged_member_type,
+					 bool clear_read, bool *is_read) {
+  switch (compress(t)) {
+  case &AggrType(AggrInfo(info,...)):
+    let ad = get_known_aggrdecl(info);
+    *f_tag = get_member_offset(ad,f);
+    // FIX: we need to get unique names for these damned structs...
+    string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
+    *tagged_member_type = strct(new str);
+    if (clear_read) *is_read = false;
+    return ad->impl->tagged;
+  default: return false;
+  }
+}
+
 // return true if e is e1.f or e1->f where e1 is a (pointer to a)
 // tagged union.  While we're at it, calculate the tag for the
 // corresponding member f_tag.
@@ -2237,31 +2253,13 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
   switch (e->r) {
   case &Cast_e(_,e1,_,_): toc_impos("cast on lhs!");
   case &AggrMember_e(e1,f,_,*is_read):
-    switch (compress((type_t)e1->topt)) {
-    case &AggrType(AggrInfo(info,...)):
-      let ad = get_known_aggrdecl(info);
-      *f_tag = get_member_offset(ad,f);
-      // FIX: we need to get unique names for these damned structs...
-      string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
-      *tagged_member_type = strct(new str);
-      if (clear_read) *is_read = false;
-      return ad->impl->tagged;
-    default: return false;
-    }
+    return is_tagged_union_project_impl((type_t)e1->topt,f,f_tag,
+					tagged_member_type,clear_read,is_read);
   case &AggrArrow_e(e1,f,_,*is_read):
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{.elt_typ = et,...}):
-      switch (compress(et)) {
-      case &AggrType(AggrInfo(info,...)):
-        let ad = get_known_aggrdecl(info);
-        *f_tag = get_member_offset(ad,f);
-        // FIX: we need to get unique names for these damned structs...
-        string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
-        *tagged_member_type = strct(new str);
-        if (clear_read) *is_read = false;
-        return ad->impl->tagged;
-      default: return false;
-      }
+      return is_tagged_union_project_impl(et,f,f_tag,
+					  tagged_member_type,clear_read,is_read);
     default: return false;
     }
   default: return false;
@@ -2321,6 +2319,82 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
                            push_address_exp(e1),
                            seq_stmt(s2,s3,DL),DL);
   return stmt_exp_r(s1);
+}
+
+static void new_comprehension_to_c(env_t nv, exp_t e, type_t new_e_type,
+				   exp_opt_t rgnopt, type_t old_typ,
+				   exp_t e1, type_t t1,
+				   bool zero_term, exp_opt_t init_exp,
+				   vardecl_opt_t vd)
+{		
+  // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array.
+  // Slight twist for zero-terminated arrays -- must allocate one more
+  // element and initialize the last element to 0.
+  // ({ unsigned int max = e1;
+  //    t *a = (t*)malloc(sizeof(t)*max);
+  //    struct tagged_arr b = _tag_arr(a);
+  //    unsigned int x ;
+  //    for (x = 0; x < max; x++) a[x] = e2;
+  //    b; })      
+  qvar_t max = temp_var();
+  qvar_t a = temp_var();
+  type_t old_elt_typ = t1;
+  type_t elt_typ = typ_to_c(old_elt_typ);
+  type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
+  exp_to_c(nv,e1);
+  let malloc_size_exp = var_exp(max,DL);
+  // add one to max for zero-terminated arrays
+  stmt_t s;
+  if (zero_term)
+    malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
+  if (init_exp != NULL)
+    s = init_comprehension(nv, new_e_type,
+			   var_exp(a,DL), (vardecl_t)vd, var_exp(max,DL),
+			   init_exp, zero_term, skip_stmt_dl(), true);
+  else if (zero_term)
+    s = exp_stmt(assign_exp(subscript_exp(var_exp(a,DL),var_exp(max,DL),DL),
+			    cast_it(elt_typ,uint_exp(0,DL)),DL),DL);
+  else
+    s = skip_stmt(DL);
+  // FIX:  casts needed on exp_opts
+  TOC_RGN(nv,r) {
+    list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls =
+      rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
+    exp_t ai;
+    if (rgnopt == NULL || no_regions)
+      ai = malloc_exp(old_elt_typ,
+		      fncall_exp(_check_times_e,
+				 list(sizeoftyp_exp(elt_typ,DL),
+				      malloc_size_exp), DL));
+    else {
+      exp_t r = (exp_t)rgnopt;
+      exp_to_c(nv,r);
+      ai = rmalloc_exp(r, fncall_exp(_check_times_e,
+				     list(sizeoftyp_exp(elt_typ,DL),
+					  malloc_size_exp), DL));
+    }
+    exp_t ainit = cast_it(ptr_typ,ai);
+    decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
+    if (!is_pointer_type(old_typ))
+      toc_impos("new_comprehension_to_c: comprehension is not an array type");
+    if (is_dyneither_ptr(old_typ)) {
+      let b = temp_var();
+      let t = typ_to_c(old_typ);
+      let tag = _tag_dyneither_e;
+      let binit =
+	fncall_exp(tag,
+		   list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL),
+			malloc_size_exp), DL);
+      decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
+      s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
+    } else // not a tagged array -- just return a
+      s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
+    for (let ds = decls; ds != NULL; ds = ds->tl) {
+      let $(d0,d1,d2) = *(ds->hd);
+      s = declare_stmt(d0,d1,d2,s,DL);
+    }
+    e->r = stmt_exp_r(s);
+  }
 }
 
 static void exp_to_c(env_t nv, exp_t e) {
@@ -3030,139 +3104,11 @@ DynCast:
       break;
 
     case &Comprehension_e(vd,e1,e2,zero_term):
-      // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array.
-      // Slight twist for zero-terminated arrays -- must allocate one more
-      // element and initialize the last element to 0.
-      // ({ unsigned int max = e1;
-      //    t *a = (t*)malloc(sizeof(t)*max);
-      //    struct tagged_arr b = _tag_arr(a);
-      //    unsigned int x ;
-      //    for (x = 0; x < max; x++) a[x] = e2;
-      //    b; })
-      bool is_dyneither_ptr = false;
-      switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
-        is_dyneither_ptr = (conref_def(bounds_one,b) == &DynEither_b_val);
-        break;
-      default: toc_impos("exp_to_c: comprehension not an array type");
-      }
-      qvar_t max = temp_var();
-      qvar_t a = temp_var();
-      type_t old_elt_typ = (type_t)e2->topt;
-      type_t elt_typ = typ_to_c(old_elt_typ);
-      type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
-      exp_to_c(nv,e1);
-      let malloc_size_exp = var_exp(max,DL);
-      // add one to max for zero-terminated arrays
-      if (zero_term)
-        malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
-      stmt_t s = init_comprehension(nv, new_e_type,
-                                    var_exp(a,DL), vd, var_exp(max,DL),
-                                    e2, zero_term, skip_stmt_dl(), true);
-      // FIX:  casts needed on exp_opts
-      TOC_RGN(nv,r) {
-        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls =
-          rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
-        exp_t ai;
-        if (rgnopt == NULL || no_regions)
-          ai = malloc_exp(old_elt_typ,
-			  fncall_exp(_check_times_e,
-				     list(sizeoftyp_exp(elt_typ,DL),
-					  malloc_size_exp), DL));
-        else {
-          exp_t r = (exp_t)rgnopt;
-          exp_to_c(nv,r);
-          ai = rmalloc_exp(r, fncall_exp(_check_times_e,
-					 list(sizeoftyp_exp(elt_typ,DL),
-					      malloc_size_exp), DL));
-
-        }
-        exp_t ainit = cast_it(ptr_typ,ai);
-        decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
-        if (is_dyneither_ptr) {
-          let b = temp_var();
-          let t = typ_to_c(old_typ);
-          let tag = _tag_dyneither_e;
-          let binit =
-	    fncall_exp(tag,
-		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL),
-                            malloc_size_exp), DL);
-          decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
-          s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
-        } else // not a tagged array -- just return a
-          s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
-        for (let ds = decls; ds != NULL; ds = ds->tl) {
-          let $(d0,d1,d2) = *(ds->hd);
-          s = declare_stmt(d0,d1,d2,s,DL);
-        }
-        e->r = stmt_exp_r(s);
-      }
+      new_comprehension_to_c(nv,e,new_e_type,rgnopt,old_typ,e1,(type_t)e2->topt,zero_term,e2,vd);
       break;
 
-      // FIX: lots of code duplication with the above
     case &ComprehensionNoinit_e(e1,t1,zero_term):
-      bool is_dyneither_ptr = false;
-      switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
-        is_dyneither_ptr = (conref_def(bounds_one,b) == &DynEither_b_val);
-        break;
-      default: toc_impos("exp_to_c: comprehension not an array type");
-      }
-      qvar_t max = temp_var();
-      qvar_t a = temp_var();
-      type_t old_elt_typ = t1;
-      type_t elt_typ = typ_to_c(old_elt_typ);
-      type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
-      exp_to_c(nv,e1);
-      let malloc_size_exp = var_exp(max,DL);
-      // add one to max for zero-terminated arrays
-      stmt_t s;
-      if (zero_term) {
-        malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
-	exp_t ex = assign_exp(subscript_exp(var_exp(a,DL),var_exp(max,DL),DL),
-			      cast_it(elt_typ,uint_exp(0,DL)),DL);
-	s = exp_stmt(ex,DL);
-      }
-      else
-	s = skip_stmt(DL);
-      // FIX:  casts needed on exp_opts
-      TOC_RGN(nv,r) {
-        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls =
-          rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
-        exp_t ai;
-        if (rgnopt == NULL || no_regions)
-          ai = malloc_exp(old_elt_typ,
-			  fncall_exp(_check_times_e,
-				     list(sizeoftyp_exp(elt_typ,DL),
-					  malloc_size_exp), DL));
-        else {
-          exp_t r = (exp_t)rgnopt;
-          exp_to_c(nv,r);
-          ai = rmalloc_exp(r, fncall_exp(_check_times_e,
-					 list(sizeoftyp_exp(elt_typ,DL),
-					      malloc_size_exp), DL));
-
-        }
-        exp_t ainit = cast_it(ptr_typ,ai);
-        decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
-        if (is_dyneither_ptr) {
-          let b = temp_var();
-          let t = typ_to_c(old_typ);
-          let tag = _tag_dyneither_e;
-          let binit =
-	    fncall_exp(tag,
-		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL),
-                            malloc_size_exp), DL);
-          decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
-          s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
-        } else // not a tagged array -- just return a
-          s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
-        for (let ds = decls; ds != NULL; ds = ds->tl) {
-          let $(d0,d1,d2) = *(ds->hd);
-          s = declare_stmt(d0,d1,d2,s,DL);
-        }
-        e->r = stmt_exp_r(s);
-      }
+      new_comprehension_to_c(nv,e,new_e_type,rgnopt,old_typ,e1,t1,zero_term,NULL,NULL);
       break;
 
     case &Aggregate_e(tdn,ts,es,ad):
@@ -3754,15 +3700,14 @@ DynCast:
     // different for the two kinds of fat pointers.  Assumes that we are
     // not swapping zero-terminated array elements so that we can avoid
     // adding dynamic checks.
-    bool is_dyneither_ptr = false;
     type_t e1_old_typ = (type_t)e1->topt;
     type_t e2_old_typ = (type_t)e2->topt;
-    if (!is_pointer_or_boxed(e1_old_typ,&is_dyneither_ptr))
+    if (!is_boxed(e1_old_typ) && !is_pointer_type(e1_old_typ))
       toc_impos("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
 
     // figure out which swap primitive to use
     exp_t swap_fn;
-    if (is_dyneither_ptr)
+    if (is_dyneither_ptr(e1_old_typ))
       swap_fn = _swap_dyneither_e;
     else
       swap_fn = _swap_word_e;

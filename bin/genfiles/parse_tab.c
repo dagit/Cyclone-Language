@@ -925,7 +925,7 @@ typedef struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_datatypedecl_t;
 typedef struct Cyc_Absyn_Typedefdecl*Cyc_Absyn_typedefdecl_t;
 typedef struct Cyc_Absyn_Enumfield*Cyc_Absyn_enumfield_t;
 typedef struct Cyc_Absyn_Enumdecl*Cyc_Absyn_enumdecl_t;
-typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;
+typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_t;typedef struct Cyc_Absyn_Vardecl*Cyc_Absyn_vardecl_opt_t;
 typedef void*Cyc_Absyn_raw_decl_t;
 typedef struct Cyc_Absyn_Decl*Cyc_Absyn_decl_t;
 typedef void*Cyc_Absyn_designator_t;
@@ -1179,39 +1179,39 @@ void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 void*Cyc_Tcutil_copy_type(void*t);
 # 71
 void*Cyc_Tcutil_compress(void*t);
-# 109
+# 110
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_mk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ek;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ik;
-# 116
+# 117
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 121
+# 122
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_urk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_uak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ubk;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_umk;
-# 126
+# 127
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
-# 128
+# 129
 extern struct Cyc_Core_Opt Cyc_Tcutil_bko;
-# 130
+# 131
 extern struct Cyc_Core_Opt Cyc_Tcutil_iko;
-# 133
+# 134
 extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
-# 143
+# 144
 struct Cyc_Core_Opt*Cyc_Tcutil_kind_to_opt(struct Cyc_Absyn_Kind*k);
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 308 "tcutil.h"
+# 309 "tcutil.h"
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 372
+# 373
 int Cyc_Tcutil_is_array(void*t);
-# 376
+# 377
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
