@@ -111,6 +111,13 @@ static int yynerrs = 0;		/*  number of parse errors so far       */
 #define YYMAXDEPTH 10000
 #endif
 
+/*  sanity check */
+
+#if YYINITDEPTH > YYMAXDEPTH
+#undef YYINITDEPTH
+#define YYINITDEPTH YYMAXDEPTH
+#endif
+
 /* The user can define YYPARSE_PARAM as a set of arguments to be passed
    into yyparse.  Grammar actions can access the variables.
  */
@@ -128,24 +135,21 @@ region yyregion; {
 
   int yyssp_offset;
   /*  the state stack     */
-  short @{YYMAXDEPTH} yyss = 
-	(short @{YYMAXDEPTH}) (rcalloc(yyregion, YYMAXDEPTH, sizeof(short)));
+  short ?yyss = rcalloc(yyregion, YYINITDEPTH, sizeof(short));
   /*  the semantic value stack */
   int yyvsp_offset;
-  union YYSTYPE @{YYMAXDEPTH} yyvs = 
-	(union YYSTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : yylval}); 
+  union YYSTYPE ? yyvs = rnew(yyregion) {for i < YYINITDEPTH : yylval}; 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
   int yylsp_offset;
-  YYLTYPE @{YYMAXDEPTH} yyls = 
-	(YYLTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH: yynewloc()});
+  YYLTYPE ? yyls = rnew(yyregion) {for i < YYINITDEPTH: yynewloc()};
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
 #else
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
 #endif
 
-  int yystacksize = YYMAXDEPTH;
+  int yystacksize = YYINITDEPTH;
 
 #ifdef YYPURE
   int yychar;
@@ -196,27 +200,23 @@ yynewstate:
       yyerror("parser stack overflow");
       throw &Yystack_overflow_val;
     }
-#if 0
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
-    short ?yyss1 = rnew(yyregion) {for i < yystacksize : 0};
-    union YYSTYPE ?yyvs1 = rnew(yyregion) {for i < yystacksize : yylval};
+    short ?yyss1 = rnew(yyregion) {for i < yystacksize : 
+				   (i <= yyssp_offset ? yyss[i] : 0)};
+    union YYSTYPE ?yyvs1 =
+      rnew(yyregion) {for i < yystacksize : 
+		      (i <= yyssp_offset ? yyvs[i] : yylval)};
 #ifdef YYLSP_NEEDED
-    YYLTYPE ?yyls1 = rnew(yyregion) {for i < yystacksize : yynewloc()};
+    YYLTYPE ?yyls1 = rnew(yyregion) {for i < yystacksize : 
+				     (i <= yyssp_offset ? yyls[i] : 
+				      yynewloc())};
 #endif
-    for (int i=0; i <= yyssp_offset; i++) {
-      yyss1[i] = yyss[i];
-      yyvs1[i] = yyvs[i];
-#ifdef YYLSP_NEEDED
-      yyls1[i] = yyls[i];
-#endif
-    }
     yyss = yyss1;
     yyvs = yyvs1;
 #ifdef YYLSP_NEEDED
     yyls = yyls1;
-#endif
 #endif
   }
     

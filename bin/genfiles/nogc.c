@@ -41,6 +41,8 @@ void *GC_malloc_atomic(int x) {
 }
 
 unsigned int GC_gc_no = 0;
+int GC_dont_expand = 0;
+int GC_use_entire_heap = 0;
 
 size_t GC_get_heap_size() {
   return 0;
@@ -52,6 +54,10 @@ size_t GC_get_free_bytes() {
 
 size_t GC_get_total_bytes() {
   return 0;
+}
+
+void GC_set_max_heap_size(unsigned int sz) {
+  return;
 }
 
 void *GC_realloc(void *x, size_t n) {

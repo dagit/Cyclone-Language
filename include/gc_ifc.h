@@ -45,5 +45,18 @@ extern "C" size_t GC_get_free_bytes(void);
 extern "C" size_t GC_get_total_bytes(void);
 /** Return the total number of bytes allocated in this process. Never
     decreases. */
+extern "C" void GC_set_max_heap_size(unsigned int sz);
+/** Prevents the heap from growing beyond [sz], specified in bytes.
+    If the footprint becomes larger than this, the allocation routines
+    will throw the exception [Bad_alloc]. */
+extern "C" int GC_dont_expand;
+/** Dont expand heap unless explicitly requested or forced to. */
+extern "C" int GC_use_entire_heap;
+/** Causes the nonincremental collector to use the entire heap before
+    collecting.  This sometimes results in more large block
+    fragmentation, since very larg blocks will tend to get broken up
+    during each GC cycle.  It is likely to result in a larger working
+    set, but lower collection frequencies, and hence fewer
+    instructions executed in the collector. */
 
 #endif
