@@ -300,7 +300,7 @@ namespace List {
       [l], or throws [Core::Not_found] if [k] is not paired with any
       value in [l].  [assoc] uses [==] to decide if [k] is a key in
       [l]. */
-  extern `b assoc_cmp(int cmp(`a,`a), list_t<$(`a,`b)@> l,`a k);
+  extern `b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x);
   /** [assoc_cmp(cmp,l,k)] is like [assoc(l,k)] except that the
       comparison function [cmp] is used to decide if [k] is a key in
       [l].  [cmp] should return 0 if two keys are equal, and non-zero
@@ -309,6 +309,11 @@ namespace List {
   extern bool mem_assoc(list_t<$(`a,`b)@> l,`a x);
   /** [mem_assoc(l,k)] returns true if [k] is a key in association
       list [l] (according to [==]).  */
+
+  extern list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x);
+  /** [delete(l,k)] returns the list with the first occurence of [x]
+      removed from it, if [x] was in the list; otherwise raises
+      [Core::Not_found].  */
 
   extern Core::opt_t<`c> check_unique(int cmp(`c,`c),list_t<`c> x);
   /** [check_unique(cmp,x)] checks whether the sorted list [x] has

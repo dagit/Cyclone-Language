@@ -644,10 +644,32 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
   throw Core::Not_found;
 }
 
-`b assoc_cmp(int cmp(`a,`a),list_t<$(`a,`b)@> l,`a x) {
+`b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
   while (l != NULL) {
-    if (cmp(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
+    if (cmp(l->hd[0][0],x) == 0) return(l->hd[0][1]);
     l = l->tl;
+  }
+  throw Core::Not_found;
+}
+
+// Given a list [x1,x2,...xn] and a key y, removes the first
+// occurence x1 in the list, if x1 == y.  Uses side effects,
+// and will return the whole list (in case it's the first
+// element that is removed).
+list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
+  let prev = l;
+  let iter = l;
+  while (iter != NULL) {
+    if (iter->hd == x) {
+      if (prev == l)
+	return l->tl;
+      else {
+	prev->tl = iter->tl;
+	return l;
+      }
+    }
+    prev = iter;
+    iter = iter->tl;
   }
   throw Core::Not_found;
 }

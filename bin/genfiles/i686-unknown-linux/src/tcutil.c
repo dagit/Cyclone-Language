@@ -276,7 +276,7 @@ f1; struct Cyc_List_List* f2; } ; extern struct _tuple0 Cyc_List_rsplit( struct
 _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x); extern
 int Cyc_List_mem( int(* compare)( void*, void*), struct Cyc_List_List* l, void*
 x); extern void* Cyc_List_assoc_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*
-l, void* k); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct
+l, void* x); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct
 _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
 9u]; struct Cyc_Position_Segment; extern struct Cyc_List_List* Cyc_Position_strings_of_segments(
 struct Cyc_List_List*); static const int Cyc_Position_Lex= 0; static const int
@@ -3550,7 +3550,7 @@ _temp2797)->f1; goto _LL2846;} else{ goto _LL2798;} _LL2800: { struct
 _handler_cons _temp2933; _push_handler(& _temp2933);{ int _temp2935= 0; if(
 setjmp( _temp2933.handler)){ _temp2935= 1;} if( ! _temp2935){{ void* _temp2936=((
 void*(*)( int(* cmp)( struct Cyc_Absyn_Tvar*, struct Cyc_Absyn_Tvar*), struct
-Cyc_List_List* l, struct Cyc_Absyn_Tvar* k)) Cyc_List_assoc_cmp)( Cyc_Absyn_tvar_cmp,
+Cyc_List_List* l, struct Cyc_Absyn_Tvar* x)) Cyc_List_assoc_cmp)( Cyc_Absyn_tvar_cmp,
 inst, _temp2847); _npop_handler( 0u); return _temp2936;}; _pop_handler();} else{
 void* _temp2934=( void*) _exn_thrown; void* _temp2938= _temp2934; _LL2940: if(
 _temp2938 ==  Cyc_Core_Not_found){ goto _LL2941;} else{ goto _LL2942;} _LL2942:
