@@ -494,23 +494,23 @@ continue;case 42:
 flags=8;
 goto again;case 108:
 # 271
- if(flags & ~(8 | 64))goto control_failure;
+ if(flags & 4294967223U)goto control_failure;
 flags |=1;
 goto again;case 76:
 # 275
- if(flags & ~(8 | 64))goto control_failure;
+ if(flags & 4294967223U)goto control_failure;
 flags |=2;
 goto again;case 104:
 # 279
- if(flags & ~(8 | 64))goto control_failure;
+ if(flags & 4294967223U)goto control_failure;
 flags |=4;
 goto again;case 48:
 # 283
  goto _LLE;case 49: _LLE: goto _LL10;case 50: _LL10: goto _LL12;case 51: _LL12: goto _LL14;case 52: _LL14: goto _LL16;case 53: _LL16:
  goto _LL18;case 54: _LL18: goto _LL1A;case 55: _LL1A: goto _LL1C;case 56: _LL1C: goto _LL1E;case 57: _LL1E:
- if(flags & ~(8 | 64))goto control_failure;
+ if(flags & 4294967223U)goto control_failure;
 flags |=64;
-width=(width * (long long)10 + (long long)c)- (long long)'0';
+width=(width * 10 + (long long)c)- 48;
 goto again;case 68:
 # 298 "scanf.cyc"
  flags |=1;
@@ -562,7 +562,7 @@ goto _LL0;case 99:
 c=0;
 goto _LL0;case 112:
 # 354
- flags |=16 | 256;
+ flags |=272U;
 c=3;
 use_strtoul=1;
 base=16;
@@ -589,7 +589,7 @@ use_strtoul=0;
 base=10;
 goto _LL0;}_LL0:;}
 # 391
-if(_IO_peekc(fp)== - 1)
+if(_IO_peekc(fp)== -1)
 goto eof_failure;
 # 398
 if((flags & 32)== 0){
@@ -606,7 +606,7 @@ int _tmp19=c;switch((int)_tmp19){case 0:
  if(width == 0)
 width=1;
 if(flags & 8){
-long long sum=(long long)0;
+long long sum=0;
 for(1;width > 0;1){
 n=_IO_getc(fp);
 if(n == -1 && width != 0)
@@ -651,7 +651,7 @@ while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int
 _IO_getc(fp);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 if(n == 0)
 goto eof_failure;
 ++ seen_eof;
@@ -670,7 +670,7 @@ _fat_ptr_inplace_plus(& p5,sizeof(char),1);
 _IO_getc(fp);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 if((char*)p5.curr == (char*)p0.curr)
 goto eof_failure;
 ++ seen_eof;
@@ -696,7 +696,7 @@ while(!isspace((int)((unsigned char)c))){
 _IO_getc(fp);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 ++ seen_eof;
 break;}}
 # 525
@@ -707,16 +707,16 @@ struct _fat_ptr _tmp1C=p2;struct _fat_ptr p3=_tmp1C;
 int c=_IO_peekc(fp);
 while(!isspace((int)((unsigned char)c))){
 c=_IO_getc(fp);
-if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p3,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p3,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p3,sizeof(char),1);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 ++ seen_eof;
 break;}}
 # 542
-if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p3,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p3,sizeof(char),0U))='\000';
 nread +=(p3.curr - p2.curr)/ sizeof(char);
 ++ nassigned;}}
@@ -725,7 +725,7 @@ continue;case 3:
 # 551
  if(width == 0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
-flags |=(64 | 128)| 512;
+flags |=704U;
 for(p=({char*_tmp1D=buf;_tag_fat(_tmp1D,sizeof(char),351U);});width != 0;-- width){
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
@@ -744,14 +744,14 @@ goto ok;case 49:
  goto _LL5A;case 50: _LL5A: goto _LL5C;case 51: _LL5C: goto _LL5E;case 52: _LL5E: goto _LL60;case 53: _LL60:
  goto _LL62;case 54: _LL62: goto _LL64;case 55: _LL64:
  base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
-flags &=~((64 | 256)| 128);
+flags &=4294966847U;
 goto ok;case 56:
 # 593
  goto _LL68;case 57: _LL68:
  base=(int)*((short*)_check_known_subscript_notnull(basefix,17U,sizeof(short),base));
 if(base <= 8)
 goto _LL54;
-flags &=~((64 | 256)| 128);
+flags &=4294966847U;
 goto ok;case 65:
 # 601
  goto _LL6C;case 66: _LL6C: goto _LL6E;case 67: _LL6E: goto _LL70;case 68: _LL70: goto _LL72;case 69: _LL72:
@@ -760,12 +760,12 @@ goto ok;case 65:
 # 605
  if(base <= 10)
 goto _LL54;
-flags &=~((64 | 256)| 128);
+flags &=4294966847U;
 goto ok;case 43:
 # 611
  goto _LL84;case 45: _LL84:
  if(flags & 64){
-flags &=~ 64;
+flags &=4294967231U;
 goto ok;}
 # 616
 goto _LL54;case 120:
@@ -773,7 +773,7 @@ goto _LL54;case 120:
  goto _LL88;case 88: _LL88:
  if(flags & 256 &&({char*_tmp3C=(char*)(_fat_ptr_plus(p,sizeof(char),- 1)).curr;_tmp3C == buf;})){
 base=16;
-flags &=~ 256;
+flags &=4294967039U;
 goto ok;}
 # 625
 goto _LL54;default:
@@ -825,7 +825,7 @@ goto _LL47;case 4:
 # 689
  if(width == 0 || width > (long long)(sizeof(buf)- 1U))
 width=(long long)(sizeof(buf)- 1U);
-flags |=((64 | 128)| 256)| 512;
+flags |=960U;
 for(p=({char*_tmp26=buf;_tag_fat(_tmp26,sizeof(char),351U);});width != 0;-- width){
 c=_IO_peekc(fp);
 # 698
@@ -834,25 +834,25 @@ c=_IO_peekc(fp);
  goto _LL8F;case 49: _LL8F: goto _LL91;case 50: _LL91: goto _LL93;case 51: _LL93: goto _LL95;case 52: _LL95:
  goto _LL97;case 53: _LL97: goto _LL99;case 54: _LL99: goto _LL9B;case 55: _LL9B: goto _LL9D;case 56: _LL9D:
  goto _LL9F;case 57: _LL9F:
- flags &=~(64 | 128);
+ flags &=4294967103U;
 goto fok;case 43:
 # 706
  goto _LLA3;case 45: _LLA3:
  if(flags & 64){
-flags &=~ 64;
+flags &=4294967231U;
 goto fok;}
 # 711
 goto _LL8B;case 46:
 # 713
  if(flags & 256){
-flags &=~(64 | 256);
+flags &=4294966975U;
 goto fok;}
 # 717
 goto _LL8B;case 101:
  goto _LLA9;case 69: _LLA9:
 # 720
- if((flags & (128 | 512))== 512){
-flags=(flags & ~(512 | 256)| 64)| 128;
+ if((flags & 640U)== 512){
+flags=(flags & 4294966527U | 64)| 128;
 # 724
 goto fok;}
 # 726
@@ -962,7 +962,7 @@ goto _LL0;}_LL0:;}}}
 static int Cyc_string_getc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp48=(char*)s.curr;_tmp48 == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== (unsigned)0)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== (int)'\000')return - 1;
+if((({char*_tmp48=(char*)s.curr;_tmp48 == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== 0)return -1;
 ({struct _fat_ptr _tmp49=_fat_ptr_plus(s,sizeof(char),1);*sptr=_tmp49;});
 return(int)c;}
 # 904
@@ -974,7 +974,7 @@ return 0;}
 static int Cyc_string_peekc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp4B=(char*)s.curr;_tmp4B == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== (unsigned)0)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== (int)'\000')return - 1;
+if((({char*_tmp4B=(char*)s.curr;_tmp4B == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=*((const char*)_check_fat_subscript(s,sizeof(char),0)))== 0)return -1;
 return(int)c;}
 # 917
 int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){

@@ -430,8 +430,8 @@ Cyc_Specsfile_target_arch=s;}
 struct Cyc_List_List*Cyc_Specsfile_cyclone_exec_path=0;
 void Cyc_Specsfile_add_cyclone_exec_path(struct _fat_ptr s){
 unsigned long _tmp0=Cyc_strlen((struct _fat_ptr)s);unsigned long len=_tmp0;
-if(len <= (unsigned long)2)return;{
-struct _fat_ptr _tmp1=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,2,len - (unsigned long)2);struct _fat_ptr dir=_tmp1;
+if(len <= 2U)return;{
+struct _fat_ptr _tmp1=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,2,len - 2U);struct _fat_ptr dir=_tmp1;
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp3=_cycalloc(sizeof(*_tmp3));({struct _fat_ptr*_tmp64=({struct _fat_ptr*_tmp2=_cycalloc(sizeof(*_tmp2));*_tmp2=dir;_tmp2;});_tmp3->hd=_tmp64;}),_tmp3->tl=Cyc_Specsfile_cyclone_exec_path;_tmp3;});}}struct _tuple0{struct _fat_ptr*f1;struct _fat_ptr*f2;};
 # 57
 struct Cyc_List_List*Cyc_Specsfile_read_specs(struct _fat_ptr file){
@@ -542,7 +542,7 @@ while(1){
 if((unsigned long)i >= n)break;
 if((int)*((const char*)_check_fat_subscript(cmdline,sizeof(char),i))== 0)break;
 if(isspace((int)((const char*)cmdline.curr)[i]))break;
-if((int)((const char*)cmdline.curr)[i]== (int)'\\'){
+if((int)((const char*)cmdline.curr)[i]== 92){
 # 175
 ++ i;
 if((unsigned long)i >= n)break;
@@ -620,7 +620,7 @@ struct _fat_ptr cyclone_exec_prefix=({char*_tmp41=getenv("CYCLONE_EXEC_PREFIX");
 if(({char*_tmp8A=(char*)cyclone_exec_prefix.curr;_tmp8A != (char*)(_tag_fat(0,0,0)).curr;}))
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp3C=_cycalloc(sizeof(*_tmp3C));({struct _fat_ptr*_tmp8B=({struct _fat_ptr*_tmp3B=_cycalloc(sizeof(*_tmp3B));*_tmp3B=cyclone_exec_prefix;_tmp3B;});_tmp3C->hd=_tmp8B;}),_tmp3C->tl=Cyc_Specsfile_cyclone_exec_path;_tmp3C;});
 Cyc_Specsfile_def_lib_path=({char*_tmp3D=Cdef_lib_path;_tag_fat(_tmp3D,sizeof(char),_get_zero_arr_size_char((void*)_tmp3D,1U));});
-if(Cyc_strlen((struct _fat_ptr)Cyc_Specsfile_def_lib_path)> (unsigned long)0)
+if(Cyc_strlen((struct _fat_ptr)Cyc_Specsfile_def_lib_path)> 0U)
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp40=_cycalloc(sizeof(*_tmp40));
 ({struct _fat_ptr*_tmp8E=({struct _fat_ptr*_tmp3F=_cycalloc(sizeof(*_tmp3F));({struct _fat_ptr _tmp8D=(struct _fat_ptr)({struct _fat_ptr _tmp8C=Cyc_Specsfile_def_lib_path;Cyc_Filename_concat(_tmp8C,({const char*_tmp3E="cyc-lib";_tag_fat(_tmp3E,sizeof(char),8U);}));});*_tmp3F=_tmp8D;});_tmp3F;});_tmp40->hd=_tmp8E;}),_tmp40->tl=Cyc_Specsfile_cyclone_exec_path;_tmp40;});
 # 295
@@ -638,7 +638,7 @@ static struct _fat_ptr*Cyc_Specsfile_find(struct Cyc_List_List*dirs,struct _fat_
 if(({char*_tmp90=(char*)file.curr;_tmp90 == (char*)(_tag_fat(0,0,0)).curr;}))return 0;
 for(1;dirs != 0;dirs=dirs->tl){
 struct _fat_ptr _tmp4D=*((struct _fat_ptr*)dirs->hd);struct _fat_ptr dir=_tmp4D;
-if(({char*_tmp91=(char*)dir.curr;_tmp91 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== (unsigned long)0)continue;{
+if(({char*_tmp91=(char*)dir.curr;_tmp91 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== 0U)continue;{
 struct _fat_ptr s=(struct _fat_ptr)Cyc_Filename_concat(dir,file);
 if(Cyc_Specsfile_file_exists(s))return({struct _fat_ptr*_tmp4E=_cycalloc(sizeof(*_tmp4E));*_tmp4E=s;_tmp4E;});}}
 # 318
@@ -648,7 +648,7 @@ static struct _fat_ptr Cyc_Specsfile_sprint_list(struct Cyc_List_List*dirs){
 struct _fat_ptr tmp=({const char*_tmp51="";_tag_fat(_tmp51,sizeof(char),1U);});
 for(1;dirs != 0;dirs=dirs->tl){
 struct _fat_ptr _tmp4F=*((struct _fat_ptr*)dirs->hd);struct _fat_ptr dir=_tmp4F;
-if(({char*_tmp92=(char*)dir.curr;_tmp92 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== (unsigned long)0)continue;
+if(({char*_tmp92=(char*)dir.curr;_tmp92 == (char*)(_tag_fat(0,0,0)).curr;})|| Cyc_strlen((struct _fat_ptr)dir)== 0U)continue;
 dir=(struct _fat_ptr)({struct _fat_ptr _tmp93=(struct _fat_ptr)dir;Cyc_strconcat(_tmp93,({const char*_tmp50=":";_tag_fat(_tmp50,sizeof(char),2U);}));});
 tmp=(struct _fat_ptr)Cyc_strconcat((struct _fat_ptr)dir,(struct _fat_ptr)tmp);}
 # 330

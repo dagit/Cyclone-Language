@@ -989,7 +989,7 @@ return Cyc_List_rto_array(Cyc_Core_heap_region,x);}
 # 743
 struct Cyc_List_List*Cyc_List_rfrom_array(struct _RegionHandle*r2,struct _fat_ptr arr){
 struct Cyc_List_List*ans=0;
-{int i=(int)(_get_fat_size(arr,sizeof(void*))- (unsigned)1);for(0;i >= 0;-- i){
+{int i=(int)(_get_fat_size(arr,sizeof(void*))- 1U);for(0;i >= 0;-- i){
 ans=({struct Cyc_List_List*_tmp2A=_region_malloc(r2,sizeof(*_tmp2A));_tmp2A->hd=*((void**)_check_fat_subscript(arr,sizeof(void*),i)),_tmp2A->tl=ans;_tmp2A;});}}
 return ans;}
 # 750
@@ -1026,7 +1026,7 @@ return i;}}
 if(l1 != 0)
 return 1;
 if(l2 != 0)
-return - 1;
+return -1;
 return 0;}
 # 793
 int Cyc_List_list_prefix(int(*cmp)(void*,void*),struct Cyc_List_List*l1,struct Cyc_List_List*l2){

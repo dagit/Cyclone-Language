@@ -147,6 +147,7 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 
 type_opt_t get_term_type(term_t t) {
   switch (t) {
+  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
   case &Const(e): return e->topt;
   case &Var(vd): return vd->type;
   case &LogicVar(_,_,topt): return topt;
@@ -297,7 +298,7 @@ typedef enum Operator{
 //assuming size of intger as sizeofint (32), assumming the highest bit
 //as the sign bit.
 #define sizeofint 32;
-static overflow_info_t is_overflow(int c1, operator_t op,int c2){
+static overflow_info_t is_signed_overflow(int c1, operator_t op,int c2){
   switch (op){
   case PLUS:
     let sum = c1 + c2;
@@ -309,6 +310,25 @@ static overflow_info_t is_overflow(int c1, operator_t op,int c2){
   case MINUS:
     let dif = c1 - c2;
     if (((c1^c2) & (c1 ^ dif)) >> 31){
+      //overflow happened
+      if (dif > 0) return $(true, MININT); //an underflow
+      else return $(true, MAXINT); //an overflow
+    } else return $(false, dif); //no overflow
+  default:
+    Tcutil::impos("Pratt_Prover: bad operator in overflow check");
+  }
+}
+
+//checking if the difference of two unsigned integers 
+//could be correctly represented by a signed integer
+//assuming size of (u/s)intger as sizeofint (32), assumming the highest bit
+//as the sign bit.
+static overflow_info_t 
+is_unsigned_overflow(unsigned c1, operator_t op,unsigned c2){
+  switch (op){
+  case MINUS:
+    int dif = c1 - c2;
+    if (((c1^c2) & (~(c1 ^ dif))) >> 31){
       //overflow happened
       if (dif > 0) return $(true, MININT); //an underflow
       else return $(true, MAXINT); //an overflow
@@ -336,7 +356,7 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
   dist_t* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
   if (ji_dist != NULL){
-    let $(overflow, sum) = is_overflow(ji_dist->length, PLUS, dist);
+    let $(overflow, sum) = is_signed_overflow(ji_dist->length, PLUS, dist);
     if (sum < 0){
       //underflowed or not, there is a negative loop indeed
       return false;
@@ -367,18 +387,18 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
       // computing w(kj) = w(ki) + w(ij)
       bool final;
       int sum;
-      let $(of1, sum1) = is_overflow(ki_dist->length, PLUS, dist);
+      let $(of1, sum1) = is_signed_overflow(ki_dist->length, PLUS, dist);
       if (!of1){
 	//computing w(kl) = w(kj) + w(jl)
-	let $(of2, sum2) = is_overflow(sum1, PLUS, jl_dist->length);
+	let $(of2, sum2) = is_signed_overflow(sum1, PLUS, jl_dist->length);
 	final = of2;
 	sum = sum2;
       }else {
 	//now we know that ki_dist, ij_dist have the same sign
 	//that's the only way the sum can cause overflow
-	let $(of1, sum1) = is_overflow(ki_dist->length, PLUS, jl_dist->length);
+	let $(of1, sum1) = is_signed_overflow(ki_dist->length, PLUS, jl_dist->length);
 	if (!of1){
-	  let $(of2, sum2) = is_overflow(sum1, PLUS, dist);
+	  let $(of2, sum2) = is_signed_overflow(sum1, PLUS, dist);
 	  final = of2;
 	  sum = sum;
 	}else {
@@ -407,11 +427,78 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, a
 
 static $(unsigned int,bool) eval_term(term_t t) {
   switch (t) {
-  case &Const(e): return Evexp::eval_const_uint_exp(e);
+  case &Uint(i): return $(i, true);
+    //  case &Const(e): return Evexp::eval_const_uint_exp(e);
   default: return $(0,false);
   }
 }
 
+static $(term_t, int) break_signed_term(graph_t @g, term_t t){
+  int c=0;
+  term_t res=t;
+  switch (t){
+  case &Primop(Absyn::Plus, ts):
+    if (ts == NULL){
+      Tcutil::impos("no argument for primop");
+    }else if (ts->tl == NULL){
+      // t = + t' = t' + 0;
+      return $(ts->hd, 0);
+    }else if (ts->tl->tl == NULL){
+      let $(c1, okay1) = eval_term(ts->hd);
+      let $(c2, okay2) = eval_term(ts->tl->hd);
+      if (okay1) {// t = c1 + t'
+	res = ts->tl->hd;
+	c = (int)c1;
+      }else if (okay2){//t = t' + c2
+	res = ts->hd;
+	c = (int)c2;
+      }else return $(t,0);
+    }else{
+      //other cases t = t1+t2+t2 ..., ignore
+      return $(t, 0);
+    }
+    break;
+  case &Primop(Absyn::Minus, ts):
+    if (ts == NULL){
+      Tcutil::impos("no argument for primop");
+    }else if (ts->tl == NULL){
+      //t = -t', can't do much here
+      return $(t, 0);
+    }else if (ts->tl->tl == NULL){
+      let $(c2, okay2) = eval_term(ts->tl->hd);
+      if (okay2){ // t = t' - c2
+	res = ts->hd;
+	c = -((int)c2); // t = t' + (-c2)
+      }
+      else return $(t, 0);
+    }else return $(t, 0);
+    break;
+  default:
+    return $(t, 0);
+  }
+  //now we have t = res + c;
+  //check if value_s(res) + value_s(c) overflow or underflow
+  if (c == 0) return $(res, 0); //no over/underflow
+  else if (c > 0){
+    // only overflow could possibily happen
+    let dist = lookup_distance(lookup_row(g, res), true, zero());
+    if (dist == NULL || dist->length > MAXINT - c){
+      return $(t, 0);
+    }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
+      return $(res, c);
+    }
+  }else {//c < 0 
+    let dist = lookup_distance(lookup_row(g,zero()), true, res);
+    if (dist == NULL || dist->length > c - MININT){
+      return $(t, 0);
+    }else {
+      //dist->length <= c - MININT
+      // 0-v(res) <= dist->length  <= c - MININT
+      // then v(res) + c >= MININT, no underflow here
+      return $(res, c);
+    }
+  }
+}
 
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
@@ -517,6 +604,8 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   }
   // nothing special about the terms -- have to add them as standard
   // sort of constraints.
+  // given t1 p t2, we want to find out if 
+  // v(t1) = v(t1')+c1, v(t2)=v(t2')+c2
   switch (p) {
   case ULt:
     // add t1 - t2 U<= -1
@@ -529,7 +618,16 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     return add_edge(g,true,t1,t2,-1, origin);
   case SLte: 
     // add t1 - t2 S<= 0
-    return add_edge(g,true,t1,t2,0, origin);
+    let $(tt1, c1) = break_signed_term(g, t1);
+    let $(tt2, c2) = break_signed_term(g, t2);
+    let $(of, dist) = is_signed_overflow(c2, MINUS, c1);
+    if (!of){
+      if(!add_edge(g, true, tt1, tt2, dist, origin))
+	return false;
+      else
+	return add_edge(g,true,t1,t2,0, origin);
+    }else
+      return add_edge(g,true,t1,t2,0, origin);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }

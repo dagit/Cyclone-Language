@@ -391,10 +391,10 @@ static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
 static struct _fat_ptr Cyc_Lexing_aux_buffer={(void*)Cyc_Lexing_aux_buffer_v,(void*)Cyc_Lexing_aux_buffer_v,(void*)(Cyc_Lexing_aux_buffer_v + 1U)};
 # 76
 void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){
-if(_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))== (unsigned)1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned)(4096 + 1));{
+if(_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1U)Cyc_Lexing_aux_buffer=Cyc_Core_new_string(4097U);{
 int read=
 ((((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun))(Cyc_Lexing_aux_buffer,(int)(
-_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))- (unsigned)1),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
+_get_fat_size(Cyc_Lexing_aux_buffer,sizeof(char))- 1U),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
 # 82
 int n=read > 0?read:(lexbuf->lex_eof_reached=1,0);
 if(lexbuf->lex_start_pos < n){
@@ -426,7 +426,7 @@ struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _fat_ptr
 # 109
 return({struct Cyc_Lexing_lexbuf*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->refill_buff=Cyc_Lexing_lex_refill,({
 struct Cyc_Lexing_function_lexbuf_state*_tmpE=({struct Cyc_Lexing_function_lexbuf_state*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->read_fun=read_fun,_tmp0->read_fun_state=read_fun_state;_tmp0;});_tmp1->refill_state=_tmpE;}),({
-struct _fat_ptr _tmpD=Cyc_Core_new_string((unsigned)(8192 + 1));_tmp1->lex_buffer=_tmpD;}),_tmp1->lex_buffer_len=8192,_tmp1->lex_abs_pos=- 8192,_tmp1->lex_start_pos=8192,_tmp1->lex_curr_pos=8192,_tmp1->lex_last_pos=8192,_tmp1->lex_last_action=0,_tmp1->lex_eof_reached=0;_tmp1;});}
+struct _fat_ptr _tmpD=Cyc_Core_new_string(8193U);_tmp1->lex_buffer=_tmpD;}),_tmp1->lex_buffer_len=8192,_tmp1->lex_abs_pos=-8192,_tmp1->lex_start_pos=8192,_tmp1->lex_curr_pos=8192,_tmp1->lex_last_pos=8192,_tmp1->lex_last_action=0,_tmp1->lex_eof_reached=0;_tmp1;});}
 # 118
 static int Cyc_Lexing_read_from_file(struct _fat_ptr aux,int n,struct Cyc___cycFILE*f){
 return Cyc_file_string_read(f,aux,0,n);}

@@ -553,7 +553,7 @@ void*_tmp30=t;void*_tmp32;void*_tmp31;switch(*((int*)_tmp30)){case 0: _tmp31=(vo
 # 152
 {void*_tmp33=tc;enum Cyc_Absyn_Size_of _tmp34;switch(*((int*)_tmp33)){case 1: _tmp34=((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)_tmp33)->f2;{enum Cyc_Absyn_Size_of sz=_tmp34;
 # 154
-return(int)sz == (int)2U ||(int)sz == (int)Cyc_Absyn_Long_sz;}case 3:
+return(int)sz == 2 ||(int)sz == 3;}case 3:
  goto _LLF;case 4: _LLF:
 # 157
  return 1;default:
@@ -846,9 +846,9 @@ static void*Cyc_Cifc_instantiate_tvar(unsigned loc,struct Cyc_Absyn_Tvar*tv){
 {void*_tmpAE=tv->kind;void*_stmttmp9=_tmpAE;void*_tmpAF=_stmttmp9;void*_tmpB0;switch(*((int*)_tmpAF)){case 0: _tmpB0=((struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct*)_tmpAF)->f1;{struct Cyc_Absyn_Kind*k=_tmpB0;
 _tmpB0=k;goto _LL4;}case 2: _tmpB0=((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmpAF)->f2;_LL4: {struct Cyc_Absyn_Kind*k=_tmpB0;
 # 536
-if((int)k->kind == (int)Cyc_Absyn_BoxKind ||(int)k->kind == (int)Cyc_Absyn_AnyKind)
+if((int)k->kind == 2 ||(int)k->kind == 0)
 return({void*_tmp1EA=Cyc_Absyn_void_type;Cyc_Absyn_cstar_type(_tmp1EA,Cyc_Absyn_empty_tqual(loc));});else{
-if((int)k->kind == (int)Cyc_Absyn_RgnKind)
+if((int)k->kind == 3)
 return(void*)({struct Cyc_Absyn_AppType_Absyn_Type_struct*_tmpB2=_cycalloc(sizeof(*_tmpB2));_tmpB2->tag=0,({void*_tmp1EB=(void*)({struct Cyc_Absyn_HeapCon_Absyn_TyCon_struct*_tmpB1=_cycalloc(sizeof(*_tmpB1));_tmpB1->tag=5;_tmpB1;});_tmpB2->f1=_tmp1EB;}),_tmpB2->f2=0;_tmpB2;});}
 goto _LL0;}default:
 # 542
@@ -1106,7 +1106,7 @@ some_change=1;}
 # 840
 tv_ovrs=changed_decls;}}while(
 some_change && ++ niter < 10U);
-if(niter >= (unsigned)10){
+if(niter >= 10U){
 ({struct Cyc_String_pa_PrintArg_struct _tmp12F=({struct Cyc_String_pa_PrintArg_struct _tmp17B;_tmp17B.tag=0,({
 struct _fat_ptr _tmp209=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_decllist2string(changed_decls));_tmp17B.f1=_tmp209;});_tmp17B;});void*_tmp12D[1];_tmp12D[0]=& _tmp12F;({struct Cyc___cycFILE*_tmp20B=Cyc_stderr;struct _fat_ptr _tmp20A=({const char*_tmp12E="Suspected mutually recursive structs involving the following decls \n %s";_tag_fat(_tmp12E,sizeof(char),72U);});Cyc_fprintf(_tmp20B,_tmp20A,_tag_fat(_tmp12D,sizeof(void*),1));});});
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmp131=({struct Cyc_Warn_String_Warn_Warg_struct _tmp17C;_tmp17C.tag=0,({struct _fat_ptr _tmp20C=({const char*_tmp132="Suspected mutually recursive structs -- abandoning cifc";_tag_fat(_tmp132,sizeof(char),56U);});_tmp17C.f1=_tmp20C;});_tmp17C;});void*_tmp130[1];_tmp130[0]=& _tmp131;({unsigned _tmp20D=loc;Cyc_Warn_err2(_tmp20D,_tag_fat(_tmp130,sizeof(void*),1));});});}
@@ -1116,7 +1116,7 @@ return abs_decls;}
 static void Cyc_Cifc_i_clear_vartype_ids(void*t){
 void*_tmp133=t;void*_tmp135;struct Cyc_Absyn_FnInfo _tmp136;struct Cyc_Absyn_ArrayInfo _tmp137;struct Cyc_Absyn_PtrInfo _tmp138;void*_tmp134;switch(*((int*)_tmp133)){case 2: _tmp134=((struct Cyc_Absyn_VarType_Absyn_Type_struct*)_tmp133)->f1;{struct Cyc_Absyn_Tvar*tv=_tmp134;
 # 853
-tv->identity=- 1;
+tv->identity=-1;
 goto _LL0;}case 0: _tmp134=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp133)->f2;{struct Cyc_List_List*ts=_tmp134;
 # 856
 while((unsigned)ts){

@@ -55,8 +55,8 @@ ifdef OPTBUILD
 override CYCFLAGS += -O3
 override CFLAGS += -O3
 endif
-ifdef VCGEN
-override CYCFLAGS += --vcgen
+ifdef ALLPATHS
+override CYCFLAGS += --allpaths
 endif
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))

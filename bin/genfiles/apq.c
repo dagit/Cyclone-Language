@@ -421,7 +421,7 @@ return Cyc_reduce(q);}}
 struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _fat_ptr str,int base){
 struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _fat_ptr _tmp2=str;struct _fat_ptr s=_tmp2;
-while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!= (int)'/'){_fat_ptr_inplace_plus(& s,sizeof(char),1);}
+while((int)*((const char*)_check_fat_subscript(s,sizeof(char),0U))&&(int)*((const char*)s.curr)!= 47){_fat_ptr_inplace_plus(& s,sizeof(char),1);}
 ({struct Cyc_AP_T*_tmp21=Cyc_AP_fromstr((const char*)_untag_fat_ptr(str,sizeof(char),1U),base);q->n=_tmp21;});
 if((int)*((const char*)s.curr)){
 struct Cyc_AP_T*_tmp3=Cyc_AP_fromstr((const char*)_untag_fat_ptr(_fat_ptr_plus(s,sizeof(char),1),sizeof(char),1U),base);struct Cyc_AP_T*d=_tmp3;

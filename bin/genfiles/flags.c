@@ -419,19 +419,19 @@ Cyc_Flags_tc_aggressive_warn=1;
 Cyc_Flags_warn_override=1;}
 # 52
 void Cyc_Flags_set_cpponly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Cpp?Cyc_Flags_stop_after_pass: Cyc_Flags_Cpp;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 0?Cyc_Flags_stop_after_pass: 0U;}
 # 55
 void Cyc_Flags_set_parseonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_Parsing?Cyc_Flags_stop_after_pass: Cyc_Flags_Parsing;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 1?Cyc_Flags_stop_after_pass: 1U;}
 # 58
 void Cyc_Flags_set_crgnonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_CurrentRegion?Cyc_Flags_stop_after_pass: Cyc_Flags_CurrentRegion;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 3?Cyc_Flags_stop_after_pass: 3U;}
 # 61
 void Cyc_Flags_set_tconly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_TypeChecking?Cyc_Flags_stop_after_pass: Cyc_Flags_TypeChecking;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 4?Cyc_Flags_stop_after_pass: 4U;}
 # 64
 void Cyc_Flags_set_cfonly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_FlowAnalysis?Cyc_Flags_stop_after_pass: Cyc_Flags_FlowAnalysis;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 6?Cyc_Flags_stop_after_pass: 6U;}
 # 67
 void Cyc_Flags_set_toconly (void){
-Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_EvalOrder?Cyc_Flags_stop_after_pass: Cyc_Flags_EvalOrder;}
+Cyc_Flags_stop_after_pass=(int)Cyc_Flags_stop_after_pass < 12?Cyc_Flags_stop_after_pass: 12U;}

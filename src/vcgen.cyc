@@ -81,6 +81,12 @@
    * Could have user-defined predicates...
    * If we knew that a goto was forward, then we could deal with it...
    */
+
+/* TODO List 
+ * 1) Treat equivalence relation separately, instead of adding four new 
+ * constraints, we want to merge all terms that are equivalent into
+ * one equivalence class
+ */
 #include "vcgen.h"
 #include "absynpp.h"
 #include "tcutil.h"
@@ -839,21 +845,25 @@ static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, 
   return $(List::imp_rev(res),ain);
 }
 
-static vardecl_t bind2vardecl(Absyn::binding_t b) {
+static vardecl_t *bind2vardecl(Absyn::binding_t b) {
   switch (b) {
-  case &Absyn::Global_b(vd): return vd;
-  case &Absyn::Funname_b(fd): return (vardecl_t)fd->fn_vardecl;
+  case &Absyn::Global_b(vd): return new vd;
+  case &Absyn::Funname_b(fd): 
+    if (fd->fn_vardecl == NULL) return NULL;
+    else return new (vardecl_t)fd->fn_vardecl;
   case &Absyn::Unresolved_b(...): Warn::impos("vcgen bind2vardecl");
-  case &Absyn::Param_b(vd): return vd;
-  case &Absyn::Local_b(vd): return vd;
-  case &Absyn::Pat_b(vd): return vd;
+  case &Absyn::Param_b(vd): return new vd;
+  case &Absyn::Local_b(vd): return new vd;
+  case &Absyn::Pat_b(vd): return new vd;
   }
 }
 
 static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
   case &Absyn::Var_e(b): 
-      return $(new Var(bind2vardecl(b)),ain);
+    let newb = bind2vardecl(b);
+    if (newb == NULL) return $(NULL, ain);
+    else return $(new Var(*bind2vardecl(b)),ain);
   default: return $(NULL, vcgen_rexp(env,e,ain)[1]);
   }
 }
@@ -908,29 +918,36 @@ static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
 }
 
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
-  if (Tcutil::is_const_exp(e)) {
-    // special case for pragmas
-    switch (e->r) {
-    case &Absyn::Pragma_e(s):
-      if (strcmp(s,"print_assn") == 0) {
-        let seg_str = Position::string_of_segment(e->loc);
-        fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(reduce(ain)));
-      }
-      if (strcmp(s,"all_paths") == 0) {
-        env->shared->widen_paths = false;
-      }
-      if (strcmp(s,"one_path") == 0) {
-        env->shared->widen_paths = true;
-      }
-      return $(zero(),ain);
-    default: return $(cnst(e),ain);
-    }
+//   if (Tcutil::is_const_exp(e)) {
+//     // special case for pragmas
+//     switch (e->r) {
+//     case &Absyn::Pragma_e(s):
+//       if (strcmp(s,"print_assn") == 0) {
+//         let seg_str = Position::string_of_segment(e->loc);
+//         fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(reduce(ain)));
+//       }
+//       if (strcmp(s,"all_paths") == 0) {
+//         env->shared->widen_paths = false;
+//       }
+//       if (strcmp(s,"one_path") == 0) {
+//         env->shared->widen_paths = true;
+//       }
+//       return $(zero(),ain);
+//     default: return $(cnst(e),ain);
+//     }
+//   }
+  if (Tcutil::is_const_exp(e)){
+    let $(cn, known)= Evexp::eval_const_uint_exp(e);
+    if (known) return $(new Uint(cn), ain);
   }
   switch (e->r) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
     return $(new Const(e),ain);
-  case &Absyn::Var_e(b): return $(new Var(bind2vardecl(b)),ain);
+  case &Absyn::Var_e(b): 
+    let newb = bind2vardecl(b);
+    if (newb == NULL) return $(NULL, ain);
+    else return $(new Var(*bind2vardecl(b)),ain);
   case &Absyn::Primop_e(p,es):
     let $(ts,aout) = vcgen_rexps(env,es,ain);
     term_opt_t t = NULL;
@@ -1086,7 +1103,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Sizeoftype_e(_):
   case &Absyn::Sizeofexp_e(_):
   case &Absyn::Valueof_e(_):
-  case &Absyn::Offsetof_e(_,_): return $(NULL,ain);
+  case &Absyn::Offsetof_e(_,_): return $(new Const(e),ain);
 
   // These can all throw exceptions
   case &Absyn::AggrMember_e(e,...): fallthru(e);

@@ -458,7 +458,7 @@ struct _fat_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){
 return Cyc_Xarray_rto_array(Cyc_Core_heap_region,xarr);}
 # 100
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _fat_ptr arr){
-if(_get_fat_size(arr,sizeof(void*))== (unsigned)0)
+if(_get_fat_size(arr,sizeof(void*))== 0U)
 return Cyc_Xarray_rcreate_empty(r);{
 struct Cyc_Xarray_Xarray*ans=({struct Cyc_Xarray_Xarray*_tmp18=_region_malloc(r,sizeof(*_tmp18));({
 struct _fat_ptr _tmp3D=({unsigned _tmp17=_get_fat_size(arr,sizeof(void*));void**_tmp16=({struct _RegionHandle*_tmp3C=Cyc_Core_unique_region;_region_malloc(_tmp3C,_check_times(_tmp17,sizeof(void*)));});({{unsigned _tmp2C=_get_fat_size(arr,sizeof(void*));unsigned i;for(i=0;i < _tmp2C;++ i){_tmp16[i]=((void**)arr.curr)[(int)i];}}0;});_tag_fat(_tmp16,sizeof(void*),_tmp17);});_tmp18->elmts=_tmp3D;}),_tmp18->num_elmts=(int)
@@ -472,7 +472,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xa
 int newsz=(int)(_get_fat_size(xarr1->elmts,sizeof(void*))+ _get_fat_size(xarr2->elmts,sizeof(void*)));
 if(newsz == 0)
 return Cyc_Xarray_rcreate_empty(r);{
-void*init=_get_fat_size(xarr1->elmts,sizeof(void*))== (unsigned)0?*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),0)):*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),0));
+void*init=_get_fat_size(xarr1->elmts,sizeof(void*))== 0U?*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),0)):*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),0));
 struct Cyc_Xarray_Xarray*ans=({struct Cyc_Xarray_Xarray*_tmp1B=_region_malloc(r,sizeof(*_tmp1B));({struct _fat_ptr _tmp3F=({unsigned _tmp1A=(unsigned)newsz;void**_tmp19=({struct _RegionHandle*_tmp3E=Cyc_Core_unique_region;_region_malloc(_tmp3E,_check_times(_tmp1A,sizeof(void*)));});({{unsigned _tmp2D=(unsigned)newsz;unsigned i;for(i=0;i < _tmp2D;++ i){_tmp19[i]=init;}}0;});_tag_fat(_tmp19,sizeof(void*),_tmp1A);});_tmp1B->elmts=_tmp3F;}),_tmp1B->num_elmts=0;_tmp1B;});
 # 121
 {int i=0;for(0;i < xarr1->num_elmts;++ i){

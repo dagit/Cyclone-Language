@@ -521,7 +521,7 @@ struct Cyc_Core_Opt*Cyc_Kinds_kind_to_bound_opt(struct Cyc_Absyn_Kind*k){
 return({struct Cyc_Core_Opt*_tmpC=_cycalloc(sizeof(*_tmpC));({void*_tmp6F=Cyc_Kinds_kind_to_bound(k);_tmpC->v=_tmp6F;});_tmpC;});}
 # 109
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr s,unsigned loc){
-if(Cyc_strlen((struct _fat_ptr)s)== (unsigned long)1 || Cyc_strlen((struct _fat_ptr)s)== (unsigned long)2){
+if(Cyc_strlen((struct _fat_ptr)s)== 1U || Cyc_strlen((struct _fat_ptr)s)== 2U){
 char _tmpD=*((const char*)_check_fat_subscript(s,sizeof(char),0));char _stmttmp0=_tmpD;char _tmpE=_stmttmp0;switch((int)_tmpE){case 65:
  return& Cyc_Kinds_ak;case 77:
  return& Cyc_Kinds_mk;case 66:

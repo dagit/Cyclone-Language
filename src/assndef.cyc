@@ -31,6 +31,7 @@ using Hashtable;
 
 
 datatype Term {
+  Uint(unsigned int);
   Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
   Var(vardecl_t);
   LogicVar(vardecl_opt_t,int,type_opt_t);
@@ -40,6 +41,7 @@ datatype Term {
 
 string_t term2string(term_t t) {
   switch (t) {
+  case &Uint(i): return aprintf("%d", i);
   case &Const(e): return Absynpp::exp2string(e);
   case &Var(vd): return Absynpp::qvar2string(vd->name);
   case &LogicVar(NULL,i,_): return aprintf("_X%d",i);
@@ -105,6 +107,9 @@ term_t fresh_var(type_opt_t t) {
 
 int cmp_term(term_t t1, term_t t2) {
   switch $(t1,t2) {
+  case $(&Uint(i1), &Uint(i2)): return i1-i2;
+  case $(&Uint(_), _): return -1;
+  case $(_, &Uint(_)): return 1;
   case $(&Const(e1),&Const(e2)): return Evexp::exp_cmp(e1,e2);
   case $(&Const(_),_): return -1;
   case $(_,&Const(_)): return 1;
@@ -504,6 +509,7 @@ static term_t
 reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
             list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
   switch (t) {
+  case &Uint(_):
   case &Const(_):
   case &LogicVar(...): return t;
   case &Cast(tp,tm):
@@ -614,6 +620,7 @@ term_t subst_term(term_t t, vardecl_t x, term_t newx) {
     let tm2 = subst_term(tm,x,newx);
     if (tm != tm2) return cast(tp,tm2);
     else return t;
+  case &Uint(_):
   case &Const(_):
   case &LogicVar(...): return t;
   }

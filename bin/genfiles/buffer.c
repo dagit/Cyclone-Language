@@ -383,8 +383,8 @@ extern struct _fat_ptr Cyc_zstrncpy(struct _fat_ptr,struct _fat_ptr,unsigned lon
 extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct Cyc_Buffer_t{struct _fat_ptr buffer;unsigned position;unsigned length;struct _fat_ptr initial_buffer;};
 # 48 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){
-if(n > (unsigned)0){
-struct _fat_ptr s=({unsigned _tmp1=n + (unsigned)1;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1),sizeof(char),_tmp1);});
+if(n > 0U){
+struct _fat_ptr s=({unsigned _tmp1=n + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1),sizeof(char),_tmp1);});
 return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s,_tmp0->position=0U,_tmp0->length=n,({struct _fat_ptr _tmp36=_tag_fat(0,0,0);_tmp0->initial_buffer=_tmp36;});_tmp0;});}else{
 # 53
 return({struct Cyc_Buffer_t*_tmp2=_cycalloc(sizeof(*_tmp2));({struct _fat_ptr _tmp38=_tag_fat(0,0,0);_tmp2->buffer=_tmp38;}),_tmp2->position=0U,_tmp2->length=0U,({struct _fat_ptr _tmp37=_tag_fat(0,0,0);_tmp2->initial_buffer=_tmp37;});_tmp2;});}}
@@ -429,7 +429,7 @@ b->position=0U;
 if(({char*_tmp3B=(char*)(b->initial_buffer).curr;_tmp3B != (char*)(_tag_fat(0,0,0)).curr;})){
 struct _fat_ptr _tmp17=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp17;
 ({struct _fat_ptr _tmp18=b->initial_buffer;struct _fat_ptr _tmp19=buf;b->initial_buffer=_tmp19;buf=_tmp18;});
-b->length=_get_fat_size(buf,sizeof(char))- (unsigned)1;
+b->length=_get_fat_size(buf,sizeof(char))- 1U;
 ({struct _fat_ptr _tmp1A=b->buffer;struct _fat_ptr _tmp1B=buf;b->buffer=_tmp1B;buf=_tmp1A;});
 ((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
 # 106
@@ -437,13 +437,13 @@ return;}
 # 109
 static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned more){
 unsigned long len=b->length;
-unsigned long new_len=len == (unsigned long)0?1U: len;
+unsigned long new_len=len == 0U?1U: len;
 struct _fat_ptr new_buffer;
 while(b->position + more > new_len){
-new_len=(unsigned long)2 * new_len;}
+new_len=2U * new_len;}
 # 116
-new_buffer=({unsigned _tmp1C=new_len + (unsigned long)1;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1C),sizeof(char),_tmp1C);});
-if(b->length != (unsigned)0){
+new_buffer=({unsigned _tmp1C=new_len + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1C),sizeof(char),_tmp1C);});
+if(b->length != 0U){
 struct _fat_ptr _tmp1D=new_buffer;struct _fat_ptr _tmp1E;_tmp1E=_tmp1D;{struct _fat_ptr x=_tmp1E;
 ({struct _fat_ptr _tmp3D=_fat_ptr_decrease_size(x,sizeof(char),1U);struct _fat_ptr _tmp3C=(struct _fat_ptr)b->buffer;Cyc_strncpy(_tmp3D,_tmp3C,b->position);});}}
 # 121

@@ -51,6 +51,7 @@ namespace AssnDef{
   typedef datatype Term @term_t, *term_opt_t;
 
   datatype Term {
+    Uint(unsigned int); // a constant value known to cyclone at compile time
     Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
     Var(vardecl_t);
     LogicVar(vardecl_opt_t,int,type_opt_t);

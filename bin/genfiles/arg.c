@@ -453,11 +453,11 @@ struct _fat_ptr indentstr=({unsigned _tmp11=(unsigned)(indent + 2)+ 1U;char*_tmp
 ({struct _fat_ptr _tmp6=_fat_ptr_plus(indentstr,sizeof(char),(int)i);char _tmp7=*((char*)_check_fat_subscript(_tmp6,sizeof(char),0U));char _tmp8=i == 0U?'\n':' ';if(_get_fat_size(_tmp6,sizeof(char))== 1U &&(_tmp7 == 0 && _tmp8 != 0))_throw_arraybounds();*((char*)_tmp6.curr)=_tmp8;});}}{
 unsigned long _tmp9=Cyc_strlen((struct _fat_ptr)item);unsigned long itemlen=_tmp9;
 struct _fat_ptr itemsep;
-if(Cyc_strlen((struct _fat_ptr)desc)> (unsigned long)0){
-if(itemlen + (unsigned long)1 > (unsigned long)indent)
+if(Cyc_strlen((struct _fat_ptr)desc)> 0U){
+if(itemlen + 1U > (unsigned long)indent)
 itemsep=indentstr;else{
 # 144
-struct _fat_ptr temp=({unsigned _tmpE=(((unsigned long)indent - itemlen)+ (unsigned long)1)+ 1U;char*_tmpD=_cycalloc_atomic(_check_times(_tmpE,sizeof(char)));({{unsigned _tmp4E=((unsigned long)indent - itemlen)+ (unsigned long)1;unsigned i;for(i=0;i < _tmp4E;++ i){_tmpD[i]='\000';}_tmpD[_tmp4E]=0;}0;});_tag_fat(_tmpD,sizeof(char),_tmpE);});
+struct _fat_ptr temp=({unsigned _tmpE=(((unsigned long)indent - itemlen)+ 1U)+ 1U;char*_tmpD=_cycalloc_atomic(_check_times(_tmpE,sizeof(char)));({{unsigned _tmp4E=((unsigned long)indent - itemlen)+ 1U;unsigned i;for(i=0;i < _tmp4E;++ i){_tmpD[i]='\000';}_tmpD[_tmp4E]=0;}0;});_tag_fat(_tmpD,sizeof(char),_tmpE);});
 {unsigned i=0U;for(0;i < (unsigned long)indent - itemlen;++ i){({struct _fat_ptr _tmpA=_fat_ptr_plus(temp,sizeof(char),(int)i);char _tmpB=*((char*)_check_fat_subscript(_tmpA,sizeof(char),0U));char _tmpC=' ';if(_get_fat_size(_tmpA,sizeof(char))== 1U &&(_tmpB == 0 && _tmpC != 0))_throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});}}
 itemsep=temp;}}else{
 # 149
@@ -520,11 +520,11 @@ Cyc_Arg_args=orig_args;{
 int initpos=Cyc_Arg_current;
 unsigned l=_get_fat_size(Cyc_Arg_args,sizeof(struct _fat_ptr));
 # 214
-if(({char*_tmp74=(char*)((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),(int)(l - (unsigned)1)))->curr;_tmp74 == (char*)(_tag_fat(0,0,0)).curr;}))l=l - (unsigned)1;
+if(({char*_tmp74=(char*)((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),(int)(l - 1U)))->curr;_tmp74 == (char*)(_tag_fat(0,0,0)).curr;}))l=l - 1U;
 ++ Cyc_Arg_current;
 while((unsigned)Cyc_Arg_current < l){
 struct _fat_ptr s=*((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),Cyc_Arg_current));
-if((({char*_tmp75=(char*)s.curr;_tmp75 != (char*)(_tag_fat(0,0,0)).curr;})&& _get_fat_size(s,sizeof(char))>= 1U)&&(int)((const char*)s.curr)[0]== (int)'-'){
+if((({char*_tmp75=(char*)s.curr;_tmp75 != (char*)(_tag_fat(0,0,0)).curr;})&& _get_fat_size(s,sizeof(char))>= 1U)&&(int)((const char*)s.curr)[0]== 45){
 void*action;
 {struct _handler_cons _tmp31;_push_handler(& _tmp31);{int _tmp33=0;if(setjmp(_tmp31.handler))_tmp33=1;if(!_tmp33){action=Cyc_Arg_lookup(speclist,s);;_pop_handler();}else{void*_tmp32=(void*)Cyc_Core_get_exn_thrown();void*_tmp34=_tmp32;void*_tmp35;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp34)->tag == Cyc_Core_Not_found){
 # 224
@@ -566,7 +566,7 @@ f(n);
 ++ Cyc_Arg_current;
 goto _LL5;}default: _tmp3B=((struct Cyc_Arg_Rest_spec_Arg_Spec_struct*)_tmp3A)->f1;{void(*f)(struct _fat_ptr)=_tmp3B;
 # 264
-while((unsigned)Cyc_Arg_current < l - (unsigned)1){
+while((unsigned)Cyc_Arg_current < l - 1U){
 f(*((struct _fat_ptr*)_check_fat_subscript(Cyc_Arg_args,sizeof(struct _fat_ptr),Cyc_Arg_current + 1)));
 ++ Cyc_Arg_current;}
 # 268

@@ -504,12 +504,12 @@ pos=8;}else{
 # 79
 ({void*_tmp10=0U;({struct Cyc___cycFILE*_tmpF2=Cyc_stderr;struct _fat_ptr _tmpF1=({const char*_tmp11="and ";_tag_fat(_tmp11,sizeof(char),5U);});Cyc_fprintf(_tmpF2,_tmpF1,_tag_fat(_tmp10,sizeof(void*),0));});});
 pos +=4;
-if((unsigned)pos + _get_fat_size(s2,sizeof(char))>= (unsigned)80){
+if((unsigned)pos + _get_fat_size(s2,sizeof(char))>= 80U){
 ({void*_tmp12=0U;({struct Cyc___cycFILE*_tmpF4=Cyc_stderr;struct _fat_ptr _tmpF3=({const char*_tmp13="\n\t";_tag_fat(_tmp13,sizeof(char),3U);});Cyc_fprintf(_tmpF4,_tmpF3,_tag_fat(_tmp12,sizeof(void*),0));});});
 pos=8;}
 # 85
 ({struct Cyc_String_pa_PrintArg_struct _tmp16=({struct Cyc_String_pa_PrintArg_struct _tmpCF;_tmpCF.tag=0,_tmpCF.f1=(struct _fat_ptr)((struct _fat_ptr)s2);_tmpCF;});void*_tmp14[1];_tmp14[0]=& _tmp16;({struct Cyc___cycFILE*_tmpF6=Cyc_stderr;struct _fat_ptr _tmpF5=({const char*_tmp15="%s ";_tag_fat(_tmp15,sizeof(char),4U);});Cyc_fprintf(_tmpF6,_tmpF5,_tag_fat(_tmp14,sizeof(void*),1));});});
-pos +=_get_fat_size(s2,sizeof(char))+ (unsigned)1;
+pos +=_get_fat_size(s2,sizeof(char))+ 1U;
 if(pos + 17 >= 80){
 ({void*_tmp17=0U;({struct Cyc___cycFILE*_tmpF8=Cyc_stderr;struct _fat_ptr _tmpF7=({const char*_tmp18="\n\t";_tag_fat(_tmp18,sizeof(char),3U);});Cyc_fprintf(_tmpF8,_tmpF7,_tag_fat(_tmp17,sizeof(void*),0));});});
 pos=8;}
@@ -517,7 +517,7 @@ pos=8;}
 ({void*_tmp19=0U;({struct Cyc___cycFILE*_tmpFA=Cyc_stderr;struct _fat_ptr _tmpF9=({const char*_tmp1A="are not compatible. ";_tag_fat(_tmp1A,sizeof(char),21U);});Cyc_fprintf(_tmpFA,_tmpF9,_tag_fat(_tmp19,sizeof(void*),0));});});
 pos +=17;
 if(({char*_tmpFB=(char*)Cyc_Unify_failure_reason.curr;_tmpFB != (char*)(_tag_fat(0,0,0)).curr;})){
-if(({unsigned long _tmpFC=(unsigned long)pos;_tmpFC + Cyc_strlen((struct _fat_ptr)Cyc_Unify_failure_reason);})>= (unsigned long)80)
+if(({unsigned long _tmpFC=(unsigned long)pos;_tmpFC + Cyc_strlen((struct _fat_ptr)Cyc_Unify_failure_reason);})>= 80U)
 ({void*_tmp1B=0U;({struct Cyc___cycFILE*_tmpFE=Cyc_stderr;struct _fat_ptr _tmpFD=({const char*_tmp1C="\n\t";_tag_fat(_tmp1C,sizeof(char),3U);});Cyc_fprintf(_tmpFE,_tmpFD,_tag_fat(_tmp1B,sizeof(void*),0));});});
 ({struct Cyc_String_pa_PrintArg_struct _tmp1F=({struct Cyc_String_pa_PrintArg_struct _tmpD0;_tmpD0.tag=0,_tmpD0.f1=(struct _fat_ptr)((struct _fat_ptr)Cyc_Unify_failure_reason);_tmpD0;});void*_tmp1D[1];_tmp1D[0]=& _tmp1F;({struct Cyc___cycFILE*_tmp100=Cyc_stderr;struct _fat_ptr _tmpFF=({const char*_tmp1E="%s";_tag_fat(_tmp1E,sizeof(char),3U);});Cyc_fprintf(_tmp100,_tmpFF,_tag_fat(_tmp1D,sizeof(void*),1));});});}
 # 98
@@ -693,7 +693,7 @@ Cyc_Unify_fail_because(({const char*_tmp59="(type variable would escape scope)";
 if(!Cyc_Kinds_kind_leq((struct Cyc_Absyn_Kind*)kind1->v,kind2))
 Cyc_Unify_fail_because(({const char*_tmp5A="(kinds are incompatible)";_tag_fat(_tmp5A,sizeof(char),25U);}));
 *ref2_ref=t1;
-return;}case 3: _tmp55=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_tmp54)->f1;if((int)((struct Cyc_Absyn_Kind*)kind1->v)->kind == (int)Cyc_Absyn_BoxKind){struct Cyc_Absyn_PtrInfo pinfo=_tmp55;
+return;}case 3: _tmp55=((struct Cyc_Absyn_PointerType_Absyn_Type_struct*)_tmp54)->f1;if((int)((struct Cyc_Absyn_Kind*)kind1->v)->kind == 2){struct Cyc_Absyn_PtrInfo pinfo=_tmp55;
 # 319
 void*_tmp5B=Cyc_Absyn_compress((pinfo.ptr_atts).bounds);void*c=_tmp5B;
 void*_tmp5C=c;if(*((int*)_tmp5C)== 1){

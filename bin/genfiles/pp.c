@@ -668,7 +668,7 @@ struct Cyc_Fn_Function*_tmpC8=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*)
 # 343
 struct Cyc_PP_Doc*Cyc_PP_cat(struct _fat_ptr l){
 struct Cyc_PP_Doc*_tmp7C=Cyc_PP_nil_doc();struct Cyc_PP_Doc*d=_tmp7C;
-{int i=(int)(_get_fat_size(l,sizeof(struct Cyc_PP_Doc*))- (unsigned)1);for(0;i >= 0;-- i){
+{int i=(int)(_get_fat_size(l,sizeof(struct Cyc_PP_Doc*))- 1U);for(0;i >= 0;-- i){
 d=Cyc_PP_concat(*((struct Cyc_PP_Doc**)_check_fat_subscript(l,sizeof(struct Cyc_PP_Doc*),i)),d);}}
 # 348
 return d;}

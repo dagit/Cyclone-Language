@@ -400,8 +400,8 @@ static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a',
 unsigned long Cyc_XP_fromint(int n,struct _fat_ptr z,unsigned long u){
 int i=0;
 do{
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % (unsigned long)(1 << 8));}while(
-(u /=(unsigned long)(1 << 8))> (unsigned long)0 && i < n);
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % 256U);}while(
+(u /=256U)> 0U && i < n);
 for(1;i < n;++ i){
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))='\000';}
 return u;}
@@ -412,7 +412,7 @@ int i=(int)sizeof(u);
 if(i > n)
 i=n;
 while(-- i >= 0){
-u=(unsigned long)(1 << 8)* u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));}
+u=256U * u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));}
 return u;}
 # 35
 int Cyc_XP_length(int n,struct _fat_ptr x){
@@ -424,16 +424,16 @@ int Cyc_XP_add(int n,struct _fat_ptr z,struct _fat_ptr x,struct _fat_ptr y,int c
 int i;
 for(i=0;i < n;++ i){
 ({int _tmp24=({int _tmp23=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_tmp23 + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});carry +=_tmp24;});
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % (1 << 8));
-carry /=1 << 8;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256U);
+carry /=256U;}
 # 47
 return carry;}
 # 49
 int Cyc_XP_sub(int n,struct _fat_ptr z,struct _fat_ptr x,struct _fat_ptr y,int borrow){
 int i;
 for(i=0;i < n;++ i){
-int d=({int _tmp25=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ (1 << 8))- borrow;_tmp25 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % (1 << 8));
+int d=({int _tmp25=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256U)- borrow;_tmp25 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256U);
 borrow=1 - d / 256U;}
 # 56
 return borrow;}
@@ -442,17 +442,17 @@ int Cyc_XP_sum(int n,struct _fat_ptr z,struct _fat_ptr x,int y){
 int i;
 for(i=0;i < n;++ i){
 y +=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(y % (1 << 8));
-y /=1 << 8;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(y % 256U);
+y /=256U;}
 # 65
 return y;}
 # 67
 int Cyc_XP_diff(int n,struct _fat_ptr z,struct _fat_ptr x,int y){
 int i;
 for(i=0;i < n;++ i){
-int d=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ (1 << 8))- y;
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % (1 << 8));
-y=1 - d / (1 << 8);}
+int d=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ 256U)- y;
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % 256U);
+y=1 - d / 256U;}
 # 74
 return y;}
 # 76
@@ -460,8 +460,8 @@ int Cyc_XP_neg(int n,struct _fat_ptr z,struct _fat_ptr x,int carry){
 int i;
 for(i=0;i < n;++ i){
 carry +=(int)~(*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i)));
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % (1 << 8));
-carry /=1 << 8;}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256U);
+carry /=256U;}
 # 83
 return carry;}
 # 85
@@ -471,13 +471,13 @@ for(i=0;i < n;++ i){
 unsigned carry=0U;
 for(j=0;j < m;++ j){
 ({unsigned _tmp28=(unsigned)({int _tmp27=({int _tmp26=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_tmp26 * (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),j));});_tmp27 + (int)*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j));});carry +=_tmp28;});
-((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % (unsigned)(1 << 8));
-carry /=(unsigned)(1 << 8);}
+((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % 256U);
+carry /=256U;}
 # 94
 for(1;j < (n + m)- i;++ j){
 carry +=(unsigned)*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j));
-((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % (unsigned)(1 << 8));
-carry /=(unsigned)(1 << 8);}
+((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % 256U);
+carry /=256U;}
 # 99
 carryout |=carry;}
 # 101
@@ -488,8 +488,8 @@ int i;
 unsigned carry=0U;
 for(i=0;i < n;++ i){
 carry +=(unsigned)((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))* y);
-*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % (unsigned)(1 << 8));
-carry /=(unsigned)(1 << 8);}
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry % 256U);
+carry /=256U;}
 # 111
 return(int)carry;}
 # 113
@@ -505,13 +505,13 @@ if(_get_fat_size(r,sizeof(unsigned char))> 1U)
 ({struct _fat_ptr _tmp2A=_fat_ptr_plus((struct _fat_ptr)r,sizeof(char),1);Cyc_memset(_tmp2A,'\000',(unsigned long)(my - 1));});}else{
 if(m > n){
 Cyc_memset((struct _fat_ptr)q,'\000',(unsigned long)nx);
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(r,(struct _fat_ptr)x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)x.curr)));
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(r,(struct _fat_ptr)x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
 ({struct _fat_ptr _tmp2B=_fat_ptr_plus((struct _fat_ptr)r,sizeof(char),n);Cyc_memset(_tmp2B,'\000',(unsigned long)(my - n));});}else{
 # 128
 int k;
 struct _fat_ptr rem=tmp;struct _fat_ptr dq=_fat_ptr_plus(_fat_ptr_plus(tmp,sizeof(unsigned char),n),sizeof(unsigned char),1);
 2 <= m && m <= n?0:({struct _fat_ptr _tmp2C=({const char*_tmp1="2 <= m && m <= n";_tag_fat(_tmp1,sizeof(char),17U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp2C,({const char*_tmp2="xp.cyc";_tag_fat(_tmp2,sizeof(char),7U);}),130U);});
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(rem,(struct _fat_ptr)x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)x.curr)));
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(rem,(struct _fat_ptr)x,(unsigned)n / sizeof(*((unsigned char*)x.curr))+ (unsigned)((unsigned)n % sizeof(*((unsigned char*)x.curr))== 0U?0: 1),sizeof(*((unsigned char*)x.curr)));
 *((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),n))='\000';
 for(k=n - m;k >= 0;-- k){
 int qk;
@@ -520,8 +520,8 @@ int i;
 (2 <= m && m <= k + m)&& k + m <= n?0:({struct _fat_ptr _tmp2D=({const char*_tmp3="2 <= m && m <= k+m && k+m <= n";_tag_fat(_tmp3,sizeof(char),31U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp2D,({const char*_tmp4="xp.cyc";_tag_fat(_tmp4,sizeof(char),7U);}),137U);});
 {
 int km=k + m;
-unsigned long y2=(unsigned long)({int _tmp2E=(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* (1 << 8);_tmp2E + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 2));});
-unsigned long r3=(unsigned long)({int _tmp30=({int _tmp2F=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* ((1 << 8)* (1 << 8));_tmp2F + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* (1 << 8);});_tmp30 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
+unsigned long y2=(unsigned long)({int _tmp2E=(int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 1))* 256U;_tmp2E + (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),m - 2));});
+unsigned long r3=(unsigned long)({int _tmp30=({int _tmp2F=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km))* 65536U;_tmp2F + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 1))* 256U;});_tmp30 + (int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned char),km - 2));});
 # 143
 qk=(int)(r3 / y2);
 if(qk >= 256U)
@@ -541,7 +541,7 @@ int borrow;
 borrow=({int _tmp38=m + 1;struct _fat_ptr _tmp37=_fat_ptr_plus(rem,sizeof(unsigned char),k);struct _fat_ptr _tmp36=_fat_ptr_plus(rem,sizeof(unsigned char),k);Cyc_XP_sub(_tmp38,_tmp37,_tmp36,dq,0);});
 borrow == 0?0:({struct _fat_ptr _tmp39=({const char*_tmp7="borrow == 0";_tag_fat(_tmp7,sizeof(char),12U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp39,({const char*_tmp8="xp.cyc";_tag_fat(_tmp8,sizeof(char),7U);}),159U);});}}
 # 162
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(r,(struct _fat_ptr)rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)((unsigned)m % sizeof(*((unsigned char*)rem.curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)rem.curr)));{
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(r,(struct _fat_ptr)rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)((unsigned)m % sizeof(*((unsigned char*)rem.curr))== 0U?0: 1),sizeof(*((unsigned char*)rem.curr)));{
 # 164
 int i;
 for(i=(n - m)+ 1;i < nx;++ i){
@@ -555,7 +555,7 @@ int Cyc_XP_quotient(int n,struct _fat_ptr z,struct _fat_ptr x,int y){
 int i;
 unsigned carry=0U;
 for(i=n - 1;i >= 0;-- i){
-carry=carry * (unsigned)(1 << 8)+ (unsigned)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));
+carry=carry * 256U + (unsigned)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(carry / (unsigned)y);
 carry %=(unsigned)y;}
 # 181
@@ -630,13 +630,13 @@ const char*p=str;
 base >= 2 && base <= 36?0:({struct _fat_ptr _tmp46=({const char*_tmpB="base >= 2 && base <= 36";_tag_fat(_tmpB,sizeof(char),24U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp46,({const char*_tmpC="xp.cyc";_tag_fat(_tmpC,sizeof(char),7U);}),251U);});
 while((int)*((const char*)_check_null(p))&& isspace((int)*p)){
 ({const char**_tmpD=& p;if(*(*_tmpD)!= 0)++(*_tmpD);else{_throw_arraybounds();}*_tmpD;});}
-if(((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - (int)'0'))< base){
+if(((int)*p && isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base){
 int carry;
-for(1;((int)*((const char*)_check_null(p))&& isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - (int)'0'))< base;({const char**_tmpE=& p;if(*(*_tmpE)!= 0)++(*_tmpE);else{_throw_arraybounds();}*_tmpE;})){
+for(1;((int)*((const char*)_check_null(p))&& isalnum((int)*p))&&(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48))< base;({const char**_tmpE=& p;if(*(*_tmpE)!= 0)++(*_tmpE);else{_throw_arraybounds();}*_tmpE;})){
 carry=Cyc_XP_product(n,z,z,base);
 if(carry)
 break;
-Cyc_XP_sum(n,z,z,(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - (int)'0')));}
+Cyc_XP_sum(n,z,z,(int)*((char*)_check_known_subscript_notnull(Cyc_map,75U,sizeof(char),(int)*p - 48)));}
 # 262
 return carry;}else{
 # 264

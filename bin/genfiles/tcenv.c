@@ -563,7 +563,7 @@ return Cyc_Tcenv_put_fenv(te,ans);}}
 # 196
 enum Cyc_Tcenv_NewStatus Cyc_Tcenv_new_status(struct Cyc_Tcenv_Tenv*te){
 struct Cyc_Tcenv_Fenv*_tmp16=te->le;struct Cyc_Tcenv_Fenv*le=_tmp16;
-if(le == 0)return Cyc_Tcenv_NoneNew;
+if(le == 0)return 0U;
 return(le->flags).in_new;}
 # 201
 int Cyc_Tcenv_abstract_val_ok(struct Cyc_Tcenv_Tenv*te){
@@ -884,7 +884,7 @@ struct Cyc_List_List*_tmp160=({struct Cyc_List_List*_tmpBC=_cycalloc(sizeof(*_tm
 _tmpBE->capability=_tmp162;}),_tmpBE->curr_rgn=param_rgn,({
 # 532
 void*_tmp15F=Cyc_CurRgn_curr_rgn_type();_tmpBE->curr_lifo_rgn=_tmp15F;}),
-(_tmpBE->flags).in_new=Cyc_Tcenv_NoneNew,(_tmpBE->flags).in_notreadctxt=0,(_tmpBE->flags).in_lhs=0,(_tmpBE->flags).abstract_ok=0,(_tmpBE->flags).in_stmt_exp=0;_tmpBE;});}}}
+(_tmpBE->flags).in_new=0U,(_tmpBE->flags).in_notreadctxt=0,(_tmpBE->flags).in_lhs=0,(_tmpBE->flags).abstract_ok=0,(_tmpBE->flags).in_stmt_exp=0;_tmpBE;});}}}
 # 537
 struct Cyc_Tcenv_Fenv*Cyc_Tcenv_nested_fenv(unsigned loc,struct Cyc_Tcenv_Fenv*old_fenv,struct Cyc_Absyn_Fndecl*fd){
 struct Cyc_Tcenv_Fenv*_tmpC9=old_fenv;void*_tmpCC;void*_tmpCB;void*_tmpCA;_tmpCA=_tmpC9->region_order;_tmpCB=_tmpC9->type_vars;_tmpCC=_tmpC9->shared;{struct Cyc_RgnOrder_RgnPO*rgn_po=_tmpCA;struct Cyc_List_List*type_vars=_tmpCB;struct Cyc_Tcenv_SharedFenv*shared=_tmpCC;
@@ -894,8 +894,8 @@ struct Cyc_Absyn_Tvar*rgn0=({struct Cyc_Absyn_Tvar*_tmpE9=_cycalloc(sizeof(*_tmp
 int _tmp164=Cyc_Tcutil_new_tvar_id();_tmpE9->identity=_tmp164;}),_tmpE9->kind=(void*)& Cyc_Tcenv_rgn_kb;_tmpE9;});
 {struct Cyc_List_List*_tmpCD=(fd->i).tvars;struct Cyc_List_List*tvars=_tmpCD;for(0;tvars != 0;tvars=tvars->tl){
 struct Cyc_Absyn_Kind*_tmpCE=Cyc_Kinds_tvar_kind((struct Cyc_Absyn_Tvar*)tvars->hd,& Cyc_Kinds_bk);struct Cyc_Absyn_Kind*_stmttmp7=_tmpCE;struct Cyc_Absyn_Kind*_tmpCF=_stmttmp7;enum Cyc_Absyn_AliasQual _tmpD1;enum Cyc_Absyn_KindQual _tmpD0;_tmpD0=_tmpCF->kind;_tmpD1=_tmpCF->aliasqual;{enum Cyc_Absyn_KindQual k=_tmpD0;enum Cyc_Absyn_AliasQual a=_tmpD1;
-if((int)k == (int)3U){
-if((int)a == (int)0U)
+if((int)k == 3){
+if((int)a == 0)
 rgn_po=Cyc_RgnOrder_add_unordered(rgn_po,(struct Cyc_Absyn_Tvar*)tvars->hd);else{
 # 549
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmpD3=({struct Cyc_Warn_String_Warn_Warg_struct _tmp109;_tmp109.tag=0,({struct _fat_ptr _tmp168=({const char*_tmpD4="non-intuitionistic tvar in nested_fenv";_tag_fat(_tmpD4,sizeof(char),39U);});_tmp109.f1=_tmp168;});_tmp109;});void*_tmpD2[1];_tmpD2[0]=& _tmpD3;((int(*)(struct _fat_ptr))Cyc_Warn_impos2)(_tag_fat(_tmpD2,sizeof(void*),1));});}}}}}
@@ -926,7 +926,7 @@ struct Cyc_List_List*_tmp16C=({struct Cyc_List_List*_tmpE0=_cycalloc(sizeof(*_tm
 _tmpE2->capability=_tmp16E;}),_tmpE2->curr_rgn=param_rgn,({
 # 578
 void*_tmp16B=Cyc_CurRgn_curr_rgn_type();_tmpE2->curr_lifo_rgn=_tmp16B;}),
-(_tmpE2->flags).in_new=Cyc_Tcenv_NoneNew,(_tmpE2->flags).in_notreadctxt=0,(_tmpE2->flags).in_lhs=0,(_tmpE2->flags).abstract_ok=0,(_tmpE2->flags).in_stmt_exp=0;_tmpE2;});}}}}
+(_tmpE2->flags).in_new=0U,(_tmpE2->flags).in_notreadctxt=0,(_tmpE2->flags).in_lhs=0,(_tmpE2->flags).abstract_ok=0,(_tmpE2->flags).in_stmt_exp=0;_tmpE2;});}}}}
 # 583
 struct Cyc_Tcenv_Fenv*Cyc_Tcenv_bogus_fenv(void*ret_type,struct Cyc_List_List*args){
 # 585
@@ -940,7 +940,7 @@ return({struct Cyc_Tcenv_Fenv*_tmpED=_cycalloc(sizeof(*_tmpED));
 void*_tmp176=Cyc_Absyn_join_eff(({struct Cyc_List_List*_tmpEC=_cycalloc(sizeof(*_tmpEC));({void*_tmp175=Cyc_Absyn_access_eff(param_rgn);_tmpEC->hd=_tmp175;}),_tmpEC->tl=0;_tmpEC;}));_tmpED->capability=_tmp176;}),_tmpED->curr_rgn=param_rgn,({
 # 596
 void*_tmp174=Cyc_CurRgn_curr_rgn_type();_tmpED->curr_lifo_rgn=_tmp174;}),
-(_tmpED->flags).in_new=Cyc_Tcenv_NoneNew,(_tmpED->flags).in_notreadctxt=0,(_tmpED->flags).in_lhs=0,(_tmpED->flags).abstract_ok=0,(_tmpED->flags).in_stmt_exp=0;_tmpED;});}
+(_tmpED->flags).in_new=0U,(_tmpED->flags).in_notreadctxt=0,(_tmpED->flags).in_lhs=0,(_tmpED->flags).abstract_ok=0,(_tmpED->flags).in_stmt_exp=0;_tmpED;});}
 # 601
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_copy_tenv_dicts(struct Cyc_Tcenv_Tenv*te){
 struct Cyc_Tcenv_Tenv*_tmpF3=({struct Cyc_Tcenv_Tenv*_tmpF5=_cycalloc(sizeof(*_tmpF5));*_tmpF5=*te;_tmpF5;});struct Cyc_Tcenv_Tenv*ans=_tmpF3;

@@ -515,7 +515,7 @@ if((unsigned)t){_tmp17=t;goto _LL8;}else{s=({const char*_tmp19="<?>";_tag_fat(_t
 s=Cyc_Absynpp_typ2string(t);goto _LL0;}case 1: _tmp17=((struct Cyc_Warn_Qvar_Warn_Warg_struct*)_tmp15)->f1;{struct _tuple0*qv=_tmp17;
 s=Cyc_Absynpp_qvar2string(qv);goto _LL0;}case 5: _tmp17=((struct Cyc_Warn_Stmt_Warn_Warg_struct*)_tmp15)->f1;{struct Cyc_Absyn_Stmt*s2=_tmp17;
 s=Cyc_Absynpp_stmt2string(s2);goto _LL0;}case 6: _tmp17=((struct Cyc_Warn_Aggrdecl_Warn_Warg_struct*)_tmp15)->f1;{struct Cyc_Absyn_Aggrdecl*ad=_tmp17;
-s=(struct _fat_ptr)({struct _fat_ptr _tmp4D=(int)ad->kind == (int)Cyc_Absyn_UnionA?({const char*_tmp1A="union ";_tag_fat(_tmp1A,sizeof(char),7U);}):({const char*_tmp1B="struct ";_tag_fat(_tmp1B,sizeof(char),8U);});Cyc_strconcat(_tmp4D,(struct _fat_ptr)
+s=(struct _fat_ptr)({struct _fat_ptr _tmp4D=(int)ad->kind == 1?({const char*_tmp1A="union ";_tag_fat(_tmp1A,sizeof(char),7U);}):({const char*_tmp1B="struct ";_tag_fat(_tmp1B,sizeof(char),8U);});Cyc_strconcat(_tmp4D,(struct _fat_ptr)
 Cyc_Absynpp_qvar2string(ad->name));});
 goto _LL0;}case 7: _tmp17=((struct Cyc_Warn_Tvar_Warn_Warg_struct*)_tmp15)->f1;{struct Cyc_Absyn_Tvar*tv=_tmp17;
 s=*tv->name;goto _LL0;}case 9: _tmp17=((struct Cyc_Warn_Kind_Warn_Warg_struct*)_tmp15)->f1;{struct Cyc_Absyn_Kind*k=_tmp17;

@@ -396,7 +396,7 @@ int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
 int Cyc_Core_nptrcmp(void*a,void*b){
 if(a == b)return 0;
 if(a > b)return 1;
-return - 1;}
+return -1;}
 # 56
 int Cyc_Core_ptrcmp(void*a,void*b){
 return Cyc_Core_nptrcmp(a,b);}struct _tuple0{void*f1;void*f2;};

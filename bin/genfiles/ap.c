@@ -511,7 +511,7 @@ struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({struct _fat_ptr _tmp5F=({const char*_tmp5="x";_tag_fat(_tmp5,sizeof(char),2U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp5F,({const char*_tmp6="ap.cyc";_tag_fat(_tmp6,sizeof(char),7U);}),97U);});
 z=Cyc_mk(x->ndigits);
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;
 return z;}
@@ -520,7 +520,7 @@ struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({struct _fat_ptr _tmp60=({const char*_tmp7="x";_tag_fat(_tmp7,sizeof(char),2U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp60,({const char*_tmp8="ap.cyc";_tag_fat(_tmp8,sizeof(char),7U);}),106U);});
 z=Cyc_mk(x->ndigits);
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=1;
 return z;}
@@ -677,7 +677,7 @@ struct Cyc_AP_T*Cyc_AP_lshift(struct Cyc_AP_T*x,int s){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({struct _fat_ptr _tmp9A=({const char*_tmp2F="x";_tag_fat(_tmp2F,sizeof(char),2U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp9A,({const char*_tmp30="ap.cyc";_tag_fat(_tmp30,sizeof(char),7U);}),269U);});
 s >= 0?0:({struct _fat_ptr _tmp9B=({const char*_tmp31="s >= 0";_tag_fat(_tmp31,sizeof(char),7U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmp9B,({const char*_tmp32="ap.cyc";_tag_fat(_tmp32,sizeof(char),7U);}),270U);});
-z=Cyc_mk(x->ndigits + (s + 7 & ~ 7)/ 8);
+z=Cyc_mk(x->ndigits + (s + 7 & 4294967288U)/ 8);
 Cyc_XP_lshift(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,x->ndigits,x->digits,s,0);
 # 274
 z->sign=x->sign;
@@ -739,7 +739,7 @@ long Cyc_AP_toint(struct Cyc_AP_T*x){
 unsigned long u;
 (unsigned)x?0:({struct _fat_ptr _tmpA1=({const char*_tmp37="x";_tag_fat(_tmp37,sizeof(char),2U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA1,({const char*_tmp38="ap.cyc";_tag_fat(_tmp38,sizeof(char),7U);}),332U);});
 u=({unsigned long _tmpA2=Cyc_XP_toint(x->ndigits,x->digits);_tmpA2 % ((unsigned)Cyc_long_max + 1U);});
-if(x->sign == - 1)
+if(x->sign == -1)
 return -(long)u;else{
 # 337
 return(long)u;}}
@@ -753,28 +753,28 @@ int carry;
 base >= 2 && base <= 36?0:({struct _fat_ptr _tmpA4=({const char*_tmp3B="base >= 2 && base <= 36";_tag_fat(_tmp3B,sizeof(char),24U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA4,({const char*_tmp3C="ap.cyc";_tag_fat(_tmp3C,sizeof(char),7U);}),345U);});
 while((int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&& isspace((int)*((const char*)p.curr))){
 _fat_ptr_inplace_plus(& p,sizeof(char),1);}
-if((int)*((const char*)p.curr)== (int)'-' ||(int)*((const char*)p.curr)== (int)'+')
+if((int)*((const char*)p.curr)== 45 ||(int)*((const char*)p.curr)== 43)
 sign=*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& p,sizeof(char),1),sizeof(char),0U));
 {
 const char*start;
 int k;int n=0;
-for(1;(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))== (int)'0' &&(int)*((const char*)_check_fat_subscript(p,sizeof(char),1))== (int)'0';_fat_ptr_inplace_plus(& p,sizeof(char),1)){
+for(1;(int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))== 48 &&(int)*((const char*)_check_fat_subscript(p,sizeof(char),1))== 48;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ;}
 start=(const char*)_untag_fat_ptr(p,sizeof(char),1U);
-for(1;(((int)'0' <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)p.curr)<= (int)'9')&&(int)*((const char*)p.curr)< (int)'0' + base ||
-((int)'a' <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= (int)'z')&&(int)*((const char*)p.curr)< ((int)'a' + base)- 10)||
-((int)'A' <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= (int)'Z')&&(int)*((const char*)p.curr)< ((int)'A' + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
+for(1;((48 <= (int)*((const char*)_check_fat_subscript(p,sizeof(char),0U))&&(int)*((const char*)p.curr)<= 57)&&(int)*((const char*)p.curr)< 48 + base ||
+(97 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 122)&&(int)*((const char*)p.curr)< (97 + base)- 10)||
+(65 <= (int)*((const char*)p.curr)&&(int)*((const char*)p.curr)<= 90)&&(int)*((const char*)p.curr)< (65 + base)- 10;_fat_ptr_inplace_plus(& p,sizeof(char),1)){
 ++ n;}
 for(k=1;1 << k < base;++ k){
 ;}
-z=Cyc_mk((k * n + 7 & ~ 7)/ 8);
+z=Cyc_mk((k * n + 7 & 4294967288U)/ 8);
 p=({const char*_tmp3D=start;_tag_fat(_tmp3D,sizeof(char),_get_zero_arr_size_char((void*)_tmp3D,1U));});}
 # 365
 carry=({int _tmpA7=((struct Cyc_AP_T*)_check_null(z))->size;struct _fat_ptr _tmpA6=z->digits;const char*_tmpA5=(const char*)_untag_fat_ptr(p,sizeof(char),1U);Cyc_XP_fromstr(_tmpA7,_tmpA6,_tmpA5,base);});
 # 367
 carry == 0?0:({struct _fat_ptr _tmpA8=({const char*_tmp3E="carry == 0";_tag_fat(_tmp3E,sizeof(char),11U);});((int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail)(_tmpA8,({const char*_tmp3F="ap.cyc";_tag_fat(_tmp3F,sizeof(char),7U);}),367U);});
 Cyc_normalize(z,z->size);
-z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != (int)'-')?1: -1;
+z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(int)sign != 45)?1: -1;
 return z;}
 # 372
 char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base){
@@ -786,12 +786,12 @@ base >= 2 && base <= 36?0:({struct _fat_ptr _tmpAA=({const char*_tmp43="base >= 
 for(k=5;1 << k > base;-- k){
 ;}
 size=((8 * x->ndigits)/ k + 1)+ 1;
-if(x->sign == - 1)
+if(x->sign == -1)
 ++ size;
 str=({unsigned _tmp45=size;_tag_fat(_cyccalloc_atomic(sizeof(char),_tmp45),sizeof(char),_tmp45);});
 q=({unsigned _tmp46=(unsigned)x->ndigits * sizeof(unsigned char);_tag_fat(_cycalloc_atomic(_tmp46),1U,_tmp46);});
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(q,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
-if(x->sign == - 1){
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(q,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+if(x->sign == -1){
 ({struct _fat_ptr _tmp47=_fat_ptr_plus(str,sizeof(char),0);char _tmp48=*((char*)_check_fat_subscript(_tmp47,sizeof(char),0U));char _tmp49='-';if(_get_fat_size(_tmp47,sizeof(char))== 1U &&(_tmp48 == 0 && _tmp49 != 0))_throw_arraybounds();*((char*)_tmp47.curr)=_tmp49;});
 ({struct _fat_ptr _tmpAE=_fat_ptr_plus(str,sizeof(char),1);int _tmpAD=size - 1;int _tmpAC=base;int _tmpAB=x->ndigits;Cyc_XP_tostr(_tmpAE,_tmpAD,_tmpAC,_tmpAB,q);});}else{
 # 390
@@ -808,7 +808,7 @@ x=y;
 y=tmp;}
 # 402
 z=Cyc_mk(x->ndigits);
-((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+((struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=x->sign;
 return z;}

@@ -487,12 +487,12 @@ void*Cyc_Atts_parse_nullary_att(unsigned loc,struct _fat_ptr s){
 static struct Cyc_Absyn_Aligned_att_Absyn_Attribute_struct att_aligned={6,0};
 static struct _tuple11 att_map[19U]={{{_tmp2,_tmp2,_tmp2 + 8U},(void*)& Cyc_Atts_Stdcall_att_val},{{_tmp3,_tmp3,_tmp3 + 6U},(void*)& Cyc_Atts_Cdecl_att_val},{{_tmp4,_tmp4,_tmp4 + 9U},(void*)& Cyc_Atts_Fastcall_att_val},{{_tmp5,_tmp5,_tmp5 + 9U},(void*)& Cyc_Atts_Noreturn_att_val},{{_tmp6,_tmp6,_tmp6 + 6U},(void*)& Cyc_Atts_Const_att_val},{{_tmp7,_tmp7,_tmp7 + 8U},(void*)& att_aligned},{{_tmp8,_tmp8,_tmp8 + 7U},(void*)& Cyc_Atts_Packed_att_val},{{_tmp9,_tmp9,_tmp9 + 7U},(void*)& Cyc_Atts_Shared_att_val},{{_tmpA,_tmpA,_tmpA + 7U},(void*)& Cyc_Atts_Unused_att_val},{{_tmpB,_tmpB,_tmpB + 5U},(void*)& Cyc_Atts_Weak_att_val},{{_tmpC,_tmpC,_tmpC + 10U},(void*)& Cyc_Atts_Dllimport_att_val},{{_tmpD,_tmpD,_tmpD + 10U},(void*)& Cyc_Atts_Dllexport_att_val},{{_tmpE,_tmpE,_tmpE + 23U},(void*)& Cyc_Atts_No_instrument_function_att_val},{{_tmpF,_tmpF,_tmpF + 12U},(void*)& Cyc_Atts_Constructor_att_val},{{_tmp10,_tmp10,_tmp10 + 11U},(void*)& Cyc_Atts_Destructor_att_val},{{_tmp11,_tmp11,_tmp11 + 22U},(void*)& Cyc_Atts_No_check_memory_usage_att_val},{{_tmp12,_tmp12,_tmp12 + 5U},(void*)& Cyc_Atts_Pure_att_val},{{_tmp13,_tmp13,_tmp13 + 14U},(void*)& Cyc_Atts_Always_inline_att_val},{{_tmp14,_tmp14,_tmp14 + 9U},(void*)& Cyc_Atts_No_throw_att_val}};
 # 77
-if((((_get_fat_size(s,sizeof(char))> 4U &&(int)((const char*)s.curr)[0]== (int)'_')&&(int)((const char*)s.curr)[1]== (int)'_')&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 2U)))== (int)'_')&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 3U)))== (int)'_')
+if((((_get_fat_size(s,sizeof(char))> 4U &&(int)((const char*)s.curr)[0]== 95)&&(int)((const char*)s.curr)[1]== 95)&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 2U)))== 95)&&(int)*((const char*)_check_fat_subscript(s,sizeof(char),(int)(_get_fat_size(s,sizeof(char))- 3U)))== 95)
 # 79
-s=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,2,_get_fat_size(s,sizeof(char))- (unsigned)5);{
+s=(struct _fat_ptr)Cyc_substring((struct _fat_ptr)s,2,_get_fat_size(s,sizeof(char))- 5U);{
 int i=0;
 for(1;(unsigned)i < 19U;++ i){
-if(Cyc_strcmp((struct _fat_ptr)s,(struct _fat_ptr)(*((struct _tuple11*)_check_known_subscript_notnull(att_map,19U,sizeof(struct _tuple11),i))).f1)== 0)
+if(Cyc_strcmp((struct _fat_ptr)s,(struct _fat_ptr)(att_map[i]).f1)== 0)
 return(att_map[i]).f2;}
 return Cyc_Atts_bad_attribute(loc);}}
 # 87
@@ -540,9 +540,9 @@ void*Cyc_Atts_parse_format_att(unsigned loc,unsigned s2loc,struct _fat_ptr s1,st
 if(!(({struct _fat_ptr _tmpFF=(struct _fat_ptr)s1;Cyc_zstrcmp(_tmpFF,({const char*_tmp39="format";_tag_fat(_tmp39,sizeof(char),7U);}));})== 0)&& !(({struct _fat_ptr _tmpFE=(struct _fat_ptr)s1;Cyc_zstrcmp(_tmpFE,({const char*_tmp3A="__format__";_tag_fat(_tmp3A,sizeof(char),11U);}));})== 0))
 return Cyc_Atts_bad_attribute(loc);
 if(({struct _fat_ptr _tmp101=(struct _fat_ptr)s2;Cyc_zstrcmp(_tmp101,({const char*_tmp3B="printf";_tag_fat(_tmp3B,sizeof(char),7U);}));})== 0 ||({struct _fat_ptr _tmp100=(struct _fat_ptr)s2;Cyc_zstrcmp(_tmp100,({const char*_tmp3C="__printf__";_tag_fat(_tmp3C,sizeof(char),11U);}));})== 0)
-return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_tmp3D=_cycalloc(sizeof(*_tmp3D));_tmp3D->tag=19,_tmp3D->f1=Cyc_Absyn_Printf_ft,_tmp3D->f2=(int)u1,_tmp3D->f3=(int)u2;_tmp3D;});
+return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_tmp3D=_cycalloc(sizeof(*_tmp3D));_tmp3D->tag=19,_tmp3D->f1=0U,_tmp3D->f2=(int)u1,_tmp3D->f3=(int)u2;_tmp3D;});
 if(({struct _fat_ptr _tmp103=(struct _fat_ptr)s2;Cyc_zstrcmp(_tmp103,({const char*_tmp3E="scanf";_tag_fat(_tmp3E,sizeof(char),6U);}));})== 0 ||({struct _fat_ptr _tmp102=(struct _fat_ptr)s2;Cyc_zstrcmp(_tmp102,({const char*_tmp3F="__scanf__";_tag_fat(_tmp3F,sizeof(char),10U);}));})== 0)
-return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_tmp40=_cycalloc(sizeof(*_tmp40));_tmp40->tag=19,_tmp40->f1=Cyc_Absyn_Scanf_ft,_tmp40->f2=(int)u1,_tmp40->f3=(int)u2;_tmp40;});
+return(void*)({struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*_tmp40=_cycalloc(sizeof(*_tmp40));_tmp40->tag=19,_tmp40->f1=1U,_tmp40->f2=(int)u1,_tmp40->f3=(int)u2;_tmp40;});
 ({void*_tmp41=0U;({unsigned _tmp105=loc;struct _fat_ptr _tmp104=({const char*_tmp42="unrecognized format type";_tag_fat(_tmp42,sizeof(char),25U);});Cyc_Warn_err(_tmp105,_tmp104,_tag_fat(_tmp41,sizeof(void*),0));});});
 return(void*)& Cyc_Atts_Cdecl_att_val;}
 # 144
@@ -707,7 +707,7 @@ _tmp93=i1;_tmp94=i2;goto _LL4;}}else{goto _LLB;}case 20: if(*((int*)_tmp91.f2)==
 return Cyc_Core_intcmp(i1,i2);}}else{goto _LLB;}case 6: if(*((int*)_tmp91.f2)== 6){_tmp9A=((struct Cyc_Absyn_Aligned_att_Absyn_Attribute_struct*)_tmp91.f1)->f1;_tmp9B=((struct Cyc_Absyn_Aligned_att_Absyn_Attribute_struct*)_tmp91.f2)->f1;{struct Cyc_Absyn_Exp*e1=_tmp9A;struct Cyc_Absyn_Exp*e2=_tmp9B;
 # 322
 if(e1 == e2)return 0;
-if(e1 == 0)return - 1;
+if(e1 == 0)return -1;
 if(e2 == 0)return 1;
 return Cyc_Evexp_exp_cmp(e1,e2);}}else{goto _LLB;}case 8: if(*((int*)_tmp91.f2)== 8){_tmp98=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp91.f1)->f1;_tmp99=((struct Cyc_Absyn_Section_att_Absyn_Attribute_struct*)_tmp91.f2)->f1;{struct _fat_ptr s1=_tmp98;struct _fat_ptr s2=_tmp99;
 return Cyc_strcmp((struct _fat_ptr)s1,(struct _fat_ptr)s2);}}else{goto _LLB;}case 19: if(*((int*)_tmp91.f2)== 19){_tmp92=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f1)->f1;_tmp93=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f1)->f2;_tmp94=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f1)->f3;_tmp95=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f2)->f1;_tmp96=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f2)->f2;_tmp97=((struct Cyc_Absyn_Format_att_Absyn_Attribute_struct*)_tmp91.f2)->f3;{enum Cyc_Absyn_Format_Type ft1=_tmp92;int i1=_tmp93;int j1=_tmp94;enum Cyc_Absyn_Format_Type ft2=_tmp95;int i2=_tmp96;int j2=_tmp97;
