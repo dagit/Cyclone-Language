@@ -200,7 +200,7 @@ struct _tagged_string ntCsl_to_ntsl(Cstring *ntCsl) {
     exit(1);
   }
   result.curr = result.base;
-  result.last_plus_one = result.base + numstrs+1;
+  result.last_plus_one = (char*)(((string_t*)result.base) + numstrs+1);
   for (i = 0; i <= numstrs; i++)
     ((string_t*)result.base)[i] = Cstring_to_string(ntCsl[i]);
   return result;

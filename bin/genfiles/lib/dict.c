@@ -1,6 +1,6 @@
  struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
 Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
-int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
+int fds_bits[ 8u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
 void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_string
