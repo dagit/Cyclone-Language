@@ -56,7 +56,9 @@ size_t GC_size(void *x) {
 }
 
 size_t GC_get_heap_size() {
-  return mALLINFo().arena;
+/*   return mALLINFo().arena; */
+/*   return mALLINFo().uordblks; */
+  return mALLINFo().usmblks;
 }
 
 size_t GC_get_free_bytes() {
