@@ -106,6 +106,14 @@ bool is_integral_type(type_t t) {
   }
 }
 
+bool is_signed_type(type_t t) {
+  switch (compress(t)) {
+  case &AppType(&IntCon(Signed,_),_): return true;
+  case &AppType(&FloatCon(_)): return true;
+  default: return false;
+  }
+}
+
 bool is_arithmetic_type(type_t t) {
   return is_integral_type(t) || is_any_float_type(t);
 }

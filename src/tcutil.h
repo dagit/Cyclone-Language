@@ -44,6 +44,7 @@ extern bool is_any_int_type(type_t);    // char, short, int, etc.
 extern bool is_any_float_type(type_t);  // any size or sign
 extern bool is_integral_type(type_t);   // any_int or tag_t or enum
 extern bool is_arithmetic_type(type_t); // integral or any_float
+extern bool is_signed_type(type_t);     // signed
 extern bool is_function_type(type_t t); // function type
 extern bool is_pointer_type(type_t t);  // pointer type
 extern bool is_array_type(type_t t);    // array type
