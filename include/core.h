@@ -165,7 +165,7 @@ extern region_t<`U> unique_region;
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
 
-extern void ufree(`a::TA ?`U ptr);
+extern void ufree(`a::TA ?`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
 
 extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);

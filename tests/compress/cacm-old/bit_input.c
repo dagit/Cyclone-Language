@@ -4,7 +4,8 @@
 
 
 /* THE BIT BUFFER. */
-
+static int bits_to_go;
+static int buffer;
 
 /* INITIALIZE BIT INPUT. */
 

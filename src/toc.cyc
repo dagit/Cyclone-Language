@@ -633,6 +633,7 @@ static type_t typ_to_c(type_t t) {
       case &Noreturn_att: 
       case &Const_att: 
       case &Format_att(_,_,_): continue;
+      case &Noliveunique_att(_): continue; // correct: a Cyclone addition
       case &Initializes_att(_): continue; // correct: a Cyclone addition
       default: new_atts = new List(atts->hd,new_atts); break;
       }
@@ -1028,9 +1029,6 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
     // warning is unfounded under sizeof as in memcpy
     // Tcutil::warn(e->loc,"unreachable dereference");
     return false;
-  case &CfFlowInfo::HasTagCmps(_):
-    Tcutil::warn(e->loc,"compiler oddity: pointer compared to tag type");
-    return is_nullable(e->topt->v);
   default: toc_impos("need_null_check");
   }
 }
@@ -1042,7 +1040,6 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
   case &CfFlowInfo::IsZero: 
     Tcutil::terr(e->loc,"dereference of NULL pointer"); 
     return NULL;
-  case &CfFlowInfo::HasTagCmps(_):
   case &EmptyAnnot: return NULL;
   default: toc_impos("get_relns");
   }

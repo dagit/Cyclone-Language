@@ -59,20 +59,6 @@ EXTERN_CFFLOW struct Place<`r::R> {
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
-  // NOTE: UniquePlace not currently in use; will finish up later ...
-EXTERN_CFFLOW struct UniquePlace<`r::R> {
-  struct Place<`r> place;
-  List::list_t<List::list_t<int,`r>,`r> path;
-  //this is a path between unique places.  That is, each element in
-  //the path is a list of fields that define the place reached from
-  //there, before doing a dereference.  For example, the difference
-  //between x.hd and x->hd is that we will have x.0 in both cases, but
-  //a path of NULL in the former case, and a path of [[ ]] in the
-  //latter, signifying the dereference.  Likewise, x->tl->hd would
-  //have initial place x.1, and then path [[0]; []].
-};
-typedef struct UniquePlace<`r1> @`r2 unique_place_t<`r1,`r2>;
-
 EXTERN_CFFLOW enum InitLevel { 
   NoneIL, // may not be initialized
   ThisIL, // this is initialized, but things it points to may not be
@@ -108,23 +94,12 @@ EXTERN_CFFLOW struct Reln {
 typedef struct Reln @`r reln_t<`r>;
 typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 
-EXTERN_CFFLOW struct TagCmp {
-  Absyn::primop_t cmp; // for now, MUST be Lt, Lte, or Eq
-  Absyn::type_t   bd;  // IntKind
-};
-typedef struct TagCmp @`r tag_cmp_t<`r>;
-
-  // as with AbsRVal below, HasTagCmps forgets zero-ness which technically
-  // is bad but shouldn't matter in practice.
 @extensible datatype Absyn::AbsynAnnot { 
   EXTERN_CFFLOW IsZero;
   EXTERN_CFFLOW NotZero(relns_t<`H>);
   EXTERN_CFFLOW UnknownZ(relns_t<`H>);
-  EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t<`H>,`H>);
 };
 extern_datacon(Absyn::AbsynAnnot,IsZero);
-extern List::list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2>,
-                                                     List::list_t<tag_cmp_t>);
 
 EXTERN_CFFLOW @tagged union AbsLVal<`r::R> {
   place_t<`r,`r> PlaceL;
@@ -146,14 +121,10 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   UnknownR(initlevel_t); // don't know what the value is
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
   AddressOf(place_t<`r,`r>); // I am a pointer to this place (implies not zero)
-  // TagCmps forgets zero-ness which technically is bad but shouldn't
-  // matter in practice (why would an array index also be used in tests?)
-  // and joins punt to UnknownR/Esc when comparing a TagCmp w/ something else
-  // Can always add zero-ness as another field.
-  TagCmps(List::list_t<tag_cmp_t<`r>,`r>);
   // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
   Aggregate(bool is_union, aggrdict_t<`r>);
+  Consumed(Absyn::exp_t consumer, int iteration, absRval_t<`r> oldvalue);
 };
 
 typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;
@@ -166,19 +137,7 @@ extern bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2);
 typedef Dict::dict_t<place_t<`r,`r>,Position::seg_t,`r> place_set_t<`r>;
 extern place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, bool disjoint);
 
-typedef Dict::dict_t<unique_place_t<`r,`r>,Position::seg_t,`r> uplace_set_t<`r>;
-extern uplace_set_t<`r> union_uplace_set(uplace_set_t<`r> s1, uplace_set_t<`r> s2, bool disjoint);
 
-EXTERN_CFFLOW struct ConsumeInfo<`r::R> {
-  place_set_t<`r> consumed;              // variables consumed by this flow
-  List::list_t<place_t<`r,`r>,`r> may_consume; // variables to possibly consume
-    // INVARIANT: should be sorted at all times!
-};
-typedef struct ConsumeInfo<`r::R> consume_t<`r>;
-
-extern consume_t<`r> and_consume(region_t<`r>, consume_t<`r> c1, consume_t<`r> c2);
-  // checks that the same variables are not consumed
-extern bool consume_approx(consume_t<`r> c1, consume_t<`r> c2);
 // Note: It would be correct to make the domain of the flowdict_t
 //       constant (all roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
@@ -189,11 +148,11 @@ extern bool consume_approx(consume_t<`r> c1, consume_t<`r> c2);
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW @tagged union FlowInfo<`r::R> {
   int BottomFL; // int unused
-  $(flowdict_t<`r>,relns_t<`r>,consume_t<`r>) ReachableFL;
+  $(flowdict_t<`r>,relns_t<`r>) ReachableFL;
 };
 typedef union FlowInfo<`r> flow_t<`r>;
 extern flow_t<`r> BottomFL();
-extern flow_t<`r> ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
+extern flow_t<`r> ReachableFL(flowdict_t<`r>,relns_t<`r>);
 
 EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;
@@ -219,8 +178,10 @@ extern int get_field_index_fs(List::list_t<Absyn::aggrfield_t> fs,
 extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
 
-extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<Absyn::aggrfield_t>, absRval_t<`r>);
+extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<struct Absyn::Aggrfield@>, absRval_t<`r>);
 extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, absRval_t<`r> leafval);
+extern absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t<`r>);
+
 
 extern initlevel_t initlevel(flow_env_t,flowdict_t<`r> d, absRval_t<`r> r);
 extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);
@@ -237,7 +198,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-// #define DEBUG_FLOW
+//#define DEBUG_FLOW
 #define SANITY
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
@@ -266,13 +227,12 @@ extern flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                                    place_set_t<`r> * all_changed, 
                                    place_t<`r,`r> place,
                                    absRval_t<`r> r);
-extern flow_t<`r> join_flow(flow_env_t<`r>,place_set_t<`r>*,flow_t<`r>,flow_t<`r>,bool); 
+extern flow_t<`r> join_flow(flow_env_t<`r>,place_set_t<`r>*,flow_t<`r>,flow_t<`r>); 
 extern $(flow_t<`r>,absRval_t<`r>) 
   join_flow_and_rval(flow_env_t<`r>,
                      place_set_t<`r>* all_changed,
                      $(flow_t<`r>,absRval_t<`r>) pr1,
-                     $(flow_t<`r>,absRval_t<`r>) pr2,
-                     bool);
+                     $(flow_t<`r>,absRval_t<`r>) pr2);
 extern flow_t<`r> after_flow(flow_env_t<`r>,place_set_t<`r>*,
                              flow_t<`r>,flow_t<`r>,
                              place_set_t<`r>,place_set_t<`r>);
@@ -289,16 +249,6 @@ typedef datatype KillRgn @`r killrgn_t<`r::R>;
 
 extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
 
-extern flow_t<`r> consume_unique_rvals(flow_env_t<`r> fenv,Position::seg_t loc,flow_t<`r> f);
-extern void check_unique_rvals(Position::seg_t loc, flow_t<`r> f);
-extern flow_t<`r> readthrough_unique_rvals(Position::seg_t loc,flow_t<`r> f);
-extern flow_t<`r> drop_unique_rvals(Position::seg_t loc,flow_t<`r> f);
-
-extern $(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r>,flow_t<`r> f, bool clear);
-extern flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c, bool may_consume_only);
 extern string_t place_err_string(place_t place);
-
-extern unique_place_t<`r,`r> unique_place_of(region_t<`r> r, Absyn::exp_t e);
-  // calculates the unique place of the unique path [e]
 }
 #endif

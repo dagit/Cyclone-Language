@@ -1,3 +1,4 @@
+typedef enum Bool { false, true } bool;
 
 int f40(int x) {switch (x) {case 1: return 1; default: return 2;}}
 
@@ -8,7 +9,6 @@ int f40(int x) {switch (x) {case 1: return 1; default: return 2;}}
 // int f42(int x) {switch (x) {case 1: return 1; case 2: return 2;}}
 
 void f43($(bool,bool,bool) x) {
-  
   switch (x) {
   case $(true,true,true): 1; break;
   case $(true,true,false): 2; break;
@@ -27,7 +27,7 @@ int f44(char x) {switch (x) {case 'a': return 1; default: return 2;}}
 
 typedef enum Color {Red, Orange, Yellow, Green, Indigo, Violet} color;
 
-int compare_color(color x,color y) {
+int compre_color(color x,color y) {
   switch ($(x,y)) {
   case $(Red,Red): return 0;
   case $(Red,_)  : return -1;
@@ -60,7 +60,7 @@ typedef struct Point *point_opt, @point;
 int f45(point p) {
   switch (p) {
   case &Point{.x=x,.y=y,.z=Yellow}: return 1;
-  case &Point{.x=x,.y=y,.z=z} where (x <= y): return 2; 
+  case &Point{.x=x,.y=y,.z=z} && x <= y: return 2; 
   case &Point{.x=x,.y=y,.z=z}: return 3;
     // default: return 4;
   }
@@ -69,7 +69,7 @@ int f45(point p) {
 int f46(point_opt p) {
   switch (p) {
   case &Point{.x=x,.y=y,.z=Yellow}: return 1;
-  case &Point{.x=x,.y=y,.z=z} where (x <= y): return 2;
+  case &Point{.x=x,.y=y,.z=z} && x <= y: return 2;
   case &Point{.x=x,.y=y,.z=z}: return 3;
   case NULL: return 4;
     // default: return 4;

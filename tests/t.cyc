@@ -1,3 +1,4 @@
+typedef enum Bool {false, true} bool;
 int x1 = 3;
 //int x2 = true; // int != bool
 int x3 = 4+3;
@@ -36,9 +37,9 @@ void f14(int x) {
 enum e1 { E1,E2 };
 enum e1 x12 = E2; // Note E2 is a constant expression
 enum e1 f19() { return E1; }
-enum e2 { E3(int), E4, E5(int,int) };
-enum e2 f20() {
-  if (true) return E5(6,7); else if (true) return E4; else return E3(-1);
+datatype e2 { E3(int), E4, E5(int,int) };
+datatype e2@ f20() {
+  if (true) return new E5(6,7); else if (true) return new E4; else return new E3(-1);
 }
 
 struct s1 { int xx; char yy; };
@@ -111,12 +112,12 @@ foo tdef1(foo x) {
 
 typedef $(int,int)@ pair;
 pair tdef2(int i) {
-  return &$(i,i);
+  return new $(i,i);
 }
 
 typedef $(`a,`b)@ ppair<`a,`b>;
 ppair<int,int> tdef3(foo i) {
-  return &$(i,i);
+  return new $(i,i);
 }
 
 //ppair<int,char> tdef3(foo i) {  // type char is not a boxed type

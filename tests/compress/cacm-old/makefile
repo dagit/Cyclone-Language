@@ -4,12 +4,12 @@ all:			adaptive_encode adaptive_decode
 
 adaptive_encode:	encode.o adaptive_model.o bit_output.o \
 			  arithmetic_encode.o
-			cc encode.o adaptive_model.o bit_output.o \
+			gcc encode.o adaptive_model.o bit_output.o \
 			  arithmetic_encode.o -o adaptive_encode
 
 adaptive_decode:	decode.o adaptive_model.o bit_input.o \
 			  arithmetic_decode.o
-			cc decode.o adaptive_model.o bit_input.o \
+			gcc decode.o adaptive_model.o bit_input.o \
 			  arithmetic_decode.o -o adaptive_decode
 
 encode.o:		encode.c model.h

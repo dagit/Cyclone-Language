@@ -1479,6 +1479,8 @@ attribute:
       a = new Aligned_att(n);
     } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) {
       a = new Initializes_att(n);
+    } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
+      a = new Noliveunique_att(n);
     } else {
       err("unrecognized attribute",LOC(@1,@1));
       a = &Cdecl_att_val;

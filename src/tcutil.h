@@ -248,7 +248,6 @@ extern bool is_noalias_pointer(type_t t);
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate.  The
 // region is used for allocating temporary stuff.
-#define NO_POINTER_PATHS
 extern bool is_noalias_path(region_t<`r>, exp_t e);
 
 // returns true if this expression is an aggregate that contains

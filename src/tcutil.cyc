@@ -3542,7 +3542,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       b->hd->identity = new_tvar_id();
       cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
       switch (compress_kb(b->hd->kind)) {
-      case &Eq_kb(MemKind):
+      case &Eq_kb(&Kind{.kind = MemKind,...}):
 	terr(loc,"function attempts to abstract Mem type variable %s",
 	     *b->hd->name); break;
       default: break;
@@ -4508,121 +4508,36 @@ static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
+static bool is_noalias_path_aux(region_t<`r> r, exp_t e) {
   switch (e->r) {
-  case &Increment_e(_,_):
-  case &And_e(_,_):
-  case &Or_e(_,_):
-  case &Throw_e(_):
-  case &Address_e(_): // address of a `U pointer is not unique
-  case &Sizeoftyp_e(_):
-  case &Sizeofexp_e(_):
-  case &Offsetof_e(_,_):
-  case &CompoundLit_e(_,_):
-  case &Comprehension_e(_,_,_,_):
-  case &Array_e(_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_):
-  case &Swap_e(_,_): // has void type
-  case &Var_e(_,&Global_b(_)): // via a global is never a unique path
-  case &Primop_e(_,_): return false;
-#ifdef NO_POINTER_PATHS
-  case &Deref_e(_):
-  case &AggrArrow_e(...): return false;
-#else
-  case &Deref_e(e1):
-    return (ignore_leaf || is_noalias_pointer_or_aggr(r,e->topt->v)) && 
-           is_noalias_path_aux(r, e1, false);
-  case &AggrArrow_e(e1,f,...):
-    switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t2,_,_)): 
-      return (ignore_leaf || is_noalias_field(r,t2,f)) &&
-	     is_noalias_path_aux(r, e1,false);
-    default: Tcutil::impos("is_noalias_path_aux: -> on non-pointer");
-    }
-    return false;
-#endif
-  // Flat aggregates are always directly available, so are considered part
-  // of a unique path if they contain unique pointers
-  case &AggrMember_e(e1,f,...):
-    return (ignore_leaf || is_noalias_field(r,e1->topt->v,f)) &&
-      is_noalias_path_aux(r, e1,false);
+  case &Var_e(_,&Global_b(...)): return false;
+  case &AggrArrow_e(e1,...): fallthru(e1);
+  case &Deref_e(e1): 
+    return is_noalias_pointer(e1->topt->v) && is_noalias_path_aux(r,e1);
+  case &AggrMember_e(e1,f,...): return is_noalias_path_aux(r,e1);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_)):
-    // FIX: dynamic arrays not allowed!  Must know size to track it
-#ifdef NO_POINTER_PATHS
-      return false;
-#else
-      return (ignore_leaf || is_noalias_pointer_or_aggr(r, t)) &&
-	is_noalias_path_aux(r, e1,false);
-#endif
-    case &TupleType(ts): 
-      let $(i,known) = Evexp::eval_const_uint_exp(e2);
-      if(!known) Tcutil::impos("is_noalias_path_aux: non-constant subscript");
-      try {
-	let t = (*List::nth(ts,i))[1];
-	return (ignore_leaf || is_noalias_pointer_or_aggr(r, t)) &&
-	  is_noalias_path_aux(r, e1,false);
-      } catch { case &Nth:
-	return Tcutil::impos("is_noalias_path_aux: out-of-bounds subscript");
-      }
-    default: Tcutil::impos("is_noalias_path_aux: subscript on non-pointer/tuple");
+    case &TupleType(...): return is_noalias_path_aux(r,e1);
+    default: return false;
     }
-  case &Datatype_e(_,_,_):
-  case &Tuple_e(_):  
-  case &Aggregate_e(_,_,_,_):
-  case &AnonStruct_e(_,_):
-  case &Const_e(_):
-  case &Malloc_e(_):
-  case &New_e(_,_):
-  case &Var_e(_,&Local_b(_)):
-  case &Var_e(_,&Pat_b(_)):
-  case &Var_e(_,&Param_b(_)):
-    let res = ignore_leaf || is_noalias_pointer_or_aggr(r,e->topt->v);
-//     fprintf(stderr,"is_noalias_path checking |%s|, typ=|%s|, res=%s\n",
-// 	    Absynpp::exp2string(e), Absynpp::typ2string(e->topt->v),
-// 	    res ? "true" : "false");
-    return res;
-  case &Conditional_e(_,e1,_): fallthru(e1);
-  case &SeqExp_e(_,e1): fallthru(e1);
-  case &AssignOp_e(e1,_,_):
-    return is_noalias_path_aux(r,e1,ignore_leaf);
-  case &FnCall_e(e1,_,_):
-    switch (compress(e1->topt->v)) {
-    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-      return ignore_leaf || is_noalias_pointer_or_aggr(r,rt);
-    case &PointerType(PtrInfo(t,_,_)):
-      switch (compress(t)) {
-      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-	return ignore_leaf || is_noalias_pointer_or_aggr(r,rt);
-      default: break;
-      }
-      fallthru;
-    default: Tcutil::impos("Fncall has non function type %s",
-			   typ2string(e1->topt->v));
-    }
-  case &Cast_e(t,e1,_,_): 
-    return is_noalias_pointer_or_aggr(r,t) && is_noalias_path_aux(r,e1,true);
+  case &Conditional_e(_,e1,e2): 
+    return is_noalias_path_aux(r,e1) && is_noalias_path_aux(r,e2);
+  case &SeqExp_e(_,e2): fallthru(e2);
+  case &Cast_e(_,e2,...): return is_noalias_path_aux(r,e2);
   case &StmtExp_e(s):
-    // keep looking for the final expression of the statement,
-    //   and recurse into that to find the unique path
     while(true) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_noalias_path_aux(r,e,ignore_leaf);
+      case &Exp_s(e): return is_noalias_path_aux(r,e);
       default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
-  default: 
-    return false; // error, but some other part of program will deal
-//     Tcutil::impos("Called is_noalias_path_aux with bogus exp |%s|\n",
-// 		  exp2string(e));
+  default: return true;
   }
 }
 bool is_noalias_path(region_t<`r> r, exp_t e) {
-  return is_noalias_path_aux(r,e,false);
+  return is_noalias_path_aux(r,e);
 }
 
 // used by address of.  

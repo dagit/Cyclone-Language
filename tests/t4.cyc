@@ -25,12 +25,12 @@ list2<`a> foo2<`a>(list<`a> x) {
   return (list2<`a>)y;
 }
 
-`a fst<`a>($(`a)* x) {
-  return x[0];
+`a fst($(`a)* x) {
+  return (*x)[0];
 }
 
-`b snd<`a,`b>($(`a,`b)* y) {
-  return y[1];
+`b snd($(`a,`b)* y) {
+  return (*y)[1];
 }
 
 list<`a> tail<`a>(list<`a> x) {

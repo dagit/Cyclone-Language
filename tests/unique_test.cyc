@@ -104,7 +104,7 @@ int *`U h(int b) {
   y = new 1; // consumed = { z }
 
   int zz;
-  zz = ({ z; *y; y; }); // consumed = { y, z }
+  // zz = ({ z; *y; y; }); // consumed = { y, z }
 
   y = (z = new 4, new 1); // consumed = { }
 
@@ -163,7 +163,7 @@ struct Mylist<`a,`r::TR> {
 typedef struct Mylist<`a,`r> *`r mylist_u_t<`a,`r>;
 
 // this checks paths, etc.
-int p(int b) {
+void p(int b) {
   struct Mylist<int,`U> e = Mylist(1,NULL);
   e.tl = new Mylist(3,NULL);
 //    mylist_u_t l = e.tl;

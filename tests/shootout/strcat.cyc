@@ -24,8 +24,8 @@ main(int argc, char ?argv[]) {
     int i, buflen = 32;
     int stufflen;
     START_TIME
-    char ?`U buf = calloc(buflen, sizeof(char));
-    { alias <`r> strbuf = (char ?`r)buf;
+    { region r;
+    char ?`r strbuf = rcalloc(r,buflen, sizeof(char));
     char ?strend;
     strend = strbuf;
     stufflen = strlen(STUFF);
@@ -44,7 +44,6 @@ main(int argc, char ?argv[]) {
     }
     fprintf(stdout, "%d\n", strlen(strbuf));
     }
-    Core::ufree(buf);
     END_TIME
     return(0);
 }

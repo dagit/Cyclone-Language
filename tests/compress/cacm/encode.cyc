@@ -1,6 +1,7 @@
 /* MAIN PROGRAM FOR ENCODING. */
 
 #include <stdio.h>
+#include <core.h>
 #include "model.h"
 
 void start_model();
@@ -11,7 +12,7 @@ void done_outputing_bits();
 void encode_symbol(int symbol, int cum_freq[]);
 void update_model(int sym);
 
-void main()
+int main()
 {   start_model();				/* Set up other modules.    */
     start_outputing_bits();
     start_encoding();

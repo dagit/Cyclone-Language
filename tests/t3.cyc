@@ -1,3 +1,4 @@
+#include <stdio.h>
 // struct cons<`a>;
 typedef struct cons<`a> {`a hd; struct cons<`a>* tl;} *list<`a>;
 
@@ -9,22 +10,22 @@ extern struct cons<`c> {`c hd; list<`c> tl;};
 extern struct cons<`a>;
 struct cons<`c>;
 
-enum exp_node<`prim>;
-typedef enum exp_node<`prim> exp<`prim>;
-enum exp_node<`prim> { 
+datatype exp_node<`prim>;
+typedef datatype exp_node<`prim> @exp<`prim>;
+datatype exp_node<`prim> { 
   Prim(`prim), 
   App(exp<`prim>,exp<`prim>), 
-  Lam(char[?],exp<`prim>)
+  Lam(char ?,exp<`prim>)
 };
-enum exp_node<`a> { 
+datatype exp_node<`a> { 
   Prim(`a), 
   App(exp<`a>,exp<`a>), 
-  Lam(char[?],exp<`a>)
+  Lam(char?,exp<`a>)
 };
-extern enum exp_node<`a> { 
+extern datatype exp_node<`a> { 
   Prim(`a), 
   App(exp<`a>,exp<`a>), 
-  Lam(char[?],exp<`a>)
+  Lam(char?,exp<`a>)
 };
 
 extern unsigned int length<`a>(list<`a> x);
@@ -49,22 +50,22 @@ int foo1(int x) {
 
 int foo2(int x, int y) {
   switch ($(x,y)) {
-  case $(0,y) where y > 0: return 1;
-  case $(0,y) where y == 0: return 0;
+  case $(0,y) && y > 0: return 1;
+  case $(0,y) && y == 0: return 0;
   default: break;
   }
   y = sizeof(int);
   // y = sizeof(int[]);
   // y = sizeof(int[sizeof(3)]);
-  y = sizeof(int[?]);
+  y = sizeof(int?);
   y = sizeof(int@);
   return y;
 }
 
 int foo3() {
 
-  int x[?] = {1,2,3,4,};
-  char s[?] = aprintf("%s %d %c","hello",3,'a');
+  int x[4] = {1,2,3,4,};
+  char ?s = aprintf("%s %d %c","hello",3,'a');
 
   printf("hello\n");
   printf("%s %d %c","hello",3,'a');
@@ -72,7 +73,7 @@ int foo3() {
   return x[0];
 }
 
-Int foo4(Int x) {
+int foo4(int x) {
   x = x + 1;
   return x;
 }

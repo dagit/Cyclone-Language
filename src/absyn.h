@@ -452,6 +452,7 @@ namespace Absyn {
                int,   // format string arg
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
+    Noliveunique_att(int); // param that has no unique pointers in it
     Pure_att;
     Mode_att(string_t);
   };
