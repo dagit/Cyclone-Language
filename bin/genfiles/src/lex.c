@@ -884,7 +884,7 @@ Cyc_Int_tok_struct* _temp209=( struct Cyc_Int_tok_struct*) GC_malloc( sizeof(
 struct Cyc_Int_tok_struct)); _temp209[ 0]=({ struct Cyc_Int_tok_struct _temp210;
 _temp210.tag= Cyc_Int_tok; _temp210.f1= Cyc_Lex_token_int; _temp210;}); _temp209;});
 break; case 347: _LL208: Cyc_yylval=( void*)({ struct Cyc_Char_tok_struct*
-_temp212=( struct Cyc_Char_tok_struct*) GC_malloc( sizeof( struct Cyc_Char_tok_struct));
+_temp212=( struct Cyc_Char_tok_struct*) GC_malloc_atomic( sizeof( struct Cyc_Char_tok_struct));
 _temp212[ 0]=({ struct Cyc_Char_tok_struct _temp213; _temp213.tag= Cyc_Char_tok;
 _temp213.f1= Cyc_Lex_token_char; _temp213;}); _temp212;}); break; case 348:
 _LL211: Cyc_yylval=( void*)({ struct Cyc_String_tok_struct* _temp215=( struct

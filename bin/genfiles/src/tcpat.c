@@ -1018,7 +1018,7 @@ struct Cyc_Tcpat_Con_s* Cyc_Tcpat_ptr_con=& Cyc_Tcpat_ptr_con0; static struct
 Cyc_Tcpat_Con_s* Cyc_Tcpat_int_con( int i){ return({ struct Cyc_Tcpat_Con_s*
 _temp557=( struct Cyc_Tcpat_Con_s*) GC_malloc( sizeof( struct Cyc_Tcpat_Con_s));
 _temp557->name=( void*)(( void*)({ struct Cyc_Tcpat_Int_v_struct* _temp558=(
-struct Cyc_Tcpat_Int_v_struct*) GC_malloc( sizeof( struct Cyc_Tcpat_Int_v_struct));
+struct Cyc_Tcpat_Int_v_struct*) GC_malloc_atomic( sizeof( struct Cyc_Tcpat_Int_v_struct));
 _temp558[ 0]=({ struct Cyc_Tcpat_Int_v_struct _temp559; _temp559.tag= Cyc_Tcpat_Int_v;
 _temp559.f1= i; _temp559;}); _temp558;})); _temp557->arity= 0; _temp557->span= 0;
 _temp557;});} static struct Cyc_Tcpat_Con_s* Cyc_Tcpat_float_con( struct
@@ -1031,16 +1031,16 @@ _temp560->arity= 0; _temp560->span= 0; _temp560;});} static struct Cyc_Tcpat_Con
 Cyc_Tcpat_char_con( unsigned char c){ return({ struct Cyc_Tcpat_Con_s* _temp563=(
 struct Cyc_Tcpat_Con_s*) GC_malloc( sizeof( struct Cyc_Tcpat_Con_s)); _temp563->name=(
 void*)(( void*)({ struct Cyc_Tcpat_Int_v_struct* _temp565=( struct Cyc_Tcpat_Int_v_struct*)
-GC_malloc( sizeof( struct Cyc_Tcpat_Int_v_struct)); _temp565[ 0]=({ struct Cyc_Tcpat_Int_v_struct
-_temp566; _temp566.tag= Cyc_Tcpat_Int_v; _temp566.f1=( int) c; _temp566;});
-_temp565;})); _temp563->arity= 0; _temp563->span=({ struct Cyc_Core_Opt*
-_temp564=( struct Cyc_Core_Opt*) GC_malloc_atomic( sizeof( struct Cyc_Core_Opt));
-_temp564->v=( void*) 256; _temp564;}); _temp563;});} static struct Cyc_Tcpat_Con_s*
-Cyc_Tcpat_tuple_con( int i){ return({ struct Cyc_Tcpat_Con_s* _temp567=( struct
-Cyc_Tcpat_Con_s*) GC_malloc( sizeof( struct Cyc_Tcpat_Con_s)); _temp567->name=(
-void*)(( void*)& Cyc_Tcpat_tuple_name_value); _temp567->arity= i; _temp567->span=
-Cyc_Tcpat_one_opt_ptr; _temp567;});} static void* Cyc_Tcpat_null_pat(){ return(
-void*)({ struct Cyc_Tcpat_Con_struct* _temp568=( struct Cyc_Tcpat_Con_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_Tcpat_Int_v_struct)); _temp565[ 0]=({
+struct Cyc_Tcpat_Int_v_struct _temp566; _temp566.tag= Cyc_Tcpat_Int_v; _temp566.f1=(
+int) c; _temp566;}); _temp565;})); _temp563->arity= 0; _temp563->span=({ struct
+Cyc_Core_Opt* _temp564=( struct Cyc_Core_Opt*) GC_malloc_atomic( sizeof( struct
+Cyc_Core_Opt)); _temp564->v=( void*) 256; _temp564;}); _temp563;});} static
+struct Cyc_Tcpat_Con_s* Cyc_Tcpat_tuple_con( int i){ return({ struct Cyc_Tcpat_Con_s*
+_temp567=( struct Cyc_Tcpat_Con_s*) GC_malloc( sizeof( struct Cyc_Tcpat_Con_s));
+_temp567->name=( void*)(( void*)& Cyc_Tcpat_tuple_name_value); _temp567->arity=
+i; _temp567->span= Cyc_Tcpat_one_opt_ptr; _temp567;});} static void* Cyc_Tcpat_null_pat(){
+return( void*)({ struct Cyc_Tcpat_Con_struct* _temp568=( struct Cyc_Tcpat_Con_struct*)
 GC_malloc( sizeof( struct Cyc_Tcpat_Con_struct)); _temp568[ 0]=({ struct Cyc_Tcpat_Con_struct
 _temp569; _temp569.tag= Cyc_Tcpat_Con; _temp569.f1= Cyc_Tcpat_null_con; _temp569.f2=
 0; _temp569;}); _temp568;});} static void* Cyc_Tcpat_int_pat( int i){ return(

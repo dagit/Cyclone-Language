@@ -34,6 +34,7 @@ static struct T<`a::B,`b::B, `r::R> {
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
 };
 typedef struct T<`a,`b,`r> *`r tree<`a,`b,`r>;
+typedef struct T<`a,`b,`r> @`r Tree_t<`a,`b,`r>;
 
 abstract struct Dict<`a,`b,`r::R,`e::E> {
   int (@rel)(`a,`a;`e);
@@ -407,37 +408,26 @@ gdict_t<`a,`b,`r2,`e> union_two(`b f(`b,`b), gdict_t<`a,`b,`r1,`e> d1,
   return Dict::fold_c(union_f, f, d1, d2);
 }
 
-static void intersect_f($(`b (@)(`b,`b), gdict_t<`a,`b,`r1,`e>,
-			  gdict_t<`a,`b,`r2,`e>) @ `r trip, `a a, `b b) {
-  let &$(f, d1, *d2) = trip;
-  if (Dict::member(d1,a))
-    *d2 = Dict::insert(*d2,a,f(Dict::lookup(d1,a),b));
-}
-
-// Note: would be faster to iterate over the smaller dict.
-gdict_t<`a,`b,`r1,`e> intersect(`b (@f)(`b,`b), gdict_t<`a,`b,`r1,`e> d1, 
-                                gdict_t<`a,`b,`r1,`e> d2) {
-  if (d1 == d2) return d1;
-  let env = $(f, d1, Dict::rempty(d1->r,d1->rel));
-  Dict::iter_c(intersect_f, &env, d2);
-  return env[2];
-}
-
-static void intersect_c_f($(`b (@)(`c,`b,`b), `c, gdict_t<`a,`b,`r1,`e> d1,
-			    gdict_t<`a,`b,`r2,`e> d2) @ `r quad, `a a, `b b) {
-  let &$(f, env, d1, *d2) = quad;
-  if (Dict::member(d1,a))
-    *d2 = Dict::insert(*d2,a,f(env,Dict::lookup(d1,a),b));
-}
-    
-gdict_t<`a,`b,`r1,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
-                                  gdict_t<`a,`b,`r1,`e> d1, 
-                                  gdict_t<`a,`b,`r1,`e> d2) {
-  if (d1 == d2) return d1;
-  // NB: env2 is stack allocated!
-  let env2 = $(f, env, d1, Dict::rempty(d1->r,d1->rel));
-  Dict::iter_c(intersect_c_f, &env2, d2);
-  return env2[3];
+gdict_t<`a,`b,`r,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
+				 gdict_t<`a,`b,`r,`e> d1, 
+				 gdict_t<`a,`b,`r,`e> d2) {
+  if (d1 == d2 || d2->t == null) return d2;
+  // resizing array used as queue (array means fewer mallocs)
+  // could region allocate, but it's probably too small to want to
+  Tree_t<`a,`b,`r> ? queue = new {for i < 16 : (Tree_t<`a,`b,`r>)d2->t};
+  int ind = 0;
+  let ans_tree = null;
+  while(ind != -1) {
+    let &T(_,l,r,$(k,v)) = queue[ind--];
+    if(ind + 2 >= queue.size)
+      queue = new {for i < queue.size*2 : 
+		   i < queue.size ? queue[i] : (Tree_t<`a,`b,`r>)d2->t};
+    if(l != null) queue[++ind] = (Tree_t<`a,`b,`r>)l;
+    if(r != null) queue[++ind] = (Tree_t<`a,`b,`r>)r;
+    if(Dict::member(d1,k))
+      ans_tree = ins(d2->r,d2->rel,$(k,f(env,Dict::lookup(d1,k),v)),ans_tree);
+  }
+  return rnew(d2->r) Dict(d2->rel, d2->r, ans_tree);
 }
 
 static List::glist_t<$(`a,`b)@`r,`r> 

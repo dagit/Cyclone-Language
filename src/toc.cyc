@@ -395,10 +395,6 @@ static bool atomic_typ(type_t t) {
   case DoubleType:    return true;
   case &FnType(_):    return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
-  case &TupleType(tqs):
-    for (; tqs != null; tqs = tqs->tl)
-      if (!atomic_typ((*tqs->hd)[1])) return false;
-    return true;
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
@@ -408,14 +404,20 @@ static bool atomic_typ(type_t t) {
     for(let fs = (*sdp)->fields->v; fs != null; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
-  case &TunionType(_):     return false;
   case &AnonStructType(fs): fallthru(fs);
   case &AnonUnionType(fs):
     for (; fs != null; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
-    return tuf->typs == null;
+    fallthru(tuf->typs);
+  case &TupleType(tqs):
+    for (; tqs != null; tqs = tqs->tl)
+      if (!atomic_typ((*tqs->hd)[1])) return false;
+    return true;
+    // FIX: can do better if all variants are fieldless (but then they could
+    //      have used an enum)
+  case &TunionType(_):    return false;
     // FIX: could make this true now since we only allow bits in unions,
     // but it would be an evil bug to track down if we had to deal with this.
   case &UnionType(_,_,_): return false; 
@@ -1959,9 +1961,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,cur_e);
 	if (is_void_star(field_typ))
 	  cur_e = cast_exp(field_typ,cur_e,DL);
-	dles = new{List(new{$(null,cur_e)},dles)};
+	dles = new List(new $(null,cur_e),dles);
       }
-      dles = new{List(new{$(null,tag_exp)},imp_rev(dles))};
+      dles = new List(new $(null,tag_exp),imp_rev(dles));
       e->r = unresolvedmem_exp(new Opt(collapse_qvar_tag(qv,"_struct")),
                                dles,DL)->r;
     } else {

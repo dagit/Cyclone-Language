@@ -544,8 +544,8 @@ Cyc_CfFlowInfo_StructF_struct _temp85; _temp85.tag= Cyc_CfFlowInfo_StructF;
 _temp85.f1= _temp76; _temp85;}); _temp84;})); goto _LL55; _LL65: { unsigned int
 _temp86= Cyc_Evexp_eval_const_uint_exp( _temp80); absop= Cyc_CfAbsexp_mkMemberOp(
 absop,( void*)({ struct Cyc_CfFlowInfo_TupleF_struct* _temp87=( struct Cyc_CfFlowInfo_TupleF_struct*)
-GC_malloc( sizeof( struct Cyc_CfFlowInfo_TupleF_struct)); _temp87[ 0]=({ struct
-Cyc_CfFlowInfo_TupleF_struct _temp88; _temp88.tag= Cyc_CfFlowInfo_TupleF;
+GC_malloc_atomic( sizeof( struct Cyc_CfFlowInfo_TupleF_struct)); _temp87[ 0]=({
+struct Cyc_CfFlowInfo_TupleF_struct _temp88; _temp88.tag= Cyc_CfFlowInfo_TupleF;
 _temp88.f1=( int) _temp86; _temp88;}); _temp87;})); goto _LL55;} _LL67:( int)
 _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp89=( struct Cyc_Core_Impossible_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp89[ 0]=({ struct
@@ -1043,7 +1043,7 @@ _temp693->tl= _temp692; _temp693;});} else{ _temp692=({ struct Cyc_List_List*
 _temp694=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp694->hd=( void*) Cyc_CfAbsexp_mkMemberOp(( void*)(( struct Cyc_List_List*)
 _check_null( ls))->hd,( void*)({ struct Cyc_CfFlowInfo_TupleF_struct* _temp695=(
-struct Cyc_CfFlowInfo_TupleF_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_TupleF_struct));
+struct Cyc_CfFlowInfo_TupleF_struct*) GC_malloc_atomic( sizeof( struct Cyc_CfFlowInfo_TupleF_struct));
 _temp695[ 0]=({ struct Cyc_CfFlowInfo_TupleF_struct _temp696; _temp696.tag= Cyc_CfFlowInfo_TupleF;
 _temp696.f1= j; _temp696;}); _temp695;})); _temp694->tl= _temp692; _temp694;});}}}{
 struct Cyc_NewControlFlow_AbsSyn _temp697= Cyc_NewControlFlow_abstract_exp( Cyc_NewControlFlow_change_lhs(

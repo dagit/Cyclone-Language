@@ -33,6 +33,7 @@ endif
 LC_FLAG =
 
 CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
+#CYC_FLAGS := -I. -B. -g -pp -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
 #CYC_FLAGS := -I. -B. -pg -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
