@@ -434,10 +434,10 @@ int main(int argc, char ??argv) {
     fprintf(stderr, "TagElim::synth_t has gotten too big!!!");
   buf_t b = init_buf();
   fprintf(stderr,"getting docs..."); fflush(stderr);
-  // doc_t orig = get_docs(init_context,b,f);
+  // doc_t orig = parse_iter(init_context,b,f);
   // fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   // doc_t d = copy_doc(orig);
-  doc_t d = get_docs(init_context,b,f);
+  doc_t d = parse_iter(init_context,b,f); // or parse_rec...
   //  fprintf(stderr,"\ndumping..."); fflush(stderr);
   //  dump(b,d);
   //  fprintf(stderr,"\nfinished!\n"); fflush(stderr);
