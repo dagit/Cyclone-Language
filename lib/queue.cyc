@@ -165,7 +165,7 @@ void remove(queue_t<`a,`r> q,`a v) {
 
   do {
     x = ptr_take(q);
-    { alias <`f> y = (_ *`f)x;
+    { alias<`f> _*`f y = x;
       if (f(env,y)) ok = true; 
     }
     rpush(g,saveq,x);

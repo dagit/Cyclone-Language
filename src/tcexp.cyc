@@ -537,14 +537,28 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = (type_t)e1->topt;
   type_t t2 = (type_t)e2->topt;
   type_t t1_elt = &VoidType_val;
+  type_t t2_elt = &VoidType_val;
   if (is_tagged_pointer_typ_elt(t1,&t1_elt)) {
-    if (is_tagged_pointer_typ(t2)) {
-      if (!unify(t1, t2)) {
+    if (is_tagged_pointer_typ_elt(t2,&t2_elt)) {
+      if (!unify(t1_elt, t2_elt)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
              typ2string(t1),typ2string(t2));
         explain_failure();
       }
+      return sint_typ;
+    } else if (is_pointer_type(t2)) {
+      if (!unify(t1_elt, pointer_elt_type(t2))) {
+	terr(e1->loc,"pointer arithmetic on values of "
+             "different types (%s != %s)",
+             typ2string(t1),typ2string(t2));
+        explain_failure();
+      }
+      // t2 is thin, coerce t1 to thin and return int
+      warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
+      unchecked_cast(te, e1, star_typ(t1_elt,pointer_region(t1),
+                                      empty_tqual(0), false_conref), 
+                     Other_coercion);
       return sint_typ;
     } else {
       if (!kind_leq(typ_kind(t1_elt),&tmk))
@@ -559,11 +573,28 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       return t1;
     }
   }
-  // if we have pointers at this point, cast them to ints
-  if (is_pointer_type(t1))
+
+  if (is_pointer_type(t1)) { // t1 must be thin
+    if (is_pointer_type(t2) && unify(pointer_elt_type(t1),
+                                     pointer_elt_type(t2))) {
+      if (is_tagged_pointer_typ(t2)) { 
+        warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
+        unchecked_cast(te, e2, star_typ(pointer_elt_type(t2),
+                                        pointer_region(t2),
+                                        empty_tqual(0), false_conref), 
+                       Other_coercion);
+      }
+      warn(e1->loc,"thin pointer subtraction!");
+      return sint_typ;
+    }
+    warn(e1->loc,"coercing thin pointer to integer to support subtraction");
     unchecked_cast(te, e1, sint_typ, Other_coercion);
-  if (is_pointer_type(t2))
+  }
+  if (is_pointer_type(t2)) {
+    warn(e1->loc,"coercing pointer to integer to support subtraction");
     unchecked_cast(te, e2, sint_typ, Other_coercion);
+  }
+                             
   return tcArithBinop(te, e1, e2, is_numeric);
 }
 

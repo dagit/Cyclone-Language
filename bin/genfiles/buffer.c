@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -842,7 +849,7 @@ struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
 return Cyc_substring((struct _dyneither_ptr)b->buffer,0,b->position);}
 # 59
 unsigned long Cyc_Buffer_length(struct Cyc_Buffer_t*b){
-return(unsigned long)b->position;}
+return b->position;}
 # 63
 void Cyc_Buffer_clear(struct Cyc_Buffer_t*b){
 b->position=0;

@@ -2290,7 +2290,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
   qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
-  vardecl_t vd = new_vardecl(v,&VoidType_val,NULL);
+  vardecl_t vd = new_vardecl(v,e_typ,e);
   exp_t ve = varb_exp(v,new Local_b(vd),e->loc);
 
   // generate a fresh region variable for it and the cast expression
@@ -2301,10 +2301,11 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   default: break;
   }
   e->topt = NULL;
-  e = cast_exp(e_typ,e,false,Unknown_coercion,e->loc);
+  vd->type = e_typ;
+  vd->initializer = e;
 
   // generate the alias decl
-  decl_t d = alias_decl(e,tv,vd,e->loc);
+  decl_t d = alias_decl(tv,vd,e->loc);
 
   return $(d,ve);
 }

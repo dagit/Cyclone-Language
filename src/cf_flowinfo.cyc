@@ -187,10 +187,10 @@ int root_cmp(root_t r1, root_t r2) {
   if(((int)r1) == ((int)r2))
     return 0;
   switch ($(r1,r2)) {
-  case $(&VarRoot(vd1),&VarRoot(vd2)): return vd1 - vd2;
+  case $(&VarRoot(vd1),&VarRoot(vd2)): return (int)vd1 - (int)vd2;
   case $(&VarRoot(_),_): return -1;
   case $(_,&VarRoot(_)): return 1;
-  case $(&MallocPt(e1,_),&MallocPt(e2,_)): return e1 - e2;
+  case $(&MallocPt(e1,_),&MallocPt(e2,_)): return (int)e1 - (int)e2;
   case $(&MallocPt(_,_),_): return -1;
   case $(_,&MallocPt(_,_)): return 1;
   case $(&InitParam(i1,_), &InitParam(i2,_)): return i1-i2;

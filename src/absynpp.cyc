@@ -1798,9 +1798,9 @@ doc_t decl2doc(decl_t d) {
              cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
              nil_doc()),text(";"));
     break;
-  case &Alias_d(e,tv,vd):
+  case &Alias_d(tv,vd):
     s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
-            qvar2doc(vd->name),text(" = "),exp2doc(e),text(";"));
+            vardecl2doc(vd),text(";"));
     break;
   case &Datatype_d(dd):
     s = cat(datatypedecl2doc(dd),text(";"));

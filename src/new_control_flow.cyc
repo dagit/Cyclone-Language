@@ -743,19 +743,22 @@ anal_stmt_exp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, stmt_t s) {
       inflow = anal_stmt(env,inflow,s1);
       s = s2;
       break;
-    case &Decl_s(&Decl{.r = &Alias_d(e,tv,vd), ...},s1):
+    case &Decl_s(&Decl{.r = &Alias_d(tv,vd), ...},s1):
       // FIX: This is the same code as in anal_stmt -- should be factored out
       // similar to the copy situation at the top of anal_Rexp
+      exp_t e = (exp_t)vd->initializer;
       let $(f,lval) = anal_Lexp(env,inflow,true,e);
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
         let old_rval = lookup_place(fd,p);
         // HACK -- if e is cast, then get at the underlying expression's type
         type_t t = (type_t)e->topt;
+        /*
         switch (e->r) {
         case &Cast_e(_,e2,...): t = (type_t)e2->topt; break;
         default: break;
         }
+        */
         let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
         fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
         f = ReachableFL(fd,relns);
@@ -2189,8 +2192,9 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
 
     // must handle alias declarations separate from other decls because
     // we need to reset some reachable stuff.
-  case &Decl_s(&Decl{.r = &Alias_d(e,tv,vd), ...},s1):
+  case &Decl_s(&Decl{.r = &Alias_d(tv,vd), ...},s1):
     // similar to the copy situation at the top of anal_Rexp
+    exp_t e = (exp_t)vd->initializer;
     let $(f,lval) = anal_Lexp(env,inflow,true,e);
     DEBUG_PRINT("inflow on alias is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
@@ -2200,10 +2204,12 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       let old_rval = lookup_place(fd,p);
       // HACK -- if e is cast, then get at the underlying expression's type
       type_t t = (type_t)e->topt;
+      /*
       switch (e->r) {
       case &Cast_e(_,e2,...): t = (type_t)e2->topt; break;
       default: break;
       }
+      */
       let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
       fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
       f = ReachableFL(fd,relns);

@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -883,11 +890,11 @@ goto _LL5;_LL8:;_LL9:
 void*_tmpB=d->tree;struct Cyc_Splay_noderef*_tmpD;_LLB: {struct Cyc_Splay_Node_Splay_tree_struct*_tmpC=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmpB;if(_tmpC->tag != 1)goto _LLD;else{_tmpD=_tmpC->f1;}}_LLC: {
 # 77
 struct Cyc_Splay_node*_tmpF=_tmpD->v;
-if((d->reln)(key,(void*)_tmpF->key)< 0){
+if((d->reln)(key,_tmpF->key)< 0){
 newleft=_tmpF->left;{
-struct Cyc_Splay_Node_Splay_tree_struct _tmp94;struct Cyc_Splay_node*_tmp93;struct Cyc_Splay_noderef*_tmp92;struct Cyc_Splay_Node_Splay_tree_struct*_tmp91;newright=(void*)((_tmp91=_cycalloc(sizeof(*_tmp91)),((_tmp91[0]=((_tmp94.tag=1,((_tmp94.f1=((_tmp92=_cycalloc(sizeof(*_tmp92)),((_tmp92->v=((_tmp93=_cycalloc(sizeof(*_tmp93)),((_tmp93->key=(void*)((void*)_tmpF->key),((_tmp93->data=(void*)((void*)_tmpF->data),((_tmp93->left=leaf,((_tmp93->right=_tmpF->right,_tmp93)))))))))),_tmp92)))),_tmp94)))),_tmp91))));};}else{
+struct Cyc_Splay_Node_Splay_tree_struct _tmp94;struct Cyc_Splay_node*_tmp93;struct Cyc_Splay_noderef*_tmp92;struct Cyc_Splay_Node_Splay_tree_struct*_tmp91;newright=(void*)((_tmp91=_cycalloc(sizeof(*_tmp91)),((_tmp91[0]=((_tmp94.tag=1,((_tmp94.f1=((_tmp92=_cycalloc(sizeof(*_tmp92)),((_tmp92->v=((_tmp93=_cycalloc(sizeof(*_tmp93)),((_tmp93->key=_tmpF->key,((_tmp93->data=_tmpF->data,((_tmp93->left=leaf,((_tmp93->right=_tmpF->right,_tmp93)))))))))),_tmp92)))),_tmp94)))),_tmp91))));};}else{
 # 84
-{struct Cyc_Splay_Node_Splay_tree_struct _tmp9E;struct Cyc_Splay_node*_tmp9D;struct Cyc_Splay_noderef*_tmp9C;struct Cyc_Splay_Node_Splay_tree_struct*_tmp9B;newleft=(void*)((_tmp9B=_cycalloc(sizeof(*_tmp9B)),((_tmp9B[0]=((_tmp9E.tag=1,((_tmp9E.f1=((_tmp9C=_cycalloc(sizeof(*_tmp9C)),((_tmp9C->v=((_tmp9D=_cycalloc(sizeof(*_tmp9D)),((_tmp9D->key=(void*)((void*)_tmpF->key),((_tmp9D->data=(void*)((void*)_tmpF->data),((_tmp9D->left=_tmpF->left,((_tmp9D->right=leaf,_tmp9D)))))))))),_tmp9C)))),_tmp9E)))),_tmp9B))));}
+{struct Cyc_Splay_Node_Splay_tree_struct _tmp9E;struct Cyc_Splay_node*_tmp9D;struct Cyc_Splay_noderef*_tmp9C;struct Cyc_Splay_Node_Splay_tree_struct*_tmp9B;newleft=(void*)((_tmp9B=_cycalloc(sizeof(*_tmp9B)),((_tmp9B[0]=((_tmp9E.tag=1,((_tmp9E.f1=((_tmp9C=_cycalloc(sizeof(*_tmp9C)),((_tmp9C->v=((_tmp9D=_cycalloc(sizeof(*_tmp9D)),((_tmp9D->key=_tmpF->key,((_tmp9D->data=_tmpF->data,((_tmp9D->left=_tmpF->left,((_tmp9D->right=leaf,_tmp9D)))))))))),_tmp9C)))),_tmp9E)))),_tmp9B))));}
 # 86
 newright=_tmpF->right;}
 # 88
@@ -896,7 +903,7 @@ goto _LLA;}_LLD: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmpE=(struct Cyc_Spla
  goto _LLA;_LLA:;}{
 # 93
 struct Cyc_Splay_Node_Splay_tree_struct*_tmpAD;struct Cyc_Splay_noderef*_tmpAC;struct Cyc_Splay_node*_tmpAB;struct Cyc_Splay_Node_Splay_tree_struct _tmpAA;struct Cyc_SlowDict_Dict*_tmpA9;return(_tmpA9=_cycalloc(sizeof(*_tmpA9)),((_tmpA9->reln=d->reln,((_tmpA9->tree=(void*)((_tmpAD=_cycalloc(sizeof(*_tmpAD)),((_tmpAD[0]=((_tmpAA.tag=1,((_tmpAA.f1=((_tmpAC=_cycalloc(sizeof(*_tmpAC)),((_tmpAC->v=(
-(_tmpAB=_cycalloc(sizeof(*_tmpAB)),((_tmpAB->key=(void*)key,((_tmpAB->data=(void*)data,((_tmpAB->left=newleft,((_tmpAB->right=newright,_tmpAB)))))))))),_tmpAC)))),_tmpAA)))),_tmpAD)))),_tmpA9)))));};}
+(_tmpAB=_cycalloc(sizeof(*_tmpAB)),((_tmpAB->key=key,((_tmpAB->data=data,((_tmpAB->left=newleft,((_tmpAB->right=newright,_tmpAB)))))))))),_tmpAC)))),_tmpAA)))),_tmpAD)))),_tmpA9)))));};}
 # 98
 struct Cyc_SlowDict_Dict*Cyc_SlowDict_insert_new(struct Cyc_SlowDict_Dict*d,void*key,void*data){
 # 100
@@ -912,12 +919,12 @@ return d;}
 # 112
 struct Cyc_SlowDict_Dict*Cyc_SlowDict_singleton(int(*comp)(void*,void*),void*key,void*data){
 struct Cyc_Splay_Leaf_Splay_tree_struct _tmpB0;struct Cyc_Splay_Leaf_Splay_tree_struct*_tmpAF;struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp1F=(_tmpAF=_cycalloc_atomic(sizeof(*_tmpAF)),((_tmpAF[0]=((_tmpB0.tag=0,((_tmpB0.f1=0,_tmpB0)))),_tmpAF)));
-struct Cyc_Splay_Node_Splay_tree_struct*_tmpBF;struct Cyc_Splay_noderef*_tmpBE;struct Cyc_Splay_node*_tmpBD;struct Cyc_Splay_Node_Splay_tree_struct _tmpBC;struct Cyc_SlowDict_Dict*_tmpBB;return(_tmpBB=_cycalloc(sizeof(*_tmpBB)),((_tmpBB->reln=comp,((_tmpBB->tree=(void*)((_tmpBF=_cycalloc(sizeof(*_tmpBF)),((_tmpBF[0]=((_tmpBC.tag=1,((_tmpBC.f1=((_tmpBE=_cycalloc(sizeof(*_tmpBE)),((_tmpBE->v=((_tmpBD=_cycalloc(sizeof(*_tmpBD)),((_tmpBD->key=(void*)key,((_tmpBD->data=(void*)data,((_tmpBD->left=(void*)_tmp1F,((_tmpBD->right=(void*)_tmp1F,_tmpBD)))))))))),_tmpBE)))),_tmpBC)))),_tmpBF)))),_tmpBB)))));}
+struct Cyc_Splay_Node_Splay_tree_struct*_tmpBF;struct Cyc_Splay_noderef*_tmpBE;struct Cyc_Splay_node*_tmpBD;struct Cyc_Splay_Node_Splay_tree_struct _tmpBC;struct Cyc_SlowDict_Dict*_tmpBB;return(_tmpBB=_cycalloc(sizeof(*_tmpBB)),((_tmpBB->reln=comp,((_tmpBB->tree=(void*)((_tmpBF=_cycalloc(sizeof(*_tmpBF)),((_tmpBF[0]=((_tmpBC.tag=1,((_tmpBC.f1=((_tmpBE=_cycalloc(sizeof(*_tmpBE)),((_tmpBE->v=((_tmpBD=_cycalloc(sizeof(*_tmpBD)),((_tmpBD->key=key,((_tmpBD->data=data,((_tmpBD->left=(void*)_tmp1F,((_tmpBD->right=(void*)_tmp1F,_tmpBD)))))))))),_tmpBE)))),_tmpBC)))),_tmpBF)))),_tmpBB)))));}
 # 117
 void*Cyc_SlowDict_lookup(struct Cyc_SlowDict_Dict*d,void*key){
 if(Cyc_Splay_splay(d->reln,key,d->tree)){
 void*_tmp27=d->tree;struct Cyc_Splay_noderef*_tmp29;_LL10: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp28=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp27;if(_tmp28->tag != 1)goto _LL12;else{_tmp29=_tmp28->f1;}}_LL11:
- return(void*)(_tmp29->v)->data;_LL12: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp2A=(struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp27;if(_tmp2A->tag != 0)goto _LLF;}_LL13: {
+ return(_tmp29->v)->data;_LL12: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp2A=(struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp27;if(_tmp2A->tag != 0)goto _LLF;}_LL13: {
 struct Cyc_Core_Impossible_exn_struct _tmpC5;const char*_tmpC4;struct Cyc_Core_Impossible_exn_struct*_tmpC3;(int)_throw((void*)((_tmpC3=_cycalloc(sizeof(*_tmpC3)),((_tmpC3[0]=((_tmpC5.tag=Cyc_Core_Impossible,((_tmpC5.f1=((_tmpC4="Dict::lookup",_tag_dyneither(_tmpC4,sizeof(char),13))),_tmpC5)))),_tmpC3)))));}_LLF:;}
 # 123
 (int)_throw((void*)& Cyc_SlowDict_Absent_val);}
@@ -925,7 +932,7 @@ struct Cyc_Core_Impossible_exn_struct _tmpC5;const char*_tmpC4;struct Cyc_Core_I
 struct Cyc_Core_Opt*Cyc_SlowDict_lookup_opt(struct Cyc_SlowDict_Dict*d,void*key){
 if(Cyc_Splay_splay(d->reln,key,d->tree)){
 void*_tmp2E=d->tree;struct Cyc_Splay_noderef*_tmp30;_LL15: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp2F=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp2E;if(_tmp2F->tag != 1)goto _LL17;else{_tmp30=_tmp2F->f1;}}_LL16: {
-struct Cyc_Core_Opt*_tmpC6;return(_tmpC6=_cycalloc(sizeof(*_tmpC6)),((_tmpC6->v=(void*)((void*)(_tmp30->v)->data),_tmpC6)));}_LL17: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp31=(struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp2E;if(_tmp31->tag != 0)goto _LL14;}_LL18: {
+struct Cyc_Core_Opt*_tmpC6;return(_tmpC6=_cycalloc(sizeof(*_tmpC6)),((_tmpC6->v=(_tmp30->v)->data,_tmpC6)));}_LL17: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp31=(struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp2E;if(_tmp31->tag != 0)goto _LL14;}_LL18: {
 struct Cyc_Core_Impossible_exn_struct _tmpCC;const char*_tmpCB;struct Cyc_Core_Impossible_exn_struct*_tmpCA;(int)_throw((void*)((_tmpCA=_cycalloc(sizeof(*_tmpCA)),((_tmpCA[0]=((_tmpCC.tag=Cyc_Core_Impossible,((_tmpCC.f1=((_tmpCB="Dict::lookup",_tag_dyneither(_tmpCB,sizeof(char),13))),_tmpCC)))),_tmpCA)))));}_LL14:;}
 # 132
 return 0;}
@@ -947,7 +954,7 @@ struct Cyc_SlowDict_Dict*_tmpD4;return(_tmpD4=_cycalloc(sizeof(*_tmpD4)),((_tmpD
  Cyc_Splay_splay(Cyc_SlowDict_get_largest,key,n->left);{
 struct Cyc_Splay_node*newtop=_tmp40->v;
 struct Cyc_Splay_Node_Splay_tree_struct*_tmpE3;struct Cyc_Splay_noderef*_tmpE2;struct Cyc_Splay_node*_tmpE1;struct Cyc_Splay_Node_Splay_tree_struct _tmpE0;struct Cyc_SlowDict_Dict*_tmpDF;return(_tmpDF=_cycalloc(sizeof(*_tmpDF)),((_tmpDF->reln=d->reln,((_tmpDF->tree=(void*)(
-(_tmpE3=_cycalloc(sizeof(*_tmpE3)),((_tmpE3[0]=((_tmpE0.tag=1,((_tmpE0.f1=((_tmpE2=_cycalloc(sizeof(*_tmpE2)),((_tmpE2->v=((_tmpE1=_cycalloc(sizeof(*_tmpE1)),((_tmpE1->key=(void*)((void*)newtop->key),((_tmpE1->data=(void*)((void*)newtop->data),((_tmpE1->left=newtop->left,((_tmpE1->right=n->right,_tmpE1)))))))))),_tmpE2)))),_tmpE0)))),_tmpE3)))),_tmpDF)))));};_LL23:;}_LL1E:;}_LL19:;}else{
+(_tmpE3=_cycalloc(sizeof(*_tmpE3)),((_tmpE3[0]=((_tmpE0.tag=1,((_tmpE0.f1=((_tmpE2=_cycalloc(sizeof(*_tmpE2)),((_tmpE2->v=((_tmpE1=_cycalloc(sizeof(*_tmpE1)),((_tmpE1->key=newtop->key,((_tmpE1->data=newtop->data,((_tmpE1->left=newtop->left,((_tmpE1->right=n->right,_tmpE1)))))))))),_tmpE2)))),_tmpE0)))),_tmpE3)))),_tmpDF)))));};_LL23:;}_LL1E:;}_LL19:;}else{
 # 158
 return d;}}
 # 161
@@ -963,7 +970,7 @@ void*_tmp4D=t;struct Cyc_Splay_noderef*_tmp50;_LL29: {struct Cyc_Splay_Leaf_Spla
  return accum;_LL2B: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp4F=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp4D;if(_tmp4F->tag != 1)goto _LL28;else{_tmp50=_tmp4F->f1;}}_LL2C: {
 # 173
 struct Cyc_Splay_node*n=_tmp50->v;
-return f((void*)n->key,(void*)n->data,Cyc_SlowDict_fold_tree(f,n->left,
+return f(n->key,n->data,Cyc_SlowDict_fold_tree(f,n->left,
 Cyc_SlowDict_fold_tree(f,n->right,accum)));}_LL28:;}
 # 178
 void*Cyc_SlowDict_fold(void*(*f)(void*,void*,void*),struct Cyc_SlowDict_Dict*d,void*accum){
@@ -975,7 +982,7 @@ void*_tmp51=t;struct Cyc_Splay_noderef*_tmp54;_LL2E: {struct Cyc_Splay_Leaf_Spla
  return accum;_LL30: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp53=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp51;if(_tmp53->tag != 1)goto _LL2D;else{_tmp54=_tmp53->f1;}}_LL31: {
 # 187
 struct Cyc_Splay_node*n=_tmp54->v;
-return f(env,(void*)n->key,(void*)n->data,
+return f(env,n->key,n->data,
 Cyc_SlowDict_fold_tree_c(f,env,n->left,Cyc_SlowDict_fold_tree_c(f,env,n->right,accum)));}_LL2D:;}
 # 192
 void*Cyc_SlowDict_fold_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_SlowDict_Dict*dict,void*accum){
@@ -987,7 +994,7 @@ void*_tmp55=t;struct Cyc_Splay_noderef*_tmp58;_LL33: {struct Cyc_Splay_Leaf_Spla
 # 200
 struct Cyc_Splay_node*_tmp59=_tmp58->v;
 Cyc_SlowDict_app_tree(f,_tmp59->left);
-f((void*)_tmp59->key,(void*)_tmp59->data);
+f(_tmp59->key,_tmp59->data);
 Cyc_SlowDict_app_tree(f,_tmp59->right);
 goto _LL32;}_LL32:;}
 # 207
@@ -1000,7 +1007,7 @@ void*_tmp5A=t;struct Cyc_Splay_noderef*_tmp5D;_LL38: {struct Cyc_Splay_Leaf_Spla
 # 215
 struct Cyc_Splay_node*n=_tmp5D->v;
 Cyc_SlowDict_iter_tree(f,n->left);
-f((void*)n->key,(void*)n->data);
+f(n->key,n->data);
 Cyc_SlowDict_iter_tree(f,n->right);
 goto _LL37;}_LL37:;}
 # 222
@@ -1013,7 +1020,7 @@ void*_tmp5E=t;struct Cyc_Splay_noderef*_tmp61;_LL3D: {struct Cyc_Splay_Leaf_Spla
 # 230
 struct Cyc_Splay_node*n=_tmp61->v;
 Cyc_SlowDict_app_tree_c(f,env,n->left);
-f(env,(void*)n->key,(void*)n->data);
+f(env,n->key,n->data);
 Cyc_SlowDict_app_tree_c(f,env,n->right);
 goto _LL3C;}_LL3C:;}
 # 237
@@ -1026,7 +1033,7 @@ void*_tmp62=t;struct Cyc_Splay_noderef*_tmp65;_LL42: {struct Cyc_Splay_Leaf_Spla
 # 245
 struct Cyc_Splay_node*n=_tmp65->v;
 Cyc_SlowDict_iter_tree_c(f,env,n->left);
-f(env,(void*)n->key,(void*)n->data);
+f(env,n->key,n->data);
 Cyc_SlowDict_iter_tree_c(f,env,n->right);
 goto _LL41;}_LL41:;}
 # 252
@@ -1038,8 +1045,8 @@ void*_tmp66=t;struct Cyc_Splay_noderef*_tmp69;_LL47: {struct Cyc_Splay_Leaf_Spla
 struct Cyc_Splay_Leaf_Splay_tree_struct _tmpE6;struct Cyc_Splay_Leaf_Splay_tree_struct*_tmpE5;return(void*)((_tmpE5=_cycalloc_atomic(sizeof(*_tmpE5)),((_tmpE5[0]=((_tmpE6.tag=0,((_tmpE6.f1=0,_tmpE6)))),_tmpE5))));}_LL49: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp68=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp66;if(_tmp68->tag != 1)goto _LL46;else{_tmp69=_tmp68->f1;}}_LL4A: {
 # 260
 struct Cyc_Splay_node*_tmp6C=_tmp69->v;
-struct Cyc_Splay_Node_Splay_tree_struct _tmpF0;struct Cyc_Splay_node*_tmpEF;struct Cyc_Splay_noderef*_tmpEE;struct Cyc_Splay_Node_Splay_tree_struct*_tmpED;return(void*)((_tmpED=_cycalloc(sizeof(*_tmpED)),((_tmpED[0]=((_tmpF0.tag=1,((_tmpF0.f1=((_tmpEE=_cycalloc(sizeof(*_tmpEE)),((_tmpEE->v=((_tmpEF=_cycalloc(sizeof(*_tmpEF)),((_tmpEF->key=(void*)((void*)_tmp6C->key),((_tmpEF->data=(void*)
-f((void*)_tmp6C->data),((_tmpEF->left=
+struct Cyc_Splay_Node_Splay_tree_struct _tmpF0;struct Cyc_Splay_node*_tmpEF;struct Cyc_Splay_noderef*_tmpEE;struct Cyc_Splay_Node_Splay_tree_struct*_tmpED;return(void*)((_tmpED=_cycalloc(sizeof(*_tmpED)),((_tmpED[0]=((_tmpF0.tag=1,((_tmpF0.f1=((_tmpEE=_cycalloc(sizeof(*_tmpEE)),((_tmpEE->v=((_tmpEF=_cycalloc(sizeof(*_tmpEF)),((_tmpEF->key=_tmp6C->key,((_tmpEF->data=
+f(_tmp6C->data),((_tmpEF->left=
 Cyc_SlowDict_map_tree(f,_tmp6C->left),((_tmpEF->right=
 Cyc_SlowDict_map_tree(f,_tmp6C->right),_tmpEF)))))))))),_tmpEE)))),_tmpF0)))),_tmpED))));}_LL46:;}
 # 267
@@ -1051,7 +1058,7 @@ void*_tmp72=t;struct Cyc_Splay_noderef*_tmp75;_LL4C: {struct Cyc_Splay_Leaf_Spla
 struct Cyc_Splay_Leaf_Splay_tree_struct _tmpF4;struct Cyc_Splay_Leaf_Splay_tree_struct*_tmpF3;return(void*)((_tmpF3=_cycalloc_atomic(sizeof(*_tmpF3)),((_tmpF3[0]=((_tmpF4.tag=0,((_tmpF4.f1=0,_tmpF4)))),_tmpF3))));}_LL4E: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp74=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp72;if(_tmp74->tag != 1)goto _LL4B;else{_tmp75=_tmp74->f1;}}_LL4F: {
 # 275
 struct Cyc_Splay_node*n=_tmp75->v;
-struct Cyc_Splay_Node_Splay_tree_struct _tmpFE;struct Cyc_Splay_node*_tmpFD;struct Cyc_Splay_noderef*_tmpFC;struct Cyc_Splay_Node_Splay_tree_struct*_tmpFB;return(void*)((_tmpFB=_cycalloc(sizeof(*_tmpFB)),((_tmpFB[0]=((_tmpFE.tag=1,((_tmpFE.f1=((_tmpFC=_cycalloc(sizeof(*_tmpFC)),((_tmpFC->v=((_tmpFD=_cycalloc(sizeof(*_tmpFD)),((_tmpFD->key=(void*)((void*)n->key),((_tmpFD->data=(void*)f(env,(void*)n->data),((_tmpFD->left=
+struct Cyc_Splay_Node_Splay_tree_struct _tmpFE;struct Cyc_Splay_node*_tmpFD;struct Cyc_Splay_noderef*_tmpFC;struct Cyc_Splay_Node_Splay_tree_struct*_tmpFB;return(void*)((_tmpFB=_cycalloc(sizeof(*_tmpFB)),((_tmpFB[0]=((_tmpFE.tag=1,((_tmpFE.f1=((_tmpFC=_cycalloc(sizeof(*_tmpFC)),((_tmpFC->v=((_tmpFD=_cycalloc(sizeof(*_tmpFD)),((_tmpFD->key=n->key,((_tmpFD->data=f(env,n->data),((_tmpFD->left=
 Cyc_SlowDict_map_tree_c(f,env,n->left),((_tmpFD->right=
 Cyc_SlowDict_map_tree_c(f,env,n->right),_tmpFD)))))))))),_tmpFC)))),_tmpFE)))),_tmpFB))));}_LL4B:;}
 # 281
@@ -1061,7 +1068,7 @@ struct Cyc_SlowDict_Dict*_tmpFF;return(_tmpFF=_cycalloc(sizeof(*_tmpFF)),((_tmpF
 struct _tuple0*Cyc_SlowDict_choose(struct Cyc_SlowDict_Dict*d){
 void*_tmp7D=d->tree;struct Cyc_Splay_noderef*_tmp80;_LL51: {struct Cyc_Splay_Leaf_Splay_tree_struct*_tmp7E=(struct Cyc_Splay_Leaf_Splay_tree_struct*)_tmp7D;if(_tmp7E->tag != 0)goto _LL53;}_LL52:
 (int)_throw((void*)& Cyc_SlowDict_Absent_val);_LL53: {struct Cyc_Splay_Node_Splay_tree_struct*_tmp7F=(struct Cyc_Splay_Node_Splay_tree_struct*)_tmp7D;if(_tmp7F->tag != 1)goto _LL50;else{_tmp80=_tmp7F->f1;}}_LL54: {
-struct _tuple0*_tmp100;return(_tmp100=_cycalloc(sizeof(*_tmp100)),((_tmp100->f1=(void*)(_tmp80->v)->key,((_tmp100->f2=(void*)(_tmp80->v)->data,_tmp100)))));}_LL50:;}
+struct _tuple0*_tmp100;return(_tmp100=_cycalloc(sizeof(*_tmp100)),((_tmp100->f1=(_tmp80->v)->key,((_tmp100->f2=(_tmp80->v)->data,_tmp100)))));}_LL50:;}
 # 292
 struct Cyc_List_List*Cyc_SlowDict_to_list_f(void*k,void*v,struct Cyc_List_List*accum){
 struct _tuple0*_tmp103;struct Cyc_List_List*_tmp102;return(_tmp102=_cycalloc(sizeof(*_tmp102)),((_tmp102->hd=((_tmp103=_cycalloc(sizeof(*_tmp103)),((_tmp103->f1=k,((_tmp103->f2=v,_tmp103)))))),((_tmp102->tl=accum,_tmp102)))));}

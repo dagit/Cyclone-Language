@@ -97,7 +97,7 @@ typedef struct Edit {
 typedef list_t<edit_t> edits_t;
 // Used for sorting edits
 int cmp_edit(edit_t e1, edit_t e2) {
-  return e1 - e2;
+  return (int)e1 - (int)e2;
 }
 
 /////////////////////////////////////////////////////////////////////

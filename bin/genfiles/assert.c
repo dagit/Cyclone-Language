@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -814,5 +821,5 @@ void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr fil
 # 30
 {const char*_tmpA;void*_tmp9[3];struct Cyc_String_pa_PrintArg_struct _tmp8;struct Cyc_Int_pa_PrintArg_struct _tmp7;struct Cyc_String_pa_PrintArg_struct _tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion),((_tmp7.tag=1,((_tmp7.f1=line,((_tmp8.tag=0,((_tmp8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file),((_tmp9[0]=& _tmp8,((_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",_tag_dyneither(_tmpA,sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}
 # 32
-Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);
+Cyc_fflush(Cyc_stderr);
 exit(- 1);}

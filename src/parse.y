@@ -178,7 +178,7 @@ static list_t<decl_t> parse_result = NULL;
 static void err(string_t<`H> msg, seg_t sg) {
   post_error(mk_err_parse(sg,msg));
 }
-static `a abort(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap) 
+static `a parse_abort(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3), noreturn)) {
   err(vrprintf(heap_region, fmt, ap), sg);
   throw new Exit;
@@ -419,7 +419,7 @@ static $(tqual_t,type_t)@
 static vardecl_t decl2vardecl(decl_t d) {
   switch (d->r) {
   case &Var_d(vd): return vd;
-  default: abort(d->loc,"bad declaration in `forarray' statement");
+  default: parse_abort(d->loc,"bad declaration in `forarray' statement");
   }
 }
 
@@ -460,7 +460,7 @@ static tvar_t copy_tvar(tvar_t t) {
 static tvar_t typ2tvar(seg_t loc, type_t t) {
   switch (t) {
   case &VarType(pr): return pr;
-  default: abort(loc,"expecting a list of type variables, not types");
+  default: parse_abort(loc,"expecting a list of type variables, not types");
   }
 }
 static type_t tvar2typ(tvar_t pr) {
@@ -509,7 +509,7 @@ static list_t<type_modifier_t<`yy>,`yy>
 	return tms;
       case &NoTypes(ids,_):
 	if(length(ids) != length(tds))
-	  abort(loc, "wrong number of parameter declarations in old-style "
+	  parse_abort(loc, "wrong number of parameter declarations in old-style "
 		"function declaration");
 	// replace each parameter with the right typed version
 	list_t<$(var_opt_t,tqual_t,type_t)@> rev_new_params = NULL;
@@ -522,18 +522,18 @@ static list_t<type_modifier_t<`yy>,`yy>
 	      if(zstrptrcmp((*vd->name)[1],ids->hd)!=0)
 		continue;
 	      if(vd->initializer != NULL)
-		abort(x->loc, "initializer found in parameter declaration");
+		parse_abort(x->loc, "initializer found in parameter declaration");
 	      if(is_qvar_qualified(vd->name))
-		abort(x->loc, "namespaces forbidden in parameter declarations");
+		parse_abort(x->loc, "namespaces forbidden in parameter declarations");
 	      rev_new_params =
 		new List(new $((*vd->name)[1], vd->tq, vd->type), 
 			 rev_new_params);
 	      goto L;
-	    default: abort(x->loc, "nonvariable declaration in parameter type");
+	    default: parse_abort(x->loc, "nonvariable declaration in parameter type");
 	    }
 	  }
 	L: if(tds2 == NULL)
-	  abort(loc,"%s is not given a type",*ids->hd);
+	  parse_abort(loc,"%s is not given a type",*ids->hd);
 	}
 	return
 	  rnew(yy) List(rnew(yy) Function_mod(rnew(yy) WithTypes(imp_rev(rev_new_params),
@@ -611,7 +611,7 @@ static fndecl_t make_function(region_t<`yy> yy,
                             .param_vardecls=NULL,
                             .fn_vardecl = NULL,
                             .attributes = append(attributes,out_atts)};
-    default: abort(loc,"declarator is not a function prototype");
+    default: parse_abort(loc,"declarator is not a function prototype");
   }
 }
 
@@ -793,7 +793,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 		       new_atts,
 		       tms->tl);
     case &NoTypes(_,loc):
-      abort(loc,"function declaration without parameter types");
+      parse_abort(loc,"function declaration without parameter types");
     }
   }
   case &TypeParams_mod(ts,loc,_):
@@ -805,8 +805,8 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
     // Otherwise, it is an error in the program if we get here;
     // TypeParams should already have been consumed by an outer
     // Function (see last case).
-    abort(loc, "type parameters must appear before function arguments "
-	  "in declarator");
+    parse_abort(loc, "type parameters must appear before function arguments "
+                "in declarator");
   case &Pointer_mod(ptratts,tq2):
     return apply_tms(tq2,new PointerType(PtrInfo(t,tq,ptratts)),atts,tms->tl);
   case &Attributes_mod(loc,atts2):
@@ -961,7 +961,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         if (tvs2 != NULL)
           Tcutil::warn(loc,"bad type params, ignoring");
         if (exprs == NULL)
-          abort(loc,"unexpected NULL in parse!");
+          parse_abort(loc,"unexpected NULL in parse!");
         let eopt = exprs->hd;
         let vd   = new_vardecl(x, t2, eopt);
 	vd->tq = tq2;
@@ -1358,10 +1358,20 @@ declaration:
     $$ = ^$(new List(region_decl(tv,vd,one,four,LOC(@1,@5)),NULL));
   }
 /* Cyc: alias <r>t v = e; */
-| ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
+| ALIAS '<' TYPE_VAR '>' declaration 
   { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
-    vardecl_t vd = new_vardecl(new $(Loc_n, new $5),&VoidType_val,NULL);
-    $$ = ^$(new List(alias_decl($7,tv,vd,LOC(@1,@8)),NULL));
+    list_t<decl_t> ds = $5;
+    if (ds == NULL || ds->tl != NULL) 
+      parse_abort(SLOC(@1),"too many declarations in alias");
+    decl_t d = ds->hd;
+    switch (d->r) {
+    case &Var_d(vd): 
+      $$ = ^$(new List(alias_decl(tv,vd,LOC(@1,@8)),NULL));
+      break;
+    default:
+      err("expecting variable declaration",SLOC(@5));
+      $$ = ^$(NULL);
+    }
   }
 ;
 

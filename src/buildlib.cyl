@@ -1382,7 +1382,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 				GCC,declsfile,cppargs_string,cppinfile);
           system(cmd); // if err, no declsfile created, and we'll handle later
         }
-        remove(cppinfile);
+        //JGM:remove(cppinfile);
       }
     }
     if (gathering()) return 0;
@@ -1416,7 +1416,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     while (slurp(l)) /* skip */;
     fclose(in_file);
     fclose((FILE @)slurp_out);
-    if (mode != FINISH) remove(declsfile);
+    if (mode != FINISH) //JGM:remove(declsfile); 
+      ;
 
     maybe = fopen(filtereddeclsfile,"r");
     if (!maybe) return 1;
@@ -1426,7 +1427,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(false); // garbage collect those big tries
     fclose(in_file);
-    remove(filtereddeclsfile);
+    //JGM:remove(filtereddeclsfile);
 
     for (let d = decls; d != NULL; d = d->tl)
       scan_decl(d->hd,t);
@@ -1618,7 +1619,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
     }
     fclose(in_file);
-    if (mode != FINISH) remove(macrosfile);
+    if (mode != FINISH) ; //JGM:remove(macrosfile);
 
     if (hstubs != NULL) {
       for (let x = hstubs; x != NULL; x = x->tl) {
@@ -1697,9 +1698,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       log("Not supported on this platform\n");
 
       /* Delete intermediate files; some may not exist but we ignore that */
-      remove(macrosfile);
-      remove(declsfile);
-      remove(filtereddeclsfile);
+      //JGM:remove(macrosfile);
+      //JGM:remove(declsfile);
+      //JGM:remove(filtereddeclsfile);
 
       return 0;
   }

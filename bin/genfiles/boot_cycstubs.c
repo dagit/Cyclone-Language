@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -861,7 +868,7 @@ int fflush(struct  __abstractFILE*);
 # 65
 int Cyc_fflush(struct Cyc___cycFILE*f){
 if((unsigned int)f)
-return fflush((struct  __abstractFILE*)f->file);else{
+return fflush(f->file);else{
 return fflush(0);}}
 # 72
 int fgetc(struct  __abstractFILE*);
@@ -874,7 +881,7 @@ struct  __abstractFILE*fopen(const char*,const char*);
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
 struct  __abstractFILE*_tmp0=fopen(name,type);
 # 84
-struct Cyc___cycFILE*_tmp12;return(unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*_tmp12)),((_tmp12->file=(struct  __abstractFILE*)_tmp0,_tmp12))): 0;}
+struct Cyc___cycFILE*_tmp12;return(unsigned int)_tmp0?(_tmp12=_cycalloc(sizeof(*_tmp12)),((_tmp12->file=_tmp0,_tmp12))): 0;}
 # 88
 int fputc(int,struct  __abstractFILE*);
 # 90
@@ -937,7 +944,7 @@ if(f == 0){
 unsigned int _tmp17;unsigned int _tmp16;struct _dyneither_ptr _tmp15;char*_tmp14;unsigned int _tmp13;struct _dyneither_ptr fn=(_tmp13=_get_dyneither_size(fname,sizeof(char)),((_tmp14=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp13 + 1)),((_tmp15=_tag_dyneither(_tmp14,sizeof(char),_tmp13 + 1),((((_tmp16=_tmp13,((_tmp18(& fname,& _tmp17,& _tmp16,& _tmp14),_tmp14[_tmp16]=(char)0)))),_tmp15)))))));
 struct Cyc_FileOpenError_exn_struct _tmp1B;struct Cyc_FileOpenError_exn_struct*_tmp1A;(int)_throw((void*)((_tmp1A=_cycalloc(sizeof(*_tmp1A)),((_tmp1A[0]=((_tmp1B.tag=Cyc_FileOpenError,((_tmp1B.f1=fn,_tmp1B)))),_tmp1A)))));}
 # 172
-return(struct Cyc___cycFILE*)f;}
+return f;}
 # 175
 struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError};
 void Cyc_file_close(struct Cyc___cycFILE*f){

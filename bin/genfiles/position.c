@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -931,7 +938,7 @@ int Cyc_Position_max_errors=10;
 # 152
 void Cyc_Position_post_error(struct Cyc_Position_Error*e){
 Cyc_Position_error_b=1;
-Cyc_fflush((struct Cyc___cycFILE*)Cyc_stdout);
+Cyc_fflush(Cyc_stdout);
 if(Cyc_Position_first_error){
 {const char*_tmp4D;void*_tmp4C;(_tmp4C=0,Cyc_fprintf(Cyc_stderr,((_tmp4D="\n",_tag_dyneither(_tmp4D,sizeof(char),2))),_tag_dyneither(_tmp4C,sizeof(void*),0)));}
 Cyc_Position_first_error=0;}
@@ -943,7 +950,7 @@ const char*_tmp52;void*_tmp51[2];struct Cyc_String_pa_PrintArg_struct _tmp50;str
 if(Cyc_Position_num_errors == Cyc_Position_max_errors){
 const char*_tmp55;void*_tmp54;(_tmp54=0,Cyc_fprintf(Cyc_stderr,((_tmp55="Too many error messages!\n",_tag_dyneither(_tmp55,sizeof(char),26))),_tag_dyneither(_tmp54,sizeof(void*),0)));}
 # 166
-Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);
+Cyc_fflush(Cyc_stderr);
 ++ Cyc_Position_num_errors;}
 # 171
 void Cyc_Position_reset_position(struct _dyneither_ptr s){Cyc_Position_source=s;Cyc_Position_error_b=0;}
@@ -952,7 +959,7 @@ struct _dyneither_ptr Cyc_Position_get_position_file(){return Cyc_Position_sourc
 # 176
 struct _dyneither_ptr Cyc_Position_get_line_directive(unsigned int s){
 struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)s);
-if((struct Cyc_Lineno_Pos*)pos_s != 0){
+if(pos_s != 0){
 const char*_tmp5A;void*_tmp59[2];struct Cyc_Int_pa_PrintArg_struct _tmp58;struct Cyc_String_pa_PrintArg_struct _tmp57;return(struct _dyneither_ptr)((_tmp57.tag=0,((_tmp57.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)pos_s->logical_file),((_tmp58.tag=1,((_tmp58.f1=(unsigned long)pos_s->line_no,((_tmp59[0]=& _tmp58,((_tmp59[1]=& _tmp57,Cyc_aprintf(((_tmp5A="\n#line %d \"%s\"\n",_tag_dyneither(_tmp5A,sizeof(char),16))),_tag_dyneither(_tmp59,sizeof(void*),2))))))))))))));}else{
 # 181
 return _tag_dyneither(0,0,0);}}

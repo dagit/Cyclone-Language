@@ -676,9 +676,12 @@ list_t<Absyn::decl_t> do_print(FILE @`H out_file, list_t<Absyn::decl_t,`H> tds) 
   // Copy cyc_setjmp.h and cyc_include.h to out_file.
   if (!parseonly_r && !tc_r && !cf_r) {
     if (!nocyc_setjmp_r) {
-      if (Lex::compile_for_boot_r)
-        fprintf(out_file,"#include <setjmp.h>\n");
-      else if (copy_internal_file(cyc_setjmp,out_file)) return tds;
+      // JGM: commenting this out to ensure we always use the generated 
+      // cyc_setjmp file which minimizes dependencies.
+      //if (Lex::compile_for_boot_r)
+      //  fprintf(out_file,"#include <setjmp.h>\n");
+      //else 
+      if (copy_internal_file(cyc_setjmp,out_file)) return tds;
     }
     if (copy_internal_file(cyc_include,out_file)) return tds;
   }

@@ -1308,12 +1308,10 @@ void dumpdecl(decl_t d) {
     }
     dump_semi();
     break;
-  case &Alias_d(e,tv,vd):
-    dump("alias "); 
+  case &Alias_d(tv,vd):
+    dump("alias"); 
     dump("<"); dumptvar(tv); dump(">" );
-    dumpqvar(vd->name);dump(" = ");
-    dumpexp(e); 
-    dump_semi();
+    dumpvardecl(vd,d->loc);
     break;
 
   case &Typedef_d(td):

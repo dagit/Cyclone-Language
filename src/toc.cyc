@@ -313,6 +313,14 @@ static raw_stmt_t goto_stmt_r(var_t v, stmt_opt_t s) {
 }
 static datatype Raw_exp.Const_e zero_exp = Const_e(Cnst{.Int_c= $(Signed,0)});
 
+// same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with
+// aggrarrow_e(e1,f,DL)
+static exp_t member_exp(exp_t e, field_name_t f, seg_t loc) {
+  switch (e->r) {
+  case &Deref_e(e1): return aggrarrow_exp(e1,f,loc);
+  default: return aggrmember_exp(e,f,loc);
+  }
+}
 
 /* functionSets are used to call the appropriate function from
  * cyc_include.h by casing on the type of the arguments
@@ -952,6 +960,10 @@ static bool is_void_star_or_boxed_tvar(type_t t) {
   return is_void_star(t) || is_boxed_tvar(t);
 }
 
+static bool is_pointer_or_boxed_tvar(type_t t) {
+  return is_pointer_type(t) || is_boxed_tvar(t);
+}
+
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
@@ -975,10 +987,12 @@ static bool is_poly_field(type_t t, field_name_t f) {
 static bool is_poly_project(exp_t e) {
   switch (e->r) {
   case &AggrMember_e(e1,f,_,_): 
-    return is_poly_field((type_t)e1->topt,f);
+    return is_poly_field((type_t)e1->topt,f) && 
+      !is_void_star_or_boxed_tvar((type_t)e->topt);
   case &AggrArrow_e(e1,f,_,_):
     switch (compress((type_t)e1->topt)) {
-    case &PointerType(PtrInfo{t,_,_}): return is_poly_field(t,f);
+    case &PointerType(PtrInfo{t,_,_}): 
+      return is_poly_field(t,f) && !is_void_star_or_boxed_tvar((type_t)e->topt);
     default: toc_impos("is_poly_project: bad type %s",typ2string((type_t)e1->topt));
     }
   default: return false;
@@ -1587,7 +1601,7 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
       toc_impos("too many designators in anonymous struct");
     switch (ds->hd) {
     case &FieldName(f):
-      exp_t lval = aggrmember_exp(lhs,f,DL);
+      exp_t lval = member_exp(lhs,f,DL);
       switch (e->r) {
       case &Array_e(dles):
         s = init_array(nv, lval, dles, s); break;
@@ -1625,7 +1639,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
     let xexp = var_exp(x,DL);
     let s    = exp_stmt(xexp,DL);
 
-    let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
+    let lval_f = pointer ? aggrarrow_exp : member_exp;
 
     bool is_atomic = true;
     let es = List::rrev(r,es);
@@ -1671,7 +1685,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   let xexp = var_exp(x,DL);
   let s    = exp_stmt(copy_exp(xexp),DL);
 
-  let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
+  let lval_f = pointer ? aggrarrow_exp : member_exp;
   let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
 
   bool is_atomic = true;
@@ -1759,10 +1773,10 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           if (is_tagged_union) {
             int i = get_member_offset(ad,f);
             exp_t f_tag_exp = signed_int_exp(i,DL);
-            exp_t lhs = aggrmember_exp(lval,tag_sp,0);
+            exp_t lhs = member_exp(lval,tag_sp,0);
             exp_t assn_exp = assign_exp(lhs,f_tag_exp,0);
             s = seq_stmt(exp_stmt(assn_exp,0),s,0);
-            lval = aggrmember_exp(lval,val_sp,0);
+            lval = member_exp(lval,val_sp,0);
           }
           switch (e->r) {
           case &Array_e(dles):
@@ -1772,7 +1786,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
           default:
-	    bool was_ptr_type = is_pointer_type((type_t)e->topt);
+	    bool was_ptr_type = is_pointer_or_boxed_tvar((type_t)e->topt);
             exp_to_c(nv,e);
             let ad = lookup_field(aggrfields,f);
             // cast to void* to avoid gcc warnings (does it more than needed)
@@ -1830,7 +1844,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     exp_t e1_copy = copy_exp(e1);
     // add the path back on to the expression
     for (; fs != NULL; fs = fs->tl)
-      e1_copy = aggrmember_exp(e1_copy,fs->hd,e1_copy->loc);
+      e1_copy = member_exp(e1_copy,fs->hd,e1_copy->loc);
     e1->r = f(e1_copy, f_env)->r;
     break;
   }
@@ -2023,7 +2037,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     // start assembling the statement
     let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
     let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
-    let xcurr = aggrmember_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
+    let xcurr = member_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
     xcurr = cast_it(c_ptr_type,xcurr);
     let deref_xcurr = deref_exp(xcurr,DL);
     let asn_exp = assign_exp(deref_xcurr,var_exp(z,DL),DL);
@@ -2072,9 +2086,9 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
     let s = declare_stmt(temp,e1_p_type,e1_f,seq_stmt(ifs,sres,DL),DL);
     return stmt_exp_r(s);
   } else {
-    let temp_f_tag = aggrmember_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
+    let temp_f_tag = member_exp(aggrproj(temp_exp,f,DL),tag_sp,DL);
     let test_exp = neq_exp(temp_f_tag,f_tag,DL);
-    let temp_f_val = aggrmember_exp(aggrproj(temp_exp,f,DL),val_sp,DL);
+    let temp_f_val = member_exp(aggrproj(temp_exp,f,DL),val_sp,DL);
     let sres = exp_stmt(temp_f_val,DL);
     let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
     let s = declare_stmt(temp,e1_c_type,e1,seq_stmt(ifs,sres,DL),DL);
@@ -2310,9 +2324,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t t2 = old_typs->tl->hd;
       type_t elt_typ = &VoidType_val; // bogus until next call
       if (is_tagged_pointer_typ_elt(t1,&elt_typ))
-	e1->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL));
+	e1->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),member_exp(new_exp(e1->r,DL),curr_sp,DL));
       if (is_tagged_pointer_typ(t2))
-	e2->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL));
+	e2->r = cast_it_r(cstar_typ(typ_to_c(elt_typ),mt_tq),member_exp(new_exp(e2->r,DL),curr_sp,DL));
       break;
     default: break; //skip
     }
@@ -2566,10 +2580,10 @@ static void exp_to_c(env_t nv, exp_t e) {
             // struct qv_tag temp x;
             // x.tag = i;
             // x.f1  = arg;
-            s = seq_stmt(assign_stmt(aggrmember_exp(varexp,fieldname(1),DL),
+            s = seq_stmt(assign_stmt(member_exp(varexp,fieldname(1),DL),
                                      arg,DL),
                          s,DL);
-            s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
+            s = seq_stmt(assign_stmt(member_exp(varexp,tag_sp,DL),
                                      datatype_tag(tud,qv),DL),
                          s,DL);
             s = declare_stmt(var,strctq(collapse_qvars(qv,tud->name)), NULL,
@@ -2645,8 +2659,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Cast_e(*t,e1,user_inserted,coercion):
     type_t old_t2  = (type_t)e1->topt;
+    type_t old_t2_c = typ_to_c(old_t2);
     type_t new_typ = *t;
-    *t = typ_to_c(new_typ);
+    type_t new_typ_c = typ_to_c(new_typ);
+    *t = new_typ_c;
     exp_to_c(nv, e1);
     // a few Cyclone casts are translated into C effects other than casts:
     switch ($(compress(old_t2),compress(new_typ))) {
@@ -2677,8 +2693,15 @@ static void exp_to_c(env_t nv, exp_t e) {
                            "cast from * to @ type");
             e->r = cast_it_r(*t,fncall_exp(_check_null_e,
                                            new List(e1,NULL),DL));
+          } else {
+            if (unify(old_t2_c,new_typ_c))
+              e->r = e1->r;
           }
-	}
+	} else {
+          // no check needed -- see if we can drop the cast all together
+          if (unify(old_t2_c,new_typ_c))
+            e->r = e1->r;
+        }
         // FIX: the type-checker doesn't currently allow the case
         // where b1 > b2, but this can be allowed for zero-terminated
         // arrays (since the true length isn't known.)  Of course,
@@ -2793,7 +2816,10 @@ DynCast:
       default: break;
       }
       break;
-    default: break;
+    default: 
+      if (unify(old_t2_c,new_typ_c)) 
+        e->r = e1->r;
+      break;
     }
     break;
 
@@ -3075,7 +3101,7 @@ DynCast:
     if (is_tagged && is_read) {
       e->r = check_tagged_union(e1,typ_to_c(e1_cyc_type),e1_cyc_type,f,
                                 in_lhs(nv),
-                                aggrmember_exp);
+                                member_exp);
     }
     if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c((type_t)e->topt),new_exp(e->r,DL),DL)->r;
@@ -3212,7 +3238,7 @@ DynCast:
           // a NULL ? pointer has size 0
           bounds_checks_eliminated++;
           e->r = subscript_exp_r(cast_it(cstar_typ(ta1,tq),
-                                         aggrmember_exp(e1,curr_sp,DL)),e2);
+                                         member_exp(e1,curr_sp,DL)),e2);
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
           let _check_f = _check_dyneither_subscript_e;
@@ -3297,9 +3323,11 @@ DynCast:
       if (sd->impl->tagged) {
         // should only be one field
         let &$(field,fieldexp) = fields->hd;
+        let fieldexp_type = (type_t)fieldexp->topt;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star_or_boxed_tvar(fieldtyp))
+        if (is_void_star_or_boxed_tvar(fieldtyp) &&
+            !is_void_star_or_boxed_tvar(fieldexp_type))
           fieldexp->r =
             cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
         // for tagged unions, must insert tag here
@@ -3319,8 +3347,10 @@ DynCast:
             if((*fields2->hd)[0] == sdfields->hd) {
               let &$(field,fieldexp) = fields2->hd;
               let fieldtyp = field->type;
+              let fieldexp_typ = (type_t)fieldexp->topt;
               exp_to_c(nv,fieldexp);
-              if (is_void_star_or_boxed_tvar(fieldtyp))
+              if (is_void_star_or_boxed_tvar(fieldtyp) && 
+                  !is_pointer_or_boxed_tvar(fieldexp_typ))
                 fieldexp->r =
                   cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
               newdles = new List(new $(NULL,fieldexp), newdles);
@@ -3342,9 +3372,11 @@ DynCast:
       let fields = Tcutil::resolve_aggregate_designators(rgn, e->loc, dles, StructA, fs);
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,fieldexp) = fields->hd;
+        let fieldexp_type = (type_t)fieldexp->topt;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star_or_boxed_tvar(fieldtyp))
+        if (is_void_star_or_boxed_tvar(fieldtyp) &&
+            !is_void_star_or_boxed_tvar(fieldexp_type))
           fieldexp->r = cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
       }
       //for (let es = dles; es != NULL; es = es->tl)
@@ -3359,11 +3391,11 @@ DynCast:
     exp_t tag_exp;
     let x = temp_var();
     let xexp = var_exp(x,DL);
-    exp_t member_exp;
+    exp_t mem_exp;
     datatype_ctype = strctq(collapse_qvars(tuf->name,tud->name));
     tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) :
       datatype_tag(tud,tuf->name);
-    member_exp = xexp;
+    mem_exp = xexp;
     let tqts = tuf->typs;
     // we have to do this differently for the toplevel
     if (is_toplevel(nv)) {
@@ -3371,9 +3403,11 @@ DynCast:
       list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> dles = NULL;
       for(; es != NULL; es = es->tl, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
+        let cur_e_typ = (type_t)cur_e->topt;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star_or_boxed_tvar(field_typ))
+	if (is_void_star_or_boxed_tvar(field_typ) && 
+            !is_pointer_or_boxed_tvar(cur_e_typ))
 	  cur_e = cast_it(field_typ,cur_e);
 	dles = new List(new $(NULL,cur_e),dles);
       }
@@ -3384,15 +3418,17 @@ DynCast:
       // ({ struct F x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
       // Due to GCC bug we can't just use a struct expression
       let rev_assign =
-	new List(assign_stmt(aggrmember_exp(member_exp,tag_sp,DL),tag_exp, DL),
+	new List(assign_stmt(member_exp(mem_exp,tag_sp,DL),tag_exp, DL),
                  NULL);
       for (int i = 1; es != NULL; es = es->tl, i++, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
+        let cur_e_typ = (type_t)cur_e->topt;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star_or_boxed_tvar(field_typ))
+	if (is_void_star_or_boxed_tvar(field_typ) && 
+            !is_pointer_or_boxed_tvar(cur_e_typ))
 	  cur_e = cast_it(field_typ,cur_e);
-	let a = assign_stmt(aggrmember_exp(member_exp,fieldname(i), DL),
+	let a = assign_stmt(member_exp(mem_exp,fieldname(i), DL),
 			    cur_e,DL);
 	rev_assign = new List(a,rev_assign);
       }
@@ -3519,8 +3555,8 @@ DynCast:
     switch (e1_typ) {
     case &AggrType(AggrInfo({.KnownAggr = &ad}, _)):
       let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
-      let e1_f = aggrmember_exp(e1,f,DL);
-      let e1_f_tag = aggrmember_exp(e1_f,tag_sp,DL);
+      let e1_f = member_exp(e1,f,DL);
+      let e1_f_tag = member_exp(e1_f,tag_sp,DL);
       e->r = eq_exp(e1_f_tag,f_tag,DL)->r;
       break;
     default: toc_impos("non-aggregate type in tagcheck");
@@ -3691,8 +3727,8 @@ xlate_pat(env_t<`rgn> nv,
 	continue;
       let t2  = (type_t)p2->topt;
       let f = fieldname(cnt);
-      let result = xlate_pat(nv,rgn,t2,aggrmember_exp(r,f,DL),
-                             aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
+      let result = xlate_pat(nv,rgn,t2,member_exp(r,f,DL),
+                             member_exp(path,f,DL),p2,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       s = seq_stmt(s,result[2],DL);
@@ -3715,8 +3751,8 @@ xlate_pat(env_t<`rgn> nv,
       let t2 = (type_t)pat->topt;
       let t2c = typ_to_c_array(t2);
       //decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
-      let pexp = aggrmember_exp(aggrmember_exp(path,f,DL),val_sp,DL);
-      let memexp = aggrmember_exp(aggrmember_exp(r,f,DL),val_sp,DL);
+      let pexp = aggrmember_exp(member_exp(path,f,DL),val_sp,DL);
+      let memexp = aggrmember_exp(member_exp(r,f,DL),val_sp,DL);
       memexp = cast_it(t2c, memexp);
       pexp = cast_it(t2c,pexp);
       let result = xlate_pat(nv,rgn,t2,
@@ -3726,7 +3762,7 @@ xlate_pat(env_t<`rgn> nv,
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
-      let s4 = if_neq_stmt(aggrmember_exp(aggrmember_exp(r,f,DL),tag_sp,DL),
+      let s4 = if_neq_stmt(aggrmember_exp(member_exp(r,f,DL),tag_sp,DL),
                            signed_int_exp(get_member_offset(ad,f),DL),
                            fail_stmt);
       //let s3 = assign_stmt(var_exp(v,DL),memexp,DL);
@@ -3747,11 +3783,11 @@ xlate_pat(env_t<`rgn> nv,
         }
         let t2 = (type_t)p2->topt;
         let t2c = typ_to_c_array(t2);
-        let memexp = aggrmember_exp(r,f,DL);
+        let memexp = member_exp(r,f,DL);
         if(is_void_star_or_boxed_tvar(lookup_field(ad->impl->fields,f)->type))
           memexp = cast_it(typ_to_c_array(t2c), memexp);
         let result = xlate_pat(nv,rgn,t2,memexp,
-                               aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
+                               member_exp(path,f,DL),p2,fail_stmt,decls);
         nv = result[0];
         decls = result[1];
         s = seq_stmt(s, result[2], DL);
@@ -4150,12 +4186,11 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                      DL),DL),DL)->r;
         }
         return;
-      case &Alias_d(e,tv,vd):
+      case &Alias_d(tv,vd):
         // Handle this like a variable declaration
         qvar_t old_name = vd->name;
         qvar_t new_name = temp_var();
         vd->name = new_name;
-        vd->initializer = e;
         s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
         TOC_RGN(nv, temp) {
           let nv2 =
@@ -4233,7 +4268,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // wrap with the conditional, declarations, and setjmp
         let setjmp_call = // setjmp(h.handler)
           fncall_exp(setjmp_e,
-                     new List(aggrmember_exp(h_exp,handler_sp,DL), NULL),
+                     new List(member_exp(h_exp,handler_sp,DL), NULL),
                      DL);
         let pushhandler_call = // _pushhandler(h);
           exp_stmt(fncall_exp(_push_handler_e,

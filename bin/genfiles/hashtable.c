@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -867,8 +874,8 @@ struct _dyneither_ptr _tmp7=t->tab;
 struct Cyc_List_List*_tmp8=((struct Cyc_List_List**)_tmp7.curr)[(int)((*t->hash)(key)% _get_dyneither_size(_tmp7,sizeof(struct Cyc_List_List*)))];
 int(*_tmp9)(void*,void*)=t->cmp;
 for(0;_tmp8 != 0;_tmp8=_tmp8->tl){
-void*_tmpB;void**_tmpC;struct _tuple0*_tmpA=(struct _tuple0*)_tmp8->hd;_tmpB=(*_tmpA).f1;_tmpC=(void**)&(*_tmpA).f2;
-if(_tmp9(key,_tmpB)== 0)return(void**)_tmpC;}
+void*_tmpB;void**_tmpC;struct _tuple0*_tmpA=(struct _tuple0*)_tmp8->hd;_tmpB=_tmpA->f1;_tmpC=(void**)& _tmpA->f2;
+if(_tmp9(key,_tmpB)== 0)return _tmpC;}
 # 76
 return 0;}
 # 79

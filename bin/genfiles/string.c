@@ -1,4 +1,11 @@
-#include <setjmp.h>
+#ifndef _SETJMP_H_
+#define _SETJMP_H_
+#ifndef _jmp_buf_def_
+#define _jmp_buf_def_
+typedef int jmp_buf[52];
+#endif
+extern int setjmp(jmp_buf);
+#endif
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -1036,7 +1043,7 @@ unsigned long total_len=0;
 struct _dyneither_ptr ans;
 struct _RegionHandle _tmp1F=_new_region("temp");struct _RegionHandle*temp=& _tmp1F;_push_region(temp);{
 struct Cyc_List_List*_tmp9F;struct Cyc_List_List*lens=
-(_tmp9F=_region_malloc(temp,sizeof(*_tmp9F)),((_tmp9F->hd=(void*)((unsigned long)0),((_tmp9F->tl=0,_tmp9F)))));
+(_tmp9F=_region_malloc(temp,sizeof(*_tmp9F)),((_tmp9F->hd=(void*)0,((_tmp9F->tl=0,_tmp9F)))));
 # 226
 struct Cyc_List_List*end=lens;
 {struct Cyc_List_List*p=strs;for(0;p != 0;p=p->tl){
@@ -1068,7 +1075,7 @@ if(strs == 0)return Cyc_Core_rnew_string(r,0);
 if(strs->tl == 0)return Cyc_rstrdup(r,(struct _dyneither_ptr)*((struct _dyneither_ptr*)strs->hd));{
 struct Cyc_List_List*_tmp24=strs;
 struct _RegionHandle _tmp25=_new_region("temp");struct _RegionHandle*temp=& _tmp25;_push_region(temp);
-{struct Cyc_List_List*_tmpA1;struct Cyc_List_List*lens=(_tmpA1=_region_malloc(temp,sizeof(*_tmpA1)),((_tmpA1->hd=(void*)((unsigned long)0),((_tmpA1->tl=0,_tmpA1)))));
+{struct Cyc_List_List*_tmpA1;struct Cyc_List_List*lens=(_tmpA1=_region_malloc(temp,sizeof(*_tmpA1)),((_tmpA1->hd=(void*)0,((_tmpA1->tl=0,_tmpA1)))));
 struct Cyc_List_List*end=lens;
 unsigned long len;
 unsigned long total_len=0;
