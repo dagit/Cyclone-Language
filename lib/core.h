@@ -42,6 +42,7 @@ extern int    int_of_string(string);
 extern string string_of_int(int);
 extern string string_of_uint(unsigned int);
 extern string string_of_char(char);
+extern region_t<`H> heap_region;
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring string_to_Cstring(string);
 // extracts the underlying char[] from the char[?] -- returns null

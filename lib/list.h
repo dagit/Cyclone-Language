@@ -34,12 +34,16 @@ namespace List {
   
   // return a fresh copy of the list (same as map of the identity)
   extern list_t<`a> copy(glist_t<`a,`r> src);
+  extern glist_t<`a,`r2> rcopy(region_t<`r2>, glist_t<`a,`r> src);
   
   // Apply a function to each element in a list, returning a new list. 
   extern list_t<`b> map(`b f(`a),glist_t<`a,`r> x);
+  extern glist_t<`b,`r2> rmap(region_t<`r2>,`b f(`a),glist_t<`a,`r> x);
   
   // Apply a "closure" to each element in a list, returning a new list.
   extern list_t<`b> map_c(`b f(`c,`a),`c env,glist_t<`a,`r> x);
+  extern glist_t<`b,`r2> rmap_c(region_t<`r2>,`b f(`c,`a),`c env,
+                                glist_t<`a,`r> x);
   
   // raised when two lists don't have the same size 
   extern xtunion exn {List_mismatch};
@@ -48,6 +52,8 @@ namespace List {
   // to each pair of elements (in order) and collect the results in a new list.
   // Raises List_mismatch if the sizes of the lists aren't the same.
   extern list_t<`c> map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+  extern glist_t<`c,`r3> rmap2(region_t<`r3>,`c f(`a,`b),
+                               glist_t<`a,`r1> x,glist_t<`b,`r2> y);
   
   // Apply some function to each element of the list, but don't bother to
   // save the result.  Similar to Ocaml's List.iter but doesn't require
@@ -84,28 +90,39 @@ namespace List {
   // Given [x1,...,xn] and [y1,...,ym], return [xn,...,x1,y1,...,ym].
   // That is, the first list reversed and appended to the second list.
   extern list_t<`a> revappend(glist_t<`a,`r> x,list_t<`a> y);
+  extern glist_t<`a,`r2> rrevappend(region_t<`r2>,glist_t<`a,`r> x,
+                                    glist_t<`a,`r2> y);
   
   // Return the reverse of a list. 
   extern list_t<`a> rev(glist_t<`a,`r> x);
+  extern glist_t<`a,`r2> rrev(region_t<`r2>,glist_t<`a,`r> x);
   // Imperatively reverse the list
   extern glist_t<`a,`r> imp_rev(glist_t<`a,`r> x);
   
   // Return a new list that has elements of x followed by elements of y
   extern list_t<`a> append(glist_t<`a,`r> x,list_t<`a> y);
+  extern glist_t<`a,`r2> rappend(region_t<`r2>,
+                                 glist_t<`a,`r> x,glist_t<`a,`r2> y);
   // Modify x so that y is appended to it destructively--if x is empty return y
   extern glist_t<`a,`r> imp_append(glist_t<`a,`r> x,glist_t<`a,`r> y);
   
   // flatten a list of lists into a single list
   extern list_t<`a> flatten(glist_t<glist_t<`a,`r1>,`r2> x);
+  extern glist_t<`a,`r3> rflatten(region_t<`r3>,
+                                  glist_t<glist_t<`a,`r1>,`r2> x);
   
   // Given a partial order less_eq on `a elements and a list, return
   // the list sorted by less_eq.  Uses a merge sort.  The less_eq
   // function should return 0 if the elements are equal, i < 0 if
   // the first is less than the second, and i > 0 otherwise.
   extern list_t<`a> merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
+  extern glist_t<`a,`r2> rmerge_sort(region_t<`r2>, int less_eq(`a,`a), 
+                                     glist_t<`a,`r> x);
   
   // Merge two (sorted) lists using the less_eq operation.
   extern list_t<`a> merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b);
+  extern glist_t<`a,`r3> rmerge(region_t<`r3>, int less_eq(`a,`a),
+                                glist_t<`a,`r1> a,glist_t<`a,`r2> b);
   
   // raised when list_nth doesn't have enough elements in the list. 
   extern xtunion exn {Nth};
@@ -128,11 +145,20 @@ namespace List {
   // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
   // Raises List_mismatch if the lengths are not the same.
   extern list_t<$(`a,`b)@> zip(glist_t<`a,`r1> x,glist_t<`b,`r2> y);
-  
+  extern glist_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
+                                        glist_t<`a,`r1> x, glist_t<`b,`r2> y);
+
   // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn])
   extern $(list_t<`a>,list_t<`b>) split(glist_t<$(`a,`b)@`r1,`r2> x);
   extern $(list_t<`a>,list_t<`b>,list_t<`c>) split3(glist_t<$(`a,`b,`c)@`r1,`r2> x);
-  
+  extern $(glist_t<`a,`r3>,glist_t<`b,`r4>) 
+    rsplit(region_t<`r3> r3, region_t<`r4> r4,
+           glist_t<$(`a,`b)@`r1,`r2> x);
+  extern $(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>) 
+    rsplit3(region_t<`r3> r3, region_t<`r4> r4, region_t<`r5> r5,
+            glist_t<$(`a,`b,`c)@`r1,`r2> x);
+
+
   // Given a list [x1,...,xn] and x, determine if x is in the list.  Uses
   // physical equality for comparison.
   extern bool memq(glist_t<`a,`r> l,`a x);
@@ -158,12 +184,17 @@ namespace List {
   
   // makes a new array with index i being the ith element of the list
   extern `a ?to_array(glist_t<`a,`r> x);
+  extern `a ?`r2 rto_array(region_t<`r2> r2, glist_t<`a,`r> x);
+
   
   // makes a new list with ith element arr[i]
   extern list_t<`a> from_array(`a ?`r arr);
+  extern glist_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ?`r arr);
   
   extern list_t<`a> tabulate(int n, `a f(int));
   extern list_t<`a> tabulate_c(int n, `a f(`b,int), `b env);
+  extern glist_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int));
+  extern glist_t<`a,`r> rtabulate_c(region_t<`r> r,int n,`a f(`b,int),`b env);
   
   // See .cyc for why the two lists are in the same region.
   extern int list_cmp(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
@@ -172,7 +203,10 @@ namespace List {
 
   // Warning: Fairly inefficient implementation.
   extern list_t<`a> filter_c(bool f(`b,`a), `b env, glist_t<`a,`r> l);
+  extern glist_t<`a,`r2> rfilter_c(region_t<`r2> r2, bool f(`b,`a), 
+                                   `b env, glist_t<`a,`r> l);
   
   extern list_t<`a> filter(bool f(`a), glist_t<`a,`r> l);
+  extern glist_t<`a,`r2> rfilter(region_t<`r2> r2,bool f(`a),glist_t<`a,`r> l);
 }
 #endif

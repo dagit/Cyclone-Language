@@ -216,6 +216,9 @@ FILE *Cyc_Stdio_stderr;
 ///////////////////////////////////////////////
 // Regions
 
+// exported in core.h
+struct _RegionHandle *Cyc_Core_heap_region = NULL;
+
 // minimum page size for a region
 #define CYC_MIN_REGION_PAGE_SIZE 128
 
@@ -275,6 +278,9 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
 // allocate s bytes within region r
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   void *result;
+  // allocate in the heap
+  if (r == NULL)
+    return GC_malloc(s);
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
   if (s > (r->last_plus_one - r->offset))

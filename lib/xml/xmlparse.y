@@ -10,7 +10,6 @@ using List;
 using Xml;              // XML abstract syntax
 using Lexing;
 
-void yyerror(string s) { return; } 
 
 // global state (we're not re-entrant)
 namespace XmlParse {
@@ -146,6 +145,8 @@ slashcls:
   SLASHCLOSE { setContext(Normal); }
 
 %%
+
+void yyerror(string s) { return; } 
 
 namespace XmlParse{
   list_t<content_t> parse_file(Stdio::FILE @f) {
