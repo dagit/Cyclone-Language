@@ -1,0 +1,59 @@
+/* Copyright (C) 1999 Lucent Technologies */
+/* Excerpted from 'The Practice of Programming' */
+/* by Brian W. Kernighan and Rob Pike */
+/* Ported to Cyclone by James Cheney, April 2001 */
+
+#include "stdio.h"
+#include "character.h"
+#include "string.h"
+
+using Stdio;
+using Core;
+using Character;
+
+void strings(string, FILE @);
+
+#define MINLEN (6)
+
+/* strings main: find printable strings in files */
+int main(int argc, string ? argv)
+{
+  int i;
+  FILE *fin;
+  if (argc == 1)
+    fprintf(stderr,"usage: strings filenames\n");
+  else {
+    for (i = 1; i < argc; i++) {
+      if ((fin = fopen(argv[i], "rb")) == null)
+	fprintf(stderr,"can't open %s:\n", argv[i]);
+      else {
+	strings(argv[i], fin);
+	fclose(fin);
+      }
+    }
+  }
+  return 0;
+}
+
+/* strings: extract printable strings from stream */
+void strings(string name, FILE @fin)
+{
+  int c = EOF, i;
+  char@{BUFSIZ} buf = new {for i < BUFSIZ : 0};
+  
+
+  do {	/* once for each string */
+    for (i = 0; (c = getc(fin)) != EOF; ) {
+      if (!isprint(c))
+	break;
+      buf[i++] = c;
+      if (i >= BUFSIZ)
+	break;
+    }
+    if (i >= MINLEN)  /* print if long enough */
+      {
+	string sub = String::substring(buf,0,i);
+	printf("%s:%s\n", name, sub);
+      }
+  } while (c != EOF);
+}

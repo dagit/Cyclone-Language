@@ -1,0 +1,44 @@
+/* Copyright (C) 1999 Lucent Technologies */
+/* Excerpted from 'The Practice of Programming' */
+/* by Brian W. Kernighan and Rob Pike */
+/* Ported to Cyclone by James Cheney, April 2001 */
+
+#include "stdio.h"
+#include "character.h"
+
+using Core;
+using Stdio;
+using Character;
+
+/* freq main: display byte frequency counts */
+int main(void)
+{
+  unsigned long count [256]= {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  
+  unsigned int c;
+  
+  
+  while ((c = getchar()) != EOF)
+      count[c]++;
+  
+    for (c = 0; c <= 255; c++)
+    if (count[c] != 0)
+      printf("%.2x  %c  %lu\n", 
+      c, isprint(c) ? c : '-', count[c]);
+  return 0;
+}

@@ -1,0 +1,163 @@
+Porting normal C programs to Cyclone:
+
+0.  
+Typically, if you include something (#include "x.h"), also do using X;
+
+Moreover, usually do using Core; using Stdio; etc.
+
+1. main
+
+Change main(argc,argv) to main(), and instead do 
+string? argv = Core::std_args();
+int argc = argv.size;
+
+5/14/01: This workaround no longer works, instead just do:
+
+main (int argc, string? argv).
+
+2. Arrays
+It is typical in C to declare an array like this:
+char buf[BUFSIZ];
+
+In this case BUFSIZ is a standard library constant which is equal to 1024.
+
+In Cyclone, the only way to initialize a stack allocated array like this appeoars to be to do:
+
+char buf[BUFSIZ] = {0,0,0, ... 1024 times ... ,0};
+
+Otherwise, we have to resort to heap allocation.  Writing a little loop
+to initialize buf's entries to 0 doesn't work, as Cyclone conservatively 
+and incorrectly warns that buf is being used before it is initialized.
+I assume that eventually this will be fixed, but in the meantime, I suggest
+that we make a constant {ZERO} that has any stack array type [n], and
+represents the array filled with zeros.
+
+Meanwhile, I guess I'll have to heap allocate things.
+
+5/14/01:  This has a workaround (which I only realized just now):
+
+Do 
+  string buf = String::expand("",BUFSIZ);
+to initialize a buffer to an arbitrary size.
+
+Also, eventually I'd like to be able to do 
+  string buf = {for i < BUFSIZ: '\0'}
+
+3. #defines
+In C, sonetimes #defined integer constants don't have parentheses around them.  This seems to confuse Cyclone, so put parentheses around them.  Blech.
+
+4. Warnings
+Don't be afraid to have warnings.  They just mean that Dan and Greg still have work to do.  In particular, use @ when it is appropriate, don't downgrade it to * just to get rid of warnings; warnings just meant that a check is happening that probably doesn't need to.
+
+5.  Combining * and ++.
+
+Some C idioms involve dereferencing a pointer, using its value, and then incrementing the value.
+
+E.G.  *text++ in
+
+/* matchstar: search for c*regexp at beginning of text */
+int matchstar(int c, string regexp, string text)
+{
+  do {	/* a * matches zero or more instances */
+    if (matchhere(regexp, text))
+      return 1;
+  } while (*text != '\0' && (*text++ == c || c == '.'));
+  return 0;
+}
+
+Cyclone does not handle this correctly at the moment.  Workaround: Rewrite the loop so that this doesn't happen.  Not sure how exactly.
+
+5/14/01: This has been fixed.
+
+6.  Malloc.
+In C, we get memory for a new struct as follows:
+  sp = (State*)malloc(sizeof(State));
+and then we initialize it field by field.
+In Cyclone, my "reasonable first guess" on how to do this is:
+  sp = new {{"",""},NULL,NULL};
+...then merrily initialize as before.
+(In this case State contains a 2-element string array and 2 pointers.)
+But this does not work: I get 
+  markov.cyc(120:14-120:21): too few arguments to struct
+
+Something that might be even better might be to do:
+  sp = new {{prefix[0],prefix[1]},NULL,statetab[h]};
+that is, to stick the initializers right in there automatically.
+In this case, the number of elements in the prefix array is a #defnied
+constant which we really want to make this code snippet depend on
+directly, instead of hardwiring things in.  The original code did:
+  for (i = 0; i < NPREF; i++)
+    sp->pref[i] = prefix[i];
+so I would instead like to do:
+  sp = new {{for i < NPREF: prefix[i]},NULL,statetab[h]};
+But this requires non-new dependent array comprehensions in addition to 
+non-broken struct initialization.
+
+Later: Figured out that struct initialization works as follows:
+  sp = &_State{.pref={prefix[0],prefix[1]},.suf=NULL,.next=statetab[h]};
+where _State has to be the exact defined struct name.
+
+Anonymous structs are not supported yet, but when they are, maybe we could do:
+  sp = new struct{.pref={prefix[0],prefix[1]},.suf=NULL,.next=statetab[h]};
+or, maybe we could use the defined type name.
+
+7.  Standard library.
+Currently the standard library is not ported.  I assume part of the reason is that it has a lot of routines, like memmove, that are tricky to typecheck.  Too bad.  Every program in the universe uses the standard library.  Memmove is good.
+
+8.  Pointer arithmetic.
+Only a p? type can have pointer arithmetic operations performed on it.  In particular, array types don't allow pointer arithmetic.  EG:
+
+  prefix: string[NPREF] |- memmove(prefix, prefix+1, (NPREF-1)*sizeof(prefix[0]));
+
+results in error
+
+  markov.cyc(205:20-205:26): type char ?@{2}#198 cannot be used here
+
+Easiest fix seems to be to do 
+
+    memmove(&prefix[0], &prefix[1], (NPREF-1)*sizeof(prefix[0]));
+
+which seems rather nasty.
+
+The real culprit seems to be to be that pointer arithmetic should be legal on 
+things with fixed array types p[] as well as on p? types.
+
+9.  Passing around fixed arrays.
+
+Suppose we have a function 
+
+  void f(string arr[10]);
+
+and eventually we call 
+
+  string arr[10] = ...;
+  f(arr);
+
+I get the following type error:
+
+array2.cyc(14:2-14:8): actual argument has type char ?@{10}#66 but formal has type char ?*{10}
+
+This apears to be a bug, and programs that have this behavior cannot be ported until it is fixed.
+
+
+5/14/02: This seems to be almost fixed, but I still get the error:
+array2.cyc(14:2-14:8): actual argument has type char ?@{10}`main  but formal has type char ?*{10}
+
+
+10.  Anonymous structs.
+
+It is common in C (especially system header files) to do:
+  typedef struct
+    {
+      long int __val[2];
+    } __quad_t;
+, i.e. define __quad_t to be an anonymous struct type.  Cyclone can't do this, and so cannot compile files that depend on system headers that do this.  (Or, these headers need to be ported over to the Cyclone library.)
+
+
+11.  Behavior of fgets.
+In C, fgets returns NULL if there was an error, otherwise returns a pointer to the beginning of the buffer that was passed in.
+
+In Cyclone, fgets returns true (==1) if there was an error, false (== 0 == NULL) if the read succeeded.
+
+Why don't we want it to be the other way around?
+

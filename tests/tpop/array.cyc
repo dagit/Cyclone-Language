@@ -1,0 +1,10 @@
+
+
+int main()
+{
+  int buf[1024] = {for i < 1024: 0};
+  int i;
+  for(i = 0; i < 1024; i++)
+    buf[i] = 0;
+  return 0;
+}

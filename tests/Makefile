@@ -52,6 +52,6 @@ clean_prefix:
 	rm -f $(addprefix $(OUT_PREFIX), hello.o cyctest.o cyctest.c foo_tab.* foo.o foo.c *.exe)
 
 clean:
-	rm -f *hello.o *hello.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c 
+	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c 
 	rm -f *test_regions.o *test_regions.c
 	rm -f *~ *.exe *.output *.stackdump

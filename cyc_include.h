@@ -1,7 +1,7 @@
-// This is a C header file to be used by the output of the Cyclone
+/* / This is a C header file to be used by the output of the Cyclone
 // to C translator.  The corresponding definitions are in
 // the file cyc_helpers.c
-
+*/
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 

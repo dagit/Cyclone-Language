@@ -112,6 +112,9 @@ int action(Lexbuf<`a>);
 int strng(Lexbuf<`a>);
 int comment(Lexbuf<`a>);
 
+int line_num;
+int line_start_pos;
+
 } // namespace Lexer
 
 // for parser -- must not be prefixed 

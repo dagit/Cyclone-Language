@@ -1,11 +1,12 @@
-
 #include "core.h"
 #include "stdio.h"
 #include "filename.h"
 #include "string.h"
 
+
 #include "syntax.h"
 #include "parser.h"
+#include "lexer.h"
 #include "lexgen.h"
 #include "compact.h"
 #include "output.h"
@@ -37,14 +38,48 @@ int main(int argc, string ? argv) {
   default: 
     fprintf(stderr, "trouble opening files");
     // FIX: remove dest file
+    // jcheney: fixed this
+
+    remove(dest_name);
     return 1;
   }
   // FIX: catch errors!!!
-  Syntax::lexer_definition_t def = Parser::parse_file(ic);
-  let &$(entries, transitions) = Lexgen::make_dfa(def);
-  let tables = Compact::compact_tables(transitions);
-  Output::output_lexdef(source_name, ic, oc,
-			def->header, tables, entries, def->trailer);
-  
+  // jcheney: working on this
+  try {
+    Syntax::lexer_definition_t def = Parser::parse_file(ic);
+    let &$(entries, transitions) = Lexgen::make_dfa(def);
+    let tables = Compact::compact_tables(transitions);
+    Output::output_lexdef(source_name, ic, oc,
+			  def->header, tables, entries, def->trailer);
+  } catch {
+    // FIX: catch other exceptions, handle common default behavior 
+    // appropriately
+    // jcheney:working on this
+    /* FIX: Subtyping here seems to be broken 
+       disbling for now */
+    /*
+    // jcheney: in this case, can't give exact character position since
+    // don't have access to lexbuf so can't get Lexing::lexeme_start(lbuf)
+    case Parser::Parser_error(s): 
+      fprintf(stderr,"File \"%s\", line %d: syntax error.\n",
+	     source_name, Lexer::line_num);
+      break;
+    case Lexer::Lexical_error(msg,line,col):
+      fprintf(stderr,"File \"%s\", line %d, character %d: %s.\n",
+	      source_name,line,col,msg);
+      break;
+    case Output::Table_overflow:
+      fprintf(stderr,"File \"%s\":\ntransition table overflow, automaton is too big\n",
+	      source_name);
+	      break; */
+    case ex:
+      fprintf(stderr, "error in parsing, generation, compaction, or output");
+      remove(dest_name);
+      throw ex;
+      return 1;
+  }  
   return 0;
 }
+
+
+

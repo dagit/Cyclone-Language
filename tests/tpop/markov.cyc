@@ -1,0 +1,208 @@
+/* Copyright (C) 1999 Lucent Technologies */
+/* Excerpted from 'The Practice of Programming' */
+/* by Brian W. Kernighan and Rob Pike */
+/* Prted to Cyclone by James Cheney, April 2001 */
+
+/*
+ * Markov chain random text generator.
+ */
+
+#include "string.h"
+#include "stdio.h"
+using Stdio;
+using Core;
+using String;
+
+#define NPREF	(2)	/* number of prefix words */
+#define NHASH	(4093)	/* size of state hash table array */
+#define MAXGEN	(10000)	/* maximum words generated */
+
+
+
+struct _Suffix {	/* list of suffixes */
+  string word;			/* suffix */
+  struct _Suffix * next;			/* next in list of suffixes */
+};
+
+struct _State {	/* prefix + suffix list */
+  string pref[NPREF];	/* prefix words */
+  struct _Suffix * suf;			/* list of suffixes */
+  struct _State	* next;			/* next in hash table */
+};
+
+typedef struct _State State;
+typedef struct _Suffix Suffix;
+
+
+State* lookup(string prefix[NPREF], int create);
+void build(string prefix[NPREF], FILE@);
+void generate(int nwords);
+void add(string prefix[NPREF], string word);
+
+State	**statetab = null;
+
+char NONWORD[] = "\n";  /* cannot appear as real word */
+
+/* temporary stubs */
+long int time(long int* ip)
+{
+  if(ip != null) *ip = 0;
+  return 0;
+}
+
+int srand_seed;
+void srand(unsigned int seed)
+{
+  srand_seed = seed;
+}
+
+int rand()
+{
+  srand_seed * 47 + 8191;
+}
+
+`a ? memmove(`a ? dest, `a ? src, size_t n)
+{/* minor assumption: n is a multiple of sizeof('a) == 4  */
+  /* Here n is a number of bytes to copy.  
+     It's hard to duplicate this behavior exactly. */
+  /* FIX: this.  I assume whoever ports stdlib will figure this out */
+  int i;
+  int m = n / 4;
+  if(src < dest && dest < src + m)
+    for(i = m-1; i >= 0; i--)
+      dest[i] = src[i];
+  else
+    for(i = 0; i < n; i++)
+      dest[i] = src[i];
+  return dest;
+}
+
+/* end stubs */
+
+/* markov main: markov-chain random text generation */
+int main(void)
+{
+  int i, nwords = MAXGEN;
+  string prefix[NPREF];		/* current input prefix */
+
+  statetab = new {for i < NHASH : null};	/*initialize*/
+  
+  int c;
+  long seed;
+
+  seed = time(null);
+  
+  srand(seed);
+  for (i = 0; i < NPREF; i++)	/* set up initial prefix */
+    prefix[i] = NONWORD;
+  build(prefix, stdin);
+  add(prefix, NONWORD);
+  generate(nwords);
+  return 0;
+}   
+
+const int MULTIPLIER = 31;  /* for hash() */
+
+/* hash: compute hash value for array of NPREF strings */
+unsigned int hash(string s[NPREF])
+{
+  unsigned int h;
+  unsigned char ? p;
+  int i;
+
+  h = 0;
+  for (i = 0; i < NPREF; i++)
+    for (p = (unsigned char * ) s[i]; *p != '\0'; p++)
+      h = MULTIPLIER * h + *p;
+  return h % NHASH;
+}
+
+/* lookup: search for prefix; create if requested. */
+/*  returns pointer if present or created; null if not. */
+/*  creation doesn't strdup so strings mustn't change later. */
+State* lookup(string prefix[NPREF], int create)
+{
+  int i, h;
+  State *sp;
+
+  h = hash(prefix);
+  for (sp = statetab[h]; sp != null; sp = sp->next) {
+    for (i = 0; i < NPREF; i++)
+      if (strcmp(prefix[i], sp->pref[i]) != 0)
+	break;
+    if (i == NPREF)		/* found it */
+      return sp;
+  }
+  if (create) {
+    /* FIX: replace .pref={prefix[0],prefix[1]} with 
+       .pref={for i < NPREF : prefix[i]} 
+       when independent array comprehensions become available */
+    sp = &_State{.pref={prefix[0],prefix[1]},.suf=null,.next=statetab[h]};
+    statetab[h] = sp;
+  }
+  return sp;
+}
+
+/* addsuffix: add to state. suffix must not change later */
+void addsuffix(State *sp, string suffix)
+{
+  Suffix *suf;
+
+  suf = &_Suffix{.word=suffix,.next=suf};
+
+  sp->suf = suf;
+}
+
+/* add: add word to suffix list, update prefix */
+void add(string prefix[NPREF], string suffix)
+{
+  State *sp;
+
+  sp = lookup(prefix, 1);  /* create if not found */
+  addsuffix(sp, suffix);
+  /* move the words down the prefix */
+  memmove(&prefix[0], &prefix[1], (NPREF-1)*sizeof(prefix[0]));
+  prefix[NPREF-1] = suffix;
+}
+
+/* build: read input, build prefix table */
+void build(string prefix[NPREF], FILE @f)
+{
+  string buf;
+
+  /* create a format string; %s could overflow buf */
+  /* FIX: this doesn't work in Cyclone; no sprintf */
+  /* sprintf(fmt, "%%%ds", sizeof(buf)-1); */
+  /* this terminates on error/EOF, not just EOF, like the fscanf version did */
+  while (fgets(buf,f) != true)
+    add(prefix, strdup(buf));
+}
+
+/* generate: produce output, one word per line */
+void generate(int nwords)
+{
+  State *sp;
+  Suffix *suf;
+  string prefix[NPREF], w;
+  int i, nmatch;
+
+  for (i = 0; i < NPREF; i++)	/* reset initial prefix */
+    prefix[i] = (string)NONWORD;
+
+  for (i = 0; i < nwords; i++) {
+    sp = lookup(prefix, 0);
+    if (sp == null)
+      printf("internal error: lookup failed\n");
+    nmatch = 0;
+    for (suf = sp->suf; suf != null; suf = suf->next)
+      if (rand() % ++nmatch == 0) /* prob = 1/nmatch */
+	w = suf->word;
+    if (nmatch == 0)
+      printf("internal error: no suffix %d %s\n", i, prefix[0]);
+    if (strcmp(w, NONWORD) == 0)
+      break;
+    printf("%s\n", w);
+    memmove(&prefix[0], &prefix[1], (NPREF-1)*sizeof(prefix[0]));
+    prefix[NPREF-1] = (string)w;
+  }
+}
