@@ -96,7 +96,9 @@ else
         mkdir -p $dest_file
         dirs="$dest_file $dirs"
       fi
-      cp $src_file $dest_file
+      # cp -p preserves mod times.  This is needed because OS X requires
+      # .a files to have a modtime = last time ranlib was run on the file.
+      cp -p $src_file $dest_file
     done
   } < $inst_file
 

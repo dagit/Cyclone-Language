@@ -496,9 +496,21 @@ static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
 }
 
 /* Given: dirs=[d1,d2,..,dn]
+   Return:     [d1/subdir,d2/subdir,..,dn/subdir] */
+static list_t<const char ?`H@`H>
+add_subdir(list_t<const char ?`H@`H> dirs, const char ?subdir) {
+  let l = NULL;
+  for (; dirs != NULL; dirs = dirs->tl) {
+    l = new List(new (const char ?)Filename::concat(*dirs->hd,subdir),l);
+  }
+  l = List::imp_rev(l);
+  return l;
+}
+
+/* Given: dirs=[d1,d2,..,dn]
    Return:     [d1,d1/subdir,d2,d2/subdir,..,dn,dn/subdir] */
 static list_t<const char ?`H@`H>
-also_suffix(list_t<const char ?`H@`H> dirs, const char ?subdir) {
+also_subdir(list_t<const char ?`H@`H> dirs, const char ?subdir) {
   let l = NULL;
   for (; dirs != NULL; dirs = dirs->tl) {
     l = new List(dirs->hd,l);
@@ -961,11 +973,14 @@ int main(int argc, string_t<`H> ?`H argv) {
   string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
     cyclone_exec_path = new List(new cyclone_exec_prefix, cyclone_exec_path);
-  // FIX: we should not share def_lib_path but rather have a def_exec_path
   string_t def_lib_path = Cstring_to_string(Cdef_lib_path);
   if (strlen(def_lib_path) > 0)
-    cyclone_exec_path = new List(new def_lib_path, cyclone_exec_path);
+    cyclone_exec_path =
+     new List(new (const char ?)Filename::concat(def_lib_path, "cyc-lib"),
+              cyclone_exec_path);
   cyclone_exec_path = List::imp_rev(cyclone_exec_path);
+  let cyclone_arch_path = also_subdir(cyclone_exec_path,
+                                      Cstring_to_string(Carch));
 
   /* The absolute file name is kept in a global variable */
   if (!stop_after_cpp_r) /* don't bother if we won't translate to C */
@@ -1028,9 +1043,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     gc_filename = "gc.a";
  
     let gc = (nogc_r ?
-              do_find(cyclone_exec_path,nogc_filename):
-              do_find(cyclone_exec_path,gc_filename));
-    let runtime = do_find(cyclone_exec_path,runtime_filename);
+              do_find(cyclone_arch_path,nogc_filename):
+              do_find(cyclone_arch_path,gc_filename));
+    let runtime = do_find(cyclone_arch_path,runtime_filename);
 
     // FIX: temporarily removed from interface check below
     //stdlib = list(new libcyc_flag);

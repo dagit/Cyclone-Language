@@ -26,10 +26,10 @@ $(error "Must have ARCH variable defined -- perhaps forgot to run ./configure")
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
-CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
+CYC_LIB_PATH := $(CYCDIR)/bin/lib
 CYC_INC_PATH := $(CYCDIR)/lib
 
-build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs 
+all: $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a cyclone tools aprof libs 
 
 cyclone: include/cstdio.h include/csignal.h
 	$(MAKE) -C bin/genfiles install 
@@ -50,9 +50,17 @@ nocheck:
 
 .PHONY: tools cyclone aprof libs nocheck
 
-$(CYC_LIB_PATH)/gc.a:
+$(CYC_LIB_PATH):
+	mkdir $(CYC_LIB_PATH)
+	mkdir $(CYC_LIB_PATH)/cyc-lib
+	mkdir $(CYC_LIB_PATH)/cyc-lib/$(ARCH)
+	cp bin/cyc-lib/cyc_include.h $(CYC_LIB_PATH)/cyc-lib
+
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_LIB_PATH)
+	cp -p $< $@
+
+gc/gc.a:
 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
-	ln gc/gc.a $@
 
 # Kludge to use architecture-specific constants -- we hope buildlib comes soon
 # The resulting files must *not* be used when cross-compiling.
@@ -75,7 +83,7 @@ include/csignal.h: include/csignal.h_in include/arch/$(ARCH).h
 
 # Store the compiler, libraries, and tools in the user-defined directories.
 # Also, keep a record of what was copied for later uninstall.
-install: build inc_install lib_install bin_install
+install: all inc_install lib_install bin_install
 uninstall: inc_uninstall lib_uninstall bin_uninstall
 
 ifdef INC_INSTALL
@@ -98,7 +106,7 @@ bin_install bin_uninstall:
 endif
 ifdef LIB_INSTALL
 lib_install:
-	$(SHELL) config/cyc_install bin/cyc-lib/* $(LIB_INSTALL)
+	$(SHELL) config/cyc_install bin/lib/* $(LIB_INSTALL)
 lib_uninstall:
 	$(SHELL) config/cyc_install -u $(LIB_INSTALL)
 else
@@ -297,8 +305,7 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tests        clean
 	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
-	$(RM) bin/cyc-lib/*libcyc*.a
-	$(RM) bin/cyc-lib/runtime_cyc*.$(O)
+	$(RM) -r bin/lib
 	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
 	$(RM) *~ amon.out
 	$(RM) include/cstdio.h include/csignal.h 

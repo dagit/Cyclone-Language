@@ -3,21 +3,22 @@ include ../../Makefile.inc
 OLDCFLAGS := $(CFLAGS)
 CFLAGS += -O3
 
-CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
+CYC_LIB_PATH=$(CYCDIR)/bin/lib
 CYC_BIN_PATH=$(CYCDIR)/bin
 
 # general targets
 
-install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a $(RUNTIME).$(O))\
+install: $(ARCH) $(CYC_LIB_PATH)/$(CYCLIB)\
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))\
   $(addprefix $(CYC_BIN_PATH)/, $(addsuffix $(EXE), cyclone cycdoc buildlib))
 	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
 $(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
-	cp $< $@
+	cp -p $< $@
 $(CYC_LIB_PATH)/nocheck_$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
-	cp $< $@
-$(CYC_LIB_PATH)/nogc.a: $(ARCH)/lib/nogc.a
-	cp $< $@
-$(CYC_LIB_PATH)/$(RUNTIME).$(O): $(ARCH)/lib/$(RUNTIME).$(O)
+	cp -p $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: $(ARCH)/lib/nogc.a
+	cp -p $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(ARCH)/lib/$(RUNTIME).$(O)
 	cp $< $@
 $(CYC_BIN_PATH)/cyclone$(EXE): $(ARCH)/src/cyclone$(EXE)
 	cp $< $@
@@ -26,22 +27,24 @@ $(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
 $(CYC_BIN_PATH)/buildlib$(EXE): $(ARCH)/src/buildlib$(EXE)
 	cp $< $@
 
-install_a: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, libcyc_a.a nogc_a.a $(RUNTIME)_a.$(O))
+install_a: $(ARCH) $(CYC_LIB_PATH)/libcyc_a.a \
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_a.a $(RUNTIME)_a.$(O))
 
 $(CYC_LIB_PATH)/libcyc_a.a: $(ARCH)/lib/libcyc_a.a
-	cp $< $@
-$(CYC_LIB_PATH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
-	cp $< $@
-$(CYC_LIB_PATH)/$(RUNTIME)_a.$(O): $(ARCH)/lib/$(RUNTIME)_a.$(O)
-	cp $< $@
+	cp -p $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_a.a: $(ARCH)/lib/nogc_a.a
+	cp -p $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O): $(ARCH)/lib/$(RUNTIME)_a.$(O)
+	cp -p $< $@
 
-install_nocheck: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, libcyc_nocheck.a nogc_nocheck.a $(RUNTIME).$(O))
+install_nocheck: $(ARCH) $(CYC_LIB_PATH)/libcyc_nocheck.a\
+  $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc_nocheck.a $(RUNTIME).$(O))
 
-$(CYC_LIB_PATH)/nogc_nocheck.a: $(ARCH)/lib/nogc.a
-	cp $< $@
+$(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc_nocheck.a: $(ARCH)/lib/nogc.a
+	cp -p $< $@
 
 $(CYC_LIB_PATH)/libcyc_nocheck.a: $(ARCH)/lib/libcyc_nocheck.a
-	cp $< $@
+	cp -p $< $@
 
 # architecture-specific targets
 
@@ -73,13 +76,13 @@ $(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.$(O)
 $(ARCH)/lib/$(RUNTIME)_a.$(O): $(ARCH)/lib/a_$(RUNTIME).$(O)
 	cp $< $@
 
-$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+$(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc

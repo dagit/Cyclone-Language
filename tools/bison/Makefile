@@ -24,6 +24,7 @@
 include ../../Makefile.inc
 PROG = cycbison$(EXE)
 BINDIR = $(CYCDIR)/bin
+CYC_LIB_PATH = $(BINDIR)/lib
 
 # hack so executable can find cycbison.simple
 BISONDIR=$(shell pwd)
@@ -34,9 +35,10 @@ PFILE1=bison.hairy
 PFILES = -DXPFILE=\"$(BISONDIR)/$(PFILE)\" -DXPFILE1=\"$(BISONDIR)/$(PFILE1)\"
 
 LC_FLAG =
-# We put in the explicit -I and -B because install builds this tool before
-# installing the include files and libraries.  Also we use a particular CYCC.
-override CYCFLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+# We put in the explicit -I and -B because install builds this tool
+# before installing the include files and libraries.  Also we use a
+# particular CYCC.
+override CYCFLAGS += -I$(CYCDIR)/include -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG)
 CYCC:=$(BINDIR)/$(CYCCOMP) 
 
 SRCS = main getargs version warshall files gram \
@@ -50,8 +52,10 @@ install: $(BINDIR)/$(PROG)
 $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
-$(PROG): $(O_SRCS) $(BINDIR)/cyc-lib/$(CYCLIB)
-	$(CYCC) -B$(BINDIR)/cyc-lib $(LC_FLAG) -o $@ $(O_SRCS) $(LDFLAGS)
+# The -B tells the compiler to use the right gc.a and runtime_cyc.o
+# The -L tells the compiler to use the right libcyc.a
+$(PROG): $(O_SRCS) $(CYC_LIB_PATH)/$(CYCLIB)
+	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ $(O_SRCS) $(LDFLAGS)
 
 # This file is different to pass the parser file names to the compiler.
 files.o: files.cyc
