@@ -528,7 +528,7 @@ augment_automaton()
   register core *statep;
   register shifts *sp;
   register shifts *sp2;
-  register shifts *sp1;
+  register shifts *sp1 = NULL; /* DJG: appease control-flow checker */
 
   sp = first_shift;
 

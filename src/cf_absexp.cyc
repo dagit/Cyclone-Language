@@ -61,7 +61,7 @@ using CfFlowInfo;
 using NewControlFlow;
 namespace CfAbsexp;
 
-xtunion exn {BadAbsexp};
+xtunion exn {BadAbsexp; BadPtrDeref};
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t     seg_t;
@@ -341,8 +341,6 @@ void check_absexp(absexp_t ae) {
 // And for AddressOf, the result is AllIL if totally init, ThisIL otherwise.
 
 // To do: avoid doing so much allocation.
-// FIX: Cannot descend through uninitialized -- it's an error that must
-//      be reported!
 path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao);
 init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   switch(ao) {
@@ -362,6 +360,7 @@ init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   case &DerefOp(ao2): 
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
     switch(inner_pinfo) {
+    case &LeafPI(InitState(_,NoneIL)): throw BadPtrDeref;
     case &LeafPI(x): return x;
     case &DictPI(_): throw BadAbsexp; // you cannot apply * to a record
     }
@@ -385,6 +384,7 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   case &DerefOp(ao2):
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
     switch(inner_pinfo) {
+    case &LeafPI(InitState(_,NoneIL)): throw BadPtrDeref;
     case &LeafPI(InitState(_,ThisIL)): return mkLeafPI(Esc,NoneIL);//Esc right?
     case &LeafPI(InitState(_,&MustPointTo(p))):
       return lookup_place(pinfo_dict,p);
@@ -442,6 +442,7 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
   case BottomFL:    return BottomFL;
   case &InitsFL(d): pinfo_dict = d; break;
   }
+  try
   switch(ae) {
 
     // To do: try to avoid unncessary allocation in AssignAE
@@ -591,5 +592,10 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
       env->all_changed = new Set::union_two(*outer_all_changed,
 					    this_all_changed);
     return out_flow;
+  }
+  catch { 
+  case BadPtrDeref:
+    Tcutil::terr(loc, "possibly uninitialized pointer dereferenced");
+    return BottomFL;
   }
 }
