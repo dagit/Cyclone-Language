@@ -12,9 +12,6 @@
 include $(CYCDIR)/Makefile.inc
 VPATH=$(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)
 export CYCFLAGS
-ifndef UPDATEARCH
-UPDATEARCH:=$(ARCH)
-endif
 
 # For bootstrapping, may want to override these with something appropriate
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
@@ -57,13 +54,6 @@ endif
 ifdef OPTBUILD
 override CYCFLAGS += -O3
 override CFLAGS += -O3
-endif
-
-# cross compilation -- will be changed to use -b shortly
-ifneq ($(UPDATEARCH),$(ARCH))
-#override CYCFLAGS += -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(UPDATEARCH))'
-# TJIM -- WORKING
-override CYCFLAGS += -b $(UPDATEARCH)
 endif
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
@@ -127,11 +117,10 @@ cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LIBR)
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LIBR)
 	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LDFLAGS)
 
+# FIX: the wchar stuff should be moved to the cycspecs file
 install_path.c: $(CYCDIR)/Makefile.inc
-	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
-	  echo "char *Carch = \"$(ARCH)\";"; \
+	 (echo "char *Carch = \"$(build)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
-	  echo "char *Ccomp = \"$(CC)\";"; \
 	  echo "char *Cversion = \"$(VERSION)\";"; \
 	  echo "int Wchar_t_unsigned = $(WCHAR_T_UNSIGNED);"; \
 	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
@@ -173,7 +162,7 @@ runtime_cyc.a: $(O_RUNTIME)
 cyc_include.h: $(CYCDIR)/bin/lib/cyc-lib/cyc_include.h
 	cp $< $@
 
-cycspecs: $(CYCDIR)/bin/lib/cyc-lib/$(UPDATEARCH)/cycspecs
+cycspecs: $(CYCDIR)/bin/lib/cyc-lib/$(build)/cycspecs
 	cp $< $@
 
 core.h: $(CYCDIR)/include/core.h

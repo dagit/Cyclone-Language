@@ -18,12 +18,9 @@
 # There is now a build/boot/cyclone.exe that you can use/move as you wish.
 
 include Makefile.inc
+VPATH=bin/genfiles:lib
 
-export CYCDIR CC CYCFLAGS UPDATEARCH
-
-ifndef ARCH
-$(error "Must have ARCH variable defined -- perhaps forgot to run ./configure")
-endif
+export CYCDIR CC CFLAGS CYCFLAGS
 
 CYC_INCLUDE_H := bin/lib/cyc-lib/cyc_include.h
 
@@ -34,14 +31,26 @@ version:
 	@echo $(VERSION)
 
 cyclone: \
+	directory-structure \
 	$(CYC_INCLUDE_H) \
-	bin/lib/cyc-lib/$(ARCH)/gc.a \
+	bin/lib/cyc-lib/$(build)/gc.a \
 	bin/lib/$(CYCBOOTLIB) \
 	$(addprefix bin/, cyclone$(EXE) cycdoc$(EXE) buildlib$(EXE)) \
-	bin/lib/cyc-lib/$(ARCH)/cycspecs \
-	$(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a runtime_cyc.a) \
-	bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h \
+	bin/lib/cyc-lib/$(build)/cycspecs \
+	$(addprefix bin/lib/cyc-lib/$(build)/, nogc.a runtime_cyc.a) \
+	bin/lib/cyc-lib/$(build)/cyc_setjmp.h \
 	bin/lib/$(CYCLIB)
+
+# FIX: can we cross-compile gc?
+# FIX: cross-compile libxml.a
+# FIX: cross-compile the _a, _pg, _nocheck variants
+ifneq ($(build),$(target))
+cyclone: \
+	bin/lib/cyc-lib/$(target)/cycspecs \
+	$(addprefix bin/lib/cyc-lib/$(target)/, nogc.a runtime_cyc.a) \
+	bin/lib/cyc-lib/$(target)/cyc_setjmp.h \
+	bin/lib/cyc-lib/$(target)/$(CYCLIB)
+endif
 
 tools:
 	$(MAKE) -C tools/bison  install 
@@ -60,10 +69,10 @@ libs:
 a_libs:
 endif
 
-aprof: $(CYC_INCLUDE_H) \
+aprof: \
   bin/lib/libcycboot_a.a \
   bin/lib/libcyc_a.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_a.a runtime_cyc_a.a) \
+  $(addprefix bin/lib/cyc-lib/$(build)/, nogc_a.a runtime_cyc_a.a) \
   a_libs
 	$(MAKE) -C tools/aprof install
 
@@ -72,89 +81,55 @@ cyclone_a: aprof bin/cyclone_a$(EXE)
 cyclone_pg: bin/cyclone_pg$(EXE)
 
 gprof: bin/lib/libcyc_pg.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_pg.a runtime_cyc_pg.a)
+  $(addprefix bin/lib/cyc-lib/$(build)/, nogc_pg.a runtime_cyc_pg.a)
 
 nocheck: bin/lib/libcyc_nocheck.a \
-  $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc.a runtime_cyc.a)
+  $(addprefix bin/lib/cyc-lib/$(build)/, nogc.a runtime_cyc.a)
 
-.PHONY: all tools cyclone aprof gprof libs nocheck
+.PHONY: all tools cyclone aprof gprof libs nocheck directory-structure
 
 # Executables for the bin directory
 bin/cyclone$(EXE): \
-  $(addprefix bin/genfiles/, $(O_SRCS) install_path.$(O)) \
+  $(addprefix build/$(build)/, $(O_SRCS) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
-  bin/lib/cyc-lib/$(ARCH)/gc.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+  bin/lib/cyc-lib/$(build)/runtime_cyc.a \
+  bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 bin/cyclone_a$(EXE): \
   $(addprefix bin/genfiles/, $(A_SRCS) install_path.$(O)) \
   bin/lib/libcycboot_a.a \
-  bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a \
-  bin/lib/cyc-lib/$(ARCH)/gc.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+  bin/lib/cyc-lib/$(build)/runtime_cyc_a.a \
+  bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 bin/cyclone_pg$(EXE): \
   $(addprefix bin/genfiles/, $(PG_SRCS) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a \
-  bin/lib/cyc-lib/$(ARCH)/gc.a
-	$(CC) -pg -o $@ $^ $(LDFLAGS)
+  bin/lib/cyc-lib/$(build)/runtime_cyc_pg.a \
+  bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -pg -o $@ $^ $(LDFLAGS)
 
 bin/cycdoc$(EXE): \
-  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O)) \
+  $(addprefix build/$(build)/, $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O)) \
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
-  bin/lib/cyc-lib/$(ARCH)/gc.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+  bin/lib/cyc-lib/$(build)/runtime_cyc.a \
+  bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 bin/buildlib$(EXE): \
-  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
+  $(addprefix build/$(build)/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
   bin/lib/$(CYCBOOTLIB) \
-  bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a \
-  bin/lib/cyc-lib/$(ARCH)/gc.a
-	$(CC) -o $@ $^ $(LDFLAGS)
+  bin/lib/cyc-lib/$(build)/runtime_cyc.a \
+  bin/lib/cyc-lib/$(build)/gc.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-
-# Directory structure of the installed library.  (During boot,
-# this is built in bin/lib.)
-#
-# lib/
-#   libcyc.a                  # "Regular" lib files go here as in gcc
-#   libcycboot.a              # .. maybe the boot lib isn't regular?
-#   cyc-lib/                  # "Special" compiler files go here
-#     cyc_include.h           # Non-arch specific
-#     ARCH/                   # i686-unknown-linux, etc.
-#       cyc_setjmp.h          # These are all arch specific
-#       cycspecs
-#       gc.a
-#       include/              # Arch specific headers; non-arch spec elsewhere
-#         HEADERS             # stdio.h, etc.
-#         precore_c.h         # precore_c, cstubs, and cycstubs are just
-#         cstubs.{c,o}        #  an artifact of the build process, should
-#         cycstubs.{cyc,o}    #  properly be deleted before install
-#       nogc.a
-#       runtime_cyc_cyc.o
-#
-# Note, every file in this hierarchy has $(CYC_INCLUDE_H) as a
-# prerequisite (except for cyc_include.h).  This is because the rule
-# for cyc_include.h causes the complete directory structure to be
-# mkdir'd.  The other files actually just need their parent directory
-# to exist, they don't depend cyc_include.h.  However, if they instead
-# used their parent directory as a prerequisite, this would lead to
-# unnecessary rebuilds, because the mod time of a directory changes
-# when, e.g., you add a file to it.
-
-bin/lib/$(CYCBOOTLIB): $(CYC_INCLUDE_H)
 bin/lib/$(CYCBOOTLIB): \
-  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-  bin/genfiles/boot_cstubs.$(O) \
-  bin/genfiles/boot_cycstubs.$(O)
+  $(addprefix build/$(build)/, $(O_BOOT_LIBS)) \
+  build/$(build)/boot_cstubs.$(O) \
+  build/$(build)/boot_cycstubs.$(O)
 	-$(RM) $@
-	ar rc $@ \
-	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-	  bin/genfiles/boot_cstubs.$(O) \
-	  bin/genfiles/boot_cycstubs.$(O)
+	ar rc $@ $^
 	$(RANLIB) $@
 
 bin/lib/libcycboot_a.a: \
@@ -162,10 +137,7 @@ bin/lib/libcycboot_a.a: \
   bin/genfiles/boot_cstubs_a.$(O) \
   bin/genfiles/boot_cycstubs_a.$(O)
 	-$(RM) $@
-	ar rc $@ \
-	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
-	  bin/genfiles/boot_cstubs_a.$(O) \
-	  bin/genfiles/boot_cycstubs_a.$(O)
+	ar rc $@ $^
 	$(RANLIB) $@
 
 # Have two sets of rules below, to differentiate which files require
@@ -174,36 +146,63 @@ bin/lib/libcycboot_a.a: \
 # NOOPT off, setting optimization flags as needed.
 NOOPT=
 ifdef NOOPT
-%.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+build/$(build)/%.o: %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+ifneq ($(build),$(target))
+build/$(target)/%.o: %.c
+	$(CC) $(BTARGET) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+endif
+
+build/$(build)/%.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+
+ifneq ($(build),$(target))
+build/$(target)/%.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) $(BTARGET) -c -Iinclude -Ibin/lib/cyc-lib/$(target)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+endif
 
 %_a.$(O): %.c
-	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+	$(CC) $(CFLAGS) -c -o $@ -DCYC_REGION_PROFILE $<
 
 %_a.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -pa -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+	bin/cyclone$(EXE) -pa -c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 
 %_pg.$(O): %.c
-	$(CC) -c -o $@ -pg $(CFLAGS) $<
+	$(CC) $(CFLAGS) -c -o $@ -pg $<
 
 %_pg.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -pg -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+	bin/cyclone$(EXE) -pg -c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 
 %_nocheck.$(O): %.c
-	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
+	$(CC) $(CFLAGS) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $<
 
 %_nocheck.$(O): %.cyc cyclone
-	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 else
-%.$(O): %.c
+build/$(build)/%.$(O): %.c
 	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
 	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
 	else $(MAKE) NOOPT=yes $@; fi)
 
-%.$(O): %.cyc bin/cyclone$(EXE)
+ifneq ($(build),$(target))
+build/$(target)/%.$(O): %.c
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+endif
+
+build/$(build)/%.$(O): %.cyc bin/cyclone$(EXE)
 	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
 	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
 	else $(MAKE) NOOPT=yes $@; fi)
+
+ifneq ($(build),$(target))
+build/$(target)/%.$(O): %.cyc bin/cyclone$(EXE)
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+endif
 
 %_a.$(O): %.c
 	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
@@ -234,159 +233,246 @@ else
 	@(if [ -z "$(findstring $@,$(O_NOOPT_SRCS))" ]; then \
 	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
 	else $(MAKE) NOOPT=yes $@; fi)
-
 endif
 
+# FIX: the wchar stuff should be moved to the cycspecs file
 bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
-	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
-	  echo "char *Carch = \"$(ARCH)\";"; \
+	 (echo "char *Carch = \"$(build)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
-	  echo "char *Ccomp = \"$(CC)\";"; \
 	  echo "char *Cversion = \"$(VERSION)\";"; \
 	  echo "int Wchar_t_unsigned = $(WCHAR_T_UNSIGNED);"; \
 	  echo "int Sizeof_wchar_t = $(SIZEOF_WCHAR_T);") > $@
 
-bin/lib/$(CYCLIB): $(CYC_INCLUDE_H)
-bin/lib/$(CYCLIB): bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
+bin/lib/$(CYCLIB): bin/lib/cyc-lib/$(build)/cyc_setjmp.h
 bin/lib/$(CYCLIB): \
-  $(addprefix lib/, $(O_LIBS)) \
-  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-  bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O) \
-  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O)
+  $(addprefix build/$(build)/, $(O_LIBS)) \
+  $(addprefix build/$(build)/, $(O_BOOT_LIBS)) \
+  build/$(build)/include/cstubs.$(O) \
+  build/$(build)/include/cycstubs.$(O)
 	-$(RM) $@
 	ar rc $@ \
-	  $(addprefix lib/, $(O_LIBS)) \
-	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O)
+	  $(addprefix build/$(build)/, $(O_LIBS)) \
+	  $(addprefix build/$(build)/, $(O_BOOT_LIBS)) \
+	  build/$(build)/include/cstubs.$(O) \
+	  build/$(build)/include/cycstubs.$(O)
 	$(RANLIB) $@
+
+ifneq ($(build),$(target))
+bin/lib/cyc-lib/$(target)/$(CYCLIB): bin/lib/cyc-lib/$(target)/cyc_setjmp.h
+bin/lib/cyc-lib/$(target)/$(CYCLIB): \
+  $(addprefix build/$(target)/, $(O_LIBS)) \
+  $(addprefix build/$(target)/, $(O_BOOT_LIBS)) \
+  build/$(target)/include/cstubs.$(O) \
+  build/$(target)/include/cycstubs.$(O)
+	-$(RM) $@
+	ar rc $@ \
+	  $(addprefix build/$(target)/, $(O_LIBS)) \
+	  $(addprefix build/$(target)/, $(O_BOOT_LIBS)) \
+	  build/$(target)/include/cstubs.$(O) \
+	  build/$(target)/include/cycstubs.$(O)
+	$(RANLIB) $@
+endif
 
 bin/lib/libcyc_a.a: \
   $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
   $(addprefix lib/, $(A_LIBS)) \
-  bin/lib/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
-  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+  build/$(build)/include/cstubs_a.$(O) \
+  build/$(build)/include/cycstubs_a.$(O)
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix bin/genfiles/, $(A_BOOT_LIBS)) \
 	  $(addprefix lib/, $(A_LIBS)) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_a.$(O) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_a.$(O)
+	  build/$(build)/include/cstubs_a.$(O) \
+	  build/$(build)/include/cycstubs_a.$(O)
 	$(RANLIB) $@
 
 bin/lib/libcyc_pg.a: \
   $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
   $(addprefix lib/, $(PG_LIBS)) \
-  bin/lib/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
-  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+  build/$(build)/include/cstubs_pg.$(O) \
+  build/$(build)/include/cycstubs_pg.$(O)
 	-$(RM) $@
-	ar rc $@ \
-	  $(addprefix bin/genfiles/, $(PG_BOOT_LIBS)) \
-	  $(addprefix lib/, $(PG_LIBS)) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_pg.$(O) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_pg.$(O)
+	ar rc $@ $^
 	$(RANLIB) $@
 
 bin/lib/libcyc_nocheck.a: \
   $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
   $(addprefix lib/, $(NOCHECK_LIBS)) \
-  bin/lib/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
-  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+  build/$(build)/include/cstubs_nocheck.$(O) \
+  build/$(build)/include/cycstubs_nocheck.$(O)
 	-$(RM) $@
-	ar rc $@ \
-	  $(addprefix bin/genfiles/, $(NOCHECK_BOOT_LIBS)) \
-	  $(addprefix lib/, $(NOCHECK_LIBS)) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cstubs_nocheck.$(O) \
-	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
+	ar rc $@ $^
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
-bin/lib/cyc-lib/$(ARCH)/nogc.a: \
-  bin/genfiles/nogc.$(O)
+bin/lib/cyc-lib/%/nogc.a: bin/genfiles/malloc.c
+bin/lib/cyc-lib/%/nogc.a: build/%/nogc.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
-bin/lib/cyc-lib/$(ARCH)/nogc_a.a: \
-  bin/genfiles/nogc_a.$(O)
+# FIX: No idea why this rule below is needed given the rule above
+ifneq ($(build),$(target))
+bin/lib/cyc-lib/$(target)/nogc.a: bin/genfiles/malloc.c
+bin/lib/cyc-lib/$(target)/nogc.a: build/$(target)/nogc.$(O)
+	-$(RM) $@
+	ar rc $@ $<
+	$(RANLIB) $@
+endif
+
+bin/lib/cyc-lib/$(build)/nogc_a.a: bin/genfiles/malloc.c
+bin/lib/cyc-lib/$(build)/nogc_a.a: \
+  build/$(build)/nogc_a.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
-bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: \
-  bin/genfiles/nogc_pg.$(O)
+bin/lib/cyc-lib/$(build)/nogc_pg.a: bin/genfiles/malloc.c
+bin/lib/cyc-lib/$(build)/nogc_pg.a: \
+  build/$(build)/nogc_pg.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a: $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc.a: \
-  $(addprefix bin/genfiles/, $(O_RUNTIME))
+bin/lib/cyc-lib/$(build)/runtime_cyc.a: \
+  $(addprefix build/$(build)/, $(O_RUNTIME))
 	-$(RM) $@
-	ar rc $@ $(addprefix bin/genfiles/, $(O_RUNTIME))
+	ar rc $@ $(addprefix build/$(build)/, $(O_RUNTIME))
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a: $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc_a.a: \
-  $(addprefix bin/genfiles/, $(A_RUNTIME))
+ifneq ($(build),$(target))
+bin/lib/cyc-lib/$(target)/runtime_cyc.a: \
+  $(addprefix build/$(target)/, $(O_RUNTIME))
 	-$(RM) $@
-	ar rc $@ $(addprefix bin/genfiles/, $(A_RUNTIME))
+	ar rc $@ $(addprefix build/$(target)/, $(O_RUNTIME))
+	$(RANLIB) $@
+endif
+
+bin/lib/cyc-lib/$(build)/runtime_cyc_a.a: \
+  $(addprefix build/$(build)/, $(A_RUNTIME))
+	-$(RM) $@
+	ar rc $@ $(addprefix build/$(build)/, $(A_RUNTIME))
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a: $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/runtime_cyc_pg.a: \
-  $(addprefix bin/genfiles/, $(PG_RUNTIME))
+bin/lib/cyc-lib/$(build)/runtime_cyc_pg.a: \
+  $(addprefix build/$(build)/, $(PG_RUNTIME))
 	-$(RM) $@
-	ar rc $@ $(addprefix bin/genfiles/, $(PG_RUNTIME))
+	ar rc $@ $(addprefix build/$(build)/, $(PG_RUNTIME))
 	$(RANLIB) $@
 
-# The rule for creating cyc_include.h creates as a side effect
-# the entire cyclone lib directory structure; see above.
-bin/lib/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
-	-mkdir bin/lib
-	-mkdir bin/lib/cyc-lib
-	-mkdir bin/lib/cyc-lib/$(ARCH)
-	-mkdir bin/lib/cyc-lib/$(ARCH)/include
+# Directory structure of the installed library.  (During boot,
+# this is built in bin/lib.)
+#
+# lib/
+#   libcyc.a                  # "Regular" lib files go here as in gcc
+#   libcycboot.a              # .. maybe the boot lib isn't regular?
+#   cyc-lib/                  # "Special" compiler files go here
+#     cyc_include.h           # Non-arch specific
+#     ARCH/                   # i686-unknown-linux, etc.
+#       cyc_setjmp.h          # These are all arch specific
+#       cycspecs
+#       gc.a
+#       include/              # Arch specific headers; non-arch spec elsewhere
+#         HEADERS             # stdio.h, etc.
+#       nogc.a
+#       runtime_cyc.a
+
+directory-structure:
+	-mkdir -p bin/lib/cyc-lib/$(build)/include
+	-mkdir -p build/$(build)   # for build temp files
+ifneq ($(build),$(target))
+	-mkdir -p bin/lib/cyc-lib/$(target)/include
+	-mkdir -p build/$(target)  # for build temp files
+endif
+
+$(CYC_INCLUDE_H): $(CYCDIR)/bin/cyc-lib/cyc_include.h
 	cp $< $@
 
-bin/lib/cyc-lib/$(ARCH)/cycspecs: $(CYC_INCLUDE_H)
-	${CYCDIR}/config/buildspecs > $@
+# Build the cycspecs file.
+# FIX: we are not using the specs file in the same way that
+# gcc spec files are used, probably there should be just one
+# entry for cyclone instead of separate entries for
+# cyclone_target_cflags, cyclone_cc, etc.
+bin/lib/cyc-lib/$(build)/cycspecs:
+	echo "*cyclone_target_cflags:" > $@
+	echo "  $(CFLAGS)" >> $@
+	echo "" >> $@
+	echo "*cyclone_cc:" >> $@
+	echo "  $(CC)" >> $@
+	echo "" >> $@
+	echo "*cyclone_inc_path:" >> $@
+	echo "  $(INC_INSTALL)" >> $@
+	echo "" >> $@
+	${CYCDIR}/config/buildspecs >> $@
+
+ifneq ($(build),$(target))
+bin/lib/cyc-lib/$(target)/cycspecs:
+	echo "*cyclone_target_cflags:" > $@
+	echo "  $(TARGET_CFLAGS)" >> $@
+	echo "" >> $@
+	echo "*cyclone_cc:" >> $@
+	echo "  $(CC)" >> $@
+	echo "" >> $@
+	echo "*cyclone_inc_path:" >> $@
+	echo "  $(INC_INSTALL)" >> $@
+	echo "" >> $@
+	${CYCDIR}/config/buildspecs $(BTARGET) >> $@
+endif
 
 # The buildlib process creates many files; exactly what files depends
 # on the architecture.  So, we give just three targets: cstubs.c,
 # cycstubs.cyc, and cyc_setjmp.h, which are always made by buildlib no
-# matter what.
-$(addprefix bin/lib/cyc-lib/$(ARCH)/include/, cstubs.c cycstubs.cyc) \
-bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h: \
-  $(CYC_INCLUDE_H) \
-  bin/cyc-lib/libc.cys
-	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -setjmp > bin/lib/cyc-lib/$(ARCH)/cyc_setjmp.h
-	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include bin/cyc-lib/libc.cys
+# matter what.  Other files are silently created by side effect.
+bin/lib/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys
+	bin/buildlib $(BTARGET) -d build/$(build)/include -setjmp > $@
 
-bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: $(CYC_INCLUDE_H)
-bin/lib/cyc-lib/$(ARCH)/include/precore_c.h: \
+ifneq ($(build),$(target))
+bin/lib/cyc-lib/$(target)/cyc_setjmp.h: bin/cyc-lib/libc.cys
+	bin/buildlib $(BTARGET) -d build/$(target)/include -setjmp > $@
+endif
+
+#%/cstubs.c: %/cycstubs.cyc
+build/$(build)/include/cstubs.c: build/$(build)/include/cycstubs.cyc
+
+ifneq ($(build),$(target))
+build/$(target)/include/cstubs.c: build/$(target)/include/cycstubs.cyc
+endif
+
+# FIX: the cp moves some temp files ??
+# FIX: the headers get moved to the $(build) dir but we might want $(target)
+%/cycstubs.cyc: bin/cyc-lib/libc.cys
+	bin/buildlib $(BTARGET) -d $(@D) $<
+	cp $(@D)/*.h bin/lib/cyc-lib/$(build)/include
+
+build/$(build)/include/precore_c.h: \
   include/core.h \
   bin/cyclone$(EXE) \
-  bin/lib/cyc-lib/$(ARCH)/cycspecs
-	bin/cyclone$(EXE) -Iinclude -Bbin/lib/cyc-lib -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -o $@ -x cyc $<
+  bin/lib/cyc-lib/$(build)/cycspecs
+	bin/cyclone$(EXE) -Iinclude -Bbin/lib/cyc-lib -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
 
-bin/lib/cyc-lib/$(ARCH)/include/cstubs.$(O): \
-  bin/lib/cyc-lib/$(ARCH)/include/cstubs.c \
-  bin/lib/cyc-lib/$(ARCH)/include/precore_c.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+ifneq ($(build),$(target))
+build/$(target)/include/precore_c.h: \
+  include/core.h \
+  bin/cyclone$(EXE) \
+  bin/lib/cyc-lib/$(target)/cycspecs
+	bin/cyclone$(EXE) $(BTARGET) -Iinclude -Bbin/lib/cyc-lib -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc -o $@ $<
+endif
 
-bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
-  bin/lib/cyc-lib/$(ARCH)/include/cycstubs.cyc \
-  bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+build/$(build)/include/cstubs.$(O): build/$(build)/include/cstubs.c build/$(build)/include/precore_c.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-bin/lib/cyc-lib/$(ARCH)/gc.a: gc/.libs/libgc.a $(CYC_INCLUDE_H)
+ifneq ($(build),$(target))
+build/$(target)/include/cstubs.$(O): build/$(target)/include/cstubs.c build/$(target)/include/precore_c.h
+	$(CC) $(BTARGET) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+endif
+
+%/cycstubs.$(O): %/cycstubs.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) $(BTARGET) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+
+bin/lib/cyc-lib/$(build)/gc.a: gc/.libs/libgc.a
 	cp -p $< $@
 
 gc/.libs/libgc.a:
-	$(MAKE) -C gc libgc.la CC="$(CC)"
+	$(MAKE) -C gc libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
 
 # gc/gc.a:
 #	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
@@ -426,7 +512,6 @@ endif
 .PHONY: install uninstall inc_install lib_install bin_install
 .PHONY: inc_uninstall lib_uninstall bin_uninstall unupdate
 
-UPDATEARCH=$(ARCH)
 BUILDDIR=build/boot
 GENDIR=bin/genfiles
 

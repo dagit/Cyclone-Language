@@ -1,25 +1,37 @@
 AC_INIT([[cyclone]],
-        [[0.4]],
+        [[0.7]],
         [[cyclone-bugs-l@lists.cs.cornell.edu]])
 # Look into the config subdir to find config.guess, config.sub, install-sh
 AC_CONFIG_AUX_DIR(config)
-# Figure out build system type
-AC_CANONICAL_BUILD
+# Figure out system type:
+#  build is set to system we are building on,
+#  host is set to system the cyclone compiler will run on,
+#  target is set to system the cyclone compiler will compile code for.
+# target defaults to host defaults to build
+# use --target to build a Cyclone cross-compiler
+AC_CANONICAL_TARGET
+
+# quit if user wants to cross-compile the compiler itself
+if [[ "$build" != "$host" ]]; then
+    echo "Cross-compiling the Cyclone compiler itself is not supported"
+    exit 1
+fi
 
 # quit if we know the architecture won't work
 case "$build_os" in
   cygwin1.3.2)
-    echo "Cygwin 1.3.2 is not supported---upgrade to version 1.3.10"
+    echo "Cygwin 1.3.2 is not supported---upgrade to latest version"
     exit 1
   ;;
   cygwin1.3.3)
-    echo "Cygwin 1.3.3 is not supported---upgrade to version 1.3.10"
+    echo "Cygwin 1.3.3 is not supported---upgrade to latest version"
     exit 1
   ;;
 esac
 
 # Starting with autoconf 2.53 abs_srcdir is already defined,
 # however, I am running 2.52 so I do it from scratch.
+# UPDATE: I had to upgrade to 2.57 so this should no longer be needed.
 # Note: under Cygwin, pwd can return a path name containing a colon.
 #  Such path names don't work in make's VPATH, so we convert them
 #  to path names without colons using the cygpath command.
@@ -35,19 +47,37 @@ esac
 AC_SUBST(abs_srcdir)
 
 # Figure out compiler characteristics
+CFLAGS=    # prevents AC_PROG_CC from setting CFLAGS=-g -O2
 AC_PROG_CC
-# Special cases
+
+# Special cases -- these are for compiling the bin/genfiles
 if [[ "$build_vendor" = "apple" ]]; then
-  CC="$CC -no-cpp-precomp -Wno-long-double"
+  CFLAGS="-no-cpp-precomp -Wno-long-double"
 fi
 if [[ "$build_cpu" = "i686" ]]; then
-  CC="$CC -march=i686"
+  CFLAGS=-march=i686
 fi
 if [[ "$build_vendor" = "sun" ]]; then
   LDFLAGS="-lnsl -lsocket -lresolv"
 fi
 
+# Special cases -- these are for compiling the C output of Cyclone
+echo Target is $target
+echo Target_vender is $target_vendor
+if [[ "$target_vendor" = "apple" ]]; then
+  TARGET_CFLAGS="-no-cpp-precomp -Wno-long-double"
+fi
+if [[ "$target_cpu" = "i686" ]]; then
+  TARGET_CFLAGS=-march=i686
+fi
+if [[ "$target_vendor" = "sun" ]]; then
+  TARGET_LDFLAGS=-lnsl -lsocket -lresolv
+fi
+AC_SUBST(TARGET_CFLAGS)
+AC_SUBST(TARGET_LDFLAGS)
+
 # Cyclone assumes sizeof(int) == sizeof(void *)
+# FIX: we should check for target too??
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(void *)
 if [[ "$ac_cv_sizeof_int" != "$ac_cv_sizeof_void_p" ]]; then

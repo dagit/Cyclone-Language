@@ -1,6 +1,15 @@
 # @configure_input@
 VERSION=@PACKAGE_VERSION@
-ARCH=@build@
+build=@build@
+target=@target@
+CC=@CC@
+CFLAGS=@CFLAGS@
+TARGET_CFLAGS=@TARGET_CFLAGS@
+ifneq ($(build),$(target))
+BTARGET=
+else
+BTARGET=-b $(target)
+endif
 CYCDIR=@abs_srcdir@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -9,7 +18,6 @@ BIN_INSTALL=@bindir@
 LIB_INSTALL=@libdir@/cyclone
 @SET_MAKE@
 RANLIB=@RANLIB@
-CC=@CC@
 EXE=@EXEEXT@
 O=@OBJEXT@
 LDFLAGS=@LDFLAGS@

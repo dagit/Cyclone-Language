@@ -80,7 +80,13 @@ using List;
 using Core;
 using Absyn;
 
-extern "C" Cstring Ccomp; // The string to invoke gcc
+// The string to invoke gcc
+// FIX: this should be taken from the cycspecs file as in cyclone.cyc
+static const char ?GCC = "gcc";
+
+// For -b flag
+static string_t target_arch = NULL;
+static string_t targetting_flags = NULL;
 
 static int do_setjmp = 0;
 static int verbose = 0;
@@ -1375,20 +1381,21 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         }
         fprintf(out_file,"#include <%s>\n",filename);
         fclose(out_file);
-        let GCC = Ccomp;
         let cppargs_string =
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
                      " ");
-        char @cmd = (char @)aprintf("%s %s -E -dM -o %s -x c %s",
-				    GCC,cppargs_string,macrosfile,cppinfile);
+        char @cmd = (char @)aprintf("%s %s %s -E -dM -o %s -x c %s",
+				    GCC,targetting_flags,
+                                    cppargs_string,macrosfile,cppinfile);
         if (verbose)
           fprintf(stderr,"%s\n",cmd);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s %s -E -o %s -x c %s",
-				GCC,cppargs_string,declsfile,cppinfile);
+          cmd = (char @)aprintf("%s %s %s -E -o %s -x c %s",
+				GCC,targetting_flags,
+                                cppargs_string,declsfile,cppinfile);
           if (verbose)
             fprintf(stderr,"%s\n",cmd);
           system(cmd); // if err, no declsfile created, and we'll handle later
@@ -1743,8 +1750,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
-      let GCC = Ccomp;
-      let cmd = aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC);
+      let cmd = aprintf("echo | %s %s -E -dM - -o INITMACROS.h\n",
+                        GCC,targetting_flags);
       if (verbose)
         fprintf(stderr,"%s\n",cmd);
       system((const char @)cmd);
@@ -1818,9 +1825,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fprintf(stderr,"Unsupported option %s\n", s);
     badparse = true;
   }
-  static void set_machine(string_t<`H> s) {
-    add_cpparg("-b");
-    add_cpparg(s);
+  static void set_target_arch(string_t<`H> s) {
+    target_arch = s;
+    targetting_flags = aprintf("-b %s",s);
   }
 
   using Arg;
@@ -1850,7 +1857,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  " compiler special file cyc_setjmp.h.  Cannot be"
                  " used with -gather, -gatherscript, or specfiles."),
       	   new $("-b",false," <machine>",
-                 new String_spec(set_machine),
+                 new String_spec(set_target_arch),
                  "Set the target machine for compilation to <machine>"),
            new $("-v",false,"",
                  new Set_spec(&verbose),
@@ -1893,7 +1900,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     if (mode == GATHERSCRIPT) {
       prscript("cd %s\n",output_dir);
-      prscript("echo | $GCC -E -dM - -o INITMACROS.h\n");
+      prscript("echo | $GCC %s -E -dM - -o INITMACROS.h\n",
+               targetting_flags);
     }
 
     if (!gathering()) {

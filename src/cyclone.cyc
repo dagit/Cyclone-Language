@@ -87,7 +87,7 @@ static void add_ccarg(string_t<`H> s) {
   ccargs = new List(new s,ccargs);
 }
 
-// set which c compiler to use
+// set which C compiler to use
 // (affects how attributes, 64-bit integers, etc. are translated)
 // defaults to gcc
 void set_c_compiler(string_t<`H> s){
@@ -122,11 +122,10 @@ static void set_specified_interface(string_t<`H> s) {
 // These strings are install_path.c, which is created by Makefile wizardry.
 // We use Cstrings because we pull the same trick when bootstrapping (and
 // then we don't have a Cyclone compiler yet)
+// Given these settings we can get the cycspecs file which has other settings
 extern "C" {
-  extern Cstring Cdef_inc_path;
   extern Cstring Cdef_lib_path;
   extern Cstring Carch;
-  extern Cstring Ccomp;
   extern Cstring Cversion;
 }
 
@@ -161,24 +160,28 @@ static void add_idirafter(string_t<`H> s) {
   add_cpparg(aprintf("-idirafter %s",s));
 }
 
+// We handle the -b flag separately from the other gcc args
+// because gcc requires it to be the first argument
 static string_t target_arch = NULL;
+static string_t targetting_flags = NULL;
 static void set_target_arch(string_t<`H> s) {
-//  toc_r = true;
   target_arch = s;
-  add_ccarg("-b");
-  add_ccarg(s);
+  targetting_flags = aprintf("-b %s",s);
 }
 
 static void set_many_errors() {
   Position::max_errors = 65535;
 }
 
+static const char ?def_inc_path = "_see_cycspecs_file_";
+
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", Cversion);
-  printf("Compiled for architecture: %s CC=\"%s\"\n", Carch, Ccomp);
+  printf("Compiled for architecture: %s\n", Carch);
   printf("Standard library directory: %s\n",Cdef_lib_path);
-  printf("Standard include directory: %s\n",Cdef_inc_path);
+  // FIX: should read the cycspecs file first to print the right thing here
+  printf("Standard include directory: %s\n",def_inc_path);
   exit(0);
 }
   
@@ -404,7 +407,9 @@ static void remove_file(string_t<`H> s) {
 #define MAXSTRNAME 256
 #define MAXSTRVALUE 4096
 
-list_t<$(const char ?@,const char ?@)@> read_specs(const char ?file) {
+typedef list_t<$(const char ?@,const char ?@)@> specs_t;
+
+specs_t read_specs(const char ?file) {
   let result = NULL;
   int c; 
   int i;
@@ -545,6 +550,15 @@ string_t<`H> ?`H split_specs(const char ?cmdline) {
   let ptrarray = List::to_array(l);
   let result = new { for k < numelts(ptrarray) : *(ptrarray[k]) };
   return result;
+}
+
+const char ?get_spec(specs_t specs, const char ?spec_name) {
+  try {
+    return *List::assoc_cmp(strptrcmp, specs, &spec_name);
+  } catch {
+  case &Not_found:
+    return NULL;
+  }
 }
 
 ////********************************************************************
@@ -947,7 +961,6 @@ static void process_file(string_t<`H> filename) {
   // 1) command line arguments (with -I and -B)
   // 2) environment var (CYCLONE_INCLUDE_PATH)
   // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
-  string_t def_inc_path = Cdef_inc_path;
   let stdinc_dirs = add_subdir(cyclone_exec_path,target_arch);
   stdinc_dirs = add_subdir(stdinc_dirs,"include");
   if (strlen(def_inc_path) > 0) {
@@ -1406,51 +1419,50 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   let cyclone_arch_path;
   string_t def_lib_path;
-  string_t comp = Ccomp;
 
   // parse the command-line arguments
-  region r; {
-    // partition the arguments into (-B and -b) and others
-    let bindices = new {for i<argc: false};
-    let numbindices = 0;
-    int i,j,k;
-    for (i = 1; i<argc; i++) { //NB arg 0 is the command
-      if (strncmp("-B",argv[i],2) == 0) {
-        bindices[i] = true;
-        numbindices++;
-      }
-      else if (strcmp("-b",argv[i]) == 0) {
-        bindices[i] = true;
-        numbindices++;
-        i++; if (i>=argc) break;
-        bindices[i] = true;
-        numbindices++;
-      }
+  // partition the arguments into (-B and -b) and others
+  let bindices = new {for i<argc: false};
+  let numbindices = 0;
+  int i,j,k;
+  for (i = 1; i<argc; i++) { //NB arg 0 is the command
+    if (strncmp("-B",argv[i],2) == 0) {
+      bindices[i] = true;
+      numbindices++;
     }
+    else if (strcmp("-b",argv[i]) == 0) {
+      bindices[i] = true;
+      numbindices++;
+      i++; if (i>=argc) break;
+      bindices[i] = true;
+      numbindices++;
+    }
+  }
 
-    // FIX: have to heap allocate these because that's what Arg::parse wants
-    // FIX: maybe we should expose an Arg function to take args
-    //   one at a time, that would let us avoid the nonsense with argv[0]
-    let bargs = new { for n<numbindices+1 : (string_t)NULL };
-    let otherargs = new { for n<argc-numbindices : (string_t)NULL };
-    bargs[0] = otherargs[0] = argv[0];
-    for (i = j = k = 1; i<argc; i++) {
-      if (bindices[i]) bargs[j++] = argv[i];
-      else otherargs[k++] = argv[i];
-    }
+  // FIX: have to heap allocate these because that's what Arg::parse wants
+  // FIX: maybe we should expose an Arg function to take args
+  //   one at a time, that would let us avoid the nonsense with argv[0]
+  let bargs = new { for n<numbindices+1 : (string_t)NULL };
+  let otherargs = new { for n<argc-numbindices : (string_t)NULL };
+  bargs[0] = otherargs[0] = argv[0];
+  for (i = j = k = 1; i<argc; i++) {
+    if (bindices[i]) bargs[j++] = argv[i];
+    else otherargs[k++] = argv[i];
+  }
 
-    // initialize the global options list tails
-    for (int i = 1; i < numelts(global_options); i++) {
-      global_options[i-1]->tl = global_options[i];
-    }
-    Arg::speclist_t<`H,`H> options = global_options[0];
+  // initialize the global options list tails
+  for (int i = 1; i < numelts(global_options); i++) {
+    global_options[i-1]->tl = global_options[i];
+  }
+  Arg::speclist_t<`H,`H> options = global_options[0];
 
   string_t optstring = "Options:";
   Arg::current = 0;
   Arg::parse(options, add_other, add_other_flag, optstring, bargs);
+  if (target_arch == NULL) target_arch = Carch;
   // Having processed -B and -b, we can now construct the exec-path
   // and arch-path
-  if (target_arch == NULL) target_arch = Carch;
+
   // The Cyclone exec-path is a list of directories where special
   // files (cyc_include.h, specs files, etc.) might be kept.
   // It is specified with the following order (where the earlier in
@@ -1477,17 +1489,16 @@ int main(int argc, string_t<`H> ?`H argv) {
   let specs_file = do_find(cyclone_arch_path,"cycspecs");
   if (v_r) fprintf(stderr,"Reading from specs file %s\n",specs_file);
   let specs = read_specs(specs_file);
-  let args_from_specs_file = NULL;
-  try {
-    let cyclone_args = *List::assoc_cmp(strptrcmp, specs, new "cyclone");
-    args_from_specs_file = split_specs(cyclone_args);
-  } catch {
-  case &Not_found: break;
-  }
+  let args_from_specs_file = split_specs(get_spec(specs,"cyclone"));
   if (args_from_specs_file != NULL) {
     Arg::current = 0;
     Arg::parse(options, add_other, add_other_flag, optstring, args_from_specs_file);
   }
+  let target_cflags = get_spec(specs,"cyclone_target_cflags");
+  let cyclone_cc = get_spec(specs,"cyclone_cc");
+  if (!cyclone_cc) cyclone_cc = "gcc";
+  def_inc_path = get_spec(specs,"cyclone_inc_path");
+
   // Finally parse the other command-line arguments
   Arg::current = 0;
   Arg::parse(options, add_other, add_other_flag, optstring, otherargs);
@@ -1508,9 +1519,10 @@ int main(int argc, string_t<`H> ?`H argv) {
     // -E and -M are used together in some versions of gcc, we get a
     // compiler error, cpp0: too many filenames.
     let dash_E = (produce_dependencies ? "" : " -E");
-    set_cpp(aprintf("%s -w -x c%s -specs %s", comp, dash_E, specs_file));
+    set_cpp(aprintf("%s %s %s -w -x c%s -specs %s",
+                    cyclone_cc, targetting_flags,
+                    target_cflags, dash_E, specs_file));
   }
-  } // end region r
   if (cyclone_files == NULL && ccargs == NULL) {
     fprintf(stderr,"missing file\n");
     exit(1);
@@ -1648,8 +1660,10 @@ int main(int argc, string_t<`H> ?`H argv) {
     outfile_str = aprintf(" -o %s",sh_escape_string(*output_file));
 
   let cccmd =
-    aprintf("%s %s%s %s%s",comp,ccargs_string,outfile_str,stdlib_string,
-            libargs_string);
+    aprintf("%s %s %s %s%s %s%s",
+            cyclone_cc, targetting_flags, target_cflags,
+            ccargs_string, outfile_str,
+            stdlib_string, libargs_string);
   if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
   if (system((const char @)cccmd) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
