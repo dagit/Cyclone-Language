@@ -876,7 +876,7 @@ struct _RegionHandle _tmpA7=_new_region("temp");struct _RegionHandle*temp=& _tmp
 # 447
 struct _dyneither_ptr queue=_tag_dyneither(({unsigned int _tmpB1=16U;const struct Cyc_Dict_T**_tmpB0=({struct _RegionHandle*_tmp110=temp;_region_malloc(_tmp110,_check_times(_tmpB1,sizeof(const struct Cyc_Dict_T*)));});({{unsigned int _tmpE6=16U;unsigned int i;for(i=0;i < _tmpE6;++ i){_tmpB0[i]=_tmpA6;}}0;});_tmpB0;}),sizeof(const struct Cyc_Dict_T*),16U);
 int ind=0;
-while(ind != - 1){
+while(ind != -1){
 const struct Cyc_Dict_T*_tmpA8=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(const struct Cyc_Dict_T*),ind --));const struct Cyc_Dict_T*_tmpA9=_tmpA8;const struct Cyc_Dict_T*_tmpAF;const struct Cyc_Dict_T*_tmpAE;void*_tmpAD;void*_tmpAC;_LL1: _tmpAF=_tmpA9->left;_tmpAE=_tmpA9->right;_tmpAD=(_tmpA9->key_val).f1;_tmpAC=(_tmpA9->key_val).f2;_LL2:;
 if((unsigned int)(ind + 2)>= _get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*)))
 queue=({unsigned int _tmpAB=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* (unsigned int)2;const struct Cyc_Dict_T**_tmpAA=({struct _RegionHandle*_tmp111=temp;_region_malloc(_tmp111,_check_times(_tmpAB,sizeof(const struct Cyc_Dict_T*)));});({{unsigned int _tmpE4=_get_dyneither_size(queue,sizeof(const struct Cyc_Dict_T*))* (unsigned int)2;unsigned int i;for(i=0;i < _tmpE4;++ i){
@@ -973,7 +973,7 @@ int Cyc_Dict_iter_f(struct _tuple10*stk,struct _tuple0*dest){
 # 571
 struct _tuple10*_tmpC5=stk;struct _dyneither_ptr _tmpC9;int*_tmpC8;_LL1: _tmpC9=_tmpC5->f1;_tmpC8=(int*)& _tmpC5->f2;_LL2:;{
 int _tmpC6=*_tmpC8;
-if(_tmpC6 == - 1)
+if(_tmpC6 == -1)
 return 0;{
 const struct Cyc_Dict_T*_tmpC7=*((const struct Cyc_Dict_T**)_check_dyneither_subscript(_tmpC9,sizeof(const struct Cyc_Dict_T*),_tmpC6));
 *dest=((const struct Cyc_Dict_T*)_check_null(_tmpC7))->key_val;
@@ -1015,7 +1015,7 @@ struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct _RegionHandle*rgn,void*env,int(*c
 # 635
 struct Cyc_Dict_Dict dict=Cyc_Dict_empty(cmp);
 int len=Cyc_getw(fp);
-if(len == - 1)
+if(len == -1)
 (int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmpD2=_cycalloc(sizeof(*_tmpD2));_tmpD2->tag=Cyc_Core_Failure,({struct _dyneither_ptr _tmp120=({const char*_tmpD1="Dict::unmarshal: list length is -1";_tag_dyneither(_tmpD1,sizeof(char),35U);});_tmpD2->f1=_tmp120;});_tmpD2;}));
 # 640
 {int i=0;for(0;i < len;++ i){

@@ -54,8 +54,10 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
     if (y != 0xffffffff && y != 0x00000000)
       return $(0,false);
     else return $((unsigned int)x,true);
-  case {.Float_c = _}: return $(0,true);
-  default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
+  case {.Float_c = _}: return $(0,false);
+  case {.Null_c = _}: return $(0,true);
+  default: 
+    terr(e->loc,"expecting unsigned int found %s",exp2string(e)); return $(0,true);
   }
 }
 
@@ -263,8 +265,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   case &AnonEnum_e(_,ef): fallthru(ef);
   case &Enum_e(_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
   default:
-    terr(e->loc,"bad static expression %s", exp2string(e));
-    return $(Int_c(Signed,0), true);
+    //terr(e->loc,"bad static expression %s", exp2string(e));
+    return $(Int_c(Signed,0), false);
   }
   if(ans[1]) {
     raw_exp_t c;

@@ -512,7 +512,7 @@ goto done;
 if( isspace(c)){
 for(0;1;0){
 c=_IO_getc(fp);
-if(c == - 1){
+if(c == -1){
 ++ seen_eof;
 break;}
 # 236
@@ -534,7 +534,7 @@ again: c=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_p
 # 255
  literal:
  n=_IO_getc(fp);
-if(n == - 1)
+if(n == -1)
 goto eof_failure;
 if(n != c){
 _IO_ungetc(n,fp);
@@ -651,7 +651,7 @@ while( isspace(n)){
 n=_IO_getc(fp);
 ++ nread;
 n=_IO_peekc(fp);
-if(n == - 1)
+if(n == -1)
 goto eof_failure;}}{
 # 415
 int _tmp1D=c;switch(_tmp1D){case 0U: _LL48: _LL49:
@@ -662,9 +662,9 @@ if(flags & 8){
 long long sum=(long long)0;
 for(0;width > (long long)0;0){
 n=_IO_getc(fp);
-if(n == - 1  && width != (long long)0)
+if(n == -1  && width != (long long)0)
 goto eof_failure;else{
-if(n == - 1){
+if(n == -1){
 ++ seen_eof;
 break;}}
 # 433
@@ -677,9 +677,9 @@ long long sum=(long long)0;
 struct _dyneither_ptr _tmp1E=Cyc_va_arg_char_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0U)));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 for(0;width > (long long)0;0){
 n=_IO_getc(fp);
-if(n == - 1  && width != (long long)0)
+if(n == -1  && width != (long long)0)
 goto eof_failure;else{
-if(n == - 1){
+if(n == -1){
 ++ seen_eof;
 break;}}
 # 448

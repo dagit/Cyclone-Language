@@ -1675,7 +1675,7 @@ struct Cyc_List_List*_tmp106=_tmp105->fields;
 if(_tmp106 == 0)return 1;
 return((struct Cyc_Absyn_Aggrfield*)_tmp106->hd)->requires_clause == 0;};};}else{if(((_tmp104.UnknownAggr).val).f3 == 0){_LLA: _tmp108=((_tmp104.UnknownAggr).val).f1;_LLB:
  return(int)_tmp108 == (int)Cyc_Absyn_UnionA;}else{_LLC: _tmp10A=((_tmp104.UnknownAggr).val).f1;_tmp109=(int)(((_tmp104.UnknownAggr).val).f3)->v;_LLD:
- return(int)_tmp10A == (int)Cyc_Absyn_UnionA  && !_tmp109;}}_LL7:;}}else{goto _LL5;}default: _LL5: _LL6:
+ return(int)_tmp10A == (int)1U  && !_tmp109;}}_LL7:;}}else{goto _LL5;}default: _LL5: _LL6:
 # 1121
  return 0;}_LL0:;}
 # 1124

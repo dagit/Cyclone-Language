@@ -745,16 +745,16 @@ if(len >= 1  && ((int)*((char*)_check_dyneither_subscript(buff,sizeof(char),len 
 len -=1;
 sn=1U;}
 # 387
-if((int)sn == (int)Cyc_Absyn_Unsigned){
+if((int)sn == (int)1U){
 unsigned long long n=(unsigned long long)0;
 {int i=0;for(0;i < len;++ i){
 n=({unsigned long long _tmp17D=n * (unsigned long long)base;_tmp17D + (unsigned long long)Cyc_Lex_int_of_char(*((char*)_check_dyneither_subscript(buff,sizeof(char),i)));});}}
 if(n > (unsigned long long)-1){
-if(declared_size  && (int)size == (int)Cyc_Absyn_Int_sz)
+if(declared_size  && (int)size == (int)2U)
 ({struct _dyneither_ptr _tmp17E=({const char*_tmp9F="integer constant too large";_tag_dyneither(_tmp9F,sizeof(char),27U);});Cyc_Lex_err(_tmp17E,lbuf);});
 size=4U;}
 # 396
-if((int)size == (int)Cyc_Absyn_Int_sz)
+if((int)size == (int)2U)
 res=({union Cyc_Absyn_Cnst _tmp149;(_tmp149.Int_c).tag=5U,((_tmp149.Int_c).val).f1=sn,((_tmp149.Int_c).val).f2=(int)((unsigned int)n);_tmp149;});else{
 # 399
 res=({union Cyc_Absyn_Cnst _tmp14A;(_tmp14A.LongLong_c).tag=6U,((_tmp14A.LongLong_c).val).f1=sn,((_tmp14A.LongLong_c).val).f2=(long long)n;_tmp14A;});}}else{
@@ -764,11 +764,11 @@ long long n=(long long)0;
 n=({long long _tmp17F=n * (long long)base;_tmp17F + (long long)Cyc_Lex_int_of_char(*((char*)_check_dyneither_subscript(buff,sizeof(char),i)));});}}{
 unsigned long long x=(unsigned long long)n >> (unsigned long long)32;
 if(x != (unsigned long long)-1  && x != (unsigned long long)0){
-if(declared_size  && (int)size == (int)Cyc_Absyn_Int_sz)
+if(declared_size  && (int)size == (int)2U)
 ({struct _dyneither_ptr _tmp180=({const char*_tmpA0="integer constant too large";_tag_dyneither(_tmpA0,sizeof(char),27U);});Cyc_Lex_err(_tmp180,lbuf);});
 size=4U;}
 # 411
-if((int)size == (int)Cyc_Absyn_Int_sz)
+if((int)size == (int)2U)
 res=({union Cyc_Absyn_Cnst _tmp14B;(_tmp14B.Int_c).tag=5U,((_tmp14B.Int_c).val).f1=sn,((_tmp14B.Int_c).val).f2=(int)n;_tmp14B;});else{
 # 414
 res=({union Cyc_Absyn_Cnst _tmp14C;(_tmp14C.LongLong_c).tag=6U,((_tmp14C.LongLong_c).val).f1=sn,((_tmp14C.LongLong_c).val).f2=n;_tmp14C;});}};}
@@ -1103,7 +1103,7 @@ return(- state)- 1;else{
 c=256;}}else{
 # 828
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c == - 1)c=256;}
+if(c == -1)c=256;}
 # 831
 if(*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_check,3971U,sizeof(int),base + c))== state)
 state=*((const int*)_check_known_subscript_notnull(Cyc_Lex_lex_trans,3971U,sizeof(int),base + c));else{

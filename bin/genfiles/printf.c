@@ -703,7 +703,7 @@ if(prec > 39){
 if(ch != (int)'g'  && ch != (int)'G'  || flags & 8)
 fpprec=prec - 39;
 prec=39;}else{
-if(prec == - 1)
+if(prec == -1)
 prec=6;}
 # 482
 cp=({char*_tmp30=buf;_tag_dyneither(_tmp30,sizeof(char),349U);});

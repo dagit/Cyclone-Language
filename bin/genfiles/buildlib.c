@@ -922,7 +922,7 @@ return(- state)- 1;else{
 c=256;}}else{
 # 413
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c == - 1)c=256;}
+if(c == -1)c=256;}
 # 416
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,3846U,sizeof(int),base + c))== state)
 state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,3846U,sizeof(int),base + c));else{
@@ -2035,7 +2035,7 @@ if((int)Cyc_mode == (int)Cyc_GATHERSCRIPT)
 ({struct Cyc_String_pa_PrintArg_struct _tmp235=({struct Cyc_String_pa_PrintArg_struct _tmp48C;_tmp48C.tag=0U,_tmp48C.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)d);_tmp48C;});struct Cyc_String_pa_PrintArg_struct _tmp236=({struct Cyc_String_pa_PrintArg_struct _tmp48B;_tmp48B.tag=0U,_tmp48B.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)d);_tmp48B;});void*_tmp233[2U];_tmp233[0]=& _tmp235,_tmp233[1]=& _tmp236;({struct _dyneither_ptr _tmp611=({const char*_tmp234="if ! test -e %s; then mkdir %s; fi\n";_tag_dyneither(_tmp234,sizeof(char),36U);});Cyc_prscript(_tmp611,_tag_dyneither(_tmp233,sizeof(void*),2U));});});else{
 # 1454
 int _tmp237=({void*_tmp23B=0U;({const char*_tmp612=(const char*)_untag_dyneither_ptr(d,sizeof(char),1U);Cyc_open(_tmp612,0,_tag_dyneither(_tmp23B,sizeof(unsigned short),0U));});});
-if(_tmp237 == - 1){
+if(_tmp237 == -1){
 if( mkdir((const char*)_check_null(_untag_dyneither_ptr(d,sizeof(char),1U)),448)== - 1){
 ({struct Cyc_String_pa_PrintArg_struct _tmp23A=({struct Cyc_String_pa_PrintArg_struct _tmp48D;_tmp48D.tag=0U,_tmp48D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)d);_tmp48D;});void*_tmp238[1U];_tmp238[0]=& _tmp23A;({struct Cyc___cycFILE*_tmp614=Cyc_stderr;struct _dyneither_ptr _tmp613=({const char*_tmp239="Error: could not create directory %s\n";_tag_dyneither(_tmp239,sizeof(char),38U);});Cyc_fprintf(_tmp614,_tmp613,_tag_dyneither(_tmp238,sizeof(void*),1U));});});
 return 1;}}else{

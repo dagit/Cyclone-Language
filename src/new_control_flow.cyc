@@ -2052,16 +2052,20 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
       }
     }
 
-    // bounds checking needs unsigned comparisons
+    // bounds checking needs unsigned comparisons or strict equality/
+    // inequality (which doesn't care about signed/unsigned).
     // this (hoisted) check shouldn't disable any of Greg's stuff because
     // it always used to either check for unsigned or require numelts(x),
     // which is unsigned
-    switch($(Tcutil::compress((type_t)e1->topt),
+    switch($(p,
+             Tcutil::compress((type_t)e1->topt),
 	     Tcutil::compress((type_t)e2->topt))) {
-    case $(&AppType(&IntCon(Unsigned,_),_),_):
-    case $(_,&AppType(&IntCon(Unsigned,_),_)):
-    case $(&AppType(&TagCon,_),_):
-    case $(_,&AppType(&TagCon,_)): break;
+    case $(Eq,_,_):
+    case $(Neq,_,_):
+    case $(_,&AppType(&IntCon(Unsigned,_),_),_):
+    case $(_,_,&AppType(&IntCon(Unsigned,_),_)):
+    case $(_,&AppType(&TagCon,_),_):
+    case $(_,_,&AppType(&TagCon,_)): break;
     default: return $(ft,ff);
     }
 

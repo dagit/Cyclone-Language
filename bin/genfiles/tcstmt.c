@@ -994,7 +994,7 @@ Cyc_Tcutil_check_type(s0->loc,_tmp96,_tmpAC,& Cyc_Tcutil_tmk,_tmpAD,1,_tmpC8);
 ({int _tmp1C4=Cyc_Tcutil_extract_const_from_typedef(s0->loc,(_tmp115->tq).print_const,_tmpC8);(_tmp115->tq).real_const=_tmp1C4;});{
 # 464
 struct Cyc_Tcenv_Tenv*_tmpAE=_tmp96;
-if((int)_tmpCC == (int)Cyc_Absyn_Extern  || (int)_tmpCC == (int)Cyc_Absyn_ExternC)
+if((int)_tmpCC == (int)3U  || (int)_tmpCC == (int)4U)
 ({void*_tmpAF=0U;({unsigned int _tmp1C6=_tmp144->loc;struct _dyneither_ptr _tmp1C5=({const char*_tmpB0="extern declarations are not yet supported within functions";_tag_dyneither(_tmpB0,sizeof(char),59U);});Cyc_Tcutil_terr(_tmp1C6,_tmp1C5,_tag_dyneither(_tmpAF,sizeof(void*),0U));});});
 if(_tmpC7 != 0){
 Cyc_Tcexp_tcExpInitializer(_tmpAE,& _tmpC8,_tmpC7);

@@ -275,19 +275,21 @@ void visit(env_t @env, fndecl_t f, fninfo_t finfo) {
   env->N = env->N + 1;
   for (let children=finfo->children; children!=NULL; children=children->tl) {
     let g = children->hd;
-    let ginfo = Hashtable::lookup(env->fninfo, g);
+    try {
+      let ginfo = Hashtable::lookup(env->fninfo, g);
 #ifdef DEBUG
-    fprintf(stderr,"  child %s (%x) info (%x): fin = %d, visited = %d\n",
-            Absynpp::qvar2string(g->name), g, ginfo,
-            ginfo->finished, ginfo->visited);
+      fprintf(stderr,"  child %s (%x) info (%x): fin = %d, visited = %d\n",
+              Absynpp::qvar2string(g->name), g, ginfo,
+              ginfo->finished, ginfo->visited);
 #endif
-    if (ginfo->finished) continue;
-    if (ginfo->visited) {
-      finfo->low = min(finfo->low, ginfo->dfsnum);
-    } else {
-      visit(env,g,ginfo);
-      finfo->low = min(finfo->low, ginfo->low);
-    }
+      if (ginfo->finished) continue;
+      if (ginfo->visited) {
+        finfo->low = min(finfo->low, ginfo->dfsnum);
+      } else {
+        visit(env,g,ginfo);
+        finfo->low = min(finfo->low, ginfo->low);
+      }
+    } catch { case &Core::Not_found:  break; }
   }
   if (finfo->low == finfo->dfsnum) {
     fninfo_t v;

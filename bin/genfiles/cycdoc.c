@@ -572,7 +572,7 @@ return(- state)- 1;else{
 c=256;}}else{
 # 78
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c == - 1)c=256;}
+if(c == -1)c=256;}
 # 81
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,266U,sizeof(int),base + c))== state)
 state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,266U,sizeof(int),base + c));else{

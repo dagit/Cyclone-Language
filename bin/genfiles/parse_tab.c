@@ -2415,9 +2415,9 @@ goto yybackup;
 yybackup:
 # 252 "cycbison.simple"
  yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yypact,1087U,sizeof(short),yystate));
-if(yyn == - 32768)goto yydefault;
+if(yyn == -32768)goto yydefault;
 # 259
-if(yychar == - 2)
+if(yychar == -2)
 # 265
 yychar=Cyc_yylex(yylex_buf,& yylval,& yylloc);
 # 269
@@ -2435,7 +2435,7 @@ yyn=(int)Cyc_yytable[yyn];
 # 307
 if(yyn < 0){
 # 309
-if(yyn == - 32768)goto yyerrlab;
+if(yyn == -32768)goto yyerrlab;
 yyn=- yyn;
 goto yyreduce;}else{
 # 313
@@ -6790,7 +6790,7 @@ yystate=(int)*((short*)_check_dyneither_subscript(yyss,sizeof(short),-- yyssp_of
 # 530 "cycbison.simple"
 yyerrhandle:
  yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yypact,1087U,sizeof(short),yystate));
-if(yyn == - 32768)goto yyerrdefault;
+if(yyn == -32768)goto yyerrdefault;
 # 534
 yyn +=1;
 if((yyn < 0  || yyn > 7470) || (int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,7471U,sizeof(short),yyn))!= 1)goto yyerrdefault;
@@ -6798,7 +6798,7 @@ if((yyn < 0  || yyn > 7470) || (int)*((short*)_check_known_subscript_notnull(Cyc
 yyn=(int)Cyc_yytable[yyn];
 if(yyn < 0){
 # 540
-if(yyn == - 32768)goto yyerrpop;
+if(yyn == -32768)goto yyerrpop;
 yyn=- yyn;
 goto yyreduce;}else{
 # 544

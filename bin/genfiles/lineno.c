@@ -482,7 +482,7 @@ return(- state)- 1;else{
 c=256;}}else{
 # 67
 c=(int)*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c == - 1)c=256;}
+if(c == -1)c=256;}
 # 70
 if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))== state)
 state=*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_trans,273U,sizeof(int),base + c));else{
@@ -555,10 +555,10 @@ eol=((int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end)(lbuf);
 # 110
 this_line=((struct _dyneither_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(lbuf);
 # 112
-if((int)next == (int)Cyc_Lineno_END  || eol > (*((struct _tuple1*)places->hd)).f1)
+if((int)next == (int)2U  || eol > (*((struct _tuple1*)places->hd)).f1)
 break;
 # 115
-if((int)next == (int)Cyc_Lineno_NEWLINE)++ _tmp16;else{
+if((int)next == (int)0U)++ _tmp16;else{
 # 117
 struct Cyc_Core_Opt*fno=Cyc_Lineno_parse_linedef(this_line);
 if(fno == 0)
@@ -567,7 +567,7 @@ if(fno == 0)
 _tmp15=(struct _dyneither_ptr)(*((struct _tuple0*)fno->v)).f1;
 _tmp16=(*((struct _tuple0*)fno->v)).f2;}}}
 # 130
-while(places != 0  && ((int)next == (int)Cyc_Lineno_END  || eol > (*((struct _tuple1*)places->hd)).f1)){
+while(places != 0  && ((int)next == (int)2U  || eol > (*((struct _tuple1*)places->hd)).f1)){
 struct Cyc_Lineno_Pos*_tmp17=(*((struct _tuple1*)places->hd)).f2;
 ({struct _dyneither_ptr _tmp27=(struct _dyneither_ptr)Cyc_strdup((struct _dyneither_ptr)_tmp15);_tmp17->logical_file=_tmp27;});
 _tmp17->line=this_line;

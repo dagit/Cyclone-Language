@@ -3100,6 +3100,8 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
     case $(&IntCon(Unsigned,Long_sz),_):
     case $(_,&IntCon(Unsigned,Long_sz)): return ulong_type;
       // FIX: I don't think these are the right promotion rules
+    case $(&TagCon,_):
+    case $(_,&TagCon):
     case $(&IntCon(Unsigned,Int_sz),_):
     case $(_,&IntCon(Unsigned,Int_sz)): return uint_type;
     case $(&IntCon(_,Long_sz),_):

@@ -511,7 +511,7 @@ while(1){
 c=Cyc_fgetc(spec_file);
 if( isspace(c))continue;
 if(c == (int)'*')break;
-if(c != - 1){
+if(c != -1){
 ({struct Cyc_String_pa_PrintArg_struct _tmpA=({struct Cyc_String_pa_PrintArg_struct _tmp59;_tmp59.tag=0U,_tmp59.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);_tmp59;});struct Cyc_Int_pa_PrintArg_struct _tmpB=({struct Cyc_Int_pa_PrintArg_struct _tmp58;_tmp58.tag=1U,_tmp58.f1=(unsigned long)c;_tmp58;});void*_tmp8[2U];_tmp8[0]=& _tmpA,_tmp8[1]=& _tmpB;({struct Cyc___cycFILE*_tmp68=Cyc_stderr;struct _dyneither_ptr _tmp67=({const char*_tmp9="Error reading spec file %s: unexpected character '%c'\n";_tag_dyneither(_tmp9,sizeof(char),55U);});Cyc_fprintf(_tmp68,_tmp67,_tag_dyneither(_tmp8,sizeof(void*),2U));});});
 # 80
 Cyc_fflush(Cyc_stderr);}
@@ -522,7 +522,7 @@ JUST_AFTER_STAR:
  i=0;
 while(1){
 c=Cyc_fgetc(spec_file);
-if(c == - 1){
+if(c == -1){
 ({struct Cyc_String_pa_PrintArg_struct _tmpE=({struct Cyc_String_pa_PrintArg_struct _tmp5A;_tmp5A.tag=0U,_tmp5A.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);_tmp5A;});void*_tmpC[1U];_tmpC[0]=& _tmpE;({struct Cyc___cycFILE*_tmp6A=Cyc_stderr;struct _dyneither_ptr _tmp69=({const char*_tmpD="Error reading spec file %s: unexpected EOF\n";_tag_dyneither(_tmpD,sizeof(char),44U);});Cyc_fprintf(_tmp6A,_tmp69,_tag_dyneither(_tmpC,sizeof(void*),1U));});});
 # 92
 Cyc_fflush(Cyc_stderr);
@@ -558,7 +558,7 @@ strvalue[0]=(char)c;
 i=1;
 while(1){
 c=Cyc_fgetc(spec_file);
-if((c == - 1  || c == (int)'\n') || c == (int)'\r'){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
+if((c == -1  || c == (int)'\n') || c == (int)'\r'){*((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))='\000';break;}
 *((char*)_check_known_subscript_notnull(strvalue,4096U,sizeof(char),i))=(char)c;
 ++ i;
 if(i >= 4096){
@@ -573,7 +573,7 @@ struct _dyneither_ptr*_tmp76=({struct _dyneither_ptr*_tmp1C=_cycalloc(sizeof(*_t
 # 137
 _tmp1E->hd=_tmp79;}),_tmp1E->tl=_tmp4;_tmp1E;});
 # 139
-if(c == - 1)goto CLEANUP_AND_RETURN;}
+if(c == -1)goto CLEANUP_AND_RETURN;}
 # 142
 CLEANUP_AND_RETURN:
  Cyc_fclose(spec_file);

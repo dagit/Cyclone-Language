@@ -562,7 +562,7 @@ enum Cyc_Toseqc_SideEffect res=0U;
 enum Cyc_Toseqc_SideEffect _tmp15=Cyc_Toseqc_exp_effect((struct Cyc_Absyn_Exp*)x->hd);
 res=Cyc_Toseqc_join_side_effect(_tmp15,res);
 # 103
-if((int)res == (int)Cyc_Toseqc_AnyEffect)
+if((int)res == (int)3U)
 # 105
 return res;}}
 # 109
