@@ -2400,7 +2400,6 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
       //fprintf(stderr,"found them to be castable\n");
       // if C supports the conversion, then we don't need the cast.
       if (c != No_coercion) unchecked_cast(te,e,t2,c);
-      // we warn for null-checks in the flow analysis now
       if (c != NonNull_to_Null)
 	warn(e->loc,"implicit cast from %s to %s",
 	     typ2string(t1),typ2string(t2));
@@ -2807,7 +2806,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       bool okay;
       okay=
         (e1 != NULL && e2 != NULL && unify_conrefs(intcmp,zt1,zt2) &&
-	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1));
+	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1) &&
+         Evexp::lte_const_exp((exp_t)e1,(exp_t)e2));
       return
         // FIX: we need to take any qualifiers into account on typedefs
         (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const)) ?

@@ -4,7 +4,7 @@
 #include <assert.h>
 
 // Test out the zero-terminated pointers and a few other things
-const char foo[3] = "foo";  // should get a warning here, but still compile
+const char foo[4] = "foo";  
 const char bar[4]@zeroterm = "bar";
 char baz[4]@zeroterm = "baz";
 
