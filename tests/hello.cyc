@@ -5,9 +5,8 @@ using Core;
 using Stdio;
 
 int main(int argc, string ? args) {
-  // Get the command line arguments as an array of strings.
   // The first string is the name of the program.
-  if (args.size <= 1) 
+  if (argc <= 1) 
     throw new Failure("missing name!");
   else
     printf("Hello, %s.\n",args[1]);

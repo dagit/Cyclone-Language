@@ -330,13 +330,55 @@ static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
 }
 // Plus needs to support a pointer and an int
 static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
-  type_t t1 = e1->topt->v;
-  if (is_tagged_pointer_typ(t1)) {
+  type_t t1 = compress(e1->topt->v);
+  type_t t2 = compress(e2->topt->v);
+  switch (t1) {
+  case &PointerType(PtrInfo{et,r,n,tq,b}):
     if (!coerce_sint_typ(te, e2))
-      terr(e2->loc,xprintf("expecting int but found %s",
-			   typ2string(e2->topt->v)));
-    return t1;
-  } else return tcArithBinop(te, e1, e2, is_numeric);
+      terr(e2->loc,xprintf("expecting int but found %s",typ2string(t2)));
+    b = compress_conref(b);
+    switch (b->v) {
+    case &Eq_constr(Unknown_b): return t1;
+    case &Eq_constr(&Upper_b(ub)):
+      let ub_v = Evexp::eval_const_uint_exp(ub);
+      n = compress_conref(n);
+      bool is_nullable;
+      switch (n->v) {
+      case &Eq_constr(is_null): 
+	// must insert cast so that null check occurs here
+	if (is_null) {
+	  let new_t1 = new PointerType(PtrInfo{et,r,new_conref(false),tq,b});
+	  warn(e1->loc,xprintf("coercing from %s to %s",typ2string(t1),
+			       typ2string(new_t1)));
+	  unchecked_cast(te, e1, new_t1);
+	}	 
+	break;
+      default: 
+	n->v = new Eq_constr(false); break;
+      }
+      if (is_const_exp(te,e2)) {
+	// FIX:  should be evaluate signed int exp!
+	let e2_v = Evexp::eval_const_uint_exp(e2);
+	if (ub_v < e2_v) {
+	  e2_v = ub_v;
+	  warn(e1->loc,xprintf("pointer arithmetic is out of bounds"));
+	}
+	let new_bound = uint_exp(ub_v - e2_v,null);
+	new_bound->topt = new Opt(uint_t);
+	// subtract off the upper bound in the result type
+	return new PointerType(PtrInfo{et,r,new_conref(false),tq,
+					 new_conref(new Upper_b(new_bound))});
+      } else {
+	terr(e1->loc,"cannot statically check pointer arithmetic.\n "
+	     "  suggest you cast the first expression to a ? type.");
+	return t1;
+      }
+    default:
+      b->v = new Eq_constr(Unknown_b); return t1;
+    }
+  default:
+    return tcArithBinop(te, e1, e2, is_numeric);
+  }
 }
 // Minus needs to support a tagged array and an int, and two tagged arrays
 static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
@@ -599,8 +641,8 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
   check_writable(te, e);
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
-  if (!is_numeric(e) && !is_tagged_pointer_typ(t))
-    terr(e->loc,xprintf("expecting arithmetic or pointer type but found %s",
+  if (!is_numeric(e) && !is_tagged_pointer_typ(t)) 
+    terr(e->loc,xprintf("expecting arithmetic or ? type but found %s",
 			typ2string(t)));
   return t;
 }
@@ -621,7 +663,6 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
 }
 
 // Assignments with optional operations, e.g., x = 3, x += 5
-// FIX: reject assignment to unmodifiable (eg. const) lvalues.
 static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
                          exp_t e1, opt_t<primop_t> po, exp_t e2) {
   // FIX: Not right b/c of funcions vs. function pointers???
