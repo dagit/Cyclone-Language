@@ -129,7 +129,10 @@ extern char Cyc_Bad_alloc[];
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
-#define _check_null(ptr) (ptr ? : (void*)_throw_null())
+#define _check_null(ptr) \
+  ({ void*_cks_null = (void*)(ptr); \
+     if (!_cks_null) _throw_null(); \
+     _cks_null; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
@@ -343,8 +346,6 @@ extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
 #define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
 #define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
-
-
 #endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -426,7 +427,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "xp.cyc"
- static char Cyc_rcsid[49U]="$Id: xp.c,v 1.3 2004-07-24 04:33:47 trevor Exp $";
+ static char Cyc_rcsid[49U]="$Id: xp.c,v 1.4 2004-07-26 17:40:56 djg Exp $";
 # 4 "ctype.h"
 int isalnum(int);
 # 22

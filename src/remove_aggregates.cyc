@@ -25,8 +25,8 @@
 // without cluttering up toc.cyc.  And because tuples and datatypes have
 // already been converted into structs, we have a lot fewer cases.
 // Do not be confused by the name: We remove aggregate _constructors_ (e.g.,
-// Aggregate_e and Array_e, but not aggregate assignment)
-// Tempting as might be to optimize x = Aggr(e1,...,en) to assign directly
+// Aggregate_e and Array_e) but not aggregate assignment
+// Tempting as it might be to optimize x = Aggr(e1,...,en) to assign directly
 //  to fields of x instead of creating a temporary, doing so requires
 //  information we do not have.  For example, consider the source expression
 //  y = $(y[1],y[0]).  We can almost always do this optimization for 

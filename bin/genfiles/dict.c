@@ -129,7 +129,10 @@ extern char Cyc_Bad_alloc[];
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
-#define _check_null(ptr) (ptr ? : (void*)_throw_null())
+#define _check_null(ptr) \
+  ({ void*_cks_null = (void*)(ptr); \
+     if (!_cks_null) _throw_null(); \
+     _cks_null; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
@@ -343,8 +346,6 @@ extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
 #define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
 #define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
-
-
 #endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -1014,8 +1015,8 @@ int len=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(dict_list);
 (int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmpD0=_cycalloc(sizeof(*_tmpD0));_tmpD0->tag=Cyc_Core_Failure,({struct _dyneither_ptr _tmp128=({const char*_tmpCF="Dict::marshal: Write failure";_tag_dyneither(_tmpCF,sizeof(char),29U);});_tmpD0->f1=_tmp128;});_tmpD0;}));
 # 620
 while(dict_list != 0){
-({void*_tmp129=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_key)(env,fp,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);env=_tmp129;});
-({void*_tmp12A=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_val)(env,fp,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);env=_tmp12A;});
+({void*_tmp12C=({void*(*_tmp12B)(void*,struct Cyc___cycFILE*,struct _tuple0*)=(void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))_check_null((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_key);void*_tmp12A=env;struct Cyc___cycFILE*_tmp129=fp;_tmp12B(_tmp12A,_tmp129,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);});env=_tmp12C;});
+({void*_tmp130=({void*(*_tmp12F)(void*,struct Cyc___cycFILE*,struct _tuple0*)=(void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))_check_null((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))write_val);void*_tmp12E=env;struct Cyc___cycFILE*_tmp12D=fp;_tmp12F(_tmp12E,_tmp12D,(struct _tuple0*)((struct Cyc_List_List*)_check_null(dict_list))->hd);});env=_tmp130;});
 dict_list=((struct Cyc_List_List*)_check_null(dict_list))->tl;}
 # 625
 return env;}
@@ -1025,11 +1026,11 @@ struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct _RegionHandle*rgn,void*env,int(*c
 struct Cyc_Dict_Dict dict=Cyc_Dict_empty(cmp);
 int len=Cyc_getw(fp);
 if(len == - 1)
-(int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmpD2=_cycalloc(sizeof(*_tmpD2));_tmpD2->tag=Cyc_Core_Failure,({struct _dyneither_ptr _tmp12B=({const char*_tmpD1="Dict::unmarshal: list length is -1";_tag_dyneither(_tmpD1,sizeof(char),35U);});_tmpD2->f1=_tmp12B;});_tmpD2;}));
+(int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmpD2=_cycalloc(sizeof(*_tmpD2));_tmpD2->tag=Cyc_Core_Failure,({struct _dyneither_ptr _tmp131=({const char*_tmpD1="Dict::unmarshal: list length is -1";_tag_dyneither(_tmpD1,sizeof(char),35U);});_tmpD2->f1=_tmp131;});_tmpD2;}));
 # 640
 {int i=0;for(0;i < len;++ i){
 void*key=read_key(env,fp);
 void*val=read_val(env,fp);
-({struct Cyc_Dict_Dict _tmp12C=Cyc_Dict_insert(dict,key,val);dict=_tmp12C;});}}
+({struct Cyc_Dict_Dict _tmp132=Cyc_Dict_insert(dict,key,val);dict=_tmp132;});}}
 # 645
 return dict;}

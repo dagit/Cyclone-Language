@@ -407,7 +407,10 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     return (type_t)e->topt;
   case Numelts:
     switch (t) {
-    case &ArrayType(_): break;
+    case &ArrayType(ArrayInfo{_,_,e2,_,_}):
+      if (e2==NULL || !Evexp::c_can_eval((exp_t)e2))
+	terr(loc,"can't calculate numelts");
+      break;
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       let eopt = get_bounds_exp(fat_bound_type,b);
       if (eopt != NULL) {

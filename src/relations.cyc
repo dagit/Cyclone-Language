@@ -392,6 +392,8 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
   case {.RNumelts = v}:
     switch (Tcutil::compress(v->type)) {
     case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
+      // DJG: this should be a moot point once relations are discarded before
+      //      translation-to-C.
       // major subtlety!  the vardecl's type might have been translated
       // to C in which case the bound is not accurate...
       if (b == Absyn::bounds_one()) break;

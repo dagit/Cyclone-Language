@@ -76,3 +76,16 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn)) {
   vimpos(fmt, ap);
 }
+
+`a vimpos_loc(seg_t loc, string_t fmt, parg_t ? ap) __attribute__((noreturn)) {
+  if (!Position::error_p()) {
+    fprintf(stderr,"Compiler Error: \n");
+    verr(loc,fmt,ap);
+  }
+  throw new Core::Impossible("Compiler Error");  
+}
+
+`a impos_loc(seg_t loc, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3), noreturn)) {
+  vimpos_loc(loc, fmt, ap);
+}

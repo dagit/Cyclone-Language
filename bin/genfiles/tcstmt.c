@@ -129,7 +129,10 @@ extern char Cyc_Bad_alloc[];
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
-#define _check_null(ptr) (ptr ? : (void*)_throw_null())
+#define _check_null(ptr) \
+  ({ void*_cks_null = (void*)(ptr); \
+     if (!_cks_null) _throw_null(); \
+     _cks_null; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
@@ -343,8 +346,6 @@ extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
 #define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
 #define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
-
-
 #endif
 
 #define MAX_MALLOC_SIZE (1 << 28)
@@ -994,7 +995,7 @@ goto _LL57;default: _LL64: _LL65:
 goto _LL50;}else{goto _LL55;}}else{goto _LL55;}default: _LL55: _LL56:
  goto _LL50;}_LL50:;}{
 # 459
-struct Cyc_List_List*_tmpAC=!is_local?0: Cyc_Tcenv_lookup_type_vars(_tmp96);
+struct Cyc_List_List*_tmpAC=!is_local?0:((struct Cyc_List_List*(*)(struct Cyc_Tcenv_Tenv*))_check_null(Cyc_Tcenv_lookup_type_vars))(_tmp96);
 int _tmpAD=!is_local?0: 1;
 Cyc_Tcutil_check_type(s0->loc,_tmp96,_tmpAC,& Cyc_Tcutil_tmk,_tmpAD,1,_tmpC8);
 ({int _tmp1D3=Cyc_Tcutil_extract_const_from_typedef(s0->loc,(_tmp113->tq).print_const,_tmpC8);(_tmp113->tq).real_const=_tmp1D3;});{

@@ -393,10 +393,8 @@ static flow_t use_nounique_Rval(analenv_t env, seg_t loc, Absyn::type_t t, flow_
   switch(inflow) {
   case {.BottomFL = _}: return BottomFL();
   case {.ReachableFL = $(d,relns)}:
-    if (!Tcutil::is_noalias_pointer(t,false)) {
+    if (!Tcutil::is_noalias_pointer(t,false))
       Warn::impos("noliveunique attribute requires alias-free pointer");
-      return BottomFL();
-    }
     let elt_type = Tcutil::pointer_elt_type(t);
     retry: switch (r) {
     case &NamedLocation(_,r2): r = r2; goto retry;
@@ -425,8 +423,6 @@ static $(flow_t,list_t<absRval_t>) anal_Rexps(analenv_t env,
   list_t<absRval_t> rvals = NULL;
   if(es == NULL)
     return $(inflow, NULL);
-  // expand out any unique paths in the flow before iterating
-//   inflow = expand_unique_places(env,inflow,es);
   do {
     let $(f,r) = anal_Rexp(env,first_is_copy,inflow,es->hd);
     inflow = f;
@@ -1193,11 +1189,13 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 
   case &FnCall_e(e1,es,...):
     let orig_es = es;
-      let $(fst_outflow,rvals) = 
-	anal_Rexps(env,inflow,new List(e1,copy(es)),false,true);
+    let $(f1,r1) = anal_Rexp(env,false,inflow,e1);
+    // DJG: e1 must not be NULL!
+    anal_derefR(env,inflow,f1,e1,r1);
+    let $(fst_outflow,rvals) = 
+	anal_Rexps(env,f1,copy(es),false,true);
       // for strange reasons, use_Rval is fine for the function pointer:
-      let outflow = use_Rval(env,e1->loc,fst_outflow,rvals->hd);
-      rvals = rvals->tl;
+      let outflow = use_Rval(env,e1->loc,fst_outflow,r1);
       // we just just "use" each arg except for the "initializes" attribute
       list_t<int> init_params = NULL;
       list_t<int> nolive_unique_params = NULL;

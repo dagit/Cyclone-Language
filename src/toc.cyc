@@ -1852,11 +1852,10 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
 }
 
 static void exp_to_c(env_t nv, exp_t e) {
-  let r = e->r;
   if(e->topt == NULL)
     toc_impos("exp_to_c: no type for %s",exp2string(e));
   type_t old_typ = (type_t)e->topt;
-  switch (r) {
+  switch (e->r) {
   case &Pragma_e(...):
     e->r = (raw_exp_t)(&zero_exp);
     break;
@@ -1889,9 +1888,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch (compress((type_t)arg->topt)) {
       case &ArrayType(ArrayInfo{_,_,e2,_,_}):
         // FIX: copy the expression e2 here.
-        if (!Evexp::c_can_eval((exp_t)e2))
-          terr(e->loc,"can't calculate numelts");
-        e->r = e2->r;  break;
+	// DJG: type-checker now checks e2 is a C constant
+        e->r = e2->r;  
+	break;
       case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,_))):
         let eopt = get_bounds_exp(bounds_one(),bound);
         if (eopt == NULL) {
@@ -1918,7 +1917,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
 	break;
       default:
-	toc_impos("size primop applied to non-array %s (%s)",
+	toc_impos("numelts primop applied to non-array %s (%s)",
                   typ2string((type_t)arg->topt),typ2string((type_t)arg->topt));
       }
       break;
@@ -2005,37 +2004,30 @@ static void exp_to_c(env_t nv, exp_t e) {
     //
     // Similarly, we need to worry about the case where e2 is a
     // tagged union projection.
-    type_t ptr_type = void_type;
-    type_t elt_type = void_type;
-    bool is_dyneither = false;
-    string_t incr_str = "increment";
+    type_t   ignore_typ  = void_type;
+    bool     ignore_bool = false;
+    int      ignore_int  = 0;
+    string_t incr_str    = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
-    if (is_zero_ptr_deref(e2,&ptr_type,&is_dyneither,&elt_type)) {
-      terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
-      toc_impos("in-place inc/dec on zero-term");
-    }
-    type_t tunion_member_type = void_type;
-    int f_tag = 0;
-    if (is_tagged_union_project(e2,&f_tag,&tunion_member_type,true)) {
-      let one = signed_int_exp(1,DL);
+    if (is_zero_ptr_deref(e2,&ignore_typ,&ignore_bool,&ignore_typ))
+      Warn::impos_loc(e->loc,"in-place %s is not supported when dereferencing "
+		      "a zero-terminated pointer", incr_str);
+    if (is_tagged_union_project(e2,&ignore_int,&ignore_typ,true)) {
+      exp_t    one = signed_int_exp(1,DL);
+      primop_t op;
       one->topt = sint_type;
       switch (incr) {
-      case PreInc:
-        e->r = new AssignOp_e(e2,new Opt(Plus),one);
-        exp_to_c(nv,e);
-        return;
-      case PreDec:
-        e->r = new AssignOp_e(e2,new Opt(Minus),one);
-        exp_to_c(nv,e);
-        return;
+      case PreInc: op = Plus;  break;
+      case PreDec: op = Minus; break;
       default:
-        terr(e->loc,"in-place post%s is not supported on @tagged union members",
-	     incr_str);
-        toc_impos("in-place inc/dec on @tagged union");
+        Warn::impos_loc(e->loc,"in-place post%s is not supported on "
+			"@tagged union members", incr_str);
       }
+      e->r = new AssignOp_e(e2,new Opt(op),one);
+      exp_to_c(nv,e);
+      return;
     }
-    bool need_null_ck = is_pointer_type(old_typ) && 
-      Tcutil::is_nullable_pointer_type(old_typ) && need_null_check(e2);
+    let need_null_ck = is_nullable_pointer_type(old_typ) && need_null_check(e2);
     set_lhs(nv,true);
     exp_to_c(nv,e2);
     set_lhs(nv,false);
@@ -2186,7 +2178,17 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e2);
     break;
   case &FnCall_e(e1,es,NULL,_):
+    bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
+    type_t e1_typ = (type_t)e1->topt;
     exp_to_c(nv,e1);
+    if(do_null_check) { 
+      if(warn_all_null_deref)
+	warn(e->loc, "inserted null check");
+      //*((t *)_check_null(e)) (cast necessary b/c void* not a function type)
+      e1->r = cast_it_r(typ_to_c(e1_typ),
+			fncall_exp(_check_null_e,
+				   new List(copy_exp(e1),NULL),DL));
+    }
     List::iter_c(exp_to_c,nv,es);
     break;
   case &FnCall_e(e1,es,&VarargCallInfo{num_varargs,injectors,vai},_):
@@ -2222,7 +2224,17 @@ static void exp_to_c(env_t nv, exp_t e) {
 			  new_args);
       new_args = imp_rev(new_args);
       // make the function call
+      bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
+      type_t e1_typ = (type_t)e1->topt;
       exp_to_c(nv,e1);
+      if(do_null_check) { 
+	if(warn_all_null_deref)
+	  warn(e->loc, "inserted null check");
+	// ((t *)_check_null(e1))
+	e1->r = cast_it_r(typ_to_c(e1_typ),
+			  fncall_exp(_check_null_e,
+				     new List(copy_exp(e1),NULL),DL));
+      }
       stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
 
       // make the declarations and prepend them
@@ -3226,8 +3238,8 @@ DynCast:
     let s2 = exp_stmt(s2e,loc); // e2 = v1
 
     let s = declare_stmt(v1,e1_old_typ,e1, // typeof(e1) v1 = e1
-			 declare_stmt(v2,e2_old_typ,e2, // typeof(e2) v2 = e2
-				      seq_stmt(s1,s2,loc),loc),loc); // above asgns
+	    declare_stmt(v2,e2_old_typ,e2, // typeof(e2) v2 = e2
+			 seq_stmt(s1,s2,loc),loc),loc); // above asgns
     stmt_to_c(nv,s);
     e->r = stmt_exp_r(s);
     break;
