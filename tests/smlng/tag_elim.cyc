@@ -19,6 +19,7 @@ namespace TagElim;
 // <B>x</B><B>y</B> wraps an outer B so that down_opt can elim the tags, but
 //                  only when bold_seen (and bold_useless) is set
 struct SynthS {
+  bool mt_doc: 1;
   bool bold_useless: 1;
   bool bold_seen: 1;
   //  bool emph: 1;
@@ -52,16 +53,27 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
-    init.s = SynthS(1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
+    init.s = SynthS(1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
     synth_t synth      = init;
     synth_t prev_synth = init;
-    if(ds == null)
-      return $(doc,synth);
+    if(ds == null) {
+      synth.s.mt_doc = 1;
+      return $(Mt,synth);
+    }
+    if(ds->tl == null)
+      return up_opt(b,ds->hd);
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
     while(ds != null) {
       let $(newd, inner_synth) = up_opt(b, ds->hd);
       ds->hd = newd; // destructive here
+      if(inner_synth.s.mt_doc) {
+	prev->tl = ds->tl;
+	ds = ds->tl;
+	if(prev == *dsp && false) 
+	  *dsp = prevprev = prev = prev->tl;
+	continue;
+      }
       // look for reasons to split the sequence and wrap with a redundant tag
       // so the ensuing down optimization can remove the inner tags
       list_t<int> split_tags = null; // no need to be heap-allocated
@@ -127,15 +139,14 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
     return $(doc,synth);
   case &Text(pos): 
     synth_t synth;
-    //    if(Buffer::get_char(b, pos) == '\0')
-    //      synth.i = ~0;
-    //    else
     synth.i = 0;
     synth.s.sizes  = ~0;
     synth.s.colors = ~0;
     return $(doc,synth);
   case &Tagged(tag,d):
     let $(d2, synth) = up_opt(b, d);
+    if(synth.s.mt_doc)
+      return $(d,synth);
     bool useless = false;
 #define USELESS(FIELD) do {useless=synth.s.FIELD; synth.s.FIELD=true;} while(0)
 #define SEEN(FIELD) do {synth.s.FIELD=true;} while(0)
@@ -187,6 +198,10 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       return $(doc,synth);
     else
       return $(new Tagged(tag,d2),synth);
+  case Mt: 
+    synth_t synth;
+    synth.i = ~0;
+    return $(Mt,synth);
   }
 }
 
@@ -205,7 +220,8 @@ $(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
     }
     return $(*dsp, prev);
   case &Text(_): fallthru;
-  case &Tagged(_,_): return $(null,null);
+  case &Tagged(_,_): fallthru;
+  case Mt: return $(null,null);
   }
 }
 
@@ -234,6 +250,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
     default: break;
     }
     switch(*d2) {
+    case Mt: fallthru;
     case &Text(_): return $(d,ShuffleSynth(is_color,is_size));
     case &Tagged(_,_):
       let pr = up_shuffle(*d2);
@@ -303,6 +320,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
 	       ShuffleSynth(is_color,is_size));
     }
 
+  case Mt: fallthru;
   case &Text(_): 
     return $(d,ShuffleSynth(0,0));
 

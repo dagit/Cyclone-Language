@@ -33,6 +33,7 @@ tunion Document {
   Seq(List::list_t<doc_t>); // list must NEVER BE SHARED
   Text(unsigned int);
   Tagged(tag_t,doc_t);
+  Mt;
 };
 
 bool is_white(char c) {
@@ -51,6 +52,7 @@ doc_t copy_doc(doc_t d) {
   case &Text(i): return new Text(i);
   case &Seq(ds): return new Seq(List::copy(ds));
   case &Tagged(t,d): return new Tagged(t,d);
+  case Mt: return Mt;
   }
 }
 
@@ -66,7 +68,8 @@ void dump(buf_t b, doc_t d) {
     } catch {
     default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
     }
-      break;
+    break;
+  case Mt: break;
   }
 }
 
@@ -83,6 +86,7 @@ int doc_size(buf_t b,doc_t d) {
     sum += doc_size(b,d);
     sum += end_tags[tag].size;
     break;
+  case Mt: break;
   }
   return sum;
 }
@@ -98,6 +102,7 @@ unsigned int num_texts(doc_t d) {
   case &Tagged(tag,d):
     sum += num_texts(d);
     break;
+  case Mt: break;
   }
   return sum;
 }
@@ -195,6 +200,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     }
     *d2 = down_opt(ctxt,*d2);
     return d;
+  case Mt: return Mt;
   }
 }
 
@@ -232,6 +238,7 @@ struct Q flattenit(doc_t d) {
     for (_ x = q.first; x != null; x = x->tl) 
       x->hd = new Tagged(tag,x->hd);
     return q;
+  case Mt: return Q{null,null};
   }
 }  
 

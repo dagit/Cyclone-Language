@@ -45,6 +45,7 @@ extern tunion Document {
   Seq(List::list_t<doc_t>); // bound because we split arrays in place
   Text(unsigned int);
   Tagged(tag_t,doc_t);
+  Mt;
 };
 #define DONT_KNOW 255
 void dump(Buffer::buf_t b,doc_t d);
