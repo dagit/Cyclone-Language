@@ -1337,6 +1337,26 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     left_rval = rvals->hd;
     right_rval = rvals->tl->hd;
     outflow = f;
+    // Make sure if we are swapping into a zero-terminated array, that
+    // element is known to be Zero
+    type_t t_ign1 = &VoidType_val, t_ign2 = &VoidType_val;
+    bool b_ign1 = false;
+    if (Tcutil::is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&t_ign2)) {
+      switch (right_rval) {
+      case &Zero: break;
+      default: aerr(e1->loc,
+		    "cannot swap value into zeroterm array not known to be 0");
+      }
+    }
+    // Assumes that if we didn't get an error on the first test, then
+    // the rhs can't itself be an array
+    else if (Tcutil::is_zero_ptr_deref(e2,&t_ign1,&b_ign1,&t_ign2)) {
+      switch (left_rval) {
+      case &Zero: break;
+      default: aerr(e2->loc,
+		    "cannot swap value into zeroterm array not known to be 0");
+      }
+    }
     // now assign the abstract rvals
     let $(_,left_lval)  = anal_Lexp(env,outflow,false,false,e1);
     let $(_,right_lval) = anal_Lexp(env,outflow,false,false,e2);

@@ -2323,13 +2323,6 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,e1->loc,topt,"swap non-lvalue");
   if (!is_lvalue(e2))
     return expr_err(te,e2->loc,topt,"swap non-lvalue");
-  // Make sure we aren't swapping elements of a zero-terminated array
-  type_t t_ign1 = &VoidType_val, t_ign2 = &VoidType_val;
-  bool b_ign1 = false;
-  if (is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&t_ign2))
-    return expr_err(te,e1->loc,topt,"swap value in zeroterm array");
-  if (is_zero_ptr_deref(e2,&t_ign1,&b_ign1,&t_ign2))
-    return expr_err(te,e2->loc,topt,"swap value in zeroterm array");
   // Make sure the elements are writable
   check_writable(te, e1);
   check_writable(te, e2);
