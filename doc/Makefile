@@ -60,7 +60,7 @@ gen-libdoc.tex: \
   ../include/set.h \
   ../include/slowdict.h \
   ../include/xarray.h
-	$(CYCDOC) -cyclone ../bin/cyclone -I../include -B../bin/cyc-lib $^ > gen-libdoc.tex
+	$(CYCDOC) -cyclone ../bin/cyclone -I../include -B../bin/lib/cyc-lib $^ > gen-libdoc.tex
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
