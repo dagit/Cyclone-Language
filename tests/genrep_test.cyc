@@ -15,7 +15,7 @@ using Position;
 #define SHARING
 #define CYCLE
 //#define READ
-//#define XML
+#define XML
 #define PRINT
 //#define PRINTTYPE
 //#define WRITE

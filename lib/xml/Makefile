@@ -11,7 +11,7 @@ CYCLEX=$(CYC_BIN_PATH)/cyclex$(EXE)
 
 override CYC_FLAGS+= -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH)
 
-SRCS=xml xmlparse_tab xmlscan xmldump
+SRCS=xml xmlparse_tab xmlscan xmldump xmlmarshal
 
 OBJS=$(addsuffix .o, $(SRCS))
 CSRCS=$(addsuffix .c, $(SRCS))
@@ -61,3 +61,4 @@ xmlparse_tab.c: xmlparse.h xml.h xmlscan.h
 xmldump.c: xmldump.h xml.h 
 xmlscan.c: xmlscan.h xml.h xmlparse.h xmlparse_tab.h
 xmlecho.c: xmldump.h xml.h xmlscan.h xmlparse.h
+xmlmarshal.c: xmlmarshal.h xml.h

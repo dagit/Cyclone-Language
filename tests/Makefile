@@ -65,7 +65,7 @@ genrep_read$(EXE):  genrep_read.o muttrep.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
 genrep_test$(EXE):  genrep_test.o muttrep.o 
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lxml
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc

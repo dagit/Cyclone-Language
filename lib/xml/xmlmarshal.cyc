@@ -1,0 +1,646 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+#include <stdlib.h>
+#include <typerep.h>
+#include <set.h>
+#include <dict.h>
+#include <stdio.h>
+#include <string.h>
+#include <xml/xml.h>
+#include <xml/xmlmarshal.h>
+
+using Typerep;
+using Xml;
+using XmlMarshal;
+using List;
+
+extern "C" `b unsafe_cast<`b,`a>(`a x);
+
+namespace XmlMarshal;
+
+// utilities for addressing
+typedef Set::set_t<unsigned int> addr_set_t;
+
+// NULL always maps to 0
+typedef $(Dict::dict_t<unsigned int,int>,int) addr_index_t;
+// 0 always maps to NULL
+typedef $(unsigned int?, int) addr_table_t;
+
+static int uint_cmp(unsigned int a, unsigned int b) {
+  if(a == b) return 0;
+  else if (a < b) return 1;
+  else return -1;
+}
+
+static addr_set_t empty_addr_set () {
+  return Set::insert(Set::empty(uint_cmp),0);
+}
+
+// returns whether elt is a member, inserts if it's not
+static $(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
+  return new $(Set::member(set,val), Set::insert(set,val));
+}
+
+static inline bool index_member(addr_index_t idx, unsigned int m) {
+  let $(_,n) = idx;
+  return (m < n);
+}
+
+static addr_index_t empty_addr_index() {
+  return $(Dict::insert(Dict::empty(uint_cmp),0,0),1);
+}
+
+
+
+
+static int index_lookup(addr_index_t index, unsigned int val) {
+  let $(dict,n) = index;
+  let indopt = Dict::lookup_opt(dict,val);
+  if(indopt != NULL) {
+    return indopt->v;
+  }
+  else return n;
+}
+
+static addr_index_t index_insert(addr_index_t index, unsigned int val) {
+  let $(dict,n) = index;
+  return $(Dict::insert(dict,val,n),n+1);
+}
+
+static addr_table_t empty_addr_table() {
+  return $(new {for i < 1: 0},1);
+}
+static inline bool table_member(addr_table_t table, unsigned int m) {
+  let $(_,n) = table;
+  return (m < n);
+}
+
+static addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
+  let $(vec,n) = tbl;
+  if(vec.size == n) {
+    vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
+  }
+  vec[n] = i;
+  return $(vec,n+1);
+}
+
+static unsigned int table_lookup(addr_table_t tbl, int i) {
+  return tbl[0][i];
+}
+
+// Emits an XML form of a value with given typerep'd type
+
+attribute_t string_att(name n, string_t<`H> s) {
+  return new $(n, new Attvalue2(s));
+}
+char? string_of_int(int i) {
+  char? buf = new {for i < 20: 0};
+  sprintf(buf,"%d",i);
+  return buf;
+}
+char? string_of_float(float f) {
+  char? buf = new {for i < 20: 0};
+  sprintf(buf,"%f",f);
+  return buf;
+}
+char? string_of_double(double d) {
+  char? buf = new {for i < 20: 0};
+  sprintf(buf,"%f",d);
+  return buf;
+}
+
+char? string_of_uint(unsigned int i) {
+  char? buf = new {for i < 12: 0};
+  sprintf(buf,"%u",i);
+  return buf;
+}
+
+attribute_t int_att(name n, int i) {
+  
+  return string_att(n, string_of_int(i));
+}
+
+attribute_t bool_att(name n, bool b) {
+  return string_att(n, b?(string_t)"true":"false");
+}
+
+$(addr_index_t,content_t)
+to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
+  switch(ts) {
+  case &Int(sn, sz):
+    int@ x = unsafe_cast(val);
+    if(sn)
+      return $(env,new Element(new StartEnd("Int",
+				      list(int_att("sz",sz)),
+				      list(new Chardata(string_of_int(*x))))));
+    else 
+      return $(env,
+	       new Element(new StartEnd("UInt",
+					list(int_att("sz",sz)),
+					list(new Chardata(string_of_uint(*x))))));
+  case Float:
+    float@ x = unsafe_cast(val);
+    return $(env, 
+	     new Element(new StartEnd("Float",
+				      NULL,
+				      list(new Chardata(string_of_float(*x))))));
+  case Double:
+    double@ x = unsafe_cast(val);
+    return $(env, 
+	     new Element(new StartEnd("Double",
+				      NULL,
+				      list(new Chardata(string_of_double(*x))))));
+
+  case &ThinPtr(sz,typ):
+    // val is a pointer to a pointer to whatever typ represents
+    int *x = unsafe_cast(val); 
+    int y = *x;
+    let mem = index_lookup(env,y); // null always shared
+    if(index_member(env,mem)) {
+      return $(env, 
+	       new Element(new Empty("ThinPtr",
+				     list(int_att("sz",sz),
+						int_att("idref",mem)))));
+    } else {
+      list_t<content_t,`H> children = NULL;
+      env = index_insert(env,y);
+      mem = index_lookup(env,y);
+      int typ_szb = size_type(typ);
+      for (int i = 0; i<sz; i++) {
+	let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(y));
+	env = env2;
+	children = new List{child, children};
+	y += typ_szb;
+      }
+      children = imp_rev(children);
+      return $(env, new Element(new StartEnd("ThinPtr",
+					     list(int_att("sz",sz),
+							int_att("id",mem)),
+					     children)));
+    }
+
+  case &FatPtr(typ):
+    $(unsigned int, unsigned int, unsigned int) @`H x = unsafe_cast(val);
+    unsigned int typ_szb = size_type(typ);
+    unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
+    unsigned int pos = (curr-base)/typ_szb;
+    unsigned int sz = (last_plus_one - base)/typ_szb;
+    let mem = index_lookup(env,base); // null always shared
+    if(index_member(env,mem)) {
+      return $(env,new Element(new Empty("FatPtr",
+					 list(int_att("idref",mem),
+					      int_att("pos",pos),
+					      int_att("sz",sz)))));
+    } else {
+      list_t<content_t,`H> children = NULL;
+      env=index_insert(env,base);
+      for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
+	let $(env2,child) = to_xml_base(typ, env, (`a@)unsafe_cast(i));
+	env = env2;
+	children = new List{child, children};
+      }
+      children = imp_rev(children);
+      return $(env,new Element(new StartEnd("FatPtr",
+					    list(int_att("id",mem),
+						 int_att("pos",pos),
+						 int_att("sz",sz)),
+					    children)));
+    }
+    
+  case &Struct(nm,szb,l):
+    unsigned int x = unsafe_cast(val);
+    list_t<content_t> children = NULL;
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs, fnm,typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(x_ofs));
+      env=env2;
+      child = new Element(new StartEnd("Field",list(string_att("nm",fnm)),list(child)));
+      children = new List{child,children};
+    } 
+    children=imp_rev(children);
+    return $(env,new Element(new StartEnd("Struct",
+					  list(string_att("nm",nm?*nm:"anon")),
+					  children)));
+  case &Tuple(_,l):
+    unsigned int x = unsafe_cast(val);
+    list_t<content_t> children = NULL;
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(x_ofs));
+      env=env2;
+      children = new List{child,children};
+    } 
+    children=imp_rev(children);
+    return $(env,new Element(new StartEnd("Tuple",
+					  NULL,
+					  children)));
+
+  case &TUnionField(tname,fname,_,l):
+    int x = unsafe_cast(val); 
+    list_t<content_t> children = NULL;
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x + ofs;
+      let $(env2,child) = to_xml_base(typ, env, (`a@)unsafe_cast(x_ofs));
+      env=env2;
+      children=new List{child,children};
+    }
+    children=imp_rev(children);
+    return $(env,new Element(new StartEnd("TunionField",
+					  list(string_att("tnm",tname),
+					       string_att("fname",fname)),
+					  children)));
+ 
+  case &TUnion(nm,t,l):
+    /* get the tag */
+    // tagp a misnomer here
+    unsigned int@ tup = unsafe_cast(val);
+    if (*tup < 1024) {
+      int tag = *tup;
+      return $(env,new Element(new Empty("TUnion",list(int_att("data",0),
+						       int_att("tag",tag),
+						       string_att("tnm",get_tagname(tag,t))))));
+    }
+    else {
+      unsigned int @tagp = unsafe_cast(*tup);
+      unsigned int tag = *tagp;
+      let mem = index_lookup(env,*tup);
+      if(index_member(env,mem)) {
+	return $(env,new Element(new Empty("TUnion",
+					       list(int_att("data",1),
+						    int_att("idref",mem),
+						    int_att("tag",tag),
+						    string_att("tnm",get_tagname2(tag,l))))));
+      } else {
+	env = index_insert(env,*tup);
+	/* figure out which variant it is */
+	let $(off, typ) = get_unionbranch(tag,l);
+	`a@ xoff = unsafe_cast(*tup+off);
+	let $(env,child) = to_xml_base(typ, env, xoff);
+	return  $(env,new Element(new StartEnd("TUnion",list(int_att("data",1),
+								int_att("id",mem),
+								int_att("tag",tag),
+								string_att("tnm",get_tagname2(tag,l))),
+						  list(child))));
+      }
+    }
+
+
+  case &XTUnion(_,l):
+    // val is a pointer to a xtunion, which is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
+    unsigned int@ xtunionp = unsafe_cast(val);
+    let mem = index_lookup(env,*xtunionp);
+    // get the pointer to the name string "\0\0\0\0Name"
+    int data = 0;
+    string_t<`H> xtname = NULL;
+    unsigned int* xtstructp = unsafe_cast(*xtunionp);
+    if(*xtstructp != 0) {
+      Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
+      xtname = Core::Cstring_to_string(xtnamec);
+      data = 1;
+    } else {
+      Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
+      xtname = Core::Cstring_to_string(xtnamec);
+    }
+    
+    if(!index_member(env,mem)) {
+      env = index_insert(env,*xtunionp);
+      // get the pointer to the name string "\0\0\0\0Name"
+      unsigned int* xtstructp = unsafe_cast(*xtunionp);
+      if(data != 0) {
+	let $(off,typ) = get_xtunionbranch(xtname,l);
+	`a@ xoff = unsafe_cast(*xtunionp+off);
+	
+	let $(env2,child) = to_xml_base(typ, env, xoff);
+	env=env2;
+	return $(env,new Element(new StartEnd("XTUnion",
+					      list(int_att("data",1),
+						   int_att("id",mem),
+						   string_att("tag",xtname)),
+					      list(child))));
+      } else {
+	return $(env,new Element(new Empty("XTUnion",
+					   list(int_att("data",0),
+						int_att("id",mem),
+						string_att("tag",xtname)))));
+      }
+      
+    } else {
+      return $(env,new Element(new Empty("XTUnion",
+					 list(int_att("data",data),
+					      string_att("tag",xtname),
+					      int_att("idref",mem)))));
+    }
+
+  case &Union(nm,_,l):
+    list_t<content_t> children=NULL;
+    for(int i = 0; i < l.size; i++) {
+      let $(fnm,ts) = *(l[i]);
+      let $(env,child) = to_xml_base(ts,env,val);
+      child = new Element(new StartEnd("Field",list(string_att("fnm",fnm)),
+				       list(child)));
+      children= new List{child,children};
+    }
+    children = imp_rev(children);
+    return $(env,new Element(new StartEnd("Union",
+					  list(string_att("nm",nm?*nm:"anon")),
+					  children)));
+
+
+  case &Enum(nm,szb,l): 
+    /* get the tag */
+    unsigned int@ tagp = unsafe_cast(val);
+    return $(env,new Element(new Empty("Enum",
+				       list(int_att("tag",*tagp),
+					    string_att("nm",get_tagname(*tagp,l))))));
+
+
+
+  }
+
+}
+
+content_t to_xml(typestruct_t ts, `a::A@ val) {
+  try{
+    let $(_,content) = to_xml_base(ts,empty_addr_index(),val);
+    return content;
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Core::Failure(%s)\n",s);
+    throw new Core::Failure(s);
+  }
+}
+
+string_t string_of_attvalue(attvalue_t av) {
+  switch(av) {
+  case &Attvalue1(s): return s;
+  case &Attvalue2(s): return s;
+  }
+}
+
+int getIntAttribute(list_t<attribute_t> atrs, name nm) {
+  while(atrs != NULL && strcmp((*(atrs->hd))[0],nm) != 0) {
+    atrs = atrs->tl;
+  }
+  if(atrs != NULL) 
+    return atoi(string_of_attvalue((*(atrs->hd))[1]));
+  else throw new Core::Failure("Attribute not found");
+}
+string_t getStringAttribute(list_t<attribute_t> atrs, name nm) {
+  while(atrs != NULL && strcmp((*(atrs->hd))[0],nm) != 0) {
+    atrs = atrs->tl;
+  }
+  if(atrs != NULL) 
+    return string_of_attvalue((*(atrs->hd))[1]);
+  else throw new Core::Failure("Attribute not found");
+}
+int hasAttribute(list_t<attribute_t> atrs, name nm) {
+  while(atrs != NULL && strcmp((*(atrs->hd))[0],nm) != 0) {
+    atrs = atrs->tl;
+  }
+  if(atrs != NULL) 
+    return true;
+  return false;
+}
+
+addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::A@ result) {
+  switch($(ts,doc)) {
+  case $(&Int(sn,sz),&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
+    int@ x = unsafe_cast(result);
+    *x = atoi(n);
+    break;
+  case $(Float,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
+    float@ x = unsafe_cast(result);
+    *x = (float)atof(n);
+    break;
+  case $(Double,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
+    double@ x = unsafe_cast(result);
+    *x = atof(n);
+    break;
+
+    // distinction between EmptyTag and StartEnd sucks.
+  case $(&ThinPtr(sz,typ), &Element(&Empty(tag,atts))): fallthru(sz,typ,tag,atts,NULL);
+
+  case $(&ThinPtr(sz,typ), &Element(&StartEnd(tag,atts,children))):
+    if(!hasAttribute(atts,"id")) {
+      unsigned int@ x = unsafe_cast(result);
+      int mem = getIntAttribute(atts, "idref");
+      *x = table_lookup(env,mem);
+    } else {
+      int typ_szb = size_type(typ);
+      // allocate block
+      char? buf = new {for i < sz*typ_szb: 0};  
+      // add to table
+      unsigned int bufptr = (unsigned int)(_*)buf;
+      unsigned int@ x = unsafe_cast(result);
+      *x=bufptr;
+      let child = children;
+      env = table_insert(env,bufptr); // implicitly must be same as id; unsafe to rearrange ids.  FIX: make table random access/allocation; or make it a dict mapping ids to pointers
+      // fill it in
+      int y = bufptr;
+      for(int i = 0; i < sz; i++) {
+	env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(y));
+	y += typ_szb;
+	child = child->tl;
+      }
+    }
+    break;
+
+  case $(&FatPtr(typ),&Element(&Empty(tag,atts))): fallthru(typ,tag,atts,NULL);
+  case $(&FatPtr(typ),&Element(&StartEnd(tag,atts,children))): 
+    int pos = getIntAttribute(atts,"pos");
+    int sz = getIntAttribute(atts,"sz");
+    int typ_szb = size_type(typ);
+    if(hasAttribute(atts,"id")) {
+      // allocate block
+      char? buf = new {for i < sz*typ_szb: 0};  
+      // add to table
+      unsigned int bufptr = (unsigned int)(_*)buf;
+      $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
+      (*x)[0] = bufptr;
+      (*x)[1] = bufptr+pos*typ_szb;
+      (*x)[2] = bufptr + sz*typ_szb;
+      env = table_insert(env,bufptr);
+      // fill it in
+      int y = bufptr;
+      let child = children;
+      for(int i = 0; i < sz; i++) {
+	env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(y));
+	y += typ_szb;
+	child = child->tl;
+      }
+    } else { // return pointer to shared thing
+      int mem = getIntAttribute(atts,"idref");
+      $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
+      (*x)[0] = table_lookup(env,mem);
+      (*x)[1] = (*x)[0] + typ_szb * pos;
+      (*x)[2] = (*x)[0] + typ_szb * sz;
+    }
+    break;
+
+  case $(&Struct(_,_,l),&Element(&Empty(_,_))): fallthru(l,NULL);
+  case $(&Struct(_,_,l),&Element(&StartEnd(_,_,children))): 
+    unsigned int x = unsafe_cast(result);
+    let child = children;
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs, _,typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      let $(contents, _) = getElemData(child->hd,"Field");
+      env = from_xml_base(typ,env,contents->hd,(`a@)unsafe_cast(x_ofs));
+      child = child->tl;
+    } 
+    break;
+
+  case $(&Tuple(_,l),&Element(&Empty(_,_))): fallthru(l,NULL);
+  case $(&Tuple(_,l),&Element(&StartEnd(_,_,children))): 
+    unsigned int x = unsafe_cast(result);
+    let child = children;
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(x_ofs));
+      child = child->tl;
+    } 
+    break;
+
+  case $(&TUnionField(_,_,_,l),&Element(&Empty(_,atts))):fallthru(l,atts,NULL);
+  case $(&TUnionField(_,_,_,l),&Element(&StartEnd(_,atts,children))):
+    unsigned int x = unsafe_cast(result);
+    let child = children;
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs, typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(x_ofs));
+      child = child->tl;
+    } 
+    break;
+
+  case $(&TUnion(_,t,l),&Element(&Empty(_,atts))):fallthru(t,l,atts,NULL);
+  case $(&TUnion(_,t,l),&Element(&StartEnd(_,atts,children))):
+    int data = getIntAttribute(atts,"data");
+    int tag = getIntAttribute(atts,"tag");
+    if(!data) { // tag-only
+      unsigned int@ x = unsafe_cast(result);
+      *x=tag;
+    } else {
+      if(!hasAttribute(atts,"id")) { // it's a reference
+	unsigned int@ x = unsafe_cast(result);
+	int mem = getIntAttribute(atts, "idref");
+	*x = table_lookup(env,mem);
+      } else {
+	// figure out which variant it is
+	let $(off,typ) = get_unionbranch(tag,l);
+	// allocate memory for new tuple
+	char? buf = new {for i < off+size_type(typ) : 0};
+	unsigned int bufptr = (unsigned int)(_*)buf;
+	// add to table
+	env = table_insert(env,bufptr);
+	// assign to result
+	unsigned int@ x = unsafe_cast(result);
+	*x=bufptr;
+	// fill in buf
+	unsigned int@ tagptr = unsafe_cast(bufptr);
+	*tagptr = tag;
+	env = from_xml_base(typ, env, children->hd, (`a@)unsafe_cast(bufptr+off));
+      }
+    }
+    break;
+
+  case $(&XTUnion(_,l),&Element(&Empty(_,atts))):fallthru(l,atts,NULL);
+  case $(&XTUnion(_,l),&Element(&StartEnd(_,atts,children))):
+    int data = getIntAttribute(atts,"data");
+    if(hasAttribute(atts,"id")) {
+      string_t xtname = getStringAttribute(atts,"tag");
+      char? s = new {for i < xtname.size+4: i < 4?0:xtname[i-4]};
+      int mem = getIntAttribute(atts,"id");
+      if(data) {
+	// figure out what branch
+	let $(off,typ) = get_xtunionbranch(xtname, l);
+	// allocate a new blob of the right size
+	char? buf = new {for i < off+size_type(typ): 0};
+	unsigned int bufptr = (unsigned int)(_*)buf;
+	// add to table
+	env = table_insert(env, bufptr);
+	// assign to result
+	unsigned int@ x = unsafe_cast(result);
+	*x = bufptr;
+	// fill in buf
+	unsigned int@ tagptr = unsafe_cast(bufptr);
+	*tagptr = (unsigned int)(_*)s;
+	env=from_xml_base(typ, env, children->hd, (`a@)unsafe_cast(bufptr+off));
+      } else { // build a non-data carrying xtunion: a pointer to NULL followed by an untagged pointer to 0000Tagname.
+	unsigned int@ x = unsafe_cast(result);
+	*x = (unsigned int)(_*)s;
+	env = table_insert(env, *x);
+      }
+    } else {
+      // look up the corresponding pointer and fill in result
+      unsigned int@ x = unsafe_cast(result);
+      int mem = getIntAttribute(atts,"idref");
+      *x = table_lookup(env,mem);
+    }
+    break;
+
+
+    // this is unreliable, since some cases like float lose precision
+    // could fix by reading/writing raw bytes here or at base type cases
+  case $(&Union(_,_,l),&Element(&Empty(_,_))): fallthru(l,NULL);
+  case $(&Union(_,_,l),&Element(&StartEnd(_,_,children))): 
+    unsigned int x = unsafe_cast(result);
+    let child = children;
+    for(int i = 0; i < l.size; i++) {
+      let $(_,typ) = *(l[i]);
+      let $(contents, _) = getElemData(child->hd,"Field");
+      env = from_xml_base(typ,env,contents->hd,(`a@)unsafe_cast(x));
+      child = child->tl;
+    } 
+    break;
+
+
+  case $(&Enum(_,_,l),&Element(&Empty(_,atts))):fallthru(l,atts);
+  case $(&Enum(_,_,l),&Element(&StartEnd(_,atts,_))):
+    int@ x = unsafe_cast(result);
+    *x = getIntAttribute(atts,"tag");
+    break;
+
+
+  default: throw new Core::Failure("unhandled xml case");
+  }
+  return env;
+
+}
+
+`a::A@ from_xml(typestruct_t ts, content_t doc) {
+  try{
+    char? buf = new {for i < size_type(ts):0}; // allocate buf for type
+    `a::A@`H result = unsafe_cast( (_*) buf); // result should point to the beginning of buf/s storage, not to the tagged array triple
+    from_xml_base(ts,empty_addr_table(),doc,result);
+    return result;
+  } catch {
+  case &Core::Failure(s):
+    fprintf(stderr,"Core::Failure(%s)\n",s);
+    throw new Core::Failure(s);
+  }
+
+}
+
+
+

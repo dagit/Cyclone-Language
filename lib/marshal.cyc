@@ -311,6 +311,7 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     }
     fprintf(fp,"}");
     break;
+
   case &Enum(_,szb,l): // assume szb=sizeof(int) FIX
     /* get the tag */
     unsigned int@ tagp = unsafe_cast(val);
