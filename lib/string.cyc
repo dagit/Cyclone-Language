@@ -81,7 +81,7 @@ int strcmp(string_t s1, string_t s2) {
   unsigned int sz1 = s1.size;
   unsigned int sz2 = s2.size;
   unsigned int minsz = (sz1 < sz2) ? sz1 : sz2;
-  assert(minsz <= s1.size && minsz <= s2.size);
+  assert(minsz <= sz1 && minsz <= sz2);
   while (i < minsz) {
     char c1 = s1[i];
     char c2 = s2[i];
@@ -96,7 +96,7 @@ int strcmp(string_t s1, string_t s2) {
     ++i;
   }
   if (sz1 == sz2) return 0;
-  if (sz1 == minsz) {
+  if (minsz < sz2) {
     if (s2[i] == '\000') return 0;
     else return -1;
   } else {
@@ -317,12 +317,6 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, string_t separator) {
 ///////////////////////// COPYING
 // Destructively copy at most n characters from src into dest
 mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
-  // Range checking
-  //let destSz = dest.size;
-  //let srcSz = src.size;
-  //if (n <= 0) return dest;
-  //if (n > destSz || n > srcSz)
-  //  throw new Invalid_argument("Std::strncpy");
   int i;
   assert(n <= src.size && n <= dest.size);
   for (i=0; i<n; i++) {
@@ -334,34 +328,10 @@ mstring_t<`r> strncpy(mstring_t<`r> dest, string_t src, size_t n) {
     dest[i] = '\000';
 
   return dest;
-
-  // FIX: This isn't right.  src->contents and dest->contents
-  // might be the same (e.g., from casting) !!
-  // We don't currently have a way to detect this at the Cyclone level,
-  // so we take C's approach and leave behavior ambiguous in this case.
-//   if (src != dest
-//      || destOfs + n < srcOfs 
-//      || srcOfs  + n < destOfs)
-//     for (int i=0; i<n; i++)
-//       dest[destOfs+i] = src[srcOfs+i];
-//   else {
-//     // we could do better, but this is correct
-//     mstring_t buffer = new_string(n);
-//     for (int i=0; i<n; i++)
-//       buffer[i] = src[srcOfs+i];
-//     for (int i=0; i<n; i++)
-//       dest[destOfs+i] = buffer[i];
-//   }
 }
 
 // Strncpy that does not pay attention to zero chars
 mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
-  // Range checking
-  //let destSz = dest.size;
-  //let srcSz  = src.size;
-  //if (n <= 0) return dest;
-  //if (n > destSz || n > srcSz)
-  //  throw new Invalid_argument("Std::zstrncpy");
   assert(n <= dest.size && n <= src.size);
   int i;
   for (i=0; i<n; i++) 
@@ -370,10 +340,22 @@ mstring_t<`r> zstrncpy(mstring_t<`r> dest, string_t src, size_t n) {
 }
 // Non-allocating string copy: first arg is returned
 mstring_t<`r> strcpy(mstring_t<`r> dest, string_t src) {
-  size_t len = strlen(src);
-  strncpy(dest,src,len);
-  if (len < dest.size)
-    dest[len] = '\000';
+  unsigned ssz = src.size;
+  unsigned dsz = dest.size;
+  if (ssz <= dsz) {
+    unsigned i;
+    for (i=0; i<ssz; i++) {
+      let srcChar = src[i];
+      dest[i] = srcChar;
+      if (srcChar == '\000') break;
+    }
+  } else {
+    // it may be that strlen(src) <= dsz
+    size_t len = strlen(src);
+    strncpy(dest,src,len);
+    if (len < dest.size)
+      dest[len] = '\000';
+  }
   return dest;
 }
 
@@ -442,12 +424,13 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
 mstring_t<`r> rsubstring(region_t<`r> r,string_t s, 
                      int start, size_t amt) {
-  if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
-    throw new Invalid_argument("Std::substring");
+  //if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
+  //  throw new Invalid_argument("Std::substring");
   mstring_t ans = rnew_string(r,amt+1);
-  assert(amt < ans.size);
+  s = s+start;
+  assert(amt < ans.size && amt <= s.size);
   for(size_t i=0; i<amt; ++i)
-    ans[i] = s[start+i];
+    ans[i] = s[i];
   ans[amt] = '\000';
   return ans;
 }
@@ -481,27 +464,27 @@ mstring_t replace_suffix (string_t src, string_t curr_suffix, string_t new_suffi
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
 string_t<`r> strpbrk(string_t<`r> s, string_t accept) {
-  int len = int_strleno(s,"Std::strpbrk");
-  char c = '\000';
+  int len = s.size;
   unsigned asize = accept.size;
-
-  for (; len>0 && (c=*s)!=0; len--,s++) {
-    for (int j=0; j<asize; j++)
+  char c;
+  unsigned i;
+  for (i = 0; i < len && (c=s[i])!=0; i++) {
+    for (unsigned j=0; j<asize; j++)
       if (c == accept[j])
-	return s;
+        return s+i;
   }
   return NULL;
 }
 
 mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept) {
-  int len = int_strleno(s,"Std::strpbrk");
-  char c = '\000';
+  int len = s.size;
   unsigned asize = accept.size;
-
-  for (; len>0 && (c=*s)!=0; len--,s++) {
-    for (int j=0; j<asize; j++)
+  char c;
+  unsigned i;
+  for (i = 0; i < len && (c=s[i])!=0; i++) {
+    for (unsigned j=0; j<asize; j++)
       if (c == accept[j])
-	return s;
+        return s+i;
   }
   return NULL;
 }
@@ -509,23 +492,23 @@ mstring_t<`r> mstrpbrk(mstring_t<`r> s, string_t accept) {
 // Return a pointer to the first occurrence of c in s, 
 // or NULL if none.
 mstring_t<`r> mstrchr(mstring_t<`r> s, char c) {
-  int len = int_strleno(s,"Std::strchr");
-  char c2 = '\000';
+  int len = s.size;
+  char c2;
+  unsigned i;
 
-  for (; len>0 && (c2=*s)!=0; len--,s++) {
-    if (c2 == c)
-      return s;
+  for (i = 0; i < len && (c2=s[i])!=0; i++) {
+    if (c2 == c) return s+i;
   }
   return NULL;
 }
 
 string_t<`r> strchr(string_t<`r> s, char c) {
-  int len = int_strleno(s,"Std::strchr");
-  char c2 = '\000';
+  int len = s.size;
+  char c2;
+  unsigned i;
 
-  for (; len>0 && (c2=*s)!=0; len--,s++) {
-    if (c2 == c)
-      return s;
+  for (i = 0; i < len && (c2=s[i])!=0; i++) {
+    if (c2 == c) return s+i;
   }
   return NULL;
 }

@@ -316,8 +316,14 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	 * Scan the format for conversions (`%' character).
 	 */
 	for (;;) {
-		for (fmark = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
-			/* void */;
+		//for (fmark = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
+		//	/* void */;
+                fmark = fmt;
+                unsigned fmt_sz = fmt.size;
+                for (n = 0; n < fmt_sz && (ch = fmt[n])!='\0' && ch!='%'; n++)
+                  /* void */;
+                fmt = fmt+n;
+
 		if ((n = fmt - fmark) != 0) {
 			PRINT(fmark, n);
 			ret += n;

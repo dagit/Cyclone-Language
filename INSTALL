@@ -49,6 +49,13 @@ directories as a result of installation.
 
 POTENTIAL PROBLEMS
 
+If you are using Cygwin, and have placed cyclone in C:/cyclone, then
+make sure to (a) run configure under bash instead of cmd.com and (b)
+to "cd /cygdrive/c/cyclone" instead of "cd c:/cyclone" before running
+configure.  The problem is that for some strange reason, if you 
+"cd c:/cyclone" then Makefile.inc gets generated with CYCDIR set to
+"c:/cyclone" which then causes later tools to barf.
+
 Note that configure and make install use several utilities, which
 need to be in your path.  In our experience, this is the most common
 source of problems.  In particular:
