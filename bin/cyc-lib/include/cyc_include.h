@@ -47,7 +47,7 @@ struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
-#endif CYC_REGION_PROFILE
+#endif
   char data[0];
 };
 

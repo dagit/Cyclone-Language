@@ -1117,4 +1117,5 @@ void dumpdecllist2file(list_t<decl_t> tdl, FILE @f) {
   *dump_file = f;
   for(; tdl != null; tdl = tdl->tl)
     dumpdecl(tdl->hd);
+  fprintf(f,"\n");
 }

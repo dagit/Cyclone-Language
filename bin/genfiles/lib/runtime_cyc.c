@@ -46,7 +46,7 @@ extern unsigned int GC_gc_no;
 extern size_t GC_get_heap_size();
 extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
-#endif;
+#endif
 
 // Need one of these per thread (we don't have threads)
 static struct _RuntimeStack *_current_handler = NULL;
@@ -366,7 +366,7 @@ signal_t signal_func(int sig, signal_t p) {
 static int rgn_total_bytes = 0;
 static int heap_total_bytes = 0;
 static int heap_total_atomic_bytes = 0;
-#endif CYC_REGION_PROFILE
+#endif
 
 
 // exported in core.h
@@ -507,7 +507,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = sizeof(struct _RegionPage) + next_size;
   p->free_bytes = next_size;
-#endif CYC_REGION_PROFILE
+#endif
   r->curr = p;
   r->offset = ((char *)p) + sizeof(struct _RegionPage);
   r->last_plus_one = r->offset + next_size;

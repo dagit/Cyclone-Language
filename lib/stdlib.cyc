@@ -8,7 +8,7 @@ namespace Cstdlib {
 /*
     float _EXFUN(atoff,(const Cstring _nptr));
 */
-#endif __STRICT_ANSI__
+#endif
     int   _EXFUN(atoi,(const Cstring _nptr));
     long  _EXFUN(atol,(const Cstring _nptr));
     Cstring _EXFUN(getenv,(const Cstring __string));
@@ -46,7 +46,7 @@ namespace Stdlib {
     return Cstdlib::atoff(s2c(_nptr));
   }
 */
-#endif __STRICT_ANSI__
+#endif
   int atoi(const char ?`r _nptr) {
     return Cstdlib::atoi(s2c(_nptr));
   }
