@@ -462,28 +462,28 @@ update: cfiles
 	@for i in $(BUILDDIR_UPDATE_FILES);\
            do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
                || (echo UPDATING $(GENDIR)/$$i;\
-		   cp -a $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
+		   cp -pR $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
 		   touch $(UNUPDATEDIR)/contains-files;\
 	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
 	@for i in $(LIB_UPDATE_FILES);\
            do (cmp -s lib/$$i $(GENDIR)/$$i\
                || (echo UPDATING $(GENDIR)/$$i;\
-		   cp -a $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
+		   cp -pR $(GENDIR)/$$i $(UNUPDATEDIR)/genfiles/$$i;\
 		   touch $(UNUPDATEDIR)/contains-files;\
                    cp lib/$$i $(GENDIR)/$$i)) done
 	@for i in $(CYCLONE_H);\
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING include/$$i;\
-		   cp -a include/$$i $(UNUPDATEDIR)/include/$$i;\
-		   cp -a lib/$$i $(UNUPDATEDIR)/lib/$$i;\
+		   cp -pR include/$$i $(UNUPDATEDIR)/include/$$i;\
+		   cp -pR lib/$$i $(UNUPDATEDIR)/lib/$$i;\
 		   touch $(UNUPDATEDIR)/contains-files;\
                    mv lib/$$i include/$$i)) done
 	@for i in $(CYC_LIB_UPDATE_FILES);\
            do (test ! -e lib/$$i\
                || cmp -s lib/$$i bin/cyc-lib/$$i\
                || (echo UPDATING bin/cyc-lib/$$i;\
-		   cp -a bin/cyc-lib/$$i $(UNUPDATEDIR)/bin/cyc-lib/$$i;\
-		   cp -a lib/$$i $(UNUPDATEDIR)/lib/$$i;\
+		   cp -pR bin/cyc-lib/$$i $(UNUPDATEDIR)/bin/cyc-lib/$$i;\
+		   cp -pR lib/$$i $(UNUPDATEDIR)/lib/$$i;\
 		   touch $(UNUPDATEDIR)/contains-files;\
                    mv lib/$$i bin/cyc-lib/$$i)) done
 	@test -e $(UNUPDATEDIR)/contains-files || \
@@ -498,9 +498,9 @@ update: cfiles
 unupdate:
 	@test -e $(UNUPDATEDIR) || (echo "There is nothing to unupdate." && false)
 	@test ! -e $(UNUPDATEDIR)/genfiles/* || cp -av $(UNUPDATEDIR)/genfiles/* $(GENDIR)
-	@test ! -e $(UNUPDATEDIR)/lib/* || cp -av $(UNUPDATEDIR)/lib/* lib
-	@test ! -e $(UNUPDATEDIR)/include/* || cp -av $(UNUPDATEDIR)/include/* include
-	@test ! -e $(UNUPDATEDIR)/bin/cyc-lib/* || cp -av $(UNUPDATEDIR)/bin/cyc-lib/* bin/cyc-lib
+	@test ! -e $(UNUPDATEDIR)/lib/* || cp -pR $(UNUPDATEDIR)/lib/* lib
+	@test ! -e $(UNUPDATEDIR)/include/* || cp -pR $(UNUPDATEDIR)/include/* include
+	@test ! -e $(UNUPDATEDIR)/bin/cyc-lib/* || cp -pR $(UNUPDATEDIR)/bin/cyc-lib/* bin/cyc-lib
 	@rm -rf $(UNUPDATEDIR)
 	@echo
 	@echo "Unupdate complete. Now \"make clean\" and \"make all\" will be run to restore your"

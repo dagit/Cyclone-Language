@@ -29,6 +29,7 @@
 #if (defined(__linux__) || defined(__APPLE__))
 
 #ifdef CYC_REGION_PROFILE
+#include <unistd.h>
 /* Override sbrk in the allocator so that it prints profiling info */
 extern void CYCALLOCPROFILE_GC_add_to_heap(void*,unsigned int);
 CYCALLOCPROFILE_sbrk(int incr) {
