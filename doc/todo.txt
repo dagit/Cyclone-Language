@@ -259,4 +259,5 @@ MISCELLANEOUS
 
 * translation to C with -noexpandtypedefs hasn't been tested in forever.
 
-
+* fix --nonullchecks to work uniformly.  This is useful for code
+  that can safely core-dump ...

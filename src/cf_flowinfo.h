@@ -130,6 +130,11 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
   Aggregate(union_rinfo_t, aggrdict_t<`r>);
   Consumed(Absyn::exp_t consumer, int iteration, absRval_t<`r> oldvalue);
+  NamedLocation(string_t<`r> name, absRval_t<`r> actvalue);
+  // A NamedLocation is simply a name for a location.  This is used to
+  // track the value pointed to by a unique pointer for a function
+  // parameter having the noconsume(x) attribute.  The name part never
+  // changes, so can be compared via physical equality.
 };
 
 typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;

@@ -427,6 +427,8 @@ doc_t tps2doc(list_t<type_t> ts) {
 
 doc_t tvar2doc(tvar_t tv) {
   let n = *tv->name;
+  if (n[0] == '#')
+    return cat(text("`TTT"),text(n+1));
   return text(n);
 }
 
