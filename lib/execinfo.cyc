@@ -36,7 +36,8 @@ namespace Execinfo;
 
 int backtrace(int ?array, int size) {
 #ifdef __linux__
-  if (size > array.size) throw new Failure("backtrace: size > array.size");
+  if (size > numelts(array))
+    throw new Failure("backtrace: size > numelts(array)");
   return Cexecinfo::backtrace((int*)array, size);
 #else
   throw new Failure("backtrace: unsupported except under Linux");
@@ -88,7 +89,7 @@ int bt(void) {
   int outfd = tochild[1];
 
   /* Write out the addresses to look up */
-  int n = backtrace(bt, bt.size);
+  int n = backtrace(bt, numelts(bt));
 
   for (int c = 0; c < n; c++) {
     char buf[100];

@@ -1075,6 +1075,7 @@ void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno)
   result =  GC_malloc(n);
   if(!result)
     _throw_badalloc();
+  set_finalizer((GC_PTR)result);
   _profile_check_gc();
   n = GC_size(result);
   heap_total_bytes += n;
@@ -1093,6 +1094,7 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
   result =  GC_malloc_atomic(n);
   if(!result)
     _throw_badalloc();
+  set_finalizer((GC_PTR)result);
   _profile_check_gc();
   n = GC_size(result);
   heap_total_bytes += n;

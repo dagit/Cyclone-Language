@@ -46,9 +46,10 @@ endif
 ifdef ALLOC_PROFILE
 override CYCFLAGS += -pa
 endif
-ifdef NOGC
-override CYCFLAGS += -nogc
-endif
+### useless -- the -nogc flag only has an effect on linking
+#ifdef NOGC
+#override CYCFLAGS += -nogc
+#endif
 ifdef NOREGIONS
 override CYCFLAGS += -noregions
 endif
@@ -87,33 +88,36 @@ cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 libc.cys:
 	(test -e $(CYCDIR)/lib/libc.cys && cp $(CYCDIR)/lib/libc.cys $@) || cp $(CYCDIR)/bin/cyc-lib/libc.cys $@
 
-$(CYCCOMP): $(O_SRCS) install_path.$(O) $(LIBR)
-ifdef MS
-#FIX: Ignore fewer flags.
-	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
-else
-	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(CYCFLAGS) $(O_SRCS) install_path.$(O) $(LDFLAGS)
-endif
-
 # The -L. makes sure that we pick up the libcyc.a of the current
 # directory.  The -B. makes sure we use the runtime_cyc.o of the
 # current directory, and the second -B makes sure we pick up the gc.a
 # of the current $(CYCDIR), and we avoid the libcyc.a and gc.a of any
 # version of Cyclone currently installed in the usual place.
-# We don't these use $(CYCFLAGS) -- because that has -save-c which is
+# Why don't these use $(CYCFLAGS) -- because that has -save-c which is
 #   irrelevant and the -B flags used there are to find cyc_include.h,
 #   not the .a files.
 ifdef PROFILE
 OTHER_CYCFLAGS += -pg
 endif
 ifdef ALLOC_PROFILE
-OTHER_CYCFLAGS += -pa
+### Don't do this -- causes linker to look for
+### runtime_cyc_a.o and libcyc_a.a, wrong
+#OTHER_CYCFLAGS += -pa
+CFLAGS += -DCYC_REGION_PROFILE
 endif
 ifdef NOGC
 OTHER_CYCFLAGS += -nogc
 endif
 ifdef NOREGIONS
 OTHER_CYCFLAGS += -noregions
+endif
+
+$(CYCCOMP): $(O_SRCS) install_path.$(O) $(LIBR)
+ifdef MS
+#FIX: Ignore fewer flags.
+	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
+else
+	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(O_SRCS) install_path.$(O) $(LDFLAGS)
 endif
 
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O) $(LIBR)

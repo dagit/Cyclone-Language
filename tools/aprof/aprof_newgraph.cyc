@@ -233,7 +233,7 @@ allocation_at_address_table = NULL;
 /* Table for remembering how much was allocated into a region */
 static struct Hashtable::Table<const char ?@,unsigned int> *
 allocation_in_region_table = NULL;
-/* Array of events -- (region name, y position) pairs */
+/* Array of events -- (region name, delta_y) pairs */
 struct Xarray::Xarray<$(const char ?,int)@> *events = NULL;
 
 static int uint_cmp(unsigned int i, unsigned int j) {
@@ -251,10 +251,11 @@ init_globals() {
   events = Xarray::create_empty();
 }
 
-static void add_point(curve_t b, unsigned int y) {
-  if (y == b->last_y) return;
+static void mark_delta(curve_t b, int delta_y) {
+  if (delta_y == 0) return;
+  unsigned int y = b->last_y + delta_y;
   b->num_points++;
-  Xarray::add((_@)events,new $(b->name,y));
+  Xarray::add((_@)events,new $(b->name,delta_y));
   unsigned int x = Xarray::length((_@)events);
   b->area += ((double)(x - b->last_x)) * b->last_y;
   if (b->max_y < y) b->max_y = y;
@@ -267,11 +268,11 @@ static void add_point(curve_t b, unsigned int y) {
   b->last_x = x;
   b->last_y = y;
 }
-static void mark_delta(curve_t b, int delta_y) {
-  unsigned int y = b->last_y + delta_y;
-  add_point(b,y);
+static void add_point(curve_t b, unsigned int y) {
+  mark_delta(b, (int)(y - b->last_y));
 }
-static void add_delta(curve_t b, unsigned int x, unsigned int y) {
+static void add_delta(curve_t b, unsigned int x, int delta_y) {
+  unsigned int y = b->last_y + delta_y;
   if (b->last_x != x-1)
     b->points = new List(new $(x-1,b->last_y),b->points);
   b->points = new List(new $(x,y),b->points);
@@ -465,13 +466,38 @@ namespace Aprof;
 list_t<curve_t> all_curves;
 static void doit($(const char ?,int) @z) {
   static unsigned int x = 1;
-  let &$(name,y) = z;
+  let &$(name,delta_y) = z;
   for (let l = all_curves; l != NULL; l = l->tl) {
     let b = l->hd;
     if (strcmp(b->name,name) == 0) {
-      add_delta(b,x++,y);
+      add_delta(b,x++,delta_y);
       return;
     }
+  }
+}
+static void doit2($(const char ?,int) @z) {
+  static unsigned int x = 1;
+  let &$(name,delta_y) = z;
+  if (strcmp(name,"reserved") == 0) {
+    for (let l = all_curves; l != NULL; l = l->tl) {
+      let b = l->hd;
+      if (strcmp(b->name,name) == 0) {
+        add_delta(b,x++,delta_y);
+        return;
+      }
+    }
+  }
+  else {
+    /* increment the curve identified by name, as well as
+       all subsequent curves in the list all_curves,
+       except for the reserved curve */
+    let saw_name = 0;
+    for (let l = all_curves; l != NULL; l = l->tl) {
+      let b = l->hd;
+      if (!saw_name && strcmp(b->name,name) == 0) saw_name = 1;
+      if (saw_name && strcmp(b->name,"reserved") != 0) add_delta(b,x,delta_y);
+    }
+    x++;
   }
 }
 //////////////////////////////////////////////////////////////////////
@@ -515,7 +541,8 @@ int generate_newgraph(string_t<`H> file) {
   if (env->other_live->area > 0.0)
     all_curves = new List(env->other_live,all_curves);
   all_curves = merge_sort(curve_cmp,all_curves);
-  Xarray::iter(doit,(_@)events);
+  //  Xarray::iter(doit,(_@)events);
+  Xarray::iter(doit2,(_@)events);
   for (let l = all_curves; l != NULL; l = l->tl)
     add_finish(l->hd);
 
