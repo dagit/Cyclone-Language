@@ -1,38 +1,23 @@
 #!/bin/sh
 #
-# Starts things off in a platform-independent way by using sh.  Gets the
-# top-level directory and then starts with the realconfigure script in config.
+# Allow the user to set the shell to use; otherwise use /bin/sh.
+# Then execute config/realconfigure in the chosen shell.
+# Probably /bin/sh is available everywhere and we could just
+# eliminate this.
 
-CONFIGSHELL=
+CONFIGSHELL=/bin/sh
 
 while [ $# != 0 ]; do
   case "$1" in
     -sh) # set the shell to use
         shift
         if [ $# = 0 ]; then 
-	  echo "-sh must specify a directory"; exit 1; fi
+	  echo "-sh must specify a path"; exit 1; fi
         CONFIGSHELL=$1
         shift;;
     *) break;;
   esac
 done
-
-# user didn't specify the shell; try to find it
-if [ -z "$CONFIGSHELL" ]; then
-  for sh in bash ksh; do
-    CONFIGSHELL=`which $sh`
-    if [ -n "$CONFIGSHELL" ]; then
-      break
-    fi
-  done
-fi
-
-if [ -z "$CONFIGSHELL" ]; then
-  echo "Could not locate bash or ksh on your system."
-  echo "Please invoke configure with -sh <bash> where <bash> is the"
-  echo "absolute location of bash on your machine."
-  exit 1
-fi
 
 export CONFIGSHELL
 

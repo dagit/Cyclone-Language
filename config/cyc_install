@@ -19,7 +19,7 @@ fi
 # inst_record_name target_dir
 #   calculates the install record's name based on some criteria
 #   (assumes the directory is an absolute path)
-function inst_record_name {
+inst_record_name () {
   mark=`echo $1 | sed -e 's/\//-/g'`
   echo ".inst_${mark}"
 }
@@ -28,7 +28,7 @@ function inst_record_name {
 #   prints all of the files in the given list.  If a given file is
 #   a directory, it recurses and prints the files in the directory as well.
 #   Skips files with CVS in their path.
-function get_files {
+get_files () {
   for file in $1; do
     # regular file
     if [ -f "$file" ]; then
