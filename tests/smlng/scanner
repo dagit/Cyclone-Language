@@ -125,7 +125,7 @@ int next(FILE @f) {
       if (c == EOF) return EOF;
       switch (c) {
       case 'B': push(ctxt); ctxt = setB(ctxt); break;
-      case 'E': push(ctxt); ctxt = invertEM(ctxt); if (get(f) == EOF) return EOF; break;
+      case 'E': push(ctxt); if (!isS(ctxt)) ctxt = invertEM(ctxt); if (get(f) == EOF) return EOF; break;
       case 'I': push(ctxt); ctxt = setI(ctxt); break;
       case 'P': push(ctxt); ctxt = doPL(ctxt); if (get(f) == EOF) return EOF; break;
       case 'S': push(ctxt); ctxt = doS(ctxt); break;
