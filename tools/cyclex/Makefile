@@ -12,7 +12,8 @@ BINDIR=../../bin
 CYCC=../../bin/cyclone.exe
 CYCBISON=../../bin/cycbison.exe
 
-CFLAGS=-O -fwritable-strings -I../..
+CFLAGS= -fwritable-strings -I../..
+#CFLAGS=-O -fwritable-strings -I../..
 
 CYC_FLAGS=-I ../../lib -tc -toc -pp
 

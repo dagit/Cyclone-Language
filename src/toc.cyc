@@ -887,6 +887,89 @@ static $(list<designator>,exp)@ add_designator(env nv, exp e) {
   return &$(null,e);
 }
 
+static exp make_struct(qvar x, typ struct_typ, stmt s, 
+		       bool pointer, bool is_atomic) {
+  Opt_t<exp> eo;
+  typ        t;
+  if(pointer) {
+    t  = nullableptr_t(struct_typ, empty_tqual());
+    let se = sizeof_exp(struct_typ,DL);
+    eo = &Opt(cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL));
+  } else {
+    t  = struct_typ;
+    eo = null;
+  }
+  return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
+}
+
+// Would be nice to share moare code with init_struct 
+// but the designators get in the way.
+static exp init_tuple(env nv, bool pointer, list<exp> es) {
+  // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
+  // &$(e1,...,en) -> ({ t * x; x->f1 = e1; ... x->fn = en; x})
+  let tqs = List::map(tup_to_c,es);
+  let n   = add_tuple_type(tqs);
+
+  let x    = temp_var();
+  let xexp = var_exp(x,DL);
+  let s    = exp_stmt(xexp,DL);
+  
+  let lval_f = pointer ? structarrow_exp : structmember_exp;
+
+  bool is_atomic = true;
+  es = List::rev(es);
+  for (int i = length(es); es != null; es = es->tl, --i) {
+    exp_to_c(nv,es->hd);
+    is_atomic = is_atomic && atomic_typ(es->hd->topt->v);
+    s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,xprintf("f%d",i),DL), 
+				     es->hd, DL), DL), 
+		 s, DL);
+  }
+  return make_struct(x,strct(n),s,pointer,is_atomic);
+}
+
+static exp init_struct(env nv, bool pointer, 
+			list<$(list<designator>,exp)@> dles, typedef_name tdn) {
+  let x    = temp_var();
+  let xexp = var_exp(x,DL);
+  let s    = exp_stmt(xexp,DL);
+
+  let lval_f = pointer ? structarrow_exp : structmember_exp;
+
+  bool is_atomic = true;
+
+  for(let es = List::rev(dles); es != null; es = es->tl) {
+    let &$(ds,e) = es->hd;
+    is_atomic = is_atomic && atomic_typ(e->topt->v);
+    if(ds == null)
+      toc_impos("empty designator list");
+    if(ds->tl != null) {
+      // untested
+      let y    = temp_var();
+      let yexp = var_exp(y,DL);
+      for(; ds != null; ds = ds->tl) 
+	switch (ds->hd) {
+	case FieldName(f):
+	  s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
+		       s, DL);
+	  break;
+	default: throw toc_impos("array designator in struct");
+	}
+      exp_to_c(nv,e);
+      s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
+    } else 
+      switch (ds->hd) {
+      case FieldName(f):
+	exp_to_c(nv,e);
+	s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), e, DL), DL),
+		     s, DL);
+	break;
+      default: throw toc_impos("array designator in struct");
+      }
+  }
+  return make_struct(x, strctq(collapse_qvar(tdn)), s, pointer, is_atomic);
+}
+
 extern void lvalue_assign_stmt(stmt s,list<field_name> fs,
 			       Opt_t<primop> popt,exp e2);
 // e1 is the result of translating an lvalue.  fs is the path of struct
@@ -1032,65 +1115,31 @@ static void exp_to_c(env nv, exp e) {
     break;
   case Address_e(e1): 
     // When e1 is a struct or a tuple, this is really a "new".
-    // TJ: we should add a "heap" storage class, i.e., force the programmer
-    // to tell us when to heap allocate a local variable.
-    // For now I added & on variables, with a warning that it may be
-    // unsafe.  This will allow us to experiment for the moment.
-    // FIX: use binding fallthru here once it's implemented
-    bool is_malloc = false;
-    bool is_atomic = true;
     switch (e1->r) {
-    case Struct_e(_,_,es,_): 
-      is_malloc = true; 
-      for (; es != null; es = es->tl) {
-	if (!atomic_typ(es->hd[1]->topt->v)) { is_atomic = false; break; }
-      }
-      break;
-    case Tuple_e(es):        
-      is_malloc = true; 
-      for (; es != null; es = es->tl) {
-	if (!atomic_typ(es->hd->topt->v)) { is_atomic = false; break; }
-      }
-      break; // skip
-    case Var_e(x,_):
-      if (!nv->toplevel)
-	warn(e1->loc,
-	     xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
-      exp_to_c(nv,e1);
-      break;
-    case NoInstantiate_e(&Exp(_,Var_e(x,_),_)): // FIX: nested NoInst???
-      if (!nv->toplevel)
-	warn(e1->loc,
-	     xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
-      exp_to_c(nv,e1);
-      break;
-    case Instantiate_e(&Exp(_,Var_e(x,_),_),_): // FIX: nested Inst???
-      if (!nv->toplevel)
-	warn(e1->loc,
-	     xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
-      exp_to_c(nv,e1);
-      break;
-    default: unimp("& on non-struct/tuple/variable"); break;
-    }
-    if(is_malloc) {
-      // Must be a struct or tuple
-      // JGM:  we need to translate this differently for the toplevel:
-      // for now, we just don't allow it -- you have to declare a variable
-      // with the tuple/struct and then take the address of it.
+    case Struct_e(tdn,_,es,_): 
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
-      // ({ struct t *x = (struct t *)(malloc(sizeof(struct t))); *x = e1; x;})
-      let e1_typ = e1->topt->v;
-      exp_to_c(nv, e1);
-      let x     = temp_var();
-      let x_typ = typ_to_c(old_typ);
-      let e3    = sizeof_exp(typ_to_c(e1_typ),DL);
-      let e2    = cast_exp(x_typ,
-			   is_atomic ? malloc_atomic(e3) : malloc_ptr(e3),DL);
-      let s1    = seq_stmt(assign_stmt(deref_exp(var_exp(x,DL),DL),e1,DL),
-			   exp_stmt(var_exp(x,DL),DL),DL);
-      e->r = stmt_exp(declare_stmt(x,x_typ,&Opt(e2),s1,DL),DL)->r;
+      e->r = init_struct(nv, true, es, tdn)->r;
+      break;
+    case Tuple_e(es):        
+      if (nv->toplevel)
+	unimp(xprintf("%s: & on non-identifiers at the top-level",
+                      Position::string_of_segment(e1->loc)));
+      e->r = init_tuple(nv, true, es)->r;
+      break;
+      // FIX: This isn't unsafe after regions are hacked in.
+    case NoInstantiate_e(&Exp(_,Var_e(x,_),_)): 
+      fallthru(x); // FIX: nested NoInst???
+    case Instantiate_e(&Exp(_,Var_e(x,_),_),_): 
+      fallthru(x); // FIX: nested Inst???
+    case Var_e(x,_):
+      if (!nv->toplevel)
+	warn(e1->loc, xprintf("unary & applied to %s, may be unsafe",
+			      qvar2string(x)));
+      exp_to_c(nv,e1);
+      break;
+    default: unimp("& on non-struct/tuple/variable"); break;
     }
     break;
   case Sizeof_e(t): e->r = Sizeof_e(typ_to_c(t)); break;
@@ -1219,19 +1268,23 @@ static void exp_to_c(env nv, exp e) {
       break;
     }
     break;
-  case Tuple_e(es):
-    // $(e1,...,en) -> (struct _tuple_type_n){.f1=e1,...,.fn=en}
-    // where _tuple_type_n is declared as an appropriate struct.
-    let tqs = List::map(tup_to_c,es);
-    let n = add_tuple_type(tqs);
-    list<$(list<designator>,exp)@> dles = null;
-    for (int i = 1; es != null; es = es->tl, i++) {
-      exp_to_c(nv,es->hd);
-      let des = &cons(FieldName(xprintf("f%d",i)),null);
-      dles = &cons(&$((list<designator>)des,es->hd),dles);
+  case Tuple_e(es): 
+    if(!nv->toplevel)
+      e->r = init_tuple(nv,false,es)->r;
+    else {
+      // At top-level must use designators
+      // $(e1,...,en) -> (struct _tuple_type_n){.f1=e1,...,.fn=en}
+      let tqs = List::map(tup_to_c,es);
+      let n = add_tuple_type(tqs);
+      list<$(list<designator>,exp)@> dles = null;
+      for (int i = 1; es != null; es = es->tl, i++) {
+	exp_to_c(nv,es->hd);
+	let des = &cons(FieldName(xprintf("f%d",i)),null);
+	dles = &cons(&$((list<designator>)des,es->hd),dles);
+      }
+      dles = List::imp_rev(dles);
+      e->r = cast_exp(strct(n),unresolvedmem_exp(null,dles,DL),DL)->r;
     }
-    dles = List::imp_rev(dles);
-    e->r = cast_exp(strct(n),unresolvedmem_exp(null,dles,DL),DL)->r;
     break;
   case CompoundLit_e(_,_): 
     // the type-checker doesn't deal with these yet...
@@ -1379,50 +1432,16 @@ static void exp_to_c(env nv, exp e) {
   case Struct_e(tdn,ots,dles,sdopt): 
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
-    if(!nv->toplevel) {
-      let x    = temp_var();
-      let xexp = var_exp(x,DL);
-      let s    = exp_stmt(xexp,DL);
-      for(let es = dles; es != null; es = es->tl) {
-	let &$(ds,e) = es->hd;
-	if(ds == null)
-	  toc_impos("empty designator list");
-	if(ds->tl != null) {
-	  // untested
-	  let y    = temp_var();
-	  let yexp = var_exp(y,DL);
-	  for(; ds != null; ds = ds->tl) 
-	    switch (ds->hd) {
-	    case FieldName(f):
-	      s = seq_stmt(exp_stmt(assign_exp(structmember_exp(xexp,f,DL),
-					       yexp, DL), DL),
-			   s, DL);
-	      break;
-	    default: throw toc_impos("array designator in struct");
-	    }
-	  exp_to_c(nv,e);
-	  s = seq_stmt(exp_stmt(assign_exp(yexp, e, DL), DL), s, DL);
-	} else 
-	  switch (ds->hd) {
-	  case FieldName(f):
-	    exp_to_c(nv,e);
-	    s = seq_stmt(exp_stmt(assign_exp(structmember_exp(xexp,f,DL), e, DL), DL),
-			 s, DL);
-	    break;
-	  default: throw toc_impos("array designator in struct");
-	  }
-      }
-      e->r = stmt_exp(declare_stmt(x,strctq(collapse_qvar(tdn)), null, s, DL), DL)->r;
-      break;
-    } else {
-      // Old way that is susceptible to the GCC bug: (struct tdn){.f1=e1,...,.fn=en}
-      // Still need to do this at top-level though!
+    if(!nv->toplevel)
+      e->r = init_struct(nv,false,dles,tdn)->r;
+    else {
+      // At top-level must use deisignators
       let n = collapse_qvar(tdn);
       for (let es = dles; es != null; es = es->tl) 
 	exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
-      break;
     }
+    break;
 
   case Enum_e(qv,_,_,es,ed,ef): 
     if (es == null) {
@@ -1491,7 +1510,7 @@ static void exp_to_c(env nv, exp e) {
 	e->r = stmt_exp(declare_stmt(x,pstrct_typ,&Opt(e1),s2,DL),DL)->r;
       }
 // GCC BUG: The code
-//   *x = (struct qv_tag){->tag = i, ->f1 = e1, ..., ->fn = en}; (t)x; })
+//   *x = (struct qv_tag){.tag = i, .f1 = e1, ..., .fn = en}; (t)x; })
 // does not seem to work properly in gcc,
 // so we had to recode as above.
 //

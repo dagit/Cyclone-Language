@@ -274,6 +274,7 @@ stmt seq_stmt(stmt s1, stmt s2, segment loc) {
 }
 stmt seq_stmts(list<stmt> ss, segment loc) {
   if (ss == null) return skip_stmt(loc);
+  else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
 stmt return_stmt(Opt_t<exp> e,segment loc) { 

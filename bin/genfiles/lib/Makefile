@@ -2,7 +2,8 @@
 
 include ../../../Makefile.inc
 
-CFLAGS=-O -fwritable-strings -I../../..
+CFLAGS= -fwritable-strings -I../../..
+#CFLAGS=-O -fwritable-strings -I../../..
 
 all: $(CYCLIB)
 
