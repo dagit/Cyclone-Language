@@ -371,7 +371,7 @@ $    /* the action file gets copied in place of this dollarsign */
     break;
   }
 
-#line 371 "cyc_bison.simple"
+#line 375 "cycbison.simple"
   yyvsp_offset -= yylen;
   yyssp_offset -= yylen;
 #ifdef YYLSP_NEEDED
