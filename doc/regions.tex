@@ -30,26 +30,26 @@ deallocate its region, and when you deallocate a region, you deallocate all
 of the objects in the region.  Regions are sometimes called ``arenas'' or
 ``zones.''
 
-Cyclone has four sorts of region:
+Cyclone has five kinds of regions:
 \begin{description}
-\item[Stack regions] As in C, local variables are allocated on the
+\item[Block regions] As in C, local variables are allocated on the
   runtime stack; the stack grows when a block is entered, and it
   shrinks when the block exits.  We call the area on the stack
-  allocated for the local variables of a block the \emph{stack region}
-  of the block.  A stack region has a fixed size---it is just large
+  allocated for the local variables of a block the \emph{block region}
+  of the block.  A block region has a fixed size---it is just large
   enough to hold the locals of the block, and no more objects can be
   placed into it.  The region is deallocated when the block containing
   the declarations of the local variables finishes executing.  With
   respect to regions, the parameters of a function are considered
   locals---when a function is called, its actual parameters are placed
-  in the same stack region as the variables declared at the start of
+  in the same block region as the variables declared at the start of
   the function.
   
-\item[Dynamic regions] Cyclone also has \emph{dynamic regions},
+\item[Growable regions] Cyclone also has \emph{growable regions},
   which are regions that you can add objects to over time.  You create
-  a dynamic region in Cyclone with a statement,
+  a growable region in Cyclone with a statement,
 \begin{alltt}
-  region {\it identifier} {\it statement}
+  region {\it identifier}; {\it statement}
 \end{alltt}
   This declares and allocates a new dynamic region, named
   \textit{identifier}, and executes \textit{statement}.  After
@@ -59,7 +59,7 @@ Cyclone has four sorts of region:
 
   Typically, \textit{statement} is a compound statement:
 \begin{alltt}
-  region \textit{identifier} \lb
+  \lb region \textit{identifier};
     {\it statement}\(\sb{1}\)
     \ldots
     {\it statement}\(\sb{n}\)
@@ -72,7 +72,24 @@ Cyclone has four sorts of region:
   uses a garbage collector to automatically remove objects from the
   heap when they are no longer needed.  You can think of garbage
   collection as an optimization that tries to keep the size of the
-  heap small.
+  heap small.  (Alternatively, you can avoid garbage collection all
+  together by specifying the \texttt{-nogc} flag when building the
+  executable.)
+
+\item[Dynamic regions]  Block and growable regions obey a strictly
+  last-in-first-out (LIFO) lifetime discipline.  This is often
+  convenient for storing temporary data, but sometimes, the lifetime
+  of data cannot be statically determined.  Such data can be allocated
+  in a \emph{dynamic region}.  A dynamic region supports deallocation
+  at (esentially) any program point.  However, before the data in a
+  dynamic region may be accessed, the dynamic region must be \emph{opened}.
+  The open operation fails by throwing an exception if the dynamic
+  region has already been freed.  Note that each data access within
+  a dynamic region does not require a check.  Rather, you can open
+  a given dynamic region once, access the data many times with no
+  additional cost, and then exit the scope of the open.  Thus, 
+  dynamic regions amortize the cost of checking whether or not data
+  are still live and localize failure points.  
 
 \item[The unique region] Cyclone has another special region called the
   \emph{unique region}.  The unique region type is \texttt{`U}, meaning that
@@ -89,7 +106,7 @@ Objects outside of the heap and unique region live until their region is
 deallocated; there is no way to free such an object earlier.  Objects in the
 heap or unique region can be garbage collected once they are unreachable
 (i.e., they cannot be reached by traversing pointers) from the program's
-variables.  Objects other regions always appear reachable to the garbage
+variables.  Objects in other regions always appear reachable to the garbage
 collector (so everything reachable from them appears reachable as well).
 
 Cyclone forbids following dangling pointers.  This restriction is part of
@@ -100,7 +117,7 @@ region?''  As explained below, each pointer type has a region and objects of
 the type may only point into that region.
 
 \subsection{Allocation}
-You can create a new object on the heap using one of three kinds of
+You can create a new object on the heap using one of a few kinds of
 expression: 
 \begin{itemize}
 \item \texttt{new {\it expr}} evaluates \textit{expr}, places the
@@ -150,7 +167,7 @@ expression:
   For example, this function returns an array containing the first
   \texttt{n} positive even numbers:
 \begin{verbatim}
-  int ? n_evens(int n) {
+  int *@fat n_evens(int n) {
     return new {for next < n :  2*(next+1)};
   }
 \end{verbatim}
@@ -167,38 +184,44 @@ expression:
   \item Currently, \texttt{for} array initializers are the only way to
     create an object whose size depends on run-time data.
   \end{itemize}
-  
-\item \texttt{malloc(sizeof({\it type}))}.  This is the only use of
-  \texttt{malloc} allowed in Cyclone; to enforce this, we have made
-  \texttt{malloc} a keyword.  This is much more restricted
-  than in C, where \texttt{malloc} is just an identifier bound to a
-  library function consuming an \texttt{int} and returning a
-  \texttt{char *}.
 
-  In Cyclone, you cannot even write \texttt{malloc(8)} if
-  \texttt{sizeof({\it type})} is 8!  So, \texttt{malloc} can't be used
-  to create an array whose size depends on run-time data.
-  
-  On the plus side, the type of \texttt{malloc(sizeof({\it type}))} is
-  \texttt{{\it type} @} (a subtype of \texttt{{\it type} *}),
-  so there is no need to cast the result from \texttt{char *}.
+\item \texttt{malloc(sizeof({\it type}))}.  Returns a \texttt{@notnull}
+  pointer to an uninitialized value of type \emph{type}.  
+
+\item \texttt{malloc(n*sizeof({\it type}))} or 
+      \texttt{malloc(sizeof({\it type})*n)}.  The type must be a bits-only
+      type (i.e., cannot contain pointers, tagged unions, zero-terminated
+      values, etc.)  If \texttt{n} is a compile-time constant expression,
+      returns a \texttt{@thin} pointer with \texttt{@numelts(n)}.  If 
+      \texttt{n} is not a compile-time constant, returns 
+      a \texttt{@fat} pointer to the sequence of
+      \texttt{n} uninitialized values.
+
+\item \texttt{calloc(n,sizeof({\it type}))}.  Similar to 
+      the malloc case above, but returns memory that is zero'd.  Therefore,
+      \texttt{calloc} supports types that are bits-only or zero-terminated.
+
+\item \texttt{malloc(e)} where \texttt{e} is an expression not of one
+      of the above forms.  If \texttt{e} is constant, returns a
+      \texttt{char *@numelts(e)@nozeroterm} otherwise 
+      returns a \texttt{char *@fat@nozeroterm}.
 \end{itemize}
 
 Unique pointers can be allocated just as with the heap, but the context must
 make clear that a unique pointer is desired.  For example, in the following
 the variable \texttt{temp} is allocated in the heap:
 \begin{alltt}
-  t @ temp = malloc(sizeof(t));
+  t * temp = malloc(sizeof(t));
 \end{alltt}
 Modifying it slightly, we allocate into the unique region instead:
 \begin{alltt}
-  t @`U temp  =        malloc(sizeof(t));
-  t @   temp2 = (t @`U)malloc(sizeof(t));
+  t *`U temp  =        malloc(sizeof(t));
+  t *   temp2 = (t *`U)malloc(sizeof(t));
 \end{alltt}
 Unfortunately, our type inference system for allocation is overly simple, so
 you can't do something like:
 \begin{alltt}
-  t @ temp = malloc(sizeof(t));
+  t * temp = malloc(sizeof(t));
   ufree(temp);
 \end{alltt}
 In an ideal world, the fact that \texttt{temp} was passed to \texttt{ufree}
@@ -210,19 +233,24 @@ expressions.
 \item \texttt{rnew({\it identifier}) {\it expr}}
 \item \texttt{rnew({\it identifier}) {\it array-initializer}}
 \item \texttt{rmalloc({\it identifier},sizeof({\it type}))}
+\item \texttt{rmalloc({\it identifier},n*sizeof({\it type}))}
+\item \texttt{rmalloc({\it identifier},sizeof({\it type})*n)}
+\item \texttt{rmalloc({\it identifier},e))}
+\item \texttt{rcalloc({\it identifier},n,sizeof({\it type}))}
 \end{itemize}
-\texttt{rnew} and \texttt{rmalloc} are keywords.
+Note that \texttt{new}, \texttt{malloc}, \texttt{calloc}, 
+\texttt{rnew}, \texttt{rmalloc} and \texttt{rcalloc} are keywords.
 
 The Cyclone library has global variables \texttt{Core::heap_region} and
 \texttt{Core::unique_region} which are handles for the heap and unique
-regions, respectively.  So, for example, \texttt{new {\it expr}} could be
+regions, respectively.  So, for example, \texttt{new {\it expr}} can be
 replaced with \texttt{rnew(heap_region,{\it expr})}.  We also define a macro
 \texttt{unew({\it expr})} that expands to \texttt{rnew(unique_region,{\it
 expr})}.
 
 The only way to create an object in a stack region is declaring it as
 a local variable.  Cyclone does not currently support \texttt{salloc};
-use a dynamic region instead.
+use a growable region instead.
 
 \subsection{Common Uses}
 \label{sec:common-use}
@@ -269,27 +297,27 @@ When regions are omitted from pointer types in function bodies, the
 compiler tries to infer the region.  However, it can sometimes be too
 ``eager'' and end up rejecting code.  For example, in
 \begin{verbatim}
-void f1(int x) {
-  int @ y = new 42;
+void f1(int * x) {
+  int * y = new 42;
   y = &x;
 }
 \end{verbatim}
 the compiler uses y's initializer to decide that y's type is
-\texttt{int @ `H}.  Hence the assignment is illegal, the parameter's
+\texttt{int * `H}.  Hence the assignment is illegal, the parameter's
 region (called \texttt{`f1}) does not outlive the heap.  On the other
 hand, this function type-checks:
 \begin{verbatim}
 void f2(int x) {
-  int @ y = &x;
+  int * y = &x;
   y = new 42;
 }
 \end{verbatim}
-because y's types is inferred to be \texttt{int @ `f2} and the
+because y's types is inferred to be \texttt{int * `f2} and the
 assignment makes y point into a region that outlives \texttt{`f2}.  We
 can fix our first function by being more explicit:
 \begin{verbatim}
-void f1(int x) {
-  int @`f1 y = new 42;
+void f1(int * x) {
+  int *`f1 y = new 42;
   y = &x;
 }
 \end{verbatim}
@@ -332,12 +360,13 @@ type-check:
 \begin{verbatim}
 int * f(int * x) { return x; }
 \end{verbatim}
-Both of these functions will type-check; the second one is more
-useful:
+Both of these functions will type-check:
 \begin{verbatim}
 int * f(int *`H x) { return x; }
 int *`r f(int *`r x) {return x; }
 \end{verbatim}
+The second one is more useful because it can be called with any
+region.
 
 In type declarations (including \texttt{typedef} for now) and
 top-level variables, omitted region annotations are assumed to point
@@ -368,7 +397,7 @@ Section~\ref{sec:poly-allocate}.}  The type of a handle is
 associated with pointers into the region.  For example, this function
 allocates a pair of integers into the region whose handle is \texttt{r}:
 \begin{verbatim}
-  $(int,int)@`r f(region_t<`r> r, int x, int y) { 
+  $(int,int)*`r f(region_t<`r> r, int x, int y) { 
      return rnew(r) $(x,y);
   }
 \end{verbatim}
@@ -386,10 +415,10 @@ Notice that we have been careful to indicate that the region where
 the region for which \texttt{r} is the handle (corresponding to
 \texttt{`r}).  Here's how to use \texttt{f2}:
 \begin{verbatim}
-  region rgn { 
+  { region rgn;
     $(int,int) *`rgn x = NULL; 
     f2(rgn,3,4,&x);
- }
+  }
 \end{verbatim} %$ <-- this dollar comment helps syntax highlighting
 The \texttt{`s} and \texttt{`rgn} in our example are unnecessary
 because they would be inferred.
@@ -397,9 +426,9 @@ because they would be inferred.
 \texttt{typedef}, \texttt{struct}, and \texttt{datatype}
 declarations can all be parameterized by regions,
 just as they can be parameterized by types.  For example, here is part
-of the list library.  Note that the ``\texttt{::R}'' is necessary.
+of the list library.  
 \begin{verbatim}
-  struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
   typedef struct List<`a,`r> *`r list_t<`a,`r>;
 
   // return a fresh copy of the list in r2
@@ -466,7 +495,15 @@ functions would look like this:
 % causes a program not to type-check, but the gory details are discussed
 % below.
 
+\subsection{Dynamic Regions}
+
+\emph{To be filled in, but see the tutorial for hints.}
+
 \subsection{Using Unique Pointers}
+
+\emph{Note:  Unique pointers are still under developement and are
+likely to change substantially by the next release.  Therefore, we
+discourage their use for now.}
 
 The main benefit of regions is also their drawback: to free data you must
 free an entire region.  This implies that to amortize the cost of creating a
@@ -496,7 +533,7 @@ any other means.  When pointers are first allocated, e.g. using
 \emph{read through} (that is, dereferenced or indexed) but not copied, as
 the following example shows:
 \begin{alltt}
-  char c, ?`U buf = calloc(MAXBUF,sizeof(char));
+  char c, *@fat`U buf = calloc(MAXBUF,sizeof(char));
   int i = 0;
   while ((c = getchar()) > 0 && !isspace(c)) \{
     buf[i++] = c;
@@ -545,8 +582,8 @@ called \texttt{alias} that permits temporary aliasing of a unique pointer,
 provided that no aliases are live when the block completes.
 Here is a simple example:
 \begin{alltt}
-  char ?`U dst, ?`U src = ...
-  \{ alias <`r> x = (char ?`r)src; // consumes src
+  char *@fat`U dst, *@fat`U src = ...
+  \{ alias <`r> x = (char *@fat`r)src; // consumes src
     memcpy(dst,x,numelts(x)); \}
   // src unconsumed
   ...

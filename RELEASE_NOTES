@@ -1,5 +1,215 @@
-This file explains some of the changes since the last release of Cyclone
-(version 0.2 dated 20 November 2001.)
+This file explains some of the changes that occurred in between 
+releases.
+
+Changes going from Version 0.3 dated 18 April 2002, to Version 0.4:
+
+* Bezillions of bug fixes.  Hopefully, we got yours, but if not,
+  please send us a bug report.
+
+* tests/shootout contains a copy of Doug Bagley's shootout code,
+  including (a) the original C version, (b) a straightforward
+  Cyclone port with minimal changes needed to get it to compile, 
+  and (c) an expert Cyclone port that takes advantage of advanced
+  Cyclone features.  See the README file.
+
+* Introduced "@tagged union" declarations.  These look and act
+  like C unions but include a hidden tag which is updated when
+  writing a member, and checked when reading a member.  If you
+  attempt to read a member other than the last one written, a
+  Match_Exception is thrown.  You can use tagcheck(e.m) as a
+  boolean expression to check whether or not m was the last 
+  member written in a tagged union (also tagcheck(e->m) for
+  pointers to tagged unions.)  
+  
+* Our old "tunion" and "xtunion" types have been renamed to
+  "datatype" and "@extensible datatype" respectively to avoid
+  confusion with @tagged unions.
+
+* e.size has changed to numelts(e).  
+
+* Because users found our pointer notation cryptic, we have 
+  introduced "long forms" for the various kinds of pointer
+  qualifiers:
+
+  @notnull/@nullable:  whether or not the pointer can be NULL
+  @zeroterm/@nozeroterm:  whether or not the sequence is zero-terminated
+  @thin/@fat: whether or not the pointer is fat
+  @numelts(e): upper bound on number of elements in sequence
+  @region(`r): region into which pointer refers
+
+  You can still use the old abbreviations if you prefer.  So,
+  for instance:
+
+  int *@notnull@numelts(42)@region(`r) == int @{42}`r
+
+* Introduced what we call "dynamic" regions.  Dynamic regions can
+  be deallocated at any time (as long as they're not open.)  However,
+  to access data in a dynamic region, or to allocate data in the
+  region, you have to open it up.  The open will fail if the region
+  has already been freed.  Dynamic regions are particularly useful
+  in conjunction with existential types, and are good for those
+  situations where you cannot statically determine the lifetimes
+  of objects.  
+
+* We now support writing down arbitrary union types.  However, if
+  they are untagged, then you can only read out the "bits-only"
+  members.  
+
+* You can use ",..." in tuple, struct, and datatype patterns to
+  match against any number of fields that you want to ignore.
+  For instance:
+
+  struct Foo {int a,b,c,d,e,f,g;};
+
+  int foo(struct Foo f) {
+    let Foo{.a = a, .g = g, ...} = f;
+    return a + g;
+  }
+
+* You can omit the struct or tagged union's name in a pattern,
+  as long as we can determine it from context.  So, the foo function
+  above can be rewritten as simply:
+
+  int foo(struct Foo f) {
+    let {.a = a, .g = g, ...} = f;
+    return a + g;
+  }
+
+* You can write "<id> as <pat>" as a pattern like ML.  This binds
+  the value being matched to the identifier, but continues matching
+  it to extract more values in <pat>.  
+
+* You no longer have to write kinds on bound type variables of
+  type definitions -- they are inferred from the definition.  
+  You *do* have to write kinds on type declarations or else the
+  kinds default to ::B (boxed).  So, for instance, if you write:
+
+    struct List<`a,`r>;
+
+  then this elaborates to: 
+  
+    struct List<`a::B,`r::B>;
+
+  To make `r have region kind (::R) you need to put it in explicitly:
+
+    struct List<`a,`r::R>;
+
+  However, if you give a definition for List, then you do not
+  need to declare the kind of `r as it can be inferred:
+
+    struct List<`a,`r> { `a hd; struct List<`a,`r>*`r tl; }
+
+* The syntax for declaring regions has changed slightly.  It used to be:
+
+    region r <stmt> 
+
+  Now it's more like a C declaration:
+
+    region r; <stmt>
+
+* There is now some support for dependent array sizes.  For a
+  good example, see tests/shootout/cyc-matrix.cyc which is a
+  version of matrix multiplication that takes in a matrix with
+  statically unknown dimensions.  The interface for the function
+  looks like this:
+
+  void mmult(tag_t rows,
+             tag_t cols,
+             int @{cols}@{rows} m1,
+             int @{cols}@{cols} m2,
+             int @{cols}@{rows} m3);
+
+  Note that the number of rows and columns of m1, m2, and m3
+  depend upon the tag_t values rows and cols.  Tag values are
+  unsigned, singleton integers.  The above is really shorthand
+  for:
+
+  void mmult(tag_t<`i::I> rows,
+             tag_t<`j::I> cols,
+             int @{valueof(`j)}@{valueof(`i)} m1,
+             int @{valueof(`j)}@{valueof(`j)} m2,
+             int @{valueof(`j)}@{valueof(`i)} m3);
+
+  Here we see that rows is some unsigned integer named `i at
+  the type-level, cols is some unsigned integer named `j,
+  and the number of rows and columns of m1,m2, and m3 depends
+  upon the value of `i and `j.  
+
+  The valueof(T) form takes a type-level (integer-kinded) expression
+  and allows you to embed the type into a value-level expression
+  which can be used to specify a bound on an array as in the example
+  above.  Furthermore, in the matrix multiply example code, the flow 
+  analysis is smart enough to avoid all run-time checks.  As a result,
+  the output of Cyclone is equivalent to the original C code.
+
+  Sadly, we have not yet updated the documentation to cover this
+  feature in detail.
+
+* You don't have to write a type-level region name in a prototype --
+  you can use the variable instead.  That is, you can abbreviate:
+
+    void foo(region_t<`r> r, int*`r)
+
+  with
+
+    void foo(region_t r, int*`r)
+
+* Patterns can now include (almost) arbitrary constant expressions.
+
+* There's a primitive porting tool.  If you take a C file (say foo.c)
+  copy it to foo.cyc and wrap the code that you want ported with:
+  __cyclone_port_on__; ... __cyclone_port_off__; and compile the
+  file with "cyclone -port", then the compiler will spit out a list
+  of edits.  These edits may be applied with the bin/rewrite tool
+  to produce foo_new.cyc.  The tool attempts to figure out where 
+  fat pointers are needed, what the region interface for a function
+  should be, and where to insert const so that things will type-check
+  under Cyclone's rules.  This won't succeed most of the time, but
+  it will generally get your code closer.  
+
+* Added extern "C include" declarations.  These allow you to define
+  C code inline in a Cyclone file.  For example:
+
+  extern "C include" { 
+    int peek(int i) {
+       return *((int *)i);
+    }
+  } export {
+    peek;
+  }
+
+  The code is (mostly) ignored by Cyclone and spit out for C to
+  compile.  The interface is processed by Cyclone, so you can use
+  Cyclone types in it (e.g., ?) but you can't use Cyclone features
+  within the definitions.  The export section identifies those 
+  identifiers you want to export to the Cyclone environment.  
+  A typical use is something like:
+
+  extern "C include" {
+  #include <c_code.h>
+  // wrappers to make c_code safe
+  } export {
+    // functions in c_code already safe and wrappers,
+    // but not unsafe functions.
+  }
+
+* There's some support for "unique pointers".  If you have a unique
+  pointer to an object, then you can free it at will.  However, 
+  you cannot make copies of unique pointers.  You can swap unique
+  pointer values within shared data structures.  And there is some
+  tentative support for writing code that is polymorphic over whether
+  or not a pointer is unique, but this has not yet been worked out
+  to our satisfaction. 
+
+* The compiler has been modified to use either (a) fine-grained
+  regions for all memory management, (b) coarse-grained regions,
+  or (c) the garbage collector.  Right now, the default is to use
+  coarse-grained regions.  This won't have any effect on users,
+  but if you've been staring at the Cyclone source code, you'll
+  now see a lot more uses of regions.
+
+----------------------------------------------------------------------
+Changes going from Version 0.2 dated 20 November 2001, to Version 0.3:
 
 * In order to provide better library coverage, we had to cut back
   on the number of platforms that we support directly.  In particular,

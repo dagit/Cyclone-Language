@@ -533,212 +533,38 @@ extern "C" {
 
 The extern C approach works well enough that it covers many
 of the cases that you'll encounter.  However, the situation is
-not so easy or straightforward when you start to take advantage
-of Cyclone's features.  As a simple example, suppose you want
-to call a C function \texttt{int\_to\_string} that takes in
-an integer and returns a string representation of that integer.
-The C prototype for the function would be:
-\begin{verbatim}
-  char *int_to_string(int i);
-\end{verbatim}
+not so when you run into more complicated interfaces.  Sometimes
+you will need to write some wrapper code to convert from 
+Cyclone's representations to C's and back.  
 
-If we just ``extern-C'' it, then we can certainly call the function
-and pass it an integer.  But we can't really use the string
-that we get out, because we've asserted that the return type
-is not a string, but rather a (possibly-null) pointer to a single
-character.  So, when we call \texttt{foo} below:
+Another useful tool is the \texttt{extern "C include"} mechanism.
+It allows you to write C definitions within a Cyclone file.  Here
+is a simple example:
 \begin{verbatim}
-  extern "C" char *int_to_string(int i);
-  void foo() {
-    int i = 12345;
-    printf(int_to_string(i));
+extern "C include" {
+  char peek(unsigned int i) {
+    return *((char *)i);
   }
-\end{verbatim}
-we'll only get ``\texttt{1}'' for the output instead of
-``\texttt{12345}''.  
 
-If we know that the function always returns a pointer to a buffer of 
-some fixed constant size, say \texttt{MAX\_NUM\_STRING}, then
-we can change the prototype to:
-\begin{verbatim}
-extern "C" char *{MAX_NUM_STRING} int_to_string(int i);
-\end{verbatim}
-and we'll get the right behavior.  However, this obviously isn't
-going to work if the size of the buffer might be different for
-different calls.  
-
-Another solution is to somehow convert the ``C string'' to a ``Cyclone
-string'' before handing it back to Cyclone.  This is fundamentally
-an unsafe operation because we must rely upon the ``C string'' being
-properly zero-terminated.  So, your best bet is to write a little
-wrapper function in C which can convert the C string to a Cyclone
-string and then use that as follows:
-\begin{verbatim}
-extern "C" char *int_to_string(int i);
-extern "C" char ?Cstring_to_string(char *);
-void foo() {
-  int i = 12345;
-  printf(Cstring_to_string(int_to_string(i)));
+  void poke(unsigned int i, char c) {
+    *((char *)i) = c;
+  }
+} export {
+  peek, poke;
 }
 \end{verbatim}
+In this example, we've defined two C functions \texttt{peek} and 
+\texttt{poke}.  Cyclone will not compile or type-check them, but
+rather pass them on to the C compiler.  The \texttt{export} clause
+indicates which function and variable definitions should be 
+exported to the Cyclone code.  If we only wanted to export the
+\texttt{peek} function, then we would leave the \texttt{poke} function
+out of the export list.
 
-Fortunately, the Cyclone runtime (\texttt{lib/runtime\_cyc.c}) 
-provides the needed routine which looks as follows:
-\begin{verbatim}
-  // struct definition for fat pointers
-  struct _tagged_arr {
-    unsigned char *curr;  // current pointer
-    unsigned char *base;  // base address of buffer
-    unsigned char *last_plus_one; // last_plus_one - base = size
-  };
-  struct _tagged_arr Cstring_to_string(char *s) {
-    struct _tagged_arr str;
-    if (s == NULL) {
-      // return Cyclone fat NULL
-      str.base = str.curr = str.last_plus_one = NULL;
-    }
-    else {
-      int sz = strlen(s)+1;  // calculate string length + 1 for 0
-      str.base = (char *)GC_malloc_atomic(sz); // malloc a new buffer
-      if (str.base == NULL) // check that mallloc succeeded
-        _throw_badalloc();
-      str.curr = str.base;  // set current to base
-      str.last_plus_one = str.base + sz; // set the size
-      // Copy the string in case the C code frees it or mangles it
-      str.curr[--sz] = '\0';
-      while(--sz>=0)
-        str.curr[sz]=s[sz];
-    }
-    return str; // return the fat pointer
-  }
-\end{verbatim}
+A more complicated example can be found in \texttt{tests/pcredemo.cyc}.
+The goal of this example is to show how you can safely suck in
+a large C interface (in this case, the Perl Compatible Regular Expression
+interface), write wrappers around some of the functions to convert
+represenations and check properties, and then safely export these
+wrappers to Cyclone.  
 
-The \texttt{\_tagged\_arr} definition defines the struct type that
-Cyclone uses to represent all fat pointers.  (It's actually defined
-in a header file that gets included.)  Fat pointers are represented
-using a ``current pointer'' which is the real pointer, and two
-other pointers which represent the base address and maximum address
-(plus one) for the buffer of objects.  
-
-The second definition defines our wrapper function which returns a fat
-pointer (\texttt{struct \_tagged\_arr}) given a C string.  You'll
-notice that the function is bullet-proofed to avoid a number of
-issues.  For instance, we first check to see if the C string is
-actually \texttt{NULL} and if so, return a fat \texttt{NULL} 
-(a struct where \texttt{curr}, \texttt{base}, and \texttt{last\_plus\_one}
-are all \texttt{NULL}.)  If the C string is not \texttt{NULL},
-we allocate a new buffer and copy the string over to the buffer.
-This ensures that if C re-uses the storage (or frees it), Cyclone
-won't get confused.  Notice also that we call \texttt{GC\_malloc\_atomic}
-to allocate the storage.  In this case, we can use the atomic
-malloc because we know the data do not contain pointers.
-After copying the string, we initialize a \texttt{struct \_tagged\_arr}
-appropriately and then return the struct.  
-
-If we could ensure that the storage passed back to us wasn't
-going to get recycled, then we could avoid the copy and simplify
-the code greatly:
-\begin{verbatim}
-struct _tagged_arr Cstring_to_string(char *s) {
-  struct _tagged_arr str;
-  if (s == NULL) {
-    // return Cyclone fat NULL
-    str.base = str.curr = str.last_plus_one = NULL;
-  }
-  else {
-    int sz = strlen(s)+1;  // calculate string length + 1 for 0
-    str.base = str.curr = s; 
-    str.last_plus_one = str.base + sz; // set the size
-  }
-  return str; // return the fat pointer
-}
-\end{verbatim}
-
-Of course, using this is a bit more risky.  It's up to you
-to make sure that you get the code right.
-In porting various C libraries to Cyclone, we have had to write
-a number of wrappers.  Doing so is fraught with peril and in the
-future, we hope to provide tools that make this task easier
-and easier to get right.  If you are planning to interface to
-C code and need to write interfaces or wrappers, we encourage
-you to look through the libraries to see how we have done
-things.  
-
-A particularly good example is the standard I/O library.  The
-interface \texttt{lib/stdio.h} just includes \texttt{lib/cstdio.h}
-and opens up the \texttt{Std} namespace.  (This makes it easier
-to port C code, but if you want to keep the namespace closed,
-you can directly include \texttt{lib/cstdio.h}.)  The \texttt{cstdio.h}
-file is adapted from the BSD and Gnu \texttt{stdio.h} files
-and shares a lot in common with them.  For instance, there
-is an abstract struct for files, definitions for stdout, stdin,
-stderr, various macros, and various function prototypes.
-
-A typical example function is the one to remove a file which
-has the following prototype:
-\begin{verbatim}
-  extern int remove(const char ?);
-\end{verbatim}
-
-You'll notice that the function takes in a Cyclone string
-as an argument.  Obviously, the ``real'' remove takes in a
-C string.  What is going on here is that Cyclone defines
-a wrapper function which, when given a Cyclone string,
-converts it to a C string, and then calls C's remove. 
-The wrapper function is defined in the file \texttt{stdio.cyc}.
-Here are a few excerpts from that file:
-\begin{verbatim}
-  namespace Cstdio {
-    extern "C" {
-      extern struct __sFILE;
-      typedef struct Cstdio::__sFILE __sFILE;
-      int remove(char *);
-      int fclose(__sFILE);
-      ...
-    }
-  }
-  namespace Std;
-  abstract struct __sFILE {
-    Cstdio::__sFILE *file; 
-  };
-  int remove(const char ? filename) {
-    return Cstdio::remove(string_to_Cstring(filename));
-  }
-  int fclose(FILE @`r f) {
-    if (f->file == NULL) return -1;
-    int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
-    if (r == 0) {
-      f->file = NULL;
-    }
-    return r;
-  }
-  ...
-\end{verbatim}
-
-At the top of the file, we have declared the external types
-and functions that C uses.  Notice that these definitions
-are wrapped in their own namespace (\texttt{Cstdio}) so that
-we can ``redefine'' them within the \texttt{Std} namespace.
-Also notice that they are wrapped with an extern-C so that
-when compiled, their names won't get mangled.
-
-The Cyclone wrapper code starts after the \texttt{namespace Std}
-declaration.  The first thing we do is define a ``wrapper''
-type for C files.  The wrapper includes a possibly null pointer
-to a C file.  We use this level of indirection to keep someone
-from closing a file twice, or from reading or writing to a file
-that has been closed.  Of course, any operations on files will
-need wrappers to strip off the level of indirection and check
-that the file has not been closed already.  
-
-The wrapper function for \texttt{remove} calls the \texttt{string\_to\_Cstring}
-function (defined in \texttt{runtime\_cyc.c}) to conver the
-argument to a C string and then passes the C string to the
-real \texttt{remove} function, returning the error code.
-The wrapper function for \texttt{fclose} checks to make sure that
-the file has not already been closed.  If so, it returns -1.
-Otherwise, it pulls out the real C file and passes it to the
-real \texttt{fclose} function.  It then checks the return code
-(to ensure that the close actually happened) and if it's 0,
-sets the C file pointer to \texttt{NULL}, ensuring that we
-don't call C's \texttt{fclose} on the file again.
