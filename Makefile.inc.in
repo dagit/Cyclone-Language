@@ -157,6 +157,8 @@ BUILDLIB_SRCS:=buildlib\
 	cf_flowinfo\
 	absyn
 
+NOOPT_SRCS:=parse_tab
+
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB
 CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h
@@ -184,5 +186,7 @@ PG_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_LIBS))
 NOCHECK_BOOT_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_BOOT_LIBS))
 NOCHECK_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
+O_NOOPT_SRCS:=$(addsuffix .$(O),$(NOOPT_SRCS))
+OPTFLAG:=-O
 
 UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)

@@ -167,26 +167,74 @@ bin/lib/libcycboot_a.a: \
 	  bin/genfiles/boot_cycstubs_a.$(O)
 	$(RANLIB) $@
 
+# Have two sets of rules below, to differentiate which files require
+# optimization and which do not.  If the NOOPT flag is set, we just
+# compile the file.  Otherwise, we compile it via a recursive call with
+# NOOPT off, setting optimization flags as needed.
+NOOPT=
+ifdef NOOPT
 %.$(O): %.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
+	bin/cyclone$(EXE) -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 
 %_a.$(O): %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
-%_a.$(O): %.cyc cyclone
-	bin/cyclone$(EXE) -pa -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
+%_a.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -pa -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 
 %_pg.$(O): %.c
 	$(CC) -c -o $@ -pg $(CFLAGS) $<
 
-%_pg.$(O): %.cyc cyclone
-	bin/cyclone$(EXE) -pg -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
+%_pg.$(O): %.cyc bin/cyclone$(EXE)
+	bin/cyclone$(EXE) -pg -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
 
 %_nocheck.$(O): %.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
 
 %_nocheck.$(O): %.cyc cyclone
-	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $<
+	bin/cyclone$(EXE) --nochecks -c -Iinclude -Ibin/lib/cyc-lib/$(ARCH)/include -Bbin/lib/cyc-lib -o $@ $(CYCFLAGS) $<
+else
+%.$(O): %.c
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%.$(O): %.cyc bin/cyclone$(EXE)
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_a.$(O): %.c
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_a.$(O): %.cyc bin/cyclone$(EXE)
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_pg.$(O): %.c
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_pg.$(O): %.cyc bin/cyclone$(EXE)
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_nocheck.$(O): %.c
+	@(if [ -z "$(findstring $(notdir $@),$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CFLAGS=$(CFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+%_nocheck.$(O): %.cyc bin/cyclone$(EXE)
+	@(if [ -z "$(findstring $@,$(O_NOOPT_SRCS))" ]; then \
+	$(MAKE) 'CYCFLAGS=$(CYCFLAGS) $(OPTFLAG)' NOOPT=yes $@; \
+	else $(MAKE) NOOPT=yes $@; fi)
+
+endif
 
 bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
