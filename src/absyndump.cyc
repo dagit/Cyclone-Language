@@ -382,9 +382,9 @@ void dumpexp_prec(int inprec, exp e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case Enum_e(n,_,_,es,_,_): fallthru(n,es);
-  case Xenum_e(n,_,es,_,_):
-    dumpqvar(n);
+  case Enum_e(_,_,es,_,ef): fallthru(es,ef);
+  case Xenum_e(_,es,_,ef):
+    dumpqvar(ef->name);
     group(dumpexp,es,"(",")",",");
     break;
 

@@ -79,13 +79,13 @@ extern string implode(list<Char> c);
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
 // InvalidArg if no valid int is found.  If offset is non-null, 
 // returns the index of the last character consumed + 1.
-extern int to_int(string s, int *offset);
+extern int to_int<`r>(string s, int *`r offset);
 
 // convert s to a double.  if offset is null, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
 // InvalidArg if no valid int is found.  If offset is non-null, 
 // returns the index of the last character consumed + 1.
-extern double to_double(string s, int *offset); // raises InvalidArg
+extern double to_double<`r>(string s, int *`r offset); // raises InvalidArg
 }
 
 #endif

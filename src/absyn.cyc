@@ -86,15 +86,15 @@ typ slong_t  = IntType(Signed,B8,Unboxed);
 typ float_t  = FloatType(Unboxed);
 typ double_t = DoubleType(Unboxed);
 // boxed, unsigned types
-typ uChar_t  = IntType(Unsigned,B1,Boxed);
-typ uShort_t = IntType(Unsigned,B2,Boxed);
-typ uInt_t   = IntType(Unsigned,B4,Boxed);
-typ uLong_t  = IntType(Unsigned,B8,Boxed);
+typ uChar_typ  = IntType(Unsigned,B1,Boxed);
+typ uShort_typ = IntType(Unsigned,B2,Boxed);
+typ uInt_typ   = IntType(Unsigned,B4,Boxed);
+typ uLong_typ  = IntType(Unsigned,B8,Boxed);
 // boxed, signed types
-typ sChar_t  = IntType(Signed,B1,Boxed);
-typ sShort_t = IntType(Signed,B2,Boxed);
-typ sInt_t   = IntType(Signed,B4,Boxed);
-typ sLong_t  = IntType(Signed,B8,Boxed);
+typ sChar_typ  = IntType(Signed,B1,Boxed);
+typ sShort_typ = IntType(Signed,B2,Boxed);
+typ sInt_typ   = IntType(Signed,B4,Boxed);
+typ sLong_typ  = IntType(Signed,B8,Boxed);
 // boxed float, double
 typ Float_typ  = FloatType(Boxed);
 typ Double_typ = DoubleType(Boxed);
@@ -120,10 +120,10 @@ static Opt_t<typ> file_t_opt = null;
 // If so, we'll need a rgn_t argument.
 typ file_typ() {
   if (file_t_opt == null) {
-    typedef_name file_t_name     = &$(null,(string)"__sFILE");
-    structdecl   sd              = &Structdecl(Abstract,&Opt(file_t_name),
-					       null, null);
-    typ          file_struct_typ = StructType(&Opt(file_t_name),null,&$(sd));
+    typedef_name_t file_t_name     = &$(null,(string)"__sFILE");
+    structdecl     sd              = &Structdecl(Abstract,&Opt(file_t_name),
+						 null, null);
+    typ            file_struct_typ = StructType(&Opt(file_t_name),null,&$(sd));
     file_t_opt = &Opt(PointerType(file_struct_typ,
 				  HeapRgnType,
 				  new_conref(false),
@@ -166,7 +166,7 @@ exp new_exp(raw_exp_t r, segment loc) {
 exp copy_exp(exp e) {
   return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
 }
-exp const_exp(cnst c, segment loc) { return new_exp(Const_e(c), loc); }
+exp const_exp(cnst_t c, segment loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(segment loc) { return new_exp(Const_e(Null_c), loc); }
 exp int_exp(sign s,int i,segment seg) { 
   return const_exp(Int_c(s,i),seg);
@@ -270,7 +270,7 @@ exp array_exp(list<exp> es, segment loc) {
   dles = List::imp_rev(dles);
   return new_exp(Array_e(dles),loc);
 }
-exp unresolvedmem_exp(Opt_t<typedef_name> n,
+exp unresolvedmem_exp(Opt_t<typedef_name_t> n,
                       list<$(list<designator>,exp)@> dles,segment loc) {
   return new_exp(UnresolvedMem_e(n,dles),loc);
 }
@@ -336,7 +336,7 @@ stmt assign_stmt(exp e1, exp e2, segment loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
 }
 /////////////////////////// Patterns //////////////////////////////
-pat new_pat(raw_pat p, segment s) { return &Pat(p,null,s); }
+pat new_pat(raw_pat_t p, segment s) { return &Pat(p,null,s); }
 
 ////////////////////////// Declarations ///////////////////////////
 decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
@@ -351,15 +351,15 @@ vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
 	          .type=t, .initializer=init, .shadow=0, .block=0};
 }
-decl struct_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
+decl struct_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
 		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
   return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs}),loc);
 }
-decl enum_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
+decl enum_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
 	       Opt_t<list<enumfield>> fs,segment loc) {
   return new_decl(Enum_d(&Enumdecl {.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
 }
-decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,segment loc) {
+decl xenum_decl(scope s,typedef_name_t n,list<enumfield> fs,segment loc) {
  return new_decl(Xenum_d(&Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);
 }
 
@@ -429,4 +429,15 @@ $(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
       return f;
   }
   return null;
+}
+
+$(tqual,typ) * lookup_tuple_field(list<$(tqual,typ)@> ts, int i) {
+  for(; i != 0; --i) {
+    if(ts == null)
+      return null;
+    ts = ts->tl;
+  }
+  if(ts == null)
+    return null;
+  return ts->hd;
 }

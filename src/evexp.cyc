@@ -22,11 +22,11 @@ void exp_err(segment loc, string msg) {
 }
 
 // forward references
-extern cnst promote_const(cnst cn);
-extern cnst eval_const_exp(exp e);
-extern cnst eval_const_unprimop(primop p,exp e);
-extern cnst eval_const_binprimop(primop p,exp e1,exp e2);
-extern cnst eval_sizeof(typ t, segment loc);
+extern cnst_t promote_const(cnst_t cn);
+extern cnst_t eval_const_exp(exp e);
+extern cnst_t eval_const_unprimop(primop p,exp e);
+extern cnst_t eval_const_binprimop(primop p,exp e1,exp e2);
+extern cnst_t eval_sizeof(typ t, segment loc);
 
 unsigned int eval_const_uint_exp(exp e) {
   switch (promote_const(eval_const_exp(e))) {
@@ -36,17 +36,12 @@ unsigned int eval_const_uint_exp(exp e) {
 }
 
 // FIX: What about LongLong?
-cnst promote_const(cnst cn) {
+cnst_t promote_const(cnst_t cn) {
   switch (cn) {
-  case Char_c(sn,c): 
-    cn = Int_c(sn,(int)c);
-    break;
-  case Short_c(sn,s):
-    cn = Int_c(sn,(int)s);
-    break;
-  default: break; // skip
+  case Char_c(sn,c):  return Int_c(sn,(int)c);
+  case Short_c(sn,s): return Int_c(sn,(int)s); 
+  default:            return cn;
   }
-  return cn;
 }
 
 bool eval_const_bool_exp(exp e) {
@@ -60,8 +55,8 @@ bool eval_const_bool_exp(exp e) {
 
 // The main routine -- side-effects the expression e, overwriting its
 // r field with the resulting constant (only if there's no error)
-cnst eval_const_exp(exp e) {
-  cnst cn;
+cnst_t eval_const_exp(exp e) {
+  cnst_t cn;
   switch (e->r) {
   case Const_e(c):
     cn = c;
@@ -175,11 +170,11 @@ unsigned int szof(typ t, segment loc) {
   }
 }
 
-cnst eval_sizeof(typ t,segment loc) {
+cnst_t eval_sizeof(typ t,segment loc) {
   return Int_c(Unsigned,(int)szof(t,loc));
 }
 
-bool is_arith_const(cnst cn) {
+bool is_arith_const(cnst_t cn) {
   switch (cn) {
   case Char_c(_,_): return true;
   case Int_c(_,_):  return true;
@@ -188,19 +183,19 @@ bool is_arith_const(cnst cn) {
   }
 }
 
-cnst eval_const_unprimop(primop p,exp e) {
-  cnst cn = promote_const(eval_const_exp(e));
+cnst_t eval_const_unprimop(primop p,exp e) {
+  cnst_t cn = promote_const(eval_const_exp(e));
   switch ($(p,cn)) {
   case $(Plus,_): 
     if (!is_arith_const(cn)) 
       exp_err(e->loc,"expecting arithmetic constant");
     return cn;
-  case $(Minus,  Int_c(s,i)): return Int_c(Signed,-i);
+  case $(Minus,  Int_c(s,i)):   return Int_c(Signed,  -i);
   case $(Minus,  Short_c(s,i)): return Short_c(Signed,-i);
-  case $(Minus,  Char_c(s,i)): return Char_c(Signed,-i);
-  case $(Not,    Int_c(_,i)): return Int_c(Signed,i == 0 ? 1 : 0);
-  case $(Not,    Null_c)    : return Int_c(Signed,1);
-  case $(Bitnot, Int_c(s,i)): return Int_c(Unsigned,~i);
+  case $(Minus,  Char_c(s,i)):  return Char_c(Signed, -i);
+  case $(Not,    Int_c(_,i)):   return Int_c(Signed,  i == 0 ? 1 : 0);
+  case $(Not,    Null_c)    :   return Int_c(Signed,  1);
+  case $(Bitnot, Int_c(s,i)):   return Int_c(Unsigned,~i);
   default: 
     exp_err(e->loc,"bad constant expression");
     return cn;
@@ -208,9 +203,9 @@ cnst eval_const_unprimop(primop p,exp e) {
 }
 
 // FIX: should allow pointer-comparison of non-integers (eg. null==null)
-cnst eval_const_binprimop(primop p,exp e1,exp e2) {
-  let cn1 = promote_const(eval_const_exp(e1));
-  let cn2 = promote_const(eval_const_exp(e2));
+cnst_t eval_const_binprimop(primop p,exp e1,exp e2) {
+  _ cn1 = promote_const(eval_const_exp(e1));
+  _ cn2 = promote_const(eval_const_exp(e2));
   // FIX: See above, do non-integer possibilities here!
   sign s1, s2;
   int i1, i2;

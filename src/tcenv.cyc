@@ -612,6 +612,8 @@ typ block_to_typ(tenv te, int block_num) {
   return ans;
 }
 
+// KLUDGE: Tcexp::lhs_const assumes the outermost block is 0 and
+// decides that the parameters live in that block!
 fenv_t new_fenv(fndecl fd) {
   _ locals = Dict::empty(String::zstrcmp);
   for(_ args = fd->args; args != null; args = args->tl)
@@ -620,7 +622,7 @@ fenv_t new_fenv(fndecl fd) {
 					    Dict::empty(String::zstrcmp),
 					    SlowDict::empty(String::zstrcmp),
 					    Dict::empty(Core::intcmp),
-					    1),
+					    0),
  	       .type_vars     = fd->tvs, // assumed unique
 	       .locals        = locals,  // assumed unique
 	       .encloser      = fd->body, // careful -- self loop at top!!!

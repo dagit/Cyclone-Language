@@ -200,9 +200,9 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 			 cf_check_exp(env,e2));
 
   case Conditional_e(e1,e2,e3):
-    let syn1 = cf_check_exp(env, e1);
-    let syn2 = cf_check_exp(syn1.when_true,  e2);
-    let syn3 = cf_check_exp(syn1.when_false, e3);
+    _ syn1 = cf_check_exp(env, e1);
+    _ syn2 = cf_check_exp(syn1.when_true,  e2);
+    _ syn3 = cf_check_exp(syn1.when_false, e3);
     return CFExpSyn(merge_flow(syn2.when_true,  syn3.when_true),
 		    merge_flow(syn3.when_false, syn3.when_false));
 
@@ -232,9 +232,9 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     return meet_expsynth(cf_check_exp(env,e1), 
 			 cf_check_exp(env,e2));
 
-  case Tuple_e(es):          fallthru(es);
-  case Enum_e(_,_,_,es,_,_): fallthru(es); 
-  case Xenum_e(_,_,es,_,_):  return cf_check_explist_unordered(env,es);
+  case Tuple_e(es):        fallthru(es);
+  case Enum_e(_,_,es,_,_): fallthru(es); 
+  case Xenum_e(_,es,_,_):  return cf_check_explist_unordered(env,es);
 
   case CompoundLit_e(_,des): fallthru(des);
   case Array_e(des):         fallthru(des);
@@ -248,7 +248,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     // Note that e2 does not execute when e1 evaluates to 0.
     // Monotonicity is why we can ignore the result of e2.
   case Comprehension_e(_,e1,e2): 
-    let syn1 = cf_check_exp(env,e1);
+    _ syn1 = cf_check_exp(env,e1);
     cf_check_exp(expsynth_to_flow(syn1),e2);
     return syn1;
 
@@ -262,8 +262,8 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   // written with SeqExp_e (and all of it if you allow declarations to
   // be hoisted), I won't bother.
   case StmtExp_e(s):
-    let syn = cf_check_stmt(env, s);
-     return CFExpSyn(syn,syn); 
+    _ syn = cf_check_stmt(env, s);
+    return CFExpSyn(syn,syn); 
 
   default: throw Impossible("ControlFlow::cf_check_exp -- bad exp syntax"
 			    " or unimplemented exp form");

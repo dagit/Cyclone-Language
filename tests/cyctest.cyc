@@ -945,7 +945,7 @@ void scanf_test() {
 }
 */
 
-void cyc_main() {
+int cyc_main() {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
   printf("EXCEPTIONS:\n");
@@ -988,8 +988,11 @@ void cyc_main() {
   printf_test();
   // scanf_test(); // commented out because sscanf is insecure
 
-  if (no_errors)
+  if (no_errors) {
     printf("\nDONE: there were no errors\n");
-  else
+    return 0;
+  } else {
     printf("\n!! ERRORS FOUND !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    return 1;
+  }
 }

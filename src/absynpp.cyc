@@ -36,7 +36,7 @@ extern Doc exp2doc(exp);
 extern Doc exp2doc_prec(int inprec, exp e);
 extern Doc exps2doc_prec(int inprec, list<exp> es);
 extern Doc qvar2doc(qvar);
-extern Doc cnst2doc(cnst);
+extern Doc cnst2doc(cnst_t);
 extern Doc prim2doc(primop);
 extern Doc primapp2doc(int inprec, primop p,list<exp> es);
 extern bool boxed2bool(boxed b);
@@ -445,13 +445,13 @@ int exp_prec(exp e) {
   case CompoundLit_e(_,_):   return 140;
   case Array_e(_):         return 140;
   case Comprehension_e(_,_,_): return 140;
-  case Struct_e(_,_,_,_):        return 140;
-  case Enum_e(_,_,_,_,_,_):          return 140;
-  case Xenum_e(_,_,_,_,_):         return 140;
+  case Struct_e(_,_,_,_):    return 140;
+  case Enum_e(_,_,_,_,_):    return 140;
+  case Xenum_e(_,_,_,_):     return 140;
   case UnresolvedMem_e(_,_): return 140; // ???
-  case StmtExp_e(_):       return 10000;
-  case Codegen_e(_):       return 140;
-  case Fill_e(_):          return 140;
+  case StmtExp_e(_):         return 10000;
+  case Codegen_e(_):         return 140;
+  case Fill_e(_):            return 140;
   }
 }
 
@@ -593,12 +593,9 @@ Doc exp2doc_prec(int inprec, exp e) {
     s = cat2(qvar2doc(n),
              group("{","}",",",List::map(de2doc,des)));
     break;
-  case Enum_e(n,_,_,es,_,_):
-    s = cat2(qvar2doc(n),
-             egroup("(",")",",",List::map(exp2doc,es)));
-    break;
-  case Xenum_e(n,_,es,_,_):
-    s = cat2(qvar2doc(n),
+  case Enum_e(_,_,es,_,ef): fallthru(es,ef);
+  case Xenum_e(_,es,_,ef):
+    s = cat2(qvar2doc(ef->name),
              egroup("(",")",",",List::map(exp2doc,es)));
     break;
   case UnresolvedMem_e(n,des): 
@@ -644,7 +641,7 @@ Doc exps2doc_prec(int inprec, list<exp> es) {
 }
 
 // FIX: take care of sign for Char_c and Short_c
-Doc cnst2doc(cnst c) {
+Doc cnst2doc(cnst_t c) {
   switch (c) {
   case Char_c(sg,ch):     return text(xprintf("'%s'",char_escape(ch)));
   case Short_c(sg,s):     return text(xprintf("(short)%d",(int)s));

@@ -117,8 +117,6 @@ Todo now:
 
 * long long, short, float, and double constants (including 12s, 3l, etc.)
 
-* lexer has not been carefully looked at.
-
 * as patterns
 
 * better evaluation in evexp.pop

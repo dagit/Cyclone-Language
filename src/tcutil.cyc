@@ -258,18 +258,17 @@ static void unify_it_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   y = compress_conref(y);
   if (x == y) return;
   switch (x->v) {
-  case No_constr: x->v = Forward_constr(y); break;
+  case No_constr: x->v = Forward_constr(y); return;
   case Forward_constr(_): throw impos("unify_conref: forward after compress");
   case Eq_constr(xv):
     switch (y->v) {
-    case No_constr: y->v = x->v; break;
+    case No_constr: y->v = x->v; return;
     case Forward_constr(_):
       throw impos("unify_confref: forward after compress(2)");
     case Eq_constr(yv):
       if (cmp(xv,yv) != 0) throw Unify;
-      break;
+      return;
     }
-    break;
   }
 }
 
@@ -294,7 +293,7 @@ void unify_it(typ t1, typ t2) {
     }
     // check that the evar doesn't occur in t2
     occurs(t1,t2);
-    let kind2 = typ_kind(t2);
+    _ kind2 = typ_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of the
     // evar is greater than or equal to the kind of t2 or t2 is an evar that
     // we can constrain to be equal to t1.
@@ -572,10 +571,9 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
   t2 = compress(t2);
   switch ($(t1,t2)) {
  
-    // FIX: look at regions!
-  case $(PointerType(t_a,_,null_a,q_a),PointerType(t_b,_,null_b,q_b)):
+  case $(PointerType(t_a,r_a,null_a,q_a),PointerType(t_b,r_b,null_b,q_b)):
     // can cast t@ to t* but not vice versa.  can cast a non-const pointer
-    // to a const pointer.  
+    // to a const pointer.  Regions must unify.
     bool okay = true;
     if (!unify_conrefs(intcmp,null_a,null_b)) {
       switch (compress_conref(null_a)->v) {
@@ -583,7 +581,10 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
       default: throw impos("silent_castable: conref not eq");
       }
     }
-    return (okay && unify(t_a,t_b) && (!q_a->q_const || q_b->q_const));
+    return (okay 
+	    && unify(t_a,t_b) 
+	    && unify(r_a,r_b)
+	    && (!q_a->q_const || q_b->q_const));
   
   case $(ArrayType(t1a,tq1a,ak1a),ArrayType(t2a,tq2a,ak2a)):
     bool okay;
@@ -713,9 +714,9 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts,sdp):
-    let sd   = *sdp;
-    let n    = tdnopt->v;
-    let inst = List::zip(sd->tvs,ts);
+    _ sd   = *sdp;
+    _ n    = tdnopt->v;
+    _ inst = List::zip(sd->tvs,ts);
     if (sd->fields == null) return &cons(&$(empty_tqual(),t1),null);
     // FIX: recursively flatten here
     return List::map_c(flatten_typ_f,inst,sd->fields->v);
@@ -728,7 +729,7 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
 extern bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2);
 static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   if (unify(t1,t2)) return true;
-  for (let a = assume; a != null; a = a->tl)
+  for (_ a = assume; a != null; a = a->tl)
     if (unify(t1,a->hd[0]) && unify(t2,a->hd[1])) 
       return true;
   t1 = compress(t1);
@@ -791,12 +792,12 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
     case PointerType(t_b,rt_b,null_b,q_b):
-      let assump = &cons(&$(t1,t2),null);
-      let ptrsub =
+      _ assump = &cons(&$(t1,t2),null);
+      _ ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
       return ptrsub && (rt_a == HeapRgnType || unify(rt_a,rt_b));
     case ArrayType(t_b,q_b,ak):
-      let assump = &cons(&$(t1,t2),null);
+      _ assump = &cons(&$(t1,t2),null);
       if (!(ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const)))
 	return false;
       switch (ak) {
@@ -831,7 +832,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
 void unchecked_cast(tenv te, exp e, typ t) {
   if (!unify(e->topt->v,t)) {
-    let inner = copy_exp(e);
+    _ inner = copy_exp(e);
     e->r    = Cast_e(t,inner);
     e->topt = &Opt(t);
   }
@@ -892,7 +893,7 @@ bool arithmetic_promote(tenv te, exp e) {
   case Evar(_,_,_):
     t = sint_t;
     if (!unify(old_typ,t))
-      if (!unify(old_typ,sInt_t))
+      if (!unify(old_typ,sInt_typ))
 	return false;
     break;
   default:
@@ -908,9 +909,9 @@ bool arithmetic_promote(tenv te, exp e) {
 // char or unsigned short will be promoted to signed int.  Otherwise,
 // the sign is preserved.
 bool integral_promote(tenv te, exp e) {
-  typ old_t = compress(e->topt->v);
+  typ old_typ = compress(e->topt->v);
   typ t;
-  switch (old_t) {
+  switch (old_typ) {
   case IntType(sn,sz,b):
     switch (sz) {
     case B1: t = sint_t; break; // convert to unboxed, signed int
@@ -924,8 +925,8 @@ bool integral_promote(tenv te, exp e) {
     break; // convert to unboxed, signed int
   case Evar(_,_,_):
     t = sint_t;
-    if (!unify(old_t,t))
-      if (!unify(old_t,sInt_t))
+    if (!unify(old_typ,t))
+      if (!unify(old_typ,sInt_typ))
 	return false;
     break;
   default:
@@ -962,7 +963,7 @@ void check_contains_assign(exp e) {
 void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
   check_unique_tvars(loc,fd->tvs);
   check_valid_type(loc,te,fd->tvs,fd->ret_type);
-  for (let x = fd->args; x != null; x = x->tl)
+  for (_ x = fd->args; x != null; x = x->tl)
     check_valid_type(loc,te,fd->tvs,x->hd[2]);
 }
 
@@ -999,24 +1000,25 @@ typ substitute(list<$(tvar,typ)@> inst, typ t) {
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
     let $(qs,ts) = List::split(List::map(substitute_f1, args));
-    let ts2      = substs(inst,ts);
-    let args2    = List::map(substitute_f2, List::zip(qs,ts2));
+    _   ts2      = substs(inst,ts);
+    _   args2    = List::map(substitute_f2, List::zip(qs,ts2));
     return FnType(vs,substitute(inst,rtyp), args2, varargs);
   case TupleType(tqts):
     let $(tqs,ts) = List::split(tqts);
-    let ts2       = substs(inst,ts);
-    let tqts2     = List::zip(tqs,ts2);
+    _   ts2       = substs(inst,ts);
+    _   tqts2     = List::zip(tqs,ts2);
     return TupleType(tqts2);
   case Evar(_,r,_):
     if (r != null) return(substitute(inst,r->v));
     else return t;
+  case RgnHandleType(rt): return RgnHandleType(substitute(inst,rt)); 
+
   case VoidType:       return t;
   case XenumType(_,_): return t;
   case IntType(_,_,_): return t;
   case FloatType(_):   return t;
   case DoubleType(_):  return t;
   case HeapRgnType:    return t;
-  case RgnHandleType(rt): return RgnHandleType(substitute(inst,rt)); 
 
   case UnionType:      return t;
   }
@@ -1156,13 +1158,14 @@ void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
     let &$(tv,k) = pr;
     for(; bound_vars != null; bound_vars = bound_vars->tl)
       if(String::zstrcmp(bound_vars->hd[0],tv)==0) {
-	let bk = bound_vars->hd[1];
+	_ bk = bound_vars->hd[1];
 	if((bk != RgnKind && bk != UnresolvedKind)
 	   || (k != RgnKind && k != UnresolvedKind)) {
 	  terr(loc, "Type variable used as region");
 	  return;
 	}
 	pr[1] = bound_vars->hd[1] = RgnKind;
+	return;
       }
     terr(loc,xprintf("unbound type variable %s",tv));
     return;
@@ -1209,7 +1212,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       terr(loc,"missing enum name");
       return;
     }
-    let tdn = tdnopt->v;
+    _ tdn = tdnopt->v;
     if(*edp == null) {
       try *edp = lookup_enumdecl(te,loc,tdn);
       catch { case Dict::Absent: 
@@ -1261,9 +1264,9 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case RgnHandleType(rgn_typ):
     check_valid_rgn(loc,te,bound_vars,rgn_typ);
     break;
-  case IntType(_,_,_): break; // skip
-  case FloatType(_):   break; // skip
-  case DoubleType(_):  break; // skip
+  case IntType(_,_,_): break; 
+  case FloatType(_):   break; 
+  case DoubleType(_):  break; 
   case ArrayType(t1,tq,ak):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);
@@ -1303,7 +1306,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       terr(loc,"missing struct name");
       return;
     }
-    let tdn = tdnopt->v;
+    _ tdn = tdnopt->v;
     if(*sdp == null) {
       try *sdp = lookup_structdecl(te,loc,tdn);
       catch { case Dict::Absent:
@@ -1368,7 +1371,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
 static void check_unique_unsorted<`a>(int (@cmp)(`a,`a), list<`a> vs,
 				      segment loc, string msg) {
   for(; vs != null; vs = vs->tl)
-    for(let vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
+    for(_ vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
       if(cmp(vs->hd, vs2->hd)== 0)
 	terr(loc, msg);
 }
@@ -1391,8 +1394,8 @@ remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
     throw MissingField;
   if (String::zstrcmp(f,fs->hd[0]) == 0)
     return (&$(fs->hd,fs->tl));
-  let orig = fs;
-  let prev = fs;
+  _ orig = fs;
+  _ prev = fs;
   fs = fs->tl;
   while (fs != null) {
     if (String::zstrcmp(f,fs->hd[0]) == 0) {

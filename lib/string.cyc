@@ -487,7 +487,7 @@ string implode(list<Char> chars) {
 
 
 // Fix:  should check for overflow
-int to_int(string s, int *offset) {
+int to_int<`r>(string s, int *`r offset) {
   int ans = 0;
   int sn = 1;
   bool digit_seen = false;
@@ -518,7 +518,7 @@ int to_int(string s, int *offset) {
 // FIX:  this does not deal with overflow properly
 // FIX:  would use the built in version of strtod but it appears to be
 // broken...
-double to_double(string s, int *offset) {
+double to_double<`r>(string s, int *`r offset) {
   double ans = 0.0;
   int sn = 1;
   bool digit_seen = false;
