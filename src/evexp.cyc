@@ -183,7 +183,8 @@ unsigned int szof(type_t t, seg_t loc) {
     return s;
   case &EnumType(_,_): return 4u;
   case HeapRgn: terr(loc, "cannot apply sizoef to a region"); return 0u;
-  case &TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
+  case &TypedefType(_,_,_): 
+    return Tcutil::impos(xprintf("szof typedeftype %s",typ2string(t)));
   case &JoinEff(_): fallthru;
   case &AccessEff(_): terr(loc, "cannot apply sizoef to an effect"); return 0u;
   }

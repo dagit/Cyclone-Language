@@ -11,7 +11,24 @@ Cyc_List_List* f2; struct Cyc_List_List* f3; } ; struct _tuple6{ struct Cyc_Decl
 f1; struct Cyc_Core_Opt* f2; } ; struct _tuple7{ struct Cyc_List_List* f1; int
 f2; struct Cyc_Core_Opt* f3; } ; struct _tuple8{ struct Cyc_List_List* f1;
 struct Cyc_Absyn_Pat* f2; } ; struct _tuple9{ struct _tagged_string f1; void* f2;
-struct _tagged_string f3; } ; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring;
+struct _tagged_string f3; } ; typedef int Cyc_ptrdiff_t; typedef unsigned int
+Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t;
+typedef char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t;
+typedef unsigned int Cyc_vm_offset_t; typedef unsigned int Cyc_vm_size_t;
+typedef char Cyc_int8_t; typedef char Cyc_u_int8_t; typedef short Cyc_int16_t;
+typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t; typedef
+unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
+unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
+typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
+typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
@@ -46,34 +63,33 @@ Cyc_Arg_spec_t; extern void Cyc_Arg_parse( struct Cyc_List_List* specs, void(*
 anonfun)( struct _tagged_string), struct _tagged_string errmsg, struct
 _tagged_ptr0 args); struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE
 Cyc_Stdio_FILE; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern struct
-Cyc_Stdio___sFILE* Cyc_Stdio_stderr; typedef unsigned int Cyc_Stdio_size_t;
-typedef int Cyc_Stdio_fpos_t; extern int Cyc_Stdio_remove( struct _tagged_string);
-extern int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush(
-struct Cyc_Stdio___sFILE*); extern char Cyc_Stdio_FileOpenError_tag[ 14u];
-struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Stdio_FileCloseError_tag[ 15u]; struct Cyc_Stdio_FileCloseError_struct{
-char* tag; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
-_tagged_string fname, struct _tagged_string mode); extern void Cyc_Stdio_file_close(
-struct Cyc_Stdio___sFILE*); extern int Cyc_String_strcmp( struct _tagged_string
-s1, struct _tagged_string s2); extern struct _tagged_string Cyc_String_strconcat(
-struct _tagged_string, struct _tagged_string); extern struct _tagged_string Cyc_String_str_sepstr(
-struct Cyc_List_List*, struct _tagged_string); struct Cyc_Dict_Dict; typedef
-struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t;
-extern char Cyc_Dict_Present_tag[ 8u]; struct Cyc_Dict_Present_struct{ char* tag;
-} ; extern char Cyc_Dict_Absent_tag[ 7u]; struct Cyc_Dict_Absent_struct{ char*
-tag; } ; extern struct _tagged_string Cyc_Filename_chop_extension( struct
-_tagged_string); struct Cyc_Id_id; typedef struct Cyc_Id_id* Cyc_Id_Id; struct
-Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct _tagged_string line;
-int line_no; int col; } ; typedef struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t;
-extern char Cyc_Position_Exit_tag[ 5u]; struct Cyc_Position_Exit_struct{ char*
-tag; } ; extern void Cyc_Position_reset_position( struct _tagged_string); struct
-Cyc_Position_Segment; typedef struct Cyc_Position_Segment* Cyc_Position_seg_t;
-typedef void* Cyc_Position_Error_kind; static const unsigned int Cyc_Position_Lex=
-0; static const unsigned int Cyc_Position_Parse= 1; static const unsigned int
-Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{
-struct _tagged_string source; struct Cyc_Position_Segment* seg; void* kind;
-struct _tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
-extern char Cyc_Position_Nocontext_tag[ 10u]; struct Cyc_Position_Nocontext_struct{
+Cyc_Stdio___sFILE* Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern int
+Cyc_Stdio_remove( struct _tagged_string); extern int Cyc_Stdio_fclose( struct
+Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
+extern char Cyc_Stdio_FileOpenError_tag[ 14u]; struct Cyc_Stdio_FileOpenError_struct{
+char* tag; struct _tagged_string f1; } ; extern char Cyc_Stdio_FileCloseError_tag[
+15u]; struct Cyc_Stdio_FileCloseError_struct{ char* tag; } ; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_file_open( struct _tagged_string fname, struct _tagged_string mode);
+extern void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE*); extern int Cyc_String_strcmp(
+struct _tagged_string s1, struct _tagged_string s2); extern struct
+_tagged_string Cyc_String_strconcat( struct _tagged_string, struct
+_tagged_string); extern struct _tagged_string Cyc_String_str_sepstr( struct Cyc_List_List*,
+struct _tagged_string); struct Cyc_Dict_Dict; typedef struct Cyc_Dict_Dict* Cyc_Dict_hdict_t;
+typedef struct Cyc_Dict_Dict* Cyc_Dict_dict_t; extern char Cyc_Dict_Present_tag[
+8u]; struct Cyc_Dict_Present_struct{ char* tag; } ; extern char Cyc_Dict_Absent_tag[
+7u]; struct Cyc_Dict_Absent_struct{ char* tag; } ; extern struct _tagged_string
+Cyc_Filename_chop_extension( struct _tagged_string); struct Cyc_Id_id; typedef
+struct Cyc_Id_id* Cyc_Id_Id; struct Cyc_Lineno_Pos{ struct _tagged_string
+logical_file; struct _tagged_string line; int line_no; int col; } ; typedef
+struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t; extern char Cyc_Position_Exit_tag[ 5u];
+struct Cyc_Position_Exit_struct{ char* tag; } ; extern void Cyc_Position_reset_position(
+struct _tagged_string); struct Cyc_Position_Segment; typedef struct Cyc_Position_Segment*
+Cyc_Position_seg_t; typedef void* Cyc_Position_Error_kind; static const
+unsigned int Cyc_Position_Lex= 0; static const unsigned int Cyc_Position_Parse=
+1; static const unsigned int Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t;
+struct Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
+seg; void* kind; struct _tagged_string desc; } ; typedef struct Cyc_Position_Error*
+Cyc_Position_error_t; extern char Cyc_Position_Nocontext_tag[ 10u]; struct Cyc_Position_Nocontext_struct{
 char* tag; } ; extern int Cyc_Position_error_p(); typedef struct _tagged_string*
 Cyc_Absyn_field_name_t; typedef struct _tagged_string* Cyc_Absyn_var_t; typedef
 struct _tagged_string* Cyc_Absyn_tvarname_t; typedef void* Cyc_Absyn_Nmspace;
@@ -766,7 +782,7 @@ preprocfile);} if( out_file != 0? out_file !=( struct Cyc_Stdio___sFILE*) Cyc_St
 _temp98= out_file; if( _temp98 == 0){ _throw( Null_Exception);} _temp98;}));}
 fprintf( Cyc_Stdio_stderr,"\n"); if( ! Cyc_compile_failure){ Cyc_Tcutil_flush_warnings();}
 Cyc_Stdio_remove( preprocfile); return;}}}}} int Cyc_main( int argc, struct
-_tagged_ptr0 argv){ struct _tuple9 specs[ 15]={({ struct _tuple9 _temp99;
+_tagged_ptr0 argv){ struct _tuple9 specs[ 15u]={({ struct _tuple9 _temp99;
 _temp99.f1=( struct _tagged_string)({ char* _temp104=( char*)"-nocyc"; struct
 _tagged_string _temp105; _temp105.curr= _temp104; _temp105.base= _temp104;
 _temp105.last_plus_one= _temp104 + 7; _temp105;}); _temp99.f2=( void*)({ struct

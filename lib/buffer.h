@@ -40,7 +40,7 @@ extern T create(uint n);
 extern string contents(T);
 //     (* Return a copy of the current contents of the buffer.
 //        The buffer itself is unchanged. *)
-extern Stdio::size_t length(T);
+extern size_t length(T);
 //     (* Return the number of characters currently contained in the buffer. *)
 extern void clear(T);
 //     (* Empty the buffer. *)

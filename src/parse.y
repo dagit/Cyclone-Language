@@ -857,6 +857,14 @@ static kind_t id_to_kind(string s, seg_t loc) {
   }
 }
 
+// Turn an optional list of attributes into an Attribute_mod
+static list_t<type_modifier_t> attopt_to_tms(seg_t loc, 
+                                             attributes_t atts,
+                                             list_t<type_modifier_t> tms) {
+  if (atts == null) return tms;
+  else return new List {new Attributes_mod(loc,atts),tms};
+}
+
 
 // convert an (optional) variable, tqual, type, and type
 // parameters to a typedef declaration.  As a side effect, register
@@ -1624,14 +1632,18 @@ direct_declarator:
 
 /* CYC: region annotations allowed */
 pointer:
-  pointer_char rgn_opt
-    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),null)); }
-| pointer_char rgn_opt type_qualifier_list
-    { $$=^$(new List(new Pointer_mod($1,$2,$3),null)); }
-| pointer_char rgn_opt pointer
-    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),$3)); }
-| pointer_char rgn_opt type_qualifier_list pointer
-    { $$=^$(new List(new Pointer_mod($1,$2,$3),$4)); }
+  pointer_char rgn_opt attributes_opt
+    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
+                     attopt_to_tms(LOC(@3,@3),$3,null))); }
+| pointer_char rgn_opt attributes_opt type_qualifier_list
+    { $$=^$(new List(new Pointer_mod($1,$2,$4),
+                     attopt_to_tms(LOC(@3,@3),$3,null))); }
+| pointer_char rgn_opt attributes_opt pointer
+    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
+                     attopt_to_tms(LOC(@3,@3),$3,$4))); }
+| pointer_char rgn_opt attributes_opt type_qualifier_list pointer
+    { $$=^$(new List(new Pointer_mod($1,$2,$4),
+                     attopt_to_tms(LOC(@3,@3),$3,$5))); }
 ;
 
 pointer_char:

@@ -20,8 +20,8 @@ CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 # uh, the precore_c.h building doesn't work with the ugly printer :-)
 CYC_FLAGS_PP := -tc -toc -pp
 
-#CYC_FLAGS:= -tc -toc -pp
-CYC_FLAGS:= -tc -toc -up #-check_null
+#CYC_FLAGS:= -tc -toc -pp -I .
+CYC_FLAGS:= -tc -toc -up -I . #-check_null
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 
@@ -31,7 +31,7 @@ $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	ranlib $@
 
 precore_c.h: precore.h $(CYCC)
-	$(CYCC) $(CYC_FLAGS_PP) -nocyc -noremoveunused -noexpandtypedefs $< | grep -v __sFILE > $@
+	$(CYCC) $(CYC_FLAGS_PP) -D _CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs $< > $@
 
 xml/libxml.a: 
 	$(MAKE) -C xml CYCC=../$(CYCC)
@@ -63,7 +63,9 @@ clean:
 	$(MAKE) clean -C xml
 
 # dependencies -- maintained by hand for now
-PRECORE_H   := precore.h
+
+TYPES_H     := sys/features.h 
+PRECORE_H   := precore.h $(TYPES_H)
 CORE_H      := core.h       $(PRECORE_H)
 STDIO_H     := $(CORE_H)
 LIST_H      := list.h       $(CORE_H)
@@ -92,6 +94,17 @@ BITVEC_H    := bitvec.h     $(LIST_H) $(SET_H)
 MATH_H      := math.h
 ASSERT_H    := assert.h     $(CORE_H)
 ERRNO_H     := errno.h      
+CONFIG_H    := config.h
+STDDEF_H    := stddef.h
+TIME_H      := time.h $(CONFIG_H) $(CORE_H)
+SYS_REENT_H := sys/reent.h $(TIME_H)
+STDLIB_H    := $(SYS_REENT_H) $(CONFIG_H)
+CTYPE_H     := ctype.h $(CONFIG_H)
+MACHINE_TYPES_H := machine/types.h
+SYS_TYPES_H := sys/types.h $(STDDEF_H) $(MACHINE_TYPES_H)
+SYS_SIGNAL_H := sys/signal.h $(CONFIG_H) sys/features.h $(SYS_TYPES_H)
+SIGNAL_H    := signal.h $(CONFIG_H) $(SYS_SIGNAL_H)
+
 
 $(OUT_PREFIX)arg.c: $(ARG_H) $(STRING_H)
 $(OUT_PREFIX)bitvec.c: $(BITVEC_H)
@@ -119,4 +132,6 @@ $(OUT_PREFIX)pp.c: $(CORE_H) $(LIST_H) $(STRING_H) $(HASHTABLE_H) $(FN_H) $(PP_H
 $(OUT_PREFIX)lineno.c: $(CORE_H) $(LEXING_H) $(STRING_H) $(LINENO_H) $(LEXING_H)
 $(OUT_PREFIX)stdio.c: $(STDIO_H)
 $(OUT_PREFIX)assert.c: $(ASSERT_H) $(CORE_H) $(STDIO_H)
-$(OUT_PREFIX)errno.c: $(CORE_H) $(ERRNO_H)
+$(OUT_PREFIX)errno.c: $(CORE_H) $(ERRNO_H) $(CONFIG_H)
+$(OUT_PREFIX)stdlib.c: $(CORE_H) $(STDLIB_H)
+$(OUT_PREFIX)time.c: $(CORE_H) $(TIME_H)

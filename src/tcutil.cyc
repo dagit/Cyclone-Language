@@ -10,6 +10,7 @@
 #include "string.h"
 #include "evexp.h"
 #include "tcutil.h"
+#include "tcexp.h"
 using Core;
 using Stdio;
 using List;
@@ -1829,7 +1830,14 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     free_vars = check_valid_type(loc,te,free_vars,RgnKind,rgn_typ);
     // check that any bound is a constant expression
     switch (compress_conref(b)->v) {
-    case &Eq_constr(&Upper_b(e)): Evexp::eval_const_uint_exp(e); break;
+    case &Eq_constr(&Upper_b(e)): 
+      if (!is_const_exp(te,e)) 
+        terr(loc,"pointer bounds expression is not a constant");
+      Tcexp::tcExp(te,null,e);
+      if (!coerce_uint_typ(te,e))
+        terr(loc,"pointer bounds expression is not an unsigned int");
+      Evexp::eval_const_uint_exp(e); 
+      break;
     default: break;
     }
     break;
@@ -1844,6 +1852,9 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     // evaluating it during unification
     if (e == null || !is_const_exp(te,(exp_t)e))
       terr(loc,"array bounds expression is not constant");
+    Tcexp::tcExp(te,null,(exp_t)e);
+    if (!coerce_uint_typ(te,(exp_t)e))
+      terr(loc,"array bounds expression is not an unsigned int");
     Evexp::eval_const_uint_exp((exp_t)e); // check that e is of constant size
     break;
   case &FnType(FnInfo{*btvs,*eff,tr,args,vararg,atts}):

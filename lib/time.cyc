@@ -1,0 +1,47 @@
+#include "time.h"
+#include "core.h"
+
+using Core;
+using Time;
+namespace Ctime {
+extern "C" {
+Cstring asctime(const struct tm *_tblock);
+Cstring ctime(const time_t *_time);
+size_t	strftime(Cstring _s, size_t _maxsize, const Cstring _fmt, const struct tm *_t);
+Cstring asctime_r(const struct tm *, Cstring);
+Cstring ctime_r(const time_t *, Cstring);
+Cstring timezone(void);  
+}
+}
+
+namespace Time {
+  char ?asctime(const struct tm *_tblock) {
+    return Cstring_to_string(Ctime::asctime(_tblock));
+  }
+
+  char ?ctime(const time_t *_time) {
+    return Cstring_to_string(Ctime::ctime(_time));
+  }
+
+  size_t strftime(char ?_s, size_t _maxsize, char ?_fmt, 
+                  const struct tm *_t) {
+    size_t m = (_s.size < _maxsize) ? _s.size : _maxsize;
+    return Ctime::strftime(underlying_Cstring(_s),m,
+                           underlying_Cstring(_fmt),_t);
+  }
+    
+  // FIX: should check that s is long enough
+  char ?asctime_r(const struct tm *t, char ?s) {
+    if (s.size < 50) 
+      throw new InvalidArg("Time::asctime_r: string too small (< 50)");
+    return Cstring_to_string(Ctime::asctime_r(t,underlying_Cstring(s)));
+  }
+  char ?ctime_r(const time_t *t, char ?s) {
+    if (s.size < 50) 
+      throw new InvalidArg("Time::ctime_r: string too small (< 50)");
+    return Cstring_to_string(Ctime::ctime_r(t,underlying_Cstring(s)));
+  }
+  char ?timezone() {
+    return Cstring_to_string(Ctime::timezone());
+  }
+}

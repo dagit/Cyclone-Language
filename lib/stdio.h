@@ -26,7 +26,6 @@ typedef struct __sFILE FILE;
 extern FILE @stdout;
 extern FILE @stdin;
 extern FILE @stderr;
-typedef unsigned int size_t;
 typedef long fpos_t;
 #define	__SLBF	0x0001		// line buffered 
 #define	__SNBF	0x0002		// unbuffered 

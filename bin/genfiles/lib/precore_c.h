@@ -1,6 +1,5 @@
 #include "cyc_include.h"
 
-typedef unsigned int uint;
 typedef char *Cstring;
 typedef struct _tagged_string string;
 typedef string string_t;

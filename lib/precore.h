@@ -5,15 +5,12 @@
 #ifndef _PRECORE_H_
 #define _PRECORE_H_
 
-// Core.cyc uses some additional C routines, but they are not
-// declared here because they are internal to Core, whereas the
-// routines below can be used by any Cyclone program.
+#ifndef _CYC_GENERATE_PRECORE_C_
+#include "types.h"
+#endif 
 
-#ifndef uint
-typedef unsigned int uint;
-#endif
 typedef char *{0} Cstring;
-// a boxed and tagged string: struct {uint sz; Cstring *contents;}@
+// a boxed and tagged string: struct {unsigned int sz; Cstring *contents;}@
 typedef char ? string;
 typedef string string_t;
 
@@ -28,7 +25,7 @@ typedef int bool;
 #ifndef true
 #define true (1)
 #endif
-extern "C" `a exit(int);
-extern "C" `a abort();
+extern "C" `a exit(int) __attribute__((noreturn)) ;
+extern "C" `a abort() __attribute__((noreturn));
 
 #endif /* _PRECORE_H_ */

@@ -1,3 +1,4 @@
+/* This takes the place of sys/config.h and _ansi.h */
 #ifndef _CYCLONE_CONFIG_H_
 #define _CYCLONE_CONFIG_H_
 /* Add definitions here that are suitable for your platform */
@@ -41,5 +42,6 @@ typedef unsigned int __uint32_t;
 #define _DEFUN_VOID(name) name(_NOARGS)
 #define _CAST_VOID (void)
 #define _LONG_DOUBLE long double
+#define _ATTRIBUTE(attrs) __attribute__ (attrs)
 
 #endif /* _CYCLONE_CONFIG_H */

@@ -317,8 +317,9 @@ static type_t typ_to_c(type_t t) {
   case &FnType(FnInfo{_,_,t2,args,vararg,atts}):
     // just drop the type arguments & effect and translate the nested types
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
+    // FIX:  I'm dropping the attributes here, but is that right?
     return new FnType(FnInfo{null,null,typ_to_c(t2),
-                               List::map(arg_to_c,args),vararg,atts});
+                               List::map(arg_to_c,args),vararg,null});
   case &TupleType(tqs):
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };

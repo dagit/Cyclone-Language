@@ -25,7 +25,10 @@ CYCLONE_LIBS:=arg\
          lineno\
 	 stdio\
          assert\
-         errno
+         errno\
+         time\
+         stdlib
+
 
 CYCLONE_SRCS:=absyn\
          parse_tab\

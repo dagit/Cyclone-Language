@@ -28,6 +28,13 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries
 
+* We don't allow enough pointer arithmetic.  For instance, we don't
+  allow the following:
+
+    int x[35] = {....}
+
+      x+1
+
 * default array initializers, at top level and local, e.g., int x[4];
 
 * nested type declarations? nested exception declarations? nested using?
