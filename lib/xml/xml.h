@@ -77,14 +77,26 @@ xtunion exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
   /** [procXMLdocFailed] is thrown if one of the following routines
       fails to process the document as specified. **/
 
-extern attvalue_t getAttribute(attribute_t atr, name nm);
-  /** [getAttribute(atr,nm)] returns the value associated with
+extern attvalue_t getAttribute(list_t<attribute_t> atrs, name nm);
+  /** [getAttribute(a,n)] returns the attribute value from [a] that
+      whose name matches [n]; throws [procXMLdocFailed]
+      if not found. **/
+
+extern attvalue_t matchAttribute(attribute_t atr, name nm);
+  /** [matchAttribute(atr,nm)] returns the value associated with
       attribute [atr] if it has name [nm]; throws [procXMLdocFailed]
       if not. **/
 
-extern list_t<attvalue_t>
+extern list_t<attvalue_t *>
 getAttributes(list_t<attribute_t> atrs,list_t<name @> names);
   /** [getAttributes(a,n)] returns the attribute values from [a] that
+      match the names in [n], returned in the order the names appear in
+      [n].  If a name is missing, a NULL is inserted instead.  Order
+      does not matter.  **/
+
+extern list_t<attvalue_t>
+matchAttributes(list_t<attribute_t> atrs,list_t<name @> names);
+  /** [matchAttributes(a,n)] returns the attribute values from [a] that
       match the names in [n].  The lists must match up exactly
       (i.e. order matters).  If order shouldn't matter, you can sort
       both lists first.  **/

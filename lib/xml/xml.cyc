@@ -76,12 +76,51 @@ getElemData(content_t doc, string_t tagname)
   }
 }
 
-/* [getAttributes(a,n)] returns the attribute values from [a] that
+
+/** [getAttribute(a,n)] returns the attribute value from [a] that
+    whose name matches [n]; throws [procXMLdocFailed]
+    if not found. **/
+attvalue_t getAttribute(list_t<attribute_t> atrs, name nm)
+{
+  while (atrs != NULL) {
+    let &$(anm,val) = atrs->hd;
+    if (!strcmp(anm,nm))
+      return val;
+    atrs = atrs->tl;
+  }
+  throw new 
+    procXMLdocFailed(strconcat((string_t)"Attribute not found: ",nm));
+}
+
+/** [getAttributes(a,n)] returns the attribute values from [a] that
+    match the names in [n], returned in the order the names appear in
+    [n].  If a name is missing, a NULL is inserted instead.  Order
+    does not matter.  **/
+list_t<attvalue_t *>
+getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
+{
+  list_t<attvalue_t *`H,`H> res = NULL;
+  while (names != NULL) {
+    try {
+      let v = getAttribute(atrs,*(names->hd));
+      res = new List(new v,res);
+    } catch {
+    default:
+      res = new List(NULL, res);
+      break;
+    }
+    names = names->tl;
+  }
+  return imp_rev(res);
+}
+
+
+/* [matchAttributes(a,n)] returns the attribute values from [a] that
    match the names in [n].  The lists must match up exactly
    (i.e. order matters).  If order shouldn't matter, you can sort both
    lists first.  */
 list_t<attvalue_t>
-getAttributes(list_t<attribute_t> atrs,list_t<name @> names) 
+matchAttributes(list_t<attribute_t> atrs,list_t<name @> names) 
 {
   list_t<attvalue_t,`H> res = NULL;
   while (names != NULL) {
@@ -103,9 +142,9 @@ getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
   return imp_rev(res);
 }
 
-/* [getAttribute(atr,nm)] returns the value associated with attribute
+/* [matchAttribute(atr,nm)] returns the value associated with attribute
    [atr] if it has name [nm]; throws [procXMLdocFailed] if not.  */
-attvalue_t getAttribute(attribute_t atr, name nm) {
+attvalue_t matchAttribute(attribute_t atr, name nm) {
   let &$(anm,aval) = atr;
   if (!strcmp(anm,nm))
     return aval;
