@@ -36,8 +36,7 @@ count:
 	wc -l $(addsuffix .gcc, $(BENCHMARKS))
 
 clean:
-	$(RM) $(NOCHECKEXEFILES)
-	$(RM) $(NOBOUNDSEXEFILES)
+	$(RM) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES)
 	$(RM) $(EXEFILES)
 	$(RM) $(GCCEXEFILES)
 	$(RM) $(HIST) $(CATN)
