@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -317,9 +327,9 @@ _LL81: Cyc_Splay_rotate_right( r, _temp55); Cyc_Splay_rotate_left( r, _temp62);
 goto _LL79; _LL83: Cyc_Splay_rotate_right( r, _temp62); Cyc_Splay_rotate_right(
 r, _temp62); goto _LL79; _LL79:;} goto _LL67; _LL67:;}}}}} int Cyc_Splay_rsplay(
 struct _RegionHandle* r, int(* reln)( void*, void*), void* reln_first_arg, void*
-tree){ struct _RegionHandle _temp84= _new_region(); struct _RegionHandle* temp=&
-_temp84; _push_region( temp);{ struct Cyc_List_List* path= 0; while( 1) { void*
-_temp85= tree; struct Cyc_Splay_noderef* _temp91; _LL87: if(( unsigned int)
+tree){ struct _RegionHandle _temp84= _new_region("temp"); struct _RegionHandle*
+temp=& _temp84; _push_region( temp);{ struct Cyc_List_List* path= 0; while( 1) {
+void* _temp85= tree; struct Cyc_Splay_noderef* _temp91; _LL87: if(( unsigned int)
 _temp85 >  1u?*(( int*) _temp85) ==  Cyc_Splay_Node: 0){ _LL92: _temp91=((
 struct Cyc_Splay_Node_struct*) _temp85)->f1; goto _LL88;} else{ goto _LL89;}
 _LL89: if( _temp85 == ( void*) Cyc_Splay_Leaf){ goto _LL90;} else{ goto _LL86;}

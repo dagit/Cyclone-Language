@@ -82,7 +82,7 @@ clean:
 # general rules
 
 a_%.o: %.c
-	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+	$(CC) -c  -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
 # for creating genfiles from patches
 

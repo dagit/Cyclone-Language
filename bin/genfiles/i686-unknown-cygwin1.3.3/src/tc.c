@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -959,7 +969,7 @@ struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, struct _tagged_arr* k, struct
 Cyc_Absyn_Typedefdecl* v)) Cyc_Dict_insert)( ge->typedefs, v, td);} static void
 Cyc_Tc_tcStructFields( struct Cyc_Tcenv_Tenv* te, struct Cyc_Tcenv_Genv* ge,
 struct Cyc_Position_Segment* loc, struct _tagged_arr obj, struct Cyc_List_List*
-fields, struct Cyc_List_List* tvs){ struct _RegionHandle _temp260= _new_region();
+fields, struct Cyc_List_List* tvs){ struct _RegionHandle _temp260= _new_region("uprev_rgn");
 struct _RegionHandle* uprev_rgn=& _temp260; _push_region( uprev_rgn);{ struct
 Cyc_List_List* prev_fields= 0; struct Cyc_List_List* _temp261= fields; for( 0;
 _temp261 !=  0; _temp261= _temp261->tl){ struct Cyc_Absyn_Structfield _temp264;
@@ -1212,7 +1222,7 @@ _temp467.f1= _tag_arr("tcTunionFields: Loc_n", sizeof( unsigned char), 22u);
 _temp467;}); _temp466;})); goto _LL451; _LL451:;}}}}{ struct Cyc_List_List*
 fields2; if( is_xtunion){ int _temp468= 1; struct Cyc_List_List* _temp469= Cyc_Tcdecl_sort_xtunion_fields(
 fields,& _temp468,(* name).f2, loc, Cyc_Tc_tc_msg); if( _temp468){ fields2=
-_temp469;} else{ fields2= 0;}} else{ struct _RegionHandle _temp470= _new_region();
+_temp469;} else{ fields2= 0;}} else{ struct _RegionHandle _temp470= _new_region("uprev_rgn");
 struct _RegionHandle* uprev_rgn=& _temp470; _push_region( uprev_rgn);{ struct
 Cyc_List_List* prev_fields= 0;{ struct Cyc_List_List* fs= fields; for( 0; fs != 
 0; fs= fs->tl){ struct Cyc_Absyn_Tunionfield* _temp471=( struct Cyc_Absyn_Tunionfield*)
@@ -1360,9 +1370,9 @@ return; _LL576:;}(* ed->name).f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
 _temp589=( struct Cyc_Absyn_Abs_n_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
 _temp589[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp590; _temp590.tag= Cyc_Absyn_Abs_n;
 _temp590.f1= te->ns; _temp590;}); _temp589;}); if( ed->fields !=  0){ struct
-_RegionHandle _temp591= _new_region(); struct _RegionHandle* uprev_rgn=&
-_temp591; _push_region( uprev_rgn);{ struct Cyc_List_List* prev_fields= 0;
-unsigned int tag_count= 0; struct Cyc_List_List* fs=( struct Cyc_List_List*)((
+_RegionHandle _temp591= _new_region("uprev_rgn"); struct _RegionHandle*
+uprev_rgn=& _temp591; _push_region( uprev_rgn);{ struct Cyc_List_List*
+prev_fields= 0; unsigned int tag_count= 0; struct Cyc_List_List* fs=( struct Cyc_List_List*)((
 struct Cyc_Core_Opt*) _check_null( ed->fields))->v; for( 0; fs !=  0; fs= fs->tl){
 struct Cyc_Absyn_Enumfield* _temp592=( struct Cyc_Absyn_Enumfield*) fs->hd; if(((
 int(*)( int(* compare)( struct _tagged_arr*, struct _tagged_arr*), struct Cyc_List_List*

@@ -2582,7 +2582,10 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       stmt_to_c(add_varmap(nv,x_var,x_exp),body);
 
       s->r = 
-	declare_stmt(rh_var,rh_struct_typ,    fncall_exp(_new_region_e,NULL,DL),
+	declare_stmt(rh_var,rh_struct_typ, 
+		     fncall_exp(_new_region_e,
+				new List(string_exp(qvar2string(x_var),DL),
+					 NULL),DL),
 	declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
   	seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
         seq_stmt(body,

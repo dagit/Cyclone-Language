@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -372,8 +382,8 @@ _tagged_arr Cyc_Std_strconcat( struct _tagged_arr a, struct _tagged_arr b){
 return Cyc_Std_rstrconcat( Cyc_Core_heap_region, a, b);} struct _tagged_arr Cyc_Std_rstrconcat_l(
 struct _RegionHandle* r, struct Cyc_List_List* strs){ unsigned int len;
 unsigned int total_len= 0; struct _tagged_arr ans;{ struct _RegionHandle _temp4=
-_new_region(); struct _RegionHandle* temp=& _temp4; _push_region( temp);{ struct
-Cyc_List_List* lens=({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
+_new_region("temp"); struct _RegionHandle* temp=& _temp4; _push_region( temp);{
+struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
 _region_malloc( temp, sizeof( struct Cyc_List_List)); _temp7->hd=( void*)((
 unsigned int) 0); _temp7->tl= 0; _temp7;}); struct Cyc_List_List* end= lens;{
 struct Cyc_List_List* p= strs; for( 0; p !=  0; p= p->tl){ len= Cyc_Std_strlen(*((
@@ -392,8 +402,8 @@ struct _tagged_arr Cyc_Std_rstr_sepstr( struct _RegionHandle* r, struct Cyc_List
 strs, struct _tagged_arr separator){ if( strs ==  0){ return Cyc_Core_rnew_string(
 r, 0);} if( strs->tl ==  0){ return Cyc_Std_rstrdup( r,*(( struct _tagged_arr*)
 strs->hd));}{ struct Cyc_List_List* _temp8= strs; struct _RegionHandle _temp9=
-_new_region(); struct _RegionHandle* temp=& _temp9; _push_region( temp);{ struct
-Cyc_List_List* lens=({ struct Cyc_List_List* _temp13=( struct Cyc_List_List*)
+_new_region("temp"); struct _RegionHandle* temp=& _temp9; _push_region( temp);{
+struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp13=( struct Cyc_List_List*)
 _region_malloc( temp, sizeof( struct Cyc_List_List)); _temp13->hd=( void*)((
 unsigned int) 0); _temp13->tl= 0; _temp13;}); struct Cyc_List_List* end= lens;
 unsigned int len= 0; unsigned int total_len= 0; unsigned int list_len= 0; for( 0;

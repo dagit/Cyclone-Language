@@ -24,7 +24,8 @@ C_APROF_FLAG :=
 CYC_APROF_FLAG := 
 endif
 
-CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_APROF_FLAG)
+# CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_APROF_FLAG)
+CFLAGS:=-I$(CYCDIR) $(C_APROF_FLAG)
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
@@ -61,7 +62,7 @@ nogc.a: nogc.o
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-precore_c.h: core.h $(CYCC)
+precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc core.h
 
 #precore_c.h: precore.h $(CYCC)
@@ -97,9 +98,9 @@ endif
 $(OUT_PREFIX)$(RUNTIME).$(O): $(RUNTIME).c precore_c.h $(CYCINC_H)
 ifdef MS
 #FIX: ignore fewer flags
-	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
+	cl $(G_FLAG) $(PG_FLAG) $(C_APROF_FLAG) /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
 else
-	$(CC) $(G_FLAG) $(PG_FLAG) -c -o $@ -include include/cyc_include.h $<
+	$(CC) $(G_FLAG) $(PG_FLAG) $(C_APROF_FLAG) -c -o $@ $<
 endif
 
 # for cross-compiling -- uses very little of the above stuff
@@ -140,6 +141,9 @@ clean:
 # the C code.
 $(OUT_PREFIX)%.d: %.cyc
 	$(CYCDIR)/bin/$(CYCCOMP) -M $(CYC_FLAGS) $< > $@
+
+a_%.o: %.c
+	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)

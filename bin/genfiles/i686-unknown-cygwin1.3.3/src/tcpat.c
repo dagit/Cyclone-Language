@@ -43,11 +43,11 @@ struct _RuntimeStack {
 
 //// Regions
 struct _RegionPage {
-  struct _RegionPage *next;
 #ifdef CYC_REGION_PROFILE
   unsigned int total_bytes;
   unsigned int free_bytes;
 #endif
+  struct _RegionPage *next;
   char data[0];
 };
 
@@ -56,9 +56,13 @@ struct _RegionHandle {
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
 };
 
-extern struct _RegionHandle _new_region();
+extern struct _RegionHandle _new_region(const char *);
+//  extern struct _RegionHandle _new_region();
 extern void * _region_malloc(struct _RegionHandle *, unsigned int);
 extern void   _free_region(struct _RegionHandle *);
 
@@ -211,7 +215,13 @@ extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
+extern struct _RegionHandle _profile_new_region(const char *rgn_name,
+						char *file,int lineno);
+extern void _profile_free_region(struct _RegionHandle *,
+				 char *file,int lineno);
 #  if !defined(RUNTIME_CYC)
+#define _new_region(n) _profile_new_region(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
+#define _free_region(r) _profile_free_region(r,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ## ":" ## __FUNCTION__,__LINE__)
@@ -952,7 +962,7 @@ _temp302.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_
 pat_ts); _temp302;}); _temp301;}); goto _LL148;} _LL174: if( _temp205 !=  0){(
 int) _throw(({ void* _temp303[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("tcPat: struct<...> not implemented",
 sizeof( unsigned char), 35u), _tag_arr( _temp303, sizeof( void*), 0u));}));}{
-struct _RegionHandle _temp304= _new_region(); struct _RegionHandle* rgn=&
+struct _RegionHandle _temp304= _new_region("rgn"); struct _RegionHandle* rgn=&
 _temp304; _push_region( rgn);{ struct _tuple4 _temp305=({ struct _tuple4
 _temp331; _temp331.f1= Cyc_Tcenv_lookup_type_vars( te); _temp331.f2= rgn;
 _temp331;}); struct Cyc_List_List* _temp306=(( struct Cyc_List_List*(*)( struct
@@ -1002,20 +1012,21 @@ Cyc_List_length)( _temp214) != (( int(*)( struct Cyc_List_List* x)) Cyc_List_len
 _temp216->tvs)){({ void* _temp332[ 0u]={}; Cyc_Tcutil_terr( p->loc, _tag_arr("wrong number of existential type variables in pattern",
 sizeof( unsigned char), 54u), _tag_arr( _temp332, sizeof( void*), 0u));});} if(((
 int(*)( struct Cyc_List_List* x)) Cyc_List_length)( _temp214) !=  0){ region_opt=
-0;}{ struct _RegionHandle _temp333= _new_region(); struct _RegionHandle* rgn=&
-_temp333; _push_region( rgn);{ struct Cyc_List_List* _temp334= 0;{ struct Cyc_List_List*
-t= _temp214; for( 0; t !=  0; t= t->tl){ struct Cyc_Absyn_Tvar* tv=( struct Cyc_Absyn_Tvar*)
-t->hd;{ void* _temp335=( void*)( Cyc_Absyn_compress_conref( tv->kind))->v; void*
-_temp345; void* _temp347; _LL337: if(( unsigned int) _temp335 >  1u?*(( int*)
-_temp335) ==  Cyc_Absyn_Eq_constr: 0){ _LL346: _temp345=( void*)(( struct Cyc_Absyn_Eq_constr_struct*)
-_temp335)->f1; if( _temp345 == ( void*) Cyc_Absyn_BoxKind){ goto _LL338;} else{
-goto _LL339;}} else{ goto _LL339;} _LL339: if(( unsigned int) _temp335 >  1u?*((
-int*) _temp335) ==  Cyc_Absyn_Eq_constr: 0){ _LL348: _temp347=( void*)(( struct
-Cyc_Absyn_Eq_constr_struct*) _temp335)->f1; goto _LL340;} else{ goto _LL341;}
-_LL341: if( _temp335 == ( void*) Cyc_Absyn_No_constr){ goto _LL342;} else{ goto
-_LL343;} _LL343: if(( unsigned int) _temp335 >  1u?*(( int*) _temp335) ==  Cyc_Absyn_Forward_constr:
-0){ goto _LL344;} else{ goto _LL336;} _LL338: goto _LL336; _LL340:({ struct Cyc_Std_String_pa_struct
-_temp352; _temp352.tag= Cyc_Std_String_pa; _temp352.f1=( struct _tagged_arr) Cyc_Absynpp_kind2string(
+0;}{ struct _RegionHandle _temp333= _new_region("rgn"); struct _RegionHandle*
+rgn=& _temp333; _push_region( rgn);{ struct Cyc_List_List* _temp334= 0;{ struct
+Cyc_List_List* t= _temp214; for( 0; t !=  0; t= t->tl){ struct Cyc_Absyn_Tvar*
+tv=( struct Cyc_Absyn_Tvar*) t->hd;{ void* _temp335=( void*)( Cyc_Absyn_compress_conref(
+tv->kind))->v; void* _temp345; void* _temp347; _LL337: if(( unsigned int)
+_temp335 >  1u?*(( int*) _temp335) ==  Cyc_Absyn_Eq_constr: 0){ _LL346: _temp345=(
+void*)(( struct Cyc_Absyn_Eq_constr_struct*) _temp335)->f1; if( _temp345 == (
+void*) Cyc_Absyn_BoxKind){ goto _LL338;} else{ goto _LL339;}} else{ goto _LL339;}
+_LL339: if(( unsigned int) _temp335 >  1u?*(( int*) _temp335) ==  Cyc_Absyn_Eq_constr:
+0){ _LL348: _temp347=( void*)(( struct Cyc_Absyn_Eq_constr_struct*) _temp335)->f1;
+goto _LL340;} else{ goto _LL341;} _LL341: if( _temp335 == ( void*) Cyc_Absyn_No_constr){
+goto _LL342;} else{ goto _LL343;} _LL343: if(( unsigned int) _temp335 >  1u?*((
+int*) _temp335) ==  Cyc_Absyn_Forward_constr: 0){ goto _LL344;} else{ goto
+_LL336;} _LL338: goto _LL336; _LL340:({ struct Cyc_Std_String_pa_struct _temp352;
+_temp352.tag= Cyc_Std_String_pa; _temp352.f1=( struct _tagged_arr) Cyc_Absynpp_kind2string(
 _temp347);{ struct Cyc_Std_String_pa_struct _temp351; _temp351.tag= Cyc_Std_String_pa;
 _temp351.f1=( struct _tagged_arr)* tv->name;{ struct Cyc_Std_String_pa_struct
 _temp350; _temp350.tag= Cyc_Std_String_pa; _temp350.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -1131,28 +1142,28 @@ _temp414->v=( void*) t; _temp414;}); return({ struct _tuple6 _temp415; _temp415.
 tv_result; _temp415.f2= v_result; _temp415;});}} struct _tuple6 Cyc_Tcpat_tcPat(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Pat* p, void** topt, void**
 region_opt){ struct _tuple6 _temp416= Cyc_Tcpat_tcPatRec( te, p, topt,
-region_opt);{ struct _RegionHandle _temp417= _new_region(); struct _RegionHandle*
-r=& _temp417; _push_region( r); Cyc_Tcutil_check_unique_vars((( struct Cyc_List_List*(*)(
-struct _RegionHandle*, struct _tagged_arr*(* f)( struct Cyc_Absyn_Vardecl*),
-struct Cyc_List_List* x)) Cyc_List_rmap)( r, Cyc_Tcpat_get_name, _temp416.f2), p->loc,
-_tag_arr("pattern contains a repeated variable", sizeof( unsigned char), 37u));;
-_pop_region( r);} return _temp416;} void Cyc_Tcpat_check_pat_regions( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_Absyn_Pat* p){ void* _temp418=( void*) p->r; struct Cyc_Absyn_Pat*
-_temp430; struct Cyc_List_List* _temp432; struct Cyc_List_List* _temp434; struct
-Cyc_List_List* _temp436; _LL420: if(( unsigned int) _temp418 >  2u?*(( int*)
-_temp418) ==  Cyc_Absyn_Pointer_p: 0){ _LL431: _temp430=(( struct Cyc_Absyn_Pointer_p_struct*)
-_temp418)->f1; goto _LL421;} else{ goto _LL422;} _LL422: if(( unsigned int)
-_temp418 >  2u?*(( int*) _temp418) ==  Cyc_Absyn_Tunion_p: 0){ _LL433: _temp432=((
-struct Cyc_Absyn_Tunion_p_struct*) _temp418)->f4; goto _LL423;} else{ goto
-_LL424;} _LL424: if(( unsigned int) _temp418 >  2u?*(( int*) _temp418) ==  Cyc_Absyn_Struct_p:
-0){ _LL435: _temp434=(( struct Cyc_Absyn_Struct_p_struct*) _temp418)->f4; goto
-_LL425;} else{ goto _LL426;} _LL426: if(( unsigned int) _temp418 >  2u?*(( int*)
-_temp418) ==  Cyc_Absyn_Tuple_p: 0){ _LL437: _temp436=(( struct Cyc_Absyn_Tuple_p_struct*)
-_temp418)->f1; goto _LL427;} else{ goto _LL428;} _LL428: goto _LL429; _LL421:
-Cyc_Tcpat_check_pat_regions( te, _temp430);{ void* _temp438=( void*)(( struct
-Cyc_Core_Opt*) _check_null( p->topt))->v; struct Cyc_Absyn_PtrInfo _temp446;
-void* _temp448; struct Cyc_Absyn_TunionInfo _temp450; void* _temp452; _LL440:
-if(( unsigned int) _temp438 >  3u?*(( int*) _temp438) ==  Cyc_Absyn_PointerType:
+region_opt);{ struct _RegionHandle _temp417= _new_region("r"); struct
+_RegionHandle* r=& _temp417; _push_region( r); Cyc_Tcutil_check_unique_vars(((
+struct Cyc_List_List*(*)( struct _RegionHandle*, struct _tagged_arr*(* f)(
+struct Cyc_Absyn_Vardecl*), struct Cyc_List_List* x)) Cyc_List_rmap)( r, Cyc_Tcpat_get_name,
+_temp416.f2), p->loc, _tag_arr("pattern contains a repeated variable", sizeof(
+unsigned char), 37u));; _pop_region( r);} return _temp416;} void Cyc_Tcpat_check_pat_regions(
+struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Pat* p){ void* _temp418=( void*) p->r;
+struct Cyc_Absyn_Pat* _temp430; struct Cyc_List_List* _temp432; struct Cyc_List_List*
+_temp434; struct Cyc_List_List* _temp436; _LL420: if(( unsigned int) _temp418 > 
+2u?*(( int*) _temp418) ==  Cyc_Absyn_Pointer_p: 0){ _LL431: _temp430=(( struct
+Cyc_Absyn_Pointer_p_struct*) _temp418)->f1; goto _LL421;} else{ goto _LL422;}
+_LL422: if(( unsigned int) _temp418 >  2u?*(( int*) _temp418) ==  Cyc_Absyn_Tunion_p:
+0){ _LL433: _temp432=(( struct Cyc_Absyn_Tunion_p_struct*) _temp418)->f4; goto
+_LL423;} else{ goto _LL424;} _LL424: if(( unsigned int) _temp418 >  2u?*(( int*)
+_temp418) ==  Cyc_Absyn_Struct_p: 0){ _LL435: _temp434=(( struct Cyc_Absyn_Struct_p_struct*)
+_temp418)->f4; goto _LL425;} else{ goto _LL426;} _LL426: if(( unsigned int)
+_temp418 >  2u?*(( int*) _temp418) ==  Cyc_Absyn_Tuple_p: 0){ _LL437: _temp436=((
+struct Cyc_Absyn_Tuple_p_struct*) _temp418)->f1; goto _LL427;} else{ goto _LL428;}
+_LL428: goto _LL429; _LL421: Cyc_Tcpat_check_pat_regions( te, _temp430);{ void*
+_temp438=( void*)(( struct Cyc_Core_Opt*) _check_null( p->topt))->v; struct Cyc_Absyn_PtrInfo
+_temp446; void* _temp448; struct Cyc_Absyn_TunionInfo _temp450; void* _temp452;
+_LL440: if(( unsigned int) _temp438 >  3u?*(( int*) _temp438) ==  Cyc_Absyn_PointerType:
 0){ _LL447: _temp446=(( struct Cyc_Absyn_PointerType_struct*) _temp438)->f1;
 _LL449: _temp448=( void*) _temp446.rgn_typ; goto _LL441;} else{ goto _LL442;}
 _LL442: if(( unsigned int) _temp438 >  3u?*(( int*) _temp438) ==  Cyc_Absyn_TunionType:
