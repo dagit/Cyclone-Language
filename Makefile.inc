@@ -2,17 +2,25 @@ CC=gcc
 
 # Assume with Windows
 
-O := obj
-A := lib
+O := o
+A := l
 EXE := .exe
+
+# What we do when using VC++
+ifdef MS
+  O := obj
+  A := lib
+endif
 
 # If there's no sign of a Cygwin environment, it's unix
 ifndef MS
   ifndef CYGWIN
-    ifneq ($(OSTYPE),cygwin)
-      O := o
-      A := a
-      EXE :=
+    ifneq ($(OS),Windows_NT)
+      ifneq ($(OSTYPE),cygwin)
+        O := o
+        A := a
+        EXE :=
+      endif
     endif
   endif
 endif
