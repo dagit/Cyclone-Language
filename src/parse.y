@@ -23,13 +23,21 @@ is adapted from the proposed C9X standard, but the productions are
 arranged as in Kernighan and Ritchie's "The C Programming
 Language (ANSI C)", Second Edition, pages 234-239.
 
-The grammar has 13 total shift-reduce conflicts.  
+The grammar has 18 total shift-reduce conflicts, and 4 reduce-reduce
+conflicts.  
 
 The grammar has 1 shift-reduce conflict due to the "dangling else"
 problem, which (the Cyclone port of) Bison properly resolves.
 
-There are 12 additional shift-reduce conflicts due to ambiguities in
+There are 11 additional shift-reduce conflicts due to ambiguities in
 attribute parsing.  
+
+There is 1 shift-reduce conflict due to the treatment of && in patterns.
+
+There are 6 additional shift-reduce conflicts and 4 reduce-reduce conflicts
+having to do with specifier-qualifier-lists and the desire to allow 
+typedef names to be redeclared as identifiers.  
+
 */
 
 %{
@@ -949,14 +957,14 @@ using Parse;
 %type <$(declarator_t,exp_opt_t)@> init_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> init_declarator_list init_declarator_list0
 %type <storage_class_t> storage_class_specifier
-%type <type_specifier_t> type_specifier enum_specifier
+%type <type_specifier_t> type_specifier type_specifier_notypedef enum_specifier
 %type <type_specifier_t> struct_or_union_specifier tunion_specifier
 %type <aggr_kind_t> struct_or_union
 %type <tqual_t> type_qualifier tqual_list
 %type <list_t<aggrfield_t>> struct_declaration_list struct_declaration
 %type <list_t<list_t<aggrfield_t>>> struct_declaration_list0
 %type <list_t<type_modifier_t>> pointer one_pointer
-%type <declarator_t> declarator direct_declarator
+%type <declarator_t> declarator direct_declarator declarator_withtypedef direct_declarator_withtypedef
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
@@ -964,7 +972,7 @@ using Parse;
 %type <scope_t> tunionfield_scope
 %type <tunionfield_t> tunionfield
 %type <list_t<tunionfield_t>> tunionfield_list
-%type <$(tqual_t,list_t<type_specifier_t>,attributes_t)@> specifier_qualifier_list
+%type <$(tqual_t,list_t<type_specifier_t>,attributes_t)@> specifier_qualifier_list notypedef_specifier_qualifier_list
 %type <list_t<var_t>> identifier_list identifier_list0
 %type <$(opt_t<var_t>,tqual_t,type_t)@> parameter_declaration type_name
 %type <list_t<$(opt_t<var_t>,tqual_t,type_t)@>> parameter_list
@@ -1331,6 +1339,13 @@ attribute:
  * an integral type qualifier (signed, long, etc.) or a declaration.
  */
 type_specifier:
+  type_specifier_notypedef
+    { $$ = $!1; }
+| qual_opt_typedef type_params_opt
+    { $$=^$(type_spec(new TypedefType($1,$2,NULL,NULL),LOC(@1,@2))); }
+;
+
+type_specifier_notypedef:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
 | '_' COLON_COLON kind 
@@ -1349,8 +1364,6 @@ type_specifier:
 | tunion_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
 | type_var { $$=^$(type_spec($1, LOC(@1,@1))); }
-| qual_opt_typedef type_params_opt
-    { $$=^$(type_spec(new TypedefType($1,$2,NULL,NULL),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
@@ -1490,10 +1503,14 @@ struct_declaration:
     }
 ;
 
+// we do this slightly differently:  at most one typedef name can occur
+// within a specifier qualifier list, and that is useful since we can
+// then allow certain declarators to use typedef names as the declared
+// identifier.
 specifier_qualifier_list:
   type_specifier
     { $$=^$(new $(empty_tqual(), new List($1,NULL), NULL)); }
-| type_specifier specifier_qualifier_list
+| type_specifier notypedef_specifier_qualifier_list
     { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
 | type_qualifier
     { $$=^$(new $($1,NULL,NULL)); }
@@ -1502,6 +1519,22 @@ specifier_qualifier_list:
 | attributes
     { $$=^$(new $(empty_tqual(), NULL, $1)); }
 | attributes specifier_qualifier_list
+    { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
+;
+
+// Same as above but does not allow typedef names as specifiers
+notypedef_specifier_qualifier_list:
+  type_specifier_notypedef
+    { $$=^$(new $(empty_tqual(), new List($1,NULL), NULL)); }
+| type_specifier_notypedef notypedef_specifier_qualifier_list
+    { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
+| type_qualifier
+    { $$=^$(new $($1,NULL,NULL)); }
+| type_qualifier notypedef_specifier_qualifier_list
+    { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
+| attributes
+    { $$=^$(new $(empty_tqual(), NULL, $1)); }
+| attributes notypedef_specifier_qualifier_list
     { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
 ;
 
@@ -1518,7 +1551,7 @@ struct_declarator_list0:
 ;
 
 struct_declarator:
-  declarator
+  declarator_withtypedef
     { $$=^$(new $($1,NULL)); }
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
@@ -1526,7 +1559,7 @@ struct_declarator:
       $$=^$(new $((new Declarator(new $(rel_ns_null, new ""), NULL)),
                   (exp_opt_t)$2));
     }
-| declarator ':' constant_expression
+| declarator_withtypedef ':' constant_expression
     { $$=^$(new $($1,(exp_opt_t)$3)); }
 ;
 
@@ -1580,6 +1613,14 @@ declarator:
     { $$=^$(new Declarator($2->id,List::imp_append($1,$2->tms))); }
 ;
 
+// same as declarator but allows typedef names to occur as the variable
+declarator_withtypedef:
+  direct_declarator_withtypedef
+    { $$=$!1; }
+| pointer direct_declarator_withtypedef
+    { $$=^$(new Declarator($2->id,List::imp_append($1,$2->tms))); }
+;
+
 direct_declarator:
   qual_opt_identifier
     { $$=^$(new Declarator($1,NULL)); }
@@ -1620,9 +1661,59 @@ direct_declarator:
                                          $1->tms)));
   }
 /* These two cases help to improve error messages */
-| qual_opt_identifier qual_opt_identifier
-{ err("identifier has not been declared as a typedef",LOC(@1,@1));
-  $$=^$(new Declarator($2,NULL)); }   
+//| qual_opt_identifier qual_opt_identifier
+//{ err("identifier has not been declared as a typedef",LOC(@1,@1));
+//  $$=^$(new Declarator($2,NULL)); }   
+/* | error 
+   { $$=^$(new Declarator(exn_name,NULL)); } */
+;
+
+// same as direct_declarator but allows typedef names to occur as the variable
+direct_declarator_withtypedef:
+  qual_opt_identifier
+    { $$=^$(new Declarator($1,NULL)); }
+| qual_opt_typedef
+    { $$=^$(new Declarator($1,NULL)); }
+| '(' declarator_withtypedef ')'
+    { $$=$!2; }
+/* the following rule causes a large number of shift/reduce conflicts
+ * but seems necessary to parse some of the GCC header files. */
+| '(' attributes declarator_withtypedef ')'
+    { let d = $3;
+      d->tms = new List(new Attributes_mod(LOC(@2,@2),$2),d->tms);
+      $$=$!3;
+    }
+| direct_declarator_withtypedef '[' ']' zeroterm_qual_opt
+    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4),$1->tms)));}
+| direct_declarator_withtypedef '[' assignment_expression ']' zeroterm_qual_opt
+    { $$=^$(new Declarator($1->id,
+                           new List(new ConstArray_mod($3,$5),$1->tms)));}
+| direct_declarator_withtypedef '(' parameter_type_list ')'
+    { let &$(lis,b,c,eff,po) = $3;
+      $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
+    }
+| direct_declarator_withtypedef '(' optional_effect optional_rgn_order ')'
+    { $$=^$(new Declarator($1->id,
+                           new List(new Function_mod(new WithTypes(NULL,
+                                                                   false,NULL,
+                                                                   $3,$4)),
+                                    $1->tms)));
+    }
+| direct_declarator_withtypedef '(' identifier_list ')'
+    { $$=^$(new Declarator($1->id,new List(new Function_mod(new NoTypes($3,LOC(@1,@4))),$1->tms))); }
+/* Cyc: added type parameters */
+| direct_declarator_withtypedef '<' type_name_list right_angle
+    { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
+      $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
+    }
+| direct_declarator_withtypedef attributes
+  { $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
+                                         $1->tms)));
+  }
+/* These two cases help to improve error messages */
+//| qual_opt_identifier qual_opt_identifier
+//{ err("identifier has not been declared as a typedef",LOC(@1,@1));
+//  $$=^$(new Declarator($2,NULL)); }   
 /* | error 
    { $$=^$(new Declarator(exn_name,NULL)); } */
 ;
@@ -1759,7 +1850,7 @@ parameter_list:
 
 /* FIX: differs from grammar in K&R */
 parameter_declaration:
-  specifier_qualifier_list declarator
+  specifier_qualifier_list declarator_withtypedef
     { let &$(tq,tspecs,atts) = $1; 
       let &Declarator(qv,tms) = $2;
       let t = speclist2typ(tspecs, LOC(@1,@1));
@@ -2010,13 +2101,13 @@ labeled_statement:
 expression_statement:
   ';'            { $$=^$(skip_stmt(LOC(@1,@1))); }
 | expression ';' { $$=^$(exp_stmt($1,LOC(@1,@2))); }
-| error ';'      { $$=^$(skip_stmt(LOC(@1,@1))); } 
+//| error ';'      { $$=^$(skip_stmt(LOC(@1,@1))); } 
 ;
 
 compound_statement:
   '{' '}'                 { $$=^$(skip_stmt(LOC(@1,@2))); }
 | '{' block_item_list '}' { $$=$!2; }
-| '{' error '}'           { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| '{' error '}'           { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 block_item_list:
@@ -2035,18 +2126,18 @@ selection_statement:
     { $$=^$(ifthenelse_stmt($3,$5,skip_stmt(DUMMYLOC),LOC(@1,@5))); }
 | IF '(' expression ')' statement ELSE statement
     { $$=^$(ifthenelse_stmt($3,$5,$7,LOC(@1,@7))); }
-| IF error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| IF error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 /* Cyc: the body of the switch statement cannot be an arbitrary
  * statement; it must be a list of switch_clauses */
 | SWITCH '(' expression ')' '{' switch_clauses '}'
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
-| SWITCH error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| SWITCH error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | TRY statement CATCH '{' switch_clauses '}'
     { $$=^$(trycatch_stmt($2,$5,LOC(@1,@6))); }
-| TRY error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| TRY error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 /* Cyc: unlike C, we only allow default or case statements within
@@ -2075,19 +2166,19 @@ switch_clauses:
                                        LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,$6,LOC(@1,@7)),$7)); }
-| CASE error ':' block_item_list
-   { $$=^$(NULL); }
+//| CASE error ':' block_item_list
+//   { $$=^$(NULL); }
 ;
 
 iteration_statement:
   WHILE '(' expression ')' statement
     { $$=^$(while_stmt($3,$5,LOC(@1,@5))); }
-| WHILE error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| WHILE error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | DO statement WHILE '(' expression ')' ';'
     { $$=^$(do_stmt($2,$5,LOC(@1,@7))); }
-| DO error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| DO error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | FOR '(' ';' ';' ')' statement
     { $$=^$(for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
 		     $6,LOC(@1,@6))); }
@@ -2136,8 +2227,8 @@ iteration_statement:
                            $8,LOC(@1,@8));
       $$=^$(flatten_declarations(decls,s));
     }
-| FOR error
-    { $$=^$(skip_stmt(LOC(@1,@2))); }
+//| FOR error
+//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 jump_statement:
@@ -2562,8 +2653,8 @@ primary_expression:
     { $$=^$(string_exp($1,LOC(@1,@1))); }
 | '(' expression ')'
     { $$= $!2; }
-| '(' error ')'
-    { $$=^$(null_exp(LOC(@2,@2))); }
+//| '(' error ')'
+//    { $$=^$(null_exp(LOC(@2,@2))); }
 /* Cyc: stop instantiation */
 | primary_expression LEFT_RIGHT
     { $$=^$(noinstantiate_exp($1, LOC(@1,@2)));}
