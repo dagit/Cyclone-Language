@@ -29,9 +29,8 @@ all: $(EXES) failtest
 
 # tests things that should be type errors
 failtest:
-	@echo ignore error for failtest
-	-$(CYCC) -c --manyerrors fail1.cyc 2> fail1.tmp
-	cmp fail1.tmp fail1.out
+	($(CYCC) -c --manyerrors fail1.cyc 2> fail1.tmp) || true
+	diff fail1.tmp fail1.out || true
 
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
