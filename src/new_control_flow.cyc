@@ -119,6 +119,8 @@ static $(flow_t<`r>,flow_t<`r>)    anal_test(analenv_t<`r>, flow_t<`r>, exp_t);
 static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
 						  place_t<`r,`r> p,
 						  type_t t);
+static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow, 
+				       list_t<exp_t> es);
 
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
@@ -414,6 +416,8 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
   flow_t old_inflow;
   flow_t outflow;
   list_t<absRval_t,`rgn> rvals;
+  // expand out any unique paths in the flow before iterating
+  inflow = expand_unique_places(env,inflow,es);
   do { // unnecessarily recomputes rvals each time
     this_all_changed = env->fenv->mt_place_set;
     // wouldn't need to peel off the head if we had a TopFL
@@ -436,10 +440,10 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
     // need to check for less than after the join b/c of the approximation
     // else may not terminate.
     inflow = join_flow(env->fenv,outer_all_changed,inflow,outflow);
-//      DEBUG_PRINT("anal_unordered: old_inflow=\n");
-//      DEBUG_PRINT_F(print_flow,old_inflow);
-//      DEBUG_PRINT("anal_unordered: joined flow=\n");
-//      DEBUG_PRINT_F(print_flow,inflow);
+     DEBUG_PRINT("anal_unordered: old_inflow=\n");
+     DEBUG_PRINT_F(print_flow,old_inflow);
+     DEBUG_PRINT("anal_unordered: joined flow=\n");
+     DEBUG_PRINT_F(print_flow,inflow);
   } while(!flow_lessthan_approx(inflow,old_inflow));
   if(outer_all_changed == NULL)
     env->all_changed = NULL;
@@ -773,12 +777,17 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
     let $(f,r) = anal_Rexp(env,true,inflow,x->hd);
     inflow = use_Rval(env,exp_loc,f,r);
   }
-  // initialize the pattern variables with their corresponding rvals
+  // Initialize the pattern variables with their corresponding rvals.
+  // We reverse the list first, so that we consume things inside-out;
+  // note that this is correct with respect to unordered evaluation
+  // because if length(vds) > 1, these expressions are otherwise
+  // side-effect free (as guaranteed by tcpat)
+  let vds = List::rev(vds);
   for (; vds != NULL; vds=vds->tl) {
     let &$(vd,ve) = vds->hd;
     if (vd != NULL && ve != NULL) {
       // first check if this is a datatype expressions
-      DEBUG_PRINT("  setting var %s --> %s\n",
+      DEBUG_PRINT("initialize_pat_vars: setting var %s --> %s\n",
 		  qvar2string((*vd)->name),exp2string(ve));
       if (ve->topt == NULL)
 	Tcutil::impos("oops! pattern init expr %s has no type!\n",
@@ -912,6 +921,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   // check to see if e is a copy of a unique pointer that needs to be
   // consumed.  Note that we could push this into the var, deref,
   // member, and arrow cases...
+//   DEBUG_PRINT("++copy_ctxt=%s\n",copy_ctxt ? "yes" : "no");
+//   DEBUG_PRINT("++is_local_rooted_path=%s\n",
+// 	      is_local_var_rooted_path(e) ? "yes" : "no");
+//   DEBUG_PRINT("++is_noalias_pointer_or_aggr=%s\n",
+// 	      Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)
+// 	      ? "yes" : "no");	      
   if (copy_ctxt && is_local_var_rooted_path(e) &&
       Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)e->topt)) {
     DEBUG_PRINT("copy of unique pointer(s)\n");
@@ -1061,6 +1076,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       return $(BottomFL(), fenv->unknown_all);
     }
     let outer_all_changed = env->all_changed;
+    // expand out any unique places, as necessary
+    inflow = expand_unique_places(env, inflow, rlist(env->r,e1,e2));
     while(true) { // local iteration
       env->all_changed  = rnew(env->r) fenv->mt_place_set;
       let $(left_out, lval) = anal_Lexp(env,inflow,false,e1);
@@ -1167,7 +1184,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	  }
 	}
         else if (List::memq(nolive_unique_params,i)) {
-          DEBUG_PRINT("using unique argument %d, inflow is {\n",i);
+          DEBUG_PRINT("using unique argument %d %s=",i,exp2string(es->hd));
+	  DEBUG_PRINT_F(print_absrval,rvals->hd);
+	  DEBUG_PRINT(", inflow is {\n");
           DEBUG_PRINT_F(print_flow,outflow);
           outflow = use_nounique_Rval(env,es->hd->loc,(type_t)es->hd->topt,
                                       outflow,rvals->hd);
@@ -1687,7 +1706,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	flds = rnew(env->r) List(get_field_index(t2,f),flds);
       }
       break;
-    default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
+    default: throw new Core::Impossible("anal_Lexp: AggrArrow ptr");
     }
     fallthru(e1);
   case &Deref_e(e1):
@@ -1699,11 +1718,10 @@ static $(flow_t<`r>,absLval_t<`r>)
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
         let rval = lookup_place(fd,p);
 	vardecl_opt_t locname = NULL;
-        switch (rval) {
+	retry: switch (rval) {
+	case &NamedLocation(n,r): rval = r; locname = n; goto retry;
         case &Consumed(_,_,&AddressOf(...)): fallthru;
         case &AddressOf(...): return anal_derefL(env,f,e1,f,rval,flds);
-	case &Consumed(_,_,&NamedLocation(n,r)): fallthru(n,r);
-	case &NamedLocation(n,r): rval = r; locname = n; fallthru;
         default:
 	  DEBUG_PRINT("expanding unique %s found place ",exp2string(e1));
 	  DEBUG_PRINT_F(print_place,p);
@@ -1781,6 +1799,21 @@ static $(flow_t<`r>,absLval_t<`r>)
 anal_Lexp(analenv_t<`r> env, flow_t<`r> inflow, bool expand_unique, exp_t e) {
   let $(f,r) = anal_Lexp_rec(env,inflow,expand_unique,e,NULL);
   return $(f,r);
+}
+
+// for each expression e in [es], if e has no-alias type and is a
+// local variable-rooted path, then expand out its representation in
+// [inflow], if necessary, and return the final flow as a result.
+static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow, 
+				       list_t<exp_t> es) {
+  for (_ x = es; x != NULL; x = x->tl) {
+    if (is_local_var_rooted_path(x->hd) &&
+	Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)x->hd->topt)) {
+      let $(f,_) = anal_Lexp(env,inflow,true,x->hd);
+      inflow = f;
+    }
+  }
+  return inflow;
 }
 
 // this function does the hard work of refining the flow info

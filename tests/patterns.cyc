@@ -3,7 +3,7 @@
 
 /*********************** NON-UNIQUE, 1-2 LEVEL PATTERNS *********************/
 
-struct s1<`r::R> {
+struct s1<`r> {
   int *`r p;
   int y;
 };
@@ -39,12 +39,40 @@ void func1b() {
   return;
 }  
 
-// void main() {
-//   func1a(new s1{.p=NULL,.y=1});
+// Aggregate pattern through unique pointer to a unique pointer
+void func1c(struct s1<`U> @`U s) {
+  s->y = 1;
+  let ps as &s1{.p=p,.y=y} = s; // s, s->p consumed; ps, p available
+  Core::ufree(ps);
+  Core::ufree(p);
+//   Core::ufree(s); // fail
+  return;
+}  
+
+
+// Aggregate pattern through unique pointer to TR pointer
+void func1d(struct s1<`RC> @`U s) {
+  let &s1{.p=p,...} = s; // s->p consumed; s, p available
+  Core::drop_refptr(p);
+  Core::ufree(s);
+}  
+
+// should fail: reference pattern on unique pointer
+// void func1e(struct s1<`RC> @`U s) {
+//   let &s1{.p=*p,...} = s; // should fail
+// }  
+
+// should fail: can't match against unique pointer in global variable
+// struct s1<`U> *`U g = NULL;
+// void func1f() {
+//   g = new s1(NULL,5);
+//   switch (g) {
+//   case &s1{.p=p,...}: Core::ufree(p); break;
+//   }
+//   Core::ufree(g);
 // }
 
 /*---------------------*/
-
 datatype Foo {
   IntStar(int *);
   IntStar2(int *);
@@ -80,7 +108,7 @@ int *func3(datatype Foo @`U f) {
 
 /*---------------------*/
 
-struct s2<`r::R> {
+struct s2<`r> {
   datatype Foo @`r f;
   int g;
 };
@@ -108,6 +136,22 @@ int *func4a() {
   }
   return NULL;
 }
+
+void func4b(struct s2<`U> *ps) {
+  switch (ps) {
+  case &s2{.f=&IntStar(px), .g=g}: break;
+//   case &s2{.f=pf, .g=g}: break; // fails
+  default: break;
+  }
+} 
+
+void func4c() {
+  struct s2<`U> @@`U pps = new (new s2(new IntStar(NULL),5));
+//   let &&s2{.f=pf,...} = pps; // fail: non-unique path to unique pointer
+  let &&s2{.f=&IntStar(p),...} = pps; // ok
+  int *x = p;
+}
+
 
 /*---------------------*/
 

@@ -660,54 +660,13 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
   return ans;
 }
 
-enum PathState { UniquePath, NoAlias, NoAliasOneAlias, AliasPath };
-
-string_t pathState2string(enum PathState ps) {
-  switch (ps) {
-  case UniquePath: return "UniquePath";
-  case NoAlias: return "NoAlias";
-  case NoAliasOneAlias: return "NoAliasOneAlias";
-  case AliasPath: return "AliasPath";
-  }
-}
-
-bool check_unique_ok(enum PathState @ps,type_t pat_typ,seg_t loc) {
-//   fprintf(stderr,"check_unique: %s\n",typ2string(pat_typ));
-  region r;
-  bool is_unique_ptr = is_noalias_pointer(pat_typ,true);
-  bool is_noalias_ptr_or_aggr = is_noalias_pointer_or_aggr(r,pat_typ);
-  switch (*ps) {
-  case UniquePath:
-    if (!is_unique_ptr)
-      if (is_noalias_ptr_or_aggr) *ps = NoAlias;
-      else *ps = AliasPath;
-    return true;
-  case NoAlias:
-    if (!is_noalias_ptr_or_aggr) {
-      *ps = NoAliasOneAlias;
-      return true;
-    }
-    break;
-  case NoAliasOneAlias: break;
-  case AliasPath:
-    if (is_noalias_ptr_or_aggr) break;
-    return true;
-  }
-  terr(loc,"Pattern dereferences a unique pointer from"
-       " non-unique path; use swap");
-  return false;
-}
-
-// This makes sure that (1) any mentioned region is accessible, and
-// that (2) matching against no-alias and unique pointers is sound.
-void check_pat_regions_rec(tenv_t te, pat_t p, enum PathState pState) {
-//   fprintf(stderr,"checking %s; pState=%s\n",pat2string(p), 
-// 	  pathState2string(pState));
+// This makes sure that any mentioned region is accessible, and that
+// reference patterns are not used on unique pointers
+void check_pat_regions_rec(tenv_t te, pat_t p,
+			   list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
   switch(p->r) {
   case &Pointer_p(p2):
-    if (!check_unique_ok(&pState,(type_t)p->topt,p->loc)) return;
-    check_pat_regions_rec(te,p2,pState);
-    // now check accessibility
+    check_pat_regions_rec(te,p2,patvars);
     switch ((type_t)p->topt) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): 
       check_rgn_accessible(te,p->loc,rt);
@@ -716,30 +675,72 @@ void check_pat_regions_rec(tenv_t te, pat_t p, enum PathState pState) {
     }
   case &Aggr_p(ai,exist_ts,dps,_): 
     for (; dps != NULL; dps = dps->tl)
-      check_pat_regions_rec(te,(*dps->hd)[1],pState);
+      check_pat_regions_rec(te,(*dps->hd)[1],patvars);
     return;
   // FIX: ultimately should allow unique pointers in datatype patterns
-  case &Datatype_p(_,_,ps,_): 
-    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,AliasPath);
-    return;
+  case &Datatype_p(_,_,ps,_): fallthru(ps);
   case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,pState);
+    for(; ps != NULL; ps = ps->tl) check_pat_regions_rec(te,ps->hd,patvars);
     return;
-  case &Reference_p(_,p2):
-    let tmp = AliasPath;
-    if (!check_unique_ok(&tmp,(type_t)p->topt,p->loc)) return;
-    check_pat_regions_rec(te,p2,AliasPath);
-    return;
-  case &Var_p(_,p2):
-    let tmp = pState;
-    if (!check_unique_ok(&tmp,(type_t)p->topt,p->loc)) return;
-    check_pat_regions_rec(te,p2,pState);
-    return;
+  case &Reference_p(vd,p2): 
+    for (_ x = patvars; x != NULL; x=x->tl) {
+      let &$(vdopt,eopt) = x->hd;
+      // NOTE: if eopt == NULL, we must be within a datatype, either because
+      // we're in a catch clause (exceptions are always datatypes), or
+      // because we're in a datatype pattern in a switch or let.  In either
+      // case, there's no worry of taking the address of a unique pointer
+      if (vdopt != NULL && *vdopt == vd && eopt != NULL) {
+	switch (((exp_t)eopt)->r) {
+	case &Address_e(e):
+	  if (is_noalias_pointer_or_aggr(Tcenv::get_fnrgn(te),
+					 (type_t)e->topt))
+	    terr(p->loc,"Reference pattern not allowed on unique pointers");
+	  break;
+	default:
+	  impos("check_pat_regions: bad reference access expression");
+	}
+	break;
+      }
+    }
+    fallthru(p2);
+  case &Var_p(_,p2): check_pat_regions_rec(te,p2,patvars); return;
   default: return;
   }
 }
-void check_pat_regions(tenv_t te, pat_t p) {
-  check_pat_regions_rec(te,p,UniquePath);
+
+// checks that the generated access expressions to each pattern
+// are legal unique paths, if they have no-alias type, and checks
+// that regions referred to are accessible.
+//
+// NOTE: if the expression is NULL, then it was either from a match to
+// a datatype somewhere along the line, in which no unique types are
+// allowed, or it's within a catch clause, which also forbids unique
+// types because exceptions are datatypes
+//
+// FIX: ultimately we should just toss this stuff and use tcExp on
+// each of the access expressions.
+void check_pat_regions(tenv_t te, pat_t p,
+		       list_t<$(vardecl_t *,exp_opt_t)@> patvars) {
+  check_pat_regions_rec(te,p,patvars);
+  TEMP_RGN(te, r) {  
+    for (_ x = patvars; x != NULL; x=x->tl) {
+      let &$(vdopt,eopt) = x->hd;
+      if (eopt != NULL) {
+	let e = (exp_t)eopt;
+// 	fprintf(stderr,"checking exp=|%s|:%s\n",
+// 		exp2string(e), typ2string((type_t)e->topt));
+	if (is_noalias_pointer_or_aggr(r,(type_t)e->topt) &&
+	    !is_noalias_path(r,e))
+	  // FIX: need better location information
+	  terr(p->loc,"Pattern %s dereferences a unique pointer from a "
+	       "non-unique path",
+	       vdopt != NULL ? (const char ? @nozeroterm)
+	                        aprintf("for variable %s",
+					qvar2string((*vdopt)->name)) 
+	       : "");
+      }
+    }
+  }
 }
 
 //static void print_pats(string s, list_t<pat_t> ps) {

@@ -360,7 +360,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           explain_failure();
         }
         else
-          check_pat_regions(te,p);
+          check_pat_regions(te,p,pat_res.patvars);
         scs->hd->pat_vars = new Opt(pat_res.patvars);
         // type-checking the body will type-check any explicit fallthrus.
         pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
@@ -405,7 +405,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           terr(scs->hd->loc, "expected datatype exn but found %s",
                typ2string((type_t)p->topt));
         else
-          check_pat_regions(te,p);
+          check_pat_regions(te,p,pat_res.patvars);
         scs->hd->pat_vars = new Opt(pat_res.patvars);
         // type-checking the body will type-check any explicit fallthrus
         pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
@@ -566,7 +566,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           explain_failure();
         }
         else
-          check_pat_regions(te,p);
+          check_pat_regions(te,p,pat_res.patvars);
         check_let_pat_exhaustive(p->loc,te,p);
         pattern_synth(s0->loc, te, pat_res, s, NULL, false);
         return;

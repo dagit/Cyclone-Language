@@ -52,7 +52,8 @@ typedef struct TcPatResult tcpat_result_t;
   // If someone has a less clumsy proposal, I'd love to hear it.
 extern tcpat_result_t tcPat(tenv_t te,pat_t p,type_t @ topt,
 			    exp_opt_t pat_var_exp);
-extern void check_pat_regions(tenv_t te, pat_t p);
+extern void check_pat_regions(tenv_t te, pat_t p,
+			      list_t<$(vardecl_t *,exp_opt_t)@> patvars);
 extern void check_switch_exhaustive(seg_t,tenv_t,list_t<switch_clause_t>);
 extern bool check_let_pat_exhaustive(seg_t,tenv_t,pat_t p); // true => exhaustive
 extern void check_catch_overlap(seg_t,tenv_t,list_t<switch_clause_t>);
