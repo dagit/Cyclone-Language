@@ -88,7 +88,6 @@ CYCLONE_H:=arg.h\
         filename.h\
         fn.h\
         getopt.h\
-        getopt1.h\
 	grp.h\
         hashtable.h\
         id.h\

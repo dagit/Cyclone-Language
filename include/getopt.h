@@ -1,23 +1,26 @@
-/* Declarations for getopt.
-   Copyright (C) 1989, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
 
-   This program is free software; you can redistribute it and/or modify it
-   under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 2, or (at your option) any
-   later version.
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-   USA.  */
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+/* Ported from the GNU C library, released under LGPL:
+   Copyright (C) 1989-1994, 1996-1999, 2001 Free Software Foundation, Inc. */
 
 #ifndef _GETOPT_H
-#define _GETOPT_H 1
+#define _GETOPT_H
 
 namespace Getopt {
 
@@ -35,7 +38,7 @@ extern char ?optarg;
 
    On entry to `getopt', zero means this is the first call; initialize.
 
-   When `getopt' returns EOF, this is the index of the first of the
+   When `getopt' returns -1, this is the index of the first of the
    non-option elements that the caller should itself scan.
 
    Otherwise, `optind' communicates from one call to the next
@@ -85,22 +88,45 @@ struct option
 
 /* Names for the values of the `has_arg' field of `struct option'.  */
 
-#define	no_argument		0
-#define required_argument	1
-#define optional_argument	2
+# define no_argument		0
+# define required_argument	1
+# define optional_argument	2
 
-extern int getopt (int argc, char?`H ?argv, const char? shortopts);
-extern int getopt_long (int argc, char ?`H ?argv, const char ?shortopts,
-		        const struct option ?`r1 longopts, int *`r2 longind);
-extern int getopt_long_only (int argc, char ?`H ?argv,
-			     const char ?shortopts,
-		             const struct option ?`r1 longopts, int *`r2 longind);
+/* Functions to process the arguments in ARGV (ARGC of them, minus the
+   program name) for options given in OPTS.
+
+   Return the option character from OPTS just read.  Return -1 when
+   there are no more options.  For unrecognized options, or options
+   missing arguments, `optopt' is set to the option letter, and '?' is
+   returned.
+
+   The OPTS string is a list of characters which are recognized option
+   letters, optionally followed by colons, specifying that that letter
+   takes an argument, to be placed in `optarg'.
+
+   If a letter in OPTS is followed by two colons, its argument is
+   optional.  This behavior is specific to the GNU `getopt'.
+
+   The argument `--' causes premature termination of argument
+   scanning, explicitly telling `getopt' that there are no more
+   options.
+
+   If OPTS begins with `--', then non-option arguments are treated as
+   arguments to the option '\0'.  This behavior is specific to the GNU
+   `getopt'.  */
+
+extern int getopt (int __argc, char ?`H ?__argv, const char ?__shortopts);
+extern int getopt_long (int __argc, char ?`H ?__argv, const char ?__shortopts,
+		        const struct option ?__longopts, int *__longind);
+extern int getopt_long_only (int __argc, char ?`H ?__argv,
+			     const char ?__shortopts,
+		             const struct option ?__longopts, int *__longind);
 
 /* Internal only.  Users should not call this directly.  */
-extern int _getopt_internal (int argc, char ?`H ?argv,
-			     const char ?shortopts,
-		             const struct option ?`r1 longopts, int *`r2 longind,
-			     int long_only);
+extern int _getopt_internal (int __argc, char ?`H ?__argv,
+			     const char ?__shortopts,
+		             const struct option ?__longopts, int *__longind,
+			     int __long_only);
 }
 
-#endif /* _GETOPT_H */
+#endif /* getopt.h */
