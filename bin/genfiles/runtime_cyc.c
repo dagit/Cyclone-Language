@@ -196,6 +196,16 @@ static struct _handler_cons top_handler;
 static int in_backtrace = 0; // avoid infinite exception chain
 static const char *_exn_filename = "?";
 static unsigned _exn_lineno = 0;
+
+const char *Cyc_Core_get_exn_filename() {
+  return _exn_filename;
+}
+int Cyc_Core_get_exn_lineno() {
+  return _exn_lineno;
+}
+const char *Cyc_Core_get_exn_name(struct _xtunion_struct *x) {
+  return x->tag;
+}
 int _throw_fn(void* e, const char *filename, unsigned lineno) {// FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   while (_current_handler->tag != 0) {
@@ -218,6 +228,11 @@ int _throw_fn(void* e, const char *filename, unsigned lineno) {// FIX: use struc
   }
 #endif
   longjmp(my_handler->handler,1);
+}
+
+/* re-throw an exception, but keep the filename and lineno info */
+void Cyc_Core_rethrow(void *e) {
+  _throw_fn(e, _exn_filename, _exn_lineno);
 }
 
 #ifdef throw

@@ -793,14 +793,14 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 169
 void Cyc_Core_ufree(struct _dyneither_ptr ptr);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 244 "core.h"
+# 256 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 249
+# 261
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 256
+# 268
 return 0;
 return dyn.curr;};}struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
 # 38 "xarray.h"

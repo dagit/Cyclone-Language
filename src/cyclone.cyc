@@ -517,51 +517,22 @@ list_t<Absyn::decl_t>
   do_stage(string_t stage_name,
            list_t<Absyn::decl_t,`H> f(`a, list_t<Absyn::decl_t,`H>),
            `a env, list_t<Absyn::decl_t,`H> tds) {
-  string_t exn_string     = "";
   string_t explain_string = "";
-  bool other_exn = false;
-  datatype exn @ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = NULL;
 
   CYCALLOCPROFILE_mark(stage_name);
 
-  /*try*/ ans = f(env,tds);
-  /*
+  try ans = f(env,tds);
   catch {
-  case &Core::Impossible(s):
-    exn_string = "Exception Core::Impossible";
-    explain_string = s;
-    break;
-  case &Dict::Absent:
-    exn_string = "Exception Dict::Absent";
-    break;
-  case &Invalid_argument(s):
-    exn_string = "Exception Core::Invalid_argument";
-    explain_string = s;
-    break;
-  case &Core::Failure(s):
-    exn_string = "Exception Core::Failure";
-    explain_string = s;
-    break;
   case x:
-    ex = x;
-    other_exn = true;
-    exn_string = "Uncaught exception";
-    break;
-    }
-*/
+    fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
+    Core::rethrow(x);
+  }
   if (Position::error_p())
     compile_failure = true;
-  if (strcmp(exn_string,"") != 0) {
-    compile_failure = true;
-    fprintf(stderr,"\n%s thrown during %s: %s",
-	    exn_string, stage_name, explain_string);
-  }
   if (compile_failure) {
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
-    if (other_exn)
-      throw ex;
     return ans;
   }
   else if (v_r) {
@@ -959,7 +930,7 @@ static void process_file(string_t<`H> filename) {
   case x:
     file_close((FILE@)in_file);
     remove_file(preprocfile); // Can't flush warnings after removal
-    throw x;
+    Core::rethrow(x);
   }
   file_close(in_file);
   if (compile_failure) {
@@ -1065,7 +1036,7 @@ static void process_file(string_t<`H> filename) {
     compile_failure = true;
     file_close(out_file);
     cfiles = new List(new ((string_t)cfile),cfiles);
-    throw x;
+    Core::rethrow(x);
   }
   file_close(out_file);
   cfiles = new List(new ((string_t)cfile),cfiles); 
@@ -1573,19 +1544,9 @@ int main(int argc, string_t<`H> ?`H argv) {
 	return 1;
       }
     }
-  } catch { case e: 
-    switch(e) {
-    case &Core::Failure(s):
-      fprintf (stderr,"Exception Core::Failure %s\n", s); break;
-    case &Core::Impossible(s):
-      fprintf (stderr,"Exception Core::Impossible %s\n", s); break;
-    case &Dict::Absent:
-      fprintf (stderr,"Exception Dict::Absent\n"); break;
-    case &Core::Invalid_argument(s):
-      fprintf (stderr,"Exception Core::Invalid_argument %s\n", s); break;
-    case _:
-      fprintf (stderr,"Uncaught exception\n"); break;
-    }
+  } catch { 
+  case e: 
+    fprintf(stderr,"INTERNAL COMPILER FAILURE:  exception %s from around %s:%d thrown.\n  Please send bug report to cyclone-bugs-l@lists.cs.cornell.edu",Core::get_exn_name(e),Core::get_exn_filename(),Core::get_exn_lineno());
     compile_failure = true;
     remove_cfiles();
     return 1;

@@ -225,6 +225,18 @@ extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */
 
+extern void rethrow(datatype exn @) __attribute__((noreturn));
+  /** throws the exception without updating the source or line number
+      information.  Useful for try { ... } catch { case e: ... rethrow(e); }
+  */
+extern const char *get_exn_name(datatype exn @);
+  /** returns the name of the exception as a string */
+extern const char *get_exn_filename();
+  /** if an exception is thrown, then you can use @get_exn_filename@ to
+      determine what source file caused the exception. */
+extern int get_exn_lineno();
+  /** if an exception is thrown, then you can use @get_exn_lineno@ to
+      determine what source line caused the exception. */
 
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring<`H> string_to_Cstring(string_t);

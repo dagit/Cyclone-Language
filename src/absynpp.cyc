@@ -427,7 +427,9 @@ doc_t tps2doc(list_t<type_t> ts) {
 
 doc_t tvar2doc(tvar_t tv) {
   let n = *tv->name;
-  if (n[0] == '#')
+  // FIX:  we're rewriting internally-generated tvars to `TTTxxx
+  // which might conflict...
+  if (rewrite_temp_tvars && Tcutil::is_temp_tvar(tv))
     return cat(text("`TTT"),text(n+1));
   return text(n);
 }
@@ -445,14 +447,10 @@ doc_t ktvars2doc(list_t<tvar_t> tvs) {
   return egroup("<",">",",",List::map(ktvar2doc,tvs));
 }
 
-static tvarname_t get_name(tvar_t tv) {
-  return tv->name;
-}
-
 doc_t tvars2doc(list_t<tvar_t> tvs) {
   if (print_all_kinds)
     return ktvars2doc(tvs);
-  return egroup("<",">",",",List::map(textptr,List::map(get_name,tvs)));
+  return egroup("<",">",",",List::map(tvar2doc,tvs));
 }
 
 doc_t arg2doc($(tqual_t,type_t)@ t) {
@@ -737,17 +735,9 @@ doc_t ntyp2doc(type_t t) {
     }
     break;
   case &VarType(tv):
-    s = textptr(tv->name);
+    s = tvar2doc(tv);
     if (print_all_kinds) {
       s = cat(s,text("::"),kindbound2doc(tv->kind));
-    }
-    //FIX: sometimes need explicit kinds!
-    //Mathieu: only if we try to declare kinds inside functions arguments
-    if (rewrite_temp_tvars && is_temp_tvar(tv)) {
-      // we're trying to print a temporary tvar,
-      // replace it by _ followed by a comment
-      s = cat(text("_ /* "), s, text(" */"));
-      // we cannot print its kind after the underscore for _::E doesn't parse
     }
     break;
   case &DatatypeType(DatatypeInfo(tu_info,ts)):
@@ -1563,7 +1553,7 @@ doc_t pat2doc(pat_t p) {
 
     s = cat(qvar2doc(vd->name),text(" as "),pat2doc(p2)); break;
   case &TagInt_p(tv,vd):
-    s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
+    s = cat(qvar2doc(vd->name), text("<"), tvar2doc(tv), text(">"));
     break;
   case &Tuple_p(ts,dots):
     s = cat(dollar(), text("("), ppseq(pat2doc,",",ts),
@@ -1589,13 +1579,13 @@ doc_t pat2doc(pat_t p) {
     string_t term = dots ? ", ...}" : "}";
     let $(_,n) = aggr_kinded_name(info);
     s = cat(qvar2doc(n), lb(),
-	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
+	    egroup("[","]",",",List::map(tvar2doc,exists)),
 	    group("",term,",",List::map(dp2doc,dps)));
     break;
   case &Aggr_p(NULL,exists,dps,dots):
     string_t term = dots ? ", ...}" : "}";
     s = cat(lb(),
-	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
+	    egroup("[","]",",",List::map(tvar2doc,exists)),
 	    group("",term,",",List::map(dp2doc,dps)));
     break;
   case &Enum_p(_,ef): fallthru(ef);
@@ -1806,7 +1796,7 @@ doc_t decl2doc(decl_t d) {
   case &Region_d(tv,vd,resetable,open_exp_opt):
     s = cat(text("region"),
             text("<"),
-            textptr(get_name(tv)),
+            tvar2doc(tv),
             text(">" ),
             qvar2doc(vd->name),
             (resetable ? text(" @resetable") : nil_doc()),
@@ -1815,7 +1805,7 @@ doc_t decl2doc(decl_t d) {
              nil_doc()),text(";"));
     break;
   case &Alias_d(tv,vd):
-    s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
+    s = cat(text("alias"),text(" <"),tvar2doc(tv),text("> "),
             vardecl2doc(vd),text(";"));
     break;
   case &Datatype_d(dd):

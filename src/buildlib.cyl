@@ -1593,6 +1593,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (!name)
 	anon_enum = true;
 
+      // set up the pretty printer to emit interfaces
+      Absynpp::set_params(&Absynpp::cyc_params_r);
       if (name) {
         ifdefmacro = aprintf("_%s_def_",*name);
         fprintf(out_file,"#ifndef %s\n",ifdefmacro);

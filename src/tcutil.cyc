@@ -2979,7 +2979,7 @@ bool is_temp_tvar(tvar_t t) {
   return (s[0]=='#');
 }
 
-void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`txxx"
+void rewrite_temp_tvar(tvar_t t) { // change t->name from "#xxx" to "`xxx"
   printf("%s", *(t->name));
   if (! is_temp_tvar(t)) return;
   let s = strconcat("`", *(t -> name));
