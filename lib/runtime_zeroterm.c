@@ -16,8 +16,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#ifdef __ARMEL__
-/* There's no stdint.h on arm-elf for Gameboy */
+#if defined(__ARMEL__) || defined(__FreeBSD__)
+/* There's no stdint.h on arm-elf for Gameboy -- same for FreeBSD */
 typedef char      int8_t;
 typedef short     int16_t;
 typedef int       int32_t;

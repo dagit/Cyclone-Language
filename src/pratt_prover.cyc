@@ -12,31 +12,20 @@ namespace PrattProver;
 #define MININT (-MAXINT-1)
 #define MAXUINT (0xFFFFFFFF)
 
-/* Not quite right yet -- when we lookup a term Prim(p,[t1,...,tn]),
-we should lookup a *node* of the form PrimNode(p,[N1,...,Nn]).  
-Furthermore, when we unify two nodes N1 == N2, then we should
-collapse any nodes that end up being the same.  For instance,
-if we unify N1 and N2, then we should also equate PrimNode(Numelts,[N1])
-and PrimNode(Numelts,[N2]). */
-
 ///////////////////////// Constraint Solving ///////////////////////////
 //
 // This is a simple constraint solver that can determine the satisfiability
 // of the conjunction of a set of constraints of the form (t1 - t2 <= c).
 //
 // We use a variation of the Pratt algorithm here where we keep track of a 
-// signed distance and an unsigned distance between equivalence classes of 
-// terms and find the minimal length signed and unsigned paths between any 
+// signed distance and an unsigned distance between terms 
+// and find the minimal length signed and unsigned paths between any 
 // two terms.  If we ever get a negative-length cycle, then the constraints 
 // are inconsistent.  
 //
 // We represent a conjunction of constraints as a sparse matrix of
 // the distances.  We consider distance(i,j) == 0 implicitly, and
 // otherwise, if (i,j) are not in the graph, the distance is infinite.
-//
-// We deal with equality specially -- terms can be unified into an equivalence
-// class (essentially a forwarding pointer to a representative term for the
-// class.)  
 //
 // To deal with an entire assertion, we must collect a set of graphs.
 // representing alternative states.  This effectively converts the 
@@ -58,14 +47,9 @@ typedef struct Distance {
 } distance_t;
 
 
-// Represents an equivalence class for terms, and is used as a row
-// within a graph.  If equiv_class is NULL, then this node represents 
-// an equivalence class of terms.  If the equiv_class is non-NULL, then 
-// we should always follow the pointer to get to the equiv_class, doing 
-// path compression along the way.  
+// Represents a row within a graph.
 struct Node {
   node_t     *next;
-  node_t     *equiv_class;
   term_t      rep;
   distance_t *unsigned_distances;
   distance_t *signed_distances;
@@ -73,13 +57,10 @@ struct Node {
 
 // A graph is essentially a pair of sparse matrices of 
 // (node_t,node_t)->distance.  We represent the matrices by having
-// a node row for each term, but only those term-nodes with a NULL
-// equiv_class are actually in the matrices.  The other nodes (with
-// non-NULL equiv_class members) are kept so that we can lookup the
-// appropriate node associated with a term.
+// a node row for each term.
 typedef struct Graph {
   struct Graph *next;
-  node_t       *rows;
+  node_t       *rows;  // we keep the rows sorted by rep order
 } graph_t;
 
 static unsigned num_graphs(graph_t *gs) {
@@ -92,33 +73,19 @@ static unsigned num_graphs(graph_t *gs) {
 // An empty graph represents the proposition "true".
 static graph_t@ true_graph() { return new Graph{NULL,NULL}; }
 
-// Given a node, look up its equivalence class and do path compression.
-static node_t @compress(node_t @`H n) {
-  let e = n->equiv_class;
-  if (e == NULL) return n;
-  let parent = compress(e);
-  n->equiv_class = parent;
-  return parent;
-}
-
 // Print out a graph.
 void print_graph(graph_t @g) {
   fprintf(stderr,"{");
   if (g->rows == NULL) fprintf(stderr,"<true>");
   else {
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
-      let &Node{_,equiv_class,rep,uds,sds} = (node_t@)rs;
-      if (equiv_class != NULL) {
-        let p = compress(equiv_class)->rep;
-        fprintf(stderr,"%s == %s\n ",term2string(rep),term2string(p));
-      } else {
-        for (; uds != NULL; uds = uds->next)
-          fprintf(stderr,"%s - %s U<= %d\n ",term2string(rep),
-                  term2string(compress(uds->target)->rep),uds->dist);
-        for (; sds != NULL; sds = sds->next) 
-          fprintf(stderr,"%s - %s S<= %d\n ",term2string(rep),
-                  term2string(compress(sds->target)->rep),sds->dist);
-      }
+      let &Node{_,rep,uds,sds} = (node_t@)rs;
+      for (; uds != NULL; uds = uds->next)
+        fprintf(stderr,"%s - %s U<= %d\n ",term2string(rep),
+                term2string(uds->target->rep),uds->dist);
+      for (; sds != NULL; sds = sds->next) 
+        fprintf(stderr,"%s - %s S<= %d\n ",term2string(rep),
+                term2string(sds->target->rep),sds->dist);
     }
   }
   fprintf(stderr,"}\n");
@@ -198,74 +165,20 @@ static int add_type_info(graph_t @g, term_t term) {
   return true;
 }
 
-// After adding a term to the graph, we want to see if we can equate
-// it to any other term in the graph that is congruent.  
-static node_t *find_equiv_term(graph_t @g, node_t @`H n) {
-  let t = n->rep;
-  switch (t) {
-  case &Binop(p,t1,t2,tp):
-    let n1 = term2node_opt(g,t1);
-    let n2 = term2node_opt(g,t2);
-    if (n1 == NULL || n2 == NULL) return NULL;
-    if (t1 != n1->rep || t2 != n2->rep) {
-      let newt = binop(p,n1->rep,n2->rep,tp);
-      for (let r = g->rows; r != NULL; r = r->next) {
-        if (cmp_term(newt,r->rep) == 0) {
-          let m = compress(r);
-          if (m != n) n->equiv_class = m;
-          break;
-        }
-      }
-    }
-    break;
-  case &Unop(p,t1,tp):
-    let n1 = term2node_opt(g,t1);
-    if (n1 == NULL) return NULL;
-    if (t1 != n1->rep) {
-      let newt = unop(p,n1->rep,tp);
-      for (let r = g->rows; r != NULL; r = r->next) {
-        if (cmp_term(newt,r->rep) == 0) {
-          let m = compress(r);
-          if (m != n) n->equiv_class = m;
-          break;
-        }
-      }
-    }
-    break;
-  case &Cast(tp,t1):
-    let n1 = term2node_opt(g,t1);
-    if (n1 == NULL) return NULL;
-    if (t1 != n1->rep) {
-      let newt = cast(tp,n1->rep);
-      for (let r = g->rows; r != NULL; r = r->next) {
-        if (cmp_term(newt,r->rep) == 0) {
-          let m = compress(r);
-          if (m != n) n->equiv_class = m;
-          break;
-        }
-      }
-    }
-    break;
-  default: 
-    break;
-  }
-  return compress(n);
-} 
-
-// Given a term, look up its equivalence class node and if not found,
-// then add the term to the graph.
+// Given a term, look up its row and if not found, then add the term 
+// to the graph.  Keep things sorted by term order.
 static node_t *term2node_opt(graph_t @g, term_t t) {
   // first see if we can find it directly.
+  node_t *@prev = &g->rows;
   for (let r = g->rows; r != NULL; r = r->next) {
-    if (cmp_term(t,r->rep) == 0) return compress(r);
+    int c = cmp_term(t,r->rep);
+    if (c == 0) return r;
+    if (c > 1) break;
+    prev = &r->next;
   }
   // term not directly found -- insert it in the graph.  
-  let n = new Node{g->rows, NULL, t, NULL, NULL};
-  g->rows = n;
-  // try to find an equivalent term via congruence.
-  n = find_equiv_term(g,n);
-  if (n == NULL) return NULL;
-  // add in any type information.
+  let n = new Node{*prev, t, NULL, NULL};
+  *prev = n;
   if (!add_type_info(g,t)) return NULL;
   return n;
 }
@@ -279,8 +192,6 @@ static node_t @term2node(graph_t @g, term_t t) {
 // are the same -- we always return a distance of zero.
 static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   static int zero = 0;
-  source = compress(source);
-  target = compress(target);
   if (source == target) return &zero;
   distance_t *ds = is_signed ? source->signed_distances : 
     source->unsigned_distances;
@@ -289,20 +200,16 @@ static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   return NULL;
 }
 
-// Same as above, but also delete the distance edge from the source -- used
-// when unifying terms.  Also, this assumes that source and target are not
-// equal and that they represent their equivalence classes.
-static int *lookup_and_delete_dist(node_t @`H source, node_t @`H target, bool is_signed) {
-  distance_t *@dsp = is_signed ? &source->signed_distances : 
-    &source->unsigned_distances;
-  for (let ds = *dsp; ds != NULL; ds = ds->next) {
-    if (ds->target == target) {
-      *dsp = ds->next;
-      return &ds->dist;
-    }
-    dsp = &ds->next;
-  }
-  return NULL;
+// returns true iff t --0--> r and r --0--> t
+static bool eq_nodes(node_t @`H r, node_t @`H t, bool is_signed) {
+  let rt_dist = lookup_dist(r,t,is_signed);
+  let tr_dist = lookup_dist(t,r,is_signed);
+  return (rt_dist != NULL && *rt_dist == 0 &&
+          tr_dist != NULL && *tr_dist == 0);
+}
+
+static bool equal_nodes(node_t @`H s, node_t @`H r) {
+  return eq_nodes(s,r,false) || eq_nodes(s,r,true);
 }
 
 // Append two lists of graphs, representing a disjunction
@@ -403,14 +310,11 @@ static bool set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
     // update the shortest paths.
   }
   for (let k = g->rows; k != NULL; k = k->next) {
-    // skip nodes that aren't the representative of the equiv class
-    if (k->equiv_class != NULL) continue;
     let ki_dist = lookup_dist(k, i, is_signed);
     if (ki_dist == NULL) continue; // no new path through ij
     for (let l = g->rows; l != NULL; l = l->next) {
-      // skip nodes that aren't the representatives of the equiv class
-      // and any node equal to k
-      if (k == l || l->equiv_class != NULL) continue;
+      // skip nodes equal to k
+      if (k == l) continue;
       let kl_dist = lookup_dist(k, l, is_signed);
       // if kl_dist is already MININT, no need to update.
       if (kl_dist != NULL && *kl_dist == (int)MININT) continue;
@@ -467,7 +371,7 @@ static bool set_distance(graph_t @g, term_t it, term_t jt, int dist, bool is_sig
 static distance_t *copy_distances(graph_t @newg, distance_t *ds) {
   distance_t *res = NULL;
   for (; ds != NULL; ds = ds->next) {
-    let t = compress(ds->target)->rep;
+    let t = ds->target->rep;
     res = new Distance{res,term2node(newg,t),ds->dist};
   }
   return res;
@@ -488,8 +392,7 @@ static node_t *revnodes(node_t *`H n) {
   return first;
 }
 
-// Produce a copy of the list of graphs -- care must be taken to get the
-// sharing right in order to preserve equivalence classes and edges.
+// Produce a copy of the list of graphs.
 static graph_t *copy_graphs(graph_t *gopt) {
   if (gopt == NULL) return NULL;
   let g = (graph_t@)gopt;
@@ -497,145 +400,76 @@ static graph_t *copy_graphs(graph_t *gopt) {
   // insert a row for each term
   node_t *newrs = NULL;
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    newrs = new Node{newrs,NULL,rs->rep,NULL,NULL};
+    newrs = new Node{newrs,rs->rep,NULL,NULL};
   }
   newrs = revnodes(newrs);
   newg->rows = newrs;
-  // process each row again, setting equivalence class pointers and
-  // adding in distance edges.
+  // process each row again adding in distance edges
   for (let rs = g->rows; rs != NULL; rs = rs->next, newrs=newrs->next){
-    if (rs->equiv_class != NULL) 
-      // In this case, r doesn't represent the equivalence class, so
-      // find r's equivalence class in g, then look up the corresponding 
-      // node in newg and set newr's equiv_class pointer to it.
-      newrs->equiv_class = term2node(newg,compress(rs)->rep);
-    else {
-      // In this csae, r represents an equivalence class, so copy all of 
-      // the distance edges.
-      newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
-      newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
-    }
+    newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
+    newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
   }
   return newg;
 }
 
-// Try to merge two nodes into a single equivalence class within the 
-// graph g, returning false if the resulting graph has an inconsistency
-// and true otherwise.
-static bool unify_nodes(graph_t @g, node_t @`H n1, node_t @`H n2) {
-  n1 = compress(n1);
-  n2 = compress(n2);
-  if (n1 == n2) return true;
-  node_t @source, @target;
-
-  // try to pick a good candidate for the representative of the equivalence
-  // class -- a constant is best.
-  switch $(n1->rep, n2->rep) {
-  case $(&Uint(i1),&Uint(i2)): if (i1 != i2) return false; fallthru;
-  case $(_,&Uint(_)): 
-  case $(&Var(_),_):
-  case $(&LogicVar(...),_):
-    source = n1;
-    target = n2;
-    break;
-  default:
-    source = n2;
-    target = n1;
-    break;
-  }
-
-  // add all of the source edges to the target.
-  for (let sds = source->signed_distances; sds != NULL; sds = sds->next) 
-    if (!set_dist(g, target, sds->target, sds->dist, true)) return false;
-  // might as well nuke out the source edges as well.
-  source->signed_distances = NULL;
-  for (let uds = source->unsigned_distances; uds != NULL; uds = uds->next) 
-    if (!set_dist(g, target, uds->target, uds->dist, false)) return false;
-  source->unsigned_distances = NULL;
-
-  // Now we need to get rid of the source column.  So we look at each
-  // row r to see if there is an edge r--d-->source, and if so, delete that
-  // edge and add in r--d-->target.  
-  for (let r = g->rows; r != NULL; r = r->next) {
-    // skip source row or non-equivalence-class row
-    if (r == source || r->equiv_class != NULL) continue;
-    // Process the signed edges first:
-    // See if there is an edge from r-->target
-    let rt_signed = lookup_dist(r,target,true);
-    // If not, we don't have to do anything since source will now point to
-    // target.  Otherwise, we have to lookup and delete any r->source edge,
-    // adding it back in to point to target.
-    if (rt_signed != NULL) {
-      let rs_signed = lookup_and_delete_dist(r,source,true);
-      if (rs_signed != NULL && (rt_signed == NULL || *rt_signed > *rs_signed))
-        if (!set_dist(g, r, target, *rs_signed, true)) return false;
-    }
-    // Process the unsigned edges:
-    let rt_unsigned = lookup_dist(r,target,false);
-    if (rt_unsigned != NULL) {
-      let rs_unsigned = lookup_and_delete_dist(r,source,false);
-      if (rs_unsigned != NULL && (rt_unsigned == NULL || *rt_unsigned > *rs_unsigned))
-        if (!set_dist(g, r, target, *rs_unsigned, false)) return false;
-    }
-  }
-  // finally, set the source's equivalence class to be the target. 
-  // subsequent lookups should now find the target.
-  source->equiv_class = target;
-  return true;
-}
-
 // If we have two nodes with representatives of the form Prim(p,[t11,...,tn1])
 // and Prim(p,[t12,...,tn2]) and the sub-terms ti1 and ti2 map to equivalent
-// nodes, then these equivalence classes should be collapsed.
-//
-// This is a truly horrible implementation -- worst case is cubic.  That
-// could be reduced to quadratic by processing the nodes in a bottom up
-// fashion.  I wish there was a more incremental solution.
+// nodes, then we should equate these two terms.  We're relying on the fact
+// that the rows are sorted in term order so that leaves are processed before
+// compound terms.
 static bool congruence_close_graph(graph_t @g) {
-  bool changed = true;
-  while (changed) {
-    changed = false;
-    for (let rs = g->rows; rs != NULL; rs = rs->next) {
-      let rs_class = compress(rs);
-      for (let ts = rs->next; ts != NULL; ts = ts->next) {
-        let ts_class = compress(ts);
-        if (rs_class == ts_class) continue;
-        switch $(rs->rep,ts->rep) {
-        case $(&Binop(p1,t11,t12,_),&Binop(p2,t21,t22,_)) && p1 == p2:
-          let n11 = term2node_opt(g,t11);
-          let n21 = term2node_opt(g,t21);
-          if (n11 == NULL || n21 == NULL) return false;
-          if (n11 != n21) break;
-          let n12 = term2node_opt(g,t12);
-          let n22 = term2node_opt(g,t22);
-          if (n12 == NULL || n22 == NULL) return false;
-          if (n12 != n22) break;
-          if (!unify_nodes(g,rs,ts)) return false;
-          break;
-        case $(&Unop(p1,t1,_),&Unop(p2,t2,_)) && p1 == p2:
+  for (let rs = g->rows; rs != NULL; rs = rs->next) {
+    for (let ts = rs->next; ts != NULL; ts = ts->next) {
+      switch $(rs->rep,ts->rep) {
+      case $(&Binop(p1,t11,t12,_),&Binop(p2,t21,t22,_)) && p1 == p2:
+        let n11 = term2node_opt(g,t11);
+        let n21 = term2node_opt(g,t21);
+        if (n11 == NULL || n21 == NULL) return false;
+        if (!equal_nodes(n11,n21)) break;
+        let n12 = term2node_opt(g,t12);
+        let n22 = term2node_opt(g,t22);
+        if (n12 == NULL || n22 == NULL) return false;
+        if (!equal_nodes(n12,n22)) break;
+        if (!add_eq(g,rs->rep,ts->rep)) return false;
+        break;
+      case $(&Unop(p1,t1,_),&Unop(p2,t2,_)) && p1 == p2:
+        let n1 = term2node_opt(g,t1);
+        let n2 = term2node_opt(g,t2);
+        if (n1 == NULL || n2 == NULL) return false;
+        if (!equal_nodes(n1,n2)) break;
+        if (!add_eq(g,rs->rep,ts->rep)) return false;
+        break;
+      case $(&Cast(tp1,t1),&Cast(tp2,t2)):
+        if (Tcutil::typecmp(tp1,tp2) == 0) {
           let n1 = term2node_opt(g,t1);
           let n2 = term2node_opt(g,t2);
           if (n1 == NULL || n2 == NULL) return false;
-          if (n1 != n2) break;
-          if (!unify_nodes(g,rs,ts)) return false;
-          break;
-        case $(&Cast(tp1,t1),&Cast(tp2,t2)):
-          if (Tcutil::typecmp(tp1,tp2) == 0) {
-            let n1 = term2node_opt(g,t1);
-            let n2 = term2node_opt(g,t2);
-            if (n1 == NULL || n2 == NULL) return false;
-            if (n1 == n2) {
-              changed = true;
-              if (!unify_nodes(g,rs,ts)) return false;
-            }
-          }
-          break;
-        default: break;
+          if (!equal_nodes(n1,n2)) break;
+          if (!add_eq(g,rs->rep,ts->rep)) return false;
         }
+        break;
+      default: break;
       }
     }
   }
   return true;
+}
+
+// run congruence closure on a set of graphs and weed out the disjuncts
+static graph_t *congruence_close_graphs(graph_t *`H gs) {
+  graph_t *prev = NULL;
+  for (let g = gs; g != NULL; g = g->next) {
+    if (!congruence_close_graph(g)) {
+      if (prev == NULL) {
+        gs = g->next;
+      } else {
+        prev->next = g->next;
+      }
+    } else {
+      prev = g;
+    }
+  }
+  return gs;
 }
 
 // used in break_term and elsewhere to try to evaluate a term to a constant
@@ -853,8 +687,6 @@ static bool add_eq(graph_t @g, term_t t1, term_t t2) {
   let n2 = term2node_opt(g,t2);
   if (n1 == NULL || n2 == NULL) return false;
   return 
-    // FIX: we shouldn't have to add these edges...
-    unify_nodes(g,n1,n2) &&
     add_constraint(g, t1, ULte, t2) &&
     add_constraint(g, t2, ULte, t1) &&
     add_constraint(g, t1, SLte, t2) &&
@@ -903,8 +735,12 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     graph_t *gs2 = copy_graphs(gs);
     // compute (gs and a1)
     gs1 = cgraph(gs1,a1);
+    // try to weed out graphs through congruence closure
+    gs1 = congruence_close_graphs(gs1);
     // compute (gs and a2)
     gs2 = cgraph(gs2,a2);
+    // try to weed out graphs through congruence closure
+    gs2 = congruence_close_graphs(gs2);
     // return (gs and a1) or (gs and a2)
     gs = graph_append(gs1,gs2);
     break;
@@ -954,28 +790,15 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
 // if it returns true, then the assertion might be consistent.
 static bool consistent(assn_t a) {
   try {
-    // start with just an empty graph (true) and then add in a
+    // start with just an empty graph (true) and then add in assertion a
     graph_t *gs = cgraph(true_graph(),a);
+    // run congruence closure to weed out graphs
+    gs = congruence_close_graphs(gs);
     // if we get back an empty list of disjuncts (false) then
     // the graph is not consistent.
     /*
     if (gs != NULL) {
       fprintf(stderr,"resulting graphs are:\n");
-      print_graphs(gs);
-      fprintf(stderr,"\nTrying congruence closure...\n");
-      graph_t *prev = NULL;
-      for (graph_t *g = gs; g != NULL; g = g->next) {
-        if (!congruence_close_graph((graph_t@)g)) {
-          if (prev == NULL) {
-            gs = g->next;
-          } else {
-            prev->next = g->next;
-          }
-        } else {
-          prev = g;
-        }
-      }
-      fprintf(stderr,"After congruence closure:\n");
       print_graphs(gs);
     }
     */

@@ -4152,7 +4152,7 @@ if(token==369)
 return Cyc_Lex_token_string;
 if(token==378)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
-int z=token > 0 && token <= 381?(int)Cyc_yytranslate[token]: 321;
+int z=token > 0 && token <= 381?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,382U,sizeof(short),token)): 321;
 if((unsigned)z < 321U)
 return Cyc_yytname[z];
 return _tag_fat(0,0,0);}}
