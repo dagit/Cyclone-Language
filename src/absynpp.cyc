@@ -716,7 +716,7 @@ doc_t ntyp2doc(type_t t) {
   case &TunionType(TunionInfo(tu_info,ts,r)):
     switch(tu_info) {
     case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
-    case &KnownTunion(&(&Tuniondecl(_,n,_,_,is_x))):
+    case &KnownTunion(&&Tuniondecl(_,n,_,_,is_x)):
       let kw = text(is_x ? "xtunion " : "tunion ");
       switch (compress(r)) {
       case HeapRgn:
@@ -973,7 +973,9 @@ int exp_prec(exp_t e) {
     }
   case &AssignOp_e(_,_,_):      return  20;
   case &Increment_e(_,_):       return 130;
-  case &Conditional_e(_,_,_):   return  30; // note || and && are hiding here!
+  case &Conditional_e(_,_,_):   return  30;
+  case &And_e(_,_):             return  35; // FIX: right precedence for &&
+  case &Or_e(_,_):              return  30; // FIX: right precedence for ||
   case &SeqExp_e(_,_):          return  10;
   case &UnknownCall_e(_,_):     
   case &FnCall_e(_,_,_):        return 140;
@@ -1037,22 +1039,14 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     }
     break;
   case &Conditional_e(e1,e2,e3):
-    // decompile to && and || if possible
-    switch ($(e2->r,e3->r)) {
-      // JGM:  this causes a bug in some places...notably the
-      //   file tools/cyclex/compact.cyc
-      //case $(Const_e(Int_c(Signed,1)),_):
-      //s = cat(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3));
-      //break;
-      //case $(_,Const_e(Int_c(Signed,0))):
-      //s = cat(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2));
-      //break;
-      //
-    default:
-      s = cat(exp2doc_prec(myprec,e1), text(" ? "), exp2doc_prec(0,e2),
-              text(" : "), exp2doc_prec(myprec,e3));
-      break;
-    }
+    s = cat(exp2doc_prec(myprec,e1), text(" ? "), exp2doc_prec(0,e2),
+            text(" : "), exp2doc_prec(myprec,e3));
+    break;
+  case &And_e(e1,e2):
+    s = cat(exp2doc_prec(myprec,e1),text(" && "),exp2doc_prec(myprec,e2));
+    break;
+  case &Or_e(e1,e2):
+    s = cat(exp2doc_prec(myprec,e1),text(" || "),exp2doc_prec(myprec,e2));
     break;
   case &SeqExp_e(e1,e2):
     // DAN: put in parens because in initializers , doesn't mean SeqExp and
@@ -1548,6 +1542,8 @@ doc_t pat2doc(pat_t p) {
   case &Tunion_p(_,tuf,ps):
     s = cat(qvar2doc(tuf->name), egroup("(",")",",",List::map(pat2doc,ps)));
     break;
+  case &Exp_p(e):
+    s = exp2doc(e); break;
   }
   return s;
 }

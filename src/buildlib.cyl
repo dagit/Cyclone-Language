@@ -807,6 +807,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_exp(e2);
       scan_exp(e3);
       return;
+    case &And_e(e1,e2): fallthru(e1,e2);
+    case &Or_e(e1,e2): 
+      scan_exp(e1);
+      scan_exp(e2);
+      return;
     case &FnCall_e(e1,x,_):
       // This case is actually impossible after only parse
       fallthru(e1,x);

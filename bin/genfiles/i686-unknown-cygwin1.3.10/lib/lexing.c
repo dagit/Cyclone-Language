@@ -523,7 +523,7 @@ struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf
 _tagged_arr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos),(
 unsigned int)len);({struct _tagged_arr _tmp3=_tagged_arr_plus(s,sizeof(char),len);
 char _tmp4=*((char*)_check_unknown_subscript(_tmp3,sizeof(char),0));char _tmp5='\000';
-if(_get_arr_size(_tmp3,sizeof(char))== 1?_tmp4 == '\000'?_tmp5 != '\000': 0: 0)
+if(_get_arr_size(_tmp3,sizeof(char))== 1  && (_tmp4 == '\000'  && _tmp5 != '\000'))
 _throw_arraybounds();*((char*)_tmp3.curr)=_tmp5;});return s;}char Cyc_Lexing_lexeme_char(
 struct Cyc_Lexing_lexbuf*lbuf,int i){return*((char*)_check_unknown_subscript(lbuf->lex_buffer,
 sizeof(char),lbuf->lex_start_pos + i));}int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*

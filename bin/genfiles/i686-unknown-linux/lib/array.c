@@ -481,8 +481,8 @@ struct _tagged_arr l,void*x);int Cyc_Array_mem(int(*cmp)(void*,void*),struct
 _tagged_arr l,void*x);struct _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int
 start,int*len_opt);void Cyc_Array_qsort(int(*less_eq)(void**,void**),struct
 _tagged_arr arr,int len){int base_ofs=0;void*temp;int sp[40];int sp_ofs;int i;int j;int
-limit_ofs;if((base_ofs < 0?1: base_ofs + len > _get_arr_size(arr,sizeof(void*)))?1:
-len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=
+limit_ofs;if((base_ofs < 0  || base_ofs + len > _get_arr_size(arr,sizeof(void*)))
+ || len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=
 _cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;
 _tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=({const char*_tmp2="Array::qsort";
 _tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,13));});_tmp1;});_tmp0;}));
@@ -536,7 +536,7 @@ _check_unknown_subscript(arr,sizeof(void*),j + 1))=temp;if(j == base_ofs)break;}
 if(sp_ofs != 0){sp_ofs -=2;base_ofs=sp[_check_known_subscript_notnull(40,sp_ofs)];
 limit_ofs=sp[_check_known_subscript_notnull(40,sp_ofs + 1)];}else{break;}}}}void
 Cyc_Array_msort(int(*less_eq)(void**,void**),struct _tagged_arr arr,int len){if(len
-> _get_arr_size(arr,sizeof(void*))?1: len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+> _get_arr_size(arr,sizeof(void*)) || len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;_tmp4.f1=({const char*_tmp5="Array::msort";
 _tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,13));});_tmp4;});_tmp3;}));{
@@ -549,7 +549,7 @@ int start;int lstart;int lend;int rstart;int rend;int dest;for(stepsize=1;stepsi
 len;stepsize=stepsize * 2){swap=from;from=to;to=swap;dest=0;for(start=0;start < 
 len;start=start + stepsize * 2){lstart=start;rstart=start + stepsize < len?start + 
 stepsize: len;lend=rstart;rend=start + stepsize * 2 < len?start + stepsize * 2: len;
-while(lstart < lend?rstart < rend: 0){if(less_eq((void**)_untag_arr(
+while(lstart < lend  && rstart < rend){if(less_eq((void**)_untag_arr(
 _tagged_arr_plus(from,sizeof(void*),lstart),sizeof(void*),1),(void**)_untag_arr(
 _tagged_arr_plus(from,sizeof(void*),rstart),sizeof(void*),1))<= 0)*((void**)
 _check_unknown_subscript(to,sizeof(void*),dest ++))=*((void**)
@@ -680,8 +680,8 @@ int(*compare)(void*,void*),struct _tagged_arr l,void*x){int s=(int)_get_arr_size
 sizeof(void*));{int i=0;for(0;i < s;i ++){if(0 == compare(*((void**)
 _check_unknown_subscript(l,sizeof(void*),i)),x))return 1;}}return 0;}struct
 _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int start,int*n_opt){int sx=(int)
-_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*n_opt;if((start < 0?1: n
-<= 0)?1: start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*n_opt;if((start < 0  || n
+<= 0) || start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp2C=_cycalloc(sizeof(*_tmp2C));_tmp2C[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp2D;_tmp2D.tag=Cyc_Core_Invalid_argument;_tmp2D.f1=({const char*_tmp2E="Array::extract";
 _tag_arr(_tmp2E,sizeof(char),_get_zero_arr_size(_tmp2E,15));});_tmp2D;});_tmp2C;}));

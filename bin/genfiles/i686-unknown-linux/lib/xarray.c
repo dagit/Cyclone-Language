@@ -463,12 +463,12 @@ void*,void*),void*,struct Cyc_Xarray_Xarray*);void Cyc_Xarray_reuse(struct Cyc_X
 xarr);void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*xarr,int num);void Cyc_Xarray_remove(
 struct Cyc_Xarray_Xarray*xarr,int i);int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*
 xarr){return xarr->num_elmts;}void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*xarr,
-int i){if(i < 0?1: i >= xarr->num_elmts)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+int i){if(i < 0  || i >= xarr->num_elmts)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=({const char*_tmp2="Xarray::get: bad index";
 _tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,23));});_tmp1;});_tmp0;}));
 return*((void**)_check_unknown_subscript(xarr->elmts,sizeof(void*),i));}void Cyc_Xarray_set(
-struct Cyc_Xarray_Xarray*xarr,int i,void*a){if(i < 0?1: i >= xarr->num_elmts)(int)
+struct Cyc_Xarray_Xarray*xarr,int i,void*a){if(i < 0  || i >= xarr->num_elmts)(int)
 _throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp3=_cycalloc(sizeof(*
 _tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct _tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;
 _tmp4.f1=({const char*_tmp5="Xarray::set: bad index";_tag_arr(_tmp5,sizeof(char),
@@ -571,7 +571,7 @@ _tmp33=_cycalloc(sizeof(*_tmp33));_tmp33[0]=({struct Cyc_Core_Invalid_argument_s
 _tmp34;_tmp34.tag=Cyc_Core_Invalid_argument;_tmp34.f1=({const char*_tmp35="number deleted is greater than length of xarray";
 _tag_arr(_tmp35,sizeof(char),_get_zero_arr_size(_tmp35,48));});_tmp34;});_tmp33;}));
 xarr->num_elmts -=num;}void Cyc_Xarray_remove(struct Cyc_Xarray_Xarray*xarr,int i){
-if(i < 0?1: i > xarr->num_elmts - 1)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+if(i < 0  || i > xarr->num_elmts - 1)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp36=_cycalloc(sizeof(*_tmp36));_tmp36[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp37;_tmp37.tag=Cyc_Core_Invalid_argument;_tmp37.f1=({const char*_tmp38="xarray index out of bounds";
 _tag_arr(_tmp38,sizeof(char),_get_zero_arr_size(_tmp38,27));});_tmp37;});_tmp36;}));{

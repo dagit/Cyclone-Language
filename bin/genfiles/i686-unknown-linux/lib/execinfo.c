@@ -490,7 +490,7 @@ const char*_tmp2="backtrace: size > array.size";_tag_arr(_tmp2,sizeof(char),
 _get_zero_arr_size(_tmp2,29));});_tmp1;});_tmp0;}));return backtrace((int*)
 _check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[
 20];{unsigned int _tmp19=20;unsigned int i;for(i=0;i < _tmp19;i ++){bt[i]=0;}}{int
-pid;int self_pid;int tochild[2]={0,0};int fromchild[2]={0,0};if(pipe(tochild)?1:
+pid;int self_pid;int tochild[2]={0,0};int fromchild[2]={0,0};if(pipe(tochild) || 
 pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],
 0)< 0){perror((const char*)"dup failed in backtrace");exit(1);}close(tochild[1]);
 if(dup2(fromchild[1],1)< 0){perror((const char*)"dup failed in backtrace");exit(1);}
@@ -503,18 +503,18 @@ const char*)_check_null(_untag_arr(({struct Cyc_Int_pa_struct _tmp8;_tmp8.tag=1;
 _tmp8.f1=(unsigned int)self_pid;{void*_tmp6[1]={& _tmp8};Cyc_aprintf(({const char*
 _tmp7="/proc/%d/exe";_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,13));}),
 _tag_arr(_tmp6,sizeof(void*),1));}}),sizeof(char),1));if(_get_arr_size(_tmp4,
-sizeof(const char*))== 1?_tmp5 == 0?_tmp9 != 0: 0: 0)_throw_arraybounds();*((const
-char**)_tmp4.curr)=_tmp9;});if(execvp((const char*)"addr2line",(const char**)args)
-== - 1)perror((const char*)"execlp failed during backtrace");exit(1);}}else{if(pid
-< 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(fromchild[1]);
-return 1;}}close(tochild[0]);close(fromchild[1]);{int infd=fromchild[0];int outfd=
-tochild[1];int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)20);{int
-c=0;for(0;c < n;c ++){char buf[100];int len=({struct Cyc_Int_pa_struct _tmpC;_tmpC.tag=
-1;_tmpC.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmpA[1]={&
-_tmpC};Cyc_sprintf(_tag_arr(buf,sizeof(char),100),({const char*_tmpB="%#x\n";
-_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,5));}),_tag_arr(_tmpA,
-sizeof(void*),1));}});Cyc_write(outfd,_tag_arr(buf,sizeof(char),100),(
-unsigned int)len);}}({void*_tmpD[0]={};Cyc_printf(({const char*_tmpE="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
+sizeof(const char*))== 1  && (_tmp5 == 0  && _tmp9 != 0))_throw_arraybounds();*((
+const char**)_tmp4.curr)=_tmp9;});if(execvp((const char*)"addr2line",(const char**)
+args)== - 1)perror((const char*)"execlp failed during backtrace");exit(1);}}else{
+if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
+fromchild[1]);return 1;}}close(tochild[0]);close(fromchild[1]);{int infd=fromchild[
+0];int outfd=tochild[1];int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(
+int)20);{int c=0;for(0;c < n;c ++){char buf[100];int len=({struct Cyc_Int_pa_struct
+_tmpC;_tmpC.tag=1;_tmpC.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
+void*_tmpA[1]={& _tmpC};Cyc_sprintf(_tag_arr(buf,sizeof(char),100),({const char*
+_tmpB="%#x\n";_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,5));}),
+_tag_arr(_tmpA,sizeof(void*),1));}});Cyc_write(outfd,_tag_arr(buf,sizeof(char),
+100),(unsigned int)len);}}({void*_tmpD[0]={};Cyc_printf(({const char*_tmpE="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
 _tag_arr(_tmpE,sizeof(char),_get_zero_arr_size(_tmpE,94));}),_tag_arr(_tmpD,
 sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int unknown=1;char d;int ret;int pos=0;({
 void*_tmpF[0]={};Cyc_printf(({const char*_tmp10="  ";_tag_arr(_tmp10,sizeof(char),

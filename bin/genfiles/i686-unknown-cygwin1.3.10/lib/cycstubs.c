@@ -679,7 +679,7 @@ munmap(const char*start,unsigned int length);static char _tmp3C[42]="mmap called
 static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp3C,
 _tmp3C,_tmp3C + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,
 unsigned int length,int prot,int flags,int fd,int offset){if((ignored.curr == (
-_tag_arr(0,0,0)).curr?prot == 1: 0)?flags == 2?1: flags == 1: 0)return(struct
+_tag_arr(0,0,0)).curr  && prot == 1) && (flags == 2  || flags == 1))return(struct
 _tagged_arr)wrap_Cbuffer_as_buffer(__stub_mmap(0,length,prot,flags,fd,offset),
 length);else{(int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct
 _tagged_arr start,unsigned int length){return munmap((const char*)_check_null(
@@ -866,14 +866,14 @@ _tagged_arr _tmp88=_tagged_arr_plus(({const char**_tmp87=newargs;_tag_arr(_tmp87
 sizeof(const char*),_get_zero_arr_size(_tmp87,1));}),sizeof(const char*),0);const
 char*_tmp89=*((const char**)_check_unknown_subscript(_tmp88,sizeof(const char*),0));
 const char*_tmp8A=(const char*)arg0;if(_get_arr_size(_tmp88,sizeof(const char*))== 
-1?_tmp89 == 0?_tmp8A != 0: 0: 0)_throw_arraybounds();*((const char**)_tmp88.curr)=
+1  && (_tmp89 == 0  && _tmp8A != 0))_throw_arraybounds();*((const char**)_tmp88.curr)=
 _tmp8A;});{int i=0;for(0;i < _get_arr_size(argv,sizeof(const char*))- 1;i ++){({
 struct _tagged_arr _tmp8C=_tagged_arr_plus(({const char**_tmp8B=newargs;_tag_arr(
 _tmp8B,sizeof(const char*),_get_zero_arr_size(_tmp8B,1));}),sizeof(const char*),i + 
 1);const char*_tmp8D=*((const char**)_check_unknown_subscript(_tmp8C,sizeof(const
 char*),0));const char*_tmp8E=*((const char**)_check_unknown_subscript(argv,sizeof(
-const char*),i));if(_get_arr_size(_tmp8C,sizeof(const char*))== 1?_tmp8D == 0?
-_tmp8E != 0: 0: 0)_throw_arraybounds();*((const char**)_tmp8C.curr)=_tmp8E;});}}
+const char*),i));if(_get_arr_size(_tmp8C,sizeof(const char*))== 1  && (_tmp8D == 0
+ && _tmp8E != 0))_throw_arraybounds();*((const char**)_tmp8C.curr)=_tmp8E;});}}
 return execvp(path,(const char**)newargs);}}char*getcwd(char*buf,unsigned int size);
 static char _tmp94[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct
 Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp94,_tmp94,_tmp94 + 29}};struct

@@ -29,6 +29,7 @@
 #include "tcenv.h"
 #include "tcexp.h"
 #include "tcpat.h"
+#include "evexp.h"
 #include <stdio.h>
 
 using Core;
@@ -112,6 +113,13 @@ static void resolve_pat(tenv_t te, pat_t p) {
     } catch { case Dict::Absent: 
       terr(p->loc, "Non-struct name has designator patterns"); break;
     }
+    return;
+  case &Exp_p(e):
+    Tcexp::tcExp(te,NULL,e);
+    if (!is_const_exp(te,e))
+      terr(p->loc,"non-constant expression in case pattern");
+    let $(i,known) = Evexp::eval_const_uint_exp(e);
+    p->r = new Int_p(None,i);
     return;
   default: return;
   }
@@ -431,6 +439,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
   case &Aggr_p(AggrInfo(&UnknownAggr(_,_),_),_,_):
   case &UnknownId_p(_):         
+  case &Exp_p(_):
   case &UnknownCall_p(_,_): t = wildtyp(new Opt(lookup_type_vars(te))); break;
   }
  tcpat_end:
@@ -715,6 +724,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &UnknownId_p(_):     impos("compile_pat: unknownid");     
   case &UnknownCall_p(_,_): impos("compile_pat: unknowncall");   
   case &Aggr_p(_,_,_):      impos("compile_pat: bad aggr");
+  case &Exp_p(_):           impos("compile_pat: exp");
   }
   return s;
 }

@@ -173,6 +173,24 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     }
     ans = bool1 ? eval_const_exp(e2) : eval_const_exp(e3);
     break;
+  case &And_e(e1,e2):
+    let $(bool1,known1) = eval_const_bool_exp(e1);
+    if (!known1) {
+      eval_const_exp(e2);
+      return $(new Int_c(Signed,0),false);
+    }
+    if (bool1) ans = eval_const_exp(e2);
+    else ans = $(new Int_c(Signed,0),true);
+    break;
+  case &Or_e(e1,e2):
+    let $(bool1,known1) = eval_const_bool_exp(e1);
+    if (!known1) {
+      eval_const_exp(e2);
+      return $(new Int_c(Signed,0),false);
+    }
+    if (!bool1) ans = eval_const_exp(e2);
+    else ans = $(new Int_c(Signed,1),true);
+    break;
   case &Primop_e(p,es):
     if (es == NULL) {
       terr(e->loc,"bad static expression (no args to primop)");
@@ -233,6 +251,8 @@ static int const_exp_case_number(exp_t e) {
   case &Sizeofexp_e(_): return 4;
   case &Offsetof_e(_,_): return 5;
   case &Cast_e(_,_,_,_): return 6;
+  case &And_e(_,_): return 7;
+  case &Or_e(_,_): return 8;
     // note: AnonEnum_e and Enum_e should be impossible b/c already replaced
   default: terr(e->loc,"bad static expression %s", exp2string(e)); return 0;
   }
@@ -252,11 +272,14 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
   case $(&Conditional_e(e11,e12,e13), &Conditional_e(e21,e22,e23)):
     // FIX: not quite right -- if e11 and e21 are known and equal, then only
     // one of the remaining pairs should matter. Anybody care?
+    let c1 = const_exp_cmp(e13,e23);
+    if (c1 != 0) return c1;
+    fallthru(e11,e12,e21,e22);
+  case $(&And_e(e11,e12),&And_e(e21,e22)): fallthru(e11,e12,e21,e22);
+  case $(&Or_e(e11,e12),&Or_e(e21,e22)): 
     let c1 = const_exp_cmp(e11,e21);
     if(c1 != 0) return c1;
-    let c2 = const_exp_cmp(e12,e22);
-    if(c2 != 0) return c2;
-    return const_exp_cmp(e13,e23);
+    return const_exp_cmp(e12,e22);
   case $(&Primop_e(p1,es1), &Primop_e(p2,es2)):
     let c1 = (int)p1 - (int)p2;
     if(c1 != 0) return c1;

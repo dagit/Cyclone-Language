@@ -598,6 +598,12 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(':'); dumpexp_prec(myprec,e3);
     break;
 
+  case &And_e(e1,e2):
+    dumpexp_prec(myprec,e1); dump(" && "); dumpexp_prec(myprec,e2); break;
+
+  case &Or_e(e1,e2):
+    dumpexp_prec(myprec,e1); dump(" || "); dumpexp_prec(myprec,e2); break;
+
   case &SeqExp_e(e1,e2):
     // DAN: put in parens because in initializers , doesn't mean SeqExp and
     // our recursive descent doesn't know if we're in an initializer.
@@ -923,6 +929,7 @@ void dumppat(pat_t p) {
     break;
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef): dumpqvar(ef->name); break;
+  case &Exp_p(e): dumpexp(e); break;
   }
 }
 

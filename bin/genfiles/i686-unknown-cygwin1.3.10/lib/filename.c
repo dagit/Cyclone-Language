@@ -459,28 +459,28 @@ struct _tagged_arr s1,struct _tagged_arr s2){return Cyc_strconcat((struct _tagge
 s1,(struct _tagged_arr)Cyc_strconcat(({const char*_tmp0="/";_tag_arr(_tmp0,sizeof(
 char),_get_zero_arr_size(_tmp0,2));}),(struct _tagged_arr)s2));}struct _tagged_arr
 Cyc_Filename_chop_extension(struct _tagged_arr filename){int i=(int)(_get_arr_size(
-filename,sizeof(char))- 1);while(i >= 0?*((const char*)_check_unknown_subscript(
-filename,sizeof(char),i))!= '.': 0){-- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+filename,sizeof(char))- 1);while(i >= 0  && *((const char*)_check_unknown_subscript(
+filename,sizeof(char),i))!= '.'){-- i;}if(i < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=({const char*_tmp3="chop_extension";
 _tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,15));});_tmp2;});_tmp1;}));
 return Cyc_substring((struct _tagged_arr)filename,0,(unsigned int)i);}struct
 _tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){int i=(int)(
-_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
-_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}if(i < 0)return
-Cyc_Core_new_string(0);return Cyc_substring((struct _tagged_arr)filename,0,(
-unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr
-filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((
-const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}
-return Cyc_substring((struct _tagged_arr)filename,i + 1,_get_arr_size(filename,
-sizeof(char))- (i + 1));}int Cyc_Filename_check_suffix(struct _tagged_arr filename,
-struct _tagged_arr suffix){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);int
-j=(int)(_get_arr_size(suffix,sizeof(char))- 1);while(i >= 0?j >= 0: 0){if(*((const
-char*)_check_unknown_subscript(filename,sizeof(char),i --))!= *((const char*)
+_get_arr_size(filename,sizeof(char))- 1);while(i >= 0  && *((const char*)
+_check_unknown_subscript(filename,sizeof(char),i))!= '/'){-- i;}if(i < 0)return Cyc_Core_new_string(
+0);return Cyc_substring((struct _tagged_arr)filename,0,(unsigned int)i);}struct
+_tagged_arr Cyc_Filename_basename(struct _tagged_arr filename){int i=(int)(
+_get_arr_size(filename,sizeof(char))- 1);while(i >= 0  && *((const char*)
+_check_unknown_subscript(filename,sizeof(char),i))!= '/'){-- i;}return Cyc_substring((
+struct _tagged_arr)filename,i + 1,_get_arr_size(filename,sizeof(char))- (i + 1));}
+int Cyc_Filename_check_suffix(struct _tagged_arr filename,struct _tagged_arr suffix){
+int i=(int)(_get_arr_size(filename,sizeof(char))- 1);int j=(int)(_get_arr_size(
+suffix,sizeof(char))- 1);while(i >= 0  && j >= 0){if(*((const char*)
+_check_unknown_subscript(filename,sizeof(char),i --))!= *((const char*)
 _check_unknown_subscript(suffix,sizeof(char),j --)))return 0;}if(j >= 0)return 0;
 else{return 1;}}struct _tagged_arr Cyc_Filename_gnuify(struct _tagged_arr filename){
-int has_drive_name=_get_arr_size(filename,sizeof(char))> 1?*((const char*)
-_check_unknown_subscript(filename,sizeof(char),1))== ':': 0;int i;int j;struct
+int has_drive_name=_get_arr_size(filename,sizeof(char))> 1  && *((const char*)
+_check_unknown_subscript(filename,sizeof(char),1))== ':';int i;int j;struct
 _tagged_arr ans;int ans_sz;if(has_drive_name){ans_sz=(int)(_get_arr_size(filename,
 sizeof(char))+ 1);ans=({unsigned int _tmp4=(unsigned int)ans_sz;char*_tmp5=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmp4 + 1));struct _tagged_arr _tmp7=
@@ -490,13 +490,13 @@ _tagged_arr _tmp8=_tagged_arr_plus(ans,sizeof(char),0);char _tmp9=*((char*)
 _check_unknown_subscript(_tmp8,sizeof(char),0));char _tmpD=({struct _tagged_arr
 _tmpA=_tagged_arr_plus(ans,sizeof(char),1);char _tmpB=*((char*)
 _check_unknown_subscript(_tmpA,sizeof(char),0));char _tmpC='/';if(_get_arr_size(
-_tmpA,sizeof(char))== 1?_tmpB == '\000'?_tmpC != '\000': 0: 0)_throw_arraybounds();*((
-char*)_tmpA.curr)=_tmpC;});if(_get_arr_size(_tmp8,sizeof(char))== 1?_tmp9 == '\000'?
-_tmpD != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp8.curr)=_tmpD;});({struct
+_tmpA,sizeof(char))== 1  && (_tmpB == '\000'  && _tmpC != '\000'))_throw_arraybounds();*((
+char*)_tmpA.curr)=_tmpC;});if(_get_arr_size(_tmp8,sizeof(char))== 1  && (_tmp9 == '\000'
+ && _tmpD != '\000'))_throw_arraybounds();*((char*)_tmp8.curr)=_tmpD;});({struct
 _tagged_arr _tmpE=_tagged_arr_plus(ans,sizeof(char),2);char _tmpF=*((char*)
 _check_unknown_subscript(_tmpE,sizeof(char),0));char _tmp10=*((const char*)
 _check_unknown_subscript(filename,sizeof(char),0));if(_get_arr_size(_tmpE,
-sizeof(char))== 1?_tmpF == '\000'?_tmp10 != '\000': 0: 0)_throw_arraybounds();*((
+sizeof(char))== 1  && (_tmpF == '\000'  && _tmp10 != '\000'))_throw_arraybounds();*((
 char*)_tmpE.curr)=_tmp10;});i=3;j=2;}else{ans_sz=(int)_get_arr_size(filename,
 sizeof(char));ans=({unsigned int _tmp11=(unsigned int)ans_sz;char*_tmp12=(char*)
 _cycalloc_atomic(_check_times(sizeof(char),_tmp11 + 1));struct _tagged_arr _tmp14=
@@ -505,6 +505,6 @@ for(k=0;k < _tmp13;k ++){_tmp12[k]='\000';}_tmp12[_tmp13]=(char)0;}_tmp14;});i=0
 0;}while(i < ans_sz){char c=*((const char*)_check_unknown_subscript(filename,
 sizeof(char),j ++));({struct _tagged_arr _tmp15=_tagged_arr_plus(ans,sizeof(char),i
 ++);char _tmp16=*((char*)_check_unknown_subscript(_tmp15,sizeof(char),0));char
-_tmp17=c == '\\'?'/': c;if(_get_arr_size(_tmp15,sizeof(char))== 1?_tmp16 == '\000'?
-_tmp17 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});}return
-ans;}
+_tmp17=c == '\\'?'/': c;if(_get_arr_size(_tmp15,sizeof(char))== 1  && (_tmp16 == '\000'
+ && _tmp17 != '\000'))_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});}
+return ans;}

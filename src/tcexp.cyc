@@ -654,6 +654,20 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   return t;
 }
 
+// e1 && e2
+static type_t tcAnd(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+  tcTest(te,e1,"logical-and expression");
+  tcTest(te,e2,"logical-and expression");
+  return sint_typ;
+}
+
+// e1 || e2
+static type_t tcOr(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+  tcTest(te,e1,"logical-or expression");
+  tcTest(te,e2,"logical-or expression");
+  return sint_typ;
+}
+
 // Assignments with optional operations, e.g., x = 3, x += 5
 static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
                          exp_t e1, opt_t<primop_t> po, exp_t e2) {
@@ -2081,6 +2095,10 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcAssignOp(te,loc,topt,e1,popt,e2); break;
   case &Conditional_e(e1,e2,e3):
     t = tcConditional(te,loc,topt,e1,e2,e3); break;
+  case &And_e(e1,e2):
+    t = tcAnd(te,loc,e1,e2); break;
+  case &Or_e(e1,e2):
+    t = tcOr(te,loc,e1,e2); break;
   case &SeqExp_e(e1,e2):
     t = tcSeqExp(te,loc,topt,e1,e2); break;
   case &FnCall_e(e1,es,*vci):

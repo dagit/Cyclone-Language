@@ -658,6 +658,18 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let pr3        = anal_Rexp(env,f1f,   e3);
     return join_flow_and_rval(env->all_changed,pr2,pr3);
 
+  case &And_e(e1,e2):
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let pr2 = anal_Rexp(env,f1t,e2);
+    let pr3 = $(f1f, (absRval_t)Zero);
+    return join_flow_and_rval(env->all_changed,pr2,pr3);
+
+  case &Or_e(e1,e2):
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let pr2 = anal_Rexp(env,f1f,e2);
+    let pr3 = $(f1t, (absRval_t)NotZeroAll);
+    return join_flow_and_rval(env->all_changed,pr2,pr3);    
+
   case &Subscript_e(e1,e2): // FIX: avoid list allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
     let f2 = f;
@@ -965,6 +977,14 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
     let $(f3t,f3f) = anal_test(env,f1f,   e3);
     return $(join_flow(env->all_changed, f2t, f3t),
 	     join_flow(env->all_changed, f2f, f3f));
+  case &And_e(e1,e2):
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let $(f2t,f2f) = anal_test(env,f1t,e2);
+    return $(f2t, join_flow(env->all_changed, f1f, f2f));
+  case &Or_e(e1,e2):
+    let $(f1t,f1f) = anal_test(env,inflow,e1);
+    let $(f2t,f2f) = anal_test(env,f1f,e2);
+    return $(join_flow(env->all_changed, f1t, f2t), f2f);
   case &SeqExp_e(e1,e2):
     return anal_test(env, anal_Rexp(env,inflow,e1)[0], e2);
   case &Primop_e(Not,&List(e1,NULL)):          

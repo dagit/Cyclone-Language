@@ -435,10 +435,10 @@ exp_t conditional_exp(exp_t e1,exp_t e2,exp_t e3,seg_t loc) {
   return new_exp(new Conditional_e(e1,e2,e3), loc);
 }
 exp_t and_exp(exp_t e1, exp_t e2, seg_t loc) {
-  return conditional_exp(e1,e2,false_exp(loc), loc);
+  return new_exp(new And_e(e1,e2), loc);
 }
 exp_t or_exp(exp_t e1, exp_t e2, seg_t loc) {
-  return conditional_exp(e1,true_exp(loc),e2, loc);
+  return new_exp(new Or_e(e1,e2), loc);
 }
 exp_t seq_exp(exp_t e1, exp_t e2, seg_t loc) {
   return new_exp(new SeqExp_e(e1,e2), loc);
@@ -577,6 +577,7 @@ stmt_t forarray_stmt(list_t<vardecl_t,`H> d, exp_t e1, exp_t e2,
 }
 /////////////////////////// Patterns //////////////////////////////
 pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,NULL,s); }
+pat_t exp_pat(exp_t e) { return new_pat(new Exp_p(e),e->loc); }
 
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
@@ -773,7 +774,7 @@ stringptr_t fieldname(int i) {
 $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU info) {
   switch(info) {
   case &UnknownAggr(k,n): return $(k,n);
-  case &KnownAggr(&(&Aggrdecl(k,_,n,_,_,_))): return $(k,n);
+  case &KnownAggr(&&Aggrdecl(k,_,n,_,_,_)): return $(k,n);
   }
 }
 aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info) {

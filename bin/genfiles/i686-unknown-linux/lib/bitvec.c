@@ -492,23 +492,23 @@ struct _tagged_arr bvec,int pos){int word=pos >> 5;int offset=pos & 31;int slot=
 _check_unknown_subscript(bvec,sizeof(int),word));int ans=(slot >> offset & 1)== 1;
 if(!ans)((int*)bvec.curr)[word]=slot | 1 << offset;return ans;}void Cyc_Bitvec_union_two(
 struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2){unsigned int
-len=_get_arr_size(dest,sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= 
-_get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct
+len=_get_arr_size(dest,sizeof(int));len <= _get_arr_size(src1,sizeof(int)) && len
+<= _get_arr_size(src2,sizeof(int))?0:((int(*)(struct _tagged_arr assertion,struct
 _tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="len <= src1.size && len <= src2.size";
 _tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*_tmp1="bitvec.cyc";
 _tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,11));}),71);{int i=0;for(0;i
 < len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]| ((int*)src2.curr)[i];}}}
 void Cyc_Bitvec_intersect_two(struct _tagged_arr dest,struct _tagged_arr src1,struct
-_tagged_arr src2){unsigned int len=_get_arr_size(dest,sizeof(int));(len <= 
-_get_arr_size(src1,sizeof(int))?len <= _get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(
+_tagged_arr src2){unsigned int len=_get_arr_size(dest,sizeof(int));len <= 
+_get_arr_size(src1,sizeof(int)) && len <= _get_arr_size(src2,sizeof(int))?0:((int(*)(
 struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp2="len <= src1.size && len <= src2.size";_tag_arr(_tmp2,sizeof(
 char),_get_zero_arr_size(_tmp2,37));}),({const char*_tmp3="bitvec.cyc";_tag_arr(
 _tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),78);{int i=0;for(0;i < len;++ i){((
 int*)dest.curr)[i]=((int*)src1.curr)[i]& ((int*)src2.curr)[i];}}}void Cyc_Bitvec_diff_two(
 struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2){unsigned int
-len=_get_arr_size(dest,sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= 
-_get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct
+len=_get_arr_size(dest,sizeof(int));len <= _get_arr_size(src1,sizeof(int)) && len
+<= _get_arr_size(src2,sizeof(int))?0:((int(*)(struct _tagged_arr assertion,struct
 _tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp4="len <= src1.size && len <= src2.size";
 _tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,37));}),({const char*_tmp5="bitvec.cyc";
 _tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,11));}),85);{int i=0;for(0;i

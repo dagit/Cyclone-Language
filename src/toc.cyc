@@ -1667,6 +1667,14 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e2);
     exp_to_c(nv,e3);
     break;
+  case &And_e(e1,e2):
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
+    break;
+  case &Or_e(e1,e2):
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
+    break;
   case &SeqExp_e(e1,e2):
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
@@ -2789,8 +2797,9 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     else
       s = s3;
     break;
-  case &UnknownId_p(_):     toc_impos("unknownid");
-  case &UnknownCall_p(_,_): toc_impos("unknowncall");
+  case &UnknownId_p(_):     toc_impos("unknownid pat");
+  case &UnknownCall_p(_,_): toc_impos("unknowncall pat");
+  case &Exp_p(_):           toc_impos("exp pat");
   }
   return $(nv,decls,s);
 }

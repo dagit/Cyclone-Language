@@ -138,7 +138,8 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 
   case &Conditional_e(e1,e2,e3):
      box_free_vars_exp(env,e3); fallthru(e1,e2);
-
+  case &And_e(e1,e2):           fallthru(e1,e2);
+  case &Or_e(e1,e2):            fallthru(e1,e2);
   case &Subscript_e(e1,e2):     fallthru(e1,e2);
   case &SeqExp_e(e1,e2):        fallthru(e1,e2);
   case &AssignOp_e(e1, _, e2):
@@ -298,7 +299,8 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
 
   case &Conditional_e(e1,e2,e3):
      apply_varmap(varmap,e3); fallthru(e1,e2);
-
+  case &And_e(e1,e2):         fallthru(e1,e2);
+  case &Or_e(e1,e2):          fallthru(e1,e2);
   case &Subscript_e(e1,e2):     fallthru(e1,e2);
   case &SeqExp_e(e1,e2):        fallthru(e1,e2);
   case &AssignOp_e(e1, _, e2):
@@ -396,7 +398,8 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &Conditional_e(e1,e2,e3):
     exp_to_vc(env, e3);          fallthru(e1,e2);
-
+  case &And_e(e1,e2):            fallthru(e1,e2);
+  case &Or_e(e1,e2):             fallthru(e1,e2);
   case &Subscript_e(e1,e2):      fallthru(e1,e2);
   case &SeqExp_e(e1,e2):         fallthru(e1,e2);
   case &AssignOp_e(e1, _, e2):

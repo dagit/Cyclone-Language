@@ -798,6 +798,28 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
   return BoxKind;
 }
 
+// convert a pattern back into an expression 
+static exp_t pat2exp(pat_t p) {
+  switch (p->r) {
+  case &UnknownId_p(x): return new_exp(new UnknownId_e(x),p->loc);
+  case &Reference_p(vd): 
+    return deref_exp(new_exp(new UnknownId_e(vd->name),p->loc),p->loc);
+  case &Pointer_p(p2): return address_exp(pat2exp(p2),p->loc);
+  case Null_p: return null_exp(p->loc);
+  case &Int_p(s,i): return int_exp(s,i,p->loc);
+  case &Char_p(c): return char_exp(c,p->loc);
+  case &Float_p(s): return float_exp(s,p->loc);
+  case &UnknownCall_p(x,ps): 
+    exp_t e1 = new_exp(new UnknownId_e(x),p->loc);
+    list_t<exp_t> es = List::map(pat2exp,ps);
+    return unknowncall_exp(e1,es,p->loc);
+  case &Exp_p(e): return e;
+  default: 
+    err("cannot mix patterns and expressions in case",p->loc);
+    return null_exp(p->loc);
+  }
+}
+
 } // end namespace Parse
 using Parse;
 %}
@@ -913,7 +935,11 @@ using Parse;
 %type <stmt_t> jump_statement
 %type <list_t<switch_clause_t>> switch_clauses
 %type <list_t<switchC_clause_t>> switchC_clauses
-%type <pat_t> pattern
+%type <pat_t> pattern exp_pattern conditional_pattern logical_or_pattern
+%type <pat_t> logical_and_pattern inclusive_or_pattern exclusive_or_pattern
+%type <pat_t> and_pattern equality_pattern relational_pattern shift_pattern
+%type <pat_t> additive_pattern multiplicative_pattern cast_pattern
+%type <pat_t> unary_pattern postfix_pattern primary_pattern
 %type <list_t<pat_t>> tuple_pattern_list
 %type <$(list_t<designator_t>,pat_t)@> field_pattern
 %type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list
@@ -2023,11 +2049,11 @@ switch_clauses:
     { $$=^$(new List(new Switch_clause(new_pat(Wild_p,LOC(@1,@1)),NULL,
                                        NULL,$3,LOC(@1,@3)),
 		     NULL));}
-| CASE pattern ':' switch_clauses
+| CASE exp_pattern ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,NULL,
                                        fallthru_stmt(NULL,LOC(@3,@3)),
                                        LOC(@1,@4)),$4)); }
-| CASE pattern ':' block_item_list switch_clauses
+| CASE exp_pattern ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,NULL,$4,LOC(@1,@4)),$5)); }
 | CASE pattern AND_OP expression ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,
@@ -2145,22 +2171,149 @@ jump_statement:
 
 /***************************** PATTERNS *****************************/
 /* Cyc:  patterns */
+
+/* The next few productions replicate expressions except that the
+ * terminal case is for patterns. */
+exp_pattern:
+  conditional_pattern { $$=$!1; }
+;
+conditional_pattern:
+  logical_or_pattern { $$=$!1; }
+| logical_or_pattern '?' expression ':' conditional_expression
+{ $$=^$(exp_pat(conditional_exp(pat2exp($1),$3,$5,LOC(@1,@5)))); }
+;
+logical_or_pattern:
+  logical_and_pattern {$$=$!1; }
+| logical_or_pattern OR_OP logical_and_expression
+{ $$=^$(exp_pat(or_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+;
+logical_and_pattern:
+  inclusive_or_pattern { $$=$!1; }
+| inclusive_or_pattern AND_OP inclusive_or_expression
+{ $$=^$(exp_pat(and_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+;
+inclusive_or_pattern:
+  exclusive_or_pattern { $$=$!1; }
+| exclusive_or_pattern '|' exclusive_or_expression
+{ $$=^$(exp_pat(prim2_exp(Bitor,pat2exp($1),$3,LOC(@1,@3)))); }
+;
+exclusive_or_pattern:
+  and_pattern { $$=$!1; }
+| and_pattern '^' exclusive_or_expression
+{ $$=^$(exp_pat(prim2_exp(Bitxor,pat2exp($1),$3,LOC(@1,@3)))); }
+;
+and_pattern:
+  equality_pattern { $$=$!1; }
+| and_pattern '&' equality_expression
+{ $$=^$(exp_pat(prim2_exp(Bitand,pat2exp($1),$3,LOC(@1,@3)))); }
+;
+equality_pattern:
+  relational_pattern { $$=$!1; }
+| equality_pattern EQ_OP relational_expression
+{ $$=^$(exp_pat(eq_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+| equality_pattern NE_OP relational_expression
+{ $$=^$(exp_pat(neq_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+;
+relational_pattern:
+  shift_pattern { $$=$!1; }
+| relational_pattern '<' shift_expression
+{ $$=^$(exp_pat(lt_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+| relational_pattern '>' shift_expression
+{ $$=^$(exp_pat(gt_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+| relational_pattern LE_OP shift_expression
+{ $$=^$(exp_pat(lte_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+| relational_pattern GE_OP shift_expression
+{ $$=^$(exp_pat(gte_exp(pat2exp($1),$3,LOC(@1,@3)))); }
+;
+shift_pattern:
+  additive_pattern { $$=$!1; }
+| shift_pattern LEFT_OP additive_expression
+{$$=^$(exp_pat(prim2_exp(Bitlshift,pat2exp($1),$3,LOC(@1,@3)))); }
+| shift_pattern RIGHT_OP additive_expression
+{$$=^$(exp_pat(prim2_exp(Bitlrshift,pat2exp($1),$3,LOC(@1,@3))));}
+;
+additive_pattern:
+  multiplicative_pattern { $$=$!1; }
+| additive_pattern '+' multiplicative_expression
+{$$=^$(exp_pat(prim2_exp(Plus,pat2exp($1),$3,LOC(@1,@3))));}
+| additive_pattern '-' multiplicative_expression
+{$$=^$(exp_pat(prim2_exp(Minus,pat2exp($1),$3,LOC(@1,@3))));}
+;
+multiplicative_pattern:
+  cast_pattern { $$=$!1; }
+| multiplicative_pattern '*' cast_expression
+{$$=^$(exp_pat(prim2_exp(Times,pat2exp($1),$3,LOC(@1,@3))));}
+| multiplicative_pattern '/' cast_expression
+{$$=^$(exp_pat(prim2_exp(Div,pat2exp($1),$3,LOC(@1,@3))));}
+| multiplicative_pattern '%' cast_expression
+{$$=^$(exp_pat(prim2_exp(Mod,pat2exp($1),$3,LOC(@1,@3))));}
+;
+cast_pattern:
+  unary_pattern { $$=$!1; }
+| '(' type_name ')' cast_expression
+{ $$=^$(exp_pat(cast_exp((*$2)[2],$4,true,Unknown_coercion,LOC(@1,@4)))); }
+;
+
+unary_pattern:
+  postfix_pattern { $$=$!1; }
+// disallow INC_OP and DEC_OP -- not constant expressions
+// disallow & and * because we need them to mark patterns
+| '+' cast_expression { $$=^$(exp_pat($2)); }
+| unary_operator cast_expression 
+  { $$=^$(exp_pat(prim1_exp($1,$2,LOC(@1,@2)))); } 
+| SIZEOF '(' type_name ')' 
+  { $$=^$(exp_pat(sizeoftyp_exp((*$3)[2],LOC(@1,@4)))); }
+| SIZEOF unary_expression
+  { $$=^$(exp_pat(sizeofexp_exp($2,LOC(@1,@2)))); }
+| OFFSETOF '(' type_name ',' field_name ')'
+   { $$=^$(exp_pat(offsetof_exp((*$3)[2],
+                                new StructField(new $5),LOC(@1,@6)))); }
+/* not checking sign here...*/
+| OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
+   { $$=^$(exp_pat(offsetof_exp((*$3)[2],
+                                new TupleIndex((*$5)[1]), LOC(@1,@6)))); }
+// disallow GEN, malloc, rmalloc, and cmalloc -- not constant expressions
+;
+
+postfix_pattern:
+  primary_pattern { $$=$!1; }
+// disallow subscript -- not constant expression
+// disallow function call because we need them to mark patterns
+// disallow x.f, x->f, x++, x-- -- not constant expressions
+// disallow struct initializers -- not valid in a case anyway
+// disallow FILL and CODEGEN
+;
+
+primary_pattern:
+  pattern { $$=$!1;}
+;
+
 pattern:
   '_'
     { $$=^$(new_pat(Wild_p,LOC(@1,@1)));}
-| '(' pattern ')'
-    { $$=$!2; }
-| INTEGER_CONSTANT
-    { $$=^$(new_pat(new Int_p((*$1)[0],(*$1)[1]),LOC(@1,@1))); }
-| '-' INTEGER_CONSTANT
-    { $$=^$(new_pat(new Int_p(Signed,-((*$2)[1])),LOC(@1,@2))); }
-| FLOATING_CONSTANT
-    { $$=^$(new_pat(new Float_p($1),LOC(@1,@1)));}
-/* TODO: we should allow negated floating constants too */
-| CHARACTER_CONSTANT
-    {$$=^$(new_pat(new Char_p($1),LOC(@1,@1)));}
-| NULL_kw
-    {$$=^$(new_pat(Null_p,LOC(@1,@1)));}
+| '(' expression ')'
+    { $$=^$(exp_pat($2)); }
+| constant
+  { exp_t e = $1;
+    switch (e->r) {
+    case &Const_e(&Char_c(s,i)): 
+      $$=^$(new_pat(new Char_p(i),e->loc)); break;
+    case &Const_e(&Short_c(s,i)):
+      $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
+    case &Const_e(&Int_c(s,i)):
+      $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
+    case &Const_e(&Float_c(s)):
+      $$=^$(new_pat(new Float_p(s),e->loc)); break;
+    case &Const_e(Null_c):
+      $$=^$(new_pat(Null_p,e->loc)); break;
+    case &Const_e(&String_c(_)): 
+      err("strings cannot occur within patterns",LOC(@1,@1)); break;
+    case &Const_e(&LongLong_c(_,_)): 
+      unimp("long long's in patterns",LOC(@1,@1)); break;
+    default: 
+      err("bad constant in case",LOC(@1,@1));
+    }
+  }
 | qual_opt_identifier
     { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
 | '$' '(' tuple_pattern_list ')'
@@ -2170,11 +2323,12 @@ pattern:
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    { let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
-			       exist_ts, List::imp_rev($4)),
-		    LOC(@1,@5)));
-    }
+			       exist_ts, List::imp_rev($4)),LOC(@1,@5)));
+   }
 | '&' pattern
     { $$=^$(new_pat(new Pointer_p($2),LOC(@1,@2))); }
+| AND_OP pattern /* to allow &&p */
+    { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
     { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
 						VoidType,NULL)),

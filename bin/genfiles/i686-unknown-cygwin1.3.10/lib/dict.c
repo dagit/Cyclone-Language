@@ -770,39 +770,39 @@ _check_null(d->t))->key_val).f2;_tmpD2;});}static int Cyc_Dict_forall_tree_c(int
 f)(void*,void*,void*),void*env,struct Cyc_Dict_T*t){struct Cyc_Dict_T _tmpD4;struct
 Cyc_Dict_T*_tmpD5;struct Cyc_Dict_T*_tmpD6;struct _tuple0 _tmpD7;void*_tmpD8;void*
 _tmpD9;struct Cyc_Dict_T*_tmpD3=t;_tmpD4=*_tmpD3;_tmpD5=_tmpD4.left;_tmpD6=_tmpD4.right;
-_tmpD7=_tmpD4.key_val;_tmpD8=_tmpD7.f1;_tmpD9=_tmpD7.f2;return((_tmpD5 == 0?1: Cyc_Dict_forall_tree_c(
-f,env,(struct Cyc_Dict_T*)_tmpD5))?f(env,_tmpD8,_tmpD9): 0)?_tmpD6 == 0?1: Cyc_Dict_forall_tree_c(
-f,env,(struct Cyc_Dict_T*)_tmpD6): 0;}int Cyc_Dict_forall_c(int(*f)(void*,void*,
-void*),void*env,struct Cyc_Dict_Dict*d){if(d->t == 0)return 1;return Cyc_Dict_forall_tree_c(
-f,env,(struct Cyc_Dict_T*)_check_null(d->t));}struct _tuple5{int(*f1)(void*,void*,
-void*);struct Cyc_Dict_Dict*f2;};static int Cyc_Dict_forall_intersect_f(struct
-_tuple5*env,void*a,void*b){struct _tuple5 _tmpDB;int(*_tmpDC)(void*,void*,void*);
-struct Cyc_Dict_Dict*_tmpDD;struct _tuple5*_tmpDA=env;_tmpDB=*_tmpDA;_tmpDC=_tmpDB.f1;
-_tmpDD=_tmpDB.f2;if(Cyc_Dict_member(_tmpDD,a))return _tmpDC(a,b,Cyc_Dict_lookup(
-_tmpDD,a));return 1;}int Cyc_Dict_forall_intersect(int(*f)(void*,void*,void*),
-struct Cyc_Dict_Dict*d1,struct Cyc_Dict_Dict*d2){struct _tuple5 _tmpDE=({struct
-_tuple5 _tmpDF;_tmpDF.f1=f;_tmpDF.f2=d2;_tmpDF;});return((int(*)(int(*f)(struct
-_tuple5*,void*,void*),struct _tuple5*env,struct Cyc_Dict_Dict*d))Cyc_Dict_forall_c)(
-Cyc_Dict_forall_intersect_f,& _tmpDE,d1);}struct _tuple6{void*(*f1)(void*,void*,
-void*,void*);void*f2;};static struct Cyc_Dict_Dict*Cyc_Dict_union_f(struct _tuple6*
-env,void*a,void*b,struct Cyc_Dict_Dict*d1){if(Cyc_Dict_member(d1,a)){void*_tmpE0=
-Cyc_Dict_lookup(d1,a);void*_tmpE1=((*env).f1)((*env).f2,a,_tmpE0,b);if(_tmpE1 != 
-_tmpE0)return Cyc_Dict_insert(d1,a,_tmpE1);return d1;}return Cyc_Dict_insert(d1,a,b);}
-struct Cyc_Dict_Dict*Cyc_Dict_union_two_c(void*(*f)(void*,void*,void*,void*),void*
-env,struct Cyc_Dict_Dict*d1,struct Cyc_Dict_Dict*d2){if((int)d1 == (int)d2)return d1;
-return((struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*(*f)(struct _tuple6*,void*,
-void*,struct Cyc_Dict_Dict*),struct _tuple6*env,struct Cyc_Dict_Dict*d,struct Cyc_Dict_Dict*
-accum))Cyc_Dict_fold_c)(Cyc_Dict_union_f,({struct _tuple6*_tmpE2=_cycalloc(
-sizeof(*_tmpE2));_tmpE2->f1=f;_tmpE2->f2=env;_tmpE2;}),d2,d1);}struct Cyc_Dict_Dict*
-Cyc_Dict_intersect_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict*
-d1,struct Cyc_Dict_Dict*d2){if(d1 == d2?1: d2->t == 0)return d2;{struct _tagged_arr
-queue=_tag_arr(({unsigned int _tmpF1=(unsigned int)16;struct Cyc_Dict_T**_tmpF2=(
-struct Cyc_Dict_T**)_cycalloc(_check_times(sizeof(struct Cyc_Dict_T*),_tmpF1));{
-unsigned int _tmpF3=_tmpF1;unsigned int i;for(i=0;i < _tmpF3;i ++){_tmpF2[i]=(struct
-Cyc_Dict_T*)_check_null(d2->t);}}_tmpF2;}),sizeof(struct Cyc_Dict_T*),(
-unsigned int)16);int ind=0;struct Cyc_Dict_T*_tmpE3=0;while(ind != - 1){struct Cyc_Dict_T
-_tmpE5;struct Cyc_Dict_T*_tmpE6;struct Cyc_Dict_T*_tmpE7;struct _tuple0 _tmpE8;void*
-_tmpE9;void*_tmpEA;struct Cyc_Dict_T*_tmpE4=*((struct Cyc_Dict_T**)
+_tmpD7=_tmpD4.key_val;_tmpD8=_tmpD7.f1;_tmpD9=_tmpD7.f2;return((_tmpD5 == 0  || 
+Cyc_Dict_forall_tree_c(f,env,(struct Cyc_Dict_T*)_tmpD5)) && f(env,_tmpD8,_tmpD9))
+ && (_tmpD6 == 0  || Cyc_Dict_forall_tree_c(f,env,(struct Cyc_Dict_T*)_tmpD6));}int
+Cyc_Dict_forall_c(int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict*d){if(
+d->t == 0)return 1;return Cyc_Dict_forall_tree_c(f,env,(struct Cyc_Dict_T*)
+_check_null(d->t));}struct _tuple5{int(*f1)(void*,void*,void*);struct Cyc_Dict_Dict*
+f2;};static int Cyc_Dict_forall_intersect_f(struct _tuple5*env,void*a,void*b){
+struct _tuple5 _tmpDB;int(*_tmpDC)(void*,void*,void*);struct Cyc_Dict_Dict*_tmpDD;
+struct _tuple5*_tmpDA=env;_tmpDB=*_tmpDA;_tmpDC=_tmpDB.f1;_tmpDD=_tmpDB.f2;if(Cyc_Dict_member(
+_tmpDD,a))return _tmpDC(a,b,Cyc_Dict_lookup(_tmpDD,a));return 1;}int Cyc_Dict_forall_intersect(
+int(*f)(void*,void*,void*),struct Cyc_Dict_Dict*d1,struct Cyc_Dict_Dict*d2){struct
+_tuple5 _tmpDE=({struct _tuple5 _tmpDF;_tmpDF.f1=f;_tmpDF.f2=d2;_tmpDF;});return((
+int(*)(int(*f)(struct _tuple5*,void*,void*),struct _tuple5*env,struct Cyc_Dict_Dict*
+d))Cyc_Dict_forall_c)(Cyc_Dict_forall_intersect_f,& _tmpDE,d1);}struct _tuple6{
+void*(*f1)(void*,void*,void*,void*);void*f2;};static struct Cyc_Dict_Dict*Cyc_Dict_union_f(
+struct _tuple6*env,void*a,void*b,struct Cyc_Dict_Dict*d1){if(Cyc_Dict_member(d1,a)){
+void*_tmpE0=Cyc_Dict_lookup(d1,a);void*_tmpE1=((*env).f1)((*env).f2,a,_tmpE0,b);
+if(_tmpE1 != _tmpE0)return Cyc_Dict_insert(d1,a,_tmpE1);return d1;}return Cyc_Dict_insert(
+d1,a,b);}struct Cyc_Dict_Dict*Cyc_Dict_union_two_c(void*(*f)(void*,void*,void*,
+void*),void*env,struct Cyc_Dict_Dict*d1,struct Cyc_Dict_Dict*d2){if((int)d1 == (int)
+d2)return d1;return((struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*(*f)(struct
+_tuple6*,void*,void*,struct Cyc_Dict_Dict*),struct _tuple6*env,struct Cyc_Dict_Dict*
+d,struct Cyc_Dict_Dict*accum))Cyc_Dict_fold_c)(Cyc_Dict_union_f,({struct _tuple6*
+_tmpE2=_cycalloc(sizeof(*_tmpE2));_tmpE2->f1=f;_tmpE2->f2=env;_tmpE2;}),d2,d1);}
+struct Cyc_Dict_Dict*Cyc_Dict_intersect_c(void*(*f)(void*,void*,void*,void*),void*
+env,struct Cyc_Dict_Dict*d1,struct Cyc_Dict_Dict*d2){if(d1 == d2  || d2->t == 0)
+return d2;{struct _tagged_arr queue=_tag_arr(({unsigned int _tmpF1=(unsigned int)16;
+struct Cyc_Dict_T**_tmpF2=(struct Cyc_Dict_T**)_cycalloc(_check_times(sizeof(
+struct Cyc_Dict_T*),_tmpF1));{unsigned int _tmpF3=_tmpF1;unsigned int i;for(i=0;i < 
+_tmpF3;i ++){_tmpF2[i]=(struct Cyc_Dict_T*)_check_null(d2->t);}}_tmpF2;}),sizeof(
+struct Cyc_Dict_T*),(unsigned int)16);int ind=0;struct Cyc_Dict_T*_tmpE3=0;while(
+ind != - 1){struct Cyc_Dict_T _tmpE5;struct Cyc_Dict_T*_tmpE6;struct Cyc_Dict_T*_tmpE7;
+struct _tuple0 _tmpE8;void*_tmpE9;void*_tmpEA;struct Cyc_Dict_T*_tmpE4=*((struct Cyc_Dict_T**)
 _check_unknown_subscript(queue,sizeof(struct Cyc_Dict_T*),ind --));_tmpE5=*_tmpE4;
 _tmpE6=_tmpE5.left;_tmpE7=_tmpE5.right;_tmpE8=_tmpE5.key_val;_tmpE9=_tmpE8.f1;
 _tmpEA=_tmpE8.f2;if(ind + 2 >= _get_arr_size(queue,sizeof(struct Cyc_Dict_T*)))

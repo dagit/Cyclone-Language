@@ -476,10 +476,10 @@ b->position);b->buffer=new_buffer;b->length=new_len;return;}void Cyc_Buffer_add_
 struct Cyc_Buffer_t*b,char c){int pos=(int)b->position;if(pos >= b->length)Cyc_Buffer_resize(
 b,1);({struct _tagged_arr _tmp1=_tagged_arr_plus(b->buffer,sizeof(char),pos);char
 _tmp2=*((char*)_check_unknown_subscript(_tmp1,sizeof(char),0));char _tmp3=c;if(
-_get_arr_size(_tmp1,sizeof(char))== 1?_tmp2 == '\000'?_tmp3 != '\000': 0: 0)
+_get_arr_size(_tmp1,sizeof(char))== 1  && (_tmp2 == '\000'  && _tmp3 != '\000'))
 _throw_arraybounds();*((char*)_tmp1.curr)=_tmp3;});b->position=(unsigned int)(
 pos + 1);return;}void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct
-_tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?1: offset + len > 
+_tagged_arr s,int offset,int len){if((offset < 0  || len < 0) || offset + len > 
 _get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp4=_cycalloc(sizeof(*_tmp4));_tmp4[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp5;_tmp5.tag=Cyc_Core_Invalid_argument;_tmp5.f1=({const char*_tmp6="Buffer::add_substring";

@@ -479,6 +479,8 @@ namespace Absyn {
     AssignOp_e(exp_t,opt_t<primop_t>,exp_t); // e1 = e2, e1 += e2, etc.
     Increment_e(exp_t,incrementor_t);  // e++, ++e, --e, e--
     Conditional_e(exp_t,exp_t,exp_t);  // e1 ? e2 : e3
+    And_e(exp_t,exp_t); // e1 && e2
+    Or_e(exp_t,exp_t);  // e1 || e2
     SeqExp_e(exp_t,exp_t);             // e1, e2
     UnknownCall_e(exp_t,list_t<exp_t>); // used during parsing
     // the vararg_call_info_t is non-null only if this is a vararg call
@@ -597,6 +599,7 @@ namespace Absyn {
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // resolved by tcpat
     UnknownCall_p(qvar_t,list_t<pat_t>); // resolved by tcpat
+    Exp_p(exp_t);        // evaluated and resolved by tcpat
   };
   // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
@@ -948,6 +951,7 @@ namespace Absyn {
 
   /////////////////////////// Patterns //////////////////////////////
   extern pat_t new_pat(raw_pat_t p, seg_t s);
+  extern pat_t exp_pat(exp_t);
 
   ////////////////////////// Declarations ///////////////////////////
   extern decl_t new_decl(raw_decl_t r, seg_t loc);
