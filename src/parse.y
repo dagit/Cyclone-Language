@@ -415,7 +415,7 @@ static $(typ,Opt_t<decl>)@
 collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
 
   /* flags that record what we've seen in the qualifiers */
-  Opt_t<Bool> signopt = null;      /* true->signed, false->unsigned */
+  Opt_t<bool> signopt = null;      /* true->signed, false->unsigned */
   Opt_t<typ> topt = null;        /* the underlying type (if any) */
   Opt_t<decl> declopt = null;      /* any hidden declarations */
   bool is_short = false;         /* short or Short */
@@ -438,13 +438,13 @@ collapse_type_specifiers (list<type_specifier_t> ts, segment loc) {
       last_loc = loc2;
       if (signopt != null) err(msg4,loc2);
       if (topt != null) err("signed qualifier must come before type",loc2);
-      signopt = &Opt((Bool)true);
+      signopt = &Opt(true);
       break;
     case Unsigned_spec(loc2):
       last_loc = loc2;
       if (signopt != null) err(msg4,loc2);
       if (topt != null) err("signed qualifier must come before type",loc2);
-      signopt = &Opt((Bool)false);
+      signopt = &Opt(false);
       break;
     case Short_spec(loc2,box):
       last_loc = loc2;
@@ -614,7 +614,7 @@ apply_tms(tqual tq,typ t,list<type_modifier> tms)
 		   "in declarator",loc));
     }
     case Pointer_mod(nullable,tq2): {
-      return apply_tms(tq2,PointerType(t,new_conref((Bool)nullable),tq),
+      return apply_tms(tq2,PointerType(t,new_conref(nullable),tq),
 		       tms->tl);
     }
   }
@@ -845,7 +845,6 @@ using Parse;
   Int_tok($(sign,int)@);
   Char_tok(char);
   Short_tok(short);
-  Bool_tok(bool);
   String_tok(string);
   StringOpt_tok(Opt_t<string>);
   Type_tok(typ);
@@ -1120,10 +1119,6 @@ type_specifier:
 /* Cyc: everything below here is an addition */
 | TYPE_VAR
     { $$=^$(type_spec(VarType($1),LOC(@1,@1))); }
-| BOOL
-    { $$=^$(type_spec(BoolType(Unboxed),LOC(@1,@1))); }
-| BOXED_BOOL
-    { $$=^$(type_spec(BoolType(Boxed),LOC(@1,@1))); }
 | BOXED_CHAR
     { $$=^$(type_spec(IntType(Unsigned, B1, Boxed),LOC(@1,@1))); }
 | BOXED_SHORT
@@ -1868,10 +1863,6 @@ pattern:
     {$$=^$(new_pat(Char_p($1),LOC(@1,@1)));}
 | NULL
     {$$=^$(new_pat(Null_p,LOC(@1,@1)));}
-| TRUE
-    {$$=^$(new_pat(Bool_p(true),LOC(@1,@1)));}
-| FALSE
-    {$$=^$(new_pat(Bool_p(false),LOC(@1,@1)));}
 | qual_opt_identifier
     { $$=^$(new_pat(UnknownId_p($1),LOC(@1,@1))); }
 | qual_opt_identifier type_params_opt '(' tuple_pattern_list ')'
@@ -2242,11 +2233,7 @@ constant:
     { $$=^$(new_exp(Const_e(Char_c(Unsigned,$1)),LOC(@1,@1))); }
 | FLOATING_CONSTANT
     { $$=^$(new_exp(Const_e(Float_c($1)),LOC(@1,@1))); }
-/* Cyc: boolean constants and null */
-| TRUE
-    { $$=^$(new_exp(Const_e(Bool_c(true)),LOC(@1,@1))); }
-| FALSE
-    { $$=^$(new_exp(Const_e(Bool_c(false)),LOC(@1,@1))); }
+/* Cyc: null */
 | NULL
     { $$=^$(new_exp(Const_e(Null_c),LOC(@1,@1))); }
 ;
@@ -2265,8 +2252,6 @@ void yyprint(int i, xenum YYSTYPE v) {
   case Int_tok(&$(_,i2)): fprintf(cyc_stderr,"%d",i2);      break;
   case Char_tok(c):       fprintf(cyc_stderr,"%c",c);       break;
   case Short_tok(s):      fprintf(cyc_stderr,"%ds",(int)s); break;
-  case Bool_tok(b):       fprintf(cyc_stderr,"%s",
-				  b ? (string)"true" : (string)"false"); break;
   case String_tok(s):          fprintf(cyc_stderr,"\"%s\"",s); break;
   case StringOpt_tok(null):    fprintf(cyc_stderr,"null");     break;
   case StringOpt_tok(&Opt(s)): fprintf(cyc_stderr,"\"%s\"",s); break;

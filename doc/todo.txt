@@ -1,5 +1,13 @@
 Todo now:
 
+* we don't verify that cyc_main has the right type:  we should rename
+  it to "main" (and translate it to _cyc_main or something like this)
+  and force it to return an int and take argc, argv as arguments.
+
+* unbox [?] arrays
+
+* get rid of null, replace with 0 (requires clever overloading)
+
 * Top of the list: figure out why compiling the compiler with the
   latest gcc from cygwin on -g causes a seg fault, whereas compiling
   with -O[2] does not.  (Note that this problem does not occur with at
@@ -38,10 +46,17 @@ Todo now:
 
 * Remove synth stuff to clean up typechecker
 
+>>>>>>> 1.4
 * ought to be able to treat the arguments to an enum constructor as a tuple
   in a pattern...
 
+* need to start putting user's guide together.
+
+<<<<<<< todo.txt
+* should port bison and lex
+=======
 * lots of places where we're not sure what to do with the type qualifiers
+>>>>>>> 1.4
 
 * should hack the popcorn front-end to spit out cyclone (or a close
   approximation thereof.)

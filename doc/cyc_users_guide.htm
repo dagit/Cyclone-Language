@@ -185,7 +185,9 @@ design and implementation.&nbsp; Dan Grossman is working on version
 2.0 of the system which should add support for a number of other
 features and clean up the type-checker considerably.&nbsp; Fred Smith,
 Dave Walker, and Stephanie Weirich have contributed greatly through
-discussions, if not code.&nbsp; Many of the ideas contained within
+discussions, if not code.&nbsp; Jeff Vinocour, Nathan Lutchansky,
+Matthew Harris, Kate Oliver, and Hubert Chao have also made many 
+valuable contributions.  Many of the ideas contained within
 Cyclone are derived from our previous experience and work on the
 Popcorn safe-C language and the Typed Assembly Language
 project.&nbsp;&nbsp;
@@ -263,11 +265,13 @@ the new code.</p>
 programs to C, and then use GCC to compile the resulting code to machine
 code.&nbsp; Typically, if one wants to compile the file foo.cyc to an object
 file foo.o, one would write:</p>
-<pre>  cyclone -tc -toc -pp foo.cyc &gt; foo.c
+<pre>  cyclone -tc -toc -pp -o foo.c foo.cyc 
   gcc -c foo.c</pre>
 <p>The &quot;tc&quot; flag tells Cyclone to type-check the code, the &quot;toc&quot;
 flag tells it to translate the code to C, and the &quot;pp&quot; flag says to
-pretty print the resulting C code to standard out.&nbsp; In the example above,
+pretty print the resulting C code.  The output is directed via the
+&quot;-o&quot; flag to the file foo.c.&nbsp;  (When no output is specified
+it is sent to standard out.)&nbsp;  In the example above,
 this would type-check foo.cyc, translate it to C, and then print the output to
 foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o</p>
 <p>Note that Cyclone runs the C pre-processor on the file before actually
@@ -276,9 +280,11 @@ compiling it (just as with C).&nbsp;&nbsp;</p>
 <ul>
   <li>-I <i>dir</i>:&nbsp; add <i>dir</i> to the search path for #include files
     (as in C)</li>
+  <li>-o <i>file</i> :&nbsp; print the output to <i>file</i></li>
   <li>-tc:&nbsp; type-check the input code</li>
   <li>-toc:&nbsp; translate the input code to C</li>
-  <li>-pp: pretty-print the code to standard out</li>
+  <li>-pp: pretty-print the code</li>
+  <li>-up: ugly-print the code</li>
   <li>-D <i>defn</i>: pass a definition to the pre-processor (as in C)</li>
   <li>-check-null:&nbsp; generate explicit tests for null (currently broken)</li>
   <li>-noexpandtypedefs:&nbsp; do not expand type-defs during pretty-printing</li>
@@ -402,7 +408,6 @@ currently includes are as follows:</p>
   <li>// comments as in Java or C++</li>
   <li>Trailing comma allowed in enum declarations.&nbsp; Also, you can use
     semi-colons instead of commas.</li>
-  <li>The boolean type is built in</li>
   <li>Declarations can appear in any statement position.&nbsp; It is not
     necessary to wrap braces around the declaration of a local variable.</li>
   <li>For-statements can include a declaration. For instance:&nbsp; <code><b>for</b>(int
@@ -490,8 +495,8 @@ the (NullPointer???) exception is raised.</p>
 <p>Cyclone provides exceptions, <code>throw</code>, and <code>
 try</code>/<code>catch</code> statements similar to
 Java.&nbsp; (We'll probably add support for finally clauses at some
-point.)&nbsp; This avoids the error-prone and type-unsafe approach in C of
-returning a value (e.g., -1) to indicate an error.&nbsp; Exception values are a special case of
+point.)&nbsp; This is one way to avoid the error-prone and type-unsafe approach in C of
+returning a value (e.g., -1) to indicate an error.&nbsp; (An alternative way is to return a possibly-null pointer, or an appropritate enum value.)&nbsp;  Exception values are a special case of
 extensible datatype enums (xenums) described below.&nbsp; The following example
 shows how to declare a couple of exceptions, how to throw an exception, and how
 to catch an exception:</p>
@@ -639,13 +644,13 @@ in an abstract syntax tree and prints the tree to stdout:</p>
                              <b>printf</b>(&quot;<font color="#0000FF">+</font>&quot;); 
                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
      <b>case</b> Term(t1,Times,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;*&quot;); 
+                             <b>printf</b>(&quot;<font color="#0000FF">*</font>&quot;); 
                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
      <b>case</b> Term(t1,Minus,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;-&quot;);
+                             <b>printf</b>(&quot;<font color="#0000FF">-</font>&quot;);
                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
      <b>case</b> Term(t1,Divide,t2):<b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
-                             <b>printf</b>(&quot;/&quot;);
+                             <b>printf</b>(&quot;<font color="#0000FF">/</font>&quot;);
                              print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
   }</pre>
 <p>Note that patterns introduce and initialize new variables local to a given
@@ -766,13 +771,13 @@ we can use the same code for different types.&nbsp; The general rule is that
 values of the types that instantiate a type variable must fit into a machine
 word and must be passed in general-purpose (as opposed to floating-point)
 registers.&nbsp; Examples of such types include int, pointer, enum, xenum, and
-array types.&nbsp; Other types, including bool, char, short, long long, float,
+array types.&nbsp; Other types, including char, short, long long, float,
 double, struct, and tuple types violate this rule and thus cannot be passed to a
 function like swap in place of the type variables.&nbsp;&nbsp;</p>
 <p>In practice, this means that you tend to manipulate a lot of pointers in
 Cyclone code.&nbsp; To deal with the base types, Cyclone also provides
-&quot;boxed&quot; versions (Bool, Char, Short, Long Long, Float, Double) that
-can be used to instantiate polymorphic code.&nbsp; Boxed types such as Bool,
+&quot;boxed&quot; versions (Char, Short, Long Long, Float, Double) that
+can be used to instantiate polymorphic code.&nbsp; Boxed types such as 
 Char, and Short take up a full machine word in a struct, tuple or array.&nbsp;
 Thus, Char[10] consists of 10 words, whereas char[10] consists of 10
 bytes.&nbsp; Boxed types such as Long Long and Double that take up more than one
@@ -964,7 +969,6 @@ namespace <i>identifier</i></font>
 <br>
 <font color=green>
 (The C9X type-specifiers
-<code>_Bool</code>,
 <code>_Complex</code>, and
 <code>_Imaginary</code>
 are not yet supported)
@@ -987,8 +991,6 @@ are not yet supported)
   <font color=red>
   <i>type-var</i>
   <br>
-  <code>bool</code><br>
-  <code>Bool</code>
   <code>Char</code>
   <code>Short</code>
   <code>Int</code>
@@ -1338,8 +1340,6 @@ see <code>switch-clauses</code>)
   <i>floating-constant</i><br>
   <i>character-constant</i><br>
   <code>null</code><br>
-  <code>true</code><br>
-  <code>false</code><br>
   <i>identifier</i><br>
   <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>(</code> <i>tuple-pattern-list</i> <code>)</code><br>
   <code>$</code> <code>(</code> <i>tuple-pattern-list</i> <code>)</code><br>
@@ -1557,8 +1557,6 @@ see <code>switch-clauses</code>)
   <i>floating-constant</i><br>
   <i>enumeration-constant</i><br>
 <font color=red>
-  true<br>
-  false<br>
   null<br>
 </font>
 </ul>

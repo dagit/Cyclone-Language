@@ -1,3 +1,5 @@
+#include "core.h"
+
 namespace Character;
 
 bool isupper(char c) {

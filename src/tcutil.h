@@ -65,6 +65,9 @@ extern exp default_initializer(tenv,typ,segment);
 
 extern $(var,typ)@ make_inst_var(var);
 
+// prints a warning when an expression contains an assignment
+extern void check_contains_assign(exp);
+
 // Check that the type is valid assuming that the free type variables are
 // drawn from the given list.  As a side-effect, expand any typedefs.
 extern void check_valid_type(segment,tenv,list<tvar>,typ);

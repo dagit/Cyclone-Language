@@ -63,14 +63,12 @@ extern string string_of_int(int);
 extern string string_of_uint(unsigned int);
 extern string string_of_char(char);
 
-extern Bool box_bool(bool);
 extern Char box_char(char);
 extern Short box_short(short);
 extern Long Long box_long_long(long long);
 extern Float box_float(float);
 extern Double box_double(double);
 
-extern bool unbox_bool(Bool);
 extern char unbox_char(Char);
 extern short unbox_short(Short);
 extern long long unbox_long_long(Long Long);

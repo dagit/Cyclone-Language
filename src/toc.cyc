@@ -195,12 +195,11 @@ static typ typ_to_c(typ t) {
                      &Opt(nullableptr_t(strct("_xenum_struct"),empty_tqual())));
   case PointerType(t2,b,tq):
     // we map t@ to t*
-    return PointerType(typ_to_c(t2),new_conref((Bool)true),tq);
+    return PointerType(typ_to_c(t2),new_conref(true),tq);
   // We assume that these are suitably defined already in an appropriate
   // include file -- especially the boxed versions and the bools.
   case IntType(sn,B8,Boxed): return longlong_typ; 
   case IntType(_,_,_):       return t;
-  case BoolType(_):          return t;
   case FloatType(_):         return t;
   case DoubleType(_):        return t;
   case ArrayType(t2,tq,ak):
@@ -275,7 +274,6 @@ static bool atomic_typ(typ t) {
   case VarType(_): return false;
   case IntType(_,B8,Boxed): return false;
   case IntType(_,_,_): return true;
-  case BoolType(_): return true;
   case FloatType(_): return true;
   case DoubleType(Boxed): return false;
   case DoubleType(Unboxed): return true;
@@ -1616,14 +1614,6 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
   case Float_p(f):
     // if (r == f) goto succ_lab else goto fail_lab;
     s = ifthenelse_stmt(eq_exp(r,float_exp(f,DL),DL),
-			goto_stmt(succ_lab,DL), 
-			goto_stmt(fail_lab,DL), DL);
-    break;
-  case Bool_p(b):
-    // if (r == b) goto succ_lab else goto fail_lab;
-    // FIX:  should this deal with the fact that C treats any non-zero
-    // value as true???
-    s = ifthenelse_stmt(eq_exp(r,bool_exp(b,DL),DL),
 			goto_stmt(succ_lab,DL), 
 			goto_stmt(fail_lab,DL), DL);
     break;

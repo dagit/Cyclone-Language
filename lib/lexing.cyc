@@ -105,13 +105,13 @@ Lexbuf<Function_lexbuf_state<FILE@>> from_file(FILE @f) {
   return from_function(read_from_file, f);
 }
 
-static void set_eof(Lexbuf<Bool> lbuf) {
+static void set_eof(Lexbuf<bool> lbuf) {
   lbuf->lex_eof_reached = true;
 }
 
-Lexbuf<Bool> from_string(string s) {
+Lexbuf<bool> from_string(string s) {
   return &lexbuf(set_eof,
-                 (Bool)false,     //ignored but can't instantiate with void
+                 false,     //ignored but can't instantiate with void
                  String::strdup(s), // copy to keep lexer shielded from updates
                  size(s),
                  0,0,0,0,0,

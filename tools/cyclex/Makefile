@@ -12,7 +12,7 @@ BINDIR=../../bin
 CYCC=../../bin/cyclone.exe
 CYCBISON=../../bin/cycbison.exe
 
-CFLAGS=-g -fwritable-strings -I../..
+CFLAGS=-O -fwritable-strings -I../..
 
 CYC_FLAGS=-I ../../lib -tc -toc -pp
 
@@ -56,7 +56,7 @@ lexer.cyc: genfiles/lexer.cyc
 endif
 
 %.c: %.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@
+	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 
 clean:
 	rm -f *.o *.c lexer.cyc parser_tab.cyc parser_tab.h *.output *.stackdump

@@ -67,9 +67,6 @@ Opt_t<Set<var>> empty_var_set = null;
 //    fflush(cyc_stderr);
 //  }
 
-// used to make empty statements more explicit
-#define SKIP ;
-
 // compress out any evars or typedefs
 typ compress(typ t) {
   switch (t) {
@@ -102,7 +99,6 @@ static kind typ_kind(typ t) {
   case XenumType(_):       return box_k;
   case PointerType(_,_,_): return box_k;
   case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? box_k : reg_k;
-  case BoolType(bx):       return (bx == Boxed) ? box_k : reg_k;
   case FloatType(bx):      return (bx == Boxed) ? box_k : reg_k;
   case DoubleType(bx):     return (bx == Boxed) ? box_k : reg_k;
   case ArrayType(_,_,ak):  return (ak == TaggedArray) ? box_k : mem_k;
@@ -236,7 +232,7 @@ static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   }
 }
 
-static int cmp_bool(Bool x,Bool y) {
+static int cmp_bool(bool x,bool y) {
   if (x == y) return 0;
   if (x == false) return -1;
   return 1;
@@ -314,8 +310,6 @@ void unify_it(typ t1, typ t2) {
     if ((sn1 == sn2) && (sz1 == sz2) && (bx1 == bx2)) return;
     break;
 
-  case $(BoolType(Boxed),     BoolType(Boxed)):     return;
-  case $(BoolType(Unboxed),   BoolType(Unboxed)):   return;
   case $(FloatType(Boxed),    FloatType(Boxed)):    return;
   case $(FloatType(Unboxed),  FloatType(Unboxed)):  return;
   case $(DoubleType(Boxed),   DoubleType(Boxed)):   return;
@@ -373,7 +367,6 @@ void unify_it(typ t1, typ t2) {
 static void unbox_exp(tenv te, exp e) {
   switch (compress(e->topt->v)) {
   case IntType(sn,sz,Boxed): unchecked_cast(te,e,IntType(sn,sz,Unboxed)); break;
-  case BoolType(Boxed):   unchecked_cast(te,e,bool_t);   break;
   case FloatType(Boxed):  unchecked_cast(te,e,float_t);  break;
   case DoubleType(Boxed): unchecked_cast(te,e,double_t); break;
   default: break;
@@ -413,7 +406,6 @@ bool is_boxed_type(typ t) {
   case IntType(_,_,bx): return (bx == Boxed);
   case FloatType(bx):   return (bx == Boxed);
   case DoubleType(bx):  return (bx == Boxed);
-  case BoolType(bx):    return (bx == Boxed);
   default:              return false;
   }
 }
@@ -423,7 +415,6 @@ typ make_unboxed_type(typ t) {
   case IntType(sn,sz,bx): return (bx == Unboxed) ? t : IntType(sn,sz,Unboxed);
   case FloatType(_):      return Float_t;
   case DoubleType(_):     return Double_t;
-  case BoolType(_):       return Bool_t;
   default:                return t;
   }
 }
@@ -460,14 +451,15 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
   return true;
 }
 
-// coerce e to have type bool -- used in conditionals 
+// coerce e to have type "bool" (uint_t) -- used in conditionals 
 bool coerce_to_bool(tenv te, exp e) {
-  if (unify(e->topt->v,bool_t)) return true; // e : bool_t
-  if (unify(e->topt->v,Bool_t)) { // e : Bool_t
-    unchecked_cast(te,e,bool_t);  // unbox e
-    return true;
+  if (!coerce_uint_typ(te,e)) {
+    switch (compress(e->topt->v)) {
+    case PointerType(_,cr,_): unchecked_cast(te,e,uint_t); break;
+    default: return false;
+    }
   }
-  return false;
+  return true;
 }
 
 bool is_integral_type(typ t) {
@@ -580,7 +572,6 @@ static bool any_promote(tenv te, exp e) {
     case B8: t = (sn == Unsigned) ? ulong_t : slong_t; break; // make unboxed
     }
     break;
-  case BoolType(b): unchecked_cast(te,e,bool_t); return false; // make unboxed
   case FloatType(b):  t = float_t;  break; // make unboxed
   case DoubleType(b): t = double_t; break; // make unboxed
   default: return false;
@@ -742,12 +733,6 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     break;
   // can cast a numeric type or bool to any numeric type
   case IntType(_,_,_): return coerceable(t2);
-  case BoolType(_)  : 
-    if (coerceable(t2)) return true;
-    switch (t2) {
-    case BoolType(_): return true;
-    default: return false;
-    }
   case FloatType(_) : return coerceable(t2);
   case DoubleType(_): return coerceable(t2);
   default: return false;
@@ -782,9 +767,6 @@ bool comparison_promote(tenv te, exp e) {
       } else return true;
     }
     break;
-  case BoolType(b):
-    unchecked_cast(te,e,bool_t);
-    return false; // make unboxed
   case FloatType(b):
     t = float_t; // make unboxed
     break;
@@ -884,6 +866,14 @@ typ max_arithmetic_type(typ t1, typ t2) {
   }
 }
 
+// used to warn when a while, for, if, or do test contains an assignment
+void check_contains_assign(exp e) {
+  switch (e->r) {
+  case AssignOp_e(_,null,_): warn(e->loc,"assignment in test"); break;
+  default: break;
+  }
+}
+
 void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
   check_unique_tvars(loc,fd->tvs);
   check_valid_type(loc,te,fd->tvs,fd->ret_type);
@@ -938,7 +928,6 @@ typ substitute(list<$(var,typ)@> inst, typ t) {
   case IntType(_,_,_): return t;
   case FloatType(_): return t;
   case DoubleType(_): return t;
-  case BoolType(_): return t;
   case UnionType: return t;
   }
 }
@@ -962,11 +951,6 @@ exp default_initializer(tenv te, typ t, segment loc) {
       if (sz != B4)
         e = new_exp(Cast_e(t,e),loc);
     }
-    break;
-  case BoolType(bx):
-    if (bx == Boxed)
-      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
-    else e->r = Const_e(Bool_c(false));
     break;
   case FloatType(bx):
     if (bx == Boxed)
@@ -1122,7 +1106,6 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     check_valid_type(loc,te,bound_vars,t1);
     break;
   case IntType(_,_,_): break; // skip
-  case BoolType(_): break; // skip
   case FloatType(_): break; // skip
   case DoubleType(_): break; // skip
   case ArrayType(t1,tq,ak):

@@ -27,11 +27,11 @@ using List;
 using Arg;
 using String;
 
-bool pp_r       = false;
-bool up_r       = false;
-bool noexpand_r = false;
-bool tc_r       = false;
-bool toc_r      = false;
+static bool pp_r       = false;
+static bool up_r       = false;
+static bool noexpand_r = false;
+static bool tc_r       = false;
+static bool toc_r      = false;
 
 bool @ pp       = &pp_r;
 bool @ up       = &up_r;
@@ -39,16 +39,21 @@ bool @ noexpand = &noexpand_r;
 bool @ tc       = &tc_r;
 bool @ toc      = &toc_r;
 
-void set_check_null() {
+static string *out_file_name_opt = null;
+
+static void set_check_null() {
   Toc::check_for_null = true;
 }
 
-list<string> includes = null;
-void add_include(string s) {
+static void set_out_file_name(string s) {
+  out_file_name_opt = (string *)(&$(s));
+}
+static list<string> includes = null;
+static void add_include(string s) {
   includes = &cons(s,includes);
 }
-list<string> defines = null;
-void add_define(string s) {
+static list<string> defines = null;
+static void add_define(string s) {
   defines = &cons(s,defines);
 }
 
@@ -121,17 +126,30 @@ void compile_file(string filename) {
     fflush(cyc_stderr);
   }
   // print
+  FILE @out_file;
+  try {
+    if (out_file_name_opt == null)
+      out_file = cyc_stdout;
+    else 
+      out_file = file_open(*out_file_name_opt, "w");
+  } catch {
+  case FileOpenError(_): 
+    fprintf(cyc_stderr,"could not open output file: %s\n",*out_file_name_opt);
+    fflush(cyc_stderr);
+    compile_failure=true;
+    return;
+  }
   if (tds != null && !compile_failure && (*pp || *up)) {
     Absynpp::expand_typedefs = ! *noexpand;
     if (*toc) {
-      printf("#include \"cyc_include.h\"\n\n");
+      fprintf(out_file, "#include \"cyc_include.h\"\n\n");
       Absynpp::qvar_to_Cids = true;
     }
     if(*pp)
-      Absynpp::decllist2file(tds,cyc_stdout);
+      Absynpp::decllist2file(tds,out_file);
     else if(*up)
-      Absyndump::dumpdecllist2file(tds,cyc_stdout);
-    fflush(cyc_stdout);
+      Absyndump::dumpdecllist2file(tds,out_file);
+    fflush(out_file);
     fprintf(cyc_stderr, "Printing completed\n");
     fflush(cyc_stderr);
   }
@@ -144,12 +162,15 @@ void compile_file(string filename) {
   }
   file_close(f);
   file_delete(preprocfile);
+  if (out_file_name_opt != null) file_close(out_file);
   return;
 }
 
 int cyc_main() {
 
   list<$(string,Arg::spec,string)@> options =
+    &cons(&$((string)"-o",String_spec(set_out_file_name),
+	     (string)"output file name"),
     &cons(&$((string)"-pp",Set_spec(pp), 
 	     (string)"pretty print"),
     &cons(&$((string)"-up",Set_spec(up), 
@@ -166,7 +187,7 @@ int cyc_main() {
 	     (string)"pass definition to pre-processor"),
     &cons(&$((string)"-check_null",Unit_spec(set_check_null), 
 	     (string)"turn on null-checking in generated C code"),
-	  null))))))));
+	  null)))))))));
 
   Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");

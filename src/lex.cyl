@@ -28,8 +28,7 @@ namespace Lex {
 /************************** RESERVED WORDS **************************/
 
   // Fix: having to cast is a pain
-static $(string,short) rw_array[64] = {
-  $((string)"Bool", (short)BOXED_BOOL),
+static $(string,short) rw_array[60] = {
   $((string)"Char", (short)BOXED_CHAR),
   $((string)"Double", (short)BOXED_DOUBLE),
   $((string)"Float", (short)BOXED_FLOAT),
@@ -38,7 +37,6 @@ static $(string,short) rw_array[64] = {
   $((string)"Short", (short)BOXED_SHORT),
   $((string)"abstract", (short)ABSTRACT),
   $((string)"auto", (short)AUTO),
-  $((string)"bool", (short)BOOL),
   $((string)"break", (short)BREAK),
   $((string)"case", (short)CASE),
   $((string)"catch", (short)CATCH),
@@ -54,7 +52,6 @@ static $(string,short) rw_array[64] = {
   $((string)"enum", (short)ENUM),
   $((string)"extern", (short)EXTERN),
   $((string)"fallthru", (short)FALLTHRU),
-  $((string)"false", (short)FALSE),
   $((string)"fill", (short)FILL),
   $((string)"float", (short)FLOAT),
   $((string)"for", (short)FOR),
@@ -81,7 +78,6 @@ static $(string,short) rw_array[64] = {
   $((string)"struct", (short)STRUCT),
   $((string)"switch", (short)SWITCH),
   $((string)"throw", (short)THROW),
-  $((string)"true", (short)TRUE),
   $((string)"try", (short)TRY),
   $((string)"typedef", (short)TYPEDEF),
   $((string)"union", (short)UNION),

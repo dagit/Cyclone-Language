@@ -84,10 +84,9 @@ typ schar_t = IntType(Signed,B1,Unboxed);
 typ sshort_t = IntType(Signed,B2,Unboxed);
 typ sint_t = IntType(Signed,B4,Unboxed);
 typ slong_t = IntType(Signed,B8,Unboxed);
-// unboxed float, double, bool
+// unboxed float, double
 typ float_t = FloatType(Unboxed);
 typ double_t = DoubleType(Unboxed);
-typ bool_t = BoolType(Unboxed);
 // boxed, unsigned types
 typ uChar_t = IntType(Unsigned,B1,Boxed);
 typ uShort_t = IntType(Unsigned,B2,Boxed);
@@ -98,10 +97,9 @@ typ sChar_t = IntType(Signed,B1,Boxed);
 typ sShort_t = IntType(Signed,B2,Boxed);
 typ sInt_t = IntType(Signed,B4,Boxed);
 typ sLong_t = IntType(Signed,B8,Boxed);
-// boxed float, double, bool
+// boxed float, double
 typ Float_t = FloatType(Boxed);
 typ Double_t = DoubleType(Boxed);
-typ Bool_t = BoolType(Boxed);
 // exceptions
 static $(list<var>,var) exn_pair = $(null,(string)"exn");
 typ exn_t = XenumType(&exn_pair);
@@ -122,14 +120,14 @@ typ file_typ() {
     typedef_name file_t_name = &$(null,(string)"__sFILE");
     typ file_struct_t = StructType(&Opt(file_t_name),null);
     file_t_opt = &Opt(PointerType(file_struct_t,
-				  new_conref((Bool)false),
+				  new_conref(false),
 				  empty_tqual()));
   }
   return file_t_opt->v;
 }
 // pointers
 typ nullableptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref((Bool)true),tq);
+  return PointerType(t,new_conref(true),tq);
 }
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
@@ -139,7 +137,7 @@ typ void_star_typ() {
   return void_star_t_opt->v;
 }
 typ pureptr_t(typ t, tqual tq) {
-  return PointerType(t,new_conref((Bool)false),tq);
+  return PointerType(t,new_conref(false),tq);
 }
 
 // structs
@@ -159,14 +157,14 @@ exp copy_exp(exp e) {
 }
 exp const_exp(cnst c, segment loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(segment loc) { return new_exp(Const_e(Null_c), loc); }
-exp bool_exp(bool b, segment loc) { return const_exp(Bool_c(b), loc); }
-exp true_exp(segment loc) { return bool_exp(true, loc); }
-exp false_exp(segment loc) { return bool_exp(false, loc); }
 exp int_exp(sign s,int i,segment seg) { 
   return const_exp(Int_c(s,i),seg);
 }
 exp signed_int_exp(int i,    segment loc) {return int_exp(Signed,i,loc);}
 exp uint_exp(unsigned int i, segment loc) {return int_exp(Unsigned,i,loc);}
+exp bool_exp(bool b, segment loc) { return signed_int_exp(b ? 1 : 0, loc); }
+exp true_exp(segment loc) { return bool_exp(true, loc); }
+exp false_exp(segment loc) { return bool_exp(false, loc); }
 exp char_exp(char c, segment loc)    { return const_exp(Char_c(Unsigned,c),loc);}
 exp float_exp(string f, segment loc) { return const_exp(Float_c(f),loc);}
 exp string_exp(string s, segment loc){ return const_exp(String_c(s),loc);}
@@ -456,4 +454,5 @@ $(tqual,typ) * lookup_struct_field(structdecl sd, var v) {
   }
   return null;
 }
+
 

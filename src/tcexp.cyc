@@ -150,8 +150,6 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
     // FIX: take i into account
   case Int_c(sn,_):      t = (sn == Unsigned) ? uint_t   : sint_t;   break;
   case LongLong_c(sn,_): t = (sn == Unsigned) ? ulong_t  : slong_t;  break;
-    // FIX: for Bool_c, should return a Boolean Synth
-  case Bool_c(_)  : t = bool_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
     int len = size(s); // includes the trailing 0 character
@@ -162,7 +160,7 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
     break;
   case Null_c:
     // FIX: take advantage of topt
-    t = PointerType(wildtyp(), &Conref(Eq_constr((Bool)true)), empty_tqual());
+    t = PointerType(wildtyp(), &Conref(Eq_constr(true)), empty_tqual());
     break;
   }
   return standard_synth(te,t);
@@ -261,9 +259,11 @@ static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
       terr(loc,xprintf("expecting arithmetic type but found %s",typ2string(t)));
     return e->topt->v;
   case Not:
-    if (!coerce_to_bool(te,e))
-      terr(loc,xprintf("expecting bool but found %s",typ2string(t)));
-    return bool_t;
+    check_contains_assign(e);
+    if (!coerce_to_bool(te,e)) 
+      terr(loc,xprintf("expecting integral or * type but found %s",
+		       typ2string(t)));
+    return sint_t;
   case Bitnot:
     if (!integral_promote(te,e))
       terr(loc,xprintf("expecting integral type but found %s",typ2string(t)));
@@ -342,7 +342,7 @@ static typ tcAnyBinop(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
 		     typ2string(t1),typ2string(t2)));
     return wildtyp();
   }
-  return bool_t;
+  return sint_t;
 }
 
 // Binary primops like e1+e2, e1>>e2, etc. 
@@ -448,9 +448,10 @@ static synth tcIncrement(tenv te, segment loc, Opt_t<typ> topt,
 static synth tcConditional(tenv te, segment loc, Opt_t<typ> topt, 
 			   exp e1, exp e2, exp e3) {
   synth esyn1,esyn2,esyn3;
-  esyn1 = tcExp(te,&Opt(bool_t),e1);
+  check_contains_assign(e1);
+  esyn1 = tcExp(te,&Opt(sint_t),e1);
   if (!coerce_to_bool(te,e1))
-    terr(e1->loc,xprintf("conditional argument has type %s instead of bool",
+    terr(e1->loc,xprintf("conditional argument has type %s instead of integral or * type",
 			 typ2string(e1->topt->v)));
   let $(true_te, false_te) = bool_layer_synth(te, esyn1);
   esyn2 = tcExp(true_te,  topt, e2);
@@ -686,7 +687,7 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   tqual tq = &Tqual{.q_const = lhs_const(te,e),
 		    .q_volatile=false, .q_restrict=false};
   typ t = PointerType(synth_typ(esyn),
-                      &Conref(Eq_constr((Bool)false)),tq);
+                      &Conref(Eq_constr(false)),tq);
   return synth_set_typ(esyn,t);
 }
 
@@ -701,7 +702,6 @@ static void ok_sizeof(tenv te, segment loc, typ t) {
   case XenumType(_): return;
   case PointerType(_,_,_): return;
   case IntType(_,_,_): return;
-  case BoolType(_): return;
   case FloatType(_): return;
   case DoubleType(_): return;
   case ArrayType(t2,tq,ak):

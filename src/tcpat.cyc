@@ -52,7 +52,7 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     t = wildtyp();
     break;
   case Null_p:
-    t = PointerType(wildtyp(), new_conref((Bool)true), empty_tqual());
+    t = PointerType(wildtyp(), new_conref(true), empty_tqual());
     break;
   case Int_p(s,i):
     // FIX: take i into account?
@@ -60,7 +60,6 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     break;
   case Char_p(c):   t = uchar_t; break;
   case Float_p(s):  t = float_t; break;
-  case Bool_p(b):   t = bool_t;  break;
   case Pointer_p(p2):
     let &$(sub_tvs,sub_vs) = tcPat(te,p2);
     tv_result = List::append(tv_result, sub_tvs);
@@ -70,7 +69,7 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
   case Reference_p(vd):
     warn(p->loc,"* pattern used, may be unsafe");
     t = wildtyp();
-    vd->type = PointerType(t,new_conref((Bool)false),empty_tqual());
+    vd->type = PointerType(t,new_conref(false),empty_tqual());
     vd->tq   = empty_tqual();
     v_result = &cons(vd,v_result);
     break;
@@ -406,7 +405,6 @@ static simple_pat_t compile_pat(pat p) {
   case Wild_p:         s = Any; break;
   case Var_p(_):       s = Any; break;
   case Null_p:         s = null_pat(); break;
-  case Bool_p(b):      s = b ? true_pat() : false_pat(); break;
   case Int_p(sn,i):    s = int_pat(i); break;
   case Char_p(c):      s = char_pat(c); break;
   case Float_p(f):     s = float_pat(f); break;
@@ -424,7 +422,7 @@ static simple_pat_t compile_pat(pat p) {
 	  n->v = y->v; 
 	  continue;
 	case No_constr:
-          n->v = Eq_constr((Bool)false);
+          n->v = Eq_constr(false);
           is_nullable   = false;
           still_working = false;  // EXIT LOOP
           break;
@@ -751,8 +749,8 @@ void check_switch_exhaustive(segment loc, list<switch_clause> swcs) {
 // the pattern is not exhaustive (a warning).  There's no way to get
 // something that's redundant (unless we add support for "or" patterns
 // of some sort.)
-static void not_exhaust_warn($(segment, Bool) @ pr) {
-  pr[1] = (Bool)false;
+static void not_exhaust_warn($(segment, bool) @ pr) {
+  pr[1] = false;
   warn(pr[0],"pattern not exhaustive");
 }
 static void dummy_fn(int i,int j) {
@@ -761,7 +759,7 @@ static void dummy_fn(int i,int j) {
 bool check_let_pat_exhaustive(segment loc,pat p) {
   let match_rules = &cons(&$(compile_pat(p),0),null);
   let dec_tree    = match_compile(match_rules);
-  let exhaust_env = &$(loc,(Bool)true);
+  let exhaust_env = &$(loc,true);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
   return exhaust_env[1];
 }

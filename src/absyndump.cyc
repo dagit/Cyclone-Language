@@ -183,8 +183,6 @@ void dumpntyp(typ t) {
   case IntType(Signed,   B8, Unboxed): dump("long long");             return;
   case IntType(Unsigned, B8, Boxed):   dump("unsigned Long Long");    return;
   case IntType(Unsigned, B8, Unboxed): dump("unsigned long long");    return;
-  case BoolType(Boxed):     dump("Bool");   return;
-  case BoolType(Unboxed):   dump("bool");   return;
   case FloatType(Boxed):    dump("Float");  return;
   case FloatType(Unboxed):  dump("float");  return;
   case DoubleType(Boxed):   dump("Double"); return;
@@ -252,8 +250,6 @@ void dumpexp_prec(int inprec, exp e) {
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case Const_e(Float_c(x)):    dump(x);      break;
   case Const_e(Null_c):        dump("null"); break;
-  case Const_e(Bool_c(true)):  dump("true"); break;
-  case Const_e(Bool_c(false)): dump("false"); break;
   case Const_e(String_c(s)):
     dump("\""); dump_nospace(Absynpp::string_escape(s)); dump_nospace("\""); 
     break;
@@ -301,9 +297,9 @@ void dumpexp_prec(int inprec, exp e) {
   case Conditional_e(e1,e2,e3):
     // decompile to && and || if possible
     switch ($(e2->r,e3->r)) {
-    case $(Const_e(Bool_c(true)),_): 
+    case $(Const_e(Int_c(Signed,1)),_): 
       dumpexp_prec(33,e1); dump("||"); dumpexp_prec(33,e3); break;
-    case $(_,Const_e(Bool_c(false))):
+    case $(_,Const_e(Int_c(Signed,0))):
       dumpexp_prec(37,e1); dump("&&"); dumpexp_prec(37,e2); break;
     default:
       dumpexp_prec(myprec,e1);
@@ -511,8 +507,6 @@ void dumppat(pat p) {
   case Int_p(Unsigned,i): dump(xprintf("%u",i)); break;
   case Char_p(ch): 
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
-  case Bool_p(true):    dump("true");       break;
-  case Bool_p(false):   dump("false");      break;
   case Float_p(x):      dump(x);            break;
   case Var_p(vd):       dumpqvar(vd->name); break;
   case Tuple_p(ts):     group(dumppat,ts,"$(",")",","); break;

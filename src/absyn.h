@@ -131,9 +131,8 @@ namespace Absyn {
     VarType(tvar);
     EnumType(Opt_t<typedef_name>,list<typ>);
     XenumType(typedef_name);
-    PointerType(typ,conref<Bool>,tqual);
+    PointerType(typ,conref<bool>,tqual);
     IntType(sign,size_of,boxed);
-    BoolType(boxed);
     FloatType(boxed);
     DoubleType(boxed);
     ArrayType(typ,tqual,array_kind);
@@ -164,7 +163,6 @@ namespace Absyn {
     Int_c(sign,int);
     LongLong_c(sign,long long);
     Float_c(string);
-    Bool_c(bool);
     String_c(string);
     Null_c;
   };
@@ -257,7 +255,6 @@ namespace Absyn {
     Int_p(sign,int);
     Char_p(char);
     Float_p(string);
-    Bool_p(bool);
     Tuple_p(list<pat>);
     Pointer_p(pat);
     Reference_p(vardecl); // only name field is right until tcpat is called
@@ -397,14 +394,14 @@ namespace Absyn {
   extern typ uchar_t, ushort_t, uint_t, ulong_t;
   // unboxed, signed types
   extern typ schar_t, sshort_t, sint_t, slong_t;
-  // unboxed float, double, bool
-  extern typ float_t, double_t, bool_t;
+  // unboxed float, double
+  extern typ float_t, double_t;
   // boxed, unsigned types
   extern typ uChar_t, uShort_t, uInt_t, uLong_t;
   // boxed, signed types
   extern typ sChar_t, sShort_t, sInt_t, sLong_t;
-  // boxed float, double, bool
-  extern typ Float_t, Double_t, Bool_t;
+  // boxed float, double
+  extern typ Float_t, Double_t;
   // exception type
   extern typ exn_t;
   // string (char[?])
@@ -522,5 +519,6 @@ namespace Absyn {
   extern bool is_lvalue(exp);
 
   extern $(tqual,typ) * lookup_struct_field(structdecl,var);
+
 }
 #endif

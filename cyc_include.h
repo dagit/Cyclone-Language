@@ -12,8 +12,8 @@ typedef int Short;
 typedef int Float;
 typedef struct _boxed_double_struct { double v; } *Double;
 typedef struct _boxed_long_long_struct { long long v; } *_LongLong;
-typedef enum _bool_enum { false=0, true=1 } bool;
-typedef int Bool;
+//typedef enum _bool_enum { false=0, true=1 } bool;
+//typedef int Bool;
 typedef int Char;
 
 ///////////////////// Strings

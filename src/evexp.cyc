@@ -34,10 +34,27 @@ unsigned int eval_const_uint_exp(exp e) {
   default:         exp_err(e->loc,"expecting unsigned int"); return 0u;
   }
 }
+
+// FIX: What about LongLong?
+cnst promote_const(cnst cn) {
+  switch (cn) {
+  case Char_c(sn,c): 
+    cn = Int_c(sn,(int)c);
+    break;
+  case Short_c(sn,s):
+    cn = Int_c(sn,(int)s);
+    break;
+  default: break; // skip
+  }
+  return cn;
+}
+
 bool eval_const_bool_exp(exp e) {
-  switch (eval_const_exp(e)) {
-  case Bool_c(b): return b;
-  default:        exp_err(e->loc,"expecting bool"); return false;
+  switch (promote_const(eval_const_exp(e))) {
+  case Int_c(_,b)     : return b != 0;
+  case LongLong_c(_,b): return b != 0;
+  case Null_c         : return false;
+  default             : exp_err(e->loc,"expecting bool"); return false;
   }
 }
 
@@ -113,8 +130,6 @@ static unsigned int szof(typ t) {
   case IntType(_,B2,Unboxed): return 1u;
   case IntType(_,B4,Unboxed): return 1u;
   case IntType(_,B8,Unboxed): return 1u;
-  case BoolType(Boxed):       return 4u;
-  case BoolType(Unboxed):     return 1u;
   case FloatType(_):          return 4u;
   case DoubleType(Boxed):     return 4u;
   case DoubleType(Unboxed):   return 8u;
@@ -142,20 +157,6 @@ cnst eval_sizeof(typ t) {
   return Int_c(Unsigned,(int)szof(t));
 }
 
-// FIX: What about LongLong?
-cnst promote_const(cnst cn) {
-  switch (cn) {
-  case Char_c(sn,c): 
-    cn = Int_c(sn,(int)c);
-    break;
-  case Short_c(sn,s):
-    cn = Int_c(sn,(int)s);
-    break;
-  default: break; // skip
-  }
-  return cn;
-}
-
 bool is_arith_const(cnst cn) {
   switch (cn) {
   case Char_c(_,_): return true;
@@ -173,7 +174,8 @@ cnst eval_const_unprimop(primop p,exp e) {
       exp_err(e->loc,"expecting arithmetic constant");
     return cn;
   case $(Minus,  Int_c(s,i)): return Int_c(Signed,-i);
-  case $(Not,    Bool_c(b)):  return Bool_c(!b);
+  case $(Not,    Int_c(_,i)): return Int_c(Signed,i == 0 ? 1 : 0);
+  case $(Not,    Null_c)    : return Int_c(Signed,1);
   case $(Bitnot, Int_c(s,i)): return Int_c(Unsigned,~i);
   default: 
     exp_err(e->loc,"bad constant expression");
@@ -252,6 +254,6 @@ cnst eval_const_binprimop(primop p,exp e1,exp e2) {
   }
   if(use_i3) return Int_c(Signed,   i3);
   if(use_u3) return Int_c(Unsigned, (int)u3);
-  if(use_b3) return Bool_c(b3);
+  if(use_b3) return Int_c(Signed, b3 ? 1 : 0);
   throw Unreachable("Evexp::eval_const_binop");
 }

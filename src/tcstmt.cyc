@@ -40,10 +40,11 @@ static synth pattern_synth(segment loc, tenv te, list<tvar> tvs,
   for(let x2=x; x2 != null; x2 = x2->tl)
     te2 = add_pat_var(loc, te2, x2->hd);
   if(where_opt != null) {
-    let esyn = tcExp(te2, &Opt(bool_t), where_opt->v);
+    check_contains_assign(where_opt->v);
+    let esyn = tcExp(te2, &Opt(sint_t), where_opt->v);
     if(!coerce_to_bool(te,where_opt->v))
       terr(where_opt->v->loc,
-	   xprintf("where clause has type %s instead of bool",
+	   xprintf("where clause has type %s instead of integral or * type",
 		   typ2string(synth_typ(esyn))));
     // could only have the "true" part of esyn propagated
     te2 = layer_synth(te2,esyn);
@@ -111,9 +112,10 @@ synth tcStmt(tenv te, stmt s0) {
     return empty_synth(te);
 
   case IfThenElse_s(e,s1,s2):
-    let esyn = tcExp(te,&Opt(bool_t),e);
+    check_contains_assign(e);
+    let esyn = tcExp(te,&Opt(sint_t),e);
     if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of if statement has type %s instead of bool",
+      terr(e->loc,xprintf("test of if statement has type %s instead of integral or * type",
                           typ2string(synth_typ(esyn))));
     let $(true_te,false_te) = bool_layer_synth(te,esyn);
     let ssyn1 = tcStmt(true_te, s1);
@@ -122,9 +124,10 @@ synth tcStmt(tenv te, stmt s0) {
 
   case While_s($(e,cont_s),s):
     ControlFlow::set_encloser(cont_s, get_encloser(te));
-    let esyn = tcExp(te,&Opt(bool_t),e);
+    check_contains_assign(e);
+    let esyn = tcExp(te,&Opt(sint_t),e);
     if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of while loop has type %s instead of bool",
+      terr(e->loc,xprintf("test of while loop has type %s instead of integral or * type",
                           typ2string(synth_typ(esyn))));
     let $(true_te,_) = bool_layer_synth(te,esyn);
     let ssyn = tcStmt(set_in_loop(true_te,cont_s),s);
@@ -151,9 +154,10 @@ synth tcStmt(tenv te, stmt s0) {
     ControlFlow::set_encloser(cont_s,  get_encloser(te));
     let esyn1 = tcExp(te,null,e1);
     te = layer_synth(te,esyn1);
-    let esyn2 = tcExp(te,&Opt(bool_t),e2);
+    check_contains_assign(e2);
+    let esyn2 = tcExp(te,&Opt(sint_t),e2);
     if (!coerce_to_bool(te,e2))
-      terr(e2->loc,xprintf("test of for loop has type %s instead of bool",
+      terr(e2->loc,xprintf("test of for loop has type %s instead of integral or * type",
 			   typ2string(synth_typ(esyn2))));
     let $(true_te,_) = bool_layer_synth(te,esyn2);
     let te_body = set_in_loop(true_te,cont_s);
@@ -379,9 +383,10 @@ synth tcStmt(tenv te, stmt s0) {
     ControlFlow::set_encloser(cont_s, get_encloser(te));
     let ssyn = tcStmt(set_in_loop(te,cont_s),s);
     let te2  = layer_synth(te,ssyn);
-    let esyn = tcExp(te2,&Opt(bool_t),e);
+    check_contains_assign(e);
+    let esyn = tcExp(te2,&Opt(sint_t),e);
     if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of do loop has type %s instead of bool",
+      terr(e->loc,xprintf("test of do loop has type %s instead of integral or * type",
 			  typ2string(synth_typ(esyn))));
     return loop_synth(esyn,ssyn);
   }

@@ -32,12 +32,12 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
-	$(CYCC) $(CYC_FLAGS) $^ > $@
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ 
 $(OUT_PREFIX)lex.cyc : lex.cyl
 	$(CYCLEX) $< $@
 
 $(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc
-	$(CYCC) $(CYC_FLAGS) $< > $@
+	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y
 	$(CYCBISON) -v -d $< -o $@
 $(OUT_PREFIX)parse_tab.h: parse.y
