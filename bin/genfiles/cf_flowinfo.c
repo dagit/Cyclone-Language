@@ -354,43 +354,33 @@ _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
   *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
   */
 static _INLINE void 
-_zero_arr_inplace_plus_char(char *x, int orig_i) {
-  char **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_char(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_char(char **x, int orig_i) {
+  *x = _zero_arr_plus_char(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_short(short *x, int orig_i) {
-  short **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_short(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_short(short **x, int orig_i) {
+  *x = _zero_arr_plus_short(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_int(int *x, int orig_i) {
-  int **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_int(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_int(int **x, int orig_i) {
+  *x = _zero_arr_plus_int(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_float(float *x, int orig_i) {
-  float **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_float(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_float(float **x, int orig_i) {
+  *x = _zero_arr_plus_float(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_double(double *x, int orig_i) {
-  double **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_double(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_double(double **x, int orig_i) {
+  *x = _zero_arr_plus_double(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_longdouble(long double *x, int orig_i) {
-  long double **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_longdouble(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_longdouble(long double **x, int orig_i) {
+  *x = _zero_arr_plus_longdouble(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
-  void ***_zap_x = &x;
-  *_zap_x = _zero_arr_plus_voidstar(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_voidstar(void ***x, int orig_i) {
+  *x = _zero_arr_plus_voidstar(*x,1,orig_i);
 }
-
-
-
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++).
    Note that this expands to call _zero_arr_plus. */
@@ -402,52 +392,45 @@ _zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
   _zap_res; })*/
   
 static _INLINE char *
-_zero_arr_inplace_plus_post_char(char *x, int orig_i){
-  char ** _zap_x = &x;
-  char * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_char(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_char(char **x, int orig_i){
+  char * _zap_res = *x;
+  *x = _zero_arr_plus_char(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE short *
-_zero_arr_inplace_plus_post_short(short *x, int orig_i){
-  short **_zap_x = &x;
-  short * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_short(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_short(short **x, int orig_i){
+  short * _zap_res = *x;
+  *x = _zero_arr_plus_short(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE int *
-_zero_arr_inplace_plus_post_int(int *x, int orig_i){
-  int **_zap_x = &x;
-  int * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_int(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_int(int **x, int orig_i){
+  int * _zap_res = *x;
+  *x = _zero_arr_plus_int(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE float *
-_zero_arr_inplace_plus_post_float(float *x, int orig_i){
-  float **_zap_x = &x;
-  float * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_float(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_float(float **x, int orig_i){
+  float * _zap_res = *x;
+  *x = _zero_arr_plus_float(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE double *
-_zero_arr_inplace_plus_post_double(double *x, int orig_i){
-  double **_zap_x = &x;
-  double * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_double(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_double(double **x, int orig_i){
+  double * _zap_res = *x;
+  *x = _zero_arr_plus_double(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE long double *
-_zero_arr_inplace_plus_post_longdouble(long double *x, int orig_i){
-  long double **_zap_x = &x;
-  long double * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_longdouble(long double **x, int orig_i){
+  long double * _zap_res = *x;
+  *x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE void **
-_zero_arr_inplace_plus_post_voidstar(void **x, int orig_i){
-  void ***_zap_x = &x;
-  void ** _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_voidstar(void ***x, int orig_i){
+  void ** _zap_res = *x;
+  *x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
   return _zap_res;
 }
 

@@ -354,43 +354,33 @@ _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
   *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
   */
 static _INLINE void 
-_zero_arr_inplace_plus_char(char *x, int orig_i) {
-  char **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_char(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_char(char **x, int orig_i) {
+  *x = _zero_arr_plus_char(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_short(short *x, int orig_i) {
-  short **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_short(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_short(short **x, int orig_i) {
+  *x = _zero_arr_plus_short(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_int(int *x, int orig_i) {
-  int **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_int(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_int(int **x, int orig_i) {
+  *x = _zero_arr_plus_int(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_float(float *x, int orig_i) {
-  float **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_float(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_float(float **x, int orig_i) {
+  *x = _zero_arr_plus_float(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_double(double *x, int orig_i) {
-  double **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_double(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_double(double **x, int orig_i) {
+  *x = _zero_arr_plus_double(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_longdouble(long double *x, int orig_i) {
-  long double **_zap_x = &x;
-  *_zap_x = _zero_arr_plus_longdouble(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_longdouble(long double **x, int orig_i) {
+  *x = _zero_arr_plus_longdouble(*x,1,orig_i);
 }
 static _INLINE void 
-_zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
-  void ***_zap_x = &x;
-  *_zap_x = _zero_arr_plus_voidstar(*_zap_x,1,orig_i);
+_zero_arr_inplace_plus_voidstar(void ***x, int orig_i) {
+  *x = _zero_arr_plus_voidstar(*x,1,orig_i);
 }
-
-
-
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++).
    Note that this expands to call _zero_arr_plus. */
@@ -402,52 +392,45 @@ _zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
   _zap_res; })*/
   
 static _INLINE char *
-_zero_arr_inplace_plus_post_char(char *x, int orig_i){
-  char ** _zap_x = &x;
-  char * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_char(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_char(char **x, int orig_i){
+  char * _zap_res = *x;
+  *x = _zero_arr_plus_char(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE short *
-_zero_arr_inplace_plus_post_short(short *x, int orig_i){
-  short **_zap_x = &x;
-  short * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_short(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_short(short **x, int orig_i){
+  short * _zap_res = *x;
+  *x = _zero_arr_plus_short(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE int *
-_zero_arr_inplace_plus_post_int(int *x, int orig_i){
-  int **_zap_x = &x;
-  int * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_int(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_int(int **x, int orig_i){
+  int * _zap_res = *x;
+  *x = _zero_arr_plus_int(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE float *
-_zero_arr_inplace_plus_post_float(float *x, int orig_i){
-  float **_zap_x = &x;
-  float * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_float(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_float(float **x, int orig_i){
+  float * _zap_res = *x;
+  *x = _zero_arr_plus_float(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE double *
-_zero_arr_inplace_plus_post_double(double *x, int orig_i){
-  double **_zap_x = &x;
-  double * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_double(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_double(double **x, int orig_i){
+  double * _zap_res = *x;
+  *x = _zero_arr_plus_double(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE long double *
-_zero_arr_inplace_plus_post_longdouble(long double *x, int orig_i){
-  long double **_zap_x = &x;
-  long double * _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_longdouble(long double **x, int orig_i){
+  long double * _zap_res = *x;
+  *x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
   return _zap_res;
 }
 static _INLINE void **
-_zero_arr_inplace_plus_post_voidstar(void **x, int orig_i){
-  void ***_zap_x = &x;
-  void ** _zap_res = *_zap_x;
-  *_zap_x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+_zero_arr_inplace_plus_post_voidstar(void ***x, int orig_i){
+  void ** _zap_res = *x;
+  *x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
   return _zap_res;
 }
 
@@ -2007,8 +1990,9 @@ _region_malloc(_tmp172->r,sizeof(*_tmp7E8)),((_tmp7E8->root=root,((_tmp7E8->fiel
 0,_tmp7E8)))));struct Cyc_CfFlowInfo_AddressOf_struct _tmp7EB;struct Cyc_CfFlowInfo_AddressOf_struct*
 _tmp7EA;void*rval=(void*)((_tmp7EA=_region_malloc(_tmp172->r,sizeof(*_tmp7EA)),((
 _tmp7EA[0]=((_tmp7EB.tag=5,((_tmp7EB.f1=place,_tmp7EB)))),_tmp7EA))));void*
-place_val=_tmp1DB?_tmp172->notzeroall: Cyc_CfFlowInfo_typ_to_absrval(_tmp172,*((
-void**)_check_null(_tmp1D9)),_tmp172->unknown_none);union Cyc_CfFlowInfo_FlowInfo
+place_val;if(_tmp1DB)place_val=_tmp172->notzeroall;else{if(_tmp1D7)place_val=Cyc_CfFlowInfo_typ_to_absrval(
+_tmp172,*((void**)_check_null(_tmp1D9)),_tmp172->zero);else{place_val=Cyc_CfFlowInfo_typ_to_absrval(
+_tmp172,*((void**)_check_null(_tmp1D9)),_tmp172->unknown_none);}}{union Cyc_CfFlowInfo_FlowInfo
 outflow;((int(*)(struct Cyc_Dict_Dict*set,struct Cyc_CfFlowInfo_Place*place,struct
 Cyc_Position_Segment*loc))Cyc_CfFlowInfo_update_place_set)(env->all_changed,
 place,0);if(_tmp1D8 != 0){struct _RegionHandle*_tmp298=env->r;union Cyc_CfFlowInfo_FlowInfo
@@ -2027,7 +2011,7 @@ _tmp7ED)));}_LL1AB: if((_tmp29F.ReachableFL).tag != 2)goto _LL1A8;_tmp2A1=(struc
 _tuple12)(_tmp29F.ReachableFL).val;_tmp2A2=_tmp2A1.f1;_tmp2A3=_tmp2A1.f2;_LL1AC: {
 struct _tuple13 _tmp7EE;return(_tmp7EE.f1=Cyc_CfFlowInfo_ReachableFL(((struct Cyc_Dict_Dict(*)(
 struct Cyc_Dict_Dict d,void*k,void*v))Cyc_Dict_insert)(_tmp2A2,root,place_val),
-_tmp2A3),((_tmp7EE.f2=rval,_tmp7EE)));}_LL1A8:;};}_LL142: {struct Cyc_Absyn_Swap_e_struct*
+_tmp2A3),((_tmp7EE.f2=rval,_tmp7EE)));}_LL1A8:;};};}_LL142: {struct Cyc_Absyn_Swap_e_struct*
 _tmp1DC=(struct Cyc_Absyn_Swap_e_struct*)_tmp191;if(_tmp1DC->tag != 35)goto _LL144;
 else{_tmp1DD=_tmp1DC->f1;_tmp1DE=_tmp1DC->f2;}}_LL143: {void*left_rval;void*
 right_rval;union Cyc_CfFlowInfo_FlowInfo outflow;struct _RegionHandle*_tmp2AB=env->r;{

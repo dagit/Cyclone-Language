@@ -1007,8 +1007,10 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     root_t    root      = rnew(fenv->r) MallocPt(exp,e->topt->v);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
-    absRval_t place_val = 
-      isfat ? fenv->notzeroall : typ_to_absrval(fenv,*topt,fenv->unknown_none);
+    absRval_t place_val;
+    if(isfat) place_val = fenv->notzeroall;
+    else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,fenv->zero);
+    else place_val = typ_to_absrval(fenv,*topt,fenv->unknown_none);
     flow_t    outflow;
     update_place_set(env->all_changed,place,NULL);
     if(eopt!=NULL) {

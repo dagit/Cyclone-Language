@@ -281,12 +281,12 @@ bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O): \
 # The rule for creating cyc_include.h creates as a side effect
 # the entire cyclone lib directory structure; see above.
 bin/lib/cyc-lib/cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
-	mkdir bin/lib
-	mkdir bin/lib/cyc-lib
-	for i in $(ALL_ARCHS);\
+	-mkdir bin/lib
+	-mkdir bin/lib/cyc-lib
+	-for i in $(ALL_ARCHS);\
 	  do mkdir bin/lib/cyc-lib/$$i;\
 	  done
-	mkdir bin/lib/cyc-lib/$(ARCH)/include
+	-mkdir bin/lib/cyc-lib/$(ARCH)/include
 	cp $< $@
 
 $(addprefix bin/lib/cyc-lib/, $(addsuffix /cycspecs, $(ALL_ARCHS))): \

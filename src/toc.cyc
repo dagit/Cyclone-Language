@@ -1935,8 +1935,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 	case &Upper_b(e2): 
           // when zero-terminated, we have to call "strlen"
           if (conref_def(false,zt)) {
-            exp_t function_e = getFunction(&_get_zero_arr_size_functionSet,
-                                           es->hd);
+            exp_t function_e = 
+	      getFunctionRemovePointer(&_get_zero_arr_size_functionSet,
+				       es->hd);
             e->r = fncall_exp_r(function_e,list(es->hd,e2));
           } else if (conref_def(false,nbl)) {
             if (!Evexp::c_can_eval(e2))
@@ -1971,7 +1972,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           if (conref_def(false,zt)) {
             exp_t e1 = es->hd;
             exp_t e2 = es->tl->hd;
-            e->r = fncall_exp(getFunction(&_zero_arr_plus_functionSet,e1),list(e1,esz,e2),DL)->r;
+            e->r = fncall_exp(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),list(e1,esz,e2),DL)->r;
           }
           break;
         }
@@ -2077,49 +2078,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
       //let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
       //  _zero_arr_inplace_plus_e;
-      exp_t fn_e;
-      switch(compress(e2->topt->v)) { 
-      case &IntType(_,sz):
-        switch(sz) {
-        case Char_sz:  
-          fn_e = (incr == PostInc) ? 
-            _zero_arr_inplace_plus_post_char_e : _zero_arr_inplace_plus_char_e;
-          break;
-        case Short_sz:
-          fn_e = (incr == PostInc) ? 
-            _zero_arr_inplace_plus_post_short_e : _zero_arr_inplace_plus_short_e;
-          break;
-        case Int_sz:
-          fn_e = (incr == PostInc) ? 
-            _zero_arr_inplace_plus_post_int_e : _zero_arr_inplace_plus_int_e;  
-          break;
-        default: throw new Impossible("impossible IntType (not char, short or int)");
-        }
-        break;
-      case &FloatType: 
-        fn_e = (incr == PostInc) ? 
-          _zero_arr_inplace_plus_post_float_e : _zero_arr_inplace_plus_float_e;
-        break; 
-      case &DoubleType(longBool): 
-        switch(longBool){
-        case true: 
-          fn_e = (incr == PostInc) ? 
-            _zero_arr_inplace_plus_post_longdouble_e : _zero_arr_inplace_plus_longdouble_e;
-          break;
-        default:  
-          fn_e = (incr == PostInc) ? 
-            _zero_arr_inplace_plus_post_double_e : _zero_arr_inplace_plus_double_e;
-        }
-        break;
-      case &PointerType(_):
-        fn_e = (incr == PostInc) ? 
-          _zero_arr_inplace_plus_post_voidstar_e : _zero_arr_inplace_plus_voidstar_e;
-        break;
-      default:
-        throw new Impossible("impossible expression type (not int, float, double, or pointer)");
-      }
-      
-      e->r = fncall_exp_r(fn_e, list(e2,signed_int_exp(1,DL)));
+      let fnSet = (incr==PostInc) ? &_zero_arr_inplace_plus_functionSet 
+	                          : &_zero_arr_inplace_plus_post_functionSet;
+      exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
+      e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
+				     signed_int_exp(1,DL)));
     } else if(elt_typ == &VoidType_val && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
       e->r = e2->r;
@@ -2191,7 +2154,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         switch (popt->v) {
         case Plus: 
           done = true;
-          e->r = fncall_exp_r(getFunction(&_zero_arr_inplace_plus_functionSet,e1),list(e1,e2));
+          e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),list(e1,e2));
           break;
         default: toc_impos("bad zero-terminated pointer arithmetic");
         }
