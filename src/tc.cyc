@@ -120,9 +120,9 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
 
     // hmm, maybe void fields should be rejected
   case VoidType:             return true;
-  case IntType(_,_,_):       return true;
-  case FloatType(_):         return true;
-  case DoubleType(_):        return true;
+  case IntType(_,_):         return true;
+  case FloatType:            return true;
+  case DoubleType:           return true;
   case ArrayType(_,_,_):     return true;
   case PointerType(_):       return true;
   case EnumType(_,_,_):      return true;

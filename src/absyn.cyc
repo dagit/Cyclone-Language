@@ -73,32 +73,19 @@ conref<`a> empty_conref<`a>() {
 }
 
 //////////////////////////// Types ///////////////////////////////
-// unboxed, unsigned types
-typ uchar_t  = IntType(Unsigned,B1,Unboxed);
-typ ushort_t = IntType(Unsigned,B2,Unboxed);
-typ uint_t   = IntType(Unsigned,B4,Unboxed);
-typ ulong_t  = IntType(Unsigned,B8,Unboxed);
-// unboxed, signed types
-typ schar_t  = IntType(Signed,B1,Unboxed);
-typ sshort_t = IntType(Signed,B2,Unboxed);
-typ sint_t   = IntType(Signed,B4,Unboxed);
-typ slong_t  = IntType(Signed,B8,Unboxed);
-// unboxed float, double
-typ float_t  = FloatType(Unboxed);
-typ double_t = DoubleType(Unboxed);
-// boxed, unsigned types
-typ uChar_typ  = IntType(Unsigned,B1,Boxed);
-typ uShort_typ = IntType(Unsigned,B2,Boxed);
-typ uInt_typ   = IntType(Unsigned,B4,Boxed);
-typ uLong_typ  = IntType(Unsigned,B8,Boxed);
-// boxed, signed types
-typ sChar_typ  = IntType(Signed,B1,Boxed);
-typ sShort_typ = IntType(Signed,B2,Boxed);
-typ sInt_typ   = IntType(Signed,B4,Boxed);
-typ sLong_typ  = IntType(Signed,B8,Boxed);
-// boxed float, double
-typ Float_typ  = FloatType(Boxed);
-typ Double_typ = DoubleType(Boxed);
+// unsigned types
+typ uchar_t  = IntType(Unsigned,B1);
+typ ushort_t = IntType(Unsigned,B2);
+typ uint_t   = IntType(Unsigned,B4);
+typ ulong_t  = IntType(Unsigned,B8);
+// signed types
+typ schar_t  = IntType(Signed,B1);
+typ sshort_t = IntType(Signed,B2);
+typ sint_t   = IntType(Signed,B4);
+typ slong_t  = IntType(Signed,B8);
+// float, double
+typ float_t  = FloatType;
+typ double_t = DoubleType;
 // exceptions
 #ifdef OLD_STRING_REP
 static $(list<var>,var) exn_name_v = $(null,(string)"exn");

@@ -124,9 +124,9 @@ static kind_t typ_kind(typ t) {
 
   case VarType(&$(_,k)):  return k;
   case VoidType:          return MemPKind;
-  case IntType(_,sz,bx):  return (sz==B4 || bx==Boxed) ? BoxPKind : MemPKind;
-  case FloatType(bx):     return (bx==Boxed)           ? BoxPKind : MemPKind;
-  case DoubleType(bx):    return (bx==Boxed)           ? BoxPKind : MemPKind;
+  case IntType(_,sz):     return (sz==B4) ? BoxPKind : MemPKind;
+  case FloatType:         return MemPKind;
+  case DoubleType:        return MemPKind;
   case FnType(_,_,_,_):   return MemPKind;
   case RgnHandleType(_):  return BoxUKind; // the whole point on packability
   case HeapRgnType:       return RgnKind;
@@ -378,14 +378,12 @@ void unify_it(typ t1, typ t2) {
     unify_it_conrefs(intcmp,null1a,null2a);
     return;
 
-  case $(IntType(sn2,sz2,bx2), IntType(sn1,sz1,bx1)):
-    if ((sn1 == sn2) && (sz1 == sz2) && (bx1 == bx2)) return;
+  case $(IntType(sn2,sz2), IntType(sn1,sz1)):
+    if ((sn1 == sn2) && (sz1 == sz2)) return;
     break;
 
-  case $(FloatType(Boxed),    FloatType(Boxed)):    return;
-  case $(FloatType(Unboxed),  FloatType(Unboxed)):  return;
-  case $(DoubleType(Boxed),   DoubleType(Boxed)):   return;
-  case $(DoubleType(Unboxed), DoubleType(Unboxed)): return;
+  case $(FloatType,    FloatType):    return;
+  case $(DoubleType,   DoubleType):   return;
 
   case $(ArrayType(t2a,tq2a,e1), ArrayType(t1a,tq1a,e2)):
     unify_it(t1a,t2a);
@@ -435,21 +433,12 @@ void unify_it(typ t1, typ t2) {
   throw Unify;
 }
 
-static void unbox_exp(tenv te, exp e) {
-  switch (compress(e->topt->v)) {
-  case IntType(sn,sz,Boxed): unchecked_cast(te,e,IntType(sn,sz,Unboxed)); break;
-  case FloatType(Boxed):     unchecked_cast(te,e,float_t);  break;
-  case DoubleType(Boxed):    unchecked_cast(te,e,double_t); break;
-  default: break;
-  }
-}
-
 bool is_arithmetic_type(typ t) {
   switch (compress(t)) {
-  case IntType(_,_,_): return true;
-  case FloatType(_):   return true;
-  case DoubleType(_):  return true;
-  default:             return false;
+  case IntType(_,_): return true;
+  case FloatType:    return true;
+  case DoubleType:   return true;
+  default:           return false;
   }
 }
 
@@ -459,34 +448,16 @@ bool will_lose_precision(typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(DoubleType(_),   FloatType(_)):    return true;
-  case $(DoubleType(_),   IntType(_,_,_)):  return true;
-  case $(FloatType(_),    IntType(_,_,_)):  return true;
-  case $(IntType(_,B8,_), IntType(_,B8,_)): return false;
-  case $(IntType(_,B8,_), _):               return true; // see prev case
-  case $(IntType(_,B4,_), FloatType(_)):    return true;
-  case $(IntType(_,B4,_), IntType(_,B2,_)): return true;
-  case $(IntType(_,B4,_), IntType(_,B1,_)): return true;
-  case $(IntType(_,B2,_), IntType(_,B1,_)): return true;
+  case $(DoubleType,   FloatType):       return true;
+  case $(DoubleType,   IntType(_,_)):    return true;
+  case $(FloatType,    IntType(_,_)):    return true;
+  case $(IntType(_,B8), IntType(_,B8)):  return false;
+  case $(IntType(_,B8), _):              return true; // see prev case
+  case $(IntType(_,B4), FloatType):      return true;
+  case $(IntType(_,B4), IntType(_,B2)):  return true;
+  case $(IntType(_,B4), IntType(_,B1)):  return true;
+  case $(IntType(_,B2), IntType(_,B1)):  return true;
   default: return false;
-  }
-}
-
-bool is_boxed_type(typ t) {
-  switch (compress(t)) {
-  case IntType(_,_,bx): return (bx == Boxed);
-  case FloatType(bx):   return (bx == Boxed);
-  case DoubleType(bx):  return (bx == Boxed);
-  default:              return false;
-  }
-}
-
-typ make_unboxed_type(typ t) {
-  switch (compress(t)) {
-  case IntType(sn,sz,bx): return (bx == Unboxed) ? t : IntType(sn,sz,Unboxed);
-  case FloatType(_):      return float_t;
-  case DoubleType(_):     return double_t;
-  default:                return t;
   }
 }
 
@@ -496,18 +467,12 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
   Opt_t<typ> max_arith_type = null;
-  bool all_boxed = true;
   for (list<exp> el = es; el != null; el = el->tl) {
     typ t1 = compress(el->hd->topt->v);
     if (is_arithmetic_type(t1)) 
       if (max_arith_type == null || will_lose_precision(t1,max_arith_type->v))
 	max_arith_type = &Opt(t1);
-    if (!is_boxed_type(t1)) 
-      all_boxed = false;
   }
-  // if even one of the expressions is unboxed, then we unbox all of them
-  if (!all_boxed && max_arith_type != null)
-    max_arith_type = &Opt(make_unboxed_type(max_arith_type->v));
   // unify the max arithmetic type with the result type t
   if (max_arith_type != null)
     if (!unify(t,max_arith_type->v))
@@ -535,7 +500,7 @@ bool coerce_to_bool(tenv te, exp e) {
 
 bool is_integral_type(typ t) {
   switch (compress(t)) {
-  case IntType(_,_,_): return true;
+  case IntType(_,_): return true;
   default: return false;
   }
 }
@@ -544,12 +509,6 @@ bool is_integral_type(typ t) {
 bool coerce_uint_typ(tenv te, exp e) {
   if (unify(e->topt->v,uint_t)) 
     return true;
-  // try unboxing e
-  if (typ_kind(e->topt->v) == BoxPKind) {
-    unbox_exp(te,e);
-    if (unify(e->topt->v,uint_t)) 
-      return true;
-  }
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type(e->topt->v)) {
     if (will_lose_precision(e->topt->v,uint_t))
@@ -564,12 +523,6 @@ bool coerce_uint_typ(tenv te, exp e) {
 bool coerce_sint_typ(tenv te, exp e) {
   if (unify(e->topt->v,sint_t)) 
     return true;
-  // try unboxing e
-  if (typ_kind(e->topt->v) == BoxPKind) {
-    unbox_exp(te,e);
-    if (unify(e->topt->v,sint_t)) 
-      return true;
-  }
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type(e->topt->v)) {
     if (will_lose_precision(e->topt->v,sint_t))
@@ -635,11 +588,6 @@ bool coerce_arg(tenv te, exp e, typ t2) {
   typ t1 = compress(e->topt->v);
   // see if types immediately match
   if (unify(t1,t2)) return true;
-  // try unboxing e
-  if (typ_kind(t1) == BoxPKind && typ_kind(t2) == MemPKind) {
-    unbox_exp(te,e);
-    if (unify(t1,t2)) return true;
-  }
   // try arithmetic conversions
   if (is_arithmetic_type(t1) && is_arithmetic_type(t2)) {
     // issue a warning if we lose precision
@@ -669,7 +617,7 @@ static bool any_promote(tenv te, exp e) {
   typ old_typ = compress(e->topt->v);
   typ t;
   switch (old_typ) {
-  case IntType(sn,sz,b):
+  case IntType(sn,sz):
     switch (sz) {
     case B1: t = sint_t; break; // convert to unboxed, signed int
     case B2: t = sint_t; break; // convert to unboxed, signed int
@@ -677,8 +625,8 @@ static bool any_promote(tenv te, exp e) {
     case B8: t = (sn == Unsigned) ? ulong_t : slong_t; break; // make unboxed
     }
     break;
-  case FloatType(b):  t = float_t;  break; // make unboxed
-  case DoubleType(b): t = double_t; break; // make unboxed
+  case FloatType:  t = float_t;  break; // make unboxed
+  case DoubleType: t = double_t; break; // make unboxed
   default: return false;
   }
   unchecked_cast(te,e,t);
@@ -687,18 +635,16 @@ static bool any_promote(tenv te, exp e) {
 
 // Convert e so that it has type t, possibly by casting t.  This is
 // used in routines like function call or assignment where we may have
-// to promote an integral type, may have to unbox, etc.  
+// to promote an integral type.
 // FIX: THIS IS NOT RIGHT.
 // FIX: account for unpackable kinds?
 bool coerce_use(tenv te, exp e, typ t2) {
   typ    t1 = compress(e->topt->v);
   kind_t k1 = typ_kind(t1);
   kind_t k2 = typ_kind(t2);
-  if (k1 == BoxPKind && k2 == MemPKind)
-    unbox_exp(te,e);
   if (unify(t1,t2)) 
     return true;
-  // unification failed, try unboxing e
+  // unification failed, try promoting
   any_promote(te,e);
   if (unify(e->topt->v,t2)) 
     return true;
@@ -716,10 +662,10 @@ bool coerce_use(tenv te, exp e, typ t2) {
 
 bool coerceable(typ t) {
   switch (compress(t)) {
-  case IntType(_,_,_): return true;
-  case FloatType(_):   return true;
-  case DoubleType(_):  return true;
-  default:             return false;
+  case IntType(_,_): return true;
+  case FloatType:    return true;
+  case DoubleType:   return true;
+  default:           return false;
   }
 }
 
@@ -859,9 +805,9 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     default: return false;
     }
   // can cast a numeric type or bool to any numeric type
-  case IntType(_,_,_): fallthru;
-  case FloatType(_) :  fallthru;
-  case DoubleType(_):  return coerceable(t2);
+  case IntType(_,_): fallthru;
+  case FloatType :  fallthru;
+  case DoubleType:  return coerceable(t2);
   default: return false;
   }
 }
@@ -875,44 +821,34 @@ void unchecked_cast(tenv te, exp e, typ t) {
   }
 }
 
-// for comparison operators, we do not unbox Double and Long Long, but
-// rather do a pointer comparison.  However, we issue a warning.
 bool comparison_promote(tenv te, exp e) {
   typ t;
   switch (compress(e->topt->v)) {
-  case IntType(sn,sz,b):
+  case IntType(sn,sz):
     switch (sz) {
     case B1: t = sint_t; break; // convert to unboxed, signed int
     case B2: t = sint_t; break; // convert to unboxed, signed int
     case B4: t = (sn == Unsigned) ? uint_t : sint_t; break; // make uboxed
-    case B8:
-      if (b == Boxed) {
-	warn(e->loc,"pointer comparison of Long Long");
-	return false;
-      } else return true;
+    case B8: return true;
     }
     break;
-  case FloatType(b): t = float_t; break; // make unboxed
-  case DoubleType(b):
-    if (b == Boxed) {
-      warn(e->loc,"pointer comparison of Double");
-      return false;
-    } else return true;
+  case FloatType: t = float_t; break; // make unboxed
+  case DoubleType: return true;
   default: return false;
   }
   unchecked_cast(te,e,t);
   return true;
 }
 
-// check that the expression has an arithmetic type and, if it's boxed
-// or a size that is smaller than an int, then promote it up to int.
+// check that the expression has an arithmetic type and, if it's 
+// a size that is smaller than an int, then promote it up to int.
 // Note that unsigned char or unsigned short will be promoted to
 // signed int.  Otherwise, the sign is preserved.
 bool arithmetic_promote(tenv te, exp e) {
   typ old_typ = compress(e->topt->v);
   typ t;
   switch (old_typ) {
-  case IntType(sn,sz,b):
+  case IntType(sn,sz):
     switch (sz) {
     case B1:  t = sint_t; break; // convert to unboxed, signed int
     case B2:  t = sint_t; break; // convert to unboxed, signed int
@@ -924,14 +860,13 @@ bool arithmetic_promote(tenv te, exp e) {
       break;
     }
     break;
-  case FloatType(b):    t = float_t;  break; // make unboxed
-  case DoubleType(b):   t = double_t; break; // make unboxed
+  case FloatType:  t = float_t;  break; // make unboxed
+  case DoubleType: t = double_t; break; // make unboxed
   case EnumType(_,_,_): t = sint_t;   break; // convert to unboxed, signed int
   case Evar(_,_,_):
     t = sint_t;
     if (!unify(old_typ,t))
-      if (!unify(old_typ,sInt_typ))
-	return false;
+      return false;
     break;
   default:
     return false;
@@ -941,7 +876,7 @@ bool arithmetic_promote(tenv te, exp e) {
 }
 
 
-// Make sure that e has integral type; if it's boxed or a size that is
+// Make sure that e has integral type; if it's a size that is
 // smaller than an int, then promote it up to int.  Note that unsigned
 // char or unsigned short will be promoted to signed int.  Otherwise,
 // the sign is preserved.
@@ -949,7 +884,7 @@ bool integral_promote(tenv te, exp e) {
   typ old_typ = compress(e->topt->v);
   typ t;
   switch (old_typ) {
-  case IntType(sn,sz,b):
+  case IntType(sn,sz):
     switch (sz) {
     case B1: t = sint_t; break; // convert to unboxed, signed int
     case B2: t = sint_t; break; // convert to unboxed, signed int
@@ -963,8 +898,7 @@ bool integral_promote(tenv te, exp e) {
   case Evar(_,_,_):
     t = sint_t;
     if (!unify(old_typ,t))
-      if (!unify(old_typ,sInt_typ))
-	return false;
+      return false;
     break;
   default:
     return false;
@@ -974,17 +908,17 @@ bool integral_promote(tenv te, exp e) {
 }
 typ max_arithmetic_type(typ t1, typ t2) {
   switch ($(t1,t2)) {
-  case $(DoubleType(_),_): fallthru;
-  case $(_,DoubleType(_)): return DoubleType(Unboxed);
-  case $(FloatType(_),_):  fallthru;
-  case $(_,FloatType(_)):  return FloatType(Unboxed);
-  case $(IntType(Unsigned,B8,_),_): fallthru;
-  case $(_,IntType(Unsigned,B8,_)): return IntType(Unsigned,B8,Unboxed);
-  case $(IntType(Signed,B8,_),_):   fallthru;
-  case $(_,IntType(Signed,B8,_)):   return IntType(Signed,B8,Unboxed);
-  case $(IntType(Unsigned,B4,_),_): fallthru;
-  case $(_,IntType(Unsigned,B4,_)): return IntType(Unsigned,B4,Unboxed);
-  default: return IntType(Signed,B4,Unboxed);
+  case $(DoubleType,_): fallthru;
+  case $(_,DoubleType): return DoubleType;
+  case $(FloatType,_):  fallthru;
+  case $(_,FloatType):  return FloatType;
+  case $(IntType(Unsigned,B8),_): fallthru;
+  case $(_,IntType(Unsigned,B8)): return IntType(Unsigned,B8);
+  case $(IntType(Signed,B8),_):   fallthru;
+  case $(_,IntType(Signed,B8)):   return IntType(Signed,B8);
+  case $(IntType(Unsigned,B4),_): fallthru;
+  case $(_,IntType(Unsigned,B4)): return IntType(Unsigned,B4);
+  default: return IntType(Signed,B4);
   }
 }
 
@@ -1054,9 +988,9 @@ typ substitute(list<$(tvar,typ)@> inst, typ t) {
 
   case VoidType:       return t;
   case XenumType(_,_): return t;
-  case IntType(_,_,_): return t;
-  case FloatType(_):   return t;
-  case DoubleType(_):  return t;
+  case IntType(_,_):   return t;
+  case FloatType:      return t;
+  case DoubleType:     return t;
   case HeapRgnType:    return t;
 
   case UnionType:      return t;
@@ -1071,18 +1005,18 @@ exp default_initializer(tenv te, typ t, segment loc) {
 
   switch (compress(t)) {
   case PointerType(_): break; // FIX: non-nullable is an error!
-  case IntType(sg,B1,Unboxed):
+  case IntType(sg,B1):
     e->r = Const_e(Char_c(Signed,'\000'));
     break;
-  case IntType(sg,sz,Unboxed):
+  case IntType(sg,sz):
     e->r = Const_e(Int_c(sg,0));
     if (sz != B4)
       e = new_exp(Cast_e(t,e),loc);
     break;
-  case FloatType(Unboxed):
+  case FloatType:
     e->r = Const_e(Float_c("0.0"));
     break;
-  case DoubleType(Unboxed):
+  case DoubleType:
     e->r = Cast_e(t,new_exp(Const_e(Float_c("0.0")), loc));
     break;
 /*
@@ -1316,9 +1250,9 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case RgnHandleType(rgn_typ):
     check_valid_rgn(loc,te,bound_vars,rgn_typ);
     break;
-  case IntType(_,_,_): break; 
-  case FloatType(_):   break; 
-  case DoubleType(_):  break; 
+  case IntType(_,_): break; 
+  case FloatType:    break; 
+  case DoubleType:   break; 
   case ArrayType(t1,tq,e):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);

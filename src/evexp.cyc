@@ -84,11 +84,7 @@ cnst_t eval_const_exp(exp e) {
     // FIX: this needs to be generalized
     cn = eval_const_exp(e2);
     switch (t) {
-    case IntType(sn,sz,bx):
-      if (bx == Boxed) {
-        exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
-        return Int_c(Signed,0);
-      }
+    case IntType(sn,sz):
       switch (cn) {
       case Int_c(sn2,x):
         cn = Int_c(sn,x);
@@ -136,14 +132,12 @@ unsigned int szof(typ t, segment loc) {
     default: 
       terr(loc,"bounds information not known for pointer type"); return 0u;
     }
-  case IntType(_,_, Boxed):   return 4u;
-  case IntType(_,B1,Unboxed): return 1u;
-  case IntType(_,B2,Unboxed): return 1u;
-  case IntType(_,B4,Unboxed): return 1u;
-  case IntType(_,B8,Unboxed): return 1u;
-  case FloatType(_):          return 4u;
-  case DoubleType(Boxed):     return 4u;
-  case DoubleType(Unboxed):   return 8u;
+  case IntType(_,B1): return 1u;
+  case IntType(_,B2): return 1u;
+  case IntType(_,B4): return 1u;
+  case IntType(_,B8): return 1u;
+  case FloatType:     return 4u;
+  case DoubleType:    return 8u;
   case ArrayType(t2,_,e): 
     // FIX: insert padding for alignment
     return szof(t2,loc) * eval_const_uint_exp(e);

@@ -86,9 +86,7 @@ static string base_sp = "base";
 static string _tagged_string_sp = "_tagged_string";
 static string _enum_struct_sp = "_enum_struct";
 static string _xenum_struct_sp = "_xenum_struct";
-static string _boxed_long_long_struct_sp = "_boxed_long_long_struct";
 static string v_sp = "v";
-static string _boxed_double_struct_sp = "_boxed_double_struct";
 static string tag_sp = "tag";
 static string _handler_cons_sp = "_handler_cons";
 static string setjmp_sp = "setjmp";
@@ -111,14 +109,8 @@ static string _enum_struct_string = "_enum_struct";
 static stringptr _enum_struct_sp = (&_enum_struct_string);
 static string _xenum_struct_string = "_xenum_struct";
 static stringptr _xenum_struct_sp = (&_xenum_struct_string);
-static string _boxed_long_long_struct_string = "_boxed_long_long_struct";
-static stringptr _boxed_long_long_struct_sp = 
-         (&_boxed_long_long_struct_string);
 static string v_string = "v";
 static stringptr v_sp = (&v_string);
-static string _boxed_double_struct_string = "_boxed_double_struct";
-static stringptr _boxed_double_struct_sp = 
-         (&_boxed_double_struct_string);
 static string tag_string = "tag";
 static stringptr tag_sp = (&tag_string);
 static string _handler_cons_string = "_handler_cons";
@@ -224,7 +216,7 @@ static int tagged_ptr_counter = 0;
 static var add_tagged_ptr_type(typ t,tqual tq) {
   // Handle char[?] specially, its C implementation is in cyc_include.h
   switch (t) {
-  case IntType(Unsigned,B1,Unboxed): return _tagged_string_sp;
+  case IntType(Unsigned,B1): return _tagged_string_sp;
   default: break; //skip
   }
   for(_ tts = tagged_ptr_types; tts != null; tts = tts->tl) {
@@ -332,12 +324,9 @@ static typ typ_to_c(typ t) {
       return strct(n);
     default: return star_typ(t2,HeapRgnType,tq);
     }
-  // We assume that these are suitably defined already in an appropriate
-  // include file -- especially the boxed versions and the bools.
-  case IntType(sn,B8,Boxed): return longlong_typ;
-  case IntType(_,_,_):       return t;
-  case FloatType(_):         return t;
-  case DoubleType(_):        return t;
+  case IntType(_,_): return t;
+  case FloatType:    return t;
+  case DoubleType:   return t;
   case ArrayType(t2,tq,e):   return ArrayType(typ_to_c_array(t2),tq,e);
   case FnType(_,t2,args,vararg):
     // just drop the type arguments and translate the nested types
@@ -388,15 +377,13 @@ static exp array_to_ptr_cast(typ t,exp e,segment l) {
 // returns true when the type contains no pointers
 static bool atomic_typ(typ t) {
   switch (compress(t)) {
-  case VoidType: return true;
-  case VarType(_): return false;
-  case IntType(_,B8,Boxed): return false;
-  case IntType(_,_,_): return true;
-  case FloatType(_): return true;
-  case DoubleType(Boxed): return false;
-  case DoubleType(Unboxed): return true;
+  case VoidType    : return true;
+  case VarType(_)  : return false;
+  case IntType(_,_): return true;
+  case FloatType   : return true;
+  case DoubleType  : return false;
   case ArrayType(t,_,_): return atomic_typ(t);
-  case FnType(_,_,_,_): return true;
+  case FnType(_,_,_,_) : return true;
   case TupleType(tqs):
     for (; tqs != null; tqs = tqs->tl)
       if (!atomic_typ((*tqs->hd)[1])) return false;
@@ -511,12 +498,6 @@ static exp malloc_exp(typ t,exp s) {
 // This section implements the various casts from one Cyclone
 // type to another (e.g., boxing, unboxing, tagging, etc.)
 static enum Conv {
-  BoxLongLong;      // long long -> Long Long
-  UnboxLongLong;    // Long Long -> long long
-  BoxFloat;         // float -> Float
-  UnboxFloat;       // Float -> float
-  BoxDouble;        // double -> Double
-  UnboxDouble;      // Double -> double
   NullCheck(typ);        // t* -> t@
   UntagPtr(typ,exp,bool); // t? -> t*{e}  bool is whether result is nullable
   TagPtr(typ,exp);       // t*{e} -> t?
@@ -534,39 +515,6 @@ static list<conv> conversion(typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-    // large boxed t1's must be unboxed
-  case $(IntType(_,B8,Boxed), IntType(_,B8,Boxed)):
-    return null;
-  case $(IntType(_,B8,Boxed), FloatType(Boxed)):
-    return &cons(BoxFloat,&cons(UnboxLongLong,null));
-  case $(IntType(_,B8,Boxed), DoubleType(Boxed)):
-    return &cons(BoxDouble,&cons(UnboxLongLong,null));
-  case $(IntType(_,B8,Boxed), _):
-    return &cons(UnboxLongLong,null);
-
-  case $(FloatType(Boxed), IntType(_,B8,Boxed)):
-    return &cons(BoxLongLong,&cons(UnboxFloat,null));
-  case $(FloatType(Boxed), FloatType(Boxed)):
-    return null;
-  case $(FloatType(Boxed), DoubleType(Boxed)):
-    return &cons(BoxDouble,&cons(UnboxFloat,null));
-  case $(FloatType(Boxed), _):
-    return &cons(UnboxFloat,null);
-
-  case $(DoubleType(Boxed), IntType(_,B8,Boxed)):
-    return &cons(BoxLongLong,&cons(UnboxDouble,null));
-  case $(DoubleType(Boxed), FloatType(Boxed)):
-    return &cons(BoxFloat,&cons(UnboxDouble,null));
-  case $(DoubleType(Boxed), DoubleType(Boxed)):
-    return null;
-  case $(DoubleType(Boxed), _):
-    return &cons(UnboxDouble,null);
-
-    // If we got this far, t1 is not large and boxed
-  case $(_, IntType(_,B8,Boxed)): return &cons(BoxLongLong,null);
-  case $(_, FloatType(Boxed)):    return &cons(BoxFloat,   null);
-  case $(_, DoubleType(Boxed)):   return &cons(BoxDouble,  null);
-
   case $(PointerType(p1), PointerType(p2)):
     _ n1 = conref_val(p1.nullable);
     _ n2 = conref_val(p2.nullable);
@@ -585,113 +533,6 @@ static list<conv> conversion(typ t1, typ t2) {
     return convs;
   default: return null;
   }
-}
-
-// long long -> Long Long
-static exp box_longlong_conv(bool toplevel, exp e) {
-  if (toplevel) {
-    // struct _boxed_long_long_struct x = { e };
-    // &x
-    qvar x = temp_var();
-    exp init = unresolvedmem_exp(null,&cons(&$(null,e),null),DL);
-    vardecl vd = static_vardecl(x,strct(_boxed_long_long_struct_sp),
-				&Opt(init));
-    temp_topdecls = &cons(new_decl(Var_d(vd),DL),temp_topdecls);
-    return address_exp(var_exp(x,DL),DL);
-  } else {
-    // ({ _LongLong x =
-    //        (_LongLong)malloc(sizeof(struct _boxed_long_long_struct));
-    //    x->v = e; x; })
-    qvar x = temp_var();
-    exp init = cast_exp(longlong_typ,
-			malloc_atomic(sizeof_exp(strct(_boxed_long_long_struct_sp),DL)),DL);
-    stmt s = seq_stmt(assign_stmt(structarrow_exp(var_exp(x,DL),v_sp,
-						  DL),e,DL),
-		      exp_stmt(var_exp(x,DL),DL),DL);
-    return stmt_exp(declare_stmt(x,longlong_typ,&Opt(init),s,DL),DL);
-  }
-}
-
-// Long Long -> long long
-static exp unbox_longlong_conv(bool toplevel, exp e) {
-  // FIX:
-  if (toplevel)
-    unimp("can't unbox top-level Long Long");
-  // ((_LongLong)e)->v
-  return structarrow_exp(cast_exp(longlong_typ,e,DL),v_sp,DL);
-}
-
-// float -> Float
-static exp box_float_conv(bool toplevel, exp e) {
-  // FIX:
-  if (toplevel)
-    unimp("can't box top-level float");
-  // ({ Float x;
-  //    float *y = (float *)(&x);
-  //    *y = e;
-  //    x; })
-  qvar x = temp_var();
-  qvar y = temp_var();
-  exp init_y = cast_exp(cstar_typ(float_t,empty_tqual()),
-			address_exp(var_exp(x,DL),DL),DL);
-  stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
-		    exp_stmt(var_exp(x,DL),DL),DL);
-  s = declare_stmt(y,cstar_typ(float_t,empty_tqual()),&Opt(init_y),s,DL);
-  return stmt_exp(declare_stmt(x,Float_typ,null,s,DL),DL);
-}
-
-// Float -> float
-static exp unbox_float_conv(bool toplevel, exp e) {
-  // FIX:
-  if (toplevel)
-    unimp("can't unbox top-level Float");
-  // ({ float x;
-  //    Float *y = (float *)(&x);
-  //    *y = e;
-  //    x; })
-  qvar x = temp_var();
-  qvar y = temp_var();
-  exp init_y = cast_exp(cstar_typ(Float_typ,empty_tqual()),
-			address_exp(var_exp(x,DL),DL),DL);
-  stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
-		    exp_stmt(var_exp(x,DL),DL),DL);
-  s=declare_stmt(y,cstar_typ(Float_typ,empty_tqual()),&Opt(init_y),s,DL);
-  return stmt_exp(declare_stmt(x,float_t,null,s,DL),DL);
-}
-
-// double -> Double
-static exp box_double_conv(bool toplevel, exp e) {
-  if (toplevel) {
-    // struct _boxed_double_struct x = { e };
-    // &x
-    qvar x = temp_var();
-    exp init = unresolvedmem_exp(null,&cons(&$(null,e),null),DL);
-    vardecl vd = static_vardecl(x,strct(_boxed_double_struct_sp), 
-				&Opt(init));
-    temp_topdecls = &cons(new_decl(Var_d(vd),DL),temp_topdecls);
-    return address_exp(var_exp(x,DL),DL);
-  } else {
-    // ({ Double x = (Double)malloc(sizeof(struct _boxed_double_struct));
-    //    x->v = e; x; })
-    qvar x = temp_var();
-    exp init = 
-      cast_exp(Double_typ,
-	       malloc_atomic(sizeof_exp(strct(_boxed_double_struct_sp),DL)),
-	       DL);
-    stmt s = seq_stmt(assign_stmt(structarrow_exp(var_exp(x,DL),v_sp,
-						  DL),e,DL),
-		      exp_stmt(var_exp(x,DL),DL),DL);
-    return stmt_exp(declare_stmt(x,Double_typ,&Opt(init),s,DL),DL);
-  }
-}
-
-// Double -> double
-static exp unbox_double_conv(bool toplevel, exp e) {
-  // FIX:
-  if (toplevel)
-    unimp("can't unbox top-level Double");
-  // ((Double)e)->v
-  return structarrow_exp(cast_exp(Double_typ,e,DL),v_sp,DL);
 }
 
 #ifdef OLD_STRING_REP
@@ -808,12 +649,6 @@ static exp untag_ptr_conv(bool toplevel,typ t1,exp sz,bool nullable,exp e) {
 static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
   for(list<conv> cs = conversion(t1,t2); cs != null; cs = cs->tl) {
     switch (cs->hd) {
-    case BoxLongLong:          e = box_longlong_conv(toplevel,e);        break;
-    case UnboxLongLong:        e = unbox_longlong_conv(toplevel,e);      break;
-    case BoxFloat:             e = box_float_conv(toplevel,e);           break;
-    case UnboxFloat:           e = unbox_float_conv(toplevel,e);         break;
-    case BoxDouble:            e = box_double_conv(toplevel,e);          break;
-    case UnboxDouble:          e = unbox_double_conv(toplevel,e);        break;
     case NullCheck(t):         e = null_check_conv(toplevel,t,e);        break;
     case TagPtr(t,sz):         e = tag_ptr_conv(toplevel,t,sz,e); break;
     case UntagPtr(tagged_ptr_typ,sz,nullable): 
@@ -1015,14 +850,14 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   args = args->tl; // strip off fmt string
   typs = typs->tl; // and its type
 
-  list<Char>             rev_fmt    = null; // reversed fmt to return
+  list<int>              rev_fmt    = null; // reversed fmt to return
   list<exp>              rev_result = null; // reversed args to return,
                                                 // minus fmt
   list<$(qvar,typ,exp)@> rev_temps  = null; // reversed temps to return
 
   for (i=0; i<len; i++) {
     char c = fmt_str[i];
-    rev_fmt = &cons((Char)c,rev_fmt);
+    rev_fmt = &cons((int)c,rev_fmt);
     if (c != '%') continue;
     _ x = Formatstr::parse_conversionspecification(fmt_str,i+1);
     if (x == null) toc_impos("bad format string");
@@ -1036,7 +871,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
                                                   &cons(precision,
                                                         &cons(lenmod,null))))),
                         rev_fmt);
-      rev_fmt = &cons((Char)c2,rev_fmt);
+      rev_fmt = &cons((int)c2,rev_fmt);
       // * width or precision consumes an argument
       switch (width) {
       case &cons(x,null) && x=='*':
@@ -1071,9 +906,9 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
       // %s case.  Note, tcexp currently prohibits flags, width, precision,
       // and length modifiers for %s, so we don't handle them here;
       // we just insert size into format and args.
-      rev_fmt = &cons((Char)'.',rev_fmt);
-      rev_fmt = &cons((Char)'*',rev_fmt);
-      rev_fmt = &cons((Char)'s',rev_fmt);
+      rev_fmt = &cons((int)'.',rev_fmt);
+      rev_fmt = &cons((int)'*',rev_fmt);
+      rev_fmt = &cons((int)'s',rev_fmt);
       _ temp = temp_var();
       rev_temps = &cons(&$(temp,typs->hd,args->hd),rev_temps);
       _ size_exp    = 
@@ -2291,7 +2126,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   // decide if we can leave it as a switch
   bool leave_as_switch;
   switch (compress(t)) {
-  case IntType(_,_,Unboxed): leave_as_switch = true;  break;
+  case IntType(_,_):         leave_as_switch = true;  break;
   default:                   leave_as_switch = false; break;
   }
   for(_ scs1 = scs; scs1 != null; scs1 = scs1->tl)

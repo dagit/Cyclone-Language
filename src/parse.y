@@ -71,8 +71,8 @@ typedef enum Blockitem blockitem_t;
 enum Type_specifier {
   Signed_spec(segment);
   Unsigned_spec(segment);
-  Short_spec(segment,boxed);
-  Long_spec(segment,boxed);
+  Short_spec(segment);
+  Long_spec(segment);
   Type_spec(typ,segment);    /* int, `a, list<`a>, etc. */
   Decl_spec(decl);
 };
@@ -387,7 +387,6 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
   typ       t         = VoidType;
   size_of_t sz        = B4;
   sign      sgn       = Signed;
-  boxed     box       = Unboxed;
 
   segment last_loc = loc;
 
@@ -413,23 +412,21 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
       seen_sign = true;
       sgn       = Unsigned;
       break;
-    case Short_spec(loc2,box2):
+    case Short_spec(loc2):
       if(seen_size)
         err("integral size may appear only once within a type specifier",loc2);
       if(seen_type) err("short modifier must come before base type",loc2);
       last_loc  = loc2;
       seen_size = true;
       sz        = B2;
-      box       = box2;
       break;
-    case Long_spec(loc2,box2):
+    case Long_spec(loc2):
       if(seen_type) err("long modifier must come before base type",loc2);
       // okay to have seen a size so long as it was long (means long long)
       // That happens when we've seen a size yet we're B4
       if(seen_size)
 	switch (sz) {
 	case B4:
-	  if(box != box2) err("must use long long or Long Long",loc2);
 	  sz = B8;
 	  break;
 	default: err("extra long in type specifier",loc2); break;
@@ -437,7 +434,6 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
       last_loc = loc2;
       // the rest is is necessary if it's long and harmless if long long
       seen_size = true;
-      box       = box2;
       break;
     case Decl_spec(d):
       // we've got a struct or enum declaration embedded in here -- return
@@ -479,19 +475,17 @@ static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts,
    * combination of signed, unsigned, short, long, or longlong */
   if (!seen_type) {
     if(!seen_sign && !seen_size) err("missing type withing specifier",last_loc);
-    t = IntType(sgn, sz, box);
+    t = IntType(sgn, sz);
   } else {
     if(seen_sign)
       switch (t) {
-      case IntType(_,sz2,box2): t = IntType(sgn,sz2,box2); break;
+      case IntType(_,sz2): t = IntType(sgn,sz2); break;
       default: err("sign specification on non-integral type",last_loc); break;
       }
     if(seen_size)
       switch (t) {
-      case IntType(sgn2,_,box2):
-	if(box != box2) 
-	  err("qualifier has different boxity than type",last_loc);
-	t = IntType(sgn2,sz,box2);
+      case IntType(sgn2,_):
+	t = IntType(sgn2,sz);
 	break;
       default: err("size qualifier on non-integral type",last_loc); break;
       }
@@ -739,8 +733,7 @@ using Parse;
 %token STRUCT UNION CASE DEFAULT INLINE
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN SIZEOF ENUM
 /* Cyc:  CYCLONE additional keywords */
-%token BOXED_CHAR BOXED_SHORT BOXED_INT BOXED_LONG
-%token BOXED_FLOAT BOXED_DOUBLE NULL_kw LET THROW TRY CATCH
+%token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
 %token FILL CODEGEN CUT SPLICE
 %token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF
@@ -1014,9 +1007,9 @@ type_specifier:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(MemUKind),LOC(@1,@1))); }
 | CHAR      { $$=^$(type_spec(uchar_t,LOC(@1,@1))); }
-| SHORT     { $$=^$(Short_spec(LOC(@1,@1),Unboxed)); }
+| SHORT     { $$=^$(Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
-| LONG      { $$=^$(Long_spec(LOC(@1,@1),Unboxed)); }
+| LONG      { $$=^$(Long_spec(LOC(@1,@1))); }
 | FLOAT     { $$=^$(type_spec(float_t,LOC(@1,@1))); }
 | DOUBLE    { $$=^$(type_spec(double_t,LOC(@1,@1))); }
 | SIGNED    { $$=^$(Signed_spec(LOC(@1,@1))); }
@@ -1029,12 +1022,6 @@ type_specifier:
 /* Cyc: everything below here is an addition */
 | TYPE_VAR     { $$=^$(type_spec(VarType(&$(allocstr($1),UnresolvedKind)),
                                  LOC(@1,@1))); }
-| BOXED_CHAR   { $$=^$(type_spec(IntType(Unsigned, B1, Boxed),LOC(@1,@1))); }
-| BOXED_SHORT  { $$=^$(Short_spec(LOC(@1,@1),Boxed)); }
-| BOXED_INT    { $$=^$(type_spec(IntType(Signed, B4, Boxed),LOC(@1,@1))); }
-| BOXED_LONG   { $$=^$(Long_spec(LOC(@1,@1),Boxed)); }
-| BOXED_FLOAT  { $$=^$(type_spec(FloatType(Boxed),LOC(@1,@1))); }
-| BOXED_DOUBLE { $$=^$(type_spec(DoubleType(Boxed),LOC(@1,@1))); }
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(TupleType(List::map_c(get_tqual_typ,
 					    LOC(@3,@3),List::imp_rev($3))),

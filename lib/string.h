@@ -76,8 +76,8 @@ extern int strspn(string s, int ofs, string accept);
 
 ////////////////////////// CONVERSIONS
 
-extern list<Char> explode(string s);
-extern string implode(list<Char> c);
+extern list<int> explode(string s);
+extern string implode(list<int> c);
 
 // convert s to an int.  if offset is null, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises

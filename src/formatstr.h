@@ -18,8 +18,8 @@ extern List::list<Absyn::typ> get_scanf_typs(string, Position::segment);
 // used internally by get_format_typs, but also by the translation to C.
 // A cleaner interface would probably be a "format_to_c" function in
 // Tcformatstr that Toc could call rather than passing back all the gunk.
-extern Core::Opt_t<$(List::list<Char>, List::list<Char>, List::list<Char>, 
-		     List::list<Char>, char, int)@>
+extern Core::Opt_t<$(List::list<int>, List::list<int>, List::list<int>, 
+		     List::list<int>, char, int)@>
 parse_conversionspecification(string s, int i);
 
 }

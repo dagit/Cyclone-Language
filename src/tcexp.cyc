@@ -149,15 +149,15 @@ static synth tcConst<`r>(tenv te, segment loc, typ *`r topt, cnst_t c, exp e) {
         // The typical case is in an array initializer, e.g.,
         // short x[1] = { 255 };
       switch (*topt) {
-      case IntType(sn,B1,_):
+      case IntType(sn,B1):
         t = (sn == Unsigned) ? uchar_t : schar_t;
         e->r = Const_e(Char_c(sn,(char)(i))); // i gets truncated here
         break;
-      case IntType(sn,B2,_):
+      case IntType(sn,B2):
 	t = (sn == Unsigned) ? ushort_t : sshort_t;
         e->r = Const_e(Short_c(sn,(short)(i))); // i gets truncated here
         break;
-      case IntType(sn,_,_):
+      case IntType(sn,_):
         t = (sn == Unsigned) ? uint_t : sint_t;
         break;
       default: // topt isn't int; presumably an error to be caught elsewhere

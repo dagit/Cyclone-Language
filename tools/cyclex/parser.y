@@ -92,7 +92,7 @@ using Parser;
   Acase_List_tok(list<acase_t>);
   Acase_tok(acase_t);
   Regexp_tok(regular_expression_t);
-  Char_tok(Char);
+  Char_tok(char);
   String_tok(string);
   Charclass_tok(list<int>);
 }

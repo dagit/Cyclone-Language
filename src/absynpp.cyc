@@ -44,7 +44,6 @@ extern Doc qvar2doc(qvar);
 extern Doc cnst2doc(cnst_t);
 extern Doc prim2doc(primop);
 extern Doc primapp2doc(int inprec, primop p,list<exp> es);
-extern bool boxed2bool(boxed b);
 extern Doc de2doc($(list<designator>,exp)@ de);
 extern Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt);
 extern Doc funargs2doc(list<$(Opt_t<var>,tqual,typ)@> args,bool varargs);
@@ -297,10 +296,9 @@ Doc ntyp2doc(typ t) {
   case XenumType(n,_):
     s = cat2(text("xenum "),qvar2doc(n));
     break;
-  case IntType(sn,sz,b):
+  case IntType(sn,sz):
     string sns;
     string ts;
-    bool b2 = boxed2bool(b);
     switch (sn) {
     case Signed:   sns = "";          break;
     case Unsigned: sns = "unsigned "; break;
@@ -311,16 +309,16 @@ Doc ntyp2doc(typ t) {
       case Signed:   sns = "signed "; break;
       case Unsigned: sns = "";        break;
       }
-      ts = b2 ? "Char" : "char";
+      ts = "char";
       break;
-    case B2: ts = b2 ? "Short"     : "short";     break;
-    case B4: ts = b2 ? "Int"       : "int";       break;
-    case B8: ts = b2 ? "Long Long" : "long long"; break;
+    case B2: ts = "short";     break;
+    case B4: ts = "int";       break;
+    case B8: ts = "long long"; break;
     }
     s = text(xprintf("%s%s",sns,ts));
     break;
-  case FloatType(b):  s = text(boxed2bool(b) ? "Float"  : "float");  break;
-  case DoubleType(b): s = text(boxed2bool(b) ? "Double" : "double"); break;
+  case FloatType:  s = text("float");  break;
+  case DoubleType: s = text("double"); break;
   case TupleType(ts):
     s = cat2(text("$"),args2doc(ts));
     break;
@@ -389,13 +387,6 @@ Doc qvar2doc(qvar q) {
   } else {
     return cat2(egroup("","::","::",List::map(var2doc,(*q)[0])),
 		var2doc((*q)[1]));
-  }
-}
-
-bool boxed2bool(boxed b) {
-  switch (b) {
-  case Boxed:   return true;
-  case Unboxed: return false;
   }
 }
 

@@ -45,7 +45,7 @@ namespace Lexer {
 xenum exn { Lexical_error(string,int,int); };
 
 static string                  token_string = (string)"";
-static Char                    token_char   = (Char)'D';
+static char                    token_char   = (char)'D';
 static struct Syntax::Location dummy_loc    = {0,0,0,0};
 static Syntax::location_t      token_action = &dummy_loc;
 
@@ -170,15 +170,15 @@ case 4:
       
 case 5: 
 #line 150 "lexer.cyl"
-      token_char = (Char)lexeme_char(lexbuf,1); 
+      token_char = (char)lexeme_char(lexbuf,1); 
       return TCHAR; 
 case 6: 
 #line 153 "lexer.cyl"
-      token_char = (Char)char_for_backslash(lexeme_char(lexbuf,2)); 
+      token_char = (char)char_for_backslash(lexeme_char(lexbuf,2)); 
       return TCHAR; 
 case 7: 
 #line 156 "lexer.cyl"
-      token_char = (Char)char_for_octal_code(lexbuf,2);
+      token_char = (char)char_for_octal_code(lexbuf,2);
       return TCHAR; 
 case 8: 
 #line 159 "lexer.cyl"

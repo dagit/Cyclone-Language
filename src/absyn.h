@@ -46,7 +46,6 @@ namespace Absyn {
   extern enum Kind;
   extern enum Array_kind;
   extern enum Sign;
-  extern enum Box;
   extern struct Conref<`a>;
   extern enum Constraint<`a>;
   extern enum Bounds;
@@ -83,7 +82,6 @@ namespace Absyn {
   typedef enum Kind kind_t;
   typedef $(tvarname_t,kind_t)@ tvar; // resolved kind via in-place mutation
   typedef enum Sign sign;
-  typedef enum Box boxed;
   typedef struct Conref<`a> @conref<`a>;
   typedef enum Constraint<`a> constraint_t<`a>;
   typedef enum Bounds bounds_t;
@@ -140,7 +138,6 @@ namespace Absyn {
     UnresolvedKind
   };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
-  EXTERN_DEFINITION enum Box  { Boxed,  Unboxed };
   EXTERN_DEFINITION struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
@@ -178,9 +175,9 @@ namespace Absyn {
     EnumType(Opt_t<typedef_name_t>,list<typ>,enumdecl *);
     XenumType(typedef_name_t,xenumdecl *);
     PointerType(ptr_info_t);
-    IntType(sign,size_of_t,boxed);
-    FloatType(boxed);
-    DoubleType(boxed);
+    IntType(sign,size_of_t);
+    FloatType;
+    DoubleType;
     ArrayType(typ/* element typ*/,tqual,exp /* size */);
     FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
     TupleType(list<$(tqual,typ)@>);
@@ -442,18 +439,12 @@ namespace Absyn {
   // return a fresh type variable of the given kind 
   extern typ new_evar(kind_t);
   extern typ wildtyp();
-  // unboxed, unsigned types
+  // unsigned types
   extern typ uchar_t, ushort_t, uint_t, ulong_t;
-  // unboxed, signed types
+  // signed types
   extern typ schar_t, sshort_t, sint_t, slong_t;
-  // unboxed float, double
+  // float, double
   extern typ float_t, double_t;
-  // boxed, unsigned types
-  extern typ uChar_typ, uShort_typ, uInt_typ, uLong_typ;
-  // boxed, signed types
-  extern typ sChar_typ, sShort_typ, sInt_typ, sLong_typ;
-  // boxed float, double
-  extern typ Float_typ, Double_typ;
   // exception name and type
   extern $(list<var>,var) @ exn_name;
   extern xenumdecl exn_xed;

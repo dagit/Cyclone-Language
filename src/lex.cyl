@@ -31,14 +31,7 @@ namespace Lex {
 
 /************************** RESERVED WORDS **************************/
 
-  // Fix: having to cast to string is a pain
-static $(string,short) rw_array[61] = {
-  $("Char", BOXED_CHAR),
-  $("Double", BOXED_DOUBLE),
-  $("Float", BOXED_FLOAT),
-  $("Int", BOXED_INT),
-  $("Long", BOXED_LONG),
-  $("Short", BOXED_SHORT),
+static $(string,short) rw_array[] = {
   $("abstract", ABSTRACT),
   $("auto", AUTO),
   $("break", BREAK),

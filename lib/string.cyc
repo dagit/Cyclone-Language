@@ -476,18 +476,18 @@ int strspn(string s, int ofs, string accept) {
 }
 
 ////////////////////////// CONVERSIONS
-list<Char> explode(string s) {
-  list<Char> result = null;
+list<int> explode(string s) {
+  list<int> result = null;
   for (int i = strlen(s) - 1; i >= 0; i--)
-    result = &cons((Char)s[i],result);
+    result = &cons((int)s[i],result);
   return result;
 }
 
-string implode(list<Char> chars) {
+string implode(list<int> chars) {
   string s = new_string(List::length(chars));
   size_t i = 0;
   while (chars != null) {
-    s[i++] = chars->hd;
+    s[i++] = (char)chars->hd;
     chars = chars->tl;
   }
   return(s);
