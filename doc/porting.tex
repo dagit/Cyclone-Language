@@ -42,7 +42,23 @@ detailed below:
 \item \hyperlink{port:const}{Copy ``const'' code or values to make it non-const.}  
 \item \hyperlink{port:free}{Get rid of calls to free, realloc, memset, memcpy, etc.}
 \item \hyperlink{port:poly}{Use polymorphism or tunions to get rid of void*.}  
+\item \hyperlink{port:arrays}{Be careful with \& and arrays.}
 \end{itemize}
+
+Even when you follow these suggestions, you'll still need to test and
+debug your code carefully.  By far, the most common run-time errors
+you will get are uncaught exceptions for null-pointer dereference
+or array out-of-bounds.  Under Linux, you should get a stack backtrace
+when you have an uncaught exception which will help narrow down
+where and why the exception occurred.  On other architectures, you
+can use \texttt{gdb} to find the problem.  The most effective way
+to do this is to set a breakpoint on the routines \texttt{\_throw\_null()}
+and \texttt{\_throw\_arraybounds()} which are defined in the
+runtime and used whenever a null-check or array-bounds-check fails.
+Then you can use \texttt{gdb}'s backtrace facility to see where
+the problem occurred.  Of course, you'll be debugging at the C
+level, so you'll want to use the \texttt{-save-c} and \texttt{-g}
+options when compiling your code.  
 
 \begin{porta}
 {port:pointers}{Change pointer types to fat pointer types where necessary.}  
@@ -357,6 +373,35 @@ int foo(i_or_s y) {
 \end{verbatim}
 \end{porta}
 
+\begin{porta}{port:arrays}{Be careful with \& and arrays.}
+
+There's currently a bug in Cyclone that involves a very subtle problem
+with arrays.  The issue is that in C, the expressions
+``\texttt{\&A[i]}'', ``\texttt{A+i}'' and ``\texttt{i+A}'' are
+all equivalent.  In Cyclone, this is currently not the case because
+of array bounds checking.  Consider the following code:
+\begin{verbatim}
+  int Arr[100] = {for i < 100 : 0};
+  int ?A = Arr;
+  int ?B = A+3
+  int ?C = &A[3];
+  B[77] = C[77];
+\end{verbatim}
+The code looks perfectly reasonable but it will cause an out-of-bounds
+exception.  The problem is that \texttt{A} will be considered an
+array of size 100, \texttt{B} will be considered an array of size
+97, but \texttt{C} will be considered an array of size 1!  In
+particular, the expression ``\texttt{\&A[3]}'' has type
+\texttt{int@} $=$ \texttt{int@\{1\}} which is a sub-type of
+\texttt{int?}, so the initialization of \texttt{C} is type-correct.
+However, while passing through the type \texttt{int@\{1\}} the
+size of the array is effectively truncated to one.  Consequently,
+the expression ``\texttt{C[77]}'' will cause an out-of-bounds
+exception.  
+
+\end{porta}
+
+
 \subsection{Interfacing to C}
 
 When porting any large code from C to Cyclone, or even when writing
@@ -608,3 +653,4 @@ real \texttt{fclose} function.  It then checks the return code
 (to ensure that the close actually happened) and if it's 0,
 sets the C file pointer to \texttt{NULL}, ensuring that we
 don't call C's \texttt{fclose} on the file again.  
+
