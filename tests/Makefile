@@ -9,7 +9,7 @@ include ../Makefile.inc
 
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC=../src/$(CYCCOMP)
+CYCC=../bin/$(CYCCOMP)
 
 CYCBISON=../bin/cycbison$(EXE)
 
@@ -18,7 +18,7 @@ OUT_PREFIX=
 
 CYC_FLAGS=-I../lib -B../lib -g
 
-LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
+LIB=../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
   $(OUT_PREFIX)cyctest$(EXE) \
