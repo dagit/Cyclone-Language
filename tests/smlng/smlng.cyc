@@ -206,12 +206,13 @@ List::list_t<doc_t> flatten(doc_t d) {
     return ds_tot;
   case &Text(i): return new List::List(d,null);
   case &Tagged(tag,d):
-    List::list_t<doc_t> ds = flatten(d);
+    List::list_t<doc_t> ds_hd, ds;
+    ds_hd = ds = flatten(d);
     while (ds != null) {
       ds->hd = new Tagged(tag,ds->hd);
       ds = ds->tl;
     }
-    return ds;
+    return ds_hd;
   }
 }  
 
