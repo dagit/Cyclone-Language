@@ -905,7 +905,7 @@ static void process_file(string_t<`H> filename) {
   if (toseqc_r)
     tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 
 		   true, ignore, true);
-  // Clean up state common to last two passes
+  // Clean up state common to last three passes
   Toc::finish();
 
   if (compile_failure) return;

@@ -714,12 +714,12 @@ void dumpexp_prec(int inprec, exp_t e) {
     dumpexp_prec(myprec,e1); dump(" || "); dumpexp_prec(myprec,e2); break;
 
   case &SeqExp_e(e1,e2):
-    // DAN: put in parens because in initializers , doesn't mean SeqExp and
+    // DJG: put in parens because in initializers , doesn't mean SeqExp and
     // our recursive descent doesn't know if we're in an initializer.
     dumploc(e->loc);
-    dump_char('(');
-    dumpexp_prec(myprec,e1); dump_char(','); dumpexp_prec(myprec,e2); 
-    dump_char(')');
+    // DJG: as a hack to avoid piles of parens for aggregate initialization
+    // we pass our precedence - 1 recursively -- sound because , is associative
+    dumpexp_prec(myprec-1,e1); dump_char(','); dumpexp_prec(myprec-1,e2); 
     break;
 
   case &FnCall_e(e1,es,...):
@@ -930,7 +930,7 @@ void dumpstmt(stmt_t s,bool expstmt) {
   dumploc(s->loc);
   switch(s->r) {
   case &Skip_s:   dump_semi(); break;
-  case &Exp_s(e): dumpexp(e); dump_semi(); break;
+  case &Exp_s(e): dumpexp_prec(-100,e); dump_semi(); break;
     // FIX:  gcc only allows declarations to be used at the beginning
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.

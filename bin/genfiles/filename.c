@@ -830,7 +830,7 @@ int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '.'){
 -- i;}
 if(i < 0)
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp2=_cycalloc(sizeof(*_tmp2));((*_tmp2).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp17=({const char*_tmp1="chop_extension";_tag_dyneither(_tmp1,sizeof(char),15U);});(*_tmp2).f1=_tmp17;}));_tmp2;}));
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp17=({const char*_tmp1="chop_extension";_tag_dyneither(_tmp1,sizeof(char),15U);});_tmp2->f1=_tmp17;});_tmp2;}));
 return Cyc_substring((struct _dyneither_ptr)filename,0,(unsigned long)i);}
 # 50
 struct _dyneither_ptr Cyc_Filename_dirname(struct _dyneither_ptr filename){

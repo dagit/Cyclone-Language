@@ -183,8 +183,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // warn if the variable is "true" or "false"
     let &$(_,&v) = vd->name;
     if (strcmp(v,"true") == 0 || strcmp(v,"false") == 0)
-      warn(p->loc, "you probably do not want to use %s as a local variable...",
-           v);
+      warn(p->loc,"you probably do not want to use %s as a local variable",v);
     res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
     // We allow arrays as long as the rgn_pat is defined, since
@@ -192,7 +191,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     switch (compress(t)) {
     case &ArrayType(_):
       if (rgn_pat == NULL || !allow_ref_pat)
-        terr(p->loc, "array reference would point into unknown/unallowed region");
+        terr(p->loc,"array reference would point into unknown/unallowed region");
       break;
     default:
       if (!kind_leq(typ_kind(t),&tmk))

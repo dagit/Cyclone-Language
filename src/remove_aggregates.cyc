@@ -25,7 +25,6 @@
 // job of generating fewer temporaries (and statement expressions)
 // without cluttering up toc.cyc.  And because tuples and datatypes have
 // already been converted into structs, we have a lot fewer cases.
-
 // Do not be confused by the name: We remove aggregate _constructors_ (e.g.,
 // Aggregate_e and Array_e, but not aggregate assignment)
 // Tempting as might be to optimize x = Aggr(e1,...,en) to assign directly
@@ -48,21 +47,23 @@ namespace RemoveAggrs;
 
 #define DL 0
 
-// ??? (may not be needed since we have the field names in the designator list)
-static Dict::dict_t<qvar_t,aggrdecl_t>* aggrdecls = NULL;
-
 static void massage_toplevel_aggr(exp_opt_t e) {
   if(e==NULL)
     return;
-  // DO ME
+  // DO ME -- still being done in toc.cyc
 }
 
-// For comprehensions, may want to allow path extension for x[i], but
-// would need to know they're pure or something?!?  Grr.
+// same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with
+// aggrarrow_e(e1,f,DL) (copied from toc.cyc)
+static exp_t member_exp(exp_t e, field_name_t f, seg_t loc) {
+  switch (e->r) {
+  case &Deref_e(e1): return aggrarrow_exp(e1,f,loc);
+  default: return aggrmember_exp(e,f,loc);
+  }
+}
 
 // treat these functionally
-// Note: we are always in a function body when we use these (see above
-//       for top-level)
+// Note: we are never at top-level when we use these (see above for top-level)
 static enum ExpContext {
   Initializer, // e appears in form t x = e (not a subexpression thereof)
   NewDest, // e appears in form new e (not a subexpression thereof)
@@ -96,7 +97,7 @@ static void noarray_remove_aggrs_exp(env_t env, exp_t e) {
 }
 
 static result_t remove_aggrs_exp(env_t env, exp_t e) {
-  enum ExpResult res  = OtherRes; // changed in comprehension and array cases
+  enum ExpResult res  = OtherRes; // changed in several cases
   bool did_assign = false; // changed in comprehension, array and aggr cases
 
   switch(e->r) {
@@ -120,7 +121,9 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
 
   case &Aggregate_e(tdn,_,dles,sdopt):
     did_assign = true;
-    bool  do_stmt_exp = (env.ctxt != AggrField && env.ctxt != NewDest);
+    bool do_stmt_exp = true;
+    if(env.ctxt == AggrField || env.ctxt == NewDest)
+      do_stmt_exp = false;
     exp_t dest;
     qvar_t * v;
     if(do_stmt_exp) {
@@ -136,7 +139,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     for(let dles2=dles; dles2 != NULL; dles2 = dles2->tl) {
       let &$(ds,field_exp) = dles2->hd;
       let f = designatorlist_to_fieldname(ds);
-      let field_dest = aggrmember_exp(copy_exp(dest),f,DL);
+      let field_dest = member_exp(copy_exp(dest),f,DL);
       remove_aggrs_exp(Env(AggrField,field_dest),field_exp);
     }
     // note: we must preserve left-to-right since we're linearizing here
@@ -233,7 +236,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     *e = *bd;
     break;
 
-  case &AssignOp_e(e1,po,e2): 
+  case &AssignOp_e(e1,_,e2): 
     noarray_remove_aggrs_exp(other_env,e1);
     remove_aggrs_exp(other_env,e2);
     break;
@@ -282,11 +285,6 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     remove_aggrs_stmt(s);
     break;
   
-  case &UnresolvedMem_e(_,dles): 
-    Warn::warn(e->loc,"resolve_aggrs: unresolvedMem (AnonStruct_e??)");
-    for(; dles != NULL; dles=dles->tl)
-      noarray_remove_aggrs_exp(other_env,(*dles->hd)[1]);
-    break;
   default: Warn::impos("bad exp after translation to C: %s",
 		       Absynpp::exp2string(e));
   }
@@ -374,12 +372,11 @@ static void remove_aggrs_stmt(stmt_t s) {
 }
 
 list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
-  aggrdecls = new Dict::empty(qvar_cmp);
   for(let ds2 = ds; ds2 != NULL; ds2 = ds2->tl)
     switch(ds2->hd->r) {
     case &Fn_d(fd):  remove_aggrs_stmt(fd->body); break;
     case &Var_d(vd): massage_toplevel_aggr(vd->initializer); break;
-    case &Aggr_d(ad): *aggrdecls = Dict::insert(*aggrdecls,ad->name,ad); break;
+    case &Aggr_d(ad): 
     case &Enum_d(_): // assuming no aggregates in tag-expressions
     case &Typedef_d(_): break;
     case &Region_d(...):

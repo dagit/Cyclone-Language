@@ -831,35 +831,35 @@ static short*Cyc_va_arg_short_ptr(void*a){
 void*_tmp0=a;unsigned short*_tmp4;short*_tmp3;switch(*((int*)_tmp0)){case 0U: _LL1: _tmp3=((struct Cyc_ShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL2:
  return _tmp3;case 1U: _LL3: _tmp4=((struct Cyc_UShortPtr_sa_ScanfArg_struct*)_tmp0)->f1;_LL4:
  return(short*)_tmp4;default: _LL5: _LL6:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp2=_cycalloc(sizeof(*_tmp2));((*_tmp2).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp37=({const char*_tmp1="scan expects short pointer";_tag_dyneither(_tmp1,sizeof(char),27U);});(*_tmp2).f1=_tmp37;}));_tmp2;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp37=({const char*_tmp1="scan expects short pointer";_tag_dyneither(_tmp1,sizeof(char),27U);});_tmp2->f1=_tmp37;});_tmp2;}));}_LL0:;}
 # 147
 static int*Cyc_va_arg_int_ptr(void*a){
 void*_tmp5=a;unsigned int*_tmp9;int*_tmp8;switch(*((int*)_tmp5)){case 2U: _LL1: _tmp8=((struct Cyc_IntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL2:
  return _tmp8;case 3U: _LL3: _tmp9=((struct Cyc_UIntPtr_sa_ScanfArg_struct*)_tmp5)->f1;_LL4:
  return(int*)_tmp9;default: _LL5: _LL6:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp7=_cycalloc(sizeof(*_tmp7));((*_tmp7).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp38=({const char*_tmp6="scan expects int pointer";_tag_dyneither(_tmp6,sizeof(char),25U);});(*_tmp7).f1=_tmp38;}));_tmp7;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp7=_cycalloc(sizeof(*_tmp7));_tmp7->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp38=({const char*_tmp6="scan expects int pointer";_tag_dyneither(_tmp6,sizeof(char),25U);});_tmp7->f1=_tmp38;});_tmp7;}));}_LL0:;}
 # 155
 static struct _dyneither_ptr Cyc_va_arg_string_ptr(void*a){
 void*_tmpA=a;struct _dyneither_ptr _tmpE;struct _dyneither_ptr _tmpD;switch(*((int*)_tmpA)){case 4U: _LL1: _tmpD=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL2:
  return _dyneither_ptr_decrease_size(_tmpD,sizeof(char),1U);case 7U: _LL3: _tmpE=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmpA)->f1;_LL4:
  return _tmpE;default: _LL5: _LL6:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmpC=_cycalloc(sizeof(*_tmpC));((*_tmpC).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp39=({const char*_tmpB="scan expects char pointer";_tag_dyneither(_tmpB,sizeof(char),26U);});(*_tmpC).f1=_tmp39;}));_tmpC;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmpC=_cycalloc(sizeof(*_tmpC));_tmpC->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp39=({const char*_tmpB="scan expects char pointer";_tag_dyneither(_tmpB,sizeof(char),26U);});_tmpC->f1=_tmp39;});_tmpC;}));}_LL0:;}
 # 163
 static double*Cyc_va_arg_double_ptr(void*a){
 void*_tmpF=a;double*_tmp12;if(((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_tmpF)->tag == 5U){_LL1: _tmp12=((struct Cyc_DoublePtr_sa_ScanfArg_struct*)_tmpF)->f1;_LL2:
  return _tmp12;}else{_LL3: _LL4:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp11=_cycalloc(sizeof(*_tmp11));((*_tmp11).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3A=({const char*_tmp10="scan expects double pointer";_tag_dyneither(_tmp10,sizeof(char),28U);});(*_tmp11).f1=_tmp3A;}));_tmp11;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3A=({const char*_tmp10="scan expects double pointer";_tag_dyneither(_tmp10,sizeof(char),28U);});_tmp11->f1=_tmp3A;});_tmp11;}));}_LL0:;}
 # 170
 static float*Cyc_va_arg_float_ptr(void*a){
 void*_tmp13=a;float*_tmp16;if(((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_tmp13)->tag == 6U){_LL1: _tmp16=((struct Cyc_FloatPtr_sa_ScanfArg_struct*)_tmp13)->f1;_LL2:
  return _tmp16;}else{_LL3: _LL4:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp15=_cycalloc(sizeof(*_tmp15));((*_tmp15).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3B=({const char*_tmp14="scan expects float pointer";_tag_dyneither(_tmp14,sizeof(char),27U);});(*_tmp15).f1=_tmp3B;}));_tmp15;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp15=_cycalloc(sizeof(*_tmp15));_tmp15->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3B=({const char*_tmp14="scan expects float pointer";_tag_dyneither(_tmp14,sizeof(char),27U);});_tmp15->f1=_tmp3B;});_tmp15;}));}_LL0:;}
 # 177
 static struct _dyneither_ptr Cyc_va_arg_char_ptr(void*a){
 void*_tmp17=a;struct _dyneither_ptr _tmp1B;struct _dyneither_ptr _tmp1A;switch(*((int*)_tmp17)){case 7U: _LL1: _tmp1A=((struct Cyc_CharPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL2:
  return _tmp1A;case 4U: _LL3: _tmp1B=((struct Cyc_StringPtr_sa_ScanfArg_struct*)_tmp17)->f1;_LL4:
  return _dyneither_ptr_decrease_size(_tmp1B,sizeof(char),1U);default: _LL5: _LL6:
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp19=_cycalloc(sizeof(*_tmp19));((*_tmp19).tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3C=({const char*_tmp18="scan expects char pointer";_tag_dyneither(_tmp18,sizeof(char),26U);});(*_tmp19).f1=_tmp3C;}));_tmp19;}));}_LL0:;}
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19->tag=Cyc_Core_Invalid_argument,({struct _dyneither_ptr _tmp3C=({const char*_tmp18="scan expects char pointer";_tag_dyneither(_tmp18,sizeof(char),26U);});_tmp19->f1=_tmp3C;});_tmp19;}));}_LL0:;}
 # 188
 int Cyc__IO_vfscanf(int(*_IO_getc)(void*),int(*_IO_ungetc)(int,void*),int(*_IO_peekc)(void*),void*fp,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap,int*errp){
 # 198
@@ -1335,7 +1335,7 @@ _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 ({int _tmp5E=({unsigned char*_tmp5D=p.curr;_tmp5D - ({char*_tmp32=buf;_tag_dyneither(_tmp32,sizeof(char),_get_zero_arr_size_char((void*)_tmp32,351U));}).curr;})/ sizeof(char);nread +=_tmp5E;});
 goto _LL47;default: _LL52: _LL53:
 # 777
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp34=_cycalloc(sizeof(*_tmp34));((*_tmp34).tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp5F=({const char*_tmp33="scanf3";_tag_dyneither(_tmp33,sizeof(char),7U);});(*_tmp34).f1=_tmp5F;}));_tmp34;}));}_LL47:;};}
+(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmp34=_cycalloc(sizeof(*_tmp34));_tmp34->tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp5F=({const char*_tmp33="scanf3";_tag_dyneither(_tmp33,sizeof(char),7U);});_tmp34->f1=_tmp5F;});_tmp34;}));}_LL47:;};}
 # 781
 eof_failure:
  ++ seen_eof;

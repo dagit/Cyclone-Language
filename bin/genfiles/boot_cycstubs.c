@@ -876,7 +876,7 @@ struct  __abstractFILE* fopen(const char*,const char*);
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
 struct  __abstractFILE*_tmp0= fopen(name,type);
 # 84
-return(unsigned int)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));(*_tmp1).file=_tmp0;_tmp1;}): 0;}
+return(unsigned int)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=_tmp0;_tmp1;}): 0;}
 # 88
 int fputc(int,struct  __abstractFILE*);
 # 90
@@ -937,7 +937,7 @@ struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither
 struct Cyc___cycFILE*f=({const char*_tmpB=(const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1U));Cyc_fopen(_tmpB,(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1U)));});
 if(f == 0){
 struct _dyneither_ptr fn=({unsigned int _tmp7=_get_dyneither_size(fname,sizeof(char))+ 1U;char*_tmp6=_cycalloc_atomic(_check_times(_tmp7,sizeof(char)));({{unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));unsigned int i;for(i=0;i < _tmpA;++ i){_tmp6[i]=((const char*)fname.curr)[(int)i];}_tmp6[_tmpA]=0;}0;});_tag_dyneither(_tmp6,sizeof(char),_tmp7);});
-(int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp5=_cycalloc(sizeof(*_tmp5));((*_tmp5).tag=Cyc_FileOpenError,(*_tmp5).f1=fn);_tmp5;}));}
+(int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=Cyc_FileOpenError,_tmp5->f1=fn;_tmp5;}));}
 # 172
 return f;}
 # 175

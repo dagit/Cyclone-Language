@@ -310,6 +310,10 @@ static stmt_t skip_stmt_dl() {
   return skip_stmt(DL);
 }
 
+static $(list_t<designator_t>,exp_t)@ make_field(var_t name,exp_t e) {
+  return new $(new List(new FieldName(name),NULL), e);
+}
+
 // These constructors are useful when we want to just update the
 // raw part of an expression or statement.
 static exp_t cast_it(type_t t, exp_t e) {
@@ -447,6 +451,13 @@ static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
 }
 
 ///////////////////////////// Various Utilities /////////////////////////////
+
+static bool is_array_type(type_t t) {
+  switch (compress(t)) {
+  case &ArrayType(_): return true;
+  default: return false;
+  }
+}
 
 /*FIX: this is duplicated in tcutil; but the functions are slightly different */
 static bool is_zero(exp_t e) {
@@ -662,9 +673,12 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
     attributes_t atts = f->attributes;
     // if the original type was abstract, then we must force the field
     // to be aligned.
-    if (fields->tl == NULL && kind_leq(&ak,typ_kind(t))) {
+    //DJG: FIX I think this is broken for an array with element-type
+    //     of abstract mem kind
+    if (fields->tl == NULL 
+	&& kind_leq(&ak,typ_kind(t))
+	&& !is_array_type(t))
       atts = new List(new Aligned_att(NULL),atts);
-    }
     t = typ_to_c(rsubstitute(r,inst,t));
     // still could be abstract and end up void -- if so, make it
     // a zero-sized array of void*'s and force it to be aligned.
@@ -1169,11 +1183,6 @@ static struct FallthruInfo<`r::R> {
   list_t<vardecl_t> binders;
 };
 
-static struct StructInfo {
-  exp_opt_t @ varsizeexp; // size of comprehension for nested struct init
-  exp_opt_t lhs_exp;      // lhs to which to (optionally) assign the curr exp
-};
-
 static struct Env<`r::R> {
   <`r2::R> : {`r2} > `r
   var_t *`r       break_lab;
@@ -1492,13 +1501,6 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
     ++i;
   }
   toc_impos(aprintf("get_member_offset %s failed",*f));
-}
-
-static bool is_array_type(type_t t) {
-  switch (compress(t)) {
-  case &ArrayType(_): return true;
-  default: return false;
-  }
 }
 
 // functions for passing to lvalue_assign (see below)
@@ -2224,8 +2226,11 @@ static void exp_to_c(env_t nv, exp_t e) {
           for(int i=num_varargs-1; i >= 0; --i)
             array_args = new List(address_exp(var_exp(vs[i],DL),DL),array_args);
           s = declare_stmt(argv, arr_type, array_exp(array_args,DL), s, DL);
-          // evaluate varargs (notice we're using a screwy evaluation order now)
-          for (int i=0; es != NULL; es=es->tl, injectors=injectors->tl, ++i) {
+          // evaluate varargs (reverse to get left-to-right)
+	  es = imp_rev(es);
+	  injectors = imp_rev(injectors);
+	  int i = length(es)-1;
+          for (; es != NULL; es=es->tl, injectors=injectors->tl, --i) {
             exp_t  arg      = es->hd;
             type_t arg_type = (type_t)arg->topt;
             qvar_t var      = vs[i];
@@ -2235,19 +2240,13 @@ static void exp_to_c(env_t nv, exp_t e) {
             exp_to_c(nv,arg);
             if (is_void_star_or_boxed_tvar(field_typ))
               arg = cast_it(field_typ,arg);
-            // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
-            //   but I doubt it would happen and it causes a lot of gunk. :-(
-            // struct qv_tag temp x;
-            // x.tag = i;
-            // x.f1  = arg;
-            s = seq_stmt(assign_stmt(member_exp(varexp,fieldname(1),DL),
-                                     arg,DL),
-                         s,DL);
-            s = seq_stmt(assign_stmt(member_exp(varexp,tag_sp,DL),
-                                     datatype_tag(tud,qv),DL),
-                         s,DL);
-            s = declare_stmt(var,strctq(collapse_qvars(qv,tud->name)), NULL,
-                             s,DL);
+	    // just make an Aggregate_e and pass the buck to RemoveAggrs
+	    let tdn = collapse_qvars(qv,tud->name);
+	    let dles = list(make_field(tag_sp,datatype_tag(tud,qv)),
+			    make_field(fieldname(1),arg));
+	    s = declare_stmt(var, strctq(tdn),
+			     new_exp(new Aggregate_e(tdn,NULL,dles,NULL),DL), 
+			     s, DL);
           }
         } else {
 	  // if there are no var args, then set argv to the empty fat pointer
@@ -2492,9 +2491,6 @@ DynCast:
     break;
 
   case &New_e(rgnopt,e1):
-    if (is_toplevel(nv))
-      unimp("%s: new at top-level", Position::string_of_segment(e1->loc));
-    type_t new_e_type = (type_t)e1->topt;
     // we share the work with RemoveAggrs:
     // * we do the malloc and the result expression
     // * we pass the destination for the initializer, which RemoveAggrs
@@ -2824,9 +2820,7 @@ DynCast:
 	aggrdecl_t sd = get_known_aggrdecl(aggrinfo);
 	for(int i=1; es != NULL; es = es->tl, ++i) {
 	  exp_to_c(nv,es->hd);
-	  dles = new List(new $(new List(new FieldName(fieldname(i)),NULL),
-				es->hd),
-			  dles);
+	  dles = new List(make_field(fieldname(i),es->hd), dles);
 	}
 	e->r    = new Aggregate_e(sd->name,NULL,imp_rev(dles),sd);
 	e->topt = strct_typ;
@@ -2947,16 +2941,14 @@ DynCast:
 	  if(sd->impl->tagged) {
 	    let n = aggrfield->name;
 	    let tag_exp = uint_exp(get_member_offset(sd,n),DL);
-	    let tag_dle = new $(list((designator_t)(new FieldName(tag_sp))), 
-				tag_exp);
-	    let val_dle = new $(list((designator_t)(new FieldName(val_sp))),
-				fieldexp);
+	    let tag_dle = make_field(tag_sp,tag_exp);
+	    let val_dle = make_field(val_sp,fieldexp);
 	    qvar_t s = new $(Abs_n(NULL,true),
 			     new (string_t)aprintf("_union_%s_%s",
 						   *(*sd->name)[1],*n));
-	    let u_dle = new $(list((designator_t)(new FieldName(n))),
-			      new_exp(new Aggregate_e(s,NULL,list(tag_dle,val_dle),
-					      NULL),DL));
+	    let u_dle = 
+	      make_field(n,new_exp(new Aggregate_e(s,NULL,list(tag_dle,val_dle),
+						   NULL),DL));
 	    e->r = new Aggregate_e(*tdn,NULL,list(u_dle),sd);
 	  }
 	  // if the last field has abstract mem-kind (after instantiating
@@ -2999,7 +2991,9 @@ DynCast:
 		  }
 		  break;
 		}
-		if(!is_array_type(old_f->type) && //DJG: ???
+		//DJG: FIX I think this is broken for an array with element-type
+		//     of abstract mem kind
+		if(!is_array_type(old_f->type) &&
 		   kind_leq(&ak,typ_kind(old_f->type)))
 		  new_f->attributes = new List(new Aligned_att(NULL),
 					       new_f->attributes);
@@ -3038,8 +3032,7 @@ DynCast:
         exp_t field_tag_exp = signed_int_exp(i,0);
         let newdles = list(new $(NULL,field_tag_exp), new $(NULL,fieldexp));
         exp_t umem = unresolvedmem_exp(NULL,newdles,0);
-        list_t<designator_t> ds = list(new FieldName(field->name));
-        e->r = unresolvedmem_exp_r(NULL,list(new $(ds,umem)));
+        e->r = unresolvedmem_exp_r(NULL,list(make_field(field->name,umem)));
       } else { // not tagged
         // here is where we now sort
         let newdles = NULL;
@@ -3086,14 +3079,11 @@ DynCast:
       // make an Aggregate_e and rely on RemoveAggrs (similar to tuple case)
       list_t<$(list_t<designator_t>,_)@> dles = NULL;
       for(int i=1; es!=NULL; es=es->tl, ++i)
-	dles = new List(new $(new List(new FieldName(fieldname(i)),NULL),
-			      es->hd),
-			dles);
+	dles = new List(make_field(fieldname(i),es->hd), dles);
       // FIX? leaves the last field NULL (TocState does not have what we want)
       // RemoveAggrs does not currently use the field, but for computing
       // the malloc-exp, we will assume the last field is not an abstract-mem
-      let tag_dle = new $(new List((designator_t)(new FieldName(tag_sp)),NULL), 
-			  tag_exp);
+      let tag_dle = make_field(tag_sp,tag_exp);
       e->r = new Aggregate_e(collapse_qvars(tuf->name,tud->name), NULL,
 			     new List(tag_dle, imp_rev(dles)), NULL);
     } else {
@@ -3889,7 +3879,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e
 	// DJG: just need to alpha-convert vd -- name resolution should
-	//      have already decided scope, so we just have to rename to
+	//      have already decided scope, so we just have to rename
 	//      because C's rules differ from ours.
         switch (p->r) {
         case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
@@ -4653,8 +4643,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 	result_decls = new List(d,result_decls);
       break;
     case &Porton_d:
-    case &Portoff_d:
-      break;
+    case &Portoff_d: break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2): nv = decls_to_c(r,nv,ds2,top,cinclude); break;

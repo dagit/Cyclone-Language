@@ -857,7 +857,7 @@ static struct Cyc_ParseErrors_ParseState Cyc_ParseErrors_msg_table[111U]={{124,3
 # 22 "parse_errors.cyc"
 void Cyc_yyerror(struct _dyneither_ptr s,int state,int token){
 if(Cyc_ParseErrors_print_state_and_token){
-({struct Cyc_Int_pa_PrintArg_struct _tmp72;_tmp72.tag=1U;_tmp72.f1=(unsigned long)token;({struct Cyc_Int_pa_PrintArg_struct _tmp71;_tmp71.tag=1U;_tmp71.f1=(unsigned long)state;({void*_tmp6F[2U];(_tmp6F[0]=& _tmp71,_tmp6F[1]=& _tmp72);({struct _dyneither_ptr _tmp74=({const char*_tmp70="parse error: state [%d], token [%d]\n";_tag_dyneither(_tmp70,sizeof(char),37U);});Cyc_printf(_tmp74,_tag_dyneither(_tmp6F,sizeof(void*),2U));});});});});
+({struct Cyc_Int_pa_PrintArg_struct _tmp71=({struct Cyc_Int_pa_PrintArg_struct _tmp75;_tmp75.tag=1U,_tmp75.f1=(unsigned long)state;_tmp75;});struct Cyc_Int_pa_PrintArg_struct _tmp72=({struct Cyc_Int_pa_PrintArg_struct _tmp74;_tmp74.tag=1U,_tmp74.f1=(unsigned long)token;_tmp74;});void*_tmp6F[2U];_tmp6F[0]=& _tmp71,_tmp6F[1]=& _tmp72;({struct _dyneither_ptr _tmp76=({const char*_tmp70="parse error: state [%d], token [%d]\n";_tag_dyneither(_tmp70,sizeof(char),37U);});Cyc_printf(_tmp76,_tag_dyneither(_tmp6F,sizeof(void*),2U));});});
  exit(1);}
 # 30
 {unsigned int i=0U;for(0;i < 111U;++ i){
@@ -868,4 +868,4 @@ break;}else{
 if((Cyc_ParseErrors_msg_table[(int)i]).state == state)
 s=(Cyc_ParseErrors_msg_table[(int)i]).msg;}}}
 # 38
-({void*_tmp73=0U;({unsigned int _tmp76=(unsigned int)Cyc_yylloc.first_line;struct _dyneither_ptr _tmp75=s;Cyc_Warn_err(_tmp76,_tmp75,_tag_dyneither(_tmp73,sizeof(void*),0U));});});}
+({void*_tmp73=0U;({unsigned int _tmp78=(unsigned int)Cyc_yylloc.first_line;struct _dyneither_ptr _tmp77=s;Cyc_Warn_err(_tmp78,_tmp77,_tag_dyneither(_tmp73,sizeof(void*),0U));});});}
