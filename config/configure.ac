@@ -135,13 +135,31 @@ AC_SUBST(ac_cv_sizeof_wchar_t)
 # ... and whether it is unsigned
 AC_C_WCHAR_T_UNSIGNED
 
+# If configured with --with-pthreads, check for pthreads.h, and if it
+# exists, set HAVE_PTHREADS=yes for use in the Makefiles.
+AC_ARG_WITH([pthreads],
+            AC_HELP_STRING([--with-pthreads],
+	                   [build the runtime system with thread support]),
+            [ac_cv_pthreads=pthreads],
+            [ac_cv_pthreads=no])
+if [[ "$ac_cv_pthreads" = "pthreads" ]]; then
+  AC_CHECK_HEADERS([pthread.h],,[ac_cv_pthreads=no])
+fi
+if [[ "$ac_cv_pthreads" = "pthreads" ]]; then
+  HAVE_PTHREAD=yes
+else
+  HAVE_PTHREAD=no
+fi
+AC_SUBST(HAVE_PTHREAD)
+
+
 # The rest...
 AC_SET_MAKE
 AC_PROG_RANLIB
 
 # configure the garbage collector
 # don't use AC_CONFIG_SUBDIRS(gc) because it can't pass flags
-(cd gc; ./configure --enable-threads=no --enable-shared=no --enable-cplusplus=no)
+(cd gc; ./configure --enable-threads=$ac_cv_pthreads --enable-shared=no --enable-cplusplus=no)
 
 AC_CONFIG_FILES(Makefile.inc)
 AC_OUTPUT

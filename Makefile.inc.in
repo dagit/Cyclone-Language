@@ -22,6 +22,12 @@ LDFLAGS=@LDFLAGS@
 SIZEOF_WCHAR_T=@ac_cv_sizeof_wchar_t@
 WCHAR_T_UNSIGNED=@WCHAR_T_UNSIGNED@
 
+HAVE_PTHREAD=@HAVE_PTHREAD@
+ifeq ($(HAVE_PTHREAD),yes)
+  LDFLAGS+=-lpthread
+  CFLAGS+=-D_HAVE_PTHREAD_
+endif
+
 SHELL=/bin/sh
 A=a
 # What we do when using VC++
