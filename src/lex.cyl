@@ -20,7 +20,7 @@ using Position;
 void yyerror(string s) { 
   post_error
     (mk_err_parse
-     (segment_of_abs(yylloc->first_line,yylloc->last_line), s));
+     (segment_of_abs(yylloc.first_line,yylloc.last_line), s));
 } 
 
 namespace Lex {
@@ -487,8 +487,8 @@ extern int comment<`a>(Lexbuf<`a>);
 /* for parser -- must not be prefixed */
 int yylex() { 
  int ans = Lex::token(lbuf->v);
- yylloc->first_line = lexeme_start (lbuf->v);
- yylloc->last_line  = lexeme_end   (lbuf->v);
+ yylloc.first_line = lexeme_start (lbuf->v);
+ yylloc.last_line  = lexeme_end   (lbuf->v);
  switch (ans) {
  case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
  case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar); break;

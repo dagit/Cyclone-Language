@@ -51,8 +51,8 @@ list<string> strings_of_segments(list<segment> segs) {
   for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
     if(segs2->hd == null)
       continue;
-    places = &cons(&$(segs2->hd->start, new_pos()),
-	     &cons(&$(segs2->hd->end,   new_pos()),
+    places = &cons(&$(segs2->hd->end,   new_pos()),
+	     &cons(&$(segs2->hd->start, new_pos()),
 		   places));
   }
   Lineno::poss_of_abss(source, places); // mutates places

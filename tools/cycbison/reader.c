@@ -35,34 +35,46 @@ The entry point is reader().  */
 #include "gram.h"
 #include "machine.h"
 
-/* DJG */
-/*
-#define LTYPESTR "\n#ifndef YYLTYPE\n struct Yyltype\n\
-    {\n      int timestamp;\n      int first_line;\n      int first_column;\
-\n      int last_line;\n      int last_column;\n      string text;\n   }\n\n\
-#define YYLTYPE yyltype\n\
-YYLTYPE yynewloc() { return yyltype(0,0,0,0,0,\"\"); }\n\
-YYLTYPE yycopyloc(YYLTYPE l) { return yyltype(l.timestamp, l.first_line, l.first_column, l.last_line, l.last_column, l.text); }\n\
-#endif\n\n"
+/* DJG: I think the parser generator is still busted if you try to
+ * re-define YYLTYPE.  Note that = is used on locs, so they shouldn't
+ * be pointers!
+ */
+#define	LTYPESTR \
+"\n#ifndef YYLTYPE"\
+"\nstruct Yyltype"\
+"\n    {"\
+"\n      int timestamp;"\
+"\n      int first_line;"\
+"\n      int first_column;"\
+"\n      int last_line;"\
+"\n      int last_column;"\
+"\n      string text;"\
+"\n   };"\
+"\ntypedef struct Yyltype yyltype;"\
+"\n\n"\
+"\n#define YYLTYPE yyltype"\
+"\nYYLTYPE yynewloc() { "\
+"\n  return Yyltype{0,0,0,0,0,(string)\"\"}; "\
+"\n}"\
+"\nyyltype yylloc=Yyltype{0,0,0,0,0,(string)\"\"};"\
+"\n#endif\n\n"
 
-#define LTYPESTR_EXTERN "\nextern struct yyltype\n\
-    {\n      int timestamp;\n      int first_line;\n      int first_column;\
-\n      int last_line;\n      int last_column;\n      string text;\n   };\n\n"
-*/
-
-#define	LTYPESTR	"\n#ifndef YYLTYPE\ntypedef\n  struct Yyltype\n\
-    {\n      int timestamp;\n      int first_line;\n      int first_column;\
-\n      int last_line;\n      int last_column;\n      string text;\n   }\n\
-  *yyltype;\n\n#define YYLTYPE yyltype\nYYLTYPE yynewloc() { \n\
-  return &Yyltype{0,0,0,0,0,(string)\"\"}; \n}\nyyltype yylloc=null;\
-\n#endif\n\n"
-
-#define	EXTERN_LTYPESTR	"\n#ifndef YYLTYPE\nextern struct Yyltype\
-    {\n      int timestamp;\n      int first_line;\n      int first_column;\
-\n      int last_line;\n      int last_column;\n      string text;\n   };\
-\ntypedef struct Yyltype *yyltype;\n\n#define YYLTYPE yyltype\n\
-extern YYLTYPE yynewloc(); \n\nextern yyltype yylloc;\
-\n#endif\n\n"
+#define EXTERN_LTYPESTR \
+"\n#ifndef YYLTYPE"\
+"\nextern struct Yyltype {"\
+"\n      int timestamp;"\
+"\n      int first_line;"\
+"\n      int first_column;"\
+"\n      int last_line;"\
+"\n      int last_column;"\
+"\n      string text;"\
+"\n};"\
+"\ntypedef struct Yyltype yyltype;"\
+"\n\n"\
+"\n#define YYLTYPE yyltype"\
+"\nextern YYLTYPE yynewloc();"\
+"\nextern yyltype yylloc;"\
+"\n#endif\n\n"
 
 /* Number of slots allocated (but not necessarily used yet) in `rline'  */
 int rline_allocated;

@@ -48,7 +48,7 @@ namespace Lex {
   extern void leave_using();
 }
 
-#define LOC(s,e) Position::segment_of_abs(s->first_line,e->last_line)
+#define LOC(s,e) Position::segment_of_abs(s.first_line,e.last_line)
 #define DUMMYLOC null
 
 namespace Parse {
@@ -2264,7 +2264,6 @@ void yyprint(int i, xenum YYSTYPE v) {
 namespace Parse{
 list<decl> parse_file(FILE @f) {
   parse_result = null;
-  yylloc = yynewloc();
   lbuf = &Opt(from_file(f));
   yyparse();
   return parse_result;

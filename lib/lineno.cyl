@@ -66,17 +66,17 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
   try {
     Lexbuf<Function_lexbuf_state<FILE@>> lbuf = from_file(f);
     string source_file = filename;
-    int line = 1;
+    int    line        = 1;
 
-    // initializations unnecessary after def. assignment better about loops
-    string this_line="";
-    int eol=0, next=0;
+    string this_line;
+    int eol, next;
     while(places != null) {
       while (true) {
-	next = token(lbuf);
-	eol  = lexeme_end(lbuf);
-	if (eol >= places->hd[0]) break;
-	this_line = lexeme(lbuf);
+	next      = token(lbuf);
+	eol       = lexeme_end(lbuf);
+	this_line = lexeme(lbuf); // FIX: expensive string copy
+	if (eol >= places->hd[0]) 
+	  break;
 	
 	switch (next) {
 	case END:     throw Failure("Lineno: Invalid file position");
@@ -104,10 +104,7 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
       }
       ++line;
     }
-  } catch {
-  case y:
-    file_close(f); throw (y);
-  }
+  } catch { case y: file_close(f); throw (y); }
   file_close(f);
   return;
 }
