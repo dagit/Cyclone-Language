@@ -34,20 +34,20 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 #	gcc -o $@ $^ ../bin/gc_pg.a -pg $(LDFLAGS)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $^
-$(OUT_PREFIX)lex.cyc : lex.cyl
+$(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc $(CYCC)
+	$(CYCC) $(CYC_FLAGS) -o $@ $<
+$(OUT_PREFIX)lex.cyc : lex.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
 
-$(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc
+$(OUT_PREFIX)parse_tab.c: $(OUT_PREFIX)parse_tab.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $< 
-$(OUT_PREFIX)parse_tab.cyc: parse.y
+$(OUT_PREFIX)parse_tab.cyc: parse.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
-$(OUT_PREFIX)parse_tab.h: parse.y
+$(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $(OUT_PREFIX)parse_tab.cyc
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c: %.cyc
+$(OUT_PREFIX)%.c: %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
 # delete generated files with a particular prefix

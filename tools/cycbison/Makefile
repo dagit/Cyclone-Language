@@ -50,7 +50,9 @@ OBJECTS = LR0.o allocate.o closure.o conflicts.o derives.o files.o	\
 
 all: $(PROG)
 
-install: all
+install: all $(BINDIR)/$(PROG)
+
+$(BINDIR)/$(PROG): $(PROG)
 	cp $(PROG) $(BINDIR)
 
 $(PROG): $(OBJECTS)

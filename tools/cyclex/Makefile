@@ -26,7 +26,9 @@ SRCS=syntax parser_tab lexer lexgen compact output main
 C_SRCS=$(addsuffix .c, $(SRCS))
 O_SRCS=$(addsuffix .o, $(SRCS))
 
-install: all
+install: all $(BINDIR)/$(PROG)
+
+$(BINDIR)/$(PROG): $(PROG)
 	cp $(PROG) $(BINDIR)
 
 all: $(PROG)
@@ -42,23 +44,26 @@ diff:
 	diff lexer.cyc genfiles/lexer.cyc
 
 # careful -- this overwrites the cyclone file needed to bootstrap!
-update: all
-	cp lexer.cyc genfiles/lexer.cyc
+update: all genfiles/lexer.cyc
 
-parser_tab.cyc: parser.y
+
+parser_tab.cyc: parser.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
-parser_tab.h: parser.y
+parser_tab.h: parser.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o parser_tab.cyc
 
 ifdef BOOTSTRAP
-lexer.cyc: lexer.cyl
+lexer.cyc: lexer.cyl $(PROG)
 	./$(PROG) $< $@
+
+genfiles/lexer.cyc: lexer.cyc
+	cp lexer.cyc genfiles/lexer.cyc
 else
 lexer.cyc: genfiles/lexer.cyc
 	cp $< $@
 endif
 
-%.c: %.cyc
+%.c: %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 
 clean:

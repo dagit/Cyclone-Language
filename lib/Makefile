@@ -28,17 +28,17 @@ $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
 	ar qc $@ $^
 
-precore_c.h: precore.h
-	$(CYCC) $(CYC_FLAGS_PP) -nocyc -noremoveunused -noexpandtypedefs $^ | grep -v __sFILE > $@
+precore_c.h: precore.h $(CYCC)
+	$(CYCC) $(CYC_FLAGS_PP) -nocyc -noremoveunused -noexpandtypedefs $< | grep -v __sFILE > $@
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc
+$(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
-$(OUT_PREFIX)lineno.cyc : lineno.cyl
+$(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c : %.cyc
+$(OUT_PREFIX)%.c : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
 # We need a special target becaue the .c file won't have the OUT_PREFIX
@@ -61,7 +61,7 @@ PRECORE_H   = precore.h
 CORE_H      = core.h       $(PRECORE_H)
 STDIO_H     = $(CORE_H)
 LIST_H      = list.h       $(CORE_H)
-ARRAY_H     = array.h 
+ARRAY_H     = array.h      $(CORE_H) $(LIST_H)
 BUFFER_H    = buffer.h     $(CORE_H) $(STDIO_H)
 CHARACTER_H = character.h 
 SLOWDICT_H  = slowdict.h   $(CORE_H) $(LIST_H)
@@ -106,7 +106,7 @@ $(OUT_PREFIX)lexing.c: $(CORE_H) $(LEXING_H) $(STRING_H)
 $(OUT_PREFIX)id.c: $(CORE_H) $(STRING_H) $(LIST_H) $(ID_H)
 $(OUT_PREFIX)xarray.c: $(CORE_H) $(XARRAY_H)
 $(OUT_PREFIX)fn.c: $(FN_H)
-$(OUT_PREFIX)array.c: $(CORE_H)
+$(OUT_PREFIX)array.c: $(CORE_H) $(LIST_H)
 $(OUT_PREFIX)position.c: $(POSITION_H) $(STRING_H)
 $(OUT_PREFIX)pp.c: $(CORE_H) $(LIST_H) $(STRING_H) $(HASHTABLE_H) $(FN_H) $(PP_H)
 $(OUT_PREFIX)lineno.c: $(CORE_H) $(LEXING_H) $(STRING_H) $(LINENO_H) $(LEXING_H)

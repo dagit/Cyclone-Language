@@ -32,15 +32,15 @@ $(OUT_PREFIX)cyctest: $(OUT_PREFIX)cyctest.o $(LIB)
 $(OUT_PREFIX)foo: $(OUT_PREFIX)foo_tab.o $(OUT_PREFIX)foo.o $(LIB)
 	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
-$(OUT_PREFIX)foo_tab.c : $(OUT_PREFIX)foo_tab.cyc
+$(OUT_PREFIX)foo_tab.c : $(OUT_PREFIX)foo_tab.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
-$(OUT_PREFIX)foo_tab.cyc : foo.y
+$(OUT_PREFIX)foo_tab.cyc : foo.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
-$(OUT_PREFIX)foo_tab.h : foo.y
+$(OUT_PREFIX)foo_tab.h : foo.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.c : %.cyc
+$(OUT_PREFIX)%.c : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $< 
 
 clean_prefix:

@@ -38,7 +38,9 @@ all: $(PROG)
 $(PROG): $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -o $@ $^
 
-install: all
+install: all $(BINDIR)/$(PROG)
+
+$(BINDIR)/$(PROG): $(PROG)
 	cp $(PROG) $(BINDIR)
 
 clean::
