@@ -13,7 +13,8 @@ a4: main-a4.pdf
 online-manual: main-screen.html gen-libdoc.tex
 	$(RM) -r online-manual
 	mkdir online-manual
-	(cd online-manual; hacha ../main-screen.html)
+	cp *.html online-manual
+	(cd online-manual; hacha main-screen.html)
 
 main-screen.html: gen-libdoc.tex
 	hevea main-screen
