@@ -202,7 +202,6 @@ static callgraph_t enter_fndecls(fndefns_t fds, callgraph_t cg,
   return cg;
 }
 
-static int hash_qvar(qvar_t q) { return Hashtable::hash_string(*((*q)[1])); }
 static int hash_fndecl(fndecl_t fd) { return (int)fd; }
 
 callgraph_t compute_callgraph(list_t<decl_t> ds) {

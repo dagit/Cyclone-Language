@@ -1,6 +1,10 @@
 #include <core.h>
 using Core;
 
+region_t<`C> g(region_t<`C> f()) {
+  return f(); // ret
+}
+
 int @ `C f2() {
   let r = current_handle();
   int @ `C x = rnew(r) 3;
@@ -8,7 +12,7 @@ int @ `C f2() {
 }
 
 int @ `C f3() {
-  let r = current_handle();
+  let r = g(current_handle);
   int @ `C x = (int @ `C)rmalloc(r, sizeof(int));
   *x = 3;
   return x;

@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <assert.h>
+#include <hashtable.h>
 #include "currgn.h"
 #include "tcutil.h"
 #include "warn.h"
@@ -25,6 +26,7 @@
 using Absyn;
 using Tcutil;
 using List;
+using Hashtable;
 
 namespace CurRgn;
 
@@ -44,27 +46,75 @@ tvar_t curr_rgn_tvar (void) {
 }
 type_t curr_rgn_type (void) {
   curr_rgn_tvar();
+  curr_rgn_typ = var_type((tvar_t)curr_tvar);
   return (type_t)curr_rgn_typ;
 }
 
-// Add `C if not already in the list
-$(list_t<tvar_t,`H>,type_t) add_curr_tvar(list_t<tvar_t,`H> tvs, type_t cap) {
-  let vs = tvs;
-  for (; vs != NULL && tvar_cmp(vs->hd,(tvar_t)curr_tvar) != 0; vs = vs->tl);
-  if (vs == NULL) {
-//     printf ("adding `C\n");
-    tvs = new List((tvar_t)curr_tvar,tvs);
-    cap = join_eff(new List(access_eff((type_t)curr_rgn_typ),
-			    new List(cap,NULL)));
+// if the argument is a function type, we return a new argument
+// descriptor that abstracts for `C.  Otherwise we return the original
+// argument.
+static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) {
+  let &$(vopt,tq,t) = arg;
+  switch (t) {
+  case &PointerType(PtrInfo(t1,...)):
+    if (!is_function_type(t1)) return arg;
+    break;
+  default: return arg;
   }
-  return $(tvs,cap);
+  let t2 = copy_type(t);
+  switch (compress(t2)) {
+  case &PointerType(PtrInfo(t1,...)):
+    switch (compress(t1)) {
+    case &FnType(FnInfo{*tvars,eff,res_tq,res_typ,args_info,c_vararg,
+			  cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
+			  ret_var}):
+      // change the type of functions to be parameterized by `C, so
+      // that `C is not substituted for
+      let tvars2 = *tvars;
+      *tvars = new List((tvar_t)curr_tvar,tvars2);
+      return new $(vopt,tq,t2);
+    default: throw new Core::Impossible("internal compiler error: not a function type");
+    }
+  default: throw new Core::Impossible("internal compiler error: not a pointer type");
+  }
 }
 
-// Change an instantiation mapping for `C to be the top lifo region
-void inst_curr_rgn(Tcenv::tenv_t te, $(tvar_t,type_t)@`r instv) {
-  if (tvar_cmp((*instv)[0],(tvar_t)curr_tvar) == 0)
-    (*instv)[1] = Tcenv::curr_lifo_rgn(te);
-  return;
+// "Instantiates" `C in the function's type with the current LIFO region
+type_t instantiate(type_t fntype, type_t currgn) {
+  switch (fntype) {
+  case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info,c_vararg,
+			cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
+			ret_var}):
+    // Need to make sure we don't instantiate for any functions
+    // appearing in the arguments of the function; simulates our
+    // assumption that they will be higher order
+    let old_args_info = *args_info;
+    // adds `C to bound variables in the function
+    *args_info = List::map(argtype,*args_info);
+    // instantiate `C
+    let inst = new List(new $((tvar_t)curr_tvar,currgn),NULL);
+    let fntype2 = substitute(inst,fntype);
+    // restore the old bound variables in both types
+    switch (fntype2) {
+    case &FnType(FnInfo{_,_,_,_,*args_info2,...}):
+      *args_info2 = old_args_info;
+      break;
+    default: break;
+    }
+    *args_info = old_args_info;
+    return fntype2;
+  default: return fntype; // error will get caught in caller
+  }
+}
+
+// Used as an argument to filter for type variable lists
+bool is_not_curr_rgn(tvar_t v) {
+  return (tvar_cmp(v,(tvar_t)curr_tvar) != 0);
+}
+
+// Used as an argument to exists for type variable lists 
+bool is_curr_rgn(tvar_t v) {
+  return (tvar_cmp(v,(tvar_t)curr_tvar) == 0);
 }
 
 struct rgnsubenv {
@@ -416,14 +466,14 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
   case &Fn_d(fd):
     // We set the current region to be `C at the start of a function
     // body.  We do not substitute for the arguments, effect, or
-    // partial order; these should stay abstract
-    // FIX: probably need to substitute for ensures clauses 
+    // partial order; these should stay abstract (they are substituted
+    // for during typechecking). FIX: probably need to substitute for
+    // ensures clauses
     env.toplevel = false;
     env.inst = new List(new $((tvar_t)curr_tvar,(type_t)curr_rgn_typ),NULL);
     rgnsubstmt(env,fd->body);
-    // FIX: what's the return type used for?
-    rgnsubtype(d->loc,env,fd->i.ret_type);
-    fd->i.ret_type = substitute_nofun(env.inst,fd->i.ret_type);
+//     rgnsubtype(d->loc,env,fd->i.ret_type);
+//     fd->i.ret_type = substitute_nofun(env.inst,fd->i.ret_type);
     return;
 
   case &Typedef_d(td):

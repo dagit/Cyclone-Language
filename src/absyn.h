@@ -880,6 +880,7 @@ namespace Absyn {
 
   // compare variables 
   int qvar_cmp(qvar_t, qvar_t);
+  int hash_qvar(qvar_t);
   int varlist_cmp(list_t<var_t>, list_t<var_t>);
   int tvar_cmp(tvar_t,tvar_t); // WARNING: ignores the kinds
 

@@ -23,6 +23,7 @@
 #include "warn.h"
 #include "flags.h"
 #include <string.h>
+#include <hashtable.h>
 #include "tcutil.h"
 #include "evexp.h"
 using Core;
@@ -66,6 +67,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   case $(_,{.Abs_n = _}): return 1; 
   }
 }
+int hash_qvar(qvar_t q) { return Hashtable::hash_string(*((*q)[1])); }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   int i = strptrcmp(tv1->name,tv2->name);

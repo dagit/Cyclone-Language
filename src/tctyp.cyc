@@ -27,6 +27,7 @@
 #include "warn.h"
 #include "flags.h"
 #include "tctyp.h"
+#include "currgn.h"
 using List;
 using Core;
 using Warn; // put Warn first so Absyn shadows
@@ -1114,8 +1115,8 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
     switch (compress(t)) {
     case &FnType(FnInfo{*btvs,...}):
       if (*btvs == NULL) {
-	// abstract the free tvars
-	*btvs = List::copy(free_tvars);
+	// abstract the free tvars, removing the current region
+	*btvs = List::filter(CurRgn::is_not_curr_rgn,free_tvars);
 	free_tvars = NULL;
       }
       break;
@@ -1125,6 +1126,14 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
       err2(loc,"unbound type variable ",free_tvars->hd, " when checking ", t);
     if (!is_function_type(t) || !te->in_tempest)
       check_free_evars(free_evars,t,loc);
+  }
+  // make sure the current region isn't in the list
+  switch (compress(t)) {
+  case &FnType(FnInfo{btvs,...}):
+    if (List::exists(CurRgn::is_curr_rgn,btvs))
+      err2(loc,"cannot abstract current region ",CurRgn::curr_rgn_name," in ", t);
+    break;
+  default: break;
   }
 }
 

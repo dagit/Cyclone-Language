@@ -27,12 +27,13 @@ namespace CurRgn {
   using List;
 
   string_t curr_rgn_name;
-  tvar_t curr_rgn_tvar (void);
-  type_t curr_rgn_type (void);
+  tvar_t curr_rgn_tvar (void); // `C
+  type_t curr_rgn_type (void); // `C
 
-  $(list_t<tvar_t,`H>,type_t) add_curr_tvar(list_t<tvar_t,`H> tvs,type_t cap);
+  type_t instantiate(type_t fntype, type_t currgn);
 
-  void inst_curr_rgn(Tcenv::tenv_t te, $(tvar_t,type_t)@`r instv);
+  bool is_curr_rgn(tvar_t v);
+  bool is_not_curr_rgn(tvar_t v);
 
   void adjust_all(list_t<decl_t,`H> tds);
 }

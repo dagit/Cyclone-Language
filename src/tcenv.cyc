@@ -498,10 +498,14 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
-  let $(tvs1,cap) = CurRgn::add_curr_tvar(fd->i.tvars,(type_t)fd->i.effect);
+//   let $(tvs1,cap,ret_t,f_rgn_po) = CurRgn::add_curr_tvar(fd);
+  let $(tvs1,cap,ret_t,f_rgn_po) = $(new List(CurRgn::curr_rgn_tvar(),fd->i.tvars),
+				     join_eff(new List(access_eff(CurRgn::curr_rgn_type()),
+						  new List((type_t)fd->i.effect,NULL))),
+				     fd->i.ret_type,fd->i.rgn_po);
   let tvs = new List(rgn0,tvs1);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = initial_fn_po(tvs1,fd->i.rgn_po,cap,rgn0,loc);
+  let rgn_po = initial_fn_po(tvs1,f_rgn_po,cap,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
@@ -517,13 +521,14 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     }
   }
   return new
-    Fenv{.shared = new_shared_fenv(fd->i.ret_type),
+    Fenv{.shared = new_shared_fenv(ret_t),
          .type_vars     = tvs,
          .region_order  = rgn_po,
          .ctrl_env      = NULL,
          .capability    = join_eff(new List(access_eff(param_rgn),
 					    new List(cap,NULL))),
          .curr_rgn      = param_rgn,
+// 	 .curr_lifo_rgn = CurRgn::init_rgn_type(fd),
 	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
 	 .flags         = FenvFlags{NoneNew,false,false,false,false}
        };
@@ -570,6 +575,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
          .capability  = join_eff(new List(access_eff(param_rgn),
 					  new List((type_t)fd->i.effect,NULL))),
          .curr_rgn    = param_rgn,
+// 	 .curr_lifo_rgn = CurRgn::init_rgn_type(fd),
 	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };

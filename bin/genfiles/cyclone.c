@@ -503,7 +503,7 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init (void);
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};
 # 29 "currgn.h"
 struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
-# 37
+# 38
 void Cyc_CurRgn_adjust_all(struct Cyc_List_List*tds);
 # 29 "tc.h"
 void Cyc_Tc_tc(struct Cyc_Tcenv_Tenv*te,int var_default_init,struct Cyc_List_List*ds);

@@ -869,7 +869,10 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
     check_rgn_accessible(te,loc,rgn);
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
-    switch (compress(t1)) {
+    // Now we "instantiate" occurrences of the current region in the function's
+    // type with the current one (as known by the environment)
+    t1 = CurRgn::instantiate(compress(t1),Tcenv::curr_lifo_rgn(te));
+    switch (t1) {
       case &FnType(FnInfo{tvars,eff,res_tq,res_typ,args_info,c_vararg,
                           cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
                           ret_var}):
@@ -1053,13 +1056,6 @@ static type_t doInstantiate(tenv_t te, seg_t loc, type_t * topt,
       for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
 	kind_t k = tvar_kind(tvars->hd,&bk);
 	check_type(loc,te,lookup_type_vars(te),k,true,true,ts->hd);
-	// If this tvar is the CurrRgn, make sure it's instantiated with
-	// the topmost region
-	if (tvar_cmp(tvars->hd,CurRgn::curr_rgn_tvar()) == 0) {
-	  if (!Unify::unify(Tcenv::curr_lifo_rgn(te),ts->hd))
-	    Warn::err2(loc, "Attempt to instantiate ",CurRgn::curr_rgn_type(),
-		       " with ",ts->hd," which is not the topmost region");
-	}
 	check_no_qual(loc,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
@@ -2310,7 +2306,6 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     case &FnType(info):
       let env  = $(lookup_type_vars(te),heap_region);
       let inst = List::map_c(r_make_inst_var,&env,info.tvars);
-      List::iter_c(CurRgn::inst_curr_rgn,te,inst);
       let ts = map(snd,inst); // FIX: wasteful allocation
       let inner = copy_exp(e);
       e->r = new Instantiate_e(inner, ts); 
