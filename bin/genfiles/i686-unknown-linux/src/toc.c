@@ -1872,16 +1872,18 @@ _tmp273,sizeof(struct _tuple1*),(unsigned int)_tmp20B);{unsigned int _tmp274=
 _tmp272;unsigned int i;for(i=0;i < _tmp274;i ++){_tmp273[i]=Cyc_Toc_temp_var();}}
 _tmp275;});struct Cyc_List_List*_tmp26C=0;{int i=_tmp20B - 1;for(0;i >= 0;-- i){
 _tmp26C=({struct Cyc_List_List*_tmp26D=_cycalloc(sizeof(*_tmp26D));_tmp26D->hd=
-Cyc_Toc_make_dle(Cyc_Absyn_address_exp(Cyc_Absyn_var_exp(((struct _tuple1**)vs.curr)[
-i],0),0));_tmp26D->tl=_tmp26C;_tmp26D;});}}s=Cyc_Absyn_declare_stmt(argv,
-arr_type,(struct Cyc_Absyn_Exp*)Cyc_Absyn_unresolvedmem_exp(0,_tmp26C,0),s,0);{
-int i=0;for(0;_tmp208 != 0;(((_tmp208=_tmp208->tl,_tmp20C=_tmp20C->tl)),++ i)){
-struct Cyc_Absyn_Exp*arg=(struct Cyc_Absyn_Exp*)_tmp208->hd;void*arg_type=(void*)((
-struct Cyc_Core_Opt*)_check_null(arg->topt))->v;struct _tuple1*var=((struct _tuple1**)
-vs.curr)[i];struct Cyc_Absyn_Exp*varexp=Cyc_Absyn_var_exp(var,0);struct Cyc_Absyn_Tunionfield
-_tmp26F;struct _tuple1*_tmp270;struct Cyc_List_List*_tmp271;struct Cyc_Absyn_Tunionfield*
-_tmp26E=(struct Cyc_Absyn_Tunionfield*)((struct Cyc_List_List*)_check_null(_tmp20C))->hd;
-_tmp26F=*_tmp26E;_tmp270=_tmp26F.name;_tmp271=_tmp26F.typs;{void*field_typ=Cyc_Toc_typ_to_c((*((
+Cyc_Toc_make_dle(Cyc_Absyn_address_exp(Cyc_Absyn_var_exp(*((struct _tuple1**)
+_check_unknown_subscript(vs,sizeof(struct _tuple1*),i)),0),0));_tmp26D->tl=
+_tmp26C;_tmp26D;});}}s=Cyc_Absyn_declare_stmt(argv,arr_type,(struct Cyc_Absyn_Exp*)
+Cyc_Absyn_unresolvedmem_exp(0,_tmp26C,0),s,0);{int i=0;for(0;_tmp208 != 0;(((
+_tmp208=_tmp208->tl,_tmp20C=_tmp20C->tl)),++ i)){struct Cyc_Absyn_Exp*arg=(struct
+Cyc_Absyn_Exp*)_tmp208->hd;void*arg_type=(void*)((struct Cyc_Core_Opt*)
+_check_null(arg->topt))->v;struct _tuple1*var=*((struct _tuple1**)
+_check_unknown_subscript(vs,sizeof(struct _tuple1*),i));struct Cyc_Absyn_Exp*
+varexp=Cyc_Absyn_var_exp(var,0);struct Cyc_Absyn_Tunionfield _tmp26F;struct _tuple1*
+_tmp270;struct Cyc_List_List*_tmp271;struct Cyc_Absyn_Tunionfield*_tmp26E=(struct
+Cyc_Absyn_Tunionfield*)((struct Cyc_List_List*)_check_null(_tmp20C))->hd;_tmp26F=*
+_tmp26E;_tmp270=_tmp26F.name;_tmp271=_tmp26F.typs;{void*field_typ=Cyc_Toc_typ_to_c((*((
 struct _tuple4*)((struct Cyc_List_List*)_check_null(_tmp271))->hd)).f2);Cyc_Toc_exp_to_c(
 nv,arg);if(Cyc_Toc_is_void_star(field_typ))arg=Cyc_Absyn_cast_exp(field_typ,arg,
 0);s=Cyc_Absyn_seq_stmt(Cyc_Absyn_assign_stmt(Cyc_Absyn_aggrmember_exp(varexp,

@@ -1043,34 +1043,35 @@ const int Cyc_lex_default[517]=(const int[517]){- 1,- 1,- 1,419,408,154,23,36,23
 - 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1};int Cyc_lex_engine(int start_state,struct Cyc_Lexing_lexbuf*
 lbuf){int state;int base;int backtrk;int c;state=start_state;if(state >= 0){lbuf->lex_last_pos=(
 lbuf->lex_start_pos=lbuf->lex_curr_pos);lbuf->lex_last_action=- 1;}else{state=(-
-state)- 1;}while(1){base=Cyc_lex_base[state];if(base < 0)return(- base)- 1;backtrk=
-Cyc_lex_backtrk[state];if(backtrk >= 0){lbuf->lex_last_pos=lbuf->lex_curr_pos;
-lbuf->lex_last_action=backtrk;}if(lbuf->lex_curr_pos >= lbuf->lex_buffer_len){if(
-!lbuf->lex_eof_reached)return(- state)- 1;else{c=256;}}else{c=(int)*((char*)
+state)- 1;}while(1){base=Cyc_lex_base[_check_known_subscript_notnull(517,state)];
+if(base < 0)return(- base)- 1;backtrk=Cyc_lex_backtrk[
+_check_known_subscript_notnull(517,state)];if(backtrk >= 0){lbuf->lex_last_pos=
+lbuf->lex_curr_pos;lbuf->lex_last_action=backtrk;}if(lbuf->lex_curr_pos >= lbuf->lex_buffer_len){
+if(!lbuf->lex_eof_reached)return(- state)- 1;else{c=256;}}else{c=(int)*((char*)
 _check_unknown_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
 if(c == - 1)c=256;}if(Cyc_lex_check[_check_known_subscript_notnull(3782,base + c)]
 == state)state=Cyc_lex_trans[_check_known_subscript_notnull(3782,base + c)];else{
-state=Cyc_lex_default[state];}if(state < 0){lbuf->lex_curr_pos=lbuf->lex_last_pos;
-if(lbuf->lex_last_action == - 1)(int)_throw((void*)({struct Cyc_Lexing_Error_struct*
-_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Lexing_Error_struct _tmp4;
-_tmp4.tag=Cyc_Lexing_Error;_tmp4.f1=_tag_arr("empty token",sizeof(char),12);
-_tmp4;});_tmp3;}));else{return lbuf->lex_last_action;}}else{if(c == 256)lbuf->lex_eof_reached=
-0;}}}struct _tuple9*Cyc_line_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
-lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0: _LL0: Cyc_macroname(
-lexbuf);for(0;Cyc_current_args != 0;Cyc_current_args=((struct Cyc_List_List*)
-_check_null(Cyc_current_args))->tl){Cyc_current_targets=({struct Cyc_Set_Set**
-_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5[0]=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*
-s,struct _tagged_arr*elt))Cyc_Set_delete)(*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets)),(
-struct _tagged_arr*)((struct Cyc_List_List*)_check_null(Cyc_current_args))->hd);
-_tmp5;});}return({struct _tuple9*_tmp6=_cycalloc(sizeof(*_tmp6));_tmp6->f1=(
-struct _tagged_arr*)_check_null(Cyc_current_source);_tmp6->f2=*((struct Cyc_Set_Set**)
-_check_null(Cyc_current_targets));_tmp6;});case 1: _LL1: return Cyc_line(lexbuf);
-case 2: _LL2: return 0;default: _LL3:(lexbuf->refill_buff)(lexbuf);return Cyc_line_rec(
-lexbuf,lexstate);}(int)_throw((void*)({struct Cyc_Lexing_Error_struct*_tmp7=
-_cycalloc(sizeof(*_tmp7));_tmp7[0]=({struct Cyc_Lexing_Error_struct _tmp8;_tmp8.tag=
-Cyc_Lexing_Error;_tmp8.f1=_tag_arr("some action didn't return!",sizeof(char),27);
-_tmp8;});_tmp7;}));}struct _tuple9*Cyc_line(struct Cyc_Lexing_lexbuf*lexbuf){
-return Cyc_line_rec(lexbuf,0);}int Cyc_macroname_rec(struct Cyc_Lexing_lexbuf*
+state=Cyc_lex_default[_check_known_subscript_notnull(517,state)];}if(state < 0){
+lbuf->lex_curr_pos=lbuf->lex_last_pos;if(lbuf->lex_last_action == - 1)(int)_throw((
+void*)({struct Cyc_Lexing_Error_struct*_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({
+struct Cyc_Lexing_Error_struct _tmp4;_tmp4.tag=Cyc_Lexing_Error;_tmp4.f1=_tag_arr("empty token",
+sizeof(char),12);_tmp4;});_tmp3;}));else{return lbuf->lex_last_action;}}else{if(c
+== 256)lbuf->lex_eof_reached=0;}}}struct _tuple9*Cyc_line_rec(struct Cyc_Lexing_lexbuf*
+lexbuf,int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){
+case 0: _LL0: Cyc_macroname(lexbuf);for(0;Cyc_current_args != 0;Cyc_current_args=((
+struct Cyc_List_List*)_check_null(Cyc_current_args))->tl){Cyc_current_targets=({
+struct Cyc_Set_Set**_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5[0]=((struct Cyc_Set_Set*(*)(
+struct Cyc_Set_Set*s,struct _tagged_arr*elt))Cyc_Set_delete)(*((struct Cyc_Set_Set**)
+_check_null(Cyc_current_targets)),(struct _tagged_arr*)((struct Cyc_List_List*)
+_check_null(Cyc_current_args))->hd);_tmp5;});}return({struct _tuple9*_tmp6=
+_cycalloc(sizeof(*_tmp6));_tmp6->f1=(struct _tagged_arr*)_check_null(Cyc_current_source);
+_tmp6->f2=*((struct Cyc_Set_Set**)_check_null(Cyc_current_targets));_tmp6;});case
+1: _LL1: return Cyc_line(lexbuf);case 2: _LL2: return 0;default: _LL3:(lexbuf->refill_buff)(
+lexbuf);return Cyc_line_rec(lexbuf,lexstate);}(int)_throw((void*)({struct Cyc_Lexing_Error_struct*
+_tmp7=_cycalloc(sizeof(*_tmp7));_tmp7[0]=({struct Cyc_Lexing_Error_struct _tmp8;
+_tmp8.tag=Cyc_Lexing_Error;_tmp8.f1=_tag_arr("some action didn't return!",
+sizeof(char),27);_tmp8;});_tmp7;}));}struct _tuple9*Cyc_line(struct Cyc_Lexing_lexbuf*
+lexbuf){return Cyc_line_rec(lexbuf,0);}int Cyc_macroname_rec(struct Cyc_Lexing_lexbuf*
 lexbuf,int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){
 case 0: _LL5: Cyc_current_source=({struct _tagged_arr*_tmp9=_cycalloc(sizeof(*_tmp9));
 _tmp9[0]=(struct _tagged_arr)Cyc_Std_substring((struct _tagged_arr)Cyc_Lexing_lexeme(

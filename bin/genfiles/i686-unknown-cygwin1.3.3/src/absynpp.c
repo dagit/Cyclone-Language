@@ -594,20 +594,22 @@ _check_unknown_subscript(_tmp3,sizeof(char),j ++))=(char)('0' + ((char)c >> 6 & 
 char*)_check_unknown_subscript(_tmp3,sizeof(char),j ++))=(char)('0' + (c >> 3 & 7));*((
 char*)_check_unknown_subscript(_tmp3,sizeof(char),j ++))=(char)('0' + (c & 7));
 return(struct _tagged_arr)_tmp3;}}}static int Cyc_Absynpp_special(struct _tagged_arr
-s){int sz=(int)(_get_arr_size(s,sizeof(char))- 1);{int i=0;for(0;i < sz;i ++){char c=((
-const char*)s.curr)[i];if(((c <= ' '?1: c >= '~')?1: c == '"')?1: c == '\\')return 1;}}
-return 0;}struct _tagged_arr Cyc_Absynpp_string_escape(struct _tagged_arr s){if(!Cyc_Absynpp_special(
-s))return s;{int n=(int)(_get_arr_size(s,sizeof(char))- 1);if(n > 0?((const char*)s.curr)[
-n]== '\000': 0)n --;{int len=0;{int i=0;for(0;i <= n;i ++){char _tmp4=((const char*)s.curr)[
-i];_LLD: if(_tmp4 != '\a')goto _LLF;_LLE: goto _LL10;_LLF: if(_tmp4 != '\b')goto _LL11;
-_LL10: goto _LL12;_LL11: if(_tmp4 != '\f')goto _LL13;_LL12: goto _LL14;_LL13: if(_tmp4 != '\n')
-goto _LL15;_LL14: goto _LL16;_LL15: if(_tmp4 != '\r')goto _LL17;_LL16: goto _LL18;_LL17:
-if(_tmp4 != '\t')goto _LL19;_LL18: goto _LL1A;_LL19: if(_tmp4 != '\v')goto _LL1B;_LL1A:
-goto _LL1C;_LL1B: if(_tmp4 != '\\')goto _LL1D;_LL1C: goto _LL1E;_LL1D: if(_tmp4 != '"')
-goto _LL1F;_LL1E: len +=2;goto _LLC;_LL1F:;_LL20: if(_tmp4 >= ' '?_tmp4 <= '~': 0)len ++;
-else{len +=4;}goto _LLC;_LLC:;}}{struct _tagged_arr t=Cyc_Core_new_string((
-unsigned int)len);int j=0;{int i=0;for(0;i <= n;i ++){char _tmp5=((const char*)s.curr)[
-i];_LL22: if(_tmp5 != '\a')goto _LL24;_LL23:*((char*)_check_unknown_subscript(t,
+s){int sz=(int)(_get_arr_size(s,sizeof(char))- 1);{int i=0;for(0;i < sz;i ++){char c=*((
+const char*)_check_unknown_subscript(s,sizeof(char),i));if(((c <= ' '?1: c >= '~')?1:
+c == '"')?1: c == '\\')return 1;}}return 0;}struct _tagged_arr Cyc_Absynpp_string_escape(
+struct _tagged_arr s){if(!Cyc_Absynpp_special(s))return s;{int n=(int)(_get_arr_size(
+s,sizeof(char))- 1);if(n > 0?*((const char*)_check_unknown_subscript(s,sizeof(char),
+n))== '\000': 0)n --;{int len=0;{int i=0;for(0;i <= n;i ++){char _tmp4=*((const char*)
+_check_unknown_subscript(s,sizeof(char),i));_LLD: if(_tmp4 != '\a')goto _LLF;_LLE:
+goto _LL10;_LLF: if(_tmp4 != '\b')goto _LL11;_LL10: goto _LL12;_LL11: if(_tmp4 != '\f')
+goto _LL13;_LL12: goto _LL14;_LL13: if(_tmp4 != '\n')goto _LL15;_LL14: goto _LL16;_LL15:
+if(_tmp4 != '\r')goto _LL17;_LL16: goto _LL18;_LL17: if(_tmp4 != '\t')goto _LL19;_LL18:
+goto _LL1A;_LL19: if(_tmp4 != '\v')goto _LL1B;_LL1A: goto _LL1C;_LL1B: if(_tmp4 != '\\')
+goto _LL1D;_LL1C: goto _LL1E;_LL1D: if(_tmp4 != '"')goto _LL1F;_LL1E: len +=2;goto _LLC;
+_LL1F:;_LL20: if(_tmp4 >= ' '?_tmp4 <= '~': 0)len ++;else{len +=4;}goto _LLC;_LLC:;}}{
+struct _tagged_arr t=Cyc_Core_new_string((unsigned int)len);int j=0;{int i=0;for(0;i
+<= n;i ++){char _tmp5=*((const char*)_check_unknown_subscript(s,sizeof(char),i));
+_LL22: if(_tmp5 != '\a')goto _LL24;_LL23:*((char*)_check_unknown_subscript(t,
 sizeof(char),j ++))='\\';*((char*)_check_unknown_subscript(t,sizeof(char),j ++))='a';
 goto _LL21;_LL24: if(_tmp5 != '\b')goto _LL26;_LL25:*((char*)
 _check_unknown_subscript(t,sizeof(char),j ++))='\\';*((char*)

@@ -969,9 +969,11 @@ _tmpB8;_tmpD4.rgn=(void*)_tmpB9;_tmpD4;});_tmpD3;});_tmpD2;});struct Cyc_Positio
 _tmpD1=Cyc_Position_segment_of_abs(0,0);return(void*)_tmpD0;}}}_LL13:;_LL14:
 return type;_LLE:;}struct _tagged_arr Cyc_Tcgenrep_make_type_cstring(void*t){struct
 _tagged_arr s=Cyc_Std_strdup(Cyc_Absynpp_typ2cstring(t));{int i=0;for(0;i < Cyc_Std_strlen((
-struct _tagged_arr)s);i ++){if(((char*)s.curr)[i]== ' ')((char*)s.curr)[i]='_';
-else{if(!isalnum((int)((char*)s.curr)[i])?((char*)s.curr)[i]!= '_': 0)((char*)s.curr)[
-i]=(char)('0' + ((char*)s.curr)[i]% 10);}}}return(struct _tagged_arr)Cyc_Std_strconcat((
+struct _tagged_arr)s);i ++){if(*((char*)_check_unknown_subscript(s,sizeof(char),i))
+== ' ')((char*)s.curr)[i]='_';else{if(!isalnum((int)*((char*)
+_check_unknown_subscript(s,sizeof(char),i)))?*((char*)_check_unknown_subscript(s,
+sizeof(char),i))!= '_': 0)((char*)s.curr)[i]=(char)('0' + *((char*)
+_check_unknown_subscript(s,sizeof(char),i))% 10);}}}return(struct _tagged_arr)Cyc_Std_strconcat((
 struct _tagged_arr)s,_tag_arr("_rep",sizeof(char),5));}struct _tuple18{struct Cyc_Dict_Dict*
 f1;struct Cyc_Tcgenrep_RepInfo*f2;};static struct _tuple18*Cyc_Tcgenrep_lookupRep(
 struct Cyc_Tcenv_Tenv*te,struct Cyc_Dict_Dict*dict,struct Cyc_Position_Segment*loc,

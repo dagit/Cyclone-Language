@@ -563,6 +563,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 
   case &Subscript_e(e1,e2): // FIX: avoid list allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
+    let f2 = f;
     switch(f) {
     case &ReachableFL(d2,relns):
       //fprintf(stderr,"subscript %s:",Absynpp::exp2string(e));
@@ -571,7 +572,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	Tcutil::terr(e2->loc, "expression may not be initialized");
       let new_relns = add_subscript_reln(relns,e1,e2);
       if (relns != new_relns)
-        f = new ReachableFL(d2,new_relns);
+        f2 = new ReachableFL(d2,new_relns);
       break;
     default: break;
     }
@@ -579,14 +580,13 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     case &TupleType(_):
       switch(rvals->hd) {
       case &Aggregate(rdict): 
-	return $(f,Dict::lookup(rdict,
+	return $(f2,Dict::lookup(rdict,
 				fieldname(Evexp::eval_const_uint_exp(e2))));
       default: throw new Core::Impossible("anal_Rexp: Subscript");
       }
     default: break;
     }
-    // FIX: if we have x[i] then we can add i < x.size to relns
-    return anal_derefR(env,inflow,f,e1,rvals->hd);
+    return $(f2,anal_derefR(env,inflow,f,e1,rvals->hd)[1]);
 
   case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
   case &Tuple_e(es):

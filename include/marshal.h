@@ -24,6 +24,7 @@
 #define _MARSHAL_H_
 
 #include <typerep.h>
+#include <set.h>
 #include <dict.h>
 
 namespace Marshal {

@@ -320,9 +320,10 @@ struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(char)
 2));if(!((unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
 _check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
 20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
-unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
-sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)
-w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp5[1]={& _tmp6};
+Cyc_Std_fprintf(w,_tag_arr("%#x\n",sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),
+1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(
+_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 sizeof(char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int
 d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(char),3),
 _tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))!= '\n'){(Cyc_Std_putc(

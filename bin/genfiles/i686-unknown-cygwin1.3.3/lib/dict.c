@@ -700,32 +700,33 @@ struct _tuple10{struct _tagged_arr f1;int f2;};int Cyc_Dict_iter_f(struct _tuple
 struct _tuple0*dest){struct _tuple10 _tmp10C;struct _tagged_arr _tmp10D;int _tmp10E;
 int*_tmp10F;struct _tuple10*_tmp10B=stk;_tmp10C=*_tmp10B;_tmp10D=_tmp10C.f1;
 _tmp10E=_tmp10C.f2;_tmp10F=(int*)&(*_tmp10B).f2;{int _tmp110=*_tmp10F;if(_tmp110
-== - 1)return 0;{struct Cyc_Dict_T*_tmp111=((struct Cyc_Dict_T**)_tmp10D.curr)[
-_tmp110];*dest=((struct Cyc_Dict_T*)_check_null(_tmp111))->key_val;-- _tmp110;if((
-unsigned int)_tmp111->left)*((struct Cyc_Dict_T**)_check_unknown_subscript(
-_tmp10D,sizeof(struct Cyc_Dict_T*),++ _tmp110))=_tmp111->left;if((unsigned int)
-_tmp111->right)*((struct Cyc_Dict_T**)_check_unknown_subscript(_tmp10D,sizeof(
-struct Cyc_Dict_T*),++ _tmp110))=_tmp111->right;*_tmp10F=_tmp110;return 1;}}}struct
-Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict*d){
-int half_max_size=1;struct Cyc_Dict_T*_tmp112=d->t;while(_tmp112 != 0){_tmp112=
-_tmp112->left;++ half_max_size;}_tmp112=d->t;{struct _tagged_arr _tmp113=({
-unsigned int _tmp116=(unsigned int)(2 * half_max_size);struct Cyc_Dict_T**_tmp117=(
-struct Cyc_Dict_T**)_region_malloc(rgn,_check_times(sizeof(struct Cyc_Dict_T*),
-_tmp116));struct _tagged_arr _tmp119=_tag_arr(_tmp117,sizeof(struct Cyc_Dict_T*),(
-unsigned int)(2 * half_max_size));{unsigned int _tmp118=_tmp116;unsigned int i;for(
-i=0;i < _tmp118;i ++){_tmp117[i]=_tmp112;}}_tmp119;});return({struct Cyc_Iter_Iter
-_tmp114;_tmp114.env=(void*)({struct _tuple10*_tmp115=_region_malloc(rgn,sizeof(*
-_tmp115));_tmp115->f1=_tmp113;_tmp115->f2=(unsigned int)_tmp112?0: - 1;_tmp115;});
-_tmp114.next=(int(*)(void*env,void*dest))Cyc_Dict_iter_f;_tmp114;});}}void*Cyc_Dict_marshal(
-struct _RegionHandle*rgn,void*env,void*(*write_key)(void*,struct Cyc_Std___cycFILE*,
-void*),void*(*write_val)(void*,struct Cyc_Std___cycFILE*,void*),struct Cyc_Std___cycFILE*
-fp,struct Cyc_Dict_Dict*dict){struct Cyc_List_List*dict_list=Cyc_Dict_rto_list(rgn,
-dict);int len=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(dict_list);if(Cyc_Std_fwrite((
-struct _tagged_arr)((struct _tagged_arr)_tag_arr(& len,sizeof(int),1)),sizeof(int),
-1,fp)< 1)(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp11A=_cycalloc(
-sizeof(*_tmp11A));_tmp11A[0]=({struct Cyc_Core_Failure_struct _tmp11B;_tmp11B.tag=
-Cyc_Core_Failure;_tmp11B.f1=_tag_arr("Dict::marshal: Write failure",sizeof(char),
-29);_tmp11B;});_tmp11A;}));while(dict_list != 0){env=((void*(*)(void*,struct Cyc_Std___cycFILE*,
+== - 1)return 0;{struct Cyc_Dict_T*_tmp111=*((struct Cyc_Dict_T**)
+_check_unknown_subscript(_tmp10D,sizeof(struct Cyc_Dict_T*),_tmp110));*dest=((
+struct Cyc_Dict_T*)_check_null(_tmp111))->key_val;-- _tmp110;if((unsigned int)
+_tmp111->left)*((struct Cyc_Dict_T**)_check_unknown_subscript(_tmp10D,sizeof(
+struct Cyc_Dict_T*),++ _tmp110))=_tmp111->left;if((unsigned int)_tmp111->right)*((
+struct Cyc_Dict_T**)_check_unknown_subscript(_tmp10D,sizeof(struct Cyc_Dict_T*),++
+_tmp110))=_tmp111->right;*_tmp10F=_tmp110;return 1;}}}struct Cyc_Iter_Iter Cyc_Dict_make_iter(
+struct _RegionHandle*rgn,struct Cyc_Dict_Dict*d){int half_max_size=1;struct Cyc_Dict_T*
+_tmp112=d->t;while(_tmp112 != 0){_tmp112=_tmp112->left;++ half_max_size;}_tmp112=d->t;{
+struct _tagged_arr _tmp113=({unsigned int _tmp116=(unsigned int)(2 * half_max_size);
+struct Cyc_Dict_T**_tmp117=(struct Cyc_Dict_T**)_region_malloc(rgn,_check_times(
+sizeof(struct Cyc_Dict_T*),_tmp116));struct _tagged_arr _tmp119=_tag_arr(_tmp117,
+sizeof(struct Cyc_Dict_T*),(unsigned int)(2 * half_max_size));{unsigned int _tmp118=
+_tmp116;unsigned int i;for(i=0;i < _tmp118;i ++){_tmp117[i]=_tmp112;}}_tmp119;});
+return({struct Cyc_Iter_Iter _tmp114;_tmp114.env=(void*)({struct _tuple10*_tmp115=
+_region_malloc(rgn,sizeof(*_tmp115));_tmp115->f1=_tmp113;_tmp115->f2=(
+unsigned int)_tmp112?0: - 1;_tmp115;});_tmp114.next=(int(*)(void*env,void*dest))
+Cyc_Dict_iter_f;_tmp114;});}}void*Cyc_Dict_marshal(struct _RegionHandle*rgn,void*
+env,void*(*write_key)(void*,struct Cyc_Std___cycFILE*,void*),void*(*write_val)(
+void*,struct Cyc_Std___cycFILE*,void*),struct Cyc_Std___cycFILE*fp,struct Cyc_Dict_Dict*
+dict){struct Cyc_List_List*dict_list=Cyc_Dict_rto_list(rgn,dict);int len=((int(*)(
+struct Cyc_List_List*x))Cyc_List_length)(dict_list);if(Cyc_Std_fwrite((struct
+_tagged_arr)((struct _tagged_arr)_tag_arr(& len,sizeof(int),1)),sizeof(int),1,fp)< 
+1)(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp11A=_cycalloc(sizeof(*
+_tmp11A));_tmp11A[0]=({struct Cyc_Core_Failure_struct _tmp11B;_tmp11B.tag=Cyc_Core_Failure;
+_tmp11B.f1=_tag_arr("Dict::marshal: Write failure",sizeof(char),29);_tmp11B;});
+_tmp11A;}));while(dict_list != 0){env=((void*(*)(void*,struct Cyc_Std___cycFILE*,
 struct _tuple0*))write_key)(env,fp,(struct _tuple0*)dict_list->hd);env=((void*(*)(
 void*,struct Cyc_Std___cycFILE*,struct _tuple0*))write_val)(env,fp,(struct _tuple0*)
 dict_list->hd);dict_list=dict_list->tl;}return env;}struct Cyc_Dict_Dict*Cyc_Dict_unmarshal(

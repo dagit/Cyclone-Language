@@ -550,13 +550,14 @@ struct Cyc_Core_Invalid_argument_struct*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19
 0]=({struct Cyc_Core_Invalid_argument_struct _tmp1A;_tmp1A.tag=Cyc_Core_Invalid_argument;
 _tmp1A.f1=_tag_arr("strtox NULL pointer",sizeof(char),20);_tmp1A;});_tmp19;}));{
 int found_zero=0;{int i=(int)(_get_arr_size(s,sizeof(char))- 1);for(0;i >= 0;i --){
-if(((const char*)s.curr)[i]== '\000'){found_zero=1;break;}}}if(!found_zero)(int)
-_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp1B=_cycalloc(sizeof(*
-_tmp1B));_tmp1B[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1C;_tmp1C.tag=Cyc_Core_Invalid_argument;
-_tmp1C.f1=_tag_arr("strtox: not a C string",sizeof(char),23);_tmp1C;});_tmp1B;}));}}
-double Cyc_Std_strtod(struct _tagged_arr nptr,struct _tagged_arr*endptr){Cyc_Std_check_valid_cstring(
-nptr);{char*c=underlying_Cstring(nptr);char*e=endptr == 0?0: c;double d=strtod(c,(
-char**)& e);if(endptr != 0){int n=(int)((unsigned int)e - (unsigned int)c);*endptr=
+if(*((const char*)_check_unknown_subscript(s,sizeof(char),i))== '\000'){
+found_zero=1;break;}}}if(!found_zero)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp1C;_tmp1C.tag=Cyc_Core_Invalid_argument;_tmp1C.f1=_tag_arr("strtox: not a C string",
+sizeof(char),23);_tmp1C;});_tmp1B;}));}}double Cyc_Std_strtod(struct _tagged_arr
+nptr,struct _tagged_arr*endptr){Cyc_Std_check_valid_cstring(nptr);{char*c=
+underlying_Cstring(nptr);char*e=endptr == 0?0: c;double d=strtod(c,(char**)& e);if(
+endptr != 0){int n=(int)((unsigned int)e - (unsigned int)c);*endptr=
 _tagged_arr_plus(nptr,sizeof(char),n);}return d;}}int Cyc_Std_strtol(struct
 _tagged_arr n,struct _tagged_arr*endptr,int base){Cyc_Std_check_valid_cstring(n);{
 char*c=underlying_Cstring(n);char*e=endptr == 0?0: c;int r=strtol(c,(char**)& e,base);

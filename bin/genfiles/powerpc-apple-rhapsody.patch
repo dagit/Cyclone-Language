@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Fri Feb  1 12:57:32 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Fri Feb  1 13:16:00 2002
+*** i686-unknown-linux/lib/cycstubs.c	Mon Feb  4 16:17:02 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Mon Feb  4 16:20:06 2002
 ***************
 *** 284,294 ****
   _check_unknown_subscript(ms,sizeof(unsigned int),0)));else{return
@@ -59,10 +59,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   _tagged_arr filename,struct Cyc_Std_stat_t*buf){return lstat(string_to_Cstring(
   filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Feb  1 12:57:32 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Fri Feb  1 13:16:00 2002
+*** i686-unknown-linux/lib/execinfo.c	Mon Feb  4 16:17:02 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Mon Feb  4 16:20:02 2002
 ***************
-*** 256,333 ****
+*** 256,334 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int Cyc_Execinfo_backtrace(
   struct _tagged_arr,int);int Cyc_Execinfo_bt();struct Cyc_Cstdio___abstractFILE;
@@ -130,9 +130,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! 2));if(!((unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
 ! _check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
 ! 20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
-! unsigned int)bt[c];{void*_tmp5[1]={& _tmp6};Cyc_Std_fprintf(w,_tag_arr("%#x\n",
-! sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)
-! w);({void*_tmp7[0]={};Cyc_Std_printf(_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
+! unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp5[1]={& _tmp6};
+! Cyc_Std_fprintf(w,_tag_arr("%#x\n",sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),
+! 1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(
+! _tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
 ! sizeof(char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int
 ! d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(char),3),
 ! _tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))!= '\n'){(Cyc_Std_putc(
@@ -168,7 +169,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Fri Feb  1 12:57:32 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Fri Feb  1 13:16:00 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Mon Feb  4 16:20:02 2002
 ***************
 *** 271,284 ****
   quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
@@ -198,8 +199,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,
   unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Fri Feb  1 12:57:32 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Fri Feb  1 13:16:00 2002
+*** i686-unknown-linux/src/buildlib.c	Mon Feb  4 16:17:00 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Mon Feb  4 16:20:04 2002
 ***************
 *** 583,608 ****
   struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(

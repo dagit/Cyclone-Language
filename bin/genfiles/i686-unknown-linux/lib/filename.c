@@ -267,17 +267,19 @@ _tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);struct
 _tagged_arr Cyc_Filename_concat(struct _tagged_arr s1,struct _tagged_arr s2){return
 Cyc_Std_strconcat(s1,(struct _tagged_arr)Cyc_Std_strconcat(_tag_arr("/",sizeof(
 char),2),s2));}struct _tagged_arr Cyc_Filename_chop_extension(struct _tagged_arr
-filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?((
-const char*)filename.curr)[i]!= '.': 0){-- i;}if(i < 0)(int)_throw((void*)({struct
-Cyc_Core_Invalid_argument_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=Cyc_Core_Invalid_argument;
-_tmp1.f1=_tag_arr("chop_extension",sizeof(char),15);_tmp1;});_tmp0;}));return Cyc_Std_substring(
-filename,0,(unsigned int)i);}struct _tagged_arr Cyc_Filename_dirname(struct
-_tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i
->= 0?((const char*)filename.curr)[i]!= '/': 0){-- i;}if(i < 0)return Cyc_Core_new_string(
-0);return Cyc_Std_substring(filename,0,(unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(
-struct _tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);
-while(i >= 0?((const char*)filename.curr)[i]!= '/': 0){-- i;}return Cyc_Std_substring(
+filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((
+const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '.': 0){-- i;}if(i
+< 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=_cycalloc(
+sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=
+Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("chop_extension",sizeof(char),15);
+_tmp1;});_tmp0;}));return Cyc_Std_substring(filename,0,(unsigned int)i);}struct
+_tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){int i=(int)(
+_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
+_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}if(i < 0)return
+Cyc_Core_new_string(0);return Cyc_Std_substring(filename,0,(unsigned int)i);}
+struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr filename){int i=(int)(
+_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
+_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}return Cyc_Std_substring(
 filename,i + 1,_get_arr_size(filename,sizeof(char))- (i + 1));}int Cyc_Filename_check_suffix(
 struct _tagged_arr filename,struct _tagged_arr suffix){int i=(int)(_get_arr_size(
 filename,sizeof(char))- 1);int j=(int)(_get_arr_size(suffix,sizeof(char))- 1);

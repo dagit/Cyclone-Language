@@ -59,9 +59,7 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn) {
     ans->d = d;
     return ans;
   case HeapRgn: 
-    printf("!");
-    ans->these_outlive_heap = 
-      new JoinEff(list(eff,po->these_outlive_heap));
+    ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
     return ans;
   default: impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
@@ -252,7 +250,10 @@ bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
   for(let cs=constraints; cs != NULL; cs = cs->tl) {
     let &$(_,bd) = cs->hd;
     switch(compress(bd)) {
-    case &Evar(_,_,_,_): unify(bd,default_bound); break;
+    case &Evar(_,_,_,_): 
+      if(do_pin) 
+	unify(bd,default_bound); 
+      break;
     default: break;
     }
   }
@@ -301,4 +302,3 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
   default: return eff_outlives_atomic_eff(po, eff1, eff2);
   }
 }
-

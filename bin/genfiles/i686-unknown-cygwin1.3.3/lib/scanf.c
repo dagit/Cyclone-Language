@@ -393,16 +393,17 @@ int)((char)_IO_peekc(fp));switch(c){case '0': _LL46: if(base == 0){base=8;flags 
 if(flags & 512)flags &=~((64 | 512)| 128);else{flags &=~((64 | 256)| 128);}goto ok;
 case '1': _LL47: goto _LL48;case '2': _LL48: goto _LL49;case '3': _LL49: goto _LL4A;case '4':
 _LL4A: goto _LL4B;case '5': _LL4B: goto _LL4C;case '6': _LL4C: goto _LL4D;case '7': _LL4D:
-base=(int)basefix[base];flags &=~((64 | 256)| 128);goto ok;case '8': _LL4E: goto _LL4F;
-case '9': _LL4F: base=(int)basefix[base];if(base <= 8)break;flags &=~((64 | 256)| 128);
-goto ok;case 'A': _LL50: goto _LL51;case 'B': _LL51: goto _LL52;case 'C': _LL52: goto _LL53;
-case 'D': _LL53: goto _LL54;case 'E': _LL54: goto _LL55;case 'F': _LL55: goto _LL56;case 'a':
-_LL56: goto _LL57;case 'b': _LL57: goto _LL58;case 'c': _LL58: goto _LL59;case 'd': _LL59:
-goto _LL5A;case 'e': _LL5A: goto _LL5B;case 'f': _LL5B: if(base <= 10)break;flags &=~((64 | 
-256)| 128);goto ok;case '+': _LL5C: goto _LL5D;case '-': _LL5D: if(flags & 64){flags &=~ 64;
-goto ok;}break;case 'x': _LL5E: goto _LL5F;case 'X': _LL5F: if(flags & 256?p.curr == (
-_tagged_arr_plus(_tag_arr(buf,sizeof(char),350),sizeof(char),1)).curr: 0){base=16;
-flags &=~ 256;goto ok;}break;default: _LL60: break;}break;ok:*((char*)
+base=(int)basefix[_check_known_subscript_notnull(17,base)];flags &=~((64 | 256)| 
+128);goto ok;case '8': _LL4E: goto _LL4F;case '9': _LL4F: base=(int)basefix[
+_check_known_subscript_notnull(17,base)];if(base <= 8)break;flags &=~((64 | 256)| 
+128);goto ok;case 'A': _LL50: goto _LL51;case 'B': _LL51: goto _LL52;case 'C': _LL52: goto
+_LL53;case 'D': _LL53: goto _LL54;case 'E': _LL54: goto _LL55;case 'F': _LL55: goto _LL56;
+case 'a': _LL56: goto _LL57;case 'b': _LL57: goto _LL58;case 'c': _LL58: goto _LL59;case 'd':
+_LL59: goto _LL5A;case 'e': _LL5A: goto _LL5B;case 'f': _LL5B: if(base <= 10)break;flags &=
+~((64 | 256)| 128);goto ok;case '+': _LL5C: goto _LL5D;case '-': _LL5D: if(flags & 64){
+flags &=~ 64;goto ok;}break;case 'x': _LL5E: goto _LL5F;case 'X': _LL5F: if(flags & 256?p.curr
+== (_tagged_arr_plus(_tag_arr(buf,sizeof(char),350),sizeof(char),1)).curr: 0){
+base=16;flags &=~ 256;goto ok;}break;default: _LL60: break;}break;ok:*((char*)
 _check_unknown_subscript(_tagged_arr_inplace_plus_post(& p,sizeof(char),1),
 sizeof(char),0))=(char)c;_IO_getc(fp);if(_IO_peekc(fp)== - 1){seen_eof ++;break;}}
 if(flags & 128){if(p.curr > (_tag_arr(buf,sizeof(char),350)).curr){
