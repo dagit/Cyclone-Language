@@ -2057,7 +2057,6 @@ qual_opt_identifier:
 
 %%
 
-
 void yyprint(int i, xenum YYSTYPE v) {
   switch (v) {
   case Okay_tok:          fprintf(cyc_stderr,"ok");         break;
@@ -2074,7 +2073,7 @@ void yyprint(int i, xenum YYSTYPE v) {
     break;
   default: fprintf(cyc_stderr,"?"); break;
   }
- }
+}
 
 namespace Parse{
 list<decl> parse_file(FILE @f) {

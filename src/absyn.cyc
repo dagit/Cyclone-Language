@@ -423,8 +423,8 @@ bool is_lvalue(exp e) {
 $(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
   if (sd->fields == null) 
     return null;
-  for(let fs = sd->fields->v; fs != null; fs = fs->tl) {
-    let f = fs->hd;
+  for(_ fs = sd->fields->v; fs != null; fs = fs->tl) {
+    _ f = fs->hd;
     if (String::zstrcmp(f[0],v) == 0)
       return f;
   }

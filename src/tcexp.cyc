@@ -16,10 +16,8 @@
 #include "evexp.h"
 #include "tcstmt.h"
 #include "control_flow.h"
+#include "formatstr.h"
 #include "tcexp.h"
-
-namespace Tcexp;
-
 using Core;
 using List;
 using Position;
@@ -27,17 +25,13 @@ using Absyn;
 using Absynpp;
 using Tcenv;
 using Tcutil;
-using Evexp;
-using Tcstmt;
+
+namespace Tcexp;
 
 static synth expr_err(tenv te,segment loc,string msg) {
   terr(loc,msg);
   return wild_synth(te);
 }
-
-// forward references
-extern synth tcExp      (tenv te, Opt_t<typ> topt, exp e);
-extern synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
 
 //////////////////// Resolving References the Parser Cannot /////////////////
 
@@ -80,7 +74,7 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
       e->r = Xenum_e(ef->name,null,es,xed,ef);
       break;
     case StructRes(sd):
-      let des = List::map(make_struct_arg,es);
+      _ des = List::map(make_struct_arg,es);
       if (sd->name != null)
         e->r = Struct_e(sd->name->v,null,des,sd);
       else {
@@ -125,6 +119,9 @@ static void resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
 }
 
 //////////////////////// Actual Type-checking //////////////////////////////
+
+// forward reference just b/c of how things are organized at the moment
+extern synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
 
 // Type check a list of expressions -- we no longer bother returning
 // a sequentialized synth (we don't have left to right evaluation anyway) 
@@ -177,8 +174,9 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c, exp e) {
     break;
   case String_c(s):
     // FIX: possibly this is the place to avoid allocation? (Maybe not.)
+    // FIX: ?? Should we allow topt to force a coercion to string ??
     int len = s.size; // includes the trailing 0 character
-    let r   = Const_e(Int_c(Unsigned,len));
+    _   r   = Const_e(Int_c(Unsigned,len));
     exp e   = new_exp(r,loc);
     e->topt = &Opt(uint_t);
     t = ArrayType(uchar_t,empty_tqual(),FixedArray(e));
@@ -206,11 +204,9 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
     case Funname_b(fd):
       q[0] = fd->name[0];
       return standard_synth(te,fndecl2typ(fd));
-    case Param_b(&$(v,tq,t)):
-      return standard_synth(te,t);
-    case Local_b(vd): fallthru(vd);
-    case Pat_b(vd):
-      return standard_synth(te,vd->type);
+    case Local_b(vd):        fallthru(vd);
+    case Pat_b(vd):          fallthru(vd->type);
+    case Param_b(&$(_,_,t)): return standard_synth(te,t);
     }
   case StructRes(_):  throw impos("StructRes in tcVar");
   case EnumRes(_,_):  throw impos("EnumRes in tcVar");
@@ -218,366 +214,15 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
   }
 }
 
-// Parse a conversion specification starting at index i in string s.
-// s[i] should be the first character after the leading '%'.
-// If there is an error, return null.
-// Otherwise, return the flags, width, precision, length modifier,
-// from s, as lists of Chars.  Also return the conversion specifier
-// as a char, and the index of the character following the conversion
-// specifier.
-Opt_t<$(list<Char>, list<Char>, list<Char>, list<Char>, char, int)@>
-parse_conversionspecification(string s, int i) {
-  //  fprintf(cyc_stderr, "String: %s\n" "Position: %d\n",s,i);
-  let len = String::strlen(s);
-  if (i<0 || i>=len) return null;
-
-  // Parse flags: ['+' '-' ' ' '#' '0']*
-  let flags = null;
-  char c = ' ';
-  for (; i<len; i++) {
-    c = s[i];
-    switch (c) {
-    case '+': fallthru;
-    case '-': fallthru;
-    case ' ': fallthru;
-    case '#': fallthru;
-    case '0': flags = &cons((Char)c,flags); continue;
-    default: break;
-    }
-    break;
-  }
-  if (i>=len) return null;
-  flags = List::imp_rev(flags);
-
-  // Parse width: ('*' | ['0'-'9']+)?
-  let width = null;
-  c = s[i]; // redundant
-  if (c=='*') {
-    width = &cons((Char)c,width);
-    i++;
-  } else {
-    for (; i<len; i++) {
-      c = s[i];
-      if (Character::isdigit(c)) width = &cons((Char)c,width);
-      else break;
-    }
-  }
-  if (i>=len) return null;
-  width = List::imp_rev(width);
-
-  // Parse precision: ('.' ('*' | ['0'-'9']+)? )?
-  let precision = null;
-  c = s[i]; // not redundant
-  if (c == '.') {
-    precision = &cons((Char)c,precision);
-    i++;
-    if (i>=len) return null;
-    c = s[i];    
-    if (c == '*') {
-      precision = &cons((Char)c,precision);
-      i++;
-    } else {
-      for (; i<len; i++) {
-        c = s[i];
-        if (Character::isdigit(c)) precision = &cons((Char)c,precision);
-        else break;
-      }
-    }
-  }
-  if (i>=len) return null;
-  precision = List::imp_rev(precision);
-
-  // Parse length modifier:
-  //  (['h' 'l' 'j' 'z' 't' 'L'] | 'h' 'h' | 'l' 'l')
-  let lenmod = null;
-  c = s[i]; // not redundant
-  switch (c) {
-  case 'h':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    if (i>=len) return null;
-    c = s[i];
-    if (c == 'h') { lenmod = &cons((Char)c,lenmod); i++; }
-    break;
-  case 'l':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    if (i>=len) return null;
-    c = s[i];
-    if (c == 'l') { lenmod = &cons((Char)c,lenmod); i++; }
-    break;
-  case 'j': fallthru; 
-  case 'z': fallthru; 
-  case 't': fallthru; 
-  case 'L':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    break;
-  default: break;
-  }
-  if (i>=len) return null;
-  lenmod = List::imp_rev(lenmod); // unnecessary
-
-  // Parse conversion specifier
-  c = s[i]; // not redundant
-  switch (c) {
-  case 'd': break;
-  case 'i': break;
-  case 'o': break;
-  case 'u': break;
-  case 'x': break;
-  case 'X': break;
-  case 'f': break;
-  case 'F': break;
-  case 'e': break;
-  case 'E': break;
-  case 'g': break;
-  case 'G': break;
-  case 'a': break;
-  case 'A': break;
-  case 'c': break;
-  case 's': break;
-  case 'p': break;
-  case 'n': break;
-  case '%': break;
-  default: return null;
-  }
-  //  fprintf(cyc_stderr,
-  //          "Flags: %s\n"
-  //          "Width: %s\n"
-  //          "Precision: %s\n"
-  //          "Lenmod: %s\n",
-  //          String::implode(flags),
-  //          String::implode(width),
-  //          String::implode(precision),
-  //          String::implode(lenmod));
-  return &Opt(&$(flags,width,precision,lenmod,c,i+1));
-}
-static list<typ> get_format_typs(string s,segment loc) {
-  // FIX: on error we return null.  This will probably lead to
-  // cascading errors (e.g., too many arguments to printf).
-  let len = String::strlen(s);
-  let typs = null;
-  int i;
-  for (i=0; i<len; i++) {
-    if (s[i] != '%') continue;
-    let cs = parse_conversionspecification(s,i+1);
-    if (cs == null) {
-      terr(loc,"bad format string");
-      return null; // bad conversion specification
-    }
-    let &$(flags,width,precision,lenmod,c,j) = cs->v;
-    i = j-1; // Subtract 1 because for-loop ends with i++
-    switch (lenmod) {
-    case &cons(x,null) && (x == 'j' || x == 'z' || x == 't'):
-      // These length modifiers are OK in C99 but we don't support them yet
-      terr(loc,xprintf("length modifier '%c' is not supported",x));
-      return null;
-    default: break;
-    }
-    switch (width) {
-    case &cons(x,null) && x=='*':
-      typs = &cons(sint_t,typs); break;
-    default: break;
-    }
-    switch (precision) {
-    case &cons(x,&cons(y,null)) && x=='.' && y=='*':
-      typs = &cons(sint_t,typs); break;
-    default: break;
-    }
-    typ t;
-    switch (c) {
-    case 'd': fallthru;
-    case 'i':
-      for (_ f = flags; f != null; f = f->tl)
-        if (f->hd == '#') {
-          terr(loc,xprintf("flag '#' is not valid with %%%c",c));
-          return null;
-        }
-      switch (lenmod) {
-      case null:                     t = sint_t; break;
-      case &cons(x,null) && x=='l':  t = slong_t; break;
-      case &cons(x,null) && x=='h':  t = sshort_t; break;
-      case &cons(x,&cons(y,null))
-        && (x=='h' && y=='h'):       t = schar_t; break;
-      // We don't support ll
-      default:
-        terr(loc,
-             xprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case 'u':
-      for (_ f = flags; f != null; f = f->tl)
-        if (f->hd == '#') {
-          terr(loc,"Flag '#' not valid with %%u");
-          return null;
-        }
-      fallthru;
-    case 'o': fallthru;
-    case 'x': fallthru;
-    case 'X':
-      switch (lenmod) {
-      case null:                     t = uint_t; break;
-      case &cons(x,null) && x=='l':  t = ulong_t; break;
-      case &cons(x,null) && x=='h':  t = ushort_t; break;
-      case &cons(x,&cons(y,null))
-        && (x=='h' && y=='h'):       t = uchar_t; break;
-      // We don't support ll
-      default:
-        terr(loc,
-             xprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case 'f': fallthru;
-    case 'F': fallthru;
-    case 'e': fallthru;
-    case 'E': fallthru;
-    case 'g': fallthru;
-    case 'G': fallthru;
-    case 'a': fallthru;
-    case 'A':
-      // We don't allow any length modifiers for floating point numbers;
-      // in particular, we don't allow L (long double)
-      if (lenmod != null) {
-        terr(loc,xprintf("length modifiers are not allowed with %%%c",c));
-        return null;
-      }
-      typs = &cons(double_t,typs);
-      break;
-    case 'c':
-      for (_ f = flags; f != null; f = f->tl)
-        if (f->hd == '#' || f->hd == '0') {
-          terr(loc,xprintf("flag '%c' not allowed with %%c",f->hd));
-          return null;
-        }
-      // We don't allow any length modifiers for characters;
-      // in particular, we don't allow l (wint_t)
-      if (lenmod != null) {
-        terr(loc,xprintf("length modifier '%s' not allowed with %%c",
-                         String::implode(lenmod)));
-        return null;
-      }
-      if (precision != null) {
-        terr(loc,xprintf("precision '%s' not allowed with %%c",
-                         String::implode(precision)));
-        return null;
-      }
-      typs = &cons(sint_t,typs);
-      break;
-    case 's':
-// FIX: temporarily we don't allow any variations on %s.  To do that
-// we'd have to modify toc.cyc
-      if (flags != null) {
-        terr(loc,xprintf("flags '%s' not allowed with %%s",
-                         String::implode(flags)));
-        return null;
-      }
-      if (width != null) {
-        terr(loc,xprintf("width '%s' not allowed with %%s",
-                         String::implode(width)));
-        return null;
-      }
-      if (precision != null) {
-        terr(loc,xprintf("precision '%s' not allowed with %%s",
-                         String::implode(precision)));
-        return null;
-      }
-      if (lenmod != null) {
-        terr(loc,xprintf("length modifier '%s' not allowed with %%s",
-                         String::implode(lenmod)));
-        return null;
-      }
-//       // Only flag '-' is allowed for %s
-//       for (_ f = flags; f != null; f = f->tl)
-//         if (f->hd != '-') {
-//           terr(loc,"a flag not allowed with %%s");
-//           return null;
-//         }
-//       // We don't allow any length modifiers for %s;
-//       // in particular, we don't allow l (wchar_t[?])
-//       if (lenmod != null) {
-//         terr(loc,"length modifiers not allowed with %%s");
-//         return null;
-//       }
-      typs = &cons(string_typ(),typs);
-      break;
-    case 'p':
-      // We don't support pointer printing
-      terr(loc,"%%p not supported");
-      return null;
-    case 'n':
-      for (_ f = flags; f != null; f = f->tl)
-        if (f->hd == '#' || f->hd == '0') {
-          terr(loc,xprintf("flag '%c' not allowed with %%n",f->hd));
-          return null;
-        }
-      if (precision != null) {
-        terr(loc,xprintf("precision '%s' not allowed with %%n",
-                         String::implode(precision)));
-        return null;
-      }
-      switch (lenmod) {
-      case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
-      case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
-      case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
-      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,xprintf("length modifier '%s' not allowed with %%n",
-                         String::implode(lenmod)));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case '%':
-      if (flags != null) {
-        terr(loc,xprintf("flags '%s' not allowed with %%%%",
-                         String::implode(flags)));
-        return null;
-      }
-      if (width != null) {
-        terr(loc,xprintf("width '%s' not allowed with %%%%",
-                         String::implode(width)));
-        return null;
-      }
-      if (precision != null) {
-        terr(loc,xprintf("precision '%s' not allowed with %%%%",
-                         String::implode(precision)));
-        return null;
-      }
-      if (lenmod != null) {
-        terr(loc,xprintf("length modifier '%s' not allowed with %%%%",
-                         String::implode(lenmod)));
-        return null;
-      }
-      break;
-    default:
-      return null; // impossible
-    }
-  }
-  return (List::imp_rev(typs));
-}
-static void check_format_args(tenv te, exp fmt, list<exp> args) {
-  list<typ> desc_types = null;
-  int i = 0;
-  // get out the literal format string
-  string fmt_str;
+static void check_format_args(tenv te, exp fmt, list<exp> args,
+			      list<typ> type_getter(string,segment)) {
+  // check the format string and get the types it requires
+  list<typ> desc_types;
   switch (fmt->r) {
-  case Const_e(String_c(s)): fmt_str = s; break;
+  case Const_e(String_c(s)): desc_types = type_getter(s,fmt->loc); break;
   default: terr(fmt->loc, "expecting a literal format string"); return;
   }
-  let desc_types = get_format_typs(fmt_str,fmt->loc);
-  // now check that each desc_type matches the expression types
+  // check that each expression has the right type
   for (; desc_types != null && args != null; desc_types = desc_types->tl, 
 	                                     args = args->tl) {
     typ t = desc_types->hd;
@@ -586,271 +231,12 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
       terr(e->loc,xprintf("descriptor has type %s but argument has type %s",
 			  typ2string(t), typ2string(e->topt->v)));
   }
+  // check arity
   if (desc_types != null)
-    terr(fmt->loc,xprintf("descriptor expects another value of type %s",
-			  typ2string(desc_types->hd)));
-  else if (args != null)
+    terr(fmt->loc,"too few arguments");
+  if (args != null)
     terr(args->hd->loc,"too many arguments");
 }
-
-// Parse a scanf conversion specification starting at index i in string s.
-// s[i] should be the first character after the leading '%'.
-// If there is an error, return null.
-// Otherwise, return whether assignment should be suppressed (a bool),
-// the width and length modifier (lists of Chars),
-// the conversion specifier (a char),
-// and the index of the character following the conversion specifier.
-Opt_t<$(bool, list<Char>, list<Char>, char, int)@>
-parse_inputformat(string s, int i) {
-  let len = String::strlen(s);
-  if (i<0 || i>=len) return null;
-
-  let suppress = false;
-  let c = s[i];
-  if (c == '*') {
-    suppress = true;
-    i++;
-    if (i>=len) return null;
-  }
-
-  let width = null;
-  for (; i<len; i++) {
-    c = s[i];
-    if (Character::isdigit(c)) width = &cons((Char)c,width);
-    else break;
-  }
-  if (i>=len) return null;
-  width = List::imp_rev(width);
-
-  // Parse length modifier:
-  //  ('h' | 'l' | 'j' | 'z' | 't' | 'L' | 'h' 'h' | 'l' 'l')
-  let lenmod = null;
-  c = s[i]; // not redundant
-  switch (c) {
-  case 'h':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    if (i>=len) return null;
-    c = s[i];
-    if (c == 'h') { lenmod = &cons((Char)c,lenmod); i++; }
-    break;
-  case 'l':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    if (i>=len) return null;
-    c = s[i];
-    if (c == 'l') { lenmod = &cons((Char)c,lenmod); i++; }
-    break;
-  case 'j': fallthru; 
-  case 'z': fallthru; 
-  case 't': fallthru; 
-  case 'L':
-    lenmod = &cons((Char)c,lenmod);
-    i++;
-    break;
-  default: break;
-  }
-  if (i>=len) return null;
-  lenmod = List::imp_rev(lenmod); // unnecessary
-
-  // Parse conversion specifier
-  c = s[i]; // not redundant
-  switch (c) {
-  case 'd': break;
-  case 'i': break;
-  case 'o': break;
-  case 'u': break;
-  case 'x': break;
-  case 'X': break;
-  case 'f': break;
-  case 'F': break;
-  case 'e': break;
-  case 'E': break;
-  case 'g': break;
-  case 'G': break;
-  case 'a': break;
-  case 'A': break;
-  case 'c': break;
-  case 's': break;
-  case 'p': break;
-  case 'n': break;
-  case '%': break;
-  default: return null;
-  }
-  return &Opt(&$(suppress,width,lenmod,c,i+1));
-}
-static list<typ> get_scanf_typs(string s,segment loc) {
-  // FIX: on error we return null.  This will probably lead to
-  // cascading errors (e.g., too many arguments to scanf).
-  let len = String::strlen(s);
-  let typs = null;
-  int i;
-  for (i=0; i<len; i++) {
-    if (s[i] != '%') continue;
-    let x = parse_inputformat(s,i+1);
-    if (x == null) {
-      terr(loc,"bad format string");
-      return null; // bad conversion specification
-    }
-    let &$(suppress,width,lenmod,c,j) = x->v;
-    i = j-1; // Subtract 1 because for-loop ends with i++
-    switch (lenmod) {
-    case &cons(x,null) && (x == 'j' || x == 'z' || x == 't'):
-      // These length modifiers are OK in C99 but we don't support them yet
-      terr(loc,xprintf("length modifier '%c' is not supported",x));
-      return null;
-    default: break;
-    }
-    if (suppress) continue;
-    typ t;
-    switch (c) {
-    case 'd': fallthru;
-    case 'i':
-      switch (lenmod) {
-      case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
-      case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(slong_t,empty_tqual()); break;
-      case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
-      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-        t = nonnullableptr_typ(schar_t,empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,
-             xprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case 'u':
-      fallthru;
-    case 'o': fallthru;
-    case 'x': fallthru;
-    case 'X':
-      switch (lenmod) {
-      case null:
-        t = nonnullableptr_typ(uint_t,empty_tqual()); break;
-      case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
-      case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(ushort_t,empty_tqual()); break;
-      case &cons(x,&cons(y,null))
-        && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(uchar_t,empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,
-             xprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case 'f': fallthru;
-    case 'F': fallthru;
-    case 'e': fallthru;
-    case 'E': fallthru;
-    case 'g': fallthru;
-    case 'G': fallthru;
-    case 'a': fallthru;
-    case 'A':
-      switch (lenmod) {
-      case null:
-        // Note, %f means float in scanf, double in printf!!
-        t = nonnullableptr_typ(float_t,empty_tqual()); break;
-      case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(double_t,empty_tqual()); break;
-      // We don't support L
-      default:
-        terr(loc,
-             xprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case 'c':
-      terr(loc,"%%c is not supported");
-      return null;
-    case 's':
-      terr(loc,"%%s is not supported");
-      return null;
-    case '[':
-      terr(loc,"%%[ is not supported");
-      return null;
-    case 'p':
-      terr(loc,"%%p is not supported");
-      return null;
-    case 'n':
-      switch (lenmod) {
-      case null:
-        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
-      case &cons(x,null) && x=='l':
-        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
-      case &cons(x,null) && x=='h':
-        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
-      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
-          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
-      // We don't support ll
-      default:
-        terr(loc,xprintf("length modifier '%s' not allowed with %%n",
-                         String::implode(lenmod)));
-        return null;
-      }
-      typs = &cons(t,typs);
-      break;
-    case '%':
-      if (suppress) {
-        terr(loc,"Assignment suppression (*) is not allowed with %%%%");
-        return null;
-      }
-      if (width != null) {
-        terr(loc,xprintf("width '%s' not allowed with %%%%",
-                         String::implode(width)));
-        return null;
-      }
-      if (lenmod != null) {
-        terr(loc,xprintf("length modifier '%s' not allowed with %%%%",
-                         String::implode(lenmod)));
-        return null;
-      }
-      break;
-    default:
-      return null; // impossible
-    }
-  }
-  return (List::imp_rev(typs));
-}
-static void check_scanf_args(tenv te, exp fmt, list<exp> args) {
-  string fmt_str;
-  list<typ> desc_types = null;
-  int i = 0;
-
-  // get out the literal format string
-  switch (fmt->r) {
-  case Const_e(String_c(s)): fmt_str = s; break;
-  default: terr(fmt->loc, "expecting a literal format string"); return;
-  }
-  let desc_types = get_scanf_typs(fmt_str,fmt->loc);
-  // now check that each desc_type matches the expression types
-  for (; desc_types != null && args != null; desc_types = desc_types->tl, 
-	                                     args = args->tl) {
-    typ t = desc_types->hd;
-    exp e = args->hd;
-    if (!coerce_arg(te,e,t))
-      terr(e->loc,xprintf("descriptor has type %s but argument has type %s",
-			  typ2string(t), typ2string(e->topt->v)));
-  }
-  if (desc_types != null)
-    terr(fmt->loc,xprintf("descriptor expects another value of type %s",
-			  typ2string(desc_types->hd)));
-  else if (args != null)
-    terr(args->hd->loc,"too many arguments");
-}
-
-// Unary primops like -e, !e, etc. 
 static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
   typ t = compress(e->topt->v);
   switch (p) {
@@ -885,7 +271,6 @@ static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
     return impos("Non-unary primop");
   }
 }
-
 // Note: promoter must return false for any non-arithmetic type.
 static typ tcArithBinop(tenv te, exp e1, exp e2, bool promoter(tenv,exp)) {
   if (!promoter(te,e1)) {
@@ -959,9 +344,8 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
   // we're losing precision).
   // HOWEVER it should be nuked when we re-write the type checker
   // to solve the general problem.
-  if (p == Minus && List::length(es) == 1) {
+  if (p == Minus && List::length(es) == 1)
     return tcExp(te,topt,es->hd);
-  }
   // FIX: sizeof(f) where f is a function (or expression of function type)
   // should not be allowed.  So for sizeof(e), we should not call tcExp on e,
   // because that will do pointer generation (convert a function to a pointer
@@ -972,7 +356,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
   case Printf:
     if (es == null)
       return expr_err(te,loc,"missing format string in printf");
-    check_format_args(te, es->hd, es->tl);
+    check_format_args(te, es->hd, es->tl, Formatstr::get_format_typs);
     t = VoidType;
     break;
   case Fprintf:
@@ -981,29 +365,28 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     if (!unify(es->hd->topt->v, file_typ()))
       terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
 			       typ2string(es->hd->topt->v)));
-    check_format_args(te, es->tl->hd, es->tl->tl);
+    check_format_args(te, es->tl->hd, es->tl->tl, Formatstr::get_format_typs);
     t = VoidType;
     break;
   case Xprintf:
     if (es == null)
       return expr_err(te,loc,"missing format string in xprintf");
-    check_format_args(te, es->hd, es->tl);
+    check_format_args(te, es->hd, es->tl, Formatstr::get_format_typs);
     t = string_typ();
     break;
   case Scanf:
     if (es == null)
       return expr_err(te,loc,"missing format string in scanf");
-    check_scanf_args(te, es->hd, es->tl);
+    check_format_args(te, es->hd, es->tl, Formatstr::get_scanf_typs);
     t = sint_t;
     break;
   case Fscanf:
     if (es == null || es->tl == null)
-      return
-        expr_err(te,loc,"missing file descriptor or format string in fscanf");
+      return expr_err(te,loc,"too few arguments to fscanf");
     if (!unify(es->hd->topt->v, file_typ()))
       terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
 			       typ2string(es->hd->topt->v)));
-    check_scanf_args(te, es->tl->hd, es->tl->tl);
+    check_format_args(te, es->tl->hd, es->tl->tl, Formatstr::get_scanf_typs);
     t = sint_t;
     break;
   case Sscanf:
@@ -1011,7 +394,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     // input string is null terminated.  The standard sscanf might
     // read past the end of the string -- a potential security breach.
     // Possible fixes: copy the string or re-implement sscanf from scratch.
-    expr_err(te,loc,"sscanf is not supported");
+    terr(loc,"sscanf is not supported");
     /* 
     // It's sometimes helpful to allow sscanf for debugging, but
     // usually this should be commented out.
@@ -1021,7 +404,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     if (!coerce_arg(te,es->hd, string_typ()))
       terr(es->hd->loc,xprintf("expecting string found %s",
 			       typ2string(es->hd->topt->v)));
-    check_scanf_args(te, es->tl->hd, es->tl->tl);
+    check_scanf_args(te, es->tl->hd, es->tl->tl, Formatstr::get_scanf_typs);
     */
     t = sint_t;
     break;
@@ -1039,55 +422,50 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
 
 static synth tcIncrement(tenv te, segment loc, Opt_t<typ> topt, 
 			 exp e, incrementor_t i) {
-  tcExp(te, null, e);
-  // FIX: this is probably not right -- for instance, it would allow
-  // an enum variable to be "incremented"
+  tcExp(te,null,e);
+  typ t = e->topt->v;
+  // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!arithmetic_promote(te,e))
     terr(e->loc,xprintf("expecting arithmetic type but found %s",
-			typ2string(e->topt->v)));
-  return standard_synth(te,e->topt->v);
+			typ2string(t)));
+  return standard_synth(te,t);
 }
 
 // e1 ? e2 : e3
 static synth tcConditional(tenv te, segment loc, Opt_t<typ> topt, 
 			   exp e1, exp e2, exp e3) {
-  tcTest(te,e1,"conditional expression");
-  tcExp(te, topt, e2);
-  tcExp(te, topt, e3);
+  tcTest(te, e1, "conditional expression");
+  tcExp(te,topt,e2);
+  tcExp(te,topt,e3);
   typ t = wildtyp();
   if (!coerce_list(te,t,&cons(e2,&cons(e3,null))))
-    expr_err(te,loc,xprintf("conditional clause types do not match: %s != %s",
+    terr(loc,xprintf("conditional clause types do not match: %s != %s",
 			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return standard_synth(te,t);
 }
 
 // Assignments with optional operations, e.g., x = 3, x += 5
-// Note that as in tcPrimop, we violate Java by not considering
-// various boolean operators to have meaning.  Must check lhs before
-// rhs, but if lhs is a Var, and there's no Op, then the Var is
-// allowed to be undefined. 
 static synth tcAssignOp(tenv te,segment loc, Opt_t<typ> topt, exp e0, exp e1,
 			Opt_t<primop> po, exp e2) {
-  let esyn_lhs = tcExp(te, null, e1);
-  let t1       = synth_typ(esyn_lhs);
+  tcExp(te,null,e1);
+  tcExp(te,null,e2);
+  typ t1 = e1->topt->v;
+  typ t2 = e2->topt->v;
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
   if (!is_lvalue(e1))
     return expr_err(te,loc,"assignment to non-lvalue");
-  let esyn_rhs    = tcExp(te, null, e2);
-  let t2          = synth_typ(esyn_rhs);
   if (po == null) {
     if (!coerce_assign(te,e2,t1)) 
       return expr_err(te,loc,xprintf("type mismatch: %s != %s",
 				     typ2string(t1), typ2string(t2)));
   } else {
-    let p        = po->v;
-    let t_result = tcBinPrimop(te,loc,null,p,e1,e2);
+    _ p        = po->v;
+    _ t_result = tcBinPrimop(te,loc,null,p,e1,e2);
     if (!(unify(t_result,t1) || coerceable(t_result)))
-      return expr_err(te,loc,
-		      "Cannot use this operator in front of an assignment");
+      return expr_err(te,loc, "Cannot use this operator in an assignment");
   }
-  return seq_synth(esyn_lhs,esyn_rhs);
+  return standard_synth(te,t2);
 }
 
 // e1,e2 
@@ -1117,8 +495,7 @@ static synth tcFnCall(tenv te,segment loc,Opt_t<typ> topt,exp e,list<exp> es) {
     case FnType(tvars,res_typ,args_info,is_vararg): //FIX: handle tvars
       if (is_vararg)
         terr(loc,"vararg functions (...) not supported yet");
-      // for each argument -- check that it has the appropriate type, coercing
-      // as necessary
+      // check that each argument has the right type or can be coerced to it
       while ((es != null) && (args_info != null)) {
         exp e1 = es->hd;
         typ t2 = args_info->hd[2];
@@ -1130,9 +507,9 @@ static synth tcFnCall(tenv te,segment loc,Opt_t<typ> topt,exp e,list<exp> es) {
         args_info = args_info->tl;
       }
       if (es != null) 
-        return expr_err(te,loc,"too many arguments for function");
-      else if (args_info != null) 
-        return expr_err(te,loc,"too few arguments for function");
+        terr(loc,"too many arguments for function");
+      if (args_info != null) 
+        terr(loc,"too few arguments for function");
       return standard_synth(te,res_typ);
     default: return expr_err(te,loc,"expected pointer to function");
     }
@@ -1142,9 +519,10 @@ static synth tcFnCall(tenv te,segment loc,Opt_t<typ> topt,exp e,list<exp> es) {
 
 // throw e 
 static synth tcThrow(tenv te, segment loc, Opt_t<typ> topt, exp e) {
-  typ t = synth_typ(tcExp(te,&Opt(exn_typ),e)); // unnecessary allocation
+  tcExp(te,&Opt(exn_typ),e); // unnecessary allocation
+  typ t = e->topt->v;
   if (!unify(t,exn_typ)) 
-    expr_err(te, loc,xprintf("expected xenum exn but found %s",typ2string(t)));
+    terr(loc,xprintf("expected xenum exn but found %s",typ2string(t)));
   return empty_synth(te);
 }
 
@@ -1154,29 +532,23 @@ static synth tcThrow(tenv te, segment loc, Opt_t<typ> topt, exp e) {
 // and the output of the typechecker isn't passed through itself...
 static synth tcInstantiate(tenv te, segment loc, Opt_t<typ> topt, 
                            exp e, Opt_t<list<typ>> @opt_ref) {
+  tcExp(te,null,e);
   Opt_t<list<typ>> topts = *opt_ref;
-  synth            esyn  = tcExp(te,null,e);
-  typ              t0    = compress(synth_typ(esyn));
+  typ              t0    = e->topt->v;
   switch (t0) {
-  case PointerType(t,_,_,_):
-    switch (t) {
-    case FnType(tvars,rtyp,args,varargs):
-      list<$(tvar,typ)@> instantiation;
-      if (topts == null) {
-        instantiation = List::map(make_inst_var,tvars);
-        *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
-      } else {
-        try instantiation = List::zip(tvars,topts->v);
-        catch { case List::List_mismatch:
-                  return expr_err(te,loc,"type instantiation mismatch");
-        }
+  case PointerType(FnType(tvars,rtyp,args,varargs),_,_,_):
+    list<$(tvar,typ)@> instantiation;
+    if (topts == null) {
+      instantiation = List::map(make_inst_var,tvars);
+      *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
+    } else {
+      try instantiation = List::zip(tvars,topts->v);
+      catch { case List::List_mismatch:
+	return expr_err(te,loc,"type instantiation mismatch");
       }
-      typ new_typ = substitute(instantiation, FnType(null,rtyp,args,varargs));
-      return synth_set_typ(esyn,new_typ);
-    default:
-      return expr_err(te,loc,xprintf("expecting polymorphic type but found %s",
-                                     typ2string(t0)));
     }
+    typ new_typ = substitute(instantiation, FnType(null,rtyp,args,varargs));
+    return standard_synth(te,new_typ);
   default:
     return expr_err(te,loc,xprintf("expecting polymorphic type but found %s",
                                    typ2string(t0)));
@@ -1186,12 +558,12 @@ static synth tcInstantiate(tenv te, segment loc, Opt_t<typ> topt,
 // (t)e 
 static synth tcCast(tenv te, segment loc, Opt_t<typ> topt, typ t, exp e) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
-  synth esyn = tcExp(te,null,e);
-  typ   t2   = synth_typ(esyn);
+  tcExp(te,null,e);
+  typ t2 = e->topt->v;
   if (!castable(te,loc,t2,t)) 
-    return expr_err(te,loc,xprintf("cannot cast %s to %s",typ2string(t2),
-				   typ2string(t)));
-  return synth_set_typ(esyn,t);
+    return expr_err(te,loc,xprintf("cannot cast %s to %s",
+				   typ2string(t2), typ2string(t)));
+  return standard_synth(te,t);
 }
 
 // if e is a valid lhs, then return true if that lhs must be const,
@@ -1204,22 +576,23 @@ static bool lhs_const(tenv te, exp e) {
     case VarRes(Unresolved_b): 
       terr(e->loc,"UnknownVar in lhs_const"); 
       return false;
-    case VarRes(Global_b(vd)): return vd->tq->q_const;
-    case VarRes(Local_b(vd)):  return vd->tq->q_const;
-    case VarRes(Pat_b(vd)):    return vd->tq->q_const;
+    case VarRes(Global_b(vd)):        fallthru(vd);
+    case VarRes(Local_b(vd)):         fallthru(vd);
+    case VarRes(Pat_b(vd)):           fallthru(vd->tq);
     case VarRes(Param_b(&$(_,tq,_))): return tq->q_const;
-    case VarRes(Funname_b(_)): return true; // ???
+    case VarRes(Funname_b(_)):        return true; // Note: won't type-check
     case StructRes(_):  throw impos("StructRes in lhs_const");
     case EnumRes(_,_):  throw impos("EnumRes in lhs_const");
     case XenumRes(_,_): throw impos("XenumRes in lhs_const");
     }
-    // FIX??? Cannot Cast_e make something const ???
+    // FIX??? Cannot Cast_e make something const 
+    // (cast should allow qualifiers)???
   case Cast_e(_,e2): return lhs_const(te,e2);
   case StructMember_e(e2,f):
     typ t = compress(e2->topt->v);
     switch (t) {
     case StructType(nopt,ts,&sd):
-      let fields = sd->fields == null ? null : sd->fields->v;
+      _ fields = sd->fields == null ? null : sd->fields->v;
       for(; fields != null; fields = fields->tl)
 	if (String::zstrcmp(fields->hd[0],f) == 0)
 	  return fields->hd[1]->q_const;
@@ -1234,7 +607,7 @@ static bool lhs_const(tenv te, exp e) {
     switch (t) {
     case ArrayType(_,tq,_): return tq->q_const;
     case TupleType(ts):
-      for(unsigned int i = eval_const_uint_exp(e2); i != 0; --i)
+      for(unsigned int i = Evexp::eval_const_uint_exp(e2); i != 0; --i)
 	ts = ts->tl;
       return ts->hd[0]->q_const;
       // FIX: pointer to tuple??
@@ -1255,7 +628,9 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   // Use tcExpNoInst here because if f is a function then
   // then &f is supposed to be a pointer to a function, not
   // a pointer to a pointer to a function
-  synth esyn = tcExpNoInst(te,topt,e);
+  // FIX: should check that topt is a pointertype and pass on the underlying
+  //      type.
+  synth esyn = tcExpNoInst(te,null,e);
   tqual tq   = &Tqual{.q_const    = lhs_const(te,e),
 		      .q_volatile = false, 
 		      .q_restrict = false};
@@ -1268,7 +643,7 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
 // sizeof t 
 static synth tcSizeof(tenv te, segment loc, Opt_t<typ> topt, typ t) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
-  szof(t,loc); // just ignore result -- posts error for bad type
+  Evexp::szof(t,loc); // just ignore result -- posts error for bad type
   return standard_synth(te,uint_t);
 }
 
@@ -1293,12 +668,12 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
   case StructType(nopt,ts,&sd):
     if (nopt == null)
       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
-    let finfo = lookup_struct_field(sd,f);
+    _ finfo = lookup_struct_field(sd,f);
     if (finfo == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
 				     qvar2string(nopt->v), f));
-    let inst = List::zip(sd->tvs,ts);
-    let t2   = substitute(inst,finfo[2]);
+    _ inst = List::zip(sd->tvs,ts);
+    _ t2   = substitute(inst,finfo[2]);
     return synth_set_typ(esyn,t2);
   case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
     switch (ak) {
@@ -1329,12 +704,12 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
   case PointerType(t2,_,_,_):
     switch (compress(t2)) {
     case StructType(nopt,ts,&sd):
-      let finfo = lookup_struct_field(sd,f);
+      _ finfo = lookup_struct_field(sd,f);
       if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
 				       qvar2string(nopt->v),f));
-      let inst = List::zip(sd->tvs,ts);
-      let t3   = substitute(inst,finfo[2]);
+      _ inst = List::zip(sd->tvs,ts);
+      _ t3   = substitute(inst,finfo[2]);
       return synth_set_typ(esyn,t3);
     default:
       return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
@@ -1353,19 +728,19 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
   typ res;
   typ t1 = compress(e1->topt->v);
   typ t2 = compress(e2->topt->v);
+  // FIX: look at topt
   // NOTE: we use unsigned int here, unlike C, because we do not support
   // negative indexing on arrays.
-  if (!coerce_uint_typ(te,e2)) {
+  if (!coerce_uint_typ(te,e2))
     return expr_err(te,e2->loc,xprintf("expecting unsigned int, found %s",
                                        typ2string(t2)));
-  }
   // the subscript could be on a tuple, a pointer to a tuple, or an array
   switch (t1) {
   case PointerType(t,_,_,tq):
     // FIX: see whether pointer is nullable? Consider tq?
     switch (t) {
     case TupleType(ts):
-      unsigned int i = eval_const_uint_exp(e2);
+      unsigned int i = Evexp::eval_const_uint_exp(e2);
       try res = List::nth(ts,i)[1];
       catch { case Nth:
         return expr_err(te,loc,
@@ -1378,16 +753,16 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
     }
     break; 
   case TupleType(ts):
-    unsigned int i = eval_const_uint_exp(e2);
+    unsigned int i = Evexp::eval_const_uint_exp(e2);
     try res = List::nth(ts,i)[1];
-    catch {case Nth:
+    catch { case Nth:
       return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
 				     i,List::length(ts)));
     }
     break;
   case ArrayType(ta,q,ak):
     if (ak == UntaggedArray)
-      expr_err(te,loc,xprintf("can't safely index into untagged array"));
+      terr(loc,xprintf("can't safely index into untagged array"));
     res = ta;
     break;
   default:
@@ -1400,11 +775,32 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
 
 // $(es) 
 static synth tcTuple(tenv te, segment loc, Opt_t<typ> topt, list<exp> es) {
+  bool done = false;
   list<$(tqual,typ)@> fields = null;
-  for(; es != null; es = es->tl) {
-    tcExp(te,null,es->hd);
-    fields = &cons(&$(empty_tqual(), es->hd->topt->v), fields);
-  }
+  if(topt != null) 
+    switch (compress(topt->v)) {
+    case TupleType(ts):
+      if(length(ts) != length(es)) {
+	terr(loc,"tuple expression has the wrong number of fields");
+	break;
+      }
+      _ topt2 = &Opt(topt->v);
+      for(; es != null; es = es->tl, ts = ts->tl) {
+	topt2->v = ts->hd[1];
+	tcExp(te,topt2,es->hd);
+	fields = &cons(&$(empty_tqual(), es->hd->topt->v), fields);
+      } 
+      done = true;
+      break;
+    default:
+      terr(loc,xprintf("initializer for %s is a tuple",typ2string(topt->v)));
+      break;
+    }
+  if(!done)
+    for(; es != null; es = es->tl) {
+      tcExp(te,null,es->hd);
+      fields = &cons(&$(empty_tqual(), es->hd->topt->v), fields);
+    }
   return standard_synth(te,TupleType(List::imp_rev(fields)));
 }
 
@@ -1426,12 +822,11 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
   else {
     switch (compress(topt->v)) {
     case ArrayType(elt_typ,_,_):
-      let topt1 = &Opt(elt_typ);
-      for (let es1 = es; es1 != null; es1 = es1->tl) {
+      _ topt1 = &Opt(elt_typ);
+      for (_ es1 = es; es1 != null; es1 = es1->tl) {
 	exp e = es1->hd;
 	tcExp(te,topt1,e);
         coerce_arg(te,e,elt_typ);
-        //	e->r = cast_exp(elt_typ,new_exp(e->r,e->loc),e->loc)->r;
       }
       break;
     default: 
@@ -1446,7 +841,7 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
     terr(es->hd->loc,
 	 xprintf("elements of array do not all have the same type (%s)",
 		 typ2string(res)));
-  let sz_rexp = Const_e(Int_c(Unsigned,List::length(es)));
+  _   sz_rexp = Const_e(Int_c(Unsigned,List::length(es)));
   exp sz_exp  = new_exp(sz_rexp,loc);
   typ res_t2  = ArrayType(res,empty_tqual(),FixedArray(sz_exp));
   sz_exp->topt = &Opt(uint_t);
@@ -1462,7 +857,7 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
         break;
       case ArrayElement(e):
 	tcExp(te,null,e);
-	unsigned int i = eval_const_uint_exp(e);
+	unsigned int i = Evexp::eval_const_uint_exp(e);
 	if (i != offset)
 	  terr(e->loc, xprintf("expecting index designator %d but found %d",
 			       offset,i));
@@ -1476,12 +871,12 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
 // {for x < e1 : e2} 
 static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
 			     vardecl vd,exp bound,exp body) {
-  let esyn_bound = tcExp(te,null,bound);
+  tcExp(te,null,bound);
   if (!coerce_uint_typ(te,bound))
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
-			    typ2string(synth_typ(esyn_bound))));
-  // add x to the environment with the type unsigned int, note it is inited
-  tenv te2 = add_local_var(loc, te, vd);
+			    typ2string(bound->topt->v)));
+  // add x to the environment with the type unsigned int
+  te = add_local_var(loc, te, vd);
   // if topt is present, cast the body to topt's element type
   if (topt != null) {
     switch (compress(topt->v)) {
@@ -1494,16 +889,10 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
     }
   }
   // type-check the body in the new environment
-  let esyn_body = tcExp(te2,null,body);
-  array_kind k;
-  if (is_const_exp(te2,bound)) 
-    k = FixedArray(bound);
-  else 
-    k = TaggedArray;
-
-  typ t = ArrayType(synth_typ(esyn_body), empty_tqual(), k);
-  // the body may never be executed -- like a while or for loop
-  return synth_set_typ(loop_synth(esyn_bound,esyn_body),t);
+  tcExp(te,null,body);
+  array_kind k = is_const_exp(te,bound) ? FixedArray(bound) : TaggedArray;
+  typ        t = ArrayType(body->topt->v, empty_tqual(), k);
+  return standard_synth(te,t);
 }
 
 //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1530,10 +919,10 @@ static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
       *tn = sd->name->v;
   }
   // calculate the instantiation and final type
-  let inst = List::map(make_inst_var,sd->tvs);
-  let typs = List::map(snd,inst); 
+  _ inst = List::map(make_inst_var,sd->tvs);
+  _ typs = List::map(snd,inst); 
   *otyps = &Opt(typs);
-  let res_typ = StructType(&Opt(*tn),typs,&$(sd));
+  _ res_typ = StructType(&Opt(*tn),typs,&$(sd));
   list<$(field_name,tqual,typ)@> fields;
   if (sd->fields == null) {
     fields = null;
@@ -1558,25 +947,24 @@ static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
     } else {
       // make sure the explicit designator is just a field name --
       // remove that field from the list of fields
-      let d = ds->hd;
+      _ d = ds->hd;
       if (ds->tl != null) terr(e->loc,"too many designators");
       switch (d) {
       case ArrayElement(e2):
 	return expr_err(te,e2->loc,"array designators not supported here");
       case FieldName(f):
 	try {
-	  let p = remove_field(f,fields);
+	  _ p = remove_field(f,fields);
 	  field = p[0];
 	  fields = p[1];
-	} catch {
-	case MissingField:
+	} catch { case MissingField:
 	  return expr_err(te,e->loc,xprintf("bad field designator %s",f));
 	}
 	break;
       }
     }
     // field is now found -- check that the argument is the right type.
-    let field_typ = substitute(inst,field[2]);
+    _ field_typ = substitute(inst,field[2]);
     if (!coerce_arg(te,e,field_typ))
       terr(e->loc,xprintf("field %s of struct %s expects type %s != %s",
 			  field[0],qvar2string(*tn),typ2string(field_typ),
@@ -1598,11 +986,11 @@ static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
 		    enumdecl ed,
 		    enumfield ef) {
   tcExpList(te,es);
-  let all_inst    = List::map(make_inst_var,ed->tvs);
-  let exist_inst  = List::map(make_inst_var,ef->tvs);
-  let all_typs    = List::map(snd,all_inst);   
-  let exist_typs  = List::map(snd,exist_inst); 
-  let inst        = List::append(all_inst,exist_inst);
+  _ all_inst   = List::map(make_inst_var,ed->tvs);
+  _ exist_inst = List::map(make_inst_var,ef->tvs);
+  _ all_typs   = List::map(snd,all_inst);   
+  _ exist_typs = List::map(snd,exist_inst); 
+  _ inst       = List::append(all_inst,exist_inst);
   *all_ref   = &Opt(all_typs);
   *exist_ref = &Opt(exist_typs);
   typ res = EnumType(ed->name,all_typs,&$(ed));
@@ -1637,8 +1025,8 @@ static synth tcXenum(tenv te, segment loc, Opt_t<typ> topt,
 		     xenumdecl xd,
 		     enumfield ef) {
   tcExpList(te,es);
-  let exist_inst  = List::map(make_inst_var,ef->tvs);
-  let exist_typs  = List::map(snd,exist_inst); //@<var,typ>
+  _ exist_inst = List::map(make_inst_var,ef->tvs);
+  _ exist_typs = List::map(snd,exist_inst); 
   *exist_ref = &Opt(exist_typs);
   typ res = XenumType(xd->name,&$(xd));
   list<$(tqual,typ)@> ts = ef->typs;
@@ -1663,7 +1051,7 @@ static synth tcXenum(tenv te, segment loc, Opt_t<typ> topt,
 
 // ({ s }) 
 static synth tcStmtExp(tenv te, segment loc, Opt_t<typ> topt, stmt s) {
-  tcStmt(set_encloser(te,s),s);
+  Tcstmt::tcStmt(set_encloser(te,s),s,true);
   // The encloser of s is not s, so reset it properly.
   ControlFlow::set_encloser(s,get_encloser(te));
   // The type is the type of the expression that ends the statment.
@@ -1673,7 +1061,7 @@ static synth tcStmtExp(tenv te, segment loc, Opt_t<typ> topt, stmt s) {
     case Seq_s(s1,s2): s = s2; continue;
     case Decl_s(d,s1): s = s1; continue;
     default: 
-      return expr_err(te,loc,"cannot determine type of statement expression");
+      return expr_err(te,loc,"statement expression must end with expression");
     }
 }
 
@@ -1688,7 +1076,6 @@ static synth tcFill(tenv te, segment loc, Opt_t<typ> topt, exp e) {
 
 // FIX: there are other expressions we could allow, such as 
 // &(x->y) or &(x[0]) that we do not support here...
-extern bool is_const_exp(tenv te, exp e);
 static bool cnst_exp(tenv te, bool var_okay, exp e) {
   switch (e->r) {
   case Const_e(_):  return true;
@@ -1719,7 +1106,8 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
   case Array_e(des): fallthru(des);
   case Struct_e(_,_,des,_):
     for (; des != null; des = des->tl)
-      if (!cnst_exp(te,false,des->hd[1])) return false;
+      if (!cnst_exp(te,false,des->hd[1])) 
+	return false;
     return true;
 
   case Primop_e(p,es):       fallthru(es);
@@ -1727,7 +1115,8 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
   case Enum_e(_,_,_,es,_,_): fallthru(es);
   case Xenum_e(_,_,es,_,_):
     for (; es != null; es = es->tl)
-      if (!cnst_exp(te,false,es->hd)) return false;
+      if (!cnst_exp(te,false,es->hd)) 
+	return false;
     return true;
   default:
     return false;
@@ -1755,21 +1144,19 @@ synth tcExp(tenv te, Opt_t<typ> topt, exp e) {
   default:
     // implicitly instantiate the expression if it has a polymorphic type
     esyn = tcExpNoInst(te,topt,e); // first, typecheck without instantiating
-    // TESTING FUNCTION STUFF
-    esyn = synth_set_typ(esyn,pointer_expand(compress(synth_typ(esyn))));
-    e->topt = &Opt(synth_typ(esyn));
-    switch (compress(synth_typ(esyn))) {
+    e->topt->v = pointer_expand(compress(e->topt->v));
+    switch (compress(e->topt->v)) {
     case PointerType(t,r,x,tq):
       switch (compress(t)) {
       case FnType(tvs,rtyp,args,varargs):
         if (tvs != null) {   // then, instantiate if necessary
-          list<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
-          list<typ> ts = List::map(snd,instantiation); //@<var,typ>
-          typ ftyp = substitute(instantiation,
-                                FnType(null,rtyp,args,varargs));
+          list<$(tvar,typ)@> inst = List::map(make_inst_var,tvs);
+          list<typ>          ts   = List::map(snd,inst);
+          typ                ftyp = substitute(inst,
+					       FnType(null,rtyp,args,varargs));
           typ new_typ = PointerType(ftyp,r,x,tq);
-	  exp inner = copy_exp(e);
-          e->r = Instantiate_e(inner,&Opt(ts));
+	  exp inner   = copy_exp(e);
+          e->r    = Instantiate_e(inner,&Opt(ts));
           e->topt = &Opt(new_typ);
           esyn = synth_set_typ(esyn,new_typ);
         }
@@ -1787,13 +1174,15 @@ synth tcExp(tenv te, Opt_t<typ> topt, exp e) {
 // Type-check the expression -- don't do any implicit instantiation. 
 static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   segment loc = e->loc;
-  synth esyn;
+  synth   esyn;
 
   switch (e->r) {
+
   case NoInstantiate_e(e2):
     // This would handle two NoInstantiates in a row; but note that
     // for now the parser does not produce this ( x<><> won't parse ).
     return tcExpNoInst(te,null,e2);
+
   case UnknownId_e(q):
     // resolve the identifier and then re-type-check the expression
     resolve_unknown_id(te,e,q);
@@ -1807,7 +1196,7 @@ static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
     // resolve as an array or struct and then re-type-check the expression
     resolve_unresolved_mem(te,loc,topt,e,ds);
     return tcExpNoInst(te,topt,e);
-    // Dispatch the other cases 
+
   case Const_e(c)               : esyn=tcConst(te,loc,topt,c,e); break;
   case Var_e(q,vd)              : esyn=tcVar(te,loc,topt,q,e); break;
   case Primop_e(p,es)           : esyn=tcPrimop(te,loc,topt,p,es); break;

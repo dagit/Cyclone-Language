@@ -26,25 +26,37 @@ using Tcpat;
 
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(segment loc, tenv te, list<tvar> tvs, 
-			  list<vardecl> x, stmt s, Opt_t<exp> where_opt) {
+			  list<vardecl> vs, stmt s, Opt_t<exp> where_opt,
+			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
-  for(_ x2 = x; x2 != null; x2 = x2->tl)
-    te2 = add_pat_var(loc, te2, x2->hd);
+  if(new_block && vs != null)
+    te2 = Tcenv::new_block(te2);
+  _ block = curr_block(te2);
+  for(_ vs2 = vs; vs2 != null; vs2 = vs2->tl) {
+    te2 = add_pat_var(loc, te2, vs2->hd);
+    vs2->hd->block = block;
+  }
 
   if(where_opt != null)
     tcTest(te2,where_opt->v,"switch clause guard");
 
-  if(x != null)
+  if(vs != null)
     te2 = set_encloser(te2,s); // for substatements inside of s
-  tcStmt(te2,s);
+  tcStmt(te2,s,true); // pattern vars are in a different region from body ??
   // The encloser of s is not s, so reset it properly.
-  if(x != null)
+  if(vs != null)
     ControlFlow::set_encloser(s,get_encloser(te));
-
-  return;
 }
 
-void tcStmt(tenv te, stmt s0) {
+// new_block is a kludge because we he abstract syntax doesn't group the
+// local declarations in a block, but the region rules do.  (That is, 
+// adjacent declarations are in the same region.  Those at the beginning
+// of a function are in the same region as the parameters.
+// Case variables are in new regions, but let variables follow the adjacency
+// rules.  We may revisit some of these semi-arbitrary decisions.)
+// Note: With these adjacency rules, you can't just throw skip statements in
+//       anywhere because they end regions.
+void tcStmt(tenv te, stmt s0, bool new_block) {
 
   ControlFlow::set_encloser(s0, get_encloser(te));
 
@@ -56,7 +68,7 @@ void tcStmt(tenv te, stmt s0) {
 
   case Seq_s(s1,s2):
     let te2 = set_next(te,Stmt_j(s2));
-    tcStmt(te2,s1);
+    tcStmt(te2,s1,new_block); // pass new_block in case of weird associativity??
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
     while (true)
@@ -64,13 +76,13 @@ void tcStmt(tenv te, stmt s0) {
       case Seq_s(s3,s4):
 	ControlFlow::set_encloser(s2, get_encloser(te));
 	te2 = set_next(te,Stmt_j(s4));
-	tcStmt(te2,s3);
+	tcStmt(te2,s3,true);
 	s2  = s4;
 	continue;
       default: goto seq_end; // break out of loop
       }
   seq_end: 
-    tcStmt(te,s2);
+    tcStmt(te,s2,true);
     return;
 
   case Return_s(eopt):
@@ -83,7 +95,7 @@ void tcStmt(tenv te, stmt s0) {
         break;
       }
     } else {
-      let e = eopt->v;
+      _ e = eopt->v;
       tcExp(te,&Opt(t),e);
       if (!coerce_use(te,e,t))
 	terr(s0->loc, xprintf("returns value of type %s but requires %s",
@@ -97,14 +109,14 @@ void tcStmt(tenv te, stmt s0) {
 
   case IfThenElse_s(e,s1,s2):
     tcTest(te,e,"if statement"); // passing string causes allocation :-(
-    tcStmt(te,s1);
-    tcStmt(te,s2);
+    tcStmt(te,s1,true);
+    tcStmt(te,s2,true);
     return;
 
   case While_s($(e,cont_s),s):
     ControlFlow::set_encloser(cont_s, get_encloser(te));
     tcTest(te,e,"while loop");
-    tcStmt(set_in_loop(te,cont_s),s);
+    tcStmt(set_in_loop(te,cont_s),s,true);
     return;
 
   case For_s(e1,$(e2,guard_s),$(e3,cont_s),s): 
@@ -112,14 +124,14 @@ void tcStmt(tenv te, stmt s0) {
     ControlFlow::set_encloser(cont_s,  get_encloser(te));
     tcExp(te,null,e1);
     tcTest(te,e2,"for loop");
-    _ te_body = set_in_loop(te,cont_s);
-    tcStmt(te_body,s);
-    tcExp(te_body,null,e3); // ??? what does a break/continue in e3 mean ???
+    te = set_in_loop(te,cont_s);
+    tcStmt(te,s,true);
+    tcExp(te,null,e3); // ??? what does a break/continue in e3 mean ???
     return;
 
   case Do_s(s,$(e,cont_s)):
     ControlFlow::set_encloser(cont_s, get_encloser(te));
-    tcStmt(set_in_loop(te,cont_s),s);
+    tcStmt(set_in_loop(te,cont_s),s,true);
     tcTest(te,e,"do loop");
     return;
   
@@ -130,7 +142,7 @@ void tcStmt(tenv te, stmt s0) {
   case Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
 
   case Fallthru_s(es,*sopt):
-    let trip_opt = process_fallthru(te,s0,sopt);
+    _ trip_opt = process_fallthru(te,s0,sopt);
     if(trip_opt == null) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
@@ -154,31 +166,31 @@ void tcStmt(tenv te, stmt s0) {
   // Note: ControlFlow requires we add the label with s, not s0 !!
   //       (That way, we can use switch_clause bodies and stmtExp stmt's
   //       as enclosers and get the right behavior!!!)
-  case Label_s(x,s): tcStmt(add_label(te,x,s),s); return;
+    // FIX: should use l for the region name.
+  case Label_s(l,s): tcStmt(add_label(te,l,s),s,true); return;
 
   case Switch_s(e,scs0):
-    let esyn = tcExp(te,null,e);
-    let t    = synth_typ(esyn);
+    _ esyn = tcExp(te,null,e);
+    _ t    = synth_typ(esyn);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
-    // we inherit the fallthru from above (i.e. from an outer switch).
-
+    // fallthru is not allowed.
     te = set_in_switch(te);
     te = clear_fallthru(te);
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
-      let p       = scs->hd->pattern;
-      let pat_typ = tcPat(te,p);
+      _ p       = scs->hd->pattern;
+      _ pat_typ = tcPat(te,p);
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
 				  typ2string(t), typ2string(p->topt->v)));
-      let pvs = null;
-      for(let y=x; y!=null; y=y->tl) 
+      _ pvs = null;
+      for(_ y=x; y!=null; y=y->tl) 
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus.
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-		    scs->hd->where_clause);
+		    scs->hd->where_clause, true);
       te = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_switch_exhaustive(s0->loc,scs0);
@@ -186,25 +198,25 @@ void tcStmt(tenv te, stmt s0) {
 
   case TryCatch_s(s,scs0):
     // must set encloser b/c cannot goto into a handler.
-    tcStmt(set_encloser(te,s0),s);
+    tcStmt(set_encloser(te,s0),s,true);
 
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);
     te = clear_fallthru(te);
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
-      let p       = scs->hd->pattern;
-      let pat_typ = tcPat(te,p);
+      _ p       = scs->hd->pattern;
+      _ pat_typ = tcPat(te,p);
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
-      let pvs = null;
-      for(let y=x; y!=null; y=y->tl) 
+      _ pvs = null;
+      for(_ y=x; y!=null; y=y->tl) 
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-		    scs->hd->where_clause);
+		    scs->hd->where_clause, true);
       te = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_catch_overlap(s0->loc,scs0);
@@ -213,9 +225,12 @@ void tcStmt(tenv te, stmt s0) {
   case Decl_s(d,s):
     string unimp_msg_part;
 
+    if(new_block)
+      te = Tcenv::new_block(te);
+
     switch (d->r) {
     case Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,_) = vd;
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
       if (nsl != null)
         terr(d->loc, "local variables cannot be qualified");
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);
@@ -226,11 +241,12 @@ void tcStmt(tenv te, stmt s0) {
 	       xprintf("%s declared with type %s, initialized with type %s",
 		       x, typ2string(t), typ2string(initializer->v->topt->v)));
       }
-      tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s);
+      *block_ptr = curr_block(te); // side effect
+      tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
       return;
 
     case Let_d(p,*topt_ref,e,*exhaust):
-      let topt = *topt_ref;
+      _ topt = *topt_ref;
       tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p);
@@ -244,21 +260,17 @@ void tcStmt(tenv te, stmt s0) {
 	terr(d->loc,xprintf("pattern type %s does not match definition type %s",
 			    typ2string(p->topt->v),typ2string(e->topt->v)));
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
-      pattern_synth(s0->loc, te, null, x, s, null);
+      pattern_synth(s0->loc, te, null, x, s, null, false);
       return;
 
-    case Namespace_d(n,tds):
-      terr(d->loc,"namespace is allowed only at top level");
-      return;
-    case Using_d(q,tds): // FIX: we should allow "using" in limited scope
-      terr(d->loc,"using is allowed only at top level");
-      return;
-    case Fn_d(_):      unimp_msg_part = "function"; break;
-    case Struct_d(_):  unimp_msg_part = "struct";   break;
-    case Union_d:      unimp_msg_part = "union";    break;
-    case Enum_d(_):    unimp_msg_part = "enum";     break;
-    case Xenum_d(_):   unimp_msg_part = "xenum";    break;
-    case Typedef_d(_): unimp_msg_part = "typedef";  break;
+    case Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
+    case Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
+    case Fn_d(_):            unimp_msg_part = "function";  break;
+    case Struct_d(_):        unimp_msg_part = "struct";    break;
+    case Union_d:            unimp_msg_part = "union";     break;
+    case Enum_d(_):          unimp_msg_part = "enum";      break;
+    case Xenum_d(_):         unimp_msg_part = "xenum";     break;
+    case Typedef_d(_):       unimp_msg_part = "typedef";   break;
     }
     throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
 			unimp_msg_part));

@@ -52,12 +52,16 @@ void dump_str(string s) {
   dump(s);
 }
 
+void dump_semi() {
+  dump_nospace(";");
+}
+
 void dump_sep<`a>(void f(`a), list<`a> l, dump_string_t sep) {
   if(l == null)
     return;
   for(; l->tl != null; l = l->tl) {
     f(l->hd);
-    dump(sep);
+    dump_nospace(sep); // still have the unnecessary space afterwards, though
   }
   f(l->hd);
 }
@@ -66,21 +70,21 @@ void dump_sep_c<`b,`a>(void f(`b,`a), `b env, list<`a> l, dump_string_t sep) {
     return;
   for(; l->tl != null; l = l->tl) {
     f(env,l->hd);
-    dump(sep);
+    dump_nospace(sep); // still have the unnecessary space afterwards, though
   }
   f(env,l->hd);
 }
 void group<`a>(void f(`a), list<`a> l, 
 	       dump_string_t start, dump_string_t end, dump_string_t sep) {
-  dump(start);
+  dump_nospace(start);
   dump_sep(f,l,sep);
-  dump(end);
+  dump_nospace(end);
 }
 void group_c<`b,`a>(void f(`b,`a), `b env, list<`a> l,
 		    dump_string_t start, dump_string_t end, dump_string_t sep) {
-  dump(start);
+  dump_nospace(start);
   dump_sep_c(f,env,l,sep);
-  dump(end);
+  dump_nospace(end);
 }
 void egroup<`a>(void f(`a), list<`a> l, 
 		dump_string_t start, dump_string_t end, dump_string_t sep) {
@@ -216,7 +220,7 @@ void dumpfunargs(list<$(Opt_t<var>,tqual,typ)@> args, bool varargs) {
     dump("(");
     for(; args != null; args = args->tl) {
       dumpfunarg(args->hd);
-      dump(",");
+      dump_nospace(",");
     }
     dump("...)");
   } else
@@ -229,8 +233,8 @@ void dumptyp(typ t) {
 
 void dumpdesignator(designator d) {
   switch (d) {
-  case ArrayElement(e): dump(".["); dumpexp(e); dump("]"); break;
-  case FieldName(v):    dump("."); dump(v); break;
+  case ArrayElement(e): dump(".["); dumpexp(e); dump_nospace("]"); break;
+  case FieldName(v):    dump("."); dump_nospace(v); break;
   }
 }
 
@@ -246,7 +250,7 @@ void dumpexps_prec(int inprec, list<exp> es) {
 void dumpexp_prec(int inprec, exp e) {
   int myprec = Absynpp::exp_prec(e);
   if(inprec >= myprec)
-    dump("(");
+    dump_nospace("(");
   switch (e->r) {
   case Const_e(Char_c(sg,ch)): 
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
@@ -292,7 +296,7 @@ void dumpexp_prec(int inprec, exp e) {
       default: throw Failure("Absyndump -- Bad number of arguments to primop");
       }
     } else {
-      dump(pstr); dump("("); dumpexps_prec(20,es); dump(")");
+      dump(pstr); dump_nospace("("); dumpexps_prec(20,es); dump_nospace(")");
     }
     break;
 
@@ -310,32 +314,20 @@ void dumpexp_prec(int inprec, exp e) {
   case Increment_e(e2,PostDec): dumpexp_prec(myprec,e2); dump("--"); break;
 
   case Conditional_e(e1,e2,e3):
-    // decompile to && and || if possible
-    switch ($(e2->r,e3->r)) {
-      /* JGM:  this causes a bug in some cases...
-       * notably tools/cyclex/compact.cyc
-    case $(Const_e(Int_c(Signed,1)),_): 
-      dumpexp_prec(33,e1); dump("||"); dumpexp_prec(33,e3); break;
-    case $(_,Const_e(Int_c(Signed,0))):
-      dumpexp_prec(37,e1); dump("&&"); dumpexp_prec(37,e2); break;
-      */
-    default:
-      dumpexp_prec(myprec,e1);
-      dump("?"); dumpexp_prec(0,e2);
-      dump(":"); dumpexp_prec(myprec,e3);
-      break;
-    }
+    dumpexp_prec(myprec,e1);
+    dump("?"); dumpexp_prec(0,e2);
+    dump(":"); dumpexp_prec(myprec,e3);
     break;
-
+    
   case SeqExp_e(e1,e2):
     dumpexp_prec(myprec,e1); dump(","); dumpexp_prec(myprec,e2); break;
 
   case UnknownCall_e(e1,es): fallthru(e1,es);
   case FnCall_e(e1,es):
     dumpexp_prec(myprec,e1);
-    dump("(");
+    dump_nospace("(");
     dumpexps_prec(20,es);
-    dump(")");
+    dump_nospace(")");
     break;
     
   case Throw_e(e1): dump("throw"); dumpexp_prec(myprec,e1); break;
@@ -344,25 +336,27 @@ void dumpexp_prec(int inprec, exp e) {
   case Instantiate_e(e1,_): dumpexp_prec(inprec,e1); break;
 
   case Cast_e(t,e1):
-    dump("("); dumptyp(t); dump(")"); dumpexp_prec(myprec,e1); break;
+    dump("("); dumptyp(t); dump_nospace(")"); dumpexp_prec(myprec,e1); 
+    break;
 
   case Address_e(e1):
     dump("&"); dumpexp_prec(myprec,e1); break;
 
   case Sizeof_e(t):
-    dump("sizeof("); dumptyp(t); dump(")"); break;
+    dump("sizeof("); dumptyp(t); dump_nospace(")"); break;
 
   case Deref_e(e1):
     dump("*"); dumpexp_prec(myprec,e1); break;
 
   case StructMember_e(e1,n):
-    dumpexp_prec(myprec,e1); dump(".");  dump(n); break;
+    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(n); break;
 
   case StructArrow_e(e1,n):
-    dumpexp_prec(myprec,e1); dump("->"); dump(n); break;
+    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(n); break;
 
   case Subscript_e(e1,e2):
-    dumpexp_prec(myprec,e1); dump("["); dumpexp(e2); dump("]"); break;
+    dumpexp_prec(myprec,e1); 
+    dump_nospace("["); dumpexp(e2); dump_nospace("]"); break;
 
   case Tuple_e(es):
     dump("$("); dumpexps_prec(20,es); dump(")"); break;
@@ -411,7 +405,7 @@ void dumpexp_prec(int inprec, exp e) {
 
   }
   if(inprec >= myprec)
-    dump(")");
+    dump_nospace(")");
 }
 
 void dumpexp(exp e) {
@@ -427,10 +421,10 @@ void dumpswitchclauses(list<switch_clause> scs) {
       dump("case");
       dumppat(c->pattern);
       if(c->where_clause != null) {
-	dump(" && ");
+	dump("&&");
 	dumpexp(c->where_clause->v);
       }
-      dump(":");
+      dump_nospace(":");
     }
     dumpstmt(c->body);
   }
@@ -438,8 +432,8 @@ void dumpswitchclauses(list<switch_clause> scs) {
 
 void dumpstmt(stmt s) {
   switch(s->r) {
-  case Skip_s:   dump(";"); break;
-  case Exp_s(e): dumpexp(e); dump(";"); break;
+  case Skip_s:   dump_semi(); break;
+  case Exp_s(e): dumpexp(e); dump_semi(); break;
     // FIX:  gcc only allows declarations to be used at the beginning
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
@@ -454,34 +448,34 @@ void dumpstmt(stmt s) {
       dumpstmt(s2);
     break;
   case Return_s(null):    dump("return;"); break;
-  case Return_s(&Opt(e)): dump("return"); dumpexp(e); dump(";"); break;
+  case Return_s(&Opt(e)): dump("return"); dumpexp(e); dump_semi(); break;
   case IfThenElse_s(e,s1,s2):
-    dump("if ("); dumpexp(e); dump(") {");
+    dump("if("); dumpexp(e); dump_nospace("){");
     dumpstmt(s1);
     dump("}");
     switch (s2->r) {
     case Skip_s: break;
-    default: dump("else {"); dumpstmt(s2); dump("}"); break;
+    default: dump("else{"); dumpstmt(s2); dump("}"); break;
     }
     break;
   case While_s($(e,_),s1):
-    dump("while ("); dumpexp(e); dump(") {");
+    dump("while("); dumpexp(e); dump_nospace(") {");
     dumpstmt(s1);
     dump("}");
     break;
   case Break_s(_):         dump("break;");        break;
   case Continue_s(_):      dump("continue;");     break;
-  case Goto_s(x,_):        dump("goto"); dump(x); dump_nospace(";"); break;
+  case Goto_s(x,_):        dump("goto"); dump(x); dump_semi(); break;
   case Fallthru_s(null,_): dump("fallthru;");     break;
   case Fallthru_s(es,_):
     dump("fallthru("); dumpexps_prec(20,es); dump(");"); break;
 
   case For_s(e1,$(e2,_),$(e3,_),s1):
-    dump("for("); dumpexp(e1); dump(";"); dumpexp(e2); dump(";"); dumpexp(e3);
-    dump(") {"); dumpstmt(s1); dump("}");
+    dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
+    dump("){"); dumpstmt(s1); dump("}");
     break;
   case Switch_s(e,ss):
-    dump("switch ("); dumpexp(e); dump(") {");
+    dump("switch("); dumpexp(e); dump("){");
     dumpswitchclauses(ss);
     dump("}");
     break;
@@ -495,9 +489,9 @@ void dumpstmt(stmt s) {
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
     if(Absynpp::is_declaration(s1)) {
-      dump(x); dump(": {"); dumpstmt(s1); dump("}");
+      dump(x); dump_nospace(": {"); dumpstmt(s1); dump("}");
     } else {
-      dump(x); dump(":"); dumpstmt(s1);
+      dump(x); dump_nospace(":"); dumpstmt(s1);
     }
     break;
 
@@ -564,7 +558,7 @@ void dumpstructfields(list<$(field_name,tqual,typ)@> fields) {
   for(; fields != null; fields = fields->tl) {
     let &$(name,tq,type) = fields->hd;
     dumptqtd(tq,type,dump_str,name);
-    dump(";");
+    dump_semi();
   }
 } 
 
@@ -593,7 +587,7 @@ void dumpdecl(decl d) {
     if(sd->name != null) dumpqvar(sd->name->v);
     dumptvars(sd->tvs);
     if(sd->fields == null)
-      dump(";");
+      dump_semi();
     else {
       dump("{");
       dumpstructfields(sd->fields->v);
@@ -608,7 +602,7 @@ void dumpdecl(decl d) {
       dump("=");
       dumpexp(initializer->v);
     }
-    dump(";");
+    dump_semi();
     break;
   case Union_d: dump("**UnionDecl**"); break;
   case Enum_d(ed):
@@ -618,7 +612,7 @@ void dumpdecl(decl d) {
     dumptvars(ed->tvs);
     dump("{");
     if(ed->fields == null)
-      dump(";");
+      dump_semi();
     else {
       dump("{");
       dumpenumfields(ed->fields->v);
@@ -631,7 +625,7 @@ void dumpdecl(decl d) {
     dumpqvar(xed->name);
     dump("{");
     if(xed->fields == null)
-      dump(";");
+      dump_semi();
     else {
       dump("{");
       dumpenumfields(xed->fields);
@@ -643,12 +637,12 @@ void dumpdecl(decl d) {
     dumppat(p);
     dump("=");
     dumpexp(e);
-    dump(";");
+    dump_semi();
     break;
   case Typedef_d(td):
     dump("typedef");
     dumptqtd(null,td->defn,dumptypedefname,td);
-    dump(";");
+    dump_semi();
     break;
   case Namespace_d(v,tdl):
     dump("namespace");
@@ -677,13 +671,13 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   switch(tms->hd) {
     // FIX?? What about tq2?
   case Pointer_mod(true,  HeapRgnType,  tq2): 
-    dump("*"); dumptms(tms->tl,f,a); return;
+    dump_nospace("*"); dumptms(tms->tl,f,a); return;
   case Pointer_mod(false, HeapRgnType,  tq2): 
-    dump("@"); dumptms(tms->tl,f,a); return;
+    dump_nospace("@"); dumptms(tms->tl,f,a); return;
   case Pointer_mod(true,  VarType(&$(r,k)), tq2):  
-    dump("*"); dump(r); dumptms(tms->tl,f,a); return;
+    dump_nospace("*"); dump(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(false, VarType(&$(r,k)), tq2): 
-    dump("@"); dump(r); dumptms(tms->tl,f,a); return;
+    dump_nospace("@"); dump(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
   default: 
@@ -729,4 +723,3 @@ void dumpdecllist2file(list<decl> tdl, FILE @f) {
   for(; tdl != null; tdl = tdl->tl)
     dumpdecl(tdl->hd);
 }
-

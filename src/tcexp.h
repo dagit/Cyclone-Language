@@ -2,27 +2,15 @@
 #define TCEXP_H
 
 #include "absyn.h"
-#include "position.h"
-#include "absynpp.h"
 #include "tcenv.h"
-#include "tcutil.h"
-#include "evexp.h"
 
 namespace Tcexp{
 
-using Core;
-using List;
-using Position;
 using Absyn;
-using Absynpp;
 using Tcenv;
-using Tcutil;
-using Evexp;
 
-extern synth tcExp(tenv, Opt_t<typ>, exp);
-extern void tcTest(tenv te,exp e,string msg_part);
+extern synth tcExp(tenv, Core::Opt_t<typ>, exp);
+extern void tcTest(tenv te, exp e, string msg_part);
 extern bool is_const_exp(tenv, exp);
-extern Opt_t<$(list<Char>, list<Char>, list<Char>, list<Char>, char, int)@>
-       parse_conversionspecification(string s, int i);
 }
 #endif

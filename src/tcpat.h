@@ -1,15 +1,17 @@
 #ifndef TCPAT_H
 #define TCPAT_H
 
+#include "list.h"
+#include "position.h"
 #include "absyn.h"
 #include "tcenv.h"
-#include "list.h"
 
 namespace Tcpat {
 
+using List;
+using Position;
 using Absyn;
 using Tcenv;
-using List;
 
 extern $(list<tvar>, list<vardecl>)@ tcPat(tenv,pat);
 extern void check_switch_exhaustive(segment,list<switch_clause>);

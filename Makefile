@@ -60,7 +60,7 @@ diff: cyclone_src
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
-cmp: cyclone_src
+cmp: 
 	@for i in $(C_SRCS); do (cmp -s bin/genfiles/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
 	@for i in $(C_LIBS); do (cmp -s bin/genfiles/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX $(C_RUNTIME) CHANGED

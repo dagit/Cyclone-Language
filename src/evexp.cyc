@@ -8,8 +8,6 @@
 #include "tcutil.h"
 #include "evexp.h"
 
-namespace Evexp;
-
 using Core;
 using Absyn;
 using List;
@@ -17,9 +15,10 @@ using Position;
 using Absynpp;
 using Tcutil;
 
+namespace Evexp;
+
 void exp_err(segment loc, string msg) {
-  Position::post_error(Position::mk_err_elab(loc, 
-					     xprintf("Exp_err: %s\n",msg)));
+  Position::post_error(Position::mk_err_elab(loc, xprintf("Exp_err: %s",msg)));
 }
 
 // forward references

@@ -8,16 +8,15 @@
 #include "string.h"
 #include "evexp.h"
 #include "tcutil.h"
-
-namespace Tcutil;
-
 using Core;
 using List;
+using Set;
+using Position;
 using Absyn;
 using Absynpp;
-using Set;
 using Tcenv;
-using Evexp;
+
+namespace Tcutil;
 
 xenum exn {TypeErr};
 
@@ -33,8 +32,8 @@ void terr(segment loc, string s) {
   throw TypeErr;
 }
 
-static list<Position::segment> warning_segs = null;
-static list<string>            warning_msgs = null;
+static list<segment> warning_segs = null;
+static list<string>  warning_msgs = null;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
@@ -373,7 +372,8 @@ void unify_it(typ t1, typ t2) {
     case $(UntaggedArray,  UntaggedArray):  return;
     case $(TaggedArray,    TaggedArray):    return;
     case $(FixedArray(e1), FixedArray(e2)):
-      if (eval_const_uint_exp(e1) == eval_const_uint_exp(e2)) return;
+      if (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2)) 
+	return;
       break;
     default: break;
     }
@@ -500,8 +500,8 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
   // now coerce each expression to the type t as if by assignment
   for (list<exp> el = es; el != null; el = el->tl)
     if (!coerce_assign(te,el->hd,t)) {
-      exp_err(el->hd->loc,xprintf("type mismatch: expecting %s but found %s",
-				  typ2string(t),typ2string(el->hd->topt->v)));
+      terr(el->hd->loc,xprintf("type mismatch: expecting %s but found %s",
+			       typ2string(t),typ2string(el->hd->topt->v)));
       return false;
     }
   return true;
@@ -592,7 +592,8 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
     case $(TaggedArray,    UntaggedArray): okay = true;  break;
     case $(TaggedArray,    TaggedArray):   okay = true;  break;
     case $(FixedArray(e1), FixedArray(e2)):
-      okay = (eval_const_uint_exp(e1) == eval_const_uint_exp(e2)); break;
+      okay = (Evexp::eval_const_uint_exp(e1) == Evexp::eval_const_uint_exp(e2));
+      break;
     case $(FixedArray(_),  _):             okay = true;  break;
     default:                               okay = false; break;
     }
@@ -799,7 +800,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
       if (!(ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const)))
 	return false;
       switch (ak) {
-      case FixedArray(e): return (eval_const_uint_exp(e) == 1);
+      case FixedArray(e): return (Evexp::eval_const_uint_exp(e) == 1);
       default: return true;
       }
     default: return false;
@@ -810,7 +811,8 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
       bool okay;
       switch ($(ak1a,ak2a)) {
       case $(FixedArray(e1),FixedArray(e2)):
-	okay = (eval_const_uint_exp(e1) >= eval_const_uint_exp(e2)); break;
+	okay=(Evexp::eval_const_uint_exp(e1) >= Evexp::eval_const_uint_exp(e2));
+	break;
       case $(UntaggedArray, _): okay = false; break;
       case $(_, UntaggedArray): okay = false; break; // FIX! Toc should allow!
       default: okay = true; break;
@@ -1271,7 +1273,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     case FixedArray(e):
       // FIX: should memoize the size so that we don't have to worry about
       // evaluating it during unification
-      eval_const_uint_exp(e); // check that e is of constant size
+      Evexp::eval_const_uint_exp(e); // check that e is of constant size
       break;
     }
     break;

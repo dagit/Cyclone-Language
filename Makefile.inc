@@ -34,6 +34,7 @@ CYCLONE_SRCS=absyn\
          tcstmt\
          tcpat\
          tcexp\
+	 formatstr\
          evexp\
          tc\
 	 control_flow\

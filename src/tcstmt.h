@@ -5,9 +5,7 @@
 #include "tcenv.h"
 
 namespace Tcstmt {
-
-extern void tcStmt(Tcenv::tenv,Absyn::stmt);
-
+extern void tcStmt(Tcenv::tenv te, Absyn::stmt s, bool new_block);
 }
 
 #endif

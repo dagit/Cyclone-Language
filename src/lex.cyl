@@ -1,4 +1,6 @@
 {
+// WARNING: Because we now intern identifiers, you better never mutate them!!!
+
 #include "core.h"
 #include "list.h"
 #include "lexing.h"
@@ -27,73 +29,70 @@ namespace Lex {
 
 /************************** RESERVED WORDS **************************/
 
-  // Fix: having to cast is a pain
+  // Fix: having to cast to string is a pain
 static $(string,short) rw_array[61] = {
-  $((string)"Char", (short)BOXED_CHAR),
-  $((string)"Double", (short)BOXED_DOUBLE),
-  $((string)"Float", (short)BOXED_FLOAT),
-  $((string)"Int", (short)BOXED_INT),
-  $((string)"Long", (short)BOXED_LONG),
-  $((string)"Short", (short)BOXED_SHORT),
-  $((string)"abstract", (short)ABSTRACT),
-  $((string)"auto", (short)AUTO),
-  $((string)"break", (short)BREAK),
-  $((string)"case", (short)CASE),
-  $((string)"catch", (short)CATCH),
-  $((string)"char", (short)CHAR),
-  $((string)"codegen", (short)CODEGEN),
-  $((string)"const", (short)CONST),
-  $((string)"continue", (short)CONTINUE),
-  $((string)"cut", (short)CUT),
-  $((string)"default", (short)DEFAULT),
-  $((string)"do", (short)DO),
-  $((string)"double", (short)DOUBLE),
-  $((string)"else", (short)ELSE),
-  $((string)"enum", (short)ENUM),
-  $((string)"extern", (short)EXTERN),
-  $((string)"fallthru", (short)FALLTHRU),
-  $((string)"fill", (short)FILL),
-  $((string)"float", (short)FLOAT),
-  $((string)"for", (short)FOR),
-  $((string)"fprintf", (short)FPRINTF),
-  $((string)"fscanf", (short)FSCANF),
-  $((string)"goto", (short)GOTO),
-  $((string)"if", (short)IF),
-  $((string)"inline", (short)INLINE),
-  $((string)"int", (short)INT),
-  $((string)"let", (short)LET),
-  $((string)"long", (short)LONG),
-  $((string)"namespace", (short)NAMESPACE),
-  $((string)"new", (short)NEW),
-  $((string)"null", (short)NULL),
-  $((string)"printf", (short)PRINTF),
-  $((string)"register", (short)REGISTER),
-  $((string)"restrict", (short)RESTRICT),
-  $((string)"return", (short)RETURN),
-  $((string)"scanf", (short)SCANF),
-  $((string)"short", (short)SHORT),
-  $((string)"signed", (short)SIGNED),
-  $((string)"sizeof", (short)SIZEOF),
-  $((string)"splice", (short)SPLICE),
-  $((string)"sscanf", (short)SSCANF),
-  $((string)"static", (short)STATIC),
-  $((string)"struct", (short)STRUCT),
-  $((string)"switch", (short)SWITCH),
-  $((string)"throw", (short)THROW),
-  $((string)"try", (short)TRY),
-  $((string)"typedef", (short)TYPEDEF),
-  $((string)"union", (short)UNION),
-  $((string)"unsigned", (short)UNSIGNED),
-  $((string)"using", (short)USING),
-  $((string)"void", (short)VOID),
-  $((string)"volatile", (short)VOLATILE),
-  $((string)"while", (short)WHILE),
-  $((string)"xenum", (short)XENUM),
-  $((string)"xprintf", (short)XPRINTF)
+  $((string)"Char", BOXED_CHAR),
+  $((string)"Double", BOXED_DOUBLE),
+  $((string)"Float", BOXED_FLOAT),
+  $((string)"Int", BOXED_INT),
+  $((string)"Long", BOXED_LONG),
+  $((string)"Short", BOXED_SHORT),
+  $((string)"abstract", ABSTRACT),
+  $((string)"auto", AUTO),
+  $((string)"break", BREAK),
+  $((string)"case", CASE),
+  $((string)"catch", CATCH),
+  $((string)"char", CHAR),
+  $((string)"codegen", CODEGEN),
+  $((string)"const", CONST),
+  $((string)"continue", CONTINUE),
+  $((string)"cut", CUT),
+  $((string)"default", DEFAULT),
+  $((string)"do", DO),
+  $((string)"double", DOUBLE),
+  $((string)"else", ELSE),
+  $((string)"enum", ENUM),
+  $((string)"extern", EXTERN),
+  $((string)"fallthru", FALLTHRU),
+  $((string)"fill", FILL),
+  $((string)"float", FLOAT),
+  $((string)"for", FOR),
+  $((string)"fprintf", FPRINTF),
+  $((string)"fscanf", FSCANF),
+  $((string)"goto", GOTO),
+  $((string)"if", IF),
+  $((string)"inline", INLINE),
+  $((string)"int", INT),
+  $((string)"let", LET),
+  $((string)"long", LONG),
+  $((string)"namespace", NAMESPACE),
+  $((string)"new", NEW),
+  $((string)"null", NULL),
+  $((string)"printf", PRINTF),
+  $((string)"register", REGISTER),
+  $((string)"restrict", RESTRICT),
+  $((string)"return", RETURN),
+  $((string)"scanf", SCANF),
+  $((string)"short", SHORT),
+  $((string)"signed", SIGNED),
+  $((string)"sizeof", SIZEOF),
+  $((string)"splice", SPLICE),
+  $((string)"sscanf", SSCANF),
+  $((string)"static", STATIC),
+  $((string)"struct", STRUCT),
+  $((string)"switch", SWITCH),
+  $((string)"throw", THROW),
+  $((string)"try", TRY),
+  $((string)"typedef", TYPEDEF),
+  $((string)"union", UNION),
+  $((string)"unsigned", UNSIGNED),
+  $((string)"using", USING),
+  $((string)"void", VOID),
+  $((string)"volatile", VOLATILE),
+  $((string)"while", WHILE),
+  $((string)"xenum", XENUM),
+  $((string)"xprintf", XPRINTF)
 };
-
-
-// WARNING: Because we now intern identifiers, you better never mutate them!!!
 
 // Should probably put this trie thing in the library
 static struct Trie;
@@ -190,26 +189,13 @@ static string get_symbol(int symbol_num) {
   return Xarray::get((Xarray::Xarray<string>)symbols, symbol_num);
 }
 
-extern void typedef_init();
+static $(sign,int)      token_int_pair = $(Signed,0);
+static $(list<var>,var) token_id_pair  = $(null,(string)"*bogus*");
 
-void lex_init() {
-  symbols = Xarray::create(101,(string)"");
-  num_kws = rw_array.size;
-  kw_nums = new {for i < num_kws : 0};
-  for (int i=0; i < num_kws; ++i) {
-    let str = rw_array[i][0];
-    str_index(str, 0, String::strlen(str));
-    kw_nums[i] = rw_array[i][1];
-  }
-  typedef_init();
-}
-
-$(sign,int) token_int_pair = $(Signed,0);
-$(sign,int)@ token_int = &token_int_pair;
-char        token_char = '\000';
-string      token_string = "";
-$(list<var>,var) token_id_pair = $(null,(string)"*bogus*");
-qvar        token_qvar = &token_id_pair;
+static char         token_char   = '\000';
+static string       token_string = "";
+static $(sign,int)@ token_int    = &token_int_pair;
+static qvar         token_qvar   = &token_id_pair;
 
 static void err<`a>(string msg,Lexbuf<`a> lb) {
   segment s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
@@ -335,20 +321,15 @@ typedef struct Lstate @lstate_t;
 static Opt_t<lstate_t> lstate = null;
 
 static void typedef_init() {
-  let init_lvis = &Lvis{.current_namespace=null,
+  _ init_lvis   = &Lvis{.current_namespace=null,
 			.imported_namespaces=null};
-  let init_lstack = &cons(init_lvis, null);
-  let init_decls = Dict::insert(Dict::empty(varlist_cmp),
-				null,
-				&Ldecls{.typedefs=Set::empty(zstrcmp),
-					.namespaces=Set::empty(zstrcmp)});
+  _ init_lstack = &cons(init_lvis, null);
+  _ init_decls  = Dict::insert(Dict::empty(varlist_cmp),
+			       null,
+			       &Ldecls{.typedefs=Set::empty(zstrcmp),
+				       .namespaces=Set::empty(zstrcmp)});
   lstate = &Opt(&Lstate{.lstack=init_lstack,
                         .decls=init_decls});
-}
-
-static void lex_sanitycheck() {
-  if (lstate == null /* JGM: can't happen now: || lstate->v->lstack == null*/)
-    throw Impossible("Lex: bad lexical state");
 }
 
 static list<var> get_absolute_namespace(List<var> ns) {
@@ -359,9 +340,8 @@ static list<var> get_absolute_namespace(List<var> ns) {
   for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
-    for (list<list<var>> x = 
-	   &cons(lv->current_namespace,lv->imported_namespaces);
-         x != null; x = x->tl) {
+    list<list<var>> x = &cons(lv->current_namespace,lv->imported_namespaces);
+    for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
       if (Set::member(ld->namespaces,n))
@@ -396,16 +376,13 @@ static bool is_typedef_in_namespace(List<var> ns, var v) {
   try {
     ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
     return Set::member(ld->typedefs,v);
-  } catch {
-  case Dict::Absent:
+  } catch { case Dict::Absent:
     return false;
   }
 }
 static bool is_typedef(qvar q) {
-  //  lex_sanitycheck();
-  if (q[0] != null) {
-    return is_typedef_in_namespace(q[0],q[1]);
-  }
+  if (q[0] != null)
+    return is_typedef_in_namespace((List<string>)q[0],q[1]);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
   string s   = q[1];
@@ -422,7 +399,6 @@ static bool is_typedef(qvar q) {
 }
 
 void enter_namespace(var s) {
-  //  lex_sanitycheck();
   list<var> ns = lstate->v->lstack->hd->current_namespace;
   list<var> new_ns = List::append(ns,&cons(s,null));
   // Push the new namespace on the stack
@@ -438,28 +414,25 @@ void enter_namespace(var s) {
 				    ns,
 				    &Ldecls{.typedefs = ld->typedefs,
 					    .namespaces = 
-					    Set::insert(ld->namespaces,
-							s)});
+					    Set::insert(ld->namespaces, s)});
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    new_ns,
-				    &Ldecls{.typedefs = Set::empty(zstrcmp),
+				    &Ldecls{.typedefs   = Set::empty(zstrcmp),
 					    .namespaces = Set::empty(zstrcmp)});
 
   }
   recompute_typedefs();
 }
 void leave_namespace() {
-  //  lex_sanitycheck();
-  lstate->v->lstack = lstate->v->lstack->tl;
+  // we never leave the outermost namespace, so the cast is okay
+  lstate->v->lstack = (List<lvis>)lstate->v->lstack->tl;
 
   recompute_typedefs();
 }
 void enter_using(qvar q) {
-  //  lex_sanitycheck();
-
-  let ns = (List<string>)List::append(q[0],&cons(q[1],null));
-  let ans = get_absolute_namespace(ns);
-  let imported = lstate->v->lstack->hd->imported_namespaces;
+  _ ns       = (List<string>)List::append(q[0],&cons(q[1],null));
+  _ ans      = get_absolute_namespace(ns);
+  _ imported = lstate->v->lstack->hd->imported_namespaces;
 
   lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
   
@@ -467,10 +440,7 @@ void enter_using(qvar q) {
   recompute_typedefs();
 }
 void leave_using() {
-  //  lex_sanitycheck();
-
-  let imported = lstate->v->lstack->hd->imported_namespaces;
-
+  _ imported = lstate->v->lstack->hd->imported_namespaces;
   lstate->v->lstack->hd->imported_namespaces = imported->tl;
 
   // some typedefs may no longer be visible
@@ -481,13 +451,11 @@ void leave_using() {
 // trie.
 void register_typedef(qvar q) {
   // FIX: we assume that q is not in fact qualified
-  //  lex_sanitycheck();
-
-  let current = lstate->v->lstack->hd->current_namespace;
-  let ds = lstate->v->decls;
-  let ld = Dict::lookup(ds,current);
-  let new_ld = &Ldecls{.typedefs   = Set::insert(ld->typedefs,q[1]),
-		       .namespaces = ld->namespaces};
+  _ current = lstate->v->lstack->hd->current_namespace;
+  _ ds      = lstate->v->decls;
+  _ ld      = Dict::lookup(ds,current);
+  _ new_ld  = &Ldecls{.typedefs   = Set::insert(ld->typedefs,q[1]),
+		      .namespaces = ld->namespaces};
   lstate->v->decls = Dict::insert(ds,current,new_ld);
 
   // FIX: We're really assuming it's unqualified here -- else need to
@@ -495,33 +463,35 @@ void register_typedef(qvar q) {
   insert_typedef(q[1]);
 }
 
-// This kludge won't be necessary to avoid allocation after we have stack
-// pointers.
-static $(List::list<var>,var) kludge_qvar = $(null,(string)"");
+// This kludge isn't necessary to avoid allocation once we have stack pointers.
+static $(List::list<var>,var) kludge_qvar_v = $(null,(string)"");
+static qvar kludge_qvar = &kludge_qvar_v;
+
 static short process_id<`a>(Lexbuf<`a> lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
   // maybe it's a keyword
   if(symbol_num < num_kws)
-    return (short)kw_nums[symbol_num];
+    return (short)kw_nums[symbol_num]; // cast should be unnecessary
 
   string s = get_symbol(symbol_num);
   kludge_qvar[1] = s;
+
   // maybe it's a typedef
-  if (is_typedef(&kludge_qvar)) {
+  if (is_typedef(kludge_qvar)) {
     token_qvar = &$(null,s);
-    return (short)QUAL_TYPEDEF_NAME;
+    return QUAL_TYPEDEF_NAME;
   }
 
   // alas, it's an identifier
   token_string = s;
-  return (short)IDENTIFIER;
+  return IDENTIFIER;
 }
 
 static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
-  int    i     = lbuf->lex_start_pos;
-  int    end   = lbuf->lex_curr_pos;
-  string s     = lbuf->lex_buffer;
+  int    i   = lbuf->lex_start_pos;
+  int    end = lbuf->lex_curr_pos;
+  string s   = lbuf->lex_buffer;
 
   list<var> rev_vs = null;
 
@@ -542,9 +512,9 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
   list<var> vs = List::imp_rev(rev_vs->tl);
   token_qvar = &$(vs,v);
   if (is_typedef(token_qvar))
-    return (short)QUAL_TYPEDEF_NAME;
+    return QUAL_TYPEDEF_NAME;
   else 
-    return (short)QUAL_IDENTIFIER;
+    return QUAL_IDENTIFIER;
 }
 
 // Forward declarations of lexing functions 
@@ -553,18 +523,18 @@ extern int strng<`a>(Lexbuf<`a>);
 extern int comment<`a>(Lexbuf<`a>);
 } // namespace Lex
 
-/* for parser -- must not be prefixed */
+// for parser -- must not be prefixed
 int yylex() { 
  int ans = Lex::token(lbuf->v);
- yylloc.first_line = lexeme_start (lbuf->v);
- yylloc.last_line  = lexeme_end   (lbuf->v);
+ yylloc.first_line = lexeme_start(lbuf->v);
+ yylloc.last_line  = lexeme_end(lbuf->v);
  switch (ans) {
  case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
- case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar); break;
- case QUAL_TYPEDEF_NAME : yylval = QualId_tok(Lex::token_qvar); break;
+ case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar);   break;
+ case QUAL_TYPEDEF_NAME : yylval = QualId_tok(Lex::token_qvar);   break;
  case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
- case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int); break;
- case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char); break;
+ case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int);       break;
+ case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char);     break;
  case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
  case STRING            : yylval = String_tok(Lex::token_string); break;
  default: break;
@@ -573,7 +543,7 @@ int yylex() {
 } 
 
 namespace Lex;
-//*************************** LEXING RULES ***************************/
+////////////////////////// LEXING RULES /////////////////////////////
 }
 
 let newline = ('\n' | '\r' | "\r\n")
@@ -759,5 +729,16 @@ and comment = parse
 
 {
 
+void lex_init() {
+  symbols = Xarray::create(101,(string)"");
+  num_kws = rw_array.size;
+  kw_nums = new {for i < num_kws : 0};
+  for (int i=0; i < num_kws; ++i) {
+    let str = rw_array[i][0];
+    str_index(str, 0, String::strlen(str));
+    kw_nums[i] = rw_array[i][1];
+  }
+  typedef_init();
+}
 
 }

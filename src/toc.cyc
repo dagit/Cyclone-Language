@@ -34,27 +34,27 @@
 //       back to the corresponding decls.  The printer doesn't follow these
 //       pointers, else we need to set them.
 
-#include "absyn.h"
-
-#include "tcutil.h"
-#include "evexp.h"
-#include "absynpp.h"
+#include "core.h"
+#include "list.h"
+#include "string.h"
 #include "set.h"
 #include "dict.h"
-#include "string.h"
 #include "position.h"
-#include "tcexp.h"
+#include "absyn.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "evexp.h"
+#include "Formatstr.h"
 #include "toc.h"
-
-namespace Toc;
-
 using Core;
 using List;
-using Absyn;
-using Tcutil;
-using Evexp;
-using Absynpp;
 using Set;
+using Position;
+using Absyn;
+using Absynpp;
+using Tcutil;
+
+namespace Toc;
 
 // used for creation of all abstract syntax nodes here
 #define DL null
@@ -111,7 +111,7 @@ static var add_tuple_type(list<$(tqual,typ)@> tqs0) {
   for (let tts = tuple_types; tts != null; tts = tts->tl) {
     let &$(x,ts) = tts->hd;
     bool okay = true;
-    let  tqs  = tqs0;
+    _    tqs  = tqs0;
     for (; tqs != null && ts != null; tqs = tqs->tl, ts = ts->tl)
       if (!unify(tqs->hd[1],ts->hd)) {
 	okay = false;
@@ -551,7 +551,7 @@ static exp null_check_conv(bool toplevel, typ t, exp e) {
 static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   qvar a = temp_var();
   qvar b = temp_var();
-  int szvalue = eval_const_uint_exp(sz);
+  int szvalue = Evexp::eval_const_uint_exp(sz);
   typ strt_typ;
   typ elt_typ;
   switch (compress(t)) {
@@ -611,7 +611,7 @@ static exp fix_taggedarray_conv(bool toplevel,typ t1, exp sz, exp e) {
   // ({ t1 x = e;
   //    if (sz > x->sz) throw(Null); x->contents; })
   qvar x = temp_var();
-  int szvalue = eval_const_uint_exp(sz);
+  int szvalue = Evexp::eval_const_uint_exp(sz);
   stmt s = exp_stmt(structarrow_exp(var_exp(x,DL),"contents",DL),DL);
   s = seq_stmt(ifthenelse_stmt(gt_exp(signed_int_exp(szvalue,DL),
 				      structarrow_exp(var_exp(x,DL),"sz",DL),
@@ -802,7 +802,6 @@ static env switch_as_switch_env(env e, var next_l) {
 //   args are the remaining args, already translated
 //   typs are the types of the translated args
 //
-//
 // Most of the work has been done in the typechecker, which inserted
 // casts on all the args.  The only remaining thing to do is handle
 // %s.  The typechecker casts the corresponding arg to char[?].
@@ -820,8 +819,6 @@ static env switch_as_switch_env(env e, var next_l) {
 //      int t3 = y;
 //      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
 //   })
-// We must introduce temps for all vars to preserve order of evaluation.
-//
 static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   // All errors are Impossible because they should have been caught by
   // the typechecker
@@ -862,7 +859,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
     char c = fmt_str[i];
     rev_fmt = &cons((Char)c,rev_fmt);
     if (c != '%') continue;
-    let x = Tcexp::parse_conversionspecification(fmt_str,i+1);
+    _ x = Formatstr::parse_conversionspecification(fmt_str,i+1);
     if (x == null) toc_impos("bad format string");
     let &$(flags,width,precision,lenmod,c2,j) = x->v;
     i = j-1; // Subtract 1 because for-loop ends with i++
@@ -878,7 +875,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
       // * width or precision consumes an argument
       switch (width) {
       case &cons(x,null) && x=='*':
-        let temp = temp_var();
+        _ temp = temp_var();
         rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
         rev_result = &cons(var_exp(temp,DL),rev_result);
         args = args->tl;
@@ -888,7 +885,7 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
       }
       switch (precision) {
       case &cons(x,&cons(y,null)) && x=='.' && y=='*':
-        let temp = temp_var();
+        _ temp = temp_var();
         rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
         rev_result = &cons(var_exp(temp,DL),rev_result);
         args = args->tl;
@@ -912,21 +909,21 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
       rev_fmt = &cons((Char)'.',rev_fmt);
       rev_fmt = &cons((Char)'*',rev_fmt);
       rev_fmt = &cons((Char)'s',rev_fmt);
-      let temp = temp_var();
+      _ temp = temp_var();
       rev_temps = &cons(&$(temp,typs->hd,args->hd),rev_temps);
-      let size_exp    = structarrow_exp(var_exp(temp,DL),"sz",DL);
-      let cstring_exp = structarrow_exp(var_exp(temp,DL),"contents",DL);
+      _ size_exp    = structarrow_exp(var_exp(temp,DL),"sz",DL);
+      _ cstring_exp = structarrow_exp(var_exp(temp,DL),"contents",DL);
       rev_result = &cons(size_exp,rev_result);
       rev_result = &cons(cstring_exp,rev_result);
       args = args->tl;
       typs = typs->tl;
     }
   }
-  let es = &cons(string_exp(String::implode(List::rev(rev_fmt)),DL),
+  _ es = &cons(string_exp(String::implode(List::rev(rev_fmt)),DL),
 		 List::rev(rev_result));
   if (aopt != null) es = &cons(aopt->v,es);
-  let e = primop_exp(p,es,DL);
-  let s = exp_stmt(e,DL);
+  _ e = primop_exp(p,es,DL);
+  _ s = exp_stmt(e,DL);
   for (; rev_temps != null; rev_temps = rev_temps->tl) {
     s = declare_stmt(rev_temps->hd[0],
                      rev_temps->hd[1],
@@ -961,7 +958,7 @@ static exp make_struct(qvar x, typ struct_typ, stmt s,
   typ        t;
   if(pointer) {
     t  = nullableptr_typ(struct_typ, empty_tqual());
-    let se = sizeof_exp(struct_typ,DL);
+    _ se = sizeof_exp(struct_typ,DL);
     eo = &Opt(cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL));
   } else {
     t  = struct_typ;
@@ -1271,12 +1268,12 @@ static void exp_to_c(env nv, exp e) {
     switch (e1_typ) {
     case TupleType(ts):
       // e1->fi  where i = e2+1
-      unsigned int i = eval_const_uint_exp(e2)+1;
+      unsigned int i = Evexp::eval_const_uint_exp(e2)+1;
       e->r = structmember_exp(e1,xprintf("f%d",i),DL)->r;
       break;
     case PointerType(t,rgn,bcr,tq):
       // The type checker ensures that this must be a pointer to a tuple
-      string fname = xprintf("f%d",eval_const_uint_exp(e2)+1);
+      string fname = xprintf("f%d",Evexp::eval_const_uint_exp(e2)+1);
       bool nullable = is_nullable(e1->topt->v);
       if (nullable) {
 	// ({t x=e1; (x == null) ? throw(NullPointer) : x->fieldname})
@@ -1321,7 +1318,7 @@ static void exp_to_c(env nv, exp e) {
         break;
       case FixedArray(esz):
 	// ({t *a=e1; uint i=e2; if (i >= esz) throw(ArrayIndex); a[i]})
-	unsigned int sz = eval_const_uint_exp(esz);
+	unsigned int sz = Evexp::eval_const_uint_exp(esz);
 	qvar i = temp_var();
 	qvar a = temp_var();
 	let ta1 = typ_to_c(ta);
