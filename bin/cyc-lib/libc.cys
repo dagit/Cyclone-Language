@@ -4688,6 +4688,7 @@ size_t
 time_t
 clockid_t
 timer_t
+pid_t
 }
 hstub {
   /* Missing declarations for
