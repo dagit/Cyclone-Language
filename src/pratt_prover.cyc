@@ -1,3 +1,21 @@
+/* Pratt's Difference-Constraint Solving Algorithm for Assertions.
+   Copyright (C) 2001 Greg Morrisett, Yanling Want, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
 #include "assndef.h"
 #include <list.h>
 
@@ -11,26 +29,120 @@ namespace PrattProver;
 #define MININT (-MAXINT-1)
 #define MAXUINT (0xFFFFFFFF)
 
-///////////////////////// Constraint Solving ///////////////////////////
-//
-// This is a simple constraint solver that can determine the satisfiability
-// of the conjunction of a set of constraints of the form (t1 - t2 <= c).
-//
-// We use a variation of the Pratt algorithm here where we keep track of a 
-// signed distance and an unsigned distance between terms 
-// and find the minimal length signed and unsigned paths between any 
-// two terms.  If we ever get a negative-length cycle, then the constraints 
-// are inconsistent.  
-//
-// We represent a conjunction of constraints as a sparse matrix of
-// the distances.  We consider distance(i,j) == 0 implicitly, and
-// otherwise, if (i,j) are not in the graph, the distance is infinite.
-//
-// To deal with an entire assertion, we must collect a set of graphs.
-// representing alternative states.  This effectively converts the 
-// assertion to DNF which is an exponential blowup.  To avoid the blowup,
-// we aggressively prune inconsistent graphs.  
 
+/**********************************************************************
+This is a simple constraint solver that can (conservatibely) determine 
+the unsatisfiability of a quantifier-free assertion, where the primitive
+assertions involve signed and unsigned int terms and [in]equations.
+The solver is based on Pratt's difference constraint algorithm, but
+has been suitably adapted to deal with modular arithmetic.  
+
+The algorithm that we use here is roughly as follows:
+
+(1) We (conceptually) compute the DNF of an assertion A, yielding
+    A1 || A2 || ... || An  where the Ai's are conjunctions of 
+    primitive relations.  
+
+(2) For each Ai, we build two distance graphs representing the signed and 
+    unsigned distances between terms respectively.
+
+(3) We then close the graph by computing the shortest path from each 
+    term to another, and by performing congruence closure w.r.t. the 
+    uninterpreted functions (e.g., numelts).  We also attempt to "break" 
+    terms involving addition of a constant (e.t., x+3) by adding edges 
+    x+3 ---(-3)---> x. However, we must be careful in doing this due to the
+    issues described below.  We use the information in the graph to try to 
+    prove that over/underflow cannot happen, in which case the edges are 
+    safe to add.  
+     
+(4) Finally, if we detect a cycle in one of the graphs 
+       t --c0--> t1 --c1--> t2 --c2--> ... --> tn --cn--> t
+    and the sum of the ci's is negative, then we have a contradiction since 
+    this would imply t - t < 0.  We can thus determine that Ai is false.
+
+(5) If all of the graphs are found to be inconsistent, then we know A is false.
+
+In practice, we incrementally convert the assertion to graphs and try to 
+prune inconsistent graphs as early as possible.  This avoids building graphs 
+proportional to the DNF which could be exponential in the size of A.
+This conversion is done in an accumulator style, where we are threading 
+through a list of graphs representing a disjunction.  That is, we compute 
+A && (G1 || ... || Gn).  If A is a primitive relation or conjunction, we 
+distribute it across all the graphs.  If A is a disjunction, (A1 || A2), 
+then we clone the list of graphs and compute Ai && (G1 || ... || Gn) and 
+A2 && (G1 || ... || Gn), appending the resulting lists of graphs that
+remain consistent.
+
+We currently perform the all-paths closure in a graph each time we add a 
+primitive constraint.  We currently perform the other closure operations when 
+we hit a disjunction (or at the end).  These allow us to prune graphs 
+relatively frequently and thus keep the space overheads reasonable.  It is 
+not clear how often we should do closure, since on the one hand, they are 
+relatively expensive passes, but on the other hand, they help to eliminate 
+whole graphs which not only saves space, but also avoids work down
+the line.
+
+The graphs are represented as sparse matrices with an implicit diagonal of 
+0, and where non-existent entries represent infinite upper bounds on 
+distance.  
+
+Notes on invariants:
+--------------------
+Terms of type int or unsigned int represent machine words (i.e., values
+in the range [0..2^32-1].)  Care must be taken when interpreting the
+operations and the tests to avoid confusion with integers (Z).  For
+example, t1 S<= t2 does not imply t1+1 S<= t2+1.  
+
+We define u : Env -> Term -> Z and s : Env -> Term -> Z as interpretation 
+functions mapping terms (of integral type) to integers as follows, where
+Env : Var -> [0..2^32-1].
+
+  u[Uint(i)]e = i
+  u[Var(x)]e  = e(x)
+  u[Binop(Plus,t1,t2,_)]e = (u[t1] + u[t2]) % 2^32
+  u[Binop(Minus,t1,t2,_)]e = (u[t1] - u[t2]) % 2^32
+  u[Binop(Times,t1,t2,_)]e = u[t1] * u[t2]) % 2^32
+
+  s[t]e = u[t] - 2^31
+
+Then the interpretations of the primitive relations U<=, S<=, and == 
+are defined as:
+    [t1 U<= t2]e iff u[t1]e <= u[t2]e
+    [t1 S<= t2]e iff s[t1]e <= s[t2]e
+    [t1 == t2]e  iff u[t1]e = u[t2]e
+
+We will leave the environment e implicit in what follows.
+
+Our graph tracks *mathematical* distances between terms.  
+In particular, an unsigned edge t1 ---i---> t2  represents
+the fact that u[t1] - u[t2] <= i and a signed edge 
+t1 ---i---> t2 represents s[t1] - s[t2] <= i.  Note that
+ideally, we would use an integer (bignum) to represent the distance i, 
+but to save space and time, we only put edges in that can be 
+represented by a machine int, at the loss of some completeness.
+Furthermore, when propagating distance information, we must check 
+for over or under flow.  
+
+It is important to note that equalities and inequalities in the
+assertions (which describe machine words, arithmetic, and relations)
+do not directly translate to these distance edges.  For example,
+suppose we have the assertion x - y == c.  It is tempting to
+think we can add x --c--> y and y -(-c)-> x to the unsigned graph.
+However, [x - y == c] does not imply y - x <= -c.  Picking x to be
+1 and y to be 2, we have (1 - 2) % 2^32 = -1 % 2^32 = 2^32 - 1.
+Yet while 1 - 2 <= 2^32-1, it is not the case that 2 - 1 <= 1 - 2^32.
+In general, we can only add the y -(-c)-> x edge when x is truly
+greater than y (and of course c and -c fit within an int.)
+
+The functions break_term() and break_term_in_graph() encapsulate the 
+logic necessary for determining when it is safe to add these edges.
+Because they depend upon whether or not a term may overflow (or underflow), 
+and this information may only become apparent later on (e.g., we discover 
+that x is actually 5, so x-2 does not underflow) we must do the
+term breaking as part of the closure process.
+*/
+
+//
 // Forward declaration -- represents an equivalence class for terms
 // (and also a row within a graph.)
 struct Node;
@@ -38,7 +150,7 @@ typedef struct Node node_t;
 
 
 // An entry in the sparse matrix -- records the target node of the
-// edge and the distance as a (signed) integer.
+// edge and the distance as a (signed) integer.  It is important to
 typedef struct Distance {
   struct Distance *next;
   node_t @target;
@@ -48,12 +160,12 @@ typedef struct Distance {
 
 // Represents a row within a graph.
 struct Node {
-  node_t     *next;
-  term_t      rep;
-  bool        broken_as_signed;
-  bool        broken_as_unsigned;
-  distance_t *unsigned_distances;
-  distance_t *signed_distances;
+  node_t     *next; // next row in graph
+  term_t      rep;  // term this node represents
+  bool        broken_as_signed   : 1; // whether we have broken out any
+  bool        broken_as_unsigned : 1; // constants (see below)
+  distance_t *unsigned_distances;     // distance edges with this node's term
+  distance_t *signed_distances;       // as the source
 };
 
 // A graph is essentially a pair of sparse matrices of 
@@ -102,30 +214,33 @@ void print_graphs(graph_t *g) {
   fprintf(stderr,"------------------\n");
 }
 
+// This exception is thrown when we discover that a graph is inconsistent.
+datatype exn { Inconsistent };
+datatype exn.Inconsistent inconsistent = Inconsistent;
+
 // forward declarations
-static node_t *term2node_opt(graph_t @g, term_t t);
-static bool set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
-static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
-static bool add_eq(graph_t @g, term_t t1, term_t t2);
-static bool break_term_in_graph(graph_t @g);
+static node_t @term2node(graph_t @g, term_t t);
+static void set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
+static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
+static void add_eq(graph_t @g, term_t t1, term_t t2);
 static $(bool,unsigned) term_is_const(graph_t @g, term_t t);
-// check term to see if its type reveals its numelts is known and if so,
-// add the information to the graph.  similarly, check if term's type
-// is tag_t<valueof(e)> and if so, add term == e and if term is unsigned, 
-// then add term >= 0.  Finally, if term = t + c, then add edges
-// term -c-> t and t -(-c)-> term.  
-static int add_type_info(graph_t @g, term_t term) {
+
+// Depending upon the type of a term, we can sometimes add extra
+// information to a graph.  For instance, if t : int@{42} then we
+// can add numelts(t) <= 42, and if t : tag_t<valueof(e)> then
+// we can add t == e.  
+static void add_type_info(graph_t @g, term_t term) {
   //for all terms t, we should know that:
   // s[t] - 0 <= MAXINT
   // 0 - u[t] <= 0
-  if (!set_distance(g,term,zero(),MAXINT,true) ||
-      !set_distance(g,zero(),term,0,false)) return false;
+  set_distance(g,term,zero(),MAXINT,true);
+  set_distance(g,zero(),term,0,false);
   switch (term) {
   case &Unop(Absyn::Numelts,x,_):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
-    if (!set_distance(g,term,zero(),MAXINT-1,true) ||
-        !set_distance(g,term,zero(),MAXINT-1,false) ||
-        !set_distance(g,zero(),term,0,false)) return false;
+    set_distance(g,term,zero(),MAXINT-1,true);
+    set_distance(g,term,zero(),MAXINT-1,false);
+    set_distance(g,zero(),term,0,false);
     break;
   default: break;
   }
@@ -152,30 +267,29 @@ static int add_type_info(graph_t @g, term_t term) {
       default: break;
       }
       term_t t2 = cnst((exp_t)e);
-      if (!add_constraint(g,t2,ULte,t1)) return false;
-      if (!add_constraint(g,t2,SLte,t1)) return false;
+      add_constraint(g,t2,ULte,t1);
+      add_constraint(g,t2,SLte,t1);
     }
     switch (Absyn::compress(t)) {
     case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_):
-      if (!add_constraint(g,zero(),ULte,term)) return false;
+      add_constraint(g,zero(),ULte,term);
       break;
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):
       switch (Absyn::compress(v)) {
       case &Absyn::ValueofType(e): add_eq(g,term,cnst(e)); break;
       case v2: 
-        if (!add_eq(g,term,cnst(Absyn::valueof_exp(v2,0)))) return false; 
+        add_eq(g,term,cnst(Absyn::valueof_exp(v2,0)));
         break;
       }
       break;
     default: break;
     }
   }
-  return true;
 }
 
 // Given a term, look up its row and if not found, then add the term 
 // to the graph.  Keep things sorted by term order.
-static node_t *term2node_opt(graph_t @g, term_t t) {
+static node_t @term2node(graph_t @g, term_t t) {
   // first see if we can find it directly.
   node_t *@prev = &g->rows;
   for (let r = g->rows; r != NULL; r = r->next) {
@@ -185,7 +299,7 @@ static node_t *term2node_opt(graph_t @g, term_t t) {
     prev = &r->next;
   }
   // term not directly found -- insert it in the graph.  
-  node_t *n;
+  node_t @n;
   switch (t){
   case &Binop(Absyn::Plus,t1,&Uint(c2),_):
     n = new Node{*prev,t,false,false,NULL,NULL};
@@ -195,17 +309,14 @@ static node_t *term2node_opt(graph_t @g, term_t t) {
     break;
   }
   *prev = n;
-  if (!add_type_info(g,t)) return NULL;
+  add_type_info(g,t);
   return n;
-}
-
-static node_t @term2node(graph_t @g, term_t t) {
-  return (node_t @)term2node_opt(g,t);
 }
 
 // Given a pair of nodes, look up their distance (if any) -- return
 // NULL if no distance is found.  Special case when source and target
-// are the same -- we always return a distance of zero.
+// are the same -- we always return a distance of zero.  Care should
+// be taken not to update the zero!
 static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   static int zero = 0;
   if (source == target) return &zero;
@@ -289,21 +400,22 @@ static void new_distance(node_t @`H source, node_t @`H target, bool is_signed, i
 
 // Tries to set the distance between two terms it and jt to dist, and
 // update the shortest paths between any two nodes in the graph.  Returns
-// true iff the resulting graph is consistent with this new constraint.  
+// normally iff the resulting graph is consistent with this new constraint,
+// and throws Inconsistent otherwise.  
 // Care must be taken when computing shortest paths to ensure that we
 // don't end up with an overflow or underflow.
-static bool set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
+static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_signed) {
   // equivalent terms are always at distance 0.
-  if (i == j && dist < 0) return false;
-  if (i == j && dist > 0) return true;
+  if (i == j && dist < 0) throw(&inconsistent);
+  if (i == j && dist > 0) return;
   let ij_dist = lookup_dist(i,j,is_signed);
   // if we already have a shorter parth, then this constraint is redundant
-  if (ij_dist != NULL && *ij_dist < dist) return true;
+  if (ij_dist != NULL && *ij_dist < dist) return;
   let ji_dist = lookup_dist(j,i,is_signed);
   // if  j --n--> i --dist--> j  and n+dist is negative, contradiction.
   if (ji_dist != NULL) {
     let $(overflow,sum) = is_signed_overflow(*ji_dist,dist);
-    if (sum < 0) return false; // there is a negative loop 
+    if (sum < 0) throw(&inconsistent); // there is a negative loop 
   }
   for (let k = g->rows; k != NULL; k = k->next) {
     let ki_dist = lookup_dist(k,i,is_signed);
@@ -349,20 +461,13 @@ static bool set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
       }
     }
   }
-  return true;
 }
 
 // same as above but maps terms to nodes first.
-static bool set_distance(graph_t @g, term_t it, term_t jt, int dist, bool is_signed) {
-  let iopt = term2node_opt(g,it);
-  let jopt = term2node_opt(g,jt);
-  if (iopt == NULL || jopt == NULL) return false;
-  let i = (node_t@)iopt;
-  let j = (node_t@)jopt;
-  //fprintf(stderr,"calling set_dist on graph\n");
-  //print_graph(g);
-  if (!set_dist(g,i,j,dist,is_signed)) return false;
-  return true;
+static void set_distance(graph_t @g, term_t it, term_t jt, int dist, bool is_signed) {
+  let i = term2node(g,it);
+  let j = term2node(g,jt);
+  set_dist(g,i,j,dist,is_signed);
 }
 
 // Used in copy_graphs below to copy a set of edges from one graph to another.
@@ -411,35 +516,28 @@ static graph_t *copy_graphs(graph_t *gopt) {
   return newg;
 }
 
-// FIX: Make sure that Times, Div, Mod, Bitlshift, Bitlrshift
-// will do the same thing for both signed, unsigned integers
-// otherwise, we might want to mark the op with types.
-// or just ignore their values.
-static  unsigned eval_binop(Absyn::primop_t p, unsigned i1, unsigned i2){
-  switch (p){
-  case Absyn::Plus: return i1 + i2;
-  case Absyn::Times: return i1 * i2;
-  case Absyn::Minus: return i1 - i2;
-  case Absyn::Div: return i1 / i2;
-  case Absyn::Mod: return i1 % i2;
-  case Absyn::Bitand: return i1 & i2;
-  case Absyn::Bitor: return i1 | i2;
-  case Absyn::Bitlshift: return i1 << i2;
-  case Absyn::Bitlrshift: return i1 >> i2;
-  default:
-    Tcutil::impos("Vcgen: found bad primop in eval_binop");
+// Applies f to each of the graphs in gs.  If f throws Inconsistent,
+// then the graph is removed from the list gs (imperatively).  
+// Returns the resulting list of graphs.
+static graph_t *app_graphs(void (@f)(`env,graph_t @`H), `env e, graph_t *`H gs) {
+  graph_t *prev = NULL;
+  for (let g = gs; g != NULL; g = g->next) {
+    try {
+      f(e,g);
+      prev = g;
+    } catch {
+    case &Inconsistent:
+      if (prev == NULL) {
+        gs = g->next;
+      } else {
+        prev->next = g->next;
+      }
+      break;
+    }
   }
+  return gs;
 }
 
-static unsigned eval_unop(Absyn::primop_t p, unsigned i ){
-  switch (p){
-  case Absyn::Not: return !i;
-  case Absyn::Bitnot: return ~i;
-  case Absyn::Minus: return -i;
-  default:
-    Tcutil::impos("Vcgen: found bad primop in add_constraint");
-  }
-}
 // when ok, the term t is equal to the value i in the graph g.
 static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
   switch(t){
@@ -452,19 +550,17 @@ static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
     break;
   default: break;
   }
-  let n = term2node_opt(g,t);
-  if (n != NULL){
-    let z = term2node(g,zero());
-    let n2z_s = lookup_dist(n,z,true);
-    if (n2z_s != NULL) {
-      let z2n_s = lookup_dist(z,n,true);
-      if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s);
-    }
-    let n2z_u = lookup_dist(n,z,false);
-    if (n2z_u != NULL) {
-      let z2n_u = lookup_dist(z,n,false);
-      if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u);
-    }
+  let n = term2node(g,t);
+  let z = term2node(g,zero());
+  let n2z_s = lookup_dist(n,z,true);
+  if (n2z_s != NULL) {
+    let z2n_s = lookup_dist(z,n,true);
+    if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s);
+  }
+  let n2z_u = lookup_dist(n,z,false);
+  if (n2z_u != NULL) {
+    let z2n_u = lookup_dist(z,n,false);
+    if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u);
   }
   return $(false,0xbad);
 }
@@ -477,47 +573,34 @@ static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
 
 // FIX: sub-terms might not be in the graph as node if they never occured
 // in any comparisons. Do we want to add those sub-terms in?
-static bool congruence_close_graph(graph_t @g) {
+static void congruence_close_graph(int dummy, graph_t @g) {
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
     for (let ts = g->rows; ts != NULL; ts = ts->next){
       switch $(rs->rep,ts->rep){
       case $(&Binop(p1,t11,t12,_),&Binop(p2,t21,t22,_)) && p1 == p2:
         if (!equal_terms(g,t11,t21)) break;
         if (!equal_terms(g,t12,t22)) break;
-        if (!add_eq(g,rs->rep,ts->rep)) return false;
+        add_eq(g,rs->rep,ts->rep);
         break;
       case $(&Unop(p1,t1,_),&Unop(p2,t2,_)) && p1 == p2:
         if (!equal_terms(g,t1,t2)) break;
-        if (!add_eq(g,rs->rep,ts->rep)) return false;
+        add_eq(g,rs->rep,ts->rep);
         break;
       case $(&Cast(tp1,t1),&Cast(tp2,t2)):
         if (Tcutil::typecmp(tp1,tp2) == 0) {
           if (!equal_terms(g,t1,t2)) break;
-          if (!add_eq(g,rs->rep,ts->rep)) return false;
+          add_eq(g,rs->rep,ts->rep);
         }
         break;
       default: break;
       }
     }
   }
-  return true;
 }
 
 // run congruence closure on a set of graphs and weed out the disjuncts
 static graph_t *congruence_close_graphs(graph_t *`H gs) {
-  graph_t *prev = NULL;
-  for (let g = gs; g != NULL; g = g->next) {
-    if (!congruence_close_graph(g)) {
-      if (prev == NULL) {
-        gs = g->next;
-      } else {
-        prev->next = g->next;
-      }
-    } else {
-      prev = g;
-    }
-  }
-  return gs;
+  return app_graphs(congruence_close_graph,0,gs);
 }
 
 
@@ -553,24 +636,24 @@ static $(bool, term_t, int) break_term(graph_t @g, term_t t, bool is_signed){
   return $(false,t,0);  
 }
 
-static bool break_term_in_graph(graph_t @g){
+static void break_term_in_graph(int dummy, graph_t @g){
   for(let rs = g->rows; rs != NULL; rs = rs->next){
     if (!rs->broken_as_signed){
       let $(ok,t1,c1) = break_term(g,rs->rep,true);
       if (ok){
 	rs->broken_as_signed = true;
-	if (!set_distance(g,rs->rep,t1,c1,true)) return false;
+	set_distance(g,rs->rep,t1,c1,true);
 	if ((unsigned)c1 != MININT)
-	  if (!set_distance(g,t1,rs->rep,-c1,true)) return false;
+	  set_distance(g,t1,rs->rep,-c1,true);
       }
     }
     if (!rs->broken_as_unsigned){
       let $(ok,t1,c1) = break_term(g,rs->rep,false);
       if (ok){
 	rs->broken_as_unsigned = true;
-	if (!set_distance(g,rs->rep,t1,c1,false)) return false;
+	set_distance(g,rs->rep,t1,c1,false);
 	if ((unsigned)c1 != MININT)
-	  if (!set_distance(g,t1,rs->rep,-c1,false)) return false;
+	  set_distance(g,t1,rs->rep,-c1,false);
       }
     }
     let $(ok,c1) = term_is_const(g,rs->rep);
@@ -580,68 +663,58 @@ static bool break_term_in_graph(graph_t @g){
       case &Binop(Absyn::Plus,t1,&Uint(c2),_):
 	rs->broken_as_signed = true;
 	rs->broken_as_unsigned = true;
-	if (!add_eq(g,t1,uint(c1-c2))) return false;
+	add_eq(g,t1,uint(c1-c2));
 	break;
       default:
 	break;
       }
     }
   }
-  return true;
 }
 
 static graph_t *break_term_in_graphs(graph_t *`H gs){
-  graph_t *prev = NULL;
-  for (let g = gs; g != NULL; g = g->next) {
-    if (!break_term_in_graph(g)) {
-      if (prev == NULL) {
-        gs = g->next;
-      } else {
-        prev->next = g->next;
-      }
-    } else {
-      prev = g;
-    }
-  }
-  return gs;
+  return app_graphs(break_term_in_graph, 0, gs);
 }
+
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
 // This does not deal with equality constraints -- those should've already
 // been eliminated.
-static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
+static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   switch $(t1,t2) {
   case $(&Uint(c1),&Uint(c2)):
     switch (p) {
-    case ULt: return (c1 < c2);
-    case ULte: return (c1 <= c2);
-    case SLt: return ((int)c1) < ((int)c2);
-    case SLte: return ((int)c1) <= ((int)c2);
+    case ULt: if (c1 < c2) return; break;
+    case ULte: if (c1 <= c2) return; break;
+    case SLt: if (((int)c1) < ((int)c2)) return; break;
+    case SLte: if (((int)c1) <= ((int)c2)) return; break;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
+    throw &inconsistent; 
   case $(_,&Uint(c2)):
     // we have t1 p c2 
     switch (p) {
     case ULt: 
       //no unsigned integer t could satisfy t u< 0
-      if (c2 == 0) return false;
+      if (c2 == 0) throw &inconsistent;
       c2 = c2 - 1; 
       fallthru;
     case ULte:
       // must check that c2 can be represented by an int.
       if (c2 <= MAXINT){
 	// we know that  u[t1]-0 u< c2 and s[t1]-0 < c2
-	return set_distance(g,t1,zero(),(int)c2,false);
+	set_distance(g,t1,zero(),(int)c2,false);
       }
-      return true;
+      return;
     case SLt: 
       //no signed integer t could satisfy t s< MININT
-      if (c2 == MININT) return false;
+      if (c2 == MININT) throw &inconsistent;
       c2 = c2 - 1;
       fallthru;
     case SLte:
       // the value of (int)c2 should be representable by an integer.
-      return set_distance(g,t1,zero(),(int)c2,true);
+      set_distance(g,t1,zero(),(int)c2,true);
+      return;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
   case $(&Uint(c1),_):
@@ -649,7 +722,7 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
     switch (p) {
     case ULt: 
       //no unsigned integer t could be greater than the biggest unsigned
-      if (c1 == MAXUINT) return false;
+      if (c1 == MAXUINT) throw &inconsistent;
       c1 = c1 + 1;
       fallthru;
     case ULte:
@@ -657,23 +730,23 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       if (c1 > MAXINT) {
 	//-u[c1] can't be represented by an integer, but we know that
 	//0-u[t2] <= -u[c1] <= MININT
-	return set_distance(g,zero(),t2,-MAXINT,false);
+	set_distance(g,zero(),t2,-MAXINT,false);
       }
       else { 
 	//-u[c1] could be represented by an integer
 	//0 - u[t2] <= -u[c1]
-	return set_distance(g,zero(),t2,-((int)c1),false);
+	set_distance(g,zero(),t2,-((int)c1),false);
       }
-      return true;
+      return;
     case SLt: 
       //no signed integer could be greater than the biggest signed int
-      if (c1 == MAXINT) return false;
+      if (c1 == MAXINT) throw &inconsistent;
       c1 = c1 + 1;
       fallthru;
     case SLte:
       // 0 - s[t2] <= -s[c1], -s[c1] could not represented by int
       // when c1 == MININT
-      if (c1 == MININT) return true;
+      if (c1 == MININT) return;
       return set_distance(g,zero(),t2,-((int)c1),true);
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
@@ -699,13 +772,20 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
 }
 
 // try to set t1 == t2
-static bool add_eq(graph_t @g, term_t t1, term_t t2) {
-  if (t1 == t2) return true;
-  return 
-    add_constraint(g,t1,ULte,t2) &&
-    add_constraint(g,t2,ULte,t1) &&
-    add_constraint(g,t1,SLte,t2) &&
-    add_constraint(g,t2,SLte,t1);
+static void add_eq(graph_t @g, term_t t1, term_t t2) {
+  if (t1 == t2) return;
+  add_constraint(g,t1,ULte,t2);
+  add_constraint(g,t2,ULte,t1);
+  add_constraint(g,t1,SLte,t2);
+  add_constraint(g,t2,SLte,t1);
+}
+
+static void add_prim($(term_t,prim_reln_t,term_t)@ p, graph_t @`H g) {
+  let $(t1,p,t2) = *p;
+  if (p == Eq) 
+    add_eq(g,t1,t2);
+  else
+    add_constraint(g,t1,p,t2);
 }
 
 datatype exn { TooLarge };
@@ -773,23 +853,8 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
   case &Prim(t1,p,t2):
     // add the primitive relation to each graph, pruning out the
     // inconsistent ones.
-    graph_t *prev = NULL;
-    for (let g = gs; g != NULL; g = g->next) {
-      bool res;
-      if (p == Eq) 
-        res = add_eq(g,t1,t2);
-      else
-        res = add_constraint(g,t1,p,t2);
-      if (!res) {
-        if (prev == NULL) {
-          gs = g->next;
-        } else {
-          prev->next = g->next;
-        }
-      } else {
-        prev = g;
-      }
-    }
+    let env = $(t1,p,t2);
+    gs = app_graphs(add_prim,&env,gs);
     //fprintf(stderr,"after inserting primitive assn %s, graphs are\n",
     //        assn2string(a));
     //print_graphs(gs);
