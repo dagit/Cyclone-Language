@@ -252,15 +252,28 @@ bool is_bound_one(ptrbound_t  b) {
 // side effect: possibly constrains zero-termination on pointers
 bool is_bits_only_type(type_t t) {
   switch (compress(t)) {
-  case &AppType(c,NULL):
+  case &AppType(c,ts):
     switch (c) {
     case &VoidCon:
     case &IntCon(_,_):
     case &FloatCon(_): return true;
     case &EnumCon(_,_):
     case &AnonEnumCon(_): return false; //could be true but for pattern exhaustion!
+    case &AggrCon({.UnknownAggr = _}): return false;
+    case &AggrCon({.KnownAggr = &ad}):
+      if(ad->impl==NULL)
+	return false;
+      bool okay = true;
+      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+	if (!is_bits_only_type(fs->hd->type)) { okay = false; break; }
+      if (okay) return true;
+      region rgn; 
+      let inst = List::rzip(rgn,rgn,ad->tvs,ts);
+      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+	if (!is_bits_only_type(rsubstitute(rgn,inst,fs->hd->type))) return false;
+      return true;
     default: return false;
-  }
+    }
   case &ArrayType(ArrayInfo{t,_,_,zero_term,_}):
     // can't allow a zero-terminated array to be treated as bits only
     // for initialization purposes
@@ -268,19 +281,6 @@ bool is_bits_only_type(type_t t) {
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if (!is_bits_only_type((*tqs->hd)[1])) return false;
-    return true;
-  case &AppType(&AggrCon({.UnknownAggr = _}),_): return false;
-  case &AppType(&AggrCon({.KnownAggr = &ad}),ts):
-    if(ad->impl==NULL)
-      return false;
-    bool okay = true;
-    for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-      if (!is_bits_only_type(fs->hd->type)) { okay = false; break; }
-    if (okay) return true;
-    region rgn; 
-    let inst = List::rzip(rgn,rgn,ad->tvs,ts);
-    for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-      if (!is_bits_only_type(rsubstitute(rgn,inst,fs->hd->type))) return false;
     return true;
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)

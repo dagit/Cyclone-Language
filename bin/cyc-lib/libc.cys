@@ -1938,6 +1938,7 @@ in_port_t
 in_addr_t
 sa_family_t
 uint8_t
+uint16_t
 uint32_t
 in_addr
 sockaddr_in
@@ -1957,6 +1958,7 @@ IPPROTO_UDP
 INADDR_ANY
 INADDR_BROADCAST
 INADDR_NONE
+INADDR_LOOPBACK
 INET_ADDRSTRLEN
 INET6_ADDRSTRLEN
 IPV6_JOIN_GROUP
@@ -2003,19 +2005,20 @@ hstub {
   typedef unsigned char sa_family_t;
   #endif
 }
-// Not sure why these were here -- they aren't according to POSIX
-// hstub htonl {
-//   extern "C" uint32_t htonl(uint32_t);
-// }
-// hstub htons {
-//   extern "C" uint16_t htons(uint16_t);
-// }
-// hstub ntohl {
-//   extern "C" uint32_t ntohl(uint32_t);
-// }
-// hstub ntohs {
-//   extern "C" uint16_t ntohs(uint16_t);
-// }
+// These aren't supposed to be here according to POSIX, but
+// they are here on Linux and other platforms, so we include them.
+hstub htonl {
+  extern uint32_t htonl(uint32_t x);
+}
+hstub htons {
+  extern uint16_t htons(uint16_t x);
+}
+hstub ntohl {
+  extern uint32_t ntohl(uint32_t x);
+}
+hstub ntohs {
+  extern uint16_t ntohs(uint16_t x);
+}
 ;
 
 netinet/tcp.h:
@@ -3470,7 +3473,7 @@ cycstub free {
 hstub getenv {
   // FIX: should this be const?  Seems like we want these things
   //   immutable
-  extern "C" char @ getenv(const char @);
+  extern "C" char * getenv(const char @);
 }
 hstub grantpt {
   extern "C" int grantpt(int);

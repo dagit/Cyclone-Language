@@ -310,7 +310,7 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
   extern "C" int toupper(int);
 
 /***** <stdlib.h> *****/
-  extern "C" char @ getenv(const char @);
+  extern "C" char * getenv(const char @);
   extern "C" double atof(const char @);
   extern "C" long strtol(char @`r, char @`r *, int);
   // FIX: should be const?
