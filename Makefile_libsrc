@@ -89,6 +89,9 @@ nogc.a: nogc.o
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
+core.h: $(CYCDIR)/include/core.h
+	cp $< $@
+
 precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc $<
 
