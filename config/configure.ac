@@ -88,6 +88,14 @@ if [[ "$target" = "arm-agb-elf" ]]; then
   TARGET_AR="arm-agb-elf-ar"
   TARGET_RANLIB="arm-agb-elf-ranlib"
 fi
+if [[ "$target" = "arm-gba-elf" ]]; then
+  # because the cross gcc is called arm-elf-gcc, not arm-unknown-elf-gcc-3.2
+  target="arm-elf"
+  TARGET_CC="arm-elf-gcc"
+  TARGET_CFLAGS=-mthumb -mthumb-interwork
+  TARGET_AR="arm-elf-ar"
+  TARGET_RANLIB="arm-elf-ranlib"
+fi
 AC_SUBST(TARGET_CC)
 AC_SUBST(TARGET_AR)
 AC_SUBST(TARGET_RANLIB)
@@ -135,9 +143,13 @@ AC_SUBST(ac_cv_sizeof_wchar_t)
 # ... and whether it is unsigned
 AC_C_WCHAR_T_UNSIGNED
 
-# If configured with --with-pthreads, check for pthreads.h, and if it
-# exists, set HAVE_PTHREADS=yes for use in the Makefiles.
-AC_CHECK_HEADERS([pthread.h],[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no])
+# Check for threads.  If available, set HAVE_PTHREADS=yes for use in
+# the Makefiles.
+# The next line is not sufficient:
+#  AC_CHECK_HEADERS([pthread.h],[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no])
+# because some systems define an empty pthreads.h.  So we look for a
+# specific type we use from pthread.h, tlocal_key_t.
+AC_CHECK_TYPE(tlocal_key_t,[ac_cv_pthreads=pthreads],[ac_cv_pthreads=no],[pthread.h])
 if [[ "$ac_cv_pthreads" = "pthreads" ]]; then
   HAVE_PTHREAD=yes
 else
