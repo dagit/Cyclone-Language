@@ -255,7 +255,8 @@ namespace Absyn {
     UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *); // MemKind 
     AnonStructType(list_t<structfield_t>); // MemKind
     AnonUnionType(list_t<structfield_t>); // MemKind
-    EnumType(typedef_name_t,struct Enumdecl *); // BoxKind
+    EnumType(typedef_name_t,struct Enumdecl *); // MemKind
+    AnonEnumType(list_t<enumfield_t>); // MemKind
     RgnHandleType(type_t);   // BoxKind
     // An abbreviation -- the opt_t<typ> contains the definition if any
     TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>);
@@ -389,6 +390,7 @@ namespace Absyn {
     Tunion_e(opt_t<list_t<type_t>>,opt_t<list_t<type_t>>,list_t<exp_t>,
              tuniondecl_t,tunionfield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
+    AnonEnum_e(qvar_t,type_t,struct Enumfield *);
     Malloc_e(exp_opt_t, type_t); // first expression is region -- null is heap
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
@@ -453,6 +455,7 @@ namespace Absyn {
 	     list_t<$(list_t<designator_t>,pat_t)@>);
     Tunion_p(tuniondecl_t, tunionfield_t, list_t<tvar_t>, list_t<pat_t>);
     Enum_p(enumdecl_t,enumfield_t);
+    AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t);
     UnknownCall_p(qvar_t,list_t<tvar_t>,list_t<pat_t>);
     UnknownFields_p(qvar_t,list_t<tvar_t>,

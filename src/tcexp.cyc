@@ -74,6 +74,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
   try switch (lookup_ordinary(te,e->loc,q)) {
   case &VarRes(b):          e->r = new Var_e(q,b); break;
   case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
+  case &AnonEnumRes(t,ef):  e->r = new AnonEnum_e(q,t,ef); break;
   case &TunionRes(tud,tuf): e->r = new Tunion_e(NULL,NULL,NULL,tud,tuf); break;
   case &StructRes(_):
     terr(e->loc,"bad occurrence of struct name %s",qvar2string(q));
@@ -119,6 +120,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
 	  e->r = new Struct_e(q,NULL,des,sd);
 	}
 	return;
+      case &AnonEnumRes(_,_):
       case &EnumRes(_,_):
         terr(e->loc,"%s is an enum constructor, not a function",
              qvar2string(q));
@@ -1913,6 +1915,9 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
   case &Enum_e(*q,ed,ef):
     *q = ef->name;
     t = new EnumType(ed->name,ed); break;
+  case &AnonEnum_e(*v,t2,ef):
+    *v = ef->name;
+    t = t2; break;
   case &Malloc_e(ropt,t2):
     t = tcMalloc(te,loc,topt,ropt,t2); break;
   }

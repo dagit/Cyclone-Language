@@ -1128,6 +1128,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     break;
 
   case &EnumType(_,_): 
+  case &AnonEnumType(_): 
     // tunion Typestruct.Int rep = Int(32);
     let varname = toplevel_name(new_gen_id("rep"));
     let d1 = tunion_constructor_decl(typerep_name(&typestruct_str),

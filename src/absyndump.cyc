@@ -76,6 +76,7 @@ void dumpdecl(decl_t);
 void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a);
 void dumptqtd(tqual_t, type_t, void f(`a), `a);
 void dumpstructfields(list_t<structfield_t> fields);
+void dumpenumfields(list_t<enumfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
@@ -405,6 +406,8 @@ void dumpntyp(type_t t) {
     dump("struct {"); dumpstructfields(fs); dump("}"); return;
   case &AnonUnionType(fs):
     dump("union {"); dumpstructfields(fs); dump("}"); return;
+  case &AnonEnumType(fs):
+    dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
   case &RgnHandleType(rgn):
     dumprgn(rgn); return;
@@ -642,6 +645,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &Enum_e(n,_,_): dumpqvar(n); break;
+  case &AnonEnum_e(q,_,_): dumpqvar(q); break;
 
   case &Malloc_e(ropt,t):
     if (ropt != NULL) {
@@ -830,6 +834,7 @@ void dumppat(pat_t p) {
     if (ps != NULL) group(dumppat,ps,"(",")",",");
     break;
   case &Enum_p(_,ef): dumpqvar(ef->name); break;
+  case &AnonEnum_p(_,ef): dumpqvar(ef->name); break;
   }
 }
 

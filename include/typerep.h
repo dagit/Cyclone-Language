@@ -65,8 +65,8 @@ EXTERN_TYPEREP tunion Typestruct {
   /** [XTUnion(fields)] is an xtunion type, where each element of
       the array [fields] is a pair [(tag,ts)] of a tag value [tag]
       and a Typestruct [ts] representing the type of the tagged data.
-      Tag-only fields are included in the array since there is no test
-      for xtunions that tells us whether the tag has fields or not.
+      Tag-only fields are not included in the array (since
+      we can just check the xtunion pointer to see if it's a tag).
   **/
   XTUnion($(string_t<`H>, tunion Typestruct)@?);
   /** [Union(fields)] is a union type, where each element of

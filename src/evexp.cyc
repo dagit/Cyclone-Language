@@ -126,6 +126,7 @@ bool okay_szofarg(type_t t) {
 	return false;
     return true;
   case &EnumType(_,_): return true;
+  case &AnonEnumType(_): return true;
   case HeapRgn: return false;
   case &JoinEff(_):   return false;
   case &AccessEff(_): return false;
@@ -263,6 +264,7 @@ cnst_t eval_const_exp(exp_t e) {
       return new Int_c(Signed,0);
     }
     break;
+  case &AnonEnum_e(_,_,ef): fallthru(ef);
   case &Enum_e(_,_,ef):
     return eval_const_exp((exp_t)ef->tag);
   default: 

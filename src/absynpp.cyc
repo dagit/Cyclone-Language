@@ -59,6 +59,7 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          opt_t<type_t> effopt, 
                          list_t<$(type_t,type_t)@> rgn_po);
 extern doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields);
+extern doc_t enumfields2doc(list_t<enumfield_t,`H> fs);
 
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
@@ -657,6 +658,9 @@ doc_t ntyp2doc(type_t t) {
             nest(2, structfields2doc(fs)),
             text("}"));
     break;
+  case &AnonEnumType(fs):
+    s = cat(text("enum {"),nest(2, enumfields2doc(fs)), text("}"));
+    break;
   case &EnumType(n,_):
     s = cat(text("enum "),qvar2doc(n)); break;
   case &TypedefType(n,ts,topt):
@@ -849,6 +853,7 @@ int exp_prec(exp_t e) {
   case &AnonStruct_e(_,_):      fallthru;
   case &Tunion_e(_,_,_,_,_):    fallthru;
   case &Enum_e(_,_,_):          fallthru;
+  case &AnonEnum_e(_,_,_):      fallthru;
   case &Malloc_e(_,_):          return 140;
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
@@ -1010,6 +1015,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Enum_e(n,_,_):
     s = qvar2doc(n);
+    break;
+  case &AnonEnum_e(q,_,_):
+    s = qvar2doc(q);
     break;
   case &Malloc_e(eopt,t):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
@@ -1353,6 +1361,9 @@ doc_t pat2doc(pat_t p) {
             group("{","}",",",List::map(dp2doc,dps)));
     break;
   case &Enum_p(_,ef):
+    s = qvar2doc(ef->name);
+    break;
+  case &AnonEnum_p(_,ef):
     s = qvar2doc(ef->name);
     break;
   case &Tunion_p(_,tuf,tvs,ps):

@@ -3,7 +3,10 @@ Todo list:
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * there's a bug in control-flow checking of catch-phrases.  If you leave
-the "break" off of a case, then it re-raises the exception.
+  the "break" off of a case, then it re-raises the exception.
+
+* we allow enum constructors to shadow other enum constructors even though
+  C doesn't.  
 
 * make command line arguments more like gcc: what happens
   when no files are given?  what happens when we have the wrong extension?
@@ -15,8 +18,6 @@ the "break" off of a case, then it re-raises the exception.
 * minimize initializing
 
 * FIX all of the FIX things.
-
-* need to add anonymous enums
 
 * can't cast char?? to const char? const ? (or whatever it is.)
 

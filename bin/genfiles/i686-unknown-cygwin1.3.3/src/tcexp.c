@@ -311,15 +311,16 @@ f3; } ; static const int Cyc_Absyn_AnonStructType= 11; struct Cyc_Absyn_AnonStru
 int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_AnonUnionType=
 12; struct Cyc_Absyn_AnonUnionType_struct{ int tag; struct Cyc_List_List* f1; }
 ; static const int Cyc_Absyn_EnumType= 13; struct Cyc_Absyn_EnumType_struct{ int
-tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; } ; static const int Cyc_Absyn_RgnHandleType=
-14; struct Cyc_Absyn_RgnHandleType_struct{ int tag; void* f1; } ; static const
-int Cyc_Absyn_TypedefType= 15; struct Cyc_Absyn_TypedefType_struct{ int tag;
-struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_Core_Opt* f3; } ;
-static const int Cyc_Absyn_HeapRgn= 3; static const int Cyc_Absyn_AccessEff= 16;
-struct Cyc_Absyn_AccessEff_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_JoinEff=
-17; struct Cyc_Absyn_JoinEff_struct{ int tag; struct Cyc_List_List* f1; } ;
-static const int Cyc_Absyn_RgnsEff= 18; struct Cyc_Absyn_RgnsEff_struct{ int tag;
-void* f1; } ; static const int Cyc_Absyn_NoTypes= 0; struct Cyc_Absyn_NoTypes_struct{
+tag; struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; } ; static const int Cyc_Absyn_AnonEnumType=
+14; struct Cyc_Absyn_AnonEnumType_struct{ int tag; struct Cyc_List_List* f1; } ;
+static const int Cyc_Absyn_RgnHandleType= 15; struct Cyc_Absyn_RgnHandleType_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_TypedefType= 16; struct Cyc_Absyn_TypedefType_struct{
+int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_Core_Opt* f3;
+} ; static const int Cyc_Absyn_HeapRgn= 3; static const int Cyc_Absyn_AccessEff=
+17; struct Cyc_Absyn_AccessEff_struct{ int tag; void* f1; } ; static const int
+Cyc_Absyn_JoinEff= 18; struct Cyc_Absyn_JoinEff_struct{ int tag; struct Cyc_List_List*
+f1; } ; static const int Cyc_Absyn_RgnsEff= 19; struct Cyc_Absyn_RgnsEff_struct{
+int tag; void* f1; } ; static const int Cyc_Absyn_NoTypes= 0; struct Cyc_Absyn_NoTypes_struct{
 int tag; struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; } ; static
 const int Cyc_Absyn_WithTypes= 1; struct Cyc_Absyn_WithTypes_struct{ int tag;
 struct Cyc_List_List* f1; int f2; struct Cyc_Absyn_VarargInfo* f3; struct Cyc_Core_Opt*
@@ -428,13 +429,15 @@ int tag; struct Cyc_Core_Opt* f1; struct Cyc_Core_Opt* f2; struct Cyc_List_List*
 f3; struct Cyc_Absyn_Tuniondecl* f4; struct Cyc_Absyn_Tunionfield* f5; } ;
 static const int Cyc_Absyn_Enum_e= 31; struct Cyc_Absyn_Enum_e_struct{ int tag;
 struct _tuple1* f1; struct Cyc_Absyn_Enumdecl* f2; struct Cyc_Absyn_Enumfield*
-f3; } ; static const int Cyc_Absyn_Malloc_e= 32; struct Cyc_Absyn_Malloc_e_struct{
-int tag; struct Cyc_Absyn_Exp* f1; void* f2; } ; static const int Cyc_Absyn_UnresolvedMem_e=
-33; struct Cyc_Absyn_UnresolvedMem_e_struct{ int tag; struct Cyc_Core_Opt* f1;
-struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_StmtExp_e= 34; struct
+f3; } ; static const int Cyc_Absyn_AnonEnum_e= 32; struct Cyc_Absyn_AnonEnum_e_struct{
+int tag; struct _tuple1* f1; void* f2; struct Cyc_Absyn_Enumfield* f3; } ;
+static const int Cyc_Absyn_Malloc_e= 33; struct Cyc_Absyn_Malloc_e_struct{ int
+tag; struct Cyc_Absyn_Exp* f1; void* f2; } ; static const int Cyc_Absyn_UnresolvedMem_e=
+34; struct Cyc_Absyn_UnresolvedMem_e_struct{ int tag; struct Cyc_Core_Opt* f1;
+struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_StmtExp_e= 35; struct
 Cyc_Absyn_StmtExp_e_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; static const
-int Cyc_Absyn_Codegen_e= 35; struct Cyc_Absyn_Codegen_e_struct{ int tag; struct
-Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Fill_e= 36; struct Cyc_Absyn_Fill_e_struct{
+int Cyc_Absyn_Codegen_e= 36; struct Cyc_Absyn_Codegen_e_struct{ int tag; struct
+Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Fill_e= 37; struct Cyc_Absyn_Fill_e_struct{
 int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_Exp{ struct Cyc_Core_Opt*
 topt; void* r; struct Cyc_Position_Segment* loc; } ; static const int Cyc_Absyn_Skip_s=
 0; static const int Cyc_Absyn_Exp_s= 0; struct Cyc_Absyn_Exp_s_struct{ int tag;
@@ -487,30 +490,31 @@ f3; struct Cyc_List_List* f4; } ; static const int Cyc_Absyn_Tunion_p= 8; struct
 Cyc_Absyn_Tunion_p_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1; struct Cyc_Absyn_Tunionfield*
 f2; struct Cyc_List_List* f3; struct Cyc_List_List* f4; } ; static const int Cyc_Absyn_Enum_p=
 9; struct Cyc_Absyn_Enum_p_struct{ int tag; struct Cyc_Absyn_Enumdecl* f1;
-struct Cyc_Absyn_Enumfield* f2; } ; static const int Cyc_Absyn_UnknownId_p= 10;
-struct Cyc_Absyn_UnknownId_p_struct{ int tag; struct _tuple1* f1; } ; static
-const int Cyc_Absyn_UnknownCall_p= 11; struct Cyc_Absyn_UnknownCall_p_struct{
-int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
-} ; static const int Cyc_Absyn_UnknownFields_p= 12; struct Cyc_Absyn_UnknownFields_p_struct{
-int tag; struct _tuple1* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
-} ; struct Cyc_Absyn_Pat{ void* r; struct Cyc_Core_Opt* topt; struct Cyc_Position_Segment*
-loc; } ; struct Cyc_Absyn_Switch_clause{ struct Cyc_Absyn_Pat* pattern; struct
-Cyc_Core_Opt* pat_vars; struct Cyc_Absyn_Exp* where_clause; struct Cyc_Absyn_Stmt*
-body; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_SwitchC_clause{
-struct Cyc_Absyn_Exp* cnst_exp; struct Cyc_Absyn_Stmt* body; struct Cyc_Position_Segment*
-loc; } ; static const int Cyc_Absyn_Unresolved_b= 0; static const int Cyc_Absyn_Global_b=
-0; struct Cyc_Absyn_Global_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
-static const int Cyc_Absyn_Funname_b= 1; struct Cyc_Absyn_Funname_b_struct{ int
-tag; struct Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Param_b= 2;
-struct Cyc_Absyn_Param_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ;
-static const int Cyc_Absyn_Local_b= 3; struct Cyc_Absyn_Local_b_struct{ int tag;
-struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_Absyn_Pat_b= 4; struct
-Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; struct Cyc_Absyn_Vardecl{
-void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual tq; void* type; struct
-Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn; struct Cyc_List_List*
-attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int is_inline; struct _tuple1*
-name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt* effect; void* ret_type;
-struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
+struct Cyc_Absyn_Enumfield* f2; } ; static const int Cyc_Absyn_AnonEnum_p= 10;
+struct Cyc_Absyn_AnonEnum_p_struct{ int tag; void* f1; struct Cyc_Absyn_Enumfield*
+f2; } ; static const int Cyc_Absyn_UnknownId_p= 11; struct Cyc_Absyn_UnknownId_p_struct{
+int tag; struct _tuple1* f1; } ; static const int Cyc_Absyn_UnknownCall_p= 12;
+struct Cyc_Absyn_UnknownCall_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_List_List* f3; } ; static const int Cyc_Absyn_UnknownFields_p= 13;
+struct Cyc_Absyn_UnknownFields_p_struct{ int tag; struct _tuple1* f1; struct Cyc_List_List*
+f2; struct Cyc_List_List* f3; } ; struct Cyc_Absyn_Pat{ void* r; struct Cyc_Core_Opt*
+topt; struct Cyc_Position_Segment* loc; } ; struct Cyc_Absyn_Switch_clause{
+struct Cyc_Absyn_Pat* pattern; struct Cyc_Core_Opt* pat_vars; struct Cyc_Absyn_Exp*
+where_clause; struct Cyc_Absyn_Stmt* body; struct Cyc_Position_Segment* loc; } ;
+struct Cyc_Absyn_SwitchC_clause{ struct Cyc_Absyn_Exp* cnst_exp; struct Cyc_Absyn_Stmt*
+body; struct Cyc_Position_Segment* loc; } ; static const int Cyc_Absyn_Unresolved_b=
+0; static const int Cyc_Absyn_Global_b= 0; struct Cyc_Absyn_Global_b_struct{ int
+tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_Absyn_Funname_b= 1;
+struct Cyc_Absyn_Funname_b_struct{ int tag; struct Cyc_Absyn_Fndecl* f1; } ;
+static const int Cyc_Absyn_Param_b= 2; struct Cyc_Absyn_Param_b_struct{ int tag;
+struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_Absyn_Local_b= 3; struct
+Cyc_Absyn_Local_b_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
+const int Cyc_Absyn_Pat_b= 4; struct Cyc_Absyn_Pat_b_struct{ int tag; struct Cyc_Absyn_Vardecl*
+f1; } ; struct Cyc_Absyn_Vardecl{ void* sc; struct _tuple1* name; struct Cyc_Absyn_Tqual
+tq; void* type; struct Cyc_Absyn_Exp* initializer; struct Cyc_Core_Opt* rgn;
+struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_Fndecl{ void* sc; int
+is_inline; struct _tuple1* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
+effect; void* ret_type; struct Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo*
 cyc_varargs; struct Cyc_List_List* rgn_po; struct Cyc_Absyn_Stmt* body; struct
 Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt* param_vardecls; struct Cyc_List_List*
 attributes; } ; struct Cyc_Absyn_Structfield{ struct _tagged_arr* name; struct
@@ -607,15 +611,17 @@ int tag; struct Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Tcenv_TunionR
 2; struct Cyc_Tcenv_TunionRes_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1;
 struct Cyc_Absyn_Tunionfield* f2; } ; static const int Cyc_Tcenv_EnumRes= 3;
 struct Cyc_Tcenv_EnumRes_struct{ int tag; struct Cyc_Absyn_Enumdecl* f1; struct
-Cyc_Absyn_Enumfield* f2; } ; struct Cyc_Tcenv_Genv{ struct Cyc_Set_Set*
-namespaces; struct Cyc_Dict_Dict* structdecls; struct Cyc_Dict_Dict* uniondecls;
-struct Cyc_Dict_Dict* tuniondecls; struct Cyc_Dict_Dict* enumdecls; struct Cyc_Dict_Dict*
-typedefs; struct Cyc_Dict_Dict* ordinaries; struct Cyc_List_List* availables; }
-; struct Cyc_Tcenv_Fenv; static const int Cyc_Tcenv_NotLoop_j= 0; static const
-int Cyc_Tcenv_CaseEnd_j= 1; static const int Cyc_Tcenv_FnEnd_j= 2; static const
-int Cyc_Tcenv_Stmt_j= 0; struct Cyc_Tcenv_Stmt_j_struct{ int tag; struct Cyc_Absyn_Stmt*
-f1; } ; static const int Cyc_Tcenv_Outermost= 0; struct Cyc_Tcenv_Outermost_struct{
-int tag; void* f1; } ; static const int Cyc_Tcenv_Frame= 1; struct Cyc_Tcenv_Frame_struct{
+Cyc_Absyn_Enumfield* f2; } ; static const int Cyc_Tcenv_AnonEnumRes= 4; struct
+Cyc_Tcenv_AnonEnumRes_struct{ int tag; void* f1; struct Cyc_Absyn_Enumfield* f2;
+} ; struct Cyc_Tcenv_Genv{ struct Cyc_Set_Set* namespaces; struct Cyc_Dict_Dict*
+structdecls; struct Cyc_Dict_Dict* uniondecls; struct Cyc_Dict_Dict* tuniondecls;
+struct Cyc_Dict_Dict* enumdecls; struct Cyc_Dict_Dict* typedefs; struct Cyc_Dict_Dict*
+ordinaries; struct Cyc_List_List* availables; } ; struct Cyc_Tcenv_Fenv; static
+const int Cyc_Tcenv_NotLoop_j= 0; static const int Cyc_Tcenv_CaseEnd_j= 1;
+static const int Cyc_Tcenv_FnEnd_j= 2; static const int Cyc_Tcenv_Stmt_j= 0;
+struct Cyc_Tcenv_Stmt_j_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; static
+const int Cyc_Tcenv_Outermost= 0; struct Cyc_Tcenv_Outermost_struct{ int tag;
+void* f1; } ; static const int Cyc_Tcenv_Frame= 1; struct Cyc_Tcenv_Frame_struct{
 int tag; void* f1; void* f2; } ; static const int Cyc_Tcenv_Hidden= 2; struct
 Cyc_Tcenv_Hidden_struct{ int tag; void* f1; void* f2; } ; struct Cyc_Tcenv_Tenv{
 struct Cyc_List_List* ns; struct Cyc_Dict_Dict* ae; struct Cyc_Core_Opt* le; } ;
@@ -710,146 +716,157 @@ void*)(( void*) 2u)}; static struct Cyc_Core_Opt Cyc_Tcexp_mk={( void*)(( void*)
 struct Cyc_Absyn_Exp* e, struct _tuple1* q){ struct _handler_cons _temp2;
 _push_handler(& _temp2);{ int _temp4= 0; if( setjmp( _temp2.handler)){ _temp4= 1;}
 if( ! _temp4){{ void* _temp5= Cyc_Tcenv_lookup_ordinary( te, e->loc, q); void*
-_temp15; struct Cyc_Absyn_Enumfield* _temp17; struct Cyc_Absyn_Enumdecl* _temp19;
-struct Cyc_Absyn_Tunionfield* _temp21; struct Cyc_Absyn_Tuniondecl* _temp23;
-_LL7: if(*(( int*) _temp5) ==  Cyc_Tcenv_VarRes){ _LL16: _temp15=( void*)((
-struct Cyc_Tcenv_VarRes_struct*) _temp5)->f1; goto _LL8;} else{ goto _LL9;} _LL9:
-if(*(( int*) _temp5) ==  Cyc_Tcenv_EnumRes){ _LL20: _temp19=(( struct Cyc_Tcenv_EnumRes_struct*)
-_temp5)->f1; goto _LL18; _LL18: _temp17=(( struct Cyc_Tcenv_EnumRes_struct*)
-_temp5)->f2; goto _LL10;} else{ goto _LL11;} _LL11: if(*(( int*) _temp5) ==  Cyc_Tcenv_TunionRes){
-_LL24: _temp23=(( struct Cyc_Tcenv_TunionRes_struct*) _temp5)->f1; goto _LL22;
-_LL22: _temp21=(( struct Cyc_Tcenv_TunionRes_struct*) _temp5)->f2; goto _LL12;}
-else{ goto _LL13;} _LL13: if(*(( int*) _temp5) ==  Cyc_Tcenv_StructRes){ goto
-_LL14;} else{ goto _LL6;} _LL8:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct*
-_temp25=( struct Cyc_Absyn_Var_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct));
-_temp25[ 0]=({ struct Cyc_Absyn_Var_e_struct _temp26; _temp26.tag= Cyc_Absyn_Var_e;
-_temp26.f1= q; _temp26.f2=( void*) _temp15; _temp26;}); _temp25;}))); goto _LL6;
-_LL10:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Enum_e_struct* _temp27=(
+_temp17; struct Cyc_Absyn_Enumfield* _temp19; struct Cyc_Absyn_Enumdecl* _temp21;
+struct Cyc_Absyn_Enumfield* _temp23; void* _temp25; struct Cyc_Absyn_Tunionfield*
+_temp27; struct Cyc_Absyn_Tuniondecl* _temp29; _LL7: if(*(( int*) _temp5) == 
+Cyc_Tcenv_VarRes){ _LL18: _temp17=( void*)(( struct Cyc_Tcenv_VarRes_struct*)
+_temp5)->f1; goto _LL8;} else{ goto _LL9;} _LL9: if(*(( int*) _temp5) ==  Cyc_Tcenv_EnumRes){
+_LL22: _temp21=(( struct Cyc_Tcenv_EnumRes_struct*) _temp5)->f1; goto _LL20;
+_LL20: _temp19=(( struct Cyc_Tcenv_EnumRes_struct*) _temp5)->f2; goto _LL10;}
+else{ goto _LL11;} _LL11: if(*(( int*) _temp5) ==  Cyc_Tcenv_AnonEnumRes){ _LL26:
+_temp25=( void*)(( struct Cyc_Tcenv_AnonEnumRes_struct*) _temp5)->f1; goto _LL24;
+_LL24: _temp23=(( struct Cyc_Tcenv_AnonEnumRes_struct*) _temp5)->f2; goto _LL12;}
+else{ goto _LL13;} _LL13: if(*(( int*) _temp5) ==  Cyc_Tcenv_TunionRes){ _LL30:
+_temp29=(( struct Cyc_Tcenv_TunionRes_struct*) _temp5)->f1; goto _LL28; _LL28:
+_temp27=(( struct Cyc_Tcenv_TunionRes_struct*) _temp5)->f2; goto _LL14;} else{
+goto _LL15;} _LL15: if(*(( int*) _temp5) ==  Cyc_Tcenv_StructRes){ goto _LL16;}
+else{ goto _LL6;} _LL8:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct*
+_temp31=( struct Cyc_Absyn_Var_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct));
+_temp31[ 0]=({ struct Cyc_Absyn_Var_e_struct _temp32; _temp32.tag= Cyc_Absyn_Var_e;
+_temp32.f1= q; _temp32.f2=( void*) _temp17; _temp32;}); _temp31;}))); goto _LL6;
+_LL10:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Enum_e_struct* _temp33=(
 struct Cyc_Absyn_Enum_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Enum_e_struct));
-_temp27[ 0]=({ struct Cyc_Absyn_Enum_e_struct _temp28; _temp28.tag= Cyc_Absyn_Enum_e;
-_temp28.f1= q; _temp28.f2=( struct Cyc_Absyn_Enumdecl*) _temp19; _temp28.f3=(
-struct Cyc_Absyn_Enumfield*) _temp17; _temp28;}); _temp27;}))); goto _LL6; _LL12:(
-void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Tunion_e_struct* _temp29=(
-struct Cyc_Absyn_Tunion_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Tunion_e_struct));
-_temp29[ 0]=({ struct Cyc_Absyn_Tunion_e_struct _temp30; _temp30.tag= Cyc_Absyn_Tunion_e;
-_temp30.f1= 0; _temp30.f2= 0; _temp30.f3= 0; _temp30.f4= _temp23; _temp30.f5=
-_temp21; _temp30;}); _temp29;}))); goto _LL6; _LL14:({ struct Cyc_Std_String_pa_struct
-_temp32; _temp32.tag= Cyc_Std_String_pa; _temp32.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
-q);{ void* _temp31[ 1u]={& _temp32}; Cyc_Tcutil_terr( e->loc, _tag_arr("bad occurrence of struct name %s",
-sizeof( unsigned char), 33u), _tag_arr( _temp31, sizeof( void*), 1u));}});( void*)(
-e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct* _temp33=( struct Cyc_Absyn_Var_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct)); _temp33[ 0]=({ struct Cyc_Absyn_Var_e_struct
-_temp34; _temp34.tag= Cyc_Absyn_Var_e; _temp34.f1= q; _temp34.f2=( void*)(( void*)
-Cyc_Absyn_Unresolved_b); _temp34;}); _temp33;}))); goto _LL6; _LL6:;};
-_pop_handler();} else{ void* _temp3=( void*) _exn_thrown; void* _temp36= _temp3;
-_LL38: if( _temp36 ==  Cyc_Dict_Absent){ goto _LL39;} else{ goto _LL40;} _LL40:
-goto _LL41; _LL39:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct*
-_temp42=( struct Cyc_Absyn_Var_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct));
-_temp42[ 0]=({ struct Cyc_Absyn_Var_e_struct _temp43; _temp43.tag= Cyc_Absyn_Var_e;
-_temp43.f1= q; _temp43.f2=( void*)(( void*) Cyc_Absyn_Unresolved_b); _temp43;});
-_temp42;}))); goto _LL37; _LL41:( void) _throw( _temp36); _LL37:;}}} struct
+_temp33[ 0]=({ struct Cyc_Absyn_Enum_e_struct _temp34; _temp34.tag= Cyc_Absyn_Enum_e;
+_temp34.f1= q; _temp34.f2=( struct Cyc_Absyn_Enumdecl*) _temp21; _temp34.f3=(
+struct Cyc_Absyn_Enumfield*) _temp19; _temp34;}); _temp33;}))); goto _LL6; _LL12:(
+void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_AnonEnum_e_struct* _temp35=(
+struct Cyc_Absyn_AnonEnum_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_AnonEnum_e_struct));
+_temp35[ 0]=({ struct Cyc_Absyn_AnonEnum_e_struct _temp36; _temp36.tag= Cyc_Absyn_AnonEnum_e;
+_temp36.f1= q; _temp36.f2=( void*) _temp25; _temp36.f3=( struct Cyc_Absyn_Enumfield*)
+_temp23; _temp36;}); _temp35;}))); goto _LL6; _LL14:( void*)( e->r=( void*)((
+void*)({ struct Cyc_Absyn_Tunion_e_struct* _temp37=( struct Cyc_Absyn_Tunion_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Tunion_e_struct)); _temp37[ 0]=({ struct Cyc_Absyn_Tunion_e_struct
+_temp38; _temp38.tag= Cyc_Absyn_Tunion_e; _temp38.f1= 0; _temp38.f2= 0; _temp38.f3=
+0; _temp38.f4= _temp29; _temp38.f5= _temp27; _temp38;}); _temp37;}))); goto _LL6;
+_LL16:({ struct Cyc_Std_String_pa_struct _temp40; _temp40.tag= Cyc_Std_String_pa;
+_temp40.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( q);{ void* _temp39[ 1u]={&
+_temp40}; Cyc_Tcutil_terr( e->loc, _tag_arr("bad occurrence of struct name %s",
+sizeof( unsigned char), 33u), _tag_arr( _temp39, sizeof( void*), 1u));}});( void*)(
+e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct* _temp41=( struct Cyc_Absyn_Var_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct)); _temp41[ 0]=({ struct Cyc_Absyn_Var_e_struct
+_temp42; _temp42.tag= Cyc_Absyn_Var_e; _temp42.f1= q; _temp42.f2=( void*)(( void*)
+Cyc_Absyn_Unresolved_b); _temp42;}); _temp41;}))); goto _LL6; _LL6:;};
+_pop_handler();} else{ void* _temp3=( void*) _exn_thrown; void* _temp44= _temp3;
+_LL46: if( _temp44 ==  Cyc_Dict_Absent){ goto _LL47;} else{ goto _LL48;} _LL48:
+goto _LL49; _LL47:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Var_e_struct*
+_temp50=( struct Cyc_Absyn_Var_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Var_e_struct));
+_temp50[ 0]=({ struct Cyc_Absyn_Var_e_struct _temp51; _temp51.tag= Cyc_Absyn_Var_e;
+_temp51.f1= q; _temp51.f2=( void*)(( void*) Cyc_Absyn_Unresolved_b); _temp51;});
+_temp50;}))); goto _LL45; _LL49:( void) _throw( _temp44); _LL45:;}}} struct
 _tuple7{ struct Cyc_List_List* f1; struct Cyc_Absyn_Exp* f2; } ; static struct
 _tuple7* Cyc_Tcexp_make_struct_arg( struct Cyc_Absyn_Exp* e){ return({ struct
-_tuple7* _temp44=( struct _tuple7*) _cycalloc( sizeof( struct _tuple7)); _temp44->f1=
-0; _temp44->f2= e; _temp44;});} static void Cyc_Tcexp_resolve_unknown_fn( struct
+_tuple7* _temp52=( struct _tuple7*) _cycalloc( sizeof( struct _tuple7)); _temp52->f1=
+0; _temp52->f2= e; _temp52;});} static void Cyc_Tcexp_resolve_unknown_fn( struct
 Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e, struct Cyc_Absyn_Exp* e1, struct
-Cyc_List_List* es){ void* _temp45=( void*) e1->r; struct _tuple1* _temp51; _LL47:
-if(*(( int*) _temp45) ==  Cyc_Absyn_UnknownId_e){ _LL52: _temp51=(( struct Cyc_Absyn_UnknownId_e_struct*)
-_temp45)->f1; goto _LL48;} else{ goto _LL49;} _LL49: goto _LL50; _LL48: { struct
-_handler_cons _temp53; _push_handler(& _temp53);{ int _temp55= 0; if( setjmp(
-_temp53.handler)){ _temp55= 1;} if( ! _temp55){{ void* _temp56= Cyc_Tcenv_lookup_ordinary(
-te, e1->loc, _temp51); void* _temp66; struct Cyc_Absyn_Tunionfield* _temp68;
-struct Cyc_Absyn_Tuniondecl* _temp70; struct Cyc_Absyn_Structdecl* _temp72;
-_LL58: if(*(( int*) _temp56) ==  Cyc_Tcenv_VarRes){ _LL67: _temp66=( void*)((
-struct Cyc_Tcenv_VarRes_struct*) _temp56)->f1; goto _LL59;} else{ goto _LL60;}
-_LL60: if(*(( int*) _temp56) ==  Cyc_Tcenv_TunionRes){ _LL71: _temp70=(( struct
-Cyc_Tcenv_TunionRes_struct*) _temp56)->f1; goto _LL69; _LL69: _temp68=(( struct
-Cyc_Tcenv_TunionRes_struct*) _temp56)->f2; goto _LL61;} else{ goto _LL62;} _LL62:
-if(*(( int*) _temp56) ==  Cyc_Tcenv_StructRes){ _LL73: _temp72=(( struct Cyc_Tcenv_StructRes_struct*)
-_temp56)->f1; goto _LL63;} else{ goto _LL64;} _LL64: if(*(( int*) _temp56) == 
-Cyc_Tcenv_EnumRes){ goto _LL65;} else{ goto _LL57;} _LL59:( void*)( e->r=( void*)((
-void*)({ struct Cyc_Absyn_FnCall_e_struct* _temp74=( struct Cyc_Absyn_FnCall_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp74[ 0]=({ struct Cyc_Absyn_FnCall_e_struct
-_temp75; _temp75.tag= Cyc_Absyn_FnCall_e; _temp75.f1= e1; _temp75.f2= es;
-_temp75.f3= 0; _temp75;}); _temp74;}))); _npop_handler( 0u); return; _LL61: if(
-_temp68->typs ==  0){({ struct Cyc_Std_String_pa_struct _temp77; _temp77.tag=
-Cyc_Std_String_pa; _temp77.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
-_temp68->name);{ void* _temp76[ 1u]={& _temp77}; Cyc_Tcutil_terr( e->loc,
+Cyc_List_List* es){ void* _temp53=( void*) e1->r; struct _tuple1* _temp59; _LL55:
+if(*(( int*) _temp53) ==  Cyc_Absyn_UnknownId_e){ _LL60: _temp59=(( struct Cyc_Absyn_UnknownId_e_struct*)
+_temp53)->f1; goto _LL56;} else{ goto _LL57;} _LL57: goto _LL58; _LL56: { struct
+_handler_cons _temp61; _push_handler(& _temp61);{ int _temp63= 0; if( setjmp(
+_temp61.handler)){ _temp63= 1;} if( ! _temp63){{ void* _temp64= Cyc_Tcenv_lookup_ordinary(
+te, e1->loc, _temp59); void* _temp76; struct Cyc_Absyn_Tunionfield* _temp78;
+struct Cyc_Absyn_Tuniondecl* _temp80; struct Cyc_Absyn_Structdecl* _temp82;
+_LL66: if(*(( int*) _temp64) ==  Cyc_Tcenv_VarRes){ _LL77: _temp76=( void*)((
+struct Cyc_Tcenv_VarRes_struct*) _temp64)->f1; goto _LL67;} else{ goto _LL68;}
+_LL68: if(*(( int*) _temp64) ==  Cyc_Tcenv_TunionRes){ _LL81: _temp80=(( struct
+Cyc_Tcenv_TunionRes_struct*) _temp64)->f1; goto _LL79; _LL79: _temp78=(( struct
+Cyc_Tcenv_TunionRes_struct*) _temp64)->f2; goto _LL69;} else{ goto _LL70;} _LL70:
+if(*(( int*) _temp64) ==  Cyc_Tcenv_StructRes){ _LL83: _temp82=(( struct Cyc_Tcenv_StructRes_struct*)
+_temp64)->f1; goto _LL71;} else{ goto _LL72;} _LL72: if(*(( int*) _temp64) == 
+Cyc_Tcenv_AnonEnumRes){ goto _LL73;} else{ goto _LL74;} _LL74: if(*(( int*)
+_temp64) ==  Cyc_Tcenv_EnumRes){ goto _LL75;} else{ goto _LL65;} _LL67:( void*)(
+e->r=( void*)(( void*)({ struct Cyc_Absyn_FnCall_e_struct* _temp84=( struct Cyc_Absyn_FnCall_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp84[ 0]=({ struct Cyc_Absyn_FnCall_e_struct
+_temp85; _temp85.tag= Cyc_Absyn_FnCall_e; _temp85.f1= e1; _temp85.f2= es;
+_temp85.f3= 0; _temp85;}); _temp84;}))); _npop_handler( 0u); return; _LL69: if(
+_temp78->typs ==  0){({ struct Cyc_Std_String_pa_struct _temp87; _temp87.tag=
+Cyc_Std_String_pa; _temp87.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
+_temp78->name);{ void* _temp86[ 1u]={& _temp87}; Cyc_Tcutil_terr( e->loc,
 _tag_arr("%s is a constant, not a function", sizeof( unsigned char), 33u),
-_tag_arr( _temp76, sizeof( void*), 1u));}});}( void*)( e->r=( void*)(( void*)({
-struct Cyc_Absyn_Tunion_e_struct* _temp78=( struct Cyc_Absyn_Tunion_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Tunion_e_struct)); _temp78[ 0]=({ struct Cyc_Absyn_Tunion_e_struct
-_temp79; _temp79.tag= Cyc_Absyn_Tunion_e; _temp79.f1= 0; _temp79.f2= 0; _temp79.f3=
-es; _temp79.f4= _temp70; _temp79.f5= _temp68; _temp79;}); _temp78;})));
-_npop_handler( 0u); return; _npop_handler( 0u); return; _LL63: { struct Cyc_List_List*
-_temp80=(( struct Cyc_List_List*(*)( struct _tuple7*(* f)( struct Cyc_Absyn_Exp*),
+_tag_arr( _temp86, sizeof( void*), 1u));}});}( void*)( e->r=( void*)(( void*)({
+struct Cyc_Absyn_Tunion_e_struct* _temp88=( struct Cyc_Absyn_Tunion_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Tunion_e_struct)); _temp88[ 0]=({ struct Cyc_Absyn_Tunion_e_struct
+_temp89; _temp89.tag= Cyc_Absyn_Tunion_e; _temp89.f1= 0; _temp89.f2= 0; _temp89.f3=
+es; _temp89.f4= _temp80; _temp89.f5= _temp78; _temp89;}); _temp88;})));
+_npop_handler( 0u); return; _npop_handler( 0u); return; _LL71: { struct Cyc_List_List*
+_temp90=(( struct Cyc_List_List*(*)( struct _tuple7*(* f)( struct Cyc_Absyn_Exp*),
 struct Cyc_List_List* x)) Cyc_List_map)( Cyc_Tcexp_make_struct_arg, es); if(
-_temp72->name !=  0){( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct*
-_temp81=( struct Cyc_Absyn_Struct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
-_temp81[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp82; _temp82.tag= Cyc_Absyn_Struct_e;
-_temp82.f1=( struct _tuple1*)(( struct Cyc_Core_Opt*) _check_null( _temp72->name))->v;
-_temp82.f2= 0; _temp82.f3= _temp80; _temp82.f4=( struct Cyc_Absyn_Structdecl*)
-_temp72; _temp82;}); _temp81;})));} else{({ void* _temp83[ 0u]={}; Cyc_Tcutil_terr(
+_temp82->name !=  0){( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct*
+_temp91=( struct Cyc_Absyn_Struct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
+_temp91[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp92; _temp92.tag= Cyc_Absyn_Struct_e;
+_temp92.f1=( struct _tuple1*)(( struct Cyc_Core_Opt*) _check_null( _temp82->name))->v;
+_temp92.f2= 0; _temp92.f3= _temp90; _temp92.f4=( struct Cyc_Absyn_Structdecl*)
+_temp82; _temp92;}); _temp91;})));} else{({ void* _temp93[ 0u]={}; Cyc_Tcutil_terr(
 e->loc, _tag_arr("missing struct name", sizeof( unsigned char), 20u), _tag_arr(
-_temp83, sizeof( void*), 0u));});( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct*
-_temp84=( struct Cyc_Absyn_Struct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
-_temp84[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp85; _temp85.tag= Cyc_Absyn_Struct_e;
-_temp85.f1= _temp51; _temp85.f2= 0; _temp85.f3= _temp80; _temp85.f4=( struct Cyc_Absyn_Structdecl*)
-_temp72; _temp85;}); _temp84;})));} _npop_handler( 0u); return;} _LL65:({ struct
-Cyc_Std_String_pa_struct _temp87; _temp87.tag= Cyc_Std_String_pa; _temp87.f1=(
-struct _tagged_arr) Cyc_Absynpp_qvar2string( _temp51);{ void* _temp86[ 1u]={&
-_temp87}; Cyc_Tcutil_terr( e->loc, _tag_arr("%s is an enum constructor, not a function",
-sizeof( unsigned char), 42u), _tag_arr( _temp86, sizeof( void*), 1u));}});
-_npop_handler( 0u); return; _LL57:;}; _pop_handler();} else{ void* _temp54=(
-void*) _exn_thrown; void* _temp89= _temp54; _LL91: if( _temp89 ==  Cyc_Dict_Absent){
-goto _LL92;} else{ goto _LL93;} _LL93: goto _LL94; _LL92:( void*)( e->r=( void*)((
-void*)({ struct Cyc_Absyn_FnCall_e_struct* _temp95=( struct Cyc_Absyn_FnCall_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp95[ 0]=({ struct Cyc_Absyn_FnCall_e_struct
-_temp96; _temp96.tag= Cyc_Absyn_FnCall_e; _temp96.f1= e1; _temp96.f2= es;
-_temp96.f3= 0; _temp96;}); _temp95;}))); return; _LL94:( void) _throw( _temp89);
-_LL90:;}}} _LL50:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_FnCall_e_struct*
-_temp97=( struct Cyc_Absyn_FnCall_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct));
-_temp97[ 0]=({ struct Cyc_Absyn_FnCall_e_struct _temp98; _temp98.tag= Cyc_Absyn_FnCall_e;
-_temp98.f1= e1; _temp98.f2= es; _temp98.f3= 0; _temp98;}); _temp97;}))); return;
-_LL46:;} static void Cyc_Tcexp_resolve_unresolved_mem( struct Cyc_Tcenv_Tenv* te,
-struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e, struct
-Cyc_List_List* des){ if( topt ==  0){( void*)( e->r=( void*)(( void*)({ struct
-Cyc_Absyn_Array_e_struct* _temp99=( struct Cyc_Absyn_Array_e_struct*) _cycalloc(
-sizeof( struct Cyc_Absyn_Array_e_struct)); _temp99[ 0]=({ struct Cyc_Absyn_Array_e_struct
-_temp100; _temp100.tag= Cyc_Absyn_Array_e; _temp100.f1= des; _temp100;});
-_temp99;}))); return;}{ void* t=*(( void**) _check_null( topt)); void* _temp101=
-Cyc_Tcutil_compress( t); struct Cyc_Absyn_Tqual _temp111; void* _temp113; struct
-Cyc_Absyn_Structdecl** _temp115; struct Cyc_List_List* _temp117; struct _tuple1*
-_temp119; _LL103: if(( unsigned int) _temp101 >  4u?*(( int*) _temp101) ==  Cyc_Absyn_ArrayType:
-0){ _LL114: _temp113=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp101)->f1;
-goto _LL112; _LL112: _temp111=(( struct Cyc_Absyn_ArrayType_struct*) _temp101)->f2;
-goto _LL104;} else{ goto _LL105;} _LL105: if(( unsigned int) _temp101 >  4u?*((
-int*) _temp101) ==  Cyc_Absyn_StructType: 0){ _LL120: _temp119=(( struct Cyc_Absyn_StructType_struct*)
-_temp101)->f1; goto _LL118; _LL118: _temp117=(( struct Cyc_Absyn_StructType_struct*)
-_temp101)->f2; goto _LL116; _LL116: _temp115=(( struct Cyc_Absyn_StructType_struct*)
-_temp101)->f3; goto _LL106;} else{ goto _LL107;} _LL107: if(( unsigned int)
-_temp101 >  4u?*(( int*) _temp101) ==  Cyc_Absyn_AnonStructType: 0){ goto _LL108;}
-else{ goto _LL109;} _LL109: goto _LL110; _LL104:( void*)( e->r=( void*)(( void*)({
-struct Cyc_Absyn_Array_e_struct* _temp121=( struct Cyc_Absyn_Array_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct)); _temp121[ 0]=({ struct Cyc_Absyn_Array_e_struct
-_temp122; _temp122.tag= Cyc_Absyn_Array_e; _temp122.f1= des; _temp122;});
-_temp121;}))); goto _LL102; _LL106: if( _temp115 ==  0? 1: _temp119 ==  0){({
-void* _temp123[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("Compiler bug: struct type not properly set",
-sizeof( unsigned char), 43u), _tag_arr( _temp123, sizeof( void*), 0u));});}(
-void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct* _temp124=(
+_temp93, sizeof( void*), 0u));});( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct*
+_temp94=( struct Cyc_Absyn_Struct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
+_temp94[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp95; _temp95.tag= Cyc_Absyn_Struct_e;
+_temp95.f1= _temp59; _temp95.f2= 0; _temp95.f3= _temp90; _temp95.f4=( struct Cyc_Absyn_Structdecl*)
+_temp82; _temp95;}); _temp94;})));} _npop_handler( 0u); return;} _LL73: goto
+_LL75; _LL75:({ struct Cyc_Std_String_pa_struct _temp97; _temp97.tag= Cyc_Std_String_pa;
+_temp97.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( _temp59);{ void*
+_temp96[ 1u]={& _temp97}; Cyc_Tcutil_terr( e->loc, _tag_arr("%s is an enum constructor, not a function",
+sizeof( unsigned char), 42u), _tag_arr( _temp96, sizeof( void*), 1u));}});
+_npop_handler( 0u); return; _LL65:;}; _pop_handler();} else{ void* _temp62=(
+void*) _exn_thrown; void* _temp99= _temp62; _LL101: if( _temp99 ==  Cyc_Dict_Absent){
+goto _LL102;} else{ goto _LL103;} _LL103: goto _LL104; _LL102:( void*)( e->r=(
+void*)(( void*)({ struct Cyc_Absyn_FnCall_e_struct* _temp105=( struct Cyc_Absyn_FnCall_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp105[ 0]=({ struct
+Cyc_Absyn_FnCall_e_struct _temp106; _temp106.tag= Cyc_Absyn_FnCall_e; _temp106.f1=
+e1; _temp106.f2= es; _temp106.f3= 0; _temp106;}); _temp105;}))); return; _LL104:(
+void) _throw( _temp99); _LL100:;}}} _LL58:( void*)( e->r=( void*)(( void*)({
+struct Cyc_Absyn_FnCall_e_struct* _temp107=( struct Cyc_Absyn_FnCall_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp107[ 0]=({ struct
+Cyc_Absyn_FnCall_e_struct _temp108; _temp108.tag= Cyc_Absyn_FnCall_e; _temp108.f1=
+e1; _temp108.f2= es; _temp108.f3= 0; _temp108;}); _temp107;}))); return; _LL54:;}
+static void Cyc_Tcexp_resolve_unresolved_mem( struct Cyc_Tcenv_Tenv* te, struct
+Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e, struct Cyc_List_List*
+des){ if( topt ==  0){( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Array_e_struct*
+_temp109=( struct Cyc_Absyn_Array_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct));
+_temp109[ 0]=({ struct Cyc_Absyn_Array_e_struct _temp110; _temp110.tag= Cyc_Absyn_Array_e;
+_temp110.f1= des; _temp110;}); _temp109;}))); return;}{ void* t=*(( void**)
+_check_null( topt)); void* _temp111= Cyc_Tcutil_compress( t); struct Cyc_Absyn_Tqual
+_temp121; void* _temp123; struct Cyc_Absyn_Structdecl** _temp125; struct Cyc_List_List*
+_temp127; struct _tuple1* _temp129; _LL113: if(( unsigned int) _temp111 >  4u?*((
+int*) _temp111) ==  Cyc_Absyn_ArrayType: 0){ _LL124: _temp123=( void*)(( struct
+Cyc_Absyn_ArrayType_struct*) _temp111)->f1; goto _LL122; _LL122: _temp121=((
+struct Cyc_Absyn_ArrayType_struct*) _temp111)->f2; goto _LL114;} else{ goto
+_LL115;} _LL115: if(( unsigned int) _temp111 >  4u?*(( int*) _temp111) ==  Cyc_Absyn_StructType:
+0){ _LL130: _temp129=(( struct Cyc_Absyn_StructType_struct*) _temp111)->f1; goto
+_LL128; _LL128: _temp127=(( struct Cyc_Absyn_StructType_struct*) _temp111)->f2;
+goto _LL126; _LL126: _temp125=(( struct Cyc_Absyn_StructType_struct*) _temp111)->f3;
+goto _LL116;} else{ goto _LL117;} _LL117: if(( unsigned int) _temp111 >  4u?*((
+int*) _temp111) ==  Cyc_Absyn_AnonStructType: 0){ goto _LL118;} else{ goto
+_LL119;} _LL119: goto _LL120; _LL114:( void*)( e->r=( void*)(( void*)({ struct
+Cyc_Absyn_Array_e_struct* _temp131=( struct Cyc_Absyn_Array_e_struct*) _cycalloc(
+sizeof( struct Cyc_Absyn_Array_e_struct)); _temp131[ 0]=({ struct Cyc_Absyn_Array_e_struct
+_temp132; _temp132.tag= Cyc_Absyn_Array_e; _temp132.f1= des; _temp132;});
+_temp131;}))); goto _LL112; _LL116: if( _temp125 ==  0? 1: _temp129 ==  0){({
+void* _temp133[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("Compiler bug: struct type not properly set",
+sizeof( unsigned char), 43u), _tag_arr( _temp133, sizeof( void*), 0u));});}(
+void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Struct_e_struct* _temp134=(
 struct Cyc_Absyn_Struct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Struct_e_struct));
-_temp124[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp125; _temp125.tag= Cyc_Absyn_Struct_e;
-_temp125.f1=( struct _tuple1*) _check_null( _temp119); _temp125.f2= 0; _temp125.f3=
-des; _temp125.f4=( struct Cyc_Absyn_Structdecl*)*(( struct Cyc_Absyn_Structdecl**)
-_check_null( _temp115)); _temp125;}); _temp124;}))); goto _LL102; _LL108:( void*)(
-e->r=( void*)(( void*)({ struct Cyc_Absyn_AnonStruct_e_struct* _temp126=( struct
+_temp134[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp135; _temp135.tag= Cyc_Absyn_Struct_e;
+_temp135.f1=( struct _tuple1*) _check_null( _temp129); _temp135.f2= 0; _temp135.f3=
+des; _temp135.f4=( struct Cyc_Absyn_Structdecl*)*(( struct Cyc_Absyn_Structdecl**)
+_check_null( _temp125)); _temp135;}); _temp134;}))); goto _LL112; _LL118:( void*)(
+e->r=( void*)(( void*)({ struct Cyc_Absyn_AnonStruct_e_struct* _temp136=( struct
 Cyc_Absyn_AnonStruct_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_AnonStruct_e_struct));
-_temp126[ 0]=({ struct Cyc_Absyn_AnonStruct_e_struct _temp127; _temp127.tag= Cyc_Absyn_AnonStruct_e;
-_temp127.f1=( void*) t; _temp127.f2= des; _temp127;}); _temp126;}))); goto
-_LL102; _LL110:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Array_e_struct*
-_temp128=( struct Cyc_Absyn_Array_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct));
-_temp128[ 0]=({ struct Cyc_Absyn_Array_e_struct _temp129; _temp129.tag= Cyc_Absyn_Array_e;
-_temp129.f1= des; _temp129;}); _temp128;}))); goto _LL102; _LL102:;}} static
+_temp136[ 0]=({ struct Cyc_Absyn_AnonStruct_e_struct _temp137; _temp137.tag= Cyc_Absyn_AnonStruct_e;
+_temp137.f1=( void*) t; _temp137.f2= des; _temp137;}); _temp136;}))); goto
+_LL112; _LL120:( void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Array_e_struct*
+_temp138=( struct Cyc_Absyn_Array_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct));
+_temp138[ 0]=({ struct Cyc_Absyn_Array_e_struct _temp139; _temp139.tag= Cyc_Absyn_Array_e;
+_temp139.f1= des; _temp139;}); _temp138;}))); goto _LL112; _LL112:;}} static
 void Cyc_Tcexp_tcExpNoInst( struct Cyc_Tcenv_Tenv* te, void** topt, struct Cyc_Absyn_Exp*
 e); static void* Cyc_Tcexp_tcExpNoPromote( struct Cyc_Tcenv_Tenv* te, void**
 topt, struct Cyc_Absyn_Exp* e); static void Cyc_Tcexp_tcExpList( struct Cyc_Tcenv_Tenv*
@@ -858,306 +875,306 @@ _check_null( es))->tl){ Cyc_Tcexp_tcExp( te, 0,( struct Cyc_Absyn_Exp*)(( struct
 Cyc_List_List*) _check_null( es))->hd);}} void Cyc_Tcexp_tcTest( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Absyn_Exp* e, struct _tagged_arr msg_part){ Cyc_Tcutil_check_contains_assign(
 e); Cyc_Tcexp_tcExp( te,( void**)& Cyc_Absyn_sint_t, e); if( ! Cyc_Tcutil_coerce_to_bool(
-te, e)){({ struct Cyc_Std_String_pa_struct _temp132; _temp132.tag= Cyc_Std_String_pa;
-_temp132.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e->topt))->v);{ struct Cyc_Std_String_pa_struct _temp131; _temp131.tag=
-Cyc_Std_String_pa; _temp131.f1=( struct _tagged_arr) msg_part;{ void* _temp130[
-2u]={& _temp131,& _temp132}; Cyc_Tcutil_terr( e->loc, _tag_arr("test of %s has type %s instead of integral or * type",
-sizeof( unsigned char), 53u), _tag_arr( _temp130, sizeof( void*), 2u));}}});}}
+te, e)){({ struct Cyc_Std_String_pa_struct _temp142; _temp142.tag= Cyc_Std_String_pa;
+_temp142.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
+_check_null( e->topt))->v);{ struct Cyc_Std_String_pa_struct _temp141; _temp141.tag=
+Cyc_Std_String_pa; _temp141.f1=( struct _tagged_arr) msg_part;{ void* _temp140[
+2u]={& _temp141,& _temp142}; Cyc_Tcutil_terr( e->loc, _tag_arr("test of %s has type %s instead of integral or * type",
+sizeof( unsigned char), 53u), _tag_arr( _temp140, sizeof( void*), 2u));}}});}}
 static void* Cyc_Tcexp_tcConst( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
-loc, void** topt, void* c, struct Cyc_Absyn_Exp* e){ void* t;{ void* _temp133= c;
-void* _temp149; void* _temp151; void* _temp153; int _temp155; void* _temp157;
-struct _tagged_arr _temp159; _LL135: if(( unsigned int) _temp133 >  1u?*(( int*)
-_temp133) ==  Cyc_Absyn_Char_c: 0){ _LL150: _temp149=( void*)(( struct Cyc_Absyn_Char_c_struct*)
-_temp133)->f1; goto _LL136;} else{ goto _LL137;} _LL137: if(( unsigned int)
-_temp133 >  1u?*(( int*) _temp133) ==  Cyc_Absyn_Short_c: 0){ _LL152: _temp151=(
-void*)(( struct Cyc_Absyn_Short_c_struct*) _temp133)->f1; goto _LL138;} else{
-goto _LL139;} _LL139: if(( unsigned int) _temp133 >  1u?*(( int*) _temp133) == 
-Cyc_Absyn_LongLong_c: 0){ _LL154: _temp153=( void*)(( struct Cyc_Absyn_LongLong_c_struct*)
-_temp133)->f1; goto _LL140;} else{ goto _LL141;} _LL141: if(( unsigned int)
-_temp133 >  1u?*(( int*) _temp133) ==  Cyc_Absyn_Float_c: 0){ goto _LL142;}
-else{ goto _LL143;} _LL143: if(( unsigned int) _temp133 >  1u?*(( int*) _temp133)
-==  Cyc_Absyn_Int_c: 0){ _LL158: _temp157=( void*)(( struct Cyc_Absyn_Int_c_struct*)
-_temp133)->f1; goto _LL156; _LL156: _temp155=(( struct Cyc_Absyn_Int_c_struct*)
-_temp133)->f2; goto _LL144;} else{ goto _LL145;} _LL145: if(( unsigned int)
-_temp133 >  1u?*(( int*) _temp133) ==  Cyc_Absyn_String_c: 0){ _LL160: _temp159=((
-struct Cyc_Absyn_String_c_struct*) _temp133)->f1; goto _LL146;} else{ goto
-_LL147;} _LL147: if( _temp133 == ( void*) Cyc_Absyn_Null_c){ goto _LL148;} else{
-goto _LL134;} _LL136: t= _temp149 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uchar_t:
-Cyc_Absyn_schar_t; goto _LL134; _LL138: t= _temp151 == ( void*) Cyc_Absyn_Unsigned?
-Cyc_Absyn_ushort_t: Cyc_Absyn_sshort_t; goto _LL134; _LL140: t= _temp153 == (
+loc, void** topt, void* c, struct Cyc_Absyn_Exp* e){ void* t;{ void* _temp143= c;
+void* _temp159; void* _temp161; void* _temp163; int _temp165; void* _temp167;
+struct _tagged_arr _temp169; _LL145: if(( unsigned int) _temp143 >  1u?*(( int*)
+_temp143) ==  Cyc_Absyn_Char_c: 0){ _LL160: _temp159=( void*)(( struct Cyc_Absyn_Char_c_struct*)
+_temp143)->f1; goto _LL146;} else{ goto _LL147;} _LL147: if(( unsigned int)
+_temp143 >  1u?*(( int*) _temp143) ==  Cyc_Absyn_Short_c: 0){ _LL162: _temp161=(
+void*)(( struct Cyc_Absyn_Short_c_struct*) _temp143)->f1; goto _LL148;} else{
+goto _LL149;} _LL149: if(( unsigned int) _temp143 >  1u?*(( int*) _temp143) == 
+Cyc_Absyn_LongLong_c: 0){ _LL164: _temp163=( void*)(( struct Cyc_Absyn_LongLong_c_struct*)
+_temp143)->f1; goto _LL150;} else{ goto _LL151;} _LL151: if(( unsigned int)
+_temp143 >  1u?*(( int*) _temp143) ==  Cyc_Absyn_Float_c: 0){ goto _LL152;}
+else{ goto _LL153;} _LL153: if(( unsigned int) _temp143 >  1u?*(( int*) _temp143)
+==  Cyc_Absyn_Int_c: 0){ _LL168: _temp167=( void*)(( struct Cyc_Absyn_Int_c_struct*)
+_temp143)->f1; goto _LL166; _LL166: _temp165=(( struct Cyc_Absyn_Int_c_struct*)
+_temp143)->f2; goto _LL154;} else{ goto _LL155;} _LL155: if(( unsigned int)
+_temp143 >  1u?*(( int*) _temp143) ==  Cyc_Absyn_String_c: 0){ _LL170: _temp169=((
+struct Cyc_Absyn_String_c_struct*) _temp143)->f1; goto _LL156;} else{ goto
+_LL157;} _LL157: if( _temp143 == ( void*) Cyc_Absyn_Null_c){ goto _LL158;} else{
+goto _LL144;} _LL146: t= _temp159 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uchar_t:
+Cyc_Absyn_schar_t; goto _LL144; _LL148: t= _temp161 == ( void*) Cyc_Absyn_Unsigned?
+Cyc_Absyn_ushort_t: Cyc_Absyn_sshort_t; goto _LL144; _LL150: t= _temp163 == (
 void*) Cyc_Absyn_Unsigned? Cyc_Absyn_ulonglong_t: Cyc_Absyn_slonglong_t; goto
-_LL134; _LL142: t= Cyc_Absyn_float_t; goto _LL134; _LL144: if( topt ==  0){ t=
-_temp157 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uint_t: Cyc_Absyn_sint_t;}
-else{ void* _temp161= Cyc_Tcutil_compress(*(( void**) _check_null( topt))); void*
-_temp171; void* _temp173; void* _temp175; void* _temp177; void* _temp179; _LL163:
-if(( unsigned int) _temp161 >  4u?*(( int*) _temp161) ==  Cyc_Absyn_IntType: 0){
-_LL174: _temp173=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp161)->f1;
-goto _LL172; _LL172: _temp171=( void*)(( struct Cyc_Absyn_IntType_struct*)
-_temp161)->f2; if( _temp171 == ( void*) Cyc_Absyn_B1){ goto _LL164;} else{ goto
-_LL165;}} else{ goto _LL165;} _LL165: if(( unsigned int) _temp161 >  4u?*(( int*)
-_temp161) ==  Cyc_Absyn_IntType: 0){ _LL178: _temp177=( void*)(( struct Cyc_Absyn_IntType_struct*)
-_temp161)->f1; goto _LL176; _LL176: _temp175=( void*)(( struct Cyc_Absyn_IntType_struct*)
-_temp161)->f2; if( _temp175 == ( void*) Cyc_Absyn_B2){ goto _LL166;} else{ goto
-_LL167;}} else{ goto _LL167;} _LL167: if(( unsigned int) _temp161 >  4u?*(( int*)
-_temp161) ==  Cyc_Absyn_IntType: 0){ _LL180: _temp179=( void*)(( struct Cyc_Absyn_IntType_struct*)
-_temp161)->f1; goto _LL168;} else{ goto _LL169;} _LL169: goto _LL170; _LL164: t=
-_temp173 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uchar_t: Cyc_Absyn_schar_t;(
-void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Const_e_struct* _temp181=(
+_LL144; _LL152: t= Cyc_Absyn_float_t; goto _LL144; _LL154: if( topt ==  0){ t=
+_temp167 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uint_t: Cyc_Absyn_sint_t;}
+else{ void* _temp171= Cyc_Tcutil_compress(*(( void**) _check_null( topt))); void*
+_temp181; void* _temp183; void* _temp185; void* _temp187; void* _temp189; _LL173:
+if(( unsigned int) _temp171 >  4u?*(( int*) _temp171) ==  Cyc_Absyn_IntType: 0){
+_LL184: _temp183=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp171)->f1;
+goto _LL182; _LL182: _temp181=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp171)->f2; if( _temp181 == ( void*) Cyc_Absyn_B1){ goto _LL174;} else{ goto
+_LL175;}} else{ goto _LL175;} _LL175: if(( unsigned int) _temp171 >  4u?*(( int*)
+_temp171) ==  Cyc_Absyn_IntType: 0){ _LL188: _temp187=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp171)->f1; goto _LL186; _LL186: _temp185=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp171)->f2; if( _temp185 == ( void*) Cyc_Absyn_B2){ goto _LL176;} else{ goto
+_LL177;}} else{ goto _LL177;} _LL177: if(( unsigned int) _temp171 >  4u?*(( int*)
+_temp171) ==  Cyc_Absyn_IntType: 0){ _LL190: _temp189=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp171)->f1; goto _LL178;} else{ goto _LL179;} _LL179: goto _LL180; _LL174: t=
+_temp183 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uchar_t: Cyc_Absyn_schar_t;(
+void*)( e->r=( void*)(( void*)({ struct Cyc_Absyn_Const_e_struct* _temp191=(
 struct Cyc_Absyn_Const_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct));
-_temp181[ 0]=({ struct Cyc_Absyn_Const_e_struct _temp182; _temp182.tag= Cyc_Absyn_Const_e;
-_temp182.f1=( void*)(( void*)({ struct Cyc_Absyn_Char_c_struct* _temp183=(
+_temp191[ 0]=({ struct Cyc_Absyn_Const_e_struct _temp192; _temp192.tag= Cyc_Absyn_Const_e;
+_temp192.f1=( void*)(( void*)({ struct Cyc_Absyn_Char_c_struct* _temp193=(
 struct Cyc_Absyn_Char_c_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Char_c_struct));
-_temp183[ 0]=({ struct Cyc_Absyn_Char_c_struct _temp184; _temp184.tag= Cyc_Absyn_Char_c;
-_temp184.f1=( void*) _temp173; _temp184.f2=( unsigned char) _temp155; _temp184;});
-_temp183;})); _temp182;}); _temp181;}))); goto _LL162; _LL166: t= _temp177 == (
+_temp193[ 0]=({ struct Cyc_Absyn_Char_c_struct _temp194; _temp194.tag= Cyc_Absyn_Char_c;
+_temp194.f1=( void*) _temp183; _temp194.f2=( unsigned char) _temp165; _temp194;});
+_temp193;})); _temp192;}); _temp191;}))); goto _LL172; _LL176: t= _temp187 == (
 void*) Cyc_Absyn_Unsigned? Cyc_Absyn_ushort_t: Cyc_Absyn_sshort_t;( void*)( e->r=(
-void*)(( void*)({ struct Cyc_Absyn_Const_e_struct* _temp185=( struct Cyc_Absyn_Const_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct)); _temp185[ 0]=({ struct Cyc_Absyn_Const_e_struct
-_temp186; _temp186.tag= Cyc_Absyn_Const_e; _temp186.f1=( void*)(( void*)({
-struct Cyc_Absyn_Short_c_struct* _temp187=( struct Cyc_Absyn_Short_c_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Short_c_struct)); _temp187[ 0]=({ struct Cyc_Absyn_Short_c_struct
-_temp188; _temp188.tag= Cyc_Absyn_Short_c; _temp188.f1=( void*) _temp177;
-_temp188.f2=( short) _temp155; _temp188;}); _temp187;})); _temp186;}); _temp185;})));
-goto _LL162; _LL168: t= _temp179 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uint_t:
-Cyc_Absyn_sint_t; goto _LL162; _LL170: t= _temp157 == ( void*) Cyc_Absyn_Unsigned?
-Cyc_Absyn_uint_t: Cyc_Absyn_sint_t; goto _LL162; _LL162:;} goto _LL134; _LL146: {
-int len=( int) _get_arr_size( _temp159, sizeof( unsigned char)); struct Cyc_Absyn_Const_e_struct*
-_temp189=({ struct Cyc_Absyn_Const_e_struct* _temp226=( struct Cyc_Absyn_Const_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct)); _temp226[ 0]=({ struct Cyc_Absyn_Const_e_struct
-_temp227; _temp227.tag= Cyc_Absyn_Const_e; _temp227.f1=( void*)(( void*)({
-struct Cyc_Absyn_Int_c_struct* _temp228=( struct Cyc_Absyn_Int_c_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Int_c_struct)); _temp228[ 0]=({ struct Cyc_Absyn_Int_c_struct
-_temp229; _temp229.tag= Cyc_Absyn_Int_c; _temp229.f1=( void*)(( void*) Cyc_Absyn_Unsigned);
-_temp229.f2= len; _temp229;}); _temp228;})); _temp227;}); _temp226;}); struct
-Cyc_Absyn_Exp* elen= Cyc_Absyn_new_exp(( void*) _temp189, loc); elen->topt=({
-struct Cyc_Core_Opt* _temp190=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp190->v=( void*) Cyc_Absyn_uint_t; _temp190;}); t= Cyc_Absyn_atb_typ(
+void*)(( void*)({ struct Cyc_Absyn_Const_e_struct* _temp195=( struct Cyc_Absyn_Const_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct)); _temp195[ 0]=({ struct Cyc_Absyn_Const_e_struct
+_temp196; _temp196.tag= Cyc_Absyn_Const_e; _temp196.f1=( void*)(( void*)({
+struct Cyc_Absyn_Short_c_struct* _temp197=( struct Cyc_Absyn_Short_c_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Short_c_struct)); _temp197[ 0]=({ struct Cyc_Absyn_Short_c_struct
+_temp198; _temp198.tag= Cyc_Absyn_Short_c; _temp198.f1=( void*) _temp187;
+_temp198.f2=( short) _temp165; _temp198;}); _temp197;})); _temp196;}); _temp195;})));
+goto _LL172; _LL178: t= _temp189 == ( void*) Cyc_Absyn_Unsigned? Cyc_Absyn_uint_t:
+Cyc_Absyn_sint_t; goto _LL172; _LL180: t= _temp167 == ( void*) Cyc_Absyn_Unsigned?
+Cyc_Absyn_uint_t: Cyc_Absyn_sint_t; goto _LL172; _LL172:;} goto _LL144; _LL156: {
+int len=( int) _get_arr_size( _temp169, sizeof( unsigned char)); struct Cyc_Absyn_Const_e_struct*
+_temp199=({ struct Cyc_Absyn_Const_e_struct* _temp236=( struct Cyc_Absyn_Const_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct)); _temp236[ 0]=({ struct Cyc_Absyn_Const_e_struct
+_temp237; _temp237.tag= Cyc_Absyn_Const_e; _temp237.f1=( void*)(( void*)({
+struct Cyc_Absyn_Int_c_struct* _temp238=( struct Cyc_Absyn_Int_c_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Int_c_struct)); _temp238[ 0]=({ struct Cyc_Absyn_Int_c_struct
+_temp239; _temp239.tag= Cyc_Absyn_Int_c; _temp239.f1=( void*)(( void*) Cyc_Absyn_Unsigned);
+_temp239.f2= len; _temp239;}); _temp238;})); _temp237;}); _temp236;}); struct
+Cyc_Absyn_Exp* elen= Cyc_Absyn_new_exp(( void*) _temp199, loc); elen->topt=({
+struct Cyc_Core_Opt* _temp200=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp200->v=( void*) Cyc_Absyn_uint_t; _temp200;}); t= Cyc_Absyn_atb_typ(
 Cyc_Absyn_uchar_t,( void*) Cyc_Absyn_HeapRgn, Cyc_Absyn_const_tqual(),( void*)({
-struct Cyc_Absyn_Upper_b_struct* _temp191=( struct Cyc_Absyn_Upper_b_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp191[ 0]=({ struct Cyc_Absyn_Upper_b_struct
-_temp192; _temp192.tag= Cyc_Absyn_Upper_b; _temp192.f1= elen; _temp192;});
-_temp191;})); if( topt !=  0){ void* _temp193= Cyc_Tcutil_compress(*(( void**)
-_check_null( topt))); struct Cyc_Absyn_Exp* _temp201; struct Cyc_Absyn_Tqual
-_temp203; void* _temp205; struct Cyc_Absyn_PtrInfo _temp207; struct Cyc_Absyn_Conref*
-_temp209; struct Cyc_Absyn_Tqual _temp211; struct Cyc_Absyn_Conref* _temp213;
-void* _temp215; void* _temp217; _LL195: if(( unsigned int) _temp193 >  4u?*((
-int*) _temp193) ==  Cyc_Absyn_ArrayType: 0){ _LL206: _temp205=( void*)(( struct
-Cyc_Absyn_ArrayType_struct*) _temp193)->f1; goto _LL204; _LL204: _temp203=((
-struct Cyc_Absyn_ArrayType_struct*) _temp193)->f2; goto _LL202; _LL202: _temp201=((
-struct Cyc_Absyn_ArrayType_struct*) _temp193)->f3; goto _LL196;} else{ goto
-_LL197;} _LL197: if(( unsigned int) _temp193 >  4u?*(( int*) _temp193) ==  Cyc_Absyn_PointerType:
-0){ _LL208: _temp207=(( struct Cyc_Absyn_PointerType_struct*) _temp193)->f1;
-_LL218: _temp217=( void*) _temp207.elt_typ; goto _LL216; _LL216: _temp215=( void*)
-_temp207.rgn_typ; goto _LL214; _LL214: _temp213= _temp207.nullable; goto _LL212;
-_LL212: _temp211= _temp207.tq; goto _LL210; _LL210: _temp209= _temp207.bounds;
-goto _LL198;} else{ goto _LL199;} _LL199: goto _LL200; _LL196: return( void*)({
-struct Cyc_Absyn_ArrayType_struct* _temp219=( struct Cyc_Absyn_ArrayType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp219[ 0]=({ struct
-Cyc_Absyn_ArrayType_struct _temp220; _temp220.tag= Cyc_Absyn_ArrayType; _temp220.f1=(
-void*) Cyc_Absyn_uchar_t; _temp220.f2= _temp203; _temp220.f3=( struct Cyc_Absyn_Exp*)
-elen; _temp220;}); _temp219;}); _LL198: if( ! Cyc_Tcutil_unify(*(( void**)
+struct Cyc_Absyn_Upper_b_struct* _temp201=( struct Cyc_Absyn_Upper_b_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp201[ 0]=({ struct Cyc_Absyn_Upper_b_struct
+_temp202; _temp202.tag= Cyc_Absyn_Upper_b; _temp202.f1= elen; _temp202;});
+_temp201;})); if( topt !=  0){ void* _temp203= Cyc_Tcutil_compress(*(( void**)
+_check_null( topt))); struct Cyc_Absyn_Exp* _temp211; struct Cyc_Absyn_Tqual
+_temp213; void* _temp215; struct Cyc_Absyn_PtrInfo _temp217; struct Cyc_Absyn_Conref*
+_temp219; struct Cyc_Absyn_Tqual _temp221; struct Cyc_Absyn_Conref* _temp223;
+void* _temp225; void* _temp227; _LL205: if(( unsigned int) _temp203 >  4u?*((
+int*) _temp203) ==  Cyc_Absyn_ArrayType: 0){ _LL216: _temp215=( void*)(( struct
+Cyc_Absyn_ArrayType_struct*) _temp203)->f1; goto _LL214; _LL214: _temp213=((
+struct Cyc_Absyn_ArrayType_struct*) _temp203)->f2; goto _LL212; _LL212: _temp211=((
+struct Cyc_Absyn_ArrayType_struct*) _temp203)->f3; goto _LL206;} else{ goto
+_LL207;} _LL207: if(( unsigned int) _temp203 >  4u?*(( int*) _temp203) ==  Cyc_Absyn_PointerType:
+0){ _LL218: _temp217=(( struct Cyc_Absyn_PointerType_struct*) _temp203)->f1;
+_LL228: _temp227=( void*) _temp217.elt_typ; goto _LL226; _LL226: _temp225=( void*)
+_temp217.rgn_typ; goto _LL224; _LL224: _temp223= _temp217.nullable; goto _LL222;
+_LL222: _temp221= _temp217.tq; goto _LL220; _LL220: _temp219= _temp217.bounds;
+goto _LL208;} else{ goto _LL209;} _LL209: goto _LL210; _LL206: return( void*)({
+struct Cyc_Absyn_ArrayType_struct* _temp229=( struct Cyc_Absyn_ArrayType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp229[ 0]=({ struct
+Cyc_Absyn_ArrayType_struct _temp230; _temp230.tag= Cyc_Absyn_ArrayType; _temp230.f1=(
+void*) Cyc_Absyn_uchar_t; _temp230.f2= _temp213; _temp230.f3=( struct Cyc_Absyn_Exp*)
+elen; _temp230;}); _temp229;}); _LL208: if( ! Cyc_Tcutil_unify(*(( void**)
 _check_null( topt)), t)? Cyc_Tcutil_silent_castable( te, loc, t,*(( void**)
-_check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt* _temp221=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp221->v=( void*) t; _temp221;});
+_check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt* _temp231=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp231->v=( void*) t; _temp231;});
 Cyc_Tcutil_unchecked_cast( te, e,*(( void**) _check_null( topt))); t=*(( void**)
 _check_null( topt));} else{ t= Cyc_Absyn_atb_typ( Cyc_Absyn_uchar_t, Cyc_Absyn_new_evar((
-struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp222=( struct
-Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp222->v=( void*)
-Cyc_Tcenv_lookup_type_vars( te); _temp222;})), Cyc_Absyn_const_tqual(),( void*)({
-struct Cyc_Absyn_Upper_b_struct* _temp223=( struct Cyc_Absyn_Upper_b_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp223[ 0]=({ struct Cyc_Absyn_Upper_b_struct
-_temp224; _temp224.tag= Cyc_Absyn_Upper_b; _temp224.f1= elen; _temp224;});
-_temp223;})); if( ! Cyc_Tcutil_unify(*(( void**) _check_null( topt)), t)? Cyc_Tcutil_silent_castable(
+struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp232=( struct
+Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp232->v=( void*)
+Cyc_Tcenv_lookup_type_vars( te); _temp232;})), Cyc_Absyn_const_tqual(),( void*)({
+struct Cyc_Absyn_Upper_b_struct* _temp233=( struct Cyc_Absyn_Upper_b_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp233[ 0]=({ struct Cyc_Absyn_Upper_b_struct
+_temp234; _temp234.tag= Cyc_Absyn_Upper_b; _temp234.f1= elen; _temp234;});
+_temp233;})); if( ! Cyc_Tcutil_unify(*(( void**) _check_null( topt)), t)? Cyc_Tcutil_silent_castable(
 te, loc, t,*(( void**) _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt*
-_temp225=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
-_temp225->v=( void*) t; _temp225;}); Cyc_Tcutil_unchecked_cast( te, e,*(( void**)
-_check_null( topt))); t=*(( void**) _check_null( topt));}} goto _LL194; _LL200:
-goto _LL194; _LL194:;} return t;} _LL148: { struct Cyc_List_List* _temp230= Cyc_Tcenv_lookup_type_vars(
-te); t=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp231=( struct Cyc_Absyn_PointerType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp231[ 0]=({ struct
-Cyc_Absyn_PointerType_struct _temp232; _temp232.tag= Cyc_Absyn_PointerType;
-_temp232.f1=({ struct Cyc_Absyn_PtrInfo _temp233; _temp233.elt_typ=( void*) Cyc_Absyn_new_evar((
-struct Cyc_Core_Opt*)& Cyc_Tcexp_ak,({ struct Cyc_Core_Opt* _temp235=( struct
-Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp235->v=( void*)
-_temp230; _temp235;})); _temp233.rgn_typ=( void*) Cyc_Absyn_new_evar(( struct
-Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp234=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp234->v=( void*) _temp230;
-_temp234;})); _temp233.nullable=(( struct Cyc_Absyn_Conref*(*)( int x)) Cyc_Absyn_new_conref)(
-1); _temp233.tq= Cyc_Absyn_empty_tqual(); _temp233.bounds= Cyc_Absyn_empty_conref();
-_temp233;}); _temp232;}); _temp231;}); goto _LL134;} _LL134:;} return t;} static
+_temp235=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp235->v=( void*) t; _temp235;}); Cyc_Tcutil_unchecked_cast( te, e,*(( void**)
+_check_null( topt))); t=*(( void**) _check_null( topt));}} goto _LL204; _LL210:
+goto _LL204; _LL204:;} return t;} _LL158: { struct Cyc_List_List* _temp240= Cyc_Tcenv_lookup_type_vars(
+te); t=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp241=( struct Cyc_Absyn_PointerType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp241[ 0]=({ struct
+Cyc_Absyn_PointerType_struct _temp242; _temp242.tag= Cyc_Absyn_PointerType;
+_temp242.f1=({ struct Cyc_Absyn_PtrInfo _temp243; _temp243.elt_typ=( void*) Cyc_Absyn_new_evar((
+struct Cyc_Core_Opt*)& Cyc_Tcexp_ak,({ struct Cyc_Core_Opt* _temp245=( struct
+Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp245->v=( void*)
+_temp240; _temp245;})); _temp243.rgn_typ=( void*) Cyc_Absyn_new_evar(( struct
+Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp244=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp244->v=( void*) _temp240;
+_temp244;})); _temp243.nullable=(( struct Cyc_Absyn_Conref*(*)( int x)) Cyc_Absyn_new_conref)(
+1); _temp243.tq= Cyc_Absyn_empty_tqual(); _temp243.bounds= Cyc_Absyn_empty_conref();
+_temp243;}); _temp242;}); _temp241;}); goto _LL144;} _LL144:;} return t;} static
 void* Cyc_Tcexp_tcVar( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
-loc, struct _tuple1* q, void* b){ void* _temp236= b; struct Cyc_Absyn_Vardecl*
-_temp250; struct Cyc_Absyn_Fndecl* _temp252; struct Cyc_Absyn_Vardecl* _temp254;
-struct Cyc_Absyn_Vardecl* _temp256; struct Cyc_Absyn_Vardecl* _temp258; _LL238:
-if( _temp236 == ( void*) Cyc_Absyn_Unresolved_b){ goto _LL239;} else{ goto
-_LL240;} _LL240: if(( unsigned int) _temp236 >  1u?*(( int*) _temp236) ==  Cyc_Absyn_Global_b:
-0){ _LL251: _temp250=(( struct Cyc_Absyn_Global_b_struct*) _temp236)->f1; goto
-_LL241;} else{ goto _LL242;} _LL242: if(( unsigned int) _temp236 >  1u?*(( int*)
-_temp236) ==  Cyc_Absyn_Funname_b: 0){ _LL253: _temp252=(( struct Cyc_Absyn_Funname_b_struct*)
-_temp236)->f1; goto _LL243;} else{ goto _LL244;} _LL244: if(( unsigned int)
-_temp236 >  1u?*(( int*) _temp236) ==  Cyc_Absyn_Pat_b: 0){ _LL255: _temp254=((
-struct Cyc_Absyn_Pat_b_struct*) _temp236)->f1; goto _LL245;} else{ goto _LL246;}
-_LL246: if(( unsigned int) _temp236 >  1u?*(( int*) _temp236) ==  Cyc_Absyn_Local_b:
-0){ _LL257: _temp256=(( struct Cyc_Absyn_Local_b_struct*) _temp236)->f1; goto
-_LL247;} else{ goto _LL248;} _LL248: if(( unsigned int) _temp236 >  1u?*(( int*)
-_temp236) ==  Cyc_Absyn_Param_b: 0){ _LL259: _temp258=(( struct Cyc_Absyn_Param_b_struct*)
-_temp236)->f1; goto _LL249;} else{ goto _LL237;} _LL239: return({ struct Cyc_Std_String_pa_struct
-_temp261; _temp261.tag= Cyc_Std_String_pa; _temp261.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
-q);{ void* _temp260[ 1u]={& _temp261}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("undeclared identifier: %s",
-sizeof( unsigned char), 26u), _tag_arr( _temp260, sizeof( void*), 1u));}});
-_LL241: q[ _check_known_subscript_notnull( 1u, 0)]=( _temp250->name)[
-_check_known_subscript_notnull( 1u, 0)]; return( void*) _temp250->type; _LL243:
-q[ _check_known_subscript_notnull( 1u, 0)]=( _temp252->name)[
-_check_known_subscript_notnull( 1u, 0)]; return Cyc_Tcutil_fndecl2typ( _temp252);
-_LL245: _temp256= _temp254; goto _LL247; _LL247: _temp258= _temp256; goto _LL249;
-_LL249:(* q).f1=( void*) Cyc_Absyn_Loc_n; return( void*) _temp258->type; _LL237:;}
+loc, struct _tuple1* q, void* b){ void* _temp246= b; struct Cyc_Absyn_Vardecl*
+_temp260; struct Cyc_Absyn_Fndecl* _temp262; struct Cyc_Absyn_Vardecl* _temp264;
+struct Cyc_Absyn_Vardecl* _temp266; struct Cyc_Absyn_Vardecl* _temp268; _LL248:
+if( _temp246 == ( void*) Cyc_Absyn_Unresolved_b){ goto _LL249;} else{ goto
+_LL250;} _LL250: if(( unsigned int) _temp246 >  1u?*(( int*) _temp246) ==  Cyc_Absyn_Global_b:
+0){ _LL261: _temp260=(( struct Cyc_Absyn_Global_b_struct*) _temp246)->f1; goto
+_LL251;} else{ goto _LL252;} _LL252: if(( unsigned int) _temp246 >  1u?*(( int*)
+_temp246) ==  Cyc_Absyn_Funname_b: 0){ _LL263: _temp262=(( struct Cyc_Absyn_Funname_b_struct*)
+_temp246)->f1; goto _LL253;} else{ goto _LL254;} _LL254: if(( unsigned int)
+_temp246 >  1u?*(( int*) _temp246) ==  Cyc_Absyn_Pat_b: 0){ _LL265: _temp264=((
+struct Cyc_Absyn_Pat_b_struct*) _temp246)->f1; goto _LL255;} else{ goto _LL256;}
+_LL256: if(( unsigned int) _temp246 >  1u?*(( int*) _temp246) ==  Cyc_Absyn_Local_b:
+0){ _LL267: _temp266=(( struct Cyc_Absyn_Local_b_struct*) _temp246)->f1; goto
+_LL257;} else{ goto _LL258;} _LL258: if(( unsigned int) _temp246 >  1u?*(( int*)
+_temp246) ==  Cyc_Absyn_Param_b: 0){ _LL269: _temp268=(( struct Cyc_Absyn_Param_b_struct*)
+_temp246)->f1; goto _LL259;} else{ goto _LL247;} _LL249: return({ struct Cyc_Std_String_pa_struct
+_temp271; _temp271.tag= Cyc_Std_String_pa; _temp271.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
+q);{ void* _temp270[ 1u]={& _temp271}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("undeclared identifier: %s",
+sizeof( unsigned char), 26u), _tag_arr( _temp270, sizeof( void*), 1u));}});
+_LL251: q[ _check_known_subscript_notnull( 1u, 0)]=( _temp260->name)[
+_check_known_subscript_notnull( 1u, 0)]; return( void*) _temp260->type; _LL253:
+q[ _check_known_subscript_notnull( 1u, 0)]=( _temp262->name)[
+_check_known_subscript_notnull( 1u, 0)]; return Cyc_Tcutil_fndecl2typ( _temp262);
+_LL255: _temp266= _temp264; goto _LL257; _LL257: _temp268= _temp266; goto _LL259;
+_LL259:(* q).f1=( void*) Cyc_Absyn_Loc_n; return( void*) _temp268->type; _LL247:;}
 static void Cyc_Tcexp_check_format_args( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
 fmt, struct Cyc_Core_Opt* opt_args, struct Cyc_List_List*(* type_getter)( struct
 Cyc_Tcenv_Tenv*, struct _tagged_arr, struct Cyc_Position_Segment*)){ struct Cyc_List_List*
-desc_types;{ void* _temp262=( void*) fmt->r; void* _temp270; struct _tagged_arr
-_temp272; struct Cyc_Absyn_Exp* _temp274; struct Cyc_Absyn_Exp _temp276; void*
-_temp277; void* _temp279; struct _tagged_arr _temp281; _LL264: if(*(( int*)
-_temp262) ==  Cyc_Absyn_Const_e){ _LL271: _temp270=( void*)(( struct Cyc_Absyn_Const_e_struct*)
-_temp262)->f1; if(( unsigned int) _temp270 >  1u?*(( int*) _temp270) ==  Cyc_Absyn_String_c:
-0){ _LL273: _temp272=(( struct Cyc_Absyn_String_c_struct*) _temp270)->f1; goto
-_LL265;} else{ goto _LL266;}} else{ goto _LL266;} _LL266: if(*(( int*) _temp262)
-==  Cyc_Absyn_Cast_e){ _LL275: _temp274=(( struct Cyc_Absyn_Cast_e_struct*)
-_temp262)->f2; _temp276=* _temp274; _LL278: _temp277=( void*) _temp276.r; if(*((
-int*) _temp277) ==  Cyc_Absyn_Const_e){ _LL280: _temp279=( void*)(( struct Cyc_Absyn_Const_e_struct*)
-_temp277)->f1; if(( unsigned int) _temp279 >  1u?*(( int*) _temp279) ==  Cyc_Absyn_String_c:
-0){ _LL282: _temp281=(( struct Cyc_Absyn_String_c_struct*) _temp279)->f1; goto
-_LL267;} else{ goto _LL268;}} else{ goto _LL268;}} else{ goto _LL268;} _LL268:
-goto _LL269; _LL265: _temp281= _temp272; goto _LL267; _LL267: desc_types=
-type_getter( te,( struct _tagged_arr) _temp281, fmt->loc); goto _LL263; _LL269:
-return; _LL263:;} if( opt_args !=  0){ struct Cyc_List_List* _temp283=( struct
+desc_types;{ void* _temp272=( void*) fmt->r; void* _temp280; struct _tagged_arr
+_temp282; struct Cyc_Absyn_Exp* _temp284; struct Cyc_Absyn_Exp _temp286; void*
+_temp287; void* _temp289; struct _tagged_arr _temp291; _LL274: if(*(( int*)
+_temp272) ==  Cyc_Absyn_Const_e){ _LL281: _temp280=( void*)(( struct Cyc_Absyn_Const_e_struct*)
+_temp272)->f1; if(( unsigned int) _temp280 >  1u?*(( int*) _temp280) ==  Cyc_Absyn_String_c:
+0){ _LL283: _temp282=(( struct Cyc_Absyn_String_c_struct*) _temp280)->f1; goto
+_LL275;} else{ goto _LL276;}} else{ goto _LL276;} _LL276: if(*(( int*) _temp272)
+==  Cyc_Absyn_Cast_e){ _LL285: _temp284=(( struct Cyc_Absyn_Cast_e_struct*)
+_temp272)->f2; _temp286=* _temp284; _LL288: _temp287=( void*) _temp286.r; if(*((
+int*) _temp287) ==  Cyc_Absyn_Const_e){ _LL290: _temp289=( void*)(( struct Cyc_Absyn_Const_e_struct*)
+_temp287)->f1; if(( unsigned int) _temp289 >  1u?*(( int*) _temp289) ==  Cyc_Absyn_String_c:
+0){ _LL292: _temp291=(( struct Cyc_Absyn_String_c_struct*) _temp289)->f1; goto
+_LL277;} else{ goto _LL278;}} else{ goto _LL278;}} else{ goto _LL278;} _LL278:
+goto _LL279; _LL275: _temp291= _temp282; goto _LL277; _LL277: desc_types=
+type_getter( te,( struct _tagged_arr) _temp291, fmt->loc); goto _LL273; _LL279:
+return; _LL273:;} if( opt_args !=  0){ struct Cyc_List_List* _temp293=( struct
 Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null( opt_args))->v; for( 0;
-desc_types !=  0? _temp283 !=  0: 0;( desc_types=(( struct Cyc_List_List*)
-_check_null( desc_types))->tl, _temp283=(( struct Cyc_List_List*) _check_null(
-_temp283))->tl)){ void* t=( void*)(( struct Cyc_List_List*) _check_null(
+desc_types !=  0? _temp293 !=  0: 0;( desc_types=(( struct Cyc_List_List*)
+_check_null( desc_types))->tl, _temp293=(( struct Cyc_List_List*) _check_null(
+_temp293))->tl)){ void* t=( void*)(( struct Cyc_List_List*) _check_null(
 desc_types))->hd; struct Cyc_Absyn_Exp* e=( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
-_check_null( _temp283))->hd; if( ! Cyc_Tcutil_coerce_arg( te, e, t)){({ struct
-Cyc_Std_String_pa_struct _temp286; _temp286.tag= Cyc_Std_String_pa; _temp286.f1=(
+_check_null( _temp293))->hd; if( ! Cyc_Tcutil_coerce_arg( te, e, t)){({ struct
+Cyc_Std_String_pa_struct _temp296; _temp296.tag= Cyc_Std_String_pa; _temp296.f1=(
 struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e->topt))->v);{ struct Cyc_Std_String_pa_struct _temp285; _temp285.tag=
-Cyc_Std_String_pa; _temp285.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{
-void* _temp284[ 2u]={& _temp285,& _temp286}; Cyc_Tcutil_terr( e->loc, _tag_arr("descriptor has type \n%s\n but argument has type \n%s",
-sizeof( unsigned char), 51u), _tag_arr( _temp284, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}
-if( desc_types !=  0){({ void* _temp287[ 0u]={}; Cyc_Tcutil_terr( fmt->loc,
-_tag_arr("too few arguments", sizeof( unsigned char), 18u), _tag_arr( _temp287,
-sizeof( void*), 0u));});} if( _temp283 !=  0){({ void* _temp288[ 0u]={}; Cyc_Tcutil_terr(((
-struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( _temp283))->hd)->loc,
-_tag_arr("too many arguments", sizeof( unsigned char), 19u), _tag_arr( _temp288,
+_check_null( e->topt))->v);{ struct Cyc_Std_String_pa_struct _temp295; _temp295.tag=
+Cyc_Std_String_pa; _temp295.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{
+void* _temp294[ 2u]={& _temp295,& _temp296}; Cyc_Tcutil_terr( e->loc, _tag_arr("descriptor has type \n%s\n but argument has type \n%s",
+sizeof( unsigned char), 51u), _tag_arr( _temp294, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}
+if( desc_types !=  0){({ void* _temp297[ 0u]={}; Cyc_Tcutil_terr( fmt->loc,
+_tag_arr("too few arguments", sizeof( unsigned char), 18u), _tag_arr( _temp297,
+sizeof( void*), 0u));});} if( _temp293 !=  0){({ void* _temp298[ 0u]={}; Cyc_Tcutil_terr(((
+struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( _temp293))->hd)->loc,
+_tag_arr("too many arguments", sizeof( unsigned char), 19u), _tag_arr( _temp298,
 sizeof( void*), 0u));});}}} static void* Cyc_Tcexp_tcUnPrimop( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, void* p, struct Cyc_Absyn_Exp*
 e){ void* t= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);
-void* _temp289= p; _LL291: if( _temp289 == ( void*) Cyc_Absyn_Plus){ goto _LL292;}
-else{ goto _LL293;} _LL293: if( _temp289 == ( void*) Cyc_Absyn_Minus){ goto
-_LL294;} else{ goto _LL295;} _LL295: if( _temp289 == ( void*) Cyc_Absyn_Not){
-goto _LL296;} else{ goto _LL297;} _LL297: if( _temp289 == ( void*) Cyc_Absyn_Bitnot){
-goto _LL298;} else{ goto _LL299;} _LL299: if( _temp289 == ( void*) Cyc_Absyn_Size){
-goto _LL300;} else{ goto _LL301;} _LL301: goto _LL302; _LL292: goto _LL294;
-_LL294: if( ! Cyc_Tcutil_is_numeric( e)){({ struct Cyc_Std_String_pa_struct
-_temp304; _temp304.tag= Cyc_Std_String_pa; _temp304.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ void* _temp303[ 1u]={& _temp304}; Cyc_Tcutil_terr( loc, _tag_arr("expecting arithmetic type but found %s",
-sizeof( unsigned char), 39u), _tag_arr( _temp303, sizeof( void*), 1u));}});}
-return( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; _LL296: Cyc_Tcutil_check_contains_assign(
+void* _temp299= p; _LL301: if( _temp299 == ( void*) Cyc_Absyn_Plus){ goto _LL302;}
+else{ goto _LL303;} _LL303: if( _temp299 == ( void*) Cyc_Absyn_Minus){ goto
+_LL304;} else{ goto _LL305;} _LL305: if( _temp299 == ( void*) Cyc_Absyn_Not){
+goto _LL306;} else{ goto _LL307;} _LL307: if( _temp299 == ( void*) Cyc_Absyn_Bitnot){
+goto _LL308;} else{ goto _LL309;} _LL309: if( _temp299 == ( void*) Cyc_Absyn_Size){
+goto _LL310;} else{ goto _LL311;} _LL311: goto _LL312; _LL302: goto _LL304;
+_LL304: if( ! Cyc_Tcutil_is_numeric( e)){({ struct Cyc_Std_String_pa_struct
+_temp314; _temp314.tag= Cyc_Std_String_pa; _temp314.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ void* _temp313[ 1u]={& _temp314}; Cyc_Tcutil_terr( loc, _tag_arr("expecting arithmetic type but found %s",
+sizeof( unsigned char), 39u), _tag_arr( _temp313, sizeof( void*), 1u));}});}
+return( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; _LL306: Cyc_Tcutil_check_contains_assign(
 e); if( ! Cyc_Tcutil_coerce_to_bool( te, e)){({ struct Cyc_Std_String_pa_struct
-_temp306; _temp306.tag= Cyc_Std_String_pa; _temp306.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ void* _temp305[ 1u]={& _temp306}; Cyc_Tcutil_terr( loc, _tag_arr("expecting integral or * type but found %s",
-sizeof( unsigned char), 42u), _tag_arr( _temp305, sizeof( void*), 1u));}});}
-return Cyc_Absyn_sint_t; _LL298: if( ! Cyc_Tcutil_is_integral( e)){({ struct Cyc_Std_String_pa_struct
-_temp308; _temp308.tag= Cyc_Std_String_pa; _temp308.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ void* _temp307[ 1u]={& _temp308}; Cyc_Tcutil_terr( loc, _tag_arr("expecting integral type but found %s",
-sizeof( unsigned char), 37u), _tag_arr( _temp307, sizeof( void*), 1u));}});}
-return( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; _LL300:{ void*
-_temp309= t; struct Cyc_Absyn_PtrInfo _temp317; _LL311: if(( unsigned int)
-_temp309 >  4u?*(( int*) _temp309) ==  Cyc_Absyn_ArrayType: 0){ goto _LL312;}
-else{ goto _LL313;} _LL313: if(( unsigned int) _temp309 >  4u?*(( int*) _temp309)
-==  Cyc_Absyn_PointerType: 0){ _LL318: _temp317=(( struct Cyc_Absyn_PointerType_struct*)
-_temp309)->f1; goto _LL314;} else{ goto _LL315;} _LL315: goto _LL316; _LL312:
-goto _LL310; _LL314: goto _LL310; _LL316:({ struct Cyc_Std_String_pa_struct
-_temp320; _temp320.tag= Cyc_Std_String_pa; _temp320.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ void* _temp319[ 1u]={& _temp320}; Cyc_Tcutil_terr( loc, _tag_arr("size requires pointer or array type, not %s",
-sizeof( unsigned char), 44u), _tag_arr( _temp319, sizeof( void*), 1u));}}); goto
-_LL310; _LL310:;} return Cyc_Absyn_uint_t; _LL302: return({ void* _temp321[ 0u]={};
+_temp316; _temp316.tag= Cyc_Std_String_pa; _temp316.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ void* _temp315[ 1u]={& _temp316}; Cyc_Tcutil_terr( loc, _tag_arr("expecting integral or * type but found %s",
+sizeof( unsigned char), 42u), _tag_arr( _temp315, sizeof( void*), 1u));}});}
+return Cyc_Absyn_sint_t; _LL308: if( ! Cyc_Tcutil_is_integral( e)){({ struct Cyc_Std_String_pa_struct
+_temp318; _temp318.tag= Cyc_Std_String_pa; _temp318.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ void* _temp317[ 1u]={& _temp318}; Cyc_Tcutil_terr( loc, _tag_arr("expecting integral type but found %s",
+sizeof( unsigned char), 37u), _tag_arr( _temp317, sizeof( void*), 1u));}});}
+return( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; _LL310:{ void*
+_temp319= t; struct Cyc_Absyn_PtrInfo _temp327; _LL321: if(( unsigned int)
+_temp319 >  4u?*(( int*) _temp319) ==  Cyc_Absyn_ArrayType: 0){ goto _LL322;}
+else{ goto _LL323;} _LL323: if(( unsigned int) _temp319 >  4u?*(( int*) _temp319)
+==  Cyc_Absyn_PointerType: 0){ _LL328: _temp327=(( struct Cyc_Absyn_PointerType_struct*)
+_temp319)->f1; goto _LL324;} else{ goto _LL325;} _LL325: goto _LL326; _LL322:
+goto _LL320; _LL324: goto _LL320; _LL326:({ struct Cyc_Std_String_pa_struct
+_temp330; _temp330.tag= Cyc_Std_String_pa; _temp330.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ void* _temp329[ 1u]={& _temp330}; Cyc_Tcutil_terr( loc, _tag_arr("size requires pointer or array type, not %s",
+sizeof( unsigned char), 44u), _tag_arr( _temp329, sizeof( void*), 1u));}}); goto
+_LL320; _LL320:;} return Cyc_Absyn_uint_t; _LL312: return({ void* _temp331[ 0u]={};
 Cyc_Tcutil_impos( _tag_arr("Non-unary primop", sizeof( unsigned char), 17u),
-_tag_arr( _temp321, sizeof( void*), 0u));}); _LL290:;} static void* Cyc_Tcexp_tcArithBinop(
+_tag_arr( _temp331, sizeof( void*), 0u));}); _LL300:;} static void* Cyc_Tcexp_tcArithBinop(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2,
 int(* checker)( struct Cyc_Absyn_Exp*)){ if( ! checker( e1)){({ struct Cyc_Std_String_pa_struct
-_temp323; _temp323.tag= Cyc_Std_String_pa; _temp323.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
-void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp322[ 1u]={&
-_temp323}; Cyc_Tcutil_terr( e1->loc, _tag_arr("type %s cannot be used here",
-sizeof( unsigned char), 28u), _tag_arr( _temp322, sizeof( void*), 1u));}});
-return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp324=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp324->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp324;}));} if( ! checker( e2)){({ struct Cyc_Std_String_pa_struct
-_temp326; _temp326.tag= Cyc_Std_String_pa; _temp326.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
-void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v);{ void* _temp325[ 1u]={&
-_temp326}; Cyc_Tcutil_terr( e2->loc, _tag_arr("type %s cannot be used here",
-sizeof( unsigned char), 28u), _tag_arr( _temp325, sizeof( void*), 1u));}});
-return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp327=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp327->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp327;}));}{ void* t1= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
+_temp333; _temp333.tag= Cyc_Std_String_pa; _temp333.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp332[ 1u]={&
+_temp333}; Cyc_Tcutil_terr( e1->loc, _tag_arr("type %s cannot be used here",
+sizeof( unsigned char), 28u), _tag_arr( _temp332, sizeof( void*), 1u));}});
+return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp334=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp334->v=( void*) Cyc_Tcenv_lookup_type_vars(
+te); _temp334;}));} if( ! checker( e2)){({ struct Cyc_Std_String_pa_struct
+_temp336; _temp336.tag= Cyc_Std_String_pa; _temp336.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v);{ void* _temp335[ 1u]={&
+_temp336}; Cyc_Tcutil_terr( e2->loc, _tag_arr("type %s cannot be used here",
+sizeof( unsigned char), 28u), _tag_arr( _temp335, sizeof( void*), 1u));}});
+return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp337=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp337->v=( void*) Cyc_Tcenv_lookup_type_vars(
+te); _temp337;}));}{ void* t1= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e1->topt))->v); void* t2= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e2->topt))->v); return Cyc_Tcutil_max_arithmetic_type( t1, t2);}}
 static void* Cyc_Tcexp_tcPlus( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
 e1, struct Cyc_Absyn_Exp* e2){ void* t1= Cyc_Tcutil_compress(( void*)(( struct
 Cyc_Core_Opt*) _check_null( e1->topt))->v); void* t2= Cyc_Tcutil_compress(( void*)((
-struct Cyc_Core_Opt*) _check_null( e2->topt))->v); void* _temp328= t1; struct
-Cyc_Absyn_PtrInfo _temp334; struct Cyc_Absyn_Conref* _temp336; struct Cyc_Absyn_Tqual
-_temp338; struct Cyc_Absyn_Conref* _temp340; void* _temp342; void* _temp344;
-_LL330: if(( unsigned int) _temp328 >  4u?*(( int*) _temp328) ==  Cyc_Absyn_PointerType:
-0){ _LL335: _temp334=(( struct Cyc_Absyn_PointerType_struct*) _temp328)->f1;
-_LL345: _temp344=( void*) _temp334.elt_typ; goto _LL343; _LL343: _temp342=( void*)
-_temp334.rgn_typ; goto _LL341; _LL341: _temp340= _temp334.nullable; goto _LL339;
-_LL339: _temp338= _temp334.tq; goto _LL337; _LL337: _temp336= _temp334.bounds;
-goto _LL331;} else{ goto _LL332;} _LL332: goto _LL333; _LL331: if( ! Cyc_Tcutil_coerce_sint_typ(
-te, e2)){({ struct Cyc_Std_String_pa_struct _temp347; _temp347.tag= Cyc_Std_String_pa;
-_temp347.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp346[
-1u]={& _temp347}; Cyc_Tcutil_terr( e2->loc, _tag_arr("expecting int but found %s",
-sizeof( unsigned char), 27u), _tag_arr( _temp346, sizeof( void*), 1u));}});}
-_temp336= Cyc_Absyn_compress_conref( _temp336);{ void* _temp348=( void*)
-_temp336->v; void* _temp356; void* _temp358; struct Cyc_Absyn_Exp* _temp360;
-_LL350: if(( unsigned int) _temp348 >  1u?*(( int*) _temp348) ==  Cyc_Absyn_Eq_constr:
-0){ _LL357: _temp356=( void*)(( struct Cyc_Absyn_Eq_constr_struct*) _temp348)->f1;
-if( _temp356 == ( void*) Cyc_Absyn_Unknown_b){ goto _LL351;} else{ goto _LL352;}}
-else{ goto _LL352;} _LL352: if(( unsigned int) _temp348 >  1u?*(( int*) _temp348)
-==  Cyc_Absyn_Eq_constr: 0){ _LL359: _temp358=( void*)(( struct Cyc_Absyn_Eq_constr_struct*)
-_temp348)->f1; if(( unsigned int) _temp358 >  1u?*(( int*) _temp358) ==  Cyc_Absyn_Upper_b:
-0){ _LL361: _temp360=(( struct Cyc_Absyn_Upper_b_struct*) _temp358)->f1; goto
-_LL353;} else{ goto _LL354;}} else{ goto _LL354;} _LL354: goto _LL355; _LL351:
-return t1; _LL353: { struct Cyc_Absyn_PointerType_struct* _temp362=({ struct Cyc_Absyn_PointerType_struct*
-_temp363=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
-_temp363[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp364; _temp364.tag= Cyc_Absyn_PointerType;
-_temp364.f1=({ struct Cyc_Absyn_PtrInfo _temp365; _temp365.elt_typ=( void*)
-_temp344; _temp365.rgn_typ=( void*) _temp342; _temp365.nullable=(( struct Cyc_Absyn_Conref*(*)(
-int x)) Cyc_Absyn_new_conref)( 1); _temp365.tq= _temp338; _temp365.bounds= Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_Unknown_b); _temp365;}); _temp364;}); _temp363;}); Cyc_Tcutil_unchecked_cast(
-te, e1,( void*) _temp362); return( void*) _temp362;} _LL355:( void*)( _temp336->v=(
-void*)(( void*)({ struct Cyc_Absyn_Eq_constr_struct* _temp366=( struct Cyc_Absyn_Eq_constr_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Eq_constr_struct)); _temp366[ 0]=({ struct
-Cyc_Absyn_Eq_constr_struct _temp367; _temp367.tag= Cyc_Absyn_Eq_constr; _temp367.f1=(
-void*)(( void*) Cyc_Absyn_Unknown_b); _temp367;}); _temp366;}))); return t1;
-_LL349:;} _LL333: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);
-_LL329:;} static void* Cyc_Tcexp_tcMinus( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
+struct Cyc_Core_Opt*) _check_null( e2->topt))->v); void* _temp338= t1; struct
+Cyc_Absyn_PtrInfo _temp344; struct Cyc_Absyn_Conref* _temp346; struct Cyc_Absyn_Tqual
+_temp348; struct Cyc_Absyn_Conref* _temp350; void* _temp352; void* _temp354;
+_LL340: if(( unsigned int) _temp338 >  4u?*(( int*) _temp338) ==  Cyc_Absyn_PointerType:
+0){ _LL345: _temp344=(( struct Cyc_Absyn_PointerType_struct*) _temp338)->f1;
+_LL355: _temp354=( void*) _temp344.elt_typ; goto _LL353; _LL353: _temp352=( void*)
+_temp344.rgn_typ; goto _LL351; _LL351: _temp350= _temp344.nullable; goto _LL349;
+_LL349: _temp348= _temp344.tq; goto _LL347; _LL347: _temp346= _temp344.bounds;
+goto _LL341;} else{ goto _LL342;} _LL342: goto _LL343; _LL341: if( ! Cyc_Tcutil_coerce_sint_typ(
+te, e2)){({ struct Cyc_Std_String_pa_struct _temp357; _temp357.tag= Cyc_Std_String_pa;
+_temp357.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp356[
+1u]={& _temp357}; Cyc_Tcutil_terr( e2->loc, _tag_arr("expecting int but found %s",
+sizeof( unsigned char), 27u), _tag_arr( _temp356, sizeof( void*), 1u));}});}
+_temp346= Cyc_Absyn_compress_conref( _temp346);{ void* _temp358=( void*)
+_temp346->v; void* _temp366; void* _temp368; struct Cyc_Absyn_Exp* _temp370;
+_LL360: if(( unsigned int) _temp358 >  1u?*(( int*) _temp358) ==  Cyc_Absyn_Eq_constr:
+0){ _LL367: _temp366=( void*)(( struct Cyc_Absyn_Eq_constr_struct*) _temp358)->f1;
+if( _temp366 == ( void*) Cyc_Absyn_Unknown_b){ goto _LL361;} else{ goto _LL362;}}
+else{ goto _LL362;} _LL362: if(( unsigned int) _temp358 >  1u?*(( int*) _temp358)
+==  Cyc_Absyn_Eq_constr: 0){ _LL369: _temp368=( void*)(( struct Cyc_Absyn_Eq_constr_struct*)
+_temp358)->f1; if(( unsigned int) _temp368 >  1u?*(( int*) _temp368) ==  Cyc_Absyn_Upper_b:
+0){ _LL371: _temp370=(( struct Cyc_Absyn_Upper_b_struct*) _temp368)->f1; goto
+_LL363;} else{ goto _LL364;}} else{ goto _LL364;} _LL364: goto _LL365; _LL361:
+return t1; _LL363: { struct Cyc_Absyn_PointerType_struct* _temp372=({ struct Cyc_Absyn_PointerType_struct*
+_temp373=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
+_temp373[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp374; _temp374.tag= Cyc_Absyn_PointerType;
+_temp374.f1=({ struct Cyc_Absyn_PtrInfo _temp375; _temp375.elt_typ=( void*)
+_temp354; _temp375.rgn_typ=( void*) _temp352; _temp375.nullable=(( struct Cyc_Absyn_Conref*(*)(
+int x)) Cyc_Absyn_new_conref)( 1); _temp375.tq= _temp348; _temp375.bounds= Cyc_Absyn_new_conref((
+void*) Cyc_Absyn_Unknown_b); _temp375;}); _temp374;}); _temp373;}); Cyc_Tcutil_unchecked_cast(
+te, e1,( void*) _temp372); return( void*) _temp372;} _LL365:( void*)( _temp346->v=(
+void*)(( void*)({ struct Cyc_Absyn_Eq_constr_struct* _temp376=( struct Cyc_Absyn_Eq_constr_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Eq_constr_struct)); _temp376[ 0]=({ struct
+Cyc_Absyn_Eq_constr_struct _temp377; _temp377.tag= Cyc_Absyn_Eq_constr; _temp377.f1=(
+void*)(( void*) Cyc_Absyn_Unknown_b); _temp377;}); _temp376;}))); return t1;
+_LL359:;} _LL343: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);
+_LL339:;} static void* Cyc_Tcexp_tcMinus( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp*
 e1, struct Cyc_Absyn_Exp* e2){ void* t1=( void*)(( struct Cyc_Core_Opt*)
 _check_null( e1->topt))->v; void* t2=( void*)(( struct Cyc_Core_Opt*)
 _check_null( e2->topt))->v; if( Cyc_Tcutil_is_tagged_pointer_typ( t1)){ if( Cyc_Tcutil_is_tagged_pointer_typ(
 t2)){ if( ! Cyc_Tcutil_unify( t1, t2)){({ struct Cyc_Std_String_pa_struct
-_temp370; _temp370.tag= Cyc_Std_String_pa; _temp370.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+_temp380; _temp380.tag= Cyc_Std_String_pa; _temp380.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v);{ struct Cyc_Std_String_pa_struct
-_temp369; _temp369.tag= Cyc_Std_String_pa; _temp369.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
-void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp368[ 2u]={&
-_temp369,& _temp370}; Cyc_Tcutil_terr( e1->loc, _tag_arr("pointer arithmetic on values of different types (%s != %s)",
-sizeof( unsigned char), 59u), _tag_arr( _temp368, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
+_temp379; _temp379.tag= Cyc_Std_String_pa; _temp379.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp378[ 2u]={&
+_temp379,& _temp380}; Cyc_Tcutil_terr( e1->loc, _tag_arr("pointer arithmetic on values of different types (%s != %s)",
+sizeof( unsigned char), 59u), _tag_arr( _temp378, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
 return Cyc_Absyn_sint_t;} else{ if( ! Cyc_Tcutil_coerce_sint_typ( te, e2)){({
-struct Cyc_Std_String_pa_struct _temp373; _temp373.tag= Cyc_Std_String_pa;
-_temp373.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
-_temp372; _temp372.tag= Cyc_Std_String_pa; _temp372.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t1);{ void* _temp371[ 2u]={& _temp372,& _temp373}; Cyc_Tcutil_terr( e2->loc,
+struct Cyc_Std_String_pa_struct _temp383; _temp383.tag= Cyc_Std_String_pa;
+_temp383.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
+_temp382; _temp382.tag= Cyc_Std_String_pa; _temp382.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t1);{ void* _temp381[ 2u]={& _temp382,& _temp383}; Cyc_Tcutil_terr( e2->loc,
 _tag_arr("expecting either %s or int but found %s", sizeof( unsigned char), 40u),
-_tag_arr( _temp371, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
+_tag_arr( _temp381, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
 return t1;}} else{ return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);}}
 static void* Cyc_Tcexp_tcAnyBinop( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2){ int e1_is_num= Cyc_Tcutil_is_numeric(
@@ -1166,272 +1183,272 @@ void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v); void* t2= Cyc_Tcutil
 void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v); if( e1_is_num?
 e2_is_num: 0){ return Cyc_Absyn_sint_t;} else{ if( Cyc_Tcutil_unify( t1, t2)?
 Cyc_Tcutil_unify( t1, Cyc_Absyn_new_evar(( struct Cyc_Core_Opt*)& Cyc_Tcexp_bk,({
-struct Cyc_Core_Opt* _temp374=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp374->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp374;}))):
+struct Cyc_Core_Opt* _temp384=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp384->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp384;}))):
 0){ return Cyc_Absyn_sint_t;} else{ if( Cyc_Tcutil_silent_castable( te, loc, t2,
 t1)){ Cyc_Tcutil_unchecked_cast( te, e2, t1); return Cyc_Absyn_sint_t;} else{
 if( Cyc_Tcutil_silent_castable( te, loc, t1, t2)){ Cyc_Tcutil_unchecked_cast( te,
 e1, t2); return Cyc_Absyn_sint_t;} else{ void* t1=( void*)(( struct Cyc_Core_Opt*)
 _check_null( e1->topt))->v; void* t2=( void*)(( struct Cyc_Core_Opt*)
-_check_null( e2->topt))->v;{ struct _tuple0 _temp376=({ struct _tuple0 _temp375;
-_temp375.f1= Cyc_Tcutil_compress( t1); _temp375.f2= Cyc_Tcutil_compress( t2);
-_temp375;}); void* _temp382; struct Cyc_Absyn_PtrInfo _temp384; void* _temp386;
-void* _temp388; struct Cyc_Absyn_PtrInfo _temp390; void* _temp392; _LL378:
-_LL389: _temp388= _temp376.f1; if(( unsigned int) _temp388 >  4u?*(( int*)
-_temp388) ==  Cyc_Absyn_PointerType: 0){ _LL391: _temp390=(( struct Cyc_Absyn_PointerType_struct*)
-_temp388)->f1; _LL393: _temp392=( void*) _temp390.elt_typ; goto _LL383;} else{
-goto _LL380;} _LL383: _temp382= _temp376.f2; if(( unsigned int) _temp382 >  4u?*((
-int*) _temp382) ==  Cyc_Absyn_PointerType: 0){ _LL385: _temp384=(( struct Cyc_Absyn_PointerType_struct*)
-_temp382)->f1; _LL387: _temp386=( void*) _temp384.elt_typ; goto _LL379;} else{
-goto _LL380;} _LL380: goto _LL381; _LL379: if( Cyc_Tcutil_unify( _temp392,
-_temp386)){ return Cyc_Absyn_sint_t;} goto _LL377; _LL381: goto _LL377; _LL377:;}({
-struct Cyc_Std_String_pa_struct _temp396; _temp396.tag= Cyc_Std_String_pa;
-_temp396.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
-_temp395; _temp395.tag= Cyc_Std_String_pa; _temp395.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t1);{ void* _temp394[ 2u]={& _temp395,& _temp396}; Cyc_Tcutil_terr( loc,
+_check_null( e2->topt))->v;{ struct _tuple0 _temp386=({ struct _tuple0 _temp385;
+_temp385.f1= Cyc_Tcutil_compress( t1); _temp385.f2= Cyc_Tcutil_compress( t2);
+_temp385;}); void* _temp392; struct Cyc_Absyn_PtrInfo _temp394; void* _temp396;
+void* _temp398; struct Cyc_Absyn_PtrInfo _temp400; void* _temp402; _LL388:
+_LL399: _temp398= _temp386.f1; if(( unsigned int) _temp398 >  4u?*(( int*)
+_temp398) ==  Cyc_Absyn_PointerType: 0){ _LL401: _temp400=(( struct Cyc_Absyn_PointerType_struct*)
+_temp398)->f1; _LL403: _temp402=( void*) _temp400.elt_typ; goto _LL393;} else{
+goto _LL390;} _LL393: _temp392= _temp386.f2; if(( unsigned int) _temp392 >  4u?*((
+int*) _temp392) ==  Cyc_Absyn_PointerType: 0){ _LL395: _temp394=(( struct Cyc_Absyn_PointerType_struct*)
+_temp392)->f1; _LL397: _temp396=( void*) _temp394.elt_typ; goto _LL389;} else{
+goto _LL390;} _LL390: goto _LL391; _LL389: if( Cyc_Tcutil_unify( _temp402,
+_temp396)){ return Cyc_Absyn_sint_t;} goto _LL387; _LL391: goto _LL387; _LL387:;}({
+struct Cyc_Std_String_pa_struct _temp406; _temp406.tag= Cyc_Std_String_pa;
+_temp406.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
+_temp405; _temp405.tag= Cyc_Std_String_pa; _temp405.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t1);{ void* _temp404[ 2u]={& _temp405,& _temp406}; Cyc_Tcutil_terr( loc,
 _tag_arr("comparison not allowed between %s and %s", sizeof( unsigned char), 41u),
-_tag_arr( _temp394, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();
-return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp397=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp397->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp397;}));}}}}} static void* Cyc_Tcexp_tcBinPrimop( struct Cyc_Tcenv_Tenv*
+_tag_arr( _temp404, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();
+return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp407=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp407->v=( void*) Cyc_Tcenv_lookup_type_vars(
+te); _temp407;}));}}}}} static void* Cyc_Tcexp_tcBinPrimop( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, void* p, struct Cyc_Absyn_Exp*
-e1, struct Cyc_Absyn_Exp* e2){ void* _temp398= p; _LL400: if( _temp398 == ( void*)
-Cyc_Absyn_Plus){ goto _LL401;} else{ goto _LL402;} _LL402: if( _temp398 == (
-void*) Cyc_Absyn_Minus){ goto _LL403;} else{ goto _LL404;} _LL404: if( _temp398
-== ( void*) Cyc_Absyn_Times){ goto _LL405;} else{ goto _LL406;} _LL406: if(
-_temp398 == ( void*) Cyc_Absyn_Div){ goto _LL407;} else{ goto _LL408;} _LL408:
-if( _temp398 == ( void*) Cyc_Absyn_Mod){ goto _LL409;} else{ goto _LL410;}
-_LL410: if( _temp398 == ( void*) Cyc_Absyn_Bitand){ goto _LL411;} else{ goto
-_LL412;} _LL412: if( _temp398 == ( void*) Cyc_Absyn_Bitor){ goto _LL413;} else{
-goto _LL414;} _LL414: if( _temp398 == ( void*) Cyc_Absyn_Bitxor){ goto _LL415;}
-else{ goto _LL416;} _LL416: if( _temp398 == ( void*) Cyc_Absyn_Bitlshift){ goto
-_LL417;} else{ goto _LL418;} _LL418: if( _temp398 == ( void*) Cyc_Absyn_Bitlrshift){
-goto _LL419;} else{ goto _LL420;} _LL420: if( _temp398 == ( void*) Cyc_Absyn_Bitarshift){
-goto _LL421;} else{ goto _LL422;} _LL422: if( _temp398 == ( void*) Cyc_Absyn_Eq){
-goto _LL423;} else{ goto _LL424;} _LL424: if( _temp398 == ( void*) Cyc_Absyn_Neq){
-goto _LL425;} else{ goto _LL426;} _LL426: if( _temp398 == ( void*) Cyc_Absyn_Gt){
-goto _LL427;} else{ goto _LL428;} _LL428: if( _temp398 == ( void*) Cyc_Absyn_Lt){
-goto _LL429;} else{ goto _LL430;} _LL430: if( _temp398 == ( void*) Cyc_Absyn_Gte){
-goto _LL431;} else{ goto _LL432;} _LL432: if( _temp398 == ( void*) Cyc_Absyn_Lte){
-goto _LL433;} else{ goto _LL434;} _LL434: goto _LL435; _LL401: return Cyc_Tcexp_tcPlus(
-te, e1, e2); _LL403: return Cyc_Tcexp_tcMinus( te, e1, e2); _LL405: goto _LL407;
-_LL407: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);
-_LL409: goto _LL411; _LL411: goto _LL413; _LL413: goto _LL415; _LL415: goto
-_LL417; _LL417: goto _LL419; _LL419: goto _LL421; _LL421: return Cyc_Tcexp_tcArithBinop(
-te, e1, e2, Cyc_Tcutil_is_integral); _LL423: goto _LL425; _LL425: goto _LL427;
-_LL427: goto _LL429; _LL429: goto _LL431; _LL431: goto _LL433; _LL433: return
-Cyc_Tcexp_tcAnyBinop( te, loc, e1, e2); _LL435:( int) _throw(( void*)({ struct
-Cyc_Core_Failure_struct* _temp436=( struct Cyc_Core_Failure_struct*) _cycalloc(
-sizeof( struct Cyc_Core_Failure_struct)); _temp436[ 0]=({ struct Cyc_Core_Failure_struct
-_temp437; _temp437.tag= Cyc_Core_Failure; _temp437.f1= _tag_arr("bad binary primop",
-sizeof( unsigned char), 18u); _temp437;}); _temp436;})); _LL399:;} static void*
+e1, struct Cyc_Absyn_Exp* e2){ void* _temp408= p; _LL410: if( _temp408 == ( void*)
+Cyc_Absyn_Plus){ goto _LL411;} else{ goto _LL412;} _LL412: if( _temp408 == (
+void*) Cyc_Absyn_Minus){ goto _LL413;} else{ goto _LL414;} _LL414: if( _temp408
+== ( void*) Cyc_Absyn_Times){ goto _LL415;} else{ goto _LL416;} _LL416: if(
+_temp408 == ( void*) Cyc_Absyn_Div){ goto _LL417;} else{ goto _LL418;} _LL418:
+if( _temp408 == ( void*) Cyc_Absyn_Mod){ goto _LL419;} else{ goto _LL420;}
+_LL420: if( _temp408 == ( void*) Cyc_Absyn_Bitand){ goto _LL421;} else{ goto
+_LL422;} _LL422: if( _temp408 == ( void*) Cyc_Absyn_Bitor){ goto _LL423;} else{
+goto _LL424;} _LL424: if( _temp408 == ( void*) Cyc_Absyn_Bitxor){ goto _LL425;}
+else{ goto _LL426;} _LL426: if( _temp408 == ( void*) Cyc_Absyn_Bitlshift){ goto
+_LL427;} else{ goto _LL428;} _LL428: if( _temp408 == ( void*) Cyc_Absyn_Bitlrshift){
+goto _LL429;} else{ goto _LL430;} _LL430: if( _temp408 == ( void*) Cyc_Absyn_Bitarshift){
+goto _LL431;} else{ goto _LL432;} _LL432: if( _temp408 == ( void*) Cyc_Absyn_Eq){
+goto _LL433;} else{ goto _LL434;} _LL434: if( _temp408 == ( void*) Cyc_Absyn_Neq){
+goto _LL435;} else{ goto _LL436;} _LL436: if( _temp408 == ( void*) Cyc_Absyn_Gt){
+goto _LL437;} else{ goto _LL438;} _LL438: if( _temp408 == ( void*) Cyc_Absyn_Lt){
+goto _LL439;} else{ goto _LL440;} _LL440: if( _temp408 == ( void*) Cyc_Absyn_Gte){
+goto _LL441;} else{ goto _LL442;} _LL442: if( _temp408 == ( void*) Cyc_Absyn_Lte){
+goto _LL443;} else{ goto _LL444;} _LL444: goto _LL445; _LL411: return Cyc_Tcexp_tcPlus(
+te, e1, e2); _LL413: return Cyc_Tcexp_tcMinus( te, e1, e2); _LL415: goto _LL417;
+_LL417: return Cyc_Tcexp_tcArithBinop( te, e1, e2, Cyc_Tcutil_is_numeric);
+_LL419: goto _LL421; _LL421: goto _LL423; _LL423: goto _LL425; _LL425: goto
+_LL427; _LL427: goto _LL429; _LL429: goto _LL431; _LL431: return Cyc_Tcexp_tcArithBinop(
+te, e1, e2, Cyc_Tcutil_is_integral); _LL433: goto _LL435; _LL435: goto _LL437;
+_LL437: goto _LL439; _LL439: goto _LL441; _LL441: goto _LL443; _LL443: return
+Cyc_Tcexp_tcAnyBinop( te, loc, e1, e2); _LL445:( int) _throw(( void*)({ struct
+Cyc_Core_Failure_struct* _temp446=( struct Cyc_Core_Failure_struct*) _cycalloc(
+sizeof( struct Cyc_Core_Failure_struct)); _temp446[ 0]=({ struct Cyc_Core_Failure_struct
+_temp447; _temp447.tag= Cyc_Core_Failure; _temp447.f1= _tag_arr("bad binary primop",
+sizeof( unsigned char), 18u); _temp447;}); _temp446;})); _LL409:;} static void*
 Cyc_Tcexp_tcPrimop( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc,
 void** topt, void* p, struct Cyc_List_List* es){ if( p == ( void*) Cyc_Absyn_Minus?((
 int(*)( struct Cyc_List_List* x)) Cyc_List_length)( es) ==  1: 0){ return Cyc_Tcexp_tcExp(
 te, topt,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd);}
 Cyc_Tcexp_tcExpList( te, es);{ void* t; switch((( int(*)( struct Cyc_List_List*
-x)) Cyc_List_length)( es)){ case 0: _LL438: return({ void* _temp440[ 0u]={}; Cyc_Tcexp_expr_err(
+x)) Cyc_List_length)( es)){ case 0: _LL448: return({ void* _temp450[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("primitive operator has 0 arguments", sizeof( unsigned char),
-35u), _tag_arr( _temp440, sizeof( void*), 0u));}); case 1: _LL439: t= Cyc_Tcexp_tcUnPrimop(
+35u), _tag_arr( _temp450, sizeof( void*), 0u));}); case 1: _LL449: t= Cyc_Tcexp_tcUnPrimop(
 te, loc, topt, p,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null(
-es))->hd); break; case 2: _LL441: t= Cyc_Tcexp_tcBinPrimop( te, loc, topt, p,(
+es))->hd); break; case 2: _LL451: t= Cyc_Tcexp_tcBinPrimop( te, loc, topt, p,(
 struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd,( struct
 Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*)
-_check_null( es))->tl))->hd); break; default: _LL442: return({ void* _temp444[ 0u]={};
+_check_null( es))->tl))->hd); break; default: _LL452: return({ void* _temp454[ 0u]={};
 Cyc_Tcexp_expr_err( te, loc, _tag_arr("primitive operator has > 2 arguments",
-sizeof( unsigned char), 37u), _tag_arr( _temp444, sizeof( void*), 0u));});}
+sizeof( unsigned char), 37u), _tag_arr( _temp454, sizeof( void*), 0u));});}
 return t;}} struct _tuple8{ struct Cyc_Absyn_Tqual f1; void* f2; } ; static void
 Cyc_Tcexp_check_writable( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e){{
-void* _temp445=( void*) e->r; void* _temp469; struct Cyc_Absyn_Vardecl* _temp471;
-void* _temp473; struct Cyc_Absyn_Vardecl* _temp475; void* _temp477; struct Cyc_Absyn_Vardecl*
-_temp479; void* _temp481; struct Cyc_Absyn_Vardecl* _temp483; struct Cyc_Absyn_Exp*
-_temp485; struct Cyc_Absyn_Exp* _temp487; struct _tagged_arr* _temp489; struct
-Cyc_Absyn_Exp* _temp491; struct _tagged_arr* _temp493; struct Cyc_Absyn_Exp*
-_temp495; struct Cyc_Absyn_Exp* _temp497; struct Cyc_Absyn_Exp* _temp499; struct
-Cyc_Absyn_Exp* _temp501; _LL447: if(*(( int*) _temp445) ==  Cyc_Absyn_Var_e){
-_LL470: _temp469=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp445)->f2; if((
-unsigned int) _temp469 >  1u?*(( int*) _temp469) ==  Cyc_Absyn_Param_b: 0){
-_LL472: _temp471=(( struct Cyc_Absyn_Param_b_struct*) _temp469)->f1; goto _LL448;}
-else{ goto _LL449;}} else{ goto _LL449;} _LL449: if(*(( int*) _temp445) ==  Cyc_Absyn_Var_e){
-_LL474: _temp473=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp445)->f2; if((
-unsigned int) _temp473 >  1u?*(( int*) _temp473) ==  Cyc_Absyn_Local_b: 0){
-_LL476: _temp475=(( struct Cyc_Absyn_Local_b_struct*) _temp473)->f1; goto _LL450;}
-else{ goto _LL451;}} else{ goto _LL451;} _LL451: if(*(( int*) _temp445) ==  Cyc_Absyn_Var_e){
-_LL478: _temp477=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp445)->f2; if((
-unsigned int) _temp477 >  1u?*(( int*) _temp477) ==  Cyc_Absyn_Pat_b: 0){ _LL480:
-_temp479=(( struct Cyc_Absyn_Pat_b_struct*) _temp477)->f1; goto _LL452;} else{
-goto _LL453;}} else{ goto _LL453;} _LL453: if(*(( int*) _temp445) ==  Cyc_Absyn_Var_e){
-_LL482: _temp481=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp445)->f2; if((
-unsigned int) _temp481 >  1u?*(( int*) _temp481) ==  Cyc_Absyn_Global_b: 0){
-_LL484: _temp483=(( struct Cyc_Absyn_Global_b_struct*) _temp481)->f1; goto
-_LL454;} else{ goto _LL455;}} else{ goto _LL455;} _LL455: if(*(( int*) _temp445)
-==  Cyc_Absyn_Subscript_e){ _LL488: _temp487=(( struct Cyc_Absyn_Subscript_e_struct*)
-_temp445)->f1; goto _LL486; _LL486: _temp485=(( struct Cyc_Absyn_Subscript_e_struct*)
-_temp445)->f2; goto _LL456;} else{ goto _LL457;} _LL457: if(*(( int*) _temp445)
-==  Cyc_Absyn_StructMember_e){ _LL492: _temp491=(( struct Cyc_Absyn_StructMember_e_struct*)
-_temp445)->f1; goto _LL490; _LL490: _temp489=(( struct Cyc_Absyn_StructMember_e_struct*)
-_temp445)->f2; goto _LL458;} else{ goto _LL459;} _LL459: if(*(( int*) _temp445)
-==  Cyc_Absyn_StructArrow_e){ _LL496: _temp495=(( struct Cyc_Absyn_StructArrow_e_struct*)
-_temp445)->f1; goto _LL494; _LL494: _temp493=(( struct Cyc_Absyn_StructArrow_e_struct*)
-_temp445)->f2; goto _LL460;} else{ goto _LL461;} _LL461: if(*(( int*) _temp445)
-==  Cyc_Absyn_Deref_e){ _LL498: _temp497=(( struct Cyc_Absyn_Deref_e_struct*)
-_temp445)->f1; goto _LL462;} else{ goto _LL463;} _LL463: if(*(( int*) _temp445)
-==  Cyc_Absyn_NoInstantiate_e){ _LL500: _temp499=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
-_temp445)->f1; goto _LL464;} else{ goto _LL465;} _LL465: if(*(( int*) _temp445)
-==  Cyc_Absyn_Instantiate_e){ _LL502: _temp501=(( struct Cyc_Absyn_Instantiate_e_struct*)
-_temp445)->f1; goto _LL466;} else{ goto _LL467;} _LL467: goto _LL468; _LL448:
-_temp475= _temp471; goto _LL450; _LL450: _temp479= _temp475; goto _LL452; _LL452:
-_temp483= _temp479; goto _LL454; _LL454: if( !( _temp483->tq).q_const){ return;}
-goto _LL446; _LL456:{ void* _temp503= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
-_check_null( _temp487->topt))->v); struct Cyc_Absyn_PtrInfo _temp513; struct Cyc_Absyn_Tqual
-_temp515; struct Cyc_Absyn_Tqual _temp517; struct Cyc_List_List* _temp519;
-_LL505: if(( unsigned int) _temp503 >  4u?*(( int*) _temp503) ==  Cyc_Absyn_PointerType:
-0){ _LL514: _temp513=(( struct Cyc_Absyn_PointerType_struct*) _temp503)->f1;
-_LL516: _temp515= _temp513.tq; goto _LL506;} else{ goto _LL507;} _LL507: if((
-unsigned int) _temp503 >  4u?*(( int*) _temp503) ==  Cyc_Absyn_ArrayType: 0){
-_LL518: _temp517=(( struct Cyc_Absyn_ArrayType_struct*) _temp503)->f2; goto
-_LL508;} else{ goto _LL509;} _LL509: if(( unsigned int) _temp503 >  4u?*(( int*)
-_temp503) ==  Cyc_Absyn_TupleType: 0){ _LL520: _temp519=(( struct Cyc_Absyn_TupleType_struct*)
-_temp503)->f1; goto _LL510;} else{ goto _LL511;} _LL511: goto _LL512; _LL506:
-_temp517= _temp515; goto _LL508; _LL508: if( ! _temp517.q_const){ return;} goto
-_LL504; _LL510: { unsigned int i= Cyc_Evexp_eval_const_uint_exp( _temp485);{
-struct _handler_cons _temp521; _push_handler(& _temp521);{ int _temp523= 0; if(
-setjmp( _temp521.handler)){ _temp523= 1;} if( ! _temp523){{ struct _tuple8
-_temp526; struct Cyc_Absyn_Tqual _temp527; struct _tuple8* _temp524=(( struct
-_tuple8*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)( _temp519,( int) i);
-_temp526=* _temp524; _LL528: _temp527= _temp526.f1; goto _LL525; _LL525: if( !
-_temp527.q_const){ _npop_handler( 0u); return;}}; _pop_handler();} else{ void*
-_temp522=( void*) _exn_thrown; void* _temp530= _temp522; _LL532: if( _temp530 == 
-Cyc_List_Nth){ goto _LL533;} else{ goto _LL534;} _LL534: goto _LL535; _LL533:
-return; _LL535:( void) _throw( _temp530); _LL531:;}}} goto _LL504;} _LL512: goto
-_LL504; _LL504:;} goto _LL446; _LL458:{ void* _temp536= Cyc_Tcutil_compress((
-void*)(( struct Cyc_Core_Opt*) _check_null( _temp491->topt))->v); struct Cyc_Absyn_Structdecl**
-_temp548; struct Cyc_List_List* _temp550; struct Cyc_List_List* _temp552; struct
-Cyc_Absyn_Uniondecl** _temp554; _LL538: if(( unsigned int) _temp536 >  4u?*((
-int*) _temp536) ==  Cyc_Absyn_StructType: 0){ _LL549: _temp548=(( struct Cyc_Absyn_StructType_struct*)
-_temp536)->f3; goto _LL539;} else{ goto _LL540;} _LL540: if(( unsigned int)
-_temp536 >  4u?*(( int*) _temp536) ==  Cyc_Absyn_AnonUnionType: 0){ _LL551:
-_temp550=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp536)->f1; goto _LL541;}
-else{ goto _LL542;} _LL542: if(( unsigned int) _temp536 >  4u?*(( int*) _temp536)
-==  Cyc_Absyn_AnonStructType: 0){ _LL553: _temp552=(( struct Cyc_Absyn_AnonStructType_struct*)
-_temp536)->f1; goto _LL543;} else{ goto _LL544;} _LL544: if(( unsigned int)
-_temp536 >  4u?*(( int*) _temp536) ==  Cyc_Absyn_UnionType: 0){ _LL555: _temp554=((
-struct Cyc_Absyn_UnionType_struct*) _temp536)->f3; goto _LL545;} else{ goto
-_LL546;} _LL546: goto _LL547; _LL539: { struct Cyc_Absyn_Structfield* sf=
-_temp548 ==  0? 0: Cyc_Absyn_lookup_struct_field(( struct Cyc_Absyn_Structdecl*)*((
-struct Cyc_Absyn_Structdecl**) _check_null( _temp548)), _temp489); if( sf ==  0?
+void* _temp455=( void*) e->r; void* _temp479; struct Cyc_Absyn_Vardecl* _temp481;
+void* _temp483; struct Cyc_Absyn_Vardecl* _temp485; void* _temp487; struct Cyc_Absyn_Vardecl*
+_temp489; void* _temp491; struct Cyc_Absyn_Vardecl* _temp493; struct Cyc_Absyn_Exp*
+_temp495; struct Cyc_Absyn_Exp* _temp497; struct _tagged_arr* _temp499; struct
+Cyc_Absyn_Exp* _temp501; struct _tagged_arr* _temp503; struct Cyc_Absyn_Exp*
+_temp505; struct Cyc_Absyn_Exp* _temp507; struct Cyc_Absyn_Exp* _temp509; struct
+Cyc_Absyn_Exp* _temp511; _LL457: if(*(( int*) _temp455) ==  Cyc_Absyn_Var_e){
+_LL480: _temp479=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp455)->f2; if((
+unsigned int) _temp479 >  1u?*(( int*) _temp479) ==  Cyc_Absyn_Param_b: 0){
+_LL482: _temp481=(( struct Cyc_Absyn_Param_b_struct*) _temp479)->f1; goto _LL458;}
+else{ goto _LL459;}} else{ goto _LL459;} _LL459: if(*(( int*) _temp455) ==  Cyc_Absyn_Var_e){
+_LL484: _temp483=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp455)->f2; if((
+unsigned int) _temp483 >  1u?*(( int*) _temp483) ==  Cyc_Absyn_Local_b: 0){
+_LL486: _temp485=(( struct Cyc_Absyn_Local_b_struct*) _temp483)->f1; goto _LL460;}
+else{ goto _LL461;}} else{ goto _LL461;} _LL461: if(*(( int*) _temp455) ==  Cyc_Absyn_Var_e){
+_LL488: _temp487=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp455)->f2; if((
+unsigned int) _temp487 >  1u?*(( int*) _temp487) ==  Cyc_Absyn_Pat_b: 0){ _LL490:
+_temp489=(( struct Cyc_Absyn_Pat_b_struct*) _temp487)->f1; goto _LL462;} else{
+goto _LL463;}} else{ goto _LL463;} _LL463: if(*(( int*) _temp455) ==  Cyc_Absyn_Var_e){
+_LL492: _temp491=( void*)(( struct Cyc_Absyn_Var_e_struct*) _temp455)->f2; if((
+unsigned int) _temp491 >  1u?*(( int*) _temp491) ==  Cyc_Absyn_Global_b: 0){
+_LL494: _temp493=(( struct Cyc_Absyn_Global_b_struct*) _temp491)->f1; goto
+_LL464;} else{ goto _LL465;}} else{ goto _LL465;} _LL465: if(*(( int*) _temp455)
+==  Cyc_Absyn_Subscript_e){ _LL498: _temp497=(( struct Cyc_Absyn_Subscript_e_struct*)
+_temp455)->f1; goto _LL496; _LL496: _temp495=(( struct Cyc_Absyn_Subscript_e_struct*)
+_temp455)->f2; goto _LL466;} else{ goto _LL467;} _LL467: if(*(( int*) _temp455)
+==  Cyc_Absyn_StructMember_e){ _LL502: _temp501=(( struct Cyc_Absyn_StructMember_e_struct*)
+_temp455)->f1; goto _LL500; _LL500: _temp499=(( struct Cyc_Absyn_StructMember_e_struct*)
+_temp455)->f2; goto _LL468;} else{ goto _LL469;} _LL469: if(*(( int*) _temp455)
+==  Cyc_Absyn_StructArrow_e){ _LL506: _temp505=(( struct Cyc_Absyn_StructArrow_e_struct*)
+_temp455)->f1; goto _LL504; _LL504: _temp503=(( struct Cyc_Absyn_StructArrow_e_struct*)
+_temp455)->f2; goto _LL470;} else{ goto _LL471;} _LL471: if(*(( int*) _temp455)
+==  Cyc_Absyn_Deref_e){ _LL508: _temp507=(( struct Cyc_Absyn_Deref_e_struct*)
+_temp455)->f1; goto _LL472;} else{ goto _LL473;} _LL473: if(*(( int*) _temp455)
+==  Cyc_Absyn_NoInstantiate_e){ _LL510: _temp509=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
+_temp455)->f1; goto _LL474;} else{ goto _LL475;} _LL475: if(*(( int*) _temp455)
+==  Cyc_Absyn_Instantiate_e){ _LL512: _temp511=(( struct Cyc_Absyn_Instantiate_e_struct*)
+_temp455)->f1; goto _LL476;} else{ goto _LL477;} _LL477: goto _LL478; _LL458:
+_temp485= _temp481; goto _LL460; _LL460: _temp489= _temp485; goto _LL462; _LL462:
+_temp493= _temp489; goto _LL464; _LL464: if( !( _temp493->tq).q_const){ return;}
+goto _LL456; _LL466:{ void* _temp513= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
+_check_null( _temp497->topt))->v); struct Cyc_Absyn_PtrInfo _temp523; struct Cyc_Absyn_Tqual
+_temp525; struct Cyc_Absyn_Tqual _temp527; struct Cyc_List_List* _temp529;
+_LL515: if(( unsigned int) _temp513 >  4u?*(( int*) _temp513) ==  Cyc_Absyn_PointerType:
+0){ _LL524: _temp523=(( struct Cyc_Absyn_PointerType_struct*) _temp513)->f1;
+_LL526: _temp525= _temp523.tq; goto _LL516;} else{ goto _LL517;} _LL517: if((
+unsigned int) _temp513 >  4u?*(( int*) _temp513) ==  Cyc_Absyn_ArrayType: 0){
+_LL528: _temp527=(( struct Cyc_Absyn_ArrayType_struct*) _temp513)->f2; goto
+_LL518;} else{ goto _LL519;} _LL519: if(( unsigned int) _temp513 >  4u?*(( int*)
+_temp513) ==  Cyc_Absyn_TupleType: 0){ _LL530: _temp529=(( struct Cyc_Absyn_TupleType_struct*)
+_temp513)->f1; goto _LL520;} else{ goto _LL521;} _LL521: goto _LL522; _LL516:
+_temp527= _temp525; goto _LL518; _LL518: if( ! _temp527.q_const){ return;} goto
+_LL514; _LL520: { unsigned int i= Cyc_Evexp_eval_const_uint_exp( _temp495);{
+struct _handler_cons _temp531; _push_handler(& _temp531);{ int _temp533= 0; if(
+setjmp( _temp531.handler)){ _temp533= 1;} if( ! _temp533){{ struct _tuple8
+_temp536; struct Cyc_Absyn_Tqual _temp537; struct _tuple8* _temp534=(( struct
+_tuple8*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)( _temp529,( int) i);
+_temp536=* _temp534; _LL538: _temp537= _temp536.f1; goto _LL535; _LL535: if( !
+_temp537.q_const){ _npop_handler( 0u); return;}}; _pop_handler();} else{ void*
+_temp532=( void*) _exn_thrown; void* _temp540= _temp532; _LL542: if( _temp540 == 
+Cyc_List_Nth){ goto _LL543;} else{ goto _LL544;} _LL544: goto _LL545; _LL543:
+return; _LL545:( void) _throw( _temp540); _LL541:;}}} goto _LL514;} _LL522: goto
+_LL514; _LL514:;} goto _LL456; _LL468:{ void* _temp546= Cyc_Tcutil_compress((
+void*)(( struct Cyc_Core_Opt*) _check_null( _temp501->topt))->v); struct Cyc_Absyn_Structdecl**
+_temp558; struct Cyc_List_List* _temp560; struct Cyc_List_List* _temp562; struct
+Cyc_Absyn_Uniondecl** _temp564; _LL548: if(( unsigned int) _temp546 >  4u?*((
+int*) _temp546) ==  Cyc_Absyn_StructType: 0){ _LL559: _temp558=(( struct Cyc_Absyn_StructType_struct*)
+_temp546)->f3; goto _LL549;} else{ goto _LL550;} _LL550: if(( unsigned int)
+_temp546 >  4u?*(( int*) _temp546) ==  Cyc_Absyn_AnonUnionType: 0){ _LL561:
+_temp560=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp546)->f1; goto _LL551;}
+else{ goto _LL552;} _LL552: if(( unsigned int) _temp546 >  4u?*(( int*) _temp546)
+==  Cyc_Absyn_AnonStructType: 0){ _LL563: _temp562=(( struct Cyc_Absyn_AnonStructType_struct*)
+_temp546)->f1; goto _LL553;} else{ goto _LL554;} _LL554: if(( unsigned int)
+_temp546 >  4u?*(( int*) _temp546) ==  Cyc_Absyn_UnionType: 0){ _LL565: _temp564=((
+struct Cyc_Absyn_UnionType_struct*) _temp546)->f3; goto _LL555;} else{ goto
+_LL556;} _LL556: goto _LL557; _LL549: { struct Cyc_Absyn_Structfield* sf=
+_temp558 ==  0? 0: Cyc_Absyn_lookup_struct_field(( struct Cyc_Absyn_Structdecl*)*((
+struct Cyc_Absyn_Structdecl**) _check_null( _temp558)), _temp499); if( sf ==  0?
 1: !((( struct Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;}
-goto _LL537;} _LL541: _temp552= _temp550; goto _LL543; _LL543: { struct Cyc_Absyn_Structfield*
-sf= Cyc_Absyn_lookup_field( _temp552, _temp489); if( sf ==  0? 1: !((( struct
-Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;} goto _LL537;}
-_LL545: { struct Cyc_Absyn_Structfield* sf= _temp554 ==  0? 0: Cyc_Absyn_lookup_union_field((
+goto _LL547;} _LL551: _temp562= _temp560; goto _LL553; _LL553: { struct Cyc_Absyn_Structfield*
+sf= Cyc_Absyn_lookup_field( _temp562, _temp499); if( sf ==  0? 1: !((( struct
+Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;} goto _LL547;}
+_LL555: { struct Cyc_Absyn_Structfield* sf= _temp564 ==  0? 0: Cyc_Absyn_lookup_union_field((
 struct Cyc_Absyn_Uniondecl*)*(( struct Cyc_Absyn_Uniondecl**) _check_null(
-_temp554)), _temp489); if( sf ==  0? 1: !((( struct Cyc_Absyn_Structfield*)
-_check_null( sf))->tq).q_const){ return;} goto _LL537;} _LL547: goto _LL537;
-_LL537:;} goto _LL446; _LL460:{ void* _temp556= Cyc_Tcutil_compress(( void*)((
-struct Cyc_Core_Opt*) _check_null( _temp495->topt))->v); struct Cyc_Absyn_PtrInfo
-_temp562; void* _temp564; _LL558: if(( unsigned int) _temp556 >  4u?*(( int*)
-_temp556) ==  Cyc_Absyn_PointerType: 0){ _LL563: _temp562=(( struct Cyc_Absyn_PointerType_struct*)
-_temp556)->f1; _LL565: _temp564=( void*) _temp562.elt_typ; goto _LL559;} else{
-goto _LL560;} _LL560: goto _LL561; _LL559:{ void* _temp566= Cyc_Tcutil_compress(
-_temp564); struct Cyc_Absyn_Structdecl** _temp578; struct Cyc_Absyn_Uniondecl**
-_temp580; struct Cyc_List_List* _temp582; struct Cyc_List_List* _temp584; _LL568:
-if(( unsigned int) _temp566 >  4u?*(( int*) _temp566) ==  Cyc_Absyn_StructType:
-0){ _LL579: _temp578=(( struct Cyc_Absyn_StructType_struct*) _temp566)->f3; goto
-_LL569;} else{ goto _LL570;} _LL570: if(( unsigned int) _temp566 >  4u?*(( int*)
-_temp566) ==  Cyc_Absyn_UnionType: 0){ _LL581: _temp580=(( struct Cyc_Absyn_UnionType_struct*)
-_temp566)->f3; goto _LL571;} else{ goto _LL572;} _LL572: if(( unsigned int)
-_temp566 >  4u?*(( int*) _temp566) ==  Cyc_Absyn_AnonStructType: 0){ _LL583:
-_temp582=(( struct Cyc_Absyn_AnonStructType_struct*) _temp566)->f1; goto _LL573;}
-else{ goto _LL574;} _LL574: if(( unsigned int) _temp566 >  4u?*(( int*) _temp566)
-==  Cyc_Absyn_AnonUnionType: 0){ _LL585: _temp584=(( struct Cyc_Absyn_AnonUnionType_struct*)
-_temp566)->f1; goto _LL575;} else{ goto _LL576;} _LL576: goto _LL577; _LL569: {
-struct Cyc_Absyn_Structfield* sf= _temp578 ==  0? 0: Cyc_Absyn_lookup_struct_field((
+_temp564)), _temp499); if( sf ==  0? 1: !((( struct Cyc_Absyn_Structfield*)
+_check_null( sf))->tq).q_const){ return;} goto _LL547;} _LL557: goto _LL547;
+_LL547:;} goto _LL456; _LL470:{ void* _temp566= Cyc_Tcutil_compress(( void*)((
+struct Cyc_Core_Opt*) _check_null( _temp505->topt))->v); struct Cyc_Absyn_PtrInfo
+_temp572; void* _temp574; _LL568: if(( unsigned int) _temp566 >  4u?*(( int*)
+_temp566) ==  Cyc_Absyn_PointerType: 0){ _LL573: _temp572=(( struct Cyc_Absyn_PointerType_struct*)
+_temp566)->f1; _LL575: _temp574=( void*) _temp572.elt_typ; goto _LL569;} else{
+goto _LL570;} _LL570: goto _LL571; _LL569:{ void* _temp576= Cyc_Tcutil_compress(
+_temp574); struct Cyc_Absyn_Structdecl** _temp588; struct Cyc_Absyn_Uniondecl**
+_temp590; struct Cyc_List_List* _temp592; struct Cyc_List_List* _temp594; _LL578:
+if(( unsigned int) _temp576 >  4u?*(( int*) _temp576) ==  Cyc_Absyn_StructType:
+0){ _LL589: _temp588=(( struct Cyc_Absyn_StructType_struct*) _temp576)->f3; goto
+_LL579;} else{ goto _LL580;} _LL580: if(( unsigned int) _temp576 >  4u?*(( int*)
+_temp576) ==  Cyc_Absyn_UnionType: 0){ _LL591: _temp590=(( struct Cyc_Absyn_UnionType_struct*)
+_temp576)->f3; goto _LL581;} else{ goto _LL582;} _LL582: if(( unsigned int)
+_temp576 >  4u?*(( int*) _temp576) ==  Cyc_Absyn_AnonStructType: 0){ _LL593:
+_temp592=(( struct Cyc_Absyn_AnonStructType_struct*) _temp576)->f1; goto _LL583;}
+else{ goto _LL584;} _LL584: if(( unsigned int) _temp576 >  4u?*(( int*) _temp576)
+==  Cyc_Absyn_AnonUnionType: 0){ _LL595: _temp594=(( struct Cyc_Absyn_AnonUnionType_struct*)
+_temp576)->f1; goto _LL585;} else{ goto _LL586;} _LL586: goto _LL587; _LL579: {
+struct Cyc_Absyn_Structfield* sf= _temp588 ==  0? 0: Cyc_Absyn_lookup_struct_field((
 struct Cyc_Absyn_Structdecl*)*(( struct Cyc_Absyn_Structdecl**) _check_null(
-_temp578)), _temp493); if( sf ==  0? 1: !((( struct Cyc_Absyn_Structfield*)
-_check_null( sf))->tq).q_const){ return;} goto _LL567;} _LL571: { struct Cyc_Absyn_Structfield*
-sf= _temp580 ==  0? 0: Cyc_Absyn_lookup_union_field(( struct Cyc_Absyn_Uniondecl*)*((
-struct Cyc_Absyn_Uniondecl**) _check_null( _temp580)), _temp493); if( sf ==  0?
+_temp588)), _temp503); if( sf ==  0? 1: !((( struct Cyc_Absyn_Structfield*)
+_check_null( sf))->tq).q_const){ return;} goto _LL577;} _LL581: { struct Cyc_Absyn_Structfield*
+sf= _temp590 ==  0? 0: Cyc_Absyn_lookup_union_field(( struct Cyc_Absyn_Uniondecl*)*((
+struct Cyc_Absyn_Uniondecl**) _check_null( _temp590)), _temp503); if( sf ==  0?
 1: !((( struct Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;}
-goto _LL567;} _LL573: _temp584= _temp582; goto _LL575; _LL575: { struct Cyc_Absyn_Structfield*
-sf= Cyc_Absyn_lookup_field( _temp584, _temp493); if( sf ==  0? 1: !((( struct
-Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;} goto _LL567;}
-_LL577: goto _LL567; _LL567:;} goto _LL557; _LL561: goto _LL557; _LL557:;} goto
-_LL446; _LL462:{ void* _temp586= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
-_check_null( _temp497->topt))->v); struct Cyc_Absyn_PtrInfo _temp594; struct Cyc_Absyn_Tqual
-_temp596; struct Cyc_Absyn_Tqual _temp598; _LL588: if(( unsigned int) _temp586 > 
-4u?*(( int*) _temp586) ==  Cyc_Absyn_PointerType: 0){ _LL595: _temp594=(( struct
-Cyc_Absyn_PointerType_struct*) _temp586)->f1; _LL597: _temp596= _temp594.tq;
-goto _LL589;} else{ goto _LL590;} _LL590: if(( unsigned int) _temp586 >  4u?*((
-int*) _temp586) ==  Cyc_Absyn_ArrayType: 0){ _LL599: _temp598=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp586)->f2; goto _LL591;} else{ goto _LL592;} _LL592: goto _LL593; _LL589:
-_temp598= _temp596; goto _LL591; _LL591: if( ! _temp598.q_const){ return;} goto
-_LL587; _LL593: goto _LL587; _LL587:;} goto _LL446; _LL464: _temp501= _temp499;
-goto _LL466; _LL466: Cyc_Tcexp_check_writable( te, _temp501); return; _LL468:
-goto _LL446; _LL446:;}({ struct Cyc_Std_String_pa_struct _temp601; _temp601.tag=
-Cyc_Std_String_pa; _temp601.f1=( struct _tagged_arr) Cyc_Absynpp_exp2string( e);{
-void* _temp600[ 1u]={& _temp601}; Cyc_Tcutil_terr( e->loc, _tag_arr("attempt to write a const location: %s",
-sizeof( unsigned char), 38u), _tag_arr( _temp600, sizeof( void*), 1u));}});}
+goto _LL577;} _LL583: _temp594= _temp592; goto _LL585; _LL585: { struct Cyc_Absyn_Structfield*
+sf= Cyc_Absyn_lookup_field( _temp594, _temp503); if( sf ==  0? 1: !((( struct
+Cyc_Absyn_Structfield*) _check_null( sf))->tq).q_const){ return;} goto _LL577;}
+_LL587: goto _LL577; _LL577:;} goto _LL567; _LL571: goto _LL567; _LL567:;} goto
+_LL456; _LL472:{ void* _temp596= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
+_check_null( _temp507->topt))->v); struct Cyc_Absyn_PtrInfo _temp604; struct Cyc_Absyn_Tqual
+_temp606; struct Cyc_Absyn_Tqual _temp608; _LL598: if(( unsigned int) _temp596 > 
+4u?*(( int*) _temp596) ==  Cyc_Absyn_PointerType: 0){ _LL605: _temp604=(( struct
+Cyc_Absyn_PointerType_struct*) _temp596)->f1; _LL607: _temp606= _temp604.tq;
+goto _LL599;} else{ goto _LL600;} _LL600: if(( unsigned int) _temp596 >  4u?*((
+int*) _temp596) ==  Cyc_Absyn_ArrayType: 0){ _LL609: _temp608=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp596)->f2; goto _LL601;} else{ goto _LL602;} _LL602: goto _LL603; _LL599:
+_temp608= _temp606; goto _LL601; _LL601: if( ! _temp608.q_const){ return;} goto
+_LL597; _LL603: goto _LL597; _LL597:;} goto _LL456; _LL474: _temp511= _temp509;
+goto _LL476; _LL476: Cyc_Tcexp_check_writable( te, _temp511); return; _LL478:
+goto _LL456; _LL456:;}({ struct Cyc_Std_String_pa_struct _temp611; _temp611.tag=
+Cyc_Std_String_pa; _temp611.f1=( struct _tagged_arr) Cyc_Absynpp_exp2string( e);{
+void* _temp610[ 1u]={& _temp611}; Cyc_Tcutil_terr( e->loc, _tag_arr("attempt to write a const location: %s",
+sizeof( unsigned char), 38u), _tag_arr( _temp610, sizeof( void*), 1u));}});}
 static void* Cyc_Tcexp_tcIncrement( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, void** topt, struct Cyc_Absyn_Exp* e, void* i){ Cyc_Tcexp_tcExpNoPromote(
-te, 0, e); if( ! Cyc_Absyn_is_lvalue( e)){ return({ void* _temp602[ 0u]={}; Cyc_Tcexp_expr_err(
+te, 0, e); if( ! Cyc_Absyn_is_lvalue( e)){ return({ void* _temp612[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("increment/decrement of non-lvalue", sizeof( unsigned char),
-34u), _tag_arr( _temp602, sizeof( void*), 0u));});} Cyc_Tcexp_check_writable( te,
+34u), _tag_arr( _temp612, sizeof( void*), 0u));});} Cyc_Tcexp_check_writable( te,
 e);{ void* t=( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; if( !
 Cyc_Tcutil_is_numeric( e)? ! Cyc_Tcutil_is_tagged_pointer_typ( t): 0){({ struct
-Cyc_Std_String_pa_struct _temp604; _temp604.tag= Cyc_Std_String_pa; _temp604.f1=(
-struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp603[ 1u]={& _temp604};
+Cyc_Std_String_pa_struct _temp614; _temp614.tag= Cyc_Std_String_pa; _temp614.f1=(
+struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp613[ 1u]={& _temp614};
 Cyc_Tcutil_terr( e->loc, _tag_arr("expecting arithmetic or ? type but found %s",
-sizeof( unsigned char), 44u), _tag_arr( _temp603, sizeof( void*), 1u));}});}
+sizeof( unsigned char), 44u), _tag_arr( _temp613, sizeof( void*), 1u));}});}
 return t;}} static void* Cyc_Tcexp_tcConditional( struct Cyc_Tcenv_Tenv* te,
 struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e1, struct
 Cyc_Absyn_Exp* e2, struct Cyc_Absyn_Exp* e3){ Cyc_Tcexp_tcTest( te, e1, _tag_arr("conditional expression",
 sizeof( unsigned char), 23u)); Cyc_Tcexp_tcExp( te, topt, e2); Cyc_Tcexp_tcExp(
 te, topt, e3);{ void* t= Cyc_Absyn_new_evar(( struct Cyc_Core_Opt*)& Cyc_Tcexp_mk,({
-struct Cyc_Core_Opt* _temp612=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp612->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp612;}));
-struct Cyc_List_List* _temp605=({ struct Cyc_List_List* _temp611=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp611->hd=( void*) e3; _temp611->tl=
-0; _temp611;}); struct Cyc_List_List* _temp606=({ struct Cyc_List_List* _temp610=(
-struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp610->hd=(
-void*) e2; _temp610->tl= _temp605; _temp610;}); if( ! Cyc_Tcutil_coerce_list( te,
-t, _temp606)){({ struct Cyc_Std_String_pa_struct _temp609; _temp609.tag= Cyc_Std_String_pa;
-_temp609.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e3->topt))->v);{ struct Cyc_Std_String_pa_struct _temp608; _temp608.tag=
-Cyc_Std_String_pa; _temp608.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
-void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v);{ void* _temp607[ 2u]={&
-_temp608,& _temp609}; Cyc_Tcutil_terr( loc, _tag_arr("conditional clause types do not match: %s != %s",
-sizeof( unsigned char), 48u), _tag_arr( _temp607, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
+struct Cyc_Core_Opt* _temp622=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp622->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp622;}));
+struct Cyc_List_List* _temp615=({ struct Cyc_List_List* _temp621=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp621->hd=( void*) e3; _temp621->tl=
+0; _temp621;}); struct Cyc_List_List* _temp616=({ struct Cyc_List_List* _temp620=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp620->hd=(
+void*) e2; _temp620->tl= _temp615; _temp620;}); if( ! Cyc_Tcutil_coerce_list( te,
+t, _temp616)){({ struct Cyc_Std_String_pa_struct _temp619; _temp619.tag= Cyc_Std_String_pa;
+_temp619.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
+_check_null( e3->topt))->v);{ struct Cyc_Std_String_pa_struct _temp618; _temp618.tag=
+Cyc_Std_String_pa; _temp618.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v);{ void* _temp617[ 2u]={&
+_temp618,& _temp619}; Cyc_Tcutil_terr( loc, _tag_arr("conditional clause types do not match: %s != %s",
+sizeof( unsigned char), 48u), _tag_arr( _temp617, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
 return t;}} static void* Cyc_Tcexp_tcAssignOp( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e1, struct Cyc_Core_Opt*
 po, struct Cyc_Absyn_Exp* e2){ Cyc_Tcexp_tcExpNoPromote( te, 0, e1); Cyc_Tcexp_tcExp(
 te,( void**)(( void**)(( void*)&(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v)),
 e2);{ void* t1=( void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v; void*
-t2=( void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v;{ void* _temp613=
-Cyc_Tcutil_compress( t1); _LL615: if(( unsigned int) _temp613 >  4u?*(( int*)
-_temp613) ==  Cyc_Absyn_ArrayType: 0){ goto _LL616;} else{ goto _LL617;} _LL617:
-goto _LL618; _LL616:({ void* _temp619[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("cannot assign to an array",
-sizeof( unsigned char), 26u), _tag_arr( _temp619, sizeof( void*), 0u));}); goto
-_LL614; _LL618: goto _LL614; _LL614:;} if( ! Cyc_Absyn_is_lvalue( e1)){ return({
-void* _temp620[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("assignment to non-lvalue",
-sizeof( unsigned char), 25u), _tag_arr( _temp620, sizeof( void*), 0u));});} Cyc_Tcexp_check_writable(
+t2=( void*)(( struct Cyc_Core_Opt*) _check_null( e2->topt))->v;{ void* _temp623=
+Cyc_Tcutil_compress( t1); _LL625: if(( unsigned int) _temp623 >  4u?*(( int*)
+_temp623) ==  Cyc_Absyn_ArrayType: 0){ goto _LL626;} else{ goto _LL627;} _LL627:
+goto _LL628; _LL626:({ void* _temp629[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("cannot assign to an array",
+sizeof( unsigned char), 26u), _tag_arr( _temp629, sizeof( void*), 0u));}); goto
+_LL624; _LL628: goto _LL624; _LL624:;} if( ! Cyc_Absyn_is_lvalue( e1)){ return({
+void* _temp630[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("assignment to non-lvalue",
+sizeof( unsigned char), 25u), _tag_arr( _temp630, sizeof( void*), 0u));});} Cyc_Tcexp_check_writable(
 te, e1); if( po ==  0){ if( ! Cyc_Tcutil_coerce_assign( te, e2, t1)){ void*
-_temp621=({ struct Cyc_Std_String_pa_struct _temp624; _temp624.tag= Cyc_Std_String_pa;
-_temp624.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
-_temp623; _temp623.tag= Cyc_Std_String_pa; _temp623.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t1);{ void* _temp622[ 2u]={& _temp623,& _temp624}; Cyc_Tcexp_expr_err( te, loc,
+_temp631=({ struct Cyc_Std_String_pa_struct _temp634; _temp634.tag= Cyc_Std_String_pa;
+_temp634.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ struct Cyc_Std_String_pa_struct
+_temp633; _temp633.tag= Cyc_Std_String_pa; _temp633.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t1);{ void* _temp632[ 2u]={& _temp633,& _temp634}; Cyc_Tcexp_expr_err( te, loc,
 _tag_arr("type mismatch: %s != %s", sizeof( unsigned char), 24u), _tag_arr(
-_temp622, sizeof( void*), 2u));}}}); Cyc_Tcutil_unify( t1, t2); Cyc_Tcutil_explain_failure();
-return _temp621;}} else{ void* _temp625=( void*)(( struct Cyc_Core_Opt*)
-_check_null( po))->v; void* _temp626= Cyc_Tcexp_tcBinPrimop( te, loc, 0,
-_temp625, e1, e2); if( !( Cyc_Tcutil_unify( _temp626, t1)? 1:( Cyc_Tcutil_coerceable(
-_temp626)? Cyc_Tcutil_coerceable( t1): 0))){ void* _temp627=({ struct Cyc_Std_String_pa_struct
-_temp630; _temp630.tag= Cyc_Std_String_pa; _temp630.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t2);{ struct Cyc_Std_String_pa_struct _temp629; _temp629.tag= Cyc_Std_String_pa;
-_temp629.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ void* _temp628[
-2u]={& _temp629,& _temp630}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("Cannot use this operator in an assignment when the arguments have types %s and %s",
-sizeof( unsigned char), 82u), _tag_arr( _temp628, sizeof( void*), 2u));}}}); Cyc_Tcutil_unify(
-_temp626, t1); Cyc_Tcutil_explain_failure(); return _temp627;} return _temp626;}
+_temp632, sizeof( void*), 2u));}}}); Cyc_Tcutil_unify( t1, t2); Cyc_Tcutil_explain_failure();
+return _temp631;}} else{ void* _temp635=( void*)(( struct Cyc_Core_Opt*)
+_check_null( po))->v; void* _temp636= Cyc_Tcexp_tcBinPrimop( te, loc, 0,
+_temp635, e1, e2); if( !( Cyc_Tcutil_unify( _temp636, t1)? 1:( Cyc_Tcutil_coerceable(
+_temp636)? Cyc_Tcutil_coerceable( t1): 0))){ void* _temp637=({ struct Cyc_Std_String_pa_struct
+_temp640; _temp640.tag= Cyc_Std_String_pa; _temp640.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t2);{ struct Cyc_Std_String_pa_struct _temp639; _temp639.tag= Cyc_Std_String_pa;
+_temp639.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ void* _temp638[
+2u]={& _temp639,& _temp640}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("Cannot use this operator in an assignment when the arguments have types %s and %s",
+sizeof( unsigned char), 82u), _tag_arr( _temp638, sizeof( void*), 2u));}}}); Cyc_Tcutil_unify(
+_temp636, t1); Cyc_Tcutil_explain_failure(); return _temp637;} return _temp636;}
 return t1;}} static void* Cyc_Tcexp_tcSeqExp( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp*
 e2){ Cyc_Tcexp_tcExp( te, 0, e1); Cyc_Tcexp_tcExp( te, topt, e2); return( void*)((
@@ -1439,1487 +1456,1495 @@ struct Cyc_Core_Opt*) _check_null( e2->topt))->v;} static struct Cyc_Absyn_Tunio
 Cyc_Tcexp_tcInjection( struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e, void*
 tu, struct _RegionHandle* r, struct Cyc_List_List* inst, struct Cyc_List_List*
 fs){ struct Cyc_List_List* fields; void* t1=( void*)(( struct Cyc_Core_Opt*)
-_check_null( e->topt))->v;{ void* _temp631= Cyc_Tcutil_compress( t1); void*
-_temp641; void* _temp643; _LL633: if( _temp631 == ( void*) Cyc_Absyn_FloatType){
-goto _LL634;} else{ goto _LL635;} _LL635: if(( unsigned int) _temp631 >  4u?*((
-int*) _temp631) ==  Cyc_Absyn_IntType: 0){ _LL642: _temp641=( void*)(( struct
-Cyc_Absyn_IntType_struct*) _temp631)->f2; if( _temp641 == ( void*) Cyc_Absyn_B1){
-goto _LL636;} else{ goto _LL637;}} else{ goto _LL637;} _LL637: if(( unsigned int)
-_temp631 >  4u?*(( int*) _temp631) ==  Cyc_Absyn_IntType: 0){ _LL644: _temp643=(
-void*)(( struct Cyc_Absyn_IntType_struct*) _temp631)->f2; if( _temp643 == ( void*)
-Cyc_Absyn_B2){ goto _LL638;} else{ goto _LL639;}} else{ goto _LL639;} _LL639:
-goto _LL640; _LL634: Cyc_Tcutil_unchecked_cast( te, e,( void*) Cyc_Absyn_DoubleType);
-t1=( void*) Cyc_Absyn_DoubleType; goto _LL632; _LL636: goto _LL638; _LL638: Cyc_Tcutil_unchecked_cast(
-te, e, Cyc_Absyn_sint_t); t1= Cyc_Absyn_sint_t; goto _LL632; _LL640: goto _LL632;
-_LL632:;} for( fields= fs; fields !=  0; fields=(( struct Cyc_List_List*)
-_check_null( fields))->tl){ void* _temp647; struct Cyc_Position_Segment*
-_temp649; struct Cyc_List_List* _temp651; struct Cyc_List_List* _temp653; struct
-_tuple1* _temp655; struct Cyc_Absyn_Tunionfield _temp645=*(( struct Cyc_Absyn_Tunionfield*)((
-struct Cyc_List_List*) _check_null( fields))->hd); _LL656: _temp655= _temp645.name;
-goto _LL654; _LL654: _temp653= _temp645.tvs; goto _LL652; _LL652: _temp651=
-_temp645.typs; goto _LL650; _LL650: _temp649= _temp645.loc; goto _LL648; _LL648:
-_temp647=( void*) _temp645.sc; goto _LL646; _LL646: if(( _temp651 ==  0? 1:((
-struct Cyc_List_List*) _check_null( _temp651))->tl !=  0)? 1: _temp653 !=  0){
+_check_null( e->topt))->v;{ void* _temp641= Cyc_Tcutil_compress( t1); void*
+_temp651; void* _temp653; _LL643: if( _temp641 == ( void*) Cyc_Absyn_FloatType){
+goto _LL644;} else{ goto _LL645;} _LL645: if(( unsigned int) _temp641 >  4u?*((
+int*) _temp641) ==  Cyc_Absyn_IntType: 0){ _LL652: _temp651=( void*)(( struct
+Cyc_Absyn_IntType_struct*) _temp641)->f2; if( _temp651 == ( void*) Cyc_Absyn_B1){
+goto _LL646;} else{ goto _LL647;}} else{ goto _LL647;} _LL647: if(( unsigned int)
+_temp641 >  4u?*(( int*) _temp641) ==  Cyc_Absyn_IntType: 0){ _LL654: _temp653=(
+void*)(( struct Cyc_Absyn_IntType_struct*) _temp641)->f2; if( _temp653 == ( void*)
+Cyc_Absyn_B2){ goto _LL648;} else{ goto _LL649;}} else{ goto _LL649;} _LL649:
+goto _LL650; _LL644: Cyc_Tcutil_unchecked_cast( te, e,( void*) Cyc_Absyn_DoubleType);
+t1=( void*) Cyc_Absyn_DoubleType; goto _LL642; _LL646: goto _LL648; _LL648: Cyc_Tcutil_unchecked_cast(
+te, e, Cyc_Absyn_sint_t); t1= Cyc_Absyn_sint_t; goto _LL642; _LL650: goto _LL642;
+_LL642:;} for( fields= fs; fields !=  0; fields=(( struct Cyc_List_List*)
+_check_null( fields))->tl){ void* _temp657; struct Cyc_Position_Segment*
+_temp659; struct Cyc_List_List* _temp661; struct Cyc_List_List* _temp663; struct
+_tuple1* _temp665; struct Cyc_Absyn_Tunionfield _temp655=*(( struct Cyc_Absyn_Tunionfield*)((
+struct Cyc_List_List*) _check_null( fields))->hd); _LL666: _temp665= _temp655.name;
+goto _LL664; _LL664: _temp663= _temp655.tvs; goto _LL662; _LL662: _temp661=
+_temp655.typs; goto _LL660; _LL660: _temp659= _temp655.loc; goto _LL658; _LL658:
+_temp657=( void*) _temp655.sc; goto _LL656; _LL656: if(( _temp661 ==  0? 1:((
+struct Cyc_List_List*) _check_null( _temp661))->tl !=  0)? 1: _temp663 !=  0){
 continue;}{ void* t2= Cyc_Tcutil_rsubstitute( r, inst,(*(( struct _tuple8*)((
-struct Cyc_List_List*) _check_null( _temp651))->hd)).f2); if( Cyc_Tcutil_unify(
+struct Cyc_List_List*) _check_null( _temp661))->hd)).f2); if( Cyc_Tcutil_unify(
 t1, t2)){ return( struct Cyc_Absyn_Tunionfield*)(( struct Cyc_Absyn_Tunionfield*)((
 struct Cyc_List_List*) _check_null( fields))->hd);}}} for( fields= fs; fields != 
-0; fields=(( struct Cyc_List_List*) _check_null( fields))->tl){ void* _temp659;
-struct Cyc_Position_Segment* _temp661; struct Cyc_List_List* _temp663; struct
-Cyc_List_List* _temp665; struct _tuple1* _temp667; struct Cyc_Absyn_Tunionfield
-_temp657=*(( struct Cyc_Absyn_Tunionfield*)(( struct Cyc_List_List*) _check_null(
-fields))->hd); _LL668: _temp667= _temp657.name; goto _LL666; _LL666: _temp665=
-_temp657.tvs; goto _LL664; _LL664: _temp663= _temp657.typs; goto _LL662; _LL662:
-_temp661= _temp657.loc; goto _LL660; _LL660: _temp659=( void*) _temp657.sc; goto
-_LL658; _LL658: if(( _temp663 ==  0? 1:(( struct Cyc_List_List*) _check_null(
-_temp663))->tl !=  0)? 1: _temp665 !=  0){ continue;}{ void* t2= Cyc_Tcutil_rsubstitute(
-r, inst,(*(( struct _tuple8*)(( struct Cyc_List_List*) _check_null( _temp663))->hd)).f2);
+0; fields=(( struct Cyc_List_List*) _check_null( fields))->tl){ void* _temp669;
+struct Cyc_Position_Segment* _temp671; struct Cyc_List_List* _temp673; struct
+Cyc_List_List* _temp675; struct _tuple1* _temp677; struct Cyc_Absyn_Tunionfield
+_temp667=*(( struct Cyc_Absyn_Tunionfield*)(( struct Cyc_List_List*) _check_null(
+fields))->hd); _LL678: _temp677= _temp667.name; goto _LL676; _LL676: _temp675=
+_temp667.tvs; goto _LL674; _LL674: _temp673= _temp667.typs; goto _LL672; _LL672:
+_temp671= _temp667.loc; goto _LL670; _LL670: _temp669=( void*) _temp667.sc; goto
+_LL668; _LL668: if(( _temp673 ==  0? 1:(( struct Cyc_List_List*) _check_null(
+_temp673))->tl !=  0)? 1: _temp675 !=  0){ continue;}{ void* t2= Cyc_Tcutil_rsubstitute(
+r, inst,(*(( struct _tuple8*)(( struct Cyc_List_List*) _check_null( _temp673))->hd)).f2);
 if( Cyc_Tcutil_coerce_arg( te, e, t2)){ return( struct Cyc_Absyn_Tunionfield*)((
 struct Cyc_Absyn_Tunionfield*)(( struct Cyc_List_List*) _check_null( fields))->hd);}}}({
-struct Cyc_Std_String_pa_struct _temp671; _temp671.tag= Cyc_Std_String_pa;
-_temp671.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ struct Cyc_Std_String_pa_struct
-_temp670; _temp670.tag= Cyc_Std_String_pa; _temp670.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-tu);{ void* _temp669[ 2u]={& _temp670,& _temp671}; Cyc_Tcutil_terr( e->loc,
+struct Cyc_Std_String_pa_struct _temp681; _temp681.tag= Cyc_Std_String_pa;
+_temp681.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ struct Cyc_Std_String_pa_struct
+_temp680; _temp680.tag= Cyc_Std_String_pa; _temp680.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+tu);{ void* _temp679[ 2u]={& _temp680,& _temp681}; Cyc_Tcutil_terr( e->loc,
 _tag_arr("can't find a field in %s to inject a value of type %s", sizeof(
-unsigned char), 54u), _tag_arr( _temp669, sizeof( void*), 2u));}}}); return 0;}
+unsigned char), 54u), _tag_arr( _temp679, sizeof( void*), 2u));}}}); return 0;}
 static void* Cyc_Tcexp_tcFnCall( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, void** topt, struct Cyc_Absyn_Exp* e, struct Cyc_List_List* args, struct
-Cyc_Absyn_VarargCallInfo** vararg_call_info){ struct Cyc_List_List* _temp672=
+Cyc_Absyn_VarargCallInfo** vararg_call_info){ struct Cyc_List_List* _temp682=
 args; te= Cyc_Tcenv_new_block( loc, te); Cyc_Tcexp_tcExp( te, 0, e);{ void* t=
 Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);
-void* _temp673= t; struct Cyc_Absyn_PtrInfo _temp679; struct Cyc_Absyn_Conref*
-_temp681; struct Cyc_Absyn_Tqual _temp683; struct Cyc_Absyn_Conref* _temp685;
-void* _temp687; void* _temp689; _LL675: if(( unsigned int) _temp673 >  4u?*((
-int*) _temp673) ==  Cyc_Absyn_PointerType: 0){ _LL680: _temp679=(( struct Cyc_Absyn_PointerType_struct*)
-_temp673)->f1; _LL690: _temp689=( void*) _temp679.elt_typ; goto _LL688; _LL688:
-_temp687=( void*) _temp679.rgn_typ; goto _LL686; _LL686: _temp685= _temp679.nullable;
-goto _LL684; _LL684: _temp683= _temp679.tq; goto _LL682; _LL682: _temp681=
-_temp679.bounds; goto _LL676;} else{ goto _LL677;} _LL677: goto _LL678; _LL676:
-Cyc_Tcenv_check_rgn_accessible( te, loc, _temp687); Cyc_Tcutil_check_nonzero_bound(
-loc, _temp681);{ void* _temp691= Cyc_Tcutil_compress( _temp689); struct Cyc_Absyn_FnInfo
-_temp697; struct Cyc_List_List* _temp699; struct Cyc_List_List* _temp701; struct
-Cyc_Absyn_VarargInfo* _temp703; int _temp705; struct Cyc_List_List* _temp707;
-void* _temp709; struct Cyc_Core_Opt* _temp711; struct Cyc_List_List* _temp713;
-_LL693: if(( unsigned int) _temp691 >  4u?*(( int*) _temp691) ==  Cyc_Absyn_FnType:
-0){ _LL698: _temp697=(( struct Cyc_Absyn_FnType_struct*) _temp691)->f1; _LL714:
-_temp713= _temp697.tvars; goto _LL712; _LL712: _temp711= _temp697.effect; goto
-_LL710; _LL710: _temp709=( void*) _temp697.ret_typ; goto _LL708; _LL708:
-_temp707= _temp697.args; goto _LL706; _LL706: _temp705= _temp697.c_varargs; goto
-_LL704; _LL704: _temp703= _temp697.cyc_varargs; goto _LL702; _LL702: _temp701=
-_temp697.rgn_po; goto _LL700; _LL700: _temp699= _temp697.attributes; goto _LL694;}
-else{ goto _LL695;} _LL695: goto _LL696; _LL694: if( topt !=  0){ Cyc_Tcutil_unify(
-_temp709,*(( void**) _check_null( topt)));} while( _temp672 !=  0? _temp707 != 
+void* _temp683= t; struct Cyc_Absyn_PtrInfo _temp689; struct Cyc_Absyn_Conref*
+_temp691; struct Cyc_Absyn_Tqual _temp693; struct Cyc_Absyn_Conref* _temp695;
+void* _temp697; void* _temp699; _LL685: if(( unsigned int) _temp683 >  4u?*((
+int*) _temp683) ==  Cyc_Absyn_PointerType: 0){ _LL690: _temp689=(( struct Cyc_Absyn_PointerType_struct*)
+_temp683)->f1; _LL700: _temp699=( void*) _temp689.elt_typ; goto _LL698; _LL698:
+_temp697=( void*) _temp689.rgn_typ; goto _LL696; _LL696: _temp695= _temp689.nullable;
+goto _LL694; _LL694: _temp693= _temp689.tq; goto _LL692; _LL692: _temp691=
+_temp689.bounds; goto _LL686;} else{ goto _LL687;} _LL687: goto _LL688; _LL686:
+Cyc_Tcenv_check_rgn_accessible( te, loc, _temp697); Cyc_Tcutil_check_nonzero_bound(
+loc, _temp691);{ void* _temp701= Cyc_Tcutil_compress( _temp699); struct Cyc_Absyn_FnInfo
+_temp707; struct Cyc_List_List* _temp709; struct Cyc_List_List* _temp711; struct
+Cyc_Absyn_VarargInfo* _temp713; int _temp715; struct Cyc_List_List* _temp717;
+void* _temp719; struct Cyc_Core_Opt* _temp721; struct Cyc_List_List* _temp723;
+_LL703: if(( unsigned int) _temp701 >  4u?*(( int*) _temp701) ==  Cyc_Absyn_FnType:
+0){ _LL708: _temp707=(( struct Cyc_Absyn_FnType_struct*) _temp701)->f1; _LL724:
+_temp723= _temp707.tvars; goto _LL722; _LL722: _temp721= _temp707.effect; goto
+_LL720; _LL720: _temp719=( void*) _temp707.ret_typ; goto _LL718; _LL718:
+_temp717= _temp707.args; goto _LL716; _LL716: _temp715= _temp707.c_varargs; goto
+_LL714; _LL714: _temp713= _temp707.cyc_varargs; goto _LL712; _LL712: _temp711=
+_temp707.rgn_po; goto _LL710; _LL710: _temp709= _temp707.attributes; goto _LL704;}
+else{ goto _LL705;} _LL705: goto _LL706; _LL704: if( topt !=  0){ Cyc_Tcutil_unify(
+_temp719,*(( void**) _check_null( topt)));} while( _temp682 !=  0? _temp717 != 
 0: 0) { struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
-_check_null( _temp672))->hd; void* t2=(*(( struct _tuple2*)(( struct Cyc_List_List*)
-_check_null( _temp707))->hd)).f3; Cyc_Tcexp_tcExp( te,( void**)& t2, e1); if( !
-Cyc_Tcutil_coerce_arg( te, e1, t2)){({ struct Cyc_Std_String_pa_struct _temp717;
-_temp717.tag= Cyc_Std_String_pa; _temp717.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t2);{ struct Cyc_Std_String_pa_struct _temp716; _temp716.tag= Cyc_Std_String_pa;
-_temp716.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e1->topt))->v);{ void* _temp715[ 2u]={& _temp716,& _temp717}; Cyc_Tcutil_terr(
+_check_null( _temp682))->hd; void* t2=(*(( struct _tuple2*)(( struct Cyc_List_List*)
+_check_null( _temp717))->hd)).f3; Cyc_Tcexp_tcExp( te,( void**)& t2, e1); if( !
+Cyc_Tcutil_coerce_arg( te, e1, t2)){({ struct Cyc_Std_String_pa_struct _temp727;
+_temp727.tag= Cyc_Std_String_pa; _temp727.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t2);{ struct Cyc_Std_String_pa_struct _temp726; _temp726.tag= Cyc_Std_String_pa;
+_temp726.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
+_check_null( e1->topt))->v);{ void* _temp725[ 2u]={& _temp726,& _temp727}; Cyc_Tcutil_terr(
 e1->loc, _tag_arr("actual argument has type \n%s\n but formal has type \n%s",
-sizeof( unsigned char), 54u), _tag_arr( _temp715, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
-_temp672=(( struct Cyc_List_List*) _check_null( _temp672))->tl; _temp707=((
-struct Cyc_List_List*) _check_null( _temp707))->tl;} if( _temp707 !=  0){({ void*
-_temp718[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("too few arguments for function",
-sizeof( unsigned char), 31u), _tag_arr( _temp718, sizeof( void*), 0u));});}
-else{ if(( _temp672 !=  0? 1: _temp705)? 1: _temp703 !=  0){ if( _temp705){ for(
-0; _temp672 !=  0; _temp672=(( struct Cyc_List_List*) _check_null( _temp672))->tl){
+sizeof( unsigned char), 54u), _tag_arr( _temp725, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}
+_temp682=(( struct Cyc_List_List*) _check_null( _temp682))->tl; _temp717=((
+struct Cyc_List_List*) _check_null( _temp717))->tl;} if( _temp717 !=  0){({ void*
+_temp728[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("too few arguments for function",
+sizeof( unsigned char), 31u), _tag_arr( _temp728, sizeof( void*), 0u));});}
+else{ if(( _temp682 !=  0? 1: _temp715)? 1: _temp713 !=  0){ if( _temp715){ for(
+0; _temp682 !=  0; _temp682=(( struct Cyc_List_List*) _check_null( _temp682))->tl){
 Cyc_Tcexp_tcExp( te, 0,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
-_check_null( _temp672))->hd);}} else{ if( _temp703 ==  0){({ void* _temp719[ 0u]={};
+_check_null( _temp682))->hd);}} else{ if( _temp713 ==  0){({ void* _temp729[ 0u]={};
 Cyc_Tcutil_terr( loc, _tag_arr("too many arguments for function", sizeof(
-unsigned char), 32u), _tag_arr( _temp719, sizeof( void*), 0u));});} else{ int
-_temp722; void* _temp724; struct Cyc_Absyn_VarargInfo _temp720=*(( struct Cyc_Absyn_VarargInfo*)
-_check_null( _temp703)); _LL725: _temp724=( void*) _temp720.type; goto _LL723;
-_LL723: _temp722= _temp720.inject; goto _LL721; _LL721: { struct Cyc_Absyn_VarargCallInfo*
-_temp726=({ struct Cyc_Absyn_VarargCallInfo* _temp756=( struct Cyc_Absyn_VarargCallInfo*)
-_cycalloc( sizeof( struct Cyc_Absyn_VarargCallInfo)); _temp756->num_varargs= 0;
-_temp756->injectors= 0; _temp756->vai=( struct Cyc_Absyn_VarargInfo*)
-_check_null( _temp703); _temp756;});* vararg_call_info=( struct Cyc_Absyn_VarargCallInfo*)
-_temp726; if( ! _temp722){ for( 0; _temp672 !=  0; _temp672=(( struct Cyc_List_List*)
-_check_null( _temp672))->tl){ struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)((
-struct Cyc_List_List*) _check_null( _temp672))->hd;(( struct Cyc_Absyn_VarargCallInfo*)
-_check_null( _temp726))->num_varargs ++; Cyc_Tcexp_tcExp( te,( void**)& _temp724,
-e1); if( ! Cyc_Tcutil_coerce_arg( te, e1, _temp724)){({ struct Cyc_Std_String_pa_struct
-_temp729; _temp729.tag= Cyc_Std_String_pa; _temp729.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+unsigned char), 32u), _tag_arr( _temp729, sizeof( void*), 0u));});} else{ int
+_temp732; void* _temp734; struct Cyc_Absyn_VarargInfo _temp730=*(( struct Cyc_Absyn_VarargInfo*)
+_check_null( _temp713)); _LL735: _temp734=( void*) _temp730.type; goto _LL733;
+_LL733: _temp732= _temp730.inject; goto _LL731; _LL731: { struct Cyc_Absyn_VarargCallInfo*
+_temp736=({ struct Cyc_Absyn_VarargCallInfo* _temp766=( struct Cyc_Absyn_VarargCallInfo*)
+_cycalloc( sizeof( struct Cyc_Absyn_VarargCallInfo)); _temp766->num_varargs= 0;
+_temp766->injectors= 0; _temp766->vai=( struct Cyc_Absyn_VarargInfo*)
+_check_null( _temp713); _temp766;});* vararg_call_info=( struct Cyc_Absyn_VarargCallInfo*)
+_temp736; if( ! _temp732){ for( 0; _temp682 !=  0; _temp682=(( struct Cyc_List_List*)
+_check_null( _temp682))->tl){ struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)((
+struct Cyc_List_List*) _check_null( _temp682))->hd;(( struct Cyc_Absyn_VarargCallInfo*)
+_check_null( _temp736))->num_varargs ++; Cyc_Tcexp_tcExp( te,( void**)& _temp734,
+e1); if( ! Cyc_Tcutil_coerce_arg( te, e1, _temp734)){({ struct Cyc_Std_String_pa_struct
+_temp739; _temp739.tag= Cyc_Std_String_pa; _temp739.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ struct Cyc_Std_String_pa_struct
-_temp728; _temp728.tag= Cyc_Std_String_pa; _temp728.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-_temp724);{ void* _temp727[ 2u]={& _temp728,& _temp729}; Cyc_Tcutil_terr( loc,
+_temp738; _temp738.tag= Cyc_Std_String_pa; _temp738.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+_temp734);{ void* _temp737[ 2u]={& _temp738,& _temp739}; Cyc_Tcutil_terr( loc,
 _tag_arr("vararg requires type %s but argument has type %s", sizeof(
-unsigned char), 49u), _tag_arr( _temp727, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}}
-else{ void* _temp730= Cyc_Tcutil_compress( _temp724); struct Cyc_Absyn_TunionInfo
-_temp736; void* _temp738; struct Cyc_List_List* _temp740; void* _temp742; struct
-Cyc_Absyn_Tuniondecl** _temp744; struct Cyc_Absyn_Tuniondecl* _temp746; _LL732:
-if(( unsigned int) _temp730 >  4u?*(( int*) _temp730) ==  Cyc_Absyn_TunionType:
-0){ _LL737: _temp736=(( struct Cyc_Absyn_TunionType_struct*) _temp730)->f1;
-_LL743: _temp742=( void*) _temp736.tunion_info; if(*(( int*) _temp742) ==  Cyc_Absyn_KnownTunion){
-_LL745: _temp744=(( struct Cyc_Absyn_KnownTunion_struct*) _temp742)->f1;
-_temp746=* _temp744; goto _LL741;} else{ goto _LL734;} _LL741: _temp740=
-_temp736.targs; goto _LL739; _LL739: _temp738=( void*) _temp736.rgn; goto _LL733;}
-else{ goto _LL734;} _LL734: goto _LL735; _LL733: { struct Cyc_Absyn_Tuniondecl*
-_temp747=* Cyc_Tcenv_lookup_tuniondecl( te, loc, _temp746->name); struct Cyc_List_List*
-fields= 0; if( _temp747->fields ==  0){({ struct Cyc_Std_String_pa_struct
-_temp749; _temp749.tag= Cyc_Std_String_pa; _temp749.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-_temp724);{ void* _temp748[ 1u]={& _temp749}; Cyc_Tcutil_terr( loc, _tag_arr("can't inject into %s",
-sizeof( unsigned char), 21u), _tag_arr( _temp748, sizeof( void*), 1u));}});}
+unsigned char), 49u), _tag_arr( _temp737, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();}}}
+else{ void* _temp740= Cyc_Tcutil_compress( _temp734); struct Cyc_Absyn_TunionInfo
+_temp746; void* _temp748; struct Cyc_List_List* _temp750; void* _temp752; struct
+Cyc_Absyn_Tuniondecl** _temp754; struct Cyc_Absyn_Tuniondecl* _temp756; _LL742:
+if(( unsigned int) _temp740 >  4u?*(( int*) _temp740) ==  Cyc_Absyn_TunionType:
+0){ _LL747: _temp746=(( struct Cyc_Absyn_TunionType_struct*) _temp740)->f1;
+_LL753: _temp752=( void*) _temp746.tunion_info; if(*(( int*) _temp752) ==  Cyc_Absyn_KnownTunion){
+_LL755: _temp754=(( struct Cyc_Absyn_KnownTunion_struct*) _temp752)->f1;
+_temp756=* _temp754; goto _LL751;} else{ goto _LL744;} _LL751: _temp750=
+_temp746.targs; goto _LL749; _LL749: _temp748=( void*) _temp746.rgn; goto _LL743;}
+else{ goto _LL744;} _LL744: goto _LL745; _LL743: { struct Cyc_Absyn_Tuniondecl*
+_temp757=* Cyc_Tcenv_lookup_tuniondecl( te, loc, _temp756->name); struct Cyc_List_List*
+fields= 0; if( _temp757->fields ==  0){({ struct Cyc_Std_String_pa_struct
+_temp759; _temp759.tag= Cyc_Std_String_pa; _temp759.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+_temp734);{ void* _temp758[ 1u]={& _temp759}; Cyc_Tcutil_terr( loc, _tag_arr("can't inject into %s",
+sizeof( unsigned char), 21u), _tag_arr( _temp758, sizeof( void*), 1u));}});}
 else{ fields=( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null(
-_temp747->fields))->v;} if( ! Cyc_Tcutil_unify( _temp738, Cyc_Tcenv_curr_rgn( te))){({
-void* _temp750[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad region for injected varargs",
-sizeof( unsigned char), 32u), _tag_arr( _temp750, sizeof( void*), 0u));});}{
-struct _RegionHandle _temp751= _new_region(); struct _RegionHandle* rgn=&
-_temp751; _push_region( rgn);{ struct Cyc_List_List* _temp752=(( struct Cyc_List_List*(*)(
+_temp757->fields))->v;} if( ! Cyc_Tcutil_unify( _temp748, Cyc_Tcenv_curr_rgn( te))){({
+void* _temp760[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad region for injected varargs",
+sizeof( unsigned char), 32u), _tag_arr( _temp760, sizeof( void*), 0u));});}{
+struct _RegionHandle _temp761= _new_region(); struct _RegionHandle* rgn=&
+_temp761; _push_region( rgn);{ struct Cyc_List_List* _temp762=(( struct Cyc_List_List*(*)(
 struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
-struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp747->tvs, _temp740);
-for( 0; _temp672 !=  0; _temp672=(( struct Cyc_List_List*) _check_null( _temp672))->tl){((
-struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp726))->num_varargs ++;{
+struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp757->tvs, _temp750);
+for( 0; _temp682 !=  0; _temp682=(( struct Cyc_List_List*) _check_null( _temp682))->tl){((
+struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp736))->num_varargs ++;{
 struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
-_check_null( _temp672))->hd; Cyc_Tcexp_tcExp( te, 0, e1);{ struct Cyc_Absyn_Tunionfield*
-_temp753= Cyc_Tcexp_tcInjection( te, e1, _temp724, rgn, _temp752, fields); if(
-_temp753 !=  0){(( struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp726))->injectors=((
+_check_null( _temp682))->hd; Cyc_Tcexp_tcExp( te, 0, e1);{ struct Cyc_Absyn_Tunionfield*
+_temp763= Cyc_Tcexp_tcInjection( te, e1, _temp734, rgn, _temp762, fields); if(
+_temp763 !=  0){(( struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp736))->injectors=((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)(((
-struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp726))->injectors,({ struct
-Cyc_List_List* _temp754=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp754->hd=( void*)(( struct Cyc_Absyn_Tunionfield*) _check_null( _temp753));
-_temp754->tl= 0; _temp754;}));}}}}}; _pop_region( rgn);} goto _LL731;} _LL735:({
-void* _temp755[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad inject vararg type",
-sizeof( unsigned char), 23u), _tag_arr( _temp755, sizeof( void*), 0u));}); goto
-_LL731; _LL731:;}}}}}}{ struct Cyc_List_List* a= _temp699; for( 0; a !=  0; a=((
-struct Cyc_List_List*) _check_null( a))->tl){ void* _temp757=( void*)(( struct
-Cyc_List_List*) _check_null( a))->hd; int _temp763; int _temp765; void* _temp767;
-_LL759: if(( unsigned int) _temp757 >  16u?*(( int*) _temp757) ==  Cyc_Absyn_Format_att:
-0){ _LL768: _temp767=( void*)(( struct Cyc_Absyn_Format_att_struct*) _temp757)->f1;
-goto _LL766; _LL766: _temp765=(( struct Cyc_Absyn_Format_att_struct*) _temp757)->f2;
-goto _LL764; _LL764: _temp763=(( struct Cyc_Absyn_Format_att_struct*) _temp757)->f3;
-goto _LL760;} else{ goto _LL761;} _LL761: goto _LL762; _LL760:{ struct
-_handler_cons _temp769; _push_handler(& _temp769);{ int _temp771= 0; if( setjmp(
-_temp769.handler)){ _temp771= 1;} if( ! _temp771){{ struct Cyc_Absyn_Exp*
-_temp772=(( struct Cyc_Absyn_Exp*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)(
-args, _temp765 -  1); struct Cyc_Core_Opt* fmt_args; if( _temp763 ==  0){
-fmt_args= 0;} else{ fmt_args=({ struct Cyc_Core_Opt* _temp773=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp773->v=( void*)(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x, int i)) Cyc_List_nth_tail)( args, _temp763 -  1);
-_temp773;});}{ void* _temp774= _temp767; _LL776: if( _temp774 == ( void*) Cyc_Absyn_Printf_ft){
-goto _LL777;} else{ goto _LL778;} _LL778: if( _temp774 == ( void*) Cyc_Absyn_Scanf_ft){
-goto _LL779;} else{ goto _LL775;} _LL777: Cyc_Tcexp_check_format_args( te,
-_temp772, fmt_args, Cyc_Formatstr_get_format_typs); goto _LL775; _LL779: Cyc_Tcexp_check_format_args(
-te, _temp772, fmt_args, Cyc_Formatstr_get_scanf_typs); goto _LL775; _LL775:;}};
-_pop_handler();} else{ void* _temp770=( void*) _exn_thrown; void* _temp781=
-_temp770; _LL783: if( _temp781 ==  Cyc_List_Nth){ goto _LL784;} else{ goto
-_LL785;} _LL785: goto _LL786; _LL784:({ void* _temp787[ 0u]={}; Cyc_Tcutil_terr(
+struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp736))->injectors,({ struct
+Cyc_List_List* _temp764=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp764->hd=( void*)(( struct Cyc_Absyn_Tunionfield*) _check_null( _temp763));
+_temp764->tl= 0; _temp764;}));}}}}}; _pop_region( rgn);} goto _LL741;} _LL745:({
+void* _temp765[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad inject vararg type",
+sizeof( unsigned char), 23u), _tag_arr( _temp765, sizeof( void*), 0u));}); goto
+_LL741; _LL741:;}}}}}}{ struct Cyc_List_List* a= _temp709; for( 0; a !=  0; a=((
+struct Cyc_List_List*) _check_null( a))->tl){ void* _temp767=( void*)(( struct
+Cyc_List_List*) _check_null( a))->hd; int _temp773; int _temp775; void* _temp777;
+_LL769: if(( unsigned int) _temp767 >  16u?*(( int*) _temp767) ==  Cyc_Absyn_Format_att:
+0){ _LL778: _temp777=( void*)(( struct Cyc_Absyn_Format_att_struct*) _temp767)->f1;
+goto _LL776; _LL776: _temp775=(( struct Cyc_Absyn_Format_att_struct*) _temp767)->f2;
+goto _LL774; _LL774: _temp773=(( struct Cyc_Absyn_Format_att_struct*) _temp767)->f3;
+goto _LL770;} else{ goto _LL771;} _LL771: goto _LL772; _LL770:{ struct
+_handler_cons _temp779; _push_handler(& _temp779);{ int _temp781= 0; if( setjmp(
+_temp779.handler)){ _temp781= 1;} if( ! _temp781){{ struct Cyc_Absyn_Exp*
+_temp782=(( struct Cyc_Absyn_Exp*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)(
+args, _temp775 -  1); struct Cyc_Core_Opt* fmt_args; if( _temp773 ==  0){
+fmt_args= 0;} else{ fmt_args=({ struct Cyc_Core_Opt* _temp783=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp783->v=( void*)(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x, int i)) Cyc_List_nth_tail)( args, _temp773 -  1);
+_temp783;});}{ void* _temp784= _temp777; _LL786: if( _temp784 == ( void*) Cyc_Absyn_Printf_ft){
+goto _LL787;} else{ goto _LL788;} _LL788: if( _temp784 == ( void*) Cyc_Absyn_Scanf_ft){
+goto _LL789;} else{ goto _LL785;} _LL787: Cyc_Tcexp_check_format_args( te,
+_temp782, fmt_args, Cyc_Formatstr_get_format_typs); goto _LL785; _LL789: Cyc_Tcexp_check_format_args(
+te, _temp782, fmt_args, Cyc_Formatstr_get_scanf_typs); goto _LL785; _LL785:;}};
+_pop_handler();} else{ void* _temp780=( void*) _exn_thrown; void* _temp791=
+_temp780; _LL793: if( _temp791 ==  Cyc_List_Nth){ goto _LL794;} else{ goto
+_LL795;} _LL795: goto _LL796; _LL794:({ void* _temp797[ 0u]={}; Cyc_Tcutil_terr(
 loc, _tag_arr("bad format arguments", sizeof( unsigned char), 21u), _tag_arr(
-_temp787, sizeof( void*), 0u));}); goto _LL782; _LL786:( void) _throw( _temp781);
-_LL782:;}}} goto _LL758; _LL762: goto _LL758; _LL758:;}} Cyc_Tcenv_check_effect_accessible(
-te, loc,( void*)(( struct Cyc_Core_Opt*) _check_null( _temp711))->v); Cyc_Tcenv_check_rgn_partial_order(
-te, loc, _temp701); return _temp709; _LL696: return({ void* _temp788[ 0u]={};
+_temp797, sizeof( void*), 0u));}); goto _LL792; _LL796:( void) _throw( _temp791);
+_LL792:;}}} goto _LL768; _LL772: goto _LL768; _LL768:;}} Cyc_Tcenv_check_effect_accessible(
+te, loc,( void*)(( struct Cyc_Core_Opt*) _check_null( _temp721))->v); Cyc_Tcenv_check_rgn_partial_order(
+te, loc, _temp711); return _temp719; _LL706: return({ void* _temp798[ 0u]={};
 Cyc_Tcexp_expr_err( te, loc, _tag_arr("expected pointer to function", sizeof(
-unsigned char), 29u), _tag_arr( _temp788, sizeof( void*), 0u));}); _LL692:;}
-_LL678: return({ void* _temp789[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expected pointer to function",
-sizeof( unsigned char), 29u), _tag_arr( _temp789, sizeof( void*), 0u));});
-_LL674:;}} static void* Cyc_Tcexp_tcThrow( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
+unsigned char), 29u), _tag_arr( _temp798, sizeof( void*), 0u));}); _LL702:;}
+_LL688: return({ void* _temp799[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expected pointer to function",
+sizeof( unsigned char), 29u), _tag_arr( _temp799, sizeof( void*), 0u));});
+_LL684:;}} static void* Cyc_Tcexp_tcThrow( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, void** topt, struct Cyc_Absyn_Exp* e){ Cyc_Tcexp_tcExp( te,( void**)& Cyc_Absyn_exn_typ,
 e); if( ! Cyc_Tcutil_coerce_arg( te, e, Cyc_Absyn_exn_typ)){({ struct Cyc_Std_String_pa_struct
-_temp791; _temp791.tag= Cyc_Std_String_pa; _temp791.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
-void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);{ void* _temp790[ 1u]={&
-_temp791}; Cyc_Tcutil_terr( loc, _tag_arr("expected xtunion exn but found %s",
-sizeof( unsigned char), 34u), _tag_arr( _temp790, sizeof( void*), 1u));}});}
-return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp792=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp792->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp792;}));} static void* Cyc_Tcexp_tcInstantiate( struct Cyc_Tcenv_Tenv*
+_temp801; _temp801.tag= Cyc_Std_String_pa; _temp801.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);{ void* _temp800[ 1u]={&
+_temp801}; Cyc_Tcutil_terr( loc, _tag_arr("expected xtunion exn but found %s",
+sizeof( unsigned char), 34u), _tag_arr( _temp800, sizeof( void*), 1u));}});}
+return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp802=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp802->v=( void*) Cyc_Tcenv_lookup_type_vars(
+te); _temp802;}));} static void* Cyc_Tcexp_tcInstantiate( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e,
 struct Cyc_List_List* ts){ Cyc_Tcexp_tcExpNoInst( te, 0, e);( void*)((( struct
 Cyc_Core_Opt*) _check_null( e->topt))->v=( void*) Cyc_Absyn_pointer_expand((
 void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v));{ void* t1= Cyc_Tcutil_compress((
-void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);{ void* _temp793= t1;
-struct Cyc_Absyn_PtrInfo _temp799; struct Cyc_Absyn_Conref* _temp801; struct Cyc_Absyn_Tqual
-_temp803; struct Cyc_Absyn_Conref* _temp805; void* _temp807; void* _temp809;
-_LL795: if(( unsigned int) _temp793 >  4u?*(( int*) _temp793) ==  Cyc_Absyn_PointerType:
-0){ _LL800: _temp799=(( struct Cyc_Absyn_PointerType_struct*) _temp793)->f1;
-_LL810: _temp809=( void*) _temp799.elt_typ; goto _LL808; _LL808: _temp807=( void*)
-_temp799.rgn_typ; goto _LL806; _LL806: _temp805= _temp799.nullable; goto _LL804;
-_LL804: _temp803= _temp799.tq; goto _LL802; _LL802: _temp801= _temp799.bounds;
-goto _LL796;} else{ goto _LL797;} _LL797: goto _LL798; _LL796:{ void* _temp811=
-Cyc_Tcutil_compress( _temp809); struct Cyc_Absyn_FnInfo _temp817; struct Cyc_List_List*
-_temp819; struct Cyc_List_List* _temp821; struct Cyc_Absyn_VarargInfo* _temp823;
-int _temp825; struct Cyc_List_List* _temp827; void* _temp829; struct Cyc_Core_Opt*
-_temp831; struct Cyc_List_List* _temp833; _LL813: if(( unsigned int) _temp811 > 
-4u?*(( int*) _temp811) ==  Cyc_Absyn_FnType: 0){ _LL818: _temp817=(( struct Cyc_Absyn_FnType_struct*)
-_temp811)->f1; _LL834: _temp833= _temp817.tvars; goto _LL832; _LL832: _temp831=
-_temp817.effect; goto _LL830; _LL830: _temp829=( void*) _temp817.ret_typ; goto
-_LL828; _LL828: _temp827= _temp817.args; goto _LL826; _LL826: _temp825= _temp817.c_varargs;
-goto _LL824; _LL824: _temp823= _temp817.cyc_varargs; goto _LL822; _LL822:
-_temp821= _temp817.rgn_po; goto _LL820; _LL820: _temp819= _temp817.attributes;
-goto _LL814;} else{ goto _LL815;} _LL815: goto _LL816; _LL814: { struct Cyc_List_List*
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);{ void* _temp803= t1;
+struct Cyc_Absyn_PtrInfo _temp809; struct Cyc_Absyn_Conref* _temp811; struct Cyc_Absyn_Tqual
+_temp813; struct Cyc_Absyn_Conref* _temp815; void* _temp817; void* _temp819;
+_LL805: if(( unsigned int) _temp803 >  4u?*(( int*) _temp803) ==  Cyc_Absyn_PointerType:
+0){ _LL810: _temp809=(( struct Cyc_Absyn_PointerType_struct*) _temp803)->f1;
+_LL820: _temp819=( void*) _temp809.elt_typ; goto _LL818; _LL818: _temp817=( void*)
+_temp809.rgn_typ; goto _LL816; _LL816: _temp815= _temp809.nullable; goto _LL814;
+_LL814: _temp813= _temp809.tq; goto _LL812; _LL812: _temp811= _temp809.bounds;
+goto _LL806;} else{ goto _LL807;} _LL807: goto _LL808; _LL806:{ void* _temp821=
+Cyc_Tcutil_compress( _temp819); struct Cyc_Absyn_FnInfo _temp827; struct Cyc_List_List*
+_temp829; struct Cyc_List_List* _temp831; struct Cyc_Absyn_VarargInfo* _temp833;
+int _temp835; struct Cyc_List_List* _temp837; void* _temp839; struct Cyc_Core_Opt*
+_temp841; struct Cyc_List_List* _temp843; _LL823: if(( unsigned int) _temp821 > 
+4u?*(( int*) _temp821) ==  Cyc_Absyn_FnType: 0){ _LL828: _temp827=(( struct Cyc_Absyn_FnType_struct*)
+_temp821)->f1; _LL844: _temp843= _temp827.tvars; goto _LL842; _LL842: _temp841=
+_temp827.effect; goto _LL840; _LL840: _temp839=( void*) _temp827.ret_typ; goto
+_LL838; _LL838: _temp837= _temp827.args; goto _LL836; _LL836: _temp835= _temp827.c_varargs;
+goto _LL834; _LL834: _temp833= _temp827.cyc_varargs; goto _LL832; _LL832:
+_temp831= _temp827.rgn_po; goto _LL830; _LL830: _temp829= _temp827.attributes;
+goto _LL824;} else{ goto _LL825;} _LL825: goto _LL826; _LL824: { struct Cyc_List_List*
 instantiation= 0; if( Cyc_List_length( ts) != (( int(*)( struct Cyc_List_List* x))
-Cyc_List_length)( _temp833)){ return({ void* _temp835[ 0u]={}; Cyc_Tcexp_expr_err(
+Cyc_List_length)( _temp843)){ return({ void* _temp845[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("type instantiation mismatch", sizeof( unsigned char), 28u),
-_tag_arr( _temp835, sizeof( void*), 0u));});} for( 0; ts !=  0;( ts=(( struct
-Cyc_List_List*) _check_null( ts))->tl, _temp833=(( struct Cyc_List_List*)
-_check_null( _temp833))->tl)){ void* k= Cyc_Absyn_conref_val((( struct Cyc_Absyn_Tvar*)((
-struct Cyc_List_List*) _check_null( _temp833))->hd)->kind); Cyc_Tcutil_check_type(
+_tag_arr( _temp845, sizeof( void*), 0u));});} for( 0; ts !=  0;( ts=(( struct
+Cyc_List_List*) _check_null( ts))->tl, _temp843=(( struct Cyc_List_List*)
+_check_null( _temp843))->tl)){ void* k= Cyc_Absyn_conref_val((( struct Cyc_Absyn_Tvar*)((
+struct Cyc_List_List*) _check_null( _temp843))->hd)->kind); Cyc_Tcutil_check_type(
 loc, te, Cyc_Tcenv_lookup_type_vars( te), k, 1,( void*)(( struct Cyc_List_List*)
-_check_null( ts))->hd); instantiation=({ struct Cyc_List_List* _temp836=( struct
-Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp836->hd=( void*)({
-struct _tuple5* _temp837=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5));
-_temp837->f1=( struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*) _check_null(
-_temp833))->hd; _temp837->f2=( void*)(( struct Cyc_List_List*) _check_null( ts))->hd;
-_temp837;}); _temp836->tl= instantiation; _temp836;});}{ void* new_fn_typ= Cyc_Tcutil_substitute(
-instantiation,( void*)({ struct Cyc_Absyn_FnType_struct* _temp841=( struct Cyc_Absyn_FnType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_FnType_struct)); _temp841[ 0]=({ struct Cyc_Absyn_FnType_struct
-_temp842; _temp842.tag= Cyc_Absyn_FnType; _temp842.f1=({ struct Cyc_Absyn_FnInfo
-_temp843; _temp843.tvars= 0; _temp843.effect= _temp831; _temp843.ret_typ=( void*)
-_temp829; _temp843.args= _temp827; _temp843.c_varargs= _temp825; _temp843.cyc_varargs=
-_temp823; _temp843.rgn_po= _temp821; _temp843.attributes= _temp819; _temp843;});
-_temp842;}); _temp841;})); void* new_typ=( void*)({ struct Cyc_Absyn_PointerType_struct*
-_temp838=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
-_temp838[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp839; _temp839.tag= Cyc_Absyn_PointerType;
-_temp839.f1=({ struct Cyc_Absyn_PtrInfo _temp840; _temp840.elt_typ=( void*)
-new_fn_typ; _temp840.rgn_typ=( void*) _temp807; _temp840.nullable= _temp805;
-_temp840.tq= _temp803; _temp840.bounds= _temp801; _temp840;}); _temp839;});
-_temp838;}); return new_typ;}} _LL816: goto _LL812; _LL812:;} goto _LL794;
-_LL798: goto _LL794; _LL794:;} return({ struct Cyc_Std_String_pa_struct _temp845;
-_temp845.tag= Cyc_Std_String_pa; _temp845.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t1);{ void* _temp844[ 1u]={& _temp845}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting polymorphic type but found %s",
-sizeof( unsigned char), 40u), _tag_arr( _temp844, sizeof( void*), 1u));}});}}
+_check_null( ts))->hd); instantiation=({ struct Cyc_List_List* _temp846=( struct
+Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp846->hd=( void*)({
+struct _tuple5* _temp847=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5));
+_temp847->f1=( struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*) _check_null(
+_temp843))->hd; _temp847->f2=( void*)(( struct Cyc_List_List*) _check_null( ts))->hd;
+_temp847;}); _temp846->tl= instantiation; _temp846;});}{ void* new_fn_typ= Cyc_Tcutil_substitute(
+instantiation,( void*)({ struct Cyc_Absyn_FnType_struct* _temp851=( struct Cyc_Absyn_FnType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_FnType_struct)); _temp851[ 0]=({ struct Cyc_Absyn_FnType_struct
+_temp852; _temp852.tag= Cyc_Absyn_FnType; _temp852.f1=({ struct Cyc_Absyn_FnInfo
+_temp853; _temp853.tvars= 0; _temp853.effect= _temp841; _temp853.ret_typ=( void*)
+_temp839; _temp853.args= _temp837; _temp853.c_varargs= _temp835; _temp853.cyc_varargs=
+_temp833; _temp853.rgn_po= _temp831; _temp853.attributes= _temp829; _temp853;});
+_temp852;}); _temp851;})); void* new_typ=( void*)({ struct Cyc_Absyn_PointerType_struct*
+_temp848=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
+_temp848[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp849; _temp849.tag= Cyc_Absyn_PointerType;
+_temp849.f1=({ struct Cyc_Absyn_PtrInfo _temp850; _temp850.elt_typ=( void*)
+new_fn_typ; _temp850.rgn_typ=( void*) _temp817; _temp850.nullable= _temp815;
+_temp850.tq= _temp813; _temp850.bounds= _temp811; _temp850;}); _temp849;});
+_temp848;}); return new_typ;}} _LL826: goto _LL822; _LL822:;} goto _LL804;
+_LL808: goto _LL804; _LL804:;} return({ struct Cyc_Std_String_pa_struct _temp855;
+_temp855.tag= Cyc_Std_String_pa; _temp855.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t1);{ void* _temp854[ 1u]={& _temp855}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting polymorphic type but found %s",
+sizeof( unsigned char), 40u), _tag_arr( _temp854, sizeof( void*), 1u));}});}}
 static void* Cyc_Tcexp_tcCast( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, void** topt, void* t, struct Cyc_Absyn_Exp* e){ Cyc_Tcutil_check_type( loc,
 te, Cyc_Tcenv_lookup_type_vars( te),( void*) Cyc_Absyn_MemKind, 1, t); Cyc_Tcexp_tcExp(
 te, 0, e);{ void* t2=( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v;
 if( ! Cyc_Tcutil_silent_castable( te, loc, t2, t)? ! Cyc_Tcutil_castable( te,
-loc, t2, t): 0){ Cyc_Tcutil_unify( t2, t);{ void* _temp846=({ struct Cyc_Std_String_pa_struct
-_temp849; _temp849.tag= Cyc_Std_String_pa; _temp849.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ struct Cyc_Std_String_pa_struct _temp848; _temp848.tag= Cyc_Std_String_pa;
-_temp848.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp847[
-2u]={& _temp848,& _temp849}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("cannot cast %s to %s",
-sizeof( unsigned char), 21u), _tag_arr( _temp847, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();
-return _temp846;}} return t;}} static void* Cyc_Tcexp_tcAddress( struct Cyc_Tcenv_Tenv*
+loc, t2, t): 0){ Cyc_Tcutil_unify( t2, t);{ void* _temp856=({ struct Cyc_Std_String_pa_struct
+_temp859; _temp859.tag= Cyc_Std_String_pa; _temp859.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ struct Cyc_Std_String_pa_struct _temp858; _temp858.tag= Cyc_Std_String_pa;
+_temp858.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp857[
+2u]={& _temp858,& _temp859}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("cannot cast %s to %s",
+sizeof( unsigned char), 21u), _tag_arr( _temp857, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();
+return _temp856;}} return t;}} static void* Cyc_Tcexp_tcAddress( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e){
-void** _temp850= 0; struct Cyc_Absyn_Tqual _temp851= Cyc_Absyn_empty_tqual();
-if( topt !=  0){ void* _temp852= Cyc_Tcutil_compress(*(( void**) _check_null(
-topt))); struct Cyc_Absyn_PtrInfo _temp858; struct Cyc_Absyn_Tqual _temp860;
-void* _temp862; _LL854: if(( unsigned int) _temp852 >  4u?*(( int*) _temp852) == 
-Cyc_Absyn_PointerType: 0){ _LL859: _temp858=(( struct Cyc_Absyn_PointerType_struct*)
-_temp852)->f1; _LL863: _temp862=( void*) _temp858.elt_typ; goto _LL861; _LL861:
-_temp860= _temp858.tq; goto _LL855;} else{ goto _LL856;} _LL856: goto _LL857;
-_LL855: _temp850=({ void** _temp864=( void**) _cycalloc( sizeof( void*));
-_temp864[ 0]= _temp862; _temp864;}); _temp851= _temp860; goto _LL853; _LL857:
-goto _LL853; _LL853:;} Cyc_Tcexp_tcExpNoInst( te, _temp850, e);{ void* _temp865=(
-void*) e->r; _LL867: if(*(( int*) _temp865) ==  Cyc_Absyn_Struct_e){ goto _LL868;}
-else{ goto _LL869;} _LL869: if(*(( int*) _temp865) ==  Cyc_Absyn_Tuple_e){ goto
-_LL870;} else{ goto _LL871;} _LL871: goto _LL872; _LL868: goto _LL870; _LL870:({
-void* _temp873[ 0u]={}; Cyc_Tcutil_warn( loc, _tag_arr("& used to allocate",
-sizeof( unsigned char), 19u), _tag_arr( _temp873, sizeof( void*), 0u));});{ void*(*
-_temp874)( void* t, void* rgn, struct Cyc_Absyn_Tqual tq)= Cyc_Absyn_at_typ; if(
-topt !=  0){ void* _temp875= Cyc_Tcutil_compress(*(( void**) _check_null( topt)));
-struct Cyc_Absyn_PtrInfo _temp881; struct Cyc_Absyn_Conref* _temp883; _LL877:
-if(( unsigned int) _temp875 >  4u?*(( int*) _temp875) ==  Cyc_Absyn_PointerType:
-0){ _LL882: _temp881=(( struct Cyc_Absyn_PointerType_struct*) _temp875)->f1;
-_LL884: _temp883= _temp881.nullable; goto _LL878;} else{ goto _LL879;} _LL879:
-goto _LL880; _LL878: if((( int(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
-_temp883)){ _temp874= Cyc_Absyn_star_typ;} goto _LL876; _LL880: goto _LL876;
-_LL876:;} return _temp874(( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v,(
-void*) Cyc_Absyn_HeapRgn, _temp851);} _LL872: goto _LL866; _LL866:;}{ void*
-_temp887; int _temp889; struct _tuple6 _temp885= Cyc_Tcutil_addressof_props( te,
-e); _LL890: _temp889= _temp885.f1; goto _LL888; _LL888: _temp887= _temp885.f2;
-goto _LL886; _LL886: { struct Cyc_Absyn_Tqual tq= Cyc_Absyn_empty_tqual(); if(
-_temp889){ tq.q_const= 1;}{ void* t= Cyc_Absyn_at_typ(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e->topt))->v, _temp887, tq); return t;}}}} static void* Cyc_Tcexp_tcSizeof(
+void** _temp860= 0; struct Cyc_Absyn_Tqual _temp861= Cyc_Absyn_empty_tqual();
+if( topt !=  0){ void* _temp862= Cyc_Tcutil_compress(*(( void**) _check_null(
+topt))); struct Cyc_Absyn_PtrInfo _temp868; struct Cyc_Absyn_Tqual _temp870;
+void* _temp872; _LL864: if(( unsigned int) _temp862 >  4u?*(( int*) _temp862) == 
+Cyc_Absyn_PointerType: 0){ _LL869: _temp868=(( struct Cyc_Absyn_PointerType_struct*)
+_temp862)->f1; _LL873: _temp872=( void*) _temp868.elt_typ; goto _LL871; _LL871:
+_temp870= _temp868.tq; goto _LL865;} else{ goto _LL866;} _LL866: goto _LL867;
+_LL865: _temp860=({ void** _temp874=( void**) _cycalloc( sizeof( void*));
+_temp874[ 0]= _temp872; _temp874;}); _temp861= _temp870; goto _LL863; _LL867:
+goto _LL863; _LL863:;} Cyc_Tcexp_tcExpNoInst( te, _temp860, e);{ void* _temp875=(
+void*) e->r; _LL877: if(*(( int*) _temp875) ==  Cyc_Absyn_Struct_e){ goto _LL878;}
+else{ goto _LL879;} _LL879: if(*(( int*) _temp875) ==  Cyc_Absyn_Tuple_e){ goto
+_LL880;} else{ goto _LL881;} _LL881: goto _LL882; _LL878: goto _LL880; _LL880:({
+void* _temp883[ 0u]={}; Cyc_Tcutil_warn( loc, _tag_arr("& used to allocate",
+sizeof( unsigned char), 19u), _tag_arr( _temp883, sizeof( void*), 0u));});{ void*(*
+_temp884)( void* t, void* rgn, struct Cyc_Absyn_Tqual tq)= Cyc_Absyn_at_typ; if(
+topt !=  0){ void* _temp885= Cyc_Tcutil_compress(*(( void**) _check_null( topt)));
+struct Cyc_Absyn_PtrInfo _temp891; struct Cyc_Absyn_Conref* _temp893; _LL887:
+if(( unsigned int) _temp885 >  4u?*(( int*) _temp885) ==  Cyc_Absyn_PointerType:
+0){ _LL892: _temp891=(( struct Cyc_Absyn_PointerType_struct*) _temp885)->f1;
+_LL894: _temp893= _temp891.nullable; goto _LL888;} else{ goto _LL889;} _LL889:
+goto _LL890; _LL888: if((( int(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
+_temp893)){ _temp884= Cyc_Absyn_star_typ;} goto _LL886; _LL890: goto _LL886;
+_LL886:;} return _temp884(( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v,(
+void*) Cyc_Absyn_HeapRgn, _temp861);} _LL882: goto _LL876; _LL876:;}{ void*
+_temp897; int _temp899; struct _tuple6 _temp895= Cyc_Tcutil_addressof_props( te,
+e); _LL900: _temp899= _temp895.f1; goto _LL898; _LL898: _temp897= _temp895.f2;
+goto _LL896; _LL896: { struct Cyc_Absyn_Tqual tq= Cyc_Absyn_empty_tqual(); if(
+_temp899){ tq.q_const= 1;}{ void* t= Cyc_Absyn_at_typ(( void*)(( struct Cyc_Core_Opt*)
+_check_null( e->topt))->v, _temp897, tq); return t;}}}} static void* Cyc_Tcexp_tcSizeof(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, void*
 t){ Cyc_Tcutil_check_type( loc, te, Cyc_Tcenv_lookup_type_vars( te),( void*) Cyc_Absyn_MemKind,
 1, t); if( ! Cyc_Evexp_okay_szofarg( t)){({ struct Cyc_Std_String_pa_struct
-_temp892; _temp892.tag= Cyc_Std_String_pa; _temp892.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-t);{ void* _temp891[ 1u]={& _temp892}; Cyc_Tcutil_terr( loc, _tag_arr("sizeof applied to type %s, which has unknown size here",
-sizeof( unsigned char), 55u), _tag_arr( _temp891, sizeof( void*), 1u));}});}
+_temp902; _temp902.tag= Cyc_Std_String_pa; _temp902.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+t);{ void* _temp901[ 1u]={& _temp902}; Cyc_Tcutil_terr( loc, _tag_arr("sizeof applied to type %s, which has unknown size here",
+sizeof( unsigned char), 55u), _tag_arr( _temp901, sizeof( void*), 1u));}});}
 return Cyc_Absyn_uint_t;} int Cyc_Tcexp_structfield_has_name( struct _tagged_arr*
 n, struct Cyc_Absyn_Structfield* sf){ return Cyc_Std_strcmp(* n,* sf->name) == 
 0;} static void* Cyc_Tcexp_tcOffsetof( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
 loc, void** topt, void* t, void* n){ Cyc_Tcutil_check_type( loc, te, Cyc_Tcenv_lookup_type_vars(
-te),( void*) Cyc_Absyn_MemKind, 1, t);{ void* _temp893= n; struct _tagged_arr*
-_temp899; unsigned int _temp901; _LL895: if(*(( int*) _temp893) ==  Cyc_Absyn_StructField){
-_LL900: _temp899=(( struct Cyc_Absyn_StructField_struct*) _temp893)->f1; goto
-_LL896;} else{ goto _LL897;} _LL897: if(*(( int*) _temp893) ==  Cyc_Absyn_TupleIndex){
-_LL902: _temp901=(( struct Cyc_Absyn_TupleIndex_struct*) _temp893)->f1; goto
-_LL898;} else{ goto _LL894;} _LL896: { int bad_type= 1;{ void* _temp903= Cyc_Tcutil_compress(
-t); struct Cyc_Absyn_Structdecl** _temp915; struct _tuple1* _temp917; struct Cyc_List_List*
-_temp919; struct Cyc_Absyn_Uniondecl** _temp921; struct _tuple1* _temp923;
-struct Cyc_List_List* _temp925; _LL905: if(( unsigned int) _temp903 >  4u?*((
-int*) _temp903) ==  Cyc_Absyn_StructType: 0){ _LL918: _temp917=(( struct Cyc_Absyn_StructType_struct*)
-_temp903)->f1; goto _LL916; _LL916: _temp915=(( struct Cyc_Absyn_StructType_struct*)
-_temp903)->f3; goto _LL906;} else{ goto _LL907;} _LL907: if(( unsigned int)
-_temp903 >  4u?*(( int*) _temp903) ==  Cyc_Absyn_AnonStructType: 0){ _LL920:
-_temp919=(( struct Cyc_Absyn_AnonStructType_struct*) _temp903)->f1; goto _LL908;}
-else{ goto _LL909;} _LL909: if(( unsigned int) _temp903 >  4u?*(( int*) _temp903)
-==  Cyc_Absyn_UnionType: 0){ _LL924: _temp923=(( struct Cyc_Absyn_UnionType_struct*)
-_temp903)->f1; goto _LL922; _LL922: _temp921=(( struct Cyc_Absyn_UnionType_struct*)
-_temp903)->f3; goto _LL910;} else{ goto _LL911;} _LL911: if(( unsigned int)
-_temp903 >  4u?*(( int*) _temp903) ==  Cyc_Absyn_AnonUnionType: 0){ _LL926:
-_temp925=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp903)->f1; goto _LL912;}
-else{ goto _LL913;} _LL913: goto _LL914; _LL906: if( _temp915 ==  0){ return({
-void* _temp927[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("offsetof on unchecked StructType",
-sizeof( unsigned char), 33u), _tag_arr( _temp927, sizeof( void*), 0u));});} if((*((
-struct Cyc_Absyn_Structdecl**) _check_null( _temp915)))->fields ==  0){ goto
-_LL904;} if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
+te),( void*) Cyc_Absyn_MemKind, 1, t);{ void* _temp903= n; struct _tagged_arr*
+_temp909; unsigned int _temp911; _LL905: if(*(( int*) _temp903) ==  Cyc_Absyn_StructField){
+_LL910: _temp909=(( struct Cyc_Absyn_StructField_struct*) _temp903)->f1; goto
+_LL906;} else{ goto _LL907;} _LL907: if(*(( int*) _temp903) ==  Cyc_Absyn_TupleIndex){
+_LL912: _temp911=(( struct Cyc_Absyn_TupleIndex_struct*) _temp903)->f1; goto
+_LL908;} else{ goto _LL904;} _LL906: { int bad_type= 1;{ void* _temp913= Cyc_Tcutil_compress(
+t); struct Cyc_Absyn_Structdecl** _temp925; struct _tuple1* _temp927; struct Cyc_List_List*
+_temp929; struct Cyc_Absyn_Uniondecl** _temp931; struct _tuple1* _temp933;
+struct Cyc_List_List* _temp935; _LL915: if(( unsigned int) _temp913 >  4u?*((
+int*) _temp913) ==  Cyc_Absyn_StructType: 0){ _LL928: _temp927=(( struct Cyc_Absyn_StructType_struct*)
+_temp913)->f1; goto _LL926; _LL926: _temp925=(( struct Cyc_Absyn_StructType_struct*)
+_temp913)->f3; goto _LL916;} else{ goto _LL917;} _LL917: if(( unsigned int)
+_temp913 >  4u?*(( int*) _temp913) ==  Cyc_Absyn_AnonStructType: 0){ _LL930:
+_temp929=(( struct Cyc_Absyn_AnonStructType_struct*) _temp913)->f1; goto _LL918;}
+else{ goto _LL919;} _LL919: if(( unsigned int) _temp913 >  4u?*(( int*) _temp913)
+==  Cyc_Absyn_UnionType: 0){ _LL934: _temp933=(( struct Cyc_Absyn_UnionType_struct*)
+_temp913)->f1; goto _LL932; _LL932: _temp931=(( struct Cyc_Absyn_UnionType_struct*)
+_temp913)->f3; goto _LL920;} else{ goto _LL921;} _LL921: if(( unsigned int)
+_temp913 >  4u?*(( int*) _temp913) ==  Cyc_Absyn_AnonUnionType: 0){ _LL936:
+_temp935=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp913)->f1; goto _LL922;}
+else{ goto _LL923;} _LL923: goto _LL924; _LL916: if( _temp925 ==  0){ return({
+void* _temp937[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("offsetof on unchecked StructType",
+sizeof( unsigned char), 33u), _tag_arr( _temp937, sizeof( void*), 0u));});} if((*((
+struct Cyc_Absyn_Structdecl**) _check_null( _temp925)))->fields ==  0){ goto
+_LL914;} if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
 struct _tagged_arr* env, struct Cyc_List_List* x)) Cyc_List_exists_c)( Cyc_Tcexp_structfield_has_name,
-_temp899,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null((*((
-struct Cyc_Absyn_Structdecl**) _check_null( _temp915)))->fields))->v)){({ struct
-Cyc_Std_String_pa_struct _temp929; _temp929.tag= Cyc_Std_String_pa; _temp929.f1=(
-struct _tagged_arr)* _temp899;{ void* _temp928[ 1u]={& _temp929}; Cyc_Tcutil_terr(
+_temp909,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null((*((
+struct Cyc_Absyn_Structdecl**) _check_null( _temp925)))->fields))->v)){({ struct
+Cyc_Std_String_pa_struct _temp939; _temp939.tag= Cyc_Std_String_pa; _temp939.f1=(
+struct _tagged_arr)* _temp909;{ void* _temp938[ 1u]={& _temp939}; Cyc_Tcutil_terr(
 loc, _tag_arr("no field of struct has name %s", sizeof( unsigned char), 31u),
-_tag_arr( _temp928, sizeof( void*), 1u));}});} bad_type= 0; goto _LL904; _LL908:
+_tag_arr( _temp938, sizeof( void*), 1u));}});} bad_type= 0; goto _LL914; _LL918:
 if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
 struct _tagged_arr* env, struct Cyc_List_List* x)) Cyc_List_exists_c)( Cyc_Tcexp_structfield_has_name,
-_temp899, _temp919)){({ struct Cyc_Std_String_pa_struct _temp931; _temp931.tag=
-Cyc_Std_String_pa; _temp931.f1=( struct _tagged_arr)* _temp899;{ void* _temp930[
-1u]={& _temp931}; Cyc_Tcutil_terr( loc, _tag_arr("no field of struct has name %s",
-sizeof( unsigned char), 31u), _tag_arr( _temp930, sizeof( void*), 1u));}});}
-bad_type= 0; goto _LL904; _LL910: if( _temp921 ==  0){ return({ void* _temp932[
+_temp909, _temp929)){({ struct Cyc_Std_String_pa_struct _temp941; _temp941.tag=
+Cyc_Std_String_pa; _temp941.f1=( struct _tagged_arr)* _temp909;{ void* _temp940[
+1u]={& _temp941}; Cyc_Tcutil_terr( loc, _tag_arr("no field of struct has name %s",
+sizeof( unsigned char), 31u), _tag_arr( _temp940, sizeof( void*), 1u));}});}
+bad_type= 0; goto _LL914; _LL920: if( _temp931 ==  0){ return({ void* _temp942[
 0u]={}; Cyc_Tcutil_impos( _tag_arr("offsetof on unchecked UnionType", sizeof(
-unsigned char), 32u), _tag_arr( _temp932, sizeof( void*), 0u));});} if((*((
-struct Cyc_Absyn_Uniondecl**) _check_null( _temp921)))->fields ==  0){ goto
-_LL904;} if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
+unsigned char), 32u), _tag_arr( _temp942, sizeof( void*), 0u));});} if((*((
+struct Cyc_Absyn_Uniondecl**) _check_null( _temp931)))->fields ==  0){ goto
+_LL914;} if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
 struct _tagged_arr* env, struct Cyc_List_List* x)) Cyc_List_exists_c)( Cyc_Tcexp_structfield_has_name,
-_temp899,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null((*((
-struct Cyc_Absyn_Uniondecl**) _check_null( _temp921)))->fields))->v)){({ struct
-Cyc_Std_String_pa_struct _temp934; _temp934.tag= Cyc_Std_String_pa; _temp934.f1=(
-struct _tagged_arr)* _temp899;{ void* _temp933[ 1u]={& _temp934}; Cyc_Tcutil_terr(
+_temp909,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null((*((
+struct Cyc_Absyn_Uniondecl**) _check_null( _temp931)))->fields))->v)){({ struct
+Cyc_Std_String_pa_struct _temp944; _temp944.tag= Cyc_Std_String_pa; _temp944.f1=(
+struct _tagged_arr)* _temp909;{ void* _temp943[ 1u]={& _temp944}; Cyc_Tcutil_terr(
 loc, _tag_arr("no field of union has name %s", sizeof( unsigned char), 30u),
-_tag_arr( _temp933, sizeof( void*), 1u));}});} bad_type= 0; goto _LL904; _LL912:
+_tag_arr( _temp943, sizeof( void*), 1u));}});} bad_type= 0; goto _LL914; _LL922:
 if( !(( int(*)( int(* pred)( struct _tagged_arr*, struct Cyc_Absyn_Structfield*),
 struct _tagged_arr* env, struct Cyc_List_List* x)) Cyc_List_exists_c)( Cyc_Tcexp_structfield_has_name,
-_temp899, _temp925)){({ struct Cyc_Std_String_pa_struct _temp936; _temp936.tag=
-Cyc_Std_String_pa; _temp936.f1=( struct _tagged_arr)* _temp899;{ void* _temp935[
-1u]={& _temp936}; Cyc_Tcutil_terr( loc, _tag_arr("no field of anonymous union has name %s",
-sizeof( unsigned char), 40u), _tag_arr( _temp935, sizeof( void*), 1u));}});}
-bad_type= 0; goto _LL904; _LL914: goto _LL904; _LL904:;} if( bad_type){({ struct
-Cyc_Std_String_pa_struct _temp938; _temp938.tag= Cyc_Std_String_pa; _temp938.f1=(
-struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp937[ 1u]={& _temp938};
+_temp909, _temp935)){({ struct Cyc_Std_String_pa_struct _temp946; _temp946.tag=
+Cyc_Std_String_pa; _temp946.f1=( struct _tagged_arr)* _temp909;{ void* _temp945[
+1u]={& _temp946}; Cyc_Tcutil_terr( loc, _tag_arr("no field of anonymous union has name %s",
+sizeof( unsigned char), 40u), _tag_arr( _temp945, sizeof( void*), 1u));}});}
+bad_type= 0; goto _LL914; _LL924: goto _LL914; _LL914:;} if( bad_type){({ struct
+Cyc_Std_String_pa_struct _temp948; _temp948.tag= Cyc_Std_String_pa; _temp948.f1=(
+struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp947[ 1u]={& _temp948};
 Cyc_Tcutil_terr( loc, _tag_arr("%s is not a known struct/union type", sizeof(
-unsigned char), 36u), _tag_arr( _temp937, sizeof( void*), 1u));}});} goto _LL894;}
-_LL898: { int bad_type= 1;{ void* _temp939= Cyc_Tcutil_compress( t); struct Cyc_Absyn_Structdecl**
-_temp955; struct Cyc_List_List* _temp957; struct Cyc_Absyn_Uniondecl** _temp959;
-struct Cyc_List_List* _temp961; struct Cyc_List_List* _temp963; struct Cyc_Absyn_TunionFieldInfo
-_temp965; void* _temp967; struct Cyc_Absyn_Tunionfield* _temp969; struct Cyc_Absyn_Tuniondecl*
-_temp971; _LL941: if(( unsigned int) _temp939 >  4u?*(( int*) _temp939) ==  Cyc_Absyn_StructType:
-0){ _LL956: _temp955=(( struct Cyc_Absyn_StructType_struct*) _temp939)->f3; goto
-_LL942;} else{ goto _LL943;} _LL943: if(( unsigned int) _temp939 >  4u?*(( int*)
-_temp939) ==  Cyc_Absyn_AnonStructType: 0){ _LL958: _temp957=(( struct Cyc_Absyn_AnonStructType_struct*)
-_temp939)->f1; goto _LL944;} else{ goto _LL945;} _LL945: if(( unsigned int)
-_temp939 >  4u?*(( int*) _temp939) ==  Cyc_Absyn_UnionType: 0){ _LL960: _temp959=((
-struct Cyc_Absyn_UnionType_struct*) _temp939)->f3; goto _LL946;} else{ goto
-_LL947;} _LL947: if(( unsigned int) _temp939 >  4u?*(( int*) _temp939) ==  Cyc_Absyn_AnonUnionType:
-0){ _LL962: _temp961=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp939)->f1;
-goto _LL948;} else{ goto _LL949;} _LL949: if(( unsigned int) _temp939 >  4u?*((
-int*) _temp939) ==  Cyc_Absyn_TupleType: 0){ _LL964: _temp963=(( struct Cyc_Absyn_TupleType_struct*)
-_temp939)->f1; goto _LL950;} else{ goto _LL951;} _LL951: if(( unsigned int)
-_temp939 >  4u?*(( int*) _temp939) ==  Cyc_Absyn_TunionFieldType: 0){ _LL966:
-_temp965=(( struct Cyc_Absyn_TunionFieldType_struct*) _temp939)->f1; _LL968:
-_temp967=( void*) _temp965.field_info; if(*(( int*) _temp967) ==  Cyc_Absyn_KnownTunionfield){
-_LL972: _temp971=(( struct Cyc_Absyn_KnownTunionfield_struct*) _temp967)->f1;
-goto _LL970; _LL970: _temp969=(( struct Cyc_Absyn_KnownTunionfield_struct*)
-_temp967)->f2; goto _LL952;} else{ goto _LL953;}} else{ goto _LL953;} _LL953:
-goto _LL954; _LL942: if( _temp955 ==  0){ return({ void* _temp973[ 0u]={}; Cyc_Tcutil_impos(
+unsigned char), 36u), _tag_arr( _temp947, sizeof( void*), 1u));}});} goto _LL904;}
+_LL908: { int bad_type= 1;{ void* _temp949= Cyc_Tcutil_compress( t); struct Cyc_Absyn_Structdecl**
+_temp965; struct Cyc_List_List* _temp967; struct Cyc_Absyn_Uniondecl** _temp969;
+struct Cyc_List_List* _temp971; struct Cyc_List_List* _temp973; struct Cyc_Absyn_TunionFieldInfo
+_temp975; void* _temp977; struct Cyc_Absyn_Tunionfield* _temp979; struct Cyc_Absyn_Tuniondecl*
+_temp981; _LL951: if(( unsigned int) _temp949 >  4u?*(( int*) _temp949) ==  Cyc_Absyn_StructType:
+0){ _LL966: _temp965=(( struct Cyc_Absyn_StructType_struct*) _temp949)->f3; goto
+_LL952;} else{ goto _LL953;} _LL953: if(( unsigned int) _temp949 >  4u?*(( int*)
+_temp949) ==  Cyc_Absyn_AnonStructType: 0){ _LL968: _temp967=(( struct Cyc_Absyn_AnonStructType_struct*)
+_temp949)->f1; goto _LL954;} else{ goto _LL955;} _LL955: if(( unsigned int)
+_temp949 >  4u?*(( int*) _temp949) ==  Cyc_Absyn_UnionType: 0){ _LL970: _temp969=((
+struct Cyc_Absyn_UnionType_struct*) _temp949)->f3; goto _LL956;} else{ goto
+_LL957;} _LL957: if(( unsigned int) _temp949 >  4u?*(( int*) _temp949) ==  Cyc_Absyn_AnonUnionType:
+0){ _LL972: _temp971=(( struct Cyc_Absyn_AnonUnionType_struct*) _temp949)->f1;
+goto _LL958;} else{ goto _LL959;} _LL959: if(( unsigned int) _temp949 >  4u?*((
+int*) _temp949) ==  Cyc_Absyn_TupleType: 0){ _LL974: _temp973=(( struct Cyc_Absyn_TupleType_struct*)
+_temp949)->f1; goto _LL960;} else{ goto _LL961;} _LL961: if(( unsigned int)
+_temp949 >  4u?*(( int*) _temp949) ==  Cyc_Absyn_TunionFieldType: 0){ _LL976:
+_temp975=(( struct Cyc_Absyn_TunionFieldType_struct*) _temp949)->f1; _LL978:
+_temp977=( void*) _temp975.field_info; if(*(( int*) _temp977) ==  Cyc_Absyn_KnownTunionfield){
+_LL982: _temp981=(( struct Cyc_Absyn_KnownTunionfield_struct*) _temp977)->f1;
+goto _LL980; _LL980: _temp979=(( struct Cyc_Absyn_KnownTunionfield_struct*)
+_temp977)->f2; goto _LL962;} else{ goto _LL963;}} else{ goto _LL963;} _LL963:
+goto _LL964; _LL952: if( _temp965 ==  0){ return({ void* _temp983[ 0u]={}; Cyc_Tcutil_impos(
 _tag_arr("offsetof on unchecked StructType", sizeof( unsigned char), 33u),
-_tag_arr( _temp973, sizeof( void*), 0u));});} if((*(( struct Cyc_Absyn_Structdecl**)
-_check_null( _temp955)))->fields ==  0){ goto _LL940;} if((( int(*)( struct Cyc_List_List*
+_tag_arr( _temp983, sizeof( void*), 0u));});} if((*(( struct Cyc_Absyn_Structdecl**)
+_check_null( _temp965)))->fields ==  0){ goto _LL950;} if((( int(*)( struct Cyc_List_List*
 x)) Cyc_List_length)(( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
-_check_null((*(( struct Cyc_Absyn_Structdecl**) _check_null( _temp955)))->fields))->v)
-<=  _temp901){({ struct Cyc_Std_Int_pa_struct _temp976; _temp976.tag= Cyc_Std_Int_pa;
-_temp976.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct _temp975; _temp975.tag=
-Cyc_Std_Int_pa; _temp975.f1=( int)(( unsigned int)(( int(*)( struct Cyc_List_List*
+_check_null((*(( struct Cyc_Absyn_Structdecl**) _check_null( _temp965)))->fields))->v)
+<=  _temp911){({ struct Cyc_Std_Int_pa_struct _temp986; _temp986.tag= Cyc_Std_Int_pa;
+_temp986.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct _temp985; _temp985.tag=
+Cyc_Std_Int_pa; _temp985.f1=( int)(( unsigned int)(( int(*)( struct Cyc_List_List*
 x)) Cyc_List_length)(( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
-_check_null((*(( struct Cyc_Absyn_Structdecl**) _check_null( _temp955)))->fields))->v));{
-void* _temp974[ 2u]={& _temp975,& _temp976}; Cyc_Tcutil_terr( loc, _tag_arr("struct has too few components: %d <= %d",
-sizeof( unsigned char), 40u), _tag_arr( _temp974, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL944: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-_temp957) <=  _temp901){({ struct Cyc_Std_Int_pa_struct _temp979; _temp979.tag=
-Cyc_Std_Int_pa; _temp979.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct
-_temp978; _temp978.tag= Cyc_Std_Int_pa; _temp978.f1=( int)(( unsigned int)(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( _temp957));{ void* _temp977[ 2u]={&
-_temp978,& _temp979}; Cyc_Tcutil_terr( loc, _tag_arr("struct has too few components: %d <= %d",
-sizeof( unsigned char), 40u), _tag_arr( _temp977, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL946: if( _temp959 ==  0){ return({ void* _temp980[
-0u]={}; Cyc_Tcutil_impos( _tag_arr("offsetof on unchecked UnionType", sizeof(
-unsigned char), 32u), _tag_arr( _temp980, sizeof( void*), 0u));});} if((*((
-struct Cyc_Absyn_Uniondecl**) _check_null( _temp959)))->fields ==  0){ goto
-_LL940;} if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(( struct Cyc_List_List*)((
-struct Cyc_Core_Opt*) _check_null((*(( struct Cyc_Absyn_Uniondecl**) _check_null(
-_temp959)))->fields))->v) <=  _temp901){({ struct Cyc_Std_Int_pa_struct _temp983;
-_temp983.tag= Cyc_Std_Int_pa; _temp983.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct
-_temp982; _temp982.tag= Cyc_Std_Int_pa; _temp982.f1=( int)(( unsigned int)(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)(( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
-_check_null((*(( struct Cyc_Absyn_Uniondecl**) _check_null( _temp959)))->fields))->v));{
-void* _temp981[ 2u]={& _temp982,& _temp983}; Cyc_Tcutil_terr( loc, _tag_arr("union has too few components: %d <= %d",
-sizeof( unsigned char), 39u), _tag_arr( _temp981, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL948: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-_temp961) <=  _temp901){({ struct Cyc_Std_Int_pa_struct _temp986; _temp986.tag=
-Cyc_Std_Int_pa; _temp986.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct
-_temp985; _temp985.tag= Cyc_Std_Int_pa; _temp985.f1=( int)(( unsigned int)(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( _temp961));{ void* _temp984[ 2u]={&
-_temp985,& _temp986}; Cyc_Tcutil_terr( loc, _tag_arr("union has too few components: %d <= %d",
-sizeof( unsigned char), 39u), _tag_arr( _temp984, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL950: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-_temp963) <=  _temp901){({ struct Cyc_Std_Int_pa_struct _temp989; _temp989.tag=
-Cyc_Std_Int_pa; _temp989.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct
+_check_null((*(( struct Cyc_Absyn_Structdecl**) _check_null( _temp965)))->fields))->v));{
+void* _temp984[ 2u]={& _temp985,& _temp986}; Cyc_Tcutil_terr( loc, _tag_arr("struct has too few components: %d <= %d",
+sizeof( unsigned char), 40u), _tag_arr( _temp984, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL954: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
+_temp967) <=  _temp911){({ struct Cyc_Std_Int_pa_struct _temp989; _temp989.tag=
+Cyc_Std_Int_pa; _temp989.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct
 _temp988; _temp988.tag= Cyc_Std_Int_pa; _temp988.f1=( int)(( unsigned int)(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( _temp963));{ void* _temp987[ 2u]={&
-_temp988,& _temp989}; Cyc_Tcutil_terr( loc, _tag_arr("tuple has too few components: %d <= %d",
-sizeof( unsigned char), 39u), _tag_arr( _temp987, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL952: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-_temp969->typs) <  _temp901){({ struct Cyc_Std_Int_pa_struct _temp992; _temp992.tag=
-Cyc_Std_Int_pa; _temp992.f1=( int) _temp901;{ struct Cyc_Std_Int_pa_struct
-_temp991; _temp991.tag= Cyc_Std_Int_pa; _temp991.f1=( int)(( unsigned int)(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( _temp969->typs));{ void* _temp990[ 2u]={&
-_temp991,& _temp992}; Cyc_Tcutil_terr( loc, _tag_arr("tunionfield has too few components: %d < %d",
-sizeof( unsigned char), 44u), _tag_arr( _temp990, sizeof( void*), 2u));}}});}
-bad_type= 0; goto _LL940; _LL954: goto _LL940; _LL940:;} if( bad_type){({ struct
-Cyc_Std_String_pa_struct _temp994; _temp994.tag= Cyc_Std_String_pa; _temp994.f1=(
-struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp993[ 1u]={& _temp994};
-Cyc_Tcutil_terr( loc, _tag_arr("%s is not a known struct/union/tuple/tunion type",
-sizeof( unsigned char), 49u), _tag_arr( _temp993, sizeof( void*), 1u));}});}
-goto _LL894;} _LL894:;} return Cyc_Absyn_uint_t;} static void* Cyc_Tcexp_tcDeref(
+struct Cyc_List_List* x)) Cyc_List_length)( _temp967));{ void* _temp987[ 2u]={&
+_temp988,& _temp989}; Cyc_Tcutil_terr( loc, _tag_arr("struct has too few components: %d <= %d",
+sizeof( unsigned char), 40u), _tag_arr( _temp987, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL956: if( _temp969 ==  0){ return({ void* _temp990[
+0u]={}; Cyc_Tcutil_impos( _tag_arr("offsetof on unchecked UnionType", sizeof(
+unsigned char), 32u), _tag_arr( _temp990, sizeof( void*), 0u));});} if((*((
+struct Cyc_Absyn_Uniondecl**) _check_null( _temp969)))->fields ==  0){ goto
+_LL950;} if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(( struct Cyc_List_List*)((
+struct Cyc_Core_Opt*) _check_null((*(( struct Cyc_Absyn_Uniondecl**) _check_null(
+_temp969)))->fields))->v) <=  _temp911){({ struct Cyc_Std_Int_pa_struct _temp993;
+_temp993.tag= Cyc_Std_Int_pa; _temp993.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct
+_temp992; _temp992.tag= Cyc_Std_Int_pa; _temp992.f1=( int)(( unsigned int)(( int(*)(
+struct Cyc_List_List* x)) Cyc_List_length)(( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
+_check_null((*(( struct Cyc_Absyn_Uniondecl**) _check_null( _temp969)))->fields))->v));{
+void* _temp991[ 2u]={& _temp992,& _temp993}; Cyc_Tcutil_terr( loc, _tag_arr("union has too few components: %d <= %d",
+sizeof( unsigned char), 39u), _tag_arr( _temp991, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL958: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
+_temp971) <=  _temp911){({ struct Cyc_Std_Int_pa_struct _temp996; _temp996.tag=
+Cyc_Std_Int_pa; _temp996.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct
+_temp995; _temp995.tag= Cyc_Std_Int_pa; _temp995.f1=( int)(( unsigned int)(( int(*)(
+struct Cyc_List_List* x)) Cyc_List_length)( _temp971));{ void* _temp994[ 2u]={&
+_temp995,& _temp996}; Cyc_Tcutil_terr( loc, _tag_arr("union has too few components: %d <= %d",
+sizeof( unsigned char), 39u), _tag_arr( _temp994, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL960: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
+_temp973) <=  _temp911){({ struct Cyc_Std_Int_pa_struct _temp999; _temp999.tag=
+Cyc_Std_Int_pa; _temp999.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct
+_temp998; _temp998.tag= Cyc_Std_Int_pa; _temp998.f1=( int)(( unsigned int)(( int(*)(
+struct Cyc_List_List* x)) Cyc_List_length)( _temp973));{ void* _temp997[ 2u]={&
+_temp998,& _temp999}; Cyc_Tcutil_terr( loc, _tag_arr("tuple has too few components: %d <= %d",
+sizeof( unsigned char), 39u), _tag_arr( _temp997, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL962: if((( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
+_temp979->typs) <  _temp911){({ struct Cyc_Std_Int_pa_struct _temp1002;
+_temp1002.tag= Cyc_Std_Int_pa; _temp1002.f1=( int) _temp911;{ struct Cyc_Std_Int_pa_struct
+_temp1001; _temp1001.tag= Cyc_Std_Int_pa; _temp1001.f1=( int)(( unsigned int)((
+int(*)( struct Cyc_List_List* x)) Cyc_List_length)( _temp979->typs));{ void*
+_temp1000[ 2u]={& _temp1001,& _temp1002}; Cyc_Tcutil_terr( loc, _tag_arr("tunionfield has too few components: %d < %d",
+sizeof( unsigned char), 44u), _tag_arr( _temp1000, sizeof( void*), 2u));}}});}
+bad_type= 0; goto _LL950; _LL964: goto _LL950; _LL950:;} if( bad_type){({ struct
+Cyc_Std_String_pa_struct _temp1004; _temp1004.tag= Cyc_Std_String_pa; _temp1004.f1=(
+struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1003[ 1u]={&
+_temp1004}; Cyc_Tcutil_terr( loc, _tag_arr("%s is not a known struct/union/tuple/tunion type",
+sizeof( unsigned char), 49u), _tag_arr( _temp1003, sizeof( void*), 1u));}});}
+goto _LL904;} _LL904:;} return Cyc_Absyn_uint_t;} static void* Cyc_Tcexp_tcDeref(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Exp* e){ Cyc_Tcexp_tcExp( te, 0, e);{ void* t= Cyc_Tcutil_compress((
-void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); void* _temp995= t;
-struct Cyc_Absyn_PtrInfo _temp1001; struct Cyc_Absyn_Conref* _temp1003; void*
-_temp1005; void* _temp1007; _LL997: if(( unsigned int) _temp995 >  4u?*(( int*)
-_temp995) ==  Cyc_Absyn_PointerType: 0){ _LL1002: _temp1001=(( struct Cyc_Absyn_PointerType_struct*)
-_temp995)->f1; _LL1008: _temp1007=( void*) _temp1001.elt_typ; goto _LL1006;
-_LL1006: _temp1005=( void*) _temp1001.rgn_typ; goto _LL1004; _LL1004: _temp1003=
-_temp1001.bounds; goto _LL998;} else{ goto _LL999;} _LL999: goto _LL1000; _LL998:
-Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1005); Cyc_Tcutil_check_nonzero_bound(
-loc, _temp1003); return _temp1007; _LL1000: return({ struct Cyc_Std_String_pa_struct
-_temp1010; _temp1010.tag= Cyc_Std_String_pa; _temp1010.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string( t);{ void* _temp1009[ 1u]={& _temp1010}; Cyc_Tcexp_expr_err(
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); void* _temp1005= t;
+struct Cyc_Absyn_PtrInfo _temp1011; struct Cyc_Absyn_Conref* _temp1013; void*
+_temp1015; void* _temp1017; _LL1007: if(( unsigned int) _temp1005 >  4u?*(( int*)
+_temp1005) ==  Cyc_Absyn_PointerType: 0){ _LL1012: _temp1011=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1005)->f1; _LL1018: _temp1017=( void*) _temp1011.elt_typ; goto _LL1016;
+_LL1016: _temp1015=( void*) _temp1011.rgn_typ; goto _LL1014; _LL1014: _temp1013=
+_temp1011.bounds; goto _LL1008;} else{ goto _LL1009;} _LL1009: goto _LL1010;
+_LL1008: Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1015); Cyc_Tcutil_check_nonzero_bound(
+loc, _temp1013); return _temp1017; _LL1010: return({ struct Cyc_Std_String_pa_struct
+_temp1020; _temp1020.tag= Cyc_Std_String_pa; _temp1020.f1=( struct _tagged_arr)
+Cyc_Absynpp_typ2string( t);{ void* _temp1019[ 1u]={& _temp1020}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("expecting * or @ type but found %s", sizeof( unsigned char),
-35u), _tag_arr( _temp1009, sizeof( void*), 1u));}}); _LL996:;}} static void* Cyc_Tcexp_tcStructMember(
-struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
-Cyc_Absyn_Exp* outer_e, struct Cyc_Absyn_Exp* e, struct _tagged_arr* f){ Cyc_Tcexp_tcExpNoPromote(
-te, 0, e);{ void* t= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
-_check_null( e->topt))->v); void* _temp1011= t; struct Cyc_Absyn_Structdecl**
-_temp1027; struct Cyc_Absyn_Structdecl* _temp1029; struct Cyc_List_List*
-_temp1030; struct _tuple1* _temp1032; struct Cyc_List_List* _temp1034; struct
-Cyc_List_List* _temp1036; struct Cyc_Absyn_Uniondecl** _temp1038; struct Cyc_Absyn_Uniondecl*
-_temp1040; struct Cyc_List_List* _temp1041; struct _tuple1* _temp1043; _LL1013:
-if(( unsigned int) _temp1011 >  4u?*(( int*) _temp1011) ==  Cyc_Absyn_StructType:
-0){ _LL1033: _temp1032=(( struct Cyc_Absyn_StructType_struct*) _temp1011)->f1;
-goto _LL1031; _LL1031: _temp1030=(( struct Cyc_Absyn_StructType_struct*)
-_temp1011)->f2; goto _LL1028; _LL1028: _temp1027=(( struct Cyc_Absyn_StructType_struct*)
-_temp1011)->f3; if( _temp1027 ==  0){ goto _LL1015;} else{ _temp1029=* _temp1027;
-goto _LL1014;}} else{ goto _LL1015;} _LL1015: if(( unsigned int) _temp1011 >  4u?*((
-int*) _temp1011) ==  Cyc_Absyn_AnonStructType: 0){ _LL1035: _temp1034=(( struct
-Cyc_Absyn_AnonStructType_struct*) _temp1011)->f1; goto _LL1016;} else{ goto
-_LL1017;} _LL1017: if(( unsigned int) _temp1011 >  4u?*(( int*) _temp1011) == 
-Cyc_Absyn_AnonUnionType: 0){ _LL1037: _temp1036=(( struct Cyc_Absyn_AnonUnionType_struct*)
-_temp1011)->f1; goto _LL1018;} else{ goto _LL1019;} _LL1019: if(( unsigned int)
-_temp1011 >  4u?*(( int*) _temp1011) ==  Cyc_Absyn_UnionType: 0){ _LL1044:
-_temp1043=(( struct Cyc_Absyn_UnionType_struct*) _temp1011)->f1; goto _LL1042;
-_LL1042: _temp1041=(( struct Cyc_Absyn_UnionType_struct*) _temp1011)->f2; goto
-_LL1039; _LL1039: _temp1038=(( struct Cyc_Absyn_UnionType_struct*) _temp1011)->f3;
-if( _temp1038 ==  0){ goto _LL1021;} else{ _temp1040=* _temp1038; goto _LL1020;}}
-else{ goto _LL1021;} _LL1021: if(( unsigned int) _temp1011 >  4u?*(( int*)
-_temp1011) ==  Cyc_Absyn_ArrayType: 0){ goto _LL1045;} else{ goto _LL1023;}
-_LL1045: if( Cyc_Std_zstrcmp(* f, _tag_arr("size", sizeof( unsigned char), 5u))
-==  0){ goto _LL1022;} else{ goto _LL1023;} _LL1023: if(( unsigned int)
-_temp1011 >  4u?*(( int*) _temp1011) ==  Cyc_Absyn_PointerType: 0){ goto _LL1046;}
-else{ goto _LL1025;} _LL1046: if( Cyc_Std_zstrcmp(* f, _tag_arr("size", sizeof(
-unsigned char), 5u)) ==  0){ goto _LL1024;} else{ goto _LL1025;} _LL1025: goto
-_LL1026; _LL1014: if( _temp1032 ==  0){ return({ void* _temp1047[ 0u]={}; Cyc_Tcexp_expr_err(
+35u), _tag_arr( _temp1019, sizeof( void*), 1u));}}); _LL1006:;}} static void*
+Cyc_Tcexp_tcStructMember( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
+loc, void** topt, struct Cyc_Absyn_Exp* outer_e, struct Cyc_Absyn_Exp* e, struct
+_tagged_arr* f){ Cyc_Tcexp_tcExpNoPromote( te, 0, e);{ void* t= Cyc_Tcutil_compress((
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); void* _temp1021= t;
+struct Cyc_Absyn_Structdecl** _temp1037; struct Cyc_Absyn_Structdecl* _temp1039;
+struct Cyc_List_List* _temp1040; struct _tuple1* _temp1042; struct Cyc_List_List*
+_temp1044; struct Cyc_List_List* _temp1046; struct Cyc_Absyn_Uniondecl**
+_temp1048; struct Cyc_Absyn_Uniondecl* _temp1050; struct Cyc_List_List*
+_temp1051; struct _tuple1* _temp1053; _LL1023: if(( unsigned int) _temp1021 >  4u?*((
+int*) _temp1021) ==  Cyc_Absyn_StructType: 0){ _LL1043: _temp1042=(( struct Cyc_Absyn_StructType_struct*)
+_temp1021)->f1; goto _LL1041; _LL1041: _temp1040=(( struct Cyc_Absyn_StructType_struct*)
+_temp1021)->f2; goto _LL1038; _LL1038: _temp1037=(( struct Cyc_Absyn_StructType_struct*)
+_temp1021)->f3; if( _temp1037 ==  0){ goto _LL1025;} else{ _temp1039=* _temp1037;
+goto _LL1024;}} else{ goto _LL1025;} _LL1025: if(( unsigned int) _temp1021 >  4u?*((
+int*) _temp1021) ==  Cyc_Absyn_AnonStructType: 0){ _LL1045: _temp1044=(( struct
+Cyc_Absyn_AnonStructType_struct*) _temp1021)->f1; goto _LL1026;} else{ goto
+_LL1027;} _LL1027: if(( unsigned int) _temp1021 >  4u?*(( int*) _temp1021) == 
+Cyc_Absyn_AnonUnionType: 0){ _LL1047: _temp1046=(( struct Cyc_Absyn_AnonUnionType_struct*)
+_temp1021)->f1; goto _LL1028;} else{ goto _LL1029;} _LL1029: if(( unsigned int)
+_temp1021 >  4u?*(( int*) _temp1021) ==  Cyc_Absyn_UnionType: 0){ _LL1054:
+_temp1053=(( struct Cyc_Absyn_UnionType_struct*) _temp1021)->f1; goto _LL1052;
+_LL1052: _temp1051=(( struct Cyc_Absyn_UnionType_struct*) _temp1021)->f2; goto
+_LL1049; _LL1049: _temp1048=(( struct Cyc_Absyn_UnionType_struct*) _temp1021)->f3;
+if( _temp1048 ==  0){ goto _LL1031;} else{ _temp1050=* _temp1048; goto _LL1030;}}
+else{ goto _LL1031;} _LL1031: if(( unsigned int) _temp1021 >  4u?*(( int*)
+_temp1021) ==  Cyc_Absyn_ArrayType: 0){ goto _LL1055;} else{ goto _LL1033;}
+_LL1055: if( Cyc_Std_zstrcmp(* f, _tag_arr("size", sizeof( unsigned char), 5u))
+==  0){ goto _LL1032;} else{ goto _LL1033;} _LL1033: if(( unsigned int)
+_temp1021 >  4u?*(( int*) _temp1021) ==  Cyc_Absyn_PointerType: 0){ goto _LL1056;}
+else{ goto _LL1035;} _LL1056: if( Cyc_Std_zstrcmp(* f, _tag_arr("size", sizeof(
+unsigned char), 5u)) ==  0){ goto _LL1034;} else{ goto _LL1035;} _LL1035: goto
+_LL1036; _LL1024: if( _temp1042 ==  0){ return({ void* _temp1057[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("unresolved struct type (COMPILER ERROR)", sizeof(
-unsigned char), 40u), _tag_arr( _temp1047, sizeof( void*), 0u));});}{ struct Cyc_Absyn_Structfield*
-_temp1048= Cyc_Absyn_lookup_struct_field( _temp1029, f); if( _temp1048 ==  0){
-return({ struct Cyc_Std_String_pa_struct _temp1051; _temp1051.tag= Cyc_Std_String_pa;
-_temp1051.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
-_temp1050; _temp1050.tag= Cyc_Std_String_pa; _temp1050.f1=( struct _tagged_arr)
-Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1032));{ void*
-_temp1049[ 2u]={& _temp1050,& _temp1051}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("struct %s has no %s field",
-sizeof( unsigned char), 26u), _tag_arr( _temp1049, sizeof( void*), 2u));}}});}{
-void* t2;{ struct _RegionHandle _temp1052= _new_region(); struct _RegionHandle*
-rgn=& _temp1052; _push_region( rgn);{ struct Cyc_List_List* _temp1053=(( struct
+unsigned char), 40u), _tag_arr( _temp1057, sizeof( void*), 0u));});}{ struct Cyc_Absyn_Structfield*
+_temp1058= Cyc_Absyn_lookup_struct_field( _temp1039, f); if( _temp1058 ==  0){
+return({ struct Cyc_Std_String_pa_struct _temp1061; _temp1061.tag= Cyc_Std_String_pa;
+_temp1061.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
+_temp1060; _temp1060.tag= Cyc_Std_String_pa; _temp1060.f1=( struct _tagged_arr)
+Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1042));{ void*
+_temp1059[ 2u]={& _temp1060,& _temp1061}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("struct %s has no %s field",
+sizeof( unsigned char), 26u), _tag_arr( _temp1059, sizeof( void*), 2u));}}});}{
+void* t2;{ struct _RegionHandle _temp1062= _new_region(); struct _RegionHandle*
+rgn=& _temp1062; _push_region( rgn);{ struct Cyc_List_List* _temp1063=(( struct
 Cyc_List_List*(*)( struct _RegionHandle* r1, struct _RegionHandle* r2, struct
-Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp1029->tvs,
-_temp1030); t2= Cyc_Tcutil_rsubstitute( rgn, _temp1053,( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1048))->type);}; _pop_region( rgn);} return t2;}} _LL1016: {
-struct Cyc_Absyn_Structfield* _temp1054= Cyc_Absyn_lookup_field( _temp1034, f);
-if( _temp1054 ==  0){ return({ struct Cyc_Std_String_pa_struct _temp1056;
-_temp1056.tag= Cyc_Std_String_pa; _temp1056.f1=( struct _tagged_arr)* f;{ void*
-_temp1055[ 1u]={& _temp1056}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("struct has no %s field",
-sizeof( unsigned char), 23u), _tag_arr( _temp1055, sizeof( void*), 1u));}});}
-return( void*)(( struct Cyc_Absyn_Structfield*) _check_null( _temp1054))->type;}
-_LL1018: { struct Cyc_Absyn_Structfield* _temp1057= Cyc_Absyn_lookup_field(
-_temp1036, f); if( _temp1057 ==  0){ return({ struct Cyc_Std_String_pa_struct
-_temp1059; _temp1059.tag= Cyc_Std_String_pa; _temp1059.f1=( struct _tagged_arr)*
-f;{ void* _temp1058[ 1u]={& _temp1059}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union has no %s field",
-sizeof( unsigned char), 22u), _tag_arr( _temp1058, sizeof( void*), 1u));}});}
-return( void*)(( struct Cyc_Absyn_Structfield*) _check_null( _temp1057))->type;}
-_LL1020: if( _temp1043 ==  0){ return({ void* _temp1060[ 0u]={}; Cyc_Tcexp_expr_err(
+Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp1039->tvs,
+_temp1040); t2= Cyc_Tcutil_rsubstitute( rgn, _temp1063,( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1058))->type);}; _pop_region( rgn);} return t2;}} _LL1026: {
+struct Cyc_Absyn_Structfield* _temp1064= Cyc_Absyn_lookup_field( _temp1044, f);
+if( _temp1064 ==  0){ return({ struct Cyc_Std_String_pa_struct _temp1066;
+_temp1066.tag= Cyc_Std_String_pa; _temp1066.f1=( struct _tagged_arr)* f;{ void*
+_temp1065[ 1u]={& _temp1066}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("struct has no %s field",
+sizeof( unsigned char), 23u), _tag_arr( _temp1065, sizeof( void*), 1u));}});}
+return( void*)(( struct Cyc_Absyn_Structfield*) _check_null( _temp1064))->type;}
+_LL1028: { struct Cyc_Absyn_Structfield* _temp1067= Cyc_Absyn_lookup_field(
+_temp1046, f); if( _temp1067 ==  0){ return({ struct Cyc_Std_String_pa_struct
+_temp1069; _temp1069.tag= Cyc_Std_String_pa; _temp1069.f1=( struct _tagged_arr)*
+f;{ void* _temp1068[ 1u]={& _temp1069}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union has no %s field",
+sizeof( unsigned char), 22u), _tag_arr( _temp1068, sizeof( void*), 1u));}});}
+return( void*)(( struct Cyc_Absyn_Structfield*) _check_null( _temp1067))->type;}
+_LL1030: if( _temp1053 ==  0){ return({ void* _temp1070[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("unresolved union type (COMPILER ERROR)", sizeof(
-unsigned char), 39u), _tag_arr( _temp1060, sizeof( void*), 0u));});}{ struct Cyc_Absyn_Structfield*
-_temp1061= Cyc_Absyn_lookup_union_field( _temp1040, f); if( _temp1061 ==  0){
-return({ struct Cyc_Std_String_pa_struct _temp1064; _temp1064.tag= Cyc_Std_String_pa;
-_temp1064.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
-_temp1063; _temp1063.tag= Cyc_Std_String_pa; _temp1063.f1=( struct _tagged_arr)
-Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1043));{ void*
-_temp1062[ 2u]={& _temp1063,& _temp1064}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union %s has no %s field",
-sizeof( unsigned char), 25u), _tag_arr( _temp1062, sizeof( void*), 2u));}}});}{
-struct Cyc_List_List* _temp1065=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x, struct Cyc_List_List* y)) Cyc_List_zip)( _temp1040->tvs, _temp1041); void*
-_temp1066= Cyc_Tcutil_substitute( _temp1065,( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1061))->type); return _temp1066;}} _LL1022:( void*)( outer_e->r=(
-void*)(( void*)({ struct Cyc_Absyn_Primop_e_struct* _temp1067=( struct Cyc_Absyn_Primop_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Primop_e_struct)); _temp1067[ 0]=({ struct
-Cyc_Absyn_Primop_e_struct _temp1068; _temp1068.tag= Cyc_Absyn_Primop_e;
-_temp1068.f1=( void*)(( void*) Cyc_Absyn_Size); _temp1068.f2=({ struct Cyc_List_List*
-_temp1069=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp1069->hd=( void*) e; _temp1069->tl= 0; _temp1069;}); _temp1068;});
-_temp1067;}))); return Cyc_Absyn_uint_t; _LL1024:( void*)( outer_e->r=( void*)((
-void*)({ struct Cyc_Absyn_Primop_e_struct* _temp1070=( struct Cyc_Absyn_Primop_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Primop_e_struct)); _temp1070[ 0]=({ struct
-Cyc_Absyn_Primop_e_struct _temp1071; _temp1071.tag= Cyc_Absyn_Primop_e;
-_temp1071.f1=( void*)(( void*) Cyc_Absyn_Size); _temp1071.f2=({ struct Cyc_List_List*
-_temp1072=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp1072->hd=( void*) e; _temp1072->tl= 0; _temp1072;}); _temp1071;});
-_temp1070;}))); return Cyc_Absyn_uint_t; _LL1026: if( Cyc_Std_zstrcmp(* f,
+unsigned char), 39u), _tag_arr( _temp1070, sizeof( void*), 0u));});}{ struct Cyc_Absyn_Structfield*
+_temp1071= Cyc_Absyn_lookup_union_field( _temp1050, f); if( _temp1071 ==  0){
+return({ struct Cyc_Std_String_pa_struct _temp1074; _temp1074.tag= Cyc_Std_String_pa;
+_temp1074.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
+_temp1073; _temp1073.tag= Cyc_Std_String_pa; _temp1073.f1=( struct _tagged_arr)
+Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1053));{ void*
+_temp1072[ 2u]={& _temp1073,& _temp1074}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union %s has no %s field",
+sizeof( unsigned char), 25u), _tag_arr( _temp1072, sizeof( void*), 2u));}}});}{
+struct Cyc_List_List* _temp1075=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x, struct Cyc_List_List* y)) Cyc_List_zip)( _temp1050->tvs, _temp1051); void*
+_temp1076= Cyc_Tcutil_substitute( _temp1075,( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1071))->type); return _temp1076;}} _LL1032:( void*)( outer_e->r=(
+void*)(( void*)({ struct Cyc_Absyn_Primop_e_struct* _temp1077=( struct Cyc_Absyn_Primop_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Primop_e_struct)); _temp1077[ 0]=({ struct
+Cyc_Absyn_Primop_e_struct _temp1078; _temp1078.tag= Cyc_Absyn_Primop_e;
+_temp1078.f1=( void*)(( void*) Cyc_Absyn_Size); _temp1078.f2=({ struct Cyc_List_List*
+_temp1079=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp1079->hd=( void*) e; _temp1079->tl= 0; _temp1079;}); _temp1078;});
+_temp1077;}))); return Cyc_Absyn_uint_t; _LL1034:( void*)( outer_e->r=( void*)((
+void*)({ struct Cyc_Absyn_Primop_e_struct* _temp1080=( struct Cyc_Absyn_Primop_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Primop_e_struct)); _temp1080[ 0]=({ struct
+Cyc_Absyn_Primop_e_struct _temp1081; _temp1081.tag= Cyc_Absyn_Primop_e;
+_temp1081.f1=( void*)(( void*) Cyc_Absyn_Size); _temp1081.f2=({ struct Cyc_List_List*
+_temp1082=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp1082->hd=( void*) e; _temp1082->tl= 0; _temp1082;}); _temp1081;});
+_temp1080;}))); return Cyc_Absyn_uint_t; _LL1036: if( Cyc_Std_zstrcmp(* f,
 _tag_arr("size", sizeof( unsigned char), 5u)) ==  0){ return({ struct Cyc_Std_String_pa_struct
-_temp1074; _temp1074.tag= Cyc_Std_String_pa; _temp1074.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string( t);{ void* _temp1073[ 1u]={& _temp1074}; Cyc_Tcexp_expr_err(
+_temp1084; _temp1084.tag= Cyc_Std_String_pa; _temp1084.f1=( struct _tagged_arr)
+Cyc_Absynpp_typ2string( t);{ void* _temp1083[ 1u]={& _temp1084}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("expecting struct, union or array, found %s", sizeof(
-unsigned char), 43u), _tag_arr( _temp1073, sizeof( void*), 1u));}});} else{
-return({ struct Cyc_Std_String_pa_struct _temp1076; _temp1076.tag= Cyc_Std_String_pa;
-_temp1076.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1075[
-1u]={& _temp1076}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting struct or union, found %s",
-sizeof( unsigned char), 36u), _tag_arr( _temp1075, sizeof( void*), 1u));}});}
-_LL1012:;}} static void* Cyc_Tcexp_tcStructArrow( struct Cyc_Tcenv_Tenv* te,
+unsigned char), 43u), _tag_arr( _temp1083, sizeof( void*), 1u));}});} else{
+return({ struct Cyc_Std_String_pa_struct _temp1086; _temp1086.tag= Cyc_Std_String_pa;
+_temp1086.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1085[
+1u]={& _temp1086}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting struct or union, found %s",
+sizeof( unsigned char), 36u), _tag_arr( _temp1085, sizeof( void*), 1u));}});}
+_LL1022:;}} static void* Cyc_Tcexp_tcStructArrow( struct Cyc_Tcenv_Tenv* te,
 struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e, struct
 _tagged_arr* f){ Cyc_Tcexp_tcExp( te, 0, e);{ void* t= Cyc_Tcutil_compress((
-void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); void* _temp1077= t;
-struct Cyc_Absyn_PtrInfo _temp1083; struct Cyc_Absyn_Conref* _temp1085; void*
-_temp1087; void* _temp1089; _LL1079: if(( unsigned int) _temp1077 >  4u?*(( int*)
-_temp1077) ==  Cyc_Absyn_PointerType: 0){ _LL1084: _temp1083=(( struct Cyc_Absyn_PointerType_struct*)
-_temp1077)->f1; _LL1090: _temp1089=( void*) _temp1083.elt_typ; goto _LL1088;
-_LL1088: _temp1087=( void*) _temp1083.rgn_typ; goto _LL1086; _LL1086: _temp1085=
-_temp1083.bounds; goto _LL1080;} else{ goto _LL1081;} _LL1081: goto _LL1082;
-_LL1080: Cyc_Tcutil_check_nonzero_bound( loc, _temp1085);{ void* _temp1091= Cyc_Tcutil_compress(
-_temp1089); struct Cyc_Absyn_Structdecl** _temp1103; struct Cyc_Absyn_Structdecl*
-_temp1105; struct Cyc_List_List* _temp1106; struct _tuple1* _temp1108; struct
-Cyc_Absyn_Uniondecl** _temp1110; struct Cyc_Absyn_Uniondecl* _temp1112; struct
-Cyc_List_List* _temp1113; struct _tuple1* _temp1115; struct Cyc_List_List*
-_temp1117; struct Cyc_List_List* _temp1119; _LL1093: if(( unsigned int)
-_temp1091 >  4u?*(( int*) _temp1091) ==  Cyc_Absyn_StructType: 0){ _LL1109:
-_temp1108=(( struct Cyc_Absyn_StructType_struct*) _temp1091)->f1; goto _LL1107;
-_LL1107: _temp1106=(( struct Cyc_Absyn_StructType_struct*) _temp1091)->f2; goto
-_LL1104; _LL1104: _temp1103=(( struct Cyc_Absyn_StructType_struct*) _temp1091)->f3;
-if( _temp1103 ==  0){ goto _LL1095;} else{ _temp1105=* _temp1103; goto _LL1094;}}
-else{ goto _LL1095;} _LL1095: if(( unsigned int) _temp1091 >  4u?*(( int*)
-_temp1091) ==  Cyc_Absyn_UnionType: 0){ _LL1116: _temp1115=(( struct Cyc_Absyn_UnionType_struct*)
-_temp1091)->f1; goto _LL1114; _LL1114: _temp1113=(( struct Cyc_Absyn_UnionType_struct*)
-_temp1091)->f2; goto _LL1111; _LL1111: _temp1110=(( struct Cyc_Absyn_UnionType_struct*)
-_temp1091)->f3; if( _temp1110 ==  0){ goto _LL1097;} else{ _temp1112=* _temp1110;
-goto _LL1096;}} else{ goto _LL1097;} _LL1097: if(( unsigned int) _temp1091 >  4u?*((
-int*) _temp1091) ==  Cyc_Absyn_AnonStructType: 0){ _LL1118: _temp1117=(( struct
-Cyc_Absyn_AnonStructType_struct*) _temp1091)->f1; goto _LL1098;} else{ goto
-_LL1099;} _LL1099: if(( unsigned int) _temp1091 >  4u?*(( int*) _temp1091) == 
-Cyc_Absyn_AnonUnionType: 0){ _LL1120: _temp1119=(( struct Cyc_Absyn_AnonUnionType_struct*)
-_temp1091)->f1; goto _LL1100;} else{ goto _LL1101;} _LL1101: goto _LL1102;
-_LL1094: { struct Cyc_Absyn_Structfield* _temp1121= Cyc_Absyn_lookup_struct_field(
-_temp1105, f); if( _temp1121 ==  0){ return({ struct Cyc_Std_String_pa_struct
-_temp1124; _temp1124.tag= Cyc_Std_String_pa; _temp1124.f1=( struct _tagged_arr)*
-f;{ struct Cyc_Std_String_pa_struct _temp1123; _temp1123.tag= Cyc_Std_String_pa;
-_temp1123.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(( struct _tuple1*)
-_check_null( _temp1108));{ void* _temp1122[ 2u]={& _temp1123,& _temp1124}; Cyc_Tcexp_expr_err(
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); void* _temp1087= t;
+struct Cyc_Absyn_PtrInfo _temp1093; struct Cyc_Absyn_Conref* _temp1095; void*
+_temp1097; void* _temp1099; _LL1089: if(( unsigned int) _temp1087 >  4u?*(( int*)
+_temp1087) ==  Cyc_Absyn_PointerType: 0){ _LL1094: _temp1093=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1087)->f1; _LL1100: _temp1099=( void*) _temp1093.elt_typ; goto _LL1098;
+_LL1098: _temp1097=( void*) _temp1093.rgn_typ; goto _LL1096; _LL1096: _temp1095=
+_temp1093.bounds; goto _LL1090;} else{ goto _LL1091;} _LL1091: goto _LL1092;
+_LL1090: Cyc_Tcutil_check_nonzero_bound( loc, _temp1095);{ void* _temp1101= Cyc_Tcutil_compress(
+_temp1099); struct Cyc_Absyn_Structdecl** _temp1113; struct Cyc_Absyn_Structdecl*
+_temp1115; struct Cyc_List_List* _temp1116; struct _tuple1* _temp1118; struct
+Cyc_Absyn_Uniondecl** _temp1120; struct Cyc_Absyn_Uniondecl* _temp1122; struct
+Cyc_List_List* _temp1123; struct _tuple1* _temp1125; struct Cyc_List_List*
+_temp1127; struct Cyc_List_List* _temp1129; _LL1103: if(( unsigned int)
+_temp1101 >  4u?*(( int*) _temp1101) ==  Cyc_Absyn_StructType: 0){ _LL1119:
+_temp1118=(( struct Cyc_Absyn_StructType_struct*) _temp1101)->f1; goto _LL1117;
+_LL1117: _temp1116=(( struct Cyc_Absyn_StructType_struct*) _temp1101)->f2; goto
+_LL1114; _LL1114: _temp1113=(( struct Cyc_Absyn_StructType_struct*) _temp1101)->f3;
+if( _temp1113 ==  0){ goto _LL1105;} else{ _temp1115=* _temp1113; goto _LL1104;}}
+else{ goto _LL1105;} _LL1105: if(( unsigned int) _temp1101 >  4u?*(( int*)
+_temp1101) ==  Cyc_Absyn_UnionType: 0){ _LL1126: _temp1125=(( struct Cyc_Absyn_UnionType_struct*)
+_temp1101)->f1; goto _LL1124; _LL1124: _temp1123=(( struct Cyc_Absyn_UnionType_struct*)
+_temp1101)->f2; goto _LL1121; _LL1121: _temp1120=(( struct Cyc_Absyn_UnionType_struct*)
+_temp1101)->f3; if( _temp1120 ==  0){ goto _LL1107;} else{ _temp1122=* _temp1120;
+goto _LL1106;}} else{ goto _LL1107;} _LL1107: if(( unsigned int) _temp1101 >  4u?*((
+int*) _temp1101) ==  Cyc_Absyn_AnonStructType: 0){ _LL1128: _temp1127=(( struct
+Cyc_Absyn_AnonStructType_struct*) _temp1101)->f1; goto _LL1108;} else{ goto
+_LL1109;} _LL1109: if(( unsigned int) _temp1101 >  4u?*(( int*) _temp1101) == 
+Cyc_Absyn_AnonUnionType: 0){ _LL1130: _temp1129=(( struct Cyc_Absyn_AnonUnionType_struct*)
+_temp1101)->f1; goto _LL1110;} else{ goto _LL1111;} _LL1111: goto _LL1112;
+_LL1104: { struct Cyc_Absyn_Structfield* _temp1131= Cyc_Absyn_lookup_struct_field(
+_temp1115, f); if( _temp1131 ==  0){ return({ struct Cyc_Std_String_pa_struct
+_temp1134; _temp1134.tag= Cyc_Std_String_pa; _temp1134.f1=( struct _tagged_arr)*
+f;{ struct Cyc_Std_String_pa_struct _temp1133; _temp1133.tag= Cyc_Std_String_pa;
+_temp1133.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(( struct _tuple1*)
+_check_null( _temp1118));{ void* _temp1132[ 2u]={& _temp1133,& _temp1134}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("struct %s has no %s field", sizeof( unsigned char), 26u),
-_tag_arr( _temp1122, sizeof( void*), 2u));}}});}{ void* t3;{ struct
-_RegionHandle _temp1125= _new_region(); struct _RegionHandle* rgn=& _temp1125;
-_push_region( rgn);{ struct Cyc_List_List* _temp1126=(( struct Cyc_List_List*(*)(
+_tag_arr( _temp1132, sizeof( void*), 2u));}}});}{ void* t3;{ struct
+_RegionHandle _temp1135= _new_region(); struct _RegionHandle* rgn=& _temp1135;
+_push_region( rgn);{ struct Cyc_List_List* _temp1136=(( struct Cyc_List_List*(*)(
 struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
-struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp1105->tvs, _temp1106);
-t3= Cyc_Tcutil_rsubstitute( rgn, _temp1126,( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1121))->type);}; _pop_region( rgn);} Cyc_Tcenv_check_rgn_accessible(
-te, loc, _temp1087); return t3;}} _LL1096: { struct Cyc_Absyn_Structfield*
-_temp1127= Cyc_Absyn_lookup_union_field( _temp1112, f); if( _temp1127 ==  0){
-return({ struct Cyc_Std_String_pa_struct _temp1130; _temp1130.tag= Cyc_Std_String_pa;
-_temp1130.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
-_temp1129; _temp1129.tag= Cyc_Std_String_pa; _temp1129.f1=( struct _tagged_arr)
-Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1115));{ void*
-_temp1128[ 2u]={& _temp1129,& _temp1130}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union %s has no %s field",
-sizeof( unsigned char), 25u), _tag_arr( _temp1128, sizeof( void*), 2u));}}});}{
-struct Cyc_List_List* _temp1131=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x, struct Cyc_List_List* y)) Cyc_List_zip)( _temp1112->tvs, _temp1113); void*
-_temp1132= Cyc_Tcutil_substitute( _temp1131,( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1127))->type); Cyc_Tcenv_check_rgn_accessible( te, loc,
-_temp1087); return _temp1132;}} _LL1098: { struct Cyc_Absyn_Structfield*
-_temp1133= Cyc_Absyn_lookup_field( _temp1117, f); if( _temp1133 ==  0){ return({
-struct Cyc_Std_String_pa_struct _temp1135; _temp1135.tag= Cyc_Std_String_pa;
-_temp1135.f1=( struct _tagged_arr)* f;{ void* _temp1134[ 1u]={& _temp1135}; Cyc_Tcexp_expr_err(
+struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp1115->tvs, _temp1116);
+t3= Cyc_Tcutil_rsubstitute( rgn, _temp1136,( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1131))->type);}; _pop_region( rgn);} Cyc_Tcenv_check_rgn_accessible(
+te, loc, _temp1097); return t3;}} _LL1106: { struct Cyc_Absyn_Structfield*
+_temp1137= Cyc_Absyn_lookup_union_field( _temp1122, f); if( _temp1137 ==  0){
+return({ struct Cyc_Std_String_pa_struct _temp1140; _temp1140.tag= Cyc_Std_String_pa;
+_temp1140.f1=( struct _tagged_arr)* f;{ struct Cyc_Std_String_pa_struct
+_temp1139; _temp1139.tag= Cyc_Std_String_pa; _temp1139.f1=( struct _tagged_arr)
+Cyc_Absynpp_qvar2string(( struct _tuple1*) _check_null( _temp1125));{ void*
+_temp1138[ 2u]={& _temp1139,& _temp1140}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("union %s has no %s field",
+sizeof( unsigned char), 25u), _tag_arr( _temp1138, sizeof( void*), 2u));}}});}{
+struct Cyc_List_List* _temp1141=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x, struct Cyc_List_List* y)) Cyc_List_zip)( _temp1122->tvs, _temp1123); void*
+_temp1142= Cyc_Tcutil_substitute( _temp1141,( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1137))->type); Cyc_Tcenv_check_rgn_accessible( te, loc,
+_temp1097); return _temp1142;}} _LL1108: { struct Cyc_Absyn_Structfield*
+_temp1143= Cyc_Absyn_lookup_field( _temp1127, f); if( _temp1143 ==  0){ return({
+struct Cyc_Std_String_pa_struct _temp1145; _temp1145.tag= Cyc_Std_String_pa;
+_temp1145.f1=( struct _tagged_arr)* f;{ void* _temp1144[ 1u]={& _temp1145}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("struct has no %s field", sizeof( unsigned char), 23u),
-_tag_arr( _temp1134, sizeof( void*), 1u));}});} return( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1133))->type;} _LL1100: { struct Cyc_Absyn_Structfield*
-_temp1136= Cyc_Absyn_lookup_field( _temp1119, f); if( _temp1136 ==  0){ return({
-struct Cyc_Std_String_pa_struct _temp1138; _temp1138.tag= Cyc_Std_String_pa;
-_temp1138.f1=( struct _tagged_arr)* f;{ void* _temp1137[ 1u]={& _temp1138}; Cyc_Tcexp_expr_err(
+_tag_arr( _temp1144, sizeof( void*), 1u));}});} return( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1143))->type;} _LL1110: { struct Cyc_Absyn_Structfield*
+_temp1146= Cyc_Absyn_lookup_field( _temp1129, f); if( _temp1146 ==  0){ return({
+struct Cyc_Std_String_pa_struct _temp1148; _temp1148.tag= Cyc_Std_String_pa;
+_temp1148.f1=( struct _tagged_arr)* f;{ void* _temp1147[ 1u]={& _temp1148}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("union has no %s field", sizeof( unsigned char), 22u),
-_tag_arr( _temp1137, sizeof( void*), 1u));}});} return( void*)(( struct Cyc_Absyn_Structfield*)
-_check_null( _temp1136))->type;} _LL1102: return({ struct Cyc_Std_String_pa_struct
-_temp1140; _temp1140.tag= Cyc_Std_String_pa; _temp1140.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string( t);{ void* _temp1139[ 1u]={& _temp1140}; Cyc_Tcexp_expr_err(
+_tag_arr( _temp1147, sizeof( void*), 1u));}});} return( void*)(( struct Cyc_Absyn_Structfield*)
+_check_null( _temp1146))->type;} _LL1112: return({ struct Cyc_Std_String_pa_struct
+_temp1150; _temp1150.tag= Cyc_Std_String_pa; _temp1150.f1=( struct _tagged_arr)
+Cyc_Absynpp_typ2string( t);{ void* _temp1149[ 1u]={& _temp1150}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("expecting struct pointer, found %s", sizeof( unsigned char),
-35u), _tag_arr( _temp1139, sizeof( void*), 1u));}}); _LL1092:;} _LL1082: return({
-struct Cyc_Std_String_pa_struct _temp1142; _temp1142.tag= Cyc_Std_String_pa;
-_temp1142.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1141[
-1u]={& _temp1142}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting struct pointer, found %s",
-sizeof( unsigned char), 35u), _tag_arr( _temp1141, sizeof( void*), 1u));}});
-_LL1078:;}} static void* Cyc_Tcexp_ithTupleType( struct Cyc_Tcenv_Tenv* te,
+35u), _tag_arr( _temp1149, sizeof( void*), 1u));}}); _LL1102:;} _LL1092: return({
+struct Cyc_Std_String_pa_struct _temp1152; _temp1152.tag= Cyc_Std_String_pa;
+_temp1152.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1151[
+1u]={& _temp1152}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("expecting struct pointer, found %s",
+sizeof( unsigned char), 35u), _tag_arr( _temp1151, sizeof( void*), 1u));}});
+_LL1088:;}} static void* Cyc_Tcexp_ithTupleType( struct Cyc_Tcenv_Tenv* te,
 struct Cyc_Position_Segment* loc, struct Cyc_List_List* ts, struct Cyc_Absyn_Exp*
 index){ unsigned int i= Cyc_Evexp_eval_const_uint_exp( index); struct
-_handler_cons _temp1143; _push_handler(& _temp1143);{ int _temp1145= 0; if(
-setjmp( _temp1143.handler)){ _temp1145= 1;} if( ! _temp1145){{ void* _temp1146=(*((
+_handler_cons _temp1153; _push_handler(& _temp1153);{ int _temp1155= 0; if(
+setjmp( _temp1153.handler)){ _temp1155= 1;} if( ! _temp1155){{ void* _temp1156=(*((
 struct _tuple8*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)( ts,( int) i)).f2;
-_npop_handler( 0u); return _temp1146;}; _pop_handler();} else{ void* _temp1144=(
-void*) _exn_thrown; void* _temp1148= _temp1144; _LL1150: if( _temp1148 ==  Cyc_List_Nth){
-goto _LL1151;} else{ goto _LL1152;} _LL1152: goto _LL1153; _LL1151: return({
-struct Cyc_Std_Int_pa_struct _temp1156; _temp1156.tag= Cyc_Std_Int_pa; _temp1156.f1=(
+_npop_handler( 0u); return _temp1156;}; _pop_handler();} else{ void* _temp1154=(
+void*) _exn_thrown; void* _temp1158= _temp1154; _LL1160: if( _temp1158 ==  Cyc_List_Nth){
+goto _LL1161;} else{ goto _LL1162;} _LL1162: goto _LL1163; _LL1161: return({
+struct Cyc_Std_Int_pa_struct _temp1166; _temp1166.tag= Cyc_Std_Int_pa; _temp1166.f1=(
 int)(( unsigned int)(( int(*)( struct Cyc_List_List* x)) Cyc_List_length)( ts));{
-struct Cyc_Std_Int_pa_struct _temp1155; _temp1155.tag= Cyc_Std_Int_pa; _temp1155.f1=(
-int) i;{ void* _temp1154[ 2u]={& _temp1155,& _temp1156}; Cyc_Tcexp_expr_err( te,
+struct Cyc_Std_Int_pa_struct _temp1165; _temp1165.tag= Cyc_Std_Int_pa; _temp1165.f1=(
+int) i;{ void* _temp1164[ 2u]={& _temp1165,& _temp1166}; Cyc_Tcexp_expr_err( te,
 loc, _tag_arr("index is %d but tuple has only %d fields", sizeof( unsigned char),
-41u), _tag_arr( _temp1154, sizeof( void*), 2u));}}}); _LL1153:( void) _throw(
-_temp1148); _LL1149:;}}} static void* Cyc_Tcexp_tcSubscript( struct Cyc_Tcenv_Tenv*
+41u), _tag_arr( _temp1164, sizeof( void*), 2u));}}}); _LL1163:( void) _throw(
+_temp1158); _LL1159:;}}} static void* Cyc_Tcexp_tcSubscript( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e1,
 struct Cyc_Absyn_Exp* e2){ Cyc_Tcexp_tcExp( te, 0, e1); Cyc_Tcexp_tcExp( te, 0,
 e2);{ void* t1= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*) _check_null(
 e1->topt))->v); void* t2= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e2->topt))->v); if( ! Cyc_Tcutil_coerce_sint_typ( te, e2)){ return({
-struct Cyc_Std_String_pa_struct _temp1158; _temp1158.tag= Cyc_Std_String_pa;
-_temp1158.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp1157[
-1u]={& _temp1158}; Cyc_Tcexp_expr_err( te, e2->loc, _tag_arr("expecting int subscript, found %s",
-sizeof( unsigned char), 34u), _tag_arr( _temp1157, sizeof( void*), 1u));}});}{
-void* _temp1159= t1; struct Cyc_Absyn_PtrInfo _temp1167; struct Cyc_Absyn_Conref*
-_temp1169; struct Cyc_Absyn_Tqual _temp1171; void* _temp1173; void* _temp1175;
-struct Cyc_List_List* _temp1177; _LL1161: if(( unsigned int) _temp1159 >  4u?*((
-int*) _temp1159) ==  Cyc_Absyn_PointerType: 0){ _LL1168: _temp1167=(( struct Cyc_Absyn_PointerType_struct*)
-_temp1159)->f1; _LL1176: _temp1175=( void*) _temp1167.elt_typ; goto _LL1174;
-_LL1174: _temp1173=( void*) _temp1167.rgn_typ; goto _LL1172; _LL1172: _temp1171=
-_temp1167.tq; goto _LL1170; _LL1170: _temp1169= _temp1167.bounds; goto _LL1162;}
-else{ goto _LL1163;} _LL1163: if(( unsigned int) _temp1159 >  4u?*(( int*)
-_temp1159) ==  Cyc_Absyn_TupleType: 0){ _LL1178: _temp1177=(( struct Cyc_Absyn_TupleType_struct*)
-_temp1159)->f1; goto _LL1164;} else{ goto _LL1165;} _LL1165: goto _LL1166;
-_LL1162: if( Cyc_Tcutil_is_const_exp( te, e2)){ Cyc_Tcutil_check_bound( loc, Cyc_Evexp_eval_const_uint_exp(
-e2), _temp1169);} else{ if( Cyc_Tcutil_is_bound_one( _temp1169)){({ void*
-_temp1179[ 0u]={}; Cyc_Tcutil_warn( e1->loc, _tag_arr("subscript applied to pointer to one object",
-sizeof( unsigned char), 43u), _tag_arr( _temp1179, sizeof( void*), 0u));});} Cyc_Tcutil_check_nonzero_bound(
-loc, _temp1169);} Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1173); return
-_temp1175; _LL1164: return Cyc_Tcexp_ithTupleType( te, loc, _temp1177, e2);
-_LL1166: return({ struct Cyc_Std_String_pa_struct _temp1181; _temp1181.tag= Cyc_Std_String_pa;
-_temp1181.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ void* _temp1180[
-1u]={& _temp1181}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("subscript applied to %s",
-sizeof( unsigned char), 24u), _tag_arr( _temp1180, sizeof( void*), 1u));}});
-_LL1160:;}}} static void* Cyc_Tcexp_tcTuple( struct Cyc_Tcenv_Tenv* te, struct
+struct Cyc_Std_String_pa_struct _temp1168; _temp1168.tag= Cyc_Std_String_pa;
+_temp1168.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp1167[
+1u]={& _temp1168}; Cyc_Tcexp_expr_err( te, e2->loc, _tag_arr("expecting int subscript, found %s",
+sizeof( unsigned char), 34u), _tag_arr( _temp1167, sizeof( void*), 1u));}});}{
+void* _temp1169= t1; struct Cyc_Absyn_PtrInfo _temp1177; struct Cyc_Absyn_Conref*
+_temp1179; struct Cyc_Absyn_Tqual _temp1181; void* _temp1183; void* _temp1185;
+struct Cyc_List_List* _temp1187; _LL1171: if(( unsigned int) _temp1169 >  4u?*((
+int*) _temp1169) ==  Cyc_Absyn_PointerType: 0){ _LL1178: _temp1177=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1169)->f1; _LL1186: _temp1185=( void*) _temp1177.elt_typ; goto _LL1184;
+_LL1184: _temp1183=( void*) _temp1177.rgn_typ; goto _LL1182; _LL1182: _temp1181=
+_temp1177.tq; goto _LL1180; _LL1180: _temp1179= _temp1177.bounds; goto _LL1172;}
+else{ goto _LL1173;} _LL1173: if(( unsigned int) _temp1169 >  4u?*(( int*)
+_temp1169) ==  Cyc_Absyn_TupleType: 0){ _LL1188: _temp1187=(( struct Cyc_Absyn_TupleType_struct*)
+_temp1169)->f1; goto _LL1174;} else{ goto _LL1175;} _LL1175: goto _LL1176;
+_LL1172: if( Cyc_Tcutil_is_const_exp( te, e2)){ Cyc_Tcutil_check_bound( loc, Cyc_Evexp_eval_const_uint_exp(
+e2), _temp1179);} else{ if( Cyc_Tcutil_is_bound_one( _temp1179)){({ void*
+_temp1189[ 0u]={}; Cyc_Tcutil_warn( e1->loc, _tag_arr("subscript applied to pointer to one object",
+sizeof( unsigned char), 43u), _tag_arr( _temp1189, sizeof( void*), 0u));});} Cyc_Tcutil_check_nonzero_bound(
+loc, _temp1179);} Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1183); return
+_temp1185; _LL1174: return Cyc_Tcexp_ithTupleType( te, loc, _temp1187, e2);
+_LL1176: return({ struct Cyc_Std_String_pa_struct _temp1191; _temp1191.tag= Cyc_Std_String_pa;
+_temp1191.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t1);{ void* _temp1190[
+1u]={& _temp1191}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("subscript applied to %s",
+sizeof( unsigned char), 24u), _tag_arr( _temp1190, sizeof( void*), 1u));}});
+_LL1170:;}}} static void* Cyc_Tcexp_tcTuple( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_Position_Segment* loc, void** topt, struct Cyc_List_List* es){ int done= 0;
-struct Cyc_List_List* fields= 0; if( topt !=  0){ void* _temp1182= Cyc_Tcutil_compress(*((
-void**) _check_null( topt))); struct Cyc_List_List* _temp1188; _LL1184: if((
-unsigned int) _temp1182 >  4u?*(( int*) _temp1182) ==  Cyc_Absyn_TupleType: 0){
-_LL1189: _temp1188=(( struct Cyc_Absyn_TupleType_struct*) _temp1182)->f1; goto
-_LL1185;} else{ goto _LL1186;} _LL1186: goto _LL1187; _LL1185: if((( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( _temp1188) != (( int(*)( struct Cyc_List_List*
-x)) Cyc_List_length)( es)){ goto _LL1183;} for( 0; es !=  0;( es=(( struct Cyc_List_List*)
-_check_null( es))->tl, _temp1188=(( struct Cyc_List_List*) _check_null(
-_temp1188))->tl)){ void* _temp1190=(*(( struct _tuple8*)(( struct Cyc_List_List*)
-_check_null( _temp1188))->hd)).f2; Cyc_Tcexp_tcExpInitializer( te,( void**)&
-_temp1190,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd);
-fields=({ struct Cyc_List_List* _temp1191=( struct Cyc_List_List*) _cycalloc(
-sizeof( struct Cyc_List_List)); _temp1191->hd=( void*)({ struct _tuple8*
-_temp1192=( struct _tuple8*) _cycalloc( sizeof( struct _tuple8)); _temp1192->f1=(*((
-struct _tuple8*)(( struct Cyc_List_List*) _check_null( _temp1188))->hd)).f1;
-_temp1192->f2=( void*)(( struct Cyc_Core_Opt*) _check_null((( struct Cyc_Absyn_Exp*)((
-struct Cyc_List_List*) _check_null( es))->hd)->topt))->v; _temp1192;});
-_temp1191->tl= fields; _temp1191;});} done= 1; goto _LL1183; _LL1187: goto
-_LL1183; _LL1183:;} if( ! done){ for( 0; es !=  0; es=(( struct Cyc_List_List*)
+struct Cyc_List_List* fields= 0; if( topt !=  0){ void* _temp1192= Cyc_Tcutil_compress(*((
+void**) _check_null( topt))); struct Cyc_List_List* _temp1198; _LL1194: if((
+unsigned int) _temp1192 >  4u?*(( int*) _temp1192) ==  Cyc_Absyn_TupleType: 0){
+_LL1199: _temp1198=(( struct Cyc_Absyn_TupleType_struct*) _temp1192)->f1; goto
+_LL1195;} else{ goto _LL1196;} _LL1196: goto _LL1197; _LL1195: if((( int(*)(
+struct Cyc_List_List* x)) Cyc_List_length)( _temp1198) != (( int(*)( struct Cyc_List_List*
+x)) Cyc_List_length)( es)){ goto _LL1193;} for( 0; es !=  0;( es=(( struct Cyc_List_List*)
+_check_null( es))->tl, _temp1198=(( struct Cyc_List_List*) _check_null(
+_temp1198))->tl)){ void* _temp1200=(*(( struct _tuple8*)(( struct Cyc_List_List*)
+_check_null( _temp1198))->hd)).f2; Cyc_Tcexp_tcExpInitializer( te,( void**)&
+_temp1200,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd);
+fields=({ struct Cyc_List_List* _temp1201=( struct Cyc_List_List*) _cycalloc(
+sizeof( struct Cyc_List_List)); _temp1201->hd=( void*)({ struct _tuple8*
+_temp1202=( struct _tuple8*) _cycalloc( sizeof( struct _tuple8)); _temp1202->f1=(*((
+struct _tuple8*)(( struct Cyc_List_List*) _check_null( _temp1198))->hd)).f1;
+_temp1202->f2=( void*)(( struct Cyc_Core_Opt*) _check_null((( struct Cyc_Absyn_Exp*)((
+struct Cyc_List_List*) _check_null( es))->hd)->topt))->v; _temp1202;});
+_temp1201->tl= fields; _temp1201;});} done= 1; goto _LL1193; _LL1197: goto
+_LL1193; _LL1193:;} if( ! done){ for( 0; es !=  0; es=(( struct Cyc_List_List*)
 _check_null( es))->tl){ Cyc_Tcexp_tcExpInitializer( te, 0,( struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*) _check_null( es))->hd); fields=({ struct Cyc_List_List*
-_temp1193=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp1193->hd=( void*)({ struct _tuple8* _temp1194=( struct _tuple8*) _cycalloc(
-sizeof( struct _tuple8)); _temp1194->f1= Cyc_Absyn_empty_tqual(); _temp1194->f2=(
+_temp1203=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp1203->hd=( void*)({ struct _tuple8* _temp1204=( struct _tuple8*) _cycalloc(
+sizeof( struct _tuple8)); _temp1204->f1= Cyc_Absyn_empty_tqual(); _temp1204->f2=(
 void*)(( struct Cyc_Core_Opt*) _check_null((( struct Cyc_Absyn_Exp*)(( struct
-Cyc_List_List*) _check_null( es))->hd)->topt))->v; _temp1194;}); _temp1193->tl=
-fields; _temp1193;});}} return( void*)({ struct Cyc_Absyn_TupleType_struct*
-_temp1195=( struct Cyc_Absyn_TupleType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_TupleType_struct));
-_temp1195[ 0]=({ struct Cyc_Absyn_TupleType_struct _temp1196; _temp1196.tag= Cyc_Absyn_TupleType;
-_temp1196.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-fields); _temp1196;}); _temp1195;});} static void* Cyc_Tcexp_tcCompoundLit(
+Cyc_List_List*) _check_null( es))->hd)->topt))->v; _temp1204;}); _temp1203->tl=
+fields; _temp1203;});}} return( void*)({ struct Cyc_Absyn_TupleType_struct*
+_temp1205=( struct Cyc_Absyn_TupleType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_TupleType_struct));
+_temp1205[ 0]=({ struct Cyc_Absyn_TupleType_struct _temp1206; _temp1206.tag= Cyc_Absyn_TupleType;
+_temp1206.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+fields); _temp1206;}); _temp1205;});} static void* Cyc_Tcexp_tcCompoundLit(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
-_tuple2* t, struct Cyc_List_List* des){ return({ void* _temp1197[ 0u]={}; Cyc_Tcexp_expr_err(
+_tuple2* t, struct Cyc_List_List* des){ return({ void* _temp1207[ 0u]={}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("tcCompoundLit", sizeof( unsigned char), 14u), _tag_arr(
-_temp1197, sizeof( void*), 0u));});} static void* Cyc_Tcexp_tcArray( struct Cyc_Tcenv_Tenv*
+_temp1207, sizeof( void*), 0u));});} static void* Cyc_Tcexp_tcArray( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** elt_topt, struct Cyc_List_List* des){
 struct Cyc_List_List* es=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Exp*(* f)(
 struct _tuple7*), struct Cyc_List_List* x)) Cyc_List_map)(( struct Cyc_Absyn_Exp*(*)(
 struct _tuple7*)) Cyc_Core_snd, des); void* res= Cyc_Absyn_new_evar(( struct Cyc_Core_Opt*)&
-Cyc_Tcexp_mk,({ struct Cyc_Core_Opt* _temp1220=( struct Cyc_Core_Opt*) _cycalloc(
-sizeof( struct Cyc_Core_Opt)); _temp1220->v=( void*) Cyc_Tcenv_lookup_type_vars(
-te); _temp1220;})); struct Cyc_Absyn_Const_e_struct* _temp1198=({ struct Cyc_Absyn_Const_e_struct*
-_temp1216=( struct Cyc_Absyn_Const_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct));
-_temp1216[ 0]=({ struct Cyc_Absyn_Const_e_struct _temp1217; _temp1217.tag= Cyc_Absyn_Const_e;
-_temp1217.f1=( void*)(( void*)({ struct Cyc_Absyn_Int_c_struct* _temp1218=(
+Cyc_Tcexp_mk,({ struct Cyc_Core_Opt* _temp1230=( struct Cyc_Core_Opt*) _cycalloc(
+sizeof( struct Cyc_Core_Opt)); _temp1230->v=( void*) Cyc_Tcenv_lookup_type_vars(
+te); _temp1230;})); struct Cyc_Absyn_Const_e_struct* _temp1208=({ struct Cyc_Absyn_Const_e_struct*
+_temp1226=( struct Cyc_Absyn_Const_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Const_e_struct));
+_temp1226[ 0]=({ struct Cyc_Absyn_Const_e_struct _temp1227; _temp1227.tag= Cyc_Absyn_Const_e;
+_temp1227.f1=( void*)(( void*)({ struct Cyc_Absyn_Int_c_struct* _temp1228=(
 struct Cyc_Absyn_Int_c_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Int_c_struct));
-_temp1218[ 0]=({ struct Cyc_Absyn_Int_c_struct _temp1219; _temp1219.tag= Cyc_Absyn_Int_c;
-_temp1219.f1=( void*)(( void*) Cyc_Absyn_Unsigned); _temp1219.f2=(( int(*)(
-struct Cyc_List_List* x)) Cyc_List_length)( es); _temp1219;}); _temp1218;}));
-_temp1217;}); _temp1216;}); struct Cyc_Absyn_Exp* sz_exp= Cyc_Absyn_new_exp((
-void*) _temp1198, loc); sz_exp->topt=({ struct Cyc_Core_Opt* _temp1199=( struct
-Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1199->v=( void*)
-Cyc_Absyn_uint_t; _temp1199;});{ void* res_t2=( void*)({ struct Cyc_Absyn_ArrayType_struct*
-_temp1214=( struct Cyc_Absyn_ArrayType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct));
-_temp1214[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp1215; _temp1215.tag= Cyc_Absyn_ArrayType;
-_temp1215.f1=( void*) res; _temp1215.f2= Cyc_Absyn_empty_tqual(); _temp1215.f3=(
-struct Cyc_Absyn_Exp*) sz_exp; _temp1215;}); _temp1214;});{ struct Cyc_List_List*
+_temp1228[ 0]=({ struct Cyc_Absyn_Int_c_struct _temp1229; _temp1229.tag= Cyc_Absyn_Int_c;
+_temp1229.f1=( void*)(( void*) Cyc_Absyn_Unsigned); _temp1229.f2=(( int(*)(
+struct Cyc_List_List* x)) Cyc_List_length)( es); _temp1229;}); _temp1228;}));
+_temp1227;}); _temp1226;}); struct Cyc_Absyn_Exp* sz_exp= Cyc_Absyn_new_exp((
+void*) _temp1208, loc); sz_exp->topt=({ struct Cyc_Core_Opt* _temp1209=( struct
+Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1209->v=( void*)
+Cyc_Absyn_uint_t; _temp1209;});{ void* res_t2=( void*)({ struct Cyc_Absyn_ArrayType_struct*
+_temp1224=( struct Cyc_Absyn_ArrayType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct));
+_temp1224[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp1225; _temp1225.tag= Cyc_Absyn_ArrayType;
+_temp1225.f1=( void*) res; _temp1225.f2= Cyc_Absyn_empty_tqual(); _temp1225.f3=(
+struct Cyc_Absyn_Exp*) sz_exp; _temp1225;}); _temp1224;});{ struct Cyc_List_List*
 es2= es; for( 0; es2 !=  0; es2=(( struct Cyc_List_List*) _check_null( es2))->tl){
 Cyc_Tcexp_tcExpInitializer( te, elt_topt,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es2))->hd);}} if( ! Cyc_Tcutil_coerce_list( te, res, es)){({ struct
-Cyc_Std_String_pa_struct _temp1201; _temp1201.tag= Cyc_Std_String_pa; _temp1201.f1=(
-struct _tagged_arr) Cyc_Absynpp_typ2string( res);{ void* _temp1200[ 1u]={&
-_temp1201}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
+Cyc_Std_String_pa_struct _temp1211; _temp1211.tag= Cyc_Std_String_pa; _temp1211.f1=(
+struct _tagged_arr) Cyc_Absynpp_typ2string( res);{ void* _temp1210[ 1u]={&
+_temp1211}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es))->hd)->loc, _tag_arr("elements of array do not all have the same type (%s)",
-sizeof( unsigned char), 53u), _tag_arr( _temp1200, sizeof( void*), 1u));}});}{
+sizeof( unsigned char), 53u), _tag_arr( _temp1210, sizeof( void*), 1u));}});}{
 int offset= 0; for( 0; des !=  0;( offset ++, des=(( struct Cyc_List_List*)
 _check_null( des))->tl)){ struct Cyc_List_List* ds=(*(( struct _tuple7*)((
 struct Cyc_List_List*) _check_null( des))->hd)).f1; if( ds !=  0){ void*
-_temp1202=( void*)(( struct Cyc_List_List*) _check_null( ds))->hd; struct Cyc_Absyn_Exp*
-_temp1208; _LL1204: if(*(( int*) _temp1202) ==  Cyc_Absyn_FieldName){ goto
-_LL1205;} else{ goto _LL1206;} _LL1206: if(*(( int*) _temp1202) ==  Cyc_Absyn_ArrayElement){
-_LL1209: _temp1208=(( struct Cyc_Absyn_ArrayElement_struct*) _temp1202)->f1;
-goto _LL1207;} else{ goto _LL1203;} _LL1205:({ void* _temp1210[ 0u]={}; Cyc_Tcutil_terr(
+_temp1212=( void*)(( struct Cyc_List_List*) _check_null( ds))->hd; struct Cyc_Absyn_Exp*
+_temp1218; _LL1214: if(*(( int*) _temp1212) ==  Cyc_Absyn_FieldName){ goto
+_LL1215;} else{ goto _LL1216;} _LL1216: if(*(( int*) _temp1212) ==  Cyc_Absyn_ArrayElement){
+_LL1219: _temp1218=(( struct Cyc_Absyn_ArrayElement_struct*) _temp1212)->f1;
+goto _LL1217;} else{ goto _LL1213;} _LL1215:({ void* _temp1220[ 0u]={}; Cyc_Tcutil_terr(
 loc, _tag_arr("only array index designators are supported", sizeof(
-unsigned char), 43u), _tag_arr( _temp1210, sizeof( void*), 0u));}); goto _LL1203;
-_LL1207: Cyc_Tcexp_tcExpInitializer( te, 0, _temp1208);{ unsigned int i= Cyc_Evexp_eval_const_uint_exp(
-_temp1208); if( i !=  offset){({ struct Cyc_Std_Int_pa_struct _temp1213;
-_temp1213.tag= Cyc_Std_Int_pa; _temp1213.f1=( int) i;{ struct Cyc_Std_Int_pa_struct
-_temp1212; _temp1212.tag= Cyc_Std_Int_pa; _temp1212.f1=( int)(( unsigned int)
-offset);{ void* _temp1211[ 2u]={& _temp1212,& _temp1213}; Cyc_Tcutil_terr(
-_temp1208->loc, _tag_arr("expecting index designator %d but found %d", sizeof(
-unsigned char), 43u), _tag_arr( _temp1211, sizeof( void*), 2u));}}});} goto
-_LL1203;} _LL1203:;}}} return res_t2;}} static void* Cyc_Tcexp_tcComprehension(
+unsigned char), 43u), _tag_arr( _temp1220, sizeof( void*), 0u));}); goto _LL1213;
+_LL1217: Cyc_Tcexp_tcExpInitializer( te, 0, _temp1218);{ unsigned int i= Cyc_Evexp_eval_const_uint_exp(
+_temp1218); if( i !=  offset){({ struct Cyc_Std_Int_pa_struct _temp1223;
+_temp1223.tag= Cyc_Std_Int_pa; _temp1223.f1=( int) i;{ struct Cyc_Std_Int_pa_struct
+_temp1222; _temp1222.tag= Cyc_Std_Int_pa; _temp1222.f1=( int)(( unsigned int)
+offset);{ void* _temp1221[ 2u]={& _temp1222,& _temp1223}; Cyc_Tcutil_terr(
+_temp1218->loc, _tag_arr("expecting index designator %d but found %d", sizeof(
+unsigned char), 43u), _tag_arr( _temp1221, sizeof( void*), 2u));}}});} goto
+_LL1213;} _LL1213:;}}} return res_t2;}} static void* Cyc_Tcexp_tcComprehension(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Vardecl* vd, struct Cyc_Absyn_Exp* bound, struct Cyc_Absyn_Exp* body){
 Cyc_Tcexp_tcExp( te, 0, bound); if( ! Cyc_Tcutil_coerce_uint_typ( te, bound)){({
-struct Cyc_Std_String_pa_struct _temp1222; _temp1222.tag= Cyc_Std_String_pa;
-_temp1222.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( bound->topt))->v);{ void* _temp1221[ 1u]={& _temp1222}; Cyc_Tcutil_terr(
+struct Cyc_Std_String_pa_struct _temp1232; _temp1232.tag= Cyc_Std_String_pa;
+_temp1232.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
+_check_null( bound->topt))->v);{ void* _temp1231[ 1u]={& _temp1232}; Cyc_Tcutil_terr(
 bound->loc, _tag_arr("expecting unsigned int, found %s", sizeof( unsigned char),
-33u), _tag_arr( _temp1221, sizeof( void*), 1u));}});} if( !( vd->tq).q_const){({
-void* _temp1223[ 0u]={};(( int(*)( struct _tagged_arr fmt, struct _tagged_arr ap))
+33u), _tag_arr( _temp1231, sizeof( void*), 1u));}});} if( !( vd->tq).q_const){({
+void* _temp1233[ 0u]={};(( int(*)( struct _tagged_arr fmt, struct _tagged_arr ap))
 Cyc_Tcutil_impos)( _tag_arr("comprehension index variable is not declared const!",
-sizeof( unsigned char), 52u), _tag_arr( _temp1223, sizeof( void*), 0u));});} if(
+sizeof( unsigned char), 52u), _tag_arr( _temp1233, sizeof( void*), 0u));});} if(
 te->le !=  0){ te= Cyc_Tcenv_new_block( loc, te); te= Cyc_Tcenv_add_local_var(
-loc, te, vd);}{ struct Cyc_Absyn_PtrInfo pinfo; void** _temp1224= 0; struct Cyc_Absyn_Tqual*
-_temp1225= 0; if( topt !=  0){ void* _temp1226= Cyc_Tcutil_compress(*(( void**)
-_check_null( topt))); struct Cyc_Absyn_PtrInfo _temp1234; struct Cyc_Absyn_Exp*
-_temp1236; struct Cyc_Absyn_Tqual _temp1238; struct Cyc_Absyn_Tqual* _temp1240;
-void* _temp1241; void** _temp1243; _LL1228: if(( unsigned int) _temp1226 >  4u?*((
-int*) _temp1226) ==  Cyc_Absyn_PointerType: 0){ _LL1235: _temp1234=(( struct Cyc_Absyn_PointerType_struct*)
-_temp1226)->f1; goto _LL1229;} else{ goto _LL1230;} _LL1230: if(( unsigned int)
-_temp1226 >  4u?*(( int*) _temp1226) ==  Cyc_Absyn_ArrayType: 0){ _LL1242:
-_temp1241=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1226)->f1;
-_temp1243=( void**)&(( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1226)->f1);
-goto _LL1239; _LL1239: _temp1238=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1226)->f2; _temp1240=( struct Cyc_Absyn_Tqual*)&(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1226)->f2; goto _LL1237; _LL1237: _temp1236=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1226)->f3; goto _LL1231;} else{ goto _LL1232;} _LL1232: goto _LL1233;
-_LL1229: pinfo= _temp1234; _temp1224=( void**)(( void**)(( void*)& pinfo.elt_typ));
-_temp1225=( struct Cyc_Absyn_Tqual*)& pinfo.tq; goto _LL1227; _LL1231: _temp1224=(
-void**) _temp1243; _temp1225=( struct Cyc_Absyn_Tqual*) _temp1240; goto _LL1227;
-_LL1233: goto _LL1227; _LL1227:;}{ void* t= Cyc_Tcexp_tcExp( te, _temp1224, body);
-if( te->le ==  0){ if( ! Cyc_Tcutil_is_const_exp( te, bound)){({ void* _temp1244[
+loc, te, vd);}{ struct Cyc_Absyn_PtrInfo pinfo; void** _temp1234= 0; struct Cyc_Absyn_Tqual*
+_temp1235= 0; if( topt !=  0){ void* _temp1236= Cyc_Tcutil_compress(*(( void**)
+_check_null( topt))); struct Cyc_Absyn_PtrInfo _temp1244; struct Cyc_Absyn_Exp*
+_temp1246; struct Cyc_Absyn_Tqual _temp1248; struct Cyc_Absyn_Tqual* _temp1250;
+void* _temp1251; void** _temp1253; _LL1238: if(( unsigned int) _temp1236 >  4u?*((
+int*) _temp1236) ==  Cyc_Absyn_PointerType: 0){ _LL1245: _temp1244=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1236)->f1; goto _LL1239;} else{ goto _LL1240;} _LL1240: if(( unsigned int)
+_temp1236 >  4u?*(( int*) _temp1236) ==  Cyc_Absyn_ArrayType: 0){ _LL1252:
+_temp1251=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1236)->f1;
+_temp1253=( void**)&(( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1236)->f1);
+goto _LL1249; _LL1249: _temp1248=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1236)->f2; _temp1250=( struct Cyc_Absyn_Tqual*)&(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1236)->f2; goto _LL1247; _LL1247: _temp1246=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1236)->f3; goto _LL1241;} else{ goto _LL1242;} _LL1242: goto _LL1243;
+_LL1239: pinfo= _temp1244; _temp1234=( void**)(( void**)(( void*)& pinfo.elt_typ));
+_temp1235=( struct Cyc_Absyn_Tqual*)& pinfo.tq; goto _LL1237; _LL1241: _temp1234=(
+void**) _temp1253; _temp1235=( struct Cyc_Absyn_Tqual*) _temp1250; goto _LL1237;
+_LL1243: goto _LL1237; _LL1237:;}{ void* t= Cyc_Tcexp_tcExp( te, _temp1234, body);
+if( te->le ==  0){ if( ! Cyc_Tcutil_is_const_exp( te, bound)){({ void* _temp1254[
 0u]={}; Cyc_Tcutil_terr( bound->loc, _tag_arr("bound is not constant", sizeof(
-unsigned char), 22u), _tag_arr( _temp1244, sizeof( void*), 0u));});} if( ! Cyc_Tcutil_is_const_exp(
-te, body)){({ void* _temp1245[ 0u]={}; Cyc_Tcutil_terr( bound->loc, _tag_arr("body is not constant",
-sizeof( unsigned char), 21u), _tag_arr( _temp1245, sizeof( void*), 0u));});}}
-return( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp1246=( struct Cyc_Absyn_ArrayType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp1246[ 0]=({ struct
-Cyc_Absyn_ArrayType_struct _temp1247; _temp1247.tag= Cyc_Absyn_ArrayType;
-_temp1247.f1=( void*) t; _temp1247.f2= _temp1225 ==  0? Cyc_Absyn_empty_tqual():*((
-struct Cyc_Absyn_Tqual*) _check_null( _temp1225)); _temp1247.f3=( struct Cyc_Absyn_Exp*)
-bound; _temp1247;}); _temp1246;});}}} struct _tuple9{ struct Cyc_Absyn_Structfield*
+unsigned char), 22u), _tag_arr( _temp1254, sizeof( void*), 0u));});} if( ! Cyc_Tcutil_is_const_exp(
+te, body)){({ void* _temp1255[ 0u]={}; Cyc_Tcutil_terr( bound->loc, _tag_arr("body is not constant",
+sizeof( unsigned char), 21u), _tag_arr( _temp1255, sizeof( void*), 0u));});}}
+return( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp1256=( struct Cyc_Absyn_ArrayType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp1256[ 0]=({ struct
+Cyc_Absyn_ArrayType_struct _temp1257; _temp1257.tag= Cyc_Absyn_ArrayType;
+_temp1257.f1=( void*) t; _temp1257.f2= _temp1235 ==  0? Cyc_Absyn_empty_tqual():*((
+struct Cyc_Absyn_Tqual*) _check_null( _temp1235)); _temp1257.f3=( struct Cyc_Absyn_Exp*)
+bound; _temp1257;}); _temp1256;});}}} struct _tuple9{ struct Cyc_Absyn_Structfield*
 f1; struct Cyc_Absyn_Exp* f2; } ; static void* Cyc_Tcexp_tcStruct( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct _tuple1** tn, struct
 Cyc_Core_Opt** otyps, struct Cyc_List_List* args, struct Cyc_Absyn_Structdecl**
 sd_opt){ struct Cyc_Absyn_Structdecl* sd; if(* sd_opt !=  0){ sd=( struct Cyc_Absyn_Structdecl*)
-_check_null(* sd_opt);} else{{ struct _handler_cons _temp1248; _push_handler(&
-_temp1248);{ int _temp1250= 0; if( setjmp( _temp1248.handler)){ _temp1250= 1;}
-if( ! _temp1250){ sd=* Cyc_Tcenv_lookup_structdecl( te, loc,* tn);; _pop_handler();}
-else{ void* _temp1249=( void*) _exn_thrown; void* _temp1252= _temp1249; _LL1254:
-if( _temp1252 ==  Cyc_Dict_Absent){ goto _LL1255;} else{ goto _LL1256;} _LL1256:
-goto _LL1257; _LL1255:({ struct Cyc_Std_String_pa_struct _temp1259; _temp1259.tag=
-Cyc_Std_String_pa; _temp1259.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(*
-tn);{ void* _temp1258[ 1u]={& _temp1259}; Cyc_Tcutil_terr( loc, _tag_arr("unbound struct name %s",
-sizeof( unsigned char), 23u), _tag_arr( _temp1258, sizeof( void*), 1u));}});
+_check_null(* sd_opt);} else{{ struct _handler_cons _temp1258; _push_handler(&
+_temp1258);{ int _temp1260= 0; if( setjmp( _temp1258.handler)){ _temp1260= 1;}
+if( ! _temp1260){ sd=* Cyc_Tcenv_lookup_structdecl( te, loc,* tn);; _pop_handler();}
+else{ void* _temp1259=( void*) _exn_thrown; void* _temp1262= _temp1259; _LL1264:
+if( _temp1262 ==  Cyc_Dict_Absent){ goto _LL1265;} else{ goto _LL1266;} _LL1266:
+goto _LL1267; _LL1265:({ struct Cyc_Std_String_pa_struct _temp1269; _temp1269.tag=
+Cyc_Std_String_pa; _temp1269.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(*
+tn);{ void* _temp1268[ 1u]={& _temp1269}; Cyc_Tcutil_terr( loc, _tag_arr("unbound struct name %s",
+sizeof( unsigned char), 23u), _tag_arr( _temp1268, sizeof( void*), 1u));}});
 return topt !=  0?*(( void**) _check_null( topt)):( void*) Cyc_Absyn_VoidType;
-_LL1257:( void) _throw( _temp1252); _LL1253:;}}}* sd_opt=( struct Cyc_Absyn_Structdecl*)
+_LL1267:( void) _throw( _temp1262); _LL1263:;}}}* sd_opt=( struct Cyc_Absyn_Structdecl*)
 sd; if( sd->name !=  0){* tn=( struct _tuple1*)(( struct Cyc_Core_Opt*)
-_check_null( sd->name))->v;}}{ struct _RegionHandle _temp1260= _new_region();
-struct _RegionHandle* rgn=& _temp1260; _push_region( rgn);{ struct _tuple4
-_temp1261=({ struct _tuple4 _temp1285; _temp1285.f1= Cyc_Tcenv_lookup_type_vars(
-te); _temp1285.f2= rgn; _temp1285;}); struct Cyc_List_List* _temp1262=(( struct
+_check_null( sd->name))->v;}}{ struct _RegionHandle _temp1270= _new_region();
+struct _RegionHandle* rgn=& _temp1270; _push_region( rgn);{ struct _tuple4
+_temp1271=({ struct _tuple4 _temp1295; _temp1295.f1= Cyc_Tcenv_lookup_type_vars(
+te); _temp1295.f2= rgn; _temp1295;}); struct Cyc_List_List* _temp1272=(( struct
 Cyc_List_List*(*)( struct _RegionHandle*, struct _tuple5*(* f)( struct _tuple4*,
 struct Cyc_Absyn_Tvar*), struct _tuple4* env, struct Cyc_List_List* x)) Cyc_List_rmap_c)(
-rgn, Cyc_Tcutil_r_make_inst_var,& _temp1261, sd->tvs); struct Cyc_List_List*
-_temp1263=(( struct Cyc_List_List*(*)( void*(* f)( struct _tuple5*), struct Cyc_List_List*
-x)) Cyc_List_map)(( void*(*)( struct _tuple5*)) Cyc_Core_snd, _temp1262); struct
-Cyc_Absyn_StructType_struct* _temp1264=({ struct Cyc_Absyn_StructType_struct*
-_temp1282=( struct Cyc_Absyn_StructType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_StructType_struct));
-_temp1282[ 0]=({ struct Cyc_Absyn_StructType_struct _temp1283; _temp1283.tag=
-Cyc_Absyn_StructType; _temp1283.f1=( struct _tuple1*)* tn; _temp1283.f2=
-_temp1263; _temp1283.f3=({ struct Cyc_Absyn_Structdecl** _temp1284=( struct Cyc_Absyn_Structdecl**)
-_cycalloc( sizeof( struct Cyc_Absyn_Structdecl*)); _temp1284[ 0]= sd; _temp1284;});
-_temp1283;}); _temp1282;}); if( topt !=  0){ Cyc_Tcutil_unify(( void*) _temp1264,*((
-void**) _check_null( topt)));}* otyps=({ struct Cyc_Core_Opt* _temp1265=( struct
-Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1265->v=( void*)
-_temp1263; _temp1265;}); if( sd->fields ==  0){({ void* _temp1266[ 0u]={}; Cyc_Tcutil_terr(
+rgn, Cyc_Tcutil_r_make_inst_var,& _temp1271, sd->tvs); struct Cyc_List_List*
+_temp1273=(( struct Cyc_List_List*(*)( void*(* f)( struct _tuple5*), struct Cyc_List_List*
+x)) Cyc_List_map)(( void*(*)( struct _tuple5*)) Cyc_Core_snd, _temp1272); struct
+Cyc_Absyn_StructType_struct* _temp1274=({ struct Cyc_Absyn_StructType_struct*
+_temp1292=( struct Cyc_Absyn_StructType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_StructType_struct));
+_temp1292[ 0]=({ struct Cyc_Absyn_StructType_struct _temp1293; _temp1293.tag=
+Cyc_Absyn_StructType; _temp1293.f1=( struct _tuple1*)* tn; _temp1293.f2=
+_temp1273; _temp1293.f3=({ struct Cyc_Absyn_Structdecl** _temp1294=( struct Cyc_Absyn_Structdecl**)
+_cycalloc( sizeof( struct Cyc_Absyn_Structdecl*)); _temp1294[ 0]= sd; _temp1294;});
+_temp1293;}); _temp1292;}); if( topt !=  0){ Cyc_Tcutil_unify(( void*) _temp1274,*((
+void**) _check_null( topt)));}* otyps=({ struct Cyc_Core_Opt* _temp1275=( struct
+Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1275->v=( void*)
+_temp1273; _temp1275;}); if( sd->fields ==  0){({ void* _temp1276[ 0u]={}; Cyc_Tcutil_terr(
 loc, _tag_arr("can't build abstract struct", sizeof( unsigned char), 28u),
-_tag_arr( _temp1266, sizeof( void*), 0u));});{ void* _temp1267=( void*)
-_temp1264; _npop_handler( 0u); return _temp1267;}}{ struct Cyc_List_List* fields=((
+_tag_arr( _temp1276, sizeof( void*), 0u));});{ void* _temp1277=( void*)
+_temp1274; _npop_handler( 0u); return _temp1277;}}{ struct Cyc_List_List* fields=((
 struct Cyc_List_List*(*)( struct _RegionHandle* rgn, struct Cyc_Position_Segment*
 loc, struct Cyc_List_List* des, struct Cyc_List_List* fields)) Cyc_Tcutil_resolve_struct_designators)(
 rgn, loc, args,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*) _check_null( sd->fields))->v);
 for( 0; fields !=  0; fields=(( struct Cyc_List_List*) _check_null( fields))->tl){
-struct _tuple9 _temp1270; struct Cyc_Absyn_Exp* _temp1271; struct Cyc_Absyn_Structfield*
-_temp1273; struct _tuple9* _temp1268=( struct _tuple9*)(( struct Cyc_List_List*)
-_check_null( fields))->hd; _temp1270=* _temp1268; _LL1274: _temp1273= _temp1270.f1;
-goto _LL1272; _LL1272: _temp1271= _temp1270.f2; goto _LL1269; _LL1269: { void*
-_temp1275= Cyc_Tcutil_rsubstitute( rgn, _temp1262,( void*) _temp1273->type); Cyc_Tcexp_tcExpInitializer(
-te,( void**)& _temp1275, _temp1271); if( ! Cyc_Tcutil_coerce_arg( te, _temp1271,
-_temp1275)){({ struct Cyc_Std_String_pa_struct _temp1280; _temp1280.tag= Cyc_Std_String_pa;
-_temp1280.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
-_check_null( _temp1271->topt))->v);{ struct Cyc_Std_String_pa_struct _temp1279;
-_temp1279.tag= Cyc_Std_String_pa; _temp1279.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-_temp1275);{ struct Cyc_Std_String_pa_struct _temp1278; _temp1278.tag= Cyc_Std_String_pa;
-_temp1278.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(* tn);{ struct Cyc_Std_String_pa_struct
-_temp1277; _temp1277.tag= Cyc_Std_String_pa; _temp1277.f1=( struct _tagged_arr)*
-_temp1273->name;{ void* _temp1276[ 4u]={& _temp1277,& _temp1278,& _temp1279,&
-_temp1280}; Cyc_Tcutil_terr( _temp1271->loc, _tag_arr("field %s of struct %s expects type %s != %s",
-sizeof( unsigned char), 44u), _tag_arr( _temp1276, sizeof( void*), 4u));}}}}});
-Cyc_Tcutil_explain_failure();}}}{ void* _temp1281=( void*) _temp1264;
-_npop_handler( 0u); return _temp1281;}}}; _pop_region( rgn);}} static void* Cyc_Tcexp_tcAnonStruct(
+struct _tuple9 _temp1280; struct Cyc_Absyn_Exp* _temp1281; struct Cyc_Absyn_Structfield*
+_temp1283; struct _tuple9* _temp1278=( struct _tuple9*)(( struct Cyc_List_List*)
+_check_null( fields))->hd; _temp1280=* _temp1278; _LL1284: _temp1283= _temp1280.f1;
+goto _LL1282; _LL1282: _temp1281= _temp1280.f2; goto _LL1279; _LL1279: { void*
+_temp1285= Cyc_Tcutil_rsubstitute( rgn, _temp1272,( void*) _temp1283->type); Cyc_Tcexp_tcExpInitializer(
+te,( void**)& _temp1285, _temp1281); if( ! Cyc_Tcutil_coerce_arg( te, _temp1281,
+_temp1285)){({ struct Cyc_Std_String_pa_struct _temp1290; _temp1290.tag= Cyc_Std_String_pa;
+_temp1290.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
+_check_null( _temp1281->topt))->v);{ struct Cyc_Std_String_pa_struct _temp1289;
+_temp1289.tag= Cyc_Std_String_pa; _temp1289.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+_temp1285);{ struct Cyc_Std_String_pa_struct _temp1288; _temp1288.tag= Cyc_Std_String_pa;
+_temp1288.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(* tn);{ struct Cyc_Std_String_pa_struct
+_temp1287; _temp1287.tag= Cyc_Std_String_pa; _temp1287.f1=( struct _tagged_arr)*
+_temp1283->name;{ void* _temp1286[ 4u]={& _temp1287,& _temp1288,& _temp1289,&
+_temp1290}; Cyc_Tcutil_terr( _temp1281->loc, _tag_arr("field %s of struct %s expects type %s != %s",
+sizeof( unsigned char), 44u), _tag_arr( _temp1286, sizeof( void*), 4u));}}}}});
+Cyc_Tcutil_explain_failure();}}}{ void* _temp1291=( void*) _temp1274;
+_npop_handler( 0u); return _temp1291;}}}; _pop_region( rgn);}} static void* Cyc_Tcexp_tcAnonStruct(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void* ts, struct
-Cyc_List_List* args){{ struct _RegionHandle _temp1286= _new_region(); struct
-_RegionHandle* rgn=& _temp1286; _push_region( rgn);{ void* _temp1287= Cyc_Tcutil_compress(
-ts); struct Cyc_List_List* _temp1293; _LL1289: if(( unsigned int) _temp1287 >  4u?*((
-int*) _temp1287) ==  Cyc_Absyn_AnonStructType: 0){ _LL1294: _temp1293=(( struct
-Cyc_Absyn_AnonStructType_struct*) _temp1287)->f1; goto _LL1290;} else{ goto
-_LL1291;} _LL1291: goto _LL1292; _LL1290: { struct Cyc_List_List* fields=((
+Cyc_List_List* args){{ struct _RegionHandle _temp1296= _new_region(); struct
+_RegionHandle* rgn=& _temp1296; _push_region( rgn);{ void* _temp1297= Cyc_Tcutil_compress(
+ts); struct Cyc_List_List* _temp1303; _LL1299: if(( unsigned int) _temp1297 >  4u?*((
+int*) _temp1297) ==  Cyc_Absyn_AnonStructType: 0){ _LL1304: _temp1303=(( struct
+Cyc_Absyn_AnonStructType_struct*) _temp1297)->f1; goto _LL1300;} else{ goto
+_LL1301;} _LL1301: goto _LL1302; _LL1300: { struct Cyc_List_List* fields=((
 struct Cyc_List_List*(*)( struct _RegionHandle* rgn, struct Cyc_Position_Segment*
 loc, struct Cyc_List_List* des, struct Cyc_List_List* fields)) Cyc_Tcutil_resolve_struct_designators)(
-rgn, loc, args, _temp1293); for( 0; fields !=  0; fields=(( struct Cyc_List_List*)
-_check_null( fields))->tl){ struct _tuple9 _temp1297; struct Cyc_Absyn_Exp*
-_temp1298; struct Cyc_Absyn_Structfield* _temp1300; struct _tuple9* _temp1295=(
-struct _tuple9*)(( struct Cyc_List_List*) _check_null( fields))->hd; _temp1297=*
-_temp1295; _LL1301: _temp1300= _temp1297.f1; goto _LL1299; _LL1299: _temp1298=
-_temp1297.f2; goto _LL1296; _LL1296: Cyc_Tcexp_tcExpInitializer( te,( void**)((
-void**)(( void*)& _temp1300->type)), _temp1298); if( ! Cyc_Tcutil_coerce_arg( te,
-_temp1298,( void*) _temp1300->type)){({ struct Cyc_Std_String_pa_struct
-_temp1305; _temp1305.tag= Cyc_Std_String_pa; _temp1305.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*) _check_null( _temp1298->topt))->v);{
-struct Cyc_Std_String_pa_struct _temp1304; _temp1304.tag= Cyc_Std_String_pa;
-_temp1304.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*) _temp1300->type);{
-struct Cyc_Std_String_pa_struct _temp1303; _temp1303.tag= Cyc_Std_String_pa;
-_temp1303.f1=( struct _tagged_arr)* _temp1300->name;{ void* _temp1302[ 3u]={&
-_temp1303,& _temp1304,& _temp1305}; Cyc_Tcutil_terr( _temp1298->loc, _tag_arr("field %s of struct expects type %s != %s",
-sizeof( unsigned char), 41u), _tag_arr( _temp1302, sizeof( void*), 3u));}}}});
-Cyc_Tcutil_explain_failure();}} goto _LL1288;} _LL1292:({ void* _temp1306[ 0u]={};((
+rgn, loc, args, _temp1303); for( 0; fields !=  0; fields=(( struct Cyc_List_List*)
+_check_null( fields))->tl){ struct _tuple9 _temp1307; struct Cyc_Absyn_Exp*
+_temp1308; struct Cyc_Absyn_Structfield* _temp1310; struct _tuple9* _temp1305=(
+struct _tuple9*)(( struct Cyc_List_List*) _check_null( fields))->hd; _temp1307=*
+_temp1305; _LL1311: _temp1310= _temp1307.f1; goto _LL1309; _LL1309: _temp1308=
+_temp1307.f2; goto _LL1306; _LL1306: Cyc_Tcexp_tcExpInitializer( te,( void**)((
+void**)(( void*)& _temp1310->type)), _temp1308); if( ! Cyc_Tcutil_coerce_arg( te,
+_temp1308,( void*) _temp1310->type)){({ struct Cyc_Std_String_pa_struct
+_temp1315; _temp1315.tag= Cyc_Std_String_pa; _temp1315.f1=( struct _tagged_arr)
+Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*) _check_null( _temp1308->topt))->v);{
+struct Cyc_Std_String_pa_struct _temp1314; _temp1314.tag= Cyc_Std_String_pa;
+_temp1314.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*) _temp1310->type);{
+struct Cyc_Std_String_pa_struct _temp1313; _temp1313.tag= Cyc_Std_String_pa;
+_temp1313.f1=( struct _tagged_arr)* _temp1310->name;{ void* _temp1312[ 3u]={&
+_temp1313,& _temp1314,& _temp1315}; Cyc_Tcutil_terr( _temp1308->loc, _tag_arr("field %s of struct expects type %s != %s",
+sizeof( unsigned char), 41u), _tag_arr( _temp1312, sizeof( void*), 3u));}}}});
+Cyc_Tcutil_explain_failure();}} goto _LL1298;} _LL1302:({ void* _temp1316[ 0u]={};((
 int(*)( struct _tagged_arr fmt, struct _tagged_arr ap)) Cyc_Tcutil_impos)(
 _tag_arr("tcAnonStruct:  not an AnonStructType", sizeof( unsigned char), 37u),
-_tag_arr( _temp1306, sizeof( void*), 0u));}); goto _LL1288; _LL1288:;};
+_tag_arr( _temp1316, sizeof( void*), 0u));}); goto _LL1298; _LL1298:;};
 _pop_region( rgn);} return ts;} static void* Cyc_Tcexp_tcTunion( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e,
 struct Cyc_Core_Opt** all_ref, struct Cyc_Core_Opt** exist_ref, struct Cyc_List_List*
 es, struct Cyc_Absyn_Tuniondecl* tud, struct Cyc_Absyn_Tunionfield* tuf){ struct
-_RegionHandle _temp1307= _new_region(); struct _RegionHandle* rgn=& _temp1307;
-_push_region( rgn);{ struct _tuple4 _temp1308=({ struct _tuple4 _temp1354;
-_temp1354.f1= Cyc_Tcenv_lookup_type_vars( te); _temp1354.f2= rgn; _temp1354;});
-struct Cyc_List_List* _temp1309=(( struct Cyc_List_List*(*)( struct
+_RegionHandle _temp1317= _new_region(); struct _RegionHandle* rgn=& _temp1317;
+_push_region( rgn);{ struct _tuple4 _temp1318=({ struct _tuple4 _temp1364;
+_temp1364.f1= Cyc_Tcenv_lookup_type_vars( te); _temp1364.f2= rgn; _temp1364;});
+struct Cyc_List_List* _temp1319=(( struct Cyc_List_List*(*)( struct
 _RegionHandle*, struct _tuple5*(* f)( struct _tuple4*, struct Cyc_Absyn_Tvar*),
 struct _tuple4* env, struct Cyc_List_List* x)) Cyc_List_rmap_c)( rgn, Cyc_Tcutil_r_make_inst_var,&
-_temp1308, tud->tvs); struct Cyc_List_List* _temp1310=(( struct Cyc_List_List*(*)(
+_temp1318, tud->tvs); struct Cyc_List_List* _temp1320=(( struct Cyc_List_List*(*)(
 struct _RegionHandle*, struct _tuple5*(* f)( struct _tuple4*, struct Cyc_Absyn_Tvar*),
 struct _tuple4* env, struct Cyc_List_List* x)) Cyc_List_rmap_c)( rgn, Cyc_Tcutil_r_make_inst_var,&
-_temp1308, tuf->tvs); struct Cyc_List_List* _temp1311=(( struct Cyc_List_List*(*)(
+_temp1318, tuf->tvs); struct Cyc_List_List* _temp1321=(( struct Cyc_List_List*(*)(
 void*(* f)( struct _tuple5*), struct Cyc_List_List* x)) Cyc_List_map)(( void*(*)(
-struct _tuple5*)) Cyc_Core_snd, _temp1309); struct Cyc_List_List* _temp1312=((
+struct _tuple5*)) Cyc_Core_snd, _temp1319); struct Cyc_List_List* _temp1322=((
 struct Cyc_List_List*(*)( void*(* f)( struct _tuple5*), struct Cyc_List_List* x))
-Cyc_List_map)(( void*(*)( struct _tuple5*)) Cyc_Core_snd, _temp1310); struct Cyc_List_List*
-_temp1313=(( struct Cyc_List_List*(*)( struct _RegionHandle*, struct Cyc_List_List*
-x, struct Cyc_List_List* y)) Cyc_List_rappend)( rgn, _temp1309, _temp1310);*
-all_ref=({ struct Cyc_Core_Opt* _temp1314=( struct Cyc_Core_Opt*) _cycalloc(
-sizeof( struct Cyc_Core_Opt)); _temp1314->v=( void*) _temp1311; _temp1314;});*
-exist_ref=({ struct Cyc_Core_Opt* _temp1315=( struct Cyc_Core_Opt*) _cycalloc(
-sizeof( struct Cyc_Core_Opt)); _temp1315->v=( void*) _temp1312; _temp1315;});{
-void* res=( void*)({ struct Cyc_Absyn_TunionFieldType_struct* _temp1349=( struct
+Cyc_List_map)(( void*(*)( struct _tuple5*)) Cyc_Core_snd, _temp1320); struct Cyc_List_List*
+_temp1323=(( struct Cyc_List_List*(*)( struct _RegionHandle*, struct Cyc_List_List*
+x, struct Cyc_List_List* y)) Cyc_List_rappend)( rgn, _temp1319, _temp1320);*
+all_ref=({ struct Cyc_Core_Opt* _temp1324=( struct Cyc_Core_Opt*) _cycalloc(
+sizeof( struct Cyc_Core_Opt)); _temp1324->v=( void*) _temp1321; _temp1324;});*
+exist_ref=({ struct Cyc_Core_Opt* _temp1325=( struct Cyc_Core_Opt*) _cycalloc(
+sizeof( struct Cyc_Core_Opt)); _temp1325->v=( void*) _temp1322; _temp1325;});{
+void* res=( void*)({ struct Cyc_Absyn_TunionFieldType_struct* _temp1359=( struct
 Cyc_Absyn_TunionFieldType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_TunionFieldType_struct));
-_temp1349[ 0]=({ struct Cyc_Absyn_TunionFieldType_struct _temp1350; _temp1350.tag=
-Cyc_Absyn_TunionFieldType; _temp1350.f1=({ struct Cyc_Absyn_TunionFieldInfo
-_temp1351; _temp1351.field_info=( void*)(( void*)({ struct Cyc_Absyn_KnownTunionfield_struct*
-_temp1352=( struct Cyc_Absyn_KnownTunionfield_struct*) _cycalloc( sizeof( struct
-Cyc_Absyn_KnownTunionfield_struct)); _temp1352[ 0]=({ struct Cyc_Absyn_KnownTunionfield_struct
-_temp1353; _temp1353.tag= Cyc_Absyn_KnownTunionfield; _temp1353.f1= tud;
-_temp1353.f2= tuf; _temp1353;}); _temp1352;})); _temp1351.targs= _temp1311;
-_temp1351;}); _temp1350;}); _temp1349;}); if( topt !=  0){ void* _temp1316= Cyc_Tcutil_compress(*((
-void**) _check_null( topt))); struct Cyc_Absyn_TunionInfo _temp1324; void*
-_temp1326; struct Cyc_List_List* _temp1328; _LL1318: if(( unsigned int)
-_temp1316 >  4u?*(( int*) _temp1316) ==  Cyc_Absyn_TunionFieldType: 0){ goto
-_LL1319;} else{ goto _LL1320;} _LL1320: if(( unsigned int) _temp1316 >  4u?*((
-int*) _temp1316) ==  Cyc_Absyn_TunionType: 0){ _LL1325: _temp1324=(( struct Cyc_Absyn_TunionType_struct*)
-_temp1316)->f1; _LL1329: _temp1328= _temp1324.targs; goto _LL1327; _LL1327:
-_temp1326=( void*) _temp1324.rgn; goto _LL1321;} else{ goto _LL1322;} _LL1322:
-goto _LL1323; _LL1319: Cyc_Tcutil_unify(*(( void**) _check_null( topt)), res);
-goto _LL1317; _LL1321:{ struct Cyc_List_List* a= _temp1311; for( 0; a !=  0?
-_temp1328 !=  0: 0;( a=(( struct Cyc_List_List*) _check_null( a))->tl, _temp1328=((
-struct Cyc_List_List*) _check_null( _temp1328))->tl)){ Cyc_Tcutil_unify(( void*)((
+_temp1359[ 0]=({ struct Cyc_Absyn_TunionFieldType_struct _temp1360; _temp1360.tag=
+Cyc_Absyn_TunionFieldType; _temp1360.f1=({ struct Cyc_Absyn_TunionFieldInfo
+_temp1361; _temp1361.field_info=( void*)(( void*)({ struct Cyc_Absyn_KnownTunionfield_struct*
+_temp1362=( struct Cyc_Absyn_KnownTunionfield_struct*) _cycalloc( sizeof( struct
+Cyc_Absyn_KnownTunionfield_struct)); _temp1362[ 0]=({ struct Cyc_Absyn_KnownTunionfield_struct
+_temp1363; _temp1363.tag= Cyc_Absyn_KnownTunionfield; _temp1363.f1= tud;
+_temp1363.f2= tuf; _temp1363;}); _temp1362;})); _temp1361.targs= _temp1321;
+_temp1361;}); _temp1360;}); _temp1359;}); if( topt !=  0){ void* _temp1326= Cyc_Tcutil_compress(*((
+void**) _check_null( topt))); struct Cyc_Absyn_TunionInfo _temp1334; void*
+_temp1336; struct Cyc_List_List* _temp1338; _LL1328: if(( unsigned int)
+_temp1326 >  4u?*(( int*) _temp1326) ==  Cyc_Absyn_TunionFieldType: 0){ goto
+_LL1329;} else{ goto _LL1330;} _LL1330: if(( unsigned int) _temp1326 >  4u?*((
+int*) _temp1326) ==  Cyc_Absyn_TunionType: 0){ _LL1335: _temp1334=(( struct Cyc_Absyn_TunionType_struct*)
+_temp1326)->f1; _LL1339: _temp1338= _temp1334.targs; goto _LL1337; _LL1337:
+_temp1336=( void*) _temp1334.rgn; goto _LL1331;} else{ goto _LL1332;} _LL1332:
+goto _LL1333; _LL1329: Cyc_Tcutil_unify(*(( void**) _check_null( topt)), res);
+goto _LL1327; _LL1331:{ struct Cyc_List_List* a= _temp1321; for( 0; a !=  0?
+_temp1338 !=  0: 0;( a=(( struct Cyc_List_List*) _check_null( a))->tl, _temp1338=((
+struct Cyc_List_List*) _check_null( _temp1338))->tl)){ Cyc_Tcutil_unify(( void*)((
 struct Cyc_List_List*) _check_null( a))->hd,( void*)(( struct Cyc_List_List*)
-_check_null( _temp1328))->hd);}} if( tuf->typs ==  0? es ==  0: 0){ e->topt=({
-struct Cyc_Core_Opt* _temp1330=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp1330->v=( void*) res; _temp1330;}); res=( void*)({ struct
-Cyc_Absyn_TunionType_struct* _temp1331=( struct Cyc_Absyn_TunionType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp1331[ 0]=({ struct
-Cyc_Absyn_TunionType_struct _temp1332; _temp1332.tag= Cyc_Absyn_TunionType;
-_temp1332.f1=({ struct Cyc_Absyn_TunionInfo _temp1333; _temp1333.tunion_info=(
-void*)(( void*)({ struct Cyc_Absyn_KnownTunion_struct* _temp1334=( struct Cyc_Absyn_KnownTunion_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_KnownTunion_struct)); _temp1334[ 0]=({
-struct Cyc_Absyn_KnownTunion_struct _temp1335; _temp1335.tag= Cyc_Absyn_KnownTunion;
-_temp1335.f1=({ struct Cyc_Absyn_Tuniondecl** _temp1336=( struct Cyc_Absyn_Tuniondecl**)
-_cycalloc( sizeof( struct Cyc_Absyn_Tuniondecl*)); _temp1336[ 0]= tud; _temp1336;});
-_temp1335;}); _temp1334;})); _temp1333.targs= _temp1311; _temp1333.rgn=( void*)
-_temp1326; _temp1333;}); _temp1332;}); _temp1331;}); Cyc_Tcutil_unchecked_cast(
-te, e, res);{ void* _temp1337= res; _npop_handler( 0u); return _temp1337;}} goto
-_LL1317; _LL1323: goto _LL1317; _LL1317:;}{ struct Cyc_List_List* ts= tuf->typs;
+_check_null( _temp1338))->hd);}} if( tuf->typs ==  0? es ==  0: 0){ e->topt=({
+struct Cyc_Core_Opt* _temp1340=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp1340->v=( void*) res; _temp1340;}); res=( void*)({ struct
+Cyc_Absyn_TunionType_struct* _temp1341=( struct Cyc_Absyn_TunionType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp1341[ 0]=({ struct
+Cyc_Absyn_TunionType_struct _temp1342; _temp1342.tag= Cyc_Absyn_TunionType;
+_temp1342.f1=({ struct Cyc_Absyn_TunionInfo _temp1343; _temp1343.tunion_info=(
+void*)(( void*)({ struct Cyc_Absyn_KnownTunion_struct* _temp1344=( struct Cyc_Absyn_KnownTunion_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_KnownTunion_struct)); _temp1344[ 0]=({
+struct Cyc_Absyn_KnownTunion_struct _temp1345; _temp1345.tag= Cyc_Absyn_KnownTunion;
+_temp1345.f1=({ struct Cyc_Absyn_Tuniondecl** _temp1346=( struct Cyc_Absyn_Tuniondecl**)
+_cycalloc( sizeof( struct Cyc_Absyn_Tuniondecl*)); _temp1346[ 0]= tud; _temp1346;});
+_temp1345;}); _temp1344;})); _temp1343.targs= _temp1321; _temp1343.rgn=( void*)
+_temp1336; _temp1343;}); _temp1342;}); _temp1341;}); Cyc_Tcutil_unchecked_cast(
+te, e, res);{ void* _temp1347= res; _npop_handler( 0u); return _temp1347;}} goto
+_LL1327; _LL1333: goto _LL1327; _LL1327:;}{ struct Cyc_List_List* ts= tuf->typs;
 for( 0; es !=  0? ts !=  0: 0;( es=(( struct Cyc_List_List*) _check_null( es))->tl,
 ts=(( struct Cyc_List_List*) _check_null( ts))->tl)){ struct Cyc_Absyn_Exp* e=(
 struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd; void* t=
-Cyc_Tcutil_rsubstitute( rgn, _temp1313,(*(( struct _tuple8*)(( struct Cyc_List_List*)
+Cyc_Tcutil_rsubstitute( rgn, _temp1323,(*(( struct _tuple8*)(( struct Cyc_List_List*)
 _check_null( ts))->hd)).f2); Cyc_Tcexp_tcExpInitializer( te,( void**)& t, e);
 if( ! Cyc_Tcutil_coerce_arg( te, e, t)){({ struct Cyc_Std_String_pa_struct
-_temp1341; _temp1341.tag= Cyc_Std_String_pa; _temp1341.f1=( struct _tagged_arr)(
+_temp1351; _temp1351.tag= Cyc_Std_String_pa; _temp1351.f1=( struct _tagged_arr)(
 e->topt ==  0? _tag_arr("?", sizeof( unsigned char), 2u): Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v));{ struct Cyc_Std_String_pa_struct
-_temp1340; _temp1340.tag= Cyc_Std_String_pa; _temp1340.f1=( struct _tagged_arr)
-Cyc_Absynpp_typ2string( t);{ struct Cyc_Std_String_pa_struct _temp1339;
-_temp1339.tag= Cyc_Std_String_pa; _temp1339.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
-tuf->name);{ void* _temp1338[ 3u]={& _temp1339,& _temp1340,& _temp1341}; Cyc_Tcutil_terr(
+_temp1350; _temp1350.tag= Cyc_Std_String_pa; _temp1350.f1=( struct _tagged_arr)
+Cyc_Absynpp_typ2string( t);{ struct Cyc_Std_String_pa_struct _temp1349;
+_temp1349.tag= Cyc_Std_String_pa; _temp1349.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
+tuf->name);{ void* _temp1348[ 3u]={& _temp1349,& _temp1350,& _temp1351}; Cyc_Tcutil_terr(
 e->loc, _tag_arr("tunion constructor %s expects argument of type %s but this argument has type %s",
-sizeof( unsigned char), 80u), _tag_arr( _temp1338, sizeof( void*), 3u));}}}});
-Cyc_Tcutil_explain_failure();}} if( es !=  0){ void* _temp1344=({ struct Cyc_Std_String_pa_struct
-_temp1343; _temp1343.tag= Cyc_Std_String_pa; _temp1343.f1=( struct _tagged_arr)
-Cyc_Absynpp_qvar2string( tuf->name);{ void* _temp1342[ 1u]={& _temp1343}; Cyc_Tcexp_expr_err(
+sizeof( unsigned char), 80u), _tag_arr( _temp1348, sizeof( void*), 3u));}}}});
+Cyc_Tcutil_explain_failure();}} if( es !=  0){ void* _temp1354=({ struct Cyc_Std_String_pa_struct
+_temp1353; _temp1353.tag= Cyc_Std_String_pa; _temp1353.f1=( struct _tagged_arr)
+Cyc_Absynpp_qvar2string( tuf->name);{ void* _temp1352[ 1u]={& _temp1353}; Cyc_Tcexp_expr_err(
 te,(( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd)->loc,
 _tag_arr("too many arguments for tunion constructor %s", sizeof( unsigned char),
-45u), _tag_arr( _temp1342, sizeof( void*), 1u));}}); _npop_handler( 0u); return
-_temp1344;} if( ts !=  0){ void* _temp1347=({ struct Cyc_Std_String_pa_struct
-_temp1346; _temp1346.tag= Cyc_Std_String_pa; _temp1346.f1=( struct _tagged_arr)
-Cyc_Absynpp_qvar2string( tuf->name);{ void* _temp1345[ 1u]={& _temp1346}; Cyc_Tcexp_expr_err(
+45u), _tag_arr( _temp1352, sizeof( void*), 1u));}}); _npop_handler( 0u); return
+_temp1354;} if( ts !=  0){ void* _temp1357=({ struct Cyc_Std_String_pa_struct
+_temp1356; _temp1356.tag= Cyc_Std_String_pa; _temp1356.f1=( struct _tagged_arr)
+Cyc_Absynpp_qvar2string( tuf->name);{ void* _temp1355[ 1u]={& _temp1356}; Cyc_Tcexp_expr_err(
 te, loc, _tag_arr("too few arguments for tunion constructor %s", sizeof(
-unsigned char), 44u), _tag_arr( _temp1345, sizeof( void*), 1u));}});
-_npop_handler( 0u); return _temp1347;}{ void* _temp1348= res; _npop_handler( 0u);
-return _temp1348;}}}}; _pop_region( rgn);} static void* Cyc_Tcexp_tcMalloc(
+unsigned char), 44u), _tag_arr( _temp1355, sizeof( void*), 1u));}});
+_npop_handler( 0u); return _temp1357;}{ void* _temp1358= res; _npop_handler( 0u);
+return _temp1358;}}}}; _pop_region( rgn);} static void* Cyc_Tcexp_tcMalloc(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Exp* ropt, void* t){ void* rgn=( void*) Cyc_Absyn_HeapRgn; if( ropt != 
 0){ void* expected_type=( void*)({ struct Cyc_Absyn_RgnHandleType_struct*
-_temp1365=( struct Cyc_Absyn_RgnHandleType_struct*) _cycalloc( sizeof( struct
-Cyc_Absyn_RgnHandleType_struct)); _temp1365[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct
-_temp1366; _temp1366.tag= Cyc_Absyn_RgnHandleType; _temp1366.f1=( void*) Cyc_Absyn_new_evar((
-struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp1367=( struct
-Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1367->v=( void*)
-Cyc_Tcenv_lookup_type_vars( te); _temp1367;})); _temp1366;}); _temp1365;}); void*
+_temp1375=( struct Cyc_Absyn_RgnHandleType_struct*) _cycalloc( sizeof( struct
+Cyc_Absyn_RgnHandleType_struct)); _temp1375[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct
+_temp1376; _temp1376.tag= Cyc_Absyn_RgnHandleType; _temp1376.f1=( void*) Cyc_Absyn_new_evar((
+struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({ struct Cyc_Core_Opt* _temp1377=( struct
+Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1377->v=( void*)
+Cyc_Tcenv_lookup_type_vars( te); _temp1377;})); _temp1376;}); _temp1375;}); void*
 handle_type= Cyc_Tcexp_tcExp( te,( void**)& expected_type,( struct Cyc_Absyn_Exp*)
-_check_null( ropt)); void* _temp1355= Cyc_Tcutil_compress( handle_type); void*
-_temp1361; _LL1357: if(( unsigned int) _temp1355 >  4u?*(( int*) _temp1355) == 
-Cyc_Absyn_RgnHandleType: 0){ _LL1362: _temp1361=( void*)(( struct Cyc_Absyn_RgnHandleType_struct*)
-_temp1355)->f1; goto _LL1358;} else{ goto _LL1359;} _LL1359: goto _LL1360;
-_LL1358: rgn= _temp1361; Cyc_Tcenv_check_rgn_accessible( te, loc, rgn); goto
-_LL1356; _LL1360:({ struct Cyc_Std_String_pa_struct _temp1364; _temp1364.tag=
-Cyc_Std_String_pa; _temp1364.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-handle_type);{ void* _temp1363[ 1u]={& _temp1364}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)
+_check_null( ropt)); void* _temp1365= Cyc_Tcutil_compress( handle_type); void*
+_temp1371; _LL1367: if(( unsigned int) _temp1365 >  4u?*(( int*) _temp1365) == 
+Cyc_Absyn_RgnHandleType: 0){ _LL1372: _temp1371=( void*)(( struct Cyc_Absyn_RgnHandleType_struct*)
+_temp1365)->f1; goto _LL1368;} else{ goto _LL1369;} _LL1369: goto _LL1370;
+_LL1368: rgn= _temp1371; Cyc_Tcenv_check_rgn_accessible( te, loc, rgn); goto
+_LL1366; _LL1370:({ struct Cyc_Std_String_pa_struct _temp1374; _temp1374.tag=
+Cyc_Std_String_pa; _temp1374.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+handle_type);{ void* _temp1373[ 1u]={& _temp1374}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)
 _check_null( ropt))->loc, _tag_arr("expecting region_t type but found %s",
-sizeof( unsigned char), 37u), _tag_arr( _temp1363, sizeof( void*), 1u));}});
-goto _LL1356; _LL1356:;} Cyc_Tcutil_check_type( loc, te, Cyc_Tcenv_lookup_type_vars(
-te),( void*) Cyc_Absyn_MemKind, 1, t);{ void* _temp1368= t; struct Cyc_Absyn_TunionFieldInfo
-_temp1374; void* _temp1376; struct Cyc_Absyn_Tunionfield* _temp1378; _LL1370:
-if(( unsigned int) _temp1368 >  4u?*(( int*) _temp1368) ==  Cyc_Absyn_TunionFieldType:
-0){ _LL1375: _temp1374=(( struct Cyc_Absyn_TunionFieldType_struct*) _temp1368)->f1;
-_LL1377: _temp1376=( void*) _temp1374.field_info; if(*(( int*) _temp1376) == 
-Cyc_Absyn_KnownTunionfield){ _LL1379: _temp1378=(( struct Cyc_Absyn_KnownTunionfield_struct*)
-_temp1376)->f2; goto _LL1371;} else{ goto _LL1372;}} else{ goto _LL1372;}
-_LL1372: goto _LL1373; _LL1371: if( _temp1378->tvs !=  0){({ void* _temp1380[ 0u]={};
+sizeof( unsigned char), 37u), _tag_arr( _temp1373, sizeof( void*), 1u));}});
+goto _LL1366; _LL1366:;} Cyc_Tcutil_check_type( loc, te, Cyc_Tcenv_lookup_type_vars(
+te),( void*) Cyc_Absyn_MemKind, 1, t);{ void* _temp1378= t; struct Cyc_Absyn_TunionFieldInfo
+_temp1384; void* _temp1386; struct Cyc_Absyn_Tunionfield* _temp1388; _LL1380:
+if(( unsigned int) _temp1378 >  4u?*(( int*) _temp1378) ==  Cyc_Absyn_TunionFieldType:
+0){ _LL1385: _temp1384=(( struct Cyc_Absyn_TunionFieldType_struct*) _temp1378)->f1;
+_LL1387: _temp1386=( void*) _temp1384.field_info; if(*(( int*) _temp1386) == 
+Cyc_Absyn_KnownTunionfield){ _LL1389: _temp1388=(( struct Cyc_Absyn_KnownTunionfield_struct*)
+_temp1386)->f2; goto _LL1381;} else{ goto _LL1382;}} else{ goto _LL1382;}
+_LL1382: goto _LL1383; _LL1381: if( _temp1388->tvs !=  0){({ void* _temp1390[ 0u]={};
 Cyc_Tcutil_terr( loc, _tag_arr("malloc with existential types not yet implemented",
-sizeof( unsigned char), 50u), _tag_arr( _temp1380, sizeof( void*), 0u));});}
-goto _LL1369; _LL1373: goto _LL1369; _LL1369:;}{ void*(* _temp1381)( void* t,
+sizeof( unsigned char), 50u), _tag_arr( _temp1390, sizeof( void*), 0u));});}
+goto _LL1379; _LL1383: goto _LL1379; _LL1379:;}{ void*(* _temp1391)( void* t,
 void* rgn, struct Cyc_Absyn_Tqual tq)= Cyc_Absyn_at_typ; if( topt !=  0){ void*
-_temp1382= Cyc_Tcutil_compress(*(( void**) _check_null( topt))); struct Cyc_Absyn_PtrInfo
-_temp1388; struct Cyc_Absyn_Conref* _temp1390; _LL1384: if(( unsigned int)
-_temp1382 >  4u?*(( int*) _temp1382) ==  Cyc_Absyn_PointerType: 0){ _LL1389:
-_temp1388=(( struct Cyc_Absyn_PointerType_struct*) _temp1382)->f1; _LL1391:
-_temp1390= _temp1388.nullable; goto _LL1385;} else{ goto _LL1386;} _LL1386: goto
-_LL1387; _LL1385: if((( int(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
-_temp1390)){ _temp1381= Cyc_Absyn_star_typ;} goto _LL1383; _LL1387: goto _LL1383;
-_LL1383:;} return _temp1381( t, rgn, Cyc_Absyn_empty_tqual());}} static void*
+_temp1392= Cyc_Tcutil_compress(*(( void**) _check_null( topt))); struct Cyc_Absyn_PtrInfo
+_temp1398; struct Cyc_Absyn_Conref* _temp1400; _LL1394: if(( unsigned int)
+_temp1392 >  4u?*(( int*) _temp1392) ==  Cyc_Absyn_PointerType: 0){ _LL1399:
+_temp1398=(( struct Cyc_Absyn_PointerType_struct*) _temp1392)->f1; _LL1401:
+_temp1400= _temp1398.nullable; goto _LL1395;} else{ goto _LL1396;} _LL1396: goto
+_LL1397; _LL1395: if((( int(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
+_temp1400)){ _temp1391= Cyc_Absyn_star_typ;} goto _LL1393; _LL1397: goto _LL1393;
+_LL1393:;} return _temp1391( t, rgn, Cyc_Absyn_empty_tqual());}} static void*
 Cyc_Tcexp_tcStmtExp( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc,
 void** topt, struct Cyc_Absyn_Stmt* s){ Cyc_Tcstmt_tcStmt( Cyc_Tcenv_set_encloser(
 te, s), s, 1); Cyc_NewControlFlow_set_encloser( s, Cyc_Tcenv_get_encloser( te));
-while( 1) { void* _temp1392=( void*) s->r; struct Cyc_Absyn_Exp* _temp1402;
-struct Cyc_Absyn_Stmt* _temp1404; struct Cyc_Absyn_Stmt* _temp1406; struct Cyc_Absyn_Stmt*
-_temp1408; struct Cyc_Absyn_Decl* _temp1410; _LL1394: if(( unsigned int)
-_temp1392 >  1u?*(( int*) _temp1392) ==  Cyc_Absyn_Exp_s: 0){ _LL1403: _temp1402=((
-struct Cyc_Absyn_Exp_s_struct*) _temp1392)->f1; goto _LL1395;} else{ goto
-_LL1396;} _LL1396: if(( unsigned int) _temp1392 >  1u?*(( int*) _temp1392) == 
-Cyc_Absyn_Seq_s: 0){ _LL1407: _temp1406=(( struct Cyc_Absyn_Seq_s_struct*)
-_temp1392)->f1; goto _LL1405; _LL1405: _temp1404=(( struct Cyc_Absyn_Seq_s_struct*)
-_temp1392)->f2; goto _LL1397;} else{ goto _LL1398;} _LL1398: if(( unsigned int)
-_temp1392 >  1u?*(( int*) _temp1392) ==  Cyc_Absyn_Decl_s: 0){ _LL1411:
-_temp1410=(( struct Cyc_Absyn_Decl_s_struct*) _temp1392)->f1; goto _LL1409;
-_LL1409: _temp1408=(( struct Cyc_Absyn_Decl_s_struct*) _temp1392)->f2; goto
-_LL1399;} else{ goto _LL1400;} _LL1400: goto _LL1401; _LL1395: return( void*)((
-struct Cyc_Core_Opt*) _check_null( _temp1402->topt))->v; _LL1397: s= _temp1404;
-continue; _LL1399: s= _temp1408; continue; _LL1401: return({ void* _temp1412[ 0u]={};
+while( 1) { void* _temp1402=( void*) s->r; struct Cyc_Absyn_Exp* _temp1412;
+struct Cyc_Absyn_Stmt* _temp1414; struct Cyc_Absyn_Stmt* _temp1416; struct Cyc_Absyn_Stmt*
+_temp1418; struct Cyc_Absyn_Decl* _temp1420; _LL1404: if(( unsigned int)
+_temp1402 >  1u?*(( int*) _temp1402) ==  Cyc_Absyn_Exp_s: 0){ _LL1413: _temp1412=((
+struct Cyc_Absyn_Exp_s_struct*) _temp1402)->f1; goto _LL1405;} else{ goto
+_LL1406;} _LL1406: if(( unsigned int) _temp1402 >  1u?*(( int*) _temp1402) == 
+Cyc_Absyn_Seq_s: 0){ _LL1417: _temp1416=(( struct Cyc_Absyn_Seq_s_struct*)
+_temp1402)->f1; goto _LL1415; _LL1415: _temp1414=(( struct Cyc_Absyn_Seq_s_struct*)
+_temp1402)->f2; goto _LL1407;} else{ goto _LL1408;} _LL1408: if(( unsigned int)
+_temp1402 >  1u?*(( int*) _temp1402) ==  Cyc_Absyn_Decl_s: 0){ _LL1421:
+_temp1420=(( struct Cyc_Absyn_Decl_s_struct*) _temp1402)->f1; goto _LL1419;
+_LL1419: _temp1418=(( struct Cyc_Absyn_Decl_s_struct*) _temp1402)->f2; goto
+_LL1409;} else{ goto _LL1410;} _LL1410: goto _LL1411; _LL1405: return( void*)((
+struct Cyc_Core_Opt*) _check_null( _temp1412->topt))->v; _LL1407: s= _temp1414;
+continue; _LL1409: s= _temp1418; continue; _LL1411: return({ void* _temp1422[ 0u]={};
 Cyc_Tcexp_expr_err( te, loc, _tag_arr("statement expression must end with expression",
-sizeof( unsigned char), 46u), _tag_arr( _temp1412, sizeof( void*), 0u));});
-_LL1393:;}} static void* Cyc_Tcexp_tcCodegen( struct Cyc_Tcenv_Tenv* te, struct
+sizeof( unsigned char), 46u), _tag_arr( _temp1422, sizeof( void*), 0u));});
+_LL1403:;}} static void* Cyc_Tcexp_tcCodegen( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Fndecl* fd){ return({
-void* _temp1413[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("tcCodegen",
-sizeof( unsigned char), 10u), _tag_arr( _temp1413, sizeof( void*), 0u));});}
+void* _temp1423[ 0u]={}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("tcCodegen",
+sizeof( unsigned char), 10u), _tag_arr( _temp1423, sizeof( void*), 0u));});}
 static void* Cyc_Tcexp_tcFill( struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment*
-loc, void** topt, struct Cyc_Absyn_Exp* e){ return({ void* _temp1414[ 0u]={};
+loc, void** topt, struct Cyc_Absyn_Exp* e){ return({ void* _temp1424[ 0u]={};
 Cyc_Tcexp_expr_err( te, loc, _tag_arr("tcFill", sizeof( unsigned char), 7u),
-_tag_arr( _temp1414, sizeof( void*), 0u));});} static void* Cyc_Tcexp_tcNew(
+_tag_arr( _temp1424, sizeof( void*), 0u));});} static void* Cyc_Tcexp_tcNew(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Exp* rgn_handle, struct Cyc_Absyn_Exp* e, struct Cyc_Absyn_Exp* e1){
 void* rgn=( void*) Cyc_Absyn_HeapRgn; if( rgn_handle !=  0){ void* expected_type=(
-void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp1425=( struct Cyc_Absyn_RgnHandleType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp1425[ 0]=({
-struct Cyc_Absyn_RgnHandleType_struct _temp1426; _temp1426.tag= Cyc_Absyn_RgnHandleType;
-_temp1426.f1=( void*) Cyc_Absyn_new_evar(( struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({
-struct Cyc_Core_Opt* _temp1427=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp1427->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp1427;}));
-_temp1426;}); _temp1425;}); void* handle_type= Cyc_Tcexp_tcExp( te,( void**)&
+void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp1435=( struct Cyc_Absyn_RgnHandleType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp1435[ 0]=({
+struct Cyc_Absyn_RgnHandleType_struct _temp1436; _temp1436.tag= Cyc_Absyn_RgnHandleType;
+_temp1436.f1=( void*) Cyc_Absyn_new_evar(( struct Cyc_Core_Opt*)& Cyc_Tcexp_rk,({
+struct Cyc_Core_Opt* _temp1437=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp1437->v=( void*) Cyc_Tcenv_lookup_type_vars( te); _temp1437;}));
+_temp1436;}); _temp1435;}); void* handle_type= Cyc_Tcexp_tcExp( te,( void**)&
 expected_type,( struct Cyc_Absyn_Exp*) _check_null( rgn_handle)); void*
-_temp1415= Cyc_Tcutil_compress( handle_type); void* _temp1421; _LL1417: if((
-unsigned int) _temp1415 >  4u?*(( int*) _temp1415) ==  Cyc_Absyn_RgnHandleType:
-0){ _LL1422: _temp1421=( void*)(( struct Cyc_Absyn_RgnHandleType_struct*)
-_temp1415)->f1; goto _LL1418;} else{ goto _LL1419;} _LL1419: goto _LL1420;
-_LL1418: rgn= _temp1421; Cyc_Tcenv_check_rgn_accessible( te, loc, rgn); goto
-_LL1416; _LL1420:({ struct Cyc_Std_String_pa_struct _temp1424; _temp1424.tag=
-Cyc_Std_String_pa; _temp1424.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
-handle_type);{ void* _temp1423[ 1u]={& _temp1424}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)
+_temp1425= Cyc_Tcutil_compress( handle_type); void* _temp1431; _LL1427: if((
+unsigned int) _temp1425 >  4u?*(( int*) _temp1425) ==  Cyc_Absyn_RgnHandleType:
+0){ _LL1432: _temp1431=( void*)(( struct Cyc_Absyn_RgnHandleType_struct*)
+_temp1425)->f1; goto _LL1428;} else{ goto _LL1429;} _LL1429: goto _LL1430;
+_LL1428: rgn= _temp1431; Cyc_Tcenv_check_rgn_accessible( te, loc, rgn); goto
+_LL1426; _LL1430:({ struct Cyc_Std_String_pa_struct _temp1434; _temp1434.tag=
+Cyc_Std_String_pa; _temp1434.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+handle_type);{ void* _temp1433[ 1u]={& _temp1434}; Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)
 _check_null( rgn_handle))->loc, _tag_arr("expecting region_t type but found %s",
-sizeof( unsigned char), 37u), _tag_arr( _temp1423, sizeof( void*), 1u));}});
-goto _LL1416; _LL1416:;}{ void* _temp1428=( void*) e1->r; struct Cyc_Absyn_Exp*
-_temp1440; struct Cyc_Absyn_Exp* _temp1442; struct Cyc_Absyn_Vardecl* _temp1444;
-struct Cyc_List_List* _temp1446; struct Cyc_Core_Opt* _temp1448; struct Cyc_List_List*
-_temp1450; void* _temp1452; struct _tagged_arr _temp1454; _LL1430: if(*(( int*)
-_temp1428) ==  Cyc_Absyn_Comprehension_e){ _LL1445: _temp1444=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1428)->f1; goto _LL1443; _LL1443: _temp1442=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1428)->f2; goto _LL1441; _LL1441: _temp1440=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1428)->f3; goto _LL1431;} else{ goto _LL1432;} _LL1432: if(*(( int*)
-_temp1428) ==  Cyc_Absyn_UnresolvedMem_e){ _LL1449: _temp1448=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
-_temp1428)->f1; goto _LL1447; _LL1447: _temp1446=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
-_temp1428)->f2; goto _LL1433;} else{ goto _LL1434;} _LL1434: if(*(( int*)
-_temp1428) ==  Cyc_Absyn_Array_e){ _LL1451: _temp1450=(( struct Cyc_Absyn_Array_e_struct*)
-_temp1428)->f1; goto _LL1435;} else{ goto _LL1436;} _LL1436: if(*(( int*)
-_temp1428) ==  Cyc_Absyn_Const_e){ _LL1453: _temp1452=( void*)(( struct Cyc_Absyn_Const_e_struct*)
-_temp1428)->f1; if(( unsigned int) _temp1452 >  1u?*(( int*) _temp1452) ==  Cyc_Absyn_String_c:
-0){ _LL1455: _temp1454=(( struct Cyc_Absyn_String_c_struct*) _temp1452)->f1;
-goto _LL1437;} else{ goto _LL1438;}} else{ goto _LL1438;} _LL1438: goto _LL1439;
-_LL1431: { void* _temp1456= Cyc_Tcexp_tcExpNoPromote( te, topt, e1); void*
-_temp1457= Cyc_Tcutil_compress( _temp1456); struct Cyc_Absyn_Tqual _temp1463;
-void* _temp1465; _LL1459: if(( unsigned int) _temp1457 >  4u?*(( int*) _temp1457)
-==  Cyc_Absyn_ArrayType: 0){ _LL1466: _temp1465=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1457)->f1; goto _LL1464; _LL1464: _temp1463=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1457)->f2; goto _LL1460;} else{ goto _LL1461;} _LL1461: goto _LL1462;
-_LL1460: { void* b= Cyc_Tcutil_is_const_exp( te, _temp1442)?( void*)({ struct
-Cyc_Absyn_Upper_b_struct* _temp1471=( struct Cyc_Absyn_Upper_b_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp1471[ 0]=({ struct
-Cyc_Absyn_Upper_b_struct _temp1472; _temp1472.tag= Cyc_Absyn_Upper_b; _temp1472.f1=
-_temp1442; _temp1472;}); _temp1471;}):( void*) Cyc_Absyn_Unknown_b; void*
-res_typ=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp1468=( struct Cyc_Absyn_PointerType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp1468[ 0]=({
-struct Cyc_Absyn_PointerType_struct _temp1469; _temp1469.tag= Cyc_Absyn_PointerType;
-_temp1469.f1=({ struct Cyc_Absyn_PtrInfo _temp1470; _temp1470.elt_typ=( void*)
-_temp1465; _temp1470.rgn_typ=( void*) rgn; _temp1470.nullable=(( struct Cyc_Absyn_Conref*(*)())
-Cyc_Absyn_empty_conref)(); _temp1470.tq= _temp1463; _temp1470.bounds= Cyc_Absyn_new_conref(
-b); _temp1470;}); _temp1469;}); _temp1468;}); if( topt !=  0){ if( ! Cyc_Tcutil_unify(*((
+sizeof( unsigned char), 37u), _tag_arr( _temp1433, sizeof( void*), 1u));}});
+goto _LL1426; _LL1426:;}{ void* _temp1438=( void*) e1->r; struct Cyc_Absyn_Exp*
+_temp1450; struct Cyc_Absyn_Exp* _temp1452; struct Cyc_Absyn_Vardecl* _temp1454;
+struct Cyc_List_List* _temp1456; struct Cyc_Core_Opt* _temp1458; struct Cyc_List_List*
+_temp1460; void* _temp1462; struct _tagged_arr _temp1464; _LL1440: if(*(( int*)
+_temp1438) ==  Cyc_Absyn_Comprehension_e){ _LL1455: _temp1454=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1438)->f1; goto _LL1453; _LL1453: _temp1452=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1438)->f2; goto _LL1451; _LL1451: _temp1450=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1438)->f3; goto _LL1441;} else{ goto _LL1442;} _LL1442: if(*(( int*)
+_temp1438) ==  Cyc_Absyn_UnresolvedMem_e){ _LL1459: _temp1458=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
+_temp1438)->f1; goto _LL1457; _LL1457: _temp1456=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
+_temp1438)->f2; goto _LL1443;} else{ goto _LL1444;} _LL1444: if(*(( int*)
+_temp1438) ==  Cyc_Absyn_Array_e){ _LL1461: _temp1460=(( struct Cyc_Absyn_Array_e_struct*)
+_temp1438)->f1; goto _LL1445;} else{ goto _LL1446;} _LL1446: if(*(( int*)
+_temp1438) ==  Cyc_Absyn_Const_e){ _LL1463: _temp1462=( void*)(( struct Cyc_Absyn_Const_e_struct*)
+_temp1438)->f1; if(( unsigned int) _temp1462 >  1u?*(( int*) _temp1462) ==  Cyc_Absyn_String_c:
+0){ _LL1465: _temp1464=(( struct Cyc_Absyn_String_c_struct*) _temp1462)->f1;
+goto _LL1447;} else{ goto _LL1448;}} else{ goto _LL1448;} _LL1448: goto _LL1449;
+_LL1441: { void* _temp1466= Cyc_Tcexp_tcExpNoPromote( te, topt, e1); void*
+_temp1467= Cyc_Tcutil_compress( _temp1466); struct Cyc_Absyn_Tqual _temp1473;
+void* _temp1475; _LL1469: if(( unsigned int) _temp1467 >  4u?*(( int*) _temp1467)
+==  Cyc_Absyn_ArrayType: 0){ _LL1476: _temp1475=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1467)->f1; goto _LL1474; _LL1474: _temp1473=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1467)->f2; goto _LL1470;} else{ goto _LL1471;} _LL1471: goto _LL1472;
+_LL1470: { void* b= Cyc_Tcutil_is_const_exp( te, _temp1452)?( void*)({ struct
+Cyc_Absyn_Upper_b_struct* _temp1481=( struct Cyc_Absyn_Upper_b_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp1481[ 0]=({ struct
+Cyc_Absyn_Upper_b_struct _temp1482; _temp1482.tag= Cyc_Absyn_Upper_b; _temp1482.f1=
+_temp1452; _temp1482;}); _temp1481;}):( void*) Cyc_Absyn_Unknown_b; void*
+res_typ=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp1478=( struct Cyc_Absyn_PointerType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp1478[ 0]=({
+struct Cyc_Absyn_PointerType_struct _temp1479; _temp1479.tag= Cyc_Absyn_PointerType;
+_temp1479.f1=({ struct Cyc_Absyn_PtrInfo _temp1480; _temp1480.elt_typ=( void*)
+_temp1475; _temp1480.rgn_typ=( void*) rgn; _temp1480.nullable=(( struct Cyc_Absyn_Conref*(*)())
+Cyc_Absyn_empty_conref)(); _temp1480.tq= _temp1473; _temp1480.bounds= Cyc_Absyn_new_conref(
+b); _temp1480;}); _temp1479;}); _temp1478;}); if( topt !=  0){ if( ! Cyc_Tcutil_unify(*((
 void**) _check_null( topt)), res_typ)? Cyc_Tcutil_silent_castable( te, loc,
 res_typ,*(( void**) _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt*
-_temp1467=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
-_temp1467->v=( void*) res_typ; _temp1467;}); Cyc_Tcutil_unchecked_cast( te, e,*((
+_temp1477=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp1477->v=( void*) res_typ; _temp1477;}); Cyc_Tcutil_unchecked_cast( te, e,*((
 void**) _check_null( topt))); res_typ=*(( void**) _check_null( topt));}} return
-res_typ;} _LL1462: return({ void* _temp1473[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("tcNew: comprehension returned non-array type",
-sizeof( unsigned char), 45u), _tag_arr( _temp1473, sizeof( void*), 0u));});
-_LL1458:;} _LL1433:( void*)( e1->r=( void*)(( void*)({ struct Cyc_Absyn_Array_e_struct*
-_temp1474=( struct Cyc_Absyn_Array_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct));
-_temp1474[ 0]=({ struct Cyc_Absyn_Array_e_struct _temp1475; _temp1475.tag= Cyc_Absyn_Array_e;
-_temp1475.f1= _temp1446; _temp1475;}); _temp1474;}))); _temp1450= _temp1446;
-goto _LL1435; _LL1435: { void** elt_typ_opt= 0; if( topt !=  0){ void* _temp1476=
+res_typ;} _LL1472: return({ void* _temp1483[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("tcNew: comprehension returned non-array type",
+sizeof( unsigned char), 45u), _tag_arr( _temp1483, sizeof( void*), 0u));});
+_LL1468:;} _LL1443:( void*)( e1->r=( void*)(( void*)({ struct Cyc_Absyn_Array_e_struct*
+_temp1484=( struct Cyc_Absyn_Array_e_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Array_e_struct));
+_temp1484[ 0]=({ struct Cyc_Absyn_Array_e_struct _temp1485; _temp1485.tag= Cyc_Absyn_Array_e;
+_temp1485.f1= _temp1456; _temp1485;}); _temp1484;}))); _temp1460= _temp1456;
+goto _LL1445; _LL1445: { void** elt_typ_opt= 0; if( topt !=  0){ void* _temp1486=
 Cyc_Tcutil_compress(*(( void**) _check_null( topt))); struct Cyc_Absyn_PtrInfo
-_temp1482; struct Cyc_Absyn_Tqual _temp1484; void* _temp1486; void** _temp1488;
-_LL1478: if(( unsigned int) _temp1476 >  4u?*(( int*) _temp1476) ==  Cyc_Absyn_PointerType:
-0){ _LL1483: _temp1482=(( struct Cyc_Absyn_PointerType_struct*) _temp1476)->f1;
-_LL1487: _temp1486=( void*) _temp1482.elt_typ; _temp1488=( void**)&((( struct
-Cyc_Absyn_PointerType_struct*) _temp1476)->f1).elt_typ; goto _LL1485; _LL1485:
-_temp1484= _temp1482.tq; goto _LL1479;} else{ goto _LL1480;} _LL1480: goto
-_LL1481; _LL1479: elt_typ_opt=( void**) _temp1488; goto _LL1477; _LL1481: goto
-_LL1477; _LL1477:;}{ void* _temp1489= Cyc_Tcexp_tcExpNoPromote( te, elt_typ_opt,
-e1); void* res_typ;{ void* _temp1490= Cyc_Tcutil_compress( _temp1489); struct
-Cyc_Absyn_Exp* _temp1496; struct Cyc_Absyn_Tqual _temp1498; void* _temp1500;
-_LL1492: if(( unsigned int) _temp1490 >  4u?*(( int*) _temp1490) ==  Cyc_Absyn_ArrayType:
-0){ _LL1501: _temp1500=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1490)->f1;
-goto _LL1499; _LL1499: _temp1498=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1490)->f2; goto _LL1497; _LL1497: _temp1496=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1490)->f3; goto _LL1493;} else{ goto _LL1494;} _LL1494: goto _LL1495;
-_LL1493: res_typ=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp1502=(
+_temp1492; struct Cyc_Absyn_Tqual _temp1494; void* _temp1496; void** _temp1498;
+_LL1488: if(( unsigned int) _temp1486 >  4u?*(( int*) _temp1486) ==  Cyc_Absyn_PointerType:
+0){ _LL1493: _temp1492=(( struct Cyc_Absyn_PointerType_struct*) _temp1486)->f1;
+_LL1497: _temp1496=( void*) _temp1492.elt_typ; _temp1498=( void**)&((( struct
+Cyc_Absyn_PointerType_struct*) _temp1486)->f1).elt_typ; goto _LL1495; _LL1495:
+_temp1494= _temp1492.tq; goto _LL1489;} else{ goto _LL1490;} _LL1490: goto
+_LL1491; _LL1489: elt_typ_opt=( void**) _temp1498; goto _LL1487; _LL1491: goto
+_LL1487; _LL1487:;}{ void* _temp1499= Cyc_Tcexp_tcExpNoPromote( te, elt_typ_opt,
+e1); void* res_typ;{ void* _temp1500= Cyc_Tcutil_compress( _temp1499); struct
+Cyc_Absyn_Exp* _temp1506; struct Cyc_Absyn_Tqual _temp1508; void* _temp1510;
+_LL1502: if(( unsigned int) _temp1500 >  4u?*(( int*) _temp1500) ==  Cyc_Absyn_ArrayType:
+0){ _LL1511: _temp1510=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1500)->f1;
+goto _LL1509; _LL1509: _temp1508=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1500)->f2; goto _LL1507; _LL1507: _temp1506=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1500)->f3; goto _LL1503;} else{ goto _LL1504;} _LL1504: goto _LL1505;
+_LL1503: res_typ=( void*)({ struct Cyc_Absyn_PointerType_struct* _temp1512=(
 struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
-_temp1502[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp1503; _temp1503.tag=
-Cyc_Absyn_PointerType; _temp1503.f1=({ struct Cyc_Absyn_PtrInfo _temp1504;
-_temp1504.elt_typ=( void*) _temp1500; _temp1504.rgn_typ=( void*) rgn; _temp1504.nullable=((
-struct Cyc_Absyn_Conref*(*)()) Cyc_Absyn_empty_conref)(); _temp1504.tq=
-_temp1498; _temp1504.bounds= Cyc_Absyn_new_conref(( void*)({ struct Cyc_Absyn_Upper_b_struct*
-_temp1505=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp1505[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1506; _temp1506.tag= Cyc_Absyn_Upper_b;
-_temp1506.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1496); _temp1506;});
-_temp1505;})); _temp1504;}); _temp1503;}); _temp1502;}); if( topt !=  0){ if( !
+_temp1512[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp1513; _temp1513.tag=
+Cyc_Absyn_PointerType; _temp1513.f1=({ struct Cyc_Absyn_PtrInfo _temp1514;
+_temp1514.elt_typ=( void*) _temp1510; _temp1514.rgn_typ=( void*) rgn; _temp1514.nullable=((
+struct Cyc_Absyn_Conref*(*)()) Cyc_Absyn_empty_conref)(); _temp1514.tq=
+_temp1508; _temp1514.bounds= Cyc_Absyn_new_conref(( void*)({ struct Cyc_Absyn_Upper_b_struct*
+_temp1515=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
+_temp1515[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1516; _temp1516.tag= Cyc_Absyn_Upper_b;
+_temp1516.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1506); _temp1516;});
+_temp1515;})); _temp1514;}); _temp1513;}); _temp1512;}); if( topt !=  0){ if( !
 Cyc_Tcutil_unify(*(( void**) _check_null( topt)), res_typ)? Cyc_Tcutil_silent_castable(
 te, loc, res_typ,*(( void**) _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt*
-_temp1507=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
-_temp1507->v=( void*) res_typ; _temp1507;}); Cyc_Tcutil_unchecked_cast( te, e,*((
+_temp1517=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp1517->v=( void*) res_typ; _temp1517;}); Cyc_Tcutil_unchecked_cast( te, e,*((
 void**) _check_null( topt))); res_typ=*(( void**) _check_null( topt));}} goto
-_LL1491; _LL1495: return({ void* _temp1508[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("tcExpNoPromote on Array_e returned non-array type",
-sizeof( unsigned char), 50u), _tag_arr( _temp1508, sizeof( void*), 0u));});
-_LL1491:;} return res_typ;}} _LL1437: { void* _temp1509= Cyc_Absyn_atb_typ( Cyc_Absyn_uchar_t,
-rgn, Cyc_Absyn_const_tqual(),( void*) Cyc_Absyn_Unknown_b); void* _temp1510= Cyc_Tcexp_tcExp(
-te,( void**)& _temp1509, e1); return Cyc_Absyn_atb_typ( _temp1510, rgn, Cyc_Absyn_empty_tqual(),(
-void*)({ struct Cyc_Absyn_Upper_b_struct* _temp1511=( struct Cyc_Absyn_Upper_b_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp1511[ 0]=({ struct
-Cyc_Absyn_Upper_b_struct _temp1512; _temp1512.tag= Cyc_Absyn_Upper_b; _temp1512.f1=
-Cyc_Absyn_uint_exp( 1, 0); _temp1512;}); _temp1511;}));} _LL1439: { void** topt2=
-0; if( topt !=  0){ void* _temp1513= Cyc_Tcutil_compress(*(( void**) _check_null(
-topt))); struct Cyc_Absyn_PtrInfo _temp1521; struct Cyc_Absyn_Conref* _temp1523;
-void* _temp1525; void** _temp1527; _LL1515: if(( unsigned int) _temp1513 >  4u?*((
-int*) _temp1513) ==  Cyc_Absyn_PointerType: 0){ _LL1522: _temp1521=(( struct Cyc_Absyn_PointerType_struct*)
-_temp1513)->f1; _LL1526: _temp1525=( void*) _temp1521.elt_typ; _temp1527=( void**)&(((
-struct Cyc_Absyn_PointerType_struct*) _temp1513)->f1).elt_typ; goto _LL1524;
-_LL1524: _temp1523= _temp1521.nullable; goto _LL1516;} else{ goto _LL1517;}
-_LL1517: if(( unsigned int) _temp1513 >  4u?*(( int*) _temp1513) ==  Cyc_Absyn_TunionType:
-0){ goto _LL1518;} else{ goto _LL1519;} _LL1519: goto _LL1520; _LL1516: topt2=(
-void**) _temp1527; goto _LL1514; _LL1518: topt2=({ void** _temp1528=( void**)
-_cycalloc( sizeof( void*)); _temp1528[ 0]=*(( void**) _check_null( topt));
-_temp1528;}); goto _LL1514; _LL1520: goto _LL1514; _LL1514:;}{ void* telt= Cyc_Tcexp_tcExp(
+_LL1501; _LL1505: return({ void* _temp1518[ 0u]={}; Cyc_Tcutil_impos( _tag_arr("tcExpNoPromote on Array_e returned non-array type",
+sizeof( unsigned char), 50u), _tag_arr( _temp1518, sizeof( void*), 0u));});
+_LL1501:;} return res_typ;}} _LL1447: { void* _temp1519= Cyc_Absyn_atb_typ( Cyc_Absyn_uchar_t,
+rgn, Cyc_Absyn_const_tqual(),( void*) Cyc_Absyn_Unknown_b); void* _temp1520= Cyc_Tcexp_tcExp(
+te,( void**)& _temp1519, e1); return Cyc_Absyn_atb_typ( _temp1520, rgn, Cyc_Absyn_empty_tqual(),(
+void*)({ struct Cyc_Absyn_Upper_b_struct* _temp1521=( struct Cyc_Absyn_Upper_b_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct)); _temp1521[ 0]=({ struct
+Cyc_Absyn_Upper_b_struct _temp1522; _temp1522.tag= Cyc_Absyn_Upper_b; _temp1522.f1=
+Cyc_Absyn_uint_exp( 1, 0); _temp1522;}); _temp1521;}));} _LL1449: { void** topt2=
+0; if( topt !=  0){ void* _temp1523= Cyc_Tcutil_compress(*(( void**) _check_null(
+topt))); struct Cyc_Absyn_PtrInfo _temp1531; struct Cyc_Absyn_Conref* _temp1533;
+void* _temp1535; void** _temp1537; _LL1525: if(( unsigned int) _temp1523 >  4u?*((
+int*) _temp1523) ==  Cyc_Absyn_PointerType: 0){ _LL1532: _temp1531=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1523)->f1; _LL1536: _temp1535=( void*) _temp1531.elt_typ; _temp1537=( void**)&(((
+struct Cyc_Absyn_PointerType_struct*) _temp1523)->f1).elt_typ; goto _LL1534;
+_LL1534: _temp1533= _temp1531.nullable; goto _LL1526;} else{ goto _LL1527;}
+_LL1527: if(( unsigned int) _temp1523 >  4u?*(( int*) _temp1523) ==  Cyc_Absyn_TunionType:
+0){ goto _LL1528;} else{ goto _LL1529;} _LL1529: goto _LL1530; _LL1526: topt2=(
+void**) _temp1537; goto _LL1524; _LL1528: topt2=({ void** _temp1538=( void**)
+_cycalloc( sizeof( void*)); _temp1538[ 0]=*(( void**) _check_null( topt));
+_temp1538;}); goto _LL1524; _LL1530: goto _LL1524; _LL1524:;}{ void* telt= Cyc_Tcexp_tcExp(
 te, topt2, e1); void* res_typ=( void*)({ struct Cyc_Absyn_PointerType_struct*
-_temp1530=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
-_temp1530[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp1531; _temp1531.tag=
-Cyc_Absyn_PointerType; _temp1531.f1=({ struct Cyc_Absyn_PtrInfo _temp1532;
-_temp1532.elt_typ=( void*) telt; _temp1532.rgn_typ=( void*) rgn; _temp1532.nullable=((
-struct Cyc_Absyn_Conref*(*)()) Cyc_Absyn_empty_conref)(); _temp1532.tq= Cyc_Absyn_empty_tqual();
-_temp1532.bounds= Cyc_Absyn_new_conref(( void*)({ struct Cyc_Absyn_Upper_b_struct*
-_temp1533=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp1533[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1534; _temp1534.tag= Cyc_Absyn_Upper_b;
-_temp1534.f1= Cyc_Absyn_uint_exp( 1, 0); _temp1534;}); _temp1533;})); _temp1532;});
-_temp1531;}); _temp1530;}); if( topt !=  0){ if( ! Cyc_Tcutil_unify(*(( void**)
+_temp1540=( struct Cyc_Absyn_PointerType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct));
+_temp1540[ 0]=({ struct Cyc_Absyn_PointerType_struct _temp1541; _temp1541.tag=
+Cyc_Absyn_PointerType; _temp1541.f1=({ struct Cyc_Absyn_PtrInfo _temp1542;
+_temp1542.elt_typ=( void*) telt; _temp1542.rgn_typ=( void*) rgn; _temp1542.nullable=((
+struct Cyc_Absyn_Conref*(*)()) Cyc_Absyn_empty_conref)(); _temp1542.tq= Cyc_Absyn_empty_tqual();
+_temp1542.bounds= Cyc_Absyn_new_conref(( void*)({ struct Cyc_Absyn_Upper_b_struct*
+_temp1543=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
+_temp1543[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1544; _temp1544.tag= Cyc_Absyn_Upper_b;
+_temp1544.f1= Cyc_Absyn_uint_exp( 1, 0); _temp1544;}); _temp1543;})); _temp1542;});
+_temp1541;}); _temp1540;}); if( topt !=  0){ if( ! Cyc_Tcutil_unify(*(( void**)
 _check_null( topt)), res_typ)? Cyc_Tcutil_silent_castable( te, loc, res_typ,*((
-void**) _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt* _temp1529=(
-struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1529->v=(
-void*) res_typ; _temp1529;}); Cyc_Tcutil_unchecked_cast( te, e,*(( void**)
+void**) _check_null( topt))): 0){ e->topt=({ struct Cyc_Core_Opt* _temp1539=(
+struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp1539->v=(
+void*) res_typ; _temp1539;}); Cyc_Tcutil_unchecked_cast( te, e,*(( void**)
 _check_null( topt))); res_typ=*(( void**) _check_null( topt));}} return res_typ;}}
-_LL1429:;}} void* Cyc_Tcexp_tcExp( struct Cyc_Tcenv_Tenv* te, void** topt,
+_LL1439:;}} void* Cyc_Tcexp_tcExp( struct Cyc_Tcenv_Tenv* te, void** topt,
 struct Cyc_Absyn_Exp* e){ void* t= Cyc_Tcutil_compress( Cyc_Tcexp_tcExpNoPromote(
-te, topt, e)); void* _temp1535= t; struct Cyc_Absyn_Exp* _temp1541; struct Cyc_Absyn_Tqual
-_temp1543; void* _temp1545; _LL1537: if(( unsigned int) _temp1535 >  4u?*(( int*)
-_temp1535) ==  Cyc_Absyn_ArrayType: 0){ _LL1546: _temp1545=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1535)->f1; goto _LL1544; _LL1544: _temp1543=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1535)->f2; goto _LL1542; _LL1542: _temp1541=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1535)->f3; goto _LL1538;} else{ goto _LL1539;} _LL1539: goto _LL1540;
-_LL1538: { void* _temp1549; struct _tuple6 _temp1547= Cyc_Tcutil_addressof_props(
-te, e); _LL1550: _temp1549= _temp1547.f2; goto _LL1548; _LL1548: { void*
-_temp1551= _temp1541 ==  0?( void*) Cyc_Absyn_Unknown_b:( void*)({ struct Cyc_Absyn_Upper_b_struct*
-_temp1552=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp1552[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1553; _temp1553.tag= Cyc_Absyn_Upper_b;
-_temp1553.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1541); _temp1553;});
-_temp1552;}); t= Cyc_Absyn_atb_typ( _temp1545, _temp1549, _temp1543, _temp1551);(
+te, topt, e)); void* _temp1545= t; struct Cyc_Absyn_Exp* _temp1551; struct Cyc_Absyn_Tqual
+_temp1553; void* _temp1555; _LL1547: if(( unsigned int) _temp1545 >  4u?*(( int*)
+_temp1545) ==  Cyc_Absyn_ArrayType: 0){ _LL1556: _temp1555=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1545)->f1; goto _LL1554; _LL1554: _temp1553=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1545)->f2; goto _LL1552; _LL1552: _temp1551=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1545)->f3; goto _LL1548;} else{ goto _LL1549;} _LL1549: goto _LL1550;
+_LL1548: { void* _temp1559; struct _tuple6 _temp1557= Cyc_Tcutil_addressof_props(
+te, e); _LL1560: _temp1559= _temp1557.f2; goto _LL1558; _LL1558: { void*
+_temp1561= _temp1551 ==  0?( void*) Cyc_Absyn_Unknown_b:( void*)({ struct Cyc_Absyn_Upper_b_struct*
+_temp1562=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
+_temp1562[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1563; _temp1563.tag= Cyc_Absyn_Upper_b;
+_temp1563.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1551); _temp1563;});
+_temp1562;}); t= Cyc_Absyn_atb_typ( _temp1555, _temp1559, _temp1553, _temp1561);(
 void*)((( struct Cyc_Core_Opt*) _check_null( e->topt))->v=( void*) t); return t;}}
-_LL1540: return t; _LL1536:;} void* Cyc_Tcexp_tcExpInitializer( struct Cyc_Tcenv_Tenv*
+_LL1550: return t; _LL1546:;} void* Cyc_Tcexp_tcExpInitializer( struct Cyc_Tcenv_Tenv*
 te, void** topt, struct Cyc_Absyn_Exp* e){ void* t= Cyc_Tcexp_tcExpNoPromote( te,
-topt, e); void* _temp1554=( void*) e->r; void* _temp1564; _LL1556: if(*(( int*)
-_temp1554) ==  Cyc_Absyn_Array_e){ goto _LL1557;} else{ goto _LL1558;} _LL1558:
-if(*(( int*) _temp1554) ==  Cyc_Absyn_Comprehension_e){ goto _LL1559;} else{
-goto _LL1560;} _LL1560: if(*(( int*) _temp1554) ==  Cyc_Absyn_Const_e){ _LL1565:
-_temp1564=( void*)(( struct Cyc_Absyn_Const_e_struct*) _temp1554)->f1; if((
-unsigned int) _temp1564 >  1u?*(( int*) _temp1564) ==  Cyc_Absyn_String_c: 0){
-goto _LL1561;} else{ goto _LL1562;}} else{ goto _LL1562;} _LL1562: goto _LL1563;
-_LL1557: return t; _LL1559: return t; _LL1561: return t; _LL1563: t= Cyc_Tcutil_compress(
-t);{ void* _temp1566= t; struct Cyc_Absyn_Exp* _temp1572; struct Cyc_Absyn_Tqual
-_temp1574; void* _temp1576; _LL1568: if(( unsigned int) _temp1566 >  4u?*(( int*)
-_temp1566) ==  Cyc_Absyn_ArrayType: 0){ _LL1577: _temp1576=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1566)->f1; goto _LL1575; _LL1575: _temp1574=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1566)->f2; goto _LL1573; _LL1573: _temp1572=(( struct Cyc_Absyn_ArrayType_struct*)
-_temp1566)->f3; goto _LL1569;} else{ goto _LL1570;} _LL1570: goto _LL1571;
-_LL1569: { void* _temp1580; struct _tuple6 _temp1578= Cyc_Tcutil_addressof_props(
-te, e); _LL1581: _temp1580= _temp1578.f2; goto _LL1579; _LL1579: { void* b=
-_temp1572 ==  0?( void*) Cyc_Absyn_Unknown_b:( void*)({ struct Cyc_Absyn_Upper_b_struct*
-_temp1582=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp1582[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1583; _temp1583.tag= Cyc_Absyn_Upper_b;
-_temp1583.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1572); _temp1583;});
-_temp1582;}); t= Cyc_Absyn_atb_typ( _temp1576, _temp1580, _temp1574, b); Cyc_Tcutil_unchecked_cast(
-te, e, t); return t;}} _LL1571: return t; _LL1567:;} _LL1555:;} static void* Cyc_Tcexp_tcExpNoPromote(
+topt, e); void* _temp1564=( void*) e->r; void* _temp1574; _LL1566: if(*(( int*)
+_temp1564) ==  Cyc_Absyn_Array_e){ goto _LL1567;} else{ goto _LL1568;} _LL1568:
+if(*(( int*) _temp1564) ==  Cyc_Absyn_Comprehension_e){ goto _LL1569;} else{
+goto _LL1570;} _LL1570: if(*(( int*) _temp1564) ==  Cyc_Absyn_Const_e){ _LL1575:
+_temp1574=( void*)(( struct Cyc_Absyn_Const_e_struct*) _temp1564)->f1; if((
+unsigned int) _temp1574 >  1u?*(( int*) _temp1574) ==  Cyc_Absyn_String_c: 0){
+goto _LL1571;} else{ goto _LL1572;}} else{ goto _LL1572;} _LL1572: goto _LL1573;
+_LL1567: return t; _LL1569: return t; _LL1571: return t; _LL1573: t= Cyc_Tcutil_compress(
+t);{ void* _temp1576= t; struct Cyc_Absyn_Exp* _temp1582; struct Cyc_Absyn_Tqual
+_temp1584; void* _temp1586; _LL1578: if(( unsigned int) _temp1576 >  4u?*(( int*)
+_temp1576) ==  Cyc_Absyn_ArrayType: 0){ _LL1587: _temp1586=( void*)(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1576)->f1; goto _LL1585; _LL1585: _temp1584=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1576)->f2; goto _LL1583; _LL1583: _temp1582=(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1576)->f3; goto _LL1579;} else{ goto _LL1580;} _LL1580: goto _LL1581;
+_LL1579: { void* _temp1590; struct _tuple6 _temp1588= Cyc_Tcutil_addressof_props(
+te, e); _LL1591: _temp1590= _temp1588.f2; goto _LL1589; _LL1589: { void* b=
+_temp1582 ==  0?( void*) Cyc_Absyn_Unknown_b:( void*)({ struct Cyc_Absyn_Upper_b_struct*
+_temp1592=( struct Cyc_Absyn_Upper_b_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
+_temp1592[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp1593; _temp1593.tag= Cyc_Absyn_Upper_b;
+_temp1593.f1=( struct Cyc_Absyn_Exp*) _check_null( _temp1582); _temp1593;});
+_temp1592;}); t= Cyc_Absyn_atb_typ( _temp1586, _temp1590, _temp1584, b); Cyc_Tcutil_unchecked_cast(
+te, e, t); return t;}} _LL1581: return t; _LL1577:;} _LL1565:;} static void* Cyc_Tcexp_tcExpNoPromote(
 struct Cyc_Tcenv_Tenv* te, void** topt, struct Cyc_Absyn_Exp* e){{ void*
-_temp1584=( void*) e->r; struct Cyc_Absyn_Exp* _temp1590; _LL1586: if(*(( int*)
-_temp1584) ==  Cyc_Absyn_NoInstantiate_e){ _LL1591: _temp1590=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
-_temp1584)->f1; goto _LL1587;} else{ goto _LL1588;} _LL1588: goto _LL1589;
-_LL1587: Cyc_Tcexp_tcExpNoInst( te, topt, _temp1590);( void*)((( struct Cyc_Core_Opt*)
-_check_null( _temp1590->topt))->v=( void*) Cyc_Absyn_pointer_expand(( void*)((
-struct Cyc_Core_Opt*) _check_null( _temp1590->topt))->v)); e->topt= _temp1590->topt;
-goto _LL1585; _LL1589: Cyc_Tcexp_tcExpNoInst( te, topt, e);( void*)((( struct
+_temp1594=( void*) e->r; struct Cyc_Absyn_Exp* _temp1600; _LL1596: if(*(( int*)
+_temp1594) ==  Cyc_Absyn_NoInstantiate_e){ _LL1601: _temp1600=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
+_temp1594)->f1; goto _LL1597;} else{ goto _LL1598;} _LL1598: goto _LL1599;
+_LL1597: Cyc_Tcexp_tcExpNoInst( te, topt, _temp1600);( void*)((( struct Cyc_Core_Opt*)
+_check_null( _temp1600->topt))->v=( void*) Cyc_Absyn_pointer_expand(( void*)((
+struct Cyc_Core_Opt*) _check_null( _temp1600->topt))->v)); e->topt= _temp1600->topt;
+goto _LL1595; _LL1599: Cyc_Tcexp_tcExpNoInst( te, topt, e);( void*)((( struct
 Cyc_Core_Opt*) _check_null( e->topt))->v=( void*) Cyc_Absyn_pointer_expand((
-void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v));{ void* _temp1592=
+void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v));{ void* _temp1602=
 Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v);
-struct Cyc_Absyn_PtrInfo _temp1598; struct Cyc_Absyn_Conref* _temp1600; struct
-Cyc_Absyn_Tqual _temp1602; struct Cyc_Absyn_Conref* _temp1604; void* _temp1606;
-void* _temp1608; _LL1594: if(( unsigned int) _temp1592 >  4u?*(( int*) _temp1592)
-==  Cyc_Absyn_PointerType: 0){ _LL1599: _temp1598=(( struct Cyc_Absyn_PointerType_struct*)
-_temp1592)->f1; _LL1609: _temp1608=( void*) _temp1598.elt_typ; goto _LL1607;
-_LL1607: _temp1606=( void*) _temp1598.rgn_typ; goto _LL1605; _LL1605: _temp1604=
-_temp1598.nullable; goto _LL1603; _LL1603: _temp1602= _temp1598.tq; goto _LL1601;
-_LL1601: _temp1600= _temp1598.bounds; goto _LL1595;} else{ goto _LL1596;}
-_LL1596: goto _LL1597; _LL1595:{ void* _temp1610= Cyc_Tcutil_compress( _temp1608);
-struct Cyc_Absyn_FnInfo _temp1616; struct Cyc_List_List* _temp1618; struct Cyc_List_List*
-_temp1620; struct Cyc_Absyn_VarargInfo* _temp1622; int _temp1624; struct Cyc_List_List*
-_temp1626; void* _temp1628; struct Cyc_Core_Opt* _temp1630; struct Cyc_List_List*
-_temp1632; _LL1612: if(( unsigned int) _temp1610 >  4u?*(( int*) _temp1610) == 
-Cyc_Absyn_FnType: 0){ _LL1617: _temp1616=(( struct Cyc_Absyn_FnType_struct*)
-_temp1610)->f1; _LL1633: _temp1632= _temp1616.tvars; goto _LL1631; _LL1631:
-_temp1630= _temp1616.effect; goto _LL1629; _LL1629: _temp1628=( void*) _temp1616.ret_typ;
-goto _LL1627; _LL1627: _temp1626= _temp1616.args; goto _LL1625; _LL1625:
-_temp1624= _temp1616.c_varargs; goto _LL1623; _LL1623: _temp1622= _temp1616.cyc_varargs;
-goto _LL1621; _LL1621: _temp1620= _temp1616.rgn_po; goto _LL1619; _LL1619:
-_temp1618= _temp1616.attributes; goto _LL1613;} else{ goto _LL1614;} _LL1614:
-goto _LL1615; _LL1613: if( _temp1632 !=  0){ struct _RegionHandle _temp1634=
-_new_region(); struct _RegionHandle* rgn=& _temp1634; _push_region( rgn);{
-struct _tuple4 _temp1635=({ struct _tuple4 _temp1645; _temp1645.f1= Cyc_Tcenv_lookup_type_vars(
-te); _temp1645.f2= rgn; _temp1645;}); struct Cyc_List_List* inst=(( struct Cyc_List_List*(*)(
+struct Cyc_Absyn_PtrInfo _temp1608; struct Cyc_Absyn_Conref* _temp1610; struct
+Cyc_Absyn_Tqual _temp1612; struct Cyc_Absyn_Conref* _temp1614; void* _temp1616;
+void* _temp1618; _LL1604: if(( unsigned int) _temp1602 >  4u?*(( int*) _temp1602)
+==  Cyc_Absyn_PointerType: 0){ _LL1609: _temp1608=(( struct Cyc_Absyn_PointerType_struct*)
+_temp1602)->f1; _LL1619: _temp1618=( void*) _temp1608.elt_typ; goto _LL1617;
+_LL1617: _temp1616=( void*) _temp1608.rgn_typ; goto _LL1615; _LL1615: _temp1614=
+_temp1608.nullable; goto _LL1613; _LL1613: _temp1612= _temp1608.tq; goto _LL1611;
+_LL1611: _temp1610= _temp1608.bounds; goto _LL1605;} else{ goto _LL1606;}
+_LL1606: goto _LL1607; _LL1605:{ void* _temp1620= Cyc_Tcutil_compress( _temp1618);
+struct Cyc_Absyn_FnInfo _temp1626; struct Cyc_List_List* _temp1628; struct Cyc_List_List*
+_temp1630; struct Cyc_Absyn_VarargInfo* _temp1632; int _temp1634; struct Cyc_List_List*
+_temp1636; void* _temp1638; struct Cyc_Core_Opt* _temp1640; struct Cyc_List_List*
+_temp1642; _LL1622: if(( unsigned int) _temp1620 >  4u?*(( int*) _temp1620) == 
+Cyc_Absyn_FnType: 0){ _LL1627: _temp1626=(( struct Cyc_Absyn_FnType_struct*)
+_temp1620)->f1; _LL1643: _temp1642= _temp1626.tvars; goto _LL1641; _LL1641:
+_temp1640= _temp1626.effect; goto _LL1639; _LL1639: _temp1638=( void*) _temp1626.ret_typ;
+goto _LL1637; _LL1637: _temp1636= _temp1626.args; goto _LL1635; _LL1635:
+_temp1634= _temp1626.c_varargs; goto _LL1633; _LL1633: _temp1632= _temp1626.cyc_varargs;
+goto _LL1631; _LL1631: _temp1630= _temp1626.rgn_po; goto _LL1629; _LL1629:
+_temp1628= _temp1626.attributes; goto _LL1623;} else{ goto _LL1624;} _LL1624:
+goto _LL1625; _LL1623: if( _temp1642 !=  0){ struct _RegionHandle _temp1644=
+_new_region(); struct _RegionHandle* rgn=& _temp1644; _push_region( rgn);{
+struct _tuple4 _temp1645=({ struct _tuple4 _temp1655; _temp1655.f1= Cyc_Tcenv_lookup_type_vars(
+te); _temp1655.f2= rgn; _temp1655;}); struct Cyc_List_List* inst=(( struct Cyc_List_List*(*)(
 struct _RegionHandle*, struct _tuple5*(* f)( struct _tuple4*, struct Cyc_Absyn_Tvar*),
 struct _tuple4* env, struct Cyc_List_List* x)) Cyc_List_rmap_c)( rgn, Cyc_Tcutil_r_make_inst_var,&
-_temp1635, _temp1632); struct Cyc_List_List* ts=(( struct Cyc_List_List*(*)(
+_temp1645, _temp1642); struct Cyc_List_List* ts=(( struct Cyc_List_List*(*)(
 void*(* f)( struct _tuple5*), struct Cyc_List_List* x)) Cyc_List_map)(( void*(*)(
 struct _tuple5*)) Cyc_Core_snd, inst); void* ftyp= Cyc_Tcutil_rsubstitute( rgn,
-inst,( void*)({ struct Cyc_Absyn_FnType_struct* _temp1642=( struct Cyc_Absyn_FnType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_FnType_struct)); _temp1642[ 0]=({ struct Cyc_Absyn_FnType_struct
-_temp1643; _temp1643.tag= Cyc_Absyn_FnType; _temp1643.f1=({ struct Cyc_Absyn_FnInfo
-_temp1644; _temp1644.tvars= 0; _temp1644.effect= _temp1630; _temp1644.ret_typ=(
-void*) _temp1628; _temp1644.args= _temp1626; _temp1644.c_varargs= _temp1624;
-_temp1644.cyc_varargs= _temp1622; _temp1644.rgn_po= _temp1620; _temp1644.attributes=
-_temp1618; _temp1644;}); _temp1643;}); _temp1642;})); void* new_typ=( void*)({
-struct Cyc_Absyn_PointerType_struct* _temp1639=( struct Cyc_Absyn_PointerType_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp1639[ 0]=({
-struct Cyc_Absyn_PointerType_struct _temp1640; _temp1640.tag= Cyc_Absyn_PointerType;
-_temp1640.f1=({ struct Cyc_Absyn_PtrInfo _temp1641; _temp1641.elt_typ=( void*)
-ftyp; _temp1641.rgn_typ=( void*) _temp1606; _temp1641.nullable= _temp1604;
-_temp1641.tq= _temp1602; _temp1641.bounds= _temp1600; _temp1641;}); _temp1640;});
-_temp1639;}); struct Cyc_Absyn_Exp* inner= Cyc_Absyn_copy_exp( e);( void*)( e->r=(
-void*)(( void*)({ struct Cyc_Absyn_Instantiate_e_struct* _temp1636=( struct Cyc_Absyn_Instantiate_e_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Instantiate_e_struct)); _temp1636[ 0]=({
-struct Cyc_Absyn_Instantiate_e_struct _temp1637; _temp1637.tag= Cyc_Absyn_Instantiate_e;
-_temp1637.f1= inner; _temp1637.f2= ts; _temp1637;}); _temp1636;}))); e->topt=({
-struct Cyc_Core_Opt* _temp1638=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
-Cyc_Core_Opt)); _temp1638->v=( void*) new_typ; _temp1638;});}; _pop_region( rgn);}
-goto _LL1611; _LL1615: goto _LL1611; _LL1611:;} goto _LL1593; _LL1597: goto
-_LL1593; _LL1593:;} goto _LL1585; _LL1585:;} return( void*)(( struct Cyc_Core_Opt*)
+inst,( void*)({ struct Cyc_Absyn_FnType_struct* _temp1652=( struct Cyc_Absyn_FnType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_FnType_struct)); _temp1652[ 0]=({ struct Cyc_Absyn_FnType_struct
+_temp1653; _temp1653.tag= Cyc_Absyn_FnType; _temp1653.f1=({ struct Cyc_Absyn_FnInfo
+_temp1654; _temp1654.tvars= 0; _temp1654.effect= _temp1640; _temp1654.ret_typ=(
+void*) _temp1638; _temp1654.args= _temp1636; _temp1654.c_varargs= _temp1634;
+_temp1654.cyc_varargs= _temp1632; _temp1654.rgn_po= _temp1630; _temp1654.attributes=
+_temp1628; _temp1654;}); _temp1653;}); _temp1652;})); void* new_typ=( void*)({
+struct Cyc_Absyn_PointerType_struct* _temp1649=( struct Cyc_Absyn_PointerType_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_PointerType_struct)); _temp1649[ 0]=({
+struct Cyc_Absyn_PointerType_struct _temp1650; _temp1650.tag= Cyc_Absyn_PointerType;
+_temp1650.f1=({ struct Cyc_Absyn_PtrInfo _temp1651; _temp1651.elt_typ=( void*)
+ftyp; _temp1651.rgn_typ=( void*) _temp1616; _temp1651.nullable= _temp1614;
+_temp1651.tq= _temp1612; _temp1651.bounds= _temp1610; _temp1651;}); _temp1650;});
+_temp1649;}); struct Cyc_Absyn_Exp* inner= Cyc_Absyn_copy_exp( e);( void*)( e->r=(
+void*)(( void*)({ struct Cyc_Absyn_Instantiate_e_struct* _temp1646=( struct Cyc_Absyn_Instantiate_e_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Instantiate_e_struct)); _temp1646[ 0]=({
+struct Cyc_Absyn_Instantiate_e_struct _temp1647; _temp1647.tag= Cyc_Absyn_Instantiate_e;
+_temp1647.f1= inner; _temp1647.f2= ts; _temp1647;}); _temp1646;}))); e->topt=({
+struct Cyc_Core_Opt* _temp1648=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct
+Cyc_Core_Opt)); _temp1648->v=( void*) new_typ; _temp1648;});}; _pop_region( rgn);}
+goto _LL1621; _LL1625: goto _LL1621; _LL1621:;} goto _LL1603; _LL1607: goto
+_LL1603; _LL1603:;} goto _LL1595; _LL1595:;} return( void*)(( struct Cyc_Core_Opt*)
 _check_null( e->topt))->v;} static void Cyc_Tcexp_tcExpNoInst( struct Cyc_Tcenv_Tenv*
 te, void** topt, struct Cyc_Absyn_Exp* e){ struct Cyc_Position_Segment* loc= e->loc;
-void* t;{ void* _temp1646=( void*) e->r; struct Cyc_Absyn_Exp* _temp1722; struct
-_tuple1* _temp1724; struct Cyc_List_List* _temp1726; struct Cyc_Absyn_Exp*
-_temp1728; struct Cyc_List_List* _temp1730; struct Cyc_Core_Opt* _temp1732; void*
-_temp1734; void* _temp1736; struct _tuple1* _temp1738; struct Cyc_List_List*
-_temp1740; void* _temp1742; void* _temp1744; struct Cyc_Absyn_Exp* _temp1746;
-struct Cyc_Absyn_Exp* _temp1748; struct Cyc_Core_Opt* _temp1750; struct Cyc_Absyn_Exp*
-_temp1752; struct Cyc_Absyn_Exp* _temp1754; struct Cyc_Absyn_Exp* _temp1756;
-struct Cyc_Absyn_Exp* _temp1758; struct Cyc_Absyn_Exp* _temp1760; struct Cyc_Absyn_Exp*
-_temp1762; struct Cyc_Absyn_VarargCallInfo* _temp1764; struct Cyc_Absyn_VarargCallInfo**
-_temp1766; struct Cyc_List_List* _temp1767; struct Cyc_Absyn_Exp* _temp1769;
-struct Cyc_Absyn_Exp* _temp1771; struct Cyc_List_List* _temp1773; struct Cyc_Absyn_Exp*
-_temp1775; struct Cyc_Absyn_Exp* _temp1777; void* _temp1779; struct Cyc_Absyn_Exp*
-_temp1781; struct Cyc_Absyn_Exp* _temp1783; struct Cyc_Absyn_Exp* _temp1785;
-struct Cyc_Absyn_Exp* _temp1787; void* _temp1789; void* _temp1791; void*
-_temp1793; struct Cyc_Absyn_Exp* _temp1795; struct _tagged_arr* _temp1797;
-struct Cyc_Absyn_Exp* _temp1799; struct _tagged_arr* _temp1801; struct Cyc_Absyn_Exp*
-_temp1803; struct Cyc_Absyn_Exp* _temp1805; struct Cyc_Absyn_Exp* _temp1807;
-struct Cyc_List_List* _temp1809; struct Cyc_List_List* _temp1811; struct _tuple2*
-_temp1813; struct Cyc_List_List* _temp1815; struct Cyc_Absyn_Stmt* _temp1817;
-struct Cyc_Absyn_Fndecl* _temp1819; struct Cyc_Absyn_Exp* _temp1821; struct Cyc_Absyn_Exp*
-_temp1823; struct Cyc_Absyn_Exp* _temp1825; struct Cyc_Absyn_Vardecl* _temp1827;
-struct Cyc_Absyn_Structdecl* _temp1829; struct Cyc_Absyn_Structdecl** _temp1831;
-struct Cyc_List_List* _temp1832; struct Cyc_Core_Opt* _temp1834; struct Cyc_Core_Opt**
-_temp1836; struct _tuple1* _temp1837; struct _tuple1** _temp1839; struct Cyc_List_List*
-_temp1840; void* _temp1842; struct Cyc_Absyn_Tunionfield* _temp1844; struct Cyc_Absyn_Tuniondecl*
-_temp1846; struct Cyc_List_List* _temp1848; struct Cyc_Core_Opt* _temp1850;
-struct Cyc_Core_Opt** _temp1852; struct Cyc_Core_Opt* _temp1853; struct Cyc_Core_Opt**
-_temp1855; struct Cyc_Absyn_Enumfield* _temp1856; struct Cyc_Absyn_Enumdecl*
-_temp1858; struct _tuple1* _temp1860; struct _tuple1** _temp1862; void*
-_temp1863; struct Cyc_Absyn_Exp* _temp1865; _LL1648: if(*(( int*) _temp1646) == 
-Cyc_Absyn_NoInstantiate_e){ _LL1723: _temp1722=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
-_temp1646)->f1; goto _LL1649;} else{ goto _LL1650;} _LL1650: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_UnknownId_e){ _LL1725: _temp1724=(( struct Cyc_Absyn_UnknownId_e_struct*)
-_temp1646)->f1; goto _LL1651;} else{ goto _LL1652;} _LL1652: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_UnknownCall_e){ _LL1729: _temp1728=(( struct Cyc_Absyn_UnknownCall_e_struct*)
-_temp1646)->f1; goto _LL1727; _LL1727: _temp1726=(( struct Cyc_Absyn_UnknownCall_e_struct*)
-_temp1646)->f2; goto _LL1653;} else{ goto _LL1654;} _LL1654: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_UnresolvedMem_e){ _LL1733: _temp1732=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
-_temp1646)->f1; goto _LL1731; _LL1731: _temp1730=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
-_temp1646)->f2; goto _LL1655;} else{ goto _LL1656;} _LL1656: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Const_e){ _LL1735: _temp1734=( void*)(( struct Cyc_Absyn_Const_e_struct*)
-_temp1646)->f1; goto _LL1657;} else{ goto _LL1658;} _LL1658: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Var_e){ _LL1739: _temp1738=(( struct Cyc_Absyn_Var_e_struct*)
-_temp1646)->f1; goto _LL1737; _LL1737: _temp1736=( void*)(( struct Cyc_Absyn_Var_e_struct*)
-_temp1646)->f2; goto _LL1659;} else{ goto _LL1660;} _LL1660: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Primop_e){ _LL1743: _temp1742=( void*)(( struct Cyc_Absyn_Primop_e_struct*)
-_temp1646)->f1; goto _LL1741; _LL1741: _temp1740=(( struct Cyc_Absyn_Primop_e_struct*)
-_temp1646)->f2; goto _LL1661;} else{ goto _LL1662;} _LL1662: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Increment_e){ _LL1747: _temp1746=(( struct Cyc_Absyn_Increment_e_struct*)
-_temp1646)->f1; goto _LL1745; _LL1745: _temp1744=( void*)(( struct Cyc_Absyn_Increment_e_struct*)
-_temp1646)->f2; goto _LL1663;} else{ goto _LL1664;} _LL1664: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_AssignOp_e){ _LL1753: _temp1752=(( struct Cyc_Absyn_AssignOp_e_struct*)
-_temp1646)->f1; goto _LL1751; _LL1751: _temp1750=(( struct Cyc_Absyn_AssignOp_e_struct*)
-_temp1646)->f2; goto _LL1749; _LL1749: _temp1748=(( struct Cyc_Absyn_AssignOp_e_struct*)
-_temp1646)->f3; goto _LL1665;} else{ goto _LL1666;} _LL1666: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Conditional_e){ _LL1759: _temp1758=(( struct Cyc_Absyn_Conditional_e_struct*)
-_temp1646)->f1; goto _LL1757; _LL1757: _temp1756=(( struct Cyc_Absyn_Conditional_e_struct*)
-_temp1646)->f2; goto _LL1755; _LL1755: _temp1754=(( struct Cyc_Absyn_Conditional_e_struct*)
-_temp1646)->f3; goto _LL1667;} else{ goto _LL1668;} _LL1668: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_SeqExp_e){ _LL1763: _temp1762=(( struct Cyc_Absyn_SeqExp_e_struct*)
-_temp1646)->f1; goto _LL1761; _LL1761: _temp1760=(( struct Cyc_Absyn_SeqExp_e_struct*)
-_temp1646)->f2; goto _LL1669;} else{ goto _LL1670;} _LL1670: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_FnCall_e){ _LL1770: _temp1769=(( struct Cyc_Absyn_FnCall_e_struct*)
-_temp1646)->f1; goto _LL1768; _LL1768: _temp1767=(( struct Cyc_Absyn_FnCall_e_struct*)
-_temp1646)->f2; goto _LL1765; _LL1765: _temp1764=(( struct Cyc_Absyn_FnCall_e_struct*)
-_temp1646)->f3; _temp1766=( struct Cyc_Absyn_VarargCallInfo**)&(( struct Cyc_Absyn_FnCall_e_struct*)
-_temp1646)->f3; goto _LL1671;} else{ goto _LL1672;} _LL1672: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Throw_e){ _LL1772: _temp1771=(( struct Cyc_Absyn_Throw_e_struct*)
-_temp1646)->f1; goto _LL1673;} else{ goto _LL1674;} _LL1674: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Instantiate_e){ _LL1776: _temp1775=(( struct Cyc_Absyn_Instantiate_e_struct*)
-_temp1646)->f1; goto _LL1774; _LL1774: _temp1773=(( struct Cyc_Absyn_Instantiate_e_struct*)
-_temp1646)->f2; goto _LL1675;} else{ goto _LL1676;} _LL1676: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Cast_e){ _LL1780: _temp1779=( void*)(( struct Cyc_Absyn_Cast_e_struct*)
-_temp1646)->f1; goto _LL1778; _LL1778: _temp1777=(( struct Cyc_Absyn_Cast_e_struct*)
-_temp1646)->f2; goto _LL1677;} else{ goto _LL1678;} _LL1678: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Address_e){ _LL1782: _temp1781=(( struct Cyc_Absyn_Address_e_struct*)
-_temp1646)->f1; goto _LL1679;} else{ goto _LL1680;} _LL1680: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_New_e){ _LL1786: _temp1785=(( struct Cyc_Absyn_New_e_struct*)
-_temp1646)->f1; goto _LL1784; _LL1784: _temp1783=(( struct Cyc_Absyn_New_e_struct*)
-_temp1646)->f2; goto _LL1681;} else{ goto _LL1682;} _LL1682: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Sizeofexp_e){ _LL1788: _temp1787=(( struct Cyc_Absyn_Sizeofexp_e_struct*)
-_temp1646)->f1; goto _LL1683;} else{ goto _LL1684;} _LL1684: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Sizeoftyp_e){ _LL1790: _temp1789=( void*)(( struct Cyc_Absyn_Sizeoftyp_e_struct*)
-_temp1646)->f1; goto _LL1685;} else{ goto _LL1686;} _LL1686: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Offsetof_e){ _LL1794: _temp1793=( void*)(( struct Cyc_Absyn_Offsetof_e_struct*)
-_temp1646)->f1; goto _LL1792; _LL1792: _temp1791=( void*)(( struct Cyc_Absyn_Offsetof_e_struct*)
-_temp1646)->f2; goto _LL1687;} else{ goto _LL1688;} _LL1688: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Gentyp_e){ goto _LL1689;} else{ goto _LL1690;} _LL1690:
-if(*(( int*) _temp1646) ==  Cyc_Absyn_Deref_e){ _LL1796: _temp1795=(( struct Cyc_Absyn_Deref_e_struct*)
-_temp1646)->f1; goto _LL1691;} else{ goto _LL1692;} _LL1692: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_StructMember_e){ _LL1800: _temp1799=(( struct Cyc_Absyn_StructMember_e_struct*)
-_temp1646)->f1; goto _LL1798; _LL1798: _temp1797=(( struct Cyc_Absyn_StructMember_e_struct*)
-_temp1646)->f2; goto _LL1693;} else{ goto _LL1694;} _LL1694: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_StructArrow_e){ _LL1804: _temp1803=(( struct Cyc_Absyn_StructArrow_e_struct*)
-_temp1646)->f1; goto _LL1802; _LL1802: _temp1801=(( struct Cyc_Absyn_StructArrow_e_struct*)
-_temp1646)->f2; goto _LL1695;} else{ goto _LL1696;} _LL1696: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Subscript_e){ _LL1808: _temp1807=(( struct Cyc_Absyn_Subscript_e_struct*)
-_temp1646)->f1; goto _LL1806; _LL1806: _temp1805=(( struct Cyc_Absyn_Subscript_e_struct*)
-_temp1646)->f2; goto _LL1697;} else{ goto _LL1698;} _LL1698: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Tuple_e){ _LL1810: _temp1809=(( struct Cyc_Absyn_Tuple_e_struct*)
-_temp1646)->f1; goto _LL1699;} else{ goto _LL1700;} _LL1700: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_CompoundLit_e){ _LL1814: _temp1813=(( struct Cyc_Absyn_CompoundLit_e_struct*)
-_temp1646)->f1; goto _LL1812; _LL1812: _temp1811=(( struct Cyc_Absyn_CompoundLit_e_struct*)
-_temp1646)->f2; goto _LL1701;} else{ goto _LL1702;} _LL1702: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Array_e){ _LL1816: _temp1815=(( struct Cyc_Absyn_Array_e_struct*)
-_temp1646)->f1; goto _LL1703;} else{ goto _LL1704;} _LL1704: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_StmtExp_e){ _LL1818: _temp1817=(( struct Cyc_Absyn_StmtExp_e_struct*)
-_temp1646)->f1; goto _LL1705;} else{ goto _LL1706;} _LL1706: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Codegen_e){ _LL1820: _temp1819=(( struct Cyc_Absyn_Codegen_e_struct*)
-_temp1646)->f1; goto _LL1707;} else{ goto _LL1708;} _LL1708: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Fill_e){ _LL1822: _temp1821=(( struct Cyc_Absyn_Fill_e_struct*)
-_temp1646)->f1; goto _LL1709;} else{ goto _LL1710;} _LL1710: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Comprehension_e){ _LL1828: _temp1827=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1646)->f1; goto _LL1826; _LL1826: _temp1825=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1646)->f2; goto _LL1824; _LL1824: _temp1823=(( struct Cyc_Absyn_Comprehension_e_struct*)
-_temp1646)->f3; goto _LL1711;} else{ goto _LL1712;} _LL1712: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Struct_e){ _LL1838: _temp1837=(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f1; _temp1839=( struct _tuple1**)&(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f1; goto _LL1835; _LL1835: _temp1834=(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f2; _temp1836=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f2; goto _LL1833; _LL1833: _temp1832=(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f3; goto _LL1830; _LL1830: _temp1829=(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f4; _temp1831=( struct Cyc_Absyn_Structdecl**)&(( struct Cyc_Absyn_Struct_e_struct*)
-_temp1646)->f4; goto _LL1713;} else{ goto _LL1714;} _LL1714: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_AnonStruct_e){ _LL1843: _temp1842=( void*)(( struct Cyc_Absyn_AnonStruct_e_struct*)
-_temp1646)->f1; goto _LL1841; _LL1841: _temp1840=(( struct Cyc_Absyn_AnonStruct_e_struct*)
-_temp1646)->f2; goto _LL1715;} else{ goto _LL1716;} _LL1716: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Tunion_e){ _LL1854: _temp1853=(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f1; _temp1855=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f1; goto _LL1851; _LL1851: _temp1850=(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f2; _temp1852=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f2; goto _LL1849; _LL1849: _temp1848=(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f3; goto _LL1847; _LL1847: _temp1846=(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f4; goto _LL1845; _LL1845: _temp1844=(( struct Cyc_Absyn_Tunion_e_struct*)
-_temp1646)->f5; goto _LL1717;} else{ goto _LL1718;} _LL1718: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Enum_e){ _LL1861: _temp1860=(( struct Cyc_Absyn_Enum_e_struct*)
-_temp1646)->f1; _temp1862=( struct _tuple1**)&(( struct Cyc_Absyn_Enum_e_struct*)
-_temp1646)->f1; goto _LL1859; _LL1859: _temp1858=(( struct Cyc_Absyn_Enum_e_struct*)
-_temp1646)->f2; goto _LL1857; _LL1857: _temp1856=(( struct Cyc_Absyn_Enum_e_struct*)
-_temp1646)->f3; goto _LL1719;} else{ goto _LL1720;} _LL1720: if(*(( int*)
-_temp1646) ==  Cyc_Absyn_Malloc_e){ _LL1866: _temp1865=(( struct Cyc_Absyn_Malloc_e_struct*)
-_temp1646)->f1; goto _LL1864; _LL1864: _temp1863=( void*)(( struct Cyc_Absyn_Malloc_e_struct*)
-_temp1646)->f2; goto _LL1721;} else{ goto _LL1647;} _LL1649: Cyc_Tcexp_tcExpNoInst(
-te, 0, _temp1722); return; _LL1651: Cyc_Tcexp_resolve_unknown_id( te, e,
-_temp1724); Cyc_Tcexp_tcExpNoInst( te, topt, e); return; _LL1653: Cyc_Tcexp_resolve_unknown_fn(
-te, e, _temp1728, _temp1726); Cyc_Tcexp_tcExpNoInst( te, topt, e); return;
-_LL1655: Cyc_Tcexp_resolve_unresolved_mem( te, loc, topt, e, _temp1730); Cyc_Tcexp_tcExpNoInst(
-te, topt, e); return; _LL1657: t= Cyc_Tcexp_tcConst( te, loc, topt, _temp1734, e);
-goto _LL1647; _LL1659: t= Cyc_Tcexp_tcVar( te, loc, _temp1738, _temp1736); goto
-_LL1647; _LL1661: t= Cyc_Tcexp_tcPrimop( te, loc, topt, _temp1742, _temp1740);
-goto _LL1647; _LL1663: t= Cyc_Tcexp_tcIncrement( te, loc, topt, _temp1746,
-_temp1744); goto _LL1647; _LL1665: t= Cyc_Tcexp_tcAssignOp( te, loc, topt,
-_temp1752, _temp1750, _temp1748); goto _LL1647; _LL1667: t= Cyc_Tcexp_tcConditional(
-te, loc, topt, _temp1758, _temp1756, _temp1754); goto _LL1647; _LL1669: t= Cyc_Tcexp_tcSeqExp(
-te, loc, topt, _temp1762, _temp1760); goto _LL1647; _LL1671: t= Cyc_Tcexp_tcFnCall(
-te, loc, topt, _temp1769, _temp1767, _temp1766); goto _LL1647; _LL1673: t= Cyc_Tcexp_tcThrow(
-te, loc, topt, _temp1771); goto _LL1647; _LL1675: t= Cyc_Tcexp_tcInstantiate( te,
-loc, topt, _temp1775, _temp1773); goto _LL1647; _LL1677: t= Cyc_Tcexp_tcCast( te,
-loc, topt, _temp1779, _temp1777); goto _LL1647; _LL1679: t= Cyc_Tcexp_tcAddress(
-te, loc, topt, _temp1781); goto _LL1647; _LL1681: t= Cyc_Tcexp_tcNew( te, loc,
-topt, _temp1785, e, _temp1783); goto _LL1647; _LL1683: { void* _temp1867= Cyc_Tcexp_tcExpNoPromote(
-te, 0, _temp1787); t= Cyc_Tcexp_tcSizeof( te, loc, topt, _temp1867); goto
-_LL1647;} _LL1685: t= Cyc_Tcexp_tcSizeof( te, loc, topt, _temp1789); goto
-_LL1647; _LL1687: t= Cyc_Tcexp_tcOffsetof( te, loc, topt, _temp1793, _temp1791);
-goto _LL1647; _LL1689:({ void* _temp1868[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("gen() not in top-level initializer",
-sizeof( unsigned char), 35u), _tag_arr( _temp1868, sizeof( void*), 0u));});
-return; _LL1691: t= Cyc_Tcexp_tcDeref( te, loc, topt, _temp1795); goto _LL1647;
-_LL1693: t= Cyc_Tcexp_tcStructMember( te, loc, topt, e, _temp1799, _temp1797);
-goto _LL1647; _LL1695: t= Cyc_Tcexp_tcStructArrow( te, loc, topt, _temp1803,
-_temp1801); goto _LL1647; _LL1697: t= Cyc_Tcexp_tcSubscript( te, loc, topt,
-_temp1807, _temp1805); goto _LL1647; _LL1699: t= Cyc_Tcexp_tcTuple( te, loc,
-topt, _temp1809); goto _LL1647; _LL1701: t= Cyc_Tcexp_tcCompoundLit( te, loc,
-topt, _temp1813, _temp1811); goto _LL1647; _LL1703: { void** elt_topt= 0; if(
-topt !=  0){ void* _temp1869= Cyc_Tcutil_compress(*(( void**) _check_null( topt)));
-void* _temp1875; void** _temp1877; _LL1871: if(( unsigned int) _temp1869 >  4u?*((
-int*) _temp1869) ==  Cyc_Absyn_ArrayType: 0){ _LL1876: _temp1875=( void*)((
-struct Cyc_Absyn_ArrayType_struct*) _temp1869)->f1; _temp1877=( void**)&(( void*)((
-struct Cyc_Absyn_ArrayType_struct*) _temp1869)->f1); goto _LL1872;} else{ goto
-_LL1873;} _LL1873: goto _LL1874; _LL1872: elt_topt=( void**) _temp1877; goto
-_LL1870; _LL1874: goto _LL1870; _LL1870:;} t= Cyc_Tcexp_tcArray( te, loc,
-elt_topt, _temp1815); goto _LL1647;} _LL1705: t= Cyc_Tcexp_tcStmtExp( te, loc,
-topt, _temp1817); goto _LL1647; _LL1707: t= Cyc_Tcexp_tcCodegen( te, loc, topt,
-_temp1819); goto _LL1647; _LL1709: t= Cyc_Tcexp_tcFill( te, loc, topt, _temp1821);
-goto _LL1647; _LL1711: t= Cyc_Tcexp_tcComprehension( te, loc, topt, _temp1827,
-_temp1825, _temp1823); goto _LL1647; _LL1713: t= Cyc_Tcexp_tcStruct( te, loc,
-topt, _temp1839, _temp1836, _temp1832, _temp1831); goto _LL1647; _LL1715: t= Cyc_Tcexp_tcAnonStruct(
-te, loc, _temp1842, _temp1840); goto _LL1647; _LL1717: t= Cyc_Tcexp_tcTunion( te,
-loc, topt, e, _temp1855, _temp1852, _temp1848, _temp1846, _temp1844); goto
-_LL1647; _LL1719:* _temp1862=(( struct Cyc_Absyn_Enumfield*) _check_null(
-_temp1856))->name; t=( void*)({ struct Cyc_Absyn_EnumType_struct* _temp1878=(
+void* t;{ void* _temp1656=( void*) e->r; struct Cyc_Absyn_Exp* _temp1734; struct
+_tuple1* _temp1736; struct Cyc_List_List* _temp1738; struct Cyc_Absyn_Exp*
+_temp1740; struct Cyc_List_List* _temp1742; struct Cyc_Core_Opt* _temp1744; void*
+_temp1746; void* _temp1748; struct _tuple1* _temp1750; struct Cyc_List_List*
+_temp1752; void* _temp1754; void* _temp1756; struct Cyc_Absyn_Exp* _temp1758;
+struct Cyc_Absyn_Exp* _temp1760; struct Cyc_Core_Opt* _temp1762; struct Cyc_Absyn_Exp*
+_temp1764; struct Cyc_Absyn_Exp* _temp1766; struct Cyc_Absyn_Exp* _temp1768;
+struct Cyc_Absyn_Exp* _temp1770; struct Cyc_Absyn_Exp* _temp1772; struct Cyc_Absyn_Exp*
+_temp1774; struct Cyc_Absyn_VarargCallInfo* _temp1776; struct Cyc_Absyn_VarargCallInfo**
+_temp1778; struct Cyc_List_List* _temp1779; struct Cyc_Absyn_Exp* _temp1781;
+struct Cyc_Absyn_Exp* _temp1783; struct Cyc_List_List* _temp1785; struct Cyc_Absyn_Exp*
+_temp1787; struct Cyc_Absyn_Exp* _temp1789; void* _temp1791; struct Cyc_Absyn_Exp*
+_temp1793; struct Cyc_Absyn_Exp* _temp1795; struct Cyc_Absyn_Exp* _temp1797;
+struct Cyc_Absyn_Exp* _temp1799; void* _temp1801; void* _temp1803; void*
+_temp1805; struct Cyc_Absyn_Exp* _temp1807; struct _tagged_arr* _temp1809;
+struct Cyc_Absyn_Exp* _temp1811; struct _tagged_arr* _temp1813; struct Cyc_Absyn_Exp*
+_temp1815; struct Cyc_Absyn_Exp* _temp1817; struct Cyc_Absyn_Exp* _temp1819;
+struct Cyc_List_List* _temp1821; struct Cyc_List_List* _temp1823; struct _tuple2*
+_temp1825; struct Cyc_List_List* _temp1827; struct Cyc_Absyn_Stmt* _temp1829;
+struct Cyc_Absyn_Fndecl* _temp1831; struct Cyc_Absyn_Exp* _temp1833; struct Cyc_Absyn_Exp*
+_temp1835; struct Cyc_Absyn_Exp* _temp1837; struct Cyc_Absyn_Vardecl* _temp1839;
+struct Cyc_Absyn_Structdecl* _temp1841; struct Cyc_Absyn_Structdecl** _temp1843;
+struct Cyc_List_List* _temp1844; struct Cyc_Core_Opt* _temp1846; struct Cyc_Core_Opt**
+_temp1848; struct _tuple1* _temp1849; struct _tuple1** _temp1851; struct Cyc_List_List*
+_temp1852; void* _temp1854; struct Cyc_Absyn_Tunionfield* _temp1856; struct Cyc_Absyn_Tuniondecl*
+_temp1858; struct Cyc_List_List* _temp1860; struct Cyc_Core_Opt* _temp1862;
+struct Cyc_Core_Opt** _temp1864; struct Cyc_Core_Opt* _temp1865; struct Cyc_Core_Opt**
+_temp1867; struct Cyc_Absyn_Enumfield* _temp1868; struct Cyc_Absyn_Enumdecl*
+_temp1870; struct _tuple1* _temp1872; struct _tuple1** _temp1874; struct Cyc_Absyn_Enumfield*
+_temp1875; void* _temp1877; struct _tuple1* _temp1879; struct _tuple1**
+_temp1881; void* _temp1882; struct Cyc_Absyn_Exp* _temp1884; _LL1658: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_NoInstantiate_e){ _LL1735: _temp1734=(( struct Cyc_Absyn_NoInstantiate_e_struct*)
+_temp1656)->f1; goto _LL1659;} else{ goto _LL1660;} _LL1660: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_UnknownId_e){ _LL1737: _temp1736=(( struct Cyc_Absyn_UnknownId_e_struct*)
+_temp1656)->f1; goto _LL1661;} else{ goto _LL1662;} _LL1662: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_UnknownCall_e){ _LL1741: _temp1740=(( struct Cyc_Absyn_UnknownCall_e_struct*)
+_temp1656)->f1; goto _LL1739; _LL1739: _temp1738=(( struct Cyc_Absyn_UnknownCall_e_struct*)
+_temp1656)->f2; goto _LL1663;} else{ goto _LL1664;} _LL1664: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_UnresolvedMem_e){ _LL1745: _temp1744=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
+_temp1656)->f1; goto _LL1743; _LL1743: _temp1742=(( struct Cyc_Absyn_UnresolvedMem_e_struct*)
+_temp1656)->f2; goto _LL1665;} else{ goto _LL1666;} _LL1666: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Const_e){ _LL1747: _temp1746=( void*)(( struct Cyc_Absyn_Const_e_struct*)
+_temp1656)->f1; goto _LL1667;} else{ goto _LL1668;} _LL1668: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Var_e){ _LL1751: _temp1750=(( struct Cyc_Absyn_Var_e_struct*)
+_temp1656)->f1; goto _LL1749; _LL1749: _temp1748=( void*)(( struct Cyc_Absyn_Var_e_struct*)
+_temp1656)->f2; goto _LL1669;} else{ goto _LL1670;} _LL1670: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Primop_e){ _LL1755: _temp1754=( void*)(( struct Cyc_Absyn_Primop_e_struct*)
+_temp1656)->f1; goto _LL1753; _LL1753: _temp1752=(( struct Cyc_Absyn_Primop_e_struct*)
+_temp1656)->f2; goto _LL1671;} else{ goto _LL1672;} _LL1672: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Increment_e){ _LL1759: _temp1758=(( struct Cyc_Absyn_Increment_e_struct*)
+_temp1656)->f1; goto _LL1757; _LL1757: _temp1756=( void*)(( struct Cyc_Absyn_Increment_e_struct*)
+_temp1656)->f2; goto _LL1673;} else{ goto _LL1674;} _LL1674: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_AssignOp_e){ _LL1765: _temp1764=(( struct Cyc_Absyn_AssignOp_e_struct*)
+_temp1656)->f1; goto _LL1763; _LL1763: _temp1762=(( struct Cyc_Absyn_AssignOp_e_struct*)
+_temp1656)->f2; goto _LL1761; _LL1761: _temp1760=(( struct Cyc_Absyn_AssignOp_e_struct*)
+_temp1656)->f3; goto _LL1675;} else{ goto _LL1676;} _LL1676: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Conditional_e){ _LL1771: _temp1770=(( struct Cyc_Absyn_Conditional_e_struct*)
+_temp1656)->f1; goto _LL1769; _LL1769: _temp1768=(( struct Cyc_Absyn_Conditional_e_struct*)
+_temp1656)->f2; goto _LL1767; _LL1767: _temp1766=(( struct Cyc_Absyn_Conditional_e_struct*)
+_temp1656)->f3; goto _LL1677;} else{ goto _LL1678;} _LL1678: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_SeqExp_e){ _LL1775: _temp1774=(( struct Cyc_Absyn_SeqExp_e_struct*)
+_temp1656)->f1; goto _LL1773; _LL1773: _temp1772=(( struct Cyc_Absyn_SeqExp_e_struct*)
+_temp1656)->f2; goto _LL1679;} else{ goto _LL1680;} _LL1680: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_FnCall_e){ _LL1782: _temp1781=(( struct Cyc_Absyn_FnCall_e_struct*)
+_temp1656)->f1; goto _LL1780; _LL1780: _temp1779=(( struct Cyc_Absyn_FnCall_e_struct*)
+_temp1656)->f2; goto _LL1777; _LL1777: _temp1776=(( struct Cyc_Absyn_FnCall_e_struct*)
+_temp1656)->f3; _temp1778=( struct Cyc_Absyn_VarargCallInfo**)&(( struct Cyc_Absyn_FnCall_e_struct*)
+_temp1656)->f3; goto _LL1681;} else{ goto _LL1682;} _LL1682: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Throw_e){ _LL1784: _temp1783=(( struct Cyc_Absyn_Throw_e_struct*)
+_temp1656)->f1; goto _LL1683;} else{ goto _LL1684;} _LL1684: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Instantiate_e){ _LL1788: _temp1787=(( struct Cyc_Absyn_Instantiate_e_struct*)
+_temp1656)->f1; goto _LL1786; _LL1786: _temp1785=(( struct Cyc_Absyn_Instantiate_e_struct*)
+_temp1656)->f2; goto _LL1685;} else{ goto _LL1686;} _LL1686: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Cast_e){ _LL1792: _temp1791=( void*)(( struct Cyc_Absyn_Cast_e_struct*)
+_temp1656)->f1; goto _LL1790; _LL1790: _temp1789=(( struct Cyc_Absyn_Cast_e_struct*)
+_temp1656)->f2; goto _LL1687;} else{ goto _LL1688;} _LL1688: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Address_e){ _LL1794: _temp1793=(( struct Cyc_Absyn_Address_e_struct*)
+_temp1656)->f1; goto _LL1689;} else{ goto _LL1690;} _LL1690: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_New_e){ _LL1798: _temp1797=(( struct Cyc_Absyn_New_e_struct*)
+_temp1656)->f1; goto _LL1796; _LL1796: _temp1795=(( struct Cyc_Absyn_New_e_struct*)
+_temp1656)->f2; goto _LL1691;} else{ goto _LL1692;} _LL1692: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Sizeofexp_e){ _LL1800: _temp1799=(( struct Cyc_Absyn_Sizeofexp_e_struct*)
+_temp1656)->f1; goto _LL1693;} else{ goto _LL1694;} _LL1694: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Sizeoftyp_e){ _LL1802: _temp1801=( void*)(( struct Cyc_Absyn_Sizeoftyp_e_struct*)
+_temp1656)->f1; goto _LL1695;} else{ goto _LL1696;} _LL1696: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Offsetof_e){ _LL1806: _temp1805=( void*)(( struct Cyc_Absyn_Offsetof_e_struct*)
+_temp1656)->f1; goto _LL1804; _LL1804: _temp1803=( void*)(( struct Cyc_Absyn_Offsetof_e_struct*)
+_temp1656)->f2; goto _LL1697;} else{ goto _LL1698;} _LL1698: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Gentyp_e){ goto _LL1699;} else{ goto _LL1700;} _LL1700:
+if(*(( int*) _temp1656) ==  Cyc_Absyn_Deref_e){ _LL1808: _temp1807=(( struct Cyc_Absyn_Deref_e_struct*)
+_temp1656)->f1; goto _LL1701;} else{ goto _LL1702;} _LL1702: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_StructMember_e){ _LL1812: _temp1811=(( struct Cyc_Absyn_StructMember_e_struct*)
+_temp1656)->f1; goto _LL1810; _LL1810: _temp1809=(( struct Cyc_Absyn_StructMember_e_struct*)
+_temp1656)->f2; goto _LL1703;} else{ goto _LL1704;} _LL1704: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_StructArrow_e){ _LL1816: _temp1815=(( struct Cyc_Absyn_StructArrow_e_struct*)
+_temp1656)->f1; goto _LL1814; _LL1814: _temp1813=(( struct Cyc_Absyn_StructArrow_e_struct*)
+_temp1656)->f2; goto _LL1705;} else{ goto _LL1706;} _LL1706: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Subscript_e){ _LL1820: _temp1819=(( struct Cyc_Absyn_Subscript_e_struct*)
+_temp1656)->f1; goto _LL1818; _LL1818: _temp1817=(( struct Cyc_Absyn_Subscript_e_struct*)
+_temp1656)->f2; goto _LL1707;} else{ goto _LL1708;} _LL1708: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Tuple_e){ _LL1822: _temp1821=(( struct Cyc_Absyn_Tuple_e_struct*)
+_temp1656)->f1; goto _LL1709;} else{ goto _LL1710;} _LL1710: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_CompoundLit_e){ _LL1826: _temp1825=(( struct Cyc_Absyn_CompoundLit_e_struct*)
+_temp1656)->f1; goto _LL1824; _LL1824: _temp1823=(( struct Cyc_Absyn_CompoundLit_e_struct*)
+_temp1656)->f2; goto _LL1711;} else{ goto _LL1712;} _LL1712: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Array_e){ _LL1828: _temp1827=(( struct Cyc_Absyn_Array_e_struct*)
+_temp1656)->f1; goto _LL1713;} else{ goto _LL1714;} _LL1714: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_StmtExp_e){ _LL1830: _temp1829=(( struct Cyc_Absyn_StmtExp_e_struct*)
+_temp1656)->f1; goto _LL1715;} else{ goto _LL1716;} _LL1716: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Codegen_e){ _LL1832: _temp1831=(( struct Cyc_Absyn_Codegen_e_struct*)
+_temp1656)->f1; goto _LL1717;} else{ goto _LL1718;} _LL1718: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Fill_e){ _LL1834: _temp1833=(( struct Cyc_Absyn_Fill_e_struct*)
+_temp1656)->f1; goto _LL1719;} else{ goto _LL1720;} _LL1720: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Comprehension_e){ _LL1840: _temp1839=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1656)->f1; goto _LL1838; _LL1838: _temp1837=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1656)->f2; goto _LL1836; _LL1836: _temp1835=(( struct Cyc_Absyn_Comprehension_e_struct*)
+_temp1656)->f3; goto _LL1721;} else{ goto _LL1722;} _LL1722: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Struct_e){ _LL1850: _temp1849=(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f1; _temp1851=( struct _tuple1**)&(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f1; goto _LL1847; _LL1847: _temp1846=(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f2; _temp1848=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f2; goto _LL1845; _LL1845: _temp1844=(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f3; goto _LL1842; _LL1842: _temp1841=(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f4; _temp1843=( struct Cyc_Absyn_Structdecl**)&(( struct Cyc_Absyn_Struct_e_struct*)
+_temp1656)->f4; goto _LL1723;} else{ goto _LL1724;} _LL1724: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_AnonStruct_e){ _LL1855: _temp1854=( void*)(( struct Cyc_Absyn_AnonStruct_e_struct*)
+_temp1656)->f1; goto _LL1853; _LL1853: _temp1852=(( struct Cyc_Absyn_AnonStruct_e_struct*)
+_temp1656)->f2; goto _LL1725;} else{ goto _LL1726;} _LL1726: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Tunion_e){ _LL1866: _temp1865=(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f1; _temp1867=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f1; goto _LL1863; _LL1863: _temp1862=(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f2; _temp1864=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f2; goto _LL1861; _LL1861: _temp1860=(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f3; goto _LL1859; _LL1859: _temp1858=(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f4; goto _LL1857; _LL1857: _temp1856=(( struct Cyc_Absyn_Tunion_e_struct*)
+_temp1656)->f5; goto _LL1727;} else{ goto _LL1728;} _LL1728: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Enum_e){ _LL1873: _temp1872=(( struct Cyc_Absyn_Enum_e_struct*)
+_temp1656)->f1; _temp1874=( struct _tuple1**)&(( struct Cyc_Absyn_Enum_e_struct*)
+_temp1656)->f1; goto _LL1871; _LL1871: _temp1870=(( struct Cyc_Absyn_Enum_e_struct*)
+_temp1656)->f2; goto _LL1869; _LL1869: _temp1868=(( struct Cyc_Absyn_Enum_e_struct*)
+_temp1656)->f3; goto _LL1729;} else{ goto _LL1730;} _LL1730: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_AnonEnum_e){ _LL1880: _temp1879=(( struct Cyc_Absyn_AnonEnum_e_struct*)
+_temp1656)->f1; _temp1881=( struct _tuple1**)&(( struct Cyc_Absyn_AnonEnum_e_struct*)
+_temp1656)->f1; goto _LL1878; _LL1878: _temp1877=( void*)(( struct Cyc_Absyn_AnonEnum_e_struct*)
+_temp1656)->f2; goto _LL1876; _LL1876: _temp1875=(( struct Cyc_Absyn_AnonEnum_e_struct*)
+_temp1656)->f3; goto _LL1731;} else{ goto _LL1732;} _LL1732: if(*(( int*)
+_temp1656) ==  Cyc_Absyn_Malloc_e){ _LL1885: _temp1884=(( struct Cyc_Absyn_Malloc_e_struct*)
+_temp1656)->f1; goto _LL1883; _LL1883: _temp1882=( void*)(( struct Cyc_Absyn_Malloc_e_struct*)
+_temp1656)->f2; goto _LL1733;} else{ goto _LL1657;} _LL1659: Cyc_Tcexp_tcExpNoInst(
+te, 0, _temp1734); return; _LL1661: Cyc_Tcexp_resolve_unknown_id( te, e,
+_temp1736); Cyc_Tcexp_tcExpNoInst( te, topt, e); return; _LL1663: Cyc_Tcexp_resolve_unknown_fn(
+te, e, _temp1740, _temp1738); Cyc_Tcexp_tcExpNoInst( te, topt, e); return;
+_LL1665: Cyc_Tcexp_resolve_unresolved_mem( te, loc, topt, e, _temp1742); Cyc_Tcexp_tcExpNoInst(
+te, topt, e); return; _LL1667: t= Cyc_Tcexp_tcConst( te, loc, topt, _temp1746, e);
+goto _LL1657; _LL1669: t= Cyc_Tcexp_tcVar( te, loc, _temp1750, _temp1748); goto
+_LL1657; _LL1671: t= Cyc_Tcexp_tcPrimop( te, loc, topt, _temp1754, _temp1752);
+goto _LL1657; _LL1673: t= Cyc_Tcexp_tcIncrement( te, loc, topt, _temp1758,
+_temp1756); goto _LL1657; _LL1675: t= Cyc_Tcexp_tcAssignOp( te, loc, topt,
+_temp1764, _temp1762, _temp1760); goto _LL1657; _LL1677: t= Cyc_Tcexp_tcConditional(
+te, loc, topt, _temp1770, _temp1768, _temp1766); goto _LL1657; _LL1679: t= Cyc_Tcexp_tcSeqExp(
+te, loc, topt, _temp1774, _temp1772); goto _LL1657; _LL1681: t= Cyc_Tcexp_tcFnCall(
+te, loc, topt, _temp1781, _temp1779, _temp1778); goto _LL1657; _LL1683: t= Cyc_Tcexp_tcThrow(
+te, loc, topt, _temp1783); goto _LL1657; _LL1685: t= Cyc_Tcexp_tcInstantiate( te,
+loc, topt, _temp1787, _temp1785); goto _LL1657; _LL1687: t= Cyc_Tcexp_tcCast( te,
+loc, topt, _temp1791, _temp1789); goto _LL1657; _LL1689: t= Cyc_Tcexp_tcAddress(
+te, loc, topt, _temp1793); goto _LL1657; _LL1691: t= Cyc_Tcexp_tcNew( te, loc,
+topt, _temp1797, e, _temp1795); goto _LL1657; _LL1693: { void* _temp1886= Cyc_Tcexp_tcExpNoPromote(
+te, 0, _temp1799); t= Cyc_Tcexp_tcSizeof( te, loc, topt, _temp1886); goto
+_LL1657;} _LL1695: t= Cyc_Tcexp_tcSizeof( te, loc, topt, _temp1801); goto
+_LL1657; _LL1697: t= Cyc_Tcexp_tcOffsetof( te, loc, topt, _temp1805, _temp1803);
+goto _LL1657; _LL1699:({ void* _temp1887[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("gen() not in top-level initializer",
+sizeof( unsigned char), 35u), _tag_arr( _temp1887, sizeof( void*), 0u));});
+return; _LL1701: t= Cyc_Tcexp_tcDeref( te, loc, topt, _temp1807); goto _LL1657;
+_LL1703: t= Cyc_Tcexp_tcStructMember( te, loc, topt, e, _temp1811, _temp1809);
+goto _LL1657; _LL1705: t= Cyc_Tcexp_tcStructArrow( te, loc, topt, _temp1815,
+_temp1813); goto _LL1657; _LL1707: t= Cyc_Tcexp_tcSubscript( te, loc, topt,
+_temp1819, _temp1817); goto _LL1657; _LL1709: t= Cyc_Tcexp_tcTuple( te, loc,
+topt, _temp1821); goto _LL1657; _LL1711: t= Cyc_Tcexp_tcCompoundLit( te, loc,
+topt, _temp1825, _temp1823); goto _LL1657; _LL1713: { void** elt_topt= 0; if(
+topt !=  0){ void* _temp1888= Cyc_Tcutil_compress(*(( void**) _check_null( topt)));
+void* _temp1894; void** _temp1896; _LL1890: if(( unsigned int) _temp1888 >  4u?*((
+int*) _temp1888) ==  Cyc_Absyn_ArrayType: 0){ _LL1895: _temp1894=( void*)((
+struct Cyc_Absyn_ArrayType_struct*) _temp1888)->f1; _temp1896=( void**)&(( void*)((
+struct Cyc_Absyn_ArrayType_struct*) _temp1888)->f1); goto _LL1891;} else{ goto
+_LL1892;} _LL1892: goto _LL1893; _LL1891: elt_topt=( void**) _temp1896; goto
+_LL1889; _LL1893: goto _LL1889; _LL1889:;} t= Cyc_Tcexp_tcArray( te, loc,
+elt_topt, _temp1827); goto _LL1657;} _LL1715: t= Cyc_Tcexp_tcStmtExp( te, loc,
+topt, _temp1829); goto _LL1657; _LL1717: t= Cyc_Tcexp_tcCodegen( te, loc, topt,
+_temp1831); goto _LL1657; _LL1719: t= Cyc_Tcexp_tcFill( te, loc, topt, _temp1833);
+goto _LL1657; _LL1721: t= Cyc_Tcexp_tcComprehension( te, loc, topt, _temp1839,
+_temp1837, _temp1835); goto _LL1657; _LL1723: t= Cyc_Tcexp_tcStruct( te, loc,
+topt, _temp1851, _temp1848, _temp1844, _temp1843); goto _LL1657; _LL1725: t= Cyc_Tcexp_tcAnonStruct(
+te, loc, _temp1854, _temp1852); goto _LL1657; _LL1727: t= Cyc_Tcexp_tcTunion( te,
+loc, topt, e, _temp1867, _temp1864, _temp1860, _temp1858, _temp1856); goto
+_LL1657; _LL1729:* _temp1874=(( struct Cyc_Absyn_Enumfield*) _check_null(
+_temp1868))->name; t=( void*)({ struct Cyc_Absyn_EnumType_struct* _temp1897=(
 struct Cyc_Absyn_EnumType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_EnumType_struct));
-_temp1878[ 0]=({ struct Cyc_Absyn_EnumType_struct _temp1879; _temp1879.tag= Cyc_Absyn_EnumType;
-_temp1879.f1=(( struct Cyc_Absyn_Enumdecl*) _check_null( _temp1858))->name;
-_temp1879.f2= _temp1858; _temp1879;}); _temp1878;}); goto _LL1647; _LL1721: t=
-Cyc_Tcexp_tcMalloc( te, loc, topt, _temp1865, _temp1863); goto _LL1647; _LL1647:;}
-e->topt=({ struct Cyc_Core_Opt* _temp1880=( struct Cyc_Core_Opt*) _cycalloc(
-sizeof( struct Cyc_Core_Opt)); _temp1880->v=( void*) t; _temp1880;});}
+_temp1897[ 0]=({ struct Cyc_Absyn_EnumType_struct _temp1898; _temp1898.tag= Cyc_Absyn_EnumType;
+_temp1898.f1=(( struct Cyc_Absyn_Enumdecl*) _check_null( _temp1870))->name;
+_temp1898.f2= _temp1870; _temp1898;}); _temp1897;}); goto _LL1657; _LL1731:*
+_temp1881=(( struct Cyc_Absyn_Enumfield*) _check_null( _temp1875))->name; t=
+_temp1877; goto _LL1657; _LL1733: t= Cyc_Tcexp_tcMalloc( te, loc, topt,
+_temp1884, _temp1882); goto _LL1657; _LL1657:;} e->topt=({ struct Cyc_Core_Opt*
+_temp1899=( struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt));
+_temp1899->v=( void*) t; _temp1899;});}

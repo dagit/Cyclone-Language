@@ -198,6 +198,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
     case &TunionRes(_,_): 
       warn(loc,"variable declaration shadows previous [x]tunion constructor");
       break;
+    case &AnonEnumRes(_,_): 
     case &EnumRes(_,_): 
       warn(loc,"variable declaration shadows previous enum tag");
       break;
@@ -265,6 +266,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
     case &TunionRes(_,_): 
       warn(loc,"function declaration shadows previous [x]tunion constructor");
       break;
+    case &AnonEnumRes(_,_):
     case &EnumRes(_,_): 
       warn(loc,"function declaration shadows previous enum tag");
       break;

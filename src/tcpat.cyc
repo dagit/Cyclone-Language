@@ -62,6 +62,9 @@ static void resolve_pat(tenv_t te, pat_t p) {
     case &EnumRes(ed,ef):
       p->r = new Enum_p(ed,ef);
       return;
+    case &AnonEnumRes(t,ef):
+      p->r = new AnonEnum_p(t,ef);
+      return;
     case &VarRes(_): // shadows an outer definition, but that's fine
       break;
     } catch { case Dict::Absent: break; } // a new variable
@@ -88,6 +91,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Tunion_p(tud,tuf,tvs,ps);
       return;
     case &EnumRes(_,_):
+    case &AnonEnumRes(_,_):
       terr(p->loc,"bad enum constructor %s in pattern",qvar2string(q));
       return;
     case &VarRes(_):
@@ -173,7 +177,10 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
   case &Int_p(Signed,_):   t = num_type(topt, sint_t);  break;
   case &Char_p(_):         t = num_type(topt, uchar_t); break;
   case &Float_p(_):        t = num_type(topt, float_t); break;
-  case &Enum_p(ed,ef):     t = num_type(topt, new EnumType(ed->name,ed)); break;
+  case &Enum_p(ed,ef):     
+    t = num_type(topt, new EnumType(ed->name,ed)); break;
+  case &AnonEnum_p(tenum,ef):  
+    t = num_type(topt, tenum); break;
   case Null_p:
     if(topt != NULL)
       switch(compress(*topt)) {
@@ -640,6 +647,21 @@ static simple_pat_t compile_pat(pat_t p) {
     int span = List::length(ed->fields->v);
     s = con_pat(*((*ef->name)[1]), new Opt(span), NULL);
     break;
+  case &AnonEnum_p(tenum,ef):
+    // FIX: I had to put `H in here.  The problem must be that we type-check
+    // the default first and try to unify impos's type (a type variable) with
+    // the type of fields which was list_t<enumfield_t,#i>.  
+    list_t<enumfield_t,`H> fields;
+    switch (compress(tenum)) {
+    case &AnonEnumType(fs): fields = fs; break;
+    default: fields = impos("bad type in AnonEnum_p"); break;
+    };
+    // FIX: two different enum constructors can have the same value so we
+    // might not get a duplicate warning when we should.
+    int span = List::length(fields);
+    s = con_pat(*((*ef->name)[1]), new Opt(span), NULL);
+    break;
+
   case &UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;
   case &UnknownCall_p(_,_,_):   s = impos("compile_pat: unknowncall");   break;
   case &UnknownFields_p(_,_,_): s = impos("compile_pat: unknownfields"); break;

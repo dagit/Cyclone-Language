@@ -283,6 +283,14 @@ static structfield_t structfield_to_c(structfield_t f) {
                             .width=f->width, .attributes=f->attributes};
 }
 
+static void enumfields_to_c(list_t<enumfield_t> fs) {
+  for (let fs = fs; fs != NULL; fs = fs->tl)
+    if (fs->hd->tag != NULL) {
+      unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
+      fs->hd->tag = uint_exp(i,NULL);
+    }
+}
+
 static type_t typ_to_c(type_t t) {
   switch (t) {
   case VoidType: return t;
@@ -355,6 +363,7 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments and translate the nested types
     return strctq((typedef_name_t)tdnopt);
   case &EnumType(tdn,_): return t;
+  case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,topt):
     if (topt == NULL) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
@@ -386,6 +395,7 @@ static bool atomic_typ(type_t t) {
   case &VarType(_):    return false;
   case &IntType(_,_):  return true;
   case &EnumType(_,_): return true;
+  case &AnonEnumType(_): return true;
   case FloatType:      return true;
   case DoubleType:     return true;
   case &FnType(_):     return true;
@@ -1876,6 +1886,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
 
   case &Enum_e(_,_,_): break;
+  case &AnonEnum_e(_,_,_): break;
 
   case &Malloc_e(rgnopt,t): 
     type_t t_c = typ_to_c(t);
@@ -1964,6 +1975,10 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 
   case &Enum_p(ed,ef):
     s = if_eq_goto_stmt(r, new_exp(new Enum_e(ef->name,ed,ef),NULL), 
+                        succ_lab, fail_lab); 
+    break;
+  case &AnonEnum_p(t2,ef):
+    s = if_eq_goto_stmt(r, new_exp(new AnonEnum_e(ef->name,t2,ef),NULL), 
                         succ_lab, fail_lab); 
     break;
 
@@ -2828,11 +2843,7 @@ static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
   ed->sc = Public; // gcc warns if we have Extern or Static on an enum
 
   if(ed->fields != NULL)
-    for (let fs = ed->fields->v; fs != NULL; fs = fs->tl)
-      if (fs->hd->tag != NULL) {
-	unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
-	fs->hd->tag = uint_exp(i,NULL);
-      }
+    enumfields_to_c(ed->fields->v);
 }
 
 // we've decided let x = e and t x = e have different rules on e's

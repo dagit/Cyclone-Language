@@ -1335,6 +1335,8 @@ enum_specifier:
                                  LOC(@1,@5)})); }
 | ENUM qual_opt_identifier
   { $$=^$(type_spec(new EnumType($2,NULL),LOC(@1,@2))); }
+| ENUM '{' enum_declaration_list '}'
+  { $$=^$(new Type_spec(new AnonEnumType($3),LOC(@1,@4))); }
 ;
 
 /* enum fields */

@@ -158,6 +158,7 @@ rule token "$(int,comment_t)*" = parse
     static bool add_cyc_prefix = false;
     static bool to_VC = false;
 
+void dumpenumfields(list_t<enumfield_t> fields);
 void dumptyp(type_t);
 void dumpntyp(type_t t);
 void dumpexp(exp_t);
@@ -389,6 +390,15 @@ void dumpntyp(type_t t) {
     }
     break;
   case &EnumType(n,_): dump_alpha("enum"); dumpqvar(n); return;
+  case &AnonEnumType(fs): 
+    dump_alpha("enum"); 
+    dump_symbol(" ");
+    dump_lb();
+    dump_symbol("\\\\\n~~");
+    dumpenumfields(fs);
+    dump_symbol("\\\\\n");
+    dump_rb();
+    return;
   case &IntType(Signed,   B4): dump_alpha("int"); return;
   case &IntType(Signed,   B1): dump_alpha("signed char"); return;
   case &IntType(Unsigned, B1): dump_alpha("unsigned char"); return;
@@ -659,6 +669,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &Enum_e(n,_,_): dumpqvar(n); break;
+  case &AnonEnum_e(n,_,_): dumpqvar(n); break;
 
   case &Malloc_e(ropt,t):
     if (ropt != NULL) {

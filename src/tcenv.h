@@ -42,6 +42,7 @@ extern tunion Resolved {
   StructRes(structdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
+  AnonEnumRes(type_t,enumfield_t);
 };
 typedef tunion Resolved resolved_t;
 

@@ -204,6 +204,9 @@ static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
   let &$(r1,r2) = x;
   return new $(copy_type(r1),copy_type(r2));
 }
+static enumfield_t copy_enumfield(enumfield_t f) {
+  return new Enumfield{f->name,f->tag,f->loc};
+}
 type_t copy_type(type_t t) {
   switch (compress(t)) {
   case VoidType:
@@ -254,8 +257,10 @@ type_t copy_type(type_t t) {
     return new AnonStructType(List::map(copy_field,fs));
   case &AnonUnionType(fs):
     return new AnonUnionType(List::map(copy_field,fs));
-  case &EnumType(tdn,_):
-    return new EnumType(tdn,NULL);
+  case &EnumType(tdn,fs):
+    return new EnumType(tdn,fs);
+  case &AnonEnumType(fs):
+    return new AnonEnumType(List::map(copy_enumfield,fs));
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
   case &TypedefType(tdn,ts,_):
     return new TypedefType(tdn,copy_types(ts),NULL);
@@ -317,6 +322,7 @@ kind_t typ_kind(type_t t) {
   case &StructType(_,_,_)   :    
   case &UnionType(_,_,_)    :     
   case &AnonStructType(_)   :    
+  case &AnonEnumType(_)     :
   case &AnonUnionType(_)    : return MemKind;   
   case &EnumType(_,ed): 
     if (ed->fields == NULL) return AnyKind; else return MemKind;
@@ -551,6 +557,7 @@ static type_t rgns_of(type_t t) {
   case FloatType: 
   case DoubleType: 
   case &EnumType(_,_):
+  case &AnonEnumType(_):
   case &IntType(_,_): return empty_effect;
   case &Evar(_,_,_,_):
   case &VarType(_): 
@@ -1087,6 +1094,34 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different enum types)";
     break;
 
+  case $(&AnonEnumType(fs1), &AnonEnumType(fs2)):
+    bool bad = false;
+    for (; fs1 != NULL && fs2 != NULL; fs1=fs1->tl, fs2=fs2->tl) {
+      let f1 = fs1->hd;
+      let f2 = fs2->hd;
+      if (qvar_cmp(f1->name,f2->name) != 0) {
+        failure_reason = "(different names for enum fields)";
+        bad = true;
+        break;
+      }
+      if (f1->tag == f2->tag) continue;
+      if (f1->tag == NULL || f2->tag == NULL) {
+        failure_reason = "(different tag values for enum fields)";
+        bad = true; 
+        break;
+      }
+      if (Evexp::eval_const_uint_exp((exp_t)f1->tag) !=
+          Evexp::eval_const_uint_exp((exp_t)f2->tag)) {
+        failure_reason = "(different tag values for enum fields)";
+        bad = true;
+        break;
+      }
+    }
+    if (bad) break;
+    if (fs1 == NULL && fs2 == NULL) return;
+    failure_reason = "(different number of fields for enums)";
+    break;
+
   case $(&UnionType(nopt2,ts2,udp2), &UnionType(nopt1,ts1,udp1)):
     if ((nopt1 != NULL && nopt2 != NULL
          && qvar_cmp((qvar_t)nopt1,(qvar_t)nopt2) == 0)
@@ -1312,6 +1347,7 @@ bool is_arithmetic_type(type_t t) {
   case FloatType:     
   case DoubleType:    
   case &EnumType(_,_): return true;
+  case &AnonEnumType(_): return true;
   default: return false;
   }
 }
@@ -1376,6 +1412,7 @@ bool is_integral_type(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
   case &EnumType(_,_): return true;
+  case &AnonEnumType(_): return true;
   default: return false;
   }
 }
@@ -1758,6 +1795,7 @@ void unchecked_cast(tenv_t te, exp_t e, type_t t) {
 bool is_integral(exp_t e) {
   switch (compress(e->topt->v)) {
   case &EnumType(_,_):
+  case &AnonEnumType(_):
   case &IntType(_,_): return true;
   case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
   default: return false;
@@ -2012,6 +2050,7 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_rt = rsubstitute(rgn,inst,rt);
     return new_rt == rt ? t : new RgnHandleType(new_rt);
   case &EnumType(_,_): return t;
+  case &AnonEnumType(_): return t;
   case VoidType:       return t;
   case &IntType(_,_):  return t;
   case FloatType:      return t;
@@ -2281,6 +2320,32 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // no need to constrain things here, but want to add it only if
     // it hasn't already been added.
     cvtenv.free_vars = fast_add_free_tvar(cvtenv.free_vars, v);
+    break;
+  case &AnonEnumType(fs):
+    // Note: this code is duplicated almost exactly in tc.cyc
+    genv_t ge = Dict::lookup(te->ae,te->ns);
+    region uprev_rgn {
+      list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
+      unsigned int tag_count = 0;
+      for (; fs != NULL; fs = fs->tl) {
+        let f = fs->hd;
+        if (List::mem(zstrptrcmp,prev_fields,(*f->name)[1]))
+          terr(f->loc,"duplicate enum field name %s",*((*f->name)[1]));
+        else
+          prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
+      
+        if (f->tag == NULL)
+          f->tag = uint_exp(tag_count, f->loc);
+        else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
+          terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
+        
+        unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag);
+        tag_count = t1+1;
+        (*f->name)[0] = new Abs_n(te->ns);
+        ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
+                                      new $(new AnonEnumRes(t,f), true));
+      }
+    }
     break;
   case &EnumType(n,*edp):
     if (*edp == NULL)
@@ -3315,6 +3380,7 @@ bool bits_only(type_t t) {
   case FloatType: 
   case DoubleType: return true;
   case &EnumType(_,_): return false; //could be true but for pattern exhaustion!
+  case &AnonEnumType(_): return false; //could be true but for pattern exhaustion!
   case &ArrayType(t,_,_): return bits_only(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl) 
@@ -3363,6 +3429,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Offsetof_e(_,_): return true;
   case &Gentyp_e(_,_):    return true;
   case &Enum_e(_,_,_):  return true;
+  case &AnonEnum_e(_,_,_):return true;
   case &Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"
     // Ignore unbound variables b/c should be reported elsewhere
@@ -3455,6 +3522,7 @@ bool supports_default(type_t t) {
   case &AnonUnionType(fs):
     return fields_support_default(NULL,NULL,fs);
 
+  case &AnonEnumType(_):
   case &EnumType(_,_): 
     // FIX: may not include 0!
     return true;
