@@ -1912,8 +1912,8 @@ type_t tcExp(tenv_t te, type_t *`r topt, exp_t e) {
 type_t tcExpInitializer(tenv_t te, type_t *`r topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   switch (e->r) {
-  case &Array_e(_): return t;
-  case &Comprehension_e(_,_,_): return t;
+  case &Array_e(_): 
+  case &Comprehension_e(_,_,_):
   case &Const_e(&String_c(_)): return t;
   default:
     t = compress(t);

@@ -118,24 +118,23 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
     // we skip over function types -- these are function protypes.
     // otherwise, we compute default initializer, if necessary
     // first check that the attributes are okay
-    for (; atts != NULL; atts = atts->tl) {
+    for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
-      case &Aligned_att(_): continue;
+      case &Aligned_att(_):
         // GCC doesn't allow variables to be packed
         // case Packed_att:     continue;
-      case &Section_att(_): continue;
-      case Nocommon_att:   continue;
-      case Shared_att:     continue;
-      case Unused_att:     continue;
-      case Weak_att:       continue;
-      case Dllimport_att:  continue;
+      case &Section_att(_):
+      case Nocommon_att:   
+      case Shared_att:     
+      case Unused_att:     
+      case Weak_att:       
+      case Dllimport_att:  
       case Dllexport_att:  continue;
       default:
         terr(loc,"bad attribute %s for variable %s",
              attribute2string(atts->hd), qvar2string(vd->name));
         break;
       }
-    }
 
     if(vd->initializer == NULL) {
       if (check_var_init && !supports_default(t))

@@ -6,6 +6,15 @@ To build Cyclone, do
 make
 make install
 
+After these steps, you can optionally do
+
+make clean
+
+to reclaim about 20MB of disk space.  You can reclaim over another
+10MB by deleting the bin subdirectory.  (In fact, none of
+the subdirectories are needed after installation, but the other ones
+contain Cyclone programs that are useful examples.)
+
 To get off the ground, you need GNU make and bash; if bash is not
 installed, ksh can be used instead. If GNU make is not the default make on 
 your system, if might be installed as "gmake" so just type gmake 
@@ -100,7 +109,7 @@ support (thus creating the appropriate config/arch/ and bin/genfiles/ files
 as described above), copy the entire cyclone source tree to a supported
 architecture.
 
-b) Configure the the source tree on the supported architecture by doing
+b) Configure the source tree on the supported architecture by doing
 ./configure again.  This should set up your configuration properly and
 indicate you are on a supported architecture.
 

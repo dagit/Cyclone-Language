@@ -2867,7 +2867,7 @@ goto _LL1744;} _LL1744: if(*(( int*) _temp1738) ==  Cyc_Absyn_Const_e){ _LL1749:
 _temp1748=( void*)(( struct Cyc_Absyn_Const_e_struct*) _temp1738)->f1; if((
 unsigned int) _temp1748 >  1u?*(( int*) _temp1748) ==  Cyc_Absyn_String_c: 0){
 goto _LL1745;} else{ goto _LL1746;}} else{ goto _LL1746;} _LL1746: goto _LL1747;
-_LL1741: return t; _LL1743: return t; _LL1745: return t; _LL1747: t= Cyc_Tcutil_compress(
+_LL1741: goto _LL1743; _LL1743: goto _LL1745; _LL1745: return t; _LL1747: t= Cyc_Tcutil_compress(
 t);{ void* _temp1750= t; struct Cyc_Absyn_Exp* _temp1756; struct Cyc_Absyn_Tqual
 _temp1758; void* _temp1760; _LL1752: if(( unsigned int) _temp1750 >  3u?*(( int*)
 _temp1750) ==  Cyc_Absyn_ArrayType: 0){ _LL1761: _temp1760=( void*)(( struct Cyc_Absyn_ArrayType_struct*)

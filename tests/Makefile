@@ -1,11 +1,11 @@
 
 include ../Makefile.inc
 
-# Override these variables to test different compilers/libraries (bootstrapping)
+# Override these variables, as well as CYCFLAGS, to test different
+#   compilers/libraries (probably because you are bootstrapping the compiler) 
 # (see targets test, test_bin, and test_src in parent directory's Makefile)
 CYCC=cyclone$(EXE)
 CYCBISON=cycbison$(EXE)
-CYCFLAGS=
 
 all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_getopt)
 	./test_regions
@@ -60,12 +60,9 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 %.o : %.cyc
 	$(CYCC) $(CYCFLAGS) -c $< 
 
-clean_prefix:
-	$(RM) hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe
-
 clean:
-	$(RM) *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o *typerep.[oc] *typerep_test.[oc] unsafe_cast.o
-	$(RM) *test_regions.o *test_regions.c
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\
+	$(RM) foo_tab.* unsafe_cast.o
 	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks

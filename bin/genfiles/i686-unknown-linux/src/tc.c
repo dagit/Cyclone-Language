@@ -805,9 +805,9 @@ goto _LL84;} _LL84: if( _temp74 == ( void*) Cyc_Absyn_Unused_att){ goto _LL85;}
 else{ goto _LL86;} _LL86: if( _temp74 == ( void*) Cyc_Absyn_Weak_att){ goto
 _LL87;} else{ goto _LL88;} _LL88: if( _temp74 == ( void*) Cyc_Absyn_Dllimport_att){
 goto _LL89;} else{ goto _LL90;} _LL90: if( _temp74 == ( void*) Cyc_Absyn_Dllexport_att){
-goto _LL91;} else{ goto _LL92;} _LL92: goto _LL93; _LL77: continue; _LL79:
-continue; _LL81: continue; _LL83: continue; _LL85: continue; _LL87: continue;
-_LL89: continue; _LL91: continue; _LL93:({ struct Cyc_Std_String_pa_struct
+goto _LL91;} else{ goto _LL92;} _LL92: goto _LL93; _LL77: goto _LL79; _LL79:
+goto _LL81; _LL81: goto _LL83; _LL83: goto _LL85; _LL85: goto _LL87; _LL87: goto
+_LL89; _LL89: goto _LL91; _LL91: continue; _LL93:({ struct Cyc_Std_String_pa_struct
 _temp96; _temp96.tag= Cyc_Std_String_pa; _temp96.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 vd->name);{ struct Cyc_Std_String_pa_struct _temp95; _temp95.tag= Cyc_Std_String_pa;
 _temp95.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string(( void*) atts->hd);{

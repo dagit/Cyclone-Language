@@ -92,8 +92,8 @@ $(ARCH)/src/install_path.c: ../../Makefile.inc
 	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 clean_arch:
-	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_nocheck.a libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o nocheck_$(RUNTIME).o)
-	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
+	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_nocheck.a libcyc_a.a  $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) nogc.[oa] a_nogc.o nogc_a.a $(RUNTIME).o a_$(RUNTIME).o nocheck_$(RUNTIME).o)
+	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) cycdoc$(EXE) cycdoc.o buildlib$(EXE) buildlib.o install_path.*)
 
 clean:
 	for arch in $(ALL_ARCHS); do \

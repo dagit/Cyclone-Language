@@ -24,7 +24,6 @@ C_APROF_FLAG :=
 CYC_APROF_FLAG := 
 endif
 
-# CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_APROF_FLAG)
 CFLAGS:=-I$(CYCDIR) $(C_APROF_FLAG)
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
