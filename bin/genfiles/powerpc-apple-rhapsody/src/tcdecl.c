@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1221,24 +1223,24 @@ Cyc_Absynpp_typ2string(void*);struct _dynforward_ptr Cyc_Absynpp_kind2string(voi
 struct _dynforward_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct
 _dynforward_ptr Cyc_Absynpp_scope2string(void*sc);char Cyc_Tcdecl_Incompatible[17]="\000\000\000\000Incompatible\000";
 void Cyc_Tcdecl_merr(struct Cyc_Position_Segment*loc,struct _dynforward_ptr*msg1,
-struct _dynforward_ptr fmt,struct _dynforward_ptr ap);static void _tmp18E(struct
-_dynforward_ptr**msg1,struct _dynforward_ptr*ap,unsigned int*_tmp18D,unsigned int*
-_tmp18C,void***_tmp18A){for(*_tmp18D=0;*_tmp18D < *_tmp18C;(*_tmp18D)++){struct
-Cyc_String_pa_struct _tmp188;struct Cyc_String_pa_struct*_tmp187;(*_tmp18A)[*
-_tmp18D]=*_tmp18D == 0?(void*)((_tmp187=_cycalloc(sizeof(*_tmp187)),((_tmp187[0]=((
-_tmp188.tag=0,((_tmp188.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)*(*
-msg1)),_tmp188)))),_tmp187)))):*((void**)_check_dynforward_subscript(*ap,sizeof(
-void*),(int)(*_tmp18D - 1)));}}void Cyc_Tcdecl_merr(struct Cyc_Position_Segment*loc,
-struct _dynforward_ptr*msg1,struct _dynforward_ptr fmt,struct _dynforward_ptr ap){if(
-msg1 == 0)(int)_throw((void*)Cyc_Tcdecl_Incompatible);{const char*_tmp185;struct
+struct _dynforward_ptr fmt,struct _dynforward_ptr ap);static void _tmp18E(unsigned int*
+_tmp18D,unsigned int*_tmp18C,void***_tmp18A,struct _dynforward_ptr**msg1,struct
+_dynforward_ptr*ap){for(*_tmp18D=0;*_tmp18D < *_tmp18C;(*_tmp18D)++){struct Cyc_String_pa_struct
+_tmp188;struct Cyc_String_pa_struct*_tmp187;(*_tmp18A)[*_tmp18D]=*_tmp18D == 0?(
+void*)((_tmp187=_cycalloc(sizeof(*_tmp187)),((_tmp187[0]=((_tmp188.tag=0,((
+_tmp188.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)*(*msg1)),_tmp188)))),
+_tmp187)))):*((void**)_check_dynforward_subscript(*ap,sizeof(void*),(int)(*
+_tmp18D - 1)));}}void Cyc_Tcdecl_merr(struct Cyc_Position_Segment*loc,struct
+_dynforward_ptr*msg1,struct _dynforward_ptr fmt,struct _dynforward_ptr ap){if(msg1 == 
+0)(int)_throw((void*)Cyc_Tcdecl_Incompatible);{const char*_tmp185;struct
 _dynforward_ptr fmt2=(struct _dynforward_ptr)Cyc_strconcat(((_tmp185="%s ",
 _tag_dynforward(_tmp185,sizeof(char),_get_zero_arr_size_char(_tmp185,4)))),(
 struct _dynforward_ptr)fmt);unsigned int _tmp18D;unsigned int _tmp18C;struct
 _dynforward_ptr _tmp18B;void**_tmp18A;unsigned int _tmp189;struct _dynforward_ptr
 ap2=(_tmp189=_get_dynforward_size(ap,sizeof(void*))+ 1,((_tmp18A=(void**)
 _cycalloc(_check_times(sizeof(void*),_tmp189)),((_tmp18B=_tag_dynforward(_tmp18A,
-sizeof(void*),_tmp189),((((_tmp18C=_tmp189,_tmp18E(& msg1,& ap,& _tmp18D,& _tmp18C,&
-_tmp18A))),_tmp18B)))))));Cyc_Position_post_error(Cyc_Position_mk_err_elab(loc,(
+sizeof(void*),_tmp189),((((_tmp18C=_tmp189,_tmp18E(& _tmp18D,& _tmp18C,& _tmp18A,&
+msg1,& ap))),_tmp18B)))))));Cyc_Position_post_error(Cyc_Position_mk_err_elab(loc,(
 struct _dynforward_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt2,ap2)));}}static void
 Cyc_Tcdecl_merge_scope_err(void*s0,void*s1,struct _dynforward_ptr t,struct
 _dynforward_ptr v,struct Cyc_Position_Segment*loc,struct _dynforward_ptr*msg);

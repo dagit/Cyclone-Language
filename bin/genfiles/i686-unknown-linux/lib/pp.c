@@ -532,9 +532,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -552,9 +553,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1066,12 +1068,12 @@ _LL10: if(!Cyc_PP_tex_output){int _tmp1F=i / 8;int _tmp20=i % 8;int _tmp21=(2 + 
 struct _dynforward_ptr _tmp22=_dynforward_ptr_plus(nlb,sizeof(char),0);char _tmp23=*((
 char*)_check_dynforward_subscript(_tmp22,sizeof(char),0));char _tmp24='\n';if(
 _get_dynforward_size(_tmp22,sizeof(char))== 1  && (_tmp23 == '\000'  && _tmp24 != '\000'))
-_throw_arraybounds();*((char*)_tmp22.curr)=_tmp24;});{int j=0;for(0;j < _tmp1F;j ++){({
+_throw_arraybounds();*((char*)_tmp22.curr)=_tmp24;});{int j=0;for(0;j < _tmp1F;++ j){({
 struct _dynforward_ptr _tmp25=_dynforward_ptr_plus(nlb,sizeof(char),j + 1);char
 _tmp26=*((char*)_check_dynforward_subscript(_tmp25,sizeof(char),0));char _tmp27='\t';
 if(_get_dynforward_size(_tmp25,sizeof(char))== 1  && (_tmp26 == '\000'  && _tmp27 != '\000'))
-_throw_arraybounds();*((char*)_tmp25.curr)=_tmp27;});}}{int j=0;for(0;j < _tmp20;j
-++){({struct _dynforward_ptr _tmp28=_dynforward_ptr_plus(nlb,sizeof(char),(j + 1)+ 
+_throw_arraybounds();*((char*)_tmp25.curr)=_tmp27;});}}{int j=0;for(0;j < _tmp20;
+++ j){({struct _dynforward_ptr _tmp28=_dynforward_ptr_plus(nlb,sizeof(char),(j + 1)+ 
 _tmp1F);char _tmp29=*((char*)_check_dynforward_subscript(_tmp28,sizeof(char),0));
 char _tmp2A=' ';if(_get_dynforward_size(_tmp28,sizeof(char))== 1  && (_tmp29 == '\000'
  && _tmp2A != '\000'))_throw_arraybounds();*((char*)_tmp28.curr)=_tmp2A;});}}((
@@ -1091,7 +1093,7 @@ _throw_arraybounds();*((char*)_tmp30.curr)=_tmp32;});({struct _dynforward_ptr
 _tmp33=_dynforward_ptr_plus(nlb,sizeof(char),2);char _tmp34=*((char*)
 _check_dynforward_subscript(_tmp33,sizeof(char),0));char _tmp35='\n';if(
 _get_dynforward_size(_tmp33,sizeof(char))== 1  && (_tmp34 == '\000'  && _tmp35 != '\000'))
-_throw_arraybounds();*((char*)_tmp33.curr)=_tmp35;});{int j=3;for(0;j < _tmp2C;j ++){({
+_throw_arraybounds();*((char*)_tmp33.curr)=_tmp35;});{int j=3;for(0;j < _tmp2C;++ j){({
 struct _dynforward_ptr _tmp36=_dynforward_ptr_plus(nlb,sizeof(char),j);char _tmp37=*((
 char*)_check_dynforward_subscript(_tmp36,sizeof(char),0));char _tmp38='~';if(
 _get_dynforward_size(_tmp36,sizeof(char))== 1  && (_tmp37 == '\000'  && _tmp38 != '\000'))
@@ -1234,7 +1236,7 @@ struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple5*,struct Cyc_PP_
 struct _tuple5*x))Cyc_Fn_make_fn)(Cyc_PP_concat_f,({struct _tuple5*_tmp7F=
 _cycalloc(sizeof(*_tmp7F));_tmp7F->f1=d1;_tmp7F->f2=d2;_tmp7F;}));_tmp7E;});}
 struct Cyc_PP_Doc*Cyc_PP_cat(struct _dynforward_ptr l){struct Cyc_PP_Doc*_tmp80=Cyc_PP_nil_doc();{
-int i=(int)(_get_dynforward_size(l,sizeof(struct Cyc_PP_Doc*))- 1);for(0;i >= 0;i --){
+int i=(int)(_get_dynforward_size(l,sizeof(struct Cyc_PP_Doc*))- 1);for(0;i >= 0;-- i){
 _tmp80=Cyc_PP_concat(*((struct Cyc_PP_Doc**)_check_dynforward_subscript(l,sizeof(
 struct Cyc_PP_Doc*),i)),_tmp80);}}return _tmp80;}static struct Cyc_PP_Out*Cyc_PP_long_cats_f(
 struct Cyc_List_List*ds0,struct Cyc_PP_Ppstate*st){struct Cyc_List_List*os=0;{

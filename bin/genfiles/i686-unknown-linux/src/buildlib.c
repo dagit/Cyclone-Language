@@ -532,9 +532,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -552,9 +553,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1934,8 +1936,8 @@ _tag_dynforward(_tmp4D,sizeof(char),_get_zero_arr_size_char(_tmp4D,27));});
 _tmp4C;});_tmp4B;}));}int Cyc_slurp_string(struct Cyc_Lexing_lexbuf*lexbuf){return
 Cyc_slurp_string_rec(lexbuf,6);}int Cyc_asm_rec(struct Cyc_Lexing_lexbuf*lexbuf,
 int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0:
-_LL6F: return 0;case 1: _LL70: if(Cyc_parens_to_match == 1)return 0;Cyc_parens_to_match
---;return 1;case 2: _LL71: Cyc_parens_to_match ++;return 1;case 3: _LL72: while(Cyc_asm_string(
+_LL6F: return 0;case 1: _LL70: if(Cyc_parens_to_match == 1)return 0;-- Cyc_parens_to_match;
+return 1;case 2: _LL71: ++ Cyc_parens_to_match;return 1;case 3: _LL72: while(Cyc_asm_string(
 lexbuf)){;}return 1;case 4: _LL73: while(Cyc_asm_comment(lexbuf)){;}return 1;case 5:
 _LL74: return 1;case 6: _LL75: return 1;default: _LL76:(lexbuf->refill_buff)(lexbuf);
 return Cyc_asm_rec(lexbuf,lexstate);}(int)_throw((void*)({struct Cyc_Lexing_Error_struct*
@@ -2045,67 +2047,66 @@ Cyc_Lexing_lexeme(lexbuf);_dynforward_ptr_inplace_plus(& _tmp72,sizeof(char),(in
 Cyc_strlen(({const char*_tmp73="hstub";_tag_dynforward(_tmp73,sizeof(char),
 _get_zero_arr_size_char(_tmp73,6));})));while(isspace((int)*((char*)
 _check_dynforward_subscript(_tmp72,sizeof(char),0)))){
-_dynforward_ptr_inplace_plus_post(& _tmp72,sizeof(char),1);}{struct
-_dynforward_ptr t=_tmp72;while(!isspace((int)*((char*)_check_dynforward_subscript(
-t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
-struct _dynforward_ptr _tmp74=Cyc_substring((struct _dynforward_ptr)_tmp72,0,(
-unsigned int)((t.curr - _tmp72.curr)/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(
-struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
-_tuple14*x=({struct _tuple14*_tmp76=_cycalloc(sizeof(*_tmp76));_tmp76->f1=(struct
-_dynforward_ptr)_tmp74;_tmp76->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
-struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp76;});Cyc_current_hstubs=({
-struct Cyc_List_List*_tmp75=_cycalloc(sizeof(*_tmp75));_tmp75->hd=x;_tmp75->tl=
-Cyc_current_hstubs;_tmp75;});return 1;}}}}case 6: _LLA0: Cyc_braces_to_match=1;Cyc_specbuf=(
-struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
-_tuple14*x=({struct _tuple14*_tmp78=_cycalloc(sizeof(*_tmp78));_tmp78->f1=(struct
-_dynforward_ptr)_tag_dynforward(0,0,0);_tmp78->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
-struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp78;});Cyc_current_cstubs=({
-struct Cyc_List_List*_tmp77=_cycalloc(sizeof(*_tmp77));_tmp77->hd=x;_tmp77->tl=
-Cyc_current_cstubs;_tmp77;});return 1;}case 7: _LLA1: {struct _dynforward_ptr _tmp79=
-Cyc_Lexing_lexeme(lexbuf);_dynforward_ptr_inplace_plus(& _tmp79,sizeof(char),(int)
-Cyc_strlen(({const char*_tmp7A="cstub";_tag_dynforward(_tmp7A,sizeof(char),
+_dynforward_ptr_inplace_plus(& _tmp72,sizeof(char),1);}{struct _dynforward_ptr t=
+_tmp72;while(!isspace((int)*((char*)_check_dynforward_subscript(t,sizeof(char),0)))){
+_dynforward_ptr_inplace_plus(& t,sizeof(char),1);}{struct _dynforward_ptr _tmp74=
+Cyc_substring((struct _dynforward_ptr)_tmp72,0,(unsigned int)((t.curr - _tmp72.curr)
+/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _tuple14*x=({struct _tuple14*_tmp76=
+_cycalloc(sizeof(*_tmp76));_tmp76->f1=(struct _dynforward_ptr)_tmp74;_tmp76->f2=(
+struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));
+_tmp76;});Cyc_current_hstubs=({struct Cyc_List_List*_tmp75=_cycalloc(sizeof(*
+_tmp75));_tmp75->hd=x;_tmp75->tl=Cyc_current_hstubs;_tmp75;});return 1;}}}}case 6:
+_LLA0: Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _tuple14*x=({struct _tuple14*_tmp78=
+_cycalloc(sizeof(*_tmp78));_tmp78->f1=(struct _dynforward_ptr)_tag_dynforward(0,0,
+0);_tmp78->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)
+_check_null(Cyc_specbuf));_tmp78;});Cyc_current_cstubs=({struct Cyc_List_List*
+_tmp77=_cycalloc(sizeof(*_tmp77));_tmp77->hd=x;_tmp77->tl=Cyc_current_cstubs;
+_tmp77;});return 1;}case 7: _LLA1: {struct _dynforward_ptr _tmp79=Cyc_Lexing_lexeme(
+lexbuf);_dynforward_ptr_inplace_plus(& _tmp79,sizeof(char),(int)Cyc_strlen(({
+const char*_tmp7A="cstub";_tag_dynforward(_tmp7A,sizeof(char),
 _get_zero_arr_size_char(_tmp7A,6));})));while(isspace((int)*((char*)
 _check_dynforward_subscript(_tmp79,sizeof(char),0)))){
-_dynforward_ptr_inplace_plus_post(& _tmp79,sizeof(char),1);}{struct
-_dynforward_ptr t=_tmp79;while(!isspace((int)*((char*)_check_dynforward_subscript(
-t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
-struct _dynforward_ptr _tmp7B=Cyc_substring((struct _dynforward_ptr)_tmp79,0,(
-unsigned int)((t.curr - _tmp79.curr)/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(
-struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
-_tuple14*x=({struct _tuple14*_tmp7D=_cycalloc(sizeof(*_tmp7D));_tmp7D->f1=(struct
-_dynforward_ptr)_tmp7B;_tmp7D->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
-struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp7D;});Cyc_current_cstubs=({
-struct Cyc_List_List*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C->hd=x;_tmp7C->tl=
-Cyc_current_cstubs;_tmp7C;});return 1;}}}}case 8: _LLA2: Cyc_braces_to_match=1;Cyc_specbuf=(
-struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
-_tuple14*x=({struct _tuple14*_tmp7F=_cycalloc(sizeof(*_tmp7F));_tmp7F->f1=(struct
-_dynforward_ptr)_tag_dynforward(0,0,0);_tmp7F->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
-struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp7F;});Cyc_current_cycstubs=({
-struct Cyc_List_List*_tmp7E=_cycalloc(sizeof(*_tmp7E));_tmp7E->hd=x;_tmp7E->tl=
-Cyc_current_cycstubs;_tmp7E;});return 1;}case 9: _LLA3: {struct _dynforward_ptr
-_tmp80=Cyc_Lexing_lexeme(lexbuf);_dynforward_ptr_inplace_plus(& _tmp80,sizeof(
-char),(int)Cyc_strlen(({const char*_tmp81="cycstub";_tag_dynforward(_tmp81,
-sizeof(char),_get_zero_arr_size_char(_tmp81,8));})));while(isspace((int)*((char*)
+_dynforward_ptr_inplace_plus(& _tmp79,sizeof(char),1);}{struct _dynforward_ptr t=
+_tmp79;while(!isspace((int)*((char*)_check_dynforward_subscript(t,sizeof(char),0)))){
+_dynforward_ptr_inplace_plus(& t,sizeof(char),1);}{struct _dynforward_ptr _tmp7B=
+Cyc_substring((struct _dynforward_ptr)_tmp79,0,(unsigned int)((t.curr - _tmp79.curr)
+/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _tuple14*x=({struct _tuple14*_tmp7D=
+_cycalloc(sizeof(*_tmp7D));_tmp7D->f1=(struct _dynforward_ptr)_tmp7B;_tmp7D->f2=(
+struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));
+_tmp7D;});Cyc_current_cstubs=({struct Cyc_List_List*_tmp7C=_cycalloc(sizeof(*
+_tmp7C));_tmp7C->hd=x;_tmp7C->tl=Cyc_current_cstubs;_tmp7C;});return 1;}}}}case 8:
+_LLA2: Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _tuple14*x=({struct _tuple14*_tmp7F=
+_cycalloc(sizeof(*_tmp7F));_tmp7F->f1=(struct _dynforward_ptr)_tag_dynforward(0,0,
+0);_tmp7F->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)
+_check_null(Cyc_specbuf));_tmp7F;});Cyc_current_cycstubs=({struct Cyc_List_List*
+_tmp7E=_cycalloc(sizeof(*_tmp7E));_tmp7E->hd=x;_tmp7E->tl=Cyc_current_cycstubs;
+_tmp7E;});return 1;}case 9: _LLA3: {struct _dynforward_ptr _tmp80=Cyc_Lexing_lexeme(
+lexbuf);_dynforward_ptr_inplace_plus(& _tmp80,sizeof(char),(int)Cyc_strlen(({
+const char*_tmp81="cycstub";_tag_dynforward(_tmp81,sizeof(char),
+_get_zero_arr_size_char(_tmp81,8));})));while(isspace((int)*((char*)
 _check_dynforward_subscript(_tmp80,sizeof(char),0)))){
-_dynforward_ptr_inplace_plus_post(& _tmp80,sizeof(char),1);}{struct
-_dynforward_ptr t=_tmp80;while(!isspace((int)*((char*)_check_dynforward_subscript(
-t,sizeof(char),0)))){_dynforward_ptr_inplace_plus_post(& t,sizeof(char),1);}{
-struct _dynforward_ptr _tmp82=Cyc_substring((struct _dynforward_ptr)_tmp80,0,(
-unsigned int)((t.curr - _tmp80.curr)/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(
-struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{struct
-_tuple14*x=({struct _tuple14*_tmp84=_cycalloc(sizeof(*_tmp84));_tmp84->f1=(struct
-_dynforward_ptr)_tmp82;_tmp84->f2=(struct _dynforward_ptr)Cyc_Buffer_contents((
-struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp84;});Cyc_current_cycstubs=({
-struct Cyc_List_List*_tmp83=_cycalloc(sizeof(*_tmp83));_tmp83->hd=x;_tmp83->tl=
-Cyc_current_cycstubs;_tmp83;});return 1;}}}}case 10: _LLA4: Cyc_braces_to_match=1;
-Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(255);while(Cyc_block(lexbuf)){;}{
-struct _dynforward_ptr*x=({struct _dynforward_ptr*_tmp86=_cycalloc(sizeof(*_tmp86));
-_tmp86[0]=(struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)
-_check_null(Cyc_specbuf));_tmp86;});Cyc_current_cpp=({struct Cyc_List_List*_tmp85=
-_cycalloc(sizeof(*_tmp85));_tmp85->hd=x;_tmp85->tl=Cyc_current_cpp;_tmp85;});
-return 1;}case 11: _LLA5: return 1;case 12: _LLA6: return 1;case 13: _LLA7:({struct Cyc_Int_pa_struct
-_tmp89;_tmp89.tag=1;_tmp89.f1=(unsigned long)((int)Cyc_Lexing_lexeme_char(lexbuf,
-0));{void*_tmp87[1]={& _tmp89};Cyc_fprintf(Cyc_stderr,({const char*_tmp88="Error in .cys file: expected command, found '%c' instead\n";
+_dynforward_ptr_inplace_plus(& _tmp80,sizeof(char),1);}{struct _dynforward_ptr t=
+_tmp80;while(!isspace((int)*((char*)_check_dynforward_subscript(t,sizeof(char),0)))){
+_dynforward_ptr_inplace_plus(& t,sizeof(char),1);}{struct _dynforward_ptr _tmp82=
+Cyc_substring((struct _dynforward_ptr)_tmp80,0,(unsigned int)((t.curr - _tmp80.curr)
+/ sizeof(char)));Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _tuple14*x=({struct _tuple14*_tmp84=
+_cycalloc(sizeof(*_tmp84));_tmp84->f1=(struct _dynforward_ptr)_tmp82;_tmp84->f2=(
+struct _dynforward_ptr)Cyc_Buffer_contents((struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));
+_tmp84;});Cyc_current_cycstubs=({struct Cyc_List_List*_tmp83=_cycalloc(sizeof(*
+_tmp83));_tmp83->hd=x;_tmp83->tl=Cyc_current_cycstubs;_tmp83;});return 1;}}}}case
+10: _LLA4: Cyc_braces_to_match=1;Cyc_specbuf=(struct Cyc_Buffer_t*)Cyc_Buffer_create(
+255);while(Cyc_block(lexbuf)){;}{struct _dynforward_ptr*x=({struct _dynforward_ptr*
+_tmp86=_cycalloc(sizeof(*_tmp86));_tmp86[0]=(struct _dynforward_ptr)Cyc_Buffer_contents((
+struct Cyc_Buffer_t*)_check_null(Cyc_specbuf));_tmp86;});Cyc_current_cpp=({struct
+Cyc_List_List*_tmp85=_cycalloc(sizeof(*_tmp85));_tmp85->hd=x;_tmp85->tl=Cyc_current_cpp;
+_tmp85;});return 1;}case 11: _LLA5: return 1;case 12: _LLA6: return 1;case 13: _LLA7:({
+struct Cyc_Int_pa_struct _tmp89;_tmp89.tag=1;_tmp89.f1=(unsigned long)((int)Cyc_Lexing_lexeme_char(
+lexbuf,0));{void*_tmp87[1]={& _tmp89};Cyc_fprintf(Cyc_stderr,({const char*_tmp88="Error in .cys file: expected command, found '%c' instead\n";
 _tag_dynforward(_tmp88,sizeof(char),_get_zero_arr_size_char(_tmp88,58));}),
 _tag_dynforward(_tmp87,sizeof(void*),1));}});return 0;default: _LLA8:(lexbuf->refill_buff)(
 lexbuf);return Cyc_commands_rec(lexbuf,lexstate);}(int)_throw((void*)({struct Cyc_Lexing_Error_struct*
@@ -2136,8 +2137,8 @@ int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){case 0:
 _LLB1:({void*_tmp97=0;Cyc_log(({const char*_tmp98="Warning: unclosed brace\n";
 _tag_dynforward(_tmp98,sizeof(char),_get_zero_arr_size_char(_tmp98,25));}),
 _tag_dynforward(_tmp97,sizeof(void*),0));});return 0;case 1: _LLB2: if(Cyc_braces_to_match
-== 1)return 0;Cyc_braces_to_match --;Cyc_Buffer_add_char((struct Cyc_Buffer_t*)
-_check_null(Cyc_specbuf),'}');return 1;case 2: _LLB3: Cyc_braces_to_match ++;Cyc_Buffer_add_char((
+== 1)return 0;-- Cyc_braces_to_match;Cyc_Buffer_add_char((struct Cyc_Buffer_t*)
+_check_null(Cyc_specbuf),'}');return 1;case 2: _LLB3: ++ Cyc_braces_to_match;Cyc_Buffer_add_char((
 struct Cyc_Buffer_t*)_check_null(Cyc_specbuf),'{');return 1;case 3: _LLB4: Cyc_Buffer_add_char((
 struct Cyc_Buffer_t*)_check_null(Cyc_specbuf),'"');while(Cyc_block_string(lexbuf)){;}
 return 1;case 4: _LLB5: Cyc_Buffer_add_string((struct Cyc_Buffer_t*)_check_null(Cyc_specbuf),({
@@ -2802,19 +2803,19 @@ _dynforward_ptr)({const char*_tmp27F=filename;_tag_dynforward(_tmp27F,sizeof(cha
 _get_zero_arr_size_char(_tmp27F,1));});{void*_tmp27C[1]={& _tmp27E};Cyc_aprintf(({
 const char*_tmp27D="_%s_";_tag_dynforward(_tmp27D,sizeof(char),
 _get_zero_arr_size_char(_tmp27D,5));}),_tag_dynforward(_tmp27C,sizeof(void*),1));}});{
-int _tmp20E=0;for(0;_tmp20E < _get_dynforward_size(ifdefmacro,sizeof(char));
-_tmp20E ++){if(*((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),
-_tmp20E))== '.'  || *((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),
-_tmp20E))== '/')({struct _dynforward_ptr _tmp20F=_dynforward_ptr_plus(ifdefmacro,
-sizeof(char),_tmp20E);char _tmp210=*((char*)_check_dynforward_subscript(_tmp20F,
-sizeof(char),0));char _tmp211='_';if(_get_dynforward_size(_tmp20F,sizeof(char))== 
-1  && (_tmp210 == '\000'  && _tmp211 != '\000'))_throw_arraybounds();*((char*)
-_tmp20F.curr)=_tmp211;});else{if(*((char*)_check_dynforward_subscript(ifdefmacro,
-sizeof(char),_tmp20E))!= '_'  && *((char*)_check_dynforward_subscript(ifdefmacro,
-sizeof(char),_tmp20E))!= '/')({struct _dynforward_ptr _tmp212=_dynforward_ptr_plus(
-ifdefmacro,sizeof(char),_tmp20E);char _tmp213=*((char*)
-_check_dynforward_subscript(_tmp212,sizeof(char),0));char _tmp214=(char)toupper((
-int)*((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),_tmp20E)));if(
+int _tmp20E=0;for(0;_tmp20E < _get_dynforward_size(ifdefmacro,sizeof(char));++
+_tmp20E){if(*((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),_tmp20E))
+== '.'  || *((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),_tmp20E))
+== '/')({struct _dynforward_ptr _tmp20F=_dynforward_ptr_plus(ifdefmacro,sizeof(
+char),_tmp20E);char _tmp210=*((char*)_check_dynforward_subscript(_tmp20F,sizeof(
+char),0));char _tmp211='_';if(_get_dynforward_size(_tmp20F,sizeof(char))== 1  && (
+_tmp210 == '\000'  && _tmp211 != '\000'))_throw_arraybounds();*((char*)_tmp20F.curr)=
+_tmp211;});else{if(*((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),
+_tmp20E))!= '_'  && *((char*)_check_dynforward_subscript(ifdefmacro,sizeof(char),
+_tmp20E))!= '/')({struct _dynforward_ptr _tmp212=_dynforward_ptr_plus(ifdefmacro,
+sizeof(char),_tmp20E);char _tmp213=*((char*)_check_dynforward_subscript(_tmp212,
+sizeof(char),0));char _tmp214=(char)toupper((int)*((char*)
+_check_dynforward_subscript(ifdefmacro,sizeof(char),_tmp20E)));if(
 _get_dynforward_size(_tmp212,sizeof(char))== 1  && (_tmp213 == '\000'  && _tmp214 != '\000'))
 _throw_arraybounds();*((char*)_tmp212.curr)=_tmp214;});}}}({struct Cyc_String_pa_struct
 _tmp218;_tmp218.tag=0;_tmp218.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)

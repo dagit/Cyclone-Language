@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1334,12 +1336,12 @@ struct _tuple6*,void*,void*,struct Cyc_Dict_Dict*),struct _tuple6*env,struct Cyc
 d,struct Cyc_Dict_Dict*accum))Cyc_Dict_fold_c)(Cyc_Dict_union_f,& _tmpDF,d2,& d1);
 return d1;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(void*,void*,void*,
 void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);static void _tmp15A(
-struct Cyc_Dict_Dict*d2,unsigned int*_tmp159,unsigned int*_tmp158,struct Cyc_Dict_T***
-_tmp157){for(*_tmp159=0;*_tmp159 < *_tmp158;(*_tmp159)++){(*_tmp157)[*_tmp159]=(
-struct Cyc_Dict_T*)(*d2).t;}}static void _tmp160(struct Cyc_Dict_Dict*d2,struct
-_dynforward_ptr*queue,unsigned int*_tmp15F,unsigned int*_tmp15E,struct Cyc_Dict_T***
-_tmp15C){for(*_tmp15F=0;*_tmp15F < *_tmp15E;(*_tmp15F)++){(*_tmp15C)[*_tmp15F]=*
-_tmp15F < _get_dynforward_size(*queue,sizeof(struct Cyc_Dict_T*))?*((struct Cyc_Dict_T**)
+unsigned int*_tmp159,unsigned int*_tmp158,struct Cyc_Dict_T***_tmp157,struct Cyc_Dict_Dict*
+d2){for(*_tmp159=0;*_tmp159 < *_tmp158;(*_tmp159)++){(*_tmp157)[*_tmp159]=(struct
+Cyc_Dict_T*)(*d2).t;}}static void _tmp160(struct _dynforward_ptr*queue,unsigned int*
+_tmp15F,unsigned int*_tmp15E,struct Cyc_Dict_T***_tmp15C,struct Cyc_Dict_Dict*d2){
+for(*_tmp15F=0;*_tmp15F < *_tmp15E;(*_tmp15F)++){(*_tmp15C)[*_tmp15F]=*_tmp15F < 
+_get_dynforward_size(*queue,sizeof(struct Cyc_Dict_T*))?*((struct Cyc_Dict_T**)
 _check_dynforward_subscript(*queue,sizeof(struct Cyc_Dict_T*),(int)*_tmp15F)):(
 struct Cyc_Dict_T*)(*d2).t;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(
 void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2){
@@ -1348,8 +1350,8 @@ _RegionHandle _tmpE2=_new_region("temp");struct _RegionHandle*temp=& _tmpE2;
 _push_region(temp);{unsigned int _tmp159;unsigned int _tmp158;struct Cyc_Dict_T**
 _tmp157;unsigned int _tmp156;struct _dynforward_ptr queue=_tag_dynforward(((_tmp156=(
 unsigned int)16,((_tmp157=(struct Cyc_Dict_T**)_region_malloc(temp,_check_times(
-sizeof(struct Cyc_Dict_T*),_tmp156)),((((_tmp158=_tmp156,_tmp15A(& d2,& _tmp159,&
-_tmp158,& _tmp157))),_tmp157)))))),sizeof(struct Cyc_Dict_T*),(unsigned int)16);
+sizeof(struct Cyc_Dict_T*),_tmp156)),((((_tmp158=_tmp156,_tmp15A(& _tmp159,&
+_tmp158,& _tmp157,& d2))),_tmp157)))))),sizeof(struct Cyc_Dict_T*),(unsigned int)16);
 int ind=0;while(ind != - 1){struct Cyc_Dict_T _tmpE4;struct Cyc_Dict_T*_tmpE5;struct
 Cyc_Dict_T*_tmpE6;struct _tuple0 _tmpE7;void*_tmpE8;void*_tmpE9;struct Cyc_Dict_T*
 _tmpE3=*((struct Cyc_Dict_T**)_check_dynforward_subscript(queue,sizeof(struct Cyc_Dict_T*),
@@ -1360,7 +1362,7 @@ _dynforward_ptr _tmp15D;struct Cyc_Dict_T**_tmp15C;unsigned int _tmp15B;queue=((
 _tmp15B=_get_dynforward_size(queue,sizeof(struct Cyc_Dict_T*))* 2,((_tmp15C=(
 struct Cyc_Dict_T**)_region_malloc(temp,_check_times(sizeof(struct Cyc_Dict_T*),
 _tmp15B)),((_tmp15D=_tag_dynforward(_tmp15C,sizeof(struct Cyc_Dict_T*),_tmp15B),((((
-_tmp15E=_tmp15B,_tmp160(& d2,& queue,& _tmp15F,& _tmp15E,& _tmp15C))),_tmp15D))))))));}
+_tmp15E=_tmp15B,_tmp160(& queue,& _tmp15F,& _tmp15E,& _tmp15C,& d2))),_tmp15D))))))));}
 if(_tmpE5 != 0)*((struct Cyc_Dict_T**)_check_dynforward_subscript(queue,sizeof(
 struct Cyc_Dict_T*),++ ind))=(struct Cyc_Dict_T*)_tmpE5;if(_tmpE6 != 0)*((struct Cyc_Dict_T**)
 _check_dynforward_subscript(queue,sizeof(struct Cyc_Dict_T*),++ ind))=(struct Cyc_Dict_T*)
@@ -1501,5 +1503,5 @@ char*_tmp17D;struct Cyc_Core_Failure_struct*_tmp17C;(int)_throw((void*)((_tmp17C
 _cycalloc(sizeof(*_tmp17C)),((_tmp17C[0]=((_tmp17E.tag=Cyc_Core_Failure,((
 _tmp17E.f1=((_tmp17D="Dict::unmarshal: list length is -1",_tag_dynforward(
 _tmp17D,sizeof(char),_get_zero_arr_size_char(_tmp17D,35)))),_tmp17E)))),_tmp17C)))));}{
-int i=0;for(0;i < len;i ++){void*key=read_key(env,fp);void*val=read_val(env,fp);
+int i=0;for(0;i < len;++ i){void*key=read_key(env,fp);void*val=read_val(env,fp);
 dict=Cyc_Dict_insert(dict,key,val);}}return dict;}

@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1014,12 +1016,12 @@ i ++){buf[i]='0';}buf[_tmp3B]=(char)0;}{int seen_eof=0;static short basefix[17]=
 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};nassigned=0;nread=0;for(0;1;0){c=(int)*((
 const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,
 sizeof(char),1),sizeof(char),0));if(c == 0)goto done;if(isspace(c)){for(0;1;0){c=
-_IO_getc(fp);if(c == - 1){seen_eof ++;break;}if(!isspace(c)){_IO_ungetc(c,fp);
-break;}nread ++;}continue;}if(c != '%')goto literal;width=(long long)0;flags=0;
+_IO_getc(fp);if(c == - 1){++ seen_eof;break;}if(!isspace(c)){_IO_ungetc(c,fp);
+break;}++ nread;}continue;}if(c != '%')goto literal;width=(long long)0;flags=0;
 again: c=(int)*((const char*)_check_dyneither_subscript(
 _dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));switch(c){
 case '%': _LL26: literal: n=_IO_getc(fp);if(n == - 1)goto eof_failure;if(n != c){
-_IO_ungetc(n,fp);goto match_failure;}nread ++;continue;case '*': _LL27: if(flags)goto
+_IO_ungetc(n,fp);goto match_failure;}++ nread;continue;case '*': _LL27: if(flags)goto
 control_failure;flags=8;goto again;case 'l': _LL28: if(flags & ~(8 | 64))goto
 control_failure;flags |=1;goto again;case 'L': _LL29: if(flags & ~(8 | 64))goto
 control_failure;flags |=2;goto again;case 'h': _LL2A: if(flags & ~(8 | 64))goto
@@ -1040,79 +1042,79 @@ flags |=32;c=1;break;case 'c': _LL44: flags |=32;c=0;break;case 'p': _LL45: flag
 short)nread;else{if(flags & 1)*Cyc_va_arg_int_ptr(*((void**)
 _check_dynforward_subscript(ap,sizeof(void*),0)))=(long)nread;else{*Cyc_va_arg_int_ptr(*((
 void**)_check_dynforward_subscript(ap,sizeof(void*),0)))=(int)nread;}}
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);continue;case '\000': _LL47:
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);continue;case '\000': _LL47:
 nassigned=- 1;goto done;default: _LL48: if(isupper(c))flags |=1;c=3;use_strtoul=0;
 base=10;break;}if(_IO_peekc(fp)== - 1)goto eof_failure;if((flags & 32)== 0){n=
-_IO_peekc(fp);while(isspace(n)){n=_IO_getc(fp);nread ++;n=_IO_peekc(fp);if(n == - 1)
+_IO_peekc(fp);while(isspace(n)){n=_IO_getc(fp);++ nread;n=_IO_peekc(fp);if(n == - 1)
 goto eof_failure;}}switch(c){case 0: _LL4A: if(width == 0)width=(long long)1;if(flags
 & 8){long long sum=(long long)0;for(0;width > 0;0){n=_IO_getc(fp);if(n == - 1  && 
-width != 0)goto eof_failure;else{if(n == - 1){seen_eof ++;break;}}sum ++;width --;}
+width != 0)goto eof_failure;else{if(n == - 1){++ seen_eof;break;}}++ sum;-- width;}
 nread +=sum;}else{long long sum=(long long)0;struct _dynforward_ptr _tmp22=Cyc_va_arg_char_ptr(*((
 void**)_check_dynforward_subscript(ap,sizeof(void*),0)));
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);for(0;width > 0;0){n=
-_IO_getc(fp);if(n == - 1  && width != 0)goto eof_failure;else{if(n == - 1){seen_eof ++;
-break;}}*((char*)_check_dynforward_subscript(_tmp22,sizeof(char),0))=(char)n;
-_dynforward_ptr_inplace_plus_post(& _tmp22,sizeof(char),1);sum ++;width --;}nread +=
-sum;nassigned ++;}break;case 1: _LL4B: if(width == 0)width=(long long)~ 0;if(flags & 8){
-n=0;{int c=_IO_peekc(fp);while((int)ccltab[_check_known_subscript_notnull(256,(
-int)((char)c))]){n ++;_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){
-if(n == 0)goto eof_failure;seen_eof ++;break;}}if(n == 0)goto match_failure;}}else{
-struct _dyneither_ptr p4=_dynforward_to_dyneither(Cyc_va_arg_string_ptr(*((void**)
-_check_dynforward_subscript(ap,sizeof(void*),0))));
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);{struct _dyneither_ptr p5=
-p4;int c=_IO_peekc(fp);while((int)ccltab[_check_known_subscript_notnull(256,(int)((
-char)c))]){if(_get_dyneither_size(p5,sizeof(char))== 0)goto eof_failure;*((char*)
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);for(0;width > 0;0){n=_IO_getc(
+fp);if(n == - 1  && width != 0)goto eof_failure;else{if(n == - 1){++ seen_eof;break;}}*((
+char*)_check_dynforward_subscript(_tmp22,sizeof(char),0))=(char)n;
+_dynforward_ptr_inplace_plus(& _tmp22,sizeof(char),1);++ sum;-- width;}nread +=sum;
+++ nassigned;}break;case 1: _LL4B: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{
+int c=_IO_peekc(fp);while((int)ccltab[_check_known_subscript_notnull(256,(int)((
+char)c))]){++ n;_IO_getc(fp);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){if(n
+== 0)goto eof_failure;++ seen_eof;break;}}if(n == 0)goto match_failure;}}else{struct
+_dyneither_ptr p4=_dynforward_to_dyneither(Cyc_va_arg_string_ptr(*((void**)
+_check_dynforward_subscript(ap,sizeof(void*),0))));_dynforward_ptr_inplace_plus(&
+ap,sizeof(void*),1);{struct _dyneither_ptr p5=p4;int c=_IO_peekc(fp);while((int)
+ccltab[_check_known_subscript_notnull(256,(int)((char)c))]){if(
+_get_dyneither_size(p5,sizeof(char))== 0)goto eof_failure;*((char*)
 _check_dyneither_subscript(p5,sizeof(char),0))=(char)c;
-_dyneither_ptr_inplace_plus_post(& p5,sizeof(char),1);_IO_getc(fp);if(-- width == 0)
-break;if((c=_IO_peekc(fp))== - 1){if(p5.curr == p0.curr)goto eof_failure;seen_eof ++;
+_dyneither_ptr_inplace_plus(& p5,sizeof(char),1);_IO_getc(fp);if(-- width == 0)
+break;if((c=_IO_peekc(fp))== - 1){if(p5.curr == p0.curr)goto eof_failure;++ seen_eof;
 break;}}n=(p5.curr - p4.curr)/ sizeof(char);if(n == 0)goto match_failure;if(
 _get_dyneither_size(p5,sizeof(char))== 0)goto eof_failure;*((char*)
-_check_dyneither_subscript(p5,sizeof(char),0))='\000';nassigned ++;}}nread +=n;
+_check_dyneither_subscript(p5,sizeof(char),0))='\000';++ nassigned;}}nread +=n;
 break;case 2: _LL4C: if(width == 0)width=(long long)~ 0;if(flags & 8){n=0;{int c=
-_IO_peekc(fp);while(!isspace((int)((unsigned char)c))){n ++;_IO_getc(fp);if(--
-width == 0)break;if((c=_IO_peekc(fp))== - 1){seen_eof ++;break;}}nread +=n;}}else{
+_IO_peekc(fp);while(!isspace((int)((unsigned char)c))){++ n;_IO_getc(fp);if(--
+width == 0)break;if((c=_IO_peekc(fp))== - 1){++ seen_eof;break;}}nread +=n;}}else{
 struct _dynforward_ptr _tmp23=Cyc_va_arg_string_ptr(*((void**)
-_check_dynforward_subscript(ap,sizeof(void*),0)));
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);{struct _dynforward_ptr
-_tmp24=_tmp23;int c=_IO_peekc(fp);while(!isspace((int)((unsigned char)c))){c=
-_IO_getc(fp);if(_get_dynforward_size(_tmp24,sizeof(char))== 0)goto eof_failure;*((
-char*)_check_dynforward_subscript(_tmp24,sizeof(char),0))=(char)c;
-_dynforward_ptr_inplace_plus_post(& _tmp24,sizeof(char),1);if(-- width == 0)break;
-if((c=_IO_peekc(fp))== - 1){seen_eof ++;break;}}if(_get_dynforward_size(_tmp24,
-sizeof(char))== 0)goto eof_failure;*((char*)_check_dynforward_subscript(_tmp24,
-sizeof(char),0))='\000';nread +=(_tmp24.curr - _tmp23.curr)/ sizeof(char);
-nassigned ++;}}continue;case 3: _LL4D: if(width == 0  || width > sizeof(buf)- 1)width=(
-long long)(sizeof(buf)- 1);flags |=(64 | 128)| 512;{char*_tmp60;for(p=((_tmp60=buf,
-_tag_dyneither(_tmp60,sizeof(char),_get_zero_arr_size_char(_tmp60,351))));width
-!= 0;width --){c=(int)((unsigned char)_IO_peekc(fp));switch(c){case '0': _LL4F: if(
-base == 0){base=8;flags |=256;}if(flags & 512)flags &=~((64 | 512)| 128);else{flags &=
-~((64 | 256)| 128);}goto ok;case '1': _LL50: goto _LL51;case '2': _LL51: goto _LL52;case '3':
-_LL52: goto _LL53;case '4': _LL53: goto _LL54;case '5': _LL54: goto _LL55;case '6': _LL55:
-goto _LL56;case '7': _LL56: base=(int)basefix[_check_known_subscript_notnull(17,base)];
-flags &=~((64 | 256)| 128);goto ok;case '8': _LL57: goto _LL58;case '9': _LL58: base=(int)
-basefix[_check_known_subscript_notnull(17,base)];if(base <= 8)break;flags &=~((64 | 
-256)| 128);goto ok;case 'A': _LL59: goto _LL5A;case 'B': _LL5A: goto _LL5B;case 'C': _LL5B:
-goto _LL5C;case 'D': _LL5C: goto _LL5D;case 'E': _LL5D: goto _LL5E;case 'F': _LL5E: goto
-_LL5F;case 'a': _LL5F: goto _LL60;case 'b': _LL60: goto _LL61;case 'c': _LL61: goto _LL62;
-case 'd': _LL62: goto _LL63;case 'e': _LL63: goto _LL64;case 'f': _LL64: if(base <= 10)
-break;flags &=~((64 | 256)| 128);goto ok;case '+': _LL65: goto _LL66;case '-': _LL66: if(
-flags & 64){flags &=~ 64;goto ok;}break;case 'x': _LL67: goto _LL68;case 'X': _LL68:{char*
-_tmp61;if(flags & 256  && p.curr == (_dyneither_ptr_plus(((_tmp61=buf,
-_tag_dyneither(_tmp61,sizeof(char),_get_zero_arr_size_char(_tmp61,351)))),
-sizeof(char),1)).curr){base=16;flags &=~ 256;goto ok;}}break;default: _LL69: break;}
-break;ok: {char _tmp64;char _tmp63;struct _dyneither_ptr _tmp62;(_tmp62=
-_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((_tmp63=*((char*)
-_check_dyneither_subscript(_tmp62,sizeof(char),0)),((_tmp64=(char)c,((
-_get_dyneither_size(_tmp62,sizeof(char))== 1  && (_tmp63 == '\000'  && _tmp64 != '\000')?
-_throw_arraybounds(): 1,*((char*)_tmp62.curr)=_tmp64)))))));}_IO_getc(fp);if(
-_IO_peekc(fp)== - 1){seen_eof ++;break;}}}if(flags & 128){{char*_tmp65;if(p.curr > ((
-_tmp65=buf,_tag_dyneither(_tmp65,sizeof(char),_get_zero_arr_size_char(_tmp65,351)))).curr){
-_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);_IO_ungetc((int)*((char*)
-_check_dyneither_subscript(p,sizeof(char),0)),fp);}}goto match_failure;}c=(int)*((
-char*)_check_dyneither_subscript(p,sizeof(char),- 1));if(c == 'x'  || c == 'X'){
-_dyneither_ptr_inplace_plus(& p,sizeof(char),-1);_IO_ungetc(c,fp);}if((flags & 8)
-== 0){unsigned long res;{char _tmp68;char _tmp67;struct _dyneither_ptr _tmp66;(_tmp66=
-p,((_tmp67=*((char*)_check_dyneither_subscript(_tmp66,sizeof(char),0)),((_tmp68='\000',((
+_check_dynforward_subscript(ap,sizeof(void*),0)));_dynforward_ptr_inplace_plus(&
+ap,sizeof(void*),1);{struct _dynforward_ptr _tmp24=_tmp23;int c=_IO_peekc(fp);
+while(!isspace((int)((unsigned char)c))){c=_IO_getc(fp);if(_get_dynforward_size(
+_tmp24,sizeof(char))== 0)goto eof_failure;*((char*)_check_dynforward_subscript(
+_tmp24,sizeof(char),0))=(char)c;_dynforward_ptr_inplace_plus(& _tmp24,sizeof(char),
+1);if(-- width == 0)break;if((c=_IO_peekc(fp))== - 1){++ seen_eof;break;}}if(
+_get_dynforward_size(_tmp24,sizeof(char))== 0)goto eof_failure;*((char*)
+_check_dynforward_subscript(_tmp24,sizeof(char),0))='\000';nread +=(_tmp24.curr - 
+_tmp23.curr)/ sizeof(char);++ nassigned;}}continue;case 3: _LL4D: if(width == 0  || 
+width > sizeof(buf)- 1)width=(long long)(sizeof(buf)- 1);flags |=(64 | 128)| 512;{
+char*_tmp60;for(p=((_tmp60=buf,_tag_dyneither(_tmp60,sizeof(char),
+_get_zero_arr_size_char(_tmp60,351))));width != 0;-- width){c=(int)((unsigned char)
+_IO_peekc(fp));switch(c){case '0': _LL4F: if(base == 0){base=8;flags |=256;}if(flags & 
+512)flags &=~((64 | 512)| 128);else{flags &=~((64 | 256)| 128);}goto ok;case '1': _LL50:
+goto _LL51;case '2': _LL51: goto _LL52;case '3': _LL52: goto _LL53;case '4': _LL53: goto
+_LL54;case '5': _LL54: goto _LL55;case '6': _LL55: goto _LL56;case '7': _LL56: base=(int)
+basefix[_check_known_subscript_notnull(17,base)];flags &=~((64 | 256)| 128);goto ok;
+case '8': _LL57: goto _LL58;case '9': _LL58: base=(int)basefix[
+_check_known_subscript_notnull(17,base)];if(base <= 8)break;flags &=~((64 | 256)| 
+128);goto ok;case 'A': _LL59: goto _LL5A;case 'B': _LL5A: goto _LL5B;case 'C': _LL5B: goto
+_LL5C;case 'D': _LL5C: goto _LL5D;case 'E': _LL5D: goto _LL5E;case 'F': _LL5E: goto _LL5F;
+case 'a': _LL5F: goto _LL60;case 'b': _LL60: goto _LL61;case 'c': _LL61: goto _LL62;case 'd':
+_LL62: goto _LL63;case 'e': _LL63: goto _LL64;case 'f': _LL64: if(base <= 10)break;flags &=
+~((64 | 256)| 128);goto ok;case '+': _LL65: goto _LL66;case '-': _LL66: if(flags & 64){
+flags &=~ 64;goto ok;}break;case 'x': _LL67: goto _LL68;case 'X': _LL68:{char*_tmp61;if(
+flags & 256  && p.curr == (_dyneither_ptr_plus(((_tmp61=buf,_tag_dyneither(_tmp61,
+sizeof(char),_get_zero_arr_size_char(_tmp61,351)))),sizeof(char),1)).curr){base=
+16;flags &=~ 256;goto ok;}}break;default: _LL69: break;}break;ok: {char _tmp64;char
+_tmp63;struct _dyneither_ptr _tmp62;(_tmp62=_dyneither_ptr_inplace_plus_post(& p,
+sizeof(char),1),((_tmp63=*((char*)_check_dyneither_subscript(_tmp62,sizeof(char),
+0)),((_tmp64=(char)c,((_get_dyneither_size(_tmp62,sizeof(char))== 1  && (_tmp63 == '\000'
+ && _tmp64 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp62.curr)=_tmp64)))))));}
+_IO_getc(fp);if(_IO_peekc(fp)== - 1){++ seen_eof;break;}}}if(flags & 128){{char*
+_tmp65;if(p.curr > ((_tmp65=buf,_tag_dyneither(_tmp65,sizeof(char),
+_get_zero_arr_size_char(_tmp65,351)))).curr){_dyneither_ptr_inplace_plus(& p,
+sizeof(char),-1);_IO_ungetc((int)*((char*)_check_dyneither_subscript(p,sizeof(
+char),0)),fp);}}goto match_failure;}c=(int)*((char*)_check_dyneither_subscript(p,
+sizeof(char),- 1));if(c == 'x'  || c == 'X'){_dyneither_ptr_inplace_plus(& p,sizeof(
+char),-1);_IO_ungetc(c,fp);}if((flags & 8)== 0){unsigned long res;{char _tmp68;char
+_tmp67;struct _dyneither_ptr _tmp66;(_tmp66=p,((_tmp67=*((char*)
+_check_dyneither_subscript(_tmp66,sizeof(char),0)),((_tmp68='\000',((
 _get_dyneither_size(_tmp66,sizeof(char))== 1  && (_tmp67 == '\000'  && _tmp68 != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmp66.curr)=_tmp68)))))));}if(use_strtoul)res=
 strtoul((char*)buf,0,base);else{res=(unsigned long)strtol((char*)buf,0,base);}
@@ -1121,12 +1123,12 @@ sizeof(void*),0)))=(int)res;else{if(flags & 4)*Cyc_va_arg_short_ptr(*((void**)
 _check_dynforward_subscript(ap,sizeof(void*),0)))=(short)res;else{if(flags & 1)*
 Cyc_va_arg_int_ptr(*((void**)_check_dynforward_subscript(ap,sizeof(void*),0)))=(
 int)res;else{*Cyc_va_arg_int_ptr(*((void**)_check_dynforward_subscript(ap,
-sizeof(void*),0)))=(int)res;}}}_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),
-1);nassigned ++;}{char*_tmp69;nread +=(p.curr - ((_tmp69=buf,_tag_dyneither(_tmp69,
+sizeof(void*),0)))=(int)res;}}}_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);
+++ nassigned;}{char*_tmp69;nread +=(p.curr - ((_tmp69=buf,_tag_dyneither(_tmp69,
 sizeof(char),_get_zero_arr_size_char(_tmp69,351)))).curr)/ sizeof(char);}break;
 case 4: _LL4E: if(width == 0  || width > sizeof(buf)- 1)width=(long long)(sizeof(buf)- 
 1);flags |=((64 | 128)| 256)| 512;{char*_tmp6A;for(p=((_tmp6A=buf,_tag_dyneither(
-_tmp6A,sizeof(char),_get_zero_arr_size_char(_tmp6A,351))));width != 0;width --){c=
+_tmp6A,sizeof(char),_get_zero_arr_size_char(_tmp6A,351))));width != 0;-- width){c=
 _IO_peekc(fp);switch(c){case '0': _LL6C: goto _LL6D;case '1': _LL6D: goto _LL6E;case '2':
 _LL6E: goto _LL6F;case '3': _LL6F: goto _LL70;case '4': _LL70: goto _LL71;case '5': _LL71:
 goto _LL72;case '6': _LL72: goto _LL73;case '7': _LL73: goto _LL74;case '8': _LL74: goto
@@ -1139,7 +1141,7 @@ _tmp6B=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((_tmp6C=*((char*)
 _check_dyneither_subscript(_tmp6B,sizeof(char),0)),((_tmp6D=(char)c,((
 _get_dyneither_size(_tmp6B,sizeof(char))== 1  && (_tmp6C == '\000'  && _tmp6D != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmp6B.curr)=_tmp6D)))))));}_IO_getc(fp);if(
-_IO_peekc(fp)== - 1){seen_eof ++;break;}}}if(flags & 128){if(flags & 512){{char*
+_IO_peekc(fp)== - 1){++ seen_eof;break;}}}if(flags & 128){if(flags & 512){{char*
 _tmp6E;while(p.curr > ((_tmp6E=buf,_tag_dyneither(_tmp6E,sizeof(char),
 _get_zero_arr_size_char(_tmp6E,351)))).curr){_dyneither_ptr_inplace_plus(& p,
 sizeof(char),-1);_IO_ungetc((int)*((char*)_check_dyneither_subscript(p,sizeof(
@@ -1154,14 +1156,14 @@ _throw_arraybounds(): 1,*((char*)_tmp6F.curr)=_tmp71)))))));}res=atof((const cha
 buf);if(flags & 1)*Cyc_va_arg_double_ptr(*((void**)_check_dynforward_subscript(ap,
 sizeof(void*),0)))=res;else{*Cyc_va_arg_float_ptr(*((void**)
 _check_dynforward_subscript(ap,sizeof(void*),0)))=(float)res;}
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);nassigned ++;}{char*_tmp72;
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);++ nassigned;}{char*_tmp72;
 nread +=(p.curr - ((_tmp72=buf,_tag_dyneither(_tmp72,sizeof(char),
 _get_zero_arr_size_char(_tmp72,351)))).curr)/ sizeof(char);}break;default: _LL6B: {
 struct Cyc_Core_Impossible_struct _tmp78;const char*_tmp77;struct Cyc_Core_Impossible_struct*
 _tmp76;(int)_throw((void*)((_tmp76=_cycalloc(sizeof(*_tmp76)),((_tmp76[0]=((
 _tmp78.tag=Cyc_Core_Impossible,((_tmp78.f1=((_tmp77="scanf3",_tag_dynforward(
 _tmp77,sizeof(char),_get_zero_arr_size_char(_tmp77,7)))),_tmp78)))),_tmp76)))));}}}
-eof_failure: seen_eof ++;input_failure: if(nassigned == 0)nassigned=- 1;
+eof_failure: ++ seen_eof;input_failure: if(nassigned == 0)nassigned=- 1;
 control_failure: match_failure: if((unsigned int)errp)*errp |=2;done: if((
 unsigned int)errp  && seen_eof)*errp |=1;return nassigned;}}static struct
 _dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt);static struct
@@ -1169,16 +1171,16 @@ _dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt){int c;int n;int v;
 const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,
 sizeof(char),1),sizeof(char),0));if(c == '^'){v=1;c=(int)*((const char*)
 _check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),
-sizeof(char),0));}else{v=0;}for(n=0;n < 256;n ++){tab[
+sizeof(char),0));}else{v=0;}for(n=0;n < 256;++ n){tab[
 _check_known_subscript_notnull(256,n)]=(char)v;}if(c == 0)return
 _dyneither_ptr_plus(fmt,sizeof(char),- 1);v=1 - v;for(0;1;0){tab[
 _check_known_subscript_notnull(256,c)]=(char)v;doswitch: n=(int)*((const char*)
 _check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),
 sizeof(char),0));switch(n){case 0: _LL7E: return _dyneither_ptr_plus(fmt,sizeof(char),
 - 1);case '-': _LL7F: n=(int)*((const char*)_check_dyneither_subscript(fmt,sizeof(
-char),0));if(n == ']'  || n < c){c=(int)'-';break;}_dyneither_ptr_inplace_plus_post(&
-fmt,sizeof(char),1);do{tab[_check_known_subscript_notnull(256,++ c)]=(char)v;}while(
-c < n);goto doswitch;break;case ']': _LL80: return fmt;default: _LL81: c=n;break;}}}
+char),0));if(n == ']'  || n < c){c=(int)'-';break;}_dyneither_ptr_inplace_plus(& fmt,
+sizeof(char),1);do{tab[_check_known_subscript_notnull(256,++ c)]=(char)v;}while(c
+< n);goto doswitch;break;case ']': _LL80: return fmt;default: _LL81: c=n;break;}}}
 static int Cyc_string_getc(struct _dyneither_ptr*sptr);static int Cyc_string_getc(
 struct _dyneither_ptr*sptr){char c;struct _dyneither_ptr s=*sptr;if((s.curr == ((
 struct _dyneither_ptr)_tag_dyneither(0,0,0)).curr  || _get_dyneither_size(s,

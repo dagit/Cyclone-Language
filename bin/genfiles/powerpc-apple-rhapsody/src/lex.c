@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1326,8 +1328,8 @@ _tmp40,_tmp40 + 8},262,1},{{_tmp41,_tmp41 + 6},276,1},{{_tmp42,_tmp42 + 9},271,1
 _tmp43,_tmp43 + 6},302,0},{{_tmp44,_tmp44 + 5},263,1},{{_tmp45,_tmp45 + 9},273,1},{{
 _tmp46,_tmp46 + 6},285,1},{{_tmp47,_tmp47 + 8},305,0},{{_tmp48,_tmp48 + 9},320,0}};
 static int Cyc_Lex_num_keywords(int include_cyclone_keywords);static int Cyc_Lex_num_keywords(
-int include_cyclone_keywords){int sum=0;{unsigned int i=0;for(0;i < 70;i ++){if(
-include_cyclone_keywords  || (Cyc_Lex_rw_array[(int)i]).f3)sum ++;}}return sum;}
+int include_cyclone_keywords){int sum=0;{unsigned int i=0;for(0;i < 70;++ i){if(
+include_cyclone_keywords  || (Cyc_Lex_rw_array[(int)i]).f3)++ sum;}}return sum;}
 static int Cyc_Lex_trie_char(int c);static int Cyc_Lex_trie_char(int c){if(c >= 95)
 return c - 59;else{if(c > 64)return c - 55;}return c - 48;}static struct Cyc_Lex_Trie*Cyc_Lex_trie_lookup(
 struct _RegionHandle*r,struct Cyc_Lex_Trie*t,struct _dynforward_ptr buff,int offset,
@@ -1613,7 +1615,7 @@ _tmpBA;if(Cyc_Lex_is_typedef(0,_tmpBA))return 356;return 350;}}static short Cyc_
 struct Cyc_Lexing_lexbuf*lbuf);static short Cyc_Lex_process_qual_id(struct Cyc_Lexing_lexbuf*
 lbuf){int i=lbuf->lex_start_pos;int end=lbuf->lex_curr_pos;struct _dynforward_ptr s=
 lbuf->lex_buffer;struct Cyc_List_List*rev_vs=0;while(i < end){int start=i;for(0;i < 
-end  && *((char*)_check_dynforward_subscript(s,sizeof(char),i))!= ':';i ++){;}if(
+end  && *((char*)_check_dynforward_subscript(s,sizeof(char),i))!= ':';++ i){;}if(
 start == i){struct Cyc_Core_Impossible_struct _tmp13A;const char*_tmp139;struct Cyc_Core_Impossible_struct*
 _tmp138;(int)_throw((void*)((_tmp138=_cycalloc(sizeof(*_tmp138)),((_tmp138[0]=((
 _tmp13A.tag=Cyc_Core_Impossible,((_tmp13A.f1=((_tmp139="bad namespace",
@@ -1972,10 +1974,10 @@ unsigned int _tmp17A;Cyc_Lex_kw_nums=((_tmp17A=(unsigned int)Cyc_Lex_num_kws,((
 _tmp17B=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmp17A)),((_tmp17C=
 _tag_dynforward(_tmp17B,sizeof(int),_tmp17A),((((_tmp17D=_tmp17A,_tmp17F(&
 _tmp17E,& _tmp17D,& _tmp17B))),_tmp17C))))))));}{unsigned int i=0;unsigned int rwsze=
-70;{unsigned int j=0;for(0;j < rwsze;j ++){if(include_cyclone_keywords  || (Cyc_Lex_rw_array[(
+70;{unsigned int j=0;for(0;j < rwsze;++ j){if(include_cyclone_keywords  || (Cyc_Lex_rw_array[(
 int)j]).f3){struct _dynforward_ptr _tmpF4=(Cyc_Lex_rw_array[
 _check_known_subscript_notnull(70,(int)j)]).f1;Cyc_Lex_str_index(_tmpF4,0,(int)
 Cyc_strlen((struct _dynforward_ptr)_tmpF4));*((int*)_check_dynforward_subscript(
 Cyc_Lex_kw_nums,sizeof(int),(int)i))=(int)(Cyc_Lex_rw_array[
-_check_known_subscript_notnull(70,(int)j)]).f2;i ++;}}}Cyc_Lex_typedef_init();Cyc_Lex_comment_depth=
+_check_known_subscript_notnull(70,(int)j)]).f2;++ i;}}}Cyc_Lex_typedef_init();Cyc_Lex_comment_depth=
 0;}}}}

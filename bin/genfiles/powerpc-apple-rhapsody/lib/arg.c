@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -990,12 +992,12 @@ _get_zero_arr_size_char(_tmp61,14)))),((_tmp62="arg.cyc",_tag_dynforward(_tmp62,
 sizeof(char),_get_zero_arr_size_char(_tmp62,8)))),94);}if(howmuch > _tmp2){Cyc_Buffer_add_string(
 b,s);return(struct _dynforward_ptr)_tag_dynforward(0,0,0);}{int i;for(i=howmuch - 1;
 i >= 0  && !isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),
-i)));i --){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[
+i)));-- i){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[
 i]) && !isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),i)));
-i ++){;}Cyc_Buffer_add_substring(b,s,0,i);{struct _dynforward_ptr whatsleft=(struct
+++ i){;}Cyc_Buffer_add_substring(b,s,0,i);{struct _dynforward_ptr whatsleft=(struct
 _dynforward_ptr)_tag_dynforward(0,0,0);for(0;(i < _tmp2  && (int)((const char*)s.curr)[
 i]) && isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),i)));
-i ++){;}if(i < _tmp2  && (int)((const char*)s.curr)[i])whatsleft=
+++ i){;}if(i < _tmp2  && (int)((const char*)s.curr)[i])whatsleft=
 _dynforward_ptr_plus(s,sizeof(char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(
 struct Cyc_Buffer_t*b,int indent,int margin,struct _dynforward_ptr item,struct
 _dynforward_ptr desc);static void _tmp68(unsigned int*_tmp67,unsigned int*_tmp66,
@@ -1011,7 +1013,7 @@ unsigned int _tmp63;struct _dynforward_ptr indentstr=(_tmp63=(unsigned int)(inde
 2),((_tmp64=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp63 + 1)),((
 _tmp65=_tag_dynforward(_tmp64,sizeof(char),_tmp63 + 1),((((_tmp66=_tmp63,((_tmp68(&
 _tmp67,& _tmp66,& _tmp64),_tmp64[_tmp66]=(char)0)))),_tmp65)))))));{unsigned int i=
-0;for(0;i < indent + 1;i ++){char _tmp6B;char _tmp6A;struct _dynforward_ptr _tmp69;(
+0;for(0;i < indent + 1;++ i){char _tmp6B;char _tmp6A;struct _dynforward_ptr _tmp69;(
 _tmp69=_dynforward_ptr_plus(indentstr,sizeof(char),(int)i),((_tmp6A=*((char*)
 _check_dynforward_subscript(_tmp69,sizeof(char),0)),((_tmp6B=i == 0?'\n':' ',((
 _get_dynforward_size(_tmp69,sizeof(char))== 1  && (_tmp6A == '\000'  && _tmp6B != '\000')?
@@ -1023,7 +1025,7 @@ unsigned int _tmp6C;struct _dynforward_ptr temp=(_tmp6C=(indent - _tmp8)+ 1,((_t
 char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp6C + 1)),((_tmp6E=
 _tag_dynforward(_tmp6D,sizeof(char),_tmp6C + 1),((((_tmp6F=_tmp6C,((_tmp71(&
 _tmp70,& _tmp6F,& _tmp6D),_tmp6D[_tmp6F]=(char)0)))),_tmp6E)))))));{unsigned int i=
-0;for(0;i < indent - _tmp8;i ++){char _tmp74;char _tmp73;struct _dynforward_ptr _tmp72;(
+0;for(0;i < indent - _tmp8;++ i){char _tmp74;char _tmp73;struct _dynforward_ptr _tmp72;(
 _tmp72=_dynforward_ptr_plus(temp,sizeof(char),(int)i),((_tmp73=*((char*)
 _check_dynforward_subscript(_tmp72,sizeof(char),0)),((_tmp74=' ',((
 _get_dynforward_size(_tmp72,sizeof(char))== 1  && (_tmp73 == '\000'  && _tmp74 != '\000')?

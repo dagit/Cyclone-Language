@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -951,18 +953,18 @@ q,void*x);void Cyc_Queue_radd(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,vo
 x){struct Cyc_List_List*_tmp5;struct Cyc_List_List*cell=(_tmp5=_region_malloc(r,
 sizeof(*_tmp5)),((_tmp5->hd=(void*)x,((_tmp5->tl=0,_tmp5)))));if(q->front == 0){q->front=
 cell;q->rear=cell;}else{((struct Cyc_List_List*)_check_null(q->rear))->tl=cell;q->rear=
-cell;}q->len ++;}void Cyc_Queue_add(struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_add(
+cell;}++ q->len;}void Cyc_Queue_add(struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_add(
 struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void
 Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_rpush(
 struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){{struct Cyc_List_List*_tmp6;
 q->front=((_tmp6=_region_malloc(r,sizeof(*_tmp6)),((_tmp6->hd=(void*)x,((_tmp6->tl=
-q->front,_tmp6))))));}if(q->rear == 0)q->rear=q->front;q->len ++;}void Cyc_Queue_push(
+q->front,_tmp6))))));}if(q->rear == 0)q->rear=q->front;++ q->len;}void Cyc_Queue_push(
 struct Cyc_Queue_Queue*q,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*q,void*
 x){Cyc_Queue_rpush(Cyc_Core_heap_region,q,x);}void*Cyc_Queue_take(struct Cyc_Queue_Queue*
 q);void*Cyc_Queue_take(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((
 void*)Cyc_Queue_Empty);else{void*_tmp3=(void*)((struct Cyc_List_List*)_check_null(
 q->front))->hd;q->front=((struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front
-== 0)q->rear=0;q->len --;return _tmp3;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*
+== 0)q->rear=0;-- q->len;return _tmp3;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*
 q);void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((
 void*)Cyc_Queue_Empty);else{return(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;}}
 void Cyc_Queue_clear(struct Cyc_Queue_Queue*q);void Cyc_Queue_clear(struct Cyc_Queue_Queue*

@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -2345,10 +2347,10 @@ _dynforward_ptr Cyc_Absyn_f0={_tmp176,_tmp176 + 3};static struct _dynforward_ptr
 1]={& Cyc_Absyn_f0};static struct _dynforward_ptr Cyc_Absyn_field_names={(void*)((
 struct _dynforward_ptr**)Cyc_Absyn_field_names_v),(void*)((struct _dynforward_ptr**)
 Cyc_Absyn_field_names_v + 1)};struct _dynforward_ptr*Cyc_Absyn_fieldname(int i);
-static void _tmp653(unsigned int*_tmp652,unsigned int*_tmp651,struct
-_dynforward_ptr***_tmp64F,unsigned int*fsz){for(*_tmp652=0;*_tmp652 < *_tmp651;(*
-_tmp652)++){struct Cyc_Int_pa_struct _tmp64D;void*_tmp64C[1];const char*_tmp64B;
-struct _dynforward_ptr*_tmp64A;(*_tmp64F)[*_tmp652]=*_tmp652 < *fsz?*((struct
+static void _tmp653(unsigned int*fsz,unsigned int*_tmp652,unsigned int*_tmp651,
+struct _dynforward_ptr***_tmp64F){for(*_tmp652=0;*_tmp652 < *_tmp651;(*_tmp652)++){
+struct Cyc_Int_pa_struct _tmp64D;void*_tmp64C[1];const char*_tmp64B;struct
+_dynforward_ptr*_tmp64A;(*_tmp64F)[*_tmp652]=*_tmp652 < *fsz?*((struct
 _dynforward_ptr**)_check_dynforward_subscript(Cyc_Absyn_field_names,sizeof(
 struct _dynforward_ptr*),(int)*_tmp652)):((_tmp64A=_cycalloc(sizeof(*_tmp64A)),((
 _tmp64A[0]=(struct _dynforward_ptr)((_tmp64D.tag=1,((_tmp64D.f1=(unsigned long)((
@@ -2360,11 +2362,11 @@ _dynforward_ptr*));if(i >= fsz){unsigned int _tmp652;unsigned int _tmp651;struct
 _dynforward_ptr _tmp650;struct _dynforward_ptr**_tmp64F;unsigned int _tmp64E;Cyc_Absyn_field_names=((
 _tmp64E=(unsigned int)(i + 1),((_tmp64F=(struct _dynforward_ptr**)_cycalloc(
 _check_times(sizeof(struct _dynforward_ptr*),_tmp64E)),((_tmp650=_tag_dynforward(
-_tmp64F,sizeof(struct _dynforward_ptr*),_tmp64E),((((_tmp651=_tmp64E,_tmp653(&
-_tmp652,& _tmp651,& _tmp64F,& fsz))),_tmp650))))))));}return*((struct
-_dynforward_ptr**)_check_dynforward_subscript(Cyc_Absyn_field_names,sizeof(
-struct _dynforward_ptr*),i));}struct _tuple4 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union
-info);struct _tuple4 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union info){
+_tmp64F,sizeof(struct _dynforward_ptr*),_tmp64E),((((_tmp651=_tmp64E,_tmp653(& fsz,&
+_tmp652,& _tmp651,& _tmp64F))),_tmp650))))))));}return*((struct _dynforward_ptr**)
+_check_dynforward_subscript(Cyc_Absyn_field_names,sizeof(struct _dynforward_ptr*),
+i));}struct _tuple4 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union info);
+struct _tuple4 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfoU_union info){
 union Cyc_Absyn_AggrInfoU_union _tmp17F=info;void*_tmp180;struct _tuple0*_tmp181;
 struct Cyc_Absyn_Aggrdecl**_tmp182;struct Cyc_Absyn_Aggrdecl*_tmp183;struct Cyc_Absyn_Aggrdecl
 _tmp184;void*_tmp185;struct _tuple0*_tmp186;_LLD7: if((_tmp17F.UnknownAggr).tag != 

@@ -532,9 +532,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -552,9 +553,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1036,12 +1038,12 @@ Cyc_Core_Failure_struct _tmp4;_tmp4.tag=Cyc_Core_Failure;_tmp4.f1=({const char*
 _tmp5="tl";_tag_dynforward(_tmp5,sizeof(char),_get_zero_arr_size_char(_tmp5,3));});
 _tmp4;});_tmp3;}));return x->tl;}struct Cyc_List_List*Cyc_List_rlist(struct
 _RegionHandle*r,struct _dynforward_ptr argv){struct Cyc_List_List*result=0;{int i=(
-int)(_get_dynforward_size(argv,sizeof(void*))- 1);for(0;i >= 0;i --){result=({
+int)(_get_dynforward_size(argv,sizeof(void*))- 1);for(0;i >= 0;-- i){result=({
 struct Cyc_List_List*_tmp6=_region_malloc(r,sizeof(*_tmp6));_tmp6->hd=(void*)*((
 void**)_check_dynforward_subscript(argv,sizeof(void*),i));_tmp6->tl=result;_tmp6;});}}
 return result;}struct Cyc_List_List*Cyc_List_list(struct _dynforward_ptr argv){
 struct Cyc_List_List*result=0;{int i=(int)(_get_dynforward_size(argv,sizeof(void*))
-- 1);for(0;i >= 0;i --){result=({struct Cyc_List_List*_tmp7=_cycalloc(sizeof(*_tmp7));
+- 1);for(0;i >= 0;-- i){result=({struct Cyc_List_List*_tmp7=_cycalloc(sizeof(*_tmp7));
 _tmp7->hd=(void*)*((void**)_check_dynforward_subscript(argv,sizeof(void*),i));
 _tmp7->tl=result;_tmp7;});}}return result;}struct Cyc_List_List*Cyc_List_rcopy(
 struct _RegionHandle*r2,struct Cyc_List_List*x){struct Cyc_List_List*result;struct
