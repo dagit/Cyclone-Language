@@ -55,63 +55,162 @@ Project<br>
 </a><a href="#The Grammar of Cyclone">Annotated Grammar<br>
 </a>The Standard Library</p>
 <hr>
-<h2><a name="Goals of the Cyclone Project">Goals of the Cyclone Project</a></h2>
-<p>Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
-of Cyclone are to:</p>
+<h2><a name="Goals of the Cyclone Project">
+    Goals of the Cyclone Project</a>
+</h2>
+<p>
+Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
+of Cyclone are to:
+</p>
 <ol>
   <li><b>Be type safe</b> --- at a minimum, this should include support for
-    memory safety, and ideally, much more.&nbsp; As with languages such as ML or
-    Java, modern typing features such as polymorphism, subtyping, abstract data
-    types, etc. should all be supported so that programs may be easily assembled
-    and debugged.&nbsp; Ideally, the type system should support static detection
-    and elimination of as many errors as possible, falling back on dynamic
-    checks only when necessary.</li>
+    memory safety, and ideally, much more.&nbsp; As with languages such as 
+    ML or Java, modern typing features such as polymorphism, subtyping, 
+    abstract data types, etc. should all be supported so that programs may 
+    be easily assembled and debugged.&nbsp; Ideally, the type system should 
+    support static detection and elimination of as many errors as possible, 
+    falling back on dynamic checks only when necessary.</li>
+
   <li><b>Support as much of C as possible</b> --- Cyclone should share as much
     with C as possible, including syntax, static semantics, data
-    representations, calling conventions, and dynamic semantics.&nbsp; This rule
-    should only be violated when it in direct conflict with the first goal of
-    supporting type safety.</li>
+    representations, calling conventions, and dynamic semantics.&nbsp; 
+    This rule should only be violated when in direct conflict with the 
+    first goal of supporting type safety.</li>
 </ol>
-<p>The intended user of Cyclone is someone who is either (a) writing systems
+
+<p>
+The intended user of Cyclone is someone who is either (a) writing systems
 code, or (b) needs to port C code to a safe environment.&nbsp; Though languages
-such as Java or ML are safe, they do not give the control over data
+such as Java, ML, or Scheme are safe, they do not give the control over data
 representations, calling conventions, etc. that C does.&nbsp; Hence, they are
 often unsuitable for building systems where performance and control
-matter.&nbsp; In addition, these languages make it relatively difficult to
+matter.&nbsp; For instance, no one suggests building a run-time system
+in these languages.  
+Furthermore, today's implementations of 
+these languages make it relatively difficult to
 interface with legacy code written in C or to incrementally move program units
 from C to the safe setting.&nbsp; The goals of Cyclone are aimed at making it
 easier to build systems software without sacrificing safety or
-control.&nbsp;&nbsp;</p>
-<p>Of course, the two goals above are in direct conflict and thus we also see
+control.&nbsp;&nbsp;
+</p>
+
+<p>
+Of course, the two goals above are in direct conflict and thus we also see
 Cyclone as a driver for new research into safe, low-level languages.&nbsp; For
 instance, right now, all heap-allocated memory is reclaimed via (conservative)
 garbage collection.&nbsp; This is type safe, but prevents systems programmers
 from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
 One of the big research goals of Cyclone is to introduce new typing
 abstractions, such as linear types or regions, that support programmer control
-over memory management without sacrificing safety.</p>
-<p>Cyclone is a work in progress by people at Cornell and AT&amp;T.&nbsp; In
-particular, Trevor Jim and I have worked out most of the initial design and
-implementation.&nbsp; Dan Grossman is working on version 2.0 of the system which
-should add support for a number of other features and clean up the type-checker
-considerably.&nbsp; Fred Smith, Dave Walker, and Stephanie Weirich have
-contributed greatly through discussions, if not code.&nbsp; Many of the ideas
-contained within Cyclone are derived from our previous experience and work on
-the Popcorn safe-C language and the Typed Assembly Language project.&nbsp;&nbsp;</p>
+over memory management without sacrificing safety.
+</p>
+
+<p>
+You might wonder what is the difference between the Cyclone project
+and a few other projects, notably 
+<a href="http://lclint.cs.virginia.edu">LCLint</a> out of MIT and Virginia, 
+the Extended Static
+Checking (ESC) project out of Compaq SRC, and the 
+<a href="http://www.cs.wisc.edu/~austin/scc.html">Safe-C</a> project
+from the University of Wisconsin.    
+These are good systems and we have great respect for the
+work that has gone into them.  But their goals are quit different
+from Cyclone and we view our work as somewhat overlapping, but
+mostly complimentary.  
+</p>
+<p>
+Though we are interested
+in finding and eliminating bugs, we also want to guarantee a certain
+level of safety.  LCLint can't provide such a guarantee, because 
+the underlying language (C) and associated static analyses are
+unsound (i.e., some bugs will not be caught.)  The reason for this
+is that without changing C, it is extremely difficult to guarantee
+even memory safety, much less a stronger type safety property,
+without a lot of extra runtime overhead, or a lot of false positives
+in your static analysis.  LCLint is aimed at being a practical tool
+for debugging C code, and as such, makes certain compromises to eliminate
+false positives, but at the expense of soundness.  Thus, LCLint can't
+be used in settings where security is a concern.
+</p>
+<p>
+ESC is similar in some ways to LCLint, but is built on top of Java.
+(A previous version was built on top of Modula-3).
+Since Java and Modula-3 are type-safe, there is a fundamental safety
+guarantee provided by the ESC system.  And in addition, one gets
+the extra (really amazing) bug-finding power of ESC.  However,
+as we argued above, many systems programming tasks cannot be
+coded in languages such as Java (or Modula-3) or at least can't
+be coded efficiently.  
+</p>
+<p>
+Consequently, we see the ESC and LCLint projects as complimentary
+to the Cyclone project.  Ideally, after Cyclone reaches a stable
+design point, we should be able to put an "ESC/Cyclone" or "LCLint/Cyclone"
+static debugging tool together.
+</p>
+<p>
+The Safe-C project out of Wisconsin is perhaps the closest in
+spirit to ours, in that they are attempting to provide a memory-safety
+guarantee.  However, the approach taken by Safe-C is quite different
+than Cyclone:  Programs continue to be written in C, but extra indirection
+and dynamic checks are inserted to ensure that abstractions are
+respected.  For example, pointers in Safe-C are actually rather
+complex data structures, and derefencing a pointer is an expensive
+operation as a number of checks must be done to ensure that the
+pointer is still valid.  In order to avoid some of these overheads,
+the Wisconsin folks apply sophisticated, automatic analyses.  
+</p>
+<p>
+The advantage of Safe-C is that, in principle, programs can be
+compiled and run with no modification by the programmer.  The
+disadvantages are that (a) there is still a great deal of space and
+time overhead for programs, (b) the data representations change
+radically.  As such, the whole system (e.g., the standard libraries)
+has to be recompiled and pieces of code cannot be migrated from C to
+Safe-C.  In contrast, Cyclone goes to great lengths to preserve
+the data representations so that Cyclone and C code can smoothly
+interoperate.  Furthermore, many more checks are performed statically
+in Cyclone.  The downside is that programmers have to change the
+code (typically, by modifying or adding more typing information),
+and they can't always write what they want.  Our research is aimed
+at eliminating these drawbacks and to compare against the Safe-C
+approach.
+</p>
+
+<p>
+Obviously, Cyclone is a work in progress.  The people involved now
+are at Cornell and AT&amp;T.&nbsp;
+In particular, Trevor Jim and I have worked out most of the initial
+design and implementation.&nbsp; Dan Grossman is working on version
+2.0 of the system which should add support for a number of other
+features and clean up the type-checker considerably.&nbsp; Fred Smith,
+Dave Walker, and Stephanie Weirich have contributed greatly through
+discussions, if not code.&nbsp; Many of the ideas contained within
+Cyclone are derived from our previous experience and work on the
+Popcorn safe-C language and the Typed Assembly Language
+project.&nbsp;&nbsp;
+</p>
 <hr>
 <h2><a name="Installing Cyclone">Installing Cyclone</a></h2>
-<p>Cyclone currently only runs on 32-bit machines, and has only been tested on
+<p>
+Cyclone currently only runs on 32-bit machines, and has only been tested on
 Win32 and Linux platforms.&nbsp; Other platforms might or might not work.&nbsp;
 There are definitely 32-bit dependencies, so the system will not work on a
 64-bit machine without major surgery.&nbsp; To install and use Cyclone, you'll
 need to use the Gnu utitlities, including GCC (the Gnu C compiler) and
-Gnu-Make.&nbsp; For Win32, you should first install the latest version of the <a href="http://cygwin.com/">Cygwin</a>
+Gnu-Make.&nbsp; For Win32, you should first install the latest version of the 
+<a href="http://cygwin.com/">Cygwin</a>
 utilities to do the build, and make sure that the Cygwin bin directory is on
-your path.</p>
-<p>The file cyclone.zip (or cyclone.tar.gz) contains all of the files that you
+your path.
+</p>
+
+<p>
+The file cyclone.zip (or cyclone.tar.gz) contains all of the files that you
 need to build and install the system.&nbsp; After unzipping the file into a
-directory, you should have a directory structure that looks like this:</p>
-<pre>cyclone/
+directory, you should have a directory structure that looks like this:
+</p>
+<pre>
+cyclone/
      bin/
         genfiles/
              lib/
@@ -123,20 +222,24 @@ directory, you should have a directory structure that looks like this:</p>
      tests/
      tools/
          cycbison/
-         cyclex/</pre>
-<p>There is a Makefile at the top-level.&nbsp; To build the system, change into
-the Cyclone directory, and then type &quot;make&quot;.&nbsp; This should produce
-files cycbison.exe, cyclex.exe, cyclib.a, cyclone.exe, and gc.a appropriate for
-your architecture, and place them in the bin/ directory.&nbsp; (<i>Note:&nbsp;
-someone should get rid of the silly &quot;.exe&quot;'s for Unix platforms.)</i>&nbsp;
-The cyclone executable is the compiler which translates Cyclone code into GCC
-code.&nbsp; The cycbison executable is a version of Gnu's Bison parser generator
-which emits Cyclone code for parsing.&nbsp; The cyclex executable is a version
-of the Ocaml lexer generator which emits Cyclone code for lexing.&nbsp; The gc.a
+         cyclex/
+</pre>
+<p>
+There is a Makefile at the top-level.&nbsp; To build the system, change into
+the Cyclone directory, and then type &quot;make&quot;.&nbsp; This should 
+produce files cycbison.exe, cyclex.exe, cyclib.a, cyclone.exe, and 
+gc.a appropriate for your architecture, and place them in the bin/ directory.&nbsp; (<i>Note:&nbsp; someone should get rid of the silly &quot;.exe&quot;'s 
+for Unix platforms.)</i>&nbsp; The cyclone executable is the compiler which 
+translates Cyclone code into GCC code.&nbsp; The cycbison executable is a 
+version of Gnu's Bison parser generator which emits Cyclone code for 
+parsing.&nbsp; The cyclex executable is a version of the Ocaml lexer 
+generator which emits Cyclone code for lexing.&nbsp; The gc.a
 library is the Boehm-Demers-Weiser garbage collector.&nbsp; And cyclib.a is a
-library of pre-built Cyclone functions.&nbsp; After building the system, you may
-want to add the bin/ directory to your path (and possibly the lib directory to
-your include path.)</p>
+library of pre-built Cyclone functions.&nbsp; After building the system, 
+you may want to add the bin/ directory to your path (and possibly the lib 
+directory to your include path.)
+</p>
+
 <p>The cycbison utility is written in C (soon to be ported to Cyclone) and its
 source is in the tools/cycbison/ sub-directory.&nbsp; The BDW garbage collector
 is also written in C and can be found in the gc/ directory (this was obtained
@@ -203,7 +306,7 @@ program:</p>
    
     <i><font color="#FF0000">// if there was no argument to the program, raise an error.</font></i>
     <b>if</b> (<b>size</b>(args) &lt;= 1) 
-      <b>throw</b> Failure(&quot;missing name!&quot;);
+      <b>throw</b> Failure(&quot;<font color="#0000FF">missing name!</font>&quot;);
     <b>else</b>
       <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,args[1]);
   }
@@ -222,7 +325,7 @@ codes.</p>
 to be a variable-sized array of strings.&nbsp; The declaration also initializes
 args by calling the function std_args() which is part of the Core
 namespace.&nbsp; After initializing args, the function checks to see if the size
-(in terms of the number of elements in the array) of size is less than or equal
+(in terms of the number of elements in the array) of args is less than or equal
 to 1.&nbsp; If so, a failure is signalled by throwing the Failure exception
 (with an argument string reading &quot;missing name!&quot;).&nbsp; Otherwise,
 the program prints to standard output &quot;Hello &lt;name&gt;&quot; where
@@ -353,7 +456,7 @@ the tuple is true (it is) and if so, increments the first component in the tuple
    <b>if</b> (x[2]) 
      x[0]++;</pre>
 <p>The above code would be roughly equivalent to writing:</p>
-<pre>   <b>struct </b>{int f0; char f1; bool f2;} x = {42,z,<b>true</b>};</pre>
+<pre>   <b>struct </b>{int f0; char f1; bool f2;} x = {42,'z',<b>true</b>};</pre>
 <pre>   <b>if</b> (x.f2)
      x.f1++;</pre>
 <p>Thus, tuple types are written $(<i>type1,...,typen</i>), tuple constructor
@@ -408,7 +511,7 @@ to catch an exception:</p>
     <b>case</b> NotFound(s):  <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
     <b>case</b> Foo: <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
     }
-    <b>printf</b>(&quot;no exception raised.\n&quot;);
+    <b>printf</b>(&quot;<font color="#0000FF">no exception raised.\n</font>&quot;);
   }</pre>
 <hr>
 <h4><a name="Variable Sized Arrays">Variable Sized Arrays</a>:</h4>
@@ -446,7 +549,12 @@ is a constant expression, then the type of the array will be [c] where c is a
 constant.&nbsp; Otherwise, it will be a [?] array.&nbsp; Of course, you can cast
 the constant-sized array to a variable-sized array.</p>
 <p>Note that all arrays in Cyclone are heap allocated (not stack
-allocated).&nbsp;&nbsp;</p>
+allocated).&nbsp;&nbsp;Also note that string literals are treated
+as either char[n] arrays or char[?] arrays depending upon context.
+If the string literal is of the form "foo", then its size is 4,
+due to the implicit trailing "\000" character (and thus its type will be char[4]).
+
+</p>
 <p>In the future, we hope to add support for DML-style dependent types so that
 arrays need not carry size information and so that bounds checks can be
 statically verified.&nbsp; In addition, we hope to add support for regions or
@@ -456,9 +564,24 @@ other fashion.)</p>
 <h4><a name="Subtyping">Subtyping</a>:</h4>
 <p>Cyclone supports &quot;extension on the right&quot; and &quot;covariant depth
 on const&quot; subtyping for pointers.&nbsp; This simply means that you can cast
-a value x from having a pointer to a struct with 10 fields, to a pointer to a struct having
-only the first 5 fields.&nbsp; Or, you can cast a pointer to a tuple having 3
-fields to a pointer to a tuple having only 2 fields.&nbsp; In other words, you can forget
+a value x from having a type "pointer to a struct with 10 fields", to "pointer to a struct having
+only the first 5 fields".&nbsp; For example, if we have the following
+definitions:
+<pre>
+  <b>typedef</b> <b>struct</b> Point {float x,y;} *point;
+
+  <b>typedef</b> <b>struct</b> CPoint {float x,y; int color;} *cpoint;
+
+  float xcoord(point p) {
+    <b>return</b> p->x;
+  }
+</pre>
+then you can call xcoord with either a point or cpoint object.  
+
+You can also cast a pointer to a tuple having 3
+fields (e.g., $(int,bool,double)*) to a pointer to a tuple having only 
+2 fields (e.g., $(int,bool)*).&nbsp; 
+In other words, you can forget
 about the &quot;tail&quot; of the object.&nbsp; This allows a degree of
 polymorphism that is useful when porting C code.&nbsp; In addition, you can do
 &quot;deep&quot; casts on pointer fields that are const.&nbsp; (It is unsound to
@@ -833,9 +956,9 @@ namespace <i>identifier</i></font>
   <code>register</code>
   <code>static</code>
   <code>extern</code>
-  <code>typedef</code>
+  <code>typedef</code><br>
 <font color=red>
-  <code>abstract</code>
+  <code>abstract</code> &nbsp;&nbsp;&nbsp;<font color="#008000">// makes struct or enum declarations abstract </font>
 </font>
 <br>
 </ul>
@@ -860,18 +983,23 @@ are not yet supported)
   <code>unsigned</code>
   <i>struct-or-union-specifier</i>
   <i>enum-specifier</i><br>
-  <i>typedef-name</i> <font color=red><i>type-params<sub>opt</sub></i></font><br>
+  <i>typedef-name</i> <font color=red><i>type-params<sub>opt</sub></i></font>
+  <br> 
   <font color=red>
   <i>type-var</i>
-  <code>bool</code>
+  <br>
+  <code>bool</code><br>
   <code>Bool</code>
   <code>Char</code>
   <code>Short</code>
   <code>Int</code>
   <code>Long</code>
   <code>Float</code>
-  <code>Double</code><br>
-  <code>$</code> <code>(</code> <i>parameter-list</i> <code>)</code><br>
+  <code>Double</code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// boxed types</font>
+   <br>
+  <code>$</code> <code>(</code> <i>parameter-list</i> <code>)</code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// tuple types</font><br>
 </font>
 </ul>
 <br>
@@ -976,7 +1104,10 @@ are not yet supported)
   <i>identifier</i><br>
   <i>identifier</i> <code>=</code> <i>constant-expression</i><br>
 <font color=red>
-  <i>identifier</i> <code>(</code> <i>parameter-list</i> <code>)</code><br>
+  <i>identifier</i> <code>(</code> <i>parameter-list</i> <code>)</code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">
+  // datatype constructor </font>
+  <br>
 </font>
 </ul>
 <br>
@@ -995,7 +1126,9 @@ are not yet supported)
   <i>direct-declarator</i> <code>(</code> <i>parameter-type-list</i> <code>)</code><br>
   <i>direct-declarator</i> <code>(</code> <i>identifier-list<sub>opt</sub></i> <code>)</code><br>
 <font color=red>
-  <i>direct-declarator</i> <code>[</code> <code>?</code> <code>]</code><br>
+  <i>direct-declarator</i> <code>[</code> <code>?</code> <code>]</code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// variable-length arrays</font>
+  <br>
   <i>direct-declarator</i> <code><</code> <i>type-name-list</i> <code>></code><br>
 </font>
 </ul>
@@ -1004,7 +1137,9 @@ are not yet supported)
 <ul>
   <code>*</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i><br>
 <font color=red>
-  <code>@</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i><br>
+  <code>@</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// non-null pointers</font>
+<br>
 </font>
 </ul>
 <br>
@@ -1107,8 +1242,12 @@ are not yet supported)
   <i>iteration-statement</i><br>
   <i>jump-statement</i><br>
 <font color=red>
-  <code>cut</code> <i>statement</i><br>
-  <code>splice</code> <i>statement</i><br>
+  <code>cut</code> <i>statement</i>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// used for runtime code generation</font>
+<br>
+  <code>splice</code> <i>statement</i>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// used for runtime code generation</font>
+<br>
 </font>
 </ul>
 <br>
@@ -1191,7 +1330,9 @@ see <code>switch-clauses</code>)
 <a name=pattern></a>
 <i>pattern</i>:<br>
 <ul>
-  <code><i>_</i></code><br>
+  <code><i>_</i></code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// wild card</font>
+  <br>
   <code>(</code> <i>pattern</i> <code>)</code><br>
   <i>integer-constant</i><br>
   <code><i>-</i></code> <i>integer-constant</i><br>
@@ -1207,6 +1348,7 @@ see <code>switch-clauses</code>)
   <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>{</code> <code>}</code><br>
   <i>identifier</i> <i>type-params<sub>opt</sub></i> <code>{</code> <i>field-pattern-list</i> <code>}</code><br>
   <code>&</code> <i>pattern</i><br>
+  <code>*</code> <i>pattern</i><br>
 </ul>
 <br>
 <i>tuple-pattern-list</i>:<br>
@@ -1350,7 +1492,9 @@ see <code>switch-clauses</code>)
   <i>unary-operator</i> <i>cast-expression</i><br>
   <code>sizeof</code> <i>unary-expression</i><br>
   <code>sizeof</code> <code>(</code> <i>type-name</i> <code>)<br>
-  <font color="#FF0000">size ( <i>expression </i>)</font></code><br>
+  <font color="#FF0000">size ( <i>expression </i>)</font></code>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// returns size of array</font>
+  <br>
 <font color=red>
   <code>raise</code> <i>unary-expression</i><br>
 </ul>
