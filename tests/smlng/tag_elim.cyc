@@ -116,16 +116,16 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
 	doc_t d = new Seq(prev);
 	for(; split_tags != null; split_tags = split_tags->tl)
 	  d = new Tagged(split_tags->hd, d);
-	if(prev == *dsp) 
+	if(prev == *dsp) {
 	  *dsp = prevprev = prev = new List(d,next);
-	else {
+	} else {
 	  prev = new List(d,next);
 	  prevprev->tl = null;
 	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
+	prev_synth.i = inner_synth.i & prev_synth.i;
 	ds = next;
-	prev_synth = synth;
       } else {
 	prevprev = prev;
 	prev = ds;
@@ -346,7 +346,9 @@ struct UnderSynth {
 
 doc_t nuke_under(doc_t doc, int ulevel) {
   switch(doc) {
-  case &Text(_): throw new Impossible("nuke_under reached a Text");
+  case &Text(_): 
+    fprintf(stderr,"!!!");
+    throw new Impossible("nuke_under reached a Text");
   case &Tagged(tag,*dp):
     if(tag == PL_tag)
       return doc;
@@ -413,6 +415,8 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
       else
 	ulevel = 0;
       if(ulevel > 0) {
+	prev_synth = UnderSynth(ulevel, 
+				prev_synth.all_plain && inner_synth.all_plain);
 	prev->hd = nuke_under(prev->hd, ulevel);
 	ds->hd   = nuke_under(ds->hd,   ulevel);
 	// IN PLACE sequence splitting
@@ -422,16 +426,15 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
 	for(; ulevel > 0; --ulevel)
 	  d = new Tagged(U_tag,d);
 	// COPIED FROM up_opt
-	if(prev == *dsp) 
+	if(prev == *dsp) {
 	  *dsp = prevprev = prev = new List(d,next);
-	else {
+	} else {
 	  prev = new List(d,next);
 	  prevprev->tl = null;
 	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
 	ds = next;
-	prev_synth = synth;
       } else {
 	prevprev = prev;
 	prev = ds;
