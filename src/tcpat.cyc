@@ -92,9 +92,9 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     p->r = new Int_p(None,i);
     return;
 
-  case &UnknownId_p(...):   throw new Impossible("resolve_pat UnknownId_p");
-  case &UnknownCall_p(...): throw new Impossible("resolve_pat UnknownCall_p");
-  case &Aggr_p(...):        throw new Impossible("resolve_pat unknownAggr");
+  case &UnknownId_p(...):   impos("resolve_pat UnknownId_p");
+  case &UnknownCall_p(...): impos("resolve_pat UnknownCall_p");
+  case &Aggr_p(...):        impos("resolve_pat unknownAggr");
 
   default: return;
   }
@@ -452,7 +452,7 @@ DONT_PROMOTE:
 	    outlives_constraints =
 	      new List(new $(empty_effect,vartype),outlives_constraints);
 	  else
-	    Tcutil::impos("opened existential had unique or top region kind");
+	    impos("opened existential had unique or top region kind");
 	}
       }
 

@@ -93,7 +93,7 @@ namespace Absyn {
     int Loc_n;  // Local name, int is not used
   };
   typedef union Nmspace nmspace_t;
-  nmspace_t Loc_n;
+  extern nmspace_t Loc_n;
   nmspace_t Rel_n(list_t<var_t,`H>);
   // Abs_n(ns) when C_scope is false, C_n(ns) when C_scope is true
   nmspace_t Abs_n(list_t<var_t,`H> ns, bool C_scope); 

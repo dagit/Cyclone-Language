@@ -545,7 +545,7 @@ $(Absyn::exp_t,relation_t,Absyn::exp_t) primop2relation(Absyn::exp_t e1,Absyn::p
   case Absyn::Lte: return $(e1,Rlte,e2);
   case Absyn::Gt: return $(e2,Rlt,e1);
   case Absyn::Gte: return $(e2,Rlte,e1);
-  default: throw new Core::Impossible("primop2relation");
+  default: Tcutil::impos("primop2relation");
   }
 }
 

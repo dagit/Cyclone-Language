@@ -128,15 +128,17 @@ bool is_boxed(type_t t) {
 // side effect: constrains an evar to signed int
 bool is_integral(exp_t e) {
   switch (compress((type_t)e->topt)) {
-  case &AppType(c,_):
-    switch (c) {
-    case &IntCon(_,_):
-    case &EnumCon(_,_):
-    case &AnonEnumCon(_):
-    case &TagCon: return true;
-    default: return false;
-    }
-  case &Evar(_,_,_,_): return unify((type_t)e->topt,sint_type);
+  case &Evar(...): return unify((type_t)e->topt,sint_type);
+  case t: return is_integral_type(t);
+  }
+}
+
+// no side effect here -- not sure why
+bool is_numeric(exp_t e) {
+  if(is_integral(e))
+    return true;
+  switch (compress((type_t)e->topt)) {
+  case &AppType(&FloatCon(_),_): return true;
   default: return false;
   }
 }
@@ -289,10 +291,9 @@ bool is_noreturn_fn_type(type_t t) {
       case &Noreturn_att: return true;
       default: continue;
       }
-    break;
-  default: break;
+    return false;
+  default: return false;
   }
-  return false;
 }
 
 datatype exn {Unify};
@@ -379,15 +380,6 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
 void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
   Warn::vwarn(sg, fmt, ap);
-}
-
-bool is_numeric(exp_t e) {
-  if(is_integral(e))
-    return true;
-  switch (compress((type_t)e->topt)) {
-  case &AppType(&FloatCon(_),_): return true;
-  default: return false;
-  }
 }
 
 //fast type-variable comparison -- can only be used when a tvar has an identity.
@@ -1527,7 +1519,7 @@ static bool same_rgn_po(list_t<$(type_t,type_t)@> rpo1,
   return (sub_rgnpo(rpo1,rpo2) && sub_rgnpo(rpo2,rpo1));
 }
 
-int tycon2int(tycon_t t) {
+static int tycon2int(tycon_t t) {
   switch (t) {
   case &VoidCon:                      return 0;
   case &IntCon(Unsigned,Char_sz):     return 1;
@@ -1567,6 +1559,22 @@ int tycon2int(tycon_t t) {
   case &DatatypeFieldCon(...):        return 35;
   case &AggrCon(...):                 return 36;
   default: impos("bad con");
+  }
+}
+static int type_case_number(type_t t) {
+  switch(t) {
+  case &Evar(_,_,_,_):        return 1;
+  case &VarType(_):           return 2;
+  case &PointerType(_):       return 3;
+  case &ArrayType(_):         return 4;
+  case &FnType(_):            return 5;
+  case &TupleType(_):         return 6;
+  case &AnonAggrType(_,_):    return 7;
+  case &TypedefType(_,_,_,_): return 8;
+  case &ValueofType(_):       return 9;
+  case &TypeDeclType(...):    return 10;
+  case &TypeofType(_):        return 11;
+  case &AppType(c,_):         return 12 + tycon2int(c);
   }
 }
 
@@ -1943,7 +1951,7 @@ void unify_it(type_t t1, type_t t2) {
   throw &Unify_val;
 }
 
-int star_cmp<`a::A,`r::R,`r2::R>(int (@`r2 cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
+int star_cmp(int (@`r2 cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
   if(a1 == a2) return 0;
   if(a1 == NULL && a2 != NULL) return -1;
   if(a1 != NULL && a2 == NULL) return 1;
@@ -1984,22 +1992,6 @@ static int enumfield_cmp(enumfield_t e1, enumfield_t e2) {
   return star_cmp(Evexp::const_exp_cmp,e1->tag,e2->tag);
 }
 
-static int type_case_number(type_t t) {
-  switch(t) {
-  case &Evar(_,_,_,_):        return 1;
-  case &VarType(_):           return 2;
-  case &PointerType(_):       return 3;
-  case &ArrayType(_):         return 4;
-  case &FnType(_):            return 5;
-  case &TupleType(_):         return 6;
-  case &AnonAggrType(_,_):    return 7;
-  case &TypedefType(_,_,_,_): return 8;
-  case &ValueofType(_):       return 9;
-  case &TypeDeclType(...):    return 10;
-  case &TypeofType(_):        return 11;
-  case &AppType(c,_):         return 12 + tycon2int(c);
-  }
-}
 // the real work of comparison
 // returns -1 if t1 < t2, 0 if ==, 1 if t1 > t2
 // error for type not to be closed (?? -- doesn't look like it's a problem)
@@ -3674,7 +3666,7 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
                     exp_opt_t width, stringptr_t fn) {
   if (width != NULL) {
     unsigned int w = 0;
-    if (!is_const_exp((exp_t)width))
+    if (!is_const_exp(width))
       terr(loc,"bitfield %s does not have constant width",*fn);
     else {
       let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
@@ -3688,14 +3680,12 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
     case &AppType(&IntCon(_,b),_):
       // FIX: this is making size assumptions
       switch (b) {
-      case Char_sz: if (w > 8)  warn(loc,"bitfield larger than type"); break;
-      case Short_sz: if (w > 16) warn(loc,"bitfield larger than type"); break;
+      case Char_sz:     if (w>8)  warn(loc,"bitfield larger than type"); break;
+      case Short_sz:    if (w>16) warn(loc,"bitfield larger than type"); break;
       case Long_sz:
-      case Int_sz:
-        if (w > 32) warn(loc,"bitfield larger than type"); break;
+      case Int_sz:      if (w>32) warn(loc,"bitfield larger than type"); break;
       case LongLong_sz: 
-      default:
-        if (w > 64) warn(loc,"bitfield larger than type"); break;
+      default:          if (w>64) warn(loc,"bitfield larger than type"); break;
       }
       break;
     default:
@@ -3709,7 +3699,7 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
 static void check_field_atts(seg_t loc, stringptr_t fn, attributes_t atts) {
   for (; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
-    case &Packed_att: continue;
+    case &Packed_att: 
     case &Aligned_att(_): continue;
     default: terr(loc,"bad attribute %s on member %s",
 		  attribute2string(atts->hd), *fn);
@@ -5058,8 +5048,7 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
 bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 		       bool @is_dyneither, type_t @elt_type) {
   switch (e1->r) {
-  case &Cast_e(_,_,_,_):
-    impos("we have a cast in a lhs:  %s",exp2string(e1));
+  case &Cast_e(...): impos("we have a cast in a lhs:  %s",exp2string(e1));
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
     return is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_dyneither,elt_type);
@@ -5446,13 +5435,11 @@ static bool cnst_exp(bool var_okay, exp_t e) {
   default: return false;
   }
 }
-
 bool is_const_exp(exp_t e) {
   return cnst_exp(false,e);
 }
 
-static bool fields_zeroable(list_t<tvar_t> tvs, list_t<type_t> ts,
-			    list_t<aggrfield_t> fs);
+static bool fields_zeroable(list_t<tvar_t>,list_t<type_t>,list_t<aggrfield_t>);
 bool zeroable_type(type_t t) {
   switch (compress(t)) {
   case &AppType(c,ts):
@@ -5460,8 +5447,7 @@ bool zeroable_type(type_t t) {
     case &VoidCon:
     case &IntCon(_,_):
     case &FloatCon(_): return true;
-      // Not all enums have a 0!
-    case &EnumCon(_,edo): 
+    case &EnumCon(_,edo): // Not all enums have a 0!
       if(edo==NULL || edo->fields==NULL)
 	return false;
       fallthru(edo->fields->v);
@@ -5476,21 +5462,21 @@ bool zeroable_type(type_t t) {
       return false;
 	
     case &AggrCon(info):
-      // FIX: must reject tagged unions
       let ad = get_known_aggrdecl(info);
       if(ad->impl == NULL) return false;
       if(ad->impl->exist_vars != NULL) return false; // FIX?
+      if(ad->kind==UnionA && ad->impl->tagged) return false;
       return fields_zeroable(ad->tvs, ts, ad->impl->fields);
     default: return false;
     }
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
-    return (unify(bounds,fat_bound_type) || force_type2bool(true,nullable));
-  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): 
+    return force_type2bool(true,n);
+  case &ArrayType(ArrayInfo{t,...}): return zeroable_type(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if (!zeroable_type((*tqs->hd)[1])) return false;
     return true;
-  case &AnonAggrType(_,fs): return fields_zeroable(NULL,NULL,fs);
+  case &AnonAggrType(_,fs): return fields_zeroable(NULL,NULL,fs); //never tagged
   default: return false;
   }
 }
@@ -5513,17 +5499,13 @@ void check_no_qual(seg_t loc, type_t t) {
   case &TypedefType(_,_,tdopt,_):
     if (tdopt != NULL) {
       let tq = tdopt->tq;
-      if (tq.print_const || tq.q_volatile || tq.q_restrict ||
-          tq.real_const) {
-        //if (tq.loc != NULL) loc = tq.loc;
+      if (tq.print_const || tq.q_volatile || tq.q_restrict || tq.real_const)
         warn(loc,"qualifier within typedef type %s is ignored",typ2string(t));
-      }
     }
     break;
   default: break;
   }
 }
-
 
 // Transfer any function type attributes from the given list to the
 // function type.
@@ -5546,10 +5528,8 @@ attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
 // return the number of elements in an array or pointer type (if present)
 exp_opt_t get_type_bound(type_t t) {
   switch (compress(t)) {
-  case &PointerType(*pi):
-    return get_bounds_exp(bounds_one(),pi->ptr_atts.bounds);
-  case &ArrayType(ArrayInfo{.num_elts = e,...}):
-    return e;
+  case &PointerType(pi): return get_bounds_exp(bounds_one(),pi.ptr_atts.bounds);
+  case &ArrayType(ArrayInfo{.num_elts = e,...}): return e;
   default: return NULL;
   }
 }
@@ -5606,4 +5586,3 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
   default: return t;
   }
 }
-

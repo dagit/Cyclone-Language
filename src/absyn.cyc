@@ -92,7 +92,7 @@ nmspace_t Abs_n(list_t<var_t,`H> x, bool C_scope) {
     return Nmspace{.Abs_n = x}; 
 }
 nmspace_t Rel_n(list_t<var_t,`H> x) { return Nmspace{.Rel_n = x}; }
-nmspace_t rel_ns_null       = Nmspace{.Rel_n = NULL};
+nmspace_t rel_ns_null = Nmspace{.Rel_n = NULL};
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {

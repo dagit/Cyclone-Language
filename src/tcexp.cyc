@@ -300,8 +300,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 // variables
 static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   switch(*b) {
-  case &Unresolved_b(q): 
-    throw new Impossible("unresolved binding in tcVar");
+  case &Unresolved_b(q): impos("unresolved binding in tcVar");
   case &Global_b(vd):  
   // FIX DJG: temporary measure to make tree-shaking sound
   //      (now that we have binding, tree-shaking should be redone)
@@ -2631,8 +2630,8 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
       while (arg_exps != NULL) {
 	while (arg_cnt != arg_exps->hd) {
 	  if (es == NULL)
-	    Tcutil::impos(aprintf("bad count %d/%d for alias coercion!",
-				  arg_cnt, arg_exps->hd));
+	    impos(aprintf("bad count %d/%d for alias coercion!",
+			  arg_cnt, arg_exps->hd));
 	  arg_cnt++;
 	  es = es->tl;
 	  es2 = es2->tl;
@@ -2644,10 +2643,10 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
 	arg_exps = arg_exps->tl;
       }
       break;
-    default: Tcutil::impos("not a function call!");
+    default: impos("not a function call!");
     }
     break;
-  default: Tcutil::impos("not a function call!");
+  default: impos("not a function call!");
   }
   // wrap function call with alias statements introducing
   // fresh type vars
@@ -2677,7 +2676,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     return;
 
   case &FnCall_e(e1,es,*vci,*resolved) && (!*resolved):
-    throw new Impossible("unresolved function in tcExpNoInst");
+    impos("unresolved function in tcExpNoInst");
 
   case &UnresolvedMem_e(nopt,des):
     // resolve as an array or struct and then re-type-check the expression

@@ -188,8 +188,7 @@ struct Abstractdeclarator<`yy::R> {
 typedef struct Abstractdeclarator<`yy> abstractdeclarator_t<`yy>;
 
 ////////////////////////// forward references //////////////////////
-static type_t
-  collapse_type_specifiers(type_specifier_t ts, seg_t loc);
+static type_t collapse_type_specifiers(type_specifier_t ts, seg_t loc);
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   apply_tms(tqual_t,type_t,list_t<attribute_t,`H>,list_t<type_modifier_t>);
 
@@ -419,7 +418,7 @@ static $(tqual_t,type_t)@
 
 static bool is_typeparam(type_modifier_t tm) {
   switch (tm) {
-  case &TypeParams_mod(_,_,_): return true;
+  case &TypeParams_mod(...): return true;
   default: return false;
   }
 }
@@ -566,13 +565,9 @@ static fndecl_t make_function(region_t<`yy> yy,
     // Example:   `a f<`b><`a>(`a x) {...}
     // Here info[2] will be the list `b.
     Warn::warn(loc,"bad type params, ignoring");
-  // fn_type had better be a FnType
-  switch (fn_type) {
+  
+  switch (fn_type) { // fn_type had better be a FnType
   case &FnType(i):
-    //tvs,eff,ret_tqual,ret_type,args,c_varargs,cyc_varargs,
-    //rgn_po,attributes,requires_clause,requires_relns,
-    // ensures_clause,ensures_relns}):
-    //      let rev_newargs = NULL;
     for(let args2 = i.args; args2 != NULL; args2 = args2->tl)
       if((*args2->hd)[0] == NULL) {
 	Warn::err(loc,"missing argument variable in function prototype");
@@ -3195,9 +3190,8 @@ void yyprint(int i, union YYSTYPE<`yy> v) {
 }
 
 string_t token2string(int token) {
-  if (token <= 0) {
+  if (token <= 0)
     return "end-of-file";
-  }
   if (token == IDENTIFIER)
     return Lex::token_string;
   else if (token == QUAL_IDENTIFIER)

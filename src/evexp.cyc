@@ -459,7 +459,7 @@ bool okay_szofarg(type_t t) {
     default:      return false;
     }
   case &Evar(&Opt{&Kind(BoxKind,_)},_,_,_): return true; // Possible?
-  case &Evar(_,_,_,_): return false;
+  case &Evar(...): return false;
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if(!okay_szofarg((*tqs->hd)[1]))

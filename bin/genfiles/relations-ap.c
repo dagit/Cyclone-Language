@@ -425,8 +425,7 @@ extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion
 struct Cyc_List_List*Cyc_List_rmap_c(struct _RegionHandle*,void*(*f)(void*,void*),void*env,struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 190
 struct Cyc_List_List*Cyc_List_rappend(struct _RegionHandle*,struct Cyc_List_List*x,struct Cyc_List_List*y);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Position_Error;struct Cyc_Relations_Reln;struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};
-# 96 "absyn.h"
-union Cyc_Absyn_Nmspace Cyc_Absyn_Loc_n;
+# 97 "absyn.h"
 union Cyc_Absyn_Nmspace Cyc_Absyn_Rel_n(struct Cyc_List_List*);
 # 99
 union Cyc_Absyn_Nmspace Cyc_Absyn_Abs_n(struct Cyc_List_List*ns,int C_scope);struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _dyneither_ptr*f2;};
@@ -983,7 +982,7 @@ enum Cyc_Absyn_Primop _tmpAC=p;switch(_tmpAC){case Cyc_Absyn_Eq: _LL1: _LL2:
  return({struct _tuple10 _tmpEE;_tmpEE.f1=e1,_tmpEE.f2=Cyc_Relations_Rlte,_tmpEE.f3=e2;_tmpEE;});case Cyc_Absyn_Gt: _LL9: _LLA:
  return({struct _tuple10 _tmpEF;_tmpEF.f1=e2,_tmpEF.f2=Cyc_Relations_Rlt,_tmpEF.f3=e1;_tmpEF;});case Cyc_Absyn_Gte: _LLB: _LLC:
  return({struct _tuple10 _tmpF0;_tmpF0.f1=e2,_tmpF0.f2=Cyc_Relations_Rlte,_tmpF0.f3=e1;_tmpF0;});default: _LLD: _LLE:
-(int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmpAE=_cycalloc(sizeof(*_tmpAE));_tmpAE->tag=Cyc_Core_Impossible,({struct _dyneither_ptr _tmp13C=({const char*_tmpAD="primop2relation";_tag_dyneither(_tmpAD,sizeof(char),16U);});_tmpAE->f1=_tmp13C;});_tmpAE;}));}_LL0:;}
+({void*_tmpAD=0U;({struct _dyneither_ptr _tmp13C=({const char*_tmpAE="primop2relation";_tag_dyneither(_tmpAE,sizeof(char),16U);});((int(*)(struct _dyneither_ptr,struct _dyneither_ptr))Cyc_Tcutil_impos)(_tmp13C,_tag_dyneither(_tmpAD,sizeof(void*),0U));});});}_LL0:;}
 # 553
 enum Cyc_Relations_Relation Cyc_Relations_flip_relation(enum Cyc_Relations_Relation r){
 enum Cyc_Relations_Relation _tmpAF=r;switch(_tmpAF){case Cyc_Relations_Req: _LL1: _LL2:
