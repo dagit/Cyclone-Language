@@ -394,8 +394,8 @@ the region for which \texttt{r} is the handle (corresponding to
 The \texttt{`s} and \texttt{`rgn} in our example are unnecessary
 because they would be inferred.
 
-\texttt{typedef}, \texttt{struct}, \texttt{tunion}, and
-\texttt{xtunion} declarations can all be parameterized by regions,
+\texttt{typedef}, \texttt{struct}, and \texttt{datatype}
+declarations can all be parameterized by regions,
 just as they can be parameterized by types.  For example, here is part
 of the list library.  Note that the ``\texttt{::R}'' is necessary.
 \begin{verbatim}
@@ -899,7 +899,7 @@ block's name), so there is little use in creating variables of type
 
 \subsubsection{Type Declarations}
 
-A \texttt{struct}, \texttt{typedef}, \texttt{tunion}, or \texttt{xtunion}
+A \texttt{struct}, \texttt{typedef}, or \texttt{datatype}
 declaration may be parameterized by any number of region names.  The region
 names are placed in the list of type parameters.  They must be followed by
 their kind -- i.e. either ``\texttt{::R}'', ``\texttt{::UR}'', or
@@ -916,12 +916,12 @@ instance of \texttt{struct List<`a,`r>}).  However, we could instantiate
 \texttt{`a} with a pointer type that has a different region name, as long as
 that region has kind R.
 
-\texttt{tunion} and \texttt{xtunion} declarations must also be
-instantiated with an additional region name.  If an object of type
-\texttt{tunion `r Foo} turns out to be a value-carrying variant, then
-the object is treated (capability-wise) as a pointer with region name
+\texttt{datatype} declarations must also be
+instantiated with an additional region name.  An object of type
+\texttt{datatype `r Foo}
+is treated (capability-wise) as a pointer with region name
 \texttt{`r}.  If the region name is omitted from a use of a
-\texttt{tunion} declaration, it is implicitly \texttt{`H}.
+\texttt{datatype} declaration, it is implicitly \texttt{`H}.
 
 \subsubsection{Function Calls}
 

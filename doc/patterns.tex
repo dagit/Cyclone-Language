@@ -129,7 +129,7 @@ first because we have already explained their use informally.
     reference patterns may only appear inside of other patterns so
     that the compiler can determine the region for the pointer type
     assigned to \texttt{x}.  They also may not occur under a
-  \texttt{tunion} pattern that has existential types unless there is a
+  \texttt{datatype} pattern that has existential types unless there is a
   pointer pattern in-between.)
   \item Bindings introduced: \texttt{x} is bound to \emph{the address of}
     the expression being matched.  Hence if matched against a value
@@ -199,19 +199,19 @@ first because we have already explained their use informally.
   \begin{itemize}
   \item Syntax: \texttt{\&p} where p is a pattern
   \item Types for match: pointer types, including \texttt{?} types.
-    Also \texttt{tunion Foo} (or instantiations of it) when the pattern
-    is \texttt{\&Bar(p1,...,pn)} and \texttt{Bar} is a value-carrying
-    variant of \texttt{tunion Foo} and pi matches the type of the ith
+    Also \texttt{datatype Foo @} (or instantiations of it) when the pattern
+    is \texttt{\&Bar(p1,...,pn)} and \texttt{Bar} is a
+    variant of \texttt{datatype Foo} and pi matches the type of the ith
     value carried by Bar.
   \item Expressions matched: non-null pointers where the value pointed
     to matches p.  Note this explanation includes the case where the
-    expression has type tunion Foo and the pattern is
+    expression has type datatype Foo @ and the pattern is
     \texttt{\&Bar(p1,...,pn)} and the current variant of the expression is
     ``pointer to \texttt{Bar}''.
   \item Bindings introduced: bindings introduced by p
   \end{itemize}
   
-\item \textbf{tunion and xtunion patterns}
+\item \textbf{datatype patterns}
   \begin{itemize}
   \item Syntax: \texttt{X} if X is a variant that carries no values.
     Else \texttt{X(p1,...,pn)} where X is the name of a variant (that
@@ -219,13 +219,10 @@ first because we have already explained their use informally.
     If X has existential type parameters, the syntax is
     \texttt{X<`t1,...,`tm>(p1,...,pn)} for distinct \texttt{`t1}, \ldots,
     \texttt{`tm}.
-  \item Types for match: If \texttt{X} is non-value-carrying variant of
-    \texttt{tunion Foo}, then types \texttt{tunion Foo} and \texttt{tunion Foo.x}
-    (or instantiations of them).  If \texttt{X} carries values, then
-    \texttt{tunion Foo.X} (or instantiations of it) where the pi matches
-    the type of ith field.  The number of existential type variables in the
-    pattern must be the number of existential type variables for
-    tunion \texttt{Foo.X}.
+  \item Types for match: \texttt{datatype Foo.X} (or instantiations of
+    it). The number of existential type variables in the pattern must
+    be the number of existential type variables for 
+    \texttt{datatype Foo.X}.
   \item Expressions matched: If \texttt{X} is non-value-carrying, then
     \texttt{X}.  If \texttt{X} is value-carrying, then values created from
     the constructor \texttt{X} such that pi matches the ith field.

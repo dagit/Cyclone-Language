@@ -30,7 +30,7 @@ typedef struct Equiv<`a,`b> {
   `a (@from)(`b);
 } equiv_t<`a,`b>;
 
-typedef tunion ThinPtrEquiv<`a,`b> {
+typedef datatype ThinPtrEquiv<`a,`b> {
   Nullable(equiv_t<`a,`b*>);
   NonNullable(equiv_t<`a,`b@>);
 } thin_ptr_equiv_t<`a,`b>;
@@ -41,13 +41,13 @@ typedef struct PtrRep<`a> {
   thin_ptr_equiv_t<`a,`b> equiv;
 } thin_ptr_rep_t<`a>;
 
-typedef tunion BoxRep<`a::A> {
+typedef datatype BoxRep<`a::A> {
   Int(equiv_t<`a,int>);
   ThinPtr(ptr_rep_t<`a>);
   ...
 } box_rep_t<`a>;
 
-typedef tunion MemRep<`a::M> {
+typedef datatype MemRep<`a::M> {
   Float(equiv_t<`a@,float@>);
   ...
 } mem_rep_t<`a>;

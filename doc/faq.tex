@@ -38,7 +38,7 @@
 \hyperlink{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A}, \texttt{`a::R}, and \texttt{`a::E} mean?}\\
 \hyperlink{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}\\
 \hyperlink{faq:list}{What does \texttt{struct List<`a,`r::R>} mean?}\\
-\hyperlink{faq:tagged}{What are \texttt{tunion} and \texttt{xtunion}?}\\
+\hyperlink{faq:tagged}{What are \texttt{@tagged} unions?}\\
 \hyperlink{faq:abstract}{What is \texttt{abstract}?}\\
 \hyperlink{faq:keywords}{What are the Cyclone keywords?}\\
 \hyperlink{faq:namespace}{What are \texttt{namespace} and \texttt{using}?}\\
@@ -190,12 +190,10 @@ The last question said that a type variable can stand for a
 ``suitable'' type.  Unfortunately, not all types are ``suitable.''
 Briefly, the ``suitable'' types are those that fit into a
 general-purpose machine register, typically including \texttt{int},
-pointers,
-\texttt{tunion} types, and \texttt{xtunion} types.  Non-suitable types
-include \texttt{float}, \texttt{struct} types (which can be of
-arbitrary size), tuples, and questionable pointers.
-Technically, the suitable types are the types of ``box kind,''
-described below.
+and pointers.  Non-suitable types include \texttt{float}, \texttt{struct}
+types (which can be of arbitrary size), tuples, and questionable
+pointers.  Technically, the suitable types are the types of ``box
+kind,'' described below.
 \end{faqa}
 
 \begin{faqa}{faq:voidstar}{How do I cast from \texttt{void *}?}
@@ -265,16 +263,19 @@ notation \texttt{typevar}\texttt{::}\textit{kind} says that a type variable
 belongs to a kind.  A type variable can only be instantiated by types that
 belong to its kind.
 
-Box types include \texttt{int}, pointers (except for questionable pointers),
-tagged unions, and extensible tagged unions.  Memory types include all box
-types, tuples, \texttt{tunion} and \texttt{xtunion} variants, questionable
-pointers, and non-abstract structs.  Any types include all types that don't
-have kind R, UR, TR, or E.  For the region types, R indicates ``normal''
-regions like the heap, stack, and dynamic regions; UR indicates the unique
-region (i.e. only `U or an alias of it has kind UR); and TR indicates
-either; UR and TR kinds are used generally only in certain
-region-polymorphic functions; see Section~\ref{sec:poly-allocate}.  Effect
-types are sets of regions (these are explained elsewhere).
+Box types include \texttt{int}, \texttt{long}, \texttt{region_t},
+\texttt{tag_t}, enums, and non-\texttt{@fat} pointers.  Memory types
+include all box types, \texttt{void}, \texttt{char}, \texttt{short},
+\texttt{long long}, \texttt{float}, \texttt{double}, arrays, tuples,
+\texttt{datatype} and \texttt{@extensible datatype} variants,
+\texttt{@fat} pointers, and non-abstract structs and unions.  Any
+types include all types that don't have kind R, UR, TR, or E.  For the
+region types, R indicates ``normal'' regions like the heap, stack, and
+dynamic regions; UR indicates the unique region (i.e. only `U or an
+alias of it has kind UR); and TR indicates either; UR and TR kinds are
+used generally only in certain region-polymorphic functions; see
+Section~\ref{sec:poly-allocate}.  Effect types are sets of regions
+(these are explained elsewhere).
 \end{faqa}
 
 \begin{faqa}{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}
@@ -312,13 +313,12 @@ type, and \texttt{struct List<struct List<int,`H>@, `H>} is a type.
 \texttt{`a} and live in region \texttt{`r}.
 \end{faqa}
 
-\begin{faqa}{faq:tagged}{What are \texttt{tunion} and \texttt{xtunion}?}
-These are Cyclone's tagged union and extensible tagged union types.
-In C, when a value has \texttt{union} type, you know that in fact it
+\begin{faqa}{faq:tagged}{What is a \texttt{@tagged} union?}
+In C, when a value has a \texttt{union} type, you know that in fact it
 has one of the types of the union's fields, but there is no guarantee
-which one.  This can lead to crashes in C\@.  Cyclone's tagged unions
-are like C unions with some additional information that lets the
-Cyclone compiler determine what type the underlying value actually
+which one.  This can lead to crashes in C\@.  Cyclone's @tagged unions
+are like C unions with some additional information (a tag) that lets
+the Cyclone compiler determine what type the underlying value actually
 has, thus helping to ensure safety.
 \end{faqa}
 
@@ -336,14 +336,12 @@ be exported.
 \begin{faqa}{faq:keywords}{What are the Cyclone keywords?}
 In addition to the C keywords, the following have special meaning and
 cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
-\texttt{codegen}, \texttt{cut}, \texttt{fallthru}, \texttt{fill},
-\texttt{let}, \texttt{malloc},
-\texttt{namespace}, \texttt{new}, \texttt{NULL},
-\texttt{region_t}, \texttt{regions},
-\texttt{rmalloc}, \texttt{rnew}, \texttt{splice},
-\texttt{throw}, \texttt{try}, \texttt{tunion}, \texttt{using},
-\texttt{xtunion}.  As in gcc,
-\texttt{__attribute__} is reserved as well.
+\texttt{codegen}, \texttt{cut}, \texttt{datatype}, \texttt{fallthru},
+\texttt{fill}, \texttt{let}, \texttt{malloc}, \texttt{namespace},
+\texttt{new}, \texttt{NULL}, \texttt{region_t}, \texttt{regions},
+\texttt{rmalloc}, \texttt{rnew}, \texttt{splice}, \texttt{throw},
+\texttt{try}, \texttt{using}.  As in gcc, \texttt{__attribute__} is
+reserved as well.
 \end{faqa}
 
 \begin{faqa}{faq:namespace}{What are \texttt{namespace} and \texttt{using}?}
@@ -427,7 +425,7 @@ global variables).
 \begin{faqa}{faq:exns}{How do I throw and catch exceptions?}
 A new exception is declared as in 
 \begin{verbatim}
-  xtunion exn { MyExn };
+  datatype exn { MyExn };
 \end{verbatim}
 The exception can be thrown with the statement
 \begin{verbatim}
@@ -448,7 +446,7 @@ If none match, the exception is re-thrown.
 Exceptions can carry values with them.  For example, here's how to
 declare an exception that carries an integer:
 \begin{verbatim}
-  xtunion exn { MyIntExn(int) };
+  datatype exn { MyIntExn(int) };
 \end{verbatim}
 Values of such exceptions must be heap-allocated.  For example, you
 can create and throw a \texttt{MyIntExn} exception with
@@ -464,18 +462,17 @@ To catch such an exception you must use an \texttt{\&}-pattern:
 \end{alltt}
 When the exception is caught, the integer value is bound to \texttt{x}.
 
-The \texttt{exn} type is just a pre-defined \texttt{xtunion} type.
-Therefore, all the standard rules for extending, creating objects, and
-destructing objects of an xtunion type apply.
+The \texttt{exn} type is just a pre-defined \texttt{@extensible
+datatype} type.  Therefore, all the standard rules for extending,
+creating objects, and destructing objects of a dataypte apply.
 \end{faqa}
 
 \begin{faqa}{faq:exn-efficiency}{How efficient is exception handling?}
 Entering a \texttt{try} block is implemented using \texttt{setjmp}.
 Throwing an exception is implemented with \texttt{longjmp}.
-Pattern-matching an
-\texttt{xtunion} against each case variant in the catch clause is a
-pointer-comparsion.  In short, exception handling is fairly
-lightweight.
+Pattern-matching a \texttt{datatype} against each case variant in the
+catch clause is a pointer-comparsion.  In short, exception handling is
+fairly lightweight.
 \end{faqa}
 
 \begin{faqa}{faq:let}{What does \texttt{let} mean?}
@@ -606,12 +603,11 @@ $\textit{const}_2 < \textit{const}_1$, and similarly for
 and
 \textit{type}\texttt{@}\lb\textit{const}$_2$\rb.
 
-An object of type \texttt{tunion T.A} can be cast to \texttt{tunion T}
-if \texttt{A} does not carry values.  An object of type tunion
-\texttt{T.A@} can be cast to \texttt{tunion T} if \texttt{A} does
-carry values.  The current implementation isn't quite as lenient as it
-should be.  For example, it rejects a cast from \texttt{int *\lb 4\rb} to
-\texttt{\$(int,int)*\lb 2\rb}, but this cast is safe.
+An object of type \texttt{datatype T.A @} can be cast to
+\texttt{datatype T @}.  The current implementation isn't quite as
+lenient as it should be.  For example, it rejects a cast from
+\texttt{int *\lb 4\rb} to \texttt{\$(int,int)*\lb 2\rb}, but this cast
+is safe.
 
 For all non-pointer-containing types \textit{type}, you can cast from a
 \textit{type ?} to a \texttt{char} \textit{?}.  This allows you to make
