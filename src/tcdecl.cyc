@@ -665,7 +665,7 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1, seg_t
   // check types
   type_t subst_defn1 = substitute(inst, d1->defn);
   if(! check_type(d0->defn, subst_defn1)) {
-    merr(loc, msg, xprintf("typedef %s does refer to the same type: %s != %s",
+    merr(loc, msg, xprintf("typedef %s does not refer to the same type: %s != %s",
 			   v, typ2string(subst_defn1), typ2string(d0->defn)));
     return null;
   }

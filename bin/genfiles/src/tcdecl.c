@@ -388,18 +388,23 @@ struct Cyc_Position_Segment*, struct _tagged_string); extern int Cyc_Tcutil_unif
 void*, void*); extern void* Cyc_Tcutil_substitute( struct Cyc_List_List*, void*);
 extern int Cyc_Tcutil_equal_tqual( struct Cyc_Absyn_Tqual tq1, struct Cyc_Absyn_Tqual
 tq2); extern int Cyc_Tcutil_same_atts( struct Cyc_List_List*, struct Cyc_List_List*);
-struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc; extern struct
-_tagged_string Cyc_Absynpp_typ2string( void*); extern struct _tagged_string Cyc_Absynpp_ckind2string(
-struct Cyc_Absyn_Conref*); extern struct _tagged_string Cyc_Absynpp_qvar2string(
-struct _tuple0*); extern struct _tagged_string Cyc_Absynpp_scope2string( void*
-sc); unsigned char Cyc_Tcdecl_Incompatible[ 17u]="\000\000\000\000Incompatible";
-void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct _tagged_string*
-msg1, struct _tagged_string msg2){ if( msg1 == 0){( void) _throw(( void*) Cyc_Tcdecl_Incompatible);}
-else{ Cyc_Tcutil_terr( loc,( struct _tagged_string)({ struct _tagged_string
-_temp0=*(( struct _tagged_string*) _check_null( msg1)); struct _tagged_string
-_temp1= msg2; xprintf("%.*s %.*s", _temp0.last_plus_one - _temp0.curr, _temp0.curr,
-_temp1.last_plus_one - _temp1.curr, _temp1.curr);}));}} static void Cyc_Tcdecl_merge_scope_err(
-void* s0, void* s1, struct _tagged_string t, struct _tagged_string v, struct Cyc_Position_Segment*
+struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{
+int expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
+int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
+print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
+print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
+curr_namespace; } ; extern struct _tagged_string Cyc_Absynpp_typ2string( void*);
+extern struct _tagged_string Cyc_Absynpp_ckind2string( struct Cyc_Absyn_Conref*);
+extern struct _tagged_string Cyc_Absynpp_qvar2string( struct _tuple0*); extern
+struct _tagged_string Cyc_Absynpp_scope2string( void* sc); unsigned char Cyc_Tcdecl_Incompatible[
+17u]="\000\000\000\000Incompatible"; void Cyc_Tcdecl_merr( struct Cyc_Position_Segment*
+loc, struct _tagged_string* msg1, struct _tagged_string msg2){ if( msg1 == 0){(
+void) _throw(( void*) Cyc_Tcdecl_Incompatible);} else{ Cyc_Tcutil_terr( loc,(
+struct _tagged_string)({ struct _tagged_string _temp0=*(( struct _tagged_string*)
+_check_null( msg1)); struct _tagged_string _temp1= msg2; xprintf("%.*s %.*s",
+_temp0.last_plus_one - _temp0.curr, _temp0.curr, _temp1.last_plus_one - _temp1.curr,
+_temp1.curr);}));}} static void Cyc_Tcdecl_merge_scope_err( void* s0, void* s1,
+struct _tagged_string t, struct _tagged_string v, struct Cyc_Position_Segment*
 loc, struct _tagged_string* msg){ Cyc_Tcdecl_merr( loc, msg,( struct
 _tagged_string)({ struct _tagged_string _temp2= t; struct _tagged_string _temp3=
 v; struct _tagged_string _temp4= Cyc_Absynpp_scope2string( s1); struct
@@ -946,7 +951,7 @@ subst_defn1= Cyc_Tcutil_substitute( _temp450,( void*) d1->defn); if( ! Cyc_Tcdec
 void*) d0->defn, subst_defn1)){ Cyc_Tcdecl_merr( loc, msg,( struct
 _tagged_string)({ struct _tagged_string _temp452= _temp446; struct
 _tagged_string _temp453= Cyc_Absynpp_typ2string( subst_defn1); struct
-_tagged_string _temp454= Cyc_Absynpp_typ2string(( void*) d0->defn); xprintf("typedef %.*s does refer to the same type: %.*s != %.*s",
+_tagged_string _temp454= Cyc_Absynpp_typ2string(( void*) d0->defn); xprintf("typedef %.*s does not refer to the same type: %.*s != %.*s",
 _temp452.last_plus_one - _temp452.curr, _temp452.curr, _temp453.last_plus_one -
 _temp453.curr, _temp453.curr, _temp454.last_plus_one - _temp454.curr, _temp454.curr);}));
 return 0;} return( struct Cyc_Absyn_Typedefdecl*) d0;}}} void* Cyc_Tcdecl_merge_binding(

@@ -146,7 +146,7 @@ static struct RgnPO {
 typedef list_t<struct RgnPO @> rgn_po_t;
 
 // Local function environments -- this is getting a bit out of hand, no?
-struct Fenv {
+abstract struct Fenv {
   struct SharedFenv @      shared;
   list_t<tvar_t>           type_vars; //type variables that can occur free
   rgn_po_t                 region_order; // partial order on region variables 
@@ -164,10 +164,13 @@ tenv_t tc_init() {
   empty_var_set = new Opt(Set::empty(String::zstrptrcmp));
 
   // Set up initial environment so that xtunion exn is defined
-  // FIX: put Null_Exception and Match_Exception in the environment
   let ge     = empty_genv();
   let top_ns = null;
-  ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], &exn_xed);
+  ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], &exn_tud);
+  ge->ordinaries = Dict::insert(ge->ordinaries, (*null_pointer_exn_name)[1],
+				new $(new TunionRes(exn_tud, null_pointer_exn_tuf), true));
+  ge->ordinaries = Dict::insert(ge->ordinaries, (*match_exn_name)[1],
+				new $(new TunionRes(exn_tud, match_exn_tuf), true));
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return new Tenv(top_ns,ae,null);
 }
@@ -618,7 +621,7 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
     try return lookup_ordinary_global(te,loc,q);    
     catch {
     case Dict::Absent: 
-      terr(loc,xprintf("unbound identifer: %s", Absynpp::qvar2string(q)));
+      terr(loc,xprintf("unbound identifier: %s", Absynpp::qvar2string(q)));
       return new VarRes(Unresolved_b);
     }
   }

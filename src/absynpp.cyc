@@ -43,43 +43,152 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
 extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
 
 // Flag controlling whether typedefs are expanded during printing
-bool expand_typedefs = false;
+static bool expand_typedefs;
 
 // Flag controlling how to print identifiers (better performance (???) than
 // re-writing them all in Toc).
-bool qvar_to_Cids = false;
+static bool qvar_to_Cids;
+
+string_t cyc_string = "Cyc";
+stringptr_t cyc_stringptr = &cyc_string;
+// Flag controlling whether to add the cyc prefix to the C-identifiers
+static bool add_cyc_prefix;
 
 // Flag controlling whether the (C) output should be for VC instead of gcc.
 // (Differences: long long vs. __int64 and inline vs. __inline)
-bool to_VC = false;
+static bool to_VC;
 
 // Flag controlling whether declarations have to be at the beginning of the blocks
-bool decls_first = false;
+static bool decls_first;
 
 // Flag controlling whether to rewrite temporary type variables
 // makes reparsing impossible, but gives nicer error messages
-bool dont_rewrite_temp_tvars = false;
+static bool rewrite_temp_tvars;
 
 // Flag controlling whether to print all type variables
-bool print_all_tvars = false;
+static bool print_all_tvars;
 
 // Flag controlling whether to print all kinds
-bool print_all_kinds = false;
+static bool print_all_kinds;
 
 // Flag controlling whether to print the Using statements
-bool print_using_stmts = false;
+static bool print_using_stmts;
 
 // Flag controlling whether to print the extern "C" {...} statements
 // after the TC, the extern "C" are propagated to the functions,
 // and we get a warning if we don't hide this one
-bool print_externC_stmts = false;
+static bool print_externC_stmts;
 
 // Flag controlling whether to print out free tvars that can be
 // used when instantiating evars
-bool print_full_evars = false;
+static bool print_full_evars;
 
-// ------ dealing with namespaces --------
+// Flag controlling whether to use the variable curr_namespace or not
+static bool use_curr_namespace;
+
+// keep a track of the current namespace
 static list_t<var_t> curr_namespace = null;
+
+struct Params {
+  bool expand_typedefs :1;
+  bool qvar_to_Cids :1;
+  bool add_cyc_prefix :1;
+  bool to_VC :1;
+  bool decls_first :1;
+  bool rewrite_temp_tvars :1;
+  bool print_all_tvars :1;
+  bool print_all_kinds :1;
+  bool print_using_stmts :1;
+  bool print_externC_stmts :1;
+  bool print_full_evars :1;
+  bool use_curr_namespace :1;
+  list_t<var_t> curr_namespace;
+};
+
+void set_params(struct Params @ `r fs) {
+  expand_typedefs = fs->expand_typedefs;
+  qvar_to_Cids = fs->qvar_to_Cids;
+  add_cyc_prefix = fs->add_cyc_prefix;
+  to_VC = fs->to_VC;
+  decls_first = fs->decls_first;
+  rewrite_temp_tvars = fs->rewrite_temp_tvars;
+  print_all_tvars = fs->print_all_tvars;
+  print_all_kinds = fs->print_all_kinds;
+  print_using_stmts = fs->print_using_stmts;
+  print_externC_stmts = fs->print_externC_stmts;
+  print_full_evars = fs->print_full_evars;
+  use_curr_namespace = fs->use_curr_namespace;
+  curr_namespace = fs->curr_namespace;
+}
+
+struct Params cyc_params_r =
+  Params{
+    .expand_typedefs = false,
+    .qvar_to_Cids = false,
+    .add_cyc_prefix = false,
+    .to_VC = false,
+    .decls_first = false,
+    .rewrite_temp_tvars = true,
+    .print_all_tvars = false,
+    .print_all_kinds = false,
+    .print_using_stmts = true,
+    .print_externC_stmts = true,
+    .print_full_evars = false,
+    .use_curr_namespace = true,
+    .curr_namespace = null
+  };
+
+struct Params cyci_params_r =
+  Params{
+    .expand_typedefs = true,
+    .qvar_to_Cids = false,
+    .add_cyc_prefix = false,
+    .to_VC = false,
+    .decls_first = false,
+    .rewrite_temp_tvars = true,
+    .print_all_tvars = false,
+    .print_all_kinds = false,
+    .print_using_stmts = true,
+    .print_externC_stmts = true,
+    .print_full_evars = false,
+    .use_curr_namespace = true,
+    .curr_namespace = null
+  };
+
+struct Params c_params_r =
+  Params{
+    .expand_typedefs = true,
+    .qvar_to_Cids = true,
+    .add_cyc_prefix = true,
+    .to_VC = false,
+    .decls_first = false,
+    .rewrite_temp_tvars = false,
+    .print_all_tvars = false,
+    .print_all_kinds = false,
+    .print_using_stmts = false,
+    .print_externC_stmts = false,
+    .print_full_evars = false,
+    .use_curr_namespace = false,
+    .curr_namespace = null
+  };
+
+struct Params tc_params_r =
+  Params{
+    .expand_typedefs = false,
+    .qvar_to_Cids = false,
+    .add_cyc_prefix = false,
+    .to_VC = false,
+    .decls_first = false,
+    .rewrite_temp_tvars = false,
+    .print_all_tvars = false,
+    .print_all_kinds = false,
+    .print_using_stmts = true,
+    .print_externC_stmts = true,
+    .print_full_evars = false,
+    .use_curr_namespace = false,
+    .curr_namespace = null
+  };
+
 
 static void curr_namespace_add(var_t v) {
   curr_namespace = imp_append(curr_namespace, new List(v, null));
@@ -96,8 +205,6 @@ static void suppr_last(list_t<`a> @ `r l) {// could be in List
 static void curr_namespace_drop() {
   suppr_last(&curr_namespace);
 }
-
-// ------------
 
 string_t char_escape(char c) {
   switch (c) {
@@ -434,7 +541,7 @@ doc_t ntyp2doc(type_t t) {
     }
     //FIX: sometimes need explicit kinds!
     //Mathieu: only if we try to declare kinds inside functions arguments
-    if (! dont_rewrite_temp_tvars && is_temp_tvar(tv)) {
+    if (rewrite_temp_tvars && is_temp_tvar(tv)) {
       // we're trying to print a temporary tvar,
       // replace it by _ followed by a comment
       s = cat(text("_ /* "), s, text(" */"));
@@ -462,7 +569,7 @@ doc_t ntyp2doc(type_t t) {
       case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
                              &Tunionfield(fname,_,_,_,_)):
                                let kw = text(is_x ? "xtunion " : "tunion ");
-      s = cat(kw, qvar2doc(tname),text("."),textptr((*fname)[1]));
+      s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
     }
     break;
@@ -571,7 +678,7 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
     arg_docs = List::append(arg_docs,new List(text("..."),null));
   else if (cyc_varargs != null) {
     let varargs_doc = cat(text("..."),typ2doc(cyc_varargs->rgn),
-                          cyc_varargs->inject ? text(" inject ") : text(""),
+                          cyc_varargs->inject ? text(" inject ") : text(" "),
                           funarg2doc(new $(cyc_varargs->name,cyc_varargs->tq,
                                            cyc_varargs->type)));
     arg_docs = List::append(arg_docs,new List(varargs_doc,null));
@@ -585,7 +692,7 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
 }
 
 $(opt_t<var_t>,tqual_t,type_t)@ arg_mk_opt($(var_t,tqual_t,type_t)@ arg) {
-  return new $(/*(opt_t<var>)*/new Opt((*arg)[0]), // FIX: can we get rid of the cast? => YES
+  return new $(new Opt((*arg)[0]),
                (*arg)[1],(*arg)[2]);
 }
 
@@ -593,19 +700,25 @@ doc_t var2doc(var_t v) { return text(*v); }
 
 doc_t qvar2doc(qvar_t q) {
   let prefix = null;
+  let match;
   switch ((*q)[0]) {
-  case Loc_n:        fallthru;
-  case &Rel_n(null): fallthru;
-  case &Abs_n(null): return var2doc((*q)[1]);
-  case &Rel_n(x):    fallthru(x);
-  case &Abs_n(x):    prefix = x; break;
+  case Loc_n:
+    fallthru(null);
+  case &Rel_n(x):
+    match = false;
+    prefix = x;
+    break;
+  case &Abs_n(x):
+    match = use_curr_namespace && list_prefix(String::strptrcmp, x, curr_namespace);
+    prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
+    break;
   }
   if (qvar_to_Cids) {
     return text(String::str_sepstr(List::append(prefix,
 						new List((*q)[1],null)),"_"));
   } else {
-    // don't print the prefix it aims at the current namespaces
-    if (list_prefix(String::strptrcmp, prefix, curr_namespace))
+    // don't print the prefix it matches the current namespaces
+    if (match)
       return var2doc((*q)[1]);
     else
       return text(String::str_sepstr(List::append(prefix,
@@ -614,17 +727,24 @@ doc_t qvar2doc(qvar_t q) {
 }
 
 doc_t typedef_name2doc(qvar_t v) {
-  // avoid the ugly 'wrong namespace' warning when translating to C
+  // behave as qvar2doc when translating to C
   if (qvar_to_Cids) return qvar2doc(v);
 
-  switch ((*v)[0]) {
-  case &Abs_n(l):
-    if (list_cmp(String::strptrcmp, l, curr_namespace) == 0) {
-      return var2doc((*v)[1]);
-    } else {
-      return cat(text("/* wrong namespace : */ "), qvar2doc(v));
+  // otherwise we should not print the complete namespace here (it won't reparse)
+  if (use_curr_namespace) {
+    switch ((*v)[0]) {
+    case Loc_n: fallthru;
+    case &Rel_n(null): return var2doc((*v)[1]);
+    case &Abs_n(l):
+      if (list_cmp(String::strptrcmp, l, curr_namespace) == 0) {
+	return var2doc((*v)[1]);
+      } else {
+	fallthru;
+      }
+    default: return cat(text("/* bad namespace : */ "), qvar2doc(v));
     }
-  default: return qvar2doc(v);
+  } else {
+    return var2doc((*v)[1]);
   }
 }
 
@@ -1432,7 +1552,7 @@ doc_t decl2doc(decl_t d) {
 
     break;
   case &Namespace_d(v,tdl):
-    if (! qvar_to_Cids) curr_namespace_add(v);
+    if (use_curr_namespace) curr_namespace_add(v);
     s = cat(text("namespace "),
             textptr(v),
             text(" {"),
@@ -1440,7 +1560,7 @@ doc_t decl2doc(decl_t d) {
             ppseql(decl2doc,"",tdl),
             line_doc(),
             text("}"));
-    if (! qvar_to_Cids) curr_namespace_drop();
+    if (use_curr_namespace) curr_namespace_drop();
     break;
   case &Using_d(q,tdl):
     if (print_using_stmts) {
@@ -1547,7 +1667,7 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
 	typvars = null;
       }
     } else {
-      if (! dont_rewrite_temp_tvars) {
+      if (rewrite_temp_tvars) {
 	// rewrite the temp variables so that they could parse
 	// WARNING : we don't check for conflicts with some user-defined tvars
 	iter(rewrite_temp_tvar, typvars);
@@ -1636,12 +1756,7 @@ string_t decllist2string(list_t<decl_t> tdl) {
 }
 string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
-string_t typ2string(type_t t)    {
-  dont_rewrite_temp_tvars = true; // so that error messages remain 'nice'
-  let s = string_of_doc(typ2doc(t),  PP_WIDTH);
-  dont_rewrite_temp_tvars = false;
-  return s;
-}
+string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}

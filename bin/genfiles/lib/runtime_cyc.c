@@ -14,12 +14,12 @@ int *__errno(void) { return &errno; }
 //////////////////////////////////////////////////////////
 
 // FIX: makes alignment and pointer-size assumptions
-char _Null_Exception_tag[] = "\0\0\0\0Null_Exception";
-struct _xtunion_struct _Null_Exception_struct = { _Null_Exception_tag };
-struct _xtunion_struct * Null_Exception = &_Null_Exception_struct;
-char _Match_Exception_tag[] = "\0\0\0\0Match_Exception";
-struct _xtunion_struct _Match_Exception_struct = { _Match_Exception_tag };
-struct _xtunion_struct * Match_Exception = &_Match_Exception_struct;
+char Cyc_Null_Exception_tag[] = "\0\0\0\0Cyc_Null_Exception";
+struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception_tag };
+struct _xtunion_struct * Cyc_Null_Exception = &Cyc_Null_Exception_struct;
+char Cyc_Match_Exception_tag[] = "\0\0\0\0Cyc_Match_Exception";
+struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception_tag };
+struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -174,7 +174,7 @@ Cstring string_to_Cstring(struct _tagged_string s) {
   if (s.curr == NULL) return NULL;
 
   if (s.curr < s.base || s.curr >= s.last_plus_one)
-    throw(Null_Exception); // FIX: this should be a bounds error, not null exn
+    throw(Cyc_Null_Exception); // FIX: this should be a bounds error, not null exn
   str = (char *)GC_malloc_atomic(sz+1);
   if (str == NULL) {
     fprintf(stderr,"internal error: out of memory in string_to_Cstring\n");
@@ -224,7 +224,7 @@ Cstring underlying_Cstring(struct _tagged_string s) {
 
   // FIX:  should throw exception?  
   if (s.curr < s.base || s.curr >= s.last_plus_one)
-    throw(Null_Exception);
+    throw(Cyc_Null_Exception);
   return str;
 }
 
@@ -241,7 +241,7 @@ FILE *sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
     exit(255);
   }
   if(!sf->file)
-    throw(Null_Exception); // FIX:  should be more descriptive?
+    throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
   return sf->file;
 }
 int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, 
@@ -251,7 +251,7 @@ int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf,
   size_t sz = dest.last_plus_one - new_curr;
   FILE *fd = sfile_to_file(sf);
   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
-    throw(Null_Exception);
+    throw(Cyc_Null_Exception);
   if(dest_offset + max_count > sz) {
     fprintf(stderr,"Attempt to read off end of string.\n");
     exit(255);
@@ -265,7 +265,7 @@ int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf,
   unsigned char *new_curr = src.curr + src_offset;
   FILE *fd = sfile_to_file(sf);
   if (new_curr < src.base || new_curr >= src.last_plus_one)
-    throw(Null_Exception);
+    throw(Cyc_Null_Exception);
   if(src_offset + max_count > sz) {
     fprintf(stderr,"Attempt to write off end of string.\n");
     exit(255);
@@ -434,7 +434,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   p = GC_malloc(sizeof(struct _RegionPage) + next_size);
   if (p == NULL) {
     fprintf(stderr,"grow_region failure");
-    throw(Null_Exception);
+    throw(Cyc_Null_Exception);
   }
   p->next = r->curr;
 #ifdef CYC_REGION_PROFILE
@@ -475,7 +475,7 @@ struct _RegionHandle _new_region() {
                                       default_region_page_size);
   if (p == NULL) {
     fprintf(stderr,"_new_region failure");
-    throw(Null_Exception);
+    throw(Cyc_Null_Exception);
   }
   p->next = NULL;
 #ifdef CYC_REGION_PROFILE

@@ -18,6 +18,37 @@ using Absyn;
 
 namespace Absyndump;
 
+// Flag controlling whether typedefs are expanded during printing
+static bool expand_typedefs;
+
+// Flag controlling how to print identifiers (better performance (???) than
+// re-writing them all in Toc).
+static bool qvar_to_Cids;
+
+// Flag controlling whether to add the cyc prefix to the C-identifiers
+static bool add_cyc_prefix;
+
+// Flag controlling whether the (C) output should be for VC instead of gcc.
+// (Differences: long long vs. __int64 and inline vs. __inline)
+static bool to_VC;
+
+void set_params(struct Absynpp::Params @ `r fs) {
+  expand_typedefs = fs->expand_typedefs;
+  qvar_to_Cids = fs->qvar_to_Cids;
+  add_cyc_prefix = fs->add_cyc_prefix;
+  to_VC = fs->to_VC;
+  //decls_first = fs->decls_first;
+  //rewrite_temp_tvars = fs->rewrite_temp_tvars;
+  //print_all_tvars = fs->print_all_tvars;
+  //print_all_kinds = fs->print_all_kinds;
+  //print_using_stmts = fs->print_using_stmts;
+  //print_externC_stmts = fs->print_externC_stmts;
+  //print_full_evars = fs->print_full_evars;
+
+  // since absyndump use absynpp, we have to set the parameters of absynpp too !!!
+  Absynpp::set_params(fs);
+}
+
 void dumptyp(type_t);
 void dumpntyp(type_t t);
 void dumpexp(exp_t);
@@ -115,23 +146,30 @@ void egroup(void f(`a), list_t<`a> l,
 void dumpqvar(qvar_t v) {
   let nsl = null;
   switch ((*v)[0]) {
-  case Loc_n:       fallthru;
-  case &Rel_n(null): fallthru;
-  case &Abs_n(null): dump_str((*v)[1]); return;
-  case &Rel_n(x):    fallthru(x);
-  case &Abs_n(x):    nsl = x; break;
+  case Loc_n:
+    fallthru(null);
+  case &Rel_n(x):
+    nsl = x;
+    break;
+  case &Abs_n(x):
+    nsl = qvar_to_Cids && add_cyc_prefix ? new List(Absynpp::cyc_stringptr, x) : x;
+    break;
   }
-  dump_str(nsl->hd);
-  for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
-    // Note: This is the most common reason the result goes over 80 columns,
-    //       but who really cares.
-    if(Absynpp::qvar_to_Cids) dump_char('_');
+  if (nsl != null) {
+    dump_str(nsl->hd);
+    for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
+      // Note: This is the most common reason the result goes over 80 columns,
+      //       but who really cares.
+      if(qvar_to_Cids) dump_char('_');
+      else dump_nospace("::");
+      dump_nospace(*(nsl->hd));
+    }
+    if(qvar_to_Cids) dump_nospace("_");
     else dump_nospace("::");
-    dump_nospace(*(nsl->hd));
+    dump_nospace(*((*v)[1]));
+  } else {
+    dump_str((*v)[1]);
   }
-  if(Absynpp::qvar_to_Cids) dump_nospace("_");
-  else dump_nospace("::");
-  dump_nospace(*((*v)[1]));
 }
 
 void dumptq(tqual_t tq) {
@@ -223,7 +261,7 @@ void dump_noncallconv(attributes_t atts) {
 
 void dumpatts(attributes_t atts) {
   if (atts == null) return;
-  if(Absynpp::to_VC) {
+  if(to_VC) {
     dump_noncallconv(atts);
     return;
   }
@@ -334,9 +372,9 @@ void dumpntyp(type_t t) {
   case &IntType(Signed,   B2): dump("short"); return;
   case &IntType(Unsigned, B2): dump("unsigned short"); return;
   case &IntType(Unsigned, B4): dump("unsigned int"); return;
-  case &IntType(Signed,   B8) && Absynpp::to_VC: dump("__int64"); return;
+  case &IntType(Signed,   B8) && to_VC: dump("__int64"); return;
   case &IntType(Signed,   B8): dump("long long"); return;
-  case &IntType(Unsigned,B8) && Absynpp::to_VC: dump("unsigned __int64");return;
+  case &IntType(Unsigned,B8) && to_VC: dump("unsigned __int64");return;
   case &IntType(Unsigned, B8): dump("unsigned long long");    return;
   case FloatType:  dump("float");  return;
   case DoubleType: dump("double"); return;
@@ -839,10 +877,10 @@ static void dumpids(list_t<vardecl_t> vds) {
 void dumpdecl(decl_t d) {
   switch(d->r) {
   case &Fn_d(fd):
-    if(Absynpp::to_VC)
+    if(to_VC)
       dumpatts(fd->attributes);
     if(fd->is_inline) 
-      if(Absynpp::to_VC)
+      if(to_VC)
 	dump("__inline");
       else
 	dump("inline");
@@ -852,7 +890,7 @@ void dumpdecl(decl_t d) {
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po, null});
     dumptqtd(Tqual(false,false,false),t,
-	     Absynpp::to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
+	     to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');
@@ -888,7 +926,7 @@ void dumpdecl(decl_t d) {
     }
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
-    if(Absynpp::to_VC) {
+    if(to_VC) {
       dumpatts(atts);
       dumpscope(sc);
       let $(tq,t,tms) = Absynpp::to_tms(tq,type);
@@ -964,7 +1002,7 @@ void dumpdecl(decl_t d) {
     dump_semi();
     break;
   case &Typedef_d(td):
-    if(!Absynpp::expand_typedefs) {
+    if(!expand_typedefs) {
       dump("typedef");
       dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
       dump_semi();

@@ -62,16 +62,16 @@ extern void _throw(void * e);
 extern struct _xtunion_struct *_exn_thrown;
 
 //// Built-in Exceptions
-extern struct _xtunion_struct _Null_Exception_struct;
-extern struct _xtunion_struct * Null_Exception;
-extern struct _xtunion_struct _Match_Exception_struct;
-extern struct _xtunion_struct * Match_Exception;
+extern struct _xtunion_struct Cyc_Null_Exception_struct;
+extern struct _xtunion_struct * Cyc_Null_Exception;
+extern struct _xtunion_struct Cyc_Match_Exception_struct;
+extern struct _xtunion_struct * Cyc_Match_Exception;
 
 //// Built-in Run-time Checks
 static inline void * _check_null(void * ptr) {
   // caller casts result back to right type
   if(!ptr)
-    _throw(Null_Exception);
+    _throw(Cyc_Null_Exception);
   return ptr;
 }
 static inline char * _check_unknown_subscript(struct _tagged_string arr, 
@@ -81,7 +81,7 @@ static inline char * _check_unknown_subscript(struct _tagged_string arr,
   // by inlining, it should be able to avoid actual multiplication
   unsigned char * ans = arr.curr + elt_sz*index;
   if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
-    _throw(Null_Exception);
+    _throw(Cyc_Null_Exception);
   return ans;
 }
 static inline char * _check_known_subscript_null(void * ptr, 
@@ -89,13 +89,13 @@ static inline char * _check_known_subscript_null(void * ptr,
 						 unsigned elt_sz,
 						 unsigned index) {
   if(!ptr || index > bound)
-    _throw(Null_Exception);
+    _throw(Cyc_Null_Exception);
   return ((char *)ptr) + elt_sz*index;
 }
 static inline unsigned _check_known_subscript_notnull(unsigned bound,
 						      unsigned index) {
   if(index > bound)
-    _throw(Null_Exception);
+    _throw(Cyc_Null_Exception);
   return index;
 }
 				  

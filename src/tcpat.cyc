@@ -637,7 +637,7 @@ typedef list_t<$(simple_pat_t,`rhs)@> match_t<`rhs>;
 // described by tdi.  The descriptor Neg[c1,...,cn] describes all
 // values v that are not of the form ci(v1,...,vm) (1 <= i <= n).
 // Note that Neg[] denotes any possible value.
-tunion Term_desc {
+static tunion Term_desc {
   Pos(con_t,list_t<tunion Term_desc>);
   Neg(Set::set_t<con_t>);
 };

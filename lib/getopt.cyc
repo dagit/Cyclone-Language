@@ -162,7 +162,7 @@ static enum ordering_tag
 {
   REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
 };
-enum ordering_tag ordering;
+static enum ordering_tag ordering;
 
 /* Value of POSIXLY_CORRECT environment variable.  */
 static char ?posixly_correct;

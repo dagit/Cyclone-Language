@@ -86,9 +86,17 @@ i_t final() {
   let i = empty();
   // add definition of xtunion exn
   let ie1 = new_ienv();
-  let tud = new *exn_xed;
-  tud->sc = Public;
-  ie1->tuniondecls = Dict::insert(ie1->tuniondecls, (*exn_name)[1], tud);
+  let exn_d = new *exn_tud;
+  exn_d->sc = Public;
+  ie1->tuniondecls = Dict::insert(ie1->tuniondecls, (*exn_name)[1], exn_d);
+  let np_exn_f = new *null_pointer_exn_tuf;
+  np_exn_f->sc = Public;
+  let np_exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, np_exn_f);
+  ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls, (*null_pointer_exn_name)[1], np_exn_fd);
+  let m_exn_f = new *match_exn_tuf;
+  m_exn_f->sc = Public;
+  let m_exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, m_exn_f);
+  ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls, (*match_exn_name)[1], m_exn_fd);
   i->exports = Dict::insert(i->exports, null, ie1);
   // add requirement of function main
   let ie2 = new_ienv();
@@ -145,16 +153,21 @@ static void body_err(string_t sc, qvar_t n) {
 	      sc, Absynpp::qvar2string(n)));
 }
 
+// don't print anything if obj1 == null
 static void static_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
-  err(xprintf("declaration of %s %s relies on static %s %s",
-	      obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
+  if (obj1 != null) {
+    err(xprintf("declaration of %s %s relies on static %s %s",
+		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
+  }
 }
 
+// id.
 static void abstract_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
-  err(xprintf("declaration of %s %s relies on fields of abstract %s %s",
-	      obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
+  if (obj1 != null) {
+    err(xprintf("declaration of %s %s relies on fields of abstract %s %s",
+		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
+  }
 }
-
 
 /* ------ checking that a given type can be safely exported ----- */
 
@@ -246,7 +259,8 @@ static bool check_public_enumdecl(aenv_t ae, seen_t seen, enumdecl_t d) {
 }
 
 static bool check_public_typedefdecl(aenv_t ae, seen_t seen, typedefdecl_t d) {
-  return check_public_type(ae, seen, "typedef", d->name, d->defn);
+  return check_public_type(ae, seen, null /*"typedef"*/, d->name, d->defn);
+  // don't print an error message for typedefs (we'll just not export the typedef) 
 }
 
 static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
@@ -303,6 +317,22 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     return check_public_type_list(ae, seen, obj, name, identity, targs)
       && check_public_uniondecl(ae, seen, ud);
 
+  case &EnumType(name, _):
+    let &$(tns, v) = name;
+    let ns = get_abs_ns(tns);
+    enumdecl_t ed;
+    try {
+      let ge = Dict::lookup(ae, ns);
+      ed = *Dict::lookup(ge->enumdecls, v);
+    } catch {
+    case Dict::Absent: invalid_arg("check_public_type");
+    }
+    if (ed->sc == Static) {
+      static_err(obj, name, "enum", ed->name);
+      return false;
+    }
+    return true /*check_public_enum(ae, seen, ed)*/;
+
   case &TunionType(TunionInfo(&KnownTunion(tud0),targs,_)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
@@ -328,19 +358,21 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->tuniondecls, v);
     } catch {
-    case Dict::Absent: invalid_arg("check_public_type");
+    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find tunion %s)",
+					   qvar2string(tud0->name)));
     }
-    if (tud->fields == null) invalid_arg("check_public_type");
+    if (tud->fields == null) invalid_arg(xprintf("check_public_type (tunion %s has no fields)",
+						 qvar2string(tud->name)));
 
     struct Tunionfield * tuf1 = null;
-    for (let fs = tud->fields->v; fs != null; fs = fs->tl) {
-      int cmp;
-      if ((cmp = qvar_cmp(tuf0->name, fs->hd->name)) >= 0) {
-	if (cmp == 0) tuf1 = fs->hd;
-	break;
-      }
-    }
-    if (tuf1 == null) invalid_arg("check_public_type");
+    for (let fs = tud->fields->v; fs != null; fs = fs->tl)
+      if (strptrcmp((*tuf0->name)[1], (*fs->hd->name)[1]) == 0) {
+	  tuf1 = fs->hd;
+	  break;
+	}
+  
+    if (tuf1 == null) invalid_arg(xprintf("check_public_type (can't find tunionfield %s)",
+					  qvar2string(tuf0->name)));
     tunionfield_t tuf = (tunionfield_t) tuf1;
 
     if (tud->sc == Static) {
@@ -399,7 +431,7 @@ static void extract_##OBJ##decl($(ienv_t, ienv_t, bool, aenv_t, seen_t, i_t) @ `
       exp->OBJ##decls = Dict::insert(exp->OBJ##decls, x, d);\
     }\
     break;\
-  case ExternC: invalid_arg("extract_" #OBJ "decl");\
+  case ExternC: fallthru;\
   case Extern:\
     if (check_public_##OBJ##decl(ae, seen, d)) {\
       imp->OBJ##decls = Dict::insert(imp->OBJ##decls, x, d);\
@@ -995,7 +1027,7 @@ static list_t<decl_t> add_structdecl(var_t x, structdecl_t d, list_t<decl_t> tds
 static list_t<decl_t> add_structdecl_header(var_t x, structdecl_t d, list_t<decl_t> tds) {
   d = new *d;
   d->fields = null;
-  d->sc = Extern;
+  if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Struct_d(d), null),tds);
 }
 
@@ -1006,7 +1038,7 @@ static list_t<decl_t> add_uniondecl(var_t x, uniondecl_t d, list_t<decl_t> tds) 
 static list_t<decl_t> add_uniondecl_header(var_t x, uniondecl_t d, list_t<decl_t> tds) {
   d = new *d;
   d->fields = null;
-  d->sc = Extern;
+  if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Union_d(d), null),tds);
 }
 
@@ -1014,10 +1046,26 @@ static list_t<decl_t> add_tuniondecl(var_t x, tuniondecl_t d, list_t<decl_t> tds
   return new List(new_decl(new Tunion_d(d), null),tds);
 }
 
+static string_t us = "_";
+static stringptr_t us_p = &us;
+
+static $(tqual_t,type_t)@ rewrite_tunionfield_type($(tqual_t,type_t)@ x) {
+  return new $(empty_tqual(),
+	       new VarType(new Tvar(us_p, null, new_conref(BoxKind)))
+	       );
+}
+
+static tunionfield_t rewrite_tunionfield(tunionfield_t f) {
+  f = new *f;
+  f->typs = map(rewrite_tunionfield_type, f->typs);
+  return f;
+}
+
 static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, list_t<decl_t> tds) {
   d = new *d;
-  d->fields = null;
-  d->sc = Extern;
+  //d->fields = null;
+  if (d->fields != null) d->fields = new Opt(map(rewrite_tunionfield, d->fields->v));
+  if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Tunion_d(d), null),tds);
 }
 
@@ -1028,7 +1076,7 @@ static list_t<decl_t> add_enumdecl(var_t x, enumdecl_t d, list_t<decl_t> tds) {
 static list_t<decl_t> add_enumdecl_header(var_t x, enumdecl_t d, list_t<decl_t> tds) {
   d = new *d;
   d->fields = null;
-  d->sc = Extern;
+  if (d->sc != ExternC) d->sc = Extern;
   return new List(new_decl(new Enum_d(d), null),tds);
 }
 
@@ -1048,6 +1096,16 @@ static list_t<decl_t> add_xtunionfielddecl(var_t x, xtunionfielddecl_t d, list_t
   return new List(new_decl(new Tunion_d(b), null),tds);
 }
 
+static list_t<decl_t> add_xtunionfielddecl_header(var_t x, xtunionfielddecl_t d, list_t<decl_t> tds) {
+  let &Tcdecl::Xtunionfielddecl(b,f)=d;
+  b = new *b;
+  f = rewrite_tunionfield(f);
+  f->sc = Extern;
+  b->fields = new Opt(new List(f,null));
+  b->sc = Extern;
+  return new List(new_decl(new Tunion_d(b), null),tds);
+}
+
 static void print_ns_headers(FILE @f, list_t<var_t> ns, ienv_t ie) {
   let tds = null;
 
@@ -1055,6 +1113,20 @@ static void print_ns_headers(FILE @f, list_t<var_t> ns, ienv_t ie) {
   tds = Dict::fold(add_uniondecl_header,   ie->uniondecls,   tds);
   tds = Dict::fold(add_tuniondecl_header,  ie->tuniondecls,  tds);
   tds = Dict::fold(add_enumdecl_header,    ie->enumdecls,    tds);
+
+  if (tds != null) {
+    tds = imp_rev(tds);
+
+    tds = add_namespace(tds, ns);
+
+    Absynpp::decllist2file(tds, f);
+  }
+}
+
+static void print_ns_xtunionfielddecl_headers(FILE @f, list_t<var_t> ns, ienv_t ie) {
+  let tds = null;
+
+  tds = Dict::fold(add_xtunionfielddecl_header, ie->xtunionfielddecls, tds);
 
   if (tds != null) {
     tds = imp_rev(tds);
@@ -1098,12 +1170,24 @@ static void print_ns_decls(FILE @f, list_t<var_t> ns, ienv_t ie) {
   }
 }
 
+// everything is extremely verbose
+// but there's no other solution as long as we have to
+// declare structures before using them
 void print(i_t i, FILE @f) {
+  Absynpp::set_params(&Absynpp::cyci_params_r);
   fprintf(f,   "/****** needed (headers) ******/\n");
-  Dict::iter_c(print_ns_headers, f, i->imports); // no typedefs here
+  Dict::iter_c(print_ns_headers, f, i->imports);
 
   fprintf(f, "\n/****** provided (headers) ******/\n");
   Dict::iter_c(print_ns_headers, f, i->exports);
+
+  // we have to handle xtunionfields separately because they can be in a different
+  // namespace from their corresponding xtuniondecls
+  fprintf(f,   "/****** needed (headers of xtunionfielddecls) ******/\n");
+  Dict::iter_c(print_ns_xtunionfielddecl_headers, f, i->imports);
+
+  fprintf(f, "\n/****** provided (headers of xtunionfielddecls) ******/\n");
+  Dict::iter_c(print_ns_xtunionfielddecl_headers, f, i->exports);
 
   //typedefs are always public...
   fprintf(f, "\n/****** provided (typedefs) ******/\n");
@@ -1122,21 +1206,21 @@ i_t parse(FILE @f) { // warning : Position::reset_position must be called before
   Lex::lex_init();
   let tds = Parse::parse_file(f);
 
-  Absynpp::expand_typedefs = false;
   let te = Tcenv::tc_init();
-  Tc::tc(te, false, false, tds); // no "Cyc" prefix, no default initializer 
+  Tc::tc(te, false, tds); // no "Cyc" prefix, no default initializer 
 
   return gen_extract(te->ae, false); // don't check that definitions are complete
 }
 
 /* ------ binary loading and saving ------ */
 
-/*
+// Mathieu : so far, there's nothing binary here
+// but let's pretend it is :-)
 void save(i_t i, FILE @f) {
-
+  print(i, f);  
 }
 
 i_t load(FILE @f) {
-  return null;
+  return parse(f);
 }
-*/
+

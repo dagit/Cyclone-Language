@@ -66,8 +66,10 @@ static list_t<decl_t> result_decls = null;
 #define DL null
 // don't use these if you're going to mutate the result! 
 // (We're avoiding useless mallocs)
-tunion Nmspace.Abs_n abs_ns_value = Abs_n(null);
-tunion Nmspace abs_ns = &abs_ns_value;
+//tunion Nmspace.Abs_n abs_ns_value = Abs_n(null);
+//tunion Nmspace abs_ns = &abs_ns_value;
+tunion Nmspace.Rel_n rel_ns_value = Rel_n(null);
+tunion Nmspace rel_ns = &rel_ns_value;
 tqual_t mt_tq = Tqual(false,false,false);
 
 // errors and reporting
@@ -100,9 +102,9 @@ MAKE_STRING(_handler_cons);
 MAKE_STRING(_push_region);
 MAKE_STRING(_pop_region);
 MAKE_STRING(handler);
-MAKE_STRING(Match_Exception);
-MAKE_STRING(Cyc_new_string);
-MAKE_STRING(Cyc_rnew_string);
+//MAKE_STRING(Match_Exception);
+//MAKE_STRING(new_string);
+//MAKE_STRING(rnew_string);
 MAKE_STRING(_RegionHandle);
 MAKE_STRING(_new_region);
 
@@ -111,7 +113,7 @@ MAKE_STRING(_new_region);
 // FIX: Next step is to make the exp_t, not just the qvar_t
 #define MAKE_QVAR(str)\
   static string_t                  str##_string = #str;\
-  static $(nmspace_t, stringptr_t) str##_pr     = $((nmspace_t)&abs_ns_value,\
+  static $(nmspace_t, stringptr_t) str##_pr     = $((nmspace_t)&rel_ns_value,\
 						  &str##_string);\
   static qvar_t                  str##_qv     = &str##_pr
 
@@ -172,7 +174,7 @@ static void add_tuple_decl(var_t x, list_t<type_t> ts) {
   for (int i=1; ts != null; ts = ts->tl, i++)
     fs = new List(new Structfield(new {(string_t)xprintf("f%d",i)},mt_tq,ts->hd,null,null),fs);
   fs = List::imp_rev(fs);
-  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(abs_ns,x)),
+  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns,x)),
                        .tvs = null, .fields = new Opt(fs), .attributes = null};
   result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
 }
@@ -184,7 +186,7 @@ static void add_tagged_ptr_decl(var_t x, type_t t) {
   let f3 = new Structfield(last_plus_one_sp,mt_tq,tptr,null,null);
   let fs = list(f1,f2,f3);
   let sd = new Structdecl{.sc = Public,
-                          .name = new Opt(new $(abs_ns,x)),
+                          .name = new Opt(new $(rel_ns,x)),
                           .tvs = null,
                           .fields = new Opt((list_t<structfield_t>)fs),
                           .attributes = null};
@@ -576,7 +578,7 @@ static conv conversion(type_t t1, type_t t2) {
 
 static string_t _sfile_to_file_string = "sfile_to_file";
 static $(nmspace_t,var_t) _sfile_to_file_var =
-  $((nmspace_t)&abs_ns_value,&_sfile_to_file_string);
+  $((nmspace_t)&rel_ns_value,&_sfile_to_file_string);
 
 // convert a Cyc_Stdio___sFILE to a FILE (aka Cyc_Cstdio___sFILE)
 static exp_t fdconv(exp_t e) {
@@ -1773,13 +1775,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     case &Const_e(&String_c(s)):
       // Cyc_new_string(s) or Cyc_rnew_string(r,s)
       if (rgnopt == null) 
-        e->r = fncall_exp(var_exp(new $(abs_ns,Cyc_new_string_sp),DL),
+        e->r = fncall_exp(var_exp(new $(abs_ns,new_string_sp),DL),
                           new List(new_exp(new Const_e(new String_c(s)),DL),
                                    null),DL)->r;
       else {
         exp_t r = (exp_t)rgnopt;
         exp_to_c(nv,r);
-        e->r = fncall_exp(var_exp(new $(abs_ns,Cyc_rnew_string_sp),DL),
+        e->r = fncall_exp(var_exp(new $(abs_ns,rnew_string_sp),DL),
                           new List(new_exp(new Const_e(new String_c(s)),DL),
                                    null),DL)->r;
       }
@@ -3009,9 +3011,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       qvar_t x_var = vd->name;
       exp_t  rh_exp = var_exp(rh_var,DL);
       exp_t  x_exp = varb_exp(x_var,new Local_b(vd),DL);
-      exp_t pushregion_exp = var_exp(new $(abs_ns, _push_region_sp),DL);
-      exp_t popregion_exp = var_exp(new $(abs_ns, _pop_region_sp),DL);
-      exp_t newregion_exp = var_exp(new $(abs_ns, _new_region_sp),DL);
+      exp_t pushregion_exp = var_exp(new $(rel_ns, _push_region_sp),DL);
+      exp_t popregion_exp = var_exp(new $(rel_ns, _pop_region_sp),DL);
+      exp_t newregion_exp = var_exp(new $(rel_ns, _new_region_sp),DL);
       exp_t addr_rh_exp = address_exp(rh_exp,DL);
       exp_t newregion_call = fncall_exp(newregion_exp, null, DL);
       exp_t popregion_call = fncall_exp(popregion_exp, 
@@ -3336,7 +3338,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, opt_t<type_t> topt, exp_t e,
     if(exhaust)
       s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,succ_stmt,DL),DL);
     else {
-      let e3 = newthrow_exp(var_exp(new $(abs_ns,Match_Exception_sp),DL));
+      let e3 = newthrow_exp(match_exn_exp(DL));
       let fail_stmt = label_stmt(fail_lab,exp_stmt(e3,DL),DL);
       s = declare_stmt(x,typ_to_c(t),e,
                        seq_stmt(test_stmt,
@@ -3366,7 +3368,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       let c_name = vd->name;
       // strip any namespace from an extern C declaration
       if (vd->sc == ExternC) 
-	c_name = new $(abs_ns,(*c_name)[1]);
+	c_name = new $(rel_ns,(*c_name)[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, (exp_t)vd->initializer);
       if (!nv->toplevel)
@@ -3381,7 +3383,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       // extern C declarations are not placed in a namespace
       let c_name = fd->name;
       if (fd->sc == ExternC)
-	c_name = new $(abs_ns,(*c_name)[1]);
+	c_name = new $(rel_ns,(*c_name)[1]);
       nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
       fd->name = c_name;
       fndecl_to_c(nv, fd);

@@ -658,13 +658,16 @@ namespace Absyn {
   extern type_t float_t, double_t;
   // exception name and type
   extern qvar_t exn_name;
-  extern tuniondecl_t exn_xed;
+  extern tuniondecl_t exn_tud;
+  extern qvar_t null_pointer_exn_name;
+  extern qvar_t match_exn_name;
+  extern tunionfield_t null_pointer_exn_tuf;
+  extern tunionfield_t match_exn_tuf;
   extern type_t exn_typ;
   // string (char ?)
   extern type_t string_typ(type_t rgn);
   extern type_t const_string_typ(type_t rgn);
-  // FILE -- KLUDGE -- first call determines all future ones!
-  extern type_t file_typ_nocyc();
+  // FILE
   extern type_t file_typ();
   // pointers
   extern tunion Bounds bounds_one; // Upper(1) (good for sharing)
@@ -742,6 +745,7 @@ namespace Absyn {
   extern exp_t tuple_exp(list_t<exp_t>, seg_t);
   extern exp_t stmt_exp(stmt_t, seg_t);
   extern exp_t null_pointer_exn_exp(seg_t);
+  extern exp_t match_exn_exp(seg_t);
   extern exp_t array_exp(list_t<exp_t>, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t>,
                                  list_t<$(list_t<designator_t>,exp_t)@>,seg_t);

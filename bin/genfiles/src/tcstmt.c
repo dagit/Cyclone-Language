@@ -340,11 +340,15 @@ void* p, struct Cyc_Position_Segment* s); struct Cyc_Stdio___sFILE; extern
 unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
 _tagged_string f1; } ; struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc;
-extern struct _tagged_string Cyc_Absynpp_typ2string( void*); struct Cyc_Set_Set;
-extern unsigned char Cyc_Set_Absent[ 11u]; struct Cyc_Dict_Dict; extern
-unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
-static const int Cyc_Tcenv_VarRes= 0; struct Cyc_Tcenv_VarRes_struct{ int tag;
-void* f1; } ; static const int Cyc_Tcenv_StructRes= 1; struct Cyc_Tcenv_StructRes_struct{
+struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int qvar_to_Cids: 1; int
+add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int rewrite_temp_tvars: 1;
+int print_all_tvars: 1; int print_all_kinds: 1; int print_using_stmts: 1; int
+print_externC_stmts: 1; int print_full_evars: 1; int use_curr_namespace: 1;
+struct Cyc_List_List* curr_namespace; } ; extern struct _tagged_string Cyc_Absynpp_typ2string(
+void*); struct Cyc_Set_Set; extern unsigned char Cyc_Set_Absent[ 11u]; struct
+Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char
+Cyc_Dict_Absent[ 11u]; static const int Cyc_Tcenv_VarRes= 0; struct Cyc_Tcenv_VarRes_struct{
+int tag; void* f1; } ; static const int Cyc_Tcenv_StructRes= 1; struct Cyc_Tcenv_StructRes_struct{
 int tag; struct Cyc_Absyn_Structdecl* f1; } ; static const int Cyc_Tcenv_TunionRes=
 2; struct Cyc_Tcenv_TunionRes_struct{ int tag; struct Cyc_Absyn_Tuniondecl* f1;
 struct Cyc_Absyn_Tunionfield* f2; } ; static const int Cyc_Tcenv_EnumRes= 3;
@@ -435,9 +439,8 @@ static const int Cyc_CfFlowInfo_BottomFL= 0; static const int Cyc_CfFlowInfo_Ini
 0; struct Cyc_CfFlowInfo_InitsFL_struct{ int tag; struct Cyc_Dict_Dict* f1; } ;
 extern void Cyc_NewControlFlow_set_encloser( struct Cyc_Absyn_Stmt* enclosee,
 struct Cyc_Absyn_Stmt* encloser); struct Cyc_NewControlFlow_AnalEnv{ struct Cyc_Dict_Dict*
-roots; int in_try; void* tryflow; } ; void Cyc_NewControlFlow_cf_check( struct
-Cyc_List_List* ds); extern void Cyc_Tcstmt_tcStmt( struct Cyc_Tcenv_Tenv* te,
-struct Cyc_Absyn_Stmt* s, int new_block); extern unsigned int Cyc_Evexp_eval_const_uint_exp(
+roots; int in_try; void* tryflow; } ; extern void Cyc_Tcstmt_tcStmt( struct Cyc_Tcenv_Tenv*
+te, struct Cyc_Absyn_Stmt* s, int new_block); extern unsigned int Cyc_Evexp_eval_const_uint_exp(
 struct Cyc_Absyn_Exp* e); static void Cyc_Tcstmt_decorate_stmt( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Absyn_Stmt* s){ Cyc_NewControlFlow_set_encloser( s, Cyc_Tcenv_get_encloser(
 te)); s->try_depth= Cyc_Tcenv_get_try_depth( te);} static void Cyc_Tcstmt_pattern_synth(

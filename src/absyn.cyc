@@ -151,17 +151,38 @@ type_t slong_t  = &slong_tt;
 type_t float_t  = FloatType;
 type_t double_t = DoubleType;
 // exceptions
-static string_t exn_string = "exn";
 static tunion Nmspace.Abs_n abs_null = Abs_n(null);
-static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_string);
+static string_t exn_str = "exn";
+static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_str);
 qvar_t exn_name   = &exn_name_v;
-static struct Tuniondecl exn_xed_v = 
-             Tuniondecl(Extern,&exn_name_v,null,null,true);
-static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_xed_v);
-tuniondecl_t exn_xed = &exn_xed_v;
+static string_t null_pointer_exn_str = "Null_Exception";
+static $(nmspace_t,var_t) null_pointer_exn_name_v = 
+  $((nmspace_t)&abs_null, &null_pointer_exn_str);
+static string_t match_exn_str = "Match_Exception";
+static $(nmspace_t,var_t) match_exn_name_v = 
+  $((nmspace_t)&abs_null, &match_exn_str);
+qvar_t null_pointer_exn_name   = &null_pointer_exn_name_v;
+qvar_t match_exn_name   = &match_exn_name_v;
+static struct Tunionfield null_pointer_exn_tuf_v =
+  Tunionfield(&null_pointer_exn_name_v, null, null, null, Extern);
+static struct Tunionfield match_exn_tuf_v =
+  Tunionfield(&match_exn_name_v, null, null, null, Extern);
+tunionfield_t null_pointer_exn_tuf = &null_pointer_exn_tuf_v;
+tunionfield_t match_exn_tuf = &match_exn_tuf_v;
+static struct List<tunionfield_t, `H> exn_l0 = List(&null_pointer_exn_tuf_v, null);
+static struct List<tunionfield_t, `H> exn_l1= List(&match_exn_tuf_v, &exn_l0);
+static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l1);
+static struct Tuniondecl exn_tud_v = Tuniondecl(Extern,
+						&exn_name_v,
+						null,
+						&exn_ol,
+						true);
+tuniondecl_t exn_tud = &exn_tud_v;
+static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud_v);
 static tunion Type.TunionType exn_typ_tt =
                   TunionType(TunionInfo(&exn_tinfou,null,HeapRgn));
 type_t exn_typ = &exn_typ_tt;
+
 // string
 static opt_t<type_t> string_t_opt = null;
 type_t string_typ(type_t rgn) {
@@ -231,28 +252,17 @@ static opt_t<type_t> file_t_opt = null;
 // If so, we'll need a rgn_t argument.
 static string_t sf_str = "__sFILE";
 static stringptr_t sf = &sf_str;
-static string_t cyc_str = "Cyc";
-static stringptr_t cyc = &cyc_str;
 static string_t st_str = "Stdio";
 static stringptr_t st = &st_str;
 
-//KLUDGE -- FIRST CALL DETERMINES EVERYTHING!
-static void file_typ_ns(list_t<var_t> ns) {
-  typedef_name_t file_t_name = 
-    new $(new Abs_n(ns), sf);
-  structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
-                                   null,null);
-  type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
-  file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
-}
 type_t file_typ() {
-  if(file_t_opt == null)
-    file_typ_ns(list(cyc,st));
-  return file_t_opt->v;
-}
-type_t file_typ_nocyc() {
-  if(file_t_opt == null)
-    file_typ_ns(list(st));
+  if(file_t_opt == null) {
+    typedef_name_t file_t_name = new $(new Abs_n(list(st)), sf);
+    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
+				     null,null);
+    type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
+    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
+  }
   return file_t_opt->v;
 }
 
@@ -273,10 +283,10 @@ opt_t<type_t> void_star_typ_opt() {
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 type_t strct(var_t name) {
-  return new StructType(new {$((nmspace_t)(new Abs_n(null)),name)},null,null);
+  return new StructType(new {$((nmspace_t)(new Rel_n(null)),name)},null,null);
 }
 type_t union_typ(var_t name) {
-  return new UnionType(new {$((nmspace_t)(new Abs_n(null)),name)},null,null);
+  return new UnionType(new {$((nmspace_t)(new Rel_n(null)),name)},null,null);
 }
 type_t strctq(qvar_t name) {
   return new StructType(name,null,null);
@@ -414,14 +424,14 @@ exp_t tuple_exp(list_t<exp_t> es, seg_t loc) {
 }
 exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
-static string_t ne_str = "Null_Exception";
-static tunion Nmspace.Abs_n top_ns = Abs_n(null);
-static $(nmspace_t,stringptr_t) ne = 
-  $((tunion Nmspace)&top_ns,&ne_str);
-
 exp_t null_pointer_exn_exp(seg_t loc) { 
-  return var_exp(&ne, loc); 
+  return var_exp(&null_pointer_exn_name_v, loc); 
 }
+
+exp_t match_exn_exp(seg_t loc) { 
+  return var_exp(&match_exn_name_v, loc); 
+}
+
 exp_t array_exp(list_t<exp_t> es, seg_t loc) {
   let dles = null;
   for (; es != null; es = es->tl)

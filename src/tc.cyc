@@ -872,14 +872,8 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
   }
 }
 
-static string_t cyc_string = "Cyc";
-static stringptr_t cyc_ns = &cyc_string;
-
-void tc(tenv_t te, bool add_cyc_namespace, bool check_var_init, list_t<decl_t> ds) {
-  if (add_cyc_namespace)
-    // wrap an implicit "namespace Cyc" around the declarations
-    ds = new List(new Decl{new Namespace_d(cyc_ns,ds),null},null);
-
+void tc(tenv_t te, bool check_var_init, list_t<decl_t> ds) {
+  set_params(&tc_params_r);
   tc_decls(te,ds,false,check_var_init);
 }
 

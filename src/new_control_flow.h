@@ -29,7 +29,7 @@ extern void update_tryflow(analenv_t env, flow_info_t new_flow);
 extern flow_info_t cf_analyze_stmt(analenv_t, Absyn::stmt_t, flow_info_t);
 
 // The entry point (all the stuff above is just for cf_absexp)
-void cf_check(list_t<Absyn::decl_t> ds);
+extern void cf_check(list_t<Absyn::decl_t> ds);
 }
 
 #endif

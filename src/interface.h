@@ -60,13 +60,11 @@ namespace Interface {
   // load from a text file
   extern i_t parse(FILE @);
 
-  /*
   // binary save to a file
   extern void save(i_t, FILE @);
 
   // load from a text file
   extern i_t load(FILE @);
-  */
 }
 
 typedef Interface::i_t interface_t;

@@ -23,7 +23,7 @@
 #include "interface.h"
 
 namespace Lex {
-extern void lex_init();
+  extern void lex_init();
 }
 using Core;
 using Stdio;
@@ -46,6 +46,9 @@ static bool v_r        = false;
 static bool save_temps_r = false;
 static bool save_c_r   = false;
 static bool add_cyc_namespace_r = true;
+static bool print_full_evars_r = false;
+static bool print_all_tvars_r = false;
+static bool print_all_kinds_r = false;
 
 static string_t *output_file = null;
 static void set_output_file(string_t s) {
@@ -163,6 +166,10 @@ list_t<Absyn::decl_t>
   case Dict::Absent:
     exn_string = "Exception Dict::Absent";
     break;
+  case &InvalidArg(s):
+    exn_string = "Exception Core::InvalidArg";
+    explain_string = s;
+    break;
   case x:
     ex = x;
     other_exn = true;
@@ -199,13 +206,7 @@ list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
 }
 
 list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
-  Absynpp::expand_typedefs = ! noexpand_r;
-  add_cyc_namespace_r = add_cyc_namespace_r && !tc_r; //don't add namespaces if we don't translate to C
-  if (add_cyc_namespace_r)
-    Absyn::file_typ();
-  else
-    Absyn::file_typ_nocyc();
-  Tc::tc(te, add_cyc_namespace_r, true, tds);
+  Tc::tc(te, true, tds);
   if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
@@ -216,13 +217,18 @@ list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t> tds) {
   return tds;
 }
 
-list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE @) @ params, list_t<Absyn::decl_t> tds) {
-  let te = (*params)[0];
-  let f = (*params)[1];
-
-  let i = Interface::extract(te -> ae);
-  Interface::print(i, f);
-
+list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *, FILE @) @ params, list_t<Absyn::decl_t> tds) {
+  let &$(te, fi, fo) = params;
+  let i1 = Interface::extract(te -> ae);
+  if (fi == null) {
+    Interface::save(i1, fo);
+  } else {
+    let i0 = Interface::parse((FILE @) fi);
+    if (!Interface::is_subinterface(i0, i1, new $("written interface", "maximal interface")))
+      compile_failure = true;
+    else
+      Interface::save(i0, fo);
+  }
   return tds;
 }
 
@@ -234,15 +240,28 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
 }
 
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
-  Absynpp::expand_typedefs = ! noexpand_r;
-  Absynpp::decls_first = Absynpp::qvar_to_Cids = ! tc_r;
-  Absynpp::to_VC = tovc_r;
+  struct Absynpp::Params params_r;
+
+  if (tc_r) {
+    params_r = Absynpp::cyc_params_r;
+  } else {
+    params_r = Absynpp::c_params_r;
+  }
+  params_r.expand_typedefs = ! noexpand_r;
+  params_r.to_VC = tovc_r;
+  params_r.add_cyc_prefix = add_cyc_namespace_r;
+  params_r.print_full_evars = print_full_evars_r;
+  params_r.print_all_tvars = print_all_tvars_r;
+  params_r.print_all_kinds = print_all_kinds_r;
 
   //  fprintf(out_file, "#include \"cyc_include.h\"\n\n");
-  if (pp_r)
+  if (pp_r) {
+    Absynpp::set_params(&params_r);
     Absynpp::decllist2file(tds,out_file);
-  else
+  } else {
+    Absyndump::set_params(&params_r);
     Absyndump::dumpdecllist2file(tds,out_file);
+  }
   fflush(out_file);
   return tds;
 }
@@ -296,11 +315,23 @@ string_t *find(list_t<stringptr_t> dirs, string_t file) {
   return null;
 }
 
+string_t do_find(list_t<stringptr_t> dirs, string_t file) {
+  let f = find(dirs, file);
+  if (f == null) {
+    fprintf(stderr,"Error: can't find internal compiler file %s", file);
+    compile_failure = true;
+    remove_cfiles();
+    exit(1);
+  }
+  return *f;
+}
+
 void process_file(string_t filename) {
 
   let basename      = Filename::chop_extension(filename);
   let preprocfile   = strconcat(basename, ".cyp");
   let interfacefile = strconcat(basename, ".cyci");
+  let interfaceobjfile = strconcat(basename, ".cycio");
   let cfile         = strconcat(basename, ".c");
 
   if (v_r) fprintf(stderr,"Compiling %s\n", filename);
@@ -345,8 +376,6 @@ void process_file(string_t filename) {
 
   // Run the stages of the Cyclone compiler
   Position::reset_position(preprocfile); // necessary for good error messages!
-  // Set up for printing Cyclone
-  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = true;
   FILE * in_file  = try_file_open(preprocfile,"r","file");
   if (compile_failure) return;
 
@@ -384,20 +413,22 @@ void process_file(string_t filename) {
     Tcutil::flush_warnings();
   remove_file(preprocfile); // Can't remove this before warnings are flushed!
   if (compile_failure) return;
-  // Once the type-checking has been done, there's no need for
-  // the 'Using' statements, nor for the extern "C" {...}
-  Absynpp::print_using_stmts = Absynpp::print_externC_stmts = false;
 
   // Interface checking
   if (ic_r) {
-    FILE *inter_file;
-    inter_file = try_file_open(interfacefile, "w", "interface file");
-    if (compile_failure) return;
-    // Position::reset_position(interfacefile);
+    FILE *inter_file = fopen(interfacefile, "r");
+    FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
+    if (inter_objfile == null) {
+      compile_failure = true;
+      return;
+    }
+    Position::reset_position(interfacefile);
     tds = do_stage("interface checking", do_interface,
-                   new $(te, (FILE @) inter_file), tds);
-    if (inter_file != null) file_close((FILE @) inter_file);
-    if (compile_failure) return;
+                   new $(te, inter_file, (FILE@) inter_objfile), tds);
+    if (inter_file != null) {
+      file_close((FILE @) inter_file);
+    }
+    file_close((FILE @) inter_objfile);
   }
 
   if (tc_r) goto PRINTC;
@@ -436,6 +467,30 @@ void process_file(string_t filename) {
     file_close((FILE @)out_file);
     cfiles = new List(new ((string_t)cfile),cfiles);
   }
+}
+
+static interface_t read_cycio(string_t @ n) {
+  string_t basename;
+  try {
+    basename = Filename::chop_extension(*n);
+  } catch {
+  case &InvalidArg(_): basename = *n; break;
+  }
+  let nf = strconcat(basename, ".cycio");
+  let f = try_file_open(nf, "r", "interface object file");
+  if (f == null) {
+    compile_failure = true;
+    remove_cfiles();
+    exit(1);
+  }
+  Position::reset_position(nf); /* in case of parsing problems */
+  let i = Interface::load((FILE@) f);
+  file_close((FILE@)f);
+  return i;
+}
+
+static bool is_cfile(string_t @ n) {
+  return (*n)[0] != '-';
 }
 
 int main(int argc, string_t ? argv) {
@@ -483,7 +538,7 @@ int main(int argc, string_t ? argv) {
          new $("-toc",new Set_spec(&toc_r),
                    "  Stop after translation to C"),
          new $("-ic",new Set_spec(&ic_r),
-                  "   Interface check"),
+                  "   Activate the link-checker"),
          new $("-pp",new Set_spec(&pp_r),
                   "   Pretty print"),
          new $("-up",new Clear_spec(&pp_r),
@@ -504,13 +559,13 @@ int main(int argc, string_t ? argv) {
          new $("-noexpandtypedefs",new Set_spec(&noexpand_r),
                "\n"
               "        Don't expand typedefs in pretty printing"),
-         new $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
+         new $("-printalltvars", new Set_spec(&print_all_tvars_r),
                "\n"
               "        Print all type variables (even implicit default effects)"),
-         new $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
+         new $("-printallkinds", new Set_spec(&print_all_kinds_r),
                "\n"
                "        Always print kinds of type variables"),
-         new $("-printfullevars", new Set_spec(&Absynpp::print_full_evars),
+         new $("-printfullevars", new Set_spec(&print_full_evars_r),
                "\n"
                "       Print full information for evars (type debugging)")
          );
@@ -537,39 +592,69 @@ int main(int argc, string_t ? argv) {
   cyclone_exec_prefix_path = new List(new ((string_t)"c:/cyclone/bin/cyc-lib"),
                                         cyclone_exec_prefix_path);
   cyclone_exec_prefix_path = List::imp_rev(cyclone_exec_prefix_path);
-  let cyc_include = find(cyclone_exec_prefix_path,"include/cyc_include.h");
-  if (cyc_include == null) {
-    fprintf(stderr,"Error: can't find internal compiler file cyc_include.h");
-    compile_failure = true;
-    remove_cfiles();
-    return 1;
+  let cyc_include = do_find(cyclone_exec_prefix_path,"include/cyc_include.h");
+
+  ccargs = rev(ccargs);
+  let ccargs_string = String::str_sepstr(ccargs, " ");
+  libargs = rev(libargs);
+  let libargs_string = String::str_sepstr(new List(new ((string_t)""), libargs), " ");
+
+  let stdlib;
+  let stdlib_string;
+  if (stop_after_asmfile_r || stop_after_objectfile_r) {
+    stdlib = null;
+    stdlib_string = (string_t)"";
+  } else {
+    let cyclib = do_find(cyclone_exec_prefix_path,"cyclib.a");
+    let gc = do_find(cyclone_exec_prefix_path,"gc.a");
+
+    stdlib = list(new cyclib /*, new gc*/);
+    stdlib_string = xprintf(" %s %s", cyclib, gc);
   }
 
-  let ccargs_string = String::str_sepstr(rev(ccargs), " ");
-  let libargs_string = String::str_sepstr(new List(new ((string_t)""),rev(libargs)), " ");
-  let stdlib_string;
-  if (stop_after_asmfile_r || stop_after_objectfile_r)
-    stdlib_string = (string_t)"";
-  else {
-    let cyclib = find(cyclone_exec_prefix_path,"cyclib.a");
-    let gc = find(cyclone_exec_prefix_path,"gc.a");
-    if (cyclib == null) {
-      fprintf(stderr,"Error: can't find internal compiler file cyclib.a");
+  if (ic_r) {
+    ccargs = filter(is_cfile, ccargs);
+    libargs = filter(is_cfile, libargs);
+    let lf = append(stdlib, append(ccargs, libargs));
+    let li = map(read_cycio, lf);
+    if (! stop_after_objectfile_r) {
+      lf = new List(new ((string_t) "<final>"), lf);
+      li = new List(Interface::final(), li);
+    }
+
+    let i = Interface::merge_list(li, lf);
+    if (i == null) {
+      fprintf(stderr,"Error: interfaces incompatible\n");
       compile_failure = true;
       remove_cfiles();
       return 1;
     }
-    if (gc == null) {
-      fprintf(stderr,"Error: can't find internal compiler file gc.a");
-      compile_failure = true;
-      remove_cfiles();
-      return 1;
+    if (stop_after_asmfile_r || stop_after_objectfile_r) {
+      if (output_file != null) {
+	let output_file_io = xprintf("%s.cycio", Filename::chop_extension(*output_file));
+	let f = try_file_open(output_file_io, "w", "interface object file");
+	if (f == null) {
+	  compile_failure = true;
+	  remove_cfiles();
+	  return 1;
+	}
+	Interface::save((interface_t) i, (FILE@)f);
+	file_close((FILE@)f);
+      }
+    } else {
+      if(!Interface::is_subinterface(Interface::empty(), (interface_t) i,
+				     new $("empty interface", "global interface"))) {
+	fprintf(stderr,"Error: some objects are still undefined\n");
+	compile_failure = true;
+	remove_cfiles();
+	return 1;
+      }
     }
-    stdlib_string = xprintf(" %s %s",*cyclib,*gc);
   }
+
   let cccmd =
     xprintf("gcc -include %s%s %s%s%s",
-            *cyc_include,
+            cyc_include,
             (output_file==null?((string_t)""):xprintf(" -o %s",*output_file)),
             ccargs_string,
             stdlib_string,

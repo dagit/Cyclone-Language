@@ -19,23 +19,17 @@ unsigned char**); extern int system( unsigned char*); extern int* __errno();
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length(
 struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[ 15u]; extern
 unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
-extern int isalnum( int __c)  __attribute__(( cdecl )) ; extern int isalpha( int
-__c)  __attribute__(( cdecl )) ; extern int iscntrl( int __c)  __attribute__((
-cdecl )) ; extern int isdigit( int __c)  __attribute__(( cdecl )) ; extern int
-isgraph( int __c)  __attribute__(( cdecl )) ; extern int islower( int __c)
- __attribute__(( cdecl )) ; extern int isprint( int __c)  __attribute__(( cdecl
-)) ; extern int ispunct( int __c)  __attribute__(( cdecl )) ; extern int isspace(
-int __c)  __attribute__(( cdecl )) ; extern int isupper( int __c)
- __attribute__(( cdecl )) ; extern int isxdigit( int __c)  __attribute__(( cdecl
-)) ; extern int tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper(
-int __c)  __attribute__(( cdecl )) ; extern int isascii( int __c)
- __attribute__(( cdecl )) ; extern int toascii( int __c)  __attribute__(( cdecl
-)) ; extern int _tolower( int __c)  __attribute__(( cdecl )) ; extern int
-_toupper( int __c)  __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern
-unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_string f1; } ; extern struct _tagged_string Cyc_String_strerror( int);
-extern unsigned int Cyc_String_strlen( struct _tagged_string s); extern int Cyc_String_strcmp(
+extern int isalnum( int __c); extern int isalpha( int __c); extern int iscntrl(
+int __c); extern int isdigit( int __c); extern int isgraph( int __c); extern int
+islower( int __c); extern int isprint( int __c); extern int ispunct( int __c);
+extern int isspace( int __c); extern int isupper( int __c); extern int isxdigit(
+int __c); extern int tolower( int __c); extern int toupper( int __c); extern int
+isascii( int __c); extern int toascii( int __c); extern int _tolower( int __c);
+extern int _toupper( int __c); struct Cyc_Stdio___sFILE; extern unsigned char
+Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u];
+struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern struct _tagged_string Cyc_String_strerror( int); extern
+unsigned int Cyc_String_strlen( struct _tagged_string s); extern int Cyc_String_strcmp(
 struct _tagged_string s1, struct _tagged_string s2); extern int Cyc_String_strptrcmp(
 struct _tagged_string* s1, struct _tagged_string* s2); extern int Cyc_String_strncmp(
 struct _tagged_string s1, struct _tagged_string s2, unsigned int len); extern
@@ -446,8 +440,8 @@ struct _tagged_string _temp106; _temp106.curr= _temp105; _temp106.base= _temp105
 _temp106.last_plus_one= _temp105 + 16; _temp106;})); unsigned char c='\000';
 for( 0; len > 0?( c=({ struct _tagged_string _temp99= s; unsigned char* _temp100=
 _temp99.curr; if( _temp99.base == 0? 1:( _temp100 < _temp99.base? 1: _temp100 >=
-_temp99.last_plus_one)){ _throw( Null_Exception);}* _temp100;})) != 0: 0;( len
---,({ struct _tagged_string* _temp101=& s; struct _tagged_string _temp102=*
+_temp99.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp100;})) != 0: 0;(
+len --,({ struct _tagged_string* _temp101=& s; struct _tagged_string _temp102=*
 _temp101; _temp101->curr ++; _temp102;}))){ int j= 0; for( 0; j <({ struct
 _tagged_string _temp103= accept;( unsigned int)( _temp103.last_plus_one -
 _temp103.curr);}); j ++){ if( c ==*(( const unsigned char*(*)( struct
@@ -460,8 +454,8 @@ _tagged_string _temp113; _temp113.curr= _temp112; _temp113.base= _temp112;
 _temp113.last_plus_one= _temp112 + 15; _temp113;})); unsigned char c2='\000';
 for( 0; len > 0?( c2=({ struct _tagged_string _temp107= s; const unsigned char*
 _temp108= _temp107.curr; if( _temp107.base == 0? 1:( _temp108 < _temp107.base? 1:
-_temp108 >= _temp107.last_plus_one)){ _throw( Null_Exception);}* _temp108;})) !=
-0: 0;( len --,({ struct _tagged_string* _temp109=& s; struct _tagged_string
+_temp108 >= _temp107.last_plus_one)){ _throw( Cyc_Null_Exception);}* _temp108;}))
+!= 0: 0;( len --,({ struct _tagged_string* _temp109=& s; struct _tagged_string
 _temp110=* _temp109; _temp109->curr ++; _temp110;}))){ if( c2 == c){ return s;}}
 return( struct _tagged_string)({ struct _tagged_string _temp111={ 0, 0, 0};
 _temp111;});} struct _tagged_string Cyc_String_strrchr( struct _tagged_string s,
@@ -473,7 +467,7 @@ for( 0; i >= 0;( i --,({ struct _tagged_string* _temp114=& s; struct
 _tagged_string _temp115=* _temp114; _temp114->curr --; _temp115;}))){ if(({
 struct _tagged_string _temp116= s; unsigned char* _temp117= _temp116.curr; if(
 _temp116.base == 0? 1:( _temp117 < _temp116.base? 1: _temp117 >= _temp116.last_plus_one)){
-_throw( Null_Exception);}* _temp117;}) == c){ return s;}} return({ struct
+_throw( Cyc_Null_Exception);}* _temp117;}) == c){ return s;}} return({ struct
 _tagged_string _temp118={ 0, 0, 0}; _temp118;});} unsigned int Cyc_String_strspn(
 struct _tagged_string s, struct _tagged_string accept){ unsigned int len= Cyc_String_int_strleno(
 s, 0,({ unsigned char* _temp123=( unsigned char*)"String::strspn"; struct
