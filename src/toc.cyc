@@ -170,7 +170,7 @@ static list<decl> temp_topdecls = null;
 static $(List::list<var>,var) longlong_v = $(null,(string)"_LongLong");
 static typ longlong_typ = TypedefType(&longlong_v,null,null);
 
-extern typ typ_to_c(typ t);
+static typ typ_to_c(typ t); // forward declaration
 static $(Opt_t<var>,tqual,typ)@ arg_to_c($(Opt_t<var>,tqual,typ)@ a) {
   return &$(a[0],a[1],typ_to_c(a[2]));
 }
@@ -925,7 +925,7 @@ static typ get_typ(exp e) {
 static $(tqual, typ)@ tup_to_c(exp e) {
   return &$(empty_tqual(), typ_to_c(e->topt->v));
 }
-extern void exp_to_c(env nv, exp e);
+static void exp_to_c(env nv, exp e); // forward declaration
 static $(list<designator>,exp)@ add_designator(env nv, exp e) {
   exp_to_c(nv,e);
   return &$(null,e);
@@ -1014,7 +1014,8 @@ static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles,
   return make_struct(x, strctq(collapse_qvar(tdn)), s, pointer, is_atomic);
 }
 
-extern void lvalue_assign_stmt(stmt s,list<field_name> fs,
+// forward declaration
+static void lvalue_assign_stmt(stmt s,list<field_name> fs,
 			       Opt_t<primop> popt,exp e2);
 // e1 is the result of translating an lvalue.  fs is the path of struct
 // fields that we're assigning to on e1 (if any).  The translation
@@ -1057,7 +1058,7 @@ static void lvalue_assign_stmt(stmt s,list<field_name> fs,
   }
 }
 
-extern void stmt_to_c(env nv, stmt s);
+static void stmt_to_c(env nv, stmt s); // forward declaration
 
 static void exp_to_c(env nv, exp e) {
   _ r = e->r;
@@ -2010,9 +2011,9 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
   whole_s->r = declare_stmt(v,typ_to_c(e->topt->v),&Opt(e), res, DL)->r;
 }
 
-extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
-			 bool exhaust, stmt s);
-extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top);
+static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
+			 bool exhaust, stmt s); // forward declaration
+static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top);
 
 
 ///////////////////////////////////////////////////////////////

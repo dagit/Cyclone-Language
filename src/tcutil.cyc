@@ -112,7 +112,7 @@ static bool kind_leq(kind_t k1, kind_t k2) {
 // FIX: The "enums, structs, and xenums are packable" rule
 //      is currently enforced stringently in Tc and should change some day.
 // FIX: I think the Evar case should be an error, but I'm not sure yet.
-extern bool is_packable(typ);
+static bool is_packable(typ);
 static kind_t typ_kind(typ t) {
   switch (compress(t)) {
     // FIX: this isn't the least kind -- what if it got constrained to
@@ -183,7 +183,7 @@ bool unify(typ t1, typ t2) {
 }
 
 // see if evar occurs within t
-extern void occurslist(typ evar, list<typ> ts); // mutually recursive fns
+static void occurslist(typ evar, list<typ> ts); // mutually recursive fns
 static void occurs(typ evar, typ t) {
   switch (compress(t)) {
   case Evar(_,r,_):
@@ -726,7 +726,7 @@ static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
 
 // FIX: the plan is, once we have a context that lets us assume t1 <= t2
 // for recursive types, then to do deep subtyping.  
-extern bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2);
+static bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2);
 static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   if (unify(t1,t2)) return true;
   for (_ a = assume; a != null; a = a->tl)
@@ -983,7 +983,7 @@ static $($(Opt_t<var>,tqual)@,typ)@ substitute_f1($(Opt_t<var>,tqual,typ)@ y) {
 static $(Opt_t<var>,tqual,typ)@ substitute_f2($($(Opt_t<var>,tqual)@,typ)@ w) {
   return &$(w[0][0],w[0][1],w[1]);
 }
-extern list<typ> substs(list<$(tvar,typ)@> inst, list<typ> ts);
+static list<typ> substs(list<$(tvar,typ)@> inst, list<typ> ts);
 typ substitute(list<$(tvar,typ)@> inst, typ t) {
   switch (compress(t)) {
   case VarType(v):

@@ -572,7 +572,7 @@ static term_desc_t build_desc<`a,`b>(context_t ctxt, term_desc_t dsc,
   } 
 }
 
-extern decision_t<`rhs> // forward declaration
+static decision_t<`rhs> // forward declaration
 match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc, context_t ctx, 
 	    work_stack work, `rhs right_hand_side, match_t(`rhs) rules);
 

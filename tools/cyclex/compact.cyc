@@ -72,7 +72,7 @@ static void grow_transitions() {
   check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
 }
 
-extern  int pack_from(list<$(int,int)@> nondef, int b);
+static int pack_from(list<$(int,int)@> nondef, int b); // forward declaration
 
 static int try_pack(list<$(int,int)@> nondef, list<$(int,int)@> rem, int b) {
   switch (rem) {

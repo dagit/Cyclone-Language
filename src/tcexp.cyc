@@ -108,7 +108,7 @@ static void resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
 //////////////////////// Actual Type-checking //////////////////////////////
 
 // forward reference just b/c of how things are organized at the moment
-extern void tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
+static void tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
 
 // Type check a list of expressions -- we no longer bother returning
 // a sequentialized synth (we don't have left to right evaluation anyway) 

@@ -100,13 +100,13 @@ struct Abstractdeclarator {
 typedef struct Abstractdeclarator @abstractdeclarator_t;
 
 // forward references
-extern $(var,tqual,typ)@ fnargspec_to_arg(segment loc,
+static $(var,tqual,typ)@ fnargspec_to_arg(segment loc,
 					  $(Opt_t<var>,tqual,typ)@ t);
-extern $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts, 
+static $(typ,Opt_t<decl>) collapse_type_specifiers(list<type_specifier_t> ts, 
 						   segment loc);
-extern $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
+static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
 					 list<type_modifier> tms);
-extern decl v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t);
+static decl v_typ_to_typedef(segment loc, $(qvar,tqual,typ,list<tvar>)@ t);
 
 // global state (we're not re-entrant)
 Opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf = null;

@@ -142,6 +142,10 @@ static bool ok_field_type(segment loc, tenv te, typ t) {
   }    
 }
 
+// FIX:  we should really check that static or public function prototypes
+// are eventually declared.  However, C will catch this for us, so I'm
+// not bothering to do this now.
+
 // now returns whether there is a redeclaration or not -- needed for treeshaking
 static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   Opt_t<$(resolved_t,bool)@> ans = Dict::lookup_opt(ge->ordinaries,name);
@@ -150,9 +154,15 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   ans->v[1] = true; // this is very important or we'd shake out too much
   switch (ans->v[0]) {
   case VarRes(Global_b(vd)):
-    // at most one non-extern
-    if(sc != Extern && vd->sc != Extern) 
-      terr(loc,xprintf("redeclaration of %s",name));
+    if (sc == Static && vd->sc != Static) 
+      warn(loc,xprintf("static declaration of %s follows non-static declaration",name));
+    if (vd->sc == Static && sc != Static)
+      warn(loc,xprintf("non-static declaration of %s follows static declaration",name));
+    // either they must both be static, both public, or at most one non-extern
+    if ((sc != Extern && vd->sc != Extern) && 
+	!(sc == Static && vd->sc == Static) &&
+	!(sc == Public && vd->sc == Public))
+      terr(loc,xprintf("incompatible redeclaration of %s",name));
     // all must be at the same type
     if (!unify(vd->type,t))
       // FIX: should the test be unification?
@@ -163,6 +173,13 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   default: break;
   }
   return true;
+}
+
+static bool is_function_type(typ t) {
+  switch (compress(t)) {
+  case FnType(_,_,_,_): return true;
+  default: return false;
+  }
 }
 
 static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
@@ -185,8 +202,9 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
   if (sc == Extern) {
     if(vd->initializer != null) 
       terr(loc,"extern declaration should not have initializer");
-  } else {
-    // compute default initializer, if necessary
+  } else if (!is_function_type(t)) {
+    // we skip over function types -- these are function protypes.
+    // otherwise, we compute default initializer, if necessary
     exp e;
     if(vd->initializer == null) {
       e = default_initializer(te,t,loc);

@@ -55,7 +55,7 @@ void usage(list<$(string,spec,string)@> speclist, string errmsg) {
   }
 }
 
-static int current = 0;
+int current = 0;
 static string args[?] = {};
 
 static void stop(int prog_pos, enum error e,
