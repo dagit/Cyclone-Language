@@ -2542,7 +2542,7 @@ argument_expression_list0:
     { $$=^$(new List($3,$1)); }
 ;
 
-/* NB: We've had to move tunioneration constants into primary_expression
+/* NB: We've had to move enumeration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
   INTEGER_CONSTANT   { $$=^$(int_exp((*$1)[0],(*$1)[1],LOC(@1,@1))); }
@@ -2553,7 +2553,7 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(new $((nmspace_t)(new Rel_n(null)),new {$1})); }
+  IDENTIFIER      { $$=^$(new $((nmspace_t)(new Rel_n(null)),new $1)); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 

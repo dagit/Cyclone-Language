@@ -1,17 +1,23 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
-unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
-Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
-typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
-Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -1385,7 +1391,7 @@ struct Cyc_Lex_Trie _temp488; _temp488.children= 0; _temp488.shared_str= 0;
 _temp488;}); _temp487;}); Cyc_Lex_symbols=( struct Cyc_Xarray_Xarray*)(( struct
 Cyc_Xarray_Xarray*(*)( int, struct _tagged_string*)) Cyc_Xarray_create)( 101,({
 struct _tagged_string* _temp489=( struct _tagged_string*) GC_malloc( sizeof(
-struct _tagged_string) * 1); _temp489[ 0]=({ unsigned char* _temp490=""; struct
+struct _tagged_string)); _temp489[ 0]=({ unsigned char* _temp490=""; struct
 _tagged_string _temp491; _temp491.curr= _temp490; _temp491.base= _temp490;
 _temp491.last_plus_one= _temp490 + 1; _temp491;}); _temp489;})); Cyc_Lex_num_kws=(
 int) 62u; Cyc_Lex_kw_nums=({ unsigned int _temp492=( unsigned int) Cyc_Lex_num_kws;

@@ -1,17 +1,23 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
-unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
-Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
-typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
-Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -32,31 +38,38 @@ Cyc_List_List* Cyc_List_List_t; extern unsigned char Cyc_List_List_empty[ 15u];
 extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
 Cyc_List_imp_rev( struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u];
 typedef int Cyc___int32_t; typedef unsigned int Cyc___uint32_t; extern int
-isalnum( int __c); extern int isalpha( int __c); extern int iscntrl( int __c);
-extern int isdigit( int __c); extern int isgraph( int __c); extern int islower(
-int __c); extern int isprint( int __c); extern int ispunct( int __c); extern int
-isspace( int __c); extern int isupper( int __c); extern int isxdigit( int __c);
-extern int tolower( int __c); extern int toupper( int __c); extern int isascii(
-int __c); extern int toascii( int __c); extern int _tolower( int __c); extern
-int _toupper( int __c); struct Cyc_Stdio___sFILE; typedef struct Cyc_Stdio___sFILE
-Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern unsigned int Cyc_String_strlen(
-struct _tagged_string s); extern struct _tagged_string Cyc_String_implode(
-struct Cyc_List_List* c); struct Cyc_Lineno_Pos{ struct _tagged_string
-logical_file; struct _tagged_string line; int line_no; int col; } ; typedef
-struct Cyc_Lineno_Pos* Cyc_Lineno_pos_t; extern unsigned char Cyc_Position_Exit[
-9u]; struct Cyc_Position_Segment; typedef struct Cyc_Position_Segment* Cyc_Position_seg_t;
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; typedef void* Cyc_Position_error_kind_t;
-struct Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
-seg; void* kind; struct _tagged_string desc; } ; typedef struct Cyc_Position_Error*
-Cyc_Position_error_t; extern unsigned char Cyc_Position_Nocontext[ 14u]; typedef
-struct _tagged_string* Cyc_Absyn_field_name_t; typedef struct _tagged_string*
-Cyc_Absyn_var_t; typedef struct _tagged_string* Cyc_Absyn_tvarname_t; typedef
-void* Cyc_Absyn_nmspace_t; struct _tuple0{ void* f1; struct _tagged_string* f2;
-} ; typedef struct _tuple0* Cyc_Absyn_qvar_t; typedef struct _tuple0* Cyc_Absyn_qvar_opt_t;
-typedef struct _tuple0* Cyc_Absyn_typedef_name_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_opt_t;
+isalnum( int __c)  __attribute__(( cdecl )) ; extern int isalpha( int __c)
+ __attribute__(( cdecl )) ; extern int iscntrl( int __c)  __attribute__(( cdecl
+)) ; extern int isdigit( int __c)  __attribute__(( cdecl )) ; extern int isgraph(
+int __c)  __attribute__(( cdecl )) ; extern int islower( int __c)
+ __attribute__(( cdecl )) ; extern int isprint( int __c)  __attribute__(( cdecl
+)) ; extern int ispunct( int __c)  __attribute__(( cdecl )) ; extern int isspace(
+int __c)  __attribute__(( cdecl )) ; extern int isupper( int __c)
+ __attribute__(( cdecl )) ; extern int isxdigit( int __c)  __attribute__(( cdecl
+)) ; extern int tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper(
+int __c)  __attribute__(( cdecl )) ; extern int isascii( int __c)
+ __attribute__(( cdecl )) ; extern int toascii( int __c)  __attribute__(( cdecl
+)) ; extern int _tolower( int __c)  __attribute__(( cdecl )) ; extern int
+_toupper( int __c)  __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; typedef
+struct Cyc_Stdio___sFILE Cyc_Stdio_FILE; typedef int Cyc_Stdio_fpos_t; extern
+unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_string f1; } ; extern unsigned int Cyc_String_strlen( struct
+_tagged_string s); extern struct _tagged_string Cyc_String_implode( struct Cyc_List_List*
+c); struct Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct
+_tagged_string line; int line_no; int col; } ; typedef struct Cyc_Lineno_Pos*
+Cyc_Lineno_pos_t; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
+typedef struct Cyc_Position_Segment* Cyc_Position_seg_t; static const int Cyc_Position_Lex=
+0; static const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2;
+typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
+_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
+_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
+extern unsigned char Cyc_Position_Nocontext[ 14u]; typedef struct _tagged_string*
+Cyc_Absyn_field_name_t; typedef struct _tagged_string* Cyc_Absyn_var_t; typedef
+struct _tagged_string* Cyc_Absyn_tvarname_t; typedef void* Cyc_Absyn_nmspace_t;
+struct _tuple0{ void* f1; struct _tagged_string* f2; } ; typedef struct _tuple0*
+Cyc_Absyn_qvar_t; typedef struct _tuple0* Cyc_Absyn_qvar_opt_t; typedef struct
+_tuple0* Cyc_Absyn_typedef_name_t; typedef struct _tuple0* Cyc_Absyn_typedef_name_opt_t;
 struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct
 Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct
 Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo;

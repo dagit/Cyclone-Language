@@ -1,17 +1,23 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
-unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
-Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
-typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
-int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
-it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
-unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
-typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
-Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
-typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
-Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
+unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
+unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
+Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
+typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
+; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
+unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
+Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
+typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
+int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
+unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
+typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
+typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
+struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -8937,11 +8943,11 @@ void*)({ struct Cyc_Absyn_Rel_n_struct* _temp4226=( struct Cyc_Absyn_Rel_n_struc
 GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct)); _temp4226[ 0]=({ struct Cyc_Absyn_Rel_n_struct
 _temp4227; _temp4227.tag= Cyc_Absyn_Rel_n; _temp4227.f1= 0; _temp4227;});
 _temp4226;}); _temp4224->f2=({ struct _tagged_string* _temp4225=( struct
-_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp4225[ 0]=
-Cyc_yyget_String_tok(*(( void**(*)( struct _tagged_ptr2, unsigned int,
-unsigned int)) _check_unknown_subscript)( yyvs, sizeof( void*), yyvsp_offset));
-_temp4225;}); _temp4224;}); _temp4223;}); _temp4222;}); break; case 399: _LL4221:
-yyval=*(( void**(*)( struct _tagged_ptr2, unsigned int, unsigned int))
+_tagged_string*) GC_malloc( sizeof( struct _tagged_string)); _temp4225[ 0]= Cyc_yyget_String_tok(*((
+void**(*)( struct _tagged_ptr2, unsigned int, unsigned int))
+_check_unknown_subscript)( yyvs, sizeof( void*), yyvsp_offset)); _temp4225;});
+_temp4224;}); _temp4223;}); _temp4222;}); break; case 399: _LL4221: yyval=*((
+void**(*)( struct _tagged_ptr2, unsigned int, unsigned int))
 _check_unknown_subscript)( yyvs, sizeof( void*), yyvsp_offset); break; default:
 _LL4228:( void) _throw(( void*) Cyc_Yyimpossible);} yyvsp_offset -= yylen;
 yyssp_offset -= yylen; yylsp_offset -= yylen;*(( void**(*)( struct _tagged_ptr2,
