@@ -1,4 +1,4 @@
-static char rcsid[] = "$Id: ap.cyc,v 1.2 2004-07-20 01:53:27 greg Exp $";
+static char rcsid[] = "$Id: ap.cyc,v 1.3 2004-07-22 15:02:59 gwprice Exp $";
 #include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -307,8 +307,6 @@ T AP_or (T x, T y) {
 	z = mk(x->ndigits);
 	XP_or (y->ndigits, z->digits, x->digits, y->digits);
 	for (i = y->ndigits; i < x->ndigits; i++)
-          // JGM: this seems wrong...
-		z[i] = x[i];
 	normalize (z, z->size);
 	z->sign = 1;
 	return z;
@@ -321,8 +319,6 @@ T AP_xor (T x, T y) {
 	z = mk(x->ndigits);
 	XP_xor (y->ndigits, z->digits, x->digits, y->digits);
 	for (i = y->ndigits; i < x->ndigits; i++)
-          // JGM: this seems wrong...
-		z[i] = x[i];
 	normalize (z, z->size);
 	z->sign = 1;
 	return z;
