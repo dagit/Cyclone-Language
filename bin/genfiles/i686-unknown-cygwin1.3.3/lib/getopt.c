@@ -217,20 +217,21 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std___sFILE;
-extern struct Cyc_Std___sFILE* Cyc_Std_stderr; extern unsigned char Cyc_Std_FileCloseError[
-19u]; extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std___sFILE; extern struct Cyc_Std___sFILE*
+Cyc_Std_stderr; extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern
+unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
 0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
@@ -257,8 +258,10 @@ unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
 __fd); extern struct _tagged_arr Cyc_Std_getenv( struct _tagged_arr); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
 tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); extern struct _tagged_arr Cyc_Std_optarg; extern int Cyc_Std_optind;
-extern int Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{
+__z); extern int select( int n, struct Cyc_Std__types_fd_set* readfds, struct
+Cyc_Std__types_fd_set* writefds, struct Cyc_Std__types_fd_set* exceptfds, struct
+Cyc_Std_timeval* timeout); extern struct _tagged_arr Cyc_Std_optarg; extern int
+Cyc_Std_optind; extern int Cyc_Std_opterr; extern int Cyc_Std_optopt; struct Cyc_Std_option{
 struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Std_getopt(
 int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
 int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
@@ -285,9 +288,10 @@ fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
 _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
 Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
-pathname); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
-extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
+pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int); int Cyc_Std_chroot(
+struct _tagged_arr); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; }
+; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
 struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strncmp(
 struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
 _tagged_arr Cyc_Std_strchr( struct _tagged_arr s, unsigned char c); struct

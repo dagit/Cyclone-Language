@@ -40,6 +40,7 @@ namespace Std {
     int tm_isdst;
   };
 
+  extern "C" void tzset(void);
   extern "C" time_t time(time_t *`r t);
   extern mstring_t asctime(const struct tm @`r timeptr);
   extern mstring_t ctime(const time_t @`r timep);

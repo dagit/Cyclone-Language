@@ -89,6 +89,8 @@ namespace Std {
   int truncate(string_t, off_t);
   ssize_t write(int fd, string_t buf, size_t count);
   int unlink(string_t pathname);
+  int gethostname(mstring_t, size_t);
+  int chroot(string_t);
 }
 
 #endif

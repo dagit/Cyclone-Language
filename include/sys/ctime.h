@@ -36,4 +36,8 @@ extern "C" int gettimeofday(struct timeval @__p,struct timezone *__z);
 
 }
 
+#ifdef __CYGWIN__
+#include <sys/cselect.h>
+#endif
+
 #endif

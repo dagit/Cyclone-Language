@@ -36,6 +36,8 @@ namespace Cunistd {
     int truncate(Cstring,off_t);
     ssize_t write(int fd, Cstring buf, size_t count);
     int unlink(Cstring pathname);
+    int gethostname(Cstring,size_t);
+    int chroot(Cstring);
   }
 }
 
@@ -132,4 +134,14 @@ ssize_t write(int fd, string_t buf, size_t count) {
 
 int unlink(string_t pathname) {
   return Cunistd::unlink(string_to_Cstring(pathname));
+}
+
+int gethostname(mstring_t buf, size_t count) {
+  if (count > buf.size)
+    throw new Failure("gethostname: called with count > buf.size");
+  return Cunistd::gethostname(underlying_Cstring(buf), count);
+}
+
+int chroot(string_t pathname) {
+  return Cunistd::chroot(string_to_Cstring(pathname));
 }

@@ -217,38 +217,39 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region;
-extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
-12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict*
-Cyc_Dict_empty( int(* cmp)( void*, void*)); extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
-struct _RegionHandle*, int(* cmp)( void*, void*)); extern int Cyc_Dict_is_empty(
-struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d,
-void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d,
-void* k, void* v); extern struct Cyc_Dict_Dict* Cyc_Dict_insert_new( struct Cyc_Dict_Dict*
-d, void* k, void* v); extern struct Cyc_Dict_Dict* Cyc_Dict_inserts( struct Cyc_Dict_Dict*
-d, struct Cyc_List_List* l); extern struct Cyc_Dict_Dict* Cyc_Dict_singleton(
-int(* cmp)( void*, void*), void* k, void* v); extern struct Cyc_Dict_Dict* Cyc_Dict_rsingleton(
-struct _RegionHandle*, int(* cmp)( void*, void*), void* k, void* v); extern void*
-Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* k); extern struct Cyc_Core_Opt*
-Cyc_Dict_lookup_opt( struct Cyc_Dict_Dict* d, void* k); extern void** Cyc_Dict_rlookup_opt(
-struct _RegionHandle*, struct Cyc_Dict_Dict* d, void* k); extern int Cyc_Dict_lookup_bool(
-struct Cyc_Dict_Dict* d, void* k, void** ans); extern void* Cyc_Dict_fold( void*(*
-f)( void*, void*, void*), struct Cyc_Dict_Dict* d, void* accum); extern void*
-Cyc_Dict_fold_c( void*(* f)( void*, void*, void*, void*), void* env, struct Cyc_Dict_Dict*
-d, void* accum); extern void Cyc_Dict_app( void*(* f)( void*, void*), struct Cyc_Dict_Dict*
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
+unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
+extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* cmp)( void*, void*)); extern
+struct Cyc_Dict_Dict* Cyc_Dict_rempty( struct _RegionHandle*, int(* cmp)( void*,
+void*)); extern int Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d); extern int Cyc_Dict_member(
+struct Cyc_Dict_Dict* d, void* k); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* k, void* v); extern struct Cyc_Dict_Dict* Cyc_Dict_insert_new(
+struct Cyc_Dict_Dict* d, void* k, void* v); extern struct Cyc_Dict_Dict* Cyc_Dict_inserts(
+struct Cyc_Dict_Dict* d, struct Cyc_List_List* l); extern struct Cyc_Dict_Dict*
+Cyc_Dict_singleton( int(* cmp)( void*, void*), void* k, void* v); extern struct
+Cyc_Dict_Dict* Cyc_Dict_rsingleton( struct _RegionHandle*, int(* cmp)( void*,
+void*), void* k, void* v); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d,
+void* k); extern struct Cyc_Core_Opt* Cyc_Dict_lookup_opt( struct Cyc_Dict_Dict*
+d, void* k); extern void** Cyc_Dict_rlookup_opt( struct _RegionHandle*, struct
+Cyc_Dict_Dict* d, void* k); extern int Cyc_Dict_lookup_bool( struct Cyc_Dict_Dict*
+d, void* k, void** ans); extern void* Cyc_Dict_fold( void*(* f)( void*, void*,
+void*), struct Cyc_Dict_Dict* d, void* accum); extern void* Cyc_Dict_fold_c(
+void*(* f)( void*, void*, void*, void*), void* env, struct Cyc_Dict_Dict* d,
+void* accum); extern void Cyc_Dict_app( void*(* f)( void*, void*), struct Cyc_Dict_Dict*
 d); extern void Cyc_Dict_app_c( void*(* f)( void*, void*, void*), void* env,
 struct Cyc_Dict_Dict* d); extern void Cyc_Dict_iter( void(* f)( void*, void*),
 struct Cyc_Dict_Dict* d); extern void Cyc_Dict_iter_c( void(* f)( void*, void*,

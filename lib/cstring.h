@@ -56,6 +56,10 @@ extern int strncmp(string_t s1, string_t s2, size_t len);
 extern int zstrcmp(string_t,string_t);
 extern int zstrncmp(string_t s1, string_t s2, size_t n);
 extern int zstrptrcmp(stringptr_t, stringptr_t);
+#ifdef __CYGWIN__
+extern int strcasecmp(string_t, string_t);
+extern int strncasecmp(string_t s1, string_t s2, size_t len);
+#endif
 
 ///////////////////////// CONCATENATION
 // Destructive concatenation: first arg modified and returned

@@ -217,31 +217,32 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_flock{
-short l_type; int l_start; short l_whence; int l_len; int l_pid; } ; static
-const int Cyc_Std_Flock= 0; struct Cyc_Std_Flock_struct{ int tag; struct Cyc_Std_flock*
-f1; } ; static const int Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag;
-int f1; } ; extern int Cyc_Std_fcntl( int fd, int cmd, struct _tagged_arr);
-extern int Cyc_Std_open( struct _tagged_arr, int, struct _tagged_arr); extern
-int Cyc_Std_creat( struct _tagged_arr, int); extern int fcntl( int fd, int cmd);
-extern int fcntl_with_arg( int fd, int cmd, int arg); extern int fcntl_with_lock(
-int fd, int cmd, struct Cyc_Std_flock* lock); extern int creat( unsigned char*,
-int); extern int open_without_mode( unsigned char*, int); extern int
-open_with_mode( unsigned char*, int, int); int Cyc_Std_fcntl( int fd, int cmd,
-struct _tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*)) ==  0){
-return fcntl( fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*)) !=  1){(
-int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+ struct Cyc_Std__types_fd_set{ int fds_bits[ 2u]; } ; extern void exit( int);
+extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_flock{ short l_type; int l_start;
+short l_whence; int l_len; int l_pid; } ; static const int Cyc_Std_Flock= 0;
+struct Cyc_Std_Flock_struct{ int tag; struct Cyc_Std_flock* f1; } ; static const
+int Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag; int f1; } ; extern int
+Cyc_Std_fcntl( int fd, int cmd, struct _tagged_arr); extern int Cyc_Std_open(
+struct _tagged_arr, int, struct _tagged_arr); extern int Cyc_Std_creat( struct
+_tagged_arr, int); extern int fcntl( int fd, int cmd); extern int fcntl_with_arg(
+int fd, int cmd, int arg); extern int fcntl_with_lock( int fd, int cmd, struct
+Cyc_Std_flock* lock); extern int creat( unsigned char*, int); extern int
+open_without_mode( unsigned char*, int); extern int open_with_mode(
+unsigned char*, int, int); int Cyc_Std_fcntl( int fd, int cmd, struct
+_tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*)) ==  0){ return fcntl(
+fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*)) !=  1){( int) _throw((
+void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
 _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("fcntl: too many args",
 sizeof( unsigned char), 21u); _temp1;}); _temp0;}));} else{ void* _temp2=*((

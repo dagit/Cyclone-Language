@@ -230,17 +230,17 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{
 int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int
-tm_wday; int tm_yday; int tm_isdst; } ; extern int time( int* t); extern struct
-Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm* localtime(
-const int* timep); extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
-unsigned long long st_dev; unsigned short __pad1; unsigned int st_ino;
-unsigned int st_mode; unsigned int st_nlink; unsigned int st_uid; unsigned int
-st_gid; unsigned long long st_rdev; unsigned short __pad2; int st_size; int
-st_blksize; int st_blocks; int st_atime; unsigned int __unused1; int st_mtime;
-unsigned int __unused2; int st_ctime; unsigned int __unused3; unsigned int
-__unused4; unsigned int __unused5; } ; extern int Cyc_Std_stat( struct
-_tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int fd,
-struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
+tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
+int* t); extern struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
+localtime( const int* timep); extern int timezone; extern int daylight; struct
+Cyc_Std_stat_t{ unsigned long long st_dev; unsigned short __pad1; unsigned int
+st_ino; unsigned int st_mode; unsigned int st_nlink; unsigned int st_uid;
+unsigned int st_gid; unsigned long long st_rdev; unsigned short __pad2; int
+st_size; int st_blksize; int st_blocks; int st_atime; unsigned int __unused1;
+int st_mtime; unsigned int __unused2; int st_ctime; unsigned int __unused3;
+unsigned int __unused4; unsigned int __unused5; } ; extern int Cyc_Std_stat(
+struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
+fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
 filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 mask); extern int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode);
 extern int Cyc_Std_chmod( struct _tagged_arr path, unsigned int mode); extern

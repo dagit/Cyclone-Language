@@ -217,22 +217,23 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_passwd{
-struct _tagged_arr pw_name; struct _tagged_arr pw_passwd; unsigned short pw_uid;
-unsigned short pw_gid; struct _tagged_arr pw_gecos; struct _tagged_arr pw_dir;
-struct _tagged_arr pw_shell; } ; extern struct Cyc_Std_passwd* Cyc_Std_getpwnam(
-struct _tagged_arr name); extern struct Cyc_Std_passwd* Cyc_Std_getpwuid(
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_passwd{ struct _tagged_arr
+pw_name; struct _tagged_arr pw_passwd; unsigned short pw_uid; unsigned short
+pw_gid; struct _tagged_arr pw_gecos; struct _tagged_arr pw_dir; struct
+_tagged_arr pw_shell; } ; extern struct Cyc_Std_passwd* Cyc_Std_getpwnam( struct
+_tagged_arr name); extern struct Cyc_Std_passwd* Cyc_Std_getpwuid(
 unsigned short uid); struct Cyc_Cpwd_Cpasswd{ unsigned char* pw_name;
 unsigned char* pw_passwd; unsigned short pw_uid; unsigned short pw_gid;
 unsigned char* pw_gecos; unsigned char* pw_dir; unsigned char* pw_shell; } ;

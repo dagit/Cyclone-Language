@@ -224,7 +224,8 @@ Cyc_Std_SA_sockaddr_in= 0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct
 Cyc_Std_sockaddr_in* f1; } ; static const int Cyc_Std_SA_socklenptr= 1; struct
 Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static const int
 Cyc_Std_SA_socklen= 2; struct Cyc_Std_SA_socklen_struct{ int tag; unsigned int
-f1; } ; extern int socket( int domain, int type, int protocol); extern int
+f1; } ; struct Cyc_Std_sockaddr{ unsigned short sa_family; unsigned char sa_data[
+14u]; } ; extern int socket( int domain, int type, int protocol); extern int
 socketpair( int domain, int type, int protocol, int* fds); extern int Cyc_Std_accept(
 int fd, struct _tagged_arr); extern int Cyc_Std_bind( int fd, struct _tagged_arr);
 extern int Cyc_Std_connect( int fd, struct _tagged_arr); extern int Cyc_Std_getpeername(

@@ -217,34 +217,35 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_from_array(
-struct _tagged_arr arr); extern void Cyc_Array_qsort( int(*)( void**, void**),
-struct _tagged_arr x, int len); extern void Cyc_Array_msort( int(*)( void**,
-void**), struct _tagged_arr x, int len); extern struct _tagged_arr Cyc_Array_from_list(
-struct Cyc_List_List* l); extern struct Cyc_List_List* Cyc_Array_to_list( struct
-_tagged_arr x); extern struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x);
-extern struct _tagged_arr Cyc_Array_map( void*(* f)( void*), struct _tagged_arr
-x); extern struct _tagged_arr Cyc_Array_map_c( void*(* f)( void*, void*), void*
-env, struct _tagged_arr x); extern void Cyc_Array_imp_map( void*(* f)( void*),
-struct _tagged_arr x); extern void Cyc_Array_imp_map_c( void*(* f)( void*, void*),
-void* env, struct _tagged_arr x); extern unsigned char Cyc_Array_Array_mismatch[
-19u]; extern struct _tagged_arr Cyc_Array_map2( void*(* f)( void*, void*),
-struct _tagged_arr x, struct _tagged_arr y); extern void Cyc_Array_app( void*(*
-f)( void*), struct _tagged_arr x); extern void Cyc_Array_app_c( void*(* f)( void*,
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array( struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_from_array( struct _tagged_arr arr);
+extern void Cyc_Array_qsort( int(*)( void**, void**), struct _tagged_arr x, int
+len); extern void Cyc_Array_msort( int(*)( void**, void**), struct _tagged_arr x,
+int len); extern struct _tagged_arr Cyc_Array_from_list( struct Cyc_List_List* l);
+extern struct Cyc_List_List* Cyc_Array_to_list( struct _tagged_arr x); extern
+struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x); extern struct
+_tagged_arr Cyc_Array_map( void*(* f)( void*), struct _tagged_arr x); extern
+struct _tagged_arr Cyc_Array_map_c( void*(* f)( void*, void*), void* env, struct
+_tagged_arr x); extern void Cyc_Array_imp_map( void*(* f)( void*), struct
+_tagged_arr x); extern void Cyc_Array_imp_map_c( void*(* f)( void*, void*), void*
+env, struct _tagged_arr x); extern unsigned char Cyc_Array_Array_mismatch[ 19u];
+extern struct _tagged_arr Cyc_Array_map2( void*(* f)( void*, void*), struct
+_tagged_arr x, struct _tagged_arr y); extern void Cyc_Array_app( void*(* f)(
+void*), struct _tagged_arr x); extern void Cyc_Array_app_c( void*(* f)( void*,
 void*), void* env, struct _tagged_arr x); extern void Cyc_Array_iter( void(* f)(
 void*), struct _tagged_arr x); extern void Cyc_Array_iter_c( void(* f)( void*,
 void*), void* env, struct _tagged_arr x); extern void Cyc_Array_app2( void*(* f)(

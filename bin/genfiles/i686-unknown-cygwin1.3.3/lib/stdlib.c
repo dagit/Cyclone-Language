@@ -217,34 +217,34 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); struct Cyc_Std__Div{ int quot; int rem; } ; struct Cyc_Std__Ldiv{
-int quot; int rem; } ; extern int abs( int __x); extern int atexit( void(*
-__func)()); extern struct Cyc_Std__Div div( int __numer, int __denom); extern
-struct Cyc_Std__Ldiv ldiv( int __numer, int __denom); extern int random();
-extern void srandom( unsigned int __seed); extern int rand(); extern void srand(
-unsigned int __seed); extern int rand_r( unsigned int* __seed); extern int
-grantpt( int __fd); extern int unlockpt( int __fd); extern double Cyc_Std_atof(
-struct _tagged_arr); extern int Cyc_Std_atoi( struct _tagged_arr); extern int
-Cyc_Std_atol( struct _tagged_arr); extern struct _tagged_arr Cyc_Std_getenv(
-struct _tagged_arr); extern double Cyc_Std_strtod( struct _tagged_arr n, struct
-_tagged_arr* end); extern int Cyc_Std_strtol( struct _tagged_arr n, struct
-_tagged_arr* end, int base); extern unsigned int Cyc_Std_strtoul( struct
-_tagged_arr n, struct _tagged_arr* end, int base); extern double atof(
-unsigned char*); extern int atoi( unsigned char*); extern int atol(
-unsigned char*); extern unsigned char* getenv( unsigned char*); extern int
-putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_Std__Div{
+int quot; int rem; } ; struct Cyc_Std__Ldiv{ int quot; int rem; } ; extern int
+abs( int __x); extern int atexit( void(* __func)()); extern struct Cyc_Std__Div
+div( int __numer, int __denom); extern struct Cyc_Std__Ldiv ldiv( int __numer,
+int __denom); extern int random(); extern void srandom( unsigned int __seed);
+extern int rand(); extern void srand( unsigned int __seed); extern int rand_r(
+unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
+__fd); extern double Cyc_Std_atof( struct _tagged_arr); extern int Cyc_Std_atoi(
+struct _tagged_arr); extern int Cyc_Std_atol( struct _tagged_arr); extern struct
+_tagged_arr Cyc_Std_getenv( struct _tagged_arr); extern double Cyc_Std_strtod(
+struct _tagged_arr n, struct _tagged_arr* end); extern int Cyc_Std_strtol(
+struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
+Cyc_Std_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
+extern double atof( unsigned char*); extern int atoi( unsigned char*); extern
+int atol( unsigned char*); extern unsigned char* getenv( unsigned char*); extern
+int putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
 extern int strtol( unsigned char*, unsigned char**, int); extern unsigned int
 strtoul( unsigned char*, unsigned char**, int); double Cyc_Std_atof( struct
 _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Std_atoi(

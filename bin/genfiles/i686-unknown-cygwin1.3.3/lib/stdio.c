@@ -217,35 +217,36 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std___sFILE;
-extern int Cyc_Std_remove( struct _tagged_arr); extern int Cyc_Std_rename(
-struct _tagged_arr, struct _tagged_arr); extern struct Cyc_Std___sFILE* Cyc_Std_tmpfile();
-extern int Cyc_Std_fclose( struct Cyc_Std___sFILE*); extern int Cyc_Std_fflush(
-struct Cyc_Std___sFILE*); extern struct Cyc_Std___sFILE* Cyc_Std_fopen( struct
-_tagged_arr __filename, struct _tagged_arr __modes); extern struct Cyc_Std___sFILE*
-Cyc_Std_freopen( struct _tagged_arr, struct _tagged_arr, struct Cyc_Std___sFILE*);
-extern void Cyc_Std_setbuf( struct Cyc_Std___sFILE* __stream, struct _tagged_arr
-__buf); extern int Cyc_Std_setvbuf( struct Cyc_Std___sFILE* __stream, struct
-_tagged_arr __buf, int __modes, unsigned int __n); extern int Cyc_Std_fgetc(
-struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_getc( struct Cyc_Std___sFILE*
-__stream); extern struct _tagged_arr Cyc_Std_fgets( struct _tagged_arr __s, int
-__n, struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_fputc( int __c,
-struct Cyc_Std___sFILE* __stream); extern int Cyc_Std_putc( int __c, struct Cyc_Std___sFILE*
-__stream); extern int Cyc_Std_fputs( struct _tagged_arr __s, struct Cyc_Std___sFILE*
-__stream); extern int Cyc_Std_puts( struct _tagged_arr __s); extern int Cyc_Std_ungetc(
-int __c, struct Cyc_Std___sFILE* __stream); extern unsigned int Cyc_Std_fread(
-struct _tagged_arr __ptr, unsigned int __size, unsigned int __n, struct Cyc_Std___sFILE*
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std___sFILE; extern int Cyc_Std_remove(
+struct _tagged_arr); extern int Cyc_Std_rename( struct _tagged_arr, struct
+_tagged_arr); extern struct Cyc_Std___sFILE* Cyc_Std_tmpfile(); extern int Cyc_Std_fclose(
+struct Cyc_Std___sFILE*); extern int Cyc_Std_fflush( struct Cyc_Std___sFILE*);
+extern struct Cyc_Std___sFILE* Cyc_Std_fopen( struct _tagged_arr __filename,
+struct _tagged_arr __modes); extern struct Cyc_Std___sFILE* Cyc_Std_freopen(
+struct _tagged_arr, struct _tagged_arr, struct Cyc_Std___sFILE*); extern void
+Cyc_Std_setbuf( struct Cyc_Std___sFILE* __stream, struct _tagged_arr __buf);
+extern int Cyc_Std_setvbuf( struct Cyc_Std___sFILE* __stream, struct _tagged_arr
+__buf, int __modes, unsigned int __n); extern int Cyc_Std_fgetc( struct Cyc_Std___sFILE*
+__stream); extern int Cyc_Std_getc( struct Cyc_Std___sFILE* __stream); extern
+struct _tagged_arr Cyc_Std_fgets( struct _tagged_arr __s, int __n, struct Cyc_Std___sFILE*
+__stream); extern int Cyc_Std_fputc( int __c, struct Cyc_Std___sFILE* __stream);
+extern int Cyc_Std_putc( int __c, struct Cyc_Std___sFILE* __stream); extern int
+Cyc_Std_fputs( struct _tagged_arr __s, struct Cyc_Std___sFILE* __stream); extern
+int Cyc_Std_puts( struct _tagged_arr __s); extern int Cyc_Std_ungetc( int __c,
+struct Cyc_Std___sFILE* __stream); extern unsigned int Cyc_Std_fread( struct
+_tagged_arr __ptr, unsigned int __size, unsigned int __n, struct Cyc_Std___sFILE*
 __stream); extern unsigned int Cyc_Std_fwrite( struct _tagged_arr __ptr,
 unsigned int __size, unsigned int __n, struct Cyc_Std___sFILE* __s); extern int
 Cyc_Std_fseek( struct Cyc_Std___sFILE* __stream, int __off, int __whence);

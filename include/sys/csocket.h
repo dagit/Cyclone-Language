@@ -92,6 +92,12 @@ extern tunion SockAddr<`r::R> {
 };
 typedef tunion `r SockAddr<`r> SA<`r>;
 
+/* For porting purposes */
+struct sockaddr {
+  unsigned short sa_family;
+  char           sa_data[14];
+};
+
 extern "C" int socket(int domain, int type, int protocol);
 extern "C" int socketpair(int domain, int type, int protocol, int @{2} fds);
 

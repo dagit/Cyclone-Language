@@ -217,11 +217,12 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern struct _tagged_arr
-Cyc_Core_rnew_string( struct _RegionHandle*, int); extern unsigned char Cyc_Core_Invalid_argument[
-21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern struct _tagged_arr
+Cyc_Core_new_string( int); extern struct _tagged_arr Cyc_Core_rnew_string(
+struct _RegionHandle*, int); extern unsigned char Cyc_Core_Invalid_argument[ 21u];
+struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -246,9 +247,11 @@ int Cyc_Std_strncmp( struct _tagged_arr s1, struct _tagged_arr s2, unsigned int
 len); extern int Cyc_Std_zstrcmp( struct _tagged_arr, struct _tagged_arr);
 extern int Cyc_Std_zstrncmp( struct _tagged_arr s1, struct _tagged_arr s2,
 unsigned int n); extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct
-_tagged_arr*); extern struct _tagged_arr Cyc_Std_strcat( struct _tagged_arr dest,
-struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_strconcat( struct
-_tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rstrconcat(
+_tagged_arr*); extern int Cyc_Std_strcasecmp( struct _tagged_arr, struct
+_tagged_arr); extern int Cyc_Std_strncasecmp( struct _tagged_arr s1, struct
+_tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_Std_strcat(
+struct _tagged_arr dest, struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rstrconcat(
 struct _RegionHandle*, struct _tagged_arr, struct _tagged_arr); extern struct
 _tagged_arr Cyc_Std_strconcat_l( struct Cyc_List_List*); extern struct
 _tagged_arr Cyc_Std_rstrconcat_l( struct _RegionHandle*, struct Cyc_List_List*);
@@ -283,12 +286,10 @@ _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strspn(
 struct _tagged_arr s, struct _tagged_arr accept); extern struct Cyc_List_List*
 Cyc_Std_explode( struct _tagged_arr s); extern struct Cyc_List_List* Cyc_Std_rexplode(
 struct _RegionHandle*, struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode(
-struct Cyc_List_List* c); extern int Cyc_Std_strcasecmp( struct _tagged_arr,
-struct _tagged_arr); extern int Cyc_Std_strncasecmp( struct _tagged_arr s1,
-struct _tagged_arr s2, unsigned int len); extern unsigned char* strerror( int
-errnum); struct _tagged_arr Cyc_Std_strerror( int errnum){ return( struct
-_tagged_arr) Cstring_to_string( strerror( errnum));} unsigned int Cyc_Std_strlen(
-struct _tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
+struct Cyc_List_List* c); extern unsigned char* strerror( int errnum); struct
+_tagged_arr Cyc_Std_strerror( int errnum){ return( struct _tagged_arr)
+Cstring_to_string( strerror( errnum));} unsigned int Cyc_Std_strlen( struct
+_tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
 unsigned char)); i ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
 sizeof( unsigned char),( int) i)) == '\000'){ return i;}} return i;} static
 unsigned int Cyc_Std_int_strleno( struct _tagged_arr s, struct _tagged_arr error){

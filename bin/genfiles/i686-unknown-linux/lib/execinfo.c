@@ -282,10 +282,11 @@ int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_S
 struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
 int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
 struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
-_tagged_arr pathname); extern int backtrace( int*, int); int Cyc_Execinfo_backtrace(
-struct _tagged_arr array, int size){ if( size >  _get_arr_size( array, sizeof(
-int))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct
-Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
+int Cyc_Std_chroot( struct _tagged_arr); extern int backtrace( int*, int); int
+Cyc_Execinfo_backtrace( struct _tagged_arr array, int size){ if( size > 
+_get_arr_size( array, sizeof( int))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("backtrace: size > array.size", sizeof( unsigned char), 29u);
 _temp1;}); _temp0;}));} return backtrace(( int*) _check_null( _untag_arr( array,

@@ -217,21 +217,24 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
-tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag;
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
+} ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
+int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
+writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
+timeout); struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag;
 int val; } ; extern unsigned int alarm( unsigned int seconds); extern int close(
 int); extern void _exit( int); extern int getpid(); extern int getppid(); extern
 int fork(); extern int fchdir( int); extern int fchown( int, unsigned short,
@@ -254,7 +257,8 @@ fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
 _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
 Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
-pathname); extern int access( unsigned char*, int); extern int chdir(
+pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int); int Cyc_Std_chroot(
+struct _tagged_arr); extern int access( unsigned char*, int); extern int chdir(
 unsigned char*); extern int chown( unsigned char*, unsigned short,
 unsigned short); extern unsigned char* getcwd( unsigned char* buf, unsigned int
 size); extern int execv( unsigned char* path, unsigned char** argv); extern int
@@ -264,21 +268,22 @@ link( unsigned char* path1, unsigned char* path2); extern int read( int fd,
 unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
 extern int symlink( unsigned char* path1, unsigned char* path2); extern int
 truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
-unsigned int count); extern int unlink( unsigned char* pathname); int Cyc_Std_access(
-struct _tagged_arr path, int mode){ return access( string_to_Cstring( path),
-mode);} int Cyc_Std_chdir( struct _tagged_arr path){ return chdir(
-string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr path,
-unsigned short owner, unsigned short group){ return chown( string_to_Cstring(
-path), owner, group);} struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
-unsigned int size){ if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf,
-sizeof( unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
-_temp1.f1= _tag_arr("getcwd: invalid buf argument", sizeof( unsigned char), 29u);
-_temp1;}); _temp0;}));}{ unsigned char* response= getcwd(( unsigned char*)
-_check_null( _untag_arr( buf, sizeof( unsigned char), 0u)), size); return(
-unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}} int Cyc_Std_execl( struct
-_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv){ if((*((
+unsigned int count); extern int unlink( unsigned char* pathname); extern int
+gethostname( unsigned char*, unsigned int); extern int chroot( unsigned char*);
+int Cyc_Std_access( struct _tagged_arr path, int mode){ return access(
+string_to_Cstring( path), mode);} int Cyc_Std_chdir( struct _tagged_arr path){
+return chdir( string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr
+path, unsigned short owner, unsigned short group){ return chown(
+string_to_Cstring( path), owner, group);} struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf, unsigned int size){ if( !(( unsigned int) buf.curr)? 1:
+_get_arr_size( buf, sizeof( unsigned char)) <  size){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("getcwd: invalid buf argument",
+sizeof( unsigned char), 29u); _temp1;}); _temp0;}));}{ unsigned char* response=
+getcwd(( unsigned char*) _check_null( _untag_arr( buf, sizeof( unsigned char), 0u)),
+size); return( unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}} int Cyc_Std_execl(
+struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv){ if((*((
 struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),(
 int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr != ((
 struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct
@@ -369,4 +374,12 @@ _temp26[ 0]=({ struct Cyc_Core_Failure_struct _temp27; _temp27.tag= Cyc_Core_Fai
 _temp27.f1= _tag_arr("write: called with count > buf.size", sizeof(
 unsigned char), 36u); _temp27;}); _temp26;}));} return write( fd,
 string_to_Cstring( buf), count);} int Cyc_Std_unlink( struct _tagged_arr
-pathname){ return unlink( string_to_Cstring( pathname));}
+pathname){ return unlink( string_to_Cstring( pathname));} int Cyc_Std_gethostname(
+struct _tagged_arr buf, unsigned int count){ if( count >  _get_arr_size( buf,
+sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp28=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp28[ 0]=({ struct Cyc_Core_Failure_struct _temp29; _temp29.tag= Cyc_Core_Failure;
+_temp29.f1= _tag_arr("gethostname: called with count > buf.size", sizeof(
+unsigned char), 42u); _temp29;}); _temp28;}));} return gethostname(
+underlying_Cstring(( struct _tagged_arr) buf), count);} int Cyc_Std_chroot(
+struct _tagged_arr pathname){ return chroot( string_to_Cstring( pathname));}

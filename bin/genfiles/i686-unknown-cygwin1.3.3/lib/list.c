@@ -217,71 +217,72 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region;
-extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern struct Cyc_List_List* Cyc_List_list( struct _tagged_arr); extern
-struct Cyc_List_List* Cyc_List_rlist( struct _RegionHandle*, struct _tagged_arr);
-extern int Cyc_List_length( struct Cyc_List_List* x); extern void* Cyc_List_hd(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List*
-x); extern struct Cyc_List_List* Cyc_List_copy( struct Cyc_List_List* x); extern
-struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List*
-x); extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List*
-x); extern struct Cyc_List_List* Cyc_List_rmap( struct _RegionHandle*, void*(* f)(
-void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map_c(
-void*(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern struct
-Cyc_List_List* Cyc_List_rmap_c( struct _RegionHandle*, void*(* f)( void*, void*),
-void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_map2( void*(* f)( void*, void*),
-struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List*
-Cyc_List_rmap2( struct _RegionHandle*, void*(* f)( void*, void*), struct Cyc_List_List*
-x, struct Cyc_List_List* y); extern void Cyc_List_app( void*(* f)( void*),
-struct Cyc_List_List* x); extern void Cyc_List_app_c( void*(* f)( void*, void*),
-void*, struct Cyc_List_List* x); extern void Cyc_List_app2( void*(* f)( void*,
-void*), struct Cyc_List_List* x, struct Cyc_List_List* y); extern void Cyc_List_app2_c(
-void*(* f)( void*, void*, void*), void* env, struct Cyc_List_List* x, struct Cyc_List_List*
-y); extern void Cyc_List_iter( void(* f)( void*), struct Cyc_List_List* x);
-extern void Cyc_List_iter_c( void(* f)( void*, void*), void* env, struct Cyc_List_List*
-x); extern void Cyc_List_iter2( void(* f)( void*, void*), struct Cyc_List_List*
-x, struct Cyc_List_List* y); extern void Cyc_List_iter2_c( void(* f)( void*,
-void*, void*), void* env, struct Cyc_List_List* x, struct Cyc_List_List* y);
-extern void* Cyc_List_fold_left( void*(* f)( void*, void*), void* accum, struct
-Cyc_List_List* x); extern void* Cyc_List_fold_left_c( void*(* f)( void*, void*,
-void*), void*, void* accum, struct Cyc_List_List* x); extern void* Cyc_List_fold_right(
-void*(* f)( void*, void*), struct Cyc_List_List* x, void* accum); extern void*
-Cyc_List_fold_right_c( void*(* f)( void*, void*, void*), void*, struct Cyc_List_List*
-x, void* accum); extern struct Cyc_List_List* Cyc_List_revappend( struct Cyc_List_List*
-x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rrevappend(
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern struct _RegionHandle* Cyc_Core_heap_region; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern struct Cyc_List_List* Cyc_List_list(
+struct _tagged_arr); extern struct Cyc_List_List* Cyc_List_rlist( struct
+_RegionHandle*, struct _tagged_arr); extern int Cyc_List_length( struct Cyc_List_List*
+x); extern void* Cyc_List_hd( struct Cyc_List_List* x); extern struct Cyc_List_List*
+Cyc_List_tl( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_copy(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rcopy( struct
+_RegionHandle*, struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map(
+void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmap(
+struct _RegionHandle*, void*(* f)( void*), struct Cyc_List_List* x); extern
+struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void* env,
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmap_c( struct
+_RegionHandle*, void*(* f)( void*, void*), void* env, struct Cyc_List_List* x);
+extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
+Cyc_List_map2( void*(* f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern struct Cyc_List_List* Cyc_List_rmap2( struct _RegionHandle*, void*(*
+f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List* y); extern
+void Cyc_List_app( void*(* f)( void*), struct Cyc_List_List* x); extern void Cyc_List_app_c(
+void*(* f)( void*, void*), void*, struct Cyc_List_List* x); extern void Cyc_List_app2(
+void*(* f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List* y);
+extern void Cyc_List_app2_c( void*(* f)( void*, void*, void*), void* env, struct
+Cyc_List_List* x, struct Cyc_List_List* y); extern void Cyc_List_iter( void(* f)(
+void*), struct Cyc_List_List* x); extern void Cyc_List_iter_c( void(* f)( void*,
+void*), void* env, struct Cyc_List_List* x); extern void Cyc_List_iter2( void(*
+f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List* y); extern
+void Cyc_List_iter2_c( void(* f)( void*, void*, void*), void* env, struct Cyc_List_List*
+x, struct Cyc_List_List* y); extern void* Cyc_List_fold_left( void*(* f)( void*,
+void*), void* accum, struct Cyc_List_List* x); extern void* Cyc_List_fold_left_c(
+void*(* f)( void*, void*, void*), void*, void* accum, struct Cyc_List_List* x);
+extern void* Cyc_List_fold_right( void*(* f)( void*, void*), struct Cyc_List_List*
+x, void* accum); extern void* Cyc_List_fold_right_c( void*(* f)( void*, void*,
+void*), void*, struct Cyc_List_List* x, void* accum); extern struct Cyc_List_List*
+Cyc_List_revappend( struct Cyc_List_List* x, struct Cyc_List_List* y); extern
+struct Cyc_List_List* Cyc_List_rrevappend( struct _RegionHandle*, struct Cyc_List_List*
+x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rev( struct
+Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rrev( struct
+_RegionHandle*, struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_imp_rev(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
+Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rappend(
 struct _RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List* y); extern
-struct Cyc_List_List* Cyc_List_rev( struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_rrev( struct _RegionHandle*, struct Cyc_List_List* x); extern struct
-Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List* y); extern
-struct Cyc_List_List* Cyc_List_rappend( struct _RegionHandle*, struct Cyc_List_List*
-x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_imp_append(
-struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List*
-Cyc_List_flatten( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rflatten(
-struct _RegionHandle*, struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_merge_sort( int(* cmp)( void*, void*), struct Cyc_List_List* x); extern
-struct Cyc_List_List* Cyc_List_rmerge_sort( struct _RegionHandle*, int(* cmp)(
-void*, void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rimp_merge_sort(
-int(* cmp)( void*, void*), struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_merge( int(* cmp)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List*
-y); extern struct Cyc_List_List* Cyc_List_rmerge( struct _RegionHandle*, int(*
-cmp)( void*, void*), struct Cyc_List_List* a, struct Cyc_List_List* b); extern
-struct Cyc_List_List* Cyc_List_imp_merge( int(* cmp)( void*, void*), struct Cyc_List_List*
-a, struct Cyc_List_List* b); extern unsigned char Cyc_List_Nth[ 8u]; extern void*
-Cyc_List_nth( struct Cyc_List_List* x, int n); extern struct Cyc_List_List* Cyc_List_nth_tail(
+struct Cyc_List_List* Cyc_List_imp_append( struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern struct Cyc_List_List* Cyc_List_flatten( struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_rflatten( struct _RegionHandle*, struct
+Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_merge_sort( int(* cmp)(
+void*, void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmerge_sort(
+struct _RegionHandle*, int(* cmp)( void*, void*), struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_rimp_merge_sort( int(* cmp)( void*, void*),
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_merge( int(* cmp)(
+void*, void*), struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct
+Cyc_List_List* Cyc_List_rmerge( struct _RegionHandle*, int(* cmp)( void*, void*),
+struct Cyc_List_List* a, struct Cyc_List_List* b); extern struct Cyc_List_List*
+Cyc_List_imp_merge( int(* cmp)( void*, void*), struct Cyc_List_List* a, struct
+Cyc_List_List* b); extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_nth(
+struct Cyc_List_List* x, int n); extern struct Cyc_List_List* Cyc_List_nth_tail(
 struct Cyc_List_List* x, int i); extern int Cyc_List_forall( int(* pred)( void*),
 struct Cyc_List_List* x); extern int Cyc_List_forall_c( int(* pred)( void*, void*),
 void* env, struct Cyc_List_List* x); extern int Cyc_List_exists( int(* pred)(

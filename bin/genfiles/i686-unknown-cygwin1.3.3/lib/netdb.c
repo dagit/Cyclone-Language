@@ -217,26 +217,30 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
-tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in= 0;
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
+} ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
+int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
+writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
+timeout); struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in= 0;
 struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1; }
 ; static const int Cyc_Std_SA_socklenptr= 1; struct Cyc_Std_SA_socklenptr_struct{
 int tag; unsigned int* f1; } ; static const int Cyc_Std_SA_socklen= 2; struct
-Cyc_Std_SA_socklen_struct{ int tag; unsigned int f1; } ; extern int socket( int
-domain, int type, int protocol); extern int socketpair( int domain, int type,
+Cyc_Std_SA_socklen_struct{ int tag; unsigned int f1; } ; struct Cyc_Std_sockaddr{
+unsigned short sa_family; unsigned char sa_data[ 14u]; } ; extern int socket(
+int domain, int type, int protocol); extern int socketpair( int domain, int type,
 int protocol, int* fds); extern int listen( int fd, int n); extern int shutdown(
 int fd, int how); static const int Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{
 int tag; int* f1; } ; static const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{

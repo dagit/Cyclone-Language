@@ -217,39 +217,39 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
-void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Set_Set; extern struct
-Cyc_Set_Set* Cyc_Set_empty( int(* cmp)( void*, void*)); extern struct Cyc_Set_Set*
-Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern int Cyc_Set_member(
-struct Cyc_Set_Set* s, void* elt); extern unsigned char Cyc_Set_Absent[ 11u];
-static const int Cyc_Typerep_Var= 0; struct Cyc_Typerep_Var_struct{ int tag;
-struct _tagged_arr* f1; } ; static const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{
-int tag; unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static
-const int Cyc_Typerep_Double= 1; static const int Cyc_Typerep_ThinPtr= 2; struct
-Cyc_Typerep_ThinPtr_struct{ int tag; unsigned int f1; void* f2; } ; static const
-int Cyc_Typerep_FatPtr= 3; struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1;
-} ; static const int Cyc_Typerep_Tuple= 4; struct _tuple0{ unsigned int f1; void*
-f2; } ; struct Cyc_Typerep_Tuple_struct{ int tag; unsigned int f1; struct
-_tagged_arr f2; } ; static const int Cyc_Typerep_TUnion= 5; struct Cyc_Typerep_TUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_XTUnion= 6;
-struct _tuple1{ struct _tagged_arr f1; void* f2; } ; struct Cyc_Typerep_XTUnion_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Typerep_Union= 7;
-struct Cyc_Typerep_Union_struct{ int tag; struct _tagged_arr f1; } ; static
-const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{ int tag;
-struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App= 9;
-struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
+tl; } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
+Cyc_List_Nth[ 8u]; struct Cyc_Set_Set; extern struct Cyc_Set_Set* Cyc_Set_empty(
+int(* cmp)( void*, void*)); extern struct Cyc_Set_Set* Cyc_Set_insert( struct
+Cyc_Set_Set* s, void* elt); extern int Cyc_Set_member( struct Cyc_Set_Set* s,
+void* elt); extern unsigned char Cyc_Set_Absent[ 11u]; static const int Cyc_Typerep_Var=
+0; struct Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static
+const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag;
+unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double=
+1; static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{
+int tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
+struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1; } ; static const int Cyc_Typerep_Tuple=
+4; struct _tuple0{ unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{
+int tag; unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
+5; struct Cyc_Typerep_TUnion_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Typerep_XTUnion= 6; struct _tuple1{ struct _tagged_arr f1; void*
+f2; } ; struct Cyc_Typerep_XTUnion_struct{ int tag; struct _tagged_arr f1; } ;
+static const int Cyc_Typerep_Union= 7; struct Cyc_Typerep_Union_struct{ int tag;
+struct _tagged_arr f1; } ; static const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{
+int tag; struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App=
+9; struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
 extern void Cyc_Typerep_print_typestruct( void* rep); extern void Cyc_Typerep_xmlize_typestruct(
 void* rep); extern void* Cyc_Typerep_normalize( void* ts); extern struct Cyc_Set_Set*
 Cyc_Typerep_empty_addr_set(); struct _tuple2{ int f1; struct Cyc_Set_Set* f2; }

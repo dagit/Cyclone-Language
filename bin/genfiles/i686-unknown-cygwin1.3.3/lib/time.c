@@ -217,20 +217,21 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
-12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
-} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
-14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
-string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
-struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{
-int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int
-tm_wday; int tm_yday; int tm_isdst; } ; extern int time( int* t); extern struct
+ extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
+fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
+15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
+16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
+f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
+unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
+_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
+ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{ int tm_sec; int tm_min; int
+tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int tm_yday; int
+tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct
 _tagged_arr Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr); extern struct
 _tagged_arr Cyc_Std_ctime( const int* timep); extern struct Cyc_Std_tm* gmtime(
 const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
@@ -241,16 +242,18 @@ _tagged_arr Cyc_Std_ctime_r( const int*, struct _tagged_arr); extern int
 timezone; extern int daylight; struct Cyc_Std_timeval{ int tv_sec; int tv_usec;
 } ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
 gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); extern
-unsigned char* asctime( const struct Cyc_Std_tm* timeptr); extern unsigned char*
-ctime( const int* timep); extern unsigned int strftime( unsigned char* s,
-unsigned int maxsize, unsigned char* fmt, const struct Cyc_Std_tm* t); extern
-unsigned char* asctime_r( const struct Cyc_Std_tm*, unsigned char*); extern
-unsigned char* ctime_r( const int*, unsigned char*); struct _tagged_arr Cyc_Std_asctime(
-const struct Cyc_Std_tm* timeptr){ return Cstring_to_string( asctime( timeptr));}
-struct _tagged_arr Cyc_Std_ctime( const int* timep){ return Cstring_to_string(
-ctime( timep));} unsigned int Cyc_Std_strftime( struct _tagged_arr s,
-unsigned int maxsize, struct _tagged_arr fmt, const struct Cyc_Std_tm* t){
-unsigned int m= _get_arr_size( s, sizeof( unsigned char)) <  maxsize?
+int select( int n, struct Cyc_Std__types_fd_set* readfds, struct Cyc_Std__types_fd_set*
+writefds, struct Cyc_Std__types_fd_set* exceptfds, struct Cyc_Std_timeval*
+timeout); extern unsigned char* asctime( const struct Cyc_Std_tm* timeptr);
+extern unsigned char* ctime( const int* timep); extern unsigned int strftime(
+unsigned char* s, unsigned int maxsize, unsigned char* fmt, const struct Cyc_Std_tm*
+t); extern unsigned char* asctime_r( const struct Cyc_Std_tm*, unsigned char*);
+extern unsigned char* ctime_r( const int*, unsigned char*); struct _tagged_arr
+Cyc_Std_asctime( const struct Cyc_Std_tm* timeptr){ return Cstring_to_string(
+asctime( timeptr));} struct _tagged_arr Cyc_Std_ctime( const int* timep){ return
+Cstring_to_string( ctime( timep));} unsigned int Cyc_Std_strftime( struct
+_tagged_arr s, unsigned int maxsize, struct _tagged_arr fmt, const struct Cyc_Std_tm*
+t){ unsigned int m= _get_arr_size( s, sizeof( unsigned char)) <  maxsize?
 _get_arr_size( s, sizeof( unsigned char)): maxsize; return strftime(
 underlying_Cstring( s), m, underlying_Cstring( fmt), t);} struct _tagged_arr Cyc_Std_asctime_r(
 const struct Cyc_Std_tm* t, struct _tagged_arr s){ if( _get_arr_size( s, sizeof(

@@ -217,29 +217,33 @@ extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
 #endif
 
 #endif
- struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{
-int tz_minuteswest; int tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval*
-__p, struct Cyc_Std_timezone* __z); struct Cyc_Std_sockaddr_in; static const int
-Cyc_Std_SA_sockaddr_in= 0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct
-Cyc_Std_sockaddr_in* f1; } ; static const int Cyc_Std_SA_socklenptr= 1; struct
-Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static const int
-Cyc_Std_SA_socklen= 2; struct Cyc_Std_SA_socklen_struct{ int tag; unsigned int
-f1; } ; extern int socket( int domain, int type, int protocol); extern int
-socketpair( int domain, int type, int protocol, int* fds); extern int Cyc_Std_accept(
-int fd, struct _tagged_arr); extern int Cyc_Std_bind( int fd, struct _tagged_arr);
-extern int Cyc_Std_connect( int fd, struct _tagged_arr); extern int Cyc_Std_getpeername(
-int fd, struct _tagged_arr); extern int Cyc_Std_getsockname( int fd, struct
-_tagged_arr); extern int listen( int fd, int n); extern int shutdown( int fd,
-int how); extern int Cyc_Std_send( int fd, struct _tagged_arr buf, unsigned int
-n, int flags); extern int Cyc_Std_recv( int fd, struct _tagged_arr buf,
-unsigned int n, int flags); extern int Cyc_Std_sendto( int fd, struct
-_tagged_arr buf, unsigned int n, int flags, struct _tagged_arr); extern int Cyc_Std_recvfrom(
-int fd, struct _tagged_arr buf, unsigned int n, int flags, struct _tagged_arr);
-static const int Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{ int tag; int*
-f1; } ; static const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{
-int tag; struct Cyc_Std_timeval* f1; } ; static const int Cyc_Std_SO_socklenptr=
-2; struct Cyc_Std_SO_socklenptr_struct{ int tag; unsigned int* f1; } ; static
-const int Cyc_Std_SO_socklen= 3; struct Cyc_Std_SO_socklen_struct{ int tag;
+ struct Cyc_Std__types_fd_set{ int fds_bits[ 2u]; } ; struct Cyc_Std_timeval{
+int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
+tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
+__z); extern int select( int n, struct Cyc_Std__types_fd_set* readfds, struct
+Cyc_Std__types_fd_set* writefds, struct Cyc_Std__types_fd_set* exceptfds, struct
+Cyc_Std_timeval* timeout); struct Cyc_Std_sockaddr_in; static const int Cyc_Std_SA_sockaddr_in=
+0; struct Cyc_Std_SA_sockaddr_in_struct{ int tag; struct Cyc_Std_sockaddr_in* f1;
+} ; static const int Cyc_Std_SA_socklenptr= 1; struct Cyc_Std_SA_socklenptr_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_SA_socklen= 2; struct
+Cyc_Std_SA_socklen_struct{ int tag; unsigned int f1; } ; struct Cyc_Std_sockaddr{
+unsigned short sa_family; unsigned char sa_data[ 14u]; } ; extern int socket(
+int domain, int type, int protocol); extern int socketpair( int domain, int type,
+int protocol, int* fds); extern int Cyc_Std_accept( int fd, struct _tagged_arr);
+extern int Cyc_Std_bind( int fd, struct _tagged_arr); extern int Cyc_Std_connect(
+int fd, struct _tagged_arr); extern int Cyc_Std_getpeername( int fd, struct
+_tagged_arr); extern int Cyc_Std_getsockname( int fd, struct _tagged_arr);
+extern int listen( int fd, int n); extern int shutdown( int fd, int how); extern
+int Cyc_Std_send( int fd, struct _tagged_arr buf, unsigned int n, int flags);
+extern int Cyc_Std_recv( int fd, struct _tagged_arr buf, unsigned int n, int
+flags); extern int Cyc_Std_sendto( int fd, struct _tagged_arr buf, unsigned int
+n, int flags, struct _tagged_arr); extern int Cyc_Std_recvfrom( int fd, struct
+_tagged_arr buf, unsigned int n, int flags, struct _tagged_arr); static const
+int Cyc_Std_SO_int= 0; struct Cyc_Std_SO_int_struct{ int tag; int* f1; } ;
+static const int Cyc_Std_SO_timeval= 1; struct Cyc_Std_SO_timeval_struct{ int
+tag; struct Cyc_Std_timeval* f1; } ; static const int Cyc_Std_SO_socklenptr= 2;
+struct Cyc_Std_SO_socklenptr_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_SO_socklen= 3; struct Cyc_Std_SO_socklen_struct{ int tag;
 unsigned int f1; } ; extern int Cyc_Std_getsockopt( int fd, int level, int
 optname, struct _tagged_arr); extern int Cyc_Std_setsockopt( int fd, int level,
 int optname, struct _tagged_arr); struct Cyc_Std_in_addr{ unsigned int s_addr; }

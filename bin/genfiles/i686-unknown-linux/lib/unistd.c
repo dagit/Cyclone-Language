@@ -254,22 +254,24 @@ int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_S
 struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
 int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
 struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
-_tagged_arr pathname); extern int access( unsigned char*, int); extern int chdir(
-unsigned char*); extern int chown( unsigned char*, unsigned int, unsigned int);
-extern unsigned char* getcwd( unsigned char* buf, unsigned int size); extern int
-execv( unsigned char* path, unsigned char** argv); extern int execvp(
-unsigned char* file, unsigned char** argv); extern int execve( unsigned char*
-path, unsigned char** argv, unsigned char** envp); extern int link(
-unsigned char* path1, unsigned char* path2); extern int read( int fd,
+_tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
+int Cyc_Std_chroot( struct _tagged_arr); extern int access( unsigned char*, int);
+extern int chdir( unsigned char*); extern int chown( unsigned char*,
+unsigned int, unsigned int); extern unsigned char* getcwd( unsigned char* buf,
+unsigned int size); extern int execv( unsigned char* path, unsigned char** argv);
+extern int execvp( unsigned char* file, unsigned char** argv); extern int execve(
+unsigned char* path, unsigned char** argv, unsigned char** envp); extern int
+link( unsigned char* path1, unsigned char* path2); extern int read( int fd,
 unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
 extern int symlink( unsigned char* path1, unsigned char* path2); extern int
 truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
-unsigned int count); extern int unlink( unsigned char* pathname); int Cyc_Std_access(
-struct _tagged_arr path, int mode){ return access( string_to_Cstring( path),
-mode);} int Cyc_Std_chdir( struct _tagged_arr path){ return chdir(
-string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr path,
-unsigned int owner, unsigned int group){ return chown( string_to_Cstring( path),
-owner, group);} struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
+unsigned int count); extern int unlink( unsigned char* pathname); extern int
+gethostname( unsigned char*, unsigned int); extern int chroot( unsigned char*);
+int Cyc_Std_access( struct _tagged_arr path, int mode){ return access(
+string_to_Cstring( path), mode);} int Cyc_Std_chdir( struct _tagged_arr path){
+return chdir( string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr
+path, unsigned int owner, unsigned int group){ return chown( string_to_Cstring(
+path), owner, group);} struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
 unsigned int size){ if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf,
 sizeof( unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
@@ -369,4 +371,12 @@ _temp26[ 0]=({ struct Cyc_Core_Failure_struct _temp27; _temp27.tag= Cyc_Core_Fai
 _temp27.f1= _tag_arr("write: called with count > buf.size", sizeof(
 unsigned char), 36u); _temp27;}); _temp26;}));} return write( fd,
 string_to_Cstring( buf), count);} int Cyc_Std_unlink( struct _tagged_arr
-pathname){ return unlink( string_to_Cstring( pathname));}
+pathname){ return unlink( string_to_Cstring( pathname));} int Cyc_Std_gethostname(
+struct _tagged_arr buf, unsigned int count){ if( count >  _get_arr_size( buf,
+sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp28=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp28[ 0]=({ struct Cyc_Core_Failure_struct _temp29; _temp29.tag= Cyc_Core_Failure;
+_temp29.f1= _tag_arr("gethostname: called with count > buf.size", sizeof(
+unsigned char), 42u); _temp29;}); _temp28;}));} return gethostname(
+underlying_Cstring(( struct _tagged_arr) buf), count);} int Cyc_Std_chroot(
+struct _tagged_arr pathname){ return chroot( string_to_Cstring( pathname));}
