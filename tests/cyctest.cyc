@@ -792,6 +792,9 @@ void r_foo(string_t s) {
 void a_foo(string_t s) {
   printf("Anon %s\n",s);
 }
+bool n_foo(string_t s) {
+  return false;
+}
 typedef $(string_t,bool,string_t,spec_t,string_t) @arg_t;
 void arg_test(string_t<`H> ?`H args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
@@ -809,6 +812,7 @@ void arg_test(string_t<`H> ?`H args) {
     arg_t r = new $("-r",false,"",(spec_t)(new Rest_spec(r_foo)),"rest");
     parse(new List(u,new List(s,new List(c,new List(i,new List(r,NULL))))),
           a_foo,
+	  n_foo,
           "Usage:",
 	  args);
     printf("u_foo_foo=%d, "
