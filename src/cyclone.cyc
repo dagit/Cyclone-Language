@@ -250,6 +250,46 @@ static void remove_cfiles() {
       remove_file(*(cfiles->hd));
 }
 
+/* Take as input a string, return the list of substrings separated by colons */
+static list_t<stringptr> split_by_char(string s, char c) {
+  if (s == null) return null;
+  let result = null;
+  let len = strlen(s);
+
+  while (len > 0) {
+    let end = strchr(s,c);
+    if (end == null) {
+      result = new List(new s,result);
+      break;
+    }
+    else {
+      result = new List(new substring(s,0,end-s),result);
+      len -= (end-s);
+      s = end+1;
+    }
+  }
+  return List::imp_rev(result);
+}
+
+/* FIX: once stat is ported we can use that instead */
+bool file_exists(string file) {
+  FILE *f = null;
+  try f = file_open(file,"r"); catch {default: break;}
+  if (f == null) return false;
+  else { fclose((FILE @)f); return true; }
+}
+
+string *find(list_t<stringptr> dirs, string file) {
+  if (file == null) return null;
+  for (; dirs != null; dirs = dirs->tl) {
+    let dir = *dirs->hd;
+    if (dir == null || strlen(dir)==0) continue;
+    let s = Filename::concat(dir,file);
+    if (file_exists(s)) return new s;
+  }
+  return null;
+}
+
 void process_file(string filename) {
 
   string basename      = Filename::chop_extension(filename);
@@ -270,7 +310,13 @@ void process_file(string filename) {
   // FIX: let user change how/which preprocessor is invoked
   let cppargs_string = String::str_sepstr(new List(new "",
                                                    rev(cppargs))," ");
-  let stdinc_string = " -Ic:/cyclone/include";
+  string stdinc_string = " -Ic:/cyclone/include";
+  let cyclone_include_path = Stdlib::getenv("CYCLONE_INCLUDE_PATH");
+  if (cyclone_include_path != null) {
+    let x = split_by_char(cyclone_include_path,':');
+    let s = String::str_sepstr(new List(new "",x)," -I");
+    stdinc_string = xprintf("%s%s",s,stdinc_string);
+  }
   let ofile_string;
   if (stop_after_cpp_r) {
     if (output_file != null)
@@ -385,68 +431,7 @@ void process_file(string filename) {
   }
 }
 
-/* Take as input a string, return the list of substrings separated by colons */
-static list_t<stringptr> split_by_char(string s, char c) {
-  if (s == null) return null;
-  let result = null;
-  let len = strlen(s);
-
-  while (len > 0) {
-    let end = strchr(s,c);
-    if (end == null) {
-      result = new List(new s,result);
-      break;
-    }
-    else {
-      result = new List(new substring(s,0,end-s),result);
-      len -= (end-s);
-      s = end+1;
-    }
-  }
-  return List::imp_rev(result);
-}
-
-/* FIX: once stat is ported we can use that instead */
-bool file_exists(string file) {
-  FILE *f = null;
-  try f = file_open(file,"r"); catch {default: break;}
-  if (f == null) return false;
-  else { fclose((FILE @)f); return true; }
-}
-
-string *find(list_t<stringptr> dirs, string file) {
-  if (file == null) return null;
-  for (; dirs != null; dirs = dirs->tl) {
-    let dir = *dirs->hd;
-    if (dir == null || strlen(dir)==0) continue;
-    let s = Filename::concat(dir,file);
-    if (file_exists(s)) return new s;
-  }
-  return null;
-}
-
 int main(int argc, string ? argv) {
-//  let path = Stdlib::getenv("PATH");
-//  let x = split_by_char(path,':');
-//  printf("Components of PATH:\n");
-//  for (; x != null; x = x->tl) {
-//    printf("Part: %s\n", *x->hd);
-//  }
-//  let t = find(x,argv[1]);
-//  if (t == null) printf("Could not find %s\n",argv[1]);
-//  else printf("%s\n",*t);
-//  fflush(stdout);
-//
-//  printf("getenv(\"googoo\") is '%s'\n",Stdlib::getenv("googoo"));
-//  
-//  printf("Can a ? pointer be null => %d\n",null==Stdlib::getenv("googoo"));
-//
-//  string gg = "hello";
-//  gg = null;
-//
-//  printf("Can a ? pointer be null => %d\n",null==gg);
-//  printf("Does getenv return empty string? => %d\n",strcmp("",Stdlib::getenv("googoo")));
-
 
   list_t<$(string,spec_t,string)@> options =
     list(new $("-nocyc",new Clear_spec(&add_cyc_namespace_r),
