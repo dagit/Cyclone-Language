@@ -440,58 +440,10 @@ void Cyc_List_iter_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*x);
 struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
 # 37 "iter.h"
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
-# 51 "set.h"
-struct Cyc_Set_Set*Cyc_Set_empty(int(*cmp)(void*,void*));
-# 54
-struct Cyc_Set_Set*Cyc_Set_rempty(struct _RegionHandle*r,int(*cmp)(void*,void*));
-# 57
-struct Cyc_Set_Set*Cyc_Set_singleton(int(*cmp)(void*,void*),void*x);
-# 60
-struct Cyc_Set_Set*Cyc_Set_from_list(int(*cmp)(void*,void*),struct Cyc_List_List*l);
-# 63
-struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*s,void*elt);
-# 66
-void Cyc_Set_imp_insert(struct Cyc_Set_Set*s,void*elt);
-# 69
-struct Cyc_Set_Set*Cyc_Set_rinsert(struct _RegionHandle*r,struct Cyc_Set_Set*s,void*elt);
-# 72
-void Cyc_Set_imp_rinsert(struct _RegionHandle*r,struct Cyc_Set_Set*s,void*elt);
-# 75
-struct Cyc_Set_Set*Cyc_Set_union_two(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
-# 79
-struct Cyc_Set_Set*Cyc_Set_intersect(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
-# 82
-struct Cyc_Set_Set*Cyc_Set_diff(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
-# 85
-struct Cyc_Set_Set*Cyc_Set_delete(struct Cyc_Set_Set*s,void*elt);
-# 88
-void*Cyc_Set_imp_delete(struct Cyc_Set_Set*s,void*elt);
-# 94
-int Cyc_Set_cardinality(struct Cyc_Set_Set*s);
-# 97
-int Cyc_Set_is_empty(struct Cyc_Set_Set*s);
-# 100
+# 100 "set.h"
 int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
-# 103
-int Cyc_Set_subset(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
 # 106
-int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
-# 110
-int Cyc_Set_equals(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);
-# 114
-void*Cyc_Set_fold(void*(*f)(void*,void*),struct Cyc_Set_Set*s,void*accum);
-# 118
-void*Cyc_Set_fold_c(void*(*f)(void*,void*,void*),void*env,struct Cyc_Set_Set*s,void*accum);
-# 122
-void Cyc_Set_app(void*(*f)(void*),struct Cyc_Set_Set*s);
-# 127
-void Cyc_Set_iter(void(*f)(void*),struct Cyc_Set_Set*s);
-# 130
-void Cyc_Set_iter_c(void(*f)(void*,void*),void*env,struct Cyc_Set_Set*s);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};
-# 137
-void*Cyc_Set_choose(struct Cyc_Set_Set*s);
-# 141
-struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s);struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
+int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2);extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
 # 39 "set.cyc"
 struct Cyc_Set_Set*Cyc_Set_empty(int(*comp)(void*,void*)){
 return({struct Cyc_Set_Set*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->cmp=comp,_tmp0->cardinality=0,_tmp0->nodes=0;_tmp0;});}

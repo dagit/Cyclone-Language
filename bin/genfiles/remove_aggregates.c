@@ -489,26 +489,25 @@ struct Cyc_Absyn_Exp*Cyc_Absyn_var_exp(struct _tuple0*,unsigned);
 struct Cyc_Absyn_Exp*Cyc_Absyn_lt_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned);
 # 1028
 struct Cyc_Absyn_Exp*Cyc_Absyn_assign_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned);
-# 1032
-struct Cyc_Absyn_Exp*Cyc_Absyn_pre_inc_exp(struct Cyc_Absyn_Exp*,unsigned);
-# 1037
+struct Cyc_Absyn_Exp*Cyc_Absyn_increment_exp(struct Cyc_Absyn_Exp*,enum Cyc_Absyn_Incrementor,unsigned);
+# 1033
 struct Cyc_Absyn_Exp*Cyc_Absyn_seq_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned);
-# 1049
+# 1045
 struct Cyc_Absyn_Exp*Cyc_Absyn_deref_exp(struct Cyc_Absyn_Exp*,unsigned);
 struct Cyc_Absyn_Exp*Cyc_Absyn_aggrmember_exp(struct Cyc_Absyn_Exp*,struct _dyneither_ptr*,unsigned);
 struct Cyc_Absyn_Exp*Cyc_Absyn_aggrarrow_exp(struct Cyc_Absyn_Exp*,struct _dyneither_ptr*,unsigned);
 struct Cyc_Absyn_Exp*Cyc_Absyn_subscript_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned);
-# 1054
+# 1050
 struct Cyc_Absyn_Exp*Cyc_Absyn_stmt_exp(struct Cyc_Absyn_Stmt*,unsigned);
-# 1068
+# 1064
 struct Cyc_Absyn_Stmt*Cyc_Absyn_exp_stmt(struct Cyc_Absyn_Exp*e,unsigned loc);
 struct Cyc_Absyn_Stmt*Cyc_Absyn_seq_stmt(struct Cyc_Absyn_Stmt*s1,struct Cyc_Absyn_Stmt*s2,unsigned loc);
-# 1076
+# 1072
 struct Cyc_Absyn_Stmt*Cyc_Absyn_for_stmt(struct Cyc_Absyn_Exp*e1,struct Cyc_Absyn_Exp*e2,struct Cyc_Absyn_Exp*e3,struct Cyc_Absyn_Stmt*s,unsigned loc);
-# 1079
+# 1075
 struct Cyc_Absyn_Stmt*Cyc_Absyn_decl_stmt(struct Cyc_Absyn_Decl*d,struct Cyc_Absyn_Stmt*s,unsigned loc);
 struct Cyc_Absyn_Stmt*Cyc_Absyn_declare_stmt(struct _tuple0*,void*,struct Cyc_Absyn_Exp*init,struct Cyc_Absyn_Stmt*,unsigned loc);
-# 1176
+# 1172
 struct _dyneither_ptr*Cyc_Absyn_designatorlist_to_fieldname(struct Cyc_List_List*);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 67 "absynpp.h"
 struct _dyneither_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);struct Cyc_Hashtable_Table;
@@ -534,8 +533,6 @@ void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);extern char Cyc_
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};
 # 49 "tcutil.h"
 int Cyc_Tcutil_is_array_type(void*t);
-# 26 "remove_aggregates.h"
-struct Cyc_List_List*Cyc_RemoveAggrs_remove_aggrs(struct Cyc_List_List*decls);
 # 50 "remove_aggregates.cyc"
 static void Cyc_RemoveAggrs_massage_toplevel_aggr(struct Cyc_Absyn_Exp*e){
 if(e == 0)
@@ -671,7 +668,7 @@ struct _tuple0*max=Cyc_Toc_temp_var();
 struct _tuple0*i=_tmp3E->name;
 struct Cyc_Absyn_Exp*ea=({struct Cyc_Absyn_Exp*_tmpA5=Cyc_Absyn_var_exp(i,0U);Cyc_Absyn_assign_exp(_tmpA5,Cyc_Absyn_signed_int_exp(0,0U),0U);});
 struct Cyc_Absyn_Exp*eb=({struct Cyc_Absyn_Exp*_tmpA6=Cyc_Absyn_var_exp(i,0U);Cyc_Absyn_lt_exp(_tmpA6,Cyc_Absyn_var_exp(max,0U),0U);});
-struct Cyc_Absyn_Exp*ec=Cyc_Absyn_pre_inc_exp(Cyc_Absyn_var_exp(i,0U),0U);
+struct Cyc_Absyn_Exp*ec=Cyc_Absyn_increment_exp(Cyc_Absyn_var_exp(i,0U),Cyc_Absyn_PreInc,0U);
 struct Cyc_Absyn_Exp*lval=({struct Cyc_Absyn_Exp*_tmpA7=(struct Cyc_Absyn_Exp*)_check_null(env.dest);Cyc_Absyn_subscript_exp(_tmpA7,Cyc_Absyn_var_exp(i,0U),0U);});
 ({struct Cyc_RemoveAggrs_Env _tmpA9=({struct Cyc_RemoveAggrs_Env _tmp8D;_tmp8D.ctxt=Cyc_RemoveAggrs_AggrField,({struct Cyc_Absyn_Exp*_tmpA8=Cyc_Absyn_copy_exp(lval);_tmp8D.dest=_tmpA8;});_tmp8D;});Cyc_RemoveAggrs_remove_aggrs_exp(_tmpA9,_tmp3C);});{
 struct Cyc_Absyn_Stmt*s=({struct Cyc_Absyn_Exp*_tmpAC=ea;struct Cyc_Absyn_Exp*_tmpAB=eb;struct Cyc_Absyn_Exp*_tmpAA=ec;Cyc_Absyn_for_stmt(_tmpAC,_tmpAB,_tmpAA,Cyc_Absyn_exp_stmt(_tmp3C,0U),0U);});

@@ -440,31 +440,15 @@ struct _dyneither_ptr Cyc__memcpy(struct _dyneither_ptr d,struct _dyneither_ptr 
 struct _dyneither_ptr Cyc_memset(struct _dyneither_ptr s,char c,unsigned long n);
 # 29 "assert.h"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned line);
-# 8 "xp.h"
-int Cyc_XP_add(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y,int carry);
+# 9 "xp.h"
 int Cyc_XP_sub(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y,int borrow);
-int Cyc_XP_mul(struct _dyneither_ptr z,int n,struct _dyneither_ptr x,int m,struct _dyneither_ptr y);
-int Cyc_XP_div(int n,struct _dyneither_ptr q,struct _dyneither_ptr x,int m,struct _dyneither_ptr y,struct _dyneither_ptr r,struct _dyneither_ptr tmp);
+# 12
 int Cyc_XP_sum(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,int y);
-int Cyc_XP_diff(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,int y);
+# 14
 int Cyc_XP_product(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,int y);
 int Cyc_XP_quotient(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,int y);
-int Cyc_XP_neg(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,int carry);
-int Cyc_XP_cmp(int n,struct _dyneither_ptr x,struct _dyneither_ptr y);
-void Cyc_XP_lshift(int n,struct _dyneither_ptr z,int m,struct _dyneither_ptr x,int s,int fill);
-# 20
-void Cyc_XP_rshift(int n,struct _dyneither_ptr z,int m,struct _dyneither_ptr x,int s,int fill);
-# 22
-void Cyc_XP_and(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y);
-void Cyc_XP_or(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y);
-void Cyc_XP_xor(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y);
-int Cyc_XP_length(int n,struct _dyneither_ptr x);
-unsigned long Cyc_XP_fromint(int n,struct _dyneither_ptr z,unsigned long u);
-# 28
-unsigned long Cyc_XP_toint(int n,struct _dyneither_ptr x);
-int Cyc_XP_fromstr(int n,struct _dyneither_ptr z,const char*str,int base);
-# 31
-struct _dyneither_ptr Cyc_XP_tostr(struct _dyneither_ptr str,int size,int base,int n,struct _dyneither_ptr x);static char _tmp0[37U]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+# 25
+int Cyc_XP_length(int n,struct _dyneither_ptr x);static char _tmp0[37U]="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 # 7 "xp.cyc"
 static struct _dyneither_ptr Cyc_digits={_tmp0,_tmp0,_tmp0 + 37U};
 static char Cyc_map[75U]={'\000','\001','\002','\003','\004','\005','\006','\a','\b','\t','$','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#','$','$','$','$','$','$','\n','\v','\f','\r','\016','\017','\020','\021','\022','\023','\024','\025','\026','\027','\030','\031','\032','\033','\034','\035','\036','\037',' ','!','"','#'};

@@ -487,11 +487,11 @@ struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(unsigned);
 # 946
 extern struct _tuple0*Cyc_Absyn_exn_name;
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud();
-# 1094
+# 1090
 struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*r,unsigned loc);
-# 1099
+# 1095
 struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned varloc,struct _tuple0*x,void*t,struct Cyc_Absyn_Exp*init);
-# 1167
+# 1163
 struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(union Cyc_Absyn_AggrInfo);struct Cyc_RgnOrder_RgnPO;
 # 32 "rgnorder.h"
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,unsigned);
@@ -510,27 +510,13 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init();
 # 89
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};struct Cyc_Interface_I;
 # 36 "interface.h"
-struct Cyc_Interface_I*Cyc_Interface_empty();
-# 45 "interface.h"
-struct Cyc_Interface_I*Cyc_Interface_final();
-# 49
-struct Cyc_Interface_I*Cyc_Interface_extract(struct Cyc_Tcenv_Genv*,struct Cyc_List_List*);struct _tuple10{struct _dyneither_ptr f1;struct _dyneither_ptr f2;};
-# 57
-int Cyc_Interface_is_subinterface(struct Cyc_Interface_I*i1,struct Cyc_Interface_I*i2,struct _tuple10*info);
+struct Cyc_Interface_I*Cyc_Interface_empty();struct _tuple10{struct _dyneither_ptr f1;struct _dyneither_ptr f2;};
 # 66 "interface.h"
 struct Cyc_Interface_I*Cyc_Interface_merge(struct Cyc_Interface_I*i1,struct Cyc_Interface_I*i2,struct _tuple10*info);
-# 70
-struct Cyc_Interface_I*Cyc_Interface_merge_list(struct Cyc_List_List*li,struct Cyc_List_List*linfo);
-# 72
-struct Cyc_Interface_I*Cyc_Interface_get_and_merge_list(struct Cyc_Interface_I*(*get)(void*),struct Cyc_List_List*la,struct Cyc_List_List*linfo);
 # 75
 void Cyc_Interface_print(struct Cyc_Interface_I*,struct Cyc___cycFILE*);
 # 78
 struct Cyc_Interface_I*Cyc_Interface_parse(struct Cyc___cycFILE*);
-# 81
-void Cyc_Interface_save(struct Cyc_Interface_I*,struct Cyc___cycFILE*);
-# 84
-struct Cyc_Interface_I*Cyc_Interface_load(struct Cyc___cycFILE*);
 # 50 "string.h"
 int Cyc_strptrcmp(struct _dyneither_ptr*s1,struct _dyneither_ptr*s2);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 53 "absynpp.h"

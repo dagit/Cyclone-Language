@@ -445,18 +445,8 @@ int Cyc_AP_cmp(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 # 34
 struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-# 6 "apq.h"
-struct Cyc_APQ_T*Cyc_APQ_fromint(int i);
-struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*n,struct Cyc_AP_T*d);
-struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _dyneither_ptr str,int base);
-struct _dyneither_ptr Cyc_APQ_tostr(struct Cyc_APQ_T*x,int base);
-struct Cyc_APQ_T*Cyc_APQ_neg(struct Cyc_APQ_T*x);
-struct Cyc_APQ_T*Cyc_APQ_abs(struct Cyc_APQ_T*x);
-struct Cyc_APQ_T*Cyc_APQ_add(struct Cyc_APQ_T*x,struct Cyc_APQ_T*y);
-struct Cyc_APQ_T*Cyc_APQ_sub(struct Cyc_APQ_T*x,struct Cyc_APQ_T*y);
-struct Cyc_APQ_T*Cyc_APQ_mul(struct Cyc_APQ_T*x,struct Cyc_APQ_T*y);
-struct Cyc_APQ_T*Cyc_APQ_div(struct Cyc_APQ_T*x,struct Cyc_APQ_T*y);
-int Cyc_APQ_cmp(struct Cyc_APQ_T*x,struct Cyc_APQ_T*y);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};
+# 7 "apq.h"
+struct Cyc_APQ_T*Cyc_APQ_fromAP(struct Cyc_AP_T*n,struct Cyc_AP_T*d);struct Cyc_APQ_T{struct Cyc_AP_T*n;struct Cyc_AP_T*d;};char Cyc_Invalid_argument[17U]="Invalid_argument";struct Cyc_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 13 "apq.cyc"
 struct Cyc_APQ_T*Cyc_reduce(struct Cyc_APQ_T*q){
 if(Cyc_AP_cmp(((struct Cyc_APQ_T*)_check_null(q))->d,Cyc_AP_zero)< 0){

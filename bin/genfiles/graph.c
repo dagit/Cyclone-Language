@@ -474,22 +474,10 @@ struct Cyc_Dict_Dict Cyc_Graph_add_node(struct Cyc_Dict_Dict g,void*s);
 struct Cyc_Dict_Dict Cyc_Graph_add_edge(struct Cyc_Dict_Dict g,void*s,void*t);
 # 59
 struct Cyc_Dict_Dict Cyc_Graph_add_edges(struct Cyc_Dict_Dict g,void*s,struct Cyc_Set_Set*T);
-# 63
-struct Cyc_Dict_Dict Cyc_Graph_remove_edge(struct Cyc_Dict_Dict g,void*s,void*t);
-# 66
-struct Cyc_Dict_Dict Cyc_Graph_remove_edges(struct Cyc_Dict_Dict g,void*s,struct Cyc_Set_Set*T);
 # 69
 int Cyc_Graph_is_edge(struct Cyc_Dict_Dict g,void*s,void*t);
 # 72
 struct Cyc_Set_Set*Cyc_Graph_get_targets(struct Cyc_Dict_Dict,void*s);
-# 74
-struct Cyc_Dict_Dict Cyc_Graph_tc(struct Cyc_Dict_Dict g);
-# 80
-struct Cyc_Dict_Dict Cyc_Graph_tkernel(struct Cyc_Dict_Dict g);
-# 85
-struct Cyc_List_List*Cyc_Graph_tsort(struct Cyc_Dict_Dict g);
-# 92
-struct Cyc_Dict_Dict Cyc_Graph_scc(struct Cyc_Dict_Dict g);
 # 27 "graph.cyc"
 struct Cyc_Dict_Dict Cyc_Graph_empty(int(*cmp)(void*,void*)){
 return((struct Cyc_Dict_Dict(*)(int(*cmp)(void*,void*)))Cyc_Dict_empty)(cmp);}

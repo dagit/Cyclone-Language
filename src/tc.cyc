@@ -262,7 +262,8 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
     if (exports == NULL || export_member(vd->name,*exports)) 
       if (b != b0 || (*ans)[1]) 
 	// no need to reinsert the entry 
-	te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q, new $(b,true));
+	te->ae->ordinaries = Dict::insert(te->ae->ordinaries, 
+					  q, new $(b,(*ans)[1]));
     return;
   } catch { case &Dict::Absent: break; }
   if (exports == NULL || export_member(vd->name,*exports))
@@ -316,8 +317,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
       // make the update if the function is exported
       if (exports == NULL || export_member(q,*exports))
 	if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
-	  te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
-					    new $(b, true));
+	  te->ae->ordinaries = Dict::insert(te->ae->ordinaries, 
+					    q, new $(b, (*ans)[1]));
     }
   } catch { case &Dict::Absent:
     if (exports == NULL || export_member(fd->name,*exports)) {

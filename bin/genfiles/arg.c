@@ -445,9 +445,7 @@ struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr)
 # 66 "arg.h"
 void Cyc_Arg_usage(struct Cyc_List_List*,struct _dyneither_ptr);
 # 69
-extern int Cyc_Arg_current;
-# 71
-void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*anonfun)(struct _dyneither_ptr),int(*anonflagfun)(struct _dyneither_ptr),struct _dyneither_ptr errmsg,struct _dyneither_ptr args);struct Cyc_Buffer_t;
+extern int Cyc_Arg_current;struct Cyc_Buffer_t;
 # 50 "buffer.h"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n);
 # 58

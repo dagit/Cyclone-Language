@@ -215,7 +215,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     qvar_t i   = vd->name;
     exp_t ea = assign_exp(var_exp(i,DL),signed_int_exp(0,DL),DL);
     exp_t eb = lt_exp(var_exp(i,DL),var_exp(max,DL),DL);
-    exp_t ec = pre_inc_exp(var_exp(i,DL),DL);
+    exp_t ec = increment_exp(var_exp(i,DL),PreInc,DL);
     exp_t lval = subscript_exp((exp_t)env.dest,var_exp(i,DL),DL);
     remove_aggrs_exp(Env(AggrField,copy_exp(lval)),body);
     stmt_t s = for_stmt(ea,eb,ec,exp_stmt(body,DL),DL);

@@ -1189,13 +1189,7 @@ prog:
 
 translation_unit:
   external_declaration translation_unit
-    { list_t<decl_t> x, y;
-      try {x = $1;} 
-      catch { case &Core::Failure(_): x = NULL; break;}
-      try {y = $2;}
-      catch { case &Core::Failure(_): y = NULL; break;}
-      $$=^$(List::imp_append(x,y)); 
-    }
+    { $$=^$(List::imp_append($1,$2)); }
 /* Cyc: added using and namespace */
 /* NB: using_action calls Lex::enter_using */
 | using_action ';' translation_unit
@@ -1210,20 +1204,7 @@ translation_unit:
       Lex::leave_namespace();
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit
-    { 
-      string_t nspace;
-      list_t<decl_t> x, y;
-      try { nspace = $1; } catch {
-      case &Core::Failure(_): nspace = ""; break;
-      }
-      try { x = $3; } catch {
-      case &Core::Failure(_): x = NULL; break;
-      }
-      try { y = $5; } catch {
-      case &Core::Failure(_): y = NULL; break;
-      }
-      $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
-    }
+    { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5)); }
 | extern_c_action '{' translation_unit end_extern_c override_opt export_list_opt translation_unit
     { let is_c_include = $1;
       list_t<decl_t> cycdecls = $5;
@@ -3010,8 +2991,8 @@ cast_expression:
 
 unary_expression:
   postfix_expression      { $$=$!1; }
-| INC_OP unary_expression { $$=^$(pre_inc_exp($2,LOC(@1,@2))); }
-| DEC_OP unary_expression { $$=^$(pre_dec_exp($2,LOC(@1,@2))); }
+| INC_OP unary_expression { $$=^$(increment_exp($2,PreInc,LOC(@1,@2))); }
+| DEC_OP unary_expression { $$=^$(increment_exp($2,PreDec,LOC(@1,@2))); }
 | '&' cast_expression     { $$=^$(address_exp($2,LOC(@1,@2))); }
 | '*' cast_expression     { $$=^$(deref_exp  ($2,LOC(@1,@2))); }
 | '+' cast_expression     { $$=^$(prim1_exp(Plus,$2,LOC(@1,@2))); }
@@ -3079,9 +3060,9 @@ postfix_expression:
 | postfix_expression PTR_OP field_name
     { $$=^$(aggrarrow_exp($1,new $3,LOC(@1,@3))); }
 | postfix_expression INC_OP
-    { $$=^$(post_inc_exp($1,LOC(@1,@2))); }
+    { $$=^$(increment_exp($1,PostInc,LOC(@1,@2))); }
 | postfix_expression DEC_OP
-    { $$=^$(post_dec_exp($1,LOC(@1,@2))); }
+    { $$=^$(increment_exp($1,PostDec,LOC(@1,@2))); }
 | '(' type_name ')' '{' '}'
     { $$=^$(new_exp(new CompoundLit_e($2,NULL),LOC(@1,@5))); }
 | '(' type_name ')' '{' initializer_list '}'

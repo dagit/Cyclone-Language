@@ -458,54 +458,26 @@ struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));
 void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);
 # 39 "pp.h"
 extern int Cyc_PP_tex_output;struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;
-# 50
-void Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc___cycFILE*f);
-# 53
-struct _dyneither_ptr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);struct _tuple0{struct _dyneither_ptr f1;struct Cyc_List_List*f2;};
-# 56
-struct _tuple0*Cyc_PP_string_and_links(struct Cyc_PP_Doc*d,int w);
 # 67 "pp.h"
 struct Cyc_PP_Doc*Cyc_PP_nil_doc();
-# 69
-struct Cyc_PP_Doc*Cyc_PP_blank_doc();
 # 72
 struct Cyc_PP_Doc*Cyc_PP_line_doc();
 # 74
 struct Cyc_PP_Doc*Cyc_PP_oline_doc();
 # 78
 struct Cyc_PP_Doc*Cyc_PP_text(struct _dyneither_ptr s);
-# 80
-struct Cyc_PP_Doc*Cyc_PP_textptr(struct _dyneither_ptr*p);
-# 83
-struct Cyc_PP_Doc*Cyc_PP_text_width(struct _dyneither_ptr s,int w);
-# 88
-struct Cyc_PP_Doc*Cyc_PP_hyperlink(struct _dyneither_ptr shrt,struct _dyneither_ptr full);
-# 91
-struct Cyc_PP_Doc*Cyc_PP_nest(int k,struct Cyc_PP_Doc*d);
 # 94
 struct Cyc_PP_Doc*Cyc_PP_cat(struct _dyneither_ptr);
 # 97
 struct Cyc_PP_Doc*Cyc_PP_cats(struct Cyc_List_List*doclist);
-# 100
-struct Cyc_PP_Doc*Cyc_PP_cats_arr(struct _dyneither_ptr docs);
 # 103
 struct Cyc_PP_Doc*Cyc_PP_doc_union(struct Cyc_PP_Doc*d1,struct Cyc_PP_Doc*d2);
 # 105
 struct Cyc_PP_Doc*Cyc_PP_tab(struct Cyc_PP_Doc*d);
 # 108
 struct Cyc_PP_Doc*Cyc_PP_seq(struct _dyneither_ptr sep,struct Cyc_List_List*l);
-# 112
-struct Cyc_PP_Doc*Cyc_PP_ppseq(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l);
 # 117
-struct Cyc_PP_Doc*Cyc_PP_seql(struct _dyneither_ptr sep,struct Cyc_List_List*l0);
-# 120
-struct Cyc_PP_Doc*Cyc_PP_ppseql(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l);
-# 123
-struct Cyc_PP_Doc*Cyc_PP_group(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*l);
-# 126
-struct Cyc_PP_Doc*Cyc_PP_groupl(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*l);
-# 129
-struct Cyc_PP_Doc*Cyc_PP_egroup(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*l);struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
+struct Cyc_PP_Doc*Cyc_PP_seql(struct _dyneither_ptr sep,struct Cyc_List_List*l0);struct Cyc_Xarray_Xarray{struct _dyneither_ptr elmts;int num_elmts;};
 # 40 "xarray.h"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 # 42
@@ -520,10 +492,10 @@ void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
 void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr);struct Cyc_PP_Empty_PP_Alist_struct{int tag;int f1;};struct Cyc_PP_Single_PP_Alist_struct{int tag;void*f1;};struct Cyc_PP_Append_PP_Alist_struct{int tag;void*f1;void*f2;};
 # 51 "pp.cyc"
 struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_stringptr={0U,0};
-struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_link={0U,0};struct _tuple1{void*f1;void*f2;};
+struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_link={0U,0};struct _tuple0{void*f1;void*f2;};
 # 54
 void*Cyc_PP_append(void*a1,void*a2){
-struct _tuple1 _tmp0=({struct _tuple1 _tmp9E;_tmp9E.f1=a1,_tmp9E.f2=a2;_tmp9E;});struct _tuple1 _tmp1=_tmp0;if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp1.f1)->tag == 0U){_LL1: _LL2:
+struct _tuple0 _tmp0=({struct _tuple0 _tmp9E;_tmp9E.f1=a1,_tmp9E.f2=a2;_tmp9E;});struct _tuple0 _tmp1=_tmp0;if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp1.f1)->tag == 0U){_LL1: _LL2:
  return a2;}else{if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp1.f2)->tag == 0U){_LL3: _LL4:
  return a1;}else{_LL5: _LL6:
  return(void*)({struct Cyc_PP_Append_PP_Alist_struct*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->tag=2U,_tmp2->f1=a1,_tmp2->f2=a2;_tmp2;});}}_LL0:;}
@@ -562,11 +534,11 @@ Cyc_PP_dump_out(f,o->ppout);}
 # 126
 struct _dyneither_ptr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w){
 struct Cyc_PP_Out*o=({struct Cyc_Fn_Function*_tmpA5=d->f;((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmpA5,({struct Cyc_PP_Ppstate*_tmp13=_cycalloc(sizeof(*_tmp13));_tmp13->ci=0,_tmp13->cc=0,_tmp13->cl=1,_tmp13->pw=w,_tmp13->epw=w;_tmp13;}));});
-return(struct _dyneither_ptr)({struct Cyc_List_List*_tmpA6=((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout);Cyc_str_sepstr(_tmpA6,({const char*_tmp12="";_tag_dyneither(_tmp12,sizeof(char),1U);}));});}
+return(struct _dyneither_ptr)({struct Cyc_List_List*_tmpA6=((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout);Cyc_str_sepstr(_tmpA6,({const char*_tmp12="";_tag_dyneither(_tmp12,sizeof(char),1U);}));});}struct _tuple1{struct _dyneither_ptr f1;struct Cyc_List_List*f2;};
 # 133
-struct _tuple0*Cyc_PP_string_and_links(struct Cyc_PP_Doc*d,int w){
+struct _tuple1*Cyc_PP_string_and_links(struct Cyc_PP_Doc*d,int w){
 struct Cyc_PP_Out*o=({struct Cyc_Fn_Function*_tmpA7=d->f;((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmpA7,({struct Cyc_PP_Ppstate*_tmp16=_cycalloc(sizeof(*_tmp16));_tmp16->ci=0,_tmp16->cc=0,_tmp16->cl=1,_tmp16->pw=w,_tmp16->epw=w;_tmp16;}));});
-return({struct _tuple0*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _dyneither_ptr _tmpAA=(struct _dyneither_ptr)({
+return({struct _tuple1*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _dyneither_ptr _tmpAA=(struct _dyneither_ptr)({
 struct Cyc_List_List*_tmpA9=((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout);Cyc_str_sepstr(_tmpA9,({const char*_tmp14="";_tag_dyneither(_tmp14,sizeof(char),1U);}));});
 # 135
 _tmp15->f1=_tmpAA;}),({

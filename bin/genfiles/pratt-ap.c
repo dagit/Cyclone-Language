@@ -498,21 +498,7 @@ struct _dyneither_ptr Cyc_Absynpp_typ2string(void*);
 # 69
 struct _dyneither_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);struct _union_Node_NZero{int tag;int val;};struct _union_Node_NVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_Node_NType{int tag;void*val;};struct _union_Node_NParam{int tag;unsigned val;};struct _union_Node_NParamNumelts{int tag;unsigned val;};struct _union_Node_NReturn{int tag;int val;};union Cyc_Pratt_Node{struct _union_Node_NZero NZero;struct _union_Node_NVar NVar;struct _union_Node_NNumelts NNumelts;struct _union_Node_NType NType;struct _union_Node_NParam NParam;struct _union_Node_NParamNumelts NParamNumelts;struct _union_Node_NReturn NReturn;};
 # 61 "pratt-ap.h"
-extern union Cyc_Pratt_Node Cyc_Pratt_zero_node;
-# 63
-union Cyc_Pratt_Node Cyc_Pratt_NVar(struct Cyc_Absyn_Vardecl*);
-union Cyc_Pratt_Node Cyc_Pratt_NType(void*);
-union Cyc_Pratt_Node Cyc_Pratt_NNumelts(struct Cyc_Absyn_Vardecl*);
-union Cyc_Pratt_Node Cyc_Pratt_NParam(unsigned);
-union Cyc_Pratt_Node Cyc_Pratt_NParamNumelts(unsigned);
-union Cyc_Pratt_Node Cyc_Pratt_NReturn();struct Cyc_Pratt_Graph;
-# 73
-void Cyc_Pratt_print_graph(struct Cyc_Pratt_Graph*);
-# 76
-struct Cyc_Pratt_Graph*Cyc_Pratt_empty_graph();
-struct Cyc_Pratt_Graph*Cyc_Pratt_copy_graph(struct Cyc_Pratt_Graph*);
-# 81
-struct Cyc_Pratt_Graph*Cyc_Pratt_add_edge(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_Node i,union Cyc_Pratt_Node j,struct Cyc_AP_T*a);
+extern union Cyc_Pratt_Node Cyc_Pratt_zero_node;struct Cyc_Pratt_Graph;
 # 84 "pratt-ap.cyc"
 union Cyc_Pratt_Node Cyc_Pratt_zero_node={.NZero={1,0}};
 union Cyc_Pratt_Node Cyc_Pratt_NVar(struct Cyc_Absyn_Vardecl*vd){return({union Cyc_Pratt_Node _tmp4D;(_tmp4D.NVar).tag=2U,(_tmp4D.NVar).val=vd;_tmp4D;});}

@@ -430,18 +430,8 @@ extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion
 struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};
 # 48 "fn.h"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);
-# 51
-struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));
 # 54
 void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);
-# 58
-struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f);
-# 64
-struct Cyc_Fn_Function*Cyc_Fn_curry(struct Cyc_Fn_Function*f);
-# 70
-struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f);
-# 77
-struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x);
 # 38 "fn.cyc"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x){
 return({struct Cyc_Fn_Function*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->f=f,_tmp0->env=x;_tmp0;});}

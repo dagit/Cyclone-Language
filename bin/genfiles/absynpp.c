@@ -496,13 +496,13 @@ int Cyc_Absyn_type2bool(int def,void*);
 void*Cyc_Absyn_new_evar(struct Cyc_Core_Opt*k,struct Cyc_Core_Opt*tenv);
 # 1019
 struct Cyc_Absyn_Exp*Cyc_Absyn_times_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned);
-# 1046
+# 1042
 struct Cyc_Absyn_Exp*Cyc_Absyn_sizeoftype_exp(void*t,unsigned);
-# 1155
+# 1151
 struct _dyneither_ptr Cyc_Absyn_attribute2string(void*);struct _tuple10{enum Cyc_Absyn_AggrKind f1;struct _tuple0*f2;};
-# 1165
+# 1161
 struct _tuple10 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfo);
-# 1173
+# 1169
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);struct _tuple11{unsigned f1;int f2;};
 # 28 "evexp.h"
 struct _tuple11 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
@@ -582,29 +582,15 @@ struct Cyc_PP_Doc*Cyc_PP_group(struct _dyneither_ptr start,struct _dyneither_ptr
 struct Cyc_PP_Doc*Cyc_PP_egroup(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*l);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 51 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;
-# 53
-void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs);
-# 55
-extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r;extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r;extern struct Cyc_Absynpp_Params Cyc_Absynpp_c_params_r;extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
-# 57
-void Cyc_Absynpp_decllist2file(struct Cyc_List_List*tdl,struct Cyc___cycFILE*f);
 # 59
 struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*d);
 # 61
 struct _dyneither_ptr Cyc_Absynpp_longlong2string(unsigned long long);
 struct _dyneither_ptr Cyc_Absynpp_typ2string(void*);
-struct _dyneither_ptr Cyc_Absynpp_typ2cstring(void*);
+# 64
 struct _dyneither_ptr Cyc_Absynpp_kind2string(struct Cyc_Absyn_Kind*);
-struct _dyneither_ptr Cyc_Absynpp_kindbound2string(void*);
-struct _dyneither_ptr Cyc_Absynpp_cnst2string(union Cyc_Absyn_Cnst);
-struct _dyneither_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
-struct _dyneither_ptr Cyc_Absynpp_stmt2string(struct Cyc_Absyn_Stmt*);
+# 69
 struct _dyneither_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
-struct _dyneither_ptr Cyc_Absynpp_decllist2string(struct Cyc_List_List*tdl);
-struct _dyneither_ptr Cyc_Absynpp_prim2string(enum Cyc_Absyn_Primop p);
-struct _dyneither_ptr Cyc_Absynpp_pat2string(struct Cyc_Absyn_Pat*p);
-struct _dyneither_ptr Cyc_Absynpp_scope2string(enum Cyc_Absyn_Scope sc);
-struct _dyneither_ptr Cyc_Absynpp_tvar2string(struct Cyc_Absyn_Tvar*);
 # 76
 int Cyc_Absynpp_is_anon_aggrtype(void*t);
 extern struct _dyneither_ptr Cyc_Absynpp_cyc_string;

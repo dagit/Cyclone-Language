@@ -436,15 +436,8 @@ extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion
 int Cyc_file_string_read(struct Cyc___cycFILE*,struct _dyneither_ptr dest,int dest_offset,int max_count);extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct _dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr lex_check;};
 # 77 "lexing.h"
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _dyneither_ptr,int,void*),void*);
-# 80
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*);
-struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _dyneither_ptr);
 # 83
-struct _dyneither_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*,struct Cyc_Lexing_lexbuf*);
-struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);
-char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*,int);
-int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*);
-int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+struct _dyneither_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*,struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 73 "string.h"
 struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
 # 103 "string.h"

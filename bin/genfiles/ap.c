@@ -441,11 +441,7 @@ extern struct Cyc_AP_T*Cyc_AP_zero;
 extern struct Cyc_AP_T*Cyc_AP_one;
 struct Cyc_AP_T*Cyc_AP_new(long n);
 struct Cyc_AP_T*Cyc_AP_fromint(long x);
-struct Cyc_AP_T*Cyc_AP_fromstr(const char*str,int base);
-long Cyc_AP_toint(struct Cyc_AP_T*x);
-char*Cyc_AP_tostr(struct Cyc_AP_T*x,int base);
-struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x);
-struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x);
+# 16
 struct Cyc_AP_T*Cyc_AP_add(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_sub(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_mul(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
@@ -453,19 +449,14 @@ struct Cyc_AP_T*Cyc_AP_div(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_mod(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_pow(struct Cyc_AP_T*x,struct Cyc_AP_T*y,struct Cyc_AP_T*p);
 struct Cyc_AP_T*Cyc_AP_addi(struct Cyc_AP_T*x,long y);
-struct Cyc_AP_T*Cyc_AP_subi(struct Cyc_AP_T*x,long y);
-struct Cyc_AP_T*Cyc_AP_muli(struct Cyc_AP_T*x,long y);
-struct Cyc_AP_T*Cyc_AP_divi(struct Cyc_AP_T*x,long y);
-long Cyc_AP_modi(struct Cyc_AP_T*x,long y);
-struct Cyc_AP_T*Cyc_AP_lshift(struct Cyc_AP_T*x,int s);
+# 28
 struct Cyc_AP_T*Cyc_AP_rshift(struct Cyc_AP_T*x,int s);
 struct Cyc_AP_T*Cyc_AP_and(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_or(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 struct Cyc_AP_T*Cyc_AP_xor(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 int Cyc_AP_cmp(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-int Cyc_AP_cmpi(struct Cyc_AP_T*x,long y);
+# 34
 struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
-struct Cyc_AP_T*Cyc_AP_lcm(struct Cyc_AP_T*x,struct Cyc_AP_T*y);
 # 8 "xp.h"
 int Cyc_XP_add(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y,int carry);
 int Cyc_XP_sub(int n,struct _dyneither_ptr z,struct _dyneither_ptr x,struct _dyneither_ptr y,int borrow);

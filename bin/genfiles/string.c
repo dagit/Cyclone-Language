@@ -442,70 +442,35 @@ int toupper(int);
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
 # 49 "string.h"
 int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
-int Cyc_strptrcmp(struct _dyneither_ptr*s1,struct _dyneither_ptr*s2);
+# 51
 int Cyc_strncmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);
 int Cyc_zstrcmp(struct _dyneither_ptr,struct _dyneither_ptr);
-int Cyc_zstrncmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long n);
-int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct _dyneither_ptr*);
-int Cyc_strcasecmp(struct _dyneither_ptr,struct _dyneither_ptr);
-int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);
-# 60
-struct _dyneither_ptr Cyc_strcat(struct _dyneither_ptr dest,struct _dyneither_ptr src);
-# 62
-struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr);
+# 63
 struct _dyneither_ptr Cyc_rstrconcat(struct _RegionHandle*,struct _dyneither_ptr,struct _dyneither_ptr);
-struct _dyneither_ptr Cyc_strconcat_l(struct Cyc_List_List*);
+# 65
 struct _dyneither_ptr Cyc_rstrconcat_l(struct _RegionHandle*,struct Cyc_List_List*);
-struct _dyneither_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dyneither_ptr);
+# 67
 struct _dyneither_ptr Cyc_rstr_sepstr(struct _RegionHandle*,struct Cyc_List_List*,struct _dyneither_ptr);
-# 71
-struct _dyneither_ptr Cyc_strcpy(struct _dyneither_ptr dest,struct _dyneither_ptr src);
+# 72
 struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-struct _dyneither_ptr Cyc_zstrncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);
-# 76
-struct _dyneither_ptr Cyc_realloc(struct _dyneither_ptr,unsigned long);
-struct _dyneither_ptr Cyc_rrealloc(struct _RegionHandle*,struct _dyneither_ptr s,unsigned long sz);
-# 81
-struct _dyneither_ptr Cyc__memcpy(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned);
-struct _dyneither_ptr Cyc__memmove(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned long,unsigned);
-int Cyc_memcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long n);
-struct _dyneither_ptr Cyc_memchr(struct _dyneither_ptr s,char c,unsigned long n);
-struct _dyneither_ptr Cyc_mmemchr(struct _dyneither_ptr s,char c,unsigned long n);
-struct _dyneither_ptr Cyc_memset(struct _dyneither_ptr s,char c,unsigned long n);
-void Cyc_bzero(struct _dyneither_ptr s,unsigned long n);
-void Cyc__bcopy(struct _dyneither_ptr src,struct _dyneither_ptr dst,unsigned long n,unsigned sz);
-# 99 "string.h"
-struct _dyneither_ptr Cyc_expand(struct _dyneither_ptr s,unsigned long sz);
+# 100 "string.h"
 struct _dyneither_ptr Cyc_rexpand(struct _RegionHandle*,struct _dyneither_ptr s,unsigned long sz);
-struct _dyneither_ptr Cyc_realloc_str(struct _dyneither_ptr str,unsigned long sz);
+# 102
 struct _dyneither_ptr Cyc_rrealloc_str(struct _RegionHandle*r,struct _dyneither_ptr str,unsigned long sz);
-struct _dyneither_ptr Cyc_strdup(struct _dyneither_ptr src);
+# 104
 struct _dyneither_ptr Cyc_rstrdup(struct _RegionHandle*,struct _dyneither_ptr src);
-# 108
-struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);
+# 109
 struct _dyneither_ptr Cyc_rsubstring(struct _RegionHandle*,struct _dyneither_ptr,int ofs,unsigned long n);
-# 113
-struct _dyneither_ptr Cyc_replace_suffix(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);
+# 114
 struct _dyneither_ptr Cyc_rreplace_suffix(struct _RegionHandle*r,struct _dyneither_ptr src,struct _dyneither_ptr curr_suffix,struct _dyneither_ptr new_suffix);
 # 119
 struct _dyneither_ptr Cyc_strchr(struct _dyneither_ptr s,char c);
 struct _dyneither_ptr Cyc_mstrchr(struct _dyneither_ptr s,char c);
-struct _dyneither_ptr Cyc_mstrrchr(struct _dyneither_ptr s,char c);
-struct _dyneither_ptr Cyc_strrchr(struct _dyneither_ptr s,char c);
-struct _dyneither_ptr Cyc_mstrstr(struct _dyneither_ptr haystack,struct _dyneither_ptr needle);
-struct _dyneither_ptr Cyc_strstr(struct _dyneither_ptr haystack,struct _dyneither_ptr needle);
-struct _dyneither_ptr Cyc_strpbrk(struct _dyneither_ptr s,struct _dyneither_ptr accept);
+# 126
 struct _dyneither_ptr Cyc_mstrpbrk(struct _dyneither_ptr s,struct _dyneither_ptr accept);
 unsigned long Cyc_strspn(struct _dyneither_ptr s,struct _dyneither_ptr accept);
-unsigned long Cyc_strcspn(struct _dyneither_ptr s,struct _dyneither_ptr accept);
-struct _dyneither_ptr Cyc_strtok(struct _dyneither_ptr s,struct _dyneither_ptr delim);
-# 133
-struct Cyc_List_List*Cyc_explode(struct _dyneither_ptr s);
+# 134
 struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*,struct _dyneither_ptr s);
-struct _dyneither_ptr Cyc_implode(struct Cyc_List_List*c);
-# 25 "strings.h"
-int Cyc_strcasecmp(struct _dyneither_ptr,struct _dyneither_ptr);
-int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);
 # 29 "assert.h"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned line);
 # 39 "string.cyc"

@@ -562,10 +562,6 @@ exp_t assign_exp(exp_t e1, exp_t e2, seg_t loc) {
 exp_t increment_exp(exp_t e,incrementor_t i,seg_t loc) {
   return new_exp(new Increment_e(e,i),loc);
 }
-exp_t post_inc_exp(exp_t e,seg_t loc) {return increment_exp(e,PostInc,loc);}
-exp_t pre_inc_exp (exp_t e, seg_t loc){return increment_exp(e,PreInc, loc);}
-exp_t pre_dec_exp (exp_t e, seg_t loc){return increment_exp(e,PreDec, loc);}
-exp_t post_dec_exp(exp_t e,seg_t loc) {return increment_exp(e,PostDec,loc);}
 exp_t conditional_exp(exp_t e1,exp_t e2,exp_t e3,seg_t loc) {
   return new_exp(new Conditional_e(e1,e2,e3), loc);
 }

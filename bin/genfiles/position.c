@@ -444,26 +444,13 @@ unsigned long Cyc_strlen(struct _dyneither_ptr s);
 struct _dyneither_ptr Cyc_strncpy(struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};
 # 33 "lineno.h"
 struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _dyneither_ptr,int);
-# 28 "position.h"
-void Cyc_Position_reset_position(struct _dyneither_ptr);
-void Cyc_Position_set_position_file(struct _dyneither_ptr);
-struct _dyneither_ptr Cyc_Position_get_position_file();
-# 34
-unsigned Cyc_Position_segment_join(unsigned,unsigned);
-int Cyc_Position_segment_equals(unsigned,unsigned);
+# 36 "position.h"
 struct _dyneither_ptr Cyc_Position_string_of_loc(unsigned);
-struct _dyneither_ptr Cyc_Position_string_of_segment(unsigned);
-struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*);struct Cyc_Position_Error;
-# 43
-struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned,struct _dyneither_ptr);
+struct _dyneither_ptr Cyc_Position_string_of_segment(unsigned);struct Cyc_Position_Error;
 # 46
 extern int Cyc_Position_use_gcc_style_location;
 extern int Cyc_Position_num_errors;
 extern int Cyc_Position_max_errors;
-void Cyc_Position_post_error(struct Cyc_Position_Error*);
-int Cyc_Position_error_p();
-# 55
-struct _dyneither_ptr Cyc_Position_get_line_directive(unsigned loc);
 # 34 "position.cyc"
 int Cyc_Position_use_gcc_style_location=1;static char _tmp0[1U]="";
 # 37

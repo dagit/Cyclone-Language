@@ -1027,10 +1027,6 @@ namespace Absyn {
   extern exp_t assignop_exp(exp_t, opt_t<primop_t,`H>, exp_t, seg_t);
   extern exp_t assign_exp(exp_t, exp_t, seg_t);
   extern exp_t increment_exp(exp_t, incrementor_t, seg_t);
-  extern exp_t post_inc_exp(exp_t, seg_t);
-  extern exp_t post_dec_exp(exp_t, seg_t);
-  extern exp_t pre_inc_exp(exp_t, seg_t);
-  extern exp_t pre_dec_exp(exp_t, seg_t);
   extern exp_t conditional_exp(exp_t, exp_t, exp_t, seg_t);
   extern exp_t and_exp(exp_t, exp_t, seg_t); // &&
   extern exp_t or_exp(exp_t, exp_t, seg_t);  // ||

@@ -1935,8 +1935,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           testexp = and_exp(neq_exp(deref_exp(var_exp(x,DL),DL),
                                     int_exp(None,0,DL),DL),testexp,DL);
         let s = ifthenelse_stmt(testexp,
-                  exp_stmt(pre_inc_exp(deref_exp(var_exp(x,DL),DL),DL),DL),
-                  exp_stmt(fncall_exp_dl(_throw_arraybounds_e),DL),DL);
+              exp_stmt(increment_exp(deref_exp(var_exp(x,DL),DL),PreInc,DL),DL),
+	      exp_stmt(fncall_exp_dl(_throw_arraybounds_e),DL),DL);
         s = seq_stmt(s,exp_stmt(deref_exp(var_exp(x,DL),DL),DL),DL);
         e->r = stmt_exp(declare_stmt(x,t,xexp,s,DL),DL)->r;
       } else {
