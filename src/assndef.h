@@ -55,24 +55,29 @@ namespace AssnDef{
     Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
     Var(vardecl_t);
     LogicVar(vardecl_opt_t,int,type_opt_t);
-    Primop(Absyn::primop_t,list_t<term_t>,type_opt_t);
+    Unop(Absyn::primop_t,term_t,type_opt_t); // Not, Bitnot, Numelts
+    Binop(Absyn::primop_t,term_t,term_t,type_opt_t); // all others
     Cast(Absyn::type_t, term_t);
   };
 
   string_t term2string(term_t t);
   
+  term_t uint(unsigned int);
   term_t cnst(Absyn::exp_t e);
   term_t zero();
   term_t one();
   
   term_t var(vardecl_t vd);
+  term_t logicvar(vardecl_opt_t,int,type_opt_t);
 
-  //  bool is_commutative(Absyn::primop_t p);
-  term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts, type_opt_t);
+  term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t);
+  term_t unop(Absyn::primop_t p, term_t, type_opt_t);
+  term_t plus(term_t t1, term_t t2, type_opt_t);
+  term_t minus(term_t t1, term_t t2, type_opt_t);
   term_t cast(Absyn::type_t tp, term_t tm);
   term_t fresh_var(type_opt_t);
 
-  int cmp_term(term_t t1, term_t t2);
+  int cmp_term(datatype Term @t1, datatype Term @t2);
   Absyn::type_opt_t get_term_type(term_t t);
   ///////////////////// Assertions /////////////////////
   typedef datatype Assn @assn_t;

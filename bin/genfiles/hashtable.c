@@ -346,12 +346,12 @@ Cyc_Hashtable_resize(t);}
 # 55
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key){
 struct _fat_ptr tab=t->tab;
-struct Cyc_List_List*l=({struct Cyc_List_List**_Tmp0=(struct Cyc_List_List**)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});
+struct Cyc_List_List*l=*((struct Cyc_List_List**)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_List_List*),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));}));}));
 return Cyc_List_assoc_cmp(t->cmp,l,key);}
 # 61
 void**Cyc_Hashtable_lookup_opt(struct Cyc_Hashtable_Table*t,void*key){
 struct _fat_ptr tab=t->tab;
-struct Cyc_List_List*l=({struct Cyc_List_List**_Tmp0=(struct Cyc_List_List**)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});
+struct Cyc_List_List*l=*((struct Cyc_List_List**)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_List_List*),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));}));}));
 int(*cmp)(void*,void*)=t->cmp;
 for(1;l!=0;l=l->tl){
 struct _tuple0*_Tmp0=(struct _tuple0*)l->hd;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=(void**)& _Tmp0->f2;{void*k=_Tmp2;void**v=(void**)_Tmp1;
@@ -362,7 +362,7 @@ return 0;}
 void**Cyc_Hashtable_lookup_other_opt(struct Cyc_Hashtable_Table*t,void*key,int(*cmp)(void*,void*),int(*hash)(void*)){
 # 78
 struct _fat_ptr tab=t->tab;
-struct Cyc_List_List*l=({struct Cyc_List_List**_Tmp0=(struct Cyc_List_List**)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});
+struct Cyc_List_List*l=*((struct Cyc_List_List**)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_List_List*),(int)({unsigned _Tmp1=(unsigned)hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));}));}));
 for(1;l!=0;l=l->tl){
 struct _tuple0*_Tmp0=(struct _tuple0*)l->hd;void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=(void**)& _Tmp0->f2;{void*k=_Tmp2;void**v=(void**)_Tmp1;
 if(cmp(key,k)==0)return v;}}
@@ -371,7 +371,7 @@ return 0;}
 # 87
 int Cyc_Hashtable_try_lookup(struct Cyc_Hashtable_Table*t,void*key,void**data){
 struct _fat_ptr tab=t->tab;
-struct Cyc_List_List*l=({struct Cyc_List_List**_Tmp0=(struct Cyc_List_List**)tab.curr;_Tmp0[(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));})];});
+struct Cyc_List_List*l=*((struct Cyc_List_List**)({typeof(tab )_Tmp0=tab;_check_fat_subscript(_Tmp0,sizeof(struct Cyc_List_List*),(int)({unsigned _Tmp1=(unsigned)t->hash(key);_Tmp1 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));}));}));
 int(*cmp)(void*,void*)=t->cmp;
 for(1;l!=0;l=l->tl){
 struct _tuple0 _Tmp0=*((struct _tuple0*)l->hd);void*_Tmp1;void*_Tmp2;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*k=_Tmp2;void*v=_Tmp1;

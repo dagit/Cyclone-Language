@@ -297,7 +297,7 @@ static term_t fresh_nonescvar(env_t env, vardecl_t vd) {
   int res = 0;
   Dict::lookup_bool(env->state_counter,vd,&res);
   env->state_counter = Dict::insert(env->state_counter,vd,res+1);
-  return new LogicVar(vd,res,vd->type);
+  return logicvar(vd,res,vd->type);
 }
 
 // each statement may have an assertion associated with it from
@@ -745,7 +745,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       for (; x != NULL; x = x->tl,ts = ts->tl) {
 	let vd = x->hd;
 	if (vd != NULL) 
-	  a = do_assign(env,a,new Var(vd),ts->hd);
+	  a = do_assign(env,a,var(vd),ts->hd);
       }
     }
     forward_assn(env, dest->body, a);
@@ -793,10 +793,10 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
       if (vdopt != NULL) {
         // FIX: the expression associated with the vardecls isn't right.
         //if (eopt != NULL)
-        //  a = do_assign(env,a,new Var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
+        //  a = do_assign(env,a,var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
         //else 
           a = kill_var(env,*vdopt,a);
-          //do_assign(env,a,new Var(*vdopt),fresh_var((*vdopt)->type));
+          //do_assign(env,a,var(*vdopt),fresh_var((*vdopt)->type));
       }
     }
     if (sc->where_clause != NULL) 
@@ -809,7 +809,7 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
 static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   // stupid C semantics means I have to put in a dummy value for vd first,
   // then run the initializer.  
-  let tv = new Var(vd);
+  let tv = var(vd);
   a = kill_var(env,vd,a);
   if (vd->initializer != NULL) {
     let $(t,a1) = vcgen_rexp(env,(exp_t)vd->initializer,a);
@@ -829,7 +829,7 @@ static assn_t vcgen_local_decl(env_t env, decl_t d, assn_t a) {
         if (eopt == NULL) a = add_vardecl(env,*vdopt,a);
         else {
           let $(t,a1) = vcgen_rexp(env,eopt,a);
-          let tv = new Var(*vdopt);
+          let tv = var(*vdopt);
           a = do_assign(env,a1,tv,t);
         }
       }
@@ -987,7 +987,7 @@ static struct Absyn::Vardecl *bind2vardecl(Absyn::binding_t b) {
 static term_opt_t varopt(Absyn::binding_t b) {
   let vdopt = bind2vardecl(b); 
   if (vdopt == NULL) return NULL;
-  return new Var((vardecl_t)vdopt);
+  return var((vardecl_t)vdopt);
 }
 
 static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
@@ -1024,7 +1024,7 @@ static void check_requires(Position::seg_t loc,
     // values
     for (; argvds != NULL && inputs != NULL; argvds = argvds->tl, inputs = inputs->tl) {
       let vd = argvds->hd;
-      a = and(a,eq(new Var(vd),inputs->hd));
+      a = and(a,eq(var(vd),inputs->hd));
     }
     // FIX? varargs.
     let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
@@ -1070,29 +1070,28 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
      default:  break;
      }
      let $(cn, known)= Evexp::eval_const_uint_exp(e);
-     if (known) return $(new Uint(cn), ain);
+     if (known) return $(uint(cn), ain);
   }
   switch (e->r) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
-    return $(new Const(e),ain);
+    return $(cnst(e),ain);
   case &Absyn::Var_e(b): return $(varopt(b),ain);
-  case &Absyn::Primop_e(p,es):
-    let $(ts, aout) = vcgen_rexps_always(env, es, ain);
-    term_opt_t t = NULL;
-    if (ts != NULL) t = primop(p, ts, e->topt);
+  case &Absyn::Primop_e(p,&List{e1,NULL}):
+    let $(t, aout) = vcgen_rexp_always(env, e1, ain);
+    return $(unop(p,t,e->topt),aout);
+  case &Absyn::Primop_e(p,&List{e1,&List{e2,_}}):
+    let $(t1, aout1) = vcgen_rexp_always(env, e1, ain);
+    let $(t2, aout) = vcgen_rexp_always(env, e2, aout1);
+    let t = binop(p, t1, t2, e->topt);
     // if  the expression has type unsigned, then we may conclude
     // t == t1 % t2 u< t2
     if ((p == Absyn::Mod) && (is_unsigned_int_exp(e))){
       //      fprintf(stderr,"e1 mod e2 is unsigned\n");
-      switch (ts){
-      case &List(t1, &List(t2, NULL)):
-	aout = and(aout, ult(t, t2));
-	break;
-      default: break;
-      }
+      aout = and(aout, ult(t1, t2));
     }
     return $(t, aout);
+  case &Absyn::Primop_e(_,_): Warn::impos("vcgen: bad primop");
   case &Absyn::AssignOp_e(e1,popt,e2):
     let $(lt,a1) = vcgen_lexp(env,e1,ain);
     let $(t2,a2) = vcgen_rexp(env,e2,a1);
@@ -1101,7 +1100,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       if (t1 == NULL || t2 == NULL) 
         t2 = NULL;
       else
-        t2 = primop(popt->v,list((term_t)t1,(term_t)t2),e->topt);
+        t2 = binop(popt->v,(term_t)t1,(term_t)t2,e->topt);
     }
     let a = do_assign(env,a2,lt,t2);
     return $(lt,a);
@@ -1112,20 +1111,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     term_opt_t assn = NULL;
     switch (i) {
     case Absyn::PreInc: 
-      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()),e->topt);
+      if (t1 != NULL) assn = plus(t1,one(),e->topt);
       res = assn;
       break;
     case Absyn::PostInc:
       res = t1;
-      if (t1 != NULL) assn = primop(Absyn::Plus,list((term_t)t1,one()),e->topt);
+      if (t1 != NULL) assn = plus(t1,one(),e->topt);
       break;
     case Absyn::PreDec:
-      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()),e->topt);
+      if (t1 != NULL) assn = minus(t1,one(),e->topt);
       res = assn;
       break;
     case Absyn::PostDec:
       res = t1;
-      if (t1 != NULL) assn = primop(Absyn::Minus,list((term_t)t1,one()),e->topt);
+      if (t1 != NULL) assn = minus(t1,one(),e->topt);
       break;
     default: Warn::impos("vcgen vcgen_rexp increment_e");
     }
@@ -1248,7 +1247,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Sizeoftype_e(_):
   case &Absyn::Sizeofexp_e(_):
   case &Absyn::Valueof_e(_):
-  case &Absyn::Offsetof_e(_,_): return $(new Const(e),ain);
+  case &Absyn::Offsetof_e(_,_): return $(cnst(e),ain);
 
   // These can all throw exceptions
   case &Absyn::AggrMember_e(e,...): fallthru(e);
@@ -1272,7 +1271,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       term_t term_numelts, term_typebound;
       // we don't know t2, can't really infer anything about the bound
       if (t2 == NULL) break;
-      term_numelts = primop(Absyn::Numelts, list(t1), Absyn::uint_type);
+      term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
       let inbound_assn = ult(t2, term_numelts);
       insert_assn_info(env->assn_info, e1, new $(a2, inbound_assn));
       a2 = and(a2,inbound_assn);
@@ -1296,14 +1295,14 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Comprehension_e(vd,e1,e2,_): 
     // similar to a while-loop except we evaluate e1 only once.
     let $(t1,a) = vcgen_rexp_always(env,e1,ain);
-    let v = new Var(vd);
+    let v = var(vd);
     // start off with index 0
     a = do_assign(env,a,v,zero());
     while (true) {
       let at = and(a,ult(v,t1));  // simulate test
       let af = and(a,ugte(v,t1));
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
-      abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one()),vd->type));
+      abody = do_assign(env,abody,v,plus(v,one(),vd->type));
       if (simple_implies(&abody,&a)) { a = af; break; }
       // no choice about widening here to ensure termination
       a = widen(or(abody,a));  // widen and possibly iterate
@@ -1351,7 +1350,7 @@ void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, ass
   // put in the requires clause as an assumption.
   let $(args,arvds,reqopt,ensopt,ret_value) = get_requires_and_ensures_info(&fd->i);
   assn_t *result_assn = (ensopt == NULL) ? NULL : new ((assn_t)&false_assn);
-  term_opt_t res_term = (ret_value == NULL) ? NULL : (new Var((vardecl_t)ret_value));
+  term_opt_t res_term = (ret_value == NULL) ? NULL : (var((vardecl_t)ret_value));
   let env = initial_env(tables,fd,assn_info,result_assn,res_term);
   if (reqopt != NULL) {
     // hope the vards in here point to the vardecls in the fn...

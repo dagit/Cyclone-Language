@@ -413,12 +413,12 @@ for(i=0;i < n;++ i){
 unsigned carry=0U;
 for(j=0;j < m;++ j){
 ({unsigned _Tmp0=(unsigned)({int _Tmp1=({int _Tmp2=(int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));_Tmp2 * (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),j));});_Tmp1 + (int)*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j));});carry +=_Tmp0;});
-((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % 256U);
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j))=(unsigned char)(carry % 256U);
 carry /=256U;}
 # 94
 for(1;j < (n + m)- i;++ j){
 carry +=(unsigned)*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j));
-((unsigned char*)z.curr)[i + j]=(unsigned char)(carry % 256U);
+*((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i + j))=(unsigned char)(carry % 256U);
 carry /=256U;}
 # 99
 carryout |=carry;}
@@ -602,7 +602,7 @@ i < size?0:({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail
 int j;
 for(j=0;j < -- i;++ j){
 char c=*((char*)_check_fat_subscript(str,sizeof(char),j));
-({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=*((char*)_check_fat_subscript(str,sizeof(char),i));if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),j);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=((char*)str.curr)[i];if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 ({struct _fat_ptr _Tmp0=_fat_ptr_plus(str,sizeof(char),i);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=c;if(_get_fat_size(_Tmp0,sizeof(char))==1U &&(_Tmp1==0 && _Tmp2!=0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});}}
 # 289
 return str;}

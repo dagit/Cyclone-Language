@@ -835,10 +835,7 @@ _check_null(requires_clause->topt);_TmpA;});struct Cyc_Warn_String_Warn_Warg_str
 ({unsigned _Tmp8=requires_clause->loc;struct Cyc_Tcenv_Tenv*_Tmp9=te;struct Cyc_List_List*_TmpA=tvs;Cyc_Tctyp_check_type(_Tmp8,_Tmp9,_TmpA,& Cyc_Kinds_ik,0,0,(void*)({struct Cyc_Absyn_ValueofType_Absyn_Type_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Absyn_ValueofType_Absyn_Type_struct));_TmpB->tag=9,_TmpB->f1=requires_clause;_TmpB;}));});{
 # 381
 struct Cyc_List_List*relns=Cyc_Relations_exp2relns(uprev_rgn,requires_clause);
-# 384
-if(!Cyc_Relations_consistent_relations(relns))
-({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=({const char*_TmpA="@requires clause may be unsatisfiable";_tag_fat(_TmpA,sizeof(char),38U);});_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(requires_clause->loc,_tag_fat(_Tmp9,sizeof(void*),1));});
-# 390
+# 390 "tc.cyc"
 {struct Cyc_List_List*p=prev_relations;for(0;p!=0;p=p->tl){
 if(Cyc_Relations_consistent_relations(Cyc_List_rappend(uprev_rgn,relns,(struct Cyc_List_List*)p->hd)))
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=({const char*_TmpA="@requires clause may overlap with previous clauses";_tag_fat(_TmpA,sizeof(char),51U);});_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(requires_clause->loc,_tag_fat(_Tmp9,sizeof(void*),1));});}}
@@ -847,9 +844,9 @@ prev_relations=({struct Cyc_List_List*_Tmp8=_region_malloc(uprev_rgn,sizeof(stru
 # 397
 if(prev_relations!=0)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp8=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9;_Tmp9.tag=0,_Tmp9.f1=({const char*_TmpA="if one field has a @requires clause, they all must";_tag_fat(_TmpA,sizeof(char),51U);});_Tmp9;});void*_Tmp9[1];_Tmp9[0]=& _Tmp8;Cyc_Warn_err2(loc,_tag_fat(_Tmp9,sizeof(void*),1));});}}}}}
-# 336
+# 336 "tc.cyc"
 ;_pop_region();}
-# 402
+# 402 "tc.cyc"
 static void Cyc_Tc_rule_out_memkind(unsigned loc,struct _tuple0*n,struct Cyc_List_List*tvs,int constrain_top_kind){
 # 404
 struct Cyc_List_List*tvs2=tvs;for(0;tvs2!=0;tvs2=tvs2->tl){

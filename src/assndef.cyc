@@ -35,7 +35,8 @@ datatype Term {
   Const(exp_t); // a Cyclone "constant" expression (e.g., 3, sizeof(e), etc.)
   Var(vardecl_t);
   LogicVar(vardecl_opt_t,int,type_opt_t);
-  Primop(Absyn::primop_t,list_t<term_t>,type_opt_t);
+  Unop(Absyn::primop_t,term_t,type_opt_t);
+  Binop(Absyn::primop_t,term_t,term_t,type_opt_t);
   Cast(Absyn::type_t, term_t);
 };
 
@@ -53,75 +54,57 @@ string_t term2string(term_t t) {
   case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
   case &LogicVar(vd,i,_): 
     res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;
-  case &Primop(p,&List{t1,&List{t2,NULL}},_): 
+  case &Binop(p,t1,t2,_):
     res = aprintf("(%s%s%s)",term2string(t1),Absynpp::prim2string(p),
                   term2string(t2));
     break;
-  case &Primop(p,&List{t1,_},_):
+  case &Unop(p,t1,_):
     res = aprintf("%s(%s)",Absynpp::prim2string(p),term2string(t1)); break;
   case &Cast(tp,tm):
     res = aprintf("(%s)%s",Absynpp::typ2string(tp),term2string(tm)); break;
-  default: Warn::impos("term2string primop args");
   }
   return res;
 }
 
-term_t zero() {
-  static datatype Term.Uint z = Uint(0);
-  return &z;
-}
-term_t one() {
-  static datatype Term.Uint x = Uint(1);
-  return &x;
-}
-term_t cnst(Absyn::exp_t e) { 
-  let $(c, known) = Evexp::eval_const_uint_exp(e);
-  if (known) {
-    if (c == 0) return zero();
-    if (c == 1) return one();
-    return new Uint(c);
-  }
-  return new Const(e); 
-}
-
-term_t var(vardecl_t vd) { return new Var(vd); }
-
-inline static bool is_commutative(Absyn::primop_t p) {
-  switch (p) {
-  case Absyn::Plus:
-  case Absyn::Times:
-  case Absyn::Eq:
-  case Absyn::Neq:
-  case Absyn::Bitand:
-  case Absyn::Bitor:
-  case Absyn::Bitxor: return true;
-  default: return false;
+static int hash_exp(exp_t e) {
+  switch (e->r) {
+  case &Absyn::Const_e(...): return 0;
+  case &Absyn::Var_e(...): return 1;
+  case &Absyn::Pragma_e(...): return 2;
+  case &Absyn::Primop_e(...): return 3;
+  case &Absyn::Conditional_e(...): return 4;
+  case &Absyn::And_e(...): return 5;
+  case &Absyn::Or_e(...): return 6;
+  case &Absyn::SeqExp_e(...): return 7;
+  case &Absyn::NoInstantiate_e(...): return 8;
+  case &Absyn::Instantiate_e(...): return 9;
+  case &Absyn::Cast_e(...): return 10;
+  case &Absyn::Address_e(...): return 11;
+  case &Absyn::Sizeoftype_e(...): return 12;
+  case &Absyn::Sizeofexp_e(...): return 13;
+  case &Absyn::Offsetof_e(...): return 14;
+  case &Absyn::Enum_e(...): return 15;
+  case &Absyn::AnonEnum_e(...): return 16;
+  case &Absyn::Valueof_e(...): return 17;
+  case &Absyn::Assert_e(...): return 18;
+  default: return 19;
   }
 }
 
-Absyn::type_opt_t get_term_type(term_t t) {
+static int termhash(datatype Term @t) {
   switch (t) {
-  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
-  case &Const(e): return e->topt;
-  case &Var(vd): return vd->type;
-  case &LogicVar(_,_,topt): return topt;
-  case &Primop(_,_,t): return t;
-  case &Cast(type,_): return type;
+  case &Uint(i): return i;
+  case &Const(e): return hash_exp(e) + 61;
+  case &Var(vd): return (unsigned int)vd;
+  case &LogicVar(vd,i,_): return (unsigned int)vd ^ (i+1);
+  case &Binop(p,t1,t2,_):
+    return p ^ (unsigned int)t1 ^ (unsigned int)t2;
+  case &Unop(p,t1,_): return p ^ (unsigned int)t1 + 1;
+  case &Cast(_,t): return termhash(t);
   }
 }
 
-term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts, type_opt_t tp) {
-  return new Primop(p,ts,tp);
-}
-term_t cast(Absyn::type_t tp, term_t tm) {
-  return new Cast(tp,tm);
-}
-term_t fresh_var(type_opt_t t) {
-  static int counter = 0;
-  return new LogicVar(NULL,counter++,t);
-}
-
-int cmp_term(term_t t1, term_t t2) {
+int cmp_term(datatype Term @t1, datatype Term @t2) {
   switch $(t1,t2) {
   case $(&Uint(i1), &Uint(i2)): return i1-i2;
   case $(&Uint(_), _): return -1;
@@ -143,18 +126,187 @@ int cmp_term(term_t t1, term_t t2) {
     return cmp_term(tm1,tm2);
   case $(&Cast(...),_): return -1;
   case $(_,&Cast(...)): return 1;
-  case $(&Primop(p1,ts1,tp1),&Primop(p2,ts2,tp2)):
+  case $(&Unop(p1,t1,_),&Unop(p2,t2,_)): 
     if (p1 != p2) return (int)p1 - (int)p2;
-    return list_cmp(cmp_term, ts1, ts2);
+    return cmp_term(t1,t2);
+  case $(&Unop(...),_): return -1;
+  case $(_,&Unop(...)): return 1;
+  case $(&Binop(p1,t11,t12,tp1),&Binop(p2,t21,t22,tp2)):
+    if (p1 != p2) return (int)p1 - (int)p2;
+    int c = cmp_term(t11,t21);
+    if (c != 0) return c;
+    return  cmp_term(t12,t22);
   }
+}
+
+static term_t copy_term(datatype Term@ t) {
+  switch (t) {
+  case &Uint(i): return new Uint(i);
+  case &Const(e): return new Const(e);
+  case &Var(vd): return new Var(vd);
+  case &LogicVar(vd,i,tp): return new LogicVar(vd,i,tp);
+  case &Binop(p,t1,t2,tp): return new Binop(p,t1,t2,tp);
+  case &Unop(p,t,tp): return new Unop(p,t,tp);
+  case &Cast(tp,t): return new Cast(tp,t);
+  }
+}
+
+// a hash-table to hold all of the term nodes to maximize sharing.  
+static struct Hashtable::Table<term_t,term_t> *term_hash_cons_table = NULL;
+
+static term_t hash_cons_term(datatype Term @t) {
+  Hashtable::table_t h;
+  if (term_hash_cons_table == NULL) {
+    h = Hashtable::create(123, cmp_term, termhash);
+    term_hash_cons_table = h;
+  } else {
+    h = (Hashtable::table_t)term_hash_cons_table;
+  }
+  let resopt = Hashtable::lookup_other_opt(h,t,cmp_term,termhash);
+  if (resopt == NULL) {
+    let t2 = copy_term(t);
+    Hashtable::insert(h,t2,t2);
+    return t2;
+  } else return *resopt;
+}
+
+term_t uint(unsigned int i) {
+  let t = Uint(i);
+  return hash_cons_term(&t);
+}
+term_t zero() {
+  return uint(0);
+}
+term_t one() {
+  return uint(1);
+}
+term_t cnst(Absyn::exp_t e) { 
+  let $(c, known) = Evexp::eval_const_uint_exp(e);
+  if (known) return uint(c);
+  let t = Const(e);
+  return hash_cons_term(&t);
+}
+term_t var(vardecl_t vd) { 
+  let t = Var(vd);
+  return hash_cons_term(&t);
+}
+term_t logicvar(vardecl_opt_t vd,int i,type_opt_t tp) {
+  let t = LogicVar(vd,i,tp);
+  return hash_cons_term(&t);
+}
+
+inline static bool is_commutative(Absyn::primop_t p) {
+  switch (p) {
+  case Absyn::Plus:
+  case Absyn::Times:
+  case Absyn::Eq:
+  case Absyn::Neq:
+  case Absyn::Bitand:
+  case Absyn::Bitor:
+  case Absyn::Bitxor: return true;
+  default: return false;
+  }
+}
+
+inline static bool is_associative(Absyn::primop_t p) {
+  switch (p) {
+  case Absyn::Plus:
+  case Absyn::Times:
+  case Absyn::Bitand:
+  case Absyn::Bitor:
+  case Absyn::Bitxor: return true;
+  default: return false;
+  }
+}
+
+Absyn::type_opt_t get_term_type(term_t t) {
+  switch (t) {
+  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
+  case &Const(e): return e->topt;
+  case &Var(vd): return vd->type;
+  case &LogicVar(_,_,topt): return topt;
+  case &Binop(_,_,_,tp): return tp;
+  case &Unop(_,_,tp): return tp;
+  case &Cast(tp,_): return tp;
+  }
+}
+
+term_t plus(term_t t1, term_t t2, type_opt_t tp) {
+  return binop(Absyn::Plus,t1,t2,tp);
+}
+term_t minus(term_t t1, term_t t2, type_opt_t tp) {
+  return binop(Absyn::Minus,t1,t2,tp);
+}
+
+term_t unop(Absyn::primop_t p, term_t t, type_opt_t tp) {
+  let ptr = Unop(p,t,tp);
+  return hash_cons_term(&ptr);
+}
+
+term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
+  if (is_commutative(p) && cmp_term(t1,t2) < 0) {
+    t1 :=: t2;
+  }
+  switch $(p,t1,t2) {
+    // constant folding
+  case $(_,&Uint(i),&Uint(j)):
+    switch (p) {
+    case Absyn::Plus: return uint(i+j);
+    case Absyn::Minus: return uint(i-j);
+    case Absyn::Bitand: return uint(i & j);
+    case Absyn::Bitor: return uint(i | j);
+    case Absyn::Bitxor: return uint(i ^ j);
+    case Absyn::Bitlshift: return uint(i << j);
+    case Absyn::Bitlrshift: return uint(i >> j);
+    default: break;
+    }
+    break;
+    // t1 - c  ==>  t1 + (-c)
+  case $(Absyn::Minus,t1,&Uint(i)): return plus(t1,uint(0 - i),tp);
+    // t - t   ==>  0
+  case $(Absyn::Minus,t1,t2):
+    if (cmp_term(t1,t2) == 0) return uint(0);
+    break;
+    // t1 + 0  ==>  t1
+  case $(Absyn::Plus,t1,&Uint(0)): return t1;
+    // t1 * 1  ==>  t1
+  case $(Absyn::Times,t1,&Uint(1)): return t1;
+    // (t1 + c1) + c2 ==> t1 + (c1 + c2)
+  case $(Absyn::Plus,&Binop(Absyn::Plus,t1,&Uint(c1),tp1),&Uint(c2)):
+    return plus(t1,uint(c1+c2),tp);
+    // (t1 * c1) * c2 ==> t1 * (c1 * c2)
+  case $(Absyn::Times,&Binop(Absyn::Plus,t1,&Uint(c1),tp1),&Uint(c2)):
+    return plus(t1,uint(c1*c2),tp);
+    // (t3 + t1) + t2 ==> (t3 + t2) + t1  when t1 < t2
+  case $(_,&Binop(p2,t3,t1,tp1),t2) && p2 == p:
+    if (is_commutative(p) && cmp_term(t1,t2) < 0)
+      return binop(p,binop(p,t3,t2,tp),t1,tp1);
+    else break;
+    // t1 p (t2 p t3) ==> (t1 p t2) p t3    when p is associative
+  case $(_,t1,&Binop(p2,t2,t3,tp2)) && p2 == p:
+    if (is_associative(p)) 
+      return binop(p,binop(p,t1,t2,tp),t3,tp2);
+    break;
+  default: 
+    break;
+  }
+  let p = Binop(p,t1,t2,tp);
+  return hash_cons_term(&p);
+}
+
+term_t cast(Absyn::type_t tp, term_t tm) {
+  let t = Cast(tp,tm);
+  return hash_cons_term(&t);
+}
+term_t fresh_var(type_opt_t t) {
+  static int counter = 0;
+  let p = LogicVar(NULL,counter++,t);
+  return hash_cons_term(&p);
 }
 
 static bool same_term(term_t t1, term_t t2) { return cmp_term(t1,t2) == 0; }
 
 ///////////////////// Assertions /////////////////////
-
-
-
 datatype Assn {
   True;
   False;
@@ -334,9 +486,6 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
     a1 = a11;
     a2 = a22;
     goto LOOP;
-    //  case $(&Graph(g1), &Graph(g2)): return Core::ptrcmp(g1,g2);
-    //  case $(&Graph(g1), _): return -1;
-    //  case $(_, &Graph(g2)): return 1;
   }
 }
 
@@ -347,6 +496,7 @@ static struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@>
 *hash_cons_table = NULL;
 
 void reset_hash_cons_table(void){
+  term_hash_cons_table = NULL;
   hash_cons_table = NULL;
 };
 // lookup an assertion to see if it has delayed substitutions or
@@ -533,17 +683,15 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
     let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
     if (tm != tm2) return cast(tp,tm2);
     else return t;
-  case &Primop(p,ts,tp):
-    list_t<term_t> res = NULL;
-    bool change = false;
-    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
-      let old_term = ptr->hd;
-      let new_term = reduce_term(old_term,non_esc_subst,esc_subst);
-      res = new List{new_term,res};
-      if (new_term != old_term) change = true;
-    }
-    if (!change) return t;
-    return primop(p,imp_rev(res),tp);
+  case &Unop(p,tm,tp):
+    let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
+    if (tm != tm2) return unop(p,tm2,tp);
+    else return t;
+  case &Binop(p,t,s,tp):
+    let t2 = reduce_term(t,non_esc_subst,esc_subst);
+    let s2 = reduce_term(s,non_esc_subst,esc_subst);
+    if (t != t2 || s != s2) return binop(p,t2,s2,tp);
+    else return t;
   case &Var(vd):
     if (vd->escapes && esc_subst != NULL) {
       // it's an escaping variable and we're under a Kill node.
@@ -631,17 +779,15 @@ term_t subst_term(term_t t, vardecl_t x, term_t newx) {
   case &Var(vd):
     if (vd == x) return newx;
     return t;
-  case &Primop(p,ts,tp):
-    list_t<term_t> res = NULL;
-    bool change = false;
-    for (let ptr = ts; ptr != NULL; ptr = ptr->tl) {
-      let old_term = ptr->hd;
-      let new_term = subst_term(old_term,x,newx);
-      res = new List{new_term,res};
-      if (new_term != old_term) change = true;
-    }
-    if (!change) return t;
-    return primop(p,imp_rev(res),tp);
+  case &Unop(p,t1,tp):
+    let t2 = subst_term(t1,x,newx);
+    if (t != t2) return unop(p,t2,tp);
+    return t;
+  case &Binop(p,t,s,tp):
+    let t2 = subst_term(t,x,newx);
+    let s2 = subst_term(s,x,newx);
+    if (t != t2 || s != s2) return binop(p,t2,s2,tp);
+    else return t;
   case &Cast(tp,tm):
     let tm2 = subst_term(tm,x,newx);
     if (tm != tm2) return cast(tp,tm2);

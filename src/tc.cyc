@@ -381,8 +381,8 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
 	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
 	// warn if the relations aren't consistent
-	if (!Relations::consistent_relations(relns))
-	  Warn::err2(requires_clause->loc,"@requires clause may be unsatisfiable");
+	//if (!Relations::consistent_relations(relns))
+	//Warn::err2(requires_clause->loc,"@requires clause may be unsatisfiable");
 
 	// run through all of the previous formulae and see if
 	// this one is consistent with those.  If so, there may

@@ -390,9 +390,9 @@ extern struct Cyc_InsertChecks_NoCheck_Absyn_AbsynAnnot_struct Cyc_InsertChecks_
 extern struct Cyc_InsertChecks_NullOnly_Absyn_AbsynAnnot_struct Cyc_InsertChecks_NullOnly_val;
 extern struct Cyc_InsertChecks_NullAndFatBound_Absyn_AbsynAnnot_struct Cyc_InsertChecks_NullAndFatBound_val;
 extern struct Cyc_InsertChecks_FatBound_Absyn_AbsynAnnot_struct Cyc_InsertChecks_FatBound_val;
-# 95 "assndef.h"
+# 100 "assndef.h"
 struct _fat_ptr Cyc_AssnDef_assn2string(void*);
-# 132 "assndef.h"
+# 137 "assndef.h"
 void*Cyc_AssnDef_reduce(void*);
 # 32 "vcgen.h"
 struct Cyc_Hashtable_Table**Cyc_Vcgen_new_assn_info (void);

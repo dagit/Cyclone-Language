@@ -146,7 +146,7 @@ static bool add_eq(graph_t @g, term_t t1, term_t t2);
 // then add term >= 0
 static int add_type_info(graph_t @g, term_t term) {
   switch (term) {
-  case &Primop(Absyn::Numelts, &List(x,_), _):
+  case &Unop(Absyn::Numelts, x, _):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
     if (!set_distance(g, term, zero(), MAXINT-1, true) ||
         !set_distance(g, term, zero(), MAXINT-1, false) ||
@@ -159,7 +159,7 @@ static int add_type_info(graph_t @g, term_t term) {
     type_t t = (type_t)topt;
     let eopt = Tcutil::get_type_bound(t);
     if (eopt != NULL) {
-      term_t t1 = primop(Absyn::Numelts, list(term), Absyn::uint_type);
+      term_t t1 = unop(Absyn::Numelts, term, Absyn::uint_type);
       // sigh -- must get rid of a cast to int/long
       exp_t e = (exp_t)eopt;
     loop:
@@ -203,23 +203,30 @@ static int add_type_info(graph_t @g, term_t term) {
 static node_t *find_equiv_term(graph_t @g, node_t @`H n) {
   let t = n->rep;
   switch (t) {
-  case &Primop(p,ts,tp):
-    let new_ts = NULL;
-    bool change = false;
-    for (; ts != NULL; ts = ts->tl) {
-      let t1 = ts->hd;
-      let n1 = term2node_opt(g,t1);
-      if (n1 == NULL) return NULL;
-      if (t1 != n1->rep) change = true;
-      new_ts = new List{n1->rep,new_ts};
-    }
-    if (change) {
-      let newt = new Primop(p,List::imp_rev(new_ts),tp);
+  case &Binop(p,t1,t2,tp):
+    let n1 = term2node_opt(g,t1);
+    let n2 = term2node_opt(g,t2);
+    if (n1 == NULL || n2 == NULL) return NULL;
+    if (t1 != n1->rep || t2 != n2->rep) {
+      let newt = binop(p,n1->rep,n2->rep,tp);
       for (let r = g->rows; r != NULL; r = r->next) {
         if (cmp_term(newt,r->rep) == 0) {
           let m = compress(r);
-          if (m != n)
-            n->equiv_class = m;
+          if (m != n) n->equiv_class = m;
+          break;
+        }
+      }
+    }
+    break;
+  case &Unop(p,t1,tp):
+    let n1 = term2node_opt(g,t1);
+    if (n1 == NULL) return NULL;
+    if (t1 != n1->rep) {
+      let newt = unop(p,n1->rep,tp);
+      for (let r = g->rows; r != NULL; r = r->next) {
+        if (cmp_term(newt,r->rep) == 0) {
+          let m = compress(r);
+          if (m != n) n->equiv_class = m;
           break;
         }
       }
@@ -229,7 +236,7 @@ static node_t *find_equiv_term(graph_t @g, node_t @`H n) {
     let n1 = term2node_opt(g,t1);
     if (n1 == NULL) return NULL;
     if (t1 != n1->rep) {
-      let newt = new Cast(tp,n1->rep);
+      let newt = cast(tp,n1->rep);
       for (let r = g->rows; r != NULL; r = r->next) {
         if (cmp_term(newt,r->rep) == 0) {
           let m = compress(r);
@@ -594,18 +601,23 @@ static bool congruence_close_graph(graph_t @g) {
         let ts_class = compress(ts);
         if (rs_class == ts_class) continue;
         switch $(rs->rep,ts->rep) {
-        case $(&Primop(p1,ts1,_),&Primop(p2,ts2,_)) && p1 == p2:
-          bool same = true;
-          for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2 = ts2->tl) {
-            let n1 = term2node_opt(g,ts1->hd);
-            let n2 = term2node_opt(g,ts2->hd);
-            if (n1 == NULL || n2 == NULL) return false;
-            if (n1 != n2) { same = false; break; }
-          }
-          if (same && ts1 == ts2) {
-            changed = true;
-            if (!unify_nodes(g,rs,ts)) return false;
-          }
+        case $(&Binop(p1,t11,t12,_),&Binop(p2,t21,t22,_)) && p1 == p2:
+          let n11 = term2node_opt(g,t11);
+          let n21 = term2node_opt(g,t21);
+          if (n11 == NULL || n21 == NULL) return false;
+          if (n11 != n21) break;
+          let n12 = term2node_opt(g,t12);
+          let n22 = term2node_opt(g,t22);
+          if (n12 == NULL || n22 == NULL) return false;
+          if (n12 != n22) break;
+          if (!unify_nodes(g,rs,ts)) return false;
+          break;
+        case $(&Unop(p1,t1,_),&Unop(p2,t2,_)) && p1 == p2:
+          let n1 = term2node_opt(g,t1);
+          let n2 = term2node_opt(g,t2);
+          if (n1 == NULL || n2 == NULL) return false;
+          if (n1 != n2) break;
+          if (!unify_nodes(g,rs,ts)) return false;
           break;
         case $(&Cast(tp1,t1),&Cast(tp2,t2)):
           if (Tcutil::typecmp(tp1,tp2) == 0) {
@@ -636,34 +648,15 @@ static $(unsigned int,bool) eval_term(term_t t) {
 }
 
 // break up a compound term that involves addition/subtraction of a constant
-static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
+static $(term_t, int) break_term(graph_t @g, bool is_signed, term_t t){
   int c = 0;
   unsigned cu = 0u;
   term_t res = t;
-  Absyn::primop_t p;
   switch (t) {
-  case &Primop(Absyn::Plus, &List{t1,&List{t2,NULL}}, _):
-    p = Absyn::Plus;
-    let $(c1, okay1) = eval_term(t1);
-    let $(c2, okay2) = eval_term(t2);
-    if (okay1) {// t = c1 + t'
-      res = t2;
-      c = (int)c1;
-      cu = (unsigned)c1;
-    } else if (okay2) {//t = t' + c2
-      res = t1;
-      c = (int)c2;
-      cu = (unsigned)c2;
-    } else return $(t,0);
-    break;
-  case &Primop(Absyn::Minus, &List{t1,&List{t2,NULL}}, _):
-    p = Absyn::Minus;
-    let $(c2, okay2) = eval_term(t2);
-    if (okay2){ // t = t' - c2
-      res = t1;
-      c = -((int)c2); // t = t' + (-c2)
-      cu = c2;
-    } else return $(t, 0);
+  case &Binop(Absyn::Plus,t1,&Uint(c2),_):
+    res = t1;
+    c = (int)c2;
+    cu = (unsigned int)c2;
     break;
   default:
     return $(t, 0);
@@ -680,7 +673,7 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
       }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
 	return $(res, c);
       }
-    }else {//c < 0 
+    } else {//c < 0 
       let dist = lookup_dist(term2node(g,zero()), term2node(g,res), true);
       if (dist == NULL || *dist > c - MININT){
 	return $(t, 0);
@@ -691,17 +684,12 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
 	return $(res, c);
       }
     }
-  }else {//is unsigned
-    if (p == Absyn::Plus){
-      let dist = lookup_dist(term2node(g, res), term2node(g,zero()), false);
-      if (dist == NULL) return $(t,0);
-      if (*dist <=0) return $(res, cu);
-      if (*dist > 0 && (unsigned)(*dist) <= MAXUINT - cu)
-	return $(res, cu);
-    }
-    else { // p == Absyn::Minus
-      return $(t, 0);
-    }
+  } else {//is unsigned
+    let dist = lookup_dist(term2node(g, res), term2node(g,zero()), false);
+    if (dist == NULL) return $(t,0);
+    if (*dist <=0) return $(res, cu);
+    if (*dist > 0 && (unsigned)(*dist) <= MAXUINT - cu)
+      return $(res, cu);
   }
   return $(t, 0);
 }
@@ -711,20 +699,16 @@ static $(term_t, int) break_term(graph_t @g, bool is_signed,term_t t){
 // This does not deal with equality constraints -- those should've already
 // been eliminated.
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
-  // first see if t1 or t2 is a constant as we can put in better
-  // constraints then.
-  let $(c1,okay1) = eval_term(t1);
-  let $(c2,okay2) = eval_term(t2);
-  if (okay1 && okay2) {
-    // we have c1 p c2 -- reduce to true or false immediately.
+  switch $(t1,t2) {
+  case $(&Uint(c1),&Uint(c2)):
     switch (p) {
     case ULt: return (c1 < c2);
-    case SLt: return ((int)c1) < ((int)c2);
     case ULte: return (c1 <= c2);
+    case SLt: return ((int)c1) < ((int)c2);
     case SLte: return ((int)c1) <= ((int)c2);
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
-  } else if (okay2) {
+  case $(_,&Uint(c2)):
     // we have t1 p c2 -- add constraints of the form t1 - Zero p c2
     switch (p) {
     case ULt: 
@@ -763,7 +747,7 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       return true;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
-  } else if (okay1) {
+  case $(&Uint(c1),_):
     // we have c1 p t2 -- add constraints of the form zero - t2 p -c1
     switch (p) {
     case ULt: 
@@ -806,6 +790,7 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       }
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
+  default: break;
   }
   // nothing special about the terms -- have to add them as standard
   // sort of constraints.
@@ -868,6 +853,7 @@ static bool add_eq(graph_t @g, term_t t1, term_t t2) {
   let n2 = term2node_opt(g,t2);
   if (n1 == NULL || n2 == NULL) return false;
   return 
+    // FIX: we shouldn't have to add these edges...
     unify_nodes(g,n1,n2) &&
     add_constraint(g, t1, ULte, t2) &&
     add_constraint(g, t2, ULte, t1) &&
@@ -888,6 +874,11 @@ unsigned int max_paths_seen = 0;
 // tail-calls to be as fast as possible.  If we end up with two
 // many disjuncts, then we throw an exception to back out of the
 // whole thing.  
+//
+// JGM: what we should probably do is delay pushing in the Or nodes
+// until we've gotten all of the And, Prim, True, and False nodes
+// pushed into the graphs.  That way we're more likely to hit an
+// inconsistency early.
 static graph_t *cgraph(graph_t *`H gs, assn_t a) {
  LOOP:
   //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
@@ -971,12 +962,21 @@ static bool consistent(assn_t a) {
     if (gs != NULL) {
       fprintf(stderr,"resulting graphs are:\n");
       print_graphs(gs);
-      fprintf(stderr,"\nDouble checking consistency...\n");
-      for (; gs != NULL; gs = gs->next)
-        if (!check_graph_consistent(gs)) {
-          fprintf(stderr,"Oops!\n");
-          print_graphs(gs);
+      fprintf(stderr,"\nTrying congruence closure...\n");
+      graph_t *prev = NULL;
+      for (graph_t *g = gs; g != NULL; g = g->next) {
+        if (!congruence_close_graph((graph_t@)g)) {
+          if (prev == NULL) {
+            gs = g->next;
+          } else {
+            prev->next = g->next;
+          }
+        } else {
+          prev = g;
         }
+      }
+      fprintf(stderr,"After congruence closure:\n");
+      print_graphs(gs);
     }
     */
     return (gs != NULL);

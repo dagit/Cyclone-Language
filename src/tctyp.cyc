@@ -339,8 +339,8 @@ static $(cvtenv_t,Relations::relns_t) check_clause(cvtenv_t env,
 	 " instead of integral type");
   env = i_check_type_level_exp(clause,env);
   let relns = Relations::exp2relns(heap_region,clause);
-  if (!Relations::consistent_relations(relns))
-    err2(clause->loc, clause_name," clause '",clause,"' may be unsatisfiable");
+  //if (!Relations::consistent_relations(relns))
+  //err2(clause->loc, clause_name," clause '",clause,"' may be unsatisfiable");
   return $(env,relns);
 }
 
