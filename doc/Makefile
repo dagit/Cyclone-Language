@@ -8,38 +8,41 @@ letter: main-letter.pdf
 
 a4: main-a4.pdf
 
-online-manual: main-screen.html
+online-manual: main-screen.html gen-libdoc.tex
 	$(RM) -r online-manual
 	mkdir online-manual
 	(cd online-manual; hacha ../main-screen.html)
 
-main-screen.html:
+main-screen.html: gen-libdoc.tex
 	hevea main-screen
 	hevea main-screen
 
-main-screen.pdf:
+main-screen.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-screen
 	makeindex main-screen
 	pdflatex '\nonstopmode\input' main-screen
 	pdflatex '\nonstopmode\input' main-screen
 
-main-letter.pdf:
+main-letter.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-letter
 	makeindex main-letter
 	pdflatex '\nonstopmode\input' main-letter
 	pdflatex '\nonstopmode\input' main-letter
 
-
-main-a4.pdf:
+main-a4.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-a4
 	makeindex main-a4
 	pdflatex '\nonstopmode\input' main-a4
 	pdflatex '\nonstopmode\input' main-a4
 
+gen-libdoc.tex: ../include/xarray.h
+	../src/cycdoc $^ > gen-libdoc.tex
+
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
 	$(RM) *.pdf *.toc *.out
 	$(RM) main-screen.html
+	$(RM) gen-libdoc.tex
 	$(RM) -r online-manual
 
 .PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf online-manual

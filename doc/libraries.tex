@@ -1,5 +1,28 @@
 \section{Libraries}
 
+We have almost completed a tool for automatically extracting
+prototypes and stylized comments from Cyclone files.  We will use this
+to document the library so that the documentation stays up-to-date
+with the actual source code.  Expect about 100 pages of documentation
+to appear hear soon.  In the meantime, the header files for
+the libraries are in the include directory of the distribution (and
+whereever the include directory is installed on your system).  When
+the prototypes and comments are insufficient, you can see the library
+implementations in the lib directory of the distribution.
+
+Some of the Cyclone libraries are safe wrappers for corresponding C
+libraries.  Others are general useful facilities (such as container
+types, bit vectors, and so on).  As usual, familiarity with libraries
+greatly eases programming.
+
+\ifscreen
+\definecolor{cycdochighlight}{rgb}{.75,.81,1}
+\else
+\definecolor{cycdochighlight}{rgb}{1,1,1}
+\fi
+
+\input{gen-libdoc}
+
 %HEVEA \newcommand{\parbox}[3][x]{#3}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\var}[1]{\texttt{#1}}
@@ -52,21 +75,6 @@
 
 \newcommand{\tindex}[1]{}
 \newcommand{\exindex}[1]{}
-
-We have almost completed a tool for automatically extracting
-prototypes and stylized comments from Cyclone files.  We will use this
-to document the library so that the documentation stays up-to-date
-with the actual source code.  Expect about 100 pages of documentation
-to appear hear soon.  In the meantime, the header files for
-the libraries are in the include directory of the distribution (and
-whereever the include directory is installed on your system).  When
-the prototypes and comments are insufficient, you can see the library
-implementations in the lib directory of the distribution.
-
-Some of the Cyclone libraries are safe wrappers for corresponding C
-libraries.  Others are general useful facilities (such as container
-types, bit vectors, and so on).  As usual, familiarity with libraries
-greatly eases programming.
 
 % \subsection{Array}
 % \begin{verbatim}
