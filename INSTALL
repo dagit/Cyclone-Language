@@ -45,6 +45,8 @@ make uninstall
 and it will remove any files and directories created in your system
 directories as a result of installation.
 
+POTENTIAL PROBLEMS
+
 Note that configure and make install use several utilities, which
 need to be in your path.  In our experience, this is the most common
 source of problems.  In particular:
@@ -54,6 +56,9 @@ to point to an appropriate egrep if necessary.
 different than the find we are expecting.  cygwin puts the find we
 want in /usr/bin -- make sure a different find is not earlier in your
 path.
+
+Other architecture-specific problems that we've encountered are
+described in the file config/ARCHINFO.
 
 PORTING TO UNSUPPORTED ARCHITECTURES
 
