@@ -1,0 +1,16 @@
+<foo>
+hello there dude
+&lt;
+&#234;
+<!-- This is  a comment -->
+<xoxo nuba="OOOK"  gaga='wewe'>
+
+<emptytag/>
+</xoxo>
+<?bar This is pi  stuff ?>
+
+<![CDATA[ This is  cdata,
+          man ]]>
+
+
+</foo>

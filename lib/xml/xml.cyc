@@ -1,0 +1,4 @@
+/* Trevor Jim, 2001 */
+
+#define _XML_CYC
+#include "xml.h"

@@ -1,0 +1,32 @@
+An XML parser by Trevor Jim
+
+This is a simple XML parser written in Cyclone.  It was originally
+written in ocaml, then ported.  The parser passes whitespace through
+to applications, as per the XML spec.  That means it's up to the
+application to deal with whitespace in XML input, and the XML printer
+is NOT a pretty-printer; it's up to the app to insert whitespace
+(e.g., newlines) into the XML abstract syntax if it wants any to
+appear in the output of the printer.
+
+The latest version of the XML spec can be found at
+
+  http://www.w3.org/TR/REC-xml
+
+The parser does not yet parse DTDs.
+The parser does not currently accept unicode.
+
+The main files are
+
+  xml.cyc           (Abstract syntax)
+  xmlparse.y        (Parser)
+  xmlscan.cyl       (Lexer)
+  xmldump.cyc       (Printer)
+
+The lexer is unusual in that it has two lexing functions; lexing
+between a start and end tag is different from lexing within a tag
+itself.  The parser controls what lexing function is in effect at any
+given moment.
+
+The other files are
+  xmlecho.cyc       (Test program that echoes its input)
+  test.xml          (An XML test input)

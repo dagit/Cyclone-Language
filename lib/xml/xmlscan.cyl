@@ -1,0 +1,199 @@
+{
+/* Trevor Jim, 2001 */
+
+#include "core.h"
+#include "stdio.h"
+#include "list.h"
+#include "lexing.h"
+#include "string.h"
+
+#include "xml.h"
+#include "xmlparse.h"
+#include "xmlparse_tab.h"
+#include "xmlscan.h"
+
+using Core;
+using List;
+using XmlParse;
+using Lexing;
+  
+namespace XmlScan {
+string token_string = "";
+string token_pi = "";
+// Forward declarations of lexing functions 
+extern int data(Lexbuf<`a>);
+extern int comment(Lexbuf<`a>);
+extern int pi(Lexbuf<`a>);
+extern int cdsect(Lexbuf<`a>);
+extern int attvalue1(Lexbuf<`a>);
+extern int attvalue2(Lexbuf<`a>);
+extern int intag(Lexbuf<`a>);
+}
+
+// for parser -- must not be prefixed
+int yylex() { 
+  int ans;
+  switch (getContext()) {
+  case Normal: ans = XmlScan::data(lbuf->v); break;
+  case InTag: ans = XmlScan::intag(lbuf->v); break;
+  }
+  switch (ans) {
+  case ATTVALUE1: fallthru;
+  case ATTVALUE2: fallthru;
+  case CDSECT: fallthru;
+  case CHARDATA: fallthru;
+  case COMMENT: fallthru;
+  case NAME: fallthru;
+  case OPEN: fallthru;
+  case OPENSLASH: fallthru;
+  case REFERENCE:
+    yylval = String_tok(XmlScan::token_string); break;
+  case PI:
+    yylval = Pi_tok(&$(XmlScan::token_pi,XmlScan::token_string)); break;
+  default: break;
+  }
+  return ans;
+} 
+
+namespace XmlScan;
+
+void init() { setContext(Normal); }
+
+static string get(Lexbuf<`a> b) { return lexeme(b); }
+
+static list_t<stringptr> buffer = null;
+
+static void gobble(Lexbuf<`a> b) {
+  buffer = &List(new {get(b)},buffer);
+}
+
+static void purge() { buffer = null; }
+
+static string regurgitate() { return String::strconcat_l(List::rev(buffer)); }
+
+static string pi_cell = "";
+static void pi_set(string s) { pi_cell = s; }
+static string pi_get() { return pi_cell; }
+
+static string after(int n,string s) {
+  try
+    return String::substring(s,n,String::strlen(s)-n);
+  catch {
+    case Core::InvalidArg(_):
+      error("internal lexing error");
+      return ""; // Unreachable
+  }
+}
+
+void warning(string msg) {
+  fprintf(Stdio::stderr,"%s",msg);
+}
+
+////////////////////////// LEXING RULES /////////////////////////////
+}
+
+let ws = [' ' '\t' '\r']
+let name = ['a'-'z' 'A'-'Z' '_' ':'] 
+            ['a'-'z' 'A'-'Z' '0'-'9' '.' '-' '_' ':']*
+
+/* The normal lexer */
+rule data = parse
+  '<' name            { token_string = after(1,get(lexbuf));
+                        return OPEN; } 
+| "</" name           { token_string = after(2,get(lexbuf));
+                        return OPENSLASH; } 
+| "&#" ['0'-'9']+ ';' { token_string = get(lexbuf);
+                        return REFERENCE; }
+| '&' name ';'        { token_string = get(lexbuf);
+                        return REFERENCE; }
+| "<![CDATA["         { purge(); return cdsect(lexbuf); }
+| "<?" name           { pi_set(after(2,get(lexbuf))); purge();
+                        return pi(lexbuf); }
+| "<!--"              { purge(); return comment(lexbuf); }
+| eof                 { return ENDOFFILE; }
+| [^ '<' '&' ']' ]*   { token_string = get(lexbuf);
+                        return CHARDATA; }
+
+/* Lexing states called from the normal state */
+and pi = parse
+  "?>"     { token_string = regurgitate();
+             token_pi = pi_get();
+             return PI; }
+| eof      { warning("PI ends in eof");
+             token_string = regurgitate();
+             token_pi = pi_get();
+             return PI; }
+| '?'      { gobble(lexbuf); return pi(lexbuf); }
+| [^ '?']+ { gobble(lexbuf); return pi(lexbuf); }
+
+and cdsect = parse
+  "]]>"             { token_string = regurgitate();
+                      return CDSECT; }
+| eof               { warning("CDATA ends in eof");
+                      token_string = regurgitate();
+                      return CDSECT; }
+| ']'               { gobble(lexbuf); return cdsect(lexbuf); }
+| '<'               { warning("CDATA contains <");
+                      gobble(lexbuf); return cdsect(lexbuf); }
+| '&'               { warning("CDATA contains &");
+                      gobble(lexbuf); return cdsect(lexbuf); }
+| [^ '<' '&' ']' ]+ { gobble(lexbuf); return cdsect(lexbuf); }
+
+and comment = parse   
+  "-->"    { token_string = regurgitate();
+             return COMMENT; }
+| eof      { warning("comment ends in eof");
+             token_string = regurgitate();
+             return COMMENT; }
+| "--"     { warning("comment contains --");
+             gobble(lexbuf); return comment(lexbuf); }
+| '-'      { gobble(lexbuf); return comment(lexbuf); }
+| [^ '-']+ { gobble(lexbuf); return comment(lexbuf); }
+
+/* Lexing inside of tags */
+and intag = parse
+  eof   { warning("tag ends in eof");
+          return ENDOFFILE; }
+| '\n'  { return intag(lexbuf); }
+| ws+   { return intag(lexbuf); }                
+| name  { token_string = get(lexbuf);
+          return NAME; }
+| '='   { return EQ; }
+| '\''  { purge(); return attvalue1(lexbuf); }
+| "\""  { purge(); return attvalue2(lexbuf); }
+| '>'   { return CLOSE; }   
+| "/>"  { return SLASHCLOSE; }
+| _     { warning(xprintf("illegal character '%s' in tag",get(lexbuf)));
+          return intag(lexbuf); }
+
+/* Other lexing states inside tags */
+and attvalue1 = parse
+  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue1(lexbuf); }
+| '&' name ';'         { gobble(lexbuf); return attvalue1(lexbuf);}
+| '&'                  { warning("ill-formed reference in attribute");
+                         gobble(lexbuf); return attvalue1(lexbuf); }
+| '<'                  { warning("attribute contains <");
+                         gobble(lexbuf); return attvalue1(lexbuf); }
+| '\''                 { token_string = regurgitate();
+                         return ATTVALUE1; }
+| eof                  { warning("attribute ends in eof");
+                         token_string = regurgitate();
+                         return ATTVALUE1; }
+| [^ '<' '&' '\'']+    { gobble(lexbuf); return attvalue1(lexbuf); }
+
+and attvalue2 = parse
+  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue2(lexbuf); }
+| '&' name ';'         { gobble(lexbuf); return attvalue2(lexbuf); }
+| '&'                  { warning("ill-formed reference in attribute");
+                         gobble(lexbuf); return attvalue2(lexbuf); }
+| '<'                  { warning("attribute contains <");
+                         gobble(lexbuf); return attvalue2(lexbuf); }
+| "\""                 { token_string = regurgitate();
+                         return ATTVALUE2; }
+| eof                  { warning("attribute ends in eof");
+                         token_string = regurgitate();
+                         return ATTVALUE2; }
+| [^ '<' '&' '"']+     { gobble(lexbuf); return attvalue2(lexbuf); }
+
+{
+}

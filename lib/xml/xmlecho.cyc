@@ -1,0 +1,23 @@
+/* Trevor Jim, 2001 */
+
+#include "xmldump.h"
+#include "xmlscan.h"
+#include "xmlparse.h"
+#include "lexing.h"
+#include "stdio.h"
+
+using Core;
+
+void doit(string file) {
+  let fd = Stdio::file_open(file,"r");
+  XmlDump::dumpContents(Stdio::stdout,XmlParse::parse_file(fd));
+  Stdio::fclose(fd);
+}
+
+int main() {
+  string ?arg = Core::std_args();
+  arg++; // skip the name of the executable
+  for (int n = arg.size; n > 0; n--,arg++)
+    doit(*arg);
+  return 0;
+}

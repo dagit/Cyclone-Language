@@ -1,0 +1,91 @@
+/* Trevor Jim, 2001 */
+
+#include "xmldump.h"
+#include "stdio.h"
+
+namespace XmlDump;
+
+using Xml;
+using List;
+using Stdio;
+
+void dumpAttvalue(FILE @fd, attvalue_t av) {
+  switch (av) {
+  case Attvalue1(s): fprintf(fd,"'%s'",s); break;
+  case Attvalue2(s): fprintf(fd,"\"%s\"",s); break;
+  }
+}
+
+void dumpAttribute(FILE @fd, attribute_t a) {
+  let &$(n,av) = a;
+  fprintf(fd,"%s=",n);
+  dumpAttvalue(fd,av);
+}
+
+void dumpAttributes(FILE @fd, list_t<attribute_t> al) {
+  switch (al) {
+  case null: break;
+  case &List(a,null): dumpAttribute(fd,a); break;
+  case &List(hd,tl):
+      dumpAttribute(fd,hd);
+      fprintf(fd," ");
+      dumpAttributes(fd,tl);
+      break;
+  }
+}
+
+void dumpElement(FILE @fd, element_t e) {
+  switch (e) {
+  case StartEnd(n,al,cl):
+    fprintf(fd,"<%s",n);
+    if (al != null) fprintf(fd," ");
+    dumpAttributes(fd,al);
+    fprintf(fd,">");
+    dumpContents(fd,cl);
+    fprintf(fd,"</%s>",n);
+    break;
+  case Empty(n,al):
+    fprintf(fd,"<%s",n);
+    if (al != null) fprintf(fd," ");
+    dumpAttributes(fd,al);
+    fprintf(fd,"/>");
+    break;
+  }
+}
+
+void dumpContent(FILE @fd, content_t c) {
+  switch(c) {
+  case Element(e):
+    dumpElement(fd,e);
+    break;
+  case Chardata(cd):
+    fprintf(fd,"%s",cd);
+    break;
+  case Reference(r):
+    fprintf(fd,"%s",r);
+    break;
+  case Cdsect(cd):
+    fprintf(fd,"<![CDATA[%s]]>",cd);
+    break;
+  case Pi(&$(n,s)):
+    fprintf(fd,"<?%s%s?>",n,s);
+    break;
+  case Comment(c):
+    fprintf(fd,"<!--%s-->",c);
+    break;
+  }
+}
+
+void dumpContents(FILE @fd, list_t<content_t> cl) {
+  switch (cl) {
+  case null:
+    break;
+  case &List(c,null):
+    dumpContent(fd,c);
+    break;
+  case &List(hd,tl):
+    dumpContent(fd,hd);
+    dumpContents(fd,tl);
+    break;
+  }
+}
