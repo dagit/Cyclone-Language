@@ -316,11 +316,11 @@ bin/lib/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
   bin/cyclone$(EXE)
 	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
 
-bin/lib/cyc-lib/$(ARCH)/gc.a: gc/gc.a $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/gc.a: gc/.libs/libgc.a $(CYC_INCLUDE_H)
 	cp -p $< $@
 
-gc/gc.a:
-	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+gc/.libs/libgc.a:
+	$(MAKE) -C gc CC="$(CC)"
 
 # gc/gc.a:
 # 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"

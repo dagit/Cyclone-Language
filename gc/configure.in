@@ -22,7 +22,7 @@ AC_INIT(gc,6.2alpha4,Hans.Boehm@hp.com)
 AC_CONFIG_SRCDIR(gcj_mlc.c)
 AC_CANONICAL_TARGET 
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.4 $)
+AC_REVISION($Revision: 1.5 $)
 GC_SET_VERSION
 AM_INIT_AUTOMAKE
 
@@ -45,14 +45,16 @@ AM_MAINTAINER_MODE
 GC_CFLAGS=${gc_cflags}
 AC_SUBST(GC_CFLAGS)
 
-AC_ARG_ENABLE(threads, [  --enable-threads=TYPE   choose threading package],
-  THREADS=$enableval,
-  [ AC_MSG_CHECKING([for thread model used by GCC])
-    THREADS=`$CC -v 2>&1 | sed -n 's/^Thread model: //p'`
-    if test -z "$THREADS"; then
-      THREADS=no
-    fi
-    AC_MSG_RESULT([$THREADS])])
+dnl TJIM: we don't use threads with Cyclone
+THREADS=no
+dnl AC_ARG_ENABLE(threads, [  --enable-threads=TYPE   choose threading package],
+dnl   THREADS=$enableval,
+dnl   [ AC_MSG_CHECKING([for thread model used by GCC])
+dnl     THREADS=`$CC -v 2>&1 | sed -n 's/^Thread model: //p'`
+dnl     if test -z "$THREADS"; then
+dnl       THREADS=no
+dnl     fi
+dnl     AC_MSG_RESULT([$THREADS])])
 
 AC_ARG_ENABLE(parallel-mark,
 [  --enable-parallel-mark	parallelize marking and free list construction],
@@ -357,9 +359,13 @@ AC_DEFINE(NO_SIGNALS)
 AC_DEFINE(NO_EXECUTE_PERMISSION)
 AC_DEFINE(ALL_INTERIOR_POINTERS)
 
+dnl TJIM: for Cyclone
+AC_DEFINE(DONT_ADD_BYTE_AT_END)
+
+dnl TJIM: we don't need the Java stuff for Cyclone
 dnl By default, make the library as general as possible.
-AC_DEFINE(JAVA_FINALIZATION)
-AC_DEFINE(GC_GCJ_SUPPORT)
+dnl AC_DEFINE(JAVA_FINALIZATION)
+dnl AC_DEFINE(GC_GCJ_SUPPORT)
 AC_DEFINE(ATOMIC_UNCOLLECTABLE)
 
 dnl This is something of a hack.  When cross-compiling we turn off

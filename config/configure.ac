@@ -64,5 +64,9 @@ AC_C_WCHAR_T_UNSIGNED
 # The rest...
 AC_SET_MAKE
 AC_PROG_RANLIB
+
+# configure the garbage collector
+AC_CONFIG_SUBDIRS(gc)
+
 AC_CONFIG_FILES(Makefile.inc)
 AC_OUTPUT
