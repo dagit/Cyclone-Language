@@ -1646,21 +1646,23 @@ extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_raw_decl_t_rep;extern struct C
 Cyc__genrep_430;static struct Cyc_Typerep_Int_struct Cyc__genrep_5={0,0,32};extern
 struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_133;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_Vardecl_rep;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_scope_t_rep;
-static char _tmp187[7]="Static";static struct _tuple7 Cyc__gentuple_137={0,{_tmp187,
-_tmp187,_tmp187 + 7}};static char _tmp188[9]="Abstract";static struct _tuple7 Cyc__gentuple_138={
-1,{_tmp188,_tmp188,_tmp188 + 9}};static char _tmp189[7]="Public";static struct
-_tuple7 Cyc__gentuple_139={2,{_tmp189,_tmp189,_tmp189 + 7}};static char _tmp18A[7]="Extern";
-static struct _tuple7 Cyc__gentuple_140={3,{_tmp18A,_tmp18A,_tmp18A + 7}};static char
-_tmp18B[8]="ExternC";static struct _tuple7 Cyc__gentuple_141={4,{_tmp18B,_tmp18B,
-_tmp18B + 8}};static char _tmp18C[9]="Register";static struct _tuple7 Cyc__gentuple_142={
-5,{_tmp18C,_tmp18C,_tmp18C + 9}};static struct _tuple7*Cyc__genarr_143[6]={& Cyc__gentuple_137,&
-Cyc__gentuple_138,& Cyc__gentuple_139,& Cyc__gentuple_140,& Cyc__gentuple_141,& Cyc__gentuple_142};
+static char _tmp187[7]="Static";static struct _tuple7 Cyc__gentuple_137={0,(struct
+_tagged_arr){_tmp187,_tmp187,_tmp187 + 7}};static char _tmp188[9]="Abstract";static
+struct _tuple7 Cyc__gentuple_138={1,(struct _tagged_arr){_tmp188,_tmp188,_tmp188 + 9}};
+static char _tmp189[7]="Public";static struct _tuple7 Cyc__gentuple_139={2,(struct
+_tagged_arr){_tmp189,_tmp189,_tmp189 + 7}};static char _tmp18A[7]="Extern";static
+struct _tuple7 Cyc__gentuple_140={3,(struct _tagged_arr){_tmp18A,_tmp18A,_tmp18A + 7}};
+static char _tmp18B[8]="ExternC";static struct _tuple7 Cyc__gentuple_141={4,(struct
+_tagged_arr){_tmp18B,_tmp18B,_tmp18B + 8}};static char _tmp18C[9]="Register";static
+struct _tuple7 Cyc__gentuple_142={5,(struct _tagged_arr){_tmp18C,_tmp18C,_tmp18C + 9}};
+static struct _tuple7*Cyc__genarr_143[6]={& Cyc__gentuple_137,& Cyc__gentuple_138,&
+Cyc__gentuple_139,& Cyc__gentuple_140,& Cyc__gentuple_141,& Cyc__gentuple_142};
 static struct _tuple5*Cyc__genarr_144[0]={};static char _tmp18E[6]="Scope";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_scope_t_rep={5,{_tmp18E,_tmp18E,_tmp18E + 6},{(void*)((struct _tuple7**)
-Cyc__genarr_143),(void*)((struct _tuple7**)Cyc__genarr_143),(void*)((struct
-_tuple7**)Cyc__genarr_143 + 6)},{(void*)((struct _tuple5**)Cyc__genarr_144),(void*)((
-struct _tuple5**)Cyc__genarr_144),(void*)((struct _tuple5**)Cyc__genarr_144 + 0)}};
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_10;extern struct Cyc_Typerep_Tuple_struct
+Cyc_Absyn_scope_t_rep={5,(struct _tagged_arr){_tmp18E,_tmp18E,_tmp18E + 6},{(void*)((
+struct _tuple7**)Cyc__genarr_143),(void*)((struct _tuple7**)Cyc__genarr_143),(void*)((
+struct _tuple7**)Cyc__genarr_143 + 6)},{(void*)((struct _tuple5**)Cyc__genarr_144),(
+void*)((struct _tuple5**)Cyc__genarr_144),(void*)((struct _tuple5**)Cyc__genarr_144
++ 0)}};extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_10;extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_11;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_nmspace_t_rep;
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_17;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_18;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_var_t46H2_rep;
@@ -1668,12 +1670,13 @@ extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_12;extern struct Cyc_Typere
 Cyc__genrep_13;static struct Cyc_Typerep_Int_struct Cyc__genrep_14={0,0,8};static
 struct Cyc_Typerep_FatPtr_struct Cyc__genrep_13={2,(void*)((void*)& Cyc__genrep_14)};
 static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_12={1,1,(void*)((void*)& Cyc__genrep_13)};
-static char _tmp192[5]="List";static struct _tagged_arr Cyc__genname_22={_tmp192,
-_tmp192,_tmp192 + 5};static char _tmp193[3]="hd";static struct _tuple5 Cyc__gentuple_19={
-offsetof(struct Cyc_List_List,hd),{_tmp193,_tmp193,_tmp193 + 3},(void*)& Cyc__genrep_12};
-static char _tmp194[3]="tl";static struct _tuple5 Cyc__gentuple_20={offsetof(struct
-Cyc_List_List,tl),{_tmp194,_tmp194,_tmp194 + 3},(void*)& Cyc__genrep_18};static
-struct _tuple5*Cyc__genarr_21[2]={& Cyc__gentuple_19,& Cyc__gentuple_20};struct Cyc_Typerep_Struct_struct
+static char _tmp192[5]="List";static struct _tagged_arr Cyc__genname_22=(struct
+_tagged_arr){_tmp192,_tmp192,_tmp192 + 5};static char _tmp193[3]="hd";static struct
+_tuple5 Cyc__gentuple_19={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp193,_tmp193,_tmp193 + 3},(void*)& Cyc__genrep_12};static char _tmp194[3]="tl";
+static struct _tuple5 Cyc__gentuple_20={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp194,_tmp194,_tmp194 + 3},(void*)& Cyc__genrep_18};static struct
+_tuple5*Cyc__genarr_21[2]={& Cyc__gentuple_19,& Cyc__gentuple_20};struct Cyc_Typerep_Struct_struct
 Cyc_struct_List_List0Absyn_var_t46H2_rep={3,(struct _tagged_arr*)& Cyc__genname_22,
 sizeof(struct Cyc_List_List),{(void*)((struct _tuple5**)Cyc__genarr_21),(void*)((
 struct _tuple5**)Cyc__genarr_21),(void*)((struct _tuple5**)Cyc__genarr_21 + 2)}};
@@ -1684,17 +1687,18 @@ offsetof(struct _tuple13,f2),(void*)& Cyc__genrep_18};static struct _tuple6*Cyc_
 2]={& Cyc__gentuple_23,& Cyc__gentuple_24};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_17={
 4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_25),(void*)((
 struct _tuple6**)Cyc__genarr_25),(void*)((struct _tuple6**)Cyc__genarr_25 + 2)}};
-static char _tmp198[6]="Loc_n";static struct _tuple7 Cyc__gentuple_15={0,{_tmp198,
-_tmp198,_tmp198 + 6}};static struct _tuple7*Cyc__genarr_16[1]={& Cyc__gentuple_15};
-static char _tmp199[6]="Rel_n";static struct _tuple5 Cyc__gentuple_26={0,{_tmp199,
-_tmp199,_tmp199 + 6},(void*)& Cyc__genrep_17};static char _tmp19A[6]="Abs_n";static
-struct _tuple5 Cyc__gentuple_27={1,{_tmp19A,_tmp19A,_tmp19A + 6},(void*)& Cyc__genrep_17};
-static struct _tuple5*Cyc__genarr_28[2]={& Cyc__gentuple_26,& Cyc__gentuple_27};
-static char _tmp19C[8]="Nmspace";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_nmspace_t_rep={
-5,{_tmp19C,_tmp19C,_tmp19C + 8},{(void*)((struct _tuple7**)Cyc__genarr_16),(void*)((
-struct _tuple7**)Cyc__genarr_16),(void*)((struct _tuple7**)Cyc__genarr_16 + 1)},{(
-void*)((struct _tuple5**)Cyc__genarr_28),(void*)((struct _tuple5**)Cyc__genarr_28),(
-void*)((struct _tuple5**)Cyc__genarr_28 + 2)}};static struct _tuple6 Cyc__gentuple_29={
+static char _tmp198[6]="Loc_n";static struct _tuple7 Cyc__gentuple_15={0,(struct
+_tagged_arr){_tmp198,_tmp198,_tmp198 + 6}};static struct _tuple7*Cyc__genarr_16[1]={&
+Cyc__gentuple_15};static char _tmp199[6]="Rel_n";static struct _tuple5 Cyc__gentuple_26={
+0,(struct _tagged_arr){_tmp199,_tmp199,_tmp199 + 6},(void*)& Cyc__genrep_17};static
+char _tmp19A[6]="Abs_n";static struct _tuple5 Cyc__gentuple_27={1,(struct _tagged_arr){
+_tmp19A,_tmp19A,_tmp19A + 6},(void*)& Cyc__genrep_17};static struct _tuple5*Cyc__genarr_28[
+2]={& Cyc__gentuple_26,& Cyc__gentuple_27};static char _tmp19C[8]="Nmspace";struct
+Cyc_Typerep_TUnion_struct Cyc_Absyn_nmspace_t_rep={5,(struct _tagged_arr){_tmp19C,
+_tmp19C,_tmp19C + 8},{(void*)((struct _tuple7**)Cyc__genarr_16),(void*)((struct
+_tuple7**)Cyc__genarr_16),(void*)((struct _tuple7**)Cyc__genarr_16 + 1)},{(void*)((
+struct _tuple5**)Cyc__genarr_28),(void*)((struct _tuple5**)Cyc__genarr_28),(void*)((
+struct _tuple5**)Cyc__genarr_28 + 2)}};static struct _tuple6 Cyc__gentuple_29={
 offsetof(struct _tuple0,f1),(void*)& Cyc_Absyn_nmspace_t_rep};static struct _tuple6
 Cyc__gentuple_30={offsetof(struct _tuple0,f2),(void*)& Cyc__genrep_12};static
 struct _tuple6*Cyc__genarr_31[2]={& Cyc__gentuple_29,& Cyc__gentuple_30};static
@@ -1711,34 +1715,37 @@ extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_type_t_rep;extern struct Cyc_T
 Cyc__genrep_1085;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1090;extern
 struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_kind_t2_rep;extern
 struct Cyc_Typerep_TUnion_struct Cyc_Absyn_kind_t_rep;static char _tmp1A0[8]="AnyKind";
-static struct _tuple7 Cyc__gentuple_188={0,{_tmp1A0,_tmp1A0,_tmp1A0 + 8}};static char
-_tmp1A1[8]="MemKind";static struct _tuple7 Cyc__gentuple_189={1,{_tmp1A1,_tmp1A1,
-_tmp1A1 + 8}};static char _tmp1A2[8]="BoxKind";static struct _tuple7 Cyc__gentuple_190={
-2,{_tmp1A2,_tmp1A2,_tmp1A2 + 8}};static char _tmp1A3[8]="RgnKind";static struct
-_tuple7 Cyc__gentuple_191={3,{_tmp1A3,_tmp1A3,_tmp1A3 + 8}};static char _tmp1A4[8]="EffKind";
-static struct _tuple7 Cyc__gentuple_192={4,{_tmp1A4,_tmp1A4,_tmp1A4 + 8}};static char
-_tmp1A5[8]="IntKind";static struct _tuple7 Cyc__gentuple_193={5,{_tmp1A5,_tmp1A5,
-_tmp1A5 + 8}};static struct _tuple7*Cyc__genarr_194[6]={& Cyc__gentuple_188,& Cyc__gentuple_189,&
-Cyc__gentuple_190,& Cyc__gentuple_191,& Cyc__gentuple_192,& Cyc__gentuple_193};
-static struct _tuple5*Cyc__genarr_195[0]={};static char _tmp1A7[5]="Kind";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_kind_t_rep={5,{_tmp1A7,_tmp1A7,_tmp1A7 + 5},{(void*)((struct _tuple7**)
-Cyc__genarr_194),(void*)((struct _tuple7**)Cyc__genarr_194),(void*)((struct
-_tuple7**)Cyc__genarr_194 + 6)},{(void*)((struct _tuple5**)Cyc__genarr_195),(void*)((
-struct _tuple5**)Cyc__genarr_195),(void*)((struct _tuple5**)Cyc__genarr_195 + 0)}};
-static char _tmp1A8[4]="Opt";static struct _tagged_arr Cyc__genname_1093={_tmp1A8,
-_tmp1A8,_tmp1A8 + 4};static char _tmp1A9[2]="v";static struct _tuple5 Cyc__gentuple_1091={
-offsetof(struct Cyc_Core_Opt,v),{_tmp1A9,_tmp1A9,_tmp1A9 + 2},(void*)& Cyc_Absyn_kind_t_rep};
-static struct _tuple5*Cyc__genarr_1092[1]={& Cyc__gentuple_1091};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_kind_t2_rep={3,(struct _tagged_arr*)& Cyc__genname_1093,
-sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_1092),(void*)((
-struct _tuple5**)Cyc__genarr_1092),(void*)((struct _tuple5**)Cyc__genarr_1092 + 1)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1090={1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_kind_t2_rep)};
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_43;extern struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_type_t2_rep;static char _tmp1AC[4]="Opt";static struct
-_tagged_arr Cyc__genname_1125={_tmp1AC,_tmp1AC,_tmp1AC + 4};static char _tmp1AD[2]="v";
-static struct _tuple5 Cyc__gentuple_1123={offsetof(struct Cyc_Core_Opt,v),{_tmp1AD,
-_tmp1AD,_tmp1AD + 2},(void*)& Cyc_Absyn_type_t_rep};static struct _tuple5*Cyc__genarr_1124[
-1]={& Cyc__gentuple_1123};struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_type_t2_rep={
+static struct _tuple7 Cyc__gentuple_188={0,(struct _tagged_arr){_tmp1A0,_tmp1A0,
+_tmp1A0 + 8}};static char _tmp1A1[8]="MemKind";static struct _tuple7 Cyc__gentuple_189={
+1,(struct _tagged_arr){_tmp1A1,_tmp1A1,_tmp1A1 + 8}};static char _tmp1A2[8]="BoxKind";
+static struct _tuple7 Cyc__gentuple_190={2,(struct _tagged_arr){_tmp1A2,_tmp1A2,
+_tmp1A2 + 8}};static char _tmp1A3[8]="RgnKind";static struct _tuple7 Cyc__gentuple_191={
+3,(struct _tagged_arr){_tmp1A3,_tmp1A3,_tmp1A3 + 8}};static char _tmp1A4[8]="EffKind";
+static struct _tuple7 Cyc__gentuple_192={4,(struct _tagged_arr){_tmp1A4,_tmp1A4,
+_tmp1A4 + 8}};static char _tmp1A5[8]="IntKind";static struct _tuple7 Cyc__gentuple_193={
+5,(struct _tagged_arr){_tmp1A5,_tmp1A5,_tmp1A5 + 8}};static struct _tuple7*Cyc__genarr_194[
+6]={& Cyc__gentuple_188,& Cyc__gentuple_189,& Cyc__gentuple_190,& Cyc__gentuple_191,&
+Cyc__gentuple_192,& Cyc__gentuple_193};static struct _tuple5*Cyc__genarr_195[0]={};
+static char _tmp1A7[5]="Kind";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_kind_t_rep={
+5,(struct _tagged_arr){_tmp1A7,_tmp1A7,_tmp1A7 + 5},{(void*)((struct _tuple7**)Cyc__genarr_194),(
+void*)((struct _tuple7**)Cyc__genarr_194),(void*)((struct _tuple7**)Cyc__genarr_194
++ 6)},{(void*)((struct _tuple5**)Cyc__genarr_195),(void*)((struct _tuple5**)Cyc__genarr_195),(
+void*)((struct _tuple5**)Cyc__genarr_195 + 0)}};static char _tmp1A8[4]="Opt";static
+struct _tagged_arr Cyc__genname_1093=(struct _tagged_arr){_tmp1A8,_tmp1A8,_tmp1A8 + 
+4};static char _tmp1A9[2]="v";static struct _tuple5 Cyc__gentuple_1091={offsetof(
+struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp1A9,_tmp1A9,_tmp1A9 + 2},(void*)&
+Cyc_Absyn_kind_t_rep};static struct _tuple5*Cyc__genarr_1092[1]={& Cyc__gentuple_1091};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_kind_t2_rep={3,(struct
+_tagged_arr*)& Cyc__genname_1093,sizeof(struct Cyc_Core_Opt),{(void*)((struct
+_tuple5**)Cyc__genarr_1092),(void*)((struct _tuple5**)Cyc__genarr_1092),(void*)((
+struct _tuple5**)Cyc__genarr_1092 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1090={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_kind_t2_rep)};extern struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_43;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_type_t2_rep;
+static char _tmp1AC[4]="Opt";static struct _tagged_arr Cyc__genname_1125=(struct
+_tagged_arr){_tmp1AC,_tmp1AC,_tmp1AC + 4};static char _tmp1AD[2]="v";static struct
+_tuple5 Cyc__gentuple_1123={offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){
+_tmp1AD,_tmp1AD,_tmp1AD + 2},(void*)& Cyc_Absyn_type_t_rep};static struct _tuple5*
+Cyc__genarr_1124[1]={& Cyc__gentuple_1123};struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_type_t2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_1125,sizeof(struct Cyc_Core_Opt),{(void*)((
 struct _tuple5**)Cyc__genarr_1124),(void*)((struct _tuple5**)Cyc__genarr_1124),(
 void*)((struct _tuple5**)Cyc__genarr_1124 + 1)}};static struct Cyc_Typerep_ThinPtr_struct
@@ -1759,15 +1766,16 @@ void*)((struct _tuple6**)Cyc__genarr_211),(void*)((struct _tuple6**)Cyc__genarr_
 void*)((struct _tuple6**)Cyc__genarr_211 + 2)}};extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_204;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_196;extern
 struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_kindbound_t2_rep;static
-char _tmp1B3[4]="Opt";static struct _tagged_arr Cyc__genname_199={_tmp1B3,_tmp1B3,
-_tmp1B3 + 4};static char _tmp1B4[2]="v";static struct _tuple5 Cyc__gentuple_197={
-offsetof(struct Cyc_Core_Opt,v),{_tmp1B4,_tmp1B4,_tmp1B4 + 2},(void*)& Cyc_Absyn_kindbound_t_rep};
-static struct _tuple5*Cyc__genarr_198[1]={& Cyc__gentuple_197};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_kindbound_t2_rep={3,(struct _tagged_arr*)& Cyc__genname_199,
-sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_198),(void*)((
-struct _tuple5**)Cyc__genarr_198),(void*)((struct _tuple5**)Cyc__genarr_198 + 1)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_196={1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_kindbound_t2_rep)};
-struct _tuple15{unsigned int f1;struct Cyc_Core_Opt*f2;};static struct _tuple6 Cyc__gentuple_205={
+char _tmp1B3[4]="Opt";static struct _tagged_arr Cyc__genname_199=(struct _tagged_arr){
+_tmp1B3,_tmp1B3,_tmp1B3 + 4};static char _tmp1B4[2]="v";static struct _tuple5 Cyc__gentuple_197={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp1B4,_tmp1B4,_tmp1B4 + 2},(
+void*)& Cyc_Absyn_kindbound_t_rep};static struct _tuple5*Cyc__genarr_198[1]={& Cyc__gentuple_197};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_kindbound_t2_rep={3,(
+struct _tagged_arr*)& Cyc__genname_199,sizeof(struct Cyc_Core_Opt),{(void*)((struct
+_tuple5**)Cyc__genarr_198),(void*)((struct _tuple5**)Cyc__genarr_198),(void*)((
+struct _tuple5**)Cyc__genarr_198 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_196={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_kindbound_t2_rep)};struct _tuple15{
+unsigned int f1;struct Cyc_Core_Opt*f2;};static struct _tuple6 Cyc__gentuple_205={
 offsetof(struct _tuple15,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_206={
 offsetof(struct _tuple15,f2),(void*)& Cyc__genrep_196};static struct _tuple6*Cyc__genarr_207[
 2]={& Cyc__gentuple_205,& Cyc__gentuple_206};static struct Cyc_Typerep_Tuple_struct
@@ -1782,23 +1790,25 @@ Cyc__genarr_203[3]={& Cyc__gentuple_200,& Cyc__gentuple_201,& Cyc__gentuple_202}
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_187={4,sizeof(struct _tuple16),{(
 void*)((struct _tuple6**)Cyc__genarr_203),(void*)((struct _tuple6**)Cyc__genarr_203),(
 void*)((struct _tuple6**)Cyc__genarr_203 + 3)}};static struct _tuple7*Cyc__genarr_186[
-0]={};static char _tmp1B9[6]="Eq_kb";static struct _tuple5 Cyc__gentuple_212={0,{
-_tmp1B9,_tmp1B9,_tmp1B9 + 6},(void*)& Cyc__genrep_208};static char _tmp1BA[11]="Unknown_kb";
-static struct _tuple5 Cyc__gentuple_213={1,{_tmp1BA,_tmp1BA,_tmp1BA + 11},(void*)&
-Cyc__genrep_204};static char _tmp1BB[8]="Less_kb";static struct _tuple5 Cyc__gentuple_214={
-2,{_tmp1BB,_tmp1BB,_tmp1BB + 8},(void*)& Cyc__genrep_187};static struct _tuple5*Cyc__genarr_215[
+0]={};static char _tmp1B9[6]="Eq_kb";static struct _tuple5 Cyc__gentuple_212={0,(
+struct _tagged_arr){_tmp1B9,_tmp1B9,_tmp1B9 + 6},(void*)& Cyc__genrep_208};static
+char _tmp1BA[11]="Unknown_kb";static struct _tuple5 Cyc__gentuple_213={1,(struct
+_tagged_arr){_tmp1BA,_tmp1BA,_tmp1BA + 11},(void*)& Cyc__genrep_204};static char
+_tmp1BB[8]="Less_kb";static struct _tuple5 Cyc__gentuple_214={2,(struct _tagged_arr){
+_tmp1BB,_tmp1BB,_tmp1BB + 8},(void*)& Cyc__genrep_187};static struct _tuple5*Cyc__genarr_215[
 3]={& Cyc__gentuple_212,& Cyc__gentuple_213,& Cyc__gentuple_214};static char _tmp1BD[
-10]="KindBound";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_kindbound_t_rep={5,{
-_tmp1BD,_tmp1BD,_tmp1BD + 10},{(void*)((struct _tuple7**)Cyc__genarr_186),(void*)((
-struct _tuple7**)Cyc__genarr_186),(void*)((struct _tuple7**)Cyc__genarr_186 + 0)},{(
-void*)((struct _tuple5**)Cyc__genarr_215),(void*)((struct _tuple5**)Cyc__genarr_215),(
+10]="KindBound";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_kindbound_t_rep={5,(
+struct _tagged_arr){_tmp1BD,_tmp1BD,_tmp1BD + 10},{(void*)((struct _tuple7**)Cyc__genarr_186),(
+void*)((struct _tuple7**)Cyc__genarr_186),(void*)((struct _tuple7**)Cyc__genarr_186
++ 0)},{(void*)((struct _tuple5**)Cyc__genarr_215),(void*)((struct _tuple5**)Cyc__genarr_215),(
 void*)((struct _tuple5**)Cyc__genarr_215 + 3)}};static char _tmp1BE[5]="Tvar";static
-struct _tagged_arr Cyc__genname_221={_tmp1BE,_tmp1BE,_tmp1BE + 5};static char _tmp1BF[
-5]="name";static struct _tuple5 Cyc__gentuple_217={offsetof(struct Cyc_Absyn_Tvar,name),{
-_tmp1BF,_tmp1BF,_tmp1BF + 5},(void*)& Cyc__genrep_12};static char _tmp1C0[9]="identity";
-static struct _tuple5 Cyc__gentuple_218={offsetof(struct Cyc_Absyn_Tvar,identity),{
-_tmp1C0,_tmp1C0,_tmp1C0 + 9},(void*)& Cyc__genrep_216};static char _tmp1C1[5]="kind";
-static struct _tuple5 Cyc__gentuple_219={offsetof(struct Cyc_Absyn_Tvar,kind),{
+struct _tagged_arr Cyc__genname_221=(struct _tagged_arr){_tmp1BE,_tmp1BE,_tmp1BE + 5};
+static char _tmp1BF[5]="name";static struct _tuple5 Cyc__gentuple_217={offsetof(
+struct Cyc_Absyn_Tvar,name),(struct _tagged_arr){_tmp1BF,_tmp1BF,_tmp1BF + 5},(void*)&
+Cyc__genrep_12};static char _tmp1C0[9]="identity";static struct _tuple5 Cyc__gentuple_218={
+offsetof(struct Cyc_Absyn_Tvar,identity),(struct _tagged_arr){_tmp1C0,_tmp1C0,
+_tmp1C0 + 9},(void*)& Cyc__genrep_216};static char _tmp1C1[5]="kind";static struct
+_tuple5 Cyc__gentuple_219={offsetof(struct Cyc_Absyn_Tvar,kind),(struct _tagged_arr){
 _tmp1C1,_tmp1C1,_tmp1C1 + 5},(void*)& Cyc_Absyn_kindbound_t_rep};static struct
 _tuple5*Cyc__genarr_220[3]={& Cyc__gentuple_217,& Cyc__gentuple_218,& Cyc__gentuple_219};
 struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Tvar_rep={3,(struct _tagged_arr*)&
@@ -1806,30 +1816,31 @@ Cyc__genname_221,sizeof(struct Cyc_Absyn_Tvar),{(void*)((struct _tuple5**)Cyc__g
 void*)((struct _tuple5**)Cyc__genarr_220),(void*)((struct _tuple5**)Cyc__genarr_220
 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_185={1,1,(void*)((void*)&
 Cyc_struct_Absyn_Tvar_rep)};static char _tmp1C4[5]="List";static struct _tagged_arr
-Cyc__genname_315={_tmp1C4,_tmp1C4,_tmp1C4 + 5};static char _tmp1C5[3]="hd";static
-struct _tuple5 Cyc__gentuple_312={offsetof(struct Cyc_List_List,hd),{_tmp1C5,
-_tmp1C5,_tmp1C5 + 3},(void*)& Cyc__genrep_185};static char _tmp1C6[3]="tl";static
-struct _tuple5 Cyc__gentuple_313={offsetof(struct Cyc_List_List,tl),{_tmp1C6,
-_tmp1C6,_tmp1C6 + 3},(void*)& Cyc__genrep_311};static struct _tuple5*Cyc__genarr_314[
-2]={& Cyc__gentuple_312,& Cyc__gentuple_313};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_tvar_t46H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_315,sizeof(struct Cyc_List_List),{(void*)((
-struct _tuple5**)Cyc__genarr_314),(void*)((struct _tuple5**)Cyc__genarr_314),(void*)((
+Cyc__genname_315=(struct _tagged_arr){_tmp1C4,_tmp1C4,_tmp1C4 + 5};static char
+_tmp1C5[3]="hd";static struct _tuple5 Cyc__gentuple_312={offsetof(struct Cyc_List_List,hd),(
+struct _tagged_arr){_tmp1C5,_tmp1C5,_tmp1C5 + 3},(void*)& Cyc__genrep_185};static
+char _tmp1C6[3]="tl";static struct _tuple5 Cyc__gentuple_313={offsetof(struct Cyc_List_List,tl),(
+struct _tagged_arr){_tmp1C6,_tmp1C6,_tmp1C6 + 3},(void*)& Cyc__genrep_311};static
+struct _tuple5*Cyc__genarr_314[2]={& Cyc__gentuple_312,& Cyc__gentuple_313};struct
+Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_tvar_t46H2_rep={3,(struct
+_tagged_arr*)& Cyc__genname_315,sizeof(struct Cyc_List_List),{(void*)((struct
+_tuple5**)Cyc__genarr_314),(void*)((struct _tuple5**)Cyc__genarr_314),(void*)((
 struct _tuple5**)Cyc__genarr_314 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_311={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_tvar_t46H2_rep)};static char
-_tmp1C9[4]="Opt";static struct _tagged_arr Cyc__genname_1089={_tmp1C9,_tmp1C9,
-_tmp1C9 + 4};static char _tmp1CA[2]="v";static struct _tuple5 Cyc__gentuple_1087={
-offsetof(struct Cyc_Core_Opt,v),{_tmp1CA,_tmp1CA,_tmp1CA + 2},(void*)& Cyc__genrep_311};
-static struct _tuple5*Cyc__genarr_1088[1]={& Cyc__gentuple_1087};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0List_list_t0Absyn_tvar_t46H22_rep={3,(struct _tagged_arr*)&
-Cyc__genname_1089,sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_1088),(
-void*)((struct _tuple5**)Cyc__genarr_1088),(void*)((struct _tuple5**)Cyc__genarr_1088
-+ 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1086={1,1,(void*)((void*)&
-Cyc_struct_Core_Opt0List_list_t0Absyn_tvar_t46H22_rep)};struct _tuple17{
-unsigned int f1;struct Cyc_Core_Opt*f2;struct Cyc_Core_Opt*f3;int f4;struct Cyc_Core_Opt*
-f5;};static struct _tuple6 Cyc__gentuple_1094={offsetof(struct _tuple17,f1),(void*)&
-Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1095={offsetof(struct _tuple17,f2),(
-void*)& Cyc__genrep_1090};static struct _tuple6 Cyc__gentuple_1096={offsetof(struct
-_tuple17,f3),(void*)& Cyc__genrep_43};static struct _tuple6 Cyc__gentuple_1097={
+_tmp1C9[4]="Opt";static struct _tagged_arr Cyc__genname_1089=(struct _tagged_arr){
+_tmp1C9,_tmp1C9,_tmp1C9 + 4};static char _tmp1CA[2]="v";static struct _tuple5 Cyc__gentuple_1087={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp1CA,_tmp1CA,_tmp1CA + 2},(
+void*)& Cyc__genrep_311};static struct _tuple5*Cyc__genarr_1088[1]={& Cyc__gentuple_1087};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0List_list_t0Absyn_tvar_t46H22_rep={
+3,(struct _tagged_arr*)& Cyc__genname_1089,sizeof(struct Cyc_Core_Opt),{(void*)((
+struct _tuple5**)Cyc__genarr_1088),(void*)((struct _tuple5**)Cyc__genarr_1088),(
+void*)((struct _tuple5**)Cyc__genarr_1088 + 1)}};static struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_1086={1,1,(void*)((void*)& Cyc_struct_Core_Opt0List_list_t0Absyn_tvar_t46H22_rep)};
+struct _tuple17{unsigned int f1;struct Cyc_Core_Opt*f2;struct Cyc_Core_Opt*f3;int f4;
+struct Cyc_Core_Opt*f5;};static struct _tuple6 Cyc__gentuple_1094={offsetof(struct
+_tuple17,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1095={
+offsetof(struct _tuple17,f2),(void*)& Cyc__genrep_1090};static struct _tuple6 Cyc__gentuple_1096={
+offsetof(struct _tuple17,f3),(void*)& Cyc__genrep_43};static struct _tuple6 Cyc__gentuple_1097={
 offsetof(struct _tuple17,f4),(void*)((void*)& Cyc__genrep_62)};static struct _tuple6
 Cyc__gentuple_1098={offsetof(struct _tuple17,f5),(void*)& Cyc__genrep_1086};static
 struct _tuple6*Cyc__genarr_1099[5]={& Cyc__gentuple_1094,& Cyc__gentuple_1095,& Cyc__gentuple_1096,&
@@ -1847,18 +1858,20 @@ void*)((struct _tuple6**)Cyc__genarr_1084),(void*)((struct _tuple6**)Cyc__genarr
 Cyc_Absyn_tunion_info_t_rep;extern struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionInfoU_rep;
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_1062;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_UnknownTunionInfo_rep;static char _tmp1CF[18]="UnknownTunionInfo";
-static struct _tagged_arr Cyc__genname_1066={_tmp1CF,_tmp1CF,_tmp1CF + 18};static
-char _tmp1D0[5]="name";static struct _tuple5 Cyc__gentuple_1063={offsetof(struct Cyc_Absyn_UnknownTunionInfo,name),{
-_tmp1D0,_tmp1D0,_tmp1D0 + 5},(void*)& Cyc__genrep_10};static char _tmp1D1[11]="is_xtunion";
-static struct _tuple5 Cyc__gentuple_1064={offsetof(struct Cyc_Absyn_UnknownTunionInfo,is_xtunion),{
-_tmp1D1,_tmp1D1,_tmp1D1 + 11},(void*)((void*)& Cyc__genrep_62)};static struct
-_tuple5*Cyc__genarr_1065[2]={& Cyc__gentuple_1063,& Cyc__gentuple_1064};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_UnknownTunionInfo_rep={3,(struct _tagged_arr*)& Cyc__genname_1066,
-sizeof(struct Cyc_Absyn_UnknownTunionInfo),{(void*)((struct _tuple5**)Cyc__genarr_1065),(
-void*)((struct _tuple5**)Cyc__genarr_1065),(void*)((struct _tuple5**)Cyc__genarr_1065
-+ 2)}};struct _tuple19{unsigned int f1;struct Cyc_Absyn_UnknownTunionInfo f2;};
-static struct _tuple6 Cyc__gentuple_1067={offsetof(struct _tuple19,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_1068={offsetof(struct _tuple19,f2),(void*)& Cyc_struct_Absyn_UnknownTunionInfo_rep};
+static struct _tagged_arr Cyc__genname_1066=(struct _tagged_arr){_tmp1CF,_tmp1CF,
+_tmp1CF + 18};static char _tmp1D0[5]="name";static struct _tuple5 Cyc__gentuple_1063={
+offsetof(struct Cyc_Absyn_UnknownTunionInfo,name),(struct _tagged_arr){_tmp1D0,
+_tmp1D0,_tmp1D0 + 5},(void*)& Cyc__genrep_10};static char _tmp1D1[11]="is_xtunion";
+static struct _tuple5 Cyc__gentuple_1064={offsetof(struct Cyc_Absyn_UnknownTunionInfo,is_xtunion),(
+struct _tagged_arr){_tmp1D1,_tmp1D1,_tmp1D1 + 11},(void*)((void*)& Cyc__genrep_62)};
+static struct _tuple5*Cyc__genarr_1065[2]={& Cyc__gentuple_1063,& Cyc__gentuple_1064};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_UnknownTunionInfo_rep={3,(struct
+_tagged_arr*)& Cyc__genname_1066,sizeof(struct Cyc_Absyn_UnknownTunionInfo),{(void*)((
+struct _tuple5**)Cyc__genarr_1065),(void*)((struct _tuple5**)Cyc__genarr_1065),(
+void*)((struct _tuple5**)Cyc__genarr_1065 + 2)}};struct _tuple19{unsigned int f1;
+struct Cyc_Absyn_UnknownTunionInfo f2;};static struct _tuple6 Cyc__gentuple_1067={
+offsetof(struct _tuple19,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1068={
+offsetof(struct _tuple19,f2),(void*)& Cyc_struct_Absyn_UnknownTunionInfo_rep};
 static struct _tuple6*Cyc__genarr_1069[2]={& Cyc__gentuple_1067,& Cyc__gentuple_1068};
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1062={4,sizeof(struct _tuple19),{(
 void*)((struct _tuple6**)Cyc__genarr_1069),(void*)((struct _tuple6**)Cyc__genarr_1069),(
@@ -1880,141 +1893,146 @@ Cyc__gentuple_289};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_287={4,
 sizeof(struct _tuple3),{(void*)((struct _tuple6**)Cyc__genarr_290),(void*)((struct
 _tuple6**)Cyc__genarr_290),(void*)((struct _tuple6**)Cyc__genarr_290 + 2)}};static
 struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_286={1,1,(void*)((void*)& Cyc__genrep_287)};
-static char _tmp1D6[5]="List";static struct _tagged_arr Cyc__genname_294={_tmp1D6,
-_tmp1D6,_tmp1D6 + 5};static char _tmp1D7[3]="hd";static struct _tuple5 Cyc__gentuple_291={
-offsetof(struct Cyc_List_List,hd),{_tmp1D7,_tmp1D7,_tmp1D7 + 3},(void*)& Cyc__genrep_286};
-static char _tmp1D8[3]="tl";static struct _tuple5 Cyc__gentuple_292={offsetof(struct
-Cyc_List_List,tl),{_tmp1D8,_tmp1D8,_tmp1D8 + 3},(void*)& Cyc__genrep_285};static
-struct _tuple5*Cyc__genarr_293[2]={& Cyc__gentuple_291,& Cyc__gentuple_292};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List060Absyn_tqual_t4Absyn_type_t1_446H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_294,sizeof(struct Cyc_List_List),{(void*)((
-struct _tuple5**)Cyc__genarr_293),(void*)((struct _tuple5**)Cyc__genarr_293),(void*)((
+static char _tmp1D6[5]="List";static struct _tagged_arr Cyc__genname_294=(struct
+_tagged_arr){_tmp1D6,_tmp1D6,_tmp1D6 + 5};static char _tmp1D7[3]="hd";static struct
+_tuple5 Cyc__gentuple_291={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp1D7,_tmp1D7,_tmp1D7 + 3},(void*)& Cyc__genrep_286};static char _tmp1D8[3]="tl";
+static struct _tuple5 Cyc__gentuple_292={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp1D8,_tmp1D8,_tmp1D8 + 3},(void*)& Cyc__genrep_285};static struct
+_tuple5*Cyc__genarr_293[2]={& Cyc__gentuple_291,& Cyc__gentuple_292};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List060Absyn_tqual_t4Absyn_type_t1_446H2_rep={3,(struct
+_tagged_arr*)& Cyc__genname_294,sizeof(struct Cyc_List_List),{(void*)((struct
+_tuple5**)Cyc__genarr_293),(void*)((struct _tuple5**)Cyc__genarr_293),(void*)((
 struct _tuple5**)Cyc__genarr_293 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_285={
 1,1,(void*)((void*)& Cyc_struct_List_List060Absyn_tqual_t4Absyn_type_t1_446H2_rep)};
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_2;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Position_Segment_rep;static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_2={
 1,1,(void*)((void*)& Cyc_struct_Position_Segment_rep)};static char _tmp1DC[12]="Tunionfield";
-static struct _tagged_arr Cyc__genname_300={_tmp1DC,_tmp1DC,_tmp1DC + 12};static char
-_tmp1DD[5]="name";static struct _tuple5 Cyc__gentuple_295={offsetof(struct Cyc_Absyn_Tunionfield,name),{
-_tmp1DD,_tmp1DD,_tmp1DD + 5},(void*)& Cyc__genrep_10};static char _tmp1DE[5]="typs";
-static struct _tuple5 Cyc__gentuple_296={offsetof(struct Cyc_Absyn_Tunionfield,typs),{
-_tmp1DE,_tmp1DE,_tmp1DE + 5},(void*)& Cyc__genrep_285};static char _tmp1DF[4]="loc";
-static struct _tuple5 Cyc__gentuple_297={offsetof(struct Cyc_Absyn_Tunionfield,loc),{
-_tmp1DF,_tmp1DF,_tmp1DF + 4},(void*)& Cyc__genrep_2};static char _tmp1E0[3]="sc";
-static struct _tuple5 Cyc__gentuple_298={offsetof(struct Cyc_Absyn_Tunionfield,sc),{
-_tmp1E0,_tmp1E0,_tmp1E0 + 3},(void*)& Cyc_Absyn_scope_t_rep};static struct _tuple5*
-Cyc__genarr_299[4]={& Cyc__gentuple_295,& Cyc__gentuple_296,& Cyc__gentuple_297,&
-Cyc__gentuple_298};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Tunionfield_rep={
+static struct _tagged_arr Cyc__genname_300=(struct _tagged_arr){_tmp1DC,_tmp1DC,
+_tmp1DC + 12};static char _tmp1DD[5]="name";static struct _tuple5 Cyc__gentuple_295={
+offsetof(struct Cyc_Absyn_Tunionfield,name),(struct _tagged_arr){_tmp1DD,_tmp1DD,
+_tmp1DD + 5},(void*)& Cyc__genrep_10};static char _tmp1DE[5]="typs";static struct
+_tuple5 Cyc__gentuple_296={offsetof(struct Cyc_Absyn_Tunionfield,typs),(struct
+_tagged_arr){_tmp1DE,_tmp1DE,_tmp1DE + 5},(void*)& Cyc__genrep_285};static char
+_tmp1DF[4]="loc";static struct _tuple5 Cyc__gentuple_297={offsetof(struct Cyc_Absyn_Tunionfield,loc),(
+struct _tagged_arr){_tmp1DF,_tmp1DF,_tmp1DF + 4},(void*)& Cyc__genrep_2};static char
+_tmp1E0[3]="sc";static struct _tuple5 Cyc__gentuple_298={offsetof(struct Cyc_Absyn_Tunionfield,sc),(
+struct _tagged_arr){_tmp1E0,_tmp1E0,_tmp1E0 + 3},(void*)& Cyc_Absyn_scope_t_rep};
+static struct _tuple5*Cyc__genarr_299[4]={& Cyc__gentuple_295,& Cyc__gentuple_296,&
+Cyc__gentuple_297,& Cyc__gentuple_298};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Tunionfield_rep={
 3,(struct _tagged_arr*)& Cyc__genname_300,sizeof(struct Cyc_Absyn_Tunionfield),{(
 void*)((struct _tuple5**)Cyc__genarr_299),(void*)((struct _tuple5**)Cyc__genarr_299),(
 void*)((struct _tuple5**)Cyc__genarr_299 + 4)}};static struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_284={1,1,(void*)((void*)& Cyc_struct_Absyn_Tunionfield_rep)};static
-char _tmp1E3[5]="List";static struct _tagged_arr Cyc__genname_307={_tmp1E3,_tmp1E3,
-_tmp1E3 + 5};static char _tmp1E4[3]="hd";static struct _tuple5 Cyc__gentuple_304={
-offsetof(struct Cyc_List_List,hd),{_tmp1E4,_tmp1E4,_tmp1E4 + 3},(void*)& Cyc__genrep_284};
-static char _tmp1E5[3]="tl";static struct _tuple5 Cyc__gentuple_305={offsetof(struct
-Cyc_List_List,tl),{_tmp1E5,_tmp1E5,_tmp1E5 + 3},(void*)& Cyc__genrep_303};static
-struct _tuple5*Cyc__genarr_306[2]={& Cyc__gentuple_304,& Cyc__gentuple_305};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_tunionfield_t46H2_rep={3,(
-struct _tagged_arr*)& Cyc__genname_307,sizeof(struct Cyc_List_List),{(void*)((
+char _tmp1E3[5]="List";static struct _tagged_arr Cyc__genname_307=(struct _tagged_arr){
+_tmp1E3,_tmp1E3,_tmp1E3 + 5};static char _tmp1E4[3]="hd";static struct _tuple5 Cyc__gentuple_304={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp1E4,_tmp1E4,_tmp1E4 + 3},(
+void*)& Cyc__genrep_284};static char _tmp1E5[3]="tl";static struct _tuple5 Cyc__gentuple_305={
+offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp1E5,_tmp1E5,_tmp1E5 + 3},(
+void*)& Cyc__genrep_303};static struct _tuple5*Cyc__genarr_306[2]={& Cyc__gentuple_304,&
+Cyc__gentuple_305};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_tunionfield_t46H2_rep={
+3,(struct _tagged_arr*)& Cyc__genname_307,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_306),(void*)((struct _tuple5**)Cyc__genarr_306),(void*)((
 struct _tuple5**)Cyc__genarr_306 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_303={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_tunionfield_t46H2_rep)};static
-char _tmp1E8[4]="Opt";static struct _tagged_arr Cyc__genname_310={_tmp1E8,_tmp1E8,
-_tmp1E8 + 4};static char _tmp1E9[2]="v";static struct _tuple5 Cyc__gentuple_308={
-offsetof(struct Cyc_Core_Opt,v),{_tmp1E9,_tmp1E9,_tmp1E9 + 2},(void*)& Cyc__genrep_303};
-static struct _tuple5*Cyc__genarr_309[1]={& Cyc__gentuple_308};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0List_list_t0Absyn_tunionfield_t46H22_rep={3,(struct
-_tagged_arr*)& Cyc__genname_310,sizeof(struct Cyc_Core_Opt),{(void*)((struct
-_tuple5**)Cyc__genarr_309),(void*)((struct _tuple5**)Cyc__genarr_309),(void*)((
+char _tmp1E8[4]="Opt";static struct _tagged_arr Cyc__genname_310=(struct _tagged_arr){
+_tmp1E8,_tmp1E8,_tmp1E8 + 4};static char _tmp1E9[2]="v";static struct _tuple5 Cyc__gentuple_308={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp1E9,_tmp1E9,_tmp1E9 + 2},(
+void*)& Cyc__genrep_303};static struct _tuple5*Cyc__genarr_309[1]={& Cyc__gentuple_308};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0List_list_t0Absyn_tunionfield_t46H22_rep={
+3,(struct _tagged_arr*)& Cyc__genname_310,sizeof(struct Cyc_Core_Opt),{(void*)((
+struct _tuple5**)Cyc__genarr_309),(void*)((struct _tuple5**)Cyc__genarr_309),(void*)((
 struct _tuple5**)Cyc__genarr_309 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_302={
 1,1,(void*)((void*)& Cyc_struct_Core_Opt0List_list_t0Absyn_tunionfield_t46H22_rep)};
-static char _tmp1EC[11]="Tuniondecl";static struct _tagged_arr Cyc__genname_322={
-_tmp1EC,_tmp1EC,_tmp1EC + 11};static char _tmp1ED[3]="sc";static struct _tuple5 Cyc__gentuple_316={
-offsetof(struct Cyc_Absyn_Tuniondecl,sc),{_tmp1ED,_tmp1ED,_tmp1ED + 3},(void*)& Cyc_Absyn_scope_t_rep};
-static char _tmp1EE[5]="name";static struct _tuple5 Cyc__gentuple_317={offsetof(
-struct Cyc_Absyn_Tuniondecl,name),{_tmp1EE,_tmp1EE,_tmp1EE + 5},(void*)& Cyc__genrep_10};
-static char _tmp1EF[4]="tvs";static struct _tuple5 Cyc__gentuple_318={offsetof(struct
-Cyc_Absyn_Tuniondecl,tvs),{_tmp1EF,_tmp1EF,_tmp1EF + 4},(void*)& Cyc__genrep_311};
-static char _tmp1F0[7]="fields";static struct _tuple5 Cyc__gentuple_319={offsetof(
-struct Cyc_Absyn_Tuniondecl,fields),{_tmp1F0,_tmp1F0,_tmp1F0 + 7},(void*)& Cyc__genrep_302};
-static char _tmp1F1[11]="is_xtunion";static struct _tuple5 Cyc__gentuple_320={
-offsetof(struct Cyc_Absyn_Tuniondecl,is_xtunion),{_tmp1F1,_tmp1F1,_tmp1F1 + 11},(
-void*)((void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_321[5]={& Cyc__gentuple_316,&
-Cyc__gentuple_317,& Cyc__gentuple_318,& Cyc__gentuple_319,& Cyc__gentuple_320};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Tuniondecl_rep={3,(struct
-_tagged_arr*)& Cyc__genname_322,sizeof(struct Cyc_Absyn_Tuniondecl),{(void*)((
-struct _tuple5**)Cyc__genarr_321),(void*)((struct _tuple5**)Cyc__genarr_321),(void*)((
-struct _tuple5**)Cyc__genarr_321 + 5)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_301={
-1,1,(void*)((void*)& Cyc_struct_Absyn_Tuniondecl_rep)};static struct Cyc_Typerep_ThinPtr_struct
-Cyc__genrep_1058={1,1,(void*)((void*)& Cyc__genrep_301)};struct _tuple20{
-unsigned int f1;struct Cyc_Absyn_Tuniondecl**f2;};static struct _tuple6 Cyc__gentuple_1059={
-offsetof(struct _tuple20,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1060={
-offsetof(struct _tuple20,f2),(void*)& Cyc__genrep_1058};static struct _tuple6*Cyc__genarr_1061[
-2]={& Cyc__gentuple_1059,& Cyc__gentuple_1060};static struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_1057={4,sizeof(struct _tuple20),{(void*)((struct _tuple6**)Cyc__genarr_1061),(
-void*)((struct _tuple6**)Cyc__genarr_1061),(void*)((struct _tuple6**)Cyc__genarr_1061
-+ 2)}};static struct _tuple7*Cyc__genarr_1056[0]={};static char _tmp1F6[14]="UnknownTunion";
-static struct _tuple5 Cyc__gentuple_1070={0,{_tmp1F6,_tmp1F6,_tmp1F6 + 14},(void*)&
-Cyc__genrep_1062};static char _tmp1F7[12]="KnownTunion";static struct _tuple5 Cyc__gentuple_1071={
-1,{_tmp1F7,_tmp1F7,_tmp1F7 + 12},(void*)& Cyc__genrep_1057};static struct _tuple5*
-Cyc__genarr_1072[2]={& Cyc__gentuple_1070,& Cyc__gentuple_1071};static char _tmp1F9[
-12]="TunionInfoU";struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionInfoU_rep={
-5,{_tmp1F9,_tmp1F9,_tmp1F9 + 12},{(void*)((struct _tuple7**)Cyc__genarr_1056),(
+static char _tmp1EC[11]="Tuniondecl";static struct _tagged_arr Cyc__genname_322=(
+struct _tagged_arr){_tmp1EC,_tmp1EC,_tmp1EC + 11};static char _tmp1ED[3]="sc";static
+struct _tuple5 Cyc__gentuple_316={offsetof(struct Cyc_Absyn_Tuniondecl,sc),(struct
+_tagged_arr){_tmp1ED,_tmp1ED,_tmp1ED + 3},(void*)& Cyc_Absyn_scope_t_rep};static
+char _tmp1EE[5]="name";static struct _tuple5 Cyc__gentuple_317={offsetof(struct Cyc_Absyn_Tuniondecl,name),(
+struct _tagged_arr){_tmp1EE,_tmp1EE,_tmp1EE + 5},(void*)& Cyc__genrep_10};static
+char _tmp1EF[4]="tvs";static struct _tuple5 Cyc__gentuple_318={offsetof(struct Cyc_Absyn_Tuniondecl,tvs),(
+struct _tagged_arr){_tmp1EF,_tmp1EF,_tmp1EF + 4},(void*)& Cyc__genrep_311};static
+char _tmp1F0[7]="fields";static struct _tuple5 Cyc__gentuple_319={offsetof(struct Cyc_Absyn_Tuniondecl,fields),(
+struct _tagged_arr){_tmp1F0,_tmp1F0,_tmp1F0 + 7},(void*)& Cyc__genrep_302};static
+char _tmp1F1[11]="is_xtunion";static struct _tuple5 Cyc__gentuple_320={offsetof(
+struct Cyc_Absyn_Tuniondecl,is_xtunion),(struct _tagged_arr){_tmp1F1,_tmp1F1,
+_tmp1F1 + 11},(void*)((void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_321[
+5]={& Cyc__gentuple_316,& Cyc__gentuple_317,& Cyc__gentuple_318,& Cyc__gentuple_319,&
+Cyc__gentuple_320};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Tuniondecl_rep={
+3,(struct _tagged_arr*)& Cyc__genname_322,sizeof(struct Cyc_Absyn_Tuniondecl),{(
+void*)((struct _tuple5**)Cyc__genarr_321),(void*)((struct _tuple5**)Cyc__genarr_321),(
+void*)((struct _tuple5**)Cyc__genarr_321 + 5)}};static struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_301={1,1,(void*)((void*)& Cyc_struct_Absyn_Tuniondecl_rep)};static
+struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1058={1,1,(void*)((void*)& Cyc__genrep_301)};
+struct _tuple20{unsigned int f1;struct Cyc_Absyn_Tuniondecl**f2;};static struct
+_tuple6 Cyc__gentuple_1059={offsetof(struct _tuple20,f1),(void*)& Cyc__genrep_5};
+static struct _tuple6 Cyc__gentuple_1060={offsetof(struct _tuple20,f2),(void*)& Cyc__genrep_1058};
+static struct _tuple6*Cyc__genarr_1061[2]={& Cyc__gentuple_1059,& Cyc__gentuple_1060};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1057={4,sizeof(struct _tuple20),{(
+void*)((struct _tuple6**)Cyc__genarr_1061),(void*)((struct _tuple6**)Cyc__genarr_1061),(
+void*)((struct _tuple6**)Cyc__genarr_1061 + 2)}};static struct _tuple7*Cyc__genarr_1056[
+0]={};static char _tmp1F6[14]="UnknownTunion";static struct _tuple5 Cyc__gentuple_1070={
+0,(struct _tagged_arr){_tmp1F6,_tmp1F6,_tmp1F6 + 14},(void*)& Cyc__genrep_1062};
+static char _tmp1F7[12]="KnownTunion";static struct _tuple5 Cyc__gentuple_1071={1,(
+struct _tagged_arr){_tmp1F7,_tmp1F7,_tmp1F7 + 12},(void*)& Cyc__genrep_1057};static
+struct _tuple5*Cyc__genarr_1072[2]={& Cyc__gentuple_1070,& Cyc__gentuple_1071};
+static char _tmp1F9[12]="TunionInfoU";struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionInfoU_rep={
+5,(struct _tagged_arr){_tmp1F9,_tmp1F9,_tmp1F9 + 12},{(void*)((struct _tuple7**)Cyc__genarr_1056),(
 void*)((struct _tuple7**)Cyc__genarr_1056),(void*)((struct _tuple7**)Cyc__genarr_1056
 + 0)},{(void*)((struct _tuple5**)Cyc__genarr_1072),(void*)((struct _tuple5**)Cyc__genarr_1072),(
 void*)((struct _tuple5**)Cyc__genarr_1072 + 2)}};extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_53;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_type_t46H2_rep;
-static char _tmp1FA[5]="List";static struct _tagged_arr Cyc__genname_57={_tmp1FA,
-_tmp1FA,_tmp1FA + 5};static char _tmp1FB[3]="hd";static struct _tuple5 Cyc__gentuple_54={
-offsetof(struct Cyc_List_List,hd),{_tmp1FB,_tmp1FB,_tmp1FB + 3},(void*)((void*)&
-Cyc_Absyn_type_t_rep)};static char _tmp1FC[3]="tl";static struct _tuple5 Cyc__gentuple_55={
-offsetof(struct Cyc_List_List,tl),{_tmp1FC,_tmp1FC,_tmp1FC + 3},(void*)& Cyc__genrep_53};
-static struct _tuple5*Cyc__genarr_56[2]={& Cyc__gentuple_54,& Cyc__gentuple_55};
-struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_type_t46H2_rep={3,(
-struct _tagged_arr*)& Cyc__genname_57,sizeof(struct Cyc_List_List),{(void*)((struct
-_tuple5**)Cyc__genarr_56),(void*)((struct _tuple5**)Cyc__genarr_56),(void*)((
-struct _tuple5**)Cyc__genarr_56 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_53={
-1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_type_t46H2_rep)};static char
-_tmp1FF[11]="TunionInfo";static struct _tagged_arr Cyc__genname_1077={_tmp1FF,
-_tmp1FF,_tmp1FF + 11};static char _tmp200[12]="tunion_info";static struct _tuple5 Cyc__gentuple_1073={
-offsetof(struct Cyc_Absyn_TunionInfo,tunion_info),{_tmp200,_tmp200,_tmp200 + 12},(
-void*)& Cyc_tunion_Absyn_TunionInfoU_rep};static char _tmp201[6]="targs";static
-struct _tuple5 Cyc__gentuple_1074={offsetof(struct Cyc_Absyn_TunionInfo,targs),{
-_tmp201,_tmp201,_tmp201 + 6},(void*)& Cyc__genrep_53};static char _tmp202[4]="rgn";
-static struct _tuple5 Cyc__gentuple_1075={offsetof(struct Cyc_Absyn_TunionInfo,rgn),{
-_tmp202,_tmp202,_tmp202 + 4},(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct
-_tuple5*Cyc__genarr_1076[3]={& Cyc__gentuple_1073,& Cyc__gentuple_1074,& Cyc__gentuple_1075};
-struct Cyc_Typerep_Struct_struct Cyc_Absyn_tunion_info_t_rep={3,(struct _tagged_arr*)&
-Cyc__genname_1077,sizeof(struct Cyc_Absyn_TunionInfo),{(void*)((struct _tuple5**)
-Cyc__genarr_1076),(void*)((struct _tuple5**)Cyc__genarr_1076),(void*)((struct
-_tuple5**)Cyc__genarr_1076 + 3)}};struct _tuple21{unsigned int f1;struct Cyc_Absyn_TunionInfo
-f2;};static struct _tuple6 Cyc__gentuple_1078={offsetof(struct _tuple21,f1),(void*)&
-Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1079={offsetof(struct _tuple21,f2),(
-void*)& Cyc_Absyn_tunion_info_t_rep};static struct _tuple6*Cyc__genarr_1080[2]={&
-Cyc__gentuple_1078,& Cyc__gentuple_1079};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1055={
-4,sizeof(struct _tuple21),{(void*)((struct _tuple6**)Cyc__genarr_1080),(void*)((
-struct _tuple6**)Cyc__genarr_1080),(void*)((struct _tuple6**)Cyc__genarr_1080 + 2)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_1029;extern struct Cyc_Typerep_Struct_struct
-Cyc_Absyn_tunion_field_info_t_rep;extern struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionFieldInfoU_rep;
+static char _tmp1FA[5]="List";static struct _tagged_arr Cyc__genname_57=(struct
+_tagged_arr){_tmp1FA,_tmp1FA,_tmp1FA + 5};static char _tmp1FB[3]="hd";static struct
+_tuple5 Cyc__gentuple_54={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp1FB,_tmp1FB,_tmp1FB + 3},(void*)((void*)& Cyc_Absyn_type_t_rep)};static char
+_tmp1FC[3]="tl";static struct _tuple5 Cyc__gentuple_55={offsetof(struct Cyc_List_List,tl),(
+struct _tagged_arr){_tmp1FC,_tmp1FC,_tmp1FC + 3},(void*)& Cyc__genrep_53};static
+struct _tuple5*Cyc__genarr_56[2]={& Cyc__gentuple_54,& Cyc__gentuple_55};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List0Absyn_type_t46H2_rep={3,(struct _tagged_arr*)& Cyc__genname_57,
+sizeof(struct Cyc_List_List),{(void*)((struct _tuple5**)Cyc__genarr_56),(void*)((
+struct _tuple5**)Cyc__genarr_56),(void*)((struct _tuple5**)Cyc__genarr_56 + 2)}};
+static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_53={1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_type_t46H2_rep)};
+static char _tmp1FF[11]="TunionInfo";static struct _tagged_arr Cyc__genname_1077=(
+struct _tagged_arr){_tmp1FF,_tmp1FF,_tmp1FF + 11};static char _tmp200[12]="tunion_info";
+static struct _tuple5 Cyc__gentuple_1073={offsetof(struct Cyc_Absyn_TunionInfo,tunion_info),(
+struct _tagged_arr){_tmp200,_tmp200,_tmp200 + 12},(void*)& Cyc_tunion_Absyn_TunionInfoU_rep};
+static char _tmp201[6]="targs";static struct _tuple5 Cyc__gentuple_1074={offsetof(
+struct Cyc_Absyn_TunionInfo,targs),(struct _tagged_arr){_tmp201,_tmp201,_tmp201 + 6},(
+void*)& Cyc__genrep_53};static char _tmp202[4]="rgn";static struct _tuple5 Cyc__gentuple_1075={
+offsetof(struct Cyc_Absyn_TunionInfo,rgn),(struct _tagged_arr){_tmp202,_tmp202,
+_tmp202 + 4},(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct _tuple5*Cyc__genarr_1076[
+3]={& Cyc__gentuple_1073,& Cyc__gentuple_1074,& Cyc__gentuple_1075};struct Cyc_Typerep_Struct_struct
+Cyc_Absyn_tunion_info_t_rep={3,(struct _tagged_arr*)& Cyc__genname_1077,sizeof(
+struct Cyc_Absyn_TunionInfo),{(void*)((struct _tuple5**)Cyc__genarr_1076),(void*)((
+struct _tuple5**)Cyc__genarr_1076),(void*)((struct _tuple5**)Cyc__genarr_1076 + 3)}};
+struct _tuple21{unsigned int f1;struct Cyc_Absyn_TunionInfo f2;};static struct _tuple6
+Cyc__gentuple_1078={offsetof(struct _tuple21,f1),(void*)& Cyc__genrep_5};static
+struct _tuple6 Cyc__gentuple_1079={offsetof(struct _tuple21,f2),(void*)& Cyc_Absyn_tunion_info_t_rep};
+static struct _tuple6*Cyc__genarr_1080[2]={& Cyc__gentuple_1078,& Cyc__gentuple_1079};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1055={4,sizeof(struct _tuple21),{(
+void*)((struct _tuple6**)Cyc__genarr_1080),(void*)((struct _tuple6**)Cyc__genarr_1080),(
+void*)((struct _tuple6**)Cyc__genarr_1080 + 2)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_1029;extern struct Cyc_Typerep_Struct_struct Cyc_Absyn_tunion_field_info_t_rep;
+extern struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionFieldInfoU_rep;
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_1036;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_UnknownTunionFieldInfo_rep;static char _tmp205[23]="UnknownTunionFieldInfo";
-static struct _tagged_arr Cyc__genname_1041={_tmp205,_tmp205,_tmp205 + 23};static
-char _tmp206[12]="tunion_name";static struct _tuple5 Cyc__gentuple_1037={offsetof(
-struct Cyc_Absyn_UnknownTunionFieldInfo,tunion_name),{_tmp206,_tmp206,_tmp206 + 12},(
-void*)& Cyc__genrep_10};static char _tmp207[11]="field_name";static struct _tuple5 Cyc__gentuple_1038={
-offsetof(struct Cyc_Absyn_UnknownTunionFieldInfo,field_name),{_tmp207,_tmp207,
-_tmp207 + 11},(void*)& Cyc__genrep_10};static char _tmp208[11]="is_xtunion";static
-struct _tuple5 Cyc__gentuple_1039={offsetof(struct Cyc_Absyn_UnknownTunionFieldInfo,is_xtunion),{
-_tmp208,_tmp208,_tmp208 + 11},(void*)((void*)& Cyc__genrep_62)};static struct
-_tuple5*Cyc__genarr_1040[3]={& Cyc__gentuple_1037,& Cyc__gentuple_1038,& Cyc__gentuple_1039};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_UnknownTunionFieldInfo_rep={3,(
-struct _tagged_arr*)& Cyc__genname_1041,sizeof(struct Cyc_Absyn_UnknownTunionFieldInfo),{(
-void*)((struct _tuple5**)Cyc__genarr_1040),(void*)((struct _tuple5**)Cyc__genarr_1040),(
-void*)((struct _tuple5**)Cyc__genarr_1040 + 3)}};struct _tuple22{unsigned int f1;
-struct Cyc_Absyn_UnknownTunionFieldInfo f2;};static struct _tuple6 Cyc__gentuple_1042={
-offsetof(struct _tuple22,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1043={
-offsetof(struct _tuple22,f2),(void*)& Cyc_struct_Absyn_UnknownTunionFieldInfo_rep};
+static struct _tagged_arr Cyc__genname_1041=(struct _tagged_arr){_tmp205,_tmp205,
+_tmp205 + 23};static char _tmp206[12]="tunion_name";static struct _tuple5 Cyc__gentuple_1037={
+offsetof(struct Cyc_Absyn_UnknownTunionFieldInfo,tunion_name),(struct _tagged_arr){
+_tmp206,_tmp206,_tmp206 + 12},(void*)& Cyc__genrep_10};static char _tmp207[11]="field_name";
+static struct _tuple5 Cyc__gentuple_1038={offsetof(struct Cyc_Absyn_UnknownTunionFieldInfo,field_name),(
+struct _tagged_arr){_tmp207,_tmp207,_tmp207 + 11},(void*)& Cyc__genrep_10};static
+char _tmp208[11]="is_xtunion";static struct _tuple5 Cyc__gentuple_1039={offsetof(
+struct Cyc_Absyn_UnknownTunionFieldInfo,is_xtunion),(struct _tagged_arr){_tmp208,
+_tmp208,_tmp208 + 11},(void*)((void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_1040[
+3]={& Cyc__gentuple_1037,& Cyc__gentuple_1038,& Cyc__gentuple_1039};struct Cyc_Typerep_Struct_struct
+Cyc_struct_Absyn_UnknownTunionFieldInfo_rep={3,(struct _tagged_arr*)& Cyc__genname_1041,
+sizeof(struct Cyc_Absyn_UnknownTunionFieldInfo),{(void*)((struct _tuple5**)Cyc__genarr_1040),(
+void*)((struct _tuple5**)Cyc__genarr_1040),(void*)((struct _tuple5**)Cyc__genarr_1040
++ 3)}};struct _tuple22{unsigned int f1;struct Cyc_Absyn_UnknownTunionFieldInfo f2;};
+static struct _tuple6 Cyc__gentuple_1042={offsetof(struct _tuple22,f1),(void*)& Cyc__genrep_5};
+static struct _tuple6 Cyc__gentuple_1043={offsetof(struct _tuple22,f2),(void*)& Cyc_struct_Absyn_UnknownTunionFieldInfo_rep};
 static struct _tuple6*Cyc__genarr_1044[2]={& Cyc__gentuple_1042,& Cyc__gentuple_1043};
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1036={4,sizeof(struct _tuple22),{(
 void*)((struct _tuple6**)Cyc__genarr_1044),(void*)((struct _tuple6**)Cyc__genarr_1044),(
@@ -2029,24 +2047,26 @@ Cyc__gentuple_1034};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1031={4,
 sizeof(struct _tuple23),{(void*)((struct _tuple6**)Cyc__genarr_1035),(void*)((
 struct _tuple6**)Cyc__genarr_1035),(void*)((struct _tuple6**)Cyc__genarr_1035 + 3)}};
 static struct _tuple7*Cyc__genarr_1030[0]={};static char _tmp20C[19]="UnknownTunionfield";
-static struct _tuple5 Cyc__gentuple_1045={0,{_tmp20C,_tmp20C,_tmp20C + 19},(void*)&
-Cyc__genrep_1036};static char _tmp20D[17]="KnownTunionfield";static struct _tuple5
-Cyc__gentuple_1046={1,{_tmp20D,_tmp20D,_tmp20D + 17},(void*)& Cyc__genrep_1031};
-static struct _tuple5*Cyc__genarr_1047[2]={& Cyc__gentuple_1045,& Cyc__gentuple_1046};
-static char _tmp20F[17]="TunionFieldInfoU";struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionFieldInfoU_rep={
-5,{_tmp20F,_tmp20F,_tmp20F + 17},{(void*)((struct _tuple7**)Cyc__genarr_1030),(
+static struct _tuple5 Cyc__gentuple_1045={0,(struct _tagged_arr){_tmp20C,_tmp20C,
+_tmp20C + 19},(void*)& Cyc__genrep_1036};static char _tmp20D[17]="KnownTunionfield";
+static struct _tuple5 Cyc__gentuple_1046={1,(struct _tagged_arr){_tmp20D,_tmp20D,
+_tmp20D + 17},(void*)& Cyc__genrep_1031};static struct _tuple5*Cyc__genarr_1047[2]={&
+Cyc__gentuple_1045,& Cyc__gentuple_1046};static char _tmp20F[17]="TunionFieldInfoU";
+struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_TunionFieldInfoU_rep={5,(struct
+_tagged_arr){_tmp20F,_tmp20F,_tmp20F + 17},{(void*)((struct _tuple7**)Cyc__genarr_1030),(
 void*)((struct _tuple7**)Cyc__genarr_1030),(void*)((struct _tuple7**)Cyc__genarr_1030
 + 0)},{(void*)((struct _tuple5**)Cyc__genarr_1047),(void*)((struct _tuple5**)Cyc__genarr_1047),(
 void*)((struct _tuple5**)Cyc__genarr_1047 + 2)}};static char _tmp210[16]="TunionFieldInfo";
-static struct _tagged_arr Cyc__genname_1051={_tmp210,_tmp210,_tmp210 + 16};static
-char _tmp211[11]="field_info";static struct _tuple5 Cyc__gentuple_1048={offsetof(
-struct Cyc_Absyn_TunionFieldInfo,field_info),{_tmp211,_tmp211,_tmp211 + 11},(void*)&
-Cyc_tunion_Absyn_TunionFieldInfoU_rep};static char _tmp212[6]="targs";static struct
-_tuple5 Cyc__gentuple_1049={offsetof(struct Cyc_Absyn_TunionFieldInfo,targs),{
-_tmp212,_tmp212,_tmp212 + 6},(void*)& Cyc__genrep_53};static struct _tuple5*Cyc__genarr_1050[
-2]={& Cyc__gentuple_1048,& Cyc__gentuple_1049};struct Cyc_Typerep_Struct_struct Cyc_Absyn_tunion_field_info_t_rep={
-3,(struct _tagged_arr*)& Cyc__genname_1051,sizeof(struct Cyc_Absyn_TunionFieldInfo),{(
-void*)((struct _tuple5**)Cyc__genarr_1050),(void*)((struct _tuple5**)Cyc__genarr_1050),(
+static struct _tagged_arr Cyc__genname_1051=(struct _tagged_arr){_tmp210,_tmp210,
+_tmp210 + 16};static char _tmp211[11]="field_info";static struct _tuple5 Cyc__gentuple_1048={
+offsetof(struct Cyc_Absyn_TunionFieldInfo,field_info),(struct _tagged_arr){_tmp211,
+_tmp211,_tmp211 + 11},(void*)& Cyc_tunion_Absyn_TunionFieldInfoU_rep};static char
+_tmp212[6]="targs";static struct _tuple5 Cyc__gentuple_1049={offsetof(struct Cyc_Absyn_TunionFieldInfo,targs),(
+struct _tagged_arr){_tmp212,_tmp212,_tmp212 + 6},(void*)& Cyc__genrep_53};static
+struct _tuple5*Cyc__genarr_1050[2]={& Cyc__gentuple_1048,& Cyc__gentuple_1049};
+struct Cyc_Typerep_Struct_struct Cyc_Absyn_tunion_field_info_t_rep={3,(struct
+_tagged_arr*)& Cyc__genname_1051,sizeof(struct Cyc_Absyn_TunionFieldInfo),{(void*)((
+struct _tuple5**)Cyc__genarr_1050),(void*)((struct _tuple5**)Cyc__genarr_1050),(
 void*)((struct _tuple5**)Cyc__genarr_1050 + 2)}};struct _tuple24{unsigned int f1;
 struct Cyc_Absyn_TunionFieldInfo f2;};static struct _tuple6 Cyc__gentuple_1052={
 offsetof(struct _tuple24,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1053={
@@ -2073,94 +2093,101 @@ static struct _tuple6*Cyc__genarr_983[2]={& Cyc__gentuple_981,& Cyc__gentuple_98
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_980={4,sizeof(struct _tuple26),{(
 void*)((struct _tuple6**)Cyc__genarr_983),(void*)((struct _tuple6**)Cyc__genarr_983),(
 void*)((struct _tuple6**)Cyc__genarr_983 + 2)}};static char _tmp217[10]="No_constr";
-static struct _tuple7 Cyc__gentuple_978={0,{_tmp217,_tmp217,_tmp217 + 10}};static
-struct _tuple7*Cyc__genarr_979[1]={& Cyc__gentuple_978};static char _tmp218[10]="Eq_constr";
-static struct _tuple5 Cyc__gentuple_984={0,{_tmp218,_tmp218,_tmp218 + 10},(void*)&
-Cyc__genrep_61};static char _tmp219[15]="Forward_constr";static struct _tuple5 Cyc__gentuple_985={
-1,{_tmp219,_tmp219,_tmp219 + 15},(void*)& Cyc__genrep_980};static struct _tuple5*Cyc__genarr_986[
-2]={& Cyc__gentuple_984,& Cyc__gentuple_985};static char _tmp21B[11]="Constraint";
-struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_Constraint0bool2_rep={5,{_tmp21B,
-_tmp21B,_tmp21B + 11},{(void*)((struct _tuple7**)Cyc__genarr_979),(void*)((struct
-_tuple7**)Cyc__genarr_979),(void*)((struct _tuple7**)Cyc__genarr_979 + 1)},{(void*)((
-struct _tuple5**)Cyc__genarr_986),(void*)((struct _tuple5**)Cyc__genarr_986),(void*)((
-struct _tuple5**)Cyc__genarr_986 + 2)}};static char _tmp21C[7]="Conref";static struct
-_tagged_arr Cyc__genname_989={_tmp21C,_tmp21C,_tmp21C + 7};static char _tmp21D[2]="v";
-static struct _tuple5 Cyc__gentuple_987={offsetof(struct Cyc_Absyn_Conref,v),{
-_tmp21D,_tmp21D,_tmp21D + 2},(void*)& Cyc_tunion_Absyn_Constraint0bool2_rep};
-static struct _tuple5*Cyc__genarr_988[1]={& Cyc__gentuple_987};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Conref0bool2_rep={3,(struct _tagged_arr*)& Cyc__genname_989,
-sizeof(struct Cyc_Absyn_Conref),{(void*)((struct _tuple5**)Cyc__genarr_988),(void*)((
-struct _tuple5**)Cyc__genarr_988),(void*)((struct _tuple5**)Cyc__genarr_988 + 1)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_977={1,1,(void*)((void*)& Cyc_struct_Absyn_Conref0bool2_rep)};
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1011;extern struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Conref0Absyn_bounds_t2_rep;static char _tmp220[7]="Conref";static
-struct _tagged_arr Cyc__genname_1014={_tmp220,_tmp220,_tmp220 + 7};static char
-_tmp221[2]="v";static struct _tuple5 Cyc__gentuple_1012={offsetof(struct Cyc_Absyn_Conref,v),{
+static struct _tuple7 Cyc__gentuple_978={0,(struct _tagged_arr){_tmp217,_tmp217,
+_tmp217 + 10}};static struct _tuple7*Cyc__genarr_979[1]={& Cyc__gentuple_978};static
+char _tmp218[10]="Eq_constr";static struct _tuple5 Cyc__gentuple_984={0,(struct
+_tagged_arr){_tmp218,_tmp218,_tmp218 + 10},(void*)& Cyc__genrep_61};static char
+_tmp219[15]="Forward_constr";static struct _tuple5 Cyc__gentuple_985={1,(struct
+_tagged_arr){_tmp219,_tmp219,_tmp219 + 15},(void*)& Cyc__genrep_980};static struct
+_tuple5*Cyc__genarr_986[2]={& Cyc__gentuple_984,& Cyc__gentuple_985};static char
+_tmp21B[11]="Constraint";struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_Constraint0bool2_rep={
+5,(struct _tagged_arr){_tmp21B,_tmp21B,_tmp21B + 11},{(void*)((struct _tuple7**)Cyc__genarr_979),(
+void*)((struct _tuple7**)Cyc__genarr_979),(void*)((struct _tuple7**)Cyc__genarr_979
++ 1)},{(void*)((struct _tuple5**)Cyc__genarr_986),(void*)((struct _tuple5**)Cyc__genarr_986),(
+void*)((struct _tuple5**)Cyc__genarr_986 + 2)}};static char _tmp21C[7]="Conref";
+static struct _tagged_arr Cyc__genname_989=(struct _tagged_arr){_tmp21C,_tmp21C,
+_tmp21C + 7};static char _tmp21D[2]="v";static struct _tuple5 Cyc__gentuple_987={
+offsetof(struct Cyc_Absyn_Conref,v),(struct _tagged_arr){_tmp21D,_tmp21D,_tmp21D + 
+2},(void*)& Cyc_tunion_Absyn_Constraint0bool2_rep};static struct _tuple5*Cyc__genarr_988[
+1]={& Cyc__gentuple_987};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Conref0bool2_rep={
+3,(struct _tagged_arr*)& Cyc__genname_989,sizeof(struct Cyc_Absyn_Conref),{(void*)((
+struct _tuple5**)Cyc__genarr_988),(void*)((struct _tuple5**)Cyc__genarr_988),(void*)((
+struct _tuple5**)Cyc__genarr_988 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_977={
+1,1,(void*)((void*)& Cyc_struct_Absyn_Conref0bool2_rep)};extern struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_1011;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Conref0Absyn_bounds_t2_rep;
+static char _tmp220[7]="Conref";static struct _tagged_arr Cyc__genname_1014=(struct
+_tagged_arr){_tmp220,_tmp220,_tmp220 + 7};static char _tmp221[2]="v";static struct
+_tuple5 Cyc__gentuple_1012={offsetof(struct Cyc_Absyn_Conref,v),(struct _tagged_arr){
 _tmp221,_tmp221,_tmp221 + 2},(void*)& Cyc_tunion_Absyn_Constraint0bool2_rep};
 static struct _tuple5*Cyc__genarr_1013[1]={& Cyc__gentuple_1012};struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_Conref0Absyn_bounds_t2_rep={3,(struct _tagged_arr*)& Cyc__genname_1014,
 sizeof(struct Cyc_Absyn_Conref),{(void*)((struct _tuple5**)Cyc__genarr_1013),(void*)((
 struct _tuple5**)Cyc__genarr_1013),(void*)((struct _tuple5**)Cyc__genarr_1013 + 1)}};
 static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1011={1,1,(void*)((void*)& Cyc_struct_Absyn_Conref0Absyn_bounds_t2_rep)};
-static char _tmp224[8]="PtrAtts";static struct _tagged_arr Cyc__genname_1020={_tmp224,
-_tmp224,_tmp224 + 8};static char _tmp225[4]="rgn";static struct _tuple5 Cyc__gentuple_1015={
-offsetof(struct Cyc_Absyn_PtrAtts,rgn),{_tmp225,_tmp225,_tmp225 + 4},(void*)((void*)&
-Cyc_Absyn_type_t_rep)};static char _tmp226[9]="nullable";static struct _tuple5 Cyc__gentuple_1016={
-offsetof(struct Cyc_Absyn_PtrAtts,nullable),{_tmp226,_tmp226,_tmp226 + 9},(void*)&
-Cyc__genrep_977};static char _tmp227[7]="bounds";static struct _tuple5 Cyc__gentuple_1017={
-offsetof(struct Cyc_Absyn_PtrAtts,bounds),{_tmp227,_tmp227,_tmp227 + 7},(void*)&
-Cyc__genrep_1011};static char _tmp228[10]="zero_term";static struct _tuple5 Cyc__gentuple_1018={
-offsetof(struct Cyc_Absyn_PtrAtts,zero_term),{_tmp228,_tmp228,_tmp228 + 10},(void*)&
-Cyc__genrep_977};static struct _tuple5*Cyc__genarr_1019[4]={& Cyc__gentuple_1015,&
-Cyc__gentuple_1016,& Cyc__gentuple_1017,& Cyc__gentuple_1018};struct Cyc_Typerep_Struct_struct
-Cyc_Absyn_ptr_atts_t_rep={3,(struct _tagged_arr*)& Cyc__genname_1020,sizeof(struct
-Cyc_Absyn_PtrAtts),{(void*)((struct _tuple5**)Cyc__genarr_1019),(void*)((struct
-_tuple5**)Cyc__genarr_1019),(void*)((struct _tuple5**)Cyc__genarr_1019 + 4)}};
-static char _tmp22A[8]="PtrInfo";static struct _tagged_arr Cyc__genname_1025={_tmp22A,
-_tmp22A,_tmp22A + 8};static char _tmp22B[8]="elt_typ";static struct _tuple5 Cyc__gentuple_1021={
-offsetof(struct Cyc_Absyn_PtrInfo,elt_typ),{_tmp22B,_tmp22B,_tmp22B + 8},(void*)((
-void*)& Cyc_Absyn_type_t_rep)};static char _tmp22C[7]="elt_tq";static struct _tuple5
-Cyc__gentuple_1022={offsetof(struct Cyc_Absyn_PtrInfo,elt_tq),{_tmp22C,_tmp22C,
-_tmp22C + 7},(void*)& Cyc__genrep_134};static char _tmp22D[9]="ptr_atts";static
-struct _tuple5 Cyc__gentuple_1023={offsetof(struct Cyc_Absyn_PtrInfo,ptr_atts),{
-_tmp22D,_tmp22D,_tmp22D + 9},(void*)& Cyc_Absyn_ptr_atts_t_rep};static struct
-_tuple5*Cyc__genarr_1024[3]={& Cyc__gentuple_1021,& Cyc__gentuple_1022,& Cyc__gentuple_1023};
-struct Cyc_Typerep_Struct_struct Cyc_Absyn_ptr_info_t_rep={3,(struct _tagged_arr*)&
-Cyc__genname_1025,sizeof(struct Cyc_Absyn_PtrInfo),{(void*)((struct _tuple5**)Cyc__genarr_1024),(
-void*)((struct _tuple5**)Cyc__genarr_1024),(void*)((struct _tuple5**)Cyc__genarr_1024
-+ 3)}};struct _tuple27{unsigned int f1;struct Cyc_Absyn_PtrInfo f2;};static struct
-_tuple6 Cyc__gentuple_1026={offsetof(struct _tuple27,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_1027={offsetof(struct _tuple27,f2),(void*)& Cyc_Absyn_ptr_info_t_rep};
-static struct _tuple6*Cyc__genarr_1028[2]={& Cyc__gentuple_1026,& Cyc__gentuple_1027};
-static struct Cyc_Typerep_Tuple_struct Cyc__genrep_1010={4,sizeof(struct _tuple27),{(
-void*)((struct _tuple6**)Cyc__genarr_1028),(void*)((struct _tuple6**)Cyc__genarr_1028),(
+static char _tmp224[8]="PtrAtts";static struct _tagged_arr Cyc__genname_1020=(struct
+_tagged_arr){_tmp224,_tmp224,_tmp224 + 8};static char _tmp225[4]="rgn";static struct
+_tuple5 Cyc__gentuple_1015={offsetof(struct Cyc_Absyn_PtrAtts,rgn),(struct
+_tagged_arr){_tmp225,_tmp225,_tmp225 + 4},(void*)((void*)& Cyc_Absyn_type_t_rep)};
+static char _tmp226[9]="nullable";static struct _tuple5 Cyc__gentuple_1016={offsetof(
+struct Cyc_Absyn_PtrAtts,nullable),(struct _tagged_arr){_tmp226,_tmp226,_tmp226 + 9},(
+void*)& Cyc__genrep_977};static char _tmp227[7]="bounds";static struct _tuple5 Cyc__gentuple_1017={
+offsetof(struct Cyc_Absyn_PtrAtts,bounds),(struct _tagged_arr){_tmp227,_tmp227,
+_tmp227 + 7},(void*)& Cyc__genrep_1011};static char _tmp228[10]="zero_term";static
+struct _tuple5 Cyc__gentuple_1018={offsetof(struct Cyc_Absyn_PtrAtts,zero_term),(
+struct _tagged_arr){_tmp228,_tmp228,_tmp228 + 10},(void*)& Cyc__genrep_977};static
+struct _tuple5*Cyc__genarr_1019[4]={& Cyc__gentuple_1015,& Cyc__gentuple_1016,& Cyc__gentuple_1017,&
+Cyc__gentuple_1018};struct Cyc_Typerep_Struct_struct Cyc_Absyn_ptr_atts_t_rep={3,(
+struct _tagged_arr*)& Cyc__genname_1020,sizeof(struct Cyc_Absyn_PtrAtts),{(void*)((
+struct _tuple5**)Cyc__genarr_1019),(void*)((struct _tuple5**)Cyc__genarr_1019),(
+void*)((struct _tuple5**)Cyc__genarr_1019 + 4)}};static char _tmp22A[8]="PtrInfo";
+static struct _tagged_arr Cyc__genname_1025=(struct _tagged_arr){_tmp22A,_tmp22A,
+_tmp22A + 8};static char _tmp22B[8]="elt_typ";static struct _tuple5 Cyc__gentuple_1021={
+offsetof(struct Cyc_Absyn_PtrInfo,elt_typ),(struct _tagged_arr){_tmp22B,_tmp22B,
+_tmp22B + 8},(void*)((void*)& Cyc_Absyn_type_t_rep)};static char _tmp22C[7]="elt_tq";
+static struct _tuple5 Cyc__gentuple_1022={offsetof(struct Cyc_Absyn_PtrInfo,elt_tq),(
+struct _tagged_arr){_tmp22C,_tmp22C,_tmp22C + 7},(void*)& Cyc__genrep_134};static
+char _tmp22D[9]="ptr_atts";static struct _tuple5 Cyc__gentuple_1023={offsetof(struct
+Cyc_Absyn_PtrInfo,ptr_atts),(struct _tagged_arr){_tmp22D,_tmp22D,_tmp22D + 9},(
+void*)& Cyc_Absyn_ptr_atts_t_rep};static struct _tuple5*Cyc__genarr_1024[3]={& Cyc__gentuple_1021,&
+Cyc__gentuple_1022,& Cyc__gentuple_1023};struct Cyc_Typerep_Struct_struct Cyc_Absyn_ptr_info_t_rep={
+3,(struct _tagged_arr*)& Cyc__genname_1025,sizeof(struct Cyc_Absyn_PtrInfo),{(void*)((
+struct _tuple5**)Cyc__genarr_1024),(void*)((struct _tuple5**)Cyc__genarr_1024),(
+void*)((struct _tuple5**)Cyc__genarr_1024 + 3)}};struct _tuple27{unsigned int f1;
+struct Cyc_Absyn_PtrInfo f2;};static struct _tuple6 Cyc__gentuple_1026={offsetof(
+struct _tuple27,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1027={
+offsetof(struct _tuple27,f2),(void*)& Cyc_Absyn_ptr_info_t_rep};static struct
+_tuple6*Cyc__genarr_1028[2]={& Cyc__gentuple_1026,& Cyc__gentuple_1027};static
+struct Cyc_Typerep_Tuple_struct Cyc__genrep_1010={4,sizeof(struct _tuple27),{(void*)((
+struct _tuple6**)Cyc__genarr_1028),(void*)((struct _tuple6**)Cyc__genarr_1028),(
 void*)((struct _tuple6**)Cyc__genarr_1028 + 2)}};extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_999;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_sign_t_rep;static
-char _tmp230[7]="Signed";static struct _tuple7 Cyc__gentuple_274={0,{_tmp230,_tmp230,
-_tmp230 + 7}};static char _tmp231[9]="Unsigned";static struct _tuple7 Cyc__gentuple_275={
-1,{_tmp231,_tmp231,_tmp231 + 9}};static char _tmp232[5]="None";static struct _tuple7
-Cyc__gentuple_276={2,{_tmp232,_tmp232,_tmp232 + 5}};static struct _tuple7*Cyc__genarr_277[
-3]={& Cyc__gentuple_274,& Cyc__gentuple_275,& Cyc__gentuple_276};static struct
-_tuple5*Cyc__genarr_278[0]={};static char _tmp234[5]="Sign";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_sign_t_rep={5,{_tmp234,_tmp234,_tmp234 + 5},{(void*)((struct _tuple7**)
-Cyc__genarr_277),(void*)((struct _tuple7**)Cyc__genarr_277),(void*)((struct
-_tuple7**)Cyc__genarr_277 + 3)},{(void*)((struct _tuple5**)Cyc__genarr_278),(void*)((
-struct _tuple5**)Cyc__genarr_278),(void*)((struct _tuple5**)Cyc__genarr_278 + 0)}};
-extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_size_of_t_rep;static char _tmp235[3]="B1";
-static struct _tuple7 Cyc__gentuple_1000={0,{_tmp235,_tmp235,_tmp235 + 3}};static
-char _tmp236[3]="B2";static struct _tuple7 Cyc__gentuple_1001={1,{_tmp236,_tmp236,
-_tmp236 + 3}};static char _tmp237[3]="B4";static struct _tuple7 Cyc__gentuple_1002={2,{
-_tmp237,_tmp237,_tmp237 + 3}};static char _tmp238[3]="B8";static struct _tuple7 Cyc__gentuple_1003={
-3,{_tmp238,_tmp238,_tmp238 + 3}};static struct _tuple7*Cyc__genarr_1004[4]={& Cyc__gentuple_1000,&
-Cyc__gentuple_1001,& Cyc__gentuple_1002,& Cyc__gentuple_1003};static struct _tuple5*
-Cyc__genarr_1005[0]={};static char _tmp23A[8]="Size_of";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_size_of_t_rep={5,{_tmp23A,_tmp23A,_tmp23A + 8},{(void*)((struct _tuple7**)
-Cyc__genarr_1004),(void*)((struct _tuple7**)Cyc__genarr_1004),(void*)((struct
-_tuple7**)Cyc__genarr_1004 + 4)},{(void*)((struct _tuple5**)Cyc__genarr_1005),(
-void*)((struct _tuple5**)Cyc__genarr_1005),(void*)((struct _tuple5**)Cyc__genarr_1005
-+ 0)}};struct _tuple28{unsigned int f1;void*f2;void*f3;};static struct _tuple6 Cyc__gentuple_1006={
-offsetof(struct _tuple28,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1007={
-offsetof(struct _tuple28,f2),(void*)& Cyc_Absyn_sign_t_rep};static struct _tuple6 Cyc__gentuple_1008={
+char _tmp230[7]="Signed";static struct _tuple7 Cyc__gentuple_274={0,(struct
+_tagged_arr){_tmp230,_tmp230,_tmp230 + 7}};static char _tmp231[9]="Unsigned";static
+struct _tuple7 Cyc__gentuple_275={1,(struct _tagged_arr){_tmp231,_tmp231,_tmp231 + 9}};
+static char _tmp232[5]="None";static struct _tuple7 Cyc__gentuple_276={2,(struct
+_tagged_arr){_tmp232,_tmp232,_tmp232 + 5}};static struct _tuple7*Cyc__genarr_277[3]={&
+Cyc__gentuple_274,& Cyc__gentuple_275,& Cyc__gentuple_276};static struct _tuple5*Cyc__genarr_278[
+0]={};static char _tmp234[5]="Sign";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_sign_t_rep={
+5,(struct _tagged_arr){_tmp234,_tmp234,_tmp234 + 5},{(void*)((struct _tuple7**)Cyc__genarr_277),(
+void*)((struct _tuple7**)Cyc__genarr_277),(void*)((struct _tuple7**)Cyc__genarr_277
++ 3)},{(void*)((struct _tuple5**)Cyc__genarr_278),(void*)((struct _tuple5**)Cyc__genarr_278),(
+void*)((struct _tuple5**)Cyc__genarr_278 + 0)}};extern struct Cyc_Typerep_TUnion_struct
+Cyc_Absyn_size_of_t_rep;static char _tmp235[3]="B1";static struct _tuple7 Cyc__gentuple_1000={
+0,(struct _tagged_arr){_tmp235,_tmp235,_tmp235 + 3}};static char _tmp236[3]="B2";
+static struct _tuple7 Cyc__gentuple_1001={1,(struct _tagged_arr){_tmp236,_tmp236,
+_tmp236 + 3}};static char _tmp237[3]="B4";static struct _tuple7 Cyc__gentuple_1002={2,(
+struct _tagged_arr){_tmp237,_tmp237,_tmp237 + 3}};static char _tmp238[3]="B8";static
+struct _tuple7 Cyc__gentuple_1003={3,(struct _tagged_arr){_tmp238,_tmp238,_tmp238 + 
+3}};static struct _tuple7*Cyc__genarr_1004[4]={& Cyc__gentuple_1000,& Cyc__gentuple_1001,&
+Cyc__gentuple_1002,& Cyc__gentuple_1003};static struct _tuple5*Cyc__genarr_1005[0]={};
+static char _tmp23A[8]="Size_of";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_size_of_t_rep={
+5,(struct _tagged_arr){_tmp23A,_tmp23A,_tmp23A + 8},{(void*)((struct _tuple7**)Cyc__genarr_1004),(
+void*)((struct _tuple7**)Cyc__genarr_1004),(void*)((struct _tuple7**)Cyc__genarr_1004
++ 4)},{(void*)((struct _tuple5**)Cyc__genarr_1005),(void*)((struct _tuple5**)Cyc__genarr_1005),(
+void*)((struct _tuple5**)Cyc__genarr_1005 + 0)}};struct _tuple28{unsigned int f1;
+void*f2;void*f3;};static struct _tuple6 Cyc__gentuple_1006={offsetof(struct _tuple28,f1),(
+void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_1007={offsetof(struct
+_tuple28,f2),(void*)& Cyc_Absyn_sign_t_rep};static struct _tuple6 Cyc__gentuple_1008={
 offsetof(struct _tuple28,f3),(void*)& Cyc_Absyn_size_of_t_rep};static struct _tuple6*
 Cyc__genarr_1009[3]={& Cyc__gentuple_1006,& Cyc__gentuple_1007,& Cyc__gentuple_1008};
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_999={4,sizeof(struct _tuple28),{(
@@ -2211,35 +2238,37 @@ static struct _tuple6*Cyc__genarr_120[2]={& Cyc__gentuple_118,& Cyc__gentuple_11
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_117={4,sizeof(struct _tuple7),{(
 void*)((struct _tuple6**)Cyc__genarr_120),(void*)((struct _tuple6**)Cyc__genarr_120),(
 void*)((struct _tuple6**)Cyc__genarr_120 + 2)}};static char _tmp243[7]="Null_c";
-static struct _tuple7 Cyc__gentuple_853={0,{_tmp243,_tmp243,_tmp243 + 7}};static
-struct _tuple7*Cyc__genarr_854[1]={& Cyc__gentuple_853};static char _tmp244[7]="Char_c";
-static struct _tuple5 Cyc__gentuple_872={0,{_tmp244,_tmp244,_tmp244 + 7},(void*)& Cyc__genrep_867};
-static char _tmp245[8]="Short_c";static struct _tuple5 Cyc__gentuple_873={1,{_tmp245,
-_tmp245,_tmp245 + 8},(void*)& Cyc__genrep_861};static char _tmp246[6]="Int_c";static
-struct _tuple5 Cyc__gentuple_874={2,{_tmp246,_tmp246,_tmp246 + 6},(void*)& Cyc__genrep_273};
-static char _tmp247[11]="LongLong_c";static struct _tuple5 Cyc__gentuple_875={3,{
-_tmp247,_tmp247,_tmp247 + 11},(void*)& Cyc__genrep_855};static char _tmp248[8]="Float_c";
-static struct _tuple5 Cyc__gentuple_876={4,{_tmp248,_tmp248,_tmp248 + 8},(void*)& Cyc__genrep_117};
-static char _tmp249[9]="String_c";static struct _tuple5 Cyc__gentuple_877={5,{_tmp249,
-_tmp249,_tmp249 + 9},(void*)& Cyc__genrep_117};static struct _tuple5*Cyc__genarr_878[
-6]={& Cyc__gentuple_872,& Cyc__gentuple_873,& Cyc__gentuple_874,& Cyc__gentuple_875,&
-Cyc__gentuple_876,& Cyc__gentuple_877};static char _tmp24B[5]="Cnst";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_cnst_t_rep={5,{_tmp24B,_tmp24B,_tmp24B + 5},{(void*)((struct _tuple7**)
-Cyc__genarr_854),(void*)((struct _tuple7**)Cyc__genarr_854),(void*)((struct
-_tuple7**)Cyc__genarr_854 + 1)},{(void*)((struct _tuple5**)Cyc__genarr_878),(void*)((
-struct _tuple5**)Cyc__genarr_878),(void*)((struct _tuple5**)Cyc__genarr_878 + 6)}};
-static struct _tuple6 Cyc__gentuple_879={offsetof(struct _tuple6,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_880={offsetof(struct _tuple6,f2),(void*)& Cyc_Absyn_cnst_t_rep};
-static struct _tuple6*Cyc__genarr_881[2]={& Cyc__gentuple_879,& Cyc__gentuple_880};
-static struct Cyc_Typerep_Tuple_struct Cyc__genrep_852={4,sizeof(struct _tuple6),{(
-void*)((struct _tuple6**)Cyc__genarr_881),(void*)((struct _tuple6**)Cyc__genarr_881),(
-void*)((struct _tuple6**)Cyc__genarr_881 + 2)}};extern struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_839;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_binding_t_rep;
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_86;extern struct Cyc_Typerep_ThinPtr_struct
-Cyc__genrep_87;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Fndecl_rep;
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_597;extern struct Cyc_Typerep_Struct_struct
-Cyc_struct_List_List060Absyn_var_t4Absyn_tqual_t4Absyn_type_t1_446H2_rep;extern
-struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_598;extern struct Cyc_Typerep_Tuple_struct
+static struct _tuple7 Cyc__gentuple_853={0,(struct _tagged_arr){_tmp243,_tmp243,
+_tmp243 + 7}};static struct _tuple7*Cyc__genarr_854[1]={& Cyc__gentuple_853};static
+char _tmp244[7]="Char_c";static struct _tuple5 Cyc__gentuple_872={0,(struct
+_tagged_arr){_tmp244,_tmp244,_tmp244 + 7},(void*)& Cyc__genrep_867};static char
+_tmp245[8]="Short_c";static struct _tuple5 Cyc__gentuple_873={1,(struct _tagged_arr){
+_tmp245,_tmp245,_tmp245 + 8},(void*)& Cyc__genrep_861};static char _tmp246[6]="Int_c";
+static struct _tuple5 Cyc__gentuple_874={2,(struct _tagged_arr){_tmp246,_tmp246,
+_tmp246 + 6},(void*)& Cyc__genrep_273};static char _tmp247[11]="LongLong_c";static
+struct _tuple5 Cyc__gentuple_875={3,(struct _tagged_arr){_tmp247,_tmp247,_tmp247 + 
+11},(void*)& Cyc__genrep_855};static char _tmp248[8]="Float_c";static struct _tuple5
+Cyc__gentuple_876={4,(struct _tagged_arr){_tmp248,_tmp248,_tmp248 + 8},(void*)& Cyc__genrep_117};
+static char _tmp249[9]="String_c";static struct _tuple5 Cyc__gentuple_877={5,(struct
+_tagged_arr){_tmp249,_tmp249,_tmp249 + 9},(void*)& Cyc__genrep_117};static struct
+_tuple5*Cyc__genarr_878[6]={& Cyc__gentuple_872,& Cyc__gentuple_873,& Cyc__gentuple_874,&
+Cyc__gentuple_875,& Cyc__gentuple_876,& Cyc__gentuple_877};static char _tmp24B[5]="Cnst";
+struct Cyc_Typerep_TUnion_struct Cyc_Absyn_cnst_t_rep={5,(struct _tagged_arr){
+_tmp24B,_tmp24B,_tmp24B + 5},{(void*)((struct _tuple7**)Cyc__genarr_854),(void*)((
+struct _tuple7**)Cyc__genarr_854),(void*)((struct _tuple7**)Cyc__genarr_854 + 1)},{(
+void*)((struct _tuple5**)Cyc__genarr_878),(void*)((struct _tuple5**)Cyc__genarr_878),(
+void*)((struct _tuple5**)Cyc__genarr_878 + 6)}};static struct _tuple6 Cyc__gentuple_879={
+offsetof(struct _tuple6,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_880={
+offsetof(struct _tuple6,f2),(void*)& Cyc_Absyn_cnst_t_rep};static struct _tuple6*Cyc__genarr_881[
+2]={& Cyc__gentuple_879,& Cyc__gentuple_880};static struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_852={4,sizeof(struct _tuple6),{(void*)((struct _tuple6**)Cyc__genarr_881),(
+void*)((struct _tuple6**)Cyc__genarr_881),(void*)((struct _tuple6**)Cyc__genarr_881
++ 2)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_839;extern struct Cyc_Typerep_TUnion_struct
+Cyc_Absyn_binding_t_rep;extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_86;
+extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_87;extern struct Cyc_Typerep_Struct_struct
+Cyc_struct_Absyn_Fndecl_rep;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_597;
+extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List060Absyn_var_t4Absyn_tqual_t4Absyn_type_t1_446H2_rep;
+extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_598;extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_599;struct _tuple33{struct _tagged_arr*f1;struct Cyc_Absyn_Tqual f2;void*
 f3;};static struct _tuple6 Cyc__gentuple_600={offsetof(struct _tuple33,f1),(void*)&
 Cyc__genrep_12};static struct _tuple6 Cyc__gentuple_601={offsetof(struct _tuple33,f2),(
@@ -2249,11 +2278,12 @@ _tuple33,f3),(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct _tuple6*Cyc__
 Cyc__genrep_599={4,sizeof(struct _tuple33),{(void*)((struct _tuple6**)Cyc__genarr_603),(
 void*)((struct _tuple6**)Cyc__genarr_603),(void*)((struct _tuple6**)Cyc__genarr_603
 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_598={1,1,(void*)((void*)&
-Cyc__genrep_599)};static char _tmp24F[5]="List";static struct _tagged_arr Cyc__genname_607={
-_tmp24F,_tmp24F,_tmp24F + 5};static char _tmp250[3]="hd";static struct _tuple5 Cyc__gentuple_604={
-offsetof(struct Cyc_List_List,hd),{_tmp250,_tmp250,_tmp250 + 3},(void*)& Cyc__genrep_598};
-static char _tmp251[3]="tl";static struct _tuple5 Cyc__gentuple_605={offsetof(struct
-Cyc_List_List,tl),{_tmp251,_tmp251,_tmp251 + 3},(void*)& Cyc__genrep_597};static
+Cyc__genrep_599)};static char _tmp24F[5]="List";static struct _tagged_arr Cyc__genname_607=(
+struct _tagged_arr){_tmp24F,_tmp24F,_tmp24F + 5};static char _tmp250[3]="hd";static
+struct _tuple5 Cyc__gentuple_604={offsetof(struct Cyc_List_List,hd),(struct
+_tagged_arr){_tmp250,_tmp250,_tmp250 + 3},(void*)& Cyc__genrep_598};static char
+_tmp251[3]="tl";static struct _tuple5 Cyc__gentuple_605={offsetof(struct Cyc_List_List,tl),(
+struct _tagged_arr){_tmp251,_tmp251,_tmp251 + 3},(void*)& Cyc__genrep_597};static
 struct _tuple5*Cyc__genarr_606[2]={& Cyc__gentuple_604,& Cyc__gentuple_605};struct
 Cyc_Typerep_Struct_struct Cyc_struct_List_List060Absyn_var_t4Absyn_tqual_t4Absyn_type_t1_446H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_607,sizeof(struct Cyc_List_List),{(void*)((
@@ -2263,24 +2293,26 @@ struct _tuple5**)Cyc__genarr_606 + 2)}};static struct Cyc_Typerep_ThinPtr_struct
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_586;extern struct Cyc_Typerep_Struct_struct
 Cyc_Absyn_vararg_info_t_rep;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_587;
 extern struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_var_t2_rep;static
-char _tmp254[4]="Opt";static struct _tagged_arr Cyc__genname_590={_tmp254,_tmp254,
-_tmp254 + 4};static char _tmp255[2]="v";static struct _tuple5 Cyc__gentuple_588={
-offsetof(struct Cyc_Core_Opt,v),{_tmp255,_tmp255,_tmp255 + 2},(void*)& Cyc__genrep_12};
-static struct _tuple5*Cyc__genarr_589[1]={& Cyc__gentuple_588};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_var_t2_rep={3,(struct _tagged_arr*)& Cyc__genname_590,
-sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_589),(void*)((
-struct _tuple5**)Cyc__genarr_589),(void*)((struct _tuple5**)Cyc__genarr_589 + 1)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_587={1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_var_t2_rep)};
-static char _tmp258[11]="VarargInfo";static struct _tagged_arr Cyc__genname_596={
-_tmp258,_tmp258,_tmp258 + 11};static char _tmp259[5]="name";static struct _tuple5 Cyc__gentuple_591={
-offsetof(struct Cyc_Absyn_VarargInfo,name),{_tmp259,_tmp259,_tmp259 + 5},(void*)&
-Cyc__genrep_587};static char _tmp25A[3]="tq";static struct _tuple5 Cyc__gentuple_592={
-offsetof(struct Cyc_Absyn_VarargInfo,tq),{_tmp25A,_tmp25A,_tmp25A + 3},(void*)& Cyc__genrep_134};
-static char _tmp25B[5]="type";static struct _tuple5 Cyc__gentuple_593={offsetof(
-struct Cyc_Absyn_VarargInfo,type),{_tmp25B,_tmp25B,_tmp25B + 5},(void*)((void*)&
-Cyc_Absyn_type_t_rep)};static char _tmp25C[7]="inject";static struct _tuple5 Cyc__gentuple_594={
-offsetof(struct Cyc_Absyn_VarargInfo,inject),{_tmp25C,_tmp25C,_tmp25C + 7},(void*)((
-void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_595[4]={& Cyc__gentuple_591,&
+char _tmp254[4]="Opt";static struct _tagged_arr Cyc__genname_590=(struct _tagged_arr){
+_tmp254,_tmp254,_tmp254 + 4};static char _tmp255[2]="v";static struct _tuple5 Cyc__gentuple_588={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp255,_tmp255,_tmp255 + 2},(
+void*)& Cyc__genrep_12};static struct _tuple5*Cyc__genarr_589[1]={& Cyc__gentuple_588};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_var_t2_rep={3,(struct
+_tagged_arr*)& Cyc__genname_590,sizeof(struct Cyc_Core_Opt),{(void*)((struct
+_tuple5**)Cyc__genarr_589),(void*)((struct _tuple5**)Cyc__genarr_589),(void*)((
+struct _tuple5**)Cyc__genarr_589 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_587={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_var_t2_rep)};static char _tmp258[11]="VarargInfo";
+static struct _tagged_arr Cyc__genname_596=(struct _tagged_arr){_tmp258,_tmp258,
+_tmp258 + 11};static char _tmp259[5]="name";static struct _tuple5 Cyc__gentuple_591={
+offsetof(struct Cyc_Absyn_VarargInfo,name),(struct _tagged_arr){_tmp259,_tmp259,
+_tmp259 + 5},(void*)& Cyc__genrep_587};static char _tmp25A[3]="tq";static struct
+_tuple5 Cyc__gentuple_592={offsetof(struct Cyc_Absyn_VarargInfo,tq),(struct
+_tagged_arr){_tmp25A,_tmp25A,_tmp25A + 3},(void*)& Cyc__genrep_134};static char
+_tmp25B[5]="type";static struct _tuple5 Cyc__gentuple_593={offsetof(struct Cyc_Absyn_VarargInfo,type),(
+struct _tagged_arr){_tmp25B,_tmp25B,_tmp25B + 5},(void*)((void*)& Cyc_Absyn_type_t_rep)};
+static char _tmp25C[7]="inject";static struct _tuple5 Cyc__gentuple_594={offsetof(
+struct Cyc_Absyn_VarargInfo,inject),(struct _tagged_arr){_tmp25C,_tmp25C,_tmp25C + 
+7},(void*)((void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_595[4]={& Cyc__gentuple_591,&
 Cyc__gentuple_592,& Cyc__gentuple_593,& Cyc__gentuple_594};struct Cyc_Typerep_Struct_struct
 Cyc_Absyn_vararg_info_t_rep={3,(struct _tagged_arr*)& Cyc__genname_596,sizeof(
 struct Cyc_Absyn_VarargInfo),{(void*)((struct _tuple5**)Cyc__genarr_595),(void*)((
@@ -2296,15 +2328,16 @@ Cyc__gentuple_374};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_372={4,
 sizeof(struct _tuple9),{(void*)((struct _tuple6**)Cyc__genarr_375),(void*)((struct
 _tuple6**)Cyc__genarr_375),(void*)((struct _tuple6**)Cyc__genarr_375 + 2)}};static
 struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_371={1,1,(void*)((void*)& Cyc__genrep_372)};
-static char _tmp261[5]="List";static struct _tagged_arr Cyc__genname_379={_tmp261,
-_tmp261,_tmp261 + 5};static char _tmp262[3]="hd";static struct _tuple5 Cyc__gentuple_376={
-offsetof(struct Cyc_List_List,hd),{_tmp262,_tmp262,_tmp262 + 3},(void*)& Cyc__genrep_371};
-static char _tmp263[3]="tl";static struct _tuple5 Cyc__gentuple_377={offsetof(struct
-Cyc_List_List,tl),{_tmp263,_tmp263,_tmp263 + 3},(void*)& Cyc__genrep_370};static
-struct _tuple5*Cyc__genarr_378[2]={& Cyc__gentuple_376,& Cyc__gentuple_377};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List060Absyn_type_t4Absyn_type_t1_446H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_379,sizeof(struct Cyc_List_List),{(void*)((
-struct _tuple5**)Cyc__genarr_378),(void*)((struct _tuple5**)Cyc__genarr_378),(void*)((
+static char _tmp261[5]="List";static struct _tagged_arr Cyc__genname_379=(struct
+_tagged_arr){_tmp261,_tmp261,_tmp261 + 5};static char _tmp262[3]="hd";static struct
+_tuple5 Cyc__gentuple_376={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp262,_tmp262,_tmp262 + 3},(void*)& Cyc__genrep_371};static char _tmp263[3]="tl";
+static struct _tuple5 Cyc__gentuple_377={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp263,_tmp263,_tmp263 + 3},(void*)& Cyc__genrep_370};static struct
+_tuple5*Cyc__genarr_378[2]={& Cyc__gentuple_376,& Cyc__gentuple_377};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List060Absyn_type_t4Absyn_type_t1_446H2_rep={3,(struct
+_tagged_arr*)& Cyc__genname_379,sizeof(struct Cyc_List_List),{(void*)((struct
+_tuple5**)Cyc__genarr_378),(void*)((struct _tuple5**)Cyc__genarr_378),(void*)((
 struct _tuple5**)Cyc__genarr_378 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_370={
 1,1,(void*)((void*)& Cyc_struct_List_List060Absyn_type_t4Absyn_type_t1_446H2_rep)};
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_162;extern struct Cyc_Typerep_Struct_struct
@@ -2402,18 +2435,18 @@ sizeof(struct _tuple41),{(void*)((struct _tuple6**)Cyc__genarr_429),(void*)((
 struct _tuple6**)Cyc__genarr_429),(void*)((struct _tuple6**)Cyc__genarr_429 + 3)}};
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_421;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_236;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_pat_t46H2_rep;
-static char _tmp272[5]="List";static struct _tagged_arr Cyc__genname_240={_tmp272,
-_tmp272,_tmp272 + 5};static char _tmp273[3]="hd";static struct _tuple5 Cyc__gentuple_237={
-offsetof(struct Cyc_List_List,hd),{_tmp273,_tmp273,_tmp273 + 3},(void*)& Cyc__genrep_231};
-static char _tmp274[3]="tl";static struct _tuple5 Cyc__gentuple_238={offsetof(struct
-Cyc_List_List,tl),{_tmp274,_tmp274,_tmp274 + 3},(void*)& Cyc__genrep_236};static
-struct _tuple5*Cyc__genarr_239[2]={& Cyc__gentuple_237,& Cyc__gentuple_238};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_pat_t46H2_rep={3,(struct
-_tagged_arr*)& Cyc__genname_240,sizeof(struct Cyc_List_List),{(void*)((struct
-_tuple5**)Cyc__genarr_239),(void*)((struct _tuple5**)Cyc__genarr_239),(void*)((
-struct _tuple5**)Cyc__genarr_239 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_236={
-1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_pat_t46H2_rep)};static struct
-_tuple6 Cyc__gentuple_422={offsetof(struct _tuple13,f1),(void*)& Cyc__genrep_5};
+static char _tmp272[5]="List";static struct _tagged_arr Cyc__genname_240=(struct
+_tagged_arr){_tmp272,_tmp272,_tmp272 + 5};static char _tmp273[3]="hd";static struct
+_tuple5 Cyc__gentuple_237={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp273,_tmp273,_tmp273 + 3},(void*)& Cyc__genrep_231};static char _tmp274[3]="tl";
+static struct _tuple5 Cyc__gentuple_238={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp274,_tmp274,_tmp274 + 3},(void*)& Cyc__genrep_236};static struct
+_tuple5*Cyc__genarr_239[2]={& Cyc__gentuple_237,& Cyc__gentuple_238};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List0Absyn_pat_t46H2_rep={3,(struct _tagged_arr*)& Cyc__genname_240,
+sizeof(struct Cyc_List_List),{(void*)((struct _tuple5**)Cyc__genarr_239),(void*)((
+struct _tuple5**)Cyc__genarr_239),(void*)((struct _tuple5**)Cyc__genarr_239 + 2)}};
+static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_236={1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_pat_t46H2_rep)};
+static struct _tuple6 Cyc__gentuple_422={offsetof(struct _tuple13,f1),(void*)& Cyc__genrep_5};
 static struct _tuple6 Cyc__gentuple_423={offsetof(struct _tuple13,f2),(void*)& Cyc__genrep_236};
 static struct _tuple6*Cyc__genarr_424[2]={& Cyc__gentuple_422,& Cyc__gentuple_423};
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_421={4,sizeof(struct _tuple13),{(
@@ -2429,23 +2462,25 @@ void*)((struct _tuple6**)Cyc__genarr_420 + 2)}};extern struct Cyc_Typerep_Tuple_
 Cyc__genrep_328;extern struct Cyc_Typerep_Struct_struct Cyc_Absyn_aggr_info_t_rep;
 extern struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_AggrInfoU_rep;extern struct
 Cyc_Typerep_Tuple_struct Cyc__genrep_400;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_aggr_kind_t_rep;
-static char _tmp279[8]="StructA";static struct _tuple7 Cyc__gentuple_385={0,{_tmp279,
-_tmp279,_tmp279 + 8}};static char _tmp27A[7]="UnionA";static struct _tuple7 Cyc__gentuple_386={
-1,{_tmp27A,_tmp27A,_tmp27A + 7}};static struct _tuple7*Cyc__genarr_387[2]={& Cyc__gentuple_385,&
-Cyc__gentuple_386};static struct _tuple5*Cyc__genarr_388[0]={};static char _tmp27C[9]="AggrKind";
-struct Cyc_Typerep_TUnion_struct Cyc_Absyn_aggr_kind_t_rep={5,{_tmp27C,_tmp27C,
-_tmp27C + 9},{(void*)((struct _tuple7**)Cyc__genarr_387),(void*)((struct _tuple7**)
-Cyc__genarr_387),(void*)((struct _tuple7**)Cyc__genarr_387 + 2)},{(void*)((struct
-_tuple5**)Cyc__genarr_388),(void*)((struct _tuple5**)Cyc__genarr_388),(void*)((
-struct _tuple5**)Cyc__genarr_388 + 0)}};struct _tuple43{unsigned int f1;void*f2;
-struct _tuple0*f3;};static struct _tuple6 Cyc__gentuple_401={offsetof(struct _tuple43,f1),(
-void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_402={offsetof(struct
-_tuple43,f2),(void*)& Cyc_Absyn_aggr_kind_t_rep};static struct _tuple6 Cyc__gentuple_403={
-offsetof(struct _tuple43,f3),(void*)& Cyc__genrep_10};static struct _tuple6*Cyc__genarr_404[
-3]={& Cyc__gentuple_401,& Cyc__gentuple_402,& Cyc__gentuple_403};static struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_400={4,sizeof(struct _tuple43),{(void*)((struct _tuple6**)Cyc__genarr_404),(
-void*)((struct _tuple6**)Cyc__genarr_404),(void*)((struct _tuple6**)Cyc__genarr_404
-+ 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_353;extern struct Cyc_Typerep_ThinPtr_struct
+static char _tmp279[8]="StructA";static struct _tuple7 Cyc__gentuple_385={0,(struct
+_tagged_arr){_tmp279,_tmp279,_tmp279 + 8}};static char _tmp27A[7]="UnionA";static
+struct _tuple7 Cyc__gentuple_386={1,(struct _tagged_arr){_tmp27A,_tmp27A,_tmp27A + 7}};
+static struct _tuple7*Cyc__genarr_387[2]={& Cyc__gentuple_385,& Cyc__gentuple_386};
+static struct _tuple5*Cyc__genarr_388[0]={};static char _tmp27C[9]="AggrKind";struct
+Cyc_Typerep_TUnion_struct Cyc_Absyn_aggr_kind_t_rep={5,(struct _tagged_arr){
+_tmp27C,_tmp27C,_tmp27C + 9},{(void*)((struct _tuple7**)Cyc__genarr_387),(void*)((
+struct _tuple7**)Cyc__genarr_387),(void*)((struct _tuple7**)Cyc__genarr_387 + 2)},{(
+void*)((struct _tuple5**)Cyc__genarr_388),(void*)((struct _tuple5**)Cyc__genarr_388),(
+void*)((struct _tuple5**)Cyc__genarr_388 + 0)}};struct _tuple43{unsigned int f1;void*
+f2;struct _tuple0*f3;};static struct _tuple6 Cyc__gentuple_401={offsetof(struct
+_tuple43,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_402={
+offsetof(struct _tuple43,f2),(void*)& Cyc_Absyn_aggr_kind_t_rep};static struct
+_tuple6 Cyc__gentuple_403={offsetof(struct _tuple43,f3),(void*)& Cyc__genrep_10};
+static struct _tuple6*Cyc__genarr_404[3]={& Cyc__gentuple_401,& Cyc__gentuple_402,&
+Cyc__gentuple_403};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_400={4,
+sizeof(struct _tuple43),{(void*)((struct _tuple6**)Cyc__genarr_404),(void*)((
+struct _tuple6**)Cyc__genarr_404),(void*)((struct _tuple6**)Cyc__genarr_404 + 3)}};
+extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_353;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_354;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_355;extern
 struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Aggrdecl_rep;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_356;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_AggrdeclImpl_rep;
@@ -2456,14 +2491,15 @@ extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_88;extern struct Cyc_Typere
 Cyc_struct_List_List0Absyn_attribute_t46H2_rep;extern struct Cyc_Typerep_TUnion_struct
 Cyc_Absyn_attribute_t_rep;extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_107;
 extern struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_Format_Type_rep;static char
-_tmp27E[10]="Printf_ft";static struct _tuple7 Cyc__gentuple_108={0,{_tmp27E,_tmp27E,
-_tmp27E + 10}};static char _tmp27F[9]="Scanf_ft";static struct _tuple7 Cyc__gentuple_109={
-1,{_tmp27F,_tmp27F,_tmp27F + 9}};static struct _tuple7*Cyc__genarr_110[2]={& Cyc__gentuple_108,&
-Cyc__gentuple_109};static struct _tuple5*Cyc__genarr_111[0]={};static char _tmp281[
-12]="Format_Type";struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_Format_Type_rep={
-5,{_tmp281,_tmp281,_tmp281 + 12},{(void*)((struct _tuple7**)Cyc__genarr_110),(void*)((
-struct _tuple7**)Cyc__genarr_110),(void*)((struct _tuple7**)Cyc__genarr_110 + 2)},{(
-void*)((struct _tuple5**)Cyc__genarr_111),(void*)((struct _tuple5**)Cyc__genarr_111),(
+_tmp27E[10]="Printf_ft";static struct _tuple7 Cyc__gentuple_108={0,(struct
+_tagged_arr){_tmp27E,_tmp27E,_tmp27E + 10}};static char _tmp27F[9]="Scanf_ft";
+static struct _tuple7 Cyc__gentuple_109={1,(struct _tagged_arr){_tmp27F,_tmp27F,
+_tmp27F + 9}};static struct _tuple7*Cyc__genarr_110[2]={& Cyc__gentuple_108,& Cyc__gentuple_109};
+static struct _tuple5*Cyc__genarr_111[0]={};static char _tmp281[12]="Format_Type";
+struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_Format_Type_rep={5,(struct
+_tagged_arr){_tmp281,_tmp281,_tmp281 + 12},{(void*)((struct _tuple7**)Cyc__genarr_110),(
+void*)((struct _tuple7**)Cyc__genarr_110),(void*)((struct _tuple7**)Cyc__genarr_110
++ 2)},{(void*)((struct _tuple5**)Cyc__genarr_111),(void*)((struct _tuple5**)Cyc__genarr_111),(
 void*)((struct _tuple5**)Cyc__genarr_111 + 0)}};struct _tuple44{unsigned int f1;void*
 f2;int f3;int f4;};static struct _tuple6 Cyc__gentuple_112={offsetof(struct _tuple44,f1),(
 void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_113={offsetof(struct
@@ -2474,112 +2510,123 @@ static struct _tuple6*Cyc__genarr_116[4]={& Cyc__gentuple_112,& Cyc__gentuple_11
 Cyc__gentuple_114,& Cyc__gentuple_115};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_107={
 4,sizeof(struct _tuple44),{(void*)((struct _tuple6**)Cyc__genarr_116),(void*)((
 struct _tuple6**)Cyc__genarr_116),(void*)((struct _tuple6**)Cyc__genarr_116 + 4)}};
-static char _tmp283[12]="Stdcall_att";static struct _tuple7 Cyc__gentuple_89={0,{
-_tmp283,_tmp283,_tmp283 + 12}};static char _tmp284[10]="Cdecl_att";static struct
-_tuple7 Cyc__gentuple_90={1,{_tmp284,_tmp284,_tmp284 + 10}};static char _tmp285[13]="Fastcall_att";
-static struct _tuple7 Cyc__gentuple_91={2,{_tmp285,_tmp285,_tmp285 + 13}};static char
-_tmp286[13]="Noreturn_att";static struct _tuple7 Cyc__gentuple_92={3,{_tmp286,
-_tmp286,_tmp286 + 13}};static char _tmp287[10]="Const_att";static struct _tuple7 Cyc__gentuple_93={
-4,{_tmp287,_tmp287,_tmp287 + 10}};static char _tmp288[11]="Packed_att";static struct
-_tuple7 Cyc__gentuple_94={5,{_tmp288,_tmp288,_tmp288 + 11}};static char _tmp289[13]="Nocommon_att";
-static struct _tuple7 Cyc__gentuple_95={6,{_tmp289,_tmp289,_tmp289 + 13}};static char
-_tmp28A[11]="Shared_att";static struct _tuple7 Cyc__gentuple_96={7,{_tmp28A,_tmp28A,
+static char _tmp283[12]="Stdcall_att";static struct _tuple7 Cyc__gentuple_89={0,(
+struct _tagged_arr){_tmp283,_tmp283,_tmp283 + 12}};static char _tmp284[10]="Cdecl_att";
+static struct _tuple7 Cyc__gentuple_90={1,(struct _tagged_arr){_tmp284,_tmp284,
+_tmp284 + 10}};static char _tmp285[13]="Fastcall_att";static struct _tuple7 Cyc__gentuple_91={
+2,(struct _tagged_arr){_tmp285,_tmp285,_tmp285 + 13}};static char _tmp286[13]="Noreturn_att";
+static struct _tuple7 Cyc__gentuple_92={3,(struct _tagged_arr){_tmp286,_tmp286,
+_tmp286 + 13}};static char _tmp287[10]="Const_att";static struct _tuple7 Cyc__gentuple_93={
+4,(struct _tagged_arr){_tmp287,_tmp287,_tmp287 + 10}};static char _tmp288[11]="Packed_att";
+static struct _tuple7 Cyc__gentuple_94={5,(struct _tagged_arr){_tmp288,_tmp288,
+_tmp288 + 11}};static char _tmp289[13]="Nocommon_att";static struct _tuple7 Cyc__gentuple_95={
+6,(struct _tagged_arr){_tmp289,_tmp289,_tmp289 + 13}};static char _tmp28A[11]="Shared_att";
+static struct _tuple7 Cyc__gentuple_96={7,(struct _tagged_arr){_tmp28A,_tmp28A,
 _tmp28A + 11}};static char _tmp28B[11]="Unused_att";static struct _tuple7 Cyc__gentuple_97={
-8,{_tmp28B,_tmp28B,_tmp28B + 11}};static char _tmp28C[9]="Weak_att";static struct
-_tuple7 Cyc__gentuple_98={9,{_tmp28C,_tmp28C,_tmp28C + 9}};static char _tmp28D[14]="Dllimport_att";
-static struct _tuple7 Cyc__gentuple_99={10,{_tmp28D,_tmp28D,_tmp28D + 14}};static
-char _tmp28E[14]="Dllexport_att";static struct _tuple7 Cyc__gentuple_100={11,{
-_tmp28E,_tmp28E,_tmp28E + 14}};static char _tmp28F[27]="No_instrument_function_att";
-static struct _tuple7 Cyc__gentuple_101={12,{_tmp28F,_tmp28F,_tmp28F + 27}};static
-char _tmp290[16]="Constructor_att";static struct _tuple7 Cyc__gentuple_102={13,{
-_tmp290,_tmp290,_tmp290 + 16}};static char _tmp291[15]="Destructor_att";static
-struct _tuple7 Cyc__gentuple_103={14,{_tmp291,_tmp291,_tmp291 + 15}};static char
-_tmp292[26]="No_check_memory_usage_att";static struct _tuple7 Cyc__gentuple_104={15,{
-_tmp292,_tmp292,_tmp292 + 26}};static char _tmp293[9]="Pure_att";static struct
-_tuple7 Cyc__gentuple_105={16,{_tmp293,_tmp293,_tmp293 + 9}};static struct _tuple7*
-Cyc__genarr_106[17]={& Cyc__gentuple_89,& Cyc__gentuple_90,& Cyc__gentuple_91,& Cyc__gentuple_92,&
-Cyc__gentuple_93,& Cyc__gentuple_94,& Cyc__gentuple_95,& Cyc__gentuple_96,& Cyc__gentuple_97,&
-Cyc__gentuple_98,& Cyc__gentuple_99,& Cyc__gentuple_100,& Cyc__gentuple_101,& Cyc__gentuple_102,&
-Cyc__gentuple_103,& Cyc__gentuple_104,& Cyc__gentuple_105};static char _tmp294[12]="Regparm_att";
-static struct _tuple5 Cyc__gentuple_121={0,{_tmp294,_tmp294,_tmp294 + 12},(void*)&
-Cyc__genrep_61};static char _tmp295[12]="Aligned_att";static struct _tuple5 Cyc__gentuple_122={
-1,{_tmp295,_tmp295,_tmp295 + 12},(void*)& Cyc__genrep_61};static char _tmp296[12]="Section_att";
-static struct _tuple5 Cyc__gentuple_123={2,{_tmp296,_tmp296,_tmp296 + 12},(void*)&
+8,(struct _tagged_arr){_tmp28B,_tmp28B,_tmp28B + 11}};static char _tmp28C[9]="Weak_att";
+static struct _tuple7 Cyc__gentuple_98={9,(struct _tagged_arr){_tmp28C,_tmp28C,
+_tmp28C + 9}};static char _tmp28D[14]="Dllimport_att";static struct _tuple7 Cyc__gentuple_99={
+10,(struct _tagged_arr){_tmp28D,_tmp28D,_tmp28D + 14}};static char _tmp28E[14]="Dllexport_att";
+static struct _tuple7 Cyc__gentuple_100={11,(struct _tagged_arr){_tmp28E,_tmp28E,
+_tmp28E + 14}};static char _tmp28F[27]="No_instrument_function_att";static struct
+_tuple7 Cyc__gentuple_101={12,(struct _tagged_arr){_tmp28F,_tmp28F,_tmp28F + 27}};
+static char _tmp290[16]="Constructor_att";static struct _tuple7 Cyc__gentuple_102={13,(
+struct _tagged_arr){_tmp290,_tmp290,_tmp290 + 16}};static char _tmp291[15]="Destructor_att";
+static struct _tuple7 Cyc__gentuple_103={14,(struct _tagged_arr){_tmp291,_tmp291,
+_tmp291 + 15}};static char _tmp292[26]="No_check_memory_usage_att";static struct
+_tuple7 Cyc__gentuple_104={15,(struct _tagged_arr){_tmp292,_tmp292,_tmp292 + 26}};
+static char _tmp293[9]="Pure_att";static struct _tuple7 Cyc__gentuple_105={16,(struct
+_tagged_arr){_tmp293,_tmp293,_tmp293 + 9}};static struct _tuple7*Cyc__genarr_106[17]={&
+Cyc__gentuple_89,& Cyc__gentuple_90,& Cyc__gentuple_91,& Cyc__gentuple_92,& Cyc__gentuple_93,&
+Cyc__gentuple_94,& Cyc__gentuple_95,& Cyc__gentuple_96,& Cyc__gentuple_97,& Cyc__gentuple_98,&
+Cyc__gentuple_99,& Cyc__gentuple_100,& Cyc__gentuple_101,& Cyc__gentuple_102,& Cyc__gentuple_103,&
+Cyc__gentuple_104,& Cyc__gentuple_105};static char _tmp294[12]="Regparm_att";static
+struct _tuple5 Cyc__gentuple_121={0,(struct _tagged_arr){_tmp294,_tmp294,_tmp294 + 
+12},(void*)& Cyc__genrep_61};static char _tmp295[12]="Aligned_att";static struct
+_tuple5 Cyc__gentuple_122={1,(struct _tagged_arr){_tmp295,_tmp295,_tmp295 + 12},(
+void*)& Cyc__genrep_61};static char _tmp296[12]="Section_att";static struct _tuple5
+Cyc__gentuple_123={2,(struct _tagged_arr){_tmp296,_tmp296,_tmp296 + 12},(void*)&
 Cyc__genrep_117};static char _tmp297[11]="Format_att";static struct _tuple5 Cyc__gentuple_124={
-3,{_tmp297,_tmp297,_tmp297 + 11},(void*)& Cyc__genrep_107};static char _tmp298[16]="Initializes_att";
-static struct _tuple5 Cyc__gentuple_125={4,{_tmp298,_tmp298,_tmp298 + 16},(void*)&
-Cyc__genrep_61};static struct _tuple5*Cyc__genarr_126[5]={& Cyc__gentuple_121,& Cyc__gentuple_122,&
-Cyc__gentuple_123,& Cyc__gentuple_124,& Cyc__gentuple_125};static char _tmp29A[10]="Attribute";
-struct Cyc_Typerep_TUnion_struct Cyc_Absyn_attribute_t_rep={5,{_tmp29A,_tmp29A,
-_tmp29A + 10},{(void*)((struct _tuple7**)Cyc__genarr_106),(void*)((struct _tuple7**)
-Cyc__genarr_106),(void*)((struct _tuple7**)Cyc__genarr_106 + 17)},{(void*)((struct
-_tuple5**)Cyc__genarr_126),(void*)((struct _tuple5**)Cyc__genarr_126),(void*)((
-struct _tuple5**)Cyc__genarr_126 + 5)}};static char _tmp29B[5]="List";static struct
-_tagged_arr Cyc__genname_130={_tmp29B,_tmp29B,_tmp29B + 5};static char _tmp29C[3]="hd";
-static struct _tuple5 Cyc__gentuple_127={offsetof(struct Cyc_List_List,hd),{_tmp29C,
-_tmp29C,_tmp29C + 3},(void*)& Cyc_Absyn_attribute_t_rep};static char _tmp29D[3]="tl";
-static struct _tuple5 Cyc__gentuple_128={offsetof(struct Cyc_List_List,tl),{_tmp29D,
-_tmp29D,_tmp29D + 3},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_129[
-2]={& Cyc__gentuple_127,& Cyc__gentuple_128};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_attribute_t46H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_130,sizeof(struct Cyc_List_List),{(void*)((
+3,(struct _tagged_arr){_tmp297,_tmp297,_tmp297 + 11},(void*)& Cyc__genrep_107};
+static char _tmp298[16]="Initializes_att";static struct _tuple5 Cyc__gentuple_125={4,(
+struct _tagged_arr){_tmp298,_tmp298,_tmp298 + 16},(void*)& Cyc__genrep_61};static
+struct _tuple5*Cyc__genarr_126[5]={& Cyc__gentuple_121,& Cyc__gentuple_122,& Cyc__gentuple_123,&
+Cyc__gentuple_124,& Cyc__gentuple_125};static char _tmp29A[10]="Attribute";struct
+Cyc_Typerep_TUnion_struct Cyc_Absyn_attribute_t_rep={5,(struct _tagged_arr){
+_tmp29A,_tmp29A,_tmp29A + 10},{(void*)((struct _tuple7**)Cyc__genarr_106),(void*)((
+struct _tuple7**)Cyc__genarr_106),(void*)((struct _tuple7**)Cyc__genarr_106 + 17)},{(
+void*)((struct _tuple5**)Cyc__genarr_126),(void*)((struct _tuple5**)Cyc__genarr_126),(
+void*)((struct _tuple5**)Cyc__genarr_126 + 5)}};static char _tmp29B[5]="List";static
+struct _tagged_arr Cyc__genname_130=(struct _tagged_arr){_tmp29B,_tmp29B,_tmp29B + 5};
+static char _tmp29C[3]="hd";static struct _tuple5 Cyc__gentuple_127={offsetof(struct
+Cyc_List_List,hd),(struct _tagged_arr){_tmp29C,_tmp29C,_tmp29C + 3},(void*)& Cyc_Absyn_attribute_t_rep};
+static char _tmp29D[3]="tl";static struct _tuple5 Cyc__gentuple_128={offsetof(struct
+Cyc_List_List,tl),(struct _tagged_arr){_tmp29D,_tmp29D,_tmp29D + 3},(void*)& Cyc__genrep_88};
+static struct _tuple5*Cyc__genarr_129[2]={& Cyc__gentuple_127,& Cyc__gentuple_128};
+struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_attribute_t46H2_rep={3,(
+struct _tagged_arr*)& Cyc__genname_130,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_129),(void*)((struct _tuple5**)Cyc__genarr_129),(void*)((
 struct _tuple5**)Cyc__genarr_129 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_88={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_attribute_t46H2_rep)};static char
-_tmp2A0[10]="Aggrfield";static struct _tagged_arr Cyc__genname_365={_tmp2A0,_tmp2A0,
-_tmp2A0 + 10};static char _tmp2A1[5]="name";static struct _tuple5 Cyc__gentuple_359={
-offsetof(struct Cyc_Absyn_Aggrfield,name),{_tmp2A1,_tmp2A1,_tmp2A1 + 5},(void*)&
-Cyc__genrep_12};static char _tmp2A2[3]="tq";static struct _tuple5 Cyc__gentuple_360={
-offsetof(struct Cyc_Absyn_Aggrfield,tq),{_tmp2A2,_tmp2A2,_tmp2A2 + 3},(void*)& Cyc__genrep_134};
-static char _tmp2A3[5]="type";static struct _tuple5 Cyc__gentuple_361={offsetof(
-struct Cyc_Absyn_Aggrfield,type),{_tmp2A3,_tmp2A3,_tmp2A3 + 5},(void*)((void*)& Cyc_Absyn_type_t_rep)};
+_tmp2A0[10]="Aggrfield";static struct _tagged_arr Cyc__genname_365=(struct
+_tagged_arr){_tmp2A0,_tmp2A0,_tmp2A0 + 10};static char _tmp2A1[5]="name";static
+struct _tuple5 Cyc__gentuple_359={offsetof(struct Cyc_Absyn_Aggrfield,name),(struct
+_tagged_arr){_tmp2A1,_tmp2A1,_tmp2A1 + 5},(void*)& Cyc__genrep_12};static char
+_tmp2A2[3]="tq";static struct _tuple5 Cyc__gentuple_360={offsetof(struct Cyc_Absyn_Aggrfield,tq),(
+struct _tagged_arr){_tmp2A2,_tmp2A2,_tmp2A2 + 3},(void*)& Cyc__genrep_134};static
+char _tmp2A3[5]="type";static struct _tuple5 Cyc__gentuple_361={offsetof(struct Cyc_Absyn_Aggrfield,type),(
+struct _tagged_arr){_tmp2A3,_tmp2A3,_tmp2A3 + 5},(void*)((void*)& Cyc_Absyn_type_t_rep)};
 static char _tmp2A4[6]="width";static struct _tuple5 Cyc__gentuple_362={offsetof(
-struct Cyc_Absyn_Aggrfield,width),{_tmp2A4,_tmp2A4,_tmp2A4 + 6},(void*)& Cyc__genrep_78};
-static char _tmp2A5[11]="attributes";static struct _tuple5 Cyc__gentuple_363={
-offsetof(struct Cyc_Absyn_Aggrfield,attributes),{_tmp2A5,_tmp2A5,_tmp2A5 + 11},(
-void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_364[5]={& Cyc__gentuple_359,&
-Cyc__gentuple_360,& Cyc__gentuple_361,& Cyc__gentuple_362,& Cyc__gentuple_363};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Aggrfield_rep={3,(struct
-_tagged_arr*)& Cyc__genname_365,sizeof(struct Cyc_Absyn_Aggrfield),{(void*)((
+struct Cyc_Absyn_Aggrfield,width),(struct _tagged_arr){_tmp2A4,_tmp2A4,_tmp2A4 + 6},(
+void*)& Cyc__genrep_78};static char _tmp2A5[11]="attributes";static struct _tuple5 Cyc__gentuple_363={
+offsetof(struct Cyc_Absyn_Aggrfield,attributes),(struct _tagged_arr){_tmp2A5,
+_tmp2A5,_tmp2A5 + 11},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_364[
+5]={& Cyc__gentuple_359,& Cyc__gentuple_360,& Cyc__gentuple_361,& Cyc__gentuple_362,&
+Cyc__gentuple_363};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Aggrfield_rep={
+3,(struct _tagged_arr*)& Cyc__genname_365,sizeof(struct Cyc_Absyn_Aggrfield),{(void*)((
 struct _tuple5**)Cyc__genarr_364),(void*)((struct _tuple5**)Cyc__genarr_364),(void*)((
 struct _tuple5**)Cyc__genarr_364 + 5)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_358={
 1,1,(void*)((void*)& Cyc_struct_Absyn_Aggrfield_rep)};static char _tmp2A8[5]="List";
-static struct _tagged_arr Cyc__genname_369={_tmp2A8,_tmp2A8,_tmp2A8 + 5};static char
-_tmp2A9[3]="hd";static struct _tuple5 Cyc__gentuple_366={offsetof(struct Cyc_List_List,hd),{
-_tmp2A9,_tmp2A9,_tmp2A9 + 3},(void*)& Cyc__genrep_358};static char _tmp2AA[3]="tl";
-static struct _tuple5 Cyc__gentuple_367={offsetof(struct Cyc_List_List,tl),{_tmp2AA,
-_tmp2AA,_tmp2AA + 3},(void*)& Cyc__genrep_357};static struct _tuple5*Cyc__genarr_368[
-2]={& Cyc__gentuple_366,& Cyc__gentuple_367};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_aggrfield_t46H2_rep={
+static struct _tagged_arr Cyc__genname_369=(struct _tagged_arr){_tmp2A8,_tmp2A8,
+_tmp2A8 + 5};static char _tmp2A9[3]="hd";static struct _tuple5 Cyc__gentuple_366={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp2A9,_tmp2A9,_tmp2A9 + 3},(
+void*)& Cyc__genrep_358};static char _tmp2AA[3]="tl";static struct _tuple5 Cyc__gentuple_367={
+offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp2AA,_tmp2AA,_tmp2AA + 3},(
+void*)& Cyc__genrep_357};static struct _tuple5*Cyc__genarr_368[2]={& Cyc__gentuple_366,&
+Cyc__gentuple_367};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_aggrfield_t46H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_369,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_368),(void*)((struct _tuple5**)Cyc__genarr_368),(void*)((
 struct _tuple5**)Cyc__genarr_368 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_357={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_aggrfield_t46H2_rep)};static char
-_tmp2AD[13]="AggrdeclImpl";static struct _tagged_arr Cyc__genname_384={_tmp2AD,
-_tmp2AD,_tmp2AD + 13};static char _tmp2AE[11]="exist_vars";static struct _tuple5 Cyc__gentuple_380={
-offsetof(struct Cyc_Absyn_AggrdeclImpl,exist_vars),{_tmp2AE,_tmp2AE,_tmp2AE + 11},(
-void*)& Cyc__genrep_311};static char _tmp2AF[7]="rgn_po";static struct _tuple5 Cyc__gentuple_381={
-offsetof(struct Cyc_Absyn_AggrdeclImpl,rgn_po),{_tmp2AF,_tmp2AF,_tmp2AF + 7},(void*)&
-Cyc__genrep_370};static char _tmp2B0[7]="fields";static struct _tuple5 Cyc__gentuple_382={
-offsetof(struct Cyc_Absyn_AggrdeclImpl,fields),{_tmp2B0,_tmp2B0,_tmp2B0 + 7},(void*)&
-Cyc__genrep_357};static struct _tuple5*Cyc__genarr_383[3]={& Cyc__gentuple_380,& Cyc__gentuple_381,&
-Cyc__gentuple_382};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_AggrdeclImpl_rep={
-3,(struct _tagged_arr*)& Cyc__genname_384,sizeof(struct Cyc_Absyn_AggrdeclImpl),{(
-void*)((struct _tuple5**)Cyc__genarr_383),(void*)((struct _tuple5**)Cyc__genarr_383),(
-void*)((struct _tuple5**)Cyc__genarr_383 + 3)}};static struct Cyc_Typerep_ThinPtr_struct
-Cyc__genrep_356={1,1,(void*)((void*)& Cyc_struct_Absyn_AggrdeclImpl_rep)};static
-char _tmp2B3[9]="Aggrdecl";static struct _tagged_arr Cyc__genname_396={_tmp2B3,
-_tmp2B3,_tmp2B3 + 9};static char _tmp2B4[5]="kind";static struct _tuple5 Cyc__gentuple_389={
-offsetof(struct Cyc_Absyn_Aggrdecl,kind),{_tmp2B4,_tmp2B4,_tmp2B4 + 5},(void*)& Cyc_Absyn_aggr_kind_t_rep};
-static char _tmp2B5[3]="sc";static struct _tuple5 Cyc__gentuple_390={offsetof(struct
-Cyc_Absyn_Aggrdecl,sc),{_tmp2B5,_tmp2B5,_tmp2B5 + 3},(void*)& Cyc_Absyn_scope_t_rep};
-static char _tmp2B6[5]="name";static struct _tuple5 Cyc__gentuple_391={offsetof(
-struct Cyc_Absyn_Aggrdecl,name),{_tmp2B6,_tmp2B6,_tmp2B6 + 5},(void*)& Cyc__genrep_10};
-static char _tmp2B7[4]="tvs";static struct _tuple5 Cyc__gentuple_392={offsetof(struct
-Cyc_Absyn_Aggrdecl,tvs),{_tmp2B7,_tmp2B7,_tmp2B7 + 4},(void*)& Cyc__genrep_311};
-static char _tmp2B8[5]="impl";static struct _tuple5 Cyc__gentuple_393={offsetof(
-struct Cyc_Absyn_Aggrdecl,impl),{_tmp2B8,_tmp2B8,_tmp2B8 + 5},(void*)& Cyc__genrep_356};
-static char _tmp2B9[11]="attributes";static struct _tuple5 Cyc__gentuple_394={
-offsetof(struct Cyc_Absyn_Aggrdecl,attributes),{_tmp2B9,_tmp2B9,_tmp2B9 + 11},(
-void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_395[6]={& Cyc__gentuple_389,&
+_tmp2AD[13]="AggrdeclImpl";static struct _tagged_arr Cyc__genname_384=(struct
+_tagged_arr){_tmp2AD,_tmp2AD,_tmp2AD + 13};static char _tmp2AE[11]="exist_vars";
+static struct _tuple5 Cyc__gentuple_380={offsetof(struct Cyc_Absyn_AggrdeclImpl,exist_vars),(
+struct _tagged_arr){_tmp2AE,_tmp2AE,_tmp2AE + 11},(void*)& Cyc__genrep_311};static
+char _tmp2AF[7]="rgn_po";static struct _tuple5 Cyc__gentuple_381={offsetof(struct Cyc_Absyn_AggrdeclImpl,rgn_po),(
+struct _tagged_arr){_tmp2AF,_tmp2AF,_tmp2AF + 7},(void*)& Cyc__genrep_370};static
+char _tmp2B0[7]="fields";static struct _tuple5 Cyc__gentuple_382={offsetof(struct Cyc_Absyn_AggrdeclImpl,fields),(
+struct _tagged_arr){_tmp2B0,_tmp2B0,_tmp2B0 + 7},(void*)& Cyc__genrep_357};static
+struct _tuple5*Cyc__genarr_383[3]={& Cyc__gentuple_380,& Cyc__gentuple_381,& Cyc__gentuple_382};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_AggrdeclImpl_rep={3,(struct
+_tagged_arr*)& Cyc__genname_384,sizeof(struct Cyc_Absyn_AggrdeclImpl),{(void*)((
+struct _tuple5**)Cyc__genarr_383),(void*)((struct _tuple5**)Cyc__genarr_383),(void*)((
+struct _tuple5**)Cyc__genarr_383 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_356={
+1,1,(void*)((void*)& Cyc_struct_Absyn_AggrdeclImpl_rep)};static char _tmp2B3[9]="Aggrdecl";
+static struct _tagged_arr Cyc__genname_396=(struct _tagged_arr){_tmp2B3,_tmp2B3,
+_tmp2B3 + 9};static char _tmp2B4[5]="kind";static struct _tuple5 Cyc__gentuple_389={
+offsetof(struct Cyc_Absyn_Aggrdecl,kind),(struct _tagged_arr){_tmp2B4,_tmp2B4,
+_tmp2B4 + 5},(void*)& Cyc_Absyn_aggr_kind_t_rep};static char _tmp2B5[3]="sc";static
+struct _tuple5 Cyc__gentuple_390={offsetof(struct Cyc_Absyn_Aggrdecl,sc),(struct
+_tagged_arr){_tmp2B5,_tmp2B5,_tmp2B5 + 3},(void*)& Cyc_Absyn_scope_t_rep};static
+char _tmp2B6[5]="name";static struct _tuple5 Cyc__gentuple_391={offsetof(struct Cyc_Absyn_Aggrdecl,name),(
+struct _tagged_arr){_tmp2B6,_tmp2B6,_tmp2B6 + 5},(void*)& Cyc__genrep_10};static
+char _tmp2B7[4]="tvs";static struct _tuple5 Cyc__gentuple_392={offsetof(struct Cyc_Absyn_Aggrdecl,tvs),(
+struct _tagged_arr){_tmp2B7,_tmp2B7,_tmp2B7 + 4},(void*)& Cyc__genrep_311};static
+char _tmp2B8[5]="impl";static struct _tuple5 Cyc__gentuple_393={offsetof(struct Cyc_Absyn_Aggrdecl,impl),(
+struct _tagged_arr){_tmp2B8,_tmp2B8,_tmp2B8 + 5},(void*)& Cyc__genrep_356};static
+char _tmp2B9[11]="attributes";static struct _tuple5 Cyc__gentuple_394={offsetof(
+struct Cyc_Absyn_Aggrdecl,attributes),(struct _tagged_arr){_tmp2B9,_tmp2B9,_tmp2B9
++ 11},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_395[6]={& Cyc__gentuple_389,&
 Cyc__gentuple_390,& Cyc__gentuple_391,& Cyc__gentuple_392,& Cyc__gentuple_393,& Cyc__gentuple_394};
 struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Aggrdecl_rep={3,(struct
 _tagged_arr*)& Cyc__genname_396,sizeof(struct Cyc_Absyn_Aggrdecl),{(void*)((struct
@@ -2594,22 +2641,24 @@ offsetof(struct _tuple45,f2),(void*)& Cyc__genrep_354};static struct _tuple6*Cyc
 Cyc__genrep_353={4,sizeof(struct _tuple45),{(void*)((struct _tuple6**)Cyc__genarr_399),(
 void*)((struct _tuple6**)Cyc__genarr_399),(void*)((struct _tuple6**)Cyc__genarr_399
 + 2)}};static struct _tuple7*Cyc__genarr_352[0]={};static char _tmp2BE[12]="UnknownAggr";
-static struct _tuple5 Cyc__gentuple_405={0,{_tmp2BE,_tmp2BE,_tmp2BE + 12},(void*)&
-Cyc__genrep_400};static char _tmp2BF[10]="KnownAggr";static struct _tuple5 Cyc__gentuple_406={
-1,{_tmp2BF,_tmp2BF,_tmp2BF + 10},(void*)& Cyc__genrep_353};static struct _tuple5*Cyc__genarr_407[
-2]={& Cyc__gentuple_405,& Cyc__gentuple_406};static char _tmp2C1[10]="AggrInfoU";
-struct Cyc_Typerep_TUnion_struct Cyc_tunion_Absyn_AggrInfoU_rep={5,{_tmp2C1,
-_tmp2C1,_tmp2C1 + 10},{(void*)((struct _tuple7**)Cyc__genarr_352),(void*)((struct
-_tuple7**)Cyc__genarr_352),(void*)((struct _tuple7**)Cyc__genarr_352 + 0)},{(void*)((
-struct _tuple5**)Cyc__genarr_407),(void*)((struct _tuple5**)Cyc__genarr_407),(void*)((
-struct _tuple5**)Cyc__genarr_407 + 2)}};static char _tmp2C2[9]="AggrInfo";static
-struct _tagged_arr Cyc__genname_411={_tmp2C2,_tmp2C2,_tmp2C2 + 9};static char _tmp2C3[
-10]="aggr_info";static struct _tuple5 Cyc__gentuple_408={offsetof(struct Cyc_Absyn_AggrInfo,aggr_info),{
-_tmp2C3,_tmp2C3,_tmp2C3 + 10},(void*)& Cyc_tunion_Absyn_AggrInfoU_rep};static char
-_tmp2C4[6]="targs";static struct _tuple5 Cyc__gentuple_409={offsetof(struct Cyc_Absyn_AggrInfo,targs),{
-_tmp2C4,_tmp2C4,_tmp2C4 + 6},(void*)& Cyc__genrep_53};static struct _tuple5*Cyc__genarr_410[
-2]={& Cyc__gentuple_408,& Cyc__gentuple_409};struct Cyc_Typerep_Struct_struct Cyc_Absyn_aggr_info_t_rep={
-3,(struct _tagged_arr*)& Cyc__genname_411,sizeof(struct Cyc_Absyn_AggrInfo),{(void*)((
+static struct _tuple5 Cyc__gentuple_405={0,(struct _tagged_arr){_tmp2BE,_tmp2BE,
+_tmp2BE + 12},(void*)& Cyc__genrep_400};static char _tmp2BF[10]="KnownAggr";static
+struct _tuple5 Cyc__gentuple_406={1,(struct _tagged_arr){_tmp2BF,_tmp2BF,_tmp2BF + 
+10},(void*)& Cyc__genrep_353};static struct _tuple5*Cyc__genarr_407[2]={& Cyc__gentuple_405,&
+Cyc__gentuple_406};static char _tmp2C1[10]="AggrInfoU";struct Cyc_Typerep_TUnion_struct
+Cyc_tunion_Absyn_AggrInfoU_rep={5,(struct _tagged_arr){_tmp2C1,_tmp2C1,_tmp2C1 + 
+10},{(void*)((struct _tuple7**)Cyc__genarr_352),(void*)((struct _tuple7**)Cyc__genarr_352),(
+void*)((struct _tuple7**)Cyc__genarr_352 + 0)},{(void*)((struct _tuple5**)Cyc__genarr_407),(
+void*)((struct _tuple5**)Cyc__genarr_407),(void*)((struct _tuple5**)Cyc__genarr_407
++ 2)}};static char _tmp2C2[9]="AggrInfo";static struct _tagged_arr Cyc__genname_411=(
+struct _tagged_arr){_tmp2C2,_tmp2C2,_tmp2C2 + 9};static char _tmp2C3[10]="aggr_info";
+static struct _tuple5 Cyc__gentuple_408={offsetof(struct Cyc_Absyn_AggrInfo,aggr_info),(
+struct _tagged_arr){_tmp2C3,_tmp2C3,_tmp2C3 + 10},(void*)& Cyc_tunion_Absyn_AggrInfoU_rep};
+static char _tmp2C4[6]="targs";static struct _tuple5 Cyc__gentuple_409={offsetof(
+struct Cyc_Absyn_AggrInfo,targs),(struct _tagged_arr){_tmp2C4,_tmp2C4,_tmp2C4 + 6},(
+void*)& Cyc__genrep_53};static struct _tuple5*Cyc__genarr_410[2]={& Cyc__gentuple_408,&
+Cyc__gentuple_409};struct Cyc_Typerep_Struct_struct Cyc_Absyn_aggr_info_t_rep={3,(
+struct _tagged_arr*)& Cyc__genname_411,sizeof(struct Cyc_Absyn_AggrInfo),{(void*)((
 struct _tuple5**)Cyc__genarr_410),(void*)((struct _tuple5**)Cyc__genarr_410),(void*)((
 struct _tuple5**)Cyc__genarr_410 + 2)}};extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_329;
 extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List060List_list_t0Absyn_designator_t46H24Absyn_pat_t1_446H2_rep;
@@ -2625,20 +2674,22 @@ static struct Cyc_Typerep_Tuple_struct Cyc__genrep_334={4,sizeof(struct _tuple46
 void*)((struct _tuple6**)Cyc__genarr_337),(void*)((struct _tuple6**)Cyc__genarr_337),(
 void*)((struct _tuple6**)Cyc__genarr_337 + 2)}};static struct _tuple7*Cyc__genarr_333[
 0]={};static char _tmp2C7[13]="ArrayElement";static struct _tuple5 Cyc__gentuple_338={
-0,{_tmp2C7,_tmp2C7,_tmp2C7 + 13},(void*)& Cyc__genrep_81};static char _tmp2C8[10]="FieldName";
-static struct _tuple5 Cyc__gentuple_339={1,{_tmp2C8,_tmp2C8,_tmp2C8 + 10},(void*)&
-Cyc__genrep_334};static struct _tuple5*Cyc__genarr_340[2]={& Cyc__gentuple_338,& Cyc__gentuple_339};
-static char _tmp2CA[11]="Designator";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_designator_t_rep={
-5,{_tmp2CA,_tmp2CA,_tmp2CA + 11},{(void*)((struct _tuple7**)Cyc__genarr_333),(void*)((
-struct _tuple7**)Cyc__genarr_333),(void*)((struct _tuple7**)Cyc__genarr_333 + 0)},{(
-void*)((struct _tuple5**)Cyc__genarr_340),(void*)((struct _tuple5**)Cyc__genarr_340),(
+0,(struct _tagged_arr){_tmp2C7,_tmp2C7,_tmp2C7 + 13},(void*)& Cyc__genrep_81};
+static char _tmp2C8[10]="FieldName";static struct _tuple5 Cyc__gentuple_339={1,(
+struct _tagged_arr){_tmp2C8,_tmp2C8,_tmp2C8 + 10},(void*)& Cyc__genrep_334};static
+struct _tuple5*Cyc__genarr_340[2]={& Cyc__gentuple_338,& Cyc__gentuple_339};static
+char _tmp2CA[11]="Designator";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_designator_t_rep={
+5,(struct _tagged_arr){_tmp2CA,_tmp2CA,_tmp2CA + 11},{(void*)((struct _tuple7**)Cyc__genarr_333),(
+void*)((struct _tuple7**)Cyc__genarr_333),(void*)((struct _tuple7**)Cyc__genarr_333
++ 0)},{(void*)((struct _tuple5**)Cyc__genarr_340),(void*)((struct _tuple5**)Cyc__genarr_340),(
 void*)((struct _tuple5**)Cyc__genarr_340 + 2)}};static char _tmp2CB[5]="List";static
-struct _tagged_arr Cyc__genname_344={_tmp2CB,_tmp2CB,_tmp2CB + 5};static char _tmp2CC[
-3]="hd";static struct _tuple5 Cyc__gentuple_341={offsetof(struct Cyc_List_List,hd),{
-_tmp2CC,_tmp2CC,_tmp2CC + 3},(void*)& Cyc_Absyn_designator_t_rep};static char
-_tmp2CD[3]="tl";static struct _tuple5 Cyc__gentuple_342={offsetof(struct Cyc_List_List,tl),{
-_tmp2CD,_tmp2CD,_tmp2CD + 3},(void*)& Cyc__genrep_332};static struct _tuple5*Cyc__genarr_343[
-2]={& Cyc__gentuple_341,& Cyc__gentuple_342};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_designator_t46H2_rep={
+struct _tagged_arr Cyc__genname_344=(struct _tagged_arr){_tmp2CB,_tmp2CB,_tmp2CB + 5};
+static char _tmp2CC[3]="hd";static struct _tuple5 Cyc__gentuple_341={offsetof(struct
+Cyc_List_List,hd),(struct _tagged_arr){_tmp2CC,_tmp2CC,_tmp2CC + 3},(void*)& Cyc_Absyn_designator_t_rep};
+static char _tmp2CD[3]="tl";static struct _tuple5 Cyc__gentuple_342={offsetof(struct
+Cyc_List_List,tl),(struct _tagged_arr){_tmp2CD,_tmp2CD,_tmp2CD + 3},(void*)& Cyc__genrep_332};
+static struct _tuple5*Cyc__genarr_343[2]={& Cyc__gentuple_341,& Cyc__gentuple_342};
+struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_designator_t46H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_344,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_343),(void*)((struct _tuple5**)Cyc__genarr_343),(void*)((
 struct _tuple5**)Cyc__genarr_343 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_332={
@@ -2650,11 +2701,12 @@ offsetof(struct _tuple47,f2),(void*)& Cyc__genrep_231};static struct _tuple6*Cyc
 Cyc__genrep_331={4,sizeof(struct _tuple47),{(void*)((struct _tuple6**)Cyc__genarr_347),(
 void*)((struct _tuple6**)Cyc__genarr_347),(void*)((struct _tuple6**)Cyc__genarr_347
 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_330={1,1,(void*)((void*)&
-Cyc__genrep_331)};static char _tmp2D2[5]="List";static struct _tagged_arr Cyc__genname_351={
-_tmp2D2,_tmp2D2,_tmp2D2 + 5};static char _tmp2D3[3]="hd";static struct _tuple5 Cyc__gentuple_348={
-offsetof(struct Cyc_List_List,hd),{_tmp2D3,_tmp2D3,_tmp2D3 + 3},(void*)& Cyc__genrep_330};
-static char _tmp2D4[3]="tl";static struct _tuple5 Cyc__gentuple_349={offsetof(struct
-Cyc_List_List,tl),{_tmp2D4,_tmp2D4,_tmp2D4 + 3},(void*)& Cyc__genrep_329};static
+Cyc__genrep_331)};static char _tmp2D2[5]="List";static struct _tagged_arr Cyc__genname_351=(
+struct _tagged_arr){_tmp2D2,_tmp2D2,_tmp2D2 + 5};static char _tmp2D3[3]="hd";static
+struct _tuple5 Cyc__gentuple_348={offsetof(struct Cyc_List_List,hd),(struct
+_tagged_arr){_tmp2D3,_tmp2D3,_tmp2D3 + 3},(void*)& Cyc__genrep_330};static char
+_tmp2D4[3]="tl";static struct _tuple5 Cyc__gentuple_349={offsetof(struct Cyc_List_List,tl),(
+struct _tagged_arr){_tmp2D4,_tmp2D4,_tmp2D4 + 3},(void*)& Cyc__genrep_329};static
 struct _tuple5*Cyc__genarr_350[2]={& Cyc__gentuple_348,& Cyc__gentuple_349};struct
 Cyc_Typerep_Struct_struct Cyc_struct_List_List060List_list_t0Absyn_designator_t46H24Absyn_pat_t1_446H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_351,sizeof(struct Cyc_List_List),{(void*)((
@@ -2695,60 +2747,64 @@ Cyc_struct_Core_Opt0List_list_t0Absyn_enumfield_t46H22_rep;extern struct Cyc_Typ
 Cyc__genrep_76;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_enumfield_t46H2_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_77;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_Enumfield_rep;static char _tmp2DA[10]="Enumfield";static struct
-_tagged_arr Cyc__genname_931={_tmp2DA,_tmp2DA,_tmp2DA + 10};static char _tmp2DB[5]="name";
-static struct _tuple5 Cyc__gentuple_927={offsetof(struct Cyc_Absyn_Enumfield,name),{
-_tmp2DB,_tmp2DB,_tmp2DB + 5},(void*)& Cyc__genrep_10};static char _tmp2DC[4]="tag";
-static struct _tuple5 Cyc__gentuple_928={offsetof(struct Cyc_Absyn_Enumfield,tag),{
-_tmp2DC,_tmp2DC,_tmp2DC + 4},(void*)& Cyc__genrep_78};static char _tmp2DD[4]="loc";
-static struct _tuple5 Cyc__gentuple_929={offsetof(struct Cyc_Absyn_Enumfield,loc),{
-_tmp2DD,_tmp2DD,_tmp2DD + 4},(void*)& Cyc__genrep_2};static struct _tuple5*Cyc__genarr_930[
-3]={& Cyc__gentuple_927,& Cyc__gentuple_928,& Cyc__gentuple_929};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Enumfield_rep={3,(struct _tagged_arr*)& Cyc__genname_931,sizeof(
-struct Cyc_Absyn_Enumfield),{(void*)((struct _tuple5**)Cyc__genarr_930),(void*)((
-struct _tuple5**)Cyc__genarr_930),(void*)((struct _tuple5**)Cyc__genarr_930 + 3)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_77={1,1,(void*)((void*)& Cyc_struct_Absyn_Enumfield_rep)};
-static char _tmp2E0[5]="List";static struct _tagged_arr Cyc__genname_935={_tmp2E0,
-_tmp2E0,_tmp2E0 + 5};static char _tmp2E1[3]="hd";static struct _tuple5 Cyc__gentuple_932={
-offsetof(struct Cyc_List_List,hd),{_tmp2E1,_tmp2E1,_tmp2E1 + 3},(void*)& Cyc__genrep_77};
-static char _tmp2E2[3]="tl";static struct _tuple5 Cyc__gentuple_933={offsetof(struct
-Cyc_List_List,tl),{_tmp2E2,_tmp2E2,_tmp2E2 + 3},(void*)& Cyc__genrep_76};static
-struct _tuple5*Cyc__genarr_934[2]={& Cyc__gentuple_932,& Cyc__gentuple_933};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_enumfield_t46H2_rep={3,(
-struct _tagged_arr*)& Cyc__genname_935,sizeof(struct Cyc_List_List),{(void*)((
+_tagged_arr Cyc__genname_931=(struct _tagged_arr){_tmp2DA,_tmp2DA,_tmp2DA + 10};
+static char _tmp2DB[5]="name";static struct _tuple5 Cyc__gentuple_927={offsetof(
+struct Cyc_Absyn_Enumfield,name),(struct _tagged_arr){_tmp2DB,_tmp2DB,_tmp2DB + 5},(
+void*)& Cyc__genrep_10};static char _tmp2DC[4]="tag";static struct _tuple5 Cyc__gentuple_928={
+offsetof(struct Cyc_Absyn_Enumfield,tag),(struct _tagged_arr){_tmp2DC,_tmp2DC,
+_tmp2DC + 4},(void*)& Cyc__genrep_78};static char _tmp2DD[4]="loc";static struct
+_tuple5 Cyc__gentuple_929={offsetof(struct Cyc_Absyn_Enumfield,loc),(struct
+_tagged_arr){_tmp2DD,_tmp2DD,_tmp2DD + 4},(void*)& Cyc__genrep_2};static struct
+_tuple5*Cyc__genarr_930[3]={& Cyc__gentuple_927,& Cyc__gentuple_928,& Cyc__gentuple_929};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Enumfield_rep={3,(struct
+_tagged_arr*)& Cyc__genname_931,sizeof(struct Cyc_Absyn_Enumfield),{(void*)((
+struct _tuple5**)Cyc__genarr_930),(void*)((struct _tuple5**)Cyc__genarr_930),(void*)((
+struct _tuple5**)Cyc__genarr_930 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_77={
+1,1,(void*)((void*)& Cyc_struct_Absyn_Enumfield_rep)};static char _tmp2E0[5]="List";
+static struct _tagged_arr Cyc__genname_935=(struct _tagged_arr){_tmp2E0,_tmp2E0,
+_tmp2E0 + 5};static char _tmp2E1[3]="hd";static struct _tuple5 Cyc__gentuple_932={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp2E1,_tmp2E1,_tmp2E1 + 3},(
+void*)& Cyc__genrep_77};static char _tmp2E2[3]="tl";static struct _tuple5 Cyc__gentuple_933={
+offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp2E2,_tmp2E2,_tmp2E2 + 3},(
+void*)& Cyc__genrep_76};static struct _tuple5*Cyc__genarr_934[2]={& Cyc__gentuple_932,&
+Cyc__gentuple_933};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_enumfield_t46H2_rep={
+3,(struct _tagged_arr*)& Cyc__genname_935,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_934),(void*)((struct _tuple5**)Cyc__genarr_934),(void*)((
 struct _tuple5**)Cyc__genarr_934 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_76={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_enumfield_t46H2_rep)};static char
-_tmp2E5[4]="Opt";static struct _tagged_arr Cyc__genname_259={_tmp2E5,_tmp2E5,
-_tmp2E5 + 4};static char _tmp2E6[2]="v";static struct _tuple5 Cyc__gentuple_257={
-offsetof(struct Cyc_Core_Opt,v),{_tmp2E6,_tmp2E6,_tmp2E6 + 2},(void*)& Cyc__genrep_76};
-static struct _tuple5*Cyc__genarr_258[1]={& Cyc__gentuple_257};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0List_list_t0Absyn_enumfield_t46H22_rep={3,(struct _tagged_arr*)&
-Cyc__genname_259,sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_258),(
-void*)((struct _tuple5**)Cyc__genarr_258),(void*)((struct _tuple5**)Cyc__genarr_258
-+ 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_256={1,1,(void*)((void*)&
-Cyc_struct_Core_Opt0List_list_t0Absyn_enumfield_t46H22_rep)};static char _tmp2E9[9]="Enumdecl";
-static struct _tagged_arr Cyc__genname_264={_tmp2E9,_tmp2E9,_tmp2E9 + 9};static char
-_tmp2EA[3]="sc";static struct _tuple5 Cyc__gentuple_260={offsetof(struct Cyc_Absyn_Enumdecl,sc),{
-_tmp2EA,_tmp2EA,_tmp2EA + 3},(void*)& Cyc_Absyn_scope_t_rep};static char _tmp2EB[5]="name";
-static struct _tuple5 Cyc__gentuple_261={offsetof(struct Cyc_Absyn_Enumdecl,name),{
-_tmp2EB,_tmp2EB,_tmp2EB + 5},(void*)& Cyc__genrep_10};static char _tmp2EC[7]="fields";
-static struct _tuple5 Cyc__gentuple_262={offsetof(struct Cyc_Absyn_Enumdecl,fields),{
-_tmp2EC,_tmp2EC,_tmp2EC + 7},(void*)& Cyc__genrep_256};static struct _tuple5*Cyc__genarr_263[
-3]={& Cyc__gentuple_260,& Cyc__gentuple_261,& Cyc__gentuple_262};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Enumdecl_rep={3,(struct _tagged_arr*)& Cyc__genname_264,sizeof(
-struct Cyc_Absyn_Enumdecl),{(void*)((struct _tuple5**)Cyc__genarr_263),(void*)((
-struct _tuple5**)Cyc__genarr_263),(void*)((struct _tuple5**)Cyc__genarr_263 + 3)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_255={1,1,(void*)((void*)& Cyc_struct_Absyn_Enumdecl_rep)};
-struct _tuple51{unsigned int f1;struct Cyc_Absyn_Enumdecl*f2;struct Cyc_Absyn_Enumfield*
-f3;};static struct _tuple6 Cyc__gentuple_265={offsetof(struct _tuple51,f1),(void*)&
-Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_266={offsetof(struct _tuple51,f2),(
-void*)& Cyc__genrep_255};static struct _tuple6 Cyc__gentuple_267={offsetof(struct
-_tuple51,f3),(void*)& Cyc__genrep_77};static struct _tuple6*Cyc__genarr_268[3]={&
-Cyc__gentuple_265,& Cyc__gentuple_266,& Cyc__gentuple_267};static struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_254={4,sizeof(struct _tuple51),{(void*)((struct _tuple6**)Cyc__genarr_268),(
-void*)((struct _tuple6**)Cyc__genarr_268),(void*)((struct _tuple6**)Cyc__genarr_268
-+ 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_249;struct _tuple52{
-unsigned int f1;void*f2;struct Cyc_Absyn_Enumfield*f3;};static struct _tuple6 Cyc__gentuple_250={
+_tmp2E5[4]="Opt";static struct _tagged_arr Cyc__genname_259=(struct _tagged_arr){
+_tmp2E5,_tmp2E5,_tmp2E5 + 4};static char _tmp2E6[2]="v";static struct _tuple5 Cyc__gentuple_257={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp2E6,_tmp2E6,_tmp2E6 + 2},(
+void*)& Cyc__genrep_76};static struct _tuple5*Cyc__genarr_258[1]={& Cyc__gentuple_257};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0List_list_t0Absyn_enumfield_t46H22_rep={
+3,(struct _tagged_arr*)& Cyc__genname_259,sizeof(struct Cyc_Core_Opt),{(void*)((
+struct _tuple5**)Cyc__genarr_258),(void*)((struct _tuple5**)Cyc__genarr_258),(void*)((
+struct _tuple5**)Cyc__genarr_258 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_256={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0List_list_t0Absyn_enumfield_t46H22_rep)};
+static char _tmp2E9[9]="Enumdecl";static struct _tagged_arr Cyc__genname_264=(struct
+_tagged_arr){_tmp2E9,_tmp2E9,_tmp2E9 + 9};static char _tmp2EA[3]="sc";static struct
+_tuple5 Cyc__gentuple_260={offsetof(struct Cyc_Absyn_Enumdecl,sc),(struct
+_tagged_arr){_tmp2EA,_tmp2EA,_tmp2EA + 3},(void*)& Cyc_Absyn_scope_t_rep};static
+char _tmp2EB[5]="name";static struct _tuple5 Cyc__gentuple_261={offsetof(struct Cyc_Absyn_Enumdecl,name),(
+struct _tagged_arr){_tmp2EB,_tmp2EB,_tmp2EB + 5},(void*)& Cyc__genrep_10};static
+char _tmp2EC[7]="fields";static struct _tuple5 Cyc__gentuple_262={offsetof(struct Cyc_Absyn_Enumdecl,fields),(
+struct _tagged_arr){_tmp2EC,_tmp2EC,_tmp2EC + 7},(void*)& Cyc__genrep_256};static
+struct _tuple5*Cyc__genarr_263[3]={& Cyc__gentuple_260,& Cyc__gentuple_261,& Cyc__gentuple_262};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Enumdecl_rep={3,(struct
+_tagged_arr*)& Cyc__genname_264,sizeof(struct Cyc_Absyn_Enumdecl),{(void*)((struct
+_tuple5**)Cyc__genarr_263),(void*)((struct _tuple5**)Cyc__genarr_263),(void*)((
+struct _tuple5**)Cyc__genarr_263 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_255={
+1,1,(void*)((void*)& Cyc_struct_Absyn_Enumdecl_rep)};struct _tuple51{unsigned int
+f1;struct Cyc_Absyn_Enumdecl*f2;struct Cyc_Absyn_Enumfield*f3;};static struct
+_tuple6 Cyc__gentuple_265={offsetof(struct _tuple51,f1),(void*)& Cyc__genrep_5};
+static struct _tuple6 Cyc__gentuple_266={offsetof(struct _tuple51,f2),(void*)& Cyc__genrep_255};
+static struct _tuple6 Cyc__gentuple_267={offsetof(struct _tuple51,f3),(void*)& Cyc__genrep_77};
+static struct _tuple6*Cyc__genarr_268[3]={& Cyc__gentuple_265,& Cyc__gentuple_266,&
+Cyc__gentuple_267};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_254={4,
+sizeof(struct _tuple51),{(void*)((struct _tuple6**)Cyc__genarr_268),(void*)((
+struct _tuple6**)Cyc__genarr_268),(void*)((struct _tuple6**)Cyc__genarr_268 + 3)}};
+extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_249;struct _tuple52{unsigned int
+f1;void*f2;struct Cyc_Absyn_Enumfield*f3;};static struct _tuple6 Cyc__gentuple_250={
 offsetof(struct _tuple52,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_251={
 offsetof(struct _tuple52,f2),(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct
 _tuple6 Cyc__gentuple_252={offsetof(struct _tuple52,f3),(void*)& Cyc__genrep_77};
@@ -2771,46 +2827,52 @@ offsetof(struct _tuple54,f3),(void*)& Cyc__genrep_236};static struct _tuple6*Cyc
 3]={& Cyc__gentuple_241,& Cyc__gentuple_242,& Cyc__gentuple_243};static struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_235={4,sizeof(struct _tuple54),{(void*)((struct _tuple6**)Cyc__genarr_244),(
 void*)((struct _tuple6**)Cyc__genarr_244),(void*)((struct _tuple6**)Cyc__genarr_244
-+ 3)}};static char _tmp2F3[7]="Wild_p";static struct _tuple7 Cyc__gentuple_232={0,{
-_tmp2F3,_tmp2F3,_tmp2F3 + 7}};static char _tmp2F4[7]="Null_p";static struct _tuple7
-Cyc__gentuple_233={1,{_tmp2F4,_tmp2F4,_tmp2F4 + 7}};static struct _tuple7*Cyc__genarr_234[
-2]={& Cyc__gentuple_232,& Cyc__gentuple_233};static char _tmp2F5[6]="Var_p";static
-struct _tuple5 Cyc__gentuple_434={0,{_tmp2F5,_tmp2F5,_tmp2F5 + 6},(void*)& Cyc__genrep_430};
-static char _tmp2F6[12]="Reference_p";static struct _tuple5 Cyc__gentuple_435={1,{
-_tmp2F6,_tmp2F6,_tmp2F6 + 12},(void*)& Cyc__genrep_430};static char _tmp2F7[9]="TagInt_p";
-static struct _tuple5 Cyc__gentuple_436={2,{_tmp2F7,_tmp2F7,_tmp2F7 + 9},(void*)& Cyc__genrep_425};
-static char _tmp2F8[8]="Tuple_p";static struct _tuple5 Cyc__gentuple_437={3,{_tmp2F8,
-_tmp2F8,_tmp2F8 + 8},(void*)& Cyc__genrep_421};static char _tmp2F9[10]="Pointer_p";
-static struct _tuple5 Cyc__gentuple_438={4,{_tmp2F9,_tmp2F9,_tmp2F9 + 10},(void*)&
-Cyc__genrep_417};static char _tmp2FA[7]="Aggr_p";static struct _tuple5 Cyc__gentuple_439={
-5,{_tmp2FA,_tmp2FA,_tmp2FA + 7},(void*)& Cyc__genrep_328};static char _tmp2FB[9]="Tunion_p";
-static struct _tuple5 Cyc__gentuple_440={6,{_tmp2FB,_tmp2FB,_tmp2FB + 9},(void*)& Cyc__genrep_283};
-static char _tmp2FC[6]="Int_p";static struct _tuple5 Cyc__gentuple_441={7,{_tmp2FC,
-_tmp2FC,_tmp2FC + 6},(void*)& Cyc__genrep_273};static char _tmp2FD[7]="Char_p";
-static struct _tuple5 Cyc__gentuple_442={8,{_tmp2FD,_tmp2FD,_tmp2FD + 7},(void*)& Cyc__genrep_269};
-static char _tmp2FE[8]="Float_p";static struct _tuple5 Cyc__gentuple_443={9,{_tmp2FE,
-_tmp2FE,_tmp2FE + 8},(void*)& Cyc__genrep_117};static char _tmp2FF[7]="Enum_p";
-static struct _tuple5 Cyc__gentuple_444={10,{_tmp2FF,_tmp2FF,_tmp2FF + 7},(void*)&
-Cyc__genrep_254};static char _tmp300[11]="AnonEnum_p";static struct _tuple5 Cyc__gentuple_445={
-11,{_tmp300,_tmp300,_tmp300 + 11},(void*)& Cyc__genrep_249};static char _tmp301[12]="UnknownId_p";
-static struct _tuple5 Cyc__gentuple_446={12,{_tmp301,_tmp301,_tmp301 + 12},(void*)&
-Cyc__genrep_245};static char _tmp302[14]="UnknownCall_p";static struct _tuple5 Cyc__gentuple_447={
-13,{_tmp302,_tmp302,_tmp302 + 14},(void*)& Cyc__genrep_235};static struct _tuple5*
-Cyc__genarr_448[14]={& Cyc__gentuple_434,& Cyc__gentuple_435,& Cyc__gentuple_436,&
++ 3)}};static char _tmp2F3[7]="Wild_p";static struct _tuple7 Cyc__gentuple_232={0,(
+struct _tagged_arr){_tmp2F3,_tmp2F3,_tmp2F3 + 7}};static char _tmp2F4[7]="Null_p";
+static struct _tuple7 Cyc__gentuple_233={1,(struct _tagged_arr){_tmp2F4,_tmp2F4,
+_tmp2F4 + 7}};static struct _tuple7*Cyc__genarr_234[2]={& Cyc__gentuple_232,& Cyc__gentuple_233};
+static char _tmp2F5[6]="Var_p";static struct _tuple5 Cyc__gentuple_434={0,(struct
+_tagged_arr){_tmp2F5,_tmp2F5,_tmp2F5 + 6},(void*)& Cyc__genrep_430};static char
+_tmp2F6[12]="Reference_p";static struct _tuple5 Cyc__gentuple_435={1,(struct
+_tagged_arr){_tmp2F6,_tmp2F6,_tmp2F6 + 12},(void*)& Cyc__genrep_430};static char
+_tmp2F7[9]="TagInt_p";static struct _tuple5 Cyc__gentuple_436={2,(struct _tagged_arr){
+_tmp2F7,_tmp2F7,_tmp2F7 + 9},(void*)& Cyc__genrep_425};static char _tmp2F8[8]="Tuple_p";
+static struct _tuple5 Cyc__gentuple_437={3,(struct _tagged_arr){_tmp2F8,_tmp2F8,
+_tmp2F8 + 8},(void*)& Cyc__genrep_421};static char _tmp2F9[10]="Pointer_p";static
+struct _tuple5 Cyc__gentuple_438={4,(struct _tagged_arr){_tmp2F9,_tmp2F9,_tmp2F9 + 
+10},(void*)& Cyc__genrep_417};static char _tmp2FA[7]="Aggr_p";static struct _tuple5
+Cyc__gentuple_439={5,(struct _tagged_arr){_tmp2FA,_tmp2FA,_tmp2FA + 7},(void*)& Cyc__genrep_328};
+static char _tmp2FB[9]="Tunion_p";static struct _tuple5 Cyc__gentuple_440={6,(struct
+_tagged_arr){_tmp2FB,_tmp2FB,_tmp2FB + 9},(void*)& Cyc__genrep_283};static char
+_tmp2FC[6]="Int_p";static struct _tuple5 Cyc__gentuple_441={7,(struct _tagged_arr){
+_tmp2FC,_tmp2FC,_tmp2FC + 6},(void*)& Cyc__genrep_273};static char _tmp2FD[7]="Char_p";
+static struct _tuple5 Cyc__gentuple_442={8,(struct _tagged_arr){_tmp2FD,_tmp2FD,
+_tmp2FD + 7},(void*)& Cyc__genrep_269};static char _tmp2FE[8]="Float_p";static struct
+_tuple5 Cyc__gentuple_443={9,(struct _tagged_arr){_tmp2FE,_tmp2FE,_tmp2FE + 8},(
+void*)& Cyc__genrep_117};static char _tmp2FF[7]="Enum_p";static struct _tuple5 Cyc__gentuple_444={
+10,(struct _tagged_arr){_tmp2FF,_tmp2FF,_tmp2FF + 7},(void*)& Cyc__genrep_254};
+static char _tmp300[11]="AnonEnum_p";static struct _tuple5 Cyc__gentuple_445={11,(
+struct _tagged_arr){_tmp300,_tmp300,_tmp300 + 11},(void*)& Cyc__genrep_249};static
+char _tmp301[12]="UnknownId_p";static struct _tuple5 Cyc__gentuple_446={12,(struct
+_tagged_arr){_tmp301,_tmp301,_tmp301 + 12},(void*)& Cyc__genrep_245};static char
+_tmp302[14]="UnknownCall_p";static struct _tuple5 Cyc__gentuple_447={13,(struct
+_tagged_arr){_tmp302,_tmp302,_tmp302 + 14},(void*)& Cyc__genrep_235};static struct
+_tuple5*Cyc__genarr_448[14]={& Cyc__gentuple_434,& Cyc__gentuple_435,& Cyc__gentuple_436,&
 Cyc__gentuple_437,& Cyc__gentuple_438,& Cyc__gentuple_439,& Cyc__gentuple_440,& Cyc__gentuple_441,&
 Cyc__gentuple_442,& Cyc__gentuple_443,& Cyc__gentuple_444,& Cyc__gentuple_445,& Cyc__gentuple_446,&
 Cyc__gentuple_447};static char _tmp304[8]="Raw_pat";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_raw_pat_t_rep={5,{_tmp304,_tmp304,_tmp304 + 8},{(void*)((struct _tuple7**)
-Cyc__genarr_234),(void*)((struct _tuple7**)Cyc__genarr_234),(void*)((struct
-_tuple7**)Cyc__genarr_234 + 2)},{(void*)((struct _tuple5**)Cyc__genarr_448),(void*)((
-struct _tuple5**)Cyc__genarr_448),(void*)((struct _tuple5**)Cyc__genarr_448 + 14)}};
-static char _tmp305[4]="Pat";static struct _tagged_arr Cyc__genname_453={_tmp305,
-_tmp305,_tmp305 + 4};static char _tmp306[2]="r";static struct _tuple5 Cyc__gentuple_449={
-offsetof(struct Cyc_Absyn_Pat,r),{_tmp306,_tmp306,_tmp306 + 2},(void*)& Cyc_Absyn_raw_pat_t_rep};
-static char _tmp307[5]="topt";static struct _tuple5 Cyc__gentuple_450={offsetof(
-struct Cyc_Absyn_Pat,topt),{_tmp307,_tmp307,_tmp307 + 5},(void*)& Cyc__genrep_43};
-static char _tmp308[4]="loc";static struct _tuple5 Cyc__gentuple_451={offsetof(struct
-Cyc_Absyn_Pat,loc),{_tmp308,_tmp308,_tmp308 + 4},(void*)& Cyc__genrep_2};static
+Cyc_Absyn_raw_pat_t_rep={5,(struct _tagged_arr){_tmp304,_tmp304,_tmp304 + 8},{(
+void*)((struct _tuple7**)Cyc__genarr_234),(void*)((struct _tuple7**)Cyc__genarr_234),(
+void*)((struct _tuple7**)Cyc__genarr_234 + 2)},{(void*)((struct _tuple5**)Cyc__genarr_448),(
+void*)((struct _tuple5**)Cyc__genarr_448),(void*)((struct _tuple5**)Cyc__genarr_448
++ 14)}};static char _tmp305[4]="Pat";static struct _tagged_arr Cyc__genname_453=(
+struct _tagged_arr){_tmp305,_tmp305,_tmp305 + 4};static char _tmp306[2]="r";static
+struct _tuple5 Cyc__gentuple_449={offsetof(struct Cyc_Absyn_Pat,r),(struct
+_tagged_arr){_tmp306,_tmp306,_tmp306 + 2},(void*)& Cyc_Absyn_raw_pat_t_rep};static
+char _tmp307[5]="topt";static struct _tuple5 Cyc__gentuple_450={offsetof(struct Cyc_Absyn_Pat,topt),(
+struct _tagged_arr){_tmp307,_tmp307,_tmp307 + 5},(void*)& Cyc__genrep_43};static
+char _tmp308[4]="loc";static struct _tuple5 Cyc__gentuple_451={offsetof(struct Cyc_Absyn_Pat,loc),(
+struct _tagged_arr){_tmp308,_tmp308,_tmp308 + 4},(void*)& Cyc__genrep_2};static
 struct _tuple5*Cyc__genarr_452[3]={& Cyc__gentuple_449,& Cyc__gentuple_450,& Cyc__gentuple_451};
 struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Pat_rep={3,(struct _tagged_arr*)&
 Cyc__genname_453,sizeof(struct Cyc_Absyn_Pat),{(void*)((struct _tuple5**)Cyc__genarr_452),(
@@ -2820,49 +2882,52 @@ Cyc_struct_Absyn_Pat_rep)};extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_
 extern struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0List_list_t0Absyn_vardecl_t46H22_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_132;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_List_List0Absyn_vardecl_t46H2_rep;static char _tmp30B[5]="List";static
-struct _tagged_arr Cyc__genname_158={_tmp30B,_tmp30B,_tmp30B + 5};static char _tmp30C[
-3]="hd";static struct _tuple5 Cyc__gentuple_155={offsetof(struct Cyc_List_List,hd),{
-_tmp30C,_tmp30C,_tmp30C + 3},(void*)& Cyc__genrep_133};static char _tmp30D[3]="tl";
-static struct _tuple5 Cyc__gentuple_156={offsetof(struct Cyc_List_List,tl),{_tmp30D,
-_tmp30D,_tmp30D + 3},(void*)& Cyc__genrep_132};static struct _tuple5*Cyc__genarr_157[
-2]={& Cyc__gentuple_155,& Cyc__gentuple_156};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_vardecl_t46H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_158,sizeof(struct Cyc_List_List),{(void*)((
+struct _tagged_arr Cyc__genname_158=(struct _tagged_arr){_tmp30B,_tmp30B,_tmp30B + 5};
+static char _tmp30C[3]="hd";static struct _tuple5 Cyc__gentuple_155={offsetof(struct
+Cyc_List_List,hd),(struct _tagged_arr){_tmp30C,_tmp30C,_tmp30C + 3},(void*)& Cyc__genrep_133};
+static char _tmp30D[3]="tl";static struct _tuple5 Cyc__gentuple_156={offsetof(struct
+Cyc_List_List,tl),(struct _tagged_arr){_tmp30D,_tmp30D,_tmp30D + 3},(void*)& Cyc__genrep_132};
+static struct _tuple5*Cyc__genarr_157[2]={& Cyc__gentuple_155,& Cyc__gentuple_156};
+struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_vardecl_t46H2_rep={3,(
+struct _tagged_arr*)& Cyc__genname_158,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_157),(void*)((struct _tuple5**)Cyc__genarr_157),(void*)((
 struct _tuple5**)Cyc__genarr_157 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_132={
 1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_vardecl_t46H2_rep)};static char
-_tmp310[4]="Opt";static struct _tagged_arr Cyc__genname_161={_tmp310,_tmp310,
-_tmp310 + 4};static char _tmp311[2]="v";static struct _tuple5 Cyc__gentuple_159={
-offsetof(struct Cyc_Core_Opt,v),{_tmp311,_tmp311,_tmp311 + 2},(void*)& Cyc__genrep_132};
-static struct _tuple5*Cyc__genarr_160[1]={& Cyc__gentuple_159};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0List_list_t0Absyn_vardecl_t46H22_rep={3,(struct _tagged_arr*)&
-Cyc__genname_161,sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_160),(
-void*)((struct _tuple5**)Cyc__genarr_160),(void*)((struct _tuple5**)Cyc__genarr_160
-+ 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_131={1,1,(void*)((void*)&
-Cyc_struct_Core_Opt0List_list_t0Absyn_vardecl_t46H22_rep)};static char _tmp314[14]="Switch_clause";
-static struct _tagged_arr Cyc__genname_460={_tmp314,_tmp314,_tmp314 + 14};static char
-_tmp315[8]="pattern";static struct _tuple5 Cyc__gentuple_454={offsetof(struct Cyc_Absyn_Switch_clause,pattern),{
-_tmp315,_tmp315,_tmp315 + 8},(void*)& Cyc__genrep_231};static char _tmp316[9]="pat_vars";
-static struct _tuple5 Cyc__gentuple_455={offsetof(struct Cyc_Absyn_Switch_clause,pat_vars),{
-_tmp316,_tmp316,_tmp316 + 9},(void*)& Cyc__genrep_131};static char _tmp317[13]="where_clause";
-static struct _tuple5 Cyc__gentuple_456={offsetof(struct Cyc_Absyn_Switch_clause,where_clause),{
-_tmp317,_tmp317,_tmp317 + 13},(void*)& Cyc__genrep_78};static char _tmp318[5]="body";
-static struct _tuple5 Cyc__gentuple_457={offsetof(struct Cyc_Absyn_Switch_clause,body),{
-_tmp318,_tmp318,_tmp318 + 5},(void*)& Cyc__genrep_162};static char _tmp319[4]="loc";
-static struct _tuple5 Cyc__gentuple_458={offsetof(struct Cyc_Absyn_Switch_clause,loc),{
-_tmp319,_tmp319,_tmp319 + 4},(void*)& Cyc__genrep_2};static struct _tuple5*Cyc__genarr_459[
-5]={& Cyc__gentuple_454,& Cyc__gentuple_455,& Cyc__gentuple_456,& Cyc__gentuple_457,&
-Cyc__gentuple_458};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Switch_clause_rep={
+_tmp310[4]="Opt";static struct _tagged_arr Cyc__genname_161=(struct _tagged_arr){
+_tmp310,_tmp310,_tmp310 + 4};static char _tmp311[2]="v";static struct _tuple5 Cyc__gentuple_159={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp311,_tmp311,_tmp311 + 2},(
+void*)& Cyc__genrep_132};static struct _tuple5*Cyc__genarr_160[1]={& Cyc__gentuple_159};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0List_list_t0Absyn_vardecl_t46H22_rep={
+3,(struct _tagged_arr*)& Cyc__genname_161,sizeof(struct Cyc_Core_Opt),{(void*)((
+struct _tuple5**)Cyc__genarr_160),(void*)((struct _tuple5**)Cyc__genarr_160),(void*)((
+struct _tuple5**)Cyc__genarr_160 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_131={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0List_list_t0Absyn_vardecl_t46H22_rep)};
+static char _tmp314[14]="Switch_clause";static struct _tagged_arr Cyc__genname_460=(
+struct _tagged_arr){_tmp314,_tmp314,_tmp314 + 14};static char _tmp315[8]="pattern";
+static struct _tuple5 Cyc__gentuple_454={offsetof(struct Cyc_Absyn_Switch_clause,pattern),(
+struct _tagged_arr){_tmp315,_tmp315,_tmp315 + 8},(void*)& Cyc__genrep_231};static
+char _tmp316[9]="pat_vars";static struct _tuple5 Cyc__gentuple_455={offsetof(struct
+Cyc_Absyn_Switch_clause,pat_vars),(struct _tagged_arr){_tmp316,_tmp316,_tmp316 + 9},(
+void*)& Cyc__genrep_131};static char _tmp317[13]="where_clause";static struct _tuple5
+Cyc__gentuple_456={offsetof(struct Cyc_Absyn_Switch_clause,where_clause),(struct
+_tagged_arr){_tmp317,_tmp317,_tmp317 + 13},(void*)& Cyc__genrep_78};static char
+_tmp318[5]="body";static struct _tuple5 Cyc__gentuple_457={offsetof(struct Cyc_Absyn_Switch_clause,body),(
+struct _tagged_arr){_tmp318,_tmp318,_tmp318 + 5},(void*)& Cyc__genrep_162};static
+char _tmp319[4]="loc";static struct _tuple5 Cyc__gentuple_458={offsetof(struct Cyc_Absyn_Switch_clause,loc),(
+struct _tagged_arr){_tmp319,_tmp319,_tmp319 + 4},(void*)& Cyc__genrep_2};static
+struct _tuple5*Cyc__genarr_459[5]={& Cyc__gentuple_454,& Cyc__gentuple_455,& Cyc__gentuple_456,&
+Cyc__gentuple_457,& Cyc__gentuple_458};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Switch_clause_rep={
 3,(struct _tagged_arr*)& Cyc__genname_460,sizeof(struct Cyc_Absyn_Switch_clause),{(
 void*)((struct _tuple5**)Cyc__genarr_459),(void*)((struct _tuple5**)Cyc__genarr_459),(
 void*)((struct _tuple5**)Cyc__genarr_459 + 5)}};static struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_230={1,1,(void*)((void*)& Cyc_struct_Absyn_Switch_clause_rep)};static
-char _tmp31C[5]="List";static struct _tagged_arr Cyc__genname_464={_tmp31C,_tmp31C,
-_tmp31C + 5};static char _tmp31D[3]="hd";static struct _tuple5 Cyc__gentuple_461={
-offsetof(struct Cyc_List_List,hd),{_tmp31D,_tmp31D,_tmp31D + 3},(void*)((void*)&
-Cyc__genrep_230)};static char _tmp31E[3]="tl";static struct _tuple5 Cyc__gentuple_462={
-offsetof(struct Cyc_List_List,tl),{_tmp31E,_tmp31E,_tmp31E + 3},(void*)& Cyc__genrep_229};
-static struct _tuple5*Cyc__genarr_463[2]={& Cyc__gentuple_461,& Cyc__gentuple_462};
-struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_switch_clause_t46H2_rep={
+char _tmp31C[5]="List";static struct _tagged_arr Cyc__genname_464=(struct _tagged_arr){
+_tmp31C,_tmp31C,_tmp31C + 5};static char _tmp31D[3]="hd";static struct _tuple5 Cyc__gentuple_461={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp31D,_tmp31D,_tmp31D + 3},(
+void*)((void*)& Cyc__genrep_230)};static char _tmp31E[3]="tl";static struct _tuple5
+Cyc__gentuple_462={offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp31E,
+_tmp31E,_tmp31E + 3},(void*)& Cyc__genrep_229};static struct _tuple5*Cyc__genarr_463[
+2]={& Cyc__gentuple_461,& Cyc__gentuple_462};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_switch_clause_t46H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_464,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_463),(void*)((struct _tuple5**)Cyc__genarr_463),(void*)((
 struct _tuple5**)Cyc__genarr_463 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_229={
@@ -2879,25 +2944,27 @@ extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_499;extern struct Cyc_Typerep
 Cyc__genrep_500;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_switchC_clause_t46H2_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_501;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Absyn_SwitchC_clause_rep;static char _tmp322[15]="SwitchC_clause";
-static struct _tagged_arr Cyc__genname_506={_tmp322,_tmp322,_tmp322 + 15};static char
-_tmp323[9]="cnst_exp";static struct _tuple5 Cyc__gentuple_502={offsetof(struct Cyc_Absyn_SwitchC_clause,cnst_exp),{
-_tmp323,_tmp323,_tmp323 + 9},(void*)& Cyc__genrep_78};static char _tmp324[5]="body";
-static struct _tuple5 Cyc__gentuple_503={offsetof(struct Cyc_Absyn_SwitchC_clause,body),{
-_tmp324,_tmp324,_tmp324 + 5},(void*)& Cyc__genrep_162};static char _tmp325[4]="loc";
-static struct _tuple5 Cyc__gentuple_504={offsetof(struct Cyc_Absyn_SwitchC_clause,loc),{
-_tmp325,_tmp325,_tmp325 + 4},(void*)& Cyc__genrep_2};static struct _tuple5*Cyc__genarr_505[
-3]={& Cyc__gentuple_502,& Cyc__gentuple_503,& Cyc__gentuple_504};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_SwitchC_clause_rep={3,(struct _tagged_arr*)& Cyc__genname_506,
-sizeof(struct Cyc_Absyn_SwitchC_clause),{(void*)((struct _tuple5**)Cyc__genarr_505),(
-void*)((struct _tuple5**)Cyc__genarr_505),(void*)((struct _tuple5**)Cyc__genarr_505
-+ 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_501={1,1,(void*)((void*)&
-Cyc_struct_Absyn_SwitchC_clause_rep)};static char _tmp328[5]="List";static struct
-_tagged_arr Cyc__genname_510={_tmp328,_tmp328,_tmp328 + 5};static char _tmp329[3]="hd";
-static struct _tuple5 Cyc__gentuple_507={offsetof(struct Cyc_List_List,hd),{_tmp329,
-_tmp329,_tmp329 + 3},(void*)& Cyc__genrep_501};static char _tmp32A[3]="tl";static
-struct _tuple5 Cyc__gentuple_508={offsetof(struct Cyc_List_List,tl),{_tmp32A,
-_tmp32A,_tmp32A + 3},(void*)& Cyc__genrep_500};static struct _tuple5*Cyc__genarr_509[
-2]={& Cyc__gentuple_507,& Cyc__gentuple_508};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_switchC_clause_t46H2_rep={
+static struct _tagged_arr Cyc__genname_506=(struct _tagged_arr){_tmp322,_tmp322,
+_tmp322 + 15};static char _tmp323[9]="cnst_exp";static struct _tuple5 Cyc__gentuple_502={
+offsetof(struct Cyc_Absyn_SwitchC_clause,cnst_exp),(struct _tagged_arr){_tmp323,
+_tmp323,_tmp323 + 9},(void*)& Cyc__genrep_78};static char _tmp324[5]="body";static
+struct _tuple5 Cyc__gentuple_503={offsetof(struct Cyc_Absyn_SwitchC_clause,body),(
+struct _tagged_arr){_tmp324,_tmp324,_tmp324 + 5},(void*)& Cyc__genrep_162};static
+char _tmp325[4]="loc";static struct _tuple5 Cyc__gentuple_504={offsetof(struct Cyc_Absyn_SwitchC_clause,loc),(
+struct _tagged_arr){_tmp325,_tmp325,_tmp325 + 4},(void*)& Cyc__genrep_2};static
+struct _tuple5*Cyc__genarr_505[3]={& Cyc__gentuple_502,& Cyc__gentuple_503,& Cyc__gentuple_504};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_SwitchC_clause_rep={3,(struct
+_tagged_arr*)& Cyc__genname_506,sizeof(struct Cyc_Absyn_SwitchC_clause),{(void*)((
+struct _tuple5**)Cyc__genarr_505),(void*)((struct _tuple5**)Cyc__genarr_505),(void*)((
+struct _tuple5**)Cyc__genarr_505 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_501={
+1,1,(void*)((void*)& Cyc_struct_Absyn_SwitchC_clause_rep)};static char _tmp328[5]="List";
+static struct _tagged_arr Cyc__genname_510=(struct _tagged_arr){_tmp328,_tmp328,
+_tmp328 + 5};static char _tmp329[3]="hd";static struct _tuple5 Cyc__gentuple_507={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp329,_tmp329,_tmp329 + 3},(
+void*)& Cyc__genrep_501};static char _tmp32A[3]="tl";static struct _tuple5 Cyc__gentuple_508={
+offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp32A,_tmp32A,_tmp32A + 3},(
+void*)& Cyc__genrep_500};static struct _tuple5*Cyc__genarr_509[2]={& Cyc__gentuple_507,&
+Cyc__gentuple_508};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_switchC_clause_t46H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_510,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_509),(void*)((struct _tuple5**)Cyc__genarr_509),(void*)((
 struct _tuple5**)Cyc__genarr_509 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_500={
@@ -2911,51 +2978,51 @@ sizeof(struct _tuple55),{(void*)((struct _tuple6**)Cyc__genarr_514),(void*)((
 struct _tuple6**)Cyc__genarr_514),(void*)((struct _tuple6**)Cyc__genarr_514 + 3)}};
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_488;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_490;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_exp_t46H2_rep;
-static char _tmp32E[5]="List";static struct _tagged_arr Cyc__genname_494={_tmp32E,
-_tmp32E,_tmp32E + 5};static char _tmp32F[3]="hd";static struct _tuple5 Cyc__gentuple_491={
-offsetof(struct Cyc_List_List,hd),{_tmp32F,_tmp32F,_tmp32F + 3},(void*)& Cyc__genrep_82};
-static char _tmp330[3]="tl";static struct _tuple5 Cyc__gentuple_492={offsetof(struct
-Cyc_List_List,tl),{_tmp330,_tmp330,_tmp330 + 3},(void*)& Cyc__genrep_490};static
-struct _tuple5*Cyc__genarr_493[2]={& Cyc__gentuple_491,& Cyc__gentuple_492};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_exp_t46H2_rep={3,(struct
-_tagged_arr*)& Cyc__genname_494,sizeof(struct Cyc_List_List),{(void*)((struct
-_tuple5**)Cyc__genarr_493),(void*)((struct _tuple5**)Cyc__genarr_493),(void*)((
-struct _tuple5**)Cyc__genarr_493 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_490={
-1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_exp_t46H2_rep)};extern struct Cyc_Typerep_ThinPtr_struct
-Cyc__genrep_489;static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_489={1,1,(void*)((
-void*)& Cyc__genrep_230)};struct _tuple56{unsigned int f1;struct Cyc_List_List*f2;
-struct Cyc_Absyn_Switch_clause**f3;};static struct _tuple6 Cyc__gentuple_495={
-offsetof(struct _tuple56,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_496={
-offsetof(struct _tuple56,f2),(void*)& Cyc__genrep_490};static struct _tuple6 Cyc__gentuple_497={
-offsetof(struct _tuple56,f3),(void*)& Cyc__genrep_489};static struct _tuple6*Cyc__genarr_498[
-3]={& Cyc__gentuple_495,& Cyc__gentuple_496,& Cyc__gentuple_497};static struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_488={4,sizeof(struct _tuple56),{(void*)((struct _tuple6**)Cyc__genarr_498),(
-void*)((struct _tuple6**)Cyc__genarr_498),(void*)((struct _tuple6**)Cyc__genarr_498
-+ 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_483;struct _tuple57{
-unsigned int f1;struct Cyc_Absyn_Decl*f2;struct Cyc_Absyn_Stmt*f3;};static struct
-_tuple6 Cyc__gentuple_484={offsetof(struct _tuple57,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_485={offsetof(struct _tuple57,f2),(void*)& Cyc__genrep_1};
-static struct _tuple6 Cyc__gentuple_486={offsetof(struct _tuple57,f3),(void*)& Cyc__genrep_162};
-static struct _tuple6*Cyc__genarr_487[3]={& Cyc__gentuple_484,& Cyc__gentuple_485,&
-Cyc__gentuple_486};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_483={4,
-sizeof(struct _tuple57),{(void*)((struct _tuple6**)Cyc__genarr_487),(void*)((
-struct _tuple6**)Cyc__genarr_487),(void*)((struct _tuple6**)Cyc__genarr_487 + 3)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_479;static struct _tuple6 Cyc__gentuple_480={
-offsetof(struct _tuple38,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_481={
-offsetof(struct _tuple38,f2),(void*)& Cyc__genrep_162};static struct _tuple6*Cyc__genarr_482[
-2]={& Cyc__gentuple_480,& Cyc__gentuple_481};static struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_479={4,sizeof(struct _tuple38),{(void*)((struct _tuple6**)Cyc__genarr_482),(
-void*)((struct _tuple6**)Cyc__genarr_482),(void*)((struct _tuple6**)Cyc__genarr_482
-+ 2)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_474;static struct _tuple6
-Cyc__gentuple_475={offsetof(struct _tuple39,f1),(void*)& Cyc__genrep_5};static
-struct _tuple6 Cyc__gentuple_476={offsetof(struct _tuple39,f2),(void*)& Cyc__genrep_12};
-static struct _tuple6 Cyc__gentuple_477={offsetof(struct _tuple39,f3),(void*)& Cyc__genrep_162};
-static struct _tuple6*Cyc__genarr_478[3]={& Cyc__gentuple_475,& Cyc__gentuple_476,&
-Cyc__gentuple_477};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_474={4,
-sizeof(struct _tuple39),{(void*)((struct _tuple6**)Cyc__genarr_478),(void*)((
-struct _tuple6**)Cyc__genarr_478),(void*)((struct _tuple6**)Cyc__genarr_478 + 3)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_469;struct _tuple58{unsigned int
-f1;struct Cyc_Absyn_Stmt*f2;struct _tuple2 f3;};static struct _tuple6 Cyc__gentuple_470={
+static char _tmp32E[5]="List";static struct _tagged_arr Cyc__genname_494=(struct
+_tagged_arr){_tmp32E,_tmp32E,_tmp32E + 5};static char _tmp32F[3]="hd";static struct
+_tuple5 Cyc__gentuple_491={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp32F,_tmp32F,_tmp32F + 3},(void*)& Cyc__genrep_82};static char _tmp330[3]="tl";
+static struct _tuple5 Cyc__gentuple_492={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp330,_tmp330,_tmp330 + 3},(void*)& Cyc__genrep_490};static struct
+_tuple5*Cyc__genarr_493[2]={& Cyc__gentuple_491,& Cyc__gentuple_492};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List0Absyn_exp_t46H2_rep={3,(struct _tagged_arr*)& Cyc__genname_494,
+sizeof(struct Cyc_List_List),{(void*)((struct _tuple5**)Cyc__genarr_493),(void*)((
+struct _tuple5**)Cyc__genarr_493),(void*)((struct _tuple5**)Cyc__genarr_493 + 2)}};
+static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_490={1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_exp_t46H2_rep)};
+extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_489;static struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_489={1,1,(void*)((void*)& Cyc__genrep_230)};struct _tuple56{
+unsigned int f1;struct Cyc_List_List*f2;struct Cyc_Absyn_Switch_clause**f3;};static
+struct _tuple6 Cyc__gentuple_495={offsetof(struct _tuple56,f1),(void*)& Cyc__genrep_5};
+static struct _tuple6 Cyc__gentuple_496={offsetof(struct _tuple56,f2),(void*)& Cyc__genrep_490};
+static struct _tuple6 Cyc__gentuple_497={offsetof(struct _tuple56,f3),(void*)& Cyc__genrep_489};
+static struct _tuple6*Cyc__genarr_498[3]={& Cyc__gentuple_495,& Cyc__gentuple_496,&
+Cyc__gentuple_497};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_488={4,
+sizeof(struct _tuple56),{(void*)((struct _tuple6**)Cyc__genarr_498),(void*)((
+struct _tuple6**)Cyc__genarr_498),(void*)((struct _tuple6**)Cyc__genarr_498 + 3)}};
+extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_483;struct _tuple57{unsigned int
+f1;struct Cyc_Absyn_Decl*f2;struct Cyc_Absyn_Stmt*f3;};static struct _tuple6 Cyc__gentuple_484={
+offsetof(struct _tuple57,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_485={
+offsetof(struct _tuple57,f2),(void*)& Cyc__genrep_1};static struct _tuple6 Cyc__gentuple_486={
+offsetof(struct _tuple57,f3),(void*)& Cyc__genrep_162};static struct _tuple6*Cyc__genarr_487[
+3]={& Cyc__gentuple_484,& Cyc__gentuple_485,& Cyc__gentuple_486};static struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_483={4,sizeof(struct _tuple57),{(void*)((struct _tuple6**)Cyc__genarr_487),(
+void*)((struct _tuple6**)Cyc__genarr_487),(void*)((struct _tuple6**)Cyc__genarr_487
++ 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_479;static struct _tuple6
+Cyc__gentuple_480={offsetof(struct _tuple38,f1),(void*)& Cyc__genrep_5};static
+struct _tuple6 Cyc__gentuple_481={offsetof(struct _tuple38,f2),(void*)& Cyc__genrep_162};
+static struct _tuple6*Cyc__genarr_482[2]={& Cyc__gentuple_480,& Cyc__gentuple_481};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_479={4,sizeof(struct _tuple38),{(
+void*)((struct _tuple6**)Cyc__genarr_482),(void*)((struct _tuple6**)Cyc__genarr_482),(
+void*)((struct _tuple6**)Cyc__genarr_482 + 2)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_474;static struct _tuple6 Cyc__gentuple_475={offsetof(struct _tuple39,f1),(
+void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_476={offsetof(struct
+_tuple39,f2),(void*)& Cyc__genrep_12};static struct _tuple6 Cyc__gentuple_477={
+offsetof(struct _tuple39,f3),(void*)& Cyc__genrep_162};static struct _tuple6*Cyc__genarr_478[
+3]={& Cyc__gentuple_475,& Cyc__gentuple_476,& Cyc__gentuple_477};static struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_474={4,sizeof(struct _tuple39),{(void*)((struct _tuple6**)Cyc__genarr_478),(
+void*)((struct _tuple6**)Cyc__genarr_478),(void*)((struct _tuple6**)Cyc__genarr_478
++ 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_469;struct _tuple58{
+unsigned int f1;struct Cyc_Absyn_Stmt*f2;struct _tuple2 f3;};static struct _tuple6 Cyc__gentuple_470={
 offsetof(struct _tuple58,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_471={
 offsetof(struct _tuple58,f2),(void*)& Cyc__genrep_162};static struct _tuple6 Cyc__gentuple_472={
 offsetof(struct _tuple58,f3),(void*)& Cyc__genrep_171};static struct _tuple6*Cyc__genarr_473[
@@ -2985,164 +3052,182 @@ Cyc__gentuple_225,& Cyc__gentuple_226};static struct Cyc_Typerep_Tuple_struct Cy
 struct _tuple6**)Cyc__genarr_227),(void*)((struct _tuple6**)Cyc__genarr_227 + 5)}};
 extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_170;extern struct Cyc_Typerep_Struct_struct
 Cyc_Absyn_forarray_info_t_rep;static char _tmp33B[13]="ForArrayInfo";static struct
-_tagged_arr Cyc__genname_180={_tmp33B,_tmp33B,_tmp33B + 13};static char _tmp33C[6]="defns";
-static struct _tuple5 Cyc__gentuple_175={offsetof(struct Cyc_Absyn_ForArrayInfo,defns),{
-_tmp33C,_tmp33C,_tmp33C + 6},(void*)& Cyc__genrep_132};static char _tmp33D[10]="condition";
-static struct _tuple5 Cyc__gentuple_176={offsetof(struct Cyc_Absyn_ForArrayInfo,condition),{
-_tmp33D,_tmp33D,_tmp33D + 10},(void*)& Cyc__genrep_171};static char _tmp33E[6]="delta";
-static struct _tuple5 Cyc__gentuple_177={offsetof(struct Cyc_Absyn_ForArrayInfo,delta),{
-_tmp33E,_tmp33E,_tmp33E + 6},(void*)& Cyc__genrep_171};static char _tmp33F[5]="body";
-static struct _tuple5 Cyc__gentuple_178={offsetof(struct Cyc_Absyn_ForArrayInfo,body),{
-_tmp33F,_tmp33F,_tmp33F + 5},(void*)& Cyc__genrep_162};static struct _tuple5*Cyc__genarr_179[
-4]={& Cyc__gentuple_175,& Cyc__gentuple_176,& Cyc__gentuple_177,& Cyc__gentuple_178};
-struct Cyc_Typerep_Struct_struct Cyc_Absyn_forarray_info_t_rep={3,(struct
-_tagged_arr*)& Cyc__genname_180,sizeof(struct Cyc_Absyn_ForArrayInfo),{(void*)((
-struct _tuple5**)Cyc__genarr_179),(void*)((struct _tuple5**)Cyc__genarr_179),(void*)((
-struct _tuple5**)Cyc__genarr_179 + 4)}};struct _tuple61{unsigned int f1;struct Cyc_Absyn_ForArrayInfo
-f2;};static struct _tuple6 Cyc__gentuple_181={offsetof(struct _tuple61,f1),(void*)&
-Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_182={offsetof(struct _tuple61,f2),(
-void*)& Cyc_Absyn_forarray_info_t_rep};static struct _tuple6*Cyc__genarr_183[2]={&
-Cyc__gentuple_181,& Cyc__gentuple_182};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_170={
-4,sizeof(struct _tuple61),{(void*)((struct _tuple6**)Cyc__genarr_183),(void*)((
-struct _tuple6**)Cyc__genarr_183),(void*)((struct _tuple6**)Cyc__genarr_183 + 2)}};
-static char _tmp342[7]="Skip_s";static struct _tuple7 Cyc__gentuple_168={0,{_tmp342,
-_tmp342,_tmp342 + 7}};static struct _tuple7*Cyc__genarr_169[1]={& Cyc__gentuple_168};
-static char _tmp343[6]="Exp_s";static struct _tuple5 Cyc__gentuple_557={0,{_tmp343,
-_tmp343,_tmp343 + 6},(void*)& Cyc__genrep_81};static char _tmp344[6]="Seq_s";static
-struct _tuple5 Cyc__gentuple_558={1,{_tmp344,_tmp344,_tmp344 + 6},(void*)& Cyc__genrep_552};
-static char _tmp345[9]="Return_s";static struct _tuple5 Cyc__gentuple_559={2,{_tmp345,
-_tmp345,_tmp345 + 9},(void*)& Cyc__genrep_548};static char _tmp346[13]="IfThenElse_s";
-static struct _tuple5 Cyc__gentuple_560={3,{_tmp346,_tmp346,_tmp346 + 13},(void*)&
-Cyc__genrep_542};static char _tmp347[8]="While_s";static struct _tuple5 Cyc__gentuple_561={
-4,{_tmp347,_tmp347,_tmp347 + 8},(void*)& Cyc__genrep_537};static char _tmp348[8]="Break_s";
-static struct _tuple5 Cyc__gentuple_562={5,{_tmp348,_tmp348,_tmp348 + 8},(void*)& Cyc__genrep_533};
-static char _tmp349[11]="Continue_s";static struct _tuple5 Cyc__gentuple_563={6,{
-_tmp349,_tmp349,_tmp349 + 11},(void*)& Cyc__genrep_533};static char _tmp34A[7]="Goto_s";
-static struct _tuple5 Cyc__gentuple_564={7,{_tmp34A,_tmp34A,_tmp34A + 7},(void*)& Cyc__genrep_527};
-static char _tmp34B[6]="For_s";static struct _tuple5 Cyc__gentuple_565={8,{_tmp34B,
-_tmp34B,_tmp34B + 6},(void*)& Cyc__genrep_520};static char _tmp34C[9]="Switch_s";
-static struct _tuple5 Cyc__gentuple_566={9,{_tmp34C,_tmp34C,_tmp34C + 9},(void*)& Cyc__genrep_515};
-static char _tmp34D[10]="SwitchC_s";static struct _tuple5 Cyc__gentuple_567={10,{
-_tmp34D,_tmp34D,_tmp34D + 10},(void*)& Cyc__genrep_499};static char _tmp34E[11]="Fallthru_s";
-static struct _tuple5 Cyc__gentuple_568={11,{_tmp34E,_tmp34E,_tmp34E + 11},(void*)&
-Cyc__genrep_488};static char _tmp34F[7]="Decl_s";static struct _tuple5 Cyc__gentuple_569={
-12,{_tmp34F,_tmp34F,_tmp34F + 7},(void*)& Cyc__genrep_483};static char _tmp350[6]="Cut_s";
-static struct _tuple5 Cyc__gentuple_570={13,{_tmp350,_tmp350,_tmp350 + 6},(void*)&
-Cyc__genrep_479};static char _tmp351[9]="Splice_s";static struct _tuple5 Cyc__gentuple_571={
-14,{_tmp351,_tmp351,_tmp351 + 9},(void*)& Cyc__genrep_479};static char _tmp352[8]="Label_s";
-static struct _tuple5 Cyc__gentuple_572={15,{_tmp352,_tmp352,_tmp352 + 8},(void*)&
+_tagged_arr Cyc__genname_180=(struct _tagged_arr){_tmp33B,_tmp33B,_tmp33B + 13};
+static char _tmp33C[6]="defns";static struct _tuple5 Cyc__gentuple_175={offsetof(
+struct Cyc_Absyn_ForArrayInfo,defns),(struct _tagged_arr){_tmp33C,_tmp33C,_tmp33C + 
+6},(void*)& Cyc__genrep_132};static char _tmp33D[10]="condition";static struct
+_tuple5 Cyc__gentuple_176={offsetof(struct Cyc_Absyn_ForArrayInfo,condition),(
+struct _tagged_arr){_tmp33D,_tmp33D,_tmp33D + 10},(void*)& Cyc__genrep_171};static
+char _tmp33E[6]="delta";static struct _tuple5 Cyc__gentuple_177={offsetof(struct Cyc_Absyn_ForArrayInfo,delta),(
+struct _tagged_arr){_tmp33E,_tmp33E,_tmp33E + 6},(void*)& Cyc__genrep_171};static
+char _tmp33F[5]="body";static struct _tuple5 Cyc__gentuple_178={offsetof(struct Cyc_Absyn_ForArrayInfo,body),(
+struct _tagged_arr){_tmp33F,_tmp33F,_tmp33F + 5},(void*)& Cyc__genrep_162};static
+struct _tuple5*Cyc__genarr_179[4]={& Cyc__gentuple_175,& Cyc__gentuple_176,& Cyc__gentuple_177,&
+Cyc__gentuple_178};struct Cyc_Typerep_Struct_struct Cyc_Absyn_forarray_info_t_rep={
+3,(struct _tagged_arr*)& Cyc__genname_180,sizeof(struct Cyc_Absyn_ForArrayInfo),{(
+void*)((struct _tuple5**)Cyc__genarr_179),(void*)((struct _tuple5**)Cyc__genarr_179),(
+void*)((struct _tuple5**)Cyc__genarr_179 + 4)}};struct _tuple61{unsigned int f1;
+struct Cyc_Absyn_ForArrayInfo f2;};static struct _tuple6 Cyc__gentuple_181={offsetof(
+struct _tuple61,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_182={
+offsetof(struct _tuple61,f2),(void*)& Cyc_Absyn_forarray_info_t_rep};static struct
+_tuple6*Cyc__genarr_183[2]={& Cyc__gentuple_181,& Cyc__gentuple_182};static struct
+Cyc_Typerep_Tuple_struct Cyc__genrep_170={4,sizeof(struct _tuple61),{(void*)((
+struct _tuple6**)Cyc__genarr_183),(void*)((struct _tuple6**)Cyc__genarr_183),(void*)((
+struct _tuple6**)Cyc__genarr_183 + 2)}};static char _tmp342[7]="Skip_s";static struct
+_tuple7 Cyc__gentuple_168={0,(struct _tagged_arr){_tmp342,_tmp342,_tmp342 + 7}};
+static struct _tuple7*Cyc__genarr_169[1]={& Cyc__gentuple_168};static char _tmp343[6]="Exp_s";
+static struct _tuple5 Cyc__gentuple_557={0,(struct _tagged_arr){_tmp343,_tmp343,
+_tmp343 + 6},(void*)& Cyc__genrep_81};static char _tmp344[6]="Seq_s";static struct
+_tuple5 Cyc__gentuple_558={1,(struct _tagged_arr){_tmp344,_tmp344,_tmp344 + 6},(
+void*)& Cyc__genrep_552};static char _tmp345[9]="Return_s";static struct _tuple5 Cyc__gentuple_559={
+2,(struct _tagged_arr){_tmp345,_tmp345,_tmp345 + 9},(void*)& Cyc__genrep_548};
+static char _tmp346[13]="IfThenElse_s";static struct _tuple5 Cyc__gentuple_560={3,(
+struct _tagged_arr){_tmp346,_tmp346,_tmp346 + 13},(void*)& Cyc__genrep_542};static
+char _tmp347[8]="While_s";static struct _tuple5 Cyc__gentuple_561={4,(struct
+_tagged_arr){_tmp347,_tmp347,_tmp347 + 8},(void*)& Cyc__genrep_537};static char
+_tmp348[8]="Break_s";static struct _tuple5 Cyc__gentuple_562={5,(struct _tagged_arr){
+_tmp348,_tmp348,_tmp348 + 8},(void*)& Cyc__genrep_533};static char _tmp349[11]="Continue_s";
+static struct _tuple5 Cyc__gentuple_563={6,(struct _tagged_arr){_tmp349,_tmp349,
+_tmp349 + 11},(void*)& Cyc__genrep_533};static char _tmp34A[7]="Goto_s";static struct
+_tuple5 Cyc__gentuple_564={7,(struct _tagged_arr){_tmp34A,_tmp34A,_tmp34A + 7},(
+void*)& Cyc__genrep_527};static char _tmp34B[6]="For_s";static struct _tuple5 Cyc__gentuple_565={
+8,(struct _tagged_arr){_tmp34B,_tmp34B,_tmp34B + 6},(void*)& Cyc__genrep_520};
+static char _tmp34C[9]="Switch_s";static struct _tuple5 Cyc__gentuple_566={9,(struct
+_tagged_arr){_tmp34C,_tmp34C,_tmp34C + 9},(void*)& Cyc__genrep_515};static char
+_tmp34D[10]="SwitchC_s";static struct _tuple5 Cyc__gentuple_567={10,(struct
+_tagged_arr){_tmp34D,_tmp34D,_tmp34D + 10},(void*)& Cyc__genrep_499};static char
+_tmp34E[11]="Fallthru_s";static struct _tuple5 Cyc__gentuple_568={11,(struct
+_tagged_arr){_tmp34E,_tmp34E,_tmp34E + 11},(void*)& Cyc__genrep_488};static char
+_tmp34F[7]="Decl_s";static struct _tuple5 Cyc__gentuple_569={12,(struct _tagged_arr){
+_tmp34F,_tmp34F,_tmp34F + 7},(void*)& Cyc__genrep_483};static char _tmp350[6]="Cut_s";
+static struct _tuple5 Cyc__gentuple_570={13,(struct _tagged_arr){_tmp350,_tmp350,
+_tmp350 + 6},(void*)& Cyc__genrep_479};static char _tmp351[9]="Splice_s";static
+struct _tuple5 Cyc__gentuple_571={14,(struct _tagged_arr){_tmp351,_tmp351,_tmp351 + 
+9},(void*)& Cyc__genrep_479};static char _tmp352[8]="Label_s";static struct _tuple5
+Cyc__gentuple_572={15,(struct _tagged_arr){_tmp352,_tmp352,_tmp352 + 8},(void*)&
 Cyc__genrep_474};static char _tmp353[5]="Do_s";static struct _tuple5 Cyc__gentuple_573={
-16,{_tmp353,_tmp353,_tmp353 + 5},(void*)& Cyc__genrep_469};static char _tmp354[11]="TryCatch_s";
-static struct _tuple5 Cyc__gentuple_574={17,{_tmp354,_tmp354,_tmp354 + 11},(void*)&
-Cyc__genrep_228};static char _tmp355[9]="Region_s";static struct _tuple5 Cyc__gentuple_575={
-18,{_tmp355,_tmp355,_tmp355 + 9},(void*)& Cyc__genrep_184};static char _tmp356[11]="ForArray_s";
-static struct _tuple5 Cyc__gentuple_576={19,{_tmp356,_tmp356,_tmp356 + 11},(void*)&
-Cyc__genrep_170};static char _tmp357[14]="ResetRegion_s";static struct _tuple5 Cyc__gentuple_577={
-20,{_tmp357,_tmp357,_tmp357 + 14},(void*)& Cyc__genrep_81};static struct _tuple5*Cyc__genarr_578[
-21]={& Cyc__gentuple_557,& Cyc__gentuple_558,& Cyc__gentuple_559,& Cyc__gentuple_560,&
-Cyc__gentuple_561,& Cyc__gentuple_562,& Cyc__gentuple_563,& Cyc__gentuple_564,& Cyc__gentuple_565,&
-Cyc__gentuple_566,& Cyc__gentuple_567,& Cyc__gentuple_568,& Cyc__gentuple_569,& Cyc__gentuple_570,&
-Cyc__gentuple_571,& Cyc__gentuple_572,& Cyc__gentuple_573,& Cyc__gentuple_574,& Cyc__gentuple_575,&
-Cyc__gentuple_576,& Cyc__gentuple_577};static char _tmp359[9]="Raw_stmt";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_raw_stmt_t_rep={5,{_tmp359,_tmp359,_tmp359 + 9},{(void*)((struct _tuple7**)
-Cyc__genarr_169),(void*)((struct _tuple7**)Cyc__genarr_169),(void*)((struct
-_tuple7**)Cyc__genarr_169 + 1)},{(void*)((struct _tuple5**)Cyc__genarr_578),(void*)((
-struct _tuple5**)Cyc__genarr_578),(void*)((struct _tuple5**)Cyc__genarr_578 + 21)}};
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_163;extern struct Cyc_Typerep_Struct_struct
-Cyc_struct_List_List0Absyn_stmt_t46H2_rep;static char _tmp35A[5]="List";static
-struct _tagged_arr Cyc__genname_167={_tmp35A,_tmp35A,_tmp35A + 5};static char _tmp35B[
-3]="hd";static struct _tuple5 Cyc__gentuple_164={offsetof(struct Cyc_List_List,hd),{
+16,(struct _tagged_arr){_tmp353,_tmp353,_tmp353 + 5},(void*)& Cyc__genrep_469};
+static char _tmp354[11]="TryCatch_s";static struct _tuple5 Cyc__gentuple_574={17,(
+struct _tagged_arr){_tmp354,_tmp354,_tmp354 + 11},(void*)& Cyc__genrep_228};static
+char _tmp355[9]="Region_s";static struct _tuple5 Cyc__gentuple_575={18,(struct
+_tagged_arr){_tmp355,_tmp355,_tmp355 + 9},(void*)& Cyc__genrep_184};static char
+_tmp356[11]="ForArray_s";static struct _tuple5 Cyc__gentuple_576={19,(struct
+_tagged_arr){_tmp356,_tmp356,_tmp356 + 11},(void*)& Cyc__genrep_170};static char
+_tmp357[14]="ResetRegion_s";static struct _tuple5 Cyc__gentuple_577={20,(struct
+_tagged_arr){_tmp357,_tmp357,_tmp357 + 14},(void*)& Cyc__genrep_81};static struct
+_tuple5*Cyc__genarr_578[21]={& Cyc__gentuple_557,& Cyc__gentuple_558,& Cyc__gentuple_559,&
+Cyc__gentuple_560,& Cyc__gentuple_561,& Cyc__gentuple_562,& Cyc__gentuple_563,& Cyc__gentuple_564,&
+Cyc__gentuple_565,& Cyc__gentuple_566,& Cyc__gentuple_567,& Cyc__gentuple_568,& Cyc__gentuple_569,&
+Cyc__gentuple_570,& Cyc__gentuple_571,& Cyc__gentuple_572,& Cyc__gentuple_573,& Cyc__gentuple_574,&
+Cyc__gentuple_575,& Cyc__gentuple_576,& Cyc__gentuple_577};static char _tmp359[9]="Raw_stmt";
+struct Cyc_Typerep_TUnion_struct Cyc_Absyn_raw_stmt_t_rep={5,(struct _tagged_arr){
+_tmp359,_tmp359,_tmp359 + 9},{(void*)((struct _tuple7**)Cyc__genarr_169),(void*)((
+struct _tuple7**)Cyc__genarr_169),(void*)((struct _tuple7**)Cyc__genarr_169 + 1)},{(
+void*)((struct _tuple5**)Cyc__genarr_578),(void*)((struct _tuple5**)Cyc__genarr_578),(
+void*)((struct _tuple5**)Cyc__genarr_578 + 21)}};extern struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_163;extern struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_stmt_t46H2_rep;
+static char _tmp35A[5]="List";static struct _tagged_arr Cyc__genname_167=(struct
+_tagged_arr){_tmp35A,_tmp35A,_tmp35A + 5};static char _tmp35B[3]="hd";static struct
+_tuple5 Cyc__gentuple_164={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
 _tmp35B,_tmp35B,_tmp35B + 3},(void*)& Cyc__genrep_162};static char _tmp35C[3]="tl";
-static struct _tuple5 Cyc__gentuple_165={offsetof(struct Cyc_List_List,tl),{_tmp35C,
-_tmp35C,_tmp35C + 3},(void*)& Cyc__genrep_163};static struct _tuple5*Cyc__genarr_166[
-2]={& Cyc__gentuple_164,& Cyc__gentuple_165};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_stmt_t46H2_rep={
-3,(struct _tagged_arr*)& Cyc__genname_167,sizeof(struct Cyc_List_List),{(void*)((
-struct _tuple5**)Cyc__genarr_166),(void*)((struct _tuple5**)Cyc__genarr_166),(void*)((
-struct _tuple5**)Cyc__genarr_166 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_163={
-1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_stmt_t46H2_rep)};extern struct Cyc_Typerep_XTUnion_struct
-Cyc_Absyn_absyn_annot_t_rep;static struct _tuple8*Cyc__genarr_79[0]={};static char
-_tmp360[11]="AbsynAnnot";struct Cyc_Typerep_XTUnion_struct Cyc_Absyn_absyn_annot_t_rep={
-7,{_tmp360,_tmp360,_tmp360 + 11},{(void*)((struct _tuple8**)Cyc__genarr_79),(void*)((
-struct _tuple8**)Cyc__genarr_79),(void*)((struct _tuple8**)Cyc__genarr_79 + 0)}};
-static char _tmp361[5]="Stmt";static struct _tagged_arr Cyc__genname_585={_tmp361,
-_tmp361,_tmp361 + 5};static char _tmp362[2]="r";static struct _tuple5 Cyc__gentuple_579={
-offsetof(struct Cyc_Absyn_Stmt,r),{_tmp362,_tmp362,_tmp362 + 2},(void*)& Cyc_Absyn_raw_stmt_t_rep};
+static struct _tuple5 Cyc__gentuple_165={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp35C,_tmp35C,_tmp35C + 3},(void*)& Cyc__genrep_163};static struct
+_tuple5*Cyc__genarr_166[2]={& Cyc__gentuple_164,& Cyc__gentuple_165};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List0Absyn_stmt_t46H2_rep={3,(struct _tagged_arr*)& Cyc__genname_167,
+sizeof(struct Cyc_List_List),{(void*)((struct _tuple5**)Cyc__genarr_166),(void*)((
+struct _tuple5**)Cyc__genarr_166),(void*)((struct _tuple5**)Cyc__genarr_166 + 2)}};
+static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_163={1,1,(void*)((void*)& Cyc_struct_List_List0Absyn_stmt_t46H2_rep)};
+extern struct Cyc_Typerep_XTUnion_struct Cyc_Absyn_absyn_annot_t_rep;static struct
+_tuple8*Cyc__genarr_79[0]={};static char _tmp360[11]="AbsynAnnot";struct Cyc_Typerep_XTUnion_struct
+Cyc_Absyn_absyn_annot_t_rep={7,(struct _tagged_arr){_tmp360,_tmp360,_tmp360 + 11},{(
+void*)((struct _tuple8**)Cyc__genarr_79),(void*)((struct _tuple8**)Cyc__genarr_79),(
+void*)((struct _tuple8**)Cyc__genarr_79 + 0)}};static char _tmp361[5]="Stmt";static
+struct _tagged_arr Cyc__genname_585=(struct _tagged_arr){_tmp361,_tmp361,_tmp361 + 5};
+static char _tmp362[2]="r";static struct _tuple5 Cyc__gentuple_579={offsetof(struct
+Cyc_Absyn_Stmt,r),(struct _tagged_arr){_tmp362,_tmp362,_tmp362 + 2},(void*)& Cyc_Absyn_raw_stmt_t_rep};
 static char _tmp363[4]="loc";static struct _tuple5 Cyc__gentuple_580={offsetof(struct
-Cyc_Absyn_Stmt,loc),{_tmp363,_tmp363,_tmp363 + 4},(void*)& Cyc__genrep_2};static
-char _tmp364[16]="non_local_preds";static struct _tuple5 Cyc__gentuple_581={
-offsetof(struct Cyc_Absyn_Stmt,non_local_preds),{_tmp364,_tmp364,_tmp364 + 16},(
-void*)& Cyc__genrep_163};static char _tmp365[10]="try_depth";static struct _tuple5 Cyc__gentuple_582={
-offsetof(struct Cyc_Absyn_Stmt,try_depth),{_tmp365,_tmp365,_tmp365 + 10},(void*)((
-void*)& Cyc__genrep_62)};static char _tmp366[6]="annot";static struct _tuple5 Cyc__gentuple_583={
-offsetof(struct Cyc_Absyn_Stmt,annot),{_tmp366,_tmp366,_tmp366 + 6},(void*)& Cyc_Absyn_absyn_annot_t_rep};
-static struct _tuple5*Cyc__genarr_584[5]={& Cyc__gentuple_579,& Cyc__gentuple_580,&
-Cyc__gentuple_581,& Cyc__gentuple_582,& Cyc__gentuple_583};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Stmt_rep={3,(struct _tagged_arr*)& Cyc__genname_585,sizeof(struct
-Cyc_Absyn_Stmt),{(void*)((struct _tuple5**)Cyc__genarr_584),(void*)((struct
-_tuple5**)Cyc__genarr_584),(void*)((struct _tuple5**)Cyc__genarr_584 + 5)}};static
-struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_162={1,1,(void*)((void*)& Cyc_struct_Absyn_Stmt_rep)};
-static char _tmp369[7]="Fndecl";static struct _tagged_arr Cyc__genname_623={_tmp369,
-_tmp369,_tmp369 + 7};static char _tmp36A[3]="sc";static struct _tuple5 Cyc__gentuple_608={
-offsetof(struct Cyc_Absyn_Fndecl,sc),{_tmp36A,_tmp36A,_tmp36A + 3},(void*)& Cyc_Absyn_scope_t_rep};
+Cyc_Absyn_Stmt,loc),(struct _tagged_arr){_tmp363,_tmp363,_tmp363 + 4},(void*)& Cyc__genrep_2};
+static char _tmp364[16]="non_local_preds";static struct _tuple5 Cyc__gentuple_581={
+offsetof(struct Cyc_Absyn_Stmt,non_local_preds),(struct _tagged_arr){_tmp364,
+_tmp364,_tmp364 + 16},(void*)& Cyc__genrep_163};static char _tmp365[10]="try_depth";
+static struct _tuple5 Cyc__gentuple_582={offsetof(struct Cyc_Absyn_Stmt,try_depth),(
+struct _tagged_arr){_tmp365,_tmp365,_tmp365 + 10},(void*)((void*)& Cyc__genrep_62)};
+static char _tmp366[6]="annot";static struct _tuple5 Cyc__gentuple_583={offsetof(
+struct Cyc_Absyn_Stmt,annot),(struct _tagged_arr){_tmp366,_tmp366,_tmp366 + 6},(
+void*)& Cyc_Absyn_absyn_annot_t_rep};static struct _tuple5*Cyc__genarr_584[5]={& Cyc__gentuple_579,&
+Cyc__gentuple_580,& Cyc__gentuple_581,& Cyc__gentuple_582,& Cyc__gentuple_583};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Stmt_rep={3,(struct _tagged_arr*)&
+Cyc__genname_585,sizeof(struct Cyc_Absyn_Stmt),{(void*)((struct _tuple5**)Cyc__genarr_584),(
+void*)((struct _tuple5**)Cyc__genarr_584),(void*)((struct _tuple5**)Cyc__genarr_584
++ 5)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_162={1,1,(void*)((void*)&
+Cyc_struct_Absyn_Stmt_rep)};static char _tmp369[7]="Fndecl";static struct
+_tagged_arr Cyc__genname_623=(struct _tagged_arr){_tmp369,_tmp369,_tmp369 + 7};
+static char _tmp36A[3]="sc";static struct _tuple5 Cyc__gentuple_608={offsetof(struct
+Cyc_Absyn_Fndecl,sc),(struct _tagged_arr){_tmp36A,_tmp36A,_tmp36A + 3},(void*)& Cyc_Absyn_scope_t_rep};
 static char _tmp36B[10]="is_inline";static struct _tuple5 Cyc__gentuple_609={
-offsetof(struct Cyc_Absyn_Fndecl,is_inline),{_tmp36B,_tmp36B,_tmp36B + 10},(void*)((
-void*)& Cyc__genrep_62)};static char _tmp36C[5]="name";static struct _tuple5 Cyc__gentuple_610={
-offsetof(struct Cyc_Absyn_Fndecl,name),{_tmp36C,_tmp36C,_tmp36C + 5},(void*)& Cyc__genrep_10};
-static char _tmp36D[4]="tvs";static struct _tuple5 Cyc__gentuple_611={offsetof(struct
-Cyc_Absyn_Fndecl,tvs),{_tmp36D,_tmp36D,_tmp36D + 4},(void*)& Cyc__genrep_311};
-static char _tmp36E[7]="effect";static struct _tuple5 Cyc__gentuple_612={offsetof(
-struct Cyc_Absyn_Fndecl,effect),{_tmp36E,_tmp36E,_tmp36E + 7},(void*)& Cyc__genrep_43};
-static char _tmp36F[9]="ret_type";static struct _tuple5 Cyc__gentuple_613={offsetof(
-struct Cyc_Absyn_Fndecl,ret_type),{_tmp36F,_tmp36F,_tmp36F + 9},(void*)((void*)&
-Cyc_Absyn_type_t_rep)};static char _tmp370[5]="args";static struct _tuple5 Cyc__gentuple_614={
-offsetof(struct Cyc_Absyn_Fndecl,args),{_tmp370,_tmp370,_tmp370 + 5},(void*)& Cyc__genrep_597};
-static char _tmp371[10]="c_varargs";static struct _tuple5 Cyc__gentuple_615={
-offsetof(struct Cyc_Absyn_Fndecl,c_varargs),{_tmp371,_tmp371,_tmp371 + 10},(void*)((
-void*)& Cyc__genrep_62)};static char _tmp372[12]="cyc_varargs";static struct _tuple5
-Cyc__gentuple_616={offsetof(struct Cyc_Absyn_Fndecl,cyc_varargs),{_tmp372,_tmp372,
+offsetof(struct Cyc_Absyn_Fndecl,is_inline),(struct _tagged_arr){_tmp36B,_tmp36B,
+_tmp36B + 10},(void*)((void*)& Cyc__genrep_62)};static char _tmp36C[5]="name";static
+struct _tuple5 Cyc__gentuple_610={offsetof(struct Cyc_Absyn_Fndecl,name),(struct
+_tagged_arr){_tmp36C,_tmp36C,_tmp36C + 5},(void*)& Cyc__genrep_10};static char
+_tmp36D[4]="tvs";static struct _tuple5 Cyc__gentuple_611={offsetof(struct Cyc_Absyn_Fndecl,tvs),(
+struct _tagged_arr){_tmp36D,_tmp36D,_tmp36D + 4},(void*)& Cyc__genrep_311};static
+char _tmp36E[7]="effect";static struct _tuple5 Cyc__gentuple_612={offsetof(struct Cyc_Absyn_Fndecl,effect),(
+struct _tagged_arr){_tmp36E,_tmp36E,_tmp36E + 7},(void*)& Cyc__genrep_43};static
+char _tmp36F[9]="ret_type";static struct _tuple5 Cyc__gentuple_613={offsetof(struct
+Cyc_Absyn_Fndecl,ret_type),(struct _tagged_arr){_tmp36F,_tmp36F,_tmp36F + 9},(void*)((
+void*)& Cyc_Absyn_type_t_rep)};static char _tmp370[5]="args";static struct _tuple5 Cyc__gentuple_614={
+offsetof(struct Cyc_Absyn_Fndecl,args),(struct _tagged_arr){_tmp370,_tmp370,
+_tmp370 + 5},(void*)& Cyc__genrep_597};static char _tmp371[10]="c_varargs";static
+struct _tuple5 Cyc__gentuple_615={offsetof(struct Cyc_Absyn_Fndecl,c_varargs),(
+struct _tagged_arr){_tmp371,_tmp371,_tmp371 + 10},(void*)((void*)& Cyc__genrep_62)};
+static char _tmp372[12]="cyc_varargs";static struct _tuple5 Cyc__gentuple_616={
+offsetof(struct Cyc_Absyn_Fndecl,cyc_varargs),(struct _tagged_arr){_tmp372,_tmp372,
 _tmp372 + 12},(void*)& Cyc__genrep_586};static char _tmp373[7]="rgn_po";static struct
-_tuple5 Cyc__gentuple_617={offsetof(struct Cyc_Absyn_Fndecl,rgn_po),{_tmp373,
-_tmp373,_tmp373 + 7},(void*)& Cyc__genrep_370};static char _tmp374[5]="body";static
-struct _tuple5 Cyc__gentuple_618={offsetof(struct Cyc_Absyn_Fndecl,body),{_tmp374,
-_tmp374,_tmp374 + 5},(void*)& Cyc__genrep_162};static char _tmp375[11]="cached_typ";
-static struct _tuple5 Cyc__gentuple_619={offsetof(struct Cyc_Absyn_Fndecl,cached_typ),{
-_tmp375,_tmp375,_tmp375 + 11},(void*)& Cyc__genrep_43};static char _tmp376[15]="param_vardecls";
-static struct _tuple5 Cyc__gentuple_620={offsetof(struct Cyc_Absyn_Fndecl,param_vardecls),{
-_tmp376,_tmp376,_tmp376 + 15},(void*)& Cyc__genrep_131};static char _tmp377[11]="attributes";
-static struct _tuple5 Cyc__gentuple_621={offsetof(struct Cyc_Absyn_Fndecl,attributes),{
-_tmp377,_tmp377,_tmp377 + 11},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_622[
-14]={& Cyc__gentuple_608,& Cyc__gentuple_609,& Cyc__gentuple_610,& Cyc__gentuple_611,&
-Cyc__gentuple_612,& Cyc__gentuple_613,& Cyc__gentuple_614,& Cyc__gentuple_615,& Cyc__gentuple_616,&
-Cyc__gentuple_617,& Cyc__gentuple_618,& Cyc__gentuple_619,& Cyc__gentuple_620,& Cyc__gentuple_621};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Fndecl_rep={3,(struct _tagged_arr*)&
-Cyc__genname_623,sizeof(struct Cyc_Absyn_Fndecl),{(void*)((struct _tuple5**)Cyc__genarr_622),(
-void*)((struct _tuple5**)Cyc__genarr_622),(void*)((struct _tuple5**)Cyc__genarr_622
-+ 14)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_87={1,1,(void*)((void*)&
-Cyc_struct_Absyn_Fndecl_rep)};struct _tuple62{unsigned int f1;struct Cyc_Absyn_Fndecl*
-f2;};static struct _tuple6 Cyc__gentuple_624={offsetof(struct _tuple62,f1),(void*)&
-Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_625={offsetof(struct _tuple62,f2),(
-void*)& Cyc__genrep_87};static struct _tuple6*Cyc__genarr_626[2]={& Cyc__gentuple_624,&
-Cyc__gentuple_625};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_86={4,sizeof(
-struct _tuple62),{(void*)((struct _tuple6**)Cyc__genarr_626),(void*)((struct
-_tuple6**)Cyc__genarr_626),(void*)((struct _tuple6**)Cyc__genarr_626 + 2)}};static
-char _tmp37B[13]="Unresolved_b";static struct _tuple7 Cyc__gentuple_840={0,{_tmp37B,
-_tmp37B,_tmp37B + 13}};static struct _tuple7*Cyc__genarr_841[1]={& Cyc__gentuple_840};
-static char _tmp37C[9]="Global_b";static struct _tuple5 Cyc__gentuple_842={0,{_tmp37C,
-_tmp37C,_tmp37C + 9},(void*)& Cyc__genrep_430};static char _tmp37D[10]="Funname_b";
-static struct _tuple5 Cyc__gentuple_843={1,{_tmp37D,_tmp37D,_tmp37D + 10},(void*)&
-Cyc__genrep_86};static char _tmp37E[8]="Param_b";static struct _tuple5 Cyc__gentuple_844={
-2,{_tmp37E,_tmp37E,_tmp37E + 8},(void*)& Cyc__genrep_430};static char _tmp37F[8]="Local_b";
-static struct _tuple5 Cyc__gentuple_845={3,{_tmp37F,_tmp37F,_tmp37F + 8},(void*)& Cyc__genrep_430};
-static char _tmp380[6]="Pat_b";static struct _tuple5 Cyc__gentuple_846={4,{_tmp380,
-_tmp380,_tmp380 + 6},(void*)& Cyc__genrep_430};static struct _tuple5*Cyc__genarr_847[
-5]={& Cyc__gentuple_842,& Cyc__gentuple_843,& Cyc__gentuple_844,& Cyc__gentuple_845,&
-Cyc__gentuple_846};static char _tmp382[8]="Binding";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_binding_t_rep={5,{_tmp382,_tmp382,_tmp382 + 8},{(void*)((struct _tuple7**)
-Cyc__genarr_841),(void*)((struct _tuple7**)Cyc__genarr_841),(void*)((struct
-_tuple7**)Cyc__genarr_841 + 1)},{(void*)((struct _tuple5**)Cyc__genarr_847),(void*)((
-struct _tuple5**)Cyc__genarr_847),(void*)((struct _tuple5**)Cyc__genarr_847 + 5)}};
-struct _tuple63{unsigned int f1;struct _tuple0*f2;void*f3;};static struct _tuple6 Cyc__gentuple_848={
-offsetof(struct _tuple63,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_849={
+_tuple5 Cyc__gentuple_617={offsetof(struct Cyc_Absyn_Fndecl,rgn_po),(struct
+_tagged_arr){_tmp373,_tmp373,_tmp373 + 7},(void*)& Cyc__genrep_370};static char
+_tmp374[5]="body";static struct _tuple5 Cyc__gentuple_618={offsetof(struct Cyc_Absyn_Fndecl,body),(
+struct _tagged_arr){_tmp374,_tmp374,_tmp374 + 5},(void*)& Cyc__genrep_162};static
+char _tmp375[11]="cached_typ";static struct _tuple5 Cyc__gentuple_619={offsetof(
+struct Cyc_Absyn_Fndecl,cached_typ),(struct _tagged_arr){_tmp375,_tmp375,_tmp375 + 
+11},(void*)& Cyc__genrep_43};static char _tmp376[15]="param_vardecls";static struct
+_tuple5 Cyc__gentuple_620={offsetof(struct Cyc_Absyn_Fndecl,param_vardecls),(
+struct _tagged_arr){_tmp376,_tmp376,_tmp376 + 15},(void*)& Cyc__genrep_131};static
+char _tmp377[11]="attributes";static struct _tuple5 Cyc__gentuple_621={offsetof(
+struct Cyc_Absyn_Fndecl,attributes),(struct _tagged_arr){_tmp377,_tmp377,_tmp377 + 
+11},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_622[14]={& Cyc__gentuple_608,&
+Cyc__gentuple_609,& Cyc__gentuple_610,& Cyc__gentuple_611,& Cyc__gentuple_612,& Cyc__gentuple_613,&
+Cyc__gentuple_614,& Cyc__gentuple_615,& Cyc__gentuple_616,& Cyc__gentuple_617,& Cyc__gentuple_618,&
+Cyc__gentuple_619,& Cyc__gentuple_620,& Cyc__gentuple_621};struct Cyc_Typerep_Struct_struct
+Cyc_struct_Absyn_Fndecl_rep={3,(struct _tagged_arr*)& Cyc__genname_623,sizeof(
+struct Cyc_Absyn_Fndecl),{(void*)((struct _tuple5**)Cyc__genarr_622),(void*)((
+struct _tuple5**)Cyc__genarr_622),(void*)((struct _tuple5**)Cyc__genarr_622 + 14)}};
+static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_87={1,1,(void*)((void*)& Cyc_struct_Absyn_Fndecl_rep)};
+struct _tuple62{unsigned int f1;struct Cyc_Absyn_Fndecl*f2;};static struct _tuple6 Cyc__gentuple_624={
+offsetof(struct _tuple62,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_625={
+offsetof(struct _tuple62,f2),(void*)& Cyc__genrep_87};static struct _tuple6*Cyc__genarr_626[
+2]={& Cyc__gentuple_624,& Cyc__gentuple_625};static struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_86={4,sizeof(struct _tuple62),{(void*)((struct _tuple6**)Cyc__genarr_626),(
+void*)((struct _tuple6**)Cyc__genarr_626),(void*)((struct _tuple6**)Cyc__genarr_626
++ 2)}};static char _tmp37B[13]="Unresolved_b";static struct _tuple7 Cyc__gentuple_840={
+0,(struct _tagged_arr){_tmp37B,_tmp37B,_tmp37B + 13}};static struct _tuple7*Cyc__genarr_841[
+1]={& Cyc__gentuple_840};static char _tmp37C[9]="Global_b";static struct _tuple5 Cyc__gentuple_842={
+0,(struct _tagged_arr){_tmp37C,_tmp37C,_tmp37C + 9},(void*)& Cyc__genrep_430};
+static char _tmp37D[10]="Funname_b";static struct _tuple5 Cyc__gentuple_843={1,(
+struct _tagged_arr){_tmp37D,_tmp37D,_tmp37D + 10},(void*)& Cyc__genrep_86};static
+char _tmp37E[8]="Param_b";static struct _tuple5 Cyc__gentuple_844={2,(struct
+_tagged_arr){_tmp37E,_tmp37E,_tmp37E + 8},(void*)& Cyc__genrep_430};static char
+_tmp37F[8]="Local_b";static struct _tuple5 Cyc__gentuple_845={3,(struct _tagged_arr){
+_tmp37F,_tmp37F,_tmp37F + 8},(void*)& Cyc__genrep_430};static char _tmp380[6]="Pat_b";
+static struct _tuple5 Cyc__gentuple_846={4,(struct _tagged_arr){_tmp380,_tmp380,
+_tmp380 + 6},(void*)& Cyc__genrep_430};static struct _tuple5*Cyc__genarr_847[5]={&
+Cyc__gentuple_842,& Cyc__gentuple_843,& Cyc__gentuple_844,& Cyc__gentuple_845,& Cyc__gentuple_846};
+static char _tmp382[8]="Binding";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_binding_t_rep={
+5,(struct _tagged_arr){_tmp382,_tmp382,_tmp382 + 8},{(void*)((struct _tuple7**)Cyc__genarr_841),(
+void*)((struct _tuple7**)Cyc__genarr_841),(void*)((struct _tuple7**)Cyc__genarr_841
++ 1)},{(void*)((struct _tuple5**)Cyc__genarr_847),(void*)((struct _tuple5**)Cyc__genarr_847),(
+void*)((struct _tuple5**)Cyc__genarr_847 + 5)}};struct _tuple63{unsigned int f1;
+struct _tuple0*f2;void*f3;};static struct _tuple6 Cyc__gentuple_848={offsetof(struct
+_tuple63,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_849={
 offsetof(struct _tuple63,f2),(void*)& Cyc__genrep_10};static struct _tuple6 Cyc__gentuple_850={
 offsetof(struct _tuple63,f3),(void*)& Cyc_Absyn_binding_t_rep};static struct _tuple6*
 Cyc__genarr_851[3]={& Cyc__gentuple_848,& Cyc__gentuple_849,& Cyc__gentuple_850};
@@ -3150,80 +3235,88 @@ static struct Cyc_Typerep_Tuple_struct Cyc__genrep_839={4,sizeof(struct _tuple63
 void*)((struct _tuple6**)Cyc__genarr_851),(void*)((struct _tuple6**)Cyc__genarr_851),(
 void*)((struct _tuple6**)Cyc__genarr_851 + 3)}};extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_834;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_primop_t_rep;
-static char _tmp384[5]="Plus";static struct _tuple7 Cyc__gentuple_804={0,{_tmp384,
-_tmp384,_tmp384 + 5}};static char _tmp385[6]="Times";static struct _tuple7 Cyc__gentuple_805={
-1,{_tmp385,_tmp385,_tmp385 + 6}};static char _tmp386[6]="Minus";static struct _tuple7
-Cyc__gentuple_806={2,{_tmp386,_tmp386,_tmp386 + 6}};static char _tmp387[4]="Div";
-static struct _tuple7 Cyc__gentuple_807={3,{_tmp387,_tmp387,_tmp387 + 4}};static char
-_tmp388[4]="Mod";static struct _tuple7 Cyc__gentuple_808={4,{_tmp388,_tmp388,
-_tmp388 + 4}};static char _tmp389[3]="Eq";static struct _tuple7 Cyc__gentuple_809={5,{
-_tmp389,_tmp389,_tmp389 + 3}};static char _tmp38A[4]="Neq";static struct _tuple7 Cyc__gentuple_810={
-6,{_tmp38A,_tmp38A,_tmp38A + 4}};static char _tmp38B[3]="Gt";static struct _tuple7 Cyc__gentuple_811={
-7,{_tmp38B,_tmp38B,_tmp38B + 3}};static char _tmp38C[3]="Lt";static struct _tuple7 Cyc__gentuple_812={
-8,{_tmp38C,_tmp38C,_tmp38C + 3}};static char _tmp38D[4]="Gte";static struct _tuple7
-Cyc__gentuple_813={9,{_tmp38D,_tmp38D,_tmp38D + 4}};static char _tmp38E[4]="Lte";
-static struct _tuple7 Cyc__gentuple_814={10,{_tmp38E,_tmp38E,_tmp38E + 4}};static
-char _tmp38F[4]="Not";static struct _tuple7 Cyc__gentuple_815={11,{_tmp38F,_tmp38F,
-_tmp38F + 4}};static char _tmp390[7]="Bitnot";static struct _tuple7 Cyc__gentuple_816={
-12,{_tmp390,_tmp390,_tmp390 + 7}};static char _tmp391[7]="Bitand";static struct
-_tuple7 Cyc__gentuple_817={13,{_tmp391,_tmp391,_tmp391 + 7}};static char _tmp392[6]="Bitor";
-static struct _tuple7 Cyc__gentuple_818={14,{_tmp392,_tmp392,_tmp392 + 6}};static
-char _tmp393[7]="Bitxor";static struct _tuple7 Cyc__gentuple_819={15,{_tmp393,
-_tmp393,_tmp393 + 7}};static char _tmp394[10]="Bitlshift";static struct _tuple7 Cyc__gentuple_820={
-16,{_tmp394,_tmp394,_tmp394 + 10}};static char _tmp395[11]="Bitlrshift";static
-struct _tuple7 Cyc__gentuple_821={17,{_tmp395,_tmp395,_tmp395 + 11}};static char
-_tmp396[11]="Bitarshift";static struct _tuple7 Cyc__gentuple_822={18,{_tmp396,
-_tmp396,_tmp396 + 11}};static char _tmp397[5]="Size";static struct _tuple7 Cyc__gentuple_823={
-19,{_tmp397,_tmp397,_tmp397 + 5}};static struct _tuple7*Cyc__genarr_824[20]={& Cyc__gentuple_804,&
-Cyc__gentuple_805,& Cyc__gentuple_806,& Cyc__gentuple_807,& Cyc__gentuple_808,& Cyc__gentuple_809,&
-Cyc__gentuple_810,& Cyc__gentuple_811,& Cyc__gentuple_812,& Cyc__gentuple_813,& Cyc__gentuple_814,&
-Cyc__gentuple_815,& Cyc__gentuple_816,& Cyc__gentuple_817,& Cyc__gentuple_818,& Cyc__gentuple_819,&
-Cyc__gentuple_820,& Cyc__gentuple_821,& Cyc__gentuple_822,& Cyc__gentuple_823};
-static struct _tuple5*Cyc__genarr_825[0]={};static char _tmp399[7]="Primop";struct
-Cyc_Typerep_TUnion_struct Cyc_Absyn_primop_t_rep={5,{_tmp399,_tmp399,_tmp399 + 7},{(
-void*)((struct _tuple7**)Cyc__genarr_824),(void*)((struct _tuple7**)Cyc__genarr_824),(
-void*)((struct _tuple7**)Cyc__genarr_824 + 20)},{(void*)((struct _tuple5**)Cyc__genarr_825),(
-void*)((struct _tuple5**)Cyc__genarr_825),(void*)((struct _tuple5**)Cyc__genarr_825
-+ 0)}};struct _tuple64{unsigned int f1;void*f2;struct Cyc_List_List*f3;};static
-struct _tuple6 Cyc__gentuple_835={offsetof(struct _tuple64,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_836={offsetof(struct _tuple64,f2),(void*)& Cyc_Absyn_primop_t_rep};
-static struct _tuple6 Cyc__gentuple_837={offsetof(struct _tuple64,f3),(void*)& Cyc__genrep_490};
-static struct _tuple6*Cyc__genarr_838[3]={& Cyc__gentuple_835,& Cyc__gentuple_836,&
-Cyc__gentuple_837};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_834={4,
-sizeof(struct _tuple64),{(void*)((struct _tuple6**)Cyc__genarr_838),(void*)((
-struct _tuple6**)Cyc__genarr_838),(void*)((struct _tuple6**)Cyc__genarr_838 + 3)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_802;extern struct Cyc_Typerep_ThinPtr_struct
-Cyc__genrep_803;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_primop_t2_rep;
-static char _tmp39B[4]="Opt";static struct _tagged_arr Cyc__genname_828={_tmp39B,
-_tmp39B,_tmp39B + 4};static char _tmp39C[2]="v";static struct _tuple5 Cyc__gentuple_826={
-offsetof(struct Cyc_Core_Opt,v),{_tmp39C,_tmp39C,_tmp39C + 2},(void*)& Cyc_Absyn_primop_t_rep};
-static struct _tuple5*Cyc__genarr_827[1]={& Cyc__gentuple_826};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_primop_t2_rep={3,(struct _tagged_arr*)& Cyc__genname_828,
-sizeof(struct Cyc_Core_Opt),{(void*)((struct _tuple5**)Cyc__genarr_827),(void*)((
-struct _tuple5**)Cyc__genarr_827),(void*)((struct _tuple5**)Cyc__genarr_827 + 1)}};
-static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_803={1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_primop_t2_rep)};
-struct _tuple65{unsigned int f1;struct Cyc_Absyn_Exp*f2;struct Cyc_Core_Opt*f3;
-struct Cyc_Absyn_Exp*f4;};static struct _tuple6 Cyc__gentuple_829={offsetof(struct
-_tuple65,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_830={
-offsetof(struct _tuple65,f2),(void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_831={
-offsetof(struct _tuple65,f3),(void*)& Cyc__genrep_803};static struct _tuple6 Cyc__gentuple_832={
+static char _tmp384[5]="Plus";static struct _tuple7 Cyc__gentuple_804={0,(struct
+_tagged_arr){_tmp384,_tmp384,_tmp384 + 5}};static char _tmp385[6]="Times";static
+struct _tuple7 Cyc__gentuple_805={1,(struct _tagged_arr){_tmp385,_tmp385,_tmp385 + 6}};
+static char _tmp386[6]="Minus";static struct _tuple7 Cyc__gentuple_806={2,(struct
+_tagged_arr){_tmp386,_tmp386,_tmp386 + 6}};static char _tmp387[4]="Div";static
+struct _tuple7 Cyc__gentuple_807={3,(struct _tagged_arr){_tmp387,_tmp387,_tmp387 + 4}};
+static char _tmp388[4]="Mod";static struct _tuple7 Cyc__gentuple_808={4,(struct
+_tagged_arr){_tmp388,_tmp388,_tmp388 + 4}};static char _tmp389[3]="Eq";static struct
+_tuple7 Cyc__gentuple_809={5,(struct _tagged_arr){_tmp389,_tmp389,_tmp389 + 3}};
+static char _tmp38A[4]="Neq";static struct _tuple7 Cyc__gentuple_810={6,(struct
+_tagged_arr){_tmp38A,_tmp38A,_tmp38A + 4}};static char _tmp38B[3]="Gt";static struct
+_tuple7 Cyc__gentuple_811={7,(struct _tagged_arr){_tmp38B,_tmp38B,_tmp38B + 3}};
+static char _tmp38C[3]="Lt";static struct _tuple7 Cyc__gentuple_812={8,(struct
+_tagged_arr){_tmp38C,_tmp38C,_tmp38C + 3}};static char _tmp38D[4]="Gte";static
+struct _tuple7 Cyc__gentuple_813={9,(struct _tagged_arr){_tmp38D,_tmp38D,_tmp38D + 4}};
+static char _tmp38E[4]="Lte";static struct _tuple7 Cyc__gentuple_814={10,(struct
+_tagged_arr){_tmp38E,_tmp38E,_tmp38E + 4}};static char _tmp38F[4]="Not";static
+struct _tuple7 Cyc__gentuple_815={11,(struct _tagged_arr){_tmp38F,_tmp38F,_tmp38F + 
+4}};static char _tmp390[7]="Bitnot";static struct _tuple7 Cyc__gentuple_816={12,(
+struct _tagged_arr){_tmp390,_tmp390,_tmp390 + 7}};static char _tmp391[7]="Bitand";
+static struct _tuple7 Cyc__gentuple_817={13,(struct _tagged_arr){_tmp391,_tmp391,
+_tmp391 + 7}};static char _tmp392[6]="Bitor";static struct _tuple7 Cyc__gentuple_818={
+14,(struct _tagged_arr){_tmp392,_tmp392,_tmp392 + 6}};static char _tmp393[7]="Bitxor";
+static struct _tuple7 Cyc__gentuple_819={15,(struct _tagged_arr){_tmp393,_tmp393,
+_tmp393 + 7}};static char _tmp394[10]="Bitlshift";static struct _tuple7 Cyc__gentuple_820={
+16,(struct _tagged_arr){_tmp394,_tmp394,_tmp394 + 10}};static char _tmp395[11]="Bitlrshift";
+static struct _tuple7 Cyc__gentuple_821={17,(struct _tagged_arr){_tmp395,_tmp395,
+_tmp395 + 11}};static char _tmp396[11]="Bitarshift";static struct _tuple7 Cyc__gentuple_822={
+18,(struct _tagged_arr){_tmp396,_tmp396,_tmp396 + 11}};static char _tmp397[5]="Size";
+static struct _tuple7 Cyc__gentuple_823={19,(struct _tagged_arr){_tmp397,_tmp397,
+_tmp397 + 5}};static struct _tuple7*Cyc__genarr_824[20]={& Cyc__gentuple_804,& Cyc__gentuple_805,&
+Cyc__gentuple_806,& Cyc__gentuple_807,& Cyc__gentuple_808,& Cyc__gentuple_809,& Cyc__gentuple_810,&
+Cyc__gentuple_811,& Cyc__gentuple_812,& Cyc__gentuple_813,& Cyc__gentuple_814,& Cyc__gentuple_815,&
+Cyc__gentuple_816,& Cyc__gentuple_817,& Cyc__gentuple_818,& Cyc__gentuple_819,& Cyc__gentuple_820,&
+Cyc__gentuple_821,& Cyc__gentuple_822,& Cyc__gentuple_823};static struct _tuple5*Cyc__genarr_825[
+0]={};static char _tmp399[7]="Primop";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_primop_t_rep={
+5,(struct _tagged_arr){_tmp399,_tmp399,_tmp399 + 7},{(void*)((struct _tuple7**)Cyc__genarr_824),(
+void*)((struct _tuple7**)Cyc__genarr_824),(void*)((struct _tuple7**)Cyc__genarr_824
++ 20)},{(void*)((struct _tuple5**)Cyc__genarr_825),(void*)((struct _tuple5**)Cyc__genarr_825),(
+void*)((struct _tuple5**)Cyc__genarr_825 + 0)}};struct _tuple64{unsigned int f1;void*
+f2;struct Cyc_List_List*f3;};static struct _tuple6 Cyc__gentuple_835={offsetof(
+struct _tuple64,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_836={
+offsetof(struct _tuple64,f2),(void*)& Cyc_Absyn_primop_t_rep};static struct _tuple6
+Cyc__gentuple_837={offsetof(struct _tuple64,f3),(void*)& Cyc__genrep_490};static
+struct _tuple6*Cyc__genarr_838[3]={& Cyc__gentuple_835,& Cyc__gentuple_836,& Cyc__gentuple_837};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_834={4,sizeof(struct _tuple64),{(
+void*)((struct _tuple6**)Cyc__genarr_838),(void*)((struct _tuple6**)Cyc__genarr_838),(
+void*)((struct _tuple6**)Cyc__genarr_838 + 3)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_802;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_803;extern
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_primop_t2_rep;static
+char _tmp39B[4]="Opt";static struct _tagged_arr Cyc__genname_828=(struct _tagged_arr){
+_tmp39B,_tmp39B,_tmp39B + 4};static char _tmp39C[2]="v";static struct _tuple5 Cyc__gentuple_826={
+offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){_tmp39C,_tmp39C,_tmp39C + 2},(
+void*)& Cyc_Absyn_primop_t_rep};static struct _tuple5*Cyc__genarr_827[1]={& Cyc__gentuple_826};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_primop_t2_rep={3,(
+struct _tagged_arr*)& Cyc__genname_828,sizeof(struct Cyc_Core_Opt),{(void*)((struct
+_tuple5**)Cyc__genarr_827),(void*)((struct _tuple5**)Cyc__genarr_827),(void*)((
+struct _tuple5**)Cyc__genarr_827 + 1)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_803={
+1,1,(void*)((void*)& Cyc_struct_Core_Opt0Absyn_primop_t2_rep)};struct _tuple65{
+unsigned int f1;struct Cyc_Absyn_Exp*f2;struct Cyc_Core_Opt*f3;struct Cyc_Absyn_Exp*
+f4;};static struct _tuple6 Cyc__gentuple_829={offsetof(struct _tuple65,f1),(void*)&
+Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_830={offsetof(struct _tuple65,f2),(
+void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_831={offsetof(struct
+_tuple65,f3),(void*)& Cyc__genrep_803};static struct _tuple6 Cyc__gentuple_832={
 offsetof(struct _tuple65,f4),(void*)& Cyc__genrep_82};static struct _tuple6*Cyc__genarr_833[
 4]={& Cyc__gentuple_829,& Cyc__gentuple_830,& Cyc__gentuple_831,& Cyc__gentuple_832};
 static struct Cyc_Typerep_Tuple_struct Cyc__genrep_802={4,sizeof(struct _tuple65),{(
 void*)((struct _tuple6**)Cyc__genarr_833),(void*)((struct _tuple6**)Cyc__genarr_833),(
 void*)((struct _tuple6**)Cyc__genarr_833 + 4)}};extern struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_791;extern struct Cyc_Typerep_TUnion_struct Cyc_Absyn_incrementor_t_rep;
-static char _tmp3A0[7]="PreInc";static struct _tuple7 Cyc__gentuple_792={0,{_tmp3A0,
-_tmp3A0,_tmp3A0 + 7}};static char _tmp3A1[8]="PostInc";static struct _tuple7 Cyc__gentuple_793={
-1,{_tmp3A1,_tmp3A1,_tmp3A1 + 8}};static char _tmp3A2[7]="PreDec";static struct
-_tuple7 Cyc__gentuple_794={2,{_tmp3A2,_tmp3A2,_tmp3A2 + 7}};static char _tmp3A3[8]="PostDec";
-static struct _tuple7 Cyc__gentuple_795={3,{_tmp3A3,_tmp3A3,_tmp3A3 + 8}};static
-struct _tuple7*Cyc__genarr_796[4]={& Cyc__gentuple_792,& Cyc__gentuple_793,& Cyc__gentuple_794,&
-Cyc__gentuple_795};static struct _tuple5*Cyc__genarr_797[0]={};static char _tmp3A5[
-12]="Incrementor";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_incrementor_t_rep={5,{
-_tmp3A5,_tmp3A5,_tmp3A5 + 12},{(void*)((struct _tuple7**)Cyc__genarr_796),(void*)((
-struct _tuple7**)Cyc__genarr_796),(void*)((struct _tuple7**)Cyc__genarr_796 + 4)},{(
-void*)((struct _tuple5**)Cyc__genarr_797),(void*)((struct _tuple5**)Cyc__genarr_797),(
+static char _tmp3A0[7]="PreInc";static struct _tuple7 Cyc__gentuple_792={0,(struct
+_tagged_arr){_tmp3A0,_tmp3A0,_tmp3A0 + 7}};static char _tmp3A1[8]="PostInc";static
+struct _tuple7 Cyc__gentuple_793={1,(struct _tagged_arr){_tmp3A1,_tmp3A1,_tmp3A1 + 8}};
+static char _tmp3A2[7]="PreDec";static struct _tuple7 Cyc__gentuple_794={2,(struct
+_tagged_arr){_tmp3A2,_tmp3A2,_tmp3A2 + 7}};static char _tmp3A3[8]="PostDec";static
+struct _tuple7 Cyc__gentuple_795={3,(struct _tagged_arr){_tmp3A3,_tmp3A3,_tmp3A3 + 8}};
+static struct _tuple7*Cyc__genarr_796[4]={& Cyc__gentuple_792,& Cyc__gentuple_793,&
+Cyc__gentuple_794,& Cyc__gentuple_795};static struct _tuple5*Cyc__genarr_797[0]={};
+static char _tmp3A5[12]="Incrementor";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_incrementor_t_rep={
+5,(struct _tagged_arr){_tmp3A5,_tmp3A5,_tmp3A5 + 12},{(void*)((struct _tuple7**)Cyc__genarr_796),(
+void*)((struct _tuple7**)Cyc__genarr_796),(void*)((struct _tuple7**)Cyc__genarr_796
++ 4)},{(void*)((struct _tuple5**)Cyc__genarr_797),(void*)((struct _tuple5**)Cyc__genarr_797),(
 void*)((struct _tuple5**)Cyc__genarr_797 + 0)}};struct _tuple66{unsigned int f1;
 struct Cyc_Absyn_Exp*f2;void*f3;};static struct _tuple6 Cyc__gentuple_798={offsetof(
 struct _tuple66,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_799={
@@ -3263,49 +3356,52 @@ extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_767;extern struct Cyc_Typerep
 Cyc__genrep_768;extern struct Cyc_Typerep_Struct_struct Cyc_Absyn_vararg_call_info_t_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_769;static struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_769={1,1,(void*)((void*)& Cyc_Absyn_vararg_info_t_rep)};static char
-_tmp3AB[15]="VarargCallInfo";static struct _tagged_arr Cyc__genname_774={_tmp3AB,
-_tmp3AB,_tmp3AB + 15};static char _tmp3AC[12]="num_varargs";static struct _tuple5 Cyc__gentuple_770={
-offsetof(struct Cyc_Absyn_VarargCallInfo,num_varargs),{_tmp3AC,_tmp3AC,_tmp3AC + 
-12},(void*)((void*)& Cyc__genrep_62)};static char _tmp3AD[10]="injectors";static
-struct _tuple5 Cyc__gentuple_771={offsetof(struct Cyc_Absyn_VarargCallInfo,injectors),{
-_tmp3AD,_tmp3AD,_tmp3AD + 10},(void*)& Cyc__genrep_303};static char _tmp3AE[4]="vai";
-static struct _tuple5 Cyc__gentuple_772={offsetof(struct Cyc_Absyn_VarargCallInfo,vai),{
-_tmp3AE,_tmp3AE,_tmp3AE + 4},(void*)& Cyc__genrep_769};static struct _tuple5*Cyc__genarr_773[
-3]={& Cyc__gentuple_770,& Cyc__gentuple_771,& Cyc__gentuple_772};struct Cyc_Typerep_Struct_struct
-Cyc_Absyn_vararg_call_info_t_rep={3,(struct _tagged_arr*)& Cyc__genname_774,
-sizeof(struct Cyc_Absyn_VarargCallInfo),{(void*)((struct _tuple5**)Cyc__genarr_773),(
-void*)((struct _tuple5**)Cyc__genarr_773),(void*)((struct _tuple5**)Cyc__genarr_773
-+ 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_768={1,1,(void*)((void*)&
-Cyc_Absyn_vararg_call_info_t_rep)};struct _tuple69{unsigned int f1;struct Cyc_Absyn_Exp*
-f2;struct Cyc_List_List*f3;struct Cyc_Absyn_VarargCallInfo*f4;};static struct
-_tuple6 Cyc__gentuple_775={offsetof(struct _tuple69,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_776={offsetof(struct _tuple69,f2),(void*)& Cyc__genrep_82};
-static struct _tuple6 Cyc__gentuple_777={offsetof(struct _tuple69,f3),(void*)& Cyc__genrep_490};
-static struct _tuple6 Cyc__gentuple_778={offsetof(struct _tuple69,f4),(void*)& Cyc__genrep_768};
-static struct _tuple6*Cyc__genarr_779[4]={& Cyc__gentuple_775,& Cyc__gentuple_776,&
-Cyc__gentuple_777,& Cyc__gentuple_778};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_767={
-4,sizeof(struct _tuple69),{(void*)((struct _tuple6**)Cyc__genarr_779),(void*)((
-struct _tuple6**)Cyc__genarr_779),(void*)((struct _tuple6**)Cyc__genarr_779 + 4)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_762;static struct _tuple6 Cyc__gentuple_763={
-offsetof(struct _tuple55,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_764={
-offsetof(struct _tuple55,f2),(void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_765={
+_tmp3AB[15]="VarargCallInfo";static struct _tagged_arr Cyc__genname_774=(struct
+_tagged_arr){_tmp3AB,_tmp3AB,_tmp3AB + 15};static char _tmp3AC[12]="num_varargs";
+static struct _tuple5 Cyc__gentuple_770={offsetof(struct Cyc_Absyn_VarargCallInfo,num_varargs),(
+struct _tagged_arr){_tmp3AC,_tmp3AC,_tmp3AC + 12},(void*)((void*)& Cyc__genrep_62)};
+static char _tmp3AD[10]="injectors";static struct _tuple5 Cyc__gentuple_771={
+offsetof(struct Cyc_Absyn_VarargCallInfo,injectors),(struct _tagged_arr){_tmp3AD,
+_tmp3AD,_tmp3AD + 10},(void*)& Cyc__genrep_303};static char _tmp3AE[4]="vai";static
+struct _tuple5 Cyc__gentuple_772={offsetof(struct Cyc_Absyn_VarargCallInfo,vai),(
+struct _tagged_arr){_tmp3AE,_tmp3AE,_tmp3AE + 4},(void*)& Cyc__genrep_769};static
+struct _tuple5*Cyc__genarr_773[3]={& Cyc__gentuple_770,& Cyc__gentuple_771,& Cyc__gentuple_772};
+struct Cyc_Typerep_Struct_struct Cyc_Absyn_vararg_call_info_t_rep={3,(struct
+_tagged_arr*)& Cyc__genname_774,sizeof(struct Cyc_Absyn_VarargCallInfo),{(void*)((
+struct _tuple5**)Cyc__genarr_773),(void*)((struct _tuple5**)Cyc__genarr_773),(void*)((
+struct _tuple5**)Cyc__genarr_773 + 3)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_768={
+1,1,(void*)((void*)& Cyc_Absyn_vararg_call_info_t_rep)};struct _tuple69{
+unsigned int f1;struct Cyc_Absyn_Exp*f2;struct Cyc_List_List*f3;struct Cyc_Absyn_VarargCallInfo*
+f4;};static struct _tuple6 Cyc__gentuple_775={offsetof(struct _tuple69,f1),(void*)&
+Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_776={offsetof(struct _tuple69,f2),(
+void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_777={offsetof(struct
+_tuple69,f3),(void*)& Cyc__genrep_490};static struct _tuple6 Cyc__gentuple_778={
+offsetof(struct _tuple69,f4),(void*)& Cyc__genrep_768};static struct _tuple6*Cyc__genarr_779[
+4]={& Cyc__gentuple_775,& Cyc__gentuple_776,& Cyc__gentuple_777,& Cyc__gentuple_778};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_767={4,sizeof(struct _tuple69),{(
+void*)((struct _tuple6**)Cyc__genarr_779),(void*)((struct _tuple6**)Cyc__genarr_779),(
+void*)((struct _tuple6**)Cyc__genarr_779 + 4)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_762;static struct _tuple6 Cyc__gentuple_763={offsetof(struct _tuple55,f1),(
+void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_764={offsetof(struct
+_tuple55,f2),(void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_765={
 offsetof(struct _tuple55,f3),(void*)& Cyc__genrep_53};static struct _tuple6*Cyc__genarr_766[
 3]={& Cyc__gentuple_763,& Cyc__gentuple_764,& Cyc__gentuple_765};static struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_762={4,sizeof(struct _tuple55),{(void*)((struct _tuple6**)Cyc__genarr_766),(
 void*)((struct _tuple6**)Cyc__genarr_766),(void*)((struct _tuple6**)Cyc__genarr_766
 + 3)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_749;extern struct Cyc_Typerep_TUnion_struct
 Cyc_Absyn_coercion_t_rep;static char _tmp3B3[17]="Unknown_coercion";static struct
-_tuple7 Cyc__gentuple_750={0,{_tmp3B3,_tmp3B3,_tmp3B3 + 17}};static char _tmp3B4[12]="No_coercion";
-static struct _tuple7 Cyc__gentuple_751={1,{_tmp3B4,_tmp3B4,_tmp3B4 + 12}};static
-char _tmp3B5[16]="NonNull_to_Null";static struct _tuple7 Cyc__gentuple_752={2,{
-_tmp3B5,_tmp3B5,_tmp3B5 + 16}};static char _tmp3B6[15]="Other_coercion";static
-struct _tuple7 Cyc__gentuple_753={3,{_tmp3B6,_tmp3B6,_tmp3B6 + 15}};static struct
-_tuple7*Cyc__genarr_754[4]={& Cyc__gentuple_750,& Cyc__gentuple_751,& Cyc__gentuple_752,&
-Cyc__gentuple_753};static struct _tuple5*Cyc__genarr_755[0]={};static char _tmp3B8[9]="Coercion";
-struct Cyc_Typerep_TUnion_struct Cyc_Absyn_coercion_t_rep={5,{_tmp3B8,_tmp3B8,
-_tmp3B8 + 9},{(void*)((struct _tuple7**)Cyc__genarr_754),(void*)((struct _tuple7**)
-Cyc__genarr_754),(void*)((struct _tuple7**)Cyc__genarr_754 + 4)},{(void*)((struct
-_tuple5**)Cyc__genarr_755),(void*)((struct _tuple5**)Cyc__genarr_755),(void*)((
+_tuple7 Cyc__gentuple_750={0,(struct _tagged_arr){_tmp3B3,_tmp3B3,_tmp3B3 + 17}};
+static char _tmp3B4[12]="No_coercion";static struct _tuple7 Cyc__gentuple_751={1,(
+struct _tagged_arr){_tmp3B4,_tmp3B4,_tmp3B4 + 12}};static char _tmp3B5[16]="NonNull_to_Null";
+static struct _tuple7 Cyc__gentuple_752={2,(struct _tagged_arr){_tmp3B5,_tmp3B5,
+_tmp3B5 + 16}};static char _tmp3B6[15]="Other_coercion";static struct _tuple7 Cyc__gentuple_753={
+3,(struct _tagged_arr){_tmp3B6,_tmp3B6,_tmp3B6 + 15}};static struct _tuple7*Cyc__genarr_754[
+4]={& Cyc__gentuple_750,& Cyc__gentuple_751,& Cyc__gentuple_752,& Cyc__gentuple_753};
+static struct _tuple5*Cyc__genarr_755[0]={};static char _tmp3B8[9]="Coercion";struct
+Cyc_Typerep_TUnion_struct Cyc_Absyn_coercion_t_rep={5,(struct _tagged_arr){_tmp3B8,
+_tmp3B8,_tmp3B8 + 9},{(void*)((struct _tuple7**)Cyc__genarr_754),(void*)((struct
+_tuple7**)Cyc__genarr_754),(void*)((struct _tuple7**)Cyc__genarr_754 + 4)},{(void*)((
+struct _tuple5**)Cyc__genarr_755),(void*)((struct _tuple5**)Cyc__genarr_755),(void*)((
 struct _tuple5**)Cyc__genarr_755 + 0)}};struct _tuple70{unsigned int f1;void*f2;
 struct Cyc_Absyn_Exp*f3;int f4;void*f5;};static struct _tuple6 Cyc__gentuple_756={
 offsetof(struct _tuple70,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_757={
@@ -3340,35 +3436,35 @@ offsetof(struct _tuple71,f2),(void*)& Cyc__genrep_5};static struct _tuple6*Cyc__
 Cyc__genrep_733={4,sizeof(struct _tuple71),{(void*)((struct _tuple6**)Cyc__genarr_736),(
 void*)((struct _tuple6**)Cyc__genarr_736),(void*)((struct _tuple6**)Cyc__genarr_736
 + 2)}};static struct _tuple7*Cyc__genarr_732[0]={};static char _tmp3BD[12]="StructField";
-static struct _tuple5 Cyc__gentuple_737={0,{_tmp3BD,_tmp3BD,_tmp3BD + 12},(void*)&
-Cyc__genrep_334};static char _tmp3BE[11]="TupleIndex";static struct _tuple5 Cyc__gentuple_738={
-1,{_tmp3BE,_tmp3BE,_tmp3BE + 11},(void*)& Cyc__genrep_733};static struct _tuple5*Cyc__genarr_739[
-2]={& Cyc__gentuple_737,& Cyc__gentuple_738};static char _tmp3C0[14]="OffsetofField";
-struct Cyc_Typerep_TUnion_struct Cyc_Absyn_offsetof_field_t_rep={5,{_tmp3C0,
-_tmp3C0,_tmp3C0 + 14},{(void*)((struct _tuple7**)Cyc__genarr_732),(void*)((struct
-_tuple7**)Cyc__genarr_732),(void*)((struct _tuple7**)Cyc__genarr_732 + 0)},{(void*)((
-struct _tuple5**)Cyc__genarr_739),(void*)((struct _tuple5**)Cyc__genarr_739),(void*)((
-struct _tuple5**)Cyc__genarr_739 + 2)}};static struct _tuple6 Cyc__gentuple_740={
-offsetof(struct _tuple28,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_741={
-offsetof(struct _tuple28,f2),(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct
-_tuple6 Cyc__gentuple_742={offsetof(struct _tuple28,f3),(void*)& Cyc_Absyn_offsetof_field_t_rep};
-static struct _tuple6*Cyc__genarr_743[3]={& Cyc__gentuple_740,& Cyc__gentuple_741,&
-Cyc__gentuple_742};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_731={4,
-sizeof(struct _tuple28),{(void*)((struct _tuple6**)Cyc__genarr_743),(void*)((
-struct _tuple6**)Cyc__genarr_743),(void*)((struct _tuple6**)Cyc__genarr_743 + 3)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_726;struct _tuple72{unsigned int
-f1;struct Cyc_List_List*f2;void*f3;};static struct _tuple6 Cyc__gentuple_727={
-offsetof(struct _tuple72,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_728={
-offsetof(struct _tuple72,f2),(void*)& Cyc__genrep_311};static struct _tuple6 Cyc__gentuple_729={
-offsetof(struct _tuple72,f3),(void*)((void*)& Cyc_Absyn_type_t_rep)};static struct
-_tuple6*Cyc__genarr_730[3]={& Cyc__gentuple_727,& Cyc__gentuple_728,& Cyc__gentuple_729};
-static struct Cyc_Typerep_Tuple_struct Cyc__genrep_726={4,sizeof(struct _tuple72),{(
-void*)((struct _tuple6**)Cyc__genarr_730),(void*)((struct _tuple6**)Cyc__genarr_730),(
-void*)((struct _tuple6**)Cyc__genarr_730 + 3)}};extern struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_721;struct _tuple73{unsigned int f1;struct Cyc_Absyn_Exp*f2;struct
-_tagged_arr*f3;};static struct _tuple6 Cyc__gentuple_722={offsetof(struct _tuple73,f1),(
-void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_723={offsetof(struct
-_tuple73,f2),(void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_724={
+static struct _tuple5 Cyc__gentuple_737={0,(struct _tagged_arr){_tmp3BD,_tmp3BD,
+_tmp3BD + 12},(void*)& Cyc__genrep_334};static char _tmp3BE[11]="TupleIndex";static
+struct _tuple5 Cyc__gentuple_738={1,(struct _tagged_arr){_tmp3BE,_tmp3BE,_tmp3BE + 
+11},(void*)& Cyc__genrep_733};static struct _tuple5*Cyc__genarr_739[2]={& Cyc__gentuple_737,&
+Cyc__gentuple_738};static char _tmp3C0[14]="OffsetofField";struct Cyc_Typerep_TUnion_struct
+Cyc_Absyn_offsetof_field_t_rep={5,(struct _tagged_arr){_tmp3C0,_tmp3C0,_tmp3C0 + 
+14},{(void*)((struct _tuple7**)Cyc__genarr_732),(void*)((struct _tuple7**)Cyc__genarr_732),(
+void*)((struct _tuple7**)Cyc__genarr_732 + 0)},{(void*)((struct _tuple5**)Cyc__genarr_739),(
+void*)((struct _tuple5**)Cyc__genarr_739),(void*)((struct _tuple5**)Cyc__genarr_739
++ 2)}};static struct _tuple6 Cyc__gentuple_740={offsetof(struct _tuple28,f1),(void*)&
+Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_741={offsetof(struct _tuple28,f2),(
+void*)((void*)& Cyc_Absyn_type_t_rep)};static struct _tuple6 Cyc__gentuple_742={
+offsetof(struct _tuple28,f3),(void*)& Cyc_Absyn_offsetof_field_t_rep};static struct
+_tuple6*Cyc__genarr_743[3]={& Cyc__gentuple_740,& Cyc__gentuple_741,& Cyc__gentuple_742};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_731={4,sizeof(struct _tuple28),{(
+void*)((struct _tuple6**)Cyc__genarr_743),(void*)((struct _tuple6**)Cyc__genarr_743),(
+void*)((struct _tuple6**)Cyc__genarr_743 + 3)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_726;struct _tuple72{unsigned int f1;struct Cyc_List_List*f2;void*f3;};
+static struct _tuple6 Cyc__gentuple_727={offsetof(struct _tuple72,f1),(void*)& Cyc__genrep_5};
+static struct _tuple6 Cyc__gentuple_728={offsetof(struct _tuple72,f2),(void*)& Cyc__genrep_311};
+static struct _tuple6 Cyc__gentuple_729={offsetof(struct _tuple72,f3),(void*)((void*)&
+Cyc_Absyn_type_t_rep)};static struct _tuple6*Cyc__genarr_730[3]={& Cyc__gentuple_727,&
+Cyc__gentuple_728,& Cyc__gentuple_729};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_726={
+4,sizeof(struct _tuple72),{(void*)((struct _tuple6**)Cyc__genarr_730),(void*)((
+struct _tuple6**)Cyc__genarr_730),(void*)((struct _tuple6**)Cyc__genarr_730 + 3)}};
+extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_721;struct _tuple73{unsigned int
+f1;struct Cyc_Absyn_Exp*f2;struct _tagged_arr*f3;};static struct _tuple6 Cyc__gentuple_722={
+offsetof(struct _tuple73,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_723={
+offsetof(struct _tuple73,f2),(void*)& Cyc__genrep_82};static struct _tuple6 Cyc__gentuple_724={
 offsetof(struct _tuple73,f3),(void*)& Cyc__genrep_12};static struct _tuple6*Cyc__genarr_725[
 3]={& Cyc__gentuple_722,& Cyc__gentuple_723,& Cyc__gentuple_724};static struct Cyc_Typerep_Tuple_struct
 Cyc__genrep_721={4,sizeof(struct _tuple73),{(void*)((struct _tuple6**)Cyc__genarr_725),(
@@ -3399,13 +3495,14 @@ Cyc__gentuple_631,& Cyc__gentuple_632};static struct Cyc_Typerep_Tuple_struct Cy
 4,sizeof(struct _tuple12),{(void*)((struct _tuple6**)Cyc__genarr_633),(void*)((
 struct _tuple6**)Cyc__genarr_633),(void*)((struct _tuple6**)Cyc__genarr_633 + 2)}};
 static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_629={1,1,(void*)((void*)& Cyc__genrep_630)};
-static char _tmp3C9[5]="List";static struct _tagged_arr Cyc__genname_637={_tmp3C9,
-_tmp3C9,_tmp3C9 + 5};static char _tmp3CA[3]="hd";static struct _tuple5 Cyc__gentuple_634={
-offsetof(struct Cyc_List_List,hd),{_tmp3CA,_tmp3CA,_tmp3CA + 3},(void*)& Cyc__genrep_629};
-static char _tmp3CB[3]="tl";static struct _tuple5 Cyc__gentuple_635={offsetof(struct
-Cyc_List_List,tl),{_tmp3CB,_tmp3CB,_tmp3CB + 3},(void*)& Cyc__genrep_628};static
-struct _tuple5*Cyc__genarr_636[2]={& Cyc__gentuple_634,& Cyc__gentuple_635};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List060List_list_t0Absyn_designator_t46H24Absyn_exp_t1_446H2_rep={
+static char _tmp3C9[5]="List";static struct _tagged_arr Cyc__genname_637=(struct
+_tagged_arr){_tmp3C9,_tmp3C9,_tmp3C9 + 5};static char _tmp3CA[3]="hd";static struct
+_tuple5 Cyc__gentuple_634={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp3CA,_tmp3CA,_tmp3CA + 3},(void*)& Cyc__genrep_629};static char _tmp3CB[3]="tl";
+static struct _tuple5 Cyc__gentuple_635={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp3CB,_tmp3CB,_tmp3CB + 3},(void*)& Cyc__genrep_628};static struct
+_tuple5*Cyc__genarr_636[2]={& Cyc__gentuple_634,& Cyc__gentuple_635};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List060List_list_t0Absyn_designator_t46H24Absyn_exp_t1_446H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_637,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_636),(void*)((struct _tuple5**)Cyc__genarr_636),(void*)((
 struct _tuple5**)Cyc__genarr_636 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_628={
@@ -3496,33 +3593,36 @@ void*)((struct _tuple6**)Cyc__genarr_663 + 4)}};extern struct Cyc_Typerep_Tuple_
 Cyc__genrep_646;extern struct Cyc_Typerep_Struct_struct Cyc_Absyn_malloc_info_t_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_67;static struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_67={1,1,(void*)((void*)& Cyc_Absyn_type_t_rep)};static char _tmp3DA[11]="MallocInfo";
-static struct _tagged_arr Cyc__genname_653={_tmp3DA,_tmp3DA,_tmp3DA + 11};static char
-_tmp3DB[10]="is_calloc";static struct _tuple5 Cyc__gentuple_647={offsetof(struct Cyc_Absyn_MallocInfo,is_calloc),{
-_tmp3DB,_tmp3DB,_tmp3DB + 10},(void*)((void*)& Cyc__genrep_62)};static char _tmp3DC[
-4]="rgn";static struct _tuple5 Cyc__gentuple_648={offsetof(struct Cyc_Absyn_MallocInfo,rgn),{
-_tmp3DC,_tmp3DC,_tmp3DC + 4},(void*)& Cyc__genrep_78};static char _tmp3DD[9]="elt_type";
-static struct _tuple5 Cyc__gentuple_649={offsetof(struct Cyc_Absyn_MallocInfo,elt_type),{
-_tmp3DD,_tmp3DD,_tmp3DD + 9},(void*)& Cyc__genrep_67};static char _tmp3DE[9]="num_elts";
-static struct _tuple5 Cyc__gentuple_650={offsetof(struct Cyc_Absyn_MallocInfo,num_elts),{
-_tmp3DE,_tmp3DE,_tmp3DE + 9},(void*)& Cyc__genrep_82};static char _tmp3DF[11]="fat_result";
-static struct _tuple5 Cyc__gentuple_651={offsetof(struct Cyc_Absyn_MallocInfo,fat_result),{
-_tmp3DF,_tmp3DF,_tmp3DF + 11},(void*)((void*)& Cyc__genrep_62)};static struct
-_tuple5*Cyc__genarr_652[5]={& Cyc__gentuple_647,& Cyc__gentuple_648,& Cyc__gentuple_649,&
-Cyc__gentuple_650,& Cyc__gentuple_651};struct Cyc_Typerep_Struct_struct Cyc_Absyn_malloc_info_t_rep={
-3,(struct _tagged_arr*)& Cyc__genname_653,sizeof(struct Cyc_Absyn_MallocInfo),{(
-void*)((struct _tuple5**)Cyc__genarr_652),(void*)((struct _tuple5**)Cyc__genarr_652),(
-void*)((struct _tuple5**)Cyc__genarr_652 + 5)}};struct _tuple80{unsigned int f1;
-struct Cyc_Absyn_MallocInfo f2;};static struct _tuple6 Cyc__gentuple_654={offsetof(
-struct _tuple80,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_655={
-offsetof(struct _tuple80,f2),(void*)& Cyc_Absyn_malloc_info_t_rep};static struct
-_tuple6*Cyc__genarr_656[2]={& Cyc__gentuple_654,& Cyc__gentuple_655};static struct
-Cyc_Typerep_Tuple_struct Cyc__genrep_646={4,sizeof(struct _tuple80),{(void*)((
-struct _tuple6**)Cyc__genarr_656),(void*)((struct _tuple6**)Cyc__genarr_656),(void*)((
-struct _tuple6**)Cyc__genarr_656 + 2)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_627;
-extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_638;extern struct Cyc_Typerep_Struct_struct
-Cyc_struct_Core_Opt0Absyn_typedef_name_t2_rep;static char _tmp3E2[4]="Opt";static
-struct _tagged_arr Cyc__genname_641={_tmp3E2,_tmp3E2,_tmp3E2 + 4};static char _tmp3E3[
-2]="v";static struct _tuple5 Cyc__gentuple_639={offsetof(struct Cyc_Core_Opt,v),{
+static struct _tagged_arr Cyc__genname_653=(struct _tagged_arr){_tmp3DA,_tmp3DA,
+_tmp3DA + 11};static char _tmp3DB[10]="is_calloc";static struct _tuple5 Cyc__gentuple_647={
+offsetof(struct Cyc_Absyn_MallocInfo,is_calloc),(struct _tagged_arr){_tmp3DB,
+_tmp3DB,_tmp3DB + 10},(void*)((void*)& Cyc__genrep_62)};static char _tmp3DC[4]="rgn";
+static struct _tuple5 Cyc__gentuple_648={offsetof(struct Cyc_Absyn_MallocInfo,rgn),(
+struct _tagged_arr){_tmp3DC,_tmp3DC,_tmp3DC + 4},(void*)& Cyc__genrep_78};static
+char _tmp3DD[9]="elt_type";static struct _tuple5 Cyc__gentuple_649={offsetof(struct
+Cyc_Absyn_MallocInfo,elt_type),(struct _tagged_arr){_tmp3DD,_tmp3DD,_tmp3DD + 9},(
+void*)& Cyc__genrep_67};static char _tmp3DE[9]="num_elts";static struct _tuple5 Cyc__gentuple_650={
+offsetof(struct Cyc_Absyn_MallocInfo,num_elts),(struct _tagged_arr){_tmp3DE,
+_tmp3DE,_tmp3DE + 9},(void*)& Cyc__genrep_82};static char _tmp3DF[11]="fat_result";
+static struct _tuple5 Cyc__gentuple_651={offsetof(struct Cyc_Absyn_MallocInfo,fat_result),(
+struct _tagged_arr){_tmp3DF,_tmp3DF,_tmp3DF + 11},(void*)((void*)& Cyc__genrep_62)};
+static struct _tuple5*Cyc__genarr_652[5]={& Cyc__gentuple_647,& Cyc__gentuple_648,&
+Cyc__gentuple_649,& Cyc__gentuple_650,& Cyc__gentuple_651};struct Cyc_Typerep_Struct_struct
+Cyc_Absyn_malloc_info_t_rep={3,(struct _tagged_arr*)& Cyc__genname_653,sizeof(
+struct Cyc_Absyn_MallocInfo),{(void*)((struct _tuple5**)Cyc__genarr_652),(void*)((
+struct _tuple5**)Cyc__genarr_652),(void*)((struct _tuple5**)Cyc__genarr_652 + 5)}};
+struct _tuple80{unsigned int f1;struct Cyc_Absyn_MallocInfo f2;};static struct _tuple6
+Cyc__gentuple_654={offsetof(struct _tuple80,f1),(void*)& Cyc__genrep_5};static
+struct _tuple6 Cyc__gentuple_655={offsetof(struct _tuple80,f2),(void*)& Cyc_Absyn_malloc_info_t_rep};
+static struct _tuple6*Cyc__genarr_656[2]={& Cyc__gentuple_654,& Cyc__gentuple_655};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_646={4,sizeof(struct _tuple80),{(
+void*)((struct _tuple6**)Cyc__genarr_656),(void*)((struct _tuple6**)Cyc__genarr_656),(
+void*)((struct _tuple6**)Cyc__genarr_656 + 2)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_627;extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_638;extern
+struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_typedef_name_t2_rep;
+static char _tmp3E2[4]="Opt";static struct _tagged_arr Cyc__genname_641=(struct
+_tagged_arr){_tmp3E2,_tmp3E2,_tmp3E2 + 4};static char _tmp3E3[2]="v";static struct
+_tuple5 Cyc__gentuple_639={offsetof(struct Cyc_Core_Opt,v),(struct _tagged_arr){
 _tmp3E3,_tmp3E3,_tmp3E3 + 2},(void*)& Cyc__genrep_10};static struct _tuple5*Cyc__genarr_640[
 1]={& Cyc__gentuple_639};struct Cyc_Typerep_Struct_struct Cyc_struct_Core_Opt0Absyn_typedef_name_t2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_641,sizeof(struct Cyc_Core_Opt),{(void*)((
@@ -3538,100 +3638,117 @@ Cyc__gentuple_644};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_627={4,
 sizeof(struct _tuple81),{(void*)((struct _tuple6**)Cyc__genarr_645),(void*)((
 struct _tuple6**)Cyc__genarr_645),(void*)((struct _tuple6**)Cyc__genarr_645 + 3)}};
 static struct _tuple7*Cyc__genarr_80[0]={};static char _tmp3E7[8]="Const_e";static
-struct _tuple5 Cyc__gentuple_882={0,{_tmp3E7,_tmp3E7,_tmp3E7 + 8},(void*)& Cyc__genrep_852};
-static char _tmp3E8[6]="Var_e";static struct _tuple5 Cyc__gentuple_883={1,{_tmp3E8,
-_tmp3E8,_tmp3E8 + 6},(void*)& Cyc__genrep_839};static char _tmp3E9[12]="UnknownId_e";
-static struct _tuple5 Cyc__gentuple_884={2,{_tmp3E9,_tmp3E9,_tmp3E9 + 12},(void*)&
-Cyc__genrep_245};static char _tmp3EA[9]="Primop_e";static struct _tuple5 Cyc__gentuple_885={
-3,{_tmp3EA,_tmp3EA,_tmp3EA + 9},(void*)& Cyc__genrep_834};static char _tmp3EB[11]="AssignOp_e";
-static struct _tuple5 Cyc__gentuple_886={4,{_tmp3EB,_tmp3EB,_tmp3EB + 11},(void*)&
-Cyc__genrep_802};static char _tmp3EC[12]="Increment_e";static struct _tuple5 Cyc__gentuple_887={
-5,{_tmp3EC,_tmp3EC,_tmp3EC + 12},(void*)& Cyc__genrep_791};static char _tmp3ED[14]="Conditional_e";
-static struct _tuple5 Cyc__gentuple_888={6,{_tmp3ED,_tmp3ED,_tmp3ED + 14},(void*)&
-Cyc__genrep_785};static char _tmp3EE[9]="SeqExp_e";static struct _tuple5 Cyc__gentuple_889={
-7,{_tmp3EE,_tmp3EE,_tmp3EE + 9},(void*)& Cyc__genrep_716};static char _tmp3EF[14]="UnknownCall_e";
-static struct _tuple5 Cyc__gentuple_890={8,{_tmp3EF,_tmp3EF,_tmp3EF + 14},(void*)&
-Cyc__genrep_780};static char _tmp3F0[9]="FnCall_e";static struct _tuple5 Cyc__gentuple_891={
-9,{_tmp3F0,_tmp3F0,_tmp3F0 + 9},(void*)& Cyc__genrep_767};static char _tmp3F1[8]="Throw_e";
-static struct _tuple5 Cyc__gentuple_892={10,{_tmp3F1,_tmp3F1,_tmp3F1 + 8},(void*)&
-Cyc__genrep_81};static char _tmp3F2[16]="NoInstantiate_e";static struct _tuple5 Cyc__gentuple_893={
-11,{_tmp3F2,_tmp3F2,_tmp3F2 + 16},(void*)& Cyc__genrep_81};static char _tmp3F3[14]="Instantiate_e";
-static struct _tuple5 Cyc__gentuple_894={12,{_tmp3F3,_tmp3F3,_tmp3F3 + 14},(void*)&
-Cyc__genrep_762};static char _tmp3F4[7]="Cast_e";static struct _tuple5 Cyc__gentuple_895={
-13,{_tmp3F4,_tmp3F4,_tmp3F4 + 7},(void*)& Cyc__genrep_749};static char _tmp3F5[10]="Address_e";
-static struct _tuple5 Cyc__gentuple_896={14,{_tmp3F5,_tmp3F5,_tmp3F5 + 10},(void*)&
-Cyc__genrep_81};static char _tmp3F6[6]="New_e";static struct _tuple5 Cyc__gentuple_897={
-15,{_tmp3F6,_tmp3F6,_tmp3F6 + 6},(void*)& Cyc__genrep_744};static char _tmp3F7[12]="Sizeoftyp_e";
-static struct _tuple5 Cyc__gentuple_898={16,{_tmp3F7,_tmp3F7,_tmp3F7 + 12},(void*)&
+struct _tuple5 Cyc__gentuple_882={0,(struct _tagged_arr){_tmp3E7,_tmp3E7,_tmp3E7 + 8},(
+void*)& Cyc__genrep_852};static char _tmp3E8[6]="Var_e";static struct _tuple5 Cyc__gentuple_883={
+1,(struct _tagged_arr){_tmp3E8,_tmp3E8,_tmp3E8 + 6},(void*)& Cyc__genrep_839};
+static char _tmp3E9[12]="UnknownId_e";static struct _tuple5 Cyc__gentuple_884={2,(
+struct _tagged_arr){_tmp3E9,_tmp3E9,_tmp3E9 + 12},(void*)& Cyc__genrep_245};static
+char _tmp3EA[9]="Primop_e";static struct _tuple5 Cyc__gentuple_885={3,(struct
+_tagged_arr){_tmp3EA,_tmp3EA,_tmp3EA + 9},(void*)& Cyc__genrep_834};static char
+_tmp3EB[11]="AssignOp_e";static struct _tuple5 Cyc__gentuple_886={4,(struct
+_tagged_arr){_tmp3EB,_tmp3EB,_tmp3EB + 11},(void*)& Cyc__genrep_802};static char
+_tmp3EC[12]="Increment_e";static struct _tuple5 Cyc__gentuple_887={5,(struct
+_tagged_arr){_tmp3EC,_tmp3EC,_tmp3EC + 12},(void*)& Cyc__genrep_791};static char
+_tmp3ED[14]="Conditional_e";static struct _tuple5 Cyc__gentuple_888={6,(struct
+_tagged_arr){_tmp3ED,_tmp3ED,_tmp3ED + 14},(void*)& Cyc__genrep_785};static char
+_tmp3EE[9]="SeqExp_e";static struct _tuple5 Cyc__gentuple_889={7,(struct _tagged_arr){
+_tmp3EE,_tmp3EE,_tmp3EE + 9},(void*)& Cyc__genrep_716};static char _tmp3EF[14]="UnknownCall_e";
+static struct _tuple5 Cyc__gentuple_890={8,(struct _tagged_arr){_tmp3EF,_tmp3EF,
+_tmp3EF + 14},(void*)& Cyc__genrep_780};static char _tmp3F0[9]="FnCall_e";static
+struct _tuple5 Cyc__gentuple_891={9,(struct _tagged_arr){_tmp3F0,_tmp3F0,_tmp3F0 + 9},(
+void*)& Cyc__genrep_767};static char _tmp3F1[8]="Throw_e";static struct _tuple5 Cyc__gentuple_892={
+10,(struct _tagged_arr){_tmp3F1,_tmp3F1,_tmp3F1 + 8},(void*)& Cyc__genrep_81};
+static char _tmp3F2[16]="NoInstantiate_e";static struct _tuple5 Cyc__gentuple_893={11,(
+struct _tagged_arr){_tmp3F2,_tmp3F2,_tmp3F2 + 16},(void*)& Cyc__genrep_81};static
+char _tmp3F3[14]="Instantiate_e";static struct _tuple5 Cyc__gentuple_894={12,(struct
+_tagged_arr){_tmp3F3,_tmp3F3,_tmp3F3 + 14},(void*)& Cyc__genrep_762};static char
+_tmp3F4[7]="Cast_e";static struct _tuple5 Cyc__gentuple_895={13,(struct _tagged_arr){
+_tmp3F4,_tmp3F4,_tmp3F4 + 7},(void*)& Cyc__genrep_749};static char _tmp3F5[10]="Address_e";
+static struct _tuple5 Cyc__gentuple_896={14,(struct _tagged_arr){_tmp3F5,_tmp3F5,
+_tmp3F5 + 10},(void*)& Cyc__genrep_81};static char _tmp3F6[6]="New_e";static struct
+_tuple5 Cyc__gentuple_897={15,(struct _tagged_arr){_tmp3F6,_tmp3F6,_tmp3F6 + 6},(
+void*)& Cyc__genrep_744};static char _tmp3F7[12]="Sizeoftyp_e";static struct _tuple5
+Cyc__gentuple_898={16,(struct _tagged_arr){_tmp3F7,_tmp3F7,_tmp3F7 + 12},(void*)&
 Cyc__genrep_48};static char _tmp3F8[12]="Sizeofexp_e";static struct _tuple5 Cyc__gentuple_899={
-17,{_tmp3F8,_tmp3F8,_tmp3F8 + 12},(void*)& Cyc__genrep_81};static char _tmp3F9[11]="Offsetof_e";
-static struct _tuple5 Cyc__gentuple_900={18,{_tmp3F9,_tmp3F9,_tmp3F9 + 11},(void*)&
-Cyc__genrep_731};static char _tmp3FA[9]="Gentyp_e";static struct _tuple5 Cyc__gentuple_901={
-19,{_tmp3FA,_tmp3FA,_tmp3FA + 9},(void*)& Cyc__genrep_726};static char _tmp3FB[8]="Deref_e";
-static struct _tuple5 Cyc__gentuple_902={20,{_tmp3FB,_tmp3FB,_tmp3FB + 8},(void*)&
-Cyc__genrep_81};static char _tmp3FC[13]="AggrMember_e";static struct _tuple5 Cyc__gentuple_903={
-21,{_tmp3FC,_tmp3FC,_tmp3FC + 13},(void*)& Cyc__genrep_721};static char _tmp3FD[12]="AggrArrow_e";
-static struct _tuple5 Cyc__gentuple_904={22,{_tmp3FD,_tmp3FD,_tmp3FD + 12},(void*)&
-Cyc__genrep_721};static char _tmp3FE[12]="Subscript_e";static struct _tuple5 Cyc__gentuple_905={
-23,{_tmp3FE,_tmp3FE,_tmp3FE + 12},(void*)& Cyc__genrep_716};static char _tmp3FF[8]="Tuple_e";
-static struct _tuple5 Cyc__gentuple_906={24,{_tmp3FF,_tmp3FF,_tmp3FF + 8},(void*)&
-Cyc__genrep_712};static char _tmp400[14]="CompoundLit_e";static struct _tuple5 Cyc__gentuple_907={
-25,{_tmp400,_tmp400,_tmp400 + 14},(void*)& Cyc__genrep_701};static char _tmp401[8]="Array_e";
-static struct _tuple5 Cyc__gentuple_908={26,{_tmp401,_tmp401,_tmp401 + 8},(void*)&
-Cyc__genrep_697};static char _tmp402[16]="Comprehension_e";static struct _tuple5 Cyc__gentuple_909={
-27,{_tmp402,_tmp402,_tmp402 + 16},(void*)& Cyc__genrep_690};static char _tmp403[9]="Struct_e";
-static struct _tuple5 Cyc__gentuple_910={28,{_tmp403,_tmp403,_tmp403 + 9},(void*)&
-Cyc__genrep_682};static char _tmp404[13]="AnonStruct_e";static struct _tuple5 Cyc__gentuple_911={
-29,{_tmp404,_tmp404,_tmp404 + 13},(void*)& Cyc__genrep_677};static char _tmp405[9]="Tunion_e";
-static struct _tuple5 Cyc__gentuple_912={30,{_tmp405,_tmp405,_tmp405 + 9},(void*)&
-Cyc__genrep_671};static char _tmp406[7]="Enum_e";static struct _tuple5 Cyc__gentuple_913={
-31,{_tmp406,_tmp406,_tmp406 + 7},(void*)& Cyc__genrep_664};static char _tmp407[11]="AnonEnum_e";
-static struct _tuple5 Cyc__gentuple_914={32,{_tmp407,_tmp407,_tmp407 + 11},(void*)&
-Cyc__genrep_657};static char _tmp408[9]="Malloc_e";static struct _tuple5 Cyc__gentuple_915={
-33,{_tmp408,_tmp408,_tmp408 + 9},(void*)& Cyc__genrep_646};static char _tmp409[16]="UnresolvedMem_e";
-static struct _tuple5 Cyc__gentuple_916={34,{_tmp409,_tmp409,_tmp409 + 16},(void*)&
-Cyc__genrep_627};static char _tmp40A[10]="StmtExp_e";static struct _tuple5 Cyc__gentuple_917={
-35,{_tmp40A,_tmp40A,_tmp40A + 10},(void*)& Cyc__genrep_479};static char _tmp40B[10]="Codegen_e";
-static struct _tuple5 Cyc__gentuple_918={36,{_tmp40B,_tmp40B,_tmp40B + 10},(void*)&
-Cyc__genrep_86};static char _tmp40C[7]="Fill_e";static struct _tuple5 Cyc__gentuple_919={
-37,{_tmp40C,_tmp40C,_tmp40C + 7},(void*)& Cyc__genrep_81};static struct _tuple5*Cyc__genarr_920[
-38]={& Cyc__gentuple_882,& Cyc__gentuple_883,& Cyc__gentuple_884,& Cyc__gentuple_885,&
-Cyc__gentuple_886,& Cyc__gentuple_887,& Cyc__gentuple_888,& Cyc__gentuple_889,& Cyc__gentuple_890,&
-Cyc__gentuple_891,& Cyc__gentuple_892,& Cyc__gentuple_893,& Cyc__gentuple_894,& Cyc__gentuple_895,&
-Cyc__gentuple_896,& Cyc__gentuple_897,& Cyc__gentuple_898,& Cyc__gentuple_899,& Cyc__gentuple_900,&
-Cyc__gentuple_901,& Cyc__gentuple_902,& Cyc__gentuple_903,& Cyc__gentuple_904,& Cyc__gentuple_905,&
-Cyc__gentuple_906,& Cyc__gentuple_907,& Cyc__gentuple_908,& Cyc__gentuple_909,& Cyc__gentuple_910,&
-Cyc__gentuple_911,& Cyc__gentuple_912,& Cyc__gentuple_913,& Cyc__gentuple_914,& Cyc__gentuple_915,&
-Cyc__gentuple_916,& Cyc__gentuple_917,& Cyc__gentuple_918,& Cyc__gentuple_919};
+17,(struct _tagged_arr){_tmp3F8,_tmp3F8,_tmp3F8 + 12},(void*)& Cyc__genrep_81};
+static char _tmp3F9[11]="Offsetof_e";static struct _tuple5 Cyc__gentuple_900={18,(
+struct _tagged_arr){_tmp3F9,_tmp3F9,_tmp3F9 + 11},(void*)& Cyc__genrep_731};static
+char _tmp3FA[9]="Gentyp_e";static struct _tuple5 Cyc__gentuple_901={19,(struct
+_tagged_arr){_tmp3FA,_tmp3FA,_tmp3FA + 9},(void*)& Cyc__genrep_726};static char
+_tmp3FB[8]="Deref_e";static struct _tuple5 Cyc__gentuple_902={20,(struct _tagged_arr){
+_tmp3FB,_tmp3FB,_tmp3FB + 8},(void*)& Cyc__genrep_81};static char _tmp3FC[13]="AggrMember_e";
+static struct _tuple5 Cyc__gentuple_903={21,(struct _tagged_arr){_tmp3FC,_tmp3FC,
+_tmp3FC + 13},(void*)& Cyc__genrep_721};static char _tmp3FD[12]="AggrArrow_e";static
+struct _tuple5 Cyc__gentuple_904={22,(struct _tagged_arr){_tmp3FD,_tmp3FD,_tmp3FD + 
+12},(void*)& Cyc__genrep_721};static char _tmp3FE[12]="Subscript_e";static struct
+_tuple5 Cyc__gentuple_905={23,(struct _tagged_arr){_tmp3FE,_tmp3FE,_tmp3FE + 12},(
+void*)& Cyc__genrep_716};static char _tmp3FF[8]="Tuple_e";static struct _tuple5 Cyc__gentuple_906={
+24,(struct _tagged_arr){_tmp3FF,_tmp3FF,_tmp3FF + 8},(void*)& Cyc__genrep_712};
+static char _tmp400[14]="CompoundLit_e";static struct _tuple5 Cyc__gentuple_907={25,(
+struct _tagged_arr){_tmp400,_tmp400,_tmp400 + 14},(void*)& Cyc__genrep_701};static
+char _tmp401[8]="Array_e";static struct _tuple5 Cyc__gentuple_908={26,(struct
+_tagged_arr){_tmp401,_tmp401,_tmp401 + 8},(void*)& Cyc__genrep_697};static char
+_tmp402[16]="Comprehension_e";static struct _tuple5 Cyc__gentuple_909={27,(struct
+_tagged_arr){_tmp402,_tmp402,_tmp402 + 16},(void*)& Cyc__genrep_690};static char
+_tmp403[9]="Struct_e";static struct _tuple5 Cyc__gentuple_910={28,(struct
+_tagged_arr){_tmp403,_tmp403,_tmp403 + 9},(void*)& Cyc__genrep_682};static char
+_tmp404[13]="AnonStruct_e";static struct _tuple5 Cyc__gentuple_911={29,(struct
+_tagged_arr){_tmp404,_tmp404,_tmp404 + 13},(void*)& Cyc__genrep_677};static char
+_tmp405[9]="Tunion_e";static struct _tuple5 Cyc__gentuple_912={30,(struct
+_tagged_arr){_tmp405,_tmp405,_tmp405 + 9},(void*)& Cyc__genrep_671};static char
+_tmp406[7]="Enum_e";static struct _tuple5 Cyc__gentuple_913={31,(struct _tagged_arr){
+_tmp406,_tmp406,_tmp406 + 7},(void*)& Cyc__genrep_664};static char _tmp407[11]="AnonEnum_e";
+static struct _tuple5 Cyc__gentuple_914={32,(struct _tagged_arr){_tmp407,_tmp407,
+_tmp407 + 11},(void*)& Cyc__genrep_657};static char _tmp408[9]="Malloc_e";static
+struct _tuple5 Cyc__gentuple_915={33,(struct _tagged_arr){_tmp408,_tmp408,_tmp408 + 
+9},(void*)& Cyc__genrep_646};static char _tmp409[16]="UnresolvedMem_e";static struct
+_tuple5 Cyc__gentuple_916={34,(struct _tagged_arr){_tmp409,_tmp409,_tmp409 + 16},(
+void*)& Cyc__genrep_627};static char _tmp40A[10]="StmtExp_e";static struct _tuple5 Cyc__gentuple_917={
+35,(struct _tagged_arr){_tmp40A,_tmp40A,_tmp40A + 10},(void*)& Cyc__genrep_479};
+static char _tmp40B[10]="Codegen_e";static struct _tuple5 Cyc__gentuple_918={36,(
+struct _tagged_arr){_tmp40B,_tmp40B,_tmp40B + 10},(void*)& Cyc__genrep_86};static
+char _tmp40C[7]="Fill_e";static struct _tuple5 Cyc__gentuple_919={37,(struct
+_tagged_arr){_tmp40C,_tmp40C,_tmp40C + 7},(void*)& Cyc__genrep_81};static struct
+_tuple5*Cyc__genarr_920[38]={& Cyc__gentuple_882,& Cyc__gentuple_883,& Cyc__gentuple_884,&
+Cyc__gentuple_885,& Cyc__gentuple_886,& Cyc__gentuple_887,& Cyc__gentuple_888,& Cyc__gentuple_889,&
+Cyc__gentuple_890,& Cyc__gentuple_891,& Cyc__gentuple_892,& Cyc__gentuple_893,& Cyc__gentuple_894,&
+Cyc__gentuple_895,& Cyc__gentuple_896,& Cyc__gentuple_897,& Cyc__gentuple_898,& Cyc__gentuple_899,&
+Cyc__gentuple_900,& Cyc__gentuple_901,& Cyc__gentuple_902,& Cyc__gentuple_903,& Cyc__gentuple_904,&
+Cyc__gentuple_905,& Cyc__gentuple_906,& Cyc__gentuple_907,& Cyc__gentuple_908,& Cyc__gentuple_909,&
+Cyc__gentuple_910,& Cyc__gentuple_911,& Cyc__gentuple_912,& Cyc__gentuple_913,& Cyc__gentuple_914,&
+Cyc__gentuple_915,& Cyc__gentuple_916,& Cyc__gentuple_917,& Cyc__gentuple_918,& Cyc__gentuple_919};
 static char _tmp40E[8]="Raw_exp";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_raw_exp_t_rep={
-5,{_tmp40E,_tmp40E,_tmp40E + 8},{(void*)((struct _tuple7**)Cyc__genarr_80),(void*)((
-struct _tuple7**)Cyc__genarr_80),(void*)((struct _tuple7**)Cyc__genarr_80 + 0)},{(
-void*)((struct _tuple5**)Cyc__genarr_920),(void*)((struct _tuple5**)Cyc__genarr_920),(
+5,(struct _tagged_arr){_tmp40E,_tmp40E,_tmp40E + 8},{(void*)((struct _tuple7**)Cyc__genarr_80),(
+void*)((struct _tuple7**)Cyc__genarr_80),(void*)((struct _tuple7**)Cyc__genarr_80 + 
+0)},{(void*)((struct _tuple5**)Cyc__genarr_920),(void*)((struct _tuple5**)Cyc__genarr_920),(
 void*)((struct _tuple5**)Cyc__genarr_920 + 38)}};static char _tmp40F[4]="Exp";static
-struct _tagged_arr Cyc__genname_926={_tmp40F,_tmp40F,_tmp40F + 4};static char _tmp410[
-5]="topt";static struct _tuple5 Cyc__gentuple_921={offsetof(struct Cyc_Absyn_Exp,topt),{
-_tmp410,_tmp410,_tmp410 + 5},(void*)& Cyc__genrep_43};static char _tmp411[2]="r";
-static struct _tuple5 Cyc__gentuple_922={offsetof(struct Cyc_Absyn_Exp,r),{_tmp411,
-_tmp411,_tmp411 + 2},(void*)& Cyc_Absyn_raw_exp_t_rep};static char _tmp412[4]="loc";
-static struct _tuple5 Cyc__gentuple_923={offsetof(struct Cyc_Absyn_Exp,loc),{_tmp412,
+struct _tagged_arr Cyc__genname_926=(struct _tagged_arr){_tmp40F,_tmp40F,_tmp40F + 4};
+static char _tmp410[5]="topt";static struct _tuple5 Cyc__gentuple_921={offsetof(
+struct Cyc_Absyn_Exp,topt),(struct _tagged_arr){_tmp410,_tmp410,_tmp410 + 5},(void*)&
+Cyc__genrep_43};static char _tmp411[2]="r";static struct _tuple5 Cyc__gentuple_922={
+offsetof(struct Cyc_Absyn_Exp,r),(struct _tagged_arr){_tmp411,_tmp411,_tmp411 + 2},(
+void*)& Cyc_Absyn_raw_exp_t_rep};static char _tmp412[4]="loc";static struct _tuple5
+Cyc__gentuple_923={offsetof(struct Cyc_Absyn_Exp,loc),(struct _tagged_arr){_tmp412,
 _tmp412,_tmp412 + 4},(void*)& Cyc__genrep_2};static char _tmp413[6]="annot";static
-struct _tuple5 Cyc__gentuple_924={offsetof(struct Cyc_Absyn_Exp,annot),{_tmp413,
-_tmp413,_tmp413 + 6},(void*)& Cyc_Absyn_absyn_annot_t_rep};static struct _tuple5*Cyc__genarr_925[
-4]={& Cyc__gentuple_921,& Cyc__gentuple_922,& Cyc__gentuple_923,& Cyc__gentuple_924};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Exp_rep={3,(struct _tagged_arr*)&
-Cyc__genname_926,sizeof(struct Cyc_Absyn_Exp),{(void*)((struct _tuple5**)Cyc__genarr_925),(
-void*)((struct _tuple5**)Cyc__genarr_925),(void*)((struct _tuple5**)Cyc__genarr_925
-+ 4)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_78={1,1,(void*)((void*)&
-Cyc_struct_Absyn_Exp_rep)};static char _tmp416[10]="ArrayInfo";static struct
-_tagged_arr Cyc__genname_995={_tmp416,_tmp416,_tmp416 + 10};static char _tmp417[9]="elt_type";
-static struct _tuple5 Cyc__gentuple_990={offsetof(struct Cyc_Absyn_ArrayInfo,elt_type),{
-_tmp417,_tmp417,_tmp417 + 9},(void*)((void*)& Cyc_Absyn_type_t_rep)};static char
-_tmp418[3]="tq";static struct _tuple5 Cyc__gentuple_991={offsetof(struct Cyc_Absyn_ArrayInfo,tq),{
-_tmp418,_tmp418,_tmp418 + 3},(void*)& Cyc__genrep_134};static char _tmp419[9]="num_elts";
-static struct _tuple5 Cyc__gentuple_992={offsetof(struct Cyc_Absyn_ArrayInfo,num_elts),{
-_tmp419,_tmp419,_tmp419 + 9},(void*)& Cyc__genrep_78};static char _tmp41A[10]="zero_term";
-static struct _tuple5 Cyc__gentuple_993={offsetof(struct Cyc_Absyn_ArrayInfo,zero_term),{
-_tmp41A,_tmp41A,_tmp41A + 10},(void*)& Cyc__genrep_977};static struct _tuple5*Cyc__genarr_994[
+struct _tuple5 Cyc__gentuple_924={offsetof(struct Cyc_Absyn_Exp,annot),(struct
+_tagged_arr){_tmp413,_tmp413,_tmp413 + 6},(void*)& Cyc_Absyn_absyn_annot_t_rep};
+static struct _tuple5*Cyc__genarr_925[4]={& Cyc__gentuple_921,& Cyc__gentuple_922,&
+Cyc__gentuple_923,& Cyc__gentuple_924};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Exp_rep={
+3,(struct _tagged_arr*)& Cyc__genname_926,sizeof(struct Cyc_Absyn_Exp),{(void*)((
+struct _tuple5**)Cyc__genarr_925),(void*)((struct _tuple5**)Cyc__genarr_925),(void*)((
+struct _tuple5**)Cyc__genarr_925 + 4)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_78={
+1,1,(void*)((void*)& Cyc_struct_Absyn_Exp_rep)};static char _tmp416[10]="ArrayInfo";
+static struct _tagged_arr Cyc__genname_995=(struct _tagged_arr){_tmp416,_tmp416,
+_tmp416 + 10};static char _tmp417[9]="elt_type";static struct _tuple5 Cyc__gentuple_990={
+offsetof(struct Cyc_Absyn_ArrayInfo,elt_type),(struct _tagged_arr){_tmp417,_tmp417,
+_tmp417 + 9},(void*)((void*)& Cyc_Absyn_type_t_rep)};static char _tmp418[3]="tq";
+static struct _tuple5 Cyc__gentuple_991={offsetof(struct Cyc_Absyn_ArrayInfo,tq),(
+struct _tagged_arr){_tmp418,_tmp418,_tmp418 + 3},(void*)& Cyc__genrep_134};static
+char _tmp419[9]="num_elts";static struct _tuple5 Cyc__gentuple_992={offsetof(struct
+Cyc_Absyn_ArrayInfo,num_elts),(struct _tagged_arr){_tmp419,_tmp419,_tmp419 + 9},(
+void*)& Cyc__genrep_78};static char _tmp41A[10]="zero_term";static struct _tuple5 Cyc__gentuple_993={
+offsetof(struct Cyc_Absyn_ArrayInfo,zero_term),(struct _tagged_arr){_tmp41A,
+_tmp41A,_tmp41A + 10},(void*)& Cyc__genrep_977};static struct _tuple5*Cyc__genarr_994[
 4]={& Cyc__gentuple_990,& Cyc__gentuple_991,& Cyc__gentuple_992,& Cyc__gentuple_993};
 struct Cyc_Typerep_Struct_struct Cyc_Absyn_array_info_t_rep={3,(struct _tagged_arr*)&
 Cyc__genname_995,sizeof(struct Cyc_Absyn_ArrayInfo),{(void*)((struct _tuple5**)Cyc__genarr_994),(
@@ -3646,56 +3763,59 @@ void*)((struct _tuple6**)Cyc__genarr_998 + 2)}};extern struct Cyc_Typerep_Tuple_
 Cyc__genrep_957;extern struct Cyc_Typerep_Struct_struct Cyc_Absyn_fn_info_t_rep;
 extern struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_958;extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_List_List060Core_opt_t0Absyn_var_t46H24Absyn_tqual_t4Absyn_type_t1_44099_6H2_rep;
-static char _tmp41D[5]="List";static struct _tagged_arr Cyc__genname_962={_tmp41D,
-_tmp41D,_tmp41D + 5};static char _tmp41E[3]="hd";static struct _tuple5 Cyc__gentuple_959={
-offsetof(struct Cyc_List_List,hd),{_tmp41E,_tmp41E,_tmp41E + 3},(void*)& Cyc__genrep_702};
-static char _tmp41F[3]="tl";static struct _tuple5 Cyc__gentuple_960={offsetof(struct
-Cyc_List_List,tl),{_tmp41F,_tmp41F,_tmp41F + 3},(void*)& Cyc__genrep_958};static
-struct _tuple5*Cyc__genarr_961[2]={& Cyc__gentuple_959,& Cyc__gentuple_960};struct
-Cyc_Typerep_Struct_struct Cyc_struct_List_List060Core_opt_t0Absyn_var_t46H24Absyn_tqual_t4Absyn_type_t1_44099_6H2_rep={
+static char _tmp41D[5]="List";static struct _tagged_arr Cyc__genname_962=(struct
+_tagged_arr){_tmp41D,_tmp41D,_tmp41D + 5};static char _tmp41E[3]="hd";static struct
+_tuple5 Cyc__gentuple_959={offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){
+_tmp41E,_tmp41E,_tmp41E + 3},(void*)& Cyc__genrep_702};static char _tmp41F[3]="tl";
+static struct _tuple5 Cyc__gentuple_960={offsetof(struct Cyc_List_List,tl),(struct
+_tagged_arr){_tmp41F,_tmp41F,_tmp41F + 3},(void*)& Cyc__genrep_958};static struct
+_tuple5*Cyc__genarr_961[2]={& Cyc__gentuple_959,& Cyc__gentuple_960};struct Cyc_Typerep_Struct_struct
+Cyc_struct_List_List060Core_opt_t0Absyn_var_t46H24Absyn_tqual_t4Absyn_type_t1_44099_6H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_962,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_961),(void*)((struct _tuple5**)Cyc__genarr_961),(void*)((
 struct _tuple5**)Cyc__genarr_961 + 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_958={
 1,1,(void*)((void*)& Cyc_struct_List_List060Core_opt_t0Absyn_var_t46H24Absyn_tqual_t4Absyn_type_t1_44099_6H2_rep)};
-static char _tmp422[7]="FnInfo";static struct _tagged_arr Cyc__genname_972={_tmp422,
-_tmp422,_tmp422 + 7};static char _tmp423[6]="tvars";static struct _tuple5 Cyc__gentuple_963={
-offsetof(struct Cyc_Absyn_FnInfo,tvars),{_tmp423,_tmp423,_tmp423 + 6},(void*)& Cyc__genrep_311};
-static char _tmp424[7]="effect";static struct _tuple5 Cyc__gentuple_964={offsetof(
-struct Cyc_Absyn_FnInfo,effect),{_tmp424,_tmp424,_tmp424 + 7},(void*)& Cyc__genrep_43};
-static char _tmp425[8]="ret_typ";static struct _tuple5 Cyc__gentuple_965={offsetof(
-struct Cyc_Absyn_FnInfo,ret_typ),{_tmp425,_tmp425,_tmp425 + 8},(void*)((void*)& Cyc_Absyn_type_t_rep)};
-static char _tmp426[5]="args";static struct _tuple5 Cyc__gentuple_966={offsetof(
-struct Cyc_Absyn_FnInfo,args),{_tmp426,_tmp426,_tmp426 + 5},(void*)& Cyc__genrep_958};
-static char _tmp427[10]="c_varargs";static struct _tuple5 Cyc__gentuple_967={
-offsetof(struct Cyc_Absyn_FnInfo,c_varargs),{_tmp427,_tmp427,_tmp427 + 10},(void*)((
-void*)& Cyc__genrep_62)};static char _tmp428[12]="cyc_varargs";static struct _tuple5
-Cyc__gentuple_968={offsetof(struct Cyc_Absyn_FnInfo,cyc_varargs),{_tmp428,_tmp428,
+static char _tmp422[7]="FnInfo";static struct _tagged_arr Cyc__genname_972=(struct
+_tagged_arr){_tmp422,_tmp422,_tmp422 + 7};static char _tmp423[6]="tvars";static
+struct _tuple5 Cyc__gentuple_963={offsetof(struct Cyc_Absyn_FnInfo,tvars),(struct
+_tagged_arr){_tmp423,_tmp423,_tmp423 + 6},(void*)& Cyc__genrep_311};static char
+_tmp424[7]="effect";static struct _tuple5 Cyc__gentuple_964={offsetof(struct Cyc_Absyn_FnInfo,effect),(
+struct _tagged_arr){_tmp424,_tmp424,_tmp424 + 7},(void*)& Cyc__genrep_43};static
+char _tmp425[8]="ret_typ";static struct _tuple5 Cyc__gentuple_965={offsetof(struct
+Cyc_Absyn_FnInfo,ret_typ),(struct _tagged_arr){_tmp425,_tmp425,_tmp425 + 8},(void*)((
+void*)& Cyc_Absyn_type_t_rep)};static char _tmp426[5]="args";static struct _tuple5 Cyc__gentuple_966={
+offsetof(struct Cyc_Absyn_FnInfo,args),(struct _tagged_arr){_tmp426,_tmp426,
+_tmp426 + 5},(void*)& Cyc__genrep_958};static char _tmp427[10]="c_varargs";static
+struct _tuple5 Cyc__gentuple_967={offsetof(struct Cyc_Absyn_FnInfo,c_varargs),(
+struct _tagged_arr){_tmp427,_tmp427,_tmp427 + 10},(void*)((void*)& Cyc__genrep_62)};
+static char _tmp428[12]="cyc_varargs";static struct _tuple5 Cyc__gentuple_968={
+offsetof(struct Cyc_Absyn_FnInfo,cyc_varargs),(struct _tagged_arr){_tmp428,_tmp428,
 _tmp428 + 12},(void*)& Cyc__genrep_586};static char _tmp429[7]="rgn_po";static struct
-_tuple5 Cyc__gentuple_969={offsetof(struct Cyc_Absyn_FnInfo,rgn_po),{_tmp429,
-_tmp429,_tmp429 + 7},(void*)& Cyc__genrep_370};static char _tmp42A[11]="attributes";
-static struct _tuple5 Cyc__gentuple_970={offsetof(struct Cyc_Absyn_FnInfo,attributes),{
-_tmp42A,_tmp42A,_tmp42A + 11},(void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_971[
-8]={& Cyc__gentuple_963,& Cyc__gentuple_964,& Cyc__gentuple_965,& Cyc__gentuple_966,&
-Cyc__gentuple_967,& Cyc__gentuple_968,& Cyc__gentuple_969,& Cyc__gentuple_970};
-struct Cyc_Typerep_Struct_struct Cyc_Absyn_fn_info_t_rep={3,(struct _tagged_arr*)&
-Cyc__genname_972,sizeof(struct Cyc_Absyn_FnInfo),{(void*)((struct _tuple5**)Cyc__genarr_971),(
-void*)((struct _tuple5**)Cyc__genarr_971),(void*)((struct _tuple5**)Cyc__genarr_971
-+ 8)}};struct _tuple83{unsigned int f1;struct Cyc_Absyn_FnInfo f2;};static struct
-_tuple6 Cyc__gentuple_973={offsetof(struct _tuple83,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_974={offsetof(struct _tuple83,f2),(void*)& Cyc_Absyn_fn_info_t_rep};
-static struct _tuple6*Cyc__genarr_975[2]={& Cyc__gentuple_973,& Cyc__gentuple_974};
-static struct Cyc_Typerep_Tuple_struct Cyc__genrep_957={4,sizeof(struct _tuple83),{(
-void*)((struct _tuple6**)Cyc__genarr_975),(void*)((struct _tuple6**)Cyc__genarr_975),(
-void*)((struct _tuple6**)Cyc__genarr_975 + 2)}};extern struct Cyc_Typerep_Tuple_struct
-Cyc__genrep_953;static struct _tuple6 Cyc__gentuple_954={offsetof(struct _tuple13,f1),(
-void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_955={offsetof(struct
-_tuple13,f2),(void*)& Cyc__genrep_285};static struct _tuple6*Cyc__genarr_956[2]={&
-Cyc__gentuple_954,& Cyc__gentuple_955};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_953={
-4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_956),(void*)((
-struct _tuple6**)Cyc__genarr_956),(void*)((struct _tuple6**)Cyc__genarr_956 + 2)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_949;struct _tuple84{unsigned int
-f1;struct Cyc_Absyn_AggrInfo f2;};static struct _tuple6 Cyc__gentuple_950={offsetof(
-struct _tuple84,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_951={
+_tuple5 Cyc__gentuple_969={offsetof(struct Cyc_Absyn_FnInfo,rgn_po),(struct
+_tagged_arr){_tmp429,_tmp429,_tmp429 + 7},(void*)& Cyc__genrep_370};static char
+_tmp42A[11]="attributes";static struct _tuple5 Cyc__gentuple_970={offsetof(struct
+Cyc_Absyn_FnInfo,attributes),(struct _tagged_arr){_tmp42A,_tmp42A,_tmp42A + 11},(
+void*)& Cyc__genrep_88};static struct _tuple5*Cyc__genarr_971[8]={& Cyc__gentuple_963,&
+Cyc__gentuple_964,& Cyc__gentuple_965,& Cyc__gentuple_966,& Cyc__gentuple_967,& Cyc__gentuple_968,&
+Cyc__gentuple_969,& Cyc__gentuple_970};struct Cyc_Typerep_Struct_struct Cyc_Absyn_fn_info_t_rep={
+3,(struct _tagged_arr*)& Cyc__genname_972,sizeof(struct Cyc_Absyn_FnInfo),{(void*)((
+struct _tuple5**)Cyc__genarr_971),(void*)((struct _tuple5**)Cyc__genarr_971),(void*)((
+struct _tuple5**)Cyc__genarr_971 + 8)}};struct _tuple83{unsigned int f1;struct Cyc_Absyn_FnInfo
+f2;};static struct _tuple6 Cyc__gentuple_973={offsetof(struct _tuple83,f1),(void*)&
+Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_974={offsetof(struct _tuple83,f2),(
+void*)& Cyc_Absyn_fn_info_t_rep};static struct _tuple6*Cyc__genarr_975[2]={& Cyc__gentuple_973,&
+Cyc__gentuple_974};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_957={4,
+sizeof(struct _tuple83),{(void*)((struct _tuple6**)Cyc__genarr_975),(void*)((
+struct _tuple6**)Cyc__genarr_975),(void*)((struct _tuple6**)Cyc__genarr_975 + 2)}};
+extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_953;static struct _tuple6 Cyc__gentuple_954={
+offsetof(struct _tuple13,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_955={
+offsetof(struct _tuple13,f2),(void*)& Cyc__genrep_285};static struct _tuple6*Cyc__genarr_956[
+2]={& Cyc__gentuple_954,& Cyc__gentuple_955};static struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_953={4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_956),(
+void*)((struct _tuple6**)Cyc__genarr_956),(void*)((struct _tuple6**)Cyc__genarr_956
++ 2)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_949;struct _tuple84{
+unsigned int f1;struct Cyc_Absyn_AggrInfo f2;};static struct _tuple6 Cyc__gentuple_950={
+offsetof(struct _tuple84,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_951={
 offsetof(struct _tuple84,f2),(void*)& Cyc_Absyn_aggr_info_t_rep};static struct
 _tuple6*Cyc__genarr_952[2]={& Cyc__gentuple_950,& Cyc__gentuple_951};static struct
 Cyc_Typerep_Tuple_struct Cyc__genrep_949={4,sizeof(struct _tuple84),{(void*)((
@@ -3724,108 +3844,123 @@ Cyc__genrep_75={4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr
 void*)((struct _tuple6**)Cyc__genarr_938),(void*)((struct _tuple6**)Cyc__genarr_938
 + 2)}};extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_66;extern struct Cyc_Typerep_ThinPtr_struct
 Cyc__genrep_68;extern struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Typedefdecl_rep;
-static char _tmp432[12]="Typedefdecl";static struct _tagged_arr Cyc__genname_1131={
-_tmp432,_tmp432,_tmp432 + 12};static char _tmp433[5]="name";static struct _tuple5 Cyc__gentuple_1126={
-offsetof(struct Cyc_Absyn_Typedefdecl,name),{_tmp433,_tmp433,_tmp433 + 5},(void*)&
-Cyc__genrep_10};static char _tmp434[4]="tvs";static struct _tuple5 Cyc__gentuple_1127={
-offsetof(struct Cyc_Absyn_Typedefdecl,tvs),{_tmp434,_tmp434,_tmp434 + 4},(void*)&
-Cyc__genrep_311};static char _tmp435[5]="kind";static struct _tuple5 Cyc__gentuple_1128={
-offsetof(struct Cyc_Absyn_Typedefdecl,kind),{_tmp435,_tmp435,_tmp435 + 5},(void*)&
-Cyc__genrep_1090};static char _tmp436[5]="defn";static struct _tuple5 Cyc__gentuple_1129={
-offsetof(struct Cyc_Absyn_Typedefdecl,defn),{_tmp436,_tmp436,_tmp436 + 5},(void*)&
-Cyc__genrep_43};static struct _tuple5*Cyc__genarr_1130[4]={& Cyc__gentuple_1126,&
-Cyc__gentuple_1127,& Cyc__gentuple_1128,& Cyc__gentuple_1129};struct Cyc_Typerep_Struct_struct
-Cyc_struct_Absyn_Typedefdecl_rep={3,(struct _tagged_arr*)& Cyc__genname_1131,
-sizeof(struct Cyc_Absyn_Typedefdecl),{(void*)((struct _tuple5**)Cyc__genarr_1130),(
-void*)((struct _tuple5**)Cyc__genarr_1130),(void*)((struct _tuple5**)Cyc__genarr_1130
-+ 4)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_68={1,1,(void*)((void*)&
-Cyc_struct_Absyn_Typedefdecl_rep)};struct _tuple86{unsigned int f1;struct _tuple0*
-f2;struct Cyc_List_List*f3;struct Cyc_Absyn_Typedefdecl*f4;void**f5;};static struct
-_tuple6 Cyc__gentuple_69={offsetof(struct _tuple86,f1),(void*)& Cyc__genrep_5};
-static struct _tuple6 Cyc__gentuple_70={offsetof(struct _tuple86,f2),(void*)& Cyc__genrep_10};
-static struct _tuple6 Cyc__gentuple_71={offsetof(struct _tuple86,f3),(void*)& Cyc__genrep_53};
-static struct _tuple6 Cyc__gentuple_72={offsetof(struct _tuple86,f4),(void*)& Cyc__genrep_68};
-static struct _tuple6 Cyc__gentuple_73={offsetof(struct _tuple86,f5),(void*)& Cyc__genrep_67};
-static struct _tuple6*Cyc__genarr_74[5]={& Cyc__gentuple_69,& Cyc__gentuple_70,& Cyc__gentuple_71,&
-Cyc__gentuple_72,& Cyc__gentuple_73};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_66={
-4,sizeof(struct _tuple86),{(void*)((struct _tuple6**)Cyc__genarr_74),(void*)((
-struct _tuple6**)Cyc__genarr_74),(void*)((struct _tuple6**)Cyc__genarr_74 + 5)}};
-extern struct Cyc_Typerep_Tuple_struct Cyc__genrep_52;static struct _tuple6 Cyc__gentuple_58={
-offsetof(struct _tuple13,f1),(void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_59={
-offsetof(struct _tuple13,f2),(void*)& Cyc__genrep_53};static struct _tuple6*Cyc__genarr_60[
-2]={& Cyc__gentuple_58,& Cyc__gentuple_59};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_52={
-4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_60),(void*)((
-struct _tuple6**)Cyc__genarr_60),(void*)((struct _tuple6**)Cyc__genarr_60 + 2)}};
-static char _tmp43B[9]="VoidType";static struct _tuple7 Cyc__gentuple_44={0,{_tmp43B,
+static char _tmp432[12]="Typedefdecl";static struct _tagged_arr Cyc__genname_1131=(
+struct _tagged_arr){_tmp432,_tmp432,_tmp432 + 12};static char _tmp433[5]="name";
+static struct _tuple5 Cyc__gentuple_1126={offsetof(struct Cyc_Absyn_Typedefdecl,name),(
+struct _tagged_arr){_tmp433,_tmp433,_tmp433 + 5},(void*)& Cyc__genrep_10};static
+char _tmp434[4]="tvs";static struct _tuple5 Cyc__gentuple_1127={offsetof(struct Cyc_Absyn_Typedefdecl,tvs),(
+struct _tagged_arr){_tmp434,_tmp434,_tmp434 + 4},(void*)& Cyc__genrep_311};static
+char _tmp435[5]="kind";static struct _tuple5 Cyc__gentuple_1128={offsetof(struct Cyc_Absyn_Typedefdecl,kind),(
+struct _tagged_arr){_tmp435,_tmp435,_tmp435 + 5},(void*)& Cyc__genrep_1090};static
+char _tmp436[5]="defn";static struct _tuple5 Cyc__gentuple_1129={offsetof(struct Cyc_Absyn_Typedefdecl,defn),(
+struct _tagged_arr){_tmp436,_tmp436,_tmp436 + 5},(void*)& Cyc__genrep_43};static
+struct _tuple5*Cyc__genarr_1130[4]={& Cyc__gentuple_1126,& Cyc__gentuple_1127,& Cyc__gentuple_1128,&
+Cyc__gentuple_1129};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Typedefdecl_rep={
+3,(struct _tagged_arr*)& Cyc__genname_1131,sizeof(struct Cyc_Absyn_Typedefdecl),{(
+void*)((struct _tuple5**)Cyc__genarr_1130),(void*)((struct _tuple5**)Cyc__genarr_1130),(
+void*)((struct _tuple5**)Cyc__genarr_1130 + 4)}};static struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_68={1,1,(void*)((void*)& Cyc_struct_Absyn_Typedefdecl_rep)};struct
+_tuple86{unsigned int f1;struct _tuple0*f2;struct Cyc_List_List*f3;struct Cyc_Absyn_Typedefdecl*
+f4;void**f5;};static struct _tuple6 Cyc__gentuple_69={offsetof(struct _tuple86,f1),(
+void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_70={offsetof(struct
+_tuple86,f2),(void*)& Cyc__genrep_10};static struct _tuple6 Cyc__gentuple_71={
+offsetof(struct _tuple86,f3),(void*)& Cyc__genrep_53};static struct _tuple6 Cyc__gentuple_72={
+offsetof(struct _tuple86,f4),(void*)& Cyc__genrep_68};static struct _tuple6 Cyc__gentuple_73={
+offsetof(struct _tuple86,f5),(void*)& Cyc__genrep_67};static struct _tuple6*Cyc__genarr_74[
+5]={& Cyc__gentuple_69,& Cyc__gentuple_70,& Cyc__gentuple_71,& Cyc__gentuple_72,& Cyc__gentuple_73};
+static struct Cyc_Typerep_Tuple_struct Cyc__genrep_66={4,sizeof(struct _tuple86),{(
+void*)((struct _tuple6**)Cyc__genarr_74),(void*)((struct _tuple6**)Cyc__genarr_74),(
+void*)((struct _tuple6**)Cyc__genarr_74 + 5)}};extern struct Cyc_Typerep_Tuple_struct
+Cyc__genrep_52;static struct _tuple6 Cyc__gentuple_58={offsetof(struct _tuple13,f1),(
+void*)& Cyc__genrep_5};static struct _tuple6 Cyc__gentuple_59={offsetof(struct
+_tuple13,f2),(void*)& Cyc__genrep_53};static struct _tuple6*Cyc__genarr_60[2]={& Cyc__gentuple_58,&
+Cyc__gentuple_59};static struct Cyc_Typerep_Tuple_struct Cyc__genrep_52={4,sizeof(
+struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_60),(void*)((struct _tuple6**)
+Cyc__genarr_60),(void*)((struct _tuple6**)Cyc__genarr_60 + 2)}};static char _tmp43B[
+9]="VoidType";static struct _tuple7 Cyc__gentuple_44={0,(struct _tagged_arr){_tmp43B,
 _tmp43B,_tmp43B + 9}};static char _tmp43C[10]="FloatType";static struct _tuple7 Cyc__gentuple_45={
-1,{_tmp43C,_tmp43C,_tmp43C + 10}};static char _tmp43D[8]="HeapRgn";static struct
-_tuple7 Cyc__gentuple_46={2,{_tmp43D,_tmp43D,_tmp43D + 8}};static struct _tuple7*Cyc__genarr_47[
-3]={& Cyc__gentuple_44,& Cyc__gentuple_45,& Cyc__gentuple_46};static char _tmp43E[5]="Evar";
-static struct _tuple5 Cyc__gentuple_1100={0,{_tmp43E,_tmp43E,_tmp43E + 5},(void*)&
-Cyc__genrep_1085};static char _tmp43F[8]="VarType";static struct _tuple5 Cyc__gentuple_1101={
-1,{_tmp43F,_tmp43F,_tmp43F + 8},(void*)& Cyc__genrep_1081};static char _tmp440[11]="TunionType";
-static struct _tuple5 Cyc__gentuple_1102={2,{_tmp440,_tmp440,_tmp440 + 11},(void*)&
-Cyc__genrep_1055};static char _tmp441[16]="TunionFieldType";static struct _tuple5 Cyc__gentuple_1103={
-3,{_tmp441,_tmp441,_tmp441 + 16},(void*)& Cyc__genrep_1029};static char _tmp442[12]="PointerType";
-static struct _tuple5 Cyc__gentuple_1104={4,{_tmp442,_tmp442,_tmp442 + 12},(void*)&
-Cyc__genrep_1010};static char _tmp443[8]="IntType";static struct _tuple5 Cyc__gentuple_1105={
-5,{_tmp443,_tmp443,_tmp443 + 8},(void*)& Cyc__genrep_999};static char _tmp444[11]="DoubleType";
-static struct _tuple5 Cyc__gentuple_1106={6,{_tmp444,_tmp444,_tmp444 + 11},(void*)&
-Cyc__genrep_61};static char _tmp445[10]="ArrayType";static struct _tuple5 Cyc__gentuple_1107={
-7,{_tmp445,_tmp445,_tmp445 + 10},(void*)& Cyc__genrep_976};static char _tmp446[7]="FnType";
-static struct _tuple5 Cyc__gentuple_1108={8,{_tmp446,_tmp446,_tmp446 + 7},(void*)&
+1,(struct _tagged_arr){_tmp43C,_tmp43C,_tmp43C + 10}};static char _tmp43D[8]="HeapRgn";
+static struct _tuple7 Cyc__gentuple_46={2,(struct _tagged_arr){_tmp43D,_tmp43D,
+_tmp43D + 8}};static struct _tuple7*Cyc__genarr_47[3]={& Cyc__gentuple_44,& Cyc__gentuple_45,&
+Cyc__gentuple_46};static char _tmp43E[5]="Evar";static struct _tuple5 Cyc__gentuple_1100={
+0,(struct _tagged_arr){_tmp43E,_tmp43E,_tmp43E + 5},(void*)& Cyc__genrep_1085};
+static char _tmp43F[8]="VarType";static struct _tuple5 Cyc__gentuple_1101={1,(struct
+_tagged_arr){_tmp43F,_tmp43F,_tmp43F + 8},(void*)& Cyc__genrep_1081};static char
+_tmp440[11]="TunionType";static struct _tuple5 Cyc__gentuple_1102={2,(struct
+_tagged_arr){_tmp440,_tmp440,_tmp440 + 11},(void*)& Cyc__genrep_1055};static char
+_tmp441[16]="TunionFieldType";static struct _tuple5 Cyc__gentuple_1103={3,(struct
+_tagged_arr){_tmp441,_tmp441,_tmp441 + 16},(void*)& Cyc__genrep_1029};static char
+_tmp442[12]="PointerType";static struct _tuple5 Cyc__gentuple_1104={4,(struct
+_tagged_arr){_tmp442,_tmp442,_tmp442 + 12},(void*)& Cyc__genrep_1010};static char
+_tmp443[8]="IntType";static struct _tuple5 Cyc__gentuple_1105={5,(struct _tagged_arr){
+_tmp443,_tmp443,_tmp443 + 8},(void*)& Cyc__genrep_999};static char _tmp444[11]="DoubleType";
+static struct _tuple5 Cyc__gentuple_1106={6,(struct _tagged_arr){_tmp444,_tmp444,
+_tmp444 + 11},(void*)& Cyc__genrep_61};static char _tmp445[10]="ArrayType";static
+struct _tuple5 Cyc__gentuple_1107={7,(struct _tagged_arr){_tmp445,_tmp445,_tmp445 + 
+10},(void*)& Cyc__genrep_976};static char _tmp446[7]="FnType";static struct _tuple5
+Cyc__gentuple_1108={8,(struct _tagged_arr){_tmp446,_tmp446,_tmp446 + 7},(void*)&
 Cyc__genrep_957};static char _tmp447[10]="TupleType";static struct _tuple5 Cyc__gentuple_1109={
-9,{_tmp447,_tmp447,_tmp447 + 10},(void*)& Cyc__genrep_953};static char _tmp448[9]="AggrType";
-static struct _tuple5 Cyc__gentuple_1110={10,{_tmp448,_tmp448,_tmp448 + 9},(void*)&
-Cyc__genrep_949};static char _tmp449[13]="AnonAggrType";static struct _tuple5 Cyc__gentuple_1111={
-11,{_tmp449,_tmp449,_tmp449 + 13},(void*)& Cyc__genrep_944};static char _tmp44A[9]="EnumType";
-static struct _tuple5 Cyc__gentuple_1112={12,{_tmp44A,_tmp44A,_tmp44A + 9},(void*)&
-Cyc__genrep_939};static char _tmp44B[13]="AnonEnumType";static struct _tuple5 Cyc__gentuple_1113={
-13,{_tmp44B,_tmp44B,_tmp44B + 13},(void*)& Cyc__genrep_75};static char _tmp44C[11]="SizeofType";
-static struct _tuple5 Cyc__gentuple_1114={14,{_tmp44C,_tmp44C,_tmp44C + 11},(void*)&
-Cyc__genrep_48};static char _tmp44D[14]="RgnHandleType";static struct _tuple5 Cyc__gentuple_1115={
-15,{_tmp44D,_tmp44D,_tmp44D + 14},(void*)& Cyc__genrep_48};static char _tmp44E[12]="TypedefType";
-static struct _tuple5 Cyc__gentuple_1116={16,{_tmp44E,_tmp44E,_tmp44E + 12},(void*)&
-Cyc__genrep_66};static char _tmp44F[8]="TagType";static struct _tuple5 Cyc__gentuple_1117={
-17,{_tmp44F,_tmp44F,_tmp44F + 8},(void*)& Cyc__genrep_48};static char _tmp450[8]="TypeInt";
-static struct _tuple5 Cyc__gentuple_1118={18,{_tmp450,_tmp450,_tmp450 + 8},(void*)&
-Cyc__genrep_61};static char _tmp451[10]="AccessEff";static struct _tuple5 Cyc__gentuple_1119={
-19,{_tmp451,_tmp451,_tmp451 + 10},(void*)& Cyc__genrep_48};static char _tmp452[8]="JoinEff";
-static struct _tuple5 Cyc__gentuple_1120={20,{_tmp452,_tmp452,_tmp452 + 8},(void*)&
-Cyc__genrep_52};static char _tmp453[8]="RgnsEff";static struct _tuple5 Cyc__gentuple_1121={
-21,{_tmp453,_tmp453,_tmp453 + 8},(void*)& Cyc__genrep_48};static struct _tuple5*Cyc__genarr_1122[
-22]={& Cyc__gentuple_1100,& Cyc__gentuple_1101,& Cyc__gentuple_1102,& Cyc__gentuple_1103,&
-Cyc__gentuple_1104,& Cyc__gentuple_1105,& Cyc__gentuple_1106,& Cyc__gentuple_1107,&
-Cyc__gentuple_1108,& Cyc__gentuple_1109,& Cyc__gentuple_1110,& Cyc__gentuple_1111,&
-Cyc__gentuple_1112,& Cyc__gentuple_1113,& Cyc__gentuple_1114,& Cyc__gentuple_1115,&
-Cyc__gentuple_1116,& Cyc__gentuple_1117,& Cyc__gentuple_1118,& Cyc__gentuple_1119,&
-Cyc__gentuple_1120,& Cyc__gentuple_1121};static char _tmp455[5]="Type";struct Cyc_Typerep_TUnion_struct
-Cyc_Absyn_type_t_rep={5,{_tmp455,_tmp455,_tmp455 + 5},{(void*)((struct _tuple7**)
-Cyc__genarr_47),(void*)((struct _tuple7**)Cyc__genarr_47),(void*)((struct _tuple7**)
-Cyc__genarr_47 + 3)},{(void*)((struct _tuple5**)Cyc__genarr_1122),(void*)((struct
-_tuple5**)Cyc__genarr_1122),(void*)((struct _tuple5**)Cyc__genarr_1122 + 22)}};
-static char _tmp456[8]="Vardecl";static struct _tagged_arr Cyc__genname_154={_tmp456,
-_tmp456,_tmp456 + 8};static char _tmp457[3]="sc";static struct _tuple5 Cyc__gentuple_145={
-offsetof(struct Cyc_Absyn_Vardecl,sc),{_tmp457,_tmp457,_tmp457 + 3},(void*)& Cyc_Absyn_scope_t_rep};
-static char _tmp458[5]="name";static struct _tuple5 Cyc__gentuple_146={offsetof(
-struct Cyc_Absyn_Vardecl,name),{_tmp458,_tmp458,_tmp458 + 5},(void*)& Cyc__genrep_10};
-static char _tmp459[3]="tq";static struct _tuple5 Cyc__gentuple_147={offsetof(struct
-Cyc_Absyn_Vardecl,tq),{_tmp459,_tmp459,_tmp459 + 3},(void*)& Cyc__genrep_134};
-static char _tmp45A[5]="type";static struct _tuple5 Cyc__gentuple_148={offsetof(
-struct Cyc_Absyn_Vardecl,type),{_tmp45A,_tmp45A,_tmp45A + 5},(void*)((void*)& Cyc_Absyn_type_t_rep)};
+9,(struct _tagged_arr){_tmp447,_tmp447,_tmp447 + 10},(void*)& Cyc__genrep_953};
+static char _tmp448[9]="AggrType";static struct _tuple5 Cyc__gentuple_1110={10,(
+struct _tagged_arr){_tmp448,_tmp448,_tmp448 + 9},(void*)& Cyc__genrep_949};static
+char _tmp449[13]="AnonAggrType";static struct _tuple5 Cyc__gentuple_1111={11,(struct
+_tagged_arr){_tmp449,_tmp449,_tmp449 + 13},(void*)& Cyc__genrep_944};static char
+_tmp44A[9]="EnumType";static struct _tuple5 Cyc__gentuple_1112={12,(struct
+_tagged_arr){_tmp44A,_tmp44A,_tmp44A + 9},(void*)& Cyc__genrep_939};static char
+_tmp44B[13]="AnonEnumType";static struct _tuple5 Cyc__gentuple_1113={13,(struct
+_tagged_arr){_tmp44B,_tmp44B,_tmp44B + 13},(void*)& Cyc__genrep_75};static char
+_tmp44C[11]="SizeofType";static struct _tuple5 Cyc__gentuple_1114={14,(struct
+_tagged_arr){_tmp44C,_tmp44C,_tmp44C + 11},(void*)& Cyc__genrep_48};static char
+_tmp44D[14]="RgnHandleType";static struct _tuple5 Cyc__gentuple_1115={15,(struct
+_tagged_arr){_tmp44D,_tmp44D,_tmp44D + 14},(void*)& Cyc__genrep_48};static char
+_tmp44E[12]="TypedefType";static struct _tuple5 Cyc__gentuple_1116={16,(struct
+_tagged_arr){_tmp44E,_tmp44E,_tmp44E + 12},(void*)& Cyc__genrep_66};static char
+_tmp44F[8]="TagType";static struct _tuple5 Cyc__gentuple_1117={17,(struct
+_tagged_arr){_tmp44F,_tmp44F,_tmp44F + 8},(void*)& Cyc__genrep_48};static char
+_tmp450[8]="TypeInt";static struct _tuple5 Cyc__gentuple_1118={18,(struct
+_tagged_arr){_tmp450,_tmp450,_tmp450 + 8},(void*)& Cyc__genrep_61};static char
+_tmp451[10]="AccessEff";static struct _tuple5 Cyc__gentuple_1119={19,(struct
+_tagged_arr){_tmp451,_tmp451,_tmp451 + 10},(void*)& Cyc__genrep_48};static char
+_tmp452[8]="JoinEff";static struct _tuple5 Cyc__gentuple_1120={20,(struct
+_tagged_arr){_tmp452,_tmp452,_tmp452 + 8},(void*)& Cyc__genrep_52};static char
+_tmp453[8]="RgnsEff";static struct _tuple5 Cyc__gentuple_1121={21,(struct
+_tagged_arr){_tmp453,_tmp453,_tmp453 + 8},(void*)& Cyc__genrep_48};static struct
+_tuple5*Cyc__genarr_1122[22]={& Cyc__gentuple_1100,& Cyc__gentuple_1101,& Cyc__gentuple_1102,&
+Cyc__gentuple_1103,& Cyc__gentuple_1104,& Cyc__gentuple_1105,& Cyc__gentuple_1106,&
+Cyc__gentuple_1107,& Cyc__gentuple_1108,& Cyc__gentuple_1109,& Cyc__gentuple_1110,&
+Cyc__gentuple_1111,& Cyc__gentuple_1112,& Cyc__gentuple_1113,& Cyc__gentuple_1114,&
+Cyc__gentuple_1115,& Cyc__gentuple_1116,& Cyc__gentuple_1117,& Cyc__gentuple_1118,&
+Cyc__gentuple_1119,& Cyc__gentuple_1120,& Cyc__gentuple_1121};static char _tmp455[5]="Type";
+struct Cyc_Typerep_TUnion_struct Cyc_Absyn_type_t_rep={5,(struct _tagged_arr){
+_tmp455,_tmp455,_tmp455 + 5},{(void*)((struct _tuple7**)Cyc__genarr_47),(void*)((
+struct _tuple7**)Cyc__genarr_47),(void*)((struct _tuple7**)Cyc__genarr_47 + 3)},{(
+void*)((struct _tuple5**)Cyc__genarr_1122),(void*)((struct _tuple5**)Cyc__genarr_1122),(
+void*)((struct _tuple5**)Cyc__genarr_1122 + 22)}};static char _tmp456[8]="Vardecl";
+static struct _tagged_arr Cyc__genname_154=(struct _tagged_arr){_tmp456,_tmp456,
+_tmp456 + 8};static char _tmp457[3]="sc";static struct _tuple5 Cyc__gentuple_145={
+offsetof(struct Cyc_Absyn_Vardecl,sc),(struct _tagged_arr){_tmp457,_tmp457,_tmp457
++ 3},(void*)& Cyc_Absyn_scope_t_rep};static char _tmp458[5]="name";static struct
+_tuple5 Cyc__gentuple_146={offsetof(struct Cyc_Absyn_Vardecl,name),(struct
+_tagged_arr){_tmp458,_tmp458,_tmp458 + 5},(void*)& Cyc__genrep_10};static char
+_tmp459[3]="tq";static struct _tuple5 Cyc__gentuple_147={offsetof(struct Cyc_Absyn_Vardecl,tq),(
+struct _tagged_arr){_tmp459,_tmp459,_tmp459 + 3},(void*)& Cyc__genrep_134};static
+char _tmp45A[5]="type";static struct _tuple5 Cyc__gentuple_148={offsetof(struct Cyc_Absyn_Vardecl,type),(
+struct _tagged_arr){_tmp45A,_tmp45A,_tmp45A + 5},(void*)((void*)& Cyc_Absyn_type_t_rep)};
 static char _tmp45B[12]="initializer";static struct _tuple5 Cyc__gentuple_149={
-offsetof(struct Cyc_Absyn_Vardecl,initializer),{_tmp45B,_tmp45B,_tmp45B + 12},(
-void*)& Cyc__genrep_78};static char _tmp45C[4]="rgn";static struct _tuple5 Cyc__gentuple_150={
-offsetof(struct Cyc_Absyn_Vardecl,rgn),{_tmp45C,_tmp45C,_tmp45C + 4},(void*)& Cyc__genrep_43};
-static char _tmp45D[11]="attributes";static struct _tuple5 Cyc__gentuple_151={
-offsetof(struct Cyc_Absyn_Vardecl,attributes),{_tmp45D,_tmp45D,_tmp45D + 11},(void*)&
-Cyc__genrep_88};static char _tmp45E[8]="escapes";static struct _tuple5 Cyc__gentuple_152={
-offsetof(struct Cyc_Absyn_Vardecl,escapes),{_tmp45E,_tmp45E,_tmp45E + 8},(void*)((
-void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_153[8]={& Cyc__gentuple_145,&
-Cyc__gentuple_146,& Cyc__gentuple_147,& Cyc__gentuple_148,& Cyc__gentuple_149,& Cyc__gentuple_150,&
-Cyc__gentuple_151,& Cyc__gentuple_152};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Vardecl_rep={
-3,(struct _tagged_arr*)& Cyc__genname_154,sizeof(struct Cyc_Absyn_Vardecl),{(void*)((
-struct _tuple5**)Cyc__genarr_153),(void*)((struct _tuple5**)Cyc__genarr_153),(void*)((
+offsetof(struct Cyc_Absyn_Vardecl,initializer),(struct _tagged_arr){_tmp45B,
+_tmp45B,_tmp45B + 12},(void*)& Cyc__genrep_78};static char _tmp45C[4]="rgn";static
+struct _tuple5 Cyc__gentuple_150={offsetof(struct Cyc_Absyn_Vardecl,rgn),(struct
+_tagged_arr){_tmp45C,_tmp45C,_tmp45C + 4},(void*)& Cyc__genrep_43};static char
+_tmp45D[11]="attributes";static struct _tuple5 Cyc__gentuple_151={offsetof(struct
+Cyc_Absyn_Vardecl,attributes),(struct _tagged_arr){_tmp45D,_tmp45D,_tmp45D + 11},(
+void*)& Cyc__genrep_88};static char _tmp45E[8]="escapes";static struct _tuple5 Cyc__gentuple_152={
+offsetof(struct Cyc_Absyn_Vardecl,escapes),(struct _tagged_arr){_tmp45E,_tmp45E,
+_tmp45E + 8},(void*)((void*)& Cyc__genrep_62)};static struct _tuple5*Cyc__genarr_153[
+8]={& Cyc__gentuple_145,& Cyc__gentuple_146,& Cyc__gentuple_147,& Cyc__gentuple_148,&
+Cyc__gentuple_149,& Cyc__gentuple_150,& Cyc__gentuple_151,& Cyc__gentuple_152};
+struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Vardecl_rep={3,(struct
+_tagged_arr*)& Cyc__genname_154,sizeof(struct Cyc_Absyn_Vardecl),{(void*)((struct
+_tuple5**)Cyc__genarr_153),(void*)((struct _tuple5**)Cyc__genarr_153),(void*)((
 struct _tuple5**)Cyc__genarr_153 + 8)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_133={
 1,1,(void*)((void*)& Cyc_struct_Absyn_Vardecl_rep)};struct _tuple87{unsigned int f1;
 struct Cyc_Absyn_Vardecl*f2;};static struct _tuple6 Cyc__gentuple_431={offsetof(
@@ -3905,47 +4040,52 @@ offsetof(struct _tuple13,f2),(void*)& Cyc__genrep_0};static struct _tuple6*Cyc__
 4,sizeof(struct _tuple13),{(void*)((struct _tuple6**)Cyc__genarr_8),(void*)((
 struct _tuple6**)Cyc__genarr_8),(void*)((struct _tuple6**)Cyc__genarr_8 + 2)}};
 static struct _tuple7*Cyc__genarr_3[0]={};static char _tmp46C[6]="Var_d";static
-struct _tuple5 Cyc__gentuple_1157={0,{_tmp46C,_tmp46C,_tmp46C + 6},(void*)& Cyc__genrep_430};
-static char _tmp46D[5]="Fn_d";static struct _tuple5 Cyc__gentuple_1158={1,{_tmp46D,
-_tmp46D,_tmp46D + 5},(void*)& Cyc__genrep_86};static char _tmp46E[6]="Let_d";static
-struct _tuple5 Cyc__gentuple_1159={2,{_tmp46E,_tmp46E,_tmp46E + 6},(void*)& Cyc__genrep_1151};
-static char _tmp46F[7]="Letv_d";static struct _tuple5 Cyc__gentuple_1160={3,{_tmp46F,
-_tmp46F,_tmp46F + 7},(void*)& Cyc__genrep_1147};static char _tmp470[7]="Aggr_d";
-static struct _tuple5 Cyc__gentuple_1161={4,{_tmp470,_tmp470,_tmp470 + 7},(void*)&
-Cyc__genrep_1143};static char _tmp471[9]="Tunion_d";static struct _tuple5 Cyc__gentuple_1162={
-5,{_tmp471,_tmp471,_tmp471 + 9},(void*)& Cyc__genrep_1139};static char _tmp472[7]="Enum_d";
-static struct _tuple5 Cyc__gentuple_1163={6,{_tmp472,_tmp472,_tmp472 + 7},(void*)&
+struct _tuple5 Cyc__gentuple_1157={0,(struct _tagged_arr){_tmp46C,_tmp46C,_tmp46C + 
+6},(void*)& Cyc__genrep_430};static char _tmp46D[5]="Fn_d";static struct _tuple5 Cyc__gentuple_1158={
+1,(struct _tagged_arr){_tmp46D,_tmp46D,_tmp46D + 5},(void*)& Cyc__genrep_86};static
+char _tmp46E[6]="Let_d";static struct _tuple5 Cyc__gentuple_1159={2,(struct
+_tagged_arr){_tmp46E,_tmp46E,_tmp46E + 6},(void*)& Cyc__genrep_1151};static char
+_tmp46F[7]="Letv_d";static struct _tuple5 Cyc__gentuple_1160={3,(struct _tagged_arr){
+_tmp46F,_tmp46F,_tmp46F + 7},(void*)& Cyc__genrep_1147};static char _tmp470[7]="Aggr_d";
+static struct _tuple5 Cyc__gentuple_1161={4,(struct _tagged_arr){_tmp470,_tmp470,
+_tmp470 + 7},(void*)& Cyc__genrep_1143};static char _tmp471[9]="Tunion_d";static
+struct _tuple5 Cyc__gentuple_1162={5,(struct _tagged_arr){_tmp471,_tmp471,_tmp471 + 
+9},(void*)& Cyc__genrep_1139};static char _tmp472[7]="Enum_d";static struct _tuple5
+Cyc__gentuple_1163={6,(struct _tagged_arr){_tmp472,_tmp472,_tmp472 + 7},(void*)&
 Cyc__genrep_1135};static char _tmp473[10]="Typedef_d";static struct _tuple5 Cyc__gentuple_1164={
-7,{_tmp473,_tmp473,_tmp473 + 10},(void*)& Cyc__genrep_41};static char _tmp474[12]="Namespace_d";
-static struct _tuple5 Cyc__gentuple_1165={8,{_tmp474,_tmp474,_tmp474 + 12},(void*)&
-Cyc__genrep_36};static char _tmp475[8]="Using_d";static struct _tuple5 Cyc__gentuple_1166={
-9,{_tmp475,_tmp475,_tmp475 + 8},(void*)& Cyc__genrep_9};static char _tmp476[10]="ExternC_d";
-static struct _tuple5 Cyc__gentuple_1167={10,{_tmp476,_tmp476,_tmp476 + 10},(void*)&
-Cyc__genrep_4};static struct _tuple5*Cyc__genarr_1168[11]={& Cyc__gentuple_1157,&
-Cyc__gentuple_1158,& Cyc__gentuple_1159,& Cyc__gentuple_1160,& Cyc__gentuple_1161,&
-Cyc__gentuple_1162,& Cyc__gentuple_1163,& Cyc__gentuple_1164,& Cyc__gentuple_1165,&
-Cyc__gentuple_1166,& Cyc__gentuple_1167};static char _tmp478[9]="Raw_decl";struct
-Cyc_Typerep_TUnion_struct Cyc_Absyn_raw_decl_t_rep={5,{_tmp478,_tmp478,_tmp478 + 9},{(
-void*)((struct _tuple7**)Cyc__genarr_3),(void*)((struct _tuple7**)Cyc__genarr_3),(
-void*)((struct _tuple7**)Cyc__genarr_3 + 0)},{(void*)((struct _tuple5**)Cyc__genarr_1168),(
-void*)((struct _tuple5**)Cyc__genarr_1168),(void*)((struct _tuple5**)Cyc__genarr_1168
-+ 11)}};static char _tmp479[5]="Decl";static struct _tagged_arr Cyc__genname_1172={
-_tmp479,_tmp479,_tmp479 + 5};static char _tmp47A[2]="r";static struct _tuple5 Cyc__gentuple_1169={
-offsetof(struct Cyc_Absyn_Decl,r),{_tmp47A,_tmp47A,_tmp47A + 2},(void*)& Cyc_Absyn_raw_decl_t_rep};
-static char _tmp47B[4]="loc";static struct _tuple5 Cyc__gentuple_1170={offsetof(
-struct Cyc_Absyn_Decl,loc),{_tmp47B,_tmp47B,_tmp47B + 4},(void*)& Cyc__genrep_2};
-static struct _tuple5*Cyc__genarr_1171[2]={& Cyc__gentuple_1169,& Cyc__gentuple_1170};
-struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Decl_rep={3,(struct _tagged_arr*)&
-Cyc__genname_1172,sizeof(struct Cyc_Absyn_Decl),{(void*)((struct _tuple5**)Cyc__genarr_1171),(
-void*)((struct _tuple5**)Cyc__genarr_1171),(void*)((struct _tuple5**)Cyc__genarr_1171
-+ 2)}};static struct Cyc_Typerep_ThinPtr_struct Cyc__genrep_1={1,1,(void*)((void*)&
-Cyc_struct_Absyn_Decl_rep)};static char _tmp47E[5]="List";static struct _tagged_arr
-Cyc__genname_1176={_tmp47E,_tmp47E,_tmp47E + 5};static char _tmp47F[3]="hd";static
-struct _tuple5 Cyc__gentuple_1173={offsetof(struct Cyc_List_List,hd),{_tmp47F,
-_tmp47F,_tmp47F + 3},(void*)& Cyc__genrep_1};static char _tmp480[3]="tl";static
-struct _tuple5 Cyc__gentuple_1174={offsetof(struct Cyc_List_List,tl),{_tmp480,
-_tmp480,_tmp480 + 3},(void*)& Cyc__genrep_0};static struct _tuple5*Cyc__genarr_1175[
-2]={& Cyc__gentuple_1173,& Cyc__gentuple_1174};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_decl_t46H2_rep={
+7,(struct _tagged_arr){_tmp473,_tmp473,_tmp473 + 10},(void*)& Cyc__genrep_41};
+static char _tmp474[12]="Namespace_d";static struct _tuple5 Cyc__gentuple_1165={8,(
+struct _tagged_arr){_tmp474,_tmp474,_tmp474 + 12},(void*)& Cyc__genrep_36};static
+char _tmp475[8]="Using_d";static struct _tuple5 Cyc__gentuple_1166={9,(struct
+_tagged_arr){_tmp475,_tmp475,_tmp475 + 8},(void*)& Cyc__genrep_9};static char
+_tmp476[10]="ExternC_d";static struct _tuple5 Cyc__gentuple_1167={10,(struct
+_tagged_arr){_tmp476,_tmp476,_tmp476 + 10},(void*)& Cyc__genrep_4};static struct
+_tuple5*Cyc__genarr_1168[11]={& Cyc__gentuple_1157,& Cyc__gentuple_1158,& Cyc__gentuple_1159,&
+Cyc__gentuple_1160,& Cyc__gentuple_1161,& Cyc__gentuple_1162,& Cyc__gentuple_1163,&
+Cyc__gentuple_1164,& Cyc__gentuple_1165,& Cyc__gentuple_1166,& Cyc__gentuple_1167};
+static char _tmp478[9]="Raw_decl";struct Cyc_Typerep_TUnion_struct Cyc_Absyn_raw_decl_t_rep={
+5,(struct _tagged_arr){_tmp478,_tmp478,_tmp478 + 9},{(void*)((struct _tuple7**)Cyc__genarr_3),(
+void*)((struct _tuple7**)Cyc__genarr_3),(void*)((struct _tuple7**)Cyc__genarr_3 + 0)},{(
+void*)((struct _tuple5**)Cyc__genarr_1168),(void*)((struct _tuple5**)Cyc__genarr_1168),(
+void*)((struct _tuple5**)Cyc__genarr_1168 + 11)}};static char _tmp479[5]="Decl";
+static struct _tagged_arr Cyc__genname_1172=(struct _tagged_arr){_tmp479,_tmp479,
+_tmp479 + 5};static char _tmp47A[2]="r";static struct _tuple5 Cyc__gentuple_1169={
+offsetof(struct Cyc_Absyn_Decl,r),(struct _tagged_arr){_tmp47A,_tmp47A,_tmp47A + 2},(
+void*)& Cyc_Absyn_raw_decl_t_rep};static char _tmp47B[4]="loc";static struct _tuple5
+Cyc__gentuple_1170={offsetof(struct Cyc_Absyn_Decl,loc),(struct _tagged_arr){
+_tmp47B,_tmp47B,_tmp47B + 4},(void*)& Cyc__genrep_2};static struct _tuple5*Cyc__genarr_1171[
+2]={& Cyc__gentuple_1169,& Cyc__gentuple_1170};struct Cyc_Typerep_Struct_struct Cyc_struct_Absyn_Decl_rep={
+3,(struct _tagged_arr*)& Cyc__genname_1172,sizeof(struct Cyc_Absyn_Decl),{(void*)((
+struct _tuple5**)Cyc__genarr_1171),(void*)((struct _tuple5**)Cyc__genarr_1171),(
+void*)((struct _tuple5**)Cyc__genarr_1171 + 2)}};static struct Cyc_Typerep_ThinPtr_struct
+Cyc__genrep_1={1,1,(void*)((void*)& Cyc_struct_Absyn_Decl_rep)};static char _tmp47E[
+5]="List";static struct _tagged_arr Cyc__genname_1176=(struct _tagged_arr){_tmp47E,
+_tmp47E,_tmp47E + 5};static char _tmp47F[3]="hd";static struct _tuple5 Cyc__gentuple_1173={
+offsetof(struct Cyc_List_List,hd),(struct _tagged_arr){_tmp47F,_tmp47F,_tmp47F + 3},(
+void*)& Cyc__genrep_1};static char _tmp480[3]="tl";static struct _tuple5 Cyc__gentuple_1174={
+offsetof(struct Cyc_List_List,tl),(struct _tagged_arr){_tmp480,_tmp480,_tmp480 + 3},(
+void*)& Cyc__genrep_0};static struct _tuple5*Cyc__genarr_1175[2]={& Cyc__gentuple_1173,&
+Cyc__gentuple_1174};struct Cyc_Typerep_Struct_struct Cyc_struct_List_List0Absyn_decl_t46H2_rep={
 3,(struct _tagged_arr*)& Cyc__genname_1176,sizeof(struct Cyc_List_List),{(void*)((
 struct _tuple5**)Cyc__genarr_1175),(void*)((struct _tuple5**)Cyc__genarr_1175),(
 void*)((struct _tuple5**)Cyc__genarr_1175 + 2)}};static struct Cyc_Typerep_ThinPtr_struct

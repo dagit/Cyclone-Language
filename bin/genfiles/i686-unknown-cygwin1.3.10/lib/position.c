@@ -698,12 +698,14 @@ _tmp6D,& _tmp6E};Cyc_aprintf(({const char*_tmp6C="\n#line %d \"%s\"\n";_tag_arr(
 _tmp6C,sizeof(char),_get_zero_arr_size(_tmp6C,16));}),_tag_arr(_tmp6B,sizeof(
 void*),2));}}});else{return(struct _tagged_arr)_tag_arr(0,0,0);}}extern struct Cyc_Typerep_Struct_struct
 Cyc_struct_Position_Segment_rep;static struct Cyc_Typerep_Int_struct Cyc__genrep_0={
-0,1,32};static char _tmp70[8]="Segment";static struct _tagged_arr Cyc__genname_4={
-_tmp70,_tmp70,_tmp70 + 8};static char _tmp71[6]="start";static struct _tuple0 Cyc__gentuple_1={
-offsetof(struct Cyc_Position_Segment,start),{_tmp71,_tmp71,_tmp71 + 6},(void*)& Cyc__genrep_0};
-static char _tmp72[4]="end";static struct _tuple0 Cyc__gentuple_2={offsetof(struct Cyc_Position_Segment,end),{
-_tmp72,_tmp72,_tmp72 + 4},(void*)& Cyc__genrep_0};static struct _tuple0*Cyc__genarr_3[
-2]={& Cyc__gentuple_1,& Cyc__gentuple_2};struct Cyc_Typerep_Struct_struct Cyc_struct_Position_Segment_rep={
-3,(struct _tagged_arr*)& Cyc__genname_4,sizeof(struct Cyc_Position_Segment),{(void*)((
-struct _tuple0**)Cyc__genarr_3),(void*)((struct _tuple0**)Cyc__genarr_3),(void*)((
-struct _tuple0**)Cyc__genarr_3 + 2)}};void*Cyc_segment_rep=(void*)& Cyc_struct_Position_Segment_rep;
+0,1,32};static char _tmp70[8]="Segment";static struct _tagged_arr Cyc__genname_4=(
+struct _tagged_arr){_tmp70,_tmp70,_tmp70 + 8};static char _tmp71[6]="start";static
+struct _tuple0 Cyc__gentuple_1={offsetof(struct Cyc_Position_Segment,start),(struct
+_tagged_arr){_tmp71,_tmp71,_tmp71 + 6},(void*)& Cyc__genrep_0};static char _tmp72[4]="end";
+static struct _tuple0 Cyc__gentuple_2={offsetof(struct Cyc_Position_Segment,end),(
+struct _tagged_arr){_tmp72,_tmp72,_tmp72 + 4},(void*)& Cyc__genrep_0};static struct
+_tuple0*Cyc__genarr_3[2]={& Cyc__gentuple_1,& Cyc__gentuple_2};struct Cyc_Typerep_Struct_struct
+Cyc_struct_Position_Segment_rep={3,(struct _tagged_arr*)& Cyc__genname_4,sizeof(
+struct Cyc_Position_Segment),{(void*)((struct _tuple0**)Cyc__genarr_3),(void*)((
+struct _tuple0**)Cyc__genarr_3),(void*)((struct _tuple0**)Cyc__genarr_3 + 2)}};void*
+Cyc_segment_rep=(void*)& Cyc_struct_Position_Segment_rep;

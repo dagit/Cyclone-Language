@@ -1304,11 +1304,13 @@ type_specifier:
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 | SIZEOF_T '<' any_type_name right_angle
     { $$=^$(type_spec(new SizeofType($3),LOC(@1,@4))); }
+| TAG_T '<' any_type_name right_angle
+    { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
+| TAG_T 
+{ $$=^$(type_spec(new TagType(new_evar(new Opt(IntKind), NULL)),LOC(@1,@1))); }
 | TYPE_INTEGER
     { let &$(_,n) = $1; 
       $$=^$(type_spec(new TypeInt(n),LOC(@1,@1))); }
-| TAG_T '<' any_type_name right_angle
-    { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */
@@ -2166,6 +2168,12 @@ pattern:
      $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(tag),NULL)),
+		   LOC(@1,@4))); }
+| IDENTIFIER '<' '_' '>' 
+   { let tv = Tcutil::new_tvar(new Eq_kb(IntKind));
+     $$=^$(new_pat(new TagInt_p(tv,
+				new_vardecl(new $(Loc_n,new $1),
+					    new TagType(new VarType(tv)),NULL)),
 		   LOC(@1,@4))); }
 ;
 

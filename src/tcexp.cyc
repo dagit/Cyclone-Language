@@ -950,7 +950,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
-  tcExp(te,NULL,e);
+  //  tcExp(te,NULL,e);
+  tcExp(te,&t,e);
   type_t t2 = e->topt->v;
   if (silent_castable(te,loc,t2,t)) {
     *c = No_coercion;

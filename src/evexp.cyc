@@ -202,6 +202,14 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
 	if(sn != sn2)
 	  ans[0] = new Int_c(sn,x); 
 	break;
+      case $(&TagType(it),&Char_c(sn2,x)):  fallthru(it,sn2,x);
+      case $(&TagType(it),&Short_c(sn2,x)): fallthru(it,sn2,x);
+      case $(&TagType(it),&Int_c(sn2,x)): 
+	if(x < 0)
+	  terr(e->loc,"cannot cast negative number to a tag type");
+	unify(it, new TypeInt(x));
+	ans[0] = new Int_c(Unsigned,x);
+	break;
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
       }
     break;

@@ -1087,9 +1087,10 @@ _tmpE0=Cyc_Tcpat_tcPat(te,_tmp98,(void**)((void**)((void*)&((struct Cyc_Core_Opt
 _check_null(_tmp9B->topt))->v)));*_tmp9A=({struct Cyc_Core_Opt*_tmpE1=_cycalloc(
 sizeof(*_tmpE1));_tmpE1->v=_tmpE0.patvars;_tmpE1;});if(!Cyc_Tcutil_unify((void*)((
 struct Cyc_Core_Opt*)_check_null(_tmp98->topt))->v,(void*)((struct Cyc_Core_Opt*)
-_check_null(_tmp9B->topt))->v)){({struct Cyc_String_pa_struct _tmpE5;_tmpE5.tag=0;
-_tmpE5.f1=(struct _tagged_arr)((struct _tagged_arr)Cyc_Absynpp_typ2string((void*)((
-struct Cyc_Core_Opt*)_check_null(_tmp9B->topt))->v));{struct Cyc_String_pa_struct
+_check_null(_tmp9B->topt))->v)?!Cyc_Tcutil_coerce_assign(te,_tmp9B,(void*)((
+struct Cyc_Core_Opt*)_check_null(_tmp98->topt))->v): 0){({struct Cyc_String_pa_struct
+_tmpE5;_tmpE5.tag=0;_tmpE5.f1=(struct _tagged_arr)((struct _tagged_arr)Cyc_Absynpp_typ2string((
+void*)((struct Cyc_Core_Opt*)_check_null(_tmp9B->topt))->v));{struct Cyc_String_pa_struct
 _tmpE4;_tmpE4.tag=0;_tmpE4.f1=(struct _tagged_arr)((struct _tagged_arr)Cyc_Absynpp_typ2string((
 void*)((struct Cyc_Core_Opt*)_check_null(_tmp98->topt))->v));{void*_tmpE2[2]={&
 _tmpE4,& _tmpE5};Cyc_Tcutil_terr(_tmp3F->loc,({const char*_tmpE3="pattern type %s does not match definition type %s";
