@@ -1021,3 +1021,23 @@ enum F242 { F242 };
 
 static enum F243 { F243 };
 extern enum F243 { F243 };
+
+// noconsume attribute: index 12 out of range
+void f244(int x, int y) __attribute__((noconsume(12)));
+// noliveunique attribute: index 12 out of range
+void f245(int x, int y) __attribute__((noliveunique(12)));
+// initializes attribute: index 12 out of range
+void f246(int x, int y) __attribute__((initializes(12)));
+// attribute overlap (others are earlier)
+void f247(int @`U x) __attribute__((noliveunique(1))) __attribute__((noconsume(1)));
+void f248(int @`U x) __attribute__((noconsume(1))) __attribute__((noliveunique(1)));
+// initializes disallowed on null, >1, zero-terminated, and nonpointers
+void f249(int *x) __attribute__((initializes(1)));
+void f250(int @{2} x) __attribute__((initializes(1)));
+void f251(int @ @zeroterm x) __attribute__((initializes(1)));
+void f252(int x) __attribute__((initializes(1)));
+// noliveunique allowed only on unique pointers
+void f253(int x) __attribute__((noliveunique(1)));
+// noconsume attribute allowed only on unique pointers
+void f254(int x) __attribute__((noconsume(1)));
+

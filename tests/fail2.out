@@ -9,5 +9,7 @@ fail2.cyc:39: expression may not be fully initialized
 fail2.cyc:48: dereference of possibly uninitialized pointer
 fail2.cyc:52: function may not return a value
 fail2.cyc:56: function may not return a value
+fail2.cyc:61: `noreturn' function might return
+fail2.cyc:64: `noreturn' function might (implicitly) return
 
 COMPILATION FAILED!

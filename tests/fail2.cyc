@@ -1,0 +1,67 @@
+void a1() {
+  int *p;
+  // dereference of possibly uninitialized pointer
+  *p = 0;
+}
+void a2a(int*p);
+void a2() {
+  int *p1;
+  // expression may not be fully initialized
+  a2a(p1);
+}
+void a3() {
+  int *p1, *p2;
+  p1 = new 0;
+  // dereference of possibly uninitialized pointer
+  (*p1) 
+    // expression may not be initialized
+    + (int)(p1=p2);
+}
+void a4() {
+  int *p1;
+  goto L;
+  p1 = new 0;
+  // dereference of possibly uninitialized pointer
+ L: *p1;
+}
+void a5(int flip) {
+  int *p1, *p2;
+  p1 = new 0;
+  while(flip) {
+    // dereference of possibly uninitialized pointer
+    *p1 = 17;
+    p1 = p2;
+  }
+}
+void a6(int**p1) {
+  int * p2;
+  // expression may not be fully initialized
+  *p1 = p2;
+}
+void a7() {
+  int *p1, *p2;
+  p1 = new 0;
+  try { 
+    p1 = p2;
+    p1 = new 3;
+    // dereference of possibly uninitialized pointer
+  } catch { default: *p1; break; }
+}
+
+// function may not return a value
+int* a8() {}
+
+// function may not return a value
+int* a9(int flip) {
+  while(flip)
+    return new 0;
+}
+// `noreturn' function might (implicitly) return
+int* a10(int flip) __attribute__((noreturn)){
+  return new 0;
+}
+void a11(int flip) __attribute__((noreturn)){
+  while(flip)
+    37;
+}
+ 
