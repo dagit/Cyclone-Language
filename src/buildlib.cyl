@@ -430,6 +430,18 @@ and slurp = parse
 { fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of malloc sidestepped\n");
   return slurp(lexbuf); }
+| " calloc "
+/* calloc is a Cyclone keyword so our parser can't handle a calloc
+   declaration. */
+{ fputs(" __IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
+  log("Warning: declaration of calloc sidestepped\n");
+  return slurp(lexbuf); }
+| "*calloc "
+/* calloc is a Cyclone keyword so our parser can't handle a calloc
+   declaration. */
+{ fputs("*__IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
+  log("Warning: declaration of calloc sidestepped\n");
+  return slurp(lexbuf); }
 | "__extension__" /* Used in cygwin in sys/reent.h */
 { return slurp(lexbuf); }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
