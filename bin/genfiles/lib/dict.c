@@ -41,51 +41,56 @@ void* accum); extern void Cyc_Dict_app( void*(* f)( void*, void*), struct Cyc_Di
 d); extern void Cyc_Dict_app_c( void*(* f)( void*, void*, void*), void* env,
 struct Cyc_Dict_Dict* d); extern void Cyc_Dict_iter( void(* f)( void*, void*),
 struct Cyc_Dict_Dict* d); extern void Cyc_Dict_iter_c( void(* f)( void*, void*,
-void*), void* env, struct Cyc_Dict_Dict* d); extern struct Cyc_Dict_Dict* Cyc_Dict_map(
-void*(* f)( void*), struct Cyc_Dict_Dict* d); extern struct Cyc_Dict_Dict* Cyc_Dict_map_c(
-void*(* f)( void*, void*), void* env, struct Cyc_Dict_Dict* d); extern struct
-Cyc_Dict_Dict* Cyc_Dict_union_two( void*(* f)( void*, void*), struct Cyc_Dict_Dict*
-d1, struct Cyc_Dict_Dict* d2); extern struct Cyc_Dict_Dict* Cyc_Dict_intersect(
+void*), void* env, struct Cyc_Dict_Dict* d); extern void Cyc_Dict_iter2_c( void(*
+f)( void*, void*, void*), void* env, struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict*
+d2); extern struct Cyc_Dict_Dict* Cyc_Dict_map( void*(* f)( void*), struct Cyc_Dict_Dict*
+d); extern struct Cyc_Dict_Dict* Cyc_Dict_map_c( void*(* f)( void*, void*), void*
+env, struct Cyc_Dict_Dict* d); extern struct Cyc_Dict_Dict* Cyc_Dict_union_two(
 void*(* f)( void*, void*), struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2);
-extern int Cyc_Dict_forall_c( int(* f)( void*, void*, void*), void* env, struct
-Cyc_Dict_Dict* d); extern struct _tuple0* Cyc_Dict_choose( struct Cyc_Dict_Dict*
-d); extern struct Cyc_List_List* Cyc_Dict_to_list( struct Cyc_Dict_Dict* d);
-char Cyc_Dict_Absent_tag[ 7u]="Absent"; char Cyc_Dict_Present_tag[ 8u]="Present";
-typedef void* Cyc_Dict_Color; static void* Cyc_Dict_R=( void*) 0; static void*
-Cyc_Dict_B=( void*) 1; struct Cyc_Dict_T{ void* color; struct Cyc_Dict_T* left;
-struct Cyc_Dict_T* right; struct _tuple0 key_val;}; typedef struct Cyc_Dict_T*
-Cyc_Dict_tree; struct Cyc_Dict_Dict{ int(* rel)( void*, void*); struct Cyc_Dict_T*
-t;}; struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*)){ return({
-struct Cyc_Dict_Dict* _temp0=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct
-Cyc_Dict_Dict)); _temp0->rel= comp; _temp0->t= 0; _temp0;});} struct Cyc_Dict_Dict*
-Cyc_Dict_singleton( int(* comp)( void*, void*), void* key, void* data){ return({
-struct Cyc_Dict_Dict* _temp1=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct
-Cyc_Dict_Dict)); _temp1->rel= comp; _temp1->t=({ struct Cyc_Dict_T* _temp2=(
-struct Cyc_Dict_T*) GC_malloc( sizeof( struct Cyc_Dict_T)); _temp2->color=( void*)
-Cyc_Dict_B; _temp2->left= 0; _temp2->right= 0; _temp2->key_val=({ struct _tuple0
-_temp3; _temp3.f1= key; _temp3.f2= data; _temp3;}); _temp2;}); _temp1;});} int
-Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d){ return d->t == 0;} int Cyc_Dict_member(
-struct Cyc_Dict_Dict* d, void* key){ int(* rel)( void*, void*)= d->rel; struct
-Cyc_Dict_T* t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1); if( i <
-0){ t= t->left;} else{ if( i > 0){ t= t->right;} else{ return 1;}}} return 0;}
-void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key){ int(* rel)( void*,
+extern struct Cyc_Dict_Dict* Cyc_Dict_intersect( void*(* f)( void*, void*),
+struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2); extern struct Cyc_Dict_Dict*
+Cyc_Dict_intersect_c( void*(* f)( void*, void*, void*), void* env, struct Cyc_Dict_Dict*
+d1, struct Cyc_Dict_Dict* d2); extern int Cyc_Dict_forall_c( int(* f)( void*,
+void*, void*), void* env, struct Cyc_Dict_Dict* d); extern int Cyc_Dict_forall_intersect(
+int(* f)( void*, void*, void*), struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict*
+d2); extern struct _tuple0* Cyc_Dict_choose( struct Cyc_Dict_Dict* d); extern
+struct Cyc_List_List* Cyc_Dict_to_list( struct Cyc_Dict_Dict* d); char Cyc_Dict_Absent_tag[
+7u]="Absent"; char Cyc_Dict_Present_tag[ 8u]="Present"; typedef void* Cyc_Dict_Color;
+static void* Cyc_Dict_R=( void*) 0; static void* Cyc_Dict_B=( void*) 1; struct
+Cyc_Dict_T{ void* color; struct Cyc_Dict_T* left; struct Cyc_Dict_T* right;
+struct _tuple0 key_val;}; typedef struct Cyc_Dict_T* Cyc_Dict_tree; struct Cyc_Dict_Dict{
+int(* rel)( void*, void*); struct Cyc_Dict_T* t;}; struct Cyc_Dict_Dict* Cyc_Dict_empty(
+int(* comp)( void*, void*)){ return({ struct Cyc_Dict_Dict* _temp0=( struct Cyc_Dict_Dict*)
+GC_malloc( sizeof( struct Cyc_Dict_Dict)); _temp0->rel= comp; _temp0->t= 0;
+_temp0;});} struct Cyc_Dict_Dict* Cyc_Dict_singleton( int(* comp)( void*, void*),
+void* key, void* data){ return({ struct Cyc_Dict_Dict* _temp1=( struct Cyc_Dict_Dict*)
+GC_malloc( sizeof( struct Cyc_Dict_Dict)); _temp1->rel= comp; _temp1->t=({
+struct Cyc_Dict_T* _temp2=( struct Cyc_Dict_T*) GC_malloc( sizeof( struct Cyc_Dict_T));
+_temp2->color=( void*) Cyc_Dict_B; _temp2->left= 0; _temp2->right= 0; _temp2->key_val=({
+struct _tuple0 _temp3; _temp3.f1= key; _temp3.f2= data; _temp3;}); _temp2;});
+_temp1;});} int Cyc_Dict_is_empty( struct Cyc_Dict_Dict* d){ return d->t == 0;}
+int Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* key){ int(* rel)( void*,
 void*)= d->rel; struct Cyc_Dict_T* t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1);
-if( i < 0){ t= t->left;} else{ if( i > 0){ t= t->right;} else{ return( t->key_val).f2;}}}(
-void) _throw(({ struct Cyc_Dict_Absent_struct* _temp4=( struct Cyc_Dict_Absent_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Dict_Absent_struct));* _temp4=( struct Cyc_Dict_Absent_struct){.tag=
-Cyc_Dict_Absent_tag};( struct _xenum_struct*) _temp4;}));} struct Cyc_Core_Opt*
-Cyc_Dict_lookup_opt( struct Cyc_Dict_Dict* d, void* key){ int(* rel)( void*,
-void*)= d->rel; struct Cyc_Dict_T* t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1);
-if( i < 0){ t= t->left;} else{ if( i > 0){ t= t->right;} else{ return({ struct
-Cyc_Core_Opt* _temp5=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp5->v=( void*)( t->key_val).f2; _temp5;});}}} return 0;} int Cyc_Dict_lookup_bool(
-struct Cyc_Dict_Dict* d, void* key, void** ans_place){ int(* rel)( void*, void*)=
-d->rel; struct Cyc_Dict_T* t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1);
-if( i < 0){ t= t->left;} else{ if( i > 0){ t= t->right;} else{* ans_place=( t->key_val).f2;
-return 1;}}} return 0;} static struct Cyc_Dict_T* Cyc_Dict_balance( struct
-_tuple1 quad){ struct _tuple1 _temp6= quad; struct _tuple0 _temp18; struct Cyc_Dict_T*
-_temp20; struct Cyc_Dict_T* _temp22; struct Cyc_Dict_T _temp24; struct _tuple0
-_temp25; struct Cyc_Dict_T* _temp27; struct Cyc_Dict_T* _temp29; struct Cyc_Dict_T
+if( i < 0){ t= t->left;} else{ if( i > 0){ t= t->right;} else{ return 1;}}}
+return 0;} void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key){ int(* rel)(
+void*, void*)= d->rel; struct Cyc_Dict_T* t= d->t; while( t != 0) { int i= rel(
+key,( t->key_val).f1); if( i < 0){ t= t->left;} else{ if( i > 0){ t= t->right;}
+else{ return( t->key_val).f2;}}}( void) _throw(({ struct Cyc_Dict_Absent_struct*
+_temp4=( struct Cyc_Dict_Absent_struct*) GC_malloc_atomic( sizeof( struct Cyc_Dict_Absent_struct));*
+_temp4=( struct Cyc_Dict_Absent_struct){.tag= Cyc_Dict_Absent_tag};( struct
+_xenum_struct*) _temp4;}));} struct Cyc_Core_Opt* Cyc_Dict_lookup_opt( struct
+Cyc_Dict_Dict* d, void* key){ int(* rel)( void*, void*)= d->rel; struct Cyc_Dict_T*
+t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1); if( i < 0){ t= t->left;}
+else{ if( i > 0){ t= t->right;} else{ return({ struct Cyc_Core_Opt* _temp5=(
+struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp5->v=( void*)(
+t->key_val).f2; _temp5;});}}} return 0;} int Cyc_Dict_lookup_bool( struct Cyc_Dict_Dict*
+d, void* key, void** ans_place){ int(* rel)( void*, void*)= d->rel; struct Cyc_Dict_T*
+t= d->t; while( t != 0) { int i= rel( key,( t->key_val).f1); if( i < 0){ t= t->left;}
+else{ if( i > 0){ t= t->right;} else{* ans_place=( t->key_val).f2; return 1;}}}
+return 0;} static struct Cyc_Dict_T* Cyc_Dict_balance( struct _tuple1 quad){
+struct _tuple1 _temp6= quad; struct _tuple0 _temp18; struct Cyc_Dict_T* _temp20;
+struct Cyc_Dict_T* _temp22; struct Cyc_Dict_T _temp24; struct _tuple0 _temp25;
+struct Cyc_Dict_T* _temp27; struct Cyc_Dict_T* _temp29; struct Cyc_Dict_T
 _temp31; struct _tuple0 _temp32; struct Cyc_Dict_T* _temp34; struct Cyc_Dict_T*
 _temp36; void* _temp38; void* _temp40; void* _temp42; struct _tuple0 _temp44;
 struct Cyc_Dict_T* _temp46; struct Cyc_Dict_T* _temp48; struct Cyc_Dict_T
@@ -341,126 +346,178 @@ Null_Exception);} _temp275;}));}} void Cyc_Dict_iter_c( void(* f)( void*, void*,
 void*), void* env, struct Cyc_Dict_Dict* d){ if( d->t != 0){(( void(*)( void(* f)(
 void*, void*, void*), void* env, struct Cyc_Dict_T* t)) Cyc_Dict_iter_tree_c)( f,
 env,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp276= d->t; if( _temp276 == 0){
-_throw( Null_Exception);} _temp276;}));}} static struct Cyc_Dict_T* Cyc_Dict_map_tree(
-void*(* f)( void*), struct Cyc_Dict_T* t){ struct Cyc_Dict_T _temp279; struct
-_tuple0 _temp280; void* _temp282; void* _temp284; struct Cyc_Dict_T* _temp286;
-struct Cyc_Dict_T* _temp288; void* _temp290; struct Cyc_Dict_T* _temp277= t;
-_temp279=* _temp277; _LL291: _temp290=( void*) _temp279.color; goto _LL289;
-_LL289: _temp288=( struct Cyc_Dict_T*) _temp279.left; goto _LL287; _LL287:
-_temp286=( struct Cyc_Dict_T*) _temp279.right; goto _LL281; _LL281: _temp280=(
-struct _tuple0) _temp279.key_val; _LL285: _temp284= _temp280.f1; goto _LL283;
-_LL283: _temp282= _temp280.f2; goto _LL278; _LL278: { struct Cyc_Dict_T*
-new_left= _temp288 == 0? 0:(( struct Cyc_Dict_T*(*)( void*(* f)( void*), struct
-Cyc_Dict_T* t)) Cyc_Dict_map_tree)( f,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T*
-_temp292= _temp288; if( _temp292 == 0){ _throw( Null_Exception);} _temp292;}));
-struct Cyc_Dict_T* new_right= _temp286 == 0? 0:(( struct Cyc_Dict_T*(*)( void*(*
-f)( void*), struct Cyc_Dict_T* t)) Cyc_Dict_map_tree)( f,( struct Cyc_Dict_T*)({
-struct Cyc_Dict_T* _temp293= _temp286; if( _temp293 == 0){ _throw(
-Null_Exception);} _temp293;})); return({ struct Cyc_Dict_T* _temp294=( struct
-Cyc_Dict_T*) GC_malloc( sizeof( struct Cyc_Dict_T)); _temp294->color=( void*)
-_temp290; _temp294->left= new_left; _temp294->right= new_right; _temp294->key_val=({
-struct _tuple0 _temp295; _temp295.f1= _temp284; _temp295.f2= f( _temp282);
-_temp295;}); _temp294;});}} struct Cyc_Dict_Dict* Cyc_Dict_map( void*(* f)( void*),
+_throw( Null_Exception);} _temp276;}));}} struct Cyc_Dict_Iter2Env{ void(* f)(
+void*, void*, void*); void* inner_env; struct Cyc_Dict_Dict* d2;}; typedef
+struct Cyc_Dict_Iter2Env Cyc_Dict_iter2_env_t; static void Cyc_Dict_iter2_c_f(
+struct Cyc_Dict_Iter2Env* env, void* a, void* b1){ struct Cyc_Dict_Iter2Env
+_temp279; struct Cyc_Dict_Dict* _temp280; void* _temp282; void(* _temp284)( void*,
+void*, void*); struct Cyc_Dict_Iter2Env* _temp277= env; _temp279=* _temp277;
+_LL285: _temp284=( void(*)( void*, void*, void*)) _temp279.f; goto _LL283;
+_LL283: _temp282=( void*) _temp279.inner_env; goto _LL281; _LL281: _temp280=(
+struct Cyc_Dict_Dict*) _temp279.d2; goto _LL278; _LL278: _temp284( _temp282, b1,((
+void*(*)( struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_lookup)( _temp280, a));}
+void Cyc_Dict_iter2_c( void(* f)( void*, void*, void*), void* inner_env, struct
+Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2){ struct Cyc_Dict_Iter2Env env=({
+struct Cyc_Dict_Iter2Env _temp286; _temp286.f= f; _temp286.inner_env=( void*)
+inner_env; _temp286.d2= d2; _temp286;});(( void(*)( void(* f)( struct Cyc_Dict_Iter2Env*,
+void*, void*), struct Cyc_Dict_Iter2Env* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)((
+void(*)( struct Cyc_Dict_Iter2Env* env, void* a, void* b1)) Cyc_Dict_iter2_c_f,&
+env, d1);} static struct Cyc_Dict_T* Cyc_Dict_map_tree( void*(* f)( void*),
+struct Cyc_Dict_T* t){ struct Cyc_Dict_T _temp289; struct _tuple0 _temp290; void*
+_temp292; void* _temp294; struct Cyc_Dict_T* _temp296; struct Cyc_Dict_T*
+_temp298; void* _temp300; struct Cyc_Dict_T* _temp287= t; _temp289=* _temp287;
+_LL301: _temp300=( void*) _temp289.color; goto _LL299; _LL299: _temp298=( struct
+Cyc_Dict_T*) _temp289.left; goto _LL297; _LL297: _temp296=( struct Cyc_Dict_T*)
+_temp289.right; goto _LL291; _LL291: _temp290=( struct _tuple0) _temp289.key_val;
+_LL295: _temp294= _temp290.f1; goto _LL293; _LL293: _temp292= _temp290.f2; goto
+_LL288; _LL288: { struct Cyc_Dict_T* new_left= _temp298 == 0? 0:(( struct Cyc_Dict_T*(*)(
+void*(* f)( void*), struct Cyc_Dict_T* t)) Cyc_Dict_map_tree)( f,( struct Cyc_Dict_T*)({
+struct Cyc_Dict_T* _temp302= _temp298; if( _temp302 == 0){ _throw(
+Null_Exception);} _temp302;})); struct Cyc_Dict_T* new_right= _temp296 == 0? 0:((
+struct Cyc_Dict_T*(*)( void*(* f)( void*), struct Cyc_Dict_T* t)) Cyc_Dict_map_tree)(
+f,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp303= _temp296; if( _temp303 ==
+0){ _throw( Null_Exception);} _temp303;})); return({ struct Cyc_Dict_T* _temp304=(
+struct Cyc_Dict_T*) GC_malloc( sizeof( struct Cyc_Dict_T)); _temp304->color=(
+void*) _temp300; _temp304->left= new_left; _temp304->right= new_right; _temp304->key_val=({
+struct _tuple0 _temp305; _temp305.f1= _temp294; _temp305.f2= f( _temp292);
+_temp305;}); _temp304;});}} struct Cyc_Dict_Dict* Cyc_Dict_map( void*(* f)( void*),
 struct Cyc_Dict_Dict* d){ if( d->t == 0){ return({ struct Cyc_Dict_Dict*
-_temp296=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
-_temp296->rel= d->rel; _temp296->t= 0; _temp296;});} return({ struct Cyc_Dict_Dict*
-_temp297=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
-_temp297->rel= d->rel; _temp297->t=(( struct Cyc_Dict_T*(*)( void*(* f)( void*),
+_temp306=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
+_temp306->rel= d->rel; _temp306->t= 0; _temp306;});} return({ struct Cyc_Dict_Dict*
+_temp307=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
+_temp307->rel= d->rel; _temp307->t=(( struct Cyc_Dict_T*(*)( void*(* f)( void*),
 struct Cyc_Dict_T* t)) Cyc_Dict_map_tree)( f,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T*
-_temp298= d->t; if( _temp298 == 0){ _throw( Null_Exception);} _temp298;}));
-_temp297;});} static struct Cyc_Dict_T* Cyc_Dict_map_tree_c( void*(* f)( void*,
-void*), void* env, struct Cyc_Dict_T* t){ struct Cyc_Dict_T _temp301; struct
-_tuple0 _temp302; void* _temp304; void* _temp306; struct Cyc_Dict_T* _temp308;
-struct Cyc_Dict_T* _temp310; void* _temp312; struct Cyc_Dict_T* _temp299= t;
-_temp301=* _temp299; _LL313: _temp312=( void*) _temp301.color; goto _LL311;
-_LL311: _temp310=( struct Cyc_Dict_T*) _temp301.left; goto _LL309; _LL309:
-_temp308=( struct Cyc_Dict_T*) _temp301.right; goto _LL303; _LL303: _temp302=(
-struct _tuple0) _temp301.key_val; _LL307: _temp306= _temp302.f1; goto _LL305;
-_LL305: _temp304= _temp302.f2; goto _LL300; _LL300: { struct Cyc_Dict_T*
-new_left= _temp310 == 0? 0:(( struct Cyc_Dict_T*(*)( void*(* f)( void*, void*),
+_temp308= d->t; if( _temp308 == 0){ _throw( Null_Exception);} _temp308;}));
+_temp307;});} static struct Cyc_Dict_T* Cyc_Dict_map_tree_c( void*(* f)( void*,
+void*), void* env, struct Cyc_Dict_T* t){ struct Cyc_Dict_T _temp311; struct
+_tuple0 _temp312; void* _temp314; void* _temp316; struct Cyc_Dict_T* _temp318;
+struct Cyc_Dict_T* _temp320; void* _temp322; struct Cyc_Dict_T* _temp309= t;
+_temp311=* _temp309; _LL323: _temp322=( void*) _temp311.color; goto _LL321;
+_LL321: _temp320=( struct Cyc_Dict_T*) _temp311.left; goto _LL319; _LL319:
+_temp318=( struct Cyc_Dict_T*) _temp311.right; goto _LL313; _LL313: _temp312=(
+struct _tuple0) _temp311.key_val; _LL317: _temp316= _temp312.f1; goto _LL315;
+_LL315: _temp314= _temp312.f2; goto _LL310; _LL310: { struct Cyc_Dict_T*
+new_left= _temp320 == 0? 0:(( struct Cyc_Dict_T*(*)( void*(* f)( void*, void*),
 void* env, struct Cyc_Dict_T* t)) Cyc_Dict_map_tree_c)( f, env,( struct Cyc_Dict_T*)({
-struct Cyc_Dict_T* _temp314= _temp310; if( _temp314 == 0){ _throw(
-Null_Exception);} _temp314;})); struct Cyc_Dict_T* new_right= _temp308 == 0? 0:((
+struct Cyc_Dict_T* _temp324= _temp320; if( _temp324 == 0){ _throw(
+Null_Exception);} _temp324;})); struct Cyc_Dict_T* new_right= _temp318 == 0? 0:((
 struct Cyc_Dict_T*(*)( void*(* f)( void*, void*), void* env, struct Cyc_Dict_T*
 t)) Cyc_Dict_map_tree_c)( f, env,( struct Cyc_Dict_T*)({ struct Cyc_Dict_T*
-_temp315= _temp308; if( _temp315 == 0){ _throw( Null_Exception);} _temp315;}));
-return({ struct Cyc_Dict_T* _temp316=( struct Cyc_Dict_T*) GC_malloc( sizeof(
-struct Cyc_Dict_T)); _temp316->color=( void*) _temp312; _temp316->left= new_left;
-_temp316->right= new_right; _temp316->key_val=({ struct _tuple0 _temp317;
-_temp317.f1= _temp306; _temp317.f2= f( env, _temp304); _temp317;}); _temp316;});}}
+_temp325= _temp318; if( _temp325 == 0){ _throw( Null_Exception);} _temp325;}));
+return({ struct Cyc_Dict_T* _temp326=( struct Cyc_Dict_T*) GC_malloc( sizeof(
+struct Cyc_Dict_T)); _temp326->color=( void*) _temp322; _temp326->left= new_left;
+_temp326->right= new_right; _temp326->key_val=({ struct _tuple0 _temp327;
+_temp327.f1= _temp316; _temp327.f2= f( env, _temp314); _temp327;}); _temp326;});}}
 struct Cyc_Dict_Dict* Cyc_Dict_map_c( void*(* f)( void*, void*), void* env,
 struct Cyc_Dict_Dict* d){ if( d->t == 0){ return({ struct Cyc_Dict_Dict*
-_temp318=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
-_temp318->rel= d->rel; _temp318->t= 0; _temp318;});} return({ struct Cyc_Dict_Dict*
-_temp319=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
-_temp319->rel= d->rel; _temp319->t=(( struct Cyc_Dict_T*(*)( void*(* f)( void*,
+_temp328=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
+_temp328->rel= d->rel; _temp328->t= 0; _temp328;});} return({ struct Cyc_Dict_Dict*
+_temp329=( struct Cyc_Dict_Dict*) GC_malloc( sizeof( struct Cyc_Dict_Dict));
+_temp329->rel= d->rel; _temp329->t=(( struct Cyc_Dict_T*(*)( void*(* f)( void*,
 void*), void* env, struct Cyc_Dict_T* t)) Cyc_Dict_map_tree_c)( f, env,( struct
-Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp320= d->t; if( _temp320 == 0){ _throw(
-Null_Exception);} _temp320;})); _temp319;});} struct _tuple0* Cyc_Dict_choose(
+Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp330= d->t; if( _temp330 == 0){ _throw(
+Null_Exception);} _temp330;})); _temp329;});} struct _tuple0* Cyc_Dict_choose(
 struct Cyc_Dict_Dict* d){ if( d->t == 0){( void) _throw(({ struct Cyc_Dict_Absent_struct*
-_temp321=( struct Cyc_Dict_Absent_struct*) GC_malloc_atomic( sizeof( struct Cyc_Dict_Absent_struct));*
-_temp321=( struct Cyc_Dict_Absent_struct){.tag= Cyc_Dict_Absent_tag};( struct
-_xenum_struct*) _temp321;}));} return({ struct _tuple0* _temp322=( struct
-_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp322->f1=(( d->t)->key_val).f1;
-_temp322->f2=(( d->t)->key_val).f2; _temp322;});} static int Cyc_Dict_forall_tree_c(
+_temp331=( struct Cyc_Dict_Absent_struct*) GC_malloc_atomic( sizeof( struct Cyc_Dict_Absent_struct));*
+_temp331=( struct Cyc_Dict_Absent_struct){.tag= Cyc_Dict_Absent_tag};( struct
+_xenum_struct*) _temp331;}));} return({ struct _tuple0* _temp332=( struct
+_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp332->f1=(( d->t)->key_val).f1;
+_temp332->f2=(( d->t)->key_val).f2; _temp332;});} static int Cyc_Dict_forall_tree_c(
 int(* f)( void*, void*, void*), void* env, struct Cyc_Dict_T* t){ struct Cyc_Dict_T
-_temp325; struct _tuple0 _temp326; void* _temp328; void* _temp330; struct Cyc_Dict_T*
-_temp332; struct Cyc_Dict_T* _temp334; void* _temp336; struct Cyc_Dict_T*
-_temp323= t; _temp325=* _temp323; _LL337: _temp336=( void*) _temp325.color; goto
-_LL335; _LL335: _temp334=( struct Cyc_Dict_T*) _temp325.left; goto _LL333;
-_LL333: _temp332=( struct Cyc_Dict_T*) _temp325.right; goto _LL327; _LL327:
-_temp326=( struct _tuple0) _temp325.key_val; _LL331: _temp330= _temp326.f1; goto
-_LL329; _LL329: _temp328= _temp326.f2; goto _LL324; _LL324: return( f( env,
-_temp330, _temp328)? _temp334 == 0? 1:(( int(*)( int(* f)( void*, void*, void*),
+_temp335; struct _tuple0 _temp336; void* _temp338; void* _temp340; struct Cyc_Dict_T*
+_temp342; struct Cyc_Dict_T* _temp344; void* _temp346; struct Cyc_Dict_T*
+_temp333= t; _temp335=* _temp333; _LL347: _temp346=( void*) _temp335.color; goto
+_LL345; _LL345: _temp344=( struct Cyc_Dict_T*) _temp335.left; goto _LL343;
+_LL343: _temp342=( struct Cyc_Dict_T*) _temp335.right; goto _LL337; _LL337:
+_temp336=( struct _tuple0) _temp335.key_val; _LL341: _temp340= _temp336.f1; goto
+_LL339; _LL339: _temp338= _temp336.f2; goto _LL334; _LL334: return( f( env,
+_temp340, _temp338)? _temp344 == 0? 1:(( int(*)( int(* f)( void*, void*, void*),
 void* env, struct Cyc_Dict_T* t)) Cyc_Dict_forall_tree_c)( f, env,( struct Cyc_Dict_T*)({
-struct Cyc_Dict_T* _temp338= _temp334; if( _temp338 == 0){ _throw(
-Null_Exception);} _temp338;})): 0)? _temp332 == 0? 1:(( int(*)( int(* f)( void*,
+struct Cyc_Dict_T* _temp348= _temp344; if( _temp348 == 0){ _throw(
+Null_Exception);} _temp348;})): 0)? _temp342 == 0? 1:(( int(*)( int(* f)( void*,
 void*, void*), void* env, struct Cyc_Dict_T* t)) Cyc_Dict_forall_tree_c)( f, env,(
-struct Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp339= _temp332; if( _temp339 == 0){
-_throw( Null_Exception);} _temp339;})): 0;} int Cyc_Dict_forall_c( int(* f)(
+struct Cyc_Dict_T*)({ struct Cyc_Dict_T* _temp349= _temp342; if( _temp349 == 0){
+_throw( Null_Exception);} _temp349;})): 0;} int Cyc_Dict_forall_c( int(* f)(
 void*, void*, void*), void* env, struct Cyc_Dict_Dict* d){ if( d->t == 0){
 return 1;} return(( int(*)( int(* f)( void*, void*, void*), void* env, struct
 Cyc_Dict_T* t)) Cyc_Dict_forall_tree_c)( f, env,( struct Cyc_Dict_T*)({ struct
-Cyc_Dict_T* _temp340= d->t; if( _temp340 == 0){ _throw( Null_Exception);}
-_temp340;}));} static struct Cyc_Dict_Dict* Cyc_Dict_union_f( void*(* f)( void*,
-void*), void* a, void* b, struct Cyc_Dict_Dict* d1){ if((( int(*)( struct Cyc_Dict_Dict*
-d, void* key)) Cyc_Dict_member)( d1, a)){ return(( struct Cyc_Dict_Dict*(*)(
-struct Cyc_Dict_Dict* d, void* key, void* data)) Cyc_Dict_insert)( d1, a, f(((
-void*(*)( struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_lookup)( d1, a), b));}
-else{ return(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, void* key,
-void* data)) Cyc_Dict_insert)( d1, a, b);}} struct Cyc_Dict_Dict* Cyc_Dict_union_two(
-void*(* f)( void*, void*), struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2){
-if( d1 == d2){ return d1;} return(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*(*
-f)( void*(*)( void*, void*), void*, void*, struct Cyc_Dict_Dict*), void*(* env)(
-void*, void*), struct Cyc_Dict_Dict* d, struct Cyc_Dict_Dict* accum)) Cyc_Dict_fold_c)((
-struct Cyc_Dict_Dict*(*)( void*(* f)( void*, void*), void* a, void* b, struct
-Cyc_Dict_Dict* d1)) Cyc_Dict_union_f, f, d2, d1);} struct Cyc_Dict_IntArg{ void*(*
-f)( void*, void*); struct Cyc_Dict_Dict* d1; struct Cyc_Dict_Dict* d2;}; typedef
-struct Cyc_Dict_IntArg Cyc_Dict_intarg_t; static void Cyc_Dict_intersect_f(
-struct Cyc_Dict_IntArg* trip, void* a, void* b){ struct Cyc_Dict_IntArg _temp343;
-struct Cyc_Dict_Dict* _temp344; struct Cyc_Dict_Dict** _temp346; struct Cyc_Dict_Dict*
-_temp347; void*(* _temp349)( void*, void*); struct Cyc_Dict_IntArg* _temp341=
-trip; _temp343=* _temp341; _LL350: _temp349=( void*(*)( void*, void*)) _temp343.f;
-goto _LL348; _LL348: _temp347=( struct Cyc_Dict_Dict*) _temp343.d1; goto _LL345;
-_LL345: _temp344=( struct Cyc_Dict_Dict*) _temp343.d2; _temp346=&(* _temp341).d2;
-goto _LL342; _LL342: if((( int(*)( struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_member)(
-_temp347, a)){* _temp346=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d,
-void* key, void* data)) Cyc_Dict_insert)(* _temp346, a, _temp349((( void*(*)(
-struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_lookup)( _temp347, a), b));}}
-struct Cyc_Dict_Dict* Cyc_Dict_intersect( void*(* f)( void*, void*), struct Cyc_Dict_Dict*
-d1, struct Cyc_Dict_Dict* d2){ if( d1 == d2){ return d1;}{ struct Cyc_Dict_IntArg
-env=({ struct Cyc_Dict_IntArg _temp351; _temp351.f= f; _temp351.d1= d1; _temp351.d2=((
-struct Cyc_Dict_Dict*(*)( int(* comp)( void*, void*))) Cyc_Dict_empty)( d1->rel);
-_temp351;});(( void(*)( void(* f)( struct Cyc_Dict_IntArg*, void*, void*),
-struct Cyc_Dict_IntArg* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)(( void(*)(
-struct Cyc_Dict_IntArg* trip, void* a, void* b)) Cyc_Dict_intersect_f,& env, d2);
-return env.d2;}} static struct Cyc_List_List* Cyc_Dict_to_list_f( void* k, void*
-v, struct Cyc_List_List* accum){ return({ struct Cyc_List_List* _temp352=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp352->hd=(
-void*)({ struct _tuple0* _temp353=( struct _tuple0*) GC_malloc( sizeof( struct
-_tuple0)); _temp353->f1= k; _temp353->f2= v; _temp353;}); _temp352->tl= accum;
-_temp352;});} struct Cyc_List_List* Cyc_Dict_to_list( struct Cyc_Dict_Dict* d){
-return(( struct Cyc_List_List*(*)( struct Cyc_List_List*(* f)( void*, void*,
-struct Cyc_List_List*), struct Cyc_Dict_Dict* d, struct Cyc_List_List* accum))
-Cyc_Dict_fold)(( struct Cyc_List_List*(*)( void* k, void* v, struct Cyc_List_List*
+Cyc_Dict_T* _temp350= d->t; if( _temp350 == 0){ _throw( Null_Exception);}
+_temp350;}));} struct Cyc_Dict_ForallIntEnv{ int(* f)( void*, void*, void*);
+struct Cyc_Dict_Dict* d1;}; typedef struct Cyc_Dict_ForallIntEnv Cyc_Dict_forall_int_env_t;
+static int Cyc_Dict_forall_intersect_f( struct Cyc_Dict_ForallIntEnv* env, void*
+a, void* b){ struct Cyc_Dict_ForallIntEnv _temp353; struct Cyc_Dict_Dict*
+_temp354; int(* _temp356)( void*, void*, void*); struct Cyc_Dict_ForallIntEnv*
+_temp351= env; _temp353=* _temp351; _LL357: _temp356=( int(*)( void*, void*,
+void*)) _temp353.f; goto _LL355; _LL355: _temp354=( struct Cyc_Dict_Dict*)
+_temp353.d1; goto _LL352; _LL352: if((( int(*)( struct Cyc_Dict_Dict* d, void*
+key)) Cyc_Dict_member)( _temp354, a)){ return _temp356( a, b,(( void*(*)( struct
+Cyc_Dict_Dict* d, void* key)) Cyc_Dict_lookup)( _temp354, a));} return 1;} int
+Cyc_Dict_forall_intersect( int(* f)( void*, void*, void*), struct Cyc_Dict_Dict*
+d1, struct Cyc_Dict_Dict* d2){ struct Cyc_Dict_ForallIntEnv env=({ struct Cyc_Dict_ForallIntEnv
+_temp358; _temp358.f= f; _temp358.d1= d2; _temp358;}); return(( int(*)( int(* f)(
+struct Cyc_Dict_ForallIntEnv*, void*, void*), struct Cyc_Dict_ForallIntEnv* env,
+struct Cyc_Dict_Dict* d)) Cyc_Dict_forall_c)(( int(*)( struct Cyc_Dict_ForallIntEnv*
+env, void* a, void* b)) Cyc_Dict_forall_intersect_f,& env, d1);} static struct
+Cyc_Dict_Dict* Cyc_Dict_union_f( void*(* f)( void*, void*), void* a, void* b,
+struct Cyc_Dict_Dict* d1){ if((( int(*)( struct Cyc_Dict_Dict* d, void* key))
+Cyc_Dict_member)( d1, a)){ return(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
+d, void* key, void* data)) Cyc_Dict_insert)( d1, a, f((( void*(*)( struct Cyc_Dict_Dict*
+d, void* key)) Cyc_Dict_lookup)( d1, a), b));} else{ return(( struct Cyc_Dict_Dict*(*)(
+struct Cyc_Dict_Dict* d, void* key, void* data)) Cyc_Dict_insert)( d1, a, b);}}
+struct Cyc_Dict_Dict* Cyc_Dict_union_two( void*(* f)( void*, void*), struct Cyc_Dict_Dict*
+d1, struct Cyc_Dict_Dict* d2){ if( d1 == d2){ return d1;} return(( struct Cyc_Dict_Dict*(*)(
+struct Cyc_Dict_Dict*(* f)( void*(*)( void*, void*), void*, void*, struct Cyc_Dict_Dict*),
+void*(* env)( void*, void*), struct Cyc_Dict_Dict* d, struct Cyc_Dict_Dict*
+accum)) Cyc_Dict_fold_c)(( struct Cyc_Dict_Dict*(*)( void*(* f)( void*, void*),
+void* a, void* b, struct Cyc_Dict_Dict* d1)) Cyc_Dict_union_f, f, d2, d1);}
+struct Cyc_Dict_IntArg{ void*(* f)( void*, void*); struct Cyc_Dict_Dict* d1;
+struct Cyc_Dict_Dict* d2;}; typedef struct Cyc_Dict_IntArg Cyc_Dict_intarg_t;
+static void Cyc_Dict_intersect_f( struct Cyc_Dict_IntArg* trip, void* a, void* b){
+struct Cyc_Dict_IntArg _temp361; struct Cyc_Dict_Dict* _temp362; struct Cyc_Dict_Dict**
+_temp364; struct Cyc_Dict_Dict* _temp365; void*(* _temp367)( void*, void*);
+struct Cyc_Dict_IntArg* _temp359= trip; _temp361=* _temp359; _LL368: _temp367=(
+void*(*)( void*, void*)) _temp361.f; goto _LL366; _LL366: _temp365=( struct Cyc_Dict_Dict*)
+_temp361.d1; goto _LL363; _LL363: _temp362=( struct Cyc_Dict_Dict*) _temp361.d2;
+_temp364=&(* _temp359).d2; goto _LL360; _LL360: if((( int(*)( struct Cyc_Dict_Dict*
+d, void* key)) Cyc_Dict_member)( _temp365, a)){* _temp364=(( struct Cyc_Dict_Dict*(*)(
+struct Cyc_Dict_Dict* d, void* key, void* data)) Cyc_Dict_insert)(* _temp364, a,
+_temp367((( void*(*)( struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_lookup)(
+_temp365, a), b));}} struct Cyc_Dict_Dict* Cyc_Dict_intersect( void*(* f)( void*,
+void*), struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2){ if( d1 == d2){
+return d1;}{ struct Cyc_Dict_IntArg env=({ struct Cyc_Dict_IntArg _temp369;
+_temp369.f= f; _temp369.d1= d1; _temp369.d2=(( struct Cyc_Dict_Dict*(*)( int(*
+comp)( void*, void*))) Cyc_Dict_empty)( d1->rel); _temp369;});(( void(*)( void(*
+f)( struct Cyc_Dict_IntArg*, void*, void*), struct Cyc_Dict_IntArg* env, struct
+Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)(( void(*)( struct Cyc_Dict_IntArg* trip,
+void* a, void* b)) Cyc_Dict_intersect_f,& env, d2); return env.d2;}} struct Cyc_Dict_IntArgC{
+void*(* f)( void*, void*, void*); void* env; struct Cyc_Dict_Dict* d1; struct
+Cyc_Dict_Dict* d2;}; typedef struct Cyc_Dict_IntArgC Cyc_Dict_intargc_t; static
+void Cyc_Dict_intersectc_f( struct Cyc_Dict_IntArgC* quad, void* a, void* b){
+struct Cyc_Dict_IntArgC _temp372; struct Cyc_Dict_Dict* _temp373; struct Cyc_Dict_Dict**
+_temp375; struct Cyc_Dict_Dict* _temp376; void* _temp378; void*(* _temp380)(
+void*, void*, void*); struct Cyc_Dict_IntArgC* _temp370= quad; _temp372=*
+_temp370; _LL381: _temp380=( void*(*)( void*, void*, void*)) _temp372.f; goto
+_LL379; _LL379: _temp378=( void*) _temp372.env; goto _LL377; _LL377: _temp376=(
+struct Cyc_Dict_Dict*) _temp372.d1; goto _LL374; _LL374: _temp373=( struct Cyc_Dict_Dict*)
+_temp372.d2; _temp375=&(* _temp370).d2; goto _LL371; _LL371: if((( int(*)(
+struct Cyc_Dict_Dict* d, void* key)) Cyc_Dict_member)( _temp376, a)){* _temp375=((
+struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, void* key, void* data)) Cyc_Dict_insert)(*
+_temp375, a, _temp380( _temp378,(( void*(*)( struct Cyc_Dict_Dict* d, void* key))
+Cyc_Dict_lookup)( _temp376, a), b));}} struct Cyc_Dict_Dict* Cyc_Dict_intersect_c(
+void*(* f)( void*, void*, void*), void* env, struct Cyc_Dict_Dict* d1, struct
+Cyc_Dict_Dict* d2){ if( d1 == d2){ return d1;}{ struct Cyc_Dict_IntArgC env2=({
+struct Cyc_Dict_IntArgC _temp382; _temp382.f= f; _temp382.env=( void*) env;
+_temp382.d1= d1; _temp382.d2=(( struct Cyc_Dict_Dict*(*)( int(* comp)( void*,
+void*))) Cyc_Dict_empty)( d1->rel); _temp382;});(( void(*)( void(* f)( struct
+Cyc_Dict_IntArgC*, void*, void*), struct Cyc_Dict_IntArgC* env, struct Cyc_Dict_Dict*
+d)) Cyc_Dict_iter_c)(( void(*)( struct Cyc_Dict_IntArgC* quad, void* a, void* b))
+Cyc_Dict_intersectc_f,& env2, d2); return env2.d2;}} static struct Cyc_List_List*
+Cyc_Dict_to_list_f( void* k, void* v, struct Cyc_List_List* accum){ return({
+struct Cyc_List_List* _temp383=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp383->hd=( void*)({ struct _tuple0* _temp384=(
+struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp384->f1= k; _temp384->f2=
+v; _temp384;}); _temp383->tl= accum; _temp383;});} struct Cyc_List_List* Cyc_Dict_to_list(
+struct Cyc_Dict_Dict* d){ return(( struct Cyc_List_List*(*)( struct Cyc_List_List*(*
+f)( void*, void*, struct Cyc_List_List*), struct Cyc_Dict_Dict* d, struct Cyc_List_List*
+accum)) Cyc_Dict_fold)(( struct Cyc_List_List*(*)( void* k, void* v, struct Cyc_List_List*
 accum)) Cyc_Dict_to_list_f, d, 0);}

@@ -250,12 +250,12 @@ struct Cyc_Absyn_For_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct _tuple2
 f2; struct _tuple2 f3; struct Cyc_Absyn_Stmt* f4;}; extern const int Cyc_Absyn_Switch_s_tag;
 struct Cyc_Absyn_Switch_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List*
 f2;}; extern const int Cyc_Absyn_Fallthru_s_tag; struct Cyc_Absyn_Fallthru_s_struct{
-int tag; struct Cyc_List_List* f1; struct Cyc_Absyn_Stmt* f2;}; extern const int
-Cyc_Absyn_Decl_s_tag; struct Cyc_Absyn_Decl_s_struct{ int tag; struct Cyc_Absyn_Decl*
-f1; struct Cyc_Absyn_Stmt* f2;}; extern const int Cyc_Absyn_Cut_s_tag; struct
-Cyc_Absyn_Cut_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1;}; extern const int
-Cyc_Absyn_Splice_s_tag; struct Cyc_Absyn_Splice_s_struct{ int tag; struct Cyc_Absyn_Stmt*
-f1;}; extern const int Cyc_Absyn_Label_s_tag; struct Cyc_Absyn_Label_s_struct{
+int tag; struct Cyc_List_List* f1; struct Cyc_Absyn_Switch_clause** f2;}; extern
+const int Cyc_Absyn_Decl_s_tag; struct Cyc_Absyn_Decl_s_struct{ int tag; struct
+Cyc_Absyn_Decl* f1; struct Cyc_Absyn_Stmt* f2;}; extern const int Cyc_Absyn_Cut_s_tag;
+struct Cyc_Absyn_Cut_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1;}; extern
+const int Cyc_Absyn_Splice_s_tag; struct Cyc_Absyn_Splice_s_struct{ int tag;
+struct Cyc_Absyn_Stmt* f1;}; extern const int Cyc_Absyn_Label_s_tag; struct Cyc_Absyn_Label_s_struct{
 int tag; struct _tagged_string* f1; struct Cyc_Absyn_Stmt* f2;}; extern const
 int Cyc_Absyn_Do_s_tag; struct Cyc_Absyn_Do_s_struct{ int tag; struct Cyc_Absyn_Stmt*
 f1; struct _tuple2 f2;}; extern const int Cyc_Absyn_TryCatch_s_tag; struct Cyc_Absyn_TryCatch_s_struct{
@@ -300,25 +300,26 @@ struct _tuple0* name; struct Cyc_Absyn_Tqual* tq; void* type; struct Cyc_Absyn_E
 initializer; int shadow; struct Cyc_Core_Opt* region;}; struct Cyc_Absyn_Fndecl{
 void* sc; int is_inline; struct _tuple0* name; struct Cyc_List_List* tvs; struct
 Cyc_Core_Opt* effect; void* ret_type; struct Cyc_List_List* args; int varargs;
-struct Cyc_Absyn_Stmt* body; struct Cyc_Core_Opt* cached_typ;}; struct Cyc_Absyn_Structdecl{
+struct Cyc_Absyn_Stmt* body; struct Cyc_Core_Opt* cached_typ; struct Cyc_Core_Opt*
+param_vardecls;}; struct Cyc_Absyn_Structdecl{ void* sc; struct Cyc_Core_Opt*
+name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt* fields;}; struct Cyc_Absyn_Enumfield{
+struct _tuple0* name; struct Cyc_Absyn_Exp* tag; struct Cyc_List_List* tvs;
+struct Cyc_List_List* typs; struct Cyc_Position_Segment* loc;}; struct Cyc_Absyn_Enumdecl{
 void* sc; struct Cyc_Core_Opt* name; struct Cyc_List_List* tvs; struct Cyc_Core_Opt*
-fields;}; struct Cyc_Absyn_Enumfield{ struct _tuple0* name; struct Cyc_Absyn_Exp*
-tag; struct Cyc_List_List* tvs; struct Cyc_List_List* typs; struct Cyc_Position_Segment*
-loc;}; struct Cyc_Absyn_Enumdecl{ void* sc; struct Cyc_Core_Opt* name; struct
-Cyc_List_List* tvs; struct Cyc_Core_Opt* fields;}; struct Cyc_Absyn_Xenumdecl{
-void* sc; struct _tuple0* name; struct Cyc_List_List* fields;}; struct Cyc_Absyn_Typedefdecl{
-struct _tuple0* name; struct Cyc_List_List* tvs; void* defn;}; extern const int
-Cyc_Absyn_Var_d_tag; struct Cyc_Absyn_Var_d_struct{ int tag; struct Cyc_Absyn_Vardecl*
-f1;}; extern const int Cyc_Absyn_Fn_d_tag; struct Cyc_Absyn_Fn_d_struct{ int tag;
-struct Cyc_Absyn_Fndecl* f1;}; extern const int Cyc_Absyn_Let_d_tag; struct Cyc_Absyn_Let_d_struct{
-int tag; struct Cyc_Absyn_Pat* f1; struct Cyc_Core_Opt* f2; struct Cyc_Core_Opt*
-f3; struct Cyc_Absyn_Exp* f4; int f5;}; extern const int Cyc_Absyn_Struct_d_tag;
-struct Cyc_Absyn_Struct_d_struct{ int tag; struct Cyc_Absyn_Structdecl* f1;};
-extern void* Cyc_Absyn_Union_d; extern const int Cyc_Absyn_Enum_d_tag; struct
-Cyc_Absyn_Enum_d_struct{ int tag; struct Cyc_Absyn_Enumdecl* f1;}; extern const
-int Cyc_Absyn_Xenum_d_tag; struct Cyc_Absyn_Xenum_d_struct{ int tag; struct Cyc_Absyn_Xenumdecl*
-f1;}; extern const int Cyc_Absyn_Typedef_d_tag; struct Cyc_Absyn_Typedef_d_struct{
-int tag; struct Cyc_Absyn_Typedefdecl* f1;}; extern const int Cyc_Absyn_Namespace_d_tag;
+fields;}; struct Cyc_Absyn_Xenumdecl{ void* sc; struct _tuple0* name; struct Cyc_List_List*
+fields;}; struct Cyc_Absyn_Typedefdecl{ struct _tuple0* name; struct Cyc_List_List*
+tvs; void* defn;}; extern const int Cyc_Absyn_Var_d_tag; struct Cyc_Absyn_Var_d_struct{
+int tag; struct Cyc_Absyn_Vardecl* f1;}; extern const int Cyc_Absyn_Fn_d_tag;
+struct Cyc_Absyn_Fn_d_struct{ int tag; struct Cyc_Absyn_Fndecl* f1;}; extern
+const int Cyc_Absyn_Let_d_tag; struct Cyc_Absyn_Let_d_struct{ int tag; struct
+Cyc_Absyn_Pat* f1; struct Cyc_Core_Opt* f2; struct Cyc_Core_Opt* f3; struct Cyc_Absyn_Exp*
+f4; int f5;}; extern const int Cyc_Absyn_Struct_d_tag; struct Cyc_Absyn_Struct_d_struct{
+int tag; struct Cyc_Absyn_Structdecl* f1;}; extern void* Cyc_Absyn_Union_d;
+extern const int Cyc_Absyn_Enum_d_tag; struct Cyc_Absyn_Enum_d_struct{ int tag;
+struct Cyc_Absyn_Enumdecl* f1;}; extern const int Cyc_Absyn_Xenum_d_tag; struct
+Cyc_Absyn_Xenum_d_struct{ int tag; struct Cyc_Absyn_Xenumdecl* f1;}; extern
+const int Cyc_Absyn_Typedef_d_tag; struct Cyc_Absyn_Typedef_d_struct{ int tag;
+struct Cyc_Absyn_Typedefdecl* f1;}; extern const int Cyc_Absyn_Namespace_d_tag;
 struct Cyc_Absyn_Namespace_d_struct{ int tag; struct _tagged_string* f1; struct
 Cyc_List_List* f2;}; extern const int Cyc_Absyn_Using_d_tag; struct Cyc_Absyn_Using_d_struct{
 int tag; struct _tuple0* f1; struct Cyc_List_List* f2;}; extern const int Cyc_Absyn_ExternC_d_tag;
@@ -444,39 +445,44 @@ Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(); extern char Cyc_Tcutil_TypeErr_tag[ 8u];
 struct Cyc_Tcutil_TypeErr_struct{ char* tag;}; extern void Cyc_Tcutil_flush_warnings();
 extern void Cyc_Tc_tc( struct Cyc_Tcenv_Tenv* te, int add_cyc_namespace, struct
 Cyc_List_List* ds); extern struct Cyc_List_List* Cyc_Tc_treeshake( struct Cyc_Tcenv_Tenv*
-te, struct Cyc_List_List*); extern void Cyc_ControlFlow_cf_check( struct Cyc_List_List*);
-extern struct Cyc_List_List* Cyc_Toc_toc( struct Cyc_List_List* ds); extern int
-Cyc_Toc_check_for_null; typedef void* Cyc_CfFlowInfo_LocalRoot; typedef void*
-Cyc_CfFlowInfo_Field; struct Cyc_CfFlowInfo_Place; typedef void* Cyc_CfFlowInfo_InitState;
-typedef void* Cyc_CfFlowInfo_PathInfo; typedef void* Cyc_CfFlowInfo_FlowInfo;
-typedef void* Cyc_CfFlowInfo_local_root_t; typedef void* Cyc_CfFlowInfo_field_t;
-typedef struct Cyc_CfFlowInfo_Place* Cyc_CfFlowInfo_place_t; typedef void* Cyc_CfFlowInfo_init_state_t;
-typedef void* Cyc_CfFlowInfo_path_info_t; typedef struct Cyc_Dict_Dict* Cyc_CfFlowInfo_path_info_dict_t;
-typedef void* Cyc_CfFlowInfo_flow_info_t; extern const int Cyc_CfFlowInfo_VarRoot_tag;
-struct Cyc_CfFlowInfo_VarRoot_struct{ int tag; struct Cyc_Absyn_Vardecl* f1;};
-extern const int Cyc_CfFlowInfo_MallocPt_tag; struct Cyc_CfFlowInfo_MallocPt_struct{
-int tag; struct Cyc_Absyn_Exp* f1;}; extern const int Cyc_CfFlowInfo_StructF_tag;
-struct Cyc_CfFlowInfo_StructF_struct{ int tag; struct _tagged_string* f1;};
-extern const int Cyc_CfFlowInfo_TupleF_tag; struct Cyc_CfFlowInfo_TupleF_struct{
-int tag; int f1;}; struct Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List*
-fields;}; extern void* Cyc_CfFlowInfo_Uninit; extern void* Cyc_CfFlowInfo_ThisInit;
-extern void* Cyc_CfFlowInfo_AllInit; extern const int Cyc_CfFlowInfo_MustPointTo_tag;
-struct Cyc_CfFlowInfo_MustPointTo_struct{ int tag; struct Cyc_CfFlowInfo_Place*
-f1;}; extern const int Cyc_CfFlowInfo_LeafPI_tag; struct Cyc_CfFlowInfo_LeafPI_struct{
+te, struct Cyc_List_List*); extern struct Cyc_List_List* Cyc_Toc_toc( struct Cyc_List_List*
+ds); extern int Cyc_Toc_check_for_null; typedef void* Cyc_CfFlowInfo_LocalRoot;
+typedef void* Cyc_CfFlowInfo_Field; struct Cyc_CfFlowInfo_Place; typedef void*
+Cyc_CfFlowInfo_Escaped; typedef void* Cyc_CfFlowInfo_InitLevel; typedef void*
+Cyc_CfFlowInfo_InitState; typedef void* Cyc_CfFlowInfo_PathInfo; typedef void*
+Cyc_CfFlowInfo_FlowInfo; typedef void* Cyc_CfFlowInfo_local_root_t; typedef void*
+Cyc_CfFlowInfo_field_t; typedef struct Cyc_CfFlowInfo_Place* Cyc_CfFlowInfo_place_t;
+typedef void* Cyc_CfFlowInfo_escaped_t; typedef void* Cyc_CfFlowInfo_init_level_t;
+typedef void* Cyc_CfFlowInfo_init_state_t; typedef void* Cyc_CfFlowInfo_path_info_t;
+typedef struct Cyc_Dict_Dict* Cyc_CfFlowInfo_pinfo_dict_t; typedef void* Cyc_CfFlowInfo_flow_info_t;
+extern const int Cyc_CfFlowInfo_VarRoot_tag; struct Cyc_CfFlowInfo_VarRoot_struct{
+int tag; struct Cyc_Absyn_Vardecl* f1;}; extern const int Cyc_CfFlowInfo_MallocPt_tag;
+struct Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1;};
+extern const int Cyc_CfFlowInfo_StructF_tag; struct Cyc_CfFlowInfo_StructF_struct{
+int tag; struct _tagged_string* f1;}; extern const int Cyc_CfFlowInfo_TupleF_tag;
+struct Cyc_CfFlowInfo_TupleF_struct{ int tag; int f1;}; struct Cyc_CfFlowInfo_Place{
+void* root; struct Cyc_List_List* fields;}; extern void* Cyc_CfFlowInfo_Esc;
+extern void* Cyc_CfFlowInfo_Unesc; extern void* Cyc_CfFlowInfo_NoneIL; extern
+void* Cyc_CfFlowInfo_ThisIL; extern void* Cyc_CfFlowInfo_AllIL; extern const int
+Cyc_CfFlowInfo_UnknownIS_tag; struct Cyc_CfFlowInfo_UnknownIS_struct{ int tag;
+void* f1; void* f2;}; extern const int Cyc_CfFlowInfo_MustPointTo_tag; struct
+Cyc_CfFlowInfo_MustPointTo_struct{ int tag; struct Cyc_CfFlowInfo_Place* f1;};
+extern const int Cyc_CfFlowInfo_LeafPI_tag; struct Cyc_CfFlowInfo_LeafPI_struct{
 int tag; void* f1;}; extern const int Cyc_CfFlowInfo_TuplePI_tag; struct Cyc_CfFlowInfo_TuplePI_struct{
 int tag; struct Cyc_Dict_Dict* f1;}; extern const int Cyc_CfFlowInfo_StructPI_tag;
 struct Cyc_CfFlowInfo_StructPI_struct{ int tag; struct Cyc_Dict_Dict* f1;};
 extern void* Cyc_CfFlowInfo_BottomFL; extern const int Cyc_CfFlowInfo_InitsFL_tag;
-struct Cyc_CfFlowInfo_InitsFL_struct{ int tag; struct Cyc_Dict_Dict* f1; struct
-Cyc_Dict_Dict* f2;}; void Cyc_NewControlFlow_cf_check( struct Cyc_List_List* ds);
-extern void Cyc_Lex_lex_init(); static int Cyc_pp_r= 0; static int Cyc_up_r= 0;
-static int Cyc_noexpand_r= 0; static int Cyc_noshake_r= 0; static int Cyc_tc_r=
-0; static int Cyc_toc_r= 0; static int Cyc_v_r= 0; static int Cyc_q_r= 0; static
-int Cyc_add_cyc_namespace_r= 1; int* Cyc_pp=& Cyc_pp_r; int* Cyc_up=& Cyc_up_r;
-int* Cyc_noexpand=& Cyc_noexpand_r; int* Cyc_noshake=& Cyc_noshake_r; int* Cyc_tc=&
-Cyc_tc_r; int* Cyc_toc=& Cyc_toc_r; int* Cyc_v=& Cyc_v_r; int* Cyc_q=& Cyc_q_r;
-int* Cyc_add_cyc_namespace=& Cyc_add_cyc_namespace_r; static struct
-_tagged_string* Cyc_out_file_name_opt= 0; static void Cyc_set_out_file_name(
+struct Cyc_CfFlowInfo_InitsFL_struct{ int tag; struct Cyc_Dict_Dict* f1;};
+struct Cyc_NewControlFlow_AnalEnv{ struct Cyc_Dict_Dict* roots; int in_try; void*
+tryflow;}; typedef struct Cyc_NewControlFlow_AnalEnv* Cyc_NewControlFlow_analenv_t;
+void Cyc_NewControlFlow_cf_check( struct Cyc_List_List* ds); extern void Cyc_Lex_lex_init();
+static int Cyc_pp_r= 0; static int Cyc_up_r= 0; static int Cyc_noexpand_r= 0;
+static int Cyc_noshake_r= 0; static int Cyc_tc_r= 0; static int Cyc_toc_r= 0;
+static int Cyc_v_r= 0; static int Cyc_q_r= 0; static int Cyc_add_cyc_namespace_r=
+1; int* Cyc_pp=& Cyc_pp_r; int* Cyc_up=& Cyc_up_r; int* Cyc_noexpand=& Cyc_noexpand_r;
+int* Cyc_noshake=& Cyc_noshake_r; int* Cyc_tc=& Cyc_tc_r; int* Cyc_toc=& Cyc_toc_r;
+int* Cyc_v=& Cyc_v_r; int* Cyc_q=& Cyc_q_r; int* Cyc_add_cyc_namespace=& Cyc_add_cyc_namespace_r;
+static struct _tagged_string* Cyc_out_file_name_opt= 0; static void Cyc_set_out_file_name(
 struct _tagged_string s){ Cyc_out_file_name_opt=( struct _tagged_string*)({
 struct _tuple8* _temp0=( struct _tuple8*) GC_malloc( sizeof( struct _tuple8));
 _temp0->f1= s; _temp0;});} static void Cyc_set_check_null(){ Cyc_Toc_check_for_null=
@@ -553,7 +559,7 @@ f);} struct Cyc_List_List* Cyc_do_typecheck( struct Cyc_Tcenv_Tenv* te, struct
 Cyc_List_List* tds){ Cyc_Absynpp_expand_typedefs= !(* Cyc_noexpand); Cyc_Tc_tc(
 te, Cyc_add_cyc_namespace_r, tds); if( !(* Cyc_noshake)){ tds= Cyc_Tc_treeshake(
 te, tds);} return tds;} struct Cyc_List_List* Cyc_do_cfcheck( int ignore, struct
-Cyc_List_List* tds){ Cyc_ControlFlow_cf_check( tds); return tds;} struct Cyc_List_List*
+Cyc_List_List* tds){ Cyc_NewControlFlow_cf_check( tds); return tds;} struct Cyc_List_List*
 Cyc_do_translate( int ignore, struct Cyc_List_List* tds){ return Cyc_Toc_toc(
 tds);} struct Cyc_List_List* Cyc_do_print( struct Cyc_Stdio___sFILE* out_file,
 struct Cyc_List_List* tds){ Cyc_Absynpp_expand_typedefs= !(* Cyc_noexpand); if(*

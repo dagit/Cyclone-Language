@@ -98,7 +98,7 @@ extern tenv_t set_in_loop(tenv_t te, stmt continue_dest);
 extern tenv_t set_in_switch(tenv_t);
 extern tenv_t set_fallthru(tenv_t te, 
 			   $(list_t<tvar>,list_t<vardecl>) * pat_typ,
-			   stmt body);
+			   switch_clause clause);
 extern tenv_t clear_fallthru(tenv_t);
 extern tenv_t set_next(tenv_t, jumpee_t);
 
@@ -106,7 +106,8 @@ extern tenv_t set_next(tenv_t, jumpee_t);
 extern void process_continue(tenv_t,stmt,stmt_opt@);
 extern void process_break   (tenv_t,stmt,stmt_opt@);
 extern void process_goto(tenv_t,stmt,var,stmt_opt@);
-extern $(stmt,list_t<tvar>,list_t<typ>)* process_fallthru(tenv_t,stmt,stmt_opt@);
+extern $(switch_clause,list_t<tvar>,list_t<typ>)* 
+process_fallthru(tenv_t,stmt, switch_clause *@);
 
 extern stmt get_encloser(tenv_t);
 extern tenv_t set_encloser(tenv_t,stmt);

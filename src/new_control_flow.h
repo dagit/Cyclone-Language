@@ -2,6 +2,7 @@
 #define NEW_CONTROL_FLOW_H
 
 #include "list.h"
+#include "set.h"
 #include "dict.h"
 #include "stdio.h"
 #include "absyn.h"
@@ -12,7 +13,17 @@ namespace NewControlFlow {
 using List;
 using CfFlowInfo;
 
-extern flow_info_t cf_analyze_stmt(Absyn::stmt, flow_info_t);
+extern struct AnalEnv {
+  pinfo_dict_t<local_root_t> roots; // the "uninit leaves" versions
+  bool        in_try;  // an optimization for the common case
+  flow_info_t tryflow; // updated by UseAE and AssignAE, used by TryCatch_s
+};
+typedef struct AnalEnv @ analenv_t;
+
+  // used by CFAbsexp::eval_absexp
+extern void update_tryflow(analenv_t env, flow_info_t new_flow);
+
+extern flow_info_t cf_analyze_stmt(analenv_t, Absyn::stmt, flow_info_t);
 
 // The entry point (all the stuff above is just for cf_absexp)
 void cf_check(list_t<Absyn::decl> ds);

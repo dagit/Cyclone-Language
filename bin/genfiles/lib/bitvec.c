@@ -125,24 +125,25 @@ struct _tagged_ptr0 bvec, int sz){ struct Cyc_List_List* ans= 0;{ int pos= sz -
 _temp68= bvec; int* _temp70= _temp68.curr + word; if( _temp70 < _temp68.base? 1:
 _temp70 >= _temp68.last_plus_one){ _throw( Null_Exception);}* _temp70;}); int
 offset= pos & 31; for( 0; offset >= 0; -- offset, -- pos){ if(( bits >> offset &
-1) == 1){ ans=({ struct Cyc_List_List* _temp71=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp71->hd=( void*) pos; _temp71->tl=
-ans; _temp71;});}}}} return ans;} void Cyc_Bitvec_clear_all( struct _tagged_ptr0
-bvec){ int len=( int)({ struct _tagged_ptr0 _temp72= bvec;( unsigned int)(
-_temp72.last_plus_one - _temp72.curr);}); int i= 0; for( 0; i < len; ++ i){({
-struct _tagged_ptr0 _temp73= bvec; int* _temp75= _temp73.curr + i; if( _temp75 <
-_temp73.base? 1: _temp75 >= _temp73.last_plus_one){ _throw( Null_Exception);}*
-_temp75= 0;});}} void Cyc_Bitvec_set_all( struct _tagged_ptr0 bvec){ int len=(
-int)({ struct _tagged_ptr0 _temp76= bvec;( unsigned int)( _temp76.last_plus_one
-- _temp76.curr);}); int i= 0; for( 0; i < len; ++ i){({ struct _tagged_ptr0
-_temp77= bvec; int* _temp79= _temp77.curr + i; if( _temp79 < _temp77.base? 1:
-_temp79 >= _temp77.last_plus_one){ _throw( Null_Exception);}* _temp79= -1;});}}
-int Cyc_Bitvec_all_set( struct _tagged_ptr0 bvec, int sz){ int words= sz >> 5;{
-int i= 0; for( 0; i < words; i ++){ if(({ struct _tagged_ptr0 _temp80= bvec; int*
-_temp82= _temp80.curr + i; if( _temp82 < _temp80.base? 1: _temp82 >= _temp80.last_plus_one){
-_throw( Null_Exception);}* _temp82;}) != -1){ return 0;}}}{ int i= words * 32;
-for( 0; i < sz; i ++){ if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;}
-void Cyc_Bitvec_print_bvec( struct _tagged_ptr0 bvec){{ int i= 0; for( 0;(
-unsigned int) i <( unsigned int) 32 *({ struct _tagged_ptr0 _temp83= bvec;(
-unsigned int)( _temp83.last_plus_one - _temp83.curr);}); ++ i){ printf("%d", Cyc_Bitvec_get(
-bvec, i)? 1: 0);}} printf("\n");}
+1) == 1){ ans=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp71=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List) * 1); _temp71[ 0]=({
+struct Cyc_List_List _temp72; _temp72.hd=( void*) pos; _temp72.tl= ans; _temp72;});
+_temp71;});}}}} return ans;} void Cyc_Bitvec_clear_all( struct _tagged_ptr0 bvec){
+int len=( int)({ struct _tagged_ptr0 _temp73= bvec;( unsigned int)( _temp73.last_plus_one
+- _temp73.curr);}); int i= 0; for( 0; i < len; ++ i){({ struct _tagged_ptr0
+_temp74= bvec; int* _temp76= _temp74.curr + i; if( _temp76 < _temp74.base? 1:
+_temp76 >= _temp74.last_plus_one){ _throw( Null_Exception);}* _temp76= 0;});}}
+void Cyc_Bitvec_set_all( struct _tagged_ptr0 bvec){ int len=( int)({ struct
+_tagged_ptr0 _temp77= bvec;( unsigned int)( _temp77.last_plus_one - _temp77.curr);});
+int i= 0; for( 0; i < len; ++ i){({ struct _tagged_ptr0 _temp78= bvec; int*
+_temp80= _temp78.curr + i; if( _temp80 < _temp78.base? 1: _temp80 >= _temp78.last_plus_one){
+_throw( Null_Exception);}* _temp80= -1;});}} int Cyc_Bitvec_all_set( struct
+_tagged_ptr0 bvec, int sz){ int words= sz >> 5;{ int i= 0; for( 0; i < words; i
+++){ if(({ struct _tagged_ptr0 _temp81= bvec; int* _temp83= _temp81.curr + i;
+if( _temp83 < _temp81.base? 1: _temp83 >= _temp81.last_plus_one){ _throw(
+Null_Exception);}* _temp83;}) != -1){ return 0;}}}{ int i= words * 32; for( 0; i
+< sz; i ++){ if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec(
+struct _tagged_ptr0 bvec){{ int i= 0; for( 0;( unsigned int) i <( unsigned int)
+32 *({ struct _tagged_ptr0 _temp84= bvec;( unsigned int)( _temp84.last_plus_one
+- _temp84.curr);}); ++ i){ printf("%d", Cyc_Bitvec_get( bvec, i)? 1: 0);}}
+printf("\n");}

@@ -144,8 +144,8 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
   case Continue_s(*sopt): process_continue(te,s0,sopt); return;
   case Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
 
-  case Fallthru_s(es,*sopt):
-    let trip_opt = process_fallthru(te,s0,sopt);
+  case Fallthru_s(es,*clauseopt):
+    let trip_opt = process_fallthru(te,s0,clauseopt);
     if(trip_opt == null) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
@@ -193,7 +193,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       // type-checking the body will type-check any explicit fallthrus.
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, pat_typ, scs->hd->body);
+      te = set_fallthru(te, pat_typ, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
     return;
@@ -218,7 +218,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       // type-checking the body will type-check any explicit fallthrus
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, pat_typ, scs->hd->body);
+      te = set_fallthru(te, pat_typ, scs->hd);
     }
     check_catch_overlap(s0->loc,scs0);
     return;

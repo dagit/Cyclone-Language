@@ -165,6 +165,9 @@ namespace List {
   extern list_t<`a> tabulate(int n, `a f(int));
   extern list_t<`a> tabulate_c(int n, `a f(`b,int), `b env);
   
+  // See .cyc for why the two lists are in the same region.
+  extern int list_cmp(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
+
   // Warning: Fairly inefficient implementation.
   extern list_t<`a> filter_c(bool f(`b,`a), `b env, glist_t<`a,`r> l);
   

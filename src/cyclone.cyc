@@ -136,8 +136,8 @@ list_t<Absyn::decl> do_typecheck(Tcenv::tenv te, list_t<Absyn::decl> tds) {
   return tds;
 }
 list_t<Absyn::decl> do_cfcheck(bool ignore, list_t<Absyn::decl> tds) {
-  ControlFlow::cf_check(tds);
-  //  NewControlFlow::cf_check(tds);
+  //  ControlFlow::cf_check(tds);
+  NewControlFlow::cf_check(tds);
   return tds;
 }
 list_t<Absyn::decl> do_translate(bool ignore, list_t<Absyn::decl> tds) {

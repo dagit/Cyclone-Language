@@ -123,7 +123,8 @@ enum Jumpee {
 static struct CtrlEnv {
   jumpee_t continue_stmt;
   jumpee_t break_stmt;
-  $(stmt, list_t<tvar>, list_t<typ>) * fallthru_stmt; // null => not allowed
+             // null => not allowed
+  $(switch_clause, list_t<tvar>, list_t<typ>) * fallthru_clause; 
   jumpee_t next_stmt; // needed to calculate break_stmt
   // The next_stmt field needs to be correct only when we might enter
   // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
@@ -434,10 +435,10 @@ static fenv_t copy_fenv_old_ctrl(fenv_t f) {
 	       f->capability, f->curr_rgn);
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
-  // WARNING: fallthru_stmt shared with old
+  // WARNING: fallthru_clause shared with old
   ctrl_env_t c = f->ctrl_env;
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser,
-	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_stmt,
+	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_clause,
 			c->next_stmt),
 	       f->capability, f->curr_rgn);
 }
@@ -565,32 +566,35 @@ void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
     *sopt = sopt2->v;
   }
 }
-$(stmt,list_t<tvar>,list_t<typ>)* process_fallthru(tenv te,stmt s,stmt_opt @sopt){
+$(switch_clause,list_t<tvar>,list_t<typ>)* 
+process_fallthru(tenv te,stmt s, switch_clause *@ clauseopt){
   if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
   let fe  = get_fenv(te);
-  let ans = fe->ctrl_env->fallthru_stmt;
+  let ans = fe->ctrl_env->fallthru_clause;
   if(ans != null) {
-    (*ans)[0]->non_local_preds = &List(s, (*ans)[0]->non_local_preds);
-    *sopt = (*ans)[0];
+    (*ans)[0]->body->non_local_preds = 
+      &List(s, (*ans)[0]->body->non_local_preds);
+    *clauseopt = new{(*ans)[0]};
   }
   return ans;
 }
 
-tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ, stmt body) {
+tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ, 
+		  switch_clause clause) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
   for(let vds = (*pat_typ)[1]; vds!=null; vds=vds->tl)
     ft_typ = &List(vds->hd->type,ft_typ);
   ft_typ = List::imp_rev(ft_typ);
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
-  fe->ctrl_env->fallthru_stmt = &$(body,(*pat_typ)[0],ft_typ);
+  fe->ctrl_env->fallthru_clause = &$(clause,(*pat_typ)[0],ft_typ);
   return put_fenv(te,fe);
 }
 // fallthru is illegal in the last case
 tenv clear_fallthru(tenv te) {
   if(te->le == null) env_err("Tcenv: unexpected clear_fallthru");
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
-  fe->ctrl_env->fallthru_stmt = null;
+  fe->ctrl_env->fallthru_clause = null;
   return put_fenv(te,fe);
 }
 
@@ -714,13 +718,17 @@ fenv_t new_fenv(fndecl fd) {
   // but if it's gensym'd, they can't.  
   tvar rgn0 = new_tvar(RgnKind);
   typ param_rgn = VarType(rgn0);
-  for(let args = fd->args; args != null; args = args->tl)
-    locals = Dict::insert(locals, (*args->hd)[0], 
-			  Param_b(new{Vardecl(Public, 
-					      new{$(Loc_n,(*args->hd)[0])},
-					      (*args->hd)[1],
-					      (*args->hd)[2],
-					      null, 0, new{Opt(param_rgn)})}));
+  let vds = null;
+  for(let args = fd->args; args != null; args = args->tl) {
+    let vd = new{Vardecl(Public, 
+			       new{$(Loc_n,(*args->hd)[0])},
+			       (*args->hd)[1],
+			       (*args->hd)[2],
+			       null, 0, new{Opt(param_rgn)})};
+    vds = new{List(vd, vds)};
+    locals = Dict::insert(locals, (*args->hd)[0], Param_b(vd));
+  }
+  fd->param_vardecls = new{Opt(vds)};
   return &Fenv{.shared      = 
                   &SharedFenv{.return_typ = fd->ret_type,
 			      .seen_labels = Dict::empty(String::zstrptrcmp),

@@ -59,14 +59,14 @@ void eqstrings(string s1,string s2) {
   okfail(0 == String::strcmp(s1,s2));
 }
 
-int list_cmp(int cmp(`a,`a),list_t<`a> x,list_t<`a> y) {
+int test_list_cmp(int cmp(`a,`a),list_t<`a> x,list_t<`a> y) {
   if (x == null)
     if (y == null) return 0;
     else return -1;
   if (y == null) return 1;
   int c = cmp(x->hd,y->hd);
   if (c != 0) return c;
-  return list_cmp(cmp,x->tl,y->tl);
+  return test_list_cmp(cmp,x->tl,y->tl);
 }
 
 int array_cmp(int cmp(`a,`a),`a ?x,`a ?y) {
@@ -174,16 +174,16 @@ void list_test() {
   // xrev = list from 1 to 10, forwards
   list_t<int> xrev = null;
   for (int i=1; i<11; i++) xrev = &List(11-i,xrev);
-  okfail(0==list_cmp(int_cmp,List::rev(x),xrev));
+  okfail(0==test_list_cmp(int_cmp,List::rev(x),xrev));
 
   // xrev2 = [1;1;2;2; ...;10;10]
   list_t<int> xrev2 = null;
   for (int i=1; i<11; i++) xrev2 = &List(11-i,&List(11-i,xrev2));
   // test mergesort and append
-  okfail(0==list_cmp(int_cmp,xrev2,
+  okfail(0==test_list_cmp(int_cmp,xrev2,
                      List::merge_sort(int_cmp,
                                       List::append(x,x))));
-  okfail(0==list_cmp(int_cmp,xrev2,
+  okfail(0==test_list_cmp(int_cmp,xrev2,
                      List::merge_sort(int_cmp,
                                       List::append(List::filter(even,xrev2),
                                                    List::filter(odd,xrev2)))));
@@ -194,13 +194,13 @@ void list_test() {
   // xplus = list from 2 to 11, backwards
   list_t<int> xplus = null;
   for (int i=1; i<11; i++) xplus = &List(i+1,xplus);
-  okfail(0==list_cmp(int_cmp,x,xplus));
+  okfail(0==test_list_cmp(int_cmp,x,xplus));
 
   // FIX:  casts are required for typechecking.  Should string constants
   // have type char? or char[sz] ??
   let slist = &List(allocstr("hello"),&List(allocstr("world"),null));
   let rlist = List::rev(slist);
-  okfail(0==list_cmp(String::strptrcmp,slist,List::rev(rlist)));
+  okfail(0==test_list_cmp(String::strptrcmp,slist,List::rev(rlist)));
 
   list_t<int> xx = null;
   list_t<int> yy = null;
@@ -209,7 +209,7 @@ void list_test() {
   // yy = list of 10 11's
   for (int i=1; i<11; i++) yy = &List(11,yy);
   try {
-    okfail(0==list_cmp(int_cmp,yy,
+    okfail(0==test_list_cmp(int_cmp,yy,
                        List::map2(my_add,xx,List::rev(xx))));
   }
   catch {
@@ -343,7 +343,7 @@ void set_test() {
   okfail(Set::member(x,-2));
   okfail(Set::member(Set::delete(x,9),-2));
   okfail(!Set::member(x,4));
-  okfail(list_cmp(int_cmp,Set::elements(x),
+  okfail(test_list_cmp(int_cmp,Set::elements(x),
                   &List(-2,&List(2,&List(9,&List(11,null))))) == 0);
   okfail(Set::subset(x2,x));
   okfail(!Set::subset(x,x2));
@@ -369,7 +369,7 @@ void set_test() {
   s = Set::insert(s,allocstr("world"));
   s = Set::insert(s,allocstr("sphinx"));
   s = Set::insert(s,allocstr("quartz"));
-  okfail(list_cmp(String::strptrcmp,Set::elements(s),
+  okfail(test_list_cmp(String::strptrcmp,Set::elements(s),
                   &List(allocstr("hello"),
                         &List(allocstr("quartz"),
                               &List(allocstr("sphinx"),
@@ -625,8 +625,8 @@ void bitvec_test() {
   okfail(Bitvec::get(b1,4));
   okfail(!Bitvec::get(b1,2));
   let l1 = Bitvec::to_sorted_list(b1,24);
-  okfail(0==list_cmp(int_cmp,l1,
-                     &List(3,&List(4,null))));
+  okfail(0==test_list_cmp(int_cmp,l1,
+			  &List(3,&List(4,null))));
   bitvec_t b2 = Bitvec::new_full(24);
   bitvec_t b3 = Bitvec::new_empty(24);
   Bitvec::intersect_two(b3,b1,b2);

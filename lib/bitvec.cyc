@@ -104,7 +104,7 @@ List::list_t<int> to_sorted_list(gbitvec_t<`r> bvec,int sz) {
     int bits = bvec[word];
     for(int offset = POS_TO_BIT(pos); offset >= 0; --offset, --pos)
       if (((bits >> offset) & 1) == 1)
-	ans = &List::List(pos,ans); 
+	ans = new{List::List(pos,ans)};
   }
   return ans;
 }  

@@ -381,7 +381,8 @@ static fndecl make_function(opt_t<decl_spec_t> dso, declarator_t d,
       return &Fndecl {.sc=sc,.name=d->id,.tvs=tvs,
                          .is_inline=is_inline,.effect=eff,
                          .ret_type=ret_type,.args=args2,
-                         .varargs=varargs,.body=body,.cached_typ=null};
+                         .varargs=varargs,.body=body,.cached_typ=null,
+			 .param_vardecls=null};
     default:
       return abort("declarator is not a function prototype",loc);
   }

@@ -69,6 +69,11 @@ extern void app_c(`c f(`d,`a,`b),`d env,hdict_t<`a,`b,`e> d);
 extern void iter(void f(`a,`b),hdict_t<`a,`b,`e> d);
 extern void iter_c(void f(`c,`a,`b),`c env,hdict_t<`a,`b,`e> d);
 
+// raises Absent if an element of d1 is not in d2
+extern void iter2_c(void (@f)(`c,`b,`b), `c env,
+		    hdict_t<`a,`b,`e> d1, 
+		    hdict_t<`a,`b,`e> d2);
+
 // Given a function that maps 'b values to 'c values, convert an
 // hdict_t<'a,'b> to a hdict_t<'a,'c> by applying the function to each
 // data item.
@@ -83,9 +88,15 @@ extern hdict_t<`a,`b,`e> union_two(`b (@f)(`b,`b),
 
 extern hdict_t<`a,`b,`e> intersect(`b (@f)(`b,`b),
                                    hdict_t<`a,`b,`e> d1, hdict_t<`a,`b,`e> d2);
+extern hdict_t<`a,`b,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
+				     hdict_t<`a,`b,`e> d1, 
+				     hdict_t<`a,`b,`e> d2);
 
 extern bool forall_c(bool f(`c,`a,`b), `c env, hdict_t<`a,`b,`e> d);
 
+extern bool forall_intersect(bool (@f)(`a,`b,`b), 
+			     hdict_t<`a,`b,`d> d1,
+			     hdict_t<`a,`b,`d> d2);
 // Return a key/data pair (in this case -- the first one in the dict).
 // If the dict is empty, raise Absent.
 extern $(`a,`b)@ choose(hdict_t<`a,`b,`e> d);

@@ -417,7 +417,7 @@ static bool cf_check_stmt_ft(flow_info_t env, stmt s) {
 // NOTE: all control-flow to below a switch is currently done
 // via break, i.e. non-local-preds. That is why we seem to ignore
 // the synth from the clauses.
-static void cf_check_switch_clauses(flow_info_t env, list_t<switch_clause> scs) {
+static void cf_check_switch_clauses(flow_info_t env, list_t<switch_clause> scs){
   for(; scs != null; scs = scs->tl) {
     let &Switch_clause(_,_,where_opt,body,_) = scs->hd;
     if(where_opt!=null) 
@@ -489,8 +489,8 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
   case Continue_s(dest):
     update_flow((stmt)dest, env);
     return empty_flow();
-  case Fallthru_s(es,dest):
-    update_flow((stmt)dest, 
+  case Fallthru_s(es,&dest_clause):
+    update_flow((stmt)dest_clause->body, 
 		expsynth_to_flow(cf_check_explist_unordered(env,es)));
     return empty_flow();
 

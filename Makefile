@@ -64,7 +64,7 @@ cmp:
 	@for i in $(C_SRCS); do (cmp -s bin/genfiles/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
 	@for i in $(C_LIBS); do (cmp -s bin/genfiles/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX $(C_RUNTIME) CHANGED
-	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX precore.h CHANGED
+	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX precore_c.h CHANGED
 
 # This target updates what is in bin/genfiles.  It would be "dangerous"
 # to invoke this target with "make -k" if we did not have version control.

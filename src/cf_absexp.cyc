@@ -25,6 +25,9 @@
 // aggregate sense.  It is up to the translation to pass us the right type
 // to make this happen.
 
+// for debugging
+#include "stdio.h"
+
 #include "core.h"
 #include "list.h"
 #include "dict.h"
@@ -45,14 +48,23 @@ typedef vardecl             vardecl_t;
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t     seg_t;
 
-enum Absexpgroup { OrderedG; UnorderedG; OneofG };
+enum Absexpgroup { 
+  OrderedG;   //all get executed in left-to-right order
+  UnorderedG; //could be any order, analysis more conservative than permutations
+  OneofG;     //exactly one option gets executed
+};
+
+// see comments in .h file
+absexpgroup_t mkAnyOrderG() {
+  return OrderedG;
+}
 
 abstract enum Absexp {
   BottomAE;
   SkipAE;
   UseAE(absop_t); 
   AssignAE(absop_t,absop_t); // first operand must be an lvalue
-  MallocAE(exp,int); // int is unique id (for debugging)
+  MallocAE(local_root_t,int); // int is unique id (for debugging)
   StmtAE(stmt);
   GroupAE(absexpgroup_t,list_t<absexp_t>);
 };
@@ -148,8 +160,9 @@ absexp_t mkBottomAE() {
 absexp_t mkSkipAE() { 
   return SkipAE;
 }
+// Note: should not be called twice with the same e
 absexp_t mkMallocAE(exp e) {
-  return MallocAE(e,mallocpt_int(e));
+  return MallocAE(MallocPt(e),mallocpt_int(e));
 }
 absexp_t mkStmtAE(stmt s) {
   return StmtAE(s);
@@ -208,61 +221,6 @@ bool isUnknownOp(absop_t ao) {
   return ao == UnknownOp;
 }
 
-/////////////////////////// Abstract Evaluation ///////////////////////////
-// Note: should have versions that takes state_dict b/c of recursive calls??
-// Note: eval_absop_l never returns ThisInit or Uninit???????
-// DO ME!!!!!!
-init_state_t eval_absop_l(seg_t loc, absop_t ao, flow_info_t flow) {
-  return Uninit;
-}
-init_state_t eval_absop_r(seg_t loc, absop_t ao, flow_info_t flow) {
-  return Uninit;
-}
-// DO ME!!!!!!
-flow_info_t eval_absexp(seg_t loc, absexp_t ae, flow_info_t in_flow) {
-  switch(ae) {
-  case UseAE(ao): 
-    let state = eval_absop_r(loc,ao,in_flow);
-    // must check for all init (detecting cycles -- do it in CfFlowInfo)
-    // must "nuke downstream"
-    return in_flow;
-  case AssignAE(aol,aor): 
-    // DO ME: if aol is not MustPointTo(p), must "nuke downstream"
-    throw Core::Impossible("");
-  case MallocAE(e,_):     
-    // DO ME: need to do nuke anything that points to part of MallocPt(e)
-    //   That's what the backward-pointer dictionary is for!
-    // Then have to make all the fields Uninit.
-    throw Core::Impossible("");
-
-    // The rest of the cases are done but untested.
-  case BottomAE:  return BottomFL;
-  case SkipAE:    return in_flow;
-
-  case StmtAE(s): return cf_analyze_stmt(s,in_flow);
-
-  case GroupAE(OrderedG,ael):
-    for(; ael != null; ael = ael->tl)
-      in_flow = eval_absexp(loc,ael->hd,in_flow);
-    return in_flow;
-
-  case GroupAE(OneofG,ael):
-    let out_flow = BottomFL; 
-    for(; ael != null; ael = ael->tl)
-      out_flow = join_flow(out_flow, eval_absexp(loc, ael->hd, in_flow));
-    return out_flow;
-
-  case GroupAE(UnorderedG,ael): // local iteration until we reach a fixpoint
-    _ out_flow;
-    do {
-      out_flow = in_flow;
-      for(; ael != null; ael = ael->tl)
-	out_flow = join_flow(out_flow, eval_absexp(loc, ael->hd, out_flow));
-    } while(out_flow != in_flow);
-    return out_flow;
-  }
-}
-
 ///////////////////////// Printing and Debugging //////////////////////////////
 string absop2string(absop_t ao) {
   switch(ao) {
@@ -287,7 +245,7 @@ string absexp2string(absexp_t ae, int depth) {
   switch(ae) {
   case SkipAE:        ans = xprintf("%sskip",ans); break;
   case UseAE(r):      ans = xprintf("%suse %s",ans,absop2string(r)); break;
-  case MallocAE(e,i): ans = xprintf("%smalloc %i",ans,i); break;
+  case MallocAE(MallocPt(e),i): ans = xprintf("%smalloc %i",ans,i); break;
   case AssignAE(l,r): ans = xprintf("%sassign %s %s",ans,
 				    absop2string(l), absop2string(r)); break;
   case GroupAE(g,l):
@@ -302,6 +260,7 @@ string absexp2string(absexp_t ae, int depth) {
     
   case StmtAE(s): ans = xprintf("%s<<stmt>>",ans); break;
   case BottomAE:  ans = xprintf("%sbottom",  ans); break;
+  default: throw BadAbsexp;
   }
   return ans;
 }
@@ -320,6 +279,7 @@ void check_absexp(absexp_t ae) {
   switch(ae) {
   case BottomAE:      return;
   case SkipAE:        return;
+  case MallocAE(VarRoot(_),_): throw BadAbsexp;
   case MallocAE(_,_): return;
   case StmtAE(s):     return;
   case GroupAE(_,l):  
@@ -334,3 +294,255 @@ void check_absexp(absexp_t ae) {
     return;
   }
 }
+
+/////////////////////////// Abstract Evaluation ///////////////////////////
+
+// An Unknown means an assignment must be totally init (for alias reasons!)
+// And for AddressOf, the result is AllIL if totally init, ThisIL otherwise.
+
+// To do: AVOID ALL THIS ALLOCATION! (reverse the field list in place???)
+// FIX: Cannot descend through uninitialized -- it's an error that must
+//      be reported!
+path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao);
+init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
+  switch(ao) {
+  case LocalOp(vd):   return MustPointTo(new {Place(VarRoot(vd),null)});
+  case MallocOp(e,_): return MustPointTo(new {Place(MallocPt(e),null)});
+  case MemberOp(ao2,n):
+    let inner_state = eval_absop_l(pinfo_dict,ao2); 
+    switch(inner_state) {
+    case UnknownIS(_,_): return inner_state;
+    case MustPointTo(&Place(root,field_list)): // too much allocation!!!
+      return MustPointTo(new {Place(root, 
+				    append(field_list, new{List(n,null)}))});
+    }
+  case DerefOp(ao2): 
+    let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
+    switch(inner_pinfo) {
+    case LeafPI(x):   return x;
+    case TuplePI(_):  fallthru;
+    case StructPI(_): throw BadAbsexp; // you cannot * a tuple or struct
+    }
+  case UnknownOp: fallthru;
+  case AddressOp(_): throw BadAbsexp;
+  }
+}
+// MORE ALLOCATION TO AVOID HERE!
+path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
+  switch(ao) {
+  case LocalOp(vd):   return Dict::lookup(pinfo_dict, VarRoot(vd));
+  case MallocOp(e,_): return Dict::lookup(pinfo_dict, MallocPt(e));
+  case MemberOp(ao2,f):
+    let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
+    switch($(inner_pinfo,f)) {
+    case $(LeafPI(UnknownIS(_,_)), _): return inner_pinfo;
+    case $(TuplePI(d),  TupleF(i)):    return Dict::lookup(d, i);
+    case $(StructPI(d), StructF(n)):   return Dict::lookup(d, n);
+    default: throw BadAbsexp;
+    }
+  case DerefOp(ao2):
+    let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
+    switch(inner_pinfo) {
+    case LeafPI(UnknownIS(_,_)):     return inner_pinfo;
+    case LeafPI(MustPointTo(place)): return lookup_place(pinfo_dict, place);
+    default: throw BadAbsexp;
+    }
+  case UnknownOp:      return mkLeafPI(Esc,AllIL); // correct variants??
+  case AddressOp(ao2): return LeafPI(eval_absop_l(pinfo_dict,ao2));
+  }
+}
+
+// to do: avoid allocation here where possible (don't use intersect!!!)
+// note: list is logically a set, but compare is a pain and a list just means
+//       repeated work.
+void assign_escape(List::list_t<path_info_t>@`r escaping_states,
+		   path_info_t old_pinfo, path_info_t new_pinfo) {
+  switch($(old_pinfo,new_pinfo)) {
+  case $(LeafPI(UnknownIS(Esc,_)), LeafPI(_)):
+    *escaping_states = new{List(new_pinfo, *escaping_states)};
+    return;
+  case $(LeafPI(_), LeafPI(_)):
+    return;
+  case $(TuplePI(d1),  TuplePI(d2)):
+    Dict::iter2_c(assign_escape, escaping_states, d1, d2);
+    return;
+  case $(StructPI(d1), StructPI(d2)):
+    Dict::iter2_c(assign_escape, escaping_states, d1, d2);
+    return;
+  default: throw Core::Impossible("bad pinfos in assign_escape");
+  }
+}
+
+bool is_ok_malloc_assign(absop_t lval, list_t<exp> ok_mallocs) {
+  switch(lval) {
+  case MallocOp(e,_):   return List::memq(ok_mallocs,e);
+  case MemberOp(ao2,_): return is_ok_malloc_assign(ao2,ok_mallocs);
+  default: return false;
+  }
+}
+
+//This function is for the Unordered KLUDGE (see comments at end of eval_absexp)
+//Note: descent through Unordered means O(n^2) overall.  Should be unnecessary??
+$(list_t<absexp_t>, list_t<exp>) unordered_mallocs(absexp_t ae,
+						   list_t<exp> ok_mallocs) {
+  let assigns = null;
+  let mallocs = null;
+  switch (ae) {
+  case BottomAE:  break;
+  case SkipAE:    break;
+  case UseAE(_):  break;
+  case AssignAE(ao1,ao2):
+    if(is_ok_malloc_assign(ao1, ok_mallocs))
+      assigns = new{List(ae, assigns)};
+    break;
+  case MallocAE(MallocPt(e),_): 
+    mallocs = new{List(e, mallocs)};
+    break;
+  case MallocAE(_,_): throw Core::Impossible("local variable in MallocAE");
+  case StmtAE(s): break; // conservative
+  case GroupAE(OrderedG, ael):
+    for(; ael != null; ael = ael->tl) {
+      let $(next_assigns, next_mallocs) =  
+	unordered_mallocs(ael->hd, append(mallocs, ok_mallocs));
+      assigns = append(next_assigns, assigns);
+      mallocs = append(next_mallocs, mallocs);
+    }
+    break;
+  case GroupAE(OneofG, ael):
+    // FIX: take intersection over mallocs and assigns in all ael
+    //      what we have here is sound though
+    break;
+  case GroupAE(UnorderedG, ael):
+    for(; ael != null; ael = ael->tl) {
+      let $(next_assigns, next_mallocs) =  
+	unordered_mallocs(ael->hd, ok_mallocs);
+      assigns = append(next_assigns, assigns);
+      mallocs = append(next_mallocs, mallocs);
+    }
+    break;
+  }
+  return $(assigns,mallocs);
+}
+
+// Note: It is CRUCIAL to get exn handling right that the Use and Assign
+//       cases update tryflow.  Malloc needn't update only b/c tryflow
+//       cannot possibly have the malloc op in its domain.
+flow_info_t eval_absexp(analenv_t env, seg_t loc, 
+			absexp_t ae, flow_info_t in_flow) {
+  //  fprintf(Stdio::stderr, "%s\n", absexp2string(ae,0));
+  pinfo_dict_t<local_root_t> pinfo_dict;
+  switch(in_flow) {
+  case BottomFL:   return BottomFL;
+  case InitsFL(d): pinfo_dict = d; break;
+  }
+  switch(ae) {
+
+    // To do: try to avoid unncessary allocation in AssignAE
+  case AssignAE(aol,aor):
+    switch(eval_absop_l(pinfo_dict, aol)) {
+    case UnknownIS(_,_): break; 
+    case MustPointTo(place):
+      // WARNING: place better be in the dict (in scope)
+      //   which is why we have kludges for Comprehension_e
+      let old_pinfo = lookup_place(pinfo_dict, place);
+      let new_pinfo = eval_absop_r(pinfo_dict, aor);
+      switch($(old_pinfo,new_pinfo)) {
+      case $(TuplePI(_),  LeafPI(UnknownIS(_,level))): fallthru(level);
+      case $(StructPI(_), LeafPI(UnknownIS(_,level))):
+	new_pinfo  = assign_unknown_dict(level, old_pinfo);
+	pinfo_dict = insert_place(pinfo_dict, place, new_pinfo);
+	let ans = InitsFL(pinfo_dict);
+	update_tryflow(env, ans);
+	return ans;
+      default: 
+	let escaping_pinfos = null;
+	assign_escape(&escaping_pinfos, old_pinfo, new_pinfo);
+	for(; escaping_pinfos != null; escaping_pinfos = escaping_pinfos->tl) {
+	  let esc_pinfo = escaping_pinfos->hd;
+	  if(!isAllInit(pinfo_dict, esc_pinfo)) {
+	    Tcutil::terr(loc,"uninitialized value assigned to escaped place");
+	    return BottomFL; // attempt to avoid cascaded messages
+	  }
+	  pinfo_dict = escape_pointsto(esc_pinfo, pinfo_dict);
+	}
+	pinfo_dict = insert_place(pinfo_dict, place, new_pinfo);
+	let ans = InitsFL(pinfo_dict);
+	update_tryflow(env,ans);
+	return ans;
+      }	
+    }
+    fallthru(aor); // this should be correct for all Unknown variants (??)
+
+  case UseAE(ao): 
+    let pinfo = eval_absop_r(pinfo_dict, ao);
+    if(!isAllInit(pinfo_dict, pinfo)) {
+      Tcutil::terr(loc, xprintf("%s must be fully initialized to be used here",
+				absop2string(ao)));
+      return BottomFL; // attempt to avoid cascaded messages
+    }
+
+    let out_dict = escape_pointsto(pinfo, pinfo_dict);
+    if(out_dict == pinfo_dict) return in_flow;
+    let ans = InitsFL(pinfo_dict);
+
+    update_tryflow(env,ans);
+    return ans;
+
+  case MallocAE(root,_): 
+    // Don't bother with the "already all uninit" since it's unlikely.
+    // (Warning: if you disagree, be careful: root might not be in pinfo_dict!)
+    // To do: avoid the repeated allocation.
+    return InitsFL(Dict::insert(pinfo_dict, root,
+				Dict::lookup(env->roots,root)));
+
+  case BottomAE:  return BottomFL;
+  case SkipAE:    return in_flow;
+
+  case StmtAE(s): return cf_analyze_stmt(env,s,in_flow);
+
+  case GroupAE(OrderedG,ael):
+    for(; ael != null; ael = ael->tl)
+      in_flow = eval_absexp(env,loc,ael->hd,in_flow);
+    return in_flow;
+  case GroupAE(OneofG,ael):
+    let out_flow = BottomFL; 
+    for(; ael != null; ael = ael->tl)
+      out_flow = join_flow(out_flow, eval_absexp(env,loc,ael->hd,in_flow));
+    return out_flow;
+  case GroupAE(UnorderedG,ael): 
+    _ out_flow = in_flow; 
+    // local iteration until we reach a fixpoint
+    // notice how we are extremely conservative.  Basically, the aes may
+    // happen any number of times in any order.
+    // That's too weak for nested malloc-and-init, so as a SOUND KLUDGE,
+    // we go back through and notice any mallocs and assignment to malloc 
+    // points that definitely occur.  The assignments must be after the 
+    // mallocs though.  We don't check that every MallocAE is for a 
+    // distinct exp, but this should be true!!
+    do {
+      in_flow  = out_flow;
+      out_flow = in_flow;
+      for(_ ael2 = ael; ael2 != null; ael2 = ael2->tl)
+	out_flow = join_flow(out_flow, eval_absexp(env,loc,ael2->hd, out_flow));
+    } while(!flow_lessthan_approx(out_flow,in_flow));
+    pinfo_dict_t<local_root_t> pinfo_dict;
+    switch(in_flow) {
+    case BottomFL:   return BottomFL;
+    case InitsFL(d): pinfo_dict = d; break;
+    }
+    // UGLY, UGLY, UGLY
+    let $(assigns,mallocs) = unordered_mallocs(ae,null);
+    for(; mallocs != null; mallocs = mallocs->tl) {
+      let malloc_pt = MallocPt(mallocs->hd); // avoid repeated allocation!
+      pinfo_dict = Dict::insert(pinfo_dict, malloc_pt, 
+				Dict::lookup(env->roots, malloc_pt));
+    }
+    out_flow = InitsFL(pinfo_dict);
+    // notice how we do these before the "outer" use/assigns -- good!
+    for(; assigns != null; assigns = assigns->tl)
+      out_flow = eval_absexp(env,loc,assigns->hd,out_flow);
+
+    return out_flow;
+  }
+}
+

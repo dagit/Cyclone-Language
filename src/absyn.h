@@ -316,7 +316,7 @@ namespace Absyn {
     Goto_s(var,stmt_opt); // stmt is dest, set by type-checking
     For_s(exp,$(exp,stmt),$(exp,stmt),stmt); 
     Switch_s(exp,list_t<switch_clause>); 
-    Fallthru_s(list_t<exp>,stmt_opt); // stmt is dest, set by type-checking
+    Fallthru_s(list_t<exp>,switch_clause *); // next case set by type-checking
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
@@ -376,6 +376,9 @@ namespace Absyn {
     Pat_b(vardecl); // may use a specialized type later
   };
 
+  // re-factor this so different kinds of vardecls only have what they
+  // need.  Makes this a struct with an enum componenent (Global, Pattern,
+  // Param, Local)
   EXTERN_DEFINITION struct Vardecl {
     scope      sc; 
     qvar       name;
@@ -397,6 +400,7 @@ namespace Absyn {
     bool                    varargs;
     stmt                    body;
     opt_t<typ>              cached_typ; // cached type of the function
+    opt_t<list_t<vardecl>>  param_vardecls; // so we can use pointer equality
   };
 
   // for structs and enums, we should really memoize the string to 

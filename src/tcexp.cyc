@@ -874,22 +874,20 @@ static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
 	terr(loc,"tuple expression has the wrong number of fields");
 	break;
       }
-      _ topt2;
       for(; es != null; es = es->tl, ts = ts->tl) {
-	topt2 = (*ts->hd)[1];
+	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
-	fields = &List(&$((*ts->hd)[0], es->hd->topt->v), fields);
+	fields = &List(new{$((*ts->hd)[0], es->hd->topt->v)}, fields);
       }
       done = true;
       break;
     default:
-      terr(loc,xprintf("initializer for %s is a tuple",typ2string(*topt)));
       break;
     }
   if(!done)
     for(; es != null; es = es->tl) {
       tcExpInitializer(te,null,es->hd);
-      fields = &List(&$(empty_tqual(), es->hd->topt->v), fields);
+      fields = &List(new{$(empty_tqual(), es->hd->topt->v)}, fields);
     }
   return TupleType(List::imp_rev(fields));
 }
@@ -923,8 +921,7 @@ static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
     }
   } else {
     switch (compress(*topt)) {
-    case PointerType(PtrInfo{elt_typ,_,_,_,_}):
-      fallthru(elt_typ);
+    case PointerType(PtrInfo{elt_typ,_,_,_,_}): fallthru(elt_typ);
     case ArrayType(elt_typ,_,_):
       let topt1 = elt_typ;
       for (let es1 = es; es1 != null; es1 = es1->tl) {
@@ -934,7 +931,6 @@ static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
       }
       break;
     default:
-      terr(loc,xprintf("initializer for %s is an array",typ2string(*topt)));
       tcExpList(te,es);
       break;
     }
@@ -999,7 +995,6 @@ static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
       bopt  = &pinfo.bounds;
       break;
     default:
-      terr(loc,xprintf("initializer for %s is an array",typ2string(*topt)));
       break;
     }
    }
