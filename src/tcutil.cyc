@@ -4038,3 +4038,20 @@ static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
   }
   return true;
 }
+
+bool is_noreturn(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{elt,_,_,_,_}): return is_noreturn(elt);
+  case &FnType(FnInfo{_,_,_,_,_,_,_,atts}):
+    for (; atts != NULL; atts = atts->tl) {
+      switch (atts->hd) {
+      case Noreturn_att: 
+        return true;
+      default: continue;
+      }
+    }
+    break;
+  default: break;
+  }
+  return false;
+}

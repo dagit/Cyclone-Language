@@ -96,6 +96,7 @@ struct AnalEnv {
   bool          in_try;      // an optimization for the common case
   flow_t        tryflow;     // updated by any flow change while in a try-block.
   place_set_t * all_changed; // NULL for "not in unorderd so don't bother"
+  bool          noreturn;    // true when function is "noreturn"
 };
 typedef struct AnalEnv @ analenv_t;
 
@@ -463,7 +464,11 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // for strange reasons, use_Rval is fine for the function pointer
     for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
       outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-    return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
+    // if the called function doesn't return, we get BottomFL out
+    if (Tcutil::is_noreturn(e1->topt->v)) 
+      return $(BottomFL,typ_to_absrval(e->topt->v,unknown_all));
+    else 
+      return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
 
   case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat}):
     root_t    root      = new MallocPt(exp);
@@ -1051,8 +1056,15 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
   switch(s->r) {
   case Skip_s: return inflow;
     // FIX: when have init parameters, check they're init by "using" them here
-  case &Return_s(NULL): return BottomFL;
+  case &Return_s(NULL): 
+    // enforce noreturn here
+    if (env->noreturn) 
+      Tcutil::terr(s->loc,"`noreturn' function might return");
+    return BottomFL;
   case &Return_s(e):    
+    // enforce noreturn here
+    if (env->noreturn) 
+      Tcutil::terr(s->loc,"`noreturn' function might return");
     let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
     use_Rval(env,e->loc,f,r);
     return BottomFL;
@@ -1238,11 +1250,13 @@ static void postpass(stmt_t s) {
 // TO DO: account for init qualifier (add ThisIL for those params and
 //        check them on return and on fall off void)
 static void check_fun(fndecl_t fd) {
-  // fprintf(stderr,"checking %s \n",*(*fd->name)[1]);
+  //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
+  //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
   flow_t    inflow  = add_vars(new ReachableFL(Dict::empty(root_cmp),NULL),
 			       fd->param_vardecls->v,
 			       unknown_all);
-  analenv_t env     = new AnalEnv(true,0,false,inflow,NULL);
+  bool noreturn     = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
+  analenv_t env     = new AnalEnv(true,0,false,inflow,NULL,noreturn);
   flow_t    outflow = inflow;
   while(env->iterate_again) {
     ++(env->iteration_num);
@@ -1253,8 +1267,25 @@ static void check_fun(fndecl_t fd) {
   switch(outflow) {
   case BottomFL: break;
   default: 
-    if(fd->ret_type != VoidType)
-      Tcutil::terr(fd->body->loc, "function may not return a value");
+    // this is the case when the function "falls off the end"
+    if (noreturn)
+      Tcutil::terr(fd->body->loc, 
+                   "`noreturn' function might (implicitly) return");
+    else {
+      switch (Tcutil::compress(fd->ret_type)) {
+      case VoidType: break;
+      case &DoubleType(_): fallthru;
+      case FloatType: fallthru;
+      case &IntType(_,_):
+        // we make these warnings to simplify porting
+        Tcutil::warn(fd->body->loc, "function may not return a value");
+        break;
+      default:
+        Tcutil::terr(fd->body->loc, "function may not return a value");
+        break;
+      }
+      break;
+    }
   }
   postpass(fd->body);
 }

@@ -151,10 +151,6 @@ static `a abort(string_t<`H> msg,seg_t sg) {
   err(msg,sg);
   throw Exit;
 }
-static void warn(string_t msg,seg_t sg) {
-  fprintf(stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
-  return;
-}
 static `a unimp(string_t msg,seg_t sg) {
   return abort(aprintf("%s unimplemented",msg),sg);
 }
@@ -366,8 +362,8 @@ static list_t<type_modifier_t>
         // Yes
         switch (args) {
         case &WithTypes(_,_,_,_,_):
-          warn("function declaration with both new- and old-style parameter"
-	       "declarations; ignoring old-style",loc);
+          Tcutil::warn(loc,"function declaration with both new- and old-style "
+                       "parameter declarations; ignoring old-style");
           return tms;
         case &NoTypes(ids,_):
           List::iter_c(only_vardecl,ids,tds);
@@ -421,11 +417,11 @@ static fndecl_t make_function(opt_t<decl_spec_t,`H> dso, declarator_t d,
   // going to append them to the function declaration and let the
   // type-checker deal with it.
   if (decl_opt != NULL)
-    warn("nested type declaration within function prototype",loc);
+    Tcutil::warn(loc,"nested type declaration within function prototype");
   if (x != NULL)
     // Example:   `a f<`b><`a>(`a x) {...}
     // Here info[2] will be the list `b.
-    warn("bad type params, ignoring",loc);
+    Tcutil::warn(loc,"bad type params, ignoring");
   // fn_type had better be a FnType
   switch (fn_type) {
     case &FnType(FnInfo{tvs,eff,ret_type,args,c_varargs,cyc_varargs,
@@ -570,7 +566,8 @@ static $(type_t,opt_t<decl_t>)
   // it's okay to not have an explicit type as long as we have some
   // combination of signed, unsigned, short, long, or longlong
   if (!seen_type) {
-    if(!seen_sign && !seen_size) err("missing type within specifier",last_loc);
+    if(!seen_sign && !seen_size) 
+      Tcutil::warn(last_loc,"missing type within specifier");
     t = new IntType(sgn, sz);
   } else {
     if(seen_sign)
@@ -704,7 +701,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 type_t speclist2typ(list_t<type_specifier_t,`H> tss, seg_t loc) {
   let $(t,decls_opt) = collapse_type_specifiers(tss,loc);
   if(decls_opt != NULL)
-    warn("ignoring nested type declaration(s) in specifier list",loc);
+    Tcutil::warn(loc,"ignoring nested type declaration(s) in specifier list");
   return t;
 }
 
@@ -855,7 +852,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
 	let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
         if (tvs2 != NULL)
-          warn("bad type params, ignoring",loc);
+          Tcutil::warn(loc,"bad type params, ignoring");
         if (exprs == NULL)
           abort("unexpected NULL in parse!",loc);
         let eopt = exprs->hd;
@@ -1183,7 +1180,8 @@ declaration_specifiers:
     { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(),NULL,false,$2)); }
 | storage_class_specifier attributes_opt declaration_specifiers
     { if ($3->sc != NULL)
-        warn("Only one storage class is allowed in a declaration",LOC(@1,@2));
+        Tcutil::warn(LOC(@1,@2),
+                     "Only one storage class is allowed in a declaration");
       $$=^$(new Declaration_spec(new Opt($1),$3->tq,$3->type_specs,
                                  $3->is_inline,
                                  List::imp_append($2,$3->attributes)));
@@ -1815,14 +1813,14 @@ parameter_declaration:
         err("parameter cannot be qualified with a namespace",LOC(@1,@1));
       let idopt = (opt_t<var_t>)(new Opt((*qv)[1]));
       if (atts2 != NULL)
-        warn("extra attributes on parameter, ignoring",LOC(@1,@2));
+        Tcutil::warn(LOC(@1,@2),"extra attributes on parameter, ignoring");
       $$=^$(new $(idopt,tq2,t2));
     }
 | specifier_qualifier_list
     { let &$(tq,tspecs,atts) = $1; 
       let t = speclist2typ(tspecs, LOC(@1,@1));
       if (atts != NULL)
-        warn("bad attributes on parameter, ignoring",LOC(@1,@1));
+        Tcutil::warn(LOC(@1,@1),"bad attributes on parameter, ignoring");
       $$=^$(new $(NULL,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
@@ -1831,9 +1829,10 @@ parameter_declaration:
       let tms = $2->tms;
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL) // Ex: int (@)<`a>
-        warn("bad type parameters on formal argument, ignoring",LOC(@1,@2));
+        Tcutil::warn(LOC(@1,@2),
+                     "bad type parameters on formal argument, ignoring");
       if (atts2 != NULL)
-        warn("bad attributes on parameter, ignoring",LOC(@1,@2));
+        Tcutil::warn(LOC(@1,@2),"bad attributes on parameter, ignoring");
       $$=^$(new $(NULL,tq2,t2));
     }
 ;
@@ -1908,7 +1907,7 @@ type_name:
     { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
       let atts = (*$1)[2];
       if (atts != NULL)
-        warn("ignoring attributes in type",LOC(@1,@1));
+        Tcutil::warn(LOC(@1,@1),"ignoring attributes in type");
       let tq = (*$1)[0];
       $$=^$(new $(NULL,tq,t));
     }
@@ -1920,9 +1919,9 @@ type_name:
       let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != NULL)
         // Ex: int (@)<`a>
-        warn("bad type params, ignoring",LOC(@2,@2));
+        Tcutil::warn(LOC(@2,@2),"bad type params, ignoring");
       if (t_info[3] != NULL)
-        warn("bad specifiers, ignoring",LOC(@2,@2));
+        Tcutil::warn(LOC(@2,@2),"bad specifiers, ignoring");
       $$=^$(new $(NULL,t_info[0],t_info[1]));
     }
 ;

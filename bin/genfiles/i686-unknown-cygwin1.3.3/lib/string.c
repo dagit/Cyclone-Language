@@ -335,26 +335,25 @@ struct _tagged_arr s, struct _tagged_arr accept); extern struct _tagged_arr Cyc_
 struct _tagged_arr s, struct _tagged_arr delim); extern struct Cyc_List_List*
 Cyc_Std_explode( struct _tagged_arr s); extern struct Cyc_List_List* Cyc_Std_rexplode(
 struct _RegionHandle*, struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode(
-struct Cyc_List_List* c); extern struct Cyc_Core_Unreachable_struct Cyc_Std___unreachable_assert;
-extern void* Cyc_Std___assert_fail( struct _tagged_arr assertion, struct
-_tagged_arr file, unsigned int line); extern unsigned char* strerror( int errnum);
-struct _tagged_arr Cyc_Std_strerror( int errnum){ return( struct _tagged_arr)
-wrap_Cstring_as_string( strerror( errnum), - 1);} unsigned int Cyc_Std_strlen(
-struct _tagged_arr s){ unsigned int i; unsigned int sz= _get_arr_size( s,
-sizeof( unsigned char)); for( i= 0; i <  sz; i ++){ if((( const unsigned char*)
-s.curr)[( int) i] == '\000'){ return i;}} return i;} inline static unsigned int
-Cyc_Std_int_strleno( struct _tagged_arr s, struct _tagged_arr error){ int i;
-unsigned int sz= _get_arr_size( s, sizeof( unsigned char)); for( i= 0; i <  sz;
-i ++){ if((( const unsigned char*) s.curr)[ i] == '\000'){ break;}} return(
-unsigned int) i;} int Cyc_Std_strcmp( struct _tagged_arr s1, struct _tagged_arr
-s2){ if( s1.curr ==  s2.curr){ return 0;}{ int i= 0; unsigned int sz1=
-_get_arr_size( s1, sizeof( unsigned char)); unsigned int sz2= _get_arr_size( s2,
-sizeof( unsigned char)); unsigned int minsz= sz1 <  sz2? sz1: sz2;( minsz <= 
-_get_arr_size( s1, sizeof( unsigned char))? minsz <=  _get_arr_size( s2, sizeof(
-unsigned char)): 0)? 0:(((( int(*)( struct _tagged_arr assertion, struct
-_tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("minsz <= s1.size && minsz <= s2.size",
-sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 84),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
+struct Cyc_List_List* c); extern void* Cyc_Std___assert_fail( struct _tagged_arr
+assertion, struct _tagged_arr file, unsigned int line); extern unsigned char*
+strerror( int errnum); struct _tagged_arr Cyc_Std_strerror( int errnum){ return(
+struct _tagged_arr) wrap_Cstring_as_string( strerror( errnum), - 1);}
+unsigned int Cyc_Std_strlen( struct _tagged_arr s){ unsigned int i; unsigned int
+sz= _get_arr_size( s, sizeof( unsigned char)); for( i= 0; i <  sz; i ++){ if(((
+const unsigned char*) s.curr)[( int) i] == '\000'){ return i;}} return i;}
+inline static unsigned int Cyc_Std_int_strleno( struct _tagged_arr s, struct
+_tagged_arr error){ int i; unsigned int sz= _get_arr_size( s, sizeof(
+unsigned char)); for( i= 0; i <  sz; i ++){ if((( const unsigned char*) s.curr)[
+i] == '\000'){ break;}} return( unsigned int) i;} int Cyc_Std_strcmp( struct
+_tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return 0;}{
+int i= 0; unsigned int sz1= _get_arr_size( s1, sizeof( unsigned char));
+unsigned int sz2= _get_arr_size( s2, sizeof( unsigned char)); unsigned int minsz=
+sz1 <  sz2? sz1: sz2;( minsz <=  _get_arr_size( s1, sizeof( unsigned char))?
+minsz <=  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct
+_tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_tag_arr("minsz <= s1.size && minsz <= s2.size", sizeof( unsigned char), 37u),
+_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 84);
 while( i <  minsz) { unsigned char c1=(( const unsigned char*) s1.curr)[ i];
 unsigned char c2=(( const unsigned char*) s2.curr)[ i]; if( c1 == '\000'){ if(
 c2 == '\000'){ return 0;} else{ return - 1;}} else{ if( c2 == '\000'){ return 1;}
@@ -367,59 +366,57 @@ Cyc_Std_ncmp( struct _tagged_arr s1, unsigned int len1, struct _tagged_arr s2,
 unsigned int len2, unsigned int n){ if( n <=  0){ return 0;}{ unsigned int
 min_len= len1 >  len2? len2: len1; unsigned int bound= min_len >  n? n: min_len;(
 bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
-s2, sizeof( unsigned char)): 0)? 0:(((( int(*)( struct _tagged_arr assertion,
+s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
 struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
 sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 120),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{
-int i= 0; for( 0; i <  bound; i ++){ int retc; if(( retc=(( const unsigned char*)
-s1.curr)[ i] - (( const unsigned char*) s2.curr)[ i]) !=  0){ return retc;}}}
-if( len1 <  n? 1: len2 <  n){ return( int) len1 - ( int) len2;} return 0;}} int
-Cyc_Std_strncmp( struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){
-unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strncmp", sizeof(
-unsigned char), 13u)); unsigned int len2= Cyc_Std_int_strleno( s2, _tag_arr("Std::strncmp",
-sizeof( unsigned char), 13u)); return Cyc_Std_ncmp( s1, len1, s2, len2, n);} int
-Cyc_Std_zstrcmp( struct _tagged_arr a, struct _tagged_arr b){ if( a.curr ==  b.curr){
-return 0;}{ unsigned int as= _get_arr_size( a, sizeof( unsigned char));
-unsigned int bs= _get_arr_size( b, sizeof( unsigned char)); unsigned int
-min_length= as <  bs? as: bs; int i= - 1;( min_length <=  _get_arr_size( a,
-sizeof( unsigned char))? min_length <=  _get_arr_size( b, sizeof( unsigned char)):
-0)? 0:(((( int(*)( struct _tagged_arr assertion, struct _tagged_arr file,
-unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("min_length <= a.size && min_length <= b.size",
-sizeof( unsigned char), 45u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 150),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-while(( ++ i, i <  min_length)) { int diff=( int)(( const unsigned char*) a.curr)[
-i] - ( int)(( const unsigned char*) b.curr)[ i]; if( diff !=  0){ return diff;}}
-return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp( struct _tagged_arr s1,
-struct _tagged_arr s2, unsigned int n){ if( n <=  0){ return 0;}{ unsigned int
-s1size= _get_arr_size( s1, sizeof( unsigned char)); unsigned int s2size=
-_get_arr_size( s2, sizeof( unsigned char)); unsigned int min_size= s1size > 
-s2size? s2size: s1size; unsigned int bound= min_size >  n? n: min_size;( bound
-<=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size( s2,
-sizeof( unsigned char)): 0)? 0:(((( int(*)( struct _tagged_arr assertion, struct
-_tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
-sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 168),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{
-int i= 0; for( 0; i <  bound; i ++){ if((( const unsigned char*) s1.curr)[ i] < ((
-const unsigned char*) s2.curr)[ i]){ return - 1;} else{ if((( const
-unsigned char*) s2.curr)[ i] < (( const unsigned char*) s1.curr)[ i]){ return 1;}}}}
-if( min_size <=  bound){ return 0;} if( s1size <  s2size){ return - 1;} else{
-return 1;}}} int Cyc_Std_zstrptrcmp( struct _tagged_arr* a, struct _tagged_arr*
-b){ return Cyc_Std_zstrcmp(* a,* b);} inline static struct _tagged_arr Cyc_Std_int_strcato(
-struct _tagged_arr dest, struct _tagged_arr src, struct _tagged_arr error){ int
-i; unsigned int dsize; unsigned int slen; unsigned int dlen; dsize=
-_get_arr_size( dest, sizeof( unsigned char)); dlen= Cyc_Std_strlen(( struct
-_tagged_arr) dest); slen= Cyc_Std_int_strleno( src, error); if( slen +  dlen <= 
-dsize){ slen <=  _get_arr_size( src, sizeof( unsigned char))? 0:(((( int(*)(
+sizeof( unsigned char), 35u), 120);{ int i= 0; for( 0; i <  bound; i ++){ int
+retc; if(( retc=(( const unsigned char*) s1.curr)[ i] - (( const unsigned char*)
+s2.curr)[ i]) !=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int)
+len1 - ( int) len2;} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1,
+struct _tagged_arr s2, unsigned int n){ unsigned int len1= Cyc_Std_int_strleno(
+s1, _tag_arr("Std::strncmp", sizeof( unsigned char), 13u)); unsigned int len2=
+Cyc_Std_int_strleno( s2, _tag_arr("Std::strncmp", sizeof( unsigned char), 13u));
+return Cyc_Std_ncmp( s1, len1, s2, len2, n);} int Cyc_Std_zstrcmp( struct
+_tagged_arr a, struct _tagged_arr b){ if( a.curr ==  b.curr){ return 0;}{
+unsigned int as= _get_arr_size( a, sizeof( unsigned char)); unsigned int bs=
+_get_arr_size( b, sizeof( unsigned char)); unsigned int min_length= as <  bs? as:
+bs; int i= - 1;( min_length <=  _get_arr_size( a, sizeof( unsigned char))?
+min_length <=  _get_arr_size( b, sizeof( unsigned char)): 0)? 0:(( int(*)(
 struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
-_tag_arr("slen <= src.size", sizeof( unsigned char), 17u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 203),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-for( i= 0; i <  slen; i ++){*(( unsigned char*) _check_unknown_subscript( dest,
-sizeof( unsigned char),( int)( i +  dlen)))=(( const unsigned char*) src.curr)[
-i];} if( i !=  dsize){*(( unsigned char*) _check_unknown_subscript( dest,
-sizeof( unsigned char),( int)( i +  dlen)))='\000';}} else{( int) _throw(( void*)({
-struct Cyc_Core_Invalid_argument_struct* _temp0=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp0[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
+_tag_arr("min_length <= a.size && min_length <= b.size", sizeof( unsigned char),
+45u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u),
+150); while(( ++ i, i <  min_length)) { int diff=( int)(( const unsigned char*)
+a.curr)[ i] - ( int)(( const unsigned char*) b.curr)[ i]; if( diff !=  0){
+return diff;}} return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp( struct
+_tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if( n <=  0){ return 0;}{
+unsigned int s1size= _get_arr_size( s1, sizeof( unsigned char)); unsigned int
+s2size= _get_arr_size( s2, sizeof( unsigned char)); unsigned int min_size=
+s1size >  s2size? s2size: s1size; unsigned int bound= min_size >  n? n: min_size;(
+bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
+s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
+struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
+sizeof( unsigned char), 35u), 168);{ int i= 0; for( 0; i <  bound; i ++){ if(((
+const unsigned char*) s1.curr)[ i] < (( const unsigned char*) s2.curr)[ i]){
+return - 1;} else{ if((( const unsigned char*) s2.curr)[ i] < (( const
+unsigned char*) s1.curr)[ i]){ return 1;}}}} if( min_size <=  bound){ return 0;}
+if( s1size <  s2size){ return - 1;} else{ return 1;}}} int Cyc_Std_zstrptrcmp(
+struct _tagged_arr* a, struct _tagged_arr* b){ return Cyc_Std_zstrcmp(* a,* b);}
+inline static struct _tagged_arr Cyc_Std_int_strcato( struct _tagged_arr dest,
+struct _tagged_arr src, struct _tagged_arr error){ int i; unsigned int dsize;
+unsigned int slen; unsigned int dlen; dsize= _get_arr_size( dest, sizeof(
+unsigned char)); dlen= Cyc_Std_strlen(( struct _tagged_arr) dest); slen= Cyc_Std_int_strleno(
+src, error); if( slen +  dlen <=  dsize){ slen <=  _get_arr_size( src, sizeof(
+unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
+file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("slen <= src.size",
+sizeof( unsigned char), 17u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
+sizeof( unsigned char), 35u), 203); for( i= 0; i <  slen; i ++){*((
+unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
++  dlen)))=(( const unsigned char*) src.curr)[ i];} if( i !=  dsize){*((
+unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
++  dlen)))='\000';}} else{( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp0=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= error; _temp1;}); _temp0;}));} return dest;} struct _tagged_arr Cyc_Std_strcat(
 struct _tagged_arr dest, struct _tagged_arr src){ return Cyc_Std_int_strcato(
 dest, src, _tag_arr("Std::strcat", sizeof( unsigned char), 12u));} struct
@@ -427,55 +424,54 @@ _tagged_arr Cyc_Std_rstrconcat( struct _RegionHandle* r, struct _tagged_arr a,
 struct _tagged_arr b){ unsigned int _temp2= Cyc_Std_strlen( a); unsigned int
 _temp3= Cyc_Std_strlen( b); struct _tagged_arr ans= Cyc_Core_rnew_string( r,(
 _temp2 +  _temp3) +  1); int i; int j;( _temp2 <=  _get_arr_size( ans, sizeof(
-unsigned char))? _temp2 <=  _get_arr_size( a, sizeof( unsigned char)): 0)? 0:((((
+unsigned char))? _temp2 <=  _get_arr_size( a, sizeof( unsigned char)): 0)? 0:((
 int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
 Cyc_Std___assert_fail)( _tag_arr("alen <= ans.size && alen <= a.size", sizeof(
 unsigned char), 35u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof(
-unsigned char), 35u), 227),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-for( i= 0; i <  _temp2; ++ i){(( unsigned char*) ans.curr)[ i]=(( const
-unsigned char*) a.curr)[ i];} _temp3 <=  _get_arr_size( b, sizeof( unsigned char))?
-0:(((( int(*)( struct _tagged_arr assertion, struct _tagged_arr file,
-unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("blen <= b.size", sizeof(
-unsigned char), 15u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof(
-unsigned char), 35u), 229),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-for( j= 0; j <  _temp3; ++ j){*(( unsigned char*) _check_unknown_subscript( ans,
-sizeof( unsigned char), i +  j))=(( const unsigned char*) b.curr)[ j];} return
-ans;} struct _tagged_arr Cyc_Std_strconcat( struct _tagged_arr a, struct
-_tagged_arr b){ return Cyc_Std_rstrconcat( Cyc_Core_heap_region, a, b);} struct
-_tagged_arr Cyc_Std_rstrconcat_l( struct _RegionHandle* r, struct Cyc_List_List*
-strs){ unsigned int len; unsigned int total_len= 0; struct _tagged_arr ans;{
-struct _RegionHandle _temp4= _new_region("temp"); struct _RegionHandle* temp=&
-_temp4; _push_region( temp);{ struct Cyc_List_List* lens=({ struct Cyc_List_List*
-_temp7=( struct Cyc_List_List*) _region_malloc( temp, sizeof( struct Cyc_List_List));
-_temp7->hd=( void*)(( unsigned int) 0); _temp7->tl= 0; _temp7;}); struct Cyc_List_List*
-end= lens;{ struct Cyc_List_List* p= strs; for( 0; p !=  0; p= p->tl){ len= Cyc_Std_strlen(*((
-struct _tagged_arr*) p->hd)); total_len += len;(( struct Cyc_List_List*)
-_check_null( end))->tl=({ struct Cyc_List_List* _temp5=( struct Cyc_List_List*)
-_region_malloc( temp, sizeof( struct Cyc_List_List)); _temp5->hd=( void*) len;
-_temp5->tl= 0; _temp5;}); end=(( struct Cyc_List_List*) _check_null( end))->tl;}}
-lens= lens->tl; ans= Cyc_Core_rnew_string( r, total_len +  1);{ unsigned int i=
-0; while( strs !=  0) { struct _tagged_arr _temp6=*(( struct _tagged_arr*) strs->hd);
-len=( unsigned int)(( struct Cyc_List_List*) _check_null( lens))->hd; Cyc_Std_strncpy(
-_tagged_arr_plus( ans, sizeof( unsigned char),( int) i), _temp6, len); i += len;
-strs= strs->tl; lens= lens->tl;}}}; _pop_region( temp);} return ans;} struct
-_tagged_arr Cyc_Std_strconcat_l( struct Cyc_List_List* strs){ return Cyc_Std_rstrconcat_l(
-Cyc_Core_heap_region, strs);} struct _tagged_arr Cyc_Std_rstr_sepstr( struct
-_RegionHandle* r, struct Cyc_List_List* strs, struct _tagged_arr separator){ if(
-strs ==  0){ return Cyc_Core_rnew_string( r, 0);} if( strs->tl ==  0){ return
-Cyc_Std_rstrdup( r,*(( struct _tagged_arr*) strs->hd));}{ struct Cyc_List_List*
-_temp8= strs; struct _RegionHandle _temp9= _new_region("temp"); struct
-_RegionHandle* temp=& _temp9; _push_region( temp);{ struct Cyc_List_List* lens=({
-struct Cyc_List_List* _temp13=( struct Cyc_List_List*) _region_malloc( temp,
-sizeof( struct Cyc_List_List)); _temp13->hd=( void*)(( unsigned int) 0); _temp13->tl=
-0; _temp13;}); struct Cyc_List_List* end= lens; unsigned int len= 0;
-unsigned int total_len= 0; unsigned int list_len= 0; for( 0; _temp8 !=  0;
-_temp8= _temp8->tl){ len= Cyc_Std_strlen(*(( struct _tagged_arr*) _temp8->hd));
+unsigned char), 35u), 227); for( i= 0; i <  _temp2; ++ i){(( unsigned char*) ans.curr)[
+i]=(( const unsigned char*) a.curr)[ i];} _temp3 <=  _get_arr_size( b, sizeof(
+unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
+file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("blen <= b.size",
+sizeof( unsigned char), 15u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
+sizeof( unsigned char), 35u), 229); for( j= 0; j <  _temp3; ++ j){*((
+unsigned char*) _check_unknown_subscript( ans, sizeof( unsigned char), i +  j))=((
+const unsigned char*) b.curr)[ j];} return ans;} struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr a, struct _tagged_arr b){ return Cyc_Std_rstrconcat( Cyc_Core_heap_region,
+a, b);} struct _tagged_arr Cyc_Std_rstrconcat_l( struct _RegionHandle* r, struct
+Cyc_List_List* strs){ unsigned int len; unsigned int total_len= 0; struct
+_tagged_arr ans;{ struct _RegionHandle _temp4= _new_region("temp"); struct
+_RegionHandle* temp=& _temp4; _push_region( temp);{ struct Cyc_List_List* lens=({
+struct Cyc_List_List* _temp7=( struct Cyc_List_List*) _region_malloc( temp,
+sizeof( struct Cyc_List_List)); _temp7->hd=( void*)(( unsigned int) 0); _temp7->tl=
+0; _temp7;}); struct Cyc_List_List* end= lens;{ struct Cyc_List_List* p= strs;
+for( 0; p !=  0; p= p->tl){ len= Cyc_Std_strlen(*(( struct _tagged_arr*) p->hd));
 total_len += len;(( struct Cyc_List_List*) _check_null( end))->tl=({ struct Cyc_List_List*
-_temp10=( struct Cyc_List_List*) _region_malloc( temp, sizeof( struct Cyc_List_List));
-_temp10->hd=( void*) len; _temp10->tl= 0; _temp10;}); end=(( struct Cyc_List_List*)
-_check_null( end))->tl; ++ list_len;} lens= lens->tl;{ unsigned int seplen= Cyc_Std_strlen(
-separator); total_len +=( list_len -  1) *  seplen;{ struct _tagged_arr ans= Cyc_Core_rnew_string(
-r, total_len); unsigned int i= 0; while( strs->tl !=  0) { struct _tagged_arr
+_temp5=( struct Cyc_List_List*) _region_malloc( temp, sizeof( struct Cyc_List_List));
+_temp5->hd=( void*) len; _temp5->tl= 0; _temp5;}); end=(( struct Cyc_List_List*)
+_check_null( end))->tl;}} lens= lens->tl; ans= Cyc_Core_rnew_string( r,
+total_len +  1);{ unsigned int i= 0; while( strs !=  0) { struct _tagged_arr
+_temp6=*(( struct _tagged_arr*) strs->hd); len=( unsigned int)(( struct Cyc_List_List*)
+_check_null( lens))->hd; Cyc_Std_strncpy( _tagged_arr_plus( ans, sizeof(
+unsigned char),( int) i), _temp6, len); i += len; strs= strs->tl; lens= lens->tl;}}};
+_pop_region( temp);} return ans;} struct _tagged_arr Cyc_Std_strconcat_l( struct
+Cyc_List_List* strs){ return Cyc_Std_rstrconcat_l( Cyc_Core_heap_region, strs);}
+struct _tagged_arr Cyc_Std_rstr_sepstr( struct _RegionHandle* r, struct Cyc_List_List*
+strs, struct _tagged_arr separator){ if( strs ==  0){ return Cyc_Core_rnew_string(
+r, 0);} if( strs->tl ==  0){ return Cyc_Std_rstrdup( r,*(( struct _tagged_arr*)
+strs->hd));}{ struct Cyc_List_List* _temp8= strs; struct _RegionHandle _temp9=
+_new_region("temp"); struct _RegionHandle* temp=& _temp9; _push_region( temp);{
+struct Cyc_List_List* lens=({ struct Cyc_List_List* _temp13=( struct Cyc_List_List*)
+_region_malloc( temp, sizeof( struct Cyc_List_List)); _temp13->hd=( void*)((
+unsigned int) 0); _temp13->tl= 0; _temp13;}); struct Cyc_List_List* end= lens;
+unsigned int len= 0; unsigned int total_len= 0; unsigned int list_len= 0; for( 0;
+_temp8 !=  0; _temp8= _temp8->tl){ len= Cyc_Std_strlen(*(( struct _tagged_arr*)
+_temp8->hd)); total_len += len;(( struct Cyc_List_List*) _check_null( end))->tl=({
+struct Cyc_List_List* _temp10=( struct Cyc_List_List*) _region_malloc( temp,
+sizeof( struct Cyc_List_List)); _temp10->hd=( void*) len; _temp10->tl= 0;
+_temp10;}); end=(( struct Cyc_List_List*) _check_null( end))->tl; ++ list_len;}
+lens= lens->tl;{ unsigned int seplen= Cyc_Std_strlen( separator); total_len +=(
+list_len -  1) *  seplen;{ struct _tagged_arr ans= Cyc_Core_rnew_string( r,
+total_len); unsigned int i= 0; while( strs->tl !=  0) { struct _tagged_arr
 _temp11=*(( struct _tagged_arr*) strs->hd); len=( unsigned int)(( struct Cyc_List_List*)
 _check_null( lens))->hd; Cyc_Std_strncpy( _tagged_arr_plus( ans, sizeof(
 unsigned char),( int) i), _temp11, len); i += len; Cyc_Std_strncpy(
@@ -489,24 +485,23 @@ struct _tagged_arr separator){ return Cyc_Std_rstr_sepstr( Cyc_Core_heap_region,
 strs, separator);} struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr dest,
 struct _tagged_arr src, unsigned int n){ int i;( n <=  _get_arr_size( src,
 sizeof( unsigned char))? n <=  _get_arr_size( dest, sizeof( unsigned char)): 0)?
-0:(((( int(*)( struct _tagged_arr assertion, struct _tagged_arr file,
-unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("n <= src.size && n <= dest.size",
+0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
+line)) Cyc_Std___assert_fail)( _tag_arr("n <= src.size && n <= dest.size",
 sizeof( unsigned char), 32u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 327),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-for( i= 0; i <  n; i ++){ unsigned char _temp14=(( const unsigned char*) src.curr)[
-i]; if( _temp14 == '\000'){ break;}(( unsigned char*) dest.curr)[ i]= _temp14;}
-for( 0; i <  n; i ++){(( unsigned char*) dest.curr)[ i]='\000';} return dest;}
-struct _tagged_arr Cyc_Std_zstrncpy( struct _tagged_arr dest, struct _tagged_arr
-src, unsigned int n){( n <=  _get_arr_size( dest, sizeof( unsigned char))? n <= 
-_get_arr_size( src, sizeof( unsigned char)): 0)? 0:(((( int(*)( struct
-_tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
-_tag_arr("n <= dest.size && n <= src.size", sizeof( unsigned char), 32u),
-_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 365),(
-int) _throw(( void*)& Cyc_Std___unreachable_assert)));{ int i; for( i= 0; i <  n;
-i ++){(( unsigned char*) dest.curr)[ i]=(( const unsigned char*) src.curr)[ i];}
-return dest;}} struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest,
-struct _tagged_arr src){ unsigned int len= Cyc_Std_strlen( src); Cyc_Std_strncpy(
-dest, src, len); if( len <  _get_arr_size( dest, sizeof( unsigned char))){((
+sizeof( unsigned char), 35u), 327); for( i= 0; i <  n; i ++){ unsigned char
+_temp14=(( const unsigned char*) src.curr)[ i]; if( _temp14 == '\000'){ break;}((
+unsigned char*) dest.curr)[ i]= _temp14;} for( 0; i <  n; i ++){(( unsigned char*)
+dest.curr)[ i]='\000';} return dest;} struct _tagged_arr Cyc_Std_zstrncpy(
+struct _tagged_arr dest, struct _tagged_arr src, unsigned int n){( n <= 
+_get_arr_size( dest, sizeof( unsigned char))? n <=  _get_arr_size( src, sizeof(
+unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
+_tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("n <= dest.size && n <= src.size",
+sizeof( unsigned char), 32u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
+sizeof( unsigned char), 35u), 365);{ int i; for( i= 0; i <  n; i ++){((
+unsigned char*) dest.curr)[ i]=(( const unsigned char*) src.curr)[ i];} return
+dest;}} struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
+_tagged_arr src){ unsigned int len= Cyc_Std_strlen( src); Cyc_Std_strncpy( dest,
+src, len); if( len <  _get_arr_size( dest, sizeof( unsigned char))){((
 unsigned char*) dest.curr)[( int) len]='\000';} return dest;} struct _tagged_arr
 Cyc_Std_rstrdup( struct _RegionHandle* r, struct _tagged_arr src){ unsigned int
 len; struct _tagged_arr temp; len= Cyc_Std_strlen( src); temp= Cyc_Core_rnew_string(
@@ -536,21 +531,20 @@ _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp15[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp16; _temp16.tag= Cyc_Core_Invalid_argument;
 _temp16.f1= _tag_arr("Std::substring", sizeof( unsigned char), 15u); _temp16;});
 _temp15;}));}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r, amt +  1); amt < 
-_get_arr_size( ans, sizeof( unsigned char))? 0:(((( int(*)( struct _tagged_arr
+_get_arr_size( ans, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
 assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("amt < ans.size", sizeof( unsigned char), 15u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 448),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{
-unsigned int i= 0; for( 0; i <  amt; ++ i){(( unsigned char*) ans.curr)[( int) i]=*((
-const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),( int)(
-start +  i)));}}(( unsigned char*) ans.curr)[( int) amt]='\000'; return ans;}}
-struct _tagged_arr Cyc_Std_substring( struct _tagged_arr s, int start,
-unsigned int amt){ return Cyc_Std_rsubstring( Cyc_Core_heap_region, s, start,
-amt);} struct _tagged_arr Cyc_Std_rreplace_suffix( struct _RegionHandle* r,
-struct _tagged_arr src, struct _tagged_arr curr_suffix, struct _tagged_arr
-new_suffix){ unsigned int m= _get_arr_size( src, sizeof( unsigned char));
-unsigned int n= _get_arr_size( curr_suffix, sizeof( unsigned char)); struct
-_tagged_arr err= _tag_arr("Std::replace_suffix", sizeof( unsigned char), 20u);
-if( m <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+sizeof( unsigned char), 35u), 448);{ unsigned int i= 0; for( 0; i <  amt; ++ i){((
+unsigned char*) ans.curr)[( int) i]=*(( const unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char),( int)( start +  i)));}}((
+unsigned char*) ans.curr)[( int) amt]='\000'; return ans;}} struct _tagged_arr
+Cyc_Std_substring( struct _tagged_arr s, int start, unsigned int amt){ return
+Cyc_Std_rsubstring( Cyc_Core_heap_region, s, start, amt);} struct _tagged_arr
+Cyc_Std_rreplace_suffix( struct _RegionHandle* r, struct _tagged_arr src, struct
+_tagged_arr curr_suffix, struct _tagged_arr new_suffix){ unsigned int m=
+_get_arr_size( src, sizeof( unsigned char)); unsigned int n= _get_arr_size(
+curr_suffix, sizeof( unsigned char)); struct _tagged_arr err= _tag_arr("Std::replace_suffix",
+sizeof( unsigned char), 20u); if( m <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
 _temp17=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp17[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp18; _temp18.tag= Cyc_Core_Invalid_argument; _temp18.f1= err; _temp18;});
@@ -644,34 +638,33 @@ start, needle,( unsigned int) len) ==  0){ return start;}}} return _tag_arr( 0u,
 0u, 0u);}} unsigned int Cyc_Std_strspn( struct _tagged_arr s, struct _tagged_arr
 accept){ unsigned int len= Cyc_Std_int_strleno( s, _tag_arr("Std::strspn",
 sizeof( unsigned char), 12u)); unsigned int asize= _get_arr_size( accept,
-sizeof( unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:((((
+sizeof( unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:((
 int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
 Cyc_Std___assert_fail)( _tag_arr("len <= s.size", sizeof( unsigned char), 14u),
-_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 596),(
-int) _throw(( void*)& Cyc_Std___unreachable_assert)));{ unsigned int i= 0; for(
-0; i <  len; i ++){ int j; for( j= 0; j <  asize; j ++){ if((( const
-unsigned char*) s.curr)[( int) i] == (( const unsigned char*) accept.curr)[ j]){
-break;}} if( j ==  asize){ return i;}}} return len;} unsigned int Cyc_Std_strcspn(
+_tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u), 596);{
+unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize; j ++){
+if((( const unsigned char*) s.curr)[( int) i] == (( const unsigned char*) accept.curr)[
+j]){ break;}} if( j ==  asize){ return i;}}} return len;} unsigned int Cyc_Std_strcspn(
 struct _tagged_arr s, struct _tagged_arr accept){ unsigned int len= Cyc_Std_int_strleno(
 s, _tag_arr("Std::strspn", sizeof( unsigned char), 12u)); unsigned int asize=
 _get_arr_size( accept, sizeof( unsigned char)); len <=  _get_arr_size( s,
-sizeof( unsigned char))? 0:(((( int(*)( struct _tagged_arr assertion, struct
+sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
 sizeof( unsigned char), 14u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 616),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{
-unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize; j ++){
-if((( const unsigned char*) s.curr)[( int) i] != (( const unsigned char*) accept.curr)[
-j]){ break;}} if( j ==  asize){ return i;}}} return len;} struct _tagged_arr Cyc_Std_strtok(
-struct _tagged_arr s, struct _tagged_arr delim){ static struct _tagged_arr olds={(
-void*) 0u,( void*) 0u,( void*)( 0u +  0u)}; struct _tagged_arr token; if( s.curr
-== ( _tag_arr( 0u, 0u, 0u)).curr){ if( olds.curr == ( _tag_arr( 0u, 0u, 0u)).curr){
-return _tag_arr( 0u, 0u, 0u);} s= olds;}{ unsigned int inc= Cyc_Std_strspn((
-struct _tagged_arr) s, delim); if( inc >=  _get_arr_size( s, sizeof(
-unsigned char))? 1:*(( unsigned char*) _check_unknown_subscript(
-_tagged_arr_plus( s, sizeof( unsigned char),( int) inc), sizeof( unsigned char),
-0u)) == '\000'){ olds= _tag_arr( 0u, 0u, 0u); return _tag_arr( 0u, 0u, 0u);}
-else{ _tagged_arr_inplace_plus(& s, sizeof( unsigned char),( int) inc);} token=
-s; s= Cyc_Std_mstrpbrk( token, delim); if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr){
+sizeof( unsigned char), 35u), 616);{ unsigned int i= 0; for( 0; i <  len; i ++){
+int j; for( j= 0; j <  asize; j ++){ if((( const unsigned char*) s.curr)[( int)
+i] != (( const unsigned char*) accept.curr)[ j]){ break;}} if( j ==  asize){
+return i;}}} return len;} struct _tagged_arr Cyc_Std_strtok( struct _tagged_arr
+s, struct _tagged_arr delim){ static struct _tagged_arr olds={( void*) 0u,( void*)
+0u,( void*)( 0u +  0u)}; struct _tagged_arr token; if( s.curr == ( _tag_arr( 0u,
+0u, 0u)).curr){ if( olds.curr == ( _tag_arr( 0u, 0u, 0u)).curr){ return _tag_arr(
+0u, 0u, 0u);} s= olds;}{ unsigned int inc= Cyc_Std_strspn(( struct _tagged_arr)
+s, delim); if( inc >=  _get_arr_size( s, sizeof( unsigned char))? 1:*((
+unsigned char*) _check_unknown_subscript( _tagged_arr_plus( s, sizeof(
+unsigned char),( int) inc), sizeof( unsigned char), 0u)) == '\000'){ olds=
+_tag_arr( 0u, 0u, 0u); return _tag_arr( 0u, 0u, 0u);} else{
+_tagged_arr_inplace_plus(& s, sizeof( unsigned char),( int) inc);} token= s; s=
+Cyc_Std_mstrpbrk( token, delim); if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr){
 olds= _tag_arr( 0u, 0u, 0u);} else{*(( unsigned char*) _check_unknown_subscript(
 s, sizeof( unsigned char), 0u))='\000'; olds= _tagged_arr_plus( s, sizeof(
 unsigned char), 1);} return token;}} struct Cyc_List_List* Cyc_Std_rexplode(
@@ -689,14 +682,13 @@ unsigned char)(( int) chars->hd); chars= chars->tl;} return s;} inline static
 int Cyc_Std_casecmp( struct _tagged_arr s1, unsigned int len1, struct
 _tagged_arr s2, unsigned int len2){ unsigned int min_length= len1 <  len2? len1:
 len2;( min_length <=  _get_arr_size( s1, sizeof( unsigned char))? min_length <= 
-_get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(((( int(*)( struct
-_tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+_get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
+assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
 _tag_arr("min_length <= s1.size && min_length <= s2.size", sizeof( unsigned char),
 47u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc", sizeof( unsigned char), 35u),
-697),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{ int i= - 1;
-while(( ++ i, i <  min_length)) { int diff= toupper(( int)(( const unsigned char*)
-s1.curr)[ i]) -  toupper(( int)(( const unsigned char*) s2.curr)[ i]); if( diff
-!=  0){ return diff;}} return( int) len1 - ( int) len2;}} int Cyc_Std_strcasecmp(
+697);{ int i= - 1; while(( ++ i, i <  min_length)) { int diff= toupper(( int)((
+const unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const unsigned char*) s2.curr)[
+i]); if( diff !=  0){ return diff;}} return( int) len1 - ( int) len2;}} int Cyc_Std_strcasecmp(
 struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
 0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",
 sizeof( unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2,
@@ -706,53 +698,53 @@ _tagged_arr s1, unsigned int len1, struct _tagged_arr s2, unsigned int len2,
 unsigned int n){ if( n <=  0){ return 0;}{ unsigned int min_len= len1 >  len2?
 len2: len1; unsigned int bound= min_len >  n? n: min_len;( bound <= 
 _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size( s2, sizeof(
-unsigned char)): 0)? 0:(((( int(*)( struct _tagged_arr assertion, struct
+unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
 sizeof( unsigned char), 37u), _tag_arr("/cygdrive/c/cyclone/lib/string.cyc",
-sizeof( unsigned char), 35u), 724),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));{
-int i= 0; for( 0; i <  bound; i ++){ int retc; if(( retc= toupper(( int)(( const
-unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const unsigned char*) s2.curr)[
-i])) !=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int) len1 - (
-int) len2;} return 0;}} int Cyc_Std_strncasecmp( struct _tagged_arr s1, struct
-_tagged_arr s2, unsigned int n){ unsigned int len1= Cyc_Std_int_strleno( s1,
-_tag_arr("Std::strncasecmp", sizeof( unsigned char), 17u)); unsigned int len2=
-Cyc_Std_int_strleno( s2, _tag_arr("Std::strncasecmp", sizeof( unsigned char), 17u));
-return Cyc_Std_caseless_ncmp( s1, len1, s2, len2, n);} extern void* memcpy( void*,
-const void*, unsigned int n); extern void* memmove( void*, const void*,
-unsigned int n); extern int memcmp( const void*, const void*, unsigned int n);
-extern unsigned char* memchr( const unsigned char*, unsigned char c,
-unsigned int n); extern void* memset( void*, int c, unsigned int n); extern void
-bcopy( const void* src, void* dest, unsigned int n); extern void bzero( void* s,
-unsigned int n); extern unsigned char* GC_realloc( unsigned char*, unsigned int
-n); struct _tagged_arr Cyc_Std_realloc( struct _tagged_arr s, unsigned int n){
-unsigned char* _temp26= GC_realloc(( unsigned char*) _check_null( _untag_arr( s,
-sizeof( unsigned char), 1u)), n); return wrap_Cstring_as_string( _temp26, n);}
-struct _tagged_arr Cyc_Std__memcpy( struct _tagged_arr d, struct _tagged_arr s,
-unsigned int n, unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr?
-1: _get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
-_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp27=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp27[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp28; _temp28.tag= Cyc_Core_Invalid_argument;
-_temp28.f1= _tag_arr("Std::memcpy", sizeof( unsigned char), 12u); _temp28;});
-_temp27;}));} memcpy(( void*) _check_null( _untag_arr( d, sizeof( void), 1u)),(
-const void*) _check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz); return d;}
-struct _tagged_arr Cyc_Std__memmove( struct _tagged_arr d, struct _tagged_arr s,
-unsigned int n, unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr?
-1: _get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
-_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp29=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp29[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp30; _temp30.tag= Cyc_Core_Invalid_argument;
-_temp30.f1= _tag_arr("Std::memove", sizeof( unsigned char), 12u); _temp30;});
-_temp29;}));} memmove(( void*) _check_null( _untag_arr( d, sizeof( void), 1u)),(
-const void*) _check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz); return d;}
-int Cyc_Std_memcmp( struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){
-if((( s1.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: s2.curr
-== (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s1,
-sizeof( unsigned char)) >=  n)? 1: _get_arr_size( s2, sizeof( unsigned char)) >= 
-n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp31=(
-struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+sizeof( unsigned char), 35u), 724);{ int i= 0; for( 0; i <  bound; i ++){ int
+retc; if(( retc= toupper(( int)(( const unsigned char*) s1.curr)[ i]) -  toupper((
+int)(( const unsigned char*) s2.curr)[ i])) !=  0){ return retc;}}} if( len1 < 
+n? 1: len2 <  n){ return( int) len1 - ( int) len2;} return 0;}} int Cyc_Std_strncasecmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ unsigned int len1=
+Cyc_Std_int_strleno( s1, _tag_arr("Std::strncasecmp", sizeof( unsigned char), 17u));
+unsigned int len2= Cyc_Std_int_strleno( s2, _tag_arr("Std::strncasecmp", sizeof(
+unsigned char), 17u)); return Cyc_Std_caseless_ncmp( s1, len1, s2, len2, n);}
+extern void* memcpy( void*, const void*, unsigned int n); extern void* memmove(
+void*, const void*, unsigned int n); extern int memcmp( const void*, const void*,
+unsigned int n); extern unsigned char* memchr( const unsigned char*,
+unsigned char c, unsigned int n); extern void* memset( void*, int c,
+unsigned int n); extern void bcopy( const void* src, void* dest, unsigned int n);
+extern void bzero( void* s, unsigned int n); extern unsigned char* GC_realloc(
+unsigned char*, unsigned int n); struct _tagged_arr Cyc_Std_realloc( struct
+_tagged_arr s, unsigned int n){ unsigned char* _temp26= GC_realloc((
+unsigned char*) _check_null( _untag_arr( s, sizeof( unsigned char), 1u)), n);
+return wrap_Cstring_as_string( _temp26, n);} struct _tagged_arr Cyc_Std__memcpy(
+struct _tagged_arr d, struct _tagged_arr s, unsigned int n, unsigned int sz){
+if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( d, sizeof( void))
+<  n)? 1: s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1:
+_get_arr_size( s, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp27=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp27[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp28; _temp28.tag= Cyc_Core_Invalid_argument; _temp28.f1= _tag_arr("Std::memcpy",
+sizeof( unsigned char), 12u); _temp28;}); _temp27;}));} memcpy(( void*)
+_check_null( _untag_arr( d, sizeof( void), 1u)),( const void*) _check_null(
+_untag_arr( s, sizeof( void), 1u)), n *  sz); return d;} struct _tagged_arr Cyc_Std__memmove(
+struct _tagged_arr d, struct _tagged_arr s, unsigned int n, unsigned int sz){
+if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( d, sizeof( void))
+<  n)? 1: s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1:
+_get_arr_size( s, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp29=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp29[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp30; _temp30.tag= Cyc_Core_Invalid_argument; _temp30.f1= _tag_arr("Std::memove",
+sizeof( unsigned char), 12u); _temp30;}); _temp29;}));} memmove(( void*)
+_check_null( _untag_arr( d, sizeof( void), 1u)),( const void*) _check_null(
+_untag_arr( s, sizeof( void), 1u)), n *  sz); return d;} int Cyc_Std_memcmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if((( s1.curr == ((
+struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: s2.curr == (( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s1, sizeof(
+unsigned char)) >=  n)? 1: _get_arr_size( s2, sizeof( unsigned char)) >=  n){(
+int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp31=( struct
+Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp31[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp32; _temp32.tag= Cyc_Core_Invalid_argument;
 _temp32.f1= _tag_arr("Std::memcmp", sizeof( unsigned char), 12u); _temp32;});
 _temp31;}));} return memcmp(( const void*) _check_null( _untag_arr( s1, sizeof(

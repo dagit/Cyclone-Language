@@ -24,15 +24,13 @@
 #include <stdio.h>
 
 namespace Std {
-  xtunion exn.Core::Unreachable __unreachable_assert = 
-    Core::Unreachable("assert");
-
   `a
-  __assert_fail (string_t assertion, string_t file, unsigned int line) {
+  __assert_fail (string_t assertion, string_t file, unsigned int line) 
+    __attribute__((noreturn))
+  {
     fprintf (stderr, "%s:%u: Assertion `%s' failed.\n",
              file, line, assertion);
     fflush (stderr);
     exit(-1);
-    throw &__unreachable_assert;
   }
 }

@@ -6,6 +6,9 @@ CONFIGURATION BUGS:
   not remove the bin/genfiles directory after it's been extracted
   and built.  This currently screws up make install.
 
+* cygwin has problems when you have c:/ in the path of Makefile.inc
+  instead of /cygdrive/c/.
+
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * There are at least two problems with the new treatment of [r]malloc and
@@ -30,8 +33,6 @@ BUG FIXES and UNSOUNDNESSES:
   file, etc.)
 
 * name mangling needs to be dealt with
-
-* minimize initializing
 
 * FIX all of the FIX things.
 
@@ -114,9 +115,6 @@ function declarations are only allowed at top-level.
   really define both "x" and "Cyc_Foo_x" in the environment.  In addition,
   users can spoof a Cyclone variable by writing {extern "C" int Cyc_x;}.
 
-* new "foo" and rnew(h) "foo" don't work properly -- they should allocate
-  a copy of the string in the region, no?
-
 * src/Makefile produces $(OUTPUT_PREFIX)parse_tab.h, but parse.h is
   hardcoded to #include "parse_tab.h", so everything breaks when you
   use a prefix.
@@ -136,9 +134,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   for bits-only things, we should only issue a warning if they're used
   before being initialized.  
 
-* should use noreturn attribute, especially for exit, and also check
-  that noreturn is actually true for a given function definition.
-
 * nested type declarations? nested exception declarations? nested using?
 
 * long long, short, float, and double constants (including 12s, 3l, etc.)
@@ -155,6 +150,9 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   have a way to check to see if a cast doesn't do any computation.
 
 * add setjmp and longjmp somehow.
+
+* should allow general constant expressions in switch -- something
+  that's hard to do with our parser and patterns.
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------

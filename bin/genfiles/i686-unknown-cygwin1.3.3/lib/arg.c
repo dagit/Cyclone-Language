@@ -316,9 +316,8 @@ isdigit( int); extern int isgraph( int); extern int islower( int); extern int
 isprint( int); extern int ispunct( int); extern int isspace( int); extern int
 isupper( int); extern int isxdigit( int); extern int toascii( int); extern int
 tolower( int); extern int toupper( int); extern int _tolower( int); extern int
-_toupper( int); extern struct Cyc_Core_Unreachable_struct Cyc_Std___unreachable_assert;
-extern void* Cyc_Std___assert_fail( struct _tagged_arr assertion, struct
-_tagged_arr file, unsigned int line); unsigned char Cyc_Arg_Bad[ 8u]="\000\000\000\000Bad";
+_toupper( int); extern void* Cyc_Std___assert_fail( struct _tagged_arr assertion,
+struct _tagged_arr file, unsigned int line); unsigned char Cyc_Arg_Bad[ 8u]="\000\000\000\000Bad";
 unsigned char Cyc_Arg_Error[ 10u]="\000\000\000\000Error"; static const int Cyc_Arg_Prefix=
 0; struct Cyc_Arg_Prefix_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Arg_Exact= 1; struct Cyc_Arg_Exact_struct{ int tag; struct
@@ -340,20 +339,20 @@ Cyc_Arg_Justify_break_line( struct Cyc_Buffer_t* b, int howmuch, struct
 _tagged_arr s){ if( s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);} if( howmuch <  0){ howmuch=
 0;}{ unsigned int _temp2= Cyc_Std_strlen( s); _temp2 <=  _get_arr_size( s,
-sizeof( unsigned char))? 0:(((( int(*)( struct _tagged_arr assertion, struct
+sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
 sizeof( unsigned char), 14u), _tag_arr("/cygdrive/c/cyclone/lib/arg.cyc",
-sizeof( unsigned char), 32u), 94),( int) _throw(( void*)& Cyc_Std___unreachable_assert)));
-if( howmuch >  _temp2){ Cyc_Buffer_add_string( b, s); return( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u);}{ int i; for( i= howmuch -  1; i >=  0? ! isspace(( int)((
-const unsigned char*) s.curr)[ i]): 0; i --){;} if( i <  0){ for( i= howmuch?
-howmuch -  1: 0;( i <  _temp2?( int)(( const unsigned char*) s.curr)[ i]: 0)? !
-isspace(( int)(( const unsigned char*) s.curr)[ i]): 0; i ++){;}} Cyc_Buffer_add_substring(
-b, s, 0, i);{ struct _tagged_arr whatsleft=( struct _tagged_arr) _tag_arr( 0u, 0u,
-0u); for( 0;( i <  _temp2?( int)(( const unsigned char*) s.curr)[ i]: 0)?
-isspace(( int)(( const unsigned char*) s.curr)[ i]): 0; i ++){;} if( i <  _temp2?(
-int)(( const unsigned char*) s.curr)[ i]: 0){ whatsleft= _tagged_arr_plus( s,
-sizeof( unsigned char), i);} return whatsleft;}}}} void Cyc_Arg_Justify_justify_b(
+sizeof( unsigned char), 32u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
+b, s); return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i=
+howmuch -  1; i >=  0? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0;
+i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)((
+const unsigned char*) s.curr)[ i]: 0)? ! isspace(( int)(( const unsigned char*)
+s.curr)[ i]): 0; i ++){;}} Cyc_Buffer_add_substring( b, s, 0, i);{ struct
+_tagged_arr whatsleft=( struct _tagged_arr) _tag_arr( 0u, 0u, 0u); for( 0;( i < 
+_temp2?( int)(( const unsigned char*) s.curr)[ i]: 0)? isspace(( int)(( const
+unsigned char*) s.curr)[ i]): 0; i ++){;} if( i <  _temp2?( int)(( const
+unsigned char*) s.curr)[ i]: 0){ whatsleft= _tagged_arr_plus( s, sizeof(
+unsigned char), i);} return whatsleft;}}}} void Cyc_Arg_Justify_justify_b(
 struct Cyc_Buffer_t* b, int indent, int margin, struct _tagged_arr item, struct
 _tagged_arr desc){ if( item.curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 Cyc_Buffer_add_string( b, item);} if( desc.curr == (( struct _tagged_arr)

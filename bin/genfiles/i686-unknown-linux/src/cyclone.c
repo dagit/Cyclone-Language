@@ -1095,35 +1095,34 @@ struct Cyc_Std_String_pa_struct _temp118; _temp118.tag= Cyc_Std_String_pa;
 _temp118.f1=( struct _tagged_arr) file;{ void* _temp117[ 2u]={& _temp118,&
 _temp119}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("Error: can't find internal compiler file %s in path %s\n",
 sizeof( unsigned char), 56u), _tag_arr( _temp117, sizeof( void*), 2u));}}}); Cyc_compile_failure=
-1; Cyc_remove_cfiles(); exit( 1);} return*(( struct _tagged_arr*) _check_null(
-_temp116));} static int Cyc_is_other_special( unsigned char c){ switch( c){ case
-'\\': _LL120: goto _LL121; case '"': _LL121: goto _LL122; case ';': _LL122: goto
-_LL123; case '&': _LL123: goto _LL124; case '(': _LL124: goto _LL125; case ')':
-_LL125: goto _LL126; case '|': _LL126: goto _LL127; case '^': _LL127: goto
-_LL128; case '<': _LL128: goto _LL129; case '>': _LL129: goto _LL130; case ' ':
-_LL130: goto _LL131; case '\n': _LL131: goto _LL132; case '\t': _LL132: return 1;
-default: _LL133: return 0;}} static struct _tagged_arr Cyc_sh_escape_string(
-struct _tagged_arr s){ unsigned int _temp135= Cyc_Std_strlen( s); int _temp136=
-0; int _temp137= 0;{ int i= 0; for( 0; i <  _temp135; i ++){ unsigned char
-_temp138=(( const unsigned char*) s.curr)[ i]; if( _temp138 == '\''){ _temp136
-++;} else{ if( Cyc_is_other_special( _temp138)){ _temp137 ++;}}}} if( _temp136
-==  0? _temp137 ==  0: 0){ return s;} if( _temp136 ==  0){ return( struct
-_tagged_arr) Cyc_Std_strconcat_l(({ struct _tagged_arr* _temp139[ 3u]; _temp139[
-2u]= _init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)),"'",
-sizeof( unsigned char), 2u); _temp139[ 1u]=({ struct _tagged_arr* _temp140=(
-struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp140[ 0]=(
-struct _tagged_arr) s; _temp140;}); _temp139[ 0u]= _init_tag_arr(( struct
-_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)),"'", sizeof( unsigned char),
-2u);(( struct Cyc_List_List*(*)( struct _tagged_arr)) Cyc_List_list)( _tag_arr(
-_temp139, sizeof( struct _tagged_arr*), 3u));}));}{ unsigned int _temp141=(
-_temp135 +  _temp136) +  _temp137; struct _tagged_arr _temp142=({ unsigned int
-_temp146= _temp141 +  1; unsigned char* _temp147=( unsigned char*)
-_cycalloc_atomic( _check_times( sizeof( unsigned char), _temp146)); struct
-_tagged_arr _temp149= _tag_arr( _temp147, sizeof( unsigned char), _temp141 +  1);{
-unsigned int _temp148= _temp146; unsigned int i; for( i= 0; i <  _temp148; i ++){
-_temp147[ i]='\000';}}; _temp149;}); int _temp143= 0; int _temp144= 0; for( 0;
-_temp143 <  _temp135; _temp143 ++){ unsigned char _temp145=(( const
-unsigned char*) s.curr)[ _temp143]; if( _temp145 == '\''? 1: Cyc_is_other_special(
+1; Cyc_remove_cfiles(); exit( 1);} return* _temp116;} static int Cyc_is_other_special(
+unsigned char c){ switch( c){ case '\\': _LL120: goto _LL121; case '"': _LL121:
+goto _LL122; case ';': _LL122: goto _LL123; case '&': _LL123: goto _LL124; case
+'(': _LL124: goto _LL125; case ')': _LL125: goto _LL126; case '|': _LL126: goto
+_LL127; case '^': _LL127: goto _LL128; case '<': _LL128: goto _LL129; case '>':
+_LL129: goto _LL130; case ' ': _LL130: goto _LL131; case '\n': _LL131: goto
+_LL132; case '\t': _LL132: return 1; default: _LL133: return 0;}} static struct
+_tagged_arr Cyc_sh_escape_string( struct _tagged_arr s){ unsigned int _temp135=
+Cyc_Std_strlen( s); int _temp136= 0; int _temp137= 0;{ int i= 0; for( 0; i < 
+_temp135; i ++){ unsigned char _temp138=(( const unsigned char*) s.curr)[ i];
+if( _temp138 == '\''){ _temp136 ++;} else{ if( Cyc_is_other_special( _temp138)){
+_temp137 ++;}}}} if( _temp136 ==  0? _temp137 ==  0: 0){ return s;} if( _temp136
+==  0){ return( struct _tagged_arr) Cyc_Std_strconcat_l(({ struct _tagged_arr*
+_temp139[ 3u]; _temp139[ 2u]= _init_tag_arr(( struct _tagged_arr*) _cycalloc(
+sizeof( struct _tagged_arr)),"'", sizeof( unsigned char), 2u); _temp139[ 1u]=({
+struct _tagged_arr* _temp140=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_tagged_arr)); _temp140[ 0]=( struct _tagged_arr) s; _temp140;}); _temp139[ 0u]=
+_init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)),"'",
+sizeof( unsigned char), 2u);(( struct Cyc_List_List*(*)( struct _tagged_arr))
+Cyc_List_list)( _tag_arr( _temp139, sizeof( struct _tagged_arr*), 3u));}));}{
+unsigned int _temp141=( _temp135 +  _temp136) +  _temp137; struct _tagged_arr
+_temp142=({ unsigned int _temp146= _temp141 +  1; unsigned char* _temp147=(
+unsigned char*) _cycalloc_atomic( _check_times( sizeof( unsigned char), _temp146));
+struct _tagged_arr _temp149= _tag_arr( _temp147, sizeof( unsigned char),
+_temp141 +  1);{ unsigned int _temp148= _temp146; unsigned int i; for( i= 0; i < 
+_temp148; i ++){ _temp147[ i]='\000';}}; _temp149;}); int _temp143= 0; int
+_temp144= 0; for( 0; _temp143 <  _temp135; _temp143 ++){ unsigned char _temp145=((
+const unsigned char*) s.curr)[ _temp143]; if( _temp145 == '\''? 1: Cyc_is_other_special(
 _temp145)){*(( unsigned char*) _check_unknown_subscript( _temp142, sizeof(
 unsigned char), _temp144 ++))='\\';}*(( unsigned char*) _check_unknown_subscript(
 _temp142, sizeof( unsigned char), _temp144 ++))= _temp145;} return( struct

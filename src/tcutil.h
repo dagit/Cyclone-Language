@@ -233,6 +233,9 @@ extern type_t snd_tqt($(tqual_t,type_t)@`r);
 
 // does the type support "0" as a default value?
 extern bool supports_default(type_t);
+
+// does the function type have the "noreturn" attribute?
+extern bool is_noreturn(type_t);
 }
 
 #endif
