@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include "buffer.h"
+using Stdio;
+using Buffer;
+namespace Buffer;
+
+#define MAX_FILESIZE (1024*1024*7) // extra slack needed for 0 terminators
+
+static char buf[MAX_FILESIZE+1];
+static unsigned int pos = 0;
+
+struct Buf {
+  int unused;
+};
+
+static struct Buf bogus_buf = {0};
+
+buf_t init_buf() {
+  return &bogus_buf;
+}
+
+extern unsigned int position(buf_t b) {
+  return pos;
+}
+
+extern unsigned int size(buf_t b, unsigned int p) {
+  unsigned int sz = 0;
+  for (; buf[p] != '\0'; p++, sz++);
+  return sz;
+}
+
+extern void add_char(buf_t b, char c) {
+  buf[pos] = c;
+  pos++;
+  if (pos > MAX_FILESIZE) {
+    fprintf(stderr,"exhausted buffer!\n");
+    exit(1);
+  }
+}
+
+extern char get_char(buf_t b, unsigned int p) {
+  return buf[p];
+}
+
+extern void write_buf(FILE @f, buf_t b, unsigned int p) {
+  char c;
+  for (; (c = buf[p]) != '\0'; p++)
+    fputc(c,f);
+}

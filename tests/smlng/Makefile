@@ -27,7 +27,8 @@ all: $(CYCC) $(LIB) \
 
 GCC_LIBS = ../../bin/cyc-lib/libcyc.a ../../bin/cyc-lib/gc.a
 
-smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o flat.o
+#smlng$(EXE): smlng.o tag_elim.o timer.o buffer.o parser.o flat.o
+smlng$(EXE): smlng.o tag_elim.o timer.o buffer2.o parser.o flat.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ $(GCC_LIBS) $(LDFLAGS)
 
@@ -49,10 +50,11 @@ $(OUT_PREFIX)%.o : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 
 smlng.cyc: smlng.h tag_elim.h timer.h buffer.h parser.h
+buffer2.cyc: buffer.h
 buffer.cyc: buffer.h
 parser.cyc: parser.h buffer.h smlng.h
 
 clean:
-	rm -f smlng.o tag_elim.o timer.o buffer.o parser.o generate.o validate.o flat.o
-	rm -f smlng.c tag_elim.c timer.c buffer.c parser.c generate.c validate.c flat.c
+	rm -f smlng.o tag_elim.o timer.o buffer2.o buffer.o parser.o generate.o validate.o flat.o
+	rm -f smlng.c tag_elim.c timer.c buffer2.c buffer.c parser.c generate.c validate.c flat.c
 	rm -f *~ *.exe *.output *.stackdump
