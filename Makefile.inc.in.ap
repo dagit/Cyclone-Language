@@ -182,7 +182,7 @@ BUILDLIB_SRCS:=buildlib\
         pratt\
         jump_analysis\
 	new_control_flow\
-	insert_check\
+	insert_checks\
 	cf_flowinfo\
         toc\
 	absyn
