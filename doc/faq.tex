@@ -1,6 +1,24 @@
 \section{Frequently Asked Questions}
 
-\newcommand{\question}[2]{\hypertarget{#1}{\paragraph{#2}}}
+% Environment for frequently asked question and answer
+%HEVEA \begin{latexonly}
+\ifscreen
+\newenvironment{faqa}[2]{%
+  \begin{list}{}{}%
+  \item[\hypertarget{#1}{\colorbox{lightblue}{\textbf{#2}}}]}{\end{list}}
+\else
+\newenvironment{faqa}[2]{%
+  \begin{list}{}{}%
+  \item[\hypertarget{#1}{\textbf{#2}}]}{\end{list}}
+\fi
+%HEVEA \end{latexonly}
+%HEVEA \newenvironment{faqa}[2]{%
+%HEVEA   \begin{list}{}{}%
+%HEVEA   \item[\hypertarget{#1}{%
+%HEVEA \begin{rawhtml}<table><tr><td bgcolor="c0d0ff">\end{rawhtml}%
+%HEVEA \textbf{#2}%
+%HEVEA \begin{rawhtml}</td></tr></table>\end{rawhtml}%
+%HEVEA }]}{\end{list}}
 
 \ifscreen
 \begin{small}
@@ -75,7 +93,7 @@
 \end{small}
 \fi
 
-\question{faq:tuple}{What does \texttt{\$({\it type}$_1$,{\it type}$_2$)} mean?  What does \texttt{\$({\it expr}$_1$, {\it expr}$_2$)} mean?}
+\begin{faqa}{faq:tuple}{What does \texttt{\$({\it type}$_1$,{\it type}$_2$)} mean?  What does \texttt{\$({\it expr}$_1$, {\it expr}$_2$)} mean?}
 
 Cyclone has \emph{tuples}, which are anonymous structs with fields
 numbered 0, 1, 2, \ldots.  For example, \texttt{\$(int,string_t)} is a
@@ -83,9 +101,9 @@ pair of an \texttt{int} and a \texttt{string_t}.  An example value of
 this type is \texttt{\$(4,"cyclone")}.  To extract a field from a
 tuple, you use array-like notation: you write \texttt{x[0]}, not
 \texttt{x.0}.
+\end{faqa}
 
-\question{faq:non-null}{What does \texttt{int @} mean?}
-
+\begin{faqa}{faq:non-null}{What does \texttt{int @} mean?}
 In Cyclone \texttt{@} is a pointer that is guaranteed not to be
 \texttt{null}.  The Cyclone compiler guarantees through static or
 dynamic checks.  For example,
@@ -97,9 +115,9 @@ will typecheck, but
   int @x = null;
 \end{verbatim}
 will not.
+\end{faqa}
 
-\question{faq:bounds}{What does \texttt{int *\lb 37\rb} mean?}
-
+\begin{faqa}{faq:bounds}{What does \texttt{int *\lb 37\rb} mean?}
 This is the type of pointers to a sequence of at least 37 integers.
 The extra length information is used by Cyclone to prevent buffer
 overflows.  For example, Cyclone will compile
@@ -108,9 +126,9 @@ overflows.  For example, Cyclone will compile
 accessing the element.  Note that \texttt{int *} is just shorthand for
 \verb|int *{1}|.  Currently, the expression in the braces must be a
 compile-time constant.
+\end{faqa}
 
-\question{faq:region}{What does \texttt{int *`r} mean?}
-
+\begin{faqa}{faq:region}{What does \texttt{int *`r} mean?}
 This is the type of a pointer to an \texttt{int} in region
 \texttt{`r}.  A region is just a group of objects with the same
 lifetime---all objects in a region are freed at once.  Cyclone uses
@@ -119,36 +137,37 @@ previously freed region.  Regions can have a ``nested'' structure, for
 example, if the region for a function parameter is a variable, then
 the function may assume that the parameter points into a region whose
 lifetime includes the lifetime of the function.
+\end{faqa}
 
-\question{faq:heapregion}{What does \texttt{`H} mean?}
+\begin{faqa}{faq:heapregion}{What does \texttt{`H} mean?}
+  This is Cyclone's heap region: objects in this region cannot be
+  explicitly freed, only garbage-collected.  Effectively, this means
+  that pointers into the heap region can always be safely
+  dereferenced; conceptually, objects in the heap last ``forever,''
+  since they are always available if needed; garbage collection is
+  like an optimization that frees objects after they are no longer
+  needed.  Note that \texttt{int *} is just shorthand for \texttt{int
+    *`H}.
+\end{faqa}
 
-This is Cyclone heap region: objects in this region cannot be
-explicitly freed, only garbage collected.  Effectively, this means
-that pointers into the heap region can always be safely dereferenced;
-conceptually, objects in the heap last ``forever,'' since they are
-always available if needed; garbage collection is like an optimization
-that frees objects after they are no longer needed.  Note that
-\texttt{int *} is just shorthand for \texttt{int *`H}.
-
-\question{faq:boundsregion}{What does \texttt{int @\lb 37\rb `r} mean?}
-
+\begin{faqa}{faq:boundsregion}{What does \texttt{int @\lb 37\rb `r} mean?}
 A pointer can come with all or none of the nullity, bound, and region
 annotation.  This type is the type of non-\texttt{null} pointers to
 at least 37 consecutive integers in region \texttt{`r}.  When the
 bound is omitted it default to 1, and when the region is omitted
 it defaults to \texttt{`H}.
+\end{faqa}
 
-\question{faq:questionable}{What does \texttt{int ?} mean?}
-
+\begin{faqa}{faq:questionable}{What does \texttt{int ?} mean?}
 The \texttt{?} a special kind of pointer that carries along bounds
 information.  It is a ``questionable'' pointer: it might be null or
 pointing out of bounds.  An \texttt{int ?} is a pointer to an integer,
 along with some information that allows Cyclone to check whether the
 pointer is in bounds at run-time.  These are the only kinds of
 pointers that you can use for pointer arithmetic in Cyclone.
+\end{faqa}
 
-\question{faq:typevar}{What does \texttt{`a} mean?}
-
+\begin{faqa}{faq:typevar}{What does \texttt{`a} mean?}
 \texttt{`a} is a \emph{type variable}.  Type variables are typically
 used in polymorphic functions.  For example, if a function takes a
 parameter of type \texttt{`a}, then the function can be called with a
@@ -158,9 +177,9 @@ for those parameters.  And if the function returns a type \texttt{`a},
 then it must return a result of the same type as the the argument.
 Syntactically, a type variable is any identifier beginning with
 \texttt{`} (backquote).
+\end{faqa}
 
-\question{faq:suitable}{What is a ``suitable'' type for a type variable?}
-
+\begin{faqa}{faq:suitable}{What is a ``suitable'' type for a type variable?}
 The last question said that a type variable can stand for a
 ``suitable'' type.  Unfortunately, not all types are ``suitable.''
 Briefly, the ``suitable'' types are those that fit into a general
@@ -170,9 +189,9 @@ include \texttt{float}, \texttt{struct} types (which can be of
 arbitrary size), tuples, and questionable pointers.
 Technically, the suitable types are the types of ``box kind,''
 described below.
+\end{faqa}
 
-\question{faq:voidstar}{How do I cast from \texttt{void *}?}
-
+\begin{faqa}{faq:voidstar}{How do I cast from \texttt{void *}?}
 You can't do this in Cyclone.  A \texttt{void *} in C really does not
 point to \texttt{void}, it points to a value of some type.  However,
 when you cast from a \texttt{void *} in C, there is no guarantee that
@@ -180,9 +199,9 @@ the pointer actually points to a value of the expected type.  This can
 lead to crashes, so Cyclone doesn't permit it.  Cyclone's
 polymorphism and tagged unions can often be used in places where C
 needs to use \texttt{void *}, and they are safe.
+\end{faqa}
 
-\question{faq:uscore-types}{What does \texttt{_} (underscore) mean in types?}
-
+\begin{faqa}{faq:uscore-types}{What does \texttt{_} (underscore) mean in types?}
 Underscore is a ``wildcard'' type.  It stands for some type that the
 programmer doesn't want to bother writing out; the compiler is
 expected to fill in the type for the programmer.  Sometimes, the
@@ -198,9 +217,9 @@ the compiler can easily infer that the wildcard stands for
 \texttt{struct Pair *} instead.
 
 Note, \texttt{_} is not allowed as part of top-level declarations.
+\end{faqa}
 
-\question{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}
-
+\begin{faqa}{faq:uscore-region}{In particular, what does \texttt{int *_} mean?}
 Here the wildcard ranges over the region of the pointer.  This use of
 the wildcard is important in making the region system easier to use.
 For example, in Cyclone you cannot write the following local declarations:
@@ -227,9 +246,9 @@ or
 \end{verbatim}
 but you might want to write down the additional type information for
 documentation.
+\end{faqa}
 
-\question{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A}, \texttt{`a::R}, and \texttt{`a::E} mean?}
-
+\begin{faqa}{faq:kinds}{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A}, \texttt{`a::R}, and \texttt{`a::E} mean?}
 Types are divided into different groups, which we call kinds.  There
 are five different kinds: B (for Box), M (for Memory), A (for Any), R
 (for Region), and E (for Effect).  The notation
@@ -244,9 +263,9 @@ Memory types include all box types, tuples, \texttt{tunion} and
 Any types include all types that don't have kind Region or Effect.
 Region types are regions, i.e., the heap and stack regions.
 Effect types are sets of regions (these are explained elsewhere).
+\end{faqa}
 
-\question{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}
-
+\begin{faqa}{faq:nokinds}{What does it mean when type variables don't have explicit kinds?}
 Every type variable has a kind, but usually the programmer doesn't
 have to write it down.  In function prototypes, the compiler will
 infer the most permissive kind.  For example,
@@ -271,17 +290,17 @@ but
 struct S<`a,`r>{`a *`r x;};
 \end{verbatim}
 is not.
+\end{faqa}
 
-\question{faq:list}{What does \texttt{struct List<`a,`r::R>} mean?}
-
+\begin{faqa}{faq:list}{What does \texttt{struct List<`a,`r::R>} mean?}
 \texttt{struct List} takes a type of box kind and a region and
 produces a type.  For example, \texttt{struct List<int, `H>} is a
 type, and \texttt{struct List<struct List<int,`H>@, `H>} is a type.
 \texttt{struct List<`a,`r::R>} is a list whose elements all have type
 \texttt{`a} and live in region \texttt{`r}.
+\end{faqa}
 
-\question{faq:tagged}{What are \texttt{tunion} and \texttt{xtunion}?}
-
+\begin{faqa}{faq:tagged}{What are \texttt{tunion} and \texttt{xtunion}?}
 These are Cyclone's tagged union and extensible tagged union types.
 In C, when a value has \texttt{union} type, you know that in fact it
 has one of the types of the union's fields, but there is no guarantee
@@ -289,9 +308,9 @@ which one.  This can lead to crashes in C\@.  Cyclone's tagged unions
 are like C unions with some additional information that lets the
 Cyclone compiler determine what type the underlying value actually
 has, thus helping to ensure safety.
+\end{faqa}
 
-\question{faq:structfp}{How do I make a struct with function-pointer fields?}
-
+\begin{faqa}{faq:structfp}{How do I make a struct with function-pointer fields?}
 Follow this arcane format:
 \begin{verbatim}
   struct S<`e1::E, `e2::E> {
@@ -301,9 +320,9 @@ Follow this arcane format:
   typedef S<{},{}> s_t;
 \end{verbatim}
 You will find more explanation where we discuss memory management.
+\end{faqa}
 
-\question{faq:abstract}{What is \texttt{abstract}?}
-
+\begin{faqa}{faq:abstract}{What is \texttt{abstract}?}
 \texttt{abstract} is a storage-class specifier, like \texttt{static}
 or \texttt{extern}.  When attached to a top-level type declaration, it
 means that other files can use the type but cannot look at the
@@ -312,9 +331,9 @@ an abstract struct).  Otherwise, abstract has the same meaning as the
 \texttt{auto} (default) storage class.  Hence \texttt{abstract} is a
 way to state within a Cyclone file that a type's representation cannot
 be exported.
+\end{faqa}
 
-\question{faq:keywords}{What are the Cyclone keywords?}
-
+\begin{faqa}{faq:keywords}{What are the Cyclone keywords?}
 In addition to the C keywords, the following have special meaning and
 cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
 \texttt{codegen}, \texttt{cut}, \texttt{fallthru}, \texttt{fill},
@@ -324,17 +343,17 @@ cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
 \texttt{throw}, \texttt{try}, \texttt{tunion}, \texttt{using},
 \texttt{xprintf}, \texttt{xscanf}, \texttt{xtunion}.  As in gcc,
 \texttt{__attribute__} is reserved as well.
+\end{faqa}
 
-\question{faq:namespace}{What are \texttt{namespace} and \texttt{using}?}
-
+\begin{faqa}{faq:namespace}{What are \texttt{namespace} and \texttt{using}?}
 These constructs provide a convenient way to help avoid name clashes.
 namespace X prepends X:: to the declarations in its body (rest of file
 in case of namespace X;) and using X makes the identifiers prepended
 with X:: available without having to write the X::.  A longer
 explanation and list of common pitfalls is here.
+\end{faqa}
 
-\question{faq:fallthru}{What is \texttt{fallthru}?}
-
+\begin{faqa}{faq:fallthru}{What is \texttt{fallthru}?}
 In Cyclone, you cannot implicitly fall through from one switch case to
 the next (a common source of bugs in C).  Instead, you must explicitly
 fall through with a \texttt{fallthru} statement.  So, to port C code,
@@ -349,9 +368,9 @@ immediately goto the next case.  Second, when the next case of the
 must) be used to specify expressions that will be bound to those
 variables in the next case.  Hence \texttt{fallthru} is more powerful
 (but more verbose) than ``or patterns'' in ML\@.
+\end{faqa}
 
-\question{faq:new}{What is \texttt{new}?}
-
+\begin{faqa}{faq:new}{What is \texttt{new}?}
 \texttt{new} \textit{expr} allocates space in the heap region,
 initializes it with the result of evaluating \texttt{expr}, and
 returns a pointer to the space.  It is roughly equivalent to
@@ -366,9 +385,9 @@ where \texttt{type} is the type of \textit{expr}.  You can also write
 to heap-allocate an array of size \textit{expr}$_1$ with the
 \texttt{i}$^{\rm th}$ element initialized to \textit{expr}$_2$ (which
 may mention \texttt{i}).
+\end{faqa}
 
-\question{faq:usetuples}{How do I use tuples?}
-
+\begin{faqa}{faq:usetuples}{How do I use tuples?}
 A tuple type is written
 \texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$)}.
 A value of the type is constructed by
@@ -387,9 +406,9 @@ pointers of structs; if
 \textit{expr} has type
 \texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$) *},
 you can extract component \texttt{i} by \texttt{(*\textit{expr})[i]}.
+\end{faqa}
 
-\question{faq:arrayinit}{What is \texttt{\lb for i < {\it expr}$_1$ : {\it expr}$_2$\rb}?}
-
+\begin{faqa}{faq:arrayinit}{What is \texttt{\lb for i < {\it expr}$_1$ : {\it expr}$_2$\rb}?}
 This is an array initializer.  It can appear where array
 initializers appear in C, and it can appear as the argument to
 \texttt{new}.
@@ -402,9 +421,9 @@ as just described.  This form is the only way to create arrays whose
 size depends on run-time information.  When {for i < e1: e2} is not an
 argument to new, e1 must be constant and e2 may not mention i.  This
 restriction includes all uses at top-level (for global variables).
+\end{faqa}
 
-\question{faq:exns}{How do I throw and catch exceptions?}
-
+\begin{faqa}{faq:exns}{How do I throw and catch exceptions?}
 A new exception is declared as in 
 \begin{verbatim}
   xtunion exn { MyExn };
@@ -447,18 +466,18 @@ When the exception is caught, the integer value is bound to \texttt{x}.
 The \texttt{exn} type is just a pre-defined \texttt{xtunion} type.
 Therefore, all the standard rules for extending, creating objects, and
 destructing objects of an xtunion type apply.
+\end{faqa}
 
-\question{faq:exn-efficiency}{How efficient is exception handling?}
-
+\begin{faqa}{faq:exn-efficiency}{How efficient is exception handling?}
 Entering a \texttt{try} block is implemented using \texttt{setjmp}.
 Creating an \texttt{xtunion} requires a heap allocation.  Throwing an
 exception is implemented with \texttt{longjmp}.  Pattern-matching an
 \texttt{xtunion} against each case variant in the catch clause is a
 pointer-comparsion.  In short, exception handling is fairly
 lightweight.
+\end{faqa}
 
-\question{faq:let}{What does \texttt{let} mean?}
-
+\begin{faqa}{faq:let}{What does \texttt{let} mean?}
 In Cyclone, \texttt{let} is used to declare variables.  For example,
 \begin{verbatim}
   let x,y,z;
@@ -489,17 +508,17 @@ declares a new variable \texttt{x} and initializes it to 3, and
 \end{verbatim}
 declares new variables \texttt{y} and \texttt{z}, and initializes
 \texttt{y} to 3 and \texttt{z} to 4.
+\end{faqa}
 
-\question{faq:pattern}{What is a pattern and how do I use it?}
-
+\begin{faqa}{faq:pattern}{What is a pattern and how do I use it?}
 Cyclone's patterns are a convenient way to destructure aggregate
 objects, such as structs and tuples.  They are also the only way to
 destructure tagged unions.  Patterns are used in Cyclone's
 \texttt{let} declarations, \texttt{switch} statements, and
 \texttt{try}/\texttt{catch} statements.
+\end{faqa}
 
-\question{faq:uscore-pattern}{What does \texttt{_} mean in a pattern?}
-
+\begin{faqa}{faq:uscore-pattern}{What does \texttt{_} mean in a pattern?}
 It is a wildcard pattern, matching any value.  For example, if
 \texttt{f} is a function that returns a pair, then
 \begin{verbatim}
@@ -507,9 +526,9 @@ It is a wildcard pattern, matching any value.  For example, if
 \end{verbatim} %$ <-- this dollar comment fixes up font highlighting
 is a way to extract the second element of the pair and bind it to a
 new variable \texttt{y}.
+\end{faqa}
 
-\question{faq:polymorphic}{What does it mean when a function has an argument with type \texttt{`a}?}
-
+\begin{faqa}{faq:polymorphic}{What does it mean when a function has an argument with type \texttt{`a}?}
 Any type that looks like \texttt{`} (backquote) followed (without
 whitespace) by an identifier is a type variable.  If a function
 parameter has a type variable for its type, it means the function can
@@ -519,9 +538,9 @@ type. If all occurrences of `a appear directly under pointers (eg. `a
 *), then an actual parameter can have any type, but the restrictions
 about using the same type still apply.  In general, Cyclone has
 parametric polymorphism as a safe alternative to casts and void *.
+\end{faqa}
 
-\question{faq:templates}{Do functions with type variables get duplicated like C++ template functions?  Is there run-time overhead for using type variables?}
-
+\begin{faqa}{faq:templates}{Do functions with type variables get duplicated like C++ template functions?  Is there run-time overhead for using type variables?}
 No and no.  Each Cyclone function gives rise to one function in the
 output, and types are not present at run-time.  When a function is
 called, it does not need to know the types with which the caller is
@@ -531,19 +550,19 @@ duplicate the code because we either know the size of the type or the
 size does not matter.  This is why we don't allow type variables of
 memory kind as parameters---doing so would require code duplication or
 run-time types.
+\end{faqa}
 
-\question{faq:vararg}{Can I use varargs?}
-
+\begin{faqa}{faq:vararg}{Can I use varargs?}
 Yes, Cyclone has a way of supporting variable-argument functions.  It
 is not quite the same as C's, but it is safe.
+\end{faqa}
 
-\question{faq:typesinfunctions}{Why can't I declare types within functions?}
-
+\begin{faqa}{faq:typesinfunctions}{Why can't I declare types within functions?}
 We just haven't implemented this support yet.  For now, you need to
 hoist type declarations and typedefs to the top-level.
+\end{faqa}
 
-\question{faq:casts}{What casts are allowed?}
-
+\begin{faqa}{faq:casts}{What casts are allowed?}
 Cyclone doesn't support all of the casts that C does, because
 incorrect casts can lead to crashes.  Instead, Cyclone supports a safe
 subset of C's casts.  Here are some examples.
@@ -590,16 +609,16 @@ if \texttt{A} does not carry values.  An object of type tunion
 carry values.  The current implementation isn't quite as lenient as it
 should be.  For example, it rejects a cast from \texttt{int *\lb 4\rb} to
 \texttt{\$(int,int)*\lb 2\rb}, but this cast is safe.
+\end{faqa}
 
-\question{faq:implicitfallthru}{Why can't I implicitly fall-through to the next \texttt{switch} case?}
-
+\begin{faqa}{faq:implicitfallthru}{Why can't I implicitly fall-through to the next \texttt{switch} case?}
 We wanted to add an explicit \texttt{fallthru} construct in
 conjunction with pattern matching, and we decided to enforce use of
 \texttt{fallthru} in all cases because this is a constant source of
 bugs in C code.
+\end{faqa}
 
-\question{faq:globalinit}{Do I have to initialize global variables?}
-
+\begin{faqa}{faq:globalinit}{Do I have to initialize global variables?}
 Yes, you currently must provide explicit initializers for global
 variables so that the compiler is can be sure that uninitialized
 memory is not read.  In the future, we expect to provide some support
@@ -624,48 +643,48 @@ Currently, \textit{expr}$_2$ may not use the variable \texttt{i}, but
 in the future it will be able to.  Note that it is not possible to
 have a global variable of an abstract type because it is impossible to
 know any constant expression of that type.
+\end{faqa}
 
-\question{faq:threads}{Are there threads?}
-
+\begin{faqa}{faq:threads}{Are there threads?}
 Cyclone does not yet have a threads library and some of the libraries
 are not re-entrant.  However, it should be fine to call Cyclone code
 from multiple C threads (provided the garbage collector is correctly
 configured).  In the future, we will support threads directly as well
 as static analysis for preventing data races.
+\end{faqa}
 
-\question{faq:setjmp}{Can I use \texttt{setjmp} and \texttt{longjmp}?}
-
+\begin{faqa}{faq:setjmp}{Can I use \texttt{setjmp} and \texttt{longjmp}?}
 No.  However, Cyclone has exceptions, which can be used for non-local
 control flow.  The problem with \texttt{setjmp} and \texttt{longjmp}
 is that safety demands we prohibit a \texttt{longjmp} to a place no
 longer on the stack.  A future release may have more support for
 non-local control flow.
+\end{faqa}
 
-\question{faq:uniontypes}{What types are allowed for union members?}
-
+\begin{faqa}{faq:uniontypes}{What types are allowed for union members?}
 Currently, \texttt{union} members cannot contain pointers.  You can
 have numeric types (including bit fields and enumerations), structs
 and tuples of allowable union-member types, and other unions.
+\end{faqa}
 
-\question{faq:voidstar2}{Why can't I do anything with values of type \texttt{void *}?}
-
+\begin{faqa}{faq:voidstar2}{Why can't I do anything with values of type \texttt{void *}?}
 Because we cannot know the size of an object pointed to by a pointer
 of type void *, we prohibit derefencing the pointer or casting it to a
 different pointer type.  To write code that works for all pointer
 types, use type variables and polymorphism.  Tagged unions can also
 substitute in some cases where \texttt{void *} is used in C\@.
+\end{faqa}
 
-\question{faq:xprintf}{What is \texttt{xprintf}?}
-
+\begin{faqa}{faq:xprintf}{What is \texttt{xprintf}?}
 The \texttt{xprintf} function prints just like \texttt{printf}, but
 the output is placed in a new string allocated on the heap.
+\end{faqa}
 
-\question{faq:sscanf}{Is there \texttt{sscanf}?}
-
+\begin{faqa}{faq:sscanf}{Is there \texttt{sscanf}?}
 Not yet. 
+\end{faqa}
 
-\question{faq:commandline}{How do I access command-line arguments?}
-
+\begin{faqa}{faq:commandline}{How do I access command-line arguments?}
 The type of \texttt{main} should be
 \begin{verbatim}
   int main(int argc, char ?? argv);
@@ -675,9 +694,9 @@ As in C, \texttt{argc} is the number of command-line arguments and
 Unlike C, \texttt{argv} and each element of \texttt{argv} carry bounds
 information.  Note that \texttt{argc} is redundant---it is always
 equal to \texttt{argv.size}.
+\end{faqa}
 
-\question{faq:stackpointer}{Why can't I pass a stack pointer to certain functions?}
-
+\begin{faqa}{faq:stackpointer}{Why can't I pass a stack pointer to certain functions?}
 If the type of a function parameter is a pointer without an explicit
 region, the default requires the region to be the heap region,
 \texttt{`H}.  If a parameter can be a stack pointer, just add a region
@@ -689,18 +708,18 @@ declare
 \begin{verbatim}
   int f(int *`r x);
 \end{verbatim}
+\end{faqa}
 
-\question{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}
-
+\begin{faqa}{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}
 If you've declared the type of the variable to be
 \textit{type}\texttt{*}, then you can only assign heap pointers to it.
 Locals are in the stack, not the heap, so you cannot assign a pointer
 to a local into your heap pointer.  The easiest solution is to declare
 the pointer variable to have type \textit{type}\texttt{*_}, or type
 \texttt{_}, or use \texttt{let} to declare the variable.
+\end{faqa}
 
-\question{faq:pointerarith}{How much pointer arithmetic can I do?}
-
+\begin{faqa}{faq:pointerarith}{How much pointer arithmetic can I do?}
 On ``questionable'' pointers (pointers with type
 \textit{type}\texttt{?}), you can add or subtract an int (including
 via increment/decrement), as in C\@.  It is okay for the result to be
@@ -710,17 +729,17 @@ information and a run-time check; an exception is thrown if the check
 fails.)  Currently, we do not support pointer arithmetic on the other
 pointer types.  As in C, you can subtract two pointers of the same
 type; the type of the result is \texttt{unsigned int}.
+\end{faqa}
 
-\question{faq:litstring}{What is the type of a literal string?}
-
+\begin{faqa}{faq:litstring}{What is the type of a literal string?}
 The type of the string constant \texttt{"foo"} is \texttt{char @\lb
   4\rb} (remember the trailing '\\0').  However, there are implicit
 casts from \texttt{char @\lb 4\rb} to \texttt{char @\lb 2\rb},
 \texttt{char *\lb 4\rb}, and \texttt{char ?}, so you shouldn't have to
 think too much about this.
+\end{faqa}
 
-\question{faq:nullterminate}{Are strings null terminated?}
-
+\begin{faqa}{faq:nullterminate}{Are strings null terminated?}
 Cyclone follows C's lead on this.  String literals lie \texttt{"foo"}
 are null-terminated.  Many of the library functions consider a null
 character to mark the end of a string.  And library functions that
@@ -731,15 +750,15 @@ character.  In C this can be exploited to cause buffer overflows.  To
 avoid this in Cyclone, strings generally have type \texttt{char ?},
 that is, they carry bounds information.  In Cyclone a string ends when
 a null character is found, or when the bounds are exceeded.
+\end{faqa}
 
-\question{faq:zero}{Why can't I assign 0 to a pointer?}
-
+\begin{faqa}{faq:zero}{Why can't I assign 0 to a pointer?}
 We currently distinguish the keyword \texttt{null} from 0, so you have
 to assign \texttt{null} instead of 0.  We hope to be more flexible in
 the future.
+\end{faqa}
 
-\question{faq:malloc}{How do I use \texttt{malloc}?}
-
+\begin{faqa}{faq:malloc}{How do I use \texttt{malloc}?}
 \texttt{malloc} is a Cyclone primitive, not a library function.
 Currently it has an extremely restricted syntax: You must write
 \texttt{malloc(sizeof(\textit{type}))}.  The result has type
@@ -753,9 +772,9 @@ Notice that you cannot (yet) use \texttt{malloc} to allocate space for
 arrays (as in the common idiom, \texttt{malloc(n*sizeof({\it type}))}.
 Also, the type-checker uses a conservative analysis to ensure that the
 fields of the allocated space are written before they are used.
+\end{faqa}
 
-\question{faq:free}{Can I call free?}
-
+\begin{faqa}{faq:free}{Can I call free?}
 No, individual memory objects may not be freed.  In future versions,
 we may support freeing objects for which you can prove that there are
 no other pointers to the object.  Until then, you must rely on a
@@ -766,9 +785,9 @@ For porting code, you may want to define
 \begin{verbatim}
   void free(`a a) {}
 \end{verbatim}
+\end{faqa}
 
-\question{faq:gc}{Is there a garbage collector?}
-
+\begin{faqa}{faq:gc}{Is there a garbage collector?}
 Yes, we use the Boehm-Demers-Weiser conservative collector.  If you
 don't want to use the garbage collector (e.g., because you know that
 your program does little or no heap allocation), you can use the
@@ -785,9 +804,9 @@ Note that if you allocate all objects on the stack, garbage collection
 will never occur.  If you allocate all objects on the stack or in
 regions, it is very unlikely collection will occur and nothing will
 actually get collected.
+\end{faqa}
 
-\question{faq:stackalloc}{How can I make a stack-allocated array?}
-
+\begin{faqa}{faq:stackalloc}{How can I make a stack-allocated array?}
 As in C, you declare a local variable with an array type.  Also as in
 C, all uses of the variable, except as an argument to \texttt{sizeof}
 and \texttt{\&}, are promoted to a pointer.  If your declaration is
@@ -808,32 +827,32 @@ Stack-allocated arrays must be initialized when they are declared
 To pass (a pointer to) the array to another function, the function
 must have a type indicating it can accept stack pointers, as explained
 elsewhere.
+\end{faqa}
 
-\question{faq:realloc}{Can I use \texttt{salloc} or \texttt{realloc}?}
-
+\begin{faqa}{faq:realloc}{Can I use \texttt{salloc} or \texttt{realloc}?}
 No, neither of these functions are currently provided and it is not
 possible to write them in Cyclone.  Both features are hard to provide
 in a way that is guaranteed safe.
+\end{faqa}
 
-\question{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{null}?} 
-
+\begin{faqa}{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{null}?} 
 Our compiler is not as smart as you are.  It does not realize that you
 have tested for \texttt{null}, and it insists on a check (the cast)
 just to be sure.  You can leave the cast implicit, but the compiler
 will emit a warning.  In the future, we may define a flow-analysis to
 omit spurious warning.  Because of aliasing and undefined evaluation
 order, a sound analysis is non-trivial.
+\end{faqa}
 
-\question{faq:memkind}{Why can't a function parameter or struct field have type \texttt{`a::M}?} 
-
+\begin{faqa}{faq:memkind}{Why can't a function parameter or struct field have type \texttt{`a::M}?} 
 Type variables of memory kind can be instantiated with types of any
 size.  There is no straightforward way to compile a function with an
 argument of arbitrary size.  The obvious way to write such a function
 is to manipulate a pointer to the arbitrary size value instead.  So
 your parameter should have type \texttt{`a::M*} or \texttt{`a::M@}.
+\end{faqa}
 
-\question{faq:compile}{Can I see how Cyclone compiles the code?}
-
+\begin{faqa}{faq:compile}{Can I see how Cyclone compiles the code?}
 The easiest way to do this is to pass the flags \texttt{-save-c} and
 \texttt{-pp} to the compiler.  This instructs the compiler to save the
 C code that it builds and passes to GCC, and print it out using the
@@ -846,9 +865,9 @@ translated to a mess of temporary variables and \texttt{goto}
 statements.  Array-bounds checks and \texttt{null} checks can clutter
 array-intensive and pointer-intensive code.  And all \texttt{typedef}s
 are expanded away before printing the output.
+\end{faqa}
 
-\question{faq:gdb}{Can I use \texttt{gdb} on the output?}
-
+\begin{faqa}{faq:gdb}{Can I use \texttt{gdb} on the output?}
 You can try, but doing more than getting a stack trace requires some
 sophistication.  First, you have to know how Cyclone translates
 top-level identifiers to C identifiers (it prepends Cyc_ and separates
@@ -865,9 +884,9 @@ signal but \texttt{gdb} doesn't know that); simply continue execution.
 Second, a common use of \texttt{gdb} is to find the location of an
 uncaught exception.  To do this, set a breakpoint at \texttt{throw} (a
 function in the Cyclone runtime).
+\end{faqa}
 
-\question{faq:gprof}{Can I use \texttt{gprof} on the output?}
-
+\begin{faqa}{faq:gprof}{Can I use \texttt{gprof} on the output?}
 Yes, just use the \texttt{-pg} flag.  You should also rebuild the
 Cyclone libraries and the garbage collector with the \texttt{-pg}
 flag.  The results of \texttt{gprof} make sense because a Cyclone
@@ -881,9 +900,9 @@ information should be ignored because \texttt{gprof} is only sampling
 100 or 1000 times a second (because it is launching threads instead of
 using native Windows profiling).  Neither of these problems are
 Cyclone-specific.
+\end{faqa}
 
-\question{faq:emacs}{Is there an Emacs mode for Cyclone?}
-
+\begin{faqa}{faq:emacs}{Is there an Emacs mode for Cyclone?}
 Sort of.  In the \texttt{doc/} directory of the distribution you will
 find a \texttt{font-lock.el} file and elisp code (in
 \texttt{cyclone_dot_emacs.el}) suitable for inclusion in your
@@ -892,9 +911,9 @@ for Cyclone rather than creating a new Cyclone mode.  Of course, we
 intend to make our own mode rather than destroy C++-mode's ability to
 be good for C++.  Note that we have not changed the C++ indentation
 rules at all; our elisp code is useful only for syntax highlighting.
+\end{faqa}
 
-\question{faq:rtcg}{Does Cyclone have something to do with runtime code generation?}
-
+\begin{faqa}{faq:rtcg}{Does Cyclone have something to do with runtime code generation?}
 Cyclone has its roots in Popcorn, a language which was safe but not as
 compatible with C\@.  An offshoot of Popcorn added safe runtime code
 generation, and was called Cyclone.  The current Cyclone language is a
@@ -903,36 +922,36 @@ Currently, the language does not have support for runtime code
 generation, but we have reserved the keywords \texttt{codegen},
 \texttt{splice}, \texttt{cut}, and \texttt{fill} in case we get a
 chance to add it.
+\end{faqa}
 
-\question{faq:platforms}{What platforms are supported?}
-
+\begin{faqa}{faq:platforms}{What platforms are supported?}
 You need a platform that has gcc 2.9, GNU make, ar, sed, and the
 ability to build the Boehm-Demers-Weiser garbage collector.
 Furthermore, the size of \texttt{int} and all C pointers must be the
 same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), Linux
 (insert distributions here), Solaris, and OpenBSD.
+\end{faqa}
 
-\question{faq:libs}{Why aren't there more libraries?}
-
+\begin{faqa}{faq:libs}{Why aren't there more libraries?}
 We are eager to have a wider code base, but we are compiler writers
 with limited resources.  Let us know of useful code you write.
+\end{faqa}
 
-\question{faq:imprev}{Why doesn't \texttt{List::imp_rev(l)} change \texttt{l} to its reverse?} 
-
+\begin{faqa}{faq:imprev}{Why doesn't \texttt{List::imp_rev(l)} change \texttt{l} to its reverse?} 
 The library function \texttt{List::imp_rev} mutates its argument by
 reversing the \texttt{tl} fields.  It returns a pointer to the new
 first (old last) cell, but \texttt{l} still points to the old first
 (new last) cell.
+\end{faqa}
 
-\question{faq:inline}{Can I inline functions?}
-
+\begin{faqa}{faq:inline}{Can I inline functions?}
 Functions can be declared inline as ISO C99.  You can get additional
 inlining by compiling the Cyclone output with the \texttt{-O2} flag.
 Whether a function is inlined or not has no effect on Cyclone
 type-checking.
+\end{faqa}
 
-\question{faq:crash}{If Cyclone is safe, why does my program crash?}
-
+\begin{faqa}{faq:crash}{If Cyclone is safe, why does my program crash?}
 There are certain classes of errors that Cyclone does not attempt to
 prevent.  Two examples are stack overflow and various numeric traps,
 such as division-by-zero.  It is also possible to run out of memory.
@@ -942,9 +961,9 @@ code (or linking incorrectly against C code).
 Note that when using \texttt{gdb}, it may appear there is a seg fault
 in GC_findlimit().  This behavior is correct; simply continue
 execution.
+\end{faqa}
 
-\question{faq:ctc}{What are compile-time constants?}
-
+\begin{faqa}{faq:ctc}{What are compile-time constants?}
 Compile-time constants are \texttt{null},
 \texttt{sizeof(\textit{type})}, integer and character constants, and
 arithmetic operations over compile-time constants.  Constructs
@@ -953,15 +972,15 @@ requiring compile-time constants are: tuple-subscript (e.g.,
 \texttt{switch} argument has a numeric type (e.g., \texttt{case
   3+4}:), sizes in array declarations (e.g., \texttt{int y[37]}, and
 sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).
+\end{faqa}
 
-\question{faq:arraysize}{How can I get the size of an array?}
-
+\begin{faqa}{faq:arraysize}{How can I get the size of an array?}
 If \textit{expr} is an array, then \texttt{{\it expr}.size} returns
 the array's size.  Note that for \texttt{?} types, the size is
 retrieved at runtime from the object.  For other array types,
 the size is determined at compile-time.
+\end{faqa}
 
-  
 % Local Variables:
 % TeX-master: "main-screen"
 % End:

@@ -6,8 +6,8 @@ that Cyclone differs from C, and some of the reasons why; you should
 come away with enough knowledge to start writing, compiling, and
 running your own Cyclone programs.  We assume that the Cyclone
 compiler is already installed on your system (see
-Appendix~\ref{sec:install} or the Cyclone web site if you need to
-install the compiler).
+\hyperref[{sec:install}]{Appendix~\ref{sec:install}} or the Cyclone
+web site if you need to install the compiler).
 
 \subsection{Getting Started}
 
@@ -15,7 +15,6 @@ Here's a Cyclone program that prints the words ``\texttt{hello,
   world}.''
 \begin{verbatim}
     #include <stdio.h>
-    using Stdio;
 
     int main() {
       printf("hello, world\n");
@@ -23,12 +22,14 @@ Here's a Cyclone program that prints the words ``\texttt{hello,
     }
 \end{verbatim}
 
-Except for the \texttt{using} statement, it looks very much like a C
-program: it uses \texttt{\#include} to tell the preprocessor to import
-some standard definitions, it defines a distinguished function
-\texttt{main} that serves as the entry point of the program, and it
-uses the familiar \texttt{printf} function to handle the printing.  To
-compile the program, put it into a file \texttt{hello.cyc}, and run
+It looks rather like a C program---in fact, a C compiler will happily
+compile it.  The program uses \texttt{\#include} to tell the
+preprocessor to import some standard definitions, it defines a
+distinguished function \texttt{main} that serves as the entry point of
+the program, and it uses the familiar \texttt{printf} function to
+handle the printing; all of this is just as in C\@.
+
+To compile the program, put it into a file \texttt{hello.cyc}, and run
 the command
 \begin{verbatim}
     cyclone hello.cyc -o hello
@@ -46,7 +47,8 @@ and it will print
     hello, world
 \end{verbatim}
 
-It's interesting to compare our program with a version written in C:
+It's interesting to compare our program with a version that omits the
+return statement:
 \begin{verbatim}
     #include <stdio.h>
 
@@ -55,56 +57,21 @@ It's interesting to compare our program with a version written in C:
     }
 \end{verbatim}
 
-A C compiler will happily compile and run the C version.  However,
-it's not valid Cyclone code: it will be rejected by the Cyclone
-compiler, for a couple of reasons.  The first reason is that the C
-version omits a \texttt{return} statement.  Cyclone requires a
-\emph{definite return}: any function with a return type other than
-\texttt{void} must explicitly return a value of the correct type.
-Since \texttt{main} is declared with return type \texttt{int}, the
-Cyclone version makes sure to return a 0.
+A C compiler will compile and run this version.  However, it's not
+valid Cyclone code: it will be rejected by the Cyclone compiler.
+Cyclone requires a \emph{definite return}: any function with a return
+type other than \texttt{void} must explicitly return a value of the
+correct type.  Since \texttt{main} is declared with return type
+\texttt{int}, Cyclone requires that it explicitly return an integer.
 
-Definite return is important for both safety and security.  The caller
-of the function expects to receive a value of the return type; if the
+Definite return reflects Cyclone's concern with safety.  The caller of
+the function expects to receive a value of the return type; if the
 function does not execute a \texttt{return} statement, the caller will
-receive some random value instead.  This could easily lead to a crash
-(for example, the caller might expect a pointer to be returned).  We
-don't expect that problem here (since the return type is
-\texttt{int}), but there is another problem: the random value returned
-is probably drawn from the space occupied by local variables of the
-function.  The caller can exploit this to inspect the internal
-variables of the function, leading to a security breach.
-
-The second reason that Cyclone rejects the C version is that it omits
-the \texttt{using} statement.  The \texttt{using} statement is
-necessary because Cyclone wraps all of its standard library
-definitions in C++ \emph{namespaces}.  A namespace is essentially a
-named scope: it associates a name with a set of declarations.  For
-example, the file \texttt{<stdio.h>} looks, in part, like this:
-\begin{alltt}
-    namespace Stdio \lb
-      {\it \ldots\ declarations \ldots}
-      extern int fflush(FILE *);
-    \rb
-\end{alltt}
-All of the declarations found in C's version of \texttt{<stdio.h>},
-including the one for the \texttt{fflush} function shown here, are
-contained within the namespace \texttt{Stdio}.  Once you've included
-the \texttt{<stdio.h>} file, you can refer to the variables in the
-namespace by prefixing them with \texttt{Stdio}, for example,
-\texttt{Stdio::fflush}.  If you don't want to use the \texttt{::}
-notation, you can make all of the variables within \texttt{Stdio}
-available with a \texttt{using} statement.  So, in our \texttt{hello}
-program, the statement \texttt{using Stdio;} allowed us to refer to
-the \texttt{printf} function as just \texttt{printf}, rather than
-\texttt{Stdio::printf}.
-
-Namespaces allow two programmers to choose names without worrying that
-they will clash with each other.  For example, if you like you can
-define your own version of the \texttt{printf} function, and use your
-\texttt{printf} and \texttt{Stdio::printf} in the same program.  When
-namespaces are used properly, they isolate one programmer's internal
-variables from another's, enhancing safety.
+receive some random value instead.  If the returned value is supposed
+to be a pointer, the caller might try to dereference it, and
+dereferencing a random address can cause the program to crash.  So,
+Cyclone requires a return statement (even if the return type is not a
+pointer type).
 
 \subsection{Pointers}
 
@@ -114,8 +81,8 @@ buffer overflows.  To prevent this, Cyclone puts some restrictions on
 how you can use pointers.
 
 There are actually several kinds of pointers in Cyclone.  The first
-kind of pointer is indicated with a \texttt{*}, as in C.  For example,
-if we declare
+kind of pointer is indicated with a \texttt{*}, as in C\@.  For
+example, if we declare
 \begin{verbatim}
     int x = 3;
     int *y = &x;
@@ -135,10 +102,8 @@ Cyclone:
 \item You can't cast an integer to a pointer.  Cyclone prevents this
   because it would let you overwrite arbitrary memory locations.  In
   fact, you can't use \texttt{(void *)0} (C's typical definition of
-  \texttt{NULL}) as a pointer in Cyclone.  Instead, Cyclone provides a
-  new keyword, \texttt{null}, for writing the null pointer.  (Also,
-  \texttt{NULL} is macro-defined as \texttt{null} in Cyclone's
-  \texttt{<stddef.h>}.)
+  \texttt{NULL}) as a pointer in Cyclone.  Instead, Cyclone provides
+  \texttt{NULL} as a keyword.
 \item You can't do pointer arithmetic on a \texttt{*} pointer.
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
@@ -159,6 +124,8 @@ If you need to do pointer arithmetic in Cyclone, you must use a second
 kind of pointer, indicated by \texttt{?}\ (the question mark).  For
 example, here is a program that echoes its command line arguments:
 \begin{verbatim}
+    #include <stdio.h>
+
     int main(int argc, char ??argv) {
       argc--; argv++; /* skip command name */
       if (argc > 0) {
@@ -203,11 +170,11 @@ of \texttt{main} for backwards compatibility.
 There is one other kind of pointer in Cyclone: the never-null pointer.
 A never-null pointer is indicated by \texttt{@} (the at sign).  An
 \texttt{@} pointer is like a \texttt{*} pointer, except that it is
-guaranteed not to be null.  This means that when you dereference an
+guaranteed not to be NULL\@.  This means that when you dereference an
 \texttt{@} pointer or assign to its contents, a null check is
 unnecessary.
 
-\texttt{@} pointers are useful in Cyclone for both efficiency and
+\texttt{@} pointers are useful in Cyclone both for efficiency and as
 documentation.  This can be seen at work in the standard library,
 where many functions take \texttt{@} pointers as arguments, or return
 \texttt{@} pointers as results.  For example, the \texttt{getc}
@@ -219,13 +186,13 @@ This says that \texttt{getc} expects to be called with a non-null
 pointer to a \texttt{FILE}\@.  Cyclone guarantees that, in fact, when
 the \texttt{getc} function is entered, its argument is not null.  This
 means that \texttt{getc} does not have to test whether it is null, or
-decide what to do if it is in fact null.
+decide what to do if it is in fact NULL\@.
 
 In C, the argument of \texttt{getc} is declared to have type
 \texttt{FILE *}, and programmers can call \texttt{getc} with
 \texttt{NULL}\@.  So for safety, C's \texttt{getc} ought to check for
-\texttt{NULL}\@.  In practice, many C implementations omit the check,
-so that \texttt{getc(NULL)} is an easy way to crash a program.
+\texttt{NULL}\@.  In practice, many C implementations omit the check;
+\texttt{getc(NULL)} is an easy way to crash a C program.
 
 In Cyclone, you can still call \texttt{getc} with a possibly-null
 \texttt{FILE} pointer (a \texttt{FILE *}).  However, Cyclone insists
@@ -234,7 +201,7 @@ that you insert a check before the actual call:
     FILE *f = fopen("/etc/passwd","r");
     int c = getc((FILE @)f);
 \end{verbatim}
-Here \texttt{f} will be null if the file \texttt{/etc/passwd} doesn't
+Here \texttt{f} will be NULL if the file \texttt{/etc/passwd} doesn't
 exist or can't be read.  So, in Cyclone \texttt{f} must be cast to
 \texttt{FILE @} before the call to \texttt{getc}.  The cast causes a
 null check.  If you try to call \texttt{getc} without the cast,
@@ -244,16 +211,18 @@ doing so.
 If you call \texttt{getc} with a \texttt{FILE @}, of course, no check
 is required.  For example, \texttt{stdin} is a \texttt{FILE @} in
 Cyclone, so you can simply call \texttt{getc(stdin)}.  In Cyclone you
-will find that many functions return \texttt{@} pointers, so, many of
+will find that many functions return \texttt{@} pointers, so many of
 the pointers you deal with will already be \texttt{@} pointers, and
-neither the caller nor the called function needs to do null checks.
+neither the caller nor the called function needs to do null
+checks---and this is perfectly safe.
 
 \subsubsection*{Other features of pointers}
 
-There's much more to Cyclone pointers than we've described here.
-A pointer type can also specify that it points to a particular
-\emph{region} of memory, or that it points to a sequence of known
-length.  See Section~\ref{sec:pointers} for details.
+There's much more to Cyclone pointers than we've described here.  For
+example, a pointer type can also specify that it points to a
+particular \emph{region} of memory, or that it points to a sequence of
+known length.  We explain pointers in much more detail in
+\hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
 
 \subsection{Tagged Unions and Pattern Matching}
 
@@ -318,7 +287,7 @@ string:
 \end{verbatim}
 The argument \texttt{a} has type \texttt{tunion t}, so it is either
 built with tag \texttt{Integer} or tag \texttt{String}.  Cyclone
-extends \texttt{switch} statements with \emph{patterns} that
+extends switch statements with \emph{patterns} that
 distinguish between the cases.  The first case,
 \begin{verbatim}
    case &Integer(i): printf("%d",i); return;
@@ -327,7 +296,8 @@ contains a pattern, \texttt{\&Integer(i)}, that will only match values
 that have been built with the \texttt{Integer} tag.  The variable
 \texttt{i} is bound to the underlying integer, and it can be used in
 the body of the case.  For example, \texttt{print(x)} will print 3,
-since \texttt{x} was initialized by \texttt{new Integer(3)}.
+since \texttt{x} was initialized by \texttt{new Integer(3)}, and
+\texttt{print(y)} will print \texttt{hello, world}.
 
 The cases of a \texttt{tunion} can carry any number of values,
 including none, and they can be recursive.  For example, we can define
@@ -409,9 +379,10 @@ tag without values, and if it is an address outside of this space, it
 represents a pointer to a structure containing a tag plus the values
 that it carries.
   
-You can find out more about patterns in Section~\ref{sec:patterns};
-for more about \texttt{tunion} and memory management, see
-Section~\ref{sec:regions}.
+You can find out more about patterns in
+\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; for more about
+\texttt{tunion} and memory management, see
+\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
 %%% For example, \texttt{connect} is a C
 %%% library function used to initiate communication with a machine on the
@@ -471,7 +442,7 @@ message.  Consider our earlier example:
     int c = getc((FILE @)f);
 \end{verbatim}
 Suppose that there is no file \texttt{/etc/passwd}; then
-\texttt{fopen} will return null, and when \texttt{f} is cast to
+\texttt{fopen} will return NULL, and when \texttt{f} is cast to
 \texttt{FILE @}, the implied null check will fail.  The program will
 halt with an error message,
 \begin{verbatim}
@@ -499,9 +470,9 @@ matching:
     }
 \end{verbatim}
 Here we've ``wrapped'' the call to \texttt{getc} in a
-\texttt{try}-\texttt{catch} statement.  If \texttt{f} isn't null and
+\texttt{try}-\texttt{catch} statement.  If \texttt{f} isn't NULL and
 the \texttt{getc} succeeds, then execution just continues, ignoring
-the \texttt{catch}.  But if \texttt{f} is null, then the null check
+the \texttt{catch}.  But if \texttt{f} is NULL, then the null check
 will fail and the exception \texttt{Null_Exception} will be thrown;
 execution immediately continues with the \texttt{catch} (the call to
 \texttt{getc} never happens).  In the \texttt{catch} the thrown
@@ -819,7 +790,7 @@ instance, you can pattern match on tuples, structs, pointers to
 tuples/structs, etc.  See the grammar for the syntax of the various
 pattern forms.
 
-The type-checker for Cyclone is much more picky about \texttt{switch}
+The type-checker for Cyclone is much more picky about switch
 statements than C\@.  In particular, it will check that all of the
 patterns you have are exhaustive (or else there's a \texttt{default:}
 clause) and that none of the patterns overlap.  This is useful for
@@ -973,7 +944,7 @@ is used in the standard library for lists:
 
 Here, we've declared a \texttt{struct List} parameterized by a type
 \texttt{`a}.  The \texttt{hd} field contains an element of type \texttt{`a}
-and the \texttt{tl} field contains a (possibly \texttt{null}) pointer to a
+and the \texttt{tl} field contains a possibly-null pointer to a
 \texttt{struct List} with elements of type \texttt{`a}.  We then define
 \texttt{list_t<`a>} as an abbreviation for \texttt{struct List<`a>*}.  So,
 for instance, we can declare both integer and string lists like this:
@@ -1089,8 +1060,8 @@ standard library which implement first-class closures.
 \item Cyclone does not permit \texttt{goto}s from one scope into
   another. C warns against this practice, as it can cause crashes;
   Cyclone rules it out entirely.
-\item Cyclone places some limitations on the form of \texttt{switch}
-  statements that rule out crashes like those caused by unrestricted
+\item Cyclone places some limitations on the form of switch statements
+  that rule out crashes like those caused by unrestricted
   \texttt{goto}.  Furthermore, Cyclone prevents you from accidentally
   falling through from one case to another. To fall through, you must
   explicitly use the \texttt{fallthru} keyword.  Otherwise, you must

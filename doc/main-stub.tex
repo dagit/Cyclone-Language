@@ -14,11 +14,13 @@
 \usepackage{color}
 \definecolor{lightgray}{gray}{.85}
 \definecolor{bluegray}{rgb}{.25,.25,.65}
+\definecolor{lightblue}{rgb}{.75,.81,1}
 \usepackage{palatino}
 \usepackage[colorlinks=true,linkcolor=bluegray,anchorcolor=bluegray,
 citecolor=bluegray,filecolor=bluegray,menucolor=bluegray,pagecolor=bluegray,
 urlcolor=bluegray]{hyperref}
 
+%HEVEA\newcommand\pagecolor[1]{}%% Eliminate hevea warning
 \ifscreen
 \pagecolor{lightgray}
 %\pagestyle{plain}
@@ -42,22 +44,27 @@ urlcolor=bluegray]{hyperref}
 \newcommand{\lb}{\texttt{\char`\{}}
 \newcommand{\rb}{\texttt{\char`\}}}
 
+%HEVEA\let\oldmeta=\@meta
+%HEVEA\renewcommand{\@meta}{\oldmeta
+%HEVEA\begin{rawhtml}<style type="text/css"> body { font-family: verdana, arial, geneva, san-serif; margin-left: 7%; margin-right: 7%; } </style>\end{rawhtml}}
+
+%HEVEA\title{CYCLONE: Safe C Programming}
+
 \begin{document}
 \thispagestyle{empty}
 \textcolor{bluegray}{
-%HEVEA \begin{rawhtml}<h1 align="center">Cyclone</h1>\end{rawhtml}
-%HEVEA \begin{rawhtml}<h1 align="center">A safe programming language</h1>\end{rawhtml}
-%HEVEA \begin{latexonly}
+%HEVEA\begin{rawhtml}<h1 align="center">CYCLONE</h1>\end{rawhtml}
+%HEVEA\begin{rawhtml}<h1 align="center">Safe C Programming</h1>\end{rawhtml}
+%HEVEA\begin{latexonly}
 \begin{center}
-  \bfseries\fontsize{.7in}{.8in}\selectfont
-  {\fontsize{1.5in}{1.6in}\selectfont Cyclone}\\[1ex]
-  A safe\\
-  programming\\
-  language
+  \Huge
+  {\fontsize{.5in}{.6in}\selectfont CYCLONE}\\[1ex]
+  Safe C Programming
 \end{center}
-%HEVEA \end{latexonly}
+%HEVEA\end{latexonly}
 }
 \newpage
+
 \tableofcontents
 \newpage
 

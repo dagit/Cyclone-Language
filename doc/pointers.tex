@@ -15,7 +15,7 @@ object pointed to, pointer types indicate:
 
 \begin{itemize}
 \item \hyperlink{pointer_null}{Whether a value of the type may be
-    \texttt{null}}
+    \texttt{NULL}}
 \item \hyperlink{pointer_bound}{The number of objects pointed to}
 \item \hyperlink{pointer_region}{The region into which the pointer
     points}
@@ -30,16 +30,16 @@ collection of types.  Throughout, we mention planned improvements.  We
 end with a \hyperlink{pointer_summary}{summary}.
 
 \subsection*{\hypertarget{pointer_null}{Whether a value of the type may be
-    \texttt{null}}}
+    \texttt{NULL}}}
 
 Cyclone's type system distinguishes between pointers that may be
-\texttt{null} and those that may not.
+\texttt{NULL} and those that may not.
 
 \paragraph{Syntax and Semantics} The syntax is straightforward:
-The \texttt{*} character is for pointers that may be \texttt{null} (as in
+The \texttt{*} character is for pointers that may be \texttt{NULL} (as in
 C), and the \texttt{@} character is for pointers that may not be
-\texttt{null}.  So ``\texttt{int * x = null;}'' is accepted, but
-``\texttt{int @ x = null;}'' is not.
+\texttt{NULL}.  So ``\texttt{int * x = NULL;}'' is accepted, but
+``\texttt{int @ x = NULL;}'' is not.
 
 
 \paragraph{Subtyping}
@@ -56,7 +56,7 @@ illegal code shows why:
 \begin{verbatim}
   void f(int @@ x) {
     int *@ y = x; // would be legal were int *@ a subtype of int @@
-    *y = null;    // legal because *y has type int *
+    *y = NULL;    // legal because *y has type int *
     **x;          // seg faults even though the type of *x is int @
   }
 \end{verbatim}
@@ -72,26 +72,26 @@ sometimes necessary to avoid spurious warnings, such as in this code:
   extern void f(int @);
 
   void g(int * x) {
-    if (x != null)
+    if (x != NULL)
        f((int @)x);
   }
 \end{verbatim}
 
 \paragraph{Implementation}
 A run-time null check is a simple comparison.  If it fails (i.e., the
-value is \texttt{null}), the exception \texttt{Null_Exception} is thrown.
+value is \texttt{NULL}), the exception \texttt{Null_Exception} is thrown.
 A check is inserted whenever a \texttt{t*} is (explicitly or implicitly)
 cast to a \texttt{t@}.  Casting \texttt{t@} to \texttt{t*} has no run-time
 effect.
 
-Safety demands that if \texttt{x} may be \texttt{null}, then \texttt{*e},
+Safety demands that if \texttt{x} may be \texttt{NULL}, then \texttt{*e},
 \texttt{e.f}, \texttt{e->f}, and \texttt{e[e2]} are translated such that we
-first check that \texttt{e} is not \texttt{null}.  \texttt{e} is only
+first check that \texttt{e} is not \texttt{NULL}.  \texttt{e} is only
 evaluated once.  The only way to guarantee there is no check at
 run-time is to use \texttt{@} instead of \texttt{*}.  For example, the
 function on the left performs one check whereas the one on the right
 performs three (both throw \texttt{Null_Exception} if passed
-\texttt{null}):
+\texttt{NULL}):
 
 \begin{verbatim}
   int sum3(int *{3} x) {           int sum3(int *{3} x) {
@@ -102,14 +102,14 @@ performs three (both throw \texttt{Null_Exception} if passed
 
 
 Note that \texttt{\&e->f} and \texttt{\&e[e2]} check (if necessary) that
-\texttt{e} is not \texttt{null} even though these constructs do not read
+\texttt{e} is not \texttt{NULL} even though these constructs do not read
 through \texttt{e}.
 
 \paragraph{Future}
 
 \begin{itemize}
 \item We may allow an implicit cast from 0 to a pointer type, as in
-  C\@.  Currently 0 must have a numeric type, even though \texttt{null}
+  C\@.  Currently 0 must have a numeric type, even though \texttt{NULL}
   is implemented as address 0.  This change would make porting easier.
 \item We may use dataflow information to avoid spurious warning about
   implicit casts from \texttt{t*} to \texttt{t@} and to avoid
@@ -246,7 +246,7 @@ when the number is not known at compile-time.
 
 
 \paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
-to objects of type \texttt{t}.  Such types may be assigned \texttt{null}.
+to objects of type \texttt{t}.  Such types may be assigned \texttt{NULL}.
 They may have a region annotation, which as with other pointer types,
 is the region into which the pointer points and the default is
 \texttt{`H}, the heap.  Clearly, explicit bounds information makes no
@@ -295,7 +295,7 @@ exception \texttt{Array_Bounds} is thrown.  Implicit casts of this form
 cause the compiler to give a warning.
 
 
-\paragraph{Future} We may add a ``cannot be null'' version of these types
+\paragraph{Future} We may add a ``cannot be NULL'' version of these types
 for sake of completeness.  More significantly, we intend to allow
 user-defined types to have certain fields describe the bounds
 information for other fields, rather than relying on types built into
@@ -306,9 +306,9 @@ A pointer type has one of the following forms, where \texttt{t} is a
 type and \texttt{n} is a constant unsigned expression:
 
 \begin{itemize}
-\item \verb|t *{n}`r|, a possibly \texttt{null} pointer to \texttt{n}
+\item \verb|t *{n}`r|, a possibly \texttt{NULL} pointer to \texttt{n}
   elements of type \texttt{t} in region \texttt{`r}
-\item \verb|t @{n}`r|, a non-\texttt{null} pointer to \texttt{n} elements
+\item \verb|t @{n}`r|, a non-\texttt{NULL} pointer to \texttt{n} elements
   of type \texttt{t} in region \texttt{`r}
 \item \texttt{t ?`r}, a pointer to an unknown number of elements of type
   \texttt{t} in region \texttt{`r}.  Implemented as a multi-word object.

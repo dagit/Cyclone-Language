@@ -1,5 +1,5 @@
 \section{Libraries}
-\definecolor{lightblue}{rgb}{.75,.81,1}
+
 %HEVEA \newcommand{\parbox}[3][x]{#3}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\var}[1]{\texttt{#1}}
@@ -7,11 +7,26 @@
 %HEVEA \begin{latexonly}
 \ifscreen
 \newcommand{\defunlabel}[1]{%
-  \parbox[b]{\labelwidth}{\makebox[0pt][l]{\colorbox{lightblue}{#1}}\\}}
+  \parbox[b]{\labelwidth}{\makebox[0pt][l]{\colorbox{lightblue}{#1}}}}
 \else
 \newcommand{\defunlabel}[1]{%
-  \parbox[b]{\labelwidth}{\makebox[0pt][l]{#1}\\}}
+  \parbox[b]{\labelwidth}{\makebox[0pt][l]{#1}}}
 \fi
+\newenvironment{defun}[2]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#1@\texttt{#1}}%
+  \item[{\tt\textbf{#1}#2}]\mbox{}\\}{\end{list}}
+\newenvironment{defun2}[3]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#2@\texttt{#2()}}%
+  \item[{\tt {#1}~\textbf{#2}{#3}}]\mbox{}\\}{\end{list}}
+\newenvironment{deexn}[2]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#1@\texttt{#1}}%
+  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb;}]\mbox{}\\}{\end{list}}
 %HEVEA \end{latexonly}
 %HEVEA \newcommand{\defunlabel}[1]{%
 %HEVEA   \parbox[b]{\labelwidth}{%
@@ -19,23 +34,22 @@
 %HEVEA #1%
 %HEVEA \begin{rawhtml}</td></tr></table>\end{rawhtml}%
 %HEVEA }}
-\newenvironment{defun}[2]{%
-  \begin{list}{}{}%
-    \renewcommand{\makelabel}{\defunlabel}%
-    \index{#1@\texttt{#1}}%
-  \item[{\tt\textbf{#1}#2}]}{\end{list}}
-\newenvironment{defun2}[3]{%
-  \begin{list}{}{}%
-    \renewcommand{\makelabel}{\defunlabel}%
-    \index{#2@\texttt{#2()}}%
-  \item[{\tt {#1}~\textbf{#2}{#3}}]}{\end{list}}
-\newenvironment{deexn}[2]{%
-  \begin{list}{}{}%
-    \renewcommand{\makelabel}{\defunlabel}%
-    \index{#1@\texttt{#1}}%
-  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb;}]}{\end{list}}
-%%% \newenvironment{defun}[2]{\noindent\index{#1@\texttt{#1}}
-%%%   \textbf{\texttt{#1}}\texttt{#2}\begin{quote}}{\end{quote}}
+%HEVEA\newenvironment{defun}[2]{%
+%HEVEA  \begin{list}{}{}%
+%HEVEA    \renewcommand{\makelabel}{\defunlabel}%
+%HEVEA    \index{#1@\texttt{#1}}%
+%HEVEA  \item[{\tt\textbf{#1}#2}]}{\end{list}}
+%HEVEA\newenvironment{defun2}[3]{%
+%HEVEA  \begin{list}{}{}%
+%HEVEA    \renewcommand{\makelabel}{\defunlabel}%
+%HEVEA    \index{#2@\texttt{#2()}}%
+%HEVEA  \item[{\tt {#1}~\textbf{#2}{#3}}]}{\end{list}}
+%HEVEA\newenvironment{deexn}[2]{%
+%HEVEA  \begin{list}{}{}%
+%HEVEA    \renewcommand{\makelabel}{\defunlabel}%
+%HEVEA    \index{#1@\texttt{#1}}%
+%HEVEA  \item[{\tt xtunion exn~\lb~extern~\textbf{#1}{#2}~\rb;}]}{\end{list}}
+
 \newcommand{\tindex}[1]{}
 \newcommand{\exindex}[1]{}
 
@@ -61,7 +75,7 @@ using Array;
 \begin{defun2}{`a ?}{extract}{(`a::B {?}`r1 \vvar{x},int \vvar{start},int *`r2 \vvar{n_opt});}
   Create a new array on the heap, with elements extracted from the
   array \vvar{x}, beginning with element \vvar{start}.  If
-  \vvar{n_opt} is \texttt{null}, all of the elements from \vvar{start}
+  \vvar{n_opt} is \texttt{NULL}, all of the elements from \vvar{start}
   to the end of \vvar{x} are extracted; if \vvar{n_opt} points to an
   integer $n$, then $n$ elements are extracted.  If $n\leq 0$ or there
   are less than $n$ elements in \vvar{x} starting at \vvar{start},
@@ -197,6 +211,7 @@ using Array;
   that \texttt{\vvar{pred}($x_i$)} is true; else return false.
 \end{defun2}
 \begin{defun2}{bool}{exists_c}{(bool \vvar{pred}(`a,`b),`a \vvar{env},`b {?}`r \vvar{x});}
+  A version of \code{exists} where the predicate takes an environment.
 \end{defun2}
 
 \subsubsection*{Arrays and Lists}
@@ -456,8 +471,8 @@ continuing for \var{len} characters to the end of buffer \var{b}.  If
 \var{offset} and \var{len} do not specify a valid substring of \var{s},
 then the function throws \code{InvalidArg("Buffer::add_substring")}.
 Note, the substring specified by \var{offset} and \var{len} may contain
-null (0) characters; in any case, the entire substring is appended to
-\var{b}, not just the substring up to the first null character.
+NUL (0) characters; in any case, the entire substring is appended to
+\var{b}, not just the substring up to the first NUL character.
 \end{defun}
 
 \begin{defun}{add_string}{(b,s)}
@@ -1131,7 +1146,7 @@ list; the head has type \texttt{`a} and the tail points into region
 \texttt{`r}.
 
 Most functions use the typedef \code{list_t}, which is a possibly-null
-pointer to a cons cell; null serves as the empty list.  The typedef
+pointer to a cons cell; NULL serves as the empty list.  The typedef
 \code{List_t} refers to non-null pointers to cons cells; so a
 \code{List_t} is a list that has at least one element.
 
@@ -1142,7 +1157,7 @@ Namespace List defines three exceptions:
     xtunion exn \lb \textbf{Nth} \rb;
 \end{alltt}
 The \code{List_empty} exception is typically thrown by a function that
-expects a non-empty list, but is passed null instead.  The
+expects a non-empty list, but is passed NULL instead.  The
 \code{List_mismatch} exception is typically thrown by a function that
 expects two lists of the same length, but receives lists of different
 lengths instead.  The \code{Nth} exception is thrown when
@@ -1438,7 +1453,7 @@ A version of memq that uses a provided comparison function.
 Checks that a list of elements is unique; it assumes that the elements
 of \var{x} are sorted according to the comparison function
 \var{compare}.  It returns an element that is duplicated if one exists,
-otherwise it returns null.
+otherwise it returns NULL\@.
 \end{defun}
 
 \subsubsection*{Lists and tuples}
@@ -2033,12 +2048,15 @@ consult \texttt{stdio.h}.
   printed, or a negative value if an output error or encoding error
   occurred.
 \end{defun2}
-\begin{defun2}{char ?}{aprintf(const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
+\begin{defun2}{char ?}{aprintf}{(const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
   Allocates and returns a string whose contents are given by printing
   according to the format string \var{fmt} and the remaining arguments.
   \texttt{FIX: is an error possible?  What do we do then?}
 \end{defun2}
 \begin{defun2}{char {?}`r1}{raprintf}{(region_t<`r1>, const char {?}`r2 fmt, ...`r3 inject parg_t<`r4> ap);}
+  Allocates and returns a string whose contents are given by printing
+  according to the format string \var{fmt} and the remaining arguments.
+  The string is allocated in region \code{`r1}.
 \end{defun2}
 
 \begin{defun2}{int}{vfprintf}{(FILE @,const char {?}`r fmt, parg_t<`r2> ? `r1 ap);}
@@ -2324,7 +2342,7 @@ Functions whose arguments have range errors throw the
 
 \subsubsection*{String length}
 \begin{defun2}{size_t}{strlen}{(const char {?}`r \vvar{s});}
-  Returns the length of the string \vvar{s}.  It considers a null
+  Returns the length of the string \vvar{s}.  It considers a NUL
   character to mark the end of the string.
 \end{defun2}
 
@@ -2352,7 +2370,7 @@ is the standard, lexicographic ordering.
 \end{defun2}
 
 \begin{defun2}{int}{zstrcmp}{(const char {?}`r1 \vvar{s1},const char {?}`r2 \vvar{s2});}
-  Compares \vvar{s1} to \vvar{s2}, and it assumes that null (zero)
+  Compares \vvar{s1} to \vvar{s2}, and it assumes that NUL (zero)
   characters in \vvar{s1} and \vvar{s2} are not end-of-string markers.
 \end{defun2}
 
@@ -2362,7 +2380,7 @@ is the standard, lexicographic ordering.
 
 \begin{defun2}{int}{zstrncmp}{(const char {?}`r1 \vvar{s1},const char {?}`r2 \vvar{s2}, size_t \vvar{n});}
   Compares at most \vvar{n} characters of \vvar{s1} to \vvar{s2},
-  assuming that null characters do not mark the end of strings.  If
+  assuming that NUL characters do not mark the end of strings.  If
   \vvar{n} is less than 0, \code{zstrncmp} returns 0.
 \end{defun2}
 
@@ -2440,14 +2458,14 @@ returns \var{dest}.  If \var{dest} is not big enough to hold
 \end{defun}
 
 \begin{defun}{zstrncpy}{(dest,src,len)}
-A variant of \code{strncpy} that does not consider null characters to
+A variant of \code{strncpy} that does not consider NUL characters to
 terminate strings.
 \end{defun}
 
 \begin{defun}{expand}{(s,n)}
 Allocates and returns a new string that has size \var{n} or
 \code{strlen(\var{s})}, whichever is greater.  The returned string has
-the same contents as \var{s} (considering null characters as string
+the same contents as \var{s} (considering NUL characters as string
 terminators).
 \end{defun}
 
@@ -2458,7 +2476,7 @@ Like expand except that the returned string is usually a bit bigger than
 
 \begin{defun}{strdup}{(s)}
 Allocates and returns a new string with the same contents as \var{s}
-(assuming that null characters terminate strings).
+(assuming that NUL characters terminate strings).
 \end{defun}
 
 \begin{defun}{substring}{(s,ofs,len)}

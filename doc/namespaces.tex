@@ -1,5 +1,36 @@
 \section{Namespaces}
 
+% The second reason that Cyclone rejects the C version is that it omits
+% the \texttt{using} statement.  The \texttt{using} statement is
+% necessary because Cyclone wraps all of its standard library
+% definitions in C++ \emph{namespaces}.  A namespace is essentially a
+% named scope: it associates a name with a set of declarations.  For
+% example, the file \texttt{<stdio.h>} looks, in part, like this:
+% \begin{alltt}
+%     namespace Stdio \lb
+%       {\it \ldots\ declarations \ldots}
+%       extern int fflush(FILE *);
+%     \rb
+% \end{alltt}
+% All of the declarations found in C's version of \texttt{<stdio.h>},
+% including the one for the \texttt{fflush} function shown here, are
+% contained within the namespace \texttt{Stdio}.  Once you've included
+% the \texttt{<stdio.h>} file, you can refer to the variables in the
+% namespace by prefixing them with \texttt{Stdio}, for example,
+% \texttt{Stdio::fflush}.  If you don't want to use the \texttt{::}
+% notation, you can make all of the variables within \texttt{Stdio}
+% available with a \texttt{using} statement.  So, in our \texttt{hello}
+% program, the statement \texttt{using Stdio;} allowed us to refer to
+% the \texttt{printf} function as just \texttt{printf}, rather than
+% \texttt{Stdio::printf}.
+% 
+% Namespaces allow two programmers to choose names without worrying that
+% they will clash with each other.  For example, if you like you can
+% define your own version of the \texttt{printf} function, and use your
+% \texttt{printf} and \texttt{Stdio::printf} in the same program.  When
+% namespaces are used properly, they isolate one programmer's internal
+% variables from another's, enhancing safety.
+
 As in C++, namespaces are used to avoid name clashes in code.  For
 example:
 \begin{verbatim}

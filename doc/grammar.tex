@@ -1,18 +1,33 @@
 \section{Grammar}
 
+
+%HEVEA \begin{latexonly}
 \newcommand{\rulelabel}[1]{%
-  \parbox[b]{\labelwidth}{\makebox[0pt][l]{\hypertarget{#1}{\textit{#1}}:}\\}}
+  \parbox[b]{\labelwidth}{\makebox[0pt][l]{\hypertarget{#1}{\textit{#1}}:}}}
+\newcommand{\ruleoneoflabel}[1]{%
+  \parbox[b]{\labelwidth}%
+  {\makebox[0pt][l]{\hypertarget{#1}{\textit{#1}}: one of}}}
 \newenvironment{rules}[1]{%
   \begin{list}{}{}%
     \renewcommand{\makelabel}{\rulelabel}%
-  \item[#1]}{\end{list}}
-\newcommand{\ruleoneoflabel}[1]{%
-  \parbox[b]{\labelwidth}%
-  {\makebox[0pt][l]{\hypertarget{#1}{\textit{#1}}: one of}\\}}
+  \item[#1]\mbox{}\\}{\end{list}}
 \newenvironment{rulesoneof}[1]{%
   \begin{list}{}{}%
     \renewcommand{\makelabel}{\ruleoneoflabel}%
-  \item[#1]}{\end{list}}
+  \item[#1]\mbox{}\\}{\end{list}}
+%HEVEA \end{latexonly}
+%HEVEA \newcommand{\rulelabel}[1]{%
+%HEVEA   \parbox[b]{\labelwidth}{\hypertarget{#1}{\textit{#1}}:}}
+%HEVEA \newcommand{\ruleoneoflabel}[1]{%
+%HEVEA   \parbox[b]{\labelwidth}{\hypertarget{#1}{\textit{#1}}: one of}}
+%HEVEA \newenvironment{rules}[1]{%
+%HEVEA   \begin{list}{}{}%
+%HEVEA     \renewcommand{\makelabel}{\rulelabel}%
+%HEVEA   \item[#1]}{\end{list}}
+%HEVEA \newenvironment{rulesoneof}[1]{%
+%HEVEA   \begin{list}{}{}%
+%HEVEA     \renewcommand{\makelabel}{\ruleoneoflabel}%
+%HEVEA   \item[#1]}{\end{list}}
 
 \newcommand{\nt}[1]{\hyperlink{#1}{\textit{#1}}} % Non-terminal
 \newcommand{\tk}[1]{\texttt{#1}}                 % Token (terminal)
@@ -23,7 +38,7 @@ It has the following additional keywords:
 
 \begin{center}
 \begin{tabular}{lllllll}
-\tk{abstract} &\tk{cut}      &\tk{let}       &\tk{null}     &\tk{rmalloc} &\tk{throw}  &\tk{xprintf}\\
+\tk{abstract} &\tk{cut}      &\tk{let}       &\tk{NULL}     &\tk{rmalloc} &\tk{throw}  &\tk{xprintf}\\
 \tk{catch}    &\tk{fallthru} &\tk{namespace} &\tk{region}   &\tk{rnew}    &\tk{tunion} &\tk{xtunion}\\
 \tk{codegen}  &\tk{fill}     &\tk{new}       &\tk{region_t} &\tk{splice}  &\tk{using}  
 \end{tabular}
@@ -46,8 +61,7 @@ The start symbol is \textit{translation-unit}.
 {\footnotesize
 \medskip
 \noindent
-Jump to:
-\nt{declaration} $\cdot$
+Jump to:~\nt{declaration} $\cdot$
 \nt{struct-or-union-specifier} $\cdot$
 \nt{tunion-specifier} $\cdot$
 \nt{statement} $\cdot$
@@ -203,7 +217,7 @@ Jump to:
 \end{rulesoneof}
 \begin{rules}{tunionfield}
   \nt{tunionfield-scope} \nt{identifier}\\
-  \nt{tunionfield-scope} \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{parameter-list} \tk{)}\\
+  \nt{tunionfield-scope} \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{parameter-list} \tk{)}
 \end{rules}
 \begin{rules}{declarator}
   \nt{pointer}\opt\ \nt{direct-declarator}
@@ -249,13 +263,13 @@ Jump to:
 \end{rules}
 \begin{rules}{effect-set}
   \nt{atomic-effect}\\
-  \nt{atomic-effect} \tk{+} \nt{effect-set}\\
+  \nt{atomic-effect} \tk{+} \nt{effect-set}
 \end{rules}
 \begin{rules}{atomic-effect}
   {\lb} {\rb}\\
   {\lb} \nt{region-set} {\rb}\\
   \nt{type-var}\\
-  \nt{type-var} \tk{::} \nt{kind}\\
+  \nt{type-var} \tk{::} \nt{kind}
 \end{rules}
 \begin{rules}{region-set}
   \nt{type-var}\\
@@ -387,7 +401,7 @@ Jump to:
   \tk{-} \nt{integer-constant}\\
   \nt{floating-constant}\\
   \nt{character-constant}\\
-  \tk{null}\\
+  \tk{NULL}\\
   \nt{identifier}\\
   \nt{identifier} \nt{type-params}\opt\ \tk{(} \nt{tuple-pattern-list} \tk{)}\\
   \tk{\$\tk{(}} \nt{tuple-pattern-list} \tk{)}\\
@@ -506,7 +520,7 @@ Jump to:
   \nt{unary-operator} \nt{cast-expression}\\
   \tk{sizeof} \nt{unary-expression}\\
   \tk{sizeof} \tk{(} \nt{type-name} \tk{)}\\
-  \nt{expression} \tk{.} \tk{size}\\
+  \nt{expression} \tk{.} \tk{size}
 \end{rules}
 \begin{rulesoneof}{unary-operator}
   \tk{\&} ~
@@ -552,7 +566,7 @@ Jump to:
   \nt{integer-constant}\\
   \nt{character-constant}\\
   \nt{floating-constant}\\
-  \tk{null}
+  \tk{NULL}
 \end{rules}
 
 % Local Variables:

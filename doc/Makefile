@@ -2,10 +2,15 @@ all: screen html
 
 html: main-screen.html
 
-main-screen.html:
-	hevea main-screen.tex
-
 screen: main-screen.pdf
+
+letter: main-letter.pdf
+
+a4: main-a4.pdf
+
+main-screen.html:
+	hevea main-screen
+	hevea main-screen
 
 main-screen.pdf:
 	pdflatex '\nonstopmode\input' main-screen
@@ -15,11 +20,18 @@ main-screen.pdf:
 
 main-letter.pdf:
 	pdflatex '\nonstopmode\input' main-letter
-	makeindex main-screen
+	makeindex main-letter
 	pdflatex '\nonstopmode\input' main-letter
 	pdflatex '\nonstopmode\input' main-letter
 
+
+main-a4.pdf:
+	pdflatex '\nonstopmode\input' main-a4
+	makeindex main-a4
+	pdflatex '\nonstopmode\input' main-a4
+	pdflatex '\nonstopmode\input' main-a4
+
 clean:
-	$(RM) *.aux *.dvi *.hind *.idx *.ilg *.ind *.ing *.log
+	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
 	$(RM) *.pdf *.toc *.out
 	$(RM) main-screen.html
