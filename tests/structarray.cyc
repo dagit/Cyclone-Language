@@ -1,0 +1,87 @@
+// tests out structs with arrays whose size depends upon a type
+// parameter.
+
+#include <core.h>
+#include <stdio.h>
+#include <assert.h>
+
+// Ptr contains a size and array with size elements -- because
+// the size cannot be statically determined, we can only manipulate
+// pointers to Ptr's.
+struct Ptr<`a> {
+  <`i::I>               // there exists some unsigned integer i
+  tag_t<`i> size;       // size == i
+  `a elts[valueof(`i)]; // numelts(elts) == i
+};
+
+typedef struct Ptr<`a>@`r ptr_t<`a,`r>; // pointer to 'a values in region `r
+
+// extract p[offset]
+`a get(ptr_t<`a,`r> p, unsigned offset) {
+  // must use pattern matching to destructure existential, locally
+  // binding the type variable `j to the size of the array.
+  let &Ptr{<`j> .size = s, .elts = e} = p; 
+  // note that e has type `a @{valueof(`j)}
+  if (offset < s)    // must test that offset is unsigned-< the size of e
+    return e[offset]; // now it's safe to do subscript
+  else throw new Array_bounds;
+}
+
+// set p[offset] to elt and return elt
+`a set(ptr_t<`a,`r> p, unsigned offset, `a elt) {
+  let &Ptr{<`j> .size = s, .elts = e} = p;
+  if (offset < s) 
+    return (e[offset] = elt);
+  else throw new Array_bounds;
+}
+
+// return the number of elts in the array
+unsigned num_elts(ptr_t<`a,`r> p) {
+  let &Ptr{<`j> .size = s, ...} = p;
+  return (unsigned)s;
+}
+  
+// create an integer array of size 4
+ptr_t<int> vector4() {
+  return new Ptr{.size = 4, .elts = {0,1,2,3}};
+}
+
+// create an integer array of size 5
+ptr_t<int> vector5() {
+  return new Ptr{.size = 5, .elts = {0,1,2,3,4}};
+}
+
+// create an integer poiner array of size 2
+ptr_t<int@> pvector3() {
+  return new Ptr{.size = 2, .elts = {new 0, new 1}};
+}
+
+int main() {
+  let p1 = vector4();
+  let p2 = vector5();
+  let p3 = pvector3();
+
+  assert(num_elts(p1) == 4);
+  assert(num_elts(p2) == 5);
+  assert(num_elts(p3) == 2);
+
+  for (int i = 0; i < 4; i++) {
+    assert(get(p1,i) == i);
+    set(p1,i,3-i);
+    assert(get(p1,i) == 3-i);
+  }
+
+  try {
+    get(p1,4);
+    fprintf(stderr,"failure to throw exception!\n");
+    exit(1);
+  } catch {
+  case &Array_bounds: break;
+  }
+
+  let i1 = get(p3,0);
+  let i2 = get(p3,1);
+  *i1 = 3;
+  *i2 = 4;
+  return 0;
+}

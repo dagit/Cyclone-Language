@@ -755,9 +755,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 
 # 35 "core.h"
  typedef char*Cyc_Cstring;
-# 36
 typedef char*Cyc_CstringNN;
-# 37
 typedef struct _dyneither_ptr Cyc_string_t;
 # 40
 typedef struct _dyneither_ptr Cyc_mstring_t;
@@ -829,81 +827,54 @@ struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);ex
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
-# 250
 return 0;{
-# 251
 unsigned char*ptrbd=dyn.curr + bd * sz;
-# 252
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 # 256
 return 0;
-# 257
 return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
 # 34
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
-# 35
 if(o == 0)
-# 36
 return 0;{
-# 37
 struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6->v=(void*)f((void*)o->v),_tmp6)));};}
 # 40
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
-# 41
 char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=_cyccalloc_atomic(sizeof(char),_tmp7),_tag_dyneither(_tmp8,sizeof(char),_tmp7))));}
 # 44
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
-# 45
 char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(char),_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}
 # 48
 struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno){
-# 49
 return Cyc_Core__rnew_dynregion(Cyc_Core_heap_region,file,lineno);}
 # 52
 int Cyc_Core_true_f(void*x){return 1;}
-# 53
 int Cyc_Core_false_f(void*x){return 0;}
 # 55
 int Cyc_Core_intcmp(int a,int b){return a - b;}
-# 56
 int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
-# 57
 int Cyc_Core_nptrcmp(void*a,void*b){
-# 58
 if(a == b)return 0;
-# 59
 if(a > b)return 1;
-# 60
 return - 1;}
 # 62
 int Cyc_Core_ptrcmp(void*a,void*b){
-# 63
 if(a == b)return 0;
-# 64
 if(a > b)return 1;
-# 65
 return - 1;}
 # 68
 void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}
-# 69
 void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}
-# 70
 void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 # 72
 void*Cyc_Core_identity(void*x){
-# 73
 return x;}
 # 79
 struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
-# 80
 struct _dyneither_ptr res;
-# 81
 res.curr=arr;
-# 82
 res.base=arr;
-# 83
 res.last_plus_one=arr + s * n;
-# 84
 return res;}

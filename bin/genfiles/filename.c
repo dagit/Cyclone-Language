@@ -755,9 +755,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 
 # 35 "core.h"
  typedef char*Cyc_Cstring;
-# 36
 typedef char*Cyc_CstringNN;
-# 37
 typedef struct _dyneither_ptr Cyc_string_t;
 # 40
 typedef struct _dyneither_ptr Cyc_mstring_t;
@@ -797,15 +795,11 @@ extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Reg
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
-# 250
 return 0;{
-# 251
 unsigned char*ptrbd=dyn.curr + bd * sz;
-# 252
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 # 256
 return 0;
-# 257
 return dyn.curr;};}
 # 30 "filename.h"
 struct _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr,struct _dyneither_ptr);
@@ -829,95 +823,57 @@ struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct _dyneither_ptr)
 struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,unsigned long n);
 # 35 "filename.cyc"
 struct _dyneither_ptr Cyc_Filename_concat(struct _dyneither_ptr s1,struct _dyneither_ptr s2){
-# 36
 const char*_tmp18;return Cyc_strconcat((struct _dyneither_ptr)s1,(struct _dyneither_ptr)Cyc_strconcat(((_tmp18="/",_tag_dyneither(_tmp18,sizeof(char),2))),(struct _dyneither_ptr)s2));}
 # 39
 struct _dyneither_ptr Cyc_Filename_chop_extension(struct _dyneither_ptr filename){
-# 40
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
-# 41
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '.'){
-# 42
 -- i;}
-# 43
 if(i < 0){
-# 44
 struct Cyc_Core_Invalid_argument_exn_struct _tmp1E;const char*_tmp1D;struct Cyc_Core_Invalid_argument_exn_struct*_tmp1C;(int)_throw((void*)((_tmp1C=_cycalloc(sizeof(*_tmp1C)),((_tmp1C[0]=((_tmp1E.tag=Cyc_Core_Invalid_argument,((_tmp1E.f1=((_tmp1D="chop_extension",_tag_dyneither(_tmp1D,sizeof(char),15))),_tmp1E)))),_tmp1C)))));}
-# 45
 return Cyc_substring((struct _dyneither_ptr)filename,0,(unsigned long)i);}
 # 50
 struct _dyneither_ptr Cyc_Filename_dirname(struct _dyneither_ptr filename){
-# 51
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
-# 52
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '/'){
-# 53
 -- i;}
-# 54
 if(i < 0)return Cyc_Core_new_string(0);
-# 55
 return Cyc_substring((struct _dyneither_ptr)filename,0,(unsigned long)i);}
 # 59
 struct _dyneither_ptr Cyc_Filename_basename(struct _dyneither_ptr filename){
-# 60
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
-# 61
 while(i >= 0  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),i))!= '/'){
-# 62
 -- i;}
-# 63
 return Cyc_substring((struct _dyneither_ptr)filename,i + 1,_get_dyneither_size(filename,sizeof(char))- (i + 1));}
 # 66
 int Cyc_Filename_check_suffix(struct _dyneither_ptr filename,struct _dyneither_ptr suffix){
-# 67
 int i=(int)(_get_dyneither_size(filename,sizeof(char))- 1);
-# 68
 int j=(int)(_get_dyneither_size(suffix,sizeof(char))- 1);
-# 69
 while(i >= 0  && j >= 0){
-# 70
 if(*((const char*)_check_dyneither_subscript(filename,sizeof(char),i --))!= *((const char*)_check_dyneither_subscript(suffix,sizeof(char),j --)))return 0;}
-# 71
 if(j >= 0)return 0;else{
-# 72
 return 1;}}struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename);static void _tmp24(unsigned int*_tmp23,unsigned int*_tmp22,char**_tmp20){for(*_tmp23=0;*_tmp23 < *_tmp22;(*_tmp23)++){(*_tmp20)[*_tmp23]='\000';}}static void _tmp36(unsigned int*_tmp35,unsigned int*_tmp34,char**_tmp32){for(*_tmp35=0;*_tmp35 < *_tmp34;(*_tmp35)++){(*_tmp32)[*_tmp35]='\000';}}
 # 75
 struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename){
-# 76
 int has_drive_name=_get_dyneither_size(filename,sizeof(char))> 1  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),1))== ':';
-# 77
 int i;int j;
-# 78
 struct _dyneither_ptr ans;
-# 79
 int ans_sz;
-# 80
 if(has_drive_name){
-# 81
 ans_sz=(int)(_get_dyneither_size(filename,sizeof(char))+ 1);
-# 82
 {unsigned int _tmp23;unsigned int _tmp22;struct _dyneither_ptr _tmp21;char*_tmp20;unsigned int _tmp1F;ans=((_tmp1F=(unsigned int)ans_sz,((_tmp20=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp1F + 1)),((_tmp21=_tag_dyneither(_tmp20,sizeof(char),_tmp1F + 1),((((_tmp22=_tmp1F,((_tmp24(& _tmp23,& _tmp22,& _tmp20),_tmp20[_tmp22]=(char)0)))),_tmp21))))))));}
-# 83
 {char _tmp2D;struct _dyneither_ptr _tmp2C;char _tmp2B;char _tmp2A;char _tmp29;struct _dyneither_ptr _tmp28;(_tmp28=_dyneither_ptr_plus(ans,sizeof(char),0),((_tmp29=*((char*)_check_dyneither_subscript(_tmp28,sizeof(char),0)),((_tmp2D=((_tmp2C=_dyneither_ptr_plus(ans,sizeof(char),1),((_tmp2B=*((char*)_check_dyneither_subscript(_tmp2C,sizeof(char),0)),((_tmp2A='/',((_get_dyneither_size(_tmp2C,sizeof(char))== 1  && (_tmp2B == '\000'  && _tmp2A != '\000')?_throw_arraybounds(): 1,*((char*)_tmp2C.curr)=_tmp2A)))))))),((_get_dyneither_size(_tmp28,sizeof(char))== 1  && (_tmp29 == '\000'  && _tmp2D != '\000')?_throw_arraybounds(): 1,*((char*)_tmp28.curr)=_tmp2D)))))));}
-# 84
 {char _tmp30;char _tmp2F;struct _dyneither_ptr _tmp2E;(_tmp2E=_dyneither_ptr_plus(ans,sizeof(char),2),((_tmp2F=*((char*)_check_dyneither_subscript(_tmp2E,sizeof(char),0)),((_tmp30=*((const char*)_check_dyneither_subscript(filename,sizeof(char),0)),((_get_dyneither_size(_tmp2E,sizeof(char))== 1  && (_tmp2F == '\000'  && _tmp30 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp2E.curr)=_tmp30)))))));}
-# 85
 i=3;
-# 86
 j=2;}else{
 # 88
 ans_sz=(int)_get_dyneither_size(filename,sizeof(char));
-# 89
 {unsigned int _tmp35;unsigned int _tmp34;struct _dyneither_ptr _tmp33;char*_tmp32;unsigned int _tmp31;ans=((_tmp31=(unsigned int)ans_sz,((_tmp32=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp31 + 1)),((_tmp33=_tag_dyneither(_tmp32,sizeof(char),_tmp31 + 1),((((_tmp34=_tmp31,((_tmp36(& _tmp35,& _tmp34,& _tmp32),_tmp32[_tmp34]=(char)0)))),_tmp33))))))));}
-# 90
 i=0;
-# 91
 j=0;}
 # 93
 while(i < ans_sz){
-# 94
 char c=*((const char*)_check_dyneither_subscript(filename,sizeof(char),j ++));
-# 95
 char _tmp39;char _tmp38;struct _dyneither_ptr _tmp37;(_tmp37=_dyneither_ptr_plus(ans,sizeof(char),i ++),((_tmp38=*((char*)_check_dyneither_subscript(_tmp37,sizeof(char),0)),((_tmp39=c == '\\'?'/': c,((_get_dyneither_size(_tmp37,sizeof(char))== 1  && (_tmp38 == '\000'  && _tmp39 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp37.curr)=_tmp39)))))));}
 # 97
 return ans;}

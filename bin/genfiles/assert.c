@@ -755,9 +755,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 
 # 35 "core.h"
  typedef char*Cyc_Cstring;
-# 36
 typedef char*Cyc_CstringNN;
-# 37
 typedef struct _dyneither_ptr Cyc_string_t;
 # 40
 typedef struct _dyneither_ptr Cyc_mstring_t;
@@ -803,15 +801,11 @@ extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Reg
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
-# 250
 return 0;{
-# 251
 unsigned char*ptrbd=dyn.curr + bd * sz;
-# 252
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 # 256
 return 0;
-# 257
 return dyn.curr;};}
 # 29 "assert.h"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line);
@@ -821,5 +815,4 @@ void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr fil
 {const char*_tmpA;void*_tmp9[3];struct Cyc_String_pa_PrintArg_struct _tmp8;struct Cyc_Int_pa_PrintArg_struct _tmp7;struct Cyc_String_pa_PrintArg_struct _tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion),((_tmp7.tag=1,((_tmp7.f1=line,((_tmp8.tag=0,((_tmp8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file),((_tmp9[0]=& _tmp8,((_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",_tag_dyneither(_tmpA,sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}
 # 32
 Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);
-# 33
 exit(- 1);}

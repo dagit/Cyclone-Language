@@ -160,7 +160,9 @@ void dumploc(Position::seg_t loc) {
   //let s = Position::get_line_directive(loc);
   let $(f,d) = Lex::xlate_pos(loc);
   if (f == NULL || ((f == last_file) && (d == last_line))) return;
-  if (f == last_file)
+  if (f == last_file && d == last_line + 1)
+    fprintf(*dump_file,"\n");
+  else if (f == last_file)
     fprintf(*dump_file,"\n# %d\n",d);
   else 
     fprintf(*dump_file,"\n# %d %s\n",d,f);

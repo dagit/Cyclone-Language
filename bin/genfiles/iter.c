@@ -755,9 +755,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 
 # 35 "core.h"
  typedef char*Cyc_Cstring;
-# 36
 typedef char*Cyc_CstringNN;
-# 37
 typedef struct _dyneither_ptr Cyc_string_t;
 # 40
 typedef struct _dyneither_ptr Cyc_mstring_t;
@@ -795,15 +793,11 @@ extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Reg
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
-# 250
 return 0;{
-# 251
 unsigned char*ptrbd=dyn.curr + bd * sz;
-# 252
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 # 256
 return 0;
-# 257
 return dyn.curr;};}struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
 # 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
@@ -811,7 +805,5 @@ typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);
 # 22 "iter.cyc"
 int Cyc_Iter_next(struct Cyc_Iter_Iter iter,void*dest){
-# 23
 void*_tmp1;int(*_tmp2)(void*env,void*dest);struct Cyc_Iter_Iter _tmp0=iter;_tmp1=(void*)_tmp0.env;_tmp2=_tmp0.next;
-# 24
 return _tmp2(_tmp1,dest);}

@@ -548,6 +548,8 @@ static type_t add_struct_type(qvar_t struct_name,
                               list_t<tvar_t,`H> type_vars,
                               list_t<type_t,`H> type_args,
                               list_t<aggrfield_t> fields) {
+  // first, filter out the type_vars and type_args that are not of
+  // type or integer kind.
   let TocState{.dyn = dyn, .abs_struct_types = abs_struct_types, ...} = *toc_state;
   //fprintf(stderr,"adding struct %s\n",typ2string(new AggrType(AggrInfo{AggrInfoU{.UnknownAggr = $(StructA,struct_name,NULL)},type_args})));
                                       
@@ -563,12 +565,22 @@ static type_t add_struct_type(qvar_t struct_name,
           let t = ts->hd;
           let t2 = ts2->hd;
           //fprintf(stderr,"    comparing args %s and %s -- ",typ2string(t),typ2string(t2));
-          if (unify(t,t2)) {
-            // fprintf(stderr," succeeded\n");
+          switch (typ_kind(t)) {
+          case &Kind{.kind = EffKind, _}: 
+          case &Kind{.kind = RgnKind, _}: 
+            // Effects and Regions won't show up in the toc types.
+            //fprintf(stderr,"effect or region -- skipping\n");
             continue;
+          default:
+            // Check if they're the same before translating them to C
+            if (unify(t,t2) || unify(typ_to_c(t),typ_to_c(t2))) {
+              //fprintf(stderr," succeeded\n");
+              continue;
+            }
+            //fprintf(stderr," failed\n");
+            okay = false; 
+            break;
           }
-          //fprintf(stderr," failed\n");
-          okay = false; 
           break;
         }
         if (okay) {
@@ -819,17 +831,14 @@ static type_t typ_to_c(type_t t) {
     for (; fs->tl != NULL; fs = fs->tl);
     let last_type = fs->hd->type;
     if (kind_leq(&ak,typ_kind(last_type))) {
-      // JGM: looping no longer possible because we enter the 
-      // instantiated type into the association list before translating
-      // the nested types.  
-      // to avoid looping, make sure the instantiation of the last
+      // To avoid looping, make sure the instantiation of the last
       // type is not still abstract.  If it is, we can just return
       // the struct type.
       region r;
-      let t = rsubstitute(r,rzip(r,r,ad->tvs,ts),last_type);
+      let inst = rzip(r,r,ad->tvs,ts);
+      let t = rsubstitute(r,inst,last_type);
       if (is_abstract_type(t)) return aggrdecl_type(ad->name,strctq);
-      return add_struct_type(ad->name,ad->tvs,
-                             List::map(typ_to_c,ts),ad->impl->fields);
+      return add_struct_type(ad->name,ad->tvs,ts,ad->impl->fields);
     }
     return aggrdecl_type(ad->name,strctq);
   case &EnumType(tdn,_): return t;
@@ -962,10 +971,11 @@ static bool is_poly_field(type_t t, field_name_t f) {
 
 // returns true when e is projection of a field in a struct that has a
 // variable type before instantiation.  For instance, the field hd has
-// type `a before instantiation in struct cons.
+// type `a before instantiation in struct List.
 static bool is_poly_project(exp_t e) {
   switch (e->r) {
-  case &AggrMember_e(e1,f,_,_): return is_poly_field((type_t)e1->topt,f);
+  case &AggrMember_e(e1,f,_,_): 
+    return is_poly_field((type_t)e1->topt,f);
   case &AggrArrow_e(e1,f,_,_):
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t,_,_}): return is_poly_field(t,f);
@@ -3558,6 +3568,15 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 			 skip_stmt_dl(),DL);
 }
 
+static int path_length(exp_t e) {
+  switch (e->r) {
+  case &Cast_e(_,e1,_,_): return path_length(e1);
+  case &Deref_e(e1): return 1 + path_length(e1);
+  case &AggrMember_e(e1,...): return path_length(e1);
+  default: return 0;
+  }
+}
+
 static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
 xlate_pat(env_t<`rgn> nv,
           region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
@@ -3566,30 +3585,29 @@ xlate_pat(env_t<`rgn> nv,
   stmt_t s; // the test statement
   switch (p->r) {
   case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
-    // when x is an array, we have to treat this like a reference pattern
-    switch (compress((type_t)p2->topt)) {
-    case &ArrayType(ArrayInfo{et,tq,ne,zt,ztl}):
-      let v = temp_var();
-      decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(et),mt_tq)),decls);
-      nv    = add_varmap(rgn,nv,x,var_exp(v,DL));
-      // cast is needed to avoid a C warning when pointing to a polymorphic field
-      s     = assign_stmt(var_exp(v,DL),
-                          cast_it(cstar_typ(typ_to_c_array(et),mt_tq),path),DL);
-      let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
-      result[2] = seq_stmt(s,result[2],DL);
-      return result;
-    default:
-      // in essence, x = r; but achieved through the varmap
-      return xlate_pat(add_varmap(rgn,nv,x,r),
-                       rgn, t, r, path, p2, fail_stmt, decls);
-    }
+    // v = r (and substitute v for x) and continue matching p2 against r
+    qvar_t v = temp_var();
+    let t2 = (type_t)p2->topt;
+    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), decls);
+    let result = xlate_pat(add_varmap(rgn,nv,x,var_exp(v,DL)),
+                           rgn,t2,var_exp(v,DL),path,p2,fail_stmt,decls);
+    nv = result[0];
+    decls = result[1];
+    let s2 = result[2];
+    let s3 = assign_stmt(var_exp(v,DL),r,DL);
+    s = seq_stmt(s3,s2,DL);
+    break;
   case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
-    // in essence, x = r; but achieved through the varmap
-    nv = add_varmap(rgn,nv,x,r);
-    fallthru;
-  case &Wild_p: s = skip_stmt_dl(); break; // potentially wasteful
+    // v = r  (and substitute v for x)
+    let v = temp_var();
+    let t2 = (type_t)p->topt;
+    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), decls);
+    nv = add_varmap(rgn,nv,x,var_exp(v,DL));
+    s = assign_stmt(var_exp(v,DL),r,DL);
+    break;
+  case &Wild_p: s = skip_stmt_dl(); break; 
   case &Reference_p(vd,p2):
-    // v = path
+    // v = &path
     let v = temp_var();
     decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(t),mt_tq)),decls);
     nv    = add_varmap(rgn,nv,vd->name,var_exp(v,DL));
@@ -3600,11 +3618,11 @@ xlate_pat(env_t<`rgn> nv,
     let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
     result[2] = seq_stmt(s,result[2],DL);
     return result;
+  // for these cases, if (r != value) goto fail_label.
   case &Null_p:       s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
   case &Int_p(sn,i):  s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
   case &Char_p(c):    s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
   case &Float_p(f,i): s=if_neq_stmt(r,float_exp(f,i,DL),   fail_stmt); break;
-
   case &Enum_p(ed,ef):
     s = if_neq_stmt(r,new_exp(new Enum_e(ef->name,ed,ef),DL),fail_stmt);
     break;
@@ -3631,20 +3649,17 @@ xlate_pat(env_t<`rgn> nv,
       if(p2->r == &Wild_p_val)
 	continue;
       let tuf_typ = (*tuf_tqts->hd)[1];
-      let v   = temp_var();
       let t2  = (type_t)p2->topt;
       let t2c = typ_to_c_array(t2);
       let arrow_exp = aggrarrow_exp(var_exp(temp,DL), fieldname(cnt), DL);
       if(is_void_star_or_boxed_tvar(typ_to_c(tuf_typ)))
 	arrow_exp = cast_it(t2c, arrow_exp);
-      decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL), arrow_exp,
+      // FIX?  why aren't we using path->fi for the path?
+      let result = xlate_pat(nv,rgn,t2,arrow_exp,arrow_exp,
 			     p2,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
-      let s3 = result[2];
-      let s1 = assign_stmt(var_exp(v,DL), arrow_exp, DL);
-      s = seq_stmt(s, seq_stmt(s1,s3,DL), DL);
+      s = seq_stmt(s, result[2], DL);
     }
     exp_t temp_tag = aggrarrow_exp(var_exp(temp,DL), tag_sp, DL);
     exp_t tag_exp =
@@ -3674,18 +3689,13 @@ xlate_pat(env_t<`rgn> nv,
       let p2  = ps->hd;
       if(p2->r == &Wild_p_val)
 	continue;
-      let v   = temp_var();
       let t2  = (type_t)p2->topt;
-      decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)),decls);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                             aggrmember_exp(path,fieldname(cnt),DL),
-			     p2,fail_stmt,decls);
+      let f = fieldname(cnt);
+      let result = xlate_pat(nv,rgn,t2,aggrmember_exp(r,f,DL),
+                             aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
-      let s2 = result[2];
-      let s3 = assign_stmt(var_exp(v,DL),
-			   aggrmember_exp(r,fieldname(cnt),DL),DL);
-      s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
+      s = seq_stmt(s,result[2],DL);
     }
     break;
   case &Aggr_p(NULL,...):
@@ -3701,23 +3711,27 @@ xlate_pat(env_t<`rgn> nv,
       case &FieldName(fn): f = fn; break;
       default: toc_impos("no field name in tagged union pattern");
       }
-      let v = temp_var();
+      //let v = temp_var();
       let t2 = (type_t)pat->topt;
       let t2c = typ_to_c_array(t2);
-      decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
+      //decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
       let pexp = aggrmember_exp(aggrmember_exp(path,f,DL),val_sp,DL);
       let memexp = aggrmember_exp(aggrmember_exp(r,f,DL),val_sp,DL);
       memexp = cast_it(t2c, memexp);
       pexp = cast_it(t2c,pexp);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),pexp,pat,fail_stmt,decls);
+      let result = xlate_pat(nv,rgn,t2,
+                             memexp,
+                             //var_exp(v,DL),
+                             pexp,pat,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
       let s4 = if_neq_stmt(aggrmember_exp(aggrmember_exp(r,f,DL),tag_sp,DL),
                            signed_int_exp(get_member_offset(ad,f),DL),
                            fail_stmt);
-      let s3 = assign_stmt(var_exp(v,DL),memexp,DL);
-      s = seq_stmt(s4,seq_stmt(s3,s2,DL),DL);
+      //let s3 = assign_stmt(var_exp(v,DL),memexp,DL);
+      //s = seq_stmt(s4,seq_stmt(s3,s2,DL),DL);
+      s = seq_stmt(s4,s2,DL);
     } else {
       // similar to translation of tuple pattern
       s = skip_stmt_dl();
@@ -3731,42 +3745,35 @@ xlate_pat(env_t<`rgn> nv,
         case &FieldName(f2): f=f2; break;
         default: throw new Match_error; // FIX:  assumes one field name designator
         }
-        let v   = temp_var();
-        let t2  = (type_t)p2->topt;
+        let t2 = (type_t)p2->topt;
         let t2c = typ_to_c_array(t2);
-        decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
-        let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
+        let memexp = aggrmember_exp(r,f,DL);
+        if(is_void_star_or_boxed_tvar(lookup_field(ad->impl->fields,f)->type))
+          memexp = cast_it(typ_to_c_array(t2c), memexp);
+        let result = xlate_pat(nv,rgn,t2,memexp,
                                aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
         nv = result[0];
         decls = result[1];
-        let memexp = aggrmember_exp(r,f,DL);
-        if(is_void_star_or_boxed_tvar(lookup_field(ad->impl->fields,f)->type))
-          memexp = cast_it(t2c, memexp);
-        let s2 = result[2];
-        let s3 = assign_stmt(var_exp(v,DL), memexp, DL);
-        s = seq_stmt(s, seq_stmt(s3,s2,DL), DL);
+        s = seq_stmt(s, result[2], DL);
       }
     }
     break;
 
   case &Pointer_p(p2):
-    // if (r == 0) goto fail_lab; v = *r; match(v,p2);
-    let v = temp_var();
     let t2 = (type_t)p2->topt;
-    decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)),decls);
-    let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),deref_exp(path,DL),p2,
+    // if (path_length(r) > 2)
+    // could insert a variable here but not a big deal.
+    let result = xlate_pat(nv,rgn,t2,deref_exp(r,DL), deref_exp(path,DL),p2,
 			   fail_stmt,decls);
     nv = result[0];
     decls = result[1];
     let s2 = result[2];
-    let s3 = seq_stmt(assign_stmt(var_exp(v,DL),deref_exp(r,DL),DL),s2,DL);
     if (is_nullable(t))
       s = seq_stmt(ifthenelse_stmt(eq_exp(r,signed_int_exp(0,DL),DL),
 				   fail_stmt,
-				   skip_stmt_dl(), DL),
-		   s3,DL);
+				   skip_stmt_dl(), DL), s2, DL);
     else
-      s = s3;
+      s = s2;
     break;
   case &UnknownId_p(_):     toc_impos("unknownid pat");
   case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
