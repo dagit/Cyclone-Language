@@ -1,0 +1,50 @@
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "timer.h"
+
+int HI = 0, LO = 0;
+
+xtunion exn { Hi_exception; };
+xtunion exn { Lo_exception; };
+
+void blowup (int n) {
+    if (n & 1) {
+        throw new Lo_exception;
+    } else {
+	throw new Hi_exception;
+    }
+}
+
+void lo_function (volatile int n) {
+    try blowup(n);
+    catch {
+    case &Lo_exception: LO++; break;
+    }
+}
+
+void hi_function (volatile int n) {
+    try lo_function(n);
+    catch {
+    case &Hi_exception: HI++; break;
+    }
+}
+
+void some_function (int n) {
+    hi_function(n);
+}
+
+int
+main(int argc, char ??argv) {
+    int volatile N = ((argc == 2) ? atoi(argv[1]) : 1);
+    START_TIME
+    while (N) {
+	some_function(N--);
+    }
+    printf("Exceptions: HI=%d / LO=%d\n", HI, LO);
+    END_TIME
+    return(0);
+}

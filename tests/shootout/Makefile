@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 CYCC = $(CYCDIR)/bin/$(CYCCOMP)
 CFLAGS = -O3 -DTIMING
-CYC_FLAGS = -O3 -DTIMING
+CYC_FLAGS = -O3 -DTIMING -nogc
 
 # Not working yet: echo moments
 # Not implemented at all: lists methcall objinst prodcons regexmatch
@@ -16,12 +16,13 @@ spellcheck strcat
 EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
 GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
 NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
+CYCEXEFILES = $(addprefix cyc-, $(EXEFILES))
 # NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
 DIFFFILES = $(addsuffix .diff, $(BENCHMARKS))
 CYCHIST=cychist$(EXE)
 CATN=catn$(EXE)
 
-all: $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
+all: $(CYCEXEFILES) $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
 
 bench: all $(CYCHIST) $(CATN)
 	@(./runtests 11 | ./cychist)
@@ -36,7 +37,7 @@ count:
 	wc -l $(addsuffix .gcc, $(BENCHMARKS))
 
 clean:
-	$(RM) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES)
+	$(RM) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES) $(CYCEXEFILES)
 	$(RM) $(EXEFILES)
 	$(RM) $(GCCEXEFILES)
 	$(RM) $(CYCHIST) $(CATN)
@@ -59,4 +60,7 @@ nocheck-%$(EXE): %.cyc
 	$(CYCC) --nochecks $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 %$(EXE): %.cyc
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
+cyc-%$(EXE): cyc-%.cyc
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

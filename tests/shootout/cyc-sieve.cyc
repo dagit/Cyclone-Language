@@ -1,0 +1,35 @@
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "timer.h"
+
+int
+main(int argc, char ??argv) {
+    int NUM = ((argc == 2) ? atoi(argv[1]) : 1);
+    static char flags[8192 + 1];
+    unsigned int i, k;
+    int count = 0;
+    START_TIME
+    while (NUM--) {
+	count = 0; 
+	for (i=2; i < 8193; i++) {
+	    flags[i] = 1;
+	}
+	for (i=2; i < 8193; i++) {
+	    if (flags[i]) {
+		// remove all multiples of prime: i
+		for (k=i+i; k < 8193; k+=i) {
+		    flags[k] = 0;
+		}
+		count++;
+	    }
+	}
+    }
+    printf("Count: %d\n", count);
+    END_TIME
+    return(0);
+}
+

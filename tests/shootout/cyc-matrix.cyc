@@ -1,0 +1,73 @@
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <assert.h>
+#include "timer.h"
+
+#define SIZE 30
+
+int ??mkmatrix(int rows, int cols) {
+    int i, j, count = 1;
+    int ??m = new {for i<rows: new {for j<cols:count++}};
+    return(m);
+}
+
+void zeromatrix(int rows, int cols, int ??m) {
+    int i, j;
+    assert(rows <= numelts(m));
+    for (i=0; i<rows; i++) {
+      int ?v = m[i];
+      assert(cols <= numelts(v));
+      for (j=0; j<cols; j++)
+        v[j] = 0;
+    }
+}
+
+void freematrix(int rows, int ??m) {
+    while (--rows > -1) { free(m[rows]); }
+    free(m);
+}
+
+int ?`r ?`r2 mmult(int rows, int cols, int ??m1, int ??m2, int ?`r ?`r2 m3) {
+    int i, j, k, val;
+    for (i=0; i<rows; i++) {
+        int ?v = m1[i];
+        int ?w = m3[i];
+        assert(cols <= numelts(w));
+	for (j=0; j<cols; j++) {
+	    val = 0;
+            assert(cols <= numelts(m2));
+	    for (k=0; k<cols; k++) {
+		val += v[k] * m2[k][j];
+	    }
+	    w[j] = val;
+	}
+    }
+    return(m3);
+}
+
+int main(int argc, char ?argv[]) {
+    int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
+    int ??m1;
+    int ??m2;
+    int ??mm;
+    START_TIME
+    m1 = mkmatrix(SIZE, SIZE);
+    m2 = mkmatrix(SIZE, SIZE);
+    mm = mkmatrix(SIZE, SIZE);
+
+    for (i=0; i<n; i++) {
+	mm = mmult(SIZE, SIZE, m1, m2, mm);
+    }
+    printf("%d %d %d %d\n", mm[0][0], mm[2][3], mm[3][2], mm[4][4]);
+
+    freematrix(SIZE, m1);
+    freematrix(SIZE, m2);
+    freematrix(SIZE, mm);
+    END_TIME
+    return(0);
+}

@@ -1,0 +1,34 @@
+#include <core.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char ?argv[])
+{
+  if (argc != 3)
+    exit(1);
+  int n = atoi(argv[1]);
+  char ?name = argv[2];
+
+  FILE @f = fopen(name,"r");
+  fseek(f,0,SEEK_END);
+  int filesz = ftell(f);
+  fseek(f,0,SEEK_SET);
+
+  char ?buf = calloc(filesz+1,sizeof(char));
+  int ret = fread(buf,1,filesz,f);
+  if (ret != filesz) {
+    fprintf(stderr,"failed to read whole file\n");
+    exit(1);
+  }
+
+  for (int i=0; i<n; i++) {
+    ret = fwrite(buf,1,filesz,stdout);
+    if (ret != filesz) {
+      fprintf(stderr,"failed to write whole file\n");
+      exit(1);
+    }
+  }
+  fclose(f);
+  return 0;
+}
+    
