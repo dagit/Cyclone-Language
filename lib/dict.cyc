@@ -159,7 +159,8 @@ ins(region_t<`r> r, int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b,`r> t) {
 dict_t<`a,`b,`r> insert(dict_t<`a,`b,`r> d,`a key,`b data) {
   let ans = ins(d.r, d.rel, $(key,data), d.t);
   ans->color = B;
-  return Dict(d.rel, d.r, ans);
+  let res = Dict(d.rel, d.r, ans);
+  return res;
 }
 
 // notice we descend twice -- we can live
@@ -419,8 +420,10 @@ union_f($(`b (@f)(`c,`a,`b,`b),`c)@ env, `a a, `b b,
 
 dict_t<`a,`b,`r1> union_two_c(`b (@f)(`c,`a,`b,`b), `c env, 
 			      dict_t<`a,`b,`r1> d1,
-			      dict_t<`a,`b,`r2> d2) {
-  if ((int)d1.t == (int)d2.t) return d1; 
+			      dict_t<`a,`b,`r1> d2) {
+  if ((int)d1.t == (int)d2.t) return d1;
+  if (d1.t == NULL) return d2;
+  if (d2.t == NULL) return d1;
   Dict::fold_c(union_f, new $(f,env), d2, &d1);
   return d1;
 }

@@ -94,7 +94,7 @@ xtunion Absyn::AbsynAnnot {
   EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t>);
 };
 
-EXTERN_CFFLOW tunion AbsLVal { PlaceL(place_t); UnknownL; };
+EXTERN_CFFLOW __flat__ tunion AbsLVal { PlaceL(place_t); UnknownL; };
 typedef tunion AbsLVal absLval_t;
 
 typedef tunion AbsRVal absRval_t;

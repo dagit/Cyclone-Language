@@ -38,31 +38,40 @@ void set(xarray_t<`a> xarr, int i, `a a) {
   xarr->elmts[i] = a;
 }
 
-xarray_t<`a> create_empty() {
-  `a ?x = new { };
-  return new Xarray{.elmts=x,.num_elmts=0};
+xarray_t<`a,`r> rcreate_empty(region_t<`r> r) {
+  `a ?x = rnew(r) { };
+  return rnew(r) Xarray{.r=r,.elmts=x,.num_elmts=0};
 }
+xarray_t<`a> create_empty() { return rcreate_empty(Core::heap_region); }
 
  // create an xarray with zero elements, but space for len elements
-xarray_t<`a> create(int len, `a a) {
+xarray_t<`a,`r> rcreate(region_t<`r> r, int len, `a a) {
   if (len < 0)
     throw new Invalid_argument("xarrays must have a non-negative size buffer");
-  return new Xarray{.elmts=new {for i < len : a}, .num_elmts=0};
+  return rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < len : a}, .num_elmts=0};
+}
+
+xarray_t<`a> create(int len, `a a) {
+  return rcreate(Core::heap_region, len, a);
+}
+
+xarray_t<`a,`r> rsingleton(region_t<`r> r, int len, `a a) {
+  if(len<1) throw new Invalid_argument("singleton xarray must have size >=1");
+  xarray_t<`a> x = rcreate(r,len,a);
+  x->num_elmts=1;
+  return x;
 }
 
 xarray_t<`a> singleton(int len, `a a) {
-  if(len<1) throw new Invalid_argument("singleton xarray must have size >=1");
-  xarray_t<`a> x = create(len,a);
-  x->num_elmts=1;
-  return x;
+  return rsingleton(heap_region,len,a);
 }
 
 void add(xarray_t<`a> xarr, `a a) {
   if (xarr->num_elmts == (xarr->elmts).size) {
     if (xarr->num_elmts == 0)
-      xarr->elmts = new {for i < 10 : a};
+      xarr->elmts = rnew(xarr->r) {for i < 10 : a};
     else {
-      `a ?newarr = new {for i < xarr->num_elmts*2 : xarr->elmts[0]};
+      `a ?newarr = rnew(xarr->r) {for i < xarr->num_elmts*2 : xarr->elmts[0]};
       for (int i=1; i < xarr->num_elmts; ++i)
         newarr[i] = xarr->elmts[i];
       xarr->elmts = newarr;
@@ -76,34 +85,47 @@ int add_ind(xarray_t<`a> xarr, `a a) {
   return xarr->num_elmts-1;
 }
 
-`a ?to_array(xarray_t<`a> xarr) {
+`a ?`r rto_array(region_t<`r> r, xarray_t<`a> xarr) {
   if (xarr->num_elmts == 0)
-    return new {};
-  `a ?ans = new {for i < xarr->num_elmts : xarr->elmts[i]};
+    return rnew(r) {};
+  `a ?ans = rnew(r) {for i < xarr->num_elmts : xarr->elmts[i]};
+  return ans;
+}
+
+`a ?to_array(xarray_t<`a> xarr) {
+  return rto_array(Core::heap_region, xarr);
+}
+
+xarray_t<`a,`r> rfrom_array(region_t<`r> r, `a ?arr) {
+  if (arr.size == 0)
+    return rcreate_empty(r);
+  xarray_t<`a> ans = rnew(r) Xarray{.r=r,
+                                    .elmts=rnew(r) {for i<arr.size : arr[i]},
+                                    .num_elmts=arr.size};
   return ans;
 }
 
 xarray_t<`a> from_array(`a ?arr) {
-  if (arr.size == 0)
-    return create_empty();
-  xarray_t<`a> ans = new Xarray{.elmts=new {for i<arr.size : arr[i]},
-                                   .num_elmts=arr.size};
-  return ans;
+  return rfrom_array(Core::heap_region,arr);
 }
 
 // append is functional -- it creates a new xarray every time
-xarray_t<`a> append(xarray_t<`a> xarr1, xarray_t<`a> xarr2) {
+xarray_t<`a,`r> rappend(region_t<`r> r,xarray_t<`a> xarr1, xarray_t<`a> xarr2){
   int newsz = (xarr1->elmts).size + (xarr2->elmts).size;
   if(newsz == 0)
-    return create_empty();
+    return rcreate_empty(r);
   `a init = (xarr1->elmts).size == 0 ? xarr2->elmts[0] : xarr1->elmts[0];
-  xarray_t<`a> ans = new Xarray{.elmts=new {for i < newsz : init},
+  xarray_t<`a> ans = rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < newsz : init},
                                    .num_elmts=0};
   for(int i=0; i < xarr1->num_elmts; ++i)
     add(ans, xarr1->elmts[i]);
   for(int i=0; i < xarr2->num_elmts; ++i)
     add(ans, xarr2->elmts[i]);
   return ans;
+}
+
+xarray_t<`a> append(xarray_t<`a> xarr1, xarray_t<`a> xarr2) {
+  return rappend(Core::heap_region,xarr1,xarr2);
 }
 
 void app(`b f(`a), xarray_t<`a> xarr) {
@@ -126,26 +148,35 @@ void iter_c(void f(`c,`a), `c env, xarray_t<`a> xarr) {
     f(env, xarr->elmts[i]);
 }
 
-xarray_t<`b> map(`b f(`a), xarray_t<`a> xarr) {
-  if(xarr->num_elmts==0) return create_empty();
+xarray_t<`b,`r> rmap(region_t<`r> r, `b f(`a), xarray_t<`a> xarr) {
+  if(xarr->num_elmts==0) return rcreate_empty(r);
 
   xarray_t<`b> ans =
-    new Xarray{.elmts=new {for i< (xarr->elmts).size : f(xarr->elmts[0])},
+    rnew(r) Xarray{.r=r,
+                   .elmts=rnew(r) {for i< (xarr->elmts).size : f(xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(xarr->elmts[i]);
   return ans;
 }
 
-xarray_t<`b> map_c(`b f(`c,`a), `c env, xarray_t<`a> xarr) {
-  if(xarr->num_elmts==0) return create_empty();
+xarray_t<`b> map(`b f(`a), xarray_t<`a> xarr) {
+  return rmap(Core::heap_region,f,xarr);
+}
+
+xarray_t<`b,`r> rmap_c(region_t<`r> r, `b f(`c,`a), `c env, xarray_t<`a> xarr) {
+  if(xarr->num_elmts==0) return rcreate_empty(r);
 
   xarray_t<`b> ans =
-    new Xarray{.elmts=new {for i < (xarr->elmts).size : f(env,xarr->elmts[0])},
+    rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < (xarr->elmts).size : f(env,xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(env, xarr->elmts[i]);
   return ans;
+}
+
+xarray_t<`b> map_c(`b f(`c,`a), `c env, xarray_t<`a> xarr) {
+  return rmap_c(Core::heap_region, f, env, xarr);
 }
 
 void reuse(xarray_t<`a> xarr) {

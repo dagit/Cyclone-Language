@@ -895,14 +895,14 @@ using Parse;
 // specify tagged union constructors for types of semantic values that 
 // the lexer must produce.  The other constructors are generated implicitly.
 %union {
-  Int_tok($(sign_t,int)@);
+  Int_tok($(sign_t,int));
   Char_tok(char);
   String_tok(string_t);
   Stringopt_tok(opt_t<stringptr_t>);
   QualId_tok(qvar_t);
 }
 /* types for productions */
-%type <$(sign_t,int)@> INTEGER_CONSTANT TYPE_INTEGER
+%type <$(sign_t,int)> INTEGER_CONSTANT TYPE_INTEGER
 %type <char> CHARACTER_CONSTANT
 %type <string_t> FLOATING_CONSTANT namespace_action
 %type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
@@ -1263,7 +1263,7 @@ attribute:
 | CONST { $$=^$(Const_att); }
 | IDENTIFIER '(' INTEGER_CONSTANT ')'
   { let s = $1;
-    let &$(_,n) = $3;
+    let $(_,n) = $3;
     attribute_t a;
     if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
       if (n < 0 || n > 3) 
@@ -1313,8 +1313,8 @@ attribute:
 | IDENTIFIER '(' IDENTIFIER ',' INTEGER_CONSTANT ',' INTEGER_CONSTANT ')'
   { let s = $1; 
     let t = $3;
-    let $(_,n) = *($5);
-    let $(_,m) = *($7);
+    let $(_,n) = $5;
+    let $(_,m) = $7;
     attribute_t a = Cdecl_att;
     if (zstrcmp(s,"format") == 0 || zstrcmp(s,"__format__") == 0)
       if (zstrcmp(t,"printf") == 0)
@@ -1380,7 +1380,7 @@ type_specifier_notypedef:
 | TAG_T 
 { $$=^$(type_spec(new TagType(new_evar(new Opt(IntKind), NULL)),LOC(@1,@1))); }
 | TYPE_INTEGER
-    { let &$(_,n) = $1; 
+    { let $(_,n) = $1; 
       $$=^$(type_spec(new TypeInt(n),LOC(@1,@1))); }
 ;
 
@@ -2404,7 +2404,7 @@ unary_pattern:
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
    { $$=^$(exp_pat(offsetof_exp((*$3)[2],
-                                new TupleIndex((*$5)[1]), LOC(@1,@6)))); }
+                                new TupleIndex($5[1]), LOC(@1,@6)))); }
 // disallow GEN, malloc, rmalloc, and cmalloc -- not constant expressions
 ;
 
@@ -2679,7 +2679,7 @@ unary_expression:
    { $$=^$(offsetof_exp((*$3)[2],new StructField(new $5),LOC(@1,@6))); }
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-   { $$=^$(offsetof_exp((*$3)[2],new TupleIndex((*$5)[1]), LOC(@1,@6))); }
+   { $$=^$(offsetof_exp((*$3)[2],new TupleIndex($5[1]), LOC(@1,@6))); }
 /* Cyc: __gen for generic, type-based marshallers */
 | GEN type_params_opt '(' type_name ')'      
    { let loc = LOC(@1,@5);
@@ -2777,7 +2777,7 @@ argument_expression_list0:
 /* NB: We've had to move enumeration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
-  INTEGER_CONSTANT   { $$=^$(int_exp((*$1)[0],(*$1)[1],LOC(@1,@1))); }
+  INTEGER_CONSTANT   { $$=^$(int_exp($1[0],$1[1],LOC(@1,@1))); }
 | CHARACTER_CONSTANT { $$=^$(char_exp($1,              LOC(@1,@1))); }
 | FLOATING_CONSTANT  { $$=^$(float_exp($1,             LOC(@1,@1))); }
 /* Cyc: NULL */
@@ -2810,7 +2810,7 @@ right_angle:
 
 void yyprint(int i, tunion YYSTYPE v) {
   switch (v) {
-  case Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
+  case Int_tok($(_,i2)): fprintf(stderr,"%d",i2);      break;
   case Char_tok(c):       fprintf(stderr,"%c",c);       break;
   case String_tok(s):          fprintf(stderr,"\"%s\"",s);  break;
   case QualId_tok(&$(p,v2)):

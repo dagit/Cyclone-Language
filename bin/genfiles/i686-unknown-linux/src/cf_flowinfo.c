@@ -992,7 +992,9 @@ tag;struct Cyc_List_List*f1;};char Cyc_CfFlowInfo_IsZero[11]="\000\000\000\000Is
 char Cyc_CfFlowInfo_NotZero[12]="\000\000\000\000NotZero\000";struct Cyc_CfFlowInfo_NotZero_struct{
 char*tag;struct Cyc_List_List*f1;};char Cyc_CfFlowInfo_UnknownZ[13]="\000\000\000\000UnknownZ\000";
 struct Cyc_CfFlowInfo_UnknownZ_struct{char*tag;struct Cyc_List_List*f1;};struct Cyc_CfFlowInfo_PlaceL_struct{
-int tag;struct Cyc_CfFlowInfo_Place*f1;};struct _dynforward_ptr Cyc_CfFlowInfo_aggrfields_to_aggrdict(
+int tag;struct Cyc_CfFlowInfo_Place*f1;};struct Cyc_CfFlowInfo_UnknownL_struct{int
+tag;};union Cyc_CfFlowInfo_AbsLVal_union{struct Cyc_CfFlowInfo_PlaceL_struct PlaceL;
+struct Cyc_CfFlowInfo_UnknownL_struct UnknownL;};struct _dynforward_ptr Cyc_CfFlowInfo_aggrfields_to_aggrdict(
 struct Cyc_List_List*,void*);struct Cyc_Dict_Dict Cyc_CfFlowInfo_empty_flowdict();
 struct Cyc_CfFlowInfo_UnknownR_struct{int tag;void*f1;};struct Cyc_CfFlowInfo_Esc_struct{
 int tag;void*f1;};struct Cyc_CfFlowInfo_AddressOf_struct{int tag;struct Cyc_CfFlowInfo_Place*

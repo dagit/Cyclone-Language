@@ -47,15 +47,15 @@ void yyerror(string_t<`H> s) {
 
 namespace Lex {
 
-static struct Trie;
-typedef struct Trie * trie_t;
-__flat__ tunion TrieChildren {
+static struct Trie<`r::R>;
+typedef struct Trie<`r> *`r trie_t<`r>;
+__flat__ tunion TrieChildren<`r::R> {
   Zero;
-  One(int, trie_t);
-  Many(trie_t @{64}); // enough room for id chars and `
+  One(int, trie_t<`r>);
+  Many(trie_t<`r> @{64}`r); // enough room for id chars and `
 };
-static struct Trie {
-  tunion TrieChildren children;
+static struct Trie<`r::R> {
+  tunion TrieChildren<`r> children;
   int                 shared_str; // meaning depends on which trie -- see below
 };
 
@@ -64,21 +64,34 @@ static struct Trie {
 // These must be (re-)initialized in lex_init.
 static int    num_kws  = 0;
 static int ?  kw_nums  = NULL;
-static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
-static trie_t ids_trie      = NULL;//int field is symbol index, 0 for not there
-static trie_t typedefs_trie = NULL;//int field true iff path is a typedef
+  //static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
+struct DynTrie {
+  <`d::R> 
+  dynregion_t<`d,`H> dyn;
+  trie_t<`d>         t;
+};
+typedef struct DynTrie *dyn_trie_t;
+struct DynTrieSymbols {
+  <`d::R> 
+  dynregion_t<`d,`H> dyn;
+  trie_t<`d>         t;  //int field is symbol index, 0 for not there
+  Xarray::xarray_t<stringptr_t,`d> symbols;
+};
+typedef struct DynTrieSymbols *dyn_trie_symbols_t;
+typedef struct DynSymbols *dyn_symbols_t;
+static dyn_trie_symbols_t ids_trie  = NULL;
+static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static $(sign_t,int)        token_int_pair = $(Signed,0);
+static $(sign_t,int)        token_int = $(Signed,0);
 static string_t             bogus_string   = "*bogus*";
 static $(nmspace_t,var_t)   token_id_pair = $(Loc_n,
 					      &bogus_string);
 
 static char           token_char   = '\000';
 static string_t       token_string = "";
-static $(sign_t,int)@ token_int    = &token_int_pair;
 static qvar_t         token_qvar   = &token_id_pair;
 
 static int runaway_start = 0;
@@ -183,7 +196,8 @@ static int trie_char(int c) {
   return c - 48;
 }
 
-static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
+static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t, 
+                              string_t buff, int offset, int len) {
   int    i    = offset;
   int    last = offset + len - 1;
   while(i <= last) {
@@ -192,7 +206,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
       // walk down one level
       int ch = trie_char(buff[i]);
       if(arr[ch] == NULL)
-	arr[ch] = new Trie(Zero,0);
+	arr[ch] = rnew(r) Trie(Zero,0);
       t = arr[ch];
       ++i;
       break;
@@ -201,10 +215,10 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
       if(one_ch == buff[i]) {
 	t = one_trie;
       } else {
-	let arr = new {for j < 64: NULL};
+	let arr = rnew(r) {for j < 64: NULL};
 	arr[trie_char(one_ch)] = one_trie;
 	let ch = trie_char(buff[i]);
-	arr[ch] = new Trie(Zero,0);
+	arr[ch] = rnew(r) Trie(Zero,0);
 	t->children = Many(arr); 
 	t = arr[ch];
       }
@@ -213,7 +227,7 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
     case Zero:
       // new string -- extend the trie
       while(i <= last) {
-	let next = new Trie(Zero,0);
+	let next = rnew(r) Trie(Zero,0);
 	t->children = One(buff[i++], next);
 	t = next;
       }
@@ -224,16 +238,18 @@ static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
 }
 
 static int str_index(string_t buff, int offset, int len) {
-  let t = trie_lookup(ids_trie, buff, offset, len);
-  // build string if necessary and return
-  if(t->shared_str == 0) {
-    let newstr = new_string(len+1);
-    zstrncpy((char ?NOZEROTERM)newstr,buff+offset,len);
-    int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
-			      new ((string_t)newstr));
-    t->shared_str = ans;
+  let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
+  region d = open(dyn) {
+    let t = trie_lookup(d, t, buff, offset, len);
+    // build string if necessary and return
+    if(t->shared_str == 0) {
+      let newstr = new_string(len+1);
+      zstrncpy((char ?NOZEROTERM)newstr,buff+offset,len);
+      int ans = Xarray::add_ind(symbols, new ((string_t)newstr));
+      t->shared_str = ans;
+    }
+    return t->shared_str;
   }
-  return t->shared_str;
 }
 
 static int str_index_lbuf(Lexbuf<`a> lbuf) {
@@ -244,13 +260,19 @@ static int str_index_lbuf(Lexbuf<`a> lbuf) {
 
 static void insert_typedef(stringptr_t sptr) {
   let s = *sptr;
-  let t = trie_lookup(typedefs_trie, s, 0, s.size-1);
-  t->shared_str = true;
+  let DynTrie{<`d> dyn, t} = *typedefs_trie;
+  region d = open(dyn) {
+    let t = trie_lookup(d, t, s, 0, s.size-1);
+    t->shared_str = true;
+  }
   return;
 }
 
 static stringptr_t get_symbol(int symbol_num) {
-  return Xarray::get((Xarray::xarray_t<stringptr_t>)symbols, symbol_num);
+  let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
+  region d = open(dyn) {
+    return Xarray::get(symbols, symbol_num);
+  }
 }
 
 // ************************ INTEGER CONSTANTS ************************
@@ -271,7 +293,7 @@ static int int_of_char(char c) {
  
 // FIX: We should really have 8-bytes to store a long literal!!!
 //      That is, we and the previous version totally ignore the L!!!
-static $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
+static $(sign_t, int) intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
   unsigned int n    = 0;
   int          end2 = lbuf->lex_curr_pos - end;
   mstring_t    buff = lbuf->lex_buffer;
@@ -281,13 +303,13 @@ static $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
     switch (c) {
         // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
     case 'u': fallthru;
-    case 'U': return new $(Unsigned,(signed int)n); 
+    case 'U': return $(Unsigned,(signed int)n); 
     case 'l': break;
     case 'L': break;
     default: n = n*base + (unsigned int)int_of_char(c); break;
     }
   }
-  return new $(Signed, (signed int)n);
+  return $(Signed, (signed int)n);
 }
 
 // ************************* STRING CONSTANTS *************************
@@ -319,7 +341,7 @@ static struct Ldecls {
   Set::set_t<var_t> typedefs;
   Set::set_t<var_t> namespaces;
 };
-typedef struct Ldecls @ldecls_t;
+typedef struct Ldecls @ ldecls_t;
 
 static struct Lvis {  // the King lives!
   // records the namespaces whose declarations are visible in a scope
@@ -373,7 +395,12 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
 
 static void recompute_typedefs() {
   // Drop the old trie on the floor.
-  typedefs_trie = new Trie(Zero,false);
+  let DynTrie{dyn,t} = *typedefs_trie;
+  Core::free_dynregion(dyn);
+  let NewRegion{<`d2> dyn2} = Core::new_dynregion();
+  region d2 = open(dyn2) {
+    typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero,false)};
+  }
   
  //For each enclosing scope, get the visible namespaces and add all the typedefs
   for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
@@ -404,20 +431,22 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   // look ma -- fast lookup
   let s   = *v;
   int    len = s.size - 1;
-  trie_t t   = typedefs_trie;
-  for(int i = 0; i < len; ++i)
+  let DynTrie{dyn,t} = *typedefs_trie;
+  region d = open(dyn) {
+    for(int i = 0; i < len; ++i)
     switch (t->children) {
-    case Zero: return false;
-    case One(one_ch, one_trie) && one_ch != s[i]: return false;
-    case One(_,      one_trie): t = one_trie; break;
-    case Many(arr):
-      let next = arr[trie_char(s[i])];
-      if(next == NULL)
-	return false;
-      t = next;
-      break;
+      case Zero: return false;
+      case One(one_ch, one_trie) && one_ch != s[i]: return false;
+      case One(_,      one_trie): t = one_trie; break;
+      case Many(arr):
+        let next = arr[trie_char(s[i])];
+        if(next == NULL)
+          return false;
+        t = next;
+        break;
     }
-  return t->shared_str;
+    return t->shared_str;
+  }
 }
 
 void enter_namespace(var_t s) {
@@ -689,12 +718,12 @@ rule token = parse
 | "'\\?'"   { token_char = '?';  return CHARACTER_CONSTANT; }
 /* octal character escapes */
 | "'\\" ['0'-'7']['0'-'7']?['0'-'7']? "'"
-            { token_char = (char)(*intconst(lexbuf,2,1,8))[1];
+            { token_char = (char)(intconst(lexbuf,2,1,8))[1];
               return CHARACTER_CONSTANT;
             }
 /* hex character escapes */
 | "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
-            { token_char = (char)(*intconst(lexbuf,3,1,16))[1];
+            { token_char = (char)(intconst(lexbuf,3,1,16))[1];
               return CHARACTER_CONSTANT;
             }
 | "'" [^ '\\' '\'' '\n'] "'"
@@ -725,12 +754,12 @@ and strng = parse
   | "\\?"           { store_string_char('?');  return 1; }
   /* octal character escapes */
   | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-                    { store_string_char((char)(*intconst(lexbuf,1,0,8))[1]);
+                    { store_string_char((char)(intconst(lexbuf,1,0,8))[1]);
                       return 1;
                     }
   /* hex character escapes FIX? any length okay? */
   | "\\x" ['0'-'9''A'-'F''a'-'f']+
-                    { store_string_char((char)(*intconst(lexbuf,2,0,16))[1]);
+                    { store_string_char((char)(intconst(lexbuf,2,0,16))[1]);
                       return 1;
                     }
   | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
@@ -762,11 +791,30 @@ and comment = parse
 {
 
 void lex_init(bool include_cyclone_keywords) {
-  ids_trie      = new Trie(Zero,0);
-  typedefs_trie = new Trie(Zero,false);
-  symbols       = Xarray::create(101,new ((string_t)""));
-  // don't use first entry b/c 0 means "not a symbol"
-  Xarray::add((Xarray::xarray_t<stringptr_t>)symbols, &bogus_string);
+  // free any dynamic regions allocated first
+  if (ids_trie != NULL) {
+    let DynTrieSymbols{dyn,...} = *ids_trie;
+    Core::free_dynregion(dyn);
+  }
+  if (typedefs_trie != NULL) {
+    let DynTrie{dyn,...} = *typedefs_trie;
+    Core::free_dynregion(dyn);
+  }
+  // Now allocate dynamic regions for the tries
+  let NewRegion{id_dyn} = Core::new_dynregion();
+  region id_rgn = open(id_dyn) {
+    Xarray::xarray_t<stringptr_t> symbols = 
+      Xarray::rcreate(id_rgn,101,new ((string_t)""));
+    // don't use first entry b/c 0 means "not a symbol"
+    Xarray::add(symbols, &bogus_string);
+    ids_trie = new DynTrieSymbols{id_dyn, rnew(id_rgn) Trie(Zero,false),
+                                  symbols};
+  }
+  let NewRegion{typedefs_dyn} = Core::new_dynregion();
+  region typedefs_rgn = open(typedefs_dyn) {
+    typedefs_trie = new DynTrie{typedefs_dyn, 
+                                rnew(typedefs_rgn) Trie(Zero,false)};
+  }
   num_kws       = num_keywords(include_cyclone_keywords);
   kw_nums       = new {for i < num_kws : 0};
   unsigned i = 0;

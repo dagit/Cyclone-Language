@@ -189,7 +189,7 @@ extern dict_t<`a,`c,`r> rmap_c(region_t<`r>, `c f(`d,`b),`d env,
 
 extern dict_t<`a,`b,`r> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
                                    dict_t<`a,`b,`r> d1,
-                                   dict_t<`a,`b> d2);
+                                   dict_t<`a,`b,`r> d2);
 /** [union_two(f,env,d1,d2)] returns a new dictionary with a binding
     for every key in [d1] or [d2].  If a key appears in both [d1] and
     [d2], its value in the result is obtained by applying [f] to the

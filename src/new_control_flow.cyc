@@ -90,11 +90,12 @@ static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
 // unnecessarily escape points-to on branches of conditional expressions.
 // Note: for *(e1 ? e2 : e3) we're requiring e2 and e3 to be all-init.
 struct AnalEnv<`r::R> {
+  region_t<`r>  r;
   bool          iterate_again; // set to true when a visited flow is updated
   int           iteration_num; // update annotations with this on each visit
   bool          in_try;      // an optimization for the common case
-  flow_t        tryflow;     // updated by any flow change while in a try-block.
-  place_set_t * all_changed; // NULL for "not in unorderd so don't bother"
+  flow_t        tryflow;     // updated by any flow change while in a try-block
+  place_set_t*`r all_changed;// NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
   list_t<place_t,`r> param_roots;
 };
@@ -257,7 +258,7 @@ static $(flow_t,list_t<absRval_t,`rgn>)
     // need to reset consume stuff on each iteration
     inflow = restore_consume_info(inflow,saved_cinfo);
     // wouldn't need to peel off the head if we had a TopFL
-    env->all_changed = new mt_place_set();
+    env->all_changed = rnew(env->r) mt_place_set();
     let $(f,r) = anal_Rexp(env,inflow,es->hd);
     outflow = f;
     rvals = rnew(rgn) List(r,NULL);
@@ -274,7 +275,7 @@ static $(flow_t,list_t<absRval_t,`rgn>)
       }
     }
     for(_ es2 = es->tl; es2 != NULL; es2 = es2->tl) {
-      env->all_changed = new mt_place_set();
+      env->all_changed = rnew(env->r) mt_place_set();
       let $(f,r) = anal_Rexp(env,inflow,es2->hd);
       rvals = rnew(rgn) List(r,rvals);
       outflow = after_flow(&this_all_changed, outflow, f, 
@@ -316,8 +317,8 @@ static $(flow_t,list_t<absRval_t,`rgn>)
   if(outer_all_changed == NULL)
     env->all_changed = NULL;
   else
-    env->all_changed = new union_place_set(*outer_all_changed,
-					   this_all_changed, false);
+    env->all_changed = rnew(env->r) union_place_set(*outer_all_changed,
+                                                    this_all_changed, false);
   update_tryflow(env,outflow);
   return $(outflow,imp_rev(rvals));
 }
@@ -354,7 +355,7 @@ static flow_t notzero(analenv_t env, flow_t inflow, flow_t outflow,
   case ReachableFL(d,relns,cinfo):
     switch(anal_Lexp(env,inflow,e)[1]) {
     case UnknownL: return outflow;
-    case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+    case PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
       return ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
                              relns,cinfo);
@@ -370,7 +371,7 @@ static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
   case ReachableFL(d,relns,cinfo):
     switch(anal_Lexp(env,inflow,e)[1]) {
     case UnknownL: return $(outflow,outflow);
-    case &PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+    case PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
       return 
         $(ReachableFL(assign_place(e->loc,d,env->all_changed,p,nzval),
@@ -392,7 +393,7 @@ static flow_t if_tagcmp(analenv_t env, flow_t flow, exp_t e1,
     case &TagCmps(cl2):
       switch(anal_Lexp(env,flow,e1)[1]) {
       case UnknownL: return flow;
-      case &PlaceL(pl):
+      case PlaceL(pl):
 	list_t new_cl;
 	switch(r1) { 
 	case &TagCmps(cl1): new_cl = cl1; break;
@@ -583,7 +584,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     check_unique_rvals(e1->loc,f);
     let $(_,lval) = anal_Lexp(env,f,e1);
     switch($(lval,f)) {
-    case $(&PlaceL(p),ReachableFL(outdict,relns,c)): 
+    case $(PlaceL(p),ReachableFL(outdict,relns,c)): 
       relns = reln_kill_exp(relns,e1);
       f = ReachableFL(assign_place(e1->loc,outdict,
 				       env->all_changed,p,unknown_all),
@@ -600,7 +601,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(_,lval) = anal_Lexp(env,f,e);
     f = consume_unique_rvals(e->loc,f); // consume the rhs of the assignment
     switch($(lval,f)) {
-    case $(&PlaceL(p),ReachableFL(outdict,relns,cinfo)): 
+    case $(PlaceL(p),ReachableFL(outdict,relns,cinfo)): 
       relns = reln_kill_exp(relns,l);
       outdict = assign_place(l->loc,outdict,env->all_changed,p,unknown_all);
       // add lhs to consume list if it's unique
@@ -650,10 +651,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     consume_t outflow_consume = empty_consume;
     bool init_consume = false;
     while(true) { // local iteration
-      env->all_changed  = new mt_place_set();
+      env->all_changed  = rnew(env->r) mt_place_set();
       let $(left_out, lval) = anal_Lexp(env,inflow,e1);
       let left_changed      = *env->all_changed;
-      env->all_changed      = new mt_place_set();
+      env->all_changed      = rnew(env->r) mt_place_set();
       let $(right_out,rval) = anal_Rexp(env,inflow,e2);
       let right_changed     = *env->all_changed;
       let outflow = after_flow(&left_changed, left_out,right_out,
@@ -704,7 +705,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  // make sure we haven't used a unique value > 1 time
 	  cinfo = and_consume(outer_cinfo,cinfo);
 	  switch(lval) {
-	  case &PlaceL(p): 
+	  case PlaceL(p): 
 	    outdict = assign_place(e->loc,outdict,env->all_changed,p,rval);
 	    // add lhs to consume list if it's unique
 	    if (Tcutil::is_unique_pointer(e1->topt->v)) {
@@ -882,14 +883,14 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       // note that we don't have to make any changes to cinfo, since
       // following the swap no `consumed' status will have changed.
       switch(left_lval) {
-      case &PlaceL(lp):
+      case PlaceL(lp):
 	outdict = assign_place(e1->loc,outdict,env->all_changed,
 			       lp,right_rval);
 	break;
       case UnknownL: break;
       }
       switch(right_lval) {
-      case &PlaceL(rp): 
+      case PlaceL(rp): 
 	outdict = assign_place(e2->loc,outdict,env->all_changed,
 			       rp,left_rval);
 	break;
@@ -938,7 +939,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f,l) = anal_Lexp(env,inflow,e1);
     switch(l) {
     case UnknownL:   return $(f, NotZeroAll);
-    case &PlaceL(p): return $(f, new AddressOf(p));
+    case PlaceL(p): return $(f, new AddressOf(p));
     }
 
   case &Deref_e(e1): 
@@ -1245,7 +1246,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 	case NotZeroThis: e->annot = new NotZero(relns); break;
 	case &AddressOf(&Place(root,flds2)): 
 	  e->annot = new NotZero(relns);
-	  return $(f, new PlaceL(new Place(root, append(flds2,flds))));
+	  return $(f, PlaceL(new Place(root, append(flds2,flds))));
 	case Zero: 
 	  e->annot = IsZero;
 	  return $(BottomFL,UnknownL);
@@ -1286,7 +1287,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):
     // since this a lhs, we can ignore uniqueness
-    return $(inflow, new PlaceL(new Place(new VarRoot(vd), flds)));
+    return $(inflow, PlaceL(new Place(new VarRoot(vd), flds)));
 
   case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
 
@@ -1976,7 +1977,7 @@ static void check_nested_fun(flow_t inflow, fndecl_t fd) {
   }
 
   bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
-  analenv_t env = rnew(frgn) AnalEnv(true,0,false,inflow,NULL,noreturn,param_roots);
+  analenv_t env = rnew(frgn) AnalEnv(frgn,true,0,false,inflow,NULL,noreturn,param_roots);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !Position::error_p()) {
     ++(env->iteration_num);

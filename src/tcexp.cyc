@@ -185,9 +185,9 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
 }
 
 // constants
-static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
+static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   type_t t;
-  switch (c) {
+  switch (*c) {
   case Char_c(Signed,_):   t = schar_typ; break;
   case Char_c(Unsigned,_): t = uchar_typ; break;
   case Char_c(None,_):     t = char_typ;  break;
@@ -211,11 +211,11 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 	case Signed: t = schar_typ; break;
 	case None: t = char_typ; break;
 	}
-        e->r = new Const_e(Char_c(sn,(char)(i))); // i gets truncated here
+        *c = Char_c(sn,(char)(i)); // i gets truncated here
         break;
       case &IntType(sn,Short_sz):
 	t = (sn == Unsigned) ? ushort_typ : sshort_typ;
-        e->r = new Const_e(Short_c(sn,(short)(i))); // i gets truncated here
+        *c = Short_c(sn,(short)(i)); // i gets truncated here
         break;
       case &IntType(sn,Int_sz):
         t = (sn == Unsigned) ? uint_typ : sint_typ;
@@ -2211,7 +2211,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     tcExpNoInst(te,topt,e);
     return;
 
-  case &Const_e(c):
+  case &Const_e(*c):
     t = tcConst(te,loc,topt,c,e); break;
   case &Var_e(q,b):
     t = tcVar(te,loc,q,b); break;

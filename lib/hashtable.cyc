@@ -32,23 +32,29 @@ namespace Hashtable;
 using List;
 
 /*abstract*/
-struct Table<`a,`b> {
+struct Table<`a,`b,`r::R> {
+  region_t<`r> r;
   int          (@cmp)(`a,`a);
   int          (@hash)(`a);
   int	       max_len; // maximum length of bucket list before resize
-  list_t<$(`a,`b)@> ?tab;
+  list_t<$(`a,`b)@`r,`r> ?`r tab;
 };
+
+table_t<`a,`b,`r> rcreate(region_t<`r> r, int sz, int (@`H cmp)(`a,`a), 
+                          int (@`H hash)(`a)) {
+  list_t<$(`a,`b)@`r,`r> mt = NULL;
+  return rnew(r) Table{r, cmp, hash, 3, rnew(r) {for i<sz :mt}};
+}
 
 table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), 
                               int (@`H hash)(`a)) {
-  list_t<$(`a,`b)@> mt = NULL;
-  return new Table(cmp, hash, 3, new {for i<sz :mt});
+  return rcreate(Core::heap_region, sz, cmp, hash);
 }
 
 void insert(table_t<`a,`b> t, `a key, `b val) {
   list_t<$(`a,`b)@> ?tab   = t->tab;
   int             bucket = (*t->hash)(key) % tab.size;
-  tab[bucket] = new List(new $(key,val),tab[bucket]);
+  tab[bucket] = rnew(t->r) List(rnew(t->r) $(key,val),tab[bucket]);
   if (length(tab[bucket]) > t->max_len) 
     resize(t);
 }
@@ -102,24 +108,25 @@ int hash_stringptr(stringptr_t s) {
 }
 
 // For resizing
-void insert_bucket(list_t<$(`a,`b)@> ?tab, int (@hash)(`a),
+void insert_bucket(region_t<`r> r,
+                   list_t<$(`a,`b)@`r,`r> ?`r tab, int (@hash)(`a),
                    list_t<$(`a,`b)@> elems) {
   if (elems == NULL) return;
-  insert_bucket(tab,hash,elems->tl); // preserve the original order
+  insert_bucket(r,tab,hash,elems->tl); // preserve the original order
   `a  key  = elems->hd[0][0];
   `b  val  = elems->hd[0][1];
   int nidx = (*hash)(key) % tab.size;
-  tab[nidx] = new List(new $(key,val),tab[nidx]);
+  tab[nidx] = rnew(r) List(rnew(r) $(key,val),tab[nidx]);
 }
 
 void resize(table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = odata.size;
   int             nsize    = 2 * osize + 1;
-  list_t<$(`a,`b)@`H,`H> mt = NULL;
-  list_t<$(`a,`b)@`H> ?`H ndata  = new {for i < nsize : mt};
+  list_t<$(`a,`b)@> mt = NULL;
+  list_t<$(`a,`b)@> ? ndata  = rnew(t->r) {for i < nsize : mt};
   for (int i = 0; i<osize; i++)
-    insert_bucket(ndata,t->hash,odata[i]);
+    insert_bucket(t->r,ndata,t->hash,odata[i]);
   t->tab     = ndata;
   t->max_len = 2 * t->max_len;
 }

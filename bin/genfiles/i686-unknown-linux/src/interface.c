@@ -1005,7 +1005,7 @@ struct _dynforward_ptr lex_base;struct _dynforward_ptr lex_backtrk;struct
 _dynforward_ptr lex_default;struct _dynforward_ptr lex_trans;struct _dynforward_ptr
 lex_check;};struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*f);
 struct Cyc_Declaration_spec;struct Cyc_Declarator;struct Cyc_Abstractdeclarator;
-struct _tuple11{void*f1;int f2;};struct Cyc_Int_tok_struct{int tag;struct _tuple11*f1;
+struct _tuple11{void*f1;int f2;};struct Cyc_Int_tok_struct{int tag;struct _tuple11 f1;
 };struct Cyc_Char_tok_struct{int tag;char f1;};struct Cyc_String_tok_struct{int tag;
 struct _dynforward_ptr f1;};struct Cyc_Stringopt_tok_struct{int tag;struct Cyc_Core_Opt*
 f1;};struct Cyc_QualId_tok_struct{int tag;struct _tuple0*f1;};struct _tuple12{struct

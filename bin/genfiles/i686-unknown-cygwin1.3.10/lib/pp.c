@@ -737,23 +737,23 @@ struct _dynforward_ptr sep,struct Cyc_List_List*l);struct Cyc_PP_Doc*Cyc_PP_grou
 struct _dynforward_ptr start,struct _dynforward_ptr stop,struct _dynforward_ptr sep,
 struct Cyc_List_List*l);struct Cyc_PP_Doc*Cyc_PP_egroup(struct _dynforward_ptr start,
 struct _dynforward_ptr stop,struct _dynforward_ptr sep,struct Cyc_List_List*l);struct
-Cyc_Xarray_Xarray{struct _dynforward_ptr elmts;int num_elmts;};int Cyc_Xarray_length(
-struct Cyc_Xarray_Xarray*);void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);void
-Cyc_Xarray_set(struct Cyc_Xarray_Xarray*,int,void*);struct Cyc_Xarray_Xarray*Cyc_Xarray_create(
-int,void*);void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);struct Cyc_PP_Single_struct{
-int tag;void*f1;};struct Cyc_PP_Append_struct{int tag;void*f1;void*f2;};void*Cyc_PP_append(
-void*a1,void*a2){if(a1 == (void*)((void*)0))return a2;else{if(a2 == (void*)((void*)
-0))return a1;else{return(void*)({struct Cyc_PP_Append_struct*_tmp0=_cycalloc(
-sizeof(*_tmp0));_tmp0[0]=({struct Cyc_PP_Append_struct _tmp1;_tmp1.tag=1;_tmp1.f1=(
-void*)a1;_tmp1.f2=(void*)a2;_tmp1;});_tmp0;});}}}struct Cyc_List_List*Cyc_PP_list_of_alist_f(
-void*y,struct Cyc_List_List*l){void*_tmp2=y;void*_tmp3;void*_tmp4;void*_tmp5;_LL1:
-if((int)_tmp2 != 0)goto _LL3;_LL2: return l;_LL3: if(_tmp2 <= (void*)1)goto _LL5;if(*((
-int*)_tmp2)!= 0)goto _LL5;_tmp3=(void*)((struct Cyc_PP_Single_struct*)_tmp2)->f1;
-_LL4: return({struct Cyc_List_List*_tmp6=_cycalloc(sizeof(*_tmp6));_tmp6->hd=(void*)
-_tmp3;_tmp6->tl=l;_tmp6;});_LL5: if(_tmp2 <= (void*)1)goto _LL0;if(*((int*)_tmp2)!= 
-1)goto _LL0;_tmp4=(void*)((struct Cyc_PP_Append_struct*)_tmp2)->f1;_tmp5=(void*)((
-struct Cyc_PP_Append_struct*)_tmp2)->f2;_LL6: return Cyc_PP_list_of_alist_f(_tmp4,
-Cyc_PP_list_of_alist_f(_tmp5,l));_LL0:;}struct Cyc_List_List*Cyc_PP_list_of_alist(
+Cyc_Xarray_Xarray{struct _RegionHandle*r;struct _dynforward_ptr elmts;int num_elmts;
+};int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,
+int);void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*,int,void*);struct Cyc_Xarray_Xarray*
+Cyc_Xarray_create(int,void*);void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*,void*);
+struct Cyc_PP_Single_struct{int tag;void*f1;};struct Cyc_PP_Append_struct{int tag;
+void*f1;void*f2;};void*Cyc_PP_append(void*a1,void*a2){if(a1 == (void*)((void*)0))
+return a2;else{if(a2 == (void*)((void*)0))return a1;else{return(void*)({struct Cyc_PP_Append_struct*
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_PP_Append_struct _tmp1;_tmp1.tag=
+1;_tmp1.f1=(void*)a1;_tmp1.f2=(void*)a2;_tmp1;});_tmp0;});}}}struct Cyc_List_List*
+Cyc_PP_list_of_alist_f(void*y,struct Cyc_List_List*l){void*_tmp2=y;void*_tmp3;
+void*_tmp4;void*_tmp5;_LL1: if((int)_tmp2 != 0)goto _LL3;_LL2: return l;_LL3: if(_tmp2
+<= (void*)1)goto _LL5;if(*((int*)_tmp2)!= 0)goto _LL5;_tmp3=(void*)((struct Cyc_PP_Single_struct*)
+_tmp2)->f1;_LL4: return({struct Cyc_List_List*_tmp6=_cycalloc(sizeof(*_tmp6));
+_tmp6->hd=(void*)_tmp3;_tmp6->tl=l;_tmp6;});_LL5: if(_tmp2 <= (void*)1)goto _LL0;
+if(*((int*)_tmp2)!= 1)goto _LL0;_tmp4=(void*)((struct Cyc_PP_Append_struct*)_tmp2)->f1;
+_tmp5=(void*)((struct Cyc_PP_Append_struct*)_tmp2)->f2;_LL6: return Cyc_PP_list_of_alist_f(
+_tmp4,Cyc_PP_list_of_alist_f(_tmp5,l));_LL0:;}struct Cyc_List_List*Cyc_PP_list_of_alist(
 void*x){return Cyc_PP_list_of_alist_f(x,0);}struct Cyc_PP_Ppstate{int ci;int cc;int
 cl;int pw;int epw;};struct Cyc_PP_Out{int newcc;int newcl;void*ppout;void*links;};
 struct Cyc_PP_Doc{int mwo;int mw;struct Cyc_Fn_Function*f;};static void Cyc_PP_dump_out(

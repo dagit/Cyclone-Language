@@ -31,8 +31,8 @@ namespace Hashtable {
        To enable an efficient implementation, you are required to
        provide a total order on keys (a comparison function).  */
 
-extern struct Table<`a,`b>;
-typedef struct Table<`a,`b> @table_t<`a,`b>;
+extern struct Table<`a,`b,`r::R>;
+typedef struct Table<`a,`b,`r> @`r table_t<`a,`b,`r>;
   /** A [table_t<`a,`b>] is a hash table with keys of type [`a]
       and values of type [`b]. */
 
@@ -44,6 +44,9 @@ extern table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a));
       to, or greater than [k2].  [hash] should be a hash function on
       keys.  [cmp] and [hash] should satisfy the following property:
       if [cmp(k1,k2)] is 0, then [hash(k1)] must equal [hash(k2)]. */
+extern table_t<`a,`b,`r> rcreate(region_t<`r> r, int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a));
+  /** [rcreate(r,sz,cmp,hash)] is similar to create but allocates its
+      result in the region r instead of the heap.  */
 extern void insert(table_t<`a,`b> t, `a key, `b val);
   /** [insert(t,key,val)] binds [key] to [value] in [t]. */
 extern `b lookup(table_t<`a,`b> t, `a key);

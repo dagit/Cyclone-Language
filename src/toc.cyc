@@ -78,7 +78,20 @@ unsigned bounds_checks_eliminated = 0;
 // it's a pain to pass this list around everywhere
 static list_t<decl_t> result_decls = NULL;
 // for gensymming, etc.
-static list_t<$(var_t,list_t<type_t>)@> tuple_types = NULL;
+struct TocState {
+  <`d::R>
+  dynregion_t<`d> dyn;
+  // tuple types seen so far and the struct they map to
+  list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
+  // aggregates seen so far and their declaration
+  Dict::dict_t<qvar_t,aggrdecl_t,`d> @`d       aggrs_so_far;
+  // tunions seen so far
+  Set::set_t<qvar_t,`d> @`d                    tunions_so_far;
+  // xtunions seen so far -- bool is false if seen but not initialized (extern)
+  Dict::dict_t<qvar_t,bool,`d> @`d             xtunions_so_far;
+};
+static struct TocState *toc_state = NULL;
+
 static int tuple_type_counter = 0;
 static int temp_var_counter = 0;
 static int fresh_label_counter = 0;
@@ -308,34 +321,38 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.  
-static var_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
-  // look for the same tuple-type already declared
-  for (let tts = tuple_types; tts != NULL; tts = tts->tl) {
-    let &$(x,ts) = tts->hd;
-    let tqs = tqs0;
-    for (; tqs != NULL && ts != NULL; tqs = tqs->tl, ts = ts->tl)
-      if (!unify((*tqs->hd)[1],ts->hd))
-	break;
-    if(tqs == NULL && ts == NULL)
-      return x;
+static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
+  let TocState{.dyn = dyn, .tuple_types = tuple_types, ...} = *toc_state;
+  region d = open(dyn) {
+    // look for the same tuple-type already declared
+    for (let tts = *tuple_types; tts != NULL; tts = tts->tl) {
+      let &$(x,ts) = tts->hd;
+      let tqs = tqs0;
+      for (; tqs != NULL && ts != NULL; tqs = tqs->tl, ts = ts->tl)
+        if (!unify((*tqs->hd)[1],ts->hd))
+          break;
+      if(tqs == NULL && ts == NULL)
+        return x;
+    }
+    // haven't seen this one before, add a declaration
+    stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
+    type_t x = strct(xname);
+    list_t<type_t> ts = List::rmap(d,snd_tqt,tqs0);
+    let fs = NULL;
+    list_t<type_t> ts2 = ts;
+    for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
+      fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
+    fs = List::imp_rev(fs);
+    let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
+                          .name = new $(Rel_n(NULL),xname), .tvs = NULL, 
+                          .impl = new AggrdeclImpl{.exist_vars = NULL, 
+                                                   .rgn_po = NULL,
+                                                   .fields = fs},
+                          .attributes = NULL};
+    result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
+    *tuple_types  = rnew(d) List(rnew(d) $(x,ts),*tuple_types);
+    return x;
   }
-  // haven't seen this one before, add a declaration
-  stringptr_t x = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
-  list_t<type_t> ts = List::map(snd_tqt,tqs0);
-  let fs = NULL;
-  list_t<type_t> ts2 = ts;
-  for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
-    fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
-  fs = List::imp_rev(fs);
-  let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
-		       .name = new $(Rel_n(NULL),x), .tvs = NULL, 
-			.impl = new AggrdeclImpl{.exist_vars = NULL, 
-						 .rgn_po = NULL,
-						 .fields = fs},
-			.attributes = NULL};
-  result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
-  tuple_types  = new List(new $(x,ts),tuple_types);
-  return x;
 }
 
 // generate a temporary variable
@@ -493,8 +510,7 @@ static type_t typ_to_c(type_t t) {
     // $(t1,...,tn) maps to struct tuple_type_n where we define
     // struct tuple_type_n { t1 f1; ...; tn fn; };
     tqs = List::map(typ_to_c_f,tqs);
-    let n = add_tuple_type(tqs);
-    return strct(n);
+    return add_tuple_type(tqs);
   // FIX: we may have to actually declare these things and use them
   // consistently to make GCC happy.
   case &AnonAggrType(k,fs): 
@@ -1220,7 +1236,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
         break;
       }
     }
-    return make_struct(nv,x,strct(n),s,pointer,rgnopt,is_atomic);
+    return make_struct(nv,x,n,s,pointer,rgnopt,is_atomic);
   }
 }
 
@@ -3668,38 +3684,39 @@ static scope_t scope_to_c(scope_t s) {
 }
 
 // struct declarations -- straightforward
-Dict::dict_t<qvar_t,aggrdecl_t> * aggrs_so_far = NULL;
 static void aggrdecl_to_c(aggrdecl_t ad) {
   let n = ad->name;
-  if (aggrs_so_far == NULL) 
-    aggrs_so_far = new Dict::empty(qvar_cmp);
-  bool seen_defn_before;
-  let dopt = Dict::lookup_opt(*aggrs_so_far, n);
-  if (dopt == NULL) {
-    seen_defn_before = false;
-    *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
-  } else {
-    if (dopt->v->impl == NULL) {
-      *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
-      seen_defn_before = false;
-    } else
-      seen_defn_before = true;
-  }
-
-  ad->sc   = Public; // gcc warns if we have Extern or Static here
-  ad->tvs  = NULL;
-  if(ad->impl != NULL) {
-    ad->impl->exist_vars = NULL;
-    ad->impl->rgn_po     = NULL;
-    if (seen_defn_before)
-      ad->impl = NULL;
-    else
-      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
-        // JGM: I'm trying to get rid of warnings when we assign "const"
-        // locations...
-        fields->hd->tq = mt_tq;
-        fields->hd->type = typ_to_c_array(fields->hd->type);
+  let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
+  region d = open(dyn) {
+    bool seen_defn_before;
+    region temp {
+      let dopt = Dict::rlookup_opt(temp,*aggrs_so_far, n);
+      if (dopt == NULL) {
+        seen_defn_before = false;
+        *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
+      } else {
+        if ((*dopt)->impl == NULL) {
+          *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
+          seen_defn_before = false;
+        } else
+          seen_defn_before = true;
       }
+    }
+    ad->sc   = Public; // gcc warns if we have Extern or Static here
+    ad->tvs  = NULL;
+    if(ad->impl != NULL) {
+      ad->impl->exist_vars = NULL;
+      ad->impl->rgn_po     = NULL;
+      if (seen_defn_before)
+        ad->impl = NULL;
+      else
+        for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
+          // JGM: I'm trying to get rid of warnings when we assign "const"
+          // locations...
+          fields->hd->tq = mt_tq;
+          fields->hd->type = typ_to_c_array(fields->hd->type);
+        }
+    }
   }
 }
 
@@ -3741,18 +3758,17 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //      struct Baz  Baz;
 //      struct Baf  Baf;
 //    };
-static opt_t<Set::set_t<qvar_t>> tunions_so_far = NULL;
 static void tuniondecl_to_c(tuniondecl_t tud) {
-  if (tunions_so_far == NULL)
-    tunions_so_far = new Opt(Set::empty(qvar_cmp));
-  let n = tud->name;
-  if(tud->fields == NULL || Set::member(tunions_so_far->v, n))
-    return;
-  tunions_so_far->v = Set::insert(tunions_so_far->v, n);
-
+  let TocState{.dyn = dyn, .tunions_so_far = tunions_so_far, ...} = *toc_state;
+  region d = open(dyn) {
+    let n = tud->name;
+    if(tud->fields == NULL || Set::member(*tunions_so_far, n))
+      return;
+    *tunions_so_far = Set::rinsert(d,*tunions_so_far, n);
+  }
   // list of anonymous struct fields used for flattened tunions
   list_t<aggrfield_t> flat_structs = NULL;
-
+  
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     tunionfield_t f = fields->hd;
     if (f->typs != NULL || tud->is_flat) {
@@ -3813,75 +3829,76 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 //     (struct _Baz_struct*)malloc(sizeof(struct _Baz_struct));
 //   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
-static Dict::dict_t<qvar_t, bool> * xtunion_fields_so_far = NULL;
 //true if already seen & initialized, false if seen but non initialized (extern)
 
 static void xtuniondecl_to_c(tuniondecl_t xd) {
-  if (xtunion_fields_so_far == NULL)
-    xtunion_fields_so_far = new Dict::empty(qvar_cmp);
   if(xd->fields == NULL)
     return;
-  let n = xd->name;
-  for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
-    tunionfield_t f  = fs->hd;
-    stringptr_t fn = (*f->name)[1];
-    let sz_exp  = uint_exp((*fn).size+4,DL);
-    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
-    // FIX: making bad alignment and pointer-size assumptions!
-    switch (Dict::lookup_opt(*xtunion_fields_so_far,f->name)) {
-    case NULL:
-      exp_opt_t initopt = NULL;
-      if (f->sc != Extern) {
-        // JGMFIX: bug -- the printf functions fail miserably when we use
-        // a 0 constants here because it thinks the 0 should be cast to a
-        // NULL string.
-        char zero = '\0';
-	initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
-      }
-      let tag_decl = new_vardecl(f->name, tag_typ, initopt);
-      tag_decl->sc = f->sc;
-      result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-      *xtunion_fields_so_far = 
-	Dict::insert(*xtunion_fields_so_far, f->name, f->sc != Extern);
-      if(f->typs != NULL) {
-	list_t<aggrfield_t> fields = NULL;
-	int i = 1;
-	for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
-	  let field_n = new ((string_t)aprintf("f%d",i));
-	  let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-				   typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
-	  fields = new List(newf,fields);
-	}
-	fields = new List(new Aggrfield(tag_sp,mt_tq,
-					cstar_typ(char_typ,mt_tq),NULL,NULL),
-			  List::imp_rev(fields));
-	let strct_decl =
-	  new Aggrdecl{.kind = StructA, .sc = Public,
-		       .name = collapse_qvar_tag(f->name,"_struct"),
-		       .tvs  = NULL, 
-		       .impl = new AggrdeclImpl(NULL,NULL,fields),
-		       .attributes = NULL};
-	result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
-				result_decls);
-      }
-      break;
+  let TocState{.dyn = dyn, .xtunions_so_far = xtunions_so_far, ...} = *toc_state;
+  region d = open(dyn) {
+    region temp { 
+      let n = xd->name;
+      for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
+        tunionfield_t f  = fs->hd;
+        stringptr_t fn = (*f->name)[1];
+        let sz_exp  = uint_exp((*fn).size+4,DL);
+        let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
+        // FIX: making bad alignment and pointer-size assumptions!
+        switch (Dict::rlookup_opt(temp,*xtunions_so_far,f->name)) {
+        case NULL:
+          exp_opt_t initopt = NULL;
+          if (f->sc != Extern) {
+            // JGMFIX: bug -- the printf functions fail miserably when we use
+            // a 0 constants here because it thinks the 0 should be cast to a
+            // NULL string.
+            char zero = '\0';
+            initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
+          }
+          let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+          tag_decl->sc = f->sc;
+          result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+          *xtunions_so_far = 
+            Dict::insert(*xtunions_so_far, f->name, f->sc != Extern);
+          if(f->typs != NULL) {
+            list_t<aggrfield_t> fields = NULL;
+            int i = 1;
+            for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
+              let field_n = new ((string_t)aprintf("f%d",i));
+              let newf = new Aggrfield(field_n,(*tqts->hd)[0],
+                                       typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
+              fields = new List(newf,fields);
+            }
+            fields = new List(new Aggrfield(tag_sp,mt_tq,
+                                            cstar_typ(char_typ,mt_tq),NULL,NULL),
+                              List::imp_rev(fields));
+            let strct_decl =
+              new Aggrdecl{.kind = StructA, .sc = Public,
+                           .name = collapse_qvar_tag(f->name,"_struct"),
+                           .tvs  = NULL, 
+                           .impl = new AggrdeclImpl(NULL,NULL,fields),
+                           .attributes = NULL};
+            result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
+                                    result_decls);
+          }
+          break;
 
-    case &Opt(false):
-      if (f->sc != Extern) {
-        // JGMFIX: bug -- the printf functions fail miserably when we use
-        // a 0 constants here because it thinks the 0 should be cast to a
-        // NULL string.
-        char zero = '\0';
-	let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
-				 DL);
-	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
-	tag_decl->sc = f->sc;
-	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-	*xtunion_fields_so_far = Dict::insert(*xtunion_fields_so_far, 
-                                              f->name, true);
+        case &false:
+          if (f->sc != Extern) {
+            // JGMFIX: bug -- the printf functions fail miserably when we use
+            // a 0 constants here because it thinks the 0 should be cast to a
+            // NULL string.
+            char zero = '\0';
+            let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
+                                     DL);
+            let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+            tag_decl->sc = f->sc;
+            result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+            *xtunions_so_far = Dict::insert(*xtunions_so_far, f->name, true);
+          }
+          break;
+        default: break;
+        }
       }
-      break;
-    default: break;
     }
   }
 }
@@ -4185,14 +4202,19 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 
 // initialize all globals
 static void init() {
+  let NewRegion{dyn} = Core::new_dynregion();
+  region d = open(dyn) {
+    toc_state = 
+      new TocState{ .dyn = dyn,
+                    .tuple_types = rnew(d) NULL,
+                    .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+                    .tunions_so_far = rnew(d) Set::rempty(d,qvar_cmp),
+                    .xtunions_so_far = rnew(d) Dict::rempty(d,qvar_cmp) };
+  }
   result_decls = NULL;
-  tuple_types = NULL;
   tuple_type_counter = 0;
   temp_var_counter = 0;
   fresh_label_counter = 0;
-  aggrs_so_far = NULL;
-  tunions_so_far = NULL;
-  xtunion_fields_so_far = NULL;
   total_bounds_checks = 0;
   bounds_checks_eliminated = 0;
   globals = new {
@@ -4269,6 +4291,9 @@ list_t<decl_t> toc(list_t<decl_t> ds) {
     fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
             bounds_checks_eliminated, total_bounds_checks);
 #endif
+    // free the state
+    let TocState{.dyn = dyn,...} = *toc_state;
+    Core::free_dynregion(dyn);
   }
   return imp_rev(result_decls);
 }

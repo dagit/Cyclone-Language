@@ -973,7 +973,7 @@ print_zeroterm: 1;int generate_line_directives: 1;int use_curr_namespace: 1;stru
 curr_namespace;};void Cyc_Absynpp_decllist2file(struct Cyc_List_List*tdl,struct Cyc___cycFILE*
 f);struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*f);struct Cyc_Declaration_spec;
 struct Cyc_Declarator;struct Cyc_Abstractdeclarator;struct _tuple4{void*f1;int f2;};
-struct Cyc_Int_tok_struct{int tag;struct _tuple4*f1;};struct Cyc_Char_tok_struct{int
+struct Cyc_Int_tok_struct{int tag;struct _tuple4 f1;};struct Cyc_Char_tok_struct{int
 tag;char f1;};struct Cyc_String_tok_struct{int tag;struct _dynforward_ptr f1;};struct
 Cyc_Stringopt_tok_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_QualId_tok_struct{
 int tag;struct _tuple0*f1;};struct _tuple5{struct Cyc_Position_Segment*f1;struct Cyc_Absyn_Conref*
