@@ -160,7 +160,6 @@ static struct CtrlEnv<`r::R> {
              // NULL => not allowed
   ftclause_t<`r> fallthru_clause;
   jumpee_t<`r> next_stmt; // needed to calculate break_stmt
-  int      try_depth;
   // The next_stmt field needs to be correct only when we might enter
   // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
 };
@@ -555,9 +554,9 @@ static fenv_t<`l> copy_fenv_new_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} = *f;
   // WARNING: fallthru_clause shared with old
-  let CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt,try_depth} = *ctrl_env;
+  let CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt} = *ctrl_env;
   let new_ctrl_env =
-    rnew(l) CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt,try_depth};
+    rnew(l) CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt};
   return rnew(l) Fenv{shared,type_vars,region_order,(bnds_t<`l>)locals,
                       encloser,new_ctrl_env,capability,curr_rgn,
                       flags,l};
@@ -887,14 +886,14 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"set_fallthru");
-  let &CtrlEnv{cr,c_stmt,b_stmt,fc,n_stmt,try_depth} = ctrl_env;
+  let &CtrlEnv{cr,c_stmt,b_stmt,fc,n_stmt} = ctrl_env;
   list_t<type_t,`c> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
     ft_typ = rnew(cr) List(vds->hd->type,ft_typ);
   let cft_typ = (mclist_t<_,`c>)List::imp_rev(ft_typ);
   let new_ctrl_env =
     rnew(r) CtrlEnv{cr,c_stmt,b_stmt,rnew(cr) $(clause,new_tvs,cft_typ),
-                    n_stmt,try_depth};
+		    n_stmt};
   let new_fe = rnew(r) Fenv{shared,type_vars,region_order,
                             (bnds_t<`r>)locals,
                             encloser,new_ctrl_env,capability,curr_rgn,
@@ -919,23 +918,11 @@ tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
                     .continue_stmt = rnew(r) Stmt_j(continue_dest),
                     .break_stmt = ctrl_env->next_stmt,
                     .next_stmt = rnew(r) Stmt_j(continue_dest),
-                    .fallthru_clause = ctrl_env->fallthru_clause,
-                    .try_depth = ctrl_env->try_depth};
+                    .fallthru_clause = ctrl_env->fallthru_clause};
   fenv_t<`r> new_fenv =
     rnew(r) Fenv{shared,type_vars,region_order,(bnds_t<`r>)locals,
                    encloser,new_cenv,capability,curr_rgn,flags,r};
   return put_fenv(r,te,new_fenv);
-}
-
-tenv_t<`g,`r> enter_try(region_t<`r> r, tenv_t<`g,`r2> te : {`r2} > `r) {
-  fenv_t fe = copy_fenv_new_ctrl(r,get_fenv(te,"enter_try"));
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
-  ++ctrl_env->try_depth;
-  return put_fenv(r,te,fe);
-}
-int get_try_depth(tenv_t te) {
-  let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = get_fenv(te,"get_try_depth");
-  return ctrl_env->try_depth;
 }
 
 // each non-last case must also call set_fallthru, here we just
@@ -959,8 +946,7 @@ tenv_t<`g,`r> set_next(region_t<`r> r, tenv_t<`g,`r2> te, jumpee_t<`r> j
                     .break_stmt = ctrl_env->break_stmt,
                     .next_stmt = j,
                     .fallthru_clause =
-                       (ftclause_t<`r>)ctrl_env->fallthru_clause,
-                    .try_depth = ctrl_env->try_depth};
+		    (ftclause_t<`r>)ctrl_env->fallthru_clause};
   fenv_t<`r> new_fenv =
     rnew(r) Fenv{shared,type_vars,region_order,(bnds_t<`r>)locals,
 		 encloser,new_cenv,capability,curr_rgn,flags,r};
@@ -1320,7 +1306,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
@@ -1367,7 +1353,7 @@ fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = skip_stmt(0),
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{false,false,false,false},
@@ -1442,7 +1428,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,

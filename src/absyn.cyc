@@ -726,8 +726,7 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
-  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth=0,
-                  .annot=&EmptyAnnot_val }; 
+  return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL,.annot=&EmptyAnnot_val};
 }
 datatype Raw_stmt.Skip_s Skip_s_val = Skip_s;
 stmt_t skip_stmt(seg_t loc) { return new_stmt(&Skip_s_val, loc); }

@@ -65,7 +65,6 @@ static void simplify_unused_result_exp(exp_t e) {
   
 static void decorate_stmt(tenv_t te, stmt_t s) {
   NewControlFlow::set_encloser(s, get_encloser(te));
-  s->try_depth = get_try_depth(te);
 }
 
 // used to type-check Let_d, switch clauses, and catch clauses
@@ -379,7 +378,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     // must set encloser b/c cannot goto into a handler.
     TEMP_RGN(te,r) {
-      tcStmt(set_encloser(r,enter_try(r,te),s0),s,true);
+      tcStmt(set_encloser(r,te,s0),s,true);
     }
 
     // add a default case that re-throws the exception
@@ -647,11 +646,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
-        // we don't push a handler when regions are turned off so we
-        // only want to enter_try when regions are on.
-        if (!no_regions) {
-          te2 = enter_try(decl_rgn,te2);
-        }
         tcStmt(set_encloser(decl_rgn,add_local_var(decl_rgn,s->loc,te2,vd),s0),s,false);
         return;
 

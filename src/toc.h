@@ -22,14 +22,18 @@
 #define _TOC_H_
 
 #include <list.h>
+#include <hashtable.h>
 #include "absyn.h"
 
 namespace Toc {
 using List;
 using Absyn;
 
+typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
+
 // translate the declarations to C
-extern list_t<decl_t> toc(list_t<decl_t> ds);
+extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
+			  list_t<decl_t> ds);
 
 // this is just for Tovc and tcStmt
 extern qvar_t temp_var();

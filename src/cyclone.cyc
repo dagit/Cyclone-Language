@@ -60,6 +60,7 @@ using Cyclone;
 using Core;
 using List;
 using Arg;
+typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 
 static bool pp_r       = false;
 bool noexpand_r = false;
@@ -648,8 +649,10 @@ list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @ params
   return tds;
 }
 
-list_t<Absyn::decl_t> do_translate(bool ignore, list_t<Absyn::decl_t> tds) {
-  return Toc::toc(tds);
+list_t<Absyn::decl_t> 
+do_translate(table_t<Absyn::fndecl_t,table_t<Absyn::stmt_t,int>> pops, 
+	     list_t<Absyn::decl_t> tds) {
+  return Toc::toc(pops,tds);
 }
 list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   Tovc::elim_array_initializers = tovc_r;
@@ -1009,6 +1012,7 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
+  let jump_tables;
   region tc_rgn; {
     let te = Tcenv::tc_init(tc_rgn); // Must declare BEFORE the goto 
     if (parseonly_r) goto PRINTC;
@@ -1022,7 +1026,7 @@ static void process_file(string_t<`H> filename) {
       return;
     } 
 
-    let jump_tables = do_stage("jump checking",do_jumpanalysis,true,tds);
+    jump_tables = do_stage("jump checking",do_jumpanalysis,true,tds);
     if (compile_failure) {
       remove_file(preprocfile); // Can't flush warnings after removal
       return;
@@ -1066,7 +1070,7 @@ static void process_file(string_t<`H> filename) {
   if (cf_r) goto PRINTC;
 
   // Translation to C
-  tds = do_stage("translation to C", do_translate, true, tds);
+  tds = do_stage("translation to C",do_translate, jump_tables->pop_tables, tds);
   if (compile_failure) {
     remove_file(preprocfile); // Can't flush warnings after removal
     return;

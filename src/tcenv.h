@@ -166,8 +166,6 @@ extern tenv_t<`g,`r> set_fallthru(region_t<`r>,
                                   switch_clause_t clause : {`r2} > `r);
 extern tenv_t<`g,`r> clear_fallthru(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);
 extern tenv_t<`g,`r> set_next(region_t<`r>,tenv_t<`g,`r2>, jumpee_t<`r> : {`r2} > `r);
-extern tenv_t<`g,`r> enter_try(region_t<`r>,tenv_t<`g,`r2> te : {`r2} > `r);
-extern int    get_try_depth(tenv_t te);
 
 // used to record whether we're type-checking an expression that is doing
 // a read.  Some expressions (e.g., x++) are both reading and writing so

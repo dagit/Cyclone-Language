@@ -720,7 +720,6 @@ namespace Absyn {
     seg_t          loc;             // location in source code
     list_t<stmt_t> non_local_preds; // set by type-checking, should go in the
                                     // appropriate CFStmtAnnot, not here!
-    int            try_depth;       // used by code generator
     absyn_annot_t  annot;           // used by analysis
   };
 

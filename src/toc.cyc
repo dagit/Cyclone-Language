@@ -80,6 +80,13 @@ bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
 unsigned bounds_checks_eliminated = 0;
 
+// should be folded into environment, but for now use globals
+table_t<fndecl_t,table_t<stmt_t,int>> * gpop_tables  = NULL;
+table_t<stmt_t,int>                   * fn_pop_table = NULL;
+static int get_npop(stmt_t s) {
+  return Hashtable::lookup(*fn_pop_table,s);
+}
+
 // we aren't re-entrant -- we build this list of output decls (in
 // reverse order)  It's global b/c tuple types, tagged pointer types, and
 // strange top-level initializers need to "splice in" toplevel decls and
@@ -4482,15 +4489,16 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	exp_to_c(nv,(exp_t)eopt);
       }
       // reset handler **after** evaluating expression
-      if (s->try_depth > 0)
+      let npop = get_npop(s);
+      if (npop > 0)
 	if (topt != NULL) {
 	  let x = temp_var();
 	  let retn_stmt = return_stmt(var_exp(x,DL),DL);
 	  s->r = declare_stmt(x,(type_t)topt, eopt,
-			      seq_stmt(make_npop_handler(s->try_depth),
+			      seq_stmt(make_npop_handler(npop),
 				       retn_stmt,DL),DL)->r;
 	} else {
-	  do_npop_before(s->try_depth,s);
+	  do_npop_before(npop,s);
 	}
       return;
     case &IfThenElse_s(e,s1,s2):
@@ -4504,22 +4512,21 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         stmt_to_c(loop_env(temp,nv),s2);
       }
       return;
-    case &Break_s(dest_opt): // dest is NULL when break to end of void function
+    case &Break_s(_): 
       let &Env{.break_lab=b,...} = nv;
       if (b != NULL)
 	s->r = goto_stmt_r(*b,NULL);
       // reset handler
-      int dest_depth = dest_opt == NULL ? 0 : dest_opt->try_depth;
-      do_npop_before(s->try_depth - dest_depth, s);
+      do_npop_before(get_npop(s),s);
       return;
-    case &Continue_s(dest):
+    case &Continue_s(_):
       let &Env{.continue_lab=c,...} = nv;
       if (c != NULL)
 	s->r = goto_stmt_r(*c,NULL);
-      fallthru(dest);
-    case &Goto_s(_,dest):
+      fallthru;
+    case &Goto_s(_,_):
       // reset handler (note: earlier checks prevent jump into handler)
-      do_npop_before(s->try_depth - dest->try_depth, s);
+      do_npop_before(get_npop(s), s);
       return;
     case &For_s(e1,$(e2,_),$(e3,_),s2):
       // FIX:  should e3 be translated in nv?
@@ -4538,7 +4545,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       let FallthruInfo{l,vs,other_vmap} = *fi;
       stmt_t s2 = goto_stmt(l, DL);
       // reset handler (after the es evaluation)
-      do_npop_before(s->try_depth - (*dest_clause)->body->try_depth, s2);
+      do_npop_before(get_npop(s), s2);
       let vs2 = List::rev(vs);
       let es2 = List::rev(es);
       for(; vs2 != NULL; vs2 = vs2->tl, es2 = es2->tl) {
@@ -4765,6 +4772,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
       stmttypes_to_c(f->body);
       return;
     }
+    fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
     if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
       let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
       let t2 = typ_to_c(dyneither_typ(t,&HeapRgn_val,tq,false_conref));// region irrelevant
@@ -5462,7 +5470,9 @@ static int destroy_labels(region_t<`d> d, struct TocState<`d>@`d ts) {
 
 // The entry point:  translate the list of Cyclone declarations to
 // a list of C declarations.
-list_t<decl_t> toc(list_t<decl_t> ds) {
+list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
+		   list_t<decl_t> ds) {
+  gpop_tables = new pop_tables;
   init();
   region start; {
     decls_to_c(start,empty_env(start),ds,true,false);
@@ -5478,5 +5488,7 @@ list_t<decl_t> toc(list_t<decl_t> ds) {
     Core::free_rckey(dyn);
     Core::ufree(ts);
   }
+  gpop_tables  = NULL;
+  fn_pop_table = NULL;
   return imp_rev(result_decls);
 }
