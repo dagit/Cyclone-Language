@@ -1130,6 +1130,9 @@ namespace Absyn {
 
   // for recurring through exps to process statement-exps
   void do_nested_statement(exp_t, `a, void (@f)(`a, stmt_t), bool do_szeof);
+
+  // might the var appear (free) in the expression (does _not_ recur thru types)
+  bool var_may_appear_exp(qvar_t,exp_t);
 }
 
 #endif

@@ -53,6 +53,7 @@ CYCLONE_BOOT_LIBS:=ap\
 	printf\
 	scanf\
         set\
+        sexp\
         slowdict\
         string\
         xarray\
@@ -97,6 +98,7 @@ CYCLONE_H:=ap.h\
 	queue.h\
 	rope.h\
 	set.h\
+        sexp.h\
 	slowdict.h\
 	splay.h\
 	string.h\
@@ -147,6 +149,7 @@ CYCLONE_SRCS:=absyn\
          toseqc\
          tovc\
 	 low_treeshake\
+	 rename_temps\
          interface\
 	 cifc\
 	 tcdecl\

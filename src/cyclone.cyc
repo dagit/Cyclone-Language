@@ -29,6 +29,7 @@
 #include "toc.h"
 #include "remove_aggregates.h"
 #include "remove_labels.h"
+#include "rename_temps.h"
 #include "toseqc.h"
 #include "tovc.h"
 #include "low_treeshake.h"
@@ -504,6 +505,9 @@ list_t<Absyn::decl_t> do_removeaggrs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_removelabs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
   return RemoveLabels::remove_unused_labels(tds);
 }
+list_t<Absyn::decl_t> do_temprename(bool ignore,list_t<Absyn::decl_t,`H> tds) {
+  return RenameTemps::rename(tds);
+}
 
 list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return Toseqc::toseqc(tds);
@@ -878,7 +882,9 @@ static void process_file(string_t<`H> filename) {
   // Removal of unused declarations (optional optimization) FIX: make flag 
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     tds = do_stage("low treehsaking", tds, do_lowtreeshake, true, tds);
-
+  // renaming of temporaries
+  if(!compile_failure && Flags::stop_after_pass >= Flags::TempRename)
+    tds = do_stage("renaming temporaries",tds,do_temprename,true,tds);
  // removal of gcc extensions (tovc is an antiquated name)
   if (!compile_failure && (Flags::tovc_r || elim_se_r))
     tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);

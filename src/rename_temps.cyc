@@ -1,0 +1,212 @@
+/* Post-translation temporary-variable renaming
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// This is an optional pass that reuses names for temporary variables.
+// It runs on C code, not Cyclone code.
+
+// While we're at it, we also remove casts to struct types, which are illegal
+// in ANSI C and in gcc are always no-ops (casts to same type)
+
+#include <dict.h>
+#include "warn.h"
+#include "rename_temps.h"
+using Absyn;
+namespace RenameTemps;
+
+struct Env {
+  Dict::dict_t<qvar_t,binding_t> d;
+  int next_num;
+};
+typedef struct Env@`r env_t<`r>;
+
+static bool is_temp_var(qvar_t qv) {
+  let v = *((*qv)[1]);
+  return (numelts(v) > 4)
+    && (v[0] == '_') && (v[1] == 't') && (v[2] == 'm') && (v[3] == 'p');
+}
+static binding_t toplevel_temp_var(int i) {
+  return new Unresolved_b (new $(Loc_n,new (string_t)aprintf("_TmpG%X",i)));
+}
+static binding_t local_temp_var(int i) { 
+  static datatype Binding* memo_arr[256]= {for i < 256: NULL}; // fast common case
+  if(i < 256) {
+    if(memo_arr[i] == NULL)
+      memo_arr[i] = new Unresolved_b(new $(Loc_n,new (string_t)aprintf("_Tmp%X",i)));
+    return (binding_t)memo_arr[i];
+  }
+  return new Unresolved_b(new $(Loc_n,new (string_t)aprintf("_Tmp%X",i)));
+}
+
+static void rename_stmt(env_t, stmt_t);
+
+static void rename_exp(env_t env, exp_t e) {
+  switch(e->r) {
+  case &Var_e(*b):
+    let qv = binding2qvar(*b);
+    if(is_temp_var(qv))
+      *b = Dict::lookup(env->d,qv);
+    break;
+
+  case &Const_e(_):
+  case &AnonEnum_e(...):        
+  case &Enum_e(...):
+  case &Offsetof_e(...):
+  case &Sizeoftype_e(_): break;
+
+  case &Cast_e(t,e1,...): 
+    // this little opt has nothing to do with temp renaming, but why not?
+    rename_exp(env,e1);
+    switch(compress(t)) {
+    case &AppType(&AggrCon(ai),NULL): e->r = e1->r; break;
+    default: break;
+    }
+    break;
+  case &NoInstantiate_e(e1):  fallthru(e1);
+  case &Instantiate_e(e1,_):  fallthru(e1);
+  case &Extension_e(e1):      fallthru(e1);  
+  case &Increment_e(e1,_):    fallthru(e1);
+  case &Sizeofexp_e(e1):      fallthru(e1);
+  case &Address_e(e1):        fallthru(e1);
+  case &Deref_e(e1):          fallthru(e1);
+  case &AggrMember_e(e1,...): fallthru(e1);
+  case &AggrArrow_e(e1,...):  rename_exp(env,e1); break;
+
+  case &FnCall_e(e1,es,...):
+    rename_exp(env,e1);
+    fallthru(es);
+  case &Primop_e(_,es):
+    for(; es != NULL; es = es->tl)
+      rename_exp(env,es->hd);
+    break;
+
+  case &Conditional_e(e1,e2,e3):
+    rename_exp(env,e1);
+    fallthru(e2,e3);
+  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
+  case &And_e(e1,e2):        fallthru(e1,e2);
+  case &Or_e(e1,e2):         fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
+  case &Subscript_e(e1,e2):  
+    rename_exp(env,e1);
+    rename_exp(env,e2);
+    break;
+
+  case &UnresolvedMem_e(NULL, ldt): fallthru(ldt);
+  case &Array_e(ldt):            
+    for(; ldt != NULL; ldt = ldt->tl)
+      rename_exp(env, (*ldt->hd)[1]);
+    break;
+
+  case &StmtExp_e(s): return rename_stmt(env, s);
+
+  case &Asm_e(_,_,sl1,sl2,_): // ???
+    for(; sl1 != NULL; sl1 = sl1->tl)
+      rename_exp(env,(*sl1->hd)[1]);
+    for(; sl2 != NULL; sl2 = sl2->tl)
+      rename_exp(env,(*sl2->hd)[1]);
+    break;
+
+  default: Warn::impos2("RenameTemps: unexpected expression form",e);
+  }
+}
+
+static void rename_stmt(env_t env, stmt_t s) {
+  // only the Decl case is interesting
+  switch(s->r) {
+  case &Return_s(eo): if(eo) fallthru(eo); break;
+  case &Exp_s(e): rename_exp(env,e); break;
+  case &IfThenElse_s(e,s1,s2):
+    rename_exp(env,e);
+    fallthru(s1,s2);
+  case &Seq_s(s1,s2):
+    rename_stmt(env,s1);
+    rename_stmt(env,s2);
+    break;
+  case &Label_s(_,s1): rename_stmt(env,s1); break;
+  case &Do_s(s1, $(e,_)): fallthru(e,s1);
+  case &While_s($(e,_),s1): 
+    rename_exp(env,e);
+    rename_stmt(env,s1);
+    break;
+  case &For_s(e1,$(e2,_),$(e3,_),s1):
+    rename_exp(env,e1);
+    rename_exp(env,e2);
+    rename_exp(env,e3);
+    rename_stmt(env,s1);
+    break;
+  case &Switch_s(e, scs, _):
+    rename_exp(env,e);
+    for(; scs != NULL; scs = scs->tl)
+      rename_stmt(env,scs->hd->body);
+    break;
+  case &Decl_s(d,s1):
+    let old_env = *env;
+    switch(d->r) {
+    case &Var_d(vd): 
+      if(is_temp_var(vd->name)) {
+	let v = local_temp_var(env->next_num++);
+	env->d = Dict::insert(env->d,vd->name,v);
+	let vd2 = *vd;
+	vd2.name = binding2qvar(v);
+	d->r = new Var_d(new vd2);
+      }
+      // global initializers won't have local declarations
+      if(vd->initializer)
+	rename_exp(env,(exp_t)vd->initializer);
+      break;
+    case &Fn_d(fd): 
+      // assuming arguments and functions can't be temporaries
+      rename_stmt(env,fd->body); break;
+    default: Warn::impos2("RenameTemps: local decl not a var or function");
+    }
+    rename_stmt(env,s1);
+    *env = old_env;
+    break;
+
+  default: break; // some forms impossible, others do not have exps/types
+  }
+}
+
+List::list_t<Absyn::decl_t> rename(List::list_t<Absyn::decl_t,`H> tds) {
+  let env = Env(Dict::empty(qvar_cmp),/*Dict::empty(Core::ptrcmp),*/0);
+  for(let tds2 = tds; tds2 != NULL; tds2 = tds2->tl)
+    switch(tds2->hd->r) {
+    case &Var_d(vd): 
+      if(is_temp_var(vd->name)) {
+	let v = toplevel_temp_var(env.next_num++);
+	env.d = Dict::insert(env.d,vd->name,v);
+	let vd2 = *vd;
+	vd2.name = binding2qvar(v);
+	tds2->hd->r = new Var_d(new vd2);
+      }
+      // global initializers won't have local declarations
+      if(vd->initializer)
+	rename_exp(&env,(exp_t)vd->initializer);
+      break;
+    case &Fn_d(fd):
+      // assuming arguments and functions can't be temporaries
+      let env2 = env;
+      env.next_num = 0; // for locals
+      rename_stmt(&env,fd->body);
+      env = env2;
+      break;
+    default: break; // could an enum tag have a temporary's address?
+    }
+  return tds;
+}

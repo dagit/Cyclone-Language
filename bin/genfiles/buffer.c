@@ -372,33 +372,33 @@ extern struct _fat_ptr Cyc_substring(struct _fat_ptr,int,unsigned long);struct C
 # 48 "buffer.cyc"
 struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned n){
 if(n > 0U){
-struct _fat_ptr s=({unsigned _tmp1=n + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1),sizeof(char),_tmp1);});
-return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s,_tmp0->position=0U,_tmp0->length=n,_tmp0->initial_buffer=_tag_fat(0,0,0);_tmp0;});}else{
+struct _fat_ptr s=({unsigned _Tmp0=n + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
+return({struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=s,_Tmp0->position=0U,_Tmp0->length=n,_Tmp0->initial_buffer=_tag_fat(0,0,0);_Tmp0;});}else{
 # 53
-return({struct Cyc_Buffer_t*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->buffer=_tag_fat(0,0,0),_tmp2->position=0U,_tmp2->length=0U,_tmp2->initial_buffer=_tag_fat(0,0,0);_tmp2;});}}
+return({struct Cyc_Buffer_t*_Tmp0=_cycalloc(sizeof(struct Cyc_Buffer_t));_Tmp0->buffer=_tag_fat(0,0,0),_Tmp0->position=0U,_Tmp0->length=0U,_Tmp0->initial_buffer=_tag_fat(0,0,0);_Tmp0;});}}
 # 57
 struct _fat_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){
-struct _fat_ptr _tmp3=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp3;
-({struct _fat_ptr _tmp4=buf;struct _fat_ptr _tmp5=b->buffer;buf=_tmp5;b->buffer=_tmp4;});
+struct _fat_ptr buf=_tag_fat(0,0,0);
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 if((char*)buf.curr == (char*)(_tag_fat(0,0,0)).curr)
 return _tag_fat(0,0,0);{
-struct _fat_ptr _tmp6=({struct _fat_ptr _tmp9=buf;struct _fat_ptr _tmpA;_tmpA=_tmp9;({struct _fat_ptr __aliasvar0=_tmpA;Cyc_substring(__aliasvar0,0,b->position);});});struct _fat_ptr res=_tmp6;
-({struct _fat_ptr _tmp7=buf;struct _fat_ptr _tmp8=b->buffer;buf=_tmp8;b->buffer=_tmp7;});
+struct _fat_ptr _Tmp0=({struct _fat_ptr _Tmp1=buf;struct _fat_ptr _Tmp2;_Tmp2=_Tmp1;({struct _fat_ptr __aliasvar0=_Tmp2;Cyc_substring(__aliasvar0,0,b->position);});});struct _fat_ptr res=_Tmp0;
+({struct _fat_ptr _Tmp1=buf;struct _fat_ptr _Tmp2=b->buffer;buf=_Tmp2;b->buffer=_Tmp1;});
 return res;}}
 # 67
 struct _fat_ptr Cyc_Buffer_extract(struct Cyc_Buffer_t*b){
-struct _fat_ptr _tmpB=_tag_fat(0,0,0);struct _fat_ptr buf=_tmpB;
-({struct _fat_ptr _tmpC=buf;struct _fat_ptr _tmpD=b->buffer;buf=_tmpD;b->buffer=_tmpC;});
-({struct _fat_ptr _tmpE=_fat_ptr_plus(buf,sizeof(char),(int)b->position);char _tmpF=*((char*)_check_fat_subscript(_tmpE,sizeof(char),0U));char _tmp10='\000';if(_get_fat_size(_tmpE,sizeof(char))== 1U &&(_tmpF == 0 && _tmp10 != 0))_throw_arraybounds();*((char*)_tmpE.curr)=_tmp10;});
+struct _fat_ptr buf=_tag_fat(0,0,0);
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(buf,sizeof(char),(int)b->position);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2='\000';if(_get_fat_size(_Tmp0,sizeof(char))== 1U &&(_Tmp1 == 0 && _Tmp2 != 0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 b->position=0U;
 b->length=0U;
 return buf;}
 # 76
 int Cyc_Buffer_restore(struct Cyc_Buffer_t*b,struct _fat_ptr buf){
-int len=(int)({struct _fat_ptr _tmp15=buf;struct _fat_ptr _tmp16;_tmp16=_tmp15;({struct _fat_ptr __aliasvar1=_tmp16;Cyc_strlen(__aliasvar1);});});
-({struct _fat_ptr _tmp11=buf;struct _fat_ptr _tmp12=b->buffer;buf=_tmp12;b->buffer=_tmp11;});
+int len=(int)({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1;_Tmp1=_Tmp0;({struct _fat_ptr __aliasvar1=_Tmp1;Cyc_strlen(__aliasvar1);});});
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 if((char*)buf.curr != (char*)(_tag_fat(0,0,0)).curr){
-({struct _fat_ptr _tmp13=buf;struct _fat_ptr _tmp14=b->buffer;buf=_tmp14;b->buffer=_tmp13;});
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 ({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));
 return 0;}
 # 84
@@ -415,10 +415,10 @@ b->position=0U;}
 void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){
 b->position=0U;
 if((char*)(b->initial_buffer).curr != (char*)(_tag_fat(0,0,0)).curr){
-struct _fat_ptr _tmp17=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp17;
-({struct _fat_ptr _tmp18=b->initial_buffer;struct _fat_ptr _tmp19=buf;b->initial_buffer=_tmp19;buf=_tmp18;});
+struct _fat_ptr buf=_tag_fat(0,0,0);
+({struct _fat_ptr _Tmp0=b->initial_buffer;struct _fat_ptr _Tmp1=buf;b->initial_buffer=_Tmp1;buf=_Tmp0;});
 b->length=_get_fat_size(buf,sizeof(char))- 1U;
-({struct _fat_ptr _tmp1A=b->buffer;struct _fat_ptr _tmp1B=buf;b->buffer=_tmp1B;buf=_tmp1A;});
+({struct _fat_ptr _Tmp0=b->buffer;struct _fat_ptr _Tmp1=buf;b->buffer=_Tmp1;buf=_Tmp0;});
 ({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
 # 106
 return;}
@@ -430,14 +430,14 @@ struct _fat_ptr new_buffer;
 while(b->position + more > new_len){
 new_len=2U * new_len;}
 # 116
-new_buffer=({unsigned _tmp1C=new_len + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1C),sizeof(char),_tmp1C);});
+new_buffer=({unsigned _Tmp0=new_len + 1U;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_Tmp0),sizeof(char),_Tmp0);});
 if(b->length != 0U){
-struct _fat_ptr _tmp1D=new_buffer;struct _fat_ptr _tmp1E;_tmp1E=_tmp1D;{struct _fat_ptr x=_tmp1E;
-({struct _fat_ptr _tmp37=_fat_ptr_decrease_size(x,sizeof(char),1U);struct _fat_ptr _tmp36=(struct _fat_ptr)b->buffer;Cyc_strncpy(_tmp37,_tmp36,b->position);});}}
+struct _fat_ptr _Tmp0=new_buffer;struct _fat_ptr _Tmp1;_Tmp1=_Tmp0;{struct _fat_ptr x=_Tmp1;
+({struct _fat_ptr _Tmp2=_fat_ptr_decrease_size(x,sizeof(char),1U);struct _fat_ptr _Tmp3=b->buffer;Cyc_strncpy(_Tmp2,_Tmp3,b->position);});}}
 # 121
 if((char*)(b->initial_buffer).curr == (char*)(_tag_fat(0,0,0)).curr)
-({struct _fat_ptr _tmp1F=b->initial_buffer;struct _fat_ptr _tmp20=b->buffer;b->initial_buffer=_tmp20;b->buffer=_tmp1F;});
-({struct _fat_ptr _tmp21=b->buffer;struct _fat_ptr _tmp22=new_buffer;b->buffer=_tmp22;new_buffer=_tmp21;});
+({struct _fat_ptr _Tmp0=b->initial_buffer;struct _fat_ptr _Tmp1=b->buffer;b->initial_buffer=_Tmp1;b->buffer=_Tmp0;});
+({struct _fat_ptr _Tmp0=b->buffer;struct _fat_ptr _Tmp1=new_buffer;b->buffer=_Tmp1;new_buffer=_Tmp0;});
 ({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(new_buffer,sizeof(char),1U + 1U));
 b->length=new_len;
 return;}
@@ -445,37 +445,37 @@ return;}
 void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){
 int pos=(int)b->position;
 if((unsigned)pos >= b->length)Cyc_Buffer_resize(b,1U);
-({struct _fat_ptr _tmp23=_fat_ptr_plus(b->buffer,sizeof(char),pos);char _tmp24=*((char*)_check_fat_subscript(_tmp23,sizeof(char),0U));char _tmp25=c;if(_get_fat_size(_tmp23,sizeof(char))== 1U &&(_tmp24 == 0 && _tmp25 != 0))_throw_arraybounds();*((char*)_tmp23.curr)=_tmp25;});
+({struct _fat_ptr _Tmp0=_fat_ptr_plus(b->buffer,sizeof(char),pos);char _Tmp1=*((char*)_check_fat_subscript(_Tmp0,sizeof(char),0U));char _Tmp2=c;if(_get_fat_size(_Tmp0,sizeof(char))== 1U &&(_Tmp1 == 0 && _Tmp2 != 0))_throw_arraybounds();*((char*)_Tmp0.curr)=_Tmp2;});
 b->position=(unsigned)(pos + 1);
 return;}
 # 140
 void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct _fat_ptr s,int offset,int len){
 if((offset < 0 || len < 0)||(unsigned)(offset + len)> _get_fat_size(s,sizeof(char)))
-(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp27=_cycalloc(sizeof(*_tmp27));_tmp27->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp38=({const char*_tmp26="Buffer::add_substring";_tag_fat(_tmp26,sizeof(char),22U);});_tmp27->f1=_tmp38;});_tmp27;}));{
+(int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=({const char*_Tmp1="Buffer::add_substring";_tag_fat(_Tmp1,sizeof(char),22U);});_Tmp0;}));{
 int new_position=(int)(b->position + (unsigned)len);
 if((unsigned)new_position > b->length)Cyc_Buffer_resize(b,(unsigned)len);{
-struct _fat_ptr _tmp28=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp28;
-({struct _fat_ptr _tmp29=buf;struct _fat_ptr _tmp2A=b->buffer;buf=_tmp2A;b->buffer=_tmp29;});
-{struct _fat_ptr _tmp2B=buf;struct _fat_ptr _tmp2C;_tmp2C=_tmp2B;{struct _fat_ptr x=_tmp2C;
-({struct _fat_ptr _tmp3A=_fat_ptr_decrease_size(_fat_ptr_plus(x,sizeof(char),(int)b->position),sizeof(char),1U);struct _fat_ptr _tmp39=(struct _fat_ptr)_fat_ptr_plus(s,sizeof(char),offset);Cyc_zstrncpy(_tmp3A,_tmp39,(unsigned long)len);});}}
+struct _fat_ptr buf=_tag_fat(0,0,0);
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
+{struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1;_Tmp1=_Tmp0;{struct _fat_ptr x=_Tmp1;
+({struct _fat_ptr _Tmp2=_fat_ptr_decrease_size(_fat_ptr_plus(x,sizeof(char),(int)b->position),sizeof(char),1U);struct _fat_ptr _Tmp3=_fat_ptr_plus(s,sizeof(char),offset);Cyc_zstrncpy(_Tmp2,_Tmp3,(unsigned long)len);});}}
 # 150
-({struct _fat_ptr _tmp2D=buf;struct _fat_ptr _tmp2E=b->buffer;buf=_tmp2E;b->buffer=_tmp2D;});
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 b->position=(unsigned)new_position;
 return;}}}
 # 156
 void Cyc_Buffer_add_string(struct Cyc_Buffer_t*b,struct _fat_ptr s){
-int len=(int)Cyc_strlen((struct _fat_ptr)s);
+int len=(int)Cyc_strlen(s);
 int new_position=(int)(b->position + (unsigned)len);
 if((unsigned)new_position > b->length)Cyc_Buffer_resize(b,(unsigned)len);{
-struct _fat_ptr _tmp2F=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp2F;
-({struct _fat_ptr _tmp30=buf;struct _fat_ptr _tmp31=b->buffer;buf=_tmp31;b->buffer=_tmp30;});
-{struct _fat_ptr _tmp32=buf;struct _fat_ptr _tmp33;_tmp33=_tmp32;{struct _fat_ptr x=_tmp33;
-({struct _fat_ptr _tmp3D=({struct _fat_ptr _tmp3B=_fat_ptr_decrease_size(x,sizeof(char),1U);_fat_ptr_plus(_tmp3B,sizeof(char),(int)b->position);});struct _fat_ptr _tmp3C=(struct _fat_ptr)s;Cyc_strncpy(_tmp3D,_tmp3C,(unsigned long)len);});}}
+struct _fat_ptr buf=_tag_fat(0,0,0);
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
+{struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1;_Tmp1=_Tmp0;{struct _fat_ptr x=_Tmp1;
+({struct _fat_ptr _Tmp2=({struct _fat_ptr _Tmp3=_fat_ptr_decrease_size(x,sizeof(char),1U);_fat_ptr_plus(_Tmp3,sizeof(char),(int)b->position);});struct _fat_ptr _Tmp3=s;Cyc_strncpy(_Tmp2,_Tmp3,(unsigned long)len);});}}
 # 165
-({struct _fat_ptr _tmp34=buf;struct _fat_ptr _tmp35=b->buffer;buf=_tmp35;b->buffer=_tmp34;});
+({struct _fat_ptr _Tmp0=buf;struct _fat_ptr _Tmp1=b->buffer;buf=_Tmp1;b->buffer=_Tmp0;});
 b->position=(unsigned)new_position;
 return;}}
 # 170
 void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){
-Cyc_Buffer_add_substring(b,(struct _fat_ptr)bs->buffer,0,(int)bs->position);
+Cyc_Buffer_add_substring(b,bs->buffer,0,(int)bs->position);
 return;}

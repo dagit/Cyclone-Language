@@ -102,6 +102,7 @@ enum Cyclone_Passes {
   Toc,
   AggregateRemoval,
   LabelRemoval,
+  TempRename,
   EvalOrder,
   CCompiler,
   AllPasses // must be last -- means do everything (the default)

@@ -175,7 +175,7 @@ void warn2(seg_t loc, ... inject warg_t args) {
   let msg = args2string(args);
   if (!Position::error_p()) {
     fprintf(stderr,"Compiler Error: \n");
-    fprintf(stderr,"%s",msg);
+    verr2(loc,args);
     fflush(stderr);
   }
   throw new Core::Impossible(msg);  

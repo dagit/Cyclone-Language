@@ -175,6 +175,16 @@ static enum SideEffect stmt_effect(stmt_t s) {
       s = s2;
       continue;
 
+    case &Decl_s(d,s1):
+      switch(d->r) {
+      case &Var_d(vd):
+	if(vd->initializer)
+	  res = join_side_effect(res,exp_effect((exp_t)vd->initializer));
+	s = s1;
+	continue;
+      default: return AnyEffect;
+      }
+
     case &Break_s:    
     case &Continue_s: 
     case &Goto_s(_):
@@ -183,7 +193,6 @@ static enum SideEffect stmt_effect(stmt_t s) {
     case &While_s(...):
     case &For_s(...):
     case &Do_s(...):
-    case &Decl_s(...):
     case &Switch_s(...): return AnyEffect;
     default: Warn::impos2("bad stmt after xlation to C");
     }
@@ -224,7 +233,8 @@ static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
   if (List::length(es) <= 1 || exps_effect(es) != AnyEffect) return NULL;
 
   // Create local declarations for each expression.  Note that we
-  // don't have to do this for the last expression in the list.
+  // don't have to do this for the last expression in the list or for
+  // constant expressions.
   stmt_t stmt = exp_stmt(copy_exp(e),e->loc);
   stmt_opt_t laststmt = stmt;
   bool did_skip = false;

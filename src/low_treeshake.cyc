@@ -19,8 +19,6 @@
 
 // This is an optional pass that removes structs, enums, and (TO DO) externs
 // that are not used.  It runs on C code, not Cyclone code.
-// FIX: for enums we need enumfields or we can't shake because of implicit
-//      coercions from an enum type to, e.g., int.
 
 #include <hashtable.h>
 #include <set.h>
@@ -141,10 +139,10 @@ static void build_tables_exp(env_t env, exp_t e) {
 static void build_tables_stmt(env_t env, stmt_t s) { 
   // just recursive descent
   switch(s->r) {
-  case &Return_s(eo): if(eo) fallthru((exp_t)eo); break;
+  case &Return_s(eo): if(eo) fallthru(eo); break;
   case &Exp_s(e): build_tables_exp(env,e); break;
-  case &IfThenElse_s(e1,s1,s2):
-    build_tables_exp(env,e1);
+  case &IfThenElse_s(e,s1,s2):
+    build_tables_exp(env,e);
     fallthru(s1,s2);
   case &Seq_s(s1,s2): 
     build_tables_stmt(env,s1);
@@ -244,7 +242,7 @@ static List::list_t<decl_t,`H> trim_decls(env_t env, List::list_t<decl_t,`H> tds
   let ans = NULL;
   for(; tds != NULL; tds = tds->tl) {
     bool keep;
-    switch(tds->hd->r) { // FIX: skiiping Enum_d and Var_d for now
+    switch(tds->hd->r) { // FIX: skipping Enum_d and Var_d for now
     case &Aggr_d(ad): keep = Set::member(env->aggr_keepers,ad->name); break;
     case &Enum_d(ed): keep = Set::member(env->enum_keepers,ed->name); break;
     default:          keep = true; break;

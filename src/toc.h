@@ -42,7 +42,7 @@ qvar_t temp_var();
 extern stringptr_t ?globals;
 // for passing New_e destinations to RemoveAggrs
 @extensible datatype Absyn::AbsynAnnot { 
-  extern Dest(exp_t);
+  extern NewInfo(exp_t,type_t);
 };
 void init();
 void finish(); // call this when done with a batch of typ_to_c calls

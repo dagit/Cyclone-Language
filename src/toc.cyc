@@ -62,7 +62,7 @@ namespace Toc;
 
 // for passing New_e destinations to RemoveAggrs
 @extensible datatype Absyn::AbsynAnnot {
-  Dest(exp_t);
+  NewInfo(exp_t,type_t);
 };
 
 static `a unimp(string_t<`H> str) __attribute__((noreturn)) {
@@ -1823,7 +1823,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
     } else if(elt_typ == void_type && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
-      e->r = e2->r;
+      *e = *e2;
     }
     break;
   case &AssignOp_e(e1,popt,e2):
@@ -1909,7 +1909,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // find the lvalue, and put the assignment there.
       if (!is_lvalue(e1)) {
         lvalue_assign(e1,NULL,assignop_lvalue,new $(popt,e2));
-        e->r = e1->r;
+        *e = *e1;
       }
     }
     break;
@@ -1929,7 +1929,6 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e1);
     did_inserted_checks = true;
     if(do_null_check(e))
-      //*_check_null(e)
       e1->r = fncall_exp_dl(_check_null_e,copy_exp(e1))->r;
     List::iter_c(exp_to_c,nv,es);
     break;
@@ -1959,7 +1958,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	new_args = new List(es->hd, new_args);
       }
       new_args = new List(fncall_exp_dl(_tag_fat_e,
-					argvexp,
+					(num_varargs==0?uint_exp(0,DL):argvexp),
 					sizeoftype_exp(cva_type,DL),
 					num_varargs_exp),
 			  new_args);
@@ -1969,8 +1968,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e1);
       did_inserted_checks = true;
       if(do_null_check(e))
-	// _check_null(e1)
 	e1->r = fncall_exp_dl(_check_null_e,copy_exp(e1))->r;
+      if(num_varargs==0) {
+	e->r = fncall_exp(e1,new_args,DL)->r;
+	break;
+      }
       stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
 
       // make the declarations and prepend them
@@ -1981,43 +1983,36 @@ static void exp_to_c(env_t nv, exp_t e) {
 	default: toc_impos("unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
-
-        if (num_varargs != 0) {
-          // declare argv = {&v1,&v2,...,&vnum_varargs}
-	  // we now make it an Array_e, which RemoveAggrs converts to a
-	  // sequence of assignments
-          let array_args = NULL;
-          for(int i=num_varargs-1; i >= 0; --i)
-            array_args = new List(address_exp(var_exp(vs[i],DL),DL),array_args);
-          s = declare_stmt(argv, arr_type, array_exp(array_args,DL), s, DL);
-          // evaluate varargs (reverse to get left-to-right)
-	  es = imp_rev(es);
-	  injectors = imp_rev(injectors);
-	  int i = length(es)-1;
-          for (; es != NULL; es=es->tl, injectors=injectors->tl, --i) {
-            exp_t  arg      = es->hd;
-            type_t arg_type = (type_t)arg->topt;
-            qvar_t var      = vs[i];
-            exp_t  varexp   = var_exp(var,DL);
-            let &Datatypefield{qv,tqts,_,_} = injectors->hd;
-            type_t field_typ = typ_to_c((*tqts->hd)[1]);
-            exp_to_c(nv,arg);
-            if (is_void_star_or_boxed_tvar(field_typ))
-              arg = cast_it(field_typ,arg);
-	    // just make an Aggregate_e and pass the buck to RemoveAggrs
-	    let tdn = collapse_qvars(qv,tud->name);
-	    let dles = list(make_field(tag_sp,datatype_tag(tud,qv)),
-			    make_field(fieldname(1),arg));
-	    s = declare_stmt(var, strctq(tdn),
-			     new_exp(new Aggregate_e(tdn,NULL,dles,NULL),DL),
-			     s, DL);
-          }
-        } else
-	  // if there are no var args, then set argv to the empty fat pointer
-	  // (thin pointer here, function-argument calls _tag_fat)
-	  // instead of an array of 0 elements to keep ansi c compilers happy
-          s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
-      } else if(num_varargs != 0) {
+	// declare argv = {&v1,&v2,...,&vnum_varargs}
+	// we now make it an Array_e, which RemoveAggrs converts to a
+	// sequence of assignments
+	let array_args = NULL;
+	for(int i=num_varargs-1; i >= 0; --i)
+	  array_args = new List(address_exp(var_exp(vs[i],DL),DL),array_args);
+	s = declare_stmt(argv, arr_type, array_exp(array_args,DL), s, DL);
+	// evaluate varargs (reverse to get left-to-right)
+	es = imp_rev(es);
+	injectors = imp_rev(injectors);
+	int i = length(es)-1;
+	for (; es != NULL; es=es->tl, injectors=injectors->tl, --i) {
+	  exp_t  arg      = es->hd;
+	  type_t arg_type = (type_t)arg->topt;
+	  qvar_t var      = vs[i];
+	  exp_t  varexp   = var_exp(var,DL);
+	  let &Datatypefield{qv,tqts,_,_} = injectors->hd;
+	  type_t field_typ = typ_to_c((*tqts->hd)[1]);
+	  exp_to_c(nv,arg);
+	  if (is_void_star_or_boxed_tvar(field_typ))
+	    arg = cast_it(field_typ,arg);
+	  // just make an Aggregate_e and pass the buck to RemoveAggrs
+	  let tdn = collapse_qvars(qv,tud->name);
+	  let dles = list(make_field(tag_sp,datatype_tag(tud,qv)),
+			  make_field(fieldname(1),arg));
+	  s = declare_stmt(var, strctq(tdn),
+			   new_exp(new Aggregate_e(tdn,NULL,dles,NULL),DL),
+			   s, DL);
+	}
+      } else {
 	// now just make an Array_e and pass the buck to RemoveAggrs to
 	// expand it out to avoid the GCC bug
 	list_t<exp_t> array_args = NULL;
@@ -2027,9 +2022,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
 	let init = array_exp(imp_rev(array_args),DL);
 	s = declare_stmt(argv, arr_type, init, s,DL);
-      } else
-	s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
-      e->r = stmt_exp_r(s);
+      }
+    e->r = stmt_exp_r(s);
     }
     break;
   case &Throw_e(e1,b):
@@ -2096,7 +2090,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	if(do_null_check(e))
 	  e->r = fncall_exp_dl(_check_null_e,e1)->r;
 	else if (Unify::unify(old_t2_c,new_typ_c))
-	  e->r = e1->r;
+	  *e = *e1; // Must copy over annot in case of New_e!!!
         // FIX: the type-checker doesn't currently allow the case
         // where b1 > b2, but this can be allowed for zero-terminated
         // arrays (since the true length isn't known.)  Of course,
@@ -2204,7 +2198,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     default:
       if (Unify::unify(old_t2_c,new_typ_c))
-        e->r = e1->r;
+        *e = *e1;
       break;
     }
     break;
@@ -2224,22 +2218,15 @@ static void exp_to_c(env_t nv, exp_t e) {
 
   case &New_e(rgnopt,e1):
     // we share the work with RemoveAggrs:
-    // * we do the malloc and the result expression
-    // * we pass the destination for the initializer, which RemoveAggrs
-    //   then gets rid of
+    // * we create the malloc-exp and if necessary, the tag_fat and cast
+    // * we pass the malloc-exp as an attribute to RemoveAggrs,
+    //   which gets rid of the New_e
     exp_to_c(nv,e1);
     // determine elt_typ after translating e1 due to the struct hack
     type_t elt_typ = typ_to_c((type_t)e1->topt);
-    let $(x,xexp) = temp_var_and_exp();
-    exp_t lhs;
     switch(compress(elt_typ)) {
-    case &ArrayType(ArrayInfo(t2,...)):
-      elt_typ = typ_to_c(t2);
-      lhs = copy_exp(xexp);
-      break;
-    default:
-      lhs = deref_exp(copy_exp(xexp),DL);
-      break;
+    case &ArrayType(ArrayInfo(t2,...)): elt_typ = typ_to_c(t2); break;
+    default: break;
     }
     exp_opt_t array_len = array_length_exp(e1);
     let lenvar = array_len ? (qvar_opt_t)temp_var() : NULL;
@@ -2248,7 +2235,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(lenexp)
       mexp = fncall_exp_dl(_check_times_e,lenexp,sizeoftype_exp(elt_typ,DL));
     else
-      mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
+      mexp = sizeoftype_exp(elt_typ,DL); // :( don't have destination anymore
     // deal with the struct hack (executing the bound twice and suffering
     // an unnecessary copy of the data)
     let vse = get_varsizeexp(e1);
@@ -2261,24 +2248,18 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,rgnopt);
       mexp = rmalloc_exp(rgnopt,mexp);
     }
-    exp_t answer;
-    if(is_fat_ptr(old_typ))
-      answer = fncall_exp_dl(_tag_fat_e,
-			     copy_exp(xexp),
-			     sizeoftype_exp(elt_typ,DL),
-			     (lenexp ? lenexp : uint_exp(1,DL)));
-    else
-      answer = copy_exp(xexp);
-    e->annot = new Dest(xexp); // RemoveAggrs puts in the assignments
-    let s = declare_stmt(x,cstar_type(elt_typ,mt_tq),mexp,
-			 seq_stmt(exp_stmt(copy_exp(e),DL),
-				  exp_stmt(answer,DL),DL),DL);
-
-    if(array_len)
-      s = declare_stmt((qvar_t)lenvar,uint_type,(exp_t)array_len,s,DL);
-    e->r = stmt_exp_r(s);
+    e->annot = new NewInfo(mexp,cstar_type(elt_typ,mt_tq));
+    if(is_fat_ptr(old_typ)) 
+      e->r = fncall_exp_dl(_tag_fat_e,copy_exp(e),
+			   sizeoftype_exp(elt_typ,DL),
+			   (lenexp ? lenexp : uint_exp(1,DL)))->r;
     if(vse != NULL) // in case of the struct hack, types do not line up
       e->r = cast_it_r(typ_to_c(old_typ),copy_exp(e));
+    if(array_len) {
+      let s = declare_stmt((qvar_t)lenvar,uint_type,(exp_t)array_len,
+			   exp_stmt(copy_exp(e),DL),DL);
+      e->r = stmt_exp_r(s);
+    }
     break;
 
     // InsertChecks ensures we don't do checks under a sizeof
@@ -3580,16 +3561,21 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       case &Let_d(p,_,e,dec_tree):
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e.
-	// copying rather than alpha-conversion is just to help debugging
-	// FIX? avoid making a temp when var does not appear
+	// copying rather than alpha-conversion is just to help debugging,
+	// but for pretty output we compute the special-case of not needing to
         switch (p->r) {
         case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
-          let new_vd = new_vardecl(DL, temp_var(), vd->type, e);
-          vd->initializer = varb_exp(new Local_b(new_vd),DL);
-          vd->initializer->topt = new_vd->type;
-          s->r = decl_stmt(new_decl(new Var_d(new_vd),s->loc),
-                           decl_stmt(new_decl(new Var_d(vd),s->loc),
-                                     body,s->loc),s->loc)->r;
+	  if(var_may_appear_exp(vd->name,e)) {
+	    let new_vd = new_vardecl(DL, temp_var(), vd->type, e);
+	    vd->initializer = varb_exp(new Local_b(new_vd),DL);
+	    vd->initializer->topt = new_vd->type;
+	    s->r = decl_stmt(new_decl(new Var_d(new_vd),s->loc),
+			     decl_stmt(new_decl(new Var_d(vd),s->loc),
+				       body,s->loc),s->loc)->r;
+	  } else {
+	    vd->initializer = e;
+	    s->r = decl_stmt(new_decl(new Var_d(vd),s->loc),body,s->loc)->r;
+	  }
           stmt_to_c(nv, s);
           break;
         default:

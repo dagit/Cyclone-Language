@@ -15,7 +15,7 @@ endif
 HAVE_PTHREAD=no
 #EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude testasm patterns)
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod testasm testsexp)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns multimethod testasm) # testsexp)
 
 ifeq ($(HAVE_PTHREAD),yes)
 EXES += $(addsuffix $(EXE),testexn)

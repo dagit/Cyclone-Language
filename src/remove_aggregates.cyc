@@ -35,7 +35,7 @@
 //  already compiled those away.)
 
 #include "warn.h"
-#include "toc.h" // for temp_var and Dest
+#include "toc.h" // for temp_var and NewInfo
 #include "tcutil.h" // for is_array
 #include "remove_aggregates.h"
 using Core;
@@ -121,9 +121,13 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
 
   case &New_e(_,e1):
     switch(e->annot) {
-    case &Toc::Dest(dest): 
-      remove_aggrs_exp(Env(NewDest,dest), e1); 
-      *e = *e1;
+    case &Toc::NewInfo(mexp,typ): 
+      let xvar = Toc::temp_var();
+      let xexp =  var_exp(xvar,DL);
+      remove_aggrs_exp(Env(NewDest,xexp), e1); 
+      let s = declare_stmt(xvar,typ,mexp,
+			   seq_stmt(exp_stmt(e1,DL),exp_stmt(xexp,DL),DL),DL);
+      e->r = stmt_exp(s,DL)->r;
       break;
     default: Warn::impos("removeAggrs: toc did not set a new-destination");
     }

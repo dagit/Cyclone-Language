@@ -360,5 +360,5 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Iter_Iter{void*env;int(*next)(void*,void*);};
 # 22 "iter.cyc"
 int Cyc_Iter_next(struct Cyc_Iter_Iter iter,void*dest){
-struct Cyc_Iter_Iter _tmp0=iter;void*_tmp2;void*_tmp1;_tmp1=(void*)_tmp0.env;_tmp2=_tmp0.next;{void*env=_tmp1;int(*f)(void*,void*)=_tmp2;
+struct Cyc_Iter_Iter _Tmp0=iter;void*_Tmp1;void*_Tmp2;_Tmp2=(void*)_Tmp0.env;_Tmp1=_Tmp0.next;{void*env=_Tmp2;int(*f)(void*,void*)=_Tmp1;
 return f(env,dest);}}

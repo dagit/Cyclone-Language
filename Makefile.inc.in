@@ -149,6 +149,7 @@ CYCLONE_SRCS:=absyn\
          toseqc\
          tovc\
 	 low_treeshake\
+	 rename_temps\
          interface\
 	 cifc\
 	 tcdecl\
