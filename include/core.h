@@ -308,8 +308,17 @@ extern `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */
 
-extern $(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
-mkthin(`a ?`r dyn, sizeof_t<`a> sz);
+struct ThinRes<`a::A,`r>{
+  <`i::I> 
+  __cyclone_internal_array_t<`a,`i,`r> arr;
+  __cyclone_internal_singleton<`i> nelts;
+};
+  /** [ThinRes<`a,`r>] is used as the return type of mkthin.  It includes an
+      abstract integer [`i],  and a thin pointer [arr] 
+      to a vector of [`i] values of type [`a], living in region [`r],
+      and a [tag_t<`i>] value [nelts] which has the value of [`i]. */
+
+extern struct ThinRes<`a,`r> mkthin(`a ?`r dyn, sizeof_t<`a> sz);
   /** mkthin is a special case of arrcast, which converts a fat
       pointer to a thin pointer and its bound.  It requires that you
       pass in the size of the element type. */

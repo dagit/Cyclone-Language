@@ -546,49 +546,31 @@ static datatype AbsynAnnot.NotZero  mt_notzero_v = NotZero(NULL);
 static datatype AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
 
 static void update_relns(exp_t e, bool possibly_null, relns_t<`H> relns) {
-  switch (e->r) {
-  // if e isn't a subscript, we don't need the relns
-  case &Subscript_e(_,_):
-    switch (e->annot) {
-    case &UnknownZ(relns2):
-      if (possibly_null && same_relns(relns,relns2)) return;
-      break;
-    case &NotZero(relns2):
-      possibly_null = false;
-      if (same_relns(relns,relns2)) return;
-      break;
-    default: break;
-    }
-    if (possibly_null) {
-      e->annot = new UnknownZ(relns);
-    }
-    else {
-      e->annot = new NotZero(relns);
-    }
+  // this is a hack to avoid allocating multiple times.
+  // FIX?  if we already have an annotation should we merge?
+  switch (e->annot) {
+  case &UnknownZ(relns2):
+    if (possibly_null && same_relns(relns,relns2)) return;
     break;
-  default:
-    // if this could be null, we check the current annotation and see.  If
-    // it is an UnknownZ, then it could be null.
-    if (possibly_null) {
-      switch (e->annot) {
-      case &UnknownZ(relns2): 
-	e->annot = &mt_unknownz_v;
-	return;
-      default: break;
-      }
-    }
-    e->annot = &mt_notzero_v;
+  case &NotZero(relns2):
+    if (!possibly_null && same_relns(relns,relns2)) return;
     break;
+  default: break;
   }
+  if (possibly_null)
+    e->annot = new UnknownZ(relns);
+  else
+    e->annot = new NotZero(relns);
 }
 
 // Given [e] is pointer type and maps to rval [r] in [f], return the flow
-// and rval resulting from dereferencing [e].
+// and rval resulting from dereferencing [e] or dereferencing [e+index].
 // Note: correct for e1 an array b/c r won't be AddressOf??
 // FIX: Important place to memoize type_to_absrval calls (b/c StructArrow
 //      calls this.)
 static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
-				       flow_t f, exp_t e, absRval_t r) {
+				       flow_t f, exp_t e, absRval_t r,
+                                       exp_opt_t index) {
 
   switch(Tcutil::compress((type_t)e->topt)) {
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,_,_))):
@@ -596,48 +578,34 @@ static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
     case {.BottomFL = _}:
       return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
     case {.ReachableFL = $(outdict,relns)}:
-      // else cannot be known: FIX: determine notzero as appropriate
-      if(Tcutil::is_bound_one(bd)) {
-	let $(r,names) = unname_rval(r);
-	switch(r) {
-	case &NamedLocation(n,r2): 
-	  Warn::impos("named location in anal_derefR");
-	case &NotZeroAll:
-	  update_relns(e,false,relns);
-	  break;
-	case &AddressOf(p):
-	  update_relns(e,false,relns);
-	  return $(f,lookup_place(outdict,p));
-	case &UniquePtr(r):
-	  update_relns(e,true,relns);
-	  return $(f,r);
-	case &Zero:
-	  e->annot = &IsZero_val;
-	  return $(BottomFL(),typ_to_absrval(env->fenv,elttype,
-					     false,env->fenv->unknown_all));
-	case &UnknownR(il):
-	  f = notzero(env,inflow,f,e,il,names);
-	  fallthru;
-	default:
-          switch (e->r) {
-          case &Subscript_e(_,_):
-            e->annot = new UnknownZ(relns);
-            break;
-          default:
-            e->annot = &mt_unknownz_v;
-            break;
-          }
-          break;
-	}
-      } else {
-        switch (e->annot) {
-        case &UnknownZ(relns2):
-          if (!same_relns(relns,relns2)) fallthru;
-          break;
-        default:
-          e->annot = new UnknownZ(relns); // FIX: too conservative?
-          break;
-        }
+      let $(r,names) = unname_rval(r);
+      switch(r) {
+      case &NamedLocation(n,r2): 
+        Warn::impos("named location in anal_derefR");
+      case &NotZeroAll:
+        update_relns(e,false,relns);
+        break;
+      case &AddressOf(p):
+        update_relns(e,false,relns);
+        if (index == NULL && Tcutil::is_bound_one(bd))
+          return $(f,lookup_place(outdict,p));
+        break;
+      case &UniquePtr(r):
+        // FIX:  -- the unique pointer could be not-null.
+        update_relns(e,true,relns);
+        if (index == NULL && Tcutil::is_bound_one(bd))
+          return $(f,r);
+        break;
+      case &Zero:
+        e->annot = &IsZero_val;
+        return $(BottomFL(),typ_to_absrval(env->fenv,elttype,
+                                           false,env->fenv->unknown_all));
+      case &UnknownR(il):
+        f = notzero(env,inflow,f,e,il,names);
+        fallthru;
+      default:
+        update_relns(e,true,relns);
+        break;
       }
       switch(initlevel(env->fenv,outdict,r)) {
       case NoneIL:
@@ -1041,7 +1009,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     // and afterwards, we know the value is not null.
   case &Cast_e(_,e1,_,Null_to_NonNull):
     let $(f1,r1) = anal_Rexp(env,copy_ctxt,inflow,e1);
-    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
+    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1,NULL);
     return $(f2,r1);
     // C doesn't allow "memory-kind casts", which is good because then
     // we'd have to translate the dictionary domains and that's a pain.
@@ -1119,7 +1087,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       // pretend like this is a dereference so we get null/not-null
       // annotations attached to e1.
       let $(g,r) = anal_Rexp(env,false,inflow,e1);
-      anal_derefR(env,inflow,g,e1,r);
+      anal_derefR(env,inflow,g,e1,r,NULL);
     }
     switch($(lval,f)) {
     case $({.PlaceL = p},{.ReachableFL = $(outdict,relns)}):
@@ -1196,7 +1164,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     let orig_es = es;
     let $(f1,r1) = anal_Rexp(env,false,inflow,e1);
     // DJG: e1 must not be NULL!
-    anal_derefR(env,inflow,f1,e1,r1);
+    anal_derefR(env,inflow,f1,e1,r1,NULL);
 //     // expand out any unique places, as necessary
 //     f1 = expand_unique_places(env,f1,es);
     let $(fst_outflow,rvals) = anal_Rexps(env,f1,copy(es),true,true);
@@ -1437,7 +1405,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 
   case &Deref_e(e1):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    return anal_derefR(env,inflow,f,e1,r);
+    return anal_derefR(env,inflow,f,e1,r,NULL);
 
   case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
@@ -1486,7 +1454,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     let $(f1,r1) = anal_Rexp(env,false,inflow,e1);
     DEBUG_PRINT("f1 flow is ");
     DEBUG_PRINT_F(print_flow,f1);
-    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
+    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1,NULL);
     DEBUG_PRINT("\nf2 flow is ");
     DEBUG_PRINT_F(print_flow,f2);
     switch(Tcutil::compress((type_t)e1->topt)) {
@@ -1558,7 +1526,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       default: Warn::impos("anal_Rexp: Subscript");
       }
     case &PointerType(...):
-      let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
+      let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd,e2);
       switch (f3) {
       case {.BottomFL = _}: return $(f3,r);
       default: return $(f2,r);

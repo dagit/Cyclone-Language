@@ -428,7 +428,7 @@ const char*Cyc_Core_get_exn_name(void*);
 # 281
 const char*Cyc_Core_get_exn_filename();
 # 288
-int Cyc_Core_get_exn_lineno();struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+int Cyc_Core_get_exn_lineno();struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr);
 # 76

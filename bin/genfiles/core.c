@@ -448,7 +448,7 @@ int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17U];str
 # 146
 extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
@@ -507,11 +507,13 @@ if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.
 return 0;
 return dyn.curr;};}
 # 104
-struct _tuple2 Cyc_Core_mkthin(struct _dyneither_ptr dyn,unsigned int sz){
-# 106
+struct Cyc_Core_ThinRes Cyc_Core_mkthin(struct _dyneither_ptr dyn,unsigned int sz){
 unsigned int bd=_get_dyneither_size(dyn,sz);
-return Cyc_Core_mktuple(dyn.curr,bd);}
-# 112
+struct Cyc_Core_ThinRes res;
+res.arr=dyn.curr;
+res.nelts=bd;
+return res;}
+# 114
 unsigned int Cyc_Core_arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
 unsigned char*_get_arr_size_curr=arr.curr;
 unsigned char*_get_arr_size_base=arr.base;

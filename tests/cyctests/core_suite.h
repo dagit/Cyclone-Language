@@ -5,9 +5,9 @@ void begin() { }
 void end() { }
 
 void mkthin_test() {
-  int ?dyn = new { for i < 10 : i };
+  int ?dyn = new { for i < 10 : (int)i };
 
-  let $(buf,x) = Core::mkthin(dyn,sizeof(int));
+  let Core::ThinRes{buf,x} = Core::mkthin(dyn,sizeof(int));
   CT_ASSERT(x==10);
   if (buf != NULL) {
     for (unsigned int i = 0; i<x; i++)
@@ -17,7 +17,7 @@ void mkthin_test() {
     CT_ASSERT(dyn[i] == 1);
 
   int ?dyn2 = NULL;
-  let $(buf2,x2) = Core::mkthin(dyn2,sizeof(int));
+  let Core::ThinRes{buf2,x2} = Core::mkthin(dyn2,sizeof(int));
   CT_ASSERT(x2 == 0);
 }
 CT_SUITE_INIT

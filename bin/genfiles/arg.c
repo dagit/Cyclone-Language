@@ -428,7 +428,7 @@ int Cyc_sscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr
 # 300 "cycboot.h"
 int isspace(int);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
 # 49 "string.h"
@@ -482,14 +482,14 @@ for(i=howmuch - 1;i >= 0  && ! isspace((int)*((const char*)_check_dyneither_subs
 ;}
 # 105
 if(i < 0)
-for(i=howmuch?howmuch - 1: 0;((unsigned long)i < _tmp3  && (int)((const char*)s.curr)[i]) && ! isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));++ i){
+for(i=howmuch?howmuch - 1: 0;((unsigned long)i < _tmp3  && (int)((const char*)s.curr)[i]) && ! isspace((int)((const char*)s.curr)[i]);++ i){
 ;}
 # 111
 Cyc_Buffer_add_substring(b,s,0,i);{
 # 114
 struct _dyneither_ptr whatsleft=_tag_dyneither(0,0,0);
 # 116
-for(0;((unsigned long)i < _tmp3  && (int)((const char*)s.curr)[i]) &&  isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));++ i){
+for(0;((unsigned long)i < _tmp3  && (int)((const char*)s.curr)[i]) &&  isspace((int)((const char*)s.curr)[i]);++ i){
 ;}
 if((unsigned long)i < _tmp3  && (int)((const char*)s.curr)[i])whatsleft=_dyneither_ptr_plus(s,sizeof(char),i);
 return whatsleft;};};};}
@@ -577,7 +577,7 @@ if(({char*_tmp7E=(char*)((struct _dyneither_ptr*)_check_dyneither_subscript(Cyc_
 ++ Cyc_Arg_current;
 while((unsigned int)Cyc_Arg_current < l){
 struct _dyneither_ptr s=*((struct _dyneither_ptr*)_check_dyneither_subscript(Cyc_Arg_args,sizeof(struct _dyneither_ptr),Cyc_Arg_current));
-if((({char*_tmp7F=(char*)s.curr;_tmp7F != (char*)(_tag_dyneither(0,0,0)).curr;}) && _get_dyneither_size(s,sizeof(char))>= (unsigned int)1) && (int)*((const char*)_check_dyneither_subscript(s,sizeof(char),0))== (int)'-'){
+if((({char*_tmp7F=(char*)s.curr;_tmp7F != (char*)(_tag_dyneither(0,0,0)).curr;}) && _get_dyneither_size(s,sizeof(char))>= (unsigned int)1) && (int)((const char*)s.curr)[0]== (int)'-'){
 void*action;
 {struct _handler_cons _tmp34;_push_handler(& _tmp34);{int _tmp36=0;if(setjmp(_tmp34.handler))_tmp36=1;if(!_tmp36){action=Cyc_Arg_lookup(speclist,s);;_pop_handler();}else{void*_tmp35=(void*)Cyc_Core_get_exn_thrown();void*_tmp37=_tmp35;void*_tmp39;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp37)->tag == Cyc_Core_Not_found){_LL1: _LL2:
 # 224

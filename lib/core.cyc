@@ -101,10 +101,12 @@ extern "C include" {
       return 0;
     return dyn.curr;
   } 
-  $(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
-  Cyc_Core_mkthin(`a ?`r dyn, sizeof_t<`a> sz) {
+  struct ThinRes<`a,`r> Cyc_Core_mkthin(`a ?`r dyn, sizeof_t<`a> sz) {
     unsigned bd = _get_dyneither_size(dyn,sz);
-    return Cyc_Core_mktuple(dyn.curr,bd);
+    struct Cyc_Core_ThinRes res;
+    res.arr = dyn.curr;
+    res.nelts = bd;
+    return res;
   } 
   // Returns the size of an array from the current pointer back to
   // its starting point.  If the curr pointer = start pointer, or 
