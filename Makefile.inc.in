@@ -177,7 +177,7 @@ BUILDLIB_SRCS:=buildlib\
 	cf_flowinfo\
 	absyn
 
-NOOPT_SRCS:=parse_tab
+NOOPT_SRCS:=parse_tab parse_tab_a parse_tab_pg
 
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB
