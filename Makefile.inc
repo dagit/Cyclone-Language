@@ -26,41 +26,75 @@ ifndef MS
 endif
 
 CYCLONE_LIBS:=arg\
-         arpa/inet\
-         array\
-         assert\
-         bitvec\
-         buffer\
-         core\
-         dict\
-         errno\
-         filename\
-         fn\
-         getopt\
-         getopt1\
-         hashtable\
-         id\
-         lexing\
-         lineno\
-         list\
-         netdb\
-         netinet/in\
-         position\
-         pp\
-         queue\
-         ref\
-         rope\
-         set\
-         slowdict\
-         splay\
-	 stdio\
-         stdlib\
-         string\
-         sys/socket\
-         time\
-         xarray
+	inet\
+        array\
+        assert\
+        bitvec\
+        buffer\
+        core\
+        dict\
+        errno\
+        filename\
+        fn\
+        getopt\
+        getopt1\
+        hashtable\
+        id\
+        lexing\
+        lineno\
+        list\
+        netdb\
+        in\
+        position\
+        pp\
+        queue\
+        ref\
+        rope\
+        set\
+        slowdict\
+        splay\
+	stdio\
+        stdlib\
+        string\
+        socket\
+        time\
+        xarray
 
-CYCLONE_OTHER_H:=config.h\
+CYCLONE_H:=arg.h\
+	arpa/inet.h\
+        array.h\
+        assert.h\
+        bitvec.h\
+        buffer.h\
+        core.h\
+        dict.h\
+        errno.h\
+        filename.h\
+        fn.h\
+        getopt.h\
+        getopt1.h\
+        hashtable.h\
+        id.h\
+        lexing.h\
+        lineno.h\
+        list.h\
+        netdb.h\
+        netinet/in.h\
+        position.h\
+        pp.h\
+        queue.h\
+        ref.h\
+        rope.h\
+        set.h\
+        slowdict.h\
+        splay.h\
+	stdio.h\
+        stdlib.h\
+        string.h\
+        sys/socket.h\
+        time.h\
+        xarray.h\
+        config.h\
 	ctype.h\
 	machine/types.h\
 	math.h\
@@ -109,7 +143,5 @@ C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
-
-CYCLONE_H:=$(addsuffix .h, $(CYCLONE_LIBS)) $(CYCLONE_OTHER_H)
 
 LDFLAGS:=-lm
