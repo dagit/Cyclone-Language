@@ -70,14 +70,14 @@ nocheck:
 
 # Executables for the bin directory
 $(CYC_BIN_PATH)/cyclone$(EXE): \
-  $(addprefix bin/genfiles/$(ARCH)/src/, $(O_SRCS) install_path.$(O)) \
+  $(addprefix bin/genfiles/, $(O_SRCS) install_path.$(O)) \
   $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(CYC_BIN_PATH)/cycdoc$(EXE): \
-  $(addprefix bin/genfiles/$(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) \
+  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS))) \
   $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
@@ -85,7 +85,7 @@ $(CYC_BIN_PATH)/cycdoc$(EXE): \
 
 
 $(CYC_BIN_PATH)/buildlib$(EXE): \
-  $(addprefix bin/genfiles/$(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
+  $(addprefix bin/genfiles/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O))\
   $(CYC_LIB_PATH)/$(CYCBOOTLIB) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/gc.a
@@ -123,31 +123,31 @@ $(CYC_BIN_PATH)/buildlib$(EXE): \
 
 $(CYC_LIB_PATH)/$(CYCBOOTLIB): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/$(CYCBOOTLIB): \
-  $(addprefix bin/genfiles/$(ARCH)/lib/, $(O_BOOT_LIBS)) \
-  bin/genfiles/$(ARCH)/lib/boot_cstubs.$(O) \
-  bin/genfiles/$(ARCH)/lib/boot_cycstubs.$(O)
+  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
+  bin/genfiles/boot_cstubs.$(O) \
+  bin/genfiles/boot_cycstubs.$(O)
 	-$(RM) $@
 	ar rc $@ \
-	  $(addprefix bin/genfiles/$(ARCH)/lib/, $(O_BOOT_LIBS)) \
-	  bin/genfiles/$(ARCH)/lib/boot_cstubs.$(O) \
-	  bin/genfiles/$(ARCH)/lib/boot_cycstubs.$(O)
+	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
+	  bin/genfiles/boot_cstubs.$(O) \
+	  bin/genfiles/boot_cycstubs.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
 # probably unnecessary
-bin/genfiles/$(ARCH)/lib/%.$(O): bin/genfiles/$(ARCH)/lib/%.c
+bin/genfiles/%.$(O): bin/genfiles/%.c
 	$(CC) -c -o $@ $(CFLAGS) $<
 
-bin/genfiles/$(ARCH)/lib/%_a.$(O): bin/genfiles/$(ARCH)/lib/%.c
+bin/genfiles/%_a.$(O): bin/genfiles/%.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
-bin/genfiles/$(ARCH)/lib/%_g.$(O): bin/genfiles/$(ARCH)/lib/%.c
+bin/genfiles/%_g.$(O): bin/genfiles/%.c
 	$(CC) -c -o $@ -pg $(CFLAGS) $<
 
-bin/genfiles/$(ARCH)/lib/%_nocheck.$(O): bin/genfiles/$(ARCH)/lib/%.c
+bin/genfiles/%_nocheck.$(O): bin/genfiles/%.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
 
-bin/genfiles/$(ARCH)/src/install_path.c: $(CYCDIR)/Makefile.inc
+bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
@@ -158,13 +158,13 @@ $(CYC_LIB_PATH)/$(CYCLIB): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/$(CYCLIB): $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/cyc_setjmp.h
 $(CYC_LIB_PATH)/$(CYCLIB): \
   $(addprefix lib/, $(O_LIBS)) \
-  $(addprefix bin/genfiles/$(ARCH)/lib/, $(O_BOOT_LIBS)) \
+  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O) \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O)
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix lib/, $(O_LIBS)) \
-	  $(addprefix bin/genfiles/$(ARCH)/lib/, $(O_BOOT_LIBS)) \
+	  $(addprefix bin/genfiles/, $(O_BOOT_LIBS)) \
 	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O) \
 	  $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O)
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
@@ -178,20 +178,20 @@ lib/%.$(O): lib/%.cyc bin/cyclone$(EXE)
 
 $(CYC_LIB_PATH)/nocheck_$(CYCBOOTLIB): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/nocheck_$(CYCBOOTLIB): \
-  bin/genfiles/$(ARCH)/lib/nocheck_$(CYCBOOTLIB)
-	$(MAKE) -C bin/genfiles $(ARCH)/lib/nocheck_$(CYCBOOTLIB)
+  bin/genfiles/nocheck_$(CYCBOOTLIB)
+	$(MAKE) -C bin/genfiles nocheck_$(CYCBOOTLIB)
 	cp -p $< $@
 
 $(CYC_LIB_PATH)/nocheck_$(CYCLIB): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/nocheck_$(CYCLIB): \
-  bin/genfiles/$(ARCH)/lib/$(CYCLIB)
-	$(MAKE) -C bin/genfiles $(ARCH)/lib/nocheck_$(CYCLIB)
+  bin/genfiles/$(CYCLIB)
+	$(MAKE) -C bin/genfiles nocheck_$(CYCLIB)
 	cp -p $< $@
 
 # Might as well just make this nogc.o, but requires changes in cyclone.cyc
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: \
-  bin/genfiles/$(ARCH)/lib/nogc.$(O)
+  bin/genfiles/nogc.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
@@ -199,7 +199,7 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/nogc.a: \
 
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): $(CYC_INCLUDE_H)
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/$(RUNTIME).$(O): \
-  bin/genfiles/$(ARCH)/lib/$(RUNTIME).$(O)
+  bin/genfiles/$(RUNTIME).$(O)
 	cp $< $@
 
 # The rule for creating cyc_include.h creates as a side effect
@@ -298,7 +298,7 @@ endif
 
 UPDATEARCH=$(ARCH)
 BUILDDIR=build/boot
-ARCHDIR=bin/genfiles/$(UPDATEARCH)
+GENDIR=bin/genfiles
 
 # These build off the Cyclone source files, but do not replace anything in bin
 # We override BUILDDIR and CYCFLAGS for many nefarious purposes:
@@ -351,151 +351,71 @@ dbg_lib_src:
 XS=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 cmp: 
 	@for i in $(UPDATE_SRCS);\
-	  do (cmp -s $(ARCHDIR)/src/$$i $(BUILDDIR)/$$i\
-	      || echo $(XS) src/$$i CHANGED) done
+	  do (cmp -s $(GENDIR)/$$i $(BUILDDIR)/$$i\
+	      || echo $(XS) $$i CHANGED) done
 	@for i in $(C_BOOT_LIBS);\
-	  do (cmp -s $(ARCHDIR)/lib/$$i $(BUILDDIR)/$$i\
-	      || echo $(XS) lib/$$i CHANGED) done
-	@cmp -s $(ARCHDIR)/lib/precore_c.h $(BUILDDIR)/precore_c.h\
-	      || echo $(XS) lib/precore_c.h CHANGED
+	  do (cmp -s $(GENDIR)/$$i $(BUILDDIR)/$$i\
+	      || echo $(XS) $$i CHANGED) done
+	@cmp -s $(GENDIR)/precore_c.h $(BUILDDIR)/precore_c.h\
+	      || echo $(XS) precore_c.h CHANGED
 	@for i in $(CYCLONE_H);\
 	  do (test ! -e lib/$$i || cmp -s include/$$i lib/$$i\
               || echo $(XS) lib/$$i CHANGED) done
-	@cmp -s $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)\
-              || echo $(XS) lib/$(C_RUNTIME) CHANGED
-	@cmp -s $(ARCHDIR)/lib/boot_cstubs.c lib/boot_cstubs.c\
-              || echo $(XS) lib/boot_cstubs.c CHANGED
-	@cmp -s $(ARCHDIR)/lib/boot_cycstubs.c $(BUILDDIR)/boot_cycstubs.c \
-              || echo $(XS) lib/boot_cycstubs.c CHANGED
-	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
-              || echo $(XS) lib/nogc.c CHANGED
+	@cmp -s $(GENDIR)/$(C_RUNTIME) lib/$(C_RUNTIME)\
+              || echo $(XS) $(C_RUNTIME) CHANGED
+	@cmp -s $(GENDIR)/boot_cstubs.c lib/boot_cstubs.c\
+              || echo $(XS) boot_cstubs.c CHANGED
+	@cmp -s $(GENDIR)/boot_cycstubs.c $(BUILDDIR)/boot_cycstubs.c \
+              || echo $(XS) boot_cycstubs.c CHANGED
+	@cmp -s $(GENDIR)/nogc.c lib/nogc.c\
+              || echo $(XS) nogc.c CHANGED
 	@test ! -e lib/cyc_include.h\
 	      || cmp -s bin/cyc-lib/cyc_include.h lib/cyc_include.h\
-              || echo $(XS) bin/cyc-lib/cyc_include.h CHANGED
+              || echo $(XS) cyc_include.h CHANGED
 	@test ! -e lib/libc.cys\
 	      || cmp -s bin/cyc-lib/libc.cys lib/libc.cys\
-              || echo $(XS) bin/cyc-lib/libc.cys CHANGED
+              || echo $(XS) libc.cys CHANGED
 
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
 # version control.  Only updates changed files (makes cvs faster).
 update: cfiles
-	 @if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
-	   cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
-	   for arch in $(ALL_ARCHS); do\
-	     ./extract_patch $(PATCH_ARCH) $$arch;\
-	   done; cd ../..;\
-	 else\
-	   cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
-	   cd ../..;\
-	 fi
 	@for i in $(UPDATE_SRCS);\
-	   do (cmp -s $(BUILDDIR)/$$i $(ARCHDIR)/src/$$i\
-               || (echo UPDATING $(ARCHDIR)/src/$$i;\
-	           cp $(BUILDDIR)/$$i $(ARCHDIR)/src/$$i)) done
+	   do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
+               || (echo UPDATING $(GENDIR)/$$i;\
+	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
 	@for i in $(C_BOOT_LIBS);\
-           do (cmp -s $(BUILDDIR)/$$i $(ARCHDIR)/lib/$$i\
-               || (echo UPDATING $(ARCHDIR)/lib/$$i;\
-	           cp $(BUILDDIR)/$$i $(ARCHDIR)/lib/$$i)) done
-	@cmp -s $(BUILDDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h\
-	       || (echo UPDATING $(ARCHDIR)/lib/precore_c.h;\
-	            cp $(BUILDDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
-	@cmp -s lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME)\
-               || (echo UPDATING $(ARCHDIR)lib/$(C_RUNTIME);\
-                   cp lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
-	@cmp -s lib/boot_cstubs.c $(ARCHDIR)/lib/boot_cstubs.c\
-               || (echo UPDATING $(ARCHDIR)/lib/boot_cstubs.c;\
-                   cp lib/boot_cstubs.c $(ARCHDIR)/lib/boot_cstubs.c)
-	@cmp -s $(BUILDDIR)/boot_cycstubs.c $(ARCHDIR)/lib/boot_cycstubs.c\
-               || (echo UPDATING $(ARCHDIR)/lib/boot_cycstubs.c;\
-                   cp $(BUILDDIR)/boot_cycstubs.c $(ARCHDIR)/lib/boot_cycstubs.c)
-	@cmp -s lib/nogc.c $(ARCHDIR)/lib/nogc.c\
-               || (echo UPDATING $(ARCHDIR)/lib/nogc.c;\
-                   cp lib/nogc.c $(ARCHDIR)/lib/nogc.c)
-ifeq ($(UPDATEARCH),$(ARCH))
+           do (cmp -s $(BUILDDIR)/$$i $(GENDIR)/$$i\
+               || (echo UPDATING $(GENDIR)/$$i;\
+	           cp $(BUILDDIR)/$$i $(GENDIR)/$$i)) done
+	@cmp -s $(BUILDDIR)/precore_c.h $(GENDIR)/precore_c.h\
+	       || (echo UPDATING $(GENDIR)/precore_c.h;\
+	            cp $(BUILDDIR)/precore_c.h $(GENDIR)/precore_c.h)
+	@cmp -s lib/$(C_RUNTIME) $(GENDIR)/$(C_RUNTIME)\
+               || (echo UPDATING $(GENDIR)/$(C_RUNTIME);\
+                   cp lib/$(C_RUNTIME) $(GENDIR)/$(C_RUNTIME))
+	@cmp -s lib/boot_cstubs.c $(GENDIR)/boot_cstubs.c\
+               || (echo UPDATING $(GENDIR)/boot_cstubs.c;\
+                   cp lib/boot_cstubs.c $(GENDIR)/boot_cstubs.c)
+	@cmp -s $(BUILDDIR)/boot_cycstubs.c $(GENDIR)/boot_cycstubs.c\
+               || (echo UPDATING $(GENDIR)/boot_cycstubs.c;\
+                   cp $(BUILDDIR)/boot_cycstubs.c $(GENDIR)/boot_cycstubs.c)
+	@cmp -s lib/nogc.c $(GENDIR)/nogc.c\
+               || (echo UPDATING $(GENDIR)/nogc.c;\
+                   cp lib/nogc.c $(GENDIR)/nogc.c)
 	@for i in $(CYCLONE_H);\
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
-               || (echo UPDATING lib/$$i;\
+               || (echo UPDATING include/$$i;\
                    mv lib/$$i include/$$i)) done
 	@test ! -e lib/cyc_include.h\
                || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
-               || (echo UPDATING cyc-lib/cyc_include.h;\
+               || (echo UPDATING bin/cyc-lib/cyc_include.h;\
                  mv lib/cyc_include.h bin/cyc-lib/cyc_include.h)
 	@test ! -e lib/libc.cys\
                || cmp -s lib/libc.cys bin/cyc-lib/libc.cys\
-               || (echo UPDATING cyc-lib/libc.cys;\
+               || (echo UPDATING bin/cyc-lib/libc.cys;\
                  mv lib/libc.cys bin/cyc-lib/libc.cys)
-endif
-	 @if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
-	   for arch in $(ALL_ARCHS); do\
-	     if [ -f "bin/genfiles/$$arch.patch" ]; then\
-	       echo "PATCHIFYING $$arch";\
-	       $(MAKE) -s -C bin/genfiles $$arch.patch && \
-	       if [ "$(ARCH)" != "$$arch" ]; then\
-	         $(RM) -rf bin/genfiles/$$arch;\
-	       fi;\
-	     fi;\
-	   done;\
-	 elif [ -f "$(ARCHDIR).patch" ]; then\
-	   echo "PATCHIFYING $(UPDATEARCH)";\
-	   $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
-	   if [ "$(UPDATEARCH)" != "$(ARCH)" ]; then\
-	     $(RM) -rf $(ARCHDIR);\
-	   fi;\
-	 fi
-
-# This will compile (C files) and update for all supported architectures
-#   and then compile and install for all supported architectures
-#   We update the PATCH_ARCH first, so that the other updates
-#   will create patches relative to the updated reference architecture.
-# FIX: this will cause patched directories to be extracted twice; that
-#   is, they will be extracted (and re-patchified) when we update the
-#   reference architecture and then extracted and patchified again
-#   when we update the patched directory itself.  Need to properly
-#   communicate between update_all_archs and update for this to
-#   work properly.
-update_all_archs: clean_genfiles
-	@if [ "$(PATCH_ARCH)" != "$(ARCH)" ]; then\
-	  $(MAKE) update\
-	 NODEPS=X\
-	 BUILDDIR=build/$(PATCH_ARCH)\
-	 UPDATEARCH=$(PATCH_ARCH);\
-	else\
-	  $(MAKE) update;\
-	fi;
-	@for arch in $(ALL_ARCHS); do\
-	  if [ "$$arch" != "$(PATCH_ARCH)" ]; then\
-	    if [ "$$arch" != "$(ARCH)" ]; then\
-	      $(MAKE) update\
-	 NODEPS=X\
-	 BUILDDIR=build/$$arch\
-	 UPDATEARCH=$$arch;\
-	    else\
-	      $(MAKE) update;\
-	    fi;\
-	  fi;\
-	done
-
-# only update development architectures
-update_devel_archs:
-	$(MAKE) update_all_archs ALL_ARCHS="$(DEVEL_ARCHS)"
-
-# to add a new architecture
-new_arch:
-	cd bin/genfiles; echo "ADDING ARCH $(UPDATEARCH)";\
-	./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
-	if [ $$? = 1 ]; then \
-	  mkdir $(UPDATEARCH); \
-	  mkdir $(UPDATEARCH)/src; \
-	  mkdir $(UPDATEARCH)/lib; \
-	else \
-	  echo "Error: architecture directory exists!"; \
-	  exit 1;\
-	fi;\
-	touch $(UPDATEARCH).patch;\
-	cd ../..; \
-	$(MAKE) UPDATEARCH=$(UPDATEARCH) update;
 
 # a little testing (much more is in the tests directory)
 test:
@@ -528,9 +448,8 @@ clean_build:
 	fi
 
 clean_genfiles:
-	$(RM) bin/genfiles/*/lib/*.$(O)
-	$(RM) bin/genfiles/*/src/*.$(O)
-	$(RM) bin/genfiles/*/src/install_path.c
+	$(RM) bin/genfiles/*.$(O)
+	$(RM) bin/genfiles/install_path.c
 
 clean_nogc: clean_test clean_build clean_genfiles
 	$(MAKE) -C tools/bison  clean

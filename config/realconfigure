@@ -106,29 +106,6 @@ if [ "$TYPE" = "sun" ]; then
   LDFLAGS="-lnsl -lsocket -lresolv"
 fi
 
-# when setting up a new architecture, figures out the default
-#   set up genfiles to use
-#
-get_def_genfiles () {
-  mkdir ${CYCDIR}/bin/genfiles/${ARCH}
-  case "${OS}" in
-    cygwin*)
-      DEF_ARCH=i686-unknown-cygwin1.3.10;;
-    *)
-      DEF_ARCH=i686-unknown-linux;;
-  esac
-  echo "Using the genfiles from ${DEF_ARCH}" 
-  ${CYCDIR}/bin/genfiles/extract_patch ${PATCH_ARCH} ${DEF_ARCH}
-  cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
-  CVS_files=`find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS`
-  if [ -n "$CVS_files" ]; then
-    \rm -rf $CVS_files
-  fi
-  if [ -f "${CYCDIR}/bin/genfiles/${PATCH_ARCH}.patch" ]; then
-    \rm -rf ${CYCDIR}/bin/genfiles/${PATCH_ARCH}
-  fi
-}
-
 ###########################################################################
 #  incdir="$CYCDIR/include"
 #  libdir="$CYCDIR/bin/cyc-lib"
@@ -192,35 +169,16 @@ cd config
 
 # see if we have #defines for this architecture
 if [ ! -f "${CYCDIR}/bin/genfiles/${ARCH}.cycspecs" ]; then
-  echo "This architecture ($ARCH) is currently unsupported."
-  echo "Set it up (y/n)?"
-  read resp
-  if [ "$resp" = "y" ]; then
-    ${CYCDIR}/config/buildspecs > ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs
-    if [ $? != 0 ]; then
-      echo "error creating ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs"
-      cleanup
-    fi
-    export EGREP
-    export CC
-    if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
-      echo "Warning: genfiles directory for ${ARCH} exists"
-    else
-      get_def_genfiles;
-    fi
-  else
-    echo "aborting."
-    exit 1
+  echo "Setting up architecture ${ARCH}"
+  ${CYCDIR}/config/buildspecs > ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs
+  if [ $? != 0 ]; then
+    echo "error creating ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs"
+    cleanup
   fi
+  export EGREP
+  export CC
 else
   echo "Supported architecture ${ARCH}"
-  cd ../bin/genfiles; 
-  ./extract_patch ${PATCH_ARCH} ${ARCH}
-  cd ../../config
-  if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
-    echo "Warning: genfiles directory for ${ARCH} not present"
-    get_def_genfiles;
-  fi
 fi
 
 # set up the installation paths
