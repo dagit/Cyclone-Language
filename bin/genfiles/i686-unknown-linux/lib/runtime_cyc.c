@@ -352,6 +352,17 @@ int fcntl_with_lock(int fd, int cmd, void *lock) {
   return fcntl(fd, cmd, lock);
 }
 
+int open_with_mode(const Cstring s, int flags, mode_t m) {
+  return open(s,flags,m);
+}
+
+int open_without_mode(const Cstring s, int flags) {
+  /* Use 0 as the mode argument, in case flags contains O_CREAT.  In
+     that case the file will be created with 0 permissions; if we
+     omitted the 0 it would be created with random permissions. */
+  return open(s,flags,0);
+}
+
 ///////////////////////////////////////////////
 // Signals (goes with signal.cyc)
 

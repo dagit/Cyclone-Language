@@ -25,6 +25,9 @@ namespace Cfcntl {
   extern "C" int fcntl(int fd, int cmd);
   extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
   extern "C" int fcntl_with_lock(int fd, int cmd, struct Std::flock *lock);
+  extern "C" int creat(const Cstring,mode_t);
+  extern "C" int open_without_mode(const Cstring,int);
+  extern "C" int open_with_mode(const Cstring,int,mode_t);
 }
 
 namespace Std;
@@ -37,3 +40,17 @@ int fcntl(int fd, int cmd, ... tunion FcntlArg argv) {
   case &Flock(lock): return Cfcntl::fcntl_with_lock(fd, cmd, lock);
   }
 }
+
+int creat(string_t s, mode_t m) {
+  return Cfcntl::creat(string_to_Cstring(s),m);
+}
+
+int open(string_t s, int i, ... mode_t ms) {
+  /* Note: if open is called with more than 3 arguments, the
+     additional args are simply ignored. */
+  if (ms.size >= 1)
+    return Cfcntl::open_with_mode(string_to_Cstring(s),i,ms[0]);
+  else
+    return Cfcntl::open_without_mode(string_to_Cstring(s),i);
+}
+

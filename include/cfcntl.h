@@ -24,6 +24,7 @@
 #define _FCNTL_H
 
 #include <sys/ctypes.h>
+#include <core.h> // for string_t
 
 #define O_RDONLY       00
 #define O_WRONLY       01
@@ -58,6 +59,8 @@ namespace Std {
   };
 
   extern int fcntl(int fd, int cmd, ... tunion FcntlArg argv);
+  extern int open(string_t,int,... mode_t);
+  extern int creat(string_t,mode_t);
 }
 
 #endif
