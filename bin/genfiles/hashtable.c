@@ -506,7 +506,7 @@ _check_dyneither_subscript_fn(struct _dyneither_ptr arr,unsigned elt_sz,unsigned
   return _cus_ans;
 }
 #define _check_dyneither_subscript(a,s,i) \
-  _check_dyneither_subscript(a,s,i,__FILE__,__LINE__)
+  _check_dyneither_subscript_fn(a,s,i,__FILE__,__LINE__)
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \

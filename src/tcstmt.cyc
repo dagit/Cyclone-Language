@@ -392,7 +392,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         switch (sc) {
         case Static: 
         case Extern: 
-        case ExternC: is_local = false; break;
+        case ExternC: 
+          vd->escapes = true;
+          is_local = false; break;
         case Abstract: 
           terr(d->loc,"bad abstract scope for local variable"); 
           fallthru;
@@ -414,6 +416,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         // if it's an array or string, fill in the size on the type
         switch (compress(t)) {
+        case &FnType(_) && is_local: 
+          // this is really an "extern" function declaration
+          vd->escapes = true;
+          sc = Extern; 
+          is_local = false;
+          break;
         case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
           switch (vd->initializer->r) {
             case &Const_e({.String_c = s}):
@@ -447,9 +455,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
                                                        vd->tq.print_const,t);
         let te2 = add_local_var(decl_rgn,s->loc,te,vd);
         if (sc == Extern || sc == ExternC)
-          terr(d->loc,"local extern declarations not yet supported");
-        //     if (sc == Static && !supports_default(t) && initializer == NULL)
-        //     terr(d->loc,"static local declaration requires an initializer");
+          terr(d->loc,"extern declarations not yet supported within functions");
         if (initializer != NULL) {
           tcExpInitializer(te2,&t,(exp_t)initializer);
           // te is only used by is_const_exp for globals and function names

@@ -506,7 +506,7 @@ _check_dyneither_subscript_fn(struct _dyneither_ptr arr,unsigned elt_sz,unsigned
   return _cus_ans;
 }
 #define _check_dyneither_subscript(a,s,i) \
-  _check_dyneither_subscript(a,s,i,__FILE__,__LINE__)
+  _check_dyneither_subscript_fn(a,s,i,__FILE__,__LINE__)
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -6991,10 +6991,10 @@ int i=0;
 # 1500
 for(0;i < 17;++ i){
 # 1501
-if(Cyc_strcmp((struct _dyneither_ptr)_tmp500,(struct _dyneither_ptr)(att_map[i]).f1)
-== 0){
+if(Cyc_strcmp((struct _dyneither_ptr)_tmp500,(struct _dyneither_ptr)(att_map[
+_check_known_subscript_notnull(17,i)]).f1)== 0){
 # 1502
-yyval=Cyc_YY46((att_map[i]).f2);
+yyval=Cyc_YY46((att_map[_check_known_subscript_notnull(17,i)]).f2);
 # 1503
 break;}}
 # 1505

@@ -506,7 +506,7 @@ _check_dyneither_subscript_fn(struct _dyneither_ptr arr,unsigned elt_sz,unsigned
   return _cus_ans;
 }
 #define _check_dyneither_subscript(a,s,i) \
-  _check_dyneither_subscript(a,s,i,__FILE__,__LINE__)
+  _check_dyneither_subscript_fn(a,s,i,__FILE__,__LINE__)
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -771,7 +771,7 @@ extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;
 struct _dyneither_ptr f1;};
 # 300 "/home/jgm/cyclone/include/cycboot.h"
 int isspace(int);
-# 35 "/home/jgm/cyclone/include/core.h"
+# 35 "core.h"
 typedef char*Cyc_Cstring;
 # 36
 typedef char*Cyc_CstringNN;
@@ -793,7 +793,7 @@ typedef struct _dyneither_ptr Cyc_buffer_t;
 typedef struct _dyneither_ptr Cyc_mbuffer_t;
 # 59
 typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-# 89 "/home/jgm/cyclone/include/core.h"
+# 89 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];
@@ -803,11 +803,11 @@ _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossib
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{
 char*tag;struct _dyneither_ptr f1;};
-# 162 "/home/jgm/cyclone/include/core.h"
+# 162 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[
 12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[
 12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 244 "/home/jgm/cyclone/include/core.h"
+# 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)

@@ -48,9 +48,6 @@ BUG FIXES and UNSOUNDNESSES:
 * There are too many conflicts in the parser (18 shift-reduce, 4 reduce-
   reduce.)  Someone should really clean this up.
 
-* C code from void f() { let x = NULL; } doesn't compile b/c we
-  underconstrain the constant NULL and the unused type of x differently.
-
 * There are at least two problems with the new treatment of [r]malloc and
   [r]calloc.  First, we need to check that the things we are allocating
   aren't too large (just as we do with array comprehensions.)  This avoids
@@ -62,8 +59,6 @@ BUG FIXES and UNSOUNDNESSES:
 * not inserting defaults for types in xdatatype variant types?
 
 * long long and short constants (12s, 3l, etc.)
-
-* wide characters and strings
 
 * attributes on enums? (e.g., packed)
 
@@ -98,13 +93,13 @@ BUG FIXES and UNSOUNDNESSES:
     struct X x;
   };
 
-* void f() {
-   void g();
+* We should properly support nested extern declarations within functions.
+  For instance:
+
+  void f() {
+   extern void g();
    g();
   }
-
-  We complain that g isn't initialized.  We should complain that
-  function declarations are only allowed at top-level.
 
 * Should break out initializers and lvalues so that the syntax is
   respected properly (e.g., shouldn't be casting lvalues).  

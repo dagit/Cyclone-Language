@@ -630,7 +630,7 @@ static pinfo_t<`r> rnew_filepos(region_t<`r> r,
                                 const char ?`H filename, 
                                 unsigned int starting_line, 
                                 pinfo_opt_t<`r> next) {
-  seg_t ?`U linenumpos = rcalloc(Core::unique_region, 20, sizeof(seg_t));
+  seg_t ?`U linenumpos = rcalloc(Core::unique_region, 10, sizeof(seg_t));
   linenumpos[0] = yylloc.first_line;
   return rnew(r) PosInfo{.next = next, .starting_line = starting_line,
                          .filename = filename,

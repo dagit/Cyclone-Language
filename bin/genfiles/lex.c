@@ -506,7 +506,7 @@ _check_dyneither_subscript_fn(struct _dyneither_ptr arr,unsigned elt_sz,unsigned
   return _cus_ans;
 }
 #define _check_dyneither_subscript(a,s,i) \
-  _check_dyneither_subscript(a,s,i,__FILE__,__LINE__)
+  _check_dyneither_subscript_fn(a,s,i,__FILE__,__LINE__)
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -2365,7 +2365,7 @@ static struct Cyc_Lex_PosInfo*Cyc_Lex_rnew_filepos(struct _RegionHandle*r,struct
 _dyneither_ptr filename,unsigned int starting_line,struct Cyc_Lex_PosInfo*next){
 # 633
 unsigned int*_tmp1A7;unsigned int _tmp1A6;struct _dyneither_ptr linenumpos=(
-_tmp1A6=20,((_tmp1A7=_region_calloc(Cyc_Core_unique_region,sizeof(unsigned int),
+_tmp1A6=10,((_tmp1A7=_region_calloc(Cyc_Core_unique_region,sizeof(unsigned int),
 _tmp1A6),_tag_dyneither(_tmp1A7,sizeof(unsigned int),_tmp1A6))));
 # 634
 *((unsigned int*)_check_dyneither_subscript(linenumpos,sizeof(unsigned int),0))=(

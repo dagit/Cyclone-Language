@@ -640,8 +640,8 @@ static $(flow_t<`r>,absRval_t<`r>)
 
 static bool is_local_var_rooted_path(Absyn::exp_t e) {
   switch (e->r) {
-  case &Var_e(_,&Param_b(_)):
   case &Var_e(_,&Local_b(_)):
+  case &Var_e(_,&Param_b(_)): 
   case &Var_e(_,&Pat_b(_)): return true;
   case &Deref_e(e): fallthru(e);
   case &AggrMember_e(e,...): fallthru(e);
@@ -821,7 +821,6 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
     return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, false,fenv->unknown_all));
-
     // Note: if Esc we return that even though it isn't an absRval.  That's
     //       okay b/c assign_place_inner does the right thing
   case &Var_e(_,&Param_b(vd)): fallthru(vd);

@@ -80,7 +80,7 @@ void tabinit(void)
 bucket * getsym(const char? key)
 {
   register int hashval;
-  register bucket *bp;
+  bucket *bp;
   register int found;
 
   hashval = hash(key);
