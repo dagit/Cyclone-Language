@@ -24,7 +24,7 @@
 include Makefile.inc
 
 ifndef ARCH
-$(error "Must have ARCH variable defined to properly compile; run configure")
+$(error "Must have ARCH variable defined to properly compile -- perhaps forgot to run ./configure")
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
