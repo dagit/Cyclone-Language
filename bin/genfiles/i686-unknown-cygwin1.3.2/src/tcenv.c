@@ -1203,13 +1203,14 @@ _temp518 !=  0; _temp518=(( struct Cyc_List_List*) _check_null( _temp518))->tl){
 void* _temp519=( void*)(( struct Cyc_Absyn_Stmt*)(( struct Cyc_List_List*)
 _check_null( _temp518))->hd)->r; struct Cyc_Absyn_Stmt* _temp525; struct Cyc_Absyn_Stmt**
 _temp527; _LL521: if(( unsigned int) _temp519 >  1u?*(( int*) _temp519) ==  Cyc_Absyn_Goto_s:
-0){ _LL526: _temp525=(( struct Cyc_Absyn_Goto_s_struct*) _temp519)->f2; _temp527=&((
-struct Cyc_Absyn_Goto_s_struct*) _temp519)->f2; goto _LL522;} else{ goto _LL523;}
-_LL523: goto _LL524; _LL522:* _temp527=( struct Cyc_Absyn_Stmt*) s; goto _LL520;
-_LL524:(( int(*)( struct _tagged_arr msg)) Cyc_Tcenv_env_err)( _tag_arr("Tcenv: add_label backpatching of non-goto",
-sizeof( unsigned char), 42u)); goto _LL520; _LL520:;}}} if((( int(*)( struct Cyc_Dict_Dict*
-d, struct _tagged_arr* key)) Cyc_Dict_member)(( _temp515->shared)->seen_labels,
-v)){({ struct Cyc_std_String_pa_struct _temp529; _temp529.tag= Cyc_std_String_pa;
+0){ _LL526: _temp525=(( struct Cyc_Absyn_Goto_s_struct*) _temp519)->f2; _temp527=(
+struct Cyc_Absyn_Stmt**)&(( struct Cyc_Absyn_Goto_s_struct*) _temp519)->f2; goto
+_LL522;} else{ goto _LL523;} _LL523: goto _LL524; _LL522:* _temp527=( struct Cyc_Absyn_Stmt*)
+s; goto _LL520; _LL524:(( int(*)( struct _tagged_arr msg)) Cyc_Tcenv_env_err)(
+_tag_arr("Tcenv: add_label backpatching of non-goto", sizeof( unsigned char), 42u));
+goto _LL520; _LL520:;}}} if((( int(*)( struct Cyc_Dict_Dict* d, struct
+_tagged_arr* key)) Cyc_Dict_member)(( _temp515->shared)->seen_labels, v)){({
+struct Cyc_std_String_pa_struct _temp529; _temp529.tag= Cyc_std_String_pa;
 _temp529.f1=( struct _tagged_arr)* v;{ void* _temp528[ 1u]={& _temp529}; Cyc_Tcutil_terr(
 s->loc, _tag_arr("Repeated label: %s", sizeof( unsigned char), 19u), _tag_arr(
 _temp528, sizeof( void*), 1u));}});}( _temp515->shared)->seen_labels=(( struct

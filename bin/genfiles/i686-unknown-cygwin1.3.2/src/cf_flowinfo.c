@@ -636,13 +636,14 @@ goto _LL260;} else{ goto _LL254;} _LL256: return 1; _LL258: return 0; _LL260: {
 struct _tuple6 _temp267; struct Cyc_List_List* _temp268; struct Cyc_List_List**
 _temp270; struct Cyc_Dict_Dict* _temp271; struct _tuple6* _temp265= env;
 _temp267=* _temp265; _LL272: _temp271= _temp267.f1; goto _LL269; _LL269:
-_temp268= _temp267.f2; _temp270=&(* _temp265).f2; goto _LL266; _LL266: if((( int(*)(
-int(* compare)( struct Cyc_CfFlowInfo_Place*, struct Cyc_CfFlowInfo_Place*),
-struct Cyc_List_List* l, struct Cyc_CfFlowInfo_Place* x)) Cyc_List_mem)( Cyc_CfFlowInfo_place_cmp,*
-_temp270, _temp263)){ return 1;}* _temp270=( struct Cyc_List_List*)({ struct Cyc_List_List*
-_temp273=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp273->hd=( void*) _temp263; _temp273->tl=* _temp270; _temp273;}); return Cyc_CfFlowInfo_isAllInit_pinfo(
-env, Cyc_CfFlowInfo_lookup_place( _temp271, _temp263));} _LL254:;} int Cyc_CfFlowInfo_isAllInit_f(
+_temp268= _temp267.f2; _temp270=( struct Cyc_List_List**)&(* _temp265).f2; goto
+_LL266; _LL266: if((( int(*)( int(* compare)( struct Cyc_CfFlowInfo_Place*,
+struct Cyc_CfFlowInfo_Place*), struct Cyc_List_List* l, struct Cyc_CfFlowInfo_Place*
+x)) Cyc_List_mem)( Cyc_CfFlowInfo_place_cmp,* _temp270, _temp263)){ return 1;}*
+_temp270=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp273=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp273->hd=( void*) _temp263;
+_temp273->tl=* _temp270; _temp273;}); return Cyc_CfFlowInfo_isAllInit_pinfo( env,
+Cyc_CfFlowInfo_lookup_place( _temp271, _temp263));} _LL254:;} int Cyc_CfFlowInfo_isAllInit_f(
 struct _tuple6* env, void* a, void* path){ return Cyc_CfFlowInfo_isAllInit_pinfo(
 env, path);} int Cyc_CfFlowInfo_isAllInit_pinfo( struct _tuple6* env, void* path){
 void* _temp274= path; void* _temp282; struct Cyc_Dict_Dict* _temp284; struct Cyc_Dict_Dict*

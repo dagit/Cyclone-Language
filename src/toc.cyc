@@ -1918,7 +1918,11 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     let v = temp_var();
     decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
     nv    = add_varmap(nv,vd->name,var_exp(v,DL));
-    s     = seq_stmt(assign_stmt(var_exp(v,DL),address_exp(path,DL),DL),
+    // cast is necessary to avoid a C warning when pointing to a polymorphic
+    // field
+    s     = seq_stmt(assign_stmt(var_exp(v,DL),
+				 cast_exp(cstar_typ(typ_to_c(t),mt_tq),
+					  address_exp(path,DL),DL),DL),
 		     goto_stmt(succ_lab,DL),DL);
     break;
 

@@ -584,19 +584,19 @@ _LL159;} _LL159: if(( unsigned int) _temp137 >  2u?*(( int*) _temp137) ==  Cyc_A
 _LL160;} else{ goto _LL161;} _LL161: if(( unsigned int) _temp137 >  2u?*(( int*)
 _temp137) ==  Cyc_Absyn_Struct_p: 0){ _LL195: _temp194=(( struct Cyc_Absyn_Struct_p_struct*)
 _temp137)->f1; goto _LL192; _LL192: _temp191=(( struct Cyc_Absyn_Struct_p_struct*)
-_temp137)->f2; _temp193=&(( struct Cyc_Absyn_Struct_p_struct*) _temp137)->f2;
-goto _LL190; _LL190: _temp189=(( struct Cyc_Absyn_Struct_p_struct*) _temp137)->f3;
-goto _LL188; _LL188: _temp187=(( struct Cyc_Absyn_Struct_p_struct*) _temp137)->f4;
-goto _LL162;} else{ goto _LL163;} _LL163: if(( unsigned int) _temp137 >  2u?*((
-int*) _temp137) ==  Cyc_Absyn_Tunion_p: 0){ _LL203: _temp202=(( struct Cyc_Absyn_Tunion_p_struct*)
-_temp137)->f1; goto _LL201; _LL201: _temp200=(( struct Cyc_Absyn_Tunion_p_struct*)
-_temp137)->f2; goto _LL199; _LL199: _temp198=(( struct Cyc_Absyn_Tunion_p_struct*)
-_temp137)->f3; goto _LL197; _LL197: _temp196=(( struct Cyc_Absyn_Tunion_p_struct*)
-_temp137)->f4; goto _LL164;} else{ goto _LL165;} _LL165: if(( unsigned int)
-_temp137 >  2u?*(( int*) _temp137) ==  Cyc_Absyn_UnknownId_p: 0){ goto _LL166;}
-else{ goto _LL167;} _LL167: if(( unsigned int) _temp137 >  2u?*(( int*) _temp137)
-==  Cyc_Absyn_UnknownCall_p: 0){ goto _LL168;} else{ goto _LL169;} _LL169: if((
-unsigned int) _temp137 >  2u?*(( int*) _temp137) ==  Cyc_Absyn_UnknownFields_p:
+_temp137)->f2; _temp193=( struct Cyc_Core_Opt**)&(( struct Cyc_Absyn_Struct_p_struct*)
+_temp137)->f2; goto _LL190; _LL190: _temp189=(( struct Cyc_Absyn_Struct_p_struct*)
+_temp137)->f3; goto _LL188; _LL188: _temp187=(( struct Cyc_Absyn_Struct_p_struct*)
+_temp137)->f4; goto _LL162;} else{ goto _LL163;} _LL163: if(( unsigned int)
+_temp137 >  2u?*(( int*) _temp137) ==  Cyc_Absyn_Tunion_p: 0){ _LL203: _temp202=((
+struct Cyc_Absyn_Tunion_p_struct*) _temp137)->f1; goto _LL201; _LL201: _temp200=((
+struct Cyc_Absyn_Tunion_p_struct*) _temp137)->f2; goto _LL199; _LL199: _temp198=((
+struct Cyc_Absyn_Tunion_p_struct*) _temp137)->f3; goto _LL197; _LL197: _temp196=((
+struct Cyc_Absyn_Tunion_p_struct*) _temp137)->f4; goto _LL164;} else{ goto
+_LL165;} _LL165: if(( unsigned int) _temp137 >  2u?*(( int*) _temp137) ==  Cyc_Absyn_UnknownId_p:
+0){ goto _LL166;} else{ goto _LL167;} _LL167: if(( unsigned int) _temp137 >  2u?*((
+int*) _temp137) ==  Cyc_Absyn_UnknownCall_p: 0){ goto _LL168;} else{ goto _LL169;}
+_LL169: if(( unsigned int) _temp137 >  2u?*(( int*) _temp137) ==  Cyc_Absyn_UnknownFields_p:
 0){ goto _LL170;} else{ goto _LL138;} _LL140: t= Cyc_Tcpat_any_type( Cyc_Tcenv_lookup_type_vars(
 te), topt); goto _LL138; _LL142: t= Cyc_Tcpat_any_type( Cyc_Tcenv_lookup_type_vars(
 te), topt); Cyc_Tcpat_set_vd( _temp171,& v_result, t); goto _LL138; _LL144: t=
