@@ -393,7 +393,7 @@ static datatype Type.RgnHandleType uniquergn_typ =
   RgnHandleType(&UniqueRgn_val);
 
 static struct Vardecl uniquergn_var_d =
-  Vardecl(Extern,&uniquergn_qvar_p,Tqual(false,false,false,false,0),
+  Vardecl(Extern,&uniquergn_qvar_p, 0,Tqual(false,false,false,false,0),
 	  &uniquergn_typ, NULL, NULL, NULL, false);
 static datatype Binding.Global_b uniquergn_bind_p = Global_b(&uniquergn_var_d);
 
@@ -765,7 +765,7 @@ stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc) {
   return new_stmt(new Decl_s(d,s), loc);
 }
 stmt_t declare_stmt(qvar_t x, type_t t, exp_opt_t init, stmt_t s, seg_t loc) {
-  decl_t d = new_decl(new Var_d(new_vardecl(x,t,init)),loc);
+  decl_t d = new_decl(new Var_d(new_vardecl(0,x,t,init)),loc);
   return new_stmt(new Decl_s(d,s),loc);
 }
 stmt_t label_stmt(var_t v, stmt_t s, seg_t loc) {
@@ -806,13 +806,14 @@ decl_t alias_decl(tvar_t tv,vardecl_t vd,exp_t e,seg_t loc) {
   return new_decl(new Let_d(new_pat(new AliasVar_p(tv,vd),loc),NULL,e,NULL),loc);
 }
 
-vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(0),
+vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init) {
+  return new Vardecl{.sc=Public, .name=x, .varloc = varloc,
+			.tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL, 
                         .attributes=NULL, .escapes=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(0),
+  return new Vardecl{.sc=Static, .name=x, .varloc = 0,.tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL,
                         .attributes=NULL, .escapes=false};
 }

@@ -1336,7 +1336,7 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
     static $(nmspace_t,var_t) bogus_qvar =
       $(Nmspace{.Loc_n = 0},&bogus_string);
     static struct Vardecl bogus_vardecl =
-    {.sc = Public, .name = &bogus_qvar,
+      {.sc = Public, .name = &bogus_qvar,.varloc =0,
      .tq = Tqual{false,false,false,false,0},
      .type = &VoidType_val, .initializer = NULL, .rgn = NULL,
      .attributes = NULL, .escapes = false};
@@ -2157,7 +2157,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
   TOC_RGN(nv, rgn2) {
-    let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
+    let x_vd = new Vardecl {Public,x,0,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
     let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
     let x_exp = varb_exp(x_bnd,DL);  // to check the bound and for NULL
     x_exp->topt = fat_ptr_type;
@@ -2165,7 +2165,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     deref_x->topt = elt_type;
     exp_to_c(nv,deref_x);
     let y = temp_var();                // build elt_type y = *x;
-    let y_vd = new Vardecl {Public,y,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
+    let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
     let y_bnd = new Local_b(y_vd);
     exp_t z_init = e2;                 // build y op e2 and translate
     if (popt != NULL) {
@@ -2176,7 +2176,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     }
     exp_to_c(nv,z_init);
     let z = temp_var();                // build z = y op e2;
-    let z_vd = new Vardecl {Public,z,mt_tq,c_elt_type,z_init,NULL,NULL,false};
+    let z_vd = new Vardecl {Public,z,0,mt_tq,c_elt_type,z_init,NULL,NULL,false};
     let z_bnd = new Local_b(z_vd);
     // build y == zero and translate -- here, we need to know what
     // the element type is to generate the right zero.
@@ -4839,7 +4839,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
       if (f->sc != Extern) {
         initopt = string_exp(*fn,DL);
       }
-      let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+      let tag_decl = new_vardecl(0,f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
       result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
       *xdatatypes_so_far =
@@ -4867,7 +4867,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
     case &false:
       if (f->sc != Extern) {
         let initopt = string_exp(*fn,DL);
-        let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+        let tag_decl = new_vardecl(0,f->name, tag_typ, initopt);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
         *xdatatypes_so_far = Dict::insert(*xdatatypes_so_far, f->name, true);

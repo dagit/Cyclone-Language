@@ -2434,7 +2434,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
   qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
-  vardecl_t vd = new_vardecl(v,e_typ,e);
+  vardecl_t vd = new_vardecl(0,v,e_typ,e);
   exp_t ve = varb_exp(new Local_b(vd),e->loc);
   // generate a fresh region variable for it and make the type
   // of the variable be as close to the instantiated type as we
@@ -4359,7 +4359,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // add a bogus "return_value" variable for the @ensures clause
       // DJG: this is done in the binding phase now
 //       let var = new "return_value";
-//       let vd = new Vardecl{.sc = Public, .name = new $((nmspace_t)Loc_n,var),
+//       let vd = new Vardecl{.sc = Public, .name = new $((nmspace_t)Loc_n,var),.varloc=0,
 //                            .tq = empty_tqual(0), .type = tr, 
 //                            .initializer = NULL, .rgn = curr_rgn(ftenv), 
 //                            .attributes = NULL, .escapes = false};

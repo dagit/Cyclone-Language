@@ -125,7 +125,7 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 
 static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init, 
                       bool in_cinclude, list_t<$(seg_t,qvar_t,bool)@>* exports){
-  let &Vardecl(sc,q,_,t,initializer,_,atts,_) = vd;
+  let &Vardecl(sc,q,_,_,t,initializer,_,atts,_) = vd;
 #ifdef DEBUG
   fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*((*q)[1]), 
           typ2string(vd->type)); fflush(stderr);

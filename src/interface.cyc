@@ -102,7 +102,7 @@ i_t final() {
   //polyvios: removed main() from the final interface, because of the various forms main(...) can have
   /*  // add requirement of function main
   qvar_t qmain = new $(Nmspace{.Abs_n = NULL}, new ((string_t)"main"));
-  let vd = new_vardecl(qmain,
+  let vd = new_vardecl(0,qmain,
 		       function_typ(NULL, NULL, empty_tqual(0), sint_typ,
 				    new List(new $(NULL, empty_tqual(0), uint_typ),
 					     new List(new $(NULL, empty_tqual(0),
@@ -518,6 +518,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
     let vd = new Vardecl{
       .sc = fd->sc,
       .name = fd->name,
+      .varloc = 0,
       .tq = empty_tqual(0),
       .type = (type_t)fd->cached_typ,
       .initializer = NULL,
@@ -621,7 +622,7 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &Fn_d(fd):
       if(fd->sc == Static) return accum;
       if(fd->sc == ExternC) return accum;
-      let vd = new_vardecl(fd->name, (type_t)fd->cached_typ, NULL);
+      let vd = new_vardecl(0,fd->name, (type_t)fd->cached_typ, NULL);
       vd->sc = fd->sc;
       return new List(new_decl(new Var_d(vd),0), accum);
     case &Aggr_d(a):

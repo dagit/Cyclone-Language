@@ -65,6 +65,9 @@
 #include "evexp.h"
 #include "tc.h"
 #include "tcdecl.h"
+#include <set.h>
+#include <hashtable.h>
+
 using Core;
 using List;
 using Absyn;
@@ -86,6 +89,17 @@ int cmp_edit(edit_t e1, edit_t e2) {
   return (int)e1 - (int)e2;
 }
 
+int cmp_seg_t(seg_t loc1, seg_t loc2){
+  return (int)(loc1-loc2);
+}
+int hash_seg_t(seg_t loc){
+  return (int)loc;
+}
+typedef struct VarUsage {
+  bool address_taken;
+  exp_opt_t init;
+  list_t<seg_t> usage_locs;
+} *varusage_t;
 /////////////////////////////////////////////////////////////////////
 // A ctype_t is a type that we use for processing C code and is
 // an approximation of Absyn's type_t
@@ -756,6 +770,8 @@ typedef struct GlobalCenv {
   list_t<$(ctype_t,ctype_t,seg_t)@>  qualifier_edits;
   list_t<$(ctype_t,ctype_t,seg_t)@>  pointer_edits;
   list_t<$(ctype_t,ctype_t,seg_t)@>  zeroterm_edits;
+  list_t<$(qvar_t, seg_t,type_t)@> vardecl_locs;
+  Hashtable::table_t<seg_t, varusage_t> varusage_tab;
   // These edits are inserted directly (e.g., for regions as we process
   // a function.)
   list_t<edit_t> edits;
@@ -770,7 +786,7 @@ typedef struct Cenv {
   gcenv_t gcenv;
   // Local variables -- we need the original type so we can do promotion
   // for arrays and functions.
-  Dict::dict_t<qvar_t, $(type_t,$(ctype_t,ctype_t)@)@> var_dict;
+  Dict::dict_t<qvar_t, $(type_t,$(ctype_t,ctype_t)@,seg_t)@> var_dict;
   // Used in the type translation
   cpos_t cpos;
 }@ cenv_t;
@@ -782,6 +798,8 @@ static cenv_t empty_cenv() {
                                .qualifier_edits = NULL,
                                .pointer_edits = NULL,
                                .zeroterm_edits = NULL,
+			       .vardecl_locs = NULL,
+			       .varusage_tab = Hashtable::create(128,cmp_seg_t,hash_seg_t),
                                .edits = NULL,
                                .porting = false,
                                .return_type = void_ct() };
@@ -867,19 +885,19 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_union_decl(cenv_t env,
 }
 
 // Look up a variable and return it's qualifier and ctype respectively
-static $(ctype_t, ctype_t) lookup_var(cenv_t env, qvar_t x) {
+static $($(ctype_t, ctype_t),seg_t) lookup_var(cenv_t env, qvar_t x) {
   try {
-    let $(_,p) = *Dict::lookup(env->var_dict,x);
-    return *p;
+    let $(_,p,loc) = *Dict::lookup(env->var_dict,x);
+    return $(*p,loc);
   } catch {
   case &Dict::Absent:
 #ifdef PORT_DEBUG
     fprintf(stderr,"can't find variable %s\n",qvar2string(x));
 #endif
-    return $(var(),var());
+    return $($(var(),var()),0);
   }
 }
-static $(type_t, $(ctype_t,ctype_t)@)@ lookup_full_var(cenv_t env, qvar_t x) {
+static $(type_t, $(ctype_t,ctype_t)@,seg_t)@ lookup_full_var(cenv_t env, qvar_t x) {
   return Dict::lookup(env->var_dict,x);
 }
 // True when x has been declared, False otherwise
@@ -889,7 +907,7 @@ static bool declared_var(cenv_t env, qvar_t x) {
 // True when x was declared as a function
 static bool isfn(cenv_t env, qvar_t x) {
   try {
-    let $(t,_) = *Dict::lookup(env->var_dict,x);
+    let $(t,_,_) = *Dict::lookup(env->var_dict,x);
   LOOP: switch (t) {
   case &TypedefType(n,_,_,_): t = lookup_typedef(env,n); goto LOOP;
   case &FnType(_): return true;
@@ -906,7 +924,7 @@ static bool isfn(cenv_t env, qvar_t x) {
 // True when x was declared as an array
 static bool isarray(cenv_t env, qvar_t x) {
   try {
-    let $(t,_) = *Dict::lookup(env->var_dict,x);
+    let $(t,_,_) = *Dict::lookup(env->var_dict,x);
   LOOP: switch (t) {
   case &TypedefType(n,_,_,_): t = lookup_typedef(env,n); goto LOOP;
   case &ArrayType(_): return true;
@@ -934,9 +952,9 @@ static void add_return_type(cenv_t env, ctype_t t) {
 // Add a variable to the environment, giving it's original parsed type,
 // and its qualifier and ctype.
 static cenv_t add_var(cenv_t env, qvar_t x, type_t t, ctype_t qual,
-                      ctype_t ctype) {
+                      ctype_t ctype, seg_t loc) {
   return new Cenv{env->gcenv,
-                  Dict::insert(env->var_dict,x,new $(t,new $(qual,ctype))),
+                  Dict::insert(env->var_dict,x,new $(t,new $(qual,ctype),loc)),
                   env->cpos};
 }
 // Add a typedef to the enviornment, giving the original parsed type and
@@ -944,6 +962,18 @@ static cenv_t add_var(cenv_t env, qvar_t x, type_t t, ctype_t qual,
 static void add_typedef(cenv_t env, typedef_name_t n, type_t t, ctype_t ct) {
   env->gcenv->typedef_dict = Dict::insert(env->gcenv->typedef_dict,
                                           n, new $(t,ct));
+}
+static void register_localvar_decl(cenv_t env, qvar_t x, seg_t loc, type_t type, exp_opt_t init){
+  env->gcenv->vardecl_locs = new List (new $(x,loc,type), env->gcenv->vardecl_locs);
+  Hashtable::insert(env->gcenv->varusage_tab, loc, new VarUsage{false, init, NULL});
+}
+static void register_localvar_usage(cenv_t env, seg_t declloc, seg_t useloc, bool takeaddress){
+  varusage_t varusage = NULL;
+  if( Hashtable::try_lookup(env->gcenv->varusage_tab, declloc, &varusage)){
+    if (takeaddress) varusage->address_taken = true;
+    let l = varusage->usage_locs;
+    varusage->usage_locs = new List(useloc, l);
+  }
 }
 // Register a ctype that is serving as a qualifier which might
 // later change.  In particular, after constraint generation and
@@ -996,7 +1026,7 @@ static cenv_t initial_cenv() {
   let e = empty_cenv();
   // enter main so that we trick it into having the right type
   e = add_var(e, new $(Loc_n,new "main"), main_type(), const_ct(),
-              type_to_ctype(e, main_type()));
+              type_to_ctype(e, main_type()),0);
   return e;
 }
 
@@ -1051,19 +1081,23 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
     register_rgns(env, counts, fn_res, et, ec);
     let loc = ploc ? ploc->rgn_loc : 0;
     rc = compress_ct(rc);
-    switch ($(rt,rc)) {
-    case $(&Evar(_,_,_,_), &Heap_ct) && !fn_res:
-      env->gcenv->edits =
-        new List(new Edit{loc,"`H ",""}, env->gcenv->edits);
-      break;
-    case $(&Evar(_,_,_,_), &RgnVar_ct(n)):
-      let i = *Dict::lookup(counts,n);
-      if (i > 1)
-        env->gcenv->edits =
-          new List(new Edit{loc,aprintf("%s ",*n),""}, env->gcenv->edits);
-      break;
-    default: break;
-    }
+
+//     switch ($(rt,rc)) {
+//     case $(&Evar(_,_,_,_), &Heap_ct) && !fn_res:
+//       env->gcenv->edits =
+//         new List(new Edit{loc,"`H ",""}, env->gcenv->edits);
+//       break;
+//     case $(&Evar(_,_,_,_), &RgnVar_ct(n)):
+//       let i = *Dict::lookup(counts,n);
+//       if (i > 1)
+//         env->gcenv->edits =
+//           new List(new Edit{loc,aprintf("%s ",*n),""}, env->gcenv->edits);
+//       break;
+//     default: break;
+//     }
+    env->gcenv->edits =
+      new List(new Edit{loc, "`H ", ""}, env->gcenv->edits);
+    
     break;
   case $(&ArrayType(ArrayInfo{et,_,_,_,_}), &Array_ct(ec,_,_)):
     register_rgns(env, counts, fn_res, et, ec);
@@ -1082,9 +1116,9 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
 
 //////////////////////////////////////////////////////////////////
 // Generation of constraints by walking AST
-static ctype_t gen_exp(cenv_t env, exp_t e);
+static ctype_t gen_exp(bool takeaddress, cenv_t env, exp_t e);
 static void gen_stmt(cenv_t env, stmt_t s);
-static cenv_t gen_localdecl(cenv_t env, decl_t d);
+static cenv_t gen_localdecl(cenv_t env, decl_t d,bool takeaddress);
 
 // true when t is char
 static bool is_char(cenv_t env, type_t t) {
@@ -1250,7 +1284,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     // add in an enum declaration
     for (; fs; fs = fs->tl) {
       (*fs->hd->name)[0] = Loc_n;
-      env = add_var(env, fs->hd->name, sint_typ, const_ct(), arith_ct());
+      env = add_var(env, fs->hd->name, sint_typ, const_ct(), arith_ct(),0);
     }
     return arith_ct();
   default: return arith_ct();
@@ -1317,17 +1351,19 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
 }
 
 // generate constraints for a LHS expression and return the qualifier & type
-static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
+static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e, bool takeaddress) {
   switch (e->r) {
   case &Var_e(b):
     let x = binding2qvar(b);
     (*x)[0] = Loc_n;
-    return lookup_var(env,x);
+    let $(p,loc)= lookup_var(env,x);
+    register_localvar_usage(env,loc,e->loc,takeaddress);
+    return p;
   case &Subscript_e(e1,e2):
     let v = var();
     let q = var();
-    let t1 = gen_exp(env, e1);
-    leq(gen_exp(env,e2),arith_ct());
+    let t1 = gen_exp(false,env, e1);
+    leq(gen_exp(false,env,e2),arith_ct());
     let p = ptr_ct(v,q,fat_ct(),var(),var());
     leq(t1,p);
     return $(q,v);
@@ -1335,19 +1371,19 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
     let v = var();
     let q = var();
     let p = ptr_ct(v,q,var(),var(),var());
-    leq(gen_exp(env,e1),p);
+    leq(gen_exp(false,env,e1),p);
     return $(q,v);
   case &AggrMember_e(e1,f,...):
     let v = var();
     let q = var();
-    let t1 = gen_exp(env, e1);
-    leq(gen_exp(env,e1),unknown_aggr_ct(list(new Cfield(q,f,v))));
+    let t1 = gen_exp(takeaddress,env, e1);
+    leq(t1,unknown_aggr_ct(list(new Cfield(q,f,v))));
     return $(q,v);
   case &AggrArrow_e(e1,f,...):
     let v = var();
     let q = var();
-    let t1 = gen_exp(env, e1);
-    leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield(q,f,v))),
+    let t1 = gen_exp(false,env, e1);
+    leq(t1,ptr_ct(unknown_aggr_ct(list(new Cfield(q,f,v))),
                                var(),var(),var(),var()));
     return $(q,v);
   default: impos(aprintf("gen_lhs: %s",exp2string(e)));
@@ -1355,7 +1391,10 @@ static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
 }
 
 // generate constraints for a RHS expression and return the constraint type
-static ctype_t gen_exp(cenv_t env, exp_t e) {
+static ctype_t gen_exp_false(cenv_t env, exp_t e) {
+  return gen_exp(false, env, e);
+}
+static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
   switch (e->r) {
   case &Const_e({.Char_c = $(_,_)}):
   case &Const_e({.Wchar_c = _}):
@@ -1377,7 +1416,8 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Var_e(b):       
     let x = binding2qvar(b);
     (*x)[0] = Loc_n;
-    let $(_,t) = lookup_var(env,x);
+    let $(p,loc) = lookup_var(env,x);
+    let $(_,t) = p;
     if (isfn(env,x)) {
       t = instantiate(t); // generate fresh region vars
       return ptr_ct(t,var(),var(),heap_ct(),nozterm_ct()); // promote to fn pointer
@@ -1390,12 +1430,15 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
       unifies(t,array_type);
       let ptr_type = ptr_ct(elt_type,qual,fat_ct(),var(),zt);
       return ptr_type;
-    } else return t;
-  case &Primop_e(p,es): return gen_primop(env,p,map_c(gen_exp,env,es));
+    } else {
+      register_localvar_usage(env, loc, e->loc,takeaddress);
+      return t;
+    }
+  case &Primop_e(p,es): return gen_primop(env,p,map_c(gen_exp_false,env,es));
   case &AssignOp_e(e1,popt,e2):
-    let $(q,t1) = gen_lhs(env,e1);
+    let $(q,t1) = gen_lhs(env,e1,false);
     unifies(q,notconst_ct());
-    let t2 = gen_exp(env,e2);
+    let t2 = gen_exp(false,env,e2);
     if (popt) {
       struct List<ctype_t> x2 = List{t2,NULL};
       struct List<ctype_t> x1 = List{t1,&x2};
@@ -1407,7 +1450,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
       return t1;
     }
   case &Increment_e(e1,inc):
-    let $(q,t) = gen_lhs(env,e1);
+    let $(q,t) = gen_lhs(env,e1,false);
     unifies(q,notconst_ct());
     // could have a fatptr or an arith
     leq(t,ptr_ct(var(),var(),fat_ct(),var(),var()));
@@ -1415,22 +1458,22 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
     return t;
   case &Conditional_e(e1,e2,e3):
     let v = var();
-    leq(gen_exp(env,e1),arith_ct());
-    leq(gen_exp(env,e2),v);
-    leq(gen_exp(env,e3),v);
+    leq(gen_exp(false,env,e1),arith_ct());
+    leq(gen_exp(false,env,e2),v);
+    leq(gen_exp(false,env,e3),v);
     return v;
   case &And_e(e1,e2): fallthru(e1,e2);
   case &Or_e(e1,e2):
-    leq(gen_exp(env,e1),arith_ct());
-    leq(gen_exp(env,e2),arith_ct());
+    leq(gen_exp(false,env,e1),arith_ct());
+    leq(gen_exp(false,env,e2),arith_ct());
     return arith_ct();
   case &SeqExp_e(e1,e2):
-    gen_exp(env,e1);
-    return gen_exp(env,e2);
+    gen_exp(false,env,e1);
+    return gen_exp(false,env,e2);
   case &FnCall_e(e1,es,...):
     let v = var();
-    let t1 = gen_exp(env,e1);
-    let ts = map_c(gen_exp,env,es);
+    let t1 = gen_exp(false,env,e1);
+    let ts = map_c(gen_exp_false,env,es);
     let vs = map(new_var,ts);
     unifies(t1,ptr_ct(fn_ct(v,vs),var(),var(),var(),nozterm_ct()));
     for (; ts != NULL; ts = ts->tl, vs = vs->tl) {
@@ -1438,39 +1481,39 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
     }
     return v;
   case &Throw_e(...): impos("throw");
-  case &NoInstantiate_e(e1): return gen_exp(env,e1);
+  case &NoInstantiate_e(e1): return gen_exp(false,env,e1);
   case &Instantiate_e(_,_): impos("instantiate");
   case &Cast_e(t,e1,_,_):
     let t1 = type_to_ctype(env,t);
-    let t2 = gen_exp(env,e1);
+    let t2 = gen_exp(false,env,e1);
     leq(t1,t2);
     return t2;
   case &Address_e(e1):
-    let $(q,t) = gen_lhs(env,e1);
+    let $(q,t) = gen_lhs(env,e1,true);
     return ptr_ct(t,q,var(),var(),var());
   case &Subscript_e(e1,e2):
     let v = var();
-    leq(gen_exp(env,e2),arith_ct());
-    let t = gen_exp(env,e1);
+    leq(gen_exp(false,env,e2),arith_ct());
+    let t = gen_exp(false,env,e1);
     leq(t,ptr_ct(v,var(),fat_ct(),var(),var()));
     return v;
   case &Deref_e(e1):
     let v = var();
-    leq(gen_exp(env,e1),ptr_ct(v,var(),var(),var(),var()));
+    leq(gen_exp(false,env,e1),ptr_ct(v,var(),var(),var(),var()));
     return v;
   case &AggrMember_e(e1,f,...):
     let v = var();
-    let t = gen_exp(env,e1);
-    leq(gen_exp(env,e1), unknown_aggr_ct(list(new Cfield{var(),f,v})));
+    let t = gen_exp(takeaddress,env,e1);
+    leq(t, unknown_aggr_ct(list(new Cfield{var(),f,v})));
     return v;
   case &AggrArrow_e(e1,f,...):
     let v = var();
-    let t = gen_exp(env,e1);
-    leq(gen_exp(env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
+    let t = gen_exp(false,env,e1);
+    leq(gen_exp(false,env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
                                var(),var(),var(),var()));
     return v;
   case &Malloc_e(MallocInfo{_,_,topt,e1,_,_}):
-    leq(gen_exp(env,e1),arith_ct());
+    leq(gen_exp(false,env,e1),arith_ct());
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());
   case &Swap_e(e1,e2): impos("Swap_e");
@@ -1495,44 +1538,45 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
 static void gen_stmt(cenv_t env, stmt_t s) {
   switch (s->r) {
   case &Skip_s: return;
-  case &Exp_s(e): gen_exp(env,e); return;
+  case &Exp_s(e): gen_exp(false,env,e); return;
   case &Seq_s(s1,s2): gen_stmt(env,s1); gen_stmt(env,s2); return;
   case &Return_s(eopt):
     let v = lookup_return_type(env);
-    let t = eopt ? gen_exp(env,eopt) : void_ct();
+    let t = eopt ? gen_exp(false,env,eopt) : void_ct();
     leq(t,v);
     return;
   case &IfThenElse_s(e,s1,s2):
-    leq(gen_exp(env,e),arith_ct());
+    leq(gen_exp(false,env,e),arith_ct());
     gen_stmt(env,s1);
     gen_stmt(env,s2);
     return;
   case &While_s($(e,_),s):
-    leq(gen_exp(env,e),arith_ct());
+    leq(gen_exp(false,env,e),arith_ct());
     gen_stmt(env,s);
     return;
   case &Break_s:
   case &Continue_s:
   case &Goto_s(_): return;
   case &For_s(e1,$(e2,_),$(e3,_),s):
-    gen_exp(env,e1);
-    leq(gen_exp(env,e2),arith_ct());
-    gen_exp(env,e3);
+    gen_exp(false,env,e1);
+    leq(gen_exp(false,env,e2),arith_ct());
+    gen_exp(false,env,e3);
     gen_stmt(env,s);
     return;
   case &Switch_s(e,scs,_):
-    leq(gen_exp(env,e),arith_ct());
+    leq(gen_exp(false,env,e),arith_ct());
     for (; scs; scs = scs->tl) {
       // ignore the patterns...
       gen_stmt(env,scs->hd->body);
     }
     return;
   case &Fallthru_s(_,_): impos("fallthru");
-  case &Decl_s(d,s): env = gen_localdecl(env,d); gen_stmt(env,s); return;
+  case &Decl_s(d,s): 
+    env = gen_localdecl(env,d,false); gen_stmt(env,s); return;
   case &Label_s(_,s): gen_stmt(env,s); return;
   case &Do_s(s,$(e,_)):
     gen_stmt(env,s);
-    leq(gen_exp(env,e),arith_ct());
+    leq(gen_exp(false,env,e),arith_ct());
     return;
   case &TryCatch_s(...): impos("try/catch");
   case &ResetRegion_s(_): impos("reset region");
@@ -1587,16 +1631,17 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
       (*n)[0] = Loc_n;
       t = lookup_typedef(env,n); goto LOOP2;
     case &ArrayType(_): return array_ct(arith_ct(), const_ct(), zterm_ct());
-    default: return gen_exp(env,e);
+    default: return gen_exp(false,env,e);
     }
-  default: return gen_exp(env, e);
+  default: return gen_exp(false,env, e);
   }
 }
 
 // generate constraints for a local declaration
-static cenv_t gen_localdecl(cenv_t env, decl_t d) {
+static cenv_t gen_localdecl(cenv_t env, decl_t d, bool fromglobal) {
   switch (d->r) {
   case &Var_d(vd):
+    if (!fromglobal) {register_localvar_decl(env,vd->name, vd->varloc, vd->type, vd->initializer);}
     let t = var();
     ctype_t q;
     if (env->gcenv->porting) {
@@ -1613,7 +1658,7 @@ static cenv_t gen_localdecl(cenv_t env, decl_t d) {
       q = vd->tq.print_const ? const_ct() : notconst_ct();
     }
     (*vd->name)[0] = Loc_n;
-    env = add_var(env, vd->name, vd->type, q, t);
+    env = add_var(env, vd->name, vd->type, q, t,vd->varloc);
     unifies(t, type_to_ctype(env, vd->type));
     if (vd->initializer) {
       exp_t e = (exp_t)vd->initializer;
@@ -1646,7 +1691,8 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     fprintf(stderr,"processing var decl %s\n",qvar2string(vd->name));
 #endif
     if (declared_var(env,vd->name)) {
-      let $(q,t) = lookup_var(env,vd->name);
+      let $(p,loc) = lookup_var(env, vd->name);
+      let $(q,t) = p;
       ctype_t q2;
       if (env->gcenv->porting && !isfn(env,vd->name)) {
         q2 = var();
@@ -1669,14 +1715,14 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       }
       return env;
     } else {
-      return gen_localdecl(env,d);
+      return gen_localdecl(env,d,true);
     }
   case &Fn_d(fd):
 #ifdef PORT_DEBUG
     fprintf(stderr,"processing fn decl %s\n",qvar2string(fd->name));
 #endif
     (*fd->name)[0] = Loc_n;
-    $(type_t, $(ctype_t,ctype_t)@) *predeclared = NULL;
+    $(type_t, $(ctype_t,ctype_t)@,seg_t) *predeclared = NULL;
 
     if (declared_var(env,fd->name)) {
       predeclared = lookup_full_var(env,fd->name);
@@ -1720,11 +1766,11 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     fprintf(stderr,"fntype is %s\n",ctype2string(true,ctype));
 #endif
     (*fd->name)[0] = Loc_n;
-    fn_env = add_var(fn_env, fd->name, fntype, const_ct(), ctype);
+    fn_env = add_var(fn_env, fd->name, fntype, const_ct(), ctype,0);
     add_return_type(fn_env,c_rettype);
     for (let xs = c_args; xs; xs = xs->tl) {
       let $(x,t,q,ct) = *xs->hd;
-      fn_env = add_var(fn_env, new $(Loc_n,x), t, q, ct);
+      fn_env = add_var(fn_env, new $(Loc_n,x), t, q, ct,0);
     }
     gen_stmt(fn_env,fd->body);
 #ifdef PORT_DEBUG
@@ -1743,7 +1789,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     // Now, crawl over the original type and the ctype and figure
     // out where there are mismatches, recording the edits in the env.
     register_rgns(env, counts, true, fntype, ctype);
-    env = add_var(fn_env, fd->name, fntype, const_ct(), ctype);
+    env = add_var(fn_env, fd->name, fntype, const_ct(), ctype,0);
     if (predeclared) {
       // A bit tricky here -- the pre-declared function hasn't been
       // region-generalized.  So, we unify the pre-declared type with
@@ -1751,7 +1797,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       // consts, etc. to propagate between them.  But then we crawl over
       // the predeclared type to generate the right region edits for it.
       // FIX: there might be more than one pre-declaration for a function.
-      let $(orig_type,&$(q2,t2)) = *predeclared;
+      let $(orig_type,&$(q2,t2),_) = *predeclared;
       unifies(q2,const_ct());
       unifies(t2,instantiate(ctype));
       // Register the regions of the predeclared type
@@ -1828,7 +1874,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
       for(let fs = ed->fields->v; fs; fs = fs->tl) {
         (*fs->hd->name)[0] = Loc_n;
         env = add_var(env, fs->hd->name, new EnumType(ed->name,ed),
-                      const_ct(), arith_ct());
+                      const_ct(), arith_ct(),0);
       }
     return env;
   default:
@@ -1854,6 +1900,29 @@ static edits_t gen_edits(list_t<decl_t> ds) {
   let consts = env->gcenv->qualifier_edits;
   let zts = env->gcenv->zeroterm_edits;
   let edits = env->gcenv->edits;
+  let localvars = env->gcenv->vardecl_locs;
+   
+  for(;localvars;localvars = localvars->tl){
+    let $(var, loc, vartype) = *localvars->hd;
+    let $(_,x) = *var;
+    let varusage = Hashtable::lookup(env->gcenv->varusage_tab, loc);
+    if (varusage->address_taken){
+      if(varusage->init){
+	// with init, "type x = e" => "type ?x = new e"
+	edits = new List{new Edit {loc, "@", ""}, edits};
+	edits = new List{new Edit {varusage->init->loc, "new ", ""}, edits};
+      }
+      else {
+	//no init, "type x" => "type @x = malloc(sizeof(type))"
+	edits = new List{new Edit {loc, aprintf("?%s = malloc(sizeof(%s))",*x,Absynpp::typ2string(vartype)), *x},edits};
+      }
+      let loclist = varusage->usage_locs;
+      for(;loclist;loclist = loclist->tl){
+	edits = new List{new Edit{loclist->hd, aprintf("(*%s)",*x), *x}, edits};
+      }
+    }
+  }
+
   // force the constraints
   for (let ps = ptrs; ps; ps = ps->tl) {
     let $(new_ctype, orig_ctype, loc) = *ps->hd;

@@ -757,6 +757,7 @@ namespace Absyn {
   EXTERN_ABSYN struct Vardecl {
     scope_t            sc;          // static, extern, etc.
     qvar_t             name;        // variable name
+    seg_t              varloc;      // declaration beginning and endding location
     tqual_t            tq;          // const, volatile, etc.
     type_t             type;        // type of variable
     exp_opt_t          initializer; // optional initializer -- 
@@ -898,7 +899,7 @@ namespace Absyn {
   // declarations w/ auxiliary info
   EXTERN_ABSYN struct Decl {
     raw_decl_t r;
-    seg_t      loc;
+    seg_t  loc;
   };
 
   EXTERN_ABSYN datatype Designator {
@@ -1112,7 +1113,7 @@ namespace Absyn {
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
   extern decl_t region_decl(tvar_t,vardecl_t,bool,exp_opt_t open_exp, seg_t); 
   extern decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
-  extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
+  extern vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 					     list_t<$(type_t,type_t)@`H,`H> po,

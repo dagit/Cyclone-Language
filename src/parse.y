@@ -82,6 +82,7 @@ namespace Lex {
 
 #define LOC(s,e) (s.first_line)
 #define SLOC(s) (s.first_line)
+#define ELOC(s) (s.last_line)
 #define DUMMYLOC 0
 
 namespace Parse {
@@ -140,6 +141,7 @@ typedef struct Declaration_spec decl_spec_t;
 
 struct Declarator<`yy::R> {
   qvar_t                  id;
+  seg_t                   varloc;
   list_t<type_modifier_t<`yy>,`yy> tms;
 };
 typedef struct Declarator<`yy> declarator_t<`yy>;
@@ -238,10 +240,10 @@ qvar_t gensym_enum() {
 
 static aggrfield_t
 make_aggr_field(seg_t loc,
-		$($(qvar_t,tqual_t,type_t,list_t<tvar_t>,
+		$($(seg_t,qvar_t,tqual_t,type_t,list_t<tvar_t>,
 		    list_t<attribute_t,`H>)@,$(exp_opt_t,exp_opt_t)@)@ 
                 field_info) {
-  let &$(&$(qid,tq,t,tvs,atts),&$(widthopt,reqopt)) = field_info;
+  let &$(&$(varloc,qid,tq,t,tvs,atts),&$(widthopt,reqopt)) = field_info;
   if (tvs != NULL)
     Warn::err(loc,"bad type params in struct field");
   if(is_qvar_qualified(qid))
@@ -526,7 +528,7 @@ static fndecl_t make_function(region_t<`yy> yy,
                               list_t<decl_t> tds, stmt_t body, seg_t loc) {
   // Handle old-style parameter declarations
   if (tds!=NULL)
-    d = Declarator(d.id,oldstyle2newstyle(yy,d.tms,tds,loc));
+    d = Declarator(d.id, d.varloc, oldstyle2newstyle(yy,d.tms,tds,loc));
 
   scope_t sc = Public;
   type_specifier_t tss = empty_spec(loc);
@@ -684,20 +686,21 @@ static type_t
   return t;
 }
 
-static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@`r,`r>
+static list_t<$(seg_t, qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@`r,`r>
   apply_tmss(region_t<`r> r, tqual_t tq, type_t t,declarators_t<`r> ds,
              attributes_t shared_atts)
 {
   if (ds==NULL) return NULL;
   declarator_t d = ds->hd;
   let q = d.id;
+  let varloc = d.varloc;
   let $(tq2,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d.tms);
   // NB: we copy the type here to avoid sharing definitions
   // but we avoid the copy when ds->tl is NULL
   if (ds->tl == NULL) 
-    return rnew(r) List(rnew(r) $(q,tq2,new_typ,tvs,atts),NULL);
+    return rnew(r) List(rnew(r) $(varloc,q,tq2,new_typ,tvs,atts),NULL);
   else
-    return rnew(r) List(rnew(r) $(q,tq2,new_typ,tvs,atts),
+    return rnew(r) List(rnew(r) $(varloc,q,tq2,new_typ,tvs,atts),
                     apply_tmss(r,tq,Tcutil::copy_type(t),ds->tl,shared_atts));
 }
 
@@ -805,8 +808,8 @@ type_t speclist2typ(type_specifier_t tss, seg_t loc) {
 // the typedef with the lexer.
 // TJ: FIX the tqual should make it into the typedef as well,
 // e.g., typedef const int CI;
-static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,`H>,list_t<attribute_t,`H>)@ t) {
-  let &$(x,tq,typ,tvs,atts) = t;
+static decl_t v_typ_to_typedef(seg_t loc, $(seg_t,qvar_t,tqual_t,type_t,list_t<tvar_t,`H>,list_t<attribute_t,`H>)@ t) {
+  let &$(varloc,x,tq,typ,tvs,atts) = t;
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
   // if the "type" is an evar, then the typedef is abstract
@@ -937,13 +940,13 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
      // here, we have a bunch of variable declarations
      list_t<decl_t> decls = NULL;
      for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
-       let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
+       let &$(varloc,x,tq2,t2,tvs2,atts2) = ds->hd;
        if (tvs2 != NULL)
 	 Warn::warn(loc,"bad type params, ignoring");
        if (exprs == NULL)
 	 parse_abort(loc,"unexpected NULL in parse!");
        let eopt = exprs->hd;
-       let vd   = new_vardecl(x, t2, eopt);
+       let vd   = new_vardecl(varloc,x, t2, eopt);
        vd->tq = tq2;
        vd->sc = s;
        vd->attributes = atts2;
@@ -1353,7 +1356,7 @@ declaration:
       for (let ids = $2; ids != NULL; ids = ids->tl) {
         let id = ids->hd;
         qvar_t qv = new $(Rel_n(NULL), id);
-        let vd = new_vardecl(qv,wildtyp(NULL),NULL);
+        let vd = new_vardecl(0,qv,wildtyp(NULL),NULL);
         vds = new List(vd,vds);
       }
       vds = List::imp_rev(vds);
@@ -1370,7 +1373,7 @@ declaration:
       Warn::err(SLOC(@4),"bad occurrence of unique region");
     tvar_t tv = new Tvar(new four,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
+    vardecl_t vd = new_vardecl(SLOC(@6),new $(Loc_n,new $6),new RgnHandleType(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
   }
 /* region h; */
@@ -1384,7 +1387,7 @@ declaration:
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
+    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new three),new RgnHandleType(t),NULL);
 
     $$ = ^$(new List(region_decl(tv,vd,one,NULL,LOC(@1,@5)),NULL));
   }
@@ -1397,7 +1400,7 @@ declaration:
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
+    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new three),new RgnHandleType(t),NULL);
 
     $$ = ^$(new List(region_decl(tv,vd,false,seven,LOC(@1,@5)),NULL));
   }
@@ -1867,12 +1870,12 @@ struct_declarator:
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""), NULL)),(exp_opt_t)$2,NULL));
+      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""), 0, NULL)),(exp_opt_t)$2,NULL));
     }
 | /* empty */ 
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""), NULL)),NULL,NULL));
+      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""),0, NULL)),NULL,NULL));
     }
 | declarator_withtypedef ':' constant_expression
     { $$=^$(rnew (yyr) $($1,(exp_opt_t)$3,NULL)); }
@@ -1939,21 +1942,21 @@ declarator:
     { $$=$!1; }
 | pointer direct_declarator
     { let two = $2;
-      $$=^$(Declarator(two.id,List::imp_append($1,two.tms))); }
+      $$=^$(Declarator(two.id, two.varloc, List::imp_append($1,two.tms))); }
 ;
 
-// same as declarator but allows typedef names to occur as the variable
+// same as declarator but allows typedef name to occur as the variable
 declarator_withtypedef:
   direct_declarator_withtypedef
     { $$=$!1; }
 | pointer direct_declarator_withtypedef
     { let two = $2;
-      $$=^$(Declarator(two.id,List::imp_append($1,two.tms))); }
+      $$=^$(Declarator(two.id, two.varloc, List::imp_append($1,two.tms))); }
 ;
 
 direct_declarator:
   qual_opt_identifier
-    { $$=^$(Declarator($1,NULL)); }
+    { $$=^$(Declarator($1, SLOC(@1),NULL)); }
 | '(' declarator ')'
     { $$=$!2; }
 /* the following rule causes a large number of shift/reduce conflicts
@@ -1964,32 +1967,32 @@ direct_declarator:
       $$=$!3;
     }
 | direct_declarator '[' ']' zeroterm_qual_opt
-    { $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Carray_mod($4,SLOC(@4)),$1.tms)));}
+    { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Carray_mod($4,SLOC(@4)),$1.tms)));}
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(Declarator($1.id,
+{ $$=^$(Declarator($1.id, $1.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),$1.tms)));}
 | direct_declarator '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt 
     { let &$(lis,b,c,eff,po) = $3;
       let req = $5;
       let ens = $6;
-      $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),$1.tms)));
+      $$=^$(Declarator($1.id, $1.varloc,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),$1.tms)));
     }
 | direct_declarator '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt 
-    { $$=^$(Declarator($1.id,
+    { $$=^$(Declarator($1.id, $1.varloc,
                        rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,
                                                                false,NULL,
                                                                $3,$4,$6,$7)),
                                 $1.tms)));
     }
 | direct_declarator '(' identifier_list ')'
-    { $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),$1.tms))); }
+    { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),$1.tms))); }
 /* Cyc: added type parameters */
 | direct_declarator '<' type_name_list right_angle
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) TypeParams_mod(ts,LOC(@1,@4),false),$1.tms)));
+      $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) TypeParams_mod(ts,LOC(@1,@4),false),$1.tms)));
     }
 | direct_declarator attributes
-  { $$=^$(Declarator($1.id,rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),
+  { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),
                                          $1.tms)));
   }
 /* These two cases help to improve error messages */
@@ -2003,9 +2006,9 @@ direct_declarator:
 // same as direct_declarator but allows typedef names to occur as the variable
 direct_declarator_withtypedef:
   qual_opt_identifier
-    { $$=^$(Declarator($1,NULL)); }
+    { $$=^$(Declarator($1, SLOC(@1), NULL)); }
 | qual_opt_typedef
-    { $$=^$(Declarator($1,NULL)); }
+    { $$=^$(Declarator($1, SLOC(@1),NULL)); }
 | '(' declarator_withtypedef ')'
     { $$=$!2; }
 /* the following rule causes a large number of shift/reduce conflicts
@@ -2017,11 +2020,11 @@ direct_declarator_withtypedef:
     }
 | direct_declarator_withtypedef '[' ']' zeroterm_qual_opt
     { let one=$1;
-      $$=^$(Declarator(one.id,
+    $$=^$(Declarator(one.id, one.varloc,
                        rnew(yyr) List(rnew(yyr) Carray_mod($4,SLOC(@4)),one.tms)));}
 | direct_declarator_withtypedef '[' assignment_expression ']' zeroterm_qual_opt
     { let one=$1;
-      $$=^$(Declarator(one.id,
+    $$=^$(Declarator(one.id, one.varloc,
                        rnew(yyr) List(rnew(yyr) ConstArray_mod($3,$5,SLOC(@5)),
                                 one.tms)));}
 | direct_declarator_withtypedef '(' parameter_type_list ')' requires_clause_opt ensures_clause_opt 
@@ -2029,11 +2032,11 @@ direct_declarator_withtypedef:
       let req = $5;
       let ens = $6;
       let one=$1;
-      $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),one.tms)));
+      $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(lis,b,c,eff,po,req,ens)),one.tms)));
     }
 | direct_declarator_withtypedef '(' optional_effect optional_rgn_order ')' requires_clause_opt ensures_clause_opt 
     { let one=$1;
-      $$=^$(Declarator(one.id,
+    $$=^$(Declarator(one.id, one.varloc,
                        rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) WithTypes(NULL,
                                                                false,NULL,
                                                                $3,$4,$6,$7)),
@@ -2041,16 +2044,16 @@ direct_declarator_withtypedef:
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
     { let one=$1;
-      $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),one.tms))); }
+      $$=^$(Declarator(one.id,one.varloc, rnew(yyr) List(rnew(yyr) Function_mod(rnew(yyr) NoTypes($3,LOC(@1,@4))),one.tms))); }
 /* Cyc: added type parameters */
 | direct_declarator_withtypedef '<' type_name_list right_angle
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
       let one=$1;
-      $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) TypeParams_mod(ts,LOC(@1,@4),false),one.tms)));
+      $$=^$(Declarator(one.id,one.varloc, rnew(yyr) List(rnew(yyr) TypeParams_mod(ts,LOC(@1,@4),false),one.tms)));
     }
 | direct_declarator_withtypedef attributes
   { let one=$1;
-    $$=^$(Declarator(one.id,rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),one.tms)));
+    $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),one.tms)));
   }
 /* These two cases help to improve error messages */
 //| qual_opt_identifier qual_opt_identifier
@@ -2254,7 +2257,7 @@ parameter_declaration:
   specifier_qualifier_list declarator_withtypedef
     { let $(tq,tspecs,atts) = $1; 
       if (tq.loc == 0) tq.loc = SLOC(@1);
-      let Declarator(qv,tms) = $2;
+      let Declarator(qv,varloc,tms) = $2;
       let t = speclist2typ(tspecs, SLOC(@1));
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL)
@@ -2313,7 +2316,7 @@ array_initializer:
 | '{' initializer_list ',' '}'
     { $$=^$(new_exp(new UnresolvedMem_e(NULL,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { let vd = new_vardecl(new $(Loc_n,new $3), uint_typ,
+    { let vd = new_vardecl(SLOC(@3),new $(Loc_n,new $3), uint_typ,
                            uint_exp(0,SLOC(@3)));
       // make the index variable const
       vd->tq.real_const = true;
@@ -2771,7 +2774,7 @@ pattern:
 | IDENTIFIER IDENTIFIER pattern
     { if (strcmp($2,"as") != 0) 
         Warn::err(SLOC(@2),"expecting `as'");
-      $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),&VoidType_val,NULL),
+      $$=^$(new_pat(new Var_p(new_vardecl(SLOC(@1),new $(Loc_n, new $1),&VoidType_val,NULL),
                               $3),SLOC(@1))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' type_name IDENTIFIER
@@ -2779,7 +2782,7 @@ pattern:
         Warn::err(SLOC(@2),"expecting `alias'");
       let location = LOC(@1,@6);
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
-      vardecl_t vd = new_vardecl(new $(Loc_n, new $6),
+      vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
       $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
     }
@@ -2807,27 +2810,27 @@ pattern:
 | AND_OP pattern /* to allow &&p */
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
-    { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
+    { $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1), new $(Loc_n, new $2),
 						&VoidType_val,NULL),
                                     new_pat(&Wild_p_val,SLOC(@2))),
 		    LOC(@1,@2))); }
 | '*' IDENTIFIER IDENTIFIER pattern
     { if (strcmp($3,"as") != 0)
         Warn::err(SLOC(@3),"expecting `as'");
-      $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
+      $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1),new $(Loc_n, new $2),
 						&VoidType_val,NULL),
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
    { let tag = id2type($3,Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(typ2tvar(SLOC(@3),tag),
-				new_vardecl(new $(Loc_n,new $1),
+				new_vardecl(SLOC(@1),new $(Loc_n,new $1),
 					    new TagType(tag),NULL)),
 		   LOC(@1,@4))); }
 | IDENTIFIER '<' '_' '>' 
    { let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(tv,
-				new_vardecl(new $(Loc_n,new $1),
+				new_vardecl(SLOC(@1), new $(Loc_n,new $1),
 					    new TagType(new VarType(tv)),NULL)),
 		   LOC(@1,@4))); }
 ;

@@ -356,7 +356,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   
   Iter::iter_t<_,`stmt_to_fun> iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
-  let vd = new Vardecl(Public,exn_name,empty_tqual(0),&VoidType_val,
+  let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),&VoidType_val,
 		       NULL,NULL,NULL,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
@@ -714,7 +714,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                               gen_ds), 
                      fd->body);
           if (*gen_ds != NULL) {
-            vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(0), 
+            vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
                                         Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
             new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
             // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);

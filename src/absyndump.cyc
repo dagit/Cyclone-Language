@@ -1182,7 +1182,7 @@ static bool is_char_ptr(type_t t) {
 }
 
 void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
-  let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
+  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_} = vd;
   switch(c_compiler){
   case Gcc_c:
     // hack to avoid writing so many useless externs:

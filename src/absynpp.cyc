@@ -1694,7 +1694,7 @@ static doc_t ids2doc(list_t<vardecl_t> vds) {
 }
 
 doc_t vardecl2doc(vardecl_t vd) {
-  let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
+  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_} = vd;
   doc_t s;
   doc_t sn = typedef_name2bolddoc(name);
   doc_t attsdoc   = atts2doc(atts);

@@ -588,7 +588,7 @@ list_t<vardecl_t> get_fun_vardecls(var_opt_t (@f)(`a), bool need_va_name,
     let &$(a,tq,t) = args->hd;
     let v = f(a);
     if(v==NULL) continue;
-    let vd = new_vardecl(new $((nmspace_t)Loc_n,(var_t)v), t, NULL);
+    let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), t, NULL);
     vd->tq = tq;
     vds = new List(vd,vds);
   }
@@ -600,7 +600,7 @@ list_t<vardecl_t> get_fun_vardecls(var_opt_t (@f)(`a), bool need_va_name,
     } else {
       // HeapRegion is wrong -- changed by type-checker!
       let typ = dyneither_typ(t, &HeapRgn_val, tq, false_conref);
-      let vd = new_vardecl(new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
+      let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
       vds = new List(vd,vds);
     }
   }
@@ -628,7 +628,7 @@ void resolve_function_stuff(seg_t loc, env_t env, type_opt_t eff, type_t rettyp,
     // return_value is a dummy var in scope only here
     let locs = *env->local_vars;
     let v    = new "return_value";
-    let vd   = new_vardecl(new $((nmspace_t)Loc_n, v), rettyp, NULL);
+    let vd   = new_vardecl(0,new $((nmspace_t)Loc_n, v), rettyp, NULL);
     *env->local_vars = Dict::insert(*env->local_vars, v,
 				    new VarRes(new Local_b(vd)));
     resolve_exp(env,(exp_t)ens_clause);
@@ -844,7 +844,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     case &AnonEnumRes(t,ef):
       p->r = new AnonEnum_p(t,ef); return;
     } catch { case &BindingError: break; } // a new variable
-    let vd = new_vardecl(qv,&VoidType_val,NULL); //type set later
+    let vd = new_vardecl(0,qv,&VoidType_val,NULL); //type set later
     resolve_and_add_vardecl(loc,env,vd);
     p->r = new Var_p(vd, new_pat(&Wild_p_val,0));
     return;
