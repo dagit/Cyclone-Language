@@ -852,7 +852,7 @@ int j=(int)(_get_dyneither_size(suffix,sizeof(char))- 1);
 while(i >= 0  && j >= 0){
 if(*((const char*)_check_dyneither_subscript(filename,sizeof(char),i --))!= *((const char*)_check_dyneither_subscript(suffix,sizeof(char),j --)))return 0;}
 if(j >= 0)return 0;else{
-return 1;}}struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename);static void _tmp24(unsigned int*_tmp23,unsigned int*_tmp22,char**_tmp20){for(*_tmp23=0;*_tmp23 < *_tmp22;(*_tmp23)++){(*_tmp20)[*_tmp23]='\000';}}static void _tmp36(unsigned int*_tmp35,unsigned int*_tmp34,char**_tmp32){for(*_tmp35=0;*_tmp35 < *_tmp34;(*_tmp35)++){(*_tmp32)[*_tmp35]='\000';}}
+return 1;}}struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename);static void _tmp24(unsigned int*_tmp23,unsigned int*_tmp22,char**_tmp20){for(*_tmp23=0;*_tmp23 < *_tmp22;(*_tmp23)++){(*_tmp20)[*_tmp23]=(char)'\000';}}static void _tmp36(unsigned int*_tmp35,unsigned int*_tmp34,char**_tmp32){for(*_tmp35=0;*_tmp35 < *_tmp34;(*_tmp35)++){(*_tmp32)[*_tmp35]=(char)'\000';}}
 # 75
 struct _dyneither_ptr Cyc_Filename_gnuify(struct _dyneither_ptr filename){
 int has_drive_name=_get_dyneither_size(filename,sizeof(char))> 1  && *((const char*)_check_dyneither_subscript(filename,sizeof(char),1))== ':';

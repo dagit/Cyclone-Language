@@ -1532,7 +1532,7 @@ x=_tmp30;}
 # 770
 return 0;}struct _dyneither_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x);static void _tmp7E(struct Cyc_List_List**x,unsigned int*_tmp7D,unsigned int*_tmp7C,void***_tmp7A){for(*_tmp7D=0;*_tmp7D < *_tmp7C;(*_tmp7D)++){
 # 779
-void*_tmp78;(*_tmp7A)[*_tmp7D]=((_tmp78=((struct Cyc_List_List*)_check_null(*x))->hd,((*x=(*x)->tl,_tmp78))));}}
+void*_tmp78;(*_tmp7A)[*_tmp7D]=(void*)((_tmp78=((struct Cyc_List_List*)_check_null(*x))->hd,((*x=(*x)->tl,_tmp78))));}}
 # 774
 struct _dyneither_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){
 int s;

@@ -1630,7 +1630,7 @@ goto _LLEF;_LLF6: {struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*_tmp12E=(struct 
  return Cyc_NewControlFlow_anal_Rexp(env,copy_ctxt,inflow,_tmp12F);_LLF8:;_LLF9: {
 struct Cyc_Core_Impossible_exn_struct _tmp768;const char*_tmp767;struct Cyc_Core_Impossible_exn_struct*_tmp766;(int)_throw((void*)((_tmp766=_cycalloc(sizeof(*_tmp766)),((_tmp766[0]=((_tmp768.tag=Cyc_Core_Impossible,((_tmp768.f1=((_tmp767="analyze_Rexp: ill-formed StmtExp",_tag_dyneither(_tmp767,sizeof(char),33))),_tmp768)))),_tmp766)))));}_LLEF:;};}}struct _tuple21{union Cyc_CfFlowInfo_AbsLVal f1;union Cyc_CfFlowInfo_FlowInfo f2;};struct _tuple22{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*f2;};static struct _tuple14 Cyc_NewControlFlow_anal_Rexp(struct Cyc_NewControlFlow_AnalEnv*env,int copy_ctxt,union Cyc_CfFlowInfo_FlowInfo inflow,struct Cyc_Absyn_Exp*e);static void _tmp80A(unsigned int*_tmp809,unsigned int*_tmp808,void***_tmp806,struct Cyc_List_List**_tmp321){for(*_tmp809=0;*_tmp809 < *_tmp808;(*_tmp809)++){
 # 1353 "new_control_flow.cyc"
-void*_tmp804;(*_tmp806)[*_tmp809]=((_tmp804=(void*)((struct Cyc_List_List*)_check_null(*_tmp321))->hd,((*_tmp321=(*_tmp321)->tl,_tmp804))));}}
+void*_tmp804;(*_tmp806)[*_tmp809]=(void*)((_tmp804=(void*)((struct Cyc_List_List*)_check_null(*_tmp321))->hd,((*_tmp321=(*_tmp321)->tl,_tmp804))));}}
 # 802 "new_control_flow.cyc"
 static struct _tuple14 Cyc_NewControlFlow_anal_Rexp(struct Cyc_NewControlFlow_AnalEnv*env,int copy_ctxt,union Cyc_CfFlowInfo_FlowInfo inflow,struct Cyc_Absyn_Exp*e){
 # 806

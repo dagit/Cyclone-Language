@@ -3776,7 +3776,7 @@ static int Cyc_Tcutil_tvar_counter=0;
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k){
 int i=Cyc_Tcutil_tvar_counter ++;
 const char*_tmp1036;void*_tmp1035[1];struct Cyc_Int_pa_PrintArg_struct _tmp1034;struct _dyneither_ptr s=(struct _dyneither_ptr)((_tmp1034.tag=1,((_tmp1034.f1=(unsigned long)i,((_tmp1035[0]=& _tmp1034,Cyc_aprintf(((_tmp1036="#%d",_tag_dyneither(_tmp1036,sizeof(char),4))),_tag_dyneither(_tmp1035,sizeof(void*),1))))))));
-struct _dyneither_ptr*_tmp1039;struct Cyc_Absyn_Tvar*_tmp1038;return(_tmp1038=_cycalloc(sizeof(*_tmp1038)),((_tmp1038->name=((_tmp1039=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp1039[0]=s,_tmp1039)))),((_tmp1038->identity=- 1,((_tmp1038->kind=k,_tmp1038)))))));}
+struct _dyneither_ptr*_tmp1039;struct Cyc_Absyn_Tvar*_tmp1038;return(_tmp1038=_cycalloc(sizeof(*_tmp1038)),((_tmp1038->name=((_tmp1039=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp1039[0]=(struct _dyneither_ptr)s,_tmp1039)))),((_tmp1038->identity=- 1,((_tmp1038->kind=k,_tmp1038)))))));}
 # 2957
 int Cyc_Tcutil_is_temp_tvar(struct Cyc_Absyn_Tvar*t){
 struct _dyneither_ptr _tmp785=*t->name;
@@ -3787,7 +3787,7 @@ void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*t){
 if(!Cyc_Tcutil_is_temp_tvar(t))return;{
 const char*_tmp103E;struct _dyneither_ptr _tmp789=Cyc_strconcat(((_tmp103E="`",_tag_dyneither(_tmp103E,sizeof(char),2))),(struct _dyneither_ptr)*t->name);
 {char _tmp1041;char _tmp1040;struct _dyneither_ptr _tmp103F;(_tmp103F=_dyneither_ptr_plus(_tmp789,sizeof(char),1),((_tmp1040=*((char*)_check_dyneither_subscript(_tmp103F,sizeof(char),0)),((_tmp1041='t',((_get_dyneither_size(_tmp103F,sizeof(char))== 1  && (_tmp1040 == '\000'  && _tmp1041 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp103F.curr)=_tmp1041)))))));}{
-struct _dyneither_ptr*_tmp1042;t->name=((_tmp1042=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp1042[0]=(struct _dyneither_ptr)_tmp789,_tmp1042))));};};}
+struct _dyneither_ptr*_tmp1042;t->name=((_tmp1042=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp1042[0]=(struct _dyneither_ptr)((struct _dyneither_ptr)_tmp789),_tmp1042))));};};}
 # 2971
 static struct _tuple10*Cyc_Tcutil_fndecl2typ_f(struct _tuple10*x){
 # 2973

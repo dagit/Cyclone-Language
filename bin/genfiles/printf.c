@@ -974,7 +974,7 @@ int fieldsz;
 int size=0;
 # 316
 char buf[349];
-{unsigned int _tmp58=348;unsigned int i;for(i=0;i < _tmp58;i ++){buf[i]='\000';}buf[_tmp58]=(char)0;}{char ox[2]={'\000','\000'};
+{unsigned int _tmp58=348;unsigned int i;for(i=0;i < _tmp58;i ++){buf[i]=(char)'\000';}buf[_tmp58]=(char)0;}{char ox[2]={'\000','\000'};
 enum Cyc_BASE base;
 # 342 "printf.cyc"
 fmt=fmt0;
@@ -1249,7 +1249,7 @@ static struct _dyneither_ptr Cyc_exponent(struct _dyneither_ptr p,int exp,int fm
 # 707
 struct _dyneither_ptr t;
 char expbuffer[309];
-{unsigned int _tmp72=308;unsigned int i;for(i=0;i < _tmp72;i ++){expbuffer[i]='0';}expbuffer[_tmp72]=(char)0;}{char*_tmp104;struct _dyneither_ptr expbuf=(_tmp104=(char*)expbuffer,_tag_dyneither(_tmp104,sizeof(char),_get_zero_arr_size_char((void*)_tmp104,309)));
+{unsigned int _tmp72=308;unsigned int i;for(i=0;i < _tmp72;i ++){expbuffer[i]=(char)'0';}expbuffer[_tmp72]=(char)0;}{char*_tmp104;struct _dyneither_ptr expbuf=(_tmp104=(char*)expbuffer,_tag_dyneither(_tmp104,sizeof(char),_get_zero_arr_size_char((void*)_tmp104,309)));
 {char _tmp107;char _tmp106;struct _dyneither_ptr _tmp105;(_tmp105=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1),((_tmp106=*((char*)_check_dyneither_subscript(_tmp105,sizeof(char),0)),((_tmp107=(char)fmtch,((_get_dyneither_size(_tmp105,sizeof(char))== 1  && (_tmp106 == '\000'  && _tmp107 != '\000')?_throw_arraybounds(): 1,*((char*)_tmp105.curr)=_tmp107)))))));}
 if(exp < 0){
 exp=- exp;{

@@ -1557,7 +1557,9 @@ static type_t array_elt_type(type_t t) {
   }
 }
 
-static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
+static stmt_t init_comprehension(env_t nv, 
+                                 type_t comprehension_type,
+                                 exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, bool zero_term, stmt_t s,
                                  bool e1_already_translated);
 
@@ -1566,9 +1568,12 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
                                stmt_t s);
 
 // code to initialize an array
-static stmt_t init_array(env_t nv, exp_t lhs,
+static stmt_t init_array(env_t nv, 
+                         type_t array_type,
+                         exp_t lhs,
                          list_t<$(list_t<designator_t>,exp_t)@> dles0,
                          stmt_t s) {
+  type_t orig_elt_type = array_elt_type(array_type);
   int count = List::length(dles0)-1;
   for (let dles = List::rev(dles0); dles != NULL; dles = dles->tl) {
     // add lhs[e_index] = e to sequence of assignments
@@ -1593,17 +1598,19 @@ static stmt_t init_array(env_t nv, exp_t lhs,
     exp_t lval = subscript_exp(lhs,e_index,DL);
     switch (e1->r) {
     case &Array_e(dles0):
-      s = init_array(nv, lval, dles0, s);
+      s = init_array(nv, orig_elt_type, lval, dles0, s);
       break;
     case &Comprehension_e(vd,g1,g2,zt):
-      s = init_comprehension(nv, lval, vd, g1, g2, zt, s, false);
+      s = init_comprehension(nv, orig_elt_type,
+                             lval, vd, g1, g2, zt, s, false);
       break;
     case &AnonStruct_e(st,dles):
       s = init_anon_struct(nv, lval, st, dles, s);
       break;
     default:
       exp_to_c(nv,e1);
-      s = seq_stmt(assign_stmt(subscript_exp(lhs,e_index,DL),e1,DL),s,DL);
+      s = seq_stmt(assign_stmt(subscript_exp(lhs,e_index,DL),
+                               cast_it(typ_to_c(orig_elt_type),e1),DL),s,DL);
       break;
     }
   }
@@ -1612,10 +1619,20 @@ static stmt_t init_array(env_t nv, exp_t lhs,
 
 // code to initialize a comprehension
 // WARNING: Changing the translation here will break Tovc.
-static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
+static stmt_t init_comprehension(env_t nv, 
+                                 type_t comprehension_type,
+                                 exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, bool zero_term,
                                  stmt_t s, bool e1_already_translated) {
   let x1 = vd->name;
+  type_t expected_elt_type;
+  switch (compress(comprehension_type)) {
+  case &ArrayType(ArrayInfo{e,...}): 
+    expected_elt_type = e; break;
+  case &PointerType(PtrInfo{e,...}):
+    expected_elt_type = e; break;
+  default: toc_impos("init_comprehension passed a bad type!");
+  }
   let elt_typ = typ_to_c((type_t)e2->topt);
   if (!e1_already_translated)
     exp_to_c(nv,e1);
@@ -1633,17 +1650,17 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
     // these two cases shouldn't arise -- but we ought to support this.
     switch (e2->r) {
     case &Array_e(dles):
-      body = init_array(nv2, lval, dles, skip_stmt_dl());
+      body = init_array(nv2, expected_elt_type, lval, dles, skip_stmt_dl());
       break;
     case &Comprehension_e(vd2,g1,g2,zt):
-      body = init_comprehension(nv2, lval, vd2, g1,g2,zt,skip_stmt_dl(), false);
+      body = init_comprehension(nv2, expected_elt_type, lval, vd2, g1,g2,zt,skip_stmt_dl(), false);
       break;
     case &AnonStruct_e(st,dles):
       body = init_anon_struct(nv, lval, st, dles, skip_stmt_dl());
       break;
     default:
       exp_to_c(nv2,e2);
-      body = assign_stmt(lval,e2,DL);
+      body = assign_stmt(lval,cast_it(typ_to_c(expected_elt_type),e2),DL);
       break;
     }
     stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
@@ -1678,9 +1695,10 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
       exp_t lval = member_exp(lhs,f,DL);
       switch (e->r) {
       case &Array_e(dles):
-        s = init_array(nv, lval, dles, s); break;
+        s = init_array(nv, (type_t)e->topt, lval, dles, s); break;
       case &Comprehension_e(vd,e1,e2,zt):
-        s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
+        s = init_comprehension(nv, (type_t)e->topt, 
+                               lval, vd, e1, e2, zt, s, false); break;
       case &AnonStruct_e(st2,dles):
         s = init_anon_struct(nv, lval, st2, dles, s); break;
       default:
@@ -1723,10 +1741,11 @@ static exp_t init_tuple(env_t nv, bool pointer,
       is_atomic = is_atomic && atomic_typ((type_t)e->topt);
       switch (e->r) {
       case &Array_e(dles):
-        s = init_array(nv, lval, dles, s);
+        s = init_array(nv, (type_t)e->topt, lval, dles, s);
         break;
       case &Comprehension_e(vd,e1,e2,zt):
-        s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false);
+        s = init_comprehension(nv, (type_t)e->topt, 
+                               lval, vd, e1, e2, zt, s, false);
         break;
         // FIX: deal with comprehensions
       default:
@@ -1790,12 +1809,12 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   bool is_atomic = true;
   list_t<type_t> forall_types;
   aggrdecl_t ad;
-  list_t<aggrfield_t> aggrfields;
+  list_t<aggrfield_t> aggrfields, orig_aggrfields;
   field_name_t *index = NULL;
   switch(compress(struct_type)) {
   case &AggrType(AggrInfo(info,ts)): 
     ad = get_known_aggrdecl(info);
-    aggrfields = ad->impl->fields;
+    orig_aggrfields = aggrfields = ad->impl->fields;
     forall_types = ts;
     break;
   default: toc_impos("init_struct: bad struct type");
@@ -1905,7 +1924,9 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           }
           switch (e->r) {
           case &Array_e(dles):
-            s = init_array(nv, lval, dles, s); break;
+            s = init_array(nv, lookup_field(aggrfields,f)->type, 
+                           lval, dles, s); 
+            break;
           case &Comprehension_e(vd,e1,e2,zt):
 	    // if this is a dynamic comprehension, grab the bound
 	    // for doing the malloc
@@ -1915,7 +1936,11 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 						   DL),DL),
 			const_exp(Cnst{.Int_c=$(Unsigned,PAD_BYTES)},DL),DL);
 	    }
-            s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
+            
+            s = init_comprehension(nv, 
+                                   lookup_field((do_declare ? aggrfields :
+                                                 orig_aggrfields),f)->type,
+                                   lval, vd, e1, e2, zt, s, false); break;
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
           default:
@@ -2998,6 +3023,7 @@ DynCast:
     // FIX: need to deal with zero-terminated arrays
     if (is_toplevel(nv))
       unimp("%s: new at top-level", Position::string_of_segment(e1->loc));
+    type_t new_e_type = (type_t)e1->topt;
     switch (e1->r) {
     case &Array_e(dles0):
       // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
@@ -3005,7 +3031,7 @@ DynCast:
       //    x[d1] = e1; ... x[dn] = en; x; })
       let x = temp_var();
       let xexp = var_exp(x,DL);
-      let s = init_array(nv, xexp, dles0, exp_stmt(xexp,DL));
+      let s = init_array(nv, new_e_type, xexp, dles0, exp_stmt(xexp,DL));
       type_t old_elt_typ;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,_,zt,_)}):
@@ -3057,7 +3083,8 @@ DynCast:
       // add one to max for zero-terminated arrays
       if (zero_term)
         malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
-      stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL),
+      stmt_t s = init_comprehension(nv, new_e_type,
+                                    var_exp(a,DL), vd, var_exp(max,DL),
                                     e2, zero_term, skip_stmt_dl(), true);
       // FIX:  casts needed on exp_opts
       TOC_RGN(nv,r) {
@@ -4760,7 +4787,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
     switch(init->r) {
     case &Comprehension_e(vd2,e1,e2,zt):
       vd->initializer = NULL;
-      s->r = init_comprehension(init_nv, var_exp(vd->name, DL), vd2, e1, e2,
+      s->r = init_comprehension(init_nv, old_typ, var_exp(vd->name, DL), vd2, e1, e2,
                                 zt, new_stmt(s->r,DL), false)->r;
       break;
     default:

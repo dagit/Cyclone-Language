@@ -880,7 +880,7 @@ struct _dyneither_ptr whatsleft=_tag_dyneither(0,0,0);
 for(0;(i < _tmp4  && (int)((const char*)s.curr)[i]) && isspace((int)((const char*)s.curr)[i]);++ i){
 ;}
 if(i < _tmp4  && (int)((const char*)s.curr)[i])whatsleft=_dyneither_ptr_plus(s,sizeof(char),i);
-return whatsleft;};};};}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int margin,struct _dyneither_ptr item,struct _dyneither_ptr desc);static void _tmp7F(unsigned int*_tmp7E,unsigned int*_tmp7D,char**_tmp7B){for(*_tmp7E=0;*_tmp7E < *_tmp7D;(*_tmp7E)++){(*_tmp7B)[*_tmp7E]='\000';}}static void _tmp88(unsigned int*_tmp87,unsigned int*_tmp86,char**_tmp84){for(*_tmp87=0;*_tmp87 < *_tmp86;(*_tmp87)++){(*_tmp84)[*_tmp87]='\000';}}
+return whatsleft;};};};}void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int margin,struct _dyneither_ptr item,struct _dyneither_ptr desc);static void _tmp7F(unsigned int*_tmp7E,unsigned int*_tmp7D,char**_tmp7B){for(*_tmp7E=0;*_tmp7E < *_tmp7D;(*_tmp7E)++){(*_tmp7B)[*_tmp7E]=(char)'\000';}}static void _tmp88(unsigned int*_tmp87,unsigned int*_tmp86,char**_tmp84){for(*_tmp87=0;*_tmp87 < *_tmp86;(*_tmp87)++){(*_tmp84)[*_tmp87]=(char)'\000';}}
 # 127
 void Cyc_Arg_Justify_justify_b(struct Cyc_Buffer_t*b,int indent,int margin,struct _dyneither_ptr item,struct _dyneither_ptr desc){
 # 129

@@ -1102,7 +1102,7 @@ static int Cyc_Lex_trie_char(int c){
 # 206
 if(c >= 95)return c - 59;else{
 if(c > 64)return c - 55;}
-return c - 48;}static struct Cyc_Lex_Trie*Cyc_Lex_trie_lookup(struct _RegionHandle*r,struct Cyc_Lex_Trie*t,struct _dyneither_ptr buff,int offset,int len);static void _tmp157(unsigned int*_tmp156,unsigned int*_tmp155,struct Cyc_Lex_Trie***_tmp154){for(*_tmp156=0;*_tmp156 < *_tmp155;(*_tmp156)++){(*_tmp154)[*_tmp156]=0;}}
+return c - 48;}static struct Cyc_Lex_Trie*Cyc_Lex_trie_lookup(struct _RegionHandle*r,struct Cyc_Lex_Trie*t,struct _dyneither_ptr buff,int offset,int len);static void _tmp157(unsigned int*_tmp156,unsigned int*_tmp155,struct Cyc_Lex_Trie***_tmp154){for(*_tmp156=0;*_tmp156 < *_tmp155;(*_tmp156)++){(*_tmp154)[*_tmp156]=(struct Cyc_Lex_Trie*)0;}}
 # 211
 static struct Cyc_Lex_Trie*Cyc_Lex_trie_lookup(struct _RegionHandle*r,struct Cyc_Lex_Trie*t,struct _dyneither_ptr buff,int offset,int len){
 # 213
@@ -1199,9 +1199,9 @@ struct _tuple5 _tmp162;return(_tmp162.f1=Cyc_Absyn_Signed,((_tmp162.f2=(int)n,_t
 # 329
 char Cyc_Lex_string_buffer_v[11]={'x','x','x','x','x','x','x','x','x','x','\000'};
 struct _dyneither_ptr Cyc_Lex_string_buffer={(void*)Cyc_Lex_string_buffer_v,(void*)Cyc_Lex_string_buffer_v,(void*)(Cyc_Lex_string_buffer_v + 11)};
-int Cyc_Lex_string_pos=0;void Cyc_Lex_store_string_char(char c);static void _tmp168(int*sz,unsigned int*_tmp167,unsigned int*_tmp166,char**_tmp164){for(*_tmp167=0;*_tmp167 < *_tmp166;(*_tmp167)++){(*_tmp164)[*_tmp167]=
+int Cyc_Lex_string_pos=0;void Cyc_Lex_store_string_char(char c);static void _tmp168(int*sz,unsigned int*_tmp167,unsigned int*_tmp166,char**_tmp164){for(*_tmp167=0;*_tmp167 < *_tmp166;(*_tmp167)++){(*_tmp164)[*_tmp167]=(char)(
 # 337
-*_tmp167 < *sz?*((char*)_check_dyneither_subscript(Cyc_Lex_string_buffer,sizeof(char),(int)*_tmp167)):'\000';}}
+*_tmp167 < *sz?*((char*)_check_dyneither_subscript(Cyc_Lex_string_buffer,sizeof(char),(int)*_tmp167)):'\000');}}
 # 332
 void Cyc_Lex_store_string_char(char c){
 int sz=(int)(_get_dyneither_size(Cyc_Lex_string_buffer,sizeof(char))- 1);
@@ -2114,7 +2114,7 @@ int Cyc_Lex_snarf_asm_body(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_Lex_snarf
 # 1158 "lex.cyl"
 void Cyc_Lex_pos_init(){
 Cyc_Lex_linenumber=1;
-Cyc_Lex_pos_info=0;}void Cyc_Lex_lex_init(int include_cyclone_keywords);static void _tmp242(unsigned int*_tmp241,unsigned int*_tmp240,int**_tmp23E){for(*_tmp241=0;*_tmp241 < *_tmp240;(*_tmp241)++){(*_tmp23E)[*_tmp241]=0;}}
+Cyc_Lex_pos_info=0;}void Cyc_Lex_lex_init(int include_cyclone_keywords);static void _tmp242(unsigned int*_tmp241,unsigned int*_tmp240,int**_tmp23E){for(*_tmp241=0;*_tmp241 < *_tmp240;(*_tmp241)++){(*_tmp23E)[*_tmp241]=(int)0;}}
 # 1163
 void Cyc_Lex_lex_init(int include_cyclone_keywords){
 # 1165

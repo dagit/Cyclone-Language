@@ -1220,7 +1220,7 @@ switch(c){case '\\': _LL6:
  goto _LL11;case '\n': _LL11:
  goto _LL12;case '\t': _LL12:
  return 1;default: _LL13:
- return 0;}}static struct _dyneither_ptr Cyc_sh_escape_string(struct _dyneither_ptr s);static void _tmpCE(unsigned int*_tmpCD,unsigned int*_tmpCC,char**_tmpCA){for(*_tmpCD=0;*_tmpCD < *_tmpCC;(*_tmpCD)++){(*_tmpCA)[*_tmpCD]='\000';}}
+ return 0;}}static struct _dyneither_ptr Cyc_sh_escape_string(struct _dyneither_ptr s);static void _tmpCE(unsigned int*_tmpCD,unsigned int*_tmpCC,char**_tmpCA){for(*_tmpCD=0;*_tmpCD < *_tmpCC;(*_tmpCD)++){(*_tmpCA)[*_tmpCD]=(char)'\000';}}
 # 183
 static struct _dyneither_ptr Cyc_sh_escape_string(struct _dyneither_ptr s){
 unsigned long _tmp1A=Cyc_strlen((struct _dyneither_ptr)s);

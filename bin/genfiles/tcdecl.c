@@ -1033,9 +1033,9 @@ struct _dyneither_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
 # 74
 struct _dyneither_ptr Cyc_Absynpp_scope2string(enum Cyc_Absyn_Scope sc);char Cyc_Tcdecl_Incompatible[13]="Incompatible";
 # 43 "tcdecl.cyc"
-struct Cyc_Tcdecl_Incompatible_exn_struct Cyc_Tcdecl_Incompatible_val={Cyc_Tcdecl_Incompatible};void Cyc_Tcdecl_merr(unsigned int loc,struct _dyneither_ptr*msg1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);static void _tmp163(struct _dyneither_ptr**msg1,struct _dyneither_ptr*ap,unsigned int*_tmp162,unsigned int*_tmp161,void***_tmp15F){for(*_tmp162=0;*_tmp162 < *_tmp161;(*_tmp162)++){struct Cyc_String_pa_PrintArg_struct _tmp15D;struct Cyc_String_pa_PrintArg_struct*_tmp15C;(*_tmp15F)[*_tmp162]=
+struct Cyc_Tcdecl_Incompatible_exn_struct Cyc_Tcdecl_Incompatible_val={Cyc_Tcdecl_Incompatible};void Cyc_Tcdecl_merr(unsigned int loc,struct _dyneither_ptr*msg1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);static void _tmp163(struct _dyneither_ptr**msg1,struct _dyneither_ptr*ap,unsigned int*_tmp162,unsigned int*_tmp161,void***_tmp15F){for(*_tmp162=0;*_tmp162 < *_tmp161;(*_tmp162)++){struct Cyc_String_pa_PrintArg_struct _tmp15D;struct Cyc_String_pa_PrintArg_struct*_tmp15C;(*_tmp15F)[*_tmp162]=(void*)(
 # 53
-*_tmp162 == 0?(void*)((_tmp15C=_cycalloc(sizeof(*_tmp15C)),((_tmp15C[0]=((_tmp15D.tag=0,((_tmp15D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*(*msg1)),_tmp15D)))),_tmp15C)))):*((void**)_check_dyneither_subscript(*ap,sizeof(void*),(int)(*_tmp162 - 1)));}}
+*_tmp162 == 0?(void*)((_tmp15C=_cycalloc(sizeof(*_tmp15C)),((_tmp15C[0]=((_tmp15D.tag=0,((_tmp15D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*(*msg1)),_tmp15D)))),_tmp15C)))):*((void**)_check_dyneither_subscript(*ap,sizeof(void*),(int)(*_tmp162 - 1))));}}
 # 45
 void Cyc_Tcdecl_merr(unsigned int loc,struct _dyneither_ptr*msg1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 # 49

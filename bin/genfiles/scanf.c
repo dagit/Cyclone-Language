@@ -879,7 +879,7 @@ char ccltab[256];
 # 215
 char buf[351];
 # 217
-{unsigned int _tmp42=350;unsigned int i;for(i=0;i < _tmp42;i ++){buf[i]='0';}buf[_tmp42]=(char)0;}{int seen_eof=0;
+{unsigned int _tmp42=350;unsigned int i;for(i=0;i < _tmp42;i ++){buf[i]=(char)'0';}buf[_tmp42]=(char)0;}{int seen_eof=0;
 # 220
 static short basefix[17]={10,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 # 223

@@ -929,7 +929,7 @@ return getw(f->file);}
 int putw(int,struct  __abstractFILE*);
 # 157
 int Cyc_putw(int x,struct Cyc___cycFILE*f){
-return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[14]="FileOpenError";struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode);static void _tmp18(struct _dyneither_ptr*fname,unsigned int*_tmp17,unsigned int*_tmp16,char**_tmp14){for(*_tmp17=0;*_tmp17 < *_tmp16;(*_tmp17)++){(*_tmp14)[*_tmp17]=((const char*)(*fname).curr)[(int)*_tmp17];}}
+return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[14]="FileOpenError";struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode);static void _tmp18(struct _dyneither_ptr*fname,unsigned int*_tmp17,unsigned int*_tmp16,char**_tmp14){for(*_tmp17=0;*_tmp17 < *_tmp16;(*_tmp17)++){(*_tmp14)[*_tmp17]=(char)((const char*)(*fname).curr)[(int)*_tmp17];}}
 # 166
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
 struct Cyc___cycFILE*f=Cyc_fopen((const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)_untag_dyneither_ptr(mode,sizeof(char),1));
