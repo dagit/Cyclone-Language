@@ -40,12 +40,12 @@ using Fn;
 
 namespace PP;
 
-tunion Alist<`a> {
+datatype Alist<`a> {
   Empty;
   Single(`a);
-  Append(tunion Alist<`a>,tunion Alist<`a>);
+  Append(datatype Alist<`a>,datatype Alist<`a>);
 };
-typedef tunion Alist<`a> alist_t<`a>;
+typedef datatype Alist<`a> alist_t<`a>;
 
 alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
   if (a1==(alist_t<`a>)Empty) return a2;

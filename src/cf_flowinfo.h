@@ -40,13 +40,13 @@
 namespace CfFlowInfo {
 
 // Do not ever mutate any data structures built from these -- they share a lot!
-EXTERN_CFFLOW tunion Root {
+EXTERN_CFFLOW datatype Root {
   VarRoot(Absyn::vardecl_t);
   // the type below is the type of the result of the malloc
   MallocPt(Absyn::exp_t,Absyn::type_t); // misnamed when do other analyses??
   InitParam(int,Absyn::type_t); // int is parameter number, type is w/o @
 };
-typedef tunion `r Root root_t<`r>;
+typedef datatype `r Root root_t<`r>;
 
 EXTERN_CFFLOW struct Place<`r::R> {
   root_t<`r> root; 
@@ -73,22 +73,22 @@ EXTERN_CFFLOW struct UniquePlace<`r::R> {
 };
 typedef struct UniquePlace<`r1> @`r2 unique_place_t<`r1,`r2>;
 
-EXTERN_CFFLOW tunion InitLevel { 
+EXTERN_CFFLOW datatype InitLevel { 
   NoneIL, // may not be initialized
   ThisIL, // this is initialized, but things it points to may not be
   AllIL   // initialized, and everything it points to is initialized
 };
-typedef tunion InitLevel initlevel_t;
+typedef datatype InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
-EXTERN_CFFLOW __flat__ tunion RelnOp {
+EXTERN_CFFLOW __flat__ datatype RelnOp {
   EqualConst(unsigned int);        // == c
   LessVar(Absyn::vardecl_t,Absyn::type_t); // < y -- type is needed due to xlation
   LessNumelts(Absyn::vardecl_t);   // < numelts(y)
   LessConst(unsigned int);         // < c
   LessEqNumelts(Absyn::vardecl_t); // <= numelts(y)
 };
-typedef tunion RelnOp reln_op_t;
+typedef datatype RelnOp reln_op_t;
 EXTERN_CFFLOW struct Reln {
   Absyn::vardecl_t vd; 
   reln_op_t rop;
@@ -104,7 +104,7 @@ typedef struct TagCmp @`r tag_cmp_t<`r>;
 
   // as with AbsRVal below, HasTagCmps forgets zero-ness which technically
   // is bad but shouldn't matter in practice.
-xtunion Absyn::AbsynAnnot { 
+datatype Absyn::AbsynAnnot @extensible { 
   EXTERN_CFFLOW IsZero;
   EXTERN_CFFLOW NotZero(relns_t<`H>);
   EXTERN_CFFLOW UnknownZ(relns_t<`H>);
@@ -113,17 +113,17 @@ xtunion Absyn::AbsynAnnot {
 extern List::list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2>,
                                                      List::list_t<tag_cmp_t>);
 
-EXTERN_CFFLOW __flat__ tunion AbsLVal<`r::R> {
+EXTERN_CFFLOW __flat__ datatype AbsLVal<`r::R> {
   PlaceL(place_t<`r,`r>);
   UnknownL;
 };
-typedef tunion AbsLVal<`r> absLval_t<`r>;
+typedef datatype AbsLVal<`r> absLval_t<`r>;
 
-EXTERN_CFFLOW tunion AbsRVal<`r::R>;
-typedef tunion `r AbsRVal<`r> absRval_t<`r>;
+EXTERN_CFFLOW datatype AbsRVal<`r::R>;
+typedef datatype `r AbsRVal<`r> absRval_t<`r>;
 typedef Dict::dict_t<root_t<`r>,absRval_t<`r>,`r> flowdict_t<`r>;
 typedef absRval_t<`r> ?`r aggrdict_t<`r>;
-EXTERN_CFFLOW tunion AbsRVal<`r::R> {
+EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   Zero;      // the value is zero and initialized
   NotZeroAll; // the value is not zero & everything reachable from it is init
   NotZeroThis; // the value is not zero, it is initialized, but not necessarily
@@ -171,11 +171,11 @@ extern bool consume_approx(consume_t<`r> c1, consume_t<`r> c2);
 //       of the analysis must be that at least these roots stay in the dict;
 //       for scalability, we don't have others.
 // join takes the intersection of the dictionaries.
-EXTERN_CFFLOW __flat__ tunion FlowInfo<`r::R> {
+EXTERN_CFFLOW __flat__ datatype FlowInfo<`r::R> {
   BottomFL;
   ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
 };
-typedef tunion FlowInfo<`r> flow_t<`r>;
+typedef datatype FlowInfo<`r> flow_t<`r>;
 
 EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;
@@ -259,11 +259,11 @@ extern flow_t<`r> after_flow(flow_env_t<`r>,place_set_t<`r>*,
   // reset anything that points into rgn to be uninitialized
 extern flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, Absyn::type_t rgn);
 
-tunion KillRgn {
+datatype KillRgn {
   UniqueRgn_k;
   Region_k(Absyn::tvar_t);
 };
-typedef tunion `r KillRgn killrgn_t<`r::R>;
+typedef datatype `r KillRgn killrgn_t<`r::R>;
 
 extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
 

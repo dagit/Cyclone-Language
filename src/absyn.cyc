@@ -35,12 +35,12 @@ using Position;
 namespace Cyclone{ 
   bool tovc_r = false;
 
-  tunion C_Compilers {
+  datatype C_Compilers {
     Gcc_c;  // gcc (default)
     Vc_c;   // visual c 
   };
 
-  tunion C_Compilers c_compiler = Gcc_c;
+  datatype C_Compilers c_compiler = Gcc_c;
 }
 using Cyclone; 
 
@@ -81,7 +81,7 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity) - (tv2->identity);
 }
   
-tunion Nmspace       rel_ns_null       = Rel_n(NULL);
+datatype Nmspace       rel_ns_null       = Rel_n(NULL);
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {
@@ -114,12 +114,12 @@ tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
 tqual_t const_tqual(seg_t loc) { return Tqual(true, false,false,true,loc); }
 
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
-  //static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
-static tunion Raw_exp.Const_e one_b_raw = Const_e(Int_c(Unsigned,1));
+  //static datatype Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
+static datatype Raw_exp.Const_e one_b_raw = Const_e(Int_c(Unsigned,1));
 struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
-static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
-tunion Bounds bounds_one = &one_bt;
+static datatype Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
+datatype Bounds bounds_one = &one_bt;
 
 //////////////////////////// Constraints /////////////////////////
 conref_t<`a> new_conref(`a x) { return new Conref{.v = Eq_constr(x)};}
@@ -185,12 +185,12 @@ kind_t force_kb(kindbound_t kb) {
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
-static tunion Type.IntType char_tt      = IntType(None,Char_sz);
-static tunion Type.IntType uchar_tt     = IntType(Unsigned,Char_sz);
-static tunion Type.IntType ushort_tt    = IntType(Unsigned,Short_sz);
-static tunion Type.IntType uint_tt      = IntType(Unsigned,Int_sz);
-static tunion Type.IntType ulong_tt     = IntType(Unsigned,Long_sz);
-static tunion Type.IntType ulonglong_tt = IntType(Unsigned,LongLong_sz);
+static datatype Type.IntType char_tt      = IntType(None,Char_sz);
+static datatype Type.IntType uchar_tt     = IntType(Unsigned,Char_sz);
+static datatype Type.IntType ushort_tt    = IntType(Unsigned,Short_sz);
+static datatype Type.IntType uint_tt      = IntType(Unsigned,Int_sz);
+static datatype Type.IntType ulong_tt     = IntType(Unsigned,Long_sz);
+static datatype Type.IntType ulonglong_tt = IntType(Unsigned,LongLong_sz);
 type_t char_typ      = &char_tt;
 type_t uchar_typ     = &uchar_tt;
 type_t ushort_typ    = &ushort_tt;
@@ -198,21 +198,21 @@ type_t uint_typ      = &uint_tt;
 type_t ulong_typ     = &ulong_tt;
 type_t ulonglong_typ = &ulonglong_tt;
 // signed types
-static tunion Type.IntType schar_tt     = IntType(Signed,Char_sz);
-static tunion Type.IntType sshort_tt    = IntType(Signed,Short_sz);
-static tunion Type.IntType sint_tt      = IntType(Signed,Int_sz);
-static tunion Type.IntType slong_tt     = IntType(Signed,Long_sz);
-static tunion Type.IntType slonglong_tt = IntType(Signed,LongLong_sz);
+static datatype Type.IntType schar_tt     = IntType(Signed,Char_sz);
+static datatype Type.IntType sshort_tt    = IntType(Signed,Short_sz);
+static datatype Type.IntType sint_tt      = IntType(Signed,Int_sz);
+static datatype Type.IntType slong_tt     = IntType(Signed,Long_sz);
+static datatype Type.IntType slonglong_tt = IntType(Signed,LongLong_sz);
 type_t schar_typ     = &schar_tt;
 type_t sshort_typ    = &sshort_tt;
 type_t sint_typ      = &sint_tt;
 type_t slong_typ     = &slong_tt;
 type_t slonglong_typ = &slonglong_tt;
 // no sign
-static tunion Type.IntType nshort_tt    = IntType(None,Short_sz);
-static tunion Type.IntType nint_tt      = IntType(None,Int_sz);
-static tunion Type.IntType nlong_tt     = IntType(None,Long_sz);
-static tunion Type.IntType nlonglong_tt = IntType(None,LongLong_sz);
+static datatype Type.IntType nshort_tt    = IntType(None,Short_sz);
+static datatype Type.IntType nint_tt      = IntType(None,Int_sz);
+static datatype Type.IntType nlong_tt     = IntType(None,Long_sz);
+static datatype Type.IntType nlonglong_tt = IntType(None,LongLong_sz);
 type_t nshort_typ    = &nshort_tt;
 type_t nint_typ      = &nint_tt;
 type_t nlong_typ     = &nlong_tt;
@@ -249,8 +249,8 @@ type_t int_typ(sign_t sn, size_of_t sz) {
 // float, double
 type_t float_typ  = FloatType;
 type_t double_typ(bool b) {
-  static tunion Type.DoubleType dt = DoubleType(true);
-  static tunion Type.DoubleType df = DoubleType(false);
+  static datatype Type.DoubleType dt = DoubleType(true);
+  static datatype Type.DoubleType df = DoubleType(false);
   return b ? &dt : &df;
 }
 // exceptions
@@ -282,13 +282,13 @@ static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
 						&exn_ol, true, false);
 tuniondecl_t exn_tud = &exn_tud_v;
 
-  //static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
+  //static datatype TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
 static struct Opt<type_t> heap_opt = Opt(HeapRgn);
-static tunion Type.TunionType exn_typ_tt =
+static datatype Type.TunionType exn_typ_tt =
                   TunionType(TunionInfo(KnownTunion(&exn_tud),NULL,&heap_opt));
 type_t exn_typ = &exn_typ_tt;
 
-// tunion PrintArg and tunion ScanfArg qvars
+// datatype PrintArg and datatype ScanfArg qvars
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
 static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
@@ -403,7 +403,7 @@ type_t void_star_typ() {
                                    false_conref);
   return *void_star_t_opt;
 }
-static tunion Type.JoinEff empty_eff = JoinEff(NULL);
+static datatype Type.JoinEff empty_eff = JoinEff(NULL);
 type_t empty_effect = &empty_eff;
 
 // structs and unions
@@ -662,8 +662,10 @@ vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
 }
 struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				    list_t<$(type_t,type_t)@`H,`H> po,
-				    list_t<aggrfield_t,`H> fs) {
-  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, .fields=fs};
+				    list_t<aggrfield_t,`H> fs, 
+                                    bool tagged) {
+  return new AggrdeclImpl{.exist_vars=exists, .rgn_po=po, 
+                          .fields=fs, .tagged = tagged};
 }
 decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 		 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
@@ -845,13 +847,13 @@ stringptr_t fieldname(int i) {
   return field_names[i];
 }
 
-$(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU info) {
+$(aggr_kind_t,qvar_t) aggr_kinded_name(datatype AggrInfoU info) {
   switch(info) {
   case UnknownAggr(k,n): return $(k,n);
   case KnownAggr(&&Aggrdecl(k,_,n,_,_,_)): return $(k,n);
   }
 }
-aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info) {
+aggrdecl_t get_known_aggrdecl(datatype AggrInfoU info) {
   switch(info) {
   case UnknownAggr(k,n): Tcutil::impos("unchecked aggrdecl");
   case KnownAggr(&ad): return ad;

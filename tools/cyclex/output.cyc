@@ -129,7 +129,7 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
           e->name, e->name, e->initial_state);
 }
 
-xtunion exn { Table_overflow };
+datatype @extensible exn { Table_overflow };
 
 void output_lexdef(string_t sourcename, 
 		   FILE @ ic, 

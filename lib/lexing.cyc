@@ -44,7 +44,7 @@ namespace Lexing;
 #define BUFFER_SIZE 8192
 #define AUX_SIZE    4096
 
-xtunion exn { Error(string_t) };
+datatype exn @extensible { Error(string_t) };
 
 struct lexbuf<`a> { // use `a for state that refill_buff might need 
 
@@ -76,7 +76,7 @@ struct lex_tables {
   int ?lex_check;
 };
 
-static char aux_buffer_v[1]ZEROTERM = {'\0'};
+static char aux_buffer_v[1]@zeroterm = {'\0'};
 static char ?aux_buffer = aux_buffer_v;
 
 void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
@@ -91,7 +91,7 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     int    newlen = oldlen*2;
 
     mstring_t newbuf = new_string(newlen+1);
-    zstrncpy((char ?NOZEROTERM)newbuf+oldlen, lexbuf->lex_buffer, oldlen);
+    zstrncpy((char ? @nozeroterm)newbuf+oldlen, lexbuf->lex_buffer, oldlen);
     lexbuf->lex_buffer     = newbuf;
     lexbuf->lex_buffer_len = newlen;
     lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   - oldlen;
@@ -99,10 +99,10 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     lexbuf->lex_start_pos  = lexbuf->lex_start_pos + oldlen;
     lexbuf->lex_last_pos   = lexbuf->lex_last_pos  + oldlen;
   }
-  zstrncpy((char ? NOZEROTERM)lexbuf->lex_buffer,
+  zstrncpy((char ?  @nozeroterm)lexbuf->lex_buffer,
                    lexbuf->lex_buffer + n,
                    lexbuf->lex_buffer_len-n);
-  zstrncpy((char ? NOZEROTERM)(lexbuf->lex_buffer+(lexbuf->lex_buffer_len-n)),
+  zstrncpy((char ?  @nozeroterm)(lexbuf->lex_buffer+(lexbuf->lex_buffer_len-n)),
                    aux_buffer, n);
   lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   + n;
   lexbuf->lex_curr_pos   = lexbuf->lex_curr_pos  - n;
@@ -150,7 +150,7 @@ Lexbuf<bool> from_string(mstring_t s) {
 mstring_t lexeme(Lexbuf<`a> lbuf) {
    int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
    mstring_t s   = new_string(len+1);
-   zstrncpy((char ?NOZEROTERM)s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
+   zstrncpy((char ? @nozeroterm)s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
    s[len] = '\000';
 //     if (len == 0) {
 //       fprintf(cyc_stderr,"Lexing::lexeme: 0 length!!\n");

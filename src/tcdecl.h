@@ -31,7 +31,7 @@ namespace Tcdecl {
   //  using String;
   using Position;
 
-  extern xtunion exn {extern Incompatible};
+  extern datatype exn @extensible {extern Incompatible};
 
   // used by Interface
   struct Xtunionfielddecl {

@@ -43,7 +43,7 @@ namespace CfFlowInfo;
 int place_cmp(place_t p1, place_t p2);
 int root_cmp(root_t r1, root_t r2);
 flow_env_t<`r> new_flow_env(region_t<`r> r) {
-  static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
+  static datatype Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
   static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
   return rnew(r) 
     FlowEnv { .r = r,
@@ -1496,8 +1496,8 @@ static flowdict_t<`r>
 kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
   switch (Tcutil::compress(rgn)) {
   case &VarType(tv): 
-    tunion KillRgn.Region_k v = Region_k(tv);
-    tunion _ KillRgn v2 = &v;
+    datatype KillRgn.Region_k v = Region_k(tv);
+    datatype _ KillRgn v2 = &v;
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,v2);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];

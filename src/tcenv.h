@@ -40,14 +40,14 @@ extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> *`r const tl; };
 typedef struct CList<`a,`r> *`r const clist_t<`a,`r>;
 
 // Used to tell what an ordinary identifer refers to 
-extern tunion Resolved {
+extern datatype Resolved {
   VarRes(binding_t); // includes unresolved variant
   AggrRes(aggrdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
 };
-typedef tunion `r Resolved resolved_t<`r>;
+typedef datatype `r Resolved resolved_t<`r>;
 
 // Global environments -- what's declared in a global scope 
 // Warning: ordinaries should really be abstract so we can ensure that any
@@ -72,13 +72,13 @@ typedef struct Genv<`r> @`r genv_t<`r>;
 extern struct Fenv<`l::R>;
 typedef struct Fenv<`l> @`l fenv_t<`l>; 
 
-extern tunion Jumpee {
+extern datatype Jumpee {
   NotLoop_j;
   CaseEnd_j;
   FnEnd_j;
   Stmt_j(stmt_t);
 };
-typedef tunion `r Jumpee jumpee_t<`r>;
+typedef datatype `r Jumpee jumpee_t<`r>;
 
 // Type environments -- `g is the region for global information
 // and `l is the region for local information

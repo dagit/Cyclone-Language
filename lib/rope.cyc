@@ -22,12 +22,12 @@
 namespace Rope;
 using Core;
 
-static tunion R {
+static datatype R {
   String_rope(string_t),
   Array_rope(rope_t?)
 };
 abstract struct Rope_node {
-  tunion R v;
+  datatype R v;
 };
 
 rope_t from_string(string_t<`H> s) {

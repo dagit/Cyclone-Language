@@ -775,13 +775,13 @@ parse_type_decl ()
   if(deconstructor) {
     if(!nolinesflag)
       fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf((FILE @)fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
+    fprintf((FILE @)fattrs, "\n static datatype @extensible exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
     // JGM: the new type system does not allow evars in function types so I am
     // going back to a macro like we used to have.  The right solution is to
     // modify bison so that we get rid of the union definition and gensym
     // tokens appropriately.
-    //fprintf((FILE @)fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
-    fprintf((FILE @)fattrs, "\n%s yyget_%s(tunion YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case %s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
+    //fprintf((FILE @)fattrs, "\n_ yyget_%s(datatype @extensible YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
+    fprintf((FILE @)fattrs, "\n%s yyget_%s(datatype YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case %s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
   }
 
   for (;;)
@@ -932,11 +932,11 @@ parse_union_decl()
 
   //JGM: we want to avoid printing out the union as-is, because we want
   //to add constructors later on.
-  //fprintf((FILE @)fattrs, "\n__flat__ tunion YYSTYPE;\n__flat__ tunion YYSTYPE "); 
+  //fprintf((FILE @)fattrs, "\n__flat__ datatype YYSTYPE;\n__flat__ datatype YYSTYPE "); 
   //if (fdefines)
   //fprintf((FILE @)fdefines, 
-  //"\nextern int yyparse();\nextern __flat__ tunion YYSTYPE; "
-  //    "\nextern __flat__ tunion YYSTYPE ");
+  //"\nextern int yyparse();\nextern __flat__ datatype YYSTYPE; "
+  //    "\nextern __flat__ datatype YYSTYPE ");
 
   count = 0;
   in_comment = 0;
@@ -1160,7 +1160,7 @@ print_union_decl()
 {
   seen_destructors = reverse(seen_destructors);
   struct strlist *`H l1 = seen_destructors;
-  fprintf((FILE @)fattrs0,"\n__flat__ tunion YYSTYPE;\n__flat__ tunion YYSTYPE ");
+  fprintf((FILE @)fattrs0,"\n__flat__ datatype YYSTYPE;\n__flat__ datatype YYSTYPE ");
   fprintf((FILE @)fattrs0,"\n{");
   for(; l1 != NULL; l1 = l1->tl){
     fprintf((FILE @)fattrs0,"\n  %s(%s),",
@@ -1170,7 +1170,7 @@ print_union_decl()
   fprintf((FILE @)fattrs0,"\n};\n");
   if (fdefines){
     fprintf((FILE @)fdefines,"\nextern int yyparse();");
-    fprintf((FILE @)fdefines,"\nextern __flat__ tunion YYSTYPE ");
+    fprintf((FILE @)fdefines,"\nextern __flat__ datatype YYSTYPE ");
     fprintf((FILE @)fdefines,"\n{");
     l1 = seen_destructors;
     for(; l1 != NULL; l1 = l1->tl){
@@ -1192,7 +1192,7 @@ parse_expect_decl()
 {
   register int c;
   register int count;
-  char buffer[21]ZEROTERM = {for i<20:0};
+  char buffer[21]@zeroterm = {for i<20:0};
 
   c = getc((FILE @)finput);
   while (c == ' ' || c == '\t')
@@ -1625,7 +1625,7 @@ copy_action(symbol_list *rule, int stack_offset)
 
 	      break;
 	      /* JGM: we use ^$ to abbreviate <typename> where
-	       * <typename> is the tunion field name that's associated with
+	       * <typename> is the datatype field name that's associated with
 	       * the rule via the type declaration.  
 	       */
 	    case '^':
@@ -1807,7 +1807,7 @@ gensym()
 {
   register bucket *sym;
 
-  sprintf((char ?NOZEROTERM)token_buffer, "@%d", ++gensym_count);
+  sprintf((char ? @nozeroterm)token_buffer, "@%d", ++gensym_count);
   sym = getsym(token_buffer);
   sym->class = SNTERM;
   sym->value = (short)nvars++;
@@ -2326,7 +2326,7 @@ packsymbols()
 	  if (spec_name_prefix)
 	    fprintf((FILE @)fdefines, "\nextern YYSTYPE %slval;\n", spec_name_prefix);
 	  else
-	    fprintf((FILE @)fdefines, "\nextern tunion YYSTYPE yylval;\n");
+	    fprintf((FILE @)fdefines, "\nextern datatype YYSTYPE yylval;\n");
 	}
 
       if (semantic_parser)

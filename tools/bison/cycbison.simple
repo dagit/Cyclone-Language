@@ -42,8 +42,8 @@
 
 /* Dan: Do not define YYERROR_VERBOSE -- it has not been ported */
 
-xtunion exn {Yyimpossible};     // used in various weird cases
-xtunion exn {Yystack_overflow}; // thrown if the parsing stack overflows
+datatype exn @extensible {Yyimpossible};     // used in various weird cases
+datatype exn @extensible {Yystack_overflow}; // thrown if the parsing stack overflows
 
 #define yyerrok		(yyerrstatus = 0)
 #define yyclearin	(yychar = YYEMPTY)
@@ -84,7 +84,7 @@ extern int yylex(YYLEX_PARAM_ARG);
 
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
-tunion YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */
+datatype YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */
 
 static int yynerrs = 0;		/*  number of parse errors so far       */
 
@@ -132,8 +132,8 @@ region yyregion; {
 	(short @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : (short)0});
   /*  the semantic value stack */
   int yyvsp_offset;
-  tunion YYSTYPE @{YYMAXDEPTH} yyvs = 
-	(tunion YYSTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : yylval}); 
+  datatype YYSTYPE @{YYMAXDEPTH} yyvs = 
+	(datatype YYSTYPE @{YYMAXDEPTH})(rnew(yyregion) {for i < YYMAXDEPTH : yylval}); 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
@@ -149,14 +149,14 @@ region yyregion; {
 
 #ifdef YYPURE
   int yychar;
-  tunion YYSTYPE yylval;
+  datatype YYSTYPE yylval;
   int yynerrs;
 #ifdef YYLSP_NEEDED
   YYLTYPE yylloc;
 #endif
 #endif
 
-  tunion YYSTYPE yyval = yylval;/* the variable used to return		*/
+  datatype YYSTYPE yyval = yylval;/* the variable used to return		*/
 				/*  semantic values from the action	*/
 				/*  routines				*/
 
@@ -201,7 +201,7 @@ yynewstate:
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
     short ?yyss1 = rnew(yyregion) {for i < yystacksize : 0};
-    tunion YYSTYPE ?yyvs1 = rnew(yyregion) {for i < yystacksize : yylval};
+    datatype YYSTYPE ?yyvs1 = rnew(yyregion) {for i < yystacksize : yylval};
 #ifdef YYLSP_NEEDED
     YYLTYPE ?yyls1 = rnew(yyregion) {for i < yystacksize : yynewloc()};
 #endif

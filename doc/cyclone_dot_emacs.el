@@ -12,16 +12,31 @@
       auto-mode-alist)))))))
 (font-lock-add-keywords 'c++-mode ; reserved words not in C++ and not types
     (list 
-      "\\\<xtunion\\\>" 
-      "\\\<tunion\\\>" 
+      "\\\<rnew>\\\>"
+      "\\\<new>\\\>"
+      "\\\<malloc>\\\>"
+      "\\\<rmalloc>\\\>"
+      "\\\<region>\\\>"      
+      "\\\<xtunion\\\>"  ; deprecated
+      "\\\<tunion\\\>"   ; deprecated
+      "\\\<datatype\\\>"
+      "\\\<extensible\\\>"
+      "\\\<zeroterm\\\>"
+      "\\\<nozeroterm\\\>"
+      "\\\<resetable\\\>"
+      "\\\<tagged\\\>"
       "\\\<fallthru\\\>"
-      "\\\<default\\\>"
-      "\\\<abstract\\\>"
-      "\\\<codegen\\\>"
-      "\\\<splice\\\>"
-      "\\\<cut\\\>"
-      "\\\<fill\\\>"
-      '("\\\<NULL\\\>" (0 'font-lock-constant-face t t)))
+      '("\\\<NULL\\\>" (0 'font-lock-constant-face t t))
+      ; color the pattern like a constant, except identifiers starting
+      ; with lower-case are variables.
+      '("\\(\\\<let\\\>\\)\\([^=\n]*\\)=" 
+	 (1 'font-lock-type-face) 
+	 (2 'font-lock-constant-face)
+	 ("[^A-Za-z0-9_]\\([a-z][A-Za-z0-9_]*\\)"  
+	  (cond (t (goto-char (match-end 1)) (match-end 2)))
+	  nil
+	  (1 font-lock-variable-name-face t t)))
+      '("\\\<let\\\>" . 'font-lock-type-face))
     t)
 
 (setq c++-font-lock-extra-types 

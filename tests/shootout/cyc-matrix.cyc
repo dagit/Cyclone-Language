@@ -52,7 +52,7 @@ void mmult(tag_t<`i> rows,
 int main(int argc, char ?argv[]) {
     int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
     START_TIME
-    region r {
+    region r; {
       int @{SIZE}@{SIZE} m1;
       int @{SIZE}@{SIZE} m2;
       int @{SIZE}@{SIZE} mm;

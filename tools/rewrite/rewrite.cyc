@@ -7,7 +7,7 @@
 using Core;
 using List;
 
-xtunion exn { Eof };
+datatype @extensible exn { Eof };
 
 void read_filename(char ?buf) {
   int i = 0;
@@ -22,7 +22,7 @@ void read_filename(char ?buf) {
 }
 
 void read_num(int @j) {
-  char buffer[11]ZEROTERM = {for i < 10 : 0};
+  char buffer[11]@zeroterm = {for i < 10 : 0};
   char ?buf = (char ?)buffer;
   int i = 0;
   int c = fgetc(stdin);
@@ -122,8 +122,8 @@ void copy_rest(FILE @fin, FILE @fout) {
 }
 
 int main(int argc, const char ?`H? argv) {
-  char filename[1026]ZEROTERM = {for i < 1025 : 0};
-  char delta[1026]ZEROTERM = {for i < 1025 : 0};
+  char filename[1026]@zeroterm = {for i < 1025 : 0};
+  char delta[1026]@zeroterm = {for i < 1025 : 0};
   int line1 = 0, line2 = 0;
   int offset1 = 0, offset2 = 0;
   int i = 0;

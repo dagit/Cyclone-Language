@@ -36,18 +36,18 @@ void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
 }
 
-tunion context {
+datatype context {
   InTag,
   Normal
 };
 
-static tunion context current = Normal;
+static datatype context current = Normal;
 
-void setContext(tunion `H context c) {
+void setContext(datatype `H context c) {
   current = c;
 }
 
-tunion context getContext() {
+datatype context getContext() {
   return current;
 } 
 

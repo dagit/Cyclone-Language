@@ -21,7 +21,7 @@ char ?strrealloc(char ?buf, unsigned sz) {
 
 int main(int argc, char ?argv[]) {
     int i, wordbufsize = 80;
-    char line[MAXLINELEN+1]ZEROTERM = {for i < MAXLINELEN : 0};
+    char line[MAXLINELEN+1]@zeroterm = {for i < MAXLINELEN : 0};
     char c, ?cp, ?wordbuf;
     struct ht_ht @dict;
     FILE *fh;

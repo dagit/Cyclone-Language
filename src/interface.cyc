@@ -259,7 +259,7 @@ static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
   return check_public_type(ae, seen, "variable", d->name, d->type);
 }
 
-static list_t<var_t> get_abs_ns(tunion Nmspace ns) {
+static list_t<var_t> get_abs_ns(datatype Nmspace ns) {
   switch (ns) {
   case Abs_n(l): return l;
   default: invalid_arg("get_abs_ns");
@@ -1220,29 +1220,29 @@ using Typerep;
 
 //  static tunion Typerep::Typestruct i_t_rep = gen(i_t);
 
-extern tunion Typestruct.Struct struct_Absyn_Aggrdecl_rep;
-static tunion Typestruct.ThinPtr aggrdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Aggrdecl_rep);
-tunion Typestruct aggrdecl_rep = (tunion Typestruct)&aggrdecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Aggrdecl_rep;
+static datatype Typestruct.ThinPtr aggrdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Aggrdecl_rep);
+datatype Typestruct aggrdecl_rep = (datatype Typestruct)&aggrdecl_p;
 
-extern tunion Typestruct.Struct struct_Absyn_Tuniondecl_rep;
-static tunion Typestruct.ThinPtr tuniondecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Tuniondecl_rep);
-tunion Typestruct tuniondecl_rep = (tunion Typestruct)&tuniondecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Tuniondecl_rep;
+static datatype Typestruct.ThinPtr tuniondecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Tuniondecl_rep);
+datatype Typestruct tuniondecl_rep = (datatype Typestruct)&tuniondecl_p;
 
-extern tunion Typestruct.Struct struct_Absyn_Enumdecl_rep;
-static tunion Typestruct.ThinPtr enumdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Enumdecl_rep);
-tunion Typestruct enumdecl_rep = (tunion Typestruct)&enumdecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Enumdecl_rep;
+static datatype Typestruct.ThinPtr enumdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Enumdecl_rep);
+datatype Typestruct enumdecl_rep = (datatype Typestruct)&enumdecl_p;
 
-extern tunion Typestruct.Struct struct_Absyn_Typedefdecl_rep;
-static tunion Typestruct.ThinPtr typedefdecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Typedefdecl_rep);
-tunion Typestruct typedefdecl_rep = (tunion Typestruct)&typedefdecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Typedefdecl_rep;
+static datatype Typestruct.ThinPtr typedefdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Typedefdecl_rep);
+datatype Typestruct typedefdecl_rep = (datatype Typestruct)&typedefdecl_p;
 
-extern tunion Typestruct.Struct struct_Absyn_Vardecl_rep;
-static tunion Typestruct.ThinPtr vardecl_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Vardecl_rep);
-tunion Typestruct vardecl_rep = (tunion Typestruct)&vardecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Vardecl_rep;
+static datatype Typestruct.ThinPtr vardecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Vardecl_rep);
+datatype Typestruct vardecl_rep = (datatype Typestruct)&vardecl_p;
 
-extern tunion Typestruct.Struct struct_Absyn_Tunionfield_rep;
-static tunion Typestruct.ThinPtr tunionfield_p = ThinPtr(1,(tunion Typestruct)&struct_Absyn_Tunionfield_rep);
-tunion Typestruct tunionfield_rep = (tunion Typestruct)&tunionfield_p;
+extern datatype Typestruct.Struct struct_Absyn_Tunionfield_rep;
+static datatype Typestruct.ThinPtr tunionfield_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Tunionfield_rep);
+datatype Typestruct tunionfield_rep = (datatype Typestruct)&tunionfield_p;
 
 namespace Interface {
 

@@ -125,9 +125,9 @@ typedef long long int _IO_ssize_t;
 
 #define u_long unsigned long
 
-static const char ?`r __sccl (char @{256} NOZEROTERM tab, const char ?`r fmt);
+static const char ?`r __sccl (char @{256}  @nozeroterm tab, const char ?`r fmt);
 
-tunion ScanfArg<`r::R> {
+datatype ScanfArg<`r::R> {
   ShortPtr_sa(short @`r);
   UShortPtr_sa(unsigned short @`r);
   IntPtr_sa(int @`r);
@@ -135,7 +135,7 @@ tunion ScanfArg<`r::R> {
   StringPtr_sa(char ?`r);
   DoublePtr_sa(double @`r);
   FloatPtr_sa(float @`r);
-  CharPtr_sa(char ?NOZEROTERM`r)
+  CharPtr_sa(char ? @nozeroterm`r)
 };
 
 static short @`r va_arg_short_ptr(sarg_t<`r,`r2> a) {
@@ -154,9 +154,9 @@ static int @`r va_arg_int_ptr(sarg_t<`r,`r2> a) {
   }
 }  
 
-static char ?NOZEROTERM `r va_arg_string_ptr(sarg_t<`r,`r2> a) {
+static char ? @nozeroterm `r va_arg_string_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
-  case &StringPtr_sa(p): return (char ?NOZEROTERM`r)p;
+  case &StringPtr_sa(p): return (char ? @nozeroterm`r)p;
   case &CharPtr_sa(p): return p;
   default: throw new Invalid_argument("scan expects char pointer");
   }
@@ -176,10 +176,10 @@ static float @`r va_arg_float_ptr(sarg_t<`r,`r2> a) {
   }
 }  
 
-static char?NOZEROTERM`r va_arg_char_ptr(sarg_t<`r,`r2> a) {
+static char? @nozeroterm`r va_arg_char_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
   case &CharPtr_sa(p): return p;
-  case &StringPtr_sa(p): return (char ?NOZEROTERM)p;
+  case &StringPtr_sa(p): return (char ? @nozeroterm)p;
   default: throw new Invalid_argument("scan expects char pointer");
   }
 }
@@ -214,7 +214,7 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
 	/* conversion function (strtol/strtoul) */
 	char ccltab[256];
         /* character class table for %[...] */
-	char buf[BUF+1]ZEROTERM = {for i < BUF: '0'};
+	char buf[BUF+1]@zeroterm = {for i < BUF: '0'};
         /* buffer for numeric conversions */
 	int seen_eof = 0;
 
@@ -480,8 +480,8 @@ literal:
                           if (n == 0)
                             goto match_failure;
 			} else {
-                            char ?NOZEROTERM p4 = (char ?NOZEROTERM)va_arg_string_ptr(*ap); ap++;
-                            char ?NOZEROTERM p5 = p4;
+                            char ? @nozeroterm p4 = (char ? @nozeroterm)va_arg_string_ptr(*ap); ap++;
+                            char ? @nozeroterm p5 = p4;
                             int c = _IO_peekc(fp);
 			    while (ccltab[(char)c]) {
                               if (numelts(p5) == 0) goto eof_failure;
@@ -803,7 +803,7 @@ done:
  */
 static const char ? `r
 __sccl (tab, fmt)
-     char @{256} NOZEROTERM tab;
+     char @{256}  @nozeroterm tab;
      const char ? `r fmt;
 {
 	int c, n, v;

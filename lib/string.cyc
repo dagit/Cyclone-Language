@@ -237,7 +237,7 @@ mstring_t<`r> rstrconcat_l(region_t<`r> r,list_t<stringptr_t>strs)
     while (strs != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy((char ?NOZEROTERM)(ans+i),next,len);
+      strncpy((char ? @nozeroterm)(ans+i),next,len);
       i += len;
       strs = strs->tl;
       lens = lens->tl;
@@ -277,14 +277,14 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, buffer_t sepa
     while (strs->tl != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy((char ?NOZEROTERM)(ans+i),next,len);
+      strncpy((char ? @nozeroterm)(ans+i),next,len);
       i += len;
-      strncpy((char ?NOZEROTERM)(ans+i),separator,seplen);
+      strncpy((char ? @nozeroterm)(ans+i),separator,seplen);
       i += seplen;
       strs = strs->tl;
       lens = lens->tl;
     }
-    strncpy((char ?NOZEROTERM)(ans+i),*(strs->hd),lens->hd);
+    strncpy((char ? @nozeroterm)(ans+i),*(strs->hd),lens->hd);
     return ans;
   }
 }
@@ -330,7 +330,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
   } else {
     // it may be that strlen(src) <= dsz
     size_t len = strlen(src);
-    strncpy((char ?NOZEROTERM)dest,src,len);
+    strncpy((char ? @nozeroterm)dest,src,len);
     if (len < numelts(dest))
       dest[len] = '\000';
   }
@@ -346,7 +346,7 @@ mstring_t<`r> rstrdup(region_t<`r> r, buffer_t src) {
 
   len = strlen(src);
   temp = rnew_string(r,len+1);
-  strncpy((char ?NOZEROTERM)temp,src,len);
+  strncpy((char ? @nozeroterm)temp,src,len);
   return temp;
 }
 
@@ -362,7 +362,7 @@ mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
   sz = (sz>slen)?sz:slen;
   temp = rnew_string(r,sz);
 
-  strncpy((char ?NOZEROTERM)temp,s,slen);
+  strncpy((char ? @nozeroterm)temp,s,slen);
 
   if (slen != numelts(s))
     temp[slen] = '\000';
@@ -429,8 +429,8 @@ mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, buffer_t curr_suffix
     if (src[m-i] != curr_suffix[n-i])
       throw new Invalid_argument(err);
   mstring_t ans = rnew_string(r,m-n+numelts(new_suffix)+1);
-  strncpy((char ?NOZEROTERM)ans,src,m-n);
-  strncpy((char ?NOZEROTERM)(ans+(m-n)),new_suffix,numelts(new_suffix));
+  strncpy((char ? @nozeroterm)ans,src,m-n);
+  strncpy((char ? @nozeroterm)(ans+(m-n)),new_suffix,numelts(new_suffix));
   return ans;
 }
 
@@ -708,16 +708,16 @@ namespace Cstr {
     `a*`r memcpy(`a::A*`r, const `a*, size_t n);
     `a*`r memmove(`a::A*`r, const `a*, size_t n);
     int memcmp(const void*, const void*, size_t n);
-    char *NOZEROTERM `r memchr(const char *NOZEROTERM `r, char c, size_t n);
-    void *NOZEROTERM `r memset(void *NOZEROTERM `r, int c, size_t n);
+    char * @nozeroterm `r memchr(const char * @nozeroterm `r, char c, size_t n);
+    void * @nozeroterm `r memset(void * @nozeroterm `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
-    char *NOZEROTERM GC_realloc(char *NOZEROTERM`H, size_t n);
+    char * @nozeroterm GC_realloc(char * @nozeroterm`H, size_t n);
   }
 }
 
-char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
-  let res = Cstr::GC_realloc((char *NOZEROTERM)s, n);
+char ? @nozeroterm realloc(char ? @nozeroterm`H s, size_t n) {
+  let res = Cstr::GC_realloc((char * @nozeroterm)s, n);
   return wrap_Cbuffer_as_buffer(res, n);
 }
 
@@ -735,47 +735,47 @@ char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
   return d;
 }
 
-int memcmp(const char ?NOZEROTERM s1, const char ?NOZEROTERM s2, size_t n) {
+int memcmp(const char ? @nozeroterm s1, const char ? @nozeroterm s2, size_t n) {
   if (s1 == NULL || s2 == NULL || numelts(s1) >= n || numelts(s2) >= n)
     throw new Invalid_argument("memcmp");
   return Cstr::memcmp((const void *)s1, (const void *)s2, n);
 }
 
-const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
+const char? @nozeroterm `r memchr(const char ? @nozeroterm `r s, char c, size_t n) {
   unsigned int sz = numelts(s);
   if (s == NULL || n > sz)
     throw new Invalid_argument("memchr");
-  let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
+  let p = Cstr::memchr((const char * @nozeroterm)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)((const char *NOZEROTERM)s);
-  let pval = (unsigned int)(const char *NOZEROTERM)p;
+  let sval = (unsigned int)((const char * @nozeroterm)s);
+  let pval = (unsigned int)(const char * @nozeroterm)p;
   let delta = pval - sval;
   return (s + delta);
 }
 
-char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
+char? @nozeroterm`r mmemchr(char ? @nozeroterm`r s, char c, size_t n) {
   unsigned int sz = numelts(s);
   if (s == NULL || n > sz)
     throw new Invalid_argument("mmemchr");
-  let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
+  let p = Cstr::memchr((const char * @nozeroterm)s, c, n);
   if (p == NULL) return NULL;
-  let sval = (unsigned int)((const char *NOZEROTERM)s);
+  let sval = (unsigned int)((const char * @nozeroterm)s);
   let pval = (unsigned int)p;
   let delta = pval - sval;
   return (s + delta);
 }
 
-char ?NOZEROTERM`r memset(char ?NOZEROTERM`r s, char c, size_t n) {
+char ? @nozeroterm`r memset(char ? @nozeroterm`r s, char c, size_t n) {
   if (s == NULL || n > numelts(s))
     throw new Invalid_argument("memset");
-  Cstr::memset((void *)((char *NOZEROTERM)s), c, n);
+  Cstr::memset((void *)((char * @nozeroterm)s), c, n);
   return s;
 }
  
-void bzero(char?NOZEROTERM s, size_t n) {
+void bzero(char? @nozeroterm s, size_t n) {
   if(s == NULL || numelts(s) < n)
     throw new Invalid_argument("bzero");
-  Cstr::bzero((_*NOZEROTERM)s,n);
+  Cstr::bzero((_* @nozeroterm)s,n);
 }
 
 void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {

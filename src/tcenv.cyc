@@ -84,7 +84,7 @@ using Absynpp;
 using RgnOrder;
 namespace Tcenv;
 
-xtunion exn {Env_error};
+datatype exn @extensible {Env_error};
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
   fprintf(stderr,"Internal error in tcenv: %s\n",msg);
@@ -126,7 +126,7 @@ struct Genv<`g::R> {
 // because we look them up in the ae environment of the tenv.
 
 // Used to tell what an ordinary identifer refers to
-tunion Resolved {
+datatype Resolved {
   VarRes(binding_t); // includes unresolved variant
   AggrRes(aggrdecl_t);
   TunionRes(tuniondecl_t,tunionfield_t);
@@ -134,7 +134,7 @@ tunion Resolved {
   AnonEnumRes(type_t,enumfield_t);
 };
 
-tunion Jumpee {
+datatype Jumpee {
   NotLoop_j;
   CaseEnd_j;
   FnEnd_j;
@@ -208,7 +208,7 @@ abstract struct Fenv<`r::R> {
 
 
 //////////////////////// Lookup a local binding /////////////////////////////
-xtunion exn { NoBinding; };
+datatype exn @extensible { NoBinding; };
 
 // lookup a binding, throwing NoBinding on failure.
 binding_t lookup_binding(bindings_t bs, var_t v) {
@@ -234,7 +234,7 @@ genv_t<`r> empty_genv(region_t<`r> r) {
 tenv_t<`r,`r> tc_init(region_t<`r> r) {
   // Initialize globals
   empty_var_set = new Opt(Set::empty(strptrcmp));
-  // Set up initial environment so that xtunion exn, etc. is defined
+  // Set up initial environment so that datatype exn, etc. is defined
   let ge     = empty_genv(r);
   ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], new exn_tud);
   for (let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl)
@@ -905,7 +905,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   return put_fenv(r,te,fe);
 }
 
-static tunion KindBound.Eq_kb rgn_kb = Eq_kb(RgnKind);
+static datatype KindBound.Eq_kb rgn_kb = Eq_kb(RgnKind);
 
 tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te 
                         : {`r2} > `r) {

@@ -20,14 +20,14 @@ SYNTAX_EXTERN_DEFINITION struct Location {
 };
 typedef struct Location @ location_t;
 
-SYNTAX_EXTERN_DEFINITION tunion Regular_expression {
+SYNTAX_EXTERN_DEFINITION datatype Regular_expression {
   Epsilon;
   Characters(list_t<int>);
-  Sequence(tunion Regular_expression, tunion Regular_expression);
-  Alternative(tunion Regular_expression, tunion Regular_expression);
-  Repetition(tunion Regular_expression);
+  Sequence(datatype Regular_expression, datatype Regular_expression);
+  Alternative(datatype Regular_expression, datatype Regular_expression);
+  Repetition(datatype Regular_expression);
 };
-typedef tunion Regular_expression regular_expression_t;
+typedef datatype Regular_expression regular_expression_t;
 
 typedef $(regular_expression_t,location_t) @ acase_t;
 typedef $(string_t,string_t,list_t<acase_t>) @ entrypoint_t;

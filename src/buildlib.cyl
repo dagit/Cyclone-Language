@@ -1142,8 +1142,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return curr;
   }
 
-  tunion buildlib_mode { NORMAL, GATHER, GATHERSCRIPT, FINISH };
-  static tunion buildlib_mode mode = NORMAL;
+  datatype buildlib_mode { NORMAL, GATHER, GATHERSCRIPT, FINISH };
+  static datatype buildlib_mode mode = NORMAL;
   static int gathering() {
     return (mode == GATHER) || (mode == GATHERSCRIPT) ;
   }
@@ -1198,7 +1198,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Exception for handling error cases of process_file */
-  xtunion exn { NO_SUPPORT(string_t) };
+  datatype exn @extensible { NO_SUPPORT(string_t) };
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
   int process_file(const char @ filename,

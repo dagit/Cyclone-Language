@@ -650,8 +650,8 @@ void check_pat_regions(tenv_t te, pat_t p) {
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
 // Xtunions is infinite (i.e., NULL).
-static __flat__ tunion Name_value { Name_v(string_t); Int_v(int); };
-typedef tunion Name_value name_value_t;
+static __flat__ datatype Name_value { Name_v(string_t); Int_v(int); };
+typedef datatype Name_value name_value_t;
 static struct Con_s<`r::R> {
   name_value_t name;
   int          arity;
@@ -660,11 +660,11 @@ static struct Con_s<`r::R> {
   struct Pat  *`H orig_pat;  
 };
 typedef struct Con_s<`r> @`r con_t<`r>;
-static tunion Simple_pat<`r::R> { 
+static datatype Simple_pat<`r::R> { 
   Any; 
-  Con(con_t<`r>,list_t<tunion `r Simple_pat<`r>,`r>); 
+  Con(con_t<`r>,list_t<datatype `r Simple_pat<`r>,`r>); 
 };
-typedef tunion `r Simple_pat<`r> simple_pat_t<`r>;
+typedef datatype `r Simple_pat<`r> simple_pat_t<`r>;
 
 // used for creating sets of constructors
 static int compare_con(con_t c1, con_t c2) {
@@ -882,11 +882,11 @@ typedef list_t<$(simple_pat_t<`r>,`rhs)@`r,`r> match_t<`rhs,`r>;
 // described by tdi.  The descriptor Neg[c1,...,cn] describes all
 // values v that are not of the form ci(v1,...,vm) (1 <= i <= n).
 // Note that Neg[] denotes any possible value.
-static tunion Term_desc<`r::R> {
-  Pos(con_t<`r>,list_t<tunion `r Term_desc<`r>,`r>);
+static datatype Term_desc<`r::R> {
+  Pos(con_t<`r>,list_t<datatype `r Term_desc<`r>,`r>);
   Neg(Set::set_t<con_t<`r>,`r>);
 };
-typedef tunion `r Term_desc<`r> term_desc_t<`r>;
+typedef datatype `r Term_desc<`r> term_desc_t<`r>;
 
 // Contexts represent a partial term-description matched thus far,
 // from the root node of the object in a left-to-right fashion.
@@ -899,14 +899,14 @@ typedef list_t<$(con_t<`r>,list_t<term_desc_t<`r>,`r>)@`r,`r> context_t<`r>;
 // information to really generate the right code.
 typedef list_t<int,`r> access_t<`r>;
 
-static tunion Decision<`rhs,`r::R> {
+static datatype Decision<`rhs,`r::R> {
   Failure(term_desc_t<`r>);
   Success(`rhs);
   IfEq(access_t<`r>, con_t<`r>, 
-       tunion `r Decision<`rhs,`r>, 
-       tunion `r Decision<`rhs,`r>);
+       datatype `r Decision<`rhs,`r>, 
+       datatype `r Decision<`rhs,`r>);
 };
-typedef tunion `r Decision<`rhs,`r> decision_t<`rhs,`r>;
+typedef datatype `r Decision<`rhs,`r> decision_t<`rhs,`r>;
 
 // A work_stack records what tests we have to continue to do.  An
 // implicit invariant is that for each frame on the stack, the
@@ -916,8 +916,8 @@ typedef  $(list_t<simple_pat_t<`r>,`r>,
 	   list_t<term_desc_t<`r>,`r>)@`r work_stack_frame_t<`r>;
 typedef list_t<work_stack_frame_t<`r>,`r> work_stack_t<`r>;
 // Used during primitive match compilation
-static tunion Answer { Yes, No, Maybe };
-typedef tunion Answer answer_t;
+static datatype Answer { Yes, No, Maybe };
+typedef datatype Answer answer_t;
 
 // Add c to a set of negative constructors for a term description.
 // Assumes that td is a negative term description, that c is not
@@ -1149,7 +1149,7 @@ $(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match($(region_t<`r>,int @)@ env,
 }
 
 // Turn a descriptor into an example for reporting an inexhaustive match
-xtunion exn { Desc2string };
+datatype @extensible exn { Desc2string };
 static string_t descs2string(region_t<`r> r, list_t<term_desc_t<`r>,`r>);
 static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
   switch (d) {

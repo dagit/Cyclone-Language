@@ -89,7 +89,7 @@ namespace Parse {
 bool no_register = false;
 
 ////////////////////// Type definitions needed only during parsing ///////////
-tunion Type_specifier {
+datatype Type_specifier {
   Signed_spec(seg_t);
   Unsigned_spec(seg_t);
   Short_spec(seg_t);
@@ -97,12 +97,12 @@ tunion Type_specifier {
   Type_spec(type_t,seg_t);    // int, `a, list_t<`a>, etc.
   Decl_spec(decl_t);
 };
-typedef tunion Type_specifier type_specifier_t;
+typedef datatype Type_specifier type_specifier_t;
 
-tunion Storage_class {
+datatype Storage_class {
  Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
 };
-typedef tunion Storage_class storage_class_t;
+typedef datatype Storage_class storage_class_t;
 
 struct Declaration_spec {
   opt_t<storage_class_t>   sc;
@@ -874,11 +874,13 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE XTUNION TUNION
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw DYNREGION_T
+%token GEN NOZEROTERM_QUAL ZEROTERM_QUAL PORTON PORTOFF FLAT_kw DYNREGION_T
 %token ALIAS NUMELTS VALUEOF VALUEOF_T
+// Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
+%token NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL EXTENSIBLE_QUAL RESETABLE_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -958,7 +960,7 @@ using Parse;
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
-%type <bool> tunion_or_xtunion optional_inject flat_opt
+%type <bool> tunion_or_xtunion optional_inject flat_opt resetable_qual_opt tagged_qual_opt extensible_opt
 %type <scope_t> tunionfield_scope
 %type <tunionfield_t> tunionfield
 %type <list_t<tunionfield_t>> tunionfield_list
@@ -1140,14 +1142,14 @@ declaration:
       $$=^$(new List(letv_decl(vds,LOC(@1,@3)),NULL));
     }
 /* Cyc: region declaration */
-/* region <`r> h; */
-| REGION '<' TYPE_VAR '>' IDENTIFIER ';'
+/* region <`r> h;  and region <`r> h @resetable; */
+| REGION '<' TYPE_VAR '>' IDENTIFIER resetable_qual_opt ';'
   { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
       err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
     tvar_t tv = new Tvar(new $3,-1,Tcutil::kind_to_bound(RgnKind));
     type_t t  = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $5),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,false,NULL,LOC(@1,@6)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,$6,NULL,LOC(@1,@7)),NULL));
   }
 /* region h;   and  region h = open(e); */
 | REGION IDENTIFIER open_exp_opt ';'
@@ -1159,28 +1161,15 @@ declaration:
     vardecl_t vd = new_vardecl(new $(Loc_n,new $2),new RgnHandleType(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,false,$3,LOC(@1,@4)),NULL));
   }
-/* region [resetable] <`r> h; */
-| REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER ';'
-  { if (zstrcmp($3,"resetable") != 0)
-      err("expecting [resetable]",LOC(@3,@3));
-    if (zstrcmp($6,"`H") == 0 || zstrcmp($6,"`U"))
-      err(aprintf("bad occurrence of heap region %s",$6),LOC(@6,@6));
-    tvar_t tv = new Tvar(new $6,-1,Tcutil::kind_to_bound(RgnKind));
-    type_t t  = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $8),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@9)),NULL));
-  }
-/* region [resetable] h; */
-| REGION '[' IDENTIFIER ']' IDENTIFIER ';'
-  { if (zstrcmp($3,"resetable") != 0)
-      err("expecting `resetable'",LOC(@3,@3));
-    if (zstrcmp($5,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@5,@5));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), -1,
+/* region h @resetable; */
+| REGION IDENTIFIER RESETABLE_QUAL ';'
+  { if (zstrcmp($2,"H") == 0)
+      err("bad occurrence of heap region `H",LOC(@2,@2));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
 			 Tcutil::kind_to_bound(RgnKind));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $5),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@6)),NULL));
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $2),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@4)),NULL));
   }
 /* Cyc: alias <r>t v = e; */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
@@ -1188,6 +1177,11 @@ declaration:
     vardecl_t vd = new_vardecl(new $(Loc_n, new $5),VoidType,NULL);
     $$ = ^$(new List(alias_decl($7,tv,vd,LOC(@1,@8)),NULL));
   }
+;
+
+resetable_qual_opt:
+  /* empty */ { $$=^$(false); }
+| RESETABLE_QUAL { $$=^$(true); }
 ;
 
 declaration_list:
@@ -1274,14 +1268,14 @@ attribute_list:
 
 attribute:
   IDENTIFIER
-  { static tunion Attribute.Aligned_att att_aligned = Aligned_att(-1);
-  static $(string_t,tunion Attribute) att_map[] = {
+  { static datatype Attribute.Aligned_att att_aligned = Aligned_att(-1);
+  static $(string_t,datatype Attribute) att_map[] = {
     $("stdcall", Stdcall_att),
     $("cdecl", Cdecl_att),
     $("fastcall", Fastcall_att),
     $("noreturn", Noreturn_att),
     $("const", Const_att), // a keyword (see grammar), but __const__ possible
-    $("aligned", (tunion Attribute)&att_aligned), // WARNING: sharing!
+    $("aligned", (datatype Attribute)&att_aligned), // WARNING: sharing!
     $("packed", Packed_att),
     $("shared", Shared_att),
     $("unused", Unused_att),
@@ -1473,21 +1467,26 @@ struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt '{' 
+| struct_or_union struct_union_name type_params_opt tagged_qual_opt '{' 
     type_params_opt optional_rgn_order 
   struct_declaration_list '}'
     { 
       let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
+      let exist_ts = List::map_c(typ2tvar,LOC(@6,@6),$6);
       $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts,
-				    aggrdecl_impl(exist_ts,$6,$7), NULL,
-				    LOC(@1,@8))));
+				    aggrdecl_impl(exist_ts,$7,$8,$4), NULL,
+				    LOC(@1,@9))));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union struct_union_name type_params_opt 
     { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2),$3)),
 		      LOC(@1,@3)));
     }
+;
+
+tagged_qual_opt:
+  /* empty */ { $$=^$(false); }
+| TAGGED_QUAL { $$=^$(true); }
 ;
 
 type_params_opt:
@@ -1619,18 +1618,21 @@ struct_declarator:
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases
 tunion_specifier:
-  flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt '{' tunionfield_list '}'
-    { let ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
-      $$ = ^$(new Decl_spec(tunion_decl(Public, $4,ts,new Opt($7), 
-                                        $2,$1,LOC(@1,@8))));
+  flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt extensible_opt '{' tunionfield_list '}'
+    { bool extensible = $2 || $6;
+      let ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
+      $$ = ^$(new Decl_spec(tunion_decl(Public, $4,ts,new Opt($8), 
+                                        extensible,$1,LOC(@1,@9))));
     }
-| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(new TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo($4,$2,$1)), $5, $3)), LOC(@1,@5)));
+| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt extensible_opt
+    { bool extensible = $2 || $6;
+      $$=^$(type_spec(new TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo($4,extensible,$1)), $5, $3)), LOC(@1,@6)));
     }
-| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(
-		  UnknownTunionfield(UnknownTunionFieldInfo($4,$6,$2)),$7)),
-		      LOC(@1,@7)));
+| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt extensible_opt
+    { bool extensible = $2 || $8;
+      $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(
+		  UnknownTunionfield(UnknownTunionFieldInfo($4,$6,extensible)),$7)),
+		      LOC(@1,@8)));
     }
 ;
 
@@ -1639,8 +1641,14 @@ flat_opt:
 | /*empty*/ { $$=^$(false); }
 
 tunion_or_xtunion:
-  TUNION  { $$=^$(false); }
-| XTUNION { $$=^$(true);  }
+  DATATYPE extensible_opt { $$=$!2; }
+| TUNION    { $$=^$(false); }
+| XTUNION   { $$=^$(true);  }
+;
+
+extensible_opt:
+  /* empty */ { $$=^$(false); }
+| EXTENSIBLE_QUAL { $$=^$(true); }
 ;
 
 tunionfield_list:
@@ -1814,9 +1822,9 @@ pointer_bound:
 | '{' assignment_expression '}' { $$=^$(new_conref(new Upper_b($2))); }
 
 zeroterm_qual_opt:
-/* empty */     { $$ = ^$(empty_conref()); }
-| ZEROTERM_kw   { $$ = ^$(true_conref);    }
-| NOZEROTERM_kw { $$ = ^$(false_conref);   }
+/* empty */       { $$ = ^$(empty_conref()); }
+| ZEROTERM_QUAL   { $$ = ^$(true_conref);    }
+| NOZEROTERM_QUAL { $$ = ^$(false_conref);   }
 ;
 
 /* Returns an option */
@@ -2550,7 +2558,7 @@ assignment_expression:
 | unary_expression assignment_operator assignment_expression
     { $$=^$(assignop_exp($1,$2,$3,LOC(@1,@3))); }
 | unary_expression SWAP assignment_expression
-   { $$=^$(new_exp(new Swap_e($1,$3), LOC(@1,@3))); }
+    { $$=^$(new_exp(new Swap_e($1,$3), LOC(@1,@3))); }
 ;
 
 assignment_operator:
@@ -2818,7 +2826,7 @@ right_angle:
 | RIGHT_OP { yylex_buf->lex_curr_pos -= 1; }
 %%
 
-void yyprint(int i, tunion YYSTYPE v) {
+void yyprint(int i, datatype YYSTYPE v) {
   switch (v) {
   case Int_tok($(_,i2)): fprintf(stderr,"%d",i2);      break;
   case Char_tok(c):       fprintf(stderr,"%c",c);       break;

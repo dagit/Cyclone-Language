@@ -68,7 +68,7 @@ int bt(void) {
     }
     close(fromchild[0]);
 
-    const char *args[5]ZEROTERM = { "addr2line", "--functions", "-e", "", 0 };
+    const char *args[5]@zeroterm = { "addr2line", "--functions", "-e", "", 0 };
     args[3] = aprintf("/proc/%d/exe", self_pid);
     if (execvp("addr2line", args) == -1) {
       perror("execlp failed during backtrace");

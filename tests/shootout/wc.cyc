@@ -12,7 +12,7 @@
 #define BSIZ 4096
 
 unsigned long ws[256];
-char buff[BSIZ+1]ZEROTERM;
+char buff[BSIZ+1]@zeroterm;
 
 int main() {
 

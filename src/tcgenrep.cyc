@@ -230,8 +230,8 @@ static decl_t gen_decl(stringptr_t<`H,`H> name, type_t type, exp_opt_t init,seg_
   qvar_t qvar = toplevel_name(name);
   vardecl_t vd = new_vardecl(qvar,type,init);
   vd->sc = Static;
-  tunion Raw_decl.Var_d@ r1 = new Var_d(vd);
-  tunion Raw_decl r2 = (tunion Raw_decl)r1;
+  datatype Raw_decl.Var_d@ r1 = new Var_d(vd);
+  datatype Raw_decl r2 = (datatype Raw_decl)r1;
   return new_decl(r2,seg);
 }
 
@@ -240,31 +240,31 @@ static decl_t gen_vardecl(qvar_t name, type_t type, exp_opt_t init,scope_t sc,se
   qvar_t topname = toplevel_name((*name)[1]);
   vardecl_t vd = new_vardecl(topname,type,init);
   vd->sc = sc;
-  tunion Raw_decl.Var_d@ r1 = new Var_d(vd);
-  tunion Raw_decl r2 = (tunion Raw_decl)r1;
+  datatype Raw_decl.Var_d@ r1 = new Var_d(vd);
+  datatype Raw_decl r2 = (datatype Raw_decl)r1;
   return new_decl(r2,seg);
 }
 
 
 static exp_t cnst_string(string_t<`H> s,seg_t seg) {
-  return const_exp((tunion Cnst)(String_c(s)),seg);
+  return const_exp((datatype Cnst)(String_c(s)),seg);
 }
 
 static exp_t cnst_string_cls(seg_t seg,var_t s) {
-  return const_exp((tunion Cnst)(String_c(*s)),seg);
+  return const_exp((datatype Cnst)(String_c(*s)),seg);
 }
 
 static exp_t cnst_qvar_string_cls(seg_t seg,qvar_t s) {
-  return const_exp((tunion Cnst)(String_c(*(*s)[1])),seg);
+  return const_exp((datatype Cnst)(String_c(*(*s)[1])),seg);
 }
 
 
 static exp_t cnst_int(int i,seg_t seg) {
-  return const_exp((tunion Cnst)(Int_c(Signed,i)),seg);
+  return const_exp((datatype Cnst)(Int_c(Signed,i)),seg);
 }
 
 static exp_t cnst_int_cls(seg_t seg,int i) {
-  return const_exp((tunion Cnst)(Int_c(Signed,i)),seg);
+  return const_exp((datatype Cnst)(Int_c(Signed,i)),seg);
 }
 
 static int size_of2int(size_of_t sz) {
@@ -479,8 +479,8 @@ static $(tqual_t,type_t)@ tqual_type(tqual_t* tq,type_t type) {
 
 static type_t tuple_typ(list_t<type_t,`H> types) {
   let tqualtypes = List::map_c(tqual_type,&tq_none,types);
-  tunion Type.TupleType @ tuple_type_base = new TupleType(tqualtypes);
-  type_t tuple_type = (tunion Type) tuple_type_base;
+  datatype Type.TupleType @ tuple_type_base = new TupleType(tqualtypes);
+  type_t tuple_type = (datatype Type) tuple_type_base;
   return tuple_type;
 }
 
@@ -578,7 +578,7 @@ type_t monomorphize_type(type_t type) {
     list_t<aggrfield_t> fields = NULL;
     if(ad->impl != NULL) 
       fields = List::map_c(substitute_structfield_type,subst,ad->impl->fields);
-    let impl = ad->impl==NULL ? NULL : new AggrdeclImpl(NULL, NULL, fields);
+    let impl = ad->impl==NULL ? NULL : new AggrdeclImpl(NULL, NULL, fields,false);
     aggrdecl_t ad2 = new Aggrdecl{ad->kind,ad->sc,ad->name,NULL,impl,
 				  ad->attributes};
     return new AggrType(AggrInfo(KnownAggr(new ad2),NULL));

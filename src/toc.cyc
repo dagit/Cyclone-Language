@@ -125,8 +125,8 @@ static int temp_var_counter = 0;
 static int fresh_label_counter = 0;
 
 // errors and reporting
-xtunion exn {Toc_Unimplemented};
-xtunion exn {Toc_Impossible};
+datatype exn @extensible {Toc_Unimplemented};
+datatype exn @extensible {Toc_Impossible};
 static `a unimp(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2), noreturn))
 {
@@ -143,7 +143,7 @@ static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
   fflush(stderr);
   throw Toc_Impossible;
 }
-xtunion exn {Match_error};
+datatype exn @extensible {Match_error};
 
 /////////////////////////// Pre-Allocated Stuff /////////////////////////////
 // Don't use any of these things if they might get mutated!!!
@@ -170,7 +170,7 @@ stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
   static string_t              str##_str = #str;\
   static $(nmspace_t, var_t)   str##_pr  = $(Loc_n,&str##_str);\
-  static tunion Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
+  static datatype Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
   static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,EmptyAnnot};\
   static exp_t                 str##_e   = &str##_ev
 
@@ -247,11 +247,11 @@ MAKE_VAR(_swap_dyneither);
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-static tunion Type.AggrType dyneither_ptr_typ_v =
+static datatype Type.AggrType dyneither_ptr_typ_v =
                            AggrType(AggrInfo(UnknownAggr(StructA,
                                                          &_dyneither_ptr_pr),
                                              NULL));
-static tunion Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
+static datatype Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
 
@@ -307,7 +307,7 @@ static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
 static raw_stmt_t goto_stmt_r(var_t v, stmt_opt_t s) {
   return new Goto_s(v,s);
 }
-static tunion Raw_exp.Const_e zero_exp = Const_e(Int_c(Signed,0));
+static datatype Raw_exp.Const_e zero_exp = Const_e(Int_c(Signed,0));
 
 
 /* functionSets are used to call the appropriate function from
@@ -474,7 +474,8 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
                           .name = new $(Rel_n(NULL),xname), .tvs = NULL, 
                           .impl = new AggrdeclImpl{.exist_vars = NULL, 
                                                    .rgn_po = NULL,
-                                                   .fields = fs},
+                                                   .fields = fs, 
+                                                   .tagged=false},
                           .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
     *tuple_types  = rnew(d) List(rnew(d) $(x,ts),*tuple_types);
@@ -3962,7 +3963,7 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
         new Aggrdecl{.kind = StructA, .sc = Public,
                      .name = collapse_qvar_tag(f->name,"_struct"),
                      .tvs = NULL, 
-                     .impl = new AggrdeclImpl(NULL,NULL,fs),
+                     .impl = new AggrdeclImpl(NULL,NULL,fs,false),
                      .attributes = NULL};
       result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
       if (tud->is_flat) {
@@ -3980,7 +3981,7 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
       new Aggrdecl{.kind = UnionA, .sc = Public, 
                    .name = collapse_qvar_tag(tud->name,"_union"),
                    .tvs = NULL,
-                   .impl = new AggrdeclImpl(NULL,NULL,flat_structs),
+                   .impl = new AggrdeclImpl(NULL,NULL,flat_structs,false),
                    .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
   }
@@ -4048,7 +4049,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
             new Aggrdecl{.kind = StructA, .sc = Public,
                          .name = collapse_qvar_tag(f->name,"_struct"),
                          .tvs  = NULL, 
-                         .impl = new AggrdeclImpl(NULL,NULL,fields),
+                         .impl = new AggrdeclImpl(NULL,NULL,fields,false),
                          .attributes = NULL};
           result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
                                   result_decls);

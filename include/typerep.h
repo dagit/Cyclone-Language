@@ -37,7 +37,7 @@ using Core;
 
 typedef unsigned int var_t;
 
-EXTERN_TYPEREP tunion Typestruct {
+EXTERN_TYPEREP datatype Typestruct {
   /** [Var(name)] indicates a type parameter variable [name] **/
   //Var(var_t);
   /** [Int(sn, sz)] indicates integer types with sign [sn] having [sz] bits **/
@@ -47,21 +47,21 @@ EXTERN_TYPEREP tunion Typestruct {
   /** [Double] indicates a double type **/
   Double;
   /** [ThinPtr(sz,typ)] a pointer to buffer of [typ] values of length [sz] **/
-  ThinPtr(unsigned int,tunion Typestruct);
+  ThinPtr(unsigned int,datatype Typestruct);
   /** [FatPtr(typ)] a fat pointer to a buffer of [typ] values **/
-  FatPtr(tunion Typestruct);
+  FatPtr(datatype Typestruct);
   /** [Struct(name,szb,(ofs_1,nm_1,typ_1)::...)] represents a struct type 
       named [*name] ([name==NULL] if the struct is anonymous).  
       The data is a buffer of values, one per
       element in the array.  The value at index i has name [nm_i], type [typ_i] and
       is at offset [ofs_i].  The total size is [szb] bytes. 
   **/
-  Struct(string_t<`H>*, unsigned int, $(unsigned int, string_t<`H>, tunion Typestruct)@?);
+  Struct(string_t<`H>*, unsigned int, $(unsigned int, string_t<`H>, datatype Typestruct)@?);
   /** [Tuple(szb,(ofs_1,typ_1)::...)] is a buffer of values, one per
       element in the array.  The value at index i has type [typ_i] and
       is at offset [ofs_i].  The total size is [szb] bytes. 
   **/
-  Tuple(unsigned int, $(unsigned int,tunion Typestruct)@?);
+  Tuple(unsigned int, $(unsigned int,datatype Typestruct)@?);
   /** [TUnion(name,tagonly,fields)] is a tunion type [name], where each element of
       the array [tagonly] is a pair [(tag,tagname)] of a tag-only tag value [tag]
       and its name [tagname], and 
@@ -72,27 +72,27 @@ EXTERN_TYPEREP tunion Typestruct {
       we can just check the tunion pointer to see if it's tag-only).
   **/
   TUnion(string_t<`H>,$(unsigned int,string_t<`H>)@?,
-			$(unsigned int, string_t<`H>,tunion Typestruct)@?);
+			$(unsigned int, string_t<`H>,datatype Typestruct)@?);
   /** [TUnionField(tname,fname,ts)] is a tunionfield type [tname.fname] where
       [ts] is a Tuple describing the tunionfield data.  (the same tuple as
       in the tunion or xtunion typestruct. 
   **/
   // should this have tag? or same data as tunion?
-  TUnionField(string_t<`H>,string_t<`H>,unsigned int, $(unsigned int,tunion Typestruct)@?);
+  TUnionField(string_t<`H>,string_t<`H>,unsigned int, $(unsigned int,datatype Typestruct)@?);
   /** [name, XTUnion(fields)] is an xtunion type [name], where each element of
       the array [fields] is a pair [(tag,ts)] of a tag value [tag]
       and a Typestruct [ts] representing the type of the tagged data.
       Tag-only fields are not included in the array (since
       we can just check the xtunion pointer to see if it's tag-only).
   **/
-  XTUnion(string_t<`H>,$(string_t<`H>, tunion Typestruct)@?);
+  XTUnion(string_t<`H>,$(string_t<`H>, datatype Typestruct)@?);
   /** [Union(name,szb,fields)] is a union type [*name] ([name == NULL] if 
       anonymous), of byte size [szb], where each element of
       the array [fields] is a pair [(name,ts)] where [name] is the 
       union field name and ts is a Typestruct represnting the data
       for a possible case of the union.
   **/
-  Union(string_t<`H>*,int,$(string_t<`H>,tunion Typestruct)@?);
+  Union(string_t<`H>*,int,$(string_t<`H>,datatype Typestruct)@?);
   /** [Enum(name,szb,l)] is an enum of [szb] size whose value-tag bindings 
       are the entries [(value,tag)] of [l].  [name] is an optional name 
       for the enum.
@@ -113,7 +113,7 @@ EXTERN_TYPEREP tunion Typestruct {
   //  App(tunion Typestruct, tunion Typestruct?);
 };
   
-  typedef tunion `r Typestruct typestruct_t<`r>;
+  typedef datatype `r Typestruct typestruct_t<`r>;
   
   extern void print_typestruct(typestruct_t rep);
   extern void xmlize_typestruct(typestruct_t rep);

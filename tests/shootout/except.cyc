@@ -8,8 +8,8 @@
 
 int HI = 0, LO = 0;
 
-xtunion exn { Hi_exception(int); };
-xtunion exn { Lo_exception(int); };
+datatype @extensible exn { Hi_exception(int); };
+datatype @extensible exn { Lo_exception(int); };
 
 void blowup (int n) {
     if (n & 1) {

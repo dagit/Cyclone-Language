@@ -36,14 +36,14 @@ extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern void error(string_t<`H> msg);
 
 extern
-tunion context {
+datatype context {
   InTag,
   Normal
 };
 
-extern void setContext(tunion `H context c);
+extern void setContext(datatype `H context c);
 
-extern tunion context getContext();
+extern datatype context getContext();
 
 }
 

@@ -18,15 +18,15 @@ using Syntax;
 namespace Lexgen;
 
 // Deep abstract for regular expressions
-static tunion Regexp {
+static datatype Regexp {
   Empty;
   Chars(int);
   Action(int);
-  Seq(tunion Regexp, tunion Regexp);
-  Alt(tunion Regexp, tunion Regexp);
-  Star(tunion Regexp);
+  Seq(datatype Regexp, datatype Regexp);
+  Alt(datatype Regexp, datatype Regexp);
+  Star(datatype Regexp);
 };
-typedef tunion Regexp regexp_t;
+typedef datatype Regexp regexp_t;
 
 static struct Lexer_entry {
   string_t                   name;
@@ -92,8 +92,8 @@ $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
 
 // generate an NFA from a regular expression (dragon book, chapter 3)
 
-static tunion transition { OnChars(int); ToAction(int); };
-typedef tunion transition transition_t;
+static datatype transition { OnChars(int); ToAction(int); };
+typedef datatype transition transition_t;
 
 static int transition_cmp(transition_t t1, transition_t t2) {
   switch ($(t1,t2)) {

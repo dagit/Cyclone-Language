@@ -69,7 +69,7 @@ struct CFStmtAnnot {
   // flow_t flow;     // flow to merge in when we check again
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
-xtunion AbsynAnnot { static CFAnnot(cf_stmt_annot_t); };
+datatype AbsynAnnot @extensible { static CFAnnot(cf_stmt_annot_t); };
 
 // to be used by the type-checking pass to get things set up for us
 // must be called on EVERY stmt in the abstract syntax (even the dummy ones)
@@ -460,8 +460,8 @@ static flow_t<`r> if_tagcmp(analenv_t<`r> env, flow_t<`r> flow, exp_t e1,
   }
 }
 
-static xtunion AbsynAnnot.NotZero mt_notzero_v = NotZero(NULL);
-static xtunion AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
+static datatype @extensible AbsynAnnot.NotZero mt_notzero_v = NotZero(NULL);
+static datatype @extensible AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
 
 // Note: correct for e1 an array b/c r won't be AddressOf??
 // FIX: Important place to memoize type_to_absrval calls (b/c StructArrow

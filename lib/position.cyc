@@ -33,7 +33,7 @@ using List;
 //   <filename>:(<lineno>:<char>-<lineno>:<char>):<message>
 bool use_gcc_style_location = true;
 
-xtunion exn {Exit};
+datatype exn @extensible {Exit};
 
 /////////// Location tracking///////////
 static string_t source = ""; // initialized by overall control
@@ -111,7 +111,7 @@ list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r> segs) {
 
 ///////////// Errors ////////////
 
-tunion Error_kind { Lex, Parse, Elab };
+datatype Error_kind { Lex, Parse, Elab };
 struct Error {
   string_t     source;
   seg_t        seg;
@@ -133,7 +133,7 @@ error_t mk_err_elab(seg_t l, string_t<`H> desc) {
 // If there are errors getting stuff from the source file then raise Nocontext
 // and just don't print the source context
 
-xtunion exn {Nocontext};
+datatype exn @extensible {Nocontext};
 
 static mstring_t trunc(int n, mstring_t<`H> s) {
   int len = strlen(s);
@@ -142,7 +142,7 @@ static mstring_t trunc(int n, mstring_t<`H> s) {
   int len_one = (n-3)/2;
   int len_two = n-3-len_one;
   mstring_t mans = new_string(n+1);
-  char ?NOZEROTERM ans = (char ?NOZEROTERM)mans;
+  char ? @nozeroterm ans = (char ? @nozeroterm)mans;
   strncpy(ans,             s,               len_one);
   strncpy(ans + len_one,   "...",           3);
   strncpy(ans + (len_one+3), s + (len-len_two), len_two);
@@ -194,7 +194,7 @@ static $(mstring_t,int,int)@ get_context(seg_t seg) {
 static bool error_b = false;
 bool error_p() { return error_b; }
 
-xtunion exn {Error(error_t)};
+datatype exn @extensible {Error(error_t)};
 
 bool print_context = false;
 
@@ -252,4 +252,4 @@ string_t get_line_directive(seg_t s) {
 
 using Typerep;
 
-tunion Typestruct segment_rep = __gen(struct Position::Segment);
+datatype Typestruct segment_rep = __gen(struct Position::Segment);

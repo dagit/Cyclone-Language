@@ -458,7 +458,7 @@ cycstub opendir {
   namespace Cdirent {
     extern "C" __cDIR *opendir(const char @);
   }
-  static xtunion exn.Failure __opendir_failure =
+  static datatype @extensible exn.Failure __opendir_failure =
     Failure("opendir called with NULL string");
   DIR *opendir(const char @ f) {
     let cd = Cdirent::opendir(f);
@@ -653,11 +653,11 @@ pid_t
 hstub {
   // FIX: ADV is not supported
 
-  tunion FcntlArg<`r::R> {
+  datatype FcntlArg<`r::R> {
     Flock(struct flock @`r);
     Long(long);
   };
-  typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
+  typedef datatype `r FcntlArg<`r> fcntlarg_t<`r>;
 
   extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
   extern int open(const char *, int, ... mode_t);
@@ -672,7 +672,7 @@ cycstub {
     extern "C" int open_without_mode(const char *,int);
     extern "C" int open_with_mode(const char *,int,mode_t);
   }
-  static xtunion exn.Failure __fcntl_failure =
+  static datatype @extensible exn.Failure __fcntl_failure =
     Failure("fcntl: too many args");
   int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
     if (numelts(argv) == 0) return Cfcntl::fcntl(fd, cmd);
@@ -1819,7 +1819,7 @@ hstub {
   // the case, then we are in trouble.
   struct hostent {
     char *h_name;
-    char **ZEROTERM h_aliases;
+    char ** @zeroterm h_aliases;
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
       short h_addrtype;
       short h_length; // always 4
@@ -1981,9 +1981,9 @@ cycstub poll {
   namespace Cpoll {
     extern "C" int poll(struct pollfd @{0}, nfds_t b, int c);
   }
-  static xtunion exn.Failure __poll_failure_1 =
+  static datatype @extensible exn.Failure __poll_failure_1 =
     Failure("poll called with NULL");
-  static xtunion exn.Failure __poll_failure_2 =
+  static datatype @extensible exn.Failure __poll_failure_2 =
     Failure("poll called with out-of-bounds pointer");
   int poll(struct pollfd?a, nfds_t b, int c) {
     if (!a) throw &__poll_failure_1;
@@ -2142,7 +2142,7 @@ hstub sigrelse {
   extern "C" int sigrelse(int);
 }
 hstub {
-  extern tunion SigBuiltin {
+  extern datatype SigBuiltin {
     SIG_DFL;
     SIG_ERR;
     SIG_IGN;
@@ -2150,11 +2150,11 @@ hstub {
     SIG_HOLD;  // Rare
   #endif
   };
-  extern tunion SigArg {
-    __SIG_BUILTIN(tunion SigBuiltin);
+  extern datatype SigArg {
+    __SIG_BUILTIN(datatype SigBuiltin);
     __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
   };
-  typedef tunion `r SigArg sigarg_t<`r>;
+  typedef datatype `r SigArg sigarg_t<`r>;
 }
 cycstub {
   #include <signal.h>
@@ -2263,7 +2263,7 @@ cycstub signal {
     extern "C" sigarg_t signal_SIG_IGN(int);
     extern "C" sigarg_t signal(int, void (@`H)(int));
   }
-  static xtunion exn.Failure __signal_failure =
+  static datatype @extensible exn.Failure __signal_failure =
     Failure("signal called with the wrong number of arguments");
   sigarg_t signal(int a, ... inject sigarg_t b) {
     if (numelts(b) != 1)
@@ -2467,15 +2467,15 @@ cstub {
 hstub {
   // vararg for printf functions.  The functions themselves are defined
   // in printf.cyc.
-  extern tunion PrintArg<`r::R> {
-    String_pa(const char ?NOZEROTERM`r);
+  extern datatype PrintArg<`r::R> {
+    String_pa(const char ? @nozeroterm`r);
     Int_pa(unsigned long);
     Double_pa(double);
     LongDouble_pa(long double);
     ShortPtr_pa(short @`r);
     IntPtr_pa(unsigned long @`r);
   };
-  typedef tunion `r PrintArg<`r> parg_t<`r>;
+  typedef datatype `r PrintArg<`r> parg_t<`r>;
 
   // Cyclone specific.
   // Similar to sprintf but allocates a result of the right size on the heap.
@@ -2581,20 +2581,20 @@ cycstub fgetpos {
   }
 }
 hstub fgets {
-  extern char ?NOZEROTERM`r fgets(char ?NOZEROTERM`r, int, FILE @);
+  extern char ? @nozeroterm`r fgets(char ? @nozeroterm`r, int, FILE @);
 }
 cycstub fgets {
   namespace Cstdio {
-    extern "C" char *NOZEROTERM`r fgets(char *NOZEROTERM`r, int, __cFILE @);
+    extern "C" char * @nozeroterm`r fgets(char * @nozeroterm`r, int, __cFILE @);
   }
-  static xtunion exn.Failure __fgets_failure_1 =
+  static datatype @extensible exn.Failure __fgets_failure_1 =
     Failure("fgets called with NULL string");
-  static xtunion exn.Failure __fgets_failure_2 =
+  static datatype @extensible exn.Failure __fgets_failure_2 =
     Failure("fgets: buffer insufficient");
-  char ?NOZEROTERM`r fgets(char ?NOZEROTERM`r s, int n, FILE @f) {
+  char ? @nozeroterm`r fgets(char ? @nozeroterm`r s, int n, FILE @f) {
     if (!s) throw &__fgets_failure_1;
-    char *NOZEROTERM`r result;
-    char *NOZEROTERM buffer = (char *NOZEROTERM)s;
+    char * @nozeroterm`r result;
+    char * @nozeroterm buffer = (char * @nozeroterm)s;
     unsigned int len = numelts(s);
     if (len < n) throw &__fgets_failure_2; 
     // n = (len < n) ? len : n;
@@ -2673,17 +2673,17 @@ cycstub fputs {
   }
 }
 hstub fread {
-  extern size_t fread(char ?NOZEROTERM, size_t, size_t, FILE @);
+  extern size_t fread(char ? @nozeroterm, size_t, size_t, FILE @);
 }
 cycstub fread {
   namespace Cstdio {
-    extern "C" size_t fread(char *NOZEROTERM, size_t, size_t, __cFILE @);
+    extern "C" size_t fread(char * @nozeroterm, size_t, size_t, __cFILE @);
   }
-  static xtunion exn.Failure __fread_failure =
+  static datatype @extensible exn.Failure __fread_failure =
     Failure("fread: buffer insufficient");
-  size_t fread(char ?NOZEROTERM ptr, size_t size, size_t nmemb, FILE @f) {
+  size_t fread(char ? @nozeroterm ptr, size_t size, size_t nmemb, FILE @f) {
     if (size * nmemb > numelts(ptr)) throw &__fread_failure;
-    return Cstdio::fread((char *NOZEROTERM)ptr, size, nmemb, f->file);
+    return Cstdio::fread((char * @nozeroterm)ptr, size, nmemb, f->file);
   }
 }
 hstub freopen {
@@ -2704,7 +2704,7 @@ cycstub freopen {
 hstub {
   // vararg for scanf functions.  The functions themselves are defined
   // in scanf.cyc.
-  extern tunion ScanfArg<`r::R> {
+  extern datatype ScanfArg<`r::R> {
     ShortPtr_sa(short @`r);
     UShortPtr_sa(unsigned short @`r);
     IntPtr_sa(int @`r);
@@ -2712,9 +2712,9 @@ hstub {
     StringPtr_sa(char ?`r);
     DoublePtr_sa(double @`r);
     FloatPtr_sa(float @`r);
-    CharPtr_sa(char ?NOZEROTERM`r)
+    CharPtr_sa(char ? @nozeroterm`r)
   };
-  typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
+  typedef datatype `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 }
 hstub {
   extern int fscanf(FILE @, const char ?, ... inject sarg_t)
@@ -2818,21 +2818,21 @@ cycstub funlockfile {
   #endif
 }
 hstub fwrite {
-  extern size_t fwrite(const char ?NOZEROTERM, size_t, size_t, FILE @);
+  extern size_t fwrite(const char ? @nozeroterm, size_t, size_t, FILE @);
 }
 cycstub fwrite {
   namespace Cstdio {
-    extern "C" size_t fwrite(const char @NOZEROTERM, size_t, size_t, __cFILE @);
+    extern "C" size_t fwrite(const char @ @nozeroterm, size_t, size_t, __cFILE @);
   }
-  static xtunion exn.Failure __fwrite_failure_1 =
+  static datatype @extensible exn.Failure __fwrite_failure_1 =
     Failure("fwrite called with NULL string");
-  static xtunion exn.Failure __fwrite_failure_2 =
+  static datatype @extensible exn.Failure __fwrite_failure_2 =
     Failure("fwrite: buffer insufficient");
-  size_t fwrite(const char ?NOZEROTERM`r ptr, size_t size, size_t nmemb, FILE @f) {
+  size_t fwrite(const char ? @nozeroterm`r ptr, size_t size, size_t nmemb, FILE @f) {
     if (!ptr) { throw &__fwrite_failure_1; } 
     else {
       if (size * nmemb > numelts(ptr)) throw &__fwrite_failure_2;
-      return Cstdio::fwrite((const char @NOZEROTERM)ptr, size, nmemb, f->file);
+      return Cstdio::fwrite((const char @ @nozeroterm)ptr, size, nmemb, f->file);
     }
   }
 }
@@ -3000,40 +3000,40 @@ hstub {
 }
 hstub setvbuf {
   // FIX: should the second arg be const?
-  extern int setvbuf(FILE @, char ?NOZEROTERM`H, int, size_t);
+  extern int setvbuf(FILE @, char ? @nozeroterm`H, int, size_t);
   // The second arg of setvbuf must be heap-allocated because
   // it will be used by the IO library after setvbuf returns.
 }
 cycstub setvbuf {
   namespace Cstdio {
-    extern "C" int setvbuf(__cFILE @, char *NOZEROTERM`H, int, size_t);
+    extern "C" int setvbuf(__cFILE @, char * @nozeroterm`H, int, size_t);
   }
-  static xtunion exn.Failure __setvbuf_failure_1 =
+  static datatype @extensible exn.Failure __setvbuf_failure_1 =
     Failure("setvbuf: buffer is NULL");
-  static xtunion exn.Failure __setvbuf_failure_2 =
+  static datatype @extensible exn.Failure __setvbuf_failure_2 =
     Failure("setvbuf: buffer insufficient");
-  int setvbuf(FILE @f, char ?NOZEROTERM`H buf, int type, size_t size) {
+  int setvbuf(FILE @f, char ? @nozeroterm`H buf, int type, size_t size) {
     if (!buf) throw &__setvbuf_failure_1;
     if (numelts(buf) < size) throw &__setvbuf_failure_2;
-    return Cstdio::setvbuf(f->file,(char *NOZEROTERM`H)buf,type,size);
+    return Cstdio::setvbuf(f->file,(char * @nozeroterm`H)buf,type,size);
   }
 }
 hstub setbuf {
-  extern void setbuf(FILE @, char ?NOZEROTERM`H);
+  extern void setbuf(FILE @, char ? @nozeroterm`H);
 }
 cycstub setbuf {
-  void setbuf(FILE @f, char ?NOZEROTERM`H buf) {
+  void setbuf(FILE @f, char ? @nozeroterm`H buf) {
     setvbuf(f, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
     return;
   }
 }
 hstub {
-  extern int snprintf(char ?NOZEROTERM, size_t, const char ?, ... inject parg_t)
+  extern int snprintf(char ? @nozeroterm, size_t, const char ?, ... inject parg_t)
     __attribute__((format(printf,3,4)))
     ;
 }
 hstub {
-  extern int sprintf(char ?NOZEROTERM, const char ?, ... inject parg_t)
+  extern int sprintf(char ? @nozeroterm, const char ?, ... inject parg_t)
     __attribute__((format(printf,2,3)))
     ;
 }
@@ -3128,12 +3128,12 @@ hstub vscanf {
   //  extern int vscanf(const char *restrict, va_list);
 }
 hstub vsnprintf {
-  extern int vsnprintf(char ?NOZEROTERM, size_t, const char ?, parg_t ?) 
+  extern int vsnprintf(char ? @nozeroterm, size_t, const char ?, parg_t ?) 
     __attribute__((format(printf,3,0)))
     ;
 }
 hstub vsprintf {
-  extern int vsprintf(char ?NOZEROTERM, const char ?, parg_t ?)
+  extern int vsprintf(char ? @nozeroterm, const char ?, parg_t ?)
     __attribute__((format(printf,2,0)))
     ;
 }
@@ -3178,7 +3178,7 @@ hstub {
   // them elsewhere.
 
   // FIX: Not sure if these should use NULL-terminated strings or not
-  extern xtunion exn {
+  extern datatype @extensible exn {
     extern FileOpenError(const char ?);
     extern FileCloseError;
   };
@@ -3235,7 +3235,7 @@ cstub {
   }
 }
 cycstub {
-  xtunion exn { 
+  datatype exn @extensible { 
     FileOpenError(const char ?); 
     FileCloseError;
   };
@@ -3416,9 +3416,9 @@ cycstub {
     extern "C" void qsort(`a::A @, size_t, size_t,
                           int (@)(const `a @, const `a @));
   }
-  static xtunion exn.Failure __qsort_failure_1 =
+  static datatype @extensible exn.Failure __qsort_failure_1 =
     Failure("qsort called with NULL");
-  static xtunion exn.Failure __qsort_failure_2 =
+  static datatype @extensible exn.Failure __qsort_failure_2 =
     Failure("qsort called with insufficient array size");
   void qsort(`a::A ? tab, size_t nmemb, tag_t<valueof_t(sizeof(`a))> szmemb, 
              int (@compar)(const `a @, const `a @)) {
@@ -3519,7 +3519,7 @@ FIONBIO
 hstub ioctl {
   // ioctl normally takes a void * as its arg, but
   //   for the moment we forbid it to taking only ints.
-  //   Ultimately should change to use tunions as
+  //   Ultimately should change to use datatypes as
   //   socket commands do
   extern "C" int ioctl(int fd, int cmd, int @arg);
 }
@@ -3563,23 +3563,23 @@ hstub {
 
   // The traditional first arg to mmap should be 0 anyway, so don't
   // even bother to pass it to us.
-  extern const char ?NOZEROTERM mmap(char ?NOZEROTERM, size_t length, 
+  extern const char ? @nozeroterm mmap(char ? @nozeroterm, size_t length, 
                                      int prot, int flags, 
 		                     int fd, off_t offset);
 
-  extern int munmap(const char ?NOZEROTERM start, size_t length);
+  extern int munmap(const char ? @nozeroterm start, size_t length);
 }
 cycstub mmap {
   namespace Cmman {
     // refers to our Cyclone stub that deals with MMAP_FAILED
-    extern "C" char *NOZEROTERM
-      __stub_mmap(char *NOZEROTERM start, size_t length, int prot,
+    extern "C" char * @nozeroterm
+      __stub_mmap(char * @nozeroterm start, size_t length, int prot,
                   int flags, int fd, off_t offset);
-    extern "C" int munmap(const char *NOZEROTERM start, size_t length);
+    extern "C" int munmap(const char * @nozeroterm start, size_t length);
   }
-  static xtunion exn.Failure __mmap_failure =
+  static datatype @extensible exn.Failure __mmap_failure =
     Failure("mmap called with illegal start/prot/flags");
-  const char ?NOZEROTERM mmap(char ?NOZEROTERM ignored,
+  const char ? @nozeroterm mmap(char ? @nozeroterm ignored,
 			      size_t length, int prot, 
 		              int flags, int fd, off_t offset) {
     if (ignored == NULL &&
@@ -3593,9 +3593,9 @@ cycstub mmap {
   }
   // Is it unsafe to ask the user for the size?  I'd like to take it
   // from the char? type, but that could have been cast around...
-  int munmap(const char ?NOZEROTERM start, size_t length) {
+  int munmap(const char ? @nozeroterm start, size_t length) {
     // We definitely do NOT want to copy the "string"
-    return Cmman::munmap((const char *NOZEROTERM)start, length);
+    return Cmman::munmap((const char * @nozeroterm)start, length);
   }
 }
 cstub mmap {
@@ -3896,7 +3896,7 @@ hstub {
   #endif
 }
 hstub {
-  extern tunion SockAddr<`r::R> {
+  extern datatype SockAddr<`r::R> {
     SA_sockaddr_in(struct sockaddr_in @`r);
     /* We will add other cases as necessary, e.g., SockAddr_In6 */
 
@@ -3906,10 +3906,10 @@ hstub {
     SA_socklenptr(socklen_t @`r); // accept, getpeername, getsockname, recvfrom
     SA_socklen(socklen_t); // bind, connect, sendto
   };
-  typedef tunion `r SockAddr<`r> SA<`r>;
+  typedef datatype `r SockAddr<`r> SA<`r>;
 }
 hstub {
-  extern tunion SockOpt<`r::R> {
+  extern datatype SockOpt<`r::R> {
     SO_int(int @`r);
     SO_timeval(struct timeval @`r);
     /* The remaining cases are for the argument following the type-varying
@@ -3917,16 +3917,16 @@ hstub {
     SO_socklenptr(socklen_t @`r); // getsockopt
     SO_socklen(socklen_t);        // setsockopt
   };
-  typedef tunion `r SockOpt<`r> SO<`r>;
+  typedef datatype `r SockOpt<`r> SO<`r>;
 }
 hstub accept {
   extern int accept(int fd, ... inject SA);
 }
 hstub {
-  xtunion exn { extern SocketError };
+  datatype exn @extensible { extern SocketError };
 }
 cycstub {
-  xtunion exn { SocketError };
+  datatype exn @extensible { SocketError };
 }
 cstub {
   #include <sys/socket.h>
@@ -4076,15 +4076,15 @@ hstub listen {
   extern "C" int listen(int fd, int n);
 }
 hstub recv {
-  extern ssize_t recv(int fd, char ?NOZEROTERM buf, size_t n, int flags);
+  extern ssize_t recv(int fd, char ? @nozeroterm buf, size_t n, int flags);
 }
 cycstub recv {
   namespace Csocket {
-    extern "C" ssize_t recv_wrapped(int, char ?NOZEROTERM, size_t, int);
+    extern "C" ssize_t recv_wrapped(int, char ? @nozeroterm, size_t, int);
   }
   // FIX: kill the extra level of indirection?  That is, rename the
   //   C function to be Cyc__recv and call it directly ...
-  ssize_t recv(int fd, char ?NOZEROTERM buf, size_t n, int flags) {
+  ssize_t recv(int fd, char ? @nozeroterm buf, size_t n, int flags) {
     return Csocket::recv_wrapped(fd,buf,n,flags);
   }
 }
@@ -4097,15 +4097,15 @@ cstub recv {
   }
 }
 hstub recvfrom {
-  extern ssize_t recvfrom(int fd, char ?NOZEROTERM buf, size_t n, int flags,
+  extern ssize_t recvfrom(int fd, char ? @nozeroterm buf, size_t n, int flags,
                           ... inject SA);
 }
 cycstub recvfrom {
   namespace Csocket {
-    extern "C" ssize_t recvfrom_in(int, char ?NOZEROTERM, size_t, int,
+    extern "C" ssize_t recvfrom_in(int, char ? @nozeroterm, size_t, int,
                                    const struct sockaddr_in @, socklen_t @);
   }
-  ssize_t recvfrom(int fd, char ?NOZEROTERM buf, size_t n, int flags, 
+  ssize_t recvfrom(int fd, char ? @nozeroterm buf, size_t n, int flags, 
 		   ... inject SA ap) {
     if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
@@ -4125,13 +4125,13 @@ cstub recvfrom {
   }
 }
 hstub send {
-  extern ssize_t send(int fd, const char ?NOZEROTERM buf, size_t n, int flags);
+  extern ssize_t send(int fd, const char ? @nozeroterm buf, size_t n, int flags);
 }
 cycstub send {
   namespace Csocket {
-    extern "C" ssize_t send_wrapped(int, const char ?NOZEROTERM, size_t, int);
+    extern "C" ssize_t send_wrapped(int, const char ? @nozeroterm, size_t, int);
   }
-  ssize_t send(int fd, const char ?NOZEROTERM buf, size_t n, int flags) {
+  ssize_t send(int fd, const char ? @nozeroterm buf, size_t n, int flags) {
     return Csocket::send_wrapped(fd,buf,n,flags);
   }
 }
@@ -4144,15 +4144,15 @@ cstub send {
   }
 }
 hstub sendto {
-  extern ssize_t sendto(int fd, const char ?NOZEROTERM buf, size_t n, int flags,
+  extern ssize_t sendto(int fd, const char ? @nozeroterm buf, size_t n, int flags,
                         ... inject SA);
 }
 cycstub sendto {
   namespace Csocket {
-    extern "C" ssize_t sendto_in(int, const char ?NOZEROTERM, size_t, int,
+    extern "C" ssize_t sendto_in(int, const char ? @nozeroterm, size_t, int,
                                  const struct sockaddr_in @, socklen_t);
   }
-  ssize_t sendto(int fd, const char ?NOZEROTERM buf, size_t n, int flags,
+  ssize_t sendto(int fd, const char ? @nozeroterm buf, size_t n, int flags,
                  ... inject SA ap) {
     if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
@@ -4744,7 +4744,7 @@ cycstub strftime {
     extern "C" size_t strftime(char *, size_t, const char *,
                                const struct tm @);
   }
-  static xtunion exn.Failure __strftime_failure =
+  static datatype @extensible exn.Failure __strftime_failure =
     Failure("fgets: buffer insufficient");
   size_t strftime(char ?s, size_t maxsize, const char ?fmt,
                   const struct tm @t) {
@@ -5162,13 +5162,13 @@ hstub execlp {
   extern int execlp(const char @, const char @`r, ... const char *`r);
 }
 cycstub execlp {
-  static xtunion exn.Failure __execlp_failure =
+  static datatype @extensible exn.Failure __execlp_failure =
     Failure("execlp arg list not NULL-terminated");
   int execlp(const char @ path, const char @`r arg0, ... const char *`r argv) {
     if (argv[numelts(argv) - 1] != NULL) throw &__execlp_failure;
     // We allocate 1+numelts(argv) because we need to prepend arg0
     // FIX: can region-allocate ...
-    const char *`r @ZEROTERM newargs = 
+    const char *`r @ @zeroterm newargs = 
       new {for i < numelts(argv) : (const char *`r)NULL};
     newargs[0] = arg0;
     for (int i = 0; i < numelts(argv)-1; i++)
@@ -5189,14 +5189,14 @@ hstub execve {
   // FIX: what did I lose by removing the const from this spec?
   //  extern int execve(const char ?, const char ? const ?, const char ? const ?);
     extern "C" int execve(const char @ path, 
-			  char **ZEROTERM argv, char **ZEROTERM envp);
+			  char ** @zeroterm argv, char ** @zeroterm envp);
 //    extern int execve(const char ?, char ? const ?, char ? const ?);
 }
 cycstub execve {
 //    namespace Cunistd {
 //      extern "C" int execve(char * path, char @ *argv, char @ *envp);
 //    }
-//    static xtunion exn.Failure __execve_failure =
+//    static datatype @extensible exn.Failure __execve_failure =
 //      Failure("execve: arg list must be NULL-terminated");
 //    int execve(const char ? filename, char ? const ?argv, char ? const ?envp) {
 //      if (argv[numelts(argv) - 1] != NULL)
@@ -5215,7 +5215,7 @@ cycstub execve {
 //    }
 }
 hstub execvp {
-  extern "C" int execvp(const char @ file, const char **ZEROTERM argv);
+  extern "C" int execvp(const char @ file, const char ** @zeroterm argv);
 }
 hstub _exit {
   extern "C" void _exit(int);
@@ -5250,7 +5250,7 @@ cycstub getcwd {
   namespace Cunistd {
     extern "C" char *`r getcwd(char *`r buf, size_t size);
   }
-  static xtunion exn.Failure __getcwd_failure =
+  static datatype @extensible exn.Failure __getcwd_failure =
     Failure("getcwd: invalid buf argument");
   char ?`r getcwd(char ?`r buf, size_t size) {
     if (numelts(buf) < size) throw &__getcwd_failure;
@@ -5275,21 +5275,21 @@ hstub gethostid {
   extern "C" long gethostid(void);
 }
 hstub gethostname {
-  extern int gethostname(char ?NOZEROTERM, size_t);
+  extern int gethostname(char ? @nozeroterm, size_t);
 }
 cycstub gethostname {
   namespace Cunistd {
-    extern "C" int gethostname(char @NOZEROTERM,size_t);
+    extern "C" int gethostname(char @ @nozeroterm,size_t);
   }
-  static xtunion exn.Failure __gethostname_failure_1 =
+  static datatype @extensible exn.Failure __gethostname_failure_1 =
     Failure("gethostname: called with NULL buf");
-  static xtunion exn.Failure __gethostname_failure_2 =
+  static datatype @extensible exn.Failure __gethostname_failure_2 =
     Failure("gethostname: called with count > numelts(buf)");
-  int gethostname(char ?NOZEROTERM buf, size_t count) {
+  int gethostname(char ? @nozeroterm buf, size_t count) {
     if (!buf) throw &__gethostname_failure_1;
     else {
       if (count > numelts(buf)) throw &__gethostname_failure_2;
-      return Cunistd::gethostname((char @NOZEROTERM)buf, count);
+      return Cunistd::gethostname((char @ @nozeroterm)buf, count);
     }
   }
 }
@@ -5369,17 +5369,17 @@ hstub pwrite {
   // extern ssize_t pwrite(int, const void *, size_t, off_t);
 }
 hstub read {
-  extern ssize_t read(int, char ?NOZEROTERM, size_t);
+  extern ssize_t read(int, char ? @nozeroterm, size_t);
 }
 cycstub read {
   namespace Cunistd {
-    extern "C" ssize_t read(int fd, char *NOZEROTERM buf, size_t count);
+    extern "C" ssize_t read(int fd, char * @nozeroterm buf, size_t count);
   }
-  static xtunion exn.Failure __read_failure =
+  static datatype @extensible exn.Failure __read_failure =
     Failure("read: called with count > numelts(buf)");
-  ssize_t read(int fd, char ?NOZEROTERM buf, size_t count) {
+  ssize_t read(int fd, char ? @nozeroterm buf, size_t count) {
     if (count > numelts(buf)) throw &__read_failure;
-    return Cunistd::read(fd, (char *NOZEROTERM)buf, count);
+    return Cunistd::read(fd, (char * @nozeroterm)buf, count);
   }
 }
 hstub readlink {
@@ -5462,17 +5462,17 @@ hstub vfork {
   extern "C" pid_t vfork(void);
 }
 hstub write {
-  extern ssize_t write(int, const char ?NOZEROTERM, size_t);
+  extern ssize_t write(int, const char ? @nozeroterm, size_t);
 }
 cycstub write {
   namespace Cunistd {
-    extern "C" ssize_t write(int fd, const char @NOZEROTERM buf, size_t count);
+    extern "C" ssize_t write(int fd, const char @ @nozeroterm buf, size_t count);
   }
-  static xtunion exn.Failure __write_failure =
+  static datatype @extensible exn.Failure __write_failure =
     Failure("write: called with count > numelts(buf)");
-  ssize_t write(int fd, const char ?NOZEROTERM buf, size_t count) {
+  ssize_t write(int fd, const char ? @nozeroterm buf, size_t count) {
     if (count > numelts(buf)) throw &__write_failure;
-    return Cunistd::write(fd, (const char @NOZEROTERM)buf, count);
+    return Cunistd::write(fd, (const char @ @nozeroterm)buf, count);
   }
 }
 hstub {

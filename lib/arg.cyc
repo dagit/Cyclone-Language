@@ -40,11 +40,11 @@ namespace Arg;
 using Core;
 using List;
 
-extern xtunion exn {Error, Bad(string_t)};
+extern datatype exn @extensible {Error, Bad(string_t)};
 
-tunion Flag {Prefix(string_t), Exact(string_t)};
+datatype Flag {Prefix(string_t), Exact(string_t)};
 
-tunion Spec {
+datatype Spec {
   Unit_spec(void (@f)()),         // Call f with unit argument
   Flag_spec(void (@f)(string_t)), // Call f with flag argument
   FlagString_spec(void (@f)(string_t,string_t)),
@@ -58,7 +58,7 @@ tunion Spec {
                                      // function with each remaining argument
 };
 
-static tunion error {
+static datatype error {
   Unknown(string_t),
   Missing(string_t),
   Message(string_t),
@@ -178,7 +178,7 @@ void usage(speclist_t<`r1,`r2> speclist,
 int current = 0;
 static string_t ?args = NULL;
 
-static void stop(int prog_pos, tunion error e,
+static void stop(int prog_pos, datatype error e,
 		 speclist_t<`r1,`r2> speclist,
                  string_t errmsg) {
   string_t progname = prog_pos < numelts(args) ? args[prog_pos] : "(?)";

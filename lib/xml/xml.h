@@ -39,29 +39,29 @@ typedef string_t comment;
 typedef string_t name;
 
 EXTERN_DEFINITION
-tunion attvalue {
+datatype attvalue {
   Attvalue1(string_t), // should be delimited by single quotes
   Attvalue2(string_t)  // should be delimited by double quotes
 };
-typedef tunion attvalue attvalue_t;
+typedef datatype attvalue attvalue_t;
 
 typedef $(name,attvalue_t)@ attribute_t;
 
 typedef $(name,string_t)@ pi_t;
 
-extern tunion content;
-typedef tunion content content_t;
+extern datatype content;
+typedef datatype content content_t;
 
 EXTERN_DEFINITION
-tunion element {
+datatype element {
   StartEnd(name,list_t<attribute_t>, // Element with start and end tags
            list_t<content_t>);
   Empty(name,list_t<attribute_t>);   // Element with no content
 };
-typedef tunion element element_t;
+typedef datatype element element_t;
 
 EXTERN_DEFINITION
-tunion content {
+datatype content {
   Element(element_t);   // A nested element
   Chardata(chardata);   // Character data
   Reference(reference); // Character reference: &foo; or &#0;
@@ -73,7 +73,7 @@ tunion content {
 // various routines to help document processing */
 
 EXTERN_DEFINITION 
-xtunion exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
+datatype @extensible exn { EXTERN_DEFINITION procXMLdocFailed(string_t) };
   /** [procXMLdocFailed] is thrown if one of the following routines
       fails to process the document as specified. **/
 

@@ -424,7 +424,7 @@ void dumpntyp(type_t t) {
     switch(tu_info) {
     case UnknownTunion(UnknownTunionInfo(n,is_x,_)): fallthru(n,is_x);
     case KnownTunion(& &Tuniondecl(_,n,_,_,is_x,_)):
-      if(is_x) dump("xtunion "); else dump("tunion ");
+      if(is_x) dump("xtunion "); else dump("datatype ");
       type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (Tcutil::compress(r)) {
       case HeapRgn: break;
@@ -441,7 +441,7 @@ void dumpntyp(type_t t) {
       fallthru(tname,is_x,fname);
     case KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
                           &Tunionfield(fname,_,_,_)):
-      if(is_x) dump("xtunion "); else dump("tunion ");
+      if(is_x) dump("xtunion "); else dump("datatype ");
       dumpqvar(tname);
       dump(".");
       dumpqvar(fname);
@@ -1128,11 +1128,12 @@ void dumpdecl(decl_t d) {
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
     dumpscope(sc);
-    dump(is_xtunion ? "xtunion" : "tunion");
+    dump("datatype");
     if (is_flat)
       dump_nospace(" __attribute__((flat))");
     dumpqvar(name);
     dumptvars(tvs);
+    if (is_xtunion) dump("@extensible");
     if(fields == NULL)
       dump_semi();
     else  {
@@ -1167,8 +1168,8 @@ void dumpdecl(decl_t d) {
     break;
   case &Region_d(tv,vd,resetable,eopt):
     dump("region"); 
-    if (resetable) dump("[resetable]");
     dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+    if (resetable) dump("@resetable");
     if (eopt != NULL) {
       dump(" = open(");
       dumpexp((exp_t)eopt);
@@ -1266,7 +1267,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
       dump_upperbound(e);
       break;
     }
-    if(conref_def(false,zt)) dump("ZEROTERM");
+    if(conref_def(false,zt)) dump("@zeroterm");
     switch(Tcutil::compress(rgn)) {
     case HeapRgn: break;
     case &VarType(tv): dump_str(tv->name); break;
@@ -1292,11 +1293,11 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     switch(tms->hd) {
     case &Carray_mod(zeroterm,_): 
       dump("[]"); 
-      if (conref_def(false,zeroterm)) dump("ZEROTERM");
+      if (conref_def(false,zeroterm)) dump("@zeroterm");
       break;
     case &ConstArray_mod(e,zeroterm,_):
       dump_char('['); dumpexp(e); dump_char(']'); 
-      if (conref_def(false,zeroterm)) dump("ZEROTERM");
+      if (conref_def(false,zeroterm)) dump("@zeroterm");
       break;
     case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po)):
       dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po); break;

@@ -569,11 +569,11 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Carray_mod(zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat(rest,conref_def(false,zeroterm) ? 
-               text("[]ZEROTERM ") : text("[]"));
+               text("[]@zeroterm") : text("[]"));
   case &ConstArray_mod(e,zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat(rest, text("["), exp2doc(e), 
-               conref_def(false,zeroterm) ? text("]ZEROTERM ") : text("]"));
+               conref_def(false,zeroterm) ? text("]@zeroterm") : text("]"));
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
@@ -613,9 +613,9 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     }
     if (print_zeroterm) {
       if (!is_char_ptr && conref_def(false,zt)) 
-	ptr = cat(ptr,text("ZEROTERM "));
+	ptr = cat(ptr,text("@zeroterm "));
       else if (is_char_ptr && !conref_def(false,zt))
-	ptr = cat(ptr,text("NOZEROTERM "));
+	ptr = cat(ptr,text("@nozeroterm "));
     }
     switch(compress(rgn)) {
     case HeapRgn: break;
@@ -718,7 +718,7 @@ doc_t ntyp2doc(type_t t) {
     case UnknownTunion(UnknownTunionInfo(n,is_x,_)): 
       fallthru(n,is_x);
     case KnownTunion(&&Tuniondecl(_,n,_,_,is_x,_)):
-      let kw = text(is_x ? "xtunion " : "tunion ");
+      let kw = text(is_x ? "xtunion " : "datatype ");
       type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (compress(r)) {
       case HeapRgn:
@@ -735,7 +735,7 @@ doc_t ntyp2doc(type_t t) {
       fallthru(tname,is_x,fname);
     case KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
                           &Tunionfield(fname,_,_,_)):
-			     let kw = text(is_x ? "xtunion " : "tunion ");
+      let kw = text(is_x ? "xtunion " : "datatype ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
     }
@@ -1671,11 +1671,11 @@ doc_t decl2doc(decl_t d) {
     break;
   case &Region_d(tv,vd,resetable,open_exp_opt):
     s = cat(text("region"),
-            resetable ? nil_doc() : text("[resetable]"),
             text("<"),
             textptr(get_name(tv)),
             text(">" ),
             qvar2doc(vd->name),
+            (resetable ? text(" @resetable") : nil_doc()),
             ((open_exp_opt != NULL) ? 
              cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
              nil_doc()),text(";"));
@@ -1687,16 +1687,18 @@ doc_t decl2doc(decl_t d) {
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
     if (fields==NULL)
       s = cat(scope2doc(sc),
-              (is_xtunion ? text("xtunion ") : text("tunion ")),
+              text("datatype "),
               (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
+              (is_xtunion ? text("@extensible") : blank_doc()),
               text(";"));
     else
       s = cat(scope2doc(sc),
-              (is_xtunion ? text("xtunion ") : text("tunion ")),
+              text("datatype "),
               (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
+              (is_xtunion ? text("xtunion ") : blank_doc()),
               (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               blank_doc(),lb(),
               nest(2, cat(line_doc(),tunionfields2doc(fields->v))),

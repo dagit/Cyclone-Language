@@ -42,7 +42,7 @@ using Cyclone;
 
 namespace Tcutil;
 
-xtunion exn {Unify};
+datatype exn @extensible {Unify};
 
 extern void unify_it(type_t t1, type_t t2);
 
@@ -1935,14 +1935,14 @@ opt_t<kind_t> kind_to_opt(kind_t k) {
 }
 
 static kindbound_t@ kind_to_b(kind_t k) {
-  static tunion KindBound.Eq_kb ab_v = Eq_kb(AnyKind);
-  static tunion KindBound.Eq_kb mb_v = Eq_kb(MemKind);
-  static tunion KindBound.Eq_kb bb_v = Eq_kb(BoxKind);
-  static tunion KindBound.Eq_kb rb_v = Eq_kb(RgnKind);
-  static tunion KindBound.Eq_kb ub_v = Eq_kb(UniqueRgnKind);
-  static tunion KindBound.Eq_kb tb_v = Eq_kb(TopRgnKind);
-  static tunion KindBound.Eq_kb eb_v = Eq_kb(EffKind);
-  static tunion KindBound.Eq_kb ib_v = Eq_kb(IntKind);
+  static datatype KindBound.Eq_kb ab_v = Eq_kb(AnyKind);
+  static datatype KindBound.Eq_kb mb_v = Eq_kb(MemKind);
+  static datatype KindBound.Eq_kb bb_v = Eq_kb(BoxKind);
+  static datatype KindBound.Eq_kb rb_v = Eq_kb(RgnKind);
+  static datatype KindBound.Eq_kb ub_v = Eq_kb(UniqueRgnKind);
+  static datatype KindBound.Eq_kb tb_v = Eq_kb(TopRgnKind);
+  static datatype KindBound.Eq_kb eb_v = Eq_kb(EffKind);
+  static datatype KindBound.Eq_kb ib_v = Eq_kb(IntKind);
   static kindbound_t ab = &ab_v;
   static kindbound_t mb = &mb_v;
   static kindbound_t bb = &bb_v;
@@ -2157,7 +2157,7 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     }
     return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
 
-    // allow tunion `r1 T<t1,...,tn> <= tunion `r2 T<t1,...,tn> when
+    // allow datatype `r1 T<t1,...,tn> <= datatype `r2 T<t1,...,tn> when
     // `r1 outlives `r2.
   case $(&TunionType(TunionInfo{KnownTunion(&tud1),ts1,&Opt(r1)}),
          &TunionType(TunionInfo{KnownTunion(&tud2),ts2,&Opt(r2)})):
@@ -3140,7 +3140,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       tuniondecl_t@ tudp;
       try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { case Dict::Absent:
-        // declare the tunion for the user
+        // declare the datatype for the user
         let ge = Dict::lookup(te->ae,te->ns);
         let tud = new Tuniondecl{Extern, n, NULL, NULL, is_x, is_flat};
         Tc::tcTuniondecl(te, ge, loc, tud);
@@ -3393,7 +3393,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     bool seen_stdcall  = false;
     bool seen_fastcall = false;
     bool seen_format   = false;
-    tunion Format_Type ft = Printf_ft;
+    datatype Format_Type ft = Printf_ft;
     int fmt_desc_arg = -1;
     int fmt_arg_start = -1;
     for (; atts != NULL; atts = atts->tl) {

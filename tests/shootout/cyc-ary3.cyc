@@ -22,7 +22,7 @@ main(int argc, char ??argv) {
     unsigned int i, k;
     let n<`n> = nval;
     START_TIME
-    region r {
+    region r; {
       int @{valueof(`n)}`r x, @{valueof(`n)}`r y;
       int ?`r faty;
 

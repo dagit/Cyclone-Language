@@ -25,7 +25,7 @@
 
 namespace Lineno;
 
-tunion token_val {
+datatype token_val {
   NEWLINE;
   LINEDEF;
   END;
@@ -35,7 +35,7 @@ tunion token_val {
 
 let newline = ('\n' | '\r' | "\r\n")
 
-rule token "tunion token_val" = parse
+rule token "datatype token_val" = parse
   "#" [^ '\n' '\r']* newline { return LINEDEF; }
 | [^ '\n' '\r']* newline     { return NEWLINE; }
 | [^ '\n' '\r']* eof         { return END; }

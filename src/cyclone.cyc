@@ -270,11 +270,11 @@ static void set_all_warnings() {
 }
 
 /* This only works enough to support cycdoc so far */
-tunion inputtype {
+datatype inputtype {
   DEFAULTINPUT;
   CYCLONEFILE;
 };
-typedef tunion inputtype inputtype_t;
+typedef datatype inputtype inputtype_t;
 static inputtype_t intype = DEFAULTINPUT;
 static void set_inputtype(string_t s) {
   if (strcmp(s,"cyc") == 0)
@@ -419,7 +419,7 @@ string_t<`H> ?`H split_specs(const char ?cmdline) {
   if (cmdline == NULL) return NULL;
   let n = strlen(cmdline);
   let l = NULL;
-  char buf[MAXSTRVALUE]NOZEROTERM;
+  char buf[MAXSTRVALUE]@nozeroterm;
   int i = 0;
   int j = 0;
   if (n > MAXSTRVALUE) goto DONE; // silently fail
@@ -489,7 +489,7 @@ list_t<Absyn::decl_t>
   string_t exn_string     = "";
   string_t explain_string = "";
   bool other_exn = false;
-  xtunion exn ex = new Core::Impossible(""); // definite assignment doesn't track data
+  datatype @extensible exn ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = NULL;
 
   try ans = f(env,tds);

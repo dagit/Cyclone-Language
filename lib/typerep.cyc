@@ -49,9 +49,9 @@ $(int,typestruct_t<`r>) tuple_tl(typestruct_t<`r> typ) {
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
 // FIX: currently includes the leading tag, this is wasteful
-$(int,tunion `r Typestruct)
+$(int,datatype `r Typestruct)
 get_unionbranch(unsigned int tag,
-		$(unsigned int,string_t<`H>,tunion `r Typestruct)@ ? l)
+		$(unsigned int,string_t<`H>,datatype `r Typestruct)@ ? l)
 {
   //fprintf(stderr,"looking for tag %d\n",tag);
   for (int i = 0; i < numelts(l); i++) {
@@ -96,9 +96,9 @@ get_tagname2(unsigned int tag,
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
    look up the tag in the list and return the corresponding type
    (assumed to be a tuple) */
-$(int,tunion `r Typestruct)
+$(int,datatype `r Typestruct)
 get_xtunionbranch(string_t<`H> tag,
-		$(string_t<`H>,tunion `r Typestruct)@ ? l)
+		$(string_t<`H>,datatype `r Typestruct)@ ? l)
 {
   //fprintf(stderr,"looking for tag %s (%x)\n",tag,(int)tag);
   for (int i = 0; i < numelts(l); i++) {

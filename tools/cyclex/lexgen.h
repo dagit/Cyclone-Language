@@ -16,23 +16,23 @@ using List {
 namespace Lexgen {
 
 // Representation of automata
-LEXGEN_EXTERN_DEFINITION tunion Automata_trans {
+LEXGEN_EXTERN_DEFINITION datatype Automata_trans {
   No_remember;
   Remember(int);
 };
-typedef tunion Automata_trans automata_trans_t;
+typedef datatype Automata_trans automata_trans_t;
 
-LEXGEN_EXTERN_DEFINITION tunion Automata_move {
+LEXGEN_EXTERN_DEFINITION datatype Automata_move {
   Backtrack;
   Goto(int);
 };
-typedef tunion Automata_move automata_move_t;
+typedef datatype Automata_move automata_move_t;
 
-LEXGEN_EXTERN_DEFINITION tunion Automata { 
+LEXGEN_EXTERN_DEFINITION datatype Automata { 
   Perform(int); 
   Shift(automata_trans_t, automata_move_t?);
 };
-typedef tunion Automata automata_t;
+typedef datatype Automata automata_t;
 
 LEXGEN_EXTERN_DEFINITION struct Automata_entry {
   string_t                           name;

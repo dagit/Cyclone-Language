@@ -73,12 +73,12 @@ namespace Absyn {
   typedef stringptr_t tvarname_t;   // type variables
 
   // Name spaces
-  EXTERN_ABSYN __flat__ tunion Nmspace {
+  EXTERN_ABSYN __flat__ datatype Nmspace {
     Loc_n,                // Local name
     Rel_n(list_t<var_t>), // Relative name
     Abs_n(list_t<var_t>)  // Absolute name
   };
-  typedef tunion Nmspace nmspace_t;
+  typedef datatype Nmspace nmspace_t;
 
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
@@ -87,21 +87,21 @@ namespace Absyn {
 
   // forward declarations
   EXTERN_ABSYN struct Conref<`a>;
-  EXTERN_ABSYN __flat__ tunion Constraint<`a>;
-  EXTERN_ABSYN __flat__ tunion Cnst;
+  EXTERN_ABSYN __flat__ datatype Constraint<`a>;
+  EXTERN_ABSYN __flat__ datatype Cnst;
 
-  // typedefs -- in general, we define foo_t to be struct Foo@ or tunion Foo.
-  typedef tunion Scope scope_t;
+  // typedefs -- in general, we define foo_t to be struct Foo@ or datatype Foo.
+  typedef datatype Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
-  typedef tunion Size_of size_of_t;
-  typedef tunion Kind kind_t;
-  typedef tunion KindBound kindbound_t;
+  typedef datatype Size_of size_of_t;
+  typedef datatype Kind kind_t;
+  typedef datatype KindBound kindbound_t;
   typedef struct Tvar @tvar_t; 
-  typedef tunion Sign sign_t;
-  typedef tunion AggrKind aggr_kind_t;
+  typedef datatype Sign sign_t;
+  typedef datatype AggrKind aggr_kind_t;
   typedef struct Conref<`a> @conref_t<`a>;
-  typedef tunion Constraint<`a> constraint_t<`a>;
-  typedef tunion Bounds bounds_t;
+  typedef datatype Constraint<`a> constraint_t<`a>;
+  typedef datatype Bounds bounds_t;
   typedef struct PtrAtts ptr_atts_t;
   typedef struct PtrInfo ptr_info_t;
   typedef struct VarargInfo vararg_info_t;
@@ -110,18 +110,18 @@ namespace Absyn {
   typedef struct TunionFieldInfo tunion_field_info_t;
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef tunion Type type_t, rgntype_t;
-  typedef tunion Cnst cnst_t;
-  typedef tunion Primop primop_t;
-  typedef tunion Incrementor incrementor_t;
+  typedef datatype Type type_t, rgntype_t;
+  typedef datatype Cnst cnst_t;
+  typedef datatype Primop primop_t;
+  typedef datatype Incrementor incrementor_t;
   typedef struct VarargCallInfo vararg_call_info_t;
-  typedef tunion Raw_exp raw_exp_t;
+  typedef datatype Raw_exp raw_exp_t;
   typedef struct Exp @exp_t, *exp_opt_t;
-  typedef tunion Raw_stmt raw_stmt_t;
+  typedef datatype Raw_stmt raw_stmt_t;
   typedef struct Stmt @stmt_t, *stmt_opt_t;
-  typedef tunion Raw_pat raw_pat_t;
+  typedef datatype Raw_pat raw_pat_t;
   typedef struct Pat @pat_t;
-  typedef tunion Binding binding_t;
+  typedef datatype Binding binding_t;
   typedef struct Switch_clause @switch_clause_t;
   typedef struct Fndecl @fndecl_t;
   typedef struct Aggrdecl @aggrdecl_t;
@@ -131,20 +131,20 @@ namespace Absyn {
   typedef struct Enumfield @enumfield_t;
   typedef struct Enumdecl @enumdecl_t;
   typedef struct Vardecl @vardecl_t;
-  typedef tunion Raw_decl raw_decl_t;
+  typedef datatype Raw_decl raw_decl_t;
   typedef struct Decl @decl_t;
-  typedef tunion Designator designator_t;
-  typedef xtunion AbsynAnnot absyn_annot_t;
-  typedef tunion Attribute attribute_t;
+  typedef datatype Designator designator_t;
+  typedef datatype @extensible AbsynAnnot absyn_annot_t;
+  typedef datatype Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Aggrfield @aggrfield_t;
-  typedef tunion OffsetofField offsetof_field_t;
+  typedef datatype OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
-  typedef tunion Coercion coercion_t;
+  typedef datatype Coercion coercion_t;
   typedef struct PtrLoc *ptrloc_t;
 
   // scopes for declarations 
-  EXTERN_ABSYN tunion Scope { 
+  EXTERN_ABSYN datatype Scope { 
     Static,    // definition is local to the compilation unit
     Abstract,  // definition is exported only abstractly (structs only)
     Public,    // definition is exported in full glory (most things)
@@ -165,13 +165,13 @@ namespace Absyn {
     seg_t loc; // only present when porting C code
   };
 
-  EXTERN_ABSYN tunion Size_of { 
+  EXTERN_ABSYN datatype Size_of { 
     Char_sz; Short_sz; Int_sz; Long_sz; LongLong_sz;
   };
                                   
 
   // Used to classify types.  
-  EXTERN_ABSYN tunion Kind { 
+  EXTERN_ABSYN datatype Kind { 
     // BoxKind <= MemKind <= AnyKind
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
@@ -185,16 +185,16 @@ namespace Absyn {
   };
 
   // signed or unsigned qualifiers on integral types
-  EXTERN_ABSYN tunion Sign { Signed, Unsigned, None };
+  EXTERN_ABSYN datatype Sign { Signed, Unsigned, None };
 
-  EXTERN_ABSYN tunion AggrKind { StructA, UnionA };
+  EXTERN_ABSYN datatype AggrKind { StructA, UnionA };
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
-  EXTERN_ABSYN __flat__ tunion Constraint<`a> { 
+  EXTERN_ABSYN __flat__ datatype Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
   };
-  EXTERN_ABSYN struct Conref<`a> { tunion Constraint<`a> v; };
+  EXTERN_ABSYN struct Conref<`a> { datatype Constraint<`a> v; };
 
   // kind bounds are used on tvar's to infer their kinds
   //   Eq_kb(k):  the tvar has kind k
@@ -202,7 +202,7 @@ namespace Absyn {
   //   Less_kb(&Opt(kb1),k): same, but link should be less than k
   //   Unknown_kb(NULL):  the tvar's kind is completely unconstrained
   //   Less_kb(NULL,k): the tvar's kind is unknown but less than k
-  EXTERN_ABSYN tunion KindBound {
+  EXTERN_ABSYN datatype KindBound {
     Eq_kb(kind_t);        
     Unknown_kb(opt_t<kindbound_t>); 
     Less_kb(opt_t<kindbound_t>, kind_t); 
@@ -216,7 +216,7 @@ namespace Absyn {
   };
 
   // used to distinguish ? pointers from *{c} or @{c} pointers
-  EXTERN_ABSYN tunion Bounds {
+  EXTERN_ABSYN datatype Bounds {
     DynEither_b;    // t?+-
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
   };
@@ -275,14 +275,14 @@ namespace Absyn {
   EXTERN_ABSYN struct UnknownTunionInfo {
     qvar_t name;       // name of the [x]tunion
     bool   is_xtunion; // true -> xtunion, false -> tunion
-    bool   is_flat;       // only used when we have an abstract union decl
+    bool   is_flat;       // only used when we have an abstract tunion decl
   };
-  EXTERN_ABSYN __flat__ tunion TunionInfoU {
+  EXTERN_ABSYN __flat__ datatype TunionInfoU {
     UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
     KnownTunion(tuniondecl_t@);              // known definition
   };
   EXTERN_ABSYN struct TunionInfo {
-    tunion TunionInfoU tunion_info; // we either know the definition or not
+    datatype TunionInfoU tunion_info; // we either know the definition or not
     list_t<type_t>     targs;       // actual type parameters
     opt_t<rgntype_t>   rgn;         // region into which tunion points -- 
                      // only present for indirect tunions (i.e., not flat)
@@ -293,21 +293,21 @@ namespace Absyn {
     qvar_t field_name;    // name of the tunion field
     bool   is_xtunion;    // true -> xtunion, false -> tunion
   };
-  EXTERN_ABSYN __flat__ tunion TunionFieldInfoU {
+  EXTERN_ABSYN __flat__ datatype TunionFieldInfoU {
     UnknownTunionfield(struct UnknownTunionFieldInfo);
     KnownTunionfield(tuniondecl_t, tunionfield_t);
   };
   EXTERN_ABSYN struct TunionFieldInfo {
-    tunion TunionFieldInfoU field_info;
+    datatype TunionFieldInfoU field_info;
     list_t<type_t>          targs;
   };
 
-  EXTERN_ABSYN __flat__ tunion AggrInfoU {
+  EXTERN_ABSYN __flat__ datatype AggrInfoU {
     UnknownAggr(aggr_kind_t,typedef_name_t);
     KnownAggr(aggrdecl_t@);
   };
   EXTERN_ABSYN struct AggrInfo {
-    tunion AggrInfoU aggr_info;
+    datatype AggrInfoU aggr_info;
     list_t<type_t> targs; // actual type parameters
   };
   EXTERN_ABSYN struct ArrayInfo {
@@ -326,7 +326,7 @@ namespace Absyn {
   // FIX: Change a lot of the abstract-syntaxes options to nullable pointers.
   //      For example, the last field of TypedefType
   // FIX: May want to make this raw_typ and store the kinds with the types.
-  EXTERN_ABSYN tunion Type {
+  EXTERN_ABSYN datatype Type {
     VoidType; // MemKind
     // Evars are introduced for unification or via _ by the user.
     // The kind can get filled in during well-formedness checking.
@@ -366,7 +366,7 @@ namespace Absyn {
   };
 
   // used when parsing/pretty-printing function definitions.
-  EXTERN_ABSYN tunion Funcparams {
+  EXTERN_ABSYN datatype Funcparams {
     NoTypes(list_t<var_t>,seg_t); // K&R style.  
     WithTypes(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, // args and types
               bool,                                    // true ==> c_varargs
@@ -374,15 +374,15 @@ namespace Absyn {
               opt_t<type_t>,                           // effect
               list_t<$(type_t,type_t)@>);              // region partial order
   };
-  typedef tunion `r Funcparams funcparams_t<`r>;
+  typedef datatype `r Funcparams funcparams_t<`r>;
 
   // Used in attributes below.
-  EXTERN_ABSYN tunion Format_Type { Printf_ft, Scanf_ft };
+  EXTERN_ABSYN datatype Format_Type { Printf_ft, Scanf_ft };
 
   // GCC attributes that we currently try to support:  this definition
   // is only used for parsing and pretty-printing.  See GCC info pages
   // for details.
-  EXTERN_ABSYN tunion Attribute {
+  EXTERN_ABSYN datatype Attribute {
     Regparm_att(int); 
     Stdcall_att;      
     Cdecl_att;        
@@ -402,7 +402,7 @@ namespace Absyn {
     Constructor_att;
     Destructor_att;
     No_check_memory_usage_att;
-    Format_att(tunion Format_Type, 
+    Format_att(datatype Format_Type, 
                int,   // format string arg
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
@@ -411,7 +411,7 @@ namespace Absyn {
   };
 
   // Type modifiers are used for parsing/pretty-printing
-  EXTERN_ABSYN tunion Type_modifier<`r::R> {
+  EXTERN_ABSYN datatype Type_modifier<`r::R> {
     Carray_mod(conref_t<bool>,seg_t); // [], conref controls zero-term
     ConstArray_mod(exp_t,conref_t<bool>,seg_t); // [c], conref controls zero-term
     Pointer_mod(ptr_atts_t,tqual_t); // qualifer for the point (**not** elts)
@@ -419,10 +419,10 @@ namespace Absyn {
     TypeParams_mod(list_t<tvar_t>,seg_t,bool);// when bool is true, print kinds
     Attributes_mod(seg_t,attributes_t);
   };
-  typedef tunion `r Type_modifier<`r> type_modifier_t<`r>;
+  typedef datatype `r Type_modifier<`r> type_modifier_t<`r>;
 
   // Constants
-  EXTERN_ABSYN __flat__ tunion Cnst {
+  EXTERN_ABSYN __flat__ datatype Cnst {
     Char_c(sign_t,char);          // chars
     Short_c(sign_t,short);        // shorts
     Int_c(sign_t,int);            // ints
@@ -433,14 +433,14 @@ namespace Absyn {
   };
 
   // Primitive operations
-  EXTERN_ABSYN tunion Primop {
+  EXTERN_ABSYN datatype Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
     Numelts
   };
 
   // ++x, x++, --x, x-- respectively
-  EXTERN_ABSYN tunion Incrementor { PreInc, PostInc, PreDec, PostDec };
+  EXTERN_ABSYN datatype Incrementor { PreInc, PostInc, PreDec, PostDec };
 
   // information about a call to a vararg function
   EXTERN_ABSYN struct VarargCallInfo {
@@ -450,7 +450,7 @@ namespace Absyn {
   };
 
   // information for offsetof
-  EXTERN_ABSYN tunion OffsetofField {
+  EXTERN_ABSYN datatype OffsetofField {
     StructField(field_name_t);
     TupleIndex(unsigned int);
   };
@@ -458,7 +458,7 @@ namespace Absyn {
   // Casts are labelled with whether or not they involve a coercion
   // of some sort.  This is used in the flow analysis to get rid of
   // spurious warnings and null checks.
-  EXTERN_ABSYN tunion Coercion {
+  EXTERN_ABSYN datatype Coercion {
     Unknown_coercion, // initially, we don't know what kind of coercion
     No_coercion,      // a cast that C supports
     NonNull_to_Null,  // t@{n+m} -> t*{n}
@@ -486,7 +486,7 @@ namespace Absyn {
   };
 
   // "raw" expressions -- don't include location info or type
-  EXTERN_ABSYN tunion Raw_exp {
+  EXTERN_ABSYN datatype Raw_exp {
     Const_e(cnst_t); // constants
     Var_e(qvar_t,binding_t); // variables -- binding_t gets filled in
     UnknownId_e(qvar_t);     // used only during parsing
@@ -556,7 +556,7 @@ namespace Absyn {
   // The $(exp,stmt) in loops are just a hack for holding the
   // non-local predecessors of the exp.  The stmt should always be Skip_s
   // and only the non_local_preds field is interesting.
-  EXTERN_ABSYN tunion Raw_stmt {
+  EXTERN_ABSYN datatype Raw_stmt {
     Skip_s;   // ;
     Exp_s(exp_t);  // e
     Seq_s(stmt_t,stmt_t); // s1;s2
@@ -587,7 +587,7 @@ namespace Absyn {
   };
 
   // raw patterns
-  EXTERN_ABSYN tunion Raw_pat {
+  EXTERN_ABSYN datatype Raw_pat {
     Wild_p; // _ 
     // for Var_p and Reference_p only name field is right until tcPat is called
     Var_p(vardecl_t,pat_t); // x as p (x when p is Wild_p)
@@ -625,7 +625,7 @@ namespace Absyn {
   };
 
   // only local and pat cases need to worry about shadowing
-  EXTERN_ABSYN tunion Binding {
+  EXTERN_ABSYN datatype Binding {
     Unresolved_b;        // don't know -- error or uninitialized
     Global_b(vardecl_t); // global variable
     Funname_b(fndecl_t); // distinction between functions and function ptrs
@@ -689,6 +689,7 @@ namespace Absyn {
     list_t<tvar_t>            exist_vars;
     list_t<$(type_t,type_t)@> rgn_po;
     list_t<aggrfield_t>       fields;
+    bool                      tagged; // only applicable for unions
   };
 
   //for structs and tunions we should memoize the string to field-number mapping
@@ -739,7 +740,7 @@ namespace Absyn {
   };
 
   // raw declarations
-  EXTERN_ABSYN tunion Raw_decl {
+  EXTERN_ABSYN datatype Raw_decl {
     Var_d(vardecl_t);  // variables: t x = e
     Fn_d(fndecl_t);    // functions  t f(t1 x1,...,tn xn) { ... }
     Let_d(pat_t,       // let p = e
@@ -773,12 +774,12 @@ namespace Absyn {
     seg_t      loc;
   };
 
-  EXTERN_ABSYN tunion Designator {
+  EXTERN_ABSYN datatype Designator {
     ArrayElement(exp_t);
     FieldName(var_t);
   };
 
-  EXTERN_ABSYN xtunion AbsynAnnot { EXTERN_ABSYN EmptyAnnot; };
+  EXTERN_ABSYN datatype AbsynAnnot @extensible { EXTERN_ABSYN EmptyAnnot; };
 
   ///////////////////////////////////////////////////////////////////
   // Operations and Constructors for Abstract Syntax
@@ -976,7 +977,8 @@ namespace Absyn {
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 					     list_t<$(type_t,type_t)@`H,`H> po,
-					     list_t<aggrfield_t,`H> fs);
+					     list_t<aggrfield_t,`H> fs,
+                                             bool tagged);
   extern decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 			  list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
 			  attributes_t atts, seg_t loc);
@@ -1017,9 +1019,9 @@ namespace Absyn {
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type
-  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU);
+  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(datatype AggrInfoU);
   // given a checked type, get the decl
-  extern aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info);
+  extern aggrdecl_t get_known_aggrdecl(datatype AggrInfoU info);
   // is a type a union-type (anonymous or otherwise)
   extern bool is_union_type(type_t);
   // is a type an aggregate type (i.e. struct, tuple, etc.)

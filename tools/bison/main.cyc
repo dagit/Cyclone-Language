@@ -31,7 +31,7 @@ int failure;
 /* The name this program was run with, for messages.  */
 char ? program_name;
 
-extern void getargs(int, char ?ZEROTERM `H ? `H), openfiles(), reader(), reduce_grammar();
+extern void getargs(int, char ? @zeroterm `H ? `H), openfiles(), reader(), reduce_grammar();
 extern void set_derives(), set_nullable(), generate_states();
 extern void lalr(), initialize_conflicts(), verbose(), terse();
 extern void output(), done(int);

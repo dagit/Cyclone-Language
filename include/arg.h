@@ -37,9 +37,9 @@
 #include <core.h>
 
 namespace Arg {
-extern xtunion exn {extern Error, extern Bad(string_t)};
+extern datatype exn @extensible {extern Error, extern Bad(string_t)};
 
-extern tunion Spec {
+extern datatype Spec {
   Unit_spec(void (@f)()),        // Call f with unit argument
   Flag_spec(void (@f)(string_t)),  // Call f with flag argument
   FlagString_spec(void (@f)(string_t,string_t)),
@@ -52,7 +52,7 @@ extern tunion Spec {
                                     // function with each remaining argument
 };
 
-typedef tunion `r Spec spec_t<`r>;
+typedef datatype `r Spec spec_t<`r>;
 
 typedef List::list_t<$(string_t,bool,string_t,spec_t<`r1>,string_t)@`r1,`r2>
 speclist_t<`r1,`r2>;

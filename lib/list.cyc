@@ -127,7 +127,7 @@ list_t<`b> map_c(`b f(`c,`a),`c env,list_t<`a> x) {
 }
 
 // thrown when two lists don't have the same size 
-xtunion exn {List_mismatch};
+datatype exn @extensible {List_mismatch};
 
 // Given two lists of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new list.
@@ -483,7 +483,7 @@ list_t<`a> merge(int less_eq(`a,`a),list_t<`a,`H> a,list_t<`a,`H> b) {
 }
 
 // thrown when nth doesn't have enough elements in the list. 
-xtunion exn {Nth};
+datatype exn @extensible {Nth};
 
 // Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
 // Throw Nth if the list doesn't have enough elements.  Notice that the

@@ -31,6 +31,7 @@
 #include "parse.h"
 #include <position.h>
 #include <dict.h>
+#include <tcutil.h>
 
 using Core;
 using List;
@@ -49,13 +50,13 @@ namespace Lex {
 
 static struct Trie<`r::R>;
 typedef struct Trie<`r> *`r trie_t<`r>;
-__flat__ tunion TrieChildren<`r::R> {
+__flat__ datatype TrieChildren<`r::R> {
   Zero;
   One(int, trie_t<`r>);
   Many(trie_t<`r> @{64}`r); // enough room for id chars and `
 };
 static struct Trie<`r::R> {
-  tunion TrieChildren<`r> children;
+  datatype TrieChildren<`r> children;
   int                 shared_str; // meaning depends on which trie -- see below
 };
 
@@ -120,6 +121,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("char", CHAR, true),
   $("const", CONST, true),
   $("continue", CONTINUE, true),
+  $("datatype", DATATYPE, false),
   $("default", DEFAULT, true),
   $("do", DO, true),
   $("double", DOUBLE, true),
@@ -143,7 +145,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("malloc", MALLOC, false),
   $("namespace", NAMESPACE, false),
   $("new", NEW, false),
-  $("NOZEROTERM",NOZEROTERM_kw, false),
+  $("NOZEROTERM",NOZEROTERM_QUAL, false),
   $("NULL", NULL_kw, false),
   $("numelts", NUMELTS, false),
   $("offsetof", OFFSETOF, true),
@@ -179,7 +181,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("volatile", VOLATILE, true),
   $("while", WHILE, true),
   $("xtunion", XTUNION, false),
-  $("ZEROTERM", ZEROTERM_kw, false)
+  $("ZEROTERM", ZEROTERM_QUAL, false)
 };
 
 static int num_keywords(bool include_cyclone_keywords) {
@@ -246,7 +248,7 @@ static int str_index(string_t buff, int offset, int len) {
     // build string if necessary and return
     if(t->shared_str == 0) {
       let newstr = new_string(len+1);
-      zstrncpy((char ?NOZEROTERM)newstr,buff+offset,len);
+      zstrncpy((char ? @nozeroterm)newstr,buff+offset,len);
       int ans = Xarray::add_ind(symbols, new ((string_t)newstr));
       t->shared_str = ans;
     }
@@ -316,7 +318,7 @@ static $(sign_t, int) intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
 
 // ************************* STRING CONSTANTS *************************
 
-char string_buffer_v[]ZEROTERM = {'x','x','x','x','x','x','x','x','x','x',0};
+char string_buffer_v[]@zeroterm = {'x','x','x','x','x','x','x','x','x','x',0};
 mstring_t string_buffer = (mstring_t)string_buffer_v;
 int    string_pos    = 0;
 void store_string_char(char c) {
@@ -534,8 +536,25 @@ static short process_id(Lexbuf<`a> lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
   // maybe it's a keyword
-  if(symbol_num <= num_kws)
+  if(symbol_num <= num_kws) {
+    short res = (short)kw_nums[symbol_num-1]; 
+    switch (res) {
+    case ZEROTERM_QUAL: 
+      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+                   "deprecated ZEROTERM, use @zeroterm"); break;
+    case NOZEROTERM_QUAL: 
+      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+                   "deprecated NOZEROTERM, use @nozeroterm"); break;
+    case TUNION: 
+      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+                   "deprecated tunion, use datatype"); break;
+    case XTUNION: 
+      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+                   "deprecated xtunion, use datatype ... @extensible"); break;
+    default: break;
+    }
     return (short)kw_nums[symbol_num-1]; 
+  }
 
   let s = get_symbol(symbol_num);
   token_string = *s;
@@ -622,6 +641,12 @@ rule token = parse
 | '`'['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
       return TYPE_VAR; }
+/* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
+| "@tagged" { return TAGGED_QUAL; }
+| "@zeroterm" { return ZEROTERM_QUAL; }
+| "@nozeroterm" { return NOZEROTERM_QUAL; }
+| "@extensible" { return EXTENSIBLE_QUAL; }
+| "@resetable" { return RESETABLE_QUAL; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
       { token_int = intconst(lexbuf,2,0,16);
@@ -663,17 +688,17 @@ rule token = parse
 | "&="   { return  AND_ASSIGN; }
 | "<<="  { return  LEFT_ASSIGN; }
 | ">>="  { return  RIGHT_ASSIGN; } 
-| ":=:"  { return  SWAP; }
 | "&&" { return  AND_OP; }
 | "||" { return  OR_OP; }  
 | "<<" { return  LEFT_OP; }
-/* JGM: see shift_expr and relational_expr -- we now parse >> as two
- * separate > tokens.  */
+/* JGM: see shift_expr and relational_expr -- we pull a nasty hack there...*/
 | ">>" { return  RIGHT_OP; }
 | "<>" { return  LEFT_RIGHT; }
 | "->" { return PTR_OP; }
 | "..." { return ELLIPSIS; }
 | "::" { return COLON_COLON; }
+/* swap operation */
+| ":=:" { return SWAP; }
 /* comments */
 | "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
 | [' ' '\t' '\v' '\f' '\n' '\r']+ { return  token(lexbuf); }

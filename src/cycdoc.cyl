@@ -40,11 +40,11 @@ namespace Position {
 using Core;
 using List;
 
-tunion Comment {
+datatype Comment {
   MatchDecl(mstring_t);
   Standalone(mstring_t);
 };
-typedef tunion Comment comment_t;
+typedef datatype Comment comment_t;
 
 extern $(int,comment_t)* token(Lexing::Lexbuf<`a> lexbuf);
 }

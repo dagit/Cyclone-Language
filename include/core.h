@@ -45,13 +45,13 @@ typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
 typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
 /** [mstringptr_t] is the mutable version of [stringptr_t]. */
 
-typedef char *NOZEROTERM`r Cbuffer_t<`r>;
+typedef char * @nozeroterm`r Cbuffer_t<`r>;
 /** [buffer_t] is a non-zero-terminated C buffer */
-typedef char @NOZEROTERM`r CbufferNN_t<`r>;
+typedef char @ @nozeroterm`r CbufferNN_t<`r>;
 /** [buffer_t] is a non-zero-terminated C buffer */
-typedef const char ?NOZEROTERM`r buffer_t<`r>;
+typedef const char ? @nozeroterm`r buffer_t<`r>;
 /** [buffer_t] is a non-zero-terminated dynamically sized buffer */
-typedef char ?NOZEROTERM`r mbuffer_t<`r>;
+typedef char ? @nozeroterm`r mbuffer_t<`r>;
 
 #ifndef bool
 typedef int bool;
@@ -135,23 +135,23 @@ extern int ptrcmp(`a::A @ `r, `a::A @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
 extern int nptrcmp(`a::A * `r, `a::A * `r);
   /** [nptrcmp] is a comparison function on nullable pointers. */
-extern xtunion exn { extern Invalid_argument(string_t) };
+extern datatype exn @extensible { extern Invalid_argument(string_t) };
   /** [Invalid_argument] is an exception thrown by library functions
       when one of their arguments is inappropriate.  */
-extern xtunion exn { extern Failure(string_t) };
+extern datatype exn @extensible { extern Failure(string_t) };
   /** [Failure] is an exception that's thrown by library functions
       when they encounter an unexpected error. */
-extern xtunion exn { extern Impossible(string_t) };
+extern datatype exn @extensible { extern Impossible(string_t) };
   /** The [Impossible] exception is thrown when a supposedly
       impossible situation occurs (whether in a library or in your own
       code).  For example, you might thrw [Impossible] if an assertion
       fails.  */
-extern xtunion exn { extern Not_found };
+extern datatype exn @extensible { extern Not_found };
   /** The [Not_found] exception is thrown by search functions to
       indicate failure.  For example, a function that looks up an
       entry in a table can throw [Not_found] if the entry is not
       found. */
-extern xtunion exn { extern Unreachable(string_t) };
+extern datatype exn @extensible { extern Unreachable(string_t) };
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 extern region_t<`U> unique_region;
@@ -171,10 +171,10 @@ extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
 extern struct NewRegion new_dynregion();
   /** The [Open_Region] exception is thrown when one attempts to open 
       a dynamic region that is either already open or has been freed. */
-extern xtunion exn { extern Open_Region };
+extern datatype exn @extensible { extern Open_Region };
   /** The [Free_Region] exception is thrown when one attempts to free
       a dynamic region that is either open or has already been freed. */
-extern xtunion exn { extern Free_Region };
+extern datatype exn @extensible { extern Free_Region };
   /** A call to [free_dynregion(d)] attempts to free the storage associated
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then the exception [Free_Region] is thrown. */
@@ -194,7 +194,7 @@ extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
 extern "C" Cstring<`H> string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns NULL
 // when the string is empty
-//  extern "C" Cstring<`r> underlying_Cstring(const char ?NOZEROTERM`r);
+//  extern "C" Cstring<`r> underlying_Cstring(const char ? @nozeroterm`r);
 extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
 //  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);

@@ -820,7 +820,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
                                        region_t<`r> r,
                                        list_t<$(tvar_t,type_t)@`r,`r> inst, 
                                        list_t<tunionfield_t> fs) {
-  static tunion Type.DoubleType dbl = DoubleType(false);
+  static datatype Type.DoubleType dbl = DoubleType(false);
   static type_t dbl_typ = &dbl;
 
   list_t<tunionfield_t> fields;
@@ -1269,6 +1269,16 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     tcExp(te,NULL,e);
     type_t t = compress(e->topt->v);
     switch (t) {
+    case &Evar(_,_,_,_):
+      let tenv_tvs = lookup_type_vars(te);
+      let t2 = new_evar(&mk,new Opt(tenv_tvs));
+      let rt = new_evar(&trk,new Opt(tenv_tvs));
+      let b = empty_conref();
+      let zt = empty_conref();
+      let atts = PtrAtts(rt,empty_conref(),b,zt,NULL);
+      let new_t = new PointerType(PtrInfo{t2,empty_tqual(NULL),atts});
+      unify(t,new_t);
+      fallthru(t2,rt,b,zt);
     case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
       check_rgn_accessible(te,loc,rt);
       check_nonzero_bound(loc, b);
@@ -1276,7 +1286,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
         terr(loc,"can't dereference abstract pointer type");
       return t2;
     default: 
-      return expr_err(te,loc,topt,"expecting * or @ type but found %s",typ2string(t));
+      return expr_err(te,loc,topt,"expecting *, @, or ? type but found %s",typ2string(t));
     }
   }
 }

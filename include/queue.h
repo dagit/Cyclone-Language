@@ -54,7 +54,7 @@ extern void rpush(region_t<`r> r, queue_t<`a,`r> q,`a x);
   /** [rpush(r,q,x)] is like [push(q,x)] except that the queue lives in
       the region with handle [r]. */
 
-extern xtunion exn { extern Empty };
+extern datatype exn @extensible { extern Empty };
   /** [Empty] is an exception raised by [take] and [peek]. */
 extern `a take(queue_t<`a>);
   /** [take(q)] removes the element from the front on [q] and returns

@@ -50,7 +50,7 @@
  * so it can't really be used on Cyclone code.  For instance, it doesn't
  * deal properly with name spaces (sets them all to Loc_n) and it
  * can't process Cyclone abstract syntax additions (e.g., patterns,
- * tunions, etc.)
+ * datatypes, etc.)
  *
  * The inference is also very naive with respect to constraint representation
  * and solving.  Right now, I just have a very ad-hoc set of rules for
@@ -108,8 +108,8 @@ int cmp_edit(edit_t e1, edit_t e2) {
 /////////////////////////////////////////////////////////////////////
 // A ctype_t is a type that we use for processing C code and is
 // an approximation of Absyn's type_t
-extern tunion Ctype;
-typedef tunion Ctype ctype_t;
+extern datatype Ctype;
+typedef datatype Ctype ctype_t;
 // Unification variables
 typedef struct Cvar {
   int id;
@@ -130,7 +130,7 @@ typedef list_t<cfield_t> cfields_t;
 //   Zero <= Ptr <= Arith
 //   Array <= Ptr
 //   Zterm <= Nozterm
-tunion Ctype {
+datatype Ctype {
   Const_ct;     // const qualifier
   Notconst_ct;  // not-const qualifier
   Thin_ct;      // * pointers
@@ -456,7 +456,7 @@ static bool occurs(ctype_t v, ctype_t t) {
 //////////////////////////////////////////////////////////////////
 // Unification of ctypes
 // thrown when unification fails
-xtunion exn { Unify_ct };
+datatype exn @extensible { Unify_ct };
 // prototypes for functions defined later
 static bool leq(ctype_t t1, ctype_t t2);
 static void unify_cts(list_t<ctype_t> t1, list_t<ctype_t> t2);
@@ -770,8 +770,8 @@ typedef struct GlobalCenv {
   bool porting; // true when we are processing unported C code, false otherwise
 } @gcenv_t;
 
-tunion CPos { FnRes_pos; FnArg_pos; FnBody_pos; Toplevel_pos };
-typedef tunion CPos cpos_t;
+datatype CPos { FnRes_pos; FnArg_pos; FnBody_pos; Toplevel_pos };
+typedef datatype CPos cpos_t;
 
 typedef struct Cenv {
   // Global environment

@@ -740,18 +740,18 @@ void fn_test() {
 
 //////////////////////////// Pretty-printer test
 using PP {
-tunion term {
+datatype term {
   Var(string_t),
-  App(tunion term,tunion term),
-  Lam(string_t,tunion term)
+  App(datatype term,datatype term),
+  Lam(string_t,datatype term)
 };
-bool is_lam(tunion term t) {
+bool is_lam(datatype term t) {
   switch (t) {
   case &Lam(x,t1): return true;
   default: return false;
   }
 }
-doc_t pp_term(tunion term t) {
+doc_t pp_term(datatype term t) {
   switch (t) {
   case &Var(x):
     return text(x);

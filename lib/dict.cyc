@@ -23,13 +23,13 @@
 
 namespace Dict;
 
-xtunion exn {Absent,Present};
+datatype exn @extensible {Absent,Present};
 
-static tunion Color { R, B };
+static datatype Color { R, B };
 
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 abstract struct T<`a::B,`b::B,`r::R> {
-  tunion Color color;
+  datatype Color color;
   struct T<`a,`b,`r> *`r const left;
   struct T<`a,`b,`r> *`r const right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
@@ -117,7 +117,7 @@ bool lookup_bool(dict_t<`a,`b,`r2> d, `a key, `b @`r ans_place) {
 
 static tree<`a,`b,`r> 
 balance(region_t<`r> r,
-        $(tunion `H Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
+        $(datatype `H Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
   switch(quad) {
   case $(B,&T(R,&T(R,a,b,x),c,y),d,z): 
     return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
