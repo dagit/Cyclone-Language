@@ -12,12 +12,13 @@ CYC_FLAGS=-I../../lib -B../../lib
 
 LIB=../../lib/$(OUT_PREFIX)$(CYCLIB)
 
-all: $(OUT_PREFIX)freq $(OUT_PREFIX)strings $(OUT_PREFIX)grep $(OUT_PREFIX)markov $(CYCC)
+all: $(CYCC) $(OUT_PREFIX)freq$(EXE) $(OUT_PREFIX)strings$(EXE) \
+  $(OUT_PREFIX)grep$(EXE) $(OUT_PREFIX)markov$(EXE)
 
 
 # Note: we leave in $(LIB) so we get the $(OUT_PREFIX) version of the
 # library
-$(OUT_PREFIX)%: $(OUT_PREFIX)%.o $(LIB)
+$(OUT_PREFIX)%$(EXE): $(OUT_PREFIX)%.o $(LIB)
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)

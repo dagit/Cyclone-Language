@@ -4,20 +4,17 @@
 # Note: we use the compiler in lib and src, not in bin
 
 CYCDIR := ../../..
-CYCCOMP := cyclone.exe
 
-# include $(CYCDIR)/Makefile.inc
+include $(CYCDIR)/Makefile.inc
 
 CYCC=$(CYCDIR)/src/$(CYCCOMP)
 
-CYCBISON=$(CYCDIR)/bin/cycbison.exe
-
 CYC_FLAGS=-I$(CYCDIR)/lib -B$(CYCDIR)/lib -pp -v
 
-encode: arithcode.o model.o encode.o
+encode$(EXE): arithcode.o model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
-decode: arithcode.o model.o decode.o
+decode$(EXE): arithcode.o model.o decode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
 %.o : %.cyc

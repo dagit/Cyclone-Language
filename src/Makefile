@@ -9,8 +9,8 @@ include ../Makefile.inc
 # an absolute path)
 CYCC:=../bin/$(CYCCOMP)
 
-CYCLEX:=../bin/cyclex.exe
-CYCBISON:=../bin/cycbison.exe
+CYCLEX:=../bin/cyclex$(EXE)
+CYCBISON:=../bin/cycbison$(EXE)
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=

@@ -9,13 +9,13 @@ compile:
 	$(MAKE) -C lib
 	$(MAKE) -C src
 
-copy: ../$(CYCLIB) ../cyclone.exe
+copy: ../$(CYCLIB) ../cyclone$(EXE)
 
 ../$(CYCLIB): lib/$(CYCLIB)
 	cp lib/$(CYCLIB) ../cyc-lib
 
-../cyclone.exe: src/cyclone.exe
-	cp src/cyclone.exe ..
+../cyclone$(EXE): src/cyclone$(EXE)
+	cp src/cyclone$(EXE) ..
 
 clean:
 	$(MAKE) clean -C src

@@ -2,9 +2,15 @@
 ifdef MS
 O := obj
 A := lib
+EXE := .exe
 else
 O := o
 A := a
+ifeq ($(OSTYPE),cygwin)
+  EXE := .exe
+else
+  EXE :=
+endif
 endif
 
 CYCLONE_LIBS:=arg\
@@ -77,7 +83,7 @@ CYCLONE_SRCS:=absyn\
 RUNTIME:=runtime_cyc
 
 CYCLIB:=cyclib.$(A)
-CYCCOMP:=cyclone.exe
+CYCCOMP:=cyclone$(EXE)
 
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))

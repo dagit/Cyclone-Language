@@ -103,11 +103,11 @@ clean_nogc:
 	$(MAKE) clean -C tests
 #	$(MAKE) clean -C gc
 #	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	rm -f bin/cyclone.exe 
+	rm -f bin/cyclone bin/cyclone.exe 
 	rm -f bin/$(CYCLIB)
 	rm -f bin/$(RUNTIME).o
-	rm -f bin/cycbison.exe 
-	rm -f bin/cyclex.exe
+	rm -f bin/cycbison bin/cycbison.exe 
+	rm -f bin/cyclex bin/cyclex.exe
 	rm -f *~ doc/*~
 
 clean: clean_nogc

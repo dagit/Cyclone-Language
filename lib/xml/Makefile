@@ -4,9 +4,9 @@ include $(CYCDIR)/Makefile.inc
 
 BINDIR=$(CYCDIR)/bin
 
-CYCC=$(CYCDIR)/bin/cyclone.exe
-CYCBISON=$(CYCDIR)/bin/cycbison.exe
-CYCLEX=$(CYCDIR)/bin/cyclex.exe
+CYCC=$(CYCDIR)/bin/$(CYCCOMP)
+CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)
+CYCLEX=$(CYCDIR)/bin/cyclex$(EXE)
 
 CYC_FLAGS=-I.. -B..
 
@@ -15,12 +15,12 @@ SRCS=xml xmlparse_tab xmlscan xmldump
 OBJS=$(addsuffix .o, $(SRCS))
 CSRCS=$(addsuffix .c, $(SRCS))
 
-all: xmlecho.exe libxml.a
+all: xmlecho$(EXE) libxml.a
 
-xmlecho.exe: $(OBJS) xmlecho.o
+xmlecho$(EXE): $(OBJS) xmlecho.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
-test: xmlecho.exe
+test: xmlecho$(EXE)
 	./xmlecho test.xml
 
 libxml.a: $(OBJS)
@@ -34,7 +34,7 @@ clean:
 	rm -f xmlscan.cyc
 	rm -f xmlparse_tab.cyc xmlparse_tab.h
 	rm -f libxml.a
-	rm -f xmlecho.exe
+	rm -f xmlecho xmlecho.exe
 
 %.o : %.cyc
 	$(CYCC) $(CYC_FLAGS) -c $< 

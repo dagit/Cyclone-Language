@@ -5,7 +5,7 @@ include ../Makefile.inc
 # an absolute path)
 CYCC:=../bin/$(CYCCOMP)
 
-CYCLEX:=../bin/cyclex.exe
+CYCLEX:=../bin/cyclex$(EXE)
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX:=
@@ -29,7 +29,7 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
+CYC_FLAGS := -B. -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

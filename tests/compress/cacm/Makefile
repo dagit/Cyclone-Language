@@ -2,8 +2,7 @@
 # Note: we use the compiler in lib and src, not bin
 
 CYCDIR := ../../..
-CYCCOMP := cyclone.exe
-#include $(CYCDIR)/Makefile.inc
+include $(CYCDIR)/Makefile.inc
 
 CYCC := $(CYCDIR)/src/$(CYCCOMP)
 
@@ -11,10 +10,10 @@ CYCC := $(CYCDIR)/src/$(CYCCOMP)
 # leaves an unterminated comment
 CYC_FLAGS := -pp -I$(CYCDIR)/lib -B$(CYCDIR)/lib
 
-encode: bit_output.o arithmetic_encode.o adaptive_model.o encode.o
+encode$(EXE): bit_output.o arithmetic_encode.o adaptive_model.o encode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
-decode: bit_input.o arithmetic_decode.o adaptive_model.o decode.o
+decode$(EXE): bit_input.o arithmetic_decode.o adaptive_model.o decode.o
 	$(CYCC) $(CYC_FLAGS) -g -o $@ $^
 
 %.o : %.cyc
