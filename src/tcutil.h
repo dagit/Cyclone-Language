@@ -232,7 +232,7 @@ extern void check_unique_tvars(seg_t,list_t<tvar_t>);
 // Check that bounds are not zero -- constrain to 1 if necessary
 extern void check_nonzero_bound(seg_t, conref_t<bounds_t>);
 // Check that bounds are greater than i -- constrain to i+1 if necessary
-extern void check_bound(seg_t, unsigned int i, conref_t<bounds_t>);
+extern void check_bound(seg_t, unsigned int i, conref_t<bounds_t>, bool do_warn);
 
 extern bool is_bound_one(conref_t<bounds_t> b);
 

@@ -5435,20 +5435,23 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 
 // give an error when we can statically tell that the array bounds aren't
 // large enough -- if the bounds are unconstrained, set them to i+1.
-void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
+void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b, bool do_warn) {
   b = compress_conref(b);
   switch (conref_constr(bounds_one,b)) {
   case &DynEither_b: return; // always checked dynamically
   case &Upper_b(e):
     let $(j,known) = Evexp::eval_const_uint_exp(e);
     if(known && j <= i)
-      terr(loc, "dereference is out of bounds: %d <= %d", j, i);
+      if (do_warn)
+	warn(loc, "a dereference will be out of bounds: %d <= %d", j, i);
+      else
+	terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
   }
 }
 
 void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
-  check_bound(loc, 0, b);
+  check_bound(loc, 0, b, false);
 }
 
 bool is_bound_one(conref_t<bounds_t> b) {

@@ -1666,7 +1666,9 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
       if (is_const_exp(e2)) {
 	let $(i,known) = Evexp::eval_const_uint_exp(e2);
 	if (known)
-	  check_bound(loc,i,b);
+	  // FIX: hack! we know that when doing &e[i] that abstract_val_ok
+	  // is set; in this case a bounds failure can just be a warning
+	  check_bound(loc,i,b,abstract_val_ok(te));
       } else {
 	// an easy warning that helps when porting C code
 	if(is_bound_one(b) && !conref_def(false,zt))
