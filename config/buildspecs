@@ -37,7 +37,7 @@ sed -e 's/ /=/' |\
 sed -e 's/\\/\\\\/g' |\
 sed -e 's/ /\\ /g' |\
 sed -e 's/	/\\	/g' |\
-awk 'BEGIN { printf "*cyclone:\n -elim-statement-expressions\n\n*predefines:\n\n\n*cpp:\n -nostdinc" }\
+awk 'BEGIN { printf "*cyclone:\n\n\n*predefines:\n\n\n*cpp:\n -nostdinc" }\
            { printf " %s", $0 }\
        END { print "" }'
 

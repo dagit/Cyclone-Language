@@ -265,16 +265,23 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
   // with a lot less here, but may as well get it right the first time. :-)
   while(true)
     switch (s->r) {
-    case &Skip_s:         
-    case &Break_s(_):    
-    case &Continue_s(_): return;
+    case &Skip_s: return;        
+    case &Break_s(_): 
+      Tcutil::warn(s->loc,"break in eliminated statement expression");   
+      return;
+    case &Continue_s(_): 
+      Tcutil::warn(s->loc,"continue in eliminated statement expression");   
       // FIX: reject if goto is to a different function (a pain to detect)
       //  (Similarly a label that has gotos from different functions)
-    case &Goto_s(_,_):   return;
+      return;
+    case &Goto_s(_,_):   
+      Tcutil::warn(s->loc,"goto in eliminated statement expression");   
+      return;
     case &Label_s(_,s2):
       s = s2;
       continue;
     case &Return_s(*eopt):
+      Tcutil::warn(s->loc,"return in eliminated statement expression");   
       // FIX: reject this -- it won't be in the right function.
       if (*eopt != NULL) {
 	let ei = box_free_vars_exp(env,(exp_t)*eopt);

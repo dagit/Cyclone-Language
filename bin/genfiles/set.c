@@ -922,13 +922,13 @@ void*Cyc_Set_choose(struct Cyc_Set_Set*s);
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s);struct Cyc_Set_Set{int(*cmp)(void*,void*);int cardinality;struct Cyc_List_List*nodes;};
 # 39 "set.cyc"
 struct Cyc_Set_Set*Cyc_Set_empty(int(*comp)(void*,void*)){
-struct Cyc_Set_Set*_tmp1E;return(_tmp1E=_cycalloc(sizeof(*_tmp1E)),((_tmp1E->cmp=comp,((_tmp1E->cardinality=0,((_tmp1E->nodes=0,_tmp1E)))))));}
+return({struct Cyc_Set_Set*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->cmp=comp;_tmp0->cardinality=0;_tmp0->nodes=0;_tmp0;});}
 # 42
 struct Cyc_Set_Set*Cyc_Set_rempty(struct _RegionHandle*rgn,int(*comp)(void*,void*)){
-struct Cyc_Set_Set*_tmp1F;return(_tmp1F=_region_malloc(rgn,sizeof(*_tmp1F)),((_tmp1F->cmp=comp,((_tmp1F->cardinality=0,((_tmp1F->nodes=0,_tmp1F)))))));}
+return({struct Cyc_Set_Set*_tmp1=_region_malloc(rgn,sizeof(*_tmp1));_tmp1->cmp=comp;_tmp1->cardinality=0;_tmp1->nodes=0;_tmp1;});}
 # 46
 struct Cyc_Set_Set*Cyc_Set_singleton(int(*comp)(void*,void*),void*x){
-struct Cyc_List_List*_tmp22;struct Cyc_Set_Set*_tmp21;return(_tmp21=_cycalloc(sizeof(*_tmp21)),((_tmp21->cmp=comp,((_tmp21->cardinality=1,((_tmp21->nodes=((_tmp22=_cycalloc(sizeof(*_tmp22)),((_tmp22->hd=x,((_tmp22->tl=0,_tmp22)))))),_tmp21)))))));}
+return({struct Cyc_Set_Set*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->cmp=comp;_tmp2->cardinality=1;_tmp2->nodes=({struct Cyc_List_List*_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3->hd=x;_tmp3->tl=0;_tmp3;});_tmp2;});}
 # 50
 int Cyc_Set_cardinality(struct Cyc_Set_Set*s){
 return s->cardinality;}
@@ -950,42 +950,42 @@ return Cyc_Set_member_b(s->cmp,s->nodes,elt);}
 # 78
 static struct Cyc_List_List*Cyc_Set_insert_b(struct _RegionHandle*rgn,int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 # 81
-if(n == 0){
-struct Cyc_List_List*_tmp23;return(_tmp23=_region_malloc(rgn,sizeof(*_tmp23)),((_tmp23->hd=elt,((_tmp23->tl=0,_tmp23)))));}else{
+if(n == 0)
+return({struct Cyc_List_List*_tmp4=_region_malloc(rgn,sizeof(*_tmp4));_tmp4->hd=elt;_tmp4->tl=0;_tmp4;});else{
 # 84
 int i=cmp(elt,n->hd);
-if(i < 0){
-struct Cyc_List_List*_tmp24;return(_tmp24=_region_malloc(rgn,sizeof(*_tmp24)),((_tmp24->hd=elt,((_tmp24->tl=n,_tmp24)))));}else{
+if(i < 0)
+return({struct Cyc_List_List*_tmp5=_region_malloc(rgn,sizeof(*_tmp5));_tmp5->hd=elt;_tmp5->tl=n;_tmp5;});else{
 # 88
-struct Cyc_List_List*_tmp25;struct Cyc_List_List*result=(_tmp25=_region_malloc(rgn,sizeof(*_tmp25)),((_tmp25->hd=n->hd,((_tmp25->tl=0,_tmp25)))));
+struct Cyc_List_List*result=({struct Cyc_List_List*_tmp8=_region_malloc(rgn,sizeof(*_tmp8));_tmp8->hd=n->hd;_tmp8->tl=0;_tmp8;});
 struct Cyc_List_List*prev=result;
 n=n->tl;
 while(n != 0  && (i=cmp(n->hd,elt))< 0){
-{struct Cyc_List_List*_tmp26;((struct Cyc_List_List*)_check_null(prev))->tl=((_tmp26=_region_malloc(rgn,sizeof(*_tmp26)),((_tmp26->hd=n->hd,((_tmp26->tl=0,_tmp26))))));}
+((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*_tmp6=_region_malloc(rgn,sizeof(*_tmp6));_tmp6->hd=n->hd;_tmp6->tl=0;_tmp6;});
 prev=prev->tl;
 n=n->tl;}
 # 96
-{struct Cyc_List_List*_tmp27;((struct Cyc_List_List*)_check_null(prev))->tl=((_tmp27=_region_malloc(rgn,sizeof(*_tmp27)),((_tmp27->hd=elt,((_tmp27->tl=n,_tmp27))))));}
+((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*_tmp7=_region_malloc(rgn,sizeof(*_tmp7));_tmp7->hd=elt;_tmp7->tl=n;_tmp7;});
 return result;}}}
 # 103
 struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*s,void*elt){
 if(Cyc_Set_member(s,elt))return s;else{
-struct Cyc_Set_Set*_tmp28;return(_tmp28=_cycalloc(sizeof(*_tmp28)),((_tmp28->cmp=s->cmp,((_tmp28->cardinality=s->cardinality + 1,((_tmp28->nodes=
-Cyc_Set_insert_b(Cyc_Core_heap_region,s->cmp,s->nodes,elt),_tmp28)))))));}}
+return({struct Cyc_Set_Set*_tmp9=_cycalloc(sizeof(*_tmp9));_tmp9->cmp=s->cmp;_tmp9->cardinality=s->cardinality + 1;_tmp9->nodes=
+Cyc_Set_insert_b(Cyc_Core_heap_region,s->cmp,s->nodes,elt);_tmp9;});}}
 # 108
 struct Cyc_Set_Set*Cyc_Set_rinsert(struct _RegionHandle*rgn,struct Cyc_Set_Set*s,void*elt){
 if(Cyc_Set_member(s,elt))return s;else{
-struct Cyc_Set_Set*_tmp29;return(_tmp29=_region_malloc(rgn,sizeof(*_tmp29)),((_tmp29->cmp=s->cmp,((_tmp29->cardinality=s->cardinality + 1,((_tmp29->nodes=
-Cyc_Set_insert_b(rgn,s->cmp,s->nodes,elt),_tmp29)))))));}}
+return({struct Cyc_Set_Set*_tmpA=_region_malloc(rgn,sizeof(*_tmpA));_tmpA->cmp=s->cmp;_tmpA->cardinality=s->cardinality + 1;_tmpA->nodes=
+Cyc_Set_insert_b(rgn,s->cmp,s->nodes,elt);_tmpA;});}}
 # 117
 static struct Cyc_List_List*Cyc_Set_imp_insert_b(struct _RegionHandle*rgn,int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 # 120
-if(n == 0){
-struct Cyc_List_List*_tmp2A;return(_tmp2A=_region_malloc(rgn,sizeof(*_tmp2A)),((_tmp2A->hd=elt,((_tmp2A->tl=0,_tmp2A)))));}else{
+if(n == 0)
+return({struct Cyc_List_List*_tmpB=_region_malloc(rgn,sizeof(*_tmpB));_tmpB->hd=elt;_tmpB->tl=0;_tmpB;});else{
 # 123
 int i=cmp(elt,n->hd);
-if(i < 0){
-struct Cyc_List_List*_tmp2B;return(_tmp2B=_region_malloc(rgn,sizeof(*_tmp2B)),((_tmp2B->hd=elt,((_tmp2B->tl=n,_tmp2B)))));}else{
+if(i < 0)
+return({struct Cyc_List_List*_tmpC=_region_malloc(rgn,sizeof(*_tmpC));_tmpC->hd=elt;_tmpC->tl=n;_tmpC;});else{
 # 127
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
@@ -993,7 +993,7 @@ while(n != 0  && (i=cmp(n->hd,elt))< 0){
 prev=((struct Cyc_List_List*)_check_null(prev))->tl;
 n=n->tl;}
 # 133
-{struct Cyc_List_List*_tmp2C;((struct Cyc_List_List*)_check_null(prev))->tl=((_tmp2C=_region_malloc(rgn,sizeof(*_tmp2C)),((_tmp2C->hd=elt,((_tmp2C->tl=n,_tmp2C))))));}
+((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*_tmpD=_region_malloc(rgn,sizeof(*_tmpD));_tmpD->hd=elt;_tmpD->tl=n;_tmpD;});
 return res;}}}
 # 140
 void Cyc_Set_imp_insert(struct Cyc_Set_Set*s,void*elt){
@@ -1030,20 +1030,20 @@ x2=x2->tl;else{
 if(i < 0){
 # 175
 if(curr == 0){
-{struct Cyc_List_List*_tmp2D;nodes=((_tmp2D=_cycalloc(sizeof(*_tmp2D)),((_tmp2D->hd=x1->hd,((_tmp2D->tl=0,_tmp2D))))));}
+nodes=({struct Cyc_List_List*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->hd=x1->hd;_tmpE->tl=0;_tmpE;});
 curr=nodes;}else{
 # 179
-{struct Cyc_List_List*_tmp2E;curr->tl=((_tmp2E=_cycalloc(sizeof(*_tmp2E)),((_tmp2E->hd=x1->hd,((_tmp2E->tl=0,_tmp2E))))));}
+curr->tl=({struct Cyc_List_List*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->hd=x1->hd;_tmpF->tl=0;_tmpF;});
 curr=curr->tl;}
 # 182
 x1=x1->tl;
 ++ cardinality;}else{
 # 186
 if(curr == 0){
-{struct Cyc_List_List*_tmp2F;nodes=((_tmp2F=_cycalloc(sizeof(*_tmp2F)),((_tmp2F->hd=x2->hd,((_tmp2F->tl=0,_tmp2F))))));}
+nodes=({struct Cyc_List_List*_tmp10=_cycalloc(sizeof(*_tmp10));_tmp10->hd=x2->hd;_tmp10->tl=0;_tmp10;});
 curr=nodes;}else{
 # 190
-{struct Cyc_List_List*_tmp30;curr->tl=((_tmp30=_cycalloc(sizeof(*_tmp30)),((_tmp30->hd=x2->hd,((_tmp30->tl=0,_tmp30))))));}
+curr->tl=({struct Cyc_List_List*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->hd=x2->hd;_tmp11->tl=0;_tmp11;});
 curr=curr->tl;}
 # 193
 x2=x2->tl;
@@ -1062,18 +1062,18 @@ if(curr == 0)
 nodes=x2;else{
 # 209
 curr->tl=x2;}
-cardinality +=Cyc_List_length(x2);}}{
+cardinality +=Cyc_List_length(x2);}}
 # 212
-struct Cyc_Set_Set*_tmp31;return(_tmp31=_cycalloc(sizeof(*_tmp31)),((_tmp31->cmp=comp,((_tmp31->cardinality=cardinality,((_tmp31->nodes=nodes,_tmp31)))))));};};}
+return({struct Cyc_Set_Set*_tmp12=_cycalloc(sizeof(*_tmp12));_tmp12->cmp=comp;_tmp12->cardinality=cardinality;_tmp12->nodes=nodes;_tmp12;});};}
 # 218
 static struct Cyc_List_List*Cyc_Set_delete_b(int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 if(cmp(((struct Cyc_List_List*)_check_null(n))->hd,elt)== 0)return n->tl;{
 # 221
-struct Cyc_List_List*_tmp32;struct Cyc_List_List*result=(_tmp32=_cycalloc(sizeof(*_tmp32)),((_tmp32->hd=n->hd,((_tmp32->tl=0,_tmp32)))));
+struct Cyc_List_List*result=({struct Cyc_List_List*_tmp14=_cycalloc(sizeof(*_tmp14));_tmp14->hd=n->hd;_tmp14->tl=0;_tmp14;});
 struct Cyc_List_List*prev=result;
 n=n->tl;
 while(n != 0  && cmp(n->hd,elt)!= 0){
-{struct Cyc_List_List*_tmp33;((struct Cyc_List_List*)_check_null(prev))->tl=((_tmp33=_cycalloc(sizeof(*_tmp33)),((_tmp33->hd=n->hd,((_tmp33->tl=0,_tmp33))))));}
+((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*_tmp13=_cycalloc(sizeof(*_tmp13));_tmp13->hd=n->hd;_tmp13->tl=0;_tmp13;});
 prev=prev->tl;
 n=n->tl;}
 # 229
@@ -1081,9 +1081,9 @@ n=n->tl;}
 return result;};}
 # 234
 struct Cyc_Set_Set*Cyc_Set_delete(struct Cyc_Set_Set*s,void*elt){
-if(Cyc_Set_member(s,elt)){
-struct Cyc_Set_Set*_tmp34;return(_tmp34=_cycalloc(sizeof(*_tmp34)),((_tmp34->cmp=s->cmp,((_tmp34->cardinality=s->cardinality - 1,((_tmp34->nodes=
-Cyc_Set_delete_b(s->cmp,s->nodes,elt),_tmp34)))))));}else{
+if(Cyc_Set_member(s,elt))
+return({struct Cyc_Set_Set*_tmp15=_cycalloc(sizeof(*_tmp15));_tmp15->cmp=s->cmp;_tmp15->cardinality=s->cardinality - 1;_tmp15->nodes=
+Cyc_Set_delete_b(s->cmp,s->nodes,elt);_tmp15;});else{
 return s;}}
 # 245
 static struct Cyc_List_List*Cyc_Set_imp_delete_b(int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt,void**ret){
@@ -1149,10 +1149,10 @@ while(x1 != 0  && x2 != 0){
 int i=comp(x1->hd,x2->hd);
 if(i == 0){
 if(result == 0){
-{struct Cyc_List_List*_tmp35;result=((_tmp35=_cycalloc(sizeof(*_tmp35)),((_tmp35->hd=x1->hd,((_tmp35->tl=0,_tmp35))))));}
+result=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));_tmp16->hd=x1->hd;_tmp16->tl=0;_tmp16;});
 prev=result;}else{
 # 322
-{struct Cyc_List_List*_tmp36;((struct Cyc_List_List*)_check_null(prev))->tl=((_tmp36=_cycalloc(sizeof(*_tmp36)),((_tmp36->hd=x1->hd,((_tmp36->tl=0,_tmp36))))));}
+((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*_tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->hd=x1->hd;_tmp17->tl=0;_tmp17;});
 prev=prev->tl;}
 # 325
 ++ card;
@@ -1161,18 +1161,18 @@ x2=x2->tl;}else{
 if(i < 0)
 x1=x1->tl;else{
 # 331
-x2=x2->tl;}}}{
+x2=x2->tl;}}}
 # 334
-struct Cyc_Set_Set*_tmp37;return(_tmp37=_cycalloc(sizeof(*_tmp37)),((_tmp37->cmp=comp,((_tmp37->cardinality=card,((_tmp37->nodes=result,_tmp37)))))));};};}
+return({struct Cyc_Set_Set*_tmp18=_cycalloc(sizeof(*_tmp18));_tmp18->cmp=comp;_tmp18->cardinality=card;_tmp18->nodes=result;_tmp18;});};}
 # 337
 struct Cyc_Set_Set*Cyc_Set_from_list(int(*comp)(void*,void*),struct Cyc_List_List*x){
 struct Cyc_List_List*z=Cyc_List_merge_sort(comp,x);
 # 340
 {struct Cyc_List_List*y=z;for(0;y != 0;y=y->tl){
 if(y->tl != 0  && comp(y->hd,((struct Cyc_List_List*)_check_null(y->tl))->hd)== 0)
-y->tl=((struct Cyc_List_List*)_check_null(y->tl))->tl;}}{
+y->tl=((struct Cyc_List_List*)_check_null(y->tl))->tl;}}
 # 344
-struct Cyc_Set_Set*_tmp38;return(_tmp38=_cycalloc(sizeof(*_tmp38)),((_tmp38->cmp=comp,((_tmp38->cardinality=Cyc_List_length(z),((_tmp38->nodes=z,_tmp38)))))));};}
+return({struct Cyc_Set_Set*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19->cmp=comp;_tmp19->cardinality=Cyc_List_length(z);_tmp19->nodes=z;_tmp19;});}
 # 347
 int Cyc_Set_subset(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 int(*comp)(void*,void*)=s1->cmp;
@@ -1207,9 +1207,9 @@ if(Cyc_Set_member_b(comp,x1,elt)){
 -- card;
 x1=Cyc_Set_delete_b(comp,x1,elt);}
 # 381
-x2=x2->tl;}{
+x2=x2->tl;}
 # 383
-struct Cyc_Set_Set*_tmp39;return(_tmp39=_cycalloc(sizeof(*_tmp39)),((_tmp39->cmp=comp,((_tmp39->cardinality=card,((_tmp39->nodes=x1,_tmp39)))))));};}
+return({struct Cyc_Set_Set*_tmp1A=_cycalloc(sizeof(*_tmp1A));_tmp1A->cmp=comp;_tmp1A->cardinality=card;_tmp1A->nodes=x1;_tmp1A;});}
 # 386
 int Cyc_Set_setcmp(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 # 389
@@ -1244,4 +1244,4 @@ return 1;}
 # 425
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){
 # 428
-struct Cyc_List_List**_tmp3C;struct Cyc_Iter_Iter _tmp3B;return(_tmp3B.env=(void*)((_tmp3C=_region_malloc(rgn,sizeof(*_tmp3C)),((_tmp3C[0]=s->nodes,_tmp3C)))),((_tmp3B.next=(int(*)(void*env,void*dest))Cyc_Set_iter_f,_tmp3B)));}
+return({struct Cyc_Iter_Iter _tmp1C;_tmp1C.env=(void*)({struct Cyc_List_List**_tmp1D=_region_malloc(rgn,sizeof(*_tmp1D));_tmp1D[0]=s->nodes;_tmp1D;});_tmp1C.next=(int(*)(void*env,void*dest))Cyc_Set_iter_f;_tmp1C;});}

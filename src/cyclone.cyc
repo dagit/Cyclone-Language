@@ -1139,6 +1139,257 @@ static bool is_cfile(string_t @ n) {
 extern "C" void GC_blacklist_warn_clear();
 //extern "C" int GC_dont_gc;
 
+///////////////////////////////////////////////////////////////////
+// table of compiler options
+///////////////////////////////////////////////////////////////////
+using Arg {
+  typedef $(string_t flag, bool isprefix, string_t argdesc, spec_t spec, 
+            string_t description) option_t;
+
+  extern void print_options();
+
+#define make_option(opt,flag,isprefix,argdesc,spec,spec_arg,description) \
+  datatype Spec.spec opt##_spec = spec(spec_arg); \
+  option_t opt##_tuple = $(flag,isprefix,argdesc,&opt##_spec,description); \
+  struct List<option_t@`H,`H> opt = {&opt##_tuple,NULL}
+
+  make_option(opt1,"-v",false,"",Set_spec,&v_r,
+              "print compilation stages verbosely");
+  make_option(opt2,"--version",false,"",
+              Unit_spec,print_version,
+              "Print version information and exit");
+  make_option(opt3,"-o",false," <file>",
+              String_spec,set_output_file,
+              "Set the output file name to <file>");
+  make_option(opt4,"-D",true,"<name>[=<value>]",
+              Flag_spec,add_cpparg,
+              "Pass definition to preprocessor");
+  make_option(opt5,"-B",true,"<file>",
+              Flag_spec,add_cyclone_exec_path,
+              "Add to the list of directories to search for compiler files");
+  make_option(opt6,"-I",true,"<dir>",
+              Flag_spec,add_cpparg,
+              "Add to the list of directories to search for include files");
+  make_option(opt7,"-L",true,"<dir>",
+              Flag_spec,add_ccarg,
+              "Add to the list of directories for -l");
+  make_option(opt8,"-l",true,"<libname>",
+              Flag_spec,add_libarg,
+              "Library file");
+  make_option(opt9,"-m",true,"<option>",
+              Flag_spec,add_marg,
+              "GCC specific: pass machine-dependent flag on to gcc");
+  make_option(opt10,"-c",false,"",
+              Unit_spec,set_stop_after_objectfile,
+              "Produce an object file instead of an executable; do not link");
+  make_option(opt11,"-x",false," <language>",
+              String_spec,set_inputtype,
+              "Specify <language> for the following input files");
+  make_option(opt12,"-pa",false,"",
+              Unit_spec,set_pa,
+              "Compile for profiling with aprof");
+  make_option(opt13,"-S",false,"",
+              Unit_spec,set_stop_after_asmfile,
+              "Stop after producing assembly code");
+  make_option(opt14,"-M",false,"",
+              Unit_spec,set_produce_dependencies,
+              "Produce dependencies");
+  make_option(opt15,"-MG",false,"",
+              Flag_spec,add_cpparg,
+              "When producing dependencies assume that missing "
+              "files are generated");
+  make_option(opt16,"-MT",false," <target>",
+              String_spec,set_dependencies_target,
+              "Give target for dependencies");
+  make_option(opt17,"-b",false,"<machine>",
+              String_spec,set_target_arch,
+              "Set target machine");
+  make_option(opt18,"-Wlose-unique",false,"",
+              Set_spec,&NewControlFlow::warn_lose_unique,
+              "Try to warn when a unique pointer might get lost");
+  make_option(opt19,"-Woverride",false,"",
+              Set_spec,&Tcenv::warn_override,
+              "Warn when a local variable overrides an existing variable");
+  make_option(opt20,"-Wall",false,"",
+              Unit_spec,set_all_warnings,
+              "Turn on all warnings");
+  make_option(opt21,"-E",false,"",
+              Set_spec,&stop_after_cpp_r,
+              "Stop after preprocessing");
+  make_option(opt22,"-stopafter-parse",false,"",
+              Set_spec,&parseonly_r,
+              "Stop after parsing");
+  make_option(opt23,"-stopafter-tc",false,"",
+              Set_spec,&tc_r,
+              "Stop after type checking");
+  make_option(opt24,"-noprint",false,"",
+              Set_spec,&noprint_r,
+              "Do not print output (when stopping early)");
+  make_option(opt25,"-stopafter-cf",false,"",
+              Set_spec,&cf_r,
+              "Stop after control-flow checking");
+  make_option(opt26,"-stopafter-toc",false,"",
+              Set_spec,&toc_r,
+              "Stop after translation to C");
+  make_option(opt27,"-ic",false,"",
+              Set_spec,&ic_r,
+              "Activate the link-checker");
+  make_option(opt28,"-pp",false,"",
+              Set_spec,&pp_r,
+              "Pretty print the C code that Cyclone generates");
+  make_option(opt29,"-up",false,"",
+              Clear_spec,&pp_r,
+              "Ugly print the C code that Cyclone generates (default)");
+  make_option(opt30,"-elim-statement-expressions",false,"",
+              Set_spec,&elim_se_r,
+              "Avoid statement expressions in C output"
+              " (implies --inline-checks)");
+  make_option(opt31,"-no-elim-statement-expressions",false,"",
+              Clear_spec,&elim_se_r,
+              "Do not avoid statement expressions in C output");
+  make_option(opt32,"-un-gcc",false,"",
+              Unit_spec,set_tovc,
+              "Avoid gcc extensions in C output (except for attributes)");
+  make_option(opt33,"-c-comp",false," <compiler>",
+              String_spec,set_c_compiler,
+              "Produce C output for the given compiler");
+  make_option(opt34,"-save-temps",false,"",
+              Unit_spec,set_save_temps,
+              "Don't delete temporary files");
+  make_option(opt35,"-save-c",false,"",
+              Set_spec,&save_c_r,
+              "Don't delete temporary C files");
+  make_option(opt36,"--nolineno",false,"",
+              Unit_spec,clear_lineno,
+              "Don't generate line numbers for debugging (automatic with -pp)");
+  make_option(opt37,"--nochecks",false,"",
+              Unit_spec,set_nochecks,
+              "Disable bounds/null checks");
+  make_option(opt38,"--nonullchecks",false,"",
+              Unit_spec,set_nonullchecks,
+              "Disable null checks");
+  make_option(opt39,"--noboundschecks",false,"",
+              Unit_spec,set_noboundschecks,
+              "Disable bounds checks");
+  make_option(opt40,"--inline-checks",false,"",
+              Unit_spec,set_inline_functions,
+              "Inline bounds checks instead of #define");
+  make_option(opt41,"-use-cpp",false,"<path>",
+              String_spec,set_cpp,
+              "Indicate which preprocessor to use");
+  make_option(opt42,"-no-cpp-precomp",false,"",
+              Unit_spec,set_nocppprecomp,
+              "Don't do smart preprocessing (mac only)");
+  make_option(opt43,"-nocyc",false,"",
+              Unit_spec,set_nocyc,
+              "Don't add implicit namespace Cyc");
+  make_option(opt44,"-nogc",false,"",
+              Set_spec,&nogc_r,
+              "Don't link in the garbage collector");
+  make_option(opt45,"-noremoveunused",false,"",
+              Set_spec,&noshake_r,
+              "Don't remove externed variables that aren't used");
+  make_option(opt46,"-noexpandtypedefs",false,"",
+              Set_spec,&noexpand_r,
+              "Don't expand typedefs in pretty printing");
+  make_option(opt47,"-printalltvars",false,"",
+              Set_spec,&print_all_tvars_r,
+              "Print all type variables (even implicit default effects)");
+  make_option(opt48,"-printallkinds",false,"",
+              Set_spec,&print_all_kinds_r,
+              "Always print kinds of type variables");
+  make_option(opt49,"-printfullevars",false,"",
+              Set_spec,&print_full_evars_r,
+              "Print full information for evars (type debugging)");
+  make_option(opt50,"-printalleffects",false,"",
+              Set_spec,&print_all_effects_r,
+              "Print effects for functions (type debugging)");
+  make_option(opt51,"-nocyc_setjmp",false,"",
+              Set_spec,&nocyc_setjmp_r,
+              "Do not use compiler special file cyc_setjmp.h");
+  make_option(opt52,"-compile-for-boot",false,"",
+              Set_spec,&Lex::compile_for_boot_r,
+              "Compile using the special boot library instead of the standard library");
+  make_option(opt53,"-CI",false," <file>",
+              String_spec,set_cyc_include,
+              "Set cyc_include.h to be <file>");
+  make_option(opt54,"-warnboundschecks", false, "",
+              Set_spec,&Toc::warn_bounds_checks,
+              "Warn when bounds checks can't be eliminated");
+  make_option(opt55,"-warnnullchecks", false, "",
+              Set_spec,&Toc::warn_all_null_deref,
+              "Warn when any null check can't be eliminated");
+  make_option(opt56,"-warnaliascoercion", false, "",
+              Set_spec,&Tcutil::warn_alias_coerce,
+              "Warn when any alias coercion is inserted");
+  make_option(opt57,"-warnregioncoerce", false, "",
+              Set_spec,&Tcutil::warn_region_coerce,
+              "Warn when any region coercion is inserted");
+  make_option(opt58,"-noregister", false, "",
+              Set_spec,&Parse::no_register,
+              "Treat register storage class as public");
+  make_option(opt59,"-detailedlocation", false, "",
+              Clear_spec,&Position::use_gcc_style_location,
+              "Try to give more detailed location information for errors");
+  make_option(opt60,"-port", false, "",
+              Unit_spec,set_port_c_code,
+              "Suggest how to port C code to Cyclone");
+  make_option(opt61,"-noregions", false, "",
+              Set_spec,&Absyn::no_regions,
+              "Generate code that doesn't use regions");
+  make_option(opt62,"-iprefix",false,"<prefix>", 
+              String_spec,add_iprefix,
+              "Specify <prefix> as the prefix for subsequent -iwithprefix options");
+  make_option(opt63,"-iwithprefix",false,"<dir>",
+              String_spec,add_iwithprefix,
+              "Add <prefix>/<dir> to the second include path.");
+  make_option(opt64,"-iwithprefixbefore",false,"<dir>",
+              String_spec,add_iwithprefixbefore,
+              "Add <prefix>/<dir> to the main include path.");
+  make_option(opt65,"-isystem",false,"<dir>",
+              String_spec,add_isystem,
+              "Add <dir> to the beginning of the second include path and treat it as a\nsystem directory.");
+  make_option(opt66,"-idirafter",false,"<dir>",
+              String_spec,add_idirafter,
+              "Add the directory to the second include path.");
+  make_option(opt67,"--geninterface",false,"",
+              Set_spec,&generate_interface_r,
+              "Generate interface files");
+  make_option(opt68,"--interface",false," <file>",
+              String_spec,set_specified_interface,
+              "Set the interface file to be <file>.");
+  make_option(opt69,"--manyerrors",false, "",
+              Unit_spec,set_many_errors,
+              "don't stop after only a few errors.");
+  make_option(opt70,"--parsestate",false, "",
+              Set_spec,&ParseErrors::print_state_and_token,
+              "print the parse state and token on a syntax error");
+  make_option(opt71,"-known-gcc-flags-only",false,"",
+              Unit_spec,noassume_gcc_flag,
+              "do not assume that unknown flags should be passed to gcc");
+  make_option(opt72,"-help",false,"",
+              Unit_spec,print_options,
+              "print out the available options");
+  make_option(opt73,"-usage",false,"",
+              Unit_spec,print_options,
+              "print out the available options");
+
+  struct List<option_t@`H,`H>@`H global_options[] = {
+            &opt1, &opt2, &opt3, &opt4, &opt5, &opt6, &opt7, &opt8, &opt9, 
+    &opt10,&opt11,&opt12,&opt13,&opt14,&opt15,&opt16,&opt17,&opt18,&opt19, 
+    &opt20,&opt21,&opt22,&opt23,&opt24,&opt25,&opt26,&opt27,&opt28,&opt29, 
+    &opt30,&opt31,&opt32,&opt33,&opt34,&opt35,&opt36,&opt37,&opt38,&opt39, 
+    &opt40,&opt41,&opt42,&opt43,&opt44,&opt45,&opt46,&opt47,&opt48,&opt49, 
+    &opt50,&opt51,&opt52,&opt53,&opt54,&opt55,&opt56,&opt57,&opt58,&opt59, 
+    &opt60,&opt61,&opt62,&opt63,&opt64,&opt65,&opt66,&opt67,&opt68,&opt69, 
+    &opt70,&opt71,&opt72,&opt73
+  };
+
+  void print_options() {
+    Arg::usage(global_options[0],"<program.cyc>");
+  }
+}
+
 int main(int argc, string_t<`H> ?`H argv) {
   //  GC_dont_gc = true;
   /* Don't print garbage collector warnings about allocations of 
@@ -1181,225 +1432,11 @@ int main(int argc, string_t<`H> ?`H argv) {
       else otherargs[k++] = argv[i];
     }
 
-    // FIX: we should be able to statically allocate these!
-    Arg::speclist_t<`r,`r> options =
-    rlist(r,rnew(r)$("-v",false,"",
-               rnew(r)Set_spec(&v_r),
-               "Print compilation stages verbosely"),
-	 rnew(r)$("--version",false,"",
-	       rnew(r)Unit_spec(print_version),
-               "Print version information and exit"),
-	 rnew(r)$("-o",false," <file>",
-               rnew(r)String_spec(set_output_file),
-               "Set the output file name to <file>"),
-         rnew(r)$("-D",true,"<name>[=<value>]",
-               rnew(r)Flag_spec(add_cpparg),
-               "Pass definition to preprocessor"),
-         rnew(r)$("-B",true,"<file>",
-               rnew(r)Flag_spec(add_cyclone_exec_path),
-               "Add to the list of directories to search for compiler files"),
-         rnew(r)$("-I",true,"<dir>",
-               rnew(r)Flag_spec(add_cpparg),
-               "Add to the list of directories to search for include files"),
-         rnew(r)$("-L",true,"<dir>",
-               rnew(r)Flag_spec(add_ccarg),
-               "Add to the list of directories for -l"),
-         rnew(r)$("-l",true,"<libname>",
-               rnew(r)Flag_spec(add_libarg),
-               "Library file"),
-         rnew(r)$("-m",true,"<option>",
-               rnew(r)Flag_spec(add_marg),
-               "GCC specific: pass machine-dependent flag on to gcc"),
-         rnew(r)$("-c",false,"",
-               rnew(r)Unit_spec(set_stop_after_objectfile),
-               "Produce an object file instead of an executable; do not link"),
-	 rnew(r)$("-x",false," <language>",
-               rnew(r)String_spec(set_inputtype),
-               "Specify <language> for the following input files"),
-         rnew(r)$("-pa",false,"",
-               rnew(r)Unit_spec(set_pa),
-               "Compile for profiling with aprof"),
-         rnew(r)$("-S",false,"",
-               rnew(r)Unit_spec(set_stop_after_asmfile),
-               "Stop after producing assembly code"),
-         rnew(r)$("-M",false,"",
-               rnew(r)Unit_spec(set_produce_dependencies),
-               "Produce dependencies"),
-         rnew(r)$("-MG",false,"",
-               rnew(r)Flag_spec(add_cpparg),
-               "When producing dependencies assume that missing "
-               "files are generated"),
-         rnew(r)$("-MT",false," <target>",
-               rnew(r)String_spec(set_dependencies_target),
-               "Give target for dependencies"),
-         rnew(r)$("-b",false,"<machine>",
-               rnew(r)String_spec(set_target_arch),
-//               "Set target architecture; implies -stopafter-toc"),
-               "Set target machine"),
-         rnew(r)$("-Wlose-unique",false,"",
-               rnew(r)Set_spec(&NewControlFlow::warn_lose_unique),
-               "Try to warn when a unique pointer might get lost"),
-         rnew(r)$("-Woverride",false,"",
-               rnew(r)Set_spec(&Tcenv::warn_override),
-               "Warn when a local variable overrides an existing variable"),
-         rnew(r)$("-Wall",false,"",
-               rnew(r)Unit_spec(set_all_warnings),
-               "Turn on all warnings"),
-         rnew(r)$("-E",false,"",
-               rnew(r)Set_spec(&stop_after_cpp_r),
-               "Stop after preprocessing"),
-         rnew(r)$("-stopafter-parse",false,"",
-               rnew(r)Set_spec(&parseonly_r),
-               "Stop after parsing"),
-         rnew(r)$("-stopafter-tc",false,"",
-               rnew(r)Set_spec(&tc_r),
-               "Stop after type checking"),
-         rnew(r)$("-noprint",false,"",
-               rnew(r)Set_spec(&noprint_r),
-               "Do not print output (when stopping early)"),
-         rnew(r)$("-stopafter-cf",false,"",
-               rnew(r)Set_spec(&cf_r),
-               "Stop after control-flow checking"),
-         rnew(r)$("-stopafter-toc",false,"",
-               rnew(r)Set_spec(&toc_r),
-               "Stop after translation to C"),
-         rnew(r)$("-ic",false,"",
-               rnew(r)Set_spec(&ic_r),
-               "Activate the link-checker"),
-         rnew(r)$("-pp",false,"",
-               rnew(r)Set_spec(&pp_r),
-               "Pretty print the C code that Cyclone generates"),
-         rnew(r)$("-up",false,"",
-               rnew(r)Clear_spec(&pp_r),
-               "Ugly print the C code that Cyclone generates (default)"),
-         rnew(r)$("-elim-statement-expressions",false,"",
-               rnew(r)Set_spec(&elim_se_r),
-               "Avoid statement expressions in C output"
-               " (implies --inline-checks)"),
-         rnew(r)$("-no-elim-statement-expressions",false,"",
-               rnew(r)Clear_spec(&elim_se_r),
-               "Do not avoid statement expressions in C output"),
-         rnew(r)$("-un-gcc",false,"",
-               rnew(r)Unit_spec(set_tovc),
-               "Avoid gcc extensions in C output (except for attributes)"),
-         rnew(r) $("-c-comp",false," <compiler>",
-               rnew(r)String_spec(set_c_compiler),
-               "Produce C output for the given compiler"),
-         rnew(r)$("-save-temps",false,"",
-               rnew(r)Unit_spec(set_save_temps),
-               "Don't delete temporary files"),
-         rnew(r)$("-save-c",false,"",
-               rnew(r)Set_spec(&save_c_r),
-               "Don't delete temporary C files"),
-         rnew(r)$("--nolineno",false,"",
-               rnew(r)Unit_spec(clear_lineno),
-               "Don't generate line numbers for debugging (automatic with -pp)"),
-         rnew(r)$("--nochecks",false,"",
-               rnew(r)Unit_spec(set_nochecks),
-               "Disable bounds/null checks"),
-         rnew(r)$("--nonullchecks",false,"",
-               rnew(r)Unit_spec(set_nonullchecks),
-               "Disable null checks"),
-         rnew(r)$("--noboundschecks",false,"",
-               rnew(r)Unit_spec(set_noboundschecks),
-               "Disable bounds checks"),
-         rnew(r)$("--inline-checks",false,"",
-               rnew(r)Unit_spec(set_inline_functions),
-               "Inline bounds checks instead of #define"),
-         rnew(r)$("-use-cpp",false,"<path>",
-               rnew(r)String_spec(set_cpp),
-               "Indicate which preprocessor to use"),
-         rnew(r)$("-no-cpp-precomp",false,"",
-               rnew(r)Unit_spec(set_nocppprecomp),
-               "Don't do smart preprocessing (mac only)"),
-         rnew(r)$("-nocyc",false,"",
-               rnew(r)Unit_spec(set_nocyc),
-               "Don't add implicit namespace Cyc"),
-         rnew(r)$("-nogc",false,"",
-               rnew(r)Set_spec(&nogc_r),
-               "Don't link in the garbage collector"),
-         rnew(r)$("-noremoveunused",false,"",
-               rnew(r)Set_spec(&noshake_r),
-               "Don't remove externed variables that aren't used"),
-         rnew(r)$("-noexpandtypedefs",false,"",
-               rnew(r)Set_spec(&noexpand_r),
-               "Don't expand typedefs in pretty printing"),
-         rnew(r)$("-printalltvars",false,"",
-               rnew(r)Set_spec(&print_all_tvars_r),
-               "Print all type variables (even implicit default effects)"),
-         rnew(r)$("-printallkinds",false,"",
-               rnew(r)Set_spec(&print_all_kinds_r),
-               "Always print kinds of type variables"),
-         rnew(r)$("-printfullevars",false,"",
-               rnew(r)Set_spec(&print_full_evars_r),
-               "Print full information for evars (type debugging)"),
-         rnew(r)$("-printalleffects",false,"",
-               rnew(r)Set_spec(&print_all_effects_r),
-               "Print effects for functions (type debugging)"),
-         rnew(r)$("-nocyc_setjmp",false,"",
-               rnew(r)Set_spec(&nocyc_setjmp_r),
-               "Do not use compiler special file cyc_setjmp.h"),
-         rnew(r)$("-compile-for-boot",false,"",
-               rnew(r)Set_spec(&Lex::compile_for_boot_r),
-               "Compile using the special boot library instead of the standard library"),
-         rnew(r)$("-CI",false," <file>",
-               rnew(r)String_spec(set_cyc_include),
-               "Set cyc_include.h to be <file>"),
-	 rnew(r)$("-warnboundschecks", false, "",
-	       rnew(r)Set_spec(&Toc::warn_bounds_checks),
-	       "Warn when bounds checks can't be eliminated"),
-	 rnew(r)$("-warnnullchecks", false, "",
-	       rnew(r)Set_spec(&Toc::warn_all_null_deref),
-	       "Warn when any null check can't be eliminated"),
-	 rnew(r)$("-warnaliascoercion", false, "",
-	       rnew(r)Set_spec(&Tcutil::warn_alias_coerce),
-	       "Warn when any alias coercion is inserted"),
-	 rnew(r)$("-warnregioncoerce", false, "",
-	       rnew(r)Set_spec(&Tcutil::warn_region_coerce),
-	       "Warn when any region coercion is inserted"),
-	 rnew(r)$("-noregister", false, "",
-	       rnew(r)Set_spec(&Parse::no_register),
-	       "Treat register storage class as public"),
-         rnew(r)$("-detailedlocation", false, "",
-               rnew(r)Clear_spec(&Position::use_gcc_style_location),
-               "Try to give more detailed location information for errors"),
-         rnew(r)$("-port", false, "",
-               rnew(r)Unit_spec(set_port_c_code),
-               "Suggest how to port C code to Cyclone"),
-         rnew(r)$("-noregions", false, "",
-               rnew(r)Set_spec(&Absyn::no_regions),
-               "Generate code that doesn't use regions"),
-         rnew(r) $("-iprefix",false,"<prefix>", 
-                   rnew(r)String_spec(add_iprefix),
-                   "Specify <prefix> as the prefix for subsequent -iwithprefix options"),
-         rnew(r) $("-iwithprefix",false,"<dir>",
-                   rnew(r)String_spec(add_iwithprefix),
-                   "Add <prefix>/<dir> to the second include path."),
-         rnew(r) $("-iwithprefixbefore",false,"<dir>",
-                    rnew(r)String_spec(add_iwithprefixbefore),
-                   "Add <prefix>/<dir> to the main include path."),
-         rnew(r) $("-isystem",false,"<dir>",
-                    rnew(r)String_spec(add_isystem),
-                   "Add <dir> to the beginning of the second include path and treat it as a\nsystem directory."),
-         rnew(r) $("-idirafter",false,"<dir>",
-                   rnew(r)String_spec(add_idirafter),
-                   "Add the directory to the second include path."),
-         rnew(r) $("--geninterface",false,"",
-                   rnew(r)Set_spec(&generate_interface_r),
-                   "Generate interface files"),
-         rnew(r) $("--interface",false," <file>",
-                   rnew(r)String_spec(set_specified_interface),
-                   "Set the interface file to be <file>."),
-          rnew(r) $("--manyerrors",false, "",
-                    rnew(r)Unit_spec(set_many_errors),
-                    "don't stop after only a few errors."),
-          rnew(r) $("--parsestate",false, "",
-                    rnew(r)Set_spec(&ParseErrors::print_state_and_token),
-                    "print the parse state and token on a syntax error"),
-	  rnew (r) $("-known-gcc-flags-only",false,"",
-		     rnew(r)Unit_spec(noassume_gcc_flag),
-		     "do not assume that unknown flags should be passed to gcc")
-         );
+    // initialize the global options list tails
+    for (int i = 1; i < numelts(global_options); i++) {
+      global_options[i-1]->tl = global_options[i];
+    }
+    Arg::speclist_t<`H,`H> options = global_options[0];
 
   string_t optstring = "Options:";
   Arg::current = 0;

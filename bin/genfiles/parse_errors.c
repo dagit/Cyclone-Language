@@ -1001,7 +1001,7 @@ static struct Cyc_ParseErrors_ParseState Cyc_ParseErrors_msg_table[111]={{124,36
 # 23 "parse_errors.cyc"
 void Cyc_yyerror(struct _dyneither_ptr s,int state,int token){
 if(Cyc_ParseErrors_print_state_and_token){
-{const char*_tmp77;void*_tmp76[2];struct Cyc_Int_pa_PrintArg_struct _tmp75;struct Cyc_Int_pa_PrintArg_struct _tmp74;(_tmp74.tag=1,((_tmp74.f1=(unsigned long)token,((_tmp75.tag=1,((_tmp75.f1=(unsigned long)state,((_tmp76[0]=& _tmp75,((_tmp76[1]=& _tmp74,Cyc_printf(((_tmp77="parse error: state [%d], token [%d]\n",_tag_dyneither(_tmp77,sizeof(char),37))),_tag_dyneither(_tmp76,sizeof(void*),2)))))))))))));}
+({struct Cyc_Int_pa_PrintArg_struct _tmp72;_tmp72.tag=1;_tmp72.f1=(unsigned long)token;({struct Cyc_Int_pa_PrintArg_struct _tmp71;_tmp71.tag=1;_tmp71.f1=(unsigned long)state;({void*_tmp6F[2]={& _tmp71,& _tmp72};Cyc_printf(({const char*_tmp70="parse error: state [%d], token [%d]\n";_tag_dyneither(_tmp70,sizeof(char),37);}),_tag_dyneither(_tmp6F,sizeof(void*),2));});});});
 exit(1);}
 # 31
 {unsigned int i=0;for(0;i < 111;++ i){

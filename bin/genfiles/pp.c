@@ -962,15 +962,15 @@ struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_stringptr={0,0};
 struct Cyc_PP_Empty_PP_Alist_struct Cyc_PP_Empty_link={0,0};struct _tuple1{void*f1;void*f2;};
 # 54
 void*Cyc_PP_append(void*a1,void*a2){
-struct _tuple1 _tmpA2;struct _tuple1 _tmp2=(_tmpA2.f1=a1,((_tmpA2.f2=a2,_tmpA2)));struct _tuple1 _tmp3=_tmp2;if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp3.f1)->tag == 0){_LL1: _LL2:
+struct _tuple1 _tmp2=({struct _tuple1 _tmp6;_tmp6.f1=a1;_tmp6.f2=a2;_tmp6;});struct _tuple1 _tmp3=_tmp2;if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp3.f1)->tag == 0){_LL1: _LL2:
  return a2;}else{if(((struct Cyc_PP_Empty_PP_Alist_struct*)_tmp3.f2)->tag == 0){_LL3: _LL4:
- return a1;}else{_LL5: _LL6: {
-struct Cyc_PP_Append_PP_Alist_struct _tmpA5;struct Cyc_PP_Append_PP_Alist_struct*_tmpA4;return(void*)((_tmpA4=_cycalloc(sizeof(*_tmpA4)),((_tmpA4[0]=((_tmpA5.tag=2,((_tmpA5.f1=a1,((_tmpA5.f2=a2,_tmpA5)))))),_tmpA4))));}}}_LL0:;}
+ return a1;}else{_LL5: _LL6:
+ return(void*)({struct Cyc_PP_Append_PP_Alist_struct*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4[0]=({struct Cyc_PP_Append_PP_Alist_struct _tmp5;_tmp5.tag=2;_tmp5.f1=a1;_tmp5.f2=a2;_tmp5;});_tmp4;});}}_LL0:;}
 # 62
 struct Cyc_List_List*Cyc_PP_list_of_alist_f(void*y,struct Cyc_List_List*l){
 void*_tmp7=y;void*_tmp8;void*_tmp9;void*_tmpA;switch(*((int*)_tmp7)){case 0: _LL8: _LL9:
- return l;case 1: _LLA: _tmpA=(void*)((struct Cyc_PP_Single_PP_Alist_struct*)_tmp7)->f1;_LLB: {
-struct Cyc_List_List*_tmpA6;return(_tmpA6=_cycalloc(sizeof(*_tmpA6)),((_tmpA6->hd=_tmpA,((_tmpA6->tl=l,_tmpA6)))));}default: _LLC: _tmp8=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmp7)->f1;_tmp9=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmp7)->f2;_LLD:
+ return l;case 1: _LLA: _tmpA=(void*)((struct Cyc_PP_Single_PP_Alist_struct*)_tmp7)->f1;_LLB:
+ return({struct Cyc_List_List*_tmpB=_cycalloc(sizeof(*_tmpB));_tmpB->hd=_tmpA;_tmpB->tl=l;_tmpB;});default: _LLC: _tmp8=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmp7)->f1;_tmp9=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmp7)->f2;_LLD:
  return Cyc_PP_list_of_alist_f(_tmp8,Cyc_PP_list_of_alist_f(_tmp9,l));}_LL7:;}
 # 69
 struct Cyc_List_List*Cyc_PP_list_of_alist(void*x){
@@ -983,7 +983,7 @@ int last=0;
 while(last >= 0){
 void*_tmpD=((void*(*)(struct Cyc_Xarray_Xarray*,int))Cyc_Xarray_get)(_tmpC,last);void*_tmpE=_tmpD;void*_tmpF;void*_tmp10;struct _dyneither_ptr*_tmp11;switch(*((int*)_tmpE)){case 0: _LLF: _LL10:
  -- last;goto _LLE;case 1: _LL11: _tmp11=(struct _dyneither_ptr*)((struct Cyc_PP_Single_PP_Alist_struct*)_tmpE)->f1;_LL12:
- -- last;{const char*_tmpAA;void*_tmpA9[1];struct Cyc_String_pa_PrintArg_struct _tmpA8;(_tmpA8.tag=0,((_tmpA8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp11),((_tmpA9[0]=& _tmpA8,Cyc_fprintf(f,((_tmpAA="%s",_tag_dyneither(_tmpAA,sizeof(char),3))),_tag_dyneither(_tmpA9,sizeof(void*),1)))))));}goto _LLE;default: _LL13: _tmpF=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmpE)->f1;_tmp10=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmpE)->f2;_LL14:
+ -- last;({struct Cyc_String_pa_PrintArg_struct _tmp14;_tmp14.tag=0;_tmp14.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp11);({void*_tmp12[1]={& _tmp14};Cyc_fprintf(f,({const char*_tmp13="%s";_tag_dyneither(_tmp13,sizeof(char),3);}),_tag_dyneither(_tmp12,sizeof(void*),1));});});goto _LLE;default: _LL13: _tmpF=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmpE)->f1;_tmp10=(void*)((struct Cyc_PP_Append_PP_Alist_struct*)_tmpE)->f2;_LL14:
 # 107
 ((void(*)(struct Cyc_Xarray_Xarray*,int,void*))Cyc_Xarray_set)(_tmpC,last,_tmp10);
 if(last == ((int(*)(struct Cyc_Xarray_Xarray*))Cyc_Xarray_length)(_tmpC)- 1)
@@ -996,27 +996,27 @@ goto _LLE;}_LLE:;}
 ((void(*)(struct Cyc_Xarray_Xarray*xarr))Cyc_Xarray_reuse)(_tmpC);};}
 # 120
 void Cyc_PP_file_of_doc(struct Cyc_PP_Doc*d,int w,struct Cyc___cycFILE*f){
-struct Cyc_PP_Ppstate*_tmpAB;struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,((_tmpAB=_cycalloc_atomic(sizeof(*_tmpAB)),((_tmpAB->ci=0,((_tmpAB->cc=0,((_tmpAB->cl=1,((_tmpAB->pw=w,((_tmpAB->epw=w,_tmpAB)))))))))))));
+struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,({struct Cyc_PP_Ppstate*_tmp15=_cycalloc_atomic(sizeof(*_tmp15));_tmp15->ci=0;_tmp15->cc=0;_tmp15->cl=1;_tmp15->pw=w;_tmp15->epw=w;_tmp15;}));
 Cyc_PP_dump_out(f,o->ppout);}
 # 126
 struct _dyneither_ptr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w){
-struct Cyc_PP_Ppstate*_tmpAC;struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,((_tmpAC=_cycalloc_atomic(sizeof(*_tmpAC)),((_tmpAC->ci=0,((_tmpAC->cc=0,((_tmpAC->cl=1,((_tmpAC->pw=w,((_tmpAC->epw=w,_tmpAC)))))))))))));
-const char*_tmpAD;return(struct _dyneither_ptr)Cyc_str_sepstr(((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout),((_tmpAD="",_tag_dyneither(_tmpAD,sizeof(char),1))));}
+struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,({struct Cyc_PP_Ppstate*_tmp17=_cycalloc_atomic(sizeof(*_tmp17));_tmp17->ci=0;_tmp17->cc=0;_tmp17->cl=1;_tmp17->pw=w;_tmp17->epw=w;_tmp17;}));
+return(struct _dyneither_ptr)Cyc_str_sepstr(((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout),({const char*_tmp16="";_tag_dyneither(_tmp16,sizeof(char),1);}));}
 # 133
 struct _tuple0*Cyc_PP_string_and_links(struct Cyc_PP_Doc*d,int w){
-struct Cyc_PP_Ppstate*_tmpAE;struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,((_tmpAE=_cycalloc_atomic(sizeof(*_tmpAE)),((_tmpAE->ci=0,((_tmpAE->cc=0,((_tmpAE->cl=1,((_tmpAE->pw=w,((_tmpAE->epw=w,_tmpAE)))))))))))));
-const char*_tmpB1;struct _tuple0*_tmpB0;return(_tmpB0=_cycalloc(sizeof(*_tmpB0)),((_tmpB0->f1=(struct _dyneither_ptr)
-Cyc_str_sepstr(((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout),((_tmpB1="",_tag_dyneither(_tmpB1,sizeof(char),1)))),((_tmpB0->f2=
-((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->links),_tmpB0)))));}
+struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,({struct Cyc_PP_Ppstate*_tmp1A=_cycalloc_atomic(sizeof(*_tmp1A));_tmp1A->ci=0;_tmp1A->cc=0;_tmp1A->cl=1;_tmp1A->pw=w;_tmp1A->epw=w;_tmp1A;}));
+return({struct _tuple0*_tmp18=_cycalloc(sizeof(*_tmp18));_tmp18->f1=(struct _dyneither_ptr)
+Cyc_str_sepstr(((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->ppout),({const char*_tmp19="";_tag_dyneither(_tmp19,sizeof(char),1);}));_tmp18->f2=
+((struct Cyc_List_List*(*)(void*x))Cyc_PP_list_of_alist)(o->links);_tmp18;});}
 # 140
 static struct Cyc_Core_Opt*Cyc_PP_bhashtbl=0;
 # 142
 int Cyc_PP_tex_output=0;
 # 144
 struct _dyneither_ptr Cyc_PP_nlblanks(int i){
-if(Cyc_PP_bhashtbl == 0){
-struct Cyc_Core_Opt*_tmpB2;Cyc_PP_bhashtbl=((_tmpB2=_cycalloc(sizeof(*_tmpB2)),((_tmpB2->v=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(int,int),int(*hash)(int)))Cyc_Hashtable_create)(61,Cyc_Core_intcmp,(int(*)(int))Cyc_Core_identity),_tmpB2))));}
-if(i < 0){struct Cyc_Core_Failure_exn_struct _tmpB8;const char*_tmpB7;struct Cyc_Core_Failure_exn_struct*_tmpB6;(int)_throw((void*)((_tmpB6=_cycalloc(sizeof(*_tmpB6)),((_tmpB6[0]=((_tmpB8.tag=Cyc_Core_Failure,((_tmpB8.f1=((_tmpB7="nlblanks",_tag_dyneither(_tmpB7,sizeof(char),9))),_tmpB8)))),_tmpB6)))));}{
+if(Cyc_PP_bhashtbl == 0)
+Cyc_PP_bhashtbl=({struct Cyc_Core_Opt*_tmp1B=_cycalloc(sizeof(*_tmp1B));_tmp1B->v=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(int,int),int(*hash)(int)))Cyc_Hashtable_create)(61,Cyc_Core_intcmp,(int(*)(int))Cyc_Core_identity);_tmp1B;});
+if(i < 0)(int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmp1C=_cycalloc(sizeof(*_tmp1C));_tmp1C[0]=({struct Cyc_Core_Failure_exn_struct _tmp1D;_tmp1D.tag=Cyc_Core_Failure;_tmp1D.f1=({const char*_tmp1E="nlblanks";_tag_dyneither(_tmp1E,sizeof(char),9);});_tmp1D;});_tmp1C;}));{
 struct _handler_cons _tmp1F;_push_handler(& _tmp1F);{int _tmp21=0;if(setjmp(_tmp1F.handler))_tmp21=1;if(!_tmp21){
 {struct _dyneither_ptr _tmp22=*((struct _dyneither_ptr*(*)(struct Cyc_Hashtable_Table*t,int key))Cyc_Hashtable_lookup)((struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_bhashtbl))->v,i);_npop_handler(0);return _tmp22;};_pop_handler();}else{void*_tmp20=(void*)_exn_thrown;void*_tmp23=_tmp20;void*_tmp24;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp23)->tag == Cyc_Core_Not_found){_LL16: _LL17:
 # 152
@@ -1025,22 +1025,22 @@ int _tmp25=i / 8;
 int _tmp26=i % 8;
 int _tmp27=(2 + _tmp25)+ _tmp26;
 struct _dyneither_ptr nlb=Cyc_Core_new_string((unsigned int)_tmp27);
-{char _tmpBB;char _tmpBA;struct _dyneither_ptr _tmpB9;(_tmpB9=_dyneither_ptr_plus(nlb,sizeof(char),0),((_tmpBA=*((char*)_check_dyneither_subscript(_tmpB9,sizeof(char),0)),((_tmpBB='\n',((_get_dyneither_size(_tmpB9,sizeof(char))== 1  && (_tmpBA == '\000'  && _tmpBB != '\000')?_throw_arraybounds(): 1,*((char*)_tmpB9.curr)=_tmpBB)))))));}
+({struct _dyneither_ptr _tmp28=_dyneither_ptr_plus(nlb,sizeof(char),0);char _tmp29=*((char*)_check_dyneither_subscript(_tmp28,sizeof(char),0));char _tmp2A='\n';if(_get_dyneither_size(_tmp28,sizeof(char))== 1  && (_tmp29 == '\000'  && _tmp2A != '\000'))_throw_arraybounds();*((char*)_tmp28.curr)=_tmp2A;});
 {int j=0;for(0;j < _tmp25;++ j){
-char _tmpBE;char _tmpBD;struct _dyneither_ptr _tmpBC;(_tmpBC=_dyneither_ptr_plus(nlb,sizeof(char),j + 1),((_tmpBD=*((char*)_check_dyneither_subscript(_tmpBC,sizeof(char),0)),((_tmpBE='\t',((_get_dyneither_size(_tmpBC,sizeof(char))== 1  && (_tmpBD == '\000'  && _tmpBE != '\000')?_throw_arraybounds(): 1,*((char*)_tmpBC.curr)=_tmpBE)))))));}}
+({struct _dyneither_ptr _tmp2B=_dyneither_ptr_plus(nlb,sizeof(char),j + 1);char _tmp2C=*((char*)_check_dyneither_subscript(_tmp2B,sizeof(char),0));char _tmp2D='\t';if(_get_dyneither_size(_tmp2B,sizeof(char))== 1  && (_tmp2C == '\000'  && _tmp2D != '\000'))_throw_arraybounds();*((char*)_tmp2B.curr)=_tmp2D;});}}
 {int j=0;for(0;j < _tmp26;++ j){
-char _tmpC1;char _tmpC0;struct _dyneither_ptr _tmpBF;(_tmpBF=_dyneither_ptr_plus(nlb,sizeof(char),(j + 1)+ _tmp25),((_tmpC0=*((char*)_check_dyneither_subscript(_tmpBF,sizeof(char),0)),((_tmpC1=' ',((_get_dyneither_size(_tmpBF,sizeof(char))== 1  && (_tmpC0 == '\000'  && _tmpC1 != '\000')?_throw_arraybounds(): 1,*((char*)_tmpBF.curr)=_tmpC1)))))));}}
-{struct _dyneither_ptr*_tmpC2;((void(*)(struct Cyc_Hashtable_Table*t,int key,struct _dyneither_ptr*val))Cyc_Hashtable_insert)((struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_bhashtbl))->v,i,((_tmpC2=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmpC2[0]=(struct _dyneither_ptr)nlb,_tmpC2)))));}
+({struct _dyneither_ptr _tmp2E=_dyneither_ptr_plus(nlb,sizeof(char),(j + 1)+ _tmp25);char _tmp2F=*((char*)_check_dyneither_subscript(_tmp2E,sizeof(char),0));char _tmp30=' ';if(_get_dyneither_size(_tmp2E,sizeof(char))== 1  && (_tmp2F == '\000'  && _tmp30 != '\000'))_throw_arraybounds();*((char*)_tmp2E.curr)=_tmp30;});}}
+((void(*)(struct Cyc_Hashtable_Table*t,int key,struct _dyneither_ptr*val))Cyc_Hashtable_insert)((struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_bhashtbl))->v,i,({struct _dyneither_ptr*_tmp31=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp31[0]=(struct _dyneither_ptr)nlb;_tmp31;}));
 return(struct _dyneither_ptr)nlb;}else{
 # 168
 int _tmp32=3 + i;
 struct _dyneither_ptr nlb=Cyc_Core_new_string((unsigned int)(_tmp32 + 1));
-{char _tmpC5;char _tmpC4;struct _dyneither_ptr _tmpC3;(_tmpC3=_dyneither_ptr_plus(nlb,sizeof(char),0),((_tmpC4=*((char*)_check_dyneither_subscript(_tmpC3,sizeof(char),0)),((_tmpC5='\\',((_get_dyneither_size(_tmpC3,sizeof(char))== 1  && (_tmpC4 == '\000'  && _tmpC5 != '\000')?_throw_arraybounds(): 1,*((char*)_tmpC3.curr)=_tmpC5)))))));}
-{char _tmpC8;char _tmpC7;struct _dyneither_ptr _tmpC6;(_tmpC6=_dyneither_ptr_plus(nlb,sizeof(char),1),((_tmpC7=*((char*)_check_dyneither_subscript(_tmpC6,sizeof(char),0)),((_tmpC8='\\',((_get_dyneither_size(_tmpC6,sizeof(char))== 1  && (_tmpC7 == '\000'  && _tmpC8 != '\000')?_throw_arraybounds(): 1,*((char*)_tmpC6.curr)=_tmpC8)))))));}
-{char _tmpCB;char _tmpCA;struct _dyneither_ptr _tmpC9;(_tmpC9=_dyneither_ptr_plus(nlb,sizeof(char),2),((_tmpCA=*((char*)_check_dyneither_subscript(_tmpC9,sizeof(char),0)),((_tmpCB='\n',((_get_dyneither_size(_tmpC9,sizeof(char))== 1  && (_tmpCA == '\000'  && _tmpCB != '\000')?_throw_arraybounds(): 1,*((char*)_tmpC9.curr)=_tmpCB)))))));}
+({struct _dyneither_ptr _tmp33=_dyneither_ptr_plus(nlb,sizeof(char),0);char _tmp34=*((char*)_check_dyneither_subscript(_tmp33,sizeof(char),0));char _tmp35='\\';if(_get_dyneither_size(_tmp33,sizeof(char))== 1  && (_tmp34 == '\000'  && _tmp35 != '\000'))_throw_arraybounds();*((char*)_tmp33.curr)=_tmp35;});
+({struct _dyneither_ptr _tmp36=_dyneither_ptr_plus(nlb,sizeof(char),1);char _tmp37=*((char*)_check_dyneither_subscript(_tmp36,sizeof(char),0));char _tmp38='\\';if(_get_dyneither_size(_tmp36,sizeof(char))== 1  && (_tmp37 == '\000'  && _tmp38 != '\000'))_throw_arraybounds();*((char*)_tmp36.curr)=_tmp38;});
+({struct _dyneither_ptr _tmp39=_dyneither_ptr_plus(nlb,sizeof(char),2);char _tmp3A=*((char*)_check_dyneither_subscript(_tmp39,sizeof(char),0));char _tmp3B='\n';if(_get_dyneither_size(_tmp39,sizeof(char))== 1  && (_tmp3A == '\000'  && _tmp3B != '\000'))_throw_arraybounds();*((char*)_tmp39.curr)=_tmp3B;});
 {int j=3;for(0;j < _tmp32;++ j){
-char _tmpCE;char _tmpCD;struct _dyneither_ptr _tmpCC;(_tmpCC=_dyneither_ptr_plus(nlb,sizeof(char),j),((_tmpCD=*((char*)_check_dyneither_subscript(_tmpCC,sizeof(char),0)),((_tmpCE='~',((_get_dyneither_size(_tmpCC,sizeof(char))== 1  && (_tmpCD == '\000'  && _tmpCE != '\000')?_throw_arraybounds(): 1,*((char*)_tmpCC.curr)=_tmpCE)))))));}}
-{struct _dyneither_ptr*_tmpCF;((void(*)(struct Cyc_Hashtable_Table*t,int key,struct _dyneither_ptr*val))Cyc_Hashtable_insert)((struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_bhashtbl))->v,i,((_tmpCF=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmpCF[0]=(struct _dyneither_ptr)nlb,_tmpCF)))));}
+({struct _dyneither_ptr _tmp3C=_dyneither_ptr_plus(nlb,sizeof(char),j);char _tmp3D=*((char*)_check_dyneither_subscript(_tmp3C,sizeof(char),0));char _tmp3E='~';if(_get_dyneither_size(_tmp3C,sizeof(char))== 1  && (_tmp3D == '\000'  && _tmp3E != '\000'))_throw_arraybounds();*((char*)_tmp3C.curr)=_tmp3E;});}}
+((void(*)(struct Cyc_Hashtable_Table*t,int key,struct _dyneither_ptr*val))Cyc_Hashtable_insert)((struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_bhashtbl))->v,i,({struct _dyneither_ptr*_tmp3F=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp3F[0]=(struct _dyneither_ptr)nlb;_tmp3F;}));
 return(struct _dyneither_ptr)nlb;}}else{_LL18: _tmp24=_tmp23;_LL19:(int)_rethrow(_tmp24);}_LL15:;}};};}
 # 182
 static struct Cyc_Core_Opt*Cyc_PP_str_hashtbl=0;
@@ -1048,59 +1048,51 @@ static struct Cyc_Core_Opt*Cyc_PP_str_hashtbl=0;
 int Cyc_PP_infinity=9999999;struct _tuple2{int f1;struct _dyneither_ptr f2;};
 # 186
 static struct Cyc_PP_Out*Cyc_PP_text_doc_f(struct _tuple2*clo,struct Cyc_PP_Ppstate*st){
-struct _tuple2*_tmp40=clo;int _tmp41;struct _dyneither_ptr _tmp42;_LL1B: _tmp41=_tmp40->f1;_tmp42=_tmp40->f2;_LL1C:;{
-struct Cyc_PP_Single_PP_Alist_struct*_tmpD9;struct _dyneither_ptr*_tmpD8;struct Cyc_PP_Single_PP_Alist_struct _tmpD7;struct Cyc_PP_Out*_tmpD6;return(_tmpD6=_cycalloc(sizeof(*_tmpD6)),((_tmpD6->newcc=st->cc + _tmp41,((_tmpD6->newcl=st->cl,((_tmpD6->ppout=(void*)(
-# 190
-(_tmpD9=_cycalloc(sizeof(*_tmpD9)),((_tmpD9[0]=((_tmpD7.tag=1,((_tmpD7.f1=((_tmpD8=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmpD8[0]=(struct _dyneither_ptr)_tmp42,_tmpD8)))),_tmpD7)))),_tmpD9)))),((_tmpD6->links=(void*)& Cyc_PP_Empty_link,_tmpD6)))))))));};}
+struct _tuple2*_tmp40=clo;int _tmp41;struct _dyneither_ptr _tmp42;_LL1B: _tmp41=_tmp40->f1;_tmp42=_tmp40->f2;_LL1C:;
+return({struct Cyc_PP_Out*_tmp43=_cycalloc(sizeof(*_tmp43));_tmp43->newcc=st->cc + _tmp41;_tmp43->newcl=st->cl;_tmp43->ppout=(void*)({struct Cyc_PP_Single_PP_Alist_struct*_tmp44=_cycalloc(sizeof(*_tmp44));_tmp44[0]=({struct Cyc_PP_Single_PP_Alist_struct _tmp45;_tmp45.tag=1;_tmp45.f1=({struct _dyneither_ptr*_tmp46=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp46[0]=(struct _dyneither_ptr)_tmp42;_tmp46;});_tmp45;});_tmp44;});_tmp43->links=(void*)& Cyc_PP_Empty_link;_tmp43;});}
 # 193
 static struct Cyc_PP_Doc*Cyc_PP_text_doc(struct _dyneither_ptr s){
 int slen=(int)Cyc_strlen((struct _dyneither_ptr)s);
-struct _tuple2*_tmpDC;struct Cyc_PP_Doc*_tmpDB;return
-(_tmpDB=_cycalloc(sizeof(*_tmpDB)),((_tmpDB->mwo=slen,((_tmpDB->mw=Cyc_PP_infinity,((_tmpDB->f=
+return({struct Cyc_PP_Doc*_tmp47=_cycalloc(sizeof(*_tmp47));_tmp47->mwo=slen;_tmp47->mw=Cyc_PP_infinity;_tmp47->f=
 # 198
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple2*,struct Cyc_PP_Ppstate*),struct _tuple2*x))Cyc_Fn_make_fn)(Cyc_PP_text_doc_f,(
-# 200
-(_tmpDC=_cycalloc(sizeof(*_tmpDC)),((_tmpDC->f1=slen,((_tmpDC->f2=s,_tmpDC))))))),_tmpDB)))))));}
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple2*,struct Cyc_PP_Ppstate*),struct _tuple2*x))Cyc_Fn_make_fn)(Cyc_PP_text_doc_f,({struct _tuple2*_tmp48=_cycalloc(sizeof(*_tmp48));_tmp48->f1=slen;_tmp48->f2=s;_tmp48;}));_tmp47;});}
 # 202
 struct Cyc_PP_Doc*Cyc_PP_text(struct _dyneither_ptr s){
 struct Cyc_Hashtable_Table*t;
 if(Cyc_PP_str_hashtbl == 0){
-t=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(struct _dyneither_ptr*,struct _dyneither_ptr*),int(*hash)(struct _dyneither_ptr*)))Cyc_Hashtable_create)(101,Cyc_zstrptrcmp,Cyc_Hashtable_hash_stringptr);{
-struct Cyc_Core_Opt*_tmpDD;Cyc_PP_str_hashtbl=((_tmpDD=_cycalloc(sizeof(*_tmpDD)),((_tmpDD->v=t,_tmpDD))));};}else{
+t=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(struct _dyneither_ptr*,struct _dyneither_ptr*),int(*hash)(struct _dyneither_ptr*)))Cyc_Hashtable_create)(101,Cyc_zstrptrcmp,Cyc_Hashtable_hash_stringptr);
+Cyc_PP_str_hashtbl=({struct Cyc_Core_Opt*_tmp49=_cycalloc(sizeof(*_tmp49));_tmp49->v=t;_tmp49;});}else{
 # 208
 t=(struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_str_hashtbl))->v;}{
 # 210
 struct _handler_cons _tmp4A;_push_handler(& _tmp4A);{int _tmp4C=0;if(setjmp(_tmp4A.handler))_tmp4C=1;if(!_tmp4C){
-{struct _dyneither_ptr*_tmpDE;struct Cyc_PP_Doc*_tmp4E=((struct Cyc_PP_Doc*(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key))Cyc_Hashtable_lookup)(t,((_tmpDE=_cycalloc(sizeof(*_tmpDE)),((_tmpDE[0]=s,_tmpDE)))));_npop_handler(0);return _tmp4E;};_pop_handler();}else{void*_tmp4B=(void*)_exn_thrown;void*_tmp4F=_tmp4B;void*_tmp50;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp4F)->tag == Cyc_Core_Not_found){_LL1E: _LL1F: {
+{struct Cyc_PP_Doc*_tmp4E=((struct Cyc_PP_Doc*(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key))Cyc_Hashtable_lookup)(t,({struct _dyneither_ptr*_tmp4D=_cycalloc(sizeof(*_tmp4D));_tmp4D[0]=s;_tmp4D;}));_npop_handler(0);return _tmp4E;};_pop_handler();}else{void*_tmp4B=(void*)_exn_thrown;void*_tmp4F=_tmp4B;void*_tmp50;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp4F)->tag == Cyc_Core_Not_found){_LL1E: _LL1F: {
 # 214
 struct Cyc_PP_Doc*d=Cyc_PP_text_doc(s);
-{struct _dyneither_ptr*_tmpDF;((void(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key,struct Cyc_PP_Doc*val))Cyc_Hashtable_insert)(t,((_tmpDF=_cycalloc(sizeof(*_tmpDF)),((_tmpDF[0]=s,_tmpDF)))),d);}
+((void(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key,struct Cyc_PP_Doc*val))Cyc_Hashtable_insert)(t,({struct _dyneither_ptr*_tmp51=_cycalloc(sizeof(*_tmp51));_tmp51[0]=s;_tmp51;}),d);
 return d;}}else{_LL20: _tmp50=_tmp4F;_LL21:(int)_rethrow(_tmp50);}_LL1D:;}};};}
 # 219
 struct Cyc_PP_Doc*Cyc_PP_textptr(struct _dyneither_ptr*s){return Cyc_PP_text(*s);}
 # 224
 static struct Cyc_PP_Doc*Cyc_PP_text_width_doc(struct _dyneither_ptr s,int slen){
-struct _tuple2*_tmpE2;struct Cyc_PP_Doc*_tmpE1;return
-(_tmpE1=_cycalloc(sizeof(*_tmpE1)),((_tmpE1->mwo=slen,((_tmpE1->mw=Cyc_PP_infinity,((_tmpE1->f=
+return({struct Cyc_PP_Doc*_tmp52=_cycalloc(sizeof(*_tmp52));_tmp52->mwo=slen;_tmp52->mw=Cyc_PP_infinity;_tmp52->f=
 # 228
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple2*,struct Cyc_PP_Ppstate*),struct _tuple2*x))Cyc_Fn_make_fn)(Cyc_PP_text_doc_f,(
-# 230
-(_tmpE2=_cycalloc(sizeof(*_tmpE2)),((_tmpE2->f1=slen,((_tmpE2->f2=s,_tmpE2))))))),_tmpE1)))))));}
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple2*,struct Cyc_PP_Ppstate*),struct _tuple2*x))Cyc_Fn_make_fn)(Cyc_PP_text_doc_f,({struct _tuple2*_tmp53=_cycalloc(sizeof(*_tmp53));_tmp53->f1=slen;_tmp53->f2=s;_tmp53;}));_tmp52;});}
 # 232
 static struct Cyc_Core_Opt*Cyc_PP_str_hashtbl2=0;
 struct Cyc_PP_Doc*Cyc_PP_text_width(struct _dyneither_ptr s,int slen){
 struct Cyc_Hashtable_Table*t;
 if(Cyc_PP_str_hashtbl2 == 0){
-t=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(struct _dyneither_ptr*,struct _dyneither_ptr*),int(*hash)(struct _dyneither_ptr*)))Cyc_Hashtable_create)(101,Cyc_zstrptrcmp,Cyc_Hashtable_hash_stringptr);{
-struct Cyc_Core_Opt*_tmpE3;Cyc_PP_str_hashtbl2=((_tmpE3=_cycalloc(sizeof(*_tmpE3)),((_tmpE3->v=t,_tmpE3))));};}else{
+t=((struct Cyc_Hashtable_Table*(*)(int sz,int(*cmp)(struct _dyneither_ptr*,struct _dyneither_ptr*),int(*hash)(struct _dyneither_ptr*)))Cyc_Hashtable_create)(101,Cyc_zstrptrcmp,Cyc_Hashtable_hash_stringptr);
+Cyc_PP_str_hashtbl2=({struct Cyc_Core_Opt*_tmp54=_cycalloc(sizeof(*_tmp54));_tmp54->v=t;_tmp54;});}else{
 # 239
 t=(struct Cyc_Hashtable_Table*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_str_hashtbl2))->v;}{
 # 241
 struct _handler_cons _tmp55;_push_handler(& _tmp55);{int _tmp57=0;if(setjmp(_tmp55.handler))_tmp57=1;if(!_tmp57){
-{struct _dyneither_ptr*_tmpE4;struct Cyc_PP_Doc*_tmp59=((struct Cyc_PP_Doc*(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key))Cyc_Hashtable_lookup)(t,((_tmpE4=_cycalloc(sizeof(*_tmpE4)),((_tmpE4[0]=s,_tmpE4)))));_npop_handler(0);return _tmp59;};_pop_handler();}else{void*_tmp56=(void*)_exn_thrown;void*_tmp5A=_tmp56;void*_tmp5B;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp5A)->tag == Cyc_Core_Not_found){_LL23: _LL24: {
+{struct Cyc_PP_Doc*_tmp59=((struct Cyc_PP_Doc*(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key))Cyc_Hashtable_lookup)(t,({struct _dyneither_ptr*_tmp58=_cycalloc(sizeof(*_tmp58));_tmp58[0]=s;_tmp58;}));_npop_handler(0);return _tmp59;};_pop_handler();}else{void*_tmp56=(void*)_exn_thrown;void*_tmp5A=_tmp56;void*_tmp5B;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp5A)->tag == Cyc_Core_Not_found){_LL23: _LL24: {
 # 245
 struct Cyc_PP_Doc*d=Cyc_PP_text_width_doc(s,slen);
-{struct _dyneither_ptr*_tmpE5;((void(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key,struct Cyc_PP_Doc*val))Cyc_Hashtable_insert)(t,((_tmpE5=_cycalloc(sizeof(*_tmpE5)),((_tmpE5[0]=s,_tmpE5)))),d);}
+((void(*)(struct Cyc_Hashtable_Table*t,struct _dyneither_ptr*key,struct Cyc_PP_Doc*val))Cyc_Hashtable_insert)(t,({struct _dyneither_ptr*_tmp5C=_cycalloc(sizeof(*_tmp5C));_tmp5C[0]=s;_tmp5C;}),d);
 return d;}}else{_LL25: _tmp5B=_tmp5A;_LL26:(int)_rethrow(_tmp5B);}_LL22:;}};};}
 # 251
 struct Cyc_Core_Opt*Cyc_PP_nil_doc_opt=0;
@@ -1108,51 +1100,45 @@ struct Cyc_Core_Opt*Cyc_PP_blank_doc_opt=0;
 struct Cyc_Core_Opt*Cyc_PP_line_doc_opt=0;
 # 257
 struct Cyc_PP_Doc*Cyc_PP_nil_doc(){
-if(Cyc_PP_nil_doc_opt == 0){
-const char*_tmpE8;struct Cyc_Core_Opt*_tmpE7;Cyc_PP_nil_doc_opt=((_tmpE7=_cycalloc(sizeof(*_tmpE7)),((_tmpE7->v=Cyc_PP_text(((_tmpE8="",_tag_dyneither(_tmpE8,sizeof(char),1)))),_tmpE7))));}
+if(Cyc_PP_nil_doc_opt == 0)
+Cyc_PP_nil_doc_opt=({struct Cyc_Core_Opt*_tmp5D=_cycalloc(sizeof(*_tmp5D));_tmp5D->v=Cyc_PP_text(({const char*_tmp5E="";_tag_dyneither(_tmp5E,sizeof(char),1);}));_tmp5D;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_nil_doc_opt))->v;}
 # 264
 struct Cyc_PP_Doc*Cyc_PP_blank_doc(){
-if(Cyc_PP_blank_doc_opt == 0){
-const char*_tmpEB;struct Cyc_Core_Opt*_tmpEA;Cyc_PP_blank_doc_opt=((_tmpEA=_cycalloc(sizeof(*_tmpEA)),((_tmpEA->v=Cyc_PP_text(((_tmpEB="",_tag_dyneither(_tmpEB,sizeof(char),1)))),_tmpEA))));}
+if(Cyc_PP_blank_doc_opt == 0)
+Cyc_PP_blank_doc_opt=({struct Cyc_Core_Opt*_tmp5F=_cycalloc(sizeof(*_tmp5F));_tmp5F->v=Cyc_PP_text(({const char*_tmp60="";_tag_dyneither(_tmp60,sizeof(char),1);}));_tmp5F;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_blank_doc_opt))->v;}struct _tuple3{int f1;struct _dyneither_ptr f2;struct _dyneither_ptr f3;};struct _tuple4{int f1;int f2;int f3;struct _dyneither_ptr f4;};
 # 270
 static struct Cyc_PP_Out*Cyc_PP_hyperlink_f(struct _tuple3*clo,struct Cyc_PP_Ppstate*st){
-struct _tuple3*_tmp61=clo;int _tmp62;struct _dyneither_ptr _tmp63;struct _dyneither_ptr _tmp64;_LL28: _tmp62=_tmp61->f1;_tmp63=_tmp61->f2;_tmp64=_tmp61->f3;_LL29:;{
-struct Cyc_PP_Single_PP_Alist_struct*_tmpFE;struct _tuple4*_tmpFD;struct Cyc_PP_Single_PP_Alist_struct _tmpFC;struct Cyc_PP_Single_PP_Alist_struct*_tmpFB;struct _dyneither_ptr*_tmpFA;struct Cyc_PP_Single_PP_Alist_struct _tmpF9;struct Cyc_PP_Out*_tmpF8;return(_tmpF8=_cycalloc(sizeof(*_tmpF8)),((_tmpF8->newcc=st->cc + _tmp62,((_tmpF8->newcl=st->cl,((_tmpF8->ppout=(void*)(
-# 274
-(_tmpFB=_cycalloc(sizeof(*_tmpFB)),((_tmpFB[0]=((_tmpF9.tag=1,((_tmpF9.f1=((_tmpFA=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmpFA[0]=(struct _dyneither_ptr)_tmp63,_tmpFA)))),_tmpF9)))),_tmpFB)))),((_tmpF8->links=(void*)(
-(_tmpFE=_cycalloc(sizeof(*_tmpFE)),((_tmpFE[0]=((_tmpFC.tag=1,((_tmpFC.f1=((_tmpFD=_cycalloc(sizeof(*_tmpFD)),((_tmpFD->f1=st->cl,((_tmpFD->f2=st->cc,((_tmpFD->f3=_tmp62,((_tmpFD->f4=_tmp64,_tmpFD)))))))))),_tmpFC)))),_tmpFE)))),_tmpF8)))))))));};}
+struct _tuple3*_tmp61=clo;int _tmp62;struct _dyneither_ptr _tmp63;struct _dyneither_ptr _tmp64;_LL28: _tmp62=_tmp61->f1;_tmp63=_tmp61->f2;_tmp64=_tmp61->f3;_LL29:;
+return({struct Cyc_PP_Out*_tmp65=_cycalloc(sizeof(*_tmp65));_tmp65->newcc=st->cc + _tmp62;_tmp65->newcl=st->cl;_tmp65->ppout=(void*)({struct Cyc_PP_Single_PP_Alist_struct*_tmp69=_cycalloc(sizeof(*_tmp69));_tmp69[0]=({struct Cyc_PP_Single_PP_Alist_struct _tmp6A;_tmp6A.tag=1;_tmp6A.f1=({struct _dyneither_ptr*_tmp6B=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp6B[0]=(struct _dyneither_ptr)_tmp63;_tmp6B;});_tmp6A;});_tmp69;});_tmp65->links=(void*)({struct Cyc_PP_Single_PP_Alist_struct*_tmp66=_cycalloc(sizeof(*_tmp66));_tmp66[0]=({struct Cyc_PP_Single_PP_Alist_struct _tmp67;_tmp67.tag=1;_tmp67.f1=({struct _tuple4*_tmp68=_cycalloc(sizeof(*_tmp68));_tmp68->f1=st->cl;_tmp68->f2=st->cc;_tmp68->f3=_tmp62;_tmp68->f4=_tmp64;_tmp68;});_tmp67;});_tmp66;});_tmp65;});}
 # 277
 struct Cyc_PP_Doc*Cyc_PP_hyperlink(struct _dyneither_ptr shrt,struct _dyneither_ptr full){
 int slen=(int)Cyc_strlen((struct _dyneither_ptr)shrt);
-struct _tuple3*_tmp101;struct Cyc_PP_Doc*_tmp100;return(_tmp100=_cycalloc(sizeof(*_tmp100)),((_tmp100->mwo=slen,((_tmp100->mw=Cyc_PP_infinity,((_tmp100->f=
+return({struct Cyc_PP_Doc*_tmp6C=_cycalloc(sizeof(*_tmp6C));_tmp6C->mwo=slen;_tmp6C->mw=Cyc_PP_infinity;_tmp6C->f=
 # 281
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple3*,struct Cyc_PP_Ppstate*),struct _tuple3*x))Cyc_Fn_make_fn)(Cyc_PP_hyperlink_f,((_tmp101=_cycalloc(sizeof(*_tmp101)),((_tmp101->f1=slen,((_tmp101->f2=shrt,((_tmp101->f3=full,_tmp101))))))))),_tmp100)))))));}
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple3*,struct Cyc_PP_Ppstate*),struct _tuple3*x))Cyc_Fn_make_fn)(Cyc_PP_hyperlink_f,({struct _tuple3*_tmp6D=_cycalloc(sizeof(*_tmp6D));_tmp6D->f1=slen;_tmp6D->f2=shrt;_tmp6D->f3=full;_tmp6D;}));_tmp6C;});}
 # 285
 static struct Cyc_PP_Out*Cyc_PP_line_f(struct Cyc_PP_Ppstate*st){
-struct Cyc_PP_Single_PP_Alist_struct*_tmp10B;struct _dyneither_ptr*_tmp10A;struct Cyc_PP_Single_PP_Alist_struct _tmp109;struct Cyc_PP_Out*_tmp108;return(_tmp108=_cycalloc(sizeof(*_tmp108)),((_tmp108->newcc=st->ci,((_tmp108->newcl=st->cl + 1,((_tmp108->ppout=(void*)(
+return({struct Cyc_PP_Out*_tmp6E=_cycalloc(sizeof(*_tmp6E));_tmp6E->newcc=st->ci;_tmp6E->newcl=st->cl + 1;_tmp6E->ppout=(void*)({struct Cyc_PP_Single_PP_Alist_struct*_tmp6F=_cycalloc(sizeof(*_tmp6F));_tmp6F[0]=({struct Cyc_PP_Single_PP_Alist_struct _tmp70;_tmp70.tag=1;_tmp70.f1=({struct _dyneither_ptr*_tmp71=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp71[0]=(struct _dyneither_ptr)
 # 288
-(_tmp10B=_cycalloc(sizeof(*_tmp10B)),((_tmp10B[0]=((_tmp109.tag=1,((_tmp109.f1=((_tmp10A=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp10A[0]=(struct _dyneither_ptr)Cyc_PP_nlblanks(st->ci),_tmp10A)))),_tmp109)))),_tmp10B)))),((_tmp108->links=(void*)& Cyc_PP_Empty_link,_tmp108)))))))));}
+Cyc_PP_nlblanks(st->ci);_tmp71;});_tmp70;});_tmp6F;});_tmp6E->links=(void*)& Cyc_PP_Empty_link;_tmp6E;});}
 # 291
 struct Cyc_PP_Doc*Cyc_PP_line_doc(){
-if(Cyc_PP_line_doc_opt == 0){
-struct Cyc_PP_Doc*_tmp10E;struct Cyc_Core_Opt*_tmp10D;Cyc_PP_line_doc_opt=((_tmp10D=_cycalloc(sizeof(*_tmp10D)),((_tmp10D->v=((_tmp10E=_cycalloc(sizeof(*_tmp10E)),((_tmp10E->mwo=0,((_tmp10E->mw=0,((_tmp10E->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_PP_Ppstate*)))Cyc_Fn_fp2fn)(Cyc_PP_line_f),_tmp10E)))))))),_tmp10D))));}
+if(Cyc_PP_line_doc_opt == 0)
+Cyc_PP_line_doc_opt=({struct Cyc_Core_Opt*_tmp72=_cycalloc(sizeof(*_tmp72));_tmp72->v=({struct Cyc_PP_Doc*_tmp73=_cycalloc(sizeof(*_tmp73));_tmp73->mwo=0;_tmp73->mw=0;_tmp73->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_PP_Ppstate*)))Cyc_Fn_fp2fn)(Cyc_PP_line_f);_tmp73;});_tmp72;});
 return(struct Cyc_PP_Doc*)((struct Cyc_Core_Opt*)_check_null(Cyc_PP_line_doc_opt))->v;}struct _tuple5{int f1;struct Cyc_PP_Doc*f2;};
 # 297
 static struct Cyc_PP_Out*Cyc_PP_nest_f(struct _tuple5*clo,struct Cyc_PP_Ppstate*st){
 struct _tuple5*_tmp74=clo;int _tmp75;struct Cyc_PP_Doc*_tmp76;_LL2B: _tmp75=_tmp74->f1;_tmp76=_tmp74->f2;_LL2C:;{
-struct Cyc_PP_Ppstate*_tmp10F;struct Cyc_PP_Ppstate*st2=
-(_tmp10F=_cycalloc_atomic(sizeof(*_tmp10F)),((_tmp10F->ci=st->ci + _tmp75,((_tmp10F->cc=st->cc,((_tmp10F->cl=st->cl,((_tmp10F->pw=st->pw,((_tmp10F->epw=st->epw,_tmp10F)))))))))));
+struct Cyc_PP_Ppstate*st2=({struct Cyc_PP_Ppstate*_tmp77=_cycalloc_atomic(sizeof(*_tmp77));_tmp77->ci=st->ci + _tmp75;_tmp77->cc=st->cc;_tmp77->cl=st->cl;_tmp77->pw=st->pw;_tmp77->epw=st->epw;_tmp77;});
 # 305
 return((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmp76->f,st2);};}
 # 307
 struct Cyc_PP_Doc*Cyc_PP_nest(int k,struct Cyc_PP_Doc*d){
-struct _tuple5*_tmp112;struct Cyc_PP_Doc*_tmp111;return(_tmp111=_cycalloc(sizeof(*_tmp111)),((_tmp111->mwo=d->mwo,((_tmp111->mw=d->mw,((_tmp111->f=
+return({struct Cyc_PP_Doc*_tmp78=_cycalloc(sizeof(*_tmp78));_tmp78->mwo=d->mwo;_tmp78->mw=d->mw;_tmp78->f=
 # 310
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple5*,struct Cyc_PP_Ppstate*),struct _tuple5*x))Cyc_Fn_make_fn)(Cyc_PP_nest_f,(
-# 312
-(_tmp112=_cycalloc(sizeof(*_tmp112)),((_tmp112->f1=k,((_tmp112->f2=d,_tmp112))))))),_tmp111)))))));}
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple5*,struct Cyc_PP_Ppstate*),struct _tuple5*x))Cyc_Fn_make_fn)(Cyc_PP_nest_f,({struct _tuple5*_tmp79=_cycalloc(sizeof(*_tmp79));_tmp79->f1=k;_tmp79->f2=d;_tmp79;}));_tmp78;});}
 # 315
 int Cyc_PP_min(int x,int y){
 if(x <= y)return x;else{
@@ -1165,20 +1151,20 @@ return y;}}struct _tuple6{struct Cyc_PP_Doc*f1;struct Cyc_PP_Doc*f2;};
 static struct Cyc_PP_Out*Cyc_PP_concat_f(struct _tuple6*clo,struct Cyc_PP_Ppstate*st){
 struct _tuple6*_tmp7A=clo;struct Cyc_PP_Doc*_tmp7B;struct Cyc_PP_Doc*_tmp7C;_LL2E: _tmp7B=_tmp7A->f1;_tmp7C=_tmp7A->f2;_LL2F:;{
 int epw2=Cyc_PP_max(st->pw - _tmp7C->mw,st->epw - _tmp7B->mwo);
-struct Cyc_PP_Ppstate*_tmp113;struct Cyc_PP_Ppstate*st2=(_tmp113=_cycalloc_atomic(sizeof(*_tmp113)),((_tmp113->ci=st->ci,((_tmp113->cc=st->cc,((_tmp113->cl=st->cl,((_tmp113->pw=st->pw,((_tmp113->epw=epw2,_tmp113)))))))))));
+struct Cyc_PP_Ppstate*st2=({struct Cyc_PP_Ppstate*_tmp7F=_cycalloc_atomic(sizeof(*_tmp7F));_tmp7F->ci=st->ci;_tmp7F->cc=st->cc;_tmp7F->cl=st->cl;_tmp7F->pw=st->pw;_tmp7F->epw=epw2;_tmp7F;});
 struct Cyc_PP_Out*o1=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmp7B->f,st2);
-struct Cyc_PP_Ppstate*_tmp114;struct Cyc_PP_Ppstate*st3=(_tmp114=_cycalloc_atomic(sizeof(*_tmp114)),((_tmp114->ci=st->ci,((_tmp114->cc=o1->newcc,((_tmp114->cl=o1->newcl,((_tmp114->pw=st->pw,((_tmp114->epw=epw2,_tmp114)))))))))));
+struct Cyc_PP_Ppstate*st3=({struct Cyc_PP_Ppstate*_tmp7E=_cycalloc_atomic(sizeof(*_tmp7E));_tmp7E->ci=st->ci;_tmp7E->cc=o1->newcc;_tmp7E->cl=o1->newcl;_tmp7E->pw=st->pw;_tmp7E->epw=epw2;_tmp7E;});
 struct Cyc_PP_Out*o2=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmp7C->f,st3);
-struct Cyc_PP_Out*_tmp115;struct Cyc_PP_Out*o3=(_tmp115=_cycalloc(sizeof(*_tmp115)),((_tmp115->newcc=o2->newcc,((_tmp115->newcl=o2->newcl,((_tmp115->ppout=
+struct Cyc_PP_Out*o3=({struct Cyc_PP_Out*_tmp7D=_cycalloc(sizeof(*_tmp7D));_tmp7D->newcc=o2->newcc;_tmp7D->newcl=o2->newcl;_tmp7D->ppout=
 # 334
-((void*(*)(void*a1,void*a2))Cyc_PP_append)(o1->ppout,o2->ppout),((_tmp115->links=
-((void*(*)(void*a1,void*a2))Cyc_PP_append)(o1->links,o2->links),_tmp115)))))))));
+((void*(*)(void*a1,void*a2))Cyc_PP_append)(o1->ppout,o2->ppout);_tmp7D->links=
+((void*(*)(void*a1,void*a2))Cyc_PP_append)(o1->links,o2->links);_tmp7D;});
 return o3;};}
 # 338
 static struct Cyc_PP_Doc*Cyc_PP_concat(struct Cyc_PP_Doc*d1,struct Cyc_PP_Doc*d2){
-struct _tuple6*_tmp118;struct Cyc_PP_Doc*_tmp117;return(_tmp117=_cycalloc(sizeof(*_tmp117)),((_tmp117->mwo=Cyc_PP_min(d1->mw,d1->mwo + d2->mwo),((_tmp117->mw=
-Cyc_PP_min(d1->mw,d1->mwo + d2->mw),((_tmp117->f=
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple6*,struct Cyc_PP_Ppstate*),struct _tuple6*x))Cyc_Fn_make_fn)(Cyc_PP_concat_f,((_tmp118=_cycalloc(sizeof(*_tmp118)),((_tmp118->f1=d1,((_tmp118->f2=d2,_tmp118))))))),_tmp117)))))));}
+return({struct Cyc_PP_Doc*_tmp80=_cycalloc(sizeof(*_tmp80));_tmp80->mwo=Cyc_PP_min(d1->mw,d1->mwo + d2->mwo);_tmp80->mw=
+Cyc_PP_min(d1->mw,d1->mwo + d2->mw);_tmp80->f=
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple6*,struct Cyc_PP_Ppstate*),struct _tuple6*x))Cyc_Fn_make_fn)(Cyc_PP_concat_f,({struct _tuple6*_tmp81=_cycalloc(sizeof(*_tmp81));_tmp81->f1=d1;_tmp81->f2=d2;_tmp81;}));_tmp80;});}
 # 343
 struct Cyc_PP_Doc*Cyc_PP_cat(struct _dyneither_ptr l){
 struct Cyc_PP_Doc*_tmp82=Cyc_PP_nil_doc();
@@ -1192,8 +1178,8 @@ struct Cyc_List_List*os=0;
 {struct Cyc_List_List*_tmp83=ds0;for(0;_tmp83 != 0;_tmp83=_tmp83->tl){
 struct Cyc_PP_Doc*d=(struct Cyc_PP_Doc*)_tmp83->hd;
 struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,st);
-{struct Cyc_PP_Ppstate*_tmp119;st=((_tmp119=_cycalloc_atomic(sizeof(*_tmp119)),((_tmp119->ci=st->ci,((_tmp119->cc=o->newcc,((_tmp119->cl=o->newcl,((_tmp119->pw=st->pw,((_tmp119->epw=st->epw - d->mwo,_tmp119))))))))))));}{
-struct Cyc_List_List*_tmp11A;os=((_tmp11A=_cycalloc(sizeof(*_tmp11A)),((_tmp11A->hd=o,((_tmp11A->tl=os,_tmp11A))))));};}}{
+st=({struct Cyc_PP_Ppstate*_tmp84=_cycalloc_atomic(sizeof(*_tmp84));_tmp84->ci=st->ci;_tmp84->cc=o->newcc;_tmp84->cl=o->newcl;_tmp84->pw=st->pw;_tmp84->epw=st->epw - d->mwo;_tmp84;});
+os=({struct Cyc_List_List*_tmp85=_cycalloc(sizeof(*_tmp85));_tmp85->hd=o;_tmp85->tl=os;_tmp85;});}}{
 # 361
 int newcc=((struct Cyc_PP_Out*)((struct Cyc_List_List*)_check_null(os))->hd)->newcc;
 int newcl=((struct Cyc_PP_Out*)os->hd)->newcl;
@@ -1201,9 +1187,9 @@ void*s=(void*)& Cyc_PP_Empty_stringptr;
 void*links=(void*)& Cyc_PP_Empty_link;
 for(0;os != 0;os=os->tl){
 s=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->ppout,s);
-links=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->links,links);}{
+links=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->links,links);}
 # 369
-struct Cyc_PP_Out*_tmp11B;return(_tmp11B=_cycalloc(sizeof(*_tmp11B)),((_tmp11B->newcc=newcc,((_tmp11B->newcl=newcl,((_tmp11B->ppout=s,((_tmp11B->links=links,_tmp11B)))))))));};};}
+return({struct Cyc_PP_Out*_tmp86=_cycalloc(sizeof(*_tmp86));_tmp86->newcc=newcc;_tmp86->newcl=newcl;_tmp86->ppout=s;_tmp86->links=links;_tmp86;});};}
 # 371
 static struct Cyc_PP_Doc*Cyc_PP_long_cats(struct Cyc_List_List*doclist){
 # 375
@@ -1217,9 +1203,9 @@ int mwo=d->mw;
 int mw2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc*)_tmp87->hd)->mwo);
 int mwo2=Cyc_PP_min(mw,mwo + ((struct Cyc_PP_Doc*)_tmp87->hd)->mw);
 mw=mw2;
-mwo=mwo2;}}{
+mwo=mwo2;}}
 # 387
-struct Cyc_PP_Doc*_tmp11C;return(_tmp11C=_cycalloc(sizeof(*_tmp11C)),((_tmp11C->mwo=mw,((_tmp11C->mw=mwo,((_tmp11C->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_List_List*,struct Cyc_PP_Ppstate*),struct Cyc_List_List*x))Cyc_Fn_make_fn)(Cyc_PP_long_cats_f,orig),_tmp11C)))))));};};}
+return({struct Cyc_PP_Doc*_tmp88=_cycalloc(sizeof(*_tmp88));_tmp88->mwo=mw;_tmp88->mw=mwo;_tmp88->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_List_List*,struct Cyc_PP_Ppstate*),struct Cyc_List_List*x))Cyc_Fn_make_fn)(Cyc_PP_long_cats_f,orig);_tmp88;});};}
 # 390
 struct Cyc_PP_Doc*Cyc_PP_cats(struct Cyc_List_List*doclist){
 if(doclist == 0)return Cyc_PP_nil_doc();else{
@@ -1235,8 +1221,8 @@ int sz=(int)_get_dyneither_size(docs,sizeof(struct Cyc_PP_Doc*));
 {int i=0;for(0;i < sz;++ i){
 struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_dyneither_subscript(docs,sizeof(struct Cyc_PP_Doc*),i));
 struct Cyc_PP_Out*o=((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,st);
-{struct Cyc_PP_Ppstate*_tmp11D;st=((_tmp11D=_cycalloc_atomic(sizeof(*_tmp11D)),((_tmp11D->ci=st->ci,((_tmp11D->cc=o->newcc,((_tmp11D->cl=o->newcl,((_tmp11D->pw=st->pw,((_tmp11D->epw=st->epw - d->mwo,_tmp11D))))))))))));}{
-struct Cyc_List_List*_tmp11E;os=((_tmp11E=_cycalloc(sizeof(*_tmp11E)),((_tmp11E->hd=o,((_tmp11E->tl=os,_tmp11E))))));};}}{
+st=({struct Cyc_PP_Ppstate*_tmp89=_cycalloc_atomic(sizeof(*_tmp89));_tmp89->ci=st->ci;_tmp89->cc=o->newcc;_tmp89->cl=o->newcl;_tmp89->pw=st->pw;_tmp89->epw=st->epw - d->mwo;_tmp89;});
+os=({struct Cyc_List_List*_tmp8A=_cycalloc(sizeof(*_tmp8A));_tmp8A->hd=o;_tmp8A->tl=os;_tmp8A;});}}{
 # 408
 int newcc=((struct Cyc_PP_Out*)((struct Cyc_List_List*)_check_null(os))->hd)->newcc;
 int newcl=((struct Cyc_PP_Out*)os->hd)->newcl;
@@ -1244,14 +1230,14 @@ void*s=(void*)& Cyc_PP_Empty_stringptr;
 void*links=(void*)& Cyc_PP_Empty_link;
 for(0;os != 0;os=os->tl){
 s=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->ppout,s);
-links=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->links,links);}{
+links=((void*(*)(void*a1,void*a2))Cyc_PP_append)(((struct Cyc_PP_Out*)os->hd)->links,links);}
 # 416
-struct Cyc_PP_Out*_tmp11F;return(_tmp11F=_cycalloc(sizeof(*_tmp11F)),((_tmp11F->newcc=newcc,((_tmp11F->newcl=newcl,((_tmp11F->ppout=s,((_tmp11F->links=links,_tmp11F)))))))));};};}
+return({struct Cyc_PP_Out*_tmp8B=_cycalloc(sizeof(*_tmp8B));_tmp8B->newcc=newcc;_tmp8B->newcl=newcl;_tmp8B->ppout=s;_tmp8B->links=links;_tmp8B;});};}
 # 419
 struct Cyc_PP_Doc*Cyc_PP_cats_arr(struct _dyneither_ptr docs){
 int sz=(int)_get_dyneither_size(docs,sizeof(struct Cyc_PP_Doc*));
-if(sz == 0){
-struct Cyc_Core_Failure_exn_struct _tmp125;const char*_tmp124;struct Cyc_Core_Failure_exn_struct*_tmp123;(int)_throw((void*)((_tmp123=_cycalloc(sizeof(*_tmp123)),((_tmp123[0]=((_tmp125.tag=Cyc_Core_Failure,((_tmp125.f1=((_tmp124="cats_arr -- size zero array",_tag_dyneither(_tmp124,sizeof(char),28))),_tmp125)))),_tmp123)))));}{
+if(sz == 0)
+(int)_throw((void*)({struct Cyc_Core_Failure_exn_struct*_tmp8C=_cycalloc(sizeof(*_tmp8C));_tmp8C[0]=({struct Cyc_Core_Failure_exn_struct _tmp8D;_tmp8D.tag=Cyc_Core_Failure;_tmp8D.f1=({const char*_tmp8E="cats_arr -- size zero array";_tag_dyneither(_tmp8E,sizeof(char),28);});_tmp8D;});_tmp8C;}));{
 struct Cyc_PP_Doc*d=*((struct Cyc_PP_Doc**)_check_dyneither_subscript(docs,sizeof(struct Cyc_PP_Doc*),0));
 int mw=d->mw;
 int mwo=d->mw;
@@ -1259,9 +1245,9 @@ int mwo=d->mw;
 int mw2=Cyc_PP_min(mw,mwo + (*((struct Cyc_PP_Doc**)_check_dyneither_subscript(docs,sizeof(struct Cyc_PP_Doc*),i)))->mwo);
 int mwo2=Cyc_PP_min(mw,mwo + (*((struct Cyc_PP_Doc**)_check_dyneither_subscript(docs,sizeof(struct Cyc_PP_Doc*),i)))->mw);
 mw=mw2;
-mwo=mwo2;}}{
+mwo=mwo2;}}
 # 432
-struct _dyneither_ptr*_tmp128;struct Cyc_PP_Doc*_tmp127;return(_tmp127=_cycalloc(sizeof(*_tmp127)),((_tmp127->mwo=mw,((_tmp127->mw=mwo,((_tmp127->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _dyneither_ptr*,struct Cyc_PP_Ppstate*),struct _dyneither_ptr*x))Cyc_Fn_make_fn)(Cyc_PP_cats_arr_f,((_tmp128=_cycalloc(sizeof(struct _dyneither_ptr)* 1),((_tmp128[0]=(struct _dyneither_ptr)docs,_tmp128))))),_tmp127)))))));};};}
+return({struct Cyc_PP_Doc*_tmp8F=_cycalloc(sizeof(*_tmp8F));_tmp8F->mwo=mw;_tmp8F->mw=mwo;_tmp8F->f=((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _dyneither_ptr*,struct Cyc_PP_Ppstate*),struct _dyneither_ptr*x))Cyc_Fn_make_fn)(Cyc_PP_cats_arr_f,({struct _dyneither_ptr*_tmp90=_cycalloc(sizeof(struct _dyneither_ptr)* 1);_tmp90[0]=(struct _dyneither_ptr)docs;_tmp90;}));_tmp8F;});};}
 # 435
 static struct Cyc_PP_Out*Cyc_PP_doc_union_f(struct _tuple6*clo,struct Cyc_PP_Ppstate*st){
 struct _tuple6*_tmp91=clo;struct Cyc_PP_Doc*_tmp92;struct Cyc_PP_Doc*_tmp93;_LL31: _tmp92=_tmp91->f1;_tmp93=_tmp91->f2;_LL32:;{
@@ -1271,28 +1257,27 @@ if(dfits)return((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Pp
 return((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(_tmp93->f,st);}};}
 # 442
 struct Cyc_PP_Doc*Cyc_PP_doc_union(struct Cyc_PP_Doc*d,struct Cyc_PP_Doc*d2){
-struct _tuple6*_tmp12B;struct Cyc_PP_Doc*_tmp12A;return(_tmp12A=_cycalloc(sizeof(*_tmp12A)),((_tmp12A->mwo=Cyc_PP_min(d->mwo,d2->mwo),((_tmp12A->mw=
-Cyc_PP_min(d->mw,d2->mw),((_tmp12A->f=
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple6*,struct Cyc_PP_Ppstate*),struct _tuple6*x))Cyc_Fn_make_fn)(Cyc_PP_doc_union_f,((_tmp12B=_cycalloc(sizeof(*_tmp12B)),((_tmp12B->f1=d,((_tmp12B->f2=d2,_tmp12B))))))),_tmp12A)))))));}
+return({struct Cyc_PP_Doc*_tmp94=_cycalloc(sizeof(*_tmp94));_tmp94->mwo=Cyc_PP_min(d->mwo,d2->mwo);_tmp94->mw=
+Cyc_PP_min(d->mw,d2->mw);_tmp94->f=
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct _tuple6*,struct Cyc_PP_Ppstate*),struct _tuple6*x))Cyc_Fn_make_fn)(Cyc_PP_doc_union_f,({struct _tuple6*_tmp95=_cycalloc(sizeof(*_tmp95));_tmp95->f1=d;_tmp95->f2=d2;_tmp95;}));_tmp94;});}
 # 449
 struct Cyc_PP_Doc*Cyc_PP_oline_doc(){
 return Cyc_PP_doc_union(Cyc_PP_nil_doc(),Cyc_PP_line_doc());}
 # 453
 static struct Cyc_PP_Out*Cyc_PP_tab_f(struct Cyc_PP_Doc*d,struct Cyc_PP_Ppstate*st){
-struct Cyc_PP_Ppstate*_tmp12C;struct Cyc_PP_Ppstate*st2=(_tmp12C=_cycalloc_atomic(sizeof(*_tmp12C)),((_tmp12C->ci=st->cc,((_tmp12C->cc=st->cc,((_tmp12C->cl=st->cl,((_tmp12C->pw=st->pw,((_tmp12C->epw=st->epw,_tmp12C)))))))))));
+struct Cyc_PP_Ppstate*st2=({struct Cyc_PP_Ppstate*_tmp96=_cycalloc_atomic(sizeof(*_tmp96));_tmp96->ci=st->cc;_tmp96->cc=st->cc;_tmp96->cl=st->cl;_tmp96->pw=st->pw;_tmp96->epw=st->epw;_tmp96;});
 return((struct Cyc_PP_Out*(*)(struct Cyc_Fn_Function*f,struct Cyc_PP_Ppstate*x))Cyc_Fn_apply)(d->f,st2);}
 # 457
 struct Cyc_PP_Doc*Cyc_PP_tab(struct Cyc_PP_Doc*d){
-struct Cyc_PP_Doc*_tmp12D;struct Cyc_PP_Doc*d2=
-(_tmp12D=_cycalloc(sizeof(*_tmp12D)),((_tmp12D->mwo=d->mwo,((_tmp12D->mw=d->mw,((_tmp12D->f=
+struct Cyc_PP_Doc*d2=({struct Cyc_PP_Doc*_tmp97=_cycalloc(sizeof(*_tmp97));_tmp97->mwo=d->mwo;_tmp97->mw=d->mw;_tmp97->f=
 # 461
-((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_PP_Doc*,struct Cyc_PP_Ppstate*),struct Cyc_PP_Doc*x))Cyc_Fn_make_fn)(Cyc_PP_tab_f,d),_tmp12D)))))));
+((struct Cyc_Fn_Function*(*)(struct Cyc_PP_Out*(*f)(struct Cyc_PP_Doc*,struct Cyc_PP_Ppstate*),struct Cyc_PP_Doc*x))Cyc_Fn_make_fn)(Cyc_PP_tab_f,d);_tmp97;});
 return d2;}
 # 467
 static struct Cyc_PP_Doc*Cyc_PP_ppseq_f(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l){
 if(l == 0)return Cyc_PP_nil_doc();else{
 if(l->tl == 0)return pp(l->hd);else{
-struct Cyc_PP_Doc*_tmp12E[4];return(_tmp12E[3]=Cyc_PP_ppseq_f(pp,sep,l->tl),((_tmp12E[2]=Cyc_PP_oline_doc(),((_tmp12E[1]=Cyc_PP_text(sep),((_tmp12E[0]=pp(l->hd),Cyc_PP_cat(_tag_dyneither(_tmp12E,sizeof(struct Cyc_PP_Doc*),4)))))))));}}}
+return({struct Cyc_PP_Doc*_tmp98[4];_tmp98[3]=Cyc_PP_ppseq_f(pp,sep,l->tl);_tmp98[2]=Cyc_PP_oline_doc();_tmp98[1]=Cyc_PP_text(sep);_tmp98[0]=pp(l->hd);Cyc_PP_cat(_tag_dyneither(_tmp98,sizeof(struct Cyc_PP_Doc*),4));});}}}
 # 473
 struct Cyc_PP_Doc*Cyc_PP_ppseq(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l){
 return Cyc_PP_tab(Cyc_PP_ppseq_f(pp,sep,l));}
@@ -1306,7 +1291,7 @@ struct Cyc_PP_Doc*oline=Cyc_PP_oline_doc();
 struct Cyc_List_List*_tmp99=l;
 while(_tmp99->tl != 0){
 struct Cyc_List_List*_tmp9A=_tmp99->tl;
-{struct Cyc_List_List*_tmp131;struct Cyc_List_List*_tmp130;_tmp99->tl=((_tmp130=_cycalloc(sizeof(*_tmp130)),((_tmp130->hd=sep2,((_tmp130->tl=((_tmp131=_cycalloc(sizeof(*_tmp131)),((_tmp131->hd=oline,((_tmp131->tl=_tmp9A,_tmp131)))))),_tmp130))))));}
+_tmp99->tl=({struct Cyc_List_List*_tmp9B=_cycalloc(sizeof(*_tmp9B));_tmp9B->hd=sep2;_tmp9B->tl=({struct Cyc_List_List*_tmp9C=_cycalloc(sizeof(*_tmp9C));_tmp9C->hd=oline;_tmp9C->tl=_tmp9A;_tmp9C;});_tmp9B;});
 _tmp99=_tmp9A;}
 # 489
 return Cyc_PP_cats(l);}}}
@@ -1317,7 +1302,7 @@ return Cyc_PP_tab(Cyc_PP_seq_f(sep,l));}
 struct Cyc_PP_Doc*Cyc_PP_ppseql_f(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l){
 if(l == 0)return Cyc_PP_nil_doc();else{
 if(l->tl == 0)return pp(l->hd);else{
-struct Cyc_PP_Doc*_tmp132[4];return(_tmp132[3]=Cyc_PP_ppseql_f(pp,sep,l->tl),((_tmp132[2]=Cyc_PP_line_doc(),((_tmp132[1]=Cyc_PP_text(sep),((_tmp132[0]=pp(l->hd),Cyc_PP_cat(_tag_dyneither(_tmp132,sizeof(struct Cyc_PP_Doc*),4)))))))));}}}
+return({struct Cyc_PP_Doc*_tmp9D[4];_tmp9D[3]=Cyc_PP_ppseql_f(pp,sep,l->tl);_tmp9D[2]=Cyc_PP_line_doc();_tmp9D[1]=Cyc_PP_text(sep);_tmp9D[0]=pp(l->hd);Cyc_PP_cat(_tag_dyneither(_tmp9D,sizeof(struct Cyc_PP_Doc*),4));});}}}
 # 507
 struct Cyc_PP_Doc*Cyc_PP_ppseql(struct Cyc_PP_Doc*(*pp)(void*),struct _dyneither_ptr sep,struct Cyc_List_List*l){
 return Cyc_PP_tab(Cyc_PP_ppseql_f(pp,sep,l));}
@@ -1325,35 +1310,35 @@ return Cyc_PP_tab(Cyc_PP_ppseql_f(pp,sep,l));}
 static struct Cyc_PP_Doc*Cyc_PP_seql_f(struct _dyneither_ptr sep,struct Cyc_List_List*l){
 if(l == 0)return Cyc_PP_nil_doc();else{
 if(l->tl == 0)return(struct Cyc_PP_Doc*)l->hd;else{
-struct Cyc_PP_Doc*_tmp133[4];return(_tmp133[3]=Cyc_PP_seql_f(sep,l->tl),((_tmp133[2]=Cyc_PP_line_doc(),((_tmp133[1]=Cyc_PP_text(sep),((_tmp133[0]=(struct Cyc_PP_Doc*)l->hd,Cyc_PP_cat(_tag_dyneither(_tmp133,sizeof(struct Cyc_PP_Doc*),4)))))))));}}}
+return({struct Cyc_PP_Doc*_tmp9E[4];_tmp9E[3]=Cyc_PP_seql_f(sep,l->tl);_tmp9E[2]=Cyc_PP_line_doc();_tmp9E[1]=Cyc_PP_text(sep);_tmp9E[0]=(struct Cyc_PP_Doc*)l->hd;Cyc_PP_cat(_tag_dyneither(_tmp9E,sizeof(struct Cyc_PP_Doc*),4));});}}}
 # 516
 struct Cyc_PP_Doc*Cyc_PP_seql(struct _dyneither_ptr sep,struct Cyc_List_List*l0){
 return Cyc_PP_tab(Cyc_PP_seql_f(sep,l0));}
 # 521
 struct Cyc_PP_Doc*Cyc_PP_group(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*ss){
-struct Cyc_PP_Doc*_tmp134[3];return(_tmp134[2]=
+return({struct Cyc_PP_Doc*_tmp9F[3];_tmp9F[2]=
 # 524
-Cyc_PP_text(stop),((_tmp134[1]=
+Cyc_PP_text(stop);_tmp9F[1]=
 # 523
-Cyc_PP_seq(sep,ss),((_tmp134[0]=
+Cyc_PP_seq(sep,ss);_tmp9F[0]=
 # 522
-Cyc_PP_text(start),Cyc_PP_cat(_tag_dyneither(_tmp134,sizeof(struct Cyc_PP_Doc*),3)))))));}
+Cyc_PP_text(start);Cyc_PP_cat(_tag_dyneither(_tmp9F,sizeof(struct Cyc_PP_Doc*),3));});}
 # 528
 struct Cyc_PP_Doc*Cyc_PP_egroup(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*ss){
 if(ss == 0)return Cyc_PP_nil_doc();else{
-struct Cyc_PP_Doc*_tmp135[3];return(_tmp135[2]=
+return({struct Cyc_PP_Doc*_tmpA0[3];_tmpA0[2]=
 # 532
-Cyc_PP_text(stop),((_tmp135[1]=
+Cyc_PP_text(stop);_tmpA0[1]=
 # 531
-Cyc_PP_seq(sep,ss),((_tmp135[0]=
+Cyc_PP_seq(sep,ss);_tmpA0[0]=
 # 530
-Cyc_PP_text(start),Cyc_PP_cat(_tag_dyneither(_tmp135,sizeof(struct Cyc_PP_Doc*),3)))))));}}
+Cyc_PP_text(start);Cyc_PP_cat(_tag_dyneither(_tmpA0,sizeof(struct Cyc_PP_Doc*),3));});}}
 # 535
 struct Cyc_PP_Doc*Cyc_PP_groupl(struct _dyneither_ptr start,struct _dyneither_ptr stop,struct _dyneither_ptr sep,struct Cyc_List_List*ss){
-struct Cyc_PP_Doc*_tmp136[3];return(_tmp136[2]=
+return({struct Cyc_PP_Doc*_tmpA1[3];_tmpA1[2]=
 # 538
-Cyc_PP_text(stop),((_tmp136[1]=
+Cyc_PP_text(stop);_tmpA1[1]=
 # 537
-Cyc_PP_seql(sep,ss),((_tmp136[0]=
+Cyc_PP_seql(sep,ss);_tmpA1[0]=
 # 536
-Cyc_PP_text(start),Cyc_PP_cat(_tag_dyneither(_tmp136,sizeof(struct Cyc_PP_Doc*),3)))))));}
+Cyc_PP_text(start);Cyc_PP_cat(_tag_dyneither(_tmpA1,sizeof(struct Cyc_PP_Doc*),3));});}
