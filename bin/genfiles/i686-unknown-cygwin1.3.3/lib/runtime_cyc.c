@@ -155,8 +155,12 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
   _exn_thrown = e;
+#ifdef __linux__
+  /* bt only works in linux, and gives a circular dependence in os x,
+     so we need to compile this conditionally */
   if (my_handler->handler == top_handler.handler)
     Cyc_Execinfo_bt();
+#endif
   longjmp(my_handler->handler,1);
 }
 
