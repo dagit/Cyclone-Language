@@ -43,14 +43,14 @@ datatype attvalue {
   Attvalue1(string_t), // should be delimited by single quotes
   Attvalue2(string_t)  // should be delimited by double quotes
 };
-typedef datatype attvalue @attvalue_t;
+typedef datatype attvalue attvalue_t;
 
 typedef $(name,attvalue_t)@ attribute_t;
 
 typedef $(name,string_t)@ pi_t;
 
 extern datatype content;
-typedef datatype content @content_t;
+typedef datatype content content_t;
 
 EXTERN_DEFINITION
 datatype element {
@@ -58,7 +58,7 @@ datatype element {
            list_t<content_t>);
   Empty(name,list_t<attribute_t>);   // Element with no content
 };
-typedef datatype element @element_t;
+typedef datatype element element_t;
 
 EXTERN_DEFINITION
 datatype content {

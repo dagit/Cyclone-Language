@@ -738,6 +738,7 @@ static bool atomic_typ(type_t t) {
     //      have used an enum)
   case &DatatypeType(_):    
   case &PointerType(_):   
+  case &DynRgnType(_,_):
   case &RgnHandleType(_): return false;
   default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
   }

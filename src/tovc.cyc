@@ -560,7 +560,10 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
                                 s3,DL);
                 s2->r = s3->r;
                 break;
-              default: throw new Impossible("array type bad initializer");
+              default:
+		let msg = aprintf("|%s|: array type bad initializer", 
+				  Absynpp::stmt2string(s));
+		throw new Impossible(msg);
               }
             break;
           default: break;

@@ -19,7 +19,7 @@
 #ifndef _XMLPARSE_H
 #define _XMLPARSE_H
 
-#include <xml/xml.h>
+#include "xml.h"
 #include <lexing.h>
 #include <list.h>
 #include <core.h>
@@ -36,14 +36,14 @@ extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern void error(string_t<`H> msg);
 
 extern
-enum context {
+datatype context {
   InTag,
   Normal
 };
 
-extern void setContext(enum context c);
+extern void setContext(datatype `H context c);
 
-extern enum context getContext();
+extern datatype context getContext();
 
 }
 
