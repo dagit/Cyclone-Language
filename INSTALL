@@ -26,6 +26,16 @@ make uninstall
 and it will remove any files and directories created in your system
 directories as a result of installation.
 
+Note that configure and make install use several utilities, which
+need to be in your path.  In our experience, this is the most common
+source of problems.  In particular:
+(1) you need Gnu-like behavior for egrep.  Set an EGREP environment variable
+to point to an appropriate egrep if necessary.
+(2) Windows systems tend to have a program called find that is
+different than the find we are expecting.  cygwin puts the find we
+want in /usr/bin -- make sure a different find is not earlier in your
+path.
+
 PORTING TO UNSUPPORTED ARCHITECTURES
 
 If your architecture is not currently supported, the configure script will

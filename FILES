@@ -4,6 +4,12 @@ distribution.  You do not need any of this information for using
 Cyclone or any of the tools; it is provided to help you browse our
 code.
 
+For the distribution, we have put the pdf versions of the manuals in
+the top directory:
+    main-screen.pdf, main-letter.pdf, and main-a4.pdf all have the same
+    information.
+The HTML version is in doc/online-manual.
+
 DIRECTORIES
 
 Subdirectories are indented.
@@ -33,7 +39,6 @@ tools: the source code for various tools written in Cyclone
          it.
 
 doc: documentation and emacs-mode support. 
-
     Producing the documentation pdf requires pdflatex and producing
     html requires hevea.  We distribute the "compiled" versions so
     that you don't need these programs.  The "top" file is
@@ -47,6 +52,9 @@ doc: documentation and emacs-mode support.
 
     todo.txt is used by the developers to remind themselves how much
     work remains.
+
+    online-manual
+       contains the html version of the documentation.
 
 tests: contains various tests and small programs.  Many of the programs were
        ported from C and we have the original C versions for comparison 
