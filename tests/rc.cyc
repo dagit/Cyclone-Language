@@ -1,0 +1,1256 @@
+/* Playing around with refcounting */
+/* Notes:
+   Failure of deep alias means we have to do everything with rc pointers
+     exposed. 
+   Since alias_refptr returns ?, often need to declare * and @ or cast.
+   ASSIGN is indispensible.
+   Can't apply alias_refptr to non-unique path, maybe should be able to??
+   Can't apply drop_refptr to non-unique path, maybe should be able to??
+   See problem with flatten.
+   alias_refptr should return non-NULL?  But only if can't be called on NULL...
+   Note :=: differs from = in that = can apply coercions while :=: needs
+     identical types for its args.  Causes a problem below w/ASSIGN2.
+   If a local rc pointer goes out of scope and is still live, warn --
+     you ought to decrement the count.  Or better: consume ptr goes out
+     of scope live should warn, and locals should be consume.
+   Maybe all _c functions should take environments allocated in `RC??  I
+     guess it works to just use alias for that.
+   Bug: can't cast struct List ?`RC to unsigned int.
+   Consider a list_t<$(int,int)@`RC> x.  Suppose you want to free it.  You start
+     by trying to drop_refptr(x->hd).  But you can't do this because x->hd
+     is not a unique path.  You need to swap, but what to swap in?  Whatever
+     you swap in will leak when you drop_refptr(x).  This comes up in Hashtable.
+     One thing to do is go to unique pointers for the list.
+  Consider
+      void foo(`a::TB x) { let q = alias_refptr(x); }
+    This fails (actual argument has type `a but formal has type `ETA2698 ?`RC)
+    If TB is the kind of `RC pointers, I don't see why alias_refptr shouldn't
+    apply to `a::TB.  But of course this would not be sound for `a instantiated
+    by int.  Prevents, e.g., writing
+      `a hd(list_t<`a::TB>)
+    which would work on both of `a == int *`RC and a` == int @`RC.
+    (? and * /@ have different representations, so need different implementations)
+ */
+
+#include <core.h>
+using Core;
+#include <stdio.h>
+
+namespace List {
+struct List<`a> {
+  `a hd;
+  struct List<`a> *`RC tl;
+};
+typedef struct List<`a> *`RC list_t<`a>;
+typedef struct List<`a> @`RC List_t<`a>;
+// assignment with RHS inc and LHS dec
+#define ASSIGN(lhs,rhs) ({\
+let tmp = NULL;\
+tmp :=: (rhs);\
+let tmp2 = alias_refptr(tmp);\
+(rhs) :=: tmp;\
+drop_refptr(lhs);\
+(lhs) = tmp2;\
+})
+// below at tmp2 can't use let, type error at swap;
+// need typeof(tmp2) == typeof(lhs).
+// We happen to apply this macro only to lhs with type _*,
+// so we hack that in.
+#define ASSIGN2(lhs,rhs) ({\
+let tmp = NULL;\
+tmp :=: (rhs);\
+_* tmp2 = alias_refptr(tmp);                 \
+(rhs) :=: tmp;\
+(lhs) :=: tmp2;\
+drop_refptr(tmp2);\
+})
+
+// int len(list_t x) {
+//   if (x == NULL) return 0;
+//   return len(x->tl)+1; // No good, would increase number of refs
+// }
+// int len(list_t x) {
+//   if (x == NULL) return 0;
+//   let tl = alias_refptr(x->tl); // No, count before return is increased?
+//                 // Problem is, x is not unique, it is RC
+//   let l = len(tl);
+//   drop_refptr(tl);
+//   return l+1;
+// }
+int len(list_t x) { // works but uses stack
+  if (!x) return 0;
+  let tmp = NULL;
+ tmp :=: x->tl;
+  let l = len(tmp);
+  tmp :=: x->tl;
+  return l+1;
+}
+int length(list_t<`a::TB> x) {
+  let z = alias_refptr(x);
+  let l = 0;
+  for (; z; l++)
+    ASSIGN(z,z->tl);
+  drop_refptr(z); // z = NULL with LHS dec
+  return l;
+}
+`a hd(list_t<`a> x) {
+  return x->hd;
+}
+list_t<`a> tl(list_t<`a::TB> x) {
+  // return alias_refptr(x)
+  let tmp = NULL;
+  tmp :=: x->tl;
+  let res = (_*) alias_refptr(tmp);
+  x->tl :=: tmp;
+  return res;
+}
+list_t<`a> from_array(`a ? arr) {
+  list_t<`a> ans = NULL;
+  for (int i = numelts(arr)-1; i >= 0; --i)
+    ans = rcnew List(arr[i],ans);
+  return ans;
+}
+list_t<`a> list(... `a argv) {
+  return from_array(argv);
+}
+list_t<`a> copy(list_t<`a> x) {
+
+  if (x == NULL) return NULL;
+
+  list_t result, prev;
+
+  result = rcnew List(x->hd,NULL);
+  prev = alias_refptr(result);
+
+  list_t y;
+  { let tmp = NULL;
+    x->tl :=: tmp;
+    y = alias_refptr(tmp);
+    tmp :=: x->tl;
+  }
+  while (y != NULL) {
+    { let tmp = rcnew List(y->hd,NULL);
+      let tmp2 = alias_refptr(tmp);
+      prev->tl :=: tmp;
+      drop_refptr(prev);
+      prev = tmp2;
+    }
+    { let tmp = NULL;
+      y->tl :=: tmp;
+      let tmp2 = alias_refptr(tmp);
+      tmp :=: y->tl;
+      drop_refptr(y);
+      y = tmp2;
+    }
+  }
+  drop_refptr(prev); // Note, no warning if this is left off. 
+  return(result);
+}
+list_t<`b> map(`b::TB f(`a),list_t<`a> x) {
+
+  if (x == NULL) return NULL;
+
+  list_t result, prev;
+
+  result = rcnew List(f(x->hd),NULL);
+  prev = alias_refptr(result);
+
+  list_t y;
+  { let tmp = NULL;
+    x->tl :=: tmp;
+    y = alias_refptr(tmp);
+    tmp :=: x->tl;
+  }
+  while (y != NULL) {
+    { let tmp = rcnew List(f(y->hd),NULL);
+      let tmp2 = alias_refptr(tmp);
+      prev->tl :=: tmp;
+      drop_refptr(prev);
+      prev = tmp2;
+    }
+    { let tmp = NULL;
+      y->tl :=: tmp;
+      let tmp2 = alias_refptr(tmp);
+      tmp :=: y->tl;
+      drop_refptr(y);
+      y = tmp2;
+    }
+  }
+  drop_refptr(prev); // Note, no warning if this is left off. 
+  return(result);
+}
+list_t<`c> map_c(`c::TB f(`a,`b),`a::TB env,list_t<`b> x) {
+
+  if (x == NULL) return NULL;
+
+  list_t result, prev;
+
+  result = rcnew List(f(env,x->hd),NULL);
+  prev = alias_refptr(result);
+
+  list_t y;
+  { let tmp = NULL;
+    x->tl :=: tmp;
+    y = alias_refptr(tmp);
+    tmp :=: x->tl;
+  }
+  while (y != NULL) {
+    { let tmp = rcnew List(f(env,y->hd),NULL);
+      let tmp2 = alias_refptr(tmp);
+      prev->tl :=: tmp;
+      drop_refptr(prev);
+      prev = tmp2;
+    }
+    { let tmp = NULL;
+      y->tl :=: tmp;
+      let tmp2 = alias_refptr(tmp);
+      tmp :=: y->tl;
+      drop_refptr(y);
+      y = tmp2;
+    }
+  }
+  drop_refptr(prev); // Note, no warning if this is left off. 
+  return(result);
+}
+
+void app(`b f(`a),list_t<`a> x) {
+  let z = alias_refptr(x);
+  while (z) {
+    f(z->hd);
+    ASSIGN(z,z->tl);
+  }
+  drop_refptr(z);
+}
+void app_c(`c f(`a::TB,`b),`a env,list_t<`b> x) {
+  let z = alias_refptr(x);
+  while (z) {
+    f(env,z->hd);
+    ASSIGN(z,z->tl);
+  }
+  drop_refptr(z);
+}
+void iter(void f(`a),list_t<`a> x) {
+  let z = alias_refptr(x);
+  while (z) {
+    f(z->hd);
+    ASSIGN(z,z->tl);
+  }
+  drop_refptr(z);
+}
+void iter_c(void f(`a::TB,`b),`a env,list_t<`b> x) {
+  let z = alias_refptr(x);
+  while (z) {
+    f(env,z->hd);
+    ASSIGN(z,z->tl);
+  }
+  drop_refptr(z);
+}
+datatype exn {List_mismatch};
+datatype exn.List_mismatch List_mismatch_val = List_mismatch;
+
+void app2(`d f(`b,`c),list_t<`b> x,list_t<`c> y) {
+  list_t x1 = alias_refptr(x);
+  list_t y1 = alias_refptr(y);
+  for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
+    f(x1->hd,y1->hd);
+  if (x1 != NULL) {
+    drop_refptr(x1);
+    if (y1 != NULL)
+      drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+  if (y1 != NULL) {
+    drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+}
+void app2_c(`d f(`a::TB,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
+  list_t x1 = alias_refptr(x);
+  list_t y1 = alias_refptr(y);
+  for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
+    f(env,x1->hd,y1->hd);
+  if (x1 != NULL) {
+    drop_refptr(x1);
+    if (y1 != NULL)
+      drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+  if (y1 != NULL) {
+    drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+}
+void iter2(void f(`b,`c),list_t<`b> x,list_t<`c> y) {
+  list_t x1 = alias_refptr(x);
+  list_t y1 = alias_refptr(y);
+  for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
+    f(x1->hd,y1->hd);
+  if (x1 != NULL) {
+    drop_refptr(x1);
+    if (y1 != NULL)
+      drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+  if (y1 != NULL) {
+    drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+}
+void iter2_c(void f(`a::TB,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
+  list_t x1 = alias_refptr(x);
+  list_t y1 = alias_refptr(y);
+  for(; x1 != NULL && y1 != NULL; ASSIGN(x1,x1->tl), ASSIGN(y1,y1->tl))
+    f(env,x1->hd,y1->hd);
+  if (x1 != NULL) {
+    drop_refptr(x1);
+    if (y1 != NULL)
+      drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+  if (y1 != NULL) {
+    drop_refptr(y1);
+    throw &List_mismatch_val;
+  }
+}
+`a fold_left(`a f(`a,`b),`a accum,list_t<`b> x) {
+  list_t z = alias_refptr(x);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    accum = f(accum,z->hd);
+  drop_refptr(z);
+  return accum;
+}
+`a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,list_t<`b> x) {
+  list_t z = alias_refptr(x);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    accum = f(env,accum,z->hd);
+  drop_refptr(z);
+  return accum;
+}
+`b fold_right(`b f(`a,`b),list_t<`a> x,`b accum) {
+  if (x == NULL) return accum;
+  list_t y;
+  { let tmp = NULL; // y = alias_refptr(x->tl);
+    tmp :=: x->tl;
+    y = alias_refptr(tmp);
+    x->tl :=: tmp;
+  }
+  let accum2 = fold_right(f,y,accum);
+  drop_refptr(y);
+  return f(x->hd,accum2);
+}
+`b fold_right_c(`b f(`c,`a,`b),`c env,list_t<`a> x,`b accum) {
+  if (x == NULL) return accum;
+  list_t y;
+  { let tmp = NULL; // y = alias_refptr(x->tl);
+    tmp :=: x->tl;
+    y = alias_refptr(tmp);
+    x->tl :=: tmp;
+  }
+  let accum2 = fold_right_c(f,env,y,accum);
+  drop_refptr(y);
+  return f(env,x->hd,accum2);
+}
+list_t<`a> revappend(list_t<`a> x,list_t<`a> y) {
+  list_t res = alias_refptr(y);
+
+  if (x == NULL) return res;
+
+  List_t z = alias_refptr(x);
+
+  for (; z != NULL; ASSIGN(z,z->tl))
+    res = rcnew List(z->hd,res);
+
+  drop_refptr(z);
+
+  return res;
+}
+list_t<`a> rev(list_t<`a> x) {
+  list_t tl = NULL;
+  return (x==NULL) ? tl : revappend(x,tl); // compiler bug: can't just use NULL for tl
+}
+// This one is actually simpler than the non-RC version!
+list_t<`a> imp_rev(list_t<`a> x) {
+  //  if (x == NULL) return x; // No good, consumes x
+  if (x == NULL) return NULL;
+
+  list_t first = alias_refptr(x);
+  list_t second = NULL;
+  x->tl :=: second;
+
+  while (second != NULL) {
+    second->tl :=: first;
+    second :=: first;
+  } 
+  return first;
+}
+list_t<`a> append(list_t<`a> x,list_t<`a> y) {
+  if (x == NULL && y == NULL) return NULL;
+  if (x == NULL) return alias_refptr(x);
+  if (y == NULL) return alias_refptr(y);
+
+
+  List_t result = rcnew List(x->hd,NULL);
+  List_t prev = alias_refptr(result);
+  list_t z = alias_refptr(x);
+  for (ASSIGN(z,z->tl); z != NULL; ASSIGN(z,z->tl)) {
+    list_t tmp = rcnew List(z->hd,NULL);
+    list_t tmp2 = alias_refptr(tmp);
+    prev->tl :=: tmp2; // tmp2 now NULL
+    ASSIGN(prev,tmp);
+    drop_refptr(tmp); // An assign w/o RHS inc!
+  }
+  prev->tl = (_*)alias_refptr(y);
+  drop_refptr(z);
+  drop_refptr(prev);
+
+  return result;
+}
+
+list_t<`a> imp_append(list_t<`a> x,list_t<`a> y) {
+  if (x == NULL && y == NULL) return NULL;
+  if (x == NULL) return alias_refptr(x);
+  if (y == NULL) return alias_refptr(y);
+
+  list_t z;
+
+  for (z = alias_refptr(x); z->tl != NULL; ASSIGN(z,z->tl))
+    ; // skip
+  let tmp = (_*)alias_refptr(y);
+  z->tl :=: tmp;
+  drop_refptr(z);
+  return alias_refptr(x);
+}
+// // An interesting one.  Fails due to kind problem on append.
+// list_t<`a> flatten(list_t<list_t<`a>> x) {
+//   return fold_right(append,x,NULL);
+// }
+
+list_t<`a> imp_merge(int less_eq(`a,`a), list_t<`a> a0, list_t<`a> b0) {
+
+  if (a0==NULL) return alias_refptr(b0);
+  if (b0==NULL) return alias_refptr(a0);
+  
+  list_t a = alias_refptr(a0);
+  list_t b = alias_refptr(b0);
+
+  // merge the two lists
+
+  list_t c,d;
+  //   d = beginning of the merged list
+  //   c = current cons cell
+ 
+  if (less_eq(a->hd,b->hd) <= 0) {
+    c = alias_refptr(a);
+    ASSIGN(a,a->tl);
+  } else {
+    c = alias_refptr(b);
+    ASSIGN(b,b->tl);
+  }
+  d = alias_refptr(c);
+  // walk through a and b
+  while ((a != NULL) && (b != NULL)) {
+    // add a to the list else add b
+    if (less_eq(a->hd, b->hd) <= 0) {
+      ASSIGN2(c->tl,a);
+      ASSIGN(c,a);
+      ASSIGN(a,a->tl);
+    } else {
+      ASSIGN2(c->tl,b);
+      ASSIGN(c,b);
+      ASSIGN(b,b->tl);
+    }
+  }
+  // splice in the rest of the other list
+  if (a == NULL)
+    ASSIGN2(c->tl,b);
+  else
+    ASSIGN2(c->tl,a);
+  drop_refptr(a);
+  drop_refptr(b);
+  drop_refptr(c);
+  return(d);
+}
+// Not a stable sort!
+list_t<`a> imp_merge_sort(int less_eq(`a,`a), list_t<`a> x) {
+  if (x == NULL) return alias_refptr(x);
+  List_t a, aptr;
+  list_t b, bptr;
+  { list_t tmp = NULL; // b = alias_refptr(x->tl);
+    tmp :=: x->tl;
+    b = alias_refptr(tmp);
+    x->tl :=: tmp;
+  }
+  if (b == NULL) return alias_refptr(x);
+
+  // x has at least two elements, b points to second cons
+
+  a = alias_refptr(x);
+
+  // Imperatively split the list
+  //   x ->[1,*]->[2,*]->[3,*]->[4,*]->[5,*]->[6,*]
+  // into
+  //   a ->[1,*]-------->[3,*]->------>[5,*]
+  //   b -------->[2,*]-------->[4,*]-------->[6,*]
+
+  list_t before = alias_refptr(a);
+  list_t after = alias_refptr(b);
+
+  // INVARIANT: before and after are consecutive cons cells, or
+  // before points to last cons cell and after == NULL
+  while (after != NULL) {
+    ASSIGN2(before->tl,after->tl);
+    ASSIGN(before,after);
+    ASSIGN(after,after->tl);
+  }
+  drop_refptr(before);
+  drop_refptr(after);
+
+  list_t asort = imp_merge_sort(less_eq,a);
+  drop_refptr(a);
+  list_t bsort = imp_merge_sort(less_eq,b);
+  drop_refptr(b);
+
+  list_t res = imp_merge(less_eq,asort,bsort);
+  drop_refptr(asort);
+  drop_refptr(bsort);
+  return res;
+}
+list_t<`a> merge_sort(int less_eq(`a,`a), list_t<`a> x) {
+  list_t x2 = copy(x);
+  list_t res = imp_merge_sort(less_eq,x2);
+  drop_refptr(x2);
+  return res;
+}
+
+datatype exn {Nth};
+datatype exn.Nth Nth_val = Nth;
+list_t<`a> nth_tail(list_t<`a> y, int i) {
+  let x = alias_refptr(y);
+  if (i < 0) throw &Nth_val;
+  for (; i > 0; --i, ASSIGN(x,x->tl))
+    if (x == NULL)
+      throw &Nth_val;
+  return x;
+}
+`a nth(list_t<`a> x,int i) {
+  let y = nth_tail(x,i);
+  let res = y->hd;
+  drop_refptr(y);
+  return res;
+}
+bool forall(bool pred(`a),list_t<`a> y) {
+  let x = alias_refptr(y);
+  for(; x != NULL; ASSIGN(x,x->tl))
+    if(!pred(x->hd)) {
+      drop_refptr(x);
+      return false;
+    }
+  drop_refptr(x);
+  return true;
+}
+bool forall_c(bool pred(`a,`b),`a env,list_t<`b> y) {
+  let x = alias_refptr(y);
+  for(; x != NULL; ASSIGN(x,x->tl))
+    if(!pred(env,x->hd)) {
+      drop_refptr(x);
+      return false;
+    }
+  drop_refptr(x);
+  return true;
+}
+bool exists(bool pred(`a),list_t<`a> y) {
+  let x = alias_refptr(y);
+  for(; x != NULL; ASSIGN(x,x->tl))
+    if(pred(x->hd)) {
+      drop_refptr(x);
+      return true;
+    }
+  drop_refptr(x);
+  return false;
+}
+bool exists_c(bool pred(`a,`b),`a env,list_t<`b> y) {
+  let x = alias_refptr(y);
+  for(; x != NULL; ASSIGN(x,x->tl))
+    if(pred(env,x->hd)) {
+      drop_refptr(x);
+      return true;
+    }
+  drop_refptr(x);
+  return false;
+}
+`c *`RC find_c(`c::TA *`RC pred(`a,`b),`a env,list_t<`b> x) {
+  let z = alias_refptr(x);
+  for (; z != NULL; ASSIGN(z,z->tl)) {
+    let v = pred(env,z->hd);
+    if (v) {
+      drop_refptr(z);
+      return v;
+    }
+  }
+  drop_refptr(z);
+  return NULL;
+}
+list_t<$(`a,`b)@`RC> zip(list_t<`a> x0, list_t<`b> y0) {
+  if (x0 == NULL && y0 == NULL) return NULL;
+  if (x0 == NULL || y0 == NULL) throw &List_mismatch_val;
+
+  List_t<$(`a,`b)@`RC> result, prev, tmp;
+
+  result = rcnew List(rcnew $(x0->hd,y0->hd),NULL);
+  prev = alias_refptr(result);
+
+  list_t x = alias_refptr(x0);
+  list_t y = alias_refptr(y0);
+  ASSIGN(x,x->tl);
+  ASSIGN(y,y->tl);
+
+  while (x != NULL && y != NULL) {
+    tmp = rcnew List(rcnew $(x->hd,y->hd),NULL);
+    { _* tmp2 = alias_refptr(tmp); // must cast ? to * so swap works
+      prev->tl :=: tmp2;
+    }
+    ASSIGN(prev,tmp);
+    ASSIGN(x,x->tl);
+    ASSIGN(y,y->tl);
+  }
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
+  return(result);
+}
+list_t<$(`a,`b)@`RC> zip3(list_t<`a> x0, list_t<`b> y0, list_t<`b> z0) {
+  if (x0 == NULL && y0 == NULL && z0 == NULL) return NULL;
+  if (x0 == NULL || y0 == NULL || z0 == NULL) throw &List_mismatch_val;
+
+  List_t<$(`a,`b)@`RC> result, prev, tmp;
+
+  result = rcnew List(rcnew $(x0->hd,y0->hd,z0->hd),NULL);
+  prev = alias_refptr(result);
+
+  list_t x = alias_refptr(x0);
+  list_t y = alias_refptr(y0);
+  list_t z = alias_refptr(z0);
+  ASSIGN(x,x->tl);
+  ASSIGN(y,y->tl);
+  ASSIGN(z,z->tl);
+
+  while (x != NULL && y != NULL && z != NULL) {
+    tmp = rcnew List(rcnew $(x->hd,y->hd,z->hd),NULL);
+    { _* tmp2 = alias_refptr(tmp); // must cast ? to * so swap works
+      prev->tl :=: tmp2;
+      // tmp2 now NULL, no need to drop_refptr
+    }
+    ASSIGN(prev,tmp);
+    ASSIGN(x,x->tl);
+    ASSIGN(y,y->tl);
+    ASSIGN(z,z->tl);
+  }
+  drop_refptr(prev);
+  if (x != NULL || y != NULL || z != NULL) throw &List_mismatch_val;
+  drop_refptr(x);
+  drop_refptr(y);
+  drop_refptr(z);
+  return(result);
+}
+$(list_t<`a>,list_t<`b>) split(list_t<$(`a,`b)@`RC> x0) {
+  List_t result1,prev1;
+  List_t result2,prev2;
+  
+  if (x0 == NULL) return $(NULL,NULL);
+
+  result1 = rcnew List(x0->hd[0][0],NULL);
+  prev1 = alias_refptr(result1);
+  result2 = rcnew List(x0->hd[0][1],NULL);
+  prev2 = alias_refptr(result2);
+
+  list_t x = alias_refptr(x0);
+
+  for (ASSIGN(x,x->tl); x != NULL; ASSIGN(x,x->tl)) {
+    List_t temp1 = rcnew List(x->hd[0][0],NULL);
+    List_t temp2 = rcnew List(x->hd[0][1],NULL);
+    { _* tmp = alias_refptr(temp1);
+      prev1->tl :=: tmp;
+    }
+    { _* tmp = alias_refptr(temp2);
+      prev2->tl :=: tmp;
+    }
+    prev1 = temp1;
+    prev2 = temp2;
+  }
+  drop_refptr(x);
+  drop_refptr(prev1);
+  drop_refptr(prev2);
+  return $(result1,result2);
+}
+$(list_t<`a>,list_t<`b>,list_t<`c>) split3(list_t<$(`a,`b,`c)@`RC> x0) {
+  List_t result1,prev1;
+  List_t result2,prev2;
+  List_t result3,prev3;
+  
+  if (x0 == NULL) return $(NULL,NULL,NULL);
+
+  result1 = rcnew List(x0->hd[0][0],NULL);
+  prev1 = alias_refptr(result1);
+  result2 = rcnew List(x0->hd[0][1],NULL);
+  prev2 = alias_refptr(result2);
+  result3 = rcnew List(x0->hd[0][2],NULL);
+  prev3 = alias_refptr(result3);
+
+  list_t x = alias_refptr(x0);
+
+  for (ASSIGN(x,x->tl); x != NULL; ASSIGN(x,x->tl)) {
+    List_t temp1 = rcnew List(x->hd[0][0],NULL);
+    List_t temp2 = rcnew List(x->hd[0][1],NULL);
+    List_t temp3 = rcnew List(x->hd[0][2],NULL);
+    { _* tmp = alias_refptr(temp1);
+      prev1->tl :=: tmp;
+    }
+    { _* tmp = alias_refptr(temp2);
+      prev2->tl :=: tmp;
+    }
+    { _* tmp = alias_refptr(temp3);
+      prev3->tl :=: tmp;
+    }
+    prev1 = temp1;
+    prev2 = temp2;
+    prev3 = temp3;
+  }
+  drop_refptr(x);
+  drop_refptr(prev1);
+  drop_refptr(prev2);
+  drop_refptr(prev3);
+  return $(result1,result2,result3);
+}
+
+bool memq(list_t<`a> l, `a x) {
+  let y = alias_refptr(l);
+  for(; y != NULL; ASSIGN(y,y->tl))
+    if (y->hd == x) {
+      drop_refptr(y);
+      return true;
+    }
+  drop_refptr(y);
+  return false;
+}
+bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
+  let y = alias_refptr(l);
+  for(; y != NULL; ASSIGN(y,y->tl))
+    if (cmp(y->hd,x)==0) {
+      drop_refptr(y);
+      return true;
+    }
+  drop_refptr(y);
+  return false;
+}
+`b assoc(list_t<$(`a,`b)@`RC> l,`a x) {
+  let z = alias_refptr(l);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    if (z->hd[0][0] == x) {
+      let res = z->hd[0][1];
+      drop_refptr(z);
+      return res;
+    }
+  drop_refptr(z);
+  throw &Not_found_val;
+}
+`b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@`RC> l,`c x) {
+  let z = alias_refptr(l);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    if (cmp(z->hd[0][0],x) == 0) {
+      let res = z->hd[0][1];
+      drop_refptr(z);
+      return res;
+    }
+  drop_refptr(z);
+  throw &Not_found_val;
+}
+list_t<`a> delete_cmp(int cmp(`a,`a), list_t<`a> l, `a x) {
+  list_t prev = NULL;
+  list_t iter = alias_refptr(l);
+  while (iter != NULL) {
+    if (cmp(iter->hd,x) == 0) {
+      if (prev == NULL) {
+        ASSIGN(iter,iter->tl);
+	return iter;
+      }
+      ASSIGN2(prev->tl,iter->tl);
+      drop_refptr(prev);
+      drop_refptr(iter);
+      return alias_refptr(l);
+    }
+    prev = alias_refptr(iter);
+    ASSIGN(iter,iter->tl);
+  }
+  throw &Not_found_val;
+}
+static int ptrequal(`a x, `a y) {
+  return !(x == y);
+}
+list_t<`a> delete(list_t<`a> l, `a x) {
+  return delete_cmp(ptrequal, l, x);
+}
+bool mem_assoc(list_t<$(`a,`b)@`RC> l,`a x) {
+  let z = alias_refptr(l);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    if (z->hd[0][0] == x) {
+      drop_refptr(z);
+      return true;
+    }
+  drop_refptr(z);
+  return false;
+}
+bool mem_assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@`RC> l,`c x) {
+  let z = alias_refptr(l);
+  for(; z != NULL; ASSIGN(z,z->tl))
+    if (cmp(z->hd[0][0],x) == 0) {
+      drop_refptr(z);
+      return true;
+    }
+  drop_refptr(z);
+  return false;
+}
+opt_t<`a,`RC> check_unique(int cmp(`a,`a),list_t<`a> x) {
+  let z = alias_refptr(x);
+  while (z != NULL) {
+    let hd = z->hd;
+    ASSIGN(z,z->tl);
+    if (z != NULL && cmp(hd,z->hd) == 0) 
+      drop_refptr(z);
+      return rcnew Opt(hd);
+  }
+  drop_refptr(z);
+  return NULL;
+}
+`a ?`RC to_array(list_t<`a> x0) {
+  int s = length(x0);
+  let x = alias_refptr(x0);
+  let res = rcnew {for i < s : ({let v = x->hd; ASSIGN(x,x->tl); v;})};
+  drop_refptr(x);
+  return res;
+}
+list_t<`a> tabulate(int n, `a f(int)) {
+  list_t res = NULL;
+  for (int i = 0; i < n; ++i)
+    res = rcnew List(f(i),res);
+  list_t res2 = imp_rev(res);
+  drop_refptr(res);
+  return res2;
+}
+list_t<`a> tabulate_c(int n, `a f(`b,int),`b env) {
+  list_t res = NULL;
+  for (int i = 0; i < n; ++i)
+    res = rcnew List(f(env,i),res);
+  list_t res2 = imp_rev(res);
+  drop_refptr(res);
+  return res2;
+}
+int list_cmp(int cmp(`a,`b), list_t<`a> x1, list_t<`b> x2) {
+  list_t l1 = alias_refptr(x1);
+  list_t l2 = alias_refptr(x2);
+  for (; l1 != NULL && l2 != NULL; ASSIGN(l1,l1->tl), ASSIGN(l2,l2->tl)) {
+    if ((unsigned)l1 == (unsigned)l2) {
+      drop_refptr(l1);
+      drop_refptr(l2);
+      return 0;
+    }
+    let i = cmp(l1->hd,l2->hd);
+    if (i != 0) {
+      drop_refptr(l1);
+      drop_refptr(l2);
+      return i;
+    }
+  }
+  if (l1 != NULL) {
+    drop_refptr(l1);
+    drop_refptr(l2);
+    return 1;
+  }
+  if (l2 != NULL) {
+    drop_refptr(l1);
+    drop_refptr(l2);
+    return -1;
+  }
+  drop_refptr(l1);
+  drop_refptr(l2);
+  return 0;
+}
+bool list_prefix(int cmp(`a,`b), list_t<`a> x1, list_t<`b> x2) {
+  list_t l1 = alias_refptr(x1);
+  list_t l2 = alias_refptr(x2);
+  for (; l1 != NULL && l2 != NULL; ASSIGN(l1,l1->tl), ASSIGN(l2,l2->tl)) {
+    if ((unsigned)l1 == (unsigned)l2) {
+      drop_refptr(l1);
+      drop_refptr(l2);
+      return true;
+    }
+    if (cmp(l1->hd,l2->hd) != 0) {
+      drop_refptr(l1);
+      drop_refptr(l2);
+      return false;
+    }
+  }
+  let res = (l1 == NULL);
+  drop_refptr(l1);
+  drop_refptr(l2);
+  return res;
+}
+list_t<`a> filter_c(bool f(`b,`a), `b env, list_t<`a> l0){
+  if (l0 == NULL)
+    return NULL;
+  list_t l = alias_refptr(l0);
+  // First elt is purposefully junk!
+  List_t result = rcnew List(l->hd,NULL); 
+  List_t end = alias_refptr(result); // pointer to last cons cell
+  for (; l != NULL; ASSIGN(l,l->tl))
+    if (f(env,l->hd)) {
+      List_t temp = rcnew List(l->hd,NULL);
+      { list_t tmp = alias_refptr(temp);
+        end->tl :=: tmp;
+      }
+      end = temp;
+    }
+  drop_refptr(l);
+  drop_refptr(end);
+  list_t res = NULL;
+  res :=: result->tl;  // Ditch the placeholder we inserted earlier.
+  drop_refptr(result);
+  return res;
+}
+list_t<`a> filter(bool f(`a), list_t<`a> l0){
+  if (l0 == NULL)
+    return NULL;
+  list_t l = alias_refptr(l0);
+  // First elt is purposefully junk!
+  List_t result = rcnew List(l->hd,NULL); 
+  List_t end = alias_refptr(result); // pointer to last cons cell
+  for (; l != NULL; ASSIGN(l,l->tl))
+    if (f(l->hd)) {
+      List_t temp = rcnew List(l->hd,NULL);
+      { list_t tmp = alias_refptr(temp);
+        end->tl :=: tmp;
+      }
+      end = temp;
+    }
+  drop_refptr(l);
+  drop_refptr(end);
+  list_t res = NULL;
+  res :=: result->tl;  // Ditch the placeholder we inserted earlier.
+  drop_refptr(result);
+  return res;
+}
+}
+using List;
+namespace Hashtable {
+struct Table<`a,`b> {
+  int          (@cmp)(`a,`a); // Don't bother with a @`RC
+  int          (@hash)(`a);   // Don't bother with a @`RC
+  int	       max_len; // maximum length of bucket list before resize
+  list_t<$(`a,`b)@`RC> ?`RC tab;
+};
+typedef struct Table<`a,`b>@`RC table_t<`a,`b>;
+
+table_t<`a::TB,`b::TB> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
+  return rcnew Table{cmp, hash, 3, rcalloc(refcnt_region,sz,sizeof(list_t))};
+}
+
+static
+ void insert_bucket(list_t<$(`a,`b::TB)@`RC> ?`RC tab, int (@hash)(`a),
+                   list_t<$(`a,`b)@`RC> elems) __attribute__((consume(3))) {
+  if (elems == NULL) return;
+  let tl = NULL;
+  tl :=: elems->tl;
+  insert_bucket(tab,hash,tl); // preserve the original order
+  `a key  = elems->hd[0][0];
+  int nidx = hash(key) % numelts(tab);
+  elems->tl :=: tab[nidx];
+  tab[nidx] = elems; // re-use cons cell
+}
+void resize(table_t<`a,`b::TB> t) {
+  let odata = NULL;
+  odata :=: t->tab;
+  unsigned int osize = numelts(odata);
+  unsigned int nsize = 2 * osize + 1; // FIX: check for overflow
+  list_t<$(`a,`b)@`RC> ? ndata = rcalloc(refcnt_region,nsize,sizeof(list_t));
+  for (int i = 0; i<osize; i++) {
+    let odatai;
+    { let tmp = NULL; // odatai = alias_refptr(odata[i])
+      tmp :=: odata[i];
+      odatai = alias_refptr(tmp);
+      odata[i] :=: tmp;
+    }
+    insert_bucket(ndata,t->hash,odatai);
+  }
+  drop_refptr(odata);
+  t->tab = ndata;
+  t->max_len = 2 * t->max_len;
+}
+void insert(table_t<`a,`b> t, `a key, `b val) {
+  int bucket = (t->hash)(key) % numelts(t->tab);
+  let tmp = NULL;
+  tmp :=: t->tab[bucket];
+  tmp = rcnew List(rcnew $(key,val),tmp);
+  
+  if (length(tmp) > t->max_len) {
+    t->tab[bucket] :=: tmp;
+    resize(t);
+  }
+  else t->tab[bucket] :=: tmp;
+}
+void insert2(table_t<`a,`b::TB> t, `a key, `b val) __attribute((consume(3))) {
+  int bucket = (t->hash)(key) % numelts(t->tab);
+  let tmp = NULL;
+  tmp :=: t->tab[bucket];
+  tmp = rcnew List(rcnew $(key,val),tmp);
+  
+  if (length(tmp) > t->max_len) {
+    t->tab[bucket] :=: tmp;
+    resize(t);
+  }
+  else t->tab[bucket] :=: tmp;
+}
+`b lookup(table_t<`a,`b> t, `a key) { // throws Not_found
+  int bucket = (t->hash)(key) % numelts(t->tab);
+  let tmp = NULL;
+  tmp :=: t->tab[bucket];
+  let res; 
+  try res = assoc_cmp(t->cmp, tmp, key);
+  catch {
+  case x:
+    // FIX: why can't we do this?
+    // The error is exp may not be initialized
+    //  t->tab[bucket] :=: tmp;
+    throw x;
+  }
+  t->tab[bucket] :=: tmp;
+  return res;
+}
+
+////   // NO GOOD
+//// `b *`RC lookup2(table_t<`a,`b *`RC> t, `a key) { // throws Not_found
+////   int bucket = (t->hash)(key) % numelts(t->tab);
+////   let tmp = NULL;
+////   tmp :=: t->tab[bucket];
+////   let res; 
+////   try res = assoc_cmp(t->cmp, tmp, key);
+////   catch {
+////   case x:
+////     // FIX: why can't we do this?
+////     // The error is exp may not be initialized
+////     //  t->tab[bucket] :=: tmp;
+////     throw x;
+////   }
+////   t->tab[bucket] :=: tmp;
+////   return res;
+//// }
+//// 
+//// `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key) {
+////   let tab = t->tab;
+////   let l = tab[(t->hash)(key) % numelts(tab)];
+////   let cmp = t->cmp;
+////   for (; l != NULL; l = l->tl) {
+////     let &$(k,*v) = l->hd;
+////     if (cmp(key,k) == 0) return v;
+////   }
+////   return NULL;
+//// }
+//// 
+//// // this is a hack to allow you to use a pointer in one region
+//// // as a key to lookup for table entries where the keys are in 
+//// // another region.  this is really necessary to avoid allocation
+//// // when building hash-cons tables.
+//// `b*`r lookup_other_opt(table_t<`a,`b,`r> t, `c key, 
+////                        int cmp(`c,`a), int hash(`c)) {
+////   let tab = t->tab;
+////   let l = tab[hash(key) % numelts(tab)];
+////   for (; l != NULL; l = l->tl) {
+////     let &$(k,*v) = l->hd;
+////     if (cmp(key,k) == 0) return v;
+////   }
+////   return NULL;
+//// }
+//// 
+//// bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
+////   let tab = t->tab;
+////   let l = tab[(t->hash)(key) % numelts(tab)];
+////   let cmp = t->cmp;
+////   for (; l != NULL; l = l->tl) {
+////     let $(k,v) = *l->hd;
+////     if (cmp(key,k) == 0) {
+////       *data = v;
+////       return true;
+////     }
+////   }
+////   return false;
+//// }
+//// 
+void remove(table_t<`a,`b> t, `a key) {
+  // remove the most recent binding; silently return if none.
+  // does a destructive list update since this data structure is not functional
+  let cmp = t->cmp;
+  int bucket = (t->hash)(key) % numelts(t->tab);
+  list_t l = NULL;
+  l :=: t->tab[bucket];
+  if (l == NULL) return;
+  if (cmp(key,l->hd[0][0]) == 0) {
+    ASSIGN(l,l->tl);
+    t->tab[bucket] :=: l;
+    return;
+  }
+  let before = alias_refptr(l);
+  let after = alias_refptr(l);
+  t->tab[bucket] :=: l;
+  
+  for (ASSIGN(after,after->tl); after != NULL; ASSIGN(before,before->tl), ASSIGN(after,after->tl))
+    // invariant: before != NULL != before->tl == after, before->hd should not be removed
+    if (cmp(key,after->hd[0][0]) == 0) {
+      ASSIGN2(before->tl,after->tl);
+      let tmp = NULL;
+      tmp :=: after->tl;
+      drop_refptr(tmp);
+      drop_refptr(after);
+      drop_refptr(before);
+      return;
+    }
+  drop_refptr(after);
+  drop_refptr(before);
+}
+
+int hash_string(string_t s) {
+  // could be made faster by explicit loop unrolling
+  int ans   = 0;
+  int sz    = numelts(s);
+  int shift = 0;
+  for (int i=0; i < sz; ++i) {
+    ans = ans ^ (s[i] << shift);
+    shift += 8;
+    if(shift == 32)
+      shift = 0;
+  }
+  return ans;
+}
+
+int hash_stringptr(stringptr_t s) {
+  return hash_string(*s);
+}
+
+void iter(void f(`a,`b), table_t<`a,`b> t) {
+  let odata;
+  { let tmp = NULL; // odata = alias_refptr(t->tab); // Do this b/c don't want t->tab==NULL during app of f
+    tmp :=: t->tab; 
+    odata = alias_refptr(tmp);
+    t->tab :=: tmp;
+  }
+  unsigned int osize = numelts(odata);
+  for (int i = 0; i<osize; i++) {
+    list_t iter;
+    { let tmp = NULL;
+      tmp :=: odata[i];
+      iter = alias_refptr(tmp);
+      odata[i] :=: tmp;
+    }
+    for(; iter != NULL; ASSIGN(iter,iter->tl))
+      f(iter->hd[0][0],iter->hd[0][1]);
+    drop_refptr(iter); // Actually, this is definitely NULL, not needed
+  }
+  drop_refptr(odata);
+}  
+void iter_c(void f(`a,`b,`c::TB), table_t<`a,`b> t, `c env) {
+
+  let odata;
+  { let tmp = NULL; // odata = alias_refptr(t->tab); // Do this b/c don't want t->tab==NULL during app of f
+    tmp :=: t->tab; 
+    odata = alias_refptr(tmp);
+    t->tab :=: tmp;
+  }
+  unsigned int osize = numelts(odata);
+  for (int i = 0; i<osize; i++) {
+    list_t iter;
+    { let tmp = NULL;
+      tmp :=: odata[i];
+      iter = alias_refptr(tmp);
+      odata[i] :=: tmp;
+    }
+    for(; iter != NULL; ASSIGN(iter,iter->tl))
+      f(iter->hd[0][0],iter->hd[0][1],env);
+    drop_refptr(iter); // Actually, this is definitely NULL, not needed
+  }
+  drop_refptr(odata);
+}  
+void print_table_map(table_t<`a,`b> t, void prn_key(`a), void prn_val(`b)) {
+  let odata;
+  { let tmp = NULL;
+    tmp :=: t->tab;
+    odata = alias_refptr(tmp);
+    t->tab :=: tmp;
+  }
+  int osize = numelts(odata);
+  for (int i = 0; i<osize; i++) {
+    printf("%d: ",i);
+    let iter = NULL;
+    for (ASSIGN(iter,odata[i]); iter != NULL; ASSIGN(iter,iter->tl)) {
+      printf("(");
+      prn_key(iter->hd[0][0]);
+      printf(",");
+      prn_val(iter->hd[0][1]);
+      printf(") ");
+    }
+    // iter is NULL, no need to drop_refptr
+    printf("\n");
+  }
+  drop_refptr(odata);
+}
+} // end Hashtable
+
+void pr_counts(list_t x) {
+  printf("Counts:\n"); 
+  let z = alias_refptr(x);
+  for (; z != NULL; ASSIGN(z,z->tl)) {
+    printf(" %d",refptr_count(z)-1); // correct for z itself
+  }
+  printf("\n");
+}
+int inc(int x) { return x+1; }
+int pr(int x) { printf(" %d",x); return 0; }
+void pr2(int x) { printf("%d",x); }
+static int inthash(int x) { return x; }
+void test_hashtable() {
+  let t = Hashtable::create(17,intcmp,inthash);
+  for (int i = 0; i<50; i++)
+    Hashtable::insert(t,2*i,4*i);
+  for (int i = 0; i<50; i++)
+    Hashtable::insert(t,2*i,i);
+  for (int i = 0; i<50; i++)
+    Hashtable::insert(t,i,3*i);
+  if (0) Hashtable::print_table_map(t,pr2,pr2);
+}
+int main() {
+  let x = list(1,4,9,12,3);
+  printf("Length is %d\n",length(x));
+  printf("First time\n");
+  app(pr,x); printf("\n");
+  pr_counts(x);
+  printf("Second time\n");
+  let y = map(inc,x);
+  app(pr,y); printf("\n");
+  pr_counts(y);
+  printf("Third time\n");
+  let z = imp_rev(x);
+  app(pr,z); printf("\n");
+  pr_counts(z);
+  printf("Fourth time\n");
+  app(pr,x); printf("\n");
+  pr_counts(x);
+  // app(pr,map(inc,x)); // NO GOOD: Compiler Error: noconsume parameter map(inc,x) must be l-values
+  list_t s = list(12,34,2,5,2,1,6,45,1,45,2,3,0,11);
+  printf("Before sort\n");
+  app(pr,s); printf("\n");
+  pr_counts(s);
+  printf("Result of sort\n");
+  list_t t = merge_sort(intcmp,s);
+  app(pr,t); printf("\n");
+  pr_counts(t);
+  printf("Before sort again\n");
+  app(pr,s); printf("\n");
+  pr_counts(s);
+  printf("Hashtable test\n");
+  test_hashtable();
+  return 0;
+}
