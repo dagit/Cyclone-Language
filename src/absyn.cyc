@@ -593,6 +593,7 @@ string attribute2string(attribute_t a) {
   case &Regparm_att(i): return xprintf("regparm(%d)",i);
   case Stdcall_att: return "stdcall";
   case Cdecl_att: return "cdecl";
+  case Fastcall_att: return "fastcall";
   case Noreturn_att: return "noreturn";
   case Const_att: return "const";
   case &Aligned_att(i): 
@@ -612,3 +613,16 @@ string attribute2string(attribute_t a) {
   case No_check_memory_usage_att: return "no_check_memory_usage";
   }
 }
+
+// returns true when a is an attribute for function types
+bool fntype_att(attribute_t a) {
+  switch (a) {
+  case &Regparm_att(_): fallthru;
+  case Stdcall_att:    fallthru;
+  case Cdecl_att:      fallthru;
+  case Noreturn_att:   fallthru;
+  case Const_att:      return true;
+  default: return false;
+  }
+}
+

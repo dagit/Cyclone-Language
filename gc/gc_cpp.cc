@@ -47,6 +47,7 @@ void* operator new( size_t size,
 }
 #endif
 
+/*
 #ifdef OPERATOR_NEW_ARRAY
 
 void* operator new[]( size_t size ) {
@@ -55,6 +56,6 @@ void* operator new[]( size_t size ) {
 void operator delete[]( void* obj ) {
     GC_FREE( obj );}
 
-#endif /* OPERATOR_NEW_ARRAY */
+    #endif*/ /* OPERATOR_NEW_ARRAY */
 
 

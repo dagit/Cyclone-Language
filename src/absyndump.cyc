@@ -18,15 +18,16 @@ using Absyn;
 
 namespace Absyndump;
 
-extern void dumptyp(type_t);
-extern void dumpntyp(type_t t);
-extern void dumpexp(exp_t);
-extern void dumpexp_prec(int,exp_t);
-extern void dumppat(pat_t);
-extern void dumpstmt(stmt_t);
-extern void dumpdecl(decl_t);
-extern void dumptqtd(tqual_t, type_t, void f(`a), `a);
-extern void dumpstructfields(list_t<structfield_t> fields);
+void dumptyp(type_t);
+void dumpntyp(type_t t);
+void dumpexp(exp_t);
+void dumpexp_prec(int,exp_t);
+void dumppat(pat_t);
+void dumpstmt(stmt_t);
+void dumpdecl(decl_t);
+void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a);
+void dumptqtd(tqual_t, type_t, void f(`a), `a);
+void dumpstructfields(list_t<structfield_t> fields);
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
@@ -187,21 +188,51 @@ void dumpargs(list_t<$(tqual_t,type_t)@> ts) {
   group(dumparg,ts,"(",")",",");
 }
 
+void dump_callconv(attributes_t atts) {
+  for(; atts != null; atts = atts->tl)
+    switch(atts->hd) {
+    case Stdcall_att:  dump("_stdcall");  return;
+    case Cdecl_att:    dump("_cdecl");    return;
+    case Fastcall_att: dump("_fastcall"); return;
+    default: break;
+    }
+}
+
+void dump_noncallconv(attributes_t atts) {
+  // NOTE: Only for to_VC.  Ignore a calling-convention attribute.
+  bool hasatt = false;
+  for(_ atts2 = atts; atts2 != null; atts2 = atts2->tl)
+    switch(atts->hd) {
+    case Stdcall_att:  break;
+    case Cdecl_att:    break;
+    case Fastcall_att: break;
+    default: hasatt = true; break;
+    }
+  if(!hasatt)
+    return;
+  dump("__declspec(");
+  for (; atts != null; atts = atts->tl)
+    switch(atts->hd) {
+    case Stdcall_att:  break;
+    case Cdecl_att:    break;
+    case Fastcall_att: break;
+    default: dump(attribute2string(atts->hd)); break;
+    }
+  dump_char(')');
+}
+
 void dumpatts(attributes_t atts) {
   if (atts == null) return;
   if(Absynpp::to_VC) {
-    dump("__declspec(");
-    for (; atts != null; atts = atts->tl)
-      dump(attribute2string(atts->hd));
-    dump_char(')');
-  } else {
-    dump(" __attribute__((");
-    for (; atts != null; atts = atts->tl) {
-      dump(attribute2string(atts->hd));
-      if (atts->tl != null) dump(",");
-    }
-    dump(")) ");
+    dump_noncallconv(atts);
+    return;
   }
+  dump(" __attribute__((");
+  for (; atts != null; atts = atts->tl) {
+    dump(attribute2string(atts->hd));
+    if (atts->tl != null) dump(",");
+  }
+  dump(")) ");
 }
 
 bool next_is_pointer(list_t<type_modifier_t> tms) {
@@ -394,9 +425,6 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Var_e(x,_):     dumpqvar(x); break;
 
   case &Primop_e(p,es):
-    // FIX: total waste to allocate, but compiler cannot cast to
-    // UntaggedArray correctly (fix Tcutil::coerce_arg and extend
-    // Toc conversions).
     string pstr = Absynpp::prim2str(p);
     if(!is_format_prim(p)) {
       switch (List::length(es)) {
@@ -743,7 +771,18 @@ static void dump_atts_qvar(fndecl_t fd) {
   dumpatts(fd->attributes);
   dumpqvar(fd->name);
 }
-static void dump_fn_qvar(fndecl_t fd) {
+static void dump_callconv_qvar($(attribute_t,qvar_t)@`r pr) {
+  switch((*pr)[0]) {
+  case Unused_att: break;
+  case Stdcall_att:  dump("_stdcall");  break;
+  case Cdecl_att:    dump("_cdecl");    break;
+  case Fastcall_att: dump("_fastcall"); break;
+  default: break;
+  }
+  dumpqvar((*pr)[1]);
+}
+static void dump_callconv_fdqvar(fndecl_t fd) {
+  dump_callconv(fd->attributes);
   dumpqvar(fd->name);
 }
 
@@ -769,7 +808,7 @@ void dumpdecl(decl_t d) {
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->varargs, null});
     dumptqtd(Tqual(false,false,false),t,
-	     Absynpp::to_VC ? dump_fn_qvar : dump_atts_qvar,fd);
+	     Absynpp::to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');
@@ -805,12 +844,35 @@ void dumpdecl(decl_t d) {
     }
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
-    if(Absynpp::to_VC)
+    if(Absynpp::to_VC) {
       dumpatts(atts);
-    dumpscope(sc);
-    dumptqtd(tq,type,dumpqvar,name);
-    if(!Absynpp::to_VC)
+      dumpscope(sc);
+      let $(tq,t,tms) = Absynpp::to_tms(tq,type);
+      dumptq(tq);
+      // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
+      attribute_t call_conv = Unused_att;
+      for(_ tms2 = tms; tms2 != null; tms2 = tms2->tl)
+	switch(tms2->hd) {
+	case &Attributes_mod(_,atts):
+	  for(; atts != null; atts = atts->tl)
+	    switch(atts->hd) {
+	    case Stdcall_att:  call_conv = Stdcall_att;  break;
+	    case Cdecl_att:    call_conv = Cdecl_att;    break;
+	    case Fastcall_att: call_conv = Fastcall_att; break;
+	    default: break;
+	    }
+	  break;
+	default: break;
+	}
+      dumptq(tq);
+      dumpntyp(t);
+      let pr = $(call_conv,name);
+      dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
+    } else {
+      dumpscope(sc);
+      dumptqtd(tq, type, dumpqvar, name);
       dumpatts(atts);
+    }
     if(initializer != null) {
       dump_char('=');
       dumpexp((exp_t)initializer);
@@ -939,8 +1001,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
       group(dump_str,sl,"(",")",","); break;
     case &TypeParams_mod(ts,loc,print_kinds): 
       if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
-    case &Attributes_mod(_,atts): 
-      dumpatts(atts); break;
+    case &Attributes_mod(_,atts): dumpatts(atts); break;
     case &Pointer_mod(nullable,tq2,_): throw new Impossible("dumptms");
     }
     return;

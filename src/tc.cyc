@@ -40,6 +40,7 @@ static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
       case &Regparm_att(_): fallthru;
       case Stdcall_att:    fallthru;
       case Cdecl_att:      fallthru;
+      case Fastcall_att:   fallthru;
       case Noreturn_att:   fallthru;
       case Const_att:
         *fnatts = new List(atts->hd,*fnatts); continue;
@@ -145,6 +146,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       case &Regparm_att(_): fallthru;
       case Stdcall_att:    fallthru;
       case Cdecl_att:      fallthru;
+      case Fastcall_att:   fallthru;
       case Noreturn_att:   fallthru;
       case Const_att:
         impos("tcVardecl: fn type attributes in function var decl");

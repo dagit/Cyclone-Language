@@ -1359,18 +1359,6 @@ static $(opt_t<var_t>,tqual_t,type_t)@
   return new $((opt_t<var_t>)(new Opt((*x)[0])), (*x)[1], (*x)[2]);
 }
 
-// returns true when a is an attribute for function types
-bool fntype_att(attribute_t a) {
-  switch (a) {
-  case &Regparm_att(_): fallthru;
-  case Stdcall_att:    fallthru;
-  case Cdecl_att:      fallthru;
-  case Noreturn_att:   fallthru;
-  case Const_att:      return true;
-  default: return false;
-  }
-}
-
 type_t fndecl2typ(fndecl_t fd) {
   if (fd->cached_typ == null) {
     // We don't cache this type as we want to expand out the effect
@@ -1764,26 +1752,29 @@ list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars,
     Evexp::eval_const_uint_exp((exp_t)e); // check that e is of constant size
     break;
   case &FnType(FnInfo{*btvs,*eff,tr,args,vararg,atts}):
-    if (atts != null) {
-      // check that the attributes are function type attributes
-      // and that at most one of stdcall or cdecl is there.
-      bool seen_cdecl = false;
-      bool seen_stdcall = false;
-      for (; atts != null; atts = atts->tl) {
-        if (!fntype_att(atts->hd))
-          terr(loc,xprintf("bad function type attribute %s",
-                           attribute2string(atts->hd)));
-        if (atts->hd == (attribute_t)Stdcall_att) {
-          if (seen_cdecl)
-            terr(loc,xprintf("function can't be both cdecl and stdcall"));
-          seen_stdcall = true;
-        } else if (atts->hd == (attribute_t)Cdecl_att) {
-          if (seen_stdcall)
-            terr(loc,xprintf("function can't be both cdecl and stdcall"));
-          seen_cdecl = true;
-        }
+    // check that the attributes are function type attributes
+    // and that at most one of {stdcall, cdecl, fastcall} is there.
+    int  num_convs = 0;
+    bool seen_cdecl    = false;
+    bool seen_stdcall  = false;
+    bool seen_fastcall = false;
+    for (; atts != null; atts = atts->tl) {
+      if (!fntype_att(atts->hd))
+	terr(loc,xprintf("bad function type attribute %s",
+			 attribute2string(atts->hd)));
+      switch(atts->hd) {
+      case Stdcall_att: 
+	if(!seen_stdcall)  { seen_stdcall=true;  ++num_convs;} break;
+      case Cdecl_att: 
+	if(!seen_cdecl)    { seen_cdecl=true;    ++num_convs;} break;
+      case Fastcall_att: 
+	if(!seen_fastcall) { seen_fastcall=true; ++num_convs;} break;
+      default: break;
       }
     }
+    if(num_convs > 1)
+      terr(loc,xprintf("function can't have multiple calling conventions"));
+
     check_unique_tvars(loc,*btvs);
     // check that the function doesn't try to abstract a MemKind
     for (_ b = *btvs; b != null; b = b->tl) {

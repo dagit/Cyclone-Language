@@ -345,10 +345,11 @@ static type_t typ_to_c(type_t t) {
     // FIX:  problem with higher-order functions?  Again C's rules are strange.
     // FIX:  I'm dropping attributes like noreturn and const because C
     // complains otherwise.
+    let new_atts = atts;
     let new_atts = null;
     for (; atts != null; atts = atts->tl) {
       switch (atts->hd) {
-      case Cdecl_att   : fallthru;
+	//      case Cdecl_att   : fallthru; DAN: Is this necessary?
       case Noreturn_att: fallthru;
       case Const_att   : continue;
       default: new_atts = new List(atts->hd,new_atts); break;
@@ -3077,12 +3078,13 @@ static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
     // a gcc warning
     (ed->sc == Extern || ed->sc == Static || 
      ed->sc == ExternC) ? Public : scope_to_c(ed->sc);
-  for (let fs = ed->fields->v; fs != null; fs = fs->tl) {
-    if (fs->hd->tag != null) {
-      unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
-      fs->hd->tag = uint_exp(i,null);
+  if(ed->fields != null)
+    for (let fs = ed->fields->v; fs != null; fs = fs->tl) {
+      if (fs->hd->tag != null) {
+	unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
+	fs->hd->tag = uint_exp(i,null);
+      }
     }
-  }
 }
 
 // let declarations -- tricky

@@ -1678,7 +1678,8 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcAnonStruct(te,loc,ts,args); break;
   case &Tunion_e(*all_ref,*exist_ref,es,tud,tuf):
     t = tcTunion(te,loc,topt,e,all_ref,exist_ref,es,tud,tuf); break;
-  case &Enum_e(q,ed,ef):
+  case &Enum_e(*q,ed,ef):
+    *q = ef->name;
     t = new EnumType(ed->name,ed); break;
   case &Malloc_e(ropt,t2):
     t = tcMalloc(te,loc,topt,ropt,t2); break;

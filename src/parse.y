@@ -125,6 +125,7 @@ tunion Attribute.Aligned_att att_aligned = Aligned_att(-1);
 $(string,tunion Attribute) att_map[] = {
   $("stdcall", Stdcall_att),
   $("cdecl", Cdecl_att),
+  $("fastcall", Fastcall_att),
   $("noreturn", Noreturn_att),
   $("const", Const_att), // a keyword (see grammar), but __const__ possible
   $("aligned", (tunion Attribute)&att_aligned), // WARNING: sharing!
@@ -580,17 +581,6 @@ static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@>
                   apply_tmss(tq,t,ds->tl,shared_atts));
 }
 
-static bool fn_type_att(attribute_t a) {
-  switch (a) {
-  case &Regparm_att(_): fallthru;
-  case Stdcall_att: fallthru;
-  case Cdecl_att: fallthru;
-  case Noreturn_att: fallthru;
-  case Const_att: return true;
-  default: return false;
-  }
-}
-
 static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   apply_tms(tqual_t tq, type_t t, list_t<attribute_t> atts,
             list_t<type_modifier_t> tms) {
@@ -608,7 +598,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
         // type
         attributes_t fn_atts = null, new_atts = null;
         for (_ as = atts; as != null; as = as->tl) {
-          if (fn_type_att(as->hd))
+          if (fntype_att(as->hd))
             fn_atts = new List(as->hd,fn_atts);
           else
             new_atts = new List(as->hd,new_atts);

@@ -281,6 +281,7 @@ namespace Absyn {
     Regparm_att(int); 
     Stdcall_att;      
     Cdecl_att;        
+    Fastcall_att;
     Noreturn_att;     
     Const_att;
     Aligned_att(int);
@@ -747,5 +748,7 @@ namespace Absyn {
   extern struct Structfield *lookup_union_field(uniondecl_t,var_t);
   extern $(tqual_t,type_t) *lookup_tuple_field(list_t<$(tqual_t,type_t)@>,int);
   extern string attribute2string(attribute_t);
+  // returns true when a is an attribute for function types
+  extern bool fntype_att(attribute_t a);
 }
 #endif
