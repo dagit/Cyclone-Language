@@ -16,7 +16,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-/* Constants taken from the GNU C Library:
+/* Some constants taken from the GNU C Library:
    Copyright (C) 1991-1999, 2000, 2001 Free Software Foundation, Inc.
 */
 
