@@ -31,7 +31,7 @@ CYC_INC_PATH := $(CYCDIR)/lib
 
 # These are passed to src and lib to control bootstrapping.  Override them
 # on the command-line (using a path that will be interpreted in src and lib)
-CYCC=$(CYC_BIN_PATH)/$(CYCCOMP) 
+CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP) 
 OUT_PREFIX=
 
 build: $(CYC_LIB_PATH)/gc.a cyclone tools
@@ -97,13 +97,6 @@ cyclone_src: lib_src
 	$(MAKE) -C src
 lib_src:
 	$(MAKE) -C lib
-
-# to make just the source files (no linking or .o), for cross-compile
-# These are affected by CYCC and OUT_PREFIX
-cyclone_srconly: lib_srconly
-	$(MAKE) -C src src
-lib_srconly:
-	$(MAKE) -C lib src
 
 # Allocation profiler and its special version of the Cyclone library
 aprof:

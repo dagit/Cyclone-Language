@@ -58,8 +58,6 @@ install_path.c:
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
 
-src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
-
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $<

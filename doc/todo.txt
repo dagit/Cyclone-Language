@@ -25,8 +25,6 @@ For the release:
   * automatically get version number into things
 
 * as many bug fixes as possible (see below)
-  * get rid of need for "using" for the C standard library -- two sets of
-    .h files, one that does the using automatically.
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
@@ -210,8 +208,6 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 
 * better comprehensions/iterators
 
-* We should add anonymous structs (and enums)?
-
 * We should allow more deep casts (e.g., function pointers) and have
   generally better support for casting between compatible representations.
   e.g., char[4] to int[1] (note not sound on architectures that require
@@ -238,8 +234,7 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
   compile (or run?) time.  That would allow us to abstract over
   Mem types.
 
-* Cyclone ought to say something when called with no arguments, as gcc
-  does.
+* Cyclone ought to say something when called with no arguments, as gcc does.
 
 THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
@@ -255,15 +250,8 @@ MISCELLANEOUS
 * allows a cast between a "struct cons<exp>*" and "exp@?" !!!
   at least it gives a warning...  Actually, this may be right.
 
-* We should get the documentation in shape.
-
-* need to start putting user's guide together.
-
 * better implementation of unresolved mem
 
-* deal with inline?
-
-* translation to C is busted with -noexpandtypedefs because we hoist
-tuples to the top (before typedef declarations)
+* translation to C with -noexpandtypedefs hasn't been tested in forever.
 
 * The FAQ in doc/web/ has two instances of "What does new mean?"

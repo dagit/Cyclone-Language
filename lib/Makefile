@@ -42,8 +42,6 @@ CYC_FLAGS += -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(G_FLAG) $(PG_FLAG) $(
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 
-src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
-
 $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).$(O))
 ifdef MS
 	lib /out:$@ $^

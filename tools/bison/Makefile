@@ -32,9 +32,11 @@ BINDIR = $(CYCDIR)/bin
 # hack so executable can find cycbison.simple
 BISONDIR=$(shell pwd)
 
-CYCC = $(CYCDIR)/bin/cyclone$(EXE)
-LC_FLAG = #-g
+LC_FLAG =
+# We put in the explicit -I and -B because install builds this tool before
+# installing the include files and libraries.  Also we use a particular CYCC.
 CYC_FLAGS += -I$(CYCDIR)/include -B$(BINDIR)/cyc-lib $(LC_FLAG)
+CYCC:=$(BINDIR)/$(CYCCOMP) 
 
 # names of parser files
 PFILE=cycbison.simple
