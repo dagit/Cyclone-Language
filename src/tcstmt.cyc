@@ -169,6 +169,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     if (eopt == NULL) {
       switch (compress(t)) {
       case &VoidType: break;
+      case &DoubleType(_):
+      case &FloatType: 
+      case &IntType(_,_):
+	warn(s0->loc,"should return a value of type %s",typ2string(t));
+        break;
       default:
 	terr(s0->loc,"must return a value of type %s",typ2string(t));
         break;
