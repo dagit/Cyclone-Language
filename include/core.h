@@ -23,6 +23,7 @@ struct Opt<`a> { `a v; };
 typedef struct Opt<`a> *opt_t<`a>;
 extern opt_t<`b> opt_map(`b f(`a), opt_t<`a> x);
 extern mstring_t new_string(int);
+extern char ?`r rnew_string(region_t<`r>,int);
 extern bool true_f(`a);
 extern bool false_f(`a);
 extern `a fst($(`a,`b)@`r);

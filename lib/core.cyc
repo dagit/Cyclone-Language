@@ -33,6 +33,10 @@ mstring_t new_string(int i) {
   return (new {for j < i : '\000'});
 }
 
+char ?`r rnew_string(region_t<`r> r, int i) {
+  return (rnew(r) {for j < i : '\000'});
+}
+
 bool true_f(`a x)  {  return true;  }
 bool false_f(`a x) {  return false; }
 

@@ -141,7 +141,7 @@ extern void file_length(string_t);
 // these two provided in cyc_runtime.c
 extern int file_string_read(FILE @fd, mstring_t dest, int dest_offset, 
 			    int max_count);
-extern int file_string_write(FILE @fd, string_t src, int src_offset, 
+extern int file_string_write(FILE @fd, const char?`r src, int src_offset, 
 			     int max_count);
 }
 #endif

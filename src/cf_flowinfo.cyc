@@ -101,7 +101,7 @@ path_info_t typ_to_unesc_none_pinfo(type_t t) {
     return new TuplePI(d);
   case &AnonStructType(fs): fallthru(fs);
   case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
-    let d = Dict::empty(String::zstrptrcmp);
+    pinfo_dict_t<stringptr_t> d = Dict::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl) {
       let &Structfield{n,_,t2,_,_} = fs->hd;
       // don't insert the field if the name is empty -- it's a bit field
