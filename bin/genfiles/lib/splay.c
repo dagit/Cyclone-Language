@@ -77,9 +77,8 @@ _temp47; struct Cyc_Splay_noderef* _temp48; void* _temp50; _LL38: _temp42=*
 _temp36; _LL46: _temp45= _temp42.f1; if( _temp45 ==( void*) Cyc_Splay_LEFT){
 goto _LL44;} else{ goto _LL40;} _LL44: _temp43= _temp42.f2; goto _LL39; _LL40:
 _temp47=* _temp36; _LL51: _temp50= _temp47.f1; if( _temp50 ==( void*) Cyc_Splay_RIGHT){
-goto _LL49;} else{ goto _LL37;} _LL49: _temp48= _temp47.f2; goto _LL41; _LL39:((
-void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_left)( _temp43); goto
-_LL37; _LL41:(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_right)(
+goto _LL49;} else{ goto _LL37;} _LL49: _temp48= _temp47.f2; goto _LL41; _LL39:
+Cyc_Splay_rotate_left( _temp43); goto _LL37; _LL41: Cyc_Splay_rotate_right(
 _temp48); goto _LL37; _LL37:;} return;}{ struct _tuple0 _temp54; struct Cyc_Splay_noderef*
 _temp55; void* _temp57; struct _tuple0* _temp52=( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( dnl))->hd; _temp54=* _temp52; _LL58: _temp57= _temp54.f1; goto
@@ -93,17 +92,13 @@ _temp66= _temp57; _LL68: if( _temp66 ==( void*) Cyc_Splay_LEFT){ goto _LL69;}
 else{ goto _LL70;} _LL70: if( _temp66 ==( void*) Cyc_Splay_RIGHT){ goto _LL71;}
 else{ goto _LL67;} _LL69:{ void* _temp72= _temp64; _LL74: if( _temp72 ==( void*)
 Cyc_Splay_LEFT){ goto _LL75;} else{ goto _LL76;} _LL76: if( _temp72 ==( void*)
-Cyc_Splay_RIGHT){ goto _LL77;} else{ goto _LL73;} _LL75:(( void(*)( struct Cyc_Splay_noderef*
-nr)) Cyc_Splay_rotate_left)( _temp62);(( void(*)( struct Cyc_Splay_noderef* nr))
-Cyc_Splay_rotate_left)( _temp62); goto _LL73; _LL77:(( void(*)( struct Cyc_Splay_noderef*
-nr)) Cyc_Splay_rotate_left)( _temp55);(( void(*)( struct Cyc_Splay_noderef* nr))
-Cyc_Splay_rotate_right)( _temp62); goto _LL73; _LL73:;} goto _LL67; _LL71:{ void*
-_temp78= _temp64; _LL80: if( _temp78 ==( void*) Cyc_Splay_LEFT){ goto _LL81;}
-else{ goto _LL82;} _LL82: if( _temp78 ==( void*) Cyc_Splay_RIGHT){ goto _LL83;}
-else{ goto _LL79;} _LL81:(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_right)(
-_temp55);(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_left)(
-_temp62); goto _LL79; _LL83:(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_right)(
-_temp62);(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_right)(
+Cyc_Splay_RIGHT){ goto _LL77;} else{ goto _LL73;} _LL75: Cyc_Splay_rotate_left(
+_temp62); Cyc_Splay_rotate_left( _temp62); goto _LL73; _LL77: Cyc_Splay_rotate_left(
+_temp55); Cyc_Splay_rotate_right( _temp62); goto _LL73; _LL73:;} goto _LL67;
+_LL71:{ void* _temp78= _temp64; _LL80: if( _temp78 ==( void*) Cyc_Splay_LEFT){
+goto _LL81;} else{ goto _LL82;} _LL82: if( _temp78 ==( void*) Cyc_Splay_RIGHT){
+goto _LL83;} else{ goto _LL79;} _LL81: Cyc_Splay_rotate_right( _temp55); Cyc_Splay_rotate_left(
+_temp62); goto _LL79; _LL83: Cyc_Splay_rotate_right( _temp62); Cyc_Splay_rotate_right(
 _temp62); goto _LL79; _LL79:;} goto _LL67; _LL67:;}}}}} int Cyc_Splay_splay( int(*
 reln)( void*, void*), void* reln_first_arg, void* tree){ struct Cyc_List_List*
 path= 0; while( 1) { void* _temp84= tree; struct Cyc_Splay_noderef* _temp90;
@@ -111,16 +106,15 @@ _LL86: if(( unsigned int) _temp84 > 1u?*(( int*) _temp84) == Cyc_Splay_Node: 0){
 _LL91: _temp90=(( struct Cyc_Splay_Node_struct*) _temp84)->f1; goto _LL87;}
 else{ goto _LL88;} _LL88: if( _temp84 ==( void*) Cyc_Splay_Leaf){ goto _LL89;}
 else{ goto _LL85;} _LL87: { struct Cyc_Splay_node* _temp92= _temp90->v; int
-_temp93= reln( reln_first_arg,( void*) _temp92->key); if( _temp93 == 0){(( void(*)(
-struct Cyc_List_List* dnl)) Cyc_Splay_lift)( path); return 1;} else{ if( _temp93
-< 0){ path=({ struct Cyc_List_List* _temp94=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp94->hd=( void*)({ struct _tuple0* _temp95=(
-struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp95->f1=( void*) Cyc_Splay_LEFT;
-_temp95->f2= _temp90; _temp95;}); _temp94->tl= path; _temp94;}); tree=( void*)
-_temp92->left;} else{ path=({ struct Cyc_List_List* _temp96=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp96->hd=( void*)({ struct _tuple0*
-_temp97=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp97->f1=(
-void*) Cyc_Splay_RIGHT; _temp97->f2= _temp90; _temp97;}); _temp96->tl= path;
-_temp96;}); tree=( void*) _temp92->right;}} goto _LL85;} _LL89: if( path != 0){((
-void(*)( struct Cyc_List_List* dnl)) Cyc_Splay_lift)((( struct Cyc_List_List*)
-_check_null( path))->tl);} return 0; _LL85:;}}
+_temp93= reln( reln_first_arg,( void*) _temp92->key); if( _temp93 == 0){ Cyc_Splay_lift(
+path); return 1;} else{ if( _temp93 < 0){ path=({ struct Cyc_List_List* _temp94=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp94->hd=(
+void*)({ struct _tuple0* _temp95=( struct _tuple0*) GC_malloc( sizeof( struct
+_tuple0)); _temp95->f1=( void*) Cyc_Splay_LEFT; _temp95->f2= _temp90; _temp95;});
+_temp94->tl= path; _temp94;}); tree=( void*) _temp92->left;} else{ path=({
+struct Cyc_List_List* _temp96=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp96->hd=( void*)({ struct _tuple0* _temp97=( struct _tuple0*)
+GC_malloc( sizeof( struct _tuple0)); _temp97->f1=( void*) Cyc_Splay_RIGHT;
+_temp97->f2= _temp90; _temp97;}); _temp96->tl= path; _temp96;}); tree=( void*)
+_temp92->right;}} goto _LL85;} _LL89: if( path != 0){ Cyc_Splay_lift((( struct
+Cyc_List_List*) _check_null( path))->tl);} return 0; _LL85:;}}

@@ -828,10 +828,7 @@ void cf_prepass(absenv_t env, stmt_t s) {
     let ae1 = abstract_exp_top(env,e1);
     let $(when_true,when_false) = abstract_guard(env,e2);
     let ae3 = abstract_exp_top(env,e3);
-    cf_set_absexps(s,new List(ae1,
-  	             new List(when_true,
-		     new List(when_false,
-		     new List(ae3,null)))));
+    cf_set_absexps(s, list(ae1, when_true, when_false, ae3));
     cf_prepass(env,s1);
     return;
   case &Switch_s(e,scs):
@@ -1008,8 +1005,7 @@ flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
 
   switch(s->r) {
   case Skip_s:         return in_flow;
-    // FIX: when have init parameters, will need to check they're init
-    //    by "using" them here.
+    // FIX: when have init parameters, check they're init by "using" them here
   case &Return_s(null): return BottomFL;
   case &Return_s(e):    
     //            fprintf(Stdio::stderr,"\n%s\n",absexp2string(aes->hd,0));
@@ -1198,6 +1194,7 @@ void cf_check(list_t<decl_t> ds) {
   for(; ds != null; ds = ds->tl) {
     switch(ds->hd->r) {
     case &Fn_d(fd):           cf_check_fun(fd); break;
+    case &ExternC_d(ds2):     fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &Namespace_d(_,ds2): cf_check(ds2); break;
     default: break;

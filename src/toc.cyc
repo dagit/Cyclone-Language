@@ -565,18 +565,18 @@ typedef struct Env @env_t;
 
 // the empty environment
 static env_t empty_env() {
-  return new Env{.break_lab       = null,
-                    .continue_lab    = null,
-                    .fallthru_info   = null,
-                    .varmap          = Dict::empty(qvar_cmp),
-                    .toplevel        = true};
+  return new Env{.break_lab     = null,
+                 .continue_lab  = null,
+                 .fallthru_info = null,
+                 .varmap        = Dict::empty(qvar_cmp),
+                 .toplevel      = true};
 }
 static env_t copy_env(env_t e) {
-  return new Env{.break_lab       = e->break_lab,
-                    .continue_lab    = e->continue_lab,
-                    .fallthru_info   = e->fallthru_info,
-                    .varmap          = e->varmap,
-                    .toplevel        = e->toplevel};
+  return new Env{.break_lab     = e->break_lab,
+                 .continue_lab  = e->continue_lab,
+                 .fallthru_info = e->fallthru_info,
+                 .varmap        = e->varmap,
+                 .toplevel      = e->toplevel};
 }
 
 static env_t clear_toplevel(env_t e) {
@@ -636,8 +636,8 @@ static env_t last_switchclause_env(env_t e, var_t break_l) {
 // anywhere, we wouldn't need the next_l.)
 static env_t switch_as_switch_env(env_t e, var_t next_l) {
   env_t ans = copy_env(e);
-  ans->break_lab       = null;
-  ans->fallthru_info   = new Opt(new $(next_l,null,Dict::empty(qvar_cmp)));
+  ans->break_lab     = null;
+  ans->fallthru_info = new Opt(new $(next_l,null,Dict::empty(qvar_cmp)));
   return ans;
 }
 
@@ -1451,13 +1451,24 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &NoInstantiate_e(e1): exp_to_c(nv,e1); break;
   case &Instantiate_e(e1,ts):
     exp_to_c(nv,e1);
-    type_t t_inst = typ_to_c(e->topt->v);
     // only cast when the instantiation has type variables,
     // you can cast other times, but you'll spit out much more C code.
+    // Note: we don't bother to cast if type is void * anyway (b/c that's
+    //       what type variables get translated to)
+    // Note: we could be even more aggressive -- often the instantiated types
+    //  don't show up in the translated type.  Moreover, we probably don't
+    //  get warnings when the only use of the tyvar is as a parameter b/c
+    //  it's just an implicit cast to void * (so long as inst type isn't int)
     for(; ts != null; ts = ts->tl) {
       kind_t k = typ_kind(ts->hd);
-      if(k != (kind_t)EffKind && k != (kind_t)RgnKind) {
-	e->r = array_to_ptr_cast(t_inst,e1,DL)->r;
+      if(k != EffKind && k != RgnKind) {
+	switch(compress(ts->hd)) {
+	case &VarType(_):    continue;
+	case &TunionType(_): continue;
+	default: 
+	  e->r = array_to_ptr_cast(typ_to_c(e->topt->v),e1,DL)->r;
+	  break;
+	}
 	break;
       }
     }
@@ -2109,6 +2120,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     let rps      = List::rrev(rgn,ps);
     for(; rps != null; rps = rps->tl, tuf_tqts = tuf_tqts->tl, cnt--) {
       let p2  = rps->hd;
+      if(p2->r == Wild_p)
+	continue;
       let tuf_typ = (*tuf_tqts->hd)[1];
       let v   = temp_var();
       let t2  = p2->topt->v;
@@ -2128,6 +2141,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       ss = new List(label_stmt(lab,s2,DL),ss);
       succ_lab = lab;
     }
+    if(ss == null)
+      ss = new List(goto_stmt(succ_lab,DL),null);
     exp_t test_exp;
     if(tud->is_xtunion) {
       exp_t e2 = cast_exp(cstar_typ(void_star_typ(),mt_tq), r,DL);
@@ -2169,6 +2184,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     int cnt = List::length(ps);
     for(let rps = List::rrev(rgn,ps); rps != null; rps = rps->tl, cnt--) {
       let p2  = rps->hd;
+      if(p2->r == Wild_p)
+	continue;
       let v   = temp_var();
       let t2  = p2->topt->v;
       let lab = fresh_label();
@@ -2185,6 +2202,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       ss = new List(label_stmt(lab,s3,DL),ss);
       succ_lab = lab;
     }
+    if(ss == null)
+      ss = new List(goto_stmt(succ_lab,DL),null);
     s = seq_stmts(ss,DL);
     break;
   case &Struct_p(sd,ot,ts,dlps0):
@@ -2193,6 +2212,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     for (let dlps = List::rrev(rgn,dlps0); dlps != null; dlps = dlps->tl) {
       let tup = dlps->hd;
       let p2  = (*tup)[1];
+      if(p2->r == Wild_p)
+	continue;
       _ f;
       switch ((*tup)[0]->hd) {
         case &FieldName(f2):
@@ -2219,6 +2240,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       ss = new List(label_stmt(lab,s3,DL),ss);
       succ_lab = lab;
     }
+    if(ss == null)
+      ss = new List(goto_stmt(succ_lab,DL),null);
     s = seq_stmts(ss,DL);
     break;
 
@@ -2388,8 +2411,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let &$(qv,t) = decls->hd;
       res = declare_stmt(qv, t, null, res, DL);
     }
-    // and finally add in the variable that holds the test and clobber
-    // the abstract syntax
+    // add in the variable holding the test and clobber the abstract syntax
     whole_s->r = declare_stmt(v,typ_to_c(e->topt->v),e, res, DL)->r;
   }
 }
@@ -2573,7 +2595,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       //   switch (e) scs
       // }
       //
-      // [Auxillary functions are defined in cyc_runtime.c]
+      // [Auxillary functions are defined in runtime_cyc.c]
       qvar_t h_var = temp_var();
       qvar_t e_var = temp_var();
       qvar_t was_thrown_var = temp_var();
@@ -2712,8 +2734,8 @@ static scope_t scope_to_c(scope_t s) {
 opt_t<Dict::dict_t<var_t,structdecl_t>> structs_so_far = null;
 static void structdecl_to_c(structdecl_t s) {
   let n = s->name->v;
-  if (structs_so_far == null) structs_so_far =
-				new Opt(Dict::empty(String::zstrptrcmp));
+  if (structs_so_far == null) 
+    structs_so_far = new Opt(Dict::empty(String::zstrptrcmp));
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(structs_so_far->v, (*n)[1]);
   if (dopt == null) {

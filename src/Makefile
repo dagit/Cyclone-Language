@@ -14,6 +14,8 @@ CYCC := $(CYCDIR)/bin/$(CYCCOMP)
 CYCLEX := $(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON := $(CYCDIR)/bin/cycbison$(EXE)
 
+CYCINC_H := $(CYCDIR)/lib/include/cyc_include.h
+
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
@@ -54,12 +56,12 @@ else
 #	gcc -o $@ $^ $(CYCDIR)/bin/cyc-lib/gc_pg.a -pg $(LDFLAGS)
 endif
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC)
+$(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $<
 $(OUT_PREFIX)lex.cyc : lex.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
 
-$(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC)
+$(OUT_PREFIX)parse_tab.o: $(OUT_PREFIX)parse_tab.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $< 
 $(OUT_PREFIX)parse_tab.cyc: parse.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o $@
@@ -69,12 +71,12 @@ parse_tab.h: parse.y $(CYCBISON)
 	$(CYCBISON) -v -d $< -o parse_tab.cyc
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.o: %.cyc $(CYCC)
+$(OUT_PREFIX)%.o: %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 ifdef MS
-%.obj: %.c
-	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
+%.obj: %.c $(CYCINC_H)
+	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $<
 endif
 
 # delete generated files with a particular prefix
@@ -91,22 +93,18 @@ clean:
 # Produce dependencies
 # We don't use $(CYCC) here because this would create a circular
 # dependency when OUT_PREFIX and CYCC are overridden on the command line
-# Note we have to add cyc_include.h by hand since it only shows up in
-# the C code
 $(OUT_PREFIX)%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< \
-	| sed 's/^\(.*\).o:/$(OUT_PREFIX)\1.o $(OUT_PREFIX)\1.d: $(CYCDIR)\/lib\/include\/cyc_include.h/' > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< > $@
 
 # We need this as well as the above to handle $(OUT_PREFIX)lex.d,
 # which depends on $(OUT_PREFIX)lex.cyc, not lex.cyc
 %.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< \
-	| sed 's/^\(.*\).o:/\1.o \1.d: $(CYCDIR)\/lib\/include\/cyc_include.h/' > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< > $@
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean_prefix)
-include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_SRCS)))
+-include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_SRCS)))
 endif
 endif
 

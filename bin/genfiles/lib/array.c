@@ -148,10 +148,9 @@ rstart < rend) {*(( void**) _check_unknown_subscript( to, sizeof( void*), dest
 if( swapped){ int i= 0; for( 0; i < len; i ++){*(( void**)
 _check_unknown_subscript( from, sizeof( void*), i))=*(( void**)
 _check_unknown_subscript( to, sizeof( void*), i));}}}} struct _tagged_arr Cyc_Array_from_list(
-struct Cyc_List_List* x){ return(( struct _tagged_arr(*)( struct Cyc_List_List*
-x)) Cyc_List_to_array)( x);} struct Cyc_List_List* Cyc_Array_to_list( struct
-_tagged_arr x){ return(( struct Cyc_List_List*(*)( struct _tagged_arr arr)) Cyc_List_from_array)(
-x);} struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x){ int sx=( int)
+struct Cyc_List_List* x){ return Cyc_List_to_array( x);} struct Cyc_List_List*
+Cyc_Array_to_list( struct _tagged_arr x){ return Cyc_List_from_array( x);}
+struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x){ int sx=( int)
 _get_arr_size( x, sizeof( void*)); return({ unsigned int _temp8=( unsigned int)
 sx; void** _temp9=( void**) GC_malloc( sizeof( void*) * _temp8); struct
 _tagged_arr _temp11= _tag_arr( _temp9, sizeof( void*),( unsigned int) sx);{

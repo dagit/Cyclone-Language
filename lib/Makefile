@@ -9,6 +9,8 @@ CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
 
 CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 
+CYCINC_H := $(CYCDIR)/lib/include/cyc_include.h
+
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX:=
 
@@ -62,13 +64,13 @@ xml/libxml.a:
 	$(MAKE) -C xml CYCC=$(CYCDIR)/$(CYCC)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
-$(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC)
+$(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $<
-$(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX)
+$(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX) 
 	$(CYCLEX) $< $@
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.o : %.cyc $(CYCC)
+$(OUT_PREFIX)%.o : %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 ifdef MS
@@ -77,12 +79,12 @@ ifdef MS
 endif
 
 # We need a special target because the .c file won't have the OUT_PREFIX
-$(OUT_PREFIX)$(RUNTIME).$(O): $(RUNTIME).c precore_c.h 
+$(OUT_PREFIX)$(RUNTIME).$(O): $(RUNTIME).c precore_c.h $(CYCINC_H)
 ifdef MS
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
 else
-	$(CC) -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
-#	$(CC) -pg -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
+	$(CC) -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $<
+#$(CC) -pg -c -o $@ -include include/cyc_include.h $(CPPFLAGS) $(CFLAGS) $<
 endif
 
 # delete generated files with a particular prefix
@@ -102,12 +104,11 @@ clean:
 # Note we have to add cyc_include.h by hand since that only shows up in
 # the C code.
 $(OUT_PREFIX)%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -I. $< \
-	| sed 's/^\(.*\).o:/$(OUT_PREFIX)\1.o $(OUT_PREFIX)\1.d: include\/cyc_include.h/' > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -I. $< > $@
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean_prefix)
-include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_LIBS)))
+-include $(addprefix $(OUT_PREFIX), $(addsuffix .d, $(CYCLONE_LIBS)))
 endif
 endif

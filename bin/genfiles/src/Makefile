@@ -4,7 +4,7 @@ include ../../../Makefile.inc
 CFLAGS=-include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-fwritable-strings -include ../../cyc-lib/include/cyc_include.h
 #CFLAGS=-g -fwritable-strings -include ../../cyc-lib/include/cyc_include.h
-#CFLAGS=-O -fwritable-strings -include ../../cyc-lib/include/cyc_include.h
+#CFLAGS=-O -include ../../cyc-lib/include/cyc_include.h
 
 PROG=cyclone$(EXE)
 

@@ -43,10 +43,10 @@ q->front=(( struct Cyc_List_List*) _check_null( q->front))->tl; if( q->front ==
 q){ if( q->front == 0){( int) _throw(( void*) Cyc_Queue_Empty);} else{ return(
 void*)(( struct Cyc_List_List*) _check_null( q->front))->hd;}} void Cyc_Queue_clear(
 struct Cyc_Queue_Queue* q){ q->front= 0; q->rear= 0;} int Cyc_Queue_length(
-struct Cyc_Queue_Queue* q){ return(( int(*)( struct Cyc_List_List* x)) Cyc_List_length)(
-q->front);} void Cyc_Queue_iter( void(* f)( void*), struct Cyc_Queue_Queue* q){
-struct Cyc_List_List* x= q->front; for( 0; x != 0; x=(( struct Cyc_List_List*)
-_check_null( x))->tl){ f(( void*)(( struct Cyc_List_List*) _check_null( x))->hd);}}
-void Cyc_Queue_app( void*(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List*
-x= q->front; for( 0; x != 0; x=(( struct Cyc_List_List*) _check_null( x))->tl){
-f(( void*)(( struct Cyc_List_List*) _check_null( x))->hd);}}
+struct Cyc_Queue_Queue* q){ return Cyc_List_length( q->front);} void Cyc_Queue_iter(
+void(* f)( void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List* x= q->front;
+for( 0; x != 0; x=(( struct Cyc_List_List*) _check_null( x))->tl){ f(( void*)((
+struct Cyc_List_List*) _check_null( x))->hd);}} void Cyc_Queue_app( void*(* f)(
+void*), struct Cyc_Queue_Queue* q){ struct Cyc_List_List* x= q->front; for( 0; x
+!= 0; x=(( struct Cyc_List_List*) _check_null( x))->tl){ f(( void*)(( struct Cyc_List_List*)
+_check_null( x))->hd);}}

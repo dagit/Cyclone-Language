@@ -93,21 +93,19 @@ GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp0[ 0]=({ struct Cyc_Le
 _temp1; _temp1.tag= Cyc_Lexing_Error; _temp1.f1= _tag_arr("empty token", sizeof(
 unsigned char), 12u); _temp1;}); _temp0;}));} else{ return lbuf->lex_last_action;}}
 else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}} int Cyc_Lineno_token_rec(
-struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate=(( int(*)( int
-start_state, struct Cyc_Lexing_lexbuf* lbuf)) Cyc_Lineno_lex_engine)( lexstate,
-lexbuf); switch( lexstate){ case 0: _LL2: return 2; case 1: _LL3: return 1; case
-2: _LL4: return 3; default: _LL5:( lexbuf->refill_buff)( lexbuf); return(( int(*)(
-struct Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lineno_token_rec)( lexbuf,
-lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp7=(
-struct Cyc_Lexing_Error_struct*) GC_malloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp7[ 0]=({ struct Cyc_Lexing_Error_struct _temp8; _temp8.tag= Cyc_Lexing_Error;
-_temp8.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
-_temp8;}); _temp7;}));} int Cyc_Lineno_token( struct Cyc_Lexing_lexbuf* lexbuf){
-return(( int(*)( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lineno_token_rec)(
-lexbuf, 0);} struct Cyc_Lineno_Pos; struct _tuple0{ struct _tagged_arr f1; int
-f2; } ; static struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef( struct _tagged_arr
-line){ struct _handler_cons _temp9; _push_handler(& _temp9);{ int _temp11= 0;
-if( setjmp( _temp9.handler)){ _temp11= 1;} if( ! _temp11){{ int i= 0; while( i <
+struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_Lineno_lex_engine(
+lexstate, lexbuf); switch( lexstate){ case 0: _LL2: return 2; case 1: _LL3:
+return 1; case 2: _LL4: return 3; default: _LL5:( lexbuf->refill_buff)( lexbuf);
+return Cyc_Lineno_token_rec( lexbuf, lexstate);}( int) _throw(( void*)({ struct
+Cyc_Lexing_Error_struct* _temp7=( struct Cyc_Lexing_Error_struct*) GC_malloc(
+sizeof( struct Cyc_Lexing_Error_struct)); _temp7[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp8; _temp8.tag= Cyc_Lexing_Error; _temp8.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp8;}); _temp7;}));} int Cyc_Lineno_token(
+struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lineno_token_rec( lexbuf, 0);}
+struct Cyc_Lineno_Pos; struct _tuple0{ struct _tagged_arr f1; int f2; } ; static
+struct Cyc_Core_Opt* Cyc_Lineno_parse_linedef( struct _tagged_arr line){ struct
+_handler_cons _temp9; _push_handler(& _temp9);{ int _temp11= 0; if( setjmp(
+_temp9.handler)){ _temp11= 1;} if( ! _temp11){{ int i= 0; while( i <
 _get_arr_size( line, sizeof( unsigned char))?*(( unsigned char*)
 _check_unknown_subscript( line, sizeof( unsigned char), i)) <'0'? 1:*((
 unsigned char*) _check_unknown_subscript( line, sizeof( unsigned char), i)) >'9':

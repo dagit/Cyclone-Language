@@ -2,6 +2,7 @@
 include ../../../Makefile.inc
 
 CFLAGS=-include ../../cyc-lib/include/cyc_include.h
+#CFLAGS=-O -include ../../cyc-lib/include/cyc_include.h
 
 all: $(CYCLIB) nogc.a
 

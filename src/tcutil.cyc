@@ -70,8 +70,8 @@ static list_t<stringptr_t> warning_msgs = null;
 // we batch warnings because we have to parse the file to determine
 // line and column information.
 void warn(seg_t sg, string_t msg) {
-  warning_segs = new List(sg, warning_segs);
-  warning_msgs = new List(new {msg},warning_msgs);
+  warning_segs = new List(sg,      warning_segs);
+  warning_msgs = new List(new msg, warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)

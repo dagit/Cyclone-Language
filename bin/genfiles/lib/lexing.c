@@ -67,22 +67,22 @@ lexbuf->lex_start_pos - n; lexbuf->lex_last_pos= lexbuf->lex_last_pos - n;}}
 struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function( int(* read_fun)( struct
 _tagged_arr, int, void*), void* read_fun_state){ return({ struct Cyc_Lexing_lexbuf*
 _temp0=( struct Cyc_Lexing_lexbuf*) GC_malloc( sizeof( struct Cyc_Lexing_lexbuf));
-_temp0->refill_buff=( void(*)( struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lexing_lex_refill;
-_temp0->refill_state=( void*)({ struct Cyc_Lexing_function_lexbuf_state* _temp1=(
-struct Cyc_Lexing_function_lexbuf_state*) GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state));
-_temp1->read_fun= read_fun; _temp1->read_fun_state=( void*) read_fun_state;
-_temp1;}); _temp0->lex_buffer= Cyc_Core_new_string( 8192); _temp0->lex_buffer_len=
-8192; _temp0->lex_abs_pos= - 8192; _temp0->lex_start_pos= 8192; _temp0->lex_curr_pos=
-8192; _temp0->lex_last_pos= 8192; _temp0->lex_last_action= 0; _temp0->lex_eof_reached=
-0; _temp0;});} int Cyc_Lexing_read_from_file( struct _tagged_arr aux, int n,
-struct Cyc_Stdio___sFILE* f){ return Cyc_Stdio_file_string_read( f, aux, 0, n);}
-struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_file( struct Cyc_Stdio___sFILE* f){
-return(( struct Cyc_Lexing_lexbuf*(*)( int(* read_fun)( struct _tagged_arr, int,
-struct Cyc_Stdio___sFILE*), struct Cyc_Stdio___sFILE* read_fun_state)) Cyc_Lexing_from_function)(
-Cyc_Lexing_read_from_file, f);} static void Cyc_Lexing_set_eof( struct Cyc_Lexing_lexbuf*
-lbuf){ lbuf->lex_eof_reached= 1;} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_string(
-struct _tagged_arr s){ return({ struct Cyc_Lexing_lexbuf* _temp2=( struct Cyc_Lexing_lexbuf*)
-GC_malloc( sizeof( struct Cyc_Lexing_lexbuf)); _temp2->refill_buff= Cyc_Lexing_set_eof;
+_temp0->refill_buff= Cyc_Lexing_lex_refill; _temp0->refill_state=( void*)({
+struct Cyc_Lexing_function_lexbuf_state* _temp1=( struct Cyc_Lexing_function_lexbuf_state*)
+GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state)); _temp1->read_fun=
+read_fun; _temp1->read_fun_state=( void*) read_fun_state; _temp1;}); _temp0->lex_buffer=
+Cyc_Core_new_string( 8192); _temp0->lex_buffer_len= 8192; _temp0->lex_abs_pos= -
+8192; _temp0->lex_start_pos= 8192; _temp0->lex_curr_pos= 8192; _temp0->lex_last_pos=
+8192; _temp0->lex_last_action= 0; _temp0->lex_eof_reached= 0; _temp0;});} int
+Cyc_Lexing_read_from_file( struct _tagged_arr aux, int n, struct Cyc_Stdio___sFILE*
+f){ return Cyc_Stdio_file_string_read( f, aux, 0, n);} struct Cyc_Lexing_lexbuf*
+Cyc_Lexing_from_file( struct Cyc_Stdio___sFILE* f){ return(( struct Cyc_Lexing_lexbuf*(*)(
+int(* read_fun)( struct _tagged_arr, int, struct Cyc_Stdio___sFILE*), struct Cyc_Stdio___sFILE*
+read_fun_state)) Cyc_Lexing_from_function)( Cyc_Lexing_read_from_file, f);}
+static void Cyc_Lexing_set_eof( struct Cyc_Lexing_lexbuf* lbuf){ lbuf->lex_eof_reached=
+1;} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_string( struct _tagged_arr s){
+return({ struct Cyc_Lexing_lexbuf* _temp2=( struct Cyc_Lexing_lexbuf*) GC_malloc(
+sizeof( struct Cyc_Lexing_lexbuf)); _temp2->refill_buff= Cyc_Lexing_set_eof;
 _temp2->refill_state=( void*) 0; _temp2->lex_buffer= Cyc_String_strdup(( struct
 _tagged_arr) s); _temp2->lex_buffer_len=( int) _get_arr_size( s, sizeof(
 unsigned char)); _temp2->lex_abs_pos= 0; _temp2->lex_start_pos= 0; _temp2->lex_curr_pos=

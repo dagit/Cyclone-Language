@@ -52,15 +52,14 @@ GC_malloc( sizeof( struct _tuple0)); _temp6->f1= key; _temp6->f2= val; _temp6;})
 _temp5->tl=*(( struct Cyc_List_List**) _check_unknown_subscript( tab, sizeof(
 struct Cyc_List_List*), bucket)); _temp5;}); if((( int(*)( struct Cyc_List_List*
 x)) Cyc_List_length)(*(( struct Cyc_List_List**) _check_unknown_subscript( tab,
-sizeof( struct Cyc_List_List*), bucket))) > t->max_len){(( void(*)( struct Cyc_Hashtable_Table*
-t)) Cyc_Hashtable_resize)( t);}} void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table*
-t, void* key){ struct _tagged_arr tab= t->tab; struct Cyc_List_List* l=*((
-struct Cyc_List_List**) _check_unknown_subscript( tab, sizeof( struct Cyc_List_List*),(
-int)((* t->hash)( key) % _get_arr_size( tab, sizeof( struct Cyc_List_List*)))));
-return(( void*(*)( int(* compare)( void*, void*), struct Cyc_List_List* l, void*
-x)) Cyc_List_assoc_cmp)( t->cmp, l, key);} void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table*
-t, void* key){ struct _tagged_arr tab= t->tab; int(* cmp)( void*, void*)= t->cmp;
-int bucket=( int)((* t->hash)( key) % _get_arr_size( tab, sizeof( struct Cyc_List_List*)));
+sizeof( struct Cyc_List_List*), bucket))) > t->max_len){ Cyc_Hashtable_resize( t);}}
+void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void* key){ struct
+_tagged_arr tab= t->tab; struct Cyc_List_List* l=*(( struct Cyc_List_List**)
+_check_unknown_subscript( tab, sizeof( struct Cyc_List_List*),( int)((* t->hash)(
+key) % _get_arr_size( tab, sizeof( struct Cyc_List_List*))))); return Cyc_List_assoc_cmp(
+t->cmp, l, key);} void Cyc_Hashtable_remove( struct Cyc_Hashtable_Table* t, void*
+key){ struct _tagged_arr tab= t->tab; int(* cmp)( void*, void*)= t->cmp; int
+bucket=( int)((* t->hash)( key) % _get_arr_size( tab, sizeof( struct Cyc_List_List*)));
 struct Cyc_List_List* l=*(( struct Cyc_List_List**) _check_unknown_subscript(
 tab, sizeof( struct Cyc_List_List*), bucket)); if( l == 0){ return;} if((* cmp)(
 key,((( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)[
@@ -79,8 +78,7 @@ sizeof( unsigned char), i)) << shift; shift += 8; if( shift == 32){ shift= 0;}}}
 return ans;} int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* s){ return
 Cyc_Hashtable_hash_string(* s);} void Cyc_Hashtable_insert_bucket( struct
 _tagged_arr tab, int(* hash)( void*), struct Cyc_List_List* elems){ if( elems ==
-0){ return;}(( void(*)( struct _tagged_arr tab, int(* hash)( void*), struct Cyc_List_List*
-elems)) Cyc_Hashtable_insert_bucket)( tab, hash,(( struct Cyc_List_List*)
+0){ return;} Cyc_Hashtable_insert_bucket( tab, hash,(( struct Cyc_List_List*)
 _check_null( elems))->tl);{ void* key=((( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( elems))->hd)[ _check_known_subscript_notnull( 1u, 0)]).f1; void*
 val=((( struct _tuple0*)(( struct Cyc_List_List*) _check_null( elems))->hd)[
@@ -99,8 +97,7 @@ Cyc_List_List** _temp10=( struct Cyc_List_List**) GC_malloc( sizeof( struct Cyc_
 * _temp9); struct _tagged_arr _temp12= _tag_arr( _temp10, sizeof( struct Cyc_List_List*),(
 unsigned int) nsize);{ unsigned int _temp11= _temp9; unsigned int i; for( i= 0;
 i < _temp11; i ++){ _temp10[ i]= mt;}}; _temp12;});{ int i= 0; for( 0; i < osize;
-i ++){(( void(*)( struct _tagged_arr tab, int(* hash)( void*), struct Cyc_List_List*
-elems)) Cyc_Hashtable_insert_bucket)( ndata, t->hash,*(( struct Cyc_List_List**)
+i ++){ Cyc_Hashtable_insert_bucket( ndata, t->hash,*(( struct Cyc_List_List**)
 _check_unknown_subscript( odata, sizeof( struct Cyc_List_List*), i)));}} t->tab=
 ndata; t->max_len= 2 * t->max_len;} void Cyc_Hashtable_iter( void(* f)( void*,
 void*), struct Cyc_Hashtable_Table* t){ struct _tagged_arr odata= t->tab; int

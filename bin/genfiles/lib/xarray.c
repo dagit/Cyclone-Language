@@ -66,37 +66,36 @@ int len, void* a){ if( len < 1){( int) _throw(( void*)({ struct Cyc_Core_Invalid
 _temp13=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp13[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp14; _temp14.tag= Cyc_Core_InvalidArg;
 _temp14.f1= _tag_arr("singleton xarray must have size >=1", sizeof(
-unsigned char), 36u); _temp14;}); _temp13;}));}{ struct Cyc_Xarray_Xarray* x=((
-struct Cyc_Xarray_Xarray*(*)( int len, void* a)) Cyc_Xarray_create)( len, a); x->num_elmts=
-1; return x;}} void Cyc_Xarray_add( struct Cyc_Xarray_Xarray* xarr, void* a){
-if( xarr->num_elmts == _get_arr_size( xarr->elmts, sizeof( void*))){ if( xarr->num_elmts
-== 0){ xarr->elmts= _tag_arr(({ unsigned int _temp15=( unsigned int) 10; void**
-_temp16=( void**) GC_malloc( sizeof( void*) * _temp15);{ unsigned int _temp17=
-_temp15; unsigned int i; for( i= 0; i < _temp17; i ++){ _temp16[ i]= a;}};
-_temp16;}), sizeof( void*),( unsigned int) 10);} else{ struct _tagged_arr newarr=({
-unsigned int _temp18=( unsigned int)( xarr->num_elmts * 2); void** _temp19=(
-void**) GC_malloc( sizeof( void*) * _temp18); struct _tagged_arr _temp21=
-_tag_arr( _temp19, sizeof( void*),( unsigned int)( xarr->num_elmts * 2));{
-unsigned int _temp20= _temp18; unsigned int i; for( i= 0; i < _temp20; i ++){
-_temp19[ i]=*(( void**) _check_unknown_subscript( xarr->elmts, sizeof( void*), 0));}};
-_temp21;});{ int i= 1; for( 0; i < xarr->num_elmts; ++ i){*(( void**)
-_check_unknown_subscript( newarr, sizeof( void*), i))=*(( void**)
-_check_unknown_subscript( xarr->elmts, sizeof( void*), i));}} xarr->elmts=
-newarr;}}*(( void**) _check_unknown_subscript( xarr->elmts, sizeof( void*), xarr->num_elmts
-++))= a;} int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray* xarr, void* a){((
-void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( xarr, a);
-return xarr->num_elmts - 1;} struct _tagged_arr Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*
-xarr){ if( xarr->num_elmts == 0){ return _tag_arr(({ void** _temp22=( void**)
-GC_malloc( sizeof( void*) * 0); _temp22;}), sizeof( void*), 0u);}{ struct
-_tagged_arr ans=({ unsigned int _temp23=( unsigned int) xarr->num_elmts; void**
-_temp24=( void**) GC_malloc( sizeof( void*) * _temp23); struct _tagged_arr
-_temp26= _tag_arr( _temp24, sizeof( void*),( unsigned int) xarr->num_elmts);{
-unsigned int _temp25= _temp23; unsigned int i; for( i= 0; i < _temp25; i ++){
-_temp24[ i]=*(( void**) _check_unknown_subscript( xarr->elmts, sizeof( void*),(
-int) i));}}; _temp26;}); return ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_from_array(
-struct _tagged_arr arr){ if( _get_arr_size( arr, sizeof( void*)) == 0){ return((
-struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ struct Cyc_Xarray_Xarray*
-ans=({ struct Cyc_Xarray_Xarray* _temp27=( struct Cyc_Xarray_Xarray*) GC_malloc(
+unsigned char), 36u); _temp14;}); _temp13;}));}{ struct Cyc_Xarray_Xarray* x=
+Cyc_Xarray_create( len, a); x->num_elmts= 1; return x;}} void Cyc_Xarray_add(
+struct Cyc_Xarray_Xarray* xarr, void* a){ if( xarr->num_elmts == _get_arr_size(
+xarr->elmts, sizeof( void*))){ if( xarr->num_elmts == 0){ xarr->elmts= _tag_arr(({
+unsigned int _temp15=( unsigned int) 10; void** _temp16=( void**) GC_malloc(
+sizeof( void*) * _temp15);{ unsigned int _temp17= _temp15; unsigned int i; for(
+i= 0; i < _temp17; i ++){ _temp16[ i]= a;}}; _temp16;}), sizeof( void*),(
+unsigned int) 10);} else{ struct _tagged_arr newarr=({ unsigned int _temp18=(
+unsigned int)( xarr->num_elmts * 2); void** _temp19=( void**) GC_malloc( sizeof(
+void*) * _temp18); struct _tagged_arr _temp21= _tag_arr( _temp19, sizeof( void*),(
+unsigned int)( xarr->num_elmts * 2));{ unsigned int _temp20= _temp18;
+unsigned int i; for( i= 0; i < _temp20; i ++){ _temp19[ i]=*(( void**)
+_check_unknown_subscript( xarr->elmts, sizeof( void*), 0));}}; _temp21;});{ int
+i= 1; for( 0; i < xarr->num_elmts; ++ i){*(( void**) _check_unknown_subscript(
+newarr, sizeof( void*), i))=*(( void**) _check_unknown_subscript( xarr->elmts,
+sizeof( void*), i));}} xarr->elmts= newarr;}}*(( void**)
+_check_unknown_subscript( xarr->elmts, sizeof( void*), xarr->num_elmts ++))= a;}
+int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray* xarr, void* a){ Cyc_Xarray_add(
+xarr, a); return xarr->num_elmts - 1;} struct _tagged_arr Cyc_Xarray_to_array(
+struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){ return _tag_arr(({
+void** _temp22=( void**) GC_malloc( sizeof( void*) * 0); _temp22;}), sizeof(
+void*), 0u);}{ struct _tagged_arr ans=({ unsigned int _temp23=( unsigned int)
+xarr->num_elmts; void** _temp24=( void**) GC_malloc( sizeof( void*) * _temp23);
+struct _tagged_arr _temp26= _tag_arr( _temp24, sizeof( void*),( unsigned int)
+xarr->num_elmts);{ unsigned int _temp25= _temp23; unsigned int i; for( i= 0; i <
+_temp25; i ++){ _temp24[ i]=*(( void**) _check_unknown_subscript( xarr->elmts,
+sizeof( void*),( int) i));}}; _temp26;}); return ans;}} struct Cyc_Xarray_Xarray*
+Cyc_Xarray_from_array( struct _tagged_arr arr){ if( _get_arr_size( arr, sizeof(
+void*)) == 0){ return Cyc_Xarray_create_empty();}{ struct Cyc_Xarray_Xarray* ans=({
+struct Cyc_Xarray_Xarray* _temp27=( struct Cyc_Xarray_Xarray*) GC_malloc(
 sizeof( struct Cyc_Xarray_Xarray)); _temp27->elmts=({ unsigned int _temp28=
 _get_arr_size( arr, sizeof( void*)); void** _temp29=( void**) GC_malloc( sizeof(
 void*) * _temp28); struct _tagged_arr _temp31= _tag_arr( _temp29, sizeof( void*),
@@ -106,47 +105,45 @@ _check_unknown_subscript( arr, sizeof( void*),( int) i));}}; _temp31;}); _temp27
 int) _get_arr_size( arr, sizeof( void*)); _temp27;}); return ans;}} struct Cyc_Xarray_Xarray*
 Cyc_Xarray_append( struct Cyc_Xarray_Xarray* xarr1, struct Cyc_Xarray_Xarray*
 xarr2){ int newsz=( int)( _get_arr_size( xarr1->elmts, sizeof( void*)) +
-_get_arr_size( xarr2->elmts, sizeof( void*))); if( newsz == 0){ return(( struct
-Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ void* init= _get_arr_size(
-xarr1->elmts, sizeof( void*)) == 0?*(( void**) _check_unknown_subscript( xarr2->elmts,
-sizeof( void*), 0)):*(( void**) _check_unknown_subscript( xarr1->elmts, sizeof(
-void*), 0)); struct Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp32=(
-struct Cyc_Xarray_Xarray*) GC_malloc( sizeof( struct Cyc_Xarray_Xarray));
-_temp32->elmts=({ unsigned int _temp33=( unsigned int) newsz; void** _temp34=(
-void**) GC_malloc( sizeof( void*) * _temp33); struct _tagged_arr _temp36=
-_tag_arr( _temp34, sizeof( void*),( unsigned int) newsz);{ unsigned int _temp35=
-_temp33; unsigned int i; for( i= 0; i < _temp35; i ++){ _temp34[ i]= init;}};
-_temp36;}); _temp32->num_elmts= 0; _temp32;});{ int i= 0; for( 0; i < xarr1->num_elmts;
-++ i){(( void(*)( struct Cyc_Xarray_Xarray* xarr, void* a)) Cyc_Xarray_add)( ans,*((
+_get_arr_size( xarr2->elmts, sizeof( void*))); if( newsz == 0){ return Cyc_Xarray_create_empty();}{
+void* init= _get_arr_size( xarr1->elmts, sizeof( void*)) == 0?*(( void**)
+_check_unknown_subscript( xarr2->elmts, sizeof( void*), 0)):*(( void**)
+_check_unknown_subscript( xarr1->elmts, sizeof( void*), 0)); struct Cyc_Xarray_Xarray*
+ans=({ struct Cyc_Xarray_Xarray* _temp32=( struct Cyc_Xarray_Xarray*) GC_malloc(
+sizeof( struct Cyc_Xarray_Xarray)); _temp32->elmts=({ unsigned int _temp33=(
+unsigned int) newsz; void** _temp34=( void**) GC_malloc( sizeof( void*) *
+_temp33); struct _tagged_arr _temp36= _tag_arr( _temp34, sizeof( void*),(
+unsigned int) newsz);{ unsigned int _temp35= _temp33; unsigned int i; for( i= 0;
+i < _temp35; i ++){ _temp34[ i]= init;}}; _temp36;}); _temp32->num_elmts= 0;
+_temp32;});{ int i= 0; for( 0; i < xarr1->num_elmts; ++ i){ Cyc_Xarray_add( ans,*((
 void**) _check_unknown_subscript( xarr1->elmts, sizeof( void*), i)));}}{ int i=
-0; for( 0; i < xarr2->num_elmts; ++ i){(( void(*)( struct Cyc_Xarray_Xarray*
-xarr, void* a)) Cyc_Xarray_add)( ans,*(( void**) _check_unknown_subscript( xarr2->elmts,
-sizeof( void*), i)));}} return ans;}} void Cyc_Xarray_app( void*(* f)( void*),
-struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts; ++ i){ f(*((
-void**) _check_unknown_subscript( xarr->elmts, sizeof( void*), i)));}} void Cyc_Xarray_app_c(
-void*(* f)( void*, void*), void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0;
-for( 0; i < xarr->num_elmts; ++ i){ f( env,*(( void**) _check_unknown_subscript(
-xarr->elmts, sizeof( void*), i)));}} void Cyc_Xarray_iter( void(* f)( void*),
-struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts; ++ i){ f(*((
-void**) _check_unknown_subscript( xarr->elmts, sizeof( void*), i)));}} void Cyc_Xarray_iter_c(
+0; for( 0; i < xarr2->num_elmts; ++ i){ Cyc_Xarray_add( ans,*(( void**)
+_check_unknown_subscript( xarr2->elmts, sizeof( void*), i)));}} return ans;}}
+void Cyc_Xarray_app( void*(* f)( void*), struct Cyc_Xarray_Xarray* xarr){ int i=
+0; for( 0; i < xarr->num_elmts; ++ i){ f(*(( void**) _check_unknown_subscript(
+xarr->elmts, sizeof( void*), i)));}} void Cyc_Xarray_app_c( void*(* f)( void*,
+void*), void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0; for( 0; i < xarr->num_elmts;
+++ i){ f( env,*(( void**) _check_unknown_subscript( xarr->elmts, sizeof( void*),
+i)));}} void Cyc_Xarray_iter( void(* f)( void*), struct Cyc_Xarray_Xarray* xarr){
+int i= 0; for( 0; i < xarr->num_elmts; ++ i){ f(*(( void**)
+_check_unknown_subscript( xarr->elmts, sizeof( void*), i)));}} void Cyc_Xarray_iter_c(
 void(* f)( void*, void*), void* env, struct Cyc_Xarray_Xarray* xarr){ int i= 0;
 for( 0; i < xarr->num_elmts; ++ i){ f( env,*(( void**) _check_unknown_subscript(
 xarr->elmts, sizeof( void*), i)));}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map(
 void*(* f)( void*), struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){
-return(( struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{ struct
-Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp37=( struct Cyc_Xarray_Xarray*)
-GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp37->elmts=({ unsigned int
-_temp38= _get_arr_size( xarr->elmts, sizeof( void*)); void** _temp39=( void**)
-GC_malloc( sizeof( void*) * _temp38); struct _tagged_arr _temp41= _tag_arr(
-_temp39, sizeof( void*), _get_arr_size( xarr->elmts, sizeof( void*)));{
-unsigned int _temp40= _temp38; unsigned int i; for( i= 0; i < _temp40; i ++){
-_temp39[ i]= f(*(( void**) _check_unknown_subscript( xarr->elmts, sizeof( void*),
-0)));}}; _temp41;}); _temp37->num_elmts= xarr->num_elmts; _temp37;});{ int i= 1;
-for( 0; i < xarr->num_elmts; ++ i){*(( void**) _check_unknown_subscript( ans->elmts,
-sizeof( void*), i))= f(*(( void**) _check_unknown_subscript( xarr->elmts,
-sizeof( void*), i)));}} return ans;}} struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c(
-void*(* f)( void*, void*), void* env, struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts
-== 0){ return(( struct Cyc_Xarray_Xarray*(*)()) Cyc_Xarray_create_empty)();}{
+return Cyc_Xarray_create_empty();}{ struct Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray*
+_temp37=( struct Cyc_Xarray_Xarray*) GC_malloc( sizeof( struct Cyc_Xarray_Xarray));
+_temp37->elmts=({ unsigned int _temp38= _get_arr_size( xarr->elmts, sizeof( void*));
+void** _temp39=( void**) GC_malloc( sizeof( void*) * _temp38); struct
+_tagged_arr _temp41= _tag_arr( _temp39, sizeof( void*), _get_arr_size( xarr->elmts,
+sizeof( void*)));{ unsigned int _temp40= _temp38; unsigned int i; for( i= 0; i <
+_temp40; i ++){ _temp39[ i]= f(*(( void**) _check_unknown_subscript( xarr->elmts,
+sizeof( void*), 0)));}}; _temp41;}); _temp37->num_elmts= xarr->num_elmts;
+_temp37;});{ int i= 1; for( 0; i < xarr->num_elmts; ++ i){*(( void**)
+_check_unknown_subscript( ans->elmts, sizeof( void*), i))= f(*(( void**)
+_check_unknown_subscript( xarr->elmts, sizeof( void*), i)));}} return ans;}}
+struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*), void* env,
+struct Cyc_Xarray_Xarray* xarr){ if( xarr->num_elmts == 0){ return Cyc_Xarray_create_empty();}{
 struct Cyc_Xarray_Xarray* ans=({ struct Cyc_Xarray_Xarray* _temp42=( struct Cyc_Xarray_Xarray*)
 GC_malloc( sizeof( struct Cyc_Xarray_Xarray)); _temp42->elmts=({ unsigned int
 _temp43= _get_arr_size( xarr->elmts, sizeof( void*)); void** _temp44=( void**)
