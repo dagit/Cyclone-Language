@@ -205,7 +205,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     _ syn2 = cf_check_exp(syn1.when_true,  e2);
     _ syn3 = cf_check_exp(syn1.when_false, e3);
     return CFExpSyn(merge_flow(syn2.when_true,  syn3.when_true),
-		    merge_flow(syn3.when_false, syn3.when_false));
+		    merge_flow(syn2.when_false, syn3.when_false));
 
   case FnCall_e(e,es):
     // Perhaps C guarantees function before arguments, in which case we're
