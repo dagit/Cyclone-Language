@@ -2627,7 +2627,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
     }
     break;
-  case &TypedefType(tdn,targs,*toptp):
+  case &TypedefType(tdn,*targs_ref,*toptp):
+    list_t<type_t> targs = *targs_ref;
     // NB: since we called compress *toptp == NULL
     typedefdecl_t td;
     try td = lookup_typedefdecl(te,loc,tdn);
@@ -2649,13 +2650,17 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (ts != NULL)
       terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
     if (tvs != NULL) {
+      list_t<type_t> hidden_ts = NULL;
       // too few parameters plug them in for the user using evars
       for (; tvs != NULL; tvs = tvs->tl) {
         kind_t k = conref_val(tvs->hd->kind);
         type_t e = new_evar(NULL,NULL);
+        hidden_ts = new List(e,hidden_ts);
         cvtenv = i_check_valid_type(loc,te,cvtenv,k,e);
         inst = new List(new $(tvs->hd,e),inst);
       }
+      // add the hidden type arguments back in so error messages are decent
+      *targs_ref = List::append(targs,hidden_ts);
     }
     type_t new_typ = substitute(inst,td->defn);
     *toptp = new Opt(new_typ);
