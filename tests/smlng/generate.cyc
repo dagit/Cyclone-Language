@@ -317,6 +317,36 @@ void random_generate1() {
   }
 }
 
+/* Colors only, flattened */
+void random_generate2() {
+  for (let lastcolor = -1; len > 0; len--) {
+    let color;
+    while ((color = random(9)) == lastcolor) // 8 colors plus original color
+      /* skip */ ;
+    if (color==8) printf("x");
+    else {
+      printf(tag_strings[color_tags[color]]);
+      printf("@");
+      printf(end_tag_strings[color_tags[color]]);
+    }
+  }
+}
+
+/* Sizes only, flattened */
+void random_generate3() {
+  for (let lastsize = -1; len > 0; len--) {
+    let sz;
+    while ((sz = random(9)) == lastsize) // 8 sizes plus original size
+      /* skip */ ;
+    if (sz==8) printf("x");
+    else {
+      printf(tag_strings[size_tags[sz]]);
+      printf("@");
+      printf(end_tag_strings[size_tags[sz]]);
+    }
+  }
+}
+
 /**********************************************************************/
 
 int main(int argc, char ??argv) {
@@ -348,8 +378,12 @@ int main(int argc, char ??argv) {
 
   if (algorithm == 0)
     random_generate0();
-  else
+  else if (algorithm == 1)
     random_generate1();
+  else if (algorithm == 2)
+    random_generate2();
+  else
+    random_generate3();
 
   return 0;
 }
