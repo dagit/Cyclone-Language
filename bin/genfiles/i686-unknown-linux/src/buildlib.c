@@ -674,14 +674,15 @@ __unused4;unsigned int __unused5;};int Cyc_Std_mkdir(struct _tagged_arr pathname
 unsigned int mode);struct Cyc_Std_flock{short l_type;short l_whence;int l_start;int
 l_len;int l_pid;};struct Cyc_Std_Flock_struct{int tag;struct Cyc_Std_flock*f1;};
 struct Cyc_Std_Long_struct{int tag;int f1;};int Cyc_Std_open(struct _tagged_arr,int,
-struct _tagged_arr);enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,
+struct _tagged_arr);enum Cyc_Std___anonymous_enum_366__{Cyc_Std__PC_LINK_MAX  = 0,
 Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX
  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
 Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
- = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
- = 0};int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chroot(struct _tagged_arr);
+ = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17,Cyc_Std__PC_ALLOC_SIZE_MIN  = 18,Cyc_Std__PC_SYMLINK_MAX
+ = 19};enum Cyc_Std___anonymous_enum_368__{Cyc_Std__CS_PATH  = 0,Cyc_Std__CS_V6_WIDTH_RESTRICTED_ENVS
+ = 1};int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chroot(struct _tagged_arr);
 int close(int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int
 size);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int isspace(int);int
 toupper(int);void Cyc_Lex_lex_init();extern char*Ccomp;struct Cyc_Std___cycFILE*Cyc_log_file=

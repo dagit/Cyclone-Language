@@ -740,19 +740,20 @@ int a,Cyc_Std_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,C
 b){return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return
 __stub_FD_ZERO(a);}enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM
  = 2,Cyc_Std_SOCK_RAW  = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET
- = 10};enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK
+ = 10};enum Cyc_Std___anonymous_enum_270__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK
  = 2,Cyc_Std_MSG_DONTROUTE  = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC
  = 32,Cyc_Std_MSG_DONTWAIT  = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,
 Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN  = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST
- = 4096,Cyc_Std_MSG_ERRQUEUE  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{
-unsigned int cmsg_len;int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};
-enum Cyc_Std___anonymous_enum_267__{Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS
- = 2,Cyc_Std___SCM_CONNECT  = 3};struct Cyc_Std_linger{int l_onoff;int l_linger;};
-enum Cyc_Std___anonymous_enum_268__{Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR
- = 2};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*f1;};
-struct Cyc_Std_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{
-int tag;unsigned int f1;};struct Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{
-int tag;struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
+ = 4096,Cyc_Std_MSG_ERRQUEUE  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384,Cyc_Std_MSG_MORE
+ = 32768};struct Cyc_Std_cmsghdr{unsigned int cmsg_len;int cmsg_level;int cmsg_type;
+unsigned char __cmsg_data[0];};enum Cyc_Std___anonymous_enum_271__{Cyc_Std_SCM_RIGHTS
+ = 1,Cyc_Std_SCM_CREDENTIALS  = 2,Cyc_Std___SCM_CONNECT  = 3};struct Cyc_Std_linger{
+int l_onoff;int l_linger;};enum Cyc_Std___anonymous_enum_272__{Cyc_Std_SHUT_RD  = 0,
+Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR  = 2};struct Cyc_Std_SA_sockaddr_in_struct{
+int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
+unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};struct
+Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{int tag;
+struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
 unsigned int*f1;};struct Cyc_Std_SO_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
 int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
 int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(
@@ -940,14 +941,15 @@ unsigned int,char*,const struct Cyc_Std_tm*);unsigned int Cyc_Std_strftime(struc
 _tagged_arr s,unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_Std_tm*t){
 unsigned int m=_get_arr_size(s,sizeof(char))< maxsize?_get_arr_size(s,sizeof(char)):
 maxsize;return strftime(underlying_Cstring(s),m,underlying_Cstring(fmt),t);}enum 
-Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 
+Cyc_Std___anonymous_enum_366__{Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 
 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX  = 4,
 Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
 Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
- = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
- = 0};int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
+ = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17,Cyc_Std__PC_ALLOC_SIZE_MIN  = 18,Cyc_Std__PC_SYMLINK_MAX
+ = 19};enum Cyc_Std___anonymous_enum_368__{Cyc_Std__CS_PATH  = 0,Cyc_Std__CS_V6_WIDTH_RESTRICTED_ENVS
+ = 1};int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
 _tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);int
 Cyc_Std_chroot(struct _tagged_arr);int Cyc_Std_execlp(struct _tagged_arr,struct
 _tagged_arr,struct _tagged_arr);int Cyc_Std_execve(struct _tagged_arr,struct

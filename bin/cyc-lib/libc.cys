@@ -3732,6 +3732,16 @@ prologue {
 }
 ;
 
+sys/ioctl.h:
+cpp {
+#include <sys/socket.h>
+}
+include {
+FIONREAD
+FIONBIO
+}
+;
+
 sys/ipc.h:
 include {
 ipc_perm
