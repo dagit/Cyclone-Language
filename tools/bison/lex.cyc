@@ -411,7 +411,7 @@ lex()
 	*p++ = '\"';
 	while (literalchar(&p, &code, '\"'))  /* read up to and including " */
 	  {
-	    if (p >= token_buffer + maxtoken - 4)
+	    if (p >= token_buffer + (maxtoken - 4))
 	      p = grow_token_buffer(p);
 	  }
 	*p = 0;

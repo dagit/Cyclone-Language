@@ -141,11 +141,12 @@ static mstring_t trunc(int n, mstring_t<`H> s) {
     return s;
   int len_one = (n-3)/2;
   int len_two = n-3-len_one;
-  mstring_t ans = new_string(n+1);
+  mstring_t mans = new_string(n+1);
+  char ?NOZEROTERM ans = (char ?NOZEROTERM)mans;
   strncpy(ans,             s,               len_one);
   strncpy(ans + len_one,   "...",           3);
-  strncpy(ans + len_one+3, s + len-len_two, len_two);
-  return ans;
+  strncpy(ans + (len_one+3), s + (len-len_two), len_two);
+  return mans;
 }
 
 static int line_length = 76;

@@ -116,22 +116,22 @@ extern int nolinesflag;
 extern int noparserflag;
 extern int toknumflag;
 
-extern char ??tags;
+extern char ?-?-tags;
 extern int ?user_toknums;
 extern int tokensetsize;
 extern int final_state;
-extern core *?state_table;
-extern shifts *?shift_table;
-extern errs *?err_table;
-extern reductions *?reduction_table;
-extern short ?accessing_symbol;
-extern unsigned ?LA;
-extern short ?LAruleno;
-extern short ?lookaheads;
-extern char ?consistent;
-extern short ?goto_map;
-extern short ?from_state;
-extern short ?to_state;
+extern core *?-state_table;
+extern shifts *?-shift_table;
+extern errs *?-err_table;
+extern reductions *?-reduction_table;
+extern short ?-accessing_symbol;
+extern unsigned ?-LA;
+extern short ?-LAruleno;
+extern short ?-lookaheads;
+extern char ?-consistent;
+extern short ?-goto_map;
+extern short ?-from_state;
+extern short ?-to_state;
 
 void output_token_translations();
 void output_gram();
@@ -332,7 +332,7 @@ output_gram()
 {
   register int i;
   register int j;
-  register short ?sp;
+  register short ?- sp;
 
   /* With the ordinary parser, 
      yyprhs and yyrhs are needed only for yydebug. */
@@ -466,14 +466,14 @@ output_rule_data()
 
   fprintf((FILE @)ftable,
           "static string_t yytname[] = {   \"%s\"",
-          tags[0]);
+          (string_t)tags[0]);
 
-  j = strlen (tags[0]) + 44;
+  j = strlen ((string_t)tags[0]) + 44;
   for (i = 1; i < nsyms; i++)
 		/* this used to be i<=nsyms, but that output a final "" symbol
 			almost by accident */
     {
-      register char ?p;
+      register char ?- p;
       putc(',', (FILE @)ftable);
       j++;
 
@@ -717,7 +717,7 @@ int action_row(int state)
   register int shift_state;
   register int symbol;
   register unsigned mask;
-  register unsigned ?wordp;
+  register unsigned ?-wordp;
   register reductions *redp;
   register shifts *shiftp;
   register errs *errp;

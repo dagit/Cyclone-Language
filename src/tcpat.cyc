@@ -67,7 +67,8 @@ static void resolve_pat(tenv_t te, pat_t p) {
     case Loc_n: 
     case &Rel_n(NULL):
       (*q)[0] = Loc_n;        
-      p->r = new Var_p(new_vardecl(q,VoidType,NULL)); // type set later
+      p->r = new Var_p(new_vardecl(q,VoidType,NULL),// type set later
+                       new_pat(Wild_p,NULL)); 
       return;
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
@@ -193,12 +194,14 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   case Wild_p:       
     t = any_type(lookup_type_vars(te),topt);
     break;
-  case &Var_p(vd):
-    t = any_type(lookup_type_vars(te),topt);
+  case &Var_p(vd,p2):
+    res = tcPatRec(te,p2,topt,rgn_opt);
+    t = p2->topt->v;
     set_vd(vd, &res.patvars, t);
     break;
-  case &Reference_p(vd):
-    t = any_type(lookup_type_vars(te),topt);
+  case &Reference_p(vd,p2):
+    res = tcPatRec(te,p2,topt,rgn_opt);
+    t = p2->topt->v;
     if(rgn_opt == NULL) {
       terr(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
@@ -691,13 +694,13 @@ static simple_pat_t compile_pat(pat_t p) {
   simple_pat_t s;
   switch (p->r) {
   case Wild_p:          
-  case &Var_p(_):       
   case &TagInt_p(_,_):  s = Any; break;
   case Null_p:          s = null_pat(p); break;
   case &Int_p(sn,i):    s = int_pat(i,p); break;
   case &Char_p(c):      s = char_pat(c,p); break;
   case &Float_p(f):     s = float_pat(f,p); break;
-  case &Reference_p(_): s = Any; break;
+  case &Var_p(_,p2):    s = compile_pat(p2); break;
+  case &Reference_p(_,p2): s = compile_pat(p2); break;
   case &Pointer_p(pp):
     switch (compress(p->topt->v)) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
@@ -1104,8 +1107,8 @@ static string_t desc2string(term_desc_t d) {
     }
     switch (p->r) {
     case Wild_p: return "_";
-    case &Var_p(vd): return qvar2string(vd->name);
-    case &Reference_p(vd): return aprintf("*%s",qvar2string(vd->name));
+    case &Var_p(vd,_): return qvar2string(vd->name);
+    case &Reference_p(vd,_): return aprintf("*%s",qvar2string(vd->name));
     case &TagInt_p(tv,vd): return aprintf("%s<`%s>",qvar2string(vd->name),
                                           *tv->name);
     case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(ds));
@@ -1134,7 +1137,7 @@ static string_t desc2string(term_desc_t d) {
     // orig_pat is NULL when we have an && clause on a pattern
     if (orig_pat == NULL) throw Desc2string;
     switch (compress(orig_pat->topt->v)) {
-    case &IntType(_,B1): 
+    case &IntType(_,Char_sz): 
       // find a character not in the constructor set
       for (int i = 0; i < 256; i++) {
         let c = char_con((char)i,orig_pat);

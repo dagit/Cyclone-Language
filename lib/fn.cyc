@@ -30,21 +30,21 @@ namespace Fn;
 // on things.
 
 struct Function<`arg,`res,`bd::R> { <`env> : regions(`env) > `bd
-  `res (@f)(`env,`arg);
+  `res (@`bd f)(`env,`arg);
   `env env;
 };
 
 // make a closure out of a function pointer and environment
-fn_t<`arg,`res,`bd> make_fn(`res f(`env,`arg), `env x : regions(`env) > `bd) {
+fn_t<`arg,`res,`bd> make_fn(`res (@`bd f)(`env,`arg), `env x : regions(`env) > `bd) {
   return new Function(f,x);
 }
 
-static `res fp_apply(`res f(`arg), `arg x) {
+static `res fp_apply(`res (@`bd f)(`arg), `arg x) {
   return f(x);
 }
 
 // convert a function pointer to a closure
-fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions($(`arg,`res)) > `bd) {
+fn_t<`arg,`res,`bd> fp2fn(`res (@`bd f)(`arg) : regions($(`arg,`res)) > `bd) {
   return make_fn(fp_apply, f);
 }
 

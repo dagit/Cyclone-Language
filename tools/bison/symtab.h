@@ -16,7 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Bison; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
+#ifndef _SYMTAB_H_
+#define _SYMTAB_H_
 
 #define	TABSIZE	1009
 
@@ -54,3 +55,4 @@ extern bucket *?symtab;
 extern bucket *firstsymbol;
 
 extern bucket *getsym(const char ?);
+#endif

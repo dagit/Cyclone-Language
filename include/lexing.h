@@ -75,7 +75,7 @@ typedef struct lex_tables @LexTables;
 
 
 extern Lexbuf<Function_lexbuf_state<`b>>
-  from_function(int read_fun(mstring_t<`H>,int,`b), `b);
+  from_function(int (@`H read_fun)(mstring_t<`H>,int,`b), `b);
 
 extern Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE@`r);
 extern Lexbuf<bool> from_string(mstring_t);

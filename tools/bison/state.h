@@ -82,7 +82,8 @@ The final state has one shift, which goes to the termination state
 The reason for the extra state at the end is to placate the parser's
 strategy of making all decisions one token ahead of its actions.  */
 
-
+#ifndef _STATE_H
+#define _STATE_H
 typedef
   struct core_tag
     {
@@ -91,7 +92,7 @@ typedef
       short number;
       short accessing_symbol;
       short nitems;
-      short ?items;
+      short ?-items;
     }
   core;
 
@@ -103,7 +104,7 @@ typedef
       struct shifts_tag *next;
       short number;
       short nshifts;
-      short ?shifts;
+      short ?-shifts;
     }
   shifts;
 
@@ -113,7 +114,7 @@ typedef
   struct errs_tag
     {
       short nerrs;
-      short ?errs;
+      short ?-errs;
     }
   errs;
 
@@ -125,7 +126,7 @@ typedef
       struct reductions_tag *next;
       short number;
       short nreds;
-      short ?rules;
+      short ?-rules;
     }
   reductions;
 
@@ -135,3 +136,4 @@ extern int nstates;
 extern core *first_state;
 extern shifts *first_shift;
 extern reductions *first_reduction;
+#endif

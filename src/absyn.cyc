@@ -122,7 +122,8 @@ conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
 MAKE_EQ_CONSTR(true_conref,bool,true);
 MAKE_EQ_CONSTR(false_conref,bool,false);
 MAKE_EQ_CONSTR(bounds_one_conref,bounds_t,&one_bt);
-MAKE_EQ_CONSTR(bounds_unknown_conref,bounds_t,Unknown_b);
+MAKE_EQ_CONSTR(bounds_dynforward_conref,bounds_t,DynForward_b);
+MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,DynEither_b);
 #undef MAKE_EQ_CONSTR
 
 // compress a conref
@@ -175,12 +176,12 @@ kind_t force_kb(kindbound_t kb) {
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
-static tunion Type.IntType char_tt      = IntType(None,B1);
-static tunion Type.IntType uchar_tt     = IntType(Unsigned,B1);
-static tunion Type.IntType ushort_tt    = IntType(Unsigned,B2);
-static tunion Type.IntType uint_tt      = IntType(Unsigned,B4);
-static tunion Type.IntType ulong_tt     = IntType(Unsigned,B4);
-static tunion Type.IntType ulonglong_tt = IntType(Unsigned,B8);
+static tunion Type.IntType char_tt      = IntType(None,Char_sz);
+static tunion Type.IntType uchar_tt     = IntType(Unsigned,Char_sz);
+static tunion Type.IntType ushort_tt    = IntType(Unsigned,Short_sz);
+static tunion Type.IntType uint_tt      = IntType(Unsigned,Int_sz);
+static tunion Type.IntType ulong_tt     = IntType(Unsigned,Long_sz);
+static tunion Type.IntType ulonglong_tt = IntType(Unsigned,LongLong_sz);
 type_t char_typ      = &char_tt;
 type_t uchar_typ     = &uchar_tt;
 type_t ushort_typ    = &ushort_tt;
@@ -188,11 +189,11 @@ type_t uint_typ      = &uint_tt;
 type_t ulong_typ     = &ulong_tt;
 type_t ulonglong_typ = &ulonglong_tt;
 // signed types
-static tunion Type.IntType schar_tt     = IntType(Signed,B1);
-static tunion Type.IntType sshort_tt    = IntType(Signed,B2);
-static tunion Type.IntType sint_tt      = IntType(Signed,B4);
-static tunion Type.IntType slong_tt     = IntType(Signed,B4);
-static tunion Type.IntType slonglong_tt = IntType(Signed,B8);
+static tunion Type.IntType schar_tt     = IntType(Signed,Char_sz);
+static tunion Type.IntType sshort_tt    = IntType(Signed,Short_sz);
+static tunion Type.IntType sint_tt      = IntType(Signed,Int_sz);
+static tunion Type.IntType slong_tt     = IntType(Signed,Long_sz);
+static tunion Type.IntType slonglong_tt = IntType(Signed,LongLong_sz);
 type_t schar_typ     = &schar_tt;
 type_t sshort_typ    = &sshort_tt;
 type_t sint_typ      = &sint_tt;
@@ -253,10 +254,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static type_t* string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,empty_tqual(NULL),Unknown_b,true_conref);
+    return starb_typ(char_typ,rgn,empty_tqual(NULL),DynForward_b,true_conref);
   if (string_t_opt == NULL) {
     type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(NULL),
-                         Unknown_b,true_conref);
+                         DynForward_b,true_conref);
     string_t_opt = new t;
   }
   return *string_t_opt;
@@ -264,10 +265,10 @@ type_t string_typ(type_t rgn) {
 static type_t* const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,const_tqual(NULL),Unknown_b,true_conref);
+    return starb_typ(char_typ,rgn,const_tqual(NULL),DynForward_b,true_conref);
   if (const_string_t_opt == NULL) {
     type_t t = starb_typ(char_typ,HeapRgn,const_tqual(NULL),
-                         Unknown_b,true_conref);
+                         DynForward_b,true_conref);
     const_string_t_opt = new t;
   }
   return *const_string_t_opt;
@@ -313,10 +314,17 @@ type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
 					  .zero_term = zeroterm, 
                                           .ptrloc=NULL}});
 }
-type_t tagged_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
+type_t dynforward_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm){
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
-					  .bounds = bounds_unknown_conref,
+					  .bounds = bounds_dynforward_conref,
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
+}
+type_t dyneither_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
+  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
+				  PtrAtts{.rgn = r, .nullable = true_conref, 
+					  .bounds = bounds_dyneither_conref,
 					  .zero_term = zeroterm, 
                                           .ptrloc=NULL}});
 }
@@ -637,7 +645,7 @@ decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 // rather than mucking with the typechecker/unifier/etc.
 static
  $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t,`H>,tqual_t,type_t)@ a) {
-  return new $((*a)[0],(*a)[1],pointer_expand((*a)[2]));
+  return new $((*a)[0],(*a)[1],pointer_expand((*a)[2],true));
 }
 
 type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ, 
@@ -646,7 +654,8 @@ type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ,
                     bool c_varargs, vararg_info_t *`H cyc_varargs,
                     list_t<$(type_t,type_t)@`H,`H> rgn_po,
                     attributes_t atts) {
-  return new FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
+  return new FnType(FnInfo{.tvars = tvs, 
+                              .ret_typ = pointer_expand(ret_typ,false),
                               .effect = eff_typ, 
                               .args = List::map(expand_arg,args), 
                               .c_varargs = c_varargs, 
@@ -654,9 +663,12 @@ type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ,
                               .rgn_po = rgn_po,
                               .attributes=atts});
 }
-type_t pointer_expand(type_t t) {
+type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (Tcutil::compress(t)) {
-  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual(NULL),false_conref);
+  case &FnType(_): return at_typ(t,
+                                 fresh_evar ? 
+                                   new_evar(new Opt(RgnKind),NULL) : HeapRgn,
+                                 empty_tqual(NULL),false_conref);
   default: return t;
   }
 }

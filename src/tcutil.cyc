@@ -319,7 +319,9 @@ kind_t typ_kind(type_t t) {
   case &Evar(k,topt,_,_): return k->v; 
   case &VarType(tv):      return tvar_kind(tv);
   case VoidType:          return MemKind;
-  case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
+    // FIX: we're assuming sizeof(int) = sizeof(long) = sizeof(void *) here
+  case &IntType(_,sz):    return (sz==(size_of_t)Int_sz || 
+                                  sz==(size_of_t)Long_sz) ? BoxKind : MemKind;
   case FloatType:         
   case &DoubleType(_):        
   case &FnType(_):        return MemKind;
@@ -344,8 +346,9 @@ kind_t typ_kind(type_t t) {
     if (ed->fields == NULL) return AnyKind; else return MemKind;
   case &PointerType(pinfo):
     switch (compress_conref(pinfo.ptr_atts.bounds)->v) {
-    case No_constr: // be conservative, in case later constrained with Unknown_b
-    case &Eq_constr(Unknown_b): return MemKind;
+    case No_constr: // be conservative, in case later constrained with DynForward_b or DynEither_b
+    case &Eq_constr(DynForward_b): return MemKind;
+    case &Eq_constr(DynEither_b): return MemKind;
     case &Eq_constr(&Upper_b(_)): 
     case &Eq_constr(&AbsUpper_b(_)): return BoxKind;
     case &Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
@@ -530,9 +533,12 @@ static bool unify_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
 
 static int boundscmp(bounds_t b1, bounds_t b2) {
   switch ($(b1,b2)) {
-  case $(Unknown_b,Unknown_b): return 0;
-  case $(Unknown_b,_): return -1;
-  case $(_,Unknown_b): return 1;
+  case $(DynForward_b,DynForward_b): return 0;
+  case $(DynForward_b,_): return -1;
+  case $(_,DynForward_b): return 1;
+  case $(DynEither_b,DynEither_b): return 0;
+  case $(DynEither_b,_): return -1;
+  case $(_,DynEither_b): return 1;
   case $(&Upper_b(e1),&Upper_b(e2)): 
     return Evexp::const_exp_cmp(e1,e2);
   case $(&Upper_b(_),&AbsUpper_b(_)): return -1;
@@ -544,9 +550,12 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
 
 static int unify_it_bounds(bounds_t b1, bounds_t b2) {
   switch ($(b1,b2)) {
-  case $(Unknown_b,Unknown_b): return 0;
-  case $(Unknown_b,_): return -1;
-  case $(_,Unknown_b): return 1;
+  case $(DynForward_b,DynForward_b): return 0;
+  case $(DynForward_b,_): return -1;
+  case $(_,DynForward_b): return 1;
+  case $(DynEither_b,DynEither_b): return 0;
+  case $(DynEither_b,_): return -1;
+  case $(_,DynEither_b): return 1;
   case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
   case $(&Upper_b(eb),&AbsUpper_b(tb)): fallthru(tb,eb);
   case $(&AbsUpper_b(tb),&Upper_b(eb)): 
@@ -1166,16 +1175,19 @@ void unify_it(type_t t1, type_t t2) {
     unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
     unify_it_conrefs(unify_it_bounds,b1,b2,"(different pointer bounds)");
-    // Don't force the nullable's to be the same when the bounds are ?.
+    // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress_conref(b1)->v) {
-    case &Eq_constr(Unknown_b): return;
+    case &Eq_constr(DynForward_b): return;
+    case &Eq_constr(DynEither_b): return;
     default: break;
     }
     unify_it_conrefs(intcmp,null1a,null2a,"(incompatible pointer types)");
     return;
 
   case $(&IntType(sn2,sz2), &IntType(sn1,sz1)):
-    if ((sn1 == sn2) && (sz1 == sz2)) return;
+    // FIX: we're assuming sizeof(int) = sizeof(long) here
+    if ((sn1 == sn2) && ((sz1 == sz2) || ((sz1 == Int_sz && sz2 == Long_sz))
+                         || (sz1 == Long_sz && sz2 == Int_sz))) return;
     failure_reason = "(different integral types)";
     break;
 
@@ -1368,7 +1380,7 @@ void unify_it(type_t t1, type_t t2) {
   throw Unify;
 }
 
-int star_cmp<`a::A,`r::R>(int cmp(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
+int star_cmp<`a::A,`r::R,`r2::R>(int (@`r2 cmp)(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
   if(a1 == a2) return 0;
   if(a1 == NULL && a2 != NULL) return -1;
   if(a1 != NULL && a2 == NULL) return 1;
@@ -1519,7 +1531,8 @@ int typecmp(type_t t1, type_t t2) {
     let zc = conrefs_cmp(intcmp,zt1,zt2);
     if (zc != 0) return zc;
     switch (compress_conref(b1)->v) {
-    case &Eq_constr(Unknown_b): return 0;
+    case &Eq_constr(DynForward_b): return 0;
+    case &Eq_constr(DynEither_b): return 0;
     default: break;
     }
     return conrefs_cmp(intcmp,null1a,null2a);
@@ -1590,7 +1603,9 @@ bool is_arithmetic_type(type_t t) {
 // we're about to convert a value of type t1 to type t2 (both arithmetic types)
 // return true if we will potentially lose precision
 bool will_lose_precision(type_t t1, type_t t2) {
-  switch ($(compress(t1),compress(t2))) {
+  t1 = compress(t1); 
+  t2 = compress(t2);
+  switch ($(t1,t2)) {
   case $(&DoubleType(b1), &DoubleType(b2)): return (!b2 && b1);
   case $(&DoubleType(_),  FloatType):       
   case $(&DoubleType(_),  &IntType(_,_)):   
@@ -1599,16 +1614,24 @@ bool will_lose_precision(type_t t1, type_t t2) {
   case $(&DoubleType(_),  &TagType(_)):   
   case $(FloatType,       &TagType(_)):
   case $(FloatType,       &IntType(_,_)):  return true;
-  case $(&IntType(_,B8),  &IntType(_,B8)): return false;
-  case $(&IntType(_,B8),  _): // see prev case
-  case $(&IntType(_,B4),  FloatType):       
-  case $(&IntType(_,B4),  &IntType(_,B2)):  
-  case $(&IntType(_,B4),  &IntType(_,B1)):  
-  case $(&IntType(_,B2),  &IntType(_,B1)): 
-  case $(&TagType(_),  &IntType(_,B2)):  
-  case $(&TagType(_),  &IntType(_,B1)): 
-  case $(&SizeofType(_),  &IntType(_,B2)):  
-  case $(&SizeofType(_),  &IntType(_,B1)): return true;
+  case $(&IntType(_,LongLong_sz),  &IntType(_,LongLong_sz)): return false;
+  case $(&IntType(_,LongLong_sz),  _): return true; // see prev cases
+
+  // FIX:  assuming sizeof(int) = sizeof(long)
+  case $(&IntType(_,Long_sz), &IntType(_,Int_sz)):
+  case $(&IntType(_,Int_sz), &IntType(_,Long_sz)): return false;
+
+  case $(&IntType(_,Long_sz), FloatType):       
+  case $(&IntType(_,Int_sz), FloatType):       
+  case $(&IntType(_,Long_sz), &IntType(_,Short_sz)):  
+  case $(&IntType(_,Int_sz), &IntType(_,Short_sz)):  
+  case $(&TagType(_), &IntType(_,Short_sz)):  
+  case $(&SizeofType(_), &IntType(_,Short_sz)):  
+  case $(&IntType(_,Long_sz), &IntType(_,Char_sz)):  
+  case $(&IntType(_,Int_sz), &IntType(_,Char_sz)):  
+  case $(&IntType(_,Short_sz), &IntType(_,Char_sz)): 
+  case $(&TagType(_), &IntType(_,Char_sz)): 
+  case $(&SizeofType(_), &IntType(_,Char_sz)): return true;
   default: return false;
   }
 }
@@ -1712,9 +1735,15 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 		compress_conref(pinfo_b.ptr_atts.bounds)->v)) {
       case $(&Eq_constr(b1), &Eq_constr(b2)):
 	switch ($(b1,b2)) {
-	case $(&Upper_b(_), Unknown_b): // okay regardless of nullable
-	case $(Unknown_b,   Unknown_b): okay = true;  break;
-
+	case $(&Upper_b(_), DynForward_b): // okay regardless of nullable
+	case $(&Upper_b(_), DynEither_b): // okay regardless of nullable
+        case $(DynEither_b, DynEither_b):
+        case $(DynForward_b, DynEither_b):  // okay
+	case $(DynForward_b, DynForward_b): okay = true;  break;
+        case $(DynEither_b, DynForward_b): 
+          // we want to issue a warning here, so don't make it silently
+          // castable.
+          okay = false; break;
 	case $(&Upper_b(e1),&Upper_b(e2)):
 	  okay = okay && Evexp::lte_const_exp(e2,e1);
 	  // no need to warn for zero-terminated arrays -- they can get back
@@ -1723,7 +1752,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  if (!conref_def(false,pinfo_b.ptr_atts.zero_term))
 	    warn(loc, "implicit cast to shorter array");
 	  break;
-	case $(Unknown_b, &Upper_b(e2)):
+	case $(DynForward_b, &Upper_b(e2)): fallthru(e2);
+	case $(DynEither_b, &Upper_b(e2)):
 	  // when zero-terminated can silently cast from ? to *{1}/@{1}
 	  if (conref_def(false,pinfo_a.ptr_atts.zero_term)
 	      && is_bound_one(pinfo_b.ptr_atts.bounds))
@@ -1829,9 +1859,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     default: break;
     }
     return false;
-
-  case $(&SizeofType(_),&IntType(_,B4)):
-  case $(&TagType(_),&IntType(_,_)): return true;
+    // FIX: we're assuming sizeof(int) = sizeof(long)
+  case $(&SizeofType(_),&IntType(_,Int_sz)):
+  case $(&SizeofType(_),&IntType(_,Long_sz)): return true;
+  case $(&TagType(_),&IntType(_,_)): return false;
 
   default: return unify(t1,t2);
   }
@@ -2027,7 +2058,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {
       switch ($(conref_val(b_a),conref_val(b_b))) {
-      case $(&Upper_b(_), Unknown_b): break;
+      case $(&Upper_b(_), DynForward_b): break;
+      case $(&Upper_b(_), DynEither_b): break;
       case $(&Upper_b(e1), &Upper_b(e2)): 
 	if(!Evexp::lte_const_exp(e2,e1))
 	  return false;
@@ -2096,7 +2128,9 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
 
 static bool isomorphic(type_t t1, type_t t2) {
   switch ($(compress(t1),compress(t2))) {
-  case $(&IntType(_,b1), &IntType(_, b2)): return b1 == b2;
+  case $(&IntType(_,b1), &IntType(_, b2)): 
+    return b1 == b2 || (b1 == Int_sz && b2 == Long_sz) || 
+      (b1 == Long_sz && b2 == Int_sz);
   default: return false;
   }
 }
@@ -2125,7 +2159,7 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
 
 static bool is_char_type(type_t t) {
   switch (compress(t)) {
-  case &IntType(_,B1): return true;
+  case &IntType(_,Char_sz): return true;
   default: return false;
   }
 }
@@ -2141,7 +2175,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return No_coercion;
   switch (t2) {
   // we can cast t1 to an int if t1 is a boxed type.
-  case &IntType(_,B4):
+  case &IntType(_,Int_sz):
+  case &IntType(_,Long_sz):
     if (typ_kind(t1) == BoxKind) return No_coercion;
     break;
   default: break;
@@ -2277,13 +2312,17 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(_,&DoubleType(_)): return t2;
   case $(FloatType,_):  
   case $(_,FloatType):  return FloatType;
-  case $(&IntType(Unsigned,B8),_): 
-  case $(_,&IntType(Unsigned,B8)): return ulonglong_typ;
-  case $(&IntType(None,B8),_):   
-  case $(_,&IntType(None,B8)):case $(&IntType(Signed,B8),_):   
-  case $(_,&IntType(Signed,B8)):   return slonglong_typ;
-  case $(&IntType(Unsigned,B4),_): 
-  case $(_,&IntType(Unsigned,B4)): return uint_typ;
+  case $(&IntType(Unsigned,LongLong_sz),_): 
+  case $(_,&IntType(Unsigned,LongLong_sz)): return ulonglong_typ;
+  case $(&IntType(_,LongLong_sz),_):   
+  case $(_,&IntType(_,LongLong_sz)): return slonglong_typ;
+  case $(&IntType(Unsigned,Long_sz),_): 
+  case $(_,&IntType(Unsigned,Long_sz)): return ulong_typ;
+    // FIX: I don't think these are the right promotion rules
+  case $(&IntType(Unsigned,Int_sz),_): 
+  case $(_,&IntType(Unsigned,Int_sz)): return uint_typ;
+  case $(&IntType(_,Long_sz),_): 
+  case $(_,&IntType(_,Long_sz)): return slong_typ;
   default: return sint_typ;
   }
 }
@@ -2660,11 +2699,15 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
     }
     switch (compress(field_typ)) {
     case &IntType(_,b):
+      // FIX: this is making size assumptions
       switch (b) {
-      case B1: if (w > 8)  terr(loc,"bitfield larger than type"); break;
-      case B2: if (w > 16) terr(loc,"bitfield larger than type"); break;
-      case B4: if (w > 32) terr(loc,"bitfield larger than type"); break;
-      case B8: if (w > 64) terr(loc,"bitfield larger than type"); break;
+      case Char_sz: if (w > 8)  terr(loc,"bitfield larger than type"); break;
+      case Short_sz: if (w > 16) terr(loc,"bitfield larger than type"); break;
+      case Long_sz: 
+      case Int_sz:
+        if (w > 32) terr(loc,"bitfield larger than type"); break;
+      case LongLong_sz: 
+        if (w > 64) terr(loc,"bitfield larger than type"); break;
       }
       break;
     default:
@@ -2936,7 +2979,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // if zero_term is unconstrained, then set it to false unless
       // we have [signed] char */@/? {n}.
       switch (compress(t1)) {
-      case &IntType(_,B1): 
+      case &IntType(_,Char_sz): 
         unify_conrefs(intcmp,zt,true_conref);
         is_zero_terminated = true;
         break;
@@ -2960,7 +3003,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check the bound
     switch (compress_conref(b)->v) {
     case No_constr:
-    case &Eq_constr(Unknown_b): break;
+    case &Eq_constr(DynForward_b): break;
+    case &Eq_constr(DynEither_b): break;
     case &Eq_constr(&Upper_b(e)): // must be a constant expression
       Tcexp::tcExp(te,NULL,e);
       if (!coerce_uint_typ(te,e))
@@ -2996,7 +3040,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       /* This old code set it to true if we had char for the elt type
        * but this causes too many headaches, so I'm disabling it.
       switch (compress(t1)) {
-      case &IntType(_,B1): 
+      case &IntType(_,Char_sz): 
         unify_conrefs(intcmp,zt,true_conref);
         is_zero_terminated = true;
         break;
@@ -3138,8 +3182,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         switch (compress(t)) {
         case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,zt,_))):
           // FIX:  zero-termination?
-          switch ($(compress(et), conref_def((bounds_t)Unknown_b,b))) {
-          case $(&IntType(None,B1), Unknown_b): break;
+          switch ($(compress(et), conref_def((bounds_t)DynForward_b,b))) {
+          case $(&IntType(None,Char_sz), DynForward_b): break;
           default: terr(loc,"format descriptor is not a char ? type"); break;
           }
           break;
@@ -3559,11 +3603,26 @@ static cvtenv_t check_valid_type(seg_t loc, tenv_t te,
 // list of the bound type variables and have the right kinds.
 void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t, bool allow_unique) {
   bool generalize_evars = is_function_type(t);
+  let te_vars = lookup_type_vars(te);
   // do not let `U appear in toplevel types for the moment
-  let cvt = check_valid_type(loc, te, NULL, MemKind, generalize_evars, t,
+  let cvt = check_valid_type(loc, te, te_vars, MemKind, generalize_evars, t,
 			     allow_unique);
   let free_tvars = cvt.free_vars;
   let free_evars = cvt.free_evars;
+
+  // filter out free tvars that are in the environment
+  if (te_vars != NULL) {
+    let res = NULL;
+    for (let fs = free_tvars; fs; fs = fs->tl) {
+      let f = fs->hd;
+      bool found = false;
+      for (let ts = te_vars; ts; ts = ts->tl)
+        if (tvar_cmp(f,ts->hd) == 0) { found = true; break; }
+      if (!found)
+        res = new List(fs->hd,res);
+    }
+    free_tvars = List::imp_rev(res);
+  }
 
   // resolve the kinds of type variables.  If there's a kind that must
   // be less than Mem or Any, make it boxed.  
@@ -3631,7 +3690,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   // this fills in the missing bound type variables and effects
   check_valid_toplevel_type(loc,te,t,true);
   switch (compress(t)) {
-  case &FnType(FnInfo{tvs,effect,_,_,_,_,_,_}):
+  case &FnType(FnInfo{tvs,effect,rt,_,_,_,_,_}):
     fd->tvs = tvs;
     fd->effect = effect;
     break;
@@ -3784,16 +3843,23 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
   return imp_rev(ans);
 }
 
-bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
+bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest, 
+                               bool @forward_only) {
+  *forward_only = false;
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,_,_))):
     let b = compress_conref(b);
     switch (compress_conref(b)->v) {
-    case &Eq_constr(Unknown_b): 
+    case &Eq_constr(DynForward_b): 
+      *forward_only = true; 
+      *elt_typ_dest = elt_typ; 
+      return true;
+    case &Eq_constr(DynEither_b): 
       *elt_typ_dest = elt_typ; 
       return true;
     case No_constr: 
-      b->v = new Eq_constr(Unknown_b); 
+      b->v = new Eq_constr(DynForward_b); 
+      *forward_only = true;
       *elt_typ_dest = elt_typ; 
       return true;
     default: return false;
@@ -3811,9 +3877,9 @@ bool is_zero_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   }
 }
 
-bool is_tagged_pointer_typ(type_t t) {
+bool is_tagged_pointer_typ(type_t t, bool @is_forward_only) {
   type_t ignore = VoidType;
-  return is_tagged_pointer_typ_elt(t, &ignore);
+  return is_tagged_pointer_typ_elt(t, &ignore, is_forward_only);
 }
 
 // used by address of.  
@@ -3951,7 +4017,11 @@ type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
   switch (b->v) {
-  case &Eq_constr(Unknown_b): return; // checked dynamically
+  case &Eq_constr(DynEither_b): return; // always checked dynamically
+  case &Eq_constr(DynForward_b): 
+    if (i < 0) 
+      terr(loc, "dereference is out of bounds");
+    return; // otherwise checked dynamically
   case &Eq_constr(&Upper_b(e)):
     let $(j,known) = Evexp::eval_const_uint_exp(e);
     if(known && j <= i)
@@ -4093,8 +4163,9 @@ bool supports_default(type_t t) {
   case &DoubleType(_): return true;
 
   case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
-    switch (conref_def((bounds_t)Unknown_b,bounds)) {
-    case Unknown_b: return true;
+    switch (conref_def((bounds_t)DynForward_b,bounds)) {
+    case DynForward_b: return true;
+    case DynEither_b: return true;
     default:
       return conref_def(true,nullable);
     }
@@ -4143,7 +4214,8 @@ bool admits_zero(type_t t) {
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
-    case &Eq_constr(Unknown_b): return false; 
+    case &Eq_constr(DynForward_b): return false; 
+    case &Eq_constr(DynEither_b): return false; 
     case &Eq_constr(_):
       switch (compress_conref(nullable)->v) {
       case &Eq_constr(b): return b;
@@ -4169,3 +4241,20 @@ bool is_noreturn(type_t t) {
   }
   return false;
 }
+
+// Transfer any function type attributes from the given list to the
+// function type.  
+attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
+  switch (compress(t)) {
+  case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
+    let res_atts = NULL;
+    for (; atts != NULL; atts = atts->tl)
+      if (fntype_att(atts->hd))
+        *fnatts = new List(atts->hd,*fnatts); 
+      else
+        res_atts = new List(atts->hd,res_atts); 
+    return res_atts;
+  default: impos("transfer_fn_type_atts"); 
+  }
+}
+

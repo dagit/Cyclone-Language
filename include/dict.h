@@ -53,13 +53,13 @@ extern xtunion exn {extern Present};
 extern xtunion exn {extern Absent};
 /** [Absent] is thrown when a key is absent but should be present. */
 
-extern dict_t<`a,`b> empty(int cmp(`a,`a));
+extern dict_t<`a,`b> empty(int (@`H cmp)(`a,`a));
 /** [empty(cmp)] returns an empty dictionary, allocated on the
     heap. [cmp] should be a comparison function on keys: [cmp(k1,k2)]
     should return a number less than, equal to, or greater than 0
     according to whether [k1] is less than, equal to, or greater than
     [k2] in the ordering on keys. */
-extern dict_t<`a,`b,`r> rempty(region_t<`r>,int cmp(`a,`a));
+extern dict_t<`a,`b,`r> rempty(region_t<`r>,int (@`H cmp)(`a,`a));
 /** [rempty(r,cmp)] is like [empty(cmp)] except that the dictionary is
     allocated in the region with handle [r]. */
 
@@ -87,11 +87,11 @@ extern dict_t<`a,`b,`r> inserts(dict_t<`a,`b,`r> d,
 /** [inserts(d,l)] inserts each key, value pair into [d], returning
     the resulting dictionary. */
 
-extern dict_t<`a,`b> singleton(int cmp(`a,`a),`a k,`b v);
+extern dict_t<`a,`b> singleton(int (@`H cmp)(`a,`a),`a k,`b v);
 /** [singleton(cmp,k,v)] returns a new heap-allocated dictionary with
     a single mapping, from [k] to [v]. */
 extern dict_t<`a,`b,`r> rsingleton(region_t<`r>,
-                                   int cmp(`a,`a),`a k,`b v);
+                                   int (@`H cmp)(`a,`a),`a k,`b v);
 /** [rsingleton(r,cmp,k,v)] is like [singleton(cmp,k,v)], except the
     resulting dictionary is allocated in the region with handle
     [r]. */
@@ -286,7 +286,7 @@ extern `c marshal(region_t<`r> rgn,
 
 extern dict_t<`a,`b> unmarshal(region_t<`r> rgn,
 			       `c @`H env,
-			       int cmp(`a,`a),
+			       int (@`H cmp)(`a,`a),
 			       `a (read_key<`a,`c>)(`c @`H, FILE @`r2),
 			       `b (read_val<`b,`c>)(`c @`H, FILE @`r2),
 			       FILE @`r2 fp);

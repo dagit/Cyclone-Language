@@ -19,23 +19,22 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 /* comments for these variables are in gram.h  */
-
 int nitems;
 int nrules;
 int nsyms;
 int ntokens;
 int nvars;
 
-short ?ritem;
-short ?rlhs;
-short ?rrhs;
-short ?rprec;
-short ?rprecsym;
-short ?sprec;
-short ?rassoc;
-short ?sassoc;
-short ?token_translations;
-short ?rline;
+short ?-ritem;
+short ?-rlhs;
+short ?-rrhs;
+short ?-rprec;
+short ?-rprecsym;
+short ?-sprec;
+short ?-rassoc;
+short ?-sassoc;
+short ?-token_translations;
+short ?-rline;
 
 int start_symbol;
 

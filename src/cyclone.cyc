@@ -1024,7 +1024,8 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Suggest how to port C code to Cyclone")
          );
 
-  Arg::parse(options, add_other, "Options:", argv);
+  string_t optstring = "Options:";
+  Arg::parse(options, add_other, optstring, argv);
 
   if (cyclone_files == NULL && ccargs == NULL) {
     fprintf(stderr,"missing file\n");

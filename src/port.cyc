@@ -981,7 +981,7 @@ static type_t main_type() {
     new $(NULL,empty_tqual(NULL),sint_typ);
   $(opt_t<var_t>,tqual_t,type_t)@ arg2 = 
     new $(NULL,empty_tqual(NULL),
-          tagged_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
+          dynforward_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
                                 empty_tqual(NULL), empty_conref()));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,.ret_typ = sint_typ,
                               .args = list(arg1,arg2), .c_varargs = false,
@@ -1133,7 +1133,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     default: 
       new_rgn = heap_ct(); break; 
     }
-    let orig_fat = (conref_val(b) == Unknown_b);
+    let orig_fat = (conref_val(b) == DynForward_b);
     let orig_zt = (zt->v == No_constr) ? is_char(env,et) : conref_val(zt);
     if (env->gcenv->porting) {
       let cqv = var(); 

@@ -55,24 +55,24 @@ If LA[l, i] and LA[l, j] are both 1 for i != j, it is a conflict.
 #include "new.h"
 #include "gram.h"
 
-extern short ??derives;
-extern char ?nullable;
+extern short ?-?-derives;
+extern char ?-nullable;
 
 
 int tokensetsize;
-short ?lookaheads;
-short ?LAruleno;
-unsigned ?LA;
-short ?accessing_symbol;
-char ? consistent;
-core *?state_table;
-shifts *?shift_table;
-reductions *?reduction_table;
-short ?goto_map;
-short ?from_state;
-short ?to_state;
+short ?-lookaheads;
+short ?-LAruleno;
+unsigned ?-LA;
+short ?-accessing_symbol;
+char ?- consistent;
+core *?-state_table;
+shifts *?-shift_table;
+reductions *?-reduction_table;
+short ?-goto_map;
+short ?-from_state;
+short ?-to_state;
 
-short ??transpose(short?`H ?`H, int);
+short ?-?-transpose(short?-`H ?-`H, int);
 void set_state_table();
 void set_accessing_symbol();
 void set_shift_table();
@@ -85,7 +85,7 @@ void build_relations();
 void add_lookback_edge(int,int,int);
 void compute_FOLLOWS();
 void compute_lookaheads();
-void digraph(short ?`H ?`H);
+void digraph(short ?-`H ?-`H);
 void traverse(int);
 
 extern void toomany(const char ?);
@@ -94,12 +94,12 @@ extern void berror(const char ?);
 static int infinity;
 static int maxrhs;
 static int ngotos;
-static unsigned ?F;
-static short ??includes;
+static unsigned ?-F;
+static short ?-?-includes;
 static shorts *?lookback;
-static short ??R;
-static short ?INDEX;
-static short ?VERTICES;
+static short ?-?-R;
+static short ?-INDEX;
+static short ?-VERTICES;
 static int top;
 
 
@@ -173,7 +173,7 @@ set_reduction_table()
 void
 set_maxrhs()
 {
-  register short ?itemp;
+  register short ?- itemp;
   register int length;
   register int max;
 
@@ -204,7 +204,7 @@ initialize_LA()
   register int count;
   register reductions *rp;
   register shifts *sp;
-  register short ?np;
+  register short ?-np;
 
   consistent = NEW2(nstates + 1, char);
   lookaheads = NEW2(nstates + 1, short);
@@ -271,12 +271,12 @@ set_goto_map()
   register int i;
   register int symbol;
   register int k;
-  register short ?temp_map;
+  register short ?- temp_map;
   register int state2;
   register int state1;
 
-  goto_map = NEW2(nvars + 1, short) - ntokens;
-  temp_map = NEW2(nvars + 1, short) - ntokens;
+  goto_map = ((_ ?-)NEW2(nvars + 1, short)) - ntokens;
+  temp_map = ((_ ?-)NEW2(nvars + 1, short)) - ntokens;
 
   ngotos = 0;
   for (sp = first_shift; sp; sp = sp->next)
@@ -370,10 +370,10 @@ initialize_F()
   register int j;
   register int k;
   register shifts *sp;
-  register short ?edge;
-  register unsigned ?rowp;
-  register short ?rp;
-  register short ??reads;
+  register short ?-edge;
+  register unsigned ?-rowp;
+  register short ?-rp;
+  register short ?-?-reads;
   register int nedges;
   register int stateno;
   register int symbol;
@@ -382,7 +382,7 @@ initialize_F()
   nwords = ngotos * tokensetsize;
   F = NEW2(nwords, unsigned);
 
-  reads = NEW2P(ngotos, short ?);
+  reads = NEW2P(ngotos, short ?-);
   edge = NEW2(ngotos + 1, short);
   nedges = 0;
 
@@ -448,8 +448,8 @@ build_relations()
   register int i;
   register int j;
   register int k;
-  register short ?rulep;
-  register short ?rp;
+  register short ?-rulep;
+  register short ?- rp;
   register shifts *sp;
   register int length;
   register int nedges;
@@ -458,12 +458,12 @@ build_relations()
   register int stateno;
   register int symbol1;
   register int symbol2;
-  register short ?shortp;
-  register short ?edge;
-  register short ?states;
-  register short ??new_includes;
+  register short ?-shortp;
+  register short ?-edge;
+  register short ?-states;
+  register short ?-?-new_includes;
 
-  includes = NEW2P(ngotos, short ?);
+  includes = NEW2P(ngotos, short ?-);
   edge = NEW2(ngotos + 1, short);
   states = NEW2(maxrhs + 1, short);
 
@@ -572,12 +572,12 @@ int gotono;
 
 
 
-short ?? transpose(short?`H ?`H R_arg, int n)
+short ?-?- transpose(short?-`H ?-`H R_arg, int n)
 {
-  register short ?`H ?`H new_R;
-  register short ?`H ?`H temp_R;
-  register short ?`H nedges;
-  register short ?`H sp;
+  register short ?-`H ?-`H new_R;
+  register short ?-`H ?-`H temp_R;
+  register short ?-`H nedges;
+  register short ?-`H sp;
   register int i;
   register int k;
 
@@ -593,8 +593,8 @@ short ?? transpose(short?`H ?`H R_arg, int n)
 	}
     }
 
-  new_R = NEW2P(n, short ?);
-  temp_R = NEW2P(n, short ?);
+  new_R = NEW2P(n, short ?-);
+  temp_R = NEW2P(n, short ?-);
 
   for (i = 0; i < n; i++)
     {
@@ -647,11 +647,11 @@ compute_lookaheads()
 {
   register int i;
   register int n;
-  register unsigned ?fp1;
-  register unsigned ?fp2;
-  register unsigned ?fp3;
+  register unsigned ?-fp1;
+  register unsigned ?-fp2;
+  register unsigned ?-fp3;
   register shorts *sp;
-  register unsigned ?rowp;
+  register unsigned ?-rowp;
 /*   register short *rulep; JF unused */
 /*  register int count; JF unused */
   register shorts *sptmp;/* JF */
@@ -686,7 +686,7 @@ compute_lookaheads()
 
 
 void
-digraph(short ?`H ?`H relation)
+digraph(short ?-`H ?-`H relation)
 {
   register int i;
 
@@ -714,14 +714,14 @@ digraph(short ?`H ?`H relation)
 void
 traverse(int i)
 {
-  register unsigned ?fp1;
-  register unsigned ?fp2;
-  register unsigned ?fp3;
+  register unsigned ?-fp1;
+  register unsigned ?-fp2;
+  register unsigned ?-fp3;
   register int j;
-  register short ?rp;
+  register short ?-rp;
 
   int height;
-  unsigned ?base;
+  unsigned ?-base;
 
   VERTICES[++top] = (short)i;
   height = top;

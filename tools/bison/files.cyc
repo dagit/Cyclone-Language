@@ -143,11 +143,11 @@ openfiles()
 #endif /* MSDOS */
       /* BASE_LENGTH includes "_tab" but not ".cyc".  */
       base_length = strlen (name_base);
-      if (!strcmp (name_base + base_length - 4, ".cyc"))
+      if (!strcmp (name_base + (base_length - 4), ".cyc"))
 	base_length -= 4;
       /* SHORT_BASE_LENGTH includes neither "_tab" nor ".cyc".  */
       short_base_length = base_length;
-      if (!strncmp (name_base + short_base_length - 4, "_tab", 4))
+      if (!strncmp (name_base + (short_base_length - 4), "_tab", 4))
 	short_base_length -= 4;
     }
   else if (spec_file_prefix)
@@ -177,7 +177,7 @@ openfiles()
       /* BASE_LENGTH gets length of NAME_BASE, sans ".y" suffix if any.  */
 
       base_length = strlen (name_base);
-      if (!strcmp (name_base + base_length - 2, ".y"))
+      if (!strcmp (name_base + (base_length - 2), ".y"))
 	base_length -= 2;
       short_base_length = base_length;
 

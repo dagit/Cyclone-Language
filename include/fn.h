@@ -36,7 +36,7 @@ namespace Fn {
        by hiding the environment from the type of the pair. */
 
 extern struct Function<`arg,`res,`bd::R> { <`env> : regions(`env) > `bd
-  `res (@f)(`env,`arg);
+  `res (@`bd f)(`env,`arg);
   `env env;
 };
 
@@ -45,10 +45,10 @@ typedef struct Function<`arg,`res,`bd> @fn_t<`arg,`res,`bd>;
       closure; [`arg] is the argument type of the function, [`res] is
       the result type, and [`bd] is a region that [regions(`arg)] outlive. */
 
-extern fn_t<`arg,`res,`bd> make_fn(`res f(`env,`arg),`env x :regions(`env)>`bd);
+extern fn_t<`arg,`res,`bd> make_fn(`res (@`bd f)(`env,`arg),`env x :regions(`env)>`bd);
   /** [make_fn(f,env)] builds a closure out of a function and an environment. */
 
-extern fn_t<`arg,`res,`bd> fp2fn(`res f(`arg) : regions($(`arg,`res)) > `bd);
+extern fn_t<`arg,`res,`bd> fp2fn(`res (@`bd f)(`arg) : regions($(`arg,`res)) > `bd);
   /** [fp2fn(f)] converts a function pointer to a closure. */
 
 extern `res apply(fn_t<`arg,`res> f, `arg x);

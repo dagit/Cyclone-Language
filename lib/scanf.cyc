@@ -125,7 +125,7 @@ typedef long long int _IO_ssize_t;
 
 #define u_long unsigned long
 
-static const char ?`r __sccl (char @{256} NOZEROTERM tab, const char ?`r fmt);
+static const char ?-`r __sccl (char @{256} NOZEROTERM tab, const char ?-`r fmt);
 
 tunion ScanfArg<`r::R> {
   ShortPtr_sa(short @`r);
@@ -197,14 +197,14 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
      sarg_t ? ap;
      int * errp;
 {
-	const char ? fmt = fmt0;
+	const char ?- fmt = fmt0;
 	int c;		/* character from format, or conversion */
 	_IO_ssize_t width;	/* field width, or 0 */
-	char ? p = NULL; /* points into all kinds of strings */
+	char ?- p = NULL; /* points into all kinds of strings */
 	int n;		/* handy integer */
 	int flags = 0;	/* flags as defined above */
         /* saves original value of p when necessary */
-	char ? p0 = NULL;
+	char ?- p0 = NULL;
         int nassigned;		/* number of fields assigned */
 	int nread;		/* number of characters consumed from fp */
 	/* Assignments to base and ccfn are just to suppress warnings from gcc.*/
@@ -480,8 +480,8 @@ literal:
                           if (n == 0)
                             goto match_failure;
 			} else {
-                            let p4 = va_arg_string_ptr(*ap); ap++;
-                            let p5 = p4;
+                            char ?-NOZEROTERM p4 = (char ?-NOZEROTERM)va_arg_string_ptr(*ap); ap++;
+                            char ?-NOZEROTERM p5 = p4;
                             int c = _IO_peekc(fp);
 			    while (ccltab[(char)c]) {
                               if (p5.size == 0) goto eof_failure;
@@ -683,7 +683,7 @@ literal:
                                 ap++;
 				nassigned++;
 			}
-			nread += p - (char ?)buf;
+			nread += p - (char ?-)buf;
 			break;
 
 		case CT_FLOAT:
@@ -773,7 +773,7 @@ literal:
                                 ap++;
 				nassigned++;
 			}
-			nread += p - (char ?)buf;
+			nread += p - (char ?-)buf;
 			break;
                 default:
                   throw new Impossible("scanf3");
@@ -801,10 +801,10 @@ done:
  * closing `]'.  The table has a 1 wherever characters should be
  * considered part of the scanset.
  */
-static const char ? `r
+static const char ?- `r
 __sccl (tab, fmt)
      char @{256} NOZEROTERM tab;
-     const char ? `r fmt;
+     const char ?- `r fmt;
 {
 	int c, n, v;
 
@@ -895,30 +895,31 @@ doswitch:
 
 // These string_xxx functions are used to implement a "file descriptor"
 // interface for the generic scanf function above.  
-static int string_getc(const char ? @ sptr) {
+static int string_getc(const char ?- @ sptr) {
   char c;
-  const char ? s = *sptr;
+  const char ?- s = *sptr;
   if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   *sptr = s+1;
   return c;
 }
 
-static int string_ungetc(int ignore, const char ? @ sptr) {
+static int string_ungetc(int ignore, const char ?- @ sptr) {
   *sptr = (*sptr) - 1;
   // FIX:  should return EOF if we rewind too far.
   return 0;
 }
 
-static int string_peekc(const char ? @ sptr) {
+static int string_peekc(const char ?- @ sptr) {
   char c;
-  const char ? s = *sptr;
+  const char ?- s = *sptr;
   if (s == NULL || s.size == 0 || (c = s[0]) == '\0') return EOF;
   return c;
 }
 
-int vsscanf(const char ? src, const char ? fmt, sarg_t ? ap) 
+int vsscanf(const char ? src1, const char ? fmt, sarg_t ? ap) 
   __attribute__((format(scanf,2,0)))
 {
+  const char ?- src = (const char ?-)src1;
   int err = 0;
   return _IO_vfscanf(string_getc, string_ungetc, string_peekc, &src, fmt, ap,&err);
                      

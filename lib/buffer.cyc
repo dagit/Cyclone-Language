@@ -80,7 +80,7 @@ static void resize(T b, unsigned int more) {
     new_len = 2 * new_len;
   }
   new_buffer = new_string(new_len + 1);
-  strncpy(new_buffer, b->buffer, b->position);
+  strncpy((char ?NOZEROTERM)new_buffer, b->buffer, b->position);
   b->buffer = new_buffer;
   b->length = new_len;
   return;
@@ -102,7 +102,7 @@ void add_substring(T b, string_t s, int offset, int len) {
     throw new Invalid_argument("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);
-  zstrncpy(b->buffer + b->position, s + offset, len);
+  zstrncpy((char ?NOZEROTERM)(b->buffer + b->position), s + offset, len);
   b->position = new_position;
   return;
 }
@@ -112,7 +112,7 @@ void add_string (T b, string_t s) {
   int len = strlen(s);
   int new_position = b->position + len;
   if (new_position > b->length) resize(b, len);
-  strncpy(b->buffer + b->position, s, len);
+  strncpy((char ?NOZEROTERM)b->buffer + b->position, s, len);
   b->position = new_position;
   return;
 }

@@ -77,7 +77,7 @@ typedef tunion Jumpee jumpee_t;
 extern struct Tenv {
   list_t<var_t>                ns; // current namespace
   dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  opt_t<fenv_t>                le; // local environment, == null except in functions
+  list_t<fenv_t>               le; // local environment, == null except in functions
 };
 typedef struct Tenv @tenv_t; 
 
@@ -85,6 +85,7 @@ extern `a env_err(string_t msg) __attribute__((noreturn));
 extern tenv_t tc_init();
 extern genv_t empty_genv();
 extern fenv_t new_fenv(seg_t,fndecl_t);
+extern fenv_t nested_fenv(seg_t,fenv_t old_fenv, fndecl_t new_fn);
 
 extern tenv_t enter_ns(tenv_t, var_t);
 

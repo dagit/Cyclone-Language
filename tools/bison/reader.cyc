@@ -89,7 +89,7 @@ extern int numval;
 extern int expected_conflicts;
 extern char ?token_buffer;
 extern int maxtoken;
-extern char? grow_token_buffer(char ?);
+extern char? grow_token_buffer(char ?`H);
 
 extern char? printable_version(char);
 extern void init_lex();
@@ -149,7 +149,7 @@ int lineno;
 symbol_list *grammar;
 int start_flag;
 bucket *startval;
-char ??tags;//an array of strings
+char ?-?-tags;//an array of strings
 int ?user_toknums;//an array of integers
 
 /* Nonzero if components of semantic values are used, implying
@@ -1790,7 +1790,7 @@ gensym()
 {
   register bucket *sym;
 
-  sprintf(token_buffer, "@%d", ++gensym_count);
+  sprintf((char ?NOZEROTERM)token_buffer, "@%d", ++gensym_count);
   sym = getsym(token_buffer);
   sym->class = SNTERM;
   sym->value = (short)nvars++;
@@ -2194,7 +2194,7 @@ packsymbols()
 
   /* int lossage = 0; JF set but not used */
 
-  tags = NEW2P(nsyms + 1, char ?);
+  tags = NEW2P(nsyms + 1, char ?-);
   tags[0] =strdup("$");
   user_toknums = NEW2(nsyms + 1, int);
   user_toknums[0] = 0;
@@ -2281,7 +2281,7 @@ packsymbols()
           if (bp->user_token_number == SALIAS) continue;  
           if (token_translations[bp->user_token_number] != 2)
             warnsss("tokens %s and %s both assigned number %s",
-                              tags[token_translations[bp->user_token_number]],
+                    (string_t)tags[token_translations[bp->user_token_number]],
             		      bp->tag,
             		      int_to_string(bp->user_token_number));
           token_translations[bp->user_token_number] = bp->value;
@@ -2317,7 +2317,8 @@ packsymbols()
 	  {
 	    /* don't make these for dummy nonterminals made by gensym.  */
 	    if (*tags[i] != '@')
-	      fprintf((FILE @)fdefines, "#define\tNT%s\t%d\n", tags[i], i);
+	      fprintf((FILE @)fdefines, "#define\tNT%s\t%d\n", 
+                      (string_t)tags[i], i);
 	  }
 #if 0
       /* `fdefines' is now a temporary file, so we need to copy its
@@ -2384,12 +2385,12 @@ packgram()
 
   bucket *ruleprec;
 
-  ritem = NEW2(nitems + 1, short);
-  rlhs = NEW2(nrules, short) - 1;
-  rrhs = NEW2(nrules, short) - 1;
-  rprec = NEW2(nrules, short) - 1;
-  rprecsym = NEW2(nrules, short) - 1;
-  rassoc = NEW2(nrules, short) - 1;
+  ritem = (_ ?-)(NEW2(nitems + 1, short));
+  rlhs = (_ ?-)(NEW2(nrules, short)) - 1;
+  rrhs = (_ ?-)(NEW2(nrules, short)) - 1;
+  rprec = (_ ?-)(NEW2(nrules, short)) - 1;
+  rprecsym = (_ ?-)(NEW2(nrules, short)) - 1;
+  rassoc = (_ ?-)(NEW2(nrules, short)) - 1;
 
   itemno = 0;
   ruleno = 1;

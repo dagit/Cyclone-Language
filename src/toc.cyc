@@ -135,19 +135,39 @@ MAKE_VAR(_npop_handler);
 MAKE_VAR(_check_null); 
 MAKE_VAR(_check_known_subscript_null);
 MAKE_VAR(_check_known_subscript_notnull);
-MAKE_VAR(_check_unknown_subscript);
-MAKE_VAR(_tagged_arr);
-MAKE_VAR(_tag_arr);
-MAKE_VAR(_init_tag_arr);
-MAKE_VAR(_untag_arr);
-MAKE_VAR(_get_arr_size);
-MAKE_VAR(_get_zero_arr_size);
-MAKE_VAR(_tagged_arr_plus);
-MAKE_VAR(_zero_arr_plus);
-MAKE_VAR(_tagged_arr_inplace_plus);
-MAKE_VAR(_zero_arr_inplace_plus);
-MAKE_VAR(_tagged_arr_inplace_plus_post);
-MAKE_VAR(_zero_arr_inplace_plus_post);
+// MAKE_VAR(_check_unknown_subscript);
+MAKE_VAR(_check_dynforward_subscript);
+MAKE_VAR(_check_dyneither_subscript);
+// MAKE_VAR(_tagged_arr);
+MAKE_VAR(_dynforward_ptr);
+MAKE_VAR(_dyneither_ptr);
+// MAKE_VAR(_tag_arr);
+MAKE_VAR(_tag_dynforward);
+MAKE_VAR(_tag_dyneither);
+// MAKE_VAR(_init_tag_arr);
+MAKE_VAR(_init_dynforward_ptr);
+MAKE_VAR(_init_dyneither_ptr);
+// MAKE_VAR(_untag_arr);
+MAKE_VAR(_untag_dynforward_ptr);
+MAKE_VAR(_untag_dyneither_ptr);
+// MAKE_VAR(_get_arr_size);
+MAKE_VAR(_get_dynforward_size);
+MAKE_VAR(_get_dyneither_size);
+MAKE_VAR(_get_zero_arr_size); // NOT SURE WHETHER WE NEED BOTH?
+// MAKE_VAR(_tagged_arr_plus);
+MAKE_VAR(_dynforward_ptr_plus);
+MAKE_VAR(_dyneither_ptr_plus);
+MAKE_VAR(_zero_arr_plus);     // NOT SURE WHETHER WE NEED BOTH?
+// MAKE_VAR(_tagged_arr_inplace_plus);
+MAKE_VAR(_dynforward_ptr_inplace_plus);
+MAKE_VAR(_dyneither_ptr_inplace_plus);
+MAKE_VAR(_zero_arr_inplace_plus); // NOT SURE WHETHER WE NEED BOTH?
+// MAKE_VAR(_tagged_arr_inplace_plus_post);
+MAKE_VAR(_dynforward_ptr_inplace_plus_post);
+MAKE_VAR(_dyneither_ptr_inplace_plus_post);
+MAKE_VAR(_dynforward_to_dyneither);
+MAKE_VAR(_dyneither_to_dynforward);
+MAKE_VAR(_zero_arr_inplace_plus_post); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_cycalloc);
 MAKE_VAR(_cyccalloc);
 MAKE_VAR(_cycalloc_atomic);
@@ -160,16 +180,30 @@ MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
 MAKE_VAR(_reset_region);
 MAKE_VAR(_throw_arraybounds);
-MAKE_VAR(_tagged_ptr_decrease_size);
+// MAKE_VAR(_tagged_ptr_decrease_size);
+MAKE_VAR(_dynforward_ptr_decrease_size);
+MAKE_VAR(_dyneither_ptr_decrease_size);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-static tunion AggrInfoU.UnknownAggr tagged_arr_typ_u = 
-                           UnknownAggr(StructA,&_tagged_arr_pr);
-static tunion Type.AggrType tagged_arr_typ_v =
-                           AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
-static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
+//static tunion AggrInfoU.UnknownAggr tagged_arr_typ_u = 
+//                           UnknownAggr(StructA,&_tagged_arr_pr);
+//static tunion Type.AggrType tagged_arr_typ_v =
+//                           AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
+//static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
+
+static tunion AggrInfoU.UnknownAggr dynforward_ptr_typ_u = 
+                           UnknownAggr(StructA,&_dynforward_ptr_pr);
+static tunion Type.AggrType dynforward_ptr_typ_v =
+                           AggrType(AggrInfo(&dynforward_ptr_typ_u,NULL));
+static tunion Type dynforward_ptr_typ = &dynforward_ptr_typ_v;
+
+static tunion AggrInfoU.UnknownAggr dyneither_ptr_typ_u = 
+                           UnknownAggr(StructA,&_dyneither_ptr_pr);
+static tunion Type.AggrType dyneither_ptr_typ_v =
+                           AggrType(AggrInfo(&dyneither_ptr_typ_u,NULL));
+static tunion Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
 
@@ -209,7 +243,8 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))): return conref_def(false,n);
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))): 
+    return conref_def(false,n);
   default: toc_impos("is_nullable");
   }
 }
@@ -356,12 +391,14 @@ static type_t typ_to_c(type_t t) {
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
-    // t2? maps to struct tagged_arr.
+    // t2? maps to struct dynforward_ptr.
+    // t2?+- maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
     case No_constr:
-    case &Eq_constr(Unknown_b): return tagged_arr_typ;
+    case &Eq_constr(DynForward_b): return dynforward_ptr_typ;
+    case &Eq_constr(DynEither_b): return dyneither_ptr_typ;
     default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
   case &IntType(_,_): 
@@ -386,7 +423,7 @@ static type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(tagged_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
+      let t =typ_to_c(dynforward_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -526,7 +563,7 @@ static bool is_poly_project(exp_t e) {
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_}): return is_poly_field(t,f);
-    default: toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
+    default: toc_impos("is_poly_project: bad type %s",typ2string(e1->topt->v));
     }
   default: return false;
   }
@@ -567,8 +604,9 @@ static exp_t newthrow_exp(exp_t e) {
   return fncall_exp(_throw_e, new List(e,NULL), DL);
 }
 
-// t*{sz} -> t? at top-level
-static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
+// t*{sz} -> t? or t?+- at top-level
+static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e, 
+                                   bool forward_only) {
   // Note e must be either (a) a string or else (b) a [possibly cast] 
   // identifier that is an array.
   // For case a, we generate
@@ -595,9 +633,14 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
     // Note: If e is NULL, element size of 0 is fine!
     xplussz = cast_it(void_star_typ(),add_exp(e,sz,DL));
   }
-  exp_t urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
-					      new $(NULL,xexp),
-					      new $(NULL,xplussz)),DL);
+  exp_t urm_exp;
+  if (!forward_only)
+    urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
+                                          new $(NULL,xexp),
+                                          new $(NULL,xplussz)),DL);
+  else 
+    urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
+                                          new $(NULL,xplussz)),DL);
   return urm_exp;
 }
 
@@ -740,7 +783,8 @@ static bool check_const_array(unsigned i, type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
     switch (conref_def(bounds_one,b)) {
-    case Unknown_b: return false;
+    case DynForward_b: return false;
+    case DynEither_b: return false;
     case &Upper_b(e):
       let $(j,known) = Evexp::eval_const_uint_exp(e);
       return known && i <= j;
@@ -1246,22 +1290,24 @@ static struct PtrInfo get_ptr_type(type_t t) {
 // return true if t is a zero-terminated pointer or array type and set the
 // elt_type and ptr_type as appropriate.
 static bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
-                             bool @is_fat, type_t @elt_type) {
+                             bool @is_dynforward, bool @is_dyneither, 
+                             type_t @elt_type) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
     if (conref_def(false,zt)) {
       *ptr_type = t;
       *elt_type = elt;
       switch (conref_def(bounds_one,bnds)) {
-      case Unknown_b: *is_fat = true; break;
-      default: *is_fat = false; break;
+      case DynForward_b: *is_dyneither = false; *is_dynforward = true; break;
+      case DynEither_b: *is_dynforward = false; *is_dyneither = true; break;
+      default: *is_dynforward = *is_dyneither = false; break;
       }
       return true;
     } else return false;
   case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
     if (conref_def(false,zt)) {
       *elt_type = elt;
-      *is_fat = false;
+      *is_dynforward = *is_dyneither = false;
       *ptr_type = 
 	new PointerType(PtrInfo(elt,tq, 
 				PtrAtts(HeapRgn,false_conref,
@@ -1275,25 +1321,31 @@ static bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set is_fat to true.
+// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
+// to true.
 static bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
-                              bool @is_fat, type_t @elt_type) {
+                              bool @is_dynforward,
+                              bool @is_dyneither,
+                              type_t @elt_type) {
   switch (e1->r) {
   case &Cast_e(_,_,_,_):
     toc_impos("we have a cast in a lhs:  %s",exp2string(e1));
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
-    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type);
+    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+                            elt_type);
   case &AggrArrow_e(e1a,_): fallthru(e1a);
   case &AggrMember_e(e1a,_):
     // sanity check
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type))
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+                         elt_type))
       toc_impos("found zero pointer aggregate member assignment: %s",
                 exp2string(e1));
     return false;
   case &Instantiate_e(e1a,_): fallthru(e1a);
   case &NoInstantiate_e(e1a):
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type))
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+                         elt_type))
       toc_impos("found zero pointer instantiate/noinstantiate: %s",
                 exp2string(e1));
     return false;
@@ -1310,12 +1362,15 @@ static exp_t generate_zero(type_t t) {
   exp_t res;
   switch (compress(t)) {
   case &PointerType(_) : res = null_exp(DL); break;
-  case &IntType(sn,B1) : res = const_exp(new Char_c(sn,0),DL); break;
-  case &IntType(sn,B2) : res = const_exp(new Short_c(sn,0),DL); break;
+  case &IntType(sn,Char_sz) : res = const_exp(new Char_c(sn,0),DL); break;
+  case &IntType(sn,Short_sz) : res = const_exp(new Short_c(sn,0),DL); break;
   case &EnumType(_,_)  : fallthru;
   case &AnonEnumType(_): fallthru(Unsigned);
-  case &IntType(sn,B4) : res = const_exp(new Int_c(sn,0),DL); break;
-  case &IntType(sn,B8) : res = const_exp(new LongLong_c(sn,0),DL); break;
+  case &IntType(sn,Int_sz) : fallthru(sn);
+  case &IntType(sn,Long_sz) : 
+    res = const_exp(new Int_c(sn,0),DL); break;
+  case &IntType(sn,LongLong_sz) : 
+    res = const_exp(new LongLong_c(sn,0),DL); break;
   case FloatType       : fallthru;
   case &DoubleType(_)  : res = const_exp(new Float_c("0.0"),DL); break;
   default: 
@@ -1330,7 +1385,9 @@ static exp_t generate_zero(type_t t) {
 // ea[eb].  We need to prevent overwriting the last zero in the array.  
 static void zero_ptr_assign_to_c(env_t nv, exp_t e, 
                                  exp_t e1, opt_t<primop_t> popt, exp_t e2,
-                                 type_t ptr_type, bool is_fat, 
+                                 type_t ptr_type, 
+                                 bool is_dynforward, 
+                                 bool is_dyneither,
                                  type_t elt_type) {
   // To simplify the translation, we always use a fat pointer and generate:
   //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb; 
@@ -1340,7 +1397,12 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   //     *x.curr = z; })
   // Note that this is generated and *then* translated to ensure the
   // proper constraints.  
-  let fat_ptr_type = tagged_typ(elt_type, HeapRgn, mt_tq, true_conref);
+  bool is_fat = (is_dynforward || is_dyneither);
+  type_t fat_ptr_type;
+  if (is_dynforward)
+    fat_ptr_type = dynforward_typ(elt_type, HeapRgn, mt_tq, true_conref);
+  else 
+    fat_ptr_type = dyneither_typ(elt_type, HeapRgn, mt_tq, true_conref);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
   let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
@@ -1359,8 +1421,12 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
-    xinit = fncall_exp(_tagged_arr_plus_e,
-                       list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
+    if (is_dynforward)
+      xinit = fncall_exp(_dynforward_ptr_plus_e,
+                         list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
+    else 
+      xinit = fncall_exp(_dyneither_ptr_plus_e,
+                         list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
     break;
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
@@ -1403,11 +1469,16 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   comp2_exp->topt = new Opt(sint_typ);
   exp_to_c(nv,comp2_exp);
   // build x.size == 1 directly (no translation)
-  let xsize = prim2_exp(Eq,fncall_exp(_get_arr_size_e,
-                                      list(varb_exp(x,x_bnd,DL),
-                                           sizeoftyp_exp(typ_to_c(elt_type),
-                                                         DL)),DL),
-                        uint_exp(1,DL),DL);
+  let xsizeargs = list(varb_exp(x,x_bnd,DL),
+                       sizeoftyp_exp(typ_to_c(elt_type),DL));
+  let oneexp = uint_exp(1,DL);
+  exp_t xsize;
+  if (is_dynforward) 
+    xsize = prim2_exp(Eq,fncall_exp(_get_dynforward_size_e,xsizeargs,DL),
+                      oneexp,DL);
+  else 
+    xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
+                      oneexp,DL);
   // start assembling the statement
   let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
   let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
@@ -1430,16 +1501,20 @@ static void exp_to_c(env_t nv, exp_t e) {
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e(Null_c):
-    // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime
-    // call unless at top-level
+    // NULL translate to 0 unless a tagged array, then {0,0,0} (if either)
+    // and {0,0} (if forward-only), via runtime call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
     // note: should share all these uint_exp(0,DL) things
     let zero = uint_exp(0,DL);
-    if(is_tagged_pointer_typ(old_typ))
+    bool forward_only = false;
+    if(is_tagged_pointer_typ(old_typ,&forward_only)) {
       if(nv->toplevel) 
-	e->r = make_toplevel_tagged_arr(old_typ, zero, zero)->r;
-      else
-	e->r = fncall_exp(_tag_arr_e, list(zero,zero,zero), DL)->r;
+	e->r = make_toplevel_dyn_arr(old_typ, zero, zero, forward_only)->r;
+      else if (forward_only)
+	e->r = fncall_exp(_tag_dynforward_e, list(zero,zero,zero), DL)->r;
+      else 
+	e->r = fncall_exp(_tag_dyneither_e, list(zero,zero,zero), DL)->r;
+    }
     else
       e->r = signed_int_exp(0,DL)->r; 
     break;
@@ -1465,11 +1540,16 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = e2->r;  break;
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
 	switch(conref_def(bounds_one,bound)) {
-	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
-	  e->r = fncall_exp(_get_arr_size_e,
+	case DynForward_b: // retrieve (last_plus_one - curr) via runtime call
+	  e->r = fncall_exp(_get_dynforward_size_e,
 			    list(es->hd, 
 				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
 	  break;
+        case DynEither_b: // same as above
+	  e->r = fncall_exp(_get_dyneither_size_e,
+			    list(es->hd, 
+				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
+          break;
 	case &Upper_b(e2): 
           // when zero-terminated, we have to call "strlen"
           if (conref_def(false,zt)) {
@@ -1490,16 +1570,23 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Plus:
-      // only translation is for tagged arrays or zero-terminated arrays
-      //   _tag_arr_plus(e1,sizeof(elt_typ),e2)
+      // only translation is for ? or ?+- pointers or zero-terminated arrays
+      //   _dynxxx_ptr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
       switch (compress(old_typs->hd)) {
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt,_))):
         switch (conref_def(bounds_one,b)) {
-        case Unknown_b:
+        case DynForward_b:
           exp_t e1 = es->hd;
           exp_t e2 = es->tl->hd;
-          e->r = fncall_exp(_tagged_arr_plus_e,
+          e->r = fncall_exp(_dynforward_ptr_plus_e,
+                            list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
+                            DL)->r;
+          break;
+        case DynEither_b:
+          exp_t e1 = es->hd;
+          exp_t e2 = es->tl->hd;
+          e->r = fncall_exp(_dyneither_ptr_plus_e,
                             list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
                             DL)->r;
           break;
@@ -1518,20 +1605,24 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Minus:
-      // only translation is for tagged arrays:
+      // only translation is for ? or ?- pointers.
       // if e2 is not a tagged array, do just like plus of negation,
       // else result type is unsigned int, so subtract curr fields
       type_t elt_typ = VoidType;
-      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
+      bool forward_only = false;
+      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ,&forward_only)) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
-	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
+        bool forward_only = false;
+	if(is_tagged_pointer_typ(old_typs->tl->hd,&forward_only)) {
 	  e1->r = aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
 	  e2->r = aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
 	  e->r  = divide_exp(copy_exp(e),
 			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
-	  e->r = fncall_exp(_tagged_arr_plus_e,
+          if (forward_only)
+            terr(e->loc, "subtraction not allowed on forward-only ? pointer");
+	  e->r = fncall_exp(_dyneither_ptr_plus_e,
 			    list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
 				 prim1_exp(Minus,e2,DL)), DL)->r;
 	}
@@ -1548,9 +1639,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t e2 = es->tl->hd;
       type_t t1 = old_typs->hd;
       type_t t2 = old_typs->tl->hd;
-      if (is_tagged_pointer_typ(t1))
+      bool forward_only = false;
+      if (is_tagged_pointer_typ(t1,&forward_only))
 	e1->r = aggrmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
-      if (is_tagged_pointer_typ(t2))
+      if (is_tagged_pointer_typ(t2,&forward_only))
 	e2->r = aggrmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
       break;
     default: break; //skip
@@ -1565,10 +1657,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     // To combat this, I'm simply disallowing it.  
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
-    bool fat_ptr = false;
+    bool is_dynforward = false;
+    bool is_dyneither = false;
     string_t incr_str = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
-    if (is_zero_ptr_deref(e2,&ptr_type,&fat_ptr,&elt_type)) {
+    if (is_zero_ptr_deref(e2,&ptr_type,&is_dynforward,&is_dyneither,
+                          &elt_type)) {
       Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
       toc_impos("in-place inc on zero-term");
     }
@@ -1576,15 +1670,24 @@ static void exp_to_c(env_t nv, exp_t e) {
     // only t ? or zero-terminated types are translated funny, 
     // note that e2 is an lvalue!
     type_t elt_typ = VoidType;
-    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
-      // eg. x++ becomes _tagged_arr_inplace_plus_post(&x,sizeof(elt_typ),1)
-      let fn_e =
-	(incr==PostInc || incr==PostDec) ? _tagged_arr_inplace_plus_post_e
-	                                 : _tagged_arr_inplace_plus_e;
-      let change = (incr==PreInc || incr==PostInc) ? 1 : -1;
+    bool forward_only = false;
+    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ,&forward_only)) {
+      _ fn_e;
+      int change = 1;
+      if (forward_only) {
+        if (incr == PostDec || incr == PreDec)
+          Tcutil::terr(e->loc,"decrement not allowed on forward ? pointer");
+        fn_e = (incr == PostInc) ? _dynforward_ptr_inplace_plus_post_e
+          : _dynforward_ptr_inplace_plus_e;
+      } else {
+        fn_e = (incr==PostInc || incr==PostDec) ? 
+          _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
+        if (incr == PreDec || incr == PostDec) 
+          change = -1;
+      }
       e->r = fncall_exp(fn_e, list(address_exp(e2,DL),
-				   sizeoftyp_exp(typ_to_c(elt_typ),DL),
-				   signed_int_exp(change,DL)), DL)->r;
+                                   sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                                   signed_int_exp(change,DL)), DL)->r;
     } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
       // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
       let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
@@ -1609,9 +1712,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     // the last element or (0 op= e2) is 0.
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
-    bool is_fat = false;
-    if (is_zero_ptr_deref(e1,&ptr_type,&is_fat, &elt_type)) {
-      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, is_fat, elt_type);
+    bool is_dynforward = false;
+    bool is_dyneither = false;
+    if (is_zero_ptr_deref(e1,&ptr_type,&is_dynforward,&is_dyneither,
+                          &elt_type)) {
+      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, is_dynforward, 
+                           is_dyneither, elt_type);
       return;
     } 
     // See if e1 is a polymorphic field (i.e., is an instantiated type
@@ -1625,19 +1731,24 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool done = false;
     if(popt != NULL) {
       type_t elt_typ = VoidType;
-      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
+      bool forward_only = false;
+      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ,&forward_only)) {
         _ change;
         switch(popt->v) {
         case Plus:  change = e2; break;
-        case Minus: change = prim1_exp(Minus,e2,DL); break;
+        case Minus: 
+          if (forward_only)
+            Tcutil::terr(e->loc,"subtraction not allowed on forward ? pointers");
+          change = prim1_exp(Minus,e2,DL); break;
         default:    toc_impos("bad t ? pointer arithmetic");
         }
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
-        e->r = fncall_exp(_tagged_arr_inplace_plus_e,
-                          list(address_exp(e1,DL),
-                               sizeoftyp_exp(typ_to_c(elt_typ),DL),
-                               change), DL)->r;
+        let fn_e = forward_only ? _dynforward_ptr_inplace_plus_e :
+          _dyneither_ptr_inplace_plus_e;
+        e->r = fncall_exp(fn_e,list(address_exp(e1,DL),
+                                    sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                                    change), DL)->r;
       } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
         // We're doing x += e where x is a zero-terminated pointer.
         // Make sure we don't run off the end.
@@ -1694,7 +1805,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     //    t argv[num_varargs] = {&v0, ..., &vn};
     // else
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
-    // e1(es[0], ..., es[n-num_varargs], tag_arr(argv, sizeof(t), num_varargs));
+    // e1(es[0], ..., es[n-num_varargs], tag_dynforward(argv, sizeof(t), num_varargs));
     region r {
       qvar_t argv     = temp_var();
       exp_t  argvexp  = var_exp(argv,DL);
@@ -1712,7 +1823,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,es->hd);
 	new_args = new List(es->hd, new_args);
       }
-      new_args = new List(fncall_exp(_tag_arr_e, 
+      new_args = new List(fncall_exp(_tag_dynforward_e,
 				     list(argvexp, 
 					  sizeoftyp_exp(cva_type,DL), 
 					  num_varargs_exp), DL),
@@ -1835,6 +1946,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       let b2 = conref_def(bounds_one,p2.ptr_atts.bounds);
       let zt1 = conref_def(false,p1.ptr_atts.zero_term);
       let zt2 = conref_def(false,p2.ptr_atts.zero_term);
+      bool p1_forward_only = false;
+      bool p2_forward_only = false;
       switch($(b1,b2)) {
       case $(&Upper_b(b1), &Upper_b(b2)):
 	if(n1 && !n2) {
@@ -1859,7 +1972,10 @@ static void exp_to_c(env_t nv, exp_t e) {
         // arrays (since the true length isn't known.)  Of course,
         // this obligates a run-time check.
 	break;
-      case $(&Upper_b(e2), Unknown_b):
+      case $(&Upper_b(e2), DynForward_b): 
+        p2_forward_only = true;
+        fallthru(e2);
+      case $(&Upper_b(e2), DynEither_b):
         // sanity checking
         if (coercion == NonNull_to_Null)
             impos("conversion mis-classified as null-check: %s",exp2string(e));
@@ -1870,13 +1986,14 @@ static void exp_to_c(env_t nv, exp_t e) {
             // one from the size so that no one can write the last location.
             e2 = prim2_exp(Minus,e2,uint_exp(1,DL),DL);
           }
-	  e->r = make_toplevel_tagged_arr(old_t2,e2,e1)->r;
+	  e->r = make_toplevel_dyn_arr(old_t2,e2,e1,p2_forward_only)->r;
 	} else {
-	  // cast from t*{n} or t@{n} to t ? 
+          let tag_e = p2_forward_only ? _tag_dynforward_e : _tag_dyneither_e;
+	  // cast from t*{n} or t@{n} to t? or t?+-
           if (zt1) {
             // if p1 is zero-terminated then calculate the size dynamically:
             //   ({ t *x = e1;
-            //      _tag_arr(x, sizeof(t), _get_zero_arr_size(x,n));
+            //      _dynxxx_ptr_arr(x, sizeof(t), _get_zero_arr_size(x,n));
             //   })
             let x = temp_var();
             let x_exp = var_exp(x,DL);
@@ -1887,19 +2004,22 @@ static void exp_to_c(env_t nv, exp_t e) {
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
             }
             let arg2 = sizeoftyp_exp(typ_to_c(p2.elt_typ),DL);
-            let tg_exp = fncall_exp(_tag_arr_e,list(x_exp,arg2,arg3),DL);
+            let tg_exp = fncall_exp(tag_e,list(x_exp,arg2,arg3),DL);
             let s = exp_stmt(tg_exp,DL);
             s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
             e->r = stmt_exp(s,DL)->r;
           } else {
             // build the t ? struct
-            e->r = fncall_exp(_tag_arr_e,
+            e->r = fncall_exp(tag_e,
                               list(e1, sizeoftyp_exp(typ_to_c(p2.elt_typ),DL),
                                    e2), DL)->r;
           }
         }
 	break;
-      case $(Unknown_b, &Upper_b(e2)):
+      case $(DynForward_b, &Upper_b(e2)):
+        p1_forward_only = true;
+        fallthru(e2);
+      case $(DynEither_b, &Upper_b(e2)):
 	if(nv->toplevel)
 	  unimp("can't coerce t? to t* or t@ at the top-level");
         // When we have t?ZEROTERM and are casting to 
@@ -1917,23 +2037,56 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// cast from t ? to t* or t@ -- run-time check: 
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
-	let ptr_exp = fncall_exp(_untag_arr_e,
-				 list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
+        let untag_e = p1_forward_only ? _untag_dynforward_ptr_e : 
+          _untag_dyneither_ptr_e;
+	let ptr_exp = fncall_exp(untag_e,
+				 list(e1,
+                                      sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
 				      new_e2), DL);
-	if(n2)
+	if(n2) 
 	  ptr_exp->r = fncall_exp(_check_null_e,
 				  new List(copy_exp(ptr_exp), NULL), DL)->r;
 	e->r = cast_it(*t, ptr_exp)->r;
 	break;
-      case $(Unknown_b, Unknown_b):
-        // If p1 is zero-terminated and p2 is not, then p2 had better
-        // be const or else we have to decrement its size by 1.
+      // If p1 is zero-terminated and p2 is not, then p2 had better
+      // be const or else we have to decrement its size by 1.
+      case $(DynForward_b, DynForward_b):
+        p1_forward_only = true; 
+        p2_forward_only = true;
+        goto DynCast;
+      case $(DynForward_b, DynEither_b):
+        p1_forward_only = true;
+        goto DynCast;
+      case $(DynEither_b, DynForward_b):
+        p2_forward_only = true;
+        goto DynCast;
+      case $(DynEither_b, DynEither_b):
+DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (nv->toplevel)
-            unimp("can't coerce a ?ZEROTERM to a non-const ?NOZEROTERM at toplevel");
-          e->r = fncall_exp(_tagged_ptr_decrease_size_e,
+            unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
+          let td_e = p1_forward_only ? _dynforward_ptr_decrease_size_e :
+            _dyneither_ptr_decrease_size_e;
+          e->r = fncall_exp(td_e,
                             list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
                                  uint_exp(1,DL)),DL)->r;
+          if (p1_forward_only != p2_forward_only) 
+            if (p1_forward_only)
+              e->r = fncall_exp(_dynforward_to_dyneither_e,
+                                list(copy_exp(e)),DL)->r;
+            else 
+              e->r = fncall_exp(_dyneither_to_dynforward_e,
+                                list(copy_exp(e)),DL)->r;
+          
+        } else if (p1_forward_only != p2_forward_only) {
+          if (nv->toplevel)
+            unimp("can't coerce between ? and ?+- at toplevel");
+          if (p1_forward_only)
+            e->r = fncall_exp(_dynforward_to_dyneither_e,
+                              list(e1),DL)->r;
+            else 
+              e->r = fncall_exp(_dyneither_to_dynforward_e,
+                                list(e1),DL)->r;
         }
 	break;
       case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
@@ -1962,7 +2115,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     case $(&PointerType(p1), &IntType(_,_)):
       switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
-      case Unknown_b: // cast t? to int -- cast curr field to int
+      case DynForward_b: // cast t? to int -- cast curr field to int
+      case DynEither_b: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp(new_exp(e1->r,e1->loc),curr_sp,DL)->r; break;
       default: break;
       }
@@ -2042,10 +2196,12 @@ static void exp_to_c(env_t nv, exp_t e) {
       //    unsigned int x ;
       //    for (x = 0; x < max; x++) a[x] = e2;
       //    b; })
-      bool is_tagged_ptr = false;
+      bool is_dynforward_ptr = false;
+      bool is_dyneither_ptr = false;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
-        is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
+        is_dynforward_ptr = (conref_def(bounds_one,b) == DynForward_b);
+        is_dyneither_ptr = (conref_def(bounds_one,b) == DynEither_b);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
       }
@@ -2081,11 +2237,12 @@ static void exp_to_c(env_t nv, exp_t e) {
         }
         exp_t ainit = cast_it(ptr_typ,ai);
         decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
-        if (is_tagged_ptr) {
+        if (is_dynforward_ptr || is_dyneither_ptr) {
           let b = temp_var();
           let t = typ_to_c(old_typ);
+          let tag = is_dynforward_ptr ? _tag_dynforward_e : _tag_dyneither_e;
           let binit = 
-	    fncall_exp(_tag_arr_e,
+	    fncall_exp(tag,
 		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL), 
                             malloc_size_exp), DL);
           decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
@@ -2131,17 +2288,23 @@ static void exp_to_c(env_t nv, exp_t e) {
       // (they're structs), so we special-case it right here
       // I HAVE NO IDEA IF I'M CATCHING ENOUGH CASES.
       bool done = false;
+      bool forward_only = false;
       switch(e1->r) {
       case &Cast_e(t2,e2,_,_):
 	switch($(compress(t2),compress(e2->topt->v))) {
 	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_,_)}),
 	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_,_)})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
-	  case $(Unknown_b,&Upper_b(arr_sz)):
+	  case $(DynForward_b,&Upper_b(arr_sz)):
+            forward_only = true;
+            fallthru(arr_sz);
+	  case $(DynEither_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
 	    inner_mexp->r = sizeoftyp_exp(elt_typ,DL)->r;
 	    done = true;
-	    e->r = fncall_exp(_init_tag_arr_e,
+            let _init_f = forward_only ? 
+              _init_dynforward_ptr_e : _init_dyneither_ptr_e;
+	    e->r = fncall_exp(_init_f,
 			      list(mexp, e2,
 				   sizeoftyp_exp(typ_to_c(arr_typ),DL),arr_sz),
 			      DL)->r;
@@ -2215,7 +2378,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         // even if it's just a 0.  Note that writes are handled specially
         // by the AssignOp_e case.  
 	break;
-      case Unknown_b:
+      case DynForward_b:
+      case DynEither_b:
 	// do it as e1[0], could share all the 0's but who cares
 	let ind_e = uint_exp(0,DL);
 	ind_e->topt = new Opt(uint_typ);
@@ -2238,6 +2402,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
+    bool forward_only = false;
     let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)} = get_ptr_type(e1typ);
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
@@ -2265,15 +2430,19 @@ static void exp_to_c(env_t nv, exp_t e) {
 			 DL)), f, DL)->r;
       }
       break;
-    case Unknown_b:
+    case DynForward_b:
+      forward_only = true; fallthru;
+    case DynEither_b:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
+      let _check_f = forward_only ? 
+        _check_dynforward_subscript_e : _check_dyneither_subscript_e;
       type_t ta1 = typ_to_c_array(ta);
       e1->r = cast_it(cstar_typ(ta1,tq),
-		       fncall_exp(_check_unknown_subscript_e,
-				  list(copy_exp(e1),
-				       sizeoftyp_exp(ta1,DL),
-				       uint_exp(0,DL)),
-				  DL))->r;
+                      fncall_exp(_check_f,
+                                 list(copy_exp(e1),
+                                      sizeoftyp_exp(ta1,DL),
+                                      uint_exp(0,DL)),
+                                 DL))->r;
       break;
     case &AbsUpper_b(_): unimp("exp_to_c: AggrArrow w/ AbsUpper_b");
     }
@@ -2311,6 +2480,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       total_bounds_checks++;
+      bool forward_only = false;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
         bool possibly_null = conref_def(false,bcr);
@@ -2338,7 +2508,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  e2->r = fncall_exp(_check_known_subscript_notnull_e,
 			     list(esz,copy_exp(e2)),DL)->r;
 	break;
-      case Unknown_b:
+      case DynForward_b:
+        forward_only = true;
+        fallthru;
+      case DynEither_b:
 	type_t ta1 = typ_to_c_array(ta);
         if (in_bnds) {
           // there's no need for a null-check here either because
@@ -2349,8 +2522,10 @@ static void exp_to_c(env_t nv, exp_t e) {
                                e2,DL)->r;
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
+          let _check_f = forward_only ? 
+            _check_dynforward_subscript_e : _check_dyneither_subscript_e;
           e->r = deref_exp(cast_it(cstar_typ(ta1,tq),
-                                    fncall_exp(_check_unknown_subscript_e,
+                                   fncall_exp(_check_f,
                                                list(e1,sizeoftyp_exp(ta1,DL),
                                                     e2),DL)),DL)->r;
         }
@@ -2551,8 +2726,10 @@ static void exp_to_c(env_t nv, exp_t e) {
         } else {
           pexp = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), var_exp(x,DL));
         }
-        rexp = fncall_exp(_tag_arr_e, list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
-                                           var_exp(x,DL)), DL);
+        // FIX: should support callocing a ?+- pointer
+        rexp = fncall_exp(_tag_dynforward_e, 
+                          list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
+                               var_exp(x,DL)), DL);
       } else {
         xexp = times_exp(sizeoftyp_exp(t_c,DL),num_elts,DL);
         if (rgnopt != NULL) {
@@ -2562,8 +2739,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         } else { 
           pexp = malloc_exp(*topt, var_exp(x,DL));
         }
-        rexp = fncall_exp(_tag_arr_e, list(var_exp(p,DL),uint_exp(1,DL),
-                                           var_exp(x,DL)), DL);
+        // FIX: should support mallocing a ?+- pointer
+        rexp = fncall_exp(_tag_dynforward_e, list(var_exp(p,DL),uint_exp(1,DL),
+                                                  var_exp(x,DL)), DL);
       }
       let s = declare_stmt(x, uint_typ, xexp,
                            declare_stmt(p,cstar_typ(t_c,mt_tq),pexp,
@@ -2621,16 +2799,21 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 }
 static $(env_t,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
 xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
-	  stmt_t fail_stmt, list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
+	  stmt_t* tag_fail_stmt, stmt_t fail_stmt, 
+          list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
-  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_)): fallthru(x);
+  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2): 
+    // in essence, x = r; but achieved through the varmap
+    return 
+      xlate_pat(add_varmap(nv,x,r), rgn, t, r, path, p2, tag_fail_stmt, 
+                fail_stmt, decls);
   case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(nv,x,r);
     fallthru;
   case Wild_p: s = skip_stmt_dl(); break; // potentially wasteful
-  case &Reference_p(vd):
+  case &Reference_p(vd,p2):
     // v = path
     let v = temp_var();
     decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
@@ -2639,8 +2822,9 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     s     = assign_stmt(var_exp(v,DL),
 			cast_it(cstar_typ(typ_to_c(t),mt_tq),
                                 address_exp(path,DL)),DL);
-    break;
-
+    let result = xlate_pat(nv,rgn,t,r,path,p2,tag_fail_stmt,fail_stmt,decls);
+    result[2] = seq_stmt(s,result[2],DL);
+    return result;
   case Null_p:       s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
   case &Int_p(sn,i): s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
   case &Char_p(c):   s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
@@ -2693,7 +2877,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 	arrow_exp = cast_it(t2c, arrow_exp);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL), arrow_exp,
-			     p2,fail_stmt,decls);
+			     p2,&fail_stmt,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s3 = result[2];
@@ -2706,17 +2890,24 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       exp_t e1 = deref_exp(e2,DL);
       exp_t e  = var_exp(tuf->name,DL);
       test_exp = neq_exp(e1,e,DL);
+      s = seq_stmt(ifthenelse_stmt(test_exp, fail_stmt, skip_stmt_dl(), DL),
+                   s, DL);
     } else {
-      int max_tag = num_void_tags(tud);
-      exp_t max_tag_exp = uint_exp(max_tag,DL);
       exp_t e3 = cast_it(cstar_typ(sint_typ,mt_tq), r);
       exp_t e1 = deref_exp(e3,DL);
-      exp_t e5 = lte_exp(r, cast_it(void_star_typ(),max_tag_exp), DL);
       exp_t e  = tunion_tag(tud,tuf->name,true);
-      test_exp = (max_tag>0)? or_exp(e5,neq_exp(e1,e,DL),DL) : neq_exp(e1,e,DL);
+      s = seq_stmt(ifthenelse_stmt(neq_exp(e1,e,DL),fail_stmt,skip_stmt_dl(),
+                                   DL), s, DL);
+      if (tag_fail_stmt != NULL) {
+        int max_tag = num_void_tags(tud);
+        if (max_tag != 0) {
+          exp_t max_tag_exp = uint_exp(max_tag,DL);
+          exp_t e5 = lte_exp(r, cast_it(void_star_typ(),max_tag_exp), DL);
+          s = seq_stmt(ifthenelse_stmt(e5,*tag_fail_stmt,skip_stmt_dl(),DL),
+                       s,DL);
+        }
+      }
     }
-    s = seq_stmt(ifthenelse_stmt(test_exp, fail_stmt, skip_stmt_dl(), DL),
-		 s, DL);
     break;
 
   case &Tunion_p(_,_,ps,_): fallthru(ps); // okay for xtunion too
@@ -2738,7 +2929,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
                              aggrmember_exp(path,fieldname(cnt),DL),
-			     p2,fail_stmt,decls);
+			     p2,&fail_stmt,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
@@ -2767,7 +2958,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
                              aggrmember_exp(path,f,DL),p2,
-                             fail_stmt,decls);
+                             &fail_stmt,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let memexp = aggrmember_exp(r,f,DL);
@@ -2785,7 +2976,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     let t2 = p2->topt->v;
     decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
     let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),deref_exp(path,DL),p2,
-			   fail_stmt,decls);
+			   &fail_stmt,fail_stmt,decls);
     nv = result[0];
     decls = result[1];
     let s2 = result[2];
@@ -2843,6 +3034,34 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
                                                    switch_clause_t sc) {
   return rnew(r) $(fresh_label(),fresh_label(),sc);
 }
+
+static bool is_mixed_tunion(type_t t) {
+  switch (compress(t)) {
+  case &TunionType(TunionInfo{&KnownTunion(&tud),...}):
+    bool seen_novalue = false;
+    bool seen_value = false;
+    for (let fs = tud->fields->v; fs; fs = fs->tl) {
+      if (fs->hd->typs == NULL)
+        seen_value = true;
+      else 
+        seen_novalue = true;
+      if (seen_value && seen_novalue) return true;
+    }
+    break;
+  default: break;
+  }
+  return false;
+}
+
+static bool no_tag_test(pat_t p) {
+  switch (p->r) {
+  case &Var_p(_,p): return no_tag_test(p);
+  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL:
+    return false;
+  default: return true;
+  }
+}
+
 static void xlate_switch(env_t nv, stmt_t whole_s, 
 			 exp_t e, list_t<switch_clause_t> scs) {
   exp_to_c(nv,e);
@@ -2884,6 +3103,8 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     list_t<stmt_t,`rgn>                test_stmts = NULL;
     list_t<env_t,`rgn>                 nvs        = NULL;
     list_t<$(qvar_t,type_t)@`rgn,`rgn> decls      = NULL;
+    bool is_tunion = is_mixed_tunion(t);
+    bool needs_tag_test = is_tunion;
     // generate the tests for each case, continuing to the case's
     // label on success and to the next test on false.
     // do tests first so as to get vars for fallthrus
@@ -2891,8 +3112,28 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     for (let lscs2 = lscs; lscs2 != NULL; lscs2 = lscs2->tl) {
       switch_clause_t sc = (*lscs2->hd)[2];
       var_t fail_lab = (lscs2->tl == NULL) ? end_l : (*lscs2->tl->hd)[0];
+      stmt_t *`rgn tag_fail_stmt = NULL;
+      // we're going to have to check if r <= max_tag.  On failure,
+      // we jump to the next pattern that might satisfy this, skipping
+      // over the tests that also require r <= max_tag.  We also record
+      // that we've already done this test so that the subsequent tests
+      // can be avoided.  
+      if (needs_tag_test && !no_tag_test(sc->pattern)) {
+        for (let xs = lscs2->tl; xs; xs = xs->tl) 
+          if (no_tag_test((*xs->hd)[2]->pattern)) {
+            tag_fail_stmt = rnew(rgn) (goto_stmt((*xs->hd)[0],DL));
+            needs_tag_test = false;
+            break;
+          }
+        if (tag_fail_stmt == NULL) 
+          tag_fail_stmt = rnew(rgn) (goto_stmt(fail_lab,DL));
+      }
       let $(nv2,decls2,test_stmt) = xlate_pat(nv,rgn,t,r,path,sc->pattern,
-					      goto_stmt(fail_lab,DL),decls);
+                                              tag_fail_stmt,
+					      goto_stmt(fail_lab,DL),
+                                              decls);
+      if (is_tunion && no_tag_test(sc->pattern))
+        needs_tag_test = true;
       if(sc->where_clause!=NULL) {
 	let e = (exp_t)sc->where_clause;
 	exp_to_c(nv2,e); // nv2 b/c pattern vars are in scope
@@ -2944,6 +3185,8 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s);
 ///////////////////////////////////////////////////////////////
 //              Translation of Statements                    //
 ///////////////////////////////////////////////////////////////
+static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude);
+
 stmt_t make_npop_handler(int n) {
   return exp_stmt(fncall_exp(_npop_handler_e,
 			     new List(uint_exp(n-1,DL),NULL), DL), DL);
@@ -3045,7 +3288,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e
         switch (p->r) {
-        case &Var_p(vd):
+        case &Var_p(vd, &Pat{.r = Wild_p, ...}):
 	  qvar_t old_name = vd->name;
 	  qvar_t new_name = temp_var();
 	  vd->name = new_name;
@@ -3085,6 +3328,12 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           s->r = decl_stmt(d2,new_stmt(s->r,DL),DL)->r;
         }
         stmt_to_c(nv,s);
+        break;
+      case &Fn_d(fd):
+        let c_name = fd->name;
+        nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
+        fndecl_to_c(nv, fd, false);
+        stmt_to_c(nv,s1);
         break;
       default: impos("bad nested declaration within function");
       }
@@ -3136,7 +3385,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       let xexp = var_exp(x,DL);
       let x_vd = new_vardecl(x,exn_typ,NULL);
       xexp->topt = new Opt(exn_typ);
-      let p = new Pat{.r=new Var_p(x_vd), .topt=new Opt(exn_typ), .loc=DL};
+      let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=Wild_p,.topt = new Opt(exn_typ), .loc = DL}), .topt=new Opt(exn_typ), .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = new Opt(VoidType);
       let rs = exp_stmt(te,DL);
@@ -3217,14 +3466,13 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 // function declaration translation -- straightforward
 static void stmttypes_to_c(stmt_t s);
 static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
-  //fprintf(stderr,"translating %s\n",qvar2string(f->name));
   f->tvs      = NULL;
   f->effect   = NULL;
   f->rgn_po   = NULL;
   f->ret_type = typ_to_c(f->ret_type);
   for (let args=f->args; args != NULL; args = args->tl) {
-    (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
+    (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     nv = add_varmap(nv,x,var_exp(x,DL));
   }
   // for C code, we need to go through and convert all of the types 
@@ -3235,7 +3483,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   }
   if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-    let t2 = typ_to_c(tagged_typ(t,HeapRgn,tq,false_conref));// region irrelevant
+    let t2 = typ_to_c(dynforward_typ(t,HeapRgn,tq,false_conref));// region irrelevant
     let x2 = new $((nmspace_t)Loc_n,n->v);
     f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
     nv = add_varmap(nv,x2,var_exp(x2,DL));
@@ -3449,7 +3697,8 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   type_t old_typ = vd->type;
   vd->type = typ_to_c_array(old_typ);
   // Fat pointers can't be declared with "register" scope
-  if (vd->sc == Register && is_tagged_pointer_typ(old_typ)) 
+  bool forward_only = false;
+  if (vd->sc == Register && is_tagged_pointer_typ(old_typ,&forward_only)) 
     vd->sc = Public;
   stmt_to_c(body_nv,s);
   if(vd->initializer != NULL) {
@@ -3506,9 +3755,10 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
   exp_to_c(nv,e);
   qvar_t x = temp_var();
   region prgn {
+    let fail = throw_match_stmt();
     let $(nv,vars,test_stmt) =
       xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p, 
-		throw_match_stmt(),NULL);
+		&fail, throw_match_stmt(),NULL);
     stmt_to_c(nv,s);
     s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,s,DL),DL);
     for (; vars != NULL; vars = vars->tl) {

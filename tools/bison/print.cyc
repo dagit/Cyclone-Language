@@ -28,17 +28,16 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gram.h"
 #include "state.h"
 
-
-extern char ??tags;
+extern char ?-?-tags;
 extern int nstates;
-extern short ?accessing_symbol;
-extern core *?state_table;
-extern shifts *?shift_table;
-extern errs *?err_table;
-extern reductions *?reduction_table;
-extern char ?consistent;
+extern short ?-accessing_symbol;
+extern core *?-state_table;
+extern shifts *?-shift_table;
+extern errs *?-err_table;
+extern reductions *?-reduction_table;
+extern char ?-consistent;
 extern char any_conflicts;
-extern char ?conflicts;
+extern char ?-conflicts;
 extern int final_state;
 
 extern void conflict_log();
@@ -81,7 +80,7 @@ void
 print_token(extnum, token)
 int extnum, token;
 {
-  fprintf((FILE @)foutput, " type %d is %s\n", extnum, tags[token]);
+  fprintf((FILE @)foutput, " type %d is %s\n", extnum, (string_t)tags[token]);
 }
 
 
@@ -103,8 +102,8 @@ int state;
   register int k;
   register int rule;
   register core @statep;
-  register short ?sp;
-  register short ?sp1;
+  register short ?-sp;
+  register short ?-sp1;
 
   statep = (core @)state_table[state];
   k = statep->nitems;
@@ -119,18 +118,18 @@ int state;
 	sp++;
 
       rule = -(*sp);
-      fprintf((FILE @)foutput, "    %s  ->  ", tags[rlhs[rule]]);
+      fprintf((FILE @)foutput, "    %s  ->  ", (string_t)tags[rlhs[rule]]);
 
       for (sp = ritem + rrhs[rule]; sp < sp1; sp++)
 	{
-	  fprintf((FILE @)foutput, "%s ", tags[*sp]);
+	  fprintf((FILE @)foutput, "%s ", (string_t)tags[*sp]);
 	}
 
       putc('.', (FILE @)foutput);
 
       while (*sp > 0)
 	{
-	  fprintf((FILE @)foutput, " %s", tags[*sp]);
+	  fprintf((FILE @)foutput, " %s", (string_t)tags[*sp]);
 	  sp++;
 	}
 
@@ -184,7 +183,7 @@ int state;
           else
             /*fix this later when we support %-4s*/
               fprintf((FILE @)foutput, "    %s\tshift, and go to state %d\n",
-                    tags[symbol], state1);
+                      (string_t)tags[symbol], state1);
 	}
 
       if (i > 0)
@@ -207,7 +206,8 @@ int state;
 	  if (! errp->errs[j]) continue;
 	  symbol = errp->errs[j];
           /*fix this later when we support %-4s*/
-          fprintf((FILE @)foutput, "    %s\terror (nonassociative)\n", tags[symbol]);
+          fprintf((FILE @)foutput, "    %s\terror (nonassociative)\n", 
+                  (string_t)tags[symbol]);
 	}
 
       if (j > 0)
@@ -219,7 +219,7 @@ int state;
       rule = redp->rules[0];
       symbol = rlhs[rule];
       fprintf((FILE @)foutput, "    $default\treduce using rule %d (%s)\n\n",
-     	        rule, tags[symbol]);
+     	        rule, (string_t)tags[symbol]);
     }
   else if (redp)
     {
@@ -234,7 +234,7 @@ int state;
 	  state1 = shiftp->shifts[i];
 	  symbol = accessing_symbol[state1];
           /*fix no %-4s supported yet */
-	  fprintf((FILE @)foutput, "    %s\tgo to state %d\n", tags[symbol], state1);
+	  fprintf((FILE @)foutput, "    %s\tgo to state %d\n", (string_t)tags[symbol], state1);
 	}
 
       putc('\n', (FILE @)foutput);
@@ -250,7 +250,7 @@ void
 print_grammar()
 {
   int i, j;
-  short? rule;
+  short?- rule;
   char ?buffer;
   int column = 0;
 
@@ -260,13 +260,13 @@ print_grammar()
     /* Don't print rules disabled in reduce_grammar_tables.  */
     if (rlhs[i] >= 0)
       {
-	fprintf((FILE @)foutput, "rule %-4d %s ->", i, tags[rlhs[i]]);
+	fprintf((FILE @)foutput, "rule %-4d %s ->", i, (string_t)tags[rlhs[i]]);
         /*fix here*/
         //	rule = &ritem[rrhs[i]];
         rule = ritem + rrhs[i];
 	if (*rule > 0)
 	  while (*rule > 0)
-	    fprintf((FILE @)foutput, " %s", tags[*rule++]);
+	    fprintf((FILE @)foutput, " %s", (string_t)tags[*rule++]);
 	else
 	  fputs ("		/* empty */", (FILE @)foutput);
 	putc('\n', (FILE @)foutput);
@@ -274,7 +274,7 @@ print_grammar()
 
   /* TERMINAL (type #) : rule #s terminal is on RHS */
   fputs("\nTerminals, with rules where they appear\n\n", (FILE @)foutput);
-  fprintf((FILE @)foutput, "%s (-1)\n", tags[0]);
+  fprintf((FILE @)foutput, "%s (-1)\n", (string_t)tags[0]);
   if (translations)
     {
       for (i = 0; i <= max_user_token_number; i++)
@@ -282,8 +282,8 @@ print_grammar()
 	  {
             //	    buffer[0] = 0;
             buffer = strdup("");
-	    column = strlen (tags[token_translations[i]]);
-	    fprintf((FILE @)foutput, "%s", tags[token_translations[i]]);
+	    column = strlen ((string_t)tags[token_translations[i]]);
+	    fprintf((FILE @)foutput, "%s", (string_t)tags[token_translations[i]]);
 	    END_TEST (50);
             //	    sprintf (buffer, " (%d)", i);
             buffer = aprintf(" (%d)", i);
@@ -309,8 +309,8 @@ print_grammar()
       {
         //	buffer[0] = 0;
         buffer = strdup("");
-	column = strlen (tags[i]);
-	fprintf((FILE @)foutput, "%s", tags[i]);
+	column = strlen ((string_t)tags[i]);
+	fprintf((FILE @)foutput, "%s", (string_t)tags[i]);
 	END_TEST (50);
         //	sprintf (buffer, " (%d)", i);
         buffer = aprintf(" (%d)", i);
@@ -350,8 +350,8 @@ print_grammar()
 
       //      buffer[0] = 0;
       buffer = strdup("");
-      fprintf((FILE @)foutput, "%s", tags[i]);
-      column = strlen (tags[i]);
+      fprintf((FILE @)foutput, "%s", (string_t)tags[i]);
+      column = strlen ((string_t)tags[i]);
       //      sprintf (buffer, " (%d)", i);
       buffer = aprintf(" (%d)", i);
       END_TEST (0);

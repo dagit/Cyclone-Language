@@ -306,7 +306,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
        }
        // We make this a buffer_t (i.e., NOZEROTERM) because more things
        // will then match.
-       type_t ptr = tagged_typ(char_typ, 
+       type_t ptr = dynforward_typ(char_typ, 
                                new_evar(&rk,new Opt(lookup_type_vars(te))),
                                const_tqual(NULL), false_conref);
        typs = new List(ptr,typs);
@@ -534,13 +534,14 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = new List(tagged_typ(char_typ,new_evar(&rk,tvs),empty_tqual(NULL),
-                                 false_conref),typs);
+      typs = new List(dynforward_typ(char_typ,new_evar(&rk,tvs),
+                                     empty_tqual(NULL),
+                                     false_conref),typs);
       break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
       // we use a mbuffer_t here because this matches more things.
-      type_t ptr = tagged_typ(char_typ, 
+      type_t ptr = dynforward_typ(char_typ, 
                               new_evar(&rk,new Opt(lookup_type_vars(te))),
                               empty_tqual(NULL), false_conref);
       typs = new List(ptr,typs);

@@ -269,10 +269,12 @@ static exp_t cnst_int_cls(seg_t seg,int i) {
 
 static int size_of2int(size_of_t sz) {
   switch(sz) {
-  case B1: return 8;
-  case B2: return 16;
-  case B4: return 32;
-  case B8: return 64;
+    // FIX: lots of assumptions about sizes here
+  case Char_sz: return 8;
+  case Short_sz: return 16;
+  case Int_sz: return 32;
+  case Long_sz: return 32;
+  case LongLong_sz: return 64;
   }
 }
 
@@ -903,7 +905,7 @@ buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Tunion array
-  type_t name_type = tagged_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
+  type_t name_type = dynforward_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
@@ -1009,8 +1011,9 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 			 address_exp(unknownid_exp(varname,loc),loc),
 			 list(base_info),NULL);
       break;
-    case Unknown_b:
-      // a ? pointer
+    case DynForward_b: // FIX!!!
+    case DynEither_b:
+      // a ?+- pointer
       // tunion Typestruct.FatPtr(`base_info->exp`);
       let varname = toplevel_name(new_gen_id("rep"));
 

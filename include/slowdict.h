@@ -46,7 +46,7 @@ extern xtunion exn {extern Present};
 extern xtunion exn {extern Absent};
 /** [Absent] is thrown when a key is absent but should be present. */
 
-extern dict_t<`a,`b> empty(int cmp(`a,`a));
+extern dict_t<`a,`b> empty(int (@`H cmp)(`a,`a));
 /** [empty(cmp)] returns an empty dictionary, allocated on the
     heap. [cmp] should be a comparison function on keys: [cmp(k1,k2)]
     should return a number less than, equal to, or greater than 0
@@ -74,7 +74,7 @@ extern dict_t<`a,`b> inserts(dict_t<`a,`b> d,list_t<$(`a,`b)@> l);
 /** [inserts(d,l)] inserts each key, value pair into [d], returning
     the resulting dictionary. */
 
-extern dict_t<`a,`b> singleton(int cmp(`a,`a),`a k,`b v);
+extern dict_t<`a,`b> singleton(int (@`H cmp)(`a,`a),`a k,`b v);
 /** [singleton(cmp,k,v)] returns a new heap-allocated dictionary with
     a single mapping, from [k] to [v]. */
 

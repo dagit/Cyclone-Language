@@ -58,6 +58,7 @@ extern void yyprint(int i, xtunion YYSTYPE v);
 #include <position.h>
 #include "absyn.h"
 #include "tcutil.h"
+#include "absynpp.h"
 using Core;
 using List;
 using Absyn;
@@ -178,7 +179,7 @@ static type_t array2ptr(type_t t, bool argposn) {
     return starb_typ(t1,
                      argposn ? new_evar(new Opt(RgnKind), NULL) : HeapRgn,
                      tq,
-                     eopt == NULL ? Unknown_b : new Upper_b((exp_t)eopt),
+                     eopt == NULL ? DynForward_b : new Upper_b((exp_t)eopt),
                      zeroterm);
   default: return t;
   }
@@ -383,6 +384,7 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
                             .rgn_po = rgn_po,
                             .body=body,.cached_typ=NULL,
                             .param_vardecls=NULL,
+                            .fn_vardecl = NULL,
                             .attributes = append(attributes,out_atts)};
     default: abort(loc,"declarator is not a function prototype");
   }
@@ -412,7 +414,7 @@ static $(type_t,opt_t<decl_t>)
   bool      seen_sign = false;
   bool      seen_size = false;
   type_t    t         = VoidType;
-  size_of_t sz        = B4; 
+  size_of_t sz        = Int_sz; 
   sign_t    sgn       = Signed;
 
   seg_t last_loc = loc;
@@ -445,19 +447,21 @@ static $(type_t,opt_t<decl_t>)
       if(seen_type) err("short modifier must come before base type",loc2);
       last_loc  = loc2;
       seen_size = true;
-      sz        = B2;
+      sz        = Short_sz;
       break;
     case &Long_spec(loc2):
       if(seen_type) err("long modifier must come before base type",loc2);
       // okay to have seen a size so long as it was long (means long long)
-      // That happens when we've seen a size yet we're B4
+      // That happens when we've seen a size yet we're Long_sz
       if(seen_size)
 	switch (sz) {
-	case B4:
-	  sz = B8;
+	case Long_sz:
+	  sz = LongLong_sz;
 	  break;
 	default: err("extra long in type specifier",loc2); break;
-	}
+	} 
+      else 
+        sz = Long_sz;
       last_loc = loc2;
       // the rest is is necessary if it's long and harmless if long long
       seen_size = true;
@@ -818,7 +822,7 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
 static exp_t pat2exp(pat_t p) {
   switch (p->r) {
   case &UnknownId_p(x): return new_exp(new UnknownId_e(x),p->loc);
-  case &Reference_p(vd): 
+  case &Reference_p(vd,&Pat{.r = Wild_p,...}): 
     return deref_exp(new_exp(new UnknownId_e(vd->name),p->loc),p->loc);
   case &Pointer_p(p2): return address_exp(pat2exp(p2),p->loc);
   case Null_p: return null_exp(p->loc);
@@ -1753,7 +1757,9 @@ one_pointer:
 pointer_null_and_bound:
   '*' pointer_bound { $$=^$(new $(LOC(@1,@1),true_conref, $2)); }
 | '@' pointer_bound { $$=^$(new $(LOC(@1,@1), false_conref, $2)); }
-| '?' { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_unknown_conref));  }
+| '?' { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_dynforward_conref));  }
+| '?' '-' 
+      { $$=^$(new $(LOC(@1,@1), true_conref,  bounds_dyneither_conref));  }
 
 pointer_bound:
 /* empty */ { $$=^$(bounds_one_conref); }
@@ -2421,6 +2427,12 @@ pattern:
   }
 | qual_opt_identifier
     { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
+| IDENTIFIER IDENTIFIER pattern
+    { if (strcmp($2,"as") != 0) 
+        err("expecting `as'",LOC(@2,@2));
+      $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),VoidType,NULL),
+                              $3),LOC(@1,@1))); 
+    }
 | '$' '(' tuple_pattern_list ')'
     { let $(ps, dots) = *($3);
       $$=^$(new_pat(new Tuple_p(ps,dots),LOC(@1,@4)));
@@ -2441,8 +2453,16 @@ pattern:
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
     { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
-						VoidType,NULL)),
+						VoidType,NULL),
+                                    new_pat(Wild_p,LOC(@2,@2))),
 		    LOC(@1,@2))); }
+| '*' IDENTIFIER IDENTIFIER pattern
+    { if (strcmp($3,"as") != 0)
+        err("expecting `as'",LOC(@3,@3));
+      $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
+						VoidType,NULL),
+                                    $4),LOC(@1,@2))); 
+    }
 | IDENTIFIER '<' TYPE_VAR '>' 
    { let tag = id2type($3,new Eq_kb(IntKind));
      $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),

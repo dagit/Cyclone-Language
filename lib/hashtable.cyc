@@ -39,8 +39,8 @@ struct Table<`a,`b> {
   list_t<$(`a,`b)@> ?tab;
 };
 
-table_t<`a,`b> create(int sz, int cmp(`a,`a), 
-                              int hash(`a)) {
+table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), 
+                              int (@`H hash)(`a)) {
   list_t<$(`a,`b)@> mt = NULL;
   return new Table(cmp, hash, 3, new {for i<sz :mt});
 }

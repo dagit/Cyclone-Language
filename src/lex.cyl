@@ -225,7 +225,7 @@ static int str_index(string_t buff, int offset, int len) {
   // build string if necessary and return
   if(t->shared_str == 0) {
     let newstr = new_string(len+1);
-    zstrncpy(newstr,buff+offset,len);
+    zstrncpy((char ?NOZEROTERM)newstr,buff+offset,len);
     int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
 			      new ((string_t)newstr));
     t->shared_str = ans;

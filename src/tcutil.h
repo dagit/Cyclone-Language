@@ -183,9 +183,10 @@ resolve_struct_designators(region_t<`r>rgn, seg_t loc,
 			   list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
 			   list_t<aggrfield_t> fields);
 // returns true if this is a t ? -- side effect unconstrained bounds
-extern bool is_tagged_pointer_typ(type_t);
+extern bool is_tagged_pointer_typ(type_t, bool @is_forward_only);
 // like above, but puts element type in elt_typ_dest when returning true.
-extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
+extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest,
+                                      bool @is_forward_only);
 // like above but checks to see if the pointer is zero-terminated
 extern bool is_zero_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
 
@@ -245,5 +246,9 @@ extern bool is_noreturn(type_t);
 // If t is a typedef, returns true if the typedef is const, and warns
 // if the flag declared_const is true.  Otherwise returns declared_const.
 extern bool extract_const_from_typedef(seg_t, bool declared_const, type_t);
+
+// Transfer any function type attributes from the given list to the
+// function type.  
+extern attributes_t transfer_fn_type_atts(type_t t, attributes_t atts);
 }
 #endif

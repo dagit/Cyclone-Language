@@ -430,21 +430,25 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
-  case &IntType(None,   B4):
-  case &IntType(Signed,   B4): dump("int"); return;
-  case &IntType(None,   B1): dump("char"); return;
-  case &IntType(Signed,   B1): dump("signed char"); return;
-  case &IntType(Unsigned, B1): dump("unsigned char"); return;
-  case &IntType(None,   B2):
-  case &IntType(Signed,   B2): dump("short"); return;
-  case &IntType(Unsigned, B2): dump("unsigned short"); return;
-  case &IntType(Unsigned, B4): dump("unsigned int"); return;
-  case &IntType(None,   B8) && to_VC:
-  case &IntType(Signed,   B8) && to_VC: dump("__int64"); return;
-  case &IntType(None,   B8):
-  case &IntType(Signed,   B8): dump("long long"); return;
-  case &IntType(Unsigned,B8) && to_VC: dump("unsigned __int64");return;
-  case &IntType(Unsigned, B8): dump("unsigned long long"); return;
+  case &IntType(None,   Int_sz):
+  case &IntType(Signed, Int_sz): dump("int"); return;
+  case &IntType(None,   Long_sz):
+  case &IntType(Signed, Long_sz): dump("long"); return;
+  case &IntType(None,   Char_sz): dump("char"); return;
+  case &IntType(Signed, Char_sz): dump("signed char"); return;
+  case &IntType(Unsigned, Char_sz): dump("unsigned char"); return;
+  case &IntType(None,   Short_sz):
+  case &IntType(Signed, Short_sz): dump("short"); return;
+  case &IntType(Unsigned, Short_sz): dump("unsigned short"); return;
+  case &IntType(Unsigned, Int_sz): dump("unsigned int"); return;
+  case &IntType(Unsigned, Long_sz): dump("unsigned long"); return;
+  case &IntType(None, LongLong_sz) && to_VC:
+  case &IntType(Signed, LongLong_sz) && to_VC: dump("__int64"); return;
+  case &IntType(None, LongLong_sz):
+  case &IntType(Signed, LongLong_sz): dump("long long"); return;
+  case &IntType(Unsigned, LongLong_sz) && to_VC: 
+    dump("unsigned __int64");return;
+  case &IntType(Unsigned, LongLong_sz): dump("unsigned long long"); return;
   case FloatType:  dump("float");  return;
   case &DoubleType(b): 
     if (b) 
@@ -878,13 +882,17 @@ void dumppat(pat_t p) {
   case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
-  case &Float_p(x):      dump(x);            break;
-  case &Var_p(vd):       dumpqvar(vd->name); break;
+  case &Float_p(x): dump(x); break;
+  case &Var_p(vd,&Pat{.r = Wild_p,...}): dumpqvar(vd->name); break;
+  case &Var_p(vd,p2): dumpqvar(vd->name); dump(" as "); dumppat(p2); break;
   case &Tuple_p(ts,dots):     
     string_t term = dots ? ", ...)" : ")";
     group(dumppat,ts,"$(",term,","); break;
   case &Pointer_p(p2):   dump("&"); dumppat(p2); break;
-  case &Reference_p(vd): dump("*"); dumpqvar(vd->name); break;
+  case &Reference_p(vd,&Pat{.r = Wild_p,...}): 
+    dump("*"); dumpqvar(vd->name); break;
+  case &Reference_p(vd,p2):
+    dump("*"); dumpqvar(vd->name); dump(" as "); dumppat(p2); break;
   case &TagInt_p(tv,vd): 
     dumpqvar(vd->name); dump_char('<'); dumptvar(tv); dump_char('>'); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
@@ -1178,7 +1186,8 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     switch(conref_def(bounds_one,bd)) {
-    case Unknown_b: dump_char('?'); break;
+    case DynForward_b: dump_char('?'); break;
+    case DynEither_b: dump_char('?'); dump_char('-'); break;
     case &Upper_b(e):
       dump_char(conref_def(true,nullable) ? '*' : '@');
       dump_upperbound(e);
@@ -1191,6 +1200,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     switch(Tcutil::compress(rgn)) {
     case HeapRgn: break;
     case &VarType(tv): dump_str(tv->name); break;
+    case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
     default: Tcutil::impos("dumptms: bad rgn type in Pointer_mod");
     }
     dumptq(tq2); // rare

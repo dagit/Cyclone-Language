@@ -35,7 +35,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "machine.h"
 #include "new.h"
 
-extern char   ??tags;		/* reader.c */
+extern char   ?-?-tags;		/* reader.c */
 extern int      verboseflag;	/* getargs.c */
 static int      statisticsflag;	/* XXXXXXX */
 
@@ -44,8 +44,8 @@ static int      statisticsflag;	/* XXXXXXX */
 #define FALSE	(0)
 #endif
 //typedef int bool;
-typedef unsigned ?BSet;
-typedef short  ?rule;
+typedef unsigned ?-BSet;
+typedef short  ?-rule;
 
 
 /*
@@ -139,7 +139,7 @@ reduce_grammar ()
 
   if (!BITISSET(N, start_symbol - ntokens))
     fatals("Start symbol %s does not derive any sentence",
-           tags[start_symbol]);
+           (string_t)tags[start_symbol]);
 
   reduce_grammar_tables();
   /* if (verboseflag) {
@@ -422,7 +422,7 @@ reduce_grammar_tables ()
 
       int    i, n;
 /*      short  j; JF unused */
-      short ?nontermmap;
+      short ?-nontermmap;
       rule   r;
 
       /*
@@ -431,7 +431,7 @@ reduce_grammar_tables ()
        * eliminated.
        */
 
-      nontermmap = NEW2(nvars, short) - ntokens;
+      nontermmap = ((_ ?-)NEW2(nvars, short)) - ntokens;
       for (i = ntokens; i < nsyms; i++)
 	nontermmap[i] = -1;
 
@@ -493,7 +493,7 @@ print_results ()
       fprintf((FILE @)foutput, "Useless nonterminals:\n\n");
       for (i = ntokens; i < nsyms; i++)
 	if (!BITISSET(V, i))
-	  fprintf((FILE @)foutput, "   %s\n", tags[i]);
+	  fprintf((FILE @)foutput, "   %s\n", (string_t)tags[i]);
     }
   b = FALSE;
   for (i = 0; i < ntokens; i++)
@@ -505,7 +505,7 @@ print_results ()
 	      fprintf((FILE @)foutput, "\n\nTerminals which are not used:\n\n");
 	      b = TRUE;
 	    }
-	  fprintf((FILE @)foutput, "   %s\n", tags[i]);
+	  fprintf((FILE @)foutput, "   %s\n", (string_t)tags[i]);
 	}
     }
 
@@ -517,11 +517,11 @@ print_results ()
 	  if (!BITISSET(P, i))
 	    {
 	      fprintf((FILE @)foutput, "#%-4d  ", i);
-	      fprintf((FILE @)foutput, "%s :\t", tags[rlhs[i]]);
+	      fprintf((FILE @)foutput, "%s :\t", (string_t)tags[rlhs[i]]);
               /*fix here*/
 	      for (r = ritem+rrhs[i]; *r >= 0; r++)
 		{
-		  fprintf((FILE @)foutput, " %s", tags[*r]);
+		  fprintf((FILE @)foutput, " %s", (string_t)tags[*r]);
 		}
 	      fprintf((FILE @)foutput, ";\n");
 	    }
@@ -544,7 +544,7 @@ dump_grammar ()
   fprintf((FILE @)foutput, "Value  Sprec    Sassoc    Tag\n");
   for (i = ntokens; i < nsyms; i++)
     fprintf((FILE @)foutput, "%5d  %5d  %5d  %s\n",
-	    i, sprec[i], sassoc[i], tags[i]);
+	    i, sprec[i], sassoc[i], (string_t)tags[i]);
   fprintf((FILE @)foutput, "\n\n");
   fprintf((FILE @)foutput, "Rules\n-----\n\n");
   for (i = 1; i <= nrules; i++)
@@ -560,10 +560,10 @@ dump_grammar ()
   fprintf((FILE @)foutput, "Rules interpreted\n-----------------\n\n");
   for (i = 1; i <= nrules; i++)
     {
-      fprintf((FILE @)foutput, "%-5d  %s :", i, tags[rlhs[i]]);
+      fprintf((FILE @)foutput, "%-5d  %s :", i, (string_t)tags[rlhs[i]]);
       /*fix here*/
       for (r = ritem+rrhs[i]; *r > 0; r++)
-	fprintf((FILE @)foutput, " %s", tags[*r]);
+	fprintf((FILE @)foutput, " %s", (string_t)tags[*r]);
       fprintf((FILE @)foutput, "\n");
     }
   fprintf((FILE @)foutput, "\n\n");

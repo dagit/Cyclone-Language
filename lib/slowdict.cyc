@@ -36,7 +36,7 @@ abstract struct Dict<`a,`b> {
 };
 
 // should be the commented out one, but unification is buggy
-dict_t<`a,`b> empty(int comp(`a,`a)) {
+dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) {
   tunion tree<`a,`b,`H> t = Leaf;
   return new Dict(comp, t);
 }
@@ -106,7 +106,7 @@ dict_t<`a,`b> inserts(dict_t<`a,`b> d,
   return d;
 }
 
-dict_t<`a,`b> singleton(int comp(`a,`a),`a key,`b data) {
+dict_t<`a,`b> singleton(int (@`H comp)(`a,`a),`a key,`b data) {
   return new Dict(comp, new Node(new noderef(new node(key, data, Leaf, Leaf))));
 }
 

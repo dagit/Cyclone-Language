@@ -599,7 +599,8 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     doc_t ptr;
     switch(conref_def(bounds_one,bd)) {
-    case Unknown_b: ptr = question(); break;
+    case DynForward_b: ptr = question(); break;
+    case DynEither_b: ptr = cat(question(),text("-")); break;
     case &Upper_b(e):
       ptr = text(conref_def(true,nullable) ? "*" : "@");
       let $(val,known) = Evexp::eval_const_uint_exp(e);
@@ -747,7 +748,7 @@ doc_t ntyp2doc(type_t t) {
     case Unsigned: sns = "unsigned "; break;
     }
     switch (sz) {
-    case B1:
+    case Char_sz:
       switch (sn) {
       case None:     sns = ""; break;
       case Signed:   sns = "signed "; break;
@@ -755,9 +756,10 @@ doc_t ntyp2doc(type_t t) {
       }
       ts = "char";
       break;
-    case B2: ts = "short"; break;
-    case B4: ts = "int";   break;
-    case B8: ts = (to_VC ? "__int64" : "long long"); break;
+    case Short_sz: ts = "short"; break;
+    case Int_sz: ts = "int";   break;
+    case Long_sz: ts = "long";   break;
+    case LongLong_sz: ts = (to_VC ? "__int64" : "long long"); break;
     }
     s = text(aprintf("%s%s",sns,ts));
     break;
@@ -1470,7 +1472,10 @@ doc_t pat2doc(pat_t p) {
     break;
   case &Char_p(ch): s = text(aprintf("'%s'",char_escape(ch))); break;
   case &Float_p(x): s = text(x); break;
-  case &Var_p(vd):  s = qvar2doc(vd->name); break;
+  case &Var_p(vd,&Pat{.r = Wild_p,...}):  
+    s = qvar2doc(vd->name); break;
+  case &Var_p(vd,p2):
+    s = cat(qvar2doc(vd->name),text(" as "),pat2doc(p2)); break;
   case &TagInt_p(tv,vd):
     s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
     break;
@@ -1481,8 +1486,11 @@ doc_t pat2doc(pat_t p) {
   case &Pointer_p(p2):
     s = cat(text("&"),pat2doc(p2));
     break;
-  case &Reference_p(vd):
+  case &Reference_p(vd,&Pat{.r = Wild_p,...}):
     s = cat(text("*"),qvar2doc(vd->name));
+    break;
+  case &Reference_p(vd,p2):
+    s = cat(text("*"),qvar2doc(vd->name),text(" as "),pat2doc(p2));
     break;
   case &UnknownId_p(q):
     s = qvar2doc(q);
@@ -1944,7 +1952,7 @@ static bool is_char_ptr(type_t t) {
     switch (elt_typ) {
     case &Evar(_,&Opt(t),_,_): elt_typ = t; goto L;
     case &TypedefType(_,_,_,&t): elt_typ = t; goto L;
-    case &IntType(_,B1): return true;
+    case &IntType(_,Char_sz): return true;
     default: return false;
     }
   default: return false;

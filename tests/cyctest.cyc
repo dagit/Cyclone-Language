@@ -241,11 +241,11 @@ void list_test() {
 void array_test() {
   // could definitely use more tests
   test_begin("Array");
-  unsigned int ?x = new { for i < 6 : 2*i }; // Note, not int ?x
-  unsigned int ?xp = x+3;
+  unsigned int ?-x = new { for i < 6 : 2*i }; // Note, not int ?x
+  unsigned int ?-xp = x+3;
   okfail(Core::arr_prevsize(xp,sizeof(*xp)) == 3);
-  unsigned char ?c = new { for i < 8 : '\0' };
-  unsigned char ?cp = c + 7;
+  unsigned char ?-c = new { for i < 8 : '\0' };
+  unsigned char ?-cp = c + 7;
   okfail(Core::arr_prevsize(cp,sizeof(*cp)) == 7);
   for (int i=0; i<6; i++)
     okfail(x[i]==2*i);
@@ -1043,7 +1043,7 @@ int main(int argc, string_t<`H> ?`H args) {
     att_test();
     letv_test();
     sig_test();
-    // scanf_test(); // commented out because sscanf is insecure
+    scanf_test(); // commented out because sscanf is insecure
   } catch {
   case Array_bounds:
     fflush(stdout);

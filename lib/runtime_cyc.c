@@ -181,46 +181,45 @@ int _throw_badalloc() {
   throw(Cyc_Bad_alloc);
 }
 
-struct _tagged_arr wrap_Cstring_as_string(Cstring s, size_t len) {
-  struct _tagged_arr str;
+struct _dynforward_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
+  struct _dynforward_ptr str;
   if (s == NULL) {
-    str.base = str.curr = str.last_plus_one = NULL;
+    str.curr = str.last_plus_one = NULL;
   } else {
     int slen = strlen(s)+1;
     if (len == -1)
       len = slen;
     else if (len > slen)
       _throw_arraybounds(); /* FIX: pick better exception */
-    str.base = str.curr = s;
-    str.last_plus_one = str.base + len;
+    str.curr = s;
+    str.last_plus_one = s + len;
   }
   return str;
 }
 
 // trusted---the length field is not verified to be correct
-struct _tagged_arr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
-  struct _tagged_arr str;
+struct _dynforward_ptr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
+  struct _dynforward_ptr str;
   if (s == NULL) {
-    str.base = str.curr = str.last_plus_one = NULL;
+    str.curr = str.last_plus_one = NULL;
   } else {
-    str.base = str.curr = s;
-    str.last_plus_one = str.base + len;
+    str.curr = s;
+    str.last_plus_one = s + len;
   }
   return str;
 }
 
-struct _tagged_arr Cstring_to_string(Cstring s) {
-  struct _tagged_arr str;
+struct _dynforward_ptr Cstring_to_string(Cstring s) {
+  struct _dynforward_ptr str;
   if (s == NULL) {
-    str.base = str.curr = str.last_plus_one = NULL;
+    str.curr = str.last_plus_one = NULL;
   }
   else {
     int sz = strlen(s)+1;
-    str.base = (char *)_cycalloc_atomic(sz);
-    if (str.base == NULL) 
+    str.curr = (char *)_cycalloc_atomic(sz);
+    if (str.curr == NULL) 
       _throw_badalloc();
-    str.curr = str.base;
-    str.last_plus_one = str.base + sz;
+    str.last_plus_one = str.curr + sz;
 
     // Copy the string in case the C code frees it or mangles it
     str.curr[--sz] = '\0';
@@ -230,7 +229,7 @@ struct _tagged_arr Cstring_to_string(Cstring s) {
   return str;
 }
 
-Cstring string_to_Cstring(struct _tagged_arr s) {
+Cstring string_to_Cstring(struct _dynforward_ptr s) {
   int i;
   char *contents = s.curr;
   size_t sz = s.last_plus_one - s.curr;
@@ -238,7 +237,7 @@ Cstring string_to_Cstring(struct _tagged_arr s) {
 
   if (s.curr == NULL) return NULL;
 
-  if (s.curr < s.base || s.curr >= s.last_plus_one)
+  if (s.curr >= s.last_plus_one)
     throw(Cyc_Null_Exception); // FIX: this should be a bounds error
   // check that there's a '\0' somewhere in the string -- if not,
   // throw an exception.
@@ -261,7 +260,7 @@ Cstring string_to_Cstring(struct _tagged_arr s) {
 // Copy a null-terminated list of Cstrings to a tagged,
 // null-terminated list of strings.  (The return type is misleading.)
 // can put back in after bootstrapping
-
+/*
 struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
   int i, numstrs = 0;
   struct _tagged_arr result;
@@ -278,21 +277,22 @@ struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
     ((string_t*)result.base)[i] = Cstring_to_string(ntCsl[i]);
   return result;
 }
-
+*/
 // Convert a "@pointer to a null-terminated list of pointers" to a
 // "?pointer to a null-terminated list of pointers".  We don't list
 // this function in core.h because "pointers to what" might change.
+/*
 struct _tagged_arr pntlp_toCyc(void **in) {
   struct _tagged_arr result;
   result.curr = result.base = result.last_plus_one = (char*)in;
   while (*(result.last_plus_one++));
   return result;
 }
-
+*/
 // Returns the size of an array from the current pointer back to
 // its starting point.  If the curr pointer = start pointer, or 
 // the curr pointer is out of bounds, then this is 0.
-unsigned int arr_prevsize(struct _tagged_arr arr,size_t elt_sz) {
+unsigned int arr_prevsize(struct _dyneither_ptr arr,size_t elt_sz) {
   unsigned char *_get_arr_size_curr=arr.curr;
   unsigned char *_get_arr_size_base=arr.base;
   return 
@@ -300,7 +300,7 @@ unsigned int arr_prevsize(struct _tagged_arr arr,size_t elt_sz) {
      _get_arr_size_curr >= arr.last_plus_one) ? 0 :
     ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
 }
-
+/*
 // FIX:  this isn't really needed since you can cast char[?] to char[]
 Cstring underlying_Cstring(struct _tagged_arr s) {
   char *str=s.curr;
@@ -312,7 +312,7 @@ Cstring underlying_Cstring(struct _tagged_arr s) {
     throw(Cyc_Null_Exception);
   return str;
 }
-
+*/
 ///////////////////////////////////////////////
 // Regions
 
@@ -351,9 +351,8 @@ bool Cyc_set_default_region_page_size(size_t s) {
 
 // argc is redundant
 struct _tagged_argv { 
-  struct _tagged_arr *curr;
-  struct _tagged_arr *base;
-  struct _tagged_arr *last_plus_one;
+  struct _dynforward_ptr *curr;
+  struct _dynforward_ptr *last_plus_one;
 };
 
 // some debugging routines
@@ -385,7 +384,7 @@ extern struct Cyc___cycFILE {
   FILE *file;
 } *Cyc_stdin, *Cyc_stdout, *Cyc_stderr;
 
-extern int Cyc_main(int argc, struct _tagged_argv argv);
+extern int Cyc_main(int argc, struct _dynforward_ptr argv);
 
 int main(int argc, char **argv) {
   // install outermost exception handler
@@ -412,18 +411,19 @@ int main(int argc, char **argv) {
   // NULL to the end of the argv so that people can step through argv
   // until they hit NULL.  
   {struct _tagged_argv args;
+  struct _dynforward_ptr args_p;
   int i, result;
-  args.base = 
-    (struct _tagged_arr *)GC_malloc((argc+1)*sizeof(struct _tagged_arr));
-  args.curr = args.base;
-  args.last_plus_one = args.base + argc + 1;
+  args.curr = 
+    (struct _dynforward_ptr *)GC_malloc((argc+1)*sizeof(struct _dynforward_ptr));
+  args.last_plus_one = args.curr + argc + 1;
   for(i = 0; i < argc; ++i)
     args.curr[i] = Cstring_to_string(argv[i]);
   // plug in final NULL
-  args.curr[argc].base = 0;
   args.curr[argc].curr = 0;
   args.curr[argc].last_plus_one = 0;
-  result = Cyc_main(argc, args);
+  args_p.curr = (unsigned char *)args.curr;
+  args_p.last_plus_one = (unsigned char *)args.last_plus_one;
+  result = Cyc_main(argc, args_p);
 #ifdef CYC_REGION_PROFILE
   fprintf(stderr,"rgn_total_bytes: %d\n",rgn_total_bytes);
   fprintf(stderr,"heap_total_bytes: %d\n",heap_total_bytes);

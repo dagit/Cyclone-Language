@@ -46,16 +46,16 @@ typedef struct Set<`a,`r> @`r set_t<`a,`r>;
        first argument is less than, equal to, or greater than its
        second argument. */
 
-extern set_t<`a> empty(int cmp(`a,`a));
+extern set_t<`a> empty(int (@`H cmp)(`a,`a));
   /** [empty(cmp)] creates an empty set given comparison function
       [cmp].  The set is heap-allocated. */
-extern set_t<`a,`r> rempty(region_t<`r> r, int cmp(`a,`a));
+extern set_t<`a,`r> rempty(region_t<`r> r, int (@`H cmp)(`a,`a));
   /** [rempty(r,cmp)] creates an empty set in the region with handle
       [r]. */
-extern set_t<`a> singleton(int cmp(`a,`a),`a x);
+extern set_t<`a> singleton(int (@`H cmp)(`a,`a),`a x);
   /** [singleton(cmp,x)] creates a set on the heap with a single
       element, [x]. */
-extern set_t<`a> from_list(int cmp(`a,`a),list_t<`a> l);
+extern set_t<`a> from_list(int (@`H cmp)(`a,`a),list_t<`a> l);
   /** [from_list(cmp,l)] creates a set on the heap; the elements of
       the set are the elements of the list [l]. */
 extern set_t<`a> insert(set_t<`a,`H> s,`a elt);

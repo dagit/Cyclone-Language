@@ -36,14 +36,14 @@ abstract struct Set<`a,`r::R> {
 };
 
 /* Given a comparison function, return an empty set. */
-set_t<`a> empty(int comp(`a,`a)) {
+set_t<`a> empty(int (@`H comp)(`a,`a)) {
   return new Set(comp,0,NULL);
 }
-set_t<`a,`r> rempty(region_t<`r> rgn, int comp(`a,`a)) {
+set_t<`a,`r> rempty(region_t<`r> rgn, int (@`H comp)(`a,`a)) {
   return rnew(rgn) Set(comp,0,NULL);
 }
 
-set_t<`a> singleton(int comp(`a,`a),`a x) {
+set_t<`a> singleton(int (@`H comp)(`a,`a),`a x) {
   return new Set(comp,1,new List(x,NULL));
 }
 
@@ -271,7 +271,7 @@ set_t<`a> intersect(set_t<`a,`H> s1,set_t<`a,`H> s2) {
   return new Set(comp,card,result);
 }
 
-set_t<`a> from_list(int comp(`a,`a),list_t<`a,`r> x) {
+set_t<`a> from_list(int (@`H comp)(`a,`a),list_t<`a,`r> x) {
   list_t<`a> z = List::merge_sort(comp,x);
   // remove duplicates
   for (list_t<`a> y=z; y!=NULL; y=y->tl) {

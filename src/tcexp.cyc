@@ -193,7 +193,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         // The typical case is in an array initializer, e.g.,
         // short x[1] = { 255 };
       switch (compress(*topt)) {
-      case &IntType(sn,B1):
+      case &IntType(sn,Char_sz):
         switch(sn) {
 	case Unsigned: t = uchar_typ; break;
 	case Signed: t = schar_typ; break;
@@ -201,11 +201,14 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 	}
         e->r = new Const_e(new Char_c(sn,(char)(i))); // i gets truncated here
         break;
-      case &IntType(sn,B2):
+      case &IntType(sn,Short_sz):
 	t = (sn == Unsigned) ? ushort_typ : sshort_typ;
         e->r = new Const_e(new Short_c(sn,(short)(i))); // i gets truncated here
         break;
-      case &IntType(sn,_):
+      case &IntType(sn,Int_sz):
+        t = (sn == Unsigned) ? uint_typ : sint_typ;
+        break;
+      case &IntType(sn,Long_sz):
         t = (sn == Unsigned) ? uint_typ : sint_typ;
         break;
       case &PointerType(_) && (i == 0):
@@ -358,7 +361,8 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     case &ArrayType(_): break;
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))): 
       switch(compress_conref(b)->v) {
-      case &Eq_constr(Unknown_b):
+      case &Eq_constr(DynForward_b):
+      case &Eq_constr(DynEither_b):
       case &Eq_constr(&Upper_b(_)): break;
       default: terr(loc,"can't apply size to pointer/array of abstract length");
       }
@@ -399,7 +403,10 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
     switch (b->v) {
-    case &Eq_constr(Unknown_b): return t1;
+    case &Eq_constr(DynForward_b): 
+      // FIX: warn if e2 is negative
+      return t1;
+    case &Eq_constr(DynEither_b): return t1;
     case &Eq_constr(&Upper_b(ub)):
       // if we have a zero-terminated array, warn that this could
       // be expensive, since coercing to a fat pointer involves a loop.  
@@ -410,10 +417,10 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       //   int buf[10] = {...};
       //   *((buf + 11) - 10)
       // This should not generate an exception.  So the best we can do
-      // is coerce e1 to a ? type.
+      // is coerce e1 to a ?- type.
       let new_t1 = new PointerType(PtrInfo(et,tq,
 					   PtrAtts(r,true_conref,
-						   bounds_unknown_conref,zt,
+						   bounds_dyneither_conref,zt,
                                                    NULL)));
       unchecked_cast(te, e1, new_t1, Other_coercion);
       return new_t1;
@@ -421,7 +428,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e1->loc, "pointer arithmetic not allowed on pointers with "
 	   "abstract bounds");
       return t1;
-    default: b->v = new Eq_constr(Unknown_b); return t1;
+    default: b->v = new Eq_constr(DynForward_b); return t1;
     }
   default: return tcArithBinop(te, e1, e2, is_numeric);
   }
@@ -432,8 +439,10 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
   type_t t1_elt = VoidType;
-  if (is_tagged_pointer_typ_elt(t1,&t1_elt)) {
-    if (is_tagged_pointer_typ(t2)) {
+  bool forward_only1 = false;
+  bool forward_only2 = false;
+  if (is_tagged_pointer_typ_elt(t1,&t1_elt,&forward_only1)) {
+    if (is_tagged_pointer_typ(t2,&forward_only2)) {
       if (!unify(t1, t2)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
@@ -442,6 +451,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       return sint_typ;
     } else {
+      if (forward_only1)
+        terr(e1->loc,"can't subtract from forward-only ? pointer");
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (!coerce_sint_typ(te, e2)) {
@@ -632,10 +643,13 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e)) {
     type_t telt = VoidType;
-    if (is_tagged_pointer_typ_elt(t,&telt) || 
+    bool forward_only = false;
+    if (is_tagged_pointer_typ_elt(t,&telt,&forward_only) || 
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),MemKind))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
+      if (forward_only && (i == PreDec || i == PostDec))
+        terr(e->loc,"can't subtract from forward-only ? pointer");
     } else 
       terr(e->loc,"expecting arithmetic or ? type but found %s",typ2string(t));
   }
@@ -743,8 +757,8 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
   case FloatType: unchecked_cast(te,e,dbl_typ,No_coercion);t1 = dbl_typ; break;
-  case &IntType(_,B1): 
-  case &IntType(_,B2): unchecked_cast(te,e,sint_typ,No_coercion);t1 = sint_typ; break;
+  case &IntType(_,Char_sz): 
+  case &IntType(_,Short_sz): unchecked_cast(te,e,sint_typ,No_coercion);t1 = sint_typ; break;
   default: break;
   }
   // try to find an exact match first
@@ -936,7 +950,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
                             exp_t e, list_t<type_t> ts) {
   tcExpNoInst(te,NULL,e);
   // turn any functions into function pointers
-  e->topt->v = pointer_expand(e->topt->v);
+  e->topt->v = pointer_expand(e->topt->v,false);
   type_t t1 = compress(e->topt->v);
   switch (t1) {
   case &PointerType(PtrInfo(t0,tq,PtrAtts(rt,x,b,zt,_))):
@@ -1297,7 +1311,8 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt,
           }
         }
         break;
-      case &Eq_constr(Unknown_b): emit_warning = false; break;
+      case &Eq_constr(DynForward_b): emit_warning = false; break;
+      case &Eq_constr(DynEither_b): emit_warning = false; break;
       default: break;
       }
       if (emit_warning) 
@@ -1817,7 +1832,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     default: break;
     }
-  if (!one_elt) ptr_maker = tagged_typ;
+  if (!one_elt) ptr_maker = dynforward_typ;
   return ptr_maker(elt_type,rgn,empty_tqual(NULL),zero_term);
 }
 // ({ s })
@@ -1874,7 +1889,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	if(is_const_exp(te,bnd))
 	  b = new Upper_b(bnd);
 	else
-	  b = Unknown_b;
+	  b = DynForward_b;
       }
       type_t res_typ = 
         new PointerType(PtrInfo(et_arr,tq_arr,
@@ -1943,7 +1958,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_typ(char_typ, rgn, const_tqual(NULL), 
-                        Unknown_b, true_conref);
+                        DynForward_b, true_conref);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)), 
                    false_conref);
@@ -1991,7 +2006,7 @@ type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   switch (t) {
   case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
     let $(_,rgn) = addressof_props(te,e);
-    let b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
+    let b = (e2 == NULL) ? (bounds_t)DynForward_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b,zt);
     e->topt->v = t;
     return t;
@@ -2014,7 +2029,8 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
     switch (t) {
     case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
       let $(_,rgn) = addressof_props(te,e);
-      bounds_t b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
+      bounds_t b = (e2 == NULL) ? (bounds_t)DynForward_b : 
+        new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b,zt);
       unchecked_cast(te,e,t,Other_coercion);
       return t;
@@ -2036,13 +2052,13 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
   case &NoInstantiate_e(e2):
     // the user has asked not to implicitly instantiate any quantifiers
     tcExpNoInst(te,topt,e2);
-    e2->topt->v = pointer_expand(e2->topt->v);
+    e2->topt->v = pointer_expand(e2->topt->v,false);
     e->topt = e2->topt;
     break;
   default:
     // first, typecheck without instantiating
     tcExpNoInst(te,topt,e);
-    e->topt->v = pointer_expand(e->topt->v);
+    e->topt->v = pointer_expand(e->topt->v,false);
     // implicitly instantiate the expression if it has a polymorphic type
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo(t,tq,PtrAtts(rt,x,b,zt,_))):

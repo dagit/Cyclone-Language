@@ -46,22 +46,6 @@ namespace Tc;
 static string_t tc_msg_c = "";
 static string_t * tc_msg = &tc_msg_c;
 
-// Transfer any function type attributes from the given list to the
-// function type.  
-static attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
-  switch (compress(t)) {
-  case &FnType(FnInfo{_,_,_,_,_,_,_,*fnatts}):
-    let res_atts = NULL;
-    for (; atts != NULL; atts = atts->tl)
-      if (fntype_att(atts->hd))
-        *fnatts = new List(atts->hd,*fnatts); 
-      else
-        res_atts = new List(atts->hd,res_atts); 
-    return res_atts;
-  default: impos("transfer_fn_type_atts"); 
-  }
-}
-
 static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
   for (; exports != NULL; exports = exports->tl) {
     let p = exports->hd;
@@ -81,7 +65,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
                       list_t<$(seg_t,qvar_t,bool)@>* exports) {
   let &Vardecl(sc,&$(ns,v),_,t,initializer,_,atts,_) = vd;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking vardecl_t %s",*v); fflush(stderr);
+  fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*v, 
+          typ2string(vd->type)); fflush(stderr);
 #endif
 
   // reject explicitly qualified name FIX: prevents re-type-checking
@@ -310,7 +295,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
-  te->le = new Opt(new_fenv(loc,fd));
+  let old_fenv = te->le;
+  te->le = new List(new_fenv(loc,fd),old_fenv);
   // check the body, then get rid of local environment
   Tcstmt::tcStmt(te,fd->body,false);
   // we've delayed checking some capabilities and constraints so that inference
@@ -351,17 +337,17 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
-        if (!unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+        if (!unify(t2,dynforward_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
                                  empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dynforward_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
                                  empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+            !unify(t2,dynforward_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
                                  const_tqual(NULL),empty_conref())) &&
-            !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dynforward_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
                                  const_tqual(NULL),empty_conref()))) {
@@ -372,7 +358,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     }
   }
 
-  te->le = NULL;
+  te->le = old_fenv;
 }
 
 static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {

@@ -28,9 +28,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gram.h"
 #include "state.h"
 
-extern char ?nullable;
-extern short ?itemset;
-extern short ?itemsetend;
+extern char ?-nullable;
+extern short ?-itemset;
+extern short ?-itemsetend;
 
 int nstates;
 int final_state;
@@ -49,7 +49,7 @@ void save_reductions();
 void augment_automaton();
 void insert_start_shift();
 extern void initialize_closure(int);
-extern void closure(short ?, int);
+extern void closure(short ?-, int);
 extern void finalize_closure();
 extern void toomany(const char ?);
 
@@ -59,30 +59,30 @@ static shifts *last_shift;
 static reductions *last_reduction;
 
 static int nshifts;
-static short ?shift_symbol;
+static short ?-shift_symbol;
 
-static short ?redset;
-static short ?shiftset;
+static short ?-redset;
+static short ?-shiftset;
 
-static short ??kernel_base;
-static short ??kernel_end;
-static short ?kernel_items;
+static short ?-?-kernel_base;
+static short ?-?-kernel_end;
+static short ?-kernel_items;
 
 /* hash table for states, to recognize equivalent ones.  */
 
 #define	STATE_TABLE_SIZE	1009
-static core *?state_table;
+static core *?-state_table;
 
 
 
 void
 allocate_itemsets()
 {
-  register short ?itemp;
+  register short ?- itemp;
   register int symbol;
   register int i;
   register int count;
-  register short ?symbol_count;
+  register short ?-symbol_count;
 
   count = 0;
   symbol_count = NEW2(nsyms, short);
@@ -105,7 +105,7 @@ allocate_itemsets()
      appears as an item, which is symbol_count[symbol].
      We allocate that much space for each symbol.  */
 
-  kernel_base = NEW2P(nsyms, short ?);
+  kernel_base = NEW2P(nsyms, short ?-);
   kernel_items = NEW2(count, short);
 
   count = 0;
@@ -116,7 +116,7 @@ allocate_itemsets()
     }
 
   shift_symbol = symbol_count;
-  kernel_end = NEW2P(nsyms, short ?);
+  kernel_end = NEW2P(nsyms, short ?-);
 }
 
 
@@ -198,8 +198,8 @@ new_itemsets()
 {
   register int i;
   register int shiftcount;
-  register short ?isp;
-  register short ?ksp;
+  register short ?-isp;
+  register short ?-ksp;
   register int symbol;
 
 #ifdef	TRACE
@@ -284,9 +284,9 @@ int
 get_state(int symbol)
 {
   register int key;
-  register short ?isp1;
-  register short ?isp2;
-  register short ?iend;
+  register short ?-isp1;
+  register short ?-isp2;
+  register short ?-iend;
   register core *sp;
   register int found;
 
@@ -358,9 +358,9 @@ new_state(int symbol)
 {
   register int n;
   register core *p;
-  register short ?isp1;
-  register short ?isp2;
-  register short ?iend;
+  register short ?-isp1;
+  register short ?-isp2;
+  register short ?-iend;
 
 #ifdef	TRACE
   fprintf(stderr, "Entering new_state, symbol = %d\n", symbol);
@@ -419,9 +419,9 @@ void
 save_shifts()
 {
   register shifts *p;
-  register short ?sp1;
-  register short ?sp2;
-  register short ?send;
+  register short ?-sp1;
+  register short ?-sp2;
+  register short ?-send;
   /*
   p = (shifts *) xmalloc((unsigned) (sizeof(shifts) +
 				       (nshifts - 1) * sizeof(short)));
@@ -458,14 +458,14 @@ save_shifts()
 void
 save_reductions()
 {
-  register short ?isp;
-  register short ?rp1;
-  register short ?rp2;
+  register short ?-isp;
+  register short ?-rp1;
+  register short ?-rp2;
   register int item;
   register int count;
   register reductions *p;
 
-  short ?rend;
+  short ?-rend;
 
   /* find and count the active items that represent ends of rules */
 

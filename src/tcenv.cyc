@@ -98,7 +98,7 @@ xtunion exn {Env_error};
 struct Tenv {
   list_t<var_t>                      ns; // current namespace
   Dict::dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  opt_t<fenv_t>                      le; // is NULL except in functions
+  list_t<fenv_t>                     le; // nested function environments
 };
 
 // Global environments -- what's declared in a global scope
@@ -119,13 +119,6 @@ tunion Resolved {
   TunionRes(tuniondecl_t,tunionfield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
-};
-
-// Models the nesting of the RTCG constructs
-tunion Frames<`a> {
-  Outermost(`a);
-  Frame(`a,tunion Frames<`a>);
-  Hidden(`a,tunion Frames<`a>);
 };
 
 tunion Jumpee {
@@ -430,12 +423,12 @@ genv_t empty_genv() {
 
 static fenv_t get_fenv(tenv_t te) {
   if (te->le == NULL) env_err("get_fenv");
-  return te->le->v;
+  return te->le->hd;
 }
 
 static tenv_t put_fenv(tenv_t te, fenv_t fe) {
   if (te->le == NULL) env_err("put_fenv");
-  return new Tenv(te->ns, te->ae, new Opt(fe));
+  return new Tenv(te->ns, te->ae, new List(fe,te->le->tl));
 }
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
@@ -862,7 +855,71 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   if (fd->cyc_varargs != NULL) {
     let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
-      let typ = tagged_typ(t, param_rgn, tq, false_conref);
+      let typ = dynforward_typ(t, param_rgn, tq, false_conref);
+      let vd = new{Vardecl{.sc = Public,
+                           .name = new $((nmspace_t)Loc_n,nopt->v),
+                           .tq = empty_tqual(NULL),
+                           .type = typ,
+                           .initializer = NULL,
+                           .rgn = new Opt(param_rgn),
+                           .attributes = NULL, .escapes = false}};
+      vds = new List(vd,vds);
+      locals = Dict::insert(locals, nopt->v, new Param_b(vd));
+    } 
+    else terr(loc,"missing name for varargs");
+  }
+  fd->param_vardecls = new{Opt(imp_rev(vds))};
+  return new 
+    Fenv{.shared = new SharedFenv{
+                     .return_typ = fd->ret_type,
+                     .seen_labels = Dict::empty(strptrcmp),
+                     .needed_labels = SlowDict::empty(strptrcmp),
+		     .delayed_effect_checks = NULL,
+		     .delayed_constraint_checks = NULL
+                   },
+         .type_vars   = tvs,
+         .region_order = rgn_po,
+         .locals      = locals,  // assumed unique
+         .encloser    = fd->body, // careful -- self loop at top!!!
+         .ctrl_env    = new CtrlEnv(NotLoop_j, NotLoop_j, NULL, FnEnd_j, 0),
+         .capability  = new JoinEff(new List(new AccessEff(param_rgn),
+                                             new List(fd->effect->v,NULL))),
+         .curr_rgn    = param_rgn,
+         .in_notreadctxt = false
+       };
+}
+
+fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
+  Dict::dict_t<var_t,binding_t> locals = old_fenv->locals;
+  tvar_t rgn0 = 
+    new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
+             new_tvar_id(),
+             new Eq_kb(RgnKind));
+  let rgn_po = old_fenv->region_order;
+  // add in all of the region vars
+  for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
+    if (tvar_kind(tvars->hd) == RgnKind)
+      rgn_po = add_youngest(rgn_po, tvars->hd, false);
+  rgn_po = add_youngest(rgn_po, rgn0, false);
+  let tvs = new List(rgn0,List::append(fd->tvs,old_fenv->type_vars));
+  Tcutil::check_unique_tvars(loc,tvs);
+  type_t param_rgn = new VarType(rgn0);
+  let vds = NULL;
+  for(let args = fd->args; args != NULL; args = args->tl) {
+    let vd = new{Vardecl{.sc = Public, 
+			 .name = new $((nmspace_t)Loc_n,(*args->hd)[0]),
+			 .tq = (*args->hd)[1],
+			 .type = (*args->hd)[2],
+			 .initializer = NULL, 
+                         .rgn = new Opt(param_rgn), 
+                         .attributes = NULL, .escapes = false}};
+    vds = new{List(vd, vds)};
+    locals = Dict::insert(locals, (*args->hd)[0], new Param_b(vd));
+  }
+  if (fd->cyc_varargs != NULL) {
+    let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
+    if (nopt != NULL) {
+      let typ = dynforward_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
                            .tq = empty_tqual(NULL),

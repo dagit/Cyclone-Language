@@ -25,34 +25,33 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gram.h"
 #include "state.h"
 
-
-extern char ??tags;
+extern char ?-?-tags;
 extern int tokensetsize;
-extern char ?consistent;
-extern short ?accessing_symbol;
-extern shifts *?shift_table;
-extern unsigned ?LA;
-extern short ?LAruleno;
-extern short ?lookaheads;
+extern char ?-consistent;
+extern short ?-accessing_symbol;
+extern shifts *?-shift_table;
+extern unsigned ?-LA;
+extern short ?-LAruleno;
+extern short ?-lookaheads;
 extern int verboseflag;
 extern int fixed_outfiles;
 
 void set_conflicts(int);
 void resolve_sr_conflict(int,int);
 void flush_shift(int,int);
-void log_resolution(int,int,int,const char?);
+void log_resolution(int,int,int,const char?-);
 void total_conflicts();
 void count_sr_conflicts(int);
 void count_rr_conflicts(int);
 
 char any_conflicts;
-char ?conflicts;
-errs *?err_table;
+char ?-conflicts;
+errs *?-err_table;
 int expected_conflicts;
 
 
-static unsigned ?shiftset;
-static unsigned ?lookaheadset;
+static unsigned ?-shiftset;
+static unsigned ?-lookaheadset;
 static int src_total;
 static int rrc_total;
 static int src_count;
@@ -82,10 +81,10 @@ void set_conflicts(int state)
   register int i;
   register int k;
   register shifts *shiftp;
-  register unsigned ?fp2;
-  register unsigned ?fp3;
-  register unsigned ?fp4;
-  register unsigned ?fp1;
+  register unsigned ?-fp2;
+  register unsigned ?-fp3;
+  register unsigned ?-fp4;
+  register unsigned ?-fp1;
   register int symbol;
 
   if (consistent[state]) return;
@@ -166,13 +165,13 @@ void resolve_sr_conflict(int state, int lookaheadnum)
 {
   register int i;
   register int mask;
-  register unsigned ?fp1;
-  register unsigned ?fp2;
+  register unsigned ?-fp1;
+  register unsigned ?-fp2;
   register int redprec;
   //errs *errp = (errs *) xmalloc (sizeof(errs) + ntokens * sizeof(short));
   errs *errp = new errs_tag{0,NULL};
   errp->errs = NEW2(ntokens+1, short);
-  short ?errtokens = errp->errs;
+  short ?-errtokens = errp->errs;
 
   /* find the rule to reduce by to get precedence of reduction  */
   redprec = rprec[LAruleno[lookaheadnum]];
@@ -294,11 +293,11 @@ void flush_shift(int state, int token)
 
 
 void
-log_resolution(int state, int LAno, int token, const char ?resolution)
+log_resolution(int state, int LAno, int token, const char ?-resolution)
 {
   fprintf((FILE @)foutput,
 	  "Conflict in state %d between rule %d and token %s resolved as %s.\n",
-	  state, LAruleno[LAno], tags[token], resolution);
+	  state, LAruleno[LAno], (string_t)tags[token], (string_t)resolution);
 }
 
 
@@ -413,9 +412,9 @@ void count_sr_conflicts(int state)
   register int k;
   register int mask;
   register shifts *shiftp;
-  register unsigned ?fp1;
-  register unsigned ?fp2;
-  register unsigned ?fp3;
+  register unsigned ?-fp1;
+  register unsigned ?-fp2;
+  register unsigned ?-fp3;
   register int symbol;
 
   src_count = 0;
@@ -479,8 +478,8 @@ void count_rr_conflicts(int state)
   register int j;
   register int count;
   register unsigned mask;
-  register unsigned ?baseword;
-  register unsigned ?wordp;
+  register unsigned ?-baseword;
+  register unsigned ?-wordp;
   register int m;
   register int n;
 
@@ -523,10 +522,10 @@ void print_reductions(int state)
   register int i;
   register int j;
   register int k;
-  register unsigned ?fp1;
-  register unsigned ?fp2;
-  register unsigned ?fp3;
-  register unsigned ?fp4;
+  register unsigned ?-fp1;
+  register unsigned ?-fp2;
+  register unsigned ?-fp3;
+  register unsigned ?-fp4;
   register int rule;
   register int symbol;
   register unsigned mask;
@@ -594,7 +593,7 @@ void print_reductions(int state)
 	  if (mask & *fp3)
             /*fix %-4s*/
 	    fprintf((FILE @)foutput, "    %s\t[reduce using rule %d (%s)]\n",
-		    tags[i], default_rule, tags[rlhs[default_rule]]);
+		    (string_t)tags[i], default_rule, (string_t)tags[rlhs[default_rule]]);
 
 	  mask <<= 1;
 	  if (mask == 0)
@@ -605,7 +604,7 @@ void print_reductions(int state)
 	}
 
       fprintf((FILE @)foutput, "    $default\treduce using rule %d (%s)\n\n",
-	      default_rule, tags[rlhs[default_rule]]);
+	      default_rule, (string_t)tags[rlhs[default_rule]]);
     }
   else if (n - m >= 1)
     {
@@ -692,7 +691,7 @@ void print_reductions(int state)
 			  rule = LAruleno[j];
                           /*fix %-4s*/
 			  fprintf((FILE @)foutput, "    %s\treduce using rule %d (%s)\n",
-				  tags[i], rule, tags[rlhs[rule]]);
+				  (string_t)tags[i], rule, (string_t)tags[rlhs[rule]]);
 			}
 		      else defaulted = 1;
 
@@ -705,13 +704,13 @@ void print_reductions(int state)
 			  rule = LAruleno[default_LA];
                           /*fix %-4s*/
 			  fprintf((FILE @)foutput, "    %s\treduce using rule %d (%s)\n",
-				  tags[i], rule, tags[rlhs[rule]]);
+				  (string_t)tags[i], rule, (string_t)tags[rlhs[rule]]);
 			  defaulted = 0;
 			}
 		      rule = LAruleno[j];
                       /*fix %-4s*/
 		      fprintf((FILE @)foutput, "    %s\t[reduce using rule %d (%s)]\n",
-			      tags[i], rule, tags[rlhs[rule]]);
+			      (string_t)tags[i], rule, (string_t)tags[rlhs[rule]]);
 		    }
 		}
 
@@ -732,7 +731,7 @@ void print_reductions(int state)
       if (default_LA >= 0)
 	{
 	  fprintf((FILE @)foutput, "    $default\treduce using rule %d (%s)\n",
-		  default_rule, tags[rlhs[default_rule]]);
+		  default_rule, (string_t)tags[rlhs[default_rule]]);
 	}
 
       putc('\n', (FILE @)foutput);

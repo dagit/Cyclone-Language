@@ -43,17 +43,17 @@ abstract struct Dict<`a,`b,`r::R> {
   tree<`a,`b,`r> t;
 };
 
-dict_t<`a,`b,`r> rempty(region_t<`r> r,int comp(`a,`a)) {
+dict_t<`a,`b,`r> rempty(region_t<`r> r,int (@`H comp)(`a,`a)) {
   return rnew(r) Dict(comp,r,NULL);
 }
-dict_t<`a,`b> empty(int comp(`a,`a)) {
+dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) {
   return rempty(Core::heap_region,comp);
 }
-dict_t<`a,`b,`r> rsingleton(region_t<`r> r, int comp(`a,`a),
+dict_t<`a,`b,`r> rsingleton(region_t<`r> r, int (@`H comp)(`a,`a),
                                 `a key, `b data) {
   return rnew(r) Dict(comp,r,rnew(r) T(B,NULL,NULL,$(key,data)));
 }
-dict_t<`a,`b> singleton(int comp(`a,`a), `a key, `b data) {
+dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) {
   return rsingleton(Core::heap_region, comp, key, data);
 }
 
@@ -599,7 +599,7 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
 
 dict_t<`a,`b> unmarshal(region_t<`r> rgn,
 			`c @`H env,
-			int cmp(`a,`a),
+			int (@`H cmp)(`a,`a),
 			`a (read_key<`a,`c>)(`c @`H, FILE @`r2),
 			`b (read_val<`b,`c>)(`c @`H, FILE @`r2),
 			FILE @`r2 fp)

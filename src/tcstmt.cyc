@@ -418,10 +418,47 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       tcStmt(set_encloser(te2,s0),s,false);
       return;
-
+    case &Fn_d(fd): 
+      // FIX: much of this code is the same as in Tc::tcFndecl
+      let curr_bl = Tcenv::curr_rgn(te);
+      if (fd->sc != Public)
+        terr(d->loc,"bad storage class for inner function");
+      // reject explicitly qualified name
+      switch ((*fd->name)[0]) {
+      case &Rel_n(NULL): break;
+      case &Abs_n(y): impos("tc: Abs_n in tcStmt var decl");
+      default: terr(d->loc,"explicit namespace not allowed on inner function declaration");
+      }
+      (*fd->name)[0] = Loc_n;
+      check_fndecl_valid_type(d->loc,te,fd);
+      type_t t = fndecl2typ(fd);
+      fd->attributes = transfer_fn_type_atts(t,fd->attributes);
+      // check packed and aligned don't show up
+      for (_ atts = fd->attributes; atts; atts = atts->tl)
+        switch (atts->hd) {
+        case Packed_att: case &Aligned_att(_):
+          terr(d->loc,"bad attribute %s for function",attribute2string(atts->hd));
+          break;
+        default: break;
+        }
+      vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
+                                  at_typ(t,curr_bl,empty_tqual(NULL), 
+                                         false_conref),
+                                  NULL, new Opt(curr_bl), NULL, false};
+      fd->fn_vardecl = vd;
+      te = add_local_var(d->loc,te,vd);
+      let old_fenv = te->le;
+      te->le = new List(nested_fenv(d->loc,old_fenv->hd,fd),old_fenv);
+      tcStmt(te,fd->body,false);
+      check_delayed_effects(te);
+      check_delayed_constraints(te);
+      if (!all_labels_resolved(te))
+        terr(d->loc,"function has goto statements to undefined labels");
+      te->le = old_fenv;
+      tcStmt(set_encloser(te,s0),s,false);
+      return;
     case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
     case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
-    case &Fn_d(_):            unimp_msg_part = "function";  break;
     case &Aggr_d(_):          unimp_msg_part = "type";      break;
     case &Tunion_d(_):        unimp_msg_part = "[x]tunion"; break;
     case &Enum_d(_):          unimp_msg_part = "enum";   break;

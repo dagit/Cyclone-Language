@@ -166,10 +166,10 @@ namespace Absyn {
     seg_t loc;
   };
 
-  // FIX: we should make this char, short, int, etc.  -- something
-  // that's machine independent.
-  // byte sizes -- 1, 2, 4, or 8 bytes
-  EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
+  EXTERN_ABSYN tunion Size_of { 
+    Char_sz; Short_sz; Int_sz; Long_sz; LongLong_sz;
+  };
+                                  
 
   // Used to classify types.  
   EXTERN_ABSYN tunion Kind { 
@@ -215,7 +215,8 @@ namespace Absyn {
 
   // used to distinguish ? pointers from *{c} or @{c} pointers
   EXTERN_ABSYN tunion Bounds {
-    Unknown_b;      // t?
+    DynForward_b;   // t?
+    DynEither_b;    // t?+-
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
     AbsUpper_b(type_t); // abstract bound -- type has IntKind
   };
@@ -579,8 +580,9 @@ namespace Absyn {
   // raw patterns
   EXTERN_ABSYN tunion Raw_pat {
     Wild_p; // _ 
-    Var_p(vardecl_t); // x. only name field is right until tcPat is called
-    Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
+    // for Var_p and Reference_p only name field is right until tcPat is called
+    Var_p(vardecl_t,pat_t); // x as p (x when p is Wild_p)
+    Reference_p(vardecl_t,pat_t);// *x as p (*x when p is Wild_p)
     TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
     Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
@@ -661,6 +663,7 @@ namespace Absyn {
     stmt_t                     body;   // body of function
     opt_t<type_t>              cached_typ; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
+    struct Vardecl            *fn_vardecl; // used only for inner functions
     // any attributes except aligned or packed
     attributes_t               attributes; 
   };
@@ -789,7 +792,8 @@ namespace Absyn {
   extern conref_t<bool> true_conref;
   extern conref_t<bool> false_conref;
   extern conref_t<bounds_t> bounds_one_conref;
-  extern conref_t<bounds_t> bounds_unknown_conref;
+  extern conref_t<bounds_t> bounds_dynforward_conref;
+  extern conref_t<bounds_t> bounds_dyneither_conref;
 
   extern kindbound_t compress_kb(kindbound_t);
   extern kind_t force_kb(kindbound_t kb);
@@ -841,8 +845,11 @@ namespace Absyn {
   // t*`H
   extern type_t cstar_typ(type_t t, tqual_t tq); 
   // t?`r
-  extern type_t tagged_typ(type_t t, type_t rgn, tqual_t tq, 
-                           conref_t<bool> zero_term);
+  extern type_t dynforward_typ(type_t t, type_t rgn, tqual_t tq, 
+                               conref_t<bool> zero_term);
+  // t?+-`r
+  extern type_t dyneither_typ(type_t t, type_t rgn, tqual_t tq, 
+                              conref_t<bool> zero_term);
   // void*
   extern type_t void_star_typ();
   // structs
@@ -976,8 +983,10 @@ namespace Absyn {
                              bool c_varargs, vararg_info_t *`H cyc_varargs,
                              list_t<$(type_t,type_t)@`H,`H> rgn_po,
                              attributes_t atts);
-  // turn t[] into t? as appropriate
-  extern type_t pointer_expand(type_t);
+  // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
+  // true, generates a fresh evar for the region of f else plugs in the
+  // heap.
+  extern type_t pointer_expand(type_t, bool fresh_evar);
   // returns true when the expression is a valid left-hand-side
   extern bool is_lvalue(exp_t);
 

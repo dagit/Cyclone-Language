@@ -27,37 +27,37 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gram.h"
 #include "new.h"
 
-char ?nullable;
+char ?- nullable;
 
 
 void
 set_nullable()
 {
-  register short ?r;
-  register short ?s1;
-  register short ?s2;
+  register short ?- r;
+  register short ?-s1;
+  register short ?-s2;
   register int ruleno;
   register int symbol;
-  register shorts ?p;
+  register shorts ?-p;
 
-  short ?squeue;
-  short ?rcount;
-  shorts *?rsets;
-  shorts ?relts;
+  short ?-squeue;
+  short ?-rcount;
+  shorts *?- rsets;
+  shorts ?-relts;
   char any_tokens;
-  short ?r1;
+  short ?- r1;
 
 #ifdef	TRACE
   fprintf(stderr, "Entering set_nullable");
 #endif
 
-  char ?temp_string = new {for i<nvars:(char)0};
+  char ?- temp_string = new {for i<nvars:(char)0};
   nullable = temp_string - ntokens;
 
   squeue = NEW2(nvars, short);
   s1 = s2 = squeue;
   rcount = NEW2(nrules + 1, short);
-  rsets = NEW2P(nvars, shorts *) - ntokens;
+  rsets = ((_ ?-)NEW2P(nvars, shorts *)) - ntokens;
   /* This is said to be more elements than we actually use.
      Supposedly nitems - nrules is enough.
      But why take the risk?  */

@@ -272,7 +272,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   qvar_t funname = Toc::temp_var();
   *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,true,funname,
 					    NULL,NULL,rettype,params,
-					    false,NULL,NULL,s,NULL,NULL,
+                                            false,NULL,NULL,s,NULL,NULL,NULL,
                                             NULL)),DL),
 		       *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);

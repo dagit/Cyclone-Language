@@ -1628,6 +1628,8 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
   return outflow;
 }
 
+static void check_nested_fun(flow_t inflow, fndecl_t fd);
+
 static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
   switch(decl->r) {
     // Note: We don't need to add initialized vars as changed things
@@ -1664,6 +1666,12 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
 
     // MWH: do I need to do anything here?
   case &Letv_d(vds): return add_vars(inflow,vds,unknown_none);
+
+  case &Fn_d(fd):
+    check_nested_fun(inflow,fd);
+    let t = fd->cached_typ->v;
+    let vd = (vardecl_t)fd->fn_vardecl;
+    return add_vars(inflow,new List(vd,NULL),unknown_all);
 
   default: throw new Core::Impossible("anal_decl: unexpected decl variant");
   }
@@ -1702,13 +1710,15 @@ static void postpass(stmt_t s) {
 // TO DO: account for init qualifier (add ThisIL for those params and
 //        check them on return and on fall off void)
 static void check_fun(fndecl_t fd) {
+  check_nested_fun(new ReachableFL(Dict::empty(root_cmp),NULL,
+                                   ConsumeInfo(mt_place_set(),NULL)),fd);
+}
+
+static void check_nested_fun(flow_t inflow, fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
   //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
   let loc = fd->body->loc;
-  flow_t inflow = add_vars(new ReachableFL(Dict::empty(root_cmp),NULL,
-					   ConsumeInfo(mt_place_set(),
-						       NULL)),
-			   fd->param_vardecls->v, unknown_all);
+  inflow = add_vars(inflow, fd->param_vardecls->v, unknown_all);
   let param_roots = NULL; // only for "initializes"
   switch(inflow) {
   case BottomFL: Tcutil::impos("check_fun");

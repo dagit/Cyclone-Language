@@ -237,7 +237,7 @@ mstring_t<`r> rstrconcat_l(region_t<`r> r,list_t<stringptr_t>strs)
     while (strs != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy(ans+i,next,len);
+      strncpy((char ?NOZEROTERM)(ans+i),next,len);
       i += len;
       strs = strs->tl;
       lens = lens->tl;
@@ -277,14 +277,14 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, buffer_t sepa
     while (strs->tl != NULL) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy(ans+i,next,len);
+      strncpy((char ?NOZEROTERM)(ans+i),next,len);
       i += len;
-      strncpy(ans+i,separator,seplen);
+      strncpy((char ?NOZEROTERM)(ans+i),separator,seplen);
       i += seplen;
       strs = strs->tl;
       lens = lens->tl;
     }
-    strncpy(ans+i,*(strs->hd),lens->hd);
+    strncpy((char ?NOZEROTERM)(ans+i),*(strs->hd),lens->hd);
     return ans;
   }
 }
@@ -330,7 +330,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
   } else {
     // it may be that strlen(src) <= dsz
     size_t len = strlen(src);
-    strncpy(dest,src,len);
+    strncpy((char ?NOZEROTERM)dest,src,len);
     if (len < dest.size)
       dest[len] = '\000';
   }
@@ -346,7 +346,7 @@ mstring_t<`r> rstrdup(region_t<`r> r, buffer_t src) {
 
   len = strlen(src);
   temp = rnew_string(r,len+1);
-  strncpy(temp,src,len);
+  strncpy((char ?NOZEROTERM)temp,src,len);
   return temp;
 }
 
@@ -362,7 +362,7 @@ mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
   sz = (sz>slen)?sz:slen;
   temp = rnew_string(r,sz);
 
-  strncpy(temp,s,slen);
+  strncpy((char ?NOZEROTERM)temp,s,slen);
 
   if (slen != s.size)
     temp[slen] = '\000';
@@ -429,8 +429,8 @@ mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, buffer_t curr_suffix
     if (src[m-i] != curr_suffix[n-i])
       throw new Invalid_argument(err);
   mstring_t ans = rnew_string(r,m-n+new_suffix.size+1);
-  strncpy(ans,src,m-n);
-  strncpy(ans+m-n,new_suffix,new_suffix.size);
+  strncpy((char ?NOZEROTERM)ans,src,m-n);
+  strncpy((char ?NOZEROTERM)(ans+(m-n)),new_suffix,new_suffix.size);
   return ans;
 }
 
@@ -493,26 +493,28 @@ string_t<`r> strchr(string_t<`r> s, char c) {
 
 // Return a pointer to the last occurrence of c in s,
 // or NULL if none.
-string_t<`r> strrchr(string_t<`r> s, char c) {
-  int len = strlen(s);
+string_t<`r> strrchr(string_t<`r> s0, char c) {
+  int len = strlen(s0);
   int i = len - 1;
+  const char ?- s = s0;
   s += i;
 
   for (; i>=0; i--, s--) {
     if (*s == c)
-      return s;
+      return (string_t)s;
   }
   return NULL;
 }
 
-mstring_t<`r> mstrrchr(mstring_t<`r> s, char c) {
-  int len = strlen(s);
+mstring_t<`r> mstrrchr(mstring_t<`r> s0, char c) {
+  int len = strlen(s0);
   int i = len - 1;
+  char ?- s = s0;
   s += i;
 
   for (; i>=0; i--, s--) {
     if (*s == c)
-      return s;
+      return (mstring_t)s;
   }
   return NULL;
 }
