@@ -4084,6 +4084,7 @@ SHUT_RD
 SHUT_RDWR
 SHUT_WR
 ssize_t
+timeval
 }
 hstub {
   /* JGM: mini_httpd needs sockaddr, so I've added it back in:

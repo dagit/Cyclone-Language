@@ -452,6 +452,10 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 | "__extension__" /* Used in cygwin in sys/reent.h */
 { log("Warning: use of __extension__ deleted\n");
   return 1; }
+| "__attribute__ ((__nonnull__ (" [^')']* ")))"
+/* We should just support this directly in Cyclone*/
+{ log("Warning: use of nonnull attribute deleted\n");
+  return 1; }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
 /* These mode hacks WILL cause bugs; best solution is to
    support mode directly in Cyclone */
