@@ -1,6 +1,55 @@
+Binary files i686-unknown-linux/lib/a_arg.o and powerpc-apple-rhapsody/lib/a_arg.o differ
+Binary files i686-unknown-linux/lib/a_array.o and powerpc-apple-rhapsody/lib/a_array.o differ
+Binary files i686-unknown-linux/lib/a_assert.o and powerpc-apple-rhapsody/lib/a_assert.o differ
+Binary files i686-unknown-linux/lib/a_bitvec.o and powerpc-apple-rhapsody/lib/a_bitvec.o differ
+Binary files i686-unknown-linux/lib/a_buffer.o and powerpc-apple-rhapsody/lib/a_buffer.o differ
+Binary files i686-unknown-linux/lib/a_core.o and powerpc-apple-rhapsody/lib/a_core.o differ
+Binary files i686-unknown-linux/lib/a_crypt.o and powerpc-apple-rhapsody/lib/a_crypt.o differ
+Binary files i686-unknown-linux/lib/a_dict.o and powerpc-apple-rhapsody/lib/a_dict.o differ
+Binary files i686-unknown-linux/lib/a_dirent.o and powerpc-apple-rhapsody/lib/a_dirent.o differ
+Binary files i686-unknown-linux/lib/a_execinfo.o and powerpc-apple-rhapsody/lib/a_execinfo.o differ
+Binary files i686-unknown-linux/lib/a_fcntl.o and powerpc-apple-rhapsody/lib/a_fcntl.o differ
+Binary files i686-unknown-linux/lib/a_filename.o and powerpc-apple-rhapsody/lib/a_filename.o differ
+Binary files i686-unknown-linux/lib/a_fn.o and powerpc-apple-rhapsody/lib/a_fn.o differ
+Binary files i686-unknown-linux/lib/a_getopt.o and powerpc-apple-rhapsody/lib/a_getopt.o differ
+Binary files i686-unknown-linux/lib/a_getopt1.o and powerpc-apple-rhapsody/lib/a_getopt1.o differ
+Binary files i686-unknown-linux/lib/a_grp.o and powerpc-apple-rhapsody/lib/a_grp.o differ
+Binary files i686-unknown-linux/lib/a_hashtable.o and powerpc-apple-rhapsody/lib/a_hashtable.o differ
+Binary files i686-unknown-linux/lib/a_in.o and powerpc-apple-rhapsody/lib/a_in.o differ
+Binary files i686-unknown-linux/lib/a_inet.o and powerpc-apple-rhapsody/lib/a_inet.o differ
+Binary files i686-unknown-linux/lib/a_lexing.o and powerpc-apple-rhapsody/lib/a_lexing.o differ
+Binary files i686-unknown-linux/lib/a_lineno.o and powerpc-apple-rhapsody/lib/a_lineno.o differ
+Binary files i686-unknown-linux/lib/a_list.o and powerpc-apple-rhapsody/lib/a_list.o differ
+Binary files i686-unknown-linux/lib/a_marshal.o and powerpc-apple-rhapsody/lib/a_marshal.o differ
+Binary files i686-unknown-linux/lib/a_mman.o and powerpc-apple-rhapsody/lib/a_mman.o differ
+Binary files i686-unknown-linux/lib/a_netdb.o and powerpc-apple-rhapsody/lib/a_netdb.o differ
+Binary files i686-unknown-linux/lib/a_nogc.o and powerpc-apple-rhapsody/lib/a_nogc.o differ
+Binary files i686-unknown-linux/lib/a_position.o and powerpc-apple-rhapsody/lib/a_position.o differ
+Binary files i686-unknown-linux/lib/a_pp.o and powerpc-apple-rhapsody/lib/a_pp.o differ
+Binary files i686-unknown-linux/lib/a_printf.o and powerpc-apple-rhapsody/lib/a_printf.o differ
+Binary files i686-unknown-linux/lib/a_pwd.o and powerpc-apple-rhapsody/lib/a_pwd.o differ
+Binary files i686-unknown-linux/lib/a_queue.o and powerpc-apple-rhapsody/lib/a_queue.o differ
+Binary files i686-unknown-linux/lib/a_rope.o and powerpc-apple-rhapsody/lib/a_rope.o differ
+Binary files i686-unknown-linux/lib/a_runtime_cyc.o and powerpc-apple-rhapsody/lib/a_runtime_cyc.o differ
+Binary files i686-unknown-linux/lib/a_scanf.o and powerpc-apple-rhapsody/lib/a_scanf.o differ
+Binary files i686-unknown-linux/lib/a_set.o and powerpc-apple-rhapsody/lib/a_set.o differ
+Binary files i686-unknown-linux/lib/a_signal.o and powerpc-apple-rhapsody/lib/a_signal.o differ
+Binary files i686-unknown-linux/lib/a_slowdict.o and powerpc-apple-rhapsody/lib/a_slowdict.o differ
+Binary files i686-unknown-linux/lib/a_socket.o and powerpc-apple-rhapsody/lib/a_socket.o differ
+Binary files i686-unknown-linux/lib/a_splay.o and powerpc-apple-rhapsody/lib/a_splay.o differ
+Binary files i686-unknown-linux/lib/a_stat.o and powerpc-apple-rhapsody/lib/a_stat.o differ
+Binary files i686-unknown-linux/lib/a_stdio.o and powerpc-apple-rhapsody/lib/a_stdio.o differ
+Binary files i686-unknown-linux/lib/a_stdlib.o and powerpc-apple-rhapsody/lib/a_stdlib.o differ
+Binary files i686-unknown-linux/lib/a_string.o and powerpc-apple-rhapsody/lib/a_string.o differ
+Binary files i686-unknown-linux/lib/a_time.o and powerpc-apple-rhapsody/lib/a_time.o differ
+Binary files i686-unknown-linux/lib/a_tmp.o and powerpc-apple-rhapsody/lib/a_tmp.o differ
+Binary files i686-unknown-linux/lib/a_typerep.o and powerpc-apple-rhapsody/lib/a_typerep.o differ
+Binary files i686-unknown-linux/lib/a_unistd.o and powerpc-apple-rhapsody/lib/a_unistd.o differ
+Binary files i686-unknown-linux/lib/a_utime.o and powerpc-apple-rhapsody/lib/a_utime.o differ
+Binary files i686-unknown-linux/lib/a_xarray.o and powerpc-apple-rhapsody/lib/a_xarray.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 265,387 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -172,7 +221,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/getopt.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/getopt.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -200,7 +249,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c powerpc-apple-rhapsody/lib/in.c
 *** i686-unknown-linux/lib/in.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/in.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/in.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -230,7 +279,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c powerpc-apple-rhapsody/lib
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c powerpc-apple-rhapsody/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/inet.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/inet.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -258,9 +307,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c powerpc-apple-rhapsody/l
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
+Binary files i686-unknown-linux/lib/libcyc_a.a and powerpc-apple-rhapsody/lib/libcyc_a.a differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
 *** i686-unknown-linux/lib/marshal.c	Tue Dec  4 11:48:21 2001
---- powerpc-apple-rhapsody/lib/marshal.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/marshal.c	Thu Dec  6 00:20:47 2001
 ***************
 *** 540,558 ****
   struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
@@ -304,7 +354,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   _temp182;})); _LL177:( void) _throw( _temp172); _LL173:;}}} void Cyc_Marshal_cycputchar(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c powerpc-apple-rhapsody/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/netdb.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/netdb.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -332,9 +382,31 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c powerpc-apple-rhapsody/
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
+Binary files i686-unknown-linux/lib/nogc_a.a and powerpc-apple-rhapsody/lib/nogc_a.a differ
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/runtime_cyc.c powerpc-apple-rhapsody/lib/runtime_cyc.c
+*** i686-unknown-linux/lib/runtime_cyc.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/runtime_cyc.c	Thu Dec  6 00:25:51 2001
+***************
+*** 859,865 ****
+  
+  static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
+    if (!msg) return;
+!   if (!strcmp(msg,"Needed to allocate blacklisted block"))
+      return;
+    GC_default_warn_proc(msg,arg);
+  }
+--- 859,866 ----
+  
+  static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
+    if (!msg) return;
+!   if (!strncmp(msg,"Needed to allocate blacklisted block",
+!                strlen("Needed to allocate blacklisted block")))
+      return;
+    GC_default_warn_proc(msg,arg);
+  }
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody/lib/socket.c
 *** i686-unknown-linux/lib/socket.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/socket.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/socket.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -364,7 +436,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/stat.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/stat.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -392,7 +464,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/l
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c powerpc-apple-rhapsody/lib/time.c
 *** i686-unknown-linux/lib/time.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/time.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/time.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -434,7 +506,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c powerpc-apple-rhapsody/l
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c powerpc-apple-rhapsody/lib/unistd.c
 *** i686-unknown-linux/lib/unistd.c	Sun Dec  2 16:30:56 2001
---- powerpc-apple-rhapsody/lib/unistd.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/lib/unistd.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -523,7 +595,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c powerpc-apple-rhapsody
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Sun Dec  2 16:30:58 2001
---- powerpc-apple-rhapsody/src/buildlib.c	Wed Dec  5 16:01:29 2001
+--- powerpc-apple-rhapsody/src/buildlib.c	Thu Dec  6 00:20:35 2001
 ***************
 *** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
@@ -579,3 +651,39 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
   extern int close( int); extern void _exit( int); extern int getpid(); extern int
   getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
+diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
+*** i686-unknown-linux/src/cyclone.c	Wed Dec  5 16:13:02 2001
+--- powerpc-apple-rhapsody/src/cyclone.c	Thu Dec  6 00:20:35 2001
+***************
+*** 1300,1308 ****
+  _check_null( _temp225)); Cyc_Std_file_close(( struct Cyc_Std___sFILE*)
+  _check_null( _temp225)); return _temp226;}}}} static int Cyc_is_cfile( struct
+  _tagged_arr* n){ return*(( const unsigned char*) _check_unknown_subscript(* n,
+! sizeof( unsigned char), 0)) != '-';} struct _tuple10{ struct _tagged_arr f1; int
+! f2; struct _tagged_arr f3; void* f4; struct _tagged_arr f5; } ; int Cyc_main(
+! int argc, struct _tagged_arr argv){ struct _tagged_arr comp=( struct _tagged_arr)
+  Cstring_to_string( Ccomp); Cyc_set_cpp(( struct _tagged_arr) Cyc_Std_strconcat(
+  comp, _tag_arr(" -x c -E -U__GNUC__ -nostdinc", sizeof( unsigned char), 30u)));{
+  struct Cyc_List_List* options=({ struct _tuple10* _temp300[ 47u]; _temp300[ 46u]=({
+--- 1300,1309 ----
+  _check_null( _temp225)); Cyc_Std_file_close(( struct Cyc_Std___sFILE*)
+  _check_null( _temp225)); return _temp226;}}}} static int Cyc_is_cfile( struct
+  _tagged_arr* n){ return*(( const unsigned char*) _check_unknown_subscript(* n,
+! sizeof( unsigned char), 0)) != '-';} extern void GC_blacklist_warn_clear();
+! struct _tuple10{ struct _tagged_arr f1; int f2; struct _tagged_arr f3; void* f4;
+! struct _tagged_arr f5; } ; int Cyc_main( int argc, struct _tagged_arr argv){
+! GC_blacklist_warn_clear();{ struct _tagged_arr comp=( struct _tagged_arr)
+  Cstring_to_string( Ccomp); Cyc_set_cpp(( struct _tagged_arr) Cyc_Std_strconcat(
+  comp, _tag_arr(" -x c -E -U__GNUC__ -nostdinc", sizeof( unsigned char), 30u)));{
+  struct Cyc_List_List* options=({ struct _tuple10* _temp300[ 47u]; _temp300[ 46u]=({
+***************
+*** 1810,1813 ****
+  _tagged_arr) _temp287) !=  0){({ void* _temp290[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr,
+  _tag_arr("Error: C compiler failed\n", sizeof( unsigned char), 26u), _tag_arr(
+  _temp290, sizeof( void*), 0u));}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
+! return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}
+--- 1811,1814 ----
+  _tagged_arr) _temp287) !=  0){({ void* _temp290[ 0u]={}; Cyc_Std_fprintf( Cyc_Std_stderr,
+  _tag_arr("Error: C compiler failed\n", sizeof( unsigned char), 26u), _tag_arr(
+  _temp290, sizeof( void*), 0u));}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
+! return 1;} Cyc_remove_cfiles(); return Cyc_compile_failure? 1: 0;}}}}}}}}

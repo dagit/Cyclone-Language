@@ -750,7 +750,14 @@ static bool is_cfile(string_t @ n) {
   return (*n)[0] != '-';
 }
 
+extern "C" void GC_blacklist_warn_clear();
+
 int main(int argc, string_t<`H> ?`H argv) {
+
+  /* Don't print garbage collector warnings about allocations of 
+     blacklisted blocks.  This turns up on OS X and possibly other
+     BSD systems (??) */
+  GC_blacklist_warn_clear();
 
   // set default preprocessor before overwriting with argument processing
   string_t comp = Cstring_to_string(Ccomp);
