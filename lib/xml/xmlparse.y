@@ -76,37 +76,37 @@ using XmlParse;
 
 // Union of types of productions
 %union{
-  String_tok(string_t);
-  Pi_tok($(Xml::name,string_t)@);
+  String_tok(string_t<`H>);
+  Pi_tok($(Xml::name,string_t<`H>)@`H);
   Element_tok(Xml::element_t);
-  Content_tok(List::list_t<Xml::content_t>);
+  Content_tok(List::list_t<Xml::content_t,`H>);
   Attribute_tok(Xml::attribute_t);
-  Attributes_tok(List::list_t<Xml::attribute_t>);
-  STag_tok($(string_t,List::list_t<Xml::attribute_t>)@);
+  Attributes_tok(List::list_t<Xml::attribute_t,`H>);
+  STag_tok($(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H);
   /*EmptyElemTag_tok($(string_t,List::list_t<Xml::attribute_t>)@);*/
 }
 
 // Tags for productions
-%type <string_t> ATTVALUE1
-%type <string_t> ATTVALUE2
-%type <string_t> CDSECT
-%type <string_t> CHARDATA
-%type <string_t> COMMENT
-%type <string_t> NAME
-%type <string_t> OPEN
-%type <string_t> opn
-%type <string_t> OPENSLASH
-%type <string_t> opnslash
-%type <$(Xml::name,string_t)@>     PI
-%type <string_t> REFERENCE
+%type <string_t<`H>> ATTVALUE1
+%type <string_t<`H>> ATTVALUE2
+%type <string_t<`H>> CDSECT
+%type <string_t<`H>> CHARDATA
+%type <string_t<`H>> COMMENT
+%type <string_t<`H>> NAME
+%type <string_t<`H>> OPEN
+%type <string_t<`H>> opn
+%type <string_t<`H>> OPENSLASH
+%type <string_t<`H>> opnslash
+%type <$(Xml::name,string_t<`H>)@`H>     PI
+%type <string_t<`H>> REFERENCE
 %type <Xml::element_t> element
-%type <List::list_t<Xml::content_t>> content
-%type <List::list_t<Xml::content_t>> content0
+%type <List::list_t<Xml::content_t,`H>> content
+%type <List::list_t<Xml::content_t,`H>> content0
 %type <Xml::attribute_t> attribute
-%type <List::list_t<Xml::attribute_t>> attributes
-%type <$(string_t,List::list_t<Xml::attribute_t>)@> sTag
-%type <string_t> eTag
-%type <$(string_t,List::list_t<Xml::attribute_t>)@> emptyElemTag
+%type <List::list_t<Xml::attribute_t,`H>> attributes
+%type <$(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H> sTag
+%type <string_t<`H>> eTag
+%type <$(string_t<`H>,List::list_t<Xml::attribute_t,`H>)@`H> emptyElemTag
 
 %start content0
 

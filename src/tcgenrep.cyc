@@ -247,24 +247,24 @@ static decl_t gen_vardecl(qvar_t name, type_t type, exp_opt_t init,scope_t sc,se
 
 
 static exp_t cnst_string(string_t<`H> s,seg_t seg) {
-  return const_exp((datatype Cnst)(String_c(s)),seg);
+  return const_exp((String_c(s)),seg);
 }
 
 static exp_t cnst_string_cls(seg_t seg,var_t s) {
-  return const_exp((datatype Cnst)(String_c(*s)),seg);
+  return const_exp((String_c(*s)),seg);
 }
 
 static exp_t cnst_qvar_string_cls(seg_t seg,qvar_t s) {
-  return const_exp((datatype Cnst)(String_c(*(*s)[1])),seg);
+  return const_exp((String_c(*(*s)[1])),seg);
 }
 
 
 static exp_t cnst_int(int i,seg_t seg) {
-  return const_exp((datatype Cnst)(Int_c(Signed,i)),seg);
+  return const_exp((Int_c(Signed,i)),seg);
 }
 
 static exp_t cnst_int_cls(seg_t seg,int i) {
-  return const_exp((datatype Cnst)(Int_c(Signed,i)),seg);
+  return const_exp((Int_c(Signed,i)),seg);
 }
 
 static int size_of2int(size_of_t sz) {
@@ -281,7 +281,6 @@ static int size_of2int(size_of_t sz) {
 static type_t datatype_typ(qvar_t name) {
   return new DatatypeType(
 			DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo(name,
-                                                                   false,
                                                                    false)),
 				   NULL,
 				   new Opt(HeapRgn)));
@@ -583,7 +582,7 @@ type_t monomorphize_type(type_t type) {
 				  ad->attributes};
     return new AggrType(AggrInfo(KnownAggr(new ad2),NULL));
 
-  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),params,rgn}):
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},params,rgn}):
     let tvs = tud->tvs;
     if(List::length(params) != List::length(tvs))
       Tcutil::impos("gen(): number of params %d differs from number of tyvars %d",List::length(params), List::length(tvs));
@@ -592,7 +591,7 @@ type_t monomorphize_type(type_t type) {
     opt_t<list_t<datatypefield_t>> fields = NULL;
     if(tud->fields != NULL) 
       fields = new Opt{List::map_c(substitute_datatypefield_type,subst,tud->fields->v)};
-    let tud2 = new Datatypedecl{tud->sc,tud->name,NULL,fields,tud->is_extensible,tud->is_flat};
+    let tud2 = new Datatypedecl{tud->sc,tud->name,NULL,fields,tud->is_extensible};
     let type2 = new DatatypeType(DatatypeInfo{KnownDatatype(new tud2),params,rgn});
     
     let loc = segment_of_abs(0,0);
@@ -1113,7 +1112,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
   case &RgnsEff(_):       
     Tcutil::terr(loc,"gen(): unhandled region, handle or effect type");
     break;
-  case &DatatypeType(DatatypeInfo{KnownDatatype(&tudecl),params,rgn}):
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tudecl},params,rgn}):
     if(tudecl->tvs != NULL) 
       Tcutil::impos("gen(): datatype type variables not handled yet");
     if(tudecl->fields == NULL) {      
@@ -1162,7 +1161,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     if(tfieldinfo.targs != NULL)
       Tcutil::impos("gen(): datatypefield type parameters not handled yet");
     switch (tfieldinfo.field_info) {
-    case KnownDatatypefield(decl,field):
+    case {.KnownDatatypefield = $(decl,field)}:
       let types = List::map(get_second,field->typs);
       let types2 = new List(uint_typ,types);
       let varname = toplevel_name(new_gen_id("rep"));

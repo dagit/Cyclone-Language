@@ -125,7 +125,7 @@ static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
 static flow_t<`r>@`r get_stmt_flow(analenv_t<`r> env, stmt_t s) {
   flow_t<`r>@`r*`r sflow = Hashtable::lookup_opt(env->flow_table, s);
   if (sflow == NULL) {
-    flow_t@`r res = rnew(env->r) BottomFL;
+    flow_t@`r res = rnew(env->r) BottomFL();
     Hashtable::insert(env->flow_table, s, res);
     return res;
   }
@@ -198,8 +198,8 @@ static flow_t<`r> add_vars(flow_env_t<`r> fenv,
                            flow_t<`r> inflow,list_t<vardecl_t> vds,
                            absRval_t<`r> leafval, Position::seg_t loc) {
   switch(inflow) {
-  case BottomFL: return BottomFL;
-  case ReachableFL(d,relns,cinfo): 
+  case {.BottomFL = _}: return BottomFL();
+  case {.ReachableFL = $(d,relns,cinfo)}: 
     for(; vds != NULL; vds = vds->tl) {
       let root = rnew(fenv->r) VarRoot(vds->hd);
       d = Dict::insert(d,root,typ_to_absrval(fenv,vds->hd->type,leafval));
@@ -234,8 +234,8 @@ static void remove_vars(flow_env_t<`r> fenv,
 // when using an r-value, we also consume any variables on the consume list.
 static flow_t<`r> use_Rval(analenv_t<`r> env, seg_t loc, flow_t<`r> inflow, absRval_t<`r> r){
   switch(inflow) {
-  case BottomFL: return BottomFL;
-  case ReachableFL(d,relns,cinfo):
+  case {.BottomFL = _}: return BottomFL();
+  case {.ReachableFL = $(d,relns,cinfo)}:
     if(initlevel(env->fenv,d,r) != AllIL)
       Tcutil::terr(loc,"expression may not be fully initialized");
     let ans_d = escape_deref(env->fenv, d, env->all_changed, r);
@@ -281,8 +281,8 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
     // application), do not consume its first argument
     if (arg1_unconsumed) {
       switch (outflow) {
-      case BottomFL: break;
-      case ReachableFL(d,r,c):
+      case {.BottomFL = _}: break;
+      case {.ReachableFL = $(d,r,c)}:
 	outflow = 
 	  ReachableFL(d,r,ConsumeInfo(c.consumed,saved_cinfo.may_consume));
       }
@@ -345,12 +345,12 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
     let $(afterflow, rvals) =
       anal_unordered_Rexps(rgn,env,inflow,es,arg1_unconsumed);
     switch(afterflow) {
-    case ReachableFL(d,_,_): 
+    case {.ReachableFL = $(d,_,_)}: 
       for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
         if(initlevel(env->fenv,d,rvals->hd)==NoneIL)
           Tcutil::terr(es->hd->loc, "expression may not be initialized");
       break;
-    case BottomFL: break;
+    case {.BottomFL = _}: break;
     }
     return $(afterflow, env->fenv->unknown_all);
   }
@@ -373,14 +373,14 @@ notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
   DEBUG_PRINT("inflow=\n");
   DEBUG_PRINT_F(print_flow,inflow);
   switch(outflow) {
-  case BottomFL: return outflow;
-  case ReachableFL(d,relns,cinfo):
+  case {.BottomFL = _}: return outflow;
+  case {.ReachableFL = $(d,relns,cinfo)}:
     switch(anal_Lexp(env,inflow,e)[1]) {
-    case UnknownL: 
+    case {.UnknownL = _}: 
       DEBUG_PRINT("Got UnknownL, outflow=\n");
       DEBUG_PRINT_F(print_flow,outflow);
       return outflow;
-    case PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+    case {.PlaceL = p}: // okay b/c p can't be escaped (it's Unknown) 
       DEBUG_PRINT("Got place ");
       DEBUG_PRINT_F(print_place,p);
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
@@ -401,11 +401,11 @@ static $(flow_t<`r>,flow_t<`r>)
 splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
           exp_t e, initlevel_t il) {
   switch(outflow) {
-  case BottomFL: return $(outflow,outflow);
-  case ReachableFL(d,relns,cinfo):
+  case {.BottomFL = _}: return $(outflow,outflow);
+  case {.ReachableFL = $(d,relns,cinfo)}:
     switch(anal_Lexp(env,inflow,e)[1]) {
-    case UnknownL: return $(outflow,outflow);
-    case PlaceL(p): // okay b/c p can't be escaped (it's Unknown) 
+    case {.UnknownL = _}: return $(outflow,outflow);
+    case {.PlaceL = p}: // okay b/c p can't be escaped (it's Unknown) 
       absRval_t nzval = il==AllIL ? NotZeroAll : NotZeroThis;
       return 
         $(ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
@@ -421,13 +421,13 @@ splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
 static flow_t<`r> if_tagcmp(analenv_t<`r> env, flow_t<`r> flow, exp_t e1, 
                             absRval_t<`r> r1,  primop_t p,  absRval_t<`r> r2) {
   switch(flow) {
-  case BottomFL: return flow;
-  case ReachableFL(d,relns,cinfo):
+  case {.BottomFL = _}: return flow;
+  case {.ReachableFL = $(d,relns,cinfo)}:
     switch (r2) {
     case &TagCmps(cl2):
       switch(anal_Lexp(env,flow,e1)[1]) {
-      case UnknownL: return flow;
-      case PlaceL(pl):
+      case {.UnknownL = _}: return flow;
+      case {.PlaceL = pl}:
 	list_t new_cl;
 	switch(r1) { 
 	case &TagCmps(cl1): new_cl = cl1; break;
@@ -473,9 +473,9 @@ static $(flow_t<`r>,absRval_t<`r>)
   switch(Tcutil::compress(e->topt->v)) {
   case &PointerType(PtrInfo(elttype,_,PtrAtts(_,_,bd,zt,_))):
     switch(f) {
-    case BottomFL: 
+    case {.BottomFL = _}: 
       return $(f,typ_to_absrval(env->fenv,elttype,env->fenv->unknown_all));
-    case ReachableFL(outdict,relns,_):
+    case {.ReachableFL = $(outdict,relns,_)}:
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd)) {
 	switch(r) {
@@ -518,7 +518,7 @@ static $(flow_t<`r>,absRval_t<`r>)
 	  return $(f,lookup_place(outdict,p));
 	case Zero: 
 	  e->annot = IsZero;
-	  return $(BottomFL,typ_to_absrval(env->fenv,elttype,
+	  return $(BottomFL(),typ_to_absrval(env->fenv,elttype,
                                            env->fenv->unknown_all));
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
 	default: 
@@ -578,7 +578,7 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
             let r = rs->hd;
             if (r->vd == i)
               switch (r->rop) {
-              case LessNumelts(v) && v == x: return relns;
+              case {.LessNumelts = v} && v == x: return relns;
               default: continue;
               }
           }
@@ -635,7 +635,7 @@ static flow_t<`r> may_consume_exp(analenv_t<`r> env,
       let fenv = env->fenv;
       let $(_,lval) = anal_Lexp(env,inflow,e);
       switch ($(lval,inflow)) {
-      case $(PlaceL(place),ReachableFL(outdict,relns,cinfo)): 
+      case $({.PlaceL = place},{.ReachableFL = $(outdict,relns,cinfo)}): 
         let c = may_consume_place(env,cinfo,place,e->topt->v,NULL);
         return ReachableFL(outdict,relns,c);
       default: 
@@ -772,7 +772,7 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
     }
     ts = imp_rev(ts);
     return noalias_ptrs_aux(env,p,ts);
-  case &AggrType(AggrInfo(KnownAggr(adp),inst_ts)):
+  case &AggrType(AggrInfo({.KnownAggr = adp},inst_ts)):
     if ((*adp)->impl == NULL) return NULL;
     else {
       let ts = NULL;
@@ -787,7 +787,7 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
       ts = imp_rev(ts);
       return noalias_ptrs_aux(env,p,ts);
     }
-  case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
+  case &AggrType(AggrInfo({.UnknownAggr = _},_)):
     Tcutil::impos("got unknown aggr in noalias_ptrs_rec");
   case &DatatypeType(_):
     // For datatypes, we consider the entire datatype to be a place,
@@ -802,9 +802,9 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
     }
   case &DatatypeFieldType(DatatypeFieldInfo(tinfo,inst_ts)):
     switch (tinfo) {
-    case UnknownDatatypefield(_):
+    case {.UnknownDatatypefield = _}:
       Tcutil::impos("got unknown datatype field in noalias_ptrs_rec");
-    case KnownDatatypefield(td,fld):
+    case {.KnownDatatypefield = $(td,fld)}:
       let ts = NULL;
       ANAL_RGN(env,rgn) {
 	let inst = List::rzip(rgn,rgn,td->tvs,inst_ts);
@@ -835,14 +835,14 @@ static $(flow_t<`r>,absRval_t<`r>)
 
   outflow = consume_unique_rvals(loc, outflow); // consume rhs
   switch(outflow) {
-  case BottomFL:
+  case {.BottomFL = _}:
     DEBUG_PRINT("leaving AssignOp_e\n");
-    return $(BottomFL,rval);
-  case ReachableFL(outdict,relns,cinfo):
+    return $(BottomFL(),rval);
+  case {.ReachableFL = $(outdict,relns,cinfo)}:
     // make sure we haven't used a unique value > 1 time
     cinfo = and_consume(fenv->r,outer_cinfo,cinfo);
     switch(lval) {
-    case PlaceL(p): 
+    case {.PlaceL = p}: 
       cinfo = consume_assignment(env,p,cinfo,outdict,lexp);
       outdict = assign_place(fenv,loc,outdict,env->all_changed,p,rval);
       relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
@@ -851,7 +851,7 @@ static $(flow_t<`r>,absRval_t<`r>)
       update_tryflow(env, outflow);
       DEBUG_PRINT("leaving AssignOp_e\n");
       return $(outflow, rval);
-    case UnknownL: 
+    case {.UnknownL = _}: 
       // if we don't know the place, then this an unconsumed location
       // accessible via a non-unique path (either a global, or
       // a nested definition).  Can do nothing in this case.
@@ -872,8 +872,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   consume_t cinfo;
   DEBUG_PRINT("in Rexp for |%s|\n",Absynpp::exp2string(e));
   switch(inflow) {
-  case BottomFL: return $(BottomFL, fenv->unknown_all); // absRval_t irrelvent
-  case ReachableFL(d2,relns2,c): d = d2; relns = relns2; cinfo = c;
+  case {.BottomFL = _}: return $(BottomFL(), fenv->unknown_all); // absRval_t irrelvent
+  case {.ReachableFL = $(d2,relns2,c)}: d = d2; relns = relns2; cinfo = c;
     //fprintf(stderr,"inflow expression %s:",Absynpp::exp2string(e));
     //print_relns(relns); fprintf(stderr,"\n");
   }
@@ -891,9 +891,9 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Rexp(env,inflow,e1);
 
-  case &Const_e(Null_c):
-  case &Const_e(Int_c(_,0)): return $(inflow, Zero);
-  case &Const_e(Int_c(_,_)): 
+  case &Const_e({.Null_c = _}):
+  case &Const_e({.Int_c = $(_,0)}): return $(inflow, Zero);
+  case &Const_e({.Int_c = $(_,_)}): 
   case &Var_e(_,&Funname_b(_)):    return $(inflow, NotZeroAll);
 
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
@@ -936,7 +936,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     check_unique_rvals(e1->loc,f);
     let $(_,lval) = anal_Lexp(env,f,e1);
     switch($(lval,f)) {
-    case $(PlaceL(p),ReachableFL(outdict,relns,c)): 
+    case $({.PlaceL = p},{.ReachableFL = $(outdict,relns,c)}): 
       relns = reln_kill_exp(fenv->r,relns,e1);
       f = ReachableFL(assign_place(fenv,e1->loc,outdict,
                                    env->all_changed,p,fenv->unknown_all),
@@ -953,9 +953,9 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(_,lval) = anal_Lexp(env,f,l);
     f = consume_unique_rvals(e->loc,f); // consume the rhs of the assignment
     switch(f) {
-    case ReachableFL(outdict,relns,cinfo):
+    case {.ReachableFL = $(outdict,relns,cinfo)}:
       switch (lval) {
-      case PlaceL(p): 
+      case {.PlaceL = p}: 
       DEBUG_PRINT("assignOp: old_inflow=\n");
       DEBUG_PRINT_F(print_flow,f);
 	cinfo = consume_assignment(env,p,cinfo,outdict,l);
@@ -966,7 +966,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         DEBUG_PRINT("assignOp: new flow=\n");
         DEBUG_PRINT_F(print_flow,f);
 	break;
-      case UnknownL: 
+      case {.UnknownL = _}: 
 	DEBUG_PRINT("assignOp: unknown place\n");
 	// if we don't know the place, then this an unconsumed location
 	// accessible via a non-unique path (either a global, or
@@ -1047,7 +1047,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     // Unique exns essentially escape to the heap when thrown
     f = consume_unique_rvals(e1->loc,f); // consume exn expression
     use_Rval(env,e1->loc,f,r); // result irrelevant so long as initialized
-    return $(BottomFL,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+    return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
 
   case &FnCall_e(e1,es,_): 
     ANAL_RGN(env,temp) {
@@ -1080,13 +1080,13 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
           continue;
         }
         switch(fst_outflow) {
-        case BottomFL: break;
-        case ReachableFL(fst_d,_,_):
+        case {.BottomFL = _}: break;
+        case {.ReachableFL = $(fst_d,_,_)}:
           if(initlevel(env->fenv,fst_d,rvals->hd)==NoneIL)
             Tcutil::terr(es->hd->loc,"expression may not be initialized");
           switch(outflow) {
-          case BottomFL: break;
-          case ReachableFL(d,relns,c):
+          case {.BottomFL = _}: break;
+          case {.ReachableFL = $(d,relns,c)}:
             // do the escape, but then set to esc_all in outflow
             let ans_d = escape_deref(fenv, d, env->all_changed, rvals->hd);
             switch(rvals->hd) {
@@ -1110,7 +1110,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       }
       // if the called function doesn't return, we get BottomFL out
       if (Tcutil::is_noreturn(e1->topt->v)) 
-        return $(BottomFL,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
+        return $(BottomFL(),typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
       else 
         return $(outflow,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all));
     }
@@ -1135,8 +1135,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     }
     outflow = readthrough_unique_rvals(exp->loc,outflow); // read malloc args
     switch(outflow) {
-    case BottomFL: return $(outflow,rval);
-    case ReachableFL(d2,relns,c):
+    case {.BottomFL = _}: return $(outflow,rval);
+    case {.ReachableFL = $(d2,relns,c)}:
       return $(ReachableFL(Dict::insert(d2,root,place_val),relns,c), rval);
     }
 
@@ -1160,22 +1160,22 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(_,left_lval) = anal_Lexp(env,outflow,e1);
     let $(_,right_lval) = anal_Lexp(env,outflow,e2);
     switch (outflow) {
-    case ReachableFL(outdict,relns,cinfo):
+    case {.ReachableFL = $(outdict,relns,cinfo)}:
       // note that we don't have to make any changes to cinfo, since
       // following the swap no `consumed' status will have changed.
       switch(left_lval) {
-      case PlaceL(lp):
+      case {.PlaceL = lp}:
 	outdict = assign_place(fenv,e1->loc,outdict,env->all_changed,
 			       lp,right_rval);
 	break;
-      case UnknownL: break;
+      case {.UnknownL = _}: break;
       }
       switch(right_lval) {
-      case PlaceL(rp): 
+      case {.PlaceL = rp}: 
 	outdict = assign_place(fenv,e2->loc,outdict,env->all_changed,
 			       rp,left_rval);
 	break;
-      case UnknownL: break;
+      case {.UnknownL = _}: break;
       }	
       // FIX: should swap the relation information
       relns = reln_kill_exp(fenv->r,relns,e1);
@@ -1211,8 +1211,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     }
     outflow = readthrough_unique_rvals(e2->loc, outflow); // read new args
     switch(outflow) {
-    case BottomFL: return $(outflow,rval);
-    case ReachableFL(d2,relns,c):
+    case {.BottomFL = _}: return $(outflow,rval);
+    case {.ReachableFL = $(d2,relns,c)}:
       return $(ReachableFL(Dict::insert(d2,root,place_val),relns,c), rval);
     }
     
@@ -1225,8 +1225,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(f,l) = anal_Lexp(env,inflow,e1);
     f = restore_consume_info(f,c,false);
     switch(l) {
-    case UnknownL:   return $(f, NotZeroAll);
-    case PlaceL(p): return $(f, rnew(env->r) AddressOf(p));
+    case {.UnknownL = _}:   return $(f, NotZeroAll);
+    case {.PlaceL = p}: return $(f, rnew(env->r) AddressOf(p));
     }
 
   case &Deref_e(e1): 
@@ -1251,6 +1251,14 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       throw new Core::Impossible(aprintf("anal_Rexp: AggrMember: %s",
                                          Absynpp::exp2string(e)));
     }
+
+  case &Tagcheck_e(e1,field):
+    // similar to above, but result is a non-zero integer
+    let $(f,r) = anal_Rexp(env,inflow,e1);
+    // we can drop these here because this has to be a unique path
+    f = drop_unique_rvals(e->loc, f);
+    f = may_consume_exp(env,f,e);
+    return $(f,fenv->unknown_all);
     
   case &AggrArrow_e(e1,field,...): // composition of * and ., of course
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
@@ -1308,7 +1316,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       f = readthrough_unique_rvals(e2->loc,f); // deref e1
       let f2 = f;
       switch(f) {
-      case ReachableFL(d2,relns,c2):
+      case {.ReachableFL = $(d2,relns,c2)}:
         //fprintf(stderr,"subscript %s:",Absynpp::exp2string(e));
         //print_relns(relns); fprintf(stderr,"\n");
         if(initlevel(env->fenv,d2,rvals->tl->hd)==NoneIL)
@@ -1345,7 +1353,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         */
         let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
         switch (f3) {
-        case BottomFL: return $(f3,r);
+        case {.BottomFL = _}: return $(f3,r);
         default: return $(f2,r);
         }
       default: throw new Core::Impossible("anal_Rexp: Subscript -- bad type");
@@ -1353,17 +1361,6 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     }
 
   case &Datatype_e(es,tud,_): // NULL case handled above
-    if (tud->is_flat) {
-      // FIX: for now, I'm just requiring everything to be initialized here
-      // because otherwise, I'm getting join errors.
-      ANAL_RGN(env, temp) {
-        let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false);
-        f = consume_unique_rvals(e->loc,f); // consume init exprs
-        for (; es; es = es->tl, rvals = rvals->tl)
-          f = use_Rval(env,es->hd->loc,f,rvals->hd);
-        return $(f,fenv->unknown_all);
-      }
-    }
     fallthru(es); 
   case &Tuple_e(es):
     ANAL_RGN(env, temp) {
@@ -1399,6 +1396,11 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             // find the field and update the aggrdict imperatively
             let field_no = get_field_index_fs(fs,fld);
             aggrdict[field_no] = rvals->hd;
+            // if this is a union, require this to be initialized
+            if (kind == UnionA) {
+              let e = (*des->hd)[1];
+              f = use_Rval(env,e->loc,f,rvals->hd);
+            }
           }
       return $(f, rnew(env->r) Aggregate(kind == UnionA, aggrdict));
     }
@@ -1418,8 +1420,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     f1 = readthrough_unique_rvals(e1->loc, f1); // read bound expr
     switch(f1) {
-    case BottomFL: return $(f1,fenv->unknown_all);
-    case ReachableFL(d1,relns,c1):
+    case {.BottomFL = _}: return $(f1,fenv->unknown_all);
+    case {.ReachableFL = $(d1,relns,c1)}:
       if(initlevel(env->fenv,d1,r1)==NoneIL)
 	Tcutil::terr(e1->loc, "expression may not be initialized");
 
@@ -1434,7 +1436,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       case &Var_e(_,&Param_b(v2)) && !v2->escapes:
         new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessVar(v2,v2->type)),relns);
         break;
-      case &Const_e(Int_c(_,i)): 
+      case &Const_e({.Int_c = $(_,i)}): 
         new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessConst(i)),relns);
         break;
       case &Primop_e(Size,&List(e3,_)):
@@ -1466,11 +1468,11 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 	let $(f2,r2) = anal_Rexp(env,f1,e2);
 	f2 = consume_unique_rvals(e2->loc,f2); // consume rhexp
 	switch(f2) {
-	case BottomFL: return $(f2,fenv->unknown_all);
-	case ReachableFL(d2,_,c2):
+	case {.BottomFL = _}: return $(f2,fenv->unknown_all);
+	case {.ReachableFL = $(d2,_,c2)}:
 	  if(initlevel(env->fenv,d2,r2) != AllIL) {
 	    Tcutil::terr(e1->loc, "expression may not be initialized");
-	    return $(BottomFL,fenv->unknown_all);
+	    return $(BottomFL(),fenv->unknown_all);
 	  }
 	}
 	f1 = f2;
@@ -1482,11 +1484,11 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 	  let $(f2,r2) = anal_Rexp(env,f1,e2);
 	  f2 = consume_unique_rvals(e2->loc,f2); // consume rh exp
 	  switch(f2) {
-	  case BottomFL: break;
-	  case ReachableFL(d2,_,c2):
+	  case {.BottomFL = _}: break;
+	  case {.ReachableFL = $(d2,_,c2)}:
 	    if(initlevel(env->fenv,d2,r2) != AllIL) {
 	      Tcutil::terr(e1->loc, "expression may not be initialized");
-	      return $(BottomFL, fenv->unknown_all);
+	      return $(BottomFL(), fenv->unknown_all);
 	    }
 	  }
 	  let newflow = join_flow(fenv,env->all_changed,f1,f2,true);
@@ -1545,8 +1547,8 @@ static $(flow_t<`r>,absLval_t<`r>)
   switch(Tcutil::compress(e->topt->v)) {
   case &PointerType(PtrInfo{elttype,_,PtrAtts(_,_,bd,zt,_)}):
     switch(f) {
-    case BottomFL: return $(f,UnknownL);
-    case ReachableFL(outdict,relns,c):
+    case {.BottomFL = _}: return $(f,UnknownL());
+    case {.ReachableFL = $(outdict,relns,c)}:
       // else cannot be known: FIX: determine notzero as appropriate
       if(Tcutil::is_bound_one(bd))
 	switch(r) {
@@ -1558,7 +1560,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	  return $(f, PlaceL(rnew(fenv->r) Place(root, rappend(fenv->r,flds2,flds))));
 	case Zero: 
 	  e->annot = IsZero;
-	  return $(BottomFL,UnknownL);
+	  return $(BottomFL(),UnknownL());
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
 	// Note: I think tag cmps aren't useful here
 	default: e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
@@ -1567,7 +1569,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
       if(initlevel(env->fenv,outdict,r)==NoneIL)
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");
-      return $(f,UnknownL);
+      return $(f,UnknownL());
     }
   default: throw new Core::Impossible("left deref of non-pointer-type");
   }
@@ -1583,8 +1585,8 @@ static $(flow_t<`r>,absLval_t<`r>)
   flowdict_t d;
   let fenv = env->fenv;
   switch(inflow) {
-  case BottomFL: return $(BottomFL, UnknownL); // absLval_t irrelvent
-  case ReachableFL(d2,relns,_):
+  case {.BottomFL = _}: return $(BottomFL(), UnknownL()); // absLval_t irrelvent
+  case {.ReachableFL = $(d2,relns,_)}:
     d = d2;
     //fprintf(stderr,"exp %s:",Absynpp::exp2string(e));
     //print_relns(relns); fprintf(stderr,"\n");
@@ -1599,7 +1601,7 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &Var_e(_,&Pat_b(vd)):
     return $(inflow, PlaceL(rnew(env->r) Place(rnew(env->r) VarRoot(vd), flds)));
 
-  case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL);
+  case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL());
 
   case &AggrArrow_e(e1,f,...):
     switch(Tcutil::compress(e1->topt->v)) {
@@ -1630,7 +1632,7 @@ static $(flow_t<`r>,absLval_t<`r>)
         f = readthrough_unique_rvals(e2->loc,f); // read index expr
         let f2 = f;
         switch(f) {
-        case ReachableFL(d2,relns,c):
+        case {.ReachableFL = $(d2,relns,c)}:
           if(initlevel(env->fenv,d2,rvals->tl->hd)==NoneIL)
             Tcutil::terr(e2->loc, "expression may not be initialized");
           let new_relns = add_subscript_reln(fenv->r,relns,e1,e2);
@@ -1655,7 +1657,7 @@ static $(flow_t<`r>,absLval_t<`r>)
         */
         let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,flds);
         switch (f3) {
-        case BottomFL: return $(f3,r);
+        case {.BottomFL = _}: return $(f3,r);
         default: return $(f2,r);
         }
       }
@@ -1664,11 +1666,11 @@ static $(flow_t<`r>,absLval_t<`r>)
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld,...): 
     if(is_nontagged_union_type(e1->topt->v))
-      return $(inflow,UnknownL);
+      return $(inflow,UnknownL());
     return anal_Lexp_rec(env,inflow,e1,
                          rnew(env->r) List(get_field_index(e1->topt->v,fld),flds)); 
 
-  default: return $(BottomFL, UnknownL); // see comment before function
+  default: return $(BottomFL(), UnknownL()); // see comment before function
   }
 }
 
@@ -1738,8 +1740,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       f = fl;
     }
     switch(f) {
-    case BottomFL: return $(f,f);
-    case ReachableFL(d,relns,cinfo):
+    case {.BottomFL = _}: return $(f,f);
+    case {.ReachableFL = $(d,relns,cinfo)}:
       let e1 = es->hd;
       let e2 = es->tl->hd;
       if(initlevel(env->fenv,d,r1)==NoneIL)
@@ -1768,16 +1770,16 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
           default: throw new Core::Impossible("anal_test, zero-split");
           }
         case $(Zero,Zero):
-          if (p == Eq) return $(f,BottomFL);
-          else return $(BottomFL,f);
+          if (p == Eq) return $(f,BottomFL());
+          else return $(BottomFL(),f);
         case $(Zero,NotZeroAll): fallthru;
         case $(Zero,NotZeroThis): fallthru;
         case $(Zero,&AddressOf(_)): fallthru;
         case $(NotZeroAll,Zero): fallthru;
         case $(NotZeroThis,Zero): fallthru;
         case $(&AddressOf(_),Zero): 
-          if (p == Neq) return $(f,BottomFL);
-          else return $(BottomFL,f);
+          if (p == Neq) return $(f,BottomFL());
+          else return $(BottomFL(),f);
         default: break;
         }
       
@@ -1816,8 +1818,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         let ff = if_tagcmp(env,f,e2,r2,Lte,r1);
         
         switch(ft) {
-        case BottomFL: throw new Core::Impossible("anal_test, Lt");
-        case ReachableFL(d2,_,cinfo2): d = d2; cinfo = cinfo2;
+        case {.BottomFL = _}: throw new Core::Impossible("anal_test, Lt");
+        case {.ReachableFL = $(d2,_,cinfo2)}: d = d2; cinfo = cinfo2;
         }
         
         // this case tracks most of the inequalities we need for bounds-checking
@@ -1837,7 +1839,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             let r = env->fenv->r;
             let relns_true = rnew(r) List(rnew(r) Reln(v1,LessVar(v2,v2->type)),relns);
             return $(ReachableFL(d,relns_true,cinfo), ff);
-          case &Const_e(Int_c(_,i)): 
+          case &Const_e({.Int_c = $(_,i)}): 
             let r = env->fenv->r;
             let relns_true = rnew(r) List(rnew(r) Reln(v1,LessConst(i)),relns);
             return $(ReachableFL(d,relns_true,cinfo), ff);
@@ -1863,8 +1865,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         let ff = if_tagcmp(env,f,e2,r1,Lt,r1);
         
         switch(ft) {
-        case BottomFL: throw new Core::Impossible("anal_test, Lte");
-        case ReachableFL(d2,_,cinfo2): d = d2; cinfo = cinfo2;
+        case {.BottomFL = _}: throw new Core::Impossible("anal_test, Lte");
+        case {.ReachableFL = $(d2,_,cinfo2)}: d = d2; cinfo = cinfo2;
         }
         
         // this case checks for i <= x.size
@@ -1901,17 +1903,17 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   let $(f,r) = anal_Rexp(env,inflow,e);
   f = readthrough_unique_rvals(e->loc,f); // read test expr
   switch(f) {
-  case BottomFL: return $(f,f);
-  case ReachableFL(d,_,_):
+  case {.BottomFL = _}: return $(f,f);
+  case {.ReachableFL = $(d,_,_)}:
     switch(r) {
-    case Zero: return $(BottomFL,f);
+    case Zero: return $(BottomFL(),f);
     case NotZeroThis:
     case NotZeroAll:
-    case &AddressOf(_): return $(f,BottomFL);
+    case &AddressOf(_): return $(f,BottomFL());
     case &UnknownR(NoneIL):
     case &Esc(NoneIL): 	
       Tcutil::terr(e->loc,"expression may not be initialized");
-      return $(BottomFL,BottomFL);
+      return $(BottomFL(),BottomFL());
     /* XXX another place to add VirtAddrOf fallthru */
     case &UnknownR(il): return splitzero(env,inflow,f,e,il);
     case &Esc(_):       return $(f,f);
@@ -1923,8 +1925,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 
 static void check_init_params(seg_t loc, analenv_t<`r> env, flow_t<`r> flow) {
   switch(flow) {
-  case BottomFL: return;
-  case ReachableFL(d,_,_):
+  case {.BottomFL = _}: return;
+  case {.ReachableFL = $(d,_,_)}:
     for(let inits = env->param_roots; inits!=NULL; inits=inits->tl)
       if(initlevel(env->fenv,d,lookup_place(d,inits->hd))!=AllIL)
 	Tcutil::terr(loc, "function may not initialize all the parameters "
@@ -1954,7 +1956,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
       clause_outflow = anal_stmt(env,clause_inflow,body);
     }
     switch(clause_outflow) {
-    case BottomFL: break;
+    case {.BottomFL = _}: break;
     default:
       // no need for a break/fallthru for the last case
       if(scs->tl == NULL)
@@ -1972,7 +1974,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
       break;
     }
   }
-  return BottomFL; // not reached if last case falls through
+  return BottomFL(); // not reached if last case falls through
 }
 
 static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
@@ -1986,7 +1988,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     if (env->noreturn) 
       Tcutil::terr(s->loc,"`noreturn' function might return");
     check_init_params(s->loc,env,inflow);
-    return BottomFL;
+    return BottomFL();
   case &Return_s(e):    
     if (env->noreturn) 
       Tcutil::terr(s->loc,"`noreturn' function might return");
@@ -1994,7 +1996,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     f = consume_unique_rvals(e->loc,f); // consume returned expression
     f = use_Rval(env,e->loc,f,r);
     check_init_params(s->loc,env,f);
-    return BottomFL;
+    return BottomFL();
     
   case &Exp_s(e): outflow = anal_Rexp(env,inflow,e)[0]; break;
 
@@ -2054,7 +2056,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     break;
 
     // eg. of when this can happen is when destination is end of function
-  case &Break_s(NULL): return BottomFL;
+  case &Break_s(NULL): return BottomFL();
   case &Fallthru_s(es,&destclause):
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false);
@@ -2065,7 +2067,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       // The gunk is because the next case's binding vars are still in scope!
       f = add_vars(fenv,f,destclause->pat_vars->v,fenv->unknown_all,s->loc);
       update_flow(env, (stmt_t)(destclause->body), f);
-      return BottomFL;
+      return BottomFL();
     }
   case &Break_s(dest):    fallthru(dest);
   case &Continue_s(dest): fallthru(dest);
@@ -2087,7 +2089,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     // now just update the dest's flow
     DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);
-    return BottomFL;
+    return BottomFL();
 
   case &Switch_s(e,scs):
     let $(f,r) = anal_Rexp(env,inflow,e);
@@ -2113,7 +2115,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     update_tryflow(env,scs_inflow); // necessary?
     flow_t scs_outflow = anal_scs(env,scs_inflow,scs);
     switch(scs_outflow) {
-    case BottomFL: break;
+    case {.BottomFL = _}: break;
     default: Tcutil::terr(s->loc, "last catch clause may implicitly fallthru");
     }
     outflow = s1_outflow; // really join with scs_outflow, but it's BottomFL
@@ -2132,8 +2134,8 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
     f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc);
     outflow = anal_stmt(env,f,s1);
     switch (outflow) {
-    case BottomFL: break;
-    case ReachableFL(o,r,c):
+    case {.BottomFL = _}: break;
+    case {.ReachableFL = $(o,r,c)}:
       // restore rhs if it was consumed
       while (mc != NULL) {
 	let old = c.consumed;
@@ -2172,7 +2174,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   DEBUG_PRINT("stmt boundary; clearing may consume\n");
   outflow = drop_unique_rvals(s->loc, outflow);
   switch (outflow) {
-  case ReachableFL(_,_,cinfo):
+  case {.ReachableFL = $(_,_,cinfo)}:
     DEBUG_PRINT("  consumed: ");
     DEBUG_PRINT_F(print_dict_set,cinfo.consumed,print_place);
     DEBUG_PRINT("\n");
@@ -2199,8 +2201,8 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     let $(f,r) = anal_Rexp(env,inflow,(exp_t)e);
     f = consume_unique_rvals(e->loc, f); // consume rhs
     switch(f) {
-    case BottomFL: return BottomFL;
-    case ReachableFL(outdict,relns,cinfo):
+    case {.BottomFL = _}: return BottomFL();
+    case {.ReachableFL = $(outdict,relns,cinfo)}:
       outdict = assign_place(env->fenv,decl->loc,outdict,env->all_changed,
 			     rnew(env->r) Place(rnew(env->r) VarRoot(vd),
                                                 NULL), r);
@@ -2301,8 +2303,8 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   inflow = add_vars(fenv,inflow,fd->param_vardecls->v,fenv->unknown_all,loc);
   list_t<place_t,`r> param_roots = NULL; // only for "initializes"
   switch(inflow) {
-  case BottomFL: Tcutil::impos("check_fun");
-  case ReachableFL(d,relns,cinfo):
+  case {.BottomFL = _}: Tcutil::impos("check_fun");
+  case {.ReachableFL = $(d,relns,cinfo)}:
     // NOTE: for reasons Dan doesn't understand, the attributes, are not
     // on the fndecl, only on the type.
     _ atts;
@@ -2359,7 +2361,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
     outflow = drop_unique_rvals(fd->body->loc, outflow);
   }
   switch(outflow) {
-  case BottomFL: break;
+  case {.BottomFL = _}: break;
   default: 
     check_init_params(loc,env,outflow);
 

@@ -71,8 +71,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
 
   // reject explicitly qualified name FIX: prevents re-type-checking
   switch (ns) {
-  case Rel_n(NULL): 
-  case Abs_n(NULL): break; // allowed for top-level constants
+  case {.Rel_n = NULL}: 
+  case {.Abs_n = NULL}: break; // allowed for top-level constants
   default:
     terr(loc,"qualified variable declarations are not implemented (%s)",
 	 qvar2string(vd->name)); // FIX
@@ -84,7 +84,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   switch (compress(t)) {
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
-      case &Const_e(String_c(s)):
+      case &Const_e({.String_c = s}):
       t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
       break;
       case &Comprehension_e(_,e,_,_):
@@ -214,7 +214,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
 static bool is_main(qvar_t n) {
   let &$(nms,v) = n;
   switch (nms) {
-  case Abs_n(NULL):
+  case {.Abs_n = NULL}:
     return (strcmp(*v,"main") == 0);
   default: return false;
   }
@@ -232,8 +232,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
 
   // reject explicitly qualified name
   switch ((*fd->name)[0]) {
-  case Rel_n(NULL): break;
-  case Abs_n(y): impos("tc: Abs_n in tcFndecl");
+  case {.Rel_n = NULL}: break;
+  case {.Abs_n = y}: impos("tc: Abs_n in tcFndecl");
   default: terr(loc,"qualified function declarations are not implemented (%s)",
 		qvar2string(fd->name)); // FIX
     return;
@@ -369,8 +369,8 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
 #endif
   // reject explicitly qualified name
   switch ((*td->name)[0]) {
-  case Rel_n(NULL): 
-  case Abs_n(NULL): break; // allowed for top-level constants
+  case {.Rel_n = NULL}: 
+  case {.Abs_n = NULL}: break; // allowed for top-level constants
   default:
     terr(loc,"qualified typedef declarations are not implemented (%s)",qvar2string(td->name)); // FIX
     return;
@@ -477,8 +477,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
   // reject explicitly qualified name
   switch ((*ad->name)[0]) {
-  case Rel_n(NULL): 
-  case Abs_n(NULL): break; // allowed for top-level constants
+  case {.Rel_n = NULL}: 
+  case {.Abs_n = NULL}: break; // allowed for top-level constants
   default: 
     terr(loc,"qualified struct declarations are not implemented (%s)",
 	 qvar2string(ad->name)); // FIX
@@ -589,11 +589,11 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
-      // make sure no no-alias fields in non-flat datatype
+      // make sure no no-alias fields in datatype
       TEMP_RGN(te, temp) {
-        if (!tudres->is_flat && is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
+        if (is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
           terr(f->loc, 
-               "noalias pointers in non-flat datatypes are not allowed (%s)",
+               "noalias pointers in datatypes are not allowed (%s)",
                qvar2string(f->name)); //FIX ?      
       }
       (*typs->hd)[0].real_const = 
@@ -602,18 +602,18 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
     }
 
     switch((*f->name)[0]) {
-    case Rel_n(NULL): 
+    case {.Rel_n = NULL}: 
       if(is_extensible)
 	(*f->name)[0] = Abs_n(te->ns);
       else
 	(*f->name)[0] = (*name)[0];
       break;
-    case Rel_n(_): 
+    case {.Rel_n = _}: 
       terr(f->loc, "qualified datatypefield declarations are not allowed (%s)",
 	   qvar2string(f->name)); //FIX ?
       break;
-    case Abs_n(_): break;
-    case Loc_n: impos("tcDatatypeFields: Loc_n");
+    case {.Abs_n = _}: break;
+    case {.Loc_n = _}: impos("tcDatatypeFields: Loc_n");
     }
   }
 
@@ -675,14 +675,12 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     case &Less_kb(*f,TopRgnKind):
       *f = new Opt(kind_to_bound(RgnKind)); break;
     case &Eq_kb(TopRgnKind):
-      if (!tud->is_flat)
-	terr(loc,"%s %s attempts to abstract type "
-	     "variable %s of kind TR",obj,*v,*tvs2->hd->name); break;
+      terr(loc,"%s %s attempts to abstract type "
+           "variable %s of kind TR",obj,*v,*tvs2->hd->name); break;
     case &Less_kb(*f,UniquepRgnKind): fallthru;
     case &Eq_kb(UniqueRgnKind):
-      if (!tud->is_flat)
-	terr(loc,"%s %s attempts to abstract type "
-	     "variable %s of kind UR",obj,*v,*tvs2->hd->name); break;
+      terr(loc,"%s %s attempts to abstract type "
+           "variable %s of kind UR",obj,*v,*tvs2->hd->name); break;
     case &Eq_kb(MemKind):
       terr(loc,"%s %s attempts to abstract type "
            "variable %s of kind M",obj,*v,*tvs2->hd->name); break;
@@ -718,8 +716,8 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     } catch {
     case Dict::Absent:
       switch ((*tud->name)[0]) {
-      case Rel_n(NULL): (*tud->name)[0] = Abs_n(te->ns); break;
-      case Abs_n(_): fallthru;
+      case {.Rel_n = NULL}: (*tud->name)[0] = Abs_n(te->ns); break;
+      case {.Abs_n = _}: fallthru;
       default:
         terr(loc,"qualified (non-extensible) datatype declarations are not implemented (%s)",
              qvar2string(tud->name)); // FIX
@@ -740,7 +738,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     case $(&Opt(*fs), NULL):
       // for the sake of recursive fields, make name abstract in body
       let tudp = new (new Datatypedecl(Extern,tud->name,tvs,NULL,
-                                       tud->is_extensible,tud->is_flat));
+                                       tud->is_extensible));
       ge->datatypedecls = Dict::insert(ge->datatypedecls, v, tudp);
    
       // check the fields (and sort them if this is a @extensible datatype)
@@ -756,7 +754,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
         tud->is_extensible = true;
       // for the sake of recursive fields, make name abstract in body
       *tudp = new Datatypedecl(Extern, tud->name, tvs, NULL, 
-                               tud->is_extensible, tud->is_flat);
+                               tud->is_extensible);
       
       // check the fields (and sort them if this is a @extensible datatype)
       *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,
@@ -785,8 +783,8 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 #endif
   // reject explicitly qualified name
   switch ((*ed->name)[0]) {
-  case Rel_n(NULL): 
-  case Abs_n(NULL): break; // allowed for top-level constants
+  case {.Rel_n = NULL}: 
+  case {.Abs_n = NULL}: break; // allowed for top-level constants
   default:
     terr(loc,"qualified enum declarations are not implemented (%s)",
 	 qvar2string(ed->name)); // FIX
@@ -864,8 +862,8 @@ static void resolve_export_namespace(tenv_t te, $(seg_t,qvar_t,bool)@ exp) {
   let $(loc,q,_) = *exp;
   let &$(ns,v) = q;
   switch (ns) {
-  case Rel_n(NULL):
-  case Abs_n(NULL): break;
+  case {.Rel_n = NULL}:
+  case {.Abs_n = NULL}: break;
   default:
     terr(loc,"qualified export variables are not implemented (%s)",
          qvar2string(q));
@@ -1000,12 +998,12 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       var_t first;
       list_t<var_t> rest;
       switch (nsl) {
-      case Loc_n:       
-      case Rel_n(NULL):
-      case Abs_n(NULL):
+      case {.Loc_n = _}:       
+      case {.Rel_n = NULL}:
+      case {.Abs_n = NULL}:
         first = v; rest = NULL; break;
-      case Rel_n(&List(x,y)): fallthru(x,y);
-      case Abs_n(&List(x,y)):
+      case {.Rel_n = &List(x,y)}: fallthru(x,y);
+      case {.Abs_n = &List(x,y)}:
         first = x; rest = List::append(y,new List(v,NULL)); break;
       }
       let ns2 = resolve_namespace(te,loc,first,rest);
@@ -1071,9 +1069,9 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     let &$(nsl,name) = vd->name;
     list_t<var_t> ns;
     switch (nsl) {
-    case Loc_n:     ns = NULL; break;
-    case Rel_n(y): ns = y;    break;
-    case Abs_n(y): ns = y;    break;
+    case {.Loc_n = _}:     ns = NULL; break;
+    case {.Rel_n = y}: ns = y;    break;
+    case {.Abs_n = y}: ns = y;    break;
     }
     let nsenv = Dict::lookup(env->nsdict,ns);
     let ge = (*nsenv)[0];

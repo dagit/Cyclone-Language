@@ -781,7 +781,8 @@ parse_type_decl ()
     // modify bison so that we get rid of the union definition and gensym
     // tokens appropriately.
     //fprintf((FILE @)fattrs, "\n_ yyget_%s(datatype @extensible YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
-    fprintf((FILE @)fattrs, "\n%s yyget_%s(datatype YYSTYPE yy1) {\n  _ yyzzz; \n  switch(yy1) {\n    case %s(yyzzzz): \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
+    fprintf((FILE @)fattrs, "\n%s yyget_%s(union YYSTYPE yy1) {\n_ yyzzz; \n  switch(yy1) {\n    case {.%s = yyzzzz}: \n      yyzzz = yyzzzz;\n      break;\n    default: throw &yyfail_%s;\n  }; \n  return yyzzz;\n}",name,deconstructor,deconstructor,deconstructor);
+    fprintf((FILE @)fattrs, "\nunion YYSTYPE %s(%s yy1) { return YYSTYPE{.%s = yy1}; }",deconstructor,name,deconstructor);
   }
 
   for (;;)
@@ -1160,24 +1161,24 @@ print_union_decl()
 {
   seen_destructors = reverse(seen_destructors);
   struct strlist *`H l1 = seen_destructors;
-  fprintf((FILE @)fattrs0,"\n__flat__ datatype YYSTYPE;\n__flat__ datatype YYSTYPE ");
+  fprintf((FILE @)fattrs0,"\nunion YYSTYPE;\n@tagged union YYSTYPE ");
   fprintf((FILE @)fattrs0,"\n{");
   for(; l1 != NULL; l1 = l1->tl){
-    fprintf((FILE @)fattrs0,"\n  %s(%s),",
-            l1->nth, l1->str);
+    fprintf((FILE @)fattrs0,"\n  %s %s;",
+            l1->str, l1->nth);
   }
-  fprintf((FILE @)fattrs0,"\n  YYINITIALSVAL");
+  fprintf((FILE @)fattrs0,"\n  int YYINITIALSVAL;");
   fprintf((FILE @)fattrs0,"\n};\n");
   if (fdefines){
     fprintf((FILE @)fdefines,"\nextern int yyparse();");
-    fprintf((FILE @)fdefines,"\nextern __flat__ datatype YYSTYPE ");
+    fprintf((FILE @)fdefines,"\nextern @tagged union YYSTYPE ");
     fprintf((FILE @)fdefines,"\n{");
     l1 = seen_destructors;
     for(; l1 != NULL; l1 = l1->tl){
-      fprintf((FILE @)fdefines,"\n  %s(%s),",
-              l1->nth, l1->str);
+      fprintf((FILE @)fdefines,"\n  %s %s;",
+              l1->str, l1->nth);
     }
-    fprintf((FILE @)fdefines,"\n  YYINITIALSVAL");
+    fprintf((FILE @)fdefines,"\n  int  YYINITIALSVAL;");
     fprintf((FILE @)fdefines,"\n};\n");
   }
 
@@ -1807,7 +1808,7 @@ gensym()
 {
   register bucket *sym;
 
-  sprintf((char ? @nozeroterm)token_buffer, "@%d", ++gensym_count);
+  sprintf((char ? @nozeroterm )token_buffer, "@%d", ++gensym_count);
   sym = getsym(token_buffer);
   sym->class = SNTERM;
   sym->value = (short)nvars++;
@@ -2326,7 +2327,7 @@ packsymbols()
 	  if (spec_name_prefix)
 	    fprintf((FILE @)fdefines, "\nextern YYSTYPE %slval;\n", spec_name_prefix);
 	  else
-	    fprintf((FILE @)fdefines, "\nextern datatype YYSTYPE yylval;\n");
+	    fprintf((FILE @)fdefines, "\nextern union YYSTYPE yylval;\n");
 	}
 
       if (semantic_parser)

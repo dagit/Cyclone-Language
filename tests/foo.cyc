@@ -4,7 +4,7 @@
 
 int c = (int)' ';
 
-datatype @extensible exn {ParseError};
+datatype exn {ParseError};
 
 void yyerror(string_t s) {
   printf("error: %s\n",s);
@@ -21,7 +21,7 @@ int yylex() {
       i = i*10 + (c - ((int)'0'));
       c = fgetc(stdin);
     }
-    yylval = Integer(i);
+    yylval = YYSTYPE{.Integer = i};
     return INT;
   } else {
     int old_c = c;

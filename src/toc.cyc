@@ -169,7 +169,7 @@ MAKE_STRING(_DynRegionFrame);
 stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
   static string_t              str##_str = #str;\
-  static $(nmspace_t, var_t)   str##_pr  = $(Loc_n,&str##_str);\
+  static $(nmspace_t, var_t)   str##_pr  = $(Nmspace{.Loc_n=0},&str##_str);\
   static datatype Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
   static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,EmptyAnnot};\
   static exp_t                 str##_e   = &str##_ev
@@ -248,9 +248,8 @@ MAKE_VAR(_swap_dyneither);
 #undef MAKE_VAR
 
 static datatype Type.AggrType dyneither_ptr_typ_v =
-                           AggrType(AggrInfo(UnknownAggr(StructA,
-                                                         &_dyneither_ptr_pr),
-                                             NULL));
+    AggrType(AggrInfo(AggrInfoU{.UnknownAggr = $(StructA,&_dyneither_ptr_pr,NULL)},NULL));
+                                             
 static datatype Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
@@ -308,7 +307,7 @@ static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
 static raw_stmt_t goto_stmt_r(var_t v, stmt_opt_t s) {
   return new Goto_s(v,s);
 }
-static datatype Raw_exp.Const_e zero_exp = Const_e(Int_c(Signed,0));
+static datatype Raw_exp.Const_e zero_exp = Const_e(Cnst{.Int_c= $(Signed,0)});
 
 
 /* functionSets are used to call the appropriate function from
@@ -402,11 +401,11 @@ exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
 
 static bool is_zero(exp_t e) {
   switch (e->r) {
-  case &Const_e(Char_c(_,c)):     return c == '\0';
-  case &Const_e(Short_c(_,i)):    return i == 0;
-  case &Const_e(Int_c(_,i)):      return i == 0;
-  case &Const_e(LongLong_c(_,i)): return i == 0;
-  case &Const_e(Null_c): return true;
+  case &Const_e({.Char_c = $(_,c)}):     return c == '\0';
+  case &Const_e({.Short_c = $(_,i)}):    return i == 0;
+  case &Const_e({.Int_c = $(_,i)}):      return i == 0;
+  case &Const_e({.LongLong_c = $(_,i)}): return i == 0;
+  case &Const_e({.Null_c = _}): return true;
   case &Cast_e(_,e1,_,_): return is_zero(e1);
   case &Tuple_e(es): return List::forall(is_zero,es);
   case &Array_e(dles):         fallthru(dles);
@@ -434,7 +433,7 @@ static bool is_nullable(type_t t) {
 static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
   let TocState{.dyn = dyn, .qvar_tags = qvs, ...} = *toc_state;
   static string_t bogus_string = "*bogus*";
-  static $(nmspace_t,var_t) bogus_qvar = $(Loc_n,&bogus_string);
+  static $(nmspace_t,var_t) bogus_qvar = $(Nmspace{.Loc_n = 0},&bogus_string);
   static $(qvar_t,string_t) pair = $(&bogus_qvar,"");
   pair = $(x,tag);
   region d = open(dyn); {
@@ -514,8 +513,7 @@ static exp_t datatype_tag(datatypedecl_t td, qvar_t name, bool carries_value) {
   int ans = 0;
   let fs  = td->fields->v;
   while(qvar_cmp(name,fs->hd->name)!=0) {
-    if(td->is_flat || 
-       (carries_value && fs->hd->typs != NULL)
+    if((carries_value && fs->hd->typs != NULL)
        || (!carries_value && fs->hd->typs == NULL))
       ++ans;
     fs = fs->tl;
@@ -611,18 +609,13 @@ static type_t typ_to_c(type_t t) {
   case &VarType(tv): 
     if (tvar_kind(tv) == AnyKind) return VoidType;
     else return void_star_typ(); // map `a to void *
-  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),_,_}): 
-    if (tud->is_flat)
-      return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
-    else return void_star_typ();
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_,_}): 
+    return void_star_typ();
   case &DatatypeType(_): toc_impos("unresolved DatatypeType");
-  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),_}):
-    // for flat datatype fields, it's the same as the datatype type.
+  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
     // for datatype fields that carry no arguments, it's an unsigned int
     // for xdatatype fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
-    if (tud->is_flat) 
-      return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     if (tuf->typs == NULL) 
       if(tud->is_extensible) 
         return char_star_typ();
@@ -633,9 +626,8 @@ static type_t typ_to_c(type_t t) {
     // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
-    switch (compress_conref(bnds)->v) {
-    case No_constr:
-    case Eq_constr(DynEither_b): return dyneither_ptr_typ;
+    switch (conref_def((bounds_t)DynEither_b,bnds)) {
+    case DynEither_b: return dyneither_ptr_typ;
     default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
   case &IntType(_,_): 
@@ -679,7 +671,7 @@ static type_t typ_to_c(type_t t) {
     // We may be in C code, in which case the implementation may not be set
     // here.
     switch (info) {
-    case UnknownAggr(...): return t;
+    case {.UnknownAggr = _}: return t;
     default: break;
     }
     let ad = get_known_aggrdecl(info);
@@ -740,7 +732,7 @@ static bool atomic_typ(type_t t) {
     // post-translation (with unchecked C types)?? (We shouldn't)
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
-    case UnknownAggr(_,_): return false; // see above!
+    case {.UnknownAggr = _}: return false; // see above!
     default: break;
     }
     let ad = get_known_aggrdecl(info);
@@ -753,7 +745,7 @@ static bool atomic_typ(type_t t) {
     for (; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
-  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),_}):
+  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -779,6 +771,17 @@ static bool is_void_star(type_t t) {
   }
 }
 
+static bool is_tvar(type_t t) {
+  switch (compress(t)) {
+  case &VarType(...): return true;
+  default: return false;
+  }
+}
+
+static bool is_void_star_or_tvar(type_t t) {
+  return is_void_star(t) || is_tvar(t);
+}
+
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
@@ -791,7 +794,7 @@ static bool is_poly_field(type_t t, field_name_t f) {
     let field = lookup_field(fs,f);
     if (field == NULL) 
       toc_impos("is_poly_field: bad field %s",*f);
-    return is_void_star(field->type);
+    return is_void_star_or_tvar(field->type);
   default: toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
@@ -865,7 +868,7 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
   //   {e,e,e+sz};
   bool is_string = false;
   switch (e->r) {
-  case &Const_e(String_c(_)): is_string = true; break;
+  case &Const_e({.String_c = _}): is_string = true; break;
   default: break;
   }
   exp_t xexp;
@@ -961,7 +964,8 @@ static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
 // The type allows y to be a general exp, but in practice it is always a var_exp
 static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`r2} > `r) {
   switch ((*x)[0]) {
-  case Rel_n(_): toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
+  case {.Rel_n = _}: 
+    toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
   let &Env{b,c,f,v,t,_} = e;
@@ -1082,8 +1086,8 @@ static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v,
     let r = relns->hd;
     if (r->vd != y) continue;
     switch (r->rop) {
-    case CfFlowInfo::LessNumelts(z) : fallthru(z);
-    case CfFlowInfo::LessEqNumelts(z): if (z == v) return true; else break; 
+    case {.LessNumelts = z} : fallthru(z);
+    case {.LessEqNumelts = z}: if (z == v) return true; else break; 
     default: continue;
     }
   }
@@ -1136,10 +1140,10 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
   inner_loop:
     switch (i->r) {
     case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
-    case &Const_e(Int_c(None,i)): fallthru(i);
-    case &Const_e(Int_c(Signed,i)): 
+    case &Const_e({.Int_c = $(None,i)}): fallthru(i);
+    case &Const_e({.Int_c = $(Signed,i)}): 
       return ((i >= 0) && check_const_array(i+1,x->type));
-    case &Const_e(Int_c(Unsigned,i)): 
+    case &Const_e({.Int_c = $(Unsigned,i)}): 
       return check_const_array(i+1,x->type);
     case &Primop_e(Mod,&List(e1,&List(e2,_))):
       // we have x[e1 % e2]
@@ -1157,8 +1161,8 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
         if (r->vd == y) {
           switch (r->rop) {
             // y < numelts(x)
-          case CfFlowInfo::LessNumelts(z): if (x == z) return true; else break;
-          case CfFlowInfo::LessVar(z,zt):
+          case {.LessNumelts = z}: if (x == z) return true; else break;
+          case {.LessVar = $(z,zt)}:
             // y < z -- 
             // first try to find out z : tag_t<t> and x has type t*{e} and
             // then prove t <= e.  Here's where we need z's original type.
@@ -1194,20 +1198,20 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
               let r = rs->hd;
               if (r->vd == z) 
                 switch (r->rop) {
-                case CfFlowInfo::LessEqNumelts(w): fallthru(w);
-                case CfFlowInfo::LessNumelts(w):
+                case {.LessEqNumelts = w}: fallthru(w);
+                case {.LessNumelts = w}:
                   if (x == w) return true; 
 		  break;
-                case CfFlowInfo::EqualConst(c): 
+                case {.EqualConst = c}: 
                   return check_const_array(c,x->type);
-                case CfFlowInfo::LessVar(w,_):
+                case {.LessVar = $(w,_)}:
                   if (check_leq_size_var(relns, x, w)) return true; 
 		  break;
                 default: break;
                 }
             }
             break;
-          case CfFlowInfo::LessConst(c):
+          case {.LessConst = c}:
             // y < c -- see if c <= numelts(x)
             return check_const_array(c,x->type);
           default: break;
@@ -1521,12 +1525,12 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
 	    bool was_ptr_type = is_pointer_type(e->topt->v);
             exp_to_c(nv,e);
             let ad = lookup_decl_field(ad,f);
-            // cast to void* to vaoid gcc warnings (does it more than needed)
+            // cast to void* to avoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
 	      e = cast_it(void_star_typ(),e);
 	    // more warning avoidance -- watch out if existentials are common
 	    if(has_exists)
-	      e = cast_it(ad->type,e);
+	      e = cast_it(typ_to_c(ad->type),e);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
             break;
@@ -1790,7 +1794,7 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
       let ad = get_known_aggrdecl(info); 
       *f_tag = get_member_offset(ad,f);
       // FIX: we need to get unique names for these damned structs...
-      string_t str = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
+      string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
       *tagged_member_type = strct(new str);
       if (clear_read) *is_read = false;
       return ad->impl->tagged;
@@ -1804,7 +1808,7 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
         let ad = get_known_aggrdecl(info); 
         *f_tag = get_member_offset(ad,f);
         // FIX: we need to get unique names for these damned structs...
-        string_t str = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
+        string_t str = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
         *tagged_member_type = strct(new str);
         if (clear_read) *is_read = false;
         return ad->impl->tagged;
@@ -1853,7 +1857,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     toc_impos("exp_to_c: no type for %s",exp2string(e));
   type_t old_typ = e->topt->v;
   switch (r) {
-  case &Const_e(Null_c):
+  case &Const_e({.Null_c = _}):
     // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime 
     // call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
@@ -2106,6 +2110,18 @@ static void exp_to_c(env_t nv, exp_t e) {
     // update its tag as well as the value.  This is problematic when
     // we have something like e.x += 1 which is both a read and a write
     // of the member.  
+    // See if e1 is a projection on a tagged union member.
+    type_t  e1_old_typ = e1->topt->v;
+    type_t  e2_old_typ = e2->topt->v;
+    int f_tag = 0; // bogus unless e1_tagged_proj
+    type_t tagged_member_struct_type = VoidType; // bogus unless e1_tagged_proj
+    if (is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true)) {
+      exp_to_c(nv,e1); 
+      exp_to_c(nv,e2);
+      e->r = tagged_union_assignop(e1,e1_old_typ,popt,e2,e2_old_typ,f_tag,
+                                   tagged_member_struct_type);
+      return;
+    }
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
     bool is_dyneither = false;
@@ -2117,21 +2133,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
     bool e1_poly    = is_poly_project(e1);
-    type_t  e1_old_typ = e1->topt->v;
-    type_t  e2_old_typ = e2->topt->v;
-    // See if e1 is a projection on a tagged union member.
-    int f_tag = 0; // bogus unless e1_tagged_proj
-    type_t tagged_member_struct_type = VoidType; // bogus unless e1_tagged_proj
-    bool e1_tagged_union_proj = 
-      is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true);
     exp_to_c(nv,e1); 
     exp_to_c(nv,e2);
-    // special case for assignment to a tagged union member. 
-    if (e1_tagged_union_proj) {
-      e->r = tagged_union_assignop(e1,e1_old_typ,popt,e2,e2_old_typ,f_tag,
-                                   tagged_member_struct_type);
-      return;
-    }
     // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
     if(popt != NULL) {
@@ -2238,7 +2241,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(vai->inject) {
 	datatypedecl_t tud;
 	switch(compress(vai->type)) {
-	case &DatatypeType(DatatypeInfo(KnownDatatype(&x),_,_)): tud = x; break;
+	case &DatatypeType(DatatypeInfo({.KnownDatatype=&x},_,_)): tud = x; break;
 	default: toc_impos("toc: unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
@@ -2260,7 +2263,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             let &Datatypefield{qv,tqts,_,_} = injectors->hd;
             type_t field_typ = typ_to_c((*tqts->hd)[1]);
             exp_to_c(nv,arg);
-            if (is_void_star(field_typ))
+            if (is_void_star_or_tvar(field_typ))
               arg = cast_it(field_typ,arg);
             // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
             //   but I doubt it would happen and it causes a lot of gunk. :-(
@@ -2414,7 +2417,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             // if what we're casting is a string constant or an array
             // variable, we can avoid computing the "size" at run-time.
             switch (e1->r) {
-            case &Const_e(String_c(_)):
+            case &Const_e({.String_c = _}):
               arg3 = e2; break;
             default:
               arg3 = fncall_exp(getFunctionRemovePointer(
@@ -2824,7 +2827,7 @@ DynCast:
     if (is_tagged && is_read) {
       e->r = check_tagged_union(e1,typ_to_c(e1typ),ta,f,aggrarrow_exp);
     }
-    if(is_poly)
+    if(is_poly && is_read)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
     break;
   case &Subscript_e(e1,e2):
@@ -2984,7 +2987,7 @@ DynCast:
         let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star(fieldtyp))
+        if (is_void_star_or_tvar(fieldtyp))
           fieldexp->r = 
             cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
         // for tagged unions, must insert tag here
@@ -3005,7 +3008,7 @@ DynCast:
               let &$(field,fieldexp) = fields2->hd;
               let fieldtyp = field->type;
               exp_to_c(nv,fieldexp);
-              if (is_void_star(fieldtyp))
+              if (is_void_star_or_tvar(fieldtyp))
                 fieldexp->r = 
                   cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
               newdles = new List(new $(NULL,fieldexp), newdles);
@@ -3029,7 +3032,7 @@ DynCast:
         let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star(fieldtyp))
+        if (is_void_star_or_tvar(fieldtyp))
           fieldexp->r = cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
       }
       //for (let es = dles; es != NULL; es = es->tl)
@@ -3039,7 +3042,7 @@ DynCast:
     }
     break;
   
-  case &Datatype_e(NULL,tud,tuf) && !tud->is_flat:
+  case &Datatype_e(NULL,tud,tuf):
     qvar_t qv = tuf->name;
     // non-value-carrying constructor
     exp_t tag_exp = tud->is_extensible ? var_exp(qv,DL) : datatype_tag(tud,qv,false);
@@ -3051,17 +3054,10 @@ DynCast:
     let x = temp_var();
     let xexp = var_exp(x,DL);
     exp_t member_exp;
-    if (tud->is_flat) {
-      datatype_ctype = unionq_typ(collapse_qvar_tag(tud->name,"_union"));
-      tag_exp = datatype_tag(tud,tuf->name,true);
-      let &$(_,v) = tuf->name;
-      member_exp = aggrmember_exp(xexp,v,DL);
-    } else {
-      datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
-      tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) : 
-        datatype_tag(tud,tuf->name,true);
-      member_exp = xexp;
-    }
+    datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
+    tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) : 
+      datatype_tag(tud,tuf->name,true);
+    member_exp = xexp;
     let tqts = tuf->typs;
     // we have to do this differently for the toplevel
     if (is_toplevel(nv)) {
@@ -3071,21 +3067,15 @@ DynCast:
 	exp_t cur_e = es->hd;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star(field_typ))
+	if (is_void_star_or_tvar(field_typ))
 	  cur_e = cast_it(field_typ,cur_e);
 	dles = new List(new $(NULL,cur_e),dles);
       }
       dles = new List(new $(NULL,tag_exp),imp_rev(dles));
       e->r = unresolvedmem_exp_r(NULL,dles);
-      if (tud->is_flat) {
-        e->r = cast_it_r(strctq(collapse_qvar_tag(tuf->name,"_struct")),
-                         copy_exp(e));
-      }
     } else {
-      // value-carrying, non-flat constructor
+      // value-carrying constructor
       // ({ struct F x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
-      // flat constructor
-      // ({ union T x; x.F.tag = i; x.F.f1 = e1; ...; x.F.fn = en; x; })
       // Due to GCC bug we can't just use a struct expression
       let rev_assign =
 	new List(assign_stmt(aggrmember_exp(member_exp,tag_sp,DL),tag_exp, DL),
@@ -3094,7 +3084,7 @@ DynCast:
 	exp_t cur_e = es->hd;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star(field_typ))
+	if (is_void_star_or_tvar(field_typ))
 	  cur_e = cast_it(field_typ,cur_e);
 	let a = assign_stmt(aggrmember_exp(member_exp,fieldname(i), DL),
 			    cur_e,DL);
@@ -3149,7 +3139,7 @@ DynCast:
     } else {
       let nelts = sizeoftyp_exp(t_c,DL);
       switch (num_elts->r) {
-      case &Const_e(Int_c(_,1)): break;
+      case &Const_e({.Int_c = $(_,1)}): break;
       default: nelts = times_exp(nelts,num_elts,DL); break;
       }
       if (rgnopt != NULL && !no_regions) {
@@ -3204,7 +3194,20 @@ DynCast:
     e->r = fncall_exp_r(swap_fn,list(address_exp(e1,DL),
 				     address_exp(e2,DL)));
     break;
-
+  case &Tagcheck_e(e1,f):
+    // e1.f.tag == f_tag
+    let e1_typ = compress(e1->topt->v);
+    exp_to_c(nv,e1);
+    switch (e1_typ) {
+    case &AggrType(AggrInfo({.KnownAggr = &ad}, _)):
+      let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
+      let e1_f = aggrmember_exp(e1,f,DL);
+      let e1_f_tag = aggrmember_exp(e1_f,tag_sp,DL);
+      e->r = eq_exp(e1_f_tag,f_tag,DL)->r;
+      break;
+    default: toc_impos("non-aggregate type in tagcheck");
+    }
+    break;
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
   case &CompoundLit_e(_,_):   unimp("compoundlit");
@@ -3286,7 +3289,7 @@ xlate_pat(env_t<`rgn> nv,
     s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
     break;
 
-  case &Datatype_p(tud,tuf,NULL,_) && !tud->is_flat:
+  case &Datatype_p(tud,tuf,NULL,_):
     // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
     // Note: This should be correct for datatype and xdatatype!
     exp_t cmp_exp;
@@ -3299,7 +3302,7 @@ xlate_pat(env_t<`rgn> nv,
     s = if_neq_stmt(r, cmp_exp, fail_stmt);
     break;
 
-  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL:
     // when ps is p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
@@ -3322,7 +3325,7 @@ xlate_pat(env_t<`rgn> nv,
       let t2  = p2->topt->v;
       let t2c = typ_to_c(t2);
       let arrow_exp = aggrarrow_exp(rcast, fieldname(cnt), DL);
-      if(is_void_star(typ_to_c(tuf_typ)))
+      if(is_void_star_or_tvar(typ_to_c(tuf_typ)))
 	arrow_exp = cast_it(t2c, arrow_exp);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL), arrow_exp,
@@ -3359,33 +3362,6 @@ xlate_pat(env_t<`rgn> nv,
     }
     break;
 
-  case &Datatype_p(tud,tuf,ps,_) && tud->is_flat: 
-    // check that the tag matches and then check the sub-patterns.
-    let &$(_,field_name) = tuf->name;
-    r = aggrmember_exp(r,field_name,DL);
-    path = aggrmember_exp(path,field_name,DL);
-    s = ifthenelse_stmt(neq_exp(aggrmember_exp(path,tag_sp,DL),
-                                datatype_tag(tud,tuf->name,true),DL),
-                        fail_stmt,skip_stmt_dl(),DL);
-    int cnt = 1;
-    for(; ps != NULL; ps = ps->tl, ++cnt) {
-      let p2  = ps->hd;
-      if(p2->r == Wild_p)
-	continue;
-      let v   = temp_var();
-      let t2  = p2->topt->v;
-      decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                             aggrmember_exp(path,fieldname(cnt),DL),
-			     p2,&fail_stmt,fail_stmt,decls);
-      nv = result[0];
-      decls = result[1];
-      let s2 = result[2];
-      let s3 = assign_stmt(var_exp(v,DL),
-			   aggrmember_exp(r,fieldname(cnt),DL),DL);
-      s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
-    }
-    break;
   case &Datatype_p(_,_,ps,_): fallthru(ps); // okay for xdatatype too
   case &Tuple_p(ps,_):
     // given the pattern $(p1,p2,...,pn)
@@ -3414,35 +3390,66 @@ xlate_pat(env_t<`rgn> nv,
       s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
     }
     break;
-  case &Aggr_p(AggrInfo(info,_),_,dlps,_):
+  case &Aggr_p(NULL,...):
+    toc_impos("unresolved aggregate pattern!");
+  case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
     let ad = get_known_aggrdecl(info);
-    // similar to translation of tuple pattern
-    s = skip_stmt_dl();
-    for (; dlps != NULL; dlps = dlps->tl) {
-      let tup = dlps->hd;
-      let p2  = (*tup)[1];
-      if(p2->r == Wild_p)
-	continue;
-      _ f;
-      switch ((*tup)[0]->hd) {
-      case &FieldName(f2): f=f2; break;
-      default: throw Match_error; // FIX:  assumes one field name designator
+    if (ad->impl->tagged) {
+      // tagged union pattern:  Foo{.f = pat}
+      // if (r.f.tag != f_tag) goto fail_lab;
+      let &$(designators,pat) = dlps->hd;
+      field_name_t f;
+      switch (designators->hd) {
+      case &FieldName(fn): f = fn; break;
+      default: toc_impos("no field name in tagged union pattern");
       }
-      let v   = temp_var();
-      let t2  = p2->topt->v;
+      let v = temp_var();
+      let t2 = pat->topt->v;
       let t2c = typ_to_c(t2);
       decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                             aggrmember_exp(path,f,DL),p2,
-                             &fail_stmt,fail_stmt,decls);
+      let pexp = aggrmember_exp(aggrmember_exp(path,f,DL),val_sp,DL);
+      let memexp = aggrmember_exp(aggrmember_exp(r,f,DL),val_sp,DL);
+      memexp = cast_it(t2c, memexp);
+      pexp = cast_it(t2c,pexp);
+      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),pexp,pat,&fail_stmt,
+                             fail_stmt,decls);
       nv = result[0];
       decls = result[1];
-      let memexp = aggrmember_exp(r,f,DL);
-      if(is_void_star(lookup_field(ad->impl->fields,f)->type))
-	memexp = cast_it(t2c, memexp);
       let s2 = result[2];
-      let s3 = assign_stmt(var_exp(v,DL), memexp, DL);
-      s = seq_stmt(s, seq_stmt(s3,s2,DL), DL);
+      let s4 = if_neq_stmt(aggrmember_exp(aggrmember_exp(r,f,DL),tag_sp,DL),
+                           signed_int_exp(get_member_offset(ad,f),DL),
+                           fail_stmt);
+      let s3 = assign_stmt(var_exp(v,DL),memexp,DL);
+      s = seq_stmt(s4,seq_stmt(s3,s2,DL),DL);
+    } else {
+      // similar to translation of tuple pattern
+      s = skip_stmt_dl();
+      for (; dlps != NULL; dlps = dlps->tl) {
+        let tup = dlps->hd;
+        let p2  = (*tup)[1];
+        if(p2->r == Wild_p)
+          continue;
+        _ f;
+        switch ((*tup)[0]->hd) {
+        case &FieldName(f2): f=f2; break;
+        default: throw Match_error; // FIX:  assumes one field name designator
+        }
+        let v   = temp_var();
+        let t2  = p2->topt->v;
+        let t2c = typ_to_c(t2);
+        decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
+        let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
+                               aggrmember_exp(path,f,DL),p2,
+                               &fail_stmt,fail_stmt,decls);
+        nv = result[0];
+        decls = result[1];
+        let memexp = aggrmember_exp(r,f,DL);
+        if(is_void_star_or_tvar(lookup_field(ad->impl->fields,f)->type))
+          memexp = cast_it(t2c, memexp);
+        let s2 = result[2];
+        let s3 = assign_stmt(var_exp(v,DL), memexp, DL);
+        s = seq_stmt(s, seq_stmt(s3,s2,DL), DL);
+      }
     }
     break;
 
@@ -3513,7 +3520,7 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
 
 static bool is_mixed_datatype(type_t t) {
   switch (compress(t)) {
-  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),...}) && !tud->is_flat:
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},...}):
     bool seen_novalue = false;
     bool seen_value = false;
     for (let fs = tud->fields->v; fs; fs = fs->tl) {
@@ -3532,7 +3539,7 @@ static bool is_mixed_datatype(type_t t) {
 static bool no_tag_test(pat_t p) {
   switch (p->r) {
   case &Var_p(_,p): return no_tag_test(p);
-  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL:
     return false;
   default: return true;
   }
@@ -4083,44 +4090,54 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
       } else
       seen_defn_before = true;
     }
-    ad->sc   = Public; // gcc warns if we have Extern or Static here
-    ad->tvs  = NULL;
-    if(ad->impl != NULL) {
-      ad->impl->exist_vars = NULL;
-      ad->impl->rgn_po     = NULL;
-      if (seen_defn_before)
-        ad->impl = NULL;
-      else
-        for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
-          // JGM: I'm trying to get rid of warnings when we assign "const"
-          // locations...
-          fields->hd->tq = mt_tq;
-          fields->hd->type = typ_to_c_array(fields->hd->type);
-          // This is a tagged union -- rewrite the member type from T
-          // to struct _union_Foo_f {int tag; T value;} where Foo is the name
-          // of the union, and f is the name of the member.
-          if (ad->impl->tagged) {
-            let T = fields->hd->type;
-            let f = fields->hd->name;
-            string_t s = aprintf("_union_%s_%s",qvar2string(ad->name),*f);
-            var_t str = new s;
-            let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL);
-            let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL);
-            let fs = list(tag_field,value_field);
-            let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
-                                   .name = new $(Loc_n,str), .tvs = NULL,
-                                  .impl = new AggrdeclImpl(NULL,NULL,fs,false),
-                                   .attributes = NULL};
-            result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
-            fields->hd->type = strct(str);
-          }
+    aggrdecl_t new_ad = new Aggrdecl {.kind = ad->kind,
+                                      .sc = Public,
+                                      .name = ad->name,
+                                      .tvs = NULL,
+                                      .impl = NULL,
+                                      .attributes = ad->attributes};
+    if(ad->impl != NULL && !seen_defn_before) {
+      new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
+                                        .rgn_po = NULL,
+                                        .fields = NULL,
+                                        .tagged = false };
+      list_t<aggrfield_t> new_fields = NULL;
+      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
+        // JGM: I'm trying to get rid of warnings when we assign "const"
+        // locations...
+        let old_field = fields->hd;
+        let new_field = new Aggrfield{.name = old_field->name,
+                                      .tq = mt_tq,
+                                      .type = typ_to_c_array(old_field->type),
+                                      .width = old_field->width,
+                                      .attributes = old_field->attributes};
+        // If this is a tagged union, rewrite the member type from T
+        // to struct _union_Foo_f {int tag; T value;} where Foo is the name
+        // of the union, and f is the name of the member.
+        if (ad->impl->tagged) {
+          let T = new_field->type;
+          let f = new_field->name;
+          string_t s = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
+          var_t str = new s;
+          let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL);
+          let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL);
+          let fs = list(tag_field,value_field);
+          let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
+                                 .name = new $(Loc_n,str), .tvs = NULL,
+                                 .impl = new AggrdeclImpl(NULL,NULL,fs,false),
+                                 .attributes = NULL};
+          result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
+          new_field->type = strct(str);
         }
+        new_fields = new List(new_field,new_fields);
+      }
+      new_ad->impl->fields = List::imp_rev(new_fields);
     }
+    result_decls = new List(new Decl(new Aggr_d(new_ad),DL),result_decls);
   }
 }
 
 // datatype declarations -- tricky
-// Non-flat case:
 // For "datatype foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
 //   struct Baz_struct {
@@ -4144,19 +4161,6 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //     of what we've seen so far.  And we make the globals static so that
 //     extern and what not is only a link-checker thing.  Unfortunately,
 //     the static trick doesn't work for xdatatype, which uses the addresses.
-// 
-// For flat datatypes, "datatype Foo {Bar, Blah, Baz(t1,t2,t3),Baf(t4,t5)}"
-// we generate:
-//    struct Bar { int tag; };
-//    struct Blah { int tag; };
-//    struct Baz { int tag; t1 f1; t2 f2; t3 f3; };
-//    struct Baf { int tag; t4 f1; t5 f2; };
-//    union Foo {
-//      struct Bar Bar;
-//      struct Blah Blah;
-//      struct Baz  Baz;
-//      struct Baf  Baf;
-//    };
 static void datatypedecl_to_c(datatypedecl_t tud) {
   let TocState{.dyn = dyn, .datatypes_so_far = datatypes_so_far, ...} = *toc_state;
   region d = open(dyn); {
@@ -4165,14 +4169,11 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
       return;
     *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
   }
-  // list of anonymous struct fields used for flattened datatypes
-  list_t<aggrfield_t> flat_structs = NULL;
   
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     datatypefield_t f = fields->hd;
-    if (f->typs != NULL || tud->is_flat) {
-      // compute the fields for the struct, adding in a tag field if this
-      // isn't a flat datatype
+    if (f->typs != NULL) {
+      // compute the fields for the struct, adding in a tag field
       let fs = NULL;
       int i  = 1;
       for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
@@ -4190,24 +4191,7 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
                      .impl = new AggrdeclImpl(NULL,NULL,fs,false),
                      .attributes = NULL};
       result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
-      if (tud->is_flat) {
-        let field = new Aggrfield((*f->name)[1], mt_tq,
-                                  new AggrType(AggrInfo(KnownAggr(new ad), NULL)),
-                                  NULL,NULL);
-        flat_structs = new List(field,flat_structs);
-      }
     }
-  }
-  if (tud->is_flat) {
-    // make an anonymous union out of the flat_structs
-    flat_structs = List::imp_rev(flat_structs);
-    let ad = 
-      new Aggrdecl{.kind = UnionA, .sc = Public, 
-                   .name = collapse_qvar_tag(tud->name,"_union"),
-                   .tvs = NULL,
-                   .impl = new AggrdeclImpl(NULL,NULL,flat_structs,false),
-                   .attributes = NULL};
-    result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
   }
 }
 
@@ -4437,6 +4421,7 @@ static void exptypes_to_c(exp_t e) {
   case &Instantiate_e(_,_): fallthru;
   case &New_e(_,_):         fallthru;
   case &Valueof_e(_):       fallthru;
+  case &Tagcheck_e(...):    fallthru;
   case &Gentyp_e(_,_):      
     Tcutil::terr(e->loc,"Cyclone expression within C code");
     break;
@@ -4559,7 +4544,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       toc_impos("alias decl at toplevel");
     case &Aggr_d(sd):
       aggrdecl_to_c(sd);
-      result_decls = new List(d,result_decls);
+      // result_decls = new List(d,result_decls);
       break;
     case &Datatype_d(tud):
       if(tud->is_extensible)

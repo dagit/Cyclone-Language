@@ -42,8 +42,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t); // needed due to mutual recursion
 
 static cnst_t promote_const(cnst_t cn) {
   switch (cn) {
-  case Char_c(sn,c):  return Int_c(sn,(int)c);
-  case Short_c(sn,s): return Int_c(sn,(int)s); 
+  case {.Char_c = $(sn,c)}:  return Int_c(sn,(int)c);
+  case {.Short_c = $(sn,s)}: return Int_c(sn,(int)s); 
   default:             return cn;
   }
 }
@@ -53,7 +53,7 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
   if(!known)
     return $(0,false);
   switch (promote_const(cn)) {
-  case Int_c(_,i): return $((unsigned int)i,true);
+  case {.Int_c = $(_,i)}: return $((unsigned int)i,true);
   default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
   }
 }
@@ -63,9 +63,9 @@ static $(bool,bool) eval_const_bool_exp(exp_t e) {
   if(!known)
     return $(false,false);
   switch (promote_const(cn)) {
-  case Int_c(_,b):      return $(b != 0, true);
-  case LongLong_c(_,b): return $(b != 0, true);
-  case Null_c:           return $(false,  false);
+  case {.Int_c = $(_,b)}:       return $(b != 0, true);
+  case {.LongLong_c = $(_,b)}:  return $(b != 0, true);
+  case {.Null_c = _}:           return $(false,  false);
   default: terr(e->loc,"expecting bool"); return $(false, false);
   }
 }
@@ -76,10 +76,10 @@ static $(cnst_t,bool) eval_const_unprimop(primop_t p,exp_t e) {
     return $(cn,false);
   switch ($(p,cn)) {
   case $(Plus,_): break;
-  case $(Minus,  Int_c(s,i)): cn = Int_c(Signed,  -i); break;
-  case $(Bitnot, Int_c(s,i)): cn = Int_c(Unsigned,~i); break;
-  case $(Not,    Int_c(_,i)): cn = Int_c(Signed,  i == 0 ? 1 : 0); break;
-  case $(Not,    Null_c):      cn = Int_c(Signed,  1); break;
+  case $(Minus,  {.Int_c = $(s,i)}): cn = Int_c(Signed,  -i); break;
+  case $(Bitnot, {.Int_c = $(s,i)}): cn = Int_c(Unsigned,~i); break;
+  case $(Not,    {.Int_c = $(_,i)}): cn = Int_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    {.Null_c = _}):      cn = Int_c(Signed,  1); break;
   default: terr(e->loc,"bad constant expression"); break;
   }
   return $(cn,true);
@@ -96,11 +96,11 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   sign_t s1, s2;
   int    i1, i2;
   switch (cn1) {
-  case Int_c(x,y): s1 = x; i1 = y; break;
+  case {.Int_c = $(x,y)}: s1 = x; i1 = y; break;
   default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
   }
   switch (cn2) {
-  case Int_c(x,y): s2 = x; i2 = y; break;
+  case {.Int_c = $(x,y)}: s2 = x; i2 = y; break;
   default: terr(e2->loc, "bad constant expression"); return $(cn1,true);
   }
   switch (p) {
@@ -222,15 +222,15 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     ans = eval_const_exp(e2);
     if(ans[1])
       switch ($(compress(t),ans[0])) {
-      case $(&IntType(sn,sz),Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),Int_c(sn2,x)): 
+      case $(&IntType(sn,sz),{.Char_c = $(sn2,x)}):  fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),{.Short_c = $(sn2,x)}): fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),{.Int_c = $(sn2,x)}): 
 	if(sn != sn2)
 	  ans[0] = Int_c(sn,x); 
 	break;
-      case $(&TagType(it),Char_c(sn2,x)):  fallthru(it,sn2,x);
-      case $(&TagType(it),Short_c(sn2,x)): fallthru(it,sn2,x);
-      case $(&TagType(it),Int_c(sn2,x)): 
+      case $(&TagType(it),{.Char_c = $(sn2,x)}):  fallthru(it,sn2,x);
+      case $(&TagType(it),{.Short_c = $(sn2,x)}): fallthru(it,sn2,x);
+      case $(&TagType(it),{.Int_c = $(sn2,x)}): 
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
 	unify(it, new ValueofType(const_exp(ans[0],NULL)));
@@ -379,7 +379,7 @@ bool okay_szofarg(type_t t) {
   case &Evar(&Opt{BoxKind},_,_,_): return true; // Possible?
   case &Evar(_,_,_,_): return false;
   case &DatatypeType(_): return true;
-  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(_,tuf),_}):
+  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(_,tuf)},_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -404,8 +404,8 @@ bool okay_szofarg(type_t t) {
   case &AggrType(AggrInfo(info,_)):
     _ ad;
     switch(info) {
-    case UnknownAggr(_,_): impos("szof on unchecked StructType");
-    case KnownAggr(&ad2): ad = ad2;
+    case {.UnknownAggr = _}: impos("szof on unchecked StructType");
+    case {.KnownAggr = &ad2}: ad = ad2;
     }
     if(ad->impl == NULL)
       return false;

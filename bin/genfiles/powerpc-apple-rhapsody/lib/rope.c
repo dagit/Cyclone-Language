@@ -735,38 +735,37 @@ f1;};struct Cyc_Rope_Rope_node{void*v;};struct Cyc_Rope_Rope_node*Cyc_Rope_from_
 struct _dyneither_ptr s);struct Cyc_Rope_Rope_node*Cyc_Rope_from_string(struct
 _dyneither_ptr s){struct Cyc_Rope_String_rope_struct*_tmp20;struct Cyc_Rope_String_rope_struct
 _tmp1F;struct Cyc_Rope_Rope_node*_tmp1E;return(_tmp1E=_cycalloc(sizeof(*_tmp1E)),((
-_tmp1E->v=(void*)((void*)((_tmp20=_cycalloc(sizeof(*_tmp20)),((_tmp20[0]=((
-_tmp1F.tag=0,((_tmp1F.f1=s,_tmp1F)))),_tmp20))))),_tmp1E)));}struct Cyc_Rope_Rope_node*
-Cyc_Rope_concat(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2);struct
-Cyc_Rope_Rope_node*Cyc_Rope_concat(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*
-r2){struct Cyc_Rope_Array_rope_struct*_tmp2A;struct Cyc_Rope_Rope_node**_tmp29;
-struct Cyc_Rope_Array_rope_struct _tmp28;struct Cyc_Rope_Rope_node*_tmp27;return(
-_tmp27=_cycalloc(sizeof(*_tmp27)),((_tmp27->v=(void*)((void*)((_tmp2A=_cycalloc(
-sizeof(*_tmp2A)),((_tmp2A[0]=((_tmp28.tag=1,((_tmp28.f1=_tag_dyneither(((_tmp29=
-_cycalloc(sizeof(struct Cyc_Rope_Rope_node*)* 2),((_tmp29[0]=r1,((_tmp29[1]=r2,
-_tmp29)))))),sizeof(struct Cyc_Rope_Rope_node*),2),_tmp28)))),_tmp2A))))),_tmp27)));}
-struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct _dyneither_ptr rs);struct Cyc_Rope_Rope_node*
-Cyc_Rope_concata(struct _dyneither_ptr rs){struct Cyc_Rope_Array_rope_struct*_tmp30;
-struct Cyc_Rope_Array_rope_struct _tmp2F;struct Cyc_Rope_Rope_node*_tmp2E;return(
-_tmp2E=_cycalloc(sizeof(*_tmp2E)),((_tmp2E->v=(void*)((void*)((_tmp30=_cycalloc(
-sizeof(*_tmp30)),((_tmp30[0]=((_tmp2F.tag=1,((_tmp2F.f1=rs,_tmp2F)))),_tmp30))))),
-_tmp2E)));}struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(struct Cyc_List_List*l);
-static void _tmp37(struct Cyc_List_List**l,unsigned int*_tmp36,unsigned int*_tmp35,
-struct Cyc_Rope_Rope_node***_tmp33){for(*_tmp36=0;*_tmp36 < *_tmp35;(*_tmp36)++){
-struct Cyc_Rope_Rope_node*_tmp31;(*_tmp33)[*_tmp36]=((_tmp31=(struct Cyc_Rope_Rope_node*)((
-struct Cyc_List_List*)_check_null(*l))->hd,((*l=(*l)->tl,_tmp31))));}}struct Cyc_Rope_Rope_node*
-Cyc_Rope_concatl(struct Cyc_List_List*l){struct Cyc_Rope_Array_rope_struct*_tmp4C;
-unsigned int _tmp4B;struct Cyc_Rope_Rope_node**_tmp4A;struct _dyneither_ptr _tmp49;
-unsigned int _tmp48;unsigned int _tmp47;struct Cyc_Rope_Array_rope_struct _tmp46;
-struct Cyc_Rope_Rope_node*_tmp45;return(_tmp45=_cycalloc(sizeof(*_tmp45)),((
-_tmp45->v=(void*)((void*)((_tmp4C=_cycalloc(sizeof(*_tmp4C)),((_tmp4C[0]=((
-_tmp46.tag=1,((_tmp46.f1=((_tmp4B=(unsigned int)((int(*)(struct Cyc_List_List*x))
-Cyc_List_length)(l),((_tmp4A=(struct Cyc_Rope_Rope_node**)_cycalloc(_check_times(
-sizeof(struct Cyc_Rope_Rope_node*),_tmp4B)),((_tmp49=_tag_dyneither(_tmp4A,
-sizeof(struct Cyc_Rope_Rope_node*),_tmp4B),((((_tmp48=_tmp4B,_tmp37(& l,& _tmp47,&
-_tmp48,& _tmp4A))),_tmp49)))))))),_tmp46)))),_tmp4C))))),_tmp45)));}unsigned int
-Cyc_Rope_length(struct Cyc_Rope_Rope_node*r);unsigned int Cyc_Rope_length(struct
-Cyc_Rope_Rope_node*r){void*_tmp11=(void*)r->v;struct _dyneither_ptr _tmp12;struct
+_tmp1E->v=(void*)((_tmp20=_cycalloc(sizeof(*_tmp20)),((_tmp20[0]=((_tmp1F.tag=0,((
+_tmp1F.f1=s,_tmp1F)))),_tmp20)))),_tmp1E)));}struct Cyc_Rope_Rope_node*Cyc_Rope_concat(
+struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2);struct Cyc_Rope_Rope_node*
+Cyc_Rope_concat(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){struct
+Cyc_Rope_Array_rope_struct*_tmp2A;struct Cyc_Rope_Rope_node**_tmp29;struct Cyc_Rope_Array_rope_struct
+_tmp28;struct Cyc_Rope_Rope_node*_tmp27;return(_tmp27=_cycalloc(sizeof(*_tmp27)),((
+_tmp27->v=(void*)((_tmp2A=_cycalloc(sizeof(*_tmp2A)),((_tmp2A[0]=((_tmp28.tag=1,((
+_tmp28.f1=_tag_dyneither(((_tmp29=_cycalloc(sizeof(struct Cyc_Rope_Rope_node*)* 2),((
+_tmp29[0]=r1,((_tmp29[1]=r2,_tmp29)))))),sizeof(struct Cyc_Rope_Rope_node*),2),
+_tmp28)))),_tmp2A)))),_tmp27)));}struct Cyc_Rope_Rope_node*Cyc_Rope_concata(
+struct _dyneither_ptr rs);struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct
+_dyneither_ptr rs){struct Cyc_Rope_Array_rope_struct*_tmp30;struct Cyc_Rope_Array_rope_struct
+_tmp2F;struct Cyc_Rope_Rope_node*_tmp2E;return(_tmp2E=_cycalloc(sizeof(*_tmp2E)),((
+_tmp2E->v=(void*)((_tmp30=_cycalloc(sizeof(*_tmp30)),((_tmp30[0]=((_tmp2F.tag=1,((
+_tmp2F.f1=rs,_tmp2F)))),_tmp30)))),_tmp2E)));}struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(
+struct Cyc_List_List*l);static void _tmp37(struct Cyc_List_List**l,unsigned int*
+_tmp36,unsigned int*_tmp35,struct Cyc_Rope_Rope_node***_tmp33){for(*_tmp36=0;*
+_tmp36 < *_tmp35;(*_tmp36)++){struct Cyc_Rope_Rope_node*_tmp31;(*_tmp33)[*_tmp36]=((
+_tmp31=(struct Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(*l))->hd,((*
+l=(*l)->tl,_tmp31))));}}struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(struct Cyc_List_List*
+l){struct Cyc_Rope_Array_rope_struct*_tmp4C;unsigned int _tmp4B;struct Cyc_Rope_Rope_node**
+_tmp4A;struct _dyneither_ptr _tmp49;unsigned int _tmp48;unsigned int _tmp47;struct
+Cyc_Rope_Array_rope_struct _tmp46;struct Cyc_Rope_Rope_node*_tmp45;return(_tmp45=
+_cycalloc(sizeof(*_tmp45)),((_tmp45->v=(void*)((_tmp4C=_cycalloc(sizeof(*_tmp4C)),((
+_tmp4C[0]=((_tmp46.tag=1,((_tmp46.f1=((_tmp4B=(unsigned int)((int(*)(struct Cyc_List_List*
+x))Cyc_List_length)(l),((_tmp4A=(struct Cyc_Rope_Rope_node**)_cycalloc(
+_check_times(sizeof(struct Cyc_Rope_Rope_node*),_tmp4B)),((_tmp49=_tag_dyneither(
+_tmp4A,sizeof(struct Cyc_Rope_Rope_node*),_tmp4B),((((_tmp48=_tmp4B,_tmp37(& l,&
+_tmp47,& _tmp48,& _tmp4A))),_tmp49)))))))),_tmp46)))),_tmp4C)))),_tmp45)));}
+unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*r);unsigned int Cyc_Rope_length(
+struct Cyc_Rope_Rope_node*r){void*_tmp11=r->v;struct _dyneither_ptr _tmp12;struct
 _dyneither_ptr _tmp13;_LL1: if(*((int*)_tmp11)!= 0)goto _LL3;_tmp12=((struct Cyc_Rope_String_rope_struct*)
 _tmp11)->f1;_LL2: return(unsigned int)Cyc_strlen((struct _dyneither_ptr)_tmp12);
 _LL3: if(*((int*)_tmp11)!= 1)goto _LL0;_tmp13=((struct Cyc_Rope_Array_rope_struct*)
@@ -775,23 +774,22 @@ sizeof(struct Cyc_Rope_Rope_node*));{unsigned int i=0;for(0;i < sz;++ i){total +
 struct Cyc_Rope_Rope_node**)_tmp13.curr)[(int)i]);}}return total;}_LL0:;}static
 unsigned int Cyc_Rope_flatten_it(struct _dyneither_ptr s,unsigned int i,struct Cyc_Rope_Rope_node*
 r);static unsigned int Cyc_Rope_flatten_it(struct _dyneither_ptr s,unsigned int i,
-struct Cyc_Rope_Rope_node*r){void*_tmp14=(void*)r->v;struct _dyneither_ptr _tmp15;
-struct _dyneither_ptr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct
-Cyc_Rope_String_rope_struct*)_tmp14)->f1;_LL7: {unsigned long _tmp17=Cyc_strlen((
-struct _dyneither_ptr)_tmp15);Cyc_strncpy(_dyneither_ptr_decrease_size(
-_dyneither_ptr_plus(s,sizeof(char),(int)i),sizeof(char),1),(struct _dyneither_ptr)
-_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((
-struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;_LL9: {unsigned int _tmp18=
-_get_dyneither_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{int j=0;for(0;j < 
-_tmp18;++ j){i=Cyc_Rope_flatten_it(s,i,*((struct Cyc_Rope_Rope_node**)
-_check_dyneither_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),j)));}}
-return i;}_LL5:;}struct _dyneither_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*
+struct Cyc_Rope_Rope_node*r){void*_tmp14=r->v;struct _dyneither_ptr _tmp15;struct
+_dyneither_ptr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)
+_tmp14)->f1;_LL7: {unsigned long _tmp17=Cyc_strlen((struct _dyneither_ptr)_tmp15);
+Cyc_strncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(s,sizeof(char),(int)
+i),sizeof(char),1),(struct _dyneither_ptr)_tmp15,_tmp17);return i + _tmp17;}_LL8:
+if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)
+_tmp14)->f1;_LL9: {unsigned int _tmp18=_get_dyneither_size(_tmp16,sizeof(struct
+Cyc_Rope_Rope_node*));{int j=0;for(0;j < _tmp18;++ j){i=Cyc_Rope_flatten_it(s,i,*((
+struct Cyc_Rope_Rope_node**)_check_dyneither_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),
+j)));}}return i;}_LL5:;}struct _dyneither_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*
 r);struct _dyneither_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*r){struct
 _dyneither_ptr s=Cyc_Core_new_string(Cyc_Rope_length(r)+ 1);Cyc_Rope_flatten_it(s,
 0,r);{struct Cyc_Rope_String_rope_struct _tmp4F;struct Cyc_Rope_String_rope_struct*
-_tmp4E;(void*)(r->v=(void*)((void*)((_tmp4E=_cycalloc(sizeof(*_tmp4E)),((_tmp4E[
-0]=((_tmp4F.tag=0,((_tmp4F.f1=(struct _dyneither_ptr)s,_tmp4F)))),_tmp4E))))));}
-return s;}int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2);
-int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){return
-Cyc_strcmp((struct _dyneither_ptr)Cyc_Rope_to_string(r1),(struct _dyneither_ptr)
-Cyc_Rope_to_string(r2));}
+_tmp4E;r->v=(void*)((_tmp4E=_cycalloc(sizeof(*_tmp4E)),((_tmp4E[0]=((_tmp4F.tag=
+0,((_tmp4F.f1=(struct _dyneither_ptr)s,_tmp4F)))),_tmp4E))));}return s;}int Cyc_Rope_cmp(
+struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2);int Cyc_Rope_cmp(struct
+Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){return Cyc_strcmp((struct
+_dyneither_ptr)Cyc_Rope_to_string(r1),(struct _dyneither_ptr)Cyc_Rope_to_string(
+r2));}

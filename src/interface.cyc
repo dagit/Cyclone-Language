@@ -22,7 +22,7 @@
 #include <dict.h>
 #include <string.h>
 #include <position.h>
-#include <marshal.h>
+//#include <marshal.h>
 #include "absynpp.h"
 #include "tc.h"
 #include "parse.h"
@@ -112,7 +112,7 @@ i_t final() {
   i->exports = Dict::insert(i->exports, NULL, ie1);
   // add requirement of function main
   let ie2 = new_ienv();
-  qvar_t qmain = new $(Abs_n(NULL), new ((string_t)"main"));
+  qvar_t qmain = new $(Nmspace{.Abs_n = NULL}, new ((string_t)"main"));
   let vd = new_vardecl(qmain,
 		       function_typ(NULL, NULL, sint_typ,
 				    new List(new $(NULL, empty_tqual(NULL), uint_typ),
@@ -260,9 +260,9 @@ static bool check_public_vardecl(aenv_t ae, seen_t seen, vardecl_t d) {
   return check_public_type(ae, seen, "variable", d->name, d->type);
 }
 
-static list_t<var_t> get_abs_ns(datatype Nmspace ns) {
+static list_t<var_t> get_abs_ns(nmspace_t ns) {
   switch (ns) {
-  case Abs_n(l): return l;
+  case {.Abs_n = l}: return l;
   default: invalid_arg("get_abs_ns");
   }
 }
@@ -313,7 +313,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &DatatypeType(DatatypeInfo(KnownDatatype(&tud0),targs,_)):
+  case &DatatypeType(DatatypeInfo({.KnownDatatype = &tud0},targs,_)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     datatypedecl_t tud;
@@ -331,7 +331,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     return check_public_type_list(ae, seen, obj, name, identity, targs)
       && check_public_datatypedecl(ae, seen, tud);
 
-  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud0,tuf0), targs}):
+  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud0,tuf0)}, targs}):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     datatypedecl_t tud;
@@ -464,8 +464,8 @@ static void
 extract_xdatatypefielddecl(i_t i, datatypedecl_t d, datatypefield_t f) {
   let ns = NULL;
   switch ((*(f->name))[0]) {
-  case Rel_n(l): fallthru(l);
-  case Abs_n(l): ns = l; break;
+  case {.Rel_n = l}: fallthru(l);
+  case {.Abs_n = l}: ns = l; break;
   default: break;
   }
   _ dict;
@@ -1214,74 +1214,17 @@ i_t parse(FILE @ f) {
 }
 
 /* ------ binary loading and saving ------ */
-}
 
-using Marshal;
-using Typerep;
-
-//  static datatype Typerep::Typestruct i_t_rep = gen(i_t);
-
-extern datatype Typestruct.Struct struct_Absyn_Aggrdecl_rep;
-static datatype Typestruct.ThinPtr aggrdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Aggrdecl_rep);
-datatype Typestruct aggrdecl_rep = (datatype Typestruct)&aggrdecl_p;
-
-extern datatype Typestruct.Struct struct_Absyn_Datatypedecl_rep;
-static datatype Typestruct.ThinPtr datatypedecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Datatypedecl_rep);
-datatype Typestruct datatypedecl_rep = (datatype Typestruct)&datatypedecl_p;
-
-extern datatype Typestruct.Struct struct_Absyn_Enumdecl_rep;
-static datatype Typestruct.ThinPtr enumdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Enumdecl_rep);
-datatype Typestruct enumdecl_rep = (datatype Typestruct)&enumdecl_p;
-
-extern datatype Typestruct.Struct struct_Absyn_Typedefdecl_rep;
-static datatype Typestruct.ThinPtr typedefdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Typedefdecl_rep);
-datatype Typestruct typedefdecl_rep = (datatype Typestruct)&typedefdecl_p;
-
-extern datatype Typestruct.Struct struct_Absyn_Vardecl_rep;
-static datatype Typestruct.ThinPtr vardecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Vardecl_rep);
-datatype Typestruct vardecl_rep = (datatype Typestruct)&vardecl_p;
-
-extern datatype Typestruct.Struct struct_Absyn_Datatypefield_rep;
-static datatype Typestruct.ThinPtr datatypefield_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Datatypefield_rep);
-datatype Typestruct datatypefield_rep = (datatype Typestruct)&datatypefield_p;
-
-namespace Interface {
-
-#define MARSHALTYP(X,R)							\
-static addr_index_t write_##X(addr_index_t env, FILE @fp, X decl) {	\
-  return write_type_base(R,env,fp,decl);				\
-}
-
-MARSHALTYP(aggrdecl_t,aggrdecl_rep)
-MARSHALTYP(datatypedecl_t,datatypedecl_rep)
-MARSHALTYP(enumdecl_t,enumdecl_rep)
-MARSHALTYP(typedefdecl_t,typedefdecl_rep)
-MARSHALTYP(vardecl_t,vardecl_rep)
-MARSHALTYP(datatypefield_t,datatypefield_rep)
-  /* XXX need one for var_t's and for list_t<var_t>'s */
-
-/* construct xdatatypefielddecl marshaller by hand from its components since
-   we can't do it automatically (due to parts of the rep structure being
-   generated already by absyn.h) */
-static addr_index_t write_xdatatypefielddecl_t(addr_index_t env, FILE @fp,
-					     xdatatypefielddecl_t decl) {
-  env = write_datatypedecl_t(env,fp,decl->base);
-  env = write_datatypefield_t(env,fp,decl->field);
-  return env;
-}
-
-  /* XXX need to create a function for ienv_t's */
 
 // Mathieu : so far, there's nothing binary here, but let's pretend it is :-)
 void save(i_t i, FILE @ f) {
   print(i, f);  
-//    write_type(i_t_rep,f,i);
 }
 
-  /* XXX need to create the dual of all of the write functions above */
+  // XXX need to create the dual of all of the write functions above
 
 i_t load(FILE @ f) {
   return parse(f);
-//    return read_type(i_t_rep, f);
 }
+
 }

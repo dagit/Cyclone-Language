@@ -188,11 +188,11 @@ type_t copy_type(type_t t);
 static list_t<type_t> copy_types(list_t<type_t> ts) {
   return List::map(copy_type, ts);
 }
-static conref_t<`a> copy_conref(conref_t<`a> c) {
-  switch (c->v) {
-  case No_constr: return empty_conref();
-  case Eq_constr(x): return new_conref(x);
-  case Forward_constr(cr): return copy_conref(cr);
+static conref_t<`a> copy_conref(conref_t<`a> cptr) {
+  switch (cptr) {
+  case &Constraint{.No_constr = _}: return empty_conref();
+  case &Constraint{.Eq_constr = x}: return new_conref(x);
+  case &Constraint{.Forward_constr = cr}: return copy_conref(cr);
   }
 }
 static kindbound_t copy_kindbound(kindbound_t kb) {
@@ -266,9 +266,9 @@ type_t copy_type(type_t t) {
     return new FnType(FnInfo{tvs2,effopt2,rt2,args2,c_varargs2,
                                cyc_varargs2,rgn_po2,atts2});
   case &TupleType(tqts): return new TupleType(List::map(copy_tqt,tqts));
-  case &AggrType(AggrInfo(UnknownAggr(k,n),ts)):
-    return new AggrType(AggrInfo(UnknownAggr(k,n),copy_types(ts)));
-  case &AggrType(AggrInfo(KnownAggr(adp),ts)):
+  case &AggrType(AggrInfo({.UnknownAggr = $(k,n,tgd)},ts)):
+    return new AggrType(AggrInfo(UnknownAggr(k,n,tgd),copy_types(ts)));
+  case &AggrType(AggrInfo({.KnownAggr = adp},ts)):
     return new AggrType(AggrInfo(KnownAggr(adp),copy_types(ts)));
   case &AnonAggrType(k,fs): return new AnonAggrType(k,List::map(copy_field,fs));
   case &EnumType(tdn,fs): return new EnumType(tdn,fs);
@@ -354,33 +354,28 @@ kind_t typ_kind(type_t t) {
   case &RgnHandleType(_): return BoxKind; 
   case UniqueRgn:	  return UniqueRgnKind;
   case HeapRgn:           return RgnKind;
-  case &DatatypeType(DatatypeInfo{UnknownDatatype(uti),...}):
-    // flat datatypes always have MemKind -- they're like structs.
-    if (uti.is_flat) return MemKind; else return BoxKind;
-  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),...}):
-    if (tud->is_flat) return MemKind; else return BoxKind;
-  case &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud,tuf),_)):
-    if (tud->is_flat) return MemKind;
-    else if(tuf->typs == NULL) return BoxKind;
+  case &DatatypeType(...):
+    // datatypes always have boxkind right now.
+    return BoxKind;
+  case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield = $(tud,tuf)},_)):
+    if(tuf->typs == NULL) return BoxKind;
     else return MemKind;
-  case &DatatypeFieldType(DatatypeFieldInfo(UnknownDatatypefield(_),_)):
+  case &DatatypeFieldType(DatatypeFieldInfo({.UnknownDatatypefield = _},_)):
     impos("typ_kind: Unresolved DatatypeFieldType");
     // for structs, unions, or enums without definitions, we must be 
     // conservative and treat them as having AnyKind
   case &EnumType(_,NULL):     
-  case &AggrType(AggrInfo(UnknownAggr(_,_),_)): return AnyKind;
-  case &AggrType(AggrInfo(KnownAggr(& &Aggrdecl(_,_,_,_,i,_)),_)):    
+  case &AggrType(AggrInfo({.UnknownAggr = _},_)): return AnyKind;
+  case &AggrType(AggrInfo({.KnownAggr = & &Aggrdecl(_,_,_,_,i,_)},_)):    
     return (i==NULL ? AnyKind : MemKind);
   case &AnonAggrType(_,_):    
   case &AnonEnumType(_):   return MemKind;
   case &EnumType(_,ed): 
     if (ed->fields == NULL) return AnyKind; else return MemKind;
   case &PointerType(pinfo):
-    switch (compress_conref(pinfo.ptr_atts.bounds)->v) {
-    case No_constr: // be conservative, in case later constrained with DynEither_b
-    case Eq_constr(DynEither_b): return MemKind;
-    case Eq_constr(&Upper_b(_)): return BoxKind;
-    case Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
+    switch (conref_def((bounds_t)DynEither_b,pinfo.ptr_atts.bounds)) {
+    case DynEither_b: return MemKind;
+    case &Upper_b(_): return BoxKind;
     }
   case &ValueofType(_): return IntKind;
   case &TagType(_): return BoxKind;
@@ -531,20 +526,21 @@ static void unify_it_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y,
   x = compress_conref(x);
   y = compress_conref(y);
   if (x == y) return;
-  switch (x->v) {
-  case No_constr: x->v = Forward_constr(y); return;
-  case Eq_constr(xv):
-    switch (y->v) {
-    case No_constr: y->v = x->v; return;
-    case Eq_constr(yv):
+  switch (x) {
+  case &Constraint{.No_constr = _}: 
+    *x = Constraint{.Forward_constr = y}; return;
+  case &Constraint{.Eq_constr = xv}:
+    switch (y) {
+    case &Constraint{.No_constr = _}: *y = *x; return;
+    case &Constraint{.Eq_constr = yv}:
       if (cmp(xv,yv) != 0) {
         failure_reason = reason;
         throw Unify;
       }
       return;
-    case Forward_constr(_): impos("unify_conref: forward after compress(2)");
+    case &Constraint{.Forward_constr = _}: impos("unify_conref: forward after compress(2)");
     }
-  case Forward_constr(_): impos("unify_conref: forward after compress");
+  case &Constraint{.Forward_constr = _}: impos("unify_conref: forward after compress");
   }
 }
 
@@ -1071,10 +1067,10 @@ void unify_it(type_t t1, type_t t2) {
         // not it's a ? pointer vs. a * or @ pointer.  
       case &PointerType(pinfo) && kind1->v == BoxKind:
         let c = compress_conref(pinfo.ptr_atts.bounds);
-        switch (c->v) {
-        case No_constr:
+        switch (c) {
+        case &Constraint{.No_constr = _}:
           // set the pointer to be a * or @ to an array of size 1
-          c->v = Eq_constr(bounds_one);
+          c->Eq_constr = bounds_one;
           *ref1_ref = new Opt(t2);
           return;
         default: break;
@@ -1159,8 +1155,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different number of fields for enums)";
     break;
 
-  case $(&DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,r2)),
-	 &DatatypeType(DatatypeInfo(KnownDatatype(&tud1),ts1,r1))):
+  case $(&DatatypeType(DatatypeInfo({.KnownDatatype = &tud2},ts2,r2)),
+	 &DatatypeType(DatatypeInfo({.KnownDatatype = &tud1},ts1,r1))):
     if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
       if (r1 != NULL && r2 != NULL)
         unify_it(r1->v,r2->v);
@@ -1172,8 +1168,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different datatype types)";
     break;
 
-  case $(&DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud2,tuf2),ts2)),
-	 &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud1,tuf1),ts1))):
+  case $(&DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield = $(tud2,tuf2)},ts2)),
+	 &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield = $(tud1,tuf1)},ts1))):
     if((tud2 == tud1 || qvar_cmp(tud2->name,tud1->name)==0)
        && (tuf2 == tuf1 || qvar_cmp(tuf2->name, tuf1->name)==0)) {
       unify_list(ts1,ts2);
@@ -1192,8 +1188,8 @@ void unify_it(type_t t1, type_t t2) {
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
     unify_it_conrefs(unify_it_bounds,b1,b2,"(different pointer bounds)");
     // Don't force the nullable's to be the same when the bounds are dyn.
-    switch (compress_conref(b1)->v) {
-    case Eq_constr(DynEither_b): return;
+    switch (conref_def(bounds_one,b1)) {
+    case DynEither_b: return;
     default: break;
     }
     unify_it_conrefs(intcmp,null1a,null2a,"(incompatible pointer types)");
@@ -1418,15 +1414,15 @@ static int conrefs_cmp(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
   x = compress_conref(x);
   y = compress_conref(y);
   if (x == y) return 0;
-  switch (x->v) {
-  case No_constr: return -1;
-  case Eq_constr(xv):
-    switch (y->v) {
-    case No_constr: return 1;
-    case Eq_constr(yv): return cmp(xv,yv);
-    case Forward_constr(_): impos("unify_conref: forward after compress(2)");
+  switch (x) {
+  case &Constraint{.No_constr = _}: return -1;
+  case &Constraint{.Eq_constr = xv}:
+    switch (y) {
+    case &Constraint{.No_constr = _}: return 1;
+    case &Constraint{.Eq_constr = yv}: return cmp(xv,yv);
+    case &Constraint{.Forward_constr = _}: impos("unify_conref: forward after compress(2)");
     }
-  case Forward_constr(_): impos("unify_conref: forward after compress");
+  case &Constraint{.Forward_constr = _}: impos("unify_conref: forward after compress");
   }
 }
 
@@ -1520,8 +1516,8 @@ int typecmp(type_t t1, type_t t2) {
   case $(&AnonEnumType(efs1), &AnonEnumType(efs2)):
     return list_cmp(enumfield_cmp,efs1,efs2);
     
-  case $(&DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,r2)),
-	 &DatatypeType(DatatypeInfo(KnownDatatype(&tud1),ts1,r1))):
+  case $(&DatatypeType(DatatypeInfo({.KnownDatatype = &tud2},ts2,r2)),
+	 &DatatypeType(DatatypeInfo({.KnownDatatype = &tud1},ts1,r1))):
     if(tud1 == tud2) return 0;
     let qc = qvar_cmp(tud1->name,tud2->name);
     if(qc != 0) return qc;
@@ -1532,8 +1528,8 @@ int typecmp(type_t t1, type_t t2) {
     else return 1;
     return list_cmp(typecmp,ts1,ts2);
 
-  case $(&DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud2,tuf2),ts2)),
-	 &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud1,tuf1),ts1))):
+  case $(&DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield = $(tud2,tuf2)},ts2)),
+	 &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield = $(tud1,tuf1)},ts1))):
     if(tud1 == tud2) return 0;
     let qc1 =  qvar_cmp(tud2->name,tud1->name);
     if(qc1 != 0) return qc1;
@@ -1553,8 +1549,8 @@ int typecmp(type_t t1, type_t t2) {
     if (cc != 0) return cc;
     let zc = conrefs_cmp(intcmp,zt1,zt2);
     if (zc != 0) return zc;
-    switch (compress_conref(b1)->v) {
-    case Eq_constr(DynEither_b): return 0;
+    switch (conref_def(bounds_one,b1)) {
+    case DynEither_b: return 0;
     default: break;
     }
     return conrefs_cmp(intcmp,null1a,null2a);
@@ -1748,39 +1744,30 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     if (!unify_conrefs(intcmp,
 		       pinfo_a.ptr_atts.nullable,
 		       pinfo_b.ptr_atts.nullable))
-      switch(compress_conref(pinfo_a.ptr_atts.nullable)->v) {
-      case Eq_constr(b): okay = !b; break;
-      default: impos("silent_castable conref not eq");
-      }
+      okay = !(conref_def(false,pinfo_a.ptr_atts.nullable));
     // can coerce *{e} to ? and *{e1} to *{e2} when e2 <= e1
     if (!unify_conrefs(unify_it_bounds,
 		       pinfo_a.ptr_atts.bounds,
 		       pinfo_b.ptr_atts.bounds))
-      switch ($(compress_conref(pinfo_a.ptr_atts.bounds)->v, 
-		compress_conref(pinfo_b.ptr_atts.bounds)->v)) {
-      case $(Eq_constr(b1), Eq_constr(b2)):
-	switch ($(b1,b2)) {
-	case $(&Upper_b(_), DynEither_b): // okay regardless of nullable
-        case $(DynEither_b, DynEither_b): okay = true; break;
-	case $(&Upper_b(e1),&Upper_b(e2)):
-	  okay = okay && Evexp::lte_const_exp(e2,e1);
-	  // no need to warn for zero-terminated arrays -- they can get back
-	  // again (usually).
-	  // warn so *x = y where y is an array doesn't port too easily
-	  if (!conref_def(false,pinfo_b.ptr_atts.zero_term))
-	    warn(loc, "implicit cast to shorter array");
-	  break;
-	case $(DynEither_b, &Upper_b(e2)):
-	  // when zero-terminated can silently cast from ? to *{1}/@{1}
-	  if (conref_def(false,pinfo_a.ptr_atts.zero_term)
-	      && is_bound_one(pinfo_b.ptr_atts.bounds))
-	    break;
-	  okay = false;
-	  break;
-	}
-	break;
-      case $(No_constr, _): okay = false; break;
-      default: impos("silent_castable conrefs didn't unify");
+      switch ($(conref_def(bounds_one,pinfo_a.ptr_atts.bounds), 
+		conref_def(bounds_one,pinfo_b.ptr_atts.bounds))) {
+      case $(&Upper_b(_), DynEither_b): // okay regardless of nullable
+      case $(DynEither_b, DynEither_b): okay = true; break;
+      case $(&Upper_b(e1),&Upper_b(e2)):
+        okay = okay && Evexp::lte_const_exp(e2,e1);
+        // no need to warn for zero-terminated arrays -- they can get back
+        // again (usually).
+        // warn so *x = y where y is an array doesn't port too easily
+        if (!conref_def(false,pinfo_b.ptr_atts.zero_term))
+          warn(loc, "implicit cast to shorter array");
+        break;
+      case $(DynEither_b, &Upper_b(e2)):
+        // when zero-terminated can silently cast from ? to *{1}/@{1}
+        if (conref_def(false,pinfo_a.ptr_atts.zero_term)
+            && is_bound_one(pinfo_b.ptr_atts.bounds))
+          break;
+        okay = false;
+        break;
       }
     // element types have to be compatible
     okay = okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ);
@@ -1801,8 +1788,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
     // allow casting datatype `r1 T<t1,...,tn> to datatype `r2 T<t1,...,tn>
     // when `r1 outlives `r2
-  case $(&DatatypeType(DatatypeInfo{KnownDatatype(&tud1),ts1,&Opt(r1)}),
-         &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,&Opt(r2)})):
+  case $(&DatatypeType(DatatypeInfo{{.KnownDatatype = &tud1},ts1,&Opt(r1)}),
+         &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud2},ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -1819,11 +1806,11 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const));
 
   // can cast a DatatypeFieldType to a DatatypeType if the field doesn't 
-  // carry values or the DatatypeType is flat.
-  case $(&DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud1,tuf),ts1}),
-         &DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,_))):
+  // carry values.
+  case $(&DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud1,tuf)},ts1}),
+         &DatatypeType(DatatypeInfo({.KnownDatatype = &tud2},ts2,_))):
        if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
-	   && (tuf->typs == NULL || tud1->is_flat)) {
+	   && tuf->typs == NULL) {
 	 for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
 	   if (!unify(ts1->hd,ts2->hd))
 	     break;
@@ -1833,13 +1820,12 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
        return false;
 
   // can cast a "datatype T.f<ts> @`r1" to a "datatype `r2 T<ts>" when 
-  //   field f carries values and r1==r2 or r1 outlives r2 and T is
-  //   not flat.
+  //   field f carries values and r1==r2 or r1 outlives r2.
   case $(&PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt1,_))),
-	 &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,r2}))&&!tud2->is_flat:
+	 &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud2},ts2,r2})):
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
-    case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud1,tuf1),ts1}):
+    case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud1,tuf1)},ts1}):
       //n1,ts1,f1,_,tufd}):
       // regions must unify or rt_a must outlive r2
       if (!unify(rt_a,r2->v) && !region_outlives(te,rt_a,r2->v))
@@ -1903,10 +1889,10 @@ bool is_pointer_or_boxed(type_t t, bool @is_dyneither_ptr) {
 
 bool is_zero(exp_t e) {
   switch (e->r) {
-  case &Const_e(Int_c(_,0)): 
-  case &Const_e(Char_c(_,0)): 
-  case &Const_e(Short_c(_,0)): 
-  case &Const_e(LongLong_c(_,0)): return true;
+  case &Const_e({.Int_c = $(_,0)}): 
+  case &Const_e({.Char_c = $(_,0)}): 
+  case &Const_e({.Short_c = $(_,0)}): 
+  case &Const_e({.LongLong_c = $(_,0)}): return true;
   case &Cast_e(t,e2,_,_): return is_zero(e2) && admits_zero(t);
   default: return false;
   }
@@ -2068,7 +2054,7 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
   case VoidType: return NULL;
   case &TupleType(tqs): 
     return rmap_c(r,rcopy_tqt,r,tqs);// FIX: recursively flatten here
-  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
+  case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
     // FIX: to strict with existentials and constraints??
     if(ad->kind==UnionA || ad->impl==NULL 
        || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL) 
@@ -2159,8 +2145,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
 
     // allow datatype `r1 T<t1,...,tn> <= datatype `r2 T<t1,...,tn> when
     // `r1 outlives `r2.
-  case $(&DatatypeType(DatatypeInfo{KnownDatatype(&tud1),ts1,&Opt(r1)}),
-         &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,&Opt(r2)})):
+  case $(&DatatypeType(DatatypeInfo{{.KnownDatatype = &tud1},ts1,&Opt(r1)}),
+         &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud2},ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -2662,8 +2648,8 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
     let new_b  = b;
-    switch(compress_conref(b)->v) {
-    case Eq_constr(&Upper_b(e)): 
+    switch(conref_def((bounds_t)DynEither_b,b)) {
+    case &Upper_b(e): 
       let new_e = rsubsexp(rgn,inst,e);
       if (new_e != e)
 	new_b = new_conref(new Upper_b(new_e));
@@ -3136,13 +3122,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &DatatypeType(DatatypeInfo(*info,*targsp,*rgn_opt)):
     let targs = *targsp;
     switch(*info) {
-    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,is_flat)):
+    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}:
       datatypedecl_t@ tudp;
       try tudp = lookup_datatypedecl(te,loc,n);// FIX: lookup_xdatatypedecl needed?
       catch { case Dict::Absent:
         // declare the datatype for the user
         let ge = Dict::lookup(te->ae,te->ns);
-        let tud = new Datatypedecl{Extern, n, NULL, NULL, is_x, is_flat};
+        let tud = new Datatypedecl{Extern, n, NULL, NULL, is_x};
         Tc::tcDatatypedecl(te, ge, loc, tud);
         tudp = lookup_datatypedecl(te,loc,n);
         // give an error here if targs is non-empty
@@ -3162,12 +3148,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
              qvar2string(n));
       *info = KnownDatatype(tudp);
       fallthru(*tudp);
-    case KnownDatatype(&tud):
-      // if this is a flat datatype, there shouldn't be a region variable
-      if (tud->is_flat && *rgn_opt)
-        terr(loc,"flat datatype has region %s",typ2string((*rgn_opt)->v));
-      // if this isn't a flat datatype, then insert a region variable
-      if (!tud->is_flat && !*rgn_opt) 
+    case {.KnownDatatype = &tud}:
+      // insert a region variable if needed
+      if (!*rgn_opt) 
         *rgn_opt = new Opt(new_evar(&rk,NULL));
       // check the region is well-formed
       if (*rgn_opt) {
@@ -3202,7 +3185,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
   case &DatatypeFieldType(DatatypeFieldInfo{*info,targs}):
     switch(*info) {
-    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
+    case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
       datatypedecl_t  tud;
       datatypefield_t tuf;
       try *lookup_datatypedecl(te,loc,tname);//FIX lookup_xdatatypedecl needed?
@@ -3233,7 +3216,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }  
       *info = KnownDatatypefield(tud,tuf);
       fallthru(tud,tuf);
-    case KnownDatatypefield(tud,tuf):
+    case {.KnownDatatypefield = $(tud,tuf)}:
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
@@ -3257,8 +3240,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     cvtenv = i_check_valid_type(loc,te,cvtenv,TopRgnKind,rgn_typ,true);
-    switch (compress_conref(zt)->v) {
-    case No_constr:
+    switch (compress_conref(zt)) {
+    case &Constraint{.No_constr = _}:
       // if zero_term is unconstrained, then set it to false unless
       // we have [signed] char */@/? {n}.
       switch (compress(t1)) {
@@ -3272,7 +3255,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         break;
       }
       break;
-    case Eq_constr(true):
+    case &Constraint{.Eq_constr = true}:
       // check that t1 admits zero as an element
       if (!admits_zero(t1))
         terr(loc,"cannot have a pointer to zero-terminated %s elements",
@@ -3284,10 +3267,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       break;
     }
     // check the bound
-    switch (compress_conref(b)->v) {
-    case No_constr:
-    case Eq_constr(DynEither_b): break;
-    case Eq_constr(&Upper_b(e)): // must be a constant expression
+    switch (conref_constr(bounds_one,b)) {
+    case DynEither_b: break;
+    case &Upper_b(e): // must be a constant expression
       TEMP_RGN(te, temp) {
         let te2 = allow_valueof(temp,te);
         Tcexp::tcExp(te2,NULL,e);
@@ -3299,7 +3281,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       if (is_zero_terminated && (!known || sz < 1))
         terr(loc,"zero-terminated pointer cannot point to empty sequence");
       break;
-    case Forward_constr(_): impos("forward constraint");
     }
     break;
   case &TagType(t1):
@@ -3326,8 +3307,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     bool is_zero_terminated;
-    switch (compress_conref(zt)->v) {
-    case No_constr:
+    switch (compress_conref(zt)) {
+    case &Constraint{.No_constr = _}:
       // if zero_term is unconstrained, then set it to false.
       unify_conrefs(intcmp,zt,false_conref);
       is_zero_terminated = false;
@@ -3345,7 +3326,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
       */
       break;
-    case Eq_constr(true):
+    case &Constraint{.Eq_constr = true}:
       // check that t1 supports 0 as an element
       if (!admits_zero(t1)) 
         terr(loc,"cannot have a zero-terminated array of %s elements",
@@ -3461,13 +3442,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt,true);
         cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
         // if inject, then check the type is an appropriate datatype
-        // FIX: does this work with flat datatypes???
         if (vi)
           switch (compress(vt)) {
-          case &DatatypeType(DatatypeInfo{KnownDatatype(tud),_,_}): 
-            if ((*tud)->is_flat)
-              terr(loc,"cant inject into a flat datatype");
-            break;
+          case &DatatypeType(...): break;
           default: terr(loc,"can't inject a non-datatype type"); break;
           }
       }
@@ -3500,9 +3477,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             // FIX: shouldn't we just do this once when the declaration is made?
             bool problem;
             switch ($(ft,compress(cyc_vararg->type))) {
-            case $(Printf_ft, &DatatypeType(DatatypeInfo(KnownDatatype(&tud),_,_))):
+            case $(Printf_ft, &DatatypeType(DatatypeInfo({.KnownDatatype = &tud},_,_))):
               problem = (qvar_cmp(tud->name,datatype_print_arg_qvar) != 0); break;
-            case $(Scanf_ft,  &DatatypeType(DatatypeInfo(KnownDatatype(&tud),_,_))):  
+            case $(Scanf_ft,  &DatatypeType(DatatypeInfo({.KnownDatatype = &tud},_,_))):  
               problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar) != 0); break;
             default: 
               problem = true; break;
@@ -3635,10 +3612,25 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
   case &AggrType(AggrInfo(*info,*targs)):
     switch(*info) {
-    case UnknownAggr(k,n):
+    case {.UnknownAggr = $(k,n,tgd)}:
       aggrdecl_t @ adp;
       try {
 	adp = lookup_aggrdecl(te,loc,n);
+        let ad = *adp;
+        if (ad->kind != k) {
+          if (ad->kind == StructA) 
+            terr(loc,"expecting struct %s instead of union %s",qvar2string(n),
+                 qvar2string(n));
+          else 
+            terr(loc,"expecting union %s instead of struct %s",qvar2string(n),
+                 qvar2string(n));
+        }
+        if (tgd && tgd->v) {
+          if (!ad->impl || !ad->impl->tagged)
+            terr(loc,"@tagged qualfiers don't agree on union %s",
+                 qvar2string(n));
+        }
+        // FIX: what to do about tgd?
 	*info = KnownAggr(adp);
       } catch { case Dict::Absent:
 	// add as an abstract type declaration
@@ -3657,7 +3649,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         break;
       }
       fallthru(*adp);
-    case KnownAggr(&ad):
+    case {.KnownAggr = &ad}:
       list_t<tvar_t> tvs = ad->tvs;
       list_t<type_t> ts = *targs;
       for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
@@ -4123,13 +4115,8 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
 bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,_,_))):
-    let b = compress_conref(b);
-    switch (compress_conref(b)->v) {
-    case Eq_constr(DynEither_b): 
-      *elt_typ_dest = elt_typ; 
-      return true;
-    case No_constr: 
-      b->v = Eq_constr(DynEither_b); 
+    switch (conref_constr((bounds_t)DynEither_b,b)) {
+    case DynEither_b: 
       *elt_typ_dest = elt_typ; 
       return true;
     default: return false;
@@ -4243,7 +4230,7 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
       qts = qts->tl;
     }
     return false;
-  case &AggrType(AggrInfo(KnownAggr(adp),ts)):
+  case &AggrType(AggrInfo({.KnownAggr = adp},ts)):
     if ((*adp)->impl == NULL) return false;
     else {
       let inst = List::rzip(rgn,rgn,(*adp)->tvs,ts);
@@ -4262,45 +4249,24 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
       x = x->tl;
     }
     return false;
-  case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
+  case &AggrType(AggrInfo({.UnknownAggr = _},_)):
     impos("got unknown aggr in is_noalias_aggr");
   case &DatatypeType(DatatypeInfo(tinfo,ts,r)):
     switch (tinfo) {
-    case UnknownDatatype(UnknownDatatypeInfo(nm,isxt,isfl)):
+    case {.UnknownDatatype = UnknownDatatypeInfo(nm,isxt)}:
       impos("got unknown datatype in is_noalias_aggr");
-    case KnownDatatype(&&Datatypedecl(_,_,tvs,flds,_,flat)):
+    case {.KnownDatatype = &&Datatypedecl(_,_,tvs,flds,_)}:
       // is non-aliased iff
-      // * it's flat and has a field with a unique pointer
-      // * it's not flat and lives in a no-alias region
-      if (!flat) {
-	if (r == NULL) return false; // FIX: implies a tag with no
-				     // data; could be unique
-	return is_noalias_region(r->v);
-      }
-      else {
-	if (flds == NULL)
-	  impos("got datatype with no fields");
-	else {
-          let inst = List::rzip(rgn,rgn,tvs,ts);
-          let fs = flds->v; // assume not-NULL
-          while (fs != NULL) {
-            let typs = fs->hd->typs;
-            while (typs != NULL) {
-              t = rsubstitute(rgn,inst,(*typs->hd)[1]);
-              if (is_noalias_pointer_or_aggr(rgn,t)) return true;
-              typs = typs->tl;
-            }
-            fs = fs->tl;
-          }
-	  return false;
-	}
-      }
+      // * lives in a no-alias region
+      if (r == NULL) return false; // FIX: implies a tag with no
+      // data; could be unique
+      return is_noalias_region(r->v);
     }
   case &DatatypeFieldType(DatatypeFieldInfo(tinfo,ts)):
     switch (tinfo) {
-    case UnknownDatatypefield(_):
+    case {.UnknownDatatypefield = _}:
       impos("got unknown datatype field in is_noalias_aggr");
-    case KnownDatatypefield(td,fld):
+    case {.KnownDatatypefield = $(td,fld)}:
       let inst = List::rzip(rgn,rgn,td->tvs,ts);
       let typs = fld->typs;
       while (typs != NULL) {
@@ -4316,7 +4282,7 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
 
 static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
   switch (compress(t)) {
-  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
+  case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
     fallthru ((ad->impl == NULL) ? NULL : ad->impl->fields);
   case &AnonAggrType(_,x):
     let finfo = lookup_field(x,f);
@@ -4504,7 +4470,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       if(finfo != NULL && finfo->width != NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case &AggrType(AggrInfo(KnownAggr(&ad),_)):
+    case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
       let finfo = lookup_decl_field(ad,f);
       if(finfo != NULL && finfo->width != NULL)
 	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
@@ -4523,7 +4489,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       switch (compress(t1)) {
       case &AnonAggrType(_,fs): 
 	finfo = lookup_field(fs,f); break;
-      case &AggrType(AggrInfo(KnownAggr(&ad),_)):
+      case &AggrType(AggrInfo({.KnownAggr = &ad},_)):
 	finfo = lookup_decl_field(ad,f); break;
       default: return bogus_ans;
       }
@@ -4591,18 +4557,13 @@ type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
 // large enough -- if the bounds are unconstrained, set them to i+1.
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
-  switch (b->v) {
-  case Eq_constr(DynEither_b): return; // always checked dynamically
-  case Eq_constr(&Upper_b(e)):
+  switch (conref_constr(bounds_one,b)) {
+  case DynEither_b: return; // always checked dynamically
+  case &Upper_b(e):
     let $(j,known) = Evexp::eval_const_uint_exp(e);
     if(known && j <= i)
       terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
-  case No_constr:
-    // constrain the bounds to be i+1
-    b->v = Eq_constr((bounds_t)(new Upper_b(uint_exp(i+1,NULL))));
-    return;
-  default: impos("check_bound -- bad compressed conref");
   }
 }
 
@@ -4611,8 +4572,8 @@ void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
 }
 
 bool is_bound_one(conref_t<bounds_t> b) {
-  switch(compress_conref(b)->v) {
-  case Eq_constr(&Upper_b(e)): 
+  switch(conref_def((bounds_t)DynEither_b,b)) {
+  case &Upper_b(e): 
     let $(i,known) = Evexp::eval_const_uint_exp(e);
     return known && i==1;
   default: return false;
@@ -4635,8 +4596,8 @@ bool bits_only(type_t t) {
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;
     return true;
-  case &AggrType(AggrInfo(UnknownAggr(_,_),_)): return false;
-  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
+  case &AggrType(AggrInfo({.UnknownAggr = _},_)): return false;
+  case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
     if(ad->impl==NULL)
       return false;
     region rgn; {
@@ -4779,17 +4740,12 @@ bool admits_zero(type_t t) {
   case FloatType: 
   case &DoubleType(_): return true;
   case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
-    switch (compress_conref(bounds)->v) {
+    switch (conref_def((bounds_t)DynEither_b,bounds)) {
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
-    case Eq_constr(DynEither_b): return false; 
-    case Eq_constr(_):
-      switch (compress_conref(nullable)->v) {
-      case Eq_constr(b): return b;
-      default: return false;
-      }
-    default: return false;
+    case DynEither_b: return false; 
+    default: return conref_def(false,nullable);
     }
   default: return false;
   }

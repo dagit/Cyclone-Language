@@ -81,14 +81,24 @@ EXTERN_CFFLOW datatype InitLevel {
 typedef datatype InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
-EXTERN_CFFLOW __flat__ datatype RelnOp {
-  EqualConst(unsigned int);        // == c
-  LessVar(Absyn::vardecl_t,Absyn::type_t); // < y -- type is needed due to xlation
-  LessNumelts(Absyn::vardecl_t);   // < numelts(y)
-  LessConst(unsigned int);         // < c
-  LessEqNumelts(Absyn::vardecl_t); // <= numelts(y)
+EXTERN_CFFLOW @tagged union RelnOp {
+  unsigned int EqualConst; // == c
+  $(Absyn::vardecl_t,Absyn::type_t) LessVar;// < y -- type is needed in xlation
+  Absyn::vardecl_t LessNumelts; // < numelts(y)
+  unsigned int LessConst; // < c
+  Absyn::vardecl_t LessEqNumelts; // <= numelts(y)
 };
-typedef datatype RelnOp reln_op_t;
+
+typedef union RelnOp reln_op_t;
+
+// constructors
+extern reln_op_t 
+  EqualConst(unsigned int),
+  LessVar(Absyn::vardecl_t,Absyn::type_t),
+  LessNumelts(Absyn::vardecl_t),
+  LessConst(unsigned int),
+  LessEqNumelts(Absyn::vardecl_t); 
+
 EXTERN_CFFLOW struct Reln {
   Absyn::vardecl_t vd; 
   reln_op_t rop;
@@ -113,11 +123,13 @@ typedef struct TagCmp @`r tag_cmp_t<`r>;
 extern List::list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2>,
                                                      List::list_t<tag_cmp_t>);
 
-EXTERN_CFFLOW __flat__ datatype AbsLVal<`r::R> {
-  PlaceL(place_t<`r,`r>);
-  UnknownL;
+EXTERN_CFFLOW @tagged union AbsLVal<`r::R> {
+  place_t<`r,`r> PlaceL;
+  int UnknownL; // int unused
 };
-typedef datatype AbsLVal<`r> absLval_t<`r>;
+typedef union AbsLVal<`r> absLval_t<`r>;
+extern absLval_t<`r> PlaceL(place_t<`r,`r>);
+extern absLval_t<`r> UnknownL();
 
 EXTERN_CFFLOW datatype AbsRVal<`r::R>;
 typedef datatype `r AbsRVal<`r> absRval_t<`r>;
@@ -172,11 +184,13 @@ extern bool consume_approx(consume_t<`r> c1, consume_t<`r> c2);
 //       of the analysis must be that at least these roots stay in the dict;
 //       for scalability, we don't have others.
 // join takes the intersection of the dictionaries.
-EXTERN_CFFLOW __flat__ datatype FlowInfo<`r::R> {
-  BottomFL;
-  ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
+EXTERN_CFFLOW @tagged union FlowInfo<`r::R> {
+  int BottomFL; // int unused
+  $(flowdict_t<`r>,relns_t<`r>,consume_t<`r>) ReachableFL;
 };
-typedef datatype FlowInfo<`r> flow_t<`r>;
+typedef union FlowInfo<`r> flow_t<`r>;
+extern flow_t<`r> BottomFL();
+extern flow_t<`r> ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
 
 EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;

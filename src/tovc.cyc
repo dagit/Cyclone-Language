@@ -103,7 +103,7 @@ typedef struct ToExpEnv<`r> toexpenv_t<`r>; // not boxed
 static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   while(true)
   switch (e->r) {
-  case &Var_e(&$(Loc_n,v),_):
+  case &Var_e(&$({.Loc_n = _},v),_):
     // DO NOT MUTATE qvars -- They get shared in funky ways
     // first apply the varmap
     if (Dict::member(env.varmap,v)) {
@@ -309,7 +309,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
 
 static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   switch (e->r) {
-  case &Var_e(&$(Loc_n,v),_):
+  case &Var_e(&$({.Loc_n = _},v),_):
     // DO NOT MUTATE qvars -- They get shared in funky ways
     // first apply the varmap
     if (Dict::member(varmap,v))

@@ -832,6 +832,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (topt != NULL) scan_type(*topt);
       scan_exp(e);
       return;
+    case &Tagcheck_e(e,_):
+      scan_exp(e); return;
     case &Valueof_e(t1): fallthru(t1);
     case &Sizeoftyp_e(t1):
       scan_type(t1);

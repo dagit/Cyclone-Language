@@ -73,22 +73,20 @@ namespace Absyn {
   typedef stringptr_t tvarname_t;   // type variables
 
   // Name spaces
-  EXTERN_ABSYN __flat__ datatype Nmspace {
-    Loc_n,                // Local name
-    Rel_n(list_t<var_t>), // Relative name
-    Abs_n(list_t<var_t>)  // Absolute name
+  EXTERN_ABSYN @tagged union Nmspace {
+    list_t<var_t> Rel_n; // Relative name
+    list_t<var_t> Abs_n; // Absolute name
+    int Loc_n;  // Local name, int is not used
   };
-  typedef datatype Nmspace nmspace_t;
+  typedef union Nmspace nmspace_t;
+  nmspace_t Loc_n;
+  nmspace_t Rel_n(list_t<var_t,`H>);
+  nmspace_t Abs_n(list_t<var_t,`H>);
 
   // Qualified variables
   typedef $(nmspace_t,var_t) @qvar_t, *qvar_opt_t;
   typedef qvar_t typedef_name_t;
   typedef qvar_opt_t typedef_name_opt_t; 
-
-  // forward declarations
-  EXTERN_ABSYN struct Conref<`a>;
-  EXTERN_ABSYN __flat__ datatype Constraint<`a>;
-  EXTERN_ABSYN __flat__ datatype Cnst;
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or datatype Foo.
   typedef datatype Scope scope_t;
@@ -99,8 +97,6 @@ namespace Absyn {
   typedef struct Tvar @tvar_t; 
   typedef datatype Sign sign_t;
   typedef datatype AggrKind aggr_kind_t;
-  typedef struct Conref<`a> @conref_t<`a>;
-  typedef datatype Constraint<`a> constraint_t<`a>;
   typedef datatype Bounds bounds_t;
   typedef struct PtrAtts ptr_atts_t;
   typedef struct PtrInfo ptr_info_t;
@@ -111,7 +107,7 @@ namespace Absyn {
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
   typedef datatype Type type_t, rgntype_t;
-  typedef datatype Cnst cnst_t;
+  typedef union Cnst cnst_t;
   typedef datatype Primop primop_t;
   typedef datatype Incrementor incrementor_t;
   typedef struct VarargCallInfo vararg_call_info_t;
@@ -191,10 +187,12 @@ namespace Absyn {
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
-  EXTERN_ABSYN __flat__ datatype Constraint<`a> { 
-    Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
+  EXTERN_ABSYN @tagged union Constraint<`a> { 
+    `a Eq_constr;
+    union Constraint<`a> @Forward_constr;
+    int No_constr;
   };
-  EXTERN_ABSYN struct Conref<`a> { datatype Constraint<`a> v; };
+  typedef union Constraint<`a> @conref_t<`a>;
 
   // kind bounds are used on tvar's to infer their kinds
   //   Eq_kb(k):  the tvar has kind k
@@ -243,6 +241,20 @@ namespace Absyn {
     ptr_atts_t ptr_atts;
   };
 
+  // these are used only during parsing now
+  EXTERN_ABSYN datatype Pointer_qual {
+    Numelts_ptrqual(exp_t);
+    Region_ptrqual(type_t);
+    Thin_ptrqual;
+    Fat_ptrqual;
+    Zeroterm_ptrqual;
+    Nozeroterm_ptrqual;
+    Notnull_ptrqual;
+    Nullable_ptrqual;
+  };
+  typedef datatype Pointer_qual pointer_qual_t;
+  typedef list_t<pointer_qual_t> pointer_quals_t;
+
   // information about vararg functions
   EXTERN_ABSYN struct VarargInfo {
     opt_t<var_t> name;
@@ -275,17 +287,18 @@ namespace Absyn {
   EXTERN_ABSYN struct UnknownDatatypeInfo {
     qvar_t name;          // name of the datatype
     bool   is_extensible; // true -> @extensible
-    bool   is_flat;       // only used when we have an abstract datatype decl
   };
-  EXTERN_ABSYN __flat__ datatype DatatypeInfoU {
-    UnknownDatatype(struct UnknownDatatypeInfo); // don't know definition yet
-    KnownDatatype(datatypedecl_t@);              // known definition
+  EXTERN_ABSYN @tagged union DatatypeInfoU {
+    struct UnknownDatatypeInfo UnknownDatatype; // don't know definition yet
+    datatypedecl_t @KnownDatatype;              // known definition
   };
+  extern union DatatypeInfoU UnknownDatatype(struct UnknownDatatypeInfo);
+  extern union DatatypeInfoU KnownDatatype(datatypedecl_t@`H);              
+
   EXTERN_ABSYN struct DatatypeInfo {
-    datatype DatatypeInfoU datatype_info; // we either know the definition or not
+    union DatatypeInfoU datatype_info; // we either know the definition or not
     list_t<type_t>     targs;       // actual type parameters
-    opt_t<rgntype_t>   rgn;         // region into which datatype points -- 
-                     // only present for indirect datatypes (i.e., not flat)
+    opt_t<rgntype_t>   rgn;         // region into which datatype points 
   };
   // information for datatype Foo.Bar
   EXTERN_ABSYN struct UnknownDatatypeFieldInfo {
@@ -293,21 +306,29 @@ namespace Absyn {
     qvar_t field_name;      // name of the datatype field
     bool   is_extensible;   // true -> @extensible
   };
-  EXTERN_ABSYN __flat__ datatype DatatypeFieldInfoU {
-    UnknownDatatypefield(struct UnknownDatatypeFieldInfo);
-    KnownDatatypefield(datatypedecl_t, datatypefield_t);
+  EXTERN_ABSYN @tagged union DatatypeFieldInfoU {
+    struct UnknownDatatypeFieldInfo UnknownDatatypefield;
+    $(datatypedecl_t, datatypefield_t) KnownDatatypefield;
   };
+  extern union DatatypeFieldInfoU 
+    UnknownDatatypefield(struct UnknownDatatypeFieldInfo);
+  extern union DatatypeFieldInfoU 
+    KnownDatatypefield(datatypedecl_t, datatypefield_t);
+
   EXTERN_ABSYN struct DatatypeFieldInfo {
-    datatype DatatypeFieldInfoU field_info;
+    union DatatypeFieldInfoU field_info;
     list_t<type_t>          targs;
   };
 
-  EXTERN_ABSYN __flat__ datatype AggrInfoU {
-    UnknownAggr(aggr_kind_t,typedef_name_t);
-    KnownAggr(aggrdecl_t@);
-  };
+  EXTERN_ABSYN @tagged union AggrInfoU {
+    $(aggr_kind_t,typedef_name_t,opt_t<bool> tagged) UnknownAggr;
+    aggrdecl_t@ KnownAggr;
+  };  
+  extern union AggrInfoU UnknownAggr(aggr_kind_t,typedef_name_t,opt_t<bool,`H>);
+  extern union AggrInfoU KnownAggr(aggrdecl_t@`H);
+
   EXTERN_ABSYN struct AggrInfo {
-    datatype AggrInfoU aggr_info;
+    union AggrInfoU aggr_info;
     list_t<type_t> targs; // actual type parameters
   };
   EXTERN_ABSYN struct ArrayInfo {
@@ -422,15 +443,23 @@ namespace Absyn {
   typedef datatype `r Type_modifier<`r> type_modifier_t<`r>;
 
   // Constants
-  EXTERN_ABSYN __flat__ datatype Cnst {
-    Char_c(sign_t,char);          // chars
-    Short_c(sign_t,short);        // shorts
-    Int_c(sign_t,int);            // ints
-    LongLong_c(sign_t,long long); // long-longs
-    Float_c(string_t);            // floats -- where's doubles?
-    String_c(string_t);           // strings
-    Null_c;                       // NULL
+  EXTERN_ABSYN @tagged union Cnst {
+    int Null_c; // int unused
+    $(sign_t,char) Char_c;
+    $(sign_t,short) Short_c;
+    $(sign_t,int) Int_c;
+    $(sign_t,long long) LongLong_c;
+    string_t Float_c;  // where's doubles?
+    string_t String_c;
   };
+  // constructors for constants
+  extern cnst_t Null_c;
+  extern cnst_t Char_c(sign_t,char);
+  extern cnst_t Short_c(sign_t,short);
+  extern cnst_t Int_c(sign_t,int);
+  extern cnst_t LongLong_c(sign_t,long long);
+  extern cnst_t Float_c(string_t<`H>);
+  extern cnst_t String_c(string_t<`H>);
 
   // Primitive operations
   EXTERN_ABSYN datatype Primop {
@@ -547,6 +576,7 @@ namespace Absyn {
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
     StmtExp_e(stmt_t); // ({s;e})
+    Tagcheck_e(exp_t, field_name_t);
     Valueof_e(type_t); // the type must have IntKind.  Valueof_e can only
     // be used within types, and is typically used within a valueof_t so
     // that we can move between the type and expression levels
@@ -602,7 +632,7 @@ namespace Absyn {
     TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
     Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
-    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>,
+    Aggr_p(aggr_info_t *,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>,
            bool dot_dot_dot);
     Datatype_p(datatypedecl_t, datatypefield_t, list_t<pat_t>, bool dot_dot_dot);
     Null_p; // NULL
@@ -722,7 +752,6 @@ namespace Absyn {
     list_t<tvar_t>               tvs;
     opt_t<list_t<datatypefield_t>> fields;
     bool                         is_extensible;
-    bool                         is_flat;
   };
 
   EXTERN_ABSYN struct Enumfield {
@@ -809,8 +838,13 @@ namespace Absyn {
   extern conref_t<`a> new_conref(`a x); 
   extern conref_t<`a> empty_conref();
   extern conref_t<`a> compress_conref(conref_t<`a> x);
+  // compresses and returns the .Eq_constr field, raising an error if no .Eq
   extern `a conref_val(conref_t<`a> x);
-  extern `a conref_def(`a, conref_t<`a> x);
+  // compresses and returns the .Eq_constr field if present, otherwise returns
+  // y -- has no side effect.
+  extern `a conref_def(`a y, conref_t<`a> x);
+  // same as conref_def, but if .No_constr, then sets it equal to y.
+  extern `a conref_constr(`a y,conref_t<`a> x);
   extern conref_t<bool> true_conref;
   extern conref_t<bool> false_conref;
   extern conref_t<bounds_t> bounds_one_conref;
@@ -998,7 +1032,7 @@ namespace Absyn {
   extern decl_t datatype_decl(scope_t s, typedef_name_t n, 
                               list_t<tvar_t,`H> ts,
                               opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-                              bool is_extensible, bool is_flat,
+                              bool is_extensible, 
                               seg_t loc);
 
   extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,
@@ -1027,9 +1061,9 @@ namespace Absyn {
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type
-  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(datatype AggrInfoU);
+  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU);
   // given a checked type, get the decl
-  extern aggrdecl_t get_known_aggrdecl(datatype AggrInfoU info);
+  extern aggrdecl_t get_known_aggrdecl(union AggrInfoU info);
   // is a type a union-type (tagged, anonymous or otherwise)
   extern bool is_union_type(type_t);
   // ditto except rule out tagged unions
@@ -1038,7 +1072,7 @@ namespace Absyn {
   extern bool is_aggr_type(type_t t);
 
   // for testing typerep; temporary
-  extern void print_decls(list_t<decl_t>);
+  // extern void print_decls(list_t<decl_t>);
 
   // used to control whether we're compiling or porting c code
   extern bool porting_c_code;

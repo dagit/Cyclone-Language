@@ -45,13 +45,13 @@ typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
 typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
 /** [mstringptr_t] is the mutable version of [stringptr_t]. */
 
-typedef char * @nozeroterm`r Cbuffer_t<`r>;
+typedef char * @nozeroterm `r Cbuffer_t<`r>;
 /** [buffer_t] is a non-zero-terminated C buffer */
-typedef char @ @nozeroterm`r CbufferNN_t<`r>;
+typedef char @ @nozeroterm `r CbufferNN_t<`r>;
 /** [buffer_t] is a non-zero-terminated C buffer */
-typedef const char ? @nozeroterm`r buffer_t<`r>;
+typedef const char ? @nozeroterm `r buffer_t<`r>;
 /** [buffer_t] is a non-zero-terminated dynamically sized buffer */
-typedef char ? @nozeroterm`r mbuffer_t<`r>;
+typedef char ? @nozeroterm `r mbuffer_t<`r>;
 
 #ifndef bool
 typedef int bool;

@@ -60,17 +60,17 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   let n1 = (*q1)[0];
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
-  case $(Loc_n,    Loc_n): break;
-  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
-  case $(Abs_n(x1),Abs_n(x2)):
+  case $({.Loc_n = _},{.Loc_n = _}): break;
+  case $({.Rel_n = x1},{.Rel_n = x2}): fallthru(x1,x2);
+  case $({.Abs_n = x1},{.Abs_n = x2}):
     int i = strlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n
-  case $(Loc_n,_):     return -1;
-  case $(_,Loc_n):     return 1;
-  case $(Rel_n(_),_): return -1;
-  case $(_,Rel_n(_)): return 1;
+  case $({.Loc_n = _},_):     return -1;
+  case $(_,{.Loc_n = _}):     return 1;
+  case $({.Rel_n = _},_): return -1;
+  case $(_,{.Rel_n = _}): return 1;
   }
   return strptrcmp((*q1)[1],(*q2)[1]);
 }
@@ -81,13 +81,16 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity) - (tv2->identity);
 }
   
-datatype Nmspace       rel_ns_null       = Rel_n(NULL);
+nmspace_t Loc_n = Nmspace{.Loc_n = 0};
+nmspace_t Abs_n(list_t<var_t,`H> x) { return Nmspace{.Abs_n = x}; }
+nmspace_t Rel_n(list_t<var_t,`H> x) { return Nmspace{.Rel_n = x}; }
+nmspace_t rel_ns_null       = Nmspace{.Rel_n = NULL};
 
 bool is_qvar_qualified(qvar_t qv) {
   switch((*qv)[0]) {
-  case Rel_n(NULL):
-  case Abs_n(NULL):
-  case Loc_n: return false;
+  case {.Rel_n = NULL}:
+  case {.Abs_n = NULL}:
+  case {.Loc_n = _}: return false;
   default:    return true;
   }
 }
@@ -115,18 +118,37 @@ tqual_t const_tqual(seg_t loc) { return Tqual(true, false,false,true,loc); }
 
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
   //static datatype Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
-static datatype Raw_exp.Const_e one_b_raw = Const_e(Int_c(Unsigned,1));
+static datatype Raw_exp.Const_e one_b_raw = 
+Const_e(Cnst{.Int_c=$(Unsigned,1)});
 struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static datatype Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 datatype Bounds bounds_one = &one_bt;
 
+union DatatypeInfoU UnknownDatatype(struct UnknownDatatypeInfo udi) {
+  return DatatypeInfoU{.UnknownDatatype = udi};
+}
+extern union DatatypeInfoU KnownDatatype(datatypedecl_t@`H d) {
+  return DatatypeInfoU{.KnownDatatype = d};
+}
+union DatatypeFieldInfoU UnknownDatatypefield(struct UnknownDatatypeFieldInfo s) {
+  return DatatypeFieldInfoU{.UnknownDatatypefield = s};
+}
+union DatatypeFieldInfoU KnownDatatypefield(datatypedecl_t dd, datatypefield_t df) {
+  return DatatypeFieldInfoU{.KnownDatatypefield = $(dd,df)};
+}
+union AggrInfoU UnknownAggr(aggr_kind_t ak,typedef_name_t n,opt_t<bool,`H> tagged) {
+  return AggrInfoU{.UnknownAggr = $(ak,n,tagged)};
+}
+union AggrInfoU KnownAggr(aggrdecl_t@`H ad) {
+  return AggrInfoU{.KnownAggr = ad};
+}
 //////////////////////////// Constraints /////////////////////////
-conref_t<`a> new_conref(`a x) { return new Conref{.v = Eq_constr(x)};}
-conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
+conref_t<`a> new_conref(`a x) { return new Constraint{.Eq_constr = x};}
+conref_t<`a> empty_conref()   { return new Constraint{.No_constr = 0};}
 
 #define MAKE_EQ_CONSTR(str,type,val)\
-  static struct Conref<type> str##_v = Conref(Eq_constr(val));\
+  static union Constraint<type> str##_v = {.Eq_constr = val};\
   conref_t<type> str = &str##_v
 
 MAKE_EQ_CONSTR(true_conref,bool,true);
@@ -137,27 +159,35 @@ MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,DynEither_b);
 
 // compress a conref
 conref_t<`a> compress_conref(conref_t<`a> x) {
-  switch (x->v) {
-  case No_constr:    
-  case Eq_constr(_): return x;
-  case Forward_constr(y):
+  switch (x) {
+  case &Constraint{.No_constr = _}:
+  case &Constraint{.Eq_constr = _}: return x;
+  case &Constraint{.Forward_constr = y}:
     let z = compress_conref(y);
-    x->v = Forward_constr(z);
+    x->Forward_constr = z;
     return z;
   }
 }
 
 `a conref_val(conref_t<`a> x) {
-  switch (compress_conref(x)->v) {
-  case Eq_constr(v): return v;
+  switch (compress_conref(x)) {
+  case &Constraint{.Eq_constr = v}: return v;
   default: Tcutil::impos("conref_val");
   }
 }
 
 `a conref_def(`a y, conref_t<`a> x) {
-  switch (compress_conref(x)->v) {
-  case Eq_constr(v): return v;
+  switch (compress_conref(x)) {
+  case &Constraint{.Eq_constr = v}: return v;
   default: return y;
+  }
+}
+
+`a conref_constr(`a y, conref_t<`a> x) {
+  x = compress_conref(x);
+  switch (x) {
+  case &Constraint{.Eq_constr = v}: return v;
+  default: x->Eq_constr = y; return y;
   }
 }
 
@@ -255,12 +285,12 @@ type_t double_typ(bool b) {
 }
 // exceptions
 static string_t exn_str = "exn";
-static $(nmspace_t,var_t) exn_name_v = $(Abs_n(NULL),&exn_str);
+static $(nmspace_t,var_t) exn_name_v = $(Nmspace{.Abs_n = NULL},&exn_str);
 qvar_t exn_name   = &exn_name_v;
 
 #define MAKE_BUILTIN_EXN(str)\
   static string_t            str##_str   = #str;\
-  static $(nmspace_t, var_t) str##_pr    = $(Abs_n(NULL), &str##_str);\
+  static $(nmspace_t, var_t) str##_pr    = $(Nmspace{.Abs_n=NULL},&str##_str);\
   qvar_t                     str##_name  = &str##_pr;\
   static struct Datatypefield  str##_tuf_v = Datatypefield(&str##_pr,\
 				 		       NULL,NULL,Extern);\
@@ -279,22 +309,22 @@ static struct List<datatypefield_t> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2
 
 static struct Opt<list_t<datatypefield_t>> exn_ol = Opt(&exn_l3);
 static struct Datatypedecl exn_tud_v = Datatypedecl(Extern, &exn_name_v, NULL,
-                                                    &exn_ol, true, false);
+                                                    &exn_ol, true);
 datatypedecl_t exn_tud = &exn_tud_v;
 
   //static datatype DatatypeInfoU.KnownDatatype exn_tinfou = KnownDatatype(&exn_tud);
 static struct Opt<type_t> heap_opt = Opt(HeapRgn);
 static datatype Type.DatatypeType exn_typ_tt =
-                  DatatypeType(DatatypeInfo(KnownDatatype(&exn_tud),NULL,&heap_opt));
+                  DatatypeType(DatatypeInfo(DatatypeInfoU{.KnownDatatype=&exn_tud},NULL,&heap_opt));
 type_t exn_typ = &exn_typ_tt;
 
 // datatype PrintArg and datatype ScanfArg qvars
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
 static $(nmspace_t,var_t) datatype_print_arg_qvar_p = 
-  $(Abs_n(NULL), &printarg_str);
+  $(Nmspace{.Abs_n = NULL}, &printarg_str);
 static $(nmspace_t,var_t) datatype_scanf_arg_qvar_p = 
-  $(Abs_n(NULL), &scanfarg_str);
+  $(Nmspace{.Abs_n = NULL}, &scanfarg_str);
 qvar_t datatype_print_arg_qvar = &datatype_print_arg_qvar_p;
 qvar_t datatype_scanf_arg_qvar = &datatype_scanf_arg_qvar_p;
 
@@ -411,18 +441,26 @@ type_t empty_effect = &empty_eff;
 //          the aggrdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 type_t aggr_typ(aggr_kind_t k, var_t name) {
-  return new AggrType(AggrInfo(UnknownAggr(k, new $(rel_ns_null,name)),
+  return new AggrType(AggrInfo(UnknownAggr(k, new $(rel_ns_null,name), NULL),
 			       NULL));
 }
 type_t strct(var_t name)     { return aggr_typ(StructA,name); }
 type_t union_typ(var_t name) { return aggr_typ(UnionA,name);  }
 
 type_t strctq(qvar_t name) {
-  return new AggrType(AggrInfo(UnknownAggr(StructA,name), NULL));
+  return new AggrType(AggrInfo(UnknownAggr(StructA,name,NULL), NULL));
 }
 type_t unionq_typ(qvar_t name) {
-  return new AggrType(AggrInfo(UnknownAggr(UnionA,name), NULL));
+  return new AggrType(AggrInfo(UnknownAggr(UnionA,name,NULL), NULL));
 }
+///////////////////////// Constants //////////////////////////////
+cnst_t Null_c = Cnst{.Null_c = 0};
+cnst_t Char_c(sign_t sn,char c) {return Cnst{.Char_c = $(sn,c)};}
+cnst_t Short_c(sign_t sn,short s) {return Cnst{.Short_c = $(sn,s)};}
+cnst_t Int_c(sign_t sn,int i) {return Cnst{.Int_c = $(sn,i)};}
+cnst_t LongLong_c(sign_t sn,long long l) {return Cnst{.LongLong_c = $(sn,l)};}
+cnst_t Float_c(string_t<`H> s) {return Cnst{.Float_c = s};}
+cnst_t String_c(string_t<`H> s) {return Cnst{.String_c = s};}
 
 ///////////////////////// Expressions //////////////////////////////
 exp_t new_exp(raw_exp_t r, seg_t loc) {
@@ -686,9 +724,8 @@ decl_t union_decl(scope_t s,typedef_name_t n,
 }
 decl_t datatype_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 		   opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-                   bool is_extensible, bool is_flat, seg_t loc){
-  return new_decl(new Datatype_d(new Datatypedecl(s,n,ts,fs,is_extensible,
-                                                  is_flat)),
+                   bool is_extensible, seg_t loc){
+  return new_decl(new Datatype_d(new Datatypedecl(s,n,ts,fs,is_extensible)),
                   loc);
 }
 
@@ -848,16 +885,16 @@ stringptr_t fieldname(int i) {
   return field_names[i];
 }
 
-$(aggr_kind_t,qvar_t) aggr_kinded_name(datatype AggrInfoU info) {
+$(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU info) {
   switch(info) {
-  case UnknownAggr(k,n): return $(k,n);
-  case KnownAggr(&&Aggrdecl(k,_,n,_,_,_)): return $(k,n);
+  case {.UnknownAggr = $(ak,n,_)}: return $(ak,n);
+  case {.KnownAggr = &&Aggrdecl(k,_,n,_,_,_)}: return $(k,n);
   }
 }
-aggrdecl_t get_known_aggrdecl(datatype AggrInfoU info) {
+aggrdecl_t get_known_aggrdecl(union AggrInfoU info) {
   switch(info) {
-  case UnknownAggr(k,n): Tcutil::impos("unchecked aggrdecl");
-  case KnownAggr(&ad): return ad;
+  case {.UnknownAggr = _ }: Tcutil::impos("unchecked aggrdecl");
+  case {.KnownAggr = &ad}: return ad;
   }
 }
 bool is_union_type(type_t t) {
@@ -872,9 +909,10 @@ bool is_nontagged_union_type(type_t t) {
   case &AnonAggrType(UnionA,_):     return true;
   case &AggrType(AggrInfo(info,_)): 
     switch (info) {
-    case KnownAggr(&ad): 
+    case {.KnownAggr = &ad}: 
       return (ad->kind == UnionA) && (ad->impl->tagged == false);
-    case UnknownAggr(k,_): return k == UnionA;
+    case {.UnknownAggr = $(k,_,NULL)}: return k == UnionA;
+    case {.UnknownAggr = $(k,_,&Opt(b))}: return k == UnionA && !b;
     }
   default: return false;
   }
@@ -890,15 +928,18 @@ bool is_aggr_type(type_t t) {
   }
 }
 
+  /*
   void print_decls(list_t<decl_t> decls) {
     Marshal::print_type(decls_rep,&decls);
     printf("\n");
   }
+  */
 
 bool porting_c_code = false;
 bool no_regions = false;
   
 }
-
+/*
 using Typerep;
 typestruct_t decls_rep = __gen(list_t<Absyn::decl_t>);
+*/

@@ -86,27 +86,27 @@ using Parser;
   Lexer_definition_tok(lexer_definition_t);
   Location_tok(location_t);
   Int_tok(int);
-  Entrypoint_List_tok(list_t<entrypoint_t>);
+  Entrypoint_List_tok(list_t<entrypoint_t,`H>);
   Entrypoint_tok(entrypoint_t);
-  Acase_List_tok(list_t<acase_t>);
+  Acase_List_tok(list_t<acase_t,`H>);
   Acase_tok(acase_t);
   Regexp_tok(regular_expression_t);
   Char_tok(char);
-  String_tok(string_t);
-  Charclass_tok(list_t<int>);
+  String_tok(string_t<`H>);
+  Charclass_tok(list_t<int,`H>);
 }
 
 %type <lexer_definition_t> lexer_definition
 %type <location_t> header TACTION
 %type <int> named_regexps
-%type <list_t<entrypoint_t>> other_definitions
+%type <list_t<entrypoint_t,`H>> other_definitions
 %type <entrypoint_t> definition
-%type <list_t<acase_t>> entry rest_of_entry
+%type <list_t<acase_t,`H>> entry rest_of_entry
 %type <acase_t> acase
 %type <regular_expression_t> regexp
 %type <char> TCHAR
-%type <string_t> TSTRING TIDENT
-%type <list_t<int>> char_class char_class1
+%type <string_t<`H>> TSTRING TIDENT
+%type <list_t<int,`H>> char_class char_class1
 
 %%
 

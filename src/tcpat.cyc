@@ -49,7 +49,7 @@ namespace Tcpat;
 // qualifiers (e.g., const).
 /////////////////////////////////////////////////////////////////////////
 
-static void resolve_pat(tenv_t te, pat_t p) {
+static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   switch(p->r) {
   case &UnknownId_p(q):
     try {
@@ -69,8 +69,8 @@ static void resolve_pat(tenv_t te, pat_t p) {
     } catch { case Dict::Absent: break; } // a new variable
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
-    case Loc_n: 
-    case Rel_n(NULL):
+    case {.Loc_n = _}: 
+    case {.Rel_n = NULL}:
       (*q)[0] = Loc_n;        
       p->r = new Var_p(new_vardecl(q,VoidType,NULL),// type set later
                        new_pat(Wild_p,NULL)); 
@@ -85,7 +85,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
           let new_ps = NULL;
           for(; ps != NULL; ps = ps->tl)
             new_ps = new List(new $(NULL,ps->hd), new_ps);
-          p->r = new Aggr_p(AggrInfo(KnownAggr(new ad),NULL),
+          p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),NULL),
                             NULL,imp_rev(new_ps),dots);
           return;
         case &DatatypeRes(tud,tuf): p->r = new Datatype_p(tud,tuf,ps,dots); return;
@@ -101,7 +101,24 @@ static void resolve_pat(tenv_t te, pat_t p) {
     p->r = Wild_p;
     return;
 
-  case &Aggr_p(AggrInfo(UnknownAggr(k,n),targs), *exist_ts, dps, dots):
+  case &Aggr_p(NULL, exist_ts, dps, dots):
+    if (topt == NULL) 
+      terr(p->loc, "cannot determine pattern type");
+    type_t t = compress(*topt);
+    switch (t) {
+    case &AggrType(ainfo):
+      p->r = new Aggr_p(new ainfo, exist_ts, dps, dots);
+      resolve_pat(te, topt, p); 
+      break;
+    default:
+      terr(p->loc, "pattern expects aggregate type instead of %s",
+           typ2string(t));
+           
+      break;
+    }
+    return;
+    
+  case &Aggr_p(&AggrInfo({.UnknownAggr = $(k,n,_)},targs), *exist_ts, dps, dots):
     try { 
       let adp = lookup_aggrdecl(te,p->loc,n);
       let ad = *adp;
@@ -125,7 +142,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
           new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
         *exist_ts = List::imp_append(*exist_ts,new_ts);
       }
-      p->r = new Aggr_p(AggrInfo(KnownAggr(adp), targs), *exist_ts, dps,
+      p->r = new Aggr_p(new AggrInfo(KnownAggr(adp), targs), *exist_ts, dps,
                         dots);
     } catch { case Dict::Absent: 
       terr(p->loc, "Non-aggregate name has designator patterns"); 
@@ -193,7 +210,7 @@ static pat_t wild_pat(seg_t loc) {
 }
 
 static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
-  resolve_pat(te,p);
+  resolve_pat(te,topt,p);
   type_t t;
   tcpat_result_t res = TcPatResult(NULL,NULL);
 
@@ -290,7 +307,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // topt suggests we do otherwise.
     if(inner_topt == NULL) 
       switch (compress(p2->topt->v)) {
-      case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),targs}) && !tud->is_flat:
+      case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud,tuf)},targs}):
 	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),targs,new Opt(ptr_rgn)});
 	break;
       default:
@@ -347,7 +364,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     t = new TupleType(List::imp_rev(pat_ts));
     break;
 
-  case &Aggr_p(AggrInfo(KnownAggr(&ad),*tsp),exist_ts,*dps_p,dots):
+  case &Aggr_p(&AggrInfo({.KnownAggr = &ad},*tsp),exist_ts,*dps_p,dots):
     let dps = *dps_p;
     string_t aggr_str = (ad->kind == StructA) ? "struct" : "union";
     if(ad->impl==NULL) {
@@ -470,9 +487,6 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
   case &Datatype_p(tud,tuf,*ps_p,dots): 
     let ps = *ps_p;
-    // don't allow reference patterns in flat datatypes -- these are like
-    // existentials (see Dan's ESOP paper.)
-    if (tud->is_flat) rgn_opt = NULL;
     TEMP_RGN(te, rgn) {
       list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
@@ -480,16 +494,14 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       let env      = $(tenv_tvs,rgn);
       let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
       let all_typs = List::map(snd,inst);
-      // unless topt says otherwise, guess we want Datatype when there are no args or we have a flat datatype
-      if(tqts == NULL || tud->is_flat) {
-        opt_t<type_t> ropt = NULL;
-        if (!tud->is_flat) 
-          ropt = new Opt(new_evar(&rk,new Opt(tenv_tvs)));
+      // unless topt says otherwise, guess we want Datatype when no args 
+      if(tqts == NULL) {
+        opt_t<type_t> ropt = new Opt(new_evar(&rk,new Opt(tenv_tvs)));
 	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),all_typs,ropt});
       } else
 	t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
 						all_typs});
-      if(topt != NULL && (tqts == NULL || tud->is_flat))
+      if(topt != NULL && tqts == NULL)
 	switch(compress(*topt)) {
 	case &DatatypeFieldType(_): 
 	  t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
@@ -540,7 +552,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     }
     break;
 
-  case &Aggr_p(AggrInfo(UnknownAggr(_,_),_),_,_,_):
+  case &Aggr_p(NULL,_,_,_):
+  case &Aggr_p(&AggrInfo({.UnknownAggr = _},_),_,_,_):
   case &UnknownId_p(_):         
   case &Exp_p(_):
   case &UnknownCall_p(_,_,_): 
@@ -644,8 +657,10 @@ void check_pat_regions(tenv_t te, pat_t p) {
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
 // Xdatatypes is infinite (i.e., NULL).
-static __flat__ datatype Name_value { Name_v(string_t); Int_v(int); };
-typedef datatype Name_value name_value_t;
+static @tagged union Name_value { string_t Name_v; int Int_v; };
+typedef union Name_value name_value_t;
+name_value_t Name_v(string_t<`H> s) { return Name_value{.Name_v = s}; }
+name_value_t Int_v(int i) { return Name_value{.Int_v = i}; }
 static struct Con_s<`r::R> {
   name_value_t name;
   int          arity;
@@ -663,15 +678,15 @@ typedef datatype `r Simple_pat<`r> simple_pat_t<`r>;
 // used for creating sets of constructors
 static int compare_con(con_t c1, con_t c2) {
   switch (c1->name) {
-  case Name_v(n1):
+  case {.Name_v = n1}:
     switch (c2->name) {
-    case Name_v(n2): return strcmp(n1,n2);
-    case Int_v(_):   return -1;
+    case {.Name_v = n2}: return strcmp(n1,n2);
+    case {.Int_v = _}:   return -1;
     }
-  case Int_v(i1):
+  case {.Int_v = i1}:
     switch (c2->name) {
-    case Name_v(_): return 1;
-    case Int_v(i2): return i1 - i2;
+    case {.Name_v = _}: return 1;
+    case {.Int_v = i2}: return i1 - i2;
     }
   }
 }
@@ -753,16 +768,16 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
       bool is_nullable = false;
       bool still_working = true;
       while (still_working) {
-	switch (n->v) {
-	case Forward_constr(y): 
-	  n->v = y->v; 
+	switch (n) {
+	case &Constraint{.Forward_constr = y}:
+	  *n = *y;
 	  continue;
-	case No_constr:
-          n->v = Eq_constr(false);
+	case &Constraint{.No_constr = _}:
+          n->Eq_constr = false;
           is_nullable   = false;
           still_working = false;  // EXIT LOOP
           break;
-	case Eq_constr(x):
+	case &Constraint{.Eq_constr = x}:
           is_nullable   = (bool)x;
           still_working = false;  // EXIT LOOP
           break;
@@ -811,7 +826,7 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   case &Tuple_p(ps,_): 
     s = tuple_pat(r,List::rmap_c(r,compile_pat,r,ps),p); break;
 
-  case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,dlps,_):
+  case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_):
     // FIX: doesn't look like multiple designators are right
     // we do different things for structs and unions:
     if (ad->kind == StructA) {
@@ -1182,7 +1197,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       return aprintf("&%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
     case &Pointer_p(_):
       return aprintf("&%s",descs2string(r,ds));
-    case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,dlps,_): 
+    case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_): 
       if (ad->kind == UnionA) {
         switch (dlps) {
         case &List{&$(&List{&FieldName(f),_},_),_}:
@@ -1235,7 +1250,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
           return "NULL";
       }
       return "&_";
-    case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),_,_}):
+    case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_,_}):
       if (tud->is_extensible) throw Desc2string;
       let fields = tud->fields->v;
       int span = List::length(fields);
@@ -1245,14 +1260,12 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
         if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, orig_pat))) {
           if (List::length(args) == 0)
             return n;
-          else if (tud->is_flat)
-            return aprintf("%s(...)",n);
-            else 
-              return aprintf("&%s(...)",n);
+          else 
+            return aprintf("&%s(...)",n);
         }
       }
       throw Desc2string;
-    case &AggrType(AggrInfo{KnownAggr(&ad),_}) && ad->kind == UnionA:
+    case &AggrType(AggrInfo{{.KnownAggr = &ad},_}) && ad->kind == UnionA:
       let fields = ad->impl->fields;
       int span = List::length(fields);
       let &$(_,&union_name) = ad->name;

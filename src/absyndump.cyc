@@ -205,11 +205,11 @@ void dumpqvar(qvar_t v) {
   let nsl = NULL;
   stringptr_t *prefix = NULL;
   switch ((*v)[0]) {
-  case Loc_n: fallthru(NULL);
-  case Rel_n(x):
+  case {.Loc_n = _}: fallthru(NULL);
+  case {.Rel_n = x}:
     nsl = x;
     break;
-  case Abs_n(x):
+  case {.Abs_n = x}:
     if (qvar_to_Cids && add_cyc_prefix) 
       prefix = &Absynpp::cyc_stringptr;
     nsl = x;
@@ -422,8 +422,8 @@ void dumpntyp(type_t t) {
   case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
   case &DatatypeType(DatatypeInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,_)): fallthru(n,is_x);
-    case KnownDatatype(& &Datatypedecl(_,n,_,_,is_x,_)):
+    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: fallthru(n,is_x);
+    case {.KnownDatatype = & &Datatypedecl(_,n,_,_,is_x)}:
       if(is_x) dump("@extensible "); 
       dump("datatype ");
       type_t r = (ropt) ? ropt->v : HeapRgn;
@@ -438,10 +438,10 @@ void dumpntyp(type_t t) {
     break;
   case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
     switch(tuf_info) {
-    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
+    case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
       fallthru(tname,is_x,fname);
-    case KnownDatatypefield(&Datatypedecl(_,tname,_,_,is_x,_),
-                            &Datatypefield(fname,_,_,_)):
+    case {.KnownDatatypefield = $(&Datatypedecl(_,tname,_,_,is_x),
+                                  &Datatypefield(fname,_,_,_))}:
       if(is_x) dump("@extensible ");
       dump("datatype ");                            
       dumpqvar(tname);
@@ -570,18 +570,18 @@ void dumpexp_prec(int inprec, exp_t e) {
   if(inprec >= myprec)
     dump_nospace("(");
   switch (e->r) {
-  case &Const_e(Char_c(sg,ch)):
+  case &Const_e({.Char_c = $(sg,ch)}):
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
-  case &Const_e(Short_c(sg,s)):     dump(aprintf("%d",s)); break;
-  case &Const_e(Int_c(None,i)):     fallthru(i);
-  case &Const_e(Int_c(Signed,i)):   dump(aprintf("%d",i)); break;
-  case &Const_e(Int_c(Unsigned,i)): dump(aprintf("%u",(unsigned)i)); break;
-  case &Const_e(LongLong_c(sg,i)):
+  case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s)); break;
+  case &Const_e({.Int_c = $(None,i)}):     fallthru(i);
+  case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
+  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%u",(unsigned)i)); break;
+  case &Const_e({.LongLong_c = $(sg,i)}):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
-  case &Const_e(Float_c(x)): dump(x); break;
-  case &Const_e(Null_c): dump("NULL"); break;
-  case &Const_e(String_c(s)):
+  case &Const_e({.Float_c = x}): dump(x); break;
+  case &Const_e({.Null_c = _}): dump("NULL"); break;
+  case &Const_e({.String_c = s}):
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
 
@@ -676,6 +676,11 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Valueof_e(t):
     dump("valueof("); dumptyp(t); dump_char(')'); break;
+
+  case &Tagcheck_e(e,f):
+    dump("tagcheck("); dumpexp(e); dump_char('.'); dump_nospace(*f); 
+    dump_char(')'); 
+    break;
 
   case &Offsetof_e(t,&StructField(n)):
     dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);
@@ -930,10 +935,16 @@ void dumppat(pat_t p) {
   case &UnknownCall_p(q,ps,dots): 
     string_t term = dots ? ", ...)" : ")";
     dumpqvar(q); group(dumppat,ps,"(",term,","); break;
-  case &Aggr_p(AggrInfo(info,_),exists,dps,dots):
+  case &Aggr_p(&AggrInfo(info,_),exists,dps,dots):
     let $(_,n) = aggr_kinded_name(info);
     string_t term = dots ? ", ...)" : ")";
     dumpqvar(n); dump_char('{');
+    egroup(dumptvar,exists,"[","]",",");
+    group(dumpdp,dps,"",term,",");
+    break;
+  case &Aggr_p(NULL,exists,dps,dots):
+    string_t term = dots ? ", ...)" : ")";
+    dump_char('{');
     egroup(dumptvar,exists,"[","]",",");
     group(dumpdp,dps,"",term,",");
     break;
@@ -1128,14 +1139,12 @@ void dumpdecl(decl_t d) {
       dump(";");
     }
     break;
-  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x,is_flat)):
+  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x)):
     dumpscope(sc);
-    dump("datatype");
-    if (is_flat)
-      dump_nospace(" __attribute__((flat))");
+    if (is_x) dump("@extensible ");
+    dump("datatype ");
     dumpqvar(name);
     dumptvars(tvs);
-    if (is_x) dump("@extensible");
     if(fields == NULL)
       dump_semi();
     else  {

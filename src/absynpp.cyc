@@ -718,9 +718,9 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &DatatypeType(DatatypeInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,_)): 
+    case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: 
       fallthru(n,is_x);
-    case KnownDatatype(&&Datatypedecl(_,n,_,_,is_x,_)):
+    case {.KnownDatatype = &&Datatypedecl(_,n,_,_,is_x)}:
       let kw = text("datatype ");
       let ext = is_x ? text("@extensible ") : nil_doc();
       type_t r = (ropt) ? ropt->v : HeapRgn;
@@ -735,10 +735,10 @@ doc_t ntyp2doc(type_t t) {
     break;
   case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
     switch(tuf_info) {
-    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
+    case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
       fallthru(tname,is_x,fname);
-    case KnownDatatypefield(&Datatypedecl(_,tname,_,_,is_x,_),
-                          &Datatypefield(fname,_,_,_)):
+    case {.KnownDatatypefield = $(&Datatypedecl(_,tname,_,_,is_x),
+             &Datatypefield(fname,_,_,_))}:
       let kw = text(is_x ? "@extensible datatype " : "datatype ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
@@ -876,13 +876,13 @@ string_t qvar2string(qvar_t q) {
   let prefix = NULL;
   let match;
   switch ((*q)[0]) {
-  case Loc_n:
+  case {.Loc_n = _}:
     fallthru(NULL);
-  case Rel_n(x):
+  case {.Rel_n = x}:
     match = false;
     prefix = x;
     break;
-  case Abs_n(x):
+  case {.Abs_n = x}:
     match = use_curr_namespace && list_prefix(strptrcmp, x, curr_namespace);
     prefix = qvar_to_Cids && add_cyc_prefix ? new List(cyc_stringptr, x) : x;
     break;
@@ -920,9 +920,9 @@ string_t typedef_name2string(qvar_t v) {
   // otherwise we should not print the complete namespace here (it won't reparse)
   if (use_curr_namespace) {
     switch ((*v)[0]) {
-    case Loc_n: fallthru;
-    case Rel_n(NULL): return *((*v)[1]);
-    case Abs_n(l):
+    case {.Loc_n = _}: fallthru;
+    case {.Rel_n = NULL}: return *((*v)[1]);
+    case {.Abs_n = l}:
       if (list_cmp(strptrcmp, l, curr_namespace) == 0) {
 	return *((*v)[1]);
       } else {
@@ -1002,6 +1002,7 @@ int exp_prec(exp_t e) {
   case &Sizeoftyp_e(_):         
   case &Sizeofexp_e(_):         
   case &Valueof_e(_):
+  case &Tagcheck_e(...):
   case &Offsetof_e(...):        
   case &Gentyp_e(...):          
   case &Deref_e(...):             return 130;
@@ -1108,6 +1109,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Sizeoftyp_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
+  case &Tagcheck_e(e,f): 
+    s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")")); 
+    break;
   case &Offsetof_e(t,&StructField(n)): 
     s = cat(text("offsetof("), typ2doc(t), text(","), textptr(n), text(")"));
     break;
@@ -1241,15 +1245,16 @@ doc_t exps2doc_prec(int inprec, list_t<exp_t> es) {
 // FIX: take care of sign for Char_c and Short_c
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
-  case Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
-  case Short_c(sg,s):     return text(aprintf("%d",(int)s));
-  case Int_c(None,i):     fallthru(i);
-  case Int_c(Signed,i):   return text(aprintf("%d",i));
-  case Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
-  case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
-  case Float_c(x):  return text(x);
-  case Null_c:      return text("NULL");
-  case String_c(s):
+  case {.Char_c = $(sg,ch)}:     return text(aprintf("'%s'",char_escape(ch)));
+  case {.Short_c = $(sg,s)}:     return text(aprintf("%d",(int)s));
+  case {.Int_c = $(None,i)}:     fallthru(i);
+  case {.Int_c = $(Signed,i)}:   return text(aprintf("%d",i));
+  case {.Int_c = $(Unsigned,i)}: return text(aprintf("%u",(unsigned)i));
+  case {.LongLong_c = $(sg,i)}:  
+    return text("<<FIX LONG LONG CONSTANT>>"); // FIX
+  case {.Float_c = x}:  return text(x);
+  case {.Null_c = _}:      return text("NULL");
+  case {.String_c = s}:
     return cat(text("\""), text(string_escape(s)), text("\""));
   }
 }
@@ -1502,10 +1507,16 @@ doc_t pat2doc(pat_t p) {
     string_t term = dots ? ", ...)" : ")";
     s = cat(qvar2doc(q), group("(",term,",",List::map(pat2doc,ps)));
     break;
-  case &Aggr_p(AggrInfo(info,_),exists,dps,dots):
+  case &Aggr_p(&AggrInfo(info,_),exists,dps,dots):
     string_t term = dots ? ", ...}" : "}";
     let $(_,n) = aggr_kinded_name(info);
     s = cat(qvar2doc(n), lb(),
+	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
+	    group("",term,",",List::map(dp2doc,dps)));
+    break;
+  case &Aggr_p(NULL,exists,dps,dots):
+    string_t term = dots ? ", ...}" : "}";
+    s = cat(lb(),
 	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
 	    group("",term,",",List::map(dp2doc,dps)));
     break;
@@ -1688,19 +1699,17 @@ doc_t decl2doc(decl_t d) {
     s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
             qvar2doc(vd->name),text(" = "),exp2doc(e),text(";"));
     break;
-  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x,is_flat)):
+  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x)):
     if (fields==NULL)
       s = cat(scope2doc(sc),
               (is_x ? text("@extensible") : blank_doc()),
               text("datatype "),
-              (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
               text(";"));
     else
       s = cat(scope2doc(sc),
               (is_x ? text("@extensible ") : blank_doc()),
-              (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               text("datatype "),
               (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),

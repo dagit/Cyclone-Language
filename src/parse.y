@@ -148,6 +148,36 @@ static void unimp(string_t msg,seg_t sg) {
 	  string_of_segment(sg),msg);
   return;
 }
+////////////////// Collapsing pointer qualifiers ///////////////////////////
+static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
+         conref_t<bool> zeroterm,type_t rgn) 
+  collapse_pointer_quals(seg_t loc, conref_t<bool> nullable, 
+                         conref_t<bounds_t> bound, type_t rgn, 
+                         pointer_quals_t pqs) {
+  // for now, the last qualifier wins and overrides previous ones
+  conref_t<bool> zeroterm = empty_conref();
+  for (; pqs != NULL; pqs = pqs->tl) {
+    switch (pqs->hd) {
+    case Zeroterm_ptrqual: 
+      zeroterm = true_conref; break;
+    case Nozeroterm_ptrqual:
+      zeroterm = false_conref; break;
+    case Nullable_ptrqual:
+      nullable = true_conref; break;
+    case Notnull_ptrqual:
+      nullable = false_conref; break;
+    case Fat_ptrqual:
+      bound = bounds_dyneither_conref; break;
+    case Thin_ptrqual:
+      bound = bounds_one_conref; break;
+    case &Numelts_ptrqual(e):
+      bound = new_conref(new Upper_b(e)); break;
+    case &Region_ptrqual(t):
+      rgn = t; break;
+    }
+  }
+  return $(nullable,bound,zeroterm,rgn);
+}
 
 ////////////////// Functions for creating abstract syntax //////////////////
 
@@ -486,12 +516,12 @@ static $(type_t,opt_t<decl_t>)
         switch (d->r) {
         case &Aggr_d(ad):
           let args = List::map(tvar2typ,List::map(copy_tvar,ad->tvs));
-          t = new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name),args));
+          t = new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name,NULL),args));
           if (ad->impl!=NULL) declopt = new Opt(d);
 	  break;
         case &Datatype_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
-          opt_t<type_t> ropt = tud->is_flat ? NULL : new Opt(HeapRgn);
+          opt_t<type_t> ropt = new Opt(HeapRgn);
           t = new DatatypeType(DatatypeInfo(KnownDatatype(new tud),args,ropt));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
@@ -746,17 +776,18 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       return new List(d,NULL);
     } else {
       switch (t) {
-      case &AggrType(AggrInfo(UnknownAggr(k,n),ts)):
+        // FIX: we're not doing anything with the @tagged qualifier here...
+      case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
 	let ts2 = List::map_c(typ2tvar,loc,ts);
 	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
 	if (atts != NULL) err("bad attributes on type declaration",loc);
 	return new List(new_decl(new Aggr_d(ad),loc),NULL);
-      case &DatatypeType(DatatypeInfo(KnownDatatype(tudp),_,_)):
+      case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_,_)):
 	if(atts != NULL) err("bad attributes on datatype", loc);
 	return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
-      case &DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo(n,isx,is_flat)),ts,_)):
+      case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let tud = datatype_decl(s, n, ts2, NULL, isx, is_flat, loc);
+        let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
         if (atts != NULL) err("bad attributes on datatype",loc);
         return new List(tud,NULL);
       case &EnumType(n,_):
@@ -877,8 +908,9 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE XTUNION TUNION
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_QUAL ZEROTERM_QUAL PORTON PORTOFF FLAT_kw DYNREGION_T
-%token ALIAS NUMELTS VALUEOF VALUEOF_T
+%token GEN NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
+%token ALIAS NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
+%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
 %token NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL EXTENSIBLE_QUAL RESETABLE_QUAL
 // double and triple-character tokens
@@ -900,16 +932,16 @@ using Parse;
 %union {
   Int_tok($(sign_t,int));
   Char_tok(char);
-  String_tok(string_t);
-  Stringopt_tok(opt_t<stringptr_t>);
+  String_tok(string_t<`H>);
+  Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H>);
   QualId_tok(qvar_t);
 }
 /* types for productions */
 %type <$(sign_t,int)> INTEGER_CONSTANT
 %type <char> CHARACTER_CONSTANT
-%type <string_t> FLOATING_CONSTANT namespace_action
-%type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
-%type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@> pointer_null_and_bound
+%type <string_t<`H>> FLOATING_CONSTANT namespace_action
+%type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
+%type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@`H> pointer_null_and_bound
 %type <conref_t<bounds_t>> pointer_bound
 %type <exp_t> primary_expression postfix_expression unary_expression
 %type <exp_t> cast_expression constant multiplicative_expression
@@ -920,10 +952,10 @@ using Parse;
 %type <exp_t> assignment_expression expression constant_expression
 %type <exp_t> initializer array_initializer
 %type <exp_opt_t> open_exp_opt
-%type <list_t<exp_t>> argument_expression_list argument_expression_list0
-%type <list_t<$(list_t<designator_t>,exp_t)@>> initializer_list
+%type <list_t<exp_t,`H>> argument_expression_list argument_expression_list0
+%type <list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>> initializer_list
 %type <primop_t> unary_operator 
-%type <opt_t<primop_t>> assignment_operator
+%type <opt_t<primop_t,`H>> assignment_operator
 %type <qvar_t> QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
 %type <qvar_t> qual_opt_identifier qual_opt_typedef
 %type <qvar_t> using_action struct_union_name
@@ -931,59 +963,60 @@ using Parse;
 %type <stmt_t> compound_statement block_item_list
 %type <stmt_t> expression_statement selection_statement iteration_statement
 %type <stmt_t> jump_statement
-%type <list_t<switch_clause_t>> switch_clauses
+%type <list_t<switch_clause_t,`H>> switch_clauses
 %type <pat_t> pattern exp_pattern conditional_pattern logical_or_pattern
 %type <pat_t> logical_and_pattern inclusive_or_pattern exclusive_or_pattern
 %type <pat_t> and_pattern equality_pattern relational_pattern shift_pattern
 %type <pat_t> additive_pattern multiplicative_pattern cast_pattern
 %type <pat_t> unary_pattern postfix_pattern primary_pattern
-%type <$(list_t<pat_t>,bool)@> tuple_pattern_list
-%type <list_t<pat_t>> tuple_pattern_list0
-%type <$(list_t<designator_t>,pat_t)@> field_pattern
-%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list0
-%type <$(list_t<$(list_t<designator_t>,pat_t)@>,bool)@> field_pattern_list
+%type <$(list_t<pat_t,`H>,bool)@`H> tuple_pattern_list
+%type <list_t<pat_t,`H>> tuple_pattern_list0
+%type <$(list_t<designator_t,`H>,pat_t)@`H> field_pattern
+%type <list_t<$(list_t<designator_t,`H>,pat_t)@`H,`H>> field_pattern_list0
+%type <$(list_t<$(list_t<designator_t,`H>,pat_t)@`H,`H>,bool)@`H> field_pattern_list
 %type <fndecl_t> function_definition function_definition2
-%type <list_t<decl_t>> declaration declaration_list
-%type <list_t<decl_t>> prog translation_unit external_declaration
+%type <list_t<decl_t,`H>> declaration declaration_list
+%type <list_t<decl_t,`H>> prog translation_unit external_declaration
 %type <decl_spec_t> declaration_specifiers
-%type <$(declarator_t,exp_opt_t)@> init_declarator
-%type <list_t<$(declarator_t,exp_opt_t)@>> init_declarator_list init_declarator_list0
+%type <$(declarator_t,exp_opt_t)@`H> init_declarator
+%type <list_t<$(declarator_t,exp_opt_t)@`H,`H>> init_declarator_list init_declarator_list0
 %type <storage_class_t> storage_class_specifier
 %type <type_specifier_t> type_specifier type_specifier_notypedef enum_specifier
 %type <type_specifier_t> struct_or_union_specifier datatype_specifier
 %type <aggr_kind_t> struct_or_union
 %type <tqual_t> type_qualifier tqual_list
-%type <list_t<aggrfield_t>> struct_declaration_list struct_declaration
-%type <list_t<list_t<aggrfield_t>>> struct_declaration_list0
-%type <list_t<type_modifier_t>> pointer one_pointer
+%type <list_t<aggrfield_t,`H>> struct_declaration_list struct_declaration
+%type <list_t<list_t<aggrfield_t,`H>,`H>> struct_declaration_list0
+%type <list_t<type_modifier_t<`H>,`H>> pointer one_pointer
 %type <declarator_t> declarator direct_declarator declarator_withtypedef direct_declarator_withtypedef
-%type <$(declarator_t,exp_opt_t)@> struct_declarator
-%type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
+%type <$(declarator_t,exp_opt_t)@`H> struct_declarator
+%type <list_t<$(declarator_t,exp_opt_t)@`H,`H>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
-%type <bool> optional_inject resetable_qual_opt 
+%type <bool> optional_inject resetable_qual_opt qual_datatype
 %type <scope_t> datatypefield_scope
 %type <datatypefield_t> datatypefield
-%type <list_t<datatypefield_t>> datatypefield_list
-%type <$(tqual_t,list_t<type_specifier_t>,attributes_t)@> specifier_qualifier_list notypedef_specifier_qualifier_list
-%type <list_t<var_t>> identifier_list identifier_list0
-%type <$(opt_t<var_t>,tqual_t,type_t)@> parameter_declaration type_name
-%type <list_t<$(opt_t<var_t>,tqual_t,type_t)@>> parameter_list
-%type <$(list_t<$(opt_t<var_t>,tqual_t,type_t)@>, bool,vararg_info_t *,opt_t<type_t>, list_t<$(type_t,type_t)@>)@> parameter_type_list
-%type <list_t<type_t>> type_name_list type_params_opt effect_set region_set
-%type <list_t<type_t>> atomic_effect
-%type <list_t<designator_t>> designation designator_list
+%type <list_t<datatypefield_t,`H>> datatypefield_list
+%type <$(tqual_t,list_t<type_specifier_t,`H>,attributes_t)@`H> specifier_qualifier_list notypedef_specifier_qualifier_list
+%type <list_t<var_t,`H>> identifier_list identifier_list0
+%type <$(opt_t<var_t,`H>,tqual_t,type_t)@`H> parameter_declaration type_name
+%type <list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H>> parameter_list
+%type <$(list_t<$(opt_t<var_t,`H>,tqual_t,type_t)@`H,`H>, bool,vararg_info_t *`H,opt_t<type_t,`H>, list_t<$(type_t,type_t)@`H,`H>)@`H> parameter_type_list
+%type <list_t<type_t,`H>> type_name_list type_params_opt effect_set region_set
+%type <list_t<type_t,`H>> atomic_effect
+%type <list_t<designator_t,`H>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
 %type <type_t> any_type_name type_var rgn_opt
-%type <list_t<attribute_t>> attributes_opt attributes attribute_list
+%type <list_t<attribute_t,`H>> attributes_opt attributes attribute_list
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
-%type <list_t<enumfield_t>> enum_declaration_list
-%type <opt_t<type_t>> optional_effect opt_rgn_opt
-%type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
+%type <list_t<enumfield_t,`H>> enum_declaration_list
+%type <opt_t<type_t,`H>> optional_effect opt_rgn_opt
+%type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <conref_t<bool>> zeroterm_qual_opt
-%type <list_t<$(Position::seg_t,qvar_t,bool)@>> export_list export_list_values
-%type <$(bool,bool)> qual_datatype
+%type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_values
+%type <pointer_qual_t> pointer_qual
+%type <pointer_quals_t> pointer_quals
 /* start production */
 %start prog
 %%
@@ -1485,9 +1518,12 @@ struct_or_union_specifier:
 				    aggrdecl_impl(exist_ts,$6,$7,false), NULL,
 				    LOC(@1,@8))));
     }
-/* Cyc:  type_params_opt are added */
+| TAGGED_QUAL struct_or_union struct_union_name type_params_opt 
+    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($2,$3,new Opt(true)),$4)),
+		      LOC(@1,@4)));
+    }
 | struct_or_union struct_union_name type_params_opt 
-    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2),$3)),
+    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2,NULL),$3)),
 		      LOC(@1,@3)));
     }
 ;
@@ -1612,7 +1648,7 @@ struct_declarator:
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(new $((new Declarator(new $(Rel_n(NULL), new ""), NULL)),
+      $$=^$(new $((new Declarator(new $(Rel_n(NULL),new ""), NULL)),
                   (exp_opt_t)$2));
     }
 | declarator_withtypedef ':' constant_expression
@@ -1622,17 +1658,17 @@ struct_declarator:
 // FIX: hack to have rgn_opt in 1st and 3rd cases
 datatype_specifier:
   qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt '{' datatypefield_list '}'
-    { let $(is_flat,is_extensible) = $1;
+    { let is_extensible = $1;
       let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
       $$ = ^$(new Decl_spec(datatype_decl(Public, $3,ts,new Opt($6), 
-                                          is_extensible,is_flat,LOC(@1,@7))));
+                                          is_extensible,LOC(@1,@7))));
     }
 | qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt 
-    { let $(is_flat,is_extensible) = $1;
-      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($3,is_extensible,is_flat)), $4, $2)), LOC(@1,@4)));
+    { let is_extensible = $1;
+      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($3,is_extensible)), $4, $2)), LOC(@1,@4)));
     }
 | qual_datatype opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt 
-   {  let $(is_flat,is_extensible) = $1;
+   {  let is_extensible = $1;
       $$=^$(type_spec(new DatatypeFieldType(DatatypeFieldInfo(
 		  UnknownDatatypefield(UnknownDatatypeFieldInfo($3,$5,is_extensible)),$6)),
 		      LOC(@1,@6)));
@@ -1640,9 +1676,8 @@ datatype_specifier:
 ;
 
 qual_datatype:
-  DATATYPE { $$ = ^$($(false,false)); }
-| FLAT_kw DATATYPE { $$ = ^$($(true,false)); }
-| EXTENSIBLE_QUAL DATATYPE { $$ = ^$($(false,true)); }
+  DATATYPE { $$ = ^$(false); }
+| EXTENSIBLE_QUAL DATATYPE { $$ = ^$(true); }
 ;
 
 datatypefield_list:
@@ -1783,31 +1818,57 @@ pointer:
 | one_pointer pointer { $$ = ^$(imp_append($1,$2)); }
 
 one_pointer:
-  pointer_null_and_bound zeroterm_qual_opt rgn_opt attributes_opt tqual_list
+  pointer_null_and_bound pointer_quals rgn_opt attributes_opt tqual_list
   { list_t<type_modifier_t> ans = NULL;
     if($4 != NULL)
       ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
     // don't put location info on every pointer -- too expensive
     ptrloc_t ptrloc = NULL;
+    let $(ploc,nullable,bound) = *$1;
     if (Absyn::porting_c_code)
-      ptrloc = new PtrLoc{.ptr_loc=(*$1)[0],.rgn_loc=LOC(@3,@3),
+      ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=LOC(@3,@3),
                           .zt_loc=LOC(@2,@2)};
-    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[1],(*$1)[2],$2,ptrloc),$5), ans);
+    let $(nullable,bound,zeroterm,rgn_opt) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
+    ans = new List(new Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc),$5), ans);
     $$ = ^$(ans);
   }
+
+pointer_quals:
+  /* empty */ { $$=^$(NULL); }
+| pointer_qual pointer_quals { $$=^$(new List($1,$2)); }
+;
+
+pointer_qual:
+  NUMELTS_QUAL '(' assignment_expression ')' 
+  { $$ = ^$(new Numelts_ptrqual($3)); }
+| REGION_QUAL '(' any_type_name ')'
+  { $$ = ^$(new Region_ptrqual($3)); }
+| THIN_QUAL
+  { $$ = ^$(Thin_ptrqual); }
+| FAT_QUAL
+  { $$ = ^$(Fat_ptrqual); }
+| ZEROTERM_QUAL
+  { $$ = ^$(Zeroterm_ptrqual); }
+| NOZEROTERM_QUAL
+  { $$ = ^$(Nozeroterm_ptrqual); }
+| NOTNULL_QUAL
+  { $$ = ^$(Notnull_ptrqual); }
+| NULLABLE_QUAL
+  { $$ = ^$(Nullable_ptrqual); }
+;
 
 pointer_null_and_bound:
   '*' pointer_bound 
    { // avoid putting location info on here when not porting C code
-     seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL;
+     seg_t loc = LOC(@1,@1);
      $$=^$(new $(loc,true_conref, $2)); 
    }
 | '@' pointer_bound 
-  {  seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL;
+  {  seg_t loc = LOC(@1,@1);
      $$=^$(new $(loc, false_conref, $2)); 
   }
 | '?' 
-  { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
+  { seg_t loc = LOC(@1,@1);
     $$=^$(new $(loc, true_conref,  bounds_dyneither_conref));  
   }
 
@@ -2436,19 +2497,19 @@ pattern:
 | constant
   { exp_t e = $1;
     switch (e->r) {
-    case &Const_e(Char_c(s,i)): 
+    case &Const_e({.Char_c = $(s,i)}): 
       $$=^$(new_pat(new Char_p(i),e->loc)); break;
-    case &Const_e(Short_c(s,i)):
+    case &Const_e({.Short_c = $(s,i)}):
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
-    case &Const_e(Int_c(s,i)):
+    case &Const_e({.Int_c = $(s,i)}):
       $$=^$(new_pat(new Int_p(s,i),e->loc)); break;
-    case &Const_e(Float_c(s)):
+    case &Const_e({.Float_c = s}):
       $$=^$(new_pat(new Float_p(s),e->loc)); break;
-    case &Const_e(Null_c):
+    case &Const_e({.Null_c = _}):
       $$=^$(new_pat(Null_p,e->loc)); break;
-    case &Const_e(String_c(_)): 
+    case &Const_e({.String_c = _}): 
       err("strings cannot occur within patterns",LOC(@1,@1)); break;
-    case &Const_e(LongLong_c(_,_)): 
+    case &Const_e({.LongLong_c = _}): 
       unimp("long long's in patterns",LOC(@1,@1)); break;
     default: 
       err("bad constant in case",LOC(@1,@1));
@@ -2473,8 +2534,13 @@ pattern:
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($4); 
       let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$=^$(new_pat(new Aggr_p(AggrInfo(UnknownAggr(StructA,$1),NULL),
+      $$=^$(new_pat(new Aggr_p(new AggrInfo(UnknownAggr(StructA,$1,NULL),NULL),
 			       exist_ts,fps,dots),LOC(@1,@5)));
+   }
+| '{' type_params_opt field_pattern_list '}'
+   {  let $(fps, dots) = *($3); 
+      let exist_ts = List::map_c(typ2tvar,LOC(@2,@2),$2);
+      $$=^$(new_pat(new Aggr_p(NULL,exist_ts,fps,dots),LOC(@1,@4)));
    }
 | '&' pattern
     { $$=^$(new_pat(new Pointer_p($2),LOC(@1,@2))); }
@@ -2712,6 +2778,10 @@ unary_expression:
                    LOC(@1,@11))); }
 | NUMELTS '(' expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
+| TAGCHECK '(' postfix_expression '.' field_name ')'
+   { $$=^$(new_exp(new Tagcheck_e($3,new $5),LOC(@1,@6))); }
+| TAGCHECK '(' postfix_expression PTR_OP field_name ')'
+   { $$=^$(new_exp(new Tagcheck_e(deref_exp($3,LOC(@3,@3)),new $5),LOC(@1,@6))); }
 | VALUEOF '(' type_name ')'
    { let $(_,_,t) = *$3;
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
@@ -2820,17 +2890,17 @@ right_angle:
 | RIGHT_OP { yylex_buf->lex_curr_pos -= 1; }
 %%
 
-void yyprint(int i, datatype YYSTYPE v) {
+void yyprint(int i, union YYSTYPE v) {
   switch (v) {
-  case Int_tok($(_,i2)): fprintf(stderr,"%d",i2);      break;
-  case Char_tok(c):       fprintf(stderr,"%c",c);       break;
-  case String_tok(s):          fprintf(stderr,"\"%s\"",s);  break;
-  case QualId_tok(&$(p,v2)):
+  case {.Int_tok = $(_,i2)}: fprintf(stderr,"%d",i2);      break;
+  case {.Char_tok = c}:       fprintf(stderr,"%c",c);       break;
+  case {.String_tok = s}:          fprintf(stderr,"\"%s\"",s);  break;
+  case {.QualId_tok = &$(p,v2)}:
     let prefix = NULL;
     switch (p) {
-    case Rel_n(x): prefix = x; break;
-    case Abs_n(x): prefix = x; break;
-    case Loc_n: break;
+    case {.Rel_n = x}: prefix = x; break;
+    case {.Abs_n = x}: prefix = x; break;
+    case {.Loc_n = _}: break;
     }
     for (; prefix != NULL; prefix = prefix->tl)
       fprintf(stderr,"%s::",*(prefix->hd));

@@ -121,10 +121,10 @@ extern int comment(Lexing::Lexbuf<`a>);
 int yylex() {
   int ans = Lexer::lexmain(lbuf->v);
   switch (ans) {
-  case TIDENT:  yylval = String_tok(Lexer::token_string);   break;
-  case TSTRING: yylval = String_tok(Lexer::token_string);   break;
-  case TCHAR:   yylval = Char_tok((char)Lexer::token_char); break;
-  case TACTION: yylval = Location_tok(Lexer::token_action); break;
+  case TIDENT:  yylval = YYSTYPE{.String_tok = Lexer::token_string};   break;
+  case TSTRING: yylval = YYSTYPE{.String_tok = Lexer::token_string};   break;
+  case TCHAR:   yylval = YYSTYPE{.Char_tok = (char)Lexer::token_char}; break;
+  case TACTION: yylval = YYSTYPE{.Location_tok = Lexer::token_action}; break;
   default: break;
   }
   return ans;

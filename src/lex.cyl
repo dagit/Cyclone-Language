@@ -50,13 +50,20 @@ namespace Lex {
 
 static struct Trie<`r::R>;
 typedef struct Trie<`r> *`r trie_t<`r>;
-__flat__ datatype TrieChildren<`r::R> {
-  Zero;
-  One(int, trie_t<`r>);
-  Many(trie_t<`r> @{64}`r); // enough room for id chars and `
+@tagged union TrieChildren<`r::R> {
+  int Zero;
+  $(int, trie_t<`r>) One;
+  trie_t<`r> @{64}`r Many; // enough room for id chars and `
 };
+union TrieChildren<`r> Zero() { return TrieChildren{.Zero = 0}; }
+union TrieChildren<`r> One(int i,trie_t<`r> t) { 
+  return TrieChildren{.One = $(i,t)}; 
+}
+union TrieChildren<`r> Many(trie_t<`r>@{64}`r ts) {
+  return TrieChildren{.Many = ts}; 
+}
 static struct Trie<`r::R> {
-  datatype TrieChildren<`r> children;
+  union TrieChildren<`r> children;
   int                 shared_str; // meaning depends on which trie -- see below
 };
 
@@ -88,7 +95,7 @@ static int comment_depth = 0;
 // These needn't be set by lex_init -- they're set while finding a token.
 static $(sign_t,int)        token_int = $(Signed,0);
 static string_t             bogus_string   = "*bogus*";
-static $(nmspace_t,var_t)   token_id_pair = $(Loc_n,
+static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 					      &bogus_string);
 
 static char           token_char   = '\000';
@@ -131,7 +138,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("export", EXPORT, false),
   $("extern", EXTERN, true),
   $("fallthru", FALLTHRU, false),
-  $("__flat__", FLAT_kw, false),
   $("float", FLOAT, true),
   $("for", FOR, true),
   $("__gen", GEN, false),
@@ -167,6 +173,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("static", STATIC, true),
   $("struct", STRUCT, true),
   $("switch", SWITCH, true),
+  $("tagcheck", TAGCHECK, false),
   $("tag_t", TAG_T, false),
   $("throw", THROW, false),
   $("try", TRY, false),
@@ -206,15 +213,15 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
   int    last = offset + len - 1;
   while(i <= last) {
     switch(t->children) {
-    case Many(arr):
+    case {.Many = arr}:
       // walk down one level
       int ch = trie_char(buff[i]);
       if(arr[ch] == NULL)
-	arr[ch] = rnew(r) Trie(Zero,0);
+	arr[ch] = rnew(r) Trie(Zero(),0);
       t = arr[ch];
       ++i;
       break;
-    case One(one_ch, one_trie):
+    case {.One = $(one_ch, one_trie)}:
       // walk down one level
       if(one_ch == buff[i]) {
 	t = one_trie;
@@ -222,16 +229,16 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
 	let arr = rnew(r) {for j < 64: NULL};
 	arr[trie_char(one_ch)] = one_trie;
 	let ch = trie_char(buff[i]);
-	arr[ch] = rnew(r) Trie(Zero,0);
+	arr[ch] = rnew(r) Trie(Zero(),0);
 	t->children = Many(arr); 
 	t = arr[ch];
       }
       ++i;
       break;
-    case Zero:
+    case {.Zero = _}:
       // new string -- extend the trie
       while(i <= last) {
-	let next = rnew(r) Trie(Zero,0);
+	let next = rnew(r) Trie(Zero(),0);
 	t->children = One(buff[i++], next);
 	t = next;
       }
@@ -403,7 +410,7 @@ static void recompute_typedefs() {
   Core::free_dynregion(dyn);
   let NewRegion{<`d2> dyn2} = Core::new_dynregion();
   region d2 = open(dyn2); {
-    typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero,false)};
+    typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero(),false)};
   }
   
  //For each enclosing scope, get the visible namespaces and add all the typedefs
@@ -439,10 +446,10 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   region d = open(dyn); {
     for(int i = 0; i < len; ++i)
     switch (t->children) {
-      case Zero: return false;
-      case One(one_ch, one_trie) && one_ch != s[i]: return false;
-      case One(_,      one_trie): t = one_trie; break;
-      case Many(arr):
+      case {.Zero = _}: return false;
+      case {.One = $(one_ch, one_trie)} && one_ch != s[i]: return false;
+      case {.One = $(_,      one_trie)}: t = one_trie; break;
+      case {.Many = arr}:
         let next = arr[trie_char(s[i])];
         if(next == NULL)
           return false;
@@ -492,11 +499,11 @@ void leave_namespace() {
 void enter_using(qvar_t q) {
   _ ns;
   switch ((*q)[0]) {
-  case Loc_n:
+  case {.Loc_n = _}:
     ns = (List_t<stringptr_t>)(new List((*q)[1],NULL));
     break;
-  case Rel_n(y): fallthru(y);
-  case Abs_n(y):
+  case {.Rel_n = y}: fallthru(y);
+  case {.Abs_n = y}:
     ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],NULL));
     break;
   }
@@ -599,7 +606,24 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
 int token(Lexbuf<`a>);
 int strng(Lexbuf<`a>);
 int comment(Lexbuf<`a>);
+int cyc_qual(Lexbuf<`a>);
 } // namespace Lex
+
+static union YYSTYPE String_tok(string_t<`H> s) {
+  return YYSTYPE{.String_tok = s};
+}
+static union YYSTYPE Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H> s) {
+  return YYSTYPE{.Stringopt_tok = s};
+}
+static union YYSTYPE Int_tok($(sign_t,int) s) {
+  return YYSTYPE{.Int_tok = s};
+}
+static union YYSTYPE Char_tok(char s) {
+  return YYSTYPE{.Char_tok = s};
+}
+static union YYSTYPE QualId_tok(qvar_t s) {
+  return YYSTYPE{.QualId_tok = s};
+}
 
 // for parser -- must not be prefixed
 int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) { 
@@ -642,11 +666,7 @@ rule token = parse
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
       return TYPE_VAR; }
 /* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
-| "@tagged" { return TAGGED_QUAL; }
-| "@zeroterm" { return ZEROTERM_QUAL; }
-| "@nozeroterm" { return NOZEROTERM_QUAL; }
-| "@extensible" { return EXTENSIBLE_QUAL; }
-| "@resetable" { return RESETABLE_QUAL; }
+| '@' { return cyc_qual(lexbuf); }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
       { token_int = intconst(lexbuf,2,0,16);
@@ -746,6 +766,45 @@ rule token = parse
 /* Default case */
 | _   { return (int)(lexeme_char(lexbuf,0)); }
 
+and cyc_qual = parse
+/* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
+ * '@tagged' 'foo' -- so we back up the lexer if necessary -- I don't
+ * see an easier way to do this... */
+  "tagged"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("taggedZ"); return '@'; }
+| "zeroterm"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("zerotermZ"); return '@'; }
+| "nozeroterm"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("nozerotermZ"); return '@'; }
+| "extensible"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("extensibleZ"); return '@'; }
+| "resetable"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("resetableZ"); return '@'; }
+| "region"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("regionZ"); return '@'; }
+| "numelts"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("numeltsZ"); return '@'; }
+| "thin"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("thinZ"); return '@'; }
+| "fat"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("fatZ"); return '@'; }
+| "notnull"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("notnullZ"); return '@'; }
+| "nullable"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("nullableZ"); return '@'; }
+| "tagged" { return TAGGED_QUAL; }
+| "zeroterm" { return ZEROTERM_QUAL; }
+| "nozeroterm" { return NOZEROTERM_QUAL; }
+| "extensible" { return EXTENSIBLE_QUAL; }
+| "resetable" { return RESETABLE_QUAL; }
+| "region" { return REGION_QUAL; }
+| "numelts" { return NUMELTS_QUAL; }
+| "thin" { return THIN_QUAL; }
+| "fat" { return FAT_QUAL; }
+| "notnull" { return NOTNULL_QUAL; }
+| "nullable" { return NULLABLE_QUAL; }
+| _ { lexbuf->lex_curr_pos -= 1; return '@'; }
+
 and strng = parse
     "\"" [' ''\n''\r''\t']* "\""
   /* concatenate adjacent strings */
@@ -818,13 +877,13 @@ void lex_init(bool include_cyclone_keywords) {
       Xarray::rcreate(id_rgn,101,new ((string_t)""));
     // don't use first entry b/c 0 means "not a symbol"
     Xarray::add(symbols, &bogus_string);
-    ids_trie = new DynTrieSymbols{id_dyn, rnew(id_rgn) Trie(Zero,false),
+    ids_trie = new DynTrieSymbols{id_dyn, rnew(id_rgn) Trie(Zero(),false),
                                   symbols};
   }
   let NewRegion{typedefs_dyn} = Core::new_dynregion();
   region typedefs_rgn = open(typedefs_dyn); {
     typedefs_trie = new DynTrie{typedefs_dyn, 
-                                rnew(typedefs_rgn) Trie(Zero,false)};
+                                rnew(typedefs_rgn) Trie(Zero(),false)};
   }
   num_kws       = num_keywords(include_cyclone_keywords);
   kw_nums       = new {for i < num_kws : 0};

@@ -63,10 +63,10 @@ int yylex() {
   case OPEN: fallthru;
   case OPENSLASH: fallthru;
   case REFERENCE:
-    yylval = String_tok(XmlScan::token_string); break;
+    yylval = YYSTYPE{.String_tok = XmlScan::token_string}; break;
   case PI:
-    yylval = Pi_tok(new $((string_t)XmlScan::token_pi,
-                          (string_t)XmlScan::token_string)); 
+    yylval = YYSTYPE{.Pi_tok = new $((string_t)XmlScan::token_pi,
+                                     (string_t)XmlScan::token_string)}; 
     break;
   default: break;
   }

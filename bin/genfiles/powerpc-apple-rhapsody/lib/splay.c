@@ -726,41 +726,40 @@ left;void*right;};int Cyc_Splay_rsplay(struct _RegionHandle*,int(*f)(void*,void*
 void*,void*);int Cyc_Splay_splay(int(*f)(void*,void*),void*,void*);static void Cyc_Splay_rotate_left(
 struct _RegionHandle*r,struct Cyc_Splay_noderef*nr);static void Cyc_Splay_rotate_left(
 struct _RegionHandle*r,struct Cyc_Splay_noderef*nr){struct Cyc_Splay_node*_tmp0=nr->v;
-void*_tmp1=(void*)_tmp0->left;struct Cyc_Splay_noderef*_tmp2;_LL1: if(_tmp1 <= (
-void*)1)goto _LL3;if(*((int*)_tmp1)!= 0)goto _LL3;_tmp2=((struct Cyc_Splay_Node_struct*)
+void*_tmp1=_tmp0->left;struct Cyc_Splay_noderef*_tmp2;_LL1: if(_tmp1 <= (void*)1)
+goto _LL3;if(*((int*)_tmp1)!= 0)goto _LL3;_tmp2=((struct Cyc_Splay_Node_struct*)
 _tmp1)->f1;_LL2: {struct Cyc_Splay_node*_tmp3=_tmp2->v;struct Cyc_Splay_Node_struct
 _tmp40;struct Cyc_Splay_node*_tmp3F;struct Cyc_Splay_noderef*_tmp3E;struct Cyc_Splay_Node_struct*
 _tmp3D;struct Cyc_Splay_Node_struct*_tmp4=(_tmp3D=_region_malloc(r,sizeof(*_tmp3D)),((
 _tmp3D[0]=((_tmp40.tag=0,((_tmp40.f1=((_tmp3E=_region_malloc(r,sizeof(*_tmp3E)),((
 _tmp3E->v=((_tmp3F=_region_malloc(r,sizeof(*_tmp3F)),((_tmp3F->key=(void*)((void*)
-_tmp0->key),((_tmp3F->data=(void*)((void*)_tmp0->data),((_tmp3F->left=(void*)((
-void*)_tmp3->right),((_tmp3F->right=(void*)((void*)_tmp0->right),_tmp3F)))))))))),
-_tmp3E)))),_tmp40)))),_tmp3D)));{struct Cyc_Splay_node*_tmp41;nr->v=((_tmp41=
-_region_malloc(r,sizeof(*_tmp41)),((_tmp41->key=(void*)((void*)_tmp3->key),((
-_tmp41->data=(void*)((void*)_tmp3->data),((_tmp41->left=(void*)((void*)_tmp3->left),((
-_tmp41->right=(void*)((void*)_tmp4),_tmp41))))))))));}goto _LL0;}_LL3:;_LL4: {
-struct Cyc_Core_Invalid_argument_struct _tmp47;const char*_tmp46;struct Cyc_Core_Invalid_argument_struct*
-_tmp45;(int)_throw((void*)((_tmp45=_cycalloc(sizeof(*_tmp45)),((_tmp45[0]=((
-_tmp47.tag=Cyc_Core_Invalid_argument,((_tmp47.f1=((_tmp46="Splay::rotate_left",
-_tag_dyneither(_tmp46,sizeof(char),19))),_tmp47)))),_tmp45)))));}_LL0:;}static
-void Cyc_Splay_rotate_right(struct _RegionHandle*r,struct Cyc_Splay_noderef*nr);
-static void Cyc_Splay_rotate_right(struct _RegionHandle*r,struct Cyc_Splay_noderef*
-nr){struct Cyc_Splay_node*_tmpD=nr->v;void*_tmpE=(void*)_tmpD->right;struct Cyc_Splay_noderef*
-_tmpF;_LL6: if(_tmpE <= (void*)1)goto _LL8;if(*((int*)_tmpE)!= 0)goto _LL8;_tmpF=((
-struct Cyc_Splay_Node_struct*)_tmpE)->f1;_LL7: {struct Cyc_Splay_node*_tmp10=_tmpF->v;
-struct Cyc_Splay_Node_struct _tmp51;struct Cyc_Splay_node*_tmp50;struct Cyc_Splay_noderef*
-_tmp4F;struct Cyc_Splay_Node_struct*_tmp4E;struct Cyc_Splay_Node_struct*_tmp11=(
-_tmp4E=_region_malloc(r,sizeof(*_tmp4E)),((_tmp4E[0]=((_tmp51.tag=0,((_tmp51.f1=((
-_tmp4F=_region_malloc(r,sizeof(*_tmp4F)),((_tmp4F->v=((_tmp50=_region_malloc(r,
-sizeof(*_tmp50)),((_tmp50->key=(void*)((void*)_tmpD->key),((_tmp50->data=(void*)((
-void*)_tmpD->data),((_tmp50->left=(void*)((void*)_tmpD->left),((_tmp50->right=(
-void*)((void*)_tmp10->left),_tmp50)))))))))),_tmp4F)))),_tmp51)))),_tmp4E)));{
-struct Cyc_Splay_node*_tmp52;nr->v=((_tmp52=_region_malloc(r,sizeof(*_tmp52)),((
-_tmp52->key=(void*)((void*)_tmp10->key),((_tmp52->data=(void*)((void*)_tmp10->data),((
-_tmp52->left=(void*)((void*)_tmp11),((_tmp52->right=(void*)((void*)_tmp10->right),
-_tmp52))))))))));}goto _LL5;}_LL8:;_LL9: {struct Cyc_Core_Invalid_argument_struct
-_tmp58;const char*_tmp57;struct Cyc_Core_Invalid_argument_struct*_tmp56;(int)
-_throw((void*)((_tmp56=_cycalloc(sizeof(*_tmp56)),((_tmp56[0]=((_tmp58.tag=Cyc_Core_Invalid_argument,((
+_tmp0->key),((_tmp3F->data=(void*)((void*)_tmp0->data),((_tmp3F->left=_tmp3->right,((
+_tmp3F->right=_tmp0->right,_tmp3F)))))))))),_tmp3E)))),_tmp40)))),_tmp3D)));{
+struct Cyc_Splay_node*_tmp41;nr->v=((_tmp41=_region_malloc(r,sizeof(*_tmp41)),((
+_tmp41->key=(void*)((void*)_tmp3->key),((_tmp41->data=(void*)((void*)_tmp3->data),((
+_tmp41->left=_tmp3->left,((_tmp41->right=(void*)_tmp4,_tmp41))))))))));}goto _LL0;}
+_LL3:;_LL4: {struct Cyc_Core_Invalid_argument_struct _tmp47;const char*_tmp46;
+struct Cyc_Core_Invalid_argument_struct*_tmp45;(int)_throw((void*)((_tmp45=
+_cycalloc(sizeof(*_tmp45)),((_tmp45[0]=((_tmp47.tag=Cyc_Core_Invalid_argument,((
+_tmp47.f1=((_tmp46="Splay::rotate_left",_tag_dyneither(_tmp46,sizeof(char),19))),
+_tmp47)))),_tmp45)))));}_LL0:;}static void Cyc_Splay_rotate_right(struct
+_RegionHandle*r,struct Cyc_Splay_noderef*nr);static void Cyc_Splay_rotate_right(
+struct _RegionHandle*r,struct Cyc_Splay_noderef*nr){struct Cyc_Splay_node*_tmpD=nr->v;
+void*_tmpE=_tmpD->right;struct Cyc_Splay_noderef*_tmpF;_LL6: if(_tmpE <= (void*)1)
+goto _LL8;if(*((int*)_tmpE)!= 0)goto _LL8;_tmpF=((struct Cyc_Splay_Node_struct*)
+_tmpE)->f1;_LL7: {struct Cyc_Splay_node*_tmp10=_tmpF->v;struct Cyc_Splay_Node_struct
+_tmp51;struct Cyc_Splay_node*_tmp50;struct Cyc_Splay_noderef*_tmp4F;struct Cyc_Splay_Node_struct*
+_tmp4E;struct Cyc_Splay_Node_struct*_tmp11=(_tmp4E=_region_malloc(r,sizeof(*
+_tmp4E)),((_tmp4E[0]=((_tmp51.tag=0,((_tmp51.f1=((_tmp4F=_region_malloc(r,
+sizeof(*_tmp4F)),((_tmp4F->v=((_tmp50=_region_malloc(r,sizeof(*_tmp50)),((_tmp50->key=(
+void*)((void*)_tmpD->key),((_tmp50->data=(void*)((void*)_tmpD->data),((_tmp50->left=
+_tmpD->left,((_tmp50->right=_tmp10->left,_tmp50)))))))))),_tmp4F)))),_tmp51)))),
+_tmp4E)));{struct Cyc_Splay_node*_tmp52;nr->v=((_tmp52=_region_malloc(r,sizeof(*
+_tmp52)),((_tmp52->key=(void*)((void*)_tmp10->key),((_tmp52->data=(void*)((void*)
+_tmp10->data),((_tmp52->left=(void*)_tmp11,((_tmp52->right=_tmp10->right,_tmp52))))))))));}
+goto _LL5;}_LL8:;_LL9: {struct Cyc_Core_Invalid_argument_struct _tmp58;const char*
+_tmp57;struct Cyc_Core_Invalid_argument_struct*_tmp56;(int)_throw((void*)((_tmp56=
+_cycalloc(sizeof(*_tmp56)),((_tmp56[0]=((_tmp58.tag=Cyc_Core_Invalid_argument,((
 _tmp58.f1=((_tmp57="Splay::rotate_right",_tag_dyneither(_tmp57,sizeof(char),20))),
 _tmp58)))),_tmp56)))));}_LL5:;}struct _tuple0{void*f1;struct Cyc_Splay_noderef*f2;
 };static void Cyc_Splay_lift(struct _RegionHandle*r,struct Cyc_List_List*dnl);static
@@ -796,11 +795,11 @@ r,path);{int _tmp31=1;_npop_handler(0);return _tmp31;}}else{if(_tmp30 < 0){{stru
 _tuple0*_tmp5B;struct Cyc_List_List*_tmp5A;path=((_tmp5A=_region_malloc(temp,
 sizeof(*_tmp5A)),((_tmp5A->hd=((_tmp5B=_region_malloc(temp,sizeof(*_tmp5B)),((
 _tmp5B->f1=(void*)((void*)0),((_tmp5B->f2=_tmp2E,_tmp5B)))))),((_tmp5A->tl=path,
-_tmp5A))))));}tree=(void*)_tmp2F->left;}else{{struct _tuple0*_tmp5E;struct Cyc_List_List*
+_tmp5A))))));}tree=_tmp2F->left;}else{{struct _tuple0*_tmp5E;struct Cyc_List_List*
 _tmp5D;path=((_tmp5D=_region_malloc(temp,sizeof(*_tmp5D)),((_tmp5D->hd=((_tmp5E=
 _region_malloc(temp,sizeof(*_tmp5E)),((_tmp5E->f1=(void*)((void*)1),((_tmp5E->f2=
-_tmp2E,_tmp5E)))))),((_tmp5D->tl=path,_tmp5D))))));}tree=(void*)_tmp2F->right;}}
-goto _LL1E;}_LL21: if((int)_tmp2D != 0)goto _LL1E;_LL22: if(path != 0)Cyc_Splay_lift(r,
+_tmp2E,_tmp5E)))))),((_tmp5D->tl=path,_tmp5D))))));}tree=_tmp2F->right;}}goto
+_LL1E;}_LL21: if((int)_tmp2D != 0)goto _LL1E;_LL22: if(path != 0)Cyc_Splay_lift(r,
 path->tl);{int _tmp36=0;_npop_handler(0);return _tmp36;}_LL1E:;}};_pop_region(temp);}
 int Cyc_Splay_splay(int(*reln)(void*,void*),void*reln_first_arg,void*tree);int Cyc_Splay_splay(
 int(*reln)(void*,void*),void*reln_first_arg,void*tree){return Cyc_Splay_rsplay(
