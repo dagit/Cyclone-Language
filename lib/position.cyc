@@ -69,7 +69,7 @@ static Lineno::pos_t new_pos() {
   return new Lineno::Pos("",new_string(0),0,0);
 }
 
-list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r> segs) {
+list_t<mstringptr_t> strings_of_segments(list_t<seg_t> segs) {
   // JGM: causes an uncaught exception, so doing the stupid thing for now.
   list_t<mstringptr_t> ans = NULL;
   for (; segs != NULL; segs = segs->tl)

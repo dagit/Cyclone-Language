@@ -57,11 +57,42 @@ int* a9(int flip) {
     return new 0;
 }
 // `noreturn' function might (implicitly) return
-int* a10(int flip) __attribute__((noreturn)){
+int* a10(int flip) __attribute__((noreturn)) {
   return new 0;
 }
-void a11(int flip) __attribute__((noreturn)){
+void a11(int flip) __attribute__((noreturn)) {
   while(flip)
     37;
 }
- 
+// last catch clause may implicitly fallthru
+void a12() {
+  try 37;
+  catch {
+  default: ;
+  }
+}
+// goto enters local scope or exception handler
+void a13() {
+  goto L;
+  int x;
+ L: 37;
+}
+// goto enters local scope or exception handler
+void a14() {
+  goto L;
+  try { L: 37; } catch { default: break; }
+}
+// `noreturn' function might return
+void a15() __attribute__((noreturn)) {
+  return;
+}
+int a16() __attribute__((noreturn)) {
+  return 42;
+}
+// switch clause may implicitly fallthru
+void a17(int x) {
+  switch(x) {
+  case 17: 37;
+  case y: 42; break;
+  }
+}

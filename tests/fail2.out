@@ -11,5 +11,11 @@ fail2.cyc:52: function may not return a value
 fail2.cyc:56: function may not return a value
 fail2.cyc:61: `noreturn' function might return
 fail2.cyc:64: `noreturn' function might (implicitly) return
+fail2.cyc:69: last catch clause may implicitly fallthru
+fail2.cyc:76: goto enters local scope or exception handler
+fail2.cyc:82: goto enters local scope or exception handler
+fail2.cyc:87: `noreturn' function might return
+fail2.cyc:90: `noreturn' function might return
+fail2.cyc:95: switch clause may implicitly fallthru
 
 COMPILATION FAILED!

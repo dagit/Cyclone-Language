@@ -60,60 +60,74 @@ static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
   return false;
 }
 
+static bool fnTypeAttsRangeOK(seg_t loc,int i,int nargs,attribute_t att) {
+  if(i < 1 || i > nargs) {
+    terr(loc,"%s has an out-of-range index",attribute2string(att));
+    return false;
+  }
+  return true;
+}
+static void fnTypeAttsOverlap(seg_t loc, int i, 
+			      $(list_t<int>,string_t) lst1,
+			      $(list_t<int>,string_t) lst2) {
+  if(List::memq(lst2[0],i))
+    terr(loc, "incompatible %s() and %s() attributes on parameter %d",
+	 lst1[1], lst2[1], i);
+}
 static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
   TEMP_RGN(te, temp) {
-    list_t<int> init_params = NULL;
-    list_t<int> nolive_unique_params = NULL;
-    list_t<int> noconsume_params = NULL;
+    $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
+    $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
+    $(list_t<int>,string_t) noconsume_params     = $(NULL,"noconsume");
     switch (compress(t)) {
     case &FnType(FnInfo{.attributes=atts,.args=args,...}):
       int nargs = List::length(args);
       for ( ; atts != NULL; atts = atts->tl) {
 	switch(atts->hd) {
 	case &Initializes_att(i):
-	  if (i < 1 || i > nargs)
-	    terr(loc,"initializes attribute: index %d out of range",i);
-	  if (List::memq(nolive_unique_params,i))
-	    terr(loc, rprintf(temp,"incompatible initializes() and "
-			      "noliveunique() attributes on parameter %d",
-			      i));
-	  if (List::memq(noconsume_params,i))
-	    terr(loc, rprintf(temp,"incompatible initializes() and noconsume()"
-			      " attributes on parameter %d",i));
-	  init_params=rnew(temp) List(i,init_params); break;
+	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	  fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
+	  fnTypeAttsOverlap(loc,i,init_params,noconsume_params);
+	  let &$(_,_,t) = List::nth(args,i-1);
+          string_t s = "initializes attribute allowed only on";
+	  switch(Tcutil::compress(t)) {
+	  case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
+	    if(conref_val(nullable))
+	      terr(loc,"%s non-null pointers",s);
+            if(!is_bound_one(bd))
+	      terr(loc,"%s pointers of size 1",s);
+            if(conref_def(false,zt))
+	      terr(loc,"%s pointers to non-zero-terminated arrays",s);
+	    break;
+          default:
+	    terr(loc,"%s pointers",s);
+          }
+	  init_params[0] = rnew(temp) List(i,init_params[0]); 
+	  break;
 	case &Noliveunique_att(i):
-	  if (i < 1 || i > nargs)
-	    terr(loc,"noliveunique attribute: index %d out of range",i);
-	  if (List::memq(init_params,i))
-	    terr(loc, rprintf(temp,"incompatible initializes() and "
-			      "noliveunique() attributes on parameter %d",
-			      i));
-	  if (List::memq(noconsume_params,i))
-	    terr(loc,rprintf(temp,"incompatible noliveunique() and noconsume()"
-			     " attributes on parameter %d",i));
-	  nolive_unique_params= rnew(temp) List(i,nolive_unique_params); break;
-	case &Noconsume_att(i):
-	  if (i < 1 || i > nargs) {
-	    terr(loc,"noconsume attribute: index %d out of range",i);
-	    continue;
-	  }
-	  if (List::memq(init_params,i))
-	    terr(loc, rprintf(temp,"incompatible initializes() and "
-			      "noconsume() attributes on parameter %d",
-			      i));
-	  if (List::memq(nolive_unique_params,i))
-	    terr(loc,rprintf(temp,"incompatible noliveunique() and noconsume()"
-			     " attributes on parameter %d",i));
+	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	  fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
+	  fnTypeAttsOverlap(loc,i,nolive_unique_params,noconsume_params);
 	  let &$(_,_,t) = List::nth(args,i-1);
 	  if (!is_noalias_pointer(t,false))
-	    terr(loc,"noconsume attribute only allowed on unique pointers");
-	  noconsume_params = rnew(temp) List(i,noconsume_params); break;
+	    terr(loc,"noliveunique attribute allowed only on unique pointers");
+	  nolive_unique_params[0] = rnew(temp) List(i,nolive_unique_params[0]);
+	  break;
+	case &Noconsume_att(i):
+	  if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	  fnTypeAttsOverlap(loc,i,noconsume_params,init_params);
+	  fnTypeAttsOverlap(loc,i,noconsume_params,nolive_unique_params);
+	  let &$(_,_,t) = List::nth(args,i-1);
+	  if (!is_noalias_pointer(t,false))
+	    terr(loc,"noconsume attribute allowed only on unique pointers");
+          // XXX other restrictions?  E.g. not on arrays or fat pointers?
+	  noconsume_params[0] = rnew(temp) List(i,noconsume_params[0]); 
+	  break;
 	default: break;
 	}
       }
       break;
-    default:
-      impos("fnTypeAttsOK: not a function type");
+    default: impos("fnTypeAttsOK: not a function type");
     }
   }
 }

@@ -2621,69 +2621,35 @@ static void check_nested_fun(flow_env_t<`r> fenv,
     case &FnType(FnInfo(_,_,_,_,_,_,_,_,as)): atts = as; break;
     default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
     }
+    // DAN: Sanity checking used to be split and duplicated with 
+    // Tc::fnTypeAttsOK.  Now everything is there where it belongs.
     for(; atts != NULL; atts = atts->tl)
       switch(atts->hd) {
       case &Noliveunique_att(i):
-        unsigned j = i;
         exp_t bogus_exp = signed_int_exp(-1,0);
-        if (j > List::length(fd->param_vardecls->v)) {
-          aerr(loc,"noliveunique attribute exceeds number of parameters");
-          continue;
-        }
-        let vd = List::nth(fd->param_vardecls->v,j-1);
+        let vd = List::nth(fd->param_vardecls->v,i-1);
         type_t t = Tcutil::compress(vd->type);
-        if (!Tcutil::is_noalias_pointer(t,false)) {
-          aerr(loc,"noliveunique attribute requires unique pointer type");
-          continue;
-        }
         type_t elttype = Tcutil::pointer_elt_type(t);
         let rval =
           make_unique_consumed(fenv,elttype,bogus_exp,-1,
                                typ_to_absrval(fenv,elttype,false,fenv->unknown_all));
-        let r = rnew(frgn) InitParam(j,t);
+        let r = rnew(frgn) InitParam(i,t);
         let rp = rnew(frgn) Place(r,NULL);
         d = Dict::insert(d,r,rval);
         d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
         break;
       case &Initializes_att(i):
-	unsigned j = i;
-	if(j > List::length(fd->param_vardecls->v)) {
-	  aerr(loc, "initializes attribute exceeds number of parameters");
-	  continue;
-	}
-	let vd = List::nth(fd->param_vardecls->v,j-1);
-	switch(Tcutil::compress(vd->type)) {
-	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
-	  if(conref_val(nullable))
-	    aerr(loc, "initializes attribute not allowed on nullable pointers");
-	  if(!Tcutil::is_bound_one(bd))
-	    aerr(loc, "initializes attribute allowed only on pointers"
-		      " of size 1");
-          if(conref_def(false,zt))
-	    aerr(loc, "initializes attribute allowed only on pointers"
-		      " to non-zero-terminated arrays");
-	  let r = rnew(frgn) InitParam(j,t);
-	  let rp = rnew(frgn) Place(r,NULL);
-	  d = Dict::insert(d,r,typ_to_absrval(fenv,t,false,fenv->esc_none));
-	  d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
-	  param_roots = rnew(frgn) List(rp,param_roots);
-	  break;
-	default: aerr(loc, "initializes attribute on non-pointer");
-	}
+	let vd = List::nth(fd->param_vardecls->v,i-1);
+        type_t elttype = Tcutil::pointer_elt_type(vd->type);
+	let r = rnew(frgn) InitParam(i,elttype);
+	let rp = rnew(frgn) Place(r,NULL);
+	d = Dict::insert(d,r,typ_to_absrval(fenv,elttype,false,fenv->esc_none));
+	d = Dict::insert(d,rnew(frgn) VarRoot(vd),rnew(frgn) AddressOf(rp));
+	param_roots = rnew(frgn) List(rp,param_roots);
 	break;
       case &Noconsume_att(i):
-        unsigned j = i;
-        if (j > List::length(fd->param_vardecls->v)) {
-          aerr(loc,"noconsume attribute exceeds number of parameters");
-          continue;
-        }
-        let vd = List::nth(fd->param_vardecls->v,j-1);
-        type_t t = Tcutil::compress(vd->type);
-        if (!Tcutil::is_noalias_pointer(t,false)) {
-          aerr(loc,"noconsume attribute requires no-alias pointer");
-          continue;
-        }
-	// XXX other restrictions?  E.g. not on arrays or fat pointers?
+        let vd = List::nth(fd->param_vardecls->v,i-1);
+        let t  = Tcutil::compress(vd->type);
         let root = rnew(frgn) VarRoot(vd);
 	let rp = rnew(frgn) Place(root,NULL);
 	noconsume_roots = rnew(frgn) List(rp,noconsume_roots);
