@@ -58,12 +58,12 @@ extern T create(unsigned int n);
 extern mstring_t contents(T);
   /** [contents(b)] heap allocates and returns a string whose contents
       are the contents of buffer [b]. */
-extern mstring_t<`U> extract(T);
+extern mstring_t<`H, UNIQUE> extract(T);
   /** [extract(b)] is like [contents(b)] except that returns a unique
       pointer to the internal array itself, adding a zero terminator
       at the current position.  This avoids making a copy.  However,
       the buffer [b] is unusable until this array is restored. */
-extern bool restore(T,mstring_t<`U>) __attribute__((consume(2)));
+extern bool restore(T,mstring_t<`H,UNIQUE>) __attribute__((consume(2)));
   /** [restore(b,s)] restores the string [s] to be the internal array
       of buffer [b].  If [b] already has valid contents, the operation
       fails and [b] is freed, returning false.  Otherwise, true is

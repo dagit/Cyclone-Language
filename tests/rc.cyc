@@ -948,7 +948,7 @@ struct Table<`a,`b> {
 typedef struct Table<`a,`b>@`RC table_t<`a,`b>;
 
 table_t<`a::TB,`b::TB> create(int sz, int (@`H cmp)(`a,`a), int (@`H hash)(`a)) {
-  return rcnew Table{cmp, hash, 3, rcalloc(refcnt_region,sz,sizeof(list_t))};
+  return rcnew Table{cmp, hash, 3, qcalloc(heap_region, refcnt_qual,sz,sizeof(list_t))};
 }
 
 static
@@ -968,7 +968,7 @@ void resize(table_t<`a,`b::TB> t) {
   odata :=: t->tab;
   unsigned int osize = numelts(odata);
   unsigned int nsize = 2 * osize + 1; // FIX: check for overflow
-  list_t<$(`a,`b)@`RC> ? ndata = rcalloc(refcnt_region,nsize,sizeof(list_t));
+  list_t<$(`a,`b)@`RC> ? ndata = qcalloc(heap_region, refcnt_qual,nsize,sizeof(list_t));
   for (int i = 0; i<osize; i++) {
     let odatai;
     { let tmp = NULL; // odatai = alias_refptr(odata[i])

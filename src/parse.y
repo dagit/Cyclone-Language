@@ -409,9 +409,9 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
     return heap_rgn_type;
   //eventually parse these as regular type vars 
   if (zstrcmp(s,"`U") == 0)
-    return unique_rgn_type;
+    return unique_rgn_shorthand_type;
   if (zstrcmp(s,"`RC") == 0)
-    return refcnt_rgn_type;
+    return refcnt_rgn_shorthand_type;
   if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
     return CurRgn::curr_rgn_type();
   return var_type(new Tvar(new s,-1,k));
@@ -1009,7 +1009,14 @@ static exp_t pat2exp(pat_t p) {
     return null_exp(p->loc);
   }
 }
-
+static $(exp_t, exp_opt_t) split_seq(exp_t maybe_seq) {
+  switch(maybe_seq->r) {
+  case &SeqExp_e(e1, e2):
+    return $(e1, e2);
+  default:
+    return $(maybe_seq, NULL);
+  }
+}
 } // end namespace Parse
 using Parse;
 %}
@@ -1023,11 +1030,11 @@ using Parse;
 %token BUILTIN_VA_LIST EXTENSION COMPLEX
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
-%token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
+%token NEW QNEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
+%token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE QMALLOC CALLOC QCALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
-%token AQ_ALIASABLE AQ_DYNTRK AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
+%token AQ_ALIASABLE  AQ_REFCNT AQ_RESTRICTED AQ_UNIQUE AQUAL_T
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL 
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged, @aqual, aquals)
@@ -1076,7 +1083,6 @@ using Parse;
 %type <exp_t> logical_or_expression conditional_expression
 %type <exp_t> assignment_expression expression constant_expression
 %type <exp_t> initializer array_initializer for_exp_opt
-%type <exp_opt_t> opt_qual_exp 
 %type <list_t<exp_t,`H>> argument_expression_list argument_expression_list0
 %type <list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>> initializer_list
 %type <primop_t> unary_operator 
@@ -1514,7 +1520,7 @@ type_specifier_notypedef:
     { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
 | REGION_T 
     { $$=^$(type_spec(rgn_handle_type(new_evar(&Kinds::rko, NULL)), SLOC(@1)));}
-| AQUAL_T '<' qual_bnd_const right_angle
+| AQUAL_T '<' any_type_name right_angle
     { $$=^$(type_spec(aqual_handle_type($3),LOC(@1,@4))); }
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(tag_type($3),LOC(@1,@4))); }
@@ -1893,7 +1899,6 @@ aqual_specifier:
   AQ_ALIASABLE { $$ = ^$(al_qual_type);}
 | AQ_UNIQUE { $$ = ^$(un_qual_type);}
 | AQ_REFCNT { $$ = ^$(rc_qual_type);}
-| AQ_DYNTRK { $$ = ^$(dt_qual_type);}
 | AQ_RESTRICTED { $$ = ^$(rtd_qual_type);}
 | TYPE_VAR 
   { tvar_ok($1,SLOC(@1));
@@ -1926,9 +1931,9 @@ zeroterm_qual_opt:
 
 /* Always returns a type (possibly an evar) */
 rgn_opt:
-/* empty */ { $$ = ^$(new_evar(&Kinds::trko,NULL)); }
-| type_var  { set_vartyp_kind($1,&Kinds::trk,true); $$ = $!1; }
-| '_'       { $$ = ^$(new_evar(&Kinds::trko,NULL)); }
+/* empty */ { $$ = ^$(new_evar(&Kinds::rko,NULL)); }
+| type_var  { set_vartyp_kind($1,&Kinds::rk,true); $$ = $!1; }
+| '_'       { $$ = ^$(new_evar(&Kinds::rko,NULL)); }
 ;
 
 tqual_list:
@@ -2008,7 +2013,7 @@ rgn_order_elt:
   { // FIX: if we replace the following with:
     // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
-    let kb = new Less_kb(NULL,&Kinds::trk);
+    let kb = new Less_kb(NULL,&Kinds::rk);
     let t = id2type($3,kb);
     $$ = ^$(new $(join_eff($1),t));
   }
@@ -2025,7 +2030,6 @@ qual_bnd_const:
   AQ_ALIASABLE { $$ = ^$(al_qual_type);}
 | AQ_UNIQUE { $$ = ^$(un_qual_type);}
 | AQ_REFCNT { $$ = ^$(rc_qual_type);}
-| AQ_DYNTRK { $$ = ^$(dt_qual_type);}
 | AQ_RESTRICTED  { $$ = ^$(rtd_qual_type);}
 | AQUALS '(' any_type_name ')'
 { 
@@ -2678,20 +2682,21 @@ conditional_expression:
 /* Cyc: throw expressions */
 | THROW conditional_expression { $$=^$(throw_exp($2,LOC(@1,@2))); }
 /* Cyc: expressions to build heap-allocated objects and arrays */
-| NEW opt_qual_exp array_initializer        { $$=^$(New_exp(NULL,$3,$2,LOC(@1,@3))); }
-| NEW opt_qual_exp logical_or_expression    { $$=^$(New_exp(NULL,$3,$2,LOC(@1,@3))); }
-| RNEW opt_qual_exp '(' expression ')' array_initializer {$$=^$(New_exp($4,$6,$2,LOC(@1,@6))); }
-| RNEW opt_qual_exp '(' expression ')' logical_or_expression
-{ $$=^$(New_exp($4,$6,$2,LOC(@1,@6))); }
+| NEW array_initializer        { $$=^$(New_exp(NULL,$2,NULL,LOC(@1,@2))); }
+| NEW logical_or_expression    { $$=^$(New_exp(NULL,$2,NULL,LOC(@1,@2))); }
+| QNEW '(' expression ')' array_initializer        { $$=^$(New_exp(NULL,$5,$3,LOC(@1,@5))); }
+| QNEW '(' expression ')' logical_or_expression    { $$=^$(New_exp(NULL,$5,$3,LOC(@1,@5))); }
+| RNEW '(' expression ')' array_initializer {let $(rgn, qual) = split_seq($3); $$=^$(New_exp(rgn,$5,qual,LOC(@1,@5))); }
+| RNEW '(' expression ')' logical_or_expression {   let $(rgn, qual) = split_seq($3); $$=^$(New_exp(rgn,$5,qual,LOC(@1,@5))); }
 ;
 
-opt_qual_exp:
-/* empty */ { $$=^$(NULL);}
-|  '<' primary_expression '>'
-  { 
-    $$ = ^$($2); 
-  }
-;
+// opt_qual_exp:
+// /* empty */ { $$=^$(NULL);}
+// |  '<' primary_expression '>'
+//   { 
+//     $$ = ^$($2); 
+//   }
+// ;
 
 constant_expression:
   conditional_expression { $$=$!1; }
@@ -2791,27 +2796,36 @@ unary_expression:
    { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(offsetof_exp(t,List::imp_rev($5),LOC(@1,@6))); 
    }
-/* Cyc: malloc, rmalloc, rvmalloc, numelts, swap, etc. */
+/* Cyc: malloc, rmalloc, rvmalloc, qmalloc, qcalloc numelts, swap, etc. */
 | MALLOC '(' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,NULL,NULL,$3,false,false}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,NULL,NULL,NULL,$3,false,false}),
                    LOC(@1,@4))); }
-| RMALLOC '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,NULL,$5,false,false}),
+| QMALLOC '(' assignment_expression ',' assignment_expression ',' assignment_expression ')'
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,$5,NULL,$7,false,false}),
+                   LOC(@1,@8))); }
+| RMALLOC '(' expression ',' assignment_expression ')'
+{  $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,NULL,NULL,$5,false,false}),
+	       LOC(@1,@6))); }
+| RVMALLOC '(' expression ',' assignment_expression ')'
+   { let $(rgn,qual) = split_seq($3);
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Vmalloc,rgn,qual,NULL,$5,false,false}),
                    LOC(@1,@6))); }
-| RVMALLOC '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{Vmalloc,$3,NULL,$5,false,false}),
-                   LOC(@1,@6))); }
-| RMALLOC_INLINE '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,NULL,$5,false,true}),
+| RMALLOC_INLINE '(' expression ',' assignment_expression ')'
+   { let $(rgn,qual) = split_seq($3);
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,rgn,qual,NULL,$5,false,true}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($7,SLOC(@7));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,NULL,new(t),$3,false,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,NULL,NULL,new(t),$3,false,false}),
                    LOC(@1,@9))); }
+| QCALLOC '(' assignment_expression ',' assignment_expression ',' assignment_expression ',' SIZEOF '(' type_name ')' ')'
+   { let t = type_name_to_type($11,SLOC(@11));
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,$3,$5,new(t),$7,false,false}),
+                   LOC(@1,@13))); }
 | RCALLOC '(' assignment_expression ',' assignment_expression ',' 
               SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($9,SLOC(@9));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,$3,new(t),$5,false,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,$3,NULL,new(t),$5,false,false}),
                    LOC(@1,@11))); }
 | NUMELTS '(' assignment_expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }

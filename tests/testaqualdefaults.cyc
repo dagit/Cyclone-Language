@@ -165,12 +165,12 @@ datatype ttv_d<`a::B> {
 void test_ttv(`a::B arg) {
   int *@aqual(RESTRICTED) a = NULL;
   int *@aqual(ALIASABLE) b = NULL;
-  ttv_s{a}; //success --XXX --need to fix aquals(`a) implementation
+  ttv_s{a}; //success 
   ttv_s{b}; //success
   ttv_s{arg}; //success
-  AAA(b);//success --XXX 
+  AAA(b);//success 
   AAA(arg);//success
-  AAA(a);//fail --XXX wrong reason
+  AAA(a);//fail --XXX 
 };
 
 
@@ -178,16 +178,17 @@ void test_ttv(`a::B arg) {
 /*    It is not possible to place a ::TR pointer in a datatype */
 /*    So, the only aliasability allowed for datatype fields in ALIASABLE */
 
-datatype dt_def<`q::Q> {
+datatype dt_def{//<`q::Q> { -- not allowed to abstract ::Q for datatypes
   CCC(int*); //ALIASABLE
-  DDD(int*@aqual(`q)); //ALIASABLE >= `q
+  DDD(int*@aqual(ALIASABLE)); //ALIASABLE >= `q
+  EEE(int*@aqual(UNIQUE)); //ALIASABLE >= `q //fail -- not allowed to have UNIQUE inside datatype
 };
 void test_dt_def() {
   int *@aqual(RESTRICTED) a = NULL;
   int *@aqual(ALIASABLE) b = NULL;
   CCC(a);//fail
   CCC(b);//success
-  DDD(a);//fail --XXX
+  DDD(a);//fail 
   DDD(b);//success
 };
 

@@ -1009,7 +1009,7 @@ static type_t main_type() {
     new $(NULL,empty_tqual(0),sint_type);
   $(var_opt_t,tqual_t,type_t)@ arg2 =
     new $(NULL,empty_tqual(0),
-          fatptr_type(string_type(wildtyp(NULL)),wildtyp(NULL),
+          fatptr_type(string_type(wildtyp(NULL),al_qual_type),wildtyp(NULL),al_qual_type,
                       empty_tqual(0), any_bool(NULL), false_type));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,
                               .ret_tqual = empty_tqual(0),
@@ -1512,7 +1512,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     leq(gen_exp(false,env,e1),ptr_ct(unknown_aggr_ct(list(new Cfield{var(),f,v})),
                                var(),var(),var(),var()));
     return v;
-  case &Malloc_e(MallocInfo{_,_,topt,e1,_,_}):
+  case &Malloc_e(MallocInfo{_,_,_,topt,e1,_,_}):
     leq(gen_exp(false,env,e1),arith_ct());
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());

@@ -911,8 +911,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_type(t1,dep);
       scan_exp(e1,dep);
       return;
-    case &Malloc_e(MallocInfo{mknd,ropt,topt,e,_,_}):
+    case &Malloc_e(MallocInfo{mknd,ropt,aqopt,topt,e,_,_}):
       if (ropt != NULL) scan_exp((exp_t)ropt,dep);
+      if (aqopt != NULL) scan_exp((exp_t)aqopt,dep);
       if (topt != NULL) scan_type(*topt,dep);
       scan_exp(e,dep);
       return;
@@ -1025,7 +1026,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &EnumCon(&$(_,v),_): add_target(v); return;
       case &DatatypeCon(_):        case &DatatypeFieldCon(_):
       case &RgnHandleCon:          case &HeapCon:
-      case &UniqueCon:             case &RefCntCon:
+      case &UniqueHeapCon:         case &RefCntHeapCon:
       case &AccessCon:             case &JoinCon:
       case &RgnsCon:               case &TagCon:
       case &TrueCon:               case &FalseCon:

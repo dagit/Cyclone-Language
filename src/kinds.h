@@ -33,18 +33,21 @@ extern struct Kind ek; // effect kind
 extern struct Kind ik; // int kind
 extern struct Kind boolk; // boolean kind
 extern struct Kind ptrbk; // pointer bound kind
-
-extern struct Kind trk; // top region kind
-extern struct Kind tak; // top abstract kind
-extern struct Kind tbk; // top boxed kind
-extern struct Kind tmk; // top memory kind
-
-extern struct Kind urk;  // unique region kind
-extern struct Kind uak;  // unique abstract kind
-extern struct Kind ubk;  // unique boxed kind
-extern struct Kind umk;  // unique memory kind
-
 extern struct Kind aqk;  // alias qualifier kind
+
+extern struct Kind bk_rhint; // restricted boxed kind
+extern struct Kind bk_uhint; // unique boxed kind
+extern struct Kind bk_rchint; // refcnt boxed kind
+
+// extern struct Kind trk; // top region kind
+// extern struct Kind tak; // top abstract kind
+// extern struct Kind tbk; // top boxed kind
+// extern struct Kind tmk; // top memory kind
+
+// extern struct Kind urk;  // unique region kind
+// extern struct Kind uak;  // unique abstract kind
+// extern struct Kind ubk;  // unique boxed kind
+// extern struct Kind umk;  // unique memory kind
 
 extern struct Core::Opt<kind_t> rko;
 extern struct Core::Opt<kind_t> ako;
@@ -54,18 +57,21 @@ extern struct Core::Opt<kind_t> iko;
 extern struct Core::Opt<kind_t> eko;
 extern struct Core::Opt<kind_t> boolko;
 extern struct Core::Opt<kind_t> ptrbko;
-
-extern struct Core::Opt<kind_t> trko;
-extern struct Core::Opt<kind_t> tako;
-extern struct Core::Opt<kind_t> tbko;
-extern struct Core::Opt<kind_t> tmko;
-
-extern struct Core::Opt<kind_t> urko;
-extern struct Core::Opt<kind_t> uako;
-extern struct Core::Opt<kind_t> ubko;
-extern struct Core::Opt<kind_t> umko;
-
 extern struct Core::Opt<kind_t> aqko;
+
+extern struct Core::Opt<kind_t> bk_rhinto;
+extern struct Core::Opt<kind_t> bk_uhinto;
+extern struct Core::Opt<kind_t> bk_rchinto;
+  
+// extern struct Core::Opt<kind_t> trko;
+// extern struct Core::Opt<kind_t> tako;
+// extern struct Core::Opt<kind_t> tbko;
+// extern struct Core::Opt<kind_t> tmko;
+
+// extern struct Core::Opt<kind_t> urko;
+// extern struct Core::Opt<kind_t> uako;
+// extern struct Core::Opt<kind_t> ubko;
+// extern struct Core::Opt<kind_t> umko;
 
 Core::opt_t<kind_t> kind_to_opt(kind_t);
 kindbound_t kind_to_bound(kind_t);

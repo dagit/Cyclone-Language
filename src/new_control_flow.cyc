@@ -119,6 +119,7 @@ struct AnalEnv {
   list_t<place_t> noconsume_params;
   Hashtable::table_t<stmt_t,flow_t@> flow_table;
   relns_t return_relns;  // ensures clause
+  list_t<$(type_t, type_t)@> aquals_bounds;
 };
 typedef struct AnalEnv @`r analenv_t<`r>;
 
@@ -197,7 +198,7 @@ static void check_unique_root($(analenv_t,seg_t,flowdict_t)@ckenv,
   switch (root) {
   case &VarRoot(vd):
     if (!Dict::lookup_bool(new_fd,root,&rval) &&
-        Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
+        Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds, vd->type)) {
     retry:switch (rval) {
       case &NamedLocation(_,r): rval = r; goto retry;
       case &Consumed(...):
@@ -381,7 +382,7 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
       check_nounique(env,loc,fs->hd->type,d[i]);
     return;
   case $(&PointerType(_),_):
-    if (Tcutil::is_noalias_pointer(t,false))
+    if (Tcutil::is_noalias_pointer(env->aquals_bounds,t,false))
       Warn::warn(loc,"argument may still contain alias-free pointers");
     return;
   default: return;
@@ -392,7 +393,7 @@ static flow_t use_nounique_Rval(analenv_t env, seg_t loc, Absyn::type_t t, flow_
   switch(inflow) {
   case {.BottomFL = _}: return BottomFL();
   case {.ReachableFL = $(d,relns)}:
-    if (!Tcutil::is_noalias_pointer(t,false))
+    if (!Tcutil::is_noalias_pointer(env->aquals_bounds,t,false))
       Warn::impos("noliveunique attribute requires alias-free pointer");
     let elt_type = Tcutil::pointer_elt_type(t);
     retry: switch (r) {
@@ -400,7 +401,7 @@ static flow_t use_nounique_Rval(analenv_t env, seg_t loc, Absyn::type_t t, flow_
     case &AddressOf(p): fallthru(lookup_place(d,p));
     case &UniquePtr(r): check_nounique(env,loc,elt_type,r); break;
     default:
-      if (Tcutil::is_noalias_pointer_or_aggr(elt_type))
+      if (Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,elt_type))
 	Warn::warn(loc,"argument may contain live alias-free pointers");
       return use_Rval(env,loc,inflow,r);
     }
@@ -469,7 +470,7 @@ static absRval_t consume_zero_rval(analenv_t env,
     Warn::impos("consume_zero_rval");
   // if needs unconsume, we consume the new_rval
   else if (needs_unconsume)
-    return make_unique_consumed(env->fenv,(type_t)e->topt,e,env->iteration_num,
+    return make_unique_consumed(env->fenv,env->aquals_bounds,(type_t)e->topt,e,env->iteration_num,
 				new_rval, false);
   else
     return new_rval;
@@ -715,7 +716,7 @@ static $(flow_t,absRval_t) do_assign(flow_env_t fenv,
       relns   = reln_assign_exp(Core::heap_region,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
       if (Flags::warn_lose_unique &&
-	  Tcutil::is_noalias_pointer_or_aggr((type_t)lexp->topt)){
+	  Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)lexp->topt)){
         // check to see if we're over-writing a unique pointer
 	let $(rv,_) = unname_rval(lookup_place(indict,p));
 	switch (rv) {
@@ -827,8 +828,8 @@ static flow_t initialize_pat_vars(flow_env_t fenv,
 	    break;
 
 	  default:
-	    if (Tcutil::is_noalias_pointer_or_aggr((type_t)ve->topt) &&
-		!Tcutil::is_noalias_pointer_or_aggr((*vd)->type))
+	    if (Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)ve->topt) &&
+		!Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(*vd)->type))
 	      aerr(exp_loc,"aliased pattern expression not an l-value: %s",
 		   exp2string(ve));
 	    // Otherwise, there just isn't a place for it, either because
@@ -951,7 +952,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 // 	      Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)
 // 	      ? "yes" : "no");	      
   if (copy_ctxt && is_local_var_rooted_path(e,false) &&
-      Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
+      Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)e->topt)) {
     DEBUG_PRINT("copy of unique pointer(s)\n");
     // if e is a copy of a unique pointer, then we want to treat this
     // as if it were:
@@ -985,7 +986,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 	return $(flval,make_unique_unconsumed(fenv,old_rval));
       }
       else {
-	let new_rval = make_unique_consumed(fenv,(type_t)e->topt,e,env->iteration_num,old_rval,local_alias);
+	let new_rval = make_unique_consumed(fenv,env->aquals_bounds,(type_t)e->topt,e,env->iteration_num,old_rval,local_alias);
 	let outdict = assign_place(fenv,e->loc,fd,p,new_rval);
 	// FIX: do I need to update the tryflow here?
 	DEBUG_PRINT("place is ");
@@ -1108,7 +1109,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     else return $(f,fenv->unknown_all);
 
   case &AssignOp_e(l,&_,r):
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)e->topt)) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -1138,7 +1139,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     return $(f,fenv->unknown_all);
   
   case &AssignOp_e(e1,NULL,e2):
-    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr((type_t)e->topt)) {
+    if (copy_ctxt && Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)e->topt)) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
@@ -1259,7 +1260,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 	//   update_tryflow there for these cases.
 	outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
 	if (!List::memq(consume_params,i) && 
-	    Tcutil::is_noalias_pointer((type_t)es->hd->topt,false))
+	    Tcutil::is_noalias_pointer(env->aquals_bounds,(type_t)es->hd->topt,false))
 	  outflow = restore_noconsume_arg(env,outflow,es->hd,es->hd->loc,rvals->hd);
       }
     }
@@ -1272,22 +1273,30 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     else
       return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
 
-  case &Malloc_e(MallocInfo{mknd,eopt,topt,exp,isfat,_}):
+  case &Malloc_e(MallocInfo{mknd,ropt,aqopt,topt,exp,isfat,_}):
     absRval_t place_val;
     if(isfat) place_val = fenv->notzeroall;
     else if(mknd==Calloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
     else place_val = typ_to_absrval(fenv,*topt,false,fenv->unknown_none);
     flow_t    outflow;
-    if(eopt!=NULL) {
-      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,exp),true,true);
-      outflow = f;
-    } else {
+    if(ropt == NULL && aqopt == NULL) {
       let $(f,_) = anal_Rexp(env,true,inflow,exp,local_alias);
+      outflow   = f;
+    }
+    else {
+      _ expl = new List(exp, NULL);
+      if(aqopt){ 
+	expl = new List(aqopt, expl);
+      }
+      if(ropt) { 
+	expl = new List(ropt, expl);
+      }
+      let $(f,rvals) = anal_Rexps(env,inflow,expl,true,true);
       outflow = f;
     }
     // if this is a unique pointer, then we create just a UniquePtr
     // rval; otherwise we need to create a place for this mallocpt
-    if (Tcutil::is_noalias_pointer((type_t)e->topt,true)) {
+    if (Tcutil::is_noalias_pointer(env->aquals_bounds,(type_t)e->topt,true)) {
       return $(outflow,new UniquePtr(place_val));
     }
     else {
@@ -1374,30 +1383,28 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &New_e(eopt,e2,qopt):
     flow_t    outflow;
     absRval_t place_val;
-    switch($(eopt, qopt)) {
-    case $(NULL, NULL):
+    if(eopt == NULL && qopt == NULL) {
       let $(f,r) = anal_Rexp(env,true,inflow,e2,local_alias);
       outflow   = f;
       place_val = r;
-      break;
-    case $(NULL, q):
-      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)qopt,e2),true,true);
-      outflow   = f;
-      place_val = rvals->tl->hd;
-      break;
-    case $(r, NULL):
-      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,e2),true,true);
-      outflow   = f;
-      place_val = rvals->tl->hd;
-      break;
-    default:
-      let $(f,rvals) = anal_Rexps(env,inflow,list((exp_t)eopt,(exp_t)qopt,e2),true,true);
-      outflow   = f;
-      place_val = rvals->tl->tl->hd;
-      break;
+    }
+    else {
+      _ expl = new List(e2, NULL);
+      _ depth = 0;
+      if(qopt) {
+	expl = new List(qopt, expl);
+	depth++;
+      }
+      if(eopt) {
+	expl = new List(eopt, expl);
+	depth++;
+      }
+      let $(f,rvals) = anal_Rexps(env,inflow,expl,true,true);
+      outflow = f;
+      place_val = depth == 1 ? rvals->tl->hd : rvals->tl->tl->hd;
     }
     // If this is a unique pointer, no need to create a place for it
-    if (Tcutil::is_noalias_pointer((type_t)e->topt,true)) {
+    if (Tcutil::is_noalias_pointer(env->aquals_bounds,(type_t)e->topt,true)) {
       return $(outflow,new UniquePtr(place_val));
     }
     else {
@@ -1844,7 +1851,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &Deref_e(e1):
     DEBUG_PRINT("anal_Lexp: found deref of |%s:%s|\n",exp2string(e1),typ2string(compress(e1->topt)));
     // should this be e1->topt?  It is for the old stuff ...
-    if (Tcutil::is_noalias_pointer((type_t)e1->topt,true)) {
+    if (Tcutil::is_noalias_pointer(env->aquals_bounds,(type_t)e1->topt,true)) {
       DEBUG_PRINT("acquiring Lexp for %s\n",exp2string(e1));
       let $(f,lval) = anal_Lexp(env,inflow,expand_unique,passthrough_consumes,e1);
       switch $(f,lval) {
@@ -1976,7 +1983,7 @@ static flow_t expand_unique_places(analenv_t env, flow_t inflow,
 		Absynpp::exp2string(x->hd),
 		Absynpp::typ2string(x->hd->topt));
     if (is_local_var_rooted_path(x->hd,true) &&
-	Tcutil::is_noalias_pointer_or_aggr((type_t)x->hd->topt)) {
+	Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,(type_t)x->hd->topt)) {
       DEBUG_PRINT("expanding it\n");
       let $(f,_) = anal_Lexp(env,inflow,true,false,x->hd);
       inflow = f;
@@ -2159,7 +2166,7 @@ static void check_for_unused_unique($(seg_t,analenv_t,flowdict_t)@ ckenv,
   let &$(loc,env,fd) = ckenv;
   switch (root) {
   case &VarRoot(vd):
-    if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
+    if (Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,vd->type)) {
       let $(rval,_) = unname_rval(rval);
       switch (rval) {
       case &Consumed(...):
@@ -2197,13 +2204,13 @@ static void check_init_params(seg_t loc, analenv_t env, flow_t flow) {
 // pointers; these could be potentially unconsumed at the completion
 // of the pattern block.
 static $(list_t<place_t>,list_t<exp_t>) 
-  get_unconsume_pat_vars(list_t<$(vardecl_t *,exp_opt_t)@> vds) {
+  get_unconsume_pat_vars(analenv_t env, list_t<$(vardecl_t *,exp_opt_t)@> vds) {
   let roots = NULL;
   let es = NULL;
   for (_ x = vds; x != NULL; x=x->tl) {
     let &$(vopt,eopt) = x->hd;
     if (vopt != NULL && eopt != NULL &&
-	Tcutil::is_noalias_pointer((type_t)(eopt)->topt,false)) {
+	Tcutil::is_noalias_pointer(env->aquals_bounds,(type_t)(eopt)->topt,false)) {
       let root = new VarRoot(*vopt);
       let rp = new Place(root,NULL);
       roots = new List(rp,roots);
@@ -2249,7 +2256,7 @@ static $(bool,absRval_opt_t) noconsume_place_ok(analenv_t env,
       if (vd == n) {
 	rval = r;
 	// if a unique pointer, make sure not consumed
-	if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
+	if (Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,vd->type)) {
 	  // see if I consumed the variable directly
 	  if (is_unique_consumed(bogus_exp,bogus_int,rval,&bogus_bool)) {
 	    if (!do_unconsume)
@@ -2273,7 +2280,7 @@ static $(bool,absRval_opt_t) noconsume_place_ok(analenv_t env,
       break;
 	
     default:
-      if (!Tcutil::is_noalias_pointer_or_aggr(vd->type))
+      if (!Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,vd->type))
 	varok = true;
       else if (!do_unconsume)
 	aerr(loc, "function parameter %s without 'consume' attribute "
@@ -2389,7 +2396,7 @@ static flow_t unconsume_exp(analenv_t env,
 	// if this is an alias expression, then overwriting the
 	// original is an error (for now)
 	if (ropt != NULL &&
-	    !Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
+	    !Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,vd->type)) {
 	  aerr(loc,"aliased expression %s was overwritten",
 	       exp2string(unconsume_exp));
 	  // CODE SAVED FROM OLD ALIAS STUFF BELOW
@@ -2468,7 +2475,7 @@ static flow_t anal_scs(analenv_t env,flow_t inflow, list_t<switch_clause_t> scs,
   let fenv = env->fenv;
   for(; scs != NULL; scs = scs->tl) {
     let &Switch_clause(_,vds_opt,where_opt,body,loc) = scs->hd;
-    let $(roots,es) = get_unconsume_pat_vars(vds_opt->v);
+    let $(roots,es) = get_unconsume_pat_vars(env, vds_opt->v);
     flow_t clause_inflow=initialize_pat_vars(env->fenv,env,inflow,
 					     vds_opt->v,
 					     roots != NULL,
@@ -2518,7 +2525,7 @@ static flow_t anal_scs(analenv_t env,flow_t inflow, list_t<switch_clause_t> scs,
 static void check_dropped_unique_vd($(analenv_t, flowdict_t, seg_t)@ vdenv,
                                      Absyn::vardecl_t vd) {
   let &$(env,fd,loc) = vdenv;
-  if (Tcutil::is_noalias_pointer_or_aggr(vd->type)) {
+  if (Tcutil::is_noalias_pointer_or_aggr(env->aquals_bounds,vd->type)) {
     // FIX: avoid allocation of var-root
     datatype Root.VarRoot vdroot = VarRoot(vd);
     let $(rval,_) = unname_rval(Dict::lookup_other(fd,root_cmp,new vdroot));
@@ -2759,7 +2766,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s,
     case &AliasVar_p(_,_): isAliasPat =true; break;
     default: break;
     }
-    let $(roots,es) = get_unconsume_pat_vars(vds);
+    let $(roots,es) = get_unconsume_pat_vars(env, vds);
     inflow = initialize_pat_vars(fenv,env,inflow,vds,roots != NULL,loc,e->loc, isAliasPat);
     let old_unique_pat_vars = env->unique_pat_vars;
     // we always assume vars are bound (as does jump-analysis)
@@ -2937,7 +2944,8 @@ static reln_op_t translate_rop(list_t<vardecl_t> vds, reln_op_t r) {
 // calculates the list of roots that must be unconsumed.  This
 // consists of all no-alias pointers that do not have the consume()
 // attribute.
-static list_t<place_t> get_noconsume_params(list_t<vardecl_t> param_vardecls,
+static list_t<place_t> get_noconsume_params(aqualbnds_t aqb,
+					    list_t<vardecl_t> param_vardecls,
 					    attributes_t atts) {
   region r;
   let len = length(param_vardecls);
@@ -2952,7 +2960,7 @@ static list_t<place_t> get_noconsume_params(list_t<vardecl_t> param_vardecls,
   list_t<place_t> noconsume_roots = NULL;
   for (int i = 0; param_vardecls != NULL; param_vardecls = param_vardecls->tl, i++) {
     let vd = param_vardecls->hd;
-    if (Tcutil::is_noalias_pointer(vd->type,false) && !cons[i]) {
+    if (Tcutil::is_noalias_pointer(aqb, vd->type,false) && !cons[i]) {
       let root = new VarRoot(vd);
       let rp = new Place(root,NULL);
       noconsume_roots = new List(rp,noconsume_roots);
@@ -2981,6 +2989,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
                          req->relation, translate_rop(vardecls,req->rop2),
                          relns);
   }
+  _ aquals_bounds = Tcutil::get_aquals_bounds(fd);
   // NOTE: for reasons Dan doesn't understand, the attributes, are not
   // on the fndecl, only on the type.
   _ atts;
@@ -2988,7 +2997,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   case &FnType(FnInfo{.attributes = as,...}): atts = as; break;
   default: Warn::impos("check_fun: non-function type cached with fndecl_t");
   }
-  list_t<place_t> noconsume_roots = get_noconsume_params(fd->param_vardecls->v,atts);
+  list_t<place_t> noconsume_roots = get_noconsume_params(aquals_bounds, fd->param_vardecls->v,atts);
   // DAN: Sanity checking used to be split and duplicated with 
   // Tc::fnTypeAttsOK.  Now everything is there where it belongs.
   for(; atts != NULL; atts = atts->tl)
@@ -2999,7 +3008,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
       type_t t = compress(vd->type);
       type_t elttype = Tcutil::pointer_elt_type(t);
       let rval =
-        make_unique_consumed(fenv,elttype,bogus_exp,-1,
+        make_unique_consumed(fenv,aquals_bounds,elttype,bogus_exp,-1,
                              typ_to_absrval(fenv,elttype,false,fenv->unknown_all),
 			     false);
       let r = new InitParam(i,t);
@@ -3030,7 +3039,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
 		Hashtable::lookup(tables->pat_pop_tables,fd),
 		fenv,true,0,false,inflow,noreturn,fd->i.ret_type,
 		NULL,param_roots,noconsume_roots,
-		flow_table,fd->i.ensures_relns);
+		flow_table,fd->i.ensures_relns, aquals_bounds);
   flow_t    outflow  = inflow;
   while(env->iterate_again && !anal_error) {
     ++(env->iteration_num);

@@ -32,28 +32,28 @@
    how. */
 
 /*** The following declarations are made outside of any namespace. */
-typedef char *`r Cstring<`r>;
-typedef char @`r CstringNN<`r>;
-typedef const char ?`r string_t<`r>;
+typedef char *@aqual(`q) `r Cstring<`r,`q::Q>; 
+typedef char @@aqual(`q) `r CstringNN<`r,`q::Q>;
+typedef const char ?@aqual(`q) `r string_t<`r,`q::Q>;
 /** A [string_t<`r>] is a constant array of characters allocated in
     region [`r].  */
-typedef char ?`r mstring_t<`r>;
+typedef char ?@aqual(`q) `r mstring_t<`r,`q::Q>;
 /** An [mstring_t<`r>] is a non-const (mutable) array of characters
     allocated in region [`r].  */
-typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
+typedef string_t<`r1,`q1> @@aqual(`q2) `r2 stringptr_t<`r1,`r2,`q1,`q2>;
 /** A [stringptr_t<`r1,`r2>] is used when a ``boxed'' string is
     needed, for example, you can have a list of string pointers, but not
     a list of strings.  */
-typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
+typedef mstring_t<`r1,`q1> @@aqual(`q2) `r2 mstringptr_t<`r1,`r2,`q1,`q2>;
 /** [mstringptr_t] is the mutable version of [stringptr_t]. */
 
-typedef char * @nozeroterm `r Cbuffer_t<`r>;
+typedef char *@aqual(`q) @nozeroterm `r Cbuffer_t<`r,`q>;
 /** [Cbuffer_t] is a possibly-NULL, non-zero-terminated C buffer */
-typedef char @ @nozeroterm `r CbufferNN_t<`r>;
+typedef char @@aqual(`q) @nozeroterm `r CbufferNN_t<`r,`q>;
 /** [CbufferNN_t] is a non-NULL, non-zero-terminated C buffer */
-typedef const char ? @nozeroterm `r buffer_t<`r>;
+typedef const char ?@aqual(`q) @nozeroterm `r buffer_t<`r,`q>;
 /** [buffer_t] is a non-zero-terminated dynamically sized buffer */
-typedef char ? @nozeroterm `r mbuffer_t<`r>;
+typedef char ?@aqual(`q) @nozeroterm `r mbuffer_t<`r,`q>;
 
 #ifndef bool
 typedef int bool;
@@ -78,7 +78,7 @@ typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
   /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
 extern struct Opt<`a::B> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
-typedef struct Opt<`a> *`r opt_t<`a,`r>;
+typedef struct Opt<`a> *@aqual(`q) `r opt_t<`a,`r,`q>;
   /** An [opt_t] is a pointer to a [struct Opt].  An [opt_t] can be
       used to pass an optional value to a function, or return an
       optional result.  For example, to return no result, return NULL;
@@ -88,7 +88,7 @@ typedef struct Opt<`a> *`r opt_t<`a,`r>;
       return a pointer to [t].  The [opt_t] type is useful primarily
       when porting Objective Caml code, which has a corresponding
       type. */
- opt_t<`b,`U> opt_map(`b f(`a), opt_t<`a> x);
+ opt_t<`b,`H,UNIQUE> opt_map(`b f(`a), opt_t<`a> x);
   /** [opt_map(f,x)] applies [f] to the value contained in option [x],
       if any, and returns the result as an option; if [x] is NULL,
       [opt_map(f,x)] returns NULL. */
@@ -100,6 +100,8 @@ typedef struct Opt<`a> *`r opt_t<`a,`r>;
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
+ mstring_t<`r,`q> rqnew_string(region_t<`r>,aqual_t<`q>,unsigned int);
+  /** [rqnew_string(r,q,n)] same as above ...except allocates with aqual(`q)*/
  bool true_f(`a);
   /** [true_f] is the constant [true] function: [true_f(x)] returns
       [true] regardless of the value of [x]. */
@@ -168,31 +170,34 @@ extern "C" int region_alloc_bytes(region_t<`r>);
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 
-extern region_t<`U> unique_region;
+  //extern region_t<`U> unique_region;
   /** [unique_region] is the region handle of the unique pointer region. */
-
-
+  
   extern aqual_t<ALIASABLE> aliasable_qual;
   extern aqual_t<UNIQUE> unique_qual;
   extern aqual_t<REFCNT> refcnt_qual;
-  extern aqual_t<DYNTRK> dyntrk_qual;
 
   /** these handles are used for allocating pointers of each kind; RESTRICTED is abstract */ 
 
   // FIX: unique_region also defined in absyn.cyc; should really unify
   //   the two definitions!
-#define unew rnew (Core::unique_region)
-#define umalloc(arg) rmalloc (Core::unique_region,arg)
+#define unew qnew (Core::unique_qual)
+#define qunew qnew (Core::unique_qual)
+  //#define qunew unew 
+  //#define umalloc(arg) rmalloc (Core::unique_region, arg)
+#define umalloc(arg) qmalloc (Core::heap_region, Core::unique_qual,  arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
- void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
+void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
 
-extern region_t<`RC> refcnt_region;
+  //extern region_t<`RC> refcnt_region;
   /** [refcnt_region] is the region handle of the reference-counted
       region. Data allocated in this region contains an additional
       reference count for managing aliases. */
-#define rcnew rnew (Core::refcnt_region)
-#define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
+// #define rcnew rnew (Core::refcnt_region)
+// #define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
+#define rcnew qnew (Core::refcnt_qual)
+#define rcmalloc(arg) qmalloc (Core::heap_region,Core::refcnt_qual,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
  int refptr_count(`a::TA ?`RC ptr);
   /** [refptr_count(p)] returns the current reference count for [p]
@@ -227,18 +232,18 @@ struct DynamicRegion<`r::R>;
       named [`r].  Dynamic regions can be created and destroyed at will,
       but access to them must be done through the open_region function. */
 
-typedef struct DynamicRegion<`r1>@`r2 region_key_t<`r1,`r2>;
+typedef struct DynamicRegion<`r1>@@aqual(`q) region_key_t<`r1,`q>;
   /** A [region_key_t<`r1,`r2>] is a pointer (in [`r2]) to a 
       [DynamicRegion<`r1>].  Keys are used as capabilities for accessing a 
       dynamic region.  You have to present a key to the open procedure to 
       access the region. */
 
-typedef region_key_t<`r,`U> uregion_key_t<`r>;
+typedef region_key_t<`r,UNIQUE> uregion_key_t<`r>;
   /** A [uregion_key_t<`r>] is a unique pointer to a [DynamicRegion<`r>].  You
       can't make copies of the key, but if you call [free_ukey], then
       you are assured that the region [`r] is reclaimed. */
 
-typedef region_key_t<`r,`RC> rcregion_key_t<`r>;
+  typedef region_key_t<`r,REFCNT> rcregion_key_t<`r>;
   /** A [rcregion_key_t<`r>] is a reference-counted pointer to a 
       [DynamicRegion<`r>].  You can make copies of the key
       using [alias_refptr] which increments the reference count.
@@ -246,24 +251,25 @@ typedef region_key_t<`r,`RC> rcregion_key_t<`r>;
       decrement the reference count.  If the count reaches zero,
       then the region will be reclaimed. */
 
-struct NewDynamicRegion<`r2> {
+struct NewDynamicRegion<`q::Q> {
   <`r>
-  region_key_t<`r,`r2> key;
+  region_key_t<`r,`q> key;
 };
+
   /** A [struct NewDynamicRegion<`r2>] is used to return a new
       dynamic region [`r].  The struct hides the name of the
       region and must be opened, guaranteeing that the type-level
       name is unique. */
 
- struct NewDynamicRegion<`U> _new_ukey(const char *file,
-				       const char *func,
-				       int lineno);
+ struct NewDynamicRegion<UNIQUE> _new_ukey(const char *file,
+					   const char *func,
+					   int lineno);
   /** [new_ukey()] creates a fresh dynamic region [`r] and returns
       a unique key for that region. */
 
- struct NewDynamicRegion<`RC> _new_rckey(const char *file,
-					 const char *func,
-					 int lineno);
+  struct NewDynamicRegion<REFCNT> _new_rckey(const char *file,
+					     const char *func,
+					     int lineno);
   /** [new_rckey()] creates a fresh dynamic region [`r] and returns
       a reference-counted key for that region. */
 
@@ -275,20 +281,20 @@ struct NewDynamicRegion<`r2> {
 #define new_rckey() _new_rckey(__FILE__,"",__LINE__)
 #endif
 
- void free_ukey(uregion_key_t<`r> k; {}) __attribute__((consume(1)));
+  void free_ukey(uregion_key_t<`r> k; {})  __attribute__((consume(1)));
   /** [free_ukey(k)] takes a unique key for the region [`r] and
       deallocates the region [`r] and destroys the key [k]. */
 
- void free_rckey(rcregion_key_t<`r> k; {}) __attribute__((consume(1)));
+  void free_rckey(rcregion_key_t<`r> k; {}) __attribute__((consume(1)));
   /** [free_rckey(k)] takes a reference-counted key for the region [`r],
       decrements the reference count and destroyes the key [k].  If the
       reference count becomes zero, then all keys have been destroyed
       and the region [`r] is deallocated. */
 
- `result open_region(region_key_t<`r,`r2::TR> key,
+ `result open_region(region_key_t<`r,`q> key,
 		     `arg arg,
-		     `result body(region_t<`r> h, `arg arg;{`r,`r2}+`eff);
-                     {`r2}+`eff);
+		     `result body(region_t<`r> h, `arg arg;{`r}+`eff);
+		     `eff : RESTRICTED >= `q);
   /** [open_region(k,arg,body)] extracts a region handle [h] for
       the region [`r] which the [k] provides access to.  The handle
       and value [arg] are passed to the function pointer [body]

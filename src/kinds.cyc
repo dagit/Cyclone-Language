@@ -23,27 +23,34 @@ using Core;
 using Absyn;
 namespace Kinds;
 
-struct Kind rk = Kind(RgnKind,Aliasable);
-struct Kind ak = Kind(AnyKind,Aliasable);
-struct Kind bk = Kind(BoxKind,Aliasable);
-struct Kind mk = Kind(MemKind,Aliasable);
-struct Kind ik = Kind(IntKind,Aliasable);
-struct Kind ek = Kind(EffKind,Aliasable);
-struct Kind boolk = Kind(BoolKind,Aliasable);
-struct Kind ptrbk = Kind(PtrBndKind,Aliasable);
+struct Kind rk = Kind(RgnKind,NoHint);
+struct Kind ak = Kind(AnyKind,NoHint);
+struct Kind bk = Kind(BoxKind,NoHint);
+struct Kind mk = Kind(MemKind,NoHint);
+struct Kind ik = Kind(IntKind,NoHint);
+struct Kind ek = Kind(EffKind,NoHint);
+struct Kind boolk = Kind(BoolKind,NoHint);
+struct Kind ptrbk = Kind(PtrBndKind,NoHint);
+struct Kind aqk = Kind(AqualKind,NoHint); 
 
-struct Kind trk = Kind(RgnKind,Top);
-struct Kind tak = Kind(AnyKind,Top);
-struct Kind tbk = Kind(BoxKind,Top);
-struct Kind tmk = Kind(MemKind,Top);
+struct Kind bk_rhint = Kind(BoxKind,RestrictedHint);
+struct Kind bk_uhint = Kind(BoxKind,UniqueHint);
+struct Kind bk_rchint = Kind(BoxKind,RefcntHint);
 
-struct Kind urk = Kind(RgnKind,Unique);
-struct Kind uak = Kind(AnyKind,Unique);
-struct Kind ubk = Kind(BoxKind,Unique);
-struct Kind umk = Kind(MemKind,Unique);
+struct Kind mk_rhint = Kind(MemKind,RestrictedHint);
+struct Kind mk_uhint = Kind(MemKind,UniqueHint);
+struct Kind mk_rchint = Kind(MemKind,RefcntHint);
 
-struct Kind aqk = Kind(AqualKind,Top);
+struct Kind ak_rhint = Kind(AnyKind,RestrictedHint);
+struct Kind ak_uhint = Kind(AnyKind,UniqueHint);
+struct Kind ak_rchint = Kind(AnyKind,RefcntHint);
 
+/* struct Kind trk = Kind(RgnKind,Top); */
+/* struct Kind tak = Kind(AnyKind,Top); */
+/* struct Kind tmk = Kind(MemKind,Top); */
+/* struct Kind urk = Kind(RgnKind,Unique); */
+/* struct Kind uak = Kind(AnyKind,Unique); */
+/* struct Kind umk = Kind(MemKind,Unique); */
 struct Opt<kind_t> rko = {&rk};
 struct Opt<kind_t> ako = {&ak};
 struct Opt<kind_t> bko = {&bk};
@@ -52,22 +59,32 @@ struct Opt<kind_t> iko = {&ik};
 struct Opt<kind_t> eko = {&ek};
 struct Opt<kind_t> boolko = {&boolk};
 struct Opt<kind_t> ptrbko = {&ptrbk};
-
-struct Opt<kind_t> trko = {&trk};
-struct Opt<kind_t> tako = {&tak};
-struct Opt<kind_t> tbko = {&tbk};
-struct Opt<kind_t> tmko = {&tmk};
-
-struct Opt<kind_t> urko = {&urk};
-struct Opt<kind_t> uako = {&uak};
-struct Opt<kind_t> ubko = {&ubk};
-struct Opt<kind_t> umko = {&umk};
 struct Opt<kind_t> aqko = {&aqk};
 
-opt_t<kind_t> kind_to_opt(kind_t ka) {
-  let &Kind(k,a) = ka;
-  switch (a) {
-  case Aliasable:
+struct Opt<kind_t> bk_rhinto = {&bk_rhint};
+struct Opt<kind_t> bk_uhinto = {&bk_uhint};
+struct Opt<kind_t> bk_rchinto = {&bk_rchint};
+
+struct Opt<kind_t> mk_rhinto = {&mk_rhint};
+struct Opt<kind_t> mk_uhinto = {&mk_uhint};
+struct Opt<kind_t> mk_rchinto = {&mk_rchint};
+
+struct Opt<kind_t> ak_rhinto = {&ak_rhint};
+struct Opt<kind_t> ak_uhinto = {&ak_uhint};
+struct Opt<kind_t> ak_rchinto = {&ak_rchint};
+
+/* struct Opt<kind_t> trko = {&trk}; */
+/* struct Opt<kind_t> tako = {&tak}; */
+/* struct Opt<kind_t> tbko = {&tbk}; */
+/* struct Opt<kind_t> tmko = {&tmk}; */
+/* struct Opt<kind_t> urko = {&urk}; */
+/* struct Opt<kind_t> uako = {&uak}; */
+/* struct Opt<kind_t> ubko = {&ubk}; */
+/* struct Opt<kind_t> umko = {&umk}; */
+
+opt_t<kind_t> kind_to_opt(kind_t kh) {
+  let &Kind(k,h) = kh;
+  if(h == NoHint) {
     switch (k) {
     case AnyKind: return &ako;
     case MemKind: return &mko;
@@ -77,31 +94,43 @@ opt_t<kind_t> kind_to_opt(kind_t ka) {
     case IntKind: return &iko;
     case BoolKind: return &bko;
     case AqualKind: return &aqko;
-    case PtrBndKind:       
-    default: return &ptrbko; 
+    case PtrBndKind: return &ptrbko; 
+    default: Warn::impos2("kind_to_opt: bad kind ",kh);
     }
-  case Unique:
-    switch (k) {
-    case AnyKind: return &uako;
-    case MemKind: return &umko;
-    case BoxKind: return &ubko;
-    case RgnKind: return &urko;
-    default: break;
-    }
-    break;
-  case Top: 
-    switch (k) {
-    case AnyKind: return &tako;
-    case MemKind: return &tmko;
-    case BoxKind: return &tbko;
-    case RgnKind: return &trko;
-    case AqualKind: return &aqko;
-    default: break;
-    }
-    break;
-  default: break;
   }
-  Warn::impos2("kind_to_opt: bad kind ",ka);
+  else { 
+    switch(k) {
+    case BoxKind:
+      switch(h) {
+      case RestrictedHint:
+	return &bk_rhinto;
+      case UniqueHint:
+	return &bk_uhinto;
+      default:
+	return &bk_rchinto;
+      }
+    case MemKind:
+      switch(h) {
+      case RestrictedHint:
+	return &mk_rhinto;
+      case UniqueHint:
+	return &mk_uhinto;
+      default:
+	return &mk_rchinto;
+      }
+    case AnyKind:
+      switch(h) {
+      case RestrictedHint:
+	return &ak_rhinto;
+      case UniqueHint:
+	return &ak_uhinto;
+      default:
+	return &ak_rchinto;
+      }
+    default:
+      Warn::impos2("kind_to_opt: bad kind ",kh);
+    }
+  }
 }
 
 kindbound_t kind_to_bound(kind_t k) {
@@ -113,7 +142,7 @@ opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
 
 // Convert an identifier to a kind
 kind_t id_to_kind(string_t<`H> s, seg_t loc) {
-  if(strlen(s)==1 || strlen(s)==2)
+  if(strlen(s)==1 || strlen(s)==2) {
     switch (s[0]) {
     case 'A': return &ak;
     case 'M': return &mk;
@@ -122,62 +151,78 @@ kind_t id_to_kind(string_t<`H> s, seg_t loc) {
     case 'E': return &ek;
     case 'I': return &ik;
     case 'Q': return &aqk;
-    case 'U': 
-      switch (s[1]) {
-      case 'R':	return &urk;
-      case 'A': return &uak;
-      case 'M': return &umk;
-      case 'B': return &ubk;
-      default: break;
+    default:
+      if(s[1] == 'B') {
+	switch (s[0]) {
+	case 'U': return &bk_uhint;
+	case 'T': return &bk_rhint;
+	case 'C': return &bk_rchint;
+	default: break;
+	}
       }
-      break;
-    case 'T':
-      switch (s[1]) {
-      case 'R':	return &trk;
-      case 'A': return &tak;
-      case 'M': return &tmk;
-      case 'B': return &tbk;
-      default: break;
+      if(s[1] == 'M') {
+	switch (s[0]) {
+	case 'U': return &mk_uhint;
+	case 'T': return &mk_rhint;
+	case 'C': return &mk_rchint;
+	default: break;
+	}
       }
+      if(s[1] == 'A') {
+	switch (s[0]) {
+	case 'U': return &ak_uhint;
+	case 'T': return &ak_rhint;
+	case 'C': return &ak_rchint;
+	default: break;
+	}
+      }
+      if(s[1] == 'R') 
+	return &rk;
       break;
-    default:  break;
+    }
   }
-  Warn::err2(loc,"bad kind: ",s," strlen=",s,strlen(s));
+  Warn::err2(loc,"bad kind: ",s," strlen=",strlen(s));
   return &bk;
 }
 
-string_t kind2string(kind_t ka) {
-  let &Kind(k,a) = ka;
-  switch (k) {
-  case AnyKind:
-    switch (a) {
-    case Aliasable: return "A";
-    case Unique: return "UA";
-    case Top: default: return "TA";
+string_t kind2string(kind_t kh) {
+  let &Kind(k,h) = kh;
+  if(h == NoHint) {
+    switch (k) {
+    case AnyKind: return "A";
+    case MemKind: return "M";
+    case BoxKind: return "B";
+    case RgnKind: return "R";
+    case AqualKind: return "Q";
+    case EffKind: return "E";
+    case IntKind: return "I";
+    case BoolKind: return "BOOL";
+    case PtrBndKind: default: return "PTRBND";
     }
-  case MemKind:
-    switch (a) {
-    case Aliasable: return "M";
-    case Unique: return "UM";
-    case Top: default: return "TM";
+  }
+  else {
+    switch(k) {
+    case BoxKind:
+      switch(h) {
+      case RestrictedHint: return "TB";
+      case UniqueHint: return "UB";
+      default: return "CB";
+      }
+    case MemKind:
+      switch(h) {
+      case RestrictedHint: return "TM";
+      case UniqueHint: return "UM";
+      default: return "CM";
+      }
+    case AnyKind:
+      switch(h) {
+      case RestrictedHint: return "TA";
+      case UniqueHint: return "UA";
+      default: return "CA";
+      }
+    default:
+      Warn::impos2("Bad kind");
     }
-  case BoxKind:
-    switch (a) {
-    case Aliasable: return "B";
-    case Unique: return "UB";
-    case Top: default: return "TB";
-    }
-  case RgnKind:
-    switch (a) {
-    case Aliasable: return "R";
-    case Unique: return "UR";
-    case Top: default: return "TR";
-    }
-  case AqualKind: return "Q";
-  case EffKind: return "E";
-  case IntKind: return "I";
-  case BoolKind: return "BOOL";
-  case PtrBndKind: default: return "PTRBND";
   }
 }
 
@@ -214,16 +259,16 @@ kindbound_t copy_kindbound(kindbound_t kb) {
 }
 
 // Our partial order looks like this:
-//          AbsType   EffKind  RgnKind  * Top
-//             V                          V V
-//          MemType               Aliasable Unique
+//          AbsType   EffKind  RgnKind  IntKind BoolKind PtrBndKind AqualKind
+//             V                   
+//          MemType
 //             V
 //          BoxType
 // Only used during unification -- we can constrain an Evar or VarType
 // as long as we move down in the lattice.
 bool kind_leq(kind_t ka1, kind_t ka2) {
-  let &Kind(k1,a1) = ka1;
-  let &Kind(k2,a2) = ka2;
+  let &Kind(k1,_) = ka1;
+  let &Kind(k2,_) = ka2;
   // check the kind part
   if (k1 != k2)
     switch ($(k1,k2)) {
@@ -233,12 +278,12 @@ bool kind_leq(kind_t ka1, kind_t ka2) {
     default: return false;
     }
   // check the aliasable part
-  if (a1 != a2)
-    switch ($(a1,a2)) {
-    case $(Aliasable, Top):
-    case $(Unique, Top): return true;
-    default: return false;
-    }
+  /*   if (a1 != a2) */
+  /*     switch ($(a1,a2)) { */
+  /*     case $(Aliasable, Top): */
+  /*     case $(Unique, Top): return true; */
+  /*     default: return false; */
+  /*     } */
   return true;
 }
 
@@ -261,7 +306,7 @@ $(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
 }
 
 bool kind_eq(kind_t k1, kind_t k2) {
-  return k1 == k2 || (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
+  return k1 == k2 || (k1->kind == k2->kind && k1->aliashint == k2->aliashint);
 }
 
 // Given two kind constraint refs, merge them so that they will

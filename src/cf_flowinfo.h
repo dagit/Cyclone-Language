@@ -164,7 +164,7 @@ extern int place_cmp(place_t, place_t);
 
 extern aggrdict_t aggrfields_to_aggrdict(flow_env_t, List::list_t<struct Absyn::Aggrfield@>, bool no_init_bits_only, absRval_t);
 extern absRval_t typ_to_absrval(flow_env_t, Absyn::type_t, bool no_init_bits_only, absRval_t leafval);
-extern absRval_t make_unique_consumed(flow_env_t, Absyn::type_t, Absyn::exp_t consumer, int iteration, absRval_t, bool);
+extern absRval_t make_unique_consumed(flow_env_t,Absyn::aqualbnds_t, Absyn::type_t, Absyn::exp_t consumer, int iteration, absRval_t, bool);
 extern bool is_unique_consumed(Absyn::exp_t, int env_iteration, absRval_t, bool @needs_unconsume);
 extern absRval_t make_unique_unconsumed(flow_env_t, absRval_t);
 extern $(absRval_t,List::list_t<Absyn::vardecl_t>) unname_rval(absRval_t);

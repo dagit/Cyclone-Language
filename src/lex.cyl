@@ -80,15 +80,15 @@ static struct KeyWordInfo ?  kw_nums  = NULL;
 bool expand_specials = false; // FLAG
 // state for recording whether or not we're parsing C code
 static bool in_extern_c = false;
-static list_t<bool,`U> prev_extern_c = NULL;
+static list_t<bool,`H,UNIQUE> prev_extern_c = NULL;
 void enter_extern_c() {
-  list_t<bool,`U> x = NULL;
+  list_t<bool,`H,UNIQUE> x = NULL;
   x :=: prev_extern_c;
-  prev_extern_c = unew List(in_extern_c,x);
+  prev_extern_c = qunew List(in_extern_c,x);
   in_extern_c = true;
 }
 void leave_extern_c() {
-  list_t<bool,`U> x = NULL;
+  list_t<bool,`H,UNIQUE> x = NULL;
   x :=: prev_extern_c;
   in_extern_c = x->hd;
   prev_extern_c = x->tl;
@@ -155,7 +155,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("default", DEFAULT, true),
   $("do", DO, true),
   $("double", DOUBLE, true),
-  $("DYNTRK", AQ_DYNTRK, false),
   $("else", ELSE, true),
   $("enum", ENUM, true),
   $("export", EXPORT, false),
@@ -182,6 +181,9 @@ static $(string_t,short,bool) rw_array[] = {
   $("__cyclone_port_on__", PORTON, false),
   $("__cyclone_port_off__", PORTOFF, false),
   $("__cyclone_pragma__", PRAGMA, false),
+  $("qcalloc", QCALLOC, false),
+  $("qmalloc", QMALLOC, false),
+  $("qnew", QNEW, false),
   $("rcalloc", RCALLOC, false),
   $("REFCNT", AQ_REFCNT, false),
   $("region_t", REGION_T, false),
@@ -690,7 +692,7 @@ static pinfo_t<`r> rnew_filepos(region_t<`r> r,
                                 const char ?`H filename, 
                                 unsigned int starting_line, 
                                 pinfo_opt_t<`r> next) {
-  seg_t ?`U linenumpos = rcalloc(unique_region, 10, sizeof(seg_t));
+  seg_t ?`U linenumpos = qcalloc(heap_region, unique_qual, 10, sizeof(seg_t));//rcalloc(unique_region, 10, sizeof(seg_t));
   linenumpos[0] = yylloc.first_line;
   return rnew(r) PosInfo{.next = next, .starting_line = starting_line,
                          .filename = filename,
@@ -710,7 +712,7 @@ static void inc_linenumber() {
   // check for enough space to insert the position
   if (offset >= n) {
     // have to grow the array -- double it and copy over old array
-    seg_t ?`U newlinenums = rcalloc(unique_region,n*2,sizeof(seg_t));
+    seg_t ?`U newlinenums = qcalloc(heap_region,unique_qual,n*2,sizeof(seg_t));//rcalloc(unique_region, n*2, sizeof(seg_t));
     for (unsigned i = 0; i < n; i++)
       newlinenums[i] = linenums[i];
     linenums :=: newlinenums;
@@ -1103,10 +1105,10 @@ static Xarray::xarray_t<stringptr_t,`d> empty_xarray(region_t<`d> id_rgn, int du
 void lex_init(bool include_cyclone_keywords) {
   // reset the in_extern_c stuff
   in_extern_c = false;
-  list_t<bool,`U> x = NULL;
+  list_t<bool,`H,UNIQUE> x = NULL;
   prev_extern_c :=: x;
   while (x != NULL) {
-    list_t<bool,`U> t = x->tl;
+    list_t<bool,`H,UNIQUE> t = x->tl;
     ufree(x);
     x = t;
   }
@@ -1129,11 +1131,11 @@ void lex_init(bool include_cyclone_keywords) {
   let NewDynamicRegion{id_dyn} = new_ukey();
   let ts = open_region(id_dyn, 0, empty_trie);
   let xa = open_region(id_dyn, 0, empty_xarray);
-  ids_trie = unew DynTrieSymbols{id_dyn, ts, xa};
+  ids_trie = qunew DynTrieSymbols{id_dyn, ts, xa};
 
   let NewDynamicRegion{typedefs_dyn} = new_ukey();
   trie_t t = open_region(typedefs_dyn, 0, empty_trie);
-  typedefs_trie = unew DynTrie{typedefs_dyn, t};
+  typedefs_trie = qunew DynTrie{typedefs_dyn, t};
   num_kws       = num_keywords(include_cyclone_keywords);
   kw_nums       = new {for i < num_kws : KeyWordInfo{0,0}};
   unsigned i = 0;

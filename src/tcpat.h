@@ -44,6 +44,8 @@ struct TcPatResult {
   //    that should be "used:" (consumed) by the flow analysis.  These
   //    will correspond to the locations of datatypes in patterns, and
   //    thus effectively require that the datatype be fully initialized.
+  list_t<$(type_t,type_t)@> aquals_bounds;
+  //for existential unpacks, we need to add aqual(`a) <= ALIASABLE etc. to the env.
 };
 
 typedef struct TcPatResult tcpat_result_t;

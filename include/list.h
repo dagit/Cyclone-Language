@@ -28,7 +28,7 @@ namespace List {
        various operations over them, following the conventions of the
        Objective Caml list library as much as possible. */
 
-  struct List<`a,`r>{`a hd; struct List<`a,`r> *`r tl;};
+  struct List<`a::TB,`r,`q::Q>{`a hd; struct List<`a,`r,`q> *@aqual(`q) `r tl;};
   /** A [struct List] is a memory cell with a head field containing an
       element and a tail field that points to the rest of the list.
       Such a structure is traditionally called a cons cell.  Note that
@@ -36,7 +36,7 @@ namespace List {
       every cons cell in the list must be allocated in the same region
       [`r].  */
 
-  typedef struct List<`a,`r> *`r list_t<`a,`r>;
+  typedef struct List<`a,`r,`q> *@aqual(`q) `r list_t<`a,`r,`q>;
   /** A [list_t] is a possibly-NULL pointer to a [struct List].  Most
       of the functions in namespace List operate on values of type
       [list_t] rather than [struct List].  Note that a [list_t] can be
@@ -46,7 +46,7 @@ namespace List {
 //   /** A [trlist_t] is the same as a list_t except that the list can
 //       reside in either a normal region or the unique region.  */
 
-  typedef struct List<`a,`r> @`r List_t<`a,`r>;
+  typedef struct List<`a,`r,`q> @@aqual(`q) `r List_t<`a,`r,`q>;
   /** A [List_t] is a non-NULL pointer to a [struct List].  This is
       used much less often than [list_t], however it may be useful
       when you want to emphasize that a list has at least one element.  */

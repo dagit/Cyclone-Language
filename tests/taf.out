@@ -18,8 +18,6 @@ testaqualfail.cyc:106: type mismatch: int *@aqual(`r) != int *@aqual(`q)
   `q and `r are not compatible. ((variable types are not the same))
 testaqualfail.cyc:113: alias qualifier bounds violated: `q <> ALIASABLE
 testaqualfail.cyc:121: alias qualifier bounds violated: `q <> ALIASABLE
-testaqualfail.cyc:133: returns value of type int *@aqual(RESTRICTED) but requires int *
-  @false and @true are not compatible. (different type constructors)
 testaqualfail.cyc:154: cannot alias value of type int *@aqual(UNIQUE)`p to type int *@aqual(REFCNT)`r
 testaqualfail.cyc:168: alias qualifier bounds violated: UNIQUE <> ALIASABLE
 testaqualfail.cyc:169: alias qualifier bounds violated: UNIQUE <> ALIASABLE

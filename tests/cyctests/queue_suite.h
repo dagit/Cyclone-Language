@@ -13,7 +13,7 @@ void end() {
 
 
 void queue_test() {
-  Queue::queue_t<stringptr_t<`H,`H>> q = Queue::create();
+  Queue::queue_t<stringptr_t<`H,`H>,`H,ALIASABLE> q = Queue::create();
   CT_ASSERT(Queue::is_empty(q));
   Queue::add(q,allocstr("a"));
   CT_ASSERT(!Queue::is_empty(q));

@@ -65,7 +65,7 @@ struct RgnPO {
 // makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
 // also allows regions(`a) to outlive only regions having R kind
 static bool valid_constraint(type_t eff, type_t rgn) {
-  let &Kind(k,a) = Tcutil::type_kind(rgn);
+  let &Kind(k,_) = Tcutil::type_kind(rgn);
   if (k != RgnKind)
     Warn::impos2("bad region type |",rgn,"| passed to add_outlives_constraint");
   switch (compress(eff)) {
@@ -75,15 +75,13 @@ static bool valid_constraint(type_t eff, type_t rgn) {
     return true;
     // FIX: do I need to worry about how the effect might be instantiated?
   case &Evar(...):
-  case &VarType(_): return true;
-  case &AppType(&RgnsCon,&List{t,_}): 
+  case &VarType(_): 
     // Only let regions(`a) outlive things that are aliasable or
-    //   have the same alias qualifier
-    let &Kind(tk,ta) = Tcutil::type_kind(t);
-    return (a == Aliasable) || ta == a;
+    //   have the same alias qualifier ... all regions are aliasable now
+  case &AppType(&RgnsCon, _):  return true;
   case &AppType(&AccessCon,&List{r,_}): 
-    let &Kind(rk,ra) = Tcutil::type_kind(r);
-    return (k == RgnKind) && ((a == Aliasable) || (ra == a));
+    let &Kind(rk,_) = Tcutil::type_kind(r);
+    return (rk == RgnKind);
   default: 
     Warn::impos2("bad effect |",eff,"| passed to add_outlives_constraint");
   }
@@ -116,11 +114,13 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
   case &AppType(&HeapCon,_):
     ans->these_outlive_heap = join_eff(list(eff,po->these_outlive_heap));
     return ans;
-  case &AppType(&UniqueCon,_):
-    ans->these_outlive_unique=join_eff(list(eff,po->these_outlive_unique));
-    return ans;
-  case &AppType(&RefCntCon,_):
-    Warn::impos("RgnOrder::add_outlives_constraint can't outlive RC for now");
+
+/*   case &AppType(&UniqueCon,_): */
+/*     ans->these_outlive_unique=join_eff(list(eff,po->these_outlive_unique)); */
+/*     return ans; */
+/*   case &AppType(&RefCntCon,_): */
+/*     Warn::impos("RgnOrder::add_outlives_constraint can't outlive RC for now"); */
+
   default: Warn::impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
 }
@@ -237,18 +237,22 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let &Kind(k,a) = Tcutil::type_kind(r);
   if(k != RgnKind)
     Warn::impos("RgnOrder: rgn not of correct kind");
-  switch (a) {
-    // FIX: currently doesn't deal with refcnt region
-  case Aliasable:
-    add_to_search(&ans,po->these_outlive_unique);
-    add_to_search(&ans,po->these_outlive_heap);
-    break;
-  case Unique: add_to_search(&ans,po->these_outlive_unique); break;
-    // can't say anything about what top-level regions outlive
-    // a top-kinded region variable, because we just don't know
-    // how this variable was created/is being used.
-  case Top: default: break;
-  }
+  add_to_search(&ans,po->these_outlive_unique);
+  add_to_search(&ans,po->these_outlive_heap);
+
+/*   switch (a) { */
+/*     // FIX: currently doesn't deal with refcnt region */
+/*   case Aliasable: */
+/*     add_to_search(&ans,po->these_outlive_unique); */
+/*     add_to_search(&ans,po->these_outlive_heap); */
+/*     break; */
+/*   case Unique: add_to_search(&ans,po->these_outlive_unique); break; */
+/*     // can't say anything about what top-level regions outlive */
+/*     // a top-kinded region variable, because we just don't know */
+/*     // how this variable was created/is being used. */
+/*   case Top: default: break; */
+/*   } */
+
   switch(r) {
   case &VarType(tv): 
     ans.seen = rnew(listrgn) List(tv,ans.seen);
@@ -266,19 +270,19 @@ static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
   case &AppType(&AccessCon,&List(vt,_)):
     // does `vt outlive `rgn ?
     switch(compress(vt)) {
-    case &AppType(&UniqueCon,_):
-      // The unique region outlives all regions with R and UR kind
-      let &Kind(k,a) = Tcutil::type_kind(compress(rgn));
-      return (k == RgnKind) && (a != Top);
-    case &AppType(&RefCntCon,_): 
-      // The refcnt region outlives all regions the heap does, plus itself
-      // FIX: this won't work if rgn is `c, and `c outlives RefCntRgn
-      if (compress(rgn) == refcnt_rgn_type) return true;
-      fallthru;
+/*     case &AppType(&UniqueCon,_): */
+/*       // The unique region outlives all regions with R and UR kind */
+/*       let &Kind(k,a) = Tcutil::type_kind(compress(rgn)); */
+/*       return (k == RgnKind) && (a != Top); */
+/*     case &AppType(&RefCntCon,_):  */
+/*       // The refcnt region outlives all regions the heap does, plus itself */
+/*       // FIX: this won't work if rgn is `c, and `c outlives RefCntRgn */
+/*       if (compress(rgn) == refcnt_rgn_type) return true; */
+/*       fallthru; */
     case &AppType(&HeapCon,_):
       // The heap outlives all regions with R kind
-      let &Kind(k,a) = Tcutil::type_kind(compress(rgn));
-      return (k == RgnKind) && (a == Aliasable);
+      let &Kind(k,_) = Tcutil::type_kind(compress(rgn));
+      return (k == RgnKind);// && (a == Aliasable);
     case &VarType(tv):
       if(po==NULL)
 	Warn::impos("RgnOrder: tvar without a partial-order");
@@ -324,14 +328,14 @@ static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
       let &Kind(k,a) = Tcutil::type_kind(rgn);
       // FIX: deal with RefCnt region
       if (k == RgnKind)
-	if (a == Aliasable) {
-	  if(contains_rgnseff(tv,po->these_outlive_heap) ||
-	     contains_rgnseff(tv,po->these_outlive_unique))
-	    return true;
-	} else if (a == Unique) {
-	  if(contains_rgnseff(tv,po->these_outlive_unique))
-	    return true;
-	}
+	//	if (a == Aliasable) {
+	if(contains_rgnseff(tv,po->these_outlive_heap) ||
+	   contains_rgnseff(tv,po->these_outlive_unique))
+	  return true;
+      /* 	} else if (a == Unique) { */
+      /* 	  if(contains_rgnseff(tv,po->these_outlive_unique)) */
+      /* 	    return true; */
+      /* 	} */
 
       while(env.todo != NULL) {
 	let next = env.todo->hd;

@@ -97,6 +97,7 @@ namespace Absyn {
   typedef datatype Type @type_t, @rgntype_t, @booltype_t, @ptrbound_t, @aqualtype_t;
   typedef datatype Type *type_opt_t;
   typedef list_t<type_t,`H> types_t;
+  typedef list_t<$(type_t,type_t)@> aqualbnds_t;
   typedef union Cnst cnst_t;
   typedef enum Primop primop_t;
   typedef enum Incrementor incrementor_t;
@@ -160,16 +161,23 @@ namespace Absyn {
     Aliasable_qual,  // for types that can be aliased
     Unique_qual,     // for types that cannot be aliased
     Refcnt_qual,     // for reference counted types
-    DynamicTrk_qual, //
     Restricted_qual  // any of the above
   };
   typedef enum AliasQualVal alias_qual_val_t;
 
-  // Used to classify kinds: Aliasable <= Top, Unique <= Top
-  EXTERN_ABSYN enum AliasQual { 
-    Aliasable, // for types that can be aliased
-    Unique,    // for types that cannot be aliased
-    Top        // any of the above
+//   // Used to classify kinds: Aliasable <= Top, Unique <= Top
+//   EXTERN_ABSYN enum AliasQual { 
+//     Aliasable, // for types that can be aliased
+//     Unique,    // for types that cannot be aliased
+//     Top        // any of the above
+//   };
+   
+  // Used to support sugar `a::TB --> `a : RESTRICTED >= aquals(`a)
+  EXTERN_ABSYN enum AliasHint { 
+    UniqueHint,    // for types that cannot be aliased
+    RefcntHint,    // for types that cannot be aliased
+    RestrictedHint,        // any of the above
+    NoHint //default -- i.e aliasable
   };
   EXTERN_ABSYN enum KindQual { 
     // BoxKind <= MemKind <= AnyKind
@@ -185,7 +193,7 @@ namespace Absyn {
   };
   EXTERN_ABSYN struct Kind { 
     enum KindQual  kind;
-    enum AliasQual aliasqual;
+    enum AliasHint aliashint;
   };
 
   // kind bounds are used on tvar's to infer their kinds
@@ -335,8 +343,8 @@ namespace Absyn {
     RgnHandleCon; // region_t<`r> (handle for allocating).  RgnKind -> BoxKind
     TagCon;     // tag_t<t>.  IntKind -> BoxKind.
     HeapCon;    // The heap region.  RgnKind 
-    UniqueCon;  // The unique region.  UniqueRgnKind 
-    RefCntCon;  // The reference-counted region.  TopRgnKind 
+    UniqueHeapCon;  // Short hand for the heap region with @aqual(UNIQUE). RgnKind
+    RefCntHeapCon;   // Short hand for the heap region with @aqual(REFCNT). RgnKind
     AccessCon;  // Uses region r.  RgnKind -> EffKind
     JoinCon;  // e1+e2.  EffKind list -> EffKind
     RgnsCon;  // regions(t).  AnyKind -> EffKind
@@ -374,7 +382,7 @@ namespace Absyn {
     // The list of tvars is the set of free type variables that can
     // occur in the type to which the evar is constrained.  
     Evar(opt_t<kind_t>,type_opt_t,int,opt_t<list_t<tvar_t>>); 
-    VarType(tvar_t); // type variables, kind induced by tvar 
+    VarType(tvar_t); // type variables, kind induced by tvar
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
@@ -520,6 +528,7 @@ namespace Absyn {
   EXTERN_ABSYN struct MallocInfo {
     malloc_kind_t mknd;     // determines whether this is a malloc or calloc or vmalloc
     exp_opt_t  rgn;      // for rmalloc and rcalloc only
+    exp_opt_t  aqual;    // aqual_t may be present for allocating unique or refcnt pointers 
     type_t    *elt_type; // when [r]malloc, set by type-checker.  when 
                          // [r]calloc, set by parser
     exp_t      num_elts; // for [r]malloc: is the sizeof(t)*n.
@@ -899,9 +908,9 @@ namespace Absyn {
   // complex types
   extern type_t complex_type(type_t);
   // regions
-  extern rgntype_t heap_rgn_type, unique_rgn_type, refcnt_rgn_type;
+  extern rgntype_t heap_rgn_type, unique_rgn_shorthand_type, refcnt_rgn_shorthand_type;
   // alias qualifiers types
-  extern aqualtype_t al_qual_type, un_qual_type, rc_qual_type, dt_qual_type, rtd_qual_type;
+  extern aqualtype_t al_qual_type, un_qual_type, rc_qual_type, rtd_qual_type;
   // empty effect
   extern type_t empty_effect;
   // bool types
@@ -932,8 +941,8 @@ namespace Absyn {
   qvar_t datatype_print_arg_qvar();
   qvar_t datatype_scanf_arg_qvar();
   // string (char ?)
-  type_t string_type(type_t rgn);
-  type_t const_string_type(type_t rgn);
+  type_t string_type(type_t rgn, aqualtype_t aq);
+  type_t const_string_type(type_t rgn, aqualtype_t aq);
   // pointer bounds
   extern ptrbound_t fat_bound_type;
   ptrbound_t thin_bounds_type(type_t);
@@ -943,17 +952,17 @@ namespace Absyn {
   // pointer types
   type_t pointer_type(struct PtrInfo);
   // t *{e}`r
-  type_t starb_type(type_t,rgntype_t,tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
+  type_t starb_type(type_t,rgntype_t,aqualtype_t,tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t @{e}`r
   type_t atb_type(type_t, rgntype_t, aqualtype_t, tqual_t, ptrbound_t, booltype_t zero_term, booltype_t rel);
   // t *`r (bounds = Upper(1)
-  type_t star_type(type_t, rgntype_t, tqual_t, booltype_t zero_term, booltype_t rel);
+  type_t star_type(type_t, rgntype_t, aqualtype_t, tqual_t, booltype_t zero_term, booltype_t rel);
   // t @`r (bounds = Upper(1)
-  type_t at_type(type_t, rgntype_t, tqual_t, booltype_t zero_term, booltype_t rel);
+  type_t at_type(type_t, rgntype_t, aqualtype_t,tqual_t, booltype_t zero_term, booltype_t rel);
   // t*`H
   type_t cstar_type(type_t, tqual_t); 
   // t?`r
-  type_t fatptr_type(type_t t, type_t rgn, tqual_t, booltype_t zt, booltype_t rel);
+  type_t fatptr_type(type_t t, type_t rgn, aqualtype_t, tqual_t, booltype_t zt, booltype_t rel);
   // structs
   type_t strct(var_t  name);
   type_t strctq(qvar_t name);
@@ -1048,8 +1057,9 @@ namespace Absyn {
   exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
 			  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 			  seg_t);
-  qvar_t uniquergn_qvar();
-  exp_t uniquergn_exp(); // refers to the unique region in Core::
+
+//   qvar_t uniquergn_qvar();
+//   exp_t uniquergn_exp(); // refers to the unique region in Core::
 
   /////////////////////////// Statements ///////////////////////////////
   stmt_t new_stmt(raw_stmt_t,seg_t);

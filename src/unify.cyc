@@ -399,12 +399,13 @@ static void unify_it(type_t t1, type_t t2) {
       fail_because("(incompatible kinds");
     *ref = t1;//bounds checking for fncall_e, aggregate_e done externally
     break;
-  case $(&AppType(&AqualVarCon, &List{&Evar(k2,_,id2,s2opt),_}), &AppType(&AqualVarCon, &List{&Evar(k1,_,id1,s1opt),_}))://case 6
-    if(id1 != id2) {      //need to check s2opt and s1opt
-      if(!Kinds::kind_eq(k2->v, k1->v)) //force kinds to be the *same*
-	fail_because("(incompatible kinds)");
-      //no point in constraining the evars
-    }
+  case $(&AppType(&AqualVarCon, &List{ev2 as &Evar(...),_}), &AppType(&AqualVarCon, &List{ev1 as &Evar(...),_}))://case 6
+    unify_it(ev1, ev2);
+    /*     if(id1 != id2) {      //need to check s2opt and s1opt */
+    /*       if(!Kinds::kind_eq(k2->v, k1->v)) //force kinds to be the *same* */
+    /* 	fail_because("(incompatible kinds)"); */
+    /*       //no point in constraining the evars */
+    /*     } */
     break;
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
     if (Tcutil::tycon_cmp(c1,c2) != 0) 

@@ -292,7 +292,7 @@ static void dumpkindedtvar(tvar_t tv) {
   switch (Kinds::compress_kb(tv->kind)) {
   case &Unknown_kb(_): 
   case &Less_kb(...):  
-  case &Eq_kb(&Kind(BoxKind,Aliasable)): break;
+  case &Eq_kb(&Kind(BoxKind,_)): break;
   case &Eq_kb(k): dump("::"); dumpkind(k); break;
   }
 }
@@ -397,7 +397,6 @@ static void dump_aqual_val(alias_qual_val_t aqv) {
   case Aliasable_qual: dump("ALIASABLE");break;
   case Unique_qual: dump("UNIQUE");break;
   case Refcnt_qual: dump("REFCNT");break;
-  case DynamicTrk_qual: dump("DYNTRK");break;
   case Restricted_qual: dump("RESTRICTED");break;
   default: break;
   }
@@ -484,8 +483,8 @@ static void dumpntyp(type_t t) {
     case &BuiltinCon(t,_): dump(t); return;
     case &RgnHandleCon:    dump("region_t<"); dumprgn(ts->hd); dump(">");return;
     case &TagCon:          dump("tag_t<");    dumptyp(ts->hd); dump(">");return;
-    case &UniqueCon: dump("`U");  return;
-    case &RefCntCon: dump("`RC"); return;
+    case &UniqueHeapCon: dump("`U");  return;
+    case &RefCntHeapCon: dump("`RC"); return;
     case &HeapCon:   dump("`H");  return;
     case &AccessCon: dump("{");        dumptyp(ts->hd); dump("}"); return;
     case &RgnsCon:   dump("regions("); dumptyp(ts->hd); dump(")"); return;
@@ -823,13 +822,20 @@ static void dumpexp_prec(int inprec, exp_t e) {
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
 
-  case &Malloc_e(MallocInfo{mknd,ropt,topt,e,_,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,ropt,aqopt,topt,e,_,inline_call}):
     dumploc(e->loc);
     if (mknd == Calloc) {
       if (ropt != NULL) {
         dump("rcalloc("); dumpexp(ropt); dump(",");
-      } else {
-        dump("calloc(");
+	if(aqopt != NULL) {
+	  dumpexp(aqopt); dump(",");
+	} 
+      }else {
+	if(aqopt != NULL) {
+	  dump("qcalloc("); dumpexp(aqopt); dump(",");
+	} 
+	else 
+	  dump("calloc(");
       }
       dumpexp(e); dump(","); dumpexp(sizeoftype_exp(*topt,0)); dump(")");
     } 
@@ -837,8 +843,15 @@ static void dumpexp_prec(int inprec, exp_t e) {
       if (ropt != NULL) {
 	dump((mknd == Vmalloc ? "rvmalloc(" : inline_call ? "rmalloc_inline(" : "rmalloc(")); 
         dumpexp(ropt); dump(",");
+	if(aqopt != NULL) {
+	  dumpexp(aqopt); dump(",");
+	}
       } else {
-        dump("malloc(");
+	if(aqopt != NULL) {
+	  dump("qmalloc(");dumpexp(aqopt); dump(",");
+	}
+	else
+	  dump("malloc(");
       }
       // see comments in absyn.h
       if (topt != NULL) 
@@ -1343,8 +1356,8 @@ static void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms,
     if(!qvar_to_Cids && type2bool(false,rel)) dump("@autoreleased");
     switch(compress(rgn)) {
     case &AppType(&HeapCon,_):   if (!qvar_to_Cids) dump("`H"); break;
-    case &AppType(&UniqueCon,_): dump("`U");  break;
-    case &AppType(&RefCntCon,_): dump("`RC"); break;
+    case &AppType(&UniqueHeapCon,_): dump("`U");  break;
+    case &AppType(&RefCntHeapCon,_): dump("`RC"); break;
     case &VarType(tv): dumptvar(tv); break;
     case &Evar(_,NULL,_,_): dumpntyp(compress(rgn)); break;
     case &TypedefType(...): dump("@region("); dumptyp(rgn); dump(")"); break;

@@ -9,13 +9,14 @@ ifndef devel
 CYCC=cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
-CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g #--vcgen
+CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g  #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion refcnt_test scheme cinclude patterns multimethod rc testasm testaqualsuccess structarray streambufftest)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion cinclude  multimethod  testasm testaqualsuccess structarray scheme patterns refcnt_test rc)
  # testsexp)
-#these are broken --> require streambufftest
+#these are broken -->  require  (related to Absyn::compress on valueof_t)
+#streambuff.cyc is broken badly ... it is unsound to pattern match on existentials with `RC inside them, wait until restrict
 ifeq ($(HAVE_PTHREAD),yes)
 EXES += $(addsuffix $(EXE),testexn)
 endif
@@ -51,7 +52,7 @@ CYCTESTS=arg_suite.h				\
   union_suite.h					\
   xarray_suite.h
 
-all: $(EXES) failtest
+all: $(EXES) failtest streambufftest.o
 	./test_regions
 	./test_currgn
 	./cyctest
@@ -63,7 +64,7 @@ all: $(EXES) failtest
 	./md5 -q
 #	./require
 	./test_getopt -abc123
-	./streambufftest -q
+#	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme
@@ -116,6 +117,9 @@ md5$(EXE): md5.o md5driver.o
 
 streambufftest$(EXE): streambufftest.o streambuff.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
+streambufftest.o: streambufftest.cyc
+	$(CYCC) $(CYCFLAGS) -c $^
 
 ifeq ($(HAVE_PTHREAD),yes)
 testexn$(EXE): testexn.cyc

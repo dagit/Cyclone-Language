@@ -9,17 +9,17 @@ void end() { }
 
 using Core;
 
-int @`r my_alloc(region_t<`r::TR> h) {
-  return rnew (h) -1;
+int @@aqual(`q) my_alloc(aqual_t<`q> aqh : RESTRICTED >= `q) {
+  return qnew (aqh) -1;
 //   return rcnew 1; // no good
 //   return unew 1; // no good
 }
 
 int my_deref(int *`r::R x) { return *x; }
 
-struct foo<`r::TR> {
-  int *`r x;
-  int *`r y;
+struct foo<`q::Q> {
+  int *@aqual(`q) x;
+  int *@aqual(`q) y;
 };
 
 void refcnt_test() {
@@ -52,7 +52,7 @@ void refcnt_test() {
 //   int *`RC x = unew 1; // no good 
 
   /* polymorphism */
-  int *`RC y = my_alloc(refcnt_region);
+  int *`RC y = my_alloc(refcnt_qual);
 
   /* aliasing */
   int z;

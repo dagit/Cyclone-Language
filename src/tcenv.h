@@ -138,7 +138,7 @@ tenv_t add_region_equality(tenv_t, type_t r1, type_t r2,
 type_t curr_rgn(tenv_t);
 type_t curr_lifo_rgn(tenv_t);
 RgnOrder::rgn_po_opt_t curr_rgnpo(tenv_t);
-list_t<$(type_t, type_t)@> curr_aquals_bounds(tenv_t te);
+aqualbnds_t curr_aquals_bounds(tenv_t te);
 tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd);
 
 tenv_t add_region(tenv_t, type_t, bool opened, bool lifo);

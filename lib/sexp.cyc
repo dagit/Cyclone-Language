@@ -52,7 +52,7 @@ typedef const char ?`H symbol_t;
 typedef Object_t ?`H tuple_t;
 
 /* coerce an Obj_t<`a> to an Object */
-Object_t up(Obj_t<`a>@`H self : regions(`a) > `H) {
+Object_t up(Obj_t<`a>@ `H self : regions(`a) > `H, ALIASABLE >= aquals(`a)) {
   return Object{<`a> .self = self};
 }
 
@@ -151,7 +151,7 @@ const char ?tostring(Object_t v) {
 
 /* used to build a collection of classes */
 typedef struct Cls {
-  <`a> : regions(`a) > `H
+  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
   Class_t<`a> @vtable;
 } @class_t;
 

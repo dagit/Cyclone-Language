@@ -63,17 +63,19 @@ struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
+/* Alias qualifier stuff */
+typedef unsigned char _AliasQualHandle_t;
+
+
 struct _RegionHandle _new_region(const char*);
-void* _region_malloc(struct _RegionHandle*, unsigned);
-void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
+void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
+void* _region_calloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
+void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
+void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
 void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void _pop_dynregion();
-
-/* Alias qualifier stuff */
-
-typedef unsigned char _AliasQualHandle_t;
 
 /* Exceptions */
 struct _handler_cons {
@@ -284,7 +286,7 @@ static inline unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) {  
+static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_t aq, unsigned orig_s) {  
   if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -302,7 +304,7 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) 
       return result;
     }
   } 
-  return _region_malloc(r,orig_s); 
+  return _region_malloc(r,aq,orig_s); 
 }
 
 #ifdef CYC_REGION_PROFILE
@@ -311,15 +313,19 @@ void* _profile_GC_malloc(int,const char*,const char*,int);
 void* _profile_GC_malloc_atomic(int,const char*,const char*,int);
 void* _profile_GC_calloc(unsigned,unsigned,const char*,const char*,int);
 void* _profile_GC_calloc_atomic(unsigned,unsigned,const char*,const char*,int);
-void* _profile_region_malloc(struct _RegionHandle*,unsigned,const char*,const char*,int);
-void* _profile_region_calloc(struct _RegionHandle*,unsigned,unsigned,const char *,const char*,int);
+void* _profile_region_malloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,const char*,const char*,int);
+void* _profile_region_calloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,unsigned,const char *,const char*,int);
+void * _profile_aqual_malloc(_AliasQualHandle_t aq, unsigned int s,const char *file, const char *func, int lineno);
+void * _profile_aqual_calloc(_AliasQualHandle_t aq, unsigned int t1,unsigned int t2,const char *file, const char *func, int lineno);
 struct _RegionHandle _profile_new_region(const char*,const char*,const char*,int);
 void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #ifndef RUNTIME_CYC
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
-#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _region_malloc(rh,aq,n) _profile_region_malloc(rh,aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,aq,n,t) _profile_region_calloc(rh,aq,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_malloc(aq,n) _profile_region_malloc(aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_calloc(aq,n,t) _profile_region_calloc(aq,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -328,7 +334,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
 
-# 168 "core.h"
+# 170 "core.h"
  extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*);
@@ -341,7 +347,7 @@ extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);struct Cyc_Hashtable_Tabl
 # 38 "hashtable.cyc"
 struct Cyc_Hashtable_Table*Cyc_Hashtable_rcreate(struct _RegionHandle*r,int sz,int(*cmp)(void*,void*),int(*hash)(void*)){
 # 40
-return({struct Cyc_Hashtable_Table*_Tmp0=_region_malloc(r,sizeof(struct Cyc_Hashtable_Table));_Tmp0->r=r,_Tmp0->cmp=cmp,_Tmp0->hash=hash,_Tmp0->max_len=3,_Tmp0->tab=({unsigned _Tmp1=sz;_tag_fat(_region_calloc(r,sizeof(struct Cyc_List_List*),_Tmp1),sizeof(struct Cyc_List_List*),_Tmp1);});_Tmp0;});}
+return({struct Cyc_Hashtable_Table*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Hashtable_Table));_Tmp0->r=r,_Tmp0->cmp=cmp,_Tmp0->hash=hash,_Tmp0->max_len=3,_Tmp0->tab=({unsigned _Tmp1=sz;_tag_fat(_region_calloc(r,0U,sizeof(struct Cyc_List_List*),_Tmp1),sizeof(struct Cyc_List_List*),_Tmp1);});_Tmp0;});}
 # 43
 struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),int(*hash)(void*)){
 return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}struct _tuple0{void*f1;void*f2;};
@@ -349,7 +355,7 @@ return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,cmp,hash);}struct _tuple0{v
 void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val){
 struct _fat_ptr tab=t->tab;
 int bucket=(int)({unsigned _Tmp0=(unsigned)t->hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(t->r,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(t->r,sizeof(struct _tuple0));_Tmp3->f1=key,_Tmp3->f2=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[bucket];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(t->r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(t->r,0U,sizeof(struct _tuple0));_Tmp3->f1=key,_Tmp3->f2=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[bucket];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=_Tmp0;});
 if(({int _Tmp0=Cyc_List_length(((struct Cyc_List_List**)tab.curr)[bucket]);_Tmp0 > t->max_len;}))
 Cyc_Hashtable_resize(t);}
 # 55
@@ -430,13 +436,13 @@ Cyc_Hashtable_insert_bucket(r,tab,hash,elems->tl);{
 void*key=((struct _tuple0*)elems->hd)[0].f1;
 void*val=((struct _tuple0*)elems->hd)[0].f2;
 int nidx=(int)({unsigned _Tmp0=(unsigned)hash(key);_Tmp0 % _get_fat_size(tab,sizeof(struct Cyc_List_List*));});
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(r,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(r,sizeof(struct _tuple0));_Tmp3->f1=key,_Tmp3->f2=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[nidx];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),nidx))=_Tmp0;});}}
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(r,0U,sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp2=({struct _tuple0*_Tmp3=_region_malloc(r,0U,sizeof(struct _tuple0));_Tmp3->f1=key,_Tmp3->f2=val;_Tmp3;});_Tmp1->hd=_Tmp2;}),_Tmp1->tl=((struct Cyc_List_List**)tab.curr)[nidx];_Tmp1;});*((struct Cyc_List_List**)_check_fat_subscript(tab,sizeof(struct Cyc_List_List*),nidx))=_Tmp0;});}}
 # 151
 void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
 struct _fat_ptr odata=t->tab;
 int osize=(int)_get_fat_size(odata,sizeof(struct Cyc_List_List*));
 int nsize=2 * osize + 1;
-struct _fat_ptr ndata=({unsigned _Tmp0=nsize;_tag_fat(_region_calloc(t->r,sizeof(struct Cyc_List_List*),_Tmp0),sizeof(struct Cyc_List_List*),_Tmp0);});
+struct _fat_ptr ndata=({unsigned _Tmp0=nsize;_tag_fat(_region_calloc(t->r,0U,sizeof(struct Cyc_List_List*),_Tmp0),sizeof(struct Cyc_List_List*),_Tmp0);});
 {int i=0;for(0;i < osize;++ i){
 Cyc_Hashtable_insert_bucket(t->r,ndata,t->hash,*((struct Cyc_List_List**)_check_fat_subscript(odata,sizeof(struct Cyc_List_List*),i)));}}
 t->tab=ndata;

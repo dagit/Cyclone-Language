@@ -629,8 +629,8 @@ bool okay_szofarg(type_t t) {
 
     case &VoidCon: 
     case &HeapCon:
-    case &RefCntCon:
-    case &UniqueCon:
+    case &RefCntHeapCon:
+    case &UniqueHeapCon:
     case &JoinCon:
     case &AccessCon: 
     case &TrueCon:

@@ -55,7 +55,7 @@ void use_explicit_argq(int *@aqual(`q) a : ALIASABLE >= `q) {
 //case 3 Evar X const
 //3(a) default assignment
 void test_3a(aqual_t<UNIQUE> hdl) {
-  int *a = new<hdl> 1;
+  int *a = qnew (hdl) 1;
   int *b = new 1;
   //  a = b; //fail -- UNIQUE != ALIASABLE
   
@@ -78,7 +78,7 @@ void explicit_arg(int *@aqual(ALIASABLE) a){}
 void use_xarg(aqual_t<UNIQUE> hdl) {
   int *@aqual(ALIASABLE) a = new 1;
   explicit_arg(a);
-  int *b = new<hdl> 1;
+  int *b = qnew (hdl) 1;
   explicit_arg(b); //this needs an auto let alias
 }
 //argument default
@@ -95,7 +95,7 @@ struct s3c<`q::Q> { //default RESTRICTED >= `q
 struct s3c<ALIASABLE> test_s3c(aqual_t<UNIQUE> hdl) {
   struct s3c<ALIASABLE> s1 = s3c{new 1};
   let s2 = s3c{new 1};
-  struct s3c<UNIQUE> s3 = s3c{new<hdl> 1};
+  struct s3c<UNIQUE> s3 = s3c{qnew (hdl) 1};
   return s1;
 }
 

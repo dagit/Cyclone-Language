@@ -48,7 +48,7 @@ xarray_t<`a> create_empty() { return rcreate_empty(Core::heap_region); }
 xarray_t<`a,`r> rcreate(region_t<`r> r, int len, `a a) {
   if (len < 0)
     throw new Invalid_argument("xarrays must have a non-negative size buffer");
-  return rnew(r) Xarray{.elmts=unew {for i < len : a}, .num_elmts=0};
+  return rnew(r) Xarray{.elmts=qnew(Core::unique_qual) {for i < len : a}, .num_elmts=0};
 }
 
 xarray_t<`a> create(int len, `a a) {
@@ -69,9 +69,9 @@ xarray_t<`a> singleton(int len, `a a) {
 void add(xarray_t<`a> xarr, `a a) {
   if (xarr->num_elmts == numelts(xarr->elmts)) {
     if (xarr->num_elmts == 0)
-      xarr->elmts = unew {for i < 10 : a};
+      xarr->elmts = qunew {for i < 10 : a};
     else {
-      `a ?newarr = unew {for i < xarr->num_elmts*2 : xarr->elmts[0]};
+      `a ?newarr = qunew {for i < xarr->num_elmts*2 : xarr->elmts[0]};
       for (int i=1; i < xarr->num_elmts; ++i)
         newarr[i] = xarr->elmts[i];
       xarr->elmts :=: newarr;
@@ -101,7 +101,7 @@ xarray_t<`a,`r> rfrom_array(region_t<`r> r, `a ?arr) {
   if (numelts(arr) == 0)
     return rcreate_empty(r);
   xarray_t<`a> ans = rnew(r) Xarray{
-                                    .elmts=unew {for i<numelts(arr) : arr[i]},
+                                    .elmts=qunew {for i<numelts(arr) : arr[i]},
                                     .num_elmts=numelts(arr)};
   return ans;
 }
@@ -116,7 +116,7 @@ xarray_t<`a,`r> rappend(region_t<`r> r,xarray_t<`a> xarr1, xarray_t<`a> xarr2){
   if(newsz == 0)
     return rcreate_empty(r);
   `a init = numelts(xarr1->elmts) == 0 ? xarr2->elmts[0] : xarr1->elmts[0];
-  xarray_t<`a> ans = rnew(r) Xarray{.elmts=unew {for i < newsz : init},
+  xarray_t<`a> ans = rnew(r) Xarray{.elmts=qunew {for i < newsz : init},
                                     .num_elmts=0};
   for(int i=0; i < xarr1->num_elmts; ++i)
     add(ans, xarr1->elmts[i]);
@@ -153,7 +153,7 @@ xarray_t<`b,`r> rmap(region_t<`r> r, `b f(`a), xarray_t<`a> xarr) {
   if(xarr->num_elmts==0) return rcreate_empty(r);
 
   xarray_t<`b> ans =
-    rnew(r) Xarray{.elmts=unew {for i< numelts(xarr->elmts) : f(xarr->elmts[0])},
+    rnew(r) Xarray{.elmts=qunew {for i< numelts(xarr->elmts) : f(xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(xarr->elmts[i]);
@@ -168,7 +168,7 @@ xarray_t<`b,`r> rmap_c(region_t<`r> r, `b f(`c,`a), `c env, xarray_t<`a> xarr) {
   if(xarr->num_elmts==0) return rcreate_empty(r);
 
   xarray_t<`b> ans =
-    rnew(r) Xarray{.elmts=unew {for i < numelts(xarr->elmts) : f(env,xarr->elmts[0])},
+    rnew(r) Xarray{.elmts=qunew {for i < numelts(xarr->elmts) : f(env,xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(env, xarr->elmts[i]);

@@ -136,6 +136,7 @@ static struct TocState<`d>@`d empty_toc_state(region_t<`d> d) {
 
 struct TocStateWrap {
   <`d::R>
+  //  Core::real_rcregion_key_t<`d> dyn;
   Core::rcregion_key_t<`d> dyn;
   struct TocState<`d>@`d state;
 };
@@ -159,6 +160,7 @@ static `res use_toc_state(`a arg,
   {region h = open(dyn2);
   let env = $(s, arg);
   res = f(h,&env);}
+  //  real_free_rckey(dyn2); // should be equivalent to drop_refptr
   free_rckey(dyn2); // should be equivalent to drop_refptr
   return res;
 }
@@ -237,6 +239,8 @@ MAKE_VAR(_cyccalloc_atomic);
 MAKE_VAR(_region_malloc);
 MAKE_VAR(_region_calloc);
 MAKE_VAR(_region_vmalloc);
+MAKE_VAR(_aqual_malloc);
+MAKE_VAR(_aqual_calloc);
 MAKE_VAR(_fast_region_malloc);
 MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
@@ -267,7 +271,7 @@ static tqual_t mt_tq = Tqual(false,false,false,false,0);
 type_t void_star_type() {
   static type_opt_t t = NULL;
   if (t == NULL)
-    t = star_type(void_type,heap_rgn_type, empty_tqual(0), false_type, false_type);
+    t = star_type(void_type,heap_rgn_type,al_qual_type,empty_tqual(0), false_type, false_type);
   return (type_t)t;
 }
 static type_t fat_ptr_type() {
@@ -282,7 +286,15 @@ static type_t rgn_type() {
     r = cstar_type(strct(_RegionHandle_sp),mt_tq);
   return (type_t)r;
 }
-
+static type_t aqualt_type() {
+  return uint_type;
+}
+static exp_t aliasable_qual_exp() {
+  static exp_opt_t aq = NULL;
+  if(aq == NULL)
+    aq = uint_exp(0, 0);
+  return aq;
+}
 static stmt_t skip_stmt_dl() {
   return skip_stmt(DL);
 }
@@ -666,7 +678,7 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
 
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): return Kinds::kind_leq(type_kind(t),&Kinds::tbk);
+  case &VarType(tv): return Kinds::kind_leq(type_kind(t),&Kinds::bk);
   default: return false;
   }
 }
@@ -711,7 +723,7 @@ type_t typ_to_c(type_t t) {
     t2 = typ_to_c(t2);
     if (get_bounds_exp(fat_bound_type,bnds) == NULL)
       return fat_ptr_type();
-    return star_type(t2,heap_rgn_type,tq,false_type,false_type);
+    return star_type(t2,heap_rgn_type,al_qual_type,tq,false_type,false_type);
   case &AppType(&IntCon(_,_),_):
   case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
@@ -723,7 +735,7 @@ type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(fatptr_type(cyc_vararg->type,heap_rgn_type,mt_tq,false_type,false_type));
+      let t =typ_to_c(fatptr_type(cyc_vararg->type,heap_rgn_type,al_qual_type,mt_tq,false_type,false_type));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -783,6 +795,7 @@ type_t typ_to_c(type_t t) {
     return new TypedefType(tdn,NULL,td,typ_to_c(topt));
   case &AppType(&TagCon,_):          return uint_type; // must be unsigned!
   case &AppType(&RgnHandleCon,_):    return rgn_type();
+  case &AppType(&AqualHandleCon,_):  return aqualt_type();
   case &AppType(&BuiltinCon(...),_): return t;
   case &AppType(&ComplexCon,_)     : return t;
   // these types get translated when we instantiate aggregates with
@@ -814,7 +827,7 @@ type_t typ_to_c(type_t t) {
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq,_,_,_}):
-    return cast_it(star_type(t2,heap_rgn_type,tq,false_type,false_type),e);
+    return cast_it(star_type(t2,heap_rgn_type,al_qual_type,tq,false_type,false_type),e);
   default: return cast_it(t,e);
   }
 }
@@ -914,20 +927,26 @@ static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
   return fncall_exp_dl(fn_e,s,n);
 }
 // region malloc something
-static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
-  return fncall_exp_dl(_region_malloc_e,rgn,s);
+static exp_t rmalloc_exp(exp_t rgn, exp_t aq, exp_t s) {
+  return fncall_exp_dl(_region_malloc_e,rgn,aq,s);
+}
+static exp_t aqmalloc_exp(exp_t aq, exp_t s) {
+  return fncall_exp_dl(_aqual_malloc_e,aq,s);
 }
 // region vmalloc something
 static exp_t rvmalloc_exp(exp_t rgn, exp_t s) {
   return fncall_exp_dl(_region_vmalloc_e,rgn,s);
 }
 // region malloc (inlined) something
-static exp_t rmalloc_inline_exp(exp_t rgn, exp_t s) {
-  return fncall_exp_dl(_fast_region_malloc_e,rgn,s);
+static exp_t rmalloc_inline_exp(exp_t rgn, exp_t aq, exp_t s) {
+  return fncall_exp_dl(_fast_region_malloc_e,rgn,aq,s);
 }
 // rcalloc something
-static exp_t rcalloc_exp(exp_t rgn, exp_t s, exp_t n) {
-  return fncall_exp_dl(_region_calloc_e,rgn,s,n);
+static exp_t rcalloc_exp(exp_t rgn, exp_t aq, exp_t s, exp_t n) {
+  return fncall_exp_dl(_region_calloc_e,rgn,aq,s,n);
+}
+static exp_t aqcalloc_exp(exp_t aq, exp_t s, exp_t n) {
+  return fncall_exp_dl(_aqual_calloc_e,aq,s,n);
 }
 // throw a match exception
 static stmt_t throw_match_stmt() {
@@ -1373,7 +1392,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   //     if (numelts(x) == 1 && y == zero && z != zero) _throw_arraybounds();
   //     *x.curr = z; })
   // This is generated and *then* translated to ensure the proper constraints.
-  type_t fat_ptr_type = fatptr_type(elt_type, heap_rgn_type, mt_tq, true_type, false_type);
+  type_t fat_ptr_type = fatptr_type(elt_type, heap_rgn_type, al_qual_type, mt_tq, true_type, false_type);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
   let c_ptr_type = cstar_type(c_elt_type, mt_tq);
@@ -2136,8 +2155,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 	let ptr_exp = e1;
         
         // ?`RC to *`RC requires current to be at base, else arraybounds
-        if (is_noalias_region(p1.ptr_atts.rgn,false)  // p1 is unique or refcounted...
-            && !is_noalias_region(p1.ptr_atts.rgn,true)) // ...and not unique (so, refcounted)
+/*         if (is_noalias_region(p1.ptr_atts.rgn,false)  // p1 is unique or refcounted... */
+/*             && !is_noalias_region(p1.ptr_atts.rgn,true)) // ...and not unique (so, refcounted) */
+        if (is_noalias_qual(p1.ptr_atts.aqual,false)  // p1 is unique or refcounted...
+            && !is_noalias_qual(p1.ptr_atts.aqual,true)) // ...and not unique (so, refcounted)
           ptr_exp = fncall_exp_dl(_check_fat_at_base_e, ptr_exp);
         
 	// FIX: allow bounds check to be elided
@@ -2221,11 +2242,19 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(vse != NULL)
       mexp = add_exp(mexp,vse,DL);
 
-    if(rgnopt == NULL || Flags::no_regions)
+    if((rgnopt == NULL && qual == NULL) || Flags::no_regions)
       mexp = malloc_exp(elt_typ,mexp);
     else {
-      exp_to_c(nv,rgnopt);
-      mexp = rmalloc_exp(rgnopt,mexp);
+      if(qual != NULL) exp_to_c(nv, qual);
+      if(rgnopt != NULL) {
+	exp_to_c(nv,rgnopt);
+	mexp = rmalloc_exp(rgnopt,
+			   (qual == NULL ? aliasable_qual_exp() : qual), 
+			   mexp);
+      }
+      else {
+	mexp = aqmalloc_exp(qual,mexp);
+      }
     }
     e->annot = new NewInfo(mexp,cstar_type(elt_typ,mt_tq));
     if(is_fat_ptr(old_typ)) 
@@ -2619,7 +2648,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Enum_e(...):
   case &AnonEnum_e(...): break;
 
-  case &Malloc_e(MallocInfo{mknd,rgnopt,topt,num_elts,is_fat,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,rgnopt,aqopt,topt,num_elts,is_fat,inline_call}):
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
     qvar_opt_t x = NULL;
@@ -2629,20 +2658,40 @@ static void exp_to_c(env_t nv, exp_t e) {
       x = temp_var();
       num_elts2 = var_exp(x,DL);
     }
-    if (mknd == Calloc) {
-      if (rgnopt != NULL && !Flags::no_regions) {
-	exp_to_c(nv,rgnopt);
-	pexp = fncall_exp_dl(_region_calloc_e,
-			     rgnopt, sizeoftype_exp(t_c,DL), num_elts2);
-      } else
+    if (mknd == Calloc) { //ignores aqopt for now ... revisit
+      if((rgnopt == NULL && aqopt == NULL) || Flags::no_regions) {
 	pexp = calloc_exp(*topt,sizeoftype_exp(t_c,DL), num_elts2);
+      }
+      else {
+	if(aqopt != NULL) exp_to_c(nv,aqopt);
+	if(rgnopt != NULL) {
+	  exp_to_c(nv,rgnopt);
+	  pexp = rcalloc_exp(rgnopt, (aqopt == NULL ? aliasable_qual_exp() : aqopt),
+			     sizeoftype_exp(t_c,DL), num_elts2);
+	}
+	else {
+	  pexp = aqcalloc_exp(aqopt, sizeoftype_exp(t_c,DL), num_elts2);
+	}
+      }
     } else {
-      if (rgnopt != NULL && !Flags::no_regions) {
-	exp_to_c(nv,rgnopt);
-	let fn_e = (mknd == Vmalloc ? rvmalloc_exp : inline_call ? rmalloc_inline_exp : rmalloc_exp);
-	pexp = fn_e(rgnopt, num_elts2);
-      } else
+      if((rgnopt == NULL && aqopt == NULL) || Flags::no_regions) {
 	pexp = malloc_exp(*topt, num_elts2);
+      }
+      else {
+	if(aqopt != NULL) exp_to_c(nv,aqopt);
+	if (rgnopt != NULL) {
+	  exp_to_c(nv,rgnopt);
+	  if(mknd == Vmalloc) {
+	    pexp = rvmalloc_exp(rgnopt, num_elts2);
+	  }
+	  else {
+	    let fn_e = (inline_call ? rmalloc_inline_exp : rmalloc_exp);	    
+	    pexp = fn_e(rgnopt, (aqopt == NULL ? aliasable_qual_exp() : aqopt), num_elts2);
+	  }
+	} 
+	else
+	  pexp = aqmalloc_exp(aqopt, num_elts2);
+      }
     }
     if (is_fat) {
       exp_t  elt_sz = (mknd==Calloc ? sizeoftype_exp(t_c,DL) : uint_exp(1,DL));
@@ -3707,7 +3756,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
   if (f->i.cyc_varargs && f->i.cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->i.cyc_varargs;
-    let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,tq,false_type,false_type));// region irrelevant
+    let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,al_qual_type,tq,false_type,false_type));// region irrelevant
     let x2 = new $((nmspace_t)Loc_n,(var_t)n);
     f->i.args = append(f->i.args,new List(new $((var_t)n,tq,t2),NULL));
     f->i.cyc_varargs = NULL;
@@ -4215,11 +4264,12 @@ static void decls_to_c(env_t nv, list_t<decl_t> ds, bool cinclude) {
 // initialize all globals
 //static
 void init() {
-  let NewDynamicRegion{dyn} = new_rckey();
+  //  let RealNewDynamicRegion{dyn} = real_new_rckey();
+    let NewDynamicRegion{dyn} = new_rckey();
   let ts;
   {region h = open(dyn);
   ts = empty_toc_state(h);}
-  toc_state = unew TocStateWrap{dyn, ts};
+  toc_state = qunew TocStateWrap{dyn, ts}; 
   result_decls = NULL;
   tuple_type_counter = 0;
   temp_var_counter = 0;
@@ -4264,6 +4314,9 @@ void init() {
     &_fat_ptr_decrease_size_str,
     &_throw_match_str,
     &_fast_region_malloc_str,
+    &_region_vmalloc_str,
+    &_aqual_malloc_str,
+    &_aqual_calloc_str
   };
 }
 
@@ -4276,6 +4329,7 @@ void finish() {
   let TocState{.temp_labels = tls, ...} = *s;
   Xarray::reuse(tls);}
 
+  //  Core::real_free_rckey(dyn);
   Core::free_rckey(dyn);
   Core::ufree(ts);
 

@@ -484,10 +484,11 @@ static void do_exp(env_t nv, exp_t e) {
     do_exp_opt(nv,qualopt);
     do_exp(nv,e1);
     break;
-  case &Malloc_e(MallocInfo(_,rgnopt,_,sizeexp,_,_)):
+  case &Malloc_e(MallocInfo(_,rgnopt,aqopt,_,sizeexp,_,_)):
     // FIX: we shouldn't be able to calloc a zero-terminated array of size < 1.
     e->annot = &NoCheck_val;
     do_exp_opt(nv,rgnopt);
+    do_exp_opt(nv,aqopt);
     do_exp(nv,sizeexp);
     break;
 

@@ -339,10 +339,10 @@ absRval_t make_unique_unconsumed(flow_env_t fenv, absRval_t r) {
 
 // The invariant here is that for aggregates and named locations, the
 // abstract r-values pointed to are made Consumed.
-absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int iteration, absRval_t r, bool local_alias) {
+absRval_t make_unique_consumed(flow_env_t fenv, aqualbnds_t aqb, type_t t, exp_t consumer, int iteration, absRval_t r, bool local_alias) {
   switch $(compress(t),r) {
   case $(_,&NamedLocation(s,r2)):
-    let r3 = make_unique_consumed(fenv,t,consumer,iteration,r2,local_alias);
+    let r3 = make_unique_consumed(fenv,aqb,t,consumer,iteration,r2,local_alias);
     if (r3 != r2) 
       return new NamedLocation(s,r3);
     return r;
@@ -350,7 +350,7 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
     let sz = numelts(d);
     aggrdict_t d2 = new { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) {
-      d2[i] = make_unique_consumed(fenv,(*tqts->hd)[1],consumer,iteration,d[i],local_alias);
+      d2[i] = make_unique_consumed(fenv,aqb,(*tqts->hd)[1],consumer,iteration,d[i],local_alias);
       tqts = tqts->tl;
     }
     return new Aggregate(b,d2);
@@ -364,11 +364,11 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
     for (int i = 0; i < sz; i++, fs = fs->tl) {
       let &Aggrfield(n,_,t2,_,_,_) = fs->hd;
       if (numelts(*n) != 1)
-        d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i],local_alias);
+        d2[i] = make_unique_consumed(fenv,aqb,t2,consumer,iteration,d[i],local_alias);
     }
     return new Aggregate(b,d2);
   default:
-    if (Tcutil::is_noalias_pointer(t,false))
+    if (Tcutil::is_noalias_pointer(aqb,t,false))
       return new Consumed(consumer,iteration,r,local_alias);
     return r;
   }

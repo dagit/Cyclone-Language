@@ -149,7 +149,8 @@ static void gobble(Lexbuf<`a> lbuf) {
   if (buf_pos+howmuch > buf_len) {
     let newlen = (buf_len? buf_len*2: 17);
     while (newlen <= buf_pos+howmuch) newlen *= 2;
-    char ?`U newbuf = calloc(newlen,sizeof(char));
+    //char ?`U newbuf = calloc(newlen,sizeof(char));
+    char ?`U newbuf = qcalloc(heap_region, unique_qual, newlen, sizeof(char));
     for (int i = 0; i<buf_pos; i++)
       newbuf[i] = buf_buf[i];
     buf_len = newlen;

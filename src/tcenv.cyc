@@ -41,6 +41,7 @@
 #include "kinds.h"
 #include "tcenv.h"
 #include "currgn.h"
+#include "absynpp.h"
 using List;
 using Absyn;
 using Tcutil;
@@ -104,7 +105,7 @@ abstract struct Fenv {
   struct SharedFenv @ shared;
   list_t<tvar_t>      type_vars; //type variables that can occur free
   rgn_po_t            region_order; // partial order on region variables
-  list_t<$(type_t, type_t)@> aquals_bounds; //need this to decide the bounds of aquals(`a)
+  aqualbnds_t aquals_bounds; //need this to decide the bounds of aquals(`a)
   ftclause_t          ctrl_env;
   type_t              capability;
   type_t              curr_rgn;   // current block's region
@@ -389,9 +390,9 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
 
   // now update the outlives constraints
   let bds = NULL;
-  if (r1 != heap_rgn_type && r1 != unique_rgn_type && r1 != refcnt_rgn_type)
+  if (r1 != heap_rgn_type)// && r1 != unique_rgn_type && r1 != refcnt_rgn_type)
     bds = new List(new $(access_eff(r1),r2),bds);
-  if (r2 != heap_rgn_type && r2 != unique_rgn_type && r2 != refcnt_rgn_type)
+  if (r2 != heap_rgn_type)// && r2 != unique_rgn_type && r2 != refcnt_rgn_type)
     bds = new List(new $(access_eff(r2),r1),bds);
   return new_outlives_constraints(te,bds,loc);
 }
@@ -411,17 +412,23 @@ rgn_po_opt_t curr_rgnpo(tenv_t te) {
   if(le == NULL) return NULL;
   return le->region_order;
 }
-list_t<$(type_t, type_t)@> curr_aquals_bounds(tenv_t te) {
+aqualbnds_t curr_aquals_bounds(tenv_t te) {
   let le = te->le;
   if(le == NULL) return NULL;
   return le->aquals_bounds;
+}
+static void print_aquals_bound(aqualbnds_t aqb) {
+  for(_ i = aqb; i != NULL; i = i->tl){
+    let &$(tv, b) = i->hd;
+    fprintf(stderr, " (%s, %s) ", Absynpp::typ2string(tv), Absynpp::typ2string(b));
+  }
 }
 tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd) {
   let ans = new *get_fenv(te,"add_aquals_bound");
   let aqb = ans->aquals_bounds;
   try {
     let found = List::assoc_cmp(Tcutil::typecmp, aqb, aq);
-    Warn::impos2("repeated add of aquals_bound");
+    return te;
   }catch {
   case &Core::Not_found:
     break;
@@ -513,19 +520,11 @@ static struct SharedFenv @`H new_shared_fenv(type_t ret) {
 			.delayed_constraint_checks = NULL };
 }
 
-static bool aquals_bnds_pred($(type_t, type_t)@ bnd) {
-  switch((*bnd)[0]) {
-  case &AppType(&AqualsCon, _):
-    return true;
-  default:
-    return false;
-  }
-}
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
-             new_tvar_id(), &rgn_kb);
+             new_tvar_id(), &rgn_kb); //this has always been ::rk
 //   let $(tvs1,cap,ret_t,f_rgn_po) = CurRgn::add_curr_tvar(fd);
   let $(tvs1,cap,ret_t,f_rgn_po) = $(new List(CurRgn::curr_rgn_tvar(),fd->i.tvars),
 				     join_eff(new List(access_eff(CurRgn::curr_rgn_type()),
@@ -534,7 +533,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   let tvs = new List(rgn0,tvs1);
   Tcutil::check_unique_tvars(loc,tvs);
   let rgn_po = initial_fn_po(tvs1,f_rgn_po,cap,rgn0,loc);
-  type_t param_rgn = new VarType(rgn0);
+  type_t param_rgn = new VarType(rgn0); //so param aqual is al_qual_type
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
   if (fd->i.cyc_varargs != NULL) {
@@ -543,7 +542,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = fatptr_type(t, param_rgn, tq, false_type, false_type);
+	vd->type = fatptr_type(t, param_rgn, al_qual_type, tq, false_type, false_type);
 	break;
       }
     }
@@ -553,7 +552,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     Fenv{.shared = new_shared_fenv(ret_t),
          .type_vars     = tvs,
          .region_order  = rgn_po,
-	 .aquals_bounds = List::filter(aquals_bnds_pred, fd->i.qual_bnd),
+	 .aquals_bounds = Tcutil::get_aquals_bounds(fd),
          .ctrl_env      = NULL,
          .capability    = join_eff(new List(access_eff(param_rgn),
 					    new List(cap,NULL))),
@@ -572,10 +571,10 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
   for (let tvars = fd->i.tvars; tvars != NULL; tvars = tvars->tl) {
     let &Kind(k,a) = Kinds::tvar_kind(tvars->hd,&Kinds::bk);
     if (k == RgnKind)
-      if (a == Aliasable)
-	rgn_po = add_unordered(rgn_po, tvars->hd);
-      else
-	Warn::impos2("non-intuitionistic tvar in nested_fenv");
+      //      if (a == Aliasable)
+      rgn_po = add_unordered(rgn_po, tvars->hd);
+    //    else
+    //      Warn::impos2("non-intuitionistic tvar in nested_fenv");
   }
   rgn_po = add_youngest(rgn_po, rgn0, false);
   for(let po2 = fd->i.rgn_po; po2 != NULL; po2=po2->tl)
@@ -591,7 +590,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = fatptr_type(t, param_rgn, tq, false_type, false_type);
+	vd->type = fatptr_type(t, param_rgn, al_qual_type, tq, false_type, false_type);
 	break;
       }
     }

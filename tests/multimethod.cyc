@@ -18,7 +18,7 @@ typedef struct Object obj_t;
  * below.)  In this case, I've only defined one single-dispatch method,
  * tostring, and one multi-method cmp.
  */
-struct Class<`a::A> {
+struct Class<`a::A> { 
   const char @(@tostring)(struct Obj<`a> @self);
   int (@cmp)(struct Obj<`a>@, struct Obj<`a>@);
   struct Obj<`a> *cast_value;
@@ -39,7 +39,7 @@ struct Obj<`a::A> {
  * region and use that as the bound instead.)
  */
 struct Object {
-  <`a> : regions(`a) > `H
+  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
   struct Obj<`a> @self;
 };
 

@@ -181,11 +181,12 @@ static int refcnt_freed_bytes = 0;
 
 // exported in core.h
 #define CYC_CORE_HEAP_REGION (NULL)
-#define CYC_CORE_UNIQUE_REGION ((struct _RegionHandle *)1)
-#define CYC_CORE_REFCNT_REGION ((struct _RegionHandle *)2)
 struct _RegionHandle *Cyc_Core_heap_region = CYC_CORE_HEAP_REGION;
-struct _RegionHandle *Cyc_Core_unique_region = CYC_CORE_UNIQUE_REGION;
-struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
+
+/* #define CYC_CORE_UNIQUE_REGION ((struct _RegionHandle *)1) */
+/* #define CYC_CORE_REFCNT_REGION ((struct _RegionHandle *)2) */
+/* struct _RegionHandle *Cyc_Core_unique_region = CYC_CORE_UNIQUE_REGION; */
+/* struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION; */
 
 #define CYC_CORE_ALIASABLE_AQUAL ((_AliasQualHandle_t)0)
 #define CYC_CORE_UNIQUE_AQUAL    ((_AliasQualHandle_t)1)
@@ -195,7 +196,6 @@ struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
 _AliasQualHandle_t Cyc_Core_aliasable_qual = CYC_CORE_ALIASABLE_AQUAL;
 _AliasQualHandle_t Cyc_Core_unique_qual = CYC_CORE_UNIQUE_AQUAL;
 _AliasQualHandle_t Cyc_Core_refcnt_qual = CYC_CORE_REFCNT_AQUAL;
-_AliasQualHandle_t Cyc_Core_dyntrk_qual = CYC_CORE_DYNTRK_AQUAL;
 
 struct _RegionHandle *Cyc_Core_current_handle(void) {
   struct _RegionHandle *h = (struct _RegionHandle *)_frame_until(LIFO_REGION,0);
@@ -425,10 +425,43 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
 #endif
 }
 
+
 // allocate s bytes within region r
-void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
+void * _region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int s) {
   char *result;
-  if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST) {
+  if(r == CYC_CORE_HEAP_REGION) { //no reaps for now
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      // need to add a word for the reference count.  We use a word to
+      // keep the resulting memory word-aligned.  Then bump the pointer.
+      // FIX: probably need to keep it double-word aligned!
+      result = _bounded_GC_malloc(s+sizeof(int),__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+      *(int *)result = 1;
+#ifdef CYC_REGION_PROFILE
+      refcnt_total_bytes += GC_size(result);
+#endif
+      result += sizeof(int);
+      /*     errprintf("alloc refptr=%x\n",result); */
+      return (void *)result;
+    }
+    else {
+      result = _bounded_GC_malloc(s,__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+#ifdef CYC_REGION_PROFILE
+      {
+	unsigned int actual_size = GC_size(result);
+	if (r == CYC_CORE_HEAP_REGION)
+	  heap_total_bytes += actual_size;
+	else
+	  unique_total_bytes += actual_size;
+      }
+#endif
+      return (void *)result;
+    }
+  }
+  else {
 #ifndef CYC_NOALIGN
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -451,38 +484,9 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
     rgn_total_bytes += s;
 #endif
     return (void *)result;
-  } else if (r != CYC_CORE_REFCNT_REGION) {
-    result = _bounded_GC_malloc(s,__FILE__, __LINE__);
-    if(!result)
-      _throw_badalloc();
-#ifdef CYC_REGION_PROFILE
-    {
-      unsigned int actual_size = GC_size(result);
-      if (r == CYC_CORE_HEAP_REGION)
-	heap_total_bytes += actual_size;
-      else
-	unique_total_bytes += actual_size;
-    }
-#endif
-    return (void *)result;
-  }
-  else { // (r == CYC_CORE_REFCNT_REGION)
-    // need to add a word for the reference count.  We use a word to
-    // keep the resulting memory word-aligned.  Then bump the pointer.
-    // FIX: probably need to keep it double-word aligned!
-    result = _bounded_GC_malloc(s+sizeof(int),__FILE__, __LINE__);
-    if(!result)
-      _throw_badalloc();
-    *(int *)result = 1;
-#ifdef CYC_REGION_PROFILE
-    refcnt_total_bytes += GC_size(result);
-#endif
-    result += sizeof(int);
-/*     errprintf("alloc refptr=%x\n",result); */
-    return (void *)result;
-  }
+  } 
 }
-
+//no alias qualifiers for vmalloc
 #if (defined(__linux__) && defined(__KERNEL__))
 void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
   unsigned tot_bytes = s + sizeof(struct _RegionPage); 
@@ -496,16 +500,46 @@ void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
 } 
 #else
 void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
-  return _region_malloc(r, s);
+  return _region_malloc(r, CYC_CORE_ALIASABLE_AQUAL, s);
 }
 #endif
 
 // allocate s bytes within region r
-void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t) 
+void * _region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int n, unsigned int t) 
 {
   unsigned int s = n*t;
   char *result;
-  if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST) {
+  if(r == CYC_CORE_HEAP_REGION) { //no reaps for now
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      // allocate in the heap + 1 word for the refcount
+      result = _bounded_GC_calloc(n*t+sizeof(int),1,__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+      *(int *)result = 1;
+#ifdef CYC_REGION_PROFILE
+      refcnt_total_bytes += GC_size(result);
+#endif
+      result += sizeof(int);
+      return result;
+    }
+    else {
+      // allocate in the heap
+      result = _bounded_GC_calloc(n,t,__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+#ifdef CYC_REGION_PROFILE
+      {
+	unsigned int actual_size = GC_size(result);
+	if (r == Cyc_Core_heap_region)
+	  heap_total_bytes += actual_size;
+	else 
+	  unique_total_bytes += actual_size;
+      }
+#endif
+      return result;
+    }
+  }
+  else {
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
 #ifndef CYC_NOALIGN
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -528,33 +562,14 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
     rgn_total_bytes += s;
 #endif
     return (void *)result;
-  } else if (r != CYC_CORE_REFCNT_REGION) {
-    // allocate in the heap
-    result = _bounded_GC_calloc(n,t,__FILE__, __LINE__);
-    if(!result)
-      _throw_badalloc();
-#ifdef CYC_REGION_PROFILE
-    {
-      unsigned int actual_size = GC_size(result);
-      if (r == Cyc_Core_heap_region)
-	heap_total_bytes += actual_size;
-      else 
-	unique_total_bytes += actual_size;
-    }
-#endif
-    return result;
-  } else { // r == CYC_CORE_REFCNT_REGION)
-    // allocate in the heap + 1 word for the refcount
-    result = _bounded_GC_calloc(n*t+sizeof(int),1,__FILE__, __LINE__);
-    if(!result)
-      _throw_badalloc();
-    *(int *)result = 1;
-#ifdef CYC_REGION_PROFILE
-    refcnt_total_bytes += GC_size(result);
-#endif
-    result += sizeof(int);
-    return result;
   }
+}
+
+void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s) {
+  return _region_malloc(CYC_CORE_HEAP_REGION, aq, s);
+}
+void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t) {
+  return _region_calloc(CYC_CORE_HEAP_REGION, aq, n, t);
 }
 
 // allocate a new page and return a region handle for a new region.
@@ -645,6 +660,9 @@ void _free_region(struct _RegionHandle *r) {
 struct Cyc_Core_NewDynamicRegion {
   struct Cyc_Core_DynamicRegion *key;
 };
+/* struct Cyc_Core_RealNewDynamicRegion { */
+/*   struct Cyc_Core_DynamicRegion *key; */
+/* }; */
 
 // Create a new dynamic region and return a unique pointer for the key.
 struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
@@ -663,6 +681,22 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
   return res;
 }
 
+/* struct Cyc_Core_RealNewDynamicRegion Cyc_Core__real_new_ukey(const char *file, */
+/* 							 const char *func, */
+/* 							 int lineno) { */
+/*   struct Cyc_Core_RealNewDynamicRegion res; */
+/*   res.key = _bounded_GC_malloc(sizeof(struct Cyc_Core_DynamicRegion),__FILE__, */
+/* 			       __LINE__); */
+/*   if (!res.key) */
+/*     _throw_badalloc(); */
+/* #ifdef CYC_REGION_PROFILE */
+/*   res.key->h = _profile_new_region("dynamic_unique",file,func,lineno); */
+/* #else */
+/*   res.key->h = _new_region("dynamic_unique"); */
+/* #endif */
+/*   return res; */
+  
+/* } */
 // XXX change to use refcount routines above
 // Create a new dynamic region and return a reference-counted pointer 
 // for the key.
@@ -686,6 +720,26 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char *file,
   return res;
 }
 
+/* struct Cyc_Core_RealNewDynamicRegion Cyc_Core__real_new_rckey(const char *file, */
+/* 						     const char *func, */
+/* 						     int lineno) { */
+/*   struct Cyc_Core_RealNewDynamicRegion res; */
+/*   int *krc = _bounded_GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion), */
+/* 				__FILE__, __LINE__); */
+/*   //errprintf("creating rckey.  Initial address is %x\n",krc);fflush(stderr); */
+/*   if (!krc) */
+/*     _throw_badalloc(); */
+/*   *krc = 1; */
+/*   res.key = (struct Cyc_Core_DynamicRegion *)(krc + 1); */
+/*   //errprintf("results key address is %x\n",res.key);fflush(stderr); */
+/* #ifdef CYC_REGION_PROFILE */
+/*   res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno); */
+/* #else */
+/*   res.key->h = _new_region("dynamic_refcnt"); */
+/* #endif */
+/*   return res; */
+/* } */
+
 // Destroy a dynamic region, given the unique key to it.
 void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
 #ifdef CYC_REGION_PROFILE
@@ -695,7 +749,9 @@ void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
 #endif
   GC_free(k);
 }
-
+/* void Cyc_Core_real_free_ukey(struct Cyc_Core_DynamicRegion *k) { */
+/*   Cyc_Core_free_ukey(k); */
+/* } */
 // Drop a reference for a dynamic region, possibly freeing it.
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
   //errprintf("freeing rckey %x\n",k);
@@ -717,6 +773,9 @@ void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
     GC_free(p);
   }
 }
+/* void Cyc_Core_real_free_rckey(struct Cyc_Core_DynamicRegion *k) { */
+/*   return Cyc_Core_free_rckey(k); */
+/* } */
 
 // Open a key (unique or reference-counted), extract the handle
 // for the dynamic region, and pass it along with env to the
@@ -727,6 +786,14 @@ void *Cyc_Core_open_region(struct Cyc_Core_DynamicRegion *k,
                                       void *env)) {
   return body(&k->h,env);
 }
+
+/* void *Cyc_Core_real_open_region(struct Cyc_Core_DynamicRegion *k, */
+/* 				void *env, */
+/* 				void *body(struct _RegionHandle *h, */
+/* 					   void *env)) { */
+/*   return body(&k->h,env); */
+/* } */
+
 
 #ifdef CYC_REGION_PROFILE
 
@@ -858,66 +925,83 @@ static void set_finalizer(GC_PTR addr) {
   GC_register_finalizer_no_order(addr,reclaim_finalizer,NULL,NULL,NULL);
 }
 
-void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
+void * _profile_region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int s,
                               const char *file, const char *func, int lineno) {
   char *addr;
-  addr = _region_malloc(r,s);
+  addr = _region_malloc(r,aq,s);
   _profile_check_gc();
   if (alloc_log != NULL) {
     if (r == CYC_CORE_HEAP_REGION) {
-      s = GC_size(addr);
-      set_finalizer((GC_PTR)addr);
+      if(aq == CYC_CORE_REFCNT_QUAL) {
+	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
+	fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+		clock(),
+		file,func,lineno,
+		(r == CYC_CORE_HEAP_REGION ? "heap" :
+		 (r == CYC_CORE_UNIQUE_REGION ? "unique" :
+		  (r == CYC_CORE_REFCNT_REGION ? "refcnt" : r->name))), s,
+		region_get_heap_size(r), 
+		region_get_free_bytes(r),
+		region_get_total_bytes(r),
+		(unsigned int)addr);
+      }
+      else if(aq == CYC_CORE_UNIQUE_QUAL) {
+	s = GC_size(addr);
+	set_finalizer((GC_PTR)addr);
+      }
+      else {
+	s = GC_size(addr);
+	set_finalizer((GC_PTR)addr);
+      }
     }
-    if (r == CYC_CORE_UNIQUE_REGION) {
-      s = GC_size(addr);
-      set_finalizer((GC_PTR)addr);
-    }
-    else if (r == CYC_CORE_REFCNT_REGION)
-      s = GC_size(addr-sizeof(int)); // back up to before the refcnt
-    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
-            clock(),
-            file,func,lineno,
-	    (r == CYC_CORE_HEAP_REGION ? "heap" :
-	     (r == CYC_CORE_UNIQUE_REGION ? "unique" :
-	      (r == CYC_CORE_REFCNT_REGION ? "refcnt" : r->name))), s,
-	    region_get_heap_size(r), 
-	    region_get_free_bytes(r),
-	    region_get_total_bytes(r),
-            (unsigned int)addr);
   }
   return (void *)addr;
 }
 
-void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
+void * _profile_region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int t1,
                               unsigned int t2,
                               const char *file, const char *func, int lineno) {
   char *addr;
   unsigned s = t1 * t2;
-  addr = _region_calloc(r,t1,t2);
+  addr = _region_calloc(r,aq,t1,t2);
   _profile_check_gc();
   if (alloc_log != NULL) {
     if (r == CYC_CORE_HEAP_REGION) {
-      s = GC_size(addr);
-      set_finalizer((GC_PTR)addr);
+      if(aq == CYC_CORE_REFCNT_QUAL) {
+	s = GC_size(addr-sizeof(int)); // back up to before the refcnt
+	fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+		clock(),
+		file,func,lineno,
+		(r == CYC_CORE_HEAP_REGION ? "heap" :
+		 (r == CYC_CORE_UNIQUE_REGION ? "unique" :
+		  (r == CYC_CORE_REFCNT_REGION ? "refcnt" : r->name))), s,
+		region_get_heap_size(r), 
+		region_get_free_bytes(r),
+		region_get_total_bytes(r),
+		(unsigned int)addr);
+      }
+      else if(aq == CYC_CORE_UNIQUE_QUAL) {
+	s = GC_size(addr);
+	set_finalizer((GC_PTR)addr);
+      }
+      else {
+	s = GC_size(addr);
+	set_finalizer((GC_PTR)addr);
+      }
     }
-    if (r == CYC_CORE_UNIQUE_REGION) {
-      s = GC_size(addr);
-      set_finalizer((GC_PTR)addr);
-    }
-    else if (r == CYC_CORE_REFCNT_REGION)
-      s = GC_size(addr-sizeof(int)); // back up to before the refcnt
-    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
-            clock(),
-            file,func,lineno,
-	    (r == CYC_CORE_HEAP_REGION ? "heap" :
-	     (r == CYC_CORE_UNIQUE_REGION ? "unique" :
-	      (r == CYC_CORE_REFCNT_REGION ? "refcnt" : r->name))), s,
-	    region_get_heap_size(r), 
-	    region_get_free_bytes(r),
-	    region_get_total_bytes(r),
-            (unsigned int)addr);
   }
   return (void *)addr;
+}
+
+void * _profile_aqual_malloc(_AliasQualHandle_t aq, unsigned int s,
+			     const char *file, const char *func, int lineno) {
+  return _profile_region_malloc(CYC_CORE_HEAP_REGION, aq, s, file, func, lineno);  
+}
+
+void * _profile_aqual_calloc(_AliasQualHandle_t aq, unsigned int t1,
+			     unsigned int t2,
+			     const char *file, const char *func, int lineno) {
+  return _profile_region_calloc(CYC_CORE_HEAP_REGION, aq, t1, t2, file, func, lineno);
 }
 
 static void *_do_profile(void *result, int is_atomic,

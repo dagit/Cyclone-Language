@@ -217,7 +217,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
   $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
   $(list_t<int>,string_t) consume_params       = $(NULL,"consume");
   switch (compress(t)) {
-  case &FnType(FnInfo{.attributes=atts,.args=args,...}):
+  case &FnType(FnInfo{.attributes=atts,.args=args,.qual_bnd=aqb,...}):
     int nargs = List::length(args);
     for ( ; atts != NULL; atts = atts->tl) {
       switch(atts->hd) {
@@ -246,7 +246,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
 	fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
 	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
-	if (!Tcutil::is_noalias_pointer(t,false))
+	if (!Tcutil::is_noalias_pointer(aqb,t,false))
 	  Warn::err2(loc,"noliveunique allowed only on unique pointers");
 	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
 	break;
@@ -255,7 +255,7 @@ void fnTypeAttsOK(seg_t loc, type_t t) {
 	fnTypeAttsOverlap(loc,i,consume_params,init_params);
 	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
-	if (!Tcutil::is_noalias_pointer(t,false))
+	if (!Tcutil::is_noalias_pointer(aqb,t,false))
 	  Warn::err2(loc,"consume allowed only on unique pointers");
 	consume_params[0] = new List(i,consume_params[0]); 
 	break;

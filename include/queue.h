@@ -29,8 +29,8 @@ namespace Queue {
        queues and various operations following the conventions of the
        Objective Caml queue library as much as possible.  */
 
-extern struct Queue<`a::TB,`r::R>;
-typedef struct Queue<`a,`r> @`r queue_t<`a,`r>;
+extern struct Queue<`a::TB,`r::R,`q::Q>;
+typedef struct Queue<`a,`r,`q> @@aqual(`q) `r queue_t<`a,`r,`q>;
   /** A value of type [queue_t<`a,`r>] is a first-in, first-out queue
       of elements of type [`a]; the queue data structures are
       allocated in region [`r]. */
@@ -44,11 +44,11 @@ extern queue_t<`a::TB> create();
 
 extern void add(queue_t<`a::TB,`H>,`a x) __attribute__((consume(2)));
   /** [add(q,x)] adds [x] to the end of [q] (by side effect). */
-extern void radd(region_t<`r>, queue_t<`a::TB,`r>,`a x) __attribute__((consume(3)));
+extern void radd(region_t<`r>, queue_t<`a::TB,`r>,`a x : RESTRICTED >= aquals(`a)) __attribute__((consume(3)));
   /** [radd(r,q,x)] is like [add(q,x)] except that the queue lives in
       the region with handle [r]. */
 
-extern void push(queue_t<`a::TB,`H> q, `a x) __attribute__((consume(2)));
+extern void push(queue_t<`a::TB,`H> q, `a x ) __attribute__((consume(2)));
   /** [push(q,x)] adds [x] to the front of [q] (by side effect). */
 extern void rpush(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) __attribute__((consume(3)));
   /** [rpush(r,q,x)] is like [push(q,x)] except that the queue lives in

@@ -29,14 +29,11 @@ testaqualdefaults.cyc:144: field a of struct LCS expects type list_t<int *@aqual
 
   @false and @true are not compatible. (different type constructors)
 testaqualdefaults.cyc:148: alias qualifier bounds violated: `p <> ALIASABLE
-testaqualdefaults.cyc:171: datatype constructor AAA expects argument of type `EB183 but this argument has type 
-int *`ETR116
-  `EB183 and int *`ETR116 are not compatible. (kinds are incompatible)
-testaqualdefaults.cyc:173: datatype constructor AAA expects argument of type `EB185 but this argument has type 
-int *@aqual(RESTRICTED)`ETR113
-  `EB185 and int *@aqual(RESTRICTED)`ETR113 are not compatible. 
-	(kinds are incompatible)
-testaqualdefaults.cyc:188: datatype constructor CCC expects argument of type int *@aqual(ALIASABLE) but this argument has type 
+testaqualdefaults.cyc:184: noalias pointers in datatypes are not allowed: EEE
+testaqualdefaults.cyc:189: datatype constructor CCC expects argument of type int *@aqual(ALIASABLE) but this argument has type 
+int *@aqual(RESTRICTED)
+  @false and @true are not compatible. (different type constructors)
+testaqualdefaults.cyc:191: datatype constructor DDD expects argument of type int * but this argument has type 
 int *@aqual(RESTRICTED)
   @false and @true are not compatible. (different type constructors)
 

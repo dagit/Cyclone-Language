@@ -419,7 +419,7 @@ static bool resolve_visit_f1(env_t env, exp_t e) {
     for(; ts != NULL; ts = ts->tl)
       resolve_type(e->loc,env,ts->hd);
     return true;
-  case &Malloc_e(MallocInfo(_,_,to,...)): 
+  case &Malloc_e(MallocInfo(_,_,_,to,...)): 
     if(to!=NULL) fallthru(*to); else return true;
   case &AnonStruct_e(t,_): fallthru(t); // can't exist until after type-checker
   case &AnonEnum_e(t,_): fallthru(t);
@@ -507,7 +507,7 @@ list_t<vardecl_t> get_fun_vardecls(bool need_va_name,
 	err2(loc,"missing name for vararg");
     } else {
       // HeapRegion is wrong -- changed by type-checker!
-      let typ = fatptr_type(t, heap_rgn_type, tq, false_type, false_type);
+      let typ = fatptr_type(t, heap_rgn_type, al_qual_type, tq, false_type, false_type);
       let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
       vds = new List(vd,vds);
     }
@@ -1139,3 +1139,4 @@ void resolve_all(list_t<Absyn::decl_t,`H> tds) {
   resolve_decl(env, new Decl(new Datatype_d(exn_tud()),0));
   resolve_decls(env, tds);
 }
+

@@ -62,6 +62,8 @@ type_t pointer_region(type_t);
 // If the given type is a pointer type, returns the region it points
 // into.  Returns NULL if not a pointer type.
 bool rgn_of_pointer(type_t t, type_t@ rgn);
+  //return the alias qualifier of a pointer type  
+type_t pointer_aqual(type_t t);
 // For a thin bound, returns the associated expression, and for a fat 
 // bound, returns null.  If b is unconstrained, then sets it to def.
 exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
@@ -99,9 +101,9 @@ bool coerce_uint_type(exp_t);
 bool coerce_sint_type(exp_t);
 bool coerce_to_bool(exp_t);
 
-bool coerce_arg(RgnOrder::rgn_po_opt_t, exp_t, type_t, bool* alias_coercion); 
-bool coerce_assign(RgnOrder::rgn_po_opt_t, exp_t, type_t);
-bool coerce_list(RgnOrder::rgn_po_opt_t, type_t, list_t<exp_t>);
+bool coerce_arg(RgnOrder::rgn_po_opt_t,aqualbnds_t, exp_t, type_t, bool* alias_coercion); 
+bool coerce_assign(RgnOrder::rgn_po_opt_t,aqualbnds_t, exp_t, type_t);
+bool coerce_list(RgnOrder::rgn_po_opt_t,aqualbnds_t, type_t, list_t<exp_t>);
 // true when expressions of type t1 can be implicitly cast to t2
 bool silent_castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
@@ -110,8 +112,8 @@ coercion_t castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 bool subtype(RgnOrder::rgn_po_opt_t, list_t<$(type_t,type_t)@`H,`H> assume, 
 	     type_t t1, type_t t2);
 bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
-  bool check_aqual_bounds(list_t<$(type_t, type_t)@> aqb, aqualtype_t sub, aqualtype_t bnd);
-// if t is a nullable pointer type and e is 0, changes e to null 
+bool check_aqual_bounds(aqualbnds_t aqb, aqualtype_t sub, aqualtype_t bnd);
+  // if t is a nullable pointer type and e is 0, changes e to null 
 bool zero_to_null(type_t, exp_t);
 
 // used to alias the given expression, assumed to have non-Aliasable type
@@ -172,20 +174,22 @@ bool is_zero_ptr_deref(exp_t, type_t @ptr_type, bool @is_fat, type_t @elt_type);
 			      
 
 // returns true if this a non-aliasable region, e.g. `U, `r::TR, etc.
-bool is_noalias_region(type_t r, bool must_be_unique);
+//bool is_noalias_region(type_t r, bool must_be_unique);
+
+bool is_noalias_qual(type_t r, bool must_be_unique);
 
 // returns true if this a non-aliasable pointer, e.g. *`U, *`r::TR, etc.
-bool is_noalias_pointer(type_t t, bool must_be_unique);
+bool is_noalias_pointer(aqualbnds_t aqb, type_t t, bool must_be_unique);
 
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate.  The
 // region is used for allocating temporary stuff.
-bool is_noalias_path(exp_t);
+bool is_noalias_path(aqualbnds_t aqb, exp_t);
 
 // returns true if this expression is an aggregate that contains
 // non-aliasable pointers or is itself a non-aliasable pointer
 // The region is used for allocating temporary stuff
-bool is_noalias_pointer_or_aggr(type_t);
+bool is_noalias_pointer_or_aggr(aqualbnds_t aqb, type_t);
 
 // Ensure e is an lvalue or function designator -- return whether
 // or not &e is const and what region e is in 
@@ -247,5 +251,8 @@ type_t any_bounds(list_t<tvar_t,`H>);
   // fairly semantic equivalence
   bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
   int tycon_cmp(tycon_t,tycon_t);
+  aqualbnds_t get_aquals_bounds(fndecl_t fd);
+  type_t lookup_aquals(aqualbnds_t aquals_map, type_t t);
+  bool is_aliasable_qual(aqualtype_t aq);
 }
 #endif

@@ -39,15 +39,15 @@ using Core;
 //(* Extensible buffers *)
 
 abstract struct t
-{ mstring_t<`U> buffer;
+{ mstring_t<`H,UNIQUE> buffer;
   unsigned int position;
   unsigned int length;
-  mstring_t<`U> initial_buffer;
+  mstring_t<`H,UNIQUE> initial_buffer;
 };
 
 T create (unsigned int n) {
   if (n > 0) {
-    mstring_t<`U> s = calloc(n+1,sizeof(char));
+    mstring_t<`H,UNIQUE> s = qcalloc(heap_region, unique_qual, n+1,sizeof(char));
     return new t(s, 0, n, NULL);
   } else {
     return new t(NULL, 0, 0, NULL);
@@ -64,7 +64,7 @@ mstring_t contents(T b) {
   return res;
 }
 
-mstring_t<`U> extract(T b) {
+mstring_t<`H,UNIQUE> extract(T b) {
   let buf = NULL;
   buf :=: b->buffer;
   buf[b->position] = '\0';
@@ -73,7 +73,7 @@ mstring_t<`U> extract(T b) {
   return buf;
 }
 
-bool restore(T b, mstring_t<`U> buf) __attribute__((consume(2))) {
+bool restore(T b, mstring_t<`H,UNIQUE> buf) __attribute__((consume(2))) {
   int len = strlen(buf);
   buf :=: b->buffer;
   if (buf != NULL) {
@@ -109,11 +109,11 @@ void reset (T b) {
 static void resize(T b, unsigned int more) {
   size_t len = b->length;
   size_t new_len = len == 0 ? 1 : len;
-  mstring_t<`U> new_buffer;
+  mstring_t<`H,UNIQUE> new_buffer;
   while (b->position + more > new_len) {
     new_len = 2 * new_len;
   }
-  new_buffer = calloc(new_len + 1,sizeof(char));
+  new_buffer = qcalloc(heap_region, unique_qual, new_len + 1,sizeof(char));
   if (b->length != 0) {
     let alias<`r>char ?`r x = new_buffer;
     strncpy((char ? @nozeroterm )x, b->buffer, b->position);

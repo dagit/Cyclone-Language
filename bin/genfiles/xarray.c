@@ -63,17 +63,19 @@ struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
+/* Alias qualifier stuff */
+typedef unsigned char _AliasQualHandle_t;
+
+
 struct _RegionHandle _new_region(const char*);
-void* _region_malloc(struct _RegionHandle*, unsigned);
-void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
+void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
+void* _region_calloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
+void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
+void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
 void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void _pop_dynregion();
-
-/* Alias qualifier stuff */
-
-typedef unsigned char _AliasQualHandle_t;
 
 /* Exceptions */
 struct _handler_cons {
@@ -284,7 +286,7 @@ static inline unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) {  
+static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_t aq, unsigned orig_s) {  
   if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -302,7 +304,7 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) 
       return result;
     }
   } 
-  return _region_malloc(r,orig_s); 
+  return _region_malloc(r,aq,orig_s); 
 }
 
 #ifdef CYC_REGION_PROFILE
@@ -311,15 +313,19 @@ void* _profile_GC_malloc(int,const char*,const char*,int);
 void* _profile_GC_malloc_atomic(int,const char*,const char*,int);
 void* _profile_GC_calloc(unsigned,unsigned,const char*,const char*,int);
 void* _profile_GC_calloc_atomic(unsigned,unsigned,const char*,const char*,int);
-void* _profile_region_malloc(struct _RegionHandle*,unsigned,const char*,const char*,int);
-void* _profile_region_calloc(struct _RegionHandle*,unsigned,unsigned,const char *,const char*,int);
+void* _profile_region_malloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,const char*,const char*,int);
+void* _profile_region_calloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,unsigned,const char *,const char*,int);
+void * _profile_aqual_malloc(_AliasQualHandle_t aq, unsigned int s,const char *file, const char *func, int lineno);
+void * _profile_aqual_calloc(_AliasQualHandle_t aq, unsigned int t1,unsigned int t2,const char *file, const char *func, int lineno);
 struct _RegionHandle _profile_new_region(const char*,const char*,const char*,int);
 void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #ifndef RUNTIME_CYC
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
-#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _region_malloc(rh,aq,n) _profile_region_malloc(rh,aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,aq,n,t) _profile_region_calloc(rh,aq,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_malloc(aq,n) _profile_region_malloc(aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_calloc(aq,n,t) _profile_region_calloc(aq,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -328,11 +334,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
  extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};
-# 168 "core.h"
+# 170 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 171
-extern struct _RegionHandle*Cyc_Core_unique_region;
-# 187 "core.h"
+# 177
+extern unsigned Cyc_Core_unique_qual;
+# 190 "core.h"
 void Cyc_Core_ufree(void*);struct Cyc_Xarray_Xarray{struct _fat_ptr elmts;int num_elmts;};
 # 25 "xarray.cyc"
 int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*xarr){
@@ -350,14 +356,14 @@ _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(size
 # 41
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate_empty(struct _RegionHandle*r){
 struct _fat_ptr x=_tag_fat(0,0,0);
-return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=x,_Tmp0->num_elmts=0;_Tmp0;});}
+return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=x,_Tmp0->num_elmts=0;_Tmp0;});}
 # 45
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty (void){return Cyc_Xarray_rcreate_empty(Cyc_Core_heap_region);}
 # 48
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(struct _RegionHandle*r,int len,void*a){
 if(len < 0)
 _throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Core_Invalid_argument_exn_struct));_Tmp0->tag=Cyc_Core_Invalid_argument,_Tmp0->f1=_tag_fat("xarrays must have a non-negative size buffer",sizeof(char),45U);_Tmp0;}));
-return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=({unsigned _Tmp1=(unsigned)len;_tag_fat(({void**_Tmp2=({struct _RegionHandle*_Tmp3=Cyc_Core_unique_region;_region_malloc(_Tmp3,_check_times(_Tmp1,sizeof(void*)));});({{unsigned _Tmp3=(unsigned)len;unsigned i;for(i=0;i < _Tmp3;++ i){_Tmp2[i]=a;}}0;});_Tmp2;}),sizeof(void*),_Tmp1);}),_Tmp0->num_elmts=0;_Tmp0;});}
+return({struct Cyc_Xarray_Xarray*_Tmp0=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray));_Tmp0->elmts=({unsigned _Tmp1=(unsigned)len;_tag_fat(({void**_Tmp2=({unsigned _Tmp3=Cyc_Core_unique_qual;_aqual_malloc(_Tmp3,_check_times(_Tmp1,sizeof(void*)));});({{unsigned _Tmp3=(unsigned)len;unsigned i;for(i=0;i < _Tmp3;++ i){_Tmp2[i]=a;}}0;});_Tmp2;}),sizeof(void*),_Tmp1);}),_Tmp0->num_elmts=0;_Tmp0;});}
 # 54
 struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int len,void*a){
 return Cyc_Xarray_rcreate(Cyc_Core_heap_region,len,a);}
@@ -374,9 +380,9 @@ return Cyc_Xarray_rsingleton(Cyc_Core_heap_region,len,a);}
 void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){
 if((unsigned)xarr->num_elmts==_get_fat_size(xarr->elmts,sizeof(void*))){
 if(xarr->num_elmts==0)
-xarr->elmts=_tag_fat(({unsigned _Tmp0=10U;({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=10U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=a;}}0;});_Tmp1;});}),sizeof(void*),10U);else{
+xarr->elmts=_tag_fat(({unsigned _Tmp0=10U;({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=10U;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=a;}}0;});_Tmp1;});}),sizeof(void*),10U);else{
 # 74
-struct _fat_ptr newarr=({unsigned _Tmp0=(unsigned)(xarr->num_elmts * 2);_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)(xarr->num_elmts * 2);unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
+struct _fat_ptr newarr=({unsigned _Tmp0=(unsigned)(xarr->num_elmts * 2);_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)(xarr->num_elmts * 2);unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 ({void*_Tmp0=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),i));*((void**)_check_fat_subscript(newarr,sizeof(void*),i))=_Tmp0;});}}
 ({struct _fat_ptr _Tmp0=xarr->elmts;struct _fat_ptr _Tmp1=newarr;xarr->elmts=_Tmp1;newarr=_Tmp0;});
@@ -390,8 +396,8 @@ return xarr->num_elmts - 1;}
 # 89
 struct _fat_ptr Cyc_Xarray_rto_array(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr){
 if(xarr->num_elmts==0)
-return _tag_fat(({unsigned _Tmp0=0;({void**_Tmp1=({struct _RegionHandle*_Tmp2=r;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});*_Tmp1=0;_Tmp1;});}),sizeof(void*),0U);{
-struct _fat_ptr ans=({unsigned _Tmp0=(unsigned)xarr->num_elmts;_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=r;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)xarr->num_elmts;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),(int)i));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
+return _tag_fat(({unsigned _Tmp0=0;({void**_Tmp1=({struct _RegionHandle*_Tmp2=r;_region_malloc(_Tmp2,0U,_check_times(_Tmp0,sizeof(void*)));});*_Tmp1=0;_Tmp1;});}),sizeof(void*),0U);{
+struct _fat_ptr ans=({unsigned _Tmp0=(unsigned)xarr->num_elmts;_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=r;_region_malloc(_Tmp2,0U,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)xarr->num_elmts;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),(int)i));}}0;});_Tmp1;}),sizeof(void*),_Tmp0);});
 return ans;}}
 # 96
 struct _fat_ptr Cyc_Xarray_to_array(struct Cyc_Xarray_Xarray*xarr){
@@ -400,8 +406,8 @@ return Cyc_Xarray_rto_array(Cyc_Core_heap_region,xarr);}
 struct Cyc_Xarray_Xarray*Cyc_Xarray_rfrom_array(struct _RegionHandle*r,struct _fat_ptr arr){
 if(_get_fat_size(arr,sizeof(void*))==0U)
 return Cyc_Xarray_rcreate_empty(r);{
-struct Cyc_Xarray_Xarray*ans;ans=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=
-_get_fat_size(arr,sizeof(void*));_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(arr,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((void**)arr.curr)[(int)i];}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=(int)
+struct Cyc_Xarray_Xarray*ans;ans=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=
+_get_fat_size(arr,sizeof(void*));_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(arr,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=((void**)arr.curr)[(int)i];}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=(int)
 _get_fat_size(arr,sizeof(void*));
 return ans;}}
 # 109
@@ -413,7 +419,7 @@ int newsz=(int)(_get_fat_size(xarr1->elmts,sizeof(void*))+ _get_fat_size(xarr2->
 if(newsz==0)
 return Cyc_Xarray_rcreate_empty(r);{
 void*init=_get_fat_size(xarr1->elmts,sizeof(void*))==0U?*((void**)_check_fat_subscript(xarr2->elmts,sizeof(void*),0)):*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),0));
-struct Cyc_Xarray_Xarray*ans;ans=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=(unsigned)newsz;_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)newsz;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=init;}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=0;
+struct Cyc_Xarray_Xarray*ans;ans=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=(unsigned)newsz;_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=(unsigned)newsz;unsigned i;for(i=0;i < _Tmp2;++ i){_Tmp1[i]=init;}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=0;
 # 121
 {int i=0;for(0;i < xarr1->num_elmts;++ i){
 Cyc_Xarray_add(ans,*((void**)_check_fat_subscript(xarr1->elmts,sizeof(void*),i)));}}
@@ -444,7 +450,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*)
 if(xarr->num_elmts==0)return Cyc_Xarray_rcreate_empty(r);{
 # 155
 struct Cyc_Xarray_Xarray*ans;
-ans=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=_get_fat_size(xarr->elmts,sizeof(void*));_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(xarr->elmts,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=f(*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0)));_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=xarr->num_elmts;
+ans=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=_get_fat_size(xarr->elmts,sizeof(void*));_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(xarr->elmts,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=f(*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0)));_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=xarr->num_elmts;
 # 158
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 ({void*_Tmp0=f(*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),i)));*((void**)_check_fat_subscript(ans->elmts,sizeof(void*),i))=_Tmp0;});}}
@@ -457,7 +463,7 @@ struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void
 if(xarr->num_elmts==0)return Cyc_Xarray_rcreate_empty(r);{
 # 170
 struct Cyc_Xarray_Xarray*ans;
-ans=_region_malloc(r,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=_get_fat_size(xarr->elmts,sizeof(void*));_tag_fat(({void**_Tmp1=({struct _RegionHandle*_Tmp2=Cyc_Core_unique_region;_region_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(xarr->elmts,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=f(env,*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0)));_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=xarr->num_elmts;
+ans=_region_malloc(r,0U,sizeof(struct Cyc_Xarray_Xarray)),ans->elmts=({unsigned _Tmp0=_get_fat_size(xarr->elmts,sizeof(void*));_tag_fat(({void**_Tmp1=({unsigned _Tmp2=Cyc_Core_unique_qual;_aqual_malloc(_Tmp2,_check_times(_Tmp0,sizeof(void*)));});({{unsigned _Tmp2=_get_fat_size(xarr->elmts,sizeof(void*));unsigned i;for(i=0;i < _Tmp2;++ i){({void*_Tmp3=f(env,*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),0)));_Tmp1[i]=_Tmp3;});}}0;});_Tmp1;}),sizeof(void*),_Tmp0);}),ans->num_elmts=xarr->num_elmts;
 # 173
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 ({void*_Tmp0=f(env,*((void**)_check_fat_subscript(xarr->elmts,sizeof(void*),i)));*((void**)_check_fat_subscript(ans->elmts,sizeof(void*),i))=_Tmp0;});}}

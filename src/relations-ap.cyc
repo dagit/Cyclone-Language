@@ -298,7 +298,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, Absyn::vardecl_t v,
   // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
   // because e1 or e2 could modify n.
   switch (e->r) {
-  case &Absyn::Malloc_e(Absyn::MallocInfo{_,_,_,e2,true,_}):
+  case &Absyn::Malloc_e(Absyn::MallocInfo{_,_,_,_,e2,true,_}):
     {
       malloc_loop:
       switch (e2->r) {

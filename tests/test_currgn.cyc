@@ -51,12 +51,12 @@ int f5() {
 // AUTORELEASE stuff
 
 int * @autoreleased `C auto_alloc_int(int x) {
-  let res = rnew (refcnt_region) 1;
+  let res = qnew (refcnt_qual) 1;
   return autorelease(res);
 }
 
 int * @autoreleased `C ? @autoreleased `C auto_alloc_array(int n) {
-  let arr = rnew (refcnt_region) { for i < n : auto_alloc_int(i) };
+  let arr = qnew (refcnt_qual) { for i < n : auto_alloc_int(i) };
   for (int i = 0; i<n; i++) *arr[i] += 5;
   return autorelease(arr);
 }

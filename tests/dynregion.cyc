@@ -42,7 +42,7 @@ int main() {
 
   // Stick the key and data in a global data structure.
   // We've now lost direct access to the key or x.
-  global = unew MyContainer{key,x};
+  global = qunew MyContainer{key,x};
   // But we can regain it by swapping for the container.
   struct MyContainer *`U p = NULL;
   global :=: p;

@@ -28,9 +28,9 @@ namespace Queue;
 
 using List;
 
-struct Queue<`a,`r> { 
-  list_t<`a,`r> front; 
-  list_t<`a,`r> rear; 
+struct Queue<`a,`r,`q> { 
+  list_t<`a,`r,`q> front; 
+  list_t<`a,`r,`q> rear; 
   unsigned int len;
 };
 

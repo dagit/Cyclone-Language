@@ -467,11 +467,12 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Enum_e(ed,ef): new_e = e; break;
   case &AnonEnum_e(t,ef):
     new_e = new_exp(new AnonEnum_e(copy_type(t),ef),e->loc); break;
-  case &Malloc_e(MallocInfo(mk,r,t,n,res,inlc)):
+  case &Malloc_e(MallocInfo(mk,r,q,t,n,res,inlc)):
     exp_t     e2 = copy_exp(e);
     exp_opt_t r1 = r; if (r != NULL) r1 = DC(pt,r);
+    exp_opt_t q1 = q; if (q != NULL) q1 = DC(pt,q);
     type_t *  t1 = t; if (t != NULL) t1 = new copy_type(*t);
-    e2->r = new Malloc_e(MallocInfo(mk,r1,t1,n,res,inlc));
+    e2->r = new Malloc_e(MallocInfo(mk,r1,q1,t1,n,res,inlc));
     new_e = e2;
     break;
   case &Swap_e(e1,e2): new_e = swap_exp(DC(pt,e1),DC(pt,e2),e->loc); break;
@@ -501,7 +502,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
 static kind_t field_kind(type_t field_type,
 			 list_t<type_t> ts, list_t<tvar_t> tvs) {
   kind_t k = type_kind(field_type);
-  if (ts != NULL && (k == &Kinds::ak || k == &Kinds::tak)) {
+  if (ts != NULL && k == &Kinds::ak) {
     // we have to substitute here, because the last type might be
     // instantiated with a ground type.
     region r;
@@ -544,9 +545,9 @@ kind_t type_kind(type_t t) {
     case &AnonEnumCon(_):
     case &RgnHandleCon:    return &Kinds::bk;
     case &AqualHandleCon:  return &Kinds::bk;
-    case &UniqueCon:	   return &Kinds::urk;
+    case &UniqueHeapCon:	   
+    case &RefCntHeapCon:	   
     case &HeapCon:         return &Kinds::rk;
-    case &RefCntCon:	   return &Kinds::trk;
     case &BuiltinCon(_,k): return k;
     case &TagCon:          return &Kinds::bk;
     case &AccessCon:
@@ -577,14 +578,14 @@ kind_t type_kind(type_t t) {
 	  ;
         let last_type = fields->hd->type;
         let k = field_kind(last_type, ts, tvs);
-        if (k == &Kinds::ak || k == &Kinds::tak) return k;
+        if (k == &Kinds::ak)  return k;
       }
       // the kind of a union depends upon the kind of all its fields
       else
         for (; fields != NULL; fields = fields->tl) {
           let type = fields->hd->type;
           let k = field_kind(type, ts, tvs);
-          if (k == &Kinds::ak || k == &Kinds::tak) return k;
+          if (k == &Kinds::ak) return k;
         }
       return &Kinds::mk;
     }
@@ -593,19 +594,11 @@ kind_t type_kind(type_t t) {
   case &PointerType(pinfo):
     switch (compress(pinfo.ptr_atts.bounds)) {
     case &AppType(&ThinCon,_):
-      switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
-      case Aliasable: return &Kinds::bk;
-      case Unique: return &Kinds::ubk;
-      case Top: default: return &Kinds::tbk;
-      }
-    // must assume worst case when the bounds are unconstrained
+      return &Kinds::bk;
+      // must assume worst case when the bounds are unconstrained
     case &AppType(&FatCon,_):
     default:
-      switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
-      case Aliasable: return &Kinds::mk;
-      case Unique: return &Kinds::umk;
-      case Top: default: return &Kinds::tmk;
-      }
+      return &Kinds::mk;
     }
   case &ValueofType(_): return &Kinds::ik;
   case &TypeofType(_): 
@@ -635,8 +628,8 @@ static type_t rgns_of_field(aggrfield_t af) {
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (Kinds::tvar_kind(tv,&Kinds::bk)) {
-  case &Kind(RgnKind,Unique):    t = unique_rgn_type; break;
-  case &Kind(RgnKind,Aliasable): t = heap_rgn_type;   break;
+    //case &Kind(RgnKind,Unique):    t = unique_rgn_type; break;
+  case &Kind(RgnKind,_):         t = heap_rgn_type;   break;
   case &Kind(EffKind,_):         t = empty_effect;    break;
   case &Kind(IntKind,_):         t = new ValueofType(uint_exp(0,0)); break;
   case &Kind(BoolKind,_):        t = true_type;       break;
@@ -707,8 +700,8 @@ type_t normalize_effect(type_t e) {
       switch (effs->hd) {
       case &AppType(&JoinCon,_):
       case &AppType(&AccessCon,&List{&AppType(&HeapCon,_),NULL}):
-      case &AppType(&AccessCon,&List{&AppType(&RefCntCon,_),NULL}):
-      case &AppType(&AccessCon,&List{&AppType(&UniqueCon,_),NULL}):
+/*       case &AppType(&AccessCon,&List{&AppType(&RefCntCon,_),NULL}): */
+/*       case &AppType(&AccessCon,&List{&AppType(&UniqueCon,_),NULL}): */
         redo_join = true; break;
       default: break;
       }
@@ -720,8 +713,9 @@ type_t normalize_effect(type_t e) {
       case &AppType(&JoinCon,nested_effs):
         effects = List::revappend(nested_effs,effects); break;
       case &AppType(&AccessCon,&List{&AppType(&HeapCon,_),NULL}):
-      case &AppType(&AccessCon,&List{&AppType(&RefCntCon,_),NULL}):
-      case &AppType(&AccessCon,&List{&AppType(&UniqueCon,_),NULL}): break;
+/*       case &AppType(&AccessCon,&List{&AppType(&RefCntCon,_),NULL}): */
+/*       case &AppType(&AccessCon,&List{&AppType(&UniqueCon,_),NULL}):  */
+	break;
       case e: effects = new List(e,effects); break;
       }
     *es = List::imp_rev(effects);
@@ -758,7 +752,7 @@ static type_t dummy_fntype(type_t eff) {
 // effect evars to become constrained.
 bool region_in_effect(bool constrain, type_t r, type_t e) {
   r = compress(r);
-  if (r == heap_rgn_type || r == unique_rgn_type || r == refcnt_rgn_type)
+  if (r == heap_rgn_type)// || r == unique_rgn_type || r == refcnt_rgn_type)
     return true;
   switch (compress(e)) {
   case &AppType(&AccessCon,&List(r2,_)):
@@ -1018,8 +1012,8 @@ static int tycon2int(tycon_t t) {
   case &RgnHandleCon:                 return 19;
   case &TagCon:                       return 20;
   case &HeapCon:                      return 21;
-  case &UniqueCon:                    return 22;
-  case &RefCntCon:                    return 23;
+  case &UniqueHeapCon:                return 22;
+  case &RefCntHeapCon:                return 23;
   case &AccessCon:                    return 24;
   case &JoinCon:                      return 25;
   case &RgnsCon:                      return 26;
@@ -1036,7 +1030,8 @@ static int tycon2int(tycon_t t) {
   case &ComplexCon:                   return 37;
   case &AqualVarCon:                  return 38;
   case &AqualConstCon(...):           return 39;
-  case &AqualsCon:               return 40;
+  case &AqualsCon:                    return 40;
+  case &AqualHandleCon:               return 41;
   default: Warn::impos2("bad con");
   }
 }
@@ -1336,7 +1331,7 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
 
 // coerce the list e so that each element has type t -- used in arrays and
 // conditionals
-bool coerce_list(RgnOrder::rgn_po_opt_t po, type_t t, list_t<exp_t> es) {
+bool coerce_list(RgnOrder::rgn_po_opt_t po, aqualbnds_t aqb, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
   opt_t<type_t> max_arith_type = NULL;
@@ -1352,7 +1347,7 @@ bool coerce_list(RgnOrder::rgn_po_opt_t po, type_t t, list_t<exp_t> es) {
       return false; // FIX? Why no error?
   // now coerce each expression to the type t as if by assignment
   for (list_t<exp_t> el = es; el != NULL; el = el->tl)
-    if (!coerce_assign(po,el->hd,t)) {
+    if (!coerce_assign(po,aqb,el->hd,t)) {
       Warn::err2(el->hd->loc,"type mismatch: expecting ",t," but found ",
 		 (type_t)el->hd->topt);
       return false;
@@ -1558,6 +1553,12 @@ bool rgn_of_pointer(type_t t, type_t @rgn) {
   }
 }
 
+type_t pointer_aqual(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{.ptr_atts = *p,...}): return p->aqual;
+  default: Warn::impos2("pointer_elt_type");
+  }
+}
 // returns true if "0" is a value in the type.  Used for checking
 // the well-formedness of zero-terminated array and pointer types.
 // Currently, only integral types and thin pointers support this.
@@ -1615,7 +1616,7 @@ bool zero_to_null(type_t t2, exp_t e1) {
   }
 }
 
-static bool is_aliasable_qual(aqualtype_t aq) {
+bool is_aliasable_qual(aqualtype_t aq) {
   switch(compress(aq)) {
   case &AppType(&AqualConstCon(aqv), _):
     return aqv == Aliasable_qual;
@@ -1625,7 +1626,6 @@ static bool is_aliasable_qual(aqualtype_t aq) {
     return false;
   }
 }
-
 
 // returns a triple by doing the following
 // (1) gensym's a variable name and creates an expression with that variable
@@ -1656,17 +1656,17 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
       //this may be a vartype in the case where we have a `r::TR pointer
       //the region outlives rules prevent a (t *`r1::TR) from being cast to a (t *`r2::R)
       //we should allow this somehow ... but for now just bail out here to prevent infinite loop
-    case &VarType(rtv):      
-      switch(rtv->kind) {
-      case &Eq_kb(knd):
-	if(knd->aliasqual == Top) {
-	  Warn::err2(e->loc, "Automatic alias coercion of top-kinded pointers not supported");
-	  success = false;
-	}
-	break;
-      default: break;
-      }
-      break;
+/*     case &VarType(rtv):       */
+/*       switch(rtv->kind) { */
+/*       case &Eq_kb(knd): */
+/* 	if(knd->aliasqual == Top) { */
+/* 	  Warn::err2(e->loc, "Automatic alias coercion of top-kinded pointers not supported"); */
+/* 	  success = false; */
+/* 	} */
+/* 	break; */
+/*       default: break; */
+/*       } */
+/*       break; */
     default:
       break;
     }
@@ -1689,11 +1689,11 @@ $(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
 
 // returns true if we could insert an alias construct around the context
 // of the expression with type has_typ to avoid consuming it
-static bool can_insert_alias(exp_t e, type_t e_type,
+static bool can_insert_alias(aqualbnds_t aqb, exp_t e,  type_t e_type,
 			     type_t wants_type, seg_t loc) {
   // check if the given expression is a pointer into a no-alias region
-  if (is_noalias_path(e) 
-      && is_noalias_pointer(e_type,false) 
+  if (is_noalias_path(aqb, e) 
+      && is_noalias_pointer(aqb, e_type,false) 
       && is_pointer_type(e_type)) {
     // check if the expected type is has a pointer type into an
     // aliasable region but not the heap region
@@ -1702,7 +1702,7 @@ static bool can_insert_alias(exp_t e, type_t e_type,
       if (is_heap_rgn_type(r2)) return false;
       let k = type_kind(r2);
       return (k->kind == RgnKind && 
-	      k->aliasqual == Aliasable && 
+	      //	      k->aliasqual == Aliasable && 
 	      is_aliasable_qual(aq));
     default: return false;
     }
@@ -1711,12 +1711,14 @@ static bool can_insert_alias(exp_t e, type_t e_type,
 }
 
 // coerce e to have type t -- used in function call and explicit fallthru and assignop
-bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2, 
+bool coerce_arg(RgnOrder::rgn_po_opt_t po, 
+		aqualbnds_t aqb, 
+		exp_t e, type_t t2, 
 		bool *alias_coercion) {
   type_t t1 = compress((type_t)e->topt);
   coercion_t c;
   //do this before unification -- because the region type can change after unification
-  bool do_alias_coercion = can_insert_alias(e, t1, t2, e->loc); 
+  bool do_alias_coercion = can_insert_alias(aqb, e,t1, t2, e->loc); 
   // see if types immediately match
   if (unify(t1,t2)) 
     return true;
@@ -1758,11 +1760,11 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
 // coerce e to have type t -- used in assignment operations.  Neither
 // gcc nor VC++ issue warnings for losing precision here, but I think
 // it may be appropriate.
-bool coerce_assign(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t) {
+bool coerce_assign(RgnOrder::rgn_po_opt_t po, aqualbnds_t aqb, exp_t e, type_t t) {
   // even if we can coerce the assignment, we don't bother because
   // the scope will be too small.
   bool bogus = false;
-  return coerce_arg(po,e,t,&bogus);
+  return coerce_arg(po,aqb,e,t,&bogus);
 }
 
 // FIX:  all of the subtyping stuff needs to be re-examined in the light
@@ -2011,7 +2013,7 @@ static bool ptrsubtype(RgnOrder::rgn_po_opt_t po,
 
 
 //compress handles aquals(`a) case too
-bool check_aqual_bounds(list_t<$(type_t, type_t)@> aquals_bnd, 
+bool check_aqual_bounds(aqualbnds_t aquals_bnd, 
 			aqualtype_t aq, aqualtype_t bnd) {
   switch ($(compress(aq), compress(bnd))) {
   case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
@@ -2031,6 +2033,16 @@ bool check_aqual_bounds(list_t<$(type_t, type_t)@> aquals_bnd,
   }
 }
 
+//typically t is a tvar
+type_t lookup_aquals(aqualbnds_t aquals_map, type_t t) {
+  let aqt = aqualsof_type(t);
+  try { 
+    return List::assoc_cmp(typecmp, aquals_map, aqt);
+  }catch {
+  case &Not_found:
+    return al_qual_type;
+  }
+}
 
 //can't use unify ... don't want side effects
 //If aquals(`a) is present force identities to be the same
@@ -2744,83 +2756,88 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
-bool is_noalias_region(type_t r, bool must_be_unique) {
-  switch (compress(r)) {
-  case &AppType(&RefCntCon,_): return !must_be_unique;
-  case &AppType(&UniqueCon,_): return true;
-  case &TypedefType(_,_,&Typedefdecl{.kind=&Opt{.v=&Kind(k,a)},...},NULL): 
-    return ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)));
-//     fallthru(k,a);
-//   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_):
-  case &VarType(tv):
-    let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::rk);
-    if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)))
-      switch (Kinds::compress_kb(tv->kind)) {
-      case &Less_kb(*x,&Kind(RgnKind,Top)):
-        *x = new Opt(new Less_kb(NULL,&Kinds::rk));
-        return false;
-      default: return true;
-      }
-    return false;
-  default: return false;
-  }
-}
+/* bool is_noalias_region(type_t r, bool must_be_unique) { */
+/*   return false; */
+/* } */
+/*   switch (compress(r)) { */
+/*   case &AppType(&RefCntCon,_): return !must_be_unique; */
+/*   case &AppType(&UniqueCon,_): return true; */
+/*   case &TypedefType(_,_,&Typedefdecl{.kind=&Opt{.v=&Kind(k,a)},...},NULL):  */
+/*     return ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique))); */
+/* //     fallthru(k,a); */
+/* //   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_): */
+/*   case &VarType(tv): */
+/*     let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::rk); */
+/*     if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique))) */
+/*       switch (Kinds::compress_kb(tv->kind)) { */
+/*       case &Less_kb(*x,&Kind(RgnKind,Top)): */
+/*         *x = new Opt(new Less_kb(NULL,&Kinds::rk)); */
+/*         return false; */
+/*       default: return true; */
+/*       } */
+/*     return false; */
+/*   default: return false; */
+/*   } */
+/* } */
 
-// warning: not just a predicate; side-effects VarTypes to be of non-unique
-//   flavor if they are not yet solidly bounded
-bool is_noalias_pointer(type_t t, bool must_be_unique) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_,_,aq))):
-    if(!is_noalias_region(r,must_be_unique)) {
-      switch(compress(aq)) {
-      case &AppType(&AqualConstCon(aqv), _): {
-	switch(aqv) {
-	case Unique_qual: return true;
-	case Refcnt_qual:
-	case Restricted_qual: return !must_be_unique;
-	default: return false;
-	}
-      }
-	//ignore unconstrained evars -- show up in (_ a= NULL; &a;)...will be constrained later  	
-      case &AppType(&AqualVarCon, &List(&VarType(...), bnd)): fallthru(bnd);
-      case &AppType(&AqualVarCon, &List(&AppType(...), bnd)): { 
-	switch(bnd->hd) {
-	case &AppType(&AqualConstCon(Unique_qual), _): return true;
-	case &AppType(&AqualConstCon(Refcnt_qual), _): 
-	case &AppType(&AqualConstCon(Restricted_qual), _): return !must_be_unique;
-	default: return false;
-	}
-      }
-      default:
-	return false;
-      }
-    }
-    return true;
-  case &VarType(tv):
-    let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::bk);
-    switch (k) {
-    case BoxKind: case AnyKind: case MemKind:
-      if (a == Unique || (a == Top && !must_be_unique))
-	switch (Kinds::compress_kb(tv->kind)) {
-	case &Less_kb(*x,&Kind(k,Top)):
-	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
-	  return false;
-	default: return true;
-	}
-      return false;
+bool is_noalias_qual(aqualtype_t aq, bool must_be_unique) {
+  switch(compress(aq)) {
+  case &AppType(&AqualConstCon(aqv), _): {
+    switch(aqv) {
+    case Unique_qual: return true;
+    case Refcnt_qual:
+    case Restricted_qual: return !must_be_unique;
     default: return false;
     }
+  }
+    //ignore unconstrained evars -- show up in (_ a= NULL; &a;)...will be constrained later  	
+  case &AppType(&AqualVarCon, &List(&VarType(...), bnd)): fallthru(bnd);
+  case &AppType(&AqualVarCon, &List(&AppType(...), bnd)): { 
+    switch(bnd->hd) {
+    case &AppType(&AqualConstCon(Unique_qual), _): return true;
+    case &AppType(&AqualConstCon(Refcnt_qual), _): 
+    case &AppType(&AqualConstCon(Restricted_qual), _): return !must_be_unique;
+    default: return false;
+    }
+  }
+  default:
+    return false;
+  }
+}
+// warning: not just a predicate; side-effects VarTypes to be of non-unique
+//   flavor if they are not yet solidly bounded
+bool is_noalias_pointer(aqualbnds_t aqb, type_t t, bool must_be_unique) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,_,aq))):
+    return is_noalias_qual(aq, must_be_unique);
+  case &VarType(tv):
+    return is_noalias_qual(lookup_aquals(aqb, t), must_be_unique);
+    //    return false; //fix this with aquals_bounds
+/*     let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::bk); */
+/*     switch (k) { */
+/*     case BoxKind: case AnyKind: case MemKind: */
+/*       if (a == Unique || (a == Top && !must_be_unique)) */
+/* 	switch (Kinds::compress_kb(tv->kind)) { */
+/* 	case &Less_kb(*x,&Kind(k,Top)): */
+/* 	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable))); */
+/* 	  return false; */
+/* 	default: return true; */
+/* 	} */
+/*       return false; */
+/*     default: return false; */
+/*     } */
+
   default: return false;
   }
 }
-bool is_noalias_pointer_or_aggr(type_t t) {
+bool is_noalias_pointer_or_aggr(aqualbnds_t aqb, type_t t) {
   t = compress(t);
-  if (is_noalias_pointer(t,false)) 
+  if (is_noalias_pointer(aqb, t,false)) 
     return true;
   switch (t) {
   case &TupleType(qts):
     for(; qts != NULL; qts = qts->tl)
-      if (is_noalias_pointer_or_aggr((*qts->hd)[1])) 
+      if (is_noalias_pointer_or_aggr(aqb,(*qts->hd)[1])) 
 	return true;
     return false;
   case &AppType(&AggrCon({.KnownAggr = adp}),ts):
@@ -2828,12 +2845,12 @@ bool is_noalias_pointer_or_aggr(type_t t) {
       return false;
     let inst = List::zip((*adp)->tvs,ts);
     for(let x = (*adp)->impl->fields; x != NULL; x = x->tl)
-      if (is_noalias_pointer_or_aggr(substitute(inst,x->hd->type))) 
+      if (is_noalias_pointer_or_aggr(aqb, substitute(inst,x->hd->type))) 
 	return true;
     return false;
   case &AnonAggrType(_,x):
     for(; x != NULL; x = x->tl)
-      if (is_noalias_pointer_or_aggr(x->hd->type)) 
+      if (is_noalias_pointer_or_aggr(aqb, x->hd->type)) 
 	return true;
     return false;
   case &AppType(&AggrCon({.UnknownAggr = _}),_):
@@ -2846,7 +2863,7 @@ bool is_noalias_pointer_or_aggr(type_t t) {
       let inst = List::zip(td->tvs,ts);
       for(let typs = fld->typs; typs != NULL; typs = typs->tl) {
         t = (inst == NULL) ? ((*typs->hd)[1]) : substitute(inst,(*typs->hd)[1]);
-        if (is_noalias_pointer_or_aggr(t)) 
+        if (is_noalias_pointer_or_aggr(aqb, t)) 
 	  return true;
       }
       return false;
@@ -2858,28 +2875,28 @@ bool is_noalias_pointer_or_aggr(type_t t) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-bool is_noalias_path(exp_t e) {
+bool is_noalias_path(aqualbnds_t aqb, exp_t e) {
   switch (e->r) {
   case &Var_e(&Global_b(...)): return false;
   case &AggrArrow_e(e1,...): fallthru(e1);
   case &Deref_e(e1):
-    return is_noalias_pointer((type_t)e1->topt,true) && is_noalias_path(e1);
-  case &AggrMember_e(e1,f,...): return is_noalias_path(e1);
+    return is_noalias_pointer(aqb, (type_t)e1->topt,true) && is_noalias_path(aqb, e1);
+  case &AggrMember_e(e1,f,...): return is_noalias_path(aqb, e1);
   case &Subscript_e(e1,e2):
     switch (compress((type_t)e1->topt)) {
-    case &TupleType(...): return is_noalias_path(e1);
+    case &TupleType(...): return is_noalias_path(aqb, e1);
     default: return false;
     }
   case &Conditional_e(_,e1,e2):
-    return is_noalias_path(e1) && is_noalias_path(e2);
+    return is_noalias_path(aqb, e1) && is_noalias_path(aqb, e2);
   case &SeqExp_e(_,e2): fallthru(e2);
-  case &Cast_e(_,e2,...): return is_noalias_path(e2);
+  case &Cast_e(_,e2,...): return is_noalias_path(aqb,e2);
   case &StmtExp_e(s):
     while(true)
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_noalias_path(e);
+      case &Exp_s(e): return is_noalias_path(aqb, e);
       default: Warn::impos2("is_noalias_stmt_exp: ill-formed StmtExp");
       }
   default: return true;
@@ -3215,4 +3232,17 @@ type_t promote_array(type_t t, type_t rgn, aqualtype_t aqual, bool convert_tag) 
     return atb_type(et,rgn,aqual,tq,b,zt,false_type);
   default: return t;
   }
+}
+
+static bool aquals_bnds_pred($(type_t, type_t)@ bnd) {
+  switch((*bnd)[0]) {
+  case &AppType(&AqualsCon, _):
+    return true;
+  default:
+    return false;
+  }
+}
+
+list_t<$(type_t, type_t)@> get_aquals_bounds(fndecl_t fd) {
+  return List::filter(aquals_bnds_pred, fd->i.qual_bnd);
 }

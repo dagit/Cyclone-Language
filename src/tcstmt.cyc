@@ -75,7 +75,7 @@ static bool make_var_exp(exp_t@ eptr, stmt_t s0) {
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
-  let TcPatResult(p,vse) = pat_res;
+  let TcPatResult(p,vse,aqb) = pat_res;
   let vs   = map(fst,vse);
   let tvs  = (p==NULL) ? NULL : map(fst,(*p)[0]);
   let bds  = (p==NULL) ? NULL : (*p)[1];
@@ -90,7 +90,16 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   for(; vs != NULL; vs = vs->tl)
     if (vs->hd != NULL)
       (*vs->hd)->rgn = ropt;
-
+  for(;aqb != NULL; aqb = aqb->tl) {
+    let &$(tv,b) = aqb->hd;
+    switch(compress(tv)) {
+    case &AppType(&AqualsCon, _):
+      te = add_aquals_bound(te, tv, b);
+      break;
+    default:
+      break;
+    }
+  }
   if(where_opt != NULL) {
     tcTest(te,where_opt,"switch clause guard");
     if (!no_side_effects_exp(where_opt))
@@ -144,11 +153,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     } 
     // don't introduce alias expressions here; would be useless
     tcExp(te,&t,eopt);
-    if (!coerce_arg(curr_rgnpo(te),eopt,t,NULL)) {
+    if (!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),eopt,t,NULL)) {
      Warn::err2(s0->loc,"returns value of type ",eopt->topt," but requires ",t);
      Unify::explain_failure();
     }
-    check_consume(eopt->loc,t,eopt);
+    check_consume(eopt->loc,curr_aquals_bounds(te),t,eopt);
     return;
 
   case &IfThenElse_s(e,s1,s2):
@@ -199,12 +208,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
       // don't introduce alias expression here, would be useless
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(curr_rgnpo(te),es->hd,ts->hd,NULL)) {
+      if(!coerce_arg(curr_rgnpo(te),curr_aquals_bounds(te),es->hd,ts->hd,NULL)) {
 	Warn::err2(s0->loc, "fallthru argument has type ",es->hd->topt,
 		   "but pattern variable has type ",ts->hd);
         Unify::explain_failure();
       }
-      check_consume(es->hd->loc,ts->hd,es->hd); // JGM: no test case
+      check_consume(es->hd->loc,curr_aquals_bounds(te),ts->hd,es->hd); // JGM: no test case
     }
     if (es != NULL)
       Warn::err2(s0->loc, "too many arguments in explicit fallthru");
@@ -222,7 +231,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let e = *exp;
     let t = tcExp(te,NULL,e);
 
-    check_consume(e->loc,t,e);
+    check_consume(e->loc,curr_aquals_bounds(te),t,e);
     // DJG: I finally got tired of checking cases in reverse order.  It is
     //      a bit more convoluted to go in order...
     // Fallthru is not allowed in the last case, even if in a nested switch
@@ -382,7 +391,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //  are in scope)
       let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
       let allow_evars = is_local;
-      Tctyp::check_type(s0->loc,te,bound_vars,&Kinds::tmk,allow_evars,true,t);
+      Tctyp::check_type(s0->loc,te,bound_vars,&Kinds::mk,allow_evars,true,t);
       vd->tq.real_const = extract_const_from_typedef(s0->loc,
 						     vd->tq.print_const,t);
       if (sc == Extern || sc == ExternC)
@@ -392,7 +401,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// te is only used by is_const_exp for globals and function names
 	if(!is_local && !is_const_exp(initializer))
 	  Warn::err2(d->loc, "initializer for static variable needs to be a constant expression");
-	if (!coerce_assign(curr_rgnpo(te),initializer,t)) {
+	if (!coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),initializer,t)) {
 	  Warn::err2(d->loc,vd," was declared with type ",t,
 		     " but initialized with type ",initializer->topt);
 	  Unify::unify(t,(type_t)initializer->topt);
@@ -424,7 +433,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *vds = new Opt(pat_res.patvars);
       let pt = (type_t)p->topt;
       let et = (type_t)e->topt;
-      if (!Unify::unify(pt,et) && !coerce_assign(curr_rgnpo(te),e,pt)) {
+      if (!Unify::unify(pt,et) && !coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),e,pt)) {
 	Warn::err2(d->loc,
 		   "pattern type ",pt," does not match definition type ",et);
 	Unify::unify(pt,et);
@@ -440,7 +449,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       for (; vds != NULL; vds = vds->tl) {
 	vds->hd->rgn = curr_bl; // side effect
-	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::tmk,
+	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::mk,
 			  true,true,vds->hd->type);
       }
       tcStmt(te,s,false);
@@ -458,20 +467,22 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       type_t rgn_typ;
       if (open_exp_opt) {
 	// the open expression should have type 
-	// struct Core::DynamicRegion<`r1::R>@`r2::TR
+	// struct Core::DynamicRegion<`r1::R> @aqual(RESTRICTED) @`r2
 	let drname = new $(Abs_n(list(new "Core"),false), new "DynamicRegion");
-	let outer_rgn = new_evar(new Opt(&Kinds::trk), NULL);
+	let outer_rgn = new_evar(new Opt(&Kinds::rk), NULL);
 	rgn_typ = new_evar(new Opt(&Kinds::rk),NULL);
+	let aq =  new_evar(new Opt(&Kinds::aqk),NULL);
 	let dr_type = aggr_type(UnknownAggr(StructA,drname,NULL),list(rgn_typ));
-	let exp_type = at_type(dr_type, outer_rgn, empty_tqual(0),false_type,false_type);
-	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::tmk,
+	let exp_type = at_type(dr_type, outer_rgn, aq, empty_tqual(0),false_type,false_type);
+	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::mk,
 			  true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
 	if (!Unify::unify(exp_type,key_typ) && 
-	    !coerce_assign(curr_rgnpo(te),open_exp_opt,exp_type))
+	    !coerce_assign(curr_rgnpo(te),curr_aquals_bounds(te),open_exp_opt,exp_type))
 	  Warn::err2(s0->loc,"expected ",exp_type," but found ",key_typ);
-	if (!Unify::unify(outer_rgn,unique_rgn_type) && 
-	    !Unify::unify(outer_rgn,refcnt_rgn_type))
+/* 	if (!Unify::unify(outer_rgn,unique_rgn_type) &&  */
+/* 	    !Unify::unify(outer_rgn,refcnt_rgn_type)) */
+	if (Tcutil::is_aliasable_qual(aq))
 	  Warn::err2(s0->loc,"open is allowed only on unique or reference-counted keys");
 	*t = rgn_handle_type(rgn_typ);
 	te2 = add_region(te2, rgn_typ, true,false);
@@ -493,9 +504,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       Tctyp::check_fndecl_valid_type(d->loc,te,fd);
       type_t t = fndecl2type(fd);
       fd->i.attributes = Atts::transfer_fn_type_atts(t,fd->i.attributes);
-      let curr_bl = Tcenv::curr_rgn(te);
+      let curr_bl = Tcenv::curr_rgn(te); //curr rgn pointers are always aliasable
       vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-				  at_type(t,curr_bl,empty_tqual(0), 
+				  at_type(t,curr_bl,al_qual_type,empty_tqual(0), 
 					  false_type, false_type),
 				  NULL, curr_bl, NULL, false,
 				  (fd->body!=NULL)};

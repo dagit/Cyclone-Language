@@ -406,7 +406,7 @@ doc_t tvar2doc(tvar_t tv) {
 doc_t ktvar2doc(tvar_t tv) {
   switch (Kinds::compress_kb(tv->kind)) {
   case &Unknown_kb(_):
-  case &Eq_kb(&Kind(BoxKind,Aliasable)): return tvar2doc(tv);
+  case &Eq_kb(&Kind(BoxKind,_)): return tvar2doc(tv);
   case &Less_kb(_,k): fallthru(k);
   case &Eq_kb(k):     return cat(tvar2doc(tv), text("::"), kind2doc(k));
   }
@@ -598,7 +598,6 @@ static doc_t aqual_val2doc(alias_qual_val_t aqv) {
   case Aliasable_qual: return text("ALIASABLE");
   case Unique_qual: return text("UNIQUE");break;
   case Refcnt_qual: return text("REFCNT");break;
-  case DynamicTrk_qual: return text("DYNTRK");break;
   case Restricted_qual: return text("RESTRICTED");break;
   default: throw new Failure("Absynpp::aqual_val2doc unrecognized value");
   }
@@ -842,8 +841,8 @@ doc_t ntyp2doc(type_t t) {
   case &AppType(&RgnsCon,ts):
     return cat(text("regions("),typ2doc(ts->hd),text(")"));
   case &AppType(&HeapCon,_):   return text("`H");
-  case &AppType(&UniqueCon,_): return text("`U");
-  case &AppType(&RefCntCon,_): return text("`RC");
+  case &AppType(&UniqueHeapCon,_): return text("`U");
+  case &AppType(&RefCntHeapCon,_): return text("`RC");
   case &AppType(&AccessCon,_):
   case &AppType(&JoinCon,_):   return eff2doc(t);
   case &TypeDeclType(&{.r=&Aggr_td(d),...},_):     return aggrdecl2doc(d);
@@ -1235,29 +1234,42 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Enum_e(_,ef):     fallthru(ef);
   case &AnonEnum_e(_,ef): s = qvar2doc(ef->name); break;
-  case &Malloc_e(MallocInfo{mknd,rgnopt,topt,e,_,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,rgnopt,aqopt,topt,e,_,inline_call}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
     if (mknd == Calloc) {
       // topt should not be NULL for calloc's
       exp_t st = sizeoftype_exp(*topt,0);
-      if (rgnopt == NULL)
-        s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
+      if (rgnopt == NULL) {
+	if(aqopt == NULL)
+	  s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
+	else
+	  s = cat(text("qcalloc("),exp2doc(aqopt),text(","),exp2doc(e),text(","),exp2doc(st),text(")"));
+      }
       else
-        s = cat(text("rcalloc("),exp2doc(rgnopt),text(","),
+        s = cat(text("rcalloc("),exp2doc(rgnopt),
+		(aqopt != NULL ? cat(text(","), exp2doc(aqopt), text(",")) : text(",")),
                 exp2doc(e),text(","),exp2doc(st),text(")"));
     } else {
       // see comments in absyn.h
       doc_t new_e = 
 	exp2doc((topt==NULL) ? e : times_exp(sizeoftype_exp(*topt,0),e,0));
       string_t fn_name = "malloc(";	
-      if (rgnopt == NULL)
-        s = cat(text(fn_name),new_e,text(")"));
+      if (rgnopt == NULL) {
+	if(aqopt == NULL) 
+	  s = cat(text(fn_name),new_e,text(")"));
+	else {
+	  fn_name = "qmalloc(";	
+	  s = cat(text(fn_name),exp2doc(aqopt),text(","),new_e,text(")"));
+	}
+      }
       else {
 	if (inline_call) fn_name = "rmalloc_inline(";
 	else if(mknd == Vmalloc) fn_name = "rvmalloc(";
 	else fn_name = "rmalloc(";
-	s = cat(text(fn_name),exp2doc(rgnopt),text(","),new_e,text(")"));
+	s = cat(text(fn_name),exp2doc(rgnopt), 
+		(aqopt != NULL ? cat(text(","), exp2doc(aqopt), text(",")) : text(",")),
+		new_e,text(")"));
       }
     }
     break;

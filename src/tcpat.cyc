@@ -156,17 +156,20 @@ static void set_vd(vardecl_t *`r vd, exp_opt_t e,
 }
 static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
   // FIX: plenty of unnecessary allocation here
-  let TcPatResult(p1,vs1) = res1;
-  let TcPatResult(p2,vs2) = res2;
+  let TcPatResult(p1,vs1,aq1) = res1;
+  let TcPatResult(p2,vs2,aq2) = res2;
+  _ aq = List::append(aq1, aq2);
   if(p1 == NULL && p2 == NULL)
-    return TcPatResult(NULL,append(vs1,vs2));
+    return TcPatResult(NULL,append(vs1,vs2), aq);
   if(p1==NULL)
     p1 = new $(NULL,NULL);
   if(p2==NULL)
     p2 = new $(NULL,NULL);
+  
   return TcPatResult(new $(append((*p1)[0],(*p2)[0]), 
 			   append((*p1)[1],(*p2)[1])),
-		     append(vs1,vs2));
+		     append(vs1,vs2),
+		     aq);
 }
 
 // Promote an array, using an evar for the region if necessary.
@@ -186,7 +189,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
 			       exp_opt_t access_exp) {
   resolve_pat(te,topt,p);
   type_t t;
-  tcpat_result_t res = TcPatResult(NULL,NULL);
+  tcpat_result_t res = TcPatResult(NULL,NULL,NULL);
 
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
@@ -209,7 +212,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         Warn::err2(p->loc,"array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!Kinds::kind_leq(type_kind(t),&Kinds::tmk))
+      if (!Kinds::kind_leq(type_kind(t),&Kinds::mk))
         Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -221,7 +224,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
       append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
-    Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&Kinds::tmk,true,false,vd->type);
+    Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&Kinds::mk,true,false,vd->type);
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
     t = any_type(lookup_type_vars(te),topt);
@@ -231,7 +234,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         Warn::err2(p->loc, "array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!Kinds::kind_leq(type_kind(t),&Kinds::tmk))
+      if (!Kinds::kind_leq(type_kind(t),&Kinds::mk))
         Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -244,7 +247,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     if(!allow_ref_pat || rgn_pat == NULL) {
       Warn::err2(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
-    } else if (is_noalias_pointer_or_aggr(t))
+    } else if (is_noalias_pointer_or_aggr(curr_aquals_bounds(te),t))
 	Warn::err2(p->loc, "* pattern cannot take the address of an alias-free path");
     exp_opt_t new_access_exp = NULL;
     let pi = Tcexp::fresh_pointer_type(te); 
@@ -309,7 +312,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    type_t ptr_rgn = new_evar(&Kinds::trko,lookup_opt_type_vars(te));
+    type_t ptr_rgn = new_evar(&Kinds::rko,lookup_opt_type_vars(te));
     exp_opt_t new_access_exp = NULL;
     if (access_exp) new_access_exp = deref_exp(access_exp,DL);
     res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true,
@@ -336,7 +339,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
                                    empty_tqual(0)),
                                   PtrAtts(ptr_rgn, any_bool(lookup_type_vars(te)),
                                           bounds_one(), false_type,
-                                          NULL, any_bool(lookup_type_vars(te)), al_qual_type)));
+                                          NULL, any_bool(lookup_type_vars(te)), 
+					  new_evar(&Kinds::aqko,lookup_opt_type_vars(te)))));
       break;
     default:
 DONT_PROMOTE:
@@ -437,8 +441,8 @@ DONT_PROMOTE:
 	// if unpacking a region var, must add it to the po
 	// FIX: allow adding existentials of TR kind?
 	if(k2->kind == RgnKind) {
-	  if (k2->aliasqual != Aliasable)
-	    Warn::impos2("opened existential had unique or top region kind");
+/* 	  if (k2->aliasqual != Aliasable) */
+/* 	    Warn::impos2("opened existential had unique or top region kind"); */
 	  outlives_constraints =
 	    new List(new $(empty_effect,vartype),outlives_constraints);
 	}
@@ -470,6 +474,14 @@ DONT_PROMOTE:
           rpo_inst = imp_rev(rpo_inst);
           (*res.tvars_and_bounds_opt)[1] = 
             append((*res.tvars_and_bounds_opt)[1],rpo_inst);
+          let aqb_inst = NULL;
+          for(let aqb=ad->impl->qual_bnd; aqb != NULL; aqb = aqb->tl) {
+	    let $(tv, b) = $(rsubstitute(rgn,inst,(*aqb->hd)[0]),
+			     rsubstitute(rgn,inst,(*aqb->hd)[1]));
+	    aqb_inst = new List(new $(tv,b),aqb_inst);
+	  }
+          aqb_inst = imp_rev(aqb_inst);
+	  res.aquals_bounds = aqb_inst;
       }
 
       //*tsp = all_typs;
@@ -590,7 +602,7 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
 				               pnew.ptr_atts.autoreleased,
 					       pold.ptr_atts.aqual}});
     return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
-            coerce_assign(curr_rgnpo(tenv), initializer, ptry));
+            coerce_assign(curr_rgnpo(tenv), curr_aquals_bounds(tenv),initializer, ptry));
   default: return false;
   }
 }
@@ -602,18 +614,18 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
 static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
                                  tvar_t tv, type_t new_type, 
                                  exp_t initializer) {
-  list_t<$(type_t,type_t)@> assump = new List{new $(unique_rgn_type,new VarType(tv)), NULL};
+  list_t<$(type_t,type_t)@> assump=NULL;
   switch $(compress(old_type),compress(new_type)) {
-    case $(&PointerType(PtrInfo(_, _, PtrAtts(_,_,_,_,_,_,aq_old))),
-	   &PointerType(PtrInfo(_, _, PtrAtts(_,_,_,_,_,_,*aq_new)))):
-      switch(*aq_new) {     
-      case &AppType(&AqualVarCon, &List{&Evar(...), bnd}):
-	*aq_new = al_qual_type;
-	break;
-      default:
-	//user specified some qualifier ... don't override
-	break;
-      }
+  case $(&PointerType(PtrInfo(_, _, PtrAtts(oldrgn,_,_,_,_,_,aq_old))),&PointerType(PtrInfo(_, _, PtrAtts(_,_,_,_,_,_,*aq_new)))):
+    assump= new List{new $(oldrgn,new VarType(tv)), NULL};
+    switch(*aq_new) {     
+    case &AppType(&AqualVarCon, &List{&Evar(...), bnd}):
+      *aq_new = al_qual_type;
+      break;
+    default:
+      //user specified some qualifier ... don't override
+      break;
+    }
     break;
   default: Warn::err2(loc,"alias requires pointer type"); break;
   }
@@ -651,9 +663,9 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
   switch(p->r) {
   case &Pointer_p(p2):
     switch ((type_t)p->topt) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(rt,...))): 
+    case &PointerType(PtrInfo(_,_,PtrAtts{.rgn=rt,.aqual=aq, ...})): 
       check_rgn_accessible(te,p->loc,rt);
-      check_pat_regions_rec(te,p2,is_noalias_region(rt,false),patvars);
+      check_pat_regions_rec(te,p2,is_noalias_qual(aq,false),patvars);
       return;
     default: Warn::impos2("check_pat_regions: bad pointer type");
     }
@@ -677,7 +689,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       if (vdopt != NULL && *vdopt == vd && eopt != NULL) {
 	switch (eopt->r) {
 	case &Address_e(e):
-	  if (is_noalias_pointer_or_aggr((type_t)e->topt))
+	  if (is_noalias_pointer_or_aggr(curr_aquals_bounds(te), (type_t)e->topt))
 	    Warn::err2(p->loc,"reference pattern not allowed on alias-free pointers");
 	  break;
 	default: Warn::impos2("check_pat_regions: bad reference access exp");
@@ -738,7 +750,8 @@ void check_pat_regions(tenv_t te, pat_t p,
     let &$(vdopt,eopt) = x->hd;
     if (eopt != NULL) {
       let e = (exp_t)eopt;
-      if (is_noalias_pointer_or_aggr((type_t)e->topt) && !is_noalias_path(e))
+      if (is_noalias_pointer_or_aggr(curr_aquals_bounds(te),(type_t)e->topt) && 
+	  !is_noalias_path(curr_aquals_bounds(te),e))
 	// FIX: need better location information
 	if(vdopt == NULL)
 	  Warn::err2(p->loc,"pattern dereferences an alias-free-pointer ",

@@ -63,17 +63,19 @@ struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
+/* Alias qualifier stuff */
+typedef unsigned char _AliasQualHandle_t;
+
+
 struct _RegionHandle _new_region(const char*);
-void* _region_malloc(struct _RegionHandle*, unsigned);
-void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
+void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
+void* _region_calloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
+void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
+void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
 void _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void _pop_dynregion();
-
-/* Alias qualifier stuff */
-
-typedef unsigned char _AliasQualHandle_t;
 
 /* Exceptions */
 struct _handler_cons {
@@ -284,7 +286,7 @@ static inline unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) {  
+static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_t aq, unsigned orig_s) {  
   if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -302,7 +304,7 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, unsigned orig_s) 
       return result;
     }
   } 
-  return _region_malloc(r,orig_s); 
+  return _region_malloc(r,aq,orig_s); 
 }
 
 #ifdef CYC_REGION_PROFILE
@@ -311,15 +313,19 @@ void* _profile_GC_malloc(int,const char*,const char*,int);
 void* _profile_GC_malloc_atomic(int,const char*,const char*,int);
 void* _profile_GC_calloc(unsigned,unsigned,const char*,const char*,int);
 void* _profile_GC_calloc_atomic(unsigned,unsigned,const char*,const char*,int);
-void* _profile_region_malloc(struct _RegionHandle*,unsigned,const char*,const char*,int);
-void* _profile_region_calloc(struct _RegionHandle*,unsigned,unsigned,const char *,const char*,int);
+void* _profile_region_malloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,const char*,const char*,int);
+void* _profile_region_calloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,unsigned,const char *,const char*,int);
+void * _profile_aqual_malloc(_AliasQualHandle_t aq, unsigned int s,const char *file, const char *func, int lineno);
+void * _profile_aqual_calloc(_AliasQualHandle_t aq, unsigned int t1,unsigned int t2,const char *file, const char *func, int lineno);
 struct _RegionHandle _profile_new_region(const char*,const char*,const char*,int);
 void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #ifndef RUNTIME_CYC
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
-#define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
-#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _region_malloc(rh,aq,n) _profile_region_malloc(rh,aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,aq,n,t) _profile_region_calloc(rh,aq,n,t,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_malloc(aq,n) _profile_region_malloc(aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_calloc(aq,n,t) _profile_region_calloc(aq,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -328,7 +334,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
 
-# 168 "core.h"
+# 170 "core.h"
  extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*);
@@ -345,7 +351,7 @@ struct Cyc_Set_Set*Cyc_Set_empty(int(*comp)(void*,void*)){
 return({struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,_Tmp0->cardinality=0,_Tmp0->nodes=0;_Tmp0;});}
 # 40
 struct Cyc_Set_Set*Cyc_Set_rempty(struct _RegionHandle*rgn,int(*comp)(void*,void*)){
-return({struct Cyc_Set_Set*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,_Tmp0->cardinality=0,_Tmp0->nodes=0;_Tmp0;});}
+return({struct Cyc_Set_Set*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,_Tmp0->cardinality=0,_Tmp0->nodes=0;_Tmp0;});}
 # 44
 struct Cyc_Set_Set*Cyc_Set_singleton(int(*comp)(void*,void*),void*x){
 return({struct Cyc_Set_Set*_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set));_Tmp0->cmp=comp,_Tmp0->cardinality=1,({struct Cyc_List_List*_Tmp1=({struct Cyc_List_List*_Tmp2=_cycalloc(sizeof(struct Cyc_List_List));_Tmp2->hd=x,_Tmp2->tl=0;_Tmp2;});_Tmp0->nodes=_Tmp1;});_Tmp0;});}
@@ -370,19 +376,19 @@ return Cyc_Set_member_b(s->cmp,s->nodes,elt);}
 static struct Cyc_List_List*Cyc_Set_insert_b(struct _RegionHandle*rgn,int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 # 77
 if(n==0)
-return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=0;_Tmp0;});{
+return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=0;_Tmp0;});{
 int i=cmp(elt,n->hd);
 if(i < 0)
-return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=n;_Tmp0;});{
-struct Cyc_List_List*result;result=_region_malloc(rgn,sizeof(struct Cyc_List_List)),result->hd=n->hd,result->tl=0;{
+return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=n;_Tmp0;});{
+struct Cyc_List_List*result;result=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List)),result->hd=n->hd,result->tl=0;{
 struct Cyc_List_List*prev=result;
 n=n->tl;
 while(n!=0 &&(i=cmp(n->hd,elt))< 0){
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp1->hd=n->hd,_Tmp1->tl=0;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=n->hd,_Tmp1->tl=0;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
 prev=prev->tl;
 n=n->tl;}
 # 90
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
 return result;}}}}
 # 95
 struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*s,void*elt){
@@ -392,23 +398,23 @@ struct Cyc_List_List*_Tmp1=Cyc_Set_insert_b(Cyc_Core_heap_region,s->cmp,s->nodes
 # 100
 struct Cyc_Set_Set*Cyc_Set_rinsert(struct _RegionHandle*rgn,struct Cyc_Set_Set*s,void*elt){
 if(Cyc_Set_member(s,elt))return s;
-return({struct Cyc_Set_Set*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_Set_Set));_Tmp0->cmp=s->cmp,_Tmp0->cardinality=s->cardinality + 1,({
+return({struct Cyc_Set_Set*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_Set_Set));_Tmp0->cmp=s->cmp,_Tmp0->cardinality=s->cardinality + 1,({
 struct Cyc_List_List*_Tmp1=Cyc_Set_insert_b(rgn,s->cmp,s->nodes,elt);_Tmp0->nodes=_Tmp1;});_Tmp0;});}
 # 108
 static struct Cyc_List_List*Cyc_Set_imp_insert_b(struct _RegionHandle*rgn,int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 # 111
 if(n==0)
-return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=0;_Tmp0;});{
+return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=0;_Tmp0;});{
 int i=cmp(elt,n->hd);
 if(i < 0)
-return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=n;_Tmp0;});{
+return({struct Cyc_List_List*_Tmp0=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp0->hd=elt,_Tmp0->tl=n;_Tmp0;});{
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
 while(n!=0 &&(i=cmp(n->hd,elt))< 0){
 prev=_check_null(prev)->tl;
 n=n->tl;}
 # 122
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List));_Tmp1->hd=elt,_Tmp1->tl=n;_Tmp1;});_check_null(prev)->tl=_Tmp0;});
 return res;}}}
 # 127
 void Cyc_Set_imp_insert(struct Cyc_Set_Set*s,void*elt){
@@ -650,4 +656,4 @@ return 1;}
 # 401
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){
 # 404
-return({struct Cyc_Iter_Iter _Tmp0;({struct Cyc_List_List**_Tmp1=({struct Cyc_List_List**_Tmp2=_region_malloc(rgn,sizeof(struct Cyc_List_List*));*_Tmp2=s->nodes;_Tmp2;});_Tmp0.env=_Tmp1;}),_Tmp0.next=Cyc_Set_iter_f;_Tmp0;});}
+return({struct Cyc_Iter_Iter _Tmp0;({struct Cyc_List_List**_Tmp1=({struct Cyc_List_List**_Tmp2=_region_malloc(rgn,0U,sizeof(struct Cyc_List_List*));*_Tmp2=s->nodes;_Tmp2;});_Tmp0.env=_Tmp1;}),_Tmp0.next=Cyc_Set_iter_f;_Tmp0;});}

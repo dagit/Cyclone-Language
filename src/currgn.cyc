@@ -325,9 +325,10 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     rgnsubds(env,ds);
     break;
 
-  case &Malloc_e(MallocInfo(_,rgnopt,elt_t,e1,_,_)):
+  case &Malloc_e(MallocInfo(_,rgnopt,aqopt,elt_t,e1,_,_)):
     assert(!env.toplevel);
     rgnsubexpopt(env,rgnopt);
+    rgnsubexpopt(env,aqopt);
     if (elt_t != NULL) {
       rgnsubtype(e->loc,env,*elt_t);
       *elt_t = Tcutil::substitute_nofun(env.inst,*elt_t);

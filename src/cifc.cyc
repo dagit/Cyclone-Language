@@ -26,6 +26,7 @@
 #include "tctyp.h"
 #include "tcutil.h"
 #include "attributes.h"
+#include "kinds.h"
 
 #include <string.h>
 
@@ -482,7 +483,7 @@ static bool kindbound_subsumed(kindbound_t kb1, kindbound_t kb2) {
   case &Eq_kb(k1):
     switch(kb2) {
     case &Eq_kb(k2):
-      return k1->kind == k2->kind && k1->aliasqual == k2->aliasqual;
+      return Kinds::kind_eq(k1, k2);
     default:
       return false;
     }
@@ -498,14 +499,14 @@ static bool kindbound_subsumed(kindbound_t kb1, kindbound_t kb2) {
   case &Less_kb(&Core::Opt(kbb1), k1):
     switch(kb2) {
     case &Less_kb(&Core::Opt(kbb2), k2):
-      return (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual) && kindbound_subsumed(kbb1, kbb2);
+      return Kinds::kind_eq(k1,k2) && kindbound_subsumed(kbb1, kbb2);
     default:
       return false;
     }
   case &Less_kb(NULL, k1):
     switch(kb2) {
     case &Less_kb(NULL, k2):
-      return (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
+      return Kinds::kind_eq(k1,k2);
     default:
       return false;
     }

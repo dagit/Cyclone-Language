@@ -93,7 +93,7 @@ type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
   return new Evar(k,NULL,new_type_counter++,env);
 }
 type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
-  return new_evar(&Kinds::tmko,tenv); 
+  return new_evar(&Kinds::mko,tenv); 
 }
 
 tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
@@ -147,7 +147,6 @@ type_t valueof_type(exp_t e) {
 MAKE_ALIAS_QUAL(al_qual_type,  Aliasable_qual);
 MAKE_ALIAS_QUAL(un_qual_type,  Unique_qual);
 MAKE_ALIAS_QUAL(rc_qual_type,  Refcnt_qual);
-MAKE_ALIAS_QUAL(dt_qual_type,  DynamicTrk_qual);
 MAKE_ALIAS_QUAL(rtd_qual_type, Restricted_qual);
 
 
@@ -165,8 +164,8 @@ MAKE_ALIAS_QUAL(rtd_qual_type, Restricted_qual);
 
 MAKE_NULLARY_TYPE(void_type,       VoidCon);
 MAKE_NULLARY_TYPE(heap_rgn_type,   HeapCon);
-MAKE_NULLARY_TYPE(unique_rgn_type, UniqueCon);
-MAKE_NULLARY_TYPE(refcnt_rgn_type, RefCntCon);
+MAKE_NULLARY_TYPE(unique_rgn_shorthand_type, UniqueHeapCon);
+MAKE_NULLARY_TYPE(refcnt_rgn_shorthand_type, RefCntHeapCon);
 MAKE_NULLARY_TYPE(true_type,       TrueCon);
 MAKE_NULLARY_TYPE(false_type,      FalseCon);
 MAKE_NULLARY_TYPE(fat_bound_type,  FatCon);
@@ -206,7 +205,6 @@ type_t aqual_constant(alias_qual_val_t v)  {
   case Aliasable_qual: return al_qual_type;
   case Unique_qual: return un_qual_type;
   case Refcnt_qual:return rc_qual_type; 
-  case DynamicTrk_qual: return dt_qual_type;
   case Restricted_qual: return rtd_qual_type;
   default: Warn::impos2("Impossible alias qualifier constant");
   }
@@ -364,7 +362,7 @@ type_t exn_type() {
   static type_opt_t eopt    = NULL;
   if (exn_typ == NULL) {
     eopt    = datatype_type(DatatypeInfo{.KnownDatatype = new exn_tud()},NULL);
-    exn_typ = at_type((type_t)eopt,heap_rgn_type,empty_tqual(0),false_type,false_type);
+    exn_typ = at_type((type_t)eopt,heap_rgn_type,al_qual_type,empty_tqual(0),false_type,false_type);
   }
   return (type_t)exn_typ;
 }
@@ -387,37 +385,38 @@ qvar_t datatype_scanf_arg_qvar() {
 // doing dynamic region profiling we correctly tally the stuff stored
 // in the unique region
 // FIX: must correspond with def in core.h; should have just one def
-qvar_t uniquergn_qvar() {
-  static qvar_opt_t q = NULL;
-  if(q==NULL)
-    q = new $(Abs_n(new List(new "Core",NULL), false), new "unique_region");
-  return (qvar_t)q;
-}
-exp_t uniquergn_exp() {
-  let t  = rgn_handle_type(unique_rgn_type);
-  let vd = new_vardecl(0,uniquergn_qvar(),t,NULL);
-  vd->sc = Extern;
-  return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, 
-		 .r = new Var_e(new Global_b(vd))};
-}
+
+/* qvar_t uniquergn_qvar() {  */
+/*   static qvar_opt_t q = NULL; */
+/*   if(q==NULL) */
+/*     q = new $(Abs_n(new List(new "Core",NULL), false), new "unique_region"); */
+/*   return (qvar_t)q; */
+/* } */
+/* exp_t uniquergn_exp() { */
+/*   let t  = rgn_handle_type(unique_rgn_type); */
+/*   let vd = new_vardecl(0,uniquergn_qvar(),t,NULL); */
+/*   vd->sc = Extern; */
+/*   return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val,  */
+/* 		 .r = new Var_e(new Global_b(vd))}; */
+/* } */
 
 // pointers
 type_t pointer_type(struct PtrInfo s) {
   return new PointerType(s);
 }
 
-type_t fatptr_type(type_t t, type_t r, tqual_t tq, booltype_t zt, booltype_t rel) {
+type_t fatptr_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = fat_bound_type,
 					     .zero_term = zt, .ptrloc=NULL,
-					     .autoreleased = rel, .aqual=al_qual_type}});
+					     .autoreleased = rel, .aqual=aq}});
 						
 }
-type_t starb_type(type_t t, type_t r, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
+type_t starb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = true_type, 
 					     .bounds = b, 
 					     .zero_term = zt, .ptrloc=NULL,
-					     .autoreleased = rel,.aqual=al_qual_type }});
+					     .autoreleased = rel,.aqual=aq }});
 }
 type_t atb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, booltype_t zt, booltype_t rel) {
   return pointer_type(PtrInfo{t, tq, PtrAtts{.rgn = r, .nullable = false_type, 
@@ -425,20 +424,20 @@ type_t atb_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, ptrbound_t b, bo
 					     .zero_term = zt, .ptrloc=NULL,
 					     .autoreleased = rel,.aqual=aq }});
 }
-type_t star_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) { 
-  return starb_type(t,r,tq,bounds_one(),zeroterm,rel);
+type_t star_type(type_t t, type_t r, type_t aq, tqual_t tq, booltype_t zeroterm, booltype_t rel) { 
+  return starb_type(t,r,aq,tq,bounds_one(),zeroterm,rel);
 }
 type_t cstar_type(type_t t, tqual_t tq) { 
-  return star_type(t, heap_rgn_type, tq, false_type, false_type);
+  return star_type(t, heap_rgn_type,al_qual_type, tq, false_type, false_type);
 }
-type_t at_type(type_t t, type_t r, tqual_t tq, booltype_t zeroterm, booltype_t rel) {
-  return atb_type(t,r,al_qual_type,tq,bounds_one(),zeroterm,rel);
+type_t at_type(type_t t, type_t r, aqualtype_t aq, tqual_t tq, booltype_t zeroterm, booltype_t rel) {
+  return atb_type(t,r,aq,tq,bounds_one(),zeroterm,rel);
 }
-type_t string_type(type_t rgn) {
-  return starb_type(char_type,rgn,empty_tqual(0),fat_bound_type,true_type,false_type);
+type_t string_type(type_t rgn, aqualtype_t aq) {
+  return starb_type(char_type,rgn,aq,empty_tqual(0),fat_bound_type,true_type,false_type);
 }
-type_t const_string_type(type_t rgn) {
-  return starb_type(char_type,rgn,const_tqual(0),fat_bound_type,true_type,false_type);
+type_t const_string_type(type_t rgn,aqualtype_t aq) {
+  return starb_type(char_type,rgn,aq,const_tqual(0),fat_bound_type,true_type,false_type);
 }
 
 type_t array_type(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
@@ -489,7 +488,7 @@ type_t compress(type_t t) {
     Evexp::eval_const_uint_exp(e);
     // get rid of any unnecessary casts
   CAST_LOOP:
-    switch (e->r) {
+    switch (e->r) { 
     case &Valueof_e(t2): return compress(t2);
     case &Cast_e(t,e2,_,_):
       switch (compress(t)) {
@@ -904,11 +903,12 @@ type_t function_type(list_t<tvar_t,`H> tvs, type_opt_t eff_type,
 }
 // MWH: use RgnKind here rather than TopRgnKind for fresh evars;
 //   function pointers can't be unique at the moment
+// NKS: same requirement translates to al_qual_type 
 type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (compress(t)) {
   case &FnType(_): 
     let rtyp = fresh_evar ? new_evar(new Opt(&Kinds::rk), NULL) : heap_rgn_type;
-    return at_type(t,rtyp,empty_tqual(0),false_type,false_type);
+    return at_type(t,rtyp,al_qual_type,empty_tqual(0),false_type,false_type);
   default: return t;
   }
 }
@@ -1146,7 +1146,7 @@ void visit_exp(bool (@f1)(`a,exp_t), bool (@f2)(`a,stmt_t), `a env, exp_t e) {
       visit_exp(f1,f2,env,lexp->hd);
     break;
 
-  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2,NULL);
+  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,.aqual=e3o,...}): fallthru(e1o,e2,e3o);
   case &New_e(e1, e2, e3): 
     // first expression is region -- null is heap
     // e3 is qualifier literal -- null is ALIASABLE

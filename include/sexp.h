@@ -60,7 +60,7 @@ struct Printer<`p> {
 };
 
 /* A class provides a set of built-in methods for various objects. */
-struct Class<`a::A> {
+struct Class<`a::A> { : ALIASABLE >= aquals(`a)
   /* cast_value is used to support down-casts */
   Obj_t<`a> *cast_value;
   /* tag is a letter unique to the class used in printing and parsing. */
@@ -85,7 +85,7 @@ struct Class<`a::A> {
  * and an `a value.  Since `a is of kind A, it can be instantiated
  * with any size type, but operations that are polymorphic must 
  * manipulate pointers to Obj's. */
-struct Obj<`a::A> { 
+struct Obj<`a::A> { : ALIASABLE >= aquals(`a)
   Class_t<`a> @vtable;
   `a            v;
 };
@@ -93,7 +93,7 @@ struct Obj<`a::A> {
 /* An Object abstracts the type of an Obj.  The regions constraint
  * effectively forces everything to be heap-allocated. */
 struct Object {
-  <`a> : regions(`a) > `H
+  <`a> : regions(`a) > `H, ALIASABLE >= aquals(`a)
   Obj_t<`a> @self;
 };
 

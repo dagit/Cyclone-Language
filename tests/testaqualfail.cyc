@@ -36,7 +36,7 @@ int *@aqual(`q) id(int *@aqual(`q) a : RESTRICTED >= `q) {
 //case 3 Evar X const
 //3(a) default assignment
 void test_3a() {
-  int *a = new<Core::unique_qual> 1;
+  int *a = unew 1;
   int *b = new 1;
   a = b; //fail -- UNIQUE != ALIASABLE
   
@@ -60,7 +60,7 @@ void explicit_arg(int *@aqual(ALIASABLE) `H a) {}
 void use_xarg(aqual_t<UNIQUE> hdl) {
   int *@aqual(ALIASABLE) a = new 1;
   explicit_arg(a);
-  int *b = new<hdl> 1;
+  int *b = qnew (hdl) 1;
   explicit_arg2(b); //fails ... explicit_arg2 used a qualifier tvar ...bounds violated
   explicit_arg(b); //b should be consumed here
 }
@@ -77,7 +77,7 @@ struct s3c<`q::Q> { //default RESTRICTED >= `q
 struct s3c<ALIASABLE> test_s3c(aqual_t<UNIQUE> hdl) {
   struct s3c<ALIASABLE> s1 = s3c{new 1};
   let s2 = s3c{new 1};
-  struct s3c<UNIQUE> s3 = s3c{new<hdl> 1};
+  struct s3c<UNIQUE> s3 = s3c{qnew(hdl) 1};
   if(1)
     return s1;
   else
@@ -129,8 +129,8 @@ struct s5b<`q>* use_s5b(int *@aqual(`q)`H a : RESTRICTED >= `q) {
 //6(a) -- only reasonable case is when using NULL ... (control_flow barfs on no_consume here)
 int *@aqual(`q) id_6c(int *@aqual(`q)`H a : RESTRICTED >= `q) {return a;}
 int*@aqual(ALIASABLE) use_6c(void) {
-  int *a = id_6c(NULL); //a should be constrained to int *@aqual(RESTRICTED)
-  return a; //fail  subtyping violation
+  int *a = id_6c(NULL); //a used to be constrained to int *@aqual(RESTRICTED) ... removed aggressive constraining
+  return a; //success
 }
 
 
