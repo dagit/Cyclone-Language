@@ -1,0 +1,427 @@
+//#define ABSYN_CYC
+
+#include <stdio.h>
+#include <typerep.h>
+#include <marshal.h>
+#include <list.h>
+#include "../src/absyn.h"
+
+using List;
+using Typerep;
+using Marshal;
+using Position;
+//#define NEW
+#define TEST
+#define SHARING
+#define CYCLE
+#define READ
+#define PRINT
+//#define WRITE
+typedef union Bar {
+  int x;
+  double y;
+} bar_t;
+
+/* Example types */
+typedef tunion Foo {
+  Foo1;
+  Foo2(int,int);
+  Foo3(float);
+  Foo4(int,tunion Foo);
+  Foo5(tunion Foo, tunion Foo);
+} foo_t; 
+
+
+typedef struct Intlist {
+  unsigned int val;
+  struct Intlist * next;
+} *intlist_t;
+
+
+extern struct Inttree;
+typedef struct Inttree* inttree_t;
+
+struct Inttree {
+  unsigned int val;
+  inttree_t left;
+  inttree_t right;
+};
+
+enum Enum { A, B, C};
+typedef enum Enum enum_t;
+
+
+struct Layout {
+  char a;
+  char b;
+  double c;
+  char d;
+  int e;
+};
+
+typedef $(char,char,double,char,int) layout_t;
+#ifdef TEST 
+
+// base types
+tunion Typestruct int_rep = gen(int);
+tunion Typestruct float_rep = gen(float);
+tunion Typestruct double_rep = gen(double);
+
+// ptrs/arrays
+tunion Typestruct arr_rep = gen(int[10]);
+tunion Typestruct ptr_rep = gen(int*);
+tunion Typestruct fptr_rep = gen(int?);
+tunion Typestruct arr_rep2 = gen(int[7][6][5]);
+
+// tuples
+tunion Typestruct tuple_rep = gen($(double,$(int,int)));
+// typedefs
+typedef $(int,float)@ pair_t;
+// tunions
+tunion Typestruct pair_t_rep = gen(pair_t);
+struct Pair {
+  float a;
+  int b;
+};
+tunion Typestruct pair_rep = gen(struct Pair);
+typedef struct {
+  int a;
+  int b;
+  int c;
+} triple_t;
+
+
+tunion Typestruct triple_rep = gen(triple_t);
+
+// recursive structs
+tunion Typestruct intlist_rep = __gen(intlist_t );
+tunion Typestruct inttree_rep = __gen(inttree_t );
+
+// enums
+tunion Typestruct enum_rep = __gen(enum_t);
+
+// tunionfields
+tunion Typestruct tunionfield_rep = __gen(tunion Foo.Foo2);
+
+// recursive tunions
+tunion Typestruct foo_rep = __gen(foo_t);
+// unions
+tunion Typestruct bar_rep = __gen(bar_t);
+
+// test recursive structs with parameters
+tunion Typestruct list_rep = __gen(list_t<int>);
+
+
+
+
+// test forward declarations for structs
+extern  struct Zot3;
+typedef struct Zot3 zot3_t;
+struct Zot3 {
+  int a;
+  zot3_t * b;
+};
+
+
+tunion Typestruct zot3_rep = __gen(zot3_t);
+
+// test forward declarations for unions
+
+extern  union Zot4;
+typedef union Zot4 zot4_t;
+union Zot4 {
+  int a;
+  zot3_t * b;
+};
+tunion Typestruct zot4_rep = __gen(zot4_t);
+
+// test fwd decls for enums
+extern enum Zot;
+typedef enum Zot* zot_t;
+enum Zot {FF,GG};
+tunion Typestruct zot_rep = __gen(zot_t);
+
+// test forward declarations for tunions
+extern  tunion Zot2;
+typedef tunion Zot2 zot2_t;
+tunion Zot2 {
+  AA(int);
+  BB(zot2_t);
+  };
+tunion Typestruct zot2_rep = __gen(zot2_t);
+
+struct Two<`a> {
+  `a x;
+  `a y;
+} ;
+
+tunion Typestruct two_rep = __gen(struct Two<int>);
+
+// test tunions with parameters
+
+tunion maybe<`a> {
+  None;
+  Some(`a);
+};
+
+tunion Typestruct sum_rep = __gen(tunion maybe<int>);
+
+// test unions with parameters
+// not allowed in any meaningful sense
+union cast<`r::R> {
+  int cast_val;
+  float val;
+};
+
+tunion Typestruct cast_rep = __gen(union cast<`H>);
+
+
+
+
+
+
+// cross-module structs, tunions, unions
+namespace Dog {
+extern struct Mutt;
+extern tunion Terrier;
+extern union Beagle;
+
+}
+  extern tunion Typestruct.Tuple struct_Dog_Mutt_rep;
+  extern tunion Typestruct.TUnion tunion_Dog_Terrier_rep;
+  extern tunion Typestruct.Union union_Dog_Beagle_rep;
+
+using Dog;
+struct Woof {
+  struct Mutt *a;
+  tunion Terrier *b;
+  union Beagle *c;
+  
+};
+
+tunion Typestruct woof_rep = __gen(struct Woof@);
+
+// test structs with bitfields
+struct bitfield {
+  int z : 1;
+  int x : 2;
+  int c : 3;
+};
+
+tunion Typestruct bitfield_rep = __gen(struct bitfield);
+
+struct bfstruct {
+  int x;
+  Absyn::tqual_t tq;
+  int y;
+};
+
+tunion Typestruct bfstruct_rep = __gen(struct bfstruct);
+
+xtunion XFoo {
+  XFoo1; 
+  XFoo2(int,char);
+};
+
+typestruct_t xtunion_rep = __gen(xtunion XFoo);
+
+
+#endif
+
+#ifdef NEW
+
+
+
+//tunion Typestruct decl_rep = __gen(Absyn::decl_t);
+
+
+#endif
+
+
+extern "C" `b unsafe_cast<`b,`a>(`a x);
+
+void do_print(tunion  Typestruct rep, `a::A@ val) {
+  print_type(rep,val);
+  printf("\n");
+}
+
+void do_write(tunion Typestruct rep, `a::A@ val) {
+  write_type(rep,stdout,val);
+
+  
+}
+
+void do_read(tunion Typestruct rep, `a::A@ val) {
+  printf("------\n");
+  `a@ val2 = read_type(rep,stdin);
+  print_type(rep,val2);
+  printf("\n\n");
+}
+void do_all(tunion Typestruct rep, `a::A@ val) {
+#ifdef PRINT
+  do_print(rep,val);
+#endif
+#ifdef WRITE
+  do_write(rep,val);
+#endif
+#ifdef READ
+  do_read(rep,val);
+#endif
+}
+
+
+
+void main() {
+
+
+#ifdef TEST
+  int i = 0xffffffff;
+  do_all(int_rep,&i);
+
+  float j = 1.2345678;
+  do_all(float_rep,&j);
+
+  double k = 1.23456789101112;
+  do_all(double_rep,&k);
+
+  int * ipn = NULL;
+  do_all(ptr_rep,&ipn);
+
+  int* ip = &i;
+  do_all(ptr_rep,&ip);
+
+
+  int? fpn = NULL;
+  do_all(fptr_rep,&fpn);
+  int? fp = new {1,2,3,4,5,6,7,8,9,10};
+  do_all(fptr_rep,&fp);
+
+  //print_typestruct(fptr_rep);
+
+  // FIX: For some reason it's impossible to construct a test for the array case.
+  //  int q[10] = {1,2,3,4,5,6,7,8,9,10};
+  //  let qp = & q;
+  //  do_all(arr_rep,&q);
+
+  //  print_typestruct(arr_rep);
+  // FIX/DANGER: Because of unsafe casting, float constants don't get promoted
+  // to doubles automatically, so testing this is tricky.  There's
+  // no real bug, you just have to remember to make the doubleness explicit.
+  let t = $((double)1.0,$(20,300));
+  do_all(tuple_rep,&t);
+
+
+  // Typedef test
+  let td = new $(1,55.5);
+  do_all(pair_t_rep,&td);
+
+
+  // Struct test: nonrecursive
+  let ps = Pair{.a = 310.1, .b = 7};
+  do_all(pair_rep,&ps);
+
+
+  // Anon struct test: this should work if above does
+  // But: scares the heck out of C compiler!  Lots of warnings
+  triple_t ts;
+  ts.a = 1;
+  ts.b = 2;
+  ts.c = 3;
+  do_all(triple_rep,&ts);
+
+
+  intlist_t g = NULL;
+  do_all(intlist_rep,&g);
+
+  g = new Intlist{.val=(unsigned int)6,.next=NULL};
+
+  do_all(intlist_rep,&g);
+
+
+  g = new Intlist{.val=(unsigned int)5,.next=new Intlist{.val=(unsigned int)6,.next=new Intlist{.val = (unsigned int)7, .next=NULL}}};
+
+
+  do_all(intlist_rep,&g);
+
+
+
+  inttree_t h = NULL;
+  do_all(inttree_rep,&h);
+
+  
+  inttree_t h = new Inttree{.val=5,.left=NULL,.right=NULL};
+  do_all(inttree_rep,&h);
+
+  inttree_t h = new Inttree{.val=5,.left=new Inttree{.val=4,.left=NULL,.right=NULL},.right=new Inttree{.val=6,.left=NULL,.right=NULL}};
+  do_all(inttree_rep,&h);
+
+
+  enum_t en = A;
+  do_all(enum_rep,&en);
+
+
+  tunion Foo.Foo2 blah = Foo2(12,34);
+  do_all(tunionfield_rep, &blah);
+
+
+  tunion `H Foo f;
+
+  f = Foo1;
+  do_all(foo_rep,&f);
+
+
+  f = new Foo2(1,2);
+  do_all(foo_rep,&f);
+
+
+  f = new Foo3(1.245);
+  do_all(foo_rep,&f);
+
+
+  f = new Foo4(1,f);
+  do_all(foo_rep,&f);
+
+  
+  union Bar u;
+  u.y = 1.23456;
+
+  do_all(bar_rep,&u);
+
+  let l = List::list(1,2,3,4);
+  do_all(list_rep,&l);
+
+  
+  struct bfstruct bfs = bfstruct{.x=1,.tq=Absyn::Tqual{.q_const=1,.q_volatile=1,.q_restrict=1},.y=444};
+
+  do_all(bfstruct_rep,&bfs);
+
+  xtunion XFoo x = XFoo1;
+  do_all(xtunion_rep,&x);
+  x = new XFoo2(1,'a');
+  do_all(xtunion_rep,&x);
+
+
+
+#endif
+
+#ifdef NEW
+#endif
+  
+#ifdef CYCLE
+  //demonstration that cycles break things
+  intlist_t cycle = new Intlist{.val = (unsigned int) 6, .next = NULL};
+  cycle->next = cycle;
+  do_all(intlist_rep,&cycle);
+
+#endif  
+
+#ifdef SHARING
+  foo_t f1 = new Foo5(Foo1,Foo1);
+  foo_t f2 = new Foo5(f1,f1);
+  foo_t f3 = new Foo5(f2,f2);
+  foo_t f4 = new Foo5(f3,f3);
+  do_all(foo_rep,&f4);
+
+#endif
+}
+

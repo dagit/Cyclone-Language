@@ -38,7 +38,10 @@ namespace Marshal;
 
 // utilities for addressing
 typedef Set::set_t<unsigned int> addr_set_t;
+
+// NULL always maps to 0
 typedef $(Dict::dict_t<unsigned int,int>,int) addr_index_t;
+// 0 always maps to NULL
 typedef $(unsigned int?, int) addr_table_t;
 
 static int uint_cmp(unsigned int a, unsigned int b) {
@@ -48,7 +51,7 @@ static int uint_cmp(unsigned int a, unsigned int b) {
 }
 
 addr_set_t empty_addr_set () {
-  return Set::empty(uint_cmp);
+  return Set::insert(Set::empty(uint_cmp),0);
 }
 
 // returns whether elt is a member, inserts if it's not
@@ -56,40 +59,47 @@ $(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
   return new $(Set::member(set,val), Set::insert(set,val));
 }
 
-
-addr_index_t empty_addr_index() {
-  return $(Dict::empty(uint_cmp),0);
+inline bool index_member(addr_index_t idx, unsigned int m) {
+  let $(_,n) = idx;
+  return (m < n);
 }
 
-$(int, addr_index_t)@ lookup_insert(addr_index_t index, unsigned int val) {
+addr_index_t empty_addr_index() {
+  return $(Dict::insert(Dict::empty(uint_cmp),0,0),1);
+}
+
+
+
+
+int index_lookup(addr_index_t index, unsigned int val) {
   let $(dict,n) = index;
   let indopt = Dict::lookup_opt(dict,val);
   if(indopt != NULL) {
-    return new $(indopt->v, index);
+    return indopt->v;
   }
-  else {
-    return new $(-1, $(Dict::insert(dict,val,n),n+1));
-  }
+  else return n;
+}
+
+addr_index_t index_insert(addr_index_t index, unsigned int val) {
+  let $(dict,n) = index;
+  return $(Dict::insert(dict,val,n),n+1);
 }
 
 addr_table_t empty_addr_table() {
-  return $(NULL,0);
+  return $(new {for i < 1: 0},1);
+}
+inline bool table_member(addr_table_t table, unsigned int m) {
+  let $(_,n) = table;
+  return (m < n);
 }
 
 addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
   let $(vec,n) = tbl;
-  if(vec == NULL) {
-    vec = new {for j < 1: i};
-    return $(vec,1);
-  } else if(vec.size == n) {
+  if(vec.size == n) {
     vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
-    vec[n] = i;
-    return $(vec,n+1);
   }
-  else { 
-    vec[n] = i;
-    return $(vec,n+1);
-  }
+  vec[n] = i;
+  return $(vec,n+1);
 }
 
 unsigned int table_lookup(addr_table_t tbl, int i) {
@@ -269,6 +279,8 @@ print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val)
   return env;
 }
 
+#include "errno.h"
+
 void print_type(typestruct_t ts, `a::A@ val) {
   try{
   print_type_base(ts,empty_addr_set(),val);
@@ -280,6 +292,68 @@ void print_type(typestruct_t ts, `a::A@ val) {
 }
 
 // FIX: getw returns -1==EOF both when EOF is reached and when the next wird is a -1.  Write put/get{8,16,32} functions using fread, fwrite.  Redo using those.
+
+#define CYCPUT(X) void cycput##X(X x, FILE@ fp) { \
+  if(fwrite( (char?)(X?)&x, sizeof(X), 1, fp) < 1) { \
+    throw new Core::Failure("Write failure"); \
+  } \
+} 
+
+CYCPUT(char)
+CYCPUT(short)
+CYCPUT(int)
+CYCPUT(float)
+CYCPUT(double)
+
+
+void cycputvarint(unsigned int i, FILE@ fp) {
+  int width = 0;
+  unsigned int mask = 0xffffff00;
+  while(mask) {
+    if(i & mask) width++;
+    mask <<= 8;
+  }
+  fputc((width << 6) | (i & 0x3f), fp);
+  i >>= 6;
+  for(int j = 0; j < width; j++) {
+    fputc(i & 0xff,fp);
+    i >>= 8;
+  }
+}
+
+#define CYCGET(X) X cycget##X(FILE@ fp) { \
+  region r { \
+    char? x = rnew(r) {for i < sizeof(X):0}; \
+    if(fread(x,sizeof(X),1,fp) < 1) { \
+      throw new Core::Failure("Read failure"); \
+    } \
+    X@ xx = unsafe_cast((_*) x); \
+  return *xx; \
+  } \
+}
+
+
+
+CYCGET(char)
+CYCGET(short)
+CYCGET(int)
+CYCGET(float)
+CYCGET(double)
+
+unsigned int cycgetvarint(FILE@ fp) {
+  int i = 0;
+  int j = cycgetchar(fp);
+  int width = (j & 0xc0) >> 6;
+  int pos = 6;
+  i += j & 0x3f;
+  for(int k = 0; k < width; k++) {
+    j = cycgetchar(fp);
+    i |= (j << pos);
+    pos += 8;
+  }
+  return i;
+}
+
 
 /* Writes a type out as binary out to a FILE* */
 /*-------------------------------------------------------------------------*/
@@ -297,15 +371,18 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     switch (sz) {
     case 8:
       char @x = unsafe_cast(val);
-      fputc(*x,fp);
+      //fputc(*x,fp);
+      cycputchar(*x,fp);
       break;
     case 16:
       short @x = unsafe_cast(val);
-      putw(*x,fp);
+      //putw(*x,fp);
+      cycputshort(*x,fp);
       break;
     case 32:
       int @x = unsafe_cast(val);
-      putw(*x,fp);
+      //putw(*x,fp);
+      cycputint(*x,fp);
       break;
     default:
       fprintf(stderr,"write_type_base: illegal int size %d bits\n", sz);
@@ -315,23 +392,24 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
   
   case Float:
     float@ x = unsafe_cast(val);
-    fwrite( (char?)(float?)x, sizeof(float), 1, fp);
+    //fwrite( (char?)(float?)x, sizeof(float), 1, fp);
+    cycputfloat(*x,fp);
     break;
   
   case Double:
     double@ x = unsafe_cast(val);
-    fwrite( (char?)(double?)x, sizeof(double), 1, fp);
+    cycputdouble(*x,fp);
+    //fwrite( (char?)(double?)x, sizeof(double), 1, fp);
     break;
 
   case &ThinPtr(sz,typ):
     // val is a pointer to a pointer to whatever typ represents
     int *x = unsafe_cast(val); 
     int y = *x;
-    let &$(mem,env2) = lookup_insert(env,y);
-    env = env2;
-    putw(mem,fp);
-    putw( (y != 0) ? 1 : 0, fp);
-    if(mem == -1 && y != 0) {
+    let mem = index_lookup(env,y); // null always shared
+    cycputvarint(mem,fp);
+    if(!index_member(env,mem)) {
+      env = index_insert(env,y);
       int typ_szb = size_type(typ);
       for (int i = 0; i<sz; i++) {
 	env = write_type_base(typ,env, fp, (`a@)unsafe_cast(y));
@@ -346,13 +424,12 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
     unsigned int pos = (curr-base)/typ_szb;
     unsigned int sz = (last_plus_one - base)/typ_szb;
-    let &$(mem,env2) = lookup_insert(env,base);
-    env = env2;
-    putw(mem,fp);
-    putw( (base != 0) ? 1 : 0, fp);
-    putw(pos,fp);
-    putw(sz,fp);
-    if(mem == -1 && base != 0) { // not yet shared
+    let mem = index_lookup(env,base); // null always shared
+    cycputvarint(mem,fp);
+    cycputvarint(pos,fp);
+    cycputvarint(sz,fp);
+    if(!index_member(env,mem)) {
+      env=index_insert(env,base);
       for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
 	env = write_type_base(typ, env, fp, (`a@)unsafe_cast(i));
       }
@@ -372,16 +449,16 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     /* get the tag */
     unsigned int@ tagp = unsafe_cast(val);
     if (*tagp < 1024) {
-      putw(*tagp-1025,fp); // since mem ranges from -1 to FFFFFFFF
+      cycputvarint(*tagp,fp); //????? // since mem ranges from -1 to FFFFFFFF
     }
     else {
-      let &$(mem,env2) = lookup_insert(env,*tagp);
-      env = env2;
-      putw(mem,fp);
-      if(mem == -1) {
+      let mem = index_lookup(env,*tagp);
+      cycputvarint(mem+1024,fp);//?????
+      if(!index_member(env,mem)) {
+	env = index_insert(env,*tagp);
 	unsigned int @x = unsafe_cast(*tagp);
 	unsigned int tag = *x;
-	putw(tag,fp);
+	cycputvarint(tag,fp);
 	/* figure out which variant it is */
 	typestruct_t typ = get_unionbranch(tag,l);
 	env = write_type_base(typ, env, fp, x);
@@ -393,27 +470,27 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
   case &XTUnion(l):
     // val is a pointer to a xtunion, which is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
     unsigned int@ xtunionp = unsafe_cast(val);
-    let &$(mem,env2) = lookup_insert(env,*xtunionp);
-    env = env2;
-    putw(mem,fp);
-    if(mem == -1) {
+    let mem = index_lookup(env,*xtunionp);
+    cycputvarint(mem,fp);
+    if(!index_member(env,mem)) {
+      env = index_insert(env,*xtunionp);
       // get the pointer to the name string "\0\0\0\0Name"
       unsigned int* xtstructp = unsafe_cast(*xtunionp);
       if(*xtstructp != 0) {
-	fputc(1,fp);
+	cycputchar(1,fp);
 	Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
 	fprintf(fp,"%s",xtname);
-	fputc(0,fp);
+	cycputchar(0,fp);
 	typestruct_t typ = get_xtunionbranch(xtname,l);
 	env = write_type_base(typ, env, fp, (_@)xtstructp);
       }
       else {
-	fputc(0,fp);
+	cycputchar(0,fp);
 	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
 	fprintf(fp,"%s",xtname);
-	fputc(0,fp);
+	cycputchar(0,fp);
       }
     }
     break;
@@ -448,7 +525,8 @@ void write_type(typestruct_t ts, FILE@ fp, `a::A@ val) {
 void fscanntstring(FILE@ fp, mstring_t s) {
   int c;
   int i = 0;
-  while((c = fgetc(fp)) && (c != EOF)) {
+  while(c = fgetc(fp)) {
+    if(c == EOF) throw new Core::Failure("Read error");
     s[i] = (char)c;
     i++;
   }
@@ -461,56 +539,53 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
     switch(sz) {
     case 8:
       char@ x = unsafe_cast(result);
-      *x = (char)fgetc(fp); // beware EOF
+      *x = cycgetchar(fp);//(char)fgetc(fp); // beware EOF
       break;
     case 16:
       short@ x = unsafe_cast(result);
-      *x = (short)getw(fp);
+      *x = cycgetshort(fp);//(short)getw(fp);
       break;
     case 32:
       int@ x = unsafe_cast(result);
-      *x = getw(fp);
+      *x = cycgetint(fp);//getw(fp);
       break;
     default:
       throw new Core::Failure("read_type_base: illegal int size bits");
     }
     break;
   case Float:
-    char? x = new {for i < sizeof(float):0};
+    /*char? x = new {for i < sizeof(float):0};
     fread(x,sizeof(float),1,fp);
-    float@ xx = unsafe_cast((_*) x);
+    float@ xx = unsafe_cast((_*) x);*/
     float@ y = unsafe_cast(result);
-    *y = *xx;
+    *y = cycgetfloat(fp);
     break;
     
     
   case Double:
-    char? x = new {for i < sizeof(double):0};
+    /*char? x = new {for i < sizeof(double):0};
     fread(x,sizeof(double),1,fp);
-    double@ xx = unsafe_cast((_*) x);
+    double@ xx = unsafe_cast((_*) x);*/
     double@ y = unsafe_cast(result);
-    *y = *xx;
+    *y = cycgetdouble(fp);
     break;
 
   case &ThinPtr(sz,typ):
-    int mem = getw(fp);
-    int nonnull = getw(fp);
-    if(mem == -1) { // not shared; read in value
+    int mem = cycgetvarint(fp); // null always shared
+    if(!table_member(env,mem)) { // not shared; read in value
       int typ_szb = size_type(typ);
       // allocate block
-      char? buf = nonnull ? new {for i < sz*typ_szb: 0} : NULL;  
+      char? buf = new {for i < sz*typ_szb: 0};  
       // add to table
-      unsigned int bufptr = nonnull ?  (unsigned int)(_*)buf : 0;
+      unsigned int bufptr = (unsigned int)(_*)buf;
       unsigned int@ x = unsafe_cast(result);
       *x=bufptr;
       env = table_insert(env,bufptr);
       // fill it in
-      if(nonnull) {
-	int y = bufptr;
-	for(int i = 0; i < sz; i++) {
-	  env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
-	  y += typ_szb;
-	}
+      int y = bufptr;
+      for(int i = 0; i < sz; i++) {
+	env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
+	y += typ_szb;
       }
     } else { // return pointer to shared thing
       unsigned int@ x = unsafe_cast(result);
@@ -519,28 +594,25 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
     break;
 
   case &FatPtr(typ):
-    int mem = getw(fp);
-    int nonnull = getw(fp);
-    int pos = getw(fp);
-    int sz = getw(fp);
+    int mem = cycgetvarint(fp);
+    int pos = cycgetvarint(fp);
+    int sz = cycgetvarint(fp);
     int typ_szb = size_type(typ);
-    if(mem == -1) { // not shared; read in value
+    if(!table_member(env,mem)) { // not shared; read in value
       // allocate block
-      char? buf = nonnull ? new {for i < sz*typ_szb: 0} : NULL;  
+      char? buf = new {for i < sz*typ_szb: 0};  
       // add to table
-      unsigned int bufptr = nonnull ? (unsigned int)(_*)buf : 0;
+      unsigned int bufptr = (unsigned int)(_*)buf;
       $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
       (*x)[0] = bufptr;
       (*x)[1] = bufptr+pos*typ_szb;
       (*x)[2] = bufptr + sz*typ_szb;
       env = table_insert(env,bufptr);
       // fill it in
-      if(nonnull) {
-	int y = bufptr;
-	for(int i = 0; i < sz; i++) {
-	  env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
-	  y += typ_szb;
-	}
+      int y = bufptr;
+      for(int i = 0; i < sz; i++) {
+	env = read_type_base(typ,env,fp,(`a@)unsafe_cast(y));
+	y += typ_szb;
       }
     } else { // return pointer to shared thing
       $(unsigned int, unsigned int, unsigned int)@ x = unsafe_cast(result);
@@ -556,19 +628,19 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = read_type_base(typ,env,fp,(`a@)unsafe_cast(x_ofs));
-    }
+   } 
     break;
 
   case &TUnion(l): 
-    int tagmem = getw(fp);
-    if(tagmem < -1) {
-      int tag = tagmem+1025;
+    int tagmem = cycgetvarint(fp); //?????
+    if(tagmem < 1024) {
+      int tag = tagmem;
       unsigned int@ x = unsafe_cast(result);
       *x=tag;
     } else {
-      int mem = tagmem;
-      if(mem == -1) {
-	int tag = getw(fp);
+      int mem = tagmem-1024;
+      if(!table_member(env,mem)) {
+	int tag = cycgetvarint(fp);
 	// figure out which variant it is
 	typestruct_t typ = get_unionbranch(tag,l);
 	// allocate memory for new tuple
@@ -598,9 +670,9 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
     // then we have a match, otherwise we have to fail with "don't know 
     // what to do here"
   case &XTUnion(l):
-    int mem = getw(fp);
-    if(mem == -1) {
-      char nonnull = (char)fgetc(fp);// need to be careful about EOF!
+    int mem = cycgetvarint(fp);
+    if(!table_member(env,mem)) {
+      char nonnull = (char)cycgetchar(fp);// need to be careful about EOF!
       mstring_t s = new {for i < MAXXTUNIONSIZE : 0};
       mstring_t xtname = s+4;
       fscanntstring(fp,xtname);
@@ -649,7 +721,7 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
   try{
     char? buf = new {for i < size_type(ts):0}; // allocate buf for type
     `a::A@`H result = unsafe_cast( (_*) buf); // result should point to the beginning of buf/s storage, not to the tagged array triple
-    read_type_base(ts,$(NULL,0),fp,result);
+    read_type_base(ts,empty_addr_table(),fp,result);
     return result;
   } catch {
   case &Core::Failure(s):

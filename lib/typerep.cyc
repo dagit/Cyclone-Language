@@ -32,7 +32,16 @@ using Dict;
 
 namespace Typerep;
 
-
+// assuming typ is a tuple, chop off the first item and return a new tuple.
+typestruct_t<`r> tuple_tl(typestruct_t<`r> typ) {
+  switch(typ) {
+  case &Tuple(sz,l):
+    int sz1 = size_type((*l[0])[1]);
+    let m = new {for i < l.size-1: new $((*l[i+1])[0] - sz1, (*l[i+1])[1])};
+    return new Tuple(sz-sz1,m);
+  default: return typ;
+  }
+}
 
 /*-------------------------------------------------------------------------*/
 /* given a tag and a list of typereps, each assumed to be a TUnionField,
@@ -48,7 +57,7 @@ get_unionbranch(unsigned int tag,
     let $(btag,typ) = *(l[i]);
     //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
-      return typ;
+      return tuple_tl(typ);
   }
 //    fprintf(stderr,"didn't find it\n");
   throw new Core::Failure("Could not find tag in TUnion");
@@ -68,7 +77,7 @@ get_xtunionbranch(string_t<`H> tag,
     let $(btag,typ) = *(l[i]);
     //fprintf(stderr,"  checking tag %s (%x)\n",btag,(int)btag);
     if (strcmp(btag,tag) == 0)
-      return typ;
+      return tuple_tl(typ);
   }
   //fprintf(stderr,"didn't find it\n");
   throw new Core::Failure("Could not find tag in XTUnion");

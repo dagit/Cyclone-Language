@@ -58,6 +58,12 @@ unsafe_cast.o: unsafe_cast.c
 typerep_test$(EXE): typerep_test.o 
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
+genrep_write$(EXE):  genrep_write.o muttrep.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
+genrep_read$(EXE):  genrep_read.o muttrep.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
 genrep_test$(EXE):  genrep_test.o muttrep.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -66,7 +72,7 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 	$(CYCC) $(CYCFLAGS) -c $< 
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\
+	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram finger test_getopt typeref typerep_test test_regions)\
 	$(RM) foo_tab.* unsafe_cast.o
 	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
 	$(RM) *~ *.exe *.output *.stackdump
