@@ -1,6 +1,23 @@
 {
 /* Notes
 
+   sys/select.h (and therefore sys/time.h) pull in a use of
+   sizeof(type) in constant expressions, which we don't currently
+   allow in Cyclone.
+
+   There is sys/time.h and time.h.  If both had cycstubs there would
+   be a conflict on time.cyc; by luck, only sys/time.h needs cycstubs.
+
+   Suppose foo() has void return type.  Then Cyclone complains if we
+       return foo();
+     Maybe we shouldn't complain?
+
+   Some of the C libraries define types (typedef) as anonymous
+     structs.  When our pretty-printer expands them the result
+     is C code that gcc complains about.  We should never expand such a
+     typedef.  In the meantime -noexpandtypedefs works.  An example of
+     this is fpos_t in stdio.h.
+
    We handle anonymous enums by giving them a fresh name.  It would be
      better to extend Cyclone to handle them.  Right now it complains,
      e.g., test.cyc(3:0-3:12): missing declarator
@@ -71,6 +88,10 @@ using Lexing;
 using List;
 using Core;
 using Absyn;
+
+FILE *log_file = NULL;
+FILE *cstubs_file = NULL;
+FILE *cycstubs_file = NULL;
 
 static string_t *current_source = NULL;
 static list_t<stringptr_t> current_args = NULL;
@@ -1060,7 +1081,6 @@ and block_comment = parse
                    list_t<ifdefined_t,`H> cstubs,
                    list_t<ifdefined_t,`H> cycstubs) {
     FILE *maybe;
-    FILE @log_file;
     FILE @in_file;
     FILE @out_file;
 
@@ -1076,13 +1096,7 @@ and block_comment = parse
       return 1;
     }
 
-    maybe = fopen("BUILDLIB.LOG","a");
-    if (!maybe) {
-      fprintf(stderr,"Error: could not open log file\n");
-      return 1;
-    }
-    log_file = (FILE @)maybe;
-    fprintf(log_file,"\n%s:\n",filename);
+    fprintf((FILE @)log_file,"\n%s:\n",filename);
 
     /* Calculate necessary file names.  For example:
        filename = sys/types.h
@@ -1090,8 +1104,6 @@ and block_comment = parse
        choppedname = types
        preprocfile = types.i
        filteredfile = types.iX
-       cstubfile = types-cstub.c
-       cstubfile = types.cyc
        dirname = sys
        cfilename = sys/ctypes.h
     */
@@ -1099,8 +1111,6 @@ and block_comment = parse
     let choppedname = Filename::chop_extension(basename);
     let preprocfile = strconcat(choppedname, ".i");
     let filteredfile = strconcat(choppedname, ".iX");
-    let cstubfile = strconcat(choppedname, "-cstub.c");
-    let cycstubfile = strconcat(choppedname, ".cyc");
     let dirname = Filename::dirname(filename);
     let cfilename = 
       (dirname.size == 0)?
@@ -1109,7 +1119,6 @@ and block_comment = parse
 
     /* Make sure we'll be able to create files in the right directories */
     if (force_directory_prefixes(filename)) {
-      fclose(log_file);
       return 1;
     }
     /* Table to hold the dependencies */
@@ -1124,7 +1133,6 @@ and block_comment = parse
       maybe = fopen(filename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",filename);
-        fclose(log_file);
         return 1;
       }
       out_file = (FILE@)maybe;
@@ -1135,7 +1143,6 @@ and block_comment = parse
       maybe = fopen(cfilename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",cfilename);
-        fclose(log_file);
         return 1;
       }
       out_file = (FILE@)maybe;
@@ -1146,8 +1153,7 @@ and block_comment = parse
       fprintf(stderr,"Warning: %s will not be supported on this platform\n",
               filename);
 
-      fprintf(log_file,"Not supported on this platform\n");
-      fclose(log_file);
+      fprintf((FILE @)log_file,"Not supported on this platform\n");
       /* Return to original directory so that we're set up for
          the next file */
       if (chdir(cwd)) {
@@ -1158,7 +1164,6 @@ and block_comment = parse
     }
     maybe = fopen(preprocfile,"r");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     in_file = (FILE@)maybe;
@@ -1176,19 +1181,16 @@ and block_comment = parse
     cmd = aprintf("echo '#include <%s>' | gcc -E -o %s -",
                   filename,preprocfile);
     if (system(cmd) != 0) {
-      fclose(log_file);
       return 1;
     }
     maybe = fopen(preprocfile,"r");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     slurp_out = fopen(filteredfile,"w");
     if (!slurp_out) {
-      fclose(log_file);
       return 1;
     }
     if (slurp(l)) {
@@ -1197,7 +1199,6 @@ and block_comment = parse
       fclose((FILE @)slurp_out);
       remove(preprocfile);
       remove(filteredfile);
-      fclose(log_file);
       return 1;
     }
     fclose(in_file);
@@ -1205,7 +1206,6 @@ and block_comment = parse
 
     maybe = fopen(filteredfile,"r");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     in_file = (FILE@)maybe;
@@ -1309,7 +1309,6 @@ and block_comment = parse
     reachable_decls = imp_rev(reachable_decls);
     maybe = fopen(filename,"w");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     out_file = (FILE @)maybe;
@@ -1317,7 +1316,6 @@ and block_comment = parse
     fclose(out_file);
     maybe = fopen(cfilename, "w");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     out_file = (FILE @)maybe;
@@ -1342,7 +1340,7 @@ and block_comment = parse
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
           fputs(text,out_file);
         else
-          fprintf(log_file,"%s is not supported on this platform\n",symbol);
+          fprintf((FILE @)log_file,"%s is not supported on this platform\n",symbol);
       }
     }
 
@@ -1410,12 +1408,10 @@ and block_comment = parse
     cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                   filename,preprocfile);
     if (system(cmd) != 0) {
-      fclose(log_file);
       return 1;
     }
     maybe = fopen(preprocfile,"r");
     if (!maybe) {
-      fclose(log_file);
       return 1;
     }
     in_file = (FILE@)maybe;
@@ -1440,7 +1436,7 @@ and block_comment = parse
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
           fputs(text,out_file);
         else
-          fprintf(log_file,"%s is not supported on this platform\n",symbol);
+          fprintf((FILE @)log_file,"%s is not supported on this platform\n",symbol);
       }
     }
     fprintf(out_file,"}\n"); // close namespace Std
@@ -1449,46 +1445,37 @@ and block_comment = parse
 
     /* Dump out the c stubs */
     if (cstubs != NULL) {
-      maybe = fopen(cstubfile,"w");
-      if (!maybe) {
-        fclose(log_file);
-        return 1;
-      }
-      out_file = (FILE @)maybe;
+      out_file = (FILE @)cstubs_file;
       for (let x = cstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
           fputs(text,out_file);
       }
-      fclose(out_file);
     }
 
     /* Dump out the cyclone stubs */
+    out_file = (FILE @)cycstubs_file;
+    /* Always include the header, to make sure it has no errors */
+    fprintf(out_file, "#include <%s>\n\n", cfilename);
     if (cycstubs != NULL) {
-      maybe = fopen(cycstubfile,"w");
-      if (!maybe) {
-        fclose(log_file);
-        return 1;
-      }
-      out_file = (FILE @)maybe;
+      out_file = (FILE @)cycstubs_file;
+      fprintf(out_file, "namespace Std {\n");
       for (let x = cycstubs; x != NULL; x = x->tl) {
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
           fputs(text,out_file);
       }
-      fclose(out_file);
+      fprintf(out_file, "}\n\n");
     }
 
     /* Return to original directory so that we're set up for
        the next file */
     if (chdir(cwd)) {
       fprintf(stderr,"Error: could not change directory to %s\n", cwd);
-      fclose(log_file);
       return 1;
     }
-    fclose(log_file);
     return 0;
   }
 
@@ -1502,8 +1489,10 @@ and block_comment = parse
       let &$(headerfile,start_symbols,omit_symbols,
              prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
       if (process_file(headerfile,dir,start_symbols,omit_symbols,
-                       prologue,epilogue,cstubs,cycstubs))
+                       prologue,epilogue,cstubs,cycstubs)) {
+        fclose(in_file);
         return 1;
+      }
     }
     fclose(in_file);
     return 0;
@@ -1524,17 +1513,42 @@ and block_comment = parse
       fprintf(stderr,"Error: could not create directory %s\n",dir);
       return 1;
     }
+
     /* Create an empty log file -- most importantly, any previous log
        file will be truncated */
-    let log = fopen(Filename::concat(dir,"BUILDLIB.LOG"),"w");
-    if (!log) {
+    log_file = fopen(Filename::concat(dir,"BUILDLIB.LOG"),"w");
+    if (!log_file) {
       fprintf(stderr,"Error: could not create log file in directory %s\n",dir);
       return 1;
     }
-    fclose((FILE@)log);
+
+    /* Create an empty cstubs.cyc file */
+    cstubs_file = fopen(Filename::concat(dir,"cstubs.c"),"w");
+    if (!cstubs_file) {
+      fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",dir);
+      return 1;
+    }
+
+    /* Create a cycstubs.cyc file with the standard prologue */
+    cycstubs_file = fopen(Filename::concat(dir,"cycstubs.cyc"),"w");
+    if (!cycstubs_file) {
+      fprintf(stderr,
+              "Error: could not create cycstubs.c in directory %s\n",
+              dir);
+      return 1;
+    }
+    fprintf((FILE@)cycstubs_file,
+            "#include <core.h>\n"
+            "using Core;\n\n");
+
     for (int i = 2; i<argc; i++) {
       process_specfile(argv[i],dir);
     }
+
+    fclose((FILE@)log_file);
+    fclose((FILE@)cstubs_file);
+    fclose((FILE@)cycstubs_file);
+
     return 0;
   }
 }
