@@ -27,17 +27,12 @@ namespace Errno {
 extern const char ?sys_err(int);
 extern "C" {
 
-/* __CYCLONE_SYS_NUM_ERR is the number of the highest error code
-   plus 1.  It should agree with the _sys_nerr variable.  It's used
-   as the bounds of an internal C array, so be sure it's correct. */
 #if defined(__CYGWIN32__) || defined(__CYGWIN__)
 /* cygwin */
-#define __CYCLONE_SYS_NUM_ERR 137
 int @ __errno(void);
 #define errno (*Errno::__errno())
 #else
 /* x86 linux */
-#define __CYCLONE_SYS_NUM_ERR 124
 int @ __errno_location(void);
 #define errno (*Errno::__errno_location())
 #endif

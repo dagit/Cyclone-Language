@@ -37,7 +37,6 @@ CYCLONE_LIBS:=arg\
         core\
         dict\
 	dirent\
-        errno\
 	execinfo\
 	fcntl\
         filename\
