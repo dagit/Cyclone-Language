@@ -419,7 +419,7 @@ Cyc_zstrncpy(_tmpA,_tmp9,(unsigned long)(lexbuf->lex_buffer_len - n));});
 lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;
 lexbuf->lex_curr_pos=lexbuf->lex_curr_pos - n;
 lexbuf->lex_start_pos=lexbuf->lex_start_pos - n;
-lexbuf->lex_last_pos=lexbuf->lex_last_pos - n;};}
+lexbuf->lex_last_pos=lexbuf->lex_last_pos - n;}}
 # 107
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _fat_ptr,int,void*),void*read_fun_state){
 # 109

@@ -447,7 +447,7 @@ struct _fat_ptr ans=_fat_ptr_decrease_size(mans,sizeof(char),1U);
 Cyc_strncpy(ans,(struct _fat_ptr)s,(unsigned long)len_one);
 ({struct _fat_ptr _tmp3B=_fat_ptr_plus(ans,sizeof(char),len_one);Cyc_strncpy(_tmp3B,({const char*_tmp18="...";_tag_fat(_tmp18,sizeof(char),4U);}),3U);});
 ({struct _fat_ptr _tmp3D=_fat_ptr_plus(ans,sizeof(char),len_one + 3);struct _fat_ptr _tmp3C=(struct _fat_ptr)_fat_ptr_plus(s,sizeof(char),len - len_two);Cyc_strncpy(_tmp3D,_tmp3C,(unsigned long)len_two);});
-return mans;};}
+return mans;}}
 # 117
 static int Cyc_Position_line_length=76;
 # 119

@@ -41,7 +41,7 @@ doc_t switchclauses2doc(list_t<switch_clause_t> cs);
 doc_t typ2doc(type_t);
 doc_t aggrfields2doc(list_t<aggrfield_t> fields);
 doc_t scope2doc(scope_t);
-doc_t stmt2doc(stmt_t,bool expstmt);
+doc_t stmt2doc(stmt_t,bool expstmt,list_t<qvar_t,`H> varsinblock);
 doc_t exp2doc(exp_t);
 doc_t exp2doc_prec(int inprec, exp_t e);
 doc_t exps2doc_prec(int inprec, list_t<exp_t> es);
@@ -1239,7 +1239,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &StmtExp_e(s2):
     s = cat(text("("),lb(),blank_doc(),
-            nest(2,stmt2doc(s2,true)),
+            nest(2,stmt2doc(s2,true,NULL)),
             blank_doc(),rb(),text(")"));
     break;
   }
@@ -1359,7 +1359,35 @@ bool is_declaration(stmt_t s) {
   }
 }
 
-doc_t stmt2doc(stmt_t st, bool stmtexp) {
+// Returns true if the declaration d shadows any of the variables in
+// the list of varsinblock.  In this case, we also return a singleton
+// list with the variable that is declared since it will be the only
+// variable in the newblock.  Otherwise, returns the variable declared
+// by the decl (if any) cons'd onto the varsinblock. 
+// We only bother to record Var_d declarations since it's only C code 
+// that we have to wrap extra braces around when a declaration shadows a 
+// previous one.
+$(bool, list_t<qvar_t,`H>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock) {
+  switch (d->r) {
+  case &Var_d(vd):
+    if (List::mem(qvar_cmp,varsinblock,vd->name)) 
+      return $(true,new List{vd->name,NULL});
+    else
+      return $(false,new List{vd->name,varsinblock});
+  default:
+    return $(false, varsinblock);
+  }
+}
+
+doc_t block(bool stmtexp, doc_t d) {
+  if (stmtexp) 
+    return cat(text("("),lb(),blank_doc(),nest(2,d),line_doc(),rb(),
+               text(");"),line_doc());
+  else 
+    return cat(lb(),blank_doc(),nest(2,d),line_doc(),rb(),line_doc());
+}
+
+doc_t stmt2doc(stmt_t st, bool stmtexp, list_t<qvar_t,`H> varsinblock) {
   doc_t s;
   switch (st->r) {
   case &Skip_s: s = text(";"); break;
@@ -1367,40 +1395,20 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
   case &Seq_s(s1,s2):
     if (decls_first) {
       if (is_declaration(s1))
-	s = cat(lb(),
-                blank_doc(),
-                nest(2,stmt2doc(s1,false)),
-                line_doc(),
-                rb(),
-                line_doc(),
+	s = cat(block(false,stmt2doc(s1,false,NULL)),
                 is_declaration(s2)? // for gcc compatibility
-                (stmtexp ?
-                 cat(text("("),lb(), blank_doc(),
-                     nest(2,stmt2doc(s2,stmtexp)),
-                     rb(),text(");"),
-                     line_doc()) :
-                 cat(lb(), blank_doc(),
-                     nest(2,stmt2doc(s2,stmtexp)),
-                     rb(),
-                     line_doc()))
-                : stmt2doc(s2,stmtexp));
+                block(stmtexp,stmt2doc(s2,stmtexp,NULL))
+                : stmt2doc(s2,stmtexp,varsinblock));
       else if (is_declaration(s2)) // for gcc compatibility
-	s = cat(stmt2doc(s1,false),
+	s = cat(stmt2doc(s1,false,varsinblock),
                 line_doc(),
-                (stmtexp ?
-                 cat(text("("),lb(), blank_doc(),
-                     nest(2,stmt2doc(s2,stmtexp)),
-                     rb(),text(");"))
-                 :
-                 cat(lb(), blank_doc(),
-                     nest(2,stmt2doc(s2,stmtexp)),
-                     rb())),
-                line_doc());
+                block(stmtexp,stmt2doc(s2,stmtexp,NULL)));
       else
-	s = cat(stmt2doc(s1,false),line_doc(),stmt2doc(s2,stmtexp));
+	s = cat(stmt2doc(s1,false,varsinblock),line_doc(),
+                stmt2doc(s2,stmtexp,varsinblock));
     }
     else
-      s = cat(stmt2doc(s1,false),line_doc(),stmt2doc(s2,stmtexp));
+      s = cat(stmt2doc(s1,false,NULL),line_doc(),stmt2doc(s2,stmtexp,NULL));
     break;
   case &Return_s(eopt):
     if (eopt == NULL)
@@ -1419,27 +1427,18 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
     s = cat(text("if ("),
             exp2doc(e),
             text(") "),
-            lb(),
-            nest(2,cat(line_doc(),stmt2doc(s1,false))),
-            line_doc(),
-            rb(),
+            block(false,stmt2doc(s1,false,NULL)),
             print_else ?
             cat(line_doc(),
                 text("else "),
-                lb(),
-                nest(2,cat(line_doc(),stmt2doc(s2,false))),
-                line_doc(),
-                rb())
+                block(false,stmt2doc(s2,false,NULL)))
             : nil_doc());
     break;
   case &While_s($(e,_),s1):
     s = cat(text("while ("),
             exp2doc(e),
             text(") "),
-            lb(),
-            nest(2,cat(line_doc(),stmt2doc(s1,false))),
-            line_doc(),
-            rb());
+            block(false,stmt2doc(s1,false,NULL)));
     break;
   case &Break_s:    s = text("break;"); break;
   case &Continue_s: s = text("continue;"); break;
@@ -1452,10 +1451,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
             text("; "),
             exp2doc(e3),
             text(") "),
-            lb(),
-            nest(2,cat(line_doc(),stmt2doc(s1,false))),
-            line_doc(),
-            rb());
+            block(false,stmt2doc(s1,false,NULL)));
     break;
   case &Switch_s(e,ss,_):
     s = cat(text("switch ("),
@@ -1471,55 +1467,28 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
   case &Fallthru_s(es,_):
     s = cat(text("fallthru("), exps2doc_prec(20,es), text(");")); break;
   case &Decl_s(d,s1):
-    s = cat(decl2doc(d),
-            line_doc(),
-            stmt2doc(s1,stmtexp));
+    let $(newblock, newvarsinblock) = shadows(d,varsinblock);
+    s = cat(decl2doc(d),line_doc(),stmt2doc(s1,stmtexp,newvarsinblock));
+    if (newblock) s = block(stmtexp,s);
     break;
   case &Label_s(x,s1):
     if (decls_first && is_declaration(s1)) {
-      if (stmtexp)
-        s = cat(textptr(x),
-                text(": ("),
-                lb(),
-                line_doc(),
-                nest(2,stmt2doc(s1,true)),
-                line_doc(),
-                rb(),text(");"));
-      else
-        s = cat(textptr(x),
-                text(": "),
-                lb(),
-                line_doc(),
-                nest(2,stmt2doc(s1,false)),
-                line_doc(),
-                rb());
+      s = cat(textptr(x),text(": "),block(stmtexp,stmt2doc(s1,stmtexp,NULL)));
     } else
-      s = cat(textptr(x),text(": "),stmt2doc(s1,stmtexp));
+      s = cat(textptr(x),text(": "),stmt2doc(s1,stmtexp,varsinblock));
     break;
   case &Do_s(s1,$(e,_)):
     s = cat(text("do "),
-            lb(),
-            line_doc(),
-            nest(2,stmt2doc(s1,false)),
-            line_doc(),
-            rb(),
+            block(false,stmt2doc(s1,false,NULL)),
             text(" while ("),
             exp2doc(e),
             text(");"));
     break;
   case &TryCatch_s(s1,ss,_):
     s = cat(text("try "),
-            lb(),
-            line_doc(),
-            nest(2,stmt2doc(s1,false)),
-            line_doc(),
-            rb(),
+            block(false,stmt2doc(s1,false,NULL)),
             text(" catch "),
-            lb(),
-            line_doc(),
-            nest(2,switchclauses2doc(ss)),
-            line_doc(),
-            rb());
+            block(false,switchclauses2doc(ss)));
     break;
   }
   return s;
@@ -1600,21 +1569,25 @@ doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp) {
 }
 
 doc_t switchclause2doc(switch_clause_t c) {
+  // must treat switch clauses like labelled statements
+  doc_t body = stmt2doc(c->body,false,NULL);
+  if (decls_first && is_declaration(c->body))
+    body = block(false,body);
   if (c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val)
     return cat(text("default: "),
-	       nest(2,cat(line_doc(),stmt2doc(c->body,false))));
+	       nest(2,cat(line_doc(),body)));
   else if (c->where_clause == NULL)
     return cat(text("case "),
 	       pat2doc(c->pattern),
 	       text(": "),
-	       nest(2,cat(line_doc(),stmt2doc(c->body,false))));
+	       nest(2,cat(line_doc(),body)));
   else
     return cat(text("case "),
 	       pat2doc(c->pattern),
 	       text(" && "),
 	       exp2doc((exp_t)c->where_clause),
 	       text(": "),
-	       nest(2,cat(line_doc(),stmt2doc(c->body,false))));
+	       nest(2,cat(line_doc(),body)));
 }
 
 doc_t switchclauses2doc(list_t<switch_clause_t> cs) {
@@ -1768,8 +1741,13 @@ doc_t decl2doc(decl_t d) {
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(empty_tqual(0), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
+    // NOTE: if we have a local variable declared in the outermost block
+    // that shadows a parameter, gcc will warn.  If we want to get rid of
+    // the warning, we could pass in the parameters as the list of variables
+    // defined in the block and then we will insert an extra { ... } which
+    // supresses the warning.
     doc_t bodydoc   = cat(blank_doc(),lb(),
-			  nest(2,cat(line_doc(),stmt2doc(fd->body,false))),
+			  nest(2,cat(line_doc(),stmt2doc(fd->body,false,NULL))),
 			  line_doc(),
 			  rb());
     s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
@@ -2187,7 +2165,7 @@ string_t decllist2string(list_t<decl_t> tdl) {
   return string_of_doc(seql("",List::map(decl2doc,tdl)),PP_WIDTH);
 }
 string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
-string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s,false), PP_WIDTH);}
+string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s,false,NULL), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string_t tvar2string(tvar_t t)   {return string_of_doc(tvar2doc(t), PP_WIDTH);}
 string_t typ2cstring(type_t t) {

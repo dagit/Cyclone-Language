@@ -73,7 +73,7 @@ static void dumpntyp(type_t t);
 static void dumpexp(exp_t);
 static void dumpexp_prec(int,exp_t);
 static void dumppat(pat_t);
-static void dumpstmt(stmt_t,bool expstmt);
+static void dumpstmt(stmt_t,bool expstmt,list_t<qvar_t,`H>);
 static void dumpvardecl(vardecl_t,Position::seg_t,bool do_semi);
 static void dump_aggrdecl(aggrdecl_t);
 static void dump_enumdecl(enumdecl_t);
@@ -759,7 +759,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde, des, "{","}",","); break;
 
   case &StmtExp_e(s):
-    dump_nospace("({"); dumpstmt(s,true); dump_nospace("})"); break;
+    dump_nospace("({"); dumpstmt(s,true,NULL); dump_nospace("})"); break;
   }
   if(inprec >= myprec)
     dump_char(')');
@@ -769,7 +769,8 @@ static void dumpexp(exp_t e) {
   dumpexp_prec(0,e);
 }
 
-static void dumpswitchclauses(list_t<switch_clause_t> scs) {
+static void dumpswitchclauses(list_t<switch_clause_t> scs,
+                              list_t<qvar_t,`H> varsinblock) {
   for(; scs != NULL; scs = scs->tl) {
     let c = scs->hd;
     if(c->where_clause == NULL && c->pattern->r == (raw_pat_t)&Wild_p_val) 
@@ -783,11 +784,14 @@ static void dumpswitchclauses(list_t<switch_clause_t> scs) {
       }
       dump_nospace(":");
     }
-    dumpstmt(c->body,false);
+    if (Absynpp::is_declaration(c->body)) {
+      dump(" {"); dumpstmt(c->body,false,NULL), dump_char('}');
+    } else 
+      dumpstmt(c->body,false,varsinblock);
   }
 }
 
-static void dumpstmt(stmt_t s,bool expstmt) {
+static void dumpstmt(stmt_t s,bool expstmt,list_t<qvar_t,`H> varsinblock) {
   dumploc(s->loc);
   switch(s->r) {
   case &Skip_s:   dump_semi(); break;
@@ -797,15 +801,15 @@ static void dumpstmt(stmt_t s,bool expstmt) {
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
   case &Seq_s(s1,s2):
     if(Absynpp::is_declaration(s1)) {
-      dump_char('{'); dumpstmt(s1,false); dump_char('}');
+      dump_char('{'); dumpstmt(s1,false,NULL); dump_char('}');
     } else
-      dumpstmt(s1,false);
+      dumpstmt(s1,false,varsinblock);
     if(Absynpp::is_declaration(s2)) {
       if (expstmt) dump_char('(');
-      dump_char('{'); dumpstmt(s2,expstmt); dump_char('}');
-      if (expstmt) dump_char(')'); dump_semi();
+      dump_char('{'); dumpstmt(s2,expstmt,NULL); dump_char('}');
+      if (expstmt) { dump_char(')'); dump_semi(); }
     } else
-      dumpstmt(s2,expstmt);
+      dumpstmt(s2,expstmt,varsinblock);
     break;
   case &Return_s(NULL): dump("return;"); break;
   case &Return_s(e):    dump("return"); dumpexp((exp_t)e); dump_semi(); break;
@@ -816,25 +820,25 @@ static void dumpstmt(stmt_t s,bool expstmt) {
     case &Decl_s(...): 
     case &IfThenElse_s(...):
     case &Label_s(...):
-      dump_nospace("){"); dumpstmt(s1,false); dump_char('}'); break;
-    default: dump_char(')'); dumpstmt(s1,false);
+      dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}'); break;
+    default: dump_char(')'); dumpstmt(s1,false,varsinblock);
     }
     switch (s2->r) {
     case &Skip_s: break;
-    default: dump("else{"); dumpstmt(s2,false); dump_char('}'); break;
+    default: dump("else{"); dumpstmt(s2,false,NULL); dump_char('}'); break;
     }
     break;
 
   case &While_s($(e,_),s1):
     dump("while("); dumpexp(e); dump_nospace("){");
-    dumpstmt(s1,false); dump_char('}');
+    dumpstmt(s1,false,NULL); dump_char('}');
     break;
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
-    dump_nospace("){"); dumpstmt(s1,false); dump_char('}');
+    dump_nospace("){"); dumpstmt(s1,false,NULL); dump_char('}');
     break;
   case &Do_s(s1,$(e,_)):
-    dump("do{"); dumpstmt(s1,false); 
+    dump("do{"); dumpstmt(s1,false,NULL); 
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
@@ -844,16 +848,26 @@ static void dumpstmt(stmt_t s,bool expstmt) {
 
   case &Switch_s(e,ss,_):
     dump("switch("); dumpexp(e); dump_nospace("){");
-    dumpswitchclauses(ss);
+    dumpswitchclauses(ss,varsinblock);
     dump_char('}');
     break;
   case &TryCatch_s(s1,ss,_):
-    dump("try"); dumpstmt(s1,false); 
+    dump("try"); dumpstmt(s1,false,varsinblock); 
     dump("catch{");
-    dumpswitchclauses(ss); dump_char('}');
+    dumpswitchclauses(ss,varsinblock); dump_char('}');
     break;
 
-  case &Decl_s(d,s1): dumpdecl(d); dumpstmt(s1,expstmt); break;
+  case &Decl_s(d,s1): 
+    let $(newblock,newvarsinblock) = Absynpp::shadows(d,varsinblock);
+    if (newblock) {
+      if (expstmt) dump("({"); else dump("{");
+      dumpdecl(d); 
+      dumpstmt(s1,expstmt,NULL);
+      if (expstmt) dump_nospace("});"); else dump("}");
+    } else {
+      dumpdecl(d); dumpstmt(s1,expstmt,newvarsinblock); 
+    }
+    break;
 
   case &Label_s(x,s1):
     // FIX:  gcc does not allow declarations to be used immediately after
@@ -862,10 +876,10 @@ static void dumpstmt(stmt_t s,bool expstmt) {
     if(Absynpp::is_declaration(s1)) {
       dump_str(x); 
       if (expstmt) dump_nospace(": ({"); else dump_nospace(": {"); 
-      dumpstmt(s1,expstmt); 
-      if (expstmt) dump_nospace("});}"); else dump_char('}');
+      dumpstmt(s1,expstmt,NULL); 
+      if (expstmt) dump_nospace("});"); else dump_char('}');
     } else {
-      dump_str(x); dump_char(':'); dumpstmt(s1,expstmt);
+      dump_str(x); dump_char(':'); dumpstmt(s1,expstmt,varsinblock);
     }
     break;
 
@@ -1125,7 +1139,7 @@ static void dumpdecl(decl_t d) {
     default:    dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd); break;  
     }
     dump_char('{');
-    dumpstmt(fd->body,false);
+    dumpstmt(fd->body,false,NULL);
     dump_char('}');
     break;
   case &Var_d(vd):      dumpvardecl(vd,d->loc,true);           break;

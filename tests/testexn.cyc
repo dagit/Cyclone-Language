@@ -82,7 +82,7 @@ void* runthread(int i) {
 }
 
 int main(int argc, string_t ?args) {
-  pthread_t t[100];
+  pthread_t t[100] = {for i < 100 : NULL};
   for(int i=0;i<100;i++) {
     exn_caught[i] = -1;
     if (pthread_create(&t[i], NULL, runthread, i)) {

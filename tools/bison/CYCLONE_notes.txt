@@ -12,15 +12,27 @@ contains all of the tables as well as the parse engine.  It's invoked
 by calling yyparse() which in turn calls yylex() expecting that yylex()
 produces an integer token and a semantic value in yylval.
 
-The type of yylval is specified with the %union declaration.  This is
-required for us (but optional for C-bison.)  The syntax for the
-declaration does not mention the type -- it becomes YYSTYPE.
+The type of yylval is always declared as @tagged union YYSTYPE.
+Cycbison will add variants to the union as necessary so that
+each semantic value can be represented as a YYSTYPE value.  
+So, for instance, if you declare the %type of a production to
+be T, then YYSTYPE will have a T variant added to it.  You
+can use the %union declaration to give a particular naem to
+the variant for a given type.  For instance, if you want to
+make all int's be placed in the member Integer, and all doubles
+to be placed in the member Double, you could specify:
+
+  %union {
+    Integer(int);
+    Double(double);
+  }
 
 One declares tokens using the %token <id> notation as in bison.
 
 One declares the type of tokens (terminals) and non-terminals
-using %type <field> t1 t2 ... tn where <field> is a field of
-the %union type, and t1,t2,...,tn are [non-]terminals.  
+using %type <type> t1 t2 ... tn.  If <type> has not been declared
+in the %union section, then Cycbison adds a new variant for
+this type to the YYSTYPE declaration.
 
 The grammar rules work just as in bison/yacc.  The biggest difference
 is within the actions of the grammar rules.  In particular, $$ refers
@@ -50,18 +62,12 @@ just place the result in $$ -- rather, we have to "cast up", hence
 the ^$ wrapped around the expression.
 ---file rpcalc.y--------------------------------------------------------------
 %{
-extern void print_string(string);
-extern int print_int(int);
+#include <core.h> 
+#include <stdio.h>
 %}
 
-%union {
-  int    foo;
-  short    x;
-}
-
 %token NUM 
-%type <foo> exp NUM
-%type <x> line input
+%type <int> exp NUM line input
 
 %% /* Grammar rules and actions follow */
 
@@ -70,8 +76,7 @@ input:   /*empty*/      { $$ = ^$(3); }
 ;
 
 line:   '\n'       { $$ = ^$(6); }
-        | exp '\n' { print_string ("RESULT=");
-	             print_int($1);
+        | exp '\n' { printf("RESULT = %d\n",$1);
 		     $$ = ^$(5); }
 ;
 

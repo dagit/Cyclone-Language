@@ -425,7 +425,7 @@ unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr || dyn.curr == 0)|| dyn.curr < dyn.base)|| ptrbd > dyn.last_plus_one)
 # 101
 return 0;
-return dyn.curr;};}
+return dyn.curr;}}
 # 104
 struct Cyc_Core_ThinRes Cyc_Core_mkthin(struct _fat_ptr dyn,unsigned sz){
 unsigned bd=_get_fat_size(dyn,sz);

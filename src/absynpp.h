@@ -82,5 +82,15 @@ extern string_t tvar2string(tvar_t);
   extern string_t prim2str(primop_t p);
   extern bool is_declaration(stmt_t s);
   extern $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r>,tqual_t tq,type_t t);
+  // Returns true if the declaration d shadows any of the variables in
+  // the list of varsinblock.  In this case, we also return a singleton
+  // list with the variable that is declared since it will be the only
+  // variable in the newblock.  Otherwise, returns the variable declared
+  // by the decl (if any) cons'd onto the varsinblock. 
+  // We only bother to record Var_d declarations since it's only C code 
+  // that we have to wrap extra braces around when a declaration shadows a 
+  // previous one.
+  extern $(bool, list_t<qvar_t>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock);
 }
+
 #endif

@@ -40,7 +40,7 @@ void func1b() {
 }  
 
 // Aggregate pattern through unique pointer to a unique pointer
-void func1c(struct s1<`U> @`U s) {
+void func1c(struct s1<`U> @`U s) __attribute__((consume(1))) {
   s->y = 1;
   let ps as &s1{.p=p,.y=y} = s; // s, s->p consumed; ps, p available
   Core::ufree(ps);
@@ -51,7 +51,7 @@ void func1c(struct s1<`U> @`U s) {
 
 
 // Aggregate pattern through unique pointer to TR pointer
-void func1d(struct s1<`RC> @`U s) {
+void func1d(struct s1<`RC> @`U s) __attribute__((consume(1))) {
   let &s1{.p=p,...} = s; // s->p consumed; s, p available
   Core::drop_refptr(p);
   Core::ufree(s);
@@ -180,4 +180,22 @@ int func6() {
   x[2] = $(NULL,new 1);
   let $(v1,v2,$(v3,v4)) = x;
   return *v4;
+}
+
+int main() {
+  func1();
+  func1a(new s1{new 3,4});
+  func1b();
+  func1c(unew s1{unew 3,4});
+  func1d(unew s1{rcnew 3,4});
+  func2();
+  let v = unew IntStar(new 3);
+  func3(v);
+  func4();
+  func4a();
+  func4b(NULL);
+  func4c();
+  func5(new AIntStar(new 3));
+  func6();
+  return 0;
 }

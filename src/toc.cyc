@@ -3019,12 +3019,15 @@ static stmt_opt_t seq_stmt_opt(stmt_opt_t s1, stmt_opt_t s2) {
   return seq_stmt(s1,s2,DL);
 }
 
+typedef list_t<$(vardecl_t oldv,vardecl_t newv)@`r,`r> patdecls_t<`r>;
+
 // given a pattern, produce code and environment to initialize the pattern
 // variables with the appropriate values.  Updates the environment and
 // decls which are passed in by reference.
-static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
-                                       list_t<vardecl_t,`rgn>@ decls,
-                                       exp_t path, pat_t p) {
+static stmt_opt_t 
+extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
+                     patdecls_t<`rgn> @ decls,
+                     exp_t path, pat_t p) {
   type_t t = (type_t)p->topt;
   switch (p->r) {
   case &AliasVar_p(_,vd):
@@ -3033,20 +3036,23 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
     fallthru(vd,p2);
   case &Var_p(vd,p2):
     // v = r (hoisted and renamed later) and continue matching p2 against r
-    *decls = rnew(rgn) List(vd,*decls);
-    let s = assign_stmt(varb_exp(new Local_b(vd),DL),copy_exp(path),DL);
+    let new_vd = new_vardecl(DL, temp_var(), typ_to_c_array(vd->type), NULL);
+    *decls = rnew(rgn) List{rnew(rgn) $(vd,new_vd),*decls};
+    let s = assign_stmt(varb_exp(new Local_b(new_vd),DL),copy_exp(path),DL);
     return seq_stmt_opt(s,extract_pattern_vars(rgn,nv,decls,path,p2));
   case &TagInt_p(_,vd): // type translation erases tvar
     // v = r  (hoisted and renamed later)
-    *decls = rnew(rgn) List(vd,*decls);
-    return assign_stmt(varb_exp(new Local_b(vd),DL),copy_exp(path),DL);
+    let new_vd = new_vardecl(DL, temp_var(), typ_to_c_array(vd->type), NULL);
+    *decls = rnew(rgn) List{rnew(rgn) $(vd,new_vd),*decls};
+    return assign_stmt(varb_exp(new Local_b(new_vd),DL),copy_exp(path),DL);
   case &Wild_p: return NULL;
   case &Reference_p(vd,p2):
     // v = &path
-    *decls = rnew(rgn) List(vd,*decls);
     vd->type = cstar_type(t,mt_tq); //DJG: apparently necessary -- bug in tcPat?
+    let new_vd = new_vardecl(DL, temp_var(), typ_to_c_array(vd->type), NULL);
+    *decls = rnew(rgn) List{rnew(rgn) $(vd,new_vd),*decls};
     // cast is needed to avoid a C warning when pointing to a polymorphic field
-    let s = assign_stmt(varb_exp(new Local_b(vd),DL),
+    let s = assign_stmt(varb_exp(new Local_b(new_vd),DL),
 			cast_it(cstar_type(typ_to_c_array(t),mt_tq),
                                 push_address_exp(copy_exp(path))),DL);
     return seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,path,p2));
@@ -3131,6 +3137,68 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
   }
 }
 
+static vardecl_t find_new_var(patdecls_t vs, vardecl_t v) {
+  for (; vs != NULL; vs = vs->tl) {
+    let $(oldv,newv) = *vs->hd;
+    if (oldv == newv) return newv;
+  }
+  toc_impos("find_new_var");
+}
+
+// we have to substitute the associated temps for the
+// pattern vars that occur in a where-clause.  This is
+// limited to noassign_exp's (see tcstmt.cyc).
+static void subst_pattern_vars(patdecls_t env, exp_t e) {
+  switch (e->r) {
+  case &Var_e(&Pat_b(vd)):  fallthru(vd);
+  case &Var_e(&Local_b(vd)):
+    try {
+      e->r = new Var_e(new Local_b(assoc(env,vd)));
+    } catch {
+    case &Core::Not_found: break;
+    }
+    break;
+  case &Conditional_e(e1,e2,e3):
+    subst_pattern_vars(env,e1); fallthru(e2,e3);
+  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2): fallthru(e1,e2);
+  case &Subscript_e(e1,e2): fallthru(e1,e2);
+  case &SeqExp_e(e1,e2): 
+    subst_pattern_vars(env,e1); fallthru(e2);
+  case &Extension_e(e): fallthru(e);
+  case &Tagcheck_e(e,_): fallthru(e);
+  case &Throw_e(e,...): fallthru(e);
+  case &NoInstantiate_e(e): fallthru(e);
+  case &Instantiate_e(e,...): fallthru(e);
+  case &Cast_e(_,e,...): fallthru(e);
+  case &Sizeofexp_e(e): fallthru(e);
+  case &Deref_e(e): fallthru(e);
+  case &AggrMember_e(e,...): fallthru(e);
+  case &AggrArrow_e(e,...): fallthru(e);
+  case &ComprehensionNoinit_e(e,...): fallthru(e);
+  case &Address_e(e): subst_pattern_vars(env,e); break;
+  case &Malloc_e(MallocInfo{_,eopt,_,e,...}): fallthru(eopt,e);
+  case &New_e(eopt,e):
+    if (eopt != NULL) subst_pattern_vars(env,(exp_t)eopt);
+    subst_pattern_vars(env,e); break;
+  case &Primop_e(_,es): fallthru(es);
+  case &Datatype_e(es,...): fallthru(es);
+  case &Tuple_e(es): List::iter_c(subst_pattern_vars,env,es); break;
+  case &UnresolvedMem_e(_,dles): fallthru(dles);
+  case &Aggregate_e(_,_,dles,_): fallthru(dles);
+  case &AnonStruct_e(_,dles)   : fallthru(dles);
+  case &Array_e(dles)          : fallthru(dles);
+  case &CompoundLit_e(_,dles)  :
+    for (; dles != NULL; dles = dles->tl) {
+      let &$(_,e) = dles->hd;
+      subst_pattern_vars(env,e);
+    }
+    break;
+  default: break;
+  }
+}
+
 // compiles a decision tree that was generated from the match compiler
 // into a set of tests, switches, goto's, etc.  dopt is the decision tree
 // and lscs is the original list of switch clauses, together with the labels
@@ -3139,7 +3207,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
 static stmt_t 
 compile_decision_tree(region_t<`rgn> rgn, 
 		      env_t<`rgn> nv,
-		      list_t<vardecl_t,`rgn>@ decls,
+		      patdecls_t<`rgn> @ decls,
 		      list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn>@ bodies,
 		      Tcpat::decision_opt_t dopt,
 		      list_t<$(bool,var_t,var_t,switch_clause_t)@> lscs,
@@ -3158,11 +3226,22 @@ compile_decision_tree(region_t<`rgn> rgn,
         if (*already_emitted) 
           return goto_stmt(init_lab,DL);
         *already_emitted = true;
+        patdecls_t<`rgn> newdecls = NULL;
         // extract all of the pattern variables for this case
-        stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,decls,var_exp(v,DL),
-                                                   sc->pattern);
-        // generate init_lab: <code to extract vars>; code_lab: <rhs>
-        stmt_t res = label_stmt(code_lab,sc->body,DL);
+        stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,&newdecls,
+                                                   var_exp(v,DL),sc->pattern);
+        // generate init_lab: <code to extract vars to temps>; 
+        //          code_lab: <copy-temps-to-declared-patvars>; <rhs>
+        stmt_t res = sc->body;
+        for (let ds = newdecls; ds != NULL; ds = ds->tl) {
+          let $(oldv,newv) = *ds->hd;
+          *decls = rnew(rgn) List{rnew(rgn) $(oldv,newv),*decls};
+          oldv->initializer = varb_exp(new Local_b(newv), DL);
+          oldv->initializer->topt = newv->type;
+          oldv->type = newv->type;
+          res = decl_stmt(new Decl{new Var_d(oldv),DL}, res, DL);
+        }
+        res = label_stmt(code_lab,res,DL);
         if (init_opt != NULL)
           res = seq_stmt(init_opt, res, DL);
         res = label_stmt(init_lab, res, DL);
@@ -3228,14 +3307,27 @@ compile_decision_tree(region_t<`rgn> rgn,
               if (*already_emitted) 
                 return goto_stmt(init_lab,DL);
               *already_emitted = true;
+              patdecls_t<`rgn> newdecls = NULL;
               // extract all of the pattern variables for this case
-              stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,decls,var_exp(v,DL),
+              stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,&newdecls,var_exp(v,DL),
                                                          sc->pattern);
-              // compile the where-clause
-              exp_to_c(nv,e);
               // generate init_lab: <code to extract vars>; 
               //          if (e) { code_lab: <rhs> } else <default>
-              stmt_t r = label_stmt(code_lab,sc->body,DL);
+              stmt_t r = sc->body;
+              for (let ds = newdecls; ds != NULL; ds = ds->tl) {
+                let $(oldv,newv) = *ds->hd;
+                *decls = rnew(rgn) List{rnew(rgn) $(oldv,newv),*decls};
+                oldv->initializer = varb_exp(new Local_b(newv), DL);
+                oldv->initializer->topt = newv->type;
+                oldv->type = newv->type;
+                r = decl_stmt(new Decl{new Var_d(oldv),DL}, r, DL);
+              }
+              r = label_stmt(code_lab,r,DL);
+              // compile the where-clause
+              // PROBLEM: we have to map the pattern variables in the
+              // where clause to the associated temps.  
+              subst_pattern_vars(*decls,e);
+              exp_to_c(nv,e);
               r = ifthenelse_stmt(e,r,res,DL);
               if (init_opt != NULL)
                 r = seq_stmt(init_opt, r, DL);
@@ -3296,7 +3388,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     // compile the decision tree -- generates a list of declarations and
     // a list of case bodies with associated labels and environments, as
     // well as a big test statement.  
-    list_t<vardecl_t,`rgn> mydecls = NULL;
+    patdecls_t<`rgn> mydecls = NULL;
     list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
     stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies, 
                                              dopt, lscs, v);
@@ -3330,7 +3422,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
           list_t<vardecl_t> vs = NULL;
           if (next_sc->pat_vars != NULL) {
             vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
-            vs = List::imp_rev(vs);
+            vs = map_c(assoc,mydecls,List::imp_rev(vs));
           }
           stmt_to_c(non_last_switchclause_env(rgn, env, end_l, fallthru_lab,
                                               vs),s);
@@ -3343,9 +3435,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     stmt_t res = seq_stmt(test_tree,label_stmt(end_l,skip_stmt_dl(),DL),DL);
     // now add in declarations and alpha-convert
     for (; mydecls != NULL; mydecls = mydecls->tl) {
-      let vd = mydecls->hd;
-      vd->name = temp_var();
-      vd->type = typ_to_c_array(vd->type);
+      let $(_,vd) = *mydecls->hd;
       res = decl_stmt(new_decl(new Var_d(vd), DL), res, DL);
     }
     // overwrite original switch with new code.
@@ -3459,10 +3549,13 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	//      because C's rules differ from ours.
         switch (p->r) {
         case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
-	  vd->name = temp_var();
-          vd->initializer = e;
-          d->r = new Var_d(vd);
-	  local_decl_to_c(nv, vd, s1);
+          let new_vd = new_vardecl(DL, temp_var(), vd->type, e);
+          vd->initializer = varb_exp(new Local_b(new_vd),DL);
+          vd->initializer->topt = new_vd->type;
+          s->r = decl_stmt(new_decl(new Var_d(new_vd),s->loc),
+                           decl_stmt(new_decl(new Var_d(vd),s->loc),
+                                     s1,s->loc),s->loc)->r;
+          stmt_to_c(nv, s);
           break;
         default:
 	  // we treat let declarations specially because they may need
@@ -3949,7 +4042,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
     // we us a bogus fail statement since it has to pass through translation.
     // we overwrite it with _throw_match() below.  For a success, we goto
     // th end label.
-    let succ_stmt = skip_stmt_dl();
+    let succ_stmt = s;
     if (dopt != NULL)
       // rewrite the decision tree so that on failure we throw Match
       // and on success, continue with the body of the let.
@@ -3958,7 +4051,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
     let c1 = new Switch_clause{p, NULL, NULL, succ_stmt, 0};
     let lscs = List::rmap_c(rgn,gen_labels,rgn,rlist(rgn,c1));
     // declarations and environments generated while compiling decision tree
-    list_t<vardecl_t> mydecls = NULL;
+    patdecls_t<`rgn> mydecls = NULL;
     list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
     // compile the pattern -- this essentially generates
     // if e matches p then <skip> else _throw_match()
@@ -3976,12 +4069,10 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
     // compilation.
     stmt_to_c(senv,s);
     // put the tests in front
-    stmt_t res = seq_stmt(test_tree,s,DL);
-    // now add in declarations and alpha-convert
+    stmt_t res = test_tree;
+    // now add in declarations of temps generated for pattern matching
     for (; mydecls != NULL; mydecls = mydecls->tl) {
-      let vd = mydecls->hd;
-      vd->name = temp_var();
-      vd->type = typ_to_c_array(vd->type);
+      let $(_,vd) = *mydecls->hd;
       res = decl_stmt(new_decl(new Var_d(vd), DL), res, DL);
     }
     // finally declare the root variable v and initialize it with e
