@@ -142,15 +142,19 @@ void _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 
 struct _tagged_string Cstring_to_string(Cstring s) {
   struct _tagged_string str;
-  int sz=(s?strlen(s):0);
-  str.base = (char *)GC_malloc_atomic(sz);
-  str.curr = str.base;
-  str.last_plus_one = str.base + sz;
+  if (s == NULL) {
+    str.base = str.curr = str.last_plus_one = NULL;
+  }
+  else {
+    int sz = strlen(s);
+    str.base = (char *)GC_malloc_atomic(sz);
+    str.curr = str.base;
+    str.last_plus_one = str.base + sz;
 
-  // Copy the string in case the C code frees it or mangles it
-  while(--sz>=0)
-    str.curr[sz]=s[sz];
-
+    // Copy the string in case the C code frees it or mangles it
+    while(--sz>=0)
+      str.curr[sz]=s[sz];
+  }
   return str;
 }
 
@@ -160,8 +164,10 @@ Cstring string_to_Cstring(string s) {
   size_t sz = s.last_plus_one - s.curr;
   char *str;
 
+  if (s.curr == NULL) return NULL;
+
   if (s.curr < s.base || s.curr >= s.last_plus_one)
-    throw(Null_Exception);
+    throw(Null_Exception); // FIX: this should be a bounds error, not null exn
   str = (char *)GC_malloc_atomic(sz+1);
   if (str == NULL) {
     fprintf(stderr,"internal error: out of memory in string_to_Cstring\n");
@@ -176,6 +182,9 @@ Cstring string_to_Cstring(string s) {
 // FIX:  this isn't really needed since you can cast char[?] to char[]
 Cstring underlying_Cstring(string s) {
   char *str=s.curr;
+
+  if (s.curr == NULL) return NULL;
+
   // FIX:  should throw exception?  
   if (s.curr < s.base || s.curr >= s.last_plus_one)
     throw(Null_Exception);
