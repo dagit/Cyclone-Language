@@ -163,7 +163,7 @@ _check_known_subscript_notnull(unsigned bound,unsigned index) {
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static inline struct _tagged_arr
 _check_unknown_subscript(struct _tagged_arr arr,unsigned elt_sz,unsigned index) {
   struct _tagged_arr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);

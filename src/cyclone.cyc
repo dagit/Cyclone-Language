@@ -149,6 +149,10 @@ static void add_libarg(string_t<`H> s) {
     libargs = new List(new s,libargs);
 }
 
+static void add_marg(string_t<`H> s) {
+  add_ccarg(s);
+}
+
 static void set_save_temps() {
   save_temps_r = true;
   add_ccarg("-save-temps");
@@ -850,9 +854,12 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-L",true,"<dir>",
                new Flag_spec(add_ccarg),
                "Add to the list of directories for -l"),
-         new $("-l",true,"<file>",
+         new $("-l",true,"<libname>",
                new Flag_spec(add_libarg),
                "Library file"),
+         new $("-m",true,"<option>",
+               new Flag_spec(add_marg),
+               "GCC specific: pass machine-dependent flag on to gcc"),
          new $("-c",false,"",
                new Unit_spec(set_stop_after_objectfile),
                "Produce an object file instead of an executable; do not link"),
