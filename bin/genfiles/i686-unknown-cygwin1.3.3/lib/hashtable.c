@@ -478,42 +478,36 @@ _tmp1));struct _tagged_arr _tmp4=_tag_arr(_tmp2,sizeof(struct Cyc_List_List*),_t
 unsigned int _tmp3=_tmp1;unsigned int i;for(i=0;i < _tmp3;i ++){_tmp2[i]=mt;}}_tmp4;});
 _tmp0;});}struct _tuple0{void*f1;void*f2;};void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*
 t,void*key,void*val){struct _tagged_arr tab=t->tab;int bucket=(int)((*t->hash)(key)
-% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=({struct Cyc_List_List*
-_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->hd=({struct _tuple0*_tmp6=_cycalloc(
-sizeof(*_tmp6));_tmp6->f1=key;_tmp6->f2=val;_tmp6;});_tmp5->tl=*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),bucket));_tmp5;});if(((
-int(*)(struct Cyc_List_List*x))Cyc_List_length)(*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),bucket)))> t->max_len)
+% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));((struct Cyc_List_List**)tab.curr)[
+bucket]=({struct Cyc_List_List*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->hd=({struct
+_tuple0*_tmp6=_cycalloc(sizeof(*_tmp6));_tmp6->f1=key;_tmp6->f2=val;_tmp6;});
+_tmp5->tl=((struct Cyc_List_List**)tab.curr)[bucket];_tmp5;});if(((int(*)(struct
+Cyc_List_List*x))Cyc_List_length)(((struct Cyc_List_List**)tab.curr)[bucket])> t->max_len)
 Cyc_Hashtable_resize(t);}void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,
-void*key){struct _tagged_arr tab=t->tab;struct Cyc_List_List*l=*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),(int)((*t->hash)(key)% 
-_get_arr_size(tab,sizeof(struct Cyc_List_List*)))));return Cyc_List_assoc_cmp(t->cmp,
-l,key);}void Cyc_Hashtable_remove(struct Cyc_Hashtable_Table*t,void*key){struct
-_tagged_arr tab=t->tab;int(*cmp)(void*,void*)=t->cmp;int bucket=(int)((*t->hash)(
-key)% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));struct Cyc_List_List*l=*((
-struct Cyc_List_List**)_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),
-bucket));if(l == 0)return;if((*cmp)(key,(((struct _tuple0*)l->hd)[
-_check_known_subscript_notnull(1,0)]).f1)== 0){*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),bucket))=l->tl;return;}{
-struct Cyc_List_List*prev=l;l=l->tl;for(0;l->tl != 0;(prev=l,l=l->tl)){if((*cmp)(
-key,(((struct _tuple0*)l->hd)[_check_known_subscript_notnull(1,0)]).f1)== 0){prev->tl=
-l->tl;return;}}}}int Cyc_Hashtable_hash_string(struct _tagged_arr s){int ans=0;int sz=(
-int)_get_arr_size(s,sizeof(char));int shift=0;{int i=0;for(0;i < sz;++ i){ans=ans ^ *((
-const char*)_check_unknown_subscript(s,sizeof(char),i))<< shift;shift +=8;if(shift
-== 32)shift=0;}}return ans;}int Cyc_Hashtable_hash_stringptr(struct _tagged_arr*s){
-return Cyc_Hashtable_hash_string(*s);}void Cyc_Hashtable_insert_bucket(struct
-_tagged_arr tab,int(*hash)(void*),struct Cyc_List_List*elems){if(elems == 0)return;
-Cyc_Hashtable_insert_bucket(tab,hash,elems->tl);{void*key=(((struct _tuple0*)
-elems->hd)[_check_known_subscript_notnull(1,0)]).f1;void*val=(((struct _tuple0*)
-elems->hd)[_check_known_subscript_notnull(1,0)]).f2;int nidx=(int)((*hash)(key)% 
-_get_arr_size(tab,sizeof(struct Cyc_List_List*)));*((struct Cyc_List_List**)
-_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),nidx))=(struct Cyc_List_List*)({
-struct Cyc_List_List*_tmp7=_cycalloc(sizeof(*_tmp7));_tmp7->hd=(struct _tuple0*)({
-struct _tuple0*_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8->f1=key;_tmp8->f2=val;_tmp8;});
-_tmp7->tl=*((struct Cyc_List_List**)_check_unknown_subscript(tab,sizeof(struct Cyc_List_List*),
-nidx));_tmp7;});}}void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){struct
-_tagged_arr odata=t->tab;int osize=(int)_get_arr_size(odata,sizeof(struct Cyc_List_List*));
+void*key){struct _tagged_arr tab=t->tab;struct Cyc_List_List*l=((struct Cyc_List_List**)
+tab.curr)[(int)((*t->hash)(key)% _get_arr_size(tab,sizeof(struct Cyc_List_List*)))];
+return Cyc_List_assoc_cmp(t->cmp,l,key);}void Cyc_Hashtable_remove(struct Cyc_Hashtable_Table*
+t,void*key){struct _tagged_arr tab=t->tab;int(*cmp)(void*,void*)=t->cmp;int bucket=(
+int)((*t->hash)(key)% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));struct Cyc_List_List*
+l=((struct Cyc_List_List**)tab.curr)[bucket];if(l == 0)return;if((*cmp)(key,(((
+struct _tuple0*)l->hd)[_check_known_subscript_notnull(1,0)]).f1)== 0){((struct Cyc_List_List**)
+tab.curr)[bucket]=l->tl;return;}{struct Cyc_List_List*prev=l;l=l->tl;for(0;l->tl
+!= 0;(prev=l,l=l->tl)){if((*cmp)(key,(((struct _tuple0*)l->hd)[
+_check_known_subscript_notnull(1,0)]).f1)== 0){prev->tl=l->tl;return;}}}}int Cyc_Hashtable_hash_string(
+struct _tagged_arr s){int ans=0;int sz=(int)_get_arr_size(s,sizeof(char));int shift=0;{
+int i=0;for(0;i < sz;++ i){ans=ans ^ *((const char*)_check_unknown_subscript(s,
+sizeof(char),i))<< shift;shift +=8;if(shift == 32)shift=0;}}return ans;}int Cyc_Hashtable_hash_stringptr(
+struct _tagged_arr*s){return Cyc_Hashtable_hash_string(*s);}void Cyc_Hashtable_insert_bucket(
+struct _tagged_arr tab,int(*hash)(void*),struct Cyc_List_List*elems){if(elems == 0)
+return;Cyc_Hashtable_insert_bucket(tab,hash,elems->tl);{void*key=(((struct
+_tuple0*)elems->hd)[_check_known_subscript_notnull(1,0)]).f1;void*val=(((struct
+_tuple0*)elems->hd)[_check_known_subscript_notnull(1,0)]).f2;int nidx=(int)((*
+hash)(key)% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));((struct Cyc_List_List**)
+tab.curr)[nidx]=(struct Cyc_List_List*)({struct Cyc_List_List*_tmp7=_cycalloc(
+sizeof(*_tmp7));_tmp7->hd=(struct _tuple0*)({struct _tuple0*_tmp8=_cycalloc(
+sizeof(*_tmp8));_tmp8->f1=key;_tmp8->f2=val;_tmp8;});_tmp7->tl=((struct Cyc_List_List**)
+tab.curr)[nidx];_tmp7;});}}void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
+struct _tagged_arr odata=t->tab;int osize=(int)_get_arr_size(odata,sizeof(struct Cyc_List_List*));
 int nsize=2 * osize + 1;struct Cyc_List_List*mt=0;struct _tagged_arr ndata=({
 unsigned int _tmp9=(unsigned int)nsize;struct Cyc_List_List**_tmpA=(struct Cyc_List_List**)
 _cycalloc(_check_times(sizeof(struct Cyc_List_List*),_tmp9));struct _tagged_arr

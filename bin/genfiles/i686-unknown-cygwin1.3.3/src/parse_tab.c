@@ -3028,14 +3028,13 @@ _get_arr_size(_tmp3E7,sizeof(char))- 2)))== '_': 0)?*((const char*)
 _check_unknown_subscript(_tmp3E7,sizeof(char),(int)(_get_arr_size(_tmp3E7,
 sizeof(char))- 3)))== '_': 0)_tmp3E7=(struct _tagged_arr)Cyc_substring((struct
 _tagged_arr)_tmp3E7,2,_get_arr_size(_tmp3E7,sizeof(char))- 5);{int i=0;for(0;i < 
-17;++ i){if(Cyc_strcmp((struct _tagged_arr)_tmp3E7,(struct _tagged_arr)(att_map[
-_check_known_subscript_notnull(17,i)]).f1)== 0){yyval=(void*)({struct Cyc_Attribute_tok_struct*
-_tmp3E8=_cycalloc(sizeof(*_tmp3E8));_tmp3E8[0]=({struct Cyc_Attribute_tok_struct
-_tmp3E9;_tmp3E9.tag=Cyc_Attribute_tok;_tmp3E9.f1=(void*)(att_map[
-_check_known_subscript_notnull(17,i)]).f2;_tmp3E9;});_tmp3E8;});break;}}if(i == 
-17){Cyc_Parse_err(({const char*_tmp3EA="unrecognized attribute";_tag_arr(_tmp3EA,
-sizeof(char),_get_zero_arr_size(_tmp3EA,23));}),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
+17;++ i){if(Cyc_strcmp((struct _tagged_arr)_tmp3E7,(struct _tagged_arr)(att_map[i]).f1)
+== 0){yyval=(void*)({struct Cyc_Attribute_tok_struct*_tmp3E8=_cycalloc(sizeof(*
+_tmp3E8));_tmp3E8[0]=({struct Cyc_Attribute_tok_struct _tmp3E9;_tmp3E9.tag=Cyc_Attribute_tok;
+_tmp3E9.f1=(void*)(att_map[i]).f2;_tmp3E9;});_tmp3E8;});break;}}if(i == 17){Cyc_Parse_err(({
+const char*_tmp3EA="unrecognized attribute";_tag_arr(_tmp3EA,sizeof(char),
+_get_zero_arr_size(_tmp3EA,23));}),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));yyval=(void*)({
 struct Cyc_Attribute_tok_struct*_tmp3EB=_cycalloc(sizeof(*_tmp3EB));_tmp3EB[0]=({
 struct Cyc_Attribute_tok_struct _tmp3EC;_tmp3EC.tag=Cyc_Attribute_tok;_tmp3EC.f1=(

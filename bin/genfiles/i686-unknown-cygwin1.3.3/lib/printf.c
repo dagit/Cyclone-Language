@@ -551,20 +551,19 @@ _tagged_arr s,char c,int n){int sz=(int)_get_arr_size(s,sizeof(char));n=n < sz?n
 for(0;n != 0;(n --,_tagged_arr_inplace_plus_post(& s,sizeof(char),1))){if(*((const
 char*)_check_unknown_subscript(s,sizeof(char),0))== c)return s;}return(struct
 _tagged_arr)_tag_arr(0,0,0);}static unsigned int Cyc_my_strlen(struct _tagged_arr s){
-unsigned int sz=_get_arr_size(s,sizeof(char));unsigned int i=0;while(i < sz?*((
-const char*)_check_unknown_subscript(s,sizeof(char),(int)i))!= 0: 0){i ++;}return i;}
-int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,struct _tagged_arr
-fmt0,struct _tagged_arr ap){struct _tagged_arr fmt;register int ch;register int n;struct
-_tagged_arr cp=_tag_arr(0,0,0);struct _tagged_arr cp2=(struct _tagged_arr)_tag_arr(0,
-0,0);struct _tagged_arr cp3=(struct _tagged_arr)_tag_arr(0,0,0);int which_cp;struct
-_tagged_arr fmark;register int flags;int ret;int width;int prec;char sign;char
-sign_string[2]={'\000','\000'};int softsign=0;double _double;int fpprec;
-unsigned int _ulong;int dprec;int dpad;int fieldsz;int size=0;char buf[349];{
-unsigned int _tmp47=348;unsigned int i;for(i=0;i < _tmp47;i ++){buf[i]='\000';}buf[
-_tmp47]=(char)0;}{char ox[2]={'\000','\000'};enum Cyc_BASE base;fmt=fmt0;ret=0;
-for(0;1;0){fmark=fmt;{unsigned int fmt_sz=_get_arr_size(fmt,sizeof(char));for(n=0;(
-n < fmt_sz?(ch=(int)*((const char*)_check_unknown_subscript(fmt,sizeof(char),n)))
-!= '\000': 0)?ch != '%': 0;n ++){;}fmt=_tagged_arr_plus(fmt,sizeof(char),n);if((n=(
+unsigned int sz=_get_arr_size(s,sizeof(char));unsigned int i=0;while(i < sz?((const
+char*)s.curr)[(int)i]!= 0: 0){i ++;}return i;}int Cyc__IO_vfprintf(int(*ioputc)(int,
+void*),void*ioputc_env,struct _tagged_arr fmt0,struct _tagged_arr ap){struct
+_tagged_arr fmt;register int ch;register int n;struct _tagged_arr cp=_tag_arr(0,0,0);
+struct _tagged_arr cp2=(struct _tagged_arr)_tag_arr(0,0,0);struct _tagged_arr cp3=(
+struct _tagged_arr)_tag_arr(0,0,0);int which_cp;struct _tagged_arr fmark;register int
+flags;int ret;int width;int prec;char sign;char sign_string[2]={'\000','\000'};int
+softsign=0;double _double;int fpprec;unsigned int _ulong;int dprec;int dpad;int
+fieldsz;int size=0;char buf[349];{unsigned int _tmp47=348;unsigned int i;for(i=0;i < 
+_tmp47;i ++){buf[i]='\000';}buf[_tmp47]=(char)0;}{char ox[2]={'\000','\000'};enum 
+Cyc_BASE base;fmt=fmt0;ret=0;for(0;1;0){fmark=fmt;{unsigned int fmt_sz=
+_get_arr_size(fmt,sizeof(char));for(n=0;(n < fmt_sz?(ch=(int)((const char*)fmt.curr)[
+n])!= '\000': 0)?ch != '%': 0;n ++){;}fmt=_tagged_arr_plus(fmt,sizeof(char),n);if((n=(
 fmt.curr - fmark.curr)/ sizeof(char))!= 0){do{if(Cyc__IO_sputn(ioputc,ioputc_env,
 fmark,n)!= n)goto error;}while(0);ret +=n;}if(ch == '\000')goto done;
 _tagged_arr_inplace_plus_post(& fmt,sizeof(char),1);flags=0;dprec=0;fpprec=0;
@@ -677,43 +676,42 @@ _get_arr_size(_tmp43,sizeof(char))== 1?_tmp44 == '\000'?_tmp45 != '\000': 0: 0)
 _throw_arraybounds();*((char*)_tmp43.curr)=_tmp45;});do{if(Cyc__IO_sputn(ioputc,
 ioputc_env,(struct _tagged_arr)({char*_tmp46=sign_string;_tag_arr(_tmp46,sizeof(
 char),_get_zero_arr_size(_tmp46,2));}),1)!= 1)goto error;}while(0);}else{if(flags
-& 64){ox[_check_known_subscript_notnull(2,0)]='0';ox[
-_check_known_subscript_notnull(2,1)]=(char)ch;do{if(Cyc__IO_nzsputn(ioputc,
-ioputc_env,_tag_arr(ox,sizeof(char),2),2)!= 2)goto error;}while(0);}}if((flags & (
-16 | 32))== 32){if(Cyc__IO_padn(ioputc,ioputc_env,'0',width - fieldsz)< width - 
-fieldsz)goto error;}if(Cyc__IO_padn(ioputc,ioputc_env,'0',dpad)< dpad)goto error;
-if(which_cp == 0)do{if(Cyc__IO_sputn(ioputc,ioputc_env,(struct _tagged_arr)cp,size)
-!= size)goto error;}while(0);else{if(which_cp == 2)do{if(Cyc__IO_sputn(ioputc,
-ioputc_env,cp2,size)!= size)goto error;}while(0);else{if(which_cp == 3)do{if(Cyc__IO_nzsputn(
-ioputc,ioputc_env,cp3,size)!= size)goto error;}while(0);}}if(Cyc__IO_padn(ioputc,
-ioputc_env,'0',fpprec)< fpprec)goto error;if(flags & 16){if(Cyc__IO_padn(ioputc,
-ioputc_env,' ',width - fieldsz)< width - fieldsz)goto error;}ret +=width > fieldsz?
-width: fieldsz;}}done: return ret;error: return - 1;}}static struct _tagged_arr Cyc_exponent(
-struct _tagged_arr p,int exp,int fmtch){struct _tagged_arr t;char expbuf[309];{
-unsigned int _tmp62=308;unsigned int i;for(i=0;i < _tmp62;i ++){expbuf[i]='0';}
-expbuf[_tmp62]=(char)0;}({struct _tagged_arr _tmp48=_tagged_arr_inplace_plus_post(&
-p,sizeof(char),1);char _tmp49=*((char*)_check_unknown_subscript(_tmp48,sizeof(
-char),0));char _tmp4A=(char)fmtch;if(_get_arr_size(_tmp48,sizeof(char))== 1?
-_tmp49 == '\000'?_tmp4A != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp48.curr)=
-_tmp4A;});if(exp < 0){exp=- exp;({struct _tagged_arr _tmp4B=
-_tagged_arr_inplace_plus_post(& p,sizeof(char),1);char _tmp4C=*((char*)
-_check_unknown_subscript(_tmp4B,sizeof(char),0));char _tmp4D='-';if(_get_arr_size(
-_tmp4B,sizeof(char))== 1?_tmp4C == '\000'?_tmp4D != '\000': 0: 0)_throw_arraybounds();*((
-char*)_tmp4B.curr)=_tmp4D;});}else{({struct _tagged_arr _tmp4E=
-_tagged_arr_inplace_plus_post(& p,sizeof(char),1);char _tmp4F=*((char*)
-_check_unknown_subscript(_tmp4E,sizeof(char),0));char _tmp50='+';if(_get_arr_size(
-_tmp4E,sizeof(char))== 1?_tmp4F == '\000'?_tmp50 != '\000': 0: 0)_throw_arraybounds();*((
-char*)_tmp4E.curr)=_tmp50;});}t=_tagged_arr_plus(({char*_tmp51=expbuf;_tag_arr(
-_tmp51,sizeof(char),_get_zero_arr_size(_tmp51,309));}),sizeof(char),308);if(exp > 
-9){do{({struct _tagged_arr _tmp52=_tagged_arr_inplace_plus(& t,sizeof(char),-1);
-char _tmp53=*((char*)_check_unknown_subscript(_tmp52,sizeof(char),0));char _tmp54=(
-char)(exp % 10 + '0');if(_get_arr_size(_tmp52,sizeof(char))== 1?_tmp53 == '\000'?
-_tmp54 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp52.curr)=_tmp54;});}while((
-exp /=10)> 9);({struct _tagged_arr _tmp55=_tagged_arr_inplace_plus(& t,sizeof(char),
--1);char _tmp56=*((char*)_check_unknown_subscript(_tmp55,sizeof(char),0));char
-_tmp57=(char)(exp + '0');if(_get_arr_size(_tmp55,sizeof(char))== 1?_tmp56 == '\000'?
-_tmp57 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp55.curr)=_tmp57;});for(0;t.curr
-< (_tagged_arr_plus(({char*_tmp58=expbuf;_tag_arr(_tmp58,sizeof(char),
+& 64){ox[0]='0';ox[1]=(char)ch;do{if(Cyc__IO_nzsputn(ioputc,ioputc_env,_tag_arr(
+ox,sizeof(char),2),2)!= 2)goto error;}while(0);}}if((flags & (16 | 32))== 32){if(
+Cyc__IO_padn(ioputc,ioputc_env,'0',width - fieldsz)< width - fieldsz)goto error;}
+if(Cyc__IO_padn(ioputc,ioputc_env,'0',dpad)< dpad)goto error;if(which_cp == 0)do{
+if(Cyc__IO_sputn(ioputc,ioputc_env,(struct _tagged_arr)cp,size)!= size)goto error;}while(
+0);else{if(which_cp == 2)do{if(Cyc__IO_sputn(ioputc,ioputc_env,cp2,size)!= size)
+goto error;}while(0);else{if(which_cp == 3)do{if(Cyc__IO_nzsputn(ioputc,ioputc_env,
+cp3,size)!= size)goto error;}while(0);}}if(Cyc__IO_padn(ioputc,ioputc_env,'0',
+fpprec)< fpprec)goto error;if(flags & 16){if(Cyc__IO_padn(ioputc,ioputc_env,' ',
+width - fieldsz)< width - fieldsz)goto error;}ret +=width > fieldsz?width: fieldsz;}}
+done: return ret;error: return - 1;}}static struct _tagged_arr Cyc_exponent(struct
+_tagged_arr p,int exp,int fmtch){struct _tagged_arr t;char expbuf[309];{unsigned int
+_tmp62=308;unsigned int i;for(i=0;i < _tmp62;i ++){expbuf[i]='0';}expbuf[_tmp62]=(
+char)0;}({struct _tagged_arr _tmp48=_tagged_arr_inplace_plus_post(& p,sizeof(char),
+1);char _tmp49=*((char*)_check_unknown_subscript(_tmp48,sizeof(char),0));char
+_tmp4A=(char)fmtch;if(_get_arr_size(_tmp48,sizeof(char))== 1?_tmp49 == '\000'?
+_tmp4A != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp48.curr)=_tmp4A;});if(exp < 
+0){exp=- exp;({struct _tagged_arr _tmp4B=_tagged_arr_inplace_plus_post(& p,sizeof(
+char),1);char _tmp4C=*((char*)_check_unknown_subscript(_tmp4B,sizeof(char),0));
+char _tmp4D='-';if(_get_arr_size(_tmp4B,sizeof(char))== 1?_tmp4C == '\000'?_tmp4D
+!= '\000': 0: 0)_throw_arraybounds();*((char*)_tmp4B.curr)=_tmp4D;});}else{({
+struct _tagged_arr _tmp4E=_tagged_arr_inplace_plus_post(& p,sizeof(char),1);char
+_tmp4F=*((char*)_check_unknown_subscript(_tmp4E,sizeof(char),0));char _tmp50='+';
+if(_get_arr_size(_tmp4E,sizeof(char))== 1?_tmp4F == '\000'?_tmp50 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp4E.curr)=_tmp50;});}t=_tagged_arr_plus(({char*
+_tmp51=expbuf;_tag_arr(_tmp51,sizeof(char),_get_zero_arr_size(_tmp51,309));}),
+sizeof(char),308);if(exp > 9){do{({struct _tagged_arr _tmp52=
+_tagged_arr_inplace_plus(& t,sizeof(char),-1);char _tmp53=*((char*)
+_check_unknown_subscript(_tmp52,sizeof(char),0));char _tmp54=(char)(exp % 10 + '0');
+if(_get_arr_size(_tmp52,sizeof(char))== 1?_tmp53 == '\000'?_tmp54 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp52.curr)=_tmp54;});}while((exp /=10)> 9);({
+struct _tagged_arr _tmp55=_tagged_arr_inplace_plus(& t,sizeof(char),-1);char _tmp56=*((
+char*)_check_unknown_subscript(_tmp55,sizeof(char),0));char _tmp57=(char)(exp + '0');
+if(_get_arr_size(_tmp55,sizeof(char))== 1?_tmp56 == '\000'?_tmp57 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp55.curr)=_tmp57;});for(0;t.curr < (
+_tagged_arr_plus(({char*_tmp58=expbuf;_tag_arr(_tmp58,sizeof(char),
 _get_zero_arr_size(_tmp58,309));}),sizeof(char),308)).curr;({struct _tagged_arr
 _tmp59=_tagged_arr_inplace_plus_post(& p,sizeof(char),1);char _tmp5A=*((char*)
 _check_unknown_subscript(_tmp59,sizeof(char),0));char _tmp5B=*((char*)

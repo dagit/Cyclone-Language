@@ -489,81 +489,73 @@ _check_unknown_subscript(bvec,sizeof(int),word))=*((int*)
 _check_unknown_subscript(bvec,sizeof(int),word))& ~(1 << offset);}int Cyc_Bitvec_get_and_set(
 struct _tagged_arr bvec,int pos){int word=pos >> 5;int offset=pos & 31;int slot=*((int*)
 _check_unknown_subscript(bvec,sizeof(int),word));int ans=(slot >> offset & 1)== 1;
-if(!ans)*((int*)_check_unknown_subscript(bvec,sizeof(int),word))=slot | 1 << 
-offset;return ans;}void Cyc_Bitvec_union_two(struct _tagged_arr dest,struct
-_tagged_arr src1,struct _tagged_arr src2){unsigned int len=_get_arr_size(dest,
-sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= _get_arr_size(src2,
-sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct _tagged_arr file,
-unsigned int line))Cyc___assert_fail)(({const char*_tmp0="len <= src1.size && len <= src2.size";
+if(!ans)((int*)bvec.curr)[word]=slot | 1 << offset;return ans;}void Cyc_Bitvec_union_two(
+struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2){unsigned int
+len=_get_arr_size(dest,sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= 
+_get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct
+_tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="len <= src1.size && len <= src2.size";
 _tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*_tmp1="bitvec.cyc";
 _tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,11));}),71);{int i=0;for(0;i
-< len;++ i){*((int*)_check_unknown_subscript(dest,sizeof(int),i))=*((int*)
-_check_unknown_subscript(src1,sizeof(int),i))| *((int*)_check_unknown_subscript(
-src2,sizeof(int),i));}}}void Cyc_Bitvec_intersect_two(struct _tagged_arr dest,
-struct _tagged_arr src1,struct _tagged_arr src2){unsigned int len=_get_arr_size(dest,
-sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= _get_arr_size(src2,
-sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct _tagged_arr file,
-unsigned int line))Cyc___assert_fail)(({const char*_tmp2="len <= src1.size && len <= src2.size";
-_tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,37));}),({const char*_tmp3="bitvec.cyc";
-_tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),78);{int i=0;for(0;i
-< len;++ i){*((int*)_check_unknown_subscript(dest,sizeof(int),i))=*((int*)
-_check_unknown_subscript(src1,sizeof(int),i))& *((int*)_check_unknown_subscript(
-src2,sizeof(int),i));}}}void Cyc_Bitvec_diff_two(struct _tagged_arr dest,struct
-_tagged_arr src1,struct _tagged_arr src2){unsigned int len=_get_arr_size(dest,
-sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= _get_arr_size(src2,
-sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct _tagged_arr file,
-unsigned int line))Cyc___assert_fail)(({const char*_tmp4="len <= src1.size && len <= src2.size";
+< len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]| ((int*)src2.curr)[i];}}}
+void Cyc_Bitvec_intersect_two(struct _tagged_arr dest,struct _tagged_arr src1,struct
+_tagged_arr src2){unsigned int len=_get_arr_size(dest,sizeof(int));(len <= 
+_get_arr_size(src1,sizeof(int))?len <= _get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(
+struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({
+const char*_tmp2="len <= src1.size && len <= src2.size";_tag_arr(_tmp2,sizeof(
+char),_get_zero_arr_size(_tmp2,37));}),({const char*_tmp3="bitvec.cyc";_tag_arr(
+_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),78);{int i=0;for(0;i < len;++ i){((
+int*)dest.curr)[i]=((int*)src1.curr)[i]& ((int*)src2.curr)[i];}}}void Cyc_Bitvec_diff_two(
+struct _tagged_arr dest,struct _tagged_arr src1,struct _tagged_arr src2){unsigned int
+len=_get_arr_size(dest,sizeof(int));(len <= _get_arr_size(src1,sizeof(int))?len <= 
+_get_arr_size(src2,sizeof(int)): 0)?0:((int(*)(struct _tagged_arr assertion,struct
+_tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp4="len <= src1.size && len <= src2.size";
 _tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,37));}),({const char*_tmp5="bitvec.cyc";
 _tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,11));}),85);{int i=0;for(0;i
-< len;++ i){*((int*)_check_unknown_subscript(dest,sizeof(int),i))=*((int*)
-_check_unknown_subscript(src1,sizeof(int),i))& ~(*((int*)
-_check_unknown_subscript(src2,sizeof(int),i)));}}}int Cyc_Bitvec_compare_two(
-struct _tagged_arr src1,struct _tagged_arr src2){unsigned int len=_get_arr_size(src1,
-sizeof(int));len <= _get_arr_size(src2,sizeof(int))?0:((int(*)(struct _tagged_arr
-assertion,struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*
-_tmp6="len <= src2.size";_tag_arr(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,17));}),({
-const char*_tmp7="bitvec.cyc";_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(
-_tmp7,11));}),92);{int i=0;for(0;i < len;++ i){if(*((int*)_check_unknown_subscript(
-src1,sizeof(int),i))!= *((int*)_check_unknown_subscript(src2,sizeof(int),i)))
-return 0;}}return 1;}struct _tagged_arr Cyc_Bitvec_new_empty(int sz){struct
-_tagged_arr ans=({unsigned int _tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)
-_cycalloc_atomic(_check_times(sizeof(int),_tmp8));struct _tagged_arr _tmpB=
-_tag_arr(_tmp9,sizeof(int),_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;
-i < _tmpA;i ++){_tmp9[i]=0;}}_tmpB;});return ans;}struct _tagged_arr Cyc_Bitvec_new_full(
-int sz){struct _tagged_arr ans=({unsigned int _tmpC=(unsigned int)(sz / 32 + 1);int*
-_tmpD=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmpC));struct _tagged_arr
-_tmpF=_tag_arr(_tmpD,sizeof(int),_tmpC);{unsigned int _tmpE=_tmpC;unsigned int i;
-for(i=0;i < _tmpE;i ++){_tmpD[i]=-1;}}_tmpF;});return ans;}struct _tagged_arr Cyc_Bitvec_new_copy(
-struct _tagged_arr old){struct _tagged_arr copy=Cyc_Bitvec_new_empty((int)
-_get_arr_size(old,sizeof(int)));Cyc_Bitvec_union_two(copy,copy,old);return copy;}
-struct _tagged_arr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict*d,int(*f)(void*),int sz,
-struct Cyc_List_List*l){struct _tagged_arr ans=({unsigned int _tmp10=(unsigned int)(
-sz % 32 + 1);int*_tmp11=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmp10));
-struct _tagged_arr _tmp13=_tag_arr(_tmp11,sizeof(int),_tmp10);{unsigned int _tmp12=
-_tmp10;unsigned int i;for(i=0;i < _tmp12;i ++){_tmp11[i]=0;}}_tmp13;});for(0;l != 0;
-l=l->tl){Cyc_Bitvec_set(ans,f(Cyc_Dict_lookup(d,(void*)l->hd)));}return ans;}
-struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(struct _tagged_arr bvec,int sz){
-struct Cyc_List_List*ans=0;{int pos=sz - 1;for(0;pos >= 0;0){int word=pos >> 5;int bits=*((
-int*)_check_unknown_subscript(bvec,sizeof(int),word));int offset=pos & 31;for(0;
-offset >= 0;(-- offset,-- pos)){if((bits >> offset & 1)== 1)ans=({struct Cyc_List_List*
-_tmp14=_cycalloc(sizeof(struct Cyc_List_List)* 1);_tmp14[0]=({struct Cyc_List_List
-_tmp15;_tmp15.hd=(void*)pos;_tmp15.tl=ans;_tmp15;});_tmp14;});}}}return ans;}void
-Cyc_Bitvec_clear_all(struct _tagged_arr bvec){unsigned int len=_get_arr_size(bvec,
-sizeof(int));int i=0;for(0;i < len;++ i){*((int*)_check_unknown_subscript(bvec,
-sizeof(int),i))=0;}}void Cyc_Bitvec_set_all(struct _tagged_arr bvec){unsigned int
-len=_get_arr_size(bvec,sizeof(int));int i=0;for(0;i < len;++ i){*((int*)
-_check_unknown_subscript(bvec,sizeof(int),i))=-1;}}int Cyc_Bitvec_all_set(struct
-_tagged_arr bvec,int sz){int words=sz >> 5;words < _get_arr_size(bvec,sizeof(int))?0:((
-int(*)(struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line))Cyc___assert_fail)(({
-const char*_tmp16="words < bvec.size";_tag_arr(_tmp16,sizeof(char),
-_get_zero_arr_size(_tmp16,18));}),({const char*_tmp17="bitvec.cyc";_tag_arr(
-_tmp17,sizeof(char),_get_zero_arr_size(_tmp17,11));}),149);{int i=0;for(0;i < 
-words;i ++){if(*((int*)_check_unknown_subscript(bvec,sizeof(int),i))!= -1)return 0;}}{
-int i=words * 32;for(0;i < sz;i ++){if(!Cyc_Bitvec_get(bvec,i))return 0;}}return 1;}
-void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec){{int i=0;for(0;i < 32 * 
-_get_arr_size(bvec,sizeof(int));++ i){({struct Cyc_Int_pa_struct _tmp1A;_tmp1A.tag=
-1;_tmp1A.f1=(unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0);{void*_tmp18[1]={& _tmp1A};
-Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,sizeof(char),
-_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({void*
-_tmp1B[0]={};Cyc_printf(({const char*_tmp1C="\n";_tag_arr(_tmp1C,sizeof(char),
+< len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]& ~((int*)src2.curr)[i];}}}
+int Cyc_Bitvec_compare_two(struct _tagged_arr src1,struct _tagged_arr src2){
+unsigned int len=_get_arr_size(src1,sizeof(int));len <= _get_arr_size(src2,sizeof(
+int))?0:((int(*)(struct _tagged_arr assertion,struct _tagged_arr file,unsigned int
+line))Cyc___assert_fail)(({const char*_tmp6="len <= src2.size";_tag_arr(_tmp6,
+sizeof(char),_get_zero_arr_size(_tmp6,17));}),({const char*_tmp7="bitvec.cyc";
+_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,11));}),92);{int i=0;for(0;i
+< len;++ i){if(((int*)src1.curr)[i]!= ((int*)src2.curr)[i])return 0;}}return 1;}
+struct _tagged_arr Cyc_Bitvec_new_empty(int sz){struct _tagged_arr ans=({unsigned int
+_tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)_cycalloc_atomic(_check_times(
+sizeof(int),_tmp8));struct _tagged_arr _tmpB=_tag_arr(_tmp9,sizeof(int),_tmp8);{
+unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < _tmpA;i ++){_tmp9[i]=0;}}_tmpB;});
+return ans;}struct _tagged_arr Cyc_Bitvec_new_full(int sz){struct _tagged_arr ans=({
+unsigned int _tmpC=(unsigned int)(sz / 32 + 1);int*_tmpD=(int*)_cycalloc_atomic(
+_check_times(sizeof(int),_tmpC));struct _tagged_arr _tmpF=_tag_arr(_tmpD,sizeof(
+int),_tmpC);{unsigned int _tmpE=_tmpC;unsigned int i;for(i=0;i < _tmpE;i ++){_tmpD[i]=
+-1;}}_tmpF;});return ans;}struct _tagged_arr Cyc_Bitvec_new_copy(struct _tagged_arr
+old){struct _tagged_arr copy=Cyc_Bitvec_new_empty((int)_get_arr_size(old,sizeof(
+int)));Cyc_Bitvec_union_two(copy,copy,old);return copy;}struct _tagged_arr Cyc_Bitvec_from_list(
+struct Cyc_Dict_Dict*d,int(*f)(void*),int sz,struct Cyc_List_List*l){struct
+_tagged_arr ans=({unsigned int _tmp10=(unsigned int)(sz % 32 + 1);int*_tmp11=(int*)
+_cycalloc_atomic(_check_times(sizeof(int),_tmp10));struct _tagged_arr _tmp13=
+_tag_arr(_tmp11,sizeof(int),_tmp10);{unsigned int _tmp12=_tmp10;unsigned int i;
+for(i=0;i < _tmp12;i ++){_tmp11[i]=0;}}_tmp13;});for(0;l != 0;l=l->tl){Cyc_Bitvec_set(
+ans,f(Cyc_Dict_lookup(d,(void*)l->hd)));}return ans;}struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
+struct _tagged_arr bvec,int sz){struct Cyc_List_List*ans=0;{int pos=sz - 1;for(0;pos >= 
+0;0){int word=pos >> 5;int bits=*((int*)_check_unknown_subscript(bvec,sizeof(int),
+word));int offset=pos & 31;for(0;offset >= 0;(-- offset,-- pos)){if((bits >> offset & 1)
+== 1)ans=({struct Cyc_List_List*_tmp14=_cycalloc(sizeof(struct Cyc_List_List)* 1);
+_tmp14[0]=({struct Cyc_List_List _tmp15;_tmp15.hd=(void*)pos;_tmp15.tl=ans;_tmp15;});
+_tmp14;});}}}return ans;}void Cyc_Bitvec_clear_all(struct _tagged_arr bvec){
+unsigned int len=_get_arr_size(bvec,sizeof(int));int i=0;for(0;i < len;++ i){((int*)
+bvec.curr)[i]=0;}}void Cyc_Bitvec_set_all(struct _tagged_arr bvec){unsigned int len=
+_get_arr_size(bvec,sizeof(int));int i=0;for(0;i < len;++ i){((int*)bvec.curr)[i]=-1;}}
+int Cyc_Bitvec_all_set(struct _tagged_arr bvec,int sz){int words=sz >> 5;words < 
+_get_arr_size(bvec,sizeof(int))?0:((int(*)(struct _tagged_arr assertion,struct
+_tagged_arr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp16="words < bvec.size";
+_tag_arr(_tmp16,sizeof(char),_get_zero_arr_size(_tmp16,18));}),({const char*
+_tmp17="bitvec.cyc";_tag_arr(_tmp17,sizeof(char),_get_zero_arr_size(_tmp17,11));}),
+149);{int i=0;for(0;i < words;i ++){if(*((int*)_check_unknown_subscript(bvec,
+sizeof(int),i))!= -1)return 0;}}{int i=words * 32;for(0;i < sz;i ++){if(!Cyc_Bitvec_get(
+bvec,i))return 0;}}return 1;}void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec){{int
+i=0;for(0;i < 32 * _get_arr_size(bvec,sizeof(int));++ i){({struct Cyc_Int_pa_struct
+_tmp1A;_tmp1A.tag=1;_tmp1A.f1=(unsigned int)(Cyc_Bitvec_get(bvec,i)?1: 0);{void*
+_tmp18[1]={& _tmp1A};Cyc_printf(({const char*_tmp19="%d";_tag_arr(_tmp19,sizeof(
+char),_get_zero_arr_size(_tmp19,3));}),_tag_arr(_tmp18,sizeof(void*),1));}});}}({
+void*_tmp1B[0]={};Cyc_printf(({const char*_tmp1C="\n";_tag_arr(_tmp1C,sizeof(char),
 _get_zero_arr_size(_tmp1C,2));}),_tag_arr(_tmp1B,sizeof(void*),0));});}

@@ -2243,7 +2243,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch (conref_def(bounds_one,b)) {
       case &AbsUpper_b(_): break;
       default:
-	let in_bnds = check_bounds(relns,e1,e2);
+	in_bnds = check_bounds(relns,e1,e2);
 	if(warn_bounds_checks && !in_bnds) 
 	  Tcutil::warn(e->loc,"bounds check necessary for %s", exp2string(e));
 #ifdef BCE_DEBUG
