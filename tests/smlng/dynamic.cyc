@@ -45,30 +45,33 @@ static entry_t size_table[INPUT_SIZE*INPUT_SIZE*VAL_WIDTH];
 
 // curr_pos must be an int -- this is for the entire sequence
 static void flatten_vals(doc_t doc, $(doc_t,val_t) ?@`r doc_arr, 
-			 int @`r curr_pos, val_t lowest_val, val_t num_vals) {
+			 int @`r curr_pos, val_t lowest_val, val_t num_vals,
+			 bool @{VAL_WIDTH}`r vals_occur) {
   doc_t next_doc;
-  val_t next_size;
+  val_t next_val;
   switch(doc) {
   case Mt:             return;
   case &Spc(_):        fallthru;
-  case &Text(_):       next_doc = doc; next_size = num_vals - 1;    break;
-  case &Tagged(tag,d): next_doc = d;   next_size = tag - lowest_val; break;
+  case &Text(_):       next_doc = doc; next_val = num_vals - 1;    break;
+  case &Tagged(tag,d): next_doc = d;   next_val = tag - lowest_val; break;
   case &Seq(ds): 
     for(; ds != null; ds = ds->tl)
-      flatten_vals(ds->hd,doc_arr,curr_pos,lowest_val,num_vals);
+      flatten_vals(ds->hd,doc_arr,curr_pos,lowest_val,num_vals,vals_occur);
     return;
   }
   if(*curr_pos == (*doc_arr).size)
     *doc_arr = new {for i < (*doc_arr).size*2: 
 		    i < (*doc_arr).size ? (*doc_arr)[i] : $(Mt,0)};
-  (*doc_arr)[(*curr_pos)++] = $(next_doc,next_size);
+  vals_occur[next_val] = true;
+  (*doc_arr)[(*curr_pos)++] = $(next_doc,next_val);
   return;
 }
 
 // TO DO: Decide where the size/recomoputation trade-offs are
 
 static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right, 
-			    val_t outer_val, val_t lowest_val, val_t num_vals){
+			    val_t outer_val, val_t lowest_val, val_t num_vals,
+			    bool @{VAL_WIDTH}`r vals_occur){
   //  fprintf(stderr,"^%d %d ^", left,right);
   if(left == right) {
     // fprintf(stderr,"\n|%d %d %d %d|", outer_val,left,right,doc_arr[left][1]);
@@ -82,6 +85,8 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
   val_t  left_val    = num_vals-1;
   cost_t left_cost = MAX_COST;
   for(val_t s=0; s < num_vals; ++s) {
+    if(!vals_occur[s])
+      continue;
     cost_t this_cost = COST_OF_ENTRY(S(left,split_point,s));
     if(this_cost != MAX_COST && s != outer_val)
       ++this_cost;
@@ -93,6 +98,8 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
   val_t  right_val  = num_vals-1;
   cost_t right_cost = MAX_COST;
   for(int s=0; s < num_vals; ++s) {
+    if(!vals_occur[s])
+      continue;
     cost_t this_cost = COST_OF_ENTRY(S(split_point+1,right,s));
     if(this_cost != MAX_COST && s != outer_val)
       ++this_cost;
@@ -104,9 +111,9 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
   //  fprintf(stderr,"\n|%d %d %d %d %d %d|", 
   //  outer_val, left_val, right_val, left, split_point, right);
   doc_t left_doc  = unflatten_vals(doc_arr,left,split_point,left_val,
-				   lowest_val,num_vals);
+				   lowest_val,num_vals,vals_occur);
   doc_t right_doc = unflatten_vals(doc_arr,split_point+1,right,right_val,
-				   lowest_val,num_vals);
+				   lowest_val,num_vals,vals_occur);
   if(left_val == right_val && left_val != outer_val)
     return new Tagged(left_val + lowest_val, 
 		      new Seq(new List(left_doc, new List(right_doc, null))));
@@ -121,8 +128,9 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
 static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
   list_t<doc_t> ans = null;
   $(doc_t,val_t) ? doc_arr = new {for i < INPUT_SIZE : $(Mt,0)};
+  bool vals_occur[VAL_WIDTH] = {for i < VAL_WIDTH : false};
   int curr_pos = 0;
-  flatten_vals(doc, &doc_arr, &curr_pos, lowest_val, num_vals);
+  flatten_vals(doc, &doc_arr, &curr_pos, lowest_val, num_vals, vals_occur);
   int arr_size = curr_pos;
   curr_pos = 0;
   for(; curr_pos < arr_size; curr_pos += INPUT_SIZE) {
@@ -133,6 +141,8 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
     // need to check time in here!!!
     for (pos_t i = 0; i < input_size; i++)
       for (val_t s = 0; s < num_vals; s++) {
+	if(!vals_occur[s])
+	  continue;
 	val_t this_val = doc_arr[curr_pos+i][1];
 	cost_t this_cost;
 	if(this_val != s)
@@ -147,13 +157,16 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
     for (pos_t d = 1; d < input_size; d++)
       for (val_t s = 0; s < num_vals; s++)
 	for (pos_t i = 0; i+d < input_size; i++) {
-	  //	  fprintf(stderr,"#");
 	  pos_t  j = i+d;
 	  cost_t min_cost = MAX_COST;
 	  pos_t  min_ind  = num_vals-1;
 	  for (pos_t k = i; k < j; k++)
-	    for (val_t s1 = 0; s1 < num_vals; s1++)
-	      for (val_t s2 = 0; s2 < num_vals; s2++) 
+	    for (val_t s1 = 0; s1 < num_vals; s1++) {
+	      if(!vals_occur[s1])
+		continue;
+	      for (val_t s2 = 0; s2 < num_vals; s2++) {
+		if(!vals_occur[s2])
+		  continue;
 		if ((s1!=num_vals-1 && s2!=num_vals-1) || s==num_vals-1) {
 		  cost_t left  = COST_OF_ENTRY(S(i,  k,s1));
 		  cost_t right = COST_OF_ENTRY(S(k+1,j,s2));
@@ -167,6 +180,8 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
 		    min_ind   = k;
 		  }
 		}
+	      }
+	    }
 	  //  fprintf(stderr,"\n#(%d,%d,%d,%d) = %d#", i,j,s,min_ind,min_cost);
 	  S(i,j,s) = MAKE_ENTRY(min_cost,min_ind);
 	  //  fprintf(stderr,"#");
@@ -175,6 +190,8 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
     val_t  left_val  = num_vals-1;
     cost_t left_cost = MAX_COST;
     for(val_t s=0; s < num_vals; ++s) {
+      if(!vals_occur[s])
+	continue;	
       cost_t this_cost = COST_OF_ENTRY(S(0,input_size-1,s));
       if(this_cost != MAX_COST && s != num_vals-1)
 	++this_cost;
@@ -184,7 +201,7 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
       }
     }
     doc_t next = unflatten_vals(doc_arr+curr_pos, 0, input_size-1, left_val,
-				lowest_val, num_vals);
+				lowest_val, num_vals, vals_occur);
     if(left_val != num_vals-1)
       next = new Tagged(left_val + lowest_val, next);
     ans = new List(next, ans);
