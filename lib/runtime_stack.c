@@ -79,6 +79,8 @@ struct _RuntimeStack * _top_frame() {
 struct _RuntimeStack * _pop_frame_until(int tag) {
   struct _RuntimeStack *current_frame = get_current_frame();
   while (current_frame != NULL && current_frame->tag != tag) {
+    if (current_frame->cleanup != NULL)
+      current_frame->cleanup(current_frame);
     set_current_frame(current_frame->next);
     current_frame = get_current_frame();
   }
