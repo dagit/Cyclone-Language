@@ -581,7 +581,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       switch(rvals->hd) {
       case &Aggregate(rdict): 
 	return $(f2,Dict::lookup(rdict,
-				fieldname(Evexp::eval_const_uint_exp(e2))));
+				 fieldname(Evexp::eval_const_uint_exp(e2)[0])));
       default: throw new Core::Impossible("anal_Rexp: Subscript");
       }
     default: break;
@@ -796,10 +796,11 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     let $(f,r) = anal_Rexp(env,inflow,e1);
     return anal_derefL(env,inflow,f,e1,r,flds);
 
-  case &Subscript_e(e1,e2): // assumes that tuple-projection implies e2 is pure
+  case &Subscript_e(e1,e2): 
+    // assumes that tuple-projection implies e2 is pure and is evaluable
     switch(Tcutil::compress(e1->topt->v)) {
     case &TupleType(_):
-      let fld = fieldname(Evexp::eval_const_uint_exp(e2));
+      let fld = fieldname(Evexp::eval_const_uint_exp(e2)[0]);
       return anal_Lexp_rec(env,inflow,e1,new List(fld,flds));
     default: break;
     }

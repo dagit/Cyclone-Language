@@ -383,7 +383,10 @@ static bool has_bitfield(aggrfield_t sf) {
 }
 
 static int add_bitfield_sizes(int total, aggrfield_t sf) {
-  return Evexp::eval_const_uint_exp((exp_t)sf->width) + total;
+  let $(i,known) = Evexp::eval_const_uint_exp((exp_t)sf->width);
+  if(!known)
+    Tcutil::impos("add_bitfield_sizes: sizeof or offsetof in bitfield size");
+  return i + total;
 }
 
 static type_t select_structfield_type(aggrfield_t sf) {
@@ -407,7 +410,7 @@ static $(field_name_t,type_t)@ select_structfield_nmtype(aggrfield_t sf) {
 $(int, qvar_t)@ select_enumfield_tagnm(enumfield_t ef) {
   if(ef->tag == NULL)
     Tcutil::impos("Enum tag exp should be filled in by now");
-  return new $((int)Evexp::eval_const_uint_exp((_@)ef->tag),ef->name);
+  return new $((int)Evexp::eval_const_uint_exp((_@)ef->tag)[0],ef->name);
 }
 
 // trickiness: fwd_decls only used if creating a new ri, ignroed if updateing existing
@@ -996,13 +999,11 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       let &$(dict2,base_info) = lookupRep(te,dict,loc,pt.elt_typ);
       dict = dict2;
       
-      // e must be a constant; evaluate it
-      unsigned int bound = Evexp::eval_const_uint_exp(e);
       // tunion Typestruct.ThinPtr gen = ThinPtr(`bound`,`base_info->exp`);
       let d1 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				       typerep_name(&thinptr_str), 
 				       varname,
-				       list(cnst_int(bound,loc),
+				       list(e,
 					    (exp_t)base_info->exp),Static,loc);
       
 	
@@ -1043,14 +1044,12 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     // get info for base type
     let &$(dict2,base_info) = lookupRep(te,dict,loc,arrtype);
     dict = dict2;
-    // e must be a constant; evaluate it
-    unsigned int bound = Evexp::eval_const_uint_exp((exp_t)e);
     // tunion Typestruct.ThinPtr gen = ThinPtr(`bound`,`base_info->exp`);
     let varname = toplevel_name(new_gen_id("rep"));
     let d1 = tunion_constructor_decl(typerep_name(&typestruct_str),
 				     typerep_name(&thinptr_str), 
 				     varname,
-				     list(cnst_int(bound,loc),
+				     list((exp_t)e,
 					  (exp_t)base_info->exp),Static,loc);
     dict = update_info(dict,
 		       type,

@@ -492,12 +492,7 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   case $(Unknown_b,Unknown_b): return 0;
   case $(Unknown_b,_): return -1;
   case $(_,Unknown_b): return 1;
-  case $(&Upper_b(e1),&Upper_b(e2)): 
-    int i1 = Evexp::eval_const_uint_exp(e1);
-    int i2 = Evexp::eval_const_uint_exp(e2);
-    if (i1 == i2) return 0;
-    if (i1 < i2) return -1;
-    return 1;
+  case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
   }
 }
 
@@ -1030,8 +1025,7 @@ void unify_it(type_t t1, type_t t2) {
         bad = true; 
         break;
       }
-      if (Evexp::eval_const_uint_exp((exp_t)f1->tag) !=
-          Evexp::eval_const_uint_exp((exp_t)f2->tag)) {
+      if(!Evexp::same_const_exp((exp_t)f1->tag, (exp_t)f2->tag)) {
         failure_reason = "(different tag values for enum fields)";
         bad = true;
         break;
@@ -1104,8 +1098,7 @@ void unify_it(type_t t1, type_t t2) {
     unify_it(t1a,t2a);
     if (e1 == e2) return;
     if (e1 == NULL || e2 == NULL) break;
-    if (Evexp::eval_const_uint_exp((exp_t)e1) == 
-        Evexp::eval_const_uint_exp((exp_t)e2))
+    if (Evexp::same_const_exp((exp_t)e1, (exp_t)e2))
       return;
     failure_reason = "(different array sizes)";
     break;
@@ -1237,8 +1230,7 @@ void unify_it(type_t t1, type_t t2) {
       if ((f1->width != NULL && f2->width == NULL) ||
           (f2->width != NULL && f1->width == NULL) ||
           (f1->width != NULL && f2->width != NULL &&
-           Evexp::eval_const_uint_exp((exp_t)f1->width) != 
-           Evexp::eval_const_uint_exp((exp_t)f2->width))) {
+	   !Evexp::same_const_exp((exp_t)f1->width, (exp_t)f2->width))) {
         t1_failure = t1; 
         t2_failure = t2;
         failure_reason = "(different bitfield widths on member)";
@@ -1328,11 +1320,6 @@ static int tqual_type_cmp($(tqual_t,type_t)@ tqt1, $(tqual_t,type_t)@tqt2) {
   return typecmp(t1,t2);
 }
 
-static int const_uint_exp_cmp(exp_t e1, exp_t e2) {
-  return intcmp(Evexp::eval_const_uint_exp(e1),
-		Evexp::eval_const_uint_exp(e2));
-}
-
 static int attribute_case_number(attribute_t att) {
   switch(att) {
     case &Regparm_att(_): return 0; 
@@ -1385,13 +1372,13 @@ static int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
   if(tc != 0) return tc;
   let ac = list_cmp(attribute_cmp,f1->attributes, f2->attributes);
   if(ac != 0) return ac;
-  return star_cmp(const_uint_exp_cmp,f1->width, f2->width);
+  return star_cmp(Evexp::const_exp_cmp,f1->width, f2->width);
 }
 
 static int enumfield_cmp(enumfield_t e1, enumfield_t e2) {
   let qc = qvar_cmp(e1->name,e2->name);
   if(qc != 0) return qc;
-  return star_cmp(const_uint_exp_cmp,e1->tag,e2->tag);
+  return star_cmp(Evexp::const_exp_cmp,e1->tag,e2->tag);
 }
 
 static int type_case_number(type_t t) {
@@ -1425,7 +1412,7 @@ static int type_case_number(type_t t) {
 }
 // the real work of comparison
 // returns -1 if t1 < t2, 0 if ==, 1 if t1 > t2
-// error for type not to be closed
+// error for type not to be closed (?? -- doesn't look like it's a problem)
 int typecmp(type_t t1, type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
@@ -1516,7 +1503,7 @@ int typecmp(type_t t1, type_t t2) {
     if (e1 == NULL || e2 == NULL) { 
       impos("missing expression in array index");
     }
-    return star_cmp(const_uint_exp_cmp,e1,e2);
+    return star_cmp(Evexp::const_exp_cmp,e1,e2);
     
   case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
 	 &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
@@ -1687,8 +1674,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	// too easily...
 	// DAN: okay, so make it a warning...
       case $(&Eq_constr(&Upper_b(e1)),&Eq_constr(&Upper_b(e2))):
-	okay = okay && (Evexp::eval_const_uint_exp(e1) >= 
-			Evexp::eval_const_uint_exp(e2)); 
+	okay = okay && Evexp::lte_const_exp(e2,e1);
 	warn(loc, "implicit cast to shorter array");
 	break;
       case $(&Eq_constr(Unknown_b),&Eq_constr(Unknown_b)):
@@ -1711,9 +1697,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     bool okay;
     // JGM: we could allow e1 >= e2 but I think it's best to give an error
     okay = 
-      (e1 != NULL && e2 != NULL &&
-       Evexp::eval_const_uint_exp((exp_t)e1) ==
-       Evexp::eval_const_uint_exp((exp_t)e2));
+      (e1 != NULL && e2 != NULL && Evexp::same_const_exp((exp_t)e1,(exp_t)e2));
     return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
@@ -1929,7 +1913,7 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
       switch ($(conref_val(b_a),conref_val(b_b))) {
       case $(&Upper_b(_), Unknown_b): break;
       case $(&Upper_b(e1), &Upper_b(e2)): 
-	if (Evexp::eval_const_uint_exp(e1) < Evexp::eval_const_uint_exp(e2))
+	if(!Evexp::lte_const_exp(e2,e1))
 	  return false;
 	break;
       default: return false;
@@ -2009,8 +1993,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  // We allow casts of any form as long as we can't statically
 	  // tell that the bounds will be violated.
 	case $(&Upper_b(e_a),&Upper_b(e_b)): 
-	  if (Evexp::eval_const_uint_exp(e_a) >= 
-	      Evexp::eval_const_uint_exp(e_b)) 
+	  if(Evexp::lte_const_exp(e_b,e_a))
 	    bounds_ok = true;
 	  break;
 	default: bounds_ok = true; break;
@@ -2028,8 +2011,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       bool okay;
       okay=
         (e1 != NULL && e2 != NULL && 
-         Evexp::eval_const_uint_exp((exp_t)e1) >= 
-         Evexp::eval_const_uint_exp((exp_t)e2));
+	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1));
       return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
     default: return false;
     }
@@ -2466,7 +2448,12 @@ void check_bitfield(seg_t loc, tenv_t te, type_t field_typ,
     unsigned int w = 0;
     if (!is_const_exp(te,(exp_t)width))
       terr(loc,"bitfield %s does not have constant width",*fn);
-    else w = Evexp::eval_const_uint_exp((exp_t)width);
+    else {
+      let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
+      if(!known)
+	terr(loc,"bitfield width cannot use sizeof or offsetof");
+      w = i;
+    }
     switch (compress(field_typ)) {
     case &IntType(_,b):
       switch (b) {
@@ -2583,7 +2570,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
           terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
         
-        unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag);
+        unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
         (*f->name)[0] = new Abs_n(te->ns);
         ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
@@ -3441,7 +3428,10 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     switch (t) {
     case &TupleType(ts):
       // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
-      let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
+      let $(i,known) = Evexp::eval_const_uint_exp(e2);
+      if(!known)
+	return bogus_ans;
+      let finfo = lookup_tuple_field(ts,i);
       if(finfo != NULL)
 	return $((*finfo)[0].q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
@@ -3485,9 +3475,9 @@ void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   switch (b->v) {
   case &Eq_constr(Unknown_b): return; // checked dynamically
   case &Eq_constr(&Upper_b(e)):
-    if (Evexp::eval_const_uint_exp(e) <= i)
-      terr(loc, "dereference is out of bounds: %d <= %d", 
-	   Evexp::eval_const_uint_exp(e), i);
+    let $(j,known) = Evexp::eval_const_uint_exp(e);
+    if(known && j <= i)
+      terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
   default:
     // constrain the bounds to be i+1
@@ -3502,7 +3492,9 @@ void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
 
 bool is_bound_one(conref_t<bounds_t> b) {
   switch(compress_conref(b)->v) {
-  case &Eq_constr(&Upper_b(e)): return Evexp::eval_const_uint_exp(e)==1;
+  case &Eq_constr(&Upper_b(e)): 
+    let $(i,known) = Evexp::eval_const_uint_exp(e);
+    return known && i==1;
   default: return false;
   }
 }
@@ -3551,7 +3543,6 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Const_e(_):     
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_): 
-    // jcheney: offsetof is constant?? need it to be for typerep anyway...
   case &Offsetof_e(_,_):
   case &Gentyp_e(_,_):  
   case &Enum_e(_,_,_):  

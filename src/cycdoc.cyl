@@ -780,8 +780,8 @@ static void dumpids(list_t<vardecl_t> vds) {
 }
 
 static void dump_upperbound(exp_t e) {
-  unsigned int i = Evexp::eval_const_uint_exp(e);
-  if (i != 1) {
+  $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
+  if (pr[0] != 1 || !pr[1]) {
     dump_char('{'); dumpexp(e); dump_char('}');
   }
 }

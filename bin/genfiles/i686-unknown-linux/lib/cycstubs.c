@@ -323,8 +323,8 @@ enum Cyc_Std___anonymous_enum_61__{Cyc_Std_MM_HARD  = 1,Cyc_Std_MM_SOFT  = 2,Cyc
  = 64,Cyc_Std_MM_NRECOV  = 128,Cyc_Std_MM_PRINT  = 256,Cyc_Std_MM_CONSOLE  = 512};
 enum Cyc_Std___anonymous_enum_62__{Cyc_Std_MM_NOSEV  = 0,Cyc_Std_MM_HALT  = 1,Cyc_Std_MM_ERROR
  = 2,Cyc_Std_MM_WARNING  = 3,Cyc_Std_MM_INFO  = 4};enum Cyc_Std___anonymous_enum_63__{
-Cyc_Std_MM_NOTOK  = 4294967295,Cyc_Std_MM_OK  = 0,Cyc_Std_MM_NOMSG  = 1,Cyc_Std_MM_NOCON
- = 4};int Cyc_Std_fmtmsg(int,struct _tagged_arr,int,struct _tagged_arr,struct
+Cyc_Std_MM_NOTOK  = -1,Cyc_Std_MM_OK  = 0,Cyc_Std_MM_NOMSG  = 1,Cyc_Std_MM_NOCON  = 
+4};int Cyc_Std_fmtmsg(int,struct _tagged_arr,int,struct _tagged_arr,struct
 _tagged_arr,struct _tagged_arr);int fmtmsg(int a,char*b,int c,char*d,char*e,char*f);
 int Cyc_Std_fmtmsg(int a,struct _tagged_arr b,int c,struct _tagged_arr d,struct
 _tagged_arr e,struct _tagged_arr f){return fmtmsg(a,string_to_Cstring(b),c,
@@ -657,36 +657,36 @@ Cyc_Std___ftok_failure={Cyc_Core_Failure,{_tmp50,_tmp50,_tmp50 + 22}};int Cyc_St
 struct _tagged_arr x,int y){if(!((unsigned int)x.curr))(int)_throw((void*)& Cyc_Std___ftok_failure);
 return ftok(string_to_Cstring(x),y);}struct Cyc_Std_timeval{int tv_sec;int tv_usec;}
 ;struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc_Std___rusage_who{
-Cyc_Std_RUSAGE_SELF  = 0,Cyc_Std_RUSAGE_CHILDREN  = 4294967295,Cyc_Std_RUSAGE_BOTH
- = 4294967294};struct Cyc_Std_rusage{struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval
-ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int
-ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int
-ru_nsignals;int ru_nvcsw;int ru_nivcsw;};enum Cyc_Std___priority_which{Cyc_Std_PRIO_PROCESS
- = 0,Cyc_Std_PRIO_PGRP  = 1,Cyc_Std_PRIO_USER  = 2};struct Cyc_Std_timespec{int
-tv_sec;int tv_nsec;};typedef struct{int __fds_bits[32];}Cyc_Std_fd_set;int select(
-int,Cyc_Std_fd_set*,Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);void
-Cyc_Std_FD_CLR(int,Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);
-void Cyc_Std_FD_SET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);
-void __stub_FD_CLR(int,Cyc_Std_fd_set*);int __stub_FD_ISSET(int,Cyc_Std_fd_set*);
-void __stub_FD_SET(int,Cyc_Std_fd_set*);void __stub_FD_ZERO(Cyc_Std_fd_set*);void
-Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(
-int a,Cyc_Std_fd_set*b){return __stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*
-b){return __stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return
-__stub_FD_ZERO(a);}enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM
- = 2,Cyc_Std_SOCK_RAW  = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET
- = 10};enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK
- = 2,Cyc_Std_MSG_DONTROUTE  = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC
- = 32,Cyc_Std_MSG_DONTWAIT  = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,
-Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN  = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST
- = 4096,Cyc_Std_MSG_ERRQUEUE  = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{
-unsigned int cmsg_len;int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};
-enum Cyc_Std___anonymous_enum_267__{Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS
- = 2,Cyc_Std___SCM_CONNECT  = 3};struct Cyc_Std_linger{int l_onoff;int l_linger;};
-enum Cyc_Std___anonymous_enum_268__{Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR
- = 2};struct Cyc_Std_SA_sockaddr_in_struct{int tag;struct Cyc_Std_sockaddr_in*f1;};
-struct Cyc_Std_SA_socklenptr_struct{int tag;unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{
-int tag;unsigned int f1;};struct Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{
-int tag;struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
+Cyc_Std_RUSAGE_SELF  = 0,Cyc_Std_RUSAGE_CHILDREN  = -1,Cyc_Std_RUSAGE_BOTH  = -2};
+struct Cyc_Std_rusage{struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;
+int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int
+ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;
+int ru_nvcsw;int ru_nivcsw;};enum Cyc_Std___priority_which{Cyc_Std_PRIO_PROCESS  = 
+0,Cyc_Std_PRIO_PGRP  = 1,Cyc_Std_PRIO_USER  = 2};struct Cyc_Std_timespec{int tv_sec;
+int tv_nsec;};typedef struct{int __fds_bits[32];}Cyc_Std_fd_set;int select(int,Cyc_Std_fd_set*,
+Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);void Cyc_Std_FD_CLR(int,
+Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_SET(int,
+Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);void __stub_FD_CLR(int,Cyc_Std_fd_set*);
+int __stub_FD_ISSET(int,Cyc_Std_fd_set*);void __stub_FD_SET(int,Cyc_Std_fd_set*);
+void __stub_FD_ZERO(Cyc_Std_fd_set*);void Cyc_Std_FD_CLR(int a,Cyc_Std_fd_set*b){
+return __stub_FD_CLR(a,b);}int Cyc_Std_FD_ISSET(int a,Cyc_Std_fd_set*b){return
+__stub_FD_ISSET(a,b);}void Cyc_Std_FD_SET(int a,Cyc_Std_fd_set*b){return
+__stub_FD_SET(a,b);}void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*a){return __stub_FD_ZERO(a);}
+enum Cyc_Std___socket_type{Cyc_Std_SOCK_STREAM  = 1,Cyc_Std_SOCK_DGRAM  = 2,Cyc_Std_SOCK_RAW
+ = 3,Cyc_Std_SOCK_RDM  = 4,Cyc_Std_SOCK_SEQPACKET  = 5,Cyc_Std_SOCK_PACKET  = 10};
+enum Cyc_Std___anonymous_enum_266__{Cyc_Std_MSG_OOB  = 1,Cyc_Std_MSG_PEEK  = 2,Cyc_Std_MSG_DONTROUTE
+ = 4,Cyc_Std_MSG_CTRUNC  = 8,Cyc_Std_MSG_PROXY  = 16,Cyc_Std_MSG_TRUNC  = 32,Cyc_Std_MSG_DONTWAIT
+ = 64,Cyc_Std_MSG_EOR  = 128,Cyc_Std_MSG_WAITALL  = 256,Cyc_Std_MSG_FIN  = 512,Cyc_Std_MSG_SYN
+ = 1024,Cyc_Std_MSG_CONFIRM  = 2048,Cyc_Std_MSG_RST  = 4096,Cyc_Std_MSG_ERRQUEUE
+ = 8192,Cyc_Std_MSG_NOSIGNAL  = 16384};struct Cyc_Std_cmsghdr{unsigned int cmsg_len;
+int cmsg_level;int cmsg_type;unsigned char __cmsg_data[0];};enum Cyc_Std___anonymous_enum_267__{
+Cyc_Std_SCM_RIGHTS  = 1,Cyc_Std_SCM_CREDENTIALS  = 2,Cyc_Std___SCM_CONNECT  = 3};
+struct Cyc_Std_linger{int l_onoff;int l_linger;};enum Cyc_Std___anonymous_enum_268__{
+Cyc_Std_SHUT_RD  = 0,Cyc_Std_SHUT_WR  = 1,Cyc_Std_SHUT_RDWR  = 2};struct Cyc_Std_SA_sockaddr_in_struct{
+int tag;struct Cyc_Std_sockaddr_in*f1;};struct Cyc_Std_SA_socklenptr_struct{int tag;
+unsigned int*f1;};struct Cyc_Std_SA_socklen_struct{int tag;unsigned int f1;};struct
+Cyc_Std_SO_int_struct{int tag;int*f1;};struct Cyc_Std_SO_timeval_struct{int tag;
+struct Cyc_Std_timeval*f1;};struct Cyc_Std_SO_socklenptr_struct{int tag;
 unsigned int*f1;};struct Cyc_Std_SO_socklen_struct{int tag;unsigned int f1;};int Cyc_Std_accept(
 int fd,struct _tagged_arr);int Cyc_Std_bind(int fd,struct _tagged_arr);int Cyc_Std_connect(
 int fd,struct _tagged_arr);int Cyc_Std_getpeername(int fd,struct _tagged_arr);int Cyc_Std_getsockname(

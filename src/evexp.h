@@ -17,22 +17,29 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-
 #ifndef _EVEXP_H_
 #define _EVEXP_H_
-
 #include "absyn.h"
-#include <position.h>
 
 namespace Evexp {
+  // returns false if e is constant but contains a sizeof or offsetof
+  // if it's not constant, an error is reported and $(0,true) returned
+extern $(unsigned int,bool) eval_const_uint_exp(Absyn::exp_t e);
 
-using Absyn;
-using Position;
-
-extern unsigned int eval_const_uint_exp(exp_t e);
+  // returns true iff we are sure the two es are the same (or lessthan) constant
+  // an error is reported if either is not a constant expression
+  // if either has sizeof or offsetof, then the two es must be essentially
+  // equal syntactically.  Therefore, false is conservative -- they might
+  // be the same or lessthan -- we just don't know.
+  // For all of these, the exp should have been type-checked b/c of 
+  //   sizeofexp_e
+extern bool same_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
+extern bool lte_const_exp(Absyn::exp_t e1, Absyn::exp_t e2);
+  // usable for sorting, trees, etc.  returns 0 iff same_const_exp returns true
+  // we need this for type_cmp unfortunately
+extern int  const_exp_cmp(Absyn::exp_t e1, Absyn::exp_t e2);
 
   // only in this module for historical reasons
-extern bool okay_szofarg(type_t t);
-
+extern bool okay_szofarg(Absyn::type_t t);
 }
 #endif

@@ -737,7 +737,10 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 	terr(loc,"enum %s, field %s: expression is not constant",
              *v,*(*f->name)[1]);
       
-      unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag);
+      // FIX? I'm just being lazy here, but who wants a sizeof in their tag?
+      let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
+      if(!known)
+	terr(loc,"Cyclone enum tags cannot use sizeof or offsetof");
       tag_count = t1+1;
       
       (*f->name)[0] = new Abs_n(te->ns);

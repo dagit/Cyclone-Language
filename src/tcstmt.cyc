@@ -272,14 +272,17 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // translate to switch after evaluating the case expressions (which must
     // be constant)
     // FIX: not right for e an enum type b/c we produce int patterns
+    // FIX?: bother to support sizeof/offsetof in cases
     let scs = NULL;
     for(; scsC !=NULL; scsC = scsC->tl) {
       let &SwitchC_clause(e1,body1,loc1) = scsC->hd;
       _ pat;
       if(e1 != NULL) {
 	tcExp(te,NULL,(exp_t)e1);
-	pat = new_pat(new Int_p(Signed,Evexp::eval_const_uint_exp((exp_t)e1)),
-		      e1->loc);
+	let $(i,known) = Evexp::eval_const_uint_exp((exp_t)e1);
+	if(!known)
+	  terr(e1->loc, "Cyclone cases do not support sizeof or offsetof");
+	pat = new_pat(new Int_p(Signed,i), e1->loc);
       } else
 	pat = new_pat(Wild_p, loc1);
       scs = new List(new Switch_clause(pat, NULL, NULL, body1, loc1), scs);

@@ -502,13 +502,15 @@ doc_t dtms2doc(doc_t d,list_t<type_modifier_t> tms) {
     _ ptr;
     switch (ps) {
     case &Nullable_ps(e):
-      if (Evexp::eval_const_uint_exp(e) == 1)
+      $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
+      if (pr[0] == 1 && pr[1])
 	ptr = text("*");
       else
 	ptr = cat(text("*"),text("{"),exp2doc(e),text("}"));
       break;
     case &NonNullable_ps(e):
-      if (Evexp::eval_const_uint_exp(e) == 1)
+      $(unsigned int,bool) pr = Evexp::eval_const_uint_exp(e);
+      if (pr[0] == 1 && pr[1])
 	ptr = text("@");
       else
 	ptr = cat(text("@"),text("{"),exp2doc(e),text("}"));

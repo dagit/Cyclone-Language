@@ -522,7 +522,11 @@ static void check_writable(tenv_t te, exp_t e) {
     case &PointerType(PtrInfo{_,_,_,tq,_}): fallthru(tq);
     case &ArrayType(_,tq,_): if (!tq.q_const) return; break;
     case &TupleType(ts):
-      unsigned int i = Evexp::eval_const_uint_exp(e2);
+      let $(i,known) = Evexp::eval_const_uint_exp(e2);
+      if(!known) {
+	terr(e->loc, "tuple projection cannot use sizeof or offsetof");
+	return;
+      }
       try {
         let &$(tq,_) = List::nth(ts,i);
         if (!tq.q_const) return;
@@ -1156,7 +1160,9 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 // e1[e2]
 static type_t ithTupleType(tenv_t te, seg_t loc,
 			   list_t<$(tqual_t,type_t)@> ts, exp_t index) {
-  unsigned int i = Evexp::eval_const_uint_exp(index);
+  let $(i,known) = Evexp::eval_const_uint_exp(index);
+  if(!known)
+    return expr_err(te,loc,"tuple projection cannot use sizeof or offsetof");
   try
     return (*List::nth(ts,i))[1];
   catch { case Nth:
@@ -1179,9 +1185,11 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt,
   switch (t1) {
   case &PointerType(PtrInfo{t,rt,_,tq,b}):
     // FIX: Consider tq?
-    if (is_const_exp(te, e2))
-      check_bound(loc,Evexp::eval_const_uint_exp(e2),b);
-    else {
+    if (is_const_exp(te, e2)) {
+      let $(i,known) = Evexp::eval_const_uint_exp(e2);
+      if(known)
+	check_bound(loc,i,b);
+    } else {
       // an easy warning that helps when porting C code
       if(is_bound_one(b))
 	warn(e1->loc,"subscript applied to pointer to one object");
@@ -1266,8 +1274,10 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt,
 	break;
       case &ArrayElement(e):
 	tcExpInitializer(te,NULL,e);
-	unsigned int i = Evexp::eval_const_uint_exp(e);
-	if (i != offset)
+	let $(i,known) = Evexp::eval_const_uint_exp(e);
+	if(!known)
+	  terr(e->loc, "index designator cannot use sizeof or offsetof");
+	else if (i != offset)
 	  terr(e->loc, "expecting index designator %d but found %d",
                offset,i);
 	break;

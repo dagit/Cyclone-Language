@@ -23,6 +23,7 @@
 #include <list.h>
 #include <position.h>
 #include <stdio.h>
+#include <string.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
@@ -37,9 +38,9 @@ using Tcutil;
 
 namespace Evexp;
 
-cnst_t eval_const_exp(exp_t e); // forward reference for mutual recursion
+static $(cnst_t,bool) eval_const_exp(exp_t); // needed due to mutual recursion
 
-cnst_t promote_const(cnst_t cn) {
+static cnst_t promote_const(cnst_t cn) {
   switch (cn) {
   case &Char_c(sn,c):  return new Int_c(sn,(int)c);
   case &Short_c(sn,s): return new Int_c(sn,(int)s); 
@@ -47,25 +48,262 @@ cnst_t promote_const(cnst_t cn) {
   }
 }
 
-unsigned int eval_const_uint_exp(exp_t e) {
-  switch (promote_const(eval_const_exp(e))) {
-  case &Int_c(_,i): return (unsigned int)i;
-  default:          terr(e->loc,"expecting unsigned int"); return 0u;
+$(unsigned int,bool) eval_const_uint_exp(exp_t e) {
+  let $(cn,known) = eval_const_exp(e);
+  if(!known)
+    return $(0,false);
+  switch (promote_const(cn)) {
+  case &Int_c(_,i): return $((unsigned int)i,true);
+  default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
   }
 }
 
-bool eval_const_bool_exp(exp_t e) {
-  switch (promote_const(eval_const_exp(e))) {
-  case &Int_c(_,b)     : return b != 0;
-  case &LongLong_c(_,b): return b != 0;
-  case Null_c         : return false;
-  default             : terr(e->loc,"expecting bool"); return false;
+static $(bool,bool) eval_const_bool_exp(exp_t e) {
+  let $(cn,known) = eval_const_exp(e);
+  if(!known)
+    return $(false,false);
+  switch (promote_const(cn)) {
+  case &Int_c(_,b):      return $(b != 0, true);
+  case &LongLong_c(_,b): return $(b != 0, true);
+  case Null_c:           return $(false,  false);
+  default: terr(e->loc,"expecting bool"); return $(false, false);
   }
 }
 
-// called by tcSizeof (which ignores result) and eval_szof.
-// Note in the latter case, this code really needs to be in sync with the
-// type translation to C.
+static $(cnst_t,bool) eval_const_unprimop(primop_t p,exp_t e) {
+  let $(cn,known) = eval_const_exp(e);
+  if(!known)
+    return $(cn,false);
+  switch ($(p,cn)) {
+  case $(Plus,_): break;
+  case $(Minus,  &Int_c(s,i)): cn = new Int_c(Signed,  -i); break;
+  case $(Bitnot, &Int_c(s,i)): cn = new Int_c(Unsigned,~i); break;
+  case $(Not,    &Int_c(_,i)): cn = new Int_c(Signed,  i == 0 ? 1 : 0); break;
+  case $(Not,    Null_c):      cn = new Int_c(Signed,  1); break;
+  default: terr(e->loc,"bad constant expression"); break;
+  }
+  return $(cn,true);
+}
+
+// FIX: should allow pointer-comparison of non-integers (e.g., NULL==NULL)
+static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
+  let $(cn1,known1) = eval_const_exp(e1);
+  let $(cn2,known2) = eval_const_exp(e2);
+  if(!known1 || !known2)
+    return $(cn1,false);
+  cn1 = promote_const(cn1);
+  cn2 = promote_const(cn2);
+  sign_t s1, s2;
+  int    i1, i2;
+  switch (cn1) {
+  case &Int_c(x,y): s1 = x; i1 = y; break;
+  default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
+  }
+  switch (cn2) {
+  case &Int_c(x,y): s2 = x; i2 = y; break;
+  default: terr(e2->loc, "bad constant expression"); return $(cn1,true);
+  }
+  switch (p) {
+  case Div:
+  case Mod: 
+    if (i2 == 0) {
+      terr(e2->loc,"division by zero in constant expression");
+      return $(cn1,true);
+    }
+    break;
+  default: break;
+  }
+  bool has_u_arg = (s1 == Unsigned || s2 == Unsigned);
+  unsigned int u1 = (unsigned int)i1;
+  unsigned int u2 = (unsigned int)i2;
+  int          i3 = 0;    // definite assignment not smart enough
+  unsigned int u3 = 0;    // definite assignment not smart enough
+  bool         b3 = true; // definite assignment not smart enough
+  bool use_i3 = false;
+  bool use_u3 = false;
+  bool use_b3 = false;
+  switch ($(p,has_u_arg)) {
+  case $(Plus,     false): i3 = i1 +  i2; use_i3 = true; break;
+  case $(Times,    false): i3 = i1 *  i2; use_i3 = true; break;
+  case $(Minus,    false): i3 = i1 -  i2; use_i3 = true; break;
+  case $(Div,      false): i3 = i1 /  i2; use_i3 = true; break;
+  case $(Mod,      false): i3 = i1 %  i2; use_i3 = true; break;
+  case $(Plus,      true): u3 = u1 +  u2; use_u3 = true; break;
+  case $(Times,     true): u3 = u1 *  u2; use_u3 = true; break;
+  case $(Minus,     true): u3 = u1 -  u2; use_u3 = true; break;
+  case $(Div,       true): u3 = u1 /  u2; use_u3 = true; break;
+  case $(Mod,       true): u3 = u1 %  u2; use_u3 = true; break;
+  case $(Eq,           _): b3 = i1 == i2; use_b3 = true; break;
+  case $(Neq,          _): b3 = i1 != i2; use_b3 = true; break;
+  case $(Gt,       false): b3 = i1 >  i2; use_b3 = true; break;
+  case $(Lt,       false): b3 = i1 <  i2; use_b3 = true; break;
+  case $(Gte,      false): b3 = i1 >= i2; use_b3 = true; break;
+  case $(Lte,      false): b3 = i1 <= i2; use_b3 = true; break;
+  case $(Gt,        true): b3 = u1 >  u2; use_b3 = true; break;
+  case $(Lt,        true): b3 = u1 <  u2; use_b3 = true; break;
+  case $(Gte,       true): b3 = u1 >= u2; use_b3 = true; break;
+  case $(Lte,       true): b3 = u1 <= u2; use_b3 = true; break;
+  case $(Bitand,       _): u3 = u1 &  u2; use_u3 = true; break;
+  case $(Bitor,        _): u3 = u1 |  u2; use_u3 = true; break;
+  case $(Bitxor,       _): u3 = u1 ^  u2; use_u3 = true; break;
+  case $(Bitlshift,    _): u3 = u1 << u2; use_u3 = true; break;
+  case $(Bitlrshift,   _): u3 = u1 >> u2; use_u3 = true; break;
+  case $(Bitarshift,   _): terr(e1->loc, ">>> NOT IMPLEMENTED"); fallthru;
+  default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
+  }
+  if(use_i3) return $(new Int_c(Signed,   i3),       true);
+  if(use_u3) return $(new Int_c(Unsigned, (int)u3),  true);
+  if(use_b3) return $(new Int_c(Signed, b3 ? 1 : 0), true);
+  impos("Evexp::eval_const_binop");
+}
+
+// The main routine -- side-effects the expression e, overwriting its
+// r field with the resulting constant (only if there's no error or sizeof)
+
+static $(cnst_t,bool) eval_const_exp(exp_t e) {
+  $(cnst_t,bool) ans;
+  switch (e->r) {
+  case &Const_e(c): return $(c,true); // return eagerly to avoid allocation
+  case &Conditional_e(e1,e2,e3):
+    let $(bool1,known1) = eval_const_bool_exp(e1);
+    if(!known1) {
+      eval_const_exp(e2);
+      eval_const_exp(e3);
+      return $(new Int_c(Signed,0),false);
+    }
+    if(bool1) // FIX CONTROL-FLOW BUG PREVENTING ?:
+      ans = eval_const_exp(e2);
+    else 
+      ans = eval_const_exp(e3);
+    break;
+  case &Primop_e(p,es):
+    if (es == NULL) {
+      terr(e->loc,"bad static expression (no args to primop)");
+      return $(new Int_c(Signed,0), true);
+    }
+    if (es->tl == NULL) {
+      ans = eval_const_unprimop(p,es->hd);
+      break;
+    }
+    if (es->tl->tl == NULL) {
+      ans = eval_const_binprimop(p,es->hd,es->tl->hd);
+      break;
+    }
+    terr(e->loc,"bad static expression (too many args to primop)");
+    return $(new Int_c(Signed,0), true);
+  case &Sizeoftyp_e(_): 
+  case &Sizeofexp_e(_):
+  case &Offsetof_e(_,_): ans = $(new Int_c(Signed,0), false); break;
+  case &Cast_e(t,e2):
+    // FIX: this needs to be generalized
+    ans = eval_const_exp(e2);
+    if(ans[1])
+      switch ($(compress(t),ans[0])) {
+      case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
+      case $(&IntType(sn,sz),&Int_c(sn2,x)): 
+	if(sn != sn2)
+	  ans[0] = new Int_c(sn,x); 
+	break;
+      default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
+      }
+    break;
+  case &AnonEnum_e(_,_,ef): fallthru(ef);
+  case &Enum_e(_,_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
+  default: 
+    terr(e->loc,"bad static expression %s", exp2string(e));
+    return $(new Int_c(Signed,0), true);
+  }
+  if(ans[1])
+    e->r = new Const_e(ans[0]);
+  return ans;
+}
+
+static int const_exp_case_number(exp_t e) {
+  switch(e->r) {
+  case &Const_e(_): return 1;
+  case &Conditional_e(_,_,_): return 2;
+  case &Primop_e(_,_): return 3;
+  case &Sizeoftyp_e(_): // do these the same so equal types are equal
+  case &Sizeofexp_e(_): return 4;
+  case &Offsetof_e(_,_): return 5;
+  case &Cast_e(_,_): return 6;
+    // note: AnonEnum_e and Enum_e should be impossible b/c already replaced
+  default: terr(e->loc,"bad static expression %s", exp2string(e)); return 0;
+  }
+}
+
+int const_exp_cmp(exp_t e1, exp_t e2) {
+  let $(i1,known1) = eval_const_uint_exp(e1);
+  let $(i2,known2) = eval_const_uint_exp(e2);
+  if(known1 && known2)
+    return i1 - i2;
+  let e1case = const_exp_case_number(e1);
+  let e2case = const_exp_case_number(e2);
+  if(e1case != e2case)
+    return e1case - e2case;
+  switch($(e1->r, e2->r)) {
+    // note: two consts are impossible -- they'd be known
+  case $(&Conditional_e(e11,e12,e13), &Conditional_e(e21,e22,e23)):
+    // FIX: not quite right -- if e11 and e21 are known and equal, then only
+    // one of the remaining pairs should matter. Anybody care?
+    let c1 = const_exp_cmp(e11,e21);
+    if(c1 != 0) return c1;
+    let c2 = const_exp_cmp(e12,e22);
+    if(c2 != 0) return c2;
+    return const_exp_cmp(e13,e23);
+  case $(&Primop_e(p1,es1), &Primop_e(p2,es2)):
+    let c1 = (int)p1 - (int)p2;
+    if(c1 != 0) return c1;
+    for(; es1 != NULL && es2 != NULL; es1=es1->tl, es2=es2->tl) {
+      let c2 = const_exp_cmp(es1->hd, es2->hd);
+      if(c2 != 0)
+	return c2;
+    }
+    return 0; // list lengths must be the same -- it's the same primop
+  case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  return typecmp(t1,t2);
+  case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)): 
+    if(e2a->topt == NULL)
+      terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
+    return typecmp(t1,e2a->topt->v);
+  case $(&Sizeofexp_e(e1a), &Sizeoftyp_e(t2)): 
+    if(e1a->topt == NULL)
+      terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
+    return typecmp(e1a->topt->v,t2);
+  case $(&Sizeofexp_e(e1a), &Sizeofexp_e(e2a)): 
+    if(e1a->topt == NULL)
+      terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
+    if(e2a->topt == NULL)
+      terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
+    return typecmp(e1a->topt->v,e2a->topt->v);
+  case $(&Offsetof_e(t1,f1), &Offsetof_e(t2,f2)):
+    let c1 = typecmp(t1,t2);
+    if(c1 != 0) return c1;
+    switch($(f1,f2)) {
+    case $(&StructField(_),&TupleIndex(_)): return -1;
+    case $(&TupleIndex(_),&StructField(_)): return 1;
+    case $(&StructField(fn1),&StructField(fn2)): return zstrptrcmp(fn1,fn2);
+    case $(&TupleIndex(i1),&TupleIndex(i2)): return i1-i2;
+    }
+  case $(&Cast_e(t1,e1a), &Cast_e(t2,e2a)):
+    let c1 = typecmp(t1,t2);
+    if(c1 != 0) return c1;
+    return const_exp_cmp(e1a,e2a);
+  default: impos("Evexp::const_exp_cmp, unexpected case");
+  }
+}
+bool same_const_exp(exp_t e1, exp_t e2) {
+  return const_exp_cmp(e1,e2)==0;
+}
+bool lte_const_exp(exp_t e1, exp_t e2) {
+  let $(i1,known1) = eval_const_uint_exp(e1);
+  let $(i2,known2) = eval_const_uint_exp(e2);
+  if(known1 && known2)
+    return i1 <= i2;
+  return same_const_exp(e1,e2);
+}
+
+// called by tcSizeof (which ignores result)
 // Note that an AggrType better be checked so we can get the aggrdecl
 bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
@@ -124,149 +362,9 @@ bool okay_szofarg(type_t t) {
   case &AccessEff(_):
   case &RgnsEff(_):   return false;
   case &TypedefType(_,_,td,_): 
+    // Is this right, considering abstract typedefs??
     if (td == NULL || td->kind == NULL)
       impos(aprintf("szof typedeftype %s",typ2string(t)));
-    else switch(td->kind->v) {
-    case BoxKind: return true;
-    default: return false;
-    }
+    return td->kind->v==BoxKind;
   }
-}
-
-cnst_t eval_const_unprimop(primop_t p,exp_t e) {
-  cnst_t cn = promote_const(eval_const_exp(e));
-  switch ($(p,cn)) {
-  case $(Plus,_): return cn;
-  case $(Minus,  &Int_c(s,i)): return new Int_c(Signed,  -i);
-  case $(Bitnot, &Int_c(s,i)): return new Int_c(Unsigned,~i);
-  case $(Not,    &Int_c(_,i)): return new Int_c(Signed,  i == 0 ? 1 : 0);
-  case $(Not,    Null_c):      return new Int_c(Signed,  1);
-  default: 
-    terr(e->loc,"bad constant expression");
-    return cn;
-  }
-}
-
-// FIX: should allow pointer-comparison of non-integers (e.g., NULL==NULL)
-cnst_t eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
-  let cn1 = promote_const(eval_const_exp(e1));
-  let cn2 = promote_const(eval_const_exp(e2));
-  sign_t s1, s2;
-  int    i1, i2;
-  switch (cn1) {
-  case &Int_c(x,y): s1 = x; i1 = y; break;
-  default: terr(e1->loc, "bad constant expression"); return cn1;
-  }
-  switch (cn2) {
-  case &Int_c(x,y): s2 = x; i2 = y; break;
-  default: terr(e2->loc, "bad constant expression"); return cn1;
-  }
-  switch (p) {
-  case Div:
-  case Mod: 
-    if (i2 == 0) {
-      terr(e2->loc,"division by zero in constant expression");
-      return cn1;
-    }
-    break;
-  default: break;
-  }
-  bool has_u_arg = (s1 == (sign_t)Unsigned || s2 == (sign_t)Unsigned);
-  unsigned int u1 = (unsigned int)i1;
-  unsigned int u2 = (unsigned int)i2;
-  int          i3 = 0;    // definite assignment not smart enough
-  unsigned int u3 = 0;    // definite assignment not smart enough
-  bool         b3 = true; // definite assignment not smart enough
-  bool use_i3 = false;
-  bool use_u3 = false;
-  bool use_b3 = false;
-  switch ($(p,has_u_arg)) {
-  case $(Plus,     false): i3 = i1 +  i2; use_i3 = true; break;
-  case $(Times,    false): i3 = i1 *  i2; use_i3 = true; break;
-  case $(Minus,    false): i3 = i1 -  i2; use_i3 = true; break;
-  case $(Div,      false): i3 = i1 /  i2; use_i3 = true; break;
-  case $(Mod,      false): i3 = i1 %  i2; use_i3 = true; break;
-  case $(Plus,      true): u3 = u1 +  u2; use_u3 = true; break;
-  case $(Times,     true): u3 = u1 *  u2; use_u3 = true; break;
-  case $(Minus,     true): u3 = u1 -  u2; use_u3 = true; break;
-  case $(Div,       true): u3 = u1 /  u2; use_u3 = true; break;
-  case $(Mod,       true): u3 = u1 %  u2; use_u3 = true; break;
-  case $(Eq,           _): b3 = i1 == i2; use_b3 = true; break;
-  case $(Neq,          _): b3 = i1 != i2; use_b3 = true; break;
-  case $(Gt,       false): b3 = i1 >  i2; use_b3 = true; break;
-  case $(Lt,       false): b3 = i1 <  i2; use_b3 = true; break;
-  case $(Gte,      false): b3 = i1 >= i2; use_b3 = true; break;
-  case $(Lte,      false): b3 = i1 <= i2; use_b3 = true; break;
-  case $(Gt,        true): b3 = u1 >  u2; use_b3 = true; break;
-  case $(Lt,        true): b3 = u1 <  u2; use_b3 = true; break;
-  case $(Gte,       true): b3 = u1 >= u2; use_b3 = true; break;
-  case $(Lte,       true): b3 = u1 <= u2; use_b3 = true; break;
-  case $(Bitand,       _): u3 = u1 &  u2; use_u3 = true; break;
-  case $(Bitor,        _): u3 = u1 |  u2; use_u3 = true; break;
-  case $(Bitxor,       _): u3 = u1 ^  u2; use_u3 = true; break;
-  case $(Bitlshift,    _): u3 = u1 << u2; use_u3 = true; break;
-  case $(Bitlrshift,   _): u3 = u1 >> u2; use_u3 = true; break;
-  case $(Bitarshift,   _): terr(e1->loc, ">>> NOT IMPLEMENTED"); return cn1;
-  default: terr(e1->loc, "bad constant expression"); return cn1;
-  }
-  if(use_i3) return new Int_c(Signed,   i3);
-  if(use_u3) return new Int_c(Unsigned, (int)u3);
-  if(use_b3) return new Int_c(Signed, b3 ? 1 : 0);
-  impos("Evexp::eval_const_binop");
-}
-
-// The main routine -- side-effects the expression e, overwriting its
-// r field with the resulting constant (only if there's no error)
-cnst_t eval_const_exp(exp_t e) {
-  cnst_t cn;
-  switch (e->r) {
-  case &Const_e(c): return c; // return eagerly to avoid allocation
-  case &Conditional_e(e1,e2,e3):
-    cn = (eval_const_bool_exp(e1) ? eval_const_exp(e2) : eval_const_exp(e3));
-    break;
-  case &Primop_e(p,es):
-    if (es == NULL) {
-      terr(e->loc,"bad static expression (no args to primop)");
-      return new Int_c(Signed,0);
-    }
-    if (es->tl == NULL) 
-      cn = eval_const_unprimop(p,es->hd);
-    else if (es->tl->tl != NULL) {
-      terr(e->loc,"bad static expression (too many args to primop)");
-      return new Int_c(Signed,0);
-    } else 
-      cn = eval_const_binprimop(p,es->hd,es->tl->hd);
-    break;
-  case &Sizeoftyp_e(_): 
-  case &Sizeofexp_e(_):
-    terr(e->loc,
-	 "sizeof(...) is not an integral constant expression in Cyclone");
-    return new Int_c(Signed,0);
-  case &Offsetof_e(_,_):
-    terr(e->loc,
-	 "offsetof(...) is not an integral constant expression in Cyclone");
-    return new Int_c(Signed,0);
-  case &Cast_e(t,e2):
-    // FIX: this needs to be generalized
-    cn = eval_const_exp(e2);
-    switch ($(compress(t),cn)) {
-    case $(&IntType(sn,sz),&Char_c(sn2,x)):  fallthru(sn,sz,sn2,x);
-    case $(&IntType(sn,sz),&Short_c(sn2,x)): fallthru(sn,sz,sn2,x);
-    case $(&IntType(sn,sz),&Int_c(sn2,x)): 
-      if(sn != sn2)
-	cn = new Int_c(sn,x); 
-      break;
-    default:
-      terr(e->loc,"eval_const: cannot cast to %s",typ2string(t));
-      return new Int_c(Signed,0);
-    }
-    break;
-  case &AnonEnum_e(_,_,ef): fallthru(ef);
-  case &Enum_e(_,_,ef): return eval_const_exp((exp_t)ef->tag);
-  default: 
-    terr(e->loc,"bad static expression %s", exp2string(e));
-    return new Int_c(Signed,0);
-  }
-  e->r = new Const_e(cn);
-  return cn;
 }

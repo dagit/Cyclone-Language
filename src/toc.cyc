@@ -320,11 +320,8 @@ static aggrfield_t aggrfield_to_c(aggrfield_t f) {
 }
 
 static void enumfields_to_c(list_t<enumfield_t> fs) {
-  for (let fs = fs; fs != NULL; fs = fs->tl)
-    if (fs->hd->tag != NULL) {
-      unsigned int i = Evexp::eval_const_uint_exp((exp_t)fs->hd->tag);
-      fs->hd->tag = uint_exp(i,NULL);
-    }
+  // warning: assumes all constant expressions are fine as C expressions
+  return;
 }
 
 static type_t typ_to_c(type_t t) {
@@ -725,13 +722,13 @@ static bool check_const_array(unsigned i, type_t t) {
     switch (conref_def(bounds_one,b)) {
     case Unknown_b: return false;
     case &Upper_b(e):
-      unsigned j = Evexp::eval_const_uint_exp(e);
-      return i <= j;
+      let $(j,known) = Evexp::eval_const_uint_exp(e);
+      return known && i <= j;
     }
   case &ArrayType(_,_,e):
     if (e == NULL) return false;
-    unsigned j = Evexp::eval_const_uint_exp((exp_t)e);
-    return i <= j;
+    let $(j,known) = Evexp::eval_const_uint_exp((exp_t)e);
+    return known && i <= j;
   default: return false;
   }
 }
@@ -1851,14 +1848,25 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
-      if (Evexp::eval_const_uint_exp(esz) < 1)
-        impos("exp_to_c:  AggrArrow_e on pointer of size 0");
-      if (do_null_check) {
-	// ((t *)_check_null(e))->f
+      // FIX: on unknown, dynamic bounds check!
+      let $(j,known) = Evexp::eval_const_uint_exp(esz);
+      if(known) {
+	if (j < 1)
+	  impos("exp_to_c:  AggrArrow_e on pointer of size 0");
+	if (do_null_check) {
+	  // ((t *)_check_null(e))->f
+	  e->r = aggrarrow_exp(cast_exp(typ_to_c(e1->topt->v),
+					fncall_exp(_check_null_e,
+						   new List(e1,NULL),DL), DL),
+			       f, DL)->r;
+	}
+      } else {
+	// very strang case: they may have used sizeof or offsetof to make
+	// a zero-size array.  Yeah, that'll happen never.
 	e->r = aggrarrow_exp(cast_exp(typ_to_c(e1->topt->v),
-				      fncall_exp(_check_null_e,
-						 new List(e1,NULL),DL), DL),
-			     f, DL)->r;
+	      fncall_exp(_check_known_subscript_null_e,
+			 list(e1,esz,sizeoftyp_exp(ta,DL),uint_exp(0,DL)),
+			 DL), DL), f, DL)->r;
       }
       break;
     case Unknown_b:
@@ -1886,8 +1894,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       // e1->fi  where i = e2+1
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
-      unsigned int i = Evexp::eval_const_uint_exp(e2)+1;
-      e->r = aggrmember_exp(e1,fieldname(i),DL)->r;
+      let $(i,known) = Evexp::eval_const_uint_exp(e2);
+      if(!known)
+	impos("unknown tuple subscript in translation to C");
+      e->r = aggrmember_exp(e1,fieldname(i+1),DL)->r;
       break;
     case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       let relns = get_relns(e1);
@@ -1903,7 +1913,6 @@ static void exp_to_c(env_t nv, exp_t e) {
       total_bounds_checks++;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
-	esz = uint_exp(Evexp::eval_const_uint_exp(esz),DL);
         bool possibly_null = conref_def(false,bcr);
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
@@ -1974,13 +1983,16 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Comprehension_e(vd,e1,e2):
     // a comprehension not under a "new" -- should only be the case
     // when e1 is constant.  For now, e2 must be too...
-    let sz = Evexp::eval_const_uint_exp(e1);
+    let $(sz,known) = Evexp::eval_const_uint_exp(e1);
     exp_to_c(nv,e2);
     list_t<$(list_t<designator_t>,exp_t)@> es = NULL;
     // generate an "empty" array intializer to avoid giant arrays
-    if (!is_zero(e2))
+    if (!is_zero(e2)) {
+      if(!known)
+	Tcutil::terr(e1->loc, "cannot determine value of constant");
       for (unsigned int i = 0; i < sz; i++)
         es = new List(new $(NULL,e2),es);
+    }
     e->r = unresolvedmem_exp(NULL,es,DL)->r;
     break;
   case &Struct_e(tdn,ts,dles,sd):
