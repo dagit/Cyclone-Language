@@ -339,19 +339,19 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
-        if (!unify(t2,dyneither_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
-                                     new_evar(new Opt(RgnKind),tvs),
+        if (!unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
+                                     new_evar(new Opt(&rk),tvs),
                                      empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
                                                                tvs)),
-                                     new_evar(new Opt(RgnKind),tvs),
+                                     new_evar(new Opt(&rk),tvs),
                                      empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,dyneither_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
-                                     new_evar(new Opt(RgnKind),tvs),
+            !unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
+                                     new_evar(new Opt(&rk),tvs),
                                      const_tqual(NULL),empty_conref())) &&
-            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
                                                                tvs)),
-                                     new_evar(new Opt(RgnKind),tvs),
+                                     new_evar(new Opt(&rk),tvs),
                                      const_tqual(NULL),empty_conref()))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
@@ -386,7 +386,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
-    check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
+    check_type(loc,te,td->tvs,&ak,false,td->defn->v);
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
     // FIX: check that attributes are okay for this kind of type
@@ -398,7 +398,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
       if (td->defn != NULL)
         warn(loc,"type variable %s is not used in typedef definition",
              *tvs->hd->name);
-      *f = new Opt(kind_to_bound(BoxKind)); break;
+      *f = new Opt(kind_to_bound(&bk)); break;
     case &Less_kb(*f,k):
       *f = new Opt(kind_to_bound(k)); break;
     default: continue;
@@ -417,8 +417,8 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
     // FIX?: forbid effect variables (but they're going away)
     for(; rpo != NULL; rpo = rpo->tl) {
       let &$(e,r) = rpo->hd;
-      check_type(loc,te,tvs,EffKind,false,e);
-      check_type(loc,te,tvs,TopRgnKind,false,r); 
+      check_type(loc,te,tvs,&ek,false,e);
+      check_type(loc,te,tvs,&trk,false,r); 
    }
 
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -433,7 +433,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
       if (strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
-      check_type(loc,te,tvs,MemKind,false,t);
+      check_type(loc,te,tvs,&mk,false,t);
 
       fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -448,11 +448,13 @@ static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     switch (compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f):      fallthru(f);
-    case &Less_kb(*f,MemKind):
-      *f = new Opt(kind_to_bound(BoxKind)); continue;
+    case &Less_kb(*f,&Kind(MemKind,Aliasable)):
+      *f = new Opt(kind_to_bound(&bk)); continue;
     case &Less_kb(*f,k): 
+//       fprintf(stderr,"fixing kind of %s at %s\n",
+// 	      *(tvs2->hd->name),Absynpp::kind2string(k));
       *f = new Opt(kind_to_bound(k)); continue;
-    case &Eq_kb(MemKind):
+    case &Eq_kb(&Kind(MemKind,_)):
       terr(loc,"type %s attempts to abstract type variable %s of kind M", 
            *n, *tvs2->hd->name); continue;
     default: continue;
@@ -579,21 +581,22 @@ static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     switch (compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f): 
-      fallthru(f);
-    case &Less_kb(*f,MemKind): 
-      *f = new Opt(kind_to_bound(BoxKind)); break;
-    case &Less_kb(*f,AnyKind): 
-      *f = new Opt(kind_to_bound(AnyKind)); break;
-    case &Less_kb(*f,TopRgnKind):
-      *f = new Opt(kind_to_bound(RgnKind)); break;
-    case &Eq_kb(TopRgnKind):
+      *f = new Opt(kind_to_bound(&bk)); break;
+//       fallthru(f); XXX
+    case &Less_kb(*f,&Kind(MemKind,a)): 
+      *f = new Opt(kind_to_bound(new Kind(BoxKind,a))); break;
+    case &Less_kb(*f,&Kind(AnyKind,a)): 
+      *f = new Opt(kind_to_bound(new Kind(AnyKind,a))); break;
+    case &Less_kb(*f,&Kind(RgnKind,Top)):
+      *f = new Opt(kind_to_bound(&rk)); break;
+    case &Eq_kb(&Kind(RgnKind,Top)):
       terr(loc,"type %s attempts to abstract type "
            "variable %s of kind TR",*v,*tvs2->hd->name); break;
-    case &Less_kb(*f,UniqueRgnKind): fallthru;
-    case &Eq_kb(UniqueRgnKind):
+    case &Less_kb(*f,&Kind(RgnKind,Unique)): fallthru;
+    case &Eq_kb(&Kind(RgnKind,Unique)):
       terr(loc,"type %s attempts to abstract type "
            "variable %s of kind UR",*v,*tvs2->hd->name); break;
-    case &Eq_kb(MemKind):
+    case &Eq_kb(&Kind(MemKind,_)):
       terr(loc,"type %s attempts to abstract type "
            "variable %s of kind M",*v,*tvs2->hd->name); break;
     default: break;
@@ -615,7 +618,7 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
     let f = fs->hd;
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
-      check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
+      check_type(f->loc, te, tvs, &mk, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
       TEMP_RGN(te, temp) {
         if (is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))

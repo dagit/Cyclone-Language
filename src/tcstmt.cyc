@@ -284,7 +284,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(Tcenv::new_named_block(r,s0->loc,add_label(te,l,s),
                                     new Tvar(new ((string_t)aprintf("`%s",*l)),
                                              new_tvar_id(),
-                                             kind_to_bound(RgnKind))),s,false); 
+                                             kind_to_bound(&rk))),s,false); 
     }
     return;
 
@@ -430,7 +430,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         //  are in scope)
         let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
         let allow_evars = (!is_local) ? false : true;
-        check_type(s0->loc,te,bound_vars,MemKind,allow_evars,t);
+        check_type(s0->loc,te,bound_vars,&mk,allow_evars,t);
         let te2 = add_local_var(decl_rgn,s->loc,te,vd);
         if (sc == Extern || sc == ExternC)
           terr(d->loc,"local extern declarations not yet supported");
@@ -497,7 +497,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             terr(d->loc, "cannot declare a qualified local variable");
             break;
           }
-          check_type(s0->loc,te2,lookup_type_vars(te2),MemKind,true,t);
+          check_type(s0->loc,te2,lookup_type_vars(te2),&mk,true,t);
           te2 = add_local_var(decl_rgn,s->loc,te2,vd);
         }
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
@@ -516,8 +516,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         if (open_opt != NULL) {
           exp_t open_exp = (exp_t)open_opt;
           let tenv_tvs = lookup_type_vars(te);
-          rgn_typ = new_evar(&rk,new Opt(tenv_tvs));
-          type_t rgn2_typ = new_evar(&rk,new Opt(tenv_tvs));
+          rgn_typ = new_evar(&rko,new Opt(tenv_tvs));
+          type_t rgn2_typ = new_evar(&rko,new Opt(tenv_tvs));
           type_t expected = new DynRgnType(rgn_typ,rgn2_typ);
           *t = new RgnHandleType(rgn_typ);
           if (!unify(tcExp(te,&expected,open_exp), expected)) {
@@ -534,7 +534,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te2 = add_type_vars(decl_rgn,s0->loc,te2,new List(tv,NULL));
           te2 = add_region(decl_rgn, te2, rgn_typ, resetable, true);
         }
-        check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,*t);
+        check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
         // we don't push a handler when regions are turned off so we
@@ -565,7 +565,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
           // create the local variable
           vd->type = copy_type(e->topt->v);
-          check_type(e->loc,te,lookup_type_vars(te2),MemKind,true,vd->type);
+          check_type(e->loc,te,lookup_type_vars(te2),&mk,true,vd->type);
           vd->rgn = new Opt(Tcenv::curr_rgn(te2));
           te2 = add_local_var(r,s0->loc, te2, vd);
           te2 = set_encloser(r,te2,s); // for substatements inside of s
@@ -633,7 +633,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &ResetRegion_s(e):
     // check that e is an intuitionistic region_t<`r> 
-    type_t rgn_type = new_evar(&rk,lookup_opt_type_vars(te));
+    type_t rgn_type = new_evar(&rko,lookup_opt_type_vars(te));
     type_t etype = new RgnHandleType(rgn_type);
     if (!unify(tcExp(te,&etype,e),etype))
       terr(e->loc, "expecting region_t but found %s", typ2string(e->topt->v));

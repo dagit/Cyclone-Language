@@ -363,14 +363,18 @@ doc_t tqual2doc(tqual_t tq) {
   return egroup(""," "," ",List::map(textptr,l));
 }
 
-string_t kind2string(kind_t k) {
+string_t kind2string(kind_t ka) {
+  let &Kind(k,a) = ka;
   switch (k) {
   case AnyKind: return "A";
   case MemKind: return "M";
   case BoxKind: return "B";
-  case RgnKind: return "R";
-  case UniqueRgnKind: return "UR";
-  case TopRgnKind: return "TR";
+  case RgnKind: 
+    switch (a) {
+    case Aliasable: return "R";
+    case Unique: return "UR";
+    case Top: return "TR";
+    }
   case EffKind: return "E";
   case IntKind: return "I";
   }

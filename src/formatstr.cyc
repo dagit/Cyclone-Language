@@ -309,7 +309,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
         // We make this a buffer_t (i.e., NOZEROTERM) because more things
         // will then match.
         type_t ptr = dyneither_typ(char_typ, 
-                                    new_evar(&rk,
+				   new_evar(&rko,
                                              new Opt(lookup_type_vars(te))),
                                     const_tqual(NULL), false_conref);
         typs = rnew(r) List(ptr,typs);
@@ -342,7 +342,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
                implode(lenmod), c);
           return NULL;
         }
-        t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
+        t = at_typ(t,new_evar(&rko,tvs),empty_tqual(NULL),false_conref);
         typs = rnew(r) List(t,typs);
         break;
       case '%':
@@ -496,7 +496,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
+      t = at_typ(t,new_evar(&rko,tvs),empty_tqual(NULL),false_conref);
       typs = rnew(r) List(t,typs);
       break;
     case 'u':
@@ -514,7 +514,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
+      t = at_typ(t,new_evar(&rko,tvs),empty_tqual(NULL),false_conref);
       typs = rnew(r) List(t,typs);
       break;
     case 'f': 
@@ -535,21 +535,21 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
+      t = at_typ(t,new_evar(&rko,tvs),empty_tqual(NULL),false_conref);
       typs = rnew(r) List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = rnew(r) List(dyneither_typ(char_typ,new_evar(&rk,tvs),
+      typs = rnew(r) List(dyneither_typ(char_typ,new_evar(&rko,tvs),
                                      empty_tqual(NULL),
                                      false_conref),typs);
       break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
       // we use a mbuffer_t here because this matches more things.
-      type_t ptr = dyneither_typ(char_typ, new_evar(&rk,tvs),
-                                  empty_tqual(NULL), false_conref);
+      type_t ptr = dyneither_typ(char_typ, new_evar(&rko,tvs),
+				 empty_tqual(NULL), false_conref);
       typs = rnew(r) List(ptr,typs);
       break;
     case '[':
@@ -568,7 +568,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(NULL),false_conref);
+      t = at_typ(t,new_evar(&rko,tvs),empty_tqual(NULL),false_conref);
       typs = rnew(r) List(t,typs);
       break;
     case '%':

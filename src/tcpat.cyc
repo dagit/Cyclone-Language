@@ -169,7 +169,7 @@ static var_t get_name(vardecl_t vd) {
 static type_t any_type(list_t<tvar_t,`H> s, type_t * topt) {
   if(topt != NULL)
     return *topt;
-  return new_evar(&mk,new Opt(s));
+  return new_evar(&mko,new Opt(s));
 }
 static type_t num_type(type_t * topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
@@ -272,11 +272,11 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       default: break;
       }
     let tenv_tvs = lookup_opt_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&ak,tenv_tvs),
+    t = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
                                 empty_tqual(NULL),
 				// MWH: don't allow switching on
 				//   unique pointers for now
-				PtrAtts(new_evar(&rk,tenv_tvs),
+				PtrAtts(new_evar(&rko,tenv_tvs),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
                                         
@@ -302,7 +302,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    type_t ptr_rgn = new_evar(&trk,lookup_opt_type_vars(te));
+    type_t ptr_rgn = new_evar(&trko,lookup_opt_type_vars(te));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
     // if p2 is a datatype field pattern (e.g., datatype F.C), then unless 
     // topt says otherwise, we make the type datatype F@.  We also change
@@ -428,11 +428,12 @@ DONT_PROMOTE:
 	var_tvs = rnew(rgn) List((type_t)(vartype),var_tvs);
 	// if unpacking a region var, must add it to the po
 	// FIX: allow adding existentials of TR kind?
-	if(k2 == RgnKind) {
-          outlives_constraints = new List(new $(empty_effect,vartype),outlives_constraints);
-	}
-	else if (k2 == UniqueRgnKind || k2 == TopRgnKind) {
-	  Tcutil::impos("opened existential had unique or top region kind");
+	if(k2->kind == RgnKind) {
+	  if (k2->aliasqual == Aliasable)
+	    outlives_constraints =
+	      new List(new $(empty_effect,vartype),outlives_constraints);
+	  else
+	    Tcutil::impos("opened existential had unique or top region kind");
 	}
       }
 

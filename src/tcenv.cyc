@@ -912,7 +912,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   return put_fenv(r,te,fe);
 }
 
-static datatype KindBound.Eq_kb rgn_kb = Eq_kb(RgnKind);
+static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Tcutil::rk);
 
 tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te 
                         : {`r2} > `r) {
@@ -1175,12 +1175,14 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
   // add in all of the region vars
-  for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
-    if (tvar_kind(tvars->hd,BoxKind) == RgnKind)
-      rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
-    else if (tvar_kind(tvars->hd,BoxKind) == UniqueRgnKind ||
-	     tvar_kind(tvars->hd,BoxKind) == TopRgnKind)
-      Tcutil::impos("non-intuitionistic tvar in nested_fenv");
+  for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl) {
+    let &Kind(k,a) = tvar_kind(tvars->hd,&bk);
+    if (k == RgnKind)
+      if (a == Aliasable)
+	rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
+      else
+	Tcutil::impos("non-intuitionistic tvar in nested_fenv");
+  }
   rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);

@@ -101,7 +101,7 @@ namespace Absyn {
   typedef enum Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
   typedef enum Size_of size_of_t;
-  typedef enum Kind kind_t;
+  typedef struct Kind @kind_t;
   typedef datatype KindBound @kindbound_t;
   typedef struct Tvar @tvar_t; 
   typedef enum Sign sign_t;
@@ -174,20 +174,32 @@ namespace Absyn {
     Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz
   };
                                   
+  // Used to classify kinds  
+  EXTERN_ABSYN enum AliasQual { 
+    // Aliasable <= Unique <= Top
+    Aliasable, // for types that can be aliased
+    Unique,    // for types that cannot be aliased
+    Top        // either one
+  };
 
-  // Used to classify types.  
-  EXTERN_ABSYN enum Kind { 
+  EXTERN_ABSYN enum KindQual { 
     // BoxKind <= MemKind <= AnyKind
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
     BoxKind, // excludes types whose values dont go in general-purpose registers
-    // RgnKind <= TopRgnKind, UniqueRgnKind <= TopRgnKind
     RgnKind, // intuitionistic regions
-    UniqueRgnKind, // the affine region's kind
-    TopRgnKind, // either one
     EffKind, // effects
     IntKind  // constant ints
   };
+
+  EXTERN_ABSYN struct Kind {
+    enum KindQual kind;
+    enum AliasQual aliasqual;
+  };
+
+#define AK(k) new Kind(k,Aliasable)
+#define UK(k) new Kind(k,Unique)
+#define TK(k) new Kind(k,Top)
 
   // signed or unsigned qualifiers on integral types
   EXTERN_ABSYN enum Sign { Signed, Unsigned, None };

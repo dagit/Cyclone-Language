@@ -597,8 +597,12 @@ static type_t typ_to_c(type_t t) {
   case &VoidType: return t;
   case &Evar(_,NULL,_,_): return sint_typ; // pick something widely useful
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
-  case &VarType(tv): 
-    if (tvar_kind(tv,BoxKind) == AnyKind) return &VoidType_val;
+  case &VarType(tv):
+    if (tvar_kind(tv,&bk)->kind == AnyKind) {
+//       fprintf(stderr,"Mapping type var %s to void; has AnyKind\n",
+// 	      *(tv->name));
+      return &VoidType_val;
+    }
     else return void_star_typ(); // map `a to void *
   case &DatatypeType(_):
     return &VoidType_val;
@@ -2365,9 +2369,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     //  get warnings when the only use of the tyvar is as a parameter b/c
     //  it's just an implicit cast to void * (so long as inst type isn't int)
     for(; ts != NULL; ts = ts->tl) {
-      kind_t k = typ_kind(ts->hd);
-      if(k != EffKind && 
-	 k != RgnKind && k != UniqueRgnKind && k != TopRgnKind) {
+      let k = typ_kind(ts->hd)->kind;
+      if(k != EffKind && k != RgnKind) {
 	switch(compress(ts->hd)) {
 	case &VarType(_):    
 	case &DatatypeType(_): continue;
@@ -4503,7 +4506,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       if (td->defn != NULL) 
         td->defn = new Opt(typ_to_c_array(td->defn->v));
       else {
-        switch (td->kind->v) {
+        switch (td->kind->v->kind) {
         case BoxKind: td->defn = new Opt(void_star_typ()); break;
         default: td->defn = new Opt(&VoidType_val); break;
         }

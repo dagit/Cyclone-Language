@@ -212,7 +212,7 @@ static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
   case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm,ztl}):
     return starb_typ(t1,
-                     argposn ? new_evar(&Tcutil::rk, NULL) : &HeapRgn_val,
+                     argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val,
                      tq,
                      eopt == NULL ? ((bounds_t)&DynEither_b_val) : 
                                     ((bounds_t)(new Upper_b((exp_t)eopt))),
@@ -240,7 +240,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(opt_t<var_t>,tqual_t,type_
         // using an evar here will mess things up since the evar will be
         // duplicated.  So, we pin the evar down to a type variable instead.
         stringptr_t nm = new aprintf("`%s",*v);
-        *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(IntKind)}));
+        *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::ik)}));
         break;
       default: break;
       }
@@ -249,7 +249,7 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(opt_t<var_t>,tqual_t,type_
       // corresponds to the variable.
     case &$(&Opt(v),_,&RgnHandleType(&Evar(_,*z,_,_))): 
       stringptr_t nm = new aprintf("`%s",*v);
-      *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(RgnKind)}));
+      *z = new Opt(new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::rk)}));
       break;
     default: break;
     }
@@ -797,7 +797,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   switch (typ) {
   case &Evar(kopt,_,_,_): 
     type = NULL;
-    if (kopt == NULL) kind = &Tcutil::bk;
+    if (kopt == NULL) kind = &Tcutil::bko;
     else kind = kopt;
     break;
   default: kind = NULL; type = new Opt(typ); break;
@@ -967,18 +967,34 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 static kind_t id_to_kind(string_t s, seg_t loc) {
   if(strlen(s)==1 || strlen(s)==2)
     switch (s[0]) {
-    case 'A': return AnyKind;
-    case 'M': return MemKind;
-    case 'B': return BoxKind;
-    case 'R': return RgnKind;
-    case 'U': if (s[1] == 'R') return UniqueRgnKind; else break;
-    case 'T': if (s[1] == 'R') return TopRgnKind; else break;
-    case 'E': return EffKind;
-    case 'I': return IntKind;
+    case 'A': return &Tcutil::ak;
+    case 'M': return &Tcutil::mk;
+    case 'B': return &Tcutil::bk;
+    case 'R': return &Tcutil::rk;
+    case 'E': return &Tcutil::ek;
+    case 'I': return &Tcutil::ik;
+    case 'U': 
+      switch (s[1]) {
+      case 'R':	return &Tcutil::urk;
+      case 'A': return &Tcutil::uak;
+      case 'M': return &Tcutil::umk;
+      case 'B': return &Tcutil::ubk;
+      default: break;
+      }
+      break;
+    case 'T':
+      switch (s[1]) {
+      case 'R':	return &Tcutil::trk;
+      case 'A': return &Tcutil::tak;
+      case 'M': return &Tcutil::tmk;
+      case 'B': return &Tcutil::tbk;
+      default: break;
+      }
+      break;
     default:  break;
   }
   err(aprintf("bad kind: %s; strlen=%d",s,strlen(s)), loc); 
-  return BoxKind;
+  return &Tcutil::bk;
 }
 
 // convert a pattern back into an expression 
@@ -1291,7 +1307,7 @@ declaration:
       err(aprintf("bad occurrence of heap region"),LOC(@4,@4));
     if (zstrcmp($4,"`U") == 0)
       err(aprintf("bad occurrence of unique region"),LOC(@4,@4));
-    tvar_t tv = new Tvar(new $4,-1,Tcutil::kind_to_bound(RgnKind));
+    tvar_t tv = new Tvar(new $4,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
@@ -1305,7 +1321,7 @@ declaration:
     if ($1 && ($4 != NULL))
       err("open regions cannot be @resetable",LOC(@1,@5));
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$3), -1,
-			 Tcutil::kind_to_bound(RgnKind));
+			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $3),new RgnHandleType(t),NULL);
 
@@ -1313,7 +1329,7 @@ declaration:
   }
 /* Cyc: alias <r>t v = e; */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
-  { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(RgnKind));
+  { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
     vardecl_t vd = new_vardecl(new $(Loc_n, new $5),&VoidType_val,NULL);
     $$ = ^$(new List(alias_decl($7,tv,vd,LOC(@1,@8)),NULL));
   }
@@ -1552,10 +1568,10 @@ type_specifier_notypedef:
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 | REGION_T 
-    { $$=^$(type_spec(new RgnHandleType(new_evar(&Tcutil::rk, NULL)),
+    { $$=^$(type_spec(new RgnHandleType(new_evar(&Tcutil::rko, NULL)),
                       LOC(@1,@1))); }
 | DYNREGION_T '<' any_type_name right_angle
-  { let t2 = new_evar(&Tcutil::rk, NULL);
+  { let t2 = new_evar(&Tcutil::rko, NULL);
     $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
   }
 | DYNREGION_T '<' any_type_name ',' any_type_name right_angle
@@ -1563,7 +1579,7 @@ type_specifier_notypedef:
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 | TAG_T 
-  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::ik, NULL)),LOC(@1,@1))); }
+  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::iko, NULL)),LOC(@1,@1))); }
 | VALUEOF_T '(' expression ')'
   { $$=^$(type_spec(new ValueofType($3),LOC(@1,@4))); }
 ;
@@ -2002,9 +2018,9 @@ zeroterm_qual_opt:
 
 /* Always returns a type (possibly an evar) */
 rgn_opt:
-/* empty */ { $$ = ^$(new_evar(&Tcutil::trk,NULL)); }
-| type_var  { set_vartyp_kind($1,TopRgnKind,true); $$ = $!1; }
-| '_'       { $$ = ^$(new_evar(&Tcutil::trk,NULL)); }
+/* empty */ { $$ = ^$(new_evar(&Tcutil::trko,NULL)); }
+| type_var  { set_vartyp_kind($1,&Tcutil::trk,true); $$ = $!1; }
+| '_'       { $$ = ^$(new_evar(&Tcutil::trko,NULL)); }
 ;
 
 tqual_list:
@@ -2051,14 +2067,14 @@ rgn_order:
   { // FIX: if we replace the following with:
     // $$ = ^$(new List(new $(new JoinEff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
-    let kb = new Less_kb(NULL,TopRgnKind);
+    let kb = new Less_kb(NULL,&Tcutil::trk);
     let id = $3;
     let t = id2type(id,kb);
     $$ = ^$(new List(new $(new JoinEff($1),t), NULL));
   }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
   { 
-    let kb = new Less_kb(NULL,TopRgnKind);
+    let kb = new Less_kb(NULL,&Tcutil::trk);
     let id = $3;
     let t = id2type(id,kb);
     $$ = ^$(new List(new $(new JoinEff($1),t),$5)); 
@@ -2086,7 +2102,7 @@ atomic_effect:
 | REGIONS '(' any_type_name ')'
   { $$=^$(new List(new RgnsEff($3), NULL)); }
 | type_var
-  { set_vartyp_kind($1,EffKind,false);
+  { set_vartyp_kind($1,&Tcutil::ek,false);
     $$ = ^$(new List($1,NULL)); 
   }
 ;
@@ -2094,11 +2110,11 @@ atomic_effect:
 /* CYC:  new */
 region_set:
   type_var
-  { set_vartyp_kind($1,TopRgnKind,true);
+  { set_vartyp_kind($1,&Tcutil::trk,true);
     $$=^$(new List(new AccessEff($1),NULL)); 
   }
 | type_var ',' region_set
-  { set_vartyp_kind($1,TopRgnKind,true);
+  { set_vartyp_kind($1,&Tcutil::trk,true);
     $$=^$(new List(new AccessEff($1),$3)); 
   }
 ;
@@ -2670,13 +2686,13 @@ pattern:
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
-   { let tag = id2type($3,Tcutil::kind_to_bound(IntKind));
+   { let tag = id2type($3,Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(tag),NULL)),
 		   LOC(@1,@4))); }
 | IDENTIFIER '<' '_' '>' 
-   { let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(IntKind));
+   { let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(tv,
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(new VarType(tv)),NULL)),

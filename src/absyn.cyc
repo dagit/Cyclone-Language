@@ -92,9 +92,8 @@ static int new_type_counter = 0;
 type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
   return new Evar(k,NULL,new_type_counter++,env);
 }
-static struct Opt<kind_t> mk = {MemKind};
 type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
-  return new_evar(&mk,tenv); 
+  return new_evar(&Tcutil::mko,tenv); 
 }
 
 tqual_t combine_tqual(tqual_t x,tqual_t y) { 
@@ -202,7 +201,7 @@ kindbound_t compress_kb(kindbound_t k) {
 kind_t force_kb(kindbound_t kb) {
   switch (compress_kb(kb)) {
   case &Eq_kb(k): return k;
-  case &Unknown_kb(*f): fallthru(f,BoxKind);
+  case &Unknown_kb(*f): fallthru(f,&Tcutil::bk);
   case &Less_kb(*f,k):
     *f = new Opt(Tcutil::kind_to_bound(k)); 
     return k;
@@ -778,7 +777,8 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (Tcutil::compress(t)) {
   case &FnType(_): return at_typ(t,
                                  fresh_evar ? 
-                                   new_evar(new Opt(RgnKind),NULL) : &HeapRgn_val,
+				 new_evar(new Opt(&Tcutil::rk),
+					  NULL) : &HeapRgn_val,
                                  empty_tqual(NULL),false_conref);
   default: return t;
   }

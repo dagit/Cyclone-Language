@@ -372,7 +372,7 @@ bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
   case &VoidType: return false;
   case &VarType(tv):
-    switch (tvar_kind(tv,BoxKind)) {
+    switch (tvar_kind(tv,&bk)) {
     case BoxKind: return true;
     default:      return false;
     }
@@ -427,6 +427,6 @@ bool okay_szofarg(type_t t) {
     // Is this right, considering abstract typedefs??
     if (td == NULL || td->kind == NULL)
       impos(aprintf("szof typedeftype %s",typ2string(t)));
-    return td->kind->v==BoxKind;
+    return td->kind->v->kind==BoxKind;
   }
 }

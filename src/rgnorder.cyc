@@ -72,7 +72,10 @@ struct RgnPO<`r::R> {
 // makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
 // also allows regions(`a) to outlive only regions having R kind
 static bool valid_constraint(type_t eff, type_t rgn) {
-  let rgnkind = typ_kind(rgn);
+  let &Kind(k,a) = typ_kind(rgn);
+  if (k != RgnKind)
+    impos("bad region type |%s| passed to add_outlives_constraint",
+	  Absynpp::typ2string(rgn));
   switch (compress(eff)) {
   case &JoinEff(es):
     for (; es != NULL; es = es->tl) 
@@ -85,12 +88,12 @@ static bool valid_constraint(type_t eff, type_t rgn) {
     // Only allow regions(`a) to outlive R kinded vars
     //   FIX: this will change when we properly deal with uniqueness and
     //   polymorphism
-    if (rgnkind == RgnKind) return true; else return false;
+    if (a == Aliasable) return true; else return false;
   case &AccessEff(r): 
 //     fprintf(stderr,"checking %s > %s; are the kinds reversed?\n",
 // 	    Absynpp::typ2string(rgn), Absynpp::typ2string(r));
-    let rkind = typ_kind(r);
-    return (rgnkind == RgnKind) || (rkind == rgnkind);
+    let &Kind(rk,ra) = typ_kind(r);
+    return (k == RgnKind) && ((a == Aliasable) || (ra == a));
 //     return kind_leq(typ_kind(r),rgnkind);
   default:
     impos("bad effect |%s| passed to add_outlives_constraint",
@@ -172,16 +175,12 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
-    switch(tvar_kind(tvs2->hd,BoxKind)) {
-    case RgnKind: 
-    case UniqueRgnKind: 
-    case TopRgnKind: 
+    if (tvar_kind(tvs2->hd,&bk)->kind == RgnKind) {
 //       fprintf(stderr,"  Adding tvar %s to dict\n",
 // 	      Absynpp::typ2string(new VarType(tvs2->hd)));
-      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false)); break;
-      break;
-    default: break;
+      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false));
     }
+
   // make sure we don't have any bogus constraints
   if (!valid_constraint(effect,new VarType(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
@@ -270,14 +269,19 @@ static struct OutlivesEnv<`r>
 initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let ans = OutlivesEnv(listrgn,NULL,NULL);
   type_t r = compress(rgn);
-  switch (typ_kind(r)) {
-  case RgnKind: add_to_search(&ans,po->these_outlive_heap); break;
-  case UniqueRgnKind:  add_to_search(&ans,po->these_outlive_unique); break;
-  case TopRgnKind:
-    add_to_search(&ans,po->these_outlive_heap);
-    add_to_search(&ans,po->these_outlive_unique); break;
-  default: impos("RgnOrder: rgn not of correct kind");
+  let &Kind(k,a) = typ_kind(r);
+  if (k == RgnKind) {
+    switch (a) {
+    case Aliasable: add_to_search(&ans,po->these_outlive_heap); break;
+    case Unique:  add_to_search(&ans,po->these_outlive_unique); break;
+    case Top:
+      add_to_search(&ans,po->these_outlive_heap);
+      add_to_search(&ans,po->these_outlive_unique); break;
+    }
   }
+  else
+    impos("RgnOrder: rgn not of correct kind");
+
   switch(r) {
   case &VarType(tv): 
     ans.seen = rnew(listrgn) List(tv,ans.seen);
@@ -302,7 +306,8 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       switch (compress(rgn)) {
       case &UniqueRgn: return false;
       case &VarType(tv):
-	if (tvar_kind(tv,BoxKind) == RgnKind) return true;
+	let &Kind(k,a) = tvar_kind(tv,&bk);
+	if ((k == RgnKind) && (a == Aliasable)) return true;
 	else return false;
       default:
 	return true;
@@ -349,11 +354,11 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       // outlives it.  This isn't really used now, since we don't allow
       // regions(`a) to outlive something of non-R kind at the moment.
       let env = initial_env(listrgn,po,rgn);
-      let k = typ_kind(rgn);
-      if (k == RgnKind || k == TopRgnKind)
+      let &Kind(k,a) = typ_kind(rgn);
+      if ((k == RgnKind) && (a == Aliasable || a == Top))
 	if(contains_rgnseff(tv,po->these_outlive_heap))
 	  return true;
-      if (k == UniqueRgnKind || k == TopRgnKind)
+      if ((k == RgnKind) && (a == Unique || a == Top))
 	if(contains_rgnseff(tv,po->these_outlive_unique))
 	  return true;
       while(env.todo != NULL) {

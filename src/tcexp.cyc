@@ -244,9 +244,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         // we're treating 0 as if it's NULL
         e->r = new Const_e(Null_c);
         let tenv_tvs = lookup_type_vars(te);
-        t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+        t = new PointerType(PtrInfo(new_evar(&ako,new Opt(tenv_tvs)), 
 				    empty_tqual(NULL),
-				    PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
+				    PtrAtts(new_evar(&trko,new Opt(tenv_tvs)), 
 					    true_conref,
 					    empty_conref(), empty_conref(),
                                             NULL)));
@@ -286,7 +286,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
           t = *topt;
         } else {
           // maybe it's going in a different region
-          t = atb_typ(char_typ,new_evar(&rk,lookup_opt_type_vars(te)),
+          t = atb_typ(char_typ,new_evar(&rko,lookup_opt_type_vars(te)),
                       const_tqual(NULL), 
                       new Upper_b(elen), true_conref);
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
@@ -303,9 +303,9 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
   case {.Null_c = _}:
     let tenv_tvs = lookup_type_vars(te);
     // FIX: take advantage of topt
-    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+    t = new PointerType(PtrInfo(new_evar(&ako,new Opt(tenv_tvs)), 
                                 empty_tqual(NULL),
-				PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
+				PtrAtts(new_evar(&trko,new Opt(tenv_tvs)), 
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
                                        
@@ -450,7 +450,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2 = compress(e2->topt->v);
   switch (t1) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
-    if (!kind_leq(typ_kind(et),MemKind))
+    if (!kind_leq(typ_kind(et),&tmk))
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1))
       terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
@@ -495,7 +495,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       return sint_typ;
     } else {
-      if (!kind_leq(typ_kind(t1_elt),MemKind))
+      if (!kind_leq(typ_kind(t1_elt),&tmk))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t1))
         terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
@@ -523,8 +523,8 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   if (e1_is_num && e2_is_num)
     return sint_typ;
   // okay if same types and boxed
-  else if ((typ_kind(t1) == BoxKind) || 
-	   (unify(t1,new_evar(&bk,lookup_opt_type_vars(te))))) {
+  else if ((typ_kind(t1)->kind == BoxKind) || 
+	   (unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
     if (unify(t1,t2))
       return sint_typ;
     // okay if t1 can be silently cast to t2 or vice versa 
@@ -719,7 +719,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
     type_t telt = &VoidType_val;
     if (is_tagged_pointer_typ_elt(t,&telt) || 
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
-      if (!kind_leq(typ_kind(telt),MemKind))
+      if (!kind_leq(typ_kind(telt),&tmk))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t))
         terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
@@ -735,7 +735,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   let TestEnv(eq,isT) = tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  type_t t = new_evar(&mk,lookup_opt_type_vars(te));
+  type_t t = new_evar(&mko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
   if (!coerce_list(te,t,&l2)) {
@@ -782,7 +782,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   default: break;
   }
   // check to see that the type is not an abstract type
-  if (!kind_leq(typ_kind(t1),MemKind))
+  if (!kind_leq(typ_kind(t1),&tmk))
     terr(loc,"type is abstract (can't determine size).");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
@@ -1066,7 +1066,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
         list_t<$(tvar_t,type_t)@> instantiation = NULL;
         // now allows partial instantiation
         for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
-          kind_t k = tvar_kind(tvars->hd,BoxKind);
+          kind_t k = tvar_kind(tvars->hd,&bk);
           check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
           instantiation = 
             rnew(temp) List(rnew(temp) $(tvars->hd,ts->hd),instantiation);
@@ -1092,7 +1092,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 // (t)e
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
-  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
+  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
   type_t t2 = e->topt->v;
@@ -1212,7 +1212,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     // we shouldn't check the type yet -- it will be done later.
     return uint_typ;
   }
-  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
+  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
@@ -1238,7 +1238,7 @@ bool structfield_has_name(field_name_t n, aggrfield_t sf) {
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt, 
 			 type_t t, offsetof_field_t n) {
-  check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
+  check_type(loc,te,lookup_type_vars(te),&mk,true,t);
   switch(n) {
   case &StructField(n):
     bool bad_type = true;
@@ -1303,8 +1303,8 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     switch (t) {
     case &Evar(_,_,_,_):
       let tenv_tvs = lookup_type_vars(te);
-      let t2 = new_evar(&mk,new Opt(tenv_tvs));
-      let rt = new_evar(&trk,new Opt(tenv_tvs));
+      let t2 = new_evar(&mko,new Opt(tenv_tvs));
+      let rt = new_evar(&trko,new Opt(tenv_tvs));
       let b = empty_conref();
       let zt = empty_conref();
       let atts = PtrAtts(rt,empty_conref(),b,zt,NULL);
@@ -1314,7 +1314,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
       check_rgn_accessible(te,loc,rt);
       check_nonzero_bound(loc, b);
-      if (!kind_leq(typ_kind(t2),MemKind))
+      if (!kind_leq(typ_kind(t2),&tmk))
         terr(loc,"can't dereference abstract pointer type");
       return t2;
     default: 
@@ -1489,7 +1489,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
         }
       }
       check_rgn_accessible(te,loc,rt);
-      if (!kind_leq(typ_kind(t),MemKind))
+      if (!kind_leq(typ_kind(t),&tmk))
         terr(e1->loc,"can't subscript an abstract pointer");
       return t;
     case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
@@ -1549,7 +1549,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
   TEMP_RGN(te, r) {
     let           num_es  = List::length(des);
     list_t<exp_t> es  = List::rmap(r,snd,des);
-    type_t        res     = new_evar(&mk,lookup_opt_type_vars(te));
+    type_t        res     = new_evar(&mko,lookup_opt_type_vars(te));
     let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
     exp_t         sz_exp  = new_exp(sz_rexp,loc);
     // if zero_term, check that last element in array is zero terminated.
@@ -1707,7 +1707,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   let ex_ts = exist_typs;
   while(user_ex_ts != NULL && ex_ts != NULL) {
     // FIX: allow other kinds
-    check_type(loc,te,lookup_type_vars(te),AnyKind,true,user_ex_ts->hd);
+    check_type(loc,te,lookup_type_vars(te),&ak,true,user_ex_ts->hd);
     unify(user_ex_ts->hd,ex_ts->hd);
     user_ex_ts = user_ex_ts->tl;
     ex_ts      = ex_ts->tl;
@@ -1882,11 +1882,10 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
 }
 
 static type_t mallocRgn(type_t rgn) {
-  switch (typ_kind(compress(rgn))) {
-  case UniqueRgnKind:
-    return &UniqueRgn_val;
-  default:
-    return &HeapRgn_val;
+  // assumes that kind(rgn) == RgnKind
+  switch (typ_kind(compress(rgn))->aliasqual) {
+  case Unique:  return &UniqueRgn_val;
+  default:      return &HeapRgn_val;
   }
 }
 
@@ -1899,7 +1898,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
-      new RgnHandleType(new_evar(&trk,lookup_opt_type_vars(te)));
+      new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)ropt);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
@@ -1935,7 +1934,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   if (*is_calloc) {
     if (*t == NULL) impos("calloc with empty type");
     elt_type = **t;
-    check_type(loc,te,lookup_type_vars(te),MemKind,true,elt_type);
+    check_type(loc,te,lookup_type_vars(te),&mk,true,elt_type);
     check_malloc_type(true,loc,topt,elt_type);
     num_elts = *e;
     one_elt = false;
@@ -2131,7 +2130,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   if (rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
-      new RgnHandleType(new_evar(&trk,lookup_opt_type_vars(te)));
+      new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)rgn_handle);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 

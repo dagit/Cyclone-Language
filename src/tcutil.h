@@ -59,6 +59,7 @@ extern bool kind_leq(kind_t k1, kind_t k2);
 extern type_t fd_type(fndecl_t fd); 
 extern kind_t tvar_kind(tvar_t t,kind_t def);
 extern kind_t typ_kind(type_t t);
+extern bool kind_eq(kind_t k1, kind_t k2);
 extern type_t compress(type_t t);
 extern void unchecked_cast(tenv_t, exp_t, type_t, coercion_t);
 extern bool coerce_arg(tenv_t, exp_t, type_t); 
@@ -84,14 +85,32 @@ extern type_t pointer_elt_type(type_t t);
 extern type_t pointer_region(type_t t);
 
 // useful kinds
-extern struct Core::Opt<kind_t> rk;
-extern struct Core::Opt<kind_t> trk;
-extern struct Core::Opt<kind_t> urk;
-extern struct Core::Opt<kind_t> ak;
-extern struct Core::Opt<kind_t> bk;
-extern struct Core::Opt<kind_t> mk;
-extern struct Core::Opt<kind_t> ek;
-extern struct Core::Opt<kind_t> ik;
+extern struct Kind rk;
+extern struct Kind ak;
+extern struct Kind bk;
+extern struct Kind mk;
+extern struct Kind ek;
+extern struct Kind ik;
+
+extern struct Kind trk;
+extern struct Kind tak;
+extern struct Kind tbk;
+extern struct Kind tmk;
+
+extern struct Kind urk;
+extern struct Kind uak;
+extern struct Kind ubk;
+extern struct Kind umk;
+
+extern struct Core::Opt<kind_t> rko;
+extern struct Core::Opt<kind_t> trko;
+extern struct Core::Opt<kind_t> urko;
+extern struct Core::Opt<kind_t> ako;
+extern struct Core::Opt<kind_t> bko;
+extern struct Core::Opt<kind_t> mko;
+extern struct Core::Opt<kind_t> eko;
+extern struct Core::Opt<kind_t> iko;
+
 extern Core::opt_t<kind_t> kind_to_opt(kind_t k);
 extern kindbound_t kind_to_bound(kind_t k);
 extern bool unify_kindbound(kindbound_t, kindbound_t);

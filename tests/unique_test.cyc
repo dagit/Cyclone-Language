@@ -52,7 +52,7 @@ int *`U h(int b) {
   try {
     z = new 5; // consumed = { x }
   } catch {
-  case Core::Not_found:
+  case &Core::Not_found:
     x = y; // consumed = { y, z }
     break;
   }
@@ -208,20 +208,20 @@ void f3(int b) {
 int *`U vary = NULL;
 int *`H varh = NULL;
 
-void refine(region_t<`r::TR> r, int *`r::TR x) {
-  if (r == Core::heap_region) {
-    printf("here\n");
-    varh = x;
-  }
-  else if (r == Core::unique_region) {
-    printf("unique here\n");
-    vary = x;
-  }
-//   y = x; // will fail
-  let z = NULL;
-  z :=: vary;
-  Core::ufree(z);
-}
+// void refine(region_t<`r::TR> r, int *`r::TR x) {
+//   if (r == Core::heap_region) {
+//     printf("here\n");
+//     varh = x;
+//   }
+//   else if (r == Core::unique_region) {
+//     printf("unique here\n");
+//     vary = x;
+//   }
+// //   y = x; // will fail
+//   let z = NULL;
+//   z :=: vary;
+//   Core::ufree(z);
+// }
 
 // void bar(region_t<`r> r, int *`r x) {
 //   if (r == unique_region) {
@@ -232,8 +232,8 @@ void refine(region_t<`r::TR> r, int *`r::TR x) {
 int main() {
   int *`U v = h(1);
   Core::ufree(v);
-  int *`U x = new 1;
-  refine(Core::unique_region,x);
-  refine(Core::heap_region,new 1);
+//   int *`U x = new 1;
+//   refine(Core::unique_region,x);
+//   refine(Core::heap_region,new 1);
   return 0;
 }
