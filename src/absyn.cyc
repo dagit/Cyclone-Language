@@ -170,6 +170,9 @@ exp float_exp(string f, segment loc) { return const_exp(Float_c(f),loc);}
 exp string_exp(string s, segment loc){ return const_exp(String_c(s),loc);}
 
 exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,Unresolved_b), loc); }
+exp varb_exp(qvar q, binding_t b, segment loc) {
+  return new_exp(Var_e(q, b), loc);
+}
 exp unknownid_exp(qvar q, segment loc) { 
   return new_exp(UnknownId_e(q), loc); 
 }

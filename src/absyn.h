@@ -431,6 +431,7 @@ namespace Absyn {
   extern exp float_exp(string f, segment);
   extern exp string_exp(string s, segment);
   extern exp var_exp(qvar, segment);
+  extern exp varb_exp(qvar, binding_t, segment);
   extern exp unknownid_exp(qvar, segment);
   extern exp primop_exp(primop, list<exp> es, segment);
   extern exp prim1_exp(primop, exp, segment);

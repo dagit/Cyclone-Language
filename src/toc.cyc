@@ -633,6 +633,9 @@ static exp convert_exp(bool toplevel, typ t1, typ t2, exp e) {
 // where the ith element of fallthru_info->v[1] is qvi 
 // and varmap' is fallthru_info->v[2]
 // (We also have to pop handlers as explained above.)
+// 
+// Note that the varmap has to take into account the shadow number
+// from bindings -- hence the domain of the map is qvar*int.
 static struct Env {
   Opt_t<var> break_lab;   
   Opt_t<var> continue_lab;
@@ -1028,9 +1031,17 @@ static void exp_to_c(env nv, exp e) {
     e->r = signed_int_exp(0,DL)->r; break;
   case Const_e(_): break;
   case Var_e(qv,b): 
+    switch (b) {
+    case Local_b(vd): fallthru(vd);
+    case Pat_b(vd): 
+      if (vd->shadow != 0) 
+	warn(e->loc,xprintf("shadowed variable %s won't be translated correctly",qvar2string(qv)));
+      break;
+    default: break;
+    }
     // FIX!
     // must look variables up in the nv->varmap
-    try 
+    try
       e->r = Dict::lookup(nv->varmap,qv)->r;
     catch { 
     case Dict::Absent:
@@ -1389,7 +1400,7 @@ static void exp_to_c(env nv, exp e) {
     typ elt_typ = typ_to_c(old_elt_typ);
     typ ptr_t = nullableptr_t(elt_typ,empty_tqual());
     exp_to_c(nv,e1);
-    env nv2 = add_varmap(nv,x1,var_exp(x1,DL));
+    env nv2 = add_varmap(nv,x1,varb_exp(x1,Local_b(vd),DL));
     exp_to_c(nv2,e2);
     qvar max = temp_var();
     qvar a = temp_var();
@@ -2505,7 +2516,10 @@ static $(env,list<decl>) decls_to_c(env nv, list<decl> ds, bool top) {
 	res = List::append(temp_topdecls,res);
 	temp_topdecls = null;
       }
-      nv = add_varmap(nv,vd->name,var_exp(n,DL));
+      if (top)
+	nv = add_varmap(nv,vd->name,varb_exp(n,Global_b(vd),DL));
+      else 
+	nv = add_varmap(nv,vd->name,varb_exp(n,Local_b(vd),DL));
       vd->name = n;
       vd->sc   = scope_to_c(vd->sc);
       vd->type = top ? top_typ_to_c(vd->type) : typ_to_c(vd->type);
