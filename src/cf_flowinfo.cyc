@@ -1353,9 +1353,12 @@ struct Vardecl *nonesc_vardecl(binding_t b) {
 bool exp2relnop(exp_t e, reln_op_t @p) {
   // if the expression has a singleton type, then that's what we track
   switch (Tcutil::compress((type_t)e->topt)) {
-  case &TagType(&VarType(i)): 
-    *p = RTvar(i);
-    return true;
+  case &TagType(t):
+    switch (Tcutil::compress(t)) {
+    case &VarType(i): *p = RTvar(i); return true;
+    default: break;
+    }
+    break;
   case &ValueofType(type_exp): 
     e = type_exp; 
     break;

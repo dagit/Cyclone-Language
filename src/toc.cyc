@@ -3432,6 +3432,7 @@ DynCast:
         if (in_bnds && !possibly_null)
 	  bounds_checks_eliminated++;
         else if (in_bnds && possibly_null) {
+          bounds_checks_eliminated++;
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
           e1->r = cast_it_r(ta2,fncall_exp(_check_null_e,
