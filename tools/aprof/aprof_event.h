@@ -191,6 +191,7 @@ extern const char ?x_caption;
 extern const char ?y_caption;
 extern bool black_and_white;
 extern bool gc_caps;
+extern bool sort_changes;
 
 
 #endif

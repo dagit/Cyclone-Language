@@ -44,6 +44,7 @@ const char ?x_caption;
 const char ?y_caption;
 bool black_and_white = false;
 bool gc_caps = false;
+bool sort_changes = false;
 
 static const char ?default_colors[] =
 //  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
@@ -103,6 +104,7 @@ struct Curve {
   /* updated in phase 1 */
   double area;  // would like to use long long, but can't printf
   unsigned int max_y;
+  unsigned int changes_y;
   unsigned int num_points;
   /* updated in phase 2 */
   coord_t ?points;
@@ -113,7 +115,7 @@ struct Curve {
 typedef struct Curve @curve_t;
 static curve_t
 curve_init(const char ?`H name) {
-  return new Curve(name,0,0,0,NULL,0,0);
+  return new Curve(name,0,0,0,0,NULL,0,0);
 }
 
 // Data that is maintained/updated at each profiled event
@@ -210,6 +212,7 @@ static void mark_delta(curve_t b, clock_t x, int delta_y) {
   //  unsigned int x = Xarray::length((_@)events);
   b->area += ((double)(x - b->last_x)) * b->last_y;
   if (b->max_y < y) b->max_y = y;
+  b->changes_y++;
 #ifdef DEBUG_ME
   fprintf(stderr,"%s = %d @ %d\n",b->name,y,x);
   //  fprintf(stderr,"%s->area += %s*events\n",
@@ -294,8 +297,8 @@ static void output_comment(const char ?s) {
 static void comment_curve_stats(curve_t b) { // for debugging
   const char ?CE = "clocks";
   if (use_events) CE = "events";
-  output_comment(aprintf("%s area: %s*%s\tmax_y: %u",b->name,
-                         print_bytes(b->area),CE,b->max_y));
+  output_comment(aprintf("%s area: %s*%s\tmax_y: %u\tchanges_y: %u",b->name,
+			 print_bytes(b->area),CE,b->max_y,b->changes_y));
 }
 
 static unsigned int bytes_reclaim_heap = 0;
@@ -512,10 +515,22 @@ static void phase2($(const char ?,clock_t,int) @z) {
 }
 //////////////////////////////////////////////////////////////////////
 
-static int curve_cmp(curve_t x, curve_t y) {
+static int curve_area_cmp(curve_t x, curve_t y) {
   if (x->area < y->area) return -1;
-  else if (x->area == y->area) return 0;
-  else return 1;
+  else if (x->area > y->area) return 1;
+  /* equal areas, secondary compare by changes in y */
+  else if (x->changes_y < y->changes_y) return -1;
+  else if (x->changes_y > y->changes_y) return 1;
+  else return 0;
+}
+
+static int curve_changes_cmp(curve_t x, curve_t y) {
+  if (x->changes_y < y->changes_y) return -1;
+  else if (x->changes_y > y->changes_y) return 1;
+  /* equal changes in y, secondary compare by area */
+  else if (x->area < y->area) return -1;
+  else if (x->area > y->area) return 1;
+  else return 0;
 }
 
 #define SEPARATION 15
@@ -728,7 +743,9 @@ int generate_svg(string_t<`H> file) {
     all_curves = new List(env->refcnt_live,all_curves);
   if (!omitted("other") && env->other_live->area > 0.0)
     all_curves = new List(env->other_live,all_curves);
-  all_curves = merge_sort(curve_cmp,all_curves);
+  if (sort_changes)
+    all_curves = merge_sort(curve_changes_cmp,all_curves);
+  else all_curves = merge_sort(curve_area_cmp,all_curves);
 
   /* Phase 2: compute the curves */
   Xarray::iter(phase2,(_@)events);

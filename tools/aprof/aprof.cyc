@@ -74,6 +74,8 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         Default is 0.5\n"
           "  -gc-caps\n"
           "         print extra caps on the gc bars\n"
+          "  -sort-changes\n"
+          "         sort regions by changes in y instead of area\n"
           "  -translate <x>,<y>\n"
           "         translate svg output <x> to the right, <y> down\n"
           "  -x-caption <s>\n"
@@ -138,6 +140,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-gc-caps" ) == 0) {
       gc_caps = true;
+    }
+    else if ( strcmp( argv[argn], "-sort-changes" ) == 0) {
+      sort_changes = true;
     }
     else if ( strcmp( argv[argn], "-translate" ) == 0 && argn+1 < argc ) {
       graph_translate = argv[++argn];
