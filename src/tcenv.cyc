@@ -214,7 +214,7 @@ static `a scoped_lookup<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var), var v){
       } catch { case Dict::Absent: break; }
     }
     if (cns == null)
-      throw Dict::Absent();
+      throw Dict::Absent;
     // v is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
@@ -258,7 +258,7 @@ list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {
       return result->hd;
     }
     if (cns == null)
-      throw Dict::Absent();
+      throw Dict::Absent;
     // ns->hd is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
@@ -314,7 +314,7 @@ Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   try ge = lookup_namespace(te,loc,nsl);
   catch { case Dict::Absent:
     Tcutil::terr(loc,"bad qualified name for xenum");
-    throw Dict::Absent();
+    throw Dict::Absent;
   }
   return &Opt(Dict::lookup(ge->xenumdecls,v));
 }

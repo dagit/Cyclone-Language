@@ -331,6 +331,6 @@ xenum exn {Absent};
  * If the set is empty, throw Absent.
  */
 `a choose<`a>(Set<`a> s) {
-  if (s->nodes == null) throw Absent();
+  if (s->nodes == null) throw Absent;
   return(s->nodes->hd);
 }

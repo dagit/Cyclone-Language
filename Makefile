@@ -73,10 +73,10 @@ cmp:
 # TJIM: modified to update only changed files.  This speeds up cvs commit
 # over a slow link.
 update: cyclone_src
-	for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/src/$$i || cp src/$$i bin/genfiles/src/$$i) done
-	for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/lib/$$i || cp lib/$$i bin/genfiles/lib/$$i) done
-	cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME)
-	cmp -s lib/precore_c.h  bin/genfiles/lib/precore_c.h || cp lib/precore_c.h  bin/genfiles/lib/precore_c.h
+	@for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/src/$$i || (echo UPDATING src/$$i; cp src/$$i bin/genfiles/src/$$i)) done
+	@for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/lib/$$i || (echo UPDATING lib/$$i; cp lib/$$i bin/genfiles/lib/$$i)) done
+	@cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || (echo UPDATING lib/$(C_RUNTIME); cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME))
+	@cmp -s lib/precore_c.h  bin/genfiles/lib/precore_c.h || (echo UPDATING lib/precore_c.h; cp lib/precore_c.h bin/genfiles/lib/precore_c.h)
 
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)

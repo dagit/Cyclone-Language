@@ -26,7 +26,7 @@ extern void dumpstmt(stmt);
 extern void dumpdecl(decl);
 extern void dumptqtd<`a>(struct Tqual *, typ, void f(`a), `a);
 
-// really want to change this to char[] (need a control character for format 
+// really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
 typedef string dump_string_t;
@@ -41,7 +41,7 @@ static unsigned int pos = 0;
 void dump(dump_string_t s) {
   pos += s.size+1;
   if (pos > 80) {
-    pos = 0; 
+    pos = 0;
     fprintf((FILE @)dump_file, "\n");
   }
   fprintf((FILE @)dump_file, " %s", s);
@@ -49,7 +49,7 @@ void dump(dump_string_t s) {
 void dump_nospace(dump_string_t s) {
   pos += s.size;
   fprintf((FILE @)dump_file, "%s", s);
-} 
+}
 // this needs to take a boxed type b/c it's used to instantiate `a
 void dump_str(stringptr s) {
   dump(*s);
@@ -77,7 +77,7 @@ void dump_sep_c<`b,`a>(void f(`b,`a), `b env, list<`a> l, dump_string_t sep) {
   }
   f(env,l->hd);
 }
-void group<`a>(void f(`a), list<`a> l, 
+void group<`a>(void f(`a), list<`a> l,
 	       dump_string_t start, dump_string_t end, dump_string_t sep) {
   dump_nospace(start);
   dump_sep(f,l,sep);
@@ -89,7 +89,7 @@ void group_c<`b,`a>(void f(`b,`a), `b env, list<`a> l,
   dump_sep_c(f,env,l,sep);
   dump_nospace(end);
 }
-void egroup<`a>(void f(`a), list<`a> l, 
+void egroup<`a>(void f(`a), list<`a> l,
 		dump_string_t start, dump_string_t end, dump_string_t sep) {
   if(l != null)
     group(f,l,start,end,sep);
@@ -196,7 +196,7 @@ void dumpntyp(typ t) {
   case StructType(n,  ts,_):
     dump("struct"); dumpqvar((qvar)n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case RgnHandleType(rgn): 
+  case RgnHandleType(rgn):
     dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX
   case HeapRgnType: return; // FIX: may want explicit rgn some times
   case UnionType: dump("union {/* unimplemented */}"); return;
@@ -246,22 +246,22 @@ void dumpexp_prec(int inprec, exp e) {
   if(inprec >= myprec)
     dump_nospace("(");
   switch (e->r) {
-  case Const_e(Char_c(sg,ch)): 
+  case Const_e(Char_c(sg,ch)):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case Const_e(Short_c(sg,s)):
     dump("(short)"); dump_nospace(string_of_int(s)); break;
-  case Const_e(Int_c(Signed,i)): 
+  case Const_e(Int_c(Signed,i)):
     dump(string_of_int(i)); break;
   case Const_e(Int_c(Unsigned,i)):
     dump(string_of_int(i)); dump_nospace("u"); break;
-  case Const_e(LongLong_c(sg,i)): 
+  case Const_e(LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case Const_e(Float_c(x)):    dump(x);      break;
   case Const_e(Null_c):        dump("null"); break;
   case Const_e(String_c(heap_allocate,s)):
-    if (heap_allocate) 
+    if (heap_allocate)
       dump("new ");
-    dump("\""); dump_nospace(Absynpp::string_escape(s)); dump_nospace("\""); 
+    dump("\""); dump_nospace(Absynpp::string_escape(s)); dump_nospace("\"");
     break;
 
     // FIX: w.r.t. shadowing???
@@ -270,9 +270,9 @@ void dumpexp_prec(int inprec, exp e) {
 
   case Primop_e(p,es):
     // FIX: total waste to allocate, but compiler cannot cast to
-    // UntaggedArray correctly (fix Tcutil::coerce_arg and extend 
+    // UntaggedArray correctly (fix Tcutil::coerce_arg and extend
     // Toc conversions).
-    string pstr = Absynpp::prim2str(p); 
+    string pstr = Absynpp::prim2str(p);
     if(!is_format_prim(p)) {
       switch (List::length(es)) {
       case 1:
@@ -280,13 +280,13 @@ void dumpexp_prec(int inprec, exp e) {
 	  dumpexp_prec(myprec,es->hd);
 	  dump(".size");
 	} else {
-	  dump(pstr); 
-	  dumpexp_prec(myprec,es->hd); 
+	  dump(pstr);
+	  dumpexp_prec(myprec,es->hd);
 	}
 	break;
-      case 2: 
-	dumpexp_prec(myprec,es->hd); 
-	dump(pstr); 
+      case 2:
+	dumpexp_prec(myprec,es->hd);
+	dump(pstr);
 	dumpexp_prec(myprec,es->tl->hd);
 	break;
       default: throw Failure("Absyndump -- Bad number of arguments to primop");
@@ -298,7 +298,7 @@ void dumpexp_prec(int inprec, exp e) {
 
   case AssignOp_e(e1,popt,e2):
     dumpexp_prec(myprec,e1);
-    if(popt != null) 
+    if(popt != null)
       dump(Absynpp::prim2str(popt->v));
     dump_nospace("=");
     dumpexp_prec(myprec,e2);
@@ -314,7 +314,7 @@ void dumpexp_prec(int inprec, exp e) {
     dump("?"); dumpexp_prec(0,e2);
     dump(":"); dumpexp_prec(myprec,e3);
     break;
-    
+
   case SeqExp_e(e1,e2):
     dumpexp_prec(myprec,e1); dump(","); dumpexp_prec(myprec,e2); break;
 
@@ -325,14 +325,14 @@ void dumpexp_prec(int inprec, exp e) {
     dumpexps_prec(20,es);
     dump_nospace(")");
     break;
-    
+
   case Throw_e(e1): dump("throw"); dumpexp_prec(myprec,e1); break;
 
   case NoInstantiate_e(e1): fallthru(e1);
   case Instantiate_e(e1,_): dumpexp_prec(inprec,e1); break;
 
   case Cast_e(t,e1):
-    dump("("); dumptyp(t); dump_nospace(")"); dumpexp_prec(myprec,e1); 
+    dump("("); dumptyp(t); dump_nospace(")"); dumpexp_prec(myprec,e1);
     break;
 
   case Address_e(e1):
@@ -345,22 +345,22 @@ void dumpexp_prec(int inprec, exp e) {
     dump("*"); dumpexp_prec(myprec,e1); break;
 
   case StructMember_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(*(n)); 
+    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(*(n));
     break;
 
   case StructArrow_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(*(n)); 
+    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(*(n));
     break;
 
   case Subscript_e(e1,e2):
-    dumpexp_prec(myprec,e1); 
+    dumpexp_prec(myprec,e1);
     dump_nospace("["); dumpexp(e2); dump_nospace("]"); break;
 
   case Tuple_e(es):
     dump("$("); dumpexps_prec(20,es); dump(")"); break;
 
   case CompoundLit_e(vat,des):
-    dump("("); 
+    dump("(");
     dumptyp((*vat)[2]); // OK to ignore qualifiers??
     dump(")");
     group(dumpde,des,"{","}",",");
@@ -383,7 +383,7 @@ void dumpexp_prec(int inprec, exp e) {
   case Enum_e(_,_,es,_,ef): fallthru(es,ef);
   case Xenum_e(_,es,_,ef):
     dumpqvar(ef->name);
-    group(dumpexp,es,"(",")",",");
+    if (es != null) group(dumpexp,es,"(",")",",");
     break;
 
   case UnresolvedMem_e(n,des):
@@ -498,7 +498,7 @@ void dumpstmt(stmt s) {
     break;
 
   case TryCatch_s(s1,ss):
-    dump("try"); dumpstmt(s1); dump("catch {"); 
+    dump("try"); dumpstmt(s1); dump("catch {");
     dumpswitchclauses(ss); dump("}");
     break;
   }
@@ -515,7 +515,7 @@ void dumppat(pat p) {
   case Null_p: dump("null"); break;
   case Int_p(Signed,i):   dump(xprintf("%d",i)); break;
   case Int_p(Unsigned,i): dump(xprintf("%u",i)); break;
-  case Char_p(ch): 
+  case Char_p(ch):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case Float_p(x):      dump(x);            break;
   case Var_p(vd):       dumpqvar(vd->name); break;
@@ -528,14 +528,16 @@ void dumppat(pat p) {
   case UnknownFields_p(q,tvs,dps):
     dumpqvar(q); dumptvars(tvs); group(dumpdp,dps,"{","}",","); break;
   case Struct_p(sd,_,tvs,dps):
-    if(sd->name != null) 
+    if(sd->name != null)
       dumpqvar(sd->name->v);
     dumptvars(tvs);
-    group(dumpdp,dps,"{","}",","); 
+    group(dumpdp,dps,"{","}",",");
     break;
   case Enum_p(n,_,tvs,ps,_,_): fallthru(n,tvs,ps);
   case Xenum_p(n,tvs,ps,_,_):
-    dumpqvar(n); dumptvars(tvs); group(dumppat,ps,"(",")",","); break;
+    dumpqvar(n); dumptvars(tvs);
+    if (ps != null) group(dumppat,ps,"(",")",",");
+    break;
   }
 }
 
@@ -558,7 +560,7 @@ void dumpstructfields(list<$(field_name,tqual,typ)@> fields) {
     dumptqtd(tq,type,dump_str,name);
     dump_semi();
   }
-} 
+}
 
 void dumptypedefname(typedefdecl td) {
   dumpqvar(td->name);
@@ -567,7 +569,7 @@ void dumptypedefname(typedefdecl td) {
 
 void dumpdecl(decl d) {
   switch(d->r) {
-  case Fn_d(fd): 
+  case Fn_d(fd):
     if(fd->is_inline) dump("inline");
     dumpscope(fd->sc);
     typ t = FnType(fd->tvs,
@@ -673,7 +675,7 @@ static void dump_upperbound(exp e) {
     dump("{"); dumpexp(e); dump("}");
   }
 }
-    
+
 void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   if(tms == null) {
     f(a);
@@ -681,25 +683,25 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case Pointer_mod(Nullable_ps(ue),  HeapRgnType,  tq2): 
+  case Pointer_mod(Nullable_ps(ue),  HeapRgnType,  tq2):
     dump_nospace("*"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps(ue), HeapRgnType,  tq2): 
+  case Pointer_mod(NonNullable_ps(ue), HeapRgnType,  tq2):
     dump_nospace("@"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(TaggedArray_ps, HeapRgnType,  tq2): 
+  case Pointer_mod(TaggedArray_ps, HeapRgnType,  tq2):
     dump_nospace("?"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(Nullable_ps(ue),  VarType(&$(r,k)), tq2):  
-    dump_nospace("*"); dump_upperbound(ue); dump_str(r); 
+  case Pointer_mod(Nullable_ps(ue),  VarType(&$(r,k)), tq2):
+    dump_nospace("*"); dump_upperbound(ue); dump_str(r);
     dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps(ue), VarType(&$(r,k)), tq2): 
-    dump_nospace("@"); dump_upperbound(ue); 
+  case Pointer_mod(NonNullable_ps(ue), VarType(&$(r,k)), tq2):
+    dump_nospace("@"); dump_upperbound(ue);
     dump_str(r); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(TaggedArray_ps, VarType(&$(r,k)), tq2): 
+  case Pointer_mod(TaggedArray_ps, VarType(&$(r,k)), tq2):
     dump_nospace("?"); dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
-  default: 
+  default:
     bool next_is_pointer = false;
-    if(tms->tl != null) 
+    if(tms->tl != null)
       switch (tms->tl->hd) {
       case Pointer_mod(_,_,_): next_is_pointer = true; break;
       default: break;
@@ -711,7 +713,7 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
       dump(")");
     switch(tms->hd) {
     case Carray_mod: dump("[]"); break;
-    case ConstArray_mod(e): 
+    case ConstArray_mod(e):
       dump("["); dumpexp(e); dump("]"); break;
     case Function_mod(WithTypes(args,varargs)):
       dumpfunargs(args,varargs); break;

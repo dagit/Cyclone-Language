@@ -63,8 +63,18 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
     try {
       switch (lookup_ordinary(te,e1->loc,q)) {
       case VarRes(b):        e->r = FnCall_e(e1,es);            return;
-      case EnumRes(ed,ef):   e->r = Enum_e(null,null,es,ed,ef); return;
-      case XenumRes(xed,ef): e->r = Xenum_e(null,es,xed,ef);    return;
+      case EnumRes(ed,ef):
+        if (ef->typs == null)
+          // Don't allow "foo()", require "foo"
+          terr(e->loc,xprintf("%s is a constant, not a function",
+                              qvar2string(ef->name)));
+        e->r = Enum_e(null,null,es,ed,ef); return;
+      case XenumRes(xed,ef):
+        if (ef->typs == null)
+          // Don't allow "foo()", require "foo"
+          terr(e->loc,xprintf("%s is a constant, not a function",
+                              qvar2string(ef->name)));
+        e->r = Xenum_e(null,es,xed,ef);    return;
       case StructRes(sd):
 	let des = List::map(make_struct_arg,es);
 	if (sd->name != null)

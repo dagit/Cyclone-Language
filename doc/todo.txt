@@ -1,7 +1,7 @@
 Todo now:
 
-* Try to avoid using so many lists in the abstract syntax -- 
-  we should use arrays (e.g., for CompoundLit_e, Array_e, 
+* Try to avoid using so many lists in the abstract syntax --
+  we should use arrays (e.g., for CompoundLit_e, Array_e,
   Struct_e, Enum_e, Xenum_e, and UnresolvedMem_e, Switch_s, etc.)
 
 * allows a cast between a "struct cons<exp>*" and "exp@?" !!!
@@ -18,7 +18,7 @@ Todo now:
   region.
 
 * we should support not having to explicitly abstract type variables
-  in functions, prototypes, structs, etc.  
+  in functions, prototypes, structs, etc.
 
 * when we have a pattern:
 
@@ -47,7 +47,7 @@ Todo now:
   don't contain pointers or abstract types.
 
 * Are we treating static variables (within a function) correctly w.r.t.
-  definite assignment?  
+  definite assignment?
 
 * We should add anonymous structs.
 
@@ -63,8 +63,6 @@ Todo now:
 
 * More libraries
 
-* Remove synth stuff to clean up typechecker
-
 * ought to be able to treat the arguments to an enum constructor as a tuple
   in a pattern...
 
@@ -78,7 +76,7 @@ Todo now:
 * need to spit out an "interface" file for each .cyc file.  The interface
   should list all of the imported types and values, and all of the exported
   types and values.  At link-time, we should suck in all of these and make
-  sure they're consistent.  
+  sure they're consistent.
 
 * better formatting support in printf & friends (i.e., deal with full
   %-specifiers)

@@ -69,12 +69,12 @@ xenum exn {Toc_Impossible};
 static `a unimp<`a>(string s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
-  throw Toc_Unimplemented();
+  throw Toc_Unimplemented;
 }
 static `a toc_impos<`a>(string s) {
   fprintf(stderr,"%s\n",s);
   fflush(stderr);
-  throw Toc_Impossible();
+  throw Toc_Impossible;
 }
 xenum exn {Match_error};
 
@@ -1995,7 +1995,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
           f=f2;
           break;
         default:  // FIX:  assumes one field name designator
-          throw Match_error();
+          throw Match_error;
       }
       _ v   = temp_var();
       _ t2  = p2->topt->v;

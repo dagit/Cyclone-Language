@@ -250,21 +250,21 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
   case Pointer_mod(ps, rgn, tq2):
     _ ptr;
     switch (ps) {
-    case Nullable_ps(e): 
+    case Nullable_ps(e):
       if (Evexp::eval_const_uint_exp(e) == 1)
-	ptr = text("*"); 
-      else 
+	ptr = text("*");
+      else
 	ptr = cat4(text("*"),text("{"),exp2doc(e),text("}"));
       break;
-    case NonNullable_ps(e): 
+    case NonNullable_ps(e):
       if (Evexp::eval_const_uint_exp(e) == 1)
-	ptr = text("@"); 
-      else 
+	ptr = text("@");
+      else
 	ptr = cat4(text("@"),text("{"),exp2doc(e),text("}"));
       break;
     case TaggedArray_ps: ptr = text("?"); break;
     }
-    _ r   = ntyp2doc(rgn);
+    let r = ntyp2doc(rgn);
     return cat3(ptr,r,rest);
   }
 }
@@ -289,7 +289,7 @@ Doc ntyp2doc(typ t) {
                   text(xprintf("%d",i)),
                   text(")"));
     break;
-  case VarType(&$(v,k)): 
+  case VarType(&$(v,k)):
     s=text(*v); break;//FIX: sometimes need explicit kinds!
   case EnumType(n,ts,_):
     if (n == null)
@@ -311,7 +311,7 @@ Doc ntyp2doc(typ t) {
     case Unsigned: sns = "unsigned "; break;
     }
     switch (sz) {
-    case B1: 
+    case B1:
       switch (sn) {
       case Signed:   sns = "signed "; break;
       case Unsigned: sns = "";        break;
@@ -415,9 +415,9 @@ int exp_prec(exp e) {
   case UnknownId_e(_):   return 10000;
   case Primop_e(p,_):
     switch (p) {
-    case Plus:           return 100; 
+    case Plus:           return 100;
     case Times:          return 110;
-    case Minus:          return 100; 
+    case Minus:          return 100;
     case Div:            return 110;
     case Mod:            return 110;
     case Eq:             return  70;
@@ -478,7 +478,7 @@ Doc exp2doc(exp e) {
 
 Doc exp2doc_prec(int inprec, exp e) {
   int myprec = exp_prec(e);
-  Doc s; 
+  Doc s;
   switch (e->r) {
   case Const_e(c): s = cnst2doc(c); break;
   case Var_e(x,Local_b(vd)):
@@ -494,7 +494,7 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Var_e(x,_):     s = qvar2doc(x); break;
   case UnknownId_e(x): s = qvar2doc(x); break;
   case Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
-  case AssignOp_e(e1,popt,e2): 
+  case AssignOp_e(e1,popt,e2):
     s = cat5(exp2doc_prec(myprec,e1),
              text(" "),
              (popt == null) ? text("") : prim2doc(popt->v),
@@ -515,11 +515,11 @@ Doc exp2doc_prec(int inprec, exp e) {
     switch ($(e2->r,e3->r)) {
       /* JGM:  this causes a bug in some places...notably the
        * file tools/cyclex/compact.cyc
-    case $(Const_e(Int_c(Signed,1)),_):  
-      s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3)); 
+    case $(Const_e(Int_c(Signed,1)),_):
+      s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3));
       break;
     case $(_,Const_e(Int_c(Signed,0))):
-      s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2)); 
+      s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2));
       break;
       */
     default:
@@ -612,11 +612,15 @@ Doc exp2doc_prec(int inprec, exp e) {
     break;
   case Enum_e(_,_,es,_,ef): fallthru(es,ef);
   case Xenum_e(_,es,_,ef):
-    s = cat2(qvar2doc(ef->name),
-             egroup("(",")",",",List::map(exp2doc,es)));
+    if (es == null)
+      // special case: a nullary enum constant is printed "foo" not "foo()"
+      s = qvar2doc(ef->name);
+    else
+      s = cat2(qvar2doc(ef->name),
+               egroup("(",")",",",List::map(exp2doc,es)));
     break;
-  case UnresolvedMem_e(n,des): 
-    // Currently n is always null from the parser 
+  case UnresolvedMem_e(n,des):
+    // Currently n is always null from the parser
     s = group("{","}",",",List::map(de2doc,des));
     break;
   case StmtExp_e(s2):
@@ -667,9 +671,9 @@ Doc cnst2doc(cnst_t c) {
   case LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case Float_c(x):  return text(x);
   case Null_c:      return text("null");
-  case String_c(true,s): 
+  case String_c(true,s):
     return cat3(text("new \""), text(string_escape(s)), text("\""));
-  case String_c(_,s): 
+  case String_c(_,s):
     return cat3(text("\""), text(string_escape(s)), text("\""));
   }
 }
@@ -685,7 +689,7 @@ Doc primapp2doc(int inprec, primop p,list<exp> es) {
 
   } else if (!is_format_prim(p)) {
     list<Doc> ds = List::map_c(exp2doc_prec,inprec,es);
-    if (ds == null) 
+    if (ds == null)
       throw Failure(xprintf("Absynpp::primapp2doc: %s with no args",
 			    string_of_doc(ps,72)));
     else if (ds->tl == null)
@@ -905,10 +909,10 @@ Doc stmt2doc(stmt st) {
     else
       s = ppseql(stmt2doc,"",&cons(s1,&cons(s2,null)));
     break;
-  case Return_s(eopt): 
-    if (eopt == null) 
+  case Return_s(eopt):
+    if (eopt == null)
       s = text("return;");
-    else 
+    else
       s = cat3(text("return "),
                (eopt==null)?nil_doc():exp2doc((exp)eopt),
                text(";"));
@@ -966,7 +970,7 @@ Doc stmt2doc(stmt st) {
              text("}"));
     break;
   case Fallthru_s(null,_): s = text("fallthru;"); break;
-  case Fallthru_s(es,_): 
+  case Fallthru_s(es,_):
     s = cat3(text("fallthru("), exps2doc_prec(20,es), text(");")); break;
   case Decl_s(d,s1):
     s = cat3(decl2doc(d),
@@ -1009,7 +1013,7 @@ Doc stmt2doc(stmt st) {
              line_doc(),
              nest(2,stmt2doc(s1)),
              line_doc(),
-             text("catch {"),                    
+             text("catch {"),
              line_doc(),
              nest(2,switchclauses2doc(ss)),
              line_doc(),
@@ -1061,15 +1065,15 @@ Doc pat2doc(pat p) {
 	     tvars2doc(tvs),
              group("{","}",",",List::map(dp2doc,dps)));
     break;
-  case Enum_p(n,_,tvs,ps,_,_):
-    s = cat3(qvar2doc(n),
-	     tvars2doc(tvs),
-             egroup("(",")",",",List::map(pat2doc,ps)));
-    break;
+  case Enum_p(n,_,tvs,ps,_,_): fallthru(n,tvs,ps);
   case Xenum_p(n,tvs,ps,_,_):
-    s = cat3(qvar2doc(n),
-	     tvars2doc(tvs),
-             egroup("(",")",",",List::map(pat2doc,ps)));
+    if (ps == null)
+      // special case: a nullary enum constant is printed "foo" not "foo()"
+      s = qvar2doc(n);
+    else
+      s = cat3(qvar2doc(n),
+               tvars2doc(tvs),
+               egroup("(",")",",",List::map(pat2doc,ps)));
     break;
   }
   return s;
@@ -1082,17 +1086,17 @@ Doc dp2doc($(list<designator>,pat)@ dp) {
 
 Doc switchclause2doc(switch_clause c) {
   if (c->where_clause == null && c->pattern->r == Wild_p)
-    return     
+    return
       cat2(text("default: "),
            nest(2,cat2(line_doc(),stmt2doc(c->body))));
   else if (c->where_clause == null)
-    return     
+    return
       cat4(text("case "),
            pat2doc(c->pattern),
            text(": "),
            nest(2,cat2(line_doc(),stmt2doc(c->body))));
-  else 
-    return     
+  else
+    return
       cat6(text("case "),
            pat2doc(c->pattern),
            text(" && "),
@@ -1145,7 +1149,7 @@ Doc decl2doc(decl d) {
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat4(scope2doc(sc),
              tqtd2doc(tq,type,&Opt(sn)),
-             (initializer == null) 
+             (initializer == null)
 	       ? text("")
 	       : cat2(text(" = "),exp2doc((exp)initializer)),
              text(";"));
@@ -1244,28 +1248,28 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
     type_modifier tm;
     if (Evexp::eval_const_uint_exp(e) == 0)
       tm = Carray_mod;
-    else 
-      tm = ConstArray_mod(e); 
-    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
+    else
+      tm = ConstArray_mod(e);
+    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3));
 
   case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
 			   .nullable = nullable, .tq = tq2, .bounds = b}):
     let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     enum Pointer_Sort ps;
     switch ($(compress_conref(nullable)->v,compress_conref(b)->v)) {
-    case $(Eq_constr(true), Eq_constr(Upper_b(e))): 
+    case $(Eq_constr(true), Eq_constr(Upper_b(e))):
       ps = Nullable_ps(e); break;
-    case $(Eq_constr(false), Eq_constr(Upper_b(e))): 
+    case $(Eq_constr(false), Eq_constr(Upper_b(e))):
       ps = NonNullable_ps(e); break;
-    case $(_, Eq_constr(Unknown_b)): 
+    case $(_, Eq_constr(Unknown_b)):
       ps = TaggedArray_ps; break;
-    default: 
+    default:
       // We need to print out something...
       ps = TaggedArray_ps; break;
       // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
-    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
+    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3));
 
   case FnType(typvars,t2,args,varargs):
     // discard tq because you can't qualify a function
@@ -1278,7 +1282,7 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
   case Evar(k,topt,i):
     if (topt == null)
       return &$(tq,t,null);
-    else 
+    else
       return to_tms(tq,topt->v);
 
   case TypedefType(n,ts,topt):
@@ -1331,7 +1335,7 @@ Doc enumfields2doc(list<enumfield> fields) {
 void decllist2file(list<decl> tdl, FILE @f) {
   for (; tdl != null; tdl = tdl->tl) {
     file_of_doc(decl2doc(tdl->hd),PP_WIDTH,f);
-    fprintf(f,"\n"); 
+    fprintf(f,"\n");
   }
 }
 

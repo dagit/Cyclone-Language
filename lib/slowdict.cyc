@@ -73,7 +73,7 @@ Dict<`a,`b> insert<`a,`b>(Dict<`a,`b> d, `a key, `b data) {
 Dict<`a,`b> insert_new<`a,`b>(Dict<`a,`b> d, `a key, `b data) {
   // somewhat wasteful this way (makes two new top nodes)
   if (splay(d->reln, key, d->tree))
-    throw Present();
+    throw Present;
   return insert(d, key, data);
 }
 
@@ -93,7 +93,7 @@ Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data) {
     case Node(nr): return nr->v->data;
     case Leaf:     throw Core::Impossible("Dict::lookup");
   }
-  throw Absent();
+  throw Absent;
 }
 
 Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d,`a key) {
@@ -134,7 +134,7 @@ Dict<`a,`b> delete<`a,`b>(Dict<`a,`b> d,`a key) {
 Dict<`a,`b> delete_present<`a,`b>(Dict<`a,`b> d,`a key) {
   let d2 = delete(d,key);
   if (d == d2)
-    throw Absent();
+    throw Absent;
   return d2;
 }
 
@@ -257,7 +257,7 @@ Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b), `d env, Dict<`a,`b> d) {
 
 $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d) {
   switch (d->tree) {
-  case Leaf:     throw Absent();
+  case Leaf:     throw Absent;
   case Node(nr): return &$(nr->v->key, nr->v->data);
   }
 }
