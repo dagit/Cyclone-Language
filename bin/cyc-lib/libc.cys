@@ -4803,17 +4803,17 @@ hstub clock_getcpuclockid {
 }
 hstub clock_getres {
   // Note, posix says the second arg of clock_getres can be NULL
-  extern "C" int clock_getres(pid_t, struct timespec *);
+  extern "C" int clock_getres(clockid_t, struct timespec *);
 }
 hstub clock_gettime {
-  extern "C" int clock_gettime(pid_t, struct timespec @);
+  extern "C" int clock_gettime(clockid_t, struct timespec @);
 }
 hstub clock_nanosleep {
   extern "C" int clock_nanosleep(clockid_t, itn, const struct timespec @,
                                  struct timespec @);
 }
 hstub clock_settime {
-  extern "C" int clock_settime(pid_t, const struct timespec @);
+  extern "C" int clock_settime(clockid_t, const struct timespec @);
 }
 hstub ctime {
   extern "C" char @{26} ctime(const time_t @);
