@@ -791,13 +791,13 @@ struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,struct _dyneither_ptr);
 int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
 typedef void*Cyc_sarg_t;
-# 157 "cycboot.h"
+# 157
 int Cyc_printf(struct _dyneither_ptr,struct _dyneither_ptr);
 # 161
 int Cyc_putc(int,struct Cyc___cycFILE*);
 # 174
 struct _dyneither_ptr Cyc_rprintf(struct _RegionHandle*,struct _dyneither_ptr,struct _dyneither_ptr);
-# 224 "cycboot.h"
+# 224
 int Cyc_vfprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);
 # 228
 int Cyc_vprintf(struct _dyneither_ptr,struct _dyneither_ptr);
@@ -811,11 +811,11 @@ int Cyc_vsprintf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_p
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 160 "core.h"
+# 160
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 162
 extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 244 "core.h"
+# 244
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
@@ -827,7 +827,7 @@ return 0;
 return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
-# 49 "list.h"
+# 49
 typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 87 "printf.cyc"
 static struct _dyneither_ptr Cyc_parg2string(void*x){
@@ -884,9 +884,9 @@ static const struct _dyneither_ptr Cyc_va_arg_string(struct _dyneither_ptr ap){
 void*_tmp2F=*((void**)_check_dyneither_subscript(ap,sizeof(void*),0));struct _dyneither_ptr _tmp31;_LL33: {struct Cyc_String_pa_PrintArg_struct*_tmp30=(struct Cyc_String_pa_PrintArg_struct*)_tmp2F;if(_tmp30->tag != 0)goto _LL35;else{_tmp31=_tmp30->f1;}}_LL34:
  return _tmp31;_LL35:;_LL36: {
 const char*_tmpDD;(int)_throw(((void*(*)(struct _dyneither_ptr s))Cyc_badarg)(((_tmpDD="printf expected string",_tag_dyneither(_tmpDD,sizeof(char),23)))));}_LL32:;}
-# 177 "printf.cyc"
+# 177
 int Cyc___cvt_double(double number,int prec,int flags,int*signp,int fmtch,struct _dyneither_ptr startp,struct _dyneither_ptr endp);
-# 206 "printf.cyc"
+# 206
 enum Cyc_BASE{Cyc_OCT  = 0,Cyc_DEC  = 1,Cyc_HEX  = 2};
 typedef enum Cyc_BASE Cyc_base_t;
 # 212
@@ -976,7 +976,7 @@ int size=0;
 char buf[349];
 {unsigned int _tmp58=348;unsigned int i;for(i=0;i < _tmp58;i ++){buf[i]='\000';}buf[_tmp58]=(char)0;}{char ox[2]={'\000','\000'};
 enum Cyc_BASE base;
-# 342 "printf.cyc"
+# 342
 fmt=fmt0;
 ret=0;
 # 348
@@ -1115,7 +1115,7 @@ goto _LL56;case 'o': _LL56:
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=Cyc_OCT;
 goto nosign;case 'p': _LL57:
-# 517 "printf.cyc"
+# 517
  _ulong=(unsigned long)Cyc_va_arg_long(ap);_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=Cyc_HEX;
 flags |=64;
@@ -1198,7 +1198,7 @@ goto done;
 size=1;
 sign='\000';
 break;}
-# 647 "printf.cyc"
+# 647
 fieldsz=size + fpprec;
 dpad=dprec - size;
 if(dpad < 0)

@@ -51,9 +51,10 @@ ptr_t<int> vector5() {
   return new Ptr{.size = 5, .elts = {0,1,2,3,4}};
 }
 
-// create an integer poiner array of size 2
+// create an integer pointer array of size 2
+// FIX: does not compile!
 ptr_t<int@> pvector3() {
-  return new Ptr{.size = 2, .elts = {new 0, new 1}};
+  return new Ptr{<int@> .size = 2, .elts = {new 0, new 1}};
 }
 
 // create an integer array of size N
