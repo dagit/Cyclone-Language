@@ -1,4 +1,3 @@
-static char rcsid[] = "$Id: xp.cyc,v 1.2 2004-07-20 01:53:27 greg Exp $";
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
