@@ -73,8 +73,7 @@ done
 
 # now figure out the architecture
 cd config
-ARCH=blcygwinah
-#`./config.guess`
+ARCH=`./config.guess`
 
 # see if we have #defines for this architecture
 if [ ! -f "arch/${ARCH}" ] || [ ! -f "arch/${ARCH}.undef" ]; then
