@@ -787,7 +787,7 @@ typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseE
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;
-# 103
+# 103 "core.h"
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*x);
 # 107
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
@@ -823,7 +823,7 @@ extern struct _RegionHandle*Cyc_Core_unique_region;
 struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*file,int lineno);
 # 197
 struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 244
+# 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
@@ -872,7 +872,7 @@ void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 void*Cyc_Core_identity(void*x){
 return x;}
 # 79
-struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
+struct _dyneither_ptr Cyc_Core_mkfat(unsigned char*arr,unsigned int s,unsigned int n){
 struct _dyneither_ptr res;
 res.curr=arr;
 res.base=arr;

@@ -1855,6 +1855,8 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     if (new_status(te) == InNewAggr) {
       let b = cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0);
       b->topt = bound->topt;
+//       printf("updating array bound from %s to %s\n",
+// 	     exp2string(bound),exp2string(b));
       bound = b;
     }
     break;
@@ -1958,9 +1960,9 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let status = new_status(te);
     if (status == InNew)
       te2 = set_new_status(rgn,InNewAggr,te);
-    // don't allow nested comprehensions
-    else if (status == InNewAggr)
-      te2 = set_new_status(rgn,NoneNew,te);
+//     // don't allow nested comprehensions
+//     else if (status == InNewAggr)
+//       te2 = set_new_status(rgn,NoneNew,te);
     // keeps the typechecker happy
     else
       te2 = set_new_status(rgn,status,te);

@@ -149,7 +149,74 @@ static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     //    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
   case &Var_e(_,_): return NULL;
 
-    // everything else is just recursive descent
+    // the next group of expressions could possibly be in lvals, so
+    // we copy them, rather than mutate them.
+  case &Subscript_e(e1,e2):
+    let e1b = box_free_vars_exp(env,e1);
+    let e2b = box_free_vars_exp(env,e2);
+    if (e1b != NULL) {
+      if (e2b != NULL) {
+	let eb = subscript_exp(e1b,e2b,e->loc);
+	eb->topt = e->topt;
+	eb->annot = e->annot;
+	return eb;
+      }
+      else {
+	let eb = subscript_exp(e1b,e2,e->loc);
+	eb->topt = e->topt;
+	eb->annot = e->annot;
+	return eb;
+      }
+    }
+    else if (e2b != NULL) {
+      let eb = subscript_exp(e1,e2b,e->loc);
+      eb->topt = e->topt;
+      eb->annot = e->annot;
+      return eb;
+    }
+    return NULL;
+
+  case &Address_e(e1):
+    let e1b = box_free_vars_exp(env,e1);
+    if (e1b != NULL) {
+      let eb = address_exp(e1b, e->loc);
+      eb->topt = e->topt;
+      eb->annot = e->annot;
+      return eb;
+    }
+    return NULL;
+
+  case &Deref_e(e1):
+    let e1b = box_free_vars_exp(env,e1);
+    if (e1b != NULL) {
+      let eb = deref_exp(e1b, e->loc);
+      eb->topt = e->topt;
+      eb->annot = e->annot;
+      return eb;
+    }
+    return NULL;
+
+  case &AggrMember_e(e1,fn,ist,isr):
+    let e1b = box_free_vars_exp(env,e1);
+    if (e1b != NULL) {
+      let eb = new_exp(new AggrMember_e(e1b,fn,ist,isr), e->loc);
+      eb->topt = e->topt;
+      eb->annot = e->annot;
+      return eb;
+    }
+    return NULL;
+
+  case &AggrArrow_e(e1,fn,ist,isr):
+    let e1b = box_free_vars_exp(env,e1);
+    if (e1b != NULL) {
+      let eb = new_exp(new AggrArrow_e(e1b,fn,ist,isr), e->loc);
+      eb->topt = e->topt;
+      eb->annot = e->annot;
+      return eb;
+    }
+    return NULL;
+
+    // everything else is just recursive descent, using mutation
   case &Const_e(_): return NULL;
   case &FnCall_e(*e1,es,...):
     BOX_EXP_AND_UPDATE(env,*e1);
@@ -165,7 +232,6 @@ static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     fallthru(e1,e2);
   case &And_e(*e1,*e2):           fallthru(e1,e2);
   case &Or_e(*e1,*e2):            fallthru(e1,e2);
-  case &Subscript_e(*e1,*e2):     fallthru(e1,e2);
   case &SeqExp_e(*e1,*e2):        fallthru(e1,e2);
   case &AssignOp_e(*e1, _, *e2):
     BOX_EXP_AND_UPDATE(env,*e2);
@@ -174,11 +240,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   case &NoInstantiate_e(*e1):    fallthru(e1);
   case &Instantiate_e(*e1,_):    fallthru(e1);
   case &Cast_e(_,*e1,_,_):       fallthru(e1);
-  case &Address_e(*e1):          fallthru(e1);
   case &Sizeofexp_e(*e1):        fallthru(e1);
-  case &Deref_e(*e1):            fallthru(e1);
-  case &AggrMember_e(*e1,...):   fallthru(e1); 
-  case &AggrArrow_e(*e1,...):    fallthru(e1);
   case &Increment_e(*e1,_):
     BOX_EXP_AND_UPDATE(env,*e1);
     return NULL;
@@ -214,9 +276,10 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       continue;
     case &Return_s(*eopt):
       // FIX: reject this -- it won't be in the right function.
-      if (*eopt == NULL)
-	return;
-      BOX_EXP_AND_UPDATE(env,*eopt);
+      if (*eopt != NULL) {
+	let ei = box_free_vars_exp(env,(exp_t)*eopt);
+	if (ei != NULL) *eopt = ei;
+      }
       return;
     case &Exp_s(*e):
       BOX_EXP_AND_UPDATE(env,*e);

@@ -76,7 +76,7 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
 /* convert a thin pointer, its element size, and the number of elements
  * to a fat pointer.  The interface for this is given in core.h. */
 extern "C include" {
-`a::A ? Cyc_Core_mkfat(void *arr, unsigned s, unsigned n) {
+`a::A ? Cyc_Core_mkfat(unsigned char *arr, unsigned s, unsigned n) {
   struct _dyneither_ptr res;
   res.curr = arr;
   res.base = arr;

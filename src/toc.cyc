@@ -69,6 +69,9 @@ namespace Toc;
 // used for creation of all abstract syntax node locations created here
 #define DL 0
 
+// padding for variable-length array allocations
+#define PAD_BYTES sizeof(double)
+
 //#define BCE_DEBUG
 bool warn_bounds_checks = false;
 bool warn_all_null_deref = false;
@@ -1101,6 +1104,11 @@ static struct FallthruInfo<`r::R> {
   Dict::dict_t<qvar_t,exp_t,`r> next_case_env;
 };
 
+static struct StructInfo {
+  exp_opt_t @ varsizeexp; // size of comprehension for nested struct init
+  exp_opt_t lhs_exp;        // lhs to which to (optionally) assign the curr exp
+};
+
 static struct Env<`r::R> {
   <`r2::R> : {`r2} > `r
   var_t *`r       break_lab;
@@ -1109,6 +1117,7 @@ static struct Env<`r::R> {
   Dict::dict_t<qvar_t,exp_t,`r> varmap;
   bool toplevel;
   bool @`r2 in_lhs;
+  struct StructInfo struct_info;
   bool @`r2 in_sizeof;
   region_t<`r> rgn;
 };
@@ -1136,22 +1145,23 @@ static env_t<`r> empty_env(region_t<`r> r) {
                      .varmap        = Dict::rempty(r,qvar_cmp),
                      .toplevel      = true,
                      .in_lhs        = rnew(r) false,
+		     .struct_info   = {new NULL,NULL},
                      .in_sizeof     = rnew(r) false,
                      .rgn           = r};
 }
 
 static env_t<`r> share_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,lhs,sz,r};
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,lhs,vs,sz,r};
 }
 
 static env_t<`r> clear_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false,lhs,sz,r};
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false,lhs,vs,sz,r};
 }
 static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true,lhs,sz,r};
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true,lhs,vs,sz,r};
 }
 static void set_lhs(env_t<`r> e, bool b) {
   let &Env{.in_lhs = lhs,...} = e;
@@ -1168,6 +1178,12 @@ static bool in_sizeof(env_t<`r> e) {
   return *sz;
 }
 
+static env_t<`r> set_lhs_exp(region_t<`r> r, exp_opt_t exp,
+			     env_t<`r> e : {`r2} > `r) {
+  let &Env{b,c,f,v,t,lhs,{vexp,_},sz,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,lhs,{vexp,exp},sz,r};
+}
+
 // add x->y to variable map in environment
 // The type allows y to be a general exp, but in practice it is always a var_exp
 static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`r2} > `r) {
@@ -1176,16 +1192,16 @@ static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`
     toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
   let new_v = Dict::insert(Dict::rshare(r,v), x, y);
-  return rnew(r) Env{b,c,f,new_v,t,lhs,sz,r};
+  return rnew(r) Env{b,c,f,new_v,t,lhs,vs,sz,r};
 }
 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env_t<`r> loop_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t,lhs,sz,r};
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t,lhs,vs,sz,r};
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
@@ -1198,19 +1214,19 @@ non_last_switchclause_env(region_t<`r> r,
   for(; fallthru_binders != NULL; fallthru_binders = fallthru_binders->tl)
     fallthru_vars = rnew(r) List(fallthru_binders->hd->name, fallthru_vars);
   fallthru_vars = List::imp_rev(fallthru_vars);
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  let &Env{_,_,_,next_case_varmap,_,_,_,_} = next_case_env;
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  let &Env{_,_,_,next_case_varmap,_,_,_,_,_} = next_case_env;
   struct FallthruInfo<`r>*`r fi =
     rnew(r) FallthruInfo{fallthru_l,fallthru_vars,
                            Dict::rshare(r,next_case_varmap)};
-  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,lhs,sz,r};
+  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,lhs,vs,sz,r};
 }
 
 static env_t<`r>
 last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
                       {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
-  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, lhs, sz, r};
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
+  return rnew(r) Env{rnew(r) break_l,c,NULL,Dict::rshare(r,v),t,lhs,vs,sz,r};
 }
 
 // must have no pattern vars and type is int, char, or datatype of a type
@@ -1219,10 +1235,10 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
 static env_t<`r>
 switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
                      {`r2} > `r) {
-  let &Env{b,c,f,v,t,lhs,sz,_} = e;
+  let &Env{b,c,f,v,t,lhs,vs,sz,_} = e;
   return rnew(r) Env{NULL,c,rnew(r) FallthruInfo{next_l,NULL,
                                                    Dict::rempty(r,qvar_cmp)},
-                       Dict::rshare(r,v), t, lhs, sz, r};
+                       Dict::rshare(r,v), t, lhs, vs, sz, r};
 }
 
 #ifdef COARSE_REGIONS
@@ -1477,14 +1493,18 @@ static $(list_t<designator_t>,exp_t)@ add_designator(env_t nv, exp_t e) {
   return new $(NULL,e);
 }
 
-static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
-                         exp_opt_t mallocsize, exp_opt_t rgnopt,
-			 bool is_atomic) {
+static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
+			 bool pointer, exp_opt_t rgnopt, bool is_atomic,
+			 bool do_declare) {
   exp_opt_t eo;
   type_t    t;
-  if (mallocsize) {
+  if (pointer) {
+    let se = sizeofexp_exp(deref_exp(x,DL),DL);
+    if (*nv->struct_info.varsizeexp != NULL) {
+      se = add_exp(se,(exp_t)*nv->struct_info.varsizeexp,DL);
+      *nv->struct_info.varsizeexp = NULL;
+    }
     t  = cstar_typ(struct_typ, mt_tq);
-    let se = (exp_t)mallocsize;
     if (rgnopt == NULL || no_regions)
       eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
     else {
@@ -1496,38 +1516,37 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
     t  = struct_typ;
     eo = NULL;
   }
-  return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
-}
-
-static exp_t make_fixed_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
-			       bool pointer, exp_opt_t rgnopt,
-			       bool is_atomic) {
-  if (pointer) {
-    let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
-    return make_struct(nv,x,struct_typ,s,se,rgnopt,is_atomic);
+  if (do_declare) {
+    switch (x->r) {
+    case &Var_e(x,_):
+      return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
+    default:
+      toc_impos("bogus x to make_struct");
+    }
   }
-  else return make_struct(nv,x,struct_typ,s,NULL,rgnopt,is_atomic);
+  else {
+    if (eo != NULL)
+      return stmt_exp(seq_stmt(exp_stmt(assign_exp(x,eo,DL),DL),s,DL),DL);
+    else
+      return stmt_exp(s,DL);
+  }
 }
 
-static type_opt_t aggr_lookup_field(type_t struct_typ,
-				    field_name_t index) {
-  switch (compress(struct_typ)) {
+static bool array_or_aggr_with_array(type_t typ) {
+  switch (compress(typ)) {
+  case &ArrayType(...): return true;
   case &AggrType(AggrInfo(info,ts)):
-    // FIX: may not know the aggregate's implementation by now ... ?
     aggrdecl_t ad = get_known_aggrdecl(info);
     list_t<aggrfield_t> aggrfields = ad->impl->fields;
-    if (ts != NULL)
-      impos("oops; get_offset_... called without subsituting types first");
     fallthru(aggrfields);
   case &AnonAggrType(_,aggrfields):
-    let field = lookup_field(aggrfields,index);
-    if (field == NULL) return NULL;
-    switch (compress(field->type)) {
-    case &ArrayType(ArrayInfo(t,...)): return t;
-    default: return NULL;
-    }
+    if (aggrfields == NULL) return false;
+    let fields;
+    for (fields = aggrfields; fields->tl != NULL; fields = fields->tl);
+    let field = fields->hd;
+    return array_or_aggr_with_array(field->type);
   default:
-    return NULL;
+    return false;
   }
 }
 
@@ -1537,19 +1556,6 @@ static type_t array_elt_type(type_t t) {
   default: toc_impos("array_elt_type called on %s",typ2string(t));
   }
 }
-
-// // assumes we are region-allocating, not stack allocating
-static exp_t make_variable_struct(env_t nv, qvar_t x,
-				  list_t<aggrfield_t,`H> fields,
-                                  type_t struct_typ, stmt_t s,
-				  exp_opt_t rgnopt, bool is_atomic,
-				  field_name_t index,
-				  exp_t num) {
-  let se = offsetof_exp(struct_typ,new List(new StructField(index),NULL),DL);
-  let elt_typ = array_elt_type(lookup_field(fields,index)->type);
-  se = add_exp(se,times_exp(num,sizeoftyp_exp(elt_typ,DL),DL),DL);
-  return make_struct(nv,x,struct_typ,s,se,rgnopt,is_atomic);
-}  
 
 static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
                                  exp_t e1, exp_t e2, bool zero_term, stmt_t s,
@@ -1730,7 +1736,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
         break;
       }
     }
-    return make_fixed_struct(nv,x,n,s,pointer,rgnopt,is_atomic);
+    return make_struct(nv,var_exp(x,DL),n,s,pointer,rgnopt,is_atomic,true);
   }
 }
 
@@ -1746,8 +1752,8 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
 
 static bool init_variable_array(type_t @typ) {
   switch (compress(*typ)) {
-  // if it's an array type and has valueof in it, change it to an array of
-  // size 0
+  // if it's an array type and has valueof in it,
+  // change it to an array of size 0
   case &ArrayType(ArrayInfo{elt_type,tq,e,zt,ztloc}):
     if (!Evexp::c_can_eval((exp_t)e)) {
       *typ = new ArrayType(ArrayInfo{elt_type,tq,uint_exp(0,DL),zt,ztloc});
@@ -1759,14 +1765,24 @@ static bool init_variable_array(type_t @typ) {
   return false;
 }
 
-static exp_t init_struct(env_t nv, type_t struct_type, 
+static exp_t init_struct(env_t nv, type_t struct_type,
                          list_t<type_t> exist_types,
                          bool pointer, exp_opt_t rgnopt, 
                          list_t<$(list_t<designator_t>,exp_t)@> dles, 
                          typedef_name_t tdn) {
-  let x    = temp_var();
-  let xexp = var_exp(x,DL);
-  let s    = exp_stmt(copy_exp(xexp),DL);
+  // x is the variable that the result will be stored in
+  bool do_declare = false;
+  exp_t xexp;
+  if (nv->struct_info.lhs_exp == NULL) {
+    let x = temp_var();
+    xexp  = var_exp(x,DL);
+    do_declare = true;
+  }
+  else {
+    xexp = (exp_t)nv->struct_info.lhs_exp;
+    nv = set_lhs_exp(nv->rgn,NULL,nv);
+  }
+  let s   = exp_stmt(copy_exp(xexp),DL);
 
   let lval_f = pointer ? aggrarrow_exp : member_exp;
   let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
@@ -1776,7 +1792,6 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   aggrdecl_t ad;
   list_t<aggrfield_t> aggrfields;
   field_name_t *index = NULL;
-  exp_opt_t sizeexp = NULL;
   switch(compress(struct_type)) {
   case &AggrType(AggrInfo(info,ts)): 
     ad = get_known_aggrdecl(info);
@@ -1787,64 +1802,66 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   }
   type_t aggr_typ = typ_to_c(struct_type); 
   if (exist_types != NULL && ad->impl->fields != NULL) {
-    // we have an aggregate with existential types that are instantiated.
-    // have to come up with (potentially) a new struct type if the last
-    // member is of abstract type.
     let fields = ad->impl->fields;
     for (; fields->tl != NULL; fields = fields->tl);
     let last_field = fields->hd;
     TOC_RGN(nv,temp) {
       type_t cast_type;
       if (pointer)
-        cast_type = cstar_typ(aggr_typ,mt_tq);
+	cast_type = cstar_typ(aggr_typ,mt_tq);
       else 
-        cast_type = aggr_typ;
+	cast_type = aggr_typ;
       s = exp_stmt(cast_it(cast_type,copy_exp(xexp)),DL);
       let inst1 = List::rzip(temp,temp,ad->tvs,forall_types);
+      // we have an aggregate with existential types have to come up
+      // with (potentially) a new struct type if the last member is of
+      // abstract type.
       if (is_abstract_type(rsubstitute(temp,inst1,last_field->type))) {
-        let inst2 = List::rzip(temp,temp,ad->impl->exist_vars,exist_types);
-        let inst = List::rappend(temp,inst1,inst2);
-        // now create a new aggregate according to the full instantiation
-        list_t<aggrfield_t> new_fields = NULL;
-        for (fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
-          let old_field = fields->hd;
-          let new_field = new Aggrfield{.name= old_field->name,
-                                        .tq = mt_tq,
-                                        .type = rsubstitute(temp,inst,
-                                                            old_field->type),
-                                        .width = old_field->width,
-                                        .attributes = old_field->attributes};
+	let inst2 = List::rzip(temp,temp,ad->impl->exist_vars,exist_types);
+	let inst = List::rappend(temp,inst1,inst2);
+	// now create a new aggregate according to the full instantiation
+	list_t<aggrfield_t> new_fields = NULL;
+	for (fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+	  let old_field = fields->hd;
+	  let new_field = new Aggrfield{.name= old_field->name,
+					.tq = mt_tq,
+					.type = rsubstitute(temp,inst,
+							    old_field->type),
+					.width = old_field->width,
+					.attributes = old_field->attributes};
 	  // if the last field is an array type that includes a valueof(`i),
-	  // make it a variable-length array instead (i.e. set the bounds to 0)
+	  // make it a variable-length array instead (i.e. set bounds to 0)
 	  // and keep track of the index needed to get to the array
 	  if (fields->tl == NULL) {
-	    if (init_variable_array(&new_field->type)) 
+	    if (init_variable_array(&new_field->type))
 	      index = new new_field->name;
 // 	    if (index != NULL) {
 // 	      printf("found array type at index obj.%s\n",**index);
 // 	    }
 	  }
-          new_fields = new List(new_field,new_fields);
-        }
-        exist_types = NULL;
-        aggrfields = List::rev(new_fields);
-        stringptr_t name = new (string_t)aprintf("_genStruct%d",tuple_type_counter++);
-        qvar_t qv = new $(Abs_n(NULL, true), name);
-        let adi = new AggrdeclImpl {.exist_vars = NULL,
-                                    .rgn_po = NULL,
-                                    .fields = aggrfields,
-                                    .tagged = false};
-        aggrdecl_t new_ad = new Aggrdecl {.kind = StructA,
-                                          .sc = Public,
-                                          .name = qv,
-                                          .tvs = NULL,
-                                          .impl = adi,
-                                          .attributes = NULL};
-        aggrdecl_to_c(new_ad, true);
-        ad = new_ad;
-        struct_type = new AggrType(AggrInfo{.aggr_info = KnownAggr(new new_ad),
-                                            .targs = NULL});
-        aggr_typ = typ_to_c(struct_type);
+	  new_fields = new List(new_field,new_fields);
+	}
+	exist_types = NULL;
+	aggrfields = List::rev(new_fields);
+	stringptr_t name =
+	  new (string_t)aprintf("_genStruct%d",tuple_type_counter++);
+	qvar_t qv = new $(Abs_n(NULL, true), name);
+	let adi = new AggrdeclImpl {.exist_vars = NULL,
+				    .rgn_po = NULL,
+				    .fields = aggrfields,
+				    .tagged = false};
+	aggrdecl_t new_ad = new Aggrdecl {.kind = StructA,
+					  .sc = Public,
+					  .name = qv,
+					  .tvs = NULL,
+					  .impl = adi,
+					  .attributes = NULL};
+	aggrdecl_to_c(new_ad, true);
+	ad = new_ad;
+	struct_type = new AggrType(AggrInfo{.aggr_info=KnownAggr(new new_ad),
+					    .targs=NULL});
+	aggr_typ = typ_to_c(struct_type);
+// 	printf("abstract struct type %s\n",typ2string(struct_type));
       }
     }
   }
@@ -1892,13 +1909,18 @@ static exp_t init_struct(env_t nv, type_t struct_type,
           case &Comprehension_e(vd,e1,e2,zt):
 	    // if this is a dynamic comprehension, grab the bound
 	    // for doing the malloc
-	    if (index != NULL && !strptrcmp(*index,f)) sizeexp = e1;
+	    if (index != NULL && !strptrcmp(*index,f)) {
+	      *nv->struct_info.varsizeexp =
+		add_exp(times_exp(e1,sizeoftyp_exp(typ_to_c((type_t)e2->topt),
+						   DL),DL),
+			const_exp(Cnst{.Int_c=$(Unsigned,PAD_BYTES)},DL),DL);
+	    }
             s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
           default:
 	    bool was_ptr_type = is_pointer_or_boxed_tvar((type_t)e->topt);
-            exp_to_c(nv,e);
+            exp_to_c(set_lhs_exp(nv->rgn,lval,nv),e);
             let ad = lookup_field(aggrfields,f);
             // cast to void* to avoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
@@ -1916,13 +1938,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
     }
     // if we have a variable-sized element of the struct, must
     //   initialize the struct differently
-    if (index != NULL)
-      return make_variable_struct(nv, x, aggrfields, 
-                                  aggr_typ, s, rgnopt, is_atomic,
-				  *index, (exp_t)sizeexp);
-    else
-      return make_fixed_struct(nv, x, aggr_typ, s, pointer, rgnopt, is_atomic);
-
+    return make_struct(nv,xexp,aggr_typ,s,pointer,rgnopt,is_atomic,do_declare);
   }
 }
 
@@ -1939,6 +1955,7 @@ static exp_t incr_lvalue(exp_t e1, incrementor_t incr) {
 
 static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 			       exp_t f(exp_t,`a), `a f_env);
+
 // e1 is the result of translating an lvalue.  fs is the path of struct
 // fields that we're assigning to on e1 (if any).  The translation
 //  may have inserted NULL checks, etc., but buried within e1 is an lvalue.
@@ -2314,6 +2331,14 @@ static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == NULL)
     toc_impos("exp_to_c: no type for %s",exp2string(e));
+  // if we're not about to convert an aggregate initializer,
+  //   clear the lhs expression
+  if (nv->struct_info.lhs_exp != NULL) {
+    switch (r) {
+    case &Aggregate_e(...): break;
+    default: nv = set_lhs_exp(nv->rgn,NULL,nv);
+    }
+  }
   //if (in_lhs(nv))
   //  fprintf(stderr,"in_lhs for %s\n",exp2string(e));
   type_t old_typ = (type_t)e->topt;
@@ -4539,15 +4564,18 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
         let old_type = old_field->type;
         if (ad->kind == StructA && 
 	    fields->tl == NULL && kind_leq(&ak,typ_kind(old_type))) {
-          // skip over the last member if it's abstract but not an array.
-          // for arrays, we just pretend like the array size is zero.
-          // (Note:  can't just leave it non-existent because this
-          // results in incomplete types!)
+          // skip over the last member if it's abstract but not an
+          // array (or an array-containing aggregate); for arrays, we
+          // just pretend like the array size is zero.  (Note: can't
+          // just leave it non-existent because this results in
+          // incomplete types!)
           switch (compress(old_type)) {
           case &ArrayType(ArrayInfo{et,tq,_,zt,ztl}):
             old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
             break;
-          default: continue;
+          default: 
+	    if (array_or_aggr_with_array(old_type)) break;
+	    else continue;
           }
         }
         let new_field = new Aggrfield{.name = old_field->name,

@@ -787,15 +787,15 @@ typedef void*Cyc_parg_t;
 int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
 typedef void*Cyc_sarg_t;
-# 142
+# 142 "cycboot.h"
 int Cyc_getc(struct Cyc___cycFILE*);
-# 197
+# 197 "cycboot.h"
 int Cyc_sscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);
-# 222
+# 222 "cycboot.h"
 int Cyc_ungetc(int,struct Cyc___cycFILE*);
 # 247
 int Cyc_vsscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 300
+# 300 "cycboot.h"
 int isspace(int);
 # 302
 int isupper(int);
@@ -808,9 +808,9 @@ unsigned long strtoul(char*,char**,int);
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 162
+# 162 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 244
+# 244 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
 # 249
 if(bd >> 20  || sz >> 12)
@@ -822,7 +822,7 @@ return 0;
 return dyn.curr;};}
 # 80 "scanf.cyc"
 typedef long long Cyc__IO_ssize_t;
-# 126
+# 126 "scanf.cyc"
 static struct _dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt);
 # 139
 static short*Cyc_va_arg_short_ptr(void*a){
@@ -945,7 +945,7 @@ goto again;case '0': _LL2B:
 flags |=64;
 width=(width * 10 + c)- '0';
 goto again;case 'D': _LL35:
-# 298
+# 298 "scanf.cyc"
  flags |=1;
 goto _LL36;case 'd': _LL36:
 # 301
@@ -1163,7 +1163,7 @@ flags |=(64 | 128)| 512;
 c=(int)((unsigned char)_IO_peekc(fp));
 # 560
 switch(c){case '0': _LL4F:
-# 575
+# 575 "scanf.cyc"
  if(base == 0){
 base=8;
 flags |=256;}
@@ -1364,7 +1364,7 @@ for(n=0;n < 256;++ n){
 tab[_check_known_subscript_notnull(256,n)]=(char)v;}
 if(c == 0)
 return _dyneither_ptr_plus(fmt,sizeof(char),- 1);
-# 829
+# 829 "scanf.cyc"
 v=1 - v;
 for(0;1;0){
 tab[_check_known_subscript_notnull(256,c)]=(char)v;
@@ -1373,7 +1373,7 @@ doswitch:
 switch(n){case 0: _LL7E:
 # 837
  return _dyneither_ptr_plus(fmt,sizeof(char),- 1);case '-': _LL7F:
-# 858
+# 858 "scanf.cyc"
  n=(int)*((const char*)_check_dyneither_subscript(fmt,sizeof(char),0));
 if(n == ']'  || n < c){
 c=(int)'-';

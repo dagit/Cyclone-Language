@@ -62,27 +62,95 @@ ptr_t<int> vectorn(tag_t n, int x) {
   return new Ptr{.size = n, .elts = {for i < n : x}};
 }
 
-int main() {
-  let p1 = vector4();
-  let p2 = vector5();
-  let p3 = pvector3();
+struct OfsPtr<`a> {
+  int ofs;
+  struct Ptr<`a> ptr;
+};
+
+typedef struct OfsPtr<`a>@`r ofsptr_t<`a,`r>;
+
+// return the number of elts in the array
+unsigned onum_elts(ofsptr_t<`a,`r> p) {
+  let &OfsPtr{.ptr={ <`j> .size = s, ...}, ...} = p;
+  return (unsigned)s;
+}
+  
+// extract p[offset]
+`a oget(ofsptr_t<`a,`r> p, unsigned offset) {
+  // must use pattern matching to destructure existential, locally
+  // binding the type variable `j to the size of the array.
+  let &OfsPtr{.ofs = x, .ptr={<`j> .size = s, .elts = e}} = p; 
+  let ptr = Core::mkfat(e,sizeof(`a),s);
+  // note that e has type `a @{valueof(`j)}
+  ptr += (x+offset);
+  return *ptr;
+}
+
+ofsptr_t<int> ofsvectorn(tag_t n, int x) {
+  return new OfsPtr{.ofs = 0, .ptr={.size = n, .elts = {for i < n : x}}};
+}
+
+void bump(ofsptr_t<`a> p, int x) {
+  let &OfsPtr{.ofs = *ofs,...} = p;
+  *ofs = *ofs + x;
+}
+
+// tests for dynamically-sized pointers
+void dynptr_test() {
   let p4 = vectorn(6,3);
+  let op = ofsvectorn(8,2);
 
-  assert(num_elts(p1) == 4);
-  assert(num_elts(p2) == 5);
-  assert(num_elts(p3) == 2);
   assert(num_elts(p4) == 6);
-
-  for (int i = 0; i < 4; i++) {
-    assert(get(p1,i) == i);
-    set(p1,i,3-i);
-    assert(get(p1,i) == 3-i);
-  }
+  assert(onum_elts(op) == 8);
 
   for (int i = 0; i < 6; i++) {
     assert(get(p4,i) == 3);
     set(p4,i,3-i);
     assert(get(p4,i) == 3-i);
+  }
+
+  try {
+    get(p4,7);
+    fprintf(stderr,"failure to throw exception!\n");
+    exit(1);
+  } catch {
+  case &Array_bounds: break;
+  }
+
+  bump(op,1);
+  let x = oget(op,5);
+  try {
+    oget(op,7);
+    fprintf(stderr,"failure to throw exception!\n");
+    exit(1);
+  } catch {
+  case &Array_bounds: break;
+  }
+}
+
+// three levels anyone?
+struct FooPtr<`a> {
+  char blah;
+  struct OfsPtr<`a> ofsptr;
+};
+
+struct FooPtr<int> @foovectorn(tag_t n, int x) {
+  return new FooPtr{.blah='c',.ofsptr={.ofs = 0, .ptr={.size = n, .elts = {for i < n : x}}}};
+}
+
+int main() {
+  let p1 = vector4();
+  let p2 = vector5();
+  let p3 = pvector3();
+
+  assert(num_elts(p1) == 4);
+  assert(num_elts(p2) == 5);
+  assert(num_elts(p3) == 2);
+
+  for (int i = 0; i < 4; i++) {
+    assert(get(p1,i) == i);
+    set(p1,i,3-i);
+    assert(get(p1,i) == 3-i);
   }
 
   try {
@@ -97,5 +165,8 @@ int main() {
   let i2 = get(p3,1);
   *i1 = 3;
   *i2 = 4;
+
+  dynptr_test();
+
   return 0;
 }
