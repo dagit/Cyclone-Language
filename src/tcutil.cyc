@@ -3048,7 +3048,7 @@ list_t<`a> filter_nulls(list_t<`a*> l) {
 
 type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
   switch(compress(t)) { 
-  case &ArrayType(ArrayInfo(et,tq,eopt,zt,ztl)):
+  case &ArrayType(ArrayInfo(et,tq,eopt,zt,_)):
     ptrbound_t b;
     if (eopt == NULL)
       b = fat_bound_type;

@@ -280,7 +280,6 @@ static bool unify_const_exp_opt(exp_opt_t e1, exp_opt_t e2) {
   return Evexp::same_uint_const_exp(e1,e2);
 }
 
-
 // the real work of unification
 static void unify_it(type_t t1, type_t t2) {
   ts_failure = $(t1,t2);
@@ -288,33 +287,57 @@ static void unify_it(type_t t1, type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   if (t1 == t2) return;
-  switch (t1) {
-  case &Evar(kind1,*ref1_ref,_,s1opt):
+  switch ($(t2,t1)) {
+  case $(&Evar(*kind1opt,*t2r,_,*s1opt),&Evar(*kind2opt,_,_,*s2opt)):
+    if(Kinds::kind_leq((*kind1opt)->v,(*kind2opt)->v))
+      *kind2opt = *kind1opt;
+    else if(Kinds::kind_leq((*kind2opt)->v,(*kind1opt)->v))
+      *kind1opt = *kind2opt;
+    else
+      fail_because("(kinds are incompatible)");
+    *t2r = t1;
+    // list intersection, trying to avoid allocation
+    let s1 = (*s1opt)->v;
+    let s2 = (*s2opt)->v;
+    if(s1==s2) return;
+    for(; s1 != NULL; s1 = s1->tl)
+      if(!List::mem(Tcutil::fast_tvar_cmp,s2,s1->hd))
+	break;
+    if(s1==NULL) {
+      *s2opt = *s1opt;
+      return;
+    }
+    s1 = (*s1opt)->v;
+    for(; s2 != NULL; s2 = s2->tl)
+      if(!List::mem(Tcutil::fast_tvar_cmp,s1,s2->hd))
+	break;
+    if(s2==NULL) {
+      *s1opt = *s2opt;
+      return;
+    }
+    s2 = (*s2opt)->v;
+    let ans = NULL;
+    for(; s2 != NULL; s2=s2->tl)
+      if(List::mem(Tcutil::fast_tvar_cmp,s1,s2->hd))
+	ans = new List(s2->hd,ans);
+    *s1opt = *s2opt = new Core::Opt(ans);
+    return;
+
+  case $(_,&Evar(kind1,*ref1_ref,_,s1opt)):
     // check that the evar doesn't occur in t2 and that any free variables
     // of t2 are contained in s1.
     occurs(t1,heap_region,s1opt->v,t2);
     let kind2 = Tcutil::type_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of
-    // the evar is greater than or equal to the kind of t2 or t2 is an
-    // evar that we can constrain to be equal to t1.
+    // the evar is greater than or equal to the kind of t2 
     if (Kinds::kind_leq(kind2,kind1->v)) {
       *ref1_ref = t2;
       return;
     } 
+    // this is a special hack to deal with the fact that a boxed evar
+    // can't unify with a pointer type where we don't know whether or
+    // not it's a ? pointer vs. a * or @ pointer.
     switch (t2) {
-    case &Evar(_,*ref2_ref,_,s2opt):
-      // check that s2 is a subset of s1
-      let s1 = s1opt->v;
-      for (_ s2 = s2opt->v; s2 != NULL; s2 = s2->tl)
-	if (!List::mem(Tcutil::fast_tvar_cmp,s1,s2->hd))
-	  fail_because("(type variable would escape scope)");
-      if (!Kinds::kind_leq(kind1->v,kind2)) 
-	fail_because("(kinds are incompatible)");
-      *ref2_ref = t1; 
-      return;
-      // this is a special hack to deal with the fact that a boxed evar
-      // can't unify with a pointer type where we don't know whether or
-      // not it's a ? pointer vs. a * or @ pointer.
     case &PointerType(pinfo) && kind1->v->kind == BoxKind:
       let c = compress(pinfo.ptr_atts.bounds);
       switch (c) {
@@ -326,11 +349,6 @@ static void unify_it(type_t t1, type_t t2) {
       }
     default: fail_because("(kinds are incompatible)");
     }
-  default: break;
-  }
-  // t1 is not an evar
-
-  switch ($(t2,t1)) {
 
   case $(&Evar(...),_): // t2 is an evar, t1 is not, so swap
     unify_it(t2,t1); return;

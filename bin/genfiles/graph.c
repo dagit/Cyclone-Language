@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -591,16 +579,16 @@ if(cmp(top,v)!= 0 ||
 goto _LL0;}}_LL0:;}
 # 290
 {int _tmp52=({(int(*)(struct Cyc_List_List*))Cyc_List_length;})(ts->cstack);int hnow=_tmp52;for(0;hnow > hsaved;-- hnow){
-int _tmp53=(int)((struct Cyc_List_List*)_check_null(ts->cstack))->hd;int X=_tmp53;
-ts->cstack=((struct Cyc_List_List*)_check_null(ts->cstack))->tl;
+int _tmp53=(int)(_check_null(ts->cstack))->hd;int X=_tmp53;
+ts->cstack=(_check_null(ts->cstack))->tl;
 if(!({(int(*)(struct Cyc_Set_Set*,int))Cyc_Set_member;})(csCnew->Succ,X)){
 struct Cyc_Set_Set*_tmp54=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,int))Cyc_Set_insert;})(csCnew->Succ,X);struct Cyc_Set_Set*s=_tmp54;
 s=({struct Cyc_Set_Set*(*_tmpBD)(struct Cyc_Set_Set*,struct Cyc_Set_Set*)=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct Cyc_Set_Set*))Cyc_Set_union_two;});struct Cyc_Set_Set*_tmpBC=s;_tmpBD(_tmpBC,(({(struct Cyc_Graph_componentstate*(*)(struct Cyc_Dict_Dict,int))Cyc_Dict_lookup;})(ts->cs,X))->Succ);});
 csCnew->Succ=s;}}}
 # 299
 while((unsigned)ts->nstack){
-void*_tmp55=((struct Cyc_List_List*)_check_null(ts->nstack))->hd;void*w=_tmp55;
-ts->nstack=((struct Cyc_List_List*)_check_null(ts->nstack))->tl;{
+void*_tmp55=(_check_null(ts->nstack))->hd;void*w=_tmp55;
+ts->nstack=(_check_null(ts->nstack))->tl;{
 struct Cyc_Graph_nodestate*_tmp56=({(struct Cyc_Graph_nodestate*(*)(struct Cyc_Dict_Dict,void*))Cyc_Dict_lookup;})(ts->ns,w);struct Cyc_Graph_nodestate*nsw=_tmp56;
 nsw->C=Cnew;
 ({struct Cyc_Set_Set*_tmpBE=Cyc_Set_insert(csCnew->nodes,w);csCnew->nodes=_tmpBE;});
@@ -661,13 +649,13 @@ void*_tmp70=s->hd;void*top=_tmp70;
 component=Cyc_Set_insert(component,top);
 if(cmp(top,x)== 0)break;}}
 # 379
-for(1;(unsigned)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
-void*_tmp71=((struct Cyc_List_List*)_check_null(*S))->hd;void*top=_tmp71;
+for(1;(unsigned)*S;*S=(_check_null(*S))->tl){
+void*_tmp71=(_check_null(*S))->hd;void*top=_tmp71;
 ({struct Cyc_Dict_Dict _tmpC8=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;})(*N,top,4294967295U);*N=_tmpC8;});
 ({struct Cyc_Dict_Dict _tmpC9=Cyc_Graph_add_node(*output,top);*output=_tmpC9;});
 ({struct Cyc_Dict_Dict _tmpCA=Cyc_Graph_add_edges(*output,top,component);*output=_tmpCA;});
 if(cmp(top,x)== 0){
-*S=((struct Cyc_List_List*)_check_null(*S))->tl;
+*S=(_check_null(*S))->tl;
 break;}}}}
 # 391
 struct Cyc_Dict_Dict Cyc_Graph_scc(struct Cyc_Dict_Dict input){
@@ -708,12 +696,12 @@ void*_tmp85=s->hd;void*top=_tmp85;
 component=Cyc_Set_insert(component,top);
 if(cmp(top,x)== 0)break;}}
 # 433
-for(1;(unsigned)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
-void*_tmp86=((struct Cyc_List_List*)_check_null(*S))->hd;void*top=_tmp86;
+for(1;(unsigned)*S;*S=(_check_null(*S))->tl){
+void*_tmp86=(_check_null(*S))->hd;void*top=_tmp86;
 ({struct Cyc_Dict_Dict _tmpD0=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,void*,unsigned))Cyc_Dict_insert;})(*N,top,4294967295U);*N=_tmpD0;});
 ({struct Cyc_List_List*_tmpD1=({struct Cyc_List_List*_tmp87=_cycalloc(sizeof(*_tmp87));_tmp87->hd=top,_tmp87->tl=*output;_tmp87;});*output=_tmpD1;});
 if(cmp(top,x)== 0){
-*S=((struct Cyc_List_List*)_check_null(*S))->tl;
+*S=(_check_null(*S))->tl;
 break;}}}}
 # 444
 struct Cyc_List_List*Cyc_Graph_tsort(struct Cyc_Dict_Dict input){

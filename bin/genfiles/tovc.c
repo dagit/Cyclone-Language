@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -399,18 +387,8 @@ extern struct Cyc_Dict_Dict Cyc_Dict_rdelete_same(struct Cyc_Dict_Dict,void*);
 # 50 "string.h"
 extern int Cyc_strptrcmp(struct _fat_ptr*,struct _fat_ptr*);struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _fat_ptr*f2;};
 # 149 "absyn.h"
-enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};
-# 170
-enum Cyc_Absyn_Size_of{Cyc_Absyn_Char_sz =0U,Cyc_Absyn_Short_sz =1U,Cyc_Absyn_Int_sz =2U,Cyc_Absyn_Long_sz =3U,Cyc_Absyn_LongLong_sz =4U};
-enum Cyc_Absyn_Sign{Cyc_Absyn_Signed =0U,Cyc_Absyn_Unsigned =1U,Cyc_Absyn_None =2U};
-enum Cyc_Absyn_AggrKind{Cyc_Absyn_StructA =0U,Cyc_Absyn_UnionA =1U};
-# 175
-enum Cyc_Absyn_AliasQual{Cyc_Absyn_Aliasable =0U,Cyc_Absyn_Unique =1U,Cyc_Absyn_Top =2U};
-# 180
-enum Cyc_Absyn_KindQual{Cyc_Absyn_AnyKind =0U,Cyc_Absyn_MemKind =1U,Cyc_Absyn_BoxKind =2U,Cyc_Absyn_RgnKind =3U,Cyc_Absyn_EffKind =4U,Cyc_Absyn_IntKind =5U,Cyc_Absyn_BoolKind =6U,Cyc_Absyn_PtrBndKind =7U};struct Cyc_Absyn_VarargInfo{struct _fat_ptr*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct Cyc_Absyn_FnInfo{struct Cyc_List_List*tvars;void*effect;struct Cyc_Absyn_Tqual ret_tqual;void*ret_type;struct Cyc_List_List*args;int c_varargs;struct Cyc_Absyn_VarargInfo*cyc_varargs;struct Cyc_List_List*rgn_po;struct Cyc_List_List*attributes;struct Cyc_Absyn_Exp*requires_clause;struct Cyc_List_List*requires_relns;struct Cyc_Absyn_Exp*ensures_clause;struct Cyc_List_List*ensures_relns;struct Cyc_Absyn_Vardecl*return_value;};struct Cyc_Absyn_ArrayInfo{void*elt_type;struct Cyc_Absyn_Tqual tq;struct Cyc_Absyn_Exp*num_elts;void*zero_term;unsigned zt_loc;};struct Cyc_Absyn_ArrayType_Absyn_Type_struct{int tag;struct Cyc_Absyn_ArrayInfo f1;};
-# 391 "absyn.h"
-enum Cyc_Absyn_Format_Type{Cyc_Absyn_Printf_ft =0U,Cyc_Absyn_Scanf_ft =1U};
-# 464
+enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};struct Cyc_Absyn_VarargInfo{struct _fat_ptr*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct Cyc_Absyn_FnInfo{struct Cyc_List_List*tvars;void*effect;struct Cyc_Absyn_Tqual ret_tqual;void*ret_type;struct Cyc_List_List*args;int c_varargs;struct Cyc_Absyn_VarargInfo*cyc_varargs;struct Cyc_List_List*rgn_po;struct Cyc_List_List*attributes;struct Cyc_Absyn_Exp*requires_clause;struct Cyc_List_List*requires_relns;struct Cyc_Absyn_Exp*ensures_clause;struct Cyc_List_List*ensures_relns;struct Cyc_Absyn_Vardecl*return_value;};struct Cyc_Absyn_ArrayInfo{void*elt_type;struct Cyc_Absyn_Tqual tq;struct Cyc_Absyn_Exp*num_elts;void*zero_term;unsigned zt_loc;};struct Cyc_Absyn_ArrayType_Absyn_Type_struct{int tag;struct Cyc_Absyn_ArrayInfo f1;};
+# 464 "absyn.h"
 enum Cyc_Absyn_Primop{Cyc_Absyn_Plus =0U,Cyc_Absyn_Times =1U,Cyc_Absyn_Minus =2U,Cyc_Absyn_Div =3U,Cyc_Absyn_Mod =4U,Cyc_Absyn_Eq =5U,Cyc_Absyn_Neq =6U,Cyc_Absyn_Gt =7U,Cyc_Absyn_Lt =8U,Cyc_Absyn_Gte =9U,Cyc_Absyn_Lte =10U,Cyc_Absyn_Not =11U,Cyc_Absyn_Bitnot =12U,Cyc_Absyn_Bitand =13U,Cyc_Absyn_Bitor =14U,Cyc_Absyn_Bitxor =15U,Cyc_Absyn_Bitlshift =16U,Cyc_Absyn_Bitlrshift =17U,Cyc_Absyn_Numelts =18U};
 # 471
 enum Cyc_Absyn_Incrementor{Cyc_Absyn_PreInc =0U,Cyc_Absyn_PostInc =1U,Cyc_Absyn_PreDec =2U,Cyc_Absyn_PostDec =3U};struct Cyc_Absyn_VarargCallInfo{int num_varargs;struct Cyc_List_List*injectors;struct Cyc_Absyn_VarargInfo*vai;};
@@ -462,8 +440,6 @@ struct Cyc_Absyn_Stmt*Cyc_Absyn_decl_stmt(struct Cyc_Absyn_Decl*,struct Cyc_Absy
 struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*,unsigned);
 # 1126
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);
-# 50 "relations-ap.h"
-enum Cyc_Relations_Relation{Cyc_Relations_Req =0U,Cyc_Relations_Rneq =1U,Cyc_Relations_Rlte =2U,Cyc_Relations_Rlt =3U};
 # 146 "tcutil.h"
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
 # 29 "warn.h"
@@ -630,7 +606,7 @@ continue;}case 3: _tmp2D=(struct Cyc_Absyn_Exp**)&((struct Cyc_Absyn_Return_s_Ab
 ({void*_tmp37=0U;({unsigned _tmpE4=s->loc;struct _fat_ptr _tmpE3=({const char*_tmp38="return in eliminated statement expression";_tag_fat(_tmp38,sizeof(char),42U);});Cyc_Warn_warn(_tmpE4,_tmpE3,_tag_fat(_tmp37,sizeof(void*),0));});});
 # 279
 if(*eopt != 0){
-struct Cyc_Absyn_Exp*_tmp39=Cyc_Tovc_box_free_vars_exp(env,(struct Cyc_Absyn_Exp*)_check_null(*eopt));struct Cyc_Absyn_Exp*ei=_tmp39;
+struct Cyc_Absyn_Exp*_tmp39=Cyc_Tovc_box_free_vars_exp(env,_check_null(*eopt));struct Cyc_Absyn_Exp*ei=_tmp39;
 if(ei != 0)*eopt=ei;}
 # 283
 return;}case 1: _tmp2D=(struct Cyc_Absyn_Exp**)&((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_tmp2C)->f1;{struct Cyc_Absyn_Exp**e=_tmp2D;
@@ -671,7 +647,7 @@ return;}case 12: _tmp2D=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_tmp2C)
 ({struct Cyc_List_List*_tmpE5=({struct Cyc_List_List*_tmp45=_region_malloc(env.rgn,sizeof(*_tmp45));_tmp45->hd=vd,_tmp45->tl=env.boundvars;_tmp45;});env.boundvars=_tmpE5;});
 ({struct Cyc_Dict_Dict _tmpE6=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*))Cyc_Dict_rdelete_same;})(env.varmap,(*vd->name).f2);env.varmap=_tmpE6;});
 if(vd->initializer != 0){
-struct Cyc_Absyn_Exp*_tmp46=Cyc_Tovc_box_free_vars_exp(env,(struct Cyc_Absyn_Exp*)_check_null(vd->initializer));struct Cyc_Absyn_Exp*ei=_tmp46;
+struct Cyc_Absyn_Exp*_tmp46=Cyc_Tovc_box_free_vars_exp(env,_check_null(vd->initializer));struct Cyc_Absyn_Exp*ei=_tmp46;
 if(ei != 0)vd->initializer=ei;}
 # 325
 s=s2;
@@ -799,8 +775,8 @@ vd->name=newqvar;
 ({struct Cyc_Dict_Dict _tmpFB=({struct Cyc_Dict_Dict(*_tmpFA)(struct Cyc_Dict_Dict,struct _fat_ptr*,struct Cyc_Absyn_Exp*)=({(struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict,struct _fat_ptr*,struct Cyc_Absyn_Exp*))Cyc_Dict_insert;});struct Cyc_Dict_Dict _tmpF9=env.varmap;struct _fat_ptr*_tmpF8=oldname;_tmpFA(_tmpF9,_tmpF8,Cyc_Absyn_var_exp(newqvar,0U));});env.varmap=_tmpFB;});{
 struct Cyc_List_List*_tmp72=0;struct Cyc_List_List*unresolvedmem_inits=_tmp72;
 if(vd->initializer != 0){
-Cyc_Tovc_apply_varmap(env.varmap,(struct Cyc_Absyn_Exp*)_check_null(vd->initializer));{
-void*_tmp73=((struct Cyc_Absyn_Exp*)_check_null(vd->initializer))->r;void*_stmttmpA=_tmp73;void*_tmp74=_stmttmpA;void*_tmp75;if(*((int*)_tmp74)== 36){_tmp75=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_tmp74)->f2;{struct Cyc_List_List*dles=_tmp75;
+Cyc_Tovc_apply_varmap(env.varmap,_check_null(vd->initializer));{
+void*_tmp73=(_check_null(vd->initializer))->r;void*_stmttmpA=_tmp73;void*_tmp74=_stmttmpA;void*_tmp75;if(*((int*)_tmp74)== 36){_tmp75=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_tmp74)->f2;{struct Cyc_List_List*dles=_tmp75;
 # 479 "tovc.cyc"
 struct Cyc_Absyn_Exp*_tmp76=Cyc_Absyn_var_exp(vd->name,0U);struct Cyc_Absyn_Exp*var=_tmp76;
 {unsigned i=0U;for(0;dles != 0;(dles=dles->tl,++ i)){
@@ -815,7 +791,7 @@ goto _LL12;}_LL12:;}}
 ({void*_tmp101=({struct Cyc_Absyn_Decl*_tmp100=d;Cyc_Absyn_decl_stmt(_tmp100,Cyc_Absyn_new_stmt((env.encloser)->r,0U),0U);})->r;(env.encloser)->r=_tmp101;});{
 struct Cyc_Absyn_Exp*_tmp79=Cyc_Tovc_stmt_to_exp(env,s2);struct Cyc_Absyn_Exp*e=_tmp79;
 if(vd->initializer != 0){
-e=({struct Cyc_Absyn_Exp*_tmp103=({struct Cyc_Absyn_Exp*_tmp102=Cyc_Absyn_var_exp(vd->name,0U);Cyc_Absyn_assign_exp(_tmp102,(struct Cyc_Absyn_Exp*)_check_null(vd->initializer),0U);});Cyc_Absyn_seq_exp(_tmp103,e,0U);});
+e=({struct Cyc_Absyn_Exp*_tmp103=({struct Cyc_Absyn_Exp*_tmp102=Cyc_Absyn_var_exp(vd->name,0U);Cyc_Absyn_assign_exp(_tmp102,_check_null(vd->initializer),0U);});Cyc_Absyn_seq_exp(_tmp103,e,0U);});
 # 497
 vd->initializer=0;}
 # 499
@@ -952,7 +928,7 @@ if(Cyc_Tovc_elim_array_initializers){
 void*_tmpA5=Cyc_Absyn_compress(vd->type);void*_stmttmpE=_tmpA5;void*_tmpA6=_stmttmpE;if(*((int*)_tmpA6)== 4){
 # 650
 if(vd->initializer != 0){
-void*_tmpA7=((struct Cyc_Absyn_Exp*)_check_null(vd->initializer))->r;void*_stmttmpF=_tmpA7;void*_tmpA8=_stmttmpF;void*_tmpA9;if(*((int*)_tmpA8)== 36){_tmpA9=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_tmpA8)->f2;{struct Cyc_List_List*dles=_tmpA9;
+void*_tmpA7=(_check_null(vd->initializer))->r;void*_stmttmpF=_tmpA7;void*_tmpA8=_stmttmpF;void*_tmpA9;if(*((int*)_tmpA8)== 36){_tmpA9=((struct Cyc_Absyn_UnresolvedMem_e_Absyn_Raw_exp_struct*)_tmpA8)->f2;{struct Cyc_List_List*dles=_tmpA9;
 # 653
 vd->initializer=0;{
 # 655
@@ -972,7 +948,7 @@ goto _LL24;}else{
 goto _LL24;}_LL24:;}
 # 671
 if(vd->initializer != 0)
-Cyc_Tovc_exp_to_vc(env,(struct Cyc_Absyn_Exp*)_check_null(vd->initializer));
+Cyc_Tovc_exp_to_vc(env,_check_null(vd->initializer));
 ({struct Cyc_List_List*_tmp10E=({struct Cyc_List_List*_tmpB0=_region_malloc(env.rgn,sizeof(*_tmpB0));_tmpB0->hd=vd,_tmpB0->tl=env.all_locals;_tmpB0;});env.all_locals=_tmp10E;});
 s=s2;
 continue;}}else{
@@ -993,7 +969,7 @@ if(fd->param_vardecls != 0){
 struct _RegionHandle _tmpB9=_new_region("rgn");struct _RegionHandle*rgn=& _tmpB9;_push_region(rgn);
 {struct Cyc_List_List**_tmpBA=({struct Cyc_List_List**_tmpBE=_region_malloc(rgn,sizeof(*_tmpBE));*_tmpBE=0;_tmpBE;});struct Cyc_List_List**gen_ds=_tmpBA;
 ({struct Cyc_Tovc_ToExpEnv _tmp112=({struct Cyc_Tovc_ToExpEnv _tmpD4;_tmpD4.rgn=rgn,({
-struct Cyc_List_List*_tmp111=({(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_List_List*))Cyc_List_rcopy;})(rgn,(struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(fd->param_vardecls))->v);_tmpD4.all_locals=_tmp111;}),({
+struct Cyc_List_List*_tmp111=({(struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_List_List*))Cyc_List_rcopy;})(rgn,(struct Cyc_List_List*)(_check_null(fd->param_vardecls))->v);_tmpD4.all_locals=_tmp111;}),({
 struct Cyc_Dict_Dict _tmp110=({(struct Cyc_Dict_Dict(*)(struct _RegionHandle*,int(*)(struct _fat_ptr*,struct _fat_ptr*)))Cyc_Dict_rempty;})(rgn,Cyc_strptrcmp);_tmpD4.varmap=_tmp110;}),_tmpD4.encloser=fd->body,_tmpD4.gen_ds=gen_ds;_tmpD4;});
 # 702
 Cyc_Tovc_stmt_to_vc(_tmp112,fd->body);});

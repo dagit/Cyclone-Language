@@ -22,17 +22,17 @@
 
 // FIX: makes alignment and pointer-size assumptions
 char Cyc_Null_Exception[] = "Cyc_Null_Exception";
-struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception };
-struct _xtunion_struct * Cyc_Null_Exception_val = &Cyc_Null_Exception_struct;
+struct Cyc_Null_Exception_exn_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception };
+struct Cyc_Null_Exception_exn_struct * Cyc_Null_Exception_val = &Cyc_Null_Exception_struct;
 char Cyc_Array_bounds[] = "Cyc_Array_bounds";
-struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds };
-struct _xtunion_struct * Cyc_Array_bounds_val = &Cyc_Array_bounds_struct;
+struct Cyc_Array_bounds_exn_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds };
+struct Cyc_Array_bounds_exn_struct * Cyc_Array_bounds_val = &Cyc_Array_bounds_struct;
 char Cyc_Match_Exception[] = "Cyc_Match_Exception";
-struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception };
-struct _xtunion_struct * Cyc_Match_Exception_val = &Cyc_Match_Exception_struct;
+struct Cyc_Match_Exception_exn_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception };
+struct Cyc_Match_Exception_exn_struct * Cyc_Match_Exception_val = &Cyc_Match_Exception_struct;
 char Cyc_Bad_alloc[] = "Cyc_Bad_alloc";
-struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
-struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
+struct Cyc_Bad_alloc_exn_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
+struct Cyc_Bad_alloc_exn_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 
 // The exception that was thrown
 #ifdef HAVE_THREADS
@@ -42,7 +42,7 @@ static tlocal_key_t _exn_lineno_key;
 #elif !defined(USE_CYC_TLS)
 static const char *_exn_filename = "?";
 static int _exn_lineno = 0; // MWH: should be unsigned? Must match core.h
-static struct _xtunion_struct *_exn_thrown = NULL;
+static void*_exn_thrown = NULL;
 #endif
 
 void _init_exceptions() {
@@ -83,9 +83,9 @@ static int (*uncaught_fun)() = NULL;
 struct _handler_cons top_handler;
 static int in_uncaught_fun = 0; // avoid infinite exception chain
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown() {
+void* Cyc_Core_get_exn_thrown() {
 #ifdef HAVE_THREADS
-  return (struct _xtunion_struct*)get_tlocal(_exn_thrown_key);
+  return get_tlocal(_exn_thrown_key);
 #elif defined(USE_CYC_TLS)
   tls_record_t *rec = cyc_runtime_lookup_tls_record();
   if(rec) {
@@ -126,8 +126,8 @@ int Cyc_Core_get_exn_lineno() {
   return _exn_lineno;
 #endif
 }
-const char *Cyc_Core_get_exn_name(struct _xtunion_struct *x) {
-  return x->tag;
+const char *Cyc_Core_get_exn_name(void*x) {
+  return *(char**)x;
 }
 
 void Cyc_Core_set_uncaught_exn_fun(int f()) {
@@ -140,7 +140,7 @@ void _set_top_handler() {
   // the initial return from this function.
   static int status = 0;
   static char *exn_name;
-  static struct _xtunion_struct *exn_thrown;
+  static void*exn_thrown;
   static const char *exn_filename;
   static int exn_lineno;
 
@@ -149,7 +149,7 @@ void _set_top_handler() {
     exn_thrown = Cyc_Core_get_exn_thrown();
     exn_filename = Cyc_Core_get_exn_filename();
     exn_lineno = Cyc_Core_get_exn_lineno();
-    exn_name = exn_thrown->tag;
+    exn_name = *(char**)exn_thrown;
     errquit("Uncaught exception %s thrown from around %s:%d\n",exn_name,
 	    exn_filename,exn_lineno);
   }
@@ -157,7 +157,6 @@ void _set_top_handler() {
 }
 
 void* _throw_fn(void* e, const char *filename, unsigned lineno) {
-  // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   // pop handlers until exception handler found
   my_handler = (struct _handler_cons *)_pop_frame_until(EXCEPTION_HANDLER);

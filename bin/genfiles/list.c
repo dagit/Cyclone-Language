@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -659,7 +647,7 @@ struct Cyc_List_List*z;
 # 321
 if(x == 0)return y;
 if(y == 0)return x;
-for(z=x;((struct Cyc_List_List*)_check_null(z))->tl != 0;z=z->tl){
+for(z=x;(_check_null(z))->tl != 0;z=z->tl){
 ;}
 z->tl=y;
 return x;}
@@ -769,7 +757,7 @@ return Cyc_List_rmerge(Cyc_Core_heap_region,less_eq,a,b);}char Cyc_List_Nth[4U]=
 struct Cyc_List_Nth_exn_struct Cyc_List_Nth_val={Cyc_List_Nth};
 # 466
 void*Cyc_List_nth(struct Cyc_List_List*x,int i){
-return((struct Cyc_List_List*)_check_null(Cyc_List_nth_tail(x,i)))->hd;}
+return(_check_null(Cyc_List_nth_tail(x,i)))->hd;}
 # 472
 struct Cyc_List_List*Cyc_List_nth_tail(struct Cyc_List_List*x,int i){
 if(i < 0)(int)_throw((void*)& Cyc_List_Nth_val);
@@ -944,7 +932,7 @@ struct Cyc_List_List*_tmp24=l;struct Cyc_List_List*iter=_tmp24;
 while(iter != 0){
 if(cmp(iter->hd,x)== 0){
 if(prev == 0)
-return((struct Cyc_List_List*)_check_null(l))->tl;
+return(_check_null(l))->tl;
 prev->tl=iter->tl;
 return l;}
 # 685
@@ -982,7 +970,7 @@ return 0;}
 # 733
 struct _fat_ptr Cyc_List_rto_array(struct _RegionHandle*r2,struct Cyc_List_List*x){
 int s=Cyc_List_length(x);
-return({unsigned _tmp29=(unsigned)s;void**_tmp28=({struct _RegionHandle*_tmp4C=r2;_region_malloc(_tmp4C,_check_times(_tmp29,sizeof(void*)));});({{unsigned _tmp36=(unsigned)s;unsigned i;for(i=0;i < _tmp36;++ i){({void*_tmp4D=({void*_tmp27=((struct Cyc_List_List*)_check_null(x))->hd;void*v=_tmp27;x=x->tl;v;});_tmp28[i]=_tmp4D;});}}0;});_tag_fat(_tmp28,sizeof(void*),_tmp29);});}
+return({unsigned _tmp29=(unsigned)s;void**_tmp28=({struct _RegionHandle*_tmp4C=r2;_region_malloc(_tmp4C,_check_times(_tmp29,sizeof(void*)));});({{unsigned _tmp36=(unsigned)s;unsigned i;for(i=0;i < _tmp36;++ i){({void*_tmp4D=({void*_tmp27=(_check_null(x))->hd;void*v=_tmp27;x=x->tl;v;});_tmp28[i]=_tmp4D;});}}0;});_tag_fat(_tmp28,sizeof(void*),_tmp29);});}
 # 738
 struct _fat_ptr Cyc_List_to_array(struct Cyc_List_List*x){
 return Cyc_List_rto_array(Cyc_Core_heap_region,x);}

@@ -49,9 +49,10 @@ extern size_t GC_get_total_bytes();
 
 extern void GC_free(void *);
 
-static int region_get_heap_size(struct _RegionHandle *r);
-static int region_get_free_bytes(struct _RegionHandle *r);
-static int region_get_total_bytes(struct _RegionHandle *r);
+static int region_get_heap_size(struct _RegionHandle *);
+static int region_get_free_bytes(struct _RegionHandle *);
+static int region_get_total_bytes(struct _RegionHandle *);
+void _free_region(struct _RegionHandle *);
 
 // FIX: I'm putting GC_calloc and GC_calloc_atomic in here as just
 // calls to GC_malloc and GC_malloc_atomic respectively.  This will

@@ -1172,8 +1172,8 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
         if (index != NULL)
           toc_impos("subscript of ? with no bounds check but need null check");
       }
-      // ((t *)_check_null(e))
-      ptr->r=cast_it_r(new_typ,fncall_exp_dl(_check_null_e,new_exp(ptr->r,0)));
+      // _check_null(e)
+      ptr->r=fncall_exp_dl(_check_null_e,new_exp(ptr->r,0))->r;
       ans = false;
       break;
     case &InsertChecks::NullAndFatBound: fallthru; // null check comes for free
@@ -1209,9 +1209,8 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 	// special case: null-check suffices when ind is zero
 	if(is_zero(bd)) {
 	  if(fn_e == _check_known_subscript_null_e)
-	    // ((t *)_check_null(e))
-	    ptr->r = cast_it_r(new_typ,
-			       fncall_exp_dl(_check_null_e, new_exp(ptr->r,0)));
+	    // _check_null(e))
+	    ptr->r = fncall_exp_dl(_check_null_e, new_exp(ptr->r,0))->r;
 	  ans = false;
 	} else {
 	  // get the right run-time function (always does a null-check)
@@ -1930,9 +1929,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e1);
     did_inserted_checks = true;
     if(do_null_check(e))
-      //*((t *)_check_null(e)) (cast necessary b/c void* not a function type)
-      e1->r = cast_it_r(typ_to_c(e1_typ),
-			fncall_exp_dl(_check_null_e,copy_exp(e1)));
+      //*_check_null(e)
+      e1->r = fncall_exp_dl(_check_null_e,copy_exp(e1))->r;
     List::iter_c(exp_to_c,nv,es);
     break;
   case &FnCall_e(e1,es,&VarargCallInfo{num_varargs,injectors,vai},_):
@@ -1971,9 +1969,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e1);
       did_inserted_checks = true;
       if(do_null_check(e))
-	// ((t *)_check_null(e1))
-	e1->r = cast_it_r(typ_to_c(e1_typ),
-			  fncall_exp_dl(_check_null_e,copy_exp(e1)));
+	// _check_null(e1)
+	e1->r = fncall_exp_dl(_check_null_e,copy_exp(e1))->r;
       stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
 
       // make the declarations and prepend them
@@ -2097,7 +2094,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// neither fat -- bound guaranteed in type-checker, so just check NULL
 	did_inserted_checks = true;
 	if(do_null_check(e))
-	  e->r = cast_it_r(*t,fncall_exp_dl(_check_null_e,e1));
+	  e->r = fncall_exp_dl(_check_null_e,e1)->r;
 	else if (Unify::unify(old_t2_c,new_typ_c))
 	  e->r = e1->r;
         // FIX: the type-checker doesn't currently allow the case
@@ -2173,7 +2170,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// FIX: allow bounds check to be elided
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
-	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
+	// for t@: _check_null(_untag_arr(e1, sizeof(t), new_e2))
 	let ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
 				    e1,
 				    sizeoftype_exp(typ_to_c(p1.elt_type),DL),
@@ -3584,6 +3581,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e.
 	// copying rather than alpha-conversion is just to help debugging
+	// FIX? avoid making a temp when var does not appear
         switch (p->r) {
         case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
           let new_vd = new_vardecl(DL, temp_var(), vd->type, e);

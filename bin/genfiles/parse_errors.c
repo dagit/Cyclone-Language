@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -373,37 +361,13 @@ extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_String_pa_PrintArg
 # 157 "cycboot.h"
 extern int Cyc_printf(struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
 # 319 "cycboot.h"
-extern void exit(int);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
-# 149 "absyn.h"
-enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};
-# 170
-enum Cyc_Absyn_Size_of{Cyc_Absyn_Char_sz =0U,Cyc_Absyn_Short_sz =1U,Cyc_Absyn_Int_sz =2U,Cyc_Absyn_Long_sz =3U,Cyc_Absyn_LongLong_sz =4U};
-enum Cyc_Absyn_Sign{Cyc_Absyn_Signed =0U,Cyc_Absyn_Unsigned =1U,Cyc_Absyn_None =2U};
-enum Cyc_Absyn_AggrKind{Cyc_Absyn_StructA =0U,Cyc_Absyn_UnionA =1U};
-# 175
-enum Cyc_Absyn_AliasQual{Cyc_Absyn_Aliasable =0U,Cyc_Absyn_Unique =1U,Cyc_Absyn_Top =2U};
-# 180
-enum Cyc_Absyn_KindQual{Cyc_Absyn_AnyKind =0U,Cyc_Absyn_MemKind =1U,Cyc_Absyn_BoxKind =2U,Cyc_Absyn_RgnKind =3U,Cyc_Absyn_EffKind =4U,Cyc_Absyn_IntKind =5U,Cyc_Absyn_BoolKind =6U,Cyc_Absyn_PtrBndKind =7U};
-# 391 "absyn.h"
-enum Cyc_Absyn_Format_Type{Cyc_Absyn_Printf_ft =0U,Cyc_Absyn_Scanf_ft =1U};
-# 464
-enum Cyc_Absyn_Primop{Cyc_Absyn_Plus =0U,Cyc_Absyn_Times =1U,Cyc_Absyn_Minus =2U,Cyc_Absyn_Div =3U,Cyc_Absyn_Mod =4U,Cyc_Absyn_Eq =5U,Cyc_Absyn_Neq =6U,Cyc_Absyn_Gt =7U,Cyc_Absyn_Lt =8U,Cyc_Absyn_Gte =9U,Cyc_Absyn_Lte =10U,Cyc_Absyn_Not =11U,Cyc_Absyn_Bitnot =12U,Cyc_Absyn_Bitand =13U,Cyc_Absyn_Bitor =14U,Cyc_Absyn_Bitxor =15U,Cyc_Absyn_Bitlshift =16U,Cyc_Absyn_Bitlrshift =17U,Cyc_Absyn_Numelts =18U};
-# 471
-enum Cyc_Absyn_Incrementor{Cyc_Absyn_PreInc =0U,Cyc_Absyn_PostInc =1U,Cyc_Absyn_PreDec =2U,Cyc_Absyn_PostDec =3U};
-# 489
-enum Cyc_Absyn_Coercion{Cyc_Absyn_Unknown_coercion =0U,Cyc_Absyn_No_coercion =1U,Cyc_Absyn_Null_to_NonNull =2U,Cyc_Absyn_Other_coercion =3U};extern char Cyc_Absyn_EmptyAnnot[11U];
+extern void exit(int);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];extern char Cyc_Absyn_EmptyAnnot[11U];
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 78 "flags.h"
-enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 92 "flags.h"
-enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_EvalOrder =12U,Cyc_Flags_CCompiler =13U,Cyc_Flags_AllPasses =14U};
-# 126
+# 126 "flags.h"
 extern int Cyc_Flags_print_parser_state_and_token;extern char Cyc_Parse_Exit[5U];
 # 27 "parse.h"
-struct _fat_ptr Cyc_token2string(int);
-# 54
-enum Cyc_Parse_Storage_class{Cyc_Parse_Typedef_sc =0U,Cyc_Parse_Extern_sc =1U,Cyc_Parse_ExternC_sc =2U,Cyc_Parse_Static_sc =3U,Cyc_Parse_Auto_sc =4U,Cyc_Parse_Register_sc =5U,Cyc_Parse_Abstract_sc =6U,Cyc_Parse_None_sc =7U};struct Cyc_Yyltype{int timestamp;int first_line;int first_column;int last_line;int last_column;};
+struct _fat_ptr Cyc_token2string(int);struct Cyc_Yyltype{int timestamp;int first_line;int first_column;int last_line;int last_column;};
 # 92 "parse_tab.h"
 extern struct Cyc_Yyltype Cyc_yylloc;struct Cyc_ParseErrors_ParseState{int state;int token;struct _fat_ptr msg;};static char _tmp0[34U]="undeclared type or missing comma ";static char _tmp1[28U]="type has not been declared ";static char _tmp2[13U]="missing ';' ";static char _tmp3[31U]="missing ')' on parameter list ";static char _tmp4[29U]="expecting IDENTIFIER or '{' ";static char _tmp5[29U]="expecting IDENTIFIER or '{' ";static char _tmp6[19U]="expecting PATTERN ";static char _tmp7[22U]="expecting IDENTIFIER ";static char _tmp8[22U]="expecting IDENTIFIER ";static char _tmp9[30U]="expecting '(' EXPRESSION ')' ";static char _tmpA[19U]="expecting 'union' ";static char _tmpB[22U]="expecting 'datatype' ";static char _tmpC[36U]="expecting '((' ATTRIBUTE_LIST '))' ";static char _tmpD[34U]="expecting '(' PARAMETER_LIST ')' ";static char _tmpE[16U]="expecting KIND ";static char _tmpF[16U]="expecting KIND ";static char _tmp10[22U]="expecting ';' or '{' ";static char _tmp11[22U]="expecting ';' or '{' ";static char _tmp12[29U]="expecting '<' or IDENTIFIER ";static char _tmp13[14U]="missing '};' ";static char _tmp14[22U]="expecting IDENTIFIER ";static char _tmp15[15U]="expecting '(' ";static char _tmp16[22U]="expecting IDENTIFIER ";static char _tmp17[19U]="expecting PATTERN ";static char _tmp18[35U]="expecting IDENTIFIER or extra ',' ";static char _tmp19[22U]="expecting EXPRESSION ";static char _tmp1A[13U]="missing '}' ";static char _tmp1B[13U]="missing '}' ";static char _tmp1C[13U]="missing ';' ";static char _tmp1D[22U]="expecting EXPRESSION ";static char _tmp1E[23U]="expecting DECLARATION ";static char _tmp1F[13U]="missing '}' ";static char _tmp20[29U]="expecting ']' or EXPRESSION ";static char _tmp21[22U]="expecting EXPRESSION ";static char _tmp22[16U]="expecting TYPE ";static char _tmp23[13U]="missing ')' ";static char _tmp24[22U]="expecting EXPRESSION ";static char _tmp25[13U]="missing ')' ";static char _tmp26[16U]="expecting TYPE ";static char _tmp27[22U]="expecting EXPRESSION ";static char _tmp28[13U]="missing '}' ";static char _tmp29[32U]="expecting TYPE_VARIABLE or '_' ";static char _tmp2A[45U]="expecting '(' EXPRESSION ')' or '( TYPE ')' ";static char _tmp2B[13U]="missing ')' ";static char _tmp2C[22U]="expecting EXPRESSION ";static char _tmp2D[37U]="expecting INITIALIZER or EXPRESSION ";static char _tmp2E[29U]="expecting '(' EXPRESSION ') ";static char _tmp2F[25U]="expecting EXPRESSION ') ";static char _tmp30[12U]="missing ') ";static char _tmp31[44U]="expecting '(' EXPRESSION ',' EXPRESSION ') ";static char _tmp32[40U]="expecting EXPRESSION ',' EXPRESSION ') ";static char _tmp33[29U]="expecting ',' EXPRESSION ') ";static char _tmp34[13U]="missing ')' ";static char _tmp35[15U]="expecting '(' ";static char _tmp36[22U]="expecting EXPRESSION ";static char _tmp37[15U]="expecting ',' ";static char _tmp38[30U]="expecting 'sizeof(' TYPE ')' ";static char _tmp39[16U]="expecting TYPE ";static char _tmp3A[13U]="missing ')' ";static char _tmp3B[15U]="expecting '(' ";static char _tmp3C[22U]="expecting EXPRESSION ";static char _tmp3D[15U]="expecting ',' ";static char _tmp3E[22U]="expecting EXPRESSION ";static char _tmp3F[15U]="expecting ',' ";static char _tmp40[20U]="expecting 'sizeof' ";static char _tmp41[15U]="expecting '(' ";static char _tmp42[16U]="expecting TYPE ";static char _tmp43[13U]="missing ')' ";static char _tmp44[37U]="expecting '(' REGION_EXPRESSION ')' ";static char _tmp45[13U]="missing ')' ";static char _tmp46[37U]="expecting INITIALIZER or EXPRESSION ";static char _tmp47[30U]="expecting '(' EXPRESSION ')' ";static char _tmp48[26U]="expecting EXPRESSION ')' ";static char _tmp49[13U]="missing ')' ";static char _tmp4A[24U]="expecting '(' TYPE ')' ";static char _tmp4B[20U]="expecting TYPE ')' ";static char _tmp4C[13U]="missing ')' ";static char _tmp4D[15U]="expecting '(' ";static char _tmp4E[22U]="expecting EXPRESSION ";static char _tmp4F[41U]="expecting '.' IDENTIFIER or missing ')' ";static char _tmp50[22U]="expecting IDENTIFIER ";static char _tmp51[46U]="expecting TYPE_LIST, EXPRESSION_LIST, or ')' ";static char _tmp52[15U]="expecting ')' ";static char _tmp53[24U]="missing ':' EXPRESSION ";static char _tmp54[33U]="missing EXPRESSION or extra '?' ";static char _tmp55[33U]="missing EXPRESSION or extra '+' ";static char _tmp56[33U]="missing EXPRESSION or extra '-' ";static char _tmp57[33U]="missing EXPRESSION or extra '*' ";static char _tmp58[33U]="missing EXPRESSION or extra '/' ";static char _tmp59[33U]="missing EXPRESSION or extra '|' ";static char _tmp5A[33U]="missing EXPRESSION or extra '&' ";static char _tmp5B[33U]="missing EXPRESSION or extra '^' ";static char _tmp5C[33U]="missing EXPRESSION or extra '&' ";static char _tmp5D[34U]="missing EXPRESSION or extra '==' ";static char _tmp5E[34U]="missing EXPRESSION or extra '!=' ";static char _tmp5F[33U]="missing EXPRESSION or extra '<' ";static char _tmp60[34U]="missing EXPRESSION or extra '<=' ";static char _tmp61[33U]="missing EXPRESSION or extra '>' ";static char _tmp62[34U]="missing EXPRESSION or extra '>=' ";static char _tmp63[34U]="missing EXPRESSION or extra '>>' ";static char _tmp64[34U]="missing EXPRESSION or extra '<<' ";static char _tmp65[33U]="missing EXPRESSION or extra '%' ";static char _tmp66[22U]="expecting EXPRESSION ";static char _tmp67[22U]="expecting EXPRESSION ";static char _tmp68[22U]="expecting EXPRESSION ";static char _tmp69[31U]="extra ',' or missing argument ";static char _tmp6A[13U]="missing ')' ";static char _tmp6B[22U]="expecting IDENTIFIER ";static char _tmp6C[22U]="expecting IDENTIFIER ";static char _tmp6D[48U]="extra space not allowed in empty instantiation ";static char _tmp6E[37U]="expecting '<>' or '<' TYPE_LIST '>' ";
 # 11 "parse_errors.cyc"

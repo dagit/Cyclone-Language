@@ -23,6 +23,8 @@
 #ifndef _LOW_TREESHAKE_H
 #define _LOW_TREESHAKE_H
 
+#include "absyn.h"
+
 namespace LowTreeShake {
 List::list_t<Absyn::decl_t> shake(List::list_t<Absyn::decl_t,`H>);
 }

@@ -2141,7 +2141,7 @@ cstub pthread_create {
 #include <stdio.h>
 extern void _pop_handler();
 extern void _push_handler(struct _handler_cons *h);
-extern struct _xtunion_struct *Cyc_Core_get_exn_thrown(void);
+extern void*Cyc_Core_get_exn_thrown(void);
 extern const char *Cyc_Core_get_exn_filename(void);
 extern int Cyc_Core_get_exn_lineno();
 static struct __pair {
@@ -2162,10 +2162,10 @@ void *pthread_cycfun_wrap(struct __pair *arg) {
      res = cycf (cycarg);
      _pop_handler();
    } else {
-     struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();
+     void*exn_thrown = Cyc_Core_get_exn_thrown();
      const char *exn_filename = Cyc_Core_get_exn_filename();
      int exn_lineno = Cyc_Core_get_exn_lineno();
-     exn_name = exn_thrown->tag;
+     exn_name = *(char**)exn_thrown;
      fprintf(stderr,"Uncaught exception %s thrown from thread around %s:%d\n",exn_name,
 	     exn_filename,exn_lineno);
   }

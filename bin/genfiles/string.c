@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -565,7 +553,7 @@ struct Cyc_List_List*end=lens;
 {struct Cyc_List_List*p=strs;for(0;p != 0;p=p->tl){
 len=Cyc_strlen((struct _fat_ptr)*((struct _fat_ptr*)p->hd));
 total_len +=len;
-({struct Cyc_List_List*_tmp92=({struct Cyc_List_List*_tmp1F=_region_malloc(temp,sizeof(*_tmp1F));_tmp1F->hd=(void*)len,_tmp1F->tl=0;_tmp1F;});((struct Cyc_List_List*)_check_null(end))->tl=_tmp92;});
+({struct Cyc_List_List*_tmp92=({struct Cyc_List_List*_tmp1F=_region_malloc(temp,sizeof(*_tmp1F));_tmp1F->hd=(void*)len,_tmp1F->tl=0;_tmp1F;});(_check_null(end))->tl=_tmp92;});
 end=end->tl;}}
 # 222
 lens=lens->tl;
@@ -573,7 +561,7 @@ ans=Cyc_Core_rnew_string(r,total_len + 1U);{
 unsigned long i=0U;
 while(strs != 0){
 struct _fat_ptr _tmp20=*((struct _fat_ptr*)strs->hd);struct _fat_ptr next=_tmp20;
-len=(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;
+len=(unsigned long)(_check_null(lens))->hd;
 ({struct _fat_ptr _tmp94=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp93=(struct _fat_ptr)next;Cyc_strncpy(_tmp94,_tmp93,len);});
 i +=len;
 strs=strs->tl;
@@ -599,7 +587,7 @@ unsigned long list_len=0U;
 for(1;p != 0;p=p->tl){
 len=Cyc_strlen((struct _fat_ptr)*((struct _fat_ptr*)p->hd));
 total_len +=len;
-({struct Cyc_List_List*_tmp95=({struct Cyc_List_List*_tmp25=_region_malloc(temp,sizeof(*_tmp25));_tmp25->hd=(void*)len,_tmp25->tl=0;_tmp25;});((struct Cyc_List_List*)_check_null(end))->tl=_tmp95;});
+({struct Cyc_List_List*_tmp95=({struct Cyc_List_List*_tmp25=_region_malloc(temp,sizeof(*_tmp25));_tmp25->hd=(void*)len,_tmp25->tl=0;_tmp25;});(_check_null(end))->tl=_tmp95;});
 end=end->tl;
 ++ list_len;}
 # 260
@@ -608,9 +596,9 @@ unsigned long seplen=Cyc_strlen(separator);
 total_len +=(list_len - 1U)* seplen;{
 struct _fat_ptr ans=Cyc_Core_rnew_string(r,total_len + 1U);
 unsigned long i=0U;
-while(((struct Cyc_List_List*)_check_null(strs))->tl != 0){
+while((_check_null(strs))->tl != 0){
 struct _fat_ptr _tmp26=*((struct _fat_ptr*)strs->hd);struct _fat_ptr next=_tmp26;
-len=(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;
+len=(unsigned long)(_check_null(lens))->hd;
 ({struct _fat_ptr _tmp97=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp96=(struct _fat_ptr)next;Cyc_strncpy(_tmp97,_tmp96,len);});
 i +=len;
 ({struct _fat_ptr _tmp99=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp98=separator;Cyc_strncpy(_tmp99,_tmp98,seplen);});
@@ -618,7 +606,7 @@ i +=seplen;
 strs=strs->tl;
 lens=lens->tl;}
 # 275
-({struct _fat_ptr _tmp9B=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp9A=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_tmp9B,_tmp9A,(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd);});{
+({struct _fat_ptr _tmp9B=_fat_ptr_decrease_size(_fat_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _fat_ptr _tmp9A=(struct _fat_ptr)*((struct _fat_ptr*)strs->hd);Cyc_strncpy(_tmp9B,_tmp9A,(unsigned long)(_check_null(lens))->hd);});{
 struct _fat_ptr _tmp27=ans;_npop_handler(0);return _tmp27;}}}}
 # 248
 ;_pop_region();}}
@@ -986,7 +974,7 @@ struct _fat_ptr Cyc_realloc(struct _fat_ptr s,unsigned long n){
 unsigned _tmp65=_get_fat_size(s,sizeof(char));unsigned _stmttmp0=_tmp65;unsigned _tmp66=_stmttmp0;unsigned _tmp67;_tmp67=_tmp66;{unsigned oldsz=_tmp67;
 unsigned long _tmp68=n;unsigned _tmp69;_tmp69=_tmp68;{unsigned l=_tmp69;
 char*_tmp6A=GC_realloc_hint((char*)_untag_fat_ptr(s,sizeof(char),1U),oldsz,l);char*res=_tmp6A;
-return({(struct _fat_ptr(*)(char*,unsigned,unsigned))Cyc_Core_mkfat;})((char*)_check_null(res),sizeof(char),l);}}}
+return({(struct _fat_ptr(*)(char*,unsigned,unsigned))Cyc_Core_mkfat;})(_check_null(res),sizeof(char),l);}}}
 # 737
 struct _fat_ptr Cyc__memcpy(struct _fat_ptr d,struct _fat_ptr s,unsigned long n,unsigned sz){
 if((((void*)d.curr == (void*)(_tag_fat(0,0,0)).curr || _get_fat_size(d,sizeof(void))< n)||(void*)s.curr == (void*)(_tag_fat(0,0,0)).curr)|| _get_fat_size(s,sizeof(void))< n)

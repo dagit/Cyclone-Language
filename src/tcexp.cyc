@@ -414,8 +414,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
 }
 static booltype_t relqual(type_t t) {
   switch (t) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,rel))):
-    return rel;
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,rel))): return rel;
   default: return false_type;
   }
 }
@@ -508,8 +507,7 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     if (Unify::unify(t1a,t2a)) 
       return sint_type; 
     break;
-  case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)):
-    return sint_type;
+  case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)): return sint_type;
   default: break;
   }
   // FIX? not right if we did not call unify
@@ -1108,11 +1106,11 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
     *c = No_coercion;
   } else {
     coercion_t crc = castable(curr_rgnpo(te),loc,t2,t);
-    if (crc != Unknown_coercion) {
+    if (crc != Unknown_coercion)
       *c = crc;
-    } else if (zero_to_null(t,e)) {
+    else if (zero_to_null(t,e))
       *c = No_coercion;
-    } else {
+    else {
       // extra unify needed to get the right reason for the failure
       Unify::unify(t2,t);
       let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t);
@@ -1144,7 +1142,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
   let topt2 = NULL;
   let tq2 = empty_tqual(0);
   let nullable = false;
-  if (topt != NULL) {
+  if (topt != NULL)
     switch (compress(*topt)) {
     case &PointerType(PtrInfo(*elttype,tq,PtrAtts(_,n,...))):
       topt2 = elttype;
@@ -1153,7 +1151,6 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
       break;
     default: break;
     }
-  }
   // Use tcExpNoInst here because if f is a function then
   // then &f is supposed to be a pointer to a function, not
   // a pointer to a pointer to a function

@@ -24,7 +24,6 @@
 
 #include <hashtable.h>
 #include <set.h>
-#include "absyn.h"
 #include "warn.h"
 #include "low_treeshake.h"
 using Absyn;
@@ -32,19 +31,14 @@ namespace LowTreeShake;
 
 // lists because types can be declared multiple times
 typedef Hashtable::table_t<qvar_t,List::list_t<aggrdecl_t>> aggr_table_t;
-typedef Hashtable::table_t<qvar_t,List::list_t<enumdecl_t>> enum_table_t;
-typedef Hashtable::table_t<qvar_t,List::list_t<enumdecl_t>> enum_field_table_t;
 typedef Set::set_t<qvar_t> qvar_set_t;
 
 // essentially global state for the pass
 struct Env {
   aggr_table_t aggrdecls;
-  enum_table_t enumdecls;
-  enum_field_table_t enumfields;
   qvar_set_t   aggr_worklist;
-  qvar_set_t   enum_worklist;
   qvar_set_t   aggr_keepers;
-  qvar_set_t   enum_keepers;
+  qvar_set_t   enum_keepers; // could distinguish needing tags and not
 };
 typedef struct Env@`r env_t<`r>;
 
@@ -57,19 +51,19 @@ static void build_tables_type(env_t env, type_t t) {
     if(!Set::member(env->aggr_keepers,n))
       Set::imp_insert(env->aggr_worklist,n);
     break;
-  case &AppType(&EnumCon(n,_),NULL):
-    if(!Set::member(env->enum_keepers,n))
-       Set::imp_insert(env->enum_worklist,n);
-    break;
-  case &AppType(&AnonEnumCon(_),NULL): break;
+  case &AppType(&EnumCon(n,_),NULL): 
+    Set::imp_insert(env->enum_keepers,n); break;
   case &AppType(_,NULL): break;
 
   case &Evar(_,topt,_,_):        fallthru(topt);
   case &TypedefType(_,_,_,topt): if(topt) fallthru(topt); break; 
   case &PointerType(PtrInfo(t1,...)): build_tables_type(env,t1); break;
-  case &ArrayType(ArrayInfo(t1,_,eo,...)): // e can have sizeof in it!
+
+  case &ArrayType(ArrayInfo(t1,_,eo,...)): // eo can have sizeof in it!
     if(eo) build_tables_exp(env,eo);
-    build_tables_type(env,t1); break;
+    build_tables_type(env,t1); 
+    break;
+
   case &FnType(i):
     build_tables_type(env,i.ret_type);
     for(let args = i.args; args != NULL; args=args->tl)
@@ -82,12 +76,13 @@ static void build_tables_type(env_t env, type_t t) {
   }
 }
 static void build_tables_exp(env_t env, exp_t e) {
-  // recursive descent for types (plus later vars and enumfields)
+  // recursive descent for types (plus later vars)
   switch(e->r) {
   case &Const_e(_):
-  case &Enum_e(...):
   case &AnonEnum_e(...):        
   case &Var_e(_): break;
+
+  case &Enum_e(ed,_): Set::imp_insert(env->enum_keepers,ed->name); break;
 
   case &Cast_e(t,e1,...):
     build_tables_type(env,t);
@@ -215,7 +210,13 @@ static void build_tables(env_t env, List::list_t<decl_t,`H> tds) {
       build_tables_stmt(env,fd->body);
       break;
     case &Aggr_d(ad): add_to_table(env->aggrdecls,ad->name,ad); break;
-    case &Enum_d(ed): break; // FIX -- skip for now (fields a pain)
+    case &Enum_d(ed): // I suppose a field could include a sizeof
+      // this conservatively assumes the enum is used
+      if(ed->fields != NULL)
+	for(let fs = ed->fields->v; fs != NULL; fs = fs->tl)
+	  if(fs->hd->tag != NULL)
+	    build_tables_exp(env,(exp_t)fs->hd->tag);
+      break;
     case &Typedef_d(td): //conservative (we usually don't have typedefs though)
       build_tables_type(env,(type_t)td->defn); break;
     default: Warn::impos2("LowTreeShake: top-level Cyclone decl");
@@ -239,24 +240,23 @@ static void process_worklist(env_t env) {
   }
 }
 
-List::list_t<decl_t,`H> trim_decls(env_t env, List::list_t<decl_t,`H> tds) {
+static List::list_t<decl_t,`H> trim_decls(env_t env, List::list_t<decl_t,`H> tds) {
   let ans = NULL;
-  for(; tds != NULL; tds = tds->tl)
+  for(; tds != NULL; tds = tds->tl) {
+    bool keep;
     switch(tds->hd->r) { // FIX: skiiping Enum_d and Var_d for now
-    case &Aggr_d(ad):
-      if(Set::member(env->aggr_keepers,ad->name))
-	fallthru;
-      break;
-    default: ans = new List::List(tds->hd,ans);
+    case &Aggr_d(ad): keep = Set::member(env->aggr_keepers,ad->name); break;
+    case &Enum_d(ed): keep = Set::member(env->enum_keepers,ed->name); break;
+    default:          keep = true; break;
     }
+    if(keep)
+      ans = new List::List(tds->hd,ans);
+  }
   return List::imp_rev(ans);
 }
 
 List::list_t<decl_t> shake(List::list_t<decl_t,`H> tds) {
   let env = Env(Hashtable::create(37,qvar_cmp,hash_qvar),
-		Hashtable::create(11,qvar_cmp,hash_qvar),
-		Hashtable::create(11,qvar_cmp,hash_qvar),
-		Set::empty(qvar_cmp),
 		Set::empty(qvar_cmp),
 		Set::empty(qvar_cmp),
 		Set::empty(qvar_cmp));

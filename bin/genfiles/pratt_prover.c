@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -372,22 +360,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);extern char Cyc_List_List_mismatch[14U];extern char Cyc_List_Nth[4U];
-# 149 "absyn.h"
-enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};
-# 170
+# 170 "absyn.h"
 enum Cyc_Absyn_Size_of{Cyc_Absyn_Char_sz =0U,Cyc_Absyn_Short_sz =1U,Cyc_Absyn_Int_sz =2U,Cyc_Absyn_Long_sz =3U,Cyc_Absyn_LongLong_sz =4U};
-enum Cyc_Absyn_Sign{Cyc_Absyn_Signed =0U,Cyc_Absyn_Unsigned =1U,Cyc_Absyn_None =2U};
-enum Cyc_Absyn_AggrKind{Cyc_Absyn_StructA =0U,Cyc_Absyn_UnionA =1U};
-# 175
-enum Cyc_Absyn_AliasQual{Cyc_Absyn_Aliasable =0U,Cyc_Absyn_Unique =1U,Cyc_Absyn_Top =2U};
-# 180
-enum Cyc_Absyn_KindQual{Cyc_Absyn_AnyKind =0U,Cyc_Absyn_MemKind =1U,Cyc_Absyn_BoxKind =2U,Cyc_Absyn_RgnKind =3U,Cyc_Absyn_EffKind =4U,Cyc_Absyn_IntKind =5U,Cyc_Absyn_BoolKind =6U,Cyc_Absyn_PtrBndKind =7U};struct Cyc_Absyn_IntCon_Absyn_TyCon_struct{int tag;enum Cyc_Absyn_Sign f1;enum Cyc_Absyn_Size_of f2;};struct Cyc_Absyn_AppType_Absyn_Type_struct{int tag;void*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_ValueofType_Absyn_Type_struct{int tag;struct Cyc_Absyn_Exp*f1;};
-# 391 "absyn.h"
-enum Cyc_Absyn_Format_Type{Cyc_Absyn_Printf_ft =0U,Cyc_Absyn_Scanf_ft =1U};
-# 464
+enum Cyc_Absyn_Sign{Cyc_Absyn_Signed =0U,Cyc_Absyn_Unsigned =1U,Cyc_Absyn_None =2U};struct Cyc_Absyn_IntCon_Absyn_TyCon_struct{int tag;enum Cyc_Absyn_Sign f1;enum Cyc_Absyn_Size_of f2;};struct Cyc_Absyn_AppType_Absyn_Type_struct{int tag;void*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_ValueofType_Absyn_Type_struct{int tag;struct Cyc_Absyn_Exp*f1;};
+# 464 "absyn.h"
 enum Cyc_Absyn_Primop{Cyc_Absyn_Plus =0U,Cyc_Absyn_Times =1U,Cyc_Absyn_Minus =2U,Cyc_Absyn_Div =3U,Cyc_Absyn_Mod =4U,Cyc_Absyn_Eq =5U,Cyc_Absyn_Neq =6U,Cyc_Absyn_Gt =7U,Cyc_Absyn_Lt =8U,Cyc_Absyn_Gte =9U,Cyc_Absyn_Lte =10U,Cyc_Absyn_Not =11U,Cyc_Absyn_Bitnot =12U,Cyc_Absyn_Bitand =13U,Cyc_Absyn_Bitor =14U,Cyc_Absyn_Bitxor =15U,Cyc_Absyn_Bitlshift =16U,Cyc_Absyn_Bitlrshift =17U,Cyc_Absyn_Numelts =18U};
-# 471
-enum Cyc_Absyn_Incrementor{Cyc_Absyn_PreInc =0U,Cyc_Absyn_PostInc =1U,Cyc_Absyn_PreDec =2U,Cyc_Absyn_PostDec =3U};
 # 489
 enum Cyc_Absyn_Coercion{Cyc_Absyn_Unknown_coercion =0U,Cyc_Absyn_No_coercion =1U,Cyc_Absyn_Null_to_NonNull =2U,Cyc_Absyn_Other_coercion =3U};struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct{int tag;void*f1;struct Cyc_Absyn_Exp*f2;int f3;enum Cyc_Absyn_Coercion f4;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};extern char Cyc_Absyn_EmptyAnnot[11U];
 # 863 "absyn.h"
@@ -404,8 +381,6 @@ extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int 
 extern int Cyc_fprintf(struct Cyc___cycFILE*,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];struct _tuple11{unsigned f1;int f2;};
 # 28 "evexp.h"
 extern struct _tuple11 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
-# 50 "relations-ap.h"
-enum Cyc_Relations_Relation{Cyc_Relations_Req =0U,Cyc_Relations_Rneq =1U,Cyc_Relations_Rlte =2U,Cyc_Relations_Rlt =3U};
 # 30 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _fat_ptr,struct _fat_ptr);
 # 74
@@ -578,7 +553,7 @@ if(Cyc_AssnDef_cmp_term(i,ns->source)== 0)return ns;}}
 return 0;}
 # 227
 static struct Cyc_PrattProver_Distance*Cyc_PrattProver_lookup_col(struct Cyc_PrattProver_Row*n,void*j){
-{struct Cyc_PrattProver_Distance*_tmp39=((struct Cyc_PrattProver_Row*)_check_null(n))->distance;struct Cyc_PrattProver_Distance*ds=_tmp39;for(0;ds != 0;ds=ds->next){
+{struct Cyc_PrattProver_Distance*_tmp39=(_check_null(n))->distance;struct Cyc_PrattProver_Distance*ds=_tmp39;for(0;ds != 0;ds=ds->next){
 if(Cyc_AssnDef_cmp_term(j,ds->target)== 0)return ds;}}
 return 0;}
 # 235
@@ -599,7 +574,7 @@ return 0;}}}else{
 return 0;}}}
 # 257
 static void Cyc_PrattProver_insert_distance(struct Cyc_PrattProver_Row*i,int is_signed,void*j,int dist,void*origin){
-if(Cyc_AssnDef_cmp_term(((struct Cyc_PrattProver_Row*)_check_null(i))->source,j)== 0)return;{
+if(Cyc_AssnDef_cmp_term((_check_null(i))->source,j)== 0)return;{
 struct Cyc_PrattProver_Distance*_tmp3B=Cyc_PrattProver_lookup_col(i,j);struct Cyc_PrattProver_Distance*ds=_tmp3B;
 if(ds != 0){
 if(is_signed){
@@ -730,11 +705,11 @@ if(ts == 0)
 if(ts->tl == 0)
 # 437
 return({struct _tuple13 _tmp100;_tmp100.f1=(void*)ts->hd,_tmp100.f2=0;_tmp100;});else{
-if(((struct Cyc_List_List*)_check_null(ts->tl))->tl == 0){
+if((_check_null(ts->tl))->tl == 0){
 struct _tuple11 _tmp68=Cyc_PrattProver_eval_term((void*)ts->hd);struct _tuple11 _stmttmp9=_tmp68;struct _tuple11 _tmp69=_stmttmp9;int _tmp6B;unsigned _tmp6A;_tmp6A=_tmp69.f1;_tmp6B=_tmp69.f2;{unsigned c1=_tmp6A;int okay1=_tmp6B;
-struct _tuple11 _tmp6C=Cyc_PrattProver_eval_term((void*)((struct Cyc_List_List*)_check_null(ts->tl))->hd);struct _tuple11 _stmttmpA=_tmp6C;struct _tuple11 _tmp6D=_stmttmpA;int _tmp6F;unsigned _tmp6E;_tmp6E=_tmp6D.f1;_tmp6F=_tmp6D.f2;{unsigned c2=_tmp6E;int okay2=_tmp6F;
+struct _tuple11 _tmp6C=Cyc_PrattProver_eval_term((void*)(_check_null(ts->tl))->hd);struct _tuple11 _stmttmpA=_tmp6C;struct _tuple11 _tmp6D=_stmttmpA;int _tmp6F;unsigned _tmp6E;_tmp6E=_tmp6D.f1;_tmp6F=_tmp6D.f2;{unsigned c2=_tmp6E;int okay2=_tmp6F;
 if(okay1){
-res=(void*)((struct Cyc_List_List*)_check_null(ts->tl))->hd;
+res=(void*)(_check_null(ts->tl))->hd;
 c=(int)c1;
 cu=c1;}else{
 if(okay2){
@@ -752,8 +727,8 @@ if(ts == 0)
 if(ts->tl == 0)
 # 460
 return({struct _tuple13 _tmp103;_tmp103.f1=t,_tmp103.f2=0;_tmp103;});else{
-if(((struct Cyc_List_List*)_check_null(ts->tl))->tl == 0){
-struct _tuple11 _tmp72=Cyc_PrattProver_eval_term((void*)((struct Cyc_List_List*)_check_null(ts->tl))->hd);struct _tuple11 _stmttmpB=_tmp72;struct _tuple11 _tmp73=_stmttmpB;int _tmp75;unsigned _tmp74;_tmp74=_tmp73.f1;_tmp75=_tmp73.f2;{unsigned c2=_tmp74;int okay2=_tmp75;
+if((_check_null(ts->tl))->tl == 0){
+struct _tuple11 _tmp72=Cyc_PrattProver_eval_term((void*)(_check_null(ts->tl))->hd);struct _tuple11 _stmttmpB=_tmp72;struct _tuple11 _tmp73=_stmttmpB;int _tmp75;unsigned _tmp74;_tmp74=_tmp73.f1;_tmp75=_tmp73.f2;{unsigned c2=_tmp74;int okay2=_tmp75;
 if(okay2){
 res=(void*)ts->hd;
 c=-(int)c2;
@@ -1070,13 +1045,13 @@ for(1;r != 0;r=r->next){
 struct Cyc_PrattProver_Distance*_tmpE4=r->distance;struct Cyc_PrattProver_Distance*d=_tmpE4;for(0;d != 0;d=d->next){
 if((int)d->dinfo & 2){
 if((d->signed_dist).prim != 0)
-a=Cyc_AssnDef_and(a,(void*)_check_null((d->signed_dist).prim));else{
+a=Cyc_AssnDef_and(a,_check_null((d->signed_dist).prim));else{
 # 869
 a=({void*_tmp17E=a;Cyc_AssnDef_and(_tmp17E,Cyc_PrattProver_edge2assn(r->source,d->target,(d->signed_dist).length,1));});}}
 # 872
 if((int)d->dinfo & 1){
 if((d->unsigned_dist).prim != 0)
-a=Cyc_AssnDef_and(a,(void*)_check_null((d->unsigned_dist).prim));else{
+a=Cyc_AssnDef_and(a,_check_null((d->unsigned_dist).prim));else{
 # 876
 a=({void*_tmp17F=a;Cyc_AssnDef_and(_tmp17F,Cyc_PrattProver_edge2assn(r->source,d->target,(d->unsigned_dist).length,0));});}}}}
 # 881

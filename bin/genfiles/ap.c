@@ -25,9 +25,6 @@ struct _fat_ptr {
   unsigned char *last_plus_one; 
 };  
 
-/* Discriminated Unions */
-struct _xtunion_struct { char *tag; };
-
 /* Regions */
 struct _RegionPage
 #ifdef CYC_REGION_PROFILE
@@ -66,9 +63,6 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
-void   _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -95,7 +89,7 @@ void* _rethrow(void*);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+void* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -107,17 +101,11 @@ extern char Cyc_Match_Exception[];
 extern char Cyc_Bad_alloc[];
 
 /* Built-in Run-time Checks and company */
-#ifdef CYC_ANSI_OUTPUT
-#define _INLINE  
-#else
-#define _INLINE inline
-#endif
-
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #define _check_null(ptr) \
-  ({ void*_cks_null = (void*)(ptr); \
+  ({ typeof(ptr) _cks_null = (ptr); \
      if (!_cks_null) _throw_null(); \
      _cks_null; })
 #endif
@@ -308,7 +296,7 @@ void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
 #endif
 
-static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+static inline unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
   unsigned word_ans = (unsigned)whole_ans;
@@ -324,7 +312,7 @@ static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
 extern int rgn_total_bytes;
 #endif
 
-static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
+static inline void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
     unsigned s =  orig_s;
@@ -449,24 +437,24 @@ return z;}
 # 43
 static struct Cyc_AP_T*Cyc_set(struct Cyc_AP_T*z,long n){
 if(n == Cyc_long_min)
-Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned)Cyc_long_max + 1U);else{
+Cyc_XP_fromint((_check_null(z))->size,z->digits,(unsigned)Cyc_long_max + 1U);else{
 if(n < 0)
-Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)(- n));else{
+Cyc_XP_fromint((_check_null(z))->size,z->digits,(unsigned long)(- n));else{
 # 49
-Cyc_XP_fromint(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,(unsigned long)n);}}
+Cyc_XP_fromint((_check_null(z))->size,z->digits,(unsigned long)n);}}
 z->sign=n < 0?-1: 1;
 return Cyc_normalize(z,z->size);}
 # 53
 static struct Cyc_AP_T*Cyc_normalize(struct Cyc_AP_T*z,int n){
-({int _tmp51=Cyc_XP_length(n,((struct Cyc_AP_T*)_check_null(z))->digits);z->ndigits=_tmp51;});
+({int _tmp51=Cyc_XP_length(n,(_check_null(z))->digits);z->ndigits=_tmp51;});
 return z;}
 # 57
 static struct Cyc_AP_T*Cyc_add(struct Cyc_AP_T*z,struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-int n=((struct Cyc_AP_T*)_check_null(y))->ndigits;
-if(((struct Cyc_AP_T*)_check_null(x))->ndigits < n)
+int n=(_check_null(y))->ndigits;
+if((_check_null(x))->ndigits < n)
 return Cyc_add(z,y,x);else{
 if(x->ndigits > n){
-int carry=Cyc_XP_add(n,((struct Cyc_AP_T*)_check_null(z))->digits,x->digits,y->digits,0);
+int carry=Cyc_XP_add(n,(_check_null(z))->digits,x->digits,y->digits,0);
 # 64
 ({unsigned char _tmp55=(unsigned char)({int _tmp54=x->ndigits - n;struct _fat_ptr _tmp53=
 _fat_ptr_plus(z->digits,sizeof(unsigned char),n);
@@ -476,13 +464,13 @@ _fat_ptr_plus(x->digits,sizeof(unsigned char),n);
 # 64
 Cyc_XP_sum(_tmp54,_tmp53,_tmp52,carry);});*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),z->size - 1))=_tmp55;});}else{
 # 67
-({unsigned char _tmp56=(unsigned char)Cyc_XP_add(n,((struct Cyc_AP_T*)_check_null(z))->digits,x->digits,y->digits,0);*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),n))=_tmp56;});}}
+({unsigned char _tmp56=(unsigned char)Cyc_XP_add(n,(_check_null(z))->digits,x->digits,y->digits,0);*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),n))=_tmp56;});}}
 # 69
 return Cyc_normalize(z,z->size);}
 # 71
 static struct Cyc_AP_T*Cyc_sub(struct Cyc_AP_T*z,struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-int borrow;int n=((struct Cyc_AP_T*)_check_null(y))->ndigits;
-borrow=({int _tmp59=n;struct _fat_ptr _tmp58=((struct Cyc_AP_T*)_check_null(z))->digits;struct _fat_ptr _tmp57=((struct Cyc_AP_T*)_check_null(x))->digits;Cyc_XP_sub(_tmp59,_tmp58,_tmp57,y->digits,0);});
+int borrow;int n=(_check_null(y))->ndigits;
+borrow=({int _tmp59=n;struct _fat_ptr _tmp58=(_check_null(z))->digits;struct _fat_ptr _tmp57=(_check_null(x))->digits;Cyc_XP_sub(_tmp59,_tmp58,_tmp57,y->digits,0);});
 # 75
 if(x->ndigits > n)
 borrow=({int _tmp5C=x->ndigits - n;struct _fat_ptr _tmp5B=_fat_ptr_plus(z->digits,sizeof(unsigned char),n);struct _fat_ptr _tmp5A=
@@ -499,7 +487,7 @@ z=Cyc_AP_mod(xy,p);
 return z;}
 # 86
 static int Cyc_cmp(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
-if(({int _tmp5F=((struct Cyc_AP_T*)_check_null(x))->ndigits;_tmp5F != ((struct Cyc_AP_T*)_check_null(y))->ndigits;}))
+if(({int _tmp5F=(_check_null(x))->ndigits;_tmp5F != (_check_null(y))->ndigits;}))
 return x->ndigits - y->ndigits;else{
 # 90
 return Cyc_XP_cmp(x->ndigits,x->digits,y->digits);}}
@@ -511,7 +499,7 @@ struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({int(*_tmp62)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp61=({const char*_tmp5="x";_tag_fat(_tmp5,sizeof(char),2U);});_tmp62(_tmp61,({const char*_tmp6="ap.cyc";_tag_fat(_tmp6,sizeof(char),7U);}),97U);});
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;
 return z;}
@@ -520,7 +508,7 @@ struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned)x?0:({int(*_tmp64)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp63=({const char*_tmp7="x";_tag_fat(_tmp7,sizeof(char),2U);});_tmp64(_tmp63,({const char*_tmp8="ap.cyc";_tag_fat(_tmp8,sizeof(char),7U);}),106U);});
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=1;
 return z;}
@@ -530,7 +518,7 @@ struct Cyc_AP_T*z;
 (unsigned)x?0:({int(*_tmp66)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp65=({const char*_tmp9="x";_tag_fat(_tmp9,sizeof(char),2U);});_tmp66(_tmp65,({const char*_tmpA="ap.cyc";_tag_fat(_tmpA,sizeof(char),7U);}),115U);});
 (unsigned)y?0:({int(*_tmp68)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp67=({const char*_tmpB="y";_tag_fat(_tmpB,sizeof(char),2U);});_tmp68(_tmp67,({const char*_tmpC="ap.cyc";_tag_fat(_tmpC,sizeof(char),7U);}),116U);});
 z=Cyc_mk(x->ndigits + y->ndigits);
-Cyc_XP_mul(((struct Cyc_AP_T*)_check_null(z))->digits,x->ndigits,x->digits,y->ndigits,y->digits);
+Cyc_XP_mul((_check_null(z))->digits,x->ndigits,x->digits,y->ndigits,y->digits);
 # 120
 Cyc_normalize(z,z->size);
 z->sign=(z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0 ||(x->sign ^ y->sign)== 0)?1: -1;
@@ -543,14 +531,14 @@ struct Cyc_AP_T*z;
 (unsigned)y?0:({int(*_tmp6C)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp6B=({const char*_tmpF="y";_tag_fat(_tmpF,sizeof(char),2U);});_tmp6C(_tmp6B,({const char*_tmp10="ap.cyc";_tag_fat(_tmp10,sizeof(char),7U);}),128U);});
 if((x->sign ^ y->sign)== 0){
 z=({struct Cyc_AP_T*_tmp6E=Cyc_mk((x->ndigits > y->ndigits?x->ndigits: y->ndigits)+ 1);struct Cyc_AP_T*_tmp6D=x;Cyc_add(_tmp6E,_tmp6D,y);});
-({int _tmp6F=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: x->sign;z->sign=_tmp6F;});}else{
+({int _tmp6F=(_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: x->sign;z->sign=_tmp6F;});}else{
 # 133
 if(Cyc_cmp(x,y)> 0){
 z=({struct Cyc_AP_T*_tmp71=Cyc_mk(x->ndigits);struct Cyc_AP_T*_tmp70=x;Cyc_sub(_tmp71,_tmp70,y);});
-z->sign=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: x->sign;}else{
+z->sign=(_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: x->sign;}else{
 # 138
 z=({struct Cyc_AP_T*_tmp73=Cyc_mk(y->ndigits);struct Cyc_AP_T*_tmp72=y;Cyc_sub(_tmp73,_tmp72,x);});
-z->sign=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: - x->sign;}}
+z->sign=(_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: - x->sign;}}
 # 141
 return z;}
 # 143
@@ -560,14 +548,14 @@ struct Cyc_AP_T*z;
 (unsigned)y?0:({int(*_tmp77)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmp76=({const char*_tmp13="y";_tag_fat(_tmp13,sizeof(char),2U);});_tmp77(_tmp76,({const char*_tmp14="ap.cyc";_tag_fat(_tmp14,sizeof(char),7U);}),146U);});
 if(!((x->sign ^ y->sign)== 0)){
 z=({struct Cyc_AP_T*_tmp79=Cyc_mk((x->ndigits > y->ndigits?x->ndigits: y->ndigits)+ 1);struct Cyc_AP_T*_tmp78=x;Cyc_add(_tmp79,_tmp78,y);});
-z->sign=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: x->sign;}else{
+z->sign=(_check_null(z))->ndigits == 1 &&(int)((unsigned char*)(z->digits).curr)[0]== 0?1: x->sign;}else{
 # 151
 if(Cyc_cmp(x,y)> 0){
 z=({struct Cyc_AP_T*_tmp7B=Cyc_mk(x->ndigits);struct Cyc_AP_T*_tmp7A=x;Cyc_sub(_tmp7B,_tmp7A,y);});
-({int _tmp7C=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: x->sign;z->sign=_tmp7C;});}else{
+({int _tmp7C=(_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: x->sign;z->sign=_tmp7C;});}else{
 # 155
 z=({struct Cyc_AP_T*_tmp7E=Cyc_mk(y->ndigits);struct Cyc_AP_T*_tmp7D=y;Cyc_sub(_tmp7E,_tmp7D,x);});
-({int _tmp7F=((struct Cyc_AP_T*)_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;z->sign=_tmp7F;});}}
+({int _tmp7F=(_check_null(z))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;z->sign=_tmp7F;});}}
 # 158
 return z;}
 # 160
@@ -580,7 +568,10 @@ q=Cyc_mk(x->ndigits);
 r=Cyc_mk(y->ndigits);
 {
 struct _fat_ptr tmp=({unsigned _tmp1B=(unsigned)((x->ndigits + y->ndigits)+ 2)* sizeof(unsigned char);_tag_fat(_cycalloc_atomic(_tmp1B),1U,_tmp1B);});
-({int _tmp8B=x->ndigits;struct _fat_ptr _tmp8A=((struct Cyc_AP_T*)_check_null(q))->digits;struct _fat_ptr _tmp89=x->digits;int _tmp88=y->ndigits;struct _fat_ptr _tmp87=y->digits;struct _fat_ptr _tmp86=((struct Cyc_AP_T*)_check_null(r))->digits;Cyc_XP_div(_tmp8B,_tmp8A,_tmp89,_tmp88,_tmp87,_tmp86,tmp);});}
+({int _tmp8B=x->ndigits;struct _fat_ptr _tmp8A=(_check_null(q))->digits;struct _fat_ptr _tmp89=x->digits;int _tmp88=y->ndigits;struct _fat_ptr _tmp87=y->digits;struct _fat_ptr _tmp86=(
+_check_null(r))->digits;
+# 169
+Cyc_XP_div(_tmp8B,_tmp8A,_tmp89,_tmp88,_tmp87,_tmp86,tmp);});}
 # 172
 Cyc_normalize(q,q->size);
 Cyc_normalize(r,r->size);
@@ -597,7 +588,10 @@ q=Cyc_mk(x->ndigits);
 r=Cyc_mk(y->ndigits);
 {
 struct _fat_ptr tmp=({unsigned _tmp22=(unsigned)((x->ndigits + y->ndigits)+ 2)* sizeof(unsigned char);_tag_fat(_cycalloc_atomic(_tmp22),1U,_tmp22);});
-({int _tmp97=x->ndigits;struct _fat_ptr _tmp96=((struct Cyc_AP_T*)_check_null(q))->digits;struct _fat_ptr _tmp95=x->digits;int _tmp94=y->ndigits;struct _fat_ptr _tmp93=y->digits;struct _fat_ptr _tmp92=((struct Cyc_AP_T*)_check_null(r))->digits;Cyc_XP_div(_tmp97,_tmp96,_tmp95,_tmp94,_tmp93,_tmp92,tmp);});}
+({int _tmp97=x->ndigits;struct _fat_ptr _tmp96=(_check_null(q))->digits;struct _fat_ptr _tmp95=x->digits;int _tmp94=y->ndigits;struct _fat_ptr _tmp93=y->digits;struct _fat_ptr _tmp92=(
+_check_null(r))->digits;
+# 187
+Cyc_XP_div(_tmp97,_tmp96,_tmp95,_tmp94,_tmp93,_tmp92,tmp);});}
 # 190
 Cyc_normalize(q,q->size);
 Cyc_normalize(r,r->size);
@@ -670,7 +664,7 @@ long rem;
 struct Cyc_AP_T*r;
 struct Cyc_AP_T*t=Cyc_mk((int)(sizeof(unsigned long)/ sizeof(unsigned char)));
 r=({struct Cyc_AP_T*_tmpAC=x;Cyc_AP_mod(_tmpAC,Cyc_set(t,y));});
-rem=(long)Cyc_XP_toint(((struct Cyc_AP_T*)_check_null(r))->ndigits,r->digits);
+rem=(long)Cyc_XP_toint((_check_null(r))->ndigits,r->digits);
 return rem;}
 # 267
 struct Cyc_AP_T*Cyc_AP_lshift(struct Cyc_AP_T*x,int s){
@@ -678,7 +672,7 @@ struct Cyc_AP_T*z;
 (unsigned)x?0:({int(*_tmpAE)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmpAD=({const char*_tmp2F="x";_tag_fat(_tmp2F,sizeof(char),2U);});_tmpAE(_tmpAD,({const char*_tmp30="ap.cyc";_tag_fat(_tmp30,sizeof(char),7U);}),269U);});
 s >= 0?0:({int(*_tmpB0)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmpAF=({const char*_tmp31="s >= 0";_tag_fat(_tmp31,sizeof(char),7U);});_tmpB0(_tmpAF,({const char*_tmp32="ap.cyc";_tag_fat(_tmp32,sizeof(char),7U);}),270U);});
 z=Cyc_mk(x->ndigits + (s + 7 & 4294967288U)/ 8);
-Cyc_XP_lshift(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,x->ndigits,x->digits,s,0);
+Cyc_XP_lshift((_check_null(z))->size,z->digits,x->ndigits,x->digits,s,0);
 # 274
 z->sign=x->sign;
 return Cyc_normalize(z,z->size);}
@@ -690,7 +684,7 @@ if(s >= 8 * x->ndigits)
 return Cyc_AP_new(0);else{
 # 283
 struct Cyc_AP_T*z=Cyc_mk(x->ndigits - s / 8);
-Cyc_XP_rshift(((struct Cyc_AP_T*)_check_null(z))->size,z->digits,x->ndigits,x->digits,s,0);
+Cyc_XP_rshift((_check_null(z))->size,z->digits,x->ndigits,x->digits,s,0);
 # 286
 Cyc_normalize(z,z->size);
 z->sign=z->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(z->digits,sizeof(unsigned char),0))== 0?1: x->sign;
@@ -699,10 +693,10 @@ return z;}}
 struct Cyc_AP_T*Cyc_AP_and(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
 int i;
 struct Cyc_AP_T*z;
-if(({int _tmpB5=((struct Cyc_AP_T*)_check_null(x))->ndigits;_tmpB5 < ((struct Cyc_AP_T*)_check_null(y))->ndigits;}))
+if(({int _tmpB5=(_check_null(x))->ndigits;_tmpB5 < (_check_null(y))->ndigits;}))
 return Cyc_AP_and(y,x);
 z=Cyc_mk(y->ndigits);
-Cyc_XP_and(y->ndigits,((struct Cyc_AP_T*)_check_null(z))->digits,x->digits,y->digits);
+Cyc_XP_and(y->ndigits,(_check_null(z))->digits,x->digits,y->digits);
 Cyc_normalize(z,z->size);
 z->sign=1;
 return z;}
@@ -710,10 +704,10 @@ return z;}
 struct Cyc_AP_T*Cyc_AP_or(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
 int i;
 struct Cyc_AP_T*z;
-if(({int _tmpB6=((struct Cyc_AP_T*)_check_null(x))->ndigits;_tmpB6 < ((struct Cyc_AP_T*)_check_null(y))->ndigits;}))
+if(({int _tmpB6=(_check_null(x))->ndigits;_tmpB6 < (_check_null(y))->ndigits;}))
 return Cyc_AP_or(y,x);
 z=Cyc_mk(x->ndigits);
-Cyc_XP_or(y->ndigits,((struct Cyc_AP_T*)_check_null(z))->digits,x->digits,y->digits);
+Cyc_XP_or(y->ndigits,(_check_null(z))->digits,x->digits,y->digits);
 for(i=y->ndigits;i < x->ndigits;++ i){
 Cyc_normalize(z,z->size);}
 z->sign=1;
@@ -722,10 +716,10 @@ return z;}
 struct Cyc_AP_T*Cyc_AP_xor(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
 int i;
 struct Cyc_AP_T*z;
-if(({int _tmpB7=((struct Cyc_AP_T*)_check_null(x))->ndigits;_tmpB7 < ((struct Cyc_AP_T*)_check_null(y))->ndigits;}))
+if(({int _tmpB7=(_check_null(x))->ndigits;_tmpB7 < (_check_null(y))->ndigits;}))
 return Cyc_AP_xor(y,x);
 z=Cyc_mk(x->ndigits);
-Cyc_XP_xor(y->ndigits,((struct Cyc_AP_T*)_check_null(z))->digits,x->digits,y->digits);
+Cyc_XP_xor(y->ndigits,(_check_null(z))->digits,x->digits,y->digits);
 for(i=y->ndigits;i < x->ndigits;++ i){
 Cyc_normalize(z,z->size);}
 z->sign=1;
@@ -770,7 +764,7 @@ for(k=1;1 << k < base;++ k){
 z=Cyc_mk((k * n + 7 & 4294967288U)/ 8);
 p=({const char*_tmp3D=start;_tag_fat(_tmp3D,sizeof(char),_get_zero_arr_size_char((void*)_tmp3D,1U));});}
 # 365
-carry=({int _tmpC1=((struct Cyc_AP_T*)_check_null(z))->size;struct _fat_ptr _tmpC0=z->digits;const char*_tmpBF=(const char*)_untag_fat_ptr(p,sizeof(char),1U);Cyc_XP_fromstr(_tmpC1,_tmpC0,_tmpBF,base);});
+carry=({int _tmpC1=(_check_null(z))->size;struct _fat_ptr _tmpC0=z->digits;const char*_tmpBF=(const char*)_untag_fat_ptr(p,sizeof(char),1U);Cyc_XP_fromstr(_tmpC1,_tmpC0,_tmpBF,base);});
 # 367
 carry == 0?0:({int(*_tmpC3)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmpC2=({const char*_tmp3E="carry == 0";_tag_fat(_tmp3E,sizeof(char),11U);});_tmpC3(_tmpC2,({const char*_tmp3F="ap.cyc";_tag_fat(_tmp3F,sizeof(char),7U);}),367U);});
 Cyc_normalize(z,z->size);
@@ -802,13 +796,13 @@ struct Cyc_AP_T*Cyc_AP_gcd(struct Cyc_AP_T*x,struct Cyc_AP_T*y){
 struct Cyc_AP_T*z;struct Cyc_AP_T*tmp;
 (unsigned)x?0:({int(*_tmpCD)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmpCC=({const char*_tmp4A="x";_tag_fat(_tmp4A,sizeof(char),2U);});_tmpCD(_tmpCC,({const char*_tmp4B="ap.cyc";_tag_fat(_tmp4B,sizeof(char),7U);}),395U);});
 (unsigned)y?0:({int(*_tmpCF)(struct _fat_ptr,struct _fat_ptr,unsigned)=({(int(*)(struct _fat_ptr,struct _fat_ptr,unsigned))Cyc___assert_fail;});struct _fat_ptr _tmpCE=({const char*_tmp4C="y";_tag_fat(_tmp4C,sizeof(char),2U);});_tmpCF(_tmpCE,({const char*_tmp4D="ap.cyc";_tag_fat(_tmp4D,sizeof(char),7U);}),396U);});
-while(!(((struct Cyc_AP_T*)_check_null(y))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))== 0)){
+while(!((_check_null(y))->ndigits == 1 &&(int)*((unsigned char*)_check_fat_subscript(y->digits,sizeof(unsigned char),0))== 0)){
 tmp=Cyc_AP_mod(x,y);
 x=y;
 y=tmp;}
 # 402
 z=Cyc_mk(x->ndigits);
-({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
+({(struct _fat_ptr(*)(struct _fat_ptr,struct _fat_ptr,unsigned long,unsigned))Cyc__memcpy;})((_check_null(z))->digits,(struct _fat_ptr)x->digits,(unsigned)x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (unsigned)((unsigned)x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0U?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 z->ndigits=x->ndigits;
 z->sign=x->sign;
 return z;}

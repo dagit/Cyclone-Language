@@ -1438,10 +1438,8 @@ $(bool, list_t<qvar_t,`H>) shadows(decl_t d, list_t<qvar_t,`H> varsinblock) {
   case &Var_d(vd):
     if (List::mem(qvar_cmp,varsinblock,vd->name)) 
       return $(true,new List{vd->name,NULL});
-    else
-      return $(false,new List{vd->name,varsinblock});
-  default:
-    return $(false, varsinblock);
+    return $(false,new List{vd->name,varsinblock});
+  default: return $(false, varsinblock);
   }
 }
 
@@ -1449,8 +1447,7 @@ doc_t block(bool stmtexp, doc_t d) {
   if (stmtexp) 
     return cat(text("("),lb(),blank_doc(),nest(2,d),line_doc(),rb(),
                text(");"),line_doc());
-  else 
-    return cat(lb(),blank_doc(),nest(2,d),line_doc(),rb(),line_doc());
+  return cat(lb(),blank_doc(),nest(2,d),line_doc(),rb(),line_doc());
 }
 
 doc_t stmt2doc(stmt_t st, bool stmtexp, list_t<qvar_t,`H> varsinblock) {

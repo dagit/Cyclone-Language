@@ -127,12 +127,9 @@ static struct T<`a,`b,`r> *`r
 balance(region_t<`r> r,
         $(enum Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
   switch(quad) {
-  case $(B,&T(R,&T(R,a,b,x),c,y),d,z): 
-    return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
-  case $(B,&T(R,a,&T(R,b,c,y),x),d,z): 
-    return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
-  case $(B,a,&T(R,&T(R,b,c,y),d,z),x): 
-    return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
+  case $(B,&T(R,&T(R,a,b,x),c,y),d,z): fallthru(a,b,c,y,x,d,z);
+  case $(B,&T(R,a,&T(R,b,c,y),x),d,z): fallthru(a,b,c,y,d,z,x);
+  case $(B,a,&T(R,&T(R,b,c,y),d,z),x): fallthru(a,b,c,d,z,y,x);
   case $(B,a,&T(R,b,&T(R,c,d,z),y),x): 
     return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
   case $(a,b,c,d): 
