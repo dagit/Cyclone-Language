@@ -22,7 +22,6 @@ using Core;
 
 namespace Cstat {
   extern "C" {
-    int open(Cstring pathname, int flags, mode_t mode);
     int stat(Cstring filename, struct stat_t @`r buf);
     int fstat(int fd, struct stat_t @`r buf);
     int lstat(Cstring filename, struct stat_t @`r buf);
@@ -32,14 +31,6 @@ namespace Cstat {
 }
 
 namespace Std;
-
-int open(string_t pathname, int flags, ... mode_t mode) {
-  mode_t my_mode;
-  if (mode.size == 0) my_mode = -1;
-  else if (mode.size == 1) my_mode = mode[0];
-  else throw new Failure("open: too many args");
-  return Cstat::open(s2c(pathname), flags, my_mode);
-}
 
 int stat(string_t filename, struct stat_t @`r buf) {
   return Cstat::stat(s2c(filename), buf);

@@ -1,0 +1,1036 @@
+{
+/* Notes
+   We handle anonymous enums by giving them a fresh name.  It would be
+     better to extend Cyclone to handle them.
+   Cygwin stdio.h has an inline function.  Probably we don't have to
+     worry about inline functions because they are used in function macros,
+     and we're planning on hand-coding all the functions.
+   Cygwin netinet/in.h and arpa/tcp.h don't work because of asm
+     Also, __inline__ not on a function.
+ */
+
+#include <core.h>
+#include <lexing.h>
+#include <set.h>
+#include <string.h>
+#include <list.h>
+#include <hashtable.h>
+#include <filename.h>
+#include <position.h>
+#include <stdlib.h>
+#include <buffer.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include "absyn.h"
+#include "absynpp.h"
+#include "parse.h"
+
+namespace Lex {
+  extern void lex_init();
+}
+
+using Lexing;
+using List;
+using Core;
+using Absyn;
+
+static string_t *current_source = NULL;
+static list_t<stringptr_t> current_args = NULL;
+static Set::set_t<stringptr_t> *current_targets = NULL;
+static void add_target(stringptr_t<`H,`H> sptr) {
+  current_targets = new Set::insert(*current_targets,sptr);
+}
+
+/* Forward declarations of lexing functions */
+typedef $(stringptr_t,Set::set_t<stringptr_t>) *line_t;
+extern line_t line(Lexbuf<`a>);
+extern int macroname(Lexbuf<`a>);
+extern int args(Lexbuf<`a>);
+extern int token(Lexbuf<`a>);
+extern int string(Lexbuf<`a>);
+
+FILE *slurp_out = NULL;
+extern int slurp(Lexbuf<`a>);
+extern int slurp_string(Lexbuf<`a>);
+int enum_hack = 0;
+
+typedef $(string_t,stringptr_t) *suck_line_t;
+extern suck_line_t suck_line(Lexbuf<`a>);
+extern int suck_macroname(Lexbuf<`a>);
+extern int suck_restofline(Lexbuf<`a>);
+string_t current_line = NULL;
+
+typedef $(string_t,list_t<stringptr_t>,string_t) *spec_t;
+extern spec_t spec(Lexbuf<`a>);
+extern int startsymbols(Lexbuf<`a>);
+extern int block(Lexbuf<`a>);
+extern int block_string(Lexbuf<`a>);
+extern int block_comment(Lexbuf<`a>);
+string_t current_header = NULL;
+list_t<stringptr_t> current_symbols = NULL;
+struct Buffer::t *specblock = NULL;
+int braces_to_match = 0;
+
+int numdef = 0;
+}
+
+let newline = ('\n' | '\r' | "\r\n")
+
+/**********************************************************************/
+/* Rules for finding dependencies of macros                           */
+/**********************************************************************/
+rule line "line_t" = parse
+  "#define "
+{ macroname(lexbuf);
+  for (; current_args != NULL; current_args = current_args->tl) {
+    current_targets = new Set::delete(*current_targets,current_args->hd);
+  }
+  /* The cast is needed so the return type matches */
+  return new $((_ @)current_source,*current_targets);}
+/* End of line */
+| ['\n' '\r']
+{ return line(lexbuf); }
+| eof
+{ return NULL; }
+
+and macroname = parse
+  ['A'-'Z''a'-'z''0'-'9''_']+ '(' ')'
+{ current_source = new (string_t)substring(lexeme(lexbuf), 0,
+                                          lexeme_end(lexbuf)-lexeme_start(lexbuf)-2);
+  current_args = NULL;
+  current_targets = new Set::empty(strptrcmp);
+  token(lexbuf);
+  return 0;
+}
+| ['A'-'Z''a'-'z''0'-'9''_']+ '('
+{ current_source = new (string_t)substring(lexeme(lexbuf), 0,
+                                          lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
+  current_args = NULL;
+  current_targets = new Set::empty(strptrcmp);
+  args(lexbuf);
+  return 0;
+}
+| ['A'-'Z''a'-'z''0'-'9''_']+
+{ current_source = new (string_t)lexeme(lexbuf);
+  current_args = NULL;
+  current_targets = new Set::empty(strptrcmp);
+  token(lexbuf);
+  return 0;
+}
+
+and args = parse
+  ['A'-'Z''a'-'z''0'-'9''_']+ ',' ' '
+{ let a = new (string_t)substring(lexeme(lexbuf), 0,
+                                  lexeme_end(lexbuf)-lexeme_start(lexbuf)-2);
+  current_args = new List(a,current_args);
+  return args(lexbuf);
+}
+| ['A'-'Z''a'-'z''0'-'9''_']+ ')'
+{ let a = new (string_t)substring(lexeme(lexbuf), 0,
+                                  lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
+  current_args = new List(a,current_args);
+  return token(lexbuf);
+}
+
+and token = parse
+/* Identifiers and keywords */
+  ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''_''0'-'9']*
+{ add_target(new (string_t)lexeme(lexbuf)); return token(lexbuf); }
+/* End of file or line */
+| (eof | ['\n' '\r'])
+{ return 0; }
+/* Other whitespace */
+| [' ' '\t' '\v' '\f']+
+{ return  token(lexbuf); }
+/* string constants */
+| "\""
+{ string(lexbuf); return token(lexbuf);}
+/* Integer constants */
+| '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+{ return token(lexbuf); }
+| '0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+{ return token(lexbuf); }
+| '0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+{ return token(lexbuf); }
+| ['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+{ return token(lexbuf); }
+/* Floating-point constants */
+| ['0'-'9']+['e''E']['+''-']?['0'-'9']+['f''F''l''L']?
+{ return token(lexbuf); }
+| ((['0'-'9']+'.')|(['0'-'9']+'.'['0'-'9']+)|('.'['0'-'9']+))
+  (['e''E']['+''-']?['0'-'9']+)?['f''F''l''L']?
+{ return token(lexbuf); }
+/* character constants */
+| "'\\a'"
+{ return token(lexbuf); }
+| "'\\b'"
+{ return token(lexbuf); }
+| "'\\f'"
+{ return token(lexbuf); }
+| "'\\n'"
+{ return token(lexbuf); }
+| "'\\r'"
+{ return token(lexbuf); }
+| "'\\t'"
+{ return token(lexbuf); }
+| "'\\v'"
+{ return token(lexbuf); }
+| "'\\\\'"
+{ return token(lexbuf); }
+| "'\\''"
+{ return token(lexbuf); }
+| "'\\\"'"
+{ return token(lexbuf); }
+| "'\\?'"
+{ return token(lexbuf); }
+| "'\\" ['0'-'7']['0'-'7']?['0'-'7']? "'"
+{ return token(lexbuf); }
+| "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
+{ return token(lexbuf); }
+| "'" [^ '\\' '\'' '\n'] "'"
+{ return token(lexbuf); }
+/* Operators */
+| "=="
+{ return token(lexbuf); }
+| "!="
+{ return token(lexbuf); }
+| "<="
+{ return token(lexbuf); }
+| ">="
+{ return token(lexbuf); }
+| "++"
+{ return token(lexbuf); }
+| "--"
+{ return token(lexbuf); }
+| "+="
+{ return token(lexbuf); }
+| "-="
+{ return token(lexbuf); }
+| "*="
+{ return token(lexbuf); }
+| "/="
+{ return token(lexbuf); }
+| "%="
+{ return token(lexbuf); }
+| "|="
+{ return token(lexbuf); }
+| "^="
+{ return token(lexbuf); }
+| "&="
+{ return token(lexbuf); }
+| "<<="
+{ return token(lexbuf); }
+| ">>="
+{ return token(lexbuf); }
+| "&&"
+{ return token(lexbuf); }
+| "||"
+{ return token(lexbuf); }
+| "<<"
+{ return token(lexbuf); }
+| ">>"
+{ return token(lexbuf); }
+| "<>"
+{ return token(lexbuf); }
+| "->"
+{ return token(lexbuf); }
+| "..."
+{ return token(lexbuf); }
+| "::"
+{ return token(lexbuf); }
+/* Default case */
+| _
+{ return token(lexbuf); }
+
+and string = parse
+    "\"" [' ''\n''\r''\t']* "\""
+  /* concatenate adjacent strings */
+                    { return string(lexbuf); }
+  | "\""            { return 0; }
+  | "\\" newline    { return string(lexbuf); }
+  | "\\a"           { return string(lexbuf); }
+  /* octal character escapes */
+  | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+                    { return string(lexbuf); }
+  /* hex character escapes FIX? any length okay? */
+  | "\\x" ['0'-'9''A'-'F''a'-'f']+
+                    { return string(lexbuf);}
+  | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
+                    { return string(lexbuf); }
+  | newline         { return 0; }
+  | eof             { return 0; }
+  | _               { return string(lexbuf); }
+
+/**********************************************************************/
+/* Rules to ``fix up'' C code so that it will go through the Cyclone  */
+/* parser.  E.g., eliminate/modify unsupported attributes, other      */
+/* unsavory hacks.                                                    */
+/**********************************************************************/
+and slurp = parse
+ "\""
+{ fputc('"',(FILE @)slurp_out);
+  if (slurp_string(lexbuf)) return 1; else return slurp(lexbuf);}
+| eof
+{ return 0; }
+| " malloc "
+/* malloc is a Cyclone keyword so our parser can't handle a malloc
+   declaration. */
+{ fputs(" __IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out); return slurp(lexbuf); }
+| "*malloc "
+/* malloc is a Cyclone keyword so our parser can't handle a malloc
+   declaration. */
+{ fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out); return slurp(lexbuf); }
+| "enum" [' ''\n''\r''\t']* '{'
+/* Our parser currently doesn't handle anonymous enums.  This is a
+   temporary hack to get around the problem -- just make up a name. */
+{ fprintf((FILE @)slurp_out,
+          "enum __CYCLONE_ENUM_HACK_%d {", enum_hack++);
+  return slurp(lexbuf); }
+| "__extension__" /* Used in cygwin in sys/reent.h */
+{ return slurp(lexbuf); }
+| "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
+{ return slurp(lexbuf); }
+| "__attribute__ ((__mode__ (__SI__)))" /* Used in linux in _G_config.h */
+{ return slurp(lexbuf); }
+| "__attribute__ ((__mode__ (__QI__)))" /* Used in linux in sys/types.h */
+{ return slurp(lexbuf); }
+| "__attribute__ ((__mode__ (__DI__)))" /* Used in linux in sys/types.h */
+{ return slurp(lexbuf); }
+| "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
+{ return slurp(lexbuf); }
+| "__inline__" /* Used in cygwin in stdio.h */
+{ fputs("inline",(FILE @)slurp_out); return slurp(lexbuf); }
+| "__const__"
+{ fputs("const",(FILE @)slurp_out); return slurp(lexbuf); }
+| "__const" /* Used in cygwin in unistd.h; an undocumented gcc extension?? */
+{ fputs("const",(FILE @)slurp_out); return slurp(lexbuf); }
+| "__builtin_va_list"
+/* Used in linux in /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h;
+   an undocumented gcc extension?  This is a HACK -- shouldn't matter since
+   we don't use va_list */
+{ fputs("int",(FILE @)slurp_out); return slurp(lexbuf); }
+| "__restrict" /* Used in linux in libio.h; an undocumented gcc extension?? */
+{ return slurp(lexbuf); }
+| [^ '"']
+{ fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return slurp(lexbuf); }
+
+and slurp_string = parse
+  "\""
+{ fputc('"',(FILE @)slurp_out); return 0; }
+| eof     /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| newline /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| "\\" newline
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+| "\\a"
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+| "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+| "\\x" ['0'-'9''A'-'F''a'-'f']+
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+| [^ '"''\\''\n']
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+| _
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+
+/**********************************************************************/
+/* Rules to suck in a #define line and return it, along with the name */
+/* of the macro                                                       */
+/**********************************************************************/
+and suck_line "suck_line_t" = parse
+  "#define "
+{ current_line = "#define ";
+  suck_macroname(lexbuf);
+  return new $(current_line,(stringptr_t)current_source); }
+| ['\n' '\r']
+{ return suck_line(lexbuf); }
+| eof
+{ return NULL; }
+
+and suck_macroname = parse
+  ['A'-'Z''a'-'z''0'-'9''_']+
+{ current_source = new (string_t)lexeme(lexbuf);
+  current_line = strconcat(current_line,*current_source);
+  return suck_restofline(lexbuf);
+}
+
+and suck_restofline = parse
+  [^'\n''\r']*
+{ current_line = strconcat(current_line,lexeme(lexbuf)); return 0; }
+
+/**********************************************************************/
+/* Rules to read in header spec files                                 */
+/**********************************************************************/
+and spec "spec_t" = parse
+  ['A'-'Z''a'-'z''0'-'9''_''.''/']+ ':'
+{ current_header =
+  (string_t)substring(lexeme(lexbuf), 0,
+                      lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
+  current_symbols = NULL;
+  specblock = Buffer::create(255);
+  startsymbols(lexbuf);
+  return new $(current_header,current_symbols,
+               (string_t)Buffer::contents((Buffer::T)specblock));
+}
+| [' ''\t''\n''\r']+
+{ return spec(lexbuf); }
+| eof
+{ return NULL; }
+| _
+{ return NULL; }
+
+and startsymbols = parse
+  ['A'-'Z''a'-'z''0'-'9''_']+
+{ current_symbols = new List(new (string_t)lexeme(lexbuf),current_symbols);
+  return startsymbols(lexbuf); }
+| [' ''\t''\n''\r']+
+{ return startsymbols(lexbuf); }
+| '{'
+{ braces_to_match = 1; return block(lexbuf); }
+| eof
+{ return 0; }
+
+and block =
+/* Expects to be entered just after a left brace, searches for the
+   matching right brace, appends everything in between to specblock.
+   Braces in comments, strings, and character constants aren't counted.
+   braces_to_match should be set to 1 before calling block. */
+parse
+  '}'
+{ if (braces_to_match == 1) return 0;
+  braces_to_match--;
+  Buffer::add_char((Buffer::T)specblock,'}');
+  return block(lexbuf); }
+| '{'
+{ braces_to_match++;
+  Buffer::add_char((Buffer::T)specblock,'{');
+  return block(lexbuf); }
+| '"'
+{ Buffer::add_char((Buffer::T)specblock,'"');
+  block_string(lexbuf);
+  return block(lexbuf); }
+| "/*"
+{ Buffer::add_string((Buffer::T)specblock,"/*");
+  block_comment(lexbuf);
+  return block(lexbuf); }
+| "//" [^'\n''\r']*
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block(lexbuf); }
+| eof
+{ return 0; }
+| [^'}']
+{ Buffer::add_char((Buffer::T)specblock,lexeme_char(lexbuf,0));
+  return block(lexbuf); }
+
+and block_string = parse
+  "\""
+{ Buffer::add_char((Buffer::T)specblock,'"'); return 0; }
+| eof     /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| newline /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| "\\" newline
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+| "\\a"
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+| "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+| "\\x" ['0'-'9''A'-'F''a'-'f']+
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+| [^ '"''\\''\n']
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+| _
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_string(lexbuf); }
+
+and block_comment = parse
+/* Assumes that comments can't be nested */
+  "*/"
+{ Buffer::add_string((Buffer::T)specblock,"*/"); return 0; }
+| eof     /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| _
+{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+  return block_comment(lexbuf); }
+
+{
+
+  static void pr(stringptr_t sptr) {
+    printf(" %s\n",*sptr);
+  }
+
+  extern void scan_type(type_t t);
+  void scan_exp(exp_opt_t e) {
+    switch (e->r) {
+    case &Var_e(&$(_,v),_):
+      // This case is actually impossible after only parse
+      fallthru(v);
+    case &UnknownId_e(&$(_,v)):
+      add_target(v);
+      return;
+    case &Primop_e(_,x):
+      for (; x != NULL; x = x->tl) {
+        scan_exp(x->hd);
+      }
+      return;
+    case &Subscript_e(e1,e2):
+      fallthru(e1,e2);
+    case &SeqExp_e(e1,e2):
+      fallthru(e1,e2);
+    case &AssignOp_e(e1,_,e2):
+      scan_exp(e1);
+      scan_exp(e2);
+      return;
+    case &Deref_e(e1):
+      fallthru(e1);
+    case &Sizeofexp_e(e1):
+      fallthru(e1);
+    case &Address_e(e1):
+      fallthru(e1);
+    case &Increment_e(e1,_):
+      scan_exp(e1);
+      return;
+    case &Conditional_e(e1,e2,e3):
+      scan_exp(e1);
+      scan_exp(e2);
+      scan_exp(e3);
+      return;
+    case &FnCall_e(e1,x,_):
+      // This case is actually impossible after only parse
+      fallthru(e1,x);
+    case &UnknownCall_e(e1,x):
+      scan_exp(e1);
+      for (; x != NULL; x = x->tl) {
+        scan_exp(x->hd);
+      }
+      return;
+    case &Cast_e(t1,e1):
+      scan_type(t1);
+      scan_exp(e1);
+      return;
+    case &Malloc_e(_,t1):
+      fallthru(t1);
+    case &Sizeoftyp_e(t1):
+      scan_type(t1);
+      return;
+    case &StructMember_e(e1,fn):
+      fallthru(e1,fn);
+    case &StructArrow_e(e1,fn):
+      scan_exp(e1);
+      add_target(fn);
+      return;
+    case &Offsetof_e(t1,fn):
+      scan_type(t1);
+      add_target(fn);
+      return;
+    case &Const_e(_):
+      return;
+    case &UnresolvedMem_e(_,x):
+      for (; x != NULL; x = x->tl) {
+        let &$(_,e1) = x->hd;
+        scan_exp(e1);
+      }
+      return;
+
+    case &StmtExp_e(_):
+      fprintf(stderr,"Error: unexpected Stmt_e\n");
+      exit(1); return;
+    case &Throw_e(_):
+      fprintf(stderr,"Error: unexpected Throw_e\n");
+      exit(1); return;
+    case &NoInstantiate_e(_):
+      fprintf(stderr,"Error: unexpected NoInstantiate_e\n");
+      exit(1); return;
+    case &Instantiate_e(_,_):
+      fprintf(stderr,"Error: unexpected Instantiate_e\n");
+      exit(1); return;
+    case &New_e(_, _):
+      fprintf(stderr,"Error: unexpected New_e\n");
+      exit(1); return;
+    case &Gentyp_e(_):
+      fprintf(stderr,"Error: unexpected Gentyp_e\n");
+      exit(1); return;
+    case &Tuple_e(_):
+      fprintf(stderr,"Error: unexpected Tuple_e\n");
+      exit(1); return;
+    case &CompoundLit_e(_,_):
+      fprintf(stderr,"Error: unexpected CompoundLit_e\n");
+      exit(1); return;
+    case &Array_e(_):
+      fprintf(stderr,"Error: unexpected Array_e\n");
+      exit(1); return;
+    case &Comprehension_e(_,_,_):
+      fprintf(stderr,"Error: unexpected Comprehension_e\n");
+      exit(1); return;
+    case &Struct_e(_,_,_,_):
+      fprintf(stderr,"Error: unexpected Struct_e\n");
+      exit(1); return;
+    case &AnonStruct_e(_,_):
+      fprintf(stderr,"Error: unexpected AnonStruct_e\n");
+      exit(1); return;
+    case &Tunion_e(_,_,_,_,_):
+      fprintf(stderr,"Error: unexpected Tunion_e\n");
+      exit(1); return;
+    case &Enum_e(_,_,_):
+      fprintf(stderr,"Error: unexpected Enum_e\n");
+      exit(1); return;
+    case &Codegen_e(_):
+      fprintf(stderr,"Error: unexpected Codegen_e\n");
+      exit(1); return;
+    case &Fill_e(_):
+      fprintf(stderr,"Error: unexpected Fill_e\n");
+      exit(1); return;
+    }
+  }
+
+  void scan_exp_opt(exp_opt_t eo) {
+    if (eo) scan_exp(eo);
+    return;
+  }
+
+  void scan_type(type_t t) {
+    switch (t) {
+    case VoidType:
+    case &IntType(_,_):
+    case FloatType:
+    case DoubleType:
+      return;
+
+    case &PointerType(x):
+      scan_type(x.elt_typ);
+      return;
+    case &ArrayType(t,_,sz):
+      scan_type(t);
+      scan_exp_opt(sz);
+      return;
+    case &FnType(x):
+      scan_type(x.ret_typ);
+      for (let a = x.args; a != NULL; a = a->tl) {
+        let &$(_,_,argt) = a->hd;
+        scan_type(argt);
+      }
+      if (x.cyc_varargs != NULL)
+        scan_type(x.cyc_varargs->type);
+      return;
+    case &AnonStructType(sfs):
+      fallthru(sfs);
+    case &AnonUnionType(sfs):
+      for (; sfs != NULL; sfs = sfs->tl) {
+        scan_type(sfs->hd->type);
+        scan_exp_opt(sfs->hd->width);
+      }
+      return;
+    case &StructType(NULL,_,_):
+      return;
+    case &UnionType(NULL,_,_):
+      return;
+    case &StructType(&$(_,v),_,_):
+      fallthru(v);
+    case &UnionType(&$(_,v),_,_):
+      fallthru(v);
+    case &EnumType(&$(_,v),_):
+      fallthru(v);
+    case &TypedefType(&$(_,v),_,_):
+      add_target(v);
+      return;
+
+    case &Evar(_,_,_,_):
+      fprintf(stderr,"Error: unexpected Evar\n");
+      exit(1); return;
+    case &VarType(_):
+      fprintf(stderr,"Error: unexpected VarType\n");
+      exit(1); return;
+    case &TunionType(_):
+      fprintf(stderr,"Error: unexpected TunionType\n");
+      exit(1); return;
+    case &TunionFieldType(_):
+      fprintf(stderr,"Error: unexpected TunionFieldType\n");
+      exit(1); return;
+    case &TupleType(_):
+      fprintf(stderr,"Error: unexpected TupleType\n");
+      exit(1); return;
+    case &RgnHandleType(_):
+      fprintf(stderr,"Error: unexpected RgnHandleType\n");
+      exit(1); return;
+    case HeapRgn:
+      fprintf(stderr,"Error: unexpected HeapRgn\n");
+      exit(1); return;
+    case &AccessEff(_):
+      fprintf(stderr,"Error: unexpected AccessEff\n");
+      exit(1); return;
+    case &JoinEff(_):
+      fprintf(stderr,"Error: unexpected JoinEff\n");
+      exit(1); return;
+    case &RgnsEff(_):
+      fprintf(stderr,"Error: unexpected RgnsEff\n");
+      exit(1); return;
+    }
+  }
+
+  line_t scan_decl(decl_t d) {
+    current_targets = new Set::empty(strptrcmp);
+    switch (d->r) {
+    case &Var_d(x):
+      let &$(_,v) = x->name;
+      current_source = v;
+      scan_type(x->type);
+      scan_exp_opt(x->initializer);
+      break;
+    case &Fn_d(x):
+      let &$(_,v) = x->name;
+      current_source = v;
+      scan_type(x->ret_type);
+      for (let a = x->args; a != NULL; a = a->tl) {
+        let &$(_,_,t1) = a->hd;
+        scan_type(t1);
+      }
+      if (x->cyc_varargs != NULL)
+        scan_type(x->cyc_varargs->type);
+      if (x->is_inline) {
+        fprintf(stderr,"Warning: ignoring inline function\n");
+      }
+      break;
+    case &Struct_d(x):
+      if (!x->name) return NULL;
+      let &$(_,v) = x->name->v;
+      current_source = v;
+      if (x->fields) {
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          let f = fs->hd;
+          add_target(f->name);
+          scan_type(f->type);
+          scan_exp_opt(f->width);
+        }
+        // That takes care of what the decl depends on.  Now must add
+        // that each field depends on the decl.
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          // FIX!!
+        }
+      }
+      break;
+    case &Union_d(x):
+      // This case is identical to the last, but x has a different type
+      // so we can't fallthru
+      if (!x->name) return NULL;
+      let &$(_,v) = x->name->v;
+      current_source = v;
+      if (x->fields) {
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          let f = fs->hd;
+          add_target(f->name);
+          scan_type(f->type);
+          scan_exp_opt(f->width);
+        }
+        // That takes care of what the decl depends on.  Now must add
+        // that each field depends on the decl.
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          // FIX!!
+        }
+      }
+      break;
+    case &Enum_d(x):
+      let &$(_,v) = x->name;
+      current_source = v;
+      if (x->fields) {
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          let f = fs->hd;
+          scan_exp_opt(f->tag);
+        }
+        // That takes care of what the decl depends on.  Now must add
+        // that each field depends on the decl.
+        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+          // FIX!!
+        }
+      }
+      break;
+    case &Typedef_d(x):
+      let &$(_,v) = x->name;
+      current_source = v;
+      scan_type(x->defn);
+      break;
+
+    case &Let_d(_,_,_,_,_):
+      fprintf(stderr,"Error: unexpected let declaration\n");
+      exit(1); return NULL;
+    case &Tunion_d(_):
+      fprintf(stderr,"Error: unexpected tunion declaration\n");
+      exit(1); return NULL;
+    case &Letv_d(_):
+      fprintf(stderr,"Error: unexpected let declaration\n");
+      exit(1); return NULL;
+    case &Namespace_d(_,_):
+      fprintf(stderr,"Error: unexpected namespace declaration\n");
+      exit(1); return NULL;
+    case &Using_d(_,_):
+      fprintf(stderr,"Error: unexpected using declaration\n");
+      exit(1); return NULL;
+    case &ExternC_d(_):
+      fprintf(stderr,"Error: unexpected extern \"C\" declaration\n");
+      exit(1); return NULL;
+    }
+    /* The cast is needed so the return type matches */
+    return new $((_ @)current_source,*current_targets);
+  }
+
+  /* Type for representing dependencies */
+  typedef Hashtable::table_t<stringptr_t<`H,`H>,
+                             Set::set_t<stringptr_t<`H,`H>,`H>> dep_t;
+
+  dep_t new_deps() {
+    return Hashtable::create(107,strptrcmp,Hashtable::hash_stringptr);
+  }
+
+  Set::set_t<stringptr_t<`H,`H>,`H> find(dep_t t, stringptr_t<`H,`H> x) {
+    try return Hashtable::lookup(t,x);
+    catch {
+    case Not_found: return Set::empty(strptrcmp);
+    }
+  }
+
+  Set::set_t<stringptr_t<`H,`H>,`H>
+    reachable(list_t<stringptr_t<`H,`H>> init, dep_t t) {
+    /* Maintain two sets, curr and delta: curr is the "current set"
+       and delta is the subset of curr that was added in the previous
+       step.  Initially curr = delta = the initial nodes.
+
+       While delta is not empty,
+         find a set, next, that consists of the nodes reachable
+           from delta in a single step;
+         set delta = next - curr, and curr = curr U delta.
+    */
+    Set::set_t<stringptr_t<`H,`H>,`H> emptyset = Set::empty(strptrcmp);
+    Set::set_t<stringptr_t<`H,`H>,`H> curr;
+    for (curr = emptyset; init != NULL; init = init->tl)
+      curr = Set::insert(curr,init->hd);
+    let delta = curr;
+
+    while (Set::cardinality(delta) > 0) {
+      let next = emptyset;
+      for (let z = Set::elements(delta); z != NULL; z = z->tl)
+        next = Set::union_two(next,find(t,z->hd));
+      delta = Set::diff(next,curr);
+      curr = Set::union_two(curr,delta);
+    }
+    return curr;
+  }
+
+  int force_directory(string_t d) {
+    /* I'd rather do this with stat but that isn't working yet */
+    let fd = open(d,O_RDONLY);
+    if (fd == -1) {
+      if (mkdir(d,0700) == -1) return 1;
+    }
+    else close(fd);
+    return 0;
+  }
+
+  int force_directory_prefixes(string_t file) {
+    /* File is a string like "foo/bar/baz/xx.h", we want to make sure
+       that the directories "foo", "foo/bar", "foo/bar/baz" all exist
+       so we can create file. */
+    let curr = strdup(file); // Make sure curr is on heap
+    /* Compute all prefixes of file */
+    let x = NULL;
+    while (true) {
+      curr = Filename::dirname(curr);
+      if (curr.size == 0) break;
+      x = new List(new (string_t)curr,x);
+    }
+    /* Make sure all prefixes exist */
+    for (; x != NULL; x = x->tl) {
+      if (force_directory(*x->hd)) return 1;
+    }
+    return 0;
+  }
+
+  int process_file(string_t filename, string_t dir,
+                   list_t<stringptr_t<`H,`H>,`H> start_symbols,
+                   string_t epilogue) {
+    fprintf(stderr,
+            "*********************************  working on %s...\n",filename);
+
+    char ?buf = new {for i<1024: '\0'};
+    let cwd = getcwd(buf,buf.size);
+    if (chdir(dir)) return 1;
+    let basename = Filename::chop_extension(Filename::basename(filename));
+    let preprocfile = strconcat(basename, ".i");
+    let filteredfile = strconcat(basename, ".iX");
+
+    /* Table to hold the dependencies */
+    dep_t t = new_deps();
+
+    /* Get the macros out of the file */
+    let cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
+                      filename,preprocfile);
+    if (system(string_to_Cstring(cmd)) != 0)
+      return 1;
+    FILE *maybe = fopen(preprocfile,"r");
+    if (!maybe) return 1;
+    FILE @in_file = (FILE@)maybe;
+    let l = Lexing::from_file(in_file);
+    let entry;
+    while ( (entry = line(l)) != NULL) {
+      let &$(name,uses) = (_ @)entry; // force NULL check to get rid of warning
+      Hashtable::insert(t,name,uses);
+      //      printf("Macro %s uses:\n",*name);
+      //      Set::iter(pr,uses);
+    }
+    fclose(in_file);
+
+    /* Get the type declarations out of the file */
+    cmd = aprintf("echo '#include <%s>' | gcc -E -o %s -",
+                  filename,preprocfile);
+    if (system(string_to_Cstring(cmd)) != 0)
+      return 1;
+    maybe = fopen(preprocfile,"r");
+    if (!maybe) return 1;
+    in_file = (FILE@)maybe;
+    l = Lexing::from_file(in_file);
+    slurp_out = fopen(filteredfile,"w");
+    if (!slurp_out) return 1;
+    if (slurp(l)) {
+      /* Unclosed string, error */
+      fclose(in_file);
+      fclose((FILE @)slurp_out);
+      remove(preprocfile);
+      remove(filteredfile);
+      return 1;
+    }
+    fclose(in_file);
+    fclose((FILE @)slurp_out);
+
+    maybe = fopen(filteredfile,"r");
+    if (!maybe) return 1;
+    in_file = (FILE@)maybe;
+    Position::reset_position(filteredfile);
+    Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+    let decls = Parse::parse_file(in_file);
+    Lex::lex_init(); // garbage collect those big tries
+    fclose(in_file);
+    remove(filteredfile);
+
+    for (let d = decls; d != NULL; d = d->tl) {
+      let entry = scan_decl(d->hd);
+      if (entry == NULL) continue;
+      let &$(name,uses) = (_ @)entry; // force NULL check to get rid of warning
+      Hashtable::insert(t,name,uses);
+    }
+
+    /* Compute reachable symbols */
+    let reachable_set = reachable(start_symbols,t);
+    //    printf("There are %d reachable symbols\n",Set::cardinality(reachable_set));
+
+    /* Print reachable declarations */
+    let reachable_decls = NULL;
+    for (let d = decls; d != NULL; d = d->tl) {
+      let decl = d->hd;
+      let name;
+      switch (decl->r) {
+      case &Var_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+      case &Fn_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+      case &Struct_d(x):
+        if (!x->name) name = NULL;
+        let &$(_,v) = x->name->v;
+        name = v;
+        break;
+      case &Union_d(x):
+        // This case is identical to the last, but x has a different type
+        // so we can't fallthru
+        if (!x->name) name = NULL;
+        let &$(_,v) = x->name->v;
+        name = v;
+        break;
+      case &Enum_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+      case &Typedef_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+
+      case &Let_d(_,_,_,_,_):
+      case &Tunion_d(_):
+      case &Letv_d(_):
+      case &Namespace_d(_,_):
+      case &Using_d(_,_):
+      case &ExternC_d(_):
+        name = NULL;
+        break;
+      }
+      if (name != NULL && Set::member(reachable_set,(stringptr_t)name))
+        reachable_decls = new List(decl,reachable_decls);
+    }
+    reachable_decls = imp_rev(reachable_decls);
+    if (force_directory_prefixes(filename)) return 1;
+    let out_file = fopen(filename,"w");
+    if (out_file == NULL) return 1;
+    Absynpp::decllist2file(reachable_decls,(FILE @)out_file);
+
+    /* Print reachable macros */
+    cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
+                  filename,preprocfile);
+    if (system(string_to_Cstring(cmd)) != 0)
+      return 1;
+    maybe = fopen(preprocfile,"r");
+    if (!maybe) return 1;
+    in_file = (FILE@)maybe;
+    l = Lexing::from_file(in_file);
+    let entry2;
+    while ( (entry2 = suck_line(l)) != NULL) {
+      let &$(line,name) = (_ @)entry2; // force NULL check to get rid of warning
+      if (Set::member(reachable_set,name))
+        fprintf((FILE @)out_file,"%s\n",line);
+    }
+    fclose(in_file);
+    remove(preprocfile);
+
+    fputs(epilogue,(FILE @)out_file);
+    fclose((FILE @)out_file);
+
+    fprintf(stderr,
+            "*********************************  %s finished!\n",filename);
+
+    if (chdir(cwd)) return 1;
+    return 0;
+  }
+
+  int process_specfile(string_t file,string_t dir) {
+    let maybe = fopen(file,"r");
+    if (!maybe) return 1;
+    let in_file = (FILE@)maybe;
+    let l = Lexing::from_file(in_file);
+    let entry;
+    while ( (entry = spec(l)) != NULL) {
+      let &$(headerfile,start_symbols,epilogue) = (_ @)entry;
+      if (process_file(headerfile,dir,start_symbols,epilogue))
+        return 1;
+    }
+    fclose(in_file);
+    return 0;
+  }
+
+  int main(int argc, char ??argv) {
+    if (argc < 3) return 1;
+    let dir = argv[1];
+    if (force_directory_prefixes(dir)) return 1;
+    if (force_directory(dir)) return 1;
+    for (int i = 2; i<argc; i++) {
+      process_specfile(argv[i],dir);
+    }
+    return 0;
+  }
+}

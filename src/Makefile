@@ -58,6 +58,15 @@ cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
 
+buildlib$(EXE): buildlib.$(O) lex.$(O) parse_tab.$(O) tcutil.$(O) \
+  absynpp.$(O) tcexp.$(O) tcstmt.$(O) formatstr.$(O) evexp.$(O) \
+  tcenv.$(O) tcpat.$(O) new_control_flow.$(O) cf_flowinfo.$(O) \
+  cf_absexp.$(O) absyn.$(O)
+	$(CYCC) -v -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+
+buildlib.cyc: buildlib.cyl
+	$(CYCLEX) $< $@
+
 install_path.c: ../Makefile.inc
 	@(echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
