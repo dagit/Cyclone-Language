@@ -51,7 +51,6 @@ ifdef MS
 else
 	$(CYCC) $(G_FLAG) $(PG_FLAG) $(LC_FLAG) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
-	$(RM) install_path.c install_path.$(O)
 
 cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
  tcutil.$(O) tcenv.$(O) tcexp.$(O) tcstmt.$(O) tcpat.$(O) \
@@ -62,7 +61,7 @@ cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
 cycdoc.cyc: cycdoc.cyl
 	$(CYCLEX) $< $@
 
-install_path.c:
+install_path.c: ../Makefile.inc
 	@(echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \

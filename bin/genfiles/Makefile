@@ -36,14 +36,12 @@ $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/install_path.c:
+$(ARCH)/src/install_path.c: ../../Makefile.inc
 	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
 	  echo "char *Ccflags = \"$(CFLAGS)\";"; \
-	  echo "char *Ccomp = \"$(CC)\";") > install_path_tmp
-	@(cmp -s $@ install_path_tmp || cp install_path_tmp $@)
-	$(RM) install_path_tmp
+	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 clean_arch:
 	rm -f $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o)
