@@ -195,6 +195,6 @@ extern const char ?font_size;
 extern bool black_and_white;
 extern bool gc_caps;
 extern bool sort_changes;
-
+extern bool fixed_colors;
 
 #endif

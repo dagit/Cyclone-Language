@@ -64,6 +64,7 @@ char ?text_properties() {
   return ans;
 }
 
+/****************************** COLORS ******************************/
 static const char ?default_colors[] =
 //  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
   {
@@ -93,6 +94,37 @@ static const char ?color(unsigned int i) {
   if (i < numelts(colors)) return colors[i];
   fprintf(stderr,"aprof: ran out of colors (<%u)\n",i);
   exit(1);
+}
+
+static int num_colors = 0;
+static list_t<$(const char ?,const char ?)@> color_map = NULL;
+static const char ?color_of_region(const char ?`H rname) {
+  const char ?c = NULL;
+  if (color_map == NULL) {
+    c = color(num_colors++);
+    color_map = new List(new $(rname,c),NULL);
+  }
+  else for (let l = color_map; l != NULL; l = l-> tl) {
+    if (strcmp((*l->hd)[0],rname) == 0)
+      return ((*l->hd)[1]);
+    if (l->tl == NULL) {
+      c = color(num_colors++);
+      l->tl = new List(new $(rname,c),NULL);
+      break;
+    }
+  }
+  return c;
+}
+bool fixed_colors = false;
+static void init_fixed_colors() {
+  if (!fixed_colors) return;
+  /* Should be called in initialization.  Forces default colors for regions. */
+  color_of_region("unique");
+  color_of_region("refcnt");
+  color_of_region("heap");
+  color_of_region("other");
+  color_of_region("available");
+  color_of_region("reserved");
 }
 
 /* Dimensions of the graph on the printed page, in points (pt).
@@ -193,6 +225,7 @@ static int uint_hash(unsigned int i) {
 static void
 init_globals() {
   if (black_and_white) colors = bw_colors;
+  init_fixed_colors();
   allocation_at_address_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   allocation_in_region_table =
@@ -596,11 +629,13 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
   }
   printf("%d,0 0,0 ",xres-1); // bottom border is x axis
   printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",
-         curve_stroke,color(0));
+         curve_stroke,
+	 color_of_region(nth(all_curves,0)->name));
 
   // ... then the other curves, going up
   for (int i=1; i < num_curves; i++) {
-    printf("<path id='%s' d='M",nth(all_curves,i)->name);
+    let nm = nth(all_curves,i)->name;
+    printf("<path id='%s' d='M",nm);
     // top border is the curve
     for (int x=0; x < xres; x++) {
       printf("%d,%d ",x,yv[i][x]);
@@ -610,7 +645,7 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
       printf("%d,%d ",x,yv[i-1][x]);
     }
     printf("0,%d ",yv[i][0]);
-    printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",curve_stroke,color(i));
+    printf("' stroke='%s' stroke-width='0.1' fill='%s' opacity='0.7'/>\n",curve_stroke,color_of_region(nm));
   }
 
   /* the garbage collections */
@@ -830,10 +865,10 @@ int generate_svg(string_t<`H> file) {
       let name = aprintf("%s %s*%s (%d%%)",b->name,
                          print_bytes(b->area),CE,
                          (int)((b->area * 100.0)/data_footprint));
-      namecolors = new List(new $((const char ?)name,color(i++)),namecolors);
+      namecolors = new List(new $((const char ?)name,color_of_region(b->name)),namecolors);
     }
     else
-      namecolors = new List(new $("reserved",color(i++)),namecolors);
+      namecolors = new List(new $("reserved",color_of_region("reserved")),namecolors);
   }
   printf("<g transform='translate(%f,0)'>\n",WIDTH+20);
   output_legend(namecolors);
@@ -947,6 +982,7 @@ static struct Xarray::Xarray<rect_t> *rects = NULL;
 static void
 init_globals2() {
   if (black_and_white) colors = bw_colors;
+  init_fixed_colors();
   allocations_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   regionaddresses_table =
@@ -1165,25 +1201,6 @@ static bool proc_event2(aprof_event_t event) {
   return true;
 }
 
-static int num_colors = 0;
-static list_t<$(const char ?,const char ?)@> color_map = NULL;
-static const char ?color_of_region(const char ?`H rname) {
-  const char ?c = NULL;
-  if (color_map == NULL) {
-    c = color(num_colors++);
-    color_map = new List(new $(rname,c),NULL);
-  }
-  else for (let l = color_map; l != NULL; l = l-> tl) {
-    if (strcmp((*l->hd)[0],rname) == 0)
-      return ((*l->hd)[1]);
-    if (l->tl == NULL) {
-      c = color(num_colors++);
-      l->tl = new List(new $(rname,c),NULL);
-      break;
-    }
-  }
-  return c;
-}
 static int rect_cmp(rect_t @a, rect_t @b) {
   return strcmp(a[0]->name,b[0]->name);
 }
@@ -1330,6 +1347,7 @@ static struct Hashtable::Table<unsigned int,unsigned int> *
 static void
 init_globals3() {
   if (black_and_white) colors = bw_colors;
+  init_fixed_colors();
   starttimes_table =
     Hashtable::create(101,uint_cmp,uint_hash);
   lifetimes_table =

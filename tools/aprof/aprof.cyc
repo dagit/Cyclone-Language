@@ -90,7 +90,9 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         use <f> as the font-family, e.g., Arial, Verdana\n"
           "  -font-size <s>\n"
           "         use <s> as the font-size in points\n"
-          "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
+          "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n"
+          "  -fixed-colors\n"
+          "         use fixed colors for the regions instead of sorting by size\n",
           argv0,
           dyn_threshhold);
   exit(1);
@@ -207,6 +209,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-landscape" ) == 0 ) {
       landscape = true;
+    }
+    else if ( strcmp( argv[argn], "-fixed-colors" ) == 0) {
+      fixed_colors = true;
     }
     else
       usage(argv[0]);
