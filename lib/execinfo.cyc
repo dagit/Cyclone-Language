@@ -9,11 +9,11 @@ using Core;
 #include <unistd.h>
 #include <signal.h>
 
-namespace Cexecinfo {
 #ifdef __linux__
+namespace Cexecinfo {
   extern "C" int backtrace(int *, int);
-#endif
 }
+#endif
 
 namespace Execinfo;
 using Stdio;

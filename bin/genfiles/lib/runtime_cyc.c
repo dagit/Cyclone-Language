@@ -108,6 +108,10 @@ void _pop_region() {
   _npop_handler(0);
 }
 
+#ifndef __linux__
+int backtrace(int *array, int size) { return 0; }
+#endif
+
 extern int Cyc_Execinfo_bt(void);
 static struct _handler_cons top_handler;
 void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
@@ -444,7 +448,6 @@ extern int Cyc_main(int argc, struct _tagged_argv argv);
 
 int main(int argc, char **argv) {
   // install outermost exception handler
-  //struct _handler_cons top_handler;
   int status = 0;
 #ifdef CYC_REGION_PROFILE
   alloc_log = fopen("amon.out","w");
