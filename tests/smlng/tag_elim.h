@@ -49,8 +49,10 @@ typedef struct UnderSynth under_synth_t;
 $(doc_t,under_synth_t) under_elim(doc_t doc);
 
 extern struct DynSynth {
-  unsigned char only_sizes;
-  unsigned char only_colors;
+  int num_size_docs;   // how many size docs we'd program over
+  int num_color_docs;  // how many color docs we'd program over
+  unsigned char only_sizes;  // are there only size docs
+  unsigned char only_colors; // are there only color docs
 };
 typedef struct DynSynth dyn_synth_t;
 

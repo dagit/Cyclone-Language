@@ -84,7 +84,7 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
   pos_t  split_point = POS_OF_ENTRY(S(left,right,outer_val));
   val_t  left_val    = num_vals-1;
   cost_t left_cost = MAX_COST;
-  for(val_t s=0; s < num_vals; ++s) {
+  for(val_t s=0; s < num_vals-1; ++s) {
     if(!vals_occur[s])
       continue;
     cost_t this_cost = COST_OF_ENTRY(S(left,split_point,s));
@@ -97,7 +97,7 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
   }
   val_t  right_val  = num_vals-1;
   cost_t right_cost = MAX_COST;
-  for(int s=0; s < num_vals; ++s) {
+  for(int s=0; s < num_vals-1; ++s) {
     if(!vals_occur[s])
       continue;
     cost_t this_cost = COST_OF_ENTRY(S(split_point+1,right,s));
@@ -126,59 +126,65 @@ static doc_t unflatten_vals($(doc_t,val_t) ? doc_arr, pos_t left, pos_t right,
 
 // FIX: do something quick when we're out of time
 static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
-  list_t<doc_t> ans = null;
   $(doc_t,val_t) ? doc_arr = new {for i < INPUT_SIZE : $(Mt,0)};
   bool vals_occur[VAL_WIDTH] = {for i < VAL_WIDTH : false};
   int curr_pos = 0;
   flatten_vals(doc, &doc_arr, &curr_pos, lowest_val, num_vals, vals_occur);
   int arr_size = curr_pos;
+  list_t<doc_t> ans = null;
   curr_pos = 0;
-  for(; curr_pos < arr_size; curr_pos += INPUT_SIZE) {
+  while(curr_pos < arr_size) {
     //    fprintf(stderr,"!%d %d!",curr_pos,arr_size);
-    int input_size = 
-      (curr_pos + INPUT_SIZE < arr_size) ? INPUT_SIZE : arr_size - curr_pos;
+
+    // skip any initial-value
+    while(curr_pos < arr_size && doc_arr[curr_pos][1] == num_vals - 1) {
+      ans = new List(doc_arr[curr_pos][0], ans);
+      ++curr_pos;
+    }
+
+    if(curr_pos == arr_size)
+      break;
+    // get an initial-value-free chunk, no larger than INPUT_SIZE
+
+    int input_size = 1;
+    while(curr_pos+input_size < arr_size 
+	  && doc_arr[curr_pos+input_size][1] != num_vals - 1
+	  && input_size < INPUT_SIZE)
+      ++input_size;
 
     // need to check time in here!!!
     for (pos_t i = 0; i < input_size; i++)
-      for (val_t s = 0; s < num_vals; s++) {
+      for (val_t s = 0; s < num_vals-1; s++) {
 	if(!vals_occur[s])
 	  continue;
 	val_t this_val = doc_arr[curr_pos+i][1];
 	cost_t this_cost;
 	if(this_val != s)
-	  if(this_val == num_vals-1)
-	    this_cost = MAX_COST;
-	  else
-	    this_cost = 1;
+	  this_cost = 1;
 	else
 	  this_cost = 0;
 	S(i,i,s) = MAKE_ENTRY(this_cost,0);
       }
     for (pos_t d = 1; d < input_size; d++)
-      for (val_t s = 0; s < num_vals; s++)
+      for (val_t s = 0; s < num_vals-1; s++)
 	for (pos_t i = 0; i+d < input_size; i++) {
 	  pos_t  j = i+d;
 	  cost_t min_cost = MAX_COST;
 	  pos_t  min_ind  = num_vals-1;
 	  for (pos_t k = i; k < j; k++)
-	    for (val_t s1 = 0; s1 < num_vals; s1++) {
+	    for (val_t s1 = 0; s1 < num_vals-1; s1++) {
 	      if(!vals_occur[s1])
 		continue;
-	      for (val_t s2 = 0; s2 < num_vals; s2++) {
+	      for (val_t s2 = 0; s2 < num_vals-1; s2++) {
 		if(!vals_occur[s2])
 		  continue;
-		if ((s1!=num_vals-1 && s2!=num_vals-1) || s==num_vals-1) {
-		  cost_t left  = COST_OF_ENTRY(S(i,  k,s1));
-		  cost_t right = COST_OF_ENTRY(S(k+1,j,s2));
-		  cost_t m_new;
-		  if(left || right == MAX_COST)
-		    m_new = MAX_COST;
-		  else
-		    m_new = left + ((s1==s)?0:1) + right + ((s2==s)?0:1);
-		  if (m_new < min_cost) {
-		    min_cost = m_new;
-		    min_ind   = k;
-		  }
+		cost_t left  = COST_OF_ENTRY(S(i,  k,s1));
+		cost_t right = COST_OF_ENTRY(S(k+1,j,s2));
+		cost_t m_new;
+		m_new = left + ((s1==s)?0:1) + right + ((s2==s)?0:1);
+		if (m_new < min_cost) {
+		  min_cost = m_new;
+		  min_ind   = k;
 		}
 	      }
 	    }
@@ -188,12 +194,10 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
     // copied from unflatten_size -- should share
     val_t  left_val  = num_vals-1;
     cost_t left_cost = MAX_COST;
-    for(val_t s=0; s < num_vals; ++s) {
+    for(val_t s=0; s < num_vals-1; ++s) {
       if(!vals_occur[s])
 	continue;	
       cost_t this_cost = COST_OF_ENTRY(S(0,input_size-1,s));
-      if(this_cost != MAX_COST && s != num_vals-1)
-	++this_cost;
       if(this_cost < left_cost) {
 	left_cost = this_cost;
 	left_val  = s;
@@ -201,9 +205,9 @@ static inline doc_t dynamic_doit(doc_t doc, val_t lowest_val, val_t num_vals) {
     }
     doc_t next = unflatten_vals(doc_arr+curr_pos, 0, input_size-1, left_val,
 				lowest_val, num_vals, vals_occur);
-    if(left_val != num_vals-1)
-      next = new Tagged(left_val + lowest_val, next);
-    ans = new List(next, ans);
+    curr_pos += input_size;
+    next = new Tagged(left_val + lowest_val, next);
+    ans  = new List(next, ans);
   }
   return new Seq(imp_rev(ans));
 }

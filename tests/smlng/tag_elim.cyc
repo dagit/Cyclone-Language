@@ -472,8 +472,10 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
 // leat be able to nail code that only has sizes or colors.  We can try
 // to finesse other tags later.
 struct DynSynth {
-  unsigned char only_sizes;
-  unsigned char only_colors;
+  int num_size_docs;   // how many size tags we'd program over
+  int num_color_docs;  // how many color tags we'd program over
+  unsigned char only_sizes;  // are there only size docs
+  unsigned char only_colors; // are there only color docs
 };
 
 // probably need to avoid calling dynamic_size/color for very small trivial
@@ -482,9 +484,9 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
   switch(doc) {
   case Mt: fallthru;
   case &Spc(_): fallthru;
-  case &Text(_): return $(doc,DynSynth(true,true));
+  case &Text(_): return $(doc,DynSynth(0,0,true,true));
   case &Seq(*dsp):
-    dyn_synth_t synth = DynSynth(true,true);
+    dyn_synth_t synth = DynSynth(0,0,true,true);
     // now with sequence splitting: find maximal regions with only sizes/colors
     flatten_top_seq(doc);
     int only_sizes  = 0;
@@ -497,8 +499,10 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
       //      fprintf(stderr,"\nA %d %d ", only_sizes, only_colors);
       let $(newd, inner_synth) = dynamic_regions(ds->hd);
       ds->hd = newd; // destructive here
-      synth.only_sizes  &= inner_synth.only_sizes;
-      synth.only_colors &= inner_synth.only_colors;
+      synth.only_sizes     &= inner_synth.only_sizes;
+      synth.only_colors    &= inner_synth.only_colors;
+      synth.num_size_docs  += inner_synth.num_size_docs;
+      synth.num_color_docs += inner_synth.num_color_docs;
       if(only_sizes > 2 && !inner_synth.only_sizes) {
 	if(prev_start_sizes == null) {
 	  // beginning of sequence -- split differently
@@ -515,7 +519,8 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
 	}
 	only_sizes = 0;
-	only_colors = inner_synth.only_colors ? only_colors + 1 : 0;
+	only_colors = 
+	  inner_synth.only_colors ? only_colors + inner_synth.num_color_docs :0;
       } else if(only_colors > 2 && !inner_synth.only_colors) {
 	if(prev_start_colors == null) {
 	  // beginning of sequence -- split differently
@@ -534,14 +539,17 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
 	  *dsp = new List(new Seq(*dsp), prev_start_sizes);
 	}
 	only_colors = 0;
-	only_sizes = inner_synth.only_sizes  ? only_sizes  + 1 : 0;
+	only_sizes = 
+	  inner_synth.only_sizes  ? only_sizes + inner_synth.num_size_docs : 0;
       } else {
 	if(only_sizes == 0 && inner_synth.only_sizes && prev != null)
 	  prev_start_sizes = prev;
 	if(only_colors == 0 && inner_synth.only_colors && prev != null)
 	  prev_start_colors = prev;
-	only_sizes  = inner_synth.only_sizes  ? only_sizes  + 1 : 0;
-	only_colors = inner_synth.only_colors ? only_colors + 1 : 0;
+	only_sizes  = 
+	  inner_synth.only_sizes  ? only_sizes + inner_synth.num_size_docs : 0;
+	only_colors = 
+	  inner_synth.only_colors ? only_colors + inner_synth.num_color_docs :0;
       }
       prev = ds;
       ds = ds->tl;
@@ -559,30 +567,36 @@ $(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
       *dsp = new List(new Seq(*dsp), 
 	     new List(dynamic_color(new Seq(start)),null));
     }
+    if(!synth.only_sizes)
+      synth.num_size_docs = 0;
+    if(!synth.only_colors)
+      synth.num_color_docs = 0;
     return $(doc,synth);
 	
   case &Tagged(tag,*d):
-    let $(d2,DynSynth(sz,col)) = dynamic_regions(*d);
+    let $(d2,DynSynth(num_sz,num_col,sz,col)) = dynamic_regions(*d);
     *d = d2;
     switch(tag) {
       // try harder here -- we should be able to say true for size and
       // treat the region abstractly EASY FIX?
     case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
     case Six: case  Seven: case  Eight: case  Nine:
-      if(col)
+      if(col && num_col > 2) {
 	*d = dynamic_color(d2);
-      return $(doc,DynSynth(sz,false));
+      }
+      return $(doc,DynSynth((sz ? num_sz+1 : 0), 0, sz,false));
     case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
     case y_tag: case k_tag: case w_tag:
-      if(sz)
+      if(sz && num_sz > 2)
 	*d = dynamic_size(d2);
-      return $(doc,DynSynth(false,col));
+      return $(doc,DynSynth(0,(col ? num_col+1 : 0),false,col));
     default:
-      if(sz)
+      if(sz && num_sz > 2)
 	*d = dynamic_size(d2);
-      else if(col)
+      else if(col && num_col > 2) {
 	*d = dynamic_color(d2);
-      return $(doc,DynSynth(false,false));
+      }
+      return $(doc,DynSynth(0,0,false,false));
     }
   }
 }

@@ -409,11 +409,11 @@ int main(int argc, char ??argv) {
   }
   //not sure how much time we need, notice we wait until cheaper things have run
   fprintf(stderr,"%d\ndynamic_regions...", check_time()); fflush(stderr);
-  let $(d2,TagElim::DynSynth(sz,col)) = TagElim::dynamic_regions(d);
+  let $(d2,TagElim::DynSynth(num_sz,num_col,sz,col)) = TagElim::dynamic_regions(d);
   d = d2;
-  if(sz) {
+  if(sz && num_sz > 2) {
     d = dynamic_size(d);
-    }if(col)
+    }if(col && num_col > 2)
     d = dynamic_color(d);
   } catch {
   case e: 
