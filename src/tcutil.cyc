@@ -39,21 +39,14 @@ static string tvar2string(tvar tv) {
   return *(*tv)[0];
 }
 
-void print_tvars(list_t<tvar> tvs) {
-  for (; tvs != null; tvs = tvs->tl) 
-    fprintf(stderr,"%s ",tvar2string(tvs->hd));
-  fprintf(stderr,"\n"); fflush(stderr);
-}
-
-static list_t<seg_t> warning_segs = null;
-static list_t<stringptr>  warning_msgs = null;
+static list_t<seg_t>     warning_segs = null;
+static list_t<stringptr> warning_msgs = null;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
 void warn(seg_t sg, string msg) {
-  warning_segs = &List(sg, warning_segs);
-  // FIX:  cast to stringptr is necessary here...
-  warning_msgs = &List((stringptr)new {msg},warning_msgs);
+  warning_segs = &List(sg,        warning_segs);
+  warning_msgs = &List(new {msg}, warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)
@@ -99,7 +92,7 @@ static bool kind_leq(kind_t k1, kind_t k2) {
   return ((k1 == k2) || (k1 == BoxKind && k2 == MemKind));
 }
 
-// return the "least" kind of a type, according to the lattice above
+// return the "least" kind of a type
 static kind_t typ_kind(typ t) {
   switch (compress(t)) {
     // FIX: this isn't the least kind -- what if it gets constrained from
@@ -122,9 +115,9 @@ static kind_t typ_kind(typ t) {
 
   case PointerType(pinfo):
     switch (compress_conref(pinfo.bounds)->v) {
-    case Eq_constr(Unknown_b): return MemKind;
+    case Eq_constr(Unknown_b):  return MemKind;
     case Eq_constr(Upper_b(_)): return BoxKind;
-    case No_constr: return MemKind; 
+    case No_constr:             return MemKind; 
       // be conservative -- this may later be constrained with an Unknown_b
     case Forward_constr(_): 
       return impos("typ_kind: forward constraint in ptr bounds");
@@ -134,9 +127,9 @@ static kind_t typ_kind(typ t) {
   case TupleType(tqts):  return MemKind;
   case TypedefType(_,_,topt): 
     return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
-  case UnionType: return impos("union type");
+  case UnionType:    return impos("union type");
   case AccessEff(_): return EffKind;
-  case JoinEff(_): return EffKind;
+  case JoinEff(_):   return EffKind;
   }
 }
 
@@ -232,18 +225,14 @@ static void unify_it_conrefs(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   x = compress_conref(x);
   y = compress_conref(y);
   if (x == y) return;
-  switch (x->v) {
-  case No_constr: x->v = Forward_constr(y); return;
-  case Forward_constr(_): throw impos("unify_conref: forward after compress");
-  case Eq_constr(xv):
-    switch (y->v) {
-    case No_constr: y->v = x->v; return;
-    case Forward_constr(_):
-      throw impos("unify_confref: forward after compress(2)");
-    case Eq_constr(yv):
-      if (cmp(xv,yv) != 0) throw Unify;
-      return;
-    }
+  switch ($(x->v,y->v)) {
+  case $(No_constr,    _): x->v = Forward_constr(y); return;
+  case $(Eq_constr(xv),No_constr): y->v = x->v; return;
+  case $(Eq_constr(xv),Eq_constr(yv)):
+    if(cmp(xv,yv) != 0)
+      throw Unify;
+    return;
+  default: throw impos("unify_conref: forward after compress");
   }
 }
 
@@ -262,9 +251,7 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   case $(Upper_b(e1),Upper_b(e2)): 
     int i1 = Evexp::eval_const_uint_exp(e1);
     int i2 = Evexp::eval_const_uint_exp(e2);
-    if (i1 == i2) return 0;
-    if (i1 < i2) return -1;
-    return 1;
+    return i1 - i2;
   }
 }
 

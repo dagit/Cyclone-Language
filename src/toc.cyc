@@ -1839,7 +1839,7 @@ static void exp_to_c(env nv, exp e) {
 // xlate_pat(env,t,r,path,p,succ_lab,fail_lab)
 //
 //  r is the "root" variable that contains the value we're matching.
-//  path is the address of this value -- used in the Address pattern.
+//  path is the address of this value -- used in the Reference pattern.
 //  p is the pattern
 //  succ_lab is where to go upon successful match
 //  fail_lab is where to go upon failure to match
@@ -2008,7 +2008,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       let lab = fresh_label();
       decls = &List(&$(v,typ_to_c(t2)),decls);
       let result = xlate_pat(nv,t2,var_exp(v,DL),
-			   structarrow_exp(path,new {xprintf("f%d",cnt)},
+			   structmember_exp(path,new {xprintf("f%d",cnt)},
 					   DL),p2,succ_lab,fail_lab,decls);
       nv = result[0];
       decls = result[1];
@@ -2041,7 +2041,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       let t2c = typ_to_c(t2);
       let lab = fresh_label();
       decls = &List(&$(v,t2c),decls);
-      let result = xlate_pat(nv,t2,var_exp(v,DL), structarrow_exp(path,f,DL),p2,
+      let result = xlate_pat(nv,t2,var_exp(v,DL),structmember_exp(path,f,DL),p2,
                              succ_lab,fail_lab,decls);
       nv = result[0];
       decls = result[1];
@@ -2061,7 +2061,8 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     let v = temp_var();
     let t2 = p2->topt->v;
     decls = &List(&$(v,typ_to_c(t2)),decls);
-    let result = xlate_pat(nv,t2,var_exp(v,DL),r,p2, succ_lab,fail_lab,decls);
+    let result = xlate_pat(nv,t2,var_exp(v,DL),deref_exp(path,DL),p2,
+			   succ_lab,fail_lab,decls);
     nv = result[0];
     decls = result[1];
     let s2 = result[2];
@@ -2149,7 +2150,7 @@ static void xlate_switch(env nv, stmt whole_s, exp e, list_t<switch_clause> scs)
   // no dice, translate to a nest of gotos...
   qvar v     = temp_var();
   exp  r     = var_exp(v,DL);
-  exp  path  = address_exp(var_exp(v,DL),DL);
+  exp  path  = var_exp(v,DL);
   var  end_l = fresh_label();
   // for each case, generate a test label and an entry label
   list_t<$(var,var,switch_clause)@> lscs = List::map(gen_label,scs);
@@ -2714,7 +2715,7 @@ static stmt letdecl_to_c(env nv, pat p, opt_t<typ> topt, exp e,
   var  succ_lab = fresh_label();
   var  fail_lab = exhaust ? succ_lab : fresh_label();
   let $(nv,vars,test_stmt) =
-    xlate_pat(nv, t, var_exp(x,DL),address_exp(var_exp(x,DL),DL),p,
+    xlate_pat(nv, t, var_exp(x,DL), var_exp(x,DL), p,
 	      succ_lab, fail_lab, null);
   stmt_to_c(nv,s);
   let succ_stmt = label_stmt(succ_lab,s,DL);

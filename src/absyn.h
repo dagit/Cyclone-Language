@@ -276,9 +276,10 @@ namespace Absyn {
     CompoundLit_e($(opt_t<var>,tqual,typ)@,list_t<$(list_t<designator>,exp)@>);
     Array_e(bool,list_t<$(list_t<designator>,exp)@>);//true == came with "new"
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
-    Struct_e(typedef_name_t,opt_t<list_t<typ>>,list_t<$(list_t<designator>,exp)@>,
-	     struct Structdecl *);
-    Enum_e(opt_t<list_t<typ>>,opt_t<list_t<typ>>,list_t<exp>,enumdecl,enumfield);
+    Struct_e(typedef_name_t,opt_t<list_t<typ>>,
+	     list_t<$(list_t<designator>,exp)@>, struct Structdecl *);
+    Enum_e(opt_t<list_t<typ>>,opt_t<list_t<typ>>,list_t<exp>,
+	   enumdecl,enumfield);
     Xenum_e(opt_t<list_t<typ>>,list_t<exp>,xenumdecl,enumfield);
     UnresolvedMem_e(opt_t<typedef_name_t>,list_t<$(list_t<designator>,exp)@>);
     StmtExp_e(stmt);

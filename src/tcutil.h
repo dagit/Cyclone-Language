@@ -21,7 +21,6 @@ extern void terr(seg_t, string);
 extern void warn(seg_t, string);
 extern void flush_warnings();
 extern void err_noloc(string);
-extern void print_tvars(list_t<tvar>);
 
 // set by by Tcenv::tc_init, just to cut down on allocation and calls
 // to Set::empty.
