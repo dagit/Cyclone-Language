@@ -298,14 +298,24 @@ static term_t flatten_merge(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t 
   }
   if (ip1 == NULL) {
     if (ip2 != NULL) {
+//       if (((p == Absyn::Plus) && (*ip2 == 0))||
+// 	  ((p == Absyn::Times) && (*ip2 == 1)))
+// 	return t;
       let ptr = Binop(p, t, uint(*ip2),topt);
       t = hash_cons_term(&ptr);
     }
   } else {
     if (ip2 != NULL) {
-      let ptr = Binop(p, t, eval_binop(p, *ip1, *ip2), topt);
+      term_t binres = eval_binop(p, *ip1, *ip2);
+//       if (((p == Absyn::Plus) && (cmp_term(binres, zero())==0)) ||
+// 	  ((p == Absyn::Times) && (cmp_term(binres, one())==0)))
+// 	return t;
+      let ptr = Binop(p, t, binres, topt);
       t = hash_cons_term(&ptr);
     } else {
+//       if (((p == Absyn::Plus) && (*ip1 == 0))||
+// 	  ((p == Absyn::Times) && (*ip1 == 1)))
+// 	return t;
       let ptr = Binop(p, t, uint(*ip1), topt);
       t = hash_cons_term(&ptr);
     }
@@ -338,9 +348,9 @@ term_t binop(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t tp) {
     if (cmp_term(t1,t2) == 0) return uint(0);
     break;
     // t1 + 0  ==>  t1
-  case $(Absyn::Plus,t1,&Uint(0)): return t1;
+    //  case $(Absyn::Plus,t1,&Uint(0)): return t1;
     // t1 * 1  ==>  t1
-  case $(Absyn::Times,t1,&Uint(1)): return t1;
+    //  case $(Absyn::Times,t1,&Uint(1)): return t1;
     // trying to normalize for commutative and associative operator p
     // into the form ((t1 p t2) p t3) ... p tn) where
     // t1 <= t2 <= t3 <= ... <= tn
@@ -744,10 +754,10 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
     let tm2 = reduce_term(tm,non_esc_subst,esc_subst);
     if (tm != tm2) return unop(p,tm2,tp);
     else return t;
-  case &Binop(p,t,s,tp):
-    let t2 = reduce_term(t,non_esc_subst,esc_subst);
+  case &Binop(p,t1,s,tp):
+    let t2 = reduce_term(t1,non_esc_subst,esc_subst);
     let s2 = reduce_term(s,non_esc_subst,esc_subst);
-    if (t != t2 || s != s2) return binop(p,t2,s2,tp);
+    if (t1 != t2 || s != s2) return binop(p,t2,s2,tp);
     else return t;
   case &Var(vd):
     if (vd->escapes && esc_subst != NULL) {
