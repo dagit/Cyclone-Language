@@ -1,4 +1,4 @@
-/* Main file */
+// Main file
 
 #include "arg.h"
 #include "core.h"
@@ -23,18 +23,17 @@ extern void lex_init();
 using Core;
 using List;
 using Arg;
-using Ref;
 using String;
 
-struct Reference<Bool> pp_r = Reference((Bool)false);
-struct Reference<Bool> noexpand_r = Reference((Bool)false);
-struct Reference<Bool> tc_r = Reference((Bool)false);
-struct Reference<Bool> toc_r = Reference((Bool)false);
+bool pp_r       = false;
+bool noexpand_r = false;
+bool tc_r       = false;
+bool toc_r      = false;
 
-ref<Bool> pp = &pp_r;
-ref<Bool> noexpand = &noexpand_r;
-ref<Bool> tc = &tc_r;
-ref<Bool> toc = &toc_r;
+bool @ pp       = &pp_r;
+bool @ noexpand = &noexpand_r;
+bool @ tc       = &tc_r;
+bool @ toc      = &toc_r;
 
 void set_check_null() {
   Toc::check_for_null = true;
@@ -88,8 +87,8 @@ void compile_file(string filename) {
   tds = Parse::parse_file(f);
   fprintf(cyc_stderr,"Parsing completed\n");
   fflush(cyc_stderr);
-  if (tds != null && tc->v) try {
-    Absynpp::expand_typedefs = !noexpand->v;
+  if (tds != null && *tc) try {
+    Absynpp::expand_typedefs = ! *noexpand;
     Tc::tc(Tcenv::tc_init(),tds);
     fprintf(cyc_stderr,"Type checking completed\n");
     fflush(cyc_stderr);
@@ -105,12 +104,12 @@ void compile_file(string filename) {
     compile_failure=true;
     break;
   }
-  if (toc->v) {
+  if (*toc) {
     tds = Toc::toc(tds); // translate to C
   }
-  if (tds != null && pp->v) {
-    Absynpp::expand_typedefs = !noexpand->v;
-    if (toc->v) 
+  if (tds != null && *pp) {
+    Absynpp::expand_typedefs = ! *noexpand;
+    if (*toc) 
       printf("#include \"cyc_include.h\"\n\n");
     Absynpp::decllist2file(tds,cyc_stdout);
     fflush(cyc_stdout);

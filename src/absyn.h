@@ -1,6 +1,22 @@
 #ifndef ABSYN_H
 #define ABSYN_H
 
+// The abstract syntax has (at last count) three different "stages":
+// A. Result of parsing
+// B. Result of type-checking
+// C. Result of translation to C
+// Each stage obeys different invariants of which the compiler hacker
+// (that's you) must be aware.  For example, here is an incomplete list
+// of things that must be true after type-checking:
+//  B1. All qvars have the correct namespace list in them
+//  B2. All "destination fields" and non_local_preds fields in stmt objects
+//      must be correct.
+//  B3. Every expression must have a non-null and correct type field.
+//  B4. None of the "unresolved" variants are used.  (There may be 
+//      underconstrained Evars for types.)
+//  B5. The pat_vars field of switch_caluse is non-null and correct.
+// Note that translation to C willfully violates B2 and B3, but that's okay.
+
 // A cute hack to avoid defining the abstract syntax twice.
 #ifdef ABSYN_CYC
 #define EXTERN_DEFINITION
@@ -208,23 +224,24 @@ namespace Absyn {
     Return_s(Opt_t<exp>);
     IfThenElse_s(exp,stmt,stmt);
     While_s(exp,stmt);
-    Break_s;
-    Continue_s;
-    Goto_s(var);
+    Break_s(Opt_t<stmt>);    // stmt is dest, set by type-checking
+    Continue_s(Opt_t<stmt>); // stmt is dest, set by type-checking
+    Goto_s(var,Opt_t<stmt>); // stmt is dest, set by type-checking
     For_s(exp,exp,exp,stmt);
-    Switch_s(exp,list<switch_clause>);
-    Fallthru_s(list<exp>);
+    Switch_s(exp,list<switch_clause>); 
+    Fallthru_s(list<exp>,Opt_t<stmt>); // stmt is dest, set by type-checking
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
-    Label_s(var,stmt);
+    Label_s(var,stmt); 
     Do_s(stmt,exp);
     TryCatch_s(stmt,list<switch_clause>);
   };
 
   EXTERN_DEFINITION struct Stmt {
-    raw_stmt r;
-    segment  loc;
+    raw_stmt   r;
+    segment    loc;
+    list<stmt> non_local_preds; // set by type-checking
   };
 
   EXTERN_DEFINITION enum Raw_pat {
@@ -254,11 +271,11 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Switch_clause {
-    pat              pattern;
+    pat               pattern;
     Opt_t<list<qvar>> pat_vars; // set by type-checker, used by translation to C
-    Opt_t<exp>       where_clause;
-    stmt             body;
-    segment          loc;
+    Opt_t<exp>        where_clause;
+    stmt              body;
+    segment           loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -381,12 +398,10 @@ namespace Absyn {
   extern typ Float_t, Double_t, Bool_t;
   // exception type
   extern typ exn_t;
-  // void type
-  extern typ void_t;
   // string (char[?])
-  extern typ string_t();
+  extern typ string_typ();
   // FILE
-  extern typ file_t();
+  extern typ file_typ();
   // pointers
   extern typ nullableptr_t(typ t, tqual tq);
   extern typ void_star_typ();

@@ -1963,7 +1963,7 @@ static void stmt_to_c(env nv, stmt s) {
       exp_to_c(nv,e); 
       stmt_to_c(loop_env(nv),s2);
       return;
-    case Break_s: 
+    case Break_s(_): 
       if (nv->break_lab != null) 
 	s->r = goto_stmt(nv->break_lab->v, DL)->r;
       // reset handler
@@ -1976,7 +1976,7 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
-    case Continue_s: 
+    case Continue_s(_): 
       if (nv->continue_lab != null) 
 	s->r = goto_stmt(nv->continue_lab->v, DL)->r;
       // reset handler
@@ -1989,7 +1989,7 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = seq_stmt(call_stmt,new_stmt(s->r,DL),DL)->r;
       }
       return;
-    case Goto_s(_): return; 
+    case Goto_s(_,_): return; 
     case For_s(e1,e2,e3,s2): 
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3); 
@@ -2002,7 +2002,7 @@ static void stmt_to_c(env nv, stmt s) {
 			       address_exp(var_exp(r,DL),DL),nv,scs);
       s->r = declare_stmt(r,typ_to_c(e->topt->v),&Opt(e), new_s, DL)->r;
       return;
-    case Fallthru_s(es): 
+    case Fallthru_s(es,_): 
       if(nv->fallthru_info == null) {
 	toc_impos("fallthru in unexpected place"); return;
       }

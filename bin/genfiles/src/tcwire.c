@@ -768,12 +768,21 @@ struct Absyn__While_s__struct {
   struct Absyn_Exp *f1;
   struct Absyn_Stmt *f2;
 };
-extern void *Absyn_Break_s;
-extern void *Absyn_Continue_s;
+extern const int Absyn__Break_s__tag;
+struct Absyn__Break_s__struct {
+  int tag;
+  struct Core_Opt *f1;
+};
+extern const int Absyn__Continue_s__tag;
+struct Absyn__Continue_s__struct {
+  int tag;
+  struct Core_Opt *f1;
+};
 extern const int Absyn__Goto_s__tag;
 struct Absyn__Goto_s__struct {
   int tag;
   struct _tagged_string *f1;
+  struct Core_Opt *f2;
 };
 extern const int Absyn__For_s__tag;
 struct Absyn__For_s__struct {
@@ -793,6 +802,7 @@ extern const int Absyn__Fallthru_s__tag;
 struct Absyn__Fallthru_s__struct {
   int tag;
   struct List_cons *f1;
+  struct Core_Opt *f2;
 };
 extern const int Absyn__Decl_s__tag;
 struct Absyn__Decl_s__struct {
@@ -831,6 +841,7 @@ struct Absyn__TryCatch_s__struct {
 struct Absyn_Stmt {
   void *r;
   struct Position_Segment *loc;
+  struct List_cons *non_local_preds;
 };
 extern void *Absyn_Wild_p;
 extern const int Absyn__Var_p__tag;
@@ -1105,9 +1116,8 @@ extern void *Absyn_Float_t;
 extern void *Absyn_Double_t;
 extern void *Absyn_Bool_t;
 extern void *Absyn_exn_t;
-extern void *Absyn_void_t;
-extern void *Absyn_string_t();
-extern void *Absyn_file_t();
+extern void *Absyn_string_typ();
+extern void *Absyn_file_typ();
 extern void *Absyn_nullableptr_t(void *t,struct Absyn_Tqual *tq);
 extern void *Absyn_void_star_typ();
 extern void *Absyn_pureptr_t(void *t,struct Absyn_Tqual *tq);

@@ -4,7 +4,6 @@
 #include "list.h"
 #include "dict.h"
 #include "set.h"
-#include "ref.h"
 #include "string.h"
 #include "position.h"
 #include "absyn.h"
@@ -20,7 +19,6 @@ namespace Tcpat;
 using Core;
 using List;
 using Set;
-using Ref;
 using Position;
 using Absyn;
 using Absynpp;
@@ -65,8 +63,8 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
   case Bool_p(b):   t = bool_t;  break;
   case Pointer_p(p2):
     let &$(sub_tvs,sub_vs) = tcPat(te,p2);
-    tv_result = List::append(sub_tvs, tv_result);
-    v_result  = List::append(sub_vs,  v_result);
+    tv_result = List::append(tv_result, sub_tvs);
+    v_result  = List::append(v_result,  sub_vs);
     t = PointerType(p2->topt->v, empty_conref(), empty_tqual());
     break;
   case Reference_p(vd):
@@ -80,8 +78,8 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     list<$(tqual,typ)@> ts = null;
     for(; ps != null; ps=ps->tl) {
       let &$(sub_tvs,sub_vs) = tcPat(te,ps->hd);
-      tv_result = List::append(sub_tvs, tv_result);
-      v_result  = List::append(sub_vs,  v_result);
+      tv_result = List::append(tv_result, sub_tvs);
+      v_result  = List::append(v_result,  sub_vs);
       ts = &cons(&$(empty_tqual(),ps->hd->topt->v),ts);
     }
     t = TupleType(List::imp_rev(ts));
@@ -175,8 +173,8 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     // type check the argument patterns
     for (let dps0 = dps; dps0 != null; dps0 = dps0->tl) {
       let &$(sub_tvs,sub_vs) = tcPat(te,dps0->hd[1]);
-      tv_result = List::append(sub_tvs, tv_result);
-      v_result  = List::append(sub_vs,  v_result);
+      tv_result = List::append(tv_result, sub_tvs);
+      v_result  = List::append(v_result,  sub_vs);
     }
     while (dps != null) {
       let &$(ds,p_arg) = dps->hd;
@@ -227,7 +225,7 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     break;
   case Enum_p(q,_,tvs,ps,ed,ef): ;
     tenv te2 = add_type_vars(p->loc,te,tvs);
-    tv_result = List::append(tvs,tv_result);
+    tv_result = List::append(tv_result, tvs);
     let all_inst = List::map(make_inst_var,ed->tvs);
     let all_typs = List::map(snd,all_inst); 
     t = EnumType(ed->name,all_typs);
@@ -235,8 +233,8 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
       let p2 = ps->hd;
       let &$(sub_tvs,sub_vs) = tcPat(te2,p2);
-      tv_result = List::append(sub_tvs, tv_result);
-      v_result  = List::append(sub_vs,  v_result);
+      tv_result = List::append(tv_result, sub_tvs);
+      v_result  = List::append(v_result,  sub_vs);
       let field_typ = substitute(all_inst,tqts->hd[1]);
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc, xprintf("%s expects argument type %s, not %s",
@@ -253,14 +251,14 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     break;
   case Xenum_p(q,tvs,ps,xed,ef): ;
     tenv te2 = add_type_vars(p->loc,te,tvs);
-    tv_result = List::append(tvs,tv_result);
+    tv_result = List::append(tv_result, tvs);
     t = XenumType(xed->name);
     list<$(tqual,typ)@> tqts = ef->typs;
     while (ps != null && tqts != null) {
       let p2 = ps->hd;
       let &$(sub_tvs,sub_vs) = tcPat(te2,p2);
-      tv_result = List::append(sub_tvs, tv_result);
-      v_result  = List::append(sub_vs,  v_result);
+      tv_result = List::append(tv_result, sub_tvs);
+      v_result  = List::append(v_result,  sub_vs);
       let field_typ = tqts->hd[1];
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
@@ -587,8 +585,8 @@ static context_t norm_context(context_t ctxt) {
 // up to the left of the current subterm), the current subterm description,
 // and the term descriptions on the work stack, which, when taken together,
 // describe the object to the right of the current subterm.
-static 
-term_desc_t build_desc<`a,`b>(context_t ctxt, term_desc_t dsc, work_stack work) {
+static term_desc_t build_desc<`a,`b>(context_t ctxt, term_desc_t dsc, 
+				     work_stack work) {
   switch ($(ctxt,work)) {
   case $(null,null): return dsc;
   case $(null,_):    return impos("build_desc: ctxt and work don't match");
@@ -715,12 +713,13 @@ void check_exhaust_overlap<`rhs,`a,`b>(decision_t<`rhs> d,
 // any pattern doesn't show up in the tree (pattern is redundant.)
 // Both are considered errors as far as the type-checker is concerned.
 static 
-$(simple_pat_t, $(bool,segment)@)@ get_match(ref<int> r, switch_clause swc) {
+$(simple_pat_t, $(bool,segment)@)@ get_match(int @ r, switch_clause swc) {
   simple_pat_t sp0 = compile_pat(swc->pattern);
   $(bool,segment)@ rhs = &$(false,swc->pattern->loc);
   simple_pat_t sp;
   if (swc->where_clause != null) {
-    sp = tuple_pat(&cons(sp0,&cons(int_pat(r->v++),null)));
+    sp = tuple_pat(&cons(sp0,&cons(int_pat(*r),null)));
+    *r = (*r) + 1;
   } else {
     sp = tuple_pat(&cons(sp0,&cons(Any,null)));
   }
@@ -738,7 +737,7 @@ void check_switch_exhaustive(segment loc, list<switch_clause> swcs) {
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
 
-  let match_rules = List::map_c(get_match,new_ref(0),swcs);
+  let match_rules = List::map_c(get_match,(int @)&$(0),swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
@@ -770,8 +769,7 @@ bool check_let_pat_exhaustive(segment loc,pat p) {
 // Check that the patterns in a catch switch are non-overlapping.
 // There's an implicit "re-throw on wild" pattern here, so no need
 // to check for exhaustiveness.
-static $(simple_pat_t, $(bool,segment)@)@ get_match2(ref<int> r, 
-						     switch_clause swc) {
+static $(simple_pat_t, $(bool,segment)@)@ get_match2(switch_clause swc) {
   simple_pat_t sp0 = compile_pat(swc->pattern);
   $(bool,segment)@ rhs = &$(false,swc->pattern->loc);
   return &$(sp0, rhs);
@@ -781,7 +779,7 @@ static void not_exhaust_err2(segment loc) {
 }
 void check_catch_overlap(segment loc, list<switch_clause> swcs) {
   // We ignore where clauses here because catch's need not be exhaustive.
-  let match_rules = List::map_c(get_match2,new_ref(0),swcs);
+  let match_rules = List::map(get_match2,swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {

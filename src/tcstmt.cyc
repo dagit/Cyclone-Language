@@ -126,7 +126,7 @@ synth tcStmt(tenv te, stmt s0) {
     let ssyn = tcStmt(set_in_loop(true_te),s);
     return loop_synth(esyn,ssyn);
 
-  case Break_s:
+  case Break_s(_):
     if (is_ok_break(te))
       return forward_jump_synth(te);
     else {
@@ -134,12 +134,12 @@ synth tcStmt(tenv te, stmt s0) {
       return skip_synth(te);
     }
 
-  case Continue_s:
+  case Continue_s(_):
     if (!is_ok_continue(te))
       terr(s0->loc,"continue outside of loop");
     return empty_synth(te);
 
-  case Goto_s(_):
+  case Goto_s(_,_):
     warn(s0->loc, "goto may be unsafe!!!");
     return forward_jump_synth(te);
 
@@ -244,7 +244,7 @@ synth tcStmt(tenv te, stmt s0) {
   case With(q): return tcWith(te,s0->loc,s0,q);
 */
 
-  case Fallthru_s(es):
+  case Fallthru_s(es,_):
     switch(get_fallthru_typ(te)) {
     case null:
       terr(s0->loc,"fallthru not in a non-last case");

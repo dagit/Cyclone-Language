@@ -105,11 +105,9 @@ typ Bool_t = BoolType(Boxed);
 // exceptions
 static $(list<var>,var) exn_pair = $(null,(string)"exn");
 typ exn_t = XenumType(&exn_pair);
-// void
-typ void_t = VoidType;
 // string
 static Opt_t<typ> string_t_opt = null;
-typ string_t() {
+typ string_typ() {
   if (string_t_opt == null) {
     typ t = ArrayType(uchar_t,empty_tqual(),TaggedArray);
     string_t_opt = &Opt(t);
@@ -119,7 +117,7 @@ typ string_t() {
 }
 // FILE
 static Opt_t<typ> file_t_opt = null;
-typ file_t() {
+typ file_typ() {
   if (file_t_opt == null) {
     typedef_name file_t_name = &$(null,(string)"__sFILE");
     typ file_struct_t = StructType(&Opt(file_t_name),null);
@@ -136,7 +134,7 @@ typ nullableptr_t(typ t, tqual tq) {
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
   if (void_star_t_opt == null) {
-    void_star_t_opt = &Opt(nullableptr_t(void_t, empty_tqual()));
+    void_star_t_opt = &Opt(nullableptr_t(VoidType, empty_tqual()));
   }
   return void_star_t_opt->v;
 }
@@ -264,7 +262,7 @@ exp unresolvedmem_exp(Opt_t<typedef_name> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt new_stmt(raw_stmt s, segment loc) { 
-  return &Stmt{.r=s, .loc=loc }; }
+  return &Stmt{.r=s, .loc=loc, .non_local_preds=null }; }
 stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
 stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
@@ -286,8 +284,8 @@ stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc) {
 stmt while_stmt(exp e,stmt s,segment loc) { 
   return new_stmt(While_s(e,s), loc); 
 }
-stmt break_stmt   (segment loc) { return new_stmt(Break_s, loc); }
-stmt continue_stmt(segment loc) { return new_stmt(Continue_s, loc); }
+stmt break_stmt   (segment loc) { return new_stmt(Break_s(null), loc); }
+stmt continue_stmt(segment loc) { return new_stmt(Continue_s(null), loc); }
 stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
   return new_stmt(For_s(e1,e2,e3,s), loc);
 }
@@ -295,7 +293,7 @@ stmt switch_stmt(exp e, list<switch_clause> scs, segment loc) {
   return new_stmt(Switch_s(e,scs), loc);
 }
 stmt fallthru_stmt(list<exp> el, segment loc) { 
-  return new_stmt(Fallthru_s(el), loc); 
+  return new_stmt(Fallthru_s(el,null), loc); 
 }
 stmt decl_stmt(decl d, stmt s, segment loc) {
   return new_stmt(Decl_s(d,s), loc);
@@ -316,7 +314,7 @@ stmt trycatch_stmt(stmt s, list<switch_clause> scs, segment loc) {
   return new_stmt(TryCatch_s(s,scs), loc);
 }
 stmt goto_stmt(var lab, segment loc) {
-  return new_stmt(Goto_s(lab), loc);
+  return new_stmt(Goto_s(lab,null), loc);
 }
 stmt assign_stmt(exp e1, exp e2, segment loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);

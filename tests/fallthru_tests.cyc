@@ -29,3 +29,12 @@ int f3(enum Quux q) {
   case Pair2(x,y): return x-y;
   }
 }
+
+enum X { Y(int,bool), Z(bool,int) };
+
+void f4(enum X x) {
+  switch (x) {
+  case Y(i,b): fallthru(b,i);
+  case Z(b,i): return;
+  }
+}

@@ -1091,7 +1091,7 @@ storage_class_specifier:
  */
 type_specifier:
   VOID
-    { $$=^$(type_spec(void_t,LOC(@1,@1))); }
+    { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_' 
     { $$=^$(type_spec(new_evar(MemKind),LOC(@1,@1))); }
 | CHAR

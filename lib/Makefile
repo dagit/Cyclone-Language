@@ -72,7 +72,7 @@ SET_H       = set.h        $(LIST_H)
 SPLAY_H     = splay.h      $(CORE_H) $(LIST_H)
 STRING_H    = string.h     $(CORE_H) $(LIST_H)
 XARRAY_H    = xarray.h     $(CORE_H)
-ARG_H       = arg.h        $(CORE_H) $(LIST_H) $(REF_H)
+ARG_H       = arg.h        $(CORE_H) $(LIST_H)
 POSITION_H  = position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
 BITVEC_H    = bitvec.h     $(CORE_H) $(LIST_H) $(SET_H)    $(DICT_H)
 

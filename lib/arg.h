@@ -3,15 +3,14 @@
 
 #include "core.h"
 #include "list.h"
-#include "ref.h"  // FIX: when we get & working just use bool@ below
 
 namespace Arg {
 extern xenum exn {Error, Bad(string)};
 
 extern enum Spec {
   Unit_spec(void (@f)()),         // Call the function with unit argument
-  Set_spec(Ref::ref<Bool>),       // Set the reference to true
-  Clear_spec(Ref::ref<Bool>),     // Set the reference to false
+  Set_spec(bool@),                // Set the reference to true
+  Clear_spec(bool@),              // Set the reference to false
   String_spec(void (@f)(string)), // Call the function with a string argument
   Int_spec(void (@f)(int)),       // Call the function with an int argument
   Rest_spec(void (@f)(string))    // Stop interpreting keywords and call the

@@ -857,9 +857,9 @@ Doc stmt2doc(stmt st) {
              line_doc(),
              text("}"));
     break;
-  case Break_s:    s = text("break;"); break;
-  case Continue_s: s = text("continue;"); break;
-  case Goto_s(x):  s = text(xprintf("goto %s;",x)); break;
+  case Break_s(_):    s = text("break;"); break;
+  case Continue_s(_): s = text("continue;"); break;
+  case Goto_s(x,_):   s = text(xprintf("goto %s;",x)); break;
   case For_s(e1,e2,e3,s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
@@ -881,8 +881,8 @@ Doc stmt2doc(stmt st) {
              line_doc(),
              text("}"));
     break;
-  case Fallthru_s(null): s = text("fallthru;"); break;
-  case Fallthru_s(es): 
+  case Fallthru_s(null,_): s = text("fallthru;"); break;
+  case Fallthru_s(es,_): 
     s = cat3(text("fallthru("), exps2doc_prec(20,es), text(");")); break;
   case Decl_s(d,s1):
     s = cat3(decl2doc(d),

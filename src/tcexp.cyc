@@ -214,13 +214,13 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
       if (i < len) {
 	// FIX: should deal with real formatting
 	switch (fmt_str[i]) {
-	case 'c': desc_types = &cons(uchar_t,    desc_types); break;
-	case 'd': desc_types = &cons(sint_t,     desc_types); break;
-	case 'u': desc_types = &cons(uint_t,     desc_types); break;
-	case 'x': desc_types = &cons(uint_t,     desc_types); break;
-	case 'f': desc_types = &cons(float_t,    desc_types); break;
-	case 's': desc_types = &cons(string_t(), desc_types); break;
-	case 'g': desc_types = &cons(double_t,   desc_types); break;
+	case 'c': desc_types = &cons(uchar_t,      desc_types); break;
+	case 'd': desc_types = &cons(sint_t,       desc_types); break;
+	case 'u': desc_types = &cons(uint_t,       desc_types); break;
+	case 'x': desc_types = &cons(uint_t,       desc_types); break;
+	case 'f': desc_types = &cons(float_t,      desc_types); break;
+	case 's': desc_types = &cons(string_typ(), desc_types); break;
+	case 'g': desc_types = &cons(double_t,     desc_types); break;
 	case '%': break; // skip
 	default: 
 	  terr(fmt->loc, xprintf("bad format character %c",fmt_str[i]));
@@ -398,7 +398,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     if (es == null || es->tl == null)
       return
         expr_err(te,loc,"missing file descriptor or format string in fprintf");
-    if (!unify(es->hd->topt->v, file_t()))
+    if (!unify(es->hd->topt->v, file_typ()))
       terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
 			       typ2string(es->hd->topt->v)));
     check_format_args(te, es->tl->hd, es->tl->tl);
@@ -408,7 +408,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
     if (es == null)
       return expr_err(te,loc,"missing format string in xprintf");
     check_format_args(te, es->hd, es->tl);
-    t = string_t();
+    t = string_typ();
     break;
   default:
     switch (List::length(es)) {
