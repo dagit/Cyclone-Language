@@ -1,5 +1,5 @@
 /* Pratt's Difference-Constraint Solving Algorithm for Assertions.
-   Copyright (C) 2001 Greg Morrisett, Yanling Want, AT&T
+   Copyright (C) 2001 Greg Morrisett, Yanling Wang, AT&T
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it
@@ -499,7 +499,7 @@ static node_t *revnodes(node_t *`H n) {
 static graph_t *copy_graphs(graph_t *gopt) {
   if (gopt == NULL) return NULL;
   let g = (graph_t@)gopt;
-  graph_t @newg = new Graph{.next = copy_graphs(g->next), .rows = NULL};
+  graph_t @newg = new Graph{.next = copy_graphs(g->next),.rows = NULL};
   // insert a row for each term
   node_t *newrs = NULL;
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
@@ -538,6 +538,45 @@ static graph_t *app_graphs(void (@f)(`env,graph_t @`H), `env e, graph_t *`H gs) 
   return gs;
 }
 
+static bool is_relation(Absyn::primop_t p){
+  switch (p){
+  case Absyn::Gt:
+  case Absyn::Lt:
+  case Absyn::Gte:
+  case Absyn::Lte: return true;
+  default: return false;
+  }
+}
+
+static unsigned eval_binop(Absyn::primop_t p, unsigned c1, unsigned c2){
+  switch (p){
+  case Absyn::Plus: return c1 + c2;
+  case Absyn::Times: return c1 * c2;
+  case Absyn::Minus: return c1 - c2;
+  case Absyn::Div: return c1/c2;  /* FIX: c2 == 0? */
+  case Absyn::Mod: return c1 % c2; /* FIX: c2 == 0? */
+  case Absyn::Eq: return c1 == c2;
+  case Absyn::Neq: return c1 != c2;
+  case Absyn::Bitand: return c1 & c2;
+  case Absyn::Bitor: return c1 | c2;
+  case Absyn::Bitxor: return c1 ^ c2;
+  case Absyn::Bitlshift: return c1 << c2;
+  case Absyn::Bitlrshift: return c1 >> c2;
+  default: Tcutil::impos(aprintf("Invalid binop %s during constant evaluation", Absynpp::prim2string(p)));
+  }
+  return 0;
+}
+
+static unsigned eval_unop(Absyn::primop_t p, unsigned c){
+  switch (p){
+  case Absyn::Not: return !c;
+  case Absyn::Bitnot: return ~c;
+  case Absyn::Plus: return c;
+  case Absyn::Minus: return -c;
+  default: Tcutil::impos(aprintf("Invalid unop %s during constant evaluation", Absynpp::prim2string(p)));
+  }
+  return 0;;
+}
 // when ok, the term t is equal to the value i in the graph g.
 static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
   switch(t){
@@ -547,6 +586,17 @@ static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
     if (ok1) add_eq(g,t,binop(Absyn::Plus,t2,uint(c1),topt));
     let $(ok2,c2) = term_is_const(g,t2);
     if (ok2) add_eq(g,t,binop(Absyn::Plus,t1,uint(c2),topt));
+    break;
+  case &Binop(p, t1, t2, topt):
+    if (is_relation(p)) break;
+    let $(ok1,c1) = term_is_const(g,t1);
+    let $(ok2,c2) = term_is_const(g,t2);
+    if (ok1 && ok2) add_eq(g,t,uint(eval_binop(p,c1,c2)));
+    break;
+  case &Unop(p, t1, topt):
+    if (p == Absyn::Numelts) break;
+    let $(ok1, c1) = term_is_const(g,t1);
+    if (ok1) add_eq(g,t,uint(eval_unop(p,c1)));
     break;
   default: break;
   }
