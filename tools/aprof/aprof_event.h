@@ -55,12 +55,7 @@ namespace Aprof {
     string_t region_name;
     struct RegionStats heap_region_stats;
   };
-  struct GrowEvent {
-    string_t region_name;
-    int amount;
-    struct RegionStats heap_region_stats;
-  };
-  struct ShrinkEvent {
+  struct ResizeEvent {
     string_t region_name;
     int amount;
     struct RegionStats heap_region_stats;
@@ -72,8 +67,7 @@ namespace Aprof {
   typedef struct AllocEvent alloc_event_t;
   typedef struct GcEvent gc_event_t;
   typedef struct CreateEvent create_event_t;
-  typedef struct GrowEvent grow_event_t;
-  typedef struct ShrinkEvent shrink_event_t;
+  typedef struct ResizeEvent resize_event_t;
   typedef struct FreeEvent free_event_t;
   
   // The main event definition
@@ -82,14 +76,27 @@ namespace Aprof {
     AllocE(alloc_event_t);
     GcE(gc_event_t);
     CreateE(create_event_t);
-    GrowE(grow_event_t);
-    ShrinkE(shrink_event_t);
+    ResizeE(resize_event_t);
     FreeE(free_event_t);
   };
   
   // For processing profiling files.  Callback will return false
   //   if something goes wrong.
   extern int proc_file(string_t file, fn_t<aprof_event_t,bool,`H> callback);
+
+  // Controls debug printing level to stderr
+  extern bool verbose;
+
+  // Uses proc_file above to generate a graph of the system's memory
+  // usage.  The output graph is printed to stdout as a jgraph graph
+  // (see http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html).
+  // If [no_dynamic] is set to true, only prints heap, unique, and
+  // refcnt region results.
+  extern int generate_graph(string_t<`H> file, bool no_dynamic);
+
+  // Uses proc_file above to generate a tabular summary of per-region
+  // allocation information.
+  extern int generate_summary(string_t<`H> file);
 }
 
 #endif

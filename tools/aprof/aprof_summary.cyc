@@ -1,0 +1,337 @@
+/* Allocation profiler
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <string.h>
+#include <hashtable.h>
+#include <list.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <array.h>
+#include "aprof_event.h"
+
+using Core;
+using Hashtable;
+using Fn;
+using Aprof;
+
+static List::list_t<$(stringptr_t<`H,`H>,
+		      $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
+		      int,int,int)@> totals = NULL;
+static List::list_t<$(stringptr_t<`H,`H>,
+		      $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
+		      int,int,int)@> collated_totals = NULL;
+static int region_count = 0;
+
+static void inctotal(stringptr_t pos, $(int,int) @rtotals) 
+{
+  totals->hd[0][2] += (*rtotals)[0]; 
+  totals->hd[0][3] += (*rtotals)[1];
+  totals->hd[0][4]++;
+}
+
+static void inccount(stringptr_t<`H,`H> rname, 
+		     table_t<stringptr_t<`H,`H>,$(int,int)@`H,`H> tab)
+{
+  let rtotals = new $(rname,new $(tab,0),0,0,0);
+  totals = new List::List(rtotals,totals);
+  iter(inctotal,tab);
+  region_count++;
+}
+
+static void add(stringptr_t<`H,`H> pos, $(int,int) @totals, 
+		$($(stringptr_t<`H,`H>,int,int) @?,int) @closure) {
+  let &$(results,*index) = closure;
+  results[(*index)++] = new $(pos,(*totals)[0],(*totals)[1]);
+}
+
+/* sort by total bytes allocated */
+static int cmp($(stringptr_t,int,int) @@x,$(stringptr_t,int,int) @@y) {
+  let left =  (**x)[1];
+  let right = (**y)[1];
+  if (left>right) return -1;
+  if (left<right) return 1;
+  return 0;
+}
+
+/* sort by total bytes allocated, per region */
+static int listcmp($(stringptr_t<`H,`H>,
+		     $(table_t<stringptr_t<`H,`H>,$(int,int)@`r>,int)@`r3,
+		     int,int,int)@`r2 left,
+		   $(stringptr_t<`H,`H>,
+		     $(table_t<stringptr_t<`H,`H>,$(int,int)@`r>,int)@`r3,
+		     int,int,int)@`r2 right)
+{
+  let &$(_,_,tcl,_,_) = left;
+  let &$(_,_,tcr,_,_) = right;
+  if (tcl > tcr) return -1;
+  if (tcl < tcr) return 1;
+  return 0;
+}
+
+static void print_results(stringptr_t rgn_name, int num_rgns, int count,
+			  $(stringptr_t<`H,`H>,int,int) @?results,
+			  int total_bytes, int total_calls) 
+{
+  printf("\n%s (created %d times):\n",*rgn_name,num_rgns);
+  printf("   Bytes     %%    Calls     %%\n");
+  printf("-----------------------------\n");
+  for (int i = 0; i < count; i++) {
+    let $(pos,byte_count,call_count) = results[i][0];
+    printf("%8d  %4.1f %8d  %4.1f  %s\n",
+           byte_count, 100.0 * byte_count / (double) total_bytes,
+           call_count, 100.0 * call_count / (double) total_calls,
+           *pos);
+  }
+}
+
+static bool remove_from_table(table_t<`a,`b> tab, `a x) {
+  try {
+    lookup(tab,x);
+    Hashtable::remove(tab,x);
+    return true;
+  } catch {
+  default: return false;
+  }
+}
+
+static void count_one(_ k, _ v, int @cnt) {
+  (*cnt)++;
+}
+
+static int count_table(table_t<`a,`b> tab) {
+  int count = 0;
+  iter_c(count_one,tab,&count);
+  return count;
+}
+
+static bool is_empty(table_t<`a,`b> tab) {
+  if (count_table(tab) != 0)
+    return false;
+  else 
+    return true;
+}
+	       
+static void update_table(stringptr_t<`H,`H> pos, $(int,int)@`H stats, 
+			 $(table_t<stringptr_t<`H,`H>, $(int,int)@`H>,int @)@ t)
+{
+  let &$(tab,count) = t;
+  try {
+    let &$(*byte_count,*call_count) = lookup(tab, pos);
+    *byte_count = *byte_count + stats[0][0];
+    *call_count = *call_count + stats[0][1];
+  } catch {
+  case &Not_found:
+    insert(tab, pos, stats); 
+    (*count)++;
+    break;
+  }
+}
+
+static void print_strptrs(stringptr_t<`H,`H> s,_ x) {
+  fprintf(stderr,"%s, ",*s);
+}
+
+static void
+collate_dyn_region(stringptr_t<`H,`H> createloc,
+		   table_t<stringptr_t<`H,`H>,bool> dynregions)
+{
+  int total_bytes = 0, total_calls = 0, total_count = 0;
+  table_t<stringptr_t<`H,`H>,$(int,int)@`H> *tab = NULL;
+  List::list_t<$(stringptr_t<`H,`H>,$(table_t<stringptr_t<`H,`H>,
+		 $(int,int)@`H>,int)@`H,int,int,int)@`H> curr, last;
+  int rgn_cnt = count_table(dynregions);
+  for (curr = totals, last = NULL; 
+       curr != NULL; curr = curr->tl) {
+    /* this is in our list; add entries to our table */
+    if (remove_from_table(dynregions,curr->hd[0][0])) {
+      /* new table, just copy the old one */
+      if (tab == NULL) {
+	tab = new curr->hd[0][1][0][0];
+	total_count += curr->hd[0][4];
+      }
+      /* merge it */
+      else {
+	int cnt = 0;
+	let closure = new $(*tab,&cnt);
+	$(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@ x = curr->hd[0][1];
+	iter_c(update_table, x[0][0], closure);
+	total_count += cnt;
+      }
+      total_bytes += curr->hd[0][2];
+      total_calls += curr->hd[0][3];
+      /* remove the element from the totals list */
+      if (last == NULL)
+	totals = curr->tl;
+      else
+	last = curr->tl;
+    }
+    /* move up our pointer to the last valid element in the list */
+    else
+      last = curr;
+  }
+  /* print out the regions for which there was no allocation */
+  /* JGM: commenting out for now -- too much data
+  if (!is_empty(dynregions)) {
+    fprintf(stderr,"No allocation events for dyn regions @%s\n",*createloc);
+    iter(print_strptrs,dynregions);
+    fprintf(stderr,"\n");
+  }
+  */
+  /* no allocation events for this region */
+  if (tab == NULL)
+    tab = new (create(101, strptrcmp, hash_stringptr));
+  collated_totals = new List::List
+    (new $(createloc,new $(*tab,rgn_cnt),total_bytes,total_calls,total_count), 
+     collated_totals);
+}
+
+struct ProcEnv {
+  table_t<stringptr_t<`H,`H>,
+	  table_t<stringptr_t<`H,`H>,
+		  $(int,int)@`H>> regiontable;
+  table_t<stringptr_t<`H,`H>,table_t<stringptr_t<`H,`H>,bool>> loctab;
+};  
+
+// for processing individual events
+static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
+  switch (event) {
+  case &CreateE(CreateEvent(loc,rname,_)):
+    /* at mapping to location correlation table */
+    let locptr = new loc;
+    try {
+      let names = lookup(env->loctab,locptr);
+      /* we've created a region at this location before,
+	 so let's correlate this dynamic region with all those
+	 past ones created at this spot. */
+      insert(names,new rname,true);
+    } catch {
+    case &Not_found:
+      /* first time; add initial correlation. */
+      table_t<stringptr_t<`H,`H>,bool> tab = 
+	create(101, strptrcmp, hash_stringptr);
+      insert(tab,new rname,true);
+      insert(env->loctab,locptr,tab);
+      break;
+    }
+    break;
+
+  case &AllocE(AllocEvent(loc,rname,count,_)):
+    // ignore freeing of memory for now
+    if (count <= 0) break;
+    // update the region table with this event
+    let rnameptr = new rname;
+    try {
+      let locptr = new loc;
+      let table = lookup(env->regiontable,rnameptr);
+      try {
+	let &$(*byte_count,*call_count) = lookup(table, locptr);
+	*byte_count = *byte_count + count;
+	*call_count = *call_count + 1;
+      } catch {
+      case &Not_found:
+	insert(table, locptr, new $(count,1)); break;
+      }
+    } catch {
+    case &Not_found:
+      /* first time we've seen this (dynamic) region;
+	 add it to the region table.  Should have only
+	 one entry per region. */
+      table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
+	create(101, strptrcmp, hash_stringptr);
+      insert(env->regiontable, rnameptr, table); break;
+    }
+    break;
+
+  case &FreeE(_):
+  case &ResizeE(_):
+  case &GcE(_): break;
+  }
+  return true;
+} 
+
+namespace Aprof;
+
+// creates a tabular summary of all of the data allocated in
+// particular regions.
+int generate_summary(string_t<`H> file) {
+
+  /* We want a table of tables, where each "sub-table"
+     contains the total allocation calls and bytes for each
+     callsite (for the region in question). */
+
+  struct ProcEnv @`H env =
+    new ProcEnv{.regiontable = create(101, strptrcmp, hash_stringptr),
+		.loctab = create(101, strptrcmp, hash_stringptr)};
+
+  /* create tables for the heap */
+  table_t<stringptr_t<`H,`H>,$(int,int)@`H> table =
+    create(101, strptrcmp, hash_stringptr);
+  insert(env->regiontable, new "heap", table);
+  table_t<stringptr_t<`H,`H>,bool> tab = 
+    create(101, strptrcmp, hash_stringptr);
+  insert(tab,new "heap",true);
+  insert(env->loctab,new "heap",tab);
+
+  /* create tables for the unique region */
+  table = create(101, strptrcmp, hash_stringptr);
+  insert(env->regiontable, new "unique", table);
+  tab = create(101, strptrcmp, hash_stringptr);
+  insert(tab,new "unique",true);
+  insert(env->loctab,new "unique",tab);
+
+  // process the file
+  fn_t clos = make_fn(proc_event,env);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
+
+  /* Now we can collate and print the results */
+
+  /* Create a list, one element per region, that totals the
+     entire bytes and calls allocated for each dynamic region. */
+  iter(inccount, env->regiontable);
+
+  /* Now we further compress the list to merge events that are
+     associated with the same call site. */
+//    collated_totals = totals;
+  iter(collate_dyn_region, env->loctab);
+
+  /* Sort the list */
+  totals = List::rimp_merge_sort(listcmp,collated_totals);
+
+  /* Collate the results per region */
+  for (List::list_t<$(stringptr_t<`H,`H>,$(table_t<stringptr_t<`H,`H>,
+		      $(int,int)@`H>,int)@`H, int,int,int)@`H> x = totals; 
+      x != NULL; x = x->tl) {
+    /* create an array to hold the total calls and bytes per site */
+    int num = x->hd[0][4];
+    $(stringptr_t<`H,`H>,int,int)@`H ?results = 
+      new {for i < num : new $((stringptr_t)(new ""),0,0)};
+    let closure = new $(results,0);
+    let tab = x->hd[0][1][0][0];
+    iter_c(add, tab, closure);
+    /* sort it by total allocation size */
+    Array::qsort(cmp,results,numelts(results));
+    /* print it out */
+    print_results(x->hd[0][0],x->hd[0][1][0][1],
+		  num,results,x->hd[0][2],x->hd[0][3]);
+  }
+
+  return 0;
+}

@@ -124,14 +124,14 @@ static list_t<`a,`r> imp_insert_b(region_t<`r> rgn,
     if (i < 0) 
       return rnew(rgn) List(elt,n);
     else {
-      list_t<`a,`r> prev = n;
+      list_t<`a,`r> prev = n, res = n;
       n = n->tl;
       while (n != NULL && (i = cmp(n->hd,elt)) < 0) {
 	prev = prev->tl;
 	n = n->tl;
       }
       prev->tl = rnew(rgn) List(elt,n);
-      return(n);
+      return(res);
     }
   }
 }
@@ -242,24 +242,26 @@ set_t<`a> delete(set_t<`a,`H> s,`a elt) {
  * assumes the elt is in the list exactly once and that the nodes are sorted.
  * Modifies the list in place.
  */
-static list_t<`a> imp_delete_b(int cmp(`a,`a),list_t<`a,`H> n,`a elt) {
+static list_t<`a> imp_delete_b(int cmp(`a,`a),list_t<`a,`H> n,`a elt,`a @ret) {
   if (cmp(n->hd,elt) == 0) return(n->tl);
 
-  list_t<`a> prev = n;
+  list_t<`a> prev = n, res = n;
   n = n->tl;
   while (n != NULL && (cmp(n->hd,elt) != 0)) {
     prev = prev->tl;
     n = n->tl;
   }
   prev->tl = n->tl;
-  return(n);
+  *ret = n->hd;
+  return(res);
 }
 
-/* Delete a elt/pair from the set if present. */
-void imp_delete(set_t<`a,`H> s,`a elt) {
+/* Delete a elt/pair from the set if present and return it. */
+`a imp_delete(set_t<`a,`H> s,`a elt) {
+  `a ret = elt;
   if (member(s,elt))
-    s->nodes = imp_delete_b(s->cmp,s->nodes,elt);
-  return;
+    s->nodes = imp_delete_b(s->cmp,s->nodes,elt,&ret);
+  return ret;
 }
 
 /* Fold a function f across the set yielding an accumulator. */

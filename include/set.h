@@ -85,8 +85,11 @@ extern set_t<`a> diff(set_t<`a,`H> s1,set_t<`a,`H> s2);
 extern set_t<`a> delete(set_t<`a,`H> s,`a elt);
   /** [delete(s,elt)] returns a set whose elements are the elements of
       [s], minus [elt]. */
-extern void imp_delete(set_t<`a,`H> s,`a elt);
-  /** [imp_delete(s,elt)] imperatively deletes [elt] from [s], if present. */
+extern `a imp_delete(set_t<`a,`H> s,`a elt);
+  /** [imp_delete(s,elt)] imperatively deletes [elt] from [s], if
+      present.  returns the element (in case the element in the set
+      differs from [elt] due to how the comparison function was
+      specified). */
 
 extern int cardinality(set_t s);
   /** [cardinality(s)] returns the number of elements in the set [s]. */

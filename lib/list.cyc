@@ -738,6 +738,16 @@ bool mem_assoc(list_t<$(`a,`b)@> l,`a x) {
   return(false);
 }
 
+// Given an association list [(k1,d1),...,(kn,dn)] and a key x,
+// returns true iff there exists a ki s.t. cmp(ki,x) == 0.
+bool mem_assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
+  while (l != NULL) {
+    if (cmp(l->hd[0][0],x) == 0) return(true);
+    l = l->tl;
+  }
+  return(false);
+}
+
 // checks that a list of elements is unique -- assumes they're sorted
 // returns an element that is duplicated if one exists, otherwise returns
 // NULL.

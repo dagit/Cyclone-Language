@@ -4,6 +4,8 @@ include ../../Makefile.inc
 PROG=aprof$(EXE)
 BINDIR=$(CYCDIR)/bin
 CYC_LIB_PATH=$(BINDIR)/lib
+SRCS=aprof aprof_event aprof_summary aprof_graph
+OBJS=$(addsuffix .o, $(SRCS))
 
 install: $(BINDIR)/$(PROG)
 
@@ -17,11 +19,11 @@ CYCC:=$(BINDIR)/$(CYCCOMP)
 $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
-$(PROG): aprof.o aprof_event.o $(CYC_LIB_PATH)/$(CYCLIB)
-	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ aprof.o aprof_event.o $(LDFLAGS)
+$(PROG): $(OBJS) $(CYC_LIB_PATH)/$(CYCLIB)
+	$(CYCC) -L$(CYC_LIB_PATH) -B$(CYC_LIB_PATH)/cyc-lib $(LC_FLAG) -o $@ $(OBJS) $(LDFLAGS)
 
 clean:
-	$(RM) aprof aprof.exe *.o
+	$(RM) aprof aprof.exe $(OBJS)
 
 %.o: %.cyc $(CYCC)
 	$(CYCC) $(CYCFLAGS) -detailedlocation -c $<

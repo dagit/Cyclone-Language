@@ -108,10 +108,8 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     GcE(GcEvent(0,RegionStats(0,0,0)));
   static datatype AProfEvent.CreateE __create_event =
     CreateE(CreateEvent("bogus","bogus",RegionStats(0,0,0)));
-  static datatype AProfEvent.GrowE __grow_event =
-    GrowE(GrowEvent("bogus",0,RegionStats(0,0,0)));
-  static datatype AProfEvent.ShrinkE __shrink_event =
-    ShrinkE(ShrinkEvent("bogus",0,RegionStats(0,0,0)));
+  static datatype AProfEvent.ResizeE __resize_event =
+    ResizeE(ResizeEvent("bogus",0,RegionStats(0,0,0)));
   static datatype AProfEvent.FreeE __free_event =
     FreeE(FreeEvent("bogus",RegionStats(0,0,0)));
 
@@ -190,11 +188,11 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     }
 
     /***********************/
-    /* SHRINK REGION event */
+    /* RESIZE REGION event */
     /***********************/
-    else if (!strcmp(buf,"shrink")) {
+    else if (!strcmp(buf,"resize")) {
       // set up the event
-      let &ShrinkE(ShrinkEvent(*rgn,*amt,*stats)) = &__shrink_event;
+      let &ResizeE(ResizeEvent(*rgn,*amt,*stats)) = &__resize_event;
       if (!getint(f,amt)) {
 	fprintf(stderr,"failed to get shrink amount for %s\n",s);
 	return -1;
@@ -205,30 +203,8 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       *rgn = rname;
       // invoke the handler
-      if (!Fn::apply(callback,&__shrink_event)) {
-	fprintf(stderr,"callback failed for shrink event at %s\n",s);
-	return -1;
-      }
-    }
-
-    /***********************/
-    /* GROW REGION event */
-    /***********************/
-    else if (!strcmp(buf,"grow")) {
-      // set up the event
-      let &GrowE(GrowEvent(*rgn,*amt,*stats)) = &__grow_event;
-      if (!getint(f,amt)) {
-	fprintf(stderr,"failed to get shrink amount for %s\n",s);
-	return -1;
-      }
-      if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
-	return -1;
-      }
-      *rgn = rname;
-      // invoke the handler
-      if (!Fn::apply(callback,&__grow_event)) {
-	fprintf(stderr,"callback failed for grow event at %s\n",s);
+      if (!Fn::apply(callback,&__resize_event)) {
+	fprintf(stderr,"callback failed for resize event at %s\n",s);
 	return -1;
       }
     }
@@ -281,5 +257,6 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     snarfline(f);
   }
 
+  fprintf(stderr,"\n");
   return 0;
 }

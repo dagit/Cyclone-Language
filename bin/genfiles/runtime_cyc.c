@@ -609,7 +609,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = next_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"bogus:0\t%s\tgrow\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"bogus:0\t%s\tresize\t%d\t%d\t%d\t%d\n",
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -631,7 +631,7 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = page_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"bogus:0\t%s\tgrow\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"bogus:0\t%s\tresize\t%d\t%d\t%d\t%d\n",
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -877,7 +877,7 @@ void _free_region(struct _RegionHandle *r) {
     GC_free(p);
     rgn_freed_bytes += sz;
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"bogus:0\t%s\tshrink\t-%d\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"bogus:0\t%s\tresize\t-%d\t%d\t%d\t%d\n",
 	      r->name, sz,
 	      GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
     }

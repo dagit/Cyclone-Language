@@ -1,0 +1,446 @@
+/* Graphical Allocation profiler
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <string.h>
+#include <list.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <array.h>
+#include <fn.h>
+#include <assert.h>
+#include "aprof_event.h"
+
+// Keep track of following information per event
+
+// 1) unique-avail-bytes
+//    update on unique alloc events (+ or - amounts)
+// 2) refcnt-avail-bytes
+//    update on refcnt alloc events (+ or - amounts)
+// 3) total-heap-size, total-free-size
+//    update on heap alloc, unique alloc, refcnt alloc, 
+//              create, resize, free events
+// 4) table that indexes a dynamic region name to a pair $(tot,free)
+//    initialize to 0 on create
+//    update on grow: tot += sz, free += (sz - (oldalloc-oldfree))
+//           on alloc: free -= sz (plus see columns)
+//           on free: remove from table
+//    keep table sorted
+//    what to do about the same region allocated multiple times?  At the
+//      moment, treat them as separate regions.
+
+// At each MM point (alloc, gc, create, free events), live data =
+
+//   current allocated data for live dyn regions
+//   refcnt live data
+//   unique live data
+//   heap = 
+//     total-heap-size - total-free-size - dyn-region size - refcnt live -
+//   unique live
+
+// Will output this information as time-based graph.
+
+using Core;
+using List;
+using Aprof;
+using Fn;
+
+// dynamic regions must consume this much of the total memory at
+//   some point to be shown in the graph
+#define DYN_THRESHHOLD  0.01
+
+// Data that is maintained/updated at each profiled event
+struct ProcEnv {
+  // RUNNING COUNTERS (some redundant)
+  unsigned int cnt;
+  unsigned int total_heap_size;
+  unsigned int total_free_size;
+  unsigned int unique_live_bytes;
+  unsigned int refcnt_live_bytes;
+  unsigned int total_dynregion_size;
+  list_t<$(stringptr_t,$(unsigned int,unsigned int) @) @> dyn_regions;
+
+  // GRAPH POINTS
+  list_t<$(unsigned int,unsigned int)@> gc_points;
+  list_t<$(unsigned int,unsigned int)@> mem_total;
+  list_t<$(unsigned int,unsigned int)@> heap_live;
+  list_t<$(unsigned int,unsigned int)@> unique_live;
+  list_t<$(unsigned int,unsigned int)@> refcnt_live;
+  list_t<$(stringptr_t,list_t<$(unsigned int,unsigned int) @>@) @> dyn_live;
+};
+
+/////////////////////////////// GRAPH OUTPUT
+
+// given a point and the current heap size, outputs a point and
+// updates the heap size.  Note that the points are out of order, so
+// we're processing them backwards.
+static void output_point($(unsigned int ?, unsigned int) @env,
+			 $(unsigned int, unsigned int) @point) {
+  let &$(*heap_size,*last_cnt) = env;
+  let x = (*point)[0];
+  let amt = (*point)[1];
+  // update the heap size for all intervening points (assuming
+  //   we're processing in reverse order)
+  if (*last_cnt == 0) {
+    (*heap_size)[x] += amt;
+    printf("%d %d ",x,(*heap_size)[x]);
+  }
+  else {
+    if (*last_cnt <= x) {
+      if (verbose)
+	fprintf(stderr,"last_cnt = %d, x=%d, amt=%d\n",*last_cnt,x,amt);
+      return;
+    }
+    int last_output_cnt = *last_cnt;
+    int last_output_amt = (*heap_size)[last_output_cnt];
+    for (unsigned int i = *last_cnt-1; i>=x; i--) {
+      (*heap_size)[i] += amt;
+      // if the last y value output is the same as this,
+      // then do nothing; if the y value changes, then we
+      // need to insert a point at the old y value at the prior
+      // x, but only if we didn't already output something at
+      // the prior x.
+      if ((*heap_size)[i] != last_output_amt) {
+	if (last_output_cnt != (i+1))
+	  printf("%d %d ",i+1,(*heap_size)[i+1]);
+	printf("%d %d ",i,(*heap_size)[i]);
+	last_output_cnt = i;
+	last_output_amt = (*heap_size)[i];
+      }
+    }
+  }
+  *last_cnt = x;
+}
+
+static void output_point_no_stack($(unsigned int, unsigned int) @point) {
+  let x = (*point)[0];
+  let y = (*point)[1];
+  printf("%d %d ",x,y);
+}
+
+// output a line representing the live data for a particular region.
+// Update the heap size as we go.
+static void output_line(string_t name,
+			int num,
+			unsigned int ? heap_size,
+			bool no_stack,
+			list_t<$(unsigned int,unsigned int)@> points) {
+  static string_t linetypes[7] =
+    { "solid", "dotted", "dashed", "longdash", "dotdash",
+      "dotdotdash", "dotdotdashdash" };
+  if (points == NULL) return;
+  if (num < 0)
+    printf("newcurve\n  label : %s\n  marktype circle\n linetype none\n",
+	   name);
+  else 
+    printf("newcurve\n  label : %s\n  marktype none\n linetype %s\n",
+	   name, linetypes[num % 7]);
+  printf("  pts ");
+  if (no_stack)
+    iter(output_point_no_stack,points);
+  else {
+    let env = new $(heap_size,(unsigned int)0);
+    iter_c(output_point,env,points);
+  }
+  printf("\n\n");
+}
+
+// go through all of the points in the line and determine if they
+// make up the given percent of the total memory at any point.
+static bool yeah_man(list_t<$(unsigned int,unsigned int) @> dynpts,
+		     list_t<$(unsigned int,unsigned int) @> mempts,
+		     double percent) {
+  for (; dynpts != NULL; dynpts = dynpts->tl) {
+    let dynx = (*dynpts->hd)[0];
+    let dynamt = (*dynpts->hd)[1];
+    int memx = 0, memamt = 0;
+    for (; mempts != NULL; mempts = mempts->tl) {
+      memx = (*mempts->hd)[0];
+      memamt = (*mempts->hd)[1];
+      if (memx <= dynx) break;
+    }
+    assert(memx != 0);
+    if (dynamt / (1.0 * memamt) > percent) return true;
+  }
+  return false;
+}
+
+static void
+output_dynregion_line($(int,unsigned int ?,
+			list_t<$(unsigned int,unsigned int) @>) @env,
+		      $(stringptr_t,
+			list_t<$(unsigned int,unsigned int) @> @) @line) {
+  let &$(*num,heap_size,mempts) = env;
+  let &$(name,pts) = line;
+  if (length(*pts) <= 2) return; // region was empty
+  if (!yeah_man(*pts,mempts,DYN_THRESHHOLD)) return;
+//   fprintf(stderr,"Outputting dynregion %s,%x\n",*name,pts);
+  output_line(*name,*num,heap_size,false,*pts);
+  *num = (*num + 1);
+}
+
+/////////////////////////////// EVENT PROCESSING
+
+// comparisons of list items (for deletion) based on the region name
+static int cmp($(stringptr_t,`a) @x,$(stringptr_t,`a) @y) {
+  return strptrcmp((*x)[0],(*y)[0]);
+}
+
+// adds a point to the list of points
+static list_t<$(unsigned int,unsigned int)@>
+add_point(int cnt, int amt,
+	  list_t<$(unsigned int,unsigned int)@`H,`H> points) {
+  if (points != NULL) {
+//     fprintf(stderr,"adding point $(%d,%d)\n",cnt,amt);
+    let &$(lastcnt,lastamt) = points->hd;
+    if (lastamt == amt) return points;
+    else if (lastcnt != (cnt-1)) {
+//       fprintf(stderr,"adding extra point: lastcnt=%d, lastamt=%d, cnt=%d, amt=%d\n",
+// 	      lastcnt,lastamt,cnt,amt);
+      // need to add in a point just before this one to "tie the knot"
+      points = new List(new $(cnt-1,lastamt),points);
+    }
+  }
+  return new List(new $(cnt,amt),points);
+}
+
+// updates the total heap use statistics.  This should always be
+// last, after updating ProcEnv with particular event info.
+static void update_heap_stats(struct ProcEnv @env,
+			      struct RegionStats @s) {
+  env->total_heap_size = s->region_size_bytes;
+  env->total_free_size = s->free_bytes;
+  env->mem_total =
+    add_point(env->cnt, env->total_heap_size, env->mem_total);
+
+  // Adjust the live size of the heap region.  Assuming that
+  // the refcnt live and unique live are accurate (that this, the
+  // user didn't drop pointers that were then GC'ed), the heap live =
+  //   total-heap-size - total-free-size - dyn-region-size -
+  //   refcnt live - unique live
+  // If this number comes out negative, then we must make it 0, and
+  // remove some data from the unique and/or reference-counted region.
+  // No really good policy here: I'll pull stuff off unique first
+  // (until 0), and then go for the refcounted region.
+  int heap_live = env->total_heap_size - env->total_free_size 
+    - env->total_dynregion_size - env->refcnt_live_bytes
+    - env->unique_live_bytes;
+//   printf("HTS=%d HFS=%d DS=%d RS=%d US=%d\n",env->total_heap_size,
+// 	 env->total_free_size,env->total_dynregion_size,env->refcnt_live_bytes,
+// 	 env->unique_live_bytes);
+  if (heap_live < 0) {
+//     printf("heap=%d\n",heap_live);
+    int unique_live = env->unique_live_bytes + heap_live;
+//     printf("unique=%d\n",unique_live);
+//     fflush(stdout);
+    heap_live = 0;
+    if (unique_live < 0) {
+      int refcnt_live = env->refcnt_live_bytes + unique_live;
+      unique_live = 0;
+      assert(refcnt_live >= 0);
+      env->refcnt_live = add_point(env->cnt,refcnt_live,env->refcnt_live);
+      env->refcnt_live_bytes = refcnt_live;
+    }
+    env->unique_live = add_point(env->cnt,unique_live,env->unique_live);
+    env->unique_live_bytes = unique_live;
+  }
+  env->heap_live = add_point(env->cnt,heap_live,env->heap_live);
+} 
+
+static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
+  // update the event counter
+  env->cnt++;
+  // process the event
+  switch (event) {
+  case &CreateE(CreateEvent(_,rname,*rstats)):
+    let rnameptr = new rname;
+
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+    assert(!mem_assoc_cmp(strptrcmp,env->dyn_regions,rnameptr));
+
+    env->dyn_regions = imp_merge(cmp,env->dyn_regions,
+				 new List(new $(rnameptr,new $(0,0)),NULL));
+    list_t<$(unsigned int,unsigned int) @`H>@`H l =
+      new (new List(new $(env->cnt,0),NULL));
+//     fprintf(stderr,"adding point at time %d for region %s l=%x\n",
+// 	    env->cnt,rname,(unsigned int)l);
+    env->dyn_live = imp_merge(cmp,env->dyn_live,
+			      new List(new $(rnameptr,l),NULL));
+    update_heap_stats(env,rstats);
+    break;
+
+  case &AllocE(AllocEvent(_,rname,count,*rstats)):
+    if (!strcmp(rname,"unique")) {
+      env->unique_live_bytes += count;
+      env->unique_live = 
+	add_point(env->cnt,env->unique_live_bytes,env->unique_live);
+      update_heap_stats(env,rstats);
+    }
+    else if (!strcmp(rname,"refcnt")) {
+      env->refcnt_live_bytes += count;
+      env->refcnt_live =
+	add_point(env->cnt,env->refcnt_live_bytes,env->refcnt_live);
+      update_heap_stats(env,rstats);
+    }
+    else if (!strcmp(rname,"heap")) {
+      update_heap_stats(env,rstats);
+      // ignores count
+    }
+    else { // dynamic region name
+      let rnameptr = new rname;
+      try {
+	// update the tot/free counts
+	let &$(*tot_size,*free_size) =
+	  assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+	*free_size = *free_size - count;
+	// update the points list
+	let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+// 	fprintf(stderr,"adding point at time %d for region %s l=%x\n",
+// 		env->cnt,rname,(unsigned int)l);
+	*l = add_point(env->cnt,*tot_size - *free_size,*l);
+      } catch {
+      case &Not_found:
+	fprintf(stderr,
+		"error: alloc event in uncreated dynamic region %s\n",rname);
+	return false;
+      }
+    }
+    break;
+
+  case &FreeE(FreeEvent(rname,*rstats)):
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    let rnameptr = new rname;
+    try {
+      env->dyn_regions = delete_cmp(cmp,env->dyn_regions,
+				    new $(rnameptr,new $(0,0)));
+      // update the points list
+      let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+//       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
+// 	      env->cnt,rname,(unsigned int)l);
+      *l = add_point(env->cnt,0,*l);      
+    } catch {
+    case &Not_found:
+      fprintf(stderr,
+	      "error: free event in uncreated dynamic region %s\n",rname);
+      return false;
+    }
+    update_heap_stats(env,rstats);
+    break;
+
+  case &ResizeE(ResizeEvent(rname,count,*rstats)):
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    if (count < 0) {
+      env->total_dynregion_size += count;
+      break;
+    }
+
+    let rnameptr = new rname;
+    try {
+      // update the tot/free counts
+      let &$(*tot_size,*free_size) =
+	assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+      let old_tot = *tot_size;
+      let old_free = *free_size;
+      *tot_size = *tot_size + count;
+      *free_size = (count - (old_tot-old_free));
+      env->total_dynregion_size += count;
+      // update point
+      let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+//       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
+// 	      env->cnt,rname,(unsigned int)l);
+      *l = add_point(env->cnt,*tot_size - *free_size,*l);
+    } catch {
+    case &Not_found:
+      fprintf(stderr,
+	      "error: resize event in uncreated dynamic region %s\n",rname);
+      return false;
+    }
+    update_heap_stats(env,rstats);
+    break;
+
+  case &GcE(GcEvent(n,*rstats)):
+    update_heap_stats(env,rstats);
+    env->gc_points = new List(new $(env->cnt,env->total_heap_size),
+			      env->gc_points);
+    break;
+  }
+  
+  return true;
+} 
+
+namespace Aprof;
+
+int generate_graph(string_t<`H> file, bool no_dynamic) {
+  struct ProcEnv @`H env =
+    new ProcEnv{.cnt = 0,
+		.total_heap_size = 0,
+		.total_free_size = 0,
+		.unique_live_bytes = 0,
+		.refcnt_live_bytes = 0,
+		.total_dynregion_size = 0,
+		.dyn_regions = NULL,
+		.gc_points = NULL,
+		.mem_total = NULL,
+		.heap_live = NULL,
+		.unique_live = NULL,
+		.refcnt_live = NULL,
+		.dyn_live = NULL };
+
+  // process the file
+  fn_t clos = make_fn(proc_event,env);
+  int ret = proc_file(file,clos);
+  if (ret != 0) return ret;
+  env->mem_total =
+    new List(new $(env->cnt-1,env->total_heap_size),env->mem_total);
+
+  // output the graph.  General idea: we output each live line one at
+  // a time, and update a global counter of the total live size seen
+  // so far.  Each line is increased by that amount to create a
+  // stacked graph.
+  unsigned int ?heap_size = calloc(env->cnt+1,sizeof(unsigned int));
+
+  // header
+  printf("newgraph\n  xaxis min 1 max %d label : allocation time\n",
+	 env->cnt+1);
+  printf("  yaxis min 1 max %d label : bytes\n\n",
+	 env->total_heap_size + (int)(env->total_heap_size * 0.05));
+
+  // gc
+  output_line(aprintf("GC (%d total)",length(env->gc_points)),
+	      -1,heap_size,true,env->gc_points);
+  // unique
+  output_line("unique",0,heap_size,false,env->unique_live);
+  // heap
+  output_line("heap",1,heap_size,false,env->heap_live);
+  // dynamic/growable regions
+  let dynenv = new $(2,heap_size,env->mem_total);
+  if (!no_dynamic) iter_c(output_dynregion_line,dynenv,env->dyn_live);
+  // total
+  output_line("total reserved",(*dynenv)[0] % 7,heap_size,true,env->mem_total);
+
+  return 0;
+}

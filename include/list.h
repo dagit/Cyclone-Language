@@ -325,6 +325,9 @@ namespace List {
   extern bool mem_assoc(list_t<$(`a,`b)@> l,`a x);
   /** [mem_assoc(l,k)] returns true if [k] is a key in association
       list [l] (according to [==]).  */
+  extern bool mem_assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x);
+  /** Same as [mem_assoc], but uses comparison function [cmp] rather
+      than pointer equality ==. */
 
   extern list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x);
   /** [delete(l,k)] returns the list with the first occurence of [x]
