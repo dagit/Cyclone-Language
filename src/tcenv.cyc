@@ -91,7 +91,6 @@ struct Tenv<`g::R,`l::R> {
 // Global environments -- what's declared in a global scope
 struct Genv<`g::R> {
   region_t<`g> grgn;   // region for allocating globals
-  set_t<var_t,`g>                   namespaces;
   Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
   Dict::dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
   Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
@@ -99,7 +98,6 @@ struct Genv<`g::R> {
   Dict::dict_t<var_t,typedefdecl_t,`g> typedefs;
   // bool for tree-shaking
   Dict::dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
-  // abs. names of "using" namespaces
 };
 // Region notes:  the @ pointers for aggrdecl_t, datatypedecl_t,
 // and enumdecl_t show up in the abstract syntax, so we make them
@@ -191,7 +189,6 @@ binding_t lookup_binding(bnds_t bs, var_t v) {
 
 genv_t<`r> empty_genv(region_t<`r> r) {
   return rnew(r) Genv{.grgn        = r,
-                      .namespaces  = Set::rempty(r,strptrcmp),
                       .aggrdecls   = Dict::rempty(r,strptrcmp),
                       .datatypedecls = Dict::rempty(r,strptrcmp),
                       .enumdecls   = Dict::rempty(r,strptrcmp),
@@ -216,113 +213,57 @@ tenv_t<`r,`r> tc_init(region_t<`r> r) {
 }
 
 // lookup functions
-static list_t<var_t> outer_namespace(list_t<var_t> ns) {
-  if (ns == NULL)
-    return env_err("outer_namespace");
-  return List::rev(List::rev(ns)->tl);
-}
-
-static bool same_namespace(list_t<var_t,`H> n1, list_t<var_t,`H> n2) {
-  if (n1 == n2) return true;
-  for (; n1 != NULL; n1 = n1->tl) {
-    if (n2 == NULL) return false;
-    if (strptrcmp(n1->hd,n2->hd) != 0) return false;
-    n2 = n2->tl;
-  }
-  if (n2 != NULL) return false;
-  return true;
-}
-
-static resolved_t lookup_ordinary_global_f(genv_t ge,var_t v,bool is_use) {
-  let ord = ge->ordinaries;
-  $(resolved_t,bool)@ ans = Dict::lookup(ord,v);
-  if (is_use)
-    (*ans)[1] = true;
-  return (*ans)[0];
-}
 static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
-    return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v,is_use);
+    let ans = Dict::lookup(Dict::lookup(te->ae,y)->ordinaries,v);
+    if(is_use)
+      (*ans)[1] = true;
+    return (*ans)[0];
   default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
-}
-
-static aggrdecl_t @ lookup_aggrdecl_f(genv_t ge,var_t v,bool ignore) {
-  let ag = ge->aggrdecls;
-  return Dict::lookup(ag,v);
 }
 aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    let ads = Dict::lookup(te->ae,y)->aggrdecls;
-    return Dict::lookup(ads,v);
-  default: 
-    terr(loc,"??? %s",qvar2string(q));
-    throw new Core::Impossible("compiler-bug: relative name in tcenv");
+  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->aggrdecls, v);
+  default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
-}
-
-static datatypedecl_t @ lookup_datatypedecl_f(genv_t ge,var_t v,bool ignore) {
-  let tds = ge->datatypedecls;
-  return Dict::lookup(tds,v);
 }
 datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    let tds = Dict::lookup(te->ae,y)->datatypedecls;
-    return Dict::lookup(tds,v);
+  case {.Abs_n = y}: 
+    return Dict::lookup(Dict::lookup(te->ae,y)->datatypedecls, v);
   default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
 }
-
-static datatypedecl_t @ lookup_xdatatypedecl_f(genv_t ge,var_t v,bool ignore) {
-  return Dict::lookup(ge->datatypedecls,v);
-}
-
 datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
-    let tds = Dict::lookup(te->ae,y)->datatypedecls;
-    return rnew(r) Dict::lookup(tds,v);
+    return rnew(r) Dict::lookup(Dict::lookup(te->ae,y)->datatypedecls,v);
   default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
-}
-
-static enumdecl_t @lookup_enumdecl_f(genv_t ge, var_t v,bool ignore) {
-  let eds = ge->enumdecls;
-  return Dict::lookup(eds,v);
 }
 enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    let eds = Dict::lookup(te->ae,y)->enumdecls;
-    return Dict::lookup(eds,v);
+  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->enumdecls,v);
   default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
-}
-
-static typedefdecl_t lookup_typedefdecl_f(genv_t ge,var_t v,bool ignore) {
-  let tds = ge->typedefs;
-  return Dict::lookup(tds,v);
 }
 typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    let tds = Dict::lookup(te->ae,y)->typedefs;
-    return Dict::lookup(tds,v);
+  case {.Abs_n = y}: return Dict::lookup(Dict::lookup(te->ae,y)->typedefs,v);
   default: throw new Core::Impossible("compiler-bug: relative name in tcenv");
   }
 }

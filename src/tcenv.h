@@ -59,7 +59,6 @@ typedef datatype Resolved @`r resolved_t<`r>;
 // FIX: We should tree-shake the type declarations too!
 extern struct Genv<`g::R> {
   region_t<`g> grgn;
-  set_t<var_t,`g>                  namespaces;
   dict_t<var_t,aggrdecl_t@,`g>     aggrdecls;
   dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
   dict_t<var_t,enumdecl_t@,`g>     enumdecls;

@@ -1046,11 +1046,10 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       let ns  = te->ns;
       let ns2 = List::append(ns,new List(v,NULL));
 
-      // Make sure namespace v has been declared in the current namespace
-      if (!Set::member(ge->namespaces,v)) {
-        ge->namespaces = Set::rinsert(grgn,ge->namespaces,v);
+      // Make sure namespace v exists (going away soon)
+      if(!Dict::member(te->ae,ns2))
         te->ae = Dict::insert(te->ae, ns2, empty_genv(grgn));
-      } 
+
       // Do the nested declarations then restore the namespace
       te->ns = ns2;
       tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
