@@ -335,15 +335,17 @@ int main(int argc, char ??argv) {
     while(is_change && check_time() > 2) {
       is_change = false;
       fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
-      d = TagElim::up_opt(b,d)[0];
+      d = TagElim::up_opt(d)[0];
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
       d = down_opt(init_context,d);
       ++round_num;
     }
-    if(round_num > 1 && check_time() > 5) {
+    if(round_num > 1 && check_time() > 8) {
       fprintf(stderr,"%d\nup_shuffle...", check_time()); fflush(stderr);
       d = TagElim::up_shuffle(d)[0];
-      // down_opt must precede up_opt
+      fprintf(stderr,"%d\nunder_elim...", check_time()); fflush(stderr);
+      d = TagElim::under_elim(d)[0];
+            // down_opt must precede up_opt
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
       d = down_opt(init_context,d);
       is_change = true;

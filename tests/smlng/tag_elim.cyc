@@ -49,7 +49,7 @@ union Synth {
 synth_t init;
 
 // currently destructive (of doc), but could easily be made functional
-$(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
+$(doc_t, synth_t) up_opt(doc_t doc) {
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
@@ -61,17 +61,15 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       return $(Mt,synth);
     }
     if(ds->tl == null)
-      return up_opt(b,ds->hd);
+      return up_opt(ds->hd);
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
     while(ds != null) {
-      let $(newd, inner_synth) = up_opt(b, ds->hd);
+      let $(newd, inner_synth) = up_opt(ds->hd);
       ds->hd = newd; // destructive here
       if(inner_synth.s.mt_doc) {
 	prev->tl = ds->tl;
 	ds = ds->tl;
-	if(prev == *dsp && false) 
-	  *dsp = prevprev = prev = prev->tl;
 	continue;
       }
       // look for reasons to split the sequence and wrap with a redundant tag
@@ -123,8 +121,7 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	else {
 	  prev = new List(d,next);
 	  prevprev->tl = null;
-	  *dsp =// imp_append(*dsp,prev);
-	    new List(new Seq(*dsp), prev);
+	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
 	  prevprev = *dsp; // comment this line if use imp_append!
 	}
 	ds = next;
@@ -137,16 +134,18 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
       }
     }
     return $(doc,synth);
-  case &Text(pos): 
+  case &Text(_): 
     synth_t synth;
     synth.i = 0;
     synth.s.sizes  = ~0;
     synth.s.colors = ~0;
     return $(doc,synth);
-  case &Tagged(tag,d):
-    let $(d2, synth) = up_opt(b, d);
+  case &Tagged(tag,*dp):
+    let d = *dp;
+    let $(d2, synth) = up_opt(d);
     if(synth.s.mt_doc)
       return $(d,synth);
+    *dp = d2; // destructive
     bool useless = false;
 #define USELESS(FIELD) do {useless=synth.s.FIELD; synth.s.FIELD=true;} while(0)
 #define SEEN(FIELD) do {synth.s.FIELD=true;} while(0)
@@ -194,10 +193,8 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 #undef SEEN
     if(useless)
       return $(d2,synth);
-    else if(d2 == d)
-      return $(doc,synth);
     else
-      return $(new Tagged(tag,d2),synth);
+      return $(doc,synth);
   case Mt: 
     synth_t synth;
     synth.i = ~0;
@@ -335,3 +332,116 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
   }
 }
         
+// This should also be run after useless things are eliminated, though I'm
+// not sure it's crucial.  It tries to percolate underlines up.
+// Rough idea: synthesize the minimum U level on all paths to a leaf or
+// a plain.  When two adjacent have a minimum above 0, immediately wrap
+// with the minimum and go down each path nuking that many.
+// More complicated because we can do better when PL guards all paths.
+
+struct UnderSynth {
+  unsigned char ulevel;
+  unsigned char all_plain; // a boolean -- means ulevel is irrelevant
+};
+
+doc_t nuke_under(doc_t doc, int ulevel) {
+  switch(doc) {
+  case &Text(_): throw new Impossible("nuke_under reached a Text");
+  case &Tagged(tag,*dp):
+    if(tag == PL_tag)
+      return doc;
+    if(tag == U_tag) {
+      if(ulevel > 1)
+	*dp = nuke_under(*dp,ulevel-1);
+      return *dp;
+    }
+    *dp = nuke_under(*dp,ulevel);
+    return doc;
+  case &Seq(ds):
+    for(; ds != null; ds = ds->tl)
+      ds->hd = nuke_under(ds->hd,ulevel);
+    return doc;
+  case Mt: return Mt;
+  }
+}
+
+$(doc_t,under_synth_t) under_elim(doc_t doc) {
+  switch(doc) {
+  case &Text(_): return $(doc,UnderSynth(0,false));
+  case &Tagged(tag,*dp):
+    let $(d,synth) = under_elim(*dp);
+    *dp = d;
+    if(tag == PL_tag)
+      return $(doc,UnderSynth(0,true));
+    if(tag != U_tag)
+      return $(doc,synth);
+    else if(synth.all_plain)
+      return $(doc,UnderSynth(1,false));
+    else if(synth.ulevel < 3)
+      return $(doc,UnderSynth((unsigned char)(synth.ulevel + 1), false));
+    else
+      return $(doc,synth);
+  case &Seq(*dsp):
+    // FIX: SHARE THIS LOGIC WITH OTHER PASSES
+    let ds = *dsp;
+    if(ds == null)
+      return $(Mt,UnderSynth(0,true)); // okay to set all_plain?!?!
+    else if(ds->tl == null)
+      return under_elim(ds->hd);
+    under_synth_t synth = UnderSynth(0,false);
+    under_synth_t prev_synth = synth;
+    list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
+    list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
+    while(ds != null) {
+      let $(newd, inner_synth) = under_elim(ds->hd);
+      ds->hd = newd; // destructive here
+
+      synth.ulevel = synth.ulevel < inner_synth.ulevel ? 
+	synth.ulevel : inner_synth.ulevel;
+      synth.all_plain = synth.all_plain && inner_synth.all_plain;
+
+      int ulevel;
+      if(prev_synth.ulevel == 0 || inner_synth.ulevel == 0)
+	ulevel = 0;
+      else if(prev_synth.all_plain && !inner_synth.all_plain)
+	ulevel = inner_synth.ulevel;
+      else if(!prev_synth.all_plain && inner_synth.all_plain)
+	ulevel = prev_synth.ulevel;
+      else if(!prev_synth.all_plain && !inner_synth.all_plain)
+	ulevel = (prev_synth.ulevel < inner_synth.ulevel) ? 
+	  prev_synth.ulevel : inner_synth.ulevel;
+      else
+	ulevel = 0;
+      if(ulevel > 0) {
+	prev->hd = nuke_under(prev->hd, ulevel);
+	ds->hd   = nuke_under(ds->hd,   ulevel);
+	// IN PLACE sequence splitting
+	let next = ds->tl;
+	ds->tl = null;
+	doc_t d = new Seq(prev);
+	for(; ulevel > 0; --ulevel)
+	  d = new Tagged(U_tag,d);
+	// COPIED FROM up_opt
+	if(prev == *dsp) 
+	  *dsp = prevprev = prev = new List(d,next);
+	else {
+	  prev = new List(d,next);
+	  prevprev->tl = null;
+	  *dsp = new List(new Seq(*dsp), prev); // imp_append(*dsp,prev);
+	  prevprev = *dsp; // comment this line if use imp_append!
+	}
+	ds = next;
+	prev_synth = synth;
+      } else {
+	prevprev = prev;
+	prev = ds;
+	ds = ds->tl;
+	prev_synth = inner_synth;
+      }
+    }
+    return $(doc,synth);
+
+  case Mt: return $(Mt,UnderSynth(0,true)); // okay to set all_plain?!?!
+  }    
+}
+

@@ -2,7 +2,6 @@
 #define TAG_ELIM_H
 
 #include "smlng.h"
-#include "buffer.h"
 
 namespace TagElim {
 extern struct SynthS {
@@ -30,7 +29,7 @@ extern union Synth {
   unsigned long long i;
 };
 typedef union Synth synth_t; // not a pointer
-extern $(doc_t, synth_t) up_opt(Buffer::buf_t, doc_t);
+extern $(doc_t, synth_t) up_opt(doc_t);
 
 extern struct ShuffleSynth {
   bool color: 1;
@@ -39,6 +38,14 @@ extern struct ShuffleSynth {
 typedef struct ShuffleSynth shuffle_synth_t;
 
 $(doc_t,shuffle_synth_t) up_shuffle(doc_t d);
-}
 
+extern struct UnderSynth {
+  unsigned char ulevel;
+  unsigned char all_plain; // a boolean -- means ulevel is irrelevant
+};
+typedef struct UnderSynth under_synth_t;
+
+$(doc_t,under_synth_t) under_elim(doc_t doc);
+
+}
 #endif
