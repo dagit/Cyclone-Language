@@ -22,9 +22,7 @@
 
 #include <cycboot.h>  // for size_t
 
-#ifndef __CYGWIN__
 extern int strcasecmp(buffer_t, buffer_t);
 extern int strncasecmp(buffer_t s1, buffer_t s2, size_t len);
-#endif
 
 #endif

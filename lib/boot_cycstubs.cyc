@@ -190,3 +190,8 @@ using Core;
     return response ? buf : NULL;
   }
 
+  namespace Execinfo {
+    int bt() {
+      return 1;
+    }
+  }

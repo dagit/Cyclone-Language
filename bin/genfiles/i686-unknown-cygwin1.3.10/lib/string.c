@@ -783,16 +783,18 @@ _dyneither_ptr s,struct _dyneither_ptr accept);struct _dyneither_ptr Cyc_strtok(
 struct _dyneither_ptr s,struct _dyneither_ptr delim);struct Cyc_List_List*Cyc_explode(
 struct _dyneither_ptr s);struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*,
 struct _dyneither_ptr s);struct _dyneither_ptr Cyc_implode(struct Cyc_List_List*c);
-void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,
-unsigned int line);char*strerror(int errnum);unsigned long Cyc_strlen(struct
-_dyneither_ptr s){unsigned long i;unsigned int sz=_get_dyneither_size(s,sizeof(char));
-for(i=0;i < sz;++ i){if(((const char*)s.curr)[(int)i]== '\000')return i;}return i;}
-int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2){if(s1.curr == s2.curr)
-return 0;{int i=0;unsigned int sz1=_get_dyneither_size(s1,sizeof(char));
-unsigned int sz2=_get_dyneither_size(s2,sizeof(char));unsigned int minsz=sz1 < sz2?
-sz1: sz2;minsz <= _get_dyneither_size(s1,sizeof(char)) && minsz <= 
-_get_dyneither_size(s2,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
-struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= numelts(s1) && minsz <= numelts(s2)";
+int Cyc_strcasecmp(struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_strncasecmp(
+struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);void*Cyc___assert_fail(
+struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line);char*
+strerror(int errnum);unsigned long Cyc_strlen(struct _dyneither_ptr s){unsigned long
+i;unsigned int sz=_get_dyneither_size(s,sizeof(char));for(i=0;i < sz;++ i){if(((
+const char*)s.curr)[(int)i]== '\000')return i;}return i;}int Cyc_strcmp(struct
+_dyneither_ptr s1,struct _dyneither_ptr s2){if(s1.curr == s2.curr)return 0;{int i=0;
+unsigned int sz1=_get_dyneither_size(s1,sizeof(char));unsigned int sz2=
+_get_dyneither_size(s2,sizeof(char));unsigned int minsz=sz1 < sz2?sz1: sz2;minsz <= 
+_get_dyneither_size(s1,sizeof(char)) && minsz <= _get_dyneither_size(s2,sizeof(
+char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,
+unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= numelts(s1) && minsz <= numelts(s2)";
 _tag_dyneither(_tmp0,sizeof(char),45);}),({const char*_tmp1="string.cyc";
 _tag_dyneither(_tmp1,sizeof(char),11);}),59);while(i < minsz){char c1=((const char*)
 s1.curr)[i];char c2=((const char*)s2.curr)[i];if(c1 == '\000'){if(c2 == '\000')

@@ -185,10 +185,6 @@ void _pop_dynregion() {
   _npop_handler(0);
 }
 
-#ifndef __linux__
-int backtrace(int *array, int size) { return 0; }
-#endif
-
 extern int Cyc_Execinfo_bt(void);
 static struct _handler_cons top_handler;
 static int in_backtrace = 0; // avoid infinite exception chain

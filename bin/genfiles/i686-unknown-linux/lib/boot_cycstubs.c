@@ -794,4 +794,4 @@ Cyc_Core_Failure,{_tmp10,_tmp10,_tmp10 + 29}};struct _dyneither_ptr Cyc_getcwd(
 struct _dyneither_ptr buf,unsigned long size){if(_get_dyneither_size(buf,sizeof(
 char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{char*_tmp11=getcwd((char*)
 _check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);return(unsigned int)
-_tmp11?buf: _tag_dyneither(0,0,0);};}
+_tmp11?buf: _tag_dyneither(0,0,0);};}int Cyc_Execinfo_bt(){return 1;}
