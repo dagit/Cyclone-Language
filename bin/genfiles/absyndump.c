@@ -1500,7 +1500,7 @@ if((args->tl != 0  || c_varargs) || cyc_varargs != 0)Cyc_Absyndump_dump_char((in
 if(c_varargs){
 const char*_tmp414;Cyc_Absyndump_dump(((_tmp414="...",_tag_dyneither(_tmp414,sizeof(char),4))));}else{
 if(cyc_varargs != 0){
-struct _tuple8*_tmp415;struct _tuple8*_tmpFF=(_tmp415=_cycalloc(sizeof(*_tmp415)),((_tmp415->f1=((struct Cyc_Absyn_VarargInfo*)_check_null(cyc_varargs))->name,((_tmp415->f2=((struct Cyc_Absyn_VarargInfo*)_check_null(cyc_varargs))->tq,((_tmp415->f3=((struct Cyc_Absyn_VarargInfo*)_check_null(cyc_varargs))->type,_tmp415)))))));
+struct _tuple8*_tmp415;struct _tuple8*_tmpFF=(_tmp415=_cycalloc(sizeof(*_tmp415)),((_tmp415->f1=cyc_varargs->name,((_tmp415->f2=cyc_varargs->tq,((_tmp415->f3=cyc_varargs->type,_tmp415)))))));
 {const char*_tmp416;Cyc_Absyndump_dump(((_tmp416="...",_tag_dyneither(_tmp416,sizeof(char),4))));}
 if(cyc_varargs->inject){const char*_tmp417;Cyc_Absyndump_dump(((_tmp417=" inject ",_tag_dyneither(_tmp417,sizeof(char),9))));}
 Cyc_Absyndump_dumpfunarg(_tmpFF);}}
@@ -1761,7 +1761,7 @@ Cyc_Absyndump_dumpexp_prec(0,e);}
 # 902
 void Cyc_Absyndump_dumpswitchclauses(struct Cyc_List_List*scs){
 for(0;scs != 0;scs=scs->tl){
-struct Cyc_Absyn_Switch_clause*_tmp1EB=(struct Cyc_Absyn_Switch_clause*)((struct Cyc_List_List*)_check_null(scs))->hd;
+struct Cyc_Absyn_Switch_clause*_tmp1EB=(struct Cyc_Absyn_Switch_clause*)scs->hd;
 if(_tmp1EB->where_clause == 0  && (_tmp1EB->pattern)->r == (void*)& Cyc_Absyn_Wild_p_val){
 const char*_tmp473;Cyc_Absyndump_dump(((_tmp473="default:",_tag_dyneither(_tmp473,sizeof(char),9))));}else{
 # 908

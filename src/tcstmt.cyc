@@ -351,7 +351,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       te = clear_fallthru(r,te);
       for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
-        let pat_res = tcPat(te,p,&t,deep_copy_exp(true,e));
+        let pat_res = tcPat(te,p,&t,e);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
         if (!unify((type_t)p->topt,t)) { // allow silent_castable?
@@ -556,7 +556,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcExpInitializer(te,NULL,e);
         //FIX: can pass region if e an lvalue
         type_t pat_type = (type_t)e->topt;
-        let pat_res = tcPat(te,p,&pat_type,deep_copy_exp(true,e));
+        let pat_res = tcPat(te,p,&pat_type,e);
         *vds = new Opt(pat_res.patvars);
         if (!unify((type_t)p->topt,(type_t)e->topt)
             && !coerce_assign(te,e,(type_t)p->topt)) {

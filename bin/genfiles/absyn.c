@@ -1938,7 +1938,7 @@ struct Cyc_Absyn_TypeDecl*Cyc_Absyn_datatype_tdecl(enum Cyc_Absyn_Scope s,struct
 struct Cyc_Absyn_Datatype_td_Absyn_Raw_typedecl_struct*_tmp368;struct Cyc_Absyn_Datatypedecl*_tmp367;struct Cyc_Absyn_Datatype_td_Absyn_Raw_typedecl_struct _tmp366;struct Cyc_Absyn_TypeDecl*_tmp365;return(_tmp365=_cycalloc(sizeof(*_tmp365)),((_tmp365->r=(void*)((_tmp368=_cycalloc(sizeof(*_tmp368)),((_tmp368[0]=((_tmp366.tag=2,((_tmp366.f1=((_tmp367=_cycalloc(sizeof(*_tmp367)),((_tmp367->sc=s,((_tmp367->name=n,((_tmp367->tvs=ts,((_tmp367->fields=fs,((_tmp367->is_extensible=is_extensible,_tmp367)))))))))))),_tmp366)))),_tmp368)))),((_tmp365->loc=loc,_tmp365)))));}
 # 866 "absyn.cyc"
 static void Cyc_Absyn_expand_arg(struct _tuple8*a){
-void*_tmp13D=(*((struct _tuple8*)_check_null(a))).f3;
+void*_tmp13D=(*a).f3;
 void*_tmp13E=Cyc_Absyn_pointer_expand(_tmp13D,1);
 if(_tmp13D != _tmp13E)
 (*a).f3=_tmp13E;}
@@ -2104,9 +2104,9 @@ return((struct Cyc_Absyn_Aggrfield*)_tmp1EB->hd)->requires_clause == 0;_LLF9: {s
 union Cyc_Absyn_AggrInfoU _tmp1EE=_tmp1ED;struct Cyc_Absyn_Aggrdecl*_tmp1EF;enum Cyc_Absyn_AggrKind _tmp1F0;enum Cyc_Absyn_AggrKind _tmp1F1;int _tmp1F2;_LLFE: if((_tmp1EE.KnownAggr).tag != 2)goto _LL100;_tmp1EF=*((struct Cyc_Absyn_Aggrdecl**)(_tmp1EE.KnownAggr).val);_LLFF:
 # 1070
  if(_tmp1EF->kind != Cyc_Absyn_UnionA)return 0;{
-struct Cyc_Absyn_AggrdeclImpl*_tmp1F3=((struct Cyc_Absyn_Aggrdecl*)_check_null(_tmp1EF))->impl;
+struct Cyc_Absyn_AggrdeclImpl*_tmp1F3=_tmp1EF->impl;
 if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp1F3))->tagged)return 0;{
-struct Cyc_List_List*_tmp1F4=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp1F3))->fields;
+struct Cyc_List_List*_tmp1F4=_tmp1F3->fields;
 if(_tmp1F4 == 0)return 1;
 return((struct Cyc_Absyn_Aggrfield*)_tmp1F4->hd)->requires_clause == 0;};};_LL100: if((_tmp1EE.UnknownAggr).tag != 1)goto _LL102;_tmp1F0=((struct _tuple2)(_tmp1EE.UnknownAggr).val).f1;if(((struct _tuple2)(_tmp1EE.UnknownAggr).val).f3 != 0)goto _LL102;_LL101:
  return _tmp1F0 == Cyc_Absyn_UnionA;_LL102: if((_tmp1EE.UnknownAggr).tag != 1)goto _LLFD;_tmp1F1=((struct _tuple2)(_tmp1EE.UnknownAggr).val).f1;if(((struct _tuple2)(_tmp1EE.UnknownAggr).val).f3 == 0)goto _LLFD;_tmp1F2=(int)(((struct _tuple2)(_tmp1EE.UnknownAggr).val).f3)->v;_LL103:
@@ -2123,9 +2123,9 @@ return((struct Cyc_Absyn_Aggrfield*)_tmp1F7->hd)->requires_clause != 0;_LL107: {
 union Cyc_Absyn_AggrInfoU _tmp1FA=_tmp1F9;struct Cyc_Absyn_Aggrdecl*_tmp1FB;enum Cyc_Absyn_AggrKind _tmp1FC;enum Cyc_Absyn_AggrKind _tmp1FD;int _tmp1FE;_LL10C: if((_tmp1FA.KnownAggr).tag != 2)goto _LL10E;_tmp1FB=*((struct Cyc_Absyn_Aggrdecl**)(_tmp1FA.KnownAggr).val);_LL10D:
 # 1090
  if(_tmp1FB->kind != Cyc_Absyn_UnionA)return 0;{
-struct Cyc_Absyn_AggrdeclImpl*_tmp1FF=((struct Cyc_Absyn_Aggrdecl*)_check_null(_tmp1FB))->impl;
+struct Cyc_Absyn_AggrdeclImpl*_tmp1FF=_tmp1FB->impl;
 if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp1FF))->tagged)return 0;{
-struct Cyc_List_List*_tmp200=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp1FF))->fields;
+struct Cyc_List_List*_tmp200=_tmp1FF->fields;
 if(_tmp200 == 0)return 0;
 return((struct Cyc_Absyn_Aggrfield*)_tmp200->hd)->requires_clause != 0;};};_LL10E: if((_tmp1FA.UnknownAggr).tag != 1)goto _LL110;_tmp1FC=((struct _tuple2)(_tmp1FA.UnknownAggr).val).f1;if(((struct _tuple2)(_tmp1FA.UnknownAggr).val).f3 != 0)goto _LL110;_LL10F:
  return 0;_LL110: if((_tmp1FA.UnknownAggr).tag != 1)goto _LL10B;_tmp1FD=((struct _tuple2)(_tmp1FA.UnknownAggr).val).f1;if(((struct _tuple2)(_tmp1FA.UnknownAggr).val).f3 == 0)goto _LL10B;_tmp1FE=(int)(((struct _tuple2)(_tmp1FA.UnknownAggr).val).f3)->v;_LL111:

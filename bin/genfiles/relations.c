@@ -1078,7 +1078,7 @@ struct _tuple12 _tmpC4;struct _tuple12 _stmttmp0=(_tmpC4.f1=r1,((_tmpC4.f2=r2,_t
 struct Cyc_List_List*Cyc_Relations_add_relation(struct _RegionHandle*rgn,union Cyc_Relations_RelnOp rop1,enum Cyc_Relations_Relation relation,union Cyc_Relations_RelnOp rop2,struct Cyc_List_List*relns){
 # 58
 {struct Cyc_List_List*_tmpE=relns;for(0;_tmpE != 0;_tmpE=_tmpE->tl){
-struct Cyc_Relations_Reln*_tmpF=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(_tmpE))->hd;
+struct Cyc_Relations_Reln*_tmpF=(struct Cyc_Relations_Reln*)_tmpE->hd;
 if((Cyc_Relations_same_relop(_tmpF->rop1,rop1) && _tmpF->relation == relation) && 
 Cyc_Relations_same_relop(_tmpF->rop2,rop2))return relns;}}{
 # 63
@@ -1088,10 +1088,10 @@ int Cyc_Relations_relns_approx(struct Cyc_List_List*r2s,struct Cyc_List_List*r1s
 if(r1s == r2s)return 1;
 # 70
 for(0;r1s != 0;r1s=r1s->tl){
-struct Cyc_Relations_Reln*_tmp12=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(r1s))->hd;
+struct Cyc_Relations_Reln*_tmp12=(struct Cyc_Relations_Reln*)r1s->hd;
 int found=0;
 {struct Cyc_List_List*_tmp13=r2s;for(0;_tmp13 != 0;_tmp13=_tmp13->tl){
-struct Cyc_Relations_Reln*_tmp14=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(_tmp13))->hd;
+struct Cyc_Relations_Reln*_tmp14=(struct Cyc_Relations_Reln*)_tmp13->hd;
 if(_tmp12 == _tmp14  || (Cyc_Relations_same_relop(_tmp12->rop1,_tmp14->rop1) && _tmp12->relation == _tmp14->relation) && 
 # 77
 Cyc_Relations_same_relop(_tmp12->rop2,_tmp14->rop2)){
@@ -1108,10 +1108,10 @@ if(r1s == r2s)return r1s;{
 struct Cyc_List_List*res=0;
 int diff=0;
 {struct Cyc_List_List*_tmp15=r1s;for(0;_tmp15 != 0;_tmp15=_tmp15->tl){
-struct Cyc_Relations_Reln*_tmp16=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(_tmp15))->hd;
+struct Cyc_Relations_Reln*_tmp16=(struct Cyc_Relations_Reln*)_tmp15->hd;
 int found=0;
 {struct Cyc_List_List*_tmp17=r2s;for(0;_tmp17 != 0;_tmp17=_tmp17->tl){
-struct Cyc_Relations_Reln*_tmp18=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(_tmp17))->hd;
+struct Cyc_Relations_Reln*_tmp18=(struct Cyc_Relations_Reln*)_tmp17->hd;
 if(_tmp16 == _tmp18  || (Cyc_Relations_same_relop(_tmp16->rop1,_tmp18->rop1) && _tmp16->relation == _tmp18->relation) && 
 # 99
 Cyc_Relations_same_relop(_tmp16->rop2,_tmp18->rop2)){
@@ -1135,7 +1135,7 @@ struct Cyc_List_List*Cyc_Relations_reln_kill_var(struct _RegionHandle*rgn,struct
 struct Cyc_List_List*p;
 int found=0;
 for(p=rs;!found  && p != 0;p=p->tl){
-struct Cyc_Relations_Reln*_tmp1D=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(p))->hd;
+struct Cyc_Relations_Reln*_tmp1D=(struct Cyc_Relations_Reln*)p->hd;
 if(Cyc_Relations_rop_contains_var(_tmp1D->rop1,v) || Cyc_Relations_rop_contains_var(_tmp1D->rop2,v)){
 found=1;
 break;}}
@@ -1144,7 +1144,7 @@ if(!found)return rs;{
 # 132
 struct Cyc_List_List*_tmp1E=0;
 for(p=rs;p != 0;p=p->tl){
-struct Cyc_Relations_Reln*_tmp1F=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(p))->hd;
+struct Cyc_Relations_Reln*_tmp1F=(struct Cyc_Relations_Reln*)p->hd;
 if(Cyc_Relations_rop_contains_var(_tmp1F->rop1,v) || Cyc_Relations_rop_contains_var(_tmp1F->rop2,v))continue;{
 struct Cyc_List_List*_tmpC9;_tmp1E=((_tmpC9=_region_malloc(rgn,sizeof(*_tmpC9)),((_tmpC9->hd=_tmp1F,((_tmpC9->tl=_tmp1E,_tmpC9))))));};}
 # 138
@@ -1214,8 +1214,8 @@ return((struct Cyc_List_List*(*)(struct _RegionHandle*,struct Cyc_Relations_Reln
 # 215
 int Cyc_Relations_same_relns(struct Cyc_List_List*r1,struct Cyc_List_List*r2){
 for(0;r1 != 0  && r2 != 0;(r1=r1->tl,r2=r2->tl)){
-struct Cyc_Relations_Reln*_tmp40=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(r1))->hd;
-struct Cyc_Relations_Reln*_tmp41=(struct Cyc_Relations_Reln*)((struct Cyc_List_List*)_check_null(r2))->hd;
+struct Cyc_Relations_Reln*_tmp40=(struct Cyc_Relations_Reln*)r1->hd;
+struct Cyc_Relations_Reln*_tmp41=(struct Cyc_Relations_Reln*)r2->hd;
 if((!Cyc_Relations_same_relop(_tmp40->rop1,_tmp41->rop1) || _tmp40->relation != _tmp41->relation) || !
 # 221
 Cyc_Relations_same_relop(_tmp40->rop2,_tmp41->rop2))return 0;}

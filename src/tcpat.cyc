@@ -648,6 +648,14 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
       if (x->hd != NULL) vs = rnew (r) List(*x->hd,vs);
     check_unique_vars(List::rmap(r, get_name, vs), p->loc,
 		      "pattern contains a repeated variable");
+    // go through and deep copy the access expressions if they
+    // are not == to pat_var_exp; this prevents bad sharing
+    // of annotations added in the flow analysis
+    for (_ x = ans.patvars; x != NULL; x=x->tl) {
+      let &$(vdopt,*expopt) = x->hd;
+      if (*expopt != NULL && *expopt != pat_var_exp)
+	*expopt = deep_copy_exp(true,(exp_t)*expopt);
+    }
   }
   return ans;
 }

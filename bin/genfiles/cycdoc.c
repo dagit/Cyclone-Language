@@ -1088,13 +1088,13 @@ struct _tuple20*Cyc_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_lex_engine(lexstate,lexbuf);
 switch(lexstate){case 0: _LL0: {
 # 56 "cycdoc.cyl"
-int _tmp3=((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_start_pos + 5;
-int _tmp4=(((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_curr_pos - ((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_start_pos)- 7;
+int _tmp3=lexbuf->lex_start_pos + 5;
+int _tmp4=(lexbuf->lex_curr_pos - lexbuf->lex_start_pos)- 7;
 struct Cyc_Standalone_Comment_struct*_tmpAC;struct Cyc_Standalone_Comment_struct _tmpAB;struct _tuple20*_tmpAA;return(_tmpAA=_cycalloc(sizeof(*_tmpAA)),((_tmpAA->f1=Cyc_Lexing_lexeme_start(lexbuf),((_tmpAA->f2=(void*)(
 (_tmpAC=_cycalloc(sizeof(*_tmpAC)),((_tmpAC[0]=((_tmpAB.tag=1,((_tmpAB.f1=Cyc_substring((struct _dyneither_ptr)lexbuf->lex_buffer,_tmp3,(unsigned long)_tmp4),_tmpAB)))),_tmpAC)))),_tmpAA)))));}case 1: _LL1: {
 # 61
-int _tmp8=((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_start_pos + 4;
-int _tmp9=(((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_curr_pos - ((struct Cyc_Lexing_lexbuf*)_check_null(lexbuf))->lex_start_pos)- 6;
+int _tmp8=lexbuf->lex_start_pos + 4;
+int _tmp9=(lexbuf->lex_curr_pos - lexbuf->lex_start_pos)- 6;
 struct Cyc_MatchDecl_Comment_struct*_tmpB2;struct Cyc_MatchDecl_Comment_struct _tmpB1;struct _tuple20*_tmpB0;return(_tmpB0=_cycalloc(sizeof(*_tmpB0)),((_tmpB0->f1=Cyc_Lexing_lexeme_start(lexbuf),((_tmpB0->f2=(void*)(
 (_tmpB2=_cycalloc(sizeof(*_tmpB2)),((_tmpB2[0]=((_tmpB1.tag=0,((_tmpB1.f1=Cyc_substring((struct _dyneither_ptr)lexbuf->lex_buffer,_tmp8,(unsigned long)_tmp9),_tmpB1)))),_tmpB2)))),_tmpB0)))));}case 2: _LL2:
 # 65 "cycdoc.cyl"

@@ -957,7 +957,7 @@ _tmp18=(struct _dyneither_ptr)(*((struct _tuple0*)fno->v)).f1;
 _tmp19=(*((struct _tuple0*)fno->v)).f2;}}}
 # 130
 while(places != 0  && (next == Cyc_Lineno_END  || eol > (*((struct _tuple1*)places->hd)).f1)){
-struct Cyc_Lineno_Pos*_tmp1A=(*((struct _tuple1*)_check_null((struct _tuple1*)((struct Cyc_List_List*)_check_null(places))->hd))).f2;
+struct Cyc_Lineno_Pos*_tmp1A=(*((struct _tuple1*)places->hd)).f2;
 _tmp1A->logical_file=(struct _dyneither_ptr)Cyc_strdup((struct _dyneither_ptr)_tmp18);
 _tmp1A->line=this_line;
 _tmp1A->line_no=_tmp19;

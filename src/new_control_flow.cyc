@@ -1314,6 +1314,10 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
   case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
+    if (e1->topt == NULL) {
+      fprintf(stderr,"aggrmember exp %s\n",exp2string(e));
+      fprintf(stderr,"oops! %s.topt = null!\n",exp2string(e1));
+    }
     let e1_type = (type_t)e1->topt;
     if(is_nontagged_nonrequire_union_type(e1_type)) {
       // we allow bits-only unions to be treated as initialized

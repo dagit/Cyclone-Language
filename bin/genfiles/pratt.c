@@ -1069,7 +1069,7 @@ struct Cyc_Pratt_Graph*_tmp48;return(_tmp48=_cycalloc(sizeof(*_tmp48)),((_tmp48-
 static struct Cyc_List_List*Cyc_Pratt_copy_edges(struct Cyc_List_List*ds){
 struct Cyc_List_List*_tmp18=0;
 for(0;ds != 0;ds=ds->tl){
-struct Cyc_Pratt_Edge*_tmp19=(struct Cyc_Pratt_Edge*)((struct Cyc_List_List*)_check_null(ds))->hd;
+struct Cyc_Pratt_Edge*_tmp19=(struct Cyc_Pratt_Edge*)ds->hd;
 struct Cyc_Pratt_Edge*_tmp4B;struct Cyc_List_List*_tmp4A;_tmp18=((_tmp4A=_cycalloc(sizeof(*_tmp4A)),((_tmp4A->hd=((_tmp4B=_cycalloc(sizeof(*_tmp4B)),((_tmp4B->x=_tmp19->x,((_tmp4B->y=_tmp19->y,((_tmp4B->value=_tmp19->value,_tmp4B)))))))),((_tmp4A->tl=_tmp18,_tmp4A))))));}
 # 144
 return((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp18);}
@@ -1082,8 +1082,8 @@ static int*Cyc_Pratt_lookup_distance(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_No
 static int zero_ptr;
 # 157
 if(Cyc_Pratt_cmp_node(x,y)== 0)return& zero_ptr;
-{struct Cyc_List_List*_tmp20=((struct Cyc_Pratt_Graph*)_check_null(G))->edges;for(0;_tmp20 != 0;_tmp20=_tmp20->tl){
-struct Cyc_Pratt_Edge*_tmp21=(struct Cyc_Pratt_Edge*)((struct Cyc_List_List*)_check_null(_tmp20))->hd;
+{struct Cyc_List_List*_tmp20=G->edges;for(0;_tmp20 != 0;_tmp20=_tmp20->tl){
+struct Cyc_Pratt_Edge*_tmp21=(struct Cyc_Pratt_Edge*)_tmp20->hd;
 if(Cyc_Pratt_cmp_node(_tmp21->x,x)== 0  && Cyc_Pratt_cmp_node(_tmp21->y,y)== 0)
 return& _tmp21->value;}}
 # 163
@@ -1103,13 +1103,13 @@ return;}{
 # 183
 struct Cyc_Pratt_Graph _stmttmp1=*G;struct Cyc_List_List*_tmp27;struct Cyc_List_List*_tmp28;struct Cyc_Pratt_Graph _tmp26=_stmttmp1;_tmp27=_tmp26.nodes;_tmp28=_tmp26.edges;
 for(0;_tmp28 != 0;_tmp28=_tmp28->tl){
-struct Cyc_Pratt_Edge*_tmp29=(struct Cyc_Pratt_Edge*)((struct Cyc_List_List*)_check_null(_tmp28))->hd;
+struct Cyc_Pratt_Edge*_tmp29=(struct Cyc_Pratt_Edge*)_tmp28->hd;
 {const char*_tmp58;void*_tmp57[3];struct Cyc_String_pa_PrintArg_struct _tmp56;struct Cyc_String_pa_PrintArg_struct _tmp55;struct Cyc_Int_pa_PrintArg_struct _tmp54;(_tmp54.tag=1,((_tmp54.f1=(unsigned long)_tmp29->value,((_tmp55.tag=0,((_tmp55.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
 Cyc_Pratt_node2string(_tmp29->y)),((_tmp56.tag=0,((_tmp56.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Pratt_node2string(_tmp29->x)),((_tmp57[0]=& _tmp56,((_tmp57[1]=& _tmp55,((_tmp57[2]=& _tmp54,Cyc_fprintf(Cyc_stderr,((_tmp58="%s - %s <= %d",_tag_dyneither(_tmp58,sizeof(char),14))),_tag_dyneither(_tmp57,sizeof(void*),3)))))))))))))))))));}
 if(_tmp28->tl != 0){const char*_tmp5B;void*_tmp5A;(_tmp5A=0,Cyc_fprintf(Cyc_stderr,((_tmp5B=", ",_tag_dyneither(_tmp5B,sizeof(char),3))),_tag_dyneither(_tmp5A,sizeof(void*),0)));}}};}
 # 193
 static void Cyc_Pratt_add_node(struct Cyc_Pratt_Graph*G,union Cyc_Pratt_Node x){
-{struct Cyc_List_List*_tmp31=((struct Cyc_Pratt_Graph*)_check_null(G))->nodes;for(0;_tmp31 != 0;_tmp31=_tmp31->tl){
+{struct Cyc_List_List*_tmp31=G->nodes;for(0;_tmp31 != 0;_tmp31=_tmp31->tl){
 union Cyc_Pratt_Node y=*((union Cyc_Pratt_Node*)_tmp31->hd);
 if(Cyc_Pratt_cmp_node(x,y)== 0)return;}}{
 # 199
@@ -1131,17 +1131,17 @@ if(dist != 0  && *dist + a < 0)
 # 229
 return 0;
 # 232
-{struct Cyc_List_List*_tmp34=((struct Cyc_Pratt_Graph*)_check_null(G))->nodes;for(0;_tmp34 != 0;_tmp34=_tmp34->tl){
-union Cyc_Pratt_Node _tmp35=*((union Cyc_Pratt_Node*)_check_null((union Cyc_Pratt_Node*)((struct Cyc_List_List*)_check_null(_tmp34))->hd));
+{struct Cyc_List_List*_tmp34=G->nodes;for(0;_tmp34 != 0;_tmp34=_tmp34->tl){
+union Cyc_Pratt_Node _tmp35=*((union Cyc_Pratt_Node*)_tmp34->hd);
 int*_tmp36=Cyc_Pratt_lookup_distance(G,_tmp35,i);
 if(_tmp36 == 0)continue;{
-struct Cyc_List_List*_tmp37=((struct Cyc_Pratt_Graph*)_check_null(G))->nodes;for(0;_tmp37 != 0;_tmp37=_tmp37->tl){
-union Cyc_Pratt_Node _tmp38=*((union Cyc_Pratt_Node*)_check_null((union Cyc_Pratt_Node*)((struct Cyc_List_List*)_check_null(_tmp37))->hd));
+struct Cyc_List_List*_tmp37=G->nodes;for(0;_tmp37 != 0;_tmp37=_tmp37->tl){
+union Cyc_Pratt_Node _tmp38=*((union Cyc_Pratt_Node*)_tmp37->hd);
 int*_tmp39=Cyc_Pratt_lookup_distance(G,j,_tmp38);
 if(_tmp39 != 0){
 int*_tmp3A=Cyc_Pratt_lookup_distance(G,_tmp35,_tmp38);
 # 242
-int _tmp3B=(*((int*)_check_null(_tmp36))+ a)+ *((int*)_check_null(_tmp39));
+int _tmp3B=(*_tmp36 + a)+ *_tmp39;
 # 246
 if(_tmp3A == 0){
 # 250

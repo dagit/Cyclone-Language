@@ -1530,7 +1530,7 @@ struct Cyc_List_List*rev_new_params=0;
 for(0;_tmpB7 != 0;_tmpB7=_tmpB7->tl){
 struct Cyc_List_List*_tmpBC=tds;
 for(0;_tmpBC != 0;_tmpBC=_tmpBC->tl){
-struct Cyc_Absyn_Decl*_tmpBD=(struct Cyc_Absyn_Decl*)((struct Cyc_List_List*)_check_null(_tmpBC))->hd;
+struct Cyc_Absyn_Decl*_tmpBD=(struct Cyc_Absyn_Decl*)_tmpBC->hd;
 void*_stmttmpC=_tmpBD->r;void*_tmpBE=_stmttmpC;struct Cyc_Absyn_Vardecl*_tmpC0;_LL63: {struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*_tmpBF=(struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_tmpBE;if(_tmpBF->tag != 0)goto _LL65;else{_tmpC0=_tmpBF->f1;}}_LL64:
 # 524
  if(Cyc_zstrptrcmp((*_tmpC0->name).f2,(struct _dyneither_ptr*)_tmpB7->hd)!= 0)
@@ -3233,7 +3233,7 @@ struct Cyc_Yyltype*yyyylsp=(struct Cyc_Yyltype*)_untag_dyneither_ptr(_dyneither_
 # 1325 "parse.y"
 struct Cyc_List_List*_tmp49C=0;
 {struct Cyc_List_List*_tmp49D=Cyc_yyget_YY39(yyyyvsp[1]);for(0;_tmp49D != 0;_tmp49D=_tmp49D->tl){
-struct _dyneither_ptr*_tmp49E=(struct _dyneither_ptr*)((struct Cyc_List_List*)_check_null(_tmp49D))->hd;
+struct _dyneither_ptr*_tmp49E=(struct _dyneither_ptr*)_tmp49D->hd;
 struct _tuple0*_tmpA37;struct _tuple0*qv=(_tmpA37=_cycalloc(sizeof(*_tmpA37)),((_tmpA37->f1=Cyc_Absyn_Rel_n(0),((_tmpA37->f2=_tmp49E,_tmpA37)))));
 struct Cyc_Absyn_Vardecl*_tmp49F=Cyc_Absyn_new_vardecl(qv,Cyc_Absyn_wildtyp(0),0);
 struct Cyc_List_List*_tmpA38;_tmp49C=((_tmpA38=_cycalloc(sizeof(*_tmpA38)),((_tmpA38->hd=_tmp49F,((_tmpA38->tl=_tmp49C,_tmpA38))))));}}

@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist requires md5)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5)
 	./test_regions
 	./cyctest
 	./foo < foo_input
@@ -21,6 +21,7 @@ all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt ze
 	./structarray
 	./flatlist
 	./md5 abcdefg
+	./require
 	./test_getopt -abc123
 
 hello$(EXE): hello.o

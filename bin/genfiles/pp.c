@@ -1258,7 +1258,7 @@ struct Cyc_PP_Doc*sep2=Cyc_PP_text(sep);
 struct Cyc_PP_Doc*oline=Cyc_PP_oline_doc();
 struct Cyc_List_List*_tmpA5=l;
 while(_tmpA5->tl != 0){
-struct Cyc_List_List*_tmpA6=((struct Cyc_List_List*)_check_null(_tmpA5))->tl;
+struct Cyc_List_List*_tmpA6=_tmpA5->tl;
 {struct Cyc_List_List*_tmp13D;struct Cyc_List_List*_tmp13C;_tmpA5->tl=((_tmp13C=_cycalloc(sizeof(*_tmp13C)),((_tmp13C->hd=sep2,((_tmp13C->tl=((_tmp13D=_cycalloc(sizeof(*_tmp13D)),((_tmp13D->hd=oline,((_tmp13D->tl=_tmpA6,_tmp13D)))))),_tmp13C))))));}
 _tmpA5=_tmpA6;}
 # 489
