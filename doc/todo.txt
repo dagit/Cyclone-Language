@@ -68,15 +68,6 @@ function declarations are only allowed at top-level.
 * new "foo" and rnew(h) "foo" don't work properly -- they should allocate
   a copy of the string in the region, no?
 
-* comprehensions like the following are broken:
-   void f() {
-     int x[10] = {for i < 10 : i};
-   }
-  the problem being that we don't translate them properly.  We really
-  have to back up the translation of the comprehension to the declaration.
-  Note that the translation works if i doesn't occur in the body of the
-  comprehension.
-  
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries

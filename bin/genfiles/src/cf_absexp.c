@@ -1333,12 +1333,12 @@ env,( void*) ans); return( void*) ans;} _LL836: { struct Cyc_List_List*
 escaping_pinfos= 0; Cyc_CfAbsexp_assign_escape(& escaping_pinfos, old_pinfo,
 new_pinfo); for( 0; escaping_pinfos != 0; escaping_pinfos=({ struct Cyc_List_List*
 _temp863= escaping_pinfos; if( _temp863 == 0){ _throw( Null_Exception);}
-_temp863->tl;})){ void* esc_pinfo=( void*)({ struct Cyc_List_List* _temp864=
-escaping_pinfos; if( _temp864 == 0){ _throw( Null_Exception);} _temp864->hd;});
+_temp863->tl;})){ void* esc_pinfo=( void*)({ struct Cyc_List_List* _temp866=
+escaping_pinfos; if( _temp866 == 0){ _throw( Null_Exception);} _temp866->hd;});
 if( ! Cyc_CfFlowInfo_isAllInit( pinfo_dict, esc_pinfo)){ Cyc_Tcutil_terr( loc,(
-struct _tagged_string)({ char* _temp865=( char*)"uninitialized value assigned to ambiguous place";
-struct _tagged_string _temp866; _temp866.curr= _temp865; _temp866.base= _temp865;
-_temp866.last_plus_one= _temp865 + 48; _temp866;})); return( void*) Cyc_CfFlowInfo_BottomFL;}
+struct _tagged_string)({ char* _temp864=( char*)"uninitialized value assigned to ambiguous place";
+struct _tagged_string _temp865; _temp865.curr= _temp864; _temp865.base= _temp864;
+_temp865.last_plus_one= _temp864 + 48; _temp865;})); return( void*) Cyc_CfFlowInfo_BottomFL;}
 pinfo_dict= Cyc_CfFlowInfo_escape_pointsto( esc_pinfo, pinfo_dict);} pinfo_dict=
 Cyc_CfFlowInfo_insert_place( pinfo_dict, _temp826, new_pinfo);{ struct Cyc_CfFlowInfo_InitsFL_struct*
 ans=({ struct Cyc_CfFlowInfo_InitsFL_struct* _temp867=( struct Cyc_CfFlowInfo_InitsFL_struct*)

@@ -1000,9 +1000,9 @@ _temp521, _temp517) == 0){ return( void*)({ struct Cyc_CfFlowInfo_LeafPI_struct*
 _temp525=( struct Cyc_CfFlowInfo_LeafPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_LeafPI_struct));
 _temp525[ 0]=({ struct Cyc_CfFlowInfo_LeafPI_struct _temp526; _temp526.tag= Cyc_CfFlowInfo_LeafPI_tag;
 _temp526.f1=( void*) state1; _temp526;}); _temp525;});}{ struct _tuple6
-isInitEnv1=({ struct _tuple6 _temp527; _temp527.f1= env->d1; _temp527.f2= 0;
-_temp527;}); struct _tuple6 isInitEnv2=({ struct _tuple6 _temp528; _temp528.f1=
-env->d2; _temp528.f2= 0; _temp528;}); if( Cyc_CfFlowInfo_isAllInit_pinfo(&
+isInitEnv1=({ struct _tuple6 _temp528; _temp528.f1= env->d1; _temp528.f2= 0;
+_temp528;}); struct _tuple6 isInitEnv2=({ struct _tuple6 _temp527; _temp527.f1=
+env->d2; _temp527.f2= 0; _temp527;}); if( Cyc_CfFlowInfo_isAllInit_pinfo(&
 isInitEnv1, Cyc_CfFlowInfo_lookup_place( env->d1, _temp521))? Cyc_CfFlowInfo_isAllInit_pinfo(&
 isInitEnv2, Cyc_CfFlowInfo_lookup_place( env->d2, _temp517)): 0){* env->places=((
 struct Cyc_Set_Set*(*)( struct Cyc_Set_Set* s, struct Cyc_CfFlowInfo_Place* elt))
@@ -1077,18 +1077,18 @@ if(( unsigned int) _temp590 > 1u?(( struct _tunion_struct*) _temp590)->tag ==
 Cyc_CfFlowInfo_InitsFL_tag: 0){ _LL593: _temp592=( struct Cyc_Dict_Dict*)((
 struct Cyc_CfFlowInfo_InitsFL_struct*) _temp590)->f1; goto _LL581;} else{ goto
 _LL575;} _LL577: return f2; _LL579: return f1; _LL581: if( _temp596 == _temp592){
-return f1;}{ struct Cyc_Set_Set* places=({ struct Cyc_Set_Set** _temp598= Cyc_CfFlowInfo_empty_place_set_ptr;
-if( _temp598 == 0){ _throw( Null_Exception);}* _temp598;}); struct Cyc_CfFlowInfo_JoinEnv
-joinenv=({ struct Cyc_CfFlowInfo_JoinEnv _temp599; _temp599.d1= _temp596;
-_temp599.d2= _temp592; _temp599.places=& places; _temp599;}); struct Cyc_Dict_Dict*
+return f1;}{ struct Cyc_Set_Set* places=({ struct Cyc_Set_Set** _temp601= Cyc_CfFlowInfo_empty_place_set_ptr;
+if( _temp601 == 0){ _throw( Null_Exception);}* _temp601;}); struct Cyc_CfFlowInfo_JoinEnv
+joinenv=({ struct Cyc_CfFlowInfo_JoinEnv _temp600; _temp600.d1= _temp596;
+_temp600.d2= _temp592; _temp600.places=& places; _temp600;}); struct Cyc_Dict_Dict*
 outdict=(( struct Cyc_Dict_Dict*(*)( void*(* f)( struct Cyc_CfFlowInfo_JoinEnv*,
 void*, void*), struct Cyc_CfFlowInfo_JoinEnv* env, struct Cyc_Dict_Dict* d1,
 struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)( Cyc_CfFlowInfo_join_pathinfo,&
 joinenv, _temp596, _temp592); return( void*)({ struct Cyc_CfFlowInfo_InitsFL_struct*
-_temp600=( struct Cyc_CfFlowInfo_InitsFL_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct));
-_temp600[ 0]=({ struct Cyc_CfFlowInfo_InitsFL_struct _temp601; _temp601.tag= Cyc_CfFlowInfo_InitsFL_tag;
-_temp601.f1= Cyc_CfFlowInfo_escape_these( places, outdict); _temp601;});
-_temp600;});} _LL575:;}} int Cyc_CfFlowInfo_initstate_lessthan_approx( void*
+_temp598=( struct Cyc_CfFlowInfo_InitsFL_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct));
+_temp598[ 0]=({ struct Cyc_CfFlowInfo_InitsFL_struct _temp599; _temp599.tag= Cyc_CfFlowInfo_InitsFL_tag;
+_temp599.f1= Cyc_CfFlowInfo_escape_these( places, outdict); _temp599;});
+_temp598;});} _LL575:;}} int Cyc_CfFlowInfo_initstate_lessthan_approx( void*
 state1, void* state2){ struct _tuple3 _temp603=({ struct _tuple3 _temp602;
 _temp602.f1= state1; _temp602.f2= state2; _temp602;}); void* _temp611; void*
 _temp613; void* _temp615; void* _temp617; void* _temp619; void* _temp621; void*

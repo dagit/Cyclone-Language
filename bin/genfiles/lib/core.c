@@ -107,15 +107,15 @@ _tagged_string _temp50= s;( unsigned int)( _temp50.last_plus_one - _temp50.curr)
 struct _tagged_string _temp51= s; char* _temp53= _temp51.curr + i; if( _temp51.base
 == 0? 1:( _temp53 < _temp51.base? 1: _temp53 >= _temp51.last_plus_one)){ _throw(
 Null_Exception);}* _temp53;}) !='\000': 0; ++ i){ int digit= Cyc_Core_int_of_char(({
-struct _tagged_string _temp54= s; char* _temp56= _temp54.curr + i; if( _temp54.base
-== 0? 1:( _temp56 < _temp54.base? 1: _temp56 >= _temp54.last_plus_one)){ _throw(
-Null_Exception);}* _temp56;})); if( digit >= base){( void) _throw(( struct
-_xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp57=( struct Cyc_Core_InvalidArg_struct*)
-GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp57[ 0]=({ struct
-Cyc_Core_InvalidArg_struct _temp58; _temp58.tag= Cyc_Core_InvalidArg_tag;
-_temp58.f1=( struct _tagged_string)({ char* _temp59=( char*)"string to integer conversion";
-struct _tagged_string _temp60; _temp60.curr= _temp59; _temp60.base= _temp59;
-_temp60.last_plus_one= _temp59 + 29; _temp60;}); _temp58;}); _temp57;}));} n= n
+struct _tagged_string _temp58= s; char* _temp60= _temp58.curr + i; if( _temp58.base
+== 0? 1:( _temp60 < _temp58.base? 1: _temp60 >= _temp58.last_plus_one)){ _throw(
+Null_Exception);}* _temp60;})); if( digit >= base){( void) _throw(( struct
+_xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp54=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp54[ 0]=({ struct
+Cyc_Core_InvalidArg_struct _temp55; _temp55.tag= Cyc_Core_InvalidArg_tag;
+_temp55.f1=( struct _tagged_string)({ char* _temp56=( char*)"string to integer conversion";
+struct _tagged_string _temp57; _temp57.curr= _temp56; _temp57.base= _temp56;
+_temp57.last_plus_one= _temp56 + 29; _temp57;}); _temp55;}); _temp54;}));} n= n
 * base + digit;} return sign * n;} struct _tagged_string Cyc_Core_string_of_int_width(
 int n, int minWidth){ int i; int len= 0; int negative= 0; if( n < 0){ negative=
 1; ++ len; n= - n;}{ int m= n; do { ++ len;} while (( m /= 10) > 0); len= len >

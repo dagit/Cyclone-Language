@@ -459,19 +459,19 @@ extern void Cyc_Absyndump_dumptqtd( struct Cyc_Absyn_Tqual*, void*, void(* f)(
 void*), void*); typedef struct _tagged_string Cyc_Absyndump_dump_string_t;
 struct Cyc_Stdio___sFILE** Cyc_Absyndump_dump_file=& Cyc_Stdio_stdout; void Cyc_Absyndump_ignore(
 void* x){ return;} static unsigned int Cyc_Absyndump_pos= 0; void Cyc_Absyndump_dump(
-struct _tagged_string s){ int sz=( int)({ struct _tagged_string _temp0= s;(
-unsigned int)( _temp0.last_plus_one - _temp0.curr);}); if( !(( int)({ struct
-_tagged_string _temp1= s; char* _temp3= _temp1.curr +( sz - 1); if( _temp1.base
-== 0? 1:( _temp3 < _temp1.base? 1: _temp3 >= _temp1.last_plus_one)){ _throw(
-Null_Exception);}* _temp3;}))){ -- sz;} Cyc_Absyndump_pos += sz + 1; if( Cyc_Absyndump_pos
+struct _tagged_string s){ int sz=( int)({ struct _tagged_string _temp3= s;(
+unsigned int)( _temp3.last_plus_one - _temp3.curr);}); if( !(( int)({ struct
+_tagged_string _temp0= s; char* _temp2= _temp0.curr +( sz - 1); if( _temp0.base
+== 0? 1:( _temp2 < _temp0.base? 1: _temp2 >= _temp0.last_plus_one)){ _throw(
+Null_Exception);}* _temp2;}))){ -- sz;} Cyc_Absyndump_pos += sz + 1; if( Cyc_Absyndump_pos
 > 80){ Cyc_Absyndump_pos=( unsigned int) sz; Cyc_Stdio_fputc(( int)'\n',* Cyc_Absyndump_dump_file);}
 else{ Cyc_Stdio_fputc(( int)' ',* Cyc_Absyndump_dump_file);} Cyc_Stdio_file_string_write(*
 Cyc_Absyndump_dump_file, s, 0, sz);} void Cyc_Absyndump_dump_nospace( struct
-_tagged_string s){ int sz=( int)({ struct _tagged_string _temp4= s;(
-unsigned int)( _temp4.last_plus_one - _temp4.curr);}); if( !(( int)({ struct
-_tagged_string _temp5= s; char* _temp7= _temp5.curr +( sz - 1); if( _temp5.base
-== 0? 1:( _temp7 < _temp5.base? 1: _temp7 >= _temp5.last_plus_one)){ _throw(
-Null_Exception);}* _temp7;}))){ -- sz;} Cyc_Absyndump_pos += sz; Cyc_Stdio_file_string_write(*
+_tagged_string s){ int sz=( int)({ struct _tagged_string _temp7= s;(
+unsigned int)( _temp7.last_plus_one - _temp7.curr);}); if( !(( int)({ struct
+_tagged_string _temp4= s; char* _temp6= _temp4.curr +( sz - 1); if( _temp4.base
+== 0? 1:( _temp6 < _temp4.base? 1: _temp6 >= _temp4.last_plus_one)){ _throw(
+Null_Exception);}* _temp6;}))){ -- sz;} Cyc_Absyndump_pos += sz; Cyc_Stdio_file_string_write(*
 Cyc_Absyndump_dump_file, s, 0, sz);} void Cyc_Absyndump_dump_char( int c){ ++
 Cyc_Absyndump_pos; Cyc_Stdio_fputc( c,* Cyc_Absyndump_dump_file);} void Cyc_Absyndump_dump_str(
 struct _tagged_string* s){ Cyc_Absyndump_dump(* s);} void Cyc_Absyndump_dump_semi(){
@@ -1478,23 +1478,23 @@ struct Cyc_Absyn_Exp* e){ Cyc_Absyndump_dumpexp_prec( 0, e);} void Cyc_Absyndump
 struct Cyc_List_List* scs){ for( 0; scs != 0; scs=({ struct Cyc_List_List*
 _temp892= scs; if( _temp892 == 0){ _throw( Null_Exception);} _temp892->tl;})){
 struct Cyc_Absyn_Switch_clause* c=( struct Cyc_Absyn_Switch_clause*)({ struct
-Cyc_List_List* _temp893= scs; if( _temp893 == 0){ _throw( Null_Exception);}
-_temp893->hd;}); if( c->where_clause == 0?( void*)( c->pattern)->r ==( void*)
+Cyc_List_List* _temp902= scs; if( _temp902 == 0){ _throw( Null_Exception);}
+_temp902->hd;}); if( c->where_clause == 0?( void*)( c->pattern)->r ==( void*)
 Cyc_Absyn_Wild_p: 0){ Cyc_Absyndump_dump(( struct _tagged_string)({ char*
-_temp894=( char*)"default:"; struct _tagged_string _temp895; _temp895.curr=
-_temp894; _temp895.base= _temp894; _temp895.last_plus_one= _temp894 + 9;
-_temp895;}));} else{ Cyc_Absyndump_dump(( struct _tagged_string)({ char*
-_temp896=( char*)"case"; struct _tagged_string _temp897; _temp897.curr= _temp896;
-_temp897.base= _temp896; _temp897.last_plus_one= _temp896 + 5; _temp897;})); Cyc_Absyndump_dumppat(
+_temp893=( char*)"default:"; struct _tagged_string _temp894; _temp894.curr=
+_temp893; _temp894.base= _temp893; _temp894.last_plus_one= _temp893 + 9;
+_temp894;}));} else{ Cyc_Absyndump_dump(( struct _tagged_string)({ char*
+_temp895=( char*)"case"; struct _tagged_string _temp896; _temp896.curr= _temp895;
+_temp896.base= _temp895; _temp896.last_plus_one= _temp895 + 5; _temp896;})); Cyc_Absyndump_dumppat(
 c->pattern); if( c->where_clause != 0){ Cyc_Absyndump_dump(( struct
-_tagged_string)({ char* _temp898=( char*)"&&"; struct _tagged_string _temp899;
-_temp899.curr= _temp898; _temp899.base= _temp898; _temp899.last_plus_one=
-_temp898 + 3; _temp899;})); Cyc_Absyndump_dumpexp(( struct Cyc_Absyn_Exp*)({
-struct Cyc_Absyn_Exp* _temp900= c->where_clause; if( _temp900 == 0){ _throw(
-Null_Exception);} _temp900;}));} Cyc_Absyndump_dump_nospace(( struct
-_tagged_string)({ char* _temp901=( char*)":"; struct _tagged_string _temp902;
-_temp902.curr= _temp901; _temp902.base= _temp901; _temp902.last_plus_one=
-_temp901 + 2; _temp902;}));} Cyc_Absyndump_dumpstmt( c->body);}} void Cyc_Absyndump_dumpstmt(
+_tagged_string)({ char* _temp897=( char*)"&&"; struct _tagged_string _temp898;
+_temp898.curr= _temp897; _temp898.base= _temp897; _temp898.last_plus_one=
+_temp897 + 3; _temp898;})); Cyc_Absyndump_dumpexp(( struct Cyc_Absyn_Exp*)({
+struct Cyc_Absyn_Exp* _temp899= c->where_clause; if( _temp899 == 0){ _throw(
+Null_Exception);} _temp899;}));} Cyc_Absyndump_dump_nospace(( struct
+_tagged_string)({ char* _temp900=( char*)":"; struct _tagged_string _temp901;
+_temp901.curr= _temp900; _temp901.base= _temp900; _temp901.last_plus_one=
+_temp900 + 2; _temp901;}));} Cyc_Absyndump_dumpstmt( c->body);}} void Cyc_Absyndump_dumpstmt(
 struct Cyc_Absyn_Stmt* s){ void* _temp903=( void*) s->r; struct Cyc_Absyn_Exp*
 _temp947; struct Cyc_Absyn_Stmt* _temp949; struct Cyc_Absyn_Stmt* _temp951;
 struct Cyc_Absyn_Exp* _temp953; struct Cyc_Absyn_Exp* _temp955; struct Cyc_Absyn_Stmt*

@@ -769,32 +769,32 @@ _throw( Null_Exception);} _temp350->hd;}))).f2, loc);} return s;} _LL184: return
 Cyc_Tcutil_impos)(( struct _tagged_string)({ char* _temp351=( char*)"szof on unchecked StructType";
 struct _tagged_string _temp352; _temp352.curr= _temp351; _temp352.base= _temp351;
 _temp352.last_plus_one= _temp351 + 29; _temp352;}));}{ struct Cyc_Absyn_Structdecl*
-sd=({ struct Cyc_Absyn_Structdecl** _temp353= _temp279; if( _temp353 == 0){
-_throw( Null_Exception);}* _temp353;}); if( sd->fields == 0){ Cyc_Tcutil_terr(
-loc,( struct _tagged_string)({ char* _temp354=( char*)"cannot apply sizeof to abstract struct type";
-struct _tagged_string _temp355; _temp355.curr= _temp354; _temp355.base= _temp354;
-_temp355.last_plus_one= _temp354 + 44; _temp355;}));}{ unsigned int s= 0;{
+sd=({ struct Cyc_Absyn_Structdecl** _temp358= _temp279; if( _temp358 == 0){
+_throw( Null_Exception);}* _temp358;}); if( sd->fields == 0){ Cyc_Tcutil_terr(
+loc,( struct _tagged_string)({ char* _temp353=( char*)"cannot apply sizeof to abstract struct type";
+struct _tagged_string _temp354; _temp354.curr= _temp353; _temp354.base= _temp353;
+_temp354.last_plus_one= _temp353 + 44; _temp354;}));}{ unsigned int s= 0;{
 struct Cyc_List_List* fs=( struct Cyc_List_List*)({ struct Cyc_Core_Opt*
-_temp356= sd->fields; if( _temp356 == 0){ _throw( Null_Exception);} _temp356->v;});
-for( 0; fs != 0; fs=({ struct Cyc_List_List* _temp357= fs; if( _temp357 == 0){
-_throw( Null_Exception);} _temp357->tl;})){ s += Cyc_Evexp_szof(( void*)((
-struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List* _temp358= fs; if(
-_temp358 == 0){ _throw( Null_Exception);} _temp358->hd;}))->type, loc);}} return
+_temp357= sd->fields; if( _temp357 == 0){ _throw( Null_Exception);} _temp357->v;});
+for( 0; fs != 0; fs=({ struct Cyc_List_List* _temp355= fs; if( _temp355 == 0){
+_throw( Null_Exception);} _temp355->tl;})){ s += Cyc_Evexp_szof(( void*)((
+struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List* _temp356= fs; if(
+_temp356 == 0){ _throw( Null_Exception);} _temp356->hd;}))->type, loc);}} return
 s;}} _LL188: if( _temp285 == 0){ return(( unsigned int(*)( struct _tagged_string))
 Cyc_Tcutil_impos)(( struct _tagged_string)({ char* _temp359=( char*)"szof on unchecked UnionType";
 struct _tagged_string _temp360; _temp360.curr= _temp359; _temp360.base= _temp359;
 _temp360.last_plus_one= _temp359 + 28; _temp360;}));}{ struct Cyc_Absyn_Uniondecl*
-ud=({ struct Cyc_Absyn_Uniondecl** _temp361= _temp285; if( _temp361 == 0){
-_throw( Null_Exception);}* _temp361;}); if( ud->fields == 0){ Cyc_Tcutil_terr(
-loc,( struct _tagged_string)({ char* _temp362=( char*)"cannot apply sizeof to abstract union type";
-struct _tagged_string _temp363; _temp363.curr= _temp362; _temp363.base= _temp362;
-_temp363.last_plus_one= _temp362 + 43; _temp363;}));}{ unsigned int s= 0;{
+ud=({ struct Cyc_Absyn_Uniondecl** _temp366= _temp285; if( _temp366 == 0){
+_throw( Null_Exception);}* _temp366;}); if( ud->fields == 0){ Cyc_Tcutil_terr(
+loc,( struct _tagged_string)({ char* _temp361=( char*)"cannot apply sizeof to abstract union type";
+struct _tagged_string _temp362; _temp362.curr= _temp361; _temp362.base= _temp361;
+_temp362.last_plus_one= _temp361 + 43; _temp362;}));}{ unsigned int s= 0;{
 struct Cyc_List_List* fs=( struct Cyc_List_List*)({ struct Cyc_Core_Opt*
-_temp364= ud->fields; if( _temp364 == 0){ _throw( Null_Exception);} _temp364->v;});
-for( 0; fs != 0; fs=({ struct Cyc_List_List* _temp365= fs; if( _temp365 == 0){
-_throw( Null_Exception);} _temp365->tl;})){ unsigned int i= Cyc_Evexp_szof((
-void*)(( struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List* _temp366= fs;
-if( _temp366 == 0){ _throw( Null_Exception);} _temp366->hd;}))->type, loc); s= s
+_temp365= ud->fields; if( _temp365 == 0){ _throw( Null_Exception);} _temp365->v;});
+for( 0; fs != 0; fs=({ struct Cyc_List_List* _temp363= fs; if( _temp363 == 0){
+_throw( Null_Exception);} _temp363->tl;})){ unsigned int i= Cyc_Evexp_szof((
+void*)(( struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List* _temp364= fs;
+if( _temp364 == 0){ _throw( Null_Exception);} _temp364->hd;}))->type, loc); s= s
 > i? s: i;}} return s;}} _LL190: return 4u; _LL192: Cyc_Tcutil_terr( loc,(
 struct _tagged_string)({ char* _temp367=( char*)"cannot apply sizoef to a region";
 struct _tagged_string _temp368; _temp368.curr= _temp367; _temp368.base= _temp367;

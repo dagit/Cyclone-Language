@@ -49,18 +49,18 @@ _temp6; _LL2: if(( unsigned int) _temp0 > 1u?(( struct _tunion_struct*) _temp0)-
 == Cyc_Splay_Node_tag: 0){ _LL7: _temp6=( struct Cyc_Splay_noderef*)(( struct
 Cyc_Splay_Node_struct*) _temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: goto
 _LL5; _LL3: { struct Cyc_Splay_node* n2= _temp6->v; struct Cyc_Splay_Node_struct*
-t=({ struct Cyc_Splay_Node_struct* _temp8=( struct Cyc_Splay_Node_struct*)
-GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp8[ 0]=({ struct Cyc_Splay_Node_struct
-_temp9; _temp9.tag= Cyc_Splay_Node_tag; _temp9.f1=({ struct Cyc_Splay_noderef*
-_temp10=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp10->v=({ struct Cyc_Splay_node* _temp11=( struct Cyc_Splay_node*) GC_malloc(
-sizeof( struct Cyc_Splay_node)); _temp11->key=( void*)(( void*) n->key); _temp11->data=(
-void*)(( void*) n->data); _temp11->left=( void*)(( void*) n2->right); _temp11->right=(
-void*)(( void*) n->right); _temp11;}); _temp10;}); _temp9;}); _temp8;}); nr->v=({
-struct Cyc_Splay_node* _temp12=( struct Cyc_Splay_node*) GC_malloc( sizeof(
-struct Cyc_Splay_node)); _temp12->key=( void*)(( void*) n2->key); _temp12->data=(
-void*)(( void*) n2->data); _temp12->left=( void*)(( void*) n2->left); _temp12->right=(
-void*)(( void*) t); _temp12;}); goto _LL1;} _LL5:( void) _throw(( struct
+t=({ struct Cyc_Splay_Node_struct* _temp9=( struct Cyc_Splay_Node_struct*)
+GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp9[ 0]=({ struct Cyc_Splay_Node_struct
+_temp10; _temp10.tag= Cyc_Splay_Node_tag; _temp10.f1=({ struct Cyc_Splay_noderef*
+_temp11=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
+_temp11->v=({ struct Cyc_Splay_node* _temp12=( struct Cyc_Splay_node*) GC_malloc(
+sizeof( struct Cyc_Splay_node)); _temp12->key=( void*)(( void*) n->key); _temp12->data=(
+void*)(( void*) n->data); _temp12->left=( void*)(( void*) n2->right); _temp12->right=(
+void*)(( void*) n->right); _temp12;}); _temp11;}); _temp10;}); _temp9;}); nr->v=({
+struct Cyc_Splay_node* _temp8=( struct Cyc_Splay_node*) GC_malloc( sizeof(
+struct Cyc_Splay_node)); _temp8->key=( void*)(( void*) n2->key); _temp8->data=(
+void*)(( void*) n2->data); _temp8->left=( void*)(( void*) n2->left); _temp8->right=(
+void*)(( void*) t); _temp8;}); goto _LL1;} _LL5:( void) _throw(( struct
 _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp13=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp13[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp14; _temp14.tag= Cyc_Core_InvalidArg_tag;
@@ -73,18 +73,18 @@ _LL19: if(( unsigned int) _temp17 > 1u?(( struct _tunion_struct*) _temp17)->tag
 == Cyc_Splay_Node_tag: 0){ _LL24: _temp23=( struct Cyc_Splay_noderef*)(( struct
 Cyc_Splay_Node_struct*) _temp17)->f1; goto _LL20;} else{ goto _LL21;} _LL21:
 goto _LL22; _LL20: { struct Cyc_Splay_node* n2= _temp23->v; struct Cyc_Splay_Node_struct*
-t=({ struct Cyc_Splay_Node_struct* _temp25=( struct Cyc_Splay_Node_struct*)
-GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp25[ 0]=({ struct Cyc_Splay_Node_struct
-_temp26; _temp26.tag= Cyc_Splay_Node_tag; _temp26.f1=({ struct Cyc_Splay_noderef*
-_temp27=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp27->v=({ struct Cyc_Splay_node* _temp28=( struct Cyc_Splay_node*) GC_malloc(
-sizeof( struct Cyc_Splay_node)); _temp28->key=( void*)(( void*) n->key); _temp28->data=(
-void*)(( void*) n->data); _temp28->left=( void*)(( void*) n->left); _temp28->right=(
-void*)(( void*) n2->left); _temp28;}); _temp27;}); _temp26;}); _temp25;}); nr->v=({
-struct Cyc_Splay_node* _temp29=( struct Cyc_Splay_node*) GC_malloc( sizeof(
-struct Cyc_Splay_node)); _temp29->key=( void*)(( void*) n2->key); _temp29->data=(
-void*)(( void*) n2->data); _temp29->left=( void*)(( void*) t); _temp29->right=(
-void*)(( void*) n2->right); _temp29;}); goto _LL18;} _LL22:( void) _throw((
+t=({ struct Cyc_Splay_Node_struct* _temp26=( struct Cyc_Splay_Node_struct*)
+GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp26[ 0]=({ struct Cyc_Splay_Node_struct
+_temp27; _temp27.tag= Cyc_Splay_Node_tag; _temp27.f1=({ struct Cyc_Splay_noderef*
+_temp28=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
+_temp28->v=({ struct Cyc_Splay_node* _temp29=( struct Cyc_Splay_node*) GC_malloc(
+sizeof( struct Cyc_Splay_node)); _temp29->key=( void*)(( void*) n->key); _temp29->data=(
+void*)(( void*) n->data); _temp29->left=( void*)(( void*) n->left); _temp29->right=(
+void*)(( void*) n2->left); _temp29;}); _temp28;}); _temp27;}); _temp26;}); nr->v=({
+struct Cyc_Splay_node* _temp25=( struct Cyc_Splay_node*) GC_malloc( sizeof(
+struct Cyc_Splay_node)); _temp25->key=( void*)(( void*) n2->key); _temp25->data=(
+void*)(( void*) n2->data); _temp25->left=( void*)(( void*) t); _temp25->right=(
+void*)(( void*) n2->right); _temp25;}); goto _LL18;} _LL22:( void) _throw((
 struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp30=( struct
 Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp30[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp31; _temp31.tag= Cyc_Core_InvalidArg_tag;

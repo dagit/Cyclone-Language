@@ -108,10 +108,10 @@ _temp22);});}} struct _tagged_string Cyc_Position_string_of_segment( struct Cyc_
 s){ if( s == 0){ return({ struct _tagged_string _temp23= Cyc_Position_source;
 xprintf("%.*s(unknown)", _temp23.last_plus_one - _temp23.curr, _temp23.curr);});}{
 struct Cyc_Lineno_Pos* pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source,({
-struct Cyc_Position_Segment* _temp24= s; if( _temp24 == 0){ _throw(
-Null_Exception);} _temp24->start;})); struct Cyc_Lineno_Pos* pos_e= Cyc_Lineno_pos_of_abs(
-Cyc_Position_source,({ struct Cyc_Position_Segment* _temp25= s; if( _temp25 == 0){
-_throw( Null_Exception);} _temp25->end;})); return Cyc_Position_string_of_pos_pr(
+struct Cyc_Position_Segment* _temp25= s; if( _temp25 == 0){ _throw(
+Null_Exception);} _temp25->start;})); struct Cyc_Lineno_Pos* pos_e= Cyc_Lineno_pos_of_abs(
+Cyc_Position_source,({ struct Cyc_Position_Segment* _temp24= s; if( _temp24 == 0){
+_throw( Null_Exception);} _temp24->end;})); return Cyc_Position_string_of_pos_pr(
 pos_s, pos_e);}} static struct Cyc_Lineno_Pos* Cyc_Position_new_pos(){ return({
 struct Cyc_Lineno_Pos* _temp26=( struct Cyc_Lineno_Pos*) GC_malloc( sizeof(
 struct Cyc_Lineno_Pos) * 1); _temp26[ 0]=({ struct Cyc_Lineno_Pos _temp27;
@@ -253,20 +253,20 @@ _temp106.curr, _temp106.curr);}); if( Cyc_Position_print_context){ struct
 _handler_cons _temp107; _push_handler(& _temp107);{ struct _xtunion_struct*
 _temp108=( struct _xtunion_struct*) setjmp( _temp107.handler); if( ! _temp108){{
 struct _tuple1* x= Cyc_Position_get_context( e->seg); struct _tagged_string
-marker_str=({ unsigned int _temp109=( unsigned int)((* x).f3 + 1); char*
-_temp110=( char*) GC_malloc_atomic( sizeof( char) * _temp109); struct
-_tagged_string _temp113={ _temp110, _temp110, _temp110 + _temp109};{
-unsigned int _temp111= _temp109; unsigned int i; for( i= 0; i < _temp111; i ++){
-_temp110[ i]='\000';}}; _temp113;}); int i= - 1; while(( ++ i) <(* x).f2) {({
-struct _tagged_string _temp114= marker_str; char* _temp116= _temp114.curr + i;
-if( _temp114.base == 0? 1:( _temp116 < _temp114.base? 1: _temp116 >= _temp114.last_plus_one)){
-_throw( Null_Exception);}* _temp116=' ';});} while(( ++ i) <(* x).f3) {({ struct
-_tagged_string _temp117= marker_str; char* _temp119= _temp117.curr + i; if(
-_temp117.base == 0? 1:( _temp119 < _temp117.base? 1: _temp119 >= _temp117.last_plus_one)){
-_throw( Null_Exception);}* _temp119='^';});}({ struct _tagged_string _temp120=(*
-x).f1; struct _tagged_string _temp121= marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n",
-_temp120.last_plus_one - _temp120.curr, _temp120.curr, _temp121.last_plus_one -
-_temp121.curr, _temp121.curr);});}; _pop_handler();} else{ struct
+marker_str=({ unsigned int _temp117=( unsigned int)((* x).f3 + 1); char*
+_temp118=( char*) GC_malloc_atomic( sizeof( char) * _temp117); struct
+_tagged_string _temp121={ _temp118, _temp118, _temp118 + _temp117};{
+unsigned int _temp119= _temp117; unsigned int i; for( i= 0; i < _temp119; i ++){
+_temp118[ i]='\000';}}; _temp121;}); int i= - 1; while(( ++ i) <(* x).f2) {({
+struct _tagged_string _temp109= marker_str; char* _temp111= _temp109.curr + i;
+if( _temp109.base == 0? 1:( _temp111 < _temp109.base? 1: _temp111 >= _temp109.last_plus_one)){
+_throw( Null_Exception);}* _temp111=' ';});} while(( ++ i) <(* x).f3) {({ struct
+_tagged_string _temp112= marker_str; char* _temp114= _temp112.curr + i; if(
+_temp112.base == 0? 1:( _temp114 < _temp112.base? 1: _temp114 >= _temp112.last_plus_one)){
+_throw( Null_Exception);}* _temp114='^';});}({ struct _tagged_string _temp115=(*
+x).f1; struct _tagged_string _temp116= marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n",
+_temp115.last_plus_one - _temp115.curr, _temp115.curr, _temp116.last_plus_one -
+_temp116.curr, _temp116.curr);});}; _pop_handler();} else{ struct
 _xtunion_struct* _temp123= _temp108; _LL125: if( _temp123->tag == Cyc_Position_Nocontext_tag){
 goto _LL126;} else{ goto _LL127;} _LL127: goto _LL128; _LL126: goto _LL124;
 _LL128:( void) _throw( _temp123); _LL124:;}}} Cyc_Stdio_fflush( Cyc_Stdio_stderr);}

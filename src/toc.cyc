@@ -2573,31 +2573,51 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       s->r = s2->r;
       return;
     case &Decl_s(d,s1):
+      // we have to treat Let_d and Var_d where we bind a comprehension
+      // (not at the top-level) specially because these have to return 
+      // "statements".  See letdecl_to_c and decls_to_c below.
       switch (d->r) {
       case &Let_d(p,_,topt,e,exhaust):
         // Handle the special case where the pattern is a 
         // variable just like a variable declaration
         let var_case = false;
+        struct Vardecl *vdopt = null;
         switch (p->r) {
         case &Var_p(vd):
           var_case = true;
+          vdopt = vd;
           vd->initializer = e;
           d->r = new Var_d(vd);
           break;
         default: break;
         }
-        if (var_case) fallthru;
+        if (var_case) fallthru((vardecl_t)vdopt);
 	// we treat let declarations specially because they may need
 	// statements in addition to declarations, so we splice them in
 	// as a statement.  Other declarations only produce declarations.
 	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
         break;
+      case &Var_d(vd):
+        let c_name = vd->name;
+        vd->type = typ_to_c_array(vd->type);
+        let nv2 = add_varmap(nv,c_name,varb_exp(c_name,new Local_b(vd),DL));
+        stmt_to_c(nv2,s1);
+        if (vd->initializer != null) {
+          exp_t init = (exp_t)vd->initializer;
+          switch (init->r) {
+          case &Comprehension_e(vd2,e1,e2):
+            vd->initializer = null;
+            s1 = init_comprehension(nv, var_exp(c_name, DL), vd2, e1, e2,
+                                    new_stmt(s1->r,DL), false);
+            break;
+          default:
+            exp_to_c(nv, init);
+            break;
+          }
+        }
+        break;
       default:
-	let $(nv,decls) = decls_to_c(nv,new List(d,null),false);
-	stmt_to_c(nv,s1);
-	for (; decls != null; decls = decls->tl)
-	  s1 = decl_stmt(decls->hd,s1,DL);
-	s->r = s1->r;
+        impos("bad nested declaration within function");
         break;
       }
       return;
@@ -3101,14 +3121,11 @@ static $(env_t,list_t<decl_t>) decls_to_c(env_t nv, list_t<decl_t> ds, bool top)
 	c_name = new $(abs_ns,(*c_name)[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, (exp_t)vd->initializer);
-      if (nv->toplevel) {
-	res = List::append(temp_topdecls,res);
-	temp_topdecls = null;
-      }
-      if (top)
-	nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
-      else
-	nv = add_varmap(nv,vd->name,varb_exp(c_name,new Local_b(vd),DL));
+      if (!nv->toplevel)
+        impos("decls_to_c: not at toplevel!");
+      res = List::append(temp_topdecls,res);
+      temp_topdecls = null;
+      nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
       vd->type = typ_to_c_array(vd->type);

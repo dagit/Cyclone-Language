@@ -647,17 +647,17 @@ _LL59: if(( unsigned int) _temp55 > 1u?(( struct _tunion_struct*) _temp55)->tag
 == Cyc_Absyn_Abs_n_tag: 0){ _LL66: _temp65=( struct Cyc_List_List*)(( struct Cyc_Absyn_Abs_n_struct*)
 _temp55)->f1; goto _LL60;} else{ goto _LL61;} _LL61: goto _LL62; _LL58: _temp65=
 _temp63; goto _LL60; _LL60: ns= _temp65; goto _LL56; _LL62: goto _LL56; _LL56:;}{
-struct Cyc_Absyn_XTuniondecl* fd=({ struct Cyc_Absyn_XTuniondecl* _temp67=(
+struct Cyc_Absyn_XTuniondecl* fd=({ struct Cyc_Absyn_XTuniondecl* _temp72=(
 struct Cyc_Absyn_XTuniondecl*) GC_malloc( sizeof( struct Cyc_Absyn_XTuniondecl));
-_temp67[ 0]=* d; _temp67;}); fd->name=({ struct _tuple0* _temp68=( struct
-_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp68->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
-_temp69=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
-_temp69[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp70; _temp70.tag= Cyc_Absyn_Abs_n_tag;
-_temp70.f1= ns; _temp70;}); _temp69;}); _temp68->f2=(* fd->name).f2; _temp68;});
-fd->fields=({ struct Cyc_List_List* _temp71=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp71->hd=( void*)(( struct Cyc_Absyn_Tunionfield*)({
-struct Cyc_List_List* _temp72= f; if( _temp72 == 0){ _throw( Null_Exception);}
-_temp72->hd;})); _temp71->tl= 0; _temp71;});{ struct Cyc_Interface_Ienv* pub=((
+_temp72[ 0]=* d; _temp72;}); fd->name=({ struct _tuple0* _temp67=( struct
+_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp67->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
+_temp68=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
+_temp68[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp69; _temp69.tag= Cyc_Absyn_Abs_n_tag;
+_temp69.f1= ns; _temp69;}); _temp68;}); _temp67->f2=(* fd->name).f2; _temp67;});
+fd->fields=({ struct Cyc_List_List* _temp70=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp70->hd=( void*)(( struct Cyc_Absyn_Tunionfield*)({
+struct Cyc_List_List* _temp71= f; if( _temp71 == 0){ _throw( Null_Exception);}
+_temp71->hd;})); _temp70->tl= 0; _temp70;});{ struct Cyc_Interface_Ienv* pub=((
 struct Cyc_Interface_Ienv*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
 key)) Cyc_Dict_lookup)( i->exports, ns); pub->xtuniondecls=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, struct _tagged_string* key, struct Cyc_Absyn_XTuniondecl*
@@ -674,17 +674,17 @@ _LL79: if(( unsigned int) _temp75 > 1u?(( struct _tunion_struct*) _temp75)->tag
 == Cyc_Absyn_Abs_n_tag: 0){ _LL86: _temp85=( struct Cyc_List_List*)(( struct Cyc_Absyn_Abs_n_struct*)
 _temp75)->f1; goto _LL80;} else{ goto _LL81;} _LL81: goto _LL82; _LL78: _temp85=
 _temp83; goto _LL80; _LL80: ns= _temp85; goto _LL76; _LL82: goto _LL76; _LL76:;}{
-struct Cyc_Absyn_XTuniondecl* fd=({ struct Cyc_Absyn_XTuniondecl* _temp87=(
+struct Cyc_Absyn_XTuniondecl* fd=({ struct Cyc_Absyn_XTuniondecl* _temp92=(
 struct Cyc_Absyn_XTuniondecl*) GC_malloc( sizeof( struct Cyc_Absyn_XTuniondecl));
-_temp87[ 0]=* d; _temp87;}); fd->name=({ struct _tuple0* _temp88=( struct
-_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp88->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
-_temp89=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
-_temp89[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp90; _temp90.tag= Cyc_Absyn_Abs_n_tag;
-_temp90.f1= ns; _temp90;}); _temp89;}); _temp88->f2=(* fd->name).f2; _temp88;});
-fd->fields=({ struct Cyc_List_List* _temp91=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp91->hd=( void*)(( struct Cyc_Absyn_Tunionfield*)({
-struct Cyc_List_List* _temp92= f; if( _temp92 == 0){ _throw( Null_Exception);}
-_temp92->hd;})); _temp91->tl= 0; _temp91;});{ struct Cyc_Interface_Ienv* ext=((
+_temp92[ 0]=* d; _temp92;}); fd->name=({ struct _tuple0* _temp87=( struct
+_tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp87->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
+_temp88=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
+_temp88[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp89; _temp89.tag= Cyc_Absyn_Abs_n_tag;
+_temp89.f1= ns; _temp89;}); _temp88;}); _temp87->f2=(* fd->name).f2; _temp87;});
+fd->fields=({ struct Cyc_List_List* _temp90=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp90->hd=( void*)(( struct Cyc_Absyn_Tunionfield*)({
+struct Cyc_List_List* _temp91= f; if( _temp91 == 0){ _throw( Null_Exception);}
+_temp91->hd;})); _temp90->tl= 0; _temp90;});{ struct Cyc_Interface_Ienv* ext=((
 struct Cyc_Interface_Ienv*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
 key)) Cyc_Dict_lookup)( i->imports, ns); ext->xtuniondecls=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, struct _tagged_string* key, struct Cyc_Absyn_XTuniondecl*
@@ -758,11 +758,11 @@ goto _LL115; _LL121: goto _LL115; _LL115:;} goto _LL107; _LL111: goto _LL107;
 _LL107:;} static void Cyc_Interface_extract_f( struct _tuple11* env_f, struct
 Cyc_List_List* ns, struct Cyc_Tcenv_Genv* ge){ struct Cyc_Interface_T* i=(*
 env_f).f1; int check_fun_definition=(* env_f).f2; struct _tuple9* env=({ struct
-_tuple9* _temp144=( struct _tuple9*) GC_malloc( sizeof( struct _tuple9));
-_temp144->f1=(( struct Cyc_Interface_Ienv*(*)( struct Cyc_Dict_Dict* d, struct
-Cyc_List_List* key)) Cyc_Dict_lookup)( i->imports, ns); _temp144->f2=(( struct
+_tuple9* _temp145=( struct _tuple9*) GC_malloc( sizeof( struct _tuple9));
+_temp145->f1=(( struct Cyc_Interface_Ienv*(*)( struct Cyc_Dict_Dict* d, struct
+Cyc_List_List* key)) Cyc_Dict_lookup)( i->imports, ns); _temp145->f2=(( struct
 Cyc_Interface_Ienv*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List* key)) Cyc_Dict_lookup)(
-i->exports, ns); _temp144;});(( void(*)( void(* f)( struct _tuple9*, struct
+i->exports, ns); _temp145;});(( void(*)( void(* f)( struct _tuple9*, struct
 _tagged_string*, struct Cyc_Absyn_Structdecl**), struct _tuple9* env, struct Cyc_Dict_Dict*
 d)) Cyc_Dict_iter_c)( Cyc_Interface_extract_structdecl, env, ge->structdecls);((
 void(*)( void(* f)( struct _tuple9*, struct _tagged_string*, struct Cyc_Absyn_Uniondecl**),
@@ -779,24 +779,24 @@ void(*)( void(* f)( struct _tuple9*, struct _tagged_string*, struct Cyc_Absyn_Ty
 struct _tuple9* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)( Cyc_Interface_extract_typedef,
 env, ge->typedefs);(( void(*)( void(* f)( struct _tuple10*, struct
 _tagged_string*, struct _tuple3*), struct _tuple10* env, struct Cyc_Dict_Dict* d))
-Cyc_Dict_iter_c)( Cyc_Interface_extract_ordinarie,({ struct _tuple10* _temp145=(
-struct _tuple10*) GC_malloc( sizeof( struct _tuple10)); _temp145->f1=(* env).f1;
-_temp145->f2=(* env).f2; _temp145->f3= check_fun_definition; _temp145;}), ge->ordinaries);}
+Cyc_Dict_iter_c)( Cyc_Interface_extract_ordinarie,({ struct _tuple10* _temp144=(
+struct _tuple10*) GC_malloc( sizeof( struct _tuple10)); _temp144->f1=(* env).f1;
+_temp144->f2=(* env).f2; _temp144->f3= check_fun_definition; _temp144;}), ge->ordinaries);}
 static struct Cyc_Interface_Ienv* Cyc_Interface_extract_new_ienv( void* ignore){
 return Cyc_Interface_new_ienv();} static struct Cyc_Interface_T* Cyc_Interface_gen_extract(
 struct Cyc_Dict_Dict* ae, int check_fun_definition){ struct Cyc_Interface_T* i=({
-struct Cyc_Interface_T* _temp146=( struct Cyc_Interface_T*) GC_malloc( sizeof(
-struct Cyc_Interface_T)); _temp146->imports=(( struct Cyc_Dict_Dict*(*)( struct
+struct Cyc_Interface_T* _temp147=( struct Cyc_Interface_T*) GC_malloc( sizeof(
+struct Cyc_Interface_T)); _temp147->imports=(( struct Cyc_Dict_Dict*(*)( struct
 Cyc_Interface_Ienv*(* f)( struct Cyc_Tcenv_Genv*), struct Cyc_Dict_Dict* d)) Cyc_Dict_map)((
 struct Cyc_Interface_Ienv*(*)( struct Cyc_Tcenv_Genv* ignore)) Cyc_Interface_extract_new_ienv,
-ae); _temp146->exports=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Interface_Ienv*(*
+ae); _temp147->exports=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Interface_Ienv*(*
 f)( struct Cyc_Tcenv_Genv*), struct Cyc_Dict_Dict* d)) Cyc_Dict_map)(( struct
 Cyc_Interface_Ienv*(*)( struct Cyc_Tcenv_Genv* ignore)) Cyc_Interface_extract_new_ienv,
-ae); _temp146;});(( void(*)( void(* f)( struct _tuple11*, struct Cyc_List_List*,
+ae); _temp147;});(( void(*)( void(* f)( struct _tuple11*, struct Cyc_List_List*,
 struct Cyc_Tcenv_Genv*), struct _tuple11* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_iter_c)(
-Cyc_Interface_extract_f,({ struct _tuple11* _temp147=( struct _tuple11*)
-GC_malloc( sizeof( struct _tuple11)); _temp147->f1= i; _temp147->f2=
-check_fun_definition; _temp147;}), ae); return i;} struct Cyc_Interface_T* Cyc_Interface_extract(
+Cyc_Interface_extract_f,({ struct _tuple11* _temp146=( struct _tuple11*)
+GC_malloc( sizeof( struct _tuple11)); _temp146->f1= i; _temp146->f2=
+check_fun_definition; _temp146;}), ae); return i;} struct Cyc_Interface_T* Cyc_Interface_extract(
 struct Cyc_Dict_Dict* ae){ return Cyc_Interface_gen_extract( ae, 1);} char Cyc_Interface_Check_False_tag[
 6u]="False"; struct Cyc_Interface_Check_False_struct{ char* tag; } ; static void
 Cyc_Interface_Check_is_true( int b){ if( ! b){( void) _throw(( struct

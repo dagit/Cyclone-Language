@@ -63,75 +63,75 @@ struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2->hd=(
 void*)({ struct _tagged_string* _temp3=( struct _tagged_string*) GC_malloc(
 sizeof( struct _tagged_string)); _temp3[ 0]= s2; _temp3;}); _temp2->tl= 0;
 _temp2;}); _temp1;}); _temp0;}));} struct _tagged_string Cyc_Filename_chop_extension(
-struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp8=
-filename;( unsigned int)( _temp8.last_plus_one - _temp8.curr);}) - 1); while( i
->= 0?({ struct _tagged_string _temp9= filename; char* _temp11= _temp9.curr + i;
-if( _temp9.base == 0? 1:( _temp11 < _temp9.base? 1: _temp11 >= _temp9.last_plus_one)){
-_throw( Null_Exception);}* _temp11;}) !='.': 0) { -- i;} if( i < 0){( void)
-_throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp12=(
+struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp15=
+filename;( unsigned int)( _temp15.last_plus_one - _temp15.curr);}) - 1); while(
+i >= 0?({ struct _tagged_string _temp8= filename; char* _temp10= _temp8.curr + i;
+if( _temp8.base == 0? 1:( _temp10 < _temp8.base? 1: _temp10 >= _temp8.last_plus_one)){
+_throw( Null_Exception);}* _temp10;}) !='.': 0) { -- i;} if( i < 0){( void)
+_throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct* _temp11=(
 struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp12[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp13; _temp13.tag= Cyc_Core_InvalidArg_tag;
-_temp13.f1=( struct _tagged_string)({ char* _temp14=( char*)"chop_extension";
-struct _tagged_string _temp15; _temp15.curr= _temp14; _temp15.base= _temp14;
-_temp15.last_plus_one= _temp14 + 15; _temp15;}); _temp13;}); _temp12;}));}
+_temp11[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp12; _temp12.tag= Cyc_Core_InvalidArg_tag;
+_temp12.f1=( struct _tagged_string)({ char* _temp13=( char*)"chop_extension";
+struct _tagged_string _temp14; _temp14.curr= _temp13; _temp14.base= _temp13;
+_temp14.last_plus_one= _temp13 + 15; _temp14;}); _temp12;}); _temp11;}));}
 return Cyc_String_substring( filename, 0,( unsigned int) i);} struct
 _tagged_string Cyc_Filename_dirname( struct _tagged_string filename){ int i=(
-int)(({ struct _tagged_string _temp16= filename;( unsigned int)( _temp16.last_plus_one
-- _temp16.curr);}) - 1); while( i >= 0?({ struct _tagged_string _temp17=
-filename; char* _temp19= _temp17.curr + i; if( _temp17.base == 0? 1:( _temp19 <
-_temp17.base? 1: _temp19 >= _temp17.last_plus_one)){ _throw( Null_Exception);}*
-_temp19;}) !='/': 0) { -- i;} if( i < 0){ return( struct _tagged_string)({ char*
-_temp20=( char*)""; struct _tagged_string _temp21; _temp21.curr= _temp20;
-_temp21.base= _temp20; _temp21.last_plus_one= _temp20 + 1; _temp21;});} return
+int)(({ struct _tagged_string _temp21= filename;( unsigned int)( _temp21.last_plus_one
+- _temp21.curr);}) - 1); while( i >= 0?({ struct _tagged_string _temp16=
+filename; char* _temp18= _temp16.curr + i; if( _temp16.base == 0? 1:( _temp18 <
+_temp16.base? 1: _temp18 >= _temp16.last_plus_one)){ _throw( Null_Exception);}*
+_temp18;}) !='/': 0) { -- i;} if( i < 0){ return( struct _tagged_string)({ char*
+_temp19=( char*)""; struct _tagged_string _temp20; _temp20.curr= _temp19;
+_temp20.base= _temp19; _temp20.last_plus_one= _temp19 + 1; _temp20;});} return
 Cyc_String_substring( filename, 0,( unsigned int) i);} struct _tagged_string Cyc_Filename_basename(
-struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp22=
-filename;( unsigned int)( _temp22.last_plus_one - _temp22.curr);}) - 1); while(
-i >= 0?({ struct _tagged_string _temp23= filename; char* _temp25= _temp23.curr +
-i; if( _temp23.base == 0? 1:( _temp25 < _temp23.base? 1: _temp25 >= _temp23.last_plus_one)){
-_throw( Null_Exception);}* _temp25;}) !='/': 0) { -- i;} return Cyc_String_substring(
-filename, i + 1,({ struct _tagged_string _temp26= filename;( unsigned int)(
-_temp26.last_plus_one - _temp26.curr);}) -( i + 1));} int Cyc_Filename_check_suffix(
+struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp26=
+filename;( unsigned int)( _temp26.last_plus_one - _temp26.curr);}) - 1); while(
+i >= 0?({ struct _tagged_string _temp22= filename; char* _temp24= _temp22.curr +
+i; if( _temp22.base == 0? 1:( _temp24 < _temp22.base? 1: _temp24 >= _temp22.last_plus_one)){
+_throw( Null_Exception);}* _temp24;}) !='/': 0) { -- i;} return Cyc_String_substring(
+filename, i + 1,({ struct _tagged_string _temp25= filename;( unsigned int)(
+_temp25.last_plus_one - _temp25.curr);}) -( i + 1));} int Cyc_Filename_check_suffix(
 struct _tagged_string filename, struct _tagged_string suffix){ int i=( int)(({
-struct _tagged_string _temp27= filename;( unsigned int)( _temp27.last_plus_one -
-_temp27.curr);}) - 1); int j=( int)(({ struct _tagged_string _temp28= suffix;(
-unsigned int)( _temp28.last_plus_one - _temp28.curr);}) - 1); while( i >= 0? j
->= 0: 0) { if(({ struct _tagged_string _temp29= filename; char* _temp31= _temp29.curr
-+( i --); if( _temp29.base == 0? 1:( _temp31 < _temp29.base? 1: _temp31 >=
-_temp29.last_plus_one)){ _throw( Null_Exception);}* _temp31;}) !=({ struct
-_tagged_string _temp32= suffix; char* _temp34= _temp32.curr +( j --); if(
-_temp32.base == 0? 1:( _temp34 < _temp32.base? 1: _temp34 >= _temp32.last_plus_one)){
-_throw( Null_Exception);}* _temp34;})){ return 0;}} if( j >= 0){ return 0;}
+struct _tagged_string _temp34= filename;( unsigned int)( _temp34.last_plus_one -
+_temp34.curr);}) - 1); int j=( int)(({ struct _tagged_string _temp33= suffix;(
+unsigned int)( _temp33.last_plus_one - _temp33.curr);}) - 1); while( i >= 0? j
+>= 0: 0) { if(({ struct _tagged_string _temp27= filename; char* _temp29= _temp27.curr
++( i --); if( _temp27.base == 0? 1:( _temp29 < _temp27.base? 1: _temp29 >=
+_temp27.last_plus_one)){ _throw( Null_Exception);}* _temp29;}) !=({ struct
+_tagged_string _temp30= suffix; char* _temp32= _temp30.curr +( j --); if(
+_temp30.base == 0? 1:( _temp32 < _temp30.base? 1: _temp32 >= _temp30.last_plus_one)){
+_throw( Null_Exception);}* _temp32;})){ return 0;}} if( j >= 0){ return 0;}
 else{ return 1;}} struct _tagged_string Cyc_Filename_gnuify( struct
-_tagged_string filename){ int has_drive_name=({ struct _tagged_string _temp35=
-filename;( unsigned int)( _temp35.last_plus_one - _temp35.curr);}) > 1?({ struct
-_tagged_string _temp36= filename; char* _temp38= _temp36.curr + 1; if( _temp36.base
-== 0? 1:( _temp38 < _temp36.base? 1: _temp38 >= _temp36.last_plus_one)){ _throw(
-Null_Exception);}* _temp38;}) ==':': 0; int i; int j; struct _tagged_string ans;
-int ans_sz; if( has_drive_name){ ans_sz=( int)(({ struct _tagged_string _temp39=
-filename;( unsigned int)( _temp39.last_plus_one - _temp39.curr);}) + 1); ans=({
-unsigned int _temp40=( unsigned int) ans_sz; char* _temp41=( char*)
-GC_malloc_atomic( sizeof( char) * _temp40); struct _tagged_string _temp44={
-_temp41, _temp41, _temp41 + _temp40};{ unsigned int _temp42= _temp40;
-unsigned int k; for( k= 0; k < _temp42; k ++){ _temp41[ k]='\000';}}; _temp44;});({
-struct _tagged_string _temp45= ans; char* _temp47= _temp45.curr + 0; if( _temp45.base
-== 0? 1:( _temp47 < _temp45.base? 1: _temp47 >= _temp45.last_plus_one)){ _throw(
-Null_Exception);}* _temp47=({ struct _tagged_string _temp48= ans; char* _temp50=
-_temp48.curr + 1; if( _temp48.base == 0? 1:( _temp50 < _temp48.base? 1: _temp50
->= _temp48.last_plus_one)){ _throw( Null_Exception);}* _temp50='/';});});({
-struct _tagged_string _temp51= ans; char* _temp53= _temp51.curr + 2; if( _temp51.base
-== 0? 1:( _temp53 < _temp51.base? 1: _temp53 >= _temp51.last_plus_one)){ _throw(
-Null_Exception);}* _temp53=({ struct _tagged_string _temp54= filename; char*
-_temp56= _temp54.curr + 0; if( _temp54.base == 0? 1:( _temp56 < _temp54.base? 1:
-_temp56 >= _temp54.last_plus_one)){ _throw( Null_Exception);}* _temp56;});}); i=
-3; j= 2;} else{ ans_sz=( int)({ struct _tagged_string _temp57= filename;(
-unsigned int)( _temp57.last_plus_one - _temp57.curr);}); ans=({ unsigned int
-_temp58=( unsigned int) ans_sz; char* _temp59=( char*) GC_malloc_atomic( sizeof(
-char) * _temp58); struct _tagged_string _temp62={ _temp59, _temp59, _temp59 +
-_temp58};{ unsigned int _temp60= _temp58; unsigned int k; for( k= 0; k < _temp60;
-k ++){ _temp59[ k]='\000';}}; _temp62;}); i= 0; j= 0;} while( i < ans_sz) { char
-c=({ struct _tagged_string _temp63= filename; char* _temp65= _temp63.curr +( j
-++); if( _temp63.base == 0? 1:( _temp65 < _temp63.base? 1: _temp65 >= _temp63.last_plus_one)){
-_throw( Null_Exception);}* _temp65;});({ struct _tagged_string _temp66= ans;
-char* _temp68= _temp66.curr +( i ++); if( _temp66.base == 0? 1:( _temp68 <
-_temp66.base? 1: _temp68 >= _temp66.last_plus_one)){ _throw( Null_Exception);}*
-_temp68= c =='\\'?'/': c;});} return ans;}
+_tagged_string filename){ int has_drive_name=({ struct _tagged_string _temp65=
+filename;( unsigned int)( _temp65.last_plus_one - _temp65.curr);}) > 1?({ struct
+_tagged_string _temp66= filename; char* _temp68= _temp66.curr + 1; if( _temp66.base
+== 0? 1:( _temp68 < _temp66.base? 1: _temp68 >= _temp66.last_plus_one)){ _throw(
+Null_Exception);}* _temp68;}) ==':': 0; int i; int j; struct _tagged_string ans;
+int ans_sz; if( has_drive_name){ ans_sz=( int)(({ struct _tagged_string _temp35=
+filename;( unsigned int)( _temp35.last_plus_one - _temp35.curr);}) + 1); ans=({
+unsigned int _temp36=( unsigned int) ans_sz; char* _temp37=( char*)
+GC_malloc_atomic( sizeof( char) * _temp36); struct _tagged_string _temp40={
+_temp37, _temp37, _temp37 + _temp36};{ unsigned int _temp38= _temp36;
+unsigned int k; for( k= 0; k < _temp38; k ++){ _temp37[ k]='\000';}}; _temp40;});({
+struct _tagged_string _temp41= ans; char* _temp43= _temp41.curr + 0; if( _temp41.base
+== 0? 1:( _temp43 < _temp41.base? 1: _temp43 >= _temp41.last_plus_one)){ _throw(
+Null_Exception);}* _temp43=({ struct _tagged_string _temp44= ans; char* _temp46=
+_temp44.curr + 1; if( _temp44.base == 0? 1:( _temp46 < _temp44.base? 1: _temp46
+>= _temp44.last_plus_one)){ _throw( Null_Exception);}* _temp46='/';});});({
+struct _tagged_string _temp47= ans; char* _temp49= _temp47.curr + 2; if( _temp47.base
+== 0? 1:( _temp49 < _temp47.base? 1: _temp49 >= _temp47.last_plus_one)){ _throw(
+Null_Exception);}* _temp49=({ struct _tagged_string _temp50= filename; char*
+_temp52= _temp50.curr + 0; if( _temp50.base == 0? 1:( _temp52 < _temp50.base? 1:
+_temp52 >= _temp50.last_plus_one)){ _throw( Null_Exception);}* _temp52;});}); i=
+3; j= 2;} else{ ans_sz=( int)({ struct _tagged_string _temp53= filename;(
+unsigned int)( _temp53.last_plus_one - _temp53.curr);}); ans=({ unsigned int
+_temp54=( unsigned int) ans_sz; char* _temp55=( char*) GC_malloc_atomic( sizeof(
+char) * _temp54); struct _tagged_string _temp58={ _temp55, _temp55, _temp55 +
+_temp54};{ unsigned int _temp56= _temp54; unsigned int k; for( k= 0; k < _temp56;
+k ++){ _temp55[ k]='\000';}}; _temp58;}); i= 0; j= 0;} while( i < ans_sz) { char
+c=({ struct _tagged_string _temp62= filename; char* _temp64= _temp62.curr +( j
+++); if( _temp62.base == 0? 1:( _temp64 < _temp62.base? 1: _temp64 >= _temp62.last_plus_one)){
+_throw( Null_Exception);}* _temp64;});({ struct _tagged_string _temp59= ans;
+char* _temp61= _temp59.curr +( i ++); if( _temp59.base == 0? 1:( _temp61 <
+_temp59.base? 1: _temp61 >= _temp59.last_plus_one)){ _throw( Null_Exception);}*
+_temp61= c =='\\'?'/': c;});} return ans;}

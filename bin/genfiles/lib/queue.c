@@ -51,18 +51,18 @@ char Cyc_Queue_Empty_tag[ 6u]="Empty"; struct Cyc_Queue_Queue* Cyc_Queue_create(
 return({ struct Cyc_Queue_Queue* _temp0=( struct Cyc_Queue_Queue*) GC_malloc(
 sizeof( struct Cyc_Queue_Queue)); _temp0->front= 0; _temp0->rear= 0; _temp0;});}
 void Cyc_Queue_add( struct Cyc_Queue_Queue* q, void* x){ struct Cyc_List_List*
-cell=({ struct Cyc_List_List* _temp1=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp1->hd=( void*) x; _temp1->tl= 0; _temp1;}); if( q->front
-== 0){ q->front= cell; q->rear= cell;} else{({ struct Cyc_List_List* _temp2= q->rear;
-if( _temp2 == 0){ _throw( Null_Exception);} _temp2->tl= cell;}); q->rear= cell;}}
+cell=({ struct Cyc_List_List* _temp2=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp2->hd=( void*) x; _temp2->tl= 0; _temp2;}); if( q->front
+== 0){ q->front= cell; q->rear= cell;} else{({ struct Cyc_List_List* _temp1= q->rear;
+if( _temp1 == 0){ _throw( Null_Exception);} _temp1->tl= cell;}); q->rear= cell;}}
 void* Cyc_Queue_take( struct Cyc_Queue_Queue* q){ if( q->front == 0){( void)
 _throw(( struct _xtunion_struct*)({ struct Cyc_Queue_Empty_struct* _temp3=(
 struct Cyc_Queue_Empty_struct*) GC_malloc( sizeof( struct Cyc_Queue_Empty_struct));
 _temp3[ 0]=({ struct Cyc_Queue_Empty_struct _temp4; _temp4.tag= Cyc_Queue_Empty_tag;
-_temp4;}); _temp3;}));} else{ void* x=( void*)({ struct Cyc_List_List* _temp5= q->front;
-if( _temp5 == 0){ _throw( Null_Exception);} _temp5->hd;}); q->front=({ struct
-Cyc_List_List* _temp6= q->front; if( _temp6 == 0){ _throw( Null_Exception);}
-_temp6->tl;}); if( q->front == 0){ q->rear= 0;} return x;}} void* Cyc_Queue_peek(
+_temp4;}); _temp3;}));} else{ void* x=( void*)({ struct Cyc_List_List* _temp6= q->front;
+if( _temp6 == 0){ _throw( Null_Exception);} _temp6->hd;}); q->front=({ struct
+Cyc_List_List* _temp5= q->front; if( _temp5 == 0){ _throw( Null_Exception);}
+_temp5->tl;}); if( q->front == 0){ q->rear= 0;} return x;}} void* Cyc_Queue_peek(
 struct Cyc_Queue_Queue* q){ if( q->front == 0){( void) _throw(( struct
 _xtunion_struct*)({ struct Cyc_Queue_Empty_struct* _temp7=( struct Cyc_Queue_Empty_struct*)
 GC_malloc( sizeof( struct Cyc_Queue_Empty_struct)); _temp7[ 0]=({ struct Cyc_Queue_Empty_struct

@@ -778,31 +778,31 @@ _tagged_string* Cyc_Absyn_cyc=& Cyc_Absyn_cyc_str; static char _temp144[ 6u]="St
 static struct _tagged_string Cyc_Absyn_st_str=( struct _tagged_string){ _temp144,
 _temp144, _temp144 + 6u}; static struct _tagged_string* Cyc_Absyn_st=& Cyc_Absyn_st_str;
 void* Cyc_Absyn_file_typ(){ if( Cyc_Absyn_file_t_opt == 0){ struct _tuple0*
-file_t_name=({ struct _tuple0* _temp145=( struct _tuple0*) GC_malloc( sizeof(
-struct _tuple0)); _temp145->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
-_temp146=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
-_temp146[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp147; _temp147.tag= Cyc_Absyn_Abs_n_tag;
-_temp147.f1=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp148=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp148->hd=( void*)
-Cyc_Absyn_cyc; _temp148->tl=({ struct Cyc_List_List* _temp149=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp149->hd=( void*) Cyc_Absyn_st;
-_temp149->tl= 0; _temp149;}); _temp148;}); _temp147;}); _temp146;}); _temp145->f2=
-Cyc_Absyn_sf; _temp145;}); struct Cyc_Absyn_Structdecl* sd=({ struct Cyc_Absyn_Structdecl*
-_temp150=( struct Cyc_Absyn_Structdecl*) GC_malloc( sizeof( struct Cyc_Absyn_Structdecl));
-_temp150->sc=( void*)(( void*) Cyc_Absyn_Abstract); _temp150->name=({ struct Cyc_Core_Opt*
-_temp151=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp151->v=( void*) file_t_name; _temp151;}); _temp150->tvs= 0; _temp150->fields=
-0; _temp150->attributes= 0; _temp150;}); void* file_struct_typ=( void*)({ struct
-Cyc_Absyn_StructType_struct* _temp152=( struct Cyc_Absyn_StructType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp152[ 0]=({ struct
-Cyc_Absyn_StructType_struct _temp153; _temp153.tag= Cyc_Absyn_StructType_tag;
-_temp153.f1=( struct _tuple0*) file_t_name; _temp153.f2= 0; _temp153.f3=({
-struct Cyc_Absyn_Structdecl** _temp154=( struct Cyc_Absyn_Structdecl**)
-GC_malloc( sizeof( struct Cyc_Absyn_Structdecl*) * 1); _temp154[ 0]= sd;
-_temp154;}); _temp153;}); _temp152;}); Cyc_Absyn_file_t_opt=({ struct Cyc_Core_Opt*
-_temp155=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp155->v=( void*) Cyc_Absyn_at_typ( file_struct_typ,( void*) Cyc_Absyn_HeapRgn,
-Cyc_Absyn_empty_tqual()); _temp155;});} return( void*)({ struct Cyc_Core_Opt*
+file_t_name=({ struct _tuple0* _temp151=( struct _tuple0*) GC_malloc( sizeof(
+struct _tuple0)); _temp151->f1=( void*)({ struct Cyc_Absyn_Abs_n_struct*
+_temp152=( struct Cyc_Absyn_Abs_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Abs_n_struct));
+_temp152[ 0]=({ struct Cyc_Absyn_Abs_n_struct _temp153; _temp153.tag= Cyc_Absyn_Abs_n_tag;
+_temp153.f1=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp154=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp154->hd=( void*)
+Cyc_Absyn_cyc; _temp154->tl=({ struct Cyc_List_List* _temp155=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp155->hd=( void*) Cyc_Absyn_st;
+_temp155->tl= 0; _temp155;}); _temp154;}); _temp153;}); _temp152;}); _temp151->f2=
+Cyc_Absyn_sf; _temp151;}); struct Cyc_Absyn_Structdecl* sd=({ struct Cyc_Absyn_Structdecl*
+_temp149=( struct Cyc_Absyn_Structdecl*) GC_malloc( sizeof( struct Cyc_Absyn_Structdecl));
+_temp149->sc=( void*)(( void*) Cyc_Absyn_Abstract); _temp149->name=({ struct Cyc_Core_Opt*
+_temp150=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp150->v=( void*) file_t_name; _temp150;}); _temp149->tvs= 0; _temp149->fields=
+0; _temp149->attributes= 0; _temp149;}); void* file_struct_typ=( void*)({ struct
+Cyc_Absyn_StructType_struct* _temp146=( struct Cyc_Absyn_StructType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp146[ 0]=({ struct
+Cyc_Absyn_StructType_struct _temp147; _temp147.tag= Cyc_Absyn_StructType_tag;
+_temp147.f1=( struct _tuple0*) file_t_name; _temp147.f2= 0; _temp147.f3=({
+struct Cyc_Absyn_Structdecl** _temp148=( struct Cyc_Absyn_Structdecl**)
+GC_malloc( sizeof( struct Cyc_Absyn_Structdecl*) * 1); _temp148[ 0]= sd;
+_temp148;}); _temp147;}); _temp146;}); Cyc_Absyn_file_t_opt=({ struct Cyc_Core_Opt*
+_temp145=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp145->v=( void*) Cyc_Absyn_at_typ( file_struct_typ,( void*) Cyc_Absyn_HeapRgn,
+Cyc_Absyn_empty_tqual()); _temp145;});} return( void*)({ struct Cyc_Core_Opt*
 _temp156= Cyc_Absyn_file_t_opt; if( _temp156 == 0){ _throw( Null_Exception);}
 _temp156->v;});} static struct Cyc_Core_Opt* Cyc_Absyn_void_star_t_opt= 0; void*
 Cyc_Absyn_void_star_typ(){ if( Cyc_Absyn_void_star_t_opt == 0){ Cyc_Absyn_void_star_t_opt=({
@@ -1174,14 +1174,14 @@ _temp290[ 0]=({ struct Cyc_Absyn_Decl_s_struct _temp291; _temp291.tag= Cyc_Absyn
 _temp291.f1= d; _temp291.f2= s; _temp291;}); _temp290;}), loc);} struct Cyc_Absyn_Stmt*
 Cyc_Absyn_declare_stmt( struct _tuple0* x, void* t, struct Cyc_Absyn_Exp* init,
 struct Cyc_Absyn_Stmt* s, struct Cyc_Position_Segment* loc){ struct Cyc_Absyn_Decl*
-d= Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Var_d_struct* _temp292=(
+d= Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Var_d_struct* _temp294=(
 struct Cyc_Absyn_Var_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Var_d_struct));
-_temp292[ 0]=({ struct Cyc_Absyn_Var_d_struct _temp293; _temp293.tag= Cyc_Absyn_Var_d_tag;
-_temp293.f1= Cyc_Absyn_new_vardecl( x, t, init); _temp293;}); _temp292;}), loc);
-return Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Decl_s_struct* _temp294=(
+_temp294[ 0]=({ struct Cyc_Absyn_Var_d_struct _temp295; _temp295.tag= Cyc_Absyn_Var_d_tag;
+_temp295.f1= Cyc_Absyn_new_vardecl( x, t, init); _temp295;}); _temp294;}), loc);
+return Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Decl_s_struct* _temp292=(
 struct Cyc_Absyn_Decl_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Decl_s_struct));
-_temp294[ 0]=({ struct Cyc_Absyn_Decl_s_struct _temp295; _temp295.tag= Cyc_Absyn_Decl_s_tag;
-_temp295.f1= d; _temp295.f2= s; _temp295;}); _temp294;}), loc);} struct Cyc_Absyn_Stmt*
+_temp292[ 0]=({ struct Cyc_Absyn_Decl_s_struct _temp293; _temp293.tag= Cyc_Absyn_Decl_s_tag;
+_temp293.f1= d; _temp293.f2= s; _temp293;}); _temp292;}), loc);} struct Cyc_Absyn_Stmt*
 Cyc_Absyn_cut_stmt( struct Cyc_Absyn_Stmt* s, struct Cyc_Position_Segment* loc){
 return Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Cut_s_struct* _temp296=(
 struct Cyc_Absyn_Cut_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Cut_s_struct));
@@ -1351,11 +1351,11 @@ return 1; _LL350: return 1; _LL352: return Cyc_Absyn_is_lvalue( _temp387);
 _LL354: return 1; _LL356: return 1; _LL358: return 0; _LL340:;} struct Cyc_Absyn_Structfield*
 Cyc_Absyn_lookup_field( struct Cyc_Core_Opt* fields, struct _tagged_string* v){
 if( fields == 0){ return 0;}{ struct Cyc_List_List* fs=( struct Cyc_List_List*)({
-struct Cyc_Core_Opt* _temp407= fields; if( _temp407 == 0){ _throw(
-Null_Exception);} _temp407->v;}); for( 0; fs != 0; fs=({ struct Cyc_List_List*
-_temp408= fs; if( _temp408 == 0){ _throw( Null_Exception);} _temp408->tl;})){
+struct Cyc_Core_Opt* _temp409= fields; if( _temp409 == 0){ _throw(
+Null_Exception);} _temp409->v;}); for( 0; fs != 0; fs=({ struct Cyc_List_List*
+_temp407= fs; if( _temp407 == 0){ _throw( Null_Exception);} _temp407->tl;})){
 struct Cyc_Absyn_Structfield* f=( struct Cyc_Absyn_Structfield*)({ struct Cyc_List_List*
-_temp409= fs; if( _temp409 == 0){ _throw( Null_Exception);} _temp409->hd;}); if(
+_temp408= fs; if( _temp408 == 0){ _throw( Null_Exception);} _temp408->hd;}); if(
 Cyc_String_zstrptrcmp( f->name, v) == 0){ return( struct Cyc_Absyn_Structfield*)
 f;}}} return 0;} struct Cyc_Absyn_Structfield* Cyc_Absyn_lookup_struct_field(
 struct Cyc_Absyn_Structdecl* sd, struct _tagged_string* v){ return Cyc_Absyn_lookup_field(
