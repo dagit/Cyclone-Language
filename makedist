@@ -42,6 +42,7 @@ else
       exit 1
     fi
   fi
+  echo $version > .version
 fi
 
 # grepexpr 
@@ -96,11 +97,7 @@ fi
 # restore the directory name
 #
 mv $DIR $OLDDIR
-
-# output the version #
-#
 cd $OLDDIR
-echo $version > .version
 
 # tag CVS, if desired
 #
