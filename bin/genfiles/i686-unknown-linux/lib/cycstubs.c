@@ -657,8 +657,18 @@ __unused1;unsigned int __unused2;};int Cyc_Std_ftok(struct _tagged_arr,int);int 
 char*,int);static char _tmp50[22]="ftok called with NULL";static struct Cyc_Core_Failure_struct
 Cyc_Std___ftok_failure={Cyc_Core_Failure,{_tmp50,_tmp50,_tmp50 + 22}};int Cyc_Std_ftok(
 struct _tagged_arr x,int y){if(!((unsigned int)x.curr))(int)_throw((void*)& Cyc_Std___ftok_failure);
-return ftok(string_to_Cstring(x),y);}struct Cyc_Std_timeval{int tv_sec;int tv_usec;}
-;struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc_Std___rusage_who{
+return ftok(string_to_Cstring(x),y);}struct _tagged_arr Cyc_Std_mmap(unsigned int
+length,int prot,int flags,int fd,int offset);int Cyc_Std_munmap(struct _tagged_arr
+start,unsigned int length);char*mmap(char*start,unsigned int length,int prot,int
+flags,int fd,int offset);int munmap(char*start,unsigned int length);static char _tmp52[
+36]="mmap called with illegal prot/flags";static struct Cyc_Core_Failure_struct Cyc_Std___mmap_failure={
+Cyc_Core_Failure,{_tmp52,_tmp52,_tmp52 + 36}};struct _tagged_arr Cyc_Std_mmap(
+unsigned int length,int prot,int flags,int fd,int offset){if(prot == 1?flags == 2?1:
+flags == 1: 0)return(struct _tagged_arr)wrap_Cstring_as_string(mmap(0,length,prot,
+flags,fd,offset),length);else{(int)_throw((void*)& Cyc_Std___mmap_failure);}}int
+Cyc_Std_munmap(struct _tagged_arr start,unsigned int length){return munmap(
+underlying_Cstring(start),length);}struct Cyc_Std_timeval{int tv_sec;int tv_usec;};
+struct Cyc_Std_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc_Std___rusage_who{
 Cyc_Std_RUSAGE_SELF  = 0,Cyc_Std_RUSAGE_CHILDREN  = -1,Cyc_Std_RUSAGE_BOTH  = -2};
 struct Cyc_Std_rusage{struct Cyc_Std_timeval ru_utime;struct Cyc_Std_timeval ru_stime;
 int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int
@@ -701,118 +711,118 @@ _tagged_arr);int Cyc_Std_setsockopt(int fd,int level,int optname,struct _tagged_
 char Cyc_Std_SocketError[16]="\000\000\000\000SocketError";int accept_in(int,const
 struct Cyc_Std_sockaddr_in*,unsigned int*);struct _tuple0{void*f1;void*f2;};int Cyc_Std_accept(
 int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp52=({struct _tuple0 _tmp51;_tmp51.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp51.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp51;});void*_tmp53;struct Cyc_Std_sockaddr_in*
-_tmp54;void*_tmp55;unsigned int*_tmp56;_LL14: _tmp53=_tmp52.f1;if(*((int*)_tmp53)
-!= 0)goto _LL16;_tmp54=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp53)->f1;_tmp55=
-_tmp52.f2;if(*((int*)_tmp55)!= 1)goto _LL16;_tmp56=((struct Cyc_Std_SA_socklenptr_struct*)
-_tmp55)->f1;_LL15: return accept_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp54,
-_tmp56);_LL16:;_LL17:(int)_throw((void*)Cyc_Std_SocketError);_LL13:;}}int bind_in(
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp54=({struct _tuple0 _tmp53;_tmp53.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp53.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp53;});void*_tmp55;struct Cyc_Std_sockaddr_in*
+_tmp56;void*_tmp57;unsigned int*_tmp58;_LL14: _tmp55=_tmp54.f1;if(*((int*)_tmp55)
+!= 0)goto _LL16;_tmp56=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp55)->f1;_tmp57=
+_tmp54.f2;if(*((int*)_tmp57)!= 1)goto _LL16;_tmp58=((struct Cyc_Std_SA_socklenptr_struct*)
+_tmp57)->f1;_LL15: return accept_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp56,
+_tmp58);_LL16:;_LL17:(int)_throw((void*)Cyc_Std_SocketError);_LL13:;}}int bind_in(
 int,const struct Cyc_Std_sockaddr_in*,unsigned int);int Cyc_Std_bind(int fd,struct
 _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((void*)Cyc_Std_SocketError);{
-struct _tuple0 _tmp58=({struct _tuple0 _tmp57;_tmp57.f1=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),0));_tmp57.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp57;});void*_tmp59;struct Cyc_Std_sockaddr_in*
-_tmp5A;void*_tmp5B;unsigned int _tmp5C;_LL19: _tmp59=_tmp58.f1;if(*((int*)_tmp59)
-!= 0)goto _LL1B;_tmp5A=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp59)->f1;_tmp5B=
-_tmp58.f2;if(*((int*)_tmp5B)!= 2)goto _LL1B;_tmp5C=((struct Cyc_Std_SA_socklen_struct*)
-_tmp5B)->f1;_LL1A: return bind_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp5A,
-_tmp5C);_LL1B:;_LL1C:(int)_throw((void*)Cyc_Std_SocketError);_LL18:;}}int
+struct _tuple0 _tmp5A=({struct _tuple0 _tmp59;_tmp59.f1=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),0));_tmp59.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp59;});void*_tmp5B;struct Cyc_Std_sockaddr_in*
+_tmp5C;void*_tmp5D;unsigned int _tmp5E;_LL19: _tmp5B=_tmp5A.f1;if(*((int*)_tmp5B)
+!= 0)goto _LL1B;_tmp5C=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp5B)->f1;_tmp5D=
+_tmp5A.f2;if(*((int*)_tmp5D)!= 2)goto _LL1B;_tmp5E=((struct Cyc_Std_SA_socklen_struct*)
+_tmp5D)->f1;_LL1A: return bind_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp5C,
+_tmp5E);_LL1B:;_LL1C:(int)_throw((void*)Cyc_Std_SocketError);_LL18:;}}int
 connect_in(int,const struct Cyc_Std_sockaddr_in*,unsigned int);int Cyc_Std_connect(
 int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp5E=({struct _tuple0 _tmp5D;_tmp5D.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp5D.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp5D;});void*_tmp5F;struct Cyc_Std_sockaddr_in*
-_tmp60;void*_tmp61;unsigned int _tmp62;_LL1E: _tmp5F=_tmp5E.f1;if(*((int*)_tmp5F)
-!= 0)goto _LL20;_tmp60=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp5F)->f1;_tmp61=
-_tmp5E.f2;if(*((int*)_tmp61)!= 2)goto _LL20;_tmp62=((struct Cyc_Std_SA_socklen_struct*)
-_tmp61)->f1;_LL1F: return connect_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp60,
-_tmp62);_LL20:;_LL21:(int)_throw((void*)Cyc_Std_SocketError);_LL1D:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp60=({struct _tuple0 _tmp5F;_tmp5F.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp5F.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp5F;});void*_tmp61;struct Cyc_Std_sockaddr_in*
+_tmp62;void*_tmp63;unsigned int _tmp64;_LL1E: _tmp61=_tmp60.f1;if(*((int*)_tmp61)
+!= 0)goto _LL20;_tmp62=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp61)->f1;_tmp63=
+_tmp60.f2;if(*((int*)_tmp63)!= 2)goto _LL20;_tmp64=((struct Cyc_Std_SA_socklen_struct*)
+_tmp63)->f1;_LL1F: return connect_in(fd,(const struct Cyc_Std_sockaddr_in*)_tmp62,
+_tmp64);_LL20:;_LL21:(int)_throw((void*)Cyc_Std_SocketError);_LL1D:;}}int
 getpeername_in(int,const struct Cyc_Std_sockaddr_in*,unsigned int*);int Cyc_Std_getpeername(
 int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp64=({struct _tuple0 _tmp63;_tmp63.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp63.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp63;});void*_tmp65;struct Cyc_Std_sockaddr_in*
-_tmp66;void*_tmp67;unsigned int*_tmp68;_LL23: _tmp65=_tmp64.f1;if(*((int*)_tmp65)
-!= 0)goto _LL25;_tmp66=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp65)->f1;_tmp67=
-_tmp64.f2;if(*((int*)_tmp67)!= 1)goto _LL25;_tmp68=((struct Cyc_Std_SA_socklenptr_struct*)
-_tmp67)->f1;_LL24: return getpeername_in(fd,(const struct Cyc_Std_sockaddr_in*)
-_tmp66,_tmp68);_LL25:;_LL26:(int)_throw((void*)Cyc_Std_SocketError);_LL22:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp66=({struct _tuple0 _tmp65;_tmp65.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp65.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp65;});void*_tmp67;struct Cyc_Std_sockaddr_in*
+_tmp68;void*_tmp69;unsigned int*_tmp6A;_LL23: _tmp67=_tmp66.f1;if(*((int*)_tmp67)
+!= 0)goto _LL25;_tmp68=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp67)->f1;_tmp69=
+_tmp66.f2;if(*((int*)_tmp69)!= 1)goto _LL25;_tmp6A=((struct Cyc_Std_SA_socklenptr_struct*)
+_tmp69)->f1;_LL24: return getpeername_in(fd,(const struct Cyc_Std_sockaddr_in*)
+_tmp68,_tmp6A);_LL25:;_LL26:(int)_throw((void*)Cyc_Std_SocketError);_LL22:;}}int
 getsockname_in(int,const struct Cyc_Std_sockaddr_in*,unsigned int*);int Cyc_Std_getsockname(
 int fd,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp6A=({struct _tuple0 _tmp69;_tmp69.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp69.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp69;});void*_tmp6B;struct Cyc_Std_sockaddr_in*
-_tmp6C;void*_tmp6D;unsigned int*_tmp6E;_LL28: _tmp6B=_tmp6A.f1;if(*((int*)_tmp6B)
-!= 0)goto _LL2A;_tmp6C=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp6B)->f1;_tmp6D=
-_tmp6A.f2;if(*((int*)_tmp6D)!= 1)goto _LL2A;_tmp6E=((struct Cyc_Std_SA_socklenptr_struct*)
-_tmp6D)->f1;_LL29: return getsockname_in(fd,(const struct Cyc_Std_sockaddr_in*)
-_tmp6C,_tmp6E);_LL2A:;_LL2B:(int)_throw((void*)Cyc_Std_SocketError);_LL27:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp6C=({struct _tuple0 _tmp6B;_tmp6B.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp6B.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp6B;});void*_tmp6D;struct Cyc_Std_sockaddr_in*
+_tmp6E;void*_tmp6F;unsigned int*_tmp70;_LL28: _tmp6D=_tmp6C.f1;if(*((int*)_tmp6D)
+!= 0)goto _LL2A;_tmp6E=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp6D)->f1;_tmp6F=
+_tmp6C.f2;if(*((int*)_tmp6F)!= 1)goto _LL2A;_tmp70=((struct Cyc_Std_SA_socklenptr_struct*)
+_tmp6F)->f1;_LL29: return getsockname_in(fd,(const struct Cyc_Std_sockaddr_in*)
+_tmp6E,_tmp70);_LL2A:;_LL2B:(int)_throw((void*)Cyc_Std_SocketError);_LL27:;}}int
 getsockopt_int(int,int,int,int*,unsigned int*);int getsockopt_timeval(int,int,int,
 struct Cyc_Std_timeval*,unsigned int*);int Cyc_Std_getsockopt(int fd,int level,int
 optname,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp70=({struct _tuple0 _tmp6F;_tmp6F.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp6F.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp6F;});void*_tmp71;int*_tmp72;
-void*_tmp73;unsigned int*_tmp74;void*_tmp75;int*_tmp76;void*_tmp77;int*_tmp78;
-void*_tmp79;struct Cyc_Std_timeval*_tmp7A;void*_tmp7B;unsigned int*_tmp7C;void*
-_tmp7D;struct Cyc_Std_timeval*_tmp7E;void*_tmp7F;int*_tmp80;_LL2D: _tmp71=_tmp70.f1;
-if(*((int*)_tmp71)!= 0)goto _LL2F;_tmp72=((struct Cyc_Std_SO_int_struct*)_tmp71)->f1;
-_tmp73=_tmp70.f2;if(*((int*)_tmp73)!= 2)goto _LL2F;_tmp74=((struct Cyc_Std_SO_socklenptr_struct*)
-_tmp73)->f1;_LL2E: return getsockopt_int(fd,level,optname,_tmp72,_tmp74);_LL2F:
-_tmp75=_tmp70.f1;if(*((int*)_tmp75)!= 0)goto _LL31;_tmp76=((struct Cyc_Std_SO_int_struct*)
-_tmp75)->f1;_tmp77=_tmp70.f2;if(*((int*)_tmp77)!= 0)goto _LL31;_tmp78=((struct Cyc_Std_SO_int_struct*)
-_tmp77)->f1;_LL30: return getsockopt_int(fd,level,optname,_tmp76,(unsigned int*)
-_tmp78);_LL31: _tmp79=_tmp70.f1;if(*((int*)_tmp79)!= 1)goto _LL33;_tmp7A=((struct
-Cyc_Std_SO_timeval_struct*)_tmp79)->f1;_tmp7B=_tmp70.f2;if(*((int*)_tmp7B)!= 2)
-goto _LL33;_tmp7C=((struct Cyc_Std_SO_socklenptr_struct*)_tmp7B)->f1;_LL32: return
-getsockopt_timeval(fd,level,optname,_tmp7A,_tmp7C);_LL33: _tmp7D=_tmp70.f1;if(*((
-int*)_tmp7D)!= 1)goto _LL35;_tmp7E=((struct Cyc_Std_SO_timeval_struct*)_tmp7D)->f1;
-_tmp7F=_tmp70.f2;if(*((int*)_tmp7F)!= 0)goto _LL35;_tmp80=((struct Cyc_Std_SO_int_struct*)
-_tmp7F)->f1;_LL34: return getsockopt_timeval(fd,level,optname,_tmp7E,(unsigned int*)
-_tmp80);_LL35:;_LL36:(int)_throw((void*)Cyc_Std_SocketError);_LL2C:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp72=({struct _tuple0 _tmp71;_tmp71.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp71.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp71;});void*_tmp73;int*_tmp74;
+void*_tmp75;unsigned int*_tmp76;void*_tmp77;int*_tmp78;void*_tmp79;int*_tmp7A;
+void*_tmp7B;struct Cyc_Std_timeval*_tmp7C;void*_tmp7D;unsigned int*_tmp7E;void*
+_tmp7F;struct Cyc_Std_timeval*_tmp80;void*_tmp81;int*_tmp82;_LL2D: _tmp73=_tmp72.f1;
+if(*((int*)_tmp73)!= 0)goto _LL2F;_tmp74=((struct Cyc_Std_SO_int_struct*)_tmp73)->f1;
+_tmp75=_tmp72.f2;if(*((int*)_tmp75)!= 2)goto _LL2F;_tmp76=((struct Cyc_Std_SO_socklenptr_struct*)
+_tmp75)->f1;_LL2E: return getsockopt_int(fd,level,optname,_tmp74,_tmp76);_LL2F:
+_tmp77=_tmp72.f1;if(*((int*)_tmp77)!= 0)goto _LL31;_tmp78=((struct Cyc_Std_SO_int_struct*)
+_tmp77)->f1;_tmp79=_tmp72.f2;if(*((int*)_tmp79)!= 0)goto _LL31;_tmp7A=((struct Cyc_Std_SO_int_struct*)
+_tmp79)->f1;_LL30: return getsockopt_int(fd,level,optname,_tmp78,(unsigned int*)
+_tmp7A);_LL31: _tmp7B=_tmp72.f1;if(*((int*)_tmp7B)!= 1)goto _LL33;_tmp7C=((struct
+Cyc_Std_SO_timeval_struct*)_tmp7B)->f1;_tmp7D=_tmp72.f2;if(*((int*)_tmp7D)!= 2)
+goto _LL33;_tmp7E=((struct Cyc_Std_SO_socklenptr_struct*)_tmp7D)->f1;_LL32: return
+getsockopt_timeval(fd,level,optname,_tmp7C,_tmp7E);_LL33: _tmp7F=_tmp72.f1;if(*((
+int*)_tmp7F)!= 1)goto _LL35;_tmp80=((struct Cyc_Std_SO_timeval_struct*)_tmp7F)->f1;
+_tmp81=_tmp72.f2;if(*((int*)_tmp81)!= 0)goto _LL35;_tmp82=((struct Cyc_Std_SO_int_struct*)
+_tmp81)->f1;_LL34: return getsockopt_timeval(fd,level,optname,_tmp80,(unsigned int*)
+_tmp82);_LL35:;_LL36:(int)_throw((void*)Cyc_Std_SocketError);_LL2C:;}}int
 recv_wrapped(int,struct _tagged_arr,unsigned int,int);int Cyc_Std_recv(int fd,
 struct _tagged_arr buf,unsigned int n,int flags){return recv_wrapped(fd,buf,n,flags);}
 int recvfrom_in(int,struct _tagged_arr,unsigned int,int,const struct Cyc_Std_sockaddr_in*,
 unsigned int*);int Cyc_Std_recvfrom(int fd,struct _tagged_arr buf,unsigned int n,int
 flags,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp82=({struct _tuple0 _tmp81;_tmp81.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp81.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp81;});void*_tmp83;struct Cyc_Std_sockaddr_in*
-_tmp84;void*_tmp85;unsigned int*_tmp86;_LL38: _tmp83=_tmp82.f1;if(*((int*)_tmp83)
-!= 0)goto _LL3A;_tmp84=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp83)->f1;_tmp85=
-_tmp82.f2;if(*((int*)_tmp85)!= 1)goto _LL3A;_tmp86=((struct Cyc_Std_SA_socklenptr_struct*)
-_tmp85)->f1;_LL39: return recvfrom_in(fd,buf,n,flags,(const struct Cyc_Std_sockaddr_in*)
-_tmp84,_tmp86);_LL3A:;_LL3B:(int)_throw((void*)Cyc_Std_SocketError);_LL37:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp84=({struct _tuple0 _tmp83;_tmp83.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp83.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp83;});void*_tmp85;struct Cyc_Std_sockaddr_in*
+_tmp86;void*_tmp87;unsigned int*_tmp88;_LL38: _tmp85=_tmp84.f1;if(*((int*)_tmp85)
+!= 0)goto _LL3A;_tmp86=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp85)->f1;_tmp87=
+_tmp84.f2;if(*((int*)_tmp87)!= 1)goto _LL3A;_tmp88=((struct Cyc_Std_SA_socklenptr_struct*)
+_tmp87)->f1;_LL39: return recvfrom_in(fd,buf,n,flags,(const struct Cyc_Std_sockaddr_in*)
+_tmp86,_tmp88);_LL3A:;_LL3B:(int)_throw((void*)Cyc_Std_SocketError);_LL37:;}}int
 send_wrapped(int,struct _tagged_arr,unsigned int,int);int Cyc_Std_send(int fd,
 struct _tagged_arr buf,unsigned int n,int flags){return send_wrapped(fd,buf,n,flags);}
 int sendto_in(int,struct _tagged_arr,unsigned int,int,const struct Cyc_Std_sockaddr_in*,
 unsigned int);int Cyc_Std_sendto(int fd,struct _tagged_arr buf,unsigned int n,int
 flags,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(int)_throw((
-void*)Cyc_Std_SocketError);{struct _tuple0 _tmp88=({struct _tuple0 _tmp87;_tmp87.f1=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp87.f2=*((void**)
-_check_unknown_subscript(ap,sizeof(void*),1));_tmp87;});void*_tmp89;struct Cyc_Std_sockaddr_in*
-_tmp8A;void*_tmp8B;unsigned int _tmp8C;_LL3D: _tmp89=_tmp88.f1;if(*((int*)_tmp89)
-!= 0)goto _LL3F;_tmp8A=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp89)->f1;_tmp8B=
-_tmp88.f2;if(*((int*)_tmp8B)!= 2)goto _LL3F;_tmp8C=((struct Cyc_Std_SA_socklen_struct*)
-_tmp8B)->f1;_LL3E: return sendto_in(fd,buf,n,flags,(const struct Cyc_Std_sockaddr_in*)
-_tmp8A,_tmp8C);_LL3F:;_LL40:(int)_throw((void*)Cyc_Std_SocketError);_LL3C:;}}int
+void*)Cyc_Std_SocketError);{struct _tuple0 _tmp8A=({struct _tuple0 _tmp89;_tmp89.f1=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp89.f2=*((void**)
+_check_unknown_subscript(ap,sizeof(void*),1));_tmp89;});void*_tmp8B;struct Cyc_Std_sockaddr_in*
+_tmp8C;void*_tmp8D;unsigned int _tmp8E;_LL3D: _tmp8B=_tmp8A.f1;if(*((int*)_tmp8B)
+!= 0)goto _LL3F;_tmp8C=((struct Cyc_Std_SA_sockaddr_in_struct*)_tmp8B)->f1;_tmp8D=
+_tmp8A.f2;if(*((int*)_tmp8D)!= 2)goto _LL3F;_tmp8E=((struct Cyc_Std_SA_socklen_struct*)
+_tmp8D)->f1;_LL3E: return sendto_in(fd,buf,n,flags,(const struct Cyc_Std_sockaddr_in*)
+_tmp8C,_tmp8E);_LL3F:;_LL40:(int)_throw((void*)Cyc_Std_SocketError);_LL3C:;}}int
 setsockopt_int(int,int,int,const int*,unsigned int);int setsockopt_timeval(int,int,
 int,const struct Cyc_Std_timeval*,unsigned int);int Cyc_Std_setsockopt(int fd,int
 level,int optname,struct _tagged_arr ap){if(_get_arr_size(ap,sizeof(void*))!= 2)(
-int)_throw((void*)Cyc_Std_SocketError);{struct _tuple0 _tmp8E=({struct _tuple0
-_tmp8D;_tmp8D.f1=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp8D.f2=*((
-void**)_check_unknown_subscript(ap,sizeof(void*),1));_tmp8D;});void*_tmp8F;int*
-_tmp90;void*_tmp91;unsigned int _tmp92;void*_tmp93;struct Cyc_Std_timeval*_tmp94;
-void*_tmp95;unsigned int _tmp96;_LL42: _tmp8F=_tmp8E.f1;if(*((int*)_tmp8F)!= 0)
-goto _LL44;_tmp90=((struct Cyc_Std_SO_int_struct*)_tmp8F)->f1;_tmp91=_tmp8E.f2;if(*((
-int*)_tmp91)!= 3)goto _LL44;_tmp92=((struct Cyc_Std_SO_socklen_struct*)_tmp91)->f1;
-_LL43: return setsockopt_int(fd,level,optname,(const int*)_tmp90,_tmp92);_LL44:
-_tmp93=_tmp8E.f1;if(*((int*)_tmp93)!= 1)goto _LL46;_tmp94=((struct Cyc_Std_SO_timeval_struct*)
-_tmp93)->f1;_tmp95=_tmp8E.f2;if(*((int*)_tmp95)!= 3)goto _LL46;_tmp96=((struct Cyc_Std_SO_socklen_struct*)
-_tmp95)->f1;_LL45: return setsockopt_timeval(fd,level,optname,(const struct Cyc_Std_timeval*)
-_tmp94,_tmp96);_LL46:;_LL47:(int)_throw((void*)Cyc_Std_SocketError);_LL41:;}}
+int)_throw((void*)Cyc_Std_SocketError);{struct _tuple0 _tmp90=({struct _tuple0
+_tmp8F;_tmp8F.f1=*((void**)_check_unknown_subscript(ap,sizeof(void*),0));_tmp8F.f2=*((
+void**)_check_unknown_subscript(ap,sizeof(void*),1));_tmp8F;});void*_tmp91;int*
+_tmp92;void*_tmp93;unsigned int _tmp94;void*_tmp95;struct Cyc_Std_timeval*_tmp96;
+void*_tmp97;unsigned int _tmp98;_LL42: _tmp91=_tmp90.f1;if(*((int*)_tmp91)!= 0)
+goto _LL44;_tmp92=((struct Cyc_Std_SO_int_struct*)_tmp91)->f1;_tmp93=_tmp90.f2;if(*((
+int*)_tmp93)!= 3)goto _LL44;_tmp94=((struct Cyc_Std_SO_socklen_struct*)_tmp93)->f1;
+_LL43: return setsockopt_int(fd,level,optname,(const int*)_tmp92,_tmp94);_LL44:
+_tmp95=_tmp90.f1;if(*((int*)_tmp95)!= 1)goto _LL46;_tmp96=((struct Cyc_Std_SO_timeval_struct*)
+_tmp95)->f1;_tmp97=_tmp90.f2;if(*((int*)_tmp97)!= 3)goto _LL46;_tmp98=((struct Cyc_Std_SO_socklen_struct*)
+_tmp97)->f1;_LL45: return setsockopt_timeval(fd,level,optname,(const struct Cyc_Std_timeval*)
+_tmp96,_tmp98);_LL46:;_LL47:(int)_throw((void*)Cyc_Std_SocketError);_LL41:;}}
 struct Cyc_Std_stat{unsigned long long st_dev;unsigned short __pad1;unsigned int
 st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned int
 st_gid;unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;
@@ -823,30 +833,30 @@ _tagged_arr filename,struct Cyc_Std_stat*buf);int Cyc_Std_mkdir(struct _tagged_a
 pathname,unsigned int mode);int Cyc_Std_mkfifo(struct _tagged_arr pathname,
 unsigned int mode);int Cyc_Std_mknod(struct _tagged_arr pathname,unsigned int mode,
 unsigned long long);int Cyc_Std_stat(struct _tagged_arr,struct Cyc_Std_stat*);int
-chmod(char*,unsigned int);static char _tmp98[23]="chmod called with NULL";static
-struct Cyc_Core_Failure_struct Cyc_Std___chmod_failure={Cyc_Core_Failure,{_tmp98,
-_tmp98,_tmp98 + 23}};int Cyc_Std_chmod(struct _tagged_arr a,unsigned int b){if(!((
+chmod(char*,unsigned int);static char _tmp9A[23]="chmod called with NULL";static
+struct Cyc_Core_Failure_struct Cyc_Std___chmod_failure={Cyc_Core_Failure,{_tmp9A,
+_tmp9A,_tmp9A + 23}};int Cyc_Std_chmod(struct _tagged_arr a,unsigned int b){if(!((
 unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___chmod_failure);return chmod(
-string_to_Cstring(a),b);}int lstat(char*,struct Cyc_Std_stat*);static char _tmp9A[23]="lstat called with NULL";
+string_to_Cstring(a),b);}int lstat(char*,struct Cyc_Std_stat*);static char _tmp9C[23]="lstat called with NULL";
 static struct Cyc_Core_Failure_struct Cyc_Std___lstat_failure={Cyc_Core_Failure,{
-_tmp9A,_tmp9A,_tmp9A + 23}};int Cyc_Std_lstat(struct _tagged_arr a,struct Cyc_Std_stat*
+_tmp9C,_tmp9C,_tmp9C + 23}};int Cyc_Std_lstat(struct _tagged_arr a,struct Cyc_Std_stat*
 b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___lstat_failure);
 return lstat(string_to_Cstring(a),b);}int mkdir(char*,unsigned int);static char
-_tmp9C[23]="mkdir called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___mkdir_failure={
-Cyc_Core_Failure,{_tmp9C,_tmp9C,_tmp9C + 23}};int Cyc_Std_mkdir(struct _tagged_arr a,
+_tmp9E[23]="mkdir called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___mkdir_failure={
+Cyc_Core_Failure,{_tmp9E,_tmp9E,_tmp9E + 23}};int Cyc_Std_mkdir(struct _tagged_arr a,
 unsigned int b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___mkdir_failure);
 return mkdir(string_to_Cstring(a),b);}int mkfifo(char*,unsigned int);static char
-_tmp9E[24]="mkfifo called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___mkfifo_failure={
-Cyc_Core_Failure,{_tmp9E,_tmp9E,_tmp9E + 24}};int Cyc_Std_mkfifo(struct _tagged_arr
+_tmpA0[24]="mkfifo called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___mkfifo_failure={
+Cyc_Core_Failure,{_tmpA0,_tmpA0,_tmpA0 + 24}};int Cyc_Std_mkfifo(struct _tagged_arr
 a,unsigned int b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___mkfifo_failure);
 return mkfifo(string_to_Cstring(a),b);}int mknod(char*,unsigned int,
-unsigned long long);static char _tmpA0[23]="mknod called with NULL";static struct
-Cyc_Core_Failure_struct Cyc_Std___mknod_failure={Cyc_Core_Failure,{_tmpA0,_tmpA0,
-_tmpA0 + 23}};int Cyc_Std_mknod(struct _tagged_arr a,unsigned int b,
+unsigned long long);static char _tmpA2[23]="mknod called with NULL";static struct
+Cyc_Core_Failure_struct Cyc_Std___mknod_failure={Cyc_Core_Failure,{_tmpA2,_tmpA2,
+_tmpA2 + 23}};int Cyc_Std_mknod(struct _tagged_arr a,unsigned int b,
 unsigned long long c){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___mknod_failure);
 return mknod(string_to_Cstring(a),b,c);}int stat(char*,struct Cyc_Std_stat*);static
-char _tmpA2[22]="stat called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___stat_failure={
-Cyc_Core_Failure,{_tmpA2,_tmpA2,_tmpA2 + 22}};int Cyc_Std_stat(struct _tagged_arr a,
+char _tmpA4[22]="stat called with NULL";static struct Cyc_Core_Failure_struct Cyc_Std___stat_failure={
+Cyc_Core_Failure,{_tmpA4,_tmpA4,_tmpA4 + 22}};int Cyc_Std_stat(struct _tagged_arr a,
 struct Cyc_Std_stat*b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___stat_failure);
 return stat(string_to_Cstring(a),b);}struct Cyc_Std_timezone{int tz_minuteswest;int
 tz_dsttime;};enum Cyc_Std___itimer_which{Cyc_Std_ITIMER_REAL  = 0,Cyc_Std_ITIMER_VIRTUAL
@@ -858,8 +868,8 @@ int,Cyc_Std_fd_set*);void Cyc_Std_FD_SET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_ZE
 Cyc_Std_fd_set*);int Cyc_Std_utimes(struct _tagged_arr,const struct Cyc_Std_timeval*);
 int gettimeofday(struct Cyc_Std_timeval*,struct Cyc_Std_timezone*);int Cyc_Std_gettimeofday(
 struct Cyc_Std_timeval*a,struct Cyc_Std_timezone*b){return gettimeofday(a,0);}
-static char _tmpA4[24]="utimes called with NULL";static struct Cyc_Core_Failure_struct
-Cyc_Std___utimes_failure={Cyc_Core_Failure,{_tmpA4,_tmpA4,_tmpA4 + 24}};int Cyc_Std_utimes(
+static char _tmpA6[24]="utimes called with NULL";static struct Cyc_Core_Failure_struct
+Cyc_Std___utimes_failure={Cyc_Core_Failure,{_tmpA6,_tmpA6,_tmpA6 + 24}};int Cyc_Std_utimes(
 struct _tagged_arr a,const struct Cyc_Std_timeval*b){if(!((unsigned int)a.curr))(int)
 _throw((void*)& Cyc_Std___utimes_failure);return Cyc_Std_utimes(_tag_arr(
 string_to_Cstring(a),sizeof(char),0),b);}struct Cyc_Std_timeb{int time;
@@ -870,21 +880,26 @@ unsigned short sun_family;char sun_path[108];};struct Cyc_Std_utsname{char sysna
 __domainname[65];};struct Cyc_Std_tm{int tm_sec;int tm_min;int tm_hour;int tm_mday;
 int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;int tm_gmtoff;const char*
 tm_zone;};struct Cyc_Std_itimerspec{struct Cyc_Std_timespec it_interval;struct Cyc_Std_timespec
-it_value;};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON
- = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 3,Cyc_Std__PC_PATH_MAX  = 4,
-Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED  = 6,Cyc_Std__PC_NO_TRUNC
- = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,Cyc_Std__PC_ASYNC_IO  = 10,
-Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,Cyc_Std__PC_FILESIZEBITS
- = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE  = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE
- = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH
- = 0};int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
-_tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned int,unsigned int);int
-Cyc_Std_chroot(struct _tagged_arr);int Cyc_Std_execlp(struct _tagged_arr,struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_execve(struct _tagged_arr,struct
-_tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr
-buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);
-struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,
+it_value;};unsigned int Cyc_Std_strftime(struct _tagged_arr,unsigned int,struct
+_tagged_arr,const struct Cyc_Std_tm*);unsigned int strftime(char*,unsigned int,char*,
+const struct Cyc_Std_tm*);unsigned int Cyc_Std_strftime(struct _tagged_arr s,
+unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_Std_tm*t){unsigned int m=
+_get_arr_size(s,sizeof(char))< maxsize?_get_arr_size(s,sizeof(char)): maxsize;
+return strftime(underlying_Cstring(s),m,underlying_Cstring(fmt),t);}enum Cyc_Std___anonymous_enum_362__{
+Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX
+ = 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
+ = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
+Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
+Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE
+ = 15,Cyc_Std__PC_REC_MIN_XFER_SIZE  = 16,Cyc_Std__PC_REC_XFER_ALIGN  = 17};enum 
+Cyc_Std___anonymous_enum_364__{Cyc_Std__CS_PATH  = 0};int Cyc_Std_access(struct
+_tagged_arr,int);int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(struct
+_tagged_arr,unsigned int,unsigned int);int Cyc_Std_chroot(struct _tagged_arr);int
+Cyc_Std_execlp(struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);int Cyc_Std_execve(
+struct _tagged_arr,struct _tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,
+unsigned int);struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(
+struct _tagged_arr,struct _tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,
 unsigned int);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
 _tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_unlink(
 struct _tagged_arr);int Cyc_Std_write(int,struct _tagged_arr,unsigned int);int
@@ -898,51 +913,51 @@ string_to_Cstring(pathname));}int execvp(char*file,char**argv);int Cyc_Std_execl
 struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv){if((*((struct
 _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(int)(
 _get_arr_size(argv,sizeof(struct _tagged_arr))- 1)))).curr != ((struct _tagged_arr)
-_tag_arr(0,0,0)).curr)(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmpA5=
-_cycalloc(sizeof(*_tmpA5));_tmpA5[0]=({struct Cyc_Core_Failure_struct _tmpA6;
-_tmpA6.tag=Cyc_Core_Failure;_tmpA6.f1=_tag_arr("execl: arg list must be NULL-terminated",
-sizeof(char),40);_tmpA6;});_tmpA5;}));{struct _tagged_arr newargs=({unsigned int
-_tmpA7=1 + _get_arr_size(argv,sizeof(struct _tagged_arr));char**_tmpA8=(char**)
-_cycalloc(_check_times(sizeof(char*),_tmpA7));struct _tagged_arr _tmpAA=_tag_arr(
-_tmpA8,sizeof(char*),1 + _get_arr_size(argv,sizeof(struct _tagged_arr)));{
-unsigned int _tmpA9=_tmpA7;unsigned int i;for(i=0;i < _tmpA9;i ++){_tmpA8[i]=0;}}
-_tmpAA;});*((char**)_check_unknown_subscript(newargs,sizeof(char*),0))=
+_tag_arr(0,0,0)).curr)(int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmpA7=
+_cycalloc(sizeof(*_tmpA7));_tmpA7[0]=({struct Cyc_Core_Failure_struct _tmpA8;
+_tmpA8.tag=Cyc_Core_Failure;_tmpA8.f1=_tag_arr("execl: arg list must be NULL-terminated",
+sizeof(char),40);_tmpA8;});_tmpA7;}));{struct _tagged_arr newargs=({unsigned int
+_tmpA9=1 + _get_arr_size(argv,sizeof(struct _tagged_arr));char**_tmpAA=(char**)
+_cycalloc(_check_times(sizeof(char*),_tmpA9));struct _tagged_arr _tmpAC=_tag_arr(
+_tmpAA,sizeof(char*),1 + _get_arr_size(argv,sizeof(struct _tagged_arr)));{
+unsigned int _tmpAB=_tmpA9;unsigned int i;for(i=0;i < _tmpAB;i ++){_tmpAA[i]=0;}}
+_tmpAC;});*((char**)_check_unknown_subscript(newargs,sizeof(char*),0))=
 string_to_Cstring(arg0);{int i=0;for(0;i < _get_arr_size(argv,sizeof(struct
 _tagged_arr));i ++){*((char**)_check_unknown_subscript(newargs,sizeof(char*),i + 1))=
 string_to_Cstring(((struct _tagged_arr*)argv.curr)[i]);}}return execvp(
 string_to_Cstring(path),(char**)_check_null(_untag_arr(newargs,sizeof(char*),1)));}}
-int execve(char*path,char**argv,char**envp);static char _tmpAC[41]="execve: arg list must be NULL-terminated";
+int execve(char*path,char**argv,char**envp);static char _tmpAE[41]="execve: arg list must be NULL-terminated";
 static struct Cyc_Core_Failure_struct Cyc_Std___execve_failure={Cyc_Core_Failure,{
-_tmpAC,_tmpAC,_tmpAC + 41}};int Cyc_Std_execve(struct _tagged_arr filename,struct
+_tmpAE,_tmpAE,_tmpAE + 41}};int Cyc_Std_execve(struct _tagged_arr filename,struct
 _tagged_arr argv,struct _tagged_arr envp){if((*((const struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),(int)(_get_arr_size(argv,
-sizeof(struct _tagged_arr))- 1)))).curr != ((struct _tagged_arr)_tag_arr(0,0,0)).curr)(
-int)_throw((void*)& Cyc_Std___execve_failure);{struct _tagged_arr newargs=({
-unsigned int _tmpB1=_get_arr_size(argv,sizeof(struct _tagged_arr));char**_tmpB2=(
-char**)_cycalloc(_check_times(sizeof(char*),_tmpB1));struct _tagged_arr _tmpB4=
-_tag_arr(_tmpB2,sizeof(char*),_get_arr_size(argv,sizeof(struct _tagged_arr)));{
-unsigned int _tmpB3=_tmpB1;unsigned int i;for(i=0;i < _tmpB3;i ++){_tmpB2[i]=0;}}
-_tmpB4;});{int i=0;for(0;i < _get_arr_size(argv,sizeof(struct _tagged_arr));i ++){*((
-char**)_check_unknown_subscript(newargs,sizeof(char*),i))=string_to_Cstring(((
-const struct _tagged_arr*)argv.curr)[i]);}}{struct _tagged_arr newenvp=({
-unsigned int _tmpAD=_get_arr_size(envp,sizeof(struct _tagged_arr));char**_tmpAE=(
-char**)_cycalloc(_check_times(sizeof(char*),_tmpAD));struct _tagged_arr _tmpB0=
-_tag_arr(_tmpAE,sizeof(char*),_get_arr_size(envp,sizeof(struct _tagged_arr)));{
-unsigned int _tmpAF=_tmpAD;unsigned int i;for(i=0;i < _tmpAF;i ++){_tmpAE[i]=0;}}
-_tmpB0;});{int i=0;for(0;i < _get_arr_size(envp,sizeof(struct _tagged_arr));i ++){*((
-char**)_check_unknown_subscript(newenvp,sizeof(char*),i))=string_to_Cstring(((
-const struct _tagged_arr*)envp.curr)[i]);}}return execve(string_to_Cstring(filename),(
-char**)_check_null(_untag_arr(newargs,sizeof(char*),1)),(char**)_check_null(
-_untag_arr(newenvp,sizeof(char*),1)));}}}char*getcwd(char*buf,unsigned int size);
-static char _tmpB6[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct
-Cyc_Std___getcwd_failure={Cyc_Core_Failure,{_tmpB6,_tmpB6,_tmpB6 + 29}};struct
-_tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size){if(!((
-unsigned int)buf.curr)?1: _get_arr_size(buf,sizeof(char))< size)(int)_throw((void*)&
-Cyc_Std___getcwd_failure);{char*response=getcwd((char*)_check_null(_untag_arr(
-buf,sizeof(char),0)),size);return(unsigned int)response?buf: _tag_arr(0,0,0);}}
-int gethostname(char*,unsigned int);static char _tmpB8[42]="gethostname: called with count > buf.size";
+sizeof(struct _tagged_arr))- 1)))).curr != (_tag_arr(0,0,0)).curr)(int)_throw((
+void*)& Cyc_Std___execve_failure);{struct _tagged_arr newargs=({unsigned int _tmpB3=
+_get_arr_size(argv,sizeof(struct _tagged_arr));char**_tmpB4=(char**)_cycalloc(
+_check_times(sizeof(char*),_tmpB3));struct _tagged_arr _tmpB6=_tag_arr(_tmpB4,
+sizeof(char*),_get_arr_size(argv,sizeof(struct _tagged_arr)));{unsigned int _tmpB5=
+_tmpB3;unsigned int i;for(i=0;i < _tmpB5;i ++){_tmpB4[i]=0;}}_tmpB6;});{int i=0;for(
+0;i < _get_arr_size(argv,sizeof(struct _tagged_arr));i ++){*((char**)
+_check_unknown_subscript(newargs,sizeof(char*),i))=string_to_Cstring((struct
+_tagged_arr)((const struct _tagged_arr*)argv.curr)[i]);}}{struct _tagged_arr newenvp=({
+unsigned int _tmpAF=_get_arr_size(envp,sizeof(struct _tagged_arr));char**_tmpB0=(
+char**)_cycalloc(_check_times(sizeof(char*),_tmpAF));struct _tagged_arr _tmpB2=
+_tag_arr(_tmpB0,sizeof(char*),_get_arr_size(envp,sizeof(struct _tagged_arr)));{
+unsigned int _tmpB1=_tmpAF;unsigned int i;for(i=0;i < _tmpB1;i ++){_tmpB0[i]=0;}}
+_tmpB2;});{int i=0;for(0;i < _get_arr_size(envp,sizeof(struct _tagged_arr));i ++){*((
+char**)_check_unknown_subscript(newenvp,sizeof(char*),i))=string_to_Cstring((
+struct _tagged_arr)((const struct _tagged_arr*)envp.curr)[i]);}}return execve(
+string_to_Cstring(filename),(char**)_check_null(_untag_arr(newargs,sizeof(char*),
+1)),(char**)_check_null(_untag_arr(newenvp,sizeof(char*),1)));}}}char*getcwd(
+char*buf,unsigned int size);static char _tmpB8[29]="getcwd: invalid buf argument";
+static struct Cyc_Core_Failure_struct Cyc_Std___getcwd_failure={Cyc_Core_Failure,{
+_tmpB8,_tmpB8,_tmpB8 + 29}};struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
+unsigned int size){if(!((unsigned int)buf.curr)?1: _get_arr_size(buf,sizeof(char))
+< size)(int)_throw((void*)& Cyc_Std___getcwd_failure);{char*response=getcwd((char*)
+_check_null(_untag_arr(buf,sizeof(char),0)),size);return(unsigned int)response?
+buf: _tag_arr(0,0,0);}}int gethostname(char*,unsigned int);static char _tmpBA[42]="gethostname: called with count > buf.size";
 static struct Cyc_Core_Failure_struct Cyc_Std___gethostname_failure={Cyc_Core_Failure,{
-_tmpB8,_tmpB8,_tmpB8 + 42}};int Cyc_Std_gethostname(struct _tagged_arr buf,
+_tmpBA,_tmpBA,_tmpBA + 42}};int Cyc_Std_gethostname(struct _tagged_arr buf,
 unsigned int count){if(count > _get_arr_size(buf,sizeof(char)))(int)_throw((void*)&
 Cyc_Std___gethostname_failure);return gethostname(underlying_Cstring((struct
 _tagged_arr)buf),count);}char*getpass(char*);struct _tagged_arr Cyc_Std_getpass(
@@ -950,8 +965,8 @@ struct _tagged_arr prompt){return wrap_Cstring_as_string(getpass(string_to_Cstri
 prompt)),- 1);}int link(char*path1,char*path2);int Cyc_Std_link(struct _tagged_arr
 path1,struct _tagged_arr path2){return link(string_to_Cstring(path1),
 string_to_Cstring(path2));}int read(int fd,char*buf,unsigned int count);static char
-_tmpBA[35]="read: called with count > buf.size";static struct Cyc_Core_Failure_struct
-Cyc_Std___read_failure={Cyc_Core_Failure,{_tmpBA,_tmpBA,_tmpBA + 35}};int Cyc_Std_read(
+_tmpBC[35]="read: called with count > buf.size";static struct Cyc_Core_Failure_struct
+Cyc_Std___read_failure={Cyc_Core_Failure,{_tmpBC,_tmpBC,_tmpBC + 35}};int Cyc_Std_read(
 int fd,struct _tagged_arr buf,unsigned int count){if(count > _get_arr_size(buf,
 sizeof(char)))(int)_throw((void*)& Cyc_Std___read_failure);return read(fd,
 underlying_Cstring((struct _tagged_arr)buf),count);}int rmdir(char*);int Cyc_Std_rmdir(
@@ -961,14 +976,14 @@ path2){return symlink(string_to_Cstring(path1),string_to_Cstring(path2));}int
 truncate(char*,int);int Cyc_Std_truncate(struct _tagged_arr path,int length){return
 truncate(string_to_Cstring(path),length);}int unlink(char*pathname);int Cyc_Std_unlink(
 struct _tagged_arr pathname){return unlink(string_to_Cstring(pathname));}int write(
-int fd,char*buf,unsigned int count);static char _tmpBC[36]="write: called with count > buf.size";
+int fd,char*buf,unsigned int count);static char _tmpBE[36]="write: called with count > buf.size";
 static struct Cyc_Core_Failure_struct Cyc_Std___write_failure={Cyc_Core_Failure,{
-_tmpBC,_tmpBC,_tmpBC + 36}};int Cyc_Std_write(int fd,struct _tagged_arr buf,
+_tmpBE,_tmpBE,_tmpBE + 36}};int Cyc_Std_write(int fd,struct _tagged_arr buf,
 unsigned int count){if(count > _get_arr_size(buf,sizeof(char)))(int)_throw((void*)&
 Cyc_Std___write_failure);return write(fd,underlying_Cstring(buf),count);}struct
 Cyc_Std_utimbuf{int actime;int modtime;};int Cyc_Std_utime(struct _tagged_arr,const
-struct Cyc_Std_utimbuf*);static char _tmpBE[23]="utime called with NULL";static
-struct Cyc_Core_Failure_struct Cyc_Std___utime_failure={Cyc_Core_Failure,{_tmpBE,
-_tmpBE,_tmpBE + 23}};int Cyc_Std_utime(struct _tagged_arr a,const struct Cyc_Std_utimbuf*
+struct Cyc_Std_utimbuf*);static char _tmpC0[23]="utime called with NULL";static
+struct Cyc_Core_Failure_struct Cyc_Std___utime_failure={Cyc_Core_Failure,{_tmpC0,
+_tmpC0,_tmpC0 + 23}};int Cyc_Std_utime(struct _tagged_arr a,const struct Cyc_Std_utimbuf*
 b){if(!((unsigned int)a.curr))(int)_throw((void*)& Cyc_Std___utime_failure);
 return Cyc_Std_utime(_tag_arr(string_to_Cstring(a),sizeof(char),0),b);}

@@ -46,7 +46,6 @@ CYCLONE_LIBS:=arg\
         lineno\
         list\
 	marshal\
-	mman\
         position\
         pp\
 	printf\
