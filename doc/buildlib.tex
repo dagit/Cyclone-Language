@@ -1,0 +1,173 @@
+\subsection{The C interface tool, \texttt{buildlib}}
+
+\texttt{buildlib} is a tool that semi-automatically constructs a
+Cyclone interface to C code.  It scans C header files and builds
+Cyclone header files and stub code so that Cyclone programs can call
+the C code.  We use it to build the Cyclone interface to the C
+standard library (in much the same way that \texttt{gcc} uses the
+\texttt{fixincludes} program).
+
+To use \texttt{buildlib}, you must construct a \emph{spec file} that
+tells it what C headers to scan, and what functions and constants to
+extract from the headers.  By convention, the names of spec files end
+in \texttt{.cys}.  If \texttt{spec.cys} is a spec file, then
+\texttt{buildlib} is invoked by
+\begin{verbatim}
+  buildlib spec.cys
+\end{verbatim}
+The output of \texttt{buildlib} is placed in a directory,
+\texttt{BUILDLIB.OUT}.  The output consists of Cyclone header files
+and the stub files \texttt{cstubs.c} and \texttt{cycstubs.cyc}.  
+
+\subsubsection*{Spec files}
+
+The form of a spec file is given by the following grammar.
+
+\begin{rules}{spec-file}
+  (empty)\\
+  \nt{spec} \nt{spec-file}
+\end{rules}
+\begin{rules}{spec}
+  \nt{header-name} \tk{:} \nt{directives} \tk{;}
+\end{rules}
+\begin{rules}{directives}
+  (empty)\\
+  \nt{directive} \nt{directives}
+\end{rules}
+\begin{rules}{directive}
+\tk{cpp} \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
+\tk{include} \tk{\lb} \nt{ids} \tk{\rb} \\
+\tk{epilogue} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
+\tk{prologue} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
+\tk{cycstub} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb} \\
+\tk{cstub} \nt{id}\opt \tk{\lb} \nt{balanced-braces} \tk{\rb}
+\end{rules}
+\begin{rules}{ids}
+  (empty)\\
+  \nt{id} \nt{ids}
+\end{rules}
+
+The non-terminal \hypertarget{id}{\textit{id}} refers
+to C identifiers, and \hypertarget{header-name}{\textit{header-name}}
+ranges over C header names (e.g., \texttt{stdio.h},
+\texttt{sys/types.h}).  We use
+\hypertarget{balanced-braces}{\textit{balanced-braces}} to refer to any
+sequence of C tokens with balanced braces, ignoring braces inside of
+comments, strings, and character constants.
+
+\subsubsection*{Directives}
+
+\begin{description}
+\item[include] The include directive is used to extract constants and
+type definitions from C header files and put them into the equivalent
+Cyclone header file.  For example, here is part of the spec that we
+use to interface to C's \texttt{errno.h}:
+\begin{verbatim}
+  errno.h:
+  include { E2BIG EACCES EADDRINUSE ... }
+\end{verbatim}
+The spec says that the Cyclone version of \texttt{errno.h} should use
+the C definitions of error constants like \texttt{E2BIG}.  These are
+typically macro-defined as integers, but the integers can differ from
+system to system.  We ensure that Cyclone uses the right constants by
+running buildlib on each system.
+
+For another example, our spec for \texttt{sys/types.h} reads, in part:
+\begin{verbatim}
+  sys/types.h:
+  include { id_t mode_t off_t pid_t ... }
+\end{verbatim}
+Here the symbols are typedef names, and the result will be that the
+Cyclone header file contains the typedefs that define \texttt{id_t},
+etc.  Again, these can differ from system to system.
+
+You can use \texttt{include} to obtain not just constants (macros) and
+typedefs, but struct and union definitions as well.  Furthermore, if a
+definition you \texttt{include} requires any other definitions that
+you do not explicitly \texttt{include}, those other definitions will
+be placed into the Cyclone header too.
+
+Currently, \texttt{include} does not work for variable or function
+declarations.  You have to use the \texttt{epilogue} directive to add
+variable and function declarations to your Cyclone header.
+
+\item[cstub]
+The \texttt{cstub} directive adds code (the \nt{balanced-braces})
+to the C stub file.  If an optional \nt{id} is used, then the code
+will be added to the stub file only if the \nt{id} is declared by the
+C header.  This is useful because every system defines a different
+subset of the C standard library.
+
+\item[cycstub]
+The \texttt{cycstub} directive is like the \texttt{cstub} directive,
+except that the code is added to the Cyclone stub file.
+
+\item[epilogue]
+The \texttt{epilogue} directive is like the \texttt{cstub} directive,
+except that the code is added to the Cyclone header file.
+
+\item[cpp]
+The \texttt{cpp} directive is used to tell \texttt{buildlib} to scan
+some extra header files before scanning the header file of the spec.
+This is useful when a header file can't be parsed in isolation.  For
+example, the standard C header \texttt{sys/resource.h} is supposed to
+define \texttt{struct timeval}, but on some systems, this is defined
+in \texttt{sys/types.h}, which must be included before
+\texttt{sys/resource.h} for that file to parse.  This can be handled
+with a spec like the following:
+\begin{verbatim}
+  sys/resource.h:
+  cpp {
+    #include <sys/types.h>
+  }
+  ...
+\end{verbatim}
+
+This will cause \texttt{sys/types.h} to be scanned by
+\texttt{buildlib} before \texttt{sys/resource.h}.
+
+You can also use the \texttt{cpp} directive to directly specify
+anything that might appear in a C include file (e.g., macros).
+\end{description}
+
+\subsubsection*{Options}
+\texttt{buildlib} has the following options.
+\begin{description}
+\item[-d \textit{directory}]
+Use \textit{directory} as the output directory instead of the default
+\texttt{BUILDLIB.OUT}.
+
+\item[-gather and -finish]
+\texttt{buildlib} works in two phases.  In the gather
+phase, \texttt{buildlib} grabs the C headers listed in the spec file
+from their normal locations in the C include tree, and stores them in
+a special format in the output directory.  In the finish phase,
+\texttt{buildlib} uses the specially formatted C headers to build the
+Cyclone headers and stub files.  The \texttt{-gather} flag tells
+\texttt{buildlib} to perform just the gather phase, and the
+\texttt{-finish} flag tells it to perform just the finish phase.
+
+\texttt{buildlib}'s two-phase strategy is intended to support cross
+compilation.  A Cyclone compiler on one architecture can compile to a
+second architecture provided it has the other architecture's Cyclone
+header files.  These headers can be generated on the first
+architecture from the output of the gather phase on the second
+architecture.  This is more general than just having the second
+architecture's Cyclone headers, because it permits works even in the
+face of some changes in the spec file or \texttt{buildlib} itself
+(which would change the other architecture's Cyclone headers).
+
+\item[-gatherscript]
+The \texttt{-gatherscript} flag tells \texttt{buildlib} to output a
+shell script that, when executed, performs \texttt{buildlib}'s gather
+phase.  This is useful when porting Cyclone to an unsupported
+architecture, where \texttt{buildlib} itself does not yet work.  The
+script can be executed on the unsupported architecture, and the result
+can be moved to a supported architecture, which can then cross-compile
+itself to the new architecture.
+
+\end{description}
+
+% Local Variables:
+% TeX-master: "main-screen"
+% End:
