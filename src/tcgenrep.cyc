@@ -529,7 +529,7 @@ check_tunionfield_and_get_nmtype(tunionfield_t tuf) {
 static $(var_t,type_t)@
 check_xtunionfield_and_get_name_type(tunionfield_t tuf) {
   // preserves tquals of original tunion...
-  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(uchar_typ,HeapRgn,tq_none))),tuf->typs)));
+  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(char_typ,HeapRgn,tq_none))),tuf->typs)));
 }
 
 // FIX: get rid of this useless stuff
@@ -904,7 +904,7 @@ buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Tunion array
-  type_t name_type = tagged_typ(uchar_typ,HeapRgn,Tqual{.q_const=true,.q_volatile=false,.q_restrict=0});
+  type_t name_type = tagged_typ(char_typ,HeapRgn,Tqual{.q_const=true,.q_volatile=false,.q_restrict=0});
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
@@ -1215,7 +1215,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 	let bytes = bits / 8 + ((bits % 8) == 0 ? 0 : 1);
 	list_t<$(tqual_t,type_t)@> chars = NULL;
 	for(int i = 0; i < bytes; i++) {
-	  chars = new List(new $(tq_none,uchar_typ),chars);
+	  chars = new List(new $(tq_none,char_typ),chars);
 	}
 	type_t base_type = new TupleType(chars);
 	let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
@@ -1265,7 +1265,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     if(fields != NULL && forall(has_bitfield,fields)) {
       let bits = fold_left(add_bitfield_sizes,0,fields);
       let bytes = bits / 8 + ((bits % 8) == 0 ? 0 : 1);
-      type_t base_type = new ArrayType(uchar_typ,tq_none,cnst_int(bytes,loc));
+      type_t base_type = new ArrayType(char_typ,tq_none,cnst_int(bytes,loc));
       let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
       dict = insert(dict2,type,base_info);
     } else {

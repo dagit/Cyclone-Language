@@ -119,7 +119,7 @@ i_t final() {
 		       function_typ(NULL, NULL, sint_typ,
 				    new List(new $(NULL, empty_tqual(), uint_typ),
 					     new List(new $(NULL, empty_tqual(),
-							    tagged_typ(tagged_typ(uchar_typ,
+							    tagged_typ(tagged_typ(char_typ,
 										  HeapRgn,
 										  empty_tqual()),
 								       HeapRgn,

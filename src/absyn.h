@@ -175,7 +175,7 @@ namespace Absyn {
   };
 
   // signed or unsigned qualifiers on integral types
-  EXTERN_ABSYN tunion Sign { Signed, Unsigned };
+  EXTERN_ABSYN tunion Sign { Signed, Unsigned, None };
 
   EXTERN_ABSYN tunion AggrKind { StructA, UnionA };
 
@@ -768,7 +768,7 @@ namespace Absyn {
   // any memory type whose free type variables are drawn from the given list
   extern type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H>);
   // unsigned types
-  extern type_t uchar_typ, ushort_typ, uint_typ, ulong_typ, ulonglong_typ;
+  extern type_t char_typ, uchar_typ, ushort_typ, uint_typ, ulong_typ, ulonglong_typ;
   // signed types
   extern type_t schar_typ, sshort_typ, sint_typ, slong_typ, slonglong_typ;
   // float, double

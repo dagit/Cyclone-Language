@@ -162,11 +162,13 @@ kind_t force_kb(kindbound_t kb) {
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
+static tunion Type.IntType char_tt     = IntType(None,B1);
 static tunion Type.IntType uchar_tt     = IntType(Unsigned,B1);
 static tunion Type.IntType ushort_tt    = IntType(Unsigned,B2);
 static tunion Type.IntType uint_tt      = IntType(Unsigned,B4);
 static tunion Type.IntType ulong_tt     = IntType(Unsigned,B4);
 static tunion Type.IntType ulonglong_tt = IntType(Unsigned,B8);
+type_t char_typ     = &char_tt;
 type_t uchar_typ     = &uchar_tt;
 type_t ushort_typ    = &ushort_tt;
 type_t uint_typ      = &uint_tt;
@@ -240,10 +242,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static opt_t<type_t> string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(uchar_typ,rgn,empty_tqual(),Unknown_b);
+    return starb_typ(char_typ,rgn,empty_tqual(),Unknown_b);
   else {
     if (string_t_opt == NULL) {
-      type_t t = starb_typ(uchar_typ,HeapRgn,empty_tqual(),Unknown_b);
+      type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b);
       string_t_opt = new Opt(t);
     }
     return string_t_opt->v;
@@ -252,10 +254,10 @@ type_t string_typ(type_t rgn) {
 static opt_t<type_t> const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(uchar_typ,rgn,const_tqual(),Unknown_b);
+    return starb_typ(char_typ,rgn,const_tqual(),Unknown_b);
   else {
     if (const_string_t_opt == NULL) {
-      type_t t = starb_typ(uchar_typ,HeapRgn,const_tqual(),Unknown_b);
+      type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b);
       const_string_t_opt = new Opt(t);
     }
     return const_string_t_opt->v;
@@ -368,7 +370,7 @@ exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
 exp_t true_exp(seg_t loc)  { return bool_exp(true, loc); }
 exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp_t char_exp(char c, seg_t loc) {
-  return const_exp(new Char_c(Unsigned,c),loc);
+  return const_exp(new Char_c(None,c),loc);
 }
 exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
 exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(new String_c(s),loc); }

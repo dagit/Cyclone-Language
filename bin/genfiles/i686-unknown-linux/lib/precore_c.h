@@ -250,7 +250,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
-typedef unsigned char *Cstring;
+typedef char *Cstring;
 typedef struct _tagged_arr string_t;
 typedef struct _tagged_arr mstring_t;
 typedef string_t *stringptr_t;

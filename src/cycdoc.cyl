@@ -402,13 +402,18 @@ void dumpntyp(type_t t) {
     dump_symbol("\\\\\n");
     dump_rb();
     return;
+  case &IntType(None,B4): 
   case &IntType(Signed,   B4): dump_alpha("int"); return;
+  case &IntType(None,B1):      dump_alpha("char"); return;
   case &IntType(Signed,   B1): dump_alpha("signed char"); return;
   case &IntType(Unsigned, B1): dump_alpha("unsigned char"); return;
+  case &IntType(None,B2): 
   case &IntType(Signed,   B2): dump_alpha("short"); return;
   case &IntType(Unsigned, B2): dump_alpha("unsigned short"); return;
   case &IntType(Unsigned, B4): dump_alpha("unsigned int"); return;
+  case &IntType(None,B8) && to_VC: 
   case &IntType(Signed,   B8) && to_VC: dump_alpha("__int64"); return;
+  case &IntType(None,B8): 
   case &IntType(Signed,   B8): dump_alpha("long long"); return;
   case &IntType(Unsigned,B8) && to_VC: dump_alpha("unsigned __int64");return;
   case &IntType(Unsigned, B8): dump_alpha("unsigned long long");    return;
@@ -514,6 +519,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e(&Short_c(sg,s)):
     dump_alpha(aprintf("%d",s));
     break;
+  case &Const_e(&Int_c(None,i)): fallthru(i);
   case &Const_e(&Int_c(Signed,i)):
     dump_alpha(aprintf("%d",i)); break;
   case &Const_e(&Int_c(Unsigned,i)):

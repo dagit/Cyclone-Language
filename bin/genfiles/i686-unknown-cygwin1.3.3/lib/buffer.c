@@ -251,56 +251,53 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
  struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};struct
-_tagged_arr Cyc_Core_new_string(unsigned int);extern unsigned char Cyc_Core_Invalid_argument[
-21];struct Cyc_Core_Invalid_argument_struct{unsigned char*tag;struct _tagged_arr f1;
-};extern unsigned char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossible[
-15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
-extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-struct Cyc_Buffer_t;struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);struct
-_tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*);unsigned int Cyc_Buffer_length(
-struct Cyc_Buffer_t*);void Cyc_Buffer_clear(struct Cyc_Buffer_t*);void Cyc_Buffer_reset(
-struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,unsigned char);
-void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _tagged_arr,int offset,int
-len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _tagged_arr);void Cyc_Buffer_add_buffer(
-struct Cyc_Buffer_t*buf_dest,struct Cyc_Buffer_t*buf_source);struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern unsigned char Cyc_List_List_mismatch[18];
-extern unsigned char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);
-struct _tagged_arr Cyc_Std_strncpy(struct _tagged_arr,struct _tagged_arr,
-unsigned int);struct _tagged_arr Cyc_Std_zstrncpy(struct _tagged_arr,struct
-_tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_substring(struct _tagged_arr,
-int ofs,unsigned int n);struct Cyc_Buffer_t{struct _tagged_arr buffer;unsigned int
-position;unsigned int length;struct _tagged_arr initial_buffer;};struct Cyc_Buffer_t*
-Cyc_Buffer_create(unsigned int n){if(n < 1)n=1;{struct _tagged_arr s=Cyc_Core_new_string(
-n);return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s;
-_tmp0->position=0;_tmp0->length=n;_tmp0->initial_buffer=s;_tmp0;});}}struct
-_tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){return Cyc_Std_substring((
+_tagged_arr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Buffer_t;
+struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);struct _tagged_arr Cyc_Buffer_contents(
+struct Cyc_Buffer_t*);unsigned int Cyc_Buffer_length(struct Cyc_Buffer_t*);void Cyc_Buffer_clear(
+struct Cyc_Buffer_t*);void Cyc_Buffer_reset(struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(
+struct Cyc_Buffer_t*,char);void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,
+struct _tagged_arr,int offset,int len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
+struct _tagged_arr);void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*buf_dest,struct
+Cyc_Buffer_t*buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
+struct _tagged_arr s);struct _tagged_arr Cyc_Std_strncpy(struct _tagged_arr,struct
+_tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_zstrncpy(struct _tagged_arr,
+struct _tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_substring(struct
+_tagged_arr,int ofs,unsigned int n);struct Cyc_Buffer_t{struct _tagged_arr buffer;
+unsigned int position;unsigned int length;struct _tagged_arr initial_buffer;};struct
+Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n){if(n < 1)n=1;{struct _tagged_arr s=
+Cyc_Core_new_string(n);return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));
+_tmp0->buffer=s;_tmp0->position=0;_tmp0->length=n;_tmp0->initial_buffer=s;_tmp0;});}}
+struct _tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){return Cyc_Std_substring((
 struct _tagged_arr)b->buffer,0,b->position);}unsigned int Cyc_Buffer_length(struct
 Cyc_Buffer_t*b){return(unsigned int)b->position;}void Cyc_Buffer_clear(struct Cyc_Buffer_t*
 b){b->position=0;return;}void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){b->position=
-0;b->buffer=b->initial_buffer;b->length=_get_arr_size(b->buffer,sizeof(
-unsigned char));return;}static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,
-unsigned int more){unsigned int len=b->length;unsigned int new_len=len;struct
-_tagged_arr new_buffer;while(b->position + more > new_len){new_len=2 * new_len;}
-new_buffer=Cyc_Core_new_string(new_len);Cyc_Std_strncpy(new_buffer,(struct
-_tagged_arr)b->buffer,b->position);b->buffer=new_buffer;b->length=new_len;
-return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,unsigned char c){int pos=(int)
-b->position;if(pos >= b->length)Cyc_Buffer_resize(b,1);*((unsigned char*)
-_check_unknown_subscript(b->buffer,sizeof(unsigned char),pos))=c;b->position=(
+0;b->buffer=b->initial_buffer;b->length=_get_arr_size(b->buffer,sizeof(char));
+return;}static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned int more){
+unsigned int len=b->length;unsigned int new_len=len;struct _tagged_arr new_buffer;
+while(b->position + more > new_len){new_len=2 * new_len;}new_buffer=Cyc_Core_new_string(
+new_len);Cyc_Std_strncpy(new_buffer,(struct _tagged_arr)b->buffer,b->position);b->buffer=
+new_buffer;b->length=new_len;return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*
+b,char c){int pos=(int)b->position;if(pos >= b->length)Cyc_Buffer_resize(b,1);*((
+char*)_check_unknown_subscript(b->buffer,sizeof(char),pos))=c;b->position=(
 unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,
 struct _tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?1: offset + len > 
-_get_arr_size(s,sizeof(unsigned char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=_tag_arr("Buffer::add_substring",
-sizeof(unsigned char),22);_tmp2;});_tmp1;}));{int new_position=(int)(b->position + 
-len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_zstrncpy(
-_tagged_arr_plus(b->buffer,sizeof(unsigned char),(int)b->position),
-_tagged_arr_plus(s,sizeof(unsigned char),offset),(unsigned int)len);b->position=(
-unsigned int)new_position;return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
-b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position
-+ len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
-_tagged_arr_plus(b->buffer,sizeof(unsigned char),(int)b->position),s,(
-unsigned int)len);b->position=(unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(
-struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct
-_tagged_arr)bs->buffer,0,(int)bs->position);return;}
+sizeof(char),22);_tmp2;});_tmp1;}));{int new_position=(int)(b->position + len);if(
+new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_zstrncpy(
+_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),_tagged_arr_plus(s,
+sizeof(char),offset),(unsigned int)len);b->position=(unsigned int)new_position;
+return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*b,struct _tagged_arr s){int
+len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position + len);if(
+new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
+_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),s,(unsigned int)len);b->position=(
+unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,
+struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _tagged_arr)bs->buffer,
+0,(int)bs->position);return;}

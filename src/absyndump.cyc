@@ -431,13 +431,18 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
+  case &IntType(None,   B4):
   case &IntType(Signed,   B4): dump("int"); return;
+  case &IntType(None,   B1): dump("char"); return;
   case &IntType(Signed,   B1): dump("signed char"); return;
   case &IntType(Unsigned, B1): dump("unsigned char"); return;
+  case &IntType(None,   B2):
   case &IntType(Signed,   B2): dump("short"); return;
   case &IntType(Unsigned, B2): dump("unsigned short"); return;
   case &IntType(Unsigned, B4): dump("unsigned int"); return;
+  case &IntType(None,   B8) && to_VC:
   case &IntType(Signed,   B8) && to_VC: dump("__int64"); return;
+  case &IntType(None,   B8):
   case &IntType(Signed,   B8): dump("long long"); return;
   case &IntType(Unsigned,B8) && to_VC: dump("unsigned __int64");return;
   case &IntType(Unsigned, B8): dump("unsigned long long"); return;
@@ -538,6 +543,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char('\''); dump_nospace(Absynpp::char_escape(ch)); dump_char('\''); 
     break;
   case &Const_e(&Short_c(sg,s)):     dump(aprintf("%d",s)); break;
+  case &Const_e(&Int_c(None,i)):     fallthru(i);
   case &Const_e(&Int_c(Signed,i)):   dump(aprintf("%d",i)); break;
   case &Const_e(&Int_c(Unsigned,i)): dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e(&LongLong_c(sg,i)):
@@ -892,6 +898,7 @@ void dumppat(pat_t p) {
   switch(p->r) {
   case Wild_p: dump_char('_'); break;
   case Null_p: dump("NULL");   break;
+  case &Int_p(None,i):     fallthru(i);
   case &Int_p(Signed,i):   dump(aprintf("%d",i)); break;
   case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):

@@ -251,14 +251,12 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
  struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
-unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
-struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
-unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
-extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
-unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Xarray_Xarray{struct
-_tagged_arr elmts;int num_elmts;};int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
+char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*
+tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Xarray_Xarray{
+struct _tagged_arr elmts;int num_elmts;};int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*);
 void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*,int);void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*,
 int,void*);struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int,void*);struct Cyc_Xarray_Xarray*
 Cyc_Xarray_create_empty();struct Cyc_Xarray_Xarray*Cyc_Xarray_singleton(int,void*);
@@ -276,30 +274,30 @@ xarr);int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*xarr){return xarr->num_elmt
 void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*xarr,int i){if(i < 0?1: i >= xarr->num_elmts)(
 int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=_cycalloc(
 sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=
-Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("Xarray::get: bad index",sizeof(
-unsigned char),23);_tmp1;});_tmp0;}));return*((void**)_check_unknown_subscript(
-xarr->elmts,sizeof(void*),i));}void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*xarr,
-int i,void*a){if(i < 0?1: i >= xarr->num_elmts)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("Xarray::get: bad index",sizeof(char),
+23);_tmp1;});_tmp0;}));return*((void**)_check_unknown_subscript(xarr->elmts,
+sizeof(void*),i));}void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*xarr,int i,void*a){
+if(i < 0?1: i >= xarr->num_elmts)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp3;_tmp3.tag=Cyc_Core_Invalid_argument;_tmp3.f1=_tag_arr("Xarray::set: bad index",
-sizeof(unsigned char),23);_tmp3;});_tmp2;}));*((void**)_check_unknown_subscript(
-xarr->elmts,sizeof(void*),i))=a;}struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty(){
-struct _tagged_arr x=_tag_arr(({void**_tmp5=_cycalloc(sizeof(void*)* 0);_tmp5;}),
-sizeof(void*),0);return({struct Cyc_Xarray_Xarray*_tmp4=_cycalloc(sizeof(*_tmp4));
-_tmp4->elmts=x;_tmp4->num_elmts=0;_tmp4;});}struct Cyc_Xarray_Xarray*Cyc_Xarray_create(
-int len,void*a){if(len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+sizeof(char),23);_tmp3;});_tmp2;}));*((void**)_check_unknown_subscript(xarr->elmts,
+sizeof(void*),i))=a;}struct Cyc_Xarray_Xarray*Cyc_Xarray_create_empty(){struct
+_tagged_arr x=_tag_arr(({void**_tmp5=_cycalloc(sizeof(void*)* 0);_tmp5;}),sizeof(
+void*),0);return({struct Cyc_Xarray_Xarray*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->elmts=
+x;_tmp4->num_elmts=0;_tmp4;});}struct Cyc_Xarray_Xarray*Cyc_Xarray_create(int len,
+void*a){if(len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp6=_cycalloc(sizeof(*_tmp6));_tmp6[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp7;_tmp7.tag=Cyc_Core_Invalid_argument;_tmp7.f1=_tag_arr("xarrays must have a non-negative size buffer",
-sizeof(unsigned char),45);_tmp7;});_tmp6;}));return({struct Cyc_Xarray_Xarray*
-_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8->elmts=({unsigned int _tmp9=(unsigned int)
-len;void**_tmpA=(void**)_cycalloc(_check_times(sizeof(void*),_tmp9));struct
+sizeof(char),45);_tmp7;});_tmp6;}));return({struct Cyc_Xarray_Xarray*_tmp8=
+_cycalloc(sizeof(*_tmp8));_tmp8->elmts=({unsigned int _tmp9=(unsigned int)len;
+void**_tmpA=(void**)_cycalloc(_check_times(sizeof(void*),_tmp9));struct
 _tagged_arr _tmpC=_tag_arr(_tmpA,sizeof(void*),(unsigned int)len);{unsigned int
 _tmpB=_tmp9;unsigned int i;for(i=0;i < _tmpB;i ++){_tmpA[i]=a;}}_tmpC;});_tmp8->num_elmts=
 0;_tmp8;});}struct Cyc_Xarray_Xarray*Cyc_Xarray_singleton(int len,void*a){if(len < 
 1)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmpD=_cycalloc(
 sizeof(*_tmpD));_tmpD[0]=({struct Cyc_Core_Invalid_argument_struct _tmpE;_tmpE.tag=
 Cyc_Core_Invalid_argument;_tmpE.f1=_tag_arr("singleton xarray must have size >=1",
-sizeof(unsigned char),36);_tmpE;});_tmpD;}));{struct Cyc_Xarray_Xarray*x=Cyc_Xarray_create(
+sizeof(char),36);_tmpE;});_tmpD;}));{struct Cyc_Xarray_Xarray*x=Cyc_Xarray_create(
 len,a);x->num_elmts=1;return x;}}void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,
 void*a){if(xarr->num_elmts == _get_arr_size(xarr->elmts,sizeof(void*))){if(xarr->num_elmts
 == 0)xarr->elmts=_tag_arr(({unsigned int _tmpF=(unsigned int)10;void**_tmp10=(

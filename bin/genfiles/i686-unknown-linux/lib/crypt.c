@@ -250,16 +250,13 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern unsigned char Cyc_Core_Invalid_argument[21];
-struct Cyc_Core_Invalid_argument_struct{unsigned char*tag;struct _tagged_arr f1;};
-extern unsigned char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossible[
-15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
-extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
-unsigned char*string_to_Cstring(struct _tagged_arr);struct _tagged_arr
-wrap_Cstring_as_string(unsigned char*,unsigned int);struct _tagged_arr Cyc_Std_crypt(
-struct _tagged_arr key,struct _tagged_arr salt);unsigned char*crypt(unsigned char*
-key,unsigned char*salt);struct _tagged_arr Cyc_Std_crypt(struct _tagged_arr key,
-struct _tagged_arr salt){return wrap_Cstring_as_string(crypt(string_to_Cstring(key),
-string_to_Cstring(salt)),- 1);}
+ struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
+string_to_Cstring(struct _tagged_arr);struct _tagged_arr wrap_Cstring_as_string(
+char*,unsigned int);struct _tagged_arr Cyc_Std_crypt(struct _tagged_arr key,struct
+_tagged_arr salt);char*crypt(char*key,char*salt);struct _tagged_arr Cyc_Std_crypt(
+struct _tagged_arr key,struct _tagged_arr salt){return wrap_Cstring_as_string(crypt(
+string_to_Cstring(key),string_to_Cstring(salt)),- 1);}

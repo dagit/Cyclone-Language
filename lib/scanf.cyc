@@ -125,10 +125,9 @@ typedef long long int _IO_ssize_t;
 #define	CT_INT		3	/* integer, i.e., strtol or strtoul */
 #define	CT_FLOAT	4	/* floating, i.e., strtod */
 
-#define u_char unsigned char
 #define u_long unsigned long
 
-static const u_char ?`r2 __sccl (char ?`r tab, const u_char ?`r2 fmt);
+static const char ?`r2 __sccl (char ?`r tab, const char ?`r2 fmt);
 
 typedef u_long (*strtoulfn<`r,`r2,`e>)(const char ? `r, char ? `r * `r2, int; {`r,`r2}+`e);
 
@@ -193,7 +192,7 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
      sarg_t<`r2,`r5> ? `r3 ap;
      int *`r4 errp;
 {
-	const u_char ? `r1 fmt = fmt0;
+	const char ? `r1 fmt = fmt0;
 	int c;		/* character from format, or conversion */
 	_IO_ssize_t width;	/* field width, or 0 */
 	char ? _ p = NULL; /* points into all kinds of strings */
@@ -803,10 +802,10 @@ done:
  * closing `]'.  The table has a 1 wherever characters should be
  * considered part of the scanset.
  */
-static const u_char ?`r2
+static const char ?`r2
 __sccl (tab, fmt)
      char ? `r tab;
-     const u_char ? `r2 fmt;
+     const char ? `r2 fmt;
 {
 	int c, n, v;
 

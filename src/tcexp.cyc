@@ -173,8 +173,12 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
 static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
   type_t t;
   switch (c) {
-  case &Char_c(sn,_):     
-    t = (sn == Unsigned) ? uchar_typ  : schar_typ;  break;
+  case &Char_c(Signed,_):     
+    t = schar_typ;  break;
+  case &Char_c(Unsigned,_):     
+    t = uchar_typ;  break;
+  case &Char_c(None,_):     
+    t = char_typ;  break;
   case &Short_c(sn,_):    
     t = (sn == Unsigned) ? ushort_typ : sshort_typ; break;
   case &LongLong_c(sn,_): 
@@ -190,7 +194,11 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         // short x[1] = { 255 };
       switch (compress(*topt)) {
       case &IntType(sn,B1):
-        t = (sn == Unsigned) ? uchar_typ : schar_typ;
+        switch(sn) {
+	case Unsigned: t = uchar_typ; break;
+	case Signed: t = schar_typ; break;
+	case None: t = char_typ; break;
+	}
         e->r = new Const_e(new Char_c(sn,(char)(i))); // i gets truncated here
         break;
       case &IntType(sn,B2):
@@ -229,11 +237,11 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
     // string is used as an initializer, then we should return an array type.
-    t = atb_typ(uchar_typ, HeapRgn, const_tqual(), new Upper_b(elen));
+    t = atb_typ(char_typ, HeapRgn, const_tqual(), new Upper_b(elen));
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(_,tq,_):
-        return new ArrayType(uchar_typ, tq, elen);
+        return new ArrayType(char_typ, tq, elen);
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -241,7 +249,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
           t = *topt;
         } else {
           // maybe it's going in a different region
-          t = atb_typ(uchar_typ,new_evar(&rk,new Opt(lookup_type_vars(te))), 
+          t = atb_typ(char_typ,new_evar(&rk,new Opt(lookup_type_vars(te))), 
                       const_tqual(), 
                       new Upper_b(elen));
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
@@ -1617,7 +1625,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     default:
     No_sizeof:
-      elt_type = uchar_typ;
+      elt_type = char_typ;
       *t = new elt_type;
       num_elts = *e;
       one_elt = false;
@@ -1754,7 +1762,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // here I'm going to guess that the user wants a char ?@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_typ(uchar_typ, rgn, const_tqual(), Unknown_b);
+    let topt2 = atb_typ(char_typ, rgn, const_tqual(), Unknown_b);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(), new Upper_b(uint_exp(1,NULL)));
   default:

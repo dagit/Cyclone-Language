@@ -342,7 +342,7 @@ static type_t typ_to_c(type_t t) {
     // for xtunion fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
     if (tuf->typs == NULL) 
-      if(tud->is_xtunion) return star_typ(uchar_typ,HeapRgn,mt_tq);
+      if(tud->is_xtunion) return star_typ(char_typ,HeapRgn,mt_tq);
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
@@ -572,7 +572,7 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
-    type_t    vd_typ = new ArrayType(uchar_typ,mt_tq,sz);
+    type_t    vd_typ = new ArrayType(char_typ,mt_tq,sz);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
@@ -797,6 +797,7 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
   inner_loop:
     switch (i->r) {
     case &Cast_e(t,e2): i = e2; goto inner_loop;
+    case &Const_e(&Int_c(None,i)): fallthru(i);
     case &Const_e(&Int_c(Signed,i)): 
       return ((i >= 0) && check_const_array(i+1,x->type));
     case &Const_e(&Int_c(Unsigned,i)): 
@@ -2933,7 +2934,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     tunionfield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
     let sz_exp  = uint_exp((*fn).size+4,DL);
-    let tag_typ = new ArrayType(uchar_typ,mt_tq,sz_exp);
+    let tag_typ = new ArrayType(char_typ,mt_tq,sz_exp);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
     case NULL:
@@ -2956,7 +2957,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	  fields = new List(newf,fields);
 	}
 	fields = new List(new Aggrfield(tag_sp,mt_tq,
-					cstar_typ(uchar_typ,mt_tq),NULL,NULL),
+					cstar_typ(char_typ,mt_tq),NULL,NULL),
 			  List::imp_rev(fields));
 	let strct_decl =
 	  new Aggrdecl{.kind = StructA, .sc = Public,

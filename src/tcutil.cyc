@@ -2103,7 +2103,8 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(_,FloatType):  return FloatType;
   case $(&IntType(Unsigned,B8),_): 
   case $(_,&IntType(Unsigned,B8)): return ulonglong_typ;
-  case $(&IntType(Signed,B8),_):   
+  case $(&IntType(None,B8),_):   
+  case $(_,&IntType(None,B8)):case $(&IntType(Signed,B8),_):   
   case $(_,&IntType(Signed,B8)):   return slonglong_typ;
   case $(&IntType(Unsigned,B4),_): 
   case $(_,&IntType(Unsigned,B4)): return uint_typ;
@@ -2847,7 +2848,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         switch (compress(t)) {
         case &PointerType(PtrInfo{et,_,_,_,b}):
           switch ($(compress(et), conref_def((bounds_t)Unknown_b,b))) {
-          case $(&IntType(Unsigned,B1), Unknown_b): break;
+          case $(&IntType(None,B1), Unknown_b): break;
           default: terr(loc,"format descriptor is not a char ? type"); break;
           }
           break;

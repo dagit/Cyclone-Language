@@ -255,7 +255,7 @@ string_t char_escape(char c) {
       let t = new_string(4);
       int j = 0;
       t[j++] = '\\';
-      t[j++] = (char)('0'+(((unsigned char)c>>6)&7));
+      t[j++] = (char)('0'+(((unsigned char)c>>6)&3));
       t[j++] = (char)('0'+((c>>3)&7));
       t[j++] = (char)('0'+(c&7));
       return t;
@@ -628,12 +628,14 @@ doc_t ntyp2doc(type_t t) {
     string_t sns;
     string_t ts;
     switch (sn) {
+    case None:
     case Signed:   sns = "";          break;
     case Unsigned: sns = "unsigned "; break;
     }
     switch (sz) {
     case B1:
       switch (sn) {
+      case None:     sns = ""; break;
       case Signed:   sns = "signed "; break;
       case Unsigned: sns = "unsigned "; break;
       }
@@ -1109,6 +1111,7 @@ doc_t cnst2doc(cnst_t c) {
   switch (c) {
   case &Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
   case &Short_c(sg,s):     return text(aprintf("%d",(int)s));
+  case &Int_c(None,i):     fallthru(i);
   case &Int_c(Signed,i):   return text(aprintf("%d",i));
   case &Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
   case &LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
@@ -1364,7 +1367,7 @@ doc_t pat2doc(pat_t p) {
   case Wild_p: s = text("_"); break;
   case Null_p: s = text("NULL"); break;
   case &Int_p(sg,i):
-    if (sg == (sign_t)Signed)
+    if (sg != (sign_t)Unsigned)
       s = text(aprintf("%d",i));
     else s = text(aprintf("%u",i));
     break;

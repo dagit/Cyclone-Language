@@ -186,8 +186,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     break;
 
   case &Int_p(Unsigned,_): t = num_type(topt, uint_typ);  break;
+  case &Int_p(None,_):
   case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
-  case &Char_p(_):         t = num_type(topt, uchar_typ); break;
+  case &Char_p(_):         t = num_type(topt, char_typ); break;
   case &Float_p(_):        t = num_type(topt, float_typ); break;
   case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;

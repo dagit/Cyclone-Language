@@ -1243,7 +1243,7 @@ type_specifier:
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(new Opt($3),NULL),LOC(@1,@3))); }
-| CHAR      { $$=^$(type_spec(uchar_typ,LOC(@1,@1))); }
+| CHAR      { $$=^$(type_spec(char_typ,LOC(@1,@1))); }
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_typ,LOC(@1,@1))); }
 | LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
