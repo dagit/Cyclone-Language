@@ -87,6 +87,7 @@
 #include <dict.h>
 #include <string.h> 
 #include <cycboot.h> 
+#include <warn.h>
 
 //#define VCGEN_DEBUG
 
@@ -162,7 +163,7 @@ static term_t fresh_var() {
 
 int cmp_term(term_t t1, term_t t2) {
   switch $(t1,t2) {
-  case $(&Const(c1),&Const(c2)): return Evexp::exp_cmp(c1,c2) == 0;
+  case $(&Const(c1),&Const(c2)): return Evexp::exp_cmp(c1,c2);
   case $(&Const(_),_): return -1;
   case $(_,&Const(_)): return 1;
   case $(&Var(vd1),&Var(vd2)): return (int)vd1 - (int)vd2;
@@ -621,7 +622,7 @@ static bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
   case &And(a1,a2): return find_ctxt(a1,t1,p1,u1) || find_ctxt(a2,t1,p1,u1);
   case &Or(a1,a2): return find_ctxt(a1,t1,p1,u1) && find_ctxt(a2,t1,p1,u1);
   case &Prim(t2,p2,u2):
-    switch $(p1,p2) {
+    switch $(p2,p1) {
     case $(Eq,Eq): 
     case $(Eq,Lte):
       return (same_term(t1,t2) && same_term(u1,u2) ||
@@ -1482,6 +1483,12 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(ain));
     }
     return $(zero(),ain);
+  case &Absyn::Assert_e(e1):
+    let $(at,_) = vcgen_test(env,e1,&true_assn);
+    if (!implies(ain,at)) 
+      Warn::err(e->loc, "cannot prove @assert from %s",
+                assn2string(ain));
+    return $(one(),and(ain,at));
   }
 }
 

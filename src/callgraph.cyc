@@ -90,6 +90,7 @@ static fndecl_set_t cg_exp(fndefns_t fds, exp_t e, fndecl_set_t s) {
   case &AggrMember_e(e,...):          fallthru(e);
   case &AggrArrow_e(e,...):           fallthru(e);
   case &Tagcheck_e(e,...):            fallthru(e);
+  case &Assert_e(e):                  fallthru(e);
   case &ComprehensionNoinit_e(e,...): fallthru(e);
   case &Increment_e(e,_):             return cg_exp(fds,e,s);
   case &Conditional_e(e1,e2,e3): 

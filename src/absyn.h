@@ -626,6 +626,7 @@ namespace Absyn {
     Asm_e(bool, string_t, list_t<$(string_t, exp_t)@>, list_t<$(string_t, exp_t)@>, list_t<string_t@>);
     Extension_e(exp_t); 
     // implements GCC's __extension__ (...) though we just pass it through.
+    Assert_e(exp_t); // a static assertion to be checked by the analysis
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -1041,6 +1042,7 @@ namespace Absyn {
                        list_t<$(string_t<`H>,exp_t)@`H,`H>, 
                        list_t<string_t<`H>@`H,`H>, seg_t);
   extern exp_t extension_exp(exp_t, seg_t);
+  extern exp_t assert_exp(exp_t, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);
@@ -1117,6 +1119,8 @@ namespace Absyn {
   extern type_t pointer_expand(type_t, bool fresh_evar);
   // returns true when the expression is a valid left-hand-side
   extern bool is_lvalue(exp_t);
+  // returns true when the expression has no side effects
+  extern bool no_side_effects_exp(exp_t e);
 
   // find a field by name from a list of fields
   extern struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);

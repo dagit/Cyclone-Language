@@ -2246,6 +2246,13 @@ static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_nam
   return uint_type;
 }
 
+static type_t tcAssert(tenv_t te, seg_t loc, exp_t e) {
+  tcTest(te,e,"@assert");
+  if (!no_side_effects_exp(e))
+    terr(loc,"@assert expression may have side effects");
+  return sint_type;
+}
+
 // e has the form new e1
 static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
                     exp_opt_t @rgn_handle, exp_t e, exp_t e1) {
@@ -2658,6 +2665,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcTagcheck(te,loc,topt,e,f); break;
   case &Extension_e(e1):
     t = tcExp(te,topt,e1); break;
+  case &Assert_e(e):
+    t = tcAssert(te,loc,e); break;
   case &Valueof_e(t2):
     if (!te->allow_valueof)
       terr(e->loc,"valueof(-) can only occur within types");

@@ -388,7 +388,8 @@ static void do_exp(env_t nv, exp_t e) {
   case &Throw_e(e1,_):       fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): fallthru(e1);
-  case &Address_e(e1):
+  case &Address_e(e1):       fallthru(e1);
+  case &Assert_e(e1):
     e->annot = &NoCheck_val;
     do_exp(nv,e1);
     break;

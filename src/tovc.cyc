@@ -568,6 +568,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &Asm_e(...): return;
 
+  case &Assert_e(...): bad_form = "Assert_e"; break;
   case &Pragma_e(...): bad_form = "Pragma_e"; break;
   case &Throw_e(...): bad_form = "Throw_e"; break;
   case &New_e(...): bad_form = "New_e"; break;

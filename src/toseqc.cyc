@@ -156,6 +156,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Swap_e(...): bad_form = "Swap_e"; break;
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  case &Assert_e(...): bad_form = "Assert_e"; break;
   }
   Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
@@ -331,6 +332,7 @@ static void exp_to_seqc(exp_t e) {
   case &Swap_e(...): bad_form = "Swap_e"; break;
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
+  case &Assert_e(...): bad_form = "Assert_e"; break;
   }
   Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }

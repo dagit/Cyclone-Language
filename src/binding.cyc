@@ -473,6 +473,7 @@ void resolve_exp(env_t env, exp_t e) {
       resolve_exp(env,es->hd);
     return;
 
+  case &Assert_e(e1): fallthru(e1);
   case &Extension_e(e1):  fallthru(e1);
   case &Tagcheck_e(e1,_): fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);

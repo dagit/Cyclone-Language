@@ -1480,6 +1480,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
       leq(ts->hd,vs->hd);
     }
     return v;
+  case &Assert_e(...): impos("@assert");
   case &Throw_e(...): impos("throw");
   case &Extension_e(e1): return gen_exp(false,env,e1);
   case &NoInstantiate_e(e1): return gen_exp(false,env,e1);

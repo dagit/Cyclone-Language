@@ -366,6 +366,7 @@ static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
 static raw_stmt_t goto_stmt_r(var_t v) {
   return new Goto_s(v);
 }
+
 static datatype Raw_exp.Const_e zero_exp = Const_e(Cnst{.Int_c= $(Signed,0)});
 
 // same as aggrmember_e(e,f,DL) but when e is a deref_e(e1), replaces with
@@ -1720,6 +1721,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Const_e(_): break;
   case &Var_e(_):   break;
+  case &Assert_e(_): e->r = int_exp(Signed,1,DL)->r; break;
   case &Extension_e(e1): exp_to_c(nv,e1); break;
   case &Primop_e(p,es):
     // Save Cyclone types -- needed for pointer arith stuff
@@ -4125,6 +4127,7 @@ static void exptypes_to_c(exp_t e) {
   case &Asm_e(...):     
   case &AnonEnum_e(...): break;
 
+  case &Assert_e(...):
   case &Pragma_e(...): 
   case &AnonStruct_e(...): 
   case &Datatype_e(...):  

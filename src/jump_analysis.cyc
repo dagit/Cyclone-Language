@@ -132,6 +132,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   case &NoInstantiate_e(e1):   fallthru(e1);
   case &Instantiate_e(e1,...): fallthru(e1);
   case &Throw_e(e1,...):       fallthru(e1);
+  case &Assert_e(e1):          fallthru(e1);
   case &Increment_e(e1,...):   anal_exp(env,e1); break;
 
   case &Conditional_e(e1,e2,e3): 

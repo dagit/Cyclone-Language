@@ -1062,7 +1062,7 @@ using Parse;
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
-%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL 
+%token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL ASSERT_QUAL
 %token EXTENSIBLE_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -3065,6 +3065,8 @@ unary_expression:
 | ASM_TOK  asm_expr 
    { $$=^$(new_exp($2, SLOC(@1))); }
 | EXTENSION unary_expression { $$=^$(extension_exp($2,LOC(@1,@3))); }
+| ASSERT_QUAL '(' assignment_expression ')'
+  { $$=^$(assert_exp($3,LOC(@1,@4))); }
 ;
 
 asm_expr:

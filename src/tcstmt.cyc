@@ -58,73 +58,6 @@ static bool is_var_exp(exp_t e) {
   }
 }
 
-// used to check that a where-clause has no effect -- we want
-// to rule out in particular assignments to variables and function calls,
-// but allow exceptions to be thrown and global variables and the like
-// to be read.  
-// FIX: rules out statement expressions.
-static bool noassign_exp(exp_t e) {
-  switch (e->r) {
-  case &FnCall_e(...)   : 
-  case &AssignOp_e(...) :
-  case &Swap_e(...)     :
-  case &Asm_e(...)      :
-  case &StmtExp_e(_)    : 
-  case &Increment_e(...): return false;
-
-  case &Valueof_e(_)    :
-  case &Const_e(_)      :
-  case &Var_e(_)        :
-  case &Sizeoftype_e(...): 
-  case &Offsetof_e(...) : 
-  case &Enum_e(...)     :
-  case &AnonEnum_e(...) :
-  case &Pragma_e(_)     : return true;
-
-  case &Conditional_e(e1,e2,e3): 
-    if (!noassign_exp(e1)) return false;
-    fallthru(e2,e3);
-  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
-  case &And_e(e1,e2)      : fallthru(e1,e2);
-  case &Or_e(e1,e2)       : fallthru(e1,e2);
-  case &Subscript_e(e1,e2): fallthru(e1,e2);
-  case &SeqExp_e(e1,e2)   : return noassign_exp(e1) && noassign_exp(e2);
-
-  case &Extension_e(e)              : fallthru(e);
-  case &Tagcheck_e(e,_)             : fallthru(e);
-  case &Throw_e(e,...)              : fallthru(e);
-  case &NoInstantiate_e(e)          : fallthru(e);
-  case &Instantiate_e(e,...)        : fallthru(e);
-  case &Cast_e(_,e,...)             : fallthru(e);
-  case &Sizeofexp_e(e)              : fallthru(e);
-  case &Deref_e(e)                  : fallthru(e);
-  case &AggrMember_e(e,...)         : fallthru(e);
-  case &AggrArrow_e(e,...)          : fallthru(e);
-  case &ComprehensionNoinit_e(e,...): fallthru(e);
-  case &Address_e(e)                : return noassign_exp(e);
-
-  case &Malloc_e(MallocInfo{_,eopt,_,e,...}): fallthru(eopt,e);
-  case &New_e(eopt,e):
-    if (!noassign_exp(e)) return false;
-    if (eopt != NULL) return noassign_exp(eopt);
-    return true;
-
-  case &Primop_e(_,es)    : fallthru(es);
-  case &Datatype_e(es,...): fallthru(es);
-  case &Tuple_e(es)       : return List::forall(noassign_exp,es);
-
-  case &UnresolvedMem_e(_,dles): fallthru(dles);
-  case &Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &AnonStruct_e(_,dles)   : fallthru(dles);
-  case &Array_e(dles)          : fallthru(dles);
-  case &CompoundLit_e(_,dles)  :
-    for (; dles != NULL; dles = dles->tl)
-      if (!noassign_exp((*dles->hd)[1])) 
-	return false;
-    return true;
-  }
-}
-
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
@@ -146,7 +79,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 
   if(where_opt != NULL) {
     tcTest(te2,where_opt,"switch clause guard");
-    if (!noassign_exp(where_opt))
+    if (!no_side_effects_exp(where_opt))
       terr(where_opt->loc, "cannot show &&-clause in pattern has no effects");
   }
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??

@@ -822,7 +822,7 @@ rule token = parse
 | "@nullable"notidchar    { --lexbuf->lex_curr_pos; return NULLABLE_QUAL; }
 | "@requires"notidchar    { --lexbuf->lex_curr_pos; return REQUIRES_QUAL; }
 | "@ensures"notidchar     { --lexbuf->lex_curr_pos; return ENSURES_QUAL; }
-
+| "@assert"notidchar      { --lexbuf->lex_curr_pos; return ASSERT_QUAL; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+ cnstsuffix
       { token_int = intconst(lexbuf,2,0,16);
