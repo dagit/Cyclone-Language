@@ -93,14 +93,13 @@ static int pack_from(list_t<$(int,int)@> nondef, int b) {
 }
 
 static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
-  int ?moves_v = new {for i < 257 : 
-		       ({int x; 
-		       switch(moves[i]) { 
-		       case Backtrack: x = -1; break;
-		       case &Goto(n):  x = n;  break;
-		       }
-		       x;
-		       })};
+  int ?moves_v = new {for i < 257 : 0};
+  for (let i = 0; i < 257; i++) {
+    switch(moves[i]) { 
+    case Backtrack: moves_v[i] = -1; break;
+    case &Goto(n):  moves_v[i] = n;  break;
+    }
+  }
   int               def    = most_frequent_elt(moves_v);
   list_t<$(int,int)@> nondef = non_default_elements(def, moves_v);
   int               base   = pack_from(nondef,0);

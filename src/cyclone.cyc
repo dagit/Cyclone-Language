@@ -66,6 +66,7 @@ static bool ic_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
+static bool inline_functions_r = false;
 static bool elim_se_r    = false;
 static bool tovc_r     = false;
 static bool v_r        = false;
@@ -201,7 +202,7 @@ static void set_lineno() {
   set_save_temps();
 }
 static void set_inline_functions() {
-  add_ccarg("-D_INLINE_FUNCTIONS");
+  inline_functions_r = true;
 }
 static void set_elim_se() {
   elim_se_r = true;
@@ -579,6 +580,9 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   params_r.print_all_tvars = print_all_tvars_r;
   params_r.print_all_kinds = print_all_kinds_r;
   params_r.print_all_effects = print_all_effects_r;
+
+  if (inline_functions_r)
+    fprintf(out_file,"#define _INLINE_FUNCTIONS\n");
 
   // Copy cyc_include.h to out_file.
   // FIX: would be better to use open, stat, and read but we don't
