@@ -117,7 +117,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p, typ *`p region_opt) {
       if (!unify(p_arg->topt->v,inst_fieldtyp))
 	terr(p->loc,
 	     xprintf("field %s of struct pattern expects type %s != %s",
-		     derefstr(n), typ2string(inst_fieldtyp), 
+		     *n, typ2string(inst_fieldtyp), 
 		     typ2string(p_arg->topt->v)));
     }
     break;
@@ -445,11 +445,10 @@ static simple_pat_t compile_pat(pat p) {
     break;
   case Enum_p(_,_,_,ps,ed,ef):
     int span = List::length(ed->fields->v);
-    s = con_pat(derefstr((*ef->name)[1]),&Opt(span),
-		List::map(compile_pat,ps)); 
+    s = con_pat(*((*ef->name)[1]),&Opt(span),List::map(compile_pat,ps)); 
     break;
   case Xenum_p(_,_,ps,xd,ef):
-    s = con_pat(derefstr((*ef->name)[1]),null,List::map(compile_pat,ps)); 
+    s = con_pat(*((*ef->name)[1]),null,List::map(compile_pat,ps)); 
     break;
   case UnknownId_p(_):         s = impos("compile_pat: unknownid");     break;
   case UnknownCall_p(_,_,_):   s = impos("compile_pat: unknowncall");   break;

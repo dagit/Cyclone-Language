@@ -9,24 +9,18 @@
 // declared here because they are internal to Core, whereas the
 // routines below can be used by any Cyclone program.
 
+#ifndef uint
 typedef unsigned int uint;
+#endif
 typedef char *{0} Cstring;
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char ? string;
 
-//#define OLD_STRING_REP
-#ifdef OLD_STRING_REP
-typedef string stringptr;
-#define allocstr(x) ((string)x)
-#define derefstr(x) (x)
-#else
 typedef string @stringptr;
-#define allocstr(x) (stringptr)(&$((string)x))
-#define allocstr_top(x,y) (&x)
-#define derefstr(x) (*(x))
-#endif
 
+#ifndef bool
 typedef int bool;
+#endif
 #ifndef false 
 #define false (0)
 #endif

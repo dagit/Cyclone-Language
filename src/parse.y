@@ -208,7 +208,7 @@ static void only_vardecl(list<stringptr> params,decl x) {
       }
     if (!found)
       abort(xprintf("%s is not listed as a parameter",
-		    derefstr((*vd->name)[1])),x->loc);
+		    *((*vd->name)[1])),x->loc);
     return;
   case Let_d(_,_,_,_):   decl_kind = "let declaration";        break;
   case Fn_d(_):          decl_kind = "function declaration";   break;
@@ -231,7 +231,7 @@ static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
 					       stringptr x) {
   let &$(tdl,loc) = env;
   if (tdl==null)
-    return(abort(xprintf("missing type for parameter %s",derefstr(x)),loc));
+    return(abort(xprintf("missing type for parameter %s",*x),loc));
   switch (tdl->hd->r) {
   case Var_d(vd):
     if ((*vd->name)[0] != null)
@@ -357,7 +357,7 @@ static $(var,tqual,typ)@ fnargspec_to_arg(segment loc,
 					  $(Opt_t<var>,tqual,typ)@ t) {
   if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
-    return &$(allocstr("?"),(*t)[1],(*t)[2]);     // Fix: explicit cast needed
+    return &$(new{"?"},(*t)[1],(*t)[2]);
   } else
     return &$((*t)[0]->v,(*t)[1],(*t)[2]);
 }
@@ -883,11 +883,11 @@ translation_unit:
     }
 /* NB: namespace_action calls Lex::enter_namespace */
 | namespace_action ';' translation_unit
-    { $$=^$(&cons(&Decl(Namespace_d(allocstr($1),$3),LOC(@1,@3)),null));
+    { $$=^$(&cons(&Decl(Namespace_d(new {$1},$3),LOC(@1,@3)),null));
       Lex::leave_namespace();
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit_opt
-    { $$=^$(&cons(&Decl(Namespace_d(allocstr($1),$3),LOC(@1,@4)),$5));
+    { $$=^$(&cons(&Decl(Namespace_d(new {$1},$3),LOC(@1,@4)),$5));
     }
 | EXTERN STRING '{' translation_unit '}' translation_unit_opt
     { if (String::strcmp($2,"C") != 0)
@@ -934,7 +934,7 @@ unusing_action:
 ;
 
 namespace_action:
-  NAMESPACE IDENTIFIER { Lex::enter_namespace(allocstr($2)); $$=$!2; }
+  NAMESPACE IDENTIFIER { Lex::enter_namespace(new {$2}); $$=$!2; }
 ;
 
 unnamespace_action:
@@ -1020,7 +1020,7 @@ type_specifier:
 | QUAL_TYPEDEF_NAME type_params_opt
     { $$=^$(type_spec(TypedefType($1,$2,null),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
-| TYPE_VAR     { $$=^$(type_spec(VarType(&$(allocstr($1),UnresolvedKind)),
+| TYPE_VAR     { $$=^$(type_spec(VarType(&$(new {$1},UnresolvedKind)),
                                  LOC(@1,@1))); }
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(TupleType(List::map_c(get_tqual_typ,
@@ -1205,7 +1205,7 @@ struct_declarator:
     { /* FIX: TEMPORARY TO TEST PARSING */
       unimp2("bit fields",LOC(@1,@2));
       // Fix: cast needed
-      $$=^$(&Declarator(&$(null,allocstr("")),null)); }
+      $$=^$(&Declarator(&$(null,new {""}),null)); }
 | declarator ':' constant_expression
     { unimp2("bit fields",LOC(@1,@2));
       $$=$!1; }
@@ -1321,7 +1321,7 @@ rgn_opt:
     if (zstrcmp(tv,"`H") == 0) // Heap region treated specially
       $$ = ^$(HeapRgnType);
     else 
-      $$ = ^$(VarType(&$(allocstr(tv),RgnKind))); 
+      $$ = ^$(VarType(&$(new {tv},RgnKind))); 
   }
 | '_'           { $$ = ^$(new_evar(RgnKind)); }
 ;
@@ -1404,9 +1404,9 @@ identifier_list:
 /* NB: returns list in reverse order */
 identifier_list0:
   IDENTIFIER
-    { $$=^$(&cons(allocstr($1),null)); }
+    { $$=^$(&cons(new {$1},null)); }
 | identifier_list0 ',' IDENTIFIER
-    { $$=^$(&cons(allocstr($3),$1)); }
+    { $$=^$(&cons(new {$3},$1)); }
 ;
 
 initializer:
@@ -1446,7 +1446,7 @@ designator_list:
 
 designator:
   '[' constant_expression ']' {$$ = ^$(ArrayElement($2));}
-| '.' IDENTIFIER              {$$ = ^$(FieldName(allocstr($2)));}
+| '.' IDENTIFIER              {$$ = ^$(FieldName(new {$2}));}
 ;
 
 type_name:
@@ -1552,7 +1552,7 @@ statement:
    labeled */
 labeled_statement:
   IDENTIFIER ':' statement
-    { $$=^$(new_stmt(Label_s(allocstr($1),$3),LOC(@1,@3))); }
+    { $$=^$(new_stmt(Label_s(new {$1},$3),LOC(@1,@3))); }
 ;
 
 expression_statement:
@@ -1695,7 +1695,7 @@ iteration_statement:
 ;
 
 jump_statement:
-  GOTO IDENTIFIER ';'   { $$=^$(goto_stmt(allocstr($2),LOC(@1,@2))); }
+  GOTO IDENTIFIER ';'   { $$=^$(goto_stmt(new {$2},LOC(@1,@2))); }
 | CONTINUE ';'          { $$=^$(continue_stmt(LOC(@1,@1)));}
 | BREAK ';'             { $$=^$(break_stmt(LOC(@1,@1)));}
 | RETURN ';'            { $$=^$(return_stmt(null,LOC(@1,@1)));}
@@ -1744,7 +1744,7 @@ pattern:
 | '&' pattern
     {$$=^$(new_pat(Pointer_p($2),LOC(@1,@2)));}
 | '*' IDENTIFIER
-    {$$=^$(new_pat(Reference_p(new_vardecl(&$(null,allocstr($2)),
+    {$$=^$(new_pat(Reference_p(new_vardecl(&$(null,new {$2}),
 					   VoidType,null)),
 		   LOC(@1,@2)));}
 ;
@@ -1982,7 +1982,7 @@ postfix_expression:
 | postfix_expression '(' argument_expression_list ')'
     { $$=^$(unknowncall_exp($1,$3,LOC(@1,@4))); }
 | postfix_expression '.' IDENTIFIER
-    { $$=^$(structmember_exp($1,allocstr($3),LOC(@1,@3))); }
+    { $$=^$(structmember_exp($1,new {$3},LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
     { qvar q = $3;
@@ -1991,7 +1991,7 @@ postfix_expression:
       $$=^$(structmember_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression PTR_OP IDENTIFIER
-    { $$=^$(structarrow_exp($1,allocstr($3),LOC(@1,@3))); }
+    { $$=^$(structarrow_exp($1,new {$3},LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression PTR_OP QUAL_TYPEDEF_NAME
     { qvar q = $3;
@@ -2018,7 +2018,7 @@ postfix_expression:
     { $$=^$(new_exp(Array_e(true,List::imp_rev($3)),LOC(@1,@4))); }
   /* array comprehension */
 | NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,allocstr($4)), uint_t,
+    { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,new {$4}), uint_t,
 						&Opt(uint_exp(0,LOC(@4,@4)))),
 				    $6, $8),
 		    LOC(@1,@9))); }
@@ -2079,7 +2079,7 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(&$(null,allocstr($1))); }
+  IDENTIFIER      { $$=^$(&$(null,new {$1})); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 
@@ -2093,11 +2093,11 @@ void yyprint(int i, xenum YYSTYPE v) {
   case Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;
   case String_tok(s):          fprintf(stderr,"\"%s\"",s); break;
   case StringOpt_tok(null):    fprintf(stderr,"null");     break;
-  case StringOpt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",derefstr(s)); break;
+  case StringOpt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",*s); break;
   case QualId_tok(&$(prefix,v2)):
     for (; prefix != null; prefix = prefix->tl)
-      fprintf(stderr,"%s::",derefstr(prefix->hd));
-    fprintf(stderr,"%s::",derefstr(v2));
+      fprintf(stderr,"%s::",*(prefix->hd));
+    fprintf(stderr,"%s::",*v2);
     break;
   default: fprintf(stderr,"?"); break;
   }

@@ -589,6 +589,7 @@ static synth tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
       // information while type-checking the arguments.
       if (topt != null) unify(res_typ,*topt);
       // check that each argument has the right type or can be coerced to it
+      // FIX: need to check that any arguments are accessible!
       while ((es != null) && (args_info != null)) {
         exp e1 = es->hd;
         typ t2 = (*args_info->hd)[2];
@@ -741,18 +742,18 @@ static synth tcStructMember<`r>(tenv te, segment loc, typ *`r topt,
     _ finfo = lookup_struct_field(sd,f);
     if (finfo == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
-				     qvar2string(nopt->v), derefstr(f)));
+				     qvar2string(nopt->v), *f));
     _ inst = List::zip(sd->tvs,ts);
     _ t2   = substitute(inst,(*finfo)[2]);
     return standard_synth(te,t2);
-  case ArrayType(_,_,_) && (String::zstrcmp(derefstr(f),"size") == 0): 
+  case ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0): 
     outer_e->r = Primop_e(Size,&cons(e,null));
     return standard_synth(te,uint_t);
-  case PointerType(_) && (String::zstrcmp(derefstr(f),"size") == 0): 
+  case PointerType(_) && (String::zstrcmp(*f,"size") == 0): 
     outer_e->r = Primop_e(Size,&cons(e,null));
     return standard_synth(te,uint_t);
   default:
-    if (String::zstrcmp(derefstr(f),"size") == 0)
+    if (String::zstrcmp(*f,"size") == 0)
       return expr_err(te,loc,xprintf("expecting struct or array, found %s",
 				     typ2string(t)));
     else 
@@ -774,7 +775,7 @@ static synth tcStructArrow<`r>(tenv te, segment loc, typ *`r topt,
       _ finfo = lookup_struct_field(sd,f);
       if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
-				       qvar2string(nopt->v),derefstr(f)));
+				       qvar2string(nopt->v),*f));
       _ inst = List::zip(sd->tvs,ts);
       _ t3   = substitute(inst,(*finfo)[2]);
       check_rgn_accessible(te,loc,rt);
@@ -1033,8 +1034,7 @@ static synth tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
     if (!coerce_arg(te,field_exp,inst_fieldtyp))
       terr(field_exp->loc,
 	   xprintf("field %s of struct %s expects type %s != %s",
-		   derefstr(n),qvar2string(*tn),
-		   typ2string(inst_fieldtyp),
+		   *n,qvar2string(*tn),typ2string(inst_fieldtyp),
 		   typ2string(field_exp->topt->v)));
   }
   return standard_synth(te,res_typ);

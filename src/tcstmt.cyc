@@ -263,7 +263,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
         if (!coerce_assign(te,initializer->v,t))
 	  terr(d->loc,
 	       xprintf("%s declared with type %s, initialized with type %s",
-		       derefstr(x), typ2string(t), 
+		       *x, typ2string(t), 
 		       typ2string(initializer->v->topt->v)));
       }
       tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);

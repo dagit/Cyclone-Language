@@ -79,7 +79,7 @@ int hash_string(string s) {
 }
 
 int hash_stringptr(stringptr s) {
-  return hash_string(derefstr(s));
+  return hash_string(*s);
 }
 
 // For resizing

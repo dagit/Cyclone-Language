@@ -204,7 +204,7 @@ static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc,
     } catch { case Dict::Absent: break; /* ignore */ }
 
     if(num_results > 1) 
-      Tcutil::terr(loc,xprintf("%s is ambiguous-",derefstr(v)));
+      Tcutil::terr(loc,xprintf("%s is ambiguous-",*v));
     if(num_results > 0)
       return result;
 
@@ -249,7 +249,7 @@ list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {
       result = &cons(List::append(cns,ns),result);
     if (result != null) {
       if (result->tl != null)
-        Tcutil::terr(loc,xprintf("%s is ambiguous_",derefstr(ns->hd)));
+        Tcutil::terr(loc,xprintf("%s is ambiguous_",*(ns->hd)));
       return result->hd;
     }
     if (cns == null)
@@ -571,7 +571,7 @@ tenv add_label(tenv te, var v, stmt s) {
       }
   }
   if(Dict::member(fe->shared->seen_labels, v))
-    Tcutil::terr(s->loc, xprintf("Repeated label: %s", derefstr(v)));
+    Tcutil::terr(s->loc, xprintf("Repeated label: %s", *v));
   fe->shared->seen_labels = Dict::insert(fe->shared->seen_labels, v, s);
   return te;
 }
@@ -617,7 +617,7 @@ typ block_to_typ(tenv te, int block_num) {
     return Dict::lookup(d,block_num);
   // KLUDGE: The tyvar will be fresh b/c block_num is unique and
   //         all user tyvars start with `.
-  _ ans = VarType(&$(allocstr(string_of_int(block_num)),RgnKind));
+  _ ans = VarType(&$(new {string_of_int(block_num)},RgnKind));
   fe->shared->block_to_rgn = 
     Dict::insert(fe->shared->block_to_rgn,block_num,ans);
   return ans;
@@ -634,11 +634,11 @@ void check_rgn_accessible(tenv te, seg_t loc, typ rgn_typ) {
       return;
     // here's the kludge
     try
-      if(List::mem(intcmp, fe->curr_blocks, int_of_string(derefstr((*tv)[0]))))
+      if(List::mem(intcmp, fe->curr_blocks, int_of_string(*((*tv)[0]))))
 	return;
     catch { case InvalidArg(_): break; }
-    terr(loc, xprintf("Expression accesses unavailable region %s", 
-		      derefstr((*tv)[0])));
+    terr(loc, xprintf("Expression accesses unavailable region %s",
+		      *((*tv)[0])));
     return;
   default:
     terr(loc,"Region of pointer cannot be determined");

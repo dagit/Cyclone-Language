@@ -52,7 +52,7 @@ void dump_nospace(dump_string_t s) {
 } 
 // this needs to take a boxed type b/c it's used to instantiate `a
 void dump_str(stringptr s) {
-  dump(derefstr(s));
+  dump(*s);
 }
 
 void dump_semi() {
@@ -108,11 +108,11 @@ void dumpqvar(qvar v) {
   for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
     if(Absynpp::qvar_to_Cids) dump_nospace("_");
     else dump_nospace("::");
-    dump_nospace(derefstr(nsl->hd));
+    dump_nospace(*(nsl->hd));
   }
   if(Absynpp::qvar_to_Cids) dump_nospace("_");
   else dump_nospace("::");
-  dump_nospace(derefstr((*v)[1]));
+  dump_nospace(*((*v)[1]));
 }
 
 void dumptq(tqual tq) {
@@ -228,7 +228,7 @@ void dumptyp(typ t) {
 void dumpdesignator(designator d) {
   switch (d) {
   case ArrayElement(e): dump(".["); dumpexp(e); dump_nospace("]"); break;
-  case FieldName(v):    dump("."); dump_nospace(derefstr(v)); break;
+  case FieldName(v):    dump("."); dump_nospace(*(v)); break;
   }
 }
 
@@ -345,11 +345,11 @@ void dumpexp_prec(int inprec, exp e) {
     dump("*"); dumpexp_prec(myprec,e1); break;
 
   case StructMember_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(derefstr(n)); 
+    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(*(n)); 
     break;
 
   case StructArrow_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(derefstr(n)); 
+    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(*(n)); 
     break;
 
   case Subscript_e(e1,e2):

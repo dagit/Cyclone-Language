@@ -74,7 +74,7 @@ int strcmp(string s1, string s2) {
 }
 
 int strptrcmp(stringptr s1, stringptr s2) {
-  return strcmp(derefstr(s1), derefstr(s2));
+  return strcmp(*s1, *s2);
 }
 
 // Like strcmp, but start comparing at offsets.
@@ -159,7 +159,7 @@ int zstrncmp(string s1,string s2,size_t n) {
 }
 // like zstrcmp but operates on pointers -- useful for hashtables
 int zstrptrcmp(stringptr a, stringptr b) {
-  return(zstrcmp(derefstr(a),derefstr(b)));
+  return(zstrcmp(*a,*b));
 }
 
 
@@ -216,7 +216,7 @@ string strconcat_l(list<stringptr> strs) {
                             null);         // (with junk 0 on front)
   list<size_t> end = lens;              // last cons cell in 'lens'
   for(list<stringptr> p = strs; p!=null; p = p->tl) {
-    len = strlen(derefstr(p->hd));
+    len = strlen(*(p->hd));
     total_len += len;
     end->tl = &cons(len,null);
     end = end->tl;
@@ -225,7 +225,7 @@ string strconcat_l(list<stringptr> strs) {
   string ans = new_string(total_len);
   size_t i = 0;
   while (strs != null) {
-    string next    = derefstr(strs->hd);
+    string next    = *(strs->hd);
     len            = lens->hd;
     strncpy(ans,i,next,0,len);
     i += len;
@@ -239,7 +239,7 @@ string strconcat_l(list<stringptr> strs) {
 // using separator between each element
 string str_sepstr(list<stringptr> strs, string separator) {
   if (strs == null)    return "";
-  if (strs->tl == null) return strdup(derefstr(strs->hd));
+  if (strs->tl == null) return strdup(*(strs->hd));
   list<stringptr> p = strs;
   list<size_t> lens = &cons((size_t)0,null);  // see comments in strconcat_l
   list<size_t> end = lens;
@@ -247,7 +247,7 @@ string str_sepstr(list<stringptr> strs, string separator) {
   size_t total_len  = 0;
   size_t list_len   = 0;
   for(;p!=null;p=p->tl) {
-    len = strlen(derefstr(p->hd));
+    len = strlen(*(p->hd));
     total_len += len;
     end->tl = &cons(len,null);
     end = end->tl;
@@ -259,7 +259,7 @@ string str_sepstr(list<stringptr> strs, string separator) {
   string ans = new_string(total_len);
   size_t i = 0;
   while (strs->tl != null) {
-    string next    = derefstr(strs->hd);
+    string next    = *(strs->hd);
     len            = lens->hd;
     strncpy(ans,i,next,0,len);
     i += len;
@@ -268,7 +268,7 @@ string str_sepstr(list<stringptr> strs, string separator) {
     strs = strs->tl;
     lens = lens->tl;
   }
-  strncpy(ans,i,derefstr(strs->hd),0,lens->hd);
+  strncpy(ans,i,*(strs->hd),0,lens->hd);
   return ans;
 }
 

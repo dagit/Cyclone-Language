@@ -29,7 +29,7 @@ static void redecl_err(segment loc, string t, stringptr v,
 		       string new_sc, string old_sc) {
   terr(loc, xprintf("redeclaration of %s %s cannot be %s "
 		    "when earlier definition is %s",
-		    t, derefstr(v), new_sc, old_sc));
+		    t, *v, new_sc, old_sc));
 }
 static scope scope_redecl_okay<`a>(scope s1, Opt_t<`a> fields1,
                                    scope s2, Opt_t<`a> fields2,
@@ -65,8 +65,8 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
   // must have same name
   if (String::zstrptrcmp((*f1->name)[1],(*f2->name)[1]) != 0)
     terr(loc,xprintf("redeclaration of %s %s: field name mismatch %s != %s",
-		     t, derefstr(v), derefstr((*f1->name)[1]), 
-		     derefstr((*f2->name)[1])));
+		     t, *v, *((*f1->name)[1]), 
+		     *((*f2->name)[1])));
   // must have same tag
   if ((f1->tag == null && f2->tag != null) ||
       (f1->tag != null && f2->tag == null) ||
@@ -74,13 +74,13 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
        Evexp::eval_const_uint_exp(f1->tag->v) !=
        Evexp::eval_const_uint_exp(f2->tag->v))) {
     terr(loc,xprintf("redeclaration of %s %s: tag mismatch for field %s",
-		     t, derefstr(v), derefstr((*f1->name)[1])));
+		     t, *v, *((*f1->name)[1])));
   }
   _ tvs1 = f1->tvs;
   _ tvs2 = f2->tvs;
   if (List::length(tvs1) != List::length(tvs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: type parameter number "
-		     "mismatch", t, derefstr(v), derefstr((*f1->name)[1])));
+		     "mismatch", t, *v, *((*f1->name)[1])));
   for (; tvs1 != null; tvs1 = tvs1->tl, tvs2 = tvs2->tl)
     inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
   // must have same number of types
@@ -88,19 +88,19 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
   _ typs2 = f2->typs;
   if (List::length(typs1) != List::length(typs2))
     terr(loc,xprintf("redeclaration of %s %s, field %s: parameter number "
-		     "mismatch", t, derefstr(v), derefstr((*f1->name)[1])));
+		     "mismatch", t, *v, *((*f1->name)[1])));
   // for all types
   for (; typs1 != null; typs1 = typs1->tl, typs2 = typs2->tl) {
      // must have same qualifier
     if (!equal_tqual((*typs1->hd)[0],(*typs2->hd)[0]))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter qualifier",
-		       t, derefstr(v), derefstr((*f1->name)[1])));
+		       t, *v, *((*f1->name)[1])));
     typ subst_t2 = substitute(inst,(*typs2->hd)[1]);
     // and be the same type FIX: (?) is unification appropriate here?
     if (!unify((*typs1->hd)[1],subst_t2))
       terr(loc,xprintf("redeclaration of %s %s, field %s: parameter type "
 		       "mismatch %s != %s",
-		       t, derefstr(v), derefstr((*f1->name)[1]),
+		       t, *v, *((*f1->name)[1]),
 		       typ2string((*typs1->hd)[1]), typ2string(subst_t2)));
   }
 }
@@ -163,25 +163,25 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
     if (sc == Static && vd->sc != Static) 
       warn(loc,
            xprintf("static declaration of %s follows non-static declaration",
-                   derefstr(name)));
+                   *name));
     if (vd->sc == Static && sc != Static)
       warn(loc,
 	   xprintf("non-static declaration of %s follows static declaration",
-		   derefstr(name)));
+		   *name));
     if ((vd->sc == ExternC && sc != ExternC) || 
 	(vd->sc != ExternC && sc == ExternC))
-      terr(loc,xprintf("incompatible redeclaration of %s",derefstr(name)));
+      terr(loc,xprintf("incompatible redeclaration of %s",*name));
     // either they must both be static, both public, or at most one non-extern
     else if ((sc != Extern && vd->sc != Extern) && 
 	!(sc == Static && vd->sc == Static) &&
 	!(sc == Public && vd->sc == Public))
-      terr(loc,xprintf("incompatible redeclaration of %s",derefstr(name)));
+      terr(loc,xprintf("incompatible redeclaration of %s",*name));
     // all must be at the same type
     if (!unify(vd->type,t))
       // FIX: should the test be unification?
       // FIX: we should also check the tqual
       terr(loc,xprintf("redeclaration of %s at a different type: %s != %s",
-		       derefstr(name), typ2string(t), typ2string(vd->type)));
+		       *name, typ2string(t), typ2string(vd->type)));
     break;
   default: break;
   }
@@ -299,7 +299,7 @@ static void tcTypedefdecl(tenv te, genv_t ge, segment loc, typedefdecl td) {
   }
   // check for redeclaration (never allowed, apparently)
   if (Dict::member(ge->typedefs,v)) {
-    terr(loc,xprintf("redeclaration of typedef %s",derefstr(v)));
+    terr(loc,xprintf("redeclaration of typedef %s",*v));
     return;
   }
   // expand to qualified name
@@ -353,8 +353,7 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
     // reject if type-arity is different
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of struct %s "
-		       "has a different number of type parameters", 
-		       derefstr(v)));
+		       "has a different number of type parameters", *v));
     // reject if scopes are inconsistent
     sd->sc = scope_redecl_okay(sd->sc, sd->fields, sd2->sc, sd2->fields,
 			       loc, "struct", v);
@@ -377,27 +376,25 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
 	// names, qualifiers, and types all must agree
 	if (String::zstrptrcmp(fn1,fn2) != 0)
 	  terr(loc, xprintf("redeclaration of struct %s: field name mismatch "
-			    "%s != %s", derefstr(v), 
-			    derefstr(fn1), derefstr(fn2)));
+			    "%s != %s", *v, *fn1, *fn2));
 	if (!equal_tqual(tq1,tq2))
-	  terr(loc, xprintf("redeclaration of struct %s: qualifier mismatch on "
-			    "field %s", derefstr(v), derefstr(fn1)));
+	  terr(loc, xprintf("redeclaration of struct %s: qualifier mismatch on"
+			    " field %s", *v, *fn1));
 	// important side-effects on t1
 	check_valid_type(loc, te, tvs, t1);
 	typ subst_t2 = substitute(inst,t2);
 	if(!unify(t1,subst_t2)) // FIX: unify definitely seems wrong here
-	  terr(loc,xprintf("redeclaration of struct %s: type mismatch on field "
-			   "%s: %s != %s",
-			   derefstr(v), derefstr(fn1), 
+	  terr(loc,xprintf("redeclaration of struct %s: type mismatch on field"
+			   " %s: %s != %s", *v, *fn1, 
 			   typ2string(t1), typ2string(subst_t2)));
       }
       // check for field-number mismatch
       if (f2s != null)
 	terr(loc,xprintf("redeclaration of struct %s is missing field %s", 
-			 derefstr(v), derefstr((*f2s->hd)[0])));
+			 *v, *((*f2s->hd)[0])));
       if (f1s != null)
 	terr(loc,xprintf("redeclaration of struct %s has extra field %s", 
-			 derefstr(v), derefstr((*f1s->hd)[0])));
+			 *v, *((*f1s->hd)[0])));
       return;
     }
     break;
@@ -413,7 +410,7 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
     let &$(fn,tq,t) = fs->hd;
     if (List::mem(String::zstrptrcmp,prev_fields,fn))
-	terr(loc,xprintf("duplicate field %s in struct",derefstr(fn)));
+	terr(loc,xprintf("duplicate field %s in struct",*fn));
     prev_fields = &cons(fn,prev_fields);
     check_valid_type(loc,te,tvs,t);
     if (!ok_field_type(loc,te,t))
@@ -469,8 +466,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
     // reject if type-arity is different
     if(List::length(tvs) != List::length(tvs2))
       terr(loc,xprintf("redeclaration of enum %s "
-		       "has a different number of type parameters", 
-		       derefstr(v)));
+		       "has a different number of type parameters", *v));
     // reject if scopes are different
     ed->sc = scope_redecl_okay(ed->sc, ed->fields, ed2->sc, ed2->fields,
 			       loc, "enum", v);
@@ -505,10 +501,10 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       // check for field-number mismatch
       if (f1s != null)
 	terr(loc,xprintf("redeclaration of enum %s has extra field %s",
-			 derefstr(v), derefstr((*f1s->hd->name)[1])));
+			 *v, *((*f1s->hd->name)[1])));
       if (f2s != null)
 	terr(loc,xprintf("redeclaration of enum %s is missing field %s",
-			 derefstr(v), derefstr((*f2s->hd->name)[1])));
+			 *v, *((*f2s->hd->name)[1])));
       return;
     }
     break;
@@ -526,7 +522,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   for(_ fs = ed->fields->v; fs != null; fs = fs->tl) {
     _ f = fs->hd;
     if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1])) 
-      terr(f->loc,xprintf("duplicate field name %s",derefstr((*f->name)[1])));
+      terr(f->loc,xprintf("duplicate field name %s",*((*f->name)[1])));
     prev_fields = &cons((*f->name)[1],prev_fields);
     if (f->tag != null) 
       Evexp::eval_const_uint_exp(f->tag->v); 
@@ -718,10 +714,13 @@ static void tc_decls(tenv te, list<decl> ds0, bool in_externC) {
   }
 }
 
+static string cyc_string = "Cyc";
+static stringptr cyc_ns = &cyc_string;
+
 void tc(tenv te, bool add_cyc_namespace, list<decl> ds) {
   if (add_cyc_namespace)
     // wrap an implicit "namespace Cyc" around the declarations
-    ds = &cons(&Decl{Namespace_d(allocstr("Cyc"),ds),null},null);
+    ds = &cons(&Decl{Namespace_d(cyc_ns,ds),null},null);
 
   tc_decls(te,ds,false);
 }

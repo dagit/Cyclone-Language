@@ -140,13 +140,18 @@ static Opt_t<typ> file_t_opt = null;
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
+static string sf_str = "__sFILE";
+static stringptr sf = &sf_str;
+static string cyc_str = "Cyc";
+static stringptr cyc = &cyc_str;
+static string st_str = "Stdio";
+static stringptr st = &st_str;
+
 typ file_typ() {
   if (file_t_opt == null) {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
-      &$((list<var>)&cons(allocstr("Cyc"),
-			     &cons(allocstr("Stdio"),null)),
-	 allocstr("__sFILE"));
+      &$((list<var>)&cons(cyc,&cons(st,null)), sf);
     structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null);
     typ file_struct_typ = StructType(&Opt(file_t_name),null,
 				     (structdecl*)(&$(sd)));
@@ -281,8 +286,11 @@ exp tuple_exp(list<exp> es, segment loc) {
   return new_exp(Tuple_e(es), loc); 
 }
 exp stmt_exp(stmt s,segment loc) { return new_exp(StmtExp_e(s), loc); }
+
+static string ne_str = "Null_Exception";
+static stringptr ne = &ne_str;
 exp null_pointer_exn_exp(segment loc) { 
-  return var_exp(&$(null,allocstr("Null_Exception")), loc); 
+  return var_exp(&$(null,ne), loc); 
 }
 exp array_exp(bool heap_allocate, list<exp> es, segment loc) {
   let dles = null;

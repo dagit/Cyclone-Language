@@ -80,7 +80,7 @@ static void dump_out(FILE @f, Alist<stringptr> al) {
   while(last >= 0) {
     switch(Xarray::get(xarr,last)) {
     case Empty:     --last;                    break;
-    case Single(s): --last; fprintf(f,"%s",derefstr(s)); break;
+    case Single(s): --last; fprintf(f,"%s",*s); break;
     case Append(a1,a2): 
       Xarray::set(xarr,last,a2); 
       if(last == Xarray::length(xarr)-1)
@@ -120,7 +120,7 @@ string nlblanks(int i) {  // a newline followed by i blanks
     bhashtbl = &Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw Failure("nlblanks");
   try
-    return derefstr(Hashtable::lookup(bhashtbl->v,i));
+    return *(Hashtable::lookup(bhashtbl->v,i));
   catch {
   case Not_found:
     let num_tabs   = i / 8;
@@ -132,7 +132,7 @@ string nlblanks(int i) {  // a newline followed by i blanks
       nlb[j+1] = '\t';
     for (int j = 0; j < num_spaces; j++)
       nlb[j+1+num_tabs] = ' ';
-    Hashtable::insert(bhashtbl->v,i,allocstr(nlb));
+    Hashtable::insert(bhashtbl->v,i,new {nlb});
     return nlb;
   }
 }
@@ -146,7 +146,7 @@ static Out text_doc_f($(int,string) @clo,Ppstate st) {
   let &$(slen,s) = clo;
   return &out(st->cc+slen,
               st->cl,
-              Single(allocstr(s)),
+              Single(new {s}),
               Empty);
 }
 static Doc text_doc(string s) {
@@ -167,11 +167,11 @@ Doc text(string s) {
     t = str_hashtbl->v;
   }
   try
-    return Hashtable::lookup(t,allocstr(s));
+    return Hashtable::lookup(t,new {s});
   catch {
   case Not_found:
     Doc d = text_doc(s);
-    Hashtable::insert(t,allocstr(s),d);
+    Hashtable::insert(t,new {s},d);
     return d;
   }
 }
@@ -199,7 +199,7 @@ static Out hyperlink_f($(int,string,string) @clo, Ppstate st) {
   let &$(slen,shrt,full) = clo;
   return &out(st->cc+slen,
               st->cl,
-              Single(allocstr(shrt)),
+              Single(new {shrt}),
               Single(&$(st->cl,st->cc,slen,full)));
 }
 Doc hyperlink(string shrt, string full) {
@@ -213,7 +213,7 @@ Doc hyperlink(string shrt, string full) {
 static Out line_f(Ppstate st) {
   return &out(st->ci,
               st->cl+1,
-              Single(allocstr(nlblanks(st->ci))),
+              Single(new {nlblanks(st->ci)}),
               Empty);
 }
 Doc line_doc() {

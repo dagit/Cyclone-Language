@@ -186,7 +186,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 
   case Var_e(&$(_,v),Local_b(vd)):
     if(is_unassigned(env,vd))
-      terr(e0->loc, xprintf("variable %s may not be initialized",derefstr(v)));
+      terr(e0->loc, xprintf("variable %s may not be initialized",*v));
     return CFExpSyn(env,env);
   case Var_e(_,_):     
     return CFExpSyn(env,env);

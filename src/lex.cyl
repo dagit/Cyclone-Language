@@ -124,7 +124,7 @@ static int str_index(string buff, int offset, int len) {
       let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
       int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
-				allocstr(newstr));
+				new {newstr});
       t->shared_str = ans;
       return ans;
     }
@@ -139,7 +139,7 @@ static int str_index(string buff, int offset, int len) {
     let newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
     int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
-			      allocstr(newstr));
+			      new {newstr});
     t->shared_str = ans;
     return ans;
   }
@@ -158,7 +158,7 @@ static struct Trie typedefs_trie_v = Trie(null,false);
 static trie_t      typedefs_trie   = &typedefs_trie_v;
 
 static void insert_typedef(stringptr sptr) {
-  string s = derefstr(sptr);
+  string s = *sptr;
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i=0; i < len; ++i) {
@@ -189,12 +189,8 @@ static stringptr get_symbol(int symbol_num) {
 }
 
 static $(sign,int)      token_int_pair = $(Signed,0);
-#ifdef OLD_STRING_REP
-static $(list<var>,var) token_id_pair  = $(null,"*bogus*");
-#else
 static string bogus_string = "*bogus*";
 static $(list<var>,var) token_id_pair  = $(null,&bogus_string);
-#endif
 
 static char         token_char   = '\000';
 static string       token_string = "";
@@ -389,7 +385,7 @@ static bool is_typedef(qvar q) {
     return is_typedef_in_namespace((List<stringptr>)(*q)[0],(*q)[1]);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
-  string s   = derefstr((*q)[1]);
+  string s   = *((*q)[1]);
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i = 0; i < len; ++i)
@@ -469,13 +465,9 @@ void register_typedef(qvar q) {
 }
 
 // This kludge isn't necessary to avoid allocation once we have stack pointers.
-#ifdef OLD_STRING_REP
-static $(List::list<var>,var) kludge_qvar_v = $(null,"");
-#else
 static string empty_string = "";
-static $(List::list<var>,var) kludge_qvar_v = 
-  $(null,&empty_string);
-#endif
+static stringptr empty_sp = &empty_string;
+static $(List::list<var>,var) kludge_qvar_v = $(null,&empty_string);
 static qvar kludge_qvar = &kludge_qvar_v;
 
 static short process_id<`a>(Lexbuf<`a> lbuf) {
@@ -495,7 +487,7 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
   }
 
   // alas, it's an identifier
-  token_string = derefstr(s);
+  token_string = *s;
   return IDENTIFIER;
 }
 
@@ -571,7 +563,7 @@ rule token = parse
       { return process_qual_id(lexbuf); }
 /* Type variables */
 | '`'['A'-'Z''a'-'z''0'-'9''_']+
-   { token_string = derefstr(get_symbol(str_index_lbuf(lexbuf))); 
+   { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
       return TYPE_VAR; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
@@ -741,7 +733,7 @@ and comment = parse
 {
 
 void lex_init() {
-  symbols = Xarray::create(101,allocstr(""));
+  symbols = Xarray::create(101,empty_sp);
   num_kws = rw_array.size;
   kw_nums = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {

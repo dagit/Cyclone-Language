@@ -15,16 +15,8 @@ typedef struct _boxed_long_long_struct { long long v; } *_LongLong;
 typedef int Char;
 
 ///////////////////// Strings
-//#define OLD_STRING_REP
-#ifdef OLD_STRING_REP
-struct _tagged_string { unsigned int sz; char *contents; };
-extern struct _tagged_string *xprintf(char *fmt, ...);
-#else
 struct _tagged_string { char *curr; char *base; char *last_plus_one; };
 extern struct _tagged_string xprintf(char *fmt, ...);
-#endif
-
-//extern struct _tagged_string *new_string(unsigned int sz);
 
 ///////////////////// Exceptions
 struct _enum_struct { int tag; };
@@ -46,7 +38,6 @@ extern struct _handler_cons *_push_handler();
 extern struct _handler_cons *_npop_handler(int);
 extern void _pop_handler();
 extern void _throw(exn e);
-//extern exn _trycatch();
 
 extern void *GC_malloc(int);
 extern void *GC_malloc_atomic(int);

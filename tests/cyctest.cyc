@@ -30,6 +30,8 @@ using Ref;
 using Fn;
 using Array;
 
+#define allocstr(s) ((stringptr) new {(string)s})
+
 void test_begin(string t) {
   int x = 12-t.size;
   if (x<0) x=0;
@@ -525,8 +527,8 @@ void queue_test() {
   Queue::add(q,allocstr("a"));
   okfail(!Queue::is_empty(q));
   Queue::add(q,allocstr("b"));
-  okfail(String::strcmp(derefstr(Queue::peek(q)),"a") == 0);
-  okfail(String::strcmp(derefstr(Queue::take(q)),"a") == 0);
+  okfail(String::strcmp(*(Queue::peek(q)),"a") == 0);
+  okfail(String::strcmp(*(Queue::take(q)),"a") == 0);
   okfail(Queue::length(q) == 1);
   test_end();;
 }
@@ -650,11 +652,11 @@ void ref_test() {
   okfail(Ref::get(x)!=4);
 
   ref<stringptr> y = new_ref(allocstr("hello")); // FIX: cast required!
-  okfail(0==String::strcmp(derefstr(Ref::get(y)),"hello"));
-  okfail(0!=String::strcmp(derefstr(Ref::get(y)),"world"));
+  okfail(0==String::strcmp(*(Ref::get(y)),"hello"));
+  okfail(0!=String::strcmp(*(Ref::get(y)),"world"));
   Ref::set(y,allocstr("world"));
-  okfail(0!=String::strcmp(derefstr(Ref::get(y)),"hello"));
-  okfail(0==String::strcmp(derefstr(Ref::get(y)),"world"));
+  okfail(0!=String::strcmp(*(Ref::get(y)),"hello"));
+  okfail(0==String::strcmp(*(Ref::get(y)),"world"));
   test_end();
 }
 

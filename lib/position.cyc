@@ -64,10 +64,11 @@ list<stringptr> strings_of_segments(list<segment> segs) {
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
-      ans = &cons(allocstr(xprintf("%s(unknown)", source)), ans);
+      // FIX:  the cast to stringptr is needed for some reason...
+      ans = &cons((stringptr) new {xprintf("%s(unknown)", source)}, ans);
     else {
-      ans = &cons(allocstr(string_of_pos_pr((*places->hd)[1], 
-					    (*places->tl->hd)[1])),
+      ans = &cons((stringptr) new {string_of_pos_pr((*places->hd)[1], 
+						    (*places->tl->hd)[1])}, 
 		  ans);
       places = places->tl->tl;
     }

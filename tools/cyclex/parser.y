@@ -124,8 +124,8 @@ header:
 
 named_regexps:
   named_regexps TLET TIDENT TEQUAL regexp 
-    { Hashtable::insert((Parser::htbl @)named_regexps, allocstr($3), 
-			$5); $$=^$(0); }
+    { Hashtable::insert((Parser::htbl @)named_regexps, new {$3}, $5); 
+      $$=^$(0); }
 | /* empty */ { $$=^$(0); }
 
 other_definitions:
@@ -159,7 +159,7 @@ regexp:
 | regexp regexp %prec CONCAT { $$=^$(Sequence($1,$2)); }
 | TLPAREN regexp TRPAREN { $$=^$($2); }
 | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
-				       allocstr($1)));
+				       new {$1}));
 	   catch { 
 	     case Not_found:
 	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));

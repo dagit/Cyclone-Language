@@ -147,14 +147,21 @@ string string_escape(string s) {
   return t;
 }
 
-static Doc textptr(stringptr s) { return text(derefstr(s)); }
+static Doc textptr(stringptr s) { return text(*s); }
+
+static string restrict_string = "restrict";
+static string volatile_string = "volatile";
+static string const_string = "const";
+static stringptr restrict_sp = &restrict_string;
+static stringptr volatile_sp = &volatile_string;
+static stringptr const_sp = &const_string;
 
 Doc tqual2doc(tqual tq) {
   list<stringptr> l = null;
 
-  if (tq->q_restrict) l = &cons(allocstr("restrict"),l);
-  if (tq->q_volatile) l = &cons(allocstr("volatile"),l);
-  if (tq->q_const)    l = &cons(allocstr("const"),   l);
+  if (tq->q_restrict) l = &cons(restrict_sp,l);
+  if (tq->q_volatile) l = &cons(volatile_sp,l);
+  if (tq->q_const)    l = &cons(const_sp,l);
   return egroup(""," "," ",List::map(textptr,l));
 }
 
@@ -283,7 +290,7 @@ Doc ntyp2doc(typ t) {
                   text(")"));
     break;
   case VarType(&$(v,k)): 
-    s=text(derefstr(v)); break;//FIX: sometimes need explicit kinds!
+    s=text(*v); break;//FIX: sometimes need explicit kinds!
   case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),
@@ -354,11 +361,11 @@ Doc ntyp2doc(typ t) {
 }
 
 Doc vo2doc(Opt_t<var> vo) {
-  return (vo==null)?nil_doc():text(derefstr(vo->v));
+  return (vo==null)?nil_doc():text(*(vo->v));
 }
 
 Doc funarg2doc($(Opt_t<var>,tqual,typ)@ t) {
-  Opt_t<Doc> dopt = ((*t)[0]==null)?null:&Opt(text(derefstr((*t)[0]->v)));
+  Opt_t<Doc> dopt = ((*t)[0]==null)?null:&Opt(text(*((*t)[0]->v)));
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
@@ -376,7 +383,7 @@ $(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
             (*arg)[1],(*arg)[2]);
 }
 
-Doc var2doc(var v) { return text(derefstr(v)); }
+Doc var2doc(var v) { return text(*v); }
 
 Doc qvar2doc(qvar q) {
   if((*q)[0] == null)
@@ -592,7 +599,7 @@ Doc exp2doc_prec(int inprec, exp e) {
     break;
   case Comprehension_e(vd,e1,e2):
     s = cat7(text("new {for "),
-             text(derefstr((*vd->name)[1])),
+             text(*((*vd->name)[1])),
              text(" < "),
              exp2doc(e1),
              text(" : "),
@@ -936,7 +943,7 @@ Doc stmt2doc(stmt st) {
     break;
   case Break_s(_):    s = text("break;"); break;
   case Continue_s(_): s = text("continue;"); break;
-  case Goto_s(x,_):   s = text(xprintf("goto %s;",derefstr(x))); break;
+  case Goto_s(x,_):   s = text(xprintf("goto %s;",*x)); break;
   case For_s(e1,$(e2,_),$(e3,_),s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
