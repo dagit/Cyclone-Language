@@ -21,6 +21,7 @@ using Evexp;
 
 extern synth tcExp(tenv, Opt_t<typ>, exp);
 extern bool is_const_exp(tenv, exp);
-
+extern Opt_t<$(list<Char>, list<Char>, list<Char>, list<Char>, char, int)@>
+       parse_conversionspecification(string s, int i);
 }
 #endif

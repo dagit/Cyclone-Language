@@ -1,9 +1,9 @@
 all: library.info library.html
 
-library.info:
+library.info: library.texinfo
 	makeinfo --no-split library.texinfo
 
-library.html:
+library.html: library.texinfo
 	makeinfo --html library.texinfo
 
 clean:

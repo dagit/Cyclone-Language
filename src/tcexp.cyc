@@ -9,6 +9,7 @@
 
 #include "absyn.h"
 #include "string.h"
+#include "character.h"
 #include "position.h"
 #include "absynpp.h"
 #include "tcenv.h"
@@ -214,6 +215,355 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
   case XenumRes(_,_): throw impos("XenumRes in tcVar");
   }
 }
+// Parse a conversion specification starting at index i in string s.
+// s[i] should be the first character after the leading '%'.
+// If there is an error, return null.
+// Otherwise, return the flags, width, precision, length modifier,
+// from s, as lists of Chars.  Also return the conversion specifier
+// as a char, and the index of the character following the conversion
+// specifier.
+Opt_t<$(list<Char>, list<Char>, list<Char>, list<Char>, char, int)@>
+parse_conversionspecification(string s, int i) {
+  //  fprintf(cyc_stderr, "String: %s\n" "Position: %d\n",s,i);
+  let len = String::strlen(s);
+  if (i<0 || i>=len) return null;
+
+  // Parse flags: ['+' '-' ' ' '#' '0']*
+  let flags = null;
+  char c = ' ';
+  for (; i<len; i++) {
+    c = s[i];
+    switch (c) {
+    case '+': fallthru;
+    case '-': fallthru;
+    case ' ': fallthru;
+    case '#': fallthru;
+    case '0': flags = &cons((Char)c,flags); continue;
+    default: break;
+    }
+    break;
+  }
+  if (i>=len) return null;
+  flags = List::imp_rev(flags);
+
+  // Parse width: ('*' | ['0'-'9']+)?
+  let width = null;
+  c = s[i]; // redundant
+  if (c=='*') {
+    width = &cons((Char)c,width);
+    i++;
+  } else {
+    for (; i<len; i++) {
+      c = s[i];
+      if (Character::isdigit(c)) width = &cons((Char)c,width);
+      else break;
+    }
+  }
+  if (i>=len) return null;
+  width = List::imp_rev(width);
+
+  // Parse precision: ('.' ('*' | ['0'-'9']+)? )?
+  let precision = null;
+  c = s[i]; // not redundant
+  if (c == '.') {
+    precision = &cons((Char)c,precision);
+    i++;
+    if (i>=len) return null;
+    c = s[i];    
+    if (c == '*') {
+      precision = &cons((Char)c,precision);
+      i++;
+    } else {
+      for (; i<len; i++) {
+        c = s[i];
+        if (Character::isdigit(c)) precision = &cons((Char)c,precision);
+        else break;
+      }
+    }
+  }
+  if (i>=len) return null;
+  precision = List::imp_rev(precision);
+
+  // Parse length modifier:
+  //  (['h' 'l' 'j' 'z' 't' 'L'] | 'h' 'h' | 'l' 'l')
+  let lenmod = null;
+  c = s[i]; // not redundant
+  switch (c) {
+  case 'h':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    if (i>=len) return null;
+    c = s[i];
+    if (c == 'h') { lenmod = &cons((Char)c,lenmod); i++; }
+    break;
+  case 'l':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    if (i>=len) return null;
+    c = s[i];
+    if (c == 'l') { lenmod = &cons((Char)c,lenmod); i++; }
+    break;
+  case 'j': fallthru; 
+  case 'z': fallthru; 
+  case 't': fallthru; 
+  case 'L':
+    lenmod = &cons((Char)c,lenmod);
+    i++;
+    break;
+  default: break;
+  }
+  if (i>=len) return null;
+  lenmod = List::imp_rev(lenmod); // unnecessary
+
+  // Parse conversion specifier
+  c = s[i]; // not redundant
+  switch (c) {
+  case 'd': break;
+  case 'i': break;
+  case 'o': break;
+  case 'u': break;
+  case 'x': break;
+  case 'X': break;
+  case 'f': break;
+  case 'F': break;
+  case 'e': break;
+  case 'E': break;
+  case 'g': break;
+  case 'G': break;
+  case 'a': break;
+  case 'A': break;
+  case 'c': break;
+  case 's': break;
+  case 'p': break;
+  case 'n': break;
+  case '%': break;
+  default: return null;
+  }
+  //  fprintf(cyc_stderr,
+  //          "Flags: %s\n"
+  //          "Width: %s\n"
+  //          "Precision: %s\n"
+  //          "Lenmod: %s\n",
+  //          String::implode(flags),
+  //          String::implode(width),
+  //          String::implode(precision),
+  //          String::implode(lenmod));
+  return &Opt(&$(flags,width,precision,lenmod,c,i+1));
+}
+static list<typ> get_format_typs(string s,segment loc) {
+  // FIX: on error we return null.  This will probably lead to
+  // cascading errors (e.g., too many arguments to printf).
+  let len = String::strlen(s);
+  let typs = null;
+  int i;
+  for (i=0; i<len; i++) {
+    if (s[i] != '%') continue;
+    let x = parse_conversionspecification(s,i+1);
+    if (x == null) {
+      terr(loc,"bad format string");
+      return null; // bad conversion specification
+    }
+    let &$(flags,width,precision,lenmod,c,j) = x->v;
+    i = j-1; // Subtract 1 because for-loop ends with i++
+    switch (lenmod) {
+    case &cons(x,null) && (x == 'j' || x == 'z' || x == 't'):
+      // These length modifiers are OK in C99 but we don't support them yet
+      terr(loc,xprintf("length modifier '%c' is not supported",x));
+      return null;
+    default: break;
+    }
+    switch (width) {
+    case &cons(x,null) && x=='*':
+      typs = &cons(sint_t,typs); break;
+    default: break;
+    }
+    switch (precision) {
+    case &cons(x,&cons(y,null)) && x=='.' && y=='*':
+      typs = &cons(sint_t,typs); break;
+    default: break;
+    }
+    typ t;
+    switch (c) {
+    case 'd': fallthru;
+    case 'i':
+      for (_ f = flags; f != null; f = f->tl)
+        if (f->hd == '#') {
+          terr(loc,xprintf("flag '#' is not valid with %%%c",c));
+          return null;
+        }
+      switch (lenmod) {
+      case null:                     t = sint_t; break;
+      case &cons(x,null) && x=='l':  t = slong_t; break;
+      case &cons(x,null) && x=='h':  t = sshort_t; break;
+      case &cons(x,&cons(y,null))
+        && (x=='h' && y=='h'):       t = schar_t; break;
+      // We don't support ll
+      default:
+        terr(loc,
+             xprintf("length modifier '%s' is not allowed with %%%c",
+                     String::implode(lenmod), c));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case 'u':
+      for (_ f = flags; f != null; f = f->tl)
+        if (f->hd == '#') {
+          terr(loc,"Flag '#' not valid with %%u");
+          return null;
+        }
+      fallthru;
+    case 'o': fallthru;
+    case 'x': fallthru;
+    case 'X':
+      switch (lenmod) {
+      case null:                     t = uint_t; break;
+      case &cons(x,null) && x=='l':  t = ulong_t; break;
+      case &cons(x,null) && x=='h':  t = ushort_t; break;
+      case &cons(x,&cons(y,null))
+        && (x=='h' && y=='h'):       t = uchar_t; break;
+      // We don't support ll
+      default:
+        terr(loc,
+             xprintf("length modifier '%s' is not allowed with %%%c",
+                     String::implode(lenmod), c));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case 'f': fallthru;
+    case 'F': fallthru;
+    case 'e': fallthru;
+    case 'E': fallthru;
+    case 'g': fallthru;
+    case 'G': fallthru;
+    case 'a': fallthru;
+    case 'A':
+      // We don't allow any length modifiers for floating point numbers;
+      // in particular, we don't allow L (long double)
+      if (lenmod != null) {
+        terr(loc,xprintf("length modifiers are not allowed with %%%c",c));
+        return null;
+      }
+      typs = &cons(double_t,typs);
+      break;
+    case 'c':
+      for (_ f = flags; f != null; f = f->tl)
+        if (f->hd == '#' || f->hd == '0') {
+          terr(loc,xprintf("flag '%c' not allowed with %%c",f->hd));
+          return null;
+        }
+      // We don't allow any length modifiers for characters;
+      // in particular, we don't allow l (wint_t)
+      if (lenmod != null) {
+        terr(loc,xprintf("length modifier '%s' not allowed with %%c",
+                         String::implode(lenmod)));
+        return null;
+      }
+      if (precision != null) {
+        terr(loc,xprintf("precision '%s' not allowed with %%c",
+                         String::implode(precision)));
+        return null;
+      }
+      typs = &cons(sint_t,typs);
+      break;
+    case 's':
+// FIX: temporarily we don't allow any variations on %s.  To do that
+// we'd have to modify toc.cyc
+      if (flags != null) {
+        terr(loc,xprintf("flags '%s' not allowed with %%s",
+                         String::implode(flags)));
+        return null;
+      }
+      if (width != null) {
+        terr(loc,xprintf("width '%s' not allowed with %%s",
+                         String::implode(width)));
+        return null;
+      }
+      if (precision != null) {
+        terr(loc,xprintf("precision '%s' not allowed with %%s",
+                         String::implode(precision)));
+        return null;
+      }
+      if (lenmod != null) {
+        terr(loc,xprintf("length modifier '%s' not allowed with %%s",
+                         String::implode(lenmod)));
+        return null;
+      }
+//       // Only flag '-' is allowed for %s
+//       for (_ f = flags; f != null; f = f->tl)
+//         if (f->hd != '-') {
+//           terr(loc,"a flag not allowed with %%s");
+//           return null;
+//         }
+//       // We don't allow any length modifiers for %s;
+//       // in particular, we don't allow l (wchar_t[?])
+//       if (lenmod != null) {
+//         terr(loc,"length modifiers not allowed with %%s");
+//         return null;
+//       }
+      typs = &cons(string_typ(),typs);
+      break;
+    case 'p':
+      // We don't support pointer printing
+      terr(loc,"%%p not supported");
+      return null;
+    case 'n':
+      for (_ f = flags; f != null; f = f->tl)
+        if (f->hd == '#' || f->hd == '0') {
+          terr(loc,xprintf("flag '%c' not allowed with %%n",f->hd));
+          return null;
+        }
+      if (precision != null) {
+        terr(loc,xprintf("precision '%s' not allowed with %%n",
+                         String::implode(precision)));
+        return null;
+      }
+      switch (lenmod) {
+      case null:
+        t = nonnullableptr_typ(sint_t,empty_tqual()); break;
+      case &cons(x,null) && x=='l':
+        t = nonnullableptr_typ(ulong_t,empty_tqual()); break;
+      case &cons(x,null) && x=='h':
+        t = nonnullableptr_typ(sshort_t,empty_tqual()); break;
+      case &cons(x,&cons(y,null)) && (x=='h' && y=='h'):
+          t = nonnullableptr_typ(schar_t,empty_tqual()); break;
+      // We don't support ll
+      default:
+        terr(loc,xprintf("length modifier '%s' not allowed with %%n",
+                         String::implode(lenmod)));
+        return null;
+      }
+      typs = &cons(t,typs);
+      break;
+    case '%':
+      if (flags != null) {
+        terr(loc,xprintf("flags '%s' not allowed with %%%%",
+                         String::implode(flags)));
+        return null;
+      }
+      if (width != null) {
+        terr(loc,xprintf("width '%s' not allowed with %%%%",
+                         String::implode(width)));
+        return null;
+      }
+      if (precision != null) {
+        terr(loc,xprintf("precision '%s' not allowed with %%%%",
+                         String::implode(precision)));
+        return null;
+      }
+      if (lenmod != null) {
+        terr(loc,xprintf("length modifier '%s' not allowed with %%%%",
+                         String::implode(lenmod)));
+        return null;
+      }
+      break;
+    default:
+      return null; // impossible
+    }
+  }
+  return (List::imp_rev(typs));
+}
 static void check_format_args(tenv te, exp fmt, list<exp> args) {
   string fmt_str;
   list<typ> desc_types = null;
@@ -224,32 +574,7 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
   case Const_e(String_c(s)): fmt_str = s; break;
   default: terr(fmt->loc, "expecting a literal format string"); return;
   }
-  int len = String::strlen(fmt_str);
-  // calculate the types
-  while (i < len) {
-    if (fmt_str[i] == '%') {
-      ++i;
-      if (i < len) {
-	// FIX: should deal with real formatting
-	switch (fmt_str[i]) {
-	case 'c': desc_types = &cons(uchar_t,      desc_types); break;
-	case 'd': desc_types = &cons(sint_t,       desc_types); break;
-	case 'u': desc_types = &cons(uint_t,       desc_types); break;
-	case 'x': desc_types = &cons(uint_t,       desc_types); break;
-	case 'f': desc_types = &cons(float_t,      desc_types); break;
-	case 's': desc_types = &cons(string_typ(), desc_types); break;
-	case 'g': desc_types = &cons(double_t,     desc_types); break;
-	case '%': break; // skip
-	default: 
-	  terr(fmt->loc, xprintf("bad format character %c",fmt_str[i]));
-          break;
-	}
-	++i;
-      }
-    } else 
-      ++i;
-  }
-  desc_types = List::imp_rev(desc_types);
+  let desc_types = get_format_typs(fmt_str,fmt->loc);
   // now check that each desc_type matches the expression types
   for (; desc_types != null && args != null; desc_types = desc_types->tl, 
 	                                     args = args->tl) {
@@ -265,7 +590,6 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
   else if (args != null)
     terr(args->hd->loc,"too many arguments");
 }
-
 
 // Unary primops like -e, !e, etc. 
 static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {

@@ -43,6 +43,7 @@
 #include "dict.h"
 #include "string.h"
 #include "position.h"
+#include "tcexp.h"
 #include "toc.h"
 
 namespace Toc;
@@ -793,8 +794,8 @@ static env switch_as_switch_env(env e, var next_l) {
 }
 
 // printf_to_c(p,aopt,args,typs)
-// Translate a printf or fprintf to C;
-//   p is printf or fprintf,
+// Translate printf functions to C;
+//   p is printf, fprintf, or xprintf
 //   aopt is &Opt(e) if p is fprintf and e is its first arg
 //   args are the remaining args, already translated
 //   typs are the types of the translated args
@@ -809,7 +810,7 @@ static env switch_as_switch_env(env e, var next_l) {
 // and, if the char[?] arg is x, we turn it into x,size(x).
 //
 // A final twist: the argument might not be a variable, so we have to
-// introduce temporaries.  e.g.,
+// introduce temporaries.  E.g.,
 //   printf("%d%s%d\n",g(x),f(e),y)
 // becomes
 //   ({ int t1 = g(x);
@@ -817,9 +818,7 @@ static env switch_as_switch_env(env e, var next_l) {
 //      int t3 = y;
 //      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
 //   })
-// We introduce temps for all vars to preserve order of evaluation.
-//
-// FIX: handle real format strings
+// We must introduce temps for all vars to preserve order of evaluation.
 //
 static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   // All errors are Impossible because they should have been caught by
@@ -860,34 +859,65 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   for (i=0; i<len; i++) {
     char c = fmt_str[i];
     rev_fmt = &cons((Char)c,rev_fmt);
-    if (c == '%') {
-      i++;
-      if (i < len) {
-        if (args == null || typs == null) toc_impos("missing arg to printf");
-        char c2 = fmt_str[i];
-        if (c2 != 's') {
-          // The usual case -- just copy format and arg
-          rev_fmt = &cons((Char)c2,rev_fmt);
-          let temp = temp_var();
-          rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
-          rev_result = &cons(var_exp(temp,DL),rev_result);
-          args = args->tl;
-          typs = typs->tl;
-        } else {
-          // The string case -- insert size into format and args
-          rev_fmt = &cons((Char)'.',rev_fmt);
-          rev_fmt = &cons((Char)'*',rev_fmt);
-          rev_fmt = &cons((Char)'s',rev_fmt);
-          let temp = temp_var();
-          rev_temps = &cons(&$(temp,typs->hd,args->hd),rev_temps);
-          let size_exp    = structarrow_exp(var_exp(temp,DL),"sz",DL);
-          let cstring_exp = structarrow_exp(var_exp(temp,DL),"contents",DL);
-          rev_result = &cons(size_exp,rev_result);
-          rev_result = &cons(cstring_exp,rev_result);
-          args = args->tl;
-          typs = typs->tl;
-        }
+    if (c != '%') continue;
+    let x = Tcexp::parse_conversionspecification(fmt_str,i+1);
+    if (x == null) toc_impos("bad format string");
+    let &$(flags,width,precision,lenmod,c2,j) = x->v;
+    i = j-1; // Subtract 1 because for-loop ends with i++
+    if (c2 != 's') {
+      // No change in this portion of format string; just copy conversion spec
+      rev_fmt =
+        List::revappend(List::flatten(&cons(flags,
+                                            &cons(width,
+                                                  &cons(precision,
+                                                        &cons(lenmod,null))))),
+                        rev_fmt);
+      rev_fmt = &cons((Char)c2,rev_fmt);
+      // * width or precision consumes an argument
+      switch (width) {
+      case &cons(x,null) && x=='*':
+        let temp = temp_var();
+        rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
+        rev_result = &cons(var_exp(temp,DL),rev_result);
+        args = args->tl;
+        typs = typs->tl;
+        break;
+      default: break;
       }
+      switch (precision) {
+      case &cons(x,&cons(y,null)) && x=='.' && y=='*':
+        let temp = temp_var();
+        rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
+        rev_result = &cons(var_exp(temp,DL),rev_result);
+        args = args->tl;
+        typs = typs->tl;
+        break;
+      default: break;
+      }
+      if (c2 != '%') { // all but %% consume an arg and typ
+        if (args == null || typs == null)
+            toc_impos(xprintf("missing arg to %s", Absynpp::prim2string(p)));
+        let temp = temp_var();
+        rev_temps  = &cons(&$(temp,typs->hd,args->hd),rev_temps);
+        rev_result = &cons(var_exp(temp,DL),rev_result);
+        args = args->tl;
+        typs = typs->tl;
+      }
+    } else {
+      // %s case.  Note, tcexp currently prohibits flags, width, precision,
+      // and length modifiers for %s, so we don't handle them here;
+      // we just insert size into format and args.
+      rev_fmt = &cons((Char)'.',rev_fmt);
+      rev_fmt = &cons((Char)'*',rev_fmt);
+      rev_fmt = &cons((Char)'s',rev_fmt);
+      let temp = temp_var();
+      rev_temps = &cons(&$(temp,typs->hd,args->hd),rev_temps);
+      let size_exp    = structarrow_exp(var_exp(temp,DL),"sz",DL);
+      let cstring_exp = structarrow_exp(var_exp(temp,DL),"contents",DL);
+      rev_result = &cons(size_exp,rev_result);
+      rev_result = &cons(cstring_exp,rev_result);
+      args = args->tl;
+      typs = typs->tl;
     }
   }
   let es = &cons(string_exp(String::implode(List::rev(rev_fmt)),DL),
