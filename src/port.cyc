@@ -1901,7 +1901,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
   let zts = env->gcenv->zeroterm_edits;
   let edits = env->gcenv->edits;
   let localvars = env->gcenv->vardecl_locs;
-   
+  /* JGM: commented out for now:
   for(;localvars;localvars = localvars->tl){
     let $(var, loc, vartype) = *localvars->hd;
     let $(_,x) = *var;
@@ -1922,6 +1922,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
       }
     }
   }
+  */
 
   // force the constraints
   for (let ps = ptrs; ps; ps = ps->tl) {
@@ -1946,7 +1947,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
         edits = new List{new Edit{loc,"?","*"}, edits};
         break;
       case &Fat_ct:
-        edits = new List{new Edit{loc,"*","?"}, edits};
+        edits = new List{new Edit{loc,"","@fat "}, edits};
         break;
       default: break;
       }

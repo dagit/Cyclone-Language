@@ -485,9 +485,7 @@ extern void*Cyc_Absyn_fat_bound_type;
 void*Cyc_Absyn_fatptr_type(void*,void*,void*,struct Cyc_Absyn_Tqual,void*,void*);
 # 1163
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);
-# 62 "absynpp.h"
-struct _fat_ptr Cyc_Absynpp_typ2string(void*);
-# 68
+# 68 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 # 70
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
@@ -515,8 +513,6 @@ extern void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict,void*);struct Cyc_Hashtabl
 extern struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int,int(*)(void*,void*),int(*)(void*));
 # 50
 extern void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*,void*,void*);
-# 52
-extern void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*,void*);
 # 67
 extern int Cyc_Hashtable_try_lookup(struct Cyc_Hashtable_Table*,void*,void**);struct Cyc_Port_Edit{unsigned loc;struct _fat_ptr old_string;struct _fat_ptr new_string;};
 # 90 "port.cyc"
@@ -1960,75 +1956,59 @@ struct Cyc_List_List*consts=env->gcenv->qualifier_edits;
 struct Cyc_List_List*zts=env->gcenv->zeroterm_edits;
 struct Cyc_List_List*edits=env->gcenv->edits;
 struct Cyc_List_List*localvars=env->gcenv->vardecl_locs;
-# 1905
-for(1;(unsigned)localvars;localvars=localvars->tl){
-struct _tuple16 _Tmp0=*((struct _tuple16*)localvars->hd);void*_Tmp1;unsigned _Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{struct _tuple0*var=_Tmp3;unsigned loc=_Tmp2;void*vartype=_Tmp1;
-struct _tuple0 _Tmp4=*var;void*_Tmp5;_Tmp5=_Tmp4.f1;{struct _fat_ptr*x=_Tmp5;
-struct Cyc_Port_VarUsage*varusage=({(struct Cyc_Port_VarUsage*(*)(struct Cyc_Hashtable_Table*,unsigned))Cyc_Hashtable_lookup;})(env->gcenv->varusage_tab,loc);
-if(_check_null(varusage)->address_taken){
-if((unsigned)varusage->init){
-# 1912
-edits=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp7=({struct Cyc_Port_Edit*_Tmp8=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp8->loc=loc,_Tmp8->old_string=_tag_fat("@",sizeof(char),2U),_Tmp8->new_string=_tag_fat("",sizeof(char),1U);_Tmp8;});_Tmp6->hd=_Tmp7;}),_Tmp6->tl=edits;_Tmp6;});
-edits=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp7=({struct Cyc_Port_Edit*_Tmp8=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp8->loc=_check_null(varusage->init)->loc,_Tmp8->old_string=_tag_fat("new ",sizeof(char),5U),_Tmp8->new_string=_tag_fat("",sizeof(char),1U);_Tmp8;});_Tmp6->hd=_Tmp7;}),_Tmp6->tl=edits;_Tmp6;});}else{
-# 1917
-edits=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp7=({struct Cyc_Port_Edit*_Tmp8=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp8->loc=loc,({struct _fat_ptr _Tmp9=(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _TmpA=({struct Cyc_String_pa_PrintArg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=(struct _fat_ptr)((struct _fat_ptr)*x);_TmpB;});struct Cyc_String_pa_PrintArg_struct _TmpB=({struct Cyc_String_pa_PrintArg_struct _TmpC;_TmpC.tag=0,({struct _fat_ptr _TmpD=(struct _fat_ptr)((struct _fat_ptr)Cyc_Absynpp_typ2string(vartype));_TmpC.f1=_TmpD;});_TmpC;});void*_TmpC[2];_TmpC[0]=& _TmpA,_TmpC[1]=& _TmpB;Cyc_aprintf(_tag_fat("?%s = malloc(sizeof(%s))",sizeof(char),25U),_tag_fat(_TmpC,sizeof(void*),2));});_Tmp8->old_string=_Tmp9;}),_Tmp8->new_string=*x;_Tmp8;});_Tmp6->hd=_Tmp7;}),_Tmp6->tl=edits;_Tmp6;});}{
-# 1919
-struct Cyc_List_List*loclist=varusage->usage_locs;
-for(1;(unsigned)loclist;loclist=loclist->tl){
-edits=({struct Cyc_List_List*_Tmp6=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp7=({struct Cyc_Port_Edit*_Tmp8=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp8->loc=(unsigned)loclist->hd,({struct _fat_ptr _Tmp9=(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _TmpA=({struct Cyc_String_pa_PrintArg_struct _TmpB;_TmpB.tag=0,_TmpB.f1=(struct _fat_ptr)((struct _fat_ptr)*x);_TmpB;});void*_TmpB[1];_TmpB[0]=& _TmpA;Cyc_aprintf(_tag_fat("(*%s)",sizeof(char),6U),_tag_fat(_TmpB,sizeof(void*),1));});_Tmp8->old_string=_Tmp9;}),_Tmp8->new_string=*x;_Tmp8;});_Tmp6->hd=_Tmp7;}),_Tmp6->tl=edits;_Tmp6;});}}}}}}
-# 1927
+# 1928 "port.cyc"
 {struct Cyc_List_List*ps=ptrs;for(0;(unsigned)ps;ps=ps->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)ps->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_ctype=_Tmp3;void*orig_ctype=_Tmp2;unsigned loc=_Tmp1;
 Cyc_Port_unifies(new_ctype,orig_ctype);}}}
-# 1931
+# 1932
 {struct Cyc_List_List*cs=consts;for(0;(unsigned)cs;cs=cs->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)cs->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_qual=_Tmp3;void*old_qual=_Tmp2;unsigned loc=_Tmp1;
 Cyc_Port_unifies(new_qual,old_qual);}}}
-# 1935
+# 1936
 {struct Cyc_List_List*zs=zts;for(0;(unsigned)zs;zs=zs->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)zs->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_zt=_Tmp3;void*old_zt=_Tmp2;unsigned loc=_Tmp1;
 Cyc_Port_unifies(new_zt,old_zt);}}}
-# 1941
+# 1942
 for(1;(unsigned)ptrs;ptrs=ptrs->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)ptrs->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_ctype=_Tmp3;void*orig_ctype=_Tmp2;unsigned loc=_Tmp1;
 if(!Cyc_Port_unifies(new_ctype,orig_ctype)&&(int)loc){
 void*_Tmp4=Cyc_Port_compress_ct(orig_ctype);switch(*((int*)_Tmp4)){case 2:
-# 1946
+# 1947
  edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("?",sizeof(char),2U),_Tmp7->new_string=_tag_fat("*",sizeof(char),2U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});
-goto _LL12;case 3:
-# 1949
- edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("*",sizeof(char),2U),_Tmp7->new_string=_tag_fat("?",sizeof(char),2U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});
-goto _LL12;default:
- goto _LL12;}_LL12:;}}}
-# 1956
+goto _LLC;case 3:
+# 1950
+ edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("",sizeof(char),1U),_Tmp7->new_string=_tag_fat("@fat ",sizeof(char),6U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});
+goto _LLC;default:
+ goto _LLC;}_LLC:;}}}
+# 1957
 for(1;(unsigned)consts;consts=consts->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)consts->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_qual=_Tmp3;void*old_qual=_Tmp2;unsigned loc=_Tmp1;
 if(!Cyc_Port_unifies(new_qual,old_qual)&&(int)loc){
 void*_Tmp4=Cyc_Port_compress_ct(old_qual);switch(*((int*)_Tmp4)){case 1:
-# 1961
- edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("const ",sizeof(char),7U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL1C;case 0:
-# 1963
- edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("",sizeof(char),1U),_Tmp7->new_string=_tag_fat("const ",sizeof(char),7U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL1C;default:
- goto _LL1C;}_LL1C:;}}}
-# 1969
+# 1962
+ edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("const ",sizeof(char),7U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL16;case 0:
+# 1964
+ edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("",sizeof(char),1U),_Tmp7->new_string=_tag_fat("const ",sizeof(char),7U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL16;default:
+ goto _LL16;}_LL16:;}}}
+# 1970
 for(1;(unsigned)zts;zts=zts->tl){
 struct _tuple17 _Tmp0=*((struct _tuple17*)zts->hd);unsigned _Tmp1;void*_Tmp2;void*_Tmp3;_Tmp3=_Tmp0.f0;_Tmp2=_Tmp0.f1;_Tmp1=_Tmp0.f2;{void*new_zt=_Tmp3;void*old_zt=_Tmp2;unsigned loc=_Tmp1;
 if(!Cyc_Port_unifies(new_zt,old_zt)&&(int)loc){
 void*_Tmp4=Cyc_Port_compress_ct(old_zt);switch(*((int*)_Tmp4)){case 8:
-# 1974
- edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("@nozeroterm ",sizeof(char),13U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL26;case 9:
-# 1976
- edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("@zeroterm ",sizeof(char),11U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL26;default:
- goto _LL26;}_LL26:;}}}
-# 1983
+# 1975
+ edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("@nozeroterm ",sizeof(char),13U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL20;case 9:
+# 1977
+ edits=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct Cyc_Port_Edit*_Tmp6=({struct Cyc_Port_Edit*_Tmp7=_cycalloc(sizeof(struct Cyc_Port_Edit));_Tmp7->loc=loc,_Tmp7->old_string=_tag_fat("@zeroterm ",sizeof(char),11U),_Tmp7->new_string=_tag_fat("",sizeof(char),1U);_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=edits;_Tmp5;});goto _LL20;default:
+ goto _LL20;}_LL20:;}}}
+# 1984
 edits=({(struct Cyc_List_List*(*)(int(*)(struct Cyc_Port_Edit*,struct Cyc_Port_Edit*),struct Cyc_List_List*))Cyc_List_merge_sort;})(Cyc_Port_cmp_edit,edits);
-# 1985
+# 1986
 while((unsigned)edits &&((struct Cyc_Port_Edit*)edits->hd)->loc==0U){
-# 1989
+# 1990
 edits=edits->tl;}
-# 1991
+# 1992
 return edits;}
-# 1996
+# 1997
 void Cyc_Port_port(struct Cyc_List_List*ds){
 struct Cyc_List_List*edits=Cyc_Port_gen_edits(ds);
 struct Cyc_List_List*locs=({(struct Cyc_List_List*(*)(unsigned(*)(struct Cyc_Port_Edit*),struct Cyc_List_List*))Cyc_List_map;})(Cyc_Port_get_seg,edits);

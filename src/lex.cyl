@@ -191,6 +191,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("regions", REGIONS, false),
   $("register", REGISTER, true),
   $("restrict", RESTRICT, true),
+  $("__restrict", RESTRICT, true),
   $("RESTRICTED", AQ_RESTRICTED, false),
   $("return", RETURN, true),
   $("rmalloc", RMALLOC, false),

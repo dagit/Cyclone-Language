@@ -2505,8 +2505,11 @@ static void exp_to_c(env_t nv, exp_t e) {
               let fieldtyp = typ_to_c(field->type);
               let fieldexp_typ = typ_to_c((type_t)fieldexp->topt);
               exp_to_c(nv,fieldexp);
-              // must cast when the types don't match up
-              if (!Unify::unify(fieldtyp, fieldexp_typ))
+              // must cast when the types don't match up -- except when
+              // the last type is of abstract kind, for then we should've
+              // generated a specialized struct...  
+              if (!Unify::unify(fieldtyp,void_type) && 
+                  !Unify::unify(fieldtyp, fieldexp_typ))
                 // unless they are both arithmetic types -- C can handle this.
                 if (!is_arithmetic_type(fieldtyp) ||
                     !is_arithmetic_type(fieldexp_typ))
