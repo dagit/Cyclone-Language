@@ -338,6 +338,18 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     }
   }
   else {
+    //Previously, when allocating zero bytes (rnew (r) {}), the
+    //pointer returned is the current offset, which is subsequently
+    //not incremented. So, the next call to rnew will return the same
+    //pointer. This is not in compliance with POSIX which states that
+    //malloc(0) should either return NULL or a *unique* pointer that
+    //can be passed to free.  This probably isn't an issue in this
+    //case since there's no freeing in normal regions, but just to be
+    //consistent we now make the minimum size sizeof(int)
+    if(s == 0) s += sizeof(int);
+    if(aq == CYC_CORE_REFCNT_AQUAL) { //we can now have rc pointers in any region
+      s += sizeof(int);
+    }
 #ifndef CYC_NOALIGN
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -355,6 +367,10 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
       }
     }
     r->offset = result + s;
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      *((int*)result) = 1;
+      result += sizeof(int);
+    }
     return (void *)result;
   } 
 }
@@ -412,6 +428,10 @@ static void * region_calloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     }
   }
   else {
+    if(s == 0) s += sizeof(int);
+    if(aq == CYC_CORE_REFCNT_AQUAL) { //we can now have rc pointers in any region
+      s += sizeof(int);
+    }
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
 #ifndef CYC_NOALIGN
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -429,6 +449,10 @@ static void * region_calloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
       }
     }
     r->offset = result + s;
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      *((int*)result) = 1;
+      result += sizeof(int);
+    }
     return (void *)result;
   }
 }
@@ -570,26 +594,7 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
     }
   }
   else {
-#ifdef TEST_PROFILER
-    if(aq == CYC_CORE_REFCNT_AQUAL) 
-      s += sizeof(int);
-    if(r->curr == NULL) {
-      get_first_region_page(r,s,0);
-      result = r->offset;
-    }
-    else {
-      result = r->offset;
-      if(s > (r->last_plus_one - result)) {
-	grow_region(r, s, 0);
-	result = r->offset;
-      }
-    }
-    r->offset = result + s;
-    if(aq == CYC_CORE_REFCNT_AQUAL) {
-      *((int*)result) = 1;
-      result = (((int*)result) + 1);
-    }
-#else
+    if(s == 0) s += sizeof(int); //see region_malloc_impl comment
     if(aq == CYC_CORE_REFCNT_AQUAL) s += sizeof(int);
     if(r->curr == NULL) { //first request ... initialize pool
       get_first_region_page(r, s, 1);
@@ -617,7 +622,6 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
       }
 #endif
     }
-#endif
     return (void*)result;
   }
 }

@@ -338,6 +338,18 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     }
   }
   else {
+    //Previously, when allocating zero bytes (rnew (r) {}) the pointer
+    //returned is the current offset, which is not incremented. The
+    //next call to rnew will return the same pointer. This is not in
+    //compliance with POSIX which states that malloc(0) should either
+    //return NULL or a *unique* pointer that can be passed to free.
+    //This probably isn't an issue in this issue since there's no
+    //freeing in normal regions, but just to be consistent we now make
+    //the minimum size sizeof(int)
+    if(s == 0) s += sizeof(int);
+    if(aq == CYC_CORE_REFCNT_AQUAL) { //we can now have rc pointers in any region
+      s += sizeof(int);
+    }
 #ifndef CYC_NOALIGN
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -355,6 +367,10 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
       }
     }
     r->offset = result + s;
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      *((int*)result) = 1;
+      result += sizeof(int);
+    }
     return (void *)result;
   } 
 }
@@ -412,6 +428,10 @@ static void * region_calloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     }
   }
   else {
+    if(s == 0) s += sizeof(int);
+    if(aq == CYC_CORE_REFCNT_AQUAL) { //we can now have rc pointers in any region
+      s += sizeof(int);
+    }
     // round s up to the nearest _CYC_MIN_ALIGNMENT value
 #ifndef CYC_NOALIGN
     s =  (s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT - 1));
@@ -429,6 +449,10 @@ static void * region_calloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
       }
     }
     r->offset = result + s;
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      *((int*)result) = 1;
+      result += sizeof(int);
+    }
     return (void *)result;
   }
 }
@@ -570,26 +594,7 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
     }
   }
   else {
-#ifdef TEST_PROFILER
-    if(aq == CYC_CORE_REFCNT_AQUAL) 
-      s += sizeof(int);
-    if(r->curr == NULL) {
-      get_first_region_page(r,s,0);
-      result = r->offset;
-    }
-    else {
-      result = r->offset;
-      if(s > (r->last_plus_one - result)) {
-	grow_region(r, s, 0);
-	result = r->offset;
-      }
-    }
-    r->offset = result + s;
-    if(aq == CYC_CORE_REFCNT_AQUAL) {
-      *((int*)result) = 1;
-      result = (((int*)result) + 1);
-    }
-#else
+    if(s == 0) s += sizeof(int); //see region_malloc_impl comment
     if(aq == CYC_CORE_REFCNT_AQUAL) s += sizeof(int);
     if(r->curr == NULL) { //first request ... initialize pool
       get_first_region_page(r, s, 1);
@@ -617,7 +622,6 @@ static void * reap_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq, u
       }
 #endif
     }
-#endif
     return (void*)result;
   }
 }
@@ -670,53 +674,22 @@ static void reap_rdrop_refptr_impl(struct _RegionHandle *r, struct _fat_ptr ptr)
 
 void Cyc_Core_rufree(struct _RegionHandle *r, unsigned char *ptr) {
   if(r != NULL) r->fcns->_rufree(r, ptr);
-/* #ifdef DISABLE_REAPS */
-/* #else */
-/*   reap_rufree_impl(r, ptr); */
-/* #endif */
 }
 void Cyc_Core_rdrop_refptr(struct _RegionHandle *r, struct _fat_ptr ptr) {
   if(r != NULL) r->fcns->_rdrop(r, ptr);
-/* #ifdef DISABLE_REAPS */
-/* #else */
-/*   if(r == NULL || r->key == NULL) */
-/*     return; */
-/*   int *cnt = get_refcnt(ptr.base); */
-/*   if (cnt != NULL) { */
-/*     *cnt = *cnt - 1; */
-/*     if (*cnt == 0) { // no more references //add something to bget to update page usage stats */
-/*       brel(r->key, (void*)(ptr.base - sizeof(int))); */
-/*     } */
-/*   } */
-/* #endif */
 }
 void * _region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int s) {
   if(r != NULL) return r->fcns->_malloc(r,aq,s);
   return reap_malloc_impl(r, aq, s);
-/* #ifdef DISABLE_REAPS */
-/*   return region_malloc_impl(r, aq, s); */
-/* #else */
-/*   return reap_malloc_impl(r, aq, s); */
-/* #endif */
 }
 
 void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
   if(r != NULL) return r->fcns->_vmalloc(r,s);
   return reap_vmalloc_impl(r, s);
-  /* #ifdef DISABLE_REAPS */
-/*   return region_vmalloc_impl(r, s); */
-/* #else */
-/*   return reap_vmalloc_impl(r, s); */
-/* #endif */
 }
 void * _region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int n, unsigned int t) {
   if(r != NULL) return r->fcns->_calloc(r,aq,n,t);
   return reap_calloc_impl(r, aq, n, t);
-/* #ifdef DISABLE_REAPS */
-/*   return region_calloc_impl(r, aq, n, t); */
-/* #else */
-/*   return reap_calloc_impl(r, aq, n, t); */
-/* #endif */
 }
 void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s) {
   return reap_aqual_malloc_impl(aq, s);
@@ -734,43 +707,6 @@ static struct _RegionAllocFunctions region_functions =
   {Cyc_Core_rufree_nop, Cyc_Core_rdrop_refptr_nop, region_malloc_impl, region_vmalloc_impl, region_calloc_impl};
 static struct _RegionAllocFunctions reap_functions = 
   {reap_rufree_impl, reap_rdrop_refptr_impl, reap_malloc_impl, reap_vmalloc_impl, reap_calloc_impl};
-
-/* // allocate a new page and return a region handle for a new region. */
-/* struct _RegionHandle _new_region(const char *rgn_name) { */
-/*   struct _RegionHandle r; */
-/* #ifdef CYC_REGION_PROFILE */
-/*   r.name = rgn_name; */
-/* #endif */
-/*   r.used_bytes = 0; */
-/*   r.wasted_bytes = 0; */
-/*   r.s.tag = LIFO_REGION; */
-/*   r.s.next = NULL; */
-/*   r.curr = 0; */
-/*   r.offset = 0; */
-/*   r.last_plus_one = 0; */
-/*   r.released_ptrs = NULL; */
-/*   r.key = NULL; */
-/*   r.fcns = &region_functions; */
-/*   return r; */
-/* } */
-
-/* struct _RegionHandle _new_reap(const char *rgn_name) { */
-/*   struct _RegionHandle r; */
-/* #ifdef CYC_REGION_PROFILE */
-/*   r.name = rgn_name; */
-/* #endif */
-/*   r.used_bytes = 0; */
-/*   r.wasted_bytes = 0; */
-/*   r.s.tag = LIFO_REGION; */
-/*   r.s.next = NULL; */
-/*   r.curr = 0; */
-/*   r.offset = 0; */
-/*   r.last_plus_one = 0; */
-/*   r.released_ptrs = NULL; */
-/*   r.key = NULL; */
-/*   r.fcns = &reap_functions; */
-/*   return r; */
-/* } */
 
 
 struct _RegionHandle _new_region(unsigned int disable_reap, const char *rgn_name) {
