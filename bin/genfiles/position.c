@@ -505,7 +505,7 @@ struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs)
 # 73
 struct Cyc_List_List*ans=0;
 for(0;segs != 0;segs=segs->tl){
-({struct Cyc_List_List*_tmp3B=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));({struct _dyneither_ptr*_tmp3A=({struct _dyneither_ptr*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _dyneither_ptr _tmp39=Cyc_Position_string_of_segment((unsigned int)segs->hd);*_tmp15=_tmp39;});_tmp15;});_tmp16->hd=_tmp3A;}),_tmp16->tl=ans;_tmp16;});ans=_tmp3B;});}
+ans=({struct Cyc_List_List*_tmp16=_cycalloc(sizeof(*_tmp16));({struct _dyneither_ptr*_tmp3A=({struct _dyneither_ptr*_tmp15=_cycalloc(sizeof(*_tmp15));({struct _dyneither_ptr _tmp39=Cyc_Position_string_of_segment((unsigned int)segs->hd);*_tmp15=_tmp39;});_tmp15;});_tmp16->hd=_tmp3A;}),_tmp16->tl=ans;_tmp16;});}
 return ans;}struct Cyc_Position_Error{struct _dyneither_ptr source;unsigned int seg;struct _dyneither_ptr desc;};
 # 99 "position.cyc"
 struct Cyc_Position_Error*Cyc_Position_mk_err(unsigned int l,struct _dyneither_ptr desc){
@@ -520,8 +520,8 @@ int len_two=(n - 3)- len_one;
 struct _dyneither_ptr mans=Cyc_Core_new_string((unsigned int)(n + 1));
 struct _dyneither_ptr ans=_dyneither_ptr_decrease_size(mans,sizeof(char),1U);
 Cyc_strncpy(ans,(struct _dyneither_ptr)s,(unsigned long)len_one);
-({struct _dyneither_ptr _tmp3C=_dyneither_ptr_plus(ans,sizeof(char),len_one);Cyc_strncpy(_tmp3C,({const char*_tmp18="...";_tag_dyneither(_tmp18,sizeof(char),4U);}),3U);});
-({struct _dyneither_ptr _tmp3E=_dyneither_ptr_plus(ans,sizeof(char),len_one + 3);struct _dyneither_ptr _tmp3D=(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),len - len_two);Cyc_strncpy(_tmp3E,_tmp3D,(unsigned long)len_two);});
+({struct _dyneither_ptr _tmp3B=_dyneither_ptr_plus(ans,sizeof(char),len_one);Cyc_strncpy(_tmp3B,({const char*_tmp18="...";_tag_dyneither(_tmp18,sizeof(char),4U);}),3U);});
+({struct _dyneither_ptr _tmp3D=_dyneither_ptr_plus(ans,sizeof(char),len_one + 3);struct _dyneither_ptr _tmp3C=(struct _dyneither_ptr)_dyneither_ptr_plus(s,sizeof(char),len - len_two);Cyc_strncpy(_tmp3D,_tmp3C,(unsigned long)len_two);});
 return mans;};}
 # 119
 static int Cyc_Position_line_length=76;
@@ -540,15 +540,15 @@ void Cyc_Position_post_error(struct Cyc_Position_Error*e){
 Cyc_Position_error_b=1;
 Cyc_fflush(Cyc_stdout);
 if(Cyc_Position_first_error){
-({void*_tmp19=0U;({struct Cyc___cycFILE*_tmp40=Cyc_stderr;struct _dyneither_ptr _tmp3F=({const char*_tmp1A="\n";_tag_dyneither(_tmp1A,sizeof(char),2U);});Cyc_fprintf(_tmp40,_tmp3F,_tag_dyneither(_tmp19,sizeof(void*),0U));});});
+({void*_tmp19=0U;({struct Cyc___cycFILE*_tmp3F=Cyc_stderr;struct _dyneither_ptr _tmp3E=({const char*_tmp1A="\n";_tag_dyneither(_tmp1A,sizeof(char),2U);});Cyc_fprintf(_tmp3F,_tmp3E,_tag_dyneither(_tmp19,sizeof(void*),0U));});});
 Cyc_Position_first_error=0;}
 # 138
 if(Cyc_Position_num_errors <= Cyc_Position_max_errors)
 # 140
-({struct Cyc_String_pa_PrintArg_struct _tmp1D=({struct Cyc_String_pa_PrintArg_struct _tmp30;_tmp30.tag=0U,({struct _dyneither_ptr _tmp41=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Position_string_of_segment(e->seg));_tmp30.f1=_tmp41;});_tmp30;});struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmp2F;_tmp2F.tag=0U,_tmp2F.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)e->desc);_tmp2F;});void*_tmp1B[2U];_tmp1B[0]=& _tmp1D,_tmp1B[1]=& _tmp1E;({struct Cyc___cycFILE*_tmp43=Cyc_stderr;struct _dyneither_ptr _tmp42=({const char*_tmp1C="%s: %s\n";_tag_dyneither(_tmp1C,sizeof(char),8U);});Cyc_fprintf(_tmp43,_tmp42,_tag_dyneither(_tmp1B,sizeof(void*),2U));});});
+({struct Cyc_String_pa_PrintArg_struct _tmp1D=({struct Cyc_String_pa_PrintArg_struct _tmp30;_tmp30.tag=0U,({struct _dyneither_ptr _tmp40=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Position_string_of_segment(e->seg));_tmp30.f1=_tmp40;});_tmp30;});struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmp2F;_tmp2F.tag=0U,_tmp2F.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)e->desc);_tmp2F;});void*_tmp1B[2U];_tmp1B[0]=& _tmp1D,_tmp1B[1]=& _tmp1E;({struct Cyc___cycFILE*_tmp42=Cyc_stderr;struct _dyneither_ptr _tmp41=({const char*_tmp1C="%s: %s\n";_tag_dyneither(_tmp1C,sizeof(char),8U);});Cyc_fprintf(_tmp42,_tmp41,_tag_dyneither(_tmp1B,sizeof(void*),2U));});});
 # 142
 if(Cyc_Position_num_errors == Cyc_Position_max_errors)
-({void*_tmp1F=0U;({struct Cyc___cycFILE*_tmp45=Cyc_stderr;struct _dyneither_ptr _tmp44=({const char*_tmp20="Too many error messages!\n";_tag_dyneither(_tmp20,sizeof(char),26U);});Cyc_fprintf(_tmp45,_tmp44,_tag_dyneither(_tmp1F,sizeof(void*),0U));});});
+({void*_tmp1F=0U;({struct Cyc___cycFILE*_tmp44=Cyc_stderr;struct _dyneither_ptr _tmp43=({const char*_tmp20="Too many error messages!\n";_tag_dyneither(_tmp20,sizeof(char),26U);});Cyc_fprintf(_tmp44,_tmp43,_tag_dyneither(_tmp1F,sizeof(void*),0U));});});
 # 145
 Cyc_fflush(Cyc_stderr);
 ++ Cyc_Position_num_errors;}
@@ -560,6 +560,6 @@ struct _dyneither_ptr Cyc_Position_get_position_file(){return Cyc_Position_sourc
 struct _dyneither_ptr Cyc_Position_get_line_directive(unsigned int s){
 struct Cyc_Lineno_Pos*pos_s=Cyc_Lineno_pos_of_abs(Cyc_Position_source,(int)s);
 if(pos_s != 0)
-return(struct _dyneither_ptr)({struct Cyc_Int_pa_PrintArg_struct _tmp23=({struct Cyc_Int_pa_PrintArg_struct _tmp32;_tmp32.tag=1U,_tmp32.f1=(unsigned long)pos_s->line_no;_tmp32;});struct Cyc_String_pa_PrintArg_struct _tmp24=({struct Cyc_String_pa_PrintArg_struct _tmp31;_tmp31.tag=0U,_tmp31.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)pos_s->logical_file);_tmp31;});void*_tmp21[2U];_tmp21[0]=& _tmp23,_tmp21[1]=& _tmp24;({struct _dyneither_ptr _tmp46=({const char*_tmp22="\n#line %d \"%s\"\n";_tag_dyneither(_tmp22,sizeof(char),16U);});Cyc_aprintf(_tmp46,_tag_dyneither(_tmp21,sizeof(void*),2U));});});else{
+return(struct _dyneither_ptr)({struct Cyc_Int_pa_PrintArg_struct _tmp23=({struct Cyc_Int_pa_PrintArg_struct _tmp32;_tmp32.tag=1U,_tmp32.f1=(unsigned long)pos_s->line_no;_tmp32;});struct Cyc_String_pa_PrintArg_struct _tmp24=({struct Cyc_String_pa_PrintArg_struct _tmp31;_tmp31.tag=0U,_tmp31.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)pos_s->logical_file);_tmp31;});void*_tmp21[2U];_tmp21[0]=& _tmp23,_tmp21[1]=& _tmp24;({struct _dyneither_ptr _tmp45=({const char*_tmp22="\n#line %d \"%s\"\n";_tag_dyneither(_tmp22,sizeof(char),16U);});Cyc_aprintf(_tmp45,_tag_dyneither(_tmp21,sizeof(void*),2U));});});else{
 # 160
 return _tag_dyneither(0,0,0);}}

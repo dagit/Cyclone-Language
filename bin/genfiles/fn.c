@@ -490,6 +490,6 @@ return((struct Cyc_Fn_Function*(*)(void*(*f)(struct Cyc_Fn_Function*,struct _tup
 struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x){
 struct Cyc_List_List*res=0;
 for(0;x != 0;x=x->tl){
-({struct Cyc_List_List*_tmpF=({struct Cyc_List_List*_tmpA=_cycalloc(sizeof(*_tmpA));({void*_tmpE=Cyc_Fn_apply(f,x->hd);_tmpA->hd=_tmpE;}),_tmpA->tl=res;_tmpA;});res=_tmpF;});}
-({struct Cyc_List_List*_tmp10=Cyc_List_imp_rev(res);res=_tmp10;});
+res=({struct Cyc_List_List*_tmpA=_cycalloc(sizeof(*_tmpA));({void*_tmpE=Cyc_Fn_apply(f,x->hd);_tmpA->hd=_tmpE;}),_tmpA->tl=res;_tmpA;});}
+res=Cyc_List_imp_rev(res);
 return res;}

@@ -309,8 +309,15 @@ static void exp_to_seqc(exp_t e) {
     exps_to_seqc(e,es);
     return;
 
-  case &Subscript_e(e1,e2):   fallthru(e1,e2);
-  case &AssignOp_e(e1, _, e2):
+  case &Subscript_e(e1,e2):   
+    exps_to_seqc(e,list(e1,e2));
+    return;
+  case &AssignOp_e(e1, p, e2):
+    if(p==NULL)
+      switch (e1->r) {
+      case &Var_e(_): exp_to_seqc(e2); return;
+      default: break;
+      }
     // we do assignment statements right to left
     exps_to_seqc(e,list(e2,e1));
     return;
