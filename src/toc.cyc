@@ -1119,7 +1119,9 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
     if (zero_term) {
       // FIX: lhs[max] may be "const" -- we need to use pointer arithmetic
       // here and cast it to be a non-const pointer to the element type.
-      exp_t ex = assign_exp(subscript_exp(lhs,var_exp(max,DL),DL),
+      // NB: we use new_exp here for the lhs to avoid sharing with the
+      // occurrence of lhs above.
+      exp_t ex = assign_exp(subscript_exp(new_exp(lhs->r,DL),var_exp(max,DL),DL),
                             cast_it(elt_typ,uint_exp(0,DL)),DL);
       s2 = seq_stmt(s2,exp_stmt(ex,DL),DL);
     }
