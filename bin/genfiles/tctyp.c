@@ -1002,7 +1002,7 @@ struct Cyc_List_List*fq=freeqvs;for(0;fq!=0;fq=fq->tl){
 struct _tuple13*_Tmp0=(struct _tuple13*)fq->hd;int _Tmp1;void*_Tmp2;_Tmp2=_Tmp0->f1;_Tmp1=_Tmp0->f2;{void*t=_Tmp2;int b=_Tmp1;
 void*_Tmp3;if(*((int*)t)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f1)==18){_Tmp3=((struct Cyc_Absyn_AppType_Absyn_Type_struct*)t)->f2;{struct Cyc_List_List*tv_bnd=_Tmp3;
 # 650
-void*tv=(void*)_check_null(tv_bnd)->hd;
+void*tv=(void*)tv_bnd->hd;
 if(b)
 ({struct Cyc_List_List*_Tmp4=({struct Cyc_List_List*_Tmp5=_cycalloc(sizeof(struct Cyc_List_List));({struct _tuple0*_Tmp6=({struct _tuple0*_Tmp7=_cycalloc(sizeof(struct _tuple0));_Tmp7->f1=tv,_Tmp7->f2=(void*)_check_null(tv_bnd->tl)->hd;_Tmp7;});_Tmp5->hd=_Tmp6;}),_Tmp5->tl=*qb;_Tmp5;});*qb=_Tmp4;});else{
 # 655
@@ -1283,7 +1283,7 @@ goto _LL61;}}else{
 if(fmt_arg_start!=0 && !c_vararg){
 # 987
 int problem;
-{struct _tuple16 _Tmp15=({struct _tuple16 _Tmp16;_Tmp16.f1=ft,({void*_Tmp17=Cyc_Absyn_compress(Cyc_Tcutil_pointer_elt_type(_check_null(cyc_vararg)->type));_Tmp16.f2=_Tmp17;});_Tmp16;});void*_Tmp16;switch((int)_Tmp15.f1){case Cyc_Absyn_Printf_ft: if(*((int*)_Tmp15.f2)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)==23){if(((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.tag==2){_Tmp16=*((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.val;{struct Cyc_Absyn_Datatypedecl*tud=_Tmp16;
+{struct _tuple16 _Tmp15=({struct _tuple16 _Tmp16;_Tmp16.f1=ft,({void*_Tmp17=Cyc_Absyn_compress(Cyc_Tcutil_pointer_elt_type(cyc_vararg->type));_Tmp16.f2=_Tmp17;});_Tmp16;});void*_Tmp16;switch((int)_Tmp15.f1){case Cyc_Absyn_Printf_ft: if(*((int*)_Tmp15.f2)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)==23){if(((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.tag==2){_Tmp16=*((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.val;{struct Cyc_Absyn_Datatypedecl*tud=_Tmp16;
 # 990
 problem=({struct _tuple1*_Tmp17=tud->name;Cyc_Absyn_qvar_cmp(_Tmp17,Cyc_Absyn_datatype_print_arg_qvar());})!=0;
 goto _LL66;}}else{goto _LL6B;}}else{goto _LL6B;}}else{goto _LL6B;}case Cyc_Absyn_Scanf_ft: if(*((int*)_Tmp15.f2)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)==23){if(((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.tag==2){_Tmp16=*((struct Cyc_Absyn_DatatypeCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp15.f2)->f1)->f1.KnownDatatype.val;{struct Cyc_Absyn_Datatypedecl*tud=_Tmp16;

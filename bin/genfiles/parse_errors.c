@@ -349,7 +349,7 @@ if(Cyc_Flags_print_parser_state_and_token){
 exit(1);}
 # 27
 {unsigned i=0U;for(0;i < 111U;++ i){
-if(Cyc_ParseErrors_msg_table[(int)i].state==state && Cyc_ParseErrors_msg_table[(int)i].token==token){
+if((*((struct Cyc_ParseErrors_ParseState*)_check_known_subscript_notnull(Cyc_ParseErrors_msg_table,111U,sizeof(struct Cyc_ParseErrors_ParseState),(int)i))).state==state && Cyc_ParseErrors_msg_table[(int)i].token==token){
 # 30
 s=Cyc_ParseErrors_msg_table[(int)i].msg;
 break;}else{

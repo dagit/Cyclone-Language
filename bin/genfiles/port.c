@@ -1083,8 +1083,8 @@ static void Cyc_Port_register_localvar_usage(struct Cyc_Port_Cenv*env,unsigned d
 struct Cyc_Port_VarUsage*varusage=0;
 if(({(int(*)(struct Cyc_Hashtable_Table*,unsigned,struct Cyc_Port_VarUsage**))Cyc_Hashtable_try_lookup;})(env->gcenv->varusage_tab,declloc,& varusage)){
 if(takeaddress)_check_null(varusage)->address_taken=1;{
-struct Cyc_List_List*l=_check_null(varusage)->usage_locs;
-({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=(void*)useloc,_Tmp1->tl=l;_Tmp1;});_check_null(varusage)->usage_locs=_Tmp0;});}}}struct _tuple17{void*f1;void*f2;unsigned f3;};
+struct Cyc_List_List*l=varusage->usage_locs;
+({struct Cyc_List_List*_Tmp0=({struct Cyc_List_List*_Tmp1=_cycalloc(sizeof(struct Cyc_List_List));_Tmp1->hd=(void*)useloc,_Tmp1->tl=l;_Tmp1;});varusage->usage_locs=_Tmp0;});}}}struct _tuple17{void*f1;void*f2;unsigned f3;};
 # 985
 static void Cyc_Port_register_const_cvar(struct Cyc_Port_Cenv*env,void*new_qual,void*orig_qual,unsigned loc){
 # 987
@@ -1331,11 +1331,11 @@ return({void*_Tmp9=crt;Cyc_Port_fn_ct(_Tmp9,Cyc_List_imp_rev(cargs));});}default
  return Cyc_Port_arith_ct();};}
 # 1297
 static void*Cyc_Port_gen_primop(struct Cyc_Port_Cenv*env,enum Cyc_Absyn_Primop p,struct Cyc_List_List*args){
-void*arg1=Cyc_Port_compress_ct((void*)_check_null(args)->hd);
+void*arg1=Cyc_Port_compress_ct((void*)args->hd);
 struct Cyc_List_List*arg2s=args->tl;
 switch((int)p){case Cyc_Absyn_Plus:  {
 # 1305
-void*arg2=Cyc_Port_compress_ct((void*)_check_null(arg2s)->hd);
+void*arg2=Cyc_Port_compress_ct((void*)arg2s->hd);
 if(({void*_Tmp0=arg1;Cyc_Port_leq(_Tmp0,({void*_Tmp1=Cyc_Port_var();void*_Tmp2=Cyc_Port_var();void*_Tmp3=Cyc_Port_fat_ct();void*_Tmp4=Cyc_Port_var();Cyc_Port_ptr_ct(_Tmp1,_Tmp2,_Tmp3,_Tmp4,Cyc_Port_var());}));})){
 ({void*_Tmp0=arg2;Cyc_Port_leq(_Tmp0,Cyc_Port_arith_ct());});
 return arg1;}else{
@@ -1650,7 +1650,7 @@ struct Cyc_List_List*fields=_check_null(ad->impl)->fields;
 for(1;dles!=0;dles=dles->tl){
 struct _tuple18 _Tmp5=*((struct _tuple18*)dles->hd);void*_Tmp6;void*_Tmp7;_Tmp7=_Tmp5.f1;_Tmp6=_Tmp5.f2;{struct Cyc_List_List*d=_Tmp7;struct Cyc_Absyn_Exp*e=_Tmp6;
 if((unsigned)d)({(int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos;})(_tag_fat("designators in initializers",sizeof(char),28U),_tag_fat(0U,sizeof(void*),0));{
-struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)_check_null(fields)->hd;
+struct Cyc_Absyn_Aggrfield*f=(struct Cyc_Absyn_Aggrfield*)fields->hd;
 fields=fields->tl;{
 void*te=Cyc_Port_gen_initializer(env,f->type,e);;}}}}
 # 1624

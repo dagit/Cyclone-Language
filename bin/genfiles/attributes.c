@@ -434,8 +434,8 @@ _get_fat_size(s,sizeof(char))- 2U)]==95)&&(int)((const char*)s.curr)[(int)(_get_
 s=Cyc_substring(s,2,_get_fat_size(s,sizeof(char))- 5U);{
 int i=0;
 for(1;(unsigned)i < 19U;++ i){
-if(Cyc_strcmp(s,att_map[i].f1)==0)
-return(*((struct _tuple11*)_check_known_subscript_notnull(att_map,19U,sizeof(struct _tuple11),i))).f2;}
+if(Cyc_strcmp(s,(*((struct _tuple11*)_check_known_subscript_notnull(att_map,19U,sizeof(struct _tuple11),i))).f1)==0)
+return att_map[i].f2;}
 return Cyc_Atts_bad_attribute(loc);}}
 # 87
 static int Cyc_Atts_exp2int(unsigned loc,struct Cyc_Absyn_Exp*e){

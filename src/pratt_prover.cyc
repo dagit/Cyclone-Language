@@ -225,6 +225,7 @@ static void set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signe
 static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 static void add_eq(graph_t @g, term_t t1, term_t t2);
 static $(bool,unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t);
+static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed);
 
 // Depending upon the type of a term, we can sometimes add extra
 // information to a graph.  For instance, if t : int@{42} then we
@@ -268,8 +269,13 @@ static void add_type_info(graph_t @g, term_t term) {
       default: break;
       }
       term_t t2 = cnst((exp_t)e);
-      add_constraint(g,t2,ULte,t1);
-      add_constraint(g,t2,SLte,t1);
+      // FIX -- if the term is a * type, then we need to say something
+      // like ((term == 0) ==> numelts(term) == 0) && 
+      //      ((term != 0) ==> numelts(term) <= t2)
+      if (!Tcutil::is_nullable_pointer_type(t,false)) {
+        add_constraint(g,t2,ULte,t1);
+        add_constraint(g,t2,SLte,t1);
+      }
     }
     switch (Absyn::compress(t)) {
     case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned,_),_):
@@ -1023,6 +1029,15 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     // return (gs and a1) or (gs and a2)
     gs = graph_append(gs1,gs2);
     break;
+  case &Prim(&Uint(0),Neq,t2): fallthru(t2);
+  case &Prim(t1,Neq,&Uint(0)):
+    // when doing an unsigned or pointer comparison against 0, we know
+    // that 0 < t1.  So use this instead of introducing a disjunction.
+    type_opt_t topt = AssnDef::get_term_type(t1);
+    if (topt == NULL || Tcutil::is_signed_type((type_t)topt))
+      fallthru(t1,zero());
+    a = ult(zero(),t1);
+    goto LOOP;
   case &Prim(t1,Neq,t2): 
     // must handle neq specially as t1 < t2 or t2 < t1 (both signed
     // and unsigned.)

@@ -394,10 +394,10 @@ static enum Cyc_Toseqc_SideEffect Cyc_Toseqc_fun_effect(struct _tuple1*qv){
 void*_Tmp0;if(((struct _tuple1*)qv)->f1.Loc_n.tag==4){_Tmp0=qv->f2;{struct _fat_ptr*fn=_Tmp0;
 # 74
 {int i=0;for(0;(unsigned)i < 9U;++ i){
-if(!Cyc_strcmp(Cyc_Toseqc_pure_funs[i],*fn))
+if(!Cyc_strcmp(*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_pure_funs,9U,sizeof(struct _fat_ptr),i)),*fn))
 return 1U;}}
 {int i=0;for(0;(unsigned)i < 7U;++ i){
-if(!Cyc_strcmp(Cyc_Toseqc_exn_effect_funs[i],*fn))
+if(!Cyc_strcmp(*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_Toseqc_exn_effect_funs,7U,sizeof(struct _fat_ptr),i)),*fn))
 return 2U;}}
 return 3U;}}else{
 return 3U;};}

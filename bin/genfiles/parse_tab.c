@@ -2010,7 +2010,7 @@ yychar1=yychar > 0 && yychar <= 390?(int)Cyc_yytranslate[yychar]: 336;}
 yyn +=yychar1;
 if((yyn < 0 || yyn > 7445)||(int)Cyc_yycheck[yyn]!=yychar1)goto yydefault;
 # 302
-yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,7446U,sizeof(short),yyn));
+yyn=(int)Cyc_yytable[yyn];
 # 309
 if(yyn < 0){
 # 311
@@ -4197,13 +4197,13 @@ p[1].l.last_column=p[0].l.last_column;}else{
 ({unsigned _Tmp1=(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),(yyvsp_offset + yylen)- 1))).l.last_line;(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),yyvsp_offset))).l.last_line=_Tmp1;});
 ((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset].l.last_column=((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1].l.last_column;}
 # 409
-yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,574U,sizeof(short),yyn));
+yyn=(int)Cyc_yyr1[yyn];
 # 411
 yystate=({int _Tmp1=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,173U,sizeof(short),yyn - 163));_Tmp1 + (int)*((short*)_check_fat_subscript(yyss,sizeof(short),yyssp_offset));});
 if((yystate >= 0 && yystate <= 7445)&&(int)Cyc_yycheck[yystate]==(int)((short*)yyss.curr)[yyssp_offset])
 yystate=(int)Cyc_yytable[yystate];else{
 # 415
-yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yydefgoto,173U,sizeof(short),yyn - 163));}
+yystate=(int)Cyc_yydefgoto[yyn - 163];}
 # 417
 goto yynewstate;
 # 419
@@ -4278,7 +4278,7 @@ if(yyn==-32768)goto yyerrdefault;
 yyn +=1;
 if((yyn < 0 || yyn > 7445)||(int)Cyc_yycheck[yyn]!=1)goto yyerrdefault;
 # 528
-yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,7446U,sizeof(short),yyn));
+yyn=(int)Cyc_yytable[yyn];
 if(yyn < 0){
 # 531
 if(yyn==-32768)goto yyerrpop;
@@ -4315,7 +4315,7 @@ if(token==387)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
 int z=token > 0 && token <= 390?(int)Cyc_yytranslate[token]: 336;
 if((unsigned)z < 336U)
-return Cyc_yytname[z];
+return*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_yytname,336U,sizeof(struct _fat_ptr),z));
 return _tag_fat(0,0,0);}}
 # 3031
 struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*f){

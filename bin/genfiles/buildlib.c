@@ -621,7 +621,7 @@ state=(- state)- 1;}
 while(1){
 base=*((const int*)_check_known_subscript_notnull(Cyc_lex_base,444U,sizeof(int),state));
 if(base < 0)return(- base)- 1;
-backtrk=*((const int*)_check_known_subscript_notnull(Cyc_lex_backtrk,444U,sizeof(int),state));
+backtrk=Cyc_lex_backtrk[state];
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -636,9 +636,9 @@ c=(int)*((char*)_check_fat_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_cur
 if(c==-1)c=256;}
 # 236
 if(*((const int*)_check_known_subscript_notnull(Cyc_lex_check,3846U,sizeof(int),base + c))==state)
-state=*((const int*)_check_known_subscript_notnull(Cyc_lex_trans,3846U,sizeof(int),base + c));else{
+state=Cyc_lex_trans[base + c];else{
 # 239
-state=*((const int*)_check_known_subscript_notnull(Cyc_lex_default,444U,sizeof(int),state));}
+state=Cyc_lex_default[state];}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action==-1)
@@ -654,7 +654,7 @@ switch((int)lexstate){case 0:
 # 211 "buildlib.cyl"
  Cyc_macroname(lexbuf);
 for(1;Cyc_current_args!=0;Cyc_current_args=_check_null(Cyc_current_args)->tl){
-Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({struct Cyc_Set_Set*_Tmp2=*_check_null(Cyc_current_targets);({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;})(_Tmp2,(struct _fat_ptr*)_check_null(Cyc_current_args)->hd);});*_Tmp0=_Tmp1;});_Tmp0;});}
+Cyc_current_targets=({struct Cyc_Set_Set**_Tmp0=_cycalloc(sizeof(struct Cyc_Set_Set*));({struct Cyc_Set_Set*_Tmp1=({(struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*,struct _fat_ptr*))Cyc_Set_delete;})(*_check_null(Cyc_current_targets),(struct _fat_ptr*)Cyc_current_args->hd);*_Tmp0=_Tmp1;});_Tmp0;});}
 # 216
 return({struct _tuple13*_Tmp0=_cycalloc(sizeof(struct _tuple13));_Tmp0->f1=_check_null(Cyc_current_source),_Tmp0->f2=*_check_null(Cyc_current_targets);_Tmp0;});case 1:
 # 219 "buildlib.cyl"
@@ -1382,7 +1382,7 @@ int Cyc_block_comment(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_block_comment_
 # 864 "buildlib.cyl"
 void Cyc_scan_type(void*,struct Cyc_Hashtable_Table*);struct _tuple18{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*f2;};
 void Cyc_scan_exp(struct Cyc_Absyn_Exp*e,struct Cyc_Hashtable_Table*dep){
-void*_Tmp0=_check_null(e)->r;enum Cyc_Absyn_MallocKind _Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;switch(*((int*)_Tmp0)){case 1: _Tmp4=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*b=_Tmp4;
+void*_Tmp0=e->r;enum Cyc_Absyn_MallocKind _Tmp1;void*_Tmp2;void*_Tmp3;void*_Tmp4;switch(*((int*)_Tmp0)){case 1: _Tmp4=(void*)((struct Cyc_Absyn_Var_e_Absyn_Raw_exp_struct*)_Tmp0)->f1;{void*b=_Tmp4;
 # 868
 struct _fat_ptr*v=(*Cyc_Absyn_binding2qvar(b)).f2;
 Cyc_add_target(v);
@@ -1450,7 +1450,7 @@ return;}case 19: _Tmp4=(void*)((struct Cyc_Absyn_Offsetof_e_Absyn_Raw_exp_struct
 # 932
 Cyc_scan_type(t1,dep);
 # 934
-{void*_Tmp5=(void*)_check_null(f)->hd;void*_Tmp6;if(*((int*)_Tmp5)==0){_Tmp6=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp5)->f1;{struct _fat_ptr*fn=_Tmp6;
+{void*_Tmp5=(void*)f->hd;void*_Tmp6;if(*((int*)_Tmp5)==0){_Tmp6=((struct Cyc_Absyn_StructField_Absyn_OffsetofField_struct*)_Tmp5)->f1;{struct _fat_ptr*fn=_Tmp6;
 Cyc_add_target(fn);goto _LL57;}}else{
 goto _LL57;}_LL57:;}
 # 938
@@ -2431,7 +2431,7 @@ if(Cyc_do_setjmp && Cyc_process_setjmp(outdir))
 return 1;else{
 # 2076
 for(1;Cyc_spec_files!=0;Cyc_spec_files=_check_null(Cyc_spec_files)->tl){
-if(Cyc_process_specfile((const char*)_check_null(Cyc_spec_files)->hd,outdir)){
+if(Cyc_process_specfile((const char*)Cyc_spec_files->hd,outdir)){
 Cyc_fprintf(Cyc_stderr,_tag_fat("FATAL ERROR -- QUIT!\n",sizeof(char),22U),_tag_fat(0U,sizeof(void*),0));
 exit(1);}}}
 # 2084

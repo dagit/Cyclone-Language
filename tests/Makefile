@@ -13,9 +13,9 @@ CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g #--vcgen
 endif
 HAVE_PTHREAD=no
 # test asm doesn't work for me on cygwin
-EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion refcnt_test require  scheme cinclude patterns multimethod rc testasm testaqualsuccess)
+EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm flatlist md5 unique_patterns dynregion refcnt_test scheme cinclude patterns multimethod rc testasm testaqualsuccess structarray streambufftest)
  # testsexp)
-#these are broken --> structarray streambufftest
+#these are broken --> require streambufftest
 ifeq ($(HAVE_PTHREAD),yes)
 EXES += $(addsuffix $(EXE),testexn)
 endif
@@ -58,12 +58,12 @@ all: $(EXES) failtest
 	./foo < foo_input
 	./histogram histogram.txt
 	./zeroterm
-#	./structarray
+	./structarray
 	./flatlist
 	./md5 -q
-	./require
+#	./require
 	./test_getopt -abc123
-#	./streambufftest -q
+	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme

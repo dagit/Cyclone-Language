@@ -1218,7 +1218,7 @@ return(void*)({struct Cyc_Tcpat_EqDatatypeTag_Tcpat_PatTest_struct*_Tmp9=_cycall
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(info);
 if(!_check_null(ad->impl)->tagged)
 ({struct Cyc_Warn_String_Warn_Warg_struct _Tmp9=({struct Cyc_Warn_String_Warn_Warg_struct _TmpA;_TmpA.tag=0,_TmpA.f1=_tag_fat("non-tagged aggregate in pattern test",sizeof(char),37U);_TmpA;});void*_TmpA[1];_TmpA[0]=& _Tmp9;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_TmpA,sizeof(void*),1));});{
-void*_Tmp9=(void*)_check_null((*((struct _tuple16*)_check_null(dlps)->hd)).f1)->hd;void*_TmpA;if(*((int*)_Tmp9)==1){_TmpA=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_Tmp9)->f1;{struct _fat_ptr*f=_TmpA;
+void*_Tmp9=(void*)_check_null((*((struct _tuple16*)dlps->hd)).f1)->hd;void*_TmpA;if(*((int*)_Tmp9)==1){_TmpA=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_Tmp9)->f1;{struct _fat_ptr*f=_TmpA;
 return(void*)({struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct*_TmpB=_cycalloc(sizeof(struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct));_TmpB->tag=8,_TmpB->f1=f,({int _TmpC=Cyc_Tcpat_get_member_offset(ad,f);_TmpB->f2=_TmpC;});_TmpB;});}}else{
 ({struct Cyc_Warn_String_Warn_Warg_struct _TmpB=({struct Cyc_Warn_String_Warn_Warg_struct _TmpC;_TmpC.tag=0,_TmpC.f1=_tag_fat("no field name in tagged union pattern",sizeof(char),38U);_TmpC;});void*_TmpC[1];_TmpC[0]=& _TmpB;({(int(*)(struct _fat_ptr))Cyc_Warn_impos2;})(_tag_fat(_TmpC,sizeof(void*),1));});};}}}else{goto _LL1C;}default: _LL1C:
 # 906
@@ -1544,7 +1544,7 @@ return(void*)({struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct*_Tmp5=_cycallo
 # 1347
 struct Cyc_Absyn_Aggrdecl*ad=Cyc_Absyn_get_known_aggrdecl(info);
 if(_check_null(ad->impl)->tagged){
-struct Cyc_List_List*_Tmp5=(*((struct _tuple16*)_check_null(dlps)->hd)).f1;void*_Tmp6;if(_Tmp5!=0){if(*((int*)((struct Cyc_List_List*)_Tmp5)->hd)==1){if(((struct Cyc_List_List*)_Tmp5)->tl==0){_Tmp6=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_Tmp5->hd)->f1;{struct _fat_ptr*f=_Tmp6;
+struct Cyc_List_List*_Tmp5=(*((struct _tuple16*)dlps->hd)).f1;void*_Tmp6;if(_Tmp5!=0){if(*((int*)((struct Cyc_List_List*)_Tmp5)->hd)==1){if(((struct Cyc_List_List*)_Tmp5)->tl==0){_Tmp6=((struct Cyc_Absyn_FieldName_Absyn_Designator_struct*)_Tmp5->hd)->f1;{struct _fat_ptr*f=_Tmp6;
 # 1351
 return(void*)({struct Cyc_Tcpat_AggrField_Tcpat_Access_struct*_Tmp7=_cycalloc(sizeof(struct Cyc_Tcpat_AggrField_Tcpat_Access_struct));_Tmp7->tag=4,_Tmp7->f1=_check_null(ad->impl)->tagged,_Tmp7->f2=f;_Tmp7;});}}else{goto _LL13;}}else{goto _LL13;}}else{_LL13:
 # 1353
@@ -1800,7 +1800,7 @@ if(!b){
 break;}}}}}}
 # 1663
 int Cyc_Tcpat_has_vars(struct Cyc_Core_Opt*pat_vars){
-{struct Cyc_List_List*l=(struct Cyc_List_List*)_check_null(pat_vars)->v;for(0;l!=0;l=l->tl){
+{struct Cyc_List_List*l=(struct Cyc_List_List*)pat_vars->v;for(0;l!=0;l=l->tl){
 if((*((struct _tuple17*)l->hd)).f1!=0)
 return 1;}}
 return 0;}

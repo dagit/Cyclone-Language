@@ -377,26 +377,30 @@ assn_info_t new_assn_info(void){
   return new assn_info;
 }
 
-$(assn_t, assn_t) exp2ctxt_assn(assn_info_t assn_info, Absyn::exp_t e){
+exp_checks_t @ exp2ctxt_checks(assn_info_t assn_info, Absyn::exp_t e){
   let result = Hashtable::lookup_opt(*assn_info, e);
   if (result == NULL){
+    static exp_checks_t b = {.ctxt = &true_assn, 
+                             .bounds_check = &false_assn,
+                             .null_check = &false_assn};
     //wangyl: we don't know any info about vcgen here, so the ctxt
     //should be true and the assertion we need to prove should be false
-    return $(&true_assn, &false_assn);
+    return &b;
   }else{
-    return **result;
+    return *result;
   }
 }
 
-static void insert_assn_info(assn_info_t assn_info, Absyn::exp_t e, $(AssnDef::assn_t, AssnDef::assn_t) @`H ctxt_assn){
+static void insert_exp_checks(assn_info_t assn_info, Absyn::exp_t e, exp_checks_t @`H exp_check) {
 #ifdef VCGEN_DEBUG
   fprintf(stderr, "###################\n");
   fprintf(stderr, "expression: %s\n", Absynpp::exp2string(e));
-  fprintf(stderr, "ctxt assns : %s \n", AssnDef::assn2string((*ctxt_assn)[0]));
-  fprintf(stderr, "toprove assn : %s \n", AssnDef::assn2string((*ctxt_assn)[1]));
+  fprintf(stderr, "ctxt assns    : %s \n", AssnDef::assn2string(exp_check->ctxt));
+  fprintf(stderr, "bnds chk assn : %s \n", AssnDef::assn2string(exp_check->bounds_check));
+  fprintf(stderr, "null chk assn : %s \n", AssnDef::assn2string(exp_check->null_check));
   fprintf(stderr, "###################\n");
 #endif
-  Hashtable::insert(*assn_info, e, ctxt_assn);
+  Hashtable::insert(*assn_info, e, exp_check);
   return;
 }
 
@@ -1231,8 +1235,8 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       if (topt == NULL) return $(NULL,a);
       term_t t = (term_t)topt;
       return $(cast(tp,t),a);
-    }
-    else {
+    } else {
+      // FIX:  we really need to interpret the casts appropriately.
       update_try_assn(env,ain); // coercion could fail
       return $(topt == NULL ? NULL : cast(tp,(term_t)topt),a);
     }
@@ -1269,14 +1273,34 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     switch (Absyn::compress((type_t)e1->topt)) {
     case &Absyn::TupleType(_): break;
     default:
-      update_try_assn(env, a2);
       term_t term_numelts, term_typebound;
       // we don't know t2, can't really infer anything about the bound
-      if (t2 == NULL) break;
-      term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
-      let inbound_assn = ult(t2, term_numelts);
-      insert_assn_info(env->assn_info, e1, new $(a2, inbound_assn));
-      a2 = and(a2,inbound_assn);
+      if (t2 == NULL) { 
+        update_try_assn(env, a2);
+        break;
+      }
+      let eopt = Tcutil::get_type_bound((type_t)e1->topt);
+      if (eopt == NULL) {
+        // fat pointer -- express bounds in terms of numelts(t1)
+        term_numelts = unop(Absyn::Numelts, t1, Absyn::uint_type);
+      } else {
+        // thin pointer -- express bounds directly from type
+        exp_t e = (exp_t)eopt;
+        term_numelts = vcgen_rexp_always(env, e, a2)[0];
+      }
+      let bnds_check = ult(t2, term_numelts);
+      // note that although this is a neq, the prover will not blow
+      // up because it need only consider 0 < t1.
+      let null_check = neq(zero(),t1);
+      // if we have an exception, then we know either the bounds check
+      // failed or the null check failed.
+      update_try_assn(env,and(a2,or(not(bnds_check),not(null_check))));
+      // associate these checks with the expression for insert_checks
+      let exp_checks = new ExpChecks{.ctxt=a2,.bounds_check=bnds_check,
+                                     .null_check=null_check};
+      insert_exp_checks(env->assn_info, e1, exp_checks);
+      // afterwards, we know both the bounds check and null check succeeded.
+      a2 = and(and(a2,bnds_check),null_check);;
     }
     return $(NULL,a2);
 

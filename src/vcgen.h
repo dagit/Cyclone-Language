@@ -28,11 +28,16 @@
 
 
 namespace Vcgen {
-  typedef Hashtable::table_t<Absyn::exp_t, $(AssnDef::assn_t, AssnDef::assn_t)@> *assn_info_t;
+  typedef struct ExpChecks {
+    AssnDef::assn_t ctxt;
+    AssnDef::assn_t bounds_check;
+    AssnDef::assn_t null_check;
+  } exp_checks_t;
+  typedef Hashtable::table_t<Absyn::exp_t, exp_checks_t@> *assn_info_t;
   assn_info_t new_assn_info();
   extern void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, 
 			    Absyn::fndecl_t fd,
 			    assn_info_t assn_info);
-  $(AssnDef::assn_t, AssnDef::assn_t) exp2ctxt_assn(assn_info_t,Absyn::exp_t);
+  exp_checks_t@ exp2ctxt_checks(assn_info_t,Absyn::exp_t);
 }
 #endif
