@@ -380,6 +380,7 @@ struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
 
 #ifdef __APPLE__
 typedef int socklen_t;
+#include <sys/time.h> // where struct timeval is defined
 #endif
 
 int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
