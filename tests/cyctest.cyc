@@ -18,6 +18,7 @@
 #include <array.h>
 #include <arg.h>
 #include <errno.h>
+#include <signal.h>
 
 using List;
 using Set;
@@ -973,6 +974,30 @@ void letv_test() {
     test_end();
 }
 
+static int sigcnt = 0;
+void sig_handler(int sig) {
+  switch (sigcnt) {
+  case 0:
+    okfail(sig == SIGUSR1); break;
+  case 1:
+    okfail(sig == SIGUSR2); break;
+  default:
+    okfail(0 == 1);
+  }
+  sigcnt++;
+}
+
+void sig_test() {
+  test_begin("Signal");
+  signal(SIGUSR1,sig_handler);
+  signal(SIGUSR2,sig_handler);
+  raise(SIGUSR1);
+  okfail(sigcnt == 1);
+  raise(SIGUSR2);
+  okfail(sigcnt == 2);
+  test_end();
+}
+
 int main(int argc, string_t<`H> ?`H args) {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
 
@@ -1015,6 +1040,7 @@ int main(int argc, string_t<`H> ?`H args) {
   printf_test();
   att_test();
   letv_test();
+  sig_test();
   // scanf_test(); // commented out because sscanf is insecure
 
   if (no_errors) {
