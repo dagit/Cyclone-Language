@@ -26,6 +26,7 @@ namespace Cstat {
     int stat(Cstring filename, struct stat_t @`r buf);
     int fstat(int fd, struct stat_t @`r buf);
     int lstat(Cstring filename, struct stat_t @`r buf);
+    int mkdir(Cstring pathname, mode_t mode);
   }
 #define s2c(x) (string_to_Cstring(x))
 }
@@ -47,3 +48,8 @@ int stat(string_t filename, struct stat_t @`r buf) {
 int lstat(string_t filename, struct stat_t @`r buf) {
   return Cstat::lstat(s2c(filename), buf);
 }
+
+int mkdir(string_t pathname, mode_t mode) {
+  return Cstat::mkdir(s2c(pathname), mode);
+}
+

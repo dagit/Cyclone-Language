@@ -1007,8 +1007,8 @@ _LL249;} else{ goto _LL250;} _LL250: if(( unsigned int) _temp238 >  1u?*(( int*)
 _temp238) ==  Cyc_Absyn_Param_b: 0){ _LL261: _temp260=(( struct Cyc_Absyn_Param_b_struct*)
 _temp238)->f1; goto _LL251;} else{ goto _LL239;} _LL241: return({ struct Cyc_Std_String_pa_struct
 _temp263; _temp263.tag= Cyc_Std_String_pa; _temp263.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
-q);{ void* _temp262[ 1u]={& _temp263}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("unbound identifier %s",
-sizeof( unsigned char), 22u), _tag_arr( _temp262, sizeof( void*), 1u));}});
+q);{ void* _temp262[ 1u]={& _temp263}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("unresolved identifier: %s",
+sizeof( unsigned char), 26u), _tag_arr( _temp262, sizeof( void*), 1u));}});
 _LL243: q[ _check_known_subscript_notnull( 1u, 0)]=( _temp252->name)[
 _check_known_subscript_notnull( 1u, 0)]; return( void*) _temp252->type; _LL245:
 q[ _check_known_subscript_notnull( 1u, 0)]=( _temp254->name)[

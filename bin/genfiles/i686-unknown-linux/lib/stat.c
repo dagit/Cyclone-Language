@@ -241,20 +241,22 @@ struct _tagged_arr pathname, int flags, struct _tagged_arr mode); extern int Cyc
 struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
 fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
 filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
-mask); extern int open( unsigned char* pathname, int flags, unsigned int mode);
-extern int stat( unsigned char* filename, struct Cyc_Std_stat_t* buf); extern
-int fstat( int fd, struct Cyc_Std_stat_t* buf); extern int lstat( unsigned char*
-filename, struct Cyc_Std_stat_t* buf); int Cyc_Std_open( struct _tagged_arr
-pathname, int flags, struct _tagged_arr mode){ unsigned int my_mode; if(
-_get_arr_size( mode, sizeof( unsigned int)) ==  0){ my_mode= - 1;} else{ if(
-_get_arr_size( mode, sizeof( unsigned int)) ==  1){ my_mode=*(( unsigned int*)
-_check_unknown_subscript( mode, sizeof( unsigned int), 0));} else{( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
-_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("open: too many args",
-sizeof( unsigned char), 20u); _temp1;}); _temp0;}));}} return open(
-string_to_Cstring( pathname), flags, my_mode);} int Cyc_Std_stat( struct
-_tagged_arr filename, struct Cyc_Std_stat_t* buf){ return stat(
-string_to_Cstring( filename), buf);} int Cyc_Std_lstat( struct _tagged_arr
+mask); extern int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode);
+extern int open( unsigned char* pathname, int flags, unsigned int mode); extern
+int stat( unsigned char* filename, struct Cyc_Std_stat_t* buf); extern int fstat(
+int fd, struct Cyc_Std_stat_t* buf); extern int lstat( unsigned char* filename,
+struct Cyc_Std_stat_t* buf); extern int mkdir( unsigned char* pathname,
+unsigned int mode); int Cyc_Std_open( struct _tagged_arr pathname, int flags,
+struct _tagged_arr mode){ unsigned int my_mode; if( _get_arr_size( mode, sizeof(
+unsigned int)) ==  0){ my_mode= - 1;} else{ if( _get_arr_size( mode, sizeof(
+unsigned int)) ==  1){ my_mode=*(( unsigned int*) _check_unknown_subscript( mode,
+sizeof( unsigned int), 0));} else{( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
+_temp1.f1= _tag_arr("open: too many args", sizeof( unsigned char), 20u); _temp1;});
+_temp0;}));}} return open( string_to_Cstring( pathname), flags, my_mode);} int
+Cyc_Std_stat( struct _tagged_arr filename, struct Cyc_Std_stat_t* buf){ return
+stat( string_to_Cstring( filename), buf);} int Cyc_Std_lstat( struct _tagged_arr
 filename, struct Cyc_Std_stat_t* buf){ return lstat( string_to_Cstring( filename),
-buf);}
+buf);} int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode){
+return mkdir( string_to_Cstring( pathname), mode);}

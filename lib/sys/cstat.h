@@ -81,6 +81,8 @@ namespace Std {
   extern "C" int fstat(int fd, struct stat_t @`r buf);
   extern int lstat(string_t filename, struct stat_t @`r buf);
   extern "C" mode_t umask(mode_t mask);
+  extern int mkdir(string_t pathname, mode_t mode);
+
 }
 
 #endif
