@@ -23,11 +23,7 @@ string string_of_loc(int loc) {
   return xprintf("%s (%d:%d)",pos->logical_file,pos->line_no,pos->col);
 }
 
-string string_of_segment(segment s) {
-  if(s == null)
-    return xprintf("%s(unknown)",source);
-  Lineno::Pos pos_s = Lineno::pos_of_abs(source,s->start);
-  Lineno::Pos pos_e = Lineno::pos_of_abs(source,s->end);
+static string string_of_pos_pr(Lineno::Pos pos_s, Lineno::Pos pos_e) {
   if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
     return xprintf("%s(%d:%d-%d:%d)", pos_s->logical_file,
 		   pos_s->line_no,pos_s->col,
@@ -36,6 +32,40 @@ string string_of_segment(segment s) {
     return xprintf("%s(%d:%d)-%s(%d:%d)",
 		   pos_s->logical_file,pos_s->line_no,pos_s->col,
 		   pos_e->logical_file,pos_e->line_no,pos_e->col);
+}
+
+string string_of_segment(segment s) {
+  if(s == null)
+    return xprintf("%s(unknown)",source);
+  Lineno::Pos pos_s = Lineno::pos_of_abs(source,s->start);
+  Lineno::Pos pos_e = Lineno::pos_of_abs(source,s->end);
+  return string_of_pos_pr(pos_s,pos_e);
+}
+
+static Lineno::Pos new_pos() {
+  return &Lineno::pos("","",0,0);
+}
+
+list<string> strings_of_segments(list<segment> segs) {
+  list<$(int,Lineno::Pos)@> places = null;
+  for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
+    if(segs2->hd == null)
+      continue;
+    places = &cons(&$(segs2->hd->start, new_pos()),
+	     &cons(&$(segs2->hd->end,   new_pos()),
+		   places));
+  }
+  Lineno::poss_of_abss(source, places); // mutates places
+  list<string> ans = null;
+  places = List::imp_rev(places);
+  for(; segs != null; segs = segs->tl) 
+    if(segs->hd == null)
+      ans = &cons(xprintf("%s(unknown)", source), ans);
+    else {
+      ans = &cons(string_of_pos_pr(places->hd[1], places->tl->hd[1]), ans);
+      places = places->tl->tl;
+    }
+  return ans;
 }
 
 ///////////// Errors ////////////

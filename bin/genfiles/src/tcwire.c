@@ -204,6 +204,7 @@ struct Lineno_pos {
 };
 typedef struct Lineno_pos *Lineno_Pos;
 extern struct Lineno_pos *Lineno_pos_of_abs(struct _tagged_string *,int);
+extern void Lineno_poss_of_abss(struct _tagged_string *filename,struct List_cons *places);
 extern char Position__Exit__tag[14];
 struct Position__Exit__struct {
   char *tag;
@@ -218,6 +219,7 @@ extern struct Position_Segment *Position_segment_join(struct Position_Segment *,
 						      struct Position_Segment *);
 extern struct _tagged_string *Position_string_of_loc(int);
 extern struct _tagged_string *Position_string_of_segment(struct Position_Segment *);
+extern struct List_cons *Position_strings_of_segments(struct List_cons *);
 typedef void *Position_Error_kind;
 extern void *Position_Lex;
 extern void *Position_Parse;

@@ -22,6 +22,7 @@ extern xenum exn {TypeErr};
 extern `a impos<`a>(string);
 extern void terr(segment, string);
 extern void warn(segment, string);
+extern void flush_warnings();
 extern void err_noloc(string);
 
 // returns the type of a function declaration

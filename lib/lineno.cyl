@@ -55,10 +55,14 @@ static Opt_t<$(string,int)@> parse_linedef(string line) {
   }      
 }
 
-Pos pos_of_abs(string filename, int abs) {
-  if (abs < 0) return &pos(filename, "", -1, 0);
+int place_cmp($(int,Pos)@ place1, $(int,Pos)@ place2) {
+  return intcmp(place1[0],place2[0]);
+}
 
-  FILE @f = file_open(filename,"r");
+// mutates its second argument's elements
+void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
+  places = List::merge_sort(place_cmp, places);
+  FILE @f = file_open(filename, "r");
   try {
     Lexbuf<Function_lexbuf_state<FILE@>> lbuf = from_file(f);
     string source_file = filename;
@@ -67,36 +71,51 @@ Pos pos_of_abs(string filename, int abs) {
     // initializations unnecessary after def. assignment better about loops
     string this_line="";
     int eol=0, next=0;
-    while (true) {
-      next = token(lbuf);
-      eol  = lexeme_end(lbuf);
-      if (eol >= abs) break;
-      this_line = lexeme(lbuf);
-      
-      switch (next) {
-      case END:     throw Failure("Lineno: Invalid file position");
-      case NEWLINE: ++line; break;
-      case LINEDEF: 
-	Opt_t<$(string,int)@> fno = parse_linedef(this_line);
-	if (fno == null) {
-	  ++line;
-	  fprintf(cyc_stderr, "Unknown directive: %s\n", this_line);
-	} else {
-	  source_file = fno->v[0]; 
-	  line        = fno->v[1];
+    while(places != null) {
+      while (true) {
+	next = token(lbuf);
+	eol  = lexeme_end(lbuf);
+	if (eol >= places->hd[0]) break;
+	this_line = lexeme(lbuf);
+	
+	switch (next) {
+	case END:     throw Failure("Lineno: Invalid file position");
+	case NEWLINE: ++line; break;
+	case LINEDEF: 
+	  Opt_t<$(string,int)@> fno = parse_linedef(this_line);
+	  if (fno == null) {
+	    ++line;
+	    fprintf(cyc_stderr, "Unknown directive: %s\n", this_line);
+	  } else {
+	    source_file = fno->v[0]; 
+	    line        = fno->v[1];
+	  }
+	  break;
+	default: throw Failure("Lineno: Impossible");
 	}
-        break;
-      default: throw Failure("Lineno: Impossible");
       }
+      while(places != null && eol >= places->hd[0]) {
+	let p = places->hd[1];
+	p->logical_file = source_file;
+	p->line         = this_line;
+	p->line_no      = line;
+	p->col          = strlen(this_line)-(eol-places->hd[0]);
+	places = places->tl;
+      }
+      ++line;
     }
-    file_close(f);
-    return &pos(source_file, this_line, line, size(this_line)-(eol-abs));
   } catch {
   case y:
     file_close(f); throw (y);
   }
-  // FIX: this is unreachable, but the compiler doesn't know that.
-  throw Core::Unreachable("Lineno::pos_of_abs");
+  file_close(f);
+  return;
+}
+
+Pos pos_of_abs(string filename, int abs) {
+  Pos ans = &pos("","",0,0);
+  poss_of_abss(filename, &List::cons(&$(abs,ans),null));
+  return ans;
 }
 
 }

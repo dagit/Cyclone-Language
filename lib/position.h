@@ -23,6 +23,7 @@ namespace Position {
   extern segment segment_join(segment,segment);
   extern string string_of_loc(int);
   extern string string_of_segment(segment);
+  extern list<string> strings_of_segments(list<segment>);
 
   //////// Errors ////////////////////
   extern enum Error_kind { Lex, Parse, Elab };

@@ -31,10 +31,35 @@ void terr(segment loc, string s) {
   throw TypeErr;
 }
 
+static list<Position::segment> warning_segs = null;
+static list<string>            warning_msgs = null;
+
 void warn(segment sg, string msg) {
-  fprintf(cyc_stderr,"%s: Warning: %s\n",Position::string_of_segment(sg),msg);
-  fflush(cyc_stderr);
+  warning_segs = &cons(sg, warning_segs);
+  warning_msgs = &cons(msg,warning_msgs);
 }
+
+void flush_warnings() {
+  if(warning_segs != null) {
+    fprintf(cyc_stderr,"***Warnings***\n");
+    list<string> seg_strs = strings_of_segments(warning_segs);
+    warning_segs = null;
+    warning_msgs = List::imp_rev(warning_msgs);
+    while(warning_msgs != null) {
+      fprintf(cyc_stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
+      fflush(cyc_stderr); // delete me
+      seg_strs     = seg_strs->tl;
+      warning_msgs = warning_msgs->tl;
+    }
+    fprintf(cyc_stderr,"**************\n");
+    fflush(cyc_stderr);
+  }
+}
+
+//  void warn(segment sg, string msg) {
+//    fprintf(cyc_stderr,"%s: Warning: %s\n",Position::string_of_segment(sg),msg);
+//    fflush(cyc_stderr);
+//  }
 
 // used to make empty statements more explicit
 #define SKIP ;

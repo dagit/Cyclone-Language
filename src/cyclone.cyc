@@ -119,6 +119,8 @@ void compile_file(string filename) {
     fprintf(cyc_stderr,"COMPILATION FAILED!\n");
     fflush(cyc_stderr);
     compile_failure=true;
+  } else {
+    Tcutil::flush_warnings();
   }
   file_close(f);
   file_delete(preprocfile);
