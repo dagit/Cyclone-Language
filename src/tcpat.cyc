@@ -588,10 +588,8 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Int_p(sn,i):    s = int_pat(i); break;
   case &Char_p(c):      s = char_pat(c); break;
   case &Float_p(f):     s = float_pat(f); break;
-  case &Tuple_p(ps):    s = tuple_pat(List::map(compile_pat,ps)); break;
   case &Reference_p(_): s = Any; break;
   case &Pointer_p(pp):
-    simple_pat_t ss = compile_pat(pp);
     switch (compress(p->topt->v)) {
     case &PointerType(PtrInfo{_,_,n,_,_}):
       bool is_nullable = false;
@@ -612,20 +610,47 @@ static simple_pat_t compile_pat(pat_t p) {
           break;
 	}
       }
+      simple_pat_t ss = compile_pat(pp);
       if (is_nullable) 
 	s = null_ptr_pat(ss);
       else 
 	s = ptr_pat(ss);
       break;
-    // if the type of the & pattern is a Tunion or XTunion, then we just
-    // leave all the compilation work to the sub-pattern.
     case &TunionType(_):
-      s = ss; break;
+      switch(pp->r) {
+      case &Tunion_p(_,_,ps,tud,tuf):
+	int span = List::length(tud->fields->v);
+	s =con_pat(*((*tuf->name)[1]),new Opt(span),List::map(compile_pat,ps)); 
+	break;
+      default: s = impos("non-tunion pattern has tunion type"); break;
+      }
+      break;
     case &XTunionType(_):
-      s = ss; break;
+      switch(pp->r) {
+      case &XTunion_p(_,_,ps,tud,tuf):
+	s = con_pat(*((*tuf->name)[1]),null,List::map(compile_pat,ps)); 
+	break;
+      default: s = impos("non-xtunion pattern has xtunion type"); break;
+      }
+      break;
     default: s = impos("pointer pattern does not have pointer type!"); break;
     }
     break;
+
+  case &Tunion_p(_,_,null,tud,tuf):
+    int span;
+    switch(compress(p->topt->v)) {
+    case &TunionType(_):      span = List::length(tud->fields->v); break;
+    case &TunionFieldType(_): span = 1; break;
+    default: span = impos("void tunion pattern has bad type"); break;
+    }
+    s =con_pat(*((*tuf->name)[1]),new Opt(span), null); 
+    break;
+    
+  case &Tunion_p(_,_,ps,_,_):  fallthru(ps);
+  case &XTunion_p(_,_,ps,_,_): fallthru(ps);
+  case &Tuple_p(ps): s = tuple_pat(List::map(compile_pat,ps)); break;
+
   case &Struct_p(sd,_,_,dlps):
     list_t<simple_pat_t> ps = null;
     for (_ fields = sd->fields->v; fields != null; fields = fields->tl) {
@@ -648,22 +673,7 @@ static simple_pat_t compile_pat(pat_t p) {
     }
     s = tuple_pat(ps);
     break;
-  case &Tunion_p(_,_,ps,ed,ef):
-    int span;
-    switch(compress(p->topt->v)) {
-    case &TunionFieldType(_): span = 1; break;
-    default: span = List::length(ed->fields->v); break;
-    }
-    s = con_pat(*((*ef->name)[1]),new Opt(span),List::map(compile_pat,ps)); 
-    break;
-  case &XTunion_p(_,_,ps,xd,ef):
-    opt_t<int> span;
-    switch(compress(p->topt->v)) {
-    case &XTunionFieldType(_): span = new Opt(1); break;
-    default: span = null; break;
-    }
-    s = con_pat(*((*ef->name)[1]),null,List::map(compile_pat,ps)); 
-    break;
+    
   case &Enum_p(q,ed,ef):
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.

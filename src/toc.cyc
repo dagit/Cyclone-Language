@@ -2214,7 +2214,7 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
                         seq_stmts(ss,DL),
                         goto_stmt(fail_lab,DL), DL);
     break;
-  case &Pointer_p(&Pat{&XTunion_p(qv,ts,ps,xd,xf),_,_}) && ps != null:
+  case &Pointer_p(&Pat{&XTunion_p(qv,ts,ps,xd,xf),_,_}):
     // similar to tunion patterns except that we cast the root to an 
     // _xtunion_struct
     // and compare r->tag against qv (and then the nested patterns and so
