@@ -68,7 +68,7 @@
 \hyperlink{faq:localaddress}{Why do I get an incomprehensible error when I assign a local's address to a pointer variable?}\\
 \hyperlink{faq:pointerarith}{How much pointer arithmetic can I do?}\\
 \hyperlink{faq:litstring}{What is the type of a literal string?}\\
-\hyperlink{faq:nullterminate}{Are strings null-terminated?}\\
+\hyperlink{faq:nullterminate}{Are strings NUL-terminated?}\\
 \hyperlink{faq:malloc}{How do I use \texttt{malloc}?}\\
 \hyperlink{faq:free}{Can I call free?}\\
 \hyperlink{faq:gc}{Is there a garbage collector?}\\
@@ -259,7 +259,7 @@ Note that \texttt{_} is not allowed as part of top-level declarations.
 call kinds.  There are four ``normal'' kinds: B (for Box), M (for Memory), A
 (for Any), and E (for Effect); and three ``region'' kinds: R (for Region),
 UR (for unique region), and TR (for either regular or unique region).  The
-notation \texttt{typevar}\texttt{::}\textit{kind} says that a type variable
+notation \textit{typevar}\texttt{::}\textit{kind} says that a type variable
 belongs to a kind.  A type variable can only be instantiated by types that
 belong to its kind.
 
@@ -336,10 +336,9 @@ be exported.
 \begin{faqa}{faq:keywords}{What are the Cyclone keywords?}
 In addition to the C keywords, the following have special meaning and
 cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
-\texttt{codegen}, \texttt{cut}, \texttt{datatype}, \texttt{fallthru},
-\texttt{fill}, \texttt{let}, \texttt{malloc}, \texttt{namespace},
-\texttt{new}, \texttt{NULL}, \texttt{region_t}, \texttt{regions},
-\texttt{rmalloc}, \texttt{rnew}, \texttt{splice}, \texttt{throw},
+\texttt{datatype}, \texttt{fallthru}, \texttt{let}, \texttt{malloc},
+\texttt{namespace}, \texttt{new}, \texttt{NULL}, \texttt{region_t},
+\texttt{regions}, \texttt{rmalloc}, \texttt{rnew}, \texttt{throw},
 \texttt{try}, \texttt{using}.  As in gcc, \texttt{__attribute__} is
 reserved as well.
 \end{faqa}
@@ -387,12 +386,12 @@ may mention \texttt{i}).
 
 \begin{faqa}{faq:usetuples}{How do I use tuples?}
 A tuple type is written
-\texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$)}.
+\texttt{\$(\textit{type}$_0$, \ldots, \textit{type}$_n$)}.
 A value of the type is constructed by
-\texttt{\$(\textit{expr}$_1$, \ldots, \textit{expr}$_n$)}.
+\texttt{\$(\textit{expr}$_0$, \ldots, \textit{expr}$_n$)},
 where \textit{expr}$_i$ has type \textit{type}$_i$.  
 If \textit{expr} has type
-\texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$)},
+\texttt{\$(\textit{type}$_0$, \ldots, \textit{type}$_n$)},
 you can extract the component \texttt{i} using
 \textit{expr}\texttt{[i]}.
 The expression in the brackets must be a compile-time constant.  In
@@ -407,19 +406,24 @@ you can extract component \texttt{i} by \texttt{(*\textit{expr})[i]}.
 \end{faqa}
 
 \begin{faqa}{faq:arrayinit}{What is \texttt{\lb for i < {\it expr}$_1$ : {\it expr}$_2$\rb}?}
-This is an array initializer.  It can appear where array
-initializers appear in C, and it can appear as the argument to
-\texttt{new}.
-i
-is an identifier.  e1 is an unsigned int indicating the size of the
-array.  e2 is evaluated e1 times, with i having values 0, 1, ..., e1-1
-and the result initializes the ith element of the array.  The form new
-\texttt{\{for i < e1 : e2\}} allocates space for a new array and initializes it
-as just described.  This form is the only way to create arrays whose
-size depends on run-time information.  When \texttt{\{for i < e1:
-e2\}} is not an argument to new, e1 must be constant and e2 may not
-mention i.  This restriction includes all uses at top-level (for
-global variables).
+This is an array initializer.  It can appear where array initializers
+appear in C, and it can appear as the argument to \texttt{new}.  It
+declares an identifier (in this case, \texttt{i}) whose scope is
+\textit{expr}$_2$.  \textit{expr}$_1$ is an expression which is
+evaluated to an unsigned integer giving the desired size of the array.
+The expression \textit{expr}$_2$ is evaluated \textit{expr}$_1$ times,
+with \texttt{i} ranging over 0, 1, ..., \textit{expr}$_1$-1; the
+result of each evaluation initializes the \texttt{i}$^{\rm th}$
+element of the array.
+
+The form \texttt{new \lb for i < {\it expr}$_1$ : {\it expr}$_2$\rb}
+allocates space for a new array and initializes it as just described.
+This form is the only way to create arrays whose size depends on
+run-time information.  When \texttt{\lb for i < {\it expr}$_1$ : {\it
+expr}$_2$\rb} is not an argument to \texttt{new}, \textit{expr}$_1$
+must be constant and \textit{expr}$_2$ may not mention \texttt{i}.
+This restriction includes all uses at top-level (for global
+variables).
 \end{faqa}
 
 \begin{faqa}{faq:exns}{How do I throw and catch exceptions?}
@@ -464,7 +468,7 @@ When the exception is caught, the integer value is bound to \texttt{x}.
 
 The \texttt{exn} type is just a pre-defined \texttt{@extensible
 datatype} type.  Therefore, all the standard rules for extending,
-creating objects, and destructing objects of a dataypte apply.
+creating objects, and destructing objects of a datatype apply.
 \end{faqa}
 
 \begin{faqa}{faq:exn-efficiency}{How efficient is exception handling?}
@@ -494,7 +498,7 @@ There is a second kind of \texttt{let} declaration, with form
 \begin{alltt}
   let {\it pattern} = {\it expr};
 \end{alltt}
-It evaluates \textit{expr} and matches it against \texttt{pattern},
+It evaluates \textit{expr} and matches it against \textit{pattern},
 initializing the pattern variables of \textit{pattern} with values
 drawn from \texttt{expr}.  For example,
 \begin{verbatim}
@@ -511,8 +515,8 @@ declares new variables \texttt{y} and \texttt{z}, and initializes
 \begin{faqa}{faq:pattern}{What is a pattern and how do I use it?}
 Cyclone's patterns are a convenient way to destructure aggregate
 objects, such as structs and tuples.  They are also the only way to
-destructure tagged unions.  Patterns are used in Cyclone's
-\texttt{let} declarations, \texttt{switch} statements, and
+destructure datatypes.  Patterns are used in Cyclone's \texttt{let}
+declarations, \texttt{switch} statements, and
 \texttt{try}/\texttt{catch} statements.
 \end{faqa}
 
@@ -532,10 +536,11 @@ whitespace) by an identifier is a type variable.  If a function
 parameter has a type variable for its type, it means the function can
 be called with any pointer or with an int.  However, if two parameters
 have the same type variable, they must be instantiated with the same
-type. If all occurrences of `a appear directly under pointers (eg. `a
-*), then an actual parameter can have any type, but the restrictions
-about using the same type still apply.  In general, Cyclone has
-parametric polymorphism as a safe alternative to casts and void *.
+type. If all occurrences of \texttt{`a} appear directly under pointers
+(e.g., \texttt{`a *}), then an actual parameter can have any type, but
+the restrictions about using the same type still apply.  This is
+called \emph{parametric polymorphism}, and it's used in Cyclone as a
+safe alternative to casts and \texttt{void *}.
 \end{faqa}
 
 \begin{faqa}{faq:templates}{Do functions with type variables get duplicated like C++ template functions?\\  Is there run-time overhead for using type variables?}
@@ -570,15 +575,15 @@ subset of C's casts.  Here are some examples.
 All of C's numeric casts, conversions, and promotions are unchanged.
 
 You can always cast between
-\textit{type}\texttt{@}\lb\textit{const}\rb,
-\textit{type}\texttt{*}\lb\textit{const}\rb, and
+\textit{type}\texttt{@}\lb\textit{const-expr}\rb,
+\textit{type}\texttt{*}\lb\textit{const-expr}\rb, and
 \textit{type}\texttt{?}.
 A cast from 
 \textit{type}\texttt{?}
 to one of the other types includes a run-time check that the pointer
-points to a sequence of at least \textit{const} objects.
+points to a sequence of at least \textit{const-expr} objects.
 A cast to
-\textit{type}\texttt{@}\lb\textit{const}\rb
+\textit{type}\texttt{@}\lb\textit{const-expr}\rb
 from one of the
 other types includes a run-time check that the pointer is not
 \texttt{NULL}.
@@ -594,14 +599,14 @@ of the target type could be the target of a cast from the
 corresponding field of the source type.
 A pointer can be cast to \texttt{int}.
 The type
-\textit{type}\texttt{*}\lb\textit{const}$_1$\rb
+\textit{type}\texttt{*}\lb\textit{const-expr}$_1$\rb
 can be cast to
-\textit{type}\texttt{*}\lb\textit{const}$_2$\rb
+\textit{type}\texttt{*}\lb\textit{const-expr}$_2$\rb
 provided
-$\textit{const}_2 < \textit{const}_1$, and similarly for
-\textit{type}\texttt{@}\lb\textit{const}$_1$\rb
+$\textit{const-expr}_2 < \textit{const-expr}_1$, and similarly for
+\textit{type}\texttt{@}\lb\textit{const-expr}$_1$\rb
 and
-\textit{type}\texttt{@}\lb\textit{const}$_2$\rb.
+\textit{type}\texttt{@}\lb\textit{const-expr}$_2$\rb.
 
 An object of type \texttt{datatype T.A @} can be cast to
 \texttt{datatype T @}.  The current implementation isn't quite as
@@ -610,7 +615,7 @@ lenient as it should be.  For example, it rejects a cast from
 is safe.
 
 For all non-pointer-containing types \textit{type}, you can cast from a
-\textit{type ?} to a \texttt{char} \textit{?}.  This allows you to make
+\textit{type} \texttt{?} to a \texttt{char ?}.  This allows you to make
 frequent use of \texttt{memcpy}, \texttt{memset}, \emph{etc.}
 \end{faqa}
 
@@ -695,7 +700,7 @@ As in C, \texttt{argc} is the number of command-line arguments and
 \texttt{argv[i]} is a string with the \texttt{i}$^{\rm th}$ argument.
 Unlike C, \texttt{argv} and each element of \texttt{argv} carry bounds
 information.  Note that \texttt{argc} is redundant---it is always
-equal to \texttt{argv.size}.
+equal to \texttt{numelts(argv)}.
 \end{faqa}
 
 \begin{faqa}{faq:stackpointer}{Why can't I pass a stack pointer to certain functions?}
@@ -712,9 +717,8 @@ with the local's address, rather than delaying the assignment until later.
 \end{faqa}
 
 \begin{faqa}{faq:pointerarith}{How much pointer arithmetic can I do?}
-On ``questionable'' pointers (pointers with type
-\textit{type}\texttt{?}), you can add or subtract an int (including
-via increment/decrement), as in C\@.  It is okay for the result to be
+On fat pointers, you can add or subtract an int (including via
+increment/decrement), as in C\@.  It is okay for the result to be
 outside the bounds of the object pointed to; it is a run-time error to
 dereference outside of the bounds.  (The compiler inserts bounds
 information and a run-time check; an exception is thrown if the check
@@ -731,17 +735,17 @@ casts from \texttt{char @\lb 4\rb} to \texttt{char @\lb 2\rb},
 think too much about this.
 \end{faqa}
 
-\begin{faqa}{faq:nullterminate}{Are strings null-terminated?}
+\begin{faqa}{faq:nullterminate}{Are strings NUL-terminated?}
 Cyclone follows C's lead on this.  String literals like \texttt{"foo"}
-are null-terminated.  Many of the library functions consider a null
+are NUL-terminated.  Many of the library functions consider a NUL
 character to mark the end of a string.  And library functions that
-return strings often ensure that they are null terminated.  However,
-there is no guarantee that a string is null terminated.  For one
-thing, as in C, the terminating null may be overwritten by any
+return strings often ensure that they are NUL terminated.  However,
+there is no guarantee that a string is NUL terminated.  For one
+thing, as in C, the terminating NUL may be overwritten by any
 character.  In C this can be exploited to cause buffer overflows.  To
 avoid this in Cyclone, strings generally have type \texttt{char ?},
 that is, they carry bounds information.  In Cyclone a string ends when
-a null character is found, or when the bounds are exceeded.
+a NUL character is found, or when the bounds are exceeded.
 \end{faqa}
 
 \begin{faqa}{faq:malloc}{How do I use \texttt{malloc}?}
@@ -819,7 +823,7 @@ elsewhere.
 \begin{faqa}{faq:realloc}{Can I use \texttt{salloc} or \texttt{realloc}?}
 Currently, we don't provide support for \texttt{salloc}.  For 
 \texttt{realloc}, we do provide support, but only on heap-allocated
-\texttt{char?} buffers.
+\texttt{char ?} buffers.
 \end{faqa}
 
 \begin{faqa}{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{NULL}?} 
@@ -836,35 +840,35 @@ Type variables of memory kind can be instantiated with types of any
 size.  There is no straightforward way to compile a function with an
 argument of arbitrary size.  The obvious way to write such a function
 is to manipulate a pointer to the arbitrary size value instead.  So
-your parameter should have type \texttt{`a::M*} or \texttt{`a::M@}.
+your parameter should have type \texttt{`a::M *} or \texttt{`a::M @}.
 \end{faqa}
 
 \begin{faqa}{faq:compile}{Can I see how Cyclone compiles the code?}
-The easiest way to do this is to pass the flags \texttt{-save-c} and
-\texttt{-pp} to the compiler.  This instructs the compiler to save the
-C code that it builds and passes to GCC, and print it out using the
-pretty-printer.  You will have to work to make some sense out of the C
-code, though.  It will likely contain many \texttt{extern}
-declarations (because the code has already gone through the
-preprocessor) and generated type definitions (because of tuples,
-tagged unions, and questionable pointers).  Pattern-matching code gets
-translated to a mess of temporary variables and \texttt{goto}
-statements.  Array-bounds checks and \texttt{NULL} checks can clutter
-array-intensive and pointer-intensive code.  And all \texttt{typedef}s
-are expanded away before printing the output.
+Just compile with flags \texttt{-save-c} and \texttt{-pp}.  This tells
+the compiler to save the C code that it builds and passes to gcc, and
+print it out using the pretty-printer.  You will have to work to make
+some sense out of the C code, though.  It will likely contain many
+\texttt{extern} declarations (because the code has already gone
+through the preprocessor) and generated type definitions (because of
+tuples, tagged unions, and questionable pointers).  Pattern-matching
+code gets translated to a mess of temporary variables and
+\texttt{goto} statements.  Array-bounds checks and \texttt{NULL}
+checks can clutter array-intensive and pointer-intensive code.  And
+all \texttt{typedef}s are expanded away before printing the output.
 \end{faqa}
 
 \begin{faqa}{faq:gdb}{Can I use \texttt{gdb} on the output?}
-You can run {\tt gdb}, but debugging support is not all the way there yet.
-By default, source-level debugging operations within {\tt gdb} will
-reference the C code generated by the Cyclone compiler, not the Cyclone
-source itself.  In this case, you need to be aware of three things.  First,
-you have to know how Cyclone translates top-level identifiers to C
-identifiers (it prepends Cyc_ and separates namespaces by _ instead of ::)
-so you can set breakpoints at functions.  Second, it can be hard to print
-values because many Cyclone types get translated to \texttt{void *.}  Third,
-we do not yet have source correlation, so if you step through code, you're
-stepping through C code, not Cyclone code.
+You can run {\tt gdb}, but debugging support is not all the way there
+yet.  By default, source-level debugging operations within {\tt gdb}
+will reference the C code generated by the Cyclone compiler, not the
+Cyclone source itself.  In this case, you need to be aware of three
+things.  First, you have to know how Cyclone translates top-level
+identifiers to C identifiers (it prepends \texttt{Cyc_} and separates
+namespaces by \texttt{_} instead of \texttt{::}) so you can set
+breakpoints at functions.  Second, it can be hard to print values
+because many Cyclone types get translated to \texttt{void *.}  Third,
+we do not yet have source correlation, so if you step through code,
+you're stepping through C code, not Cyclone code.
 
 To improve this situation somehwat, you can compile your files with the
 option \texttt{--lineno}.  This will insert \texttt{\#line} directives in the
@@ -919,21 +923,16 @@ compatible with C\@.  An offshoot of Popcorn added safe runtime code
 generation, and was called Cyclone.  The current Cyclone language is a
 merger of the two, refocused on safety and C compatibility.
 Currently, the language does not have support for runtime code
-generation, but we have reserved the keywords \texttt{codegen},
-\texttt{splice}, \texttt{cut}, and \texttt{fill} in case we get a
-chance to add it.
+generation.
 \end{faqa}
 
 \begin{faqa}{faq:platforms}{What platforms are supported?}
-You need a platform that has gcc 2.9, GNU make, ar, sed, either bash or ksh,
-and the ability to build the Boehm-Demers-Weiser garbage collector.
-Furthermore, the size of \texttt{int} and all C pointers must be the same.
-We have actively develop Cyclone on cygwin (Windows 98, NT, 2K), and Linux.
-We have code for versions on Solaris, OpenBSD, FreeBSD, and Mac OS X.  The
-platform-specific parts of these non-development distributions, particularly
-system call interfaces, may not be correct.  We are in the process of
-developing a tool to automatically generate system-dependent code that
-should be part of future releases.
+You need a platform that has gcc, GNU make, ar, sed, either bash or
+ksh, and the ability to build the Boehm-Demers-Weiser garbage
+collector.  Furthermore, the size of \texttt{int} and all C pointers
+must be the same.  We actively develop Cyclone in Cygwin (a Unix
+emulation layer for Windows 98, NT, 2K), Linux, and Mac OS X.
+Versions have run on OpenBSD and FreeBSD.
 \end{faqa}
 
 \begin{faqa}{faq:libs}{Why aren't there more libraries?}
@@ -944,8 +943,8 @@ with limited resources.  Let us know of useful code you write.
 \begin{faqa}{faq:imprev}{Why doesn't \texttt{List::imp_rev(l)} change \texttt{l} to its reverse?} 
 The library function \texttt{List::imp_rev} mutates its argument by
 reversing the \texttt{tl} fields.  It returns a pointer to the new
-first (old last) cell, but \texttt{l} still points to the old first
-(new last) cell.
+first cell (the old last cell), but \texttt{l} still points to the old
+first cell (the new last cell).
 \end{faqa}
 
 \begin{faqa}{faq:inline}{Can I inline functions?}
@@ -968,23 +967,25 @@ execution.
 \end{faqa}
 
 \begin{faqa}{faq:ctc}{What are compile-time constants?}
-Compile-time constants are \texttt{NULL}, integer and character
-constants, and arithmetic operations over compile-time constants.
-Constructs requiring compile-time constants are: tuple-subscript
-(e.g.,
-\texttt{x[3]} for tuple \texttt{x}), case argument for 
-\texttt{switch "C"} argument has a numeric type (e.g., \texttt{case
-  3+4}:), sizes in array declarations (e.g., \texttt{int y[37]}, and
-sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).  Unlike in
-C, \texttt{sizeof(t)} is not an integral constant expression because
-the Cyclone compiler does not know the actual size of aggregate types.
+Cyclone's compile-time constants are \texttt{NULL}, integer and
+character constants, and arithmetic operations over compile-time
+constants.  Unlike C, \texttt{sizeof(t)} is not an integral constant
+expression in our current implementation of Cyclone because our
+compiler does not know the actual size of aggregate types; we hope to
+repair this in a future version.  Constructs requiring compile-time
+constants are: tuple-subscript (e.g., \texttt{x[3]} for tuple
+\texttt{x}), sizes in array declarations (e.g., \texttt{int y[37]}),
+and sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).
 \end{faqa}
 
 \begin{faqa}{faq:arraysize}{How can I get the size of an array?}
-If \textit{expr} is an array, then \texttt{{\it expr}.size} returns
-the array's size.  Note that for \texttt{?} types, the size is
-retrieved at runtime from the object.  For other array types,
-the size is determined at compile-time.
+If \textit{expr} is an array, then \texttt{numelts({\it expr})} returns
+the number of elements in the array.  If \textit{expr} is a pointer to
+an array, \texttt{numelts({\it expr})} returns the number of elements
+in the array pointed to.  If \textit{expr} is a fat pointer, then the
+number of elements is calculated at runtime from the bounds
+information contained in the fat pointer.  For other types, the size
+is determined at compile-time.
 \end{faqa}
 
 % Local Variables:
