@@ -193,7 +193,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
 				    new $(new VarRes(b), true));
       break;
     case &StructRes(_):
-      warn(loc,"variable declaration shadows previous struct declaration");
+      // warn(loc,"variable declaration shadows previous struct declaration");
       break;
     case &TunionRes(_,_): 
       warn(loc,"variable declaration shadows previous [x]tunion constructor");
@@ -261,7 +261,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
 				    new $(new VarRes(b), true));
       break;
     case &StructRes(_):
-      warn(loc,"function declaration shadows previous struct declaration");
+      // warn(loc,"function declaration shadows previous struct declaration");
       break;
     case &TunionRes(_,_): 
       warn(loc,"function declaration shadows previous [x]tunion constructor");
