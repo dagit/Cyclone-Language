@@ -3,8 +3,7 @@ include ../../../../Makefile.inc
 CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
 
 CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
-#CFLAGS=-fwritable-strings -include $(CYC_LIB_PATH)/include/cyc_include.h
-#CFLAGS=-g -fwritable-strings -include $(CYC_LIB_PATH)/include/cyc_include.h
+#CFLAGS=-g -include $(CYC_LIB_PATH)/include/cyc_include.h
 #CFLAGS=-O -include $(CYC_INCLUDE_PATH)/include/cyc_include.h
 
 PROG=cyclone$(EXE)
