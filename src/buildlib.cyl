@@ -49,6 +49,10 @@
    Some systems define typedefs with macros -- e.g., socklen_t in
    cygwin.
 
+   OS X defines a struct with no members [/usr/include/net/if_var.h]
+   and we don't parse it:
+        struct tqdummy {
+        };
  */
 
 #include <core.h>
@@ -59,15 +63,17 @@
 #include <hashtable.h>
 #include <filename.h>
 #include <position.h>
-#include <stdlib.h>
+#include <arg.h>
 #include <buffer.h>
+#include "absyn.h"
+#include "absynpp.h"
+#include "parse.h"
+
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ctype.h>
-#include "absyn.h"
-#include "absynpp.h"
-#include "parse.h"
 
 namespace Lex {
   extern void lex_init();
@@ -818,9 +824,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
 {
 
-  static void pr(stringptr_t sptr) {
-    printf(" %s\n",*sptr);
-  }
+//  static void pr(stringptr_t sptr) {
+//    log(" %s\n",*sptr);
+//  }
 
   extern void scan_type(type_t t);
   void scan_exp(exp_opt_t e) {
@@ -1197,6 +1203,17 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
   }
 
+  /* Exceptions for handling error cases of process_file */
+  xtunion exn {
+    DELETE_CD_ERR;
+    DELETE_CD_NOERR;
+    CD_ERR;
+    CD_NOERR;
+  };
+
+  tunion buildlib_mode { NORMAL, GATHER, FINISH };
+  static tunion buildlib_mode mode = NORMAL;
+
   int process_file(string_t filename,
                    string_t dir,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
@@ -1208,6 +1225,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     FILE *maybe;
     FILE @in_file;
     FILE @out_file;
+    int errorcode = 0;
 
     fprintf(stderr,
             "********************************* %s...\n",filename);
@@ -1226,54 +1244,79 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     /* Calculate necessary file names.  For example:
        filename = sys/types.h
        basename = types.h
+       dirname = sys
        choppedname = types
        cppinfile = types.iA
-       preprocfile = types.i
-       filteredfile = types.iB
-       dirname = sys
+       macrosfile = sys/types.iB
+       declsfile = sys/types.iC
+       filtereddeclsfile = sys/types.iD
        cfilename = sys/ctypes.h
     */
     let basename = Filename::basename(filename);
+    let dirname = Filename::dirname(filename);
     let choppedname = Filename::chop_extension(basename);
     let cppinfile = strconcat(choppedname, ".iA");
-    let preprocfile = strconcat(choppedname, ".i");
-    let filteredfile = strconcat(choppedname, ".iB");
-    let dirname = Filename::dirname(filename);
+    let macrosfile =
+      (dirname.size == 0)?
+      (aprintf("%s.iB", choppedname)):
+      (Filename::concat(dirname, aprintf("%s.iB", choppedname)));
+    let declsfile =
+      (dirname.size == 0)?
+      (aprintf("%s.iC", choppedname)):
+      (Filename::concat(dirname, aprintf("%s.iC", choppedname)));
+    let filtereddeclsfile =
+      (dirname.size == 0)?
+      (aprintf("%s.iD", choppedname)):
+      (Filename::concat(dirname, aprintf("%s.iD", choppedname)));
     let cfilename = 
       (dirname.size == 0)?
       (aprintf("c%s", basename)):
       (Filename::concat(dirname, aprintf("c%s", basename)));
 
+    try {
+
     /* Make sure we'll be able to create files in the right directories */
     if (force_directory_prefixes(filename)) {
-      return 1;
+      throw CD_ERR;
     }
-    /* Table to hold the dependencies */
-    dep_t t = new_deps();
 
-    /* Get the macros out of the file */
-    let GCC = Cstring_to_string(Ccomp);
-    maybe = fopen(cppinfile,"w");
-    if (!maybe) {
-      fprintf(stderr,"Error: could not create file %s\n",cppinfile);
-      return 1;
-    }
-    out_file = (FILE@)maybe;
-    current_cpp = imp_rev(current_cpp);
-    for (let l = current_cpp; l != NULL; l = l->tl)
-      fputs(*(l->hd),out_file);
-    fprintf(out_file,"#include <%s>\n",filename);
-    fclose(out_file);
-    let cmd = aprintf("%s -E -dM -o %s -x c %s",
-                      GCC,preprocfile,cppinfile);
-    if (system(cmd) != 0) {
+    /* Create the file of macros and the file of declarations */
+    if (mode != FINISH) {
+      let GCC = Cstring_to_string(Ccomp);
+      maybe = fopen(cppinfile,"w");
+      if (!maybe) {
+        fprintf(stderr,"Error: could not create file %s\n",cppinfile);
+        throw CD_ERR;
+      }
+      out_file = (FILE@)maybe;
+      current_cpp = imp_rev(current_cpp);
+      for (let l = current_cpp; l != NULL; l = l->tl)
+        fputs(*(l->hd),out_file);
+      fprintf(out_file,"#include <%s>\n",filename);
+      fclose(out_file);
+      let cmd = aprintf("%s -E -dM -o %s -x c %s",
+                        GCC,macrosfile,cppinfile);
+      if (!system(cmd)) {
+        /* No error in creating the file of macros, so go ahead and create
+           the file of declarations */
+        cmd = aprintf("%s -E -o %s -x c %s",
+                      GCC,declsfile,cppinfile);
+        system(cmd); // if err, no declsfile created, and we'll handle later
+      }
       remove(cppinfile);
+    }
+    if (mode == GATHER) throw CD_NOERR;
+
+    /* Put the macros in the table of dependencies */
+    dep_t t = new_deps();
+    maybe = fopen(macrosfile,"r");
+    if (!maybe) {
       /* The header probably doesn't exist on this system;
          create a default header. */
       maybe = fopen(filename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",filename);
-        return 1;
+        throw CD_ERR;
       }
       out_file = (FILE@)maybe;
       fprintf(out_file,
@@ -1283,7 +1326,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       maybe = fopen(cfilename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",cfilename);
-        return 1;
+        throw CD_ERR;
       }
       out_file = (FILE@)maybe;
       fprintf(out_file,
@@ -1294,60 +1337,48 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
               filename);
 
       log("Not supported on this platform\n");
-      /* Return to original directory so that we're set up for
-         the next file */
-      if (chdir(cwd)) {
-        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
-        return 1;
-      }
-      return 0;
+      throw CD_NOERR;
     }
-    maybe = fopen(preprocfile,"r");
-    if (!maybe) {
-      return 1;
-    }
+
     in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = line(l)) != NULL) {
       let &$(name,uses) = (_ @)entry; // force NULL check to get rid of warning
       Hashtable::insert(t,name,uses);
-      //      printf("Macro %s uses:\n",*name);
+      //      log("Macro %s uses:\n",*name);
       //      Set::iter(pr,uses);
     }
     fclose(in_file);
 
     /* Get the type declarations out of the file */
-    cmd = aprintf("%s -E -o %s -x c %s",
-                  GCC,preprocfile,cppinfile);
-    if (system(cmd) != 0) {
-      return 1;
-    }
-    maybe = fopen(preprocfile,"r");
+    maybe = fopen(declsfile,"r");
     if (!maybe) {
-      return 1;
+      /* Impossible(?), macrosfile created successfully but not declsfile. */
+      throw CD_ERR;
     }
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
-    slurp_out = fopen(filteredfile,"w");
+    slurp_out = fopen(filtereddeclsfile,"w");
     if (!slurp_out) {
-      return 1;
+      throw DELETE_CD_ERR;
     }
     while (slurp(l)) /* skip */;
     fclose(in_file);
     fclose((FILE @)slurp_out);
+    if (mode != FINISH) remove(declsfile);
 
-    maybe = fopen(filteredfile,"r");
+    maybe = fopen(filtereddeclsfile,"r");
     if (!maybe) {
-      return 1;
+      throw DELETE_CD_ERR;
     }
     in_file = (FILE@)maybe;
-    Position::reset_position(filteredfile);
+    Position::reset_position(filtereddeclsfile);
     Lex::lex_init(); // must forget typedefs, may as well flush symbols too
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(); // garbage collect those big tries
     fclose(in_file);
-    remove(filteredfile);
+    remove(filtereddeclsfile);
 
     for (let d = decls; d != NULL; d = d->tl) {
       let entry = scan_decl(d->hd);
@@ -1434,14 +1465,14 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     reachable_decls = imp_rev(reachable_decls);
     maybe = fopen(filename,"w");
     if (!maybe) {
-      return 1;
+      throw DELETE_CD_ERR;
     }
     out_file = (FILE @)maybe;
     fprintf(out_file,"#include <%s>\nusing Std;\n",cfilename);
     fclose(out_file);
     maybe = fopen(cfilename, "w");
     if (!maybe) {
-      return 1;
+      throw DELETE_CD_ERR;
     }
     out_file = (FILE @)maybe;
     mstring_t ifdefmacro = aprintf("_%s_",filename);
@@ -1522,14 +1553,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
 
     /* Print reachable macros */
-    cmd = aprintf("%s -E -dM -o %s -x c %s",
-                  GCC,preprocfile,cppinfile);
-    if (system(cmd) != 0) {
-      return 1;
-    }
-    maybe = fopen(preprocfile,"r");
+    maybe = fopen(macrosfile,"r");
     if (!maybe) {
-      return 1;
+      throw CD_ERR;
     }
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
@@ -1543,8 +1569,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       }
     }
     fclose(in_file);
-    remove(cppinfile);
-    remove(preprocfile);
+    if (mode != FINISH) remove(macrosfile);
 
     if (epilogue != NULL) {
       for (let x = epilogue; x != NULL; x = x->tl) {
@@ -1588,13 +1613,31 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(out_file, "}\n\n");
     }
 
-    /* Return to original directory so that we're set up for
-       the next file */
-    if (chdir(cwd)) {
-      fprintf(stderr,"Error: could not change directory to %s\n", cwd);
-      return 1;
+    throw CD_NOERR;
+
+    } catch {
+    case CD_ERR:
+      errorcode = 1; fallthru;
+    case CD_NOERR:
+      if (chdir(cwd)) {
+        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+        return 1;
+      }
+      return errorcode;
+    case DELETE_CD_ERR:
+      errorcode = 1; fallthru;
+    case DELETE_CD_NOERR:
+    default: /* For other errors, e.g., parse errors */
+      /* Delete intermediate files; some may not exist but we ignore that */
+      remove(macrosfile);
+      remove(declsfile);
+      remove(filtereddeclsfile);
+      if (chdir(cwd)) {
+        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+        return 1;
+      }
+      return errorcode;
     }
-    return 0;
   }
 
   void process_specfile(string_t file,string_t dir) {
@@ -1627,8 +1670,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       log("Warning: could not find the size of %s\n",type);
       return -1;
     }
-    /* We have to jump through some hoops here because system is not
-       returning the value returned by main, like it's supposed to. */
+    /* We jump through some hoops here because the system function does not
+       return the value returned by main (it does something more
+       complicated and not very portable). */
     fprintf((FILE@)getsizefile,
             "%s\n"
             "#include <stdio.h>\n"
@@ -1648,13 +1692,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                          GCC,
                          getsizeexec,
                          getsizefilename);
-    if (system(gcccmd) != 0) {
-      fprintf(stderr,"Warning: could not find the size of %s; continuing anyway\n",type);
+    if (system(gcccmd)) {
+      fprintf(stderr,
+              "Warning: could not find the size of %s; continuing anyway\n",
+              type);
       log("Warning: could not find the size of %s\n",type);
       return -1;
     }
     let z = system(getsizeexec);
-    log("size of %s returned by system is %d\n",type,z);
+    //    log("size of %s returned by system is %d\n",type,z);
     let f = fopen(getsizeout,"r");
     int w = -1;
     if (fscanf((FILE@)f,"%d",&w) != 1) {
@@ -1669,17 +1715,59 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return w;
   }
 
+  /* Helper functions for command line argument processing */
+  static string_t output_dir = NULL;
+  static void set_output_dir(string_t<`H> s) {
+    output_dir = s;
+  }
+  static list_t<stringptr_t> spec_files = NULL;
+  static void add_spec_file(string_t<`H> s) {
+    spec_files = new List(new s,spec_files);
+  }
+  static void set_GATHER() {
+    mode = GATHER;
+  }
+  static void set_FINISH() {
+    mode = FINISH;
+  }
+  static bool badparse = false;
+  static void unsupported_option(string_t<`H> s) {
+    fprintf(stderr,"Unsupported option %s\n", s);
+    badparse = true;
+  }
+
+  using Arg;
+
+  /********************** Main *********************/
   extern "C" void GC_blacklist_warn_clear();
-  int main(int argc, char ??argv) {
+  int main(int argc, const char ?`H?`H argv) {
     GC_blacklist_warn_clear();
-    if (argc < 3) {
-      fprintf(stderr,
-              "Usage: buildlib <dir> <spec>\n"
-              " where <dir> the output directory"
-              " and <spec> is a .cys specification file.\n");
+
+    Arg::speclist_t<`H,`H> options =
+      list(new $("-d",false," <file>",
+                 new String_spec(set_output_dir),
+                 "Set the output directory to <file>"),
+           new $("-gather",false,"",
+                 new Unit_spec(set_GATHER),
+                 "Gather C library info but don't produce Cyclone headers"),
+           new $("-finish",false,"",
+                 new Unit_spec(set_FINISH),
+                 "Produce Cyclone headers from pre-gathered C library info"),
+           new $("-",true,"",
+                 /* FIX: this is a crude way to see if there is an
+                    invalid option on the command line, and halt if so.
+                    We ought to change Arg::parse to make this
+                    cleaner. */
+                 new Flag_spec(unsupported_option),
+                 "")
+           );
+    Arg::parse(options, add_spec_file, "Options:", argv);
+    if (badparse) {
+      Arg::usage(options,"Options:");
       return 1;
     }
-    let dir = argv[1];
+
+    let dir = output_dir ? output_dir : ".";
 
     /* Make sure the directory where the output files will be placed exists */
     if (force_directory_prefixes(dir) || force_directory(dir)) {
@@ -1695,47 +1783,51 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return 1;
     }
 
-    /* Create an empty cstubs.cyc file */
-    cstubs_file = fopen(Filename::concat(dir,"cstubs.c"),"w");
-    if (!cstubs_file) {
-      fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",dir);
-      return 1;
-    }
+    if (mode != GATHER) {
+      /* Create an empty cstubs.cyc file */
+      cstubs_file = fopen(Filename::concat(dir,"cstubs.c"),"w");
+      if (!cstubs_file) {
+        fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",dir);
+        return 1;
+      }
 
-    /* Create a cycstubs.cyc file with the standard prologue */
-    cycstubs_file = fopen(Filename::concat(dir,"cycstubs.cyc"),"w");
-    if (!cycstubs_file) {
-      fprintf(stderr,
-              "Error: could not create cycstubs.c in directory %s\n",
-              dir);
-      return 1;
-    }
-    fprintf((FILE@)cycstubs_file,
-            "#include <core.h>\n"
-            "using Core;\n\n");
+      /* Create a cycstubs.cyc file with the standard prologue */
+      cycstubs_file = fopen(Filename::concat(dir,"cycstubs.cyc"),"w");
+      if (!cycstubs_file) {
+        fprintf(stderr,
+                "Error: could not create cycstubs.c in directory %s\n",
+                dir);
+        return 1;
+      }
+      fprintf((FILE@)cycstubs_file,
+              "#include <core.h>\n"
+              "using Core;\n\n");
 
-    /* Find the sizes of various types, for use in constant expressions */
-    sizeof_unsignedlongint = getsize(dir,"","unsigned long int");
-    sizeof_unsignedshortint = getsize(dir,"","unsigned short int");
-    sizeof_shortint = getsize(dir,"","short int");
-    sizeof_int = getsize(dir,"","int");
-    sizeof_short = getsize(dir,"","short");
-    /* sys/types is needed on OS X b/c it defines needed typedef u_int */
-    sizeof_fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
-    sizeof___fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
-    sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
-    /* sys/types is needed on OS X b/c it defines needed typedef u_char */
-    sizeof_sockaddr = getsize(dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
-    sizeof_inport = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
-    sizeof_inaddr = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
+      /* Find the sizes of various types, for use in constant expressions */
+      sizeof_unsignedlongint = getsize(dir,"","unsigned long int");
+      sizeof_unsignedshortint = getsize(dir,"","unsigned short int");
+      sizeof_shortint = getsize(dir,"","short int");
+      sizeof_int = getsize(dir,"","int");
+      sizeof_short = getsize(dir,"","short");
+      /* sys/types is needed on OS X b/c it defines needed typedef u_int */
+      sizeof_fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
+      sizeof___fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
+      sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
+      /* sys/types is needed on OS X b/c it defines needed typedef u_char */
+      sizeof_sockaddr = getsize(dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
+      sizeof_inport = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
+      sizeof_inaddr = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
+    }
             
-    for (int i = 2; i<argc; i++) {
-      process_specfile(argv[i],dir);
+    for (; spec_files != NULL; spec_files = spec_files->tl) {
+      process_specfile(*(spec_files->hd),dir);
     }
 
     fclose((FILE@)log_file);
-    fclose((FILE@)cstubs_file);
-    fclose((FILE@)cycstubs_file);
+    if (mode != GATHER) {
+      fclose((FILE@)cstubs_file);
+      fclose((FILE@)cycstubs_file);
+    }
 
     return 0;
   }

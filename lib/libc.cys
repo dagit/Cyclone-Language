@@ -1,8 +1,8 @@
 // Realtime
 // Has a structure containing void *
 // Not supported yet
-// aio.h:
-// ;
+aio.h:
+;
 
 arpa/inet.h:
 cpp {
@@ -99,7 +99,7 @@ epilogue inet_pton {
 
 // Our compiler can't handle this yet.  E.g., it doesn't like
 // types such as 'long double complex'.
-// complex.h:
+complex.h:
 // include {
 // complex
 // _Complex_I
@@ -305,7 +305,7 @@ epilogue inet_pton {
 // epilogue ctanl {
 //   extern "C" long double complex ctanl(long double complex);
 // }
-// ;
+;
 
 cpio.h:
 include {
@@ -389,8 +389,8 @@ epilogue _toupper {
 
 // Dynamic linking
 // Not supported yet
-// dlfcn.h:
-// ;
+dlfcn.h:
+;
 
 dirent.h:
 cpp {
@@ -864,7 +864,7 @@ cycstub {
 // This one requires true closures, or an implementation
 // completely in Cyclone.
 // Our parser dies on it in Linux
-// ftw.h:
+ftw.h:
 // omitvariables { stat }
 // include {
 // FTW
@@ -926,20 +926,20 @@ cycstub {
 //                   int,
 //                   int);
 // }
-// ;
+;
 
 // This may need to be written entirely in Cyclone, since it manipulates
 // arrays of paths
-// glob.h:
-// ;
+glob.h:
+;
 
 // This may need to be written entirely in Cyclone, since it manipulates
 // arrays of paths
-// grp.h:
-// ;
+grp.h:
+;
 
 // Not supported yet
-// inttypes.h:
+inttypes.h:
 // include {
 // imaxdiv_t
 // }
@@ -949,7 +949,7 @@ cycstub {
 //   // <stdint.h> available in the Std namespace.
 // #include <stdint.h>
 // }
-// ;
+;
 
 iso646.h:
 include {
@@ -968,8 +968,8 @@ xor_eq
 ;
 
 // Not supported yet
-// langinfo.h:
-// ;
+langinfo.h:
+;
 
 libgen.h:
 epilogue {
@@ -1171,8 +1171,8 @@ NZERO
 
 // Defines a struct containing char *
 // Not supported yet
-// locale.h:
-// ;
+locale.h:
+;
 
 math.h:
 include {
@@ -1777,28 +1777,28 @@ epilogue {
 
 // Defines a printf-like function, so we need to define it in Cyclone
 // Not supported yet
-// monetary.h:
-// ;
+monetary.h:
+;
 
 // Realtime
 // Not supported yet
-// mqueue.h:
-// ;
+mqueue.h:
+;
 
 // Defines a structure containing a void *
 // Not supported yet
-// ndbm.h:
-// ;
+ndbm.h:
+;
 
 // Defines a structure containing a char *
 // Not supported yet
-// net/if.h:
-// ;
+net/if.h:
+;
 
 // Defines a structure containing a char *
 // Not supported yet
-// netdb.h:
-// ;
+netdb.h:
+;
 
 netinet/in.h:
 cpp {
@@ -1879,8 +1879,8 @@ TCP_NODELAY
 
 // Locale stuff
 // Not supported yet
-// nl_types.h:
-// ;
+nl_types.h:
+;
 
 poll.h:
 include {
@@ -1931,37 +1931,37 @@ cycstub poll {
 
 // Threads
 // Not supported yet
-// pthread.h:
-// ;
+pthread.h:
+;
 
 // Defines a structure containing a char *
 // Not supported yet
-// pwd.h:
-// ;
+pwd.h:
+;
 
 // Our parser dies on it in Linux
 // Uses strings extensively, probably best to rewrite in Cyclone
 // Not supported yet
-// regexp.h:
-// ;
+regexp.h:
+;
 
 // Real time
 // Not supported yet
-// sched.h:
-// ;
+sched.h:
+;
 
 // Defines a structure containing a char *
 // Not supported yet
-// search.h:
-// ;
+search.h:
+;
 
 // Not supported yet
-// semaphore.h:
-// ;
+semaphore.h:
+;
 
 // Not supported yet
-// setjmp.h:
-// ;
+setjmp.h:
+;
 
 signal.h:
 omitvariables { sigaction }
@@ -2253,18 +2253,18 @@ epilogue {
 
 // Realtime
 // Not supported yet
-// spawn.h:
-// ;
+spawn.h:
+;
 
 // We have safe ways of handling varargs in Cyclone already
 // Not supported
-// stdarg.h:
-// ;
+stdarg.h:
+;
 
 // Maybe this should replace Cyclone's treatment of bool?
 // Not supported yet
-// stdbool.h:
-// ;
+stdbool.h:
+;
 
 stddef.h:
 include {
@@ -3659,8 +3659,8 @@ epilogue setrlimit {
 ;
 
 // Semaphores -- not supported yet
-// sys/sem.h:
-// ;
+sys/sem.h:
+;
 
 sys/select.h:
 include {
@@ -3745,8 +3745,8 @@ cstub {
 
 // Shared memory stuff
 // Not supported yet
-// sys/shm.h:
-// ;
+sys/shm.h:
+;
 
 sys/socket.h:
 include {
@@ -4316,13 +4316,12 @@ epilogue umask {
 ;
 
 // Our parser gets a parse error on this file in Linux
-// sys/statvfs.h:
-// ;
+sys/statvfs.h:
+;
 
-// This works fine but produces plenty of warnings so I don't
-// bother to put it in clib.cys yet.
-// tgmath.h:
-// ;
+// This seems to work but produces plenty of warnings so I'm waiting
+tgmath.h:
+;
 
 sys/time.h:
 include {
@@ -4434,8 +4433,8 @@ epilogue {
 ;
 
 // Defines a struct containing a void *, not supported.
-// sys/uio.h:
-// ;
+sys/uio.h:
+;
 
 sys/un.h:
 include {
@@ -4586,8 +4585,8 @@ TOEXEC
 
 // Terminal I/O interface
 // Not supported yet
-// termios.h:
-// ;
+termios.h:
+;
 
 time.h:
 include {
@@ -4766,18 +4765,18 @@ epilogue daylight {
 
 // Tracing
 // Not supported yet
-// trace.h:
-// ;
+trace.h:
+;
 
 // User context
 // Defines a pointer-containing struct, not supported yet
-// ucontext.h:
-// ;
+ucontext.h:
+;
 
 // Defines a vararg function, needs a stub to be written
 // Not supported yet
-// ulimit.h:
-// ;
+ulimit.h:
+;
 
 unistd.h:
 include {
@@ -5556,19 +5555,19 @@ cycstub {
 
 // User accounting database definitions
 // Not supported yet
-// utmpx.h:
-// ;
+utmpx.h:
+;
 
 // This gives a parse error in Cygwin because their wchar.h
 // contains an actual parse error: they don't define size_t
-// wchar.h:
-// ;
+wchar.h:
+;
 
 // Wide characters are not supported yet in Cyclone
-// wctype.h:
-// ;
+wctype.h:
+;
 
 // Word expansions
 // Not supported yet
-// wordexp.h:
-// ;
+wordexp.h:
+;
