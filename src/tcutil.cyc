@@ -1646,7 +1646,7 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
         // again (usually).
         // warn so *x = y where y is an array doesn't port too easily
         if (!force_type2bool(false,pinfo_b.ptr_atts.zero_term))
-          warn(loc, "implicit cast to shorter array");
+          Warn::warn2(loc, "implicit cast to shorter array");
         break;
       }
     }
@@ -1657,9 +1657,8 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
       if (RgnOrder::rgn_outlives_rgn(po,pinfo_a.ptr_atts.rgn,
 				     pinfo_b.ptr_atts.rgn)) {
         if (warn_region_coerce)
-          warn(loc, "implicit cast from region %s to region %s", 
-               typ2string(pinfo_a.ptr_atts.rgn),
-               typ2string(pinfo_b.ptr_atts.rgn));
+          Warn::warn2(loc, "implicit cast from region ", pinfo_a.ptr_atts.rgn,
+		      " to region ", pinfo_b.ptr_atts.rgn);
       } else okay = false;
     }
     // must preserve zero-termination or second pointer must be const
@@ -1879,7 +1878,6 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
   // should have an evar for the region of the pointer type, with
   // the new type variable.  
   tvar_t tv = new_tvar(&rgn_kb);
-  //fprintf(stderr,"before unifying, type is %s\n",typ2string(e_type));
   switch (compress(e_type)) {
   case &PointerType(PtrInfo{et,tq,PtrAtts{old_r,nb,b,zt,pl}}):
     switch (compress(old_r)) {
@@ -1892,7 +1890,6 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
     break;
   default: break;
   }
-  //fprintf(stderr,"after unifying, type is %s\n",typ2string(e_type));
   e->topt = NULL;
   vd->initializer = NULL;
 
@@ -1945,8 +1942,7 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
   // typechecks before performing the coercion (for better error reporting).
   if (can_insert_alias(e,t1,t2,e->loc)) {
     if (warn_alias_coerce)
-      warn(e->loc,"implicit alias coercion for %s:%s to %s",
-	   exp2string(e), typ2string(t1), typ2string(t2));
+      Warn::warn2(e->loc,"implicit alias coercion for ",e,":",t1," to ",t2);
     if(alias_coercion != NULL)
       *alias_coercion = true;
   }
@@ -1962,7 +1958,7 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
     if (c != No_coercion) 
       unchecked_cast(e,t2,c);
     if (c != Null_to_NonNull)
-      warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
+      Warn::warn2(e->loc,"implicit cast from ",t1," to ",t2);
     return true;
   }
   return false;
@@ -1988,9 +1984,8 @@ bool coerce_assign(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t) {
 // but doing so is tricky because we have to get the padding and
 // alignment right.  This seems to be particularly weird on the
 // x86 -- I need to find precise documentation on it before we do this.
-static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r> r,
-                                                    bool flatten,
-                                                    type_t t1);
+static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r>,bool,type_t);
+
 static list_t<$(tqual_t,type_t)@`r,`r>
   flatten_type_f($(list_t<$(tvar_t,type_t)@`r,`r>,
                   region_t<`r>, bool)@ env,aggrfield_t x){
@@ -2122,21 +2117,18 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     if (!unify(b_a,b_b)) {
       let e1 = get_bounds_exp(bounds_one(),b_a);
       let e2 = get_bounds_exp(bounds_one(),b_b);
-      if (e1 != e2) {
+      if (e1 != e2)
         if (e1 == NULL || e2 == NULL || !Evexp::lte_const_exp(e2,e2)) 
           return false;
-      }
     }
     // check that qualifiers are the same or that t2's is at least const
     // (or it's element type is abstract).
-    if (!q_b.real_const && q_a.real_const) {
+    if (!q_b.real_const && q_a.real_const)
       if (!kind_leq(&ak,type_kind(t_b)))
         return false;
-    }
     // Note, we can only allow ptrsubtype when the second pointer has a
     // bound of 1, is not fat, and is not zero-terminated!
-    let deep_subtype =
-      unify(b_b,bounds_one()) && (!force_type2bool(false,zt_b));
+    let deep_subtype = unify(b_b,bounds_one()) && !force_type2bool(false,zt_b);
 
     //fprintf(stderr,"subtype: got here on %s and %s\n",typ2string(t1), typ2string(t2));
     // now check that t_a is a pointer sub-type of t_b
@@ -2254,7 +2246,6 @@ coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
     return No_coercion;
   t1 = compress(t1);
   t2 = compress(t2);
-  //fprintf(stderr,"checking castable %s and %s\n",typ2string(t1),typ2string(t2));
   switch (t2) {
   case &AppType(&VoidCon,_): return No_coercion;
   // we can cast t1 to an int if t1 is a boxed type.
@@ -2423,11 +2414,9 @@ static void replace_rop(list_t<$(var_opt_t,tqual_t,type_t)@> args,
     unsigned int c = 0;
     for (let a = args; a != NULL; a = a->tl, c++) {
       let &$(vopt,_,_) = a->hd;
-      if (vopt != NULL) {
-        if (strcmp(*var,*vopt) == 0) {
-          *rop = Relations::RParam(c);
-          break;
-        }
+      if (vopt != NULL && strcmp(*var,*vopt) == 0) {
+	*rop = Relations::RParam(c);
+	break;
       }
     }
     break;
@@ -2437,11 +2426,9 @@ static void replace_rop(list_t<$(var_opt_t,tqual_t,type_t)@> args,
     unsigned int c = 0;
     for (let a = args; a != NULL; a = a->tl, c++) {
       let &$(vopt,_,_) = a->hd;
-      if (vopt != NULL) {
-        if (strcmp(*var,*vopt) == 0) {
-          *rop = Relations::RParamNumelts(c);
-          break;
-        }
+      if (vopt != NULL && strcmp(*var,*vopt) == 0) {
+	*rop = Relations::RParamNumelts(c);
+	break;
       }
     }
     break;
@@ -2468,7 +2455,7 @@ type_t snd_tqt($(tqual_t,type_t)@`r t) { return (*t)[1]; }
 static $(tqual_t,type_t)@ map2_tq($(tqual_t,type_t)@`H pr, type_t t) {
   let &$(tq,t2) = pr;
   if (t2 == t) return pr;
-  else return new $(tq,t);
+  return new $(tq,t);
 }
 static $($(var_opt_t,tqual_t)@`r,type_t)@`r
 substitute_f1(region_t<`r> rgn, $(var_opt_t,tqual_t,type_t) @`r2 y) {
@@ -2480,9 +2467,8 @@ substitute_f2($(var_opt_t,tqual_t,type_t)@`H orig_arg, type_t t) {
   if (t == t_orig) return orig_arg;
   return new $(vopt_orig,tq_orig,t);
 }
-static list_t<type_t,`r2> substs(region_t<`r> rgn,
-                                 list_t<$(tvar_t,type_t)@`r,`r> inst,
-                                 list_t<type_t,`r2> ts);
+static list_t<type_t,`r2> substs(region_t<`r>, list_t<$(tvar_t,type_t)@`r,`r>,
+                                 list_t<type_t,`r2>);
 
 // used to copy an expression during substitution
 static exp_t copye(exp_t old, raw_exp_t r) {
@@ -2504,8 +2490,7 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     if (List::length(es) == 1) {
       let e1 = es->hd;
       let new_e1 = rsubsexp(r,inst,e1);
-      if (new_e1 == e1) return e;
-      return copye(e, new Primop_e(p,list(new_e1)));
+      return (new_e1==e1) ? e : copye(e, new Primop_e(p,list(new_e1)));
     } else if (List::length(es) == 2) {
       let e1 = es->hd;
       let e2 = es->tl->hd;
@@ -2513,7 +2498,8 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
       let new_e2 = rsubsexp(r,inst,e2);
       if (new_e1 == e1 && new_e2 == e2) return e;
       return copye(e, new Primop_e(p,list(new_e1,new_e2)));
-    } else return impos("primop does not have 1 or 2 args!");
+    } 
+    return Warn::impos2("primop does not have 1 or 2 args!");
   case &Conditional_e(e1,e2,e3):
     let new_e1 = rsubsexp(r,inst,e1);
     let new_e2 = rsubsexp(r,inst,e2);
@@ -2542,20 +2528,16 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     return copye(e, new Cast_e(new_typ,new_e1,b,c));
   case &Sizeoftype_e(t):
     let new_typ = rsubstitute(r,inst,t);
-    if (new_typ == t) return e;
-    return copye(e, new Sizeoftype_e(new_typ));
+    return (new_typ==t) ? e : copye(e, new Sizeoftype_e(new_typ));
   case &Sizeofexp_e(e1):
     let new_e1 = rsubsexp(r,inst,e1);
-    if (new_e1 == e1) return e;
-    return copye(e, new Sizeofexp_e(new_e1));
+    return (new_e1==e1) ? e : copye(e, new Sizeofexp_e(new_e1));
   case &Extension_e(e1):
     let new_e1 = rsubsexp(r,inst,e1);
-    if (new_e1 == e1) return e;
-    return copye(e, new Extension_e(new_e1));
+    return (new_e1==e1) ? e : copye(e, new Extension_e(new_e1));
   case &Offsetof_e(t,f):
     let new_typ = rsubstitute(r,inst,t);
-    if (new_typ == t) return e;
-    return copye(e, new Offsetof_e(new_typ,f));
+    return (new_typ==t) ? e : copye(e, new Offsetof_e(new_typ,f));
   case &Valueof_e(t):
     let new_typ = rsubstitute(r,inst,t);
     if (new_typ == t) return e;
@@ -2564,15 +2546,14 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     case &ValueofType(e): return e;
     default: return copye(e, new Valueof_e(new_typ));
     }
-  default: return impos("non-type-level-expression in Tcutil::rsubsexp");
+  default: return Warn::impos2("non-type-level-expression in Tcutil::rsubsexp");
   }
 }
 
 static exp_opt_t rsubs_exp_opt(region_t<`r> r,
                                list_t<$(tvar_t,type_t)@`r,`r> inst, 
                                exp_opt_t e) {
-  if (e == NULL) return NULL;
-  else return rsubsexp(r,inst,e);
+  return (e==NULL) ? NULL : rsubsexp(r,inst,e);
 }
 
 static aggrfield_t subst_aggrfield(region_t<`r> r,
@@ -2580,12 +2561,14 @@ static aggrfield_t subst_aggrfield(region_t<`r> r,
 				   aggrfield_t f) {
   let t = f->type;
   let req = f->requires_clause;
-  let new_t = rsubstitute(r,inst,t);
+  let new_typ = rsubstitute(r,inst,t);
   let new_req = rsubs_exp_opt(r,inst,req);
-  if (t == new_t && req == new_req) return f;
-  else return new Aggrfield{.name = f->name, .tq = f->tq, .type = new_t,
-                            .width = f->width, .attributes = f->attributes,
-                            .requires_clause = new_req};
+  if (t == new_typ && req == new_req) 
+    return f;
+  let ans = new *f;
+  ans->type = new_typ;
+  ans->requires_clause = new_req;
+  return ans;
 }
 
 static list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
@@ -2595,9 +2578,10 @@ static list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
   let f = fs->hd;
   let t = fs->tl;
   let new_f = subst_aggrfield(r,inst,f);
-  let new_t = subst_aggrfields(r,inst,t);
-  if (new_f == f && new_t == t) return fs;
-  return new List(new_f,new_t);
+  let new_typ = subst_aggrfields(r,inst,t);
+  if (new_f == f && new_typ == t) 
+    return fs;
+  return new List(new_f,new_typ);
 }
 
 list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
@@ -2608,8 +2592,7 @@ list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
   let rpo2b = substs(rgn,inst,rpo1b);
   if (rpo2a == rpo1a && rpo2b == rpo1b)
     return rgn_po;
-  else
-    return List::zip(rpo2a,rpo2b);
+  return List::zip(rpo2a,rpo2b);
 }
 
 type_t rsubstitute(region_t<`r> rgn,
@@ -2625,7 +2608,7 @@ type_t rsubstitute(region_t<`r> rgn,
     return (new_ts == ts) ? t : new TypedefType(n,new_ts,td,topt);
   case &ArrayType(ArrayInfo{t1,tq,e,zt,ztl}):
     let new_t1 = rsubstitute(rgn,inst,t1);
-    let new_e = (e == NULL) ? NULL : rsubsexp(rgn,inst,e);
+    let new_e  = rsubs_exp_opt(rgn,inst,e);
     let new_zt = rsubstitute(rgn,inst,zt);
     return (new_t1 == t1 && new_e == e && new_zt == zt) ? t : 
       new ArrayType(ArrayInfo{new_t1,tq,new_e,new_zt,ztl});
@@ -2648,16 +2631,8 @@ type_t rsubstitute(region_t<`r> rgn,
     let ts2 = substs(rgn,inst,ts);
     if (ts2 != ts) 
       args2 = List::map2(substitute_f2, args, ts2);
-    type_opt_t eff2;
-    if(eff == NULL)
-      eff2 = NULL;
-    else {
-      type_opt_t new_eff = rsubstitute(rgn,inst,eff);
-      if(new_eff == eff)
-	eff2 = eff;
-      else
-	eff2 = new_eff;
-    }
+    type_opt_t eff2 = (eff==NULL) ? NULL : rsubstitute(rgn,inst,eff);
+
     vararg_info_t *cyc_varargs2;
     if (cyc_varargs == NULL)
       cyc_varargs2 = NULL;
@@ -2681,9 +2656,8 @@ type_t rsubstitute(region_t<`r> rgn,
     for (let ts1 = tqts; ts1 != NULL; ts1 = ts1->tl) {
       let t1 = (*ts1->hd)[1];
       let t2 = rsubstitute(rgn,inst,t1);
-      if (t1 != t2) {
+      if (t1 != t2)
         change = true;
-      }
       ts2 = rnew(rgn) List(t2,ts2);
     }
     if(!change)
@@ -2691,23 +2665,19 @@ type_t rsubstitute(region_t<`r> rgn,
     return new TupleType(List::map2(map2_tq,tqts,List::imp_rev(ts2)));
   case &AnonAggrType(k,fs):
     let new_fs = subst_aggrfields(rgn,inst,fs);
-    if (fs == new_fs) return t;
-    return new AnonAggrType(k,new_fs);
+    return (fs==new_fs) ? t : new AnonAggrType(k,new_fs);
   case &Evar(_,r,_,_):
-    if (r != NULL) return rsubstitute(rgn,inst,(type_t)r);
-    else return t;
-  case &AppType(c,NULL): return t;
+    return (r==NULL) ? t : rsubstitute(rgn,inst,(type_t)r);
   case &AppType(c,ts):
     let new_ts = substs(rgn,inst,ts);
-    if (ts == new_ts) return t;
-    else return new AppType(c,new_ts);
+    return (ts==new_ts) ? t : new AppType(c,new_ts);
   case &ValueofType(e):
     let new_e = rsubsexp(rgn,inst,e);
-    return new_e == e ? t : new ValueofType(new_e);
+    return (new_e==e) ? t : new ValueofType(new_e);
   case &TypeofType(e):
     let new_e = rsubsexp(rgn,inst,e);
-    return new_e == e ? t : new TypeofType(new_e);
-  case &TypeDeclType(...): impos("found typedecltype in rsubs");
+    return (new_e==e) ? t : new TypeofType(new_e);
+  case &TypeDeclType(...): Warn::impos2("found typedecltype in rsubs");
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
@@ -2728,7 +2698,7 @@ static list_t<type_t,`r2> substs(region_t<`r> rgn,
 extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
   if (inst != NULL) 
     return rsubstitute(heap_region, inst, t);
-  else return t;
+  return t;
 }
 
 // Generate an appropriate evar for an instantiation of a type var
@@ -2745,17 +2715,17 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
 }
 
 void check_bitfield(seg_t loc, type_t field_type,
-		    exp_opt_t width, stringptr_t fn) {
+		    exp_opt_t width, stringptr_t<`H> fn) {
   if (width != NULL) {
     unsigned int w = 0;
     if (!is_const_exp(width))
-      terr(loc,"bitfield %s does not have constant width",*fn);
+      Warn::err2(loc,"bitfield ",*fn," does not have constant width");
     else {
       let $(i,known) = Evexp::eval_const_uint_exp(width);
       if(!known)
-	warn(loc,"cannot evaluate bitfield width at compile time");
+	Warn::warn2(loc,"cannot evaluate bitfield width at compile time");
       if ((int)i < 0)
-	terr(loc,"bitfield has negative width");
+	Warn::err2(loc,"bitfield has negative width");
       w = i;
     }
     switch (compress(field_type)) {
@@ -2771,8 +2741,8 @@ void check_bitfield(seg_t loc, type_t field_type,
       }
       break;
     default:
-      terr(loc,"bitfield %s must have integral type but has type %s",
-           *fn,typ2string(field_type));
+      Warn::err2(loc,"bitfield ",*fn," must have integral type but has type ",
+		 field_type);
       break;
     }
   }
@@ -2784,7 +2754,7 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
   switch (t) {
   case &TypedefType(_,_,td,tdopt):
     if (td->tq.real_const || td->tq.print_const) {
-      if (declared_const) warn(loc,"extra const");
+      if (declared_const) Warn::warn2(loc,"extra const");
       return true;
     }
     // not done yet -- the typedef could expand to a typedef
@@ -2869,28 +2839,28 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
 	  break;
 	}
       if(fields2 == NULL)
-	terr(loc, "too many arguments to %s",aggr_str);
+	Warn::err2(loc, "too many arguments to ",aggr_str);
     } else if(dl->tl != NULL)
       // we don't support multiple designators
-      terr(loc, "multiple designators are not yet supported");
+      Warn::err2(loc, "multiple designators are not yet supported");
     else
       // find the right field based on the designator
       switch (dl->hd) {
       case &ArrayElement(_):
-	terr(loc, "array designator used in argument to %s",aggr_str);
+	Warn::err2(loc, "array designator used in argument to ",aggr_str);
 	break;
       case &FieldName(v):
 	let fields2 = fields;
 	for(; fields2 != NULL; fields2 = fields2->tl)
 	  if(strptrcmp(v,((*fields2->hd)[0])->name) == 0) {
 	    if((*fields2->hd)[1])
-	      terr(loc, "member %s has already been used as an argument", *v);
+	      Warn::err2(loc, "member ",*v," has already been used as an argument");
 	    (*fields2->hd)[1] = true;
 	    ans = rnew(rgn) List(rnew(rgn) $((*fields2->hd)[0],a), ans);
 	    break;
 	  }
 	if(fields2 == NULL)
-	  terr(loc, "bad field designator %s", *v);
+	  Warn::err2(loc, "bad field designator ", *v);
 	break;
       }
   }
@@ -2898,7 +2868,7 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
     // make sure we used all the fields
     for(; fields != NULL; fields = fields->tl)
       if(!(*fields->hd)[1]) {
-        terr(loc, "too few arguments to struct");
+        Warn::err2(loc, "too few arguments to struct");
         break;
       }
   } else {
@@ -2906,10 +2876,12 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
     bool found = false;
     for (; fields != NULL; fields = fields->tl)
       if ((*fields->hd)[1]) {
-        if (found) terr(loc,"only one member of a union is allowed");
+        if (found) 
+	  Warn::err2(loc,"only one member of a union is allowed");
         found = true;
       }
-    if (!found) terr(loc,"missing member for union");
+    if (!found) 
+      Warn::err2(loc,"missing member for union");
   }
 
   return imp_rev(ans);
@@ -2921,7 +2893,7 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
 bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 		       bool @is_fat, type_t @elt_type) {
   switch (e1->r) {
-  case &Cast_e(...): impos("we have a cast in a lhs:  %s",exp2string(e1));
+  case &Cast_e(...): Warn::impos2("we have a cast in a lhs: ",e1);
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
     return is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type);
@@ -2929,17 +2901,15 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
   case &AggrMember_e(e1a,...):
     // sanity check
     if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type))
-      impos("found zero pointer aggregate member assignment: %s",
-	    exp2string(e1));
+      Warn::impos2("found zero pointer aggregate member assignment: ",e1);
     return false;
   case &Instantiate_e(e1a,_): fallthru(e1a);
   case &NoInstantiate_e(e1a):
     if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type))
-      impos("found zero pointer instantiate/noinstantiate: %s",
-	    exp2string(e1));
+      Warn::impos2("found zero pointer instantiate/noinstantiate: ",e1);
     return false;
   case &Var_e(...): return false;
-  default: impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
+  default: Warn::impos2("found bad lhs in is_zero_ptr_deref: ",e1);
   }
 }
 
@@ -2950,12 +2920,10 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 // warning: not just a predicate; side-effects VarTypes to be of non-unique
 //   flavor if they are not yet set
 bool is_noalias_region(type_t r, bool must_be_unique) {
-//   printf("is_noalias_region: %s/%s\n",typ2string(compress(r)),
-// 	 must_be_unique ? "yes" : "no");
   switch (compress(r)) {
   case &AppType(&RefCntCon,_): return !must_be_unique;
   case &AppType(&UniqueCon,_): return true;
-  case &TypedefType(_,_,&Typedefdecl{.kind=&Core::Opt{.v=&Kind(k,a)},...},NULL): 
+  case &TypedefType(_,_,&Typedefdecl{.kind=&Opt{.v=&Kind(k,a)},...},NULL): 
     return ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)));
 //     fallthru(k,a);
 //   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_):
@@ -2978,7 +2946,7 @@ bool is_noalias_region(type_t r, bool must_be_unique) {
 //   flavor if they are not yet solidly bounded
 bool is_noalias_pointer(type_t t, bool must_be_unique) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
+  case &PointerType(PtrInfo(_,_,PtrAtts(r,...))):
     return is_noalias_region(r,must_be_unique);
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&bk);
@@ -2989,9 +2957,7 @@ bool is_noalias_pointer(type_t t, bool must_be_unique) {
 	case &Less_kb(*x,&Kind(k,Top)):
 	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
 	  return false;
-	default:
-// 	  fprintf(stderr,"|%s| is a no-alias path?\n",typ2string(t));
-	  return true;
+	default: return true;
 	}
       }
       return false;
@@ -3002,57 +2968,41 @@ bool is_noalias_pointer(type_t t, bool must_be_unique) {
 }
 bool is_noalias_pointer_or_aggr(type_t t) {
   let t = compress(t);
-  if (is_noalias_pointer(t,false)) return true;
+  if (is_noalias_pointer(t,false)) 
+    return true;
   switch (t) {
   case &TupleType(qts):
-    while (qts != NULL) {
-      if (is_noalias_pointer_or_aggr((*qts->hd)[1])) return true;
-      qts = qts->tl;
-    }
+    for(; qts != NULL; qts = qts->tl)
+      if (is_noalias_pointer_or_aggr((*qts->hd)[1])) 
+	return true;
     return false;
   case &AppType(&AggrCon({.KnownAggr = adp}),ts):
-    if ((*adp)->impl == NULL) return false;
-    else {
-      let inst = List::zip((*adp)->tvs,ts);
-      let x = (*adp)->impl->fields;
-      type_t t;
-      while (x != NULL) {
-        t = (inst == NULL) ? x->hd->type : substitute(inst,x->hd->type);
-        if (is_noalias_pointer_or_aggr(t)) return true;
-        x = x->tl;
-      }
+    if ((*adp)->impl == NULL) 
       return false;
+    let inst = List::zip((*adp)->tvs,ts);
+    for(let x = (*adp)->impl->fields; x != NULL; x = x->tl) {
+      type_t t = (inst == NULL) ? x->hd->type : substitute(inst,x->hd->type);
+      if (is_noalias_pointer_or_aggr(t)) 
+	return true;
     }
+    return false;
   case &AnonAggrType(_,x):
-    while (x != NULL) {
-      if (is_noalias_pointer_or_aggr(x->hd->type)) return true;
-      x = x->tl;
-    }
+    for(; x != NULL; x = x->tl)
+      if (is_noalias_pointer_or_aggr(x->hd->type)) 
+	return true;
     return false;
   case &AppType(&AggrCon({.UnknownAggr = _}),_):
-    // impos("got unknown aggr in is_noalias_aggr");
-    return false;
-  case &AppType(&DatatypeCon(tinfo),ts):
-    switch (tinfo) {
-    case {.UnknownDatatype = UnknownDatatypeInfo(nm,isxt)}:
-      // impos("got unknown datatype in is_noalias_aggr");
-      return false;
-    case {.KnownDatatype = &&Datatypedecl(_,_,tvs,flds,_)}:
-      // FIX: ...?
-      return false;
-    }
+  case &AppType(&DatatypeCon(_),_): return false; // FIX: ... ? (see below)
+
   case &AppType(&DatatypeFieldCon(tinfo),ts):
     switch (tinfo) {
-    case {.UnknownDatatypefield = _}:
-      // impos("got unknown datatype field in is_noalias_aggr");
-      return false;
+    case {.UnknownDatatypefield = _}: return false;
     case {.KnownDatatypefield = $(td,fld)}:
       let inst = List::zip(td->tvs,ts);
-      let typs = fld->typs;
-      while (typs != NULL) {
+      for(let typs = fld->typs; typs != NULL; typs = typs->tl) {
         t = (inst == NULL) ? ((*typs->hd)[1]) : substitute(inst,(*typs->hd)[1]);
-        if (is_noalias_pointer_or_aggr(t)) return true;
-        typs = typs->tl;
+        if (is_noalias_pointer_or_aggr(t)) 
+	  return true;
       }
       return false;
     }
@@ -3197,7 +3147,7 @@ $(bool,type_t) addressof_props(exp_t e) {
       return bogus_ans;
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,...))):
       return $(tq.real_const,r);
-    case &ArrayType(ArrayInfo{_,tq,_,_,_}):
+    case &ArrayType(ArrayInfo{_,tq,...}):
       // Actually, this should be impossible since we've surely
       // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.

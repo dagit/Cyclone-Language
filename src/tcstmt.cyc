@@ -132,8 +132,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
      Warn::err2(s0->loc,"returns value of type ",eopt->topt," but requires ",t);
      Unify::explain_failure();
     }
-    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(eopt))
-      unique_consume_err(eopt->loc);
+    check_consume(eopt->loc,t,eopt);
     return;
 
   case &IfThenElse_s(e,s1,s2):
@@ -190,8 +189,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         Unify::explain_failure();
       }
       // JGM: no test case
-      if (is_noalias_pointer_or_aggr(ts->hd) && !is_noalias_path(es->hd))
-	unique_consume_err(es->hd->loc);
+      check_consume(es->hd->loc,ts->hd,es->hd);
     }
     if (es != NULL)
       Warn::err2(s0->loc, "too many arguments in explicit fallthru");
@@ -218,8 +216,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     let t = tcExp(te,NULL,e);
 
-    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-      unique_consume_err(e->loc);
+    check_consume(e->loc,t,e);
     // DJG: I finally got tired of checking cases in reverse order.  It is
     //      a bit more convoluted to go in order...
     // Fallthru is not allowed in the last case, even if in a nested switch

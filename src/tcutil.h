@@ -210,7 +210,7 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,tvar_t);
 
 // checks that a width given on a struct or union member is consistent
 // with the type definition for the member.
-void check_bitfield(seg_t, type_t field_typ, exp_opt_t width, stringptr_t fn);
+void check_bitfield(seg_t,type_t field_typ,exp_opt_t width,stringptr_t<`H> fn);
 
 void check_unique_vars(list_t<var_t,`r>, seg_t, string_t err_msg);
 void check_unique_tvars(seg_t,list_t<tvar_t>);
