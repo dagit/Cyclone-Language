@@ -93,10 +93,10 @@ extern int _throw(void* e);
 extern struct _xtunion_struct *_exn_thrown;
 
 /* Built-in Exceptions */
-struct Cyc_Null_Exception_struct { char *tag; };
-struct Cyc_Array_bounds_struct { char *tag; };
-struct Cyc_Match_Exception_struct { char *tag; };
-struct Cyc_Bad_alloc_struct { char *tag; };
+struct Cyc_Null_Exception_exn_struct { char *tag; };
+struct Cyc_Array_bounds_exn_struct { char *tag; };
+struct Cyc_Match_Exception_exn_struct { char *tag; };
+struct Cyc_Bad_alloc_exn_struct { char *tag; };
 extern char Cyc_Null_Exception[];
 extern char Cyc_Array_bounds[];
 extern char Cyc_Match_Exception[];
@@ -703,18 +703,19 @@ char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
 _dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct
 _DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
 unsigned short Cyc_mode_t;struct Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;
-struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
-unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
+struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};
+struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{
+int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};
+struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
+struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
+int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
+struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};typedef void*
+Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{
+char*tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
 void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;struct Cyc_Core_Opt*Cyc_Core_opt_map(
 void*(*f)(void*),struct Cyc_Core_Opt*x);struct _dyneither_ptr Cyc_Core_new_string(
 unsigned int);struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,
@@ -723,24 +724,24 @@ void*f1;void*f2;};void*Cyc_Core_fst(struct _tuple0*);void*Cyc_Core_snd(struct
 _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};void*Cyc_Core_third(struct
 _tuple1*);void*Cyc_Core_identity(void*);int Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(
 char,char);int Cyc_Core_ptrcmp(void*,void*);int Cyc_Core_nptrcmp(void*,void*);
-extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern struct Cyc_Core_Not_found_struct Cyc_Core_Not_found_val;extern
-char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;extern struct
-_RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(
+extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
+char*tag;};extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;
+extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*
+tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(
 struct _RegionHandle*,const char*file,int lineno);struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(
-const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{
 char*tag;};inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
 unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
 sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 return 0;return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";
-char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_struct{char*tag;int
-f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";
-char Cyc_Core_Not_found[10]="Not_found";struct Cyc_Core_Not_found_struct Cyc_Core_Not_found_val={
+char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;
+int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";
+char Cyc_Core_Not_found[10]="Not_found";struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={
 Cyc_Core_Not_found};char Cyc_Core_Unreachable[12]="Unreachable";struct Cyc_Core_Opt;
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){if(o
 == 0)return 0;{struct Cyc_Core_Opt*_tmp6;return(_tmp6=_cycalloc(sizeof(*_tmp6)),((

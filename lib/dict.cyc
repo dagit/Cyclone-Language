@@ -87,6 +87,17 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   throw &Absent_val;
 }
 
+`b lookup_other(dict_t<`a,`b,`r> d, int cmp(`c,`a), `c key) {
+  let t = d.t;
+  while (t != NULL) {
+    let i = cmp(key,t->key_val[0]);
+    if (i < 0) t = t->left;
+    else if (i > 0) t = t->right;
+    else return t->key_val[1];
+  }
+  throw &Absent_val;
+}
+
 `b*`r lookup_opt(dict_t<`a,`b,`r> d, `a key) {
   let rel = d.rel;
   let t   = d.t;

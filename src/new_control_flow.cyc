@@ -822,14 +822,14 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
     return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, false,fenv->unknown_all));
 
-    // FIX: avoid allocation of VarRoot
     // Note: if Esc we return that even though it isn't an absRval.  That's
     //       okay b/c assign_place_inner does the right thing
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
-    return $(inflow, Dict::lookup(d, rnew(env->r) VarRoot(vd)));
+    datatype Root.VarRoot vdroot = VarRoot(vd);
+    return $(inflow, Dict::lookup_other(d, root_cmp, &vdroot));
 
     // Note: none of the primops cause things to escape or do a dereference!
     //       and they all return initialized ints of unknown value.
@@ -1833,8 +1833,9 @@ static void check_dropped_unique_vd($(analenv_t<`r>, flowdict_t<`r>, seg_t)@ vde
   let &$(env,fd,loc) = vdenv;
   if (Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,vd->type)) {
     // FIX: avoid allocation of var-root
-    let root = rnew(env->fenv->r) VarRoot(vd);
-    let rval = Dict::lookup(fd,root);
+    datatype Root.VarRoot vdroot = VarRoot(vd);
+    //let root = rnew(env->fenv->r) VarRoot(vd);
+    let rval = Dict::lookup_other(fd,root_cmp,&vdroot);
     switch (rval) {
     case &Consumed(...):
     case &Zero:

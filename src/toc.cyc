@@ -94,19 +94,20 @@ struct TocState {
   Set::set_t<qvar_t,`d> @`d                    datatypes_so_far;
   // xdatatypes seen so far -- bool is false if seen but not initialized (extern)
   Dict::dict_t<qvar_t,bool,`d> @`d             xdatatypes_so_far;
-  // generated identifiers from other identifiers (e.g., Foo_struct)
-  Dict::dict_t<$(qvar_t,string_t)@`d,qvar_t,`d>@`d qvar_tags;
+  // generated identifiers from combining other identifiers -- used when
+  // collapsing datatype members with the datatype itself.  
+  Dict::dict_t<$(qvar_t,qvar_t)@`d,qvar_t,`d>@`d qvar_tags;
   // generated labels -- get re-used across functions
   Xarray::xarray_t<var_t,`d>                    temp_labels;
 };
 static struct TocState *toc_state = NULL;
 
-int qvar_tag_cmp($(qvar_t,string_t)@ x, $(qvar_t,string_t)@ y) {
+int qvar_tag_cmp($(qvar_t,qvar_t)@ x, $(qvar_t,qvar_t)@ y) {
   let $(qx,sx) = *x;
   let $(qy,sy) = *y;
   int i = qvar_cmp(qx,qy);
   if (i != 0) return i;
-  return strcmp(sx,sy);
+  return qvar_cmp(sx,sy);
 }
 
 type_t aggrdecl_type(qvar_t q, type_t type_maker(qvar_t)) {
@@ -444,19 +445,56 @@ static bool is_nullable(type_t t) {
   }
 }
 
-// FIX: Share the results to save compile-time space and time.
-//      Alternately, put struct names for datatype variants in the environment.
-static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
+// If x = X1::X2::...::Xn::v, generate s_X1_X2_..._Xn_v_struct
+static string_t collapse_qvar(string_t s, qvar_t x) {
+  unsigned slen = strlen(s);
+  unsigned len = 9 + slen;  // s + "_struct" + "\0" plus slack
+  let &$(namespce,&v) = x;
+  unsigned vlen = strlen(v);
+  len += 1 + vlen;          // "_" + v
+  list_t<var_t> nms;
+  switch (namespce) {
+  case {.Loc_n = _}: nms = NULL; break;
+  case {.Rel_n = vs}: nms = vs; break;
+  case {.Abs_n = vs}: nms = vs; break;
+  case {.C_n = vs}: nms = vs; break;
+  }
+  for (let names = nms; names != NULL; names = names->tl)
+    len += 1 + strlen(*(names->hd)); // "_" + Xi
+  char ? buf = calloc(len,sizeof(char));
+  char ? p = buf;
+  strcpy(p,s);  p += slen; // s
+  for (; nms != NULL; nms = nms->tl) {
+    let &X = nms->hd;
+    *p = '_'; p++;                    // '_'
+    strcpy(p,X);                      // X
+    p += strlen(X);
+  }
+  *p = '_'; p++;                 // '_'
+  strcpy(p,v); p += vlen;        // v
+  strcpy(p,"_struct");
+  return buf;
+}
+
+// Used when generating the struct name for a datatype field.  
+// If fieldname = N1::N2::...::Nn::f and the datatype name is
+// M1::M2::...::Mm::d, then we generate the qvar that looks
+// like N1::N2::....::Nn::f_M1_M2_..._Mm_d_struct.  
+// FIX: this could conflict with a user-defined struct which
+// can cause errors at C-compile time. 
+static qvar_t collapse_qvars(qvar_t fieldname,qvar_t dtname) {
   let TocState{.dyn = dyn, .qvar_tags = qvs, ...} = *toc_state;
   static string_t bogus_string = "*bogus*";
   static $(nmspace_t,var_t) bogus_qvar = $(Nmspace{.Loc_n = 0},&bogus_string);
-  static $(qvar_t,string_t) pair = $(&bogus_qvar,"");
-  pair = $(x,tag);
+  static $(qvar_t,qvar_t) pair = $(&bogus_qvar,&bogus_qvar);
+  pair = $(fieldname,dtname);
   region d = open(dyn); {
     let qptr = Dict::lookup_opt(*qvs,&pair);
     if (qptr != NULL) return *qptr;
-    let new_pair = new $(x,tag);
-    qvar_t res = new $((*x)[0], new (string_t)strconcat(*((*x)[1]),tag));
+    let new_pair = new $(fieldname,dtname);
+    let &$(nmspace,&fieldvar) = fieldname;
+    string_t newvar = collapse_qvar(fieldvar,dtname);
+    qvar_t res = new $(nmspace, new newvar);
     *qvs = Dict::insert(*qvs,new_pair,res);
     return res;
   }
@@ -718,7 +756,7 @@ static type_t typ_to_c(type_t t) {
   case &DatatypeType(_):
     return &VoidType_val;
   case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
-    return strctq(collapse_qvar_tag(tuf->name,"_struct"));
+    return strctq(collapse_qvars(tuf->name,tud->name));
   case &DatatypeFieldType(_): toc_impos("unresolved DatatypeFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct dyneither_ptr.
@@ -2519,7 +2557,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
                                      datatype_tag(tud,qv),DL),
                          s,DL);
-            s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
+            s = declare_stmt(var,strctq(collapse_qvars(qv,tud->name)), NULL,
                              s,DL);
           }
         }
@@ -3307,7 +3345,7 @@ DynCast:
     let x = temp_var();
     let xexp = var_exp(x,DL);
     exp_t member_exp;
-    datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
+    datatype_ctype = strctq(collapse_qvars(tuf->name,tud->name));
     tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) :
       datatype_tag(tud,tuf->name);
     member_exp = xexp;
@@ -3564,7 +3602,7 @@ xlate_pat(env_t<`rgn> nv,
     // FIX: When type is DatatypeField, can avoid all checks
     s = skip_stmt_dl();
     let temp        = temp_var();
-    qvar_t tufstrct = collapse_qvar_tag(tuf->name,"_struct");
+    qvar_t tufstrct = collapse_qvars(tuf->name,tud->name);
     let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
     int    cnt      = 1;
     exp_t  rcast    = cast_it(field_ptr_typ,r);
@@ -4335,13 +4373,13 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
 // datatype declarations -- tricky
 // For "datatype foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
-//   struct Baz_struct {
+//   struct Baz_foo_struct {
 //     int tag;  // always == 0
 //     t1 f1;
 //     t2 f2;
 //     t3 f3;
 //   };
-//   struct Baf_struct {
+//   struct Baf_foo_struct {
 //     int tag;  // always == 1
 //     t4 f1;
 //     t5 f2;
@@ -4364,7 +4402,6 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
       return;
     *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
   }
-
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     datatypefield_t f = fields->hd;
     // compute the fields for the struct, adding in a tag field
@@ -4380,7 +4417,7 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
                   List::imp_rev(fs));
     let ad =
       new Aggrdecl{.kind = StructA, .sc = Public,
-                   .name = collapse_qvar_tag(f->name,"_struct"),
+                   .name = collapse_qvars(f->name,tud->name),
                    .tvs = NULL,
                    .impl = new AggrdeclImpl(NULL,NULL,fs,false),
                    .attributes = NULL};
@@ -4393,9 +4430,9 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
 //   "@extensible datatype foo {Bar,Baz(t1,t2)}"
 // we generate
 //   char Bar[] = "Bar";
-//   struct Bar_struct { char *tag; };
+//   struct Bar_foo_struct { char *tag; };
 //   char Baz[] = "Baz";
-//   struct Baz_struct { char *tag; t1 f1; t2 f2; };
+//   struct Baz_foo_struct { char *tag; t1 f1; t2 f2; };
 // When the xdatatype is extern, then we don't do initializers for the tags.
 //
 // Thus "Baz(e1,e2)" maps to
@@ -4441,7 +4478,7 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
                           List::imp_rev(fields));
         let strct_decl =
           new Aggrdecl{.kind = StructA, .sc = Public,
-                       .name = collapse_qvar_tag(f->name,"_struct"),
+                       .name = collapse_qvars(f->name,xd->name),
                        .tvs  = NULL,
                        .impl = new AggrdeclImpl(NULL,NULL,fields,false),
                        .attributes = NULL};

@@ -93,10 +93,10 @@ extern int _throw(void* e);
 extern struct _xtunion_struct *_exn_thrown;
 
 /* Built-in Exceptions */
-struct Cyc_Null_Exception_struct { char *tag; };
-struct Cyc_Array_bounds_struct { char *tag; };
-struct Cyc_Match_Exception_struct { char *tag; };
-struct Cyc_Bad_alloc_struct { char *tag; };
+struct Cyc_Null_Exception_exn_struct { char *tag; };
+struct Cyc_Array_bounds_exn_struct { char *tag; };
+struct Cyc_Match_Exception_exn_struct { char *tag; };
+struct Cyc_Bad_alloc_exn_struct { char *tag; };
 extern char Cyc_Null_Exception[];
 extern char Cyc_Array_bounds[];
 extern char Cyc_Match_Exception[];
@@ -703,39 +703,41 @@ char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
 _dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;void exit(int);struct Cyc_Core_NewRegion{
 struct _DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
 unsigned short Cyc_mode_t;struct Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;
-extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_struct{int tag;struct
-_dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
-Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
-unsigned long*f1;};typedef void*Cyc_parg_t;int Cyc_fflush(struct Cyc___cycFILE*);
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);
-struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int
-tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
-_dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
-void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[
-17];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};
-extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;
+struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;
+};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};
+struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};typedef void*Cyc_parg_t;
+int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct Cyc___cycFILE*,struct
+_dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int
+tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{
+int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct
+_dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};
+struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{
+int tag;struct _dyneither_ptr f1;};typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[
+15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[
+14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};typedef
+unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};typedef struct Cyc_Core_Opt*
+Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_unique_region;
-extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
-extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < 
-dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*
+tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{
+char*tag;};inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
 return 0;return dyn.curr;};}void*Cyc___assert_fail(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line);void*Cyc___assert_fail(struct
 _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line){{const char*
-_tmpA;void*_tmp9[3];struct Cyc_String_pa_struct _tmp8;struct Cyc_Int_pa_struct _tmp7;
-struct Cyc_String_pa_struct _tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct _dyneither_ptr)((
-struct _dyneither_ptr)assertion),((_tmp7.tag=1,((_tmp7.f1=line,((_tmp8.tag=0,((
-_tmp8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file),((_tmp9[0]=& _tmp8,((
-_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",
-_tag_dyneither(_tmpA,sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}
-Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}
+_tmpA;void*_tmp9[3];struct Cyc_String_pa_PrintArg_struct _tmp8;struct Cyc_Int_pa_PrintArg_struct
+_tmp7;struct Cyc_String_pa_PrintArg_struct _tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct
+_dyneither_ptr)((struct _dyneither_ptr)assertion),((_tmp7.tag=1,((_tmp7.f1=line,((
+_tmp8.tag=0,((_tmp8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file),((
+_tmp9[0]=& _tmp8,((_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((
+_tmpA="%s:%u: Assertion `%s' failed.\n",_tag_dyneither(_tmpA,sizeof(char),31))),
+_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}Cyc_fflush((struct Cyc___cycFILE*)
+Cyc_stderr);exit(- 1);}

@@ -110,6 +110,15 @@ extern dict_t<`a,`b,`r> rsingleton(region_t<`r>,
 extern `b lookup(dict_t<`a,`b> d,`a k);
 /** [lookup(d,k)] returns a pointer to the value associated with 
     key [k] in [d], or throws [Absent] if [k] is not mapped to any value. */
+extern `b lookup_other(dict_t<`a,`b,`r> d, int cmp(`c,`a), `c k);
+/** [lookup_other(d,cmp,k)] returns a pointer to the value associated with 
+    key [k] in [d], or throws [Absent] if [k] is not mapped to any value. 
+    The comparison function associated with the dictionary is ignored and
+    instead, the [cmp] argument is used.  Note that [cmp] must respect
+    the same ordering constraints as the dictionary's built-in comparison
+    in order to succeed.  This is useful when the dictionary has keys that
+    are pointers into one region, but you want to look up with a key that
+    is a pointer into another region. */
 extern `b*`r lookup_opt(dict_t<`a,`b,`r> d,`a k);
 /** [lookup_opt(d,k)] returns [NULL] if [k] is not mapped to any value
     in [d], and returns a non-NULL, heap-allocated option containing

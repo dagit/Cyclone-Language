@@ -1120,6 +1120,7 @@ int main(int argc, string_t<`H> ?`H argv) {
       else otherargs[k++] = argv[i];
     }
 
+    // FIX: we should be able to statically allocate these!
     Arg::speclist_t<`r,`r> options =
     rlist(r,rnew(r)$("-v",false,"",
                rnew(r)Set_spec(&v_r),

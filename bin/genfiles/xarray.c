@@ -93,10 +93,10 @@ extern int _throw(void* e);
 extern struct _xtunion_struct *_exn_thrown;
 
 /* Built-in Exceptions */
-struct Cyc_Null_Exception_struct { char *tag; };
-struct Cyc_Array_bounds_struct { char *tag; };
-struct Cyc_Match_Exception_struct { char *tag; };
-struct Cyc_Bad_alloc_struct { char *tag; };
+struct Cyc_Null_Exception_exn_struct { char *tag; };
+struct Cyc_Array_bounds_exn_struct { char *tag; };
+struct Cyc_Match_Exception_exn_struct { char *tag; };
+struct Cyc_Bad_alloc_exn_struct { char *tag; };
 extern char Cyc_Null_Exception[];
 extern char Cyc_Array_bounds[];
 extern char Cyc_Match_Exception[];
@@ -703,28 +703,29 @@ char*Cyc_CbufferNN_t;typedef struct _dyneither_ptr Cyc_buffer_t;typedef struct
 _dyneither_ptr Cyc_mbuffer_t;typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct
 _DynRegionHandle*dynregion;};typedef unsigned long Cyc_size_t;typedef
 unsigned short Cyc_mode_t;struct Cyc___cycFILE;typedef struct Cyc___cycFILE Cyc_FILE;
-struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
-unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
-char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
+struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};
+struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{
+int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};
+struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};
+struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{
+int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};
+struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};typedef void*
+Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{
+char*tag;struct _dyneither_ptr f1;};typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{
 void*v;};typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[
-17];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};
-extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};
+extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct
+_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
 extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[
-12];struct Cyc_Core_Open_Region_struct{char*tag;};extern char Cyc_Core_Free_Region[
-12];struct Cyc_Core_Free_Region_struct{char*tag;};inline static void* arrcast(
+12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[
+12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};inline static void* arrcast(
 struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)
 return 0;{unsigned char*ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 
 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}
@@ -756,15 +757,15 @@ void*,struct Cyc_Xarray_Xarray*);void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*
 xarr);void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*xarr,int num);void Cyc_Xarray_remove(
 struct Cyc_Xarray_Xarray*xarr,int i);int Cyc_Xarray_length(struct Cyc_Xarray_Xarray*
 xarr){return xarr->num_elmts;}void*Cyc_Xarray_get(struct Cyc_Xarray_Xarray*xarr,
-int i){if(i < 0  || i >= xarr->num_elmts){struct Cyc_Core_Invalid_argument_struct
-_tmp3E;const char*_tmp3D;struct Cyc_Core_Invalid_argument_struct*_tmp3C;(int)
+int i){if(i < 0  || i >= xarr->num_elmts){struct Cyc_Core_Invalid_argument_exn_struct
+_tmp3E;const char*_tmp3D;struct Cyc_Core_Invalid_argument_exn_struct*_tmp3C;(int)
 _throw((void*)((_tmp3C=_cycalloc(sizeof(*_tmp3C)),((_tmp3C[0]=((_tmp3E.tag=Cyc_Core_Invalid_argument,((
 _tmp3E.f1=((_tmp3D="Xarray::get: bad index",_tag_dyneither(_tmp3D,sizeof(char),
 23))),_tmp3E)))),_tmp3C)))));}return*((void**)_check_dyneither_subscript(xarr->elmts,
 sizeof(void*),i));}void Cyc_Xarray_set(struct Cyc_Xarray_Xarray*xarr,int i,void*a){
-if(i < 0  || i >= xarr->num_elmts){struct Cyc_Core_Invalid_argument_struct _tmp44;
-const char*_tmp43;struct Cyc_Core_Invalid_argument_struct*_tmp42;(int)_throw((void*)((
-_tmp42=_cycalloc(sizeof(*_tmp42)),((_tmp42[0]=((_tmp44.tag=Cyc_Core_Invalid_argument,((
+if(i < 0  || i >= xarr->num_elmts){struct Cyc_Core_Invalid_argument_exn_struct _tmp44;
+const char*_tmp43;struct Cyc_Core_Invalid_argument_exn_struct*_tmp42;(int)_throw((
+void*)((_tmp42=_cycalloc(sizeof(*_tmp42)),((_tmp42[0]=((_tmp44.tag=Cyc_Core_Invalid_argument,((
 _tmp44.f1=((_tmp43="Xarray::set: bad index",_tag_dyneither(_tmp43,sizeof(char),
 23))),_tmp44)))),_tmp42)))));}*((void**)_check_dyneither_subscript(xarr->elmts,
 sizeof(void*),i))=a;}struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate_empty(struct
@@ -776,8 +777,8 @@ return Cyc_Xarray_rcreate_empty(Cyc_Core_heap_region);}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rcreate(struct _RegionHandle*r,int len,void*a);static void _tmp52(void**a,
 unsigned int*_tmp51,unsigned int*_tmp50,void***_tmp4E){for(*_tmp51=0;*_tmp51 < *
 _tmp50;(*_tmp51)++){(*_tmp4E)[*_tmp51]=*a;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_rcreate(
-struct _RegionHandle*r,int len,void*a){if(len < 0){struct Cyc_Core_Invalid_argument_struct
-_tmp4C;const char*_tmp4B;struct Cyc_Core_Invalid_argument_struct*_tmp4A;(int)
+struct _RegionHandle*r,int len,void*a){if(len < 0){struct Cyc_Core_Invalid_argument_exn_struct
+_tmp4C;const char*_tmp4B;struct Cyc_Core_Invalid_argument_exn_struct*_tmp4A;(int)
 _throw((void*)((_tmp4A=_cycalloc(sizeof(*_tmp4A)),((_tmp4A[0]=((_tmp4C.tag=Cyc_Core_Invalid_argument,((
 _tmp4C.f1=((_tmp4B="xarrays must have a non-negative size buffer",_tag_dyneither(
 _tmp4B,sizeof(char),45))),_tmp4C)))),_tmp4A)))));}{unsigned int _tmp58;void**
@@ -789,9 +790,9 @@ _tmp57,sizeof(void*),_tmp58),((((_tmp55=_tmp58,_tmp52(& a,& _tmp54,& _tmp55,& _t
 _tmp56)))))))),((_tmp53->num_elmts=0,_tmp53)))))));};}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_create(int len,void*a){return Cyc_Xarray_rcreate(Cyc_Core_heap_region,
 len,a);}struct Cyc_Xarray_Xarray*Cyc_Xarray_rsingleton(struct _RegionHandle*r,int
-len,void*a){if(len < 1){struct Cyc_Core_Invalid_argument_struct _tmp5E;const char*
-_tmp5D;struct Cyc_Core_Invalid_argument_struct*_tmp5C;(int)_throw((void*)((_tmp5C=
-_cycalloc(sizeof(*_tmp5C)),((_tmp5C[0]=((_tmp5E.tag=Cyc_Core_Invalid_argument,((
+len,void*a){if(len < 1){struct Cyc_Core_Invalid_argument_exn_struct _tmp5E;const
+char*_tmp5D;struct Cyc_Core_Invalid_argument_exn_struct*_tmp5C;(int)_throw((void*)((
+_tmp5C=_cycalloc(sizeof(*_tmp5C)),((_tmp5C[0]=((_tmp5E.tag=Cyc_Core_Invalid_argument,((
 _tmp5E.f1=((_tmp5D="singleton xarray must have size >=1",_tag_dyneither(_tmp5D,
 sizeof(char),36))),_tmp5E)))),_tmp5C)))));}{struct Cyc_Xarray_Xarray*x=Cyc_Xarray_rcreate(
 r,len,a);x->num_elmts=1;return x;};}struct Cyc_Xarray_Xarray*Cyc_Xarray_singleton(
@@ -913,15 +914,15 @@ void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;};
 struct Cyc_Xarray_Xarray*Cyc_Xarray_map_c(void*(*f)(void*,void*),void*env,struct
 Cyc_Xarray_Xarray*xarr){return Cyc_Xarray_rmap_c(Cyc_Core_heap_region,f,env,xarr);}
 void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr){xarr->num_elmts=0;}void Cyc_Xarray_delete(
-struct Cyc_Xarray_Xarray*xarr,int num){if(num > Cyc_Xarray_length(xarr)){struct Cyc_Core_Invalid_argument_struct
-_tmpA6;const char*_tmpA5;struct Cyc_Core_Invalid_argument_struct*_tmpA4;(int)
+struct Cyc_Xarray_Xarray*xarr,int num){if(num > Cyc_Xarray_length(xarr)){struct Cyc_Core_Invalid_argument_exn_struct
+_tmpA6;const char*_tmpA5;struct Cyc_Core_Invalid_argument_exn_struct*_tmpA4;(int)
 _throw((void*)((_tmpA4=_cycalloc(sizeof(*_tmpA4)),((_tmpA4[0]=((_tmpA6.tag=Cyc_Core_Invalid_argument,((
 _tmpA6.f1=((_tmpA5="number deleted is greater than length of xarray",
 _tag_dyneither(_tmpA5,sizeof(char),48))),_tmpA6)))),_tmpA4)))));}xarr->num_elmts
 -=num;}void Cyc_Xarray_remove(struct Cyc_Xarray_Xarray*xarr,int i){if(i < 0  || i > 
-xarr->num_elmts - 1){struct Cyc_Core_Invalid_argument_struct _tmpAC;const char*
-_tmpAB;struct Cyc_Core_Invalid_argument_struct*_tmpAA;(int)_throw((void*)((_tmpAA=
-_cycalloc(sizeof(*_tmpAA)),((_tmpAA[0]=((_tmpAC.tag=Cyc_Core_Invalid_argument,((
+xarr->num_elmts - 1){struct Cyc_Core_Invalid_argument_exn_struct _tmpAC;const char*
+_tmpAB;struct Cyc_Core_Invalid_argument_exn_struct*_tmpAA;(int)_throw((void*)((
+_tmpAA=_cycalloc(sizeof(*_tmpAA)),((_tmpAA[0]=((_tmpAC.tag=Cyc_Core_Invalid_argument,((
 _tmpAC.f1=((_tmpAB="xarray index out of bounds",_tag_dyneither(_tmpAB,sizeof(
 char),27))),_tmpAC)))),_tmpAA)))));}{int j=i;for(0;j < xarr->num_elmts - 2;++ j){*((
 void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),j))=*((void**)

@@ -137,7 +137,7 @@ input region \texttt{`s} so it's safe to treat \texttt{`r} pointers
 as if they were \texttt{`s} pointers:
 \begin{verbatim}
   void bar(int *@region(`r) x,
-           int *@region(`s) y : {`r} > `s);
+           int *@region(`s) y : {`s} > `r);
 \end{verbatim}
 In general, the outlives relation is specified after the function
 arguments by separating the relations with a colon (\texttt{:}) and
