@@ -42,8 +42,8 @@
 
 /* Dan: Do not define YYERROR_VERBOSE -- it has not been ported */
 
-datatype exn {Yyimpossible};     // used in various weird cases
-datatype exn {Yystack_overflow}; // thrown if the parsing stack overflows
+datatype exn {Yystack_overflow(int)}; // thrown if the parsing stack overflows
+datatype exn.Yystack_overflow Yystack_overflow_val = Yystack_overflow(0);
 
 #define yyerrok		(yyerrstatus = 0)
 #define yyclearin	(yychar = YYEMPTY)
@@ -194,7 +194,7 @@ yynewstate:
     // grow the stacks
     if (yystacksize >= YYMAXDEPTH) {
       yyerror("parser stack overflow");
-      throw Yystack_overflow;
+      throw &Yystack_overflow_val;
     }
 #if 0
     yystacksize *= 2;
@@ -357,7 +357,7 @@ yyreduce:
 #endif
 
 $    /* the action file gets copied in place of this dollarsign */
- default: // throw Yyimpossible;
+ default:
     break;
   }
 

@@ -25,17 +25,17 @@
 
 namespace Lineno;
 
-datatype token_val {
-  NEWLINE;
-  LINEDEF;
-  END;
+enum token_val {
+  NEWLINE,
+  LINEDEF,
+  END
 };
 
 }
 
 let newline = ('\n' | '\r' | "\r\n")
 
-rule token "datatype token_val" = parse
+rule token "enum token_val" = parse
   "#" [^ '\n' '\r']* newline { return LINEDEF; }
 | [^ '\n' '\r']* newline     { return NEWLINE; }
 | [^ '\n' '\r']* eof         { return END; }

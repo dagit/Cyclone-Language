@@ -29,15 +29,17 @@ namespace SlowDict;
 using   Splay;
 
 datatype exn {Absent,Present};
+datatype exn.Absent Absent_val = Absent;
+datatype exn.Present Present_val = Present;
 
 abstract struct Dict<`a,`b> {
   int       (@reln)(`a,`a);
-  datatype tree<`a,`b,`H> tree;
+  datatype tree<`a,`b,`H> @tree;
 };
 
 // should be the commented out one, but unification is buggy
 dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) {
-  datatype tree<`a,`b,`H> t = Leaf;
+  datatype tree<`a,`b,`H> @t = new Leaf(0);
   return new Dict(comp, t);
 }
 //dict_t<`a,`b> empty(int comp(`a,`a)) {
@@ -46,7 +48,7 @@ dict_t<`a,`b> empty(int (@`H comp)(`a,`a)) {
 
 bool is_empty(dict_t<`a,`b> d) {
   switch (d->tree) {
-  case Leaf:    return true;
+  case &Leaf(_): return true;
   case &Node(_): return false;
   }
 }
@@ -56,7 +58,8 @@ bool member(dict_t<`a,`b> d, `a key) {
 }
 
 dict_t<`a,`b> insert(dict_t<`a,`b> d, `a key, `b data) {
-  datatype tree<`a,`b,`H> newleft = Leaf, newright = Leaf;
+  datatype tree<`a,`b,`H> @leaf = new Leaf(0);
+  datatype tree<`a,`b,`H> @newleft = leaf, @newright = leaf;
   if (splay(d->reln, key, d->tree)) {
     // we're functional, so have to make a new root node?
     switch (d->tree) {
@@ -76,14 +79,14 @@ dict_t<`a,`b> insert(dict_t<`a,`b> d, `a key, `b data) {
 	newleft  = n->left;
 	newright = new Node(new noderef(new 
                                         node(n->key, n->data, 
-                                             Leaf, n->right)));
+                                             leaf, n->right)));
       } else {
 	newleft  = new Node(new noderef(new 
-                                        node(n->key, n->data, n->left, Leaf)));
+                                        node(n->key, n->data, n->left, leaf)));
 	newright = n->right;
       }
       break;
-    case Leaf:
+    case &Leaf(_):
       break; // newleft and newright are already Leaf
     }
   }
@@ -95,7 +98,7 @@ dict_t<`a,`b> insert(dict_t<`a,`b> d, `a key, `b data) {
 dict_t<`a,`b> insert_new(dict_t<`a,`b> d, `a key, `b data) {
   // somewhat wasteful this way (makes two new top nodes)
   if (splay(d->reln, key, d->tree))
-    throw Present;
+    throw &Present_val;
   return insert(d, key, data);
 }
 
@@ -107,23 +110,24 @@ dict_t<`a,`b> inserts(dict_t<`a,`b> d,
 }
 
 dict_t<`a,`b> singleton(int (@`H comp)(`a,`a),`a key,`b data) {
-  return new Dict(comp, new Node(new noderef(new node(key, data, Leaf, Leaf))));
+  let leaf = new Leaf(0);
+  return new Dict(comp, new Node(new noderef(new node(key, data, leaf, leaf))));
 }
 
 `b lookup(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
     case &Node(nr): return nr->v->data;
-    case Leaf:     throw new Core::Impossible("Dict::lookup");
+    case &Leaf(_):     throw new Core::Impossible("Dict::lookup");
   }
-  throw Absent;
+  throw &Absent_val;
 }
 
 Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
     case &Node(nr): return new Core::Opt(nr->v->data);
-    case Leaf:     throw new Core::Impossible("Dict::lookup");
+    case &Leaf(_):     throw new Core::Impossible("Dict::lookup");
   }
   return NULL;
 }
@@ -133,14 +137,14 @@ static int get_largest(`a x, `a y) { return 1; }
 dict_t<`a,`b> delete(dict_t<`a,`b> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
-    case Leaf: throw new Core::Impossible("Dict::lookup");
+    case &Leaf(_): throw new Core::Impossible("Dict::lookup");
     case &Node(nr):
       struct node<`a,`b,`H> @n = nr->v;
       switch (n->left) {
-      case Leaf:    return new Dict(d->reln, n->right);
+      case &Leaf(_):    return new Dict(d->reln, n->right);
       case &Node(noderef_left): 
 	switch (n->right) {
-	case Leaf:    return new Dict(d->reln, n->left);
+	case &Leaf(_):    return new Dict(d->reln, n->left);
 	case &Node(node_ref_right): 
 	  splay(get_largest, key, n->left);
 	  struct node<`a,`b,`H> @newtop = noderef_left->v; // splay changes this
@@ -157,13 +161,13 @@ dict_t<`a,`b> delete(dict_t<`a,`b> d,`a key) {
 dict_t<`a,`b> delete_present(dict_t<`a,`b> d,`a key) {
   let d2 = delete(d,key);
   if (d == d2)
-    throw Absent;
+    throw &Absent_val;
   return d2;
 }
 
-static `c fold_tree(`c f(`a,`b,`c), datatype tree<`a,`b,`H> t, `c accum) {
+static `c fold_tree(`c f(`a,`b,`c), datatype tree<`a,`b,`H> @ t, `c accum) {
   switch (t) {
-  case Leaf: 
+  case &Leaf(_): 
     return accum;
   case &Node(nr): 
     struct node<`a,`b,`H> @n = nr->v;
@@ -175,9 +179,9 @@ static `c fold_tree(`c f(`a,`b,`c), datatype tree<`a,`b,`H> t, `c accum) {
   return fold_tree(f, d->tree, accum);
 }
 
-static `c fold_tree_c(`c f(`d,`a,`b,`c),`d env, datatype tree<`a,`b,`H> t,`c accum) {
+static `c fold_tree_c(`c f(`d,`a,`b,`c),`d env, datatype tree<`a,`b,`H>@ t,`c accum) {
   switch (t) {
-  case Leaf: 
+  case &Leaf(_): 
     return accum;
   case &Node(nr): 
     struct node<`a,`b,`H> @n = nr->v;
@@ -189,9 +193,9 @@ static `c fold_tree_c(`c f(`d,`a,`b,`c),`d env, datatype tree<`a,`b,`H> t,`c acc
   return fold_tree_c(f,env,dict->tree,accum);
 }
 
-static void app_tree(`c f(`a,`b),datatype tree<`a,`b,`H> t) {
+static void app_tree(`c f(`a,`b),datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: break;
+  case &Leaf(_): break;
   case &Node(nr):
     let n = nr->v;
     app_tree(f, n->left);
@@ -204,9 +208,9 @@ void app(`c f(`a,`b),dict_t<`a,`b> d) {
   app_tree(f,d->tree);
 }
 
-static void iter_tree(void f(`a,`b),datatype tree<`a,`b,`H> t) {
+static void iter_tree(void f(`a,`b),datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: break;
+  case &Leaf(_): break;
   case &Node(nr):
     struct node<`a,`b,`H> @n = nr->v;
     iter_tree(f, n->left);
@@ -219,9 +223,9 @@ void iter(void f(`a,`b),dict_t<`a,`b> d) {
   iter_tree(f,d->tree);
 }
 
-static void app_tree_c(`c f(`d,`a,`b),`d env,datatype tree<`a,`b,`H> t) {
+static void app_tree_c(`c f(`d,`a,`b),`d env,datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: break;
+  case &Leaf(_): break;
   case &Node(nr):
     struct node<`a,`b,`H> @n = nr->v;
     app_tree_c(f, env, n->left);
@@ -234,9 +238,9 @@ void app_c(`c f(`d,`a,`b),`d env,dict_t<`a,`b> d) {
   app_tree_c(f,env,d->tree);
 }
 
-static void iter_tree_c(void f(`c,`a,`b),`c env,datatype tree<`a,`b,`H> t) {
+static void iter_tree_c(void f(`c,`a,`b),`c env,datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: break;
+  case &Leaf(_): break;
   case &Node(nr):
     struct node<`a,`b,`H> @n = nr->v;
     iter_tree_c(f, env, n->left);
@@ -249,9 +253,9 @@ void iter_c(void f(`c,`a,`b),`c env,dict_t<`a,`b> d) {
   iter_tree_c(f,env,d->tree);
 }
 
-static datatype tree<`a,`c,`H> map_tree(`c f(`b), datatype tree<`a,`b,`H> t) {
+static datatype tree<`a,`c,`H> @ map_tree(`c f(`b), datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: return Leaf;
+  case &Leaf(_): return new Leaf(0);
   case &Node(nr):
     let n = nr->v;
     return new Node(new noderef(new node(n->key,
@@ -264,9 +268,9 @@ dict_t<`a,`c> map(`c f(`b), dict_t<`a,`b> d) {
   return new Dict(d->reln, map_tree(f, d->tree));
 }
 
-static datatype tree<`a,`c,`H> map_tree_c(`c f(`d,`b), `d env, datatype tree<`a,`b,`H> t) {
+static datatype tree<`a,`c,`H> @map_tree_c(`c f(`d,`b), `d env, datatype tree<`a,`b,`H>@ t) {
   switch (t) {
-  case Leaf: return Leaf;
+  case &Leaf(_): return new Leaf(0);
   case &Node(nr):
     struct node<`a,`b,`H> @n = nr->v;
     return new Node(new noderef(new node(n->key, f(env, n->data), 
@@ -280,7 +284,7 @@ dict_t<`a,`c> map_c(`c f(`d,`b), `d env, dict_t<`a,`b> d) {
 
 $(`a,`b)@ choose(dict_t<`a,`b> d) {
   switch (d->tree) {
-  case Leaf:      throw Absent;
+  case &Leaf(_):      throw &Absent_val;
   case &Node(nr): return new $(nr->v->key, nr->v->data);
   }
 }

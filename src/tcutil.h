@@ -57,7 +57,7 @@ extern bool kind_leq(kind_t k1, kind_t k2);
 
 // returns the type of a function declaration
 extern type_t fd_type(fndecl_t fd); 
-extern kind_t tvar_kind(tvar_t t);
+extern kind_t tvar_kind(tvar_t t,kind_t def);
 extern kind_t typ_kind(type_t t);
 extern type_t compress(type_t t);
 extern void unchecked_cast(tenv_t, exp_t, type_t, coercion_t);
@@ -80,6 +80,8 @@ extern bool is_function_type(type_t t);
 extern bool is_pointer_type(type_t t);
 extern bool is_zero(exp_t e);
 extern bool is_pointer_or_boxed(type_t t,bool @is_dyneither_ptr);
+extern type_t pointer_elt_type(type_t t);
+extern type_t pointer_region(type_t t);
 
 // useful kinds
 extern struct Core::Opt<kind_t> rk;
@@ -92,6 +94,7 @@ extern struct Core::Opt<kind_t> ek;
 extern struct Core::Opt<kind_t> ik;
 extern Core::opt_t<kind_t> kind_to_opt(kind_t k);
 extern kindbound_t kind_to_bound(kind_t k);
+extern bool unify_kindbound(kindbound_t, kindbound_t);
 
 extern $(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb);
   // for temporary kind refinement

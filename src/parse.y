@@ -46,8 +46,8 @@ typedef names to be redeclared as identifiers.
 #define YYERROR_VERBOSE
 
 #if YYDEBUG==1
-extern @extensible datatype YYSTYPE;
-extern void yyprint(int i, datatype YYSTYPE v);
+extern @tagged union YYSTYPE;
+extern void yyprint(int i, union YYSTYPE v);
 #endif
 
 #include <core.h>
@@ -97,12 +97,12 @@ datatype Type_specifier {
   Type_spec(type_t,seg_t);    // int, `a, list_t<`a>, etc.
   Decl_spec(decl_t);
 };
-typedef datatype Type_specifier type_specifier_t;
+typedef datatype Type_specifier @type_specifier_t;
 
-datatype Storage_class {
+enum Storage_class {
  Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
 };
-typedef datatype Storage_class storage_class_t;
+typedef enum Storage_class storage_class_t;
 
 struct Declaration_spec {
   opt_t<storage_class_t>   sc;
@@ -141,7 +141,7 @@ static void err(string_t<`H> msg, seg_t sg) {
 static `a abort(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3), noreturn)) {
   err(vrprintf(heap_region, fmt, ap), sg);
-  throw Exit;
+  throw new Exit;
 }
 static void unimp(string_t msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: Cyclone does not yet support %s\n",
@@ -158,17 +158,17 @@ static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
   conref_t<bool> zeroterm = empty_conref();
   for (; pqs != NULL; pqs = pqs->tl) {
     switch (pqs->hd) {
-    case Zeroterm_ptrqual: 
+    case &Zeroterm_ptrqual: 
       zeroterm = true_conref; break;
-    case Nozeroterm_ptrqual:
+    case &Nozeroterm_ptrqual:
       zeroterm = false_conref; break;
-    case Nullable_ptrqual:
+    case &Nullable_ptrqual:
       nullable = true_conref; break;
-    case Notnull_ptrqual:
+    case &Notnull_ptrqual:
       nullable = false_conref; break;
-    case Fat_ptrqual:
+    case &Fat_ptrqual:
       bound = bounds_dyneither_conref; break;
-    case Thin_ptrqual:
+    case &Thin_ptrqual:
       bound = bounds_one_conref; break;
     case &Numelts_ptrqual(e):
       bound = new_conref(new Upper_b(e)); break;
@@ -212,9 +212,10 @@ static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
   case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm,ztl}):
     return starb_typ(t1,
-                     argposn ? new_evar(&Tcutil::rk, NULL) : HeapRgn,
+                     argposn ? new_evar(&Tcutil::rk, NULL) : &HeapRgn_val,
                      tq,
-                     eopt == NULL ? DynEither_b : new Upper_b((exp_t)eopt),
+                     eopt == NULL ? ((bounds_t)&DynEither_b_val) : 
+                                    ((bounds_t)(new Upper_b((exp_t)eopt))),
                      zeroterm);
   default: return t;
   }
@@ -251,9 +252,9 @@ static bool is_typeparam(type_modifier_t tm) {
 // `H then return HeapRgn, otherwise, return a type variable.
 static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
-    return HeapRgn;
+    return &HeapRgn_val;
   else if (zstrcmp(s,"`U") == 0)
-    return UniqueRgn;
+    return &UniqueRgn_val;
   else
     return new VarType(new Tvar(new s,-1,k));
 }
@@ -451,7 +452,7 @@ static $(type_t,opt_t<decl_t>)
   bool      seen_type = false;
   bool      seen_sign = false;
   bool      seen_size = false;
-  type_t    t         = VoidType;
+  type_t    t         = &VoidType_val;
   size_of_t sz        = Int_sz; 
   sign_t    sgn       = Signed;
 
@@ -521,8 +522,7 @@ static $(type_t,opt_t<decl_t>)
 	  break;
         case &Datatype_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
-          opt_t<type_t> ropt = new Opt(HeapRgn);
-          t = new DatatypeType(DatatypeInfo(KnownDatatype(new tud),args,ropt));
+          t = new DatatypeType(DatatypeInfo(KnownDatatype(new tud),args));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Enum_d(ed):
@@ -620,7 +620,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  && args2 != NULL      // not empty arg list
 	  && args2->tl == NULL   // not >1 arg
 	  && (*args2->hd)[0] == NULL // not f(void x)
-	  && (*args2->hd)[2] == VoidType) {
+	  && (*args2->hd)[2] == &VoidType_val) {
 	args2 = NULL;
       }
       // convert result type from array to pointer result
@@ -782,10 +782,10 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
 	if (atts != NULL) err("bad attributes on type declaration",loc);
 	return new List(new_decl(new Aggr_d(ad),loc),NULL);
-      case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_,_)):
+      case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
 	if(atts != NULL) err("bad attributes on datatype", loc);
 	return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
-      case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts,_)):
+      case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
         if (atts != NULL) err("bad attributes on datatype",loc);
@@ -876,10 +876,10 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
 static exp_t pat2exp(pat_t p) {
   switch (p->r) {
   case &UnknownId_p(x): return new_exp(new UnknownId_e(x),p->loc);
-  case &Reference_p(vd,&Pat{.r = Wild_p,...}): 
+  case &Reference_p(vd,&Pat{.r = &Wild_p,...}): 
     return deref_exp(new_exp(new UnknownId_e(vd->name),p->loc),p->loc);
   case &Pointer_p(p2): return address_exp(pat2exp(p2),p->loc);
-  case Null_p: return null_exp(p->loc);
+  case &Null_p: return null_exp(p->loc);
   case &Int_p(s,i): return int_exp(s,i,p->loc);
   case &Char_p(c): return char_exp(c,p->loc);
   case &Float_p(s): return float_exp(s,p->loc);
@@ -1011,7 +1011,7 @@ using Parse;
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
 %type <list_t<enumfield_t,`H>> enum_declaration_list
-%type <opt_t<type_t,`H>> optional_effect opt_rgn_opt
+%type <opt_t<type_t,`H>> optional_effect 
 %type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
 %type <conref_t<bool>> zeroterm_qual_opt
 %type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_values
@@ -1089,9 +1089,9 @@ translation_unit:
       $$=^$(new List(new Decl(new ExternCinclude_d($4,exs),LOC(@1,@6)),$7));
     }
 | PORTON ';' translation_unit
-  { $$=^$(new List(new Decl(Porton_d,LOC(@1,@1)),$3)); }
+  { $$=^$(new List(new Decl(&Porton_d_val,LOC(@1,@1)),$3)); }
 | PORTOFF ';' translation_unit
-  { $$=^$(new List(new Decl(Portoff_d,LOC(@1,@1)),$3)); }
+  { $$=^$(new List(new Decl(&Portoff_d_val,LOC(@1,@1)),$3)); }
 | /* empty */ { $$=^$(NULL); }
 ;
 
@@ -1205,7 +1205,7 @@ declaration:
 /* Cyc: alias <r>t v = e; */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
   { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(RgnKind));
-    vardecl_t vd = new_vardecl(new $(Loc_n, new $5),VoidType,NULL);
+    vardecl_t vd = new_vardecl(new $(Loc_n, new $5),&VoidType_val,NULL);
     $$ = ^$(new List(alias_decl($7,tv,vd,LOC(@1,@8)),NULL));
   }
 ;
@@ -1300,24 +1300,24 @@ attribute_list:
 attribute:
   IDENTIFIER
   { static datatype Attribute.Aligned_att att_aligned = Aligned_att(-1);
-  static $(string_t,datatype Attribute) att_map[] = {
-    $("stdcall", Stdcall_att),
-    $("cdecl", Cdecl_att),
-    $("fastcall", Fastcall_att),
-    $("noreturn", Noreturn_att),
-    $("const", Const_att), // a keyword (see grammar), but __const__ possible
-    $("aligned", (datatype Attribute)&att_aligned), // WARNING: sharing!
-    $("packed", Packed_att),
-    $("shared", Shared_att),
-    $("unused", Unused_att),
-    $("weak", Weak_att),
-    $("dllimport", Dllimport_att),
-    $("dllexport", Dllexport_att),
-    $("no_instrument_function", No_instrument_function_att),
-    $("constructor", Constructor_att),
-    $("destructor", Destructor_att),
-    $("no_check_memory_usage", No_check_memory_usage_att),
-    $("pure",Pure_att),
+  static $(string_t,datatype Attribute @) att_map[] = {
+    $("stdcall", &Stdcall_att_val),
+    $("cdecl", &Cdecl_att_val),
+    $("fastcall", &Fastcall_att_val),
+    $("noreturn", &Noreturn_att_val),
+    $("const", &Const_att_val), // a keyword (see grammar), but __const__ possible
+    $("aligned", (datatype Attribute @)&att_aligned), // WARNING: sharing!
+    $("packed", &Packed_att_val),
+    $("shared", &Shared_att_val),
+    $("unused", &Unused_att_val),
+    $("weak", &Weak_att_val),
+    $("dllimport", &Dllimport_att_val),
+    $("dllexport", &Dllexport_att_val),
+    $("no_instrument_function", &No_instrument_function_att_val),
+    $("constructor", &Constructor_att_val),
+    $("destructor", &Destructor_att_val),
+    $("no_check_memory_usage", &No_check_memory_usage_att_val),
+    $("pure",&Pure_att_val),
   };
     let s = $1;
     // drop the surrounding __ in s, if it's there
@@ -1332,10 +1332,10 @@ attribute:
       }
     if(i == numelts(att_map)) {
       err("unrecognized attribute",LOC(@1,@1));
-      $$ = ^$(Cdecl_att);
+      $$ = ^$(&Cdecl_att_val);
     }
   }
-| CONST { $$=^$(Const_att); }
+| CONST { $$=^$(&Const_att_val); }
 | IDENTIFIER '(' INTEGER_CONSTANT ')'
   { let s = $1;
     let $(_,n) = $3;
@@ -1356,7 +1356,7 @@ attribute:
       a = new Initializes_att(n);
     } else {
       err("unrecognized attribute",LOC(@1,@1));
-      a = Cdecl_att;
+      a = &Cdecl_att_val;
     }
     $$=^$(a);
   }
@@ -1368,7 +1368,7 @@ attribute:
       a = new Section_att(str);
     else {
       err("unrecognized attribute",LOC(@1,@1));
-      a = Cdecl_att;
+      a = &Cdecl_att_val;
     }
     $$=^$(a);
   }
@@ -1381,7 +1381,7 @@ attribute:
       a = new Mode_att(str);
     else {
       err("unrecognized attribute",LOC(@1,@1));
-      a = Cdecl_att;
+      a = &Cdecl_att_val;
     }
     $$=^$(a);
   }
@@ -1390,7 +1390,7 @@ attribute:
     let t = $3;
     let $(_,n) = $5;
     let $(_,m) = $7;
-    attribute_t a = Cdecl_att;
+    attribute_t a = &Cdecl_att_val;
     if (zstrcmp(s,"format") == 0 || zstrcmp(s,"__format__") == 0)
       if (zstrcmp(t,"printf") == 0)
         a = new Format_att(Printf_ft,n,m);
@@ -1417,7 +1417,7 @@ type_specifier:
 ;
 
 type_specifier_notypedef:
-  VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
+  VOID      { $$=^$(type_spec(&VoidType_val,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(Tcutil::kind_to_opt($3),NULL),LOC(@1,@3))); }
@@ -1657,21 +1657,21 @@ struct_declarator:
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases
 datatype_specifier:
-  qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt '{' datatypefield_list '}'
+  qual_datatype qual_opt_identifier type_params_opt '{' datatypefield_list '}'
     { let is_extensible = $1;
-      let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
-      $$ = ^$(new Decl_spec(datatype_decl(Public, $3,ts,new Opt($6), 
-                                          is_extensible,LOC(@1,@7))));
+      let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+      $$ = ^$(new Decl_spec(datatype_decl(Public,$2,ts,new Opt($5), 
+                                          is_extensible,LOC(@1,@6))));
     }
-| qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt 
+| qual_datatype qual_opt_identifier type_params_opt 
     { let is_extensible = $1;
-      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($3,is_extensible)), $4, $2)), LOC(@1,@4)));
+      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($2,is_extensible)), $3)), LOC(@1,@3)));
     }
-| qual_datatype opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt 
+| qual_datatype qual_opt_identifier '.' qual_opt_identifier type_params_opt 
    {  let is_extensible = $1;
       $$=^$(type_spec(new DatatypeFieldType(DatatypeFieldInfo(
-		  UnknownDatatypefield(UnknownDatatypeFieldInfo($3,$5,is_extensible)),$6)),
-		      LOC(@1,@6)));
+		  UnknownDatatypefield(UnknownDatatypeFieldInfo($2,$4,is_extensible)),$5)),
+		      LOC(@1,@5)));
     }
 ;
 
@@ -1844,17 +1844,17 @@ pointer_qual:
 | REGION_QUAL '(' any_type_name ')'
   { $$ = ^$(new Region_ptrqual($3)); }
 | THIN_QUAL
-  { $$ = ^$(Thin_ptrqual); }
+  { $$ = ^$(new Thin_ptrqual); }
 | FAT_QUAL
-  { $$ = ^$(Fat_ptrqual); }
+  { $$ = ^$(new Fat_ptrqual); }
 | ZEROTERM_QUAL
-  { $$ = ^$(Zeroterm_ptrqual); }
+  { $$ = ^$(new Zeroterm_ptrqual); }
 | NOZEROTERM_QUAL
-  { $$ = ^$(Nozeroterm_ptrqual); }
+  { $$ = ^$(new Nozeroterm_ptrqual); }
 | NOTNULL_QUAL
-  { $$ = ^$(Notnull_ptrqual); }
+  { $$ = ^$(new Notnull_ptrqual); }
 | NULLABLE_QUAL
-  { $$ = ^$(Nullable_ptrqual); }
+  { $$ = ^$(new Nullable_ptrqual); }
 ;
 
 pointer_null_and_bound:
@@ -1880,13 +1880,6 @@ zeroterm_qual_opt:
 /* empty */       { $$ = ^$(empty_conref()); }
 | ZEROTERM_QUAL   { $$ = ^$(true_conref);    }
 | NOZEROTERM_QUAL { $$ = ^$(false_conref);   }
-;
-
-/* Returns an option */
-opt_rgn_opt:
-/* empty */ { $$ = ^$(NULL); }
-| type_var  { set_vartyp_kind($1,RgnKind,true); $$ = ^$(new Opt($1)); }
-| '_'       { $$ = ^$(new Opt(new_evar(&Tcutil::rk,NULL))); }
 ;
 
 /* Always returns a type (possibly an evar) */
@@ -2277,7 +2270,7 @@ switch_clauses:
   /* empty */
     { $$=^$(NULL); }
 | DEFAULT ':' block_item_list
-    { $$=^$(new List(new Switch_clause(new_pat(Wild_p,LOC(@1,@1)),NULL,
+    { $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,LOC(@1,@1)),NULL,
                                        NULL,$3,LOC(@1,@3)),
 		     NULL));}
 | CASE exp_pattern ':' switch_clauses
@@ -2491,7 +2484,7 @@ primary_pattern:
 
 pattern:
   '_'
-    { $$=^$(new_pat(Wild_p,LOC(@1,@1)));}
+    { $$=^$(new_pat(&Wild_p_val,LOC(@1,@1)));}
 | '(' expression ')'
     { $$=^$(exp_pat($2)); }
 | constant
@@ -2506,7 +2499,7 @@ pattern:
     case &Const_e({.Float_c = s}):
       $$=^$(new_pat(new Float_p(s),e->loc)); break;
     case &Const_e({.Null_c = _}):
-      $$=^$(new_pat(Null_p,e->loc)); break;
+      $$=^$(new_pat(&Null_p_val,e->loc)); break;
     case &Const_e({.String_c = _}): 
       err("strings cannot occur within patterns",LOC(@1,@1)); break;
     case &Const_e({.LongLong_c = _}): 
@@ -2520,7 +2513,7 @@ pattern:
 | IDENTIFIER IDENTIFIER pattern
     { if (strcmp($2,"as") != 0) 
         err("expecting `as'",LOC(@2,@2));
-      $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),VoidType,NULL),
+      $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),&VoidType_val,NULL),
                               $3),LOC(@1,@1))); 
     }
 | '$' '(' tuple_pattern_list ')'
@@ -2548,14 +2541,14 @@ pattern:
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
     { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
-						VoidType,NULL),
-                                    new_pat(Wild_p,LOC(@2,@2))),
+						&VoidType_val,NULL),
+                                    new_pat(&Wild_p_val,LOC(@2,@2))),
 		    LOC(@1,@2))); }
 | '*' IDENTIFIER IDENTIFIER pattern
     { if (strcmp($3,"as") != 0)
         err("expecting `as'",LOC(@3,@3));
       $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
-						VoidType,NULL),
+						&VoidType_val,NULL),
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 

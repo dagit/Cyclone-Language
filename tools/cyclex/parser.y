@@ -36,7 +36,7 @@ lexer_definition_t parse_result = NULL;
 regular_expression_t regexp_for_string(string_t s) {
   int len = strlen(s);
   if(len == 0)
-    return Epsilon;
+    return &Epsilon_val;
   regular_expression_t ans = new Characters(new List((int)(s[len-1]), NULL));
   for(int n = len - 2; n >= 0; --n)
     ans = new Sequence(new Characters(new List((int)(s[n]), NULL)), ans);
@@ -154,7 +154,7 @@ regexp:
 | TSTRING     { $$=^$(regexp_for_string($1)); }
 | TLBRACKET char_class TRBRACKET { $$=^$(new Characters($2)); }
 | regexp TSTAR      { $$=^$(new Repetition($1)); }
-| regexp TMAYBE     { $$=^$(new Alternative($1,Epsilon)); }
+| regexp TMAYBE     { $$=^$(new Alternative($1,&Epsilon_val)); }
 | regexp TPLUS      { $$=^$(new Sequence($1, new Repetition($1))); }
 | regexp TOR regexp { $$=^$(new Alternative($1,$3)); }
 | regexp regexp %prec CONCAT { $$=^$(new Sequence($1,$2)); }
@@ -162,7 +162,7 @@ regexp:
 | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
 				       new {(string_t)$1}));
 	   catch { 
-	     case Not_found:
+	     case &Not_found:
 	     yyerror(aprintf("Reference to unbound regexp name `%s'", $1));
 	     break;
 	   }

@@ -712,34 +712,37 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  void exit(int);void*abort();struct Cyc_Core_NewRegion{struct _DynRegionHandle*
-dynregion;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
+dynregion;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];
 struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc___cycFILE;
-extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
-int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
-;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
-tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
+_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;
+struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 int tag;unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct
 _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*
 f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;}
 ;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
-tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
-18];struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};typedef
-struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;void*
-abort();void exit(int);char*getenv(const char*);extern struct _dyneither_ptr Cyc_optarg;
-extern int Cyc_optind;extern int Cyc_opterr;extern int Cyc_optopt;struct Cyc_option{
-struct _dyneither_ptr name;int has_arg;int*flag;int val;};int Cyc_getopt(int __argc,
-struct _dyneither_ptr __argv,struct _dyneither_ptr __shortopts);int Cyc__getopt_internal(
-int __argc,struct _dyneither_ptr __argv,struct _dyneither_ptr __shortopts,struct
-_dyneither_ptr __longopts,int*__longind,int __long_only);struct Cyc_List_List{void*
-hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
-8];unsigned long Cyc_strlen(struct _dyneither_ptr s);int Cyc_strcmp(struct
+tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};typedef struct{int quot;int rem;}Cyc_div_t;typedef
+struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);char*getenv(const
+char*);extern struct _dyneither_ptr Cyc_optarg;extern int Cyc_optind;extern int Cyc_opterr;
+extern int Cyc_optopt;struct Cyc_option{struct _dyneither_ptr name;int has_arg;int*
+flag;int val;};int Cyc_getopt(int __argc,struct _dyneither_ptr __argv,struct
+_dyneither_ptr __shortopts);int Cyc__getopt_internal(int __argc,struct
+_dyneither_ptr __argv,struct _dyneither_ptr __shortopts,struct _dyneither_ptr
+__longopts,int*__longind,int __long_only);struct Cyc_List_List{void*hd;struct Cyc_List_List*
+tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
+char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};
+unsigned long Cyc_strlen(struct _dyneither_ptr s);int Cyc_strcmp(struct
 _dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strncmp(struct _dyneither_ptr s1,
 struct _dyneither_ptr s2,unsigned long len);struct _dyneither_ptr Cyc_strchr(struct
 _dyneither_ptr s,char c);struct _dyneither_ptr Cyc_optarg;int Cyc_optind=1;int Cyc___getopt_initialized;

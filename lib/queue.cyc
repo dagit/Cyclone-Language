@@ -41,6 +41,7 @@ bool is_empty(queue_t q)  {
 
 // raised by take and peek
 datatype exn { Empty };
+datatype exn.Empty Empty_val = Empty;
 
 // create a new queue
 queue_t create() {
@@ -80,7 +81,7 @@ void push(queue_t<`a,`H> q, `a x) {
 // get and remove an element from the front of the queue (side effect)
 `a take(queue_t<`a> q) {
   if (q->front == NULL)
-    throw Empty; // FIX: toc problems if we try to return this.
+    throw &Empty_val; // FIX: toc problems if we try to return this.
   //    return (throw Empty);
   else {
     let x = q->front->hd;
@@ -96,7 +97,7 @@ void push(queue_t<`a,`H> q, `a x) {
 // return the first element in the queue without removing it
 `a peek(queue_t<`a> q) {
   if (q->front == NULL)
-    throw Empty; // FIX: toc problems if we try to return this.
+    throw &Empty_val; // FIX: toc problems if we try to return this.
   else {
     return(q->front->hd);
   }

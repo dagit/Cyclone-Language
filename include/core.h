@@ -147,6 +147,7 @@ extern datatype exn  { extern Impossible(string_t) };
       code).  For example, you might thrw [Impossible] if an assertion
       fails.  */
 extern datatype exn  { extern Not_found };
+extern datatype exn.Not_found Not_found_val;
   /** The [Not_found] exception is thrown by search functions to
       indicate failure.  For example, a function that looks up an
       entry in a table can throw [Not_found] if the entry is not

@@ -35,12 +35,7 @@ using Position;
 namespace Cyclone{ 
   bool tovc_r = false;
 
-  datatype C_Compilers {
-    Gcc_c;  // gcc (default)
-    Vc_c;   // visual c 
-  };
-
-  datatype C_Compilers c_compiler = Gcc_c;
+  enum C_Compilers c_compiler = Gcc_c;
 }
 using Cyclone; 
 
@@ -116,14 +111,16 @@ tqual_t combine_tqual(tqual_t x,tqual_t y) {
 tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
 tqual_t const_tqual(seg_t loc) { return Tqual(true, false,false,true,loc); }
 
+datacon(AbsynAnnot, EmptyAnnot);
+
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
   //static datatype Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
 static datatype Raw_exp.Const_e one_b_raw = 
 Const_e(Cnst{.Int_c=$(Unsigned,1)});
-struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,EmptyAnnot};
+struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,&EmptyAnnot_val};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static datatype Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
-datatype Bounds bounds_one = &one_bt;
+datatype Bounds @bounds_one = &one_bt;
 
 union DatatypeInfoU UnknownDatatype(struct UnknownDatatypeInfo udi) {
   return DatatypeInfoU{.UnknownDatatype = udi};
@@ -151,10 +148,12 @@ conref_t<`a> empty_conref()   { return new Constraint{.No_constr = 0};}
   static union Constraint<type> str##_v = {.Eq_constr = val};\
   conref_t<type> str = &str##_v
 
+datacon(Bounds,DynEither_b);
+
 MAKE_EQ_CONSTR(true_conref,bool,true);
 MAKE_EQ_CONSTR(false_conref,bool,false);
 MAKE_EQ_CONSTR(bounds_one_conref,bounds_t,&one_bt);
-MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,DynEither_b);
+MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,&DynEither_b_val);
 #undef MAKE_EQ_CONSTR
 
 // compress a conref
@@ -214,6 +213,11 @@ kind_t force_kb(kindbound_t kb) {
 }
 
 //////////////////////////// Types ///////////////////////////////
+datacon(Type,HeapRgn);
+datacon(Type,UniqueRgn);
+datacon(Type,VoidType);
+datacon(Type,FloatType);
+
 // unsigned types
 static datatype Type.IntType char_tt      = IntType(None,Char_sz);
 static datatype Type.IntType uchar_tt     = IntType(Unsigned,Char_sz);
@@ -277,7 +281,7 @@ type_t int_typ(sign_t sn, size_of_t sz) {
   }
 }
 // float, double
-type_t float_typ  = FloatType;
+type_t float_typ  = &FloatType_val;
 type_t double_typ(bool b) {
   static datatype Type.DoubleType dt = DoubleType(true);
   static datatype Type.DoubleType df = DoubleType(false);
@@ -313,10 +317,17 @@ static struct Datatypedecl exn_tud_v = Datatypedecl(Extern, &exn_name_v, NULL,
 datatypedecl_t exn_tud = &exn_tud_v;
 
   //static datatype DatatypeInfoU.KnownDatatype exn_tinfou = KnownDatatype(&exn_tud);
-static struct Opt<type_t> heap_opt = Opt(HeapRgn);
+static struct Opt<type_t> heap_opt = Opt(&HeapRgn_val);
 static datatype Type.DatatypeType exn_typ_tt =
-                  DatatypeType(DatatypeInfo(DatatypeInfoU{.KnownDatatype=&exn_tud},NULL,&heap_opt));
-type_t exn_typ = &exn_typ_tt;
+                  DatatypeType(DatatypeInfo(DatatypeInfoU{.KnownDatatype=&exn_tud},NULL));
+type_t exn_typ() {
+  static opt_t<type_t> exn_type_val = NULL;
+  if (exn_type_val == NULL) {
+    exn_type_val = new Opt(at_typ(&exn_typ_tt, &HeapRgn_val, 
+                                  empty_tqual(NULL), false_conref));
+  }
+  return exn_type_val->v;
+}
 
 // datatype PrintArg and datatype ScanfArg qvars
 static string_t printarg_str = "PrintArg";
@@ -331,25 +342,31 @@ qvar_t datatype_scanf_arg_qvar = &datatype_scanf_arg_qvar_p;
 // string
 static type_t* string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
-  if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,empty_tqual(NULL),DynEither_b,true_conref);
-  if (string_t_opt == NULL) {
-    type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(NULL),
-                         DynEither_b,true_conref);
-    string_t_opt = new t;
+  switch (Tcutil::compress(rgn)) {
+  case &HeapRgn:
+    if (string_t_opt == NULL) {
+      type_t t = starb_typ(char_typ,&HeapRgn_val,empty_tqual(NULL),
+                           &DynEither_b_val,true_conref);
+      string_t_opt = new t;
+    }
+    return *string_t_opt;
+  default:
+    return starb_typ(char_typ,rgn,empty_tqual(NULL),&DynEither_b_val,true_conref);
   }
-  return *string_t_opt;
 }
 static type_t* const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
-  if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,const_tqual(NULL),DynEither_b,true_conref);
-  if (const_string_t_opt == NULL) {
-    type_t t = starb_typ(char_typ,HeapRgn,const_tqual(NULL),
-                         DynEither_b,true_conref);
-    const_string_t_opt = new t;
+  switch (Tcutil::compress(rgn)) {
+  case &HeapRgn:
+    if (const_string_t_opt == NULL) {
+      type_t t = starb_typ(char_typ,&HeapRgn_val,const_tqual(NULL),
+                           &DynEither_b_val,true_conref);
+      const_string_t_opt = new t;
+    }
+    return *const_string_t_opt;
+  default:
+    return starb_typ(char_typ,rgn,const_tqual(NULL),&DynEither_b_val,true_conref);
   }
-  return *const_string_t_opt;
 }
 // pointers
 
@@ -379,7 +396,7 @@ type_t star_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
-				  PtrAtts{.rgn = HeapRgn, 
+				  PtrAtts{.rgn = &HeapRgn_val, 
 					  .nullable = true_conref, 
 					  .bounds = bounds_one_conref,
 					  .zero_term = false_conref,
@@ -419,7 +436,7 @@ type_t file_typ() {
     typedef_name_t file_t_name = new $(Abs_n(NULL), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
-    file_t_opt = new at_typ(file_struct_typ,HeapRgn,empty_tqual(NULL),
+    file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(NULL),
                             false_conref);
   }
   return *file_t_opt;
@@ -429,8 +446,8 @@ type_t void_star_typ() {
   static type_t* void_star_t_opt = NULL;
 
   if (void_star_t_opt == NULL)
-    void_star_t_opt = new star_typ(VoidType,HeapRgn,empty_tqual(NULL),
-                                   false_conref);
+    void_star_t_opt = new star_typ(&VoidType_val,&HeapRgn_val,
+                                   empty_tqual(NULL),false_conref);
   return *void_star_t_opt;
 }
 static datatype Type.JoinEff empty_eff = JoinEff(NULL);
@@ -464,7 +481,7 @@ cnst_t String_c(string_t<`H> s) {return Cnst{.String_c = s};}
 
 ///////////////////////// Expressions //////////////////////////////
 exp_t new_exp(raw_exp_t r, seg_t loc) {
-  return new Exp{.topt=NULL, .r=r, .loc=loc, .annot=EmptyAnnot};
+  return new Exp{.topt=NULL, .r=r, .loc=loc, .annot=&EmptyAnnot_val};
 }
 exp_t New_exp(exp_opt_t rgn_handle, exp_t e, seg_t loc) {
   return new_exp(new New_e(rgn_handle,e), loc);
@@ -486,10 +503,12 @@ exp_t char_exp(char c, seg_t loc) {
 exp_t float_exp(string_t<`H> f, seg_t loc) { return const_exp(Float_c(f),loc);  }
 exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(String_c(s),loc); }
 
+datacon(Binding,Unresolved_b);
+
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.
 exp_t var_exp(qvar_t q, seg_t loc) {
-  return new_exp(new Var_e(q,Unresolved_b), loc);
+  return new_exp(new Var_e(q,&Unresolved_b_val), loc);
 }
 exp_t varb_exp(qvar_t q, binding_t b, seg_t loc) {
   return new_exp(new Var_e(q, b), loc);
@@ -609,9 +628,10 @@ exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H> n,
 ///////////////////////// Statements ///////////////////////////////
 stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
   return new Stmt{.r=s, .loc=loc, .non_local_preds=NULL, .try_depth=0,
-                  .annot=EmptyAnnot }; 
+                  .annot=&EmptyAnnot_val }; 
 }
-stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
+datatype Raw_stmt.Skip_s Skip_s_val = Skip_s;
+stmt_t skip_stmt(seg_t loc) { return new_stmt(&Skip_s_val, loc); }
 stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
 stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
   if (ss == NULL) return skip_stmt(loc);
@@ -639,8 +659,8 @@ stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H> scs, seg_t loc) {
 }
 stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
   switch ($(s1->r,s2->r)) {
-  case $(Skip_s,_): return s2;
-  case $(_,Skip_s): return s1;
+  case $(&Skip_s,_): return s2;
+  case $(_,&Skip_s): return s1;
   default: return new_stmt(new Seq_s(s1,s2), loc); 
   }
 }
@@ -672,6 +692,8 @@ stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
 /////////////////////////// Patterns //////////////////////////////
 pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,NULL,s); }
 pat_t exp_pat(exp_t e) { return new_pat(new Exp_p(e),e->loc); }
+datatype Raw_pat.Wild_p Wild_p_val = Wild_p;
+datatype Raw_pat.Null_p Null_p_val = Null_p;
 
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
@@ -762,7 +784,7 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (Tcutil::compress(t)) {
   case &FnType(_): return at_typ(t,
                                  fresh_evar ? 
-                                   new_evar(new Opt(RgnKind),NULL) : HeapRgn,
+                                   new_evar(new Opt(RgnKind),NULL) : &HeapRgn_val,
                                  empty_tqual(NULL),false_conref);
   default: return t;
   }
@@ -821,14 +843,32 @@ $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@`H> ts, int i) {
   return ts->hd;
 }
 
+datacon(Attribute,Stdcall_att);      
+datacon(Attribute,Cdecl_att);        
+datacon(Attribute,Fastcall_att);
+datacon(Attribute,Noreturn_att);     
+datacon(Attribute,Const_att);
+datacon(Attribute,Packed_att);
+datacon(Attribute,Nocommon_att);
+datacon(Attribute,Shared_att);
+datacon(Attribute,Unused_att);
+datacon(Attribute,Weak_att);
+datacon(Attribute,Dllimport_att);
+datacon(Attribute,Dllexport_att);
+datacon(Attribute,No_instrument_function_att);
+datacon(Attribute,Constructor_att);
+datacon(Attribute,Destructor_att);
+datacon(Attribute,No_check_memory_usage_att);
+datacon(Attribute,Pure_att);
+
 string_t attribute2string(attribute_t a) {
   switch (a) {
   case &Regparm_att(i): return aprintf("regparm(%d)",i);
-  case Stdcall_att: return "stdcall";
-  case Cdecl_att: return "cdecl";
-  case Fastcall_att: return "fastcall";
-  case Noreturn_att: return "noreturn";
-  case Const_att: return "const";
+  case &Stdcall_att: return "stdcall";
+  case &Cdecl_att: return "cdecl";
+  case &Fastcall_att: return "fastcall";
+  case &Noreturn_att: return "noreturn";
+  case &Const_att: return "const";
   case &Aligned_att(i): 
     if (i == -1) return "aligned";
     else /* return aprintf("aligned(%d)",i);*/
@@ -836,22 +876,22 @@ string_t attribute2string(attribute_t a) {
       case Gcc_c: return aprintf("aligned(%d)",i);
       case Vc_c:  return aprintf("align(%d)",i);
       }
-  case Packed_att: return "packed";
+  case &Packed_att: return "packed";
   case &Section_att(s): return aprintf("section(\"%s\")",s);
-  case Nocommon_att: return "nocommon";
-  case Shared_att: return "shared";
-  case Unused_att: return "unused";
-  case Weak_att: return "weak";
-  case Dllimport_att: return "dllimport";
-  case Dllexport_att: return "dllexport";
-  case No_instrument_function_att: return "no_instrument_function";
-  case Constructor_att: return "constructor";
-  case Destructor_att: return "destructor";
-  case No_check_memory_usage_att: return "no_check_memory_usage";
+  case &Nocommon_att: return "nocommon";
+  case &Shared_att: return "shared";
+  case &Unused_att: return "unused";
+  case &Weak_att: return "weak";
+  case &Dllimport_att: return "dllimport";
+  case &Dllexport_att: return "dllexport";
+  case &No_instrument_function_att: return "no_instrument_function";
+  case &Constructor_att: return "constructor";
+  case &Destructor_att: return "destructor";
+  case &No_check_memory_usage_att: return "no_check_memory_usage";
   case &Format_att(Printf_ft,n,m): return aprintf("format(printf,%u,%u)",n,m);
   case &Format_att(Scanf_ft,n,m):  return aprintf("format(scanf,%u,%u)", n,m);
   case &Initializes_att(n): return aprintf("initializes(%d)",n);
-  case Pure_att: return "pure";
+  case &Pure_att: return "pure";
   case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
  }
 }
@@ -859,14 +899,14 @@ string_t attribute2string(attribute_t a) {
 // returns true when a is an attribute for function types
 bool fntype_att(attribute_t a) {
   switch (a) {
-  case &Regparm_att(_):    
-  case Fastcall_att:       
-  case Stdcall_att:        
-  case Cdecl_att:          
-  case Noreturn_att:       
-  case Pure_att:
-  case &Format_att(_,_,_): 
-  case Const_att: return true;
+  case &Regparm_att(i):    
+  case &Fastcall_att:       
+  case &Stdcall_att:        
+  case &Cdecl_att:          
+  case &Noreturn_att:       
+  case &Pure_att:
+  case &Format_att(...):
+  case &Const_att: return true;
   case &Initializes_att(_): return true;
   default: return false;
   }
@@ -927,6 +967,9 @@ bool is_aggr_type(type_t t) {
   default: return false;
   }
 }
+
+datacon(Raw_decl,Porton_d);
+datacon(Raw_decl,Portoff_d);
 
   /*
   void print_decls(list_t<decl_t> decls) {

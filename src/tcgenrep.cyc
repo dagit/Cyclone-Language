@@ -139,7 +139,7 @@ dfsvisit(repinfo_t ri, Hashtable::table_t<repinfo_t, int> visited) {
     //printf("cycle!\n");
     return NULL;
   } catch {
-  case Not_found:
+  case &Not_found:
     // mark the node as visited
     Hashtable::insert(visited,ri,1);
     // process the children
@@ -231,7 +231,7 @@ static decl_t gen_decl(stringptr_t<`H,`H> name, type_t type, exp_opt_t init,seg_
   vardecl_t vd = new_vardecl(qvar,type,init);
   vd->sc = Static;
   datatype Raw_decl.Var_d@ r1 = new Var_d(vd);
-  datatype Raw_decl r2 = (datatype Raw_decl)r1;
+  raw_decl_t r2 = r1;
   return new_decl(r2,seg);
 }
 
@@ -241,7 +241,7 @@ static decl_t gen_vardecl(qvar_t name, type_t type, exp_opt_t init,scope_t sc,se
   vardecl_t vd = new_vardecl(topname,type,init);
   vd->sc = sc;
   datatype Raw_decl.Var_d@ r1 = new Var_d(vd);
-  datatype Raw_decl r2 = (datatype Raw_decl)r1;
+  raw_decl_t r2 = r1;
   return new_decl(r2,seg);
 }
 
@@ -282,8 +282,7 @@ static type_t datatype_typ(qvar_t name) {
   return new DatatypeType(
 			DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo(name,
                                                                    false)),
-				   NULL,
-				   new Opt(HeapRgn)));
+                                     NULL));
 }
 static type_t datatypefield_typ(qvar_t name, qvar_t fieldname) {
   return new DatatypeFieldType(DatatypeFieldInfo(UnknownDatatypefield(UnknownDatatypeFieldInfo(name,fieldname,false)),NULL));
@@ -479,7 +478,7 @@ static $(tqual_t,type_t)@ tqual_type(tqual_t* tq,type_t type) {
 static type_t tuple_typ(list_t<type_t,`H> types) {
   let tqualtypes = List::map_c(tqual_type,&tq_none,types);
   datatype Type.TupleType @ tuple_type_base = new TupleType(tqualtypes);
-  type_t tuple_type = (datatype Type) tuple_type_base;
+  type_t tuple_type = tuple_type_base;
   return tuple_type;
 }
 
@@ -503,7 +502,7 @@ array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
   let addrnamesexp = arr_init_exp(addrnames,loc);
   // step 4: declare an unspecified-length array initialized to this
   let arrname = new_gen_id("arr");
-  let pptr_type = at_typ(type,HeapRgn,tq_none,false_conref);
+  let pptr_type = at_typ(type,&HeapRgn_val,tq_none,false_conref);
   let arrty = array_typ(pptr_type,tq_none,NULL,false_conref,NULL);
   let d1 = gen_decl(arrname,arrty,addrnamesexp,loc);
   let resultexp = unknownid_exp(toplevel_name(arrname),loc);
@@ -529,7 +528,7 @@ check_datatypefield_and_get_nmtype(datatypefield_t tuf) {
 static $(var_t,type_t)@
 check_xdatatypefield_and_get_name_type(datatypefield_t tuf) {
   // preserves tquals of original datatype...
-  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(char_typ,HeapRgn,tq_none,true_conref))),tuf->typs)));
+  return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(char_typ,&HeapRgn_val,tq_none,true_conref))),tuf->typs)));
 }
 
 // FIX: get rid of this useless stuff
@@ -582,7 +581,7 @@ type_t monomorphize_type(type_t type) {
 				  ad->attributes};
     return new AggrType(AggrInfo(KnownAggr(new ad2),NULL));
 
-  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},params,rgn}):
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},params}):
     let tvs = tud->tvs;
     if(List::length(params) != List::length(tvs))
       Tcutil::impos("gen(): number of params %d differs from number of tyvars %d",List::length(params), List::length(tvs));
@@ -592,7 +591,7 @@ type_t monomorphize_type(type_t type) {
     if(tud->fields != NULL) 
       fields = new Opt{List::map_c(substitute_datatypefield_type,subst,tud->fields->v)};
     let tud2 = new Datatypedecl{tud->sc,tud->name,NULL,fields,tud->is_extensible};
-    let type2 = new DatatypeType(DatatypeInfo{KnownDatatype(new tud2),params,rgn});
+    let type2 = new DatatypeType(DatatypeInfo{KnownDatatype(new tud2),params});
     
     let loc = segment_of_abs(0,0);
     //printf("before: %s\n after: %s\n", 
@@ -727,7 +726,7 @@ buildRepStruct(opt_t<typedef_name_t> sname, tenv_t te, dict_t<type_t,repinfo_t,`
   // construct the (globally unique) type of components of the tuple array
   // FIX: Make this not duplicate so much run time data.
 
-  type_t tuple_type = tuple_typ(list(uint_typ,const_string_typ(HeapRgn),datatype_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type = tuple_typ(list(uint_typ,const_string_typ(&HeapRgn_val),datatype_typ(typerep_name(&typestruct_str))));
 
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
   // name
@@ -737,7 +736,7 @@ buildRepStruct(opt_t<typedef_name_t> sname, tenv_t te, dict_t<type_t,repinfo_t,`
   } else {
     // string_t gen_nameNN = "`*name`";
     let namename = new_gen_id("name");
-    let dname = gen_decl(namename,const_string_typ(HeapRgn),cnst_string(*(*sname->v)[1],loc),loc);
+    let dname = gen_decl(namename,const_string_typ(&HeapRgn_val),cnst_string(*(*sname->v)[1],loc),loc);
     // add dname to decls
     tupledecls = new List{dname,tupledecls};
     // assign name exp
@@ -774,7 +773,7 @@ buildRepUnion(opt_t<typedef_name_t> uname, tenv_t te, dict_t<type_t,repinfo_t,`H
   let nmexps = List::map_c(cnst_string_cls,loc,names);
   let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
   let nmriexps = List::map_c(tuple2_exp_cls,loc,List::zip(nmexps, riexps));
-  let tuple_type = tuple_typ(list(const_string_typ(HeapRgn),datatype_typ(typerep_name(&typestruct_str))));
+  let tuple_type = tuple_typ(list(const_string_typ(&HeapRgn_val),datatype_typ(typerep_name(&typestruct_str))));
   let &$(decls,arrexp) = array_decls(tuple_type,nmriexps,loc);
   // make name expression: null for now (FIX)
   // name
@@ -784,7 +783,7 @@ buildRepUnion(opt_t<typedef_name_t> uname, tenv_t te, dict_t<type_t,repinfo_t,`H
   } else {
     // string_t gen_nameNN = "`*name`";
     let namename = new_gen_id("name");
-    let dname = gen_decl(namename,const_string_typ(HeapRgn),cnst_string(*(*uname->v)[1],loc),loc);
+    let dname = gen_decl(namename,const_string_typ(&HeapRgn_val),cnst_string(*(*uname->v)[1],loc),loc);
     // add dname to decls
     decls = new List{dname,decls};
     // assign name exp
@@ -811,7 +810,7 @@ buildRepEnum(typedef_name_t* ename, tenv_t te, dict_t<type_t,repinfo_t,`H> dict,
   let nmexps = List::map_c(cnst_qvar_string_cls,loc,names);
   let tagexps = List::map_c(cnst_int_cls,loc,tags);
   let tagnmexps = List::map_c(tuple2_exp_cls,loc,List::zip(tagexps, nmexps));
-  let tuple_type = tuple_typ(list(uint_typ,const_string_typ(HeapRgn)));
+  let tuple_type = tuple_typ(list(uint_typ,const_string_typ(&HeapRgn_val)));
   let &$(decls,arrexp) = array_decls(tuple_type,tagnmexps,loc);
   // name
   exp_t name;
@@ -820,7 +819,7 @@ buildRepEnum(typedef_name_t* ename, tenv_t te, dict_t<type_t,repinfo_t,`H> dict,
   } else {
     // string_t gen_nameNN = "`*name`";
     let namename = new_gen_id("name");
-    let dname = gen_decl(namename,const_string_typ(HeapRgn),cnst_string(*(**ename)[1],loc),loc);
+    let dname = gen_decl(namename,const_string_typ(&HeapRgn_val),cnst_string(*(**ename)[1],loc),loc);
     // add dname to decls
     decls = new List{dname,decls};
     // assign name exp
@@ -849,7 +848,7 @@ buildRepDatatype(qvar_t tname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_
   let nmexps = List::map_c(cnst_qvar_string_cls,loc,tonames);
   let tagnmexps = List::zip(totags, nmexps);
   let tuplelist1 = List::map_c(tuple2_exp_cls,loc,tagnmexps);
-  let tuple_type1 = tuple_typ(list(uint_typ, const_string_typ(HeapRgn)));
+  let tuple_type1 = tuple_typ(list(uint_typ, const_string_typ(&HeapRgn_val)));
   let &$(tupledecls1,arrexp1) = array_decls(tuple_type1,tuplelist1,loc);
 
   // then build the tag+data list.
@@ -870,7 +869,7 @@ buildRepDatatype(qvar_t tname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_
   let tagnmriexps = List::zip3(tags,nmexps,riexps);
   let tuplelist2 = List::map_c(tuple3_exp_cls,loc,tagnmriexps);
   // build the type of elements of Datatype array
-  type_t tuple_type2 = tuple_typ(list(uint_typ,const_string_typ(HeapRgn),datatype_typ(typerep_name(&typestruct_str))));
+  type_t tuple_type2 = tuple_typ(list(uint_typ,const_string_typ(&HeapRgn_val),datatype_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls2,arrexp2) = array_decls(tuple_type2,tuplelist2,loc);
   // build name expression
   let name = cnst_string(*(*tname)[1],loc); // ignore namespace for now
@@ -904,7 +903,7 @@ buildRepXDatatype(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Datatype array
-  type_t name_type = dyneither_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
+  type_t name_type = dyneither_typ(char_typ,&HeapRgn_val,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
   type_t tuple_type = tuple_typ(list(name_type,
 				     datatype_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
@@ -969,7 +968,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 						 loc),loc),
 		       NULL,NULL);
     break;
-  case FloatType:
+  case &FloatType:
     dict = update_info(dict,
 		       type,
 		       NULL,
@@ -1010,7 +1009,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 			 address_exp(unknownid_exp(varname,loc),loc),
 			 list(base_info),NULL);
       break;
-    case DynEither_b:
+    case &DynEither_b:
       // a ? pointer
       // datatype Typestruct.FatPtr(`base_info->exp`);
       let varname = toplevel_name(new_gen_id("rep"));
@@ -1077,7 +1076,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     dict = insert(dict2,type,info2);
     break;
 
-  case VoidType: 
+  case &VoidType: 
     Tcutil::terr(loc,"found void in gen() expression"); break;
   case &Evar(_,_,_,_):
     Tcutil::terr(loc,"found evar in gen() expression"); break;
@@ -1085,7 +1084,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     Tcutil::terr(loc,"found tyvar in gen() expression");
     /*      // string_t name = `*tvar->name`;
 	    let strname = new_gen_id("name");
-	    let d1 = gen_decl(strname,string_typ(HeapRgn),cnst_string(*tvar->name,loc),loc);
+	    let d1 = gen_decl(strname,string_typ(&HeapRgn_val),cnst_string(*tvar->name,loc),loc);
 	    // datatype Typestruct.Var gen = Var(&name);
 	    let varname = new_gen_id("gen");
 	    let d2 = datatype_constructor_decl(&typestruct_str,&var_str, varname,
@@ -1105,14 +1104,14 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     // conceivably we might have to marshal these somehow... how?
   case &RgnHandleType(_): 
   case &DynRgnType(_,_): 
-  case UniqueRgn:           
-  case HeapRgn:           
+  case &UniqueRgn:           
+  case &HeapRgn:           
   case &AccessEff(_):     
   case &JoinEff(_):
   case &RgnsEff(_):       
     Tcutil::terr(loc,"gen(): unhandled region, handle or effect type");
     break;
-  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tudecl},params,rgn}):
+  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tudecl},params}):
     if(tudecl->tvs != NULL) 
       Tcutil::impos("gen(): datatype type variables not handled yet");
     if(tudecl->fields == NULL) {      

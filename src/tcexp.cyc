@@ -83,15 +83,15 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
       case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); break;
       case &AggrRes(_):
         terr(e->loc,"bad occurrence of type name %s",qvar2string(q));
-        e->r = new Var_e(q,Unresolved_b);
+        e->r = new Var_e(q,&Unresolved_b_val);
         break;
       }
     }
   } catch { 
-    case Dict::Absent:
+    case &Dict::Absent:
       // This is an error, but the message will be printed elsewhere.
       // Here we just put the "I don't know" answer in e->r
-      e->r = new Var_e(q,Unresolved_b);
+      e->r = new Var_e(q,&Unresolved_b_val);
       break;
     }
 }
@@ -128,7 +128,7 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
           return;
         }
       }
-    } catch { case Dict::Absent:
+    } catch { case &Dict::Absent:
       // print out error message later when type-checking the fn call
       // terr(e1->loc, "unbound identifier %s",qvar2string(q));
       e->r = new FnCall_e(e1,es,NULL);
@@ -271,7 +271,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     // The default is to treat a string as if it's statically heap 
     // allocated and return a pointer to that string.  However, if the 
     // string is used as an initializer, then we should return an array type.
-    t = atb_typ(char_typ,HeapRgn,const_tqual(NULL),
+    t = atb_typ(char_typ,&HeapRgn_val,const_tqual(NULL),
                 new Upper_b(elen),true_conref);
     if (topt != NULL) {
       switch (compress(*topt)) {
@@ -317,7 +317,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
 // variables
 static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
-  case Unresolved_b:
+  case &Unresolved_b:
     return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
   case &Global_b(vd):  *q = *vd->name; return vd->type;
   case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
@@ -402,8 +402,8 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     switch (t) {
     case &ArrayType(_): break;
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))): 
-      switch(conref_constr((bounds_t)DynEither_b,b)) {
-      case DynEither_b: break;
+      switch(conref_constr((bounds_t)&DynEither_b_val,b)) {
+      case &DynEither_b: break;
       case &Upper_b(e): 
         if (!Evexp::c_can_eval(e))
           terr(loc,"cannot apply numelts to a pointer with abstract bounds");
@@ -446,8 +446,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
     if (!coerce_sint_typ(te, e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
-    switch (conref_constr((bounds_t)DynEither_b,b)) {
-    case DynEither_b: return t1;
+    switch (conref_constr((bounds_t)&DynEither_b_val,b)) {
+    case &DynEither_b: return t1;
     case &Upper_b(ub):
       // if we have a zero-terminated array, warn that this could
       // be expensive, since coercing to a fat pointer involves a loop.  
@@ -474,7 +474,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
 static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
-  type_t t1_elt = VoidType;
+  type_t t1_elt = &VoidType_val;
   if (is_tagged_pointer_typ_elt(t1,&t1_elt)) {
     if (is_tagged_pointer_typ(t2)) {
       if (!unify(t1, t2)) {
@@ -644,7 +644,7 @@ static void check_writable(tenv_t te, exp_t e) {
       try {
         let &$(tq,_) = List::nth(ts,i);
         if (!tq.real_const) return;
-      } catch { case Nth: return; }
+      } catch { case &Nth: return; }
       break;
     default: break;
     }
@@ -706,7 +706,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e)) {
-    type_t telt = VoidType;
+    type_t telt = &VoidType_val;
     if (is_tagged_pointer_typ_elt(t,&telt) || 
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),MemKind))
@@ -827,7 +827,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = e->topt->v;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case FloatType: unchecked_cast(te,e,dbl_typ,No_coercion);t1 = dbl_typ; break;
+  case &FloatType: unchecked_cast(te,e,dbl_typ,No_coercion);t1 = dbl_typ; break;
   case &IntType(_,Char_sz): 
   case &IntType(_,Short_sz): unchecked_cast(te,e,sint_typ,No_coercion);t1 = sint_typ; break;
   default: break;
@@ -839,8 +839,9 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (unify(t1,t2))
+    if (unify(t1,t2)) {
       return fields->hd;
+    }
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != NULL; fields = fields->tl) {
@@ -932,7 +933,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                 }
               }
             } catch {
-            case Nth: terr(loc,"bad format arguments"); break;
+            case &Nth: terr(loc,"bad format arguments"); break;
             }
             break;
           default: break;
@@ -970,17 +971,26 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             } else {
               // this is trickier, we have to match up the type of the
               // actual argument with a constructor from the datatype.
-              switch (compress(vt)) {
-              case &DatatypeType(DatatypeInfo{{.KnownDatatype=&td},targs,tur}):
+              switch (compress(pointer_elt_type(vt))) {
+              case &DatatypeType(DatatypeInfo{{.KnownDatatype=&td},targs}):
                 // unfortunately, td may not be the "latest" declaration of
                 // an xdatatype, so we re-look it up in the environment.
                 let td = *lookup_datatypedecl(te,loc,td->name);
                 list_t<datatypefield_t> fields = NULL;
                 if (td->fields == NULL) 
-                  terr(loc,"can't inject into %s",typ2string(vt));
+                  terr(loc,"can't inject into abstract datatype %s",
+                       typ2string(vt));
                 else fields = td->fields->v;
-                if(!unify(tur->v,curr_rgn(te)))
-                  terr(loc,"bad region for injected varargs");
+
+                // we want to avoid unifying pointer regions too early
+                // and instead get away with subtyping since it's more
+                // flexible.  So, we're going to constraint the region
+                // of the pointer to the datatype to be the current
+                // block's region.
+                if (!unify(pointer_region(vt),curr_rgn(te)))
+                  terr(loc,"can't unify pointer region for %s to curr_rgn %s",
+                       typ2string(vt), typ2string(curr_rgn(te)));
+
                 TEMP_RGN(te, rgn) {
                   let inst = List::rzip(rgn,rgn,td->tvs,targs);
                   for (; es != NULL; es = es->tl) {
@@ -993,7 +1003,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 			  !is_noalias_path(rgn,e1))
 			terr(e1->loc,UNIQUE_ERR_MSG);
 		    }
-                    let f = tcInjection(te,e1,vt,rgn,inst,fields);
+                    let f = tcInjection(te,e1,pointer_elt_type(vt),
+                                        rgn,inst,fields);
                     if (f != NULL)
                       vci->injectors = 
                         List::append(vci->injectors,
@@ -1022,9 +1033,11 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 
 // throw e1
 static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
-  tcExp(te,&exn_typ,e); 
-  if (!coerce_arg(te,e,exn_typ))
-    terr(loc,"expected datatype exn but found %s",typ2string(e->topt->v));
+  let exception_type = exn_typ();
+  tcExp(te,&exception_type,e); 
+  if (!coerce_arg(te,e,exception_type))
+    terr(loc,"expected %s but found %s",typ2string(exception_type),
+         typ2string(e->topt->v));
   return wildtyp(lookup_opt_type_vars(te));
 }
 
@@ -1043,7 +1056,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
         list_t<$(tvar_t,type_t)@> instantiation = NULL;
         // now allows partial instantiation
         for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
-          kind_t k = tvar_kind(tvars->hd);
+          kind_t k = tvar_kind(tvars->hd,BoxKind);
           check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
           instantiation = 
             rnew(temp) List(rnew(temp) $(tvars->hd,ts->hd),instantiation);
@@ -1408,7 +1421,7 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
                     "tuple projection cannot use sizeof or offsetof");
   try
     return (*List::nth(ts,i))[1];
-  catch { case Nth:
+  catch { case &Nth:
     return expr_err(te,loc,NULL,"index is %d but tuple has only %d fields",
                     i, List::length(ts));
   }
@@ -1433,7 +1446,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
       // to remind the user that this is an expensive operation.
       if (conref_def(false,zt)) {
         bool emit_warning = true;
-        switch (conref_def((bounds_t)DynEither_b,b)) {
+        switch (conref_def((bounds_t)&DynEither_b_val,b)) {
         case &Upper_b(e3):
           if (is_const_exp(te, e2)) {
             let $(i,known) = Evexp::eval_const_uint_exp(e2);
@@ -1443,7 +1456,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
             }
           }
           break;
-        case DynEither_b: emit_warning = false; break;
+        case &DynEither_b: emit_warning = false; break;
         }
         if (emit_warning) 
           warn(e2->loc, "subscript on thin, zero-terminated pointer could be expensive.");
@@ -1654,9 +1667,9 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     ad = (aggrdecl_t)(*ad_opt);
   else {
     try ad = *lookup_aggrdecl(te,loc,*tn);
-    catch { case Dict::Absent:
+    catch { case &Dict::Absent:
       terr(loc, "unbound struct/union name %s",qvar2string(*tn));
-      return topt != NULL ? *topt : VoidType;
+      return topt != NULL ? *topt : &VoidType_val;
     }
     *ad_opt = ad;
     *tn = ad->name;
@@ -1748,7 +1761,8 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 
 // f(es)   where f is a datatype and is tuf->name
 static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
-		       list_t<exp_t> es, datatypedecl_t tud, datatypefield_t tuf) {
+                         list_t<exp_t> es, datatypedecl_t tud, 
+                         datatypefield_t tuf) {
   TEMP_RGN(te, rgn) {
   let env      = $(lookup_type_vars(te),rgn);
   let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
@@ -1760,18 +1774,6 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   if (topt != NULL) {
     switch (compress(*topt)) {
     case &DatatypeFieldType(_): unify(*topt,res); break;
-    case &DatatypeType(DatatypeInfo{_,targs,r}):
-      for (_ a = all_typs; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
-        unify(a->hd,targs->hd);
-      // top-down, we're looking for a Datatype, not a Datatype field.
-      // we can cast up here if there are no arguments to the constructor
-      if (tuf->typs == NULL && es == NULL) {
-        e->topt = new Opt(res);
-        res = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),all_typs,r});
-        unchecked_cast(te, e, res, No_coercion);
-        // return res;
-      }
-      break;
     default: break;
     }
   }
@@ -1801,7 +1803,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 
 static bool zeroable_type(type_t t) {
   switch (compress(t)) {
-  case VoidType: return true;
+  case &VoidType: return true;
   case &Evar(_,_,_,_):
   case &VarType(_): 
   case &DatatypeType(_):
@@ -1809,7 +1811,7 @@ static bool zeroable_type(type_t t) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
     return (conref_def(true,n));
   case &IntType(_,_):
-  case FloatType:
+  case &FloatType:
   case &DoubleType(_): return true;
   case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
   case &FnType(_): return false;
@@ -1839,8 +1841,8 @@ static bool zeroable_type(type_t t) {
   case &RgnHandleType(_): return false;
 
   case &ValueofType(_):
-  case HeapRgn:
-  case UniqueRgn:
+  case &HeapRgn:
+  case &UniqueRgn:
   case &AccessEff(_):
   case &JoinEff(_):
   case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
@@ -1867,9 +1869,9 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
 static type_t mallocRgn(type_t rgn) {
   switch (typ_kind(compress(rgn))) {
   case UniqueRgnKind:
-    return UniqueRgn;
+    return &UniqueRgn_val;
   default:
-    return HeapRgn;
+    return &HeapRgn_val;
   }
 }
 
@@ -1878,7 +1880,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
                        bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
   //   to do otherwise (see below)
-  type_t rgn = HeapRgn;
+  type_t rgn = &HeapRgn_val;
   if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
@@ -1898,7 +1900,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   // if the type passed down constrains the region in any way
   // switched to the constrained one.
   else if (topt != NULL) {
-    type_t optrgn = VoidType;
+    type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
     }
@@ -1989,7 +1991,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       // here, we're seeing if what's expected is T@{e}.  If so, we
       // check to see if e is the same as upper_exp or its type.
       switch (conref_def(bounds_one,b)) {
-      case DynEither_b: break;
+      case &DynEither_b: break;
       case &Upper_b(upper_exp) && !one_elt:
         let is_constant = Evexp::c_can_eval(num_elts);
         if (is_constant && Evexp::same_const_exp(upper_exp,num_elts)) {
@@ -2044,7 +2046,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   if (!is_lvalue(e2))
     return expr_err(te,e2->loc,topt,"swap non-lvalue");
   // Make sure we aren't swapping elements of a zero-terminated array
-  type_t t_ign1 = VoidType, t_ign2 = VoidType;
+  type_t t_ign1 = &VoidType_val, t_ign2 = &VoidType_val;
   bool b_ign1 = false;
   if (is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&t_ign2))
     return expr_err(te,e1->loc,topt,"swap value in zeroterm array");
@@ -2058,7 +2060,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 			  typ2string(t1), typ2string(t2));
     return result;
   }
-  return VoidType;
+  return &VoidType_val;
 }
 
 // ({ s })
@@ -2102,7 +2104,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
                     exp_opt_t rgn_handle, exp_t e, exp_t e1) {
   // by default, we allocate heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
-  type_t rgn = HeapRgn; 
+  type_t rgn = &HeapRgn_val; 
   if (rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
@@ -2122,7 +2124,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // if the type passed down constrains the region in any way
   // switched to the constrained one.
   else if (topt != NULL) {
-    type_t optrgn = VoidType;
+    type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
     }
@@ -2144,7 +2146,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	if(is_const_exp(te,bnd))
 	  b = new Upper_b(bnd);
 	else
-	  b = DynEither_b;
+	  b = &DynEither_b_val;
       }
       type_t res_typ = 
         new PointerType(PtrInfo(et_arr,tq_arr,
@@ -2205,7 +2207,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_typ(char_typ, rgn, const_tqual(NULL), 
-                        DynEither_b, true_conref);
+                        &DynEither_b_val, true_conref);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)), 
                    false_conref);
@@ -2250,7 +2252,7 @@ type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   switch (t) {
   case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
     let $(_,rgn) = addressof_props(te,e);
-    let b = (e2 == NULL) ? (bounds_t)DynEither_b : new Upper_b((exp_t)e2);
+    let b = (e2 == NULL) ? (bounds_t)&DynEither_b_val : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b,zt);
     e->topt->v = t;
     return t;
@@ -2284,7 +2286,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
     switch (t) {
     case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
       let $(_,rgn) = addressof_props(te,e);
-      bounds_t b = (e2 == NULL) ? (bounds_t)DynEither_b : 
+      bounds_t b = (e2 == NULL) ? (bounds_t)&DynEither_b_val : 
         new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b,zt);
       unchecked_cast(te,e,t,Other_coercion);

@@ -24,12 +24,12 @@ namespace Cyclone {
   // true if the generated c code should be ansi
   extern bool tovc_r;
 
-  datatype C_Compilers {
-    Gcc_c;  // gcc (default)
-    Vc_c;   // visual c 
+  enum C_Compilers {
+    Gcc_c,  // gcc (default)
+    Vc_c    // visual c 
   };
 
   // used to tell how attributes, 64 bit integers, etc. should be generate
-  extern datatype C_Compilers c_compiler;
+  extern enum C_Compilers c_compiler;
 }
 #endif

@@ -728,16 +728,17 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  void exit(int);struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct
-Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];int Cyc_Execinfo_backtrace(
-struct _dyneither_ptr,int);int Cyc_Execinfo_bt();typedef struct{int __count;union{
-unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long
-__pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
-struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};int Cyc_Execinfo_backtrace(struct _dyneither_ptr,int);int Cyc_Execinfo_bt();
+typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
+typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
+Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
 ;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
 tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
@@ -749,28 +750,29 @@ _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cy
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
 void perror(const char*);int Cyc_printf(struct _dyneither_ptr,struct _dyneither_ptr);
 int putchar(int);int Cyc_sprintf(struct _dyneither_ptr,struct _dyneither_ptr,struct
-_dyneither_ptr);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];
-struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_timeval{
-long tv_sec;long tv_usec;};struct Cyc_rusage{struct Cyc_timeval ru_utime;struct Cyc_timeval
-ru_stime;long ru_maxrss;long ru_ixrss;long ru_idrss;long ru_isrss;long ru_minflt;long
-ru_majflt;long ru_nswap;long ru_inblock;long ru_oublock;long ru_msgsnd;long ru_msgrcv;
-long ru_nsignals;long ru_nvcsw;long ru_nivcsw;};typedef enum {Cyc_P_ALL  = 0,Cyc_P_PID
- = 1,Cyc_P_PGID  = 2 }Cyc_idtype_t;int waitpid(int,int*,int);typedef struct{
-unsigned long __val[1024 / (8 * sizeof(unsigned long))];}Cyc___sigset_t;typedef Cyc___sigset_t
-Cyc_sigset_t;enum Cyc___anonymous_enum_182__{Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE
- = 1,Cyc_SIGEV_THREAD  = 2};int kill(int,int);struct Cyc___SIG_BUILTIN_struct{int
-tag;void*f1;};struct Cyc___SIG_HANDLER_struct{int tag;void(*f1)(int);};enum Cyc___anonymous_enum_368__{
-Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX
- = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC
- = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO  = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO
- = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS  = 13,Cyc__PC_REC_INCR_XFER_SIZE
- = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE  = 16,Cyc__PC_REC_XFER_ALIGN
- = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX  = 19};enum Cyc___anonymous_enum_370__{
-Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS  = 1};struct Cyc_option{struct
-_dyneither_ptr name;int has_arg;int*flag;int val;};int close(int);int dup2(int,int);
-int execvp(const char*file,const char**argv);int fork();int getpid();int pipe(int*);
-int Cyc_read(int,struct _dyneither_ptr,unsigned int);int Cyc_write(int,struct
-_dyneither_ptr,unsigned int);int backtrace(int*,int);int Cyc_Execinfo_backtrace(
+_dyneither_ptr);extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};struct Cyc_timeval{long tv_sec;long tv_usec;};struct
+Cyc_rusage{struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;long ru_maxrss;
+long ru_ixrss;long ru_idrss;long ru_isrss;long ru_minflt;long ru_majflt;long ru_nswap;
+long ru_inblock;long ru_oublock;long ru_msgsnd;long ru_msgrcv;long ru_nsignals;long
+ru_nvcsw;long ru_nivcsw;};typedef enum {Cyc_P_ALL  = 0,Cyc_P_PID  = 1,Cyc_P_PGID  = 2
+}Cyc_idtype_t;int waitpid(int,int*,int);typedef struct{unsigned long __val[1024 / (8
+* sizeof(unsigned long))];}Cyc___sigset_t;typedef Cyc___sigset_t Cyc_sigset_t;
+enum Cyc___anonymous_enum_182__{Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE  = 1,Cyc_SIGEV_THREAD
+ = 2};int kill(int,int);enum Cyc_SigBuiltin{Cyc_SIG_DFL  = 0,Cyc_SIG_ERR  = 1,Cyc_SIG_IGN
+ = 2};struct Cyc___SIG_BUILTIN_struct{int tag;enum Cyc_SigBuiltin f1;};struct Cyc___SIG_HANDLER_struct{
+int tag;void(*f1)(int);};enum Cyc___anonymous_enum_368__{Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON
+ = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF
+ = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO
+ = 9,Cyc__PC_ASYNC_IO  = 10,Cyc__PC_PRIO_IO  = 11,Cyc__PC_SOCK_MAXBUF  = 12,Cyc__PC_FILESIZEBITS
+ = 13,Cyc__PC_REC_INCR_XFER_SIZE  = 14,Cyc__PC_REC_MAX_XFER_SIZE  = 15,Cyc__PC_REC_MIN_XFER_SIZE
+ = 16,Cyc__PC_REC_XFER_ALIGN  = 17,Cyc__PC_ALLOC_SIZE_MIN  = 18,Cyc__PC_SYMLINK_MAX
+ = 19};enum Cyc___anonymous_enum_370__{Cyc__CS_PATH  = 0,Cyc__CS_V6_WIDTH_RESTRICTED_ENVS
+ = 1};struct Cyc_option{struct _dyneither_ptr name;int has_arg;int*flag;int val;};int
+close(int);int dup2(int,int);int execvp(const char*file,const char**argv);int fork();
+int getpid();int pipe(int*);int Cyc_read(int,struct _dyneither_ptr,unsigned int);int
+Cyc_write(int,struct _dyneither_ptr,unsigned int);int backtrace(int*,int);int Cyc_Execinfo_backtrace(
 struct _dyneither_ptr array,int size){if(size > _get_dyneither_size(array,sizeof(int)))(
 int)_throw((void*)({struct Cyc_Core_Failure_struct*_tmp0=_cycalloc(sizeof(*_tmp0));
 _tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=({

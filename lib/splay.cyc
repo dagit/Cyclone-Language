@@ -39,11 +39,11 @@ using List;
 namespace Splay;
 
 datatype tree<`a,`b,`r::R> {
-  Leaf,
+  Leaf(dummy_t),
   Node(struct noderef<`a,`b,`r> @`r)
 };
 
-static datatype direction {
+static enum direction {
   LEFT, RIGHT
 };
 
@@ -105,7 +105,7 @@ static void rotate_right(region_t<`r> r, struct noderef<`a,`b,`r> @`r nr) {
 // }
 
 static void lift(region_t<`r> r,
-                 list_t<$(datatype direction,struct noderef<`a,`b,`r> @`r)@> dnl) {
+                 list_t<$(enum direction,struct noderef<`a,`b,`r> @`r)@> dnl) {
   while (dnl != NULL) {
     if (dnl->tl == NULL) {
       switch (dnl->hd) {
@@ -137,9 +137,9 @@ static void lift(region_t<`r> r,
 // maybe want a splay_c too, but dict doesn't need it and that's the immediate
 // concern
 bool rsplay(region_t<`r> r, 
-            int reln(`a,`a), `a reln_first_arg, datatype `r tree<`a,`b,`r> tree) {
+            int reln(`a,`a), `a reln_first_arg, datatype tree<`a,`b,`r> @`r tree) {
   region temp; {
-    list_t<$(datatype direction, struct noderef<`a,`b,`r>@`r)@`temp,`temp> path = NULL;
+    list_t<$(enum direction, struct noderef<`a,`b,`r>@`r)@`temp,`temp> path = NULL;
     while(true) {
       switch (tree) {
       case &Node(nr):
@@ -149,14 +149,14 @@ bool rsplay(region_t<`r> r,
           lift(r, path);
           return true;
         } else if (comp < 0) {
-          path = rnew(temp) List(rnew(temp) $((datatype direction)LEFT, nr), path);
+          path = rnew(temp) List(rnew(temp) $((enum direction)LEFT, nr), path);
           tree = n->left;
         } else {
-          path = rnew(temp) List(rnew(temp) $((datatype direction)RIGHT, nr), path);
+          path = rnew(temp) List(rnew(temp) $((enum direction)RIGHT, nr), path);
           tree = n->right;
         }
         break;
-      case Leaf:
+      case &Leaf(_):
         if (path != NULL) {
           lift(r, path->tl); // b/c of Dict::delete for example
         }
@@ -166,6 +166,6 @@ bool rsplay(region_t<`r> r,
   }
 }
 
-bool splay(int reln(`a,`a), `a reln_first_arg, datatype `H tree<`a,`b,`H> tree) {
+bool splay(int reln(`a,`a), `a reln_first_arg, datatype tree<`a,`b,`H> @`H tree) {
   return rsplay(heap_region, reln, reln_first_arg, tree);
 }

@@ -712,28 +712,31 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];int Cyc_Execinfo_backtrace(
-struct _dyneither_ptr,int);int Cyc_Execinfo_bt();struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
-struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};int Cyc_Execinfo_backtrace(struct _dyneither_ptr,int);int Cyc_Execinfo_bt();
+struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
+;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
 Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;}
 ;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
-tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
-18];struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_rusage;
-struct Cyc___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc___SIG_HANDLER_struct{
-int tag;void(*f1)(int);};int Cyc_Execinfo_backtrace(struct _dyneither_ptr array,int
-size);int Cyc_Execinfo_backtrace(struct _dyneither_ptr array,int size){{struct Cyc_Core_Failure_struct
-_tmp8;const char*_tmp7;struct Cyc_Core_Failure_struct*_tmp6;(int)_throw((void*)((
-_tmp6=_cycalloc(sizeof(*_tmp6)),((_tmp6[0]=((_tmp8.tag=Cyc_Core_Failure,((_tmp8.f1=((
-_tmp7="backtrace: unsupported except under Linux",_tag_dyneither(_tmp7,sizeof(
-char),42))),_tmp8)))),_tmp6)))));}return 0;}int Cyc_Execinfo_bt();int Cyc_Execinfo_bt(){
-return 1;}
+tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};struct Cyc_rusage;enum Cyc_SigBuiltin{Cyc_SIG_DFL  = 
+0,Cyc_SIG_ERR  = 1,Cyc_SIG_IGN  = 2};struct Cyc___SIG_BUILTIN_struct{int tag;enum 
+Cyc_SigBuiltin f1;};struct Cyc___SIG_HANDLER_struct{int tag;void(*f1)(int);};int Cyc_Execinfo_backtrace(
+struct _dyneither_ptr array,int size);int Cyc_Execinfo_backtrace(struct
+_dyneither_ptr array,int size){{struct Cyc_Core_Failure_struct _tmp8;const char*_tmp7;
+struct Cyc_Core_Failure_struct*_tmp6;(int)_throw((void*)((_tmp6=_cycalloc(sizeof(*
+_tmp6)),((_tmp6[0]=((_tmp8.tag=Cyc_Core_Failure,((_tmp8.f1=((_tmp7="backtrace: unsupported except under Linux",
+_tag_dyneither(_tmp7,sizeof(char),42))),_tmp8)))),_tmp6)))));}return 0;}int Cyc_Execinfo_bt();
+int Cyc_Execinfo_bt(){return 1;}

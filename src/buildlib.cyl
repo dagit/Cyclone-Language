@@ -917,9 +917,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
   void scan_type(type_t t) {
     switch (t) {
-    case VoidType:
+    case &VoidType:
     case &IntType(_,_):
-    case FloatType:
+    case &FloatType:
     case &DoubleType(_):
       return;
 
@@ -977,10 +977,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &DynRgnType(_,_):
       fprintf(stderr,"Error: unexpected DynRgnType\n");
       exit(1); return;
-    case HeapRgn:
+    case &HeapRgn:
       fprintf(stderr,"Error: unexpected HeapRgn\n");
       exit(1); return;
-    case UniqueRgn:
+    case &UniqueRgn:
       fprintf(stderr,"Error: unexpected UniqueRgn\n");
       exit(1); return;
     case &AccessEff(_):
@@ -1067,10 +1067,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Alias_d(...):
       fprintf(stderr,"Error: unexpected alias declaration");
       exit(1); 
-    case Porton_d:
+    case &Porton_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_on__");
       exit(1); return NULL;
-    case Portoff_d:
+    case &Portoff_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_off__");
       exit(1); return NULL;
     case &Let_d(_,_,_):
@@ -1111,7 +1111,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   Set::set_t<stringptr_t<`H,`H>,`H> find(dep_t t, stringptr_t<`H,`H> x) {
     try return Hashtable::lookup(t,x);
     catch {
-    case Not_found: return Set::empty(strptrcmp);
+    case &Not_found: return Set::empty(strptrcmp);
     }
   }
 
@@ -1144,8 +1144,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return curr;
   }
 
-  datatype buildlib_mode { NORMAL, GATHER, GATHERSCRIPT, FINISH };
-  static datatype buildlib_mode mode = NORMAL;
+  enum buildlib_mode { NORMAL, GATHER, GATHERSCRIPT, FINISH };
+  static enum buildlib_mode mode = NORMAL;
   static int gathering() {
     return (mode == GATHER) || (mode == GATHERSCRIPT) ;
   }
@@ -1345,7 +1345,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       try
         old = Hashtable::lookup(t,name);
       catch {
-      case Not_found: old = Set::empty(strptrcmp); break;
+      case &Not_found: old = Set::empty(strptrcmp); break;
       }
       Hashtable::insert(t,name,Set::union_two(uses,old));
     }
@@ -1402,8 +1402,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(_,v) = x->name;
         name = v;
         break;
-      case Porton_d:
-      case Portoff_d:
+      case &Porton_d:
+      case &Portoff_d:
       case &Let_d(_,_,_):
       case &Datatype_d(_):
       case &Letv_d(_):
@@ -1468,8 +1468,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         break;
       case &Region_d(...):
       case &Alias_d(...):
-      case Porton_d:
-      case Portoff_d:
+      case &Porton_d:
+      case &Portoff_d:
       case &Let_d(_,_,_):
       case &Datatype_d(_):
       case &Letv_d(_):

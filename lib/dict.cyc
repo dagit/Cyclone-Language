@@ -24,12 +24,14 @@
 namespace Dict;
 
 datatype exn {Absent,Present};
+datatype exn.Absent Absent_val = Absent;
+datatype exn.Present Present_val = Present;
 
-static datatype Color { R, B };
+static enum Color { R, B };
 
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 abstract struct T<`a::B,`b::B,`r::R> {
-  datatype Color color;
+  enum Color color;
   struct T<`a,`b,`r> *`r const left;
   struct T<`a,`b,`r> *`r const right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
@@ -76,6 +78,7 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   return false;
 }
 
+
 `b lookup(dict_t<`a,`b,`r> d, `a key) {
   let rel = d.rel;
   let t   = d.t;
@@ -85,7 +88,7 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
     else if (i > 0) t = t->right;
     else return t->key_val[1];
   }
-  throw Absent;
+  throw &Absent_val;
 }
 
 `b*`r lookup_opt(dict_t<`a,`b,`r> d, `a key) {
@@ -117,7 +120,7 @@ bool lookup_bool(dict_t<`a,`b,`r2> d, `a key, `b @`r ans_place) {
 
 static tree<`a,`b,`r> 
 balance(region_t<`r> r,
-        $(datatype `H Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
+        $(enum Color, tree<`a,`b,`r>, tree<`a,`b,`r>, $(`a,`b)) quad) {
   switch(quad) {
   case $(B,&T(R,&T(R,a,b,x),c,y),d,z): 
     return rnew(r) T(R,rnew(r) T(B,a,b,x),rnew(r) T(B,c,d,z),y);
@@ -154,7 +157,7 @@ dict_t<`a,`b,`r> insert(dict_t<`a,`b,`r> d,`a key,`b data) {
 // notice we descend twice -- we can live
 dict_t<`a,`b,`r> insert_new(dict_t<`a,`b,`r> d,`a key,`b data) {
   if(member(d,key))
-    throw Absent;
+    throw &Absent_val;
   return insert(d, key, data);
 }
 
@@ -358,7 +361,7 @@ dict_t<`a,`c> map_c(`c f(`d,`b), `d env, dict_t<`a,`b,`r> d) {
 
 $(`a,`b)@`r rchoose(region_t<`r> r,dict_t<`a,`b,`r2> d) {
   if(d.t == NULL)
-    throw Absent;
+    throw &Absent_val;
   return rnew(r) $(d.t->key_val[0], d.t->key_val[1]);
 }
 

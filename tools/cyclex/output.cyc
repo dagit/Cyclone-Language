@@ -129,7 +129,7 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
           e->name, e->name, e->initial_state);
 }
 
-datatype exn { Table_overflow };
+datatype exn { Table_overflow(int) };
 
 void output_lexdef(string_t sourcename, 
 		   FILE @ ic, 
@@ -146,7 +146,7 @@ void output_lexdef(string_t sourcename,
 	       + numelts(tables->defaultX) + numelts(tables->trans)
 	       + numelts(tables->check)));
   if(numelts(tables->trans) > 0x8000)
-    throw Table_overflow;
+    throw new Table_overflow(0);
   copy_chunk(sourcename, ic, oc, header);
   fprintf(oc, "using Lexing {\n\n");
   output_tables(oc, tables);

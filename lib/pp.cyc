@@ -40,22 +40,28 @@ using Fn;
 
 namespace PP;
 
+typedef int dummy_t;
+
 datatype Alist<`a> {
-  Empty;
+  Empty(dummy_t);
   Single(`a);
-  Append(datatype Alist<`a>,datatype Alist<`a>);
+  Append(datatype Alist<`a> @,datatype Alist<`a> @);
 };
-typedef datatype Alist<`a> alist_t<`a>;
+typedef datatype Alist<`a> @alist_t<`a>;
+datatype Alist.Empty<stringptr_t> Empty_stringptr = Empty(0);
+datatype Alist.Empty<$(int,int,int,string_t)@> Empty_link = Empty(0);
 
 alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
-  if (a1==(alist_t<`a>)Empty) return a2;
-  else if (a2==(alist_t<`a>)Empty) return a1;
-  else return new Append(a1,a2);
+  switch $(a1,a2) {
+  case $(&Empty(_),_): return a2;
+  case $(_,&Empty(_)): return a1;
+  default: return new Append(a1,a2);
+  }
 }
 
 list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a,`H> l) {
   switch (y) {
-  case Empty:          return l;
+  case &Empty(_):      return l;
   case &Single(z):     return new List(z,l);
   case &Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
@@ -95,7 +101,7 @@ static void dump_out(FILE @f, alist_t<stringptr_t> al) {
   int last = 0;
   while(last >= 0) {
     switch(Xarray::get(xarr,last)) {
-    case Empty:     --last;                    break;
+    case &Empty(_):     --last;                    break;
     case &Single(s): --last; fprintf(f,"%s",*s); break;
     case &Append(a1,a2): 
       Xarray::set(xarr,last,a2); 
@@ -141,7 +147,7 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
   try
     return *(Hashtable::lookup(bhashtbl->v,i));
   catch {
-  case Not_found:
+  case &Not_found:
     if (!tex_output) {
       let num_tabs   = i / 8;
       let num_spaces = i % 8;
@@ -181,7 +187,7 @@ static out_t text_doc_f($(int,string_t<`H>) @clo,ppstate_t st) {
   return new Out(st->cc+slen,
                  st->cl,
                  new Single(new {s}),
-                 Empty);
+                 &Empty_link);
 }
 static doc_t text_doc(string_t<`H> s) {
   int slen = strlen(s);
@@ -203,7 +209,7 @@ doc_t text(string_t<`H> s) {
   try
     return Hashtable::lookup(t,new s);
   catch {
-  case Not_found:
+  case &Not_found:
     doc_t d = text_doc(s);
     Hashtable::insert(t,new s,d);
     return d;
@@ -234,7 +240,7 @@ doc_t text_width(string_t<`H> s, int slen) {
   try
     return Hashtable::lookup(t,new s);
   catch {
-  case Not_found:
+  case &Not_found:
     doc_t d = text_width_doc(s,slen);
     Hashtable::insert(t,new s,d);
     return d;
@@ -279,7 +285,7 @@ static out_t line_f(ppstate_t st) {
   return new Out(st->ci,
                  st->cl+1,
                  new Single(new {nlblanks(st->ci)}),
-                 Empty);
+                 &Empty_link);
 }
 doc_t line_doc() {
   if (line_doc_opt == NULL) 
@@ -353,8 +359,8 @@ static out_t long_cats_f(list_t<doc_t> ds0, ppstate_t st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  alist_t<stringptr_t> s = Empty;
-  alist_t<$(int,int,int,string_t)@> links = Empty;
+  alist_t<stringptr_t> s = &Empty_stringptr;
+  alist_t<$(int,int,int,string_t)@> links = &Empty_link;
   for(; os != NULL; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
@@ -400,8 +406,8 @@ static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  alist_t<stringptr_t> s = Empty;
-  alist_t<$(int,int,int,string_t)@> links = Empty;
+  alist_t<stringptr_t> s = &Empty_stringptr;
+  alist_t<$(int,int,int,string_t)@> links = &Empty_link;
   for(; os != NULL; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);

@@ -85,12 +85,14 @@ using RgnOrder;
 namespace Tcenv;
 
 datatype exn {Env_error};
+datacon(exn,Env_error);
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
   fprintf(stderr,"Internal error in tcenv: %s\n",msg);
   fflush(stderr);
-  throw Env_error;
+  throw &Env_error_val;
 }
+
 
 /////////////////////////// Type Definitions /////////////////////////////////
 
@@ -140,6 +142,10 @@ datatype Jumpee {
   FnEnd_j;
   Stmt_j(stmt_t);
 };
+datacon(Jumpee,NotLoop_j);
+datacon(Jumpee,CaseEnd_j);
+datacon(Jumpee,FnEnd_j);
+
 
 typedef $(switch_clause_t, list_t<tvar_t>, clist_t<type_t,`r>)*`r 
 ftclause_t<`r>;
@@ -209,13 +215,14 @@ abstract struct Fenv<`r::R> {
 
 //////////////////////// Lookup a local binding /////////////////////////////
 datatype exn { NoBinding; };
+datacon(exn,NoBinding);
 
 // lookup a binding, throwing NoBinding on failure.
 binding_t lookup_binding(bindings_t bs, var_t v) {
   for (; bs; bs = bs->tl) {
     if (strptrcmp(v,bs->v) == 0) return bs->b;
   }
-  throw NoBinding;
+  throw &NoBinding_val;
 }
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -284,7 +291,7 @@ static void check_repeat(tenv_t<`r> te, seg_t loc,
       try {
 	lookup(ge2,v);
 	Tcutil::terr(loc,"%s is ambiguous",*v);
-      } catch { case Dict::Absent: break; }
+      } catch { case &Dict::Absent: break; }
     }
   return;
 }
@@ -298,7 +305,7 @@ static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t),v
       `a result = lookup(ge,v);
       check_repeat(te, loc, lookup, v, cns, ge->availables);
       return result;
-    } catch { case Dict::Absent: break; }
+    } catch { case &Dict::Absent: break; }
     // Check available namespaces
     for (let nss = ge->availables; nss != NULL; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
@@ -306,10 +313,10 @@ static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t),v
 	`a result = lookup(ge2,v);
 	check_repeat(te, loc, lookup, v, nss->hd, nss->tl);
 	return result;
-      } catch { case Dict::Absent: break; }
+      } catch { case &Dict::Absent: break; }
     }
     if (cns == NULL)
-      throw Dict::Absent;
+      throw new Dict::Absent;
     // v is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
@@ -365,7 +372,7 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
         return possible_results->hd;
       }
       if (cns == NULL)
-        throw Dict::Absent;
+        throw new Dict::Absent;
       // n is not defined in current namespace, look in next outer
       cns = outer_namespace(cns);
     }
@@ -424,7 +431,7 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
   case {.Rel_n = NULL}:
     // unqualified name, okay to fail -- that just means we have a new xdatatype
     try return rnew(r) scoped_lookup(te, loc, lookup_xdatatypedecl_f, v);
-    catch { case Dict::Absent: return NULL; }
+    catch { case &Dict::Absent: return NULL; }
   case {.Loc_n = _}: // impossible case
     terr(loc,"lookup_xdatatypedecl: impossible");
     return NULL;
@@ -436,9 +443,9 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
     genv_t ge;
     try ge = lookup_namespace(te,loc,x,y);
     catch {
-    case Dict::Absent:
+    case &Dict::Absent:
       Tcutil::terr(loc,"bad qualified name for @extensible datatype");
-      throw Dict::Absent;
+      throw new Dict::Absent;
     }
     let tds = ge->datatypedecls;
     return rnew(r) Dict::lookup(tds,v);
@@ -646,19 +653,19 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.Loc_n = _}:
-    if (le == NULL) throw Dict::Absent;
+    if (le == NULL) throw new Dict::Absent;
     fallthru;
   case {.Rel_n = NULL} && le != NULL:
     let &Fenv{<`f,`c> .locals = locals,...} = (fenv_t)le;
     // NB a local overrides any global, without an ambiguity warning
     try return rnew(r) VarRes(lookup_binding(locals,v));
-    catch {case No_Binding: return lookup_ordinary_global(te,loc,q);}
+    catch {case &NoBinding: return lookup_ordinary_global(te,loc,q);}
   default:
     try return lookup_ordinary_global(te,loc,q);    
-    catch {case Dict::Absent: 
+    catch {case &Dict::Absent: 
       // Print out the error message elsewhere.
       // terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
-      return rnew(r) VarRes(Unresolved_b);
+      return rnew(r) VarRes(&Unresolved_b_val);
     }
   }
 }
@@ -671,9 +678,9 @@ void process_continue(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
     s2->non_local_preds = new List(s,s2->non_local_preds);
     *sopt = s2;
     return;
-  case NotLoop_j: terr(s->loc, "continue not in a loop"); return;
-  case CaseEnd_j: 
-  case FnEnd_j:   env_err("bad continue destination");
+  case &NotLoop_j: terr(s->loc, "continue not in a loop"); return;
+  case &CaseEnd_j: 
+  case &FnEnd_j:   env_err("bad continue destination");
   }
 }
 void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
@@ -684,17 +691,17 @@ void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
     s2->non_local_preds = new List(s,s2->non_local_preds);
     *sopt = s2;
     return;
-  case NotLoop_j:
+  case &NotLoop_j:
     terr(s->loc, "break not in a loop or switch");
     return;
-  case FnEnd_j:
+  case &FnEnd_j:
     // Note doing this here is more conservative than in control-flow.
     // Eg: while(true) if(false) break; else return 0;
     // But it's a pain to do in control flow because there is no stmt dest
-    if(shared->return_typ != (type_t)VoidType)
+    if(shared->return_typ != (type_t)&VoidType_val)
       terr(s->loc, "break causes function not to return a value");
     return;
-  case CaseEnd_j:
+  case &CaseEnd_j:
     // Analogous comment to previous case applies.
     terr(s->loc, "break causes outer switch clause to implicitly fallthru");
     return;
@@ -793,7 +800,7 @@ tenv_t<`g,`r> set_in_switch(region_t<`r> r, tenv_t<`g,`r2> te : {`r2}>`r) {
   fenv_t fe  = copy_fenv_new_ctrl(r,get_fenv(te,"set_in_switch"));
   let &Fenv{<`f,`c> .ctrl_env = ctrl_env,...} = fe;
   ctrl_env->break_stmt = ctrl_env->next_stmt; // break goes to next
-  ctrl_env->next_stmt  = CaseEnd_j; // prevent nested break to fallthru
+  ctrl_env->next_stmt  = &CaseEnd_j_val; // prevent nested break to fallthru
   return put_fenv(r,te,fe);
 }
 
@@ -966,11 +973,11 @@ tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te,
   // now update the outlives constraints
   let r = Tcenv::get_fnrgn(te);
   let bds = NULL;
-  if (r1 != HeapRgn && r1 != UniqueRgn) {
+  if (r1 != &HeapRgn_val && r1 != &UniqueRgn_val) {
     type_t eff1 = new AccessEff(r1);
     bds = rnew (r) List::List(rnew (r) $(eff1,r2),bds);
   }
-  if (r2 != HeapRgn && r2 != UniqueRgn) {
+  if (r2 != &HeapRgn_val && r2 != &UniqueRgn_val) {
     type_t eff2 = new AccessEff(r2);
     bds = rnew (r) List::List(rnew (r) $(eff2,r1),bds);
   }
@@ -980,7 +987,7 @@ tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te,
 
 type_t curr_rgn(tenv_t te) {
   let le = te->le;
-  if (le == NULL) return HeapRgn; 
+  if (le == NULL) return &HeapRgn_val; 
   fenv_t fe = le;
   let &Fenv{<`f,`c> .curr_rgn = c, ...} = fe;
   return c;
@@ -1024,7 +1031,7 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
   rt_b = compress(rt_b);
   // When typechecking a toplevel declaration:
   if(le==NULL)
-    return rt_a==UniqueRgn || (rt_a==HeapRgn && rt_b != UniqueRgn);
+    return rt_a==&UniqueRgn_val || (rt_a==&HeapRgn_val && rt_b != &UniqueRgn_val);
   // When typechecking a function body:
   fenv_t fe = le;
   let &Fenv{<`f,`c> .region_order = ro, ...} = fe;
@@ -1080,7 +1087,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
     return;
   }
   let &Fenv{<`f,`c> .region_order = ro, .shared = shared, ...} = (fenv_t)le;
-  if(!satisfies_constraints(ro,po,HeapRgn,false))
+  if(!satisfies_constraints(ro,po,&HeapRgn_val,false))
     shared->delayed_constraint_checks = 
       rnew(shared->frgn) List(rnew(shared->frgn) $(ro,po,loc),
                               shared->delayed_constraint_checks);
@@ -1092,7 +1099,7 @@ void check_delayed_constraints(tenv_t te) {
   let checks = shared->delayed_constraint_checks;
   for(; checks != NULL; checks = checks->tl) {
     let &$(rgn_order,po,loc) = checks->hd;
-    if(!satisfies_constraints(rgn_order,po,HeapRgn,true))
+    if(!satisfies_constraints(rgn_order,po,&HeapRgn_val,true))
       terr(loc,"the required region ordering is not satisfied here");
   }
 }
@@ -1150,7 +1157,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, NotLoop_j, NotLoop_j, NULL, FnEnd_j, 0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List(fd->effect->v,NULL))),
          .curr_rgn    = param_rgn,
@@ -1169,10 +1176,10 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
              new_tvar_id(), &rgn_kb);
   // add in all of the region vars
   for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
-    if (tvar_kind(tvars->hd) == RgnKind)
+    if (tvar_kind(tvars->hd,BoxKind) == RgnKind)
       rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
-    else if (tvar_kind(tvars->hd) == UniqueRgnKind ||
-	     tvar_kind(tvars->hd) == TopRgnKind)
+    else if (tvar_kind(tvars->hd,BoxKind) == UniqueRgnKind ||
+	     tvar_kind(tvars->hd,BoxKind) == TopRgnKind)
       Tcutil::impos("non-intuitionistic tvar in nested_fenv");
   rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
@@ -1221,7 +1228,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .region_order = rgn_po,
          .locals      = locals,  // assumed unique
          .encloser    = fd->body, // careful -- self loop at top!!!
-         .ctrl_env    = rnew(r) CtrlEnv(r, NotLoop_j, NotLoop_j, NULL, FnEnd_j, 0),
+         .ctrl_env    = rnew(r) CtrlEnv(r, &NotLoop_j_val, &NotLoop_j_val, NULL, &FnEnd_j_val, 0),
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List(fd->effect->v,NULL))),
          .curr_rgn    = param_rgn,

@@ -714,21 +714,24 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
 void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);struct
 _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);extern char
-Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*tag;
-struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-struct _RegionHandle*Cyc_Core_heap_region;extern char Cyc_Core_Open_Region[16];
-extern char Cyc_Core_Free_Region[16];struct _dyneither_ptr wrap_Cbuffer_as_buffer(
-char*,unsigned int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(
-struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
-8];int toupper(int);char*strerror(int errnum);unsigned int Cyc_strlen(struct
-_dyneither_ptr s);int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
-int Cyc_strptrcmp(struct _dyneither_ptr*s1,struct _dyneither_ptr*s2);int Cyc_strncmp(
-struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned int len);int Cyc_zstrcmp(
-struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_zstrncmp(struct _dyneither_ptr
-s1,struct _dyneither_ptr s2,unsigned int n);int Cyc_zstrptrcmp(struct _dyneither_ptr*,
+Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{char*tag;
+struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
+extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
+extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
+struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);
+extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
+tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};int toupper(
+int);char*strerror(int errnum);unsigned int Cyc_strlen(struct _dyneither_ptr s);int
+Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strptrcmp(
+struct _dyneither_ptr*s1,struct _dyneither_ptr*s2);int Cyc_strncmp(struct
+_dyneither_ptr s1,struct _dyneither_ptr s2,unsigned int len);int Cyc_zstrcmp(struct
+_dyneither_ptr,struct _dyneither_ptr);int Cyc_zstrncmp(struct _dyneither_ptr s1,
+struct _dyneither_ptr s2,unsigned int n);int Cyc_zstrptrcmp(struct _dyneither_ptr*,
 struct _dyneither_ptr*);int Cyc_strcasecmp(struct _dyneither_ptr,struct
 _dyneither_ptr);int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,
 unsigned int len);struct _dyneither_ptr Cyc_strcat(struct _dyneither_ptr dest,struct

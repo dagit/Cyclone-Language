@@ -52,7 +52,7 @@ extern datatype Spec {
                                     // function with each remaining argument
 };
 
-typedef datatype `r Spec spec_t<`r>;
+typedef datatype Spec @`r spec_t<`r>;
 
 typedef List::list_t<$(string_t,bool,string_t,spec_t<`r1>,string_t)@`r1,`r2>
 speclist_t<`r1,`r2>;

@@ -728,18 +728,19 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];typedef struct{
-int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
-typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
-Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc___cycFILE*
-Cyc_fromCfile(struct Cyc_Cstdio___abstractFILE*cf);struct Cyc_String_pa_struct{int
-tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};
-struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}
+__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;
+typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
+struct Cyc___cycFILE*Cyc_fromCfile(struct Cyc_Cstdio___abstractFILE*cf);struct Cyc_String_pa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
+;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
 tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
 Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
@@ -747,14 +748,15 @@ int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct C
 int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;}
 ;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
 tag;struct _dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_tmpfile();struct
-_dyneither_ptr Cyc_tmpnam(struct _dyneither_ptr);extern char Cyc_FileCloseError[19];
-extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;struct
-_dyneither_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct _dyneither_ptr Cyc_strcpy(
-struct _dyneither_ptr dest,struct _dyneither_ptr src);struct Cyc_Cstdio___abstractFILE*
-tmpfile();char*tmpnam(char*);struct Cyc___cycFILE*Cyc_tmpfile(){struct Cyc_Cstdio___abstractFILE*
-cf=tmpfile();return Cyc_fromCfile(cf);}struct _dyneither_ptr Cyc_tmpnam(struct
-_dyneither_ptr s){char*name=tmpnam(0);return(unsigned int)s.curr?Cyc_strcpy(s,(
-struct _dyneither_ptr)({char*_tmp0=name;_tag_dyneither(_tmp0,sizeof(char),
-_get_zero_arr_size_char(_tmp0,1));})):({char*_tmp1=name;_tag_dyneither(_tmp1,
-sizeof(char),_get_zero_arr_size_char(_tmp1,1));});}
+_dyneither_ptr Cyc_tmpnam(struct _dyneither_ptr);extern char Cyc_FileCloseError[15];
+struct Cyc_FileCloseError_struct{char*tag;};extern char Cyc_FileOpenError[14];
+struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
+char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};struct
+_dyneither_ptr Cyc_strcpy(struct _dyneither_ptr dest,struct _dyneither_ptr src);
+struct Cyc_Cstdio___abstractFILE*tmpfile();char*tmpnam(char*);struct Cyc___cycFILE*
+Cyc_tmpfile(){struct Cyc_Cstdio___abstractFILE*cf=tmpfile();return Cyc_fromCfile(
+cf);}struct _dyneither_ptr Cyc_tmpnam(struct _dyneither_ptr s){char*name=tmpnam(0);
+return(unsigned int)s.curr?Cyc_strcpy(s,(struct _dyneither_ptr)({char*_tmp0=name;
+_tag_dyneither(_tmp0,sizeof(char),_get_zero_arr_size_char(_tmp0,1));})):({char*
+_tmp1=name;_tag_dyneither(_tmp1,sizeof(char),_get_zero_arr_size_char(_tmp1,1));});}

@@ -106,12 +106,12 @@ static type_t filter_effect(type_t eff, kind_t k) {
     _ effs = NULL;
     for (; es != NULL; es = es->tl) {
       let e2 = filter_effect(es->hd,k);
-      if (e2 != VoidType) effs = new List(e2,effs);
+      if (e2 != &VoidType_val) effs = new List(e2,effs);
     }
     return new JoinEff(List::imp_rev(effs));
   case &Evar(_,_,_,_):
   case &RgnsEff(_): return e;
-  case &AccessEff(t): if (typ_kind(t) != k) return e; else return VoidType;
+  case &AccessEff(t): if (typ_kind(t) != k) return e; else return &VoidType_val;
   default: impos("bad effect passed to filter_effect");
   }
 }
@@ -141,12 +141,12 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
     ans->d = d;
     return ans;
   case &Evar(_,_,_,_):
-    unify(rgn,HeapRgn);
+    unify(rgn,&HeapRgn_val);
     fallthru;
-  case HeapRgn:
+  case &HeapRgn:
     ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
     return ans;
-  case UniqueRgn:
+  case &UniqueRgn:
     ans->these_outlive_unique =
       new JoinEff(list(eff,po->these_outlive_unique));
     return ans;
@@ -172,7 +172,7 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
-    switch(tvar_kind(tvs2->hd)) {
+    switch(tvar_kind(tvs2->hd,BoxKind)) {
     case RgnKind: 
     case UniqueRgnKind: 
     case TopRgnKind: 
@@ -274,14 +274,14 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   case &AccessEff(vt):
     // does `vt outlive `rgn ?
     switch(compress(vt)) {
-    case UniqueRgn: return true;
-    case HeapRgn:
+    case &UniqueRgn: return true;
+    case &HeapRgn:
       // The heap outlives all regions except the unique region
       //   and regions with UR and TR kind
       switch (compress(rgn)) {
-      case UniqueRgn: return false;
+      case &UniqueRgn: return false;
       case &VarType(tv):
-	if (tvar_kind(tv) == RgnKind) return true;
+	if (tvar_kind(tv,BoxKind) == RgnKind) return true;
 	else return false;
       default:
 	return true;
@@ -440,9 +440,9 @@ static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
       default: break;
       }
       fallthru;
-    default: return eff1==HeapRgn;
+    default: return eff1==&HeapRgn_val;
     }
-  default: return eff1==HeapRgn;
+  default: return eff1==&HeapRgn_val;
   }
 }
 

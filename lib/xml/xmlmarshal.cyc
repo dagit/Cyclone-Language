@@ -154,13 +154,13 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
 	       new Element(new StartEnd("UInt",
 					list(int_att("sz",sz)),
 					list(new Chardata(string_of_uint(*x))))));
-  case Float:
+  case &Float:
     float@ x = unsafe_cast(val);
     return $(env, 
 	     new Element(new StartEnd("Float",
 				      NULL,
 				      list(new Chardata(string_of_float(*x))))));
-  case Double:
+  case &Double:
     double@ x = unsafe_cast(val);
     return $(env, 
 	     new Element(new StartEnd("Double",
@@ -427,11 +427,11 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     int@ x = unsafe_cast(result);
     *x = atoi((const char @)n);
     break;
-  case $(Float,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
+  case $(&Float,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
     float@ x = unsafe_cast(result);
     *x = (float)atof((const char @)n);
     break;
-  case $(Double,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
+  case $(&Double,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
     double@ x = unsafe_cast(result);
     *x = atof((const char @)n);
     break;

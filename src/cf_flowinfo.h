@@ -46,7 +46,7 @@ EXTERN_CFFLOW datatype Root {
   MallocPt(Absyn::exp_t,Absyn::type_t); // misnamed when do other analyses??
   InitParam(int,Absyn::type_t); // int is parameter number, type is w/o @
 };
-typedef datatype `r Root root_t<`r>;
+typedef datatype Root @`r root_t<`r>;
 
 EXTERN_CFFLOW struct Place<`r::R> {
   root_t<`r> root; 
@@ -73,12 +73,12 @@ EXTERN_CFFLOW struct UniquePlace<`r::R> {
 };
 typedef struct UniquePlace<`r1> @`r2 unique_place_t<`r1,`r2>;
 
-EXTERN_CFFLOW datatype InitLevel { 
+EXTERN_CFFLOW enum InitLevel { 
   NoneIL, // may not be initialized
   ThisIL, // this is initialized, but things it points to may not be
   AllIL   // initialized, and everything it points to is initialized
 };
-typedef datatype InitLevel initlevel_t;
+typedef enum InitLevel initlevel_t;
 
 // primitive relations that we track for non-escaping, integral variables
 EXTERN_CFFLOW @tagged union RelnOp {
@@ -120,6 +120,7 @@ typedef struct TagCmp @`r tag_cmp_t<`r>;
   EXTERN_CFFLOW UnknownZ(relns_t<`H>);
   EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t<`H>,`H>);
 };
+extern_datacon(Absyn::AbsynAnnot,IsZero);
 extern List::list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2>,
                                                      List::list_t<tag_cmp_t>);
 
@@ -132,7 +133,7 @@ extern absLval_t<`r> PlaceL(place_t<`r,`r>);
 extern absLval_t<`r> UnknownL();
 
 EXTERN_CFFLOW datatype AbsRVal<`r::R>;
-typedef datatype `r AbsRVal<`r> absRval_t<`r>;
+typedef datatype AbsRVal<`r> @`r absRval_t<`r>;
 typedef Dict::dict_t<root_t<`r>,absRval_t<`r>,`r> flowdict_t<`r>;
 typedef absRval_t<`r> ?`r aggrdict_t<`r>;
 EXTERN_CFFLOW datatype AbsRVal<`r::R> {
@@ -194,6 +195,9 @@ extern flow_t<`r> ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
 
 EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;
+  absRval_t<`r>   zero;
+  absRval_t<`r>   notzeroall;
+  absRval_t<`r>   notzerothis;
   absRval_t<`r>   unknown_none;
   absRval_t<`r>   unknown_this;
   absRval_t<`r>   unknown_all;
@@ -278,11 +282,12 @@ datatype KillRgn {
   UniqueRgn_k;
   Region_k(Absyn::tvar_t);
 };
-typedef datatype `r KillRgn killrgn_t<`r::R>;
+extern_datacon(KillRgn,UniqueRgn_k);
+typedef datatype KillRgn @`r killrgn_t<`r::R>;
 
 extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
 
-extern flow_t<`r> consume_unique_rvals(Position::seg_t loc,flow_t<`r> f);
+extern flow_t<`r> consume_unique_rvals(flow_env_t<`r> fenv,Position::seg_t loc,flow_t<`r> f);
 extern void check_unique_rvals(Position::seg_t loc, flow_t<`r> f);
 extern flow_t<`r> readthrough_unique_rvals(Position::seg_t loc,flow_t<`r> f);
 extern flow_t<`r> drop_unique_rvals(Position::seg_t loc,flow_t<`r> f);

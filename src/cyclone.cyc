@@ -270,11 +270,11 @@ static void set_all_warnings() {
 }
 
 /* This only works enough to support cycdoc so far */
-datatype inputtype {
-  DEFAULTINPUT;
-  CYCLONEFILE;
+enum inputtype {
+  DEFAULTINPUT,
+  CYCLONEFILE
 };
-typedef datatype inputtype inputtype_t;
+typedef enum inputtype inputtype_t;
 static inputtype_t intype = DEFAULTINPUT;
 static void set_inputtype(string_t s) {
   if (strcmp(s,"cyc") == 0)
@@ -489,7 +489,7 @@ list_t<Absyn::decl_t>
   string_t exn_string     = "";
   string_t explain_string = "";
   bool other_exn = false;
-  datatype exn ex = new Core::Impossible(""); // definite assignment doesn't track data
+  datatype exn @ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = NULL;
 
   try ans = f(env,tds);
@@ -498,7 +498,7 @@ list_t<Absyn::decl_t>
     exn_string = "Exception Core::Impossible";
     explain_string = s;
     break;
-  case Dict::Absent:
+  case &Dict::Absent:
     exn_string = "Exception Dict::Absent";
     break;
   case &Invalid_argument(s):
@@ -640,10 +640,11 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
     fprintf(out_file,"#define _INLINE_FUNCTIONS\n");
 
   // Copy cyc_setjmp.h and cyc_include.h to out_file.
-  if (!nocyc_setjmp_r)
-    if (copy_internal_file(cyc_setjmp,out_file)) return tds;
-  if (copy_internal_file(cyc_include,out_file)) return tds;
-  
+  if (!parseonly_r && !tc_r && !cf_r) {
+    if (!nocyc_setjmp_r)
+      if (copy_internal_file(cyc_setjmp,out_file)) return tds;
+    if (copy_internal_file(cyc_include,out_file)) return tds;
+  }
   if (pp_r) {
     Absynpp::set_params(&params_r);
     Absynpp::decllist2file(tds,out_file);
@@ -1326,7 +1327,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     let cyclone_args = *List::assoc_cmp(strptrcmp, specs, new "cyclone");
     args_from_specs_file = split_specs(cyclone_args);
   } catch {
-  case Not_found: break;
+  case &Not_found: break;
   }
   if (args_from_specs_file != NULL) {
     Arg::current = 0;
@@ -1476,7 +1477,7 @@ int main(int argc, string_t<`H> ?`H argv) {
       fprintf (stderr,"Exception Core::Failure %s\n", s); break;
     case &Core::Impossible(s):
       fprintf (stderr,"Exception Core::Impossible %s\n", s); break;
-    case Dict::Absent:
+    case &Dict::Absent:
       fprintf (stderr,"Exception Dict::Absent\n"); break;
     case &Core::Invalid_argument(s):
       fprintf (stderr,"Exception Core::Invalid_argument %s\n", s); break;

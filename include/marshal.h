@@ -36,15 +36,15 @@ namespace Marshal {
       boundaries).
   */
 
-extern void fprint_type(datatype Typerep::Typestruct rep, FILE@ fp,`a::A@ val);
+extern void fprint_type(datatype Typerep::Typestruct @rep, FILE@ fp,`a::A@ val);
   /** [fprint_type(rep,fp,val)] takes a representation of type [`a], 
       an open file pointer [fp], and [val], a pointer to [`a], and 
       (ugly-)prints a text representation of [*val] to [fp].
   */
-extern void print_type(datatype Typerep::Typestruct rep, `a::A@ val);
+extern void print_type(datatype Typerep::Typestruct @rep, `a::A@ val);
   /** [print_type(rep,val)] is [fprint_type] directed to [stdout]. 
    */
-extern void write_type(datatype Typerep::Typestruct rep, FILE@ fp, `a::A@ val);
+extern void write_type(datatype Typerep::Typestruct @rep, FILE@ fp, `a::A@ val);
   /** [write_type(rep,fp,val)] writes a binary representation out to [fp].
       ([fp] should be in binary mode on operating systems where there is a
       difference).
@@ -61,33 +61,33 @@ typedef $(Dict::dict_t<addr_t,int>,int) addr_index_t;
 typedef $(addr_t?, int) addr_table_t;
 
 extern addr_index_t empty_addr_index();
-extern addr_index_t write_type_base(datatype Typerep::Typestruct rep, 
+extern addr_index_t write_type_base(datatype Typerep::Typestruct @rep, 
 				    addr_index_t env, FILE@ fp, `a::A@ val);
 
-extern `a::A@`r rread_type(region_t<`r> r,datatype Typerep::Typestruct rep, FILE@ fp);
+extern `a::A@`r rread_type(region_t<`r> r,datatype Typerep::Typestruct @rep, FILE@ fp);
   /** [rread_type(r,rep,fp)] reads a value encoded in the binary format of 
       [write_type] from [fp], allocating into region [`r], and returns 
       a pointer to the value. 
       Warning: Currently, xtunions values cannot be safely read.
   */
-extern `a::A@ read_type(datatype Typerep::Typestruct rep, FILE@ fp);
+extern `a::A@ read_type(datatype Typerep::Typestruct @rep, FILE@ fp);
   /** [read_type(rep,fp)] is [rread_type(heap_region,rep,fp)].
    */
-extern `a::A@`r rcopy_type(region_t<`r>,datatype Typerep::Typestruct rep, `a@ val);
+extern `a::A@`r rcopy_type(region_t<`r>,datatype Typerep::Typestruct @rep, `a@ val);
   /** [rcopy_type(r,rep,val)] makes an exact structural (deep) copy of 
       [*val], allocating into region [`r].
   */
-extern `a::A@ copy_type(datatype Typerep::Typestruct rep, `a@ val);
+extern `a::A@ copy_type(datatype Typerep::Typestruct @rep, `a@ val);
   /** [copy_type(rep,val)] is [rcopy_type(rep,heap_region,val)].
    */
-extern bool leq_type(datatype Typerep::Typestruct rep, `a::A@ x, `a@ y);
+extern bool leq_type(datatype Typerep::Typestruct @rep, `a::A@ x, `a@ y);
   /** [leq_val(rep,x,y)] compares two values of the same type.
    */
-extern bool eq_type(datatype Typerep::Typestruct rep, `a::A@ x, `a@ y);
+extern bool eq_type(datatype Typerep::Typestruct @rep, `a::A@ x, `a@ y);
   /** [eq_type(rep,x,y)] tests structural equality of [x] and [y].
       Attempts to handle cycles and sharing efficiently/safely.
   */
-extern int cmp_type(datatype Typerep::Typestruct rep, `a::A@ x, `a@ y);
+extern int cmp_type(datatype Typerep::Typestruct @rep, `a::A@ x, `a@ y);
   /** [cmp_type(rep,x,y)] compares [x] and [y], returning 0 if [x == y], 
       1 if [x < y] and -1 if [x > y].  Can be used as a comparison function
       for dictionary, set modules. 

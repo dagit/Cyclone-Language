@@ -118,9 +118,9 @@ i_t final() {
 				    new List(new $(NULL, empty_tqual(NULL), uint_typ),
 					     new List(new $(NULL, empty_tqual(NULL),
 							    dyneither_typ(dyneither_typ(char_typ,
-										  HeapRgn,
+										  &HeapRgn_val,
 										  empty_tqual(NULL),false_conref),
-								       HeapRgn,
+								       &HeapRgn_val,
 								       empty_tqual(NULL),false_conref)),
 						      NULL)),
 				    false, NULL, NULL, NULL),
@@ -211,7 +211,7 @@ static bool check_public_type_list(aenv_t ae, seen_t seen, string_t obj,
 }
 static bool check_public_aggrdecl(aenv_t ae, seen_t seen, aggrdecl_t d) {
   try return Dict::lookup(seen->aggrs, d->name);
-  catch { case Dict::Absent: break; }
+  catch { case &Dict::Absent: break; }
   let res = true;
   seen->aggrs = Dict::insert(seen->aggrs, d->name, res); // necessary for recursive datas
   if (d->impl != NULL)
@@ -232,7 +232,7 @@ static type_t get_type2($(opt_t<string_t @>, struct Tqual, type_t) @ x) {
 
 static bool check_public_datatypedecl(aenv_t ae, seen_t seen, datatypedecl_t d) {
   try return Dict::lookup(seen->datatypes, d->name);
-  catch { case Dict::Absent: break; }
+  catch { case &Dict::Absent: break; }
   let res = true;
   seen->datatypes = Dict::insert(seen->datatypes, d->name, res); // necessary for recursive datas
   if (d->fields != NULL)
@@ -303,7 +303,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       ed = *Dict::lookup(ge->enumdecls, v);
     } catch {
-    case Dict::Absent: 
+    case &Dict::Absent: 
       invalid_arg(aprintf("check_public_type (can't find enum %s)",
 			  qvar2string(name)));
     }
@@ -313,14 +313,14 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &DatatypeType(DatatypeInfo({.KnownDatatype = &tud0},targs,_)):
+  case &DatatypeType(DatatypeInfo({.KnownDatatype = &tud0},targs)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     datatypedecl_t tud;
     try {
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->datatypedecls, v);
-    } catch { case Dict::Absent: 
+    } catch { case &Dict::Absent: 
       invalid_arg(aprintf("check_public_type (can't find datatype %s)",
 			  qvar2string(tud0->name)));
     }
@@ -339,7 +339,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->datatypedecls, v);
     } catch {
-    case Dict::Absent:
+    case &Dict::Absent:
       invalid_arg(aprintf("check_public_type (can't find datatype %s and search its fields)",
 			  qvar2string(tud0->name)));
     }
@@ -480,7 +480,7 @@ extract_xdatatypefielddecl(i_t i, datatypedecl_t d, datatypefield_t f) {
   try {
     env = Dict::lookup(*dict, ns);
   } catch {
-  case Dict::Absent:
+  case &Dict::Absent:
     env = new_ienv();
     *dict = Dict::insert(*dict, ns, env);
     break;
@@ -656,7 +656,7 @@ static void incl_dict_f($(bool,
     let y2 = Dict::lookup(dic2, x);
     if (! incl_f(y1, y2, msg)) (*res) = false;
   } catch {
-  case Dict::Absent:
+  case &Dict::Absent:
     check_err(msg, aprintf("%s %s is missing", t, *x));
     *res = false;
     break;
@@ -734,7 +734,7 @@ static void incl_ns_f($(bool,
 
   // it's OK to use lazy_new_ienv because everything's functional
   try ie2 = Dict::lookup(dic2, ns);
-  catch {case Dict::Absent: ie2 = lazy_new_ienv(); break;}
+  catch {case &Dict::Absent: ie2 = lazy_new_ienv(); break;}
 
   if (! incl_ienv(ie1, ie2, msg)) *res = false;
 }
@@ -762,7 +762,7 @@ bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
     
     return res;
   } catch {
-  case Tcdecl::Incompatible: return false;
+  case &Tcdecl::Incompatible: return false;
   }
 }
 
@@ -790,7 +790,7 @@ void compat_merge_dict_f($(bool,
     }
     y = (`a @) yt;
   } catch {
-  case Dict::Absent:
+  case &Dict::Absent:
     y = y2;
     break;
   }
@@ -808,7 +808,7 @@ void compat_merge_dict_f($(bool,
       *res = false;
     }
   } catch {
-  case Dict::Absent:
+  case &Dict::Absent:
     if (*res)
       *res_dic = Dict::insert(*res_dic, x, y);
     break;
@@ -861,7 +861,7 @@ void compat_merge_ns_f($(bool,
 
   // it's OK to use lazy_new_ienv because everything's functional
   try iexcl = Dict::lookup(excl, ns);
-  catch {case Dict::Absent: iexcl = lazy_new_ienv(); break;}
+  catch {case &Dict::Absent: iexcl = lazy_new_ienv(); break;}
 
   try {
     ie1 = Dict::lookup(dic1, ns);
@@ -871,7 +871,7 @@ void compat_merge_ns_f($(bool,
       return;
     }
     ie1 = (ienv_t) ie;
-  } catch {case Dict::Absent: ie1 = lazy_new_ienv(); break;}
+  } catch {case &Dict::Absent: ie1 = lazy_new_ienv(); break;}
 
   let ie = compat_merge_ienv(ie1, ie2, iexcl, msg);
 
@@ -948,7 +948,7 @@ void disj_merge_ns_f($(bool, Dict::dict_t<list_t<var_t,`H>, ienv_t,`H>,
   ienv_t ie1;
 
   try ie1 = Dict::lookup(dic1, ns);
-  catch { case Dict::Absent: ie1 = lazy_new_ienv(); break; }
+  catch { case &Dict::Absent: ie1 = lazy_new_ienv(); break; }
 
   let ie = disj_merge_ienv(ie1, ie2, msg);
 
@@ -990,7 +990,7 @@ struct I * merge(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * info) {
     if (imp == NULL) return NULL;
 
     return new I(*imp, *exp);
-  } catch { case Tcdecl::Incompatible: return NULL; }
+  } catch { case &Tcdecl::Incompatible: return NULL; }
 }
 
 struct I * merge_list(list_t<i_t,`H> li, list_t<string_t<`H> @`H,`H> linfo) {

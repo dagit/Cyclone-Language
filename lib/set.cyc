@@ -342,12 +342,13 @@ bool equals(set_t<`a> s1, set_t<`a> s2) {
 }
     
 datatype exn {Absent};
+datatype exn.Absent Absent_val = Absent;
 
 /* Return an elt (in this case -- the first one in the set).
  * If the set is empty, throw Absent.
  */
 `a choose(set_t<`a> s) {
-  if (s->nodes == NULL) throw Absent;
+  if (s->nodes == NULL) throw &Absent_val;
   return(s->nodes->hd);
 }
 

@@ -32,7 +32,7 @@ static int most_frequent_elt(int ?v) {
     int @ r;
     try r = Hashtable::lookup(frequencies, e);
     catch {
-    case Not_found: 
+    case &Not_found: 
       r = rnew(rgn) 0;
       Hashtable::insert(frequencies, e, r);
       break;
@@ -96,7 +96,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
   int ?moves_v = new {for i < 257 : 0};
   for (let i = 0; i < 257; i++) {
     switch(moves[i]) { 
-    case Backtrack: moves_v[i] = -1; break;
+    case &Backtrack(_): moves_v[i] = -1; break;
     case &Goto(n):  moves_v[i] = n;  break;
     }
   }
@@ -126,7 +126,7 @@ lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
     case &Perform(m): base[i] = -(m+1); break;
     case &Shift(trans,move):
       switch (trans) {
-      case No_remember: break;
+      case &No_remember(_): break;
       case &Remember(m): backtrk[i] = m; break;
       }
       let &$(b,d) = pack_moves(i,move);

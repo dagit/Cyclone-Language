@@ -144,12 +144,12 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     }
     break;
   
-  case Float:
+  case &Float:
     float @x = unsafe_cast(val);
     fprintf (fp,"%f",*x);
     break;
   
-  case Double:
+  case &Double:
     double @x = unsafe_cast(val);
     fprintf (fp,"%f",*x);
     break;
@@ -449,13 +449,13 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     }
     break;
   
-  case Float:
+  case &Float:
     float@ x = unsafe_cast(val);
     //fwrite( (char?)(float?)x, sizeof(float), 1, fp);
     cycputfloat(*x,fp);
     break;
   
-  case Double:
+  case &Double:
     double@ x = unsafe_cast(val);
     cycputdouble(*x,fp);
     //fwrite( (char?)(double?)x, sizeof(double), 1, fp);
@@ -633,13 +633,13 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
       throw new Core::Failure("read_type_base: illegal int size bits");
     }
     break;
-  case Float:
+  case &Float:
     float@ y = unsafe_cast(result);
     *y = cycgetfloat(fp);
     break;
     
     
-  case Double:
+  case &Double:
     double@ y = unsafe_cast(result);
     *y = cycgetdouble(fp);
     break;
@@ -860,13 +860,13 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
     *result0 = *val0;
     break;
 
-  case Float:
+  case &Float:
     float@ val0 = unsafe_cast(val);
     float@ result0 = unsafe_cast(result);
     *result0 = *val0;
     break;   
 
-  case Double:
+  case &Double:
     double@ val0 = unsafe_cast(val);
     double@ result0 = unsafe_cast(result);
     *result0 = *val0;
@@ -1047,7 +1047,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
   return rcopy_type(Core::heap_region,ts,val);
 }
 
-typedef datatype Order {Gt_ord;Eq_ord;Lt_ord;} order_t;
+typedef enum Order {Gt_ord,Eq_ord,Lt_ord} order_t;
 
 
 #define compare_ord(x,y) ((x)==(y)?Eq_ord:((x)<=(y)?Lt_ord:Gt_ord))
@@ -1130,12 +1130,12 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
     unsigned long long@ y0 = unsafe_cast(y);
     return $(compare_ord(*x0,*y0),env);
 
-  case Float:
+  case &Float:
     float@ x0 = unsafe_cast(x);
     float@ y0 = unsafe_cast(y);
     return $(compare_ord(*x0,*y0),env);
 
-  case Double:
+  case &Double:
     double@ x0 = unsafe_cast(x);
     double@ y0 = unsafe_cast(y);
     return $(compare_ord(*x0,*y0),env);

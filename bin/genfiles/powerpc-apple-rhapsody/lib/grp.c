@@ -712,17 +712,18 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char*
-string_to_Cstring(struct _dyneither_ptr);struct _dyneither_ptr Cstring_to_string(
-char*);struct _dyneither_ptr ntCsl_to_ntsl(char**);struct Cyc_group{struct
-_dyneither_ptr gr_name;struct _dyneither_ptr gr_passwd;unsigned int gr_gid;struct
-_dyneither_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(struct _dyneither_ptr name);
-struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(struct
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};char*string_to_Cstring(struct _dyneither_ptr);struct _dyneither_ptr
+Cstring_to_string(char*);struct _dyneither_ptr ntCsl_to_ntsl(char**);struct Cyc_group{
+struct _dyneither_ptr gr_name;struct _dyneither_ptr gr_passwd;unsigned int gr_gid;
+struct _dyneither_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(struct _dyneither_ptr
+name);struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(struct
 _dyneither_ptr user,unsigned int group);int Cyc_setgroups(struct _dyneither_ptr
 groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
 char**gr_mem;};struct Cyc_Cgrp_Cgroup*getgrnam(char*const name);struct Cyc_Cgrp_Cgroup*

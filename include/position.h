@@ -45,7 +45,7 @@ namespace Position {
 
   //////// Errors ////////////////////
   extern datatype Error_kind { Lex, Parse, Elab };
-  typedef datatype Error_kind error_kind_t;
+  typedef datatype Error_kind @ error_kind_t;
   extern struct Error {
     string_t     source;
     seg_t        seg;

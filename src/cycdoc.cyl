@@ -44,7 +44,7 @@ datatype Comment {
   MatchDecl(mstring_t);
   Standalone(mstring_t);
 };
-typedef datatype Comment comment_t;
+typedef datatype Comment @comment_t;
 
 extern $(int,comment_t)* token(Lexing::Lexbuf<`a> lexbuf);
 }
@@ -268,8 +268,8 @@ rule token "$(int,comment_t)*" = parse
       case &Fn_d(_):
       case &Let_d(_,_,_):
       case &Letv_d(_):
-      case Porton_d:
-      case Portoff_d:
+      case &Porton_d:
+      case &Portoff_d:
       case &Region_d(...):
       case &Alias_d(...):
         result = new List(decls->hd,result);

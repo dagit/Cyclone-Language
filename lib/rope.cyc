@@ -27,7 +27,7 @@ static datatype R {
   Array_rope(rope_t?)
 };
 abstract struct Rope_node {
-  datatype R v;
+  datatype R @v;
 };
 
 rope_t from_string(string_t<`H> s) {

@@ -2,8 +2,6 @@ Todo list:
 
 CONFIGURATION BUGS:
 ------------------
-* just a bullet
-
 * when building on an architecture that uses a .patch file, need to
   not remove the bin/genfiles directory after it's been extracted
   and built.  This currently screws up make install.
@@ -15,13 +13,9 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
-* We allow comparisons between things like structs or flattened tunions
-which then barfs at the C level.
+* Get rid of any left-over C warnings.
 
-* There's a weird ordering bug with declaring __flat__ tunions.
-
-* We still get warnings on some flat tunion patterns at the C level
-(assignment makes integer from pointer without a cast.)
+* Test failures of type-checker, so that we always recover and exit properly.
 
 * Variables do not shadow typedef's properly.  For instance:
 
@@ -42,7 +36,7 @@ which then barfs at the C level.
 * long int and int are treated as if they are the same when they are
   not.  When we make this distinction, we should probably introduce a
   new type, int_psize which is guaranteed to have the size and alignment
-  constraints of a pointer.  We should also change the Sizeof tunion to
+  constraints of a pointer.  We should also change the Sizeof datatype to
   use symbolic sizes instead of B1, B2, etc.  Finally, int_psize should
   have BoxKind and, depending upon the architecture, int and long
   *could* have BoxKind or MemKind.  We ought to have a flag on the
@@ -63,7 +57,7 @@ which then barfs at the C level.
   run into at least one situation where something panic'd but I can't
   reproduce it right now.  
 
-* not inserting defaults for types in xtunion variant types?
+* not inserting defaults for types in xdatatype variant types?
 
 * long long, short, float, and double constants (including 12s, 3l, etc.)
 
@@ -207,22 +201,12 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
-* need dynamic (i.e., first-class) region support.
-
-* reference counting on regions?
-
-* linear pointers?
+* finish getting unique pointers into shape.
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
-* We should have pointer qualifiers FAT/NONFAT, MAYBENULL/NOTNULL
-  so that we can express any combination.  In particular, we need
-  NOTNULL+ZEROTERM to safely interface to some C functions.
-
 * better type error messages:  it would be good to drop region information
   when it's not germaine to the error (e.g., regions).
-
-* dependent types for arrays (and lots more?)
 
 * nested functions (closures -- with RTCG approach to get calling convention
   right.)
@@ -238,12 +222,12 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 
 * We should allow partial instantiations of polymorphic routines.
 
-* ought to be able to treat the arguments to a tunion constructor as a tuple
+* ought to be able to treat the arguments to a datatype constructor as a tuple
   in a pattern...
 
 * should support "..." in struct patterns?
 
-* qualifiers for arguments to [x]tunion constructors?  on tuples?
+* qualifiers for arguments to [x]datatype constructors?  on tuples?
 
 * Support qualified identifier declarations (instead of just uses).
 
@@ -264,7 +248,7 @@ THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
 * Try to avoid using so many lists in the abstract syntax --
   we should use arrays (e.g., for CompoundLit_e, Array_e,
-  Struct_e, Tunion_e, Xtunion_e, and UnresolvedMem_e, Switch_s, etc.)
+  Struct_e, and UnresolvedMem_e, Switch_s, etc.)
 
 * We need to re-do the pattern match compilation -- we should take
   advantage of the decision tree built during type-checking.

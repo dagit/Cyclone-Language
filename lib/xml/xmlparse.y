@@ -17,7 +17,7 @@
    330, Boston, MA 02111-1307 USA. */
 
 %{
-#include "xmlparse.h"
+#include <xml/xmlparse.h>
 #include "xmlscan.h"
 #include <string.h>
 #include <stdio.h>
@@ -36,18 +36,13 @@ void error(string_t<`H> msg) {
   throw new Core::Failure(msg);
 }
 
-datatype context {
-  InTag,
-  Normal
-};
+static enum context current = Normal;
 
-static datatype context current = Normal;
-
-void setContext(datatype `H context c) {
+void setContext(enum context c) {
   current = c;
 }
 
-datatype context getContext() {
+enum context getContext() {
   return current;
 } 
 

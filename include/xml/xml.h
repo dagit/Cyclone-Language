@@ -43,14 +43,14 @@ datatype attvalue {
   Attvalue1(string_t), // should be delimited by single quotes
   Attvalue2(string_t)  // should be delimited by double quotes
 };
-typedef datatype attvalue attvalue_t;
+typedef datatype attvalue @attvalue_t;
 
 typedef $(name,attvalue_t)@ attribute_t;
 
 typedef $(name,string_t)@ pi_t;
 
 extern datatype content;
-typedef datatype content content_t;
+typedef datatype content @content_t;
 
 EXTERN_DEFINITION
 datatype element {
@@ -58,7 +58,7 @@ datatype element {
            list_t<content_t>);
   Empty(name,list_t<attribute_t>);   // Element with no content
 };
-typedef datatype element element_t;
+typedef datatype element @element_t;
 
 EXTERN_DEFINITION
 datatype content {
@@ -88,18 +88,19 @@ extern attvalue_t matchAttribute(attribute_t atr, name nm);
       if not. **/
 
 extern list_t<attvalue_t *,`r>
-getAttributes(region_t<`r> r,list_t<attribute_t> atrs,list_t<name @> names);
+getAttributes(region_t<`r> r,
+              list_t<attribute_t> atrs,list_t<name @> names);
   /** [getAttributes(r,a,n)] returns the attribute values from [a] that
       match the names in [n], returned in the order the names appear in
       [n].  If a name is missing, a NULL is inserted instead.  Order
-      does not matter.  The result list is allocated in region [r]. **/
+      does not matter.  **/
 
 extern list_t<attvalue_t,`r>
-matchAttributes(region_t<`r> r,list_t<attribute_t> atrs,list_t<name @> names);
-  /** [matchAttributes(a,n)] returns the attribute values from [a] that
+matchAttributes(region_t<`r>,list_t<attribute_t> atrs,list_t<name @> names);
+  /** [matchAttributes(r,a,n)] returns the attribute values from [a] that
       match the names in [n].  The lists must match up exactly
       (i.e. order matters).  If order shouldn't matter, you can sort
-      both lists first.  The result list is allocated in region [r]. **/
+      both lists first.  **/
 
 extern $(list_t<content_t>,list_t<attribute_t>)
 getElemData(content_t doc, string_t tagname);

@@ -657,7 +657,7 @@ hstub {
     Flock(struct flock @`r);
     Long(long);
   };
-  typedef datatype `r FcntlArg<`r> fcntlarg_t<`r>;
+  typedef datatype FcntlArg<`r>@`r fcntlarg_t<`r>;
 
   extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
   extern int open(const char *, int, ... mode_t);
@@ -1987,11 +1987,8 @@ cycstub poll {
     Failure("poll called with out-of-bounds pointer");
   int poll(struct pollfd?a, nfds_t b, int c) {
     if (!a) throw &__poll_failure_1;
-    try *a;
-    catch {
-    case Array_bounds: throw &__poll_failure_2;
-    }
     int len = numelts(a);
+    if (len < 1) throw &__poll_failure_2;
     return Cpoll::poll((struct pollfd @{0})a,
                        (b<(nfds_t)len)?b:(nfds_t)len,
                        c);
@@ -2142,19 +2139,19 @@ hstub sigrelse {
   extern "C" int sigrelse(int);
 }
 hstub {
-  extern datatype SigBuiltin {
-    SIG_DFL;
-    SIG_ERR;
-    SIG_IGN;
+  extern enum SigBuiltin {
+    SIG_DFL,
+    SIG_ERR,
+    SIG_IGN
   #ifdef _SIG_HOLD_def_
-    SIG_HOLD;  // Rare
+    , SIG_HOLD // Rare
   #endif
   };
   extern datatype SigArg {
-    __SIG_BUILTIN(datatype SigBuiltin);
+    __SIG_BUILTIN(enum SigBuiltin);
     __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
   };
-  typedef datatype `r SigArg sigarg_t<`r>;
+  typedef datatype SigArg @`r sigarg_t<`r>;
 }
 cycstub {
   #include <signal.h>
@@ -2475,7 +2472,7 @@ hstub {
     ShortPtr_pa(short @`r);
     IntPtr_pa(unsigned long @`r);
   };
-  typedef datatype `r PrintArg<`r> parg_t<`r>;
+  typedef datatype PrintArg<`r> @`r parg_t<`r>;
 
   // Cyclone specific.
   // Similar to sprintf but allocates a result of the right size on the heap.
@@ -2714,7 +2711,7 @@ hstub {
     FloatPtr_sa(float @`r);
     CharPtr_sa(char ? @nozeroterm`r)
   };
-  typedef datatype `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
+  typedef datatype ScanfArg<`r1> @`r2 sarg_t<`r1,`r2>;
 }
 hstub {
   extern int fscanf(FILE @, const char ?, ... inject sarg_t)
@@ -3249,8 +3246,9 @@ cycstub {
     return (FILE @)f; // FIX: get rid of cast?
   }
 
+  datatype exn.FileCloseError FileCloseError_val = FileCloseError;
   void file_close(FILE @ f) {
-    if (fclose(f) != 0) throw FileCloseError;
+    if (fclose(f) != 0) throw &FileCloseError_val;
   }
 }
 ;
@@ -3906,7 +3904,7 @@ hstub {
     SA_socklenptr(socklen_t @`r); // accept, getpeername, getsockname, recvfrom
     SA_socklen(socklen_t); // bind, connect, sendto
   };
-  typedef datatype `r SockAddr<`r> SA<`r>;
+  typedef datatype SockAddr<`r> @`r SA<`r>;
 }
 hstub {
   extern datatype SockOpt<`r::R> {
@@ -3917,7 +3915,7 @@ hstub {
     SO_socklenptr(socklen_t @`r); // getsockopt
     SO_socklen(socklen_t);        // setsockopt
   };
-  typedef datatype `r SockOpt<`r> SO<`r>;
+  typedef datatype SockOpt<`r> @`r SO<`r>;
 }
 hstub accept {
   extern int accept(int fd, ... inject SA);
@@ -3927,6 +3925,7 @@ hstub {
 }
 cycstub {
   datatype exn { SocketError };
+  datatype exn.SocketError SocketError_val = SocketError;
 }
 cstub {
   #include <sys/socket.h>
@@ -3942,11 +3941,11 @@ cycstub accept {
     extern "C" int accept_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int accept(int fd, ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::accept_in(fd,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -3963,11 +3962,11 @@ cycstub bind {
     extern "C" int bind_in(int, const struct sockaddr_in @, socklen_t);
   }
   int bind(int fd, ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::bind_in(fd,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -3984,11 +3983,11 @@ cycstub connect {
     extern "C" int connect_in(int, const struct sockaddr_in @, socklen_t);
   }
   int connect(int fd, ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::connect_in(fd,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4005,11 +4004,11 @@ cycstub getpeername {
     extern "C" int getpeername_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int getpeername(int fd, ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::getpeername_in(fd,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4026,11 +4025,11 @@ cycstub getsockname {
     extern "C" int getsockname_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int getsockname(int fd, ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::getsockname_in(fd,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4048,7 +4047,7 @@ cycstub getsockopt {
     extern "C" int getsockopt_timeval(int, int, int, struct timeval @, socklen_t @);
   }
   int getsockopt(int fd, int level, int optname, ... inject SO ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SO_int(x),&SO_socklenptr(y)):
       return Csocket::getsockopt_int(fd,level,optname,x,y);
@@ -4058,7 +4057,7 @@ cycstub getsockopt {
       return Csocket::getsockopt_timeval(fd,level,optname,x,y);
     case $(&SO_timeval(x),&SO_int(y)): // FIX: inject problem b/c socklen_t=int
       return Csocket::getsockopt_timeval(fd,level,optname,x,(socklen_t @)y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4107,11 +4106,11 @@ cycstub recvfrom {
   }
   ssize_t recvfrom(int fd, char ? @nozeroterm buf, size_t n, int flags, 
 		   ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::recvfrom_in(fd,buf,n,flags,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4154,11 +4153,11 @@ cycstub sendto {
   }
   ssize_t sendto(int fd, const char ? @nozeroterm buf, size_t n, int flags,
                  ... inject SA ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::sendto_in(fd,buf,n,flags,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }
@@ -4180,13 +4179,13 @@ cycstub setsockopt {
     extern "C" int setsockopt_timeval(int, int, int, const struct timeval @, socklen_t);
   }
   int setsockopt(int fd, int level, int optname, ... inject SO ap) {
-    if (numelts(ap) != 2) throw SocketError;
+    if (numelts(ap) != 2) throw &SocketError_val;
     switch ($(ap[0],ap[1])) {
     case $(&SO_int(x),&SO_socklen(y)):
       return Csocket::setsockopt_int(fd,level,optname,x,y);
     case $(&SO_timeval(x),&SO_socklen(y)):
       return Csocket::setsockopt_timeval(fd,level,optname,x,y);
-    default: throw SocketError;
+    default: throw &SocketError_val;
     }
   }
 }

@@ -712,27 +712,29 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];struct Cyc_List_List*
-Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_Fn_Function{
-void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
-void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*
-Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);struct Cyc_Fn_Function*Cyc_Fn_compose(
-struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*Cyc_Fn_curry(
-struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*
-f);struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*
-x);struct Cyc_Fn_Function;struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,
-void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*
-x){struct Cyc_Fn_Function*_tmpF;return(_tmpF=_cycalloc(sizeof(*_tmpF)),((_tmpF->f=(
-void*(*)(void*,void*))f,((_tmpF->env=(void*)((void*)x),_tmpF)))));}static void*
-Cyc_Fn_fp_apply(void*(*f)(void*),void*x);static void*Cyc_Fn_fp_apply(void*(*f)(
-void*),void*x){return f(x);}struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));
-struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*)){return((struct Cyc_Fn_Function*(*)(
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+14];struct Cyc_List_List_mismatch_struct{char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(
+struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*
+tag;};struct Cyc_Fn_Function{void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*
+Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(
+void*(*f)(void*));void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);struct Cyc_Fn_Function*
+Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*
+Cyc_Fn_curry(struct Cyc_Fn_Function*f);struct Cyc_Fn_Function*Cyc_Fn_uncurry(
+struct Cyc_Fn_Function*f);struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*
+f,struct Cyc_List_List*x);struct Cyc_Fn_Function;struct Cyc_Fn_Function*Cyc_Fn_make_fn(
+void*(*f)(void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
+void*,void*),void*x){struct Cyc_Fn_Function*_tmpF;return(_tmpF=_cycalloc(sizeof(*
+_tmpF)),((_tmpF->f=(void*(*)(void*,void*))f,((_tmpF->env=(void*)((void*)x),_tmpF)))));}
+static void*Cyc_Fn_fp_apply(void*(*f)(void*),void*x);static void*Cyc_Fn_fp_apply(
+void*(*f)(void*),void*x){return f(x);}struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(
+void*));struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*)){return((struct Cyc_Fn_Function*(*)(
 void*(*f)(void*(*)(void*),void*),void*(*x)(void*)))Cyc_Fn_make_fn)((void*(*)(
 void*(*)(void*),void*))Cyc_Fn_fp_apply,f);}void*Cyc_Fn_apply(struct Cyc_Fn_Function*
 f,void*x);void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x){struct Cyc_Fn_Function

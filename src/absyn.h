@@ -20,6 +20,15 @@
 #ifndef _ABSYN_H_
 #define _ABSYN_H_
 
+
+// These macros are useful for declaring globally shared, nullary
+// data constructors.  
+#define extern_datacon(T,C) \
+  extern datatype T.C C##_val
+
+#define datacon(T,C) \
+  datatype T.C C##_val = C
+
 // This file defines the abstract syntax used by the Cyclone compiler
 // and related tools.  It is the crucial set of data structures that 
 // pervade the compiler.  
@@ -89,15 +98,15 @@ namespace Absyn {
   typedef qvar_opt_t typedef_name_opt_t; 
 
   // typedefs -- in general, we define foo_t to be struct Foo@ or datatype Foo.
-  typedef datatype Scope scope_t;
+  typedef enum Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
-  typedef datatype Size_of size_of_t;
-  typedef datatype Kind kind_t;
-  typedef datatype KindBound kindbound_t;
+  typedef enum Size_of size_of_t;
+  typedef enum Kind kind_t;
+  typedef datatype KindBound @kindbound_t;
   typedef struct Tvar @tvar_t; 
-  typedef datatype Sign sign_t;
-  typedef datatype AggrKind aggr_kind_t;
-  typedef datatype Bounds bounds_t;
+  typedef enum Sign sign_t;
+  typedef enum AggrKind aggr_kind_t;
+  typedef datatype Bounds @bounds_t;
   typedef struct PtrAtts ptr_atts_t;
   typedef struct PtrInfo ptr_info_t;
   typedef struct VarargInfo vararg_info_t;
@@ -106,18 +115,18 @@ namespace Absyn {
   typedef struct DatatypeFieldInfo datatype_field_info_t;
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
-  typedef datatype Type type_t, rgntype_t;
+  typedef datatype Type @type_t, @rgntype_t;
   typedef union Cnst cnst_t;
-  typedef datatype Primop primop_t;
-  typedef datatype Incrementor incrementor_t;
+  typedef enum Primop primop_t;
+  typedef enum Incrementor incrementor_t;
   typedef struct VarargCallInfo vararg_call_info_t;
-  typedef datatype Raw_exp raw_exp_t;
+  typedef datatype Raw_exp @raw_exp_t;
   typedef struct Exp @exp_t, *exp_opt_t;
-  typedef datatype Raw_stmt raw_stmt_t;
+  typedef datatype Raw_stmt @raw_stmt_t;
   typedef struct Stmt @stmt_t, *stmt_opt_t;
-  typedef datatype Raw_pat raw_pat_t;
+  typedef datatype Raw_pat @raw_pat_t;
   typedef struct Pat @pat_t;
-  typedef datatype Binding binding_t;
+  typedef datatype Binding @binding_t;
   typedef struct Switch_clause @switch_clause_t;
   typedef struct Fndecl @fndecl_t;
   typedef struct Aggrdecl @aggrdecl_t;
@@ -127,20 +136,20 @@ namespace Absyn {
   typedef struct Enumfield @enumfield_t;
   typedef struct Enumdecl @enumdecl_t;
   typedef struct Vardecl @vardecl_t;
-  typedef datatype Raw_decl raw_decl_t;
+  typedef datatype Raw_decl @raw_decl_t;
   typedef struct Decl @decl_t;
-  typedef datatype Designator designator_t;
-  typedef @extensible datatype AbsynAnnot absyn_annot_t;
-  typedef datatype Attribute attribute_t;
+  typedef datatype Designator @designator_t;
+  typedef @extensible datatype AbsynAnnot @absyn_annot_t;
+  typedef datatype Attribute @attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Aggrfield @aggrfield_t;
-  typedef datatype OffsetofField offsetof_field_t;
+  typedef datatype OffsetofField @offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
-  typedef datatype Coercion coercion_t;
+  typedef enum Coercion coercion_t;
   typedef struct PtrLoc *ptrloc_t;
 
   // scopes for declarations 
-  EXTERN_ABSYN datatype Scope { 
+  EXTERN_ABSYN enum Scope { 
     Static,    // definition is local to the compilation unit
     Abstract,  // definition is exported only abstractly (structs only)
     Public,    // definition is exported in full glory (most things)
@@ -161,13 +170,13 @@ namespace Absyn {
     seg_t loc; // only present when porting C code
   };
 
-  EXTERN_ABSYN datatype Size_of { 
-    Char_sz; Short_sz; Int_sz; Long_sz; LongLong_sz;
+  EXTERN_ABSYN enum Size_of { 
+    Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz
   };
                                   
 
   // Used to classify types.  
-  EXTERN_ABSYN datatype Kind { 
+  EXTERN_ABSYN enum Kind { 
     // BoxKind <= MemKind <= AnyKind
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
@@ -181,9 +190,9 @@ namespace Absyn {
   };
 
   // signed or unsigned qualifiers on integral types
-  EXTERN_ABSYN datatype Sign { Signed, Unsigned, None };
+  EXTERN_ABSYN enum Sign { Signed, Unsigned, None };
 
-  EXTERN_ABSYN datatype AggrKind { StructA, UnionA };
+  EXTERN_ABSYN enum AggrKind { StructA, UnionA };
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
@@ -203,7 +212,7 @@ namespace Absyn {
   EXTERN_ABSYN datatype KindBound {
     Eq_kb(kind_t);        
     Unknown_kb(opt_t<kindbound_t>); 
-    Less_kb(opt_t<kindbound_t>, kind_t); 
+    Less_kb(opt_t<kindbound_t>, kind_t);
   };
 
   // type variables
@@ -218,6 +227,7 @@ namespace Absyn {
     DynEither_b;    // t?+-
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
   };
+  extern_datacon(Bounds,DynEither_b);
 
   EXTERN_ABSYN struct PtrLoc {
     seg_t  ptr_loc;
@@ -252,7 +262,7 @@ namespace Absyn {
     Notnull_ptrqual;
     Nullable_ptrqual;
   };
-  typedef datatype Pointer_qual pointer_qual_t;
+  typedef datatype Pointer_qual @pointer_qual_t;
   typedef list_t<pointer_qual_t> pointer_quals_t;
 
   // information about vararg functions
@@ -297,8 +307,7 @@ namespace Absyn {
 
   EXTERN_ABSYN struct DatatypeInfo {
     union DatatypeInfoU datatype_info; // we either know the definition or not
-    list_t<type_t>     targs;       // actual type parameters
-    opt_t<rgntype_t>   rgn;         // region into which datatype points 
+    list_t<type_t>     targs;          // actual type parameters
   };
   // information for datatype Foo.Bar
   EXTERN_ABSYN struct UnknownDatatypeFieldInfo {
@@ -348,7 +357,7 @@ namespace Absyn {
   //      For example, the last field of TypedefType
   // FIX: May want to make this raw_typ and store the kinds with the types.
   EXTERN_ABSYN datatype Type {
-    VoidType; // MemKind
+    VoidType;// MemKind
     // Evars are introduced for unification or via _ by the user.
     // The kind can get filled in during well-formedness checking.
     // The type can get filled in during unification.
@@ -379,12 +388,16 @@ namespace Absyn {
     TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_t*);
     ValueofType(exp_t);      // IntKind -- exp must be a type-level expression
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
-    HeapRgn;                 // The heap region.  RgnKind 
-    UniqueRgn;               // The unique region.  UniqueRgnKind 
+    HeapRgn;        // The heap region.  RgnKind 
+    UniqueRgn;      // The unique region.  UniqueRgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
     RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind
   };
+  extern_datacon(Type,HeapRgn);
+  extern_datacon(Type,UniqueRgn);
+  extern_datacon(Type,VoidType);
+  extern_datacon(Type,FloatType);
 
   // used when parsing/pretty-printing function definitions.
   EXTERN_ABSYN datatype Funcparams {
@@ -395,10 +408,10 @@ namespace Absyn {
               opt_t<type_t>,                           // effect
               list_t<$(type_t,type_t)@>);              // region partial order
   };
-  typedef datatype `r Funcparams funcparams_t<`r>;
+  typedef datatype Funcparams @`r funcparams_t<`r>;
 
   // Used in attributes below.
-  EXTERN_ABSYN datatype Format_Type { Printf_ft, Scanf_ft };
+  EXTERN_ABSYN enum Format_Type { Printf_ft, Scanf_ft };
 
   // GCC attributes that we currently try to support:  this definition
   // is only used for parsing and pretty-printing.  See GCC info pages
@@ -423,13 +436,30 @@ namespace Absyn {
     Constructor_att;
     Destructor_att;
     No_check_memory_usage_att;
-    Format_att(datatype Format_Type, 
+    Format_att(enum Format_Type, 
                int,   // format string arg
                int);  // first arg to type-check
     Initializes_att(int); // param that function initializes through
     Pure_att;
     Mode_att(string_t);
   };
+  extern_datacon(Attribute,Stdcall_att);      
+  extern_datacon(Attribute,Cdecl_att);        
+  extern_datacon(Attribute,Fastcall_att);
+  extern_datacon(Attribute,Noreturn_att);     
+  extern_datacon(Attribute,Const_att);
+  extern_datacon(Attribute,Packed_att);
+  extern_datacon(Attribute,Nocommon_att);
+  extern_datacon(Attribute,Shared_att);
+  extern_datacon(Attribute,Unused_att);
+  extern_datacon(Attribute,Weak_att);
+  extern_datacon(Attribute,Dllimport_att);
+  extern_datacon(Attribute,Dllexport_att);
+  extern_datacon(Attribute,No_instrument_function_att);
+  extern_datacon(Attribute,Constructor_att);
+  extern_datacon(Attribute,Destructor_att);
+  extern_datacon(Attribute,No_check_memory_usage_att);
+  extern_datacon(Attribute,Pure_att);
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN datatype Type_modifier<`r::R> {
@@ -440,7 +470,7 @@ namespace Absyn {
     TypeParams_mod(list_t<tvar_t>,seg_t,bool);// when bool is true, print kinds
     Attributes_mod(seg_t,attributes_t);
   };
-  typedef datatype `r Type_modifier<`r> type_modifier_t<`r>;
+  typedef datatype Type_modifier<`r> @`r type_modifier_t<`r>;
 
   // Constants
   EXTERN_ABSYN @tagged union Cnst {
@@ -462,14 +492,14 @@ namespace Absyn {
   extern cnst_t String_c(string_t<`H>);
 
   // Primitive operations
-  EXTERN_ABSYN datatype Primop {
+  EXTERN_ABSYN enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
     Numelts
   };
 
   // ++x, x++, --x, x-- respectively
-  EXTERN_ABSYN datatype Incrementor { PreInc, PostInc, PreDec, PostDec };
+  EXTERN_ABSYN enum Incrementor { PreInc, PostInc, PreDec, PostDec };
 
   // information about a call to a vararg function
   EXTERN_ABSYN struct VarargCallInfo {
@@ -487,7 +517,7 @@ namespace Absyn {
   // Casts are labelled with whether or not they involve a coercion
   // of some sort.  This is used in the flow analysis to get rid of
   // spurious warnings and null checks.
-  EXTERN_ABSYN datatype Coercion {
+  EXTERN_ABSYN enum Coercion {
     Unknown_coercion, // initially, we don't know what kind of coercion
     No_coercion,      // a cast that C supports
     NonNull_to_Null,  // t@{n+m} -> t*{n}
@@ -613,6 +643,8 @@ namespace Absyn {
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
     ResetRegion_s(exp_t); // reset_region(e)
   };
+  extern_datacon(Raw_stmt,Skip_s);
+
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
     raw_stmt_t     r;               // raw statement
@@ -645,6 +677,9 @@ namespace Absyn {
     UnknownCall_p(qvar_t,list_t<pat_t>, bool dot_dot_dot); // resolved by tcpat
     Exp_p(exp_t);        // evaluated and resolved by tcpat
   };
+  extern_datacon(Raw_pat,Wild_p);
+  extern_datacon(Raw_pat,Null_p);
+
   // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
     raw_pat_t      r;    // raw pattern
@@ -670,6 +705,7 @@ namespace Absyn {
     Local_b(vardecl_t);  // local variable
     Pat_b(vardecl_t);    // pattern variable
   };
+  extern_datacon(Binding,Unresolved_b);
 
   // Variable declarations.
   // re-factor this so different kinds of vardecls only have what they
@@ -803,6 +839,8 @@ namespace Absyn {
     // the bool in the vars is used to warn when an export doesn't appear
     // in the declarations.
   };
+  extern_datacon(Raw_decl,Porton_d);
+  extern_datacon(Raw_decl,Portoff_d);
 
   // declarations w/ auxiliary info
   EXTERN_ABSYN struct Decl {
@@ -816,6 +854,7 @@ namespace Absyn {
   };
 
   EXTERN_ABSYN @extensible datatype AbsynAnnot { EXTERN_ABSYN EmptyAnnot; };
+  extern_datacon(AbsynAnnot, EmptyAnnot);
 
   ///////////////////////////////////////////////////////////////////
   // Operations and Constructors for Abstract Syntax
@@ -874,7 +913,7 @@ namespace Absyn {
   extern qvar_t match_exn_name;
   extern datatypefield_t null_pointer_exn_tuf;
   extern datatypefield_t match_exn_tuf;
-  extern type_t exn_typ;
+  extern type_t exn_typ();
   // datatype PrintArg and datatype ScanfArg types
   extern qvar_t datatype_print_arg_qvar;
   extern qvar_t datatype_scanf_arg_qvar;

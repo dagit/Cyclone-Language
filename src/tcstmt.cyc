@@ -131,7 +131,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   switch (s0->r) {
 
-  case Skip_s: return;
+  case &Skip_s: return;
 
   case &Exp_s(e): 
     tcExp(te,NULL,e); 
@@ -168,7 +168,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     type_t t = return_typ(te);
     if (eopt == NULL) {
       switch (compress(t)) {
-      case VoidType: break;
+      case &VoidType: break;
       default:
 	terr(s0->loc,"must return a value of type %s",typ2string(t));
         break;
@@ -344,10 +344,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       te = clear_fallthru(r2,te);
       for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
-        let pat_res = tcPat(te,p,&exn_typ);
+        let exception_type = exn_typ();
+        let pat_res = tcPat(te,p,&exception_type);
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
-        if (!unify(p->topt->v,exn_typ))
+        if (!unify(p->topt->v,exception_type))
           terr(scs->hd->loc, "expected datatype exn but found %s",
                typ2string(p->topt->v));
         else
@@ -391,7 +392,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         case Public: is_local = true; break;
         }
         // side effect
-        *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); 
+        *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(&HeapRgn_val); 
         switch (nsl) {
         case {.Loc_n = _}: break;
         case {.Rel_n = NULL}:
@@ -593,7 +594,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         // check packed and aligned don't show up
         for (_ atts = fd->attributes; atts; atts = atts->tl)
           switch (atts->hd) {
-          case Packed_att: case &Aligned_att(_):
+          case &Packed_att: case &Aligned_att(_):
             terr(d->loc,"bad attribute %s for function",
                  attribute2string(atts->hd));
             break;
@@ -624,8 +625,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
       case &ExternCinclude_d(_,_):
         unimp_msg_part = "extern \"C include\""; break;
-      case Porton_d:            unimp_msg_part = "__cyclone_port_on__"; break;
-      case Portoff_d:           unimp_msg_part = "__cyclone_port_off__"; break;
+      case &Porton_d:          unimp_msg_part = "__cyclone_port_on__"; break;
+      case &Portoff_d:         unimp_msg_part = "__cyclone_port_off__"; break;
       }
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);

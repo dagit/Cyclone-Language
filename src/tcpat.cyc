@@ -56,7 +56,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,p->loc,q)) {
         case &AggrRes(_):
-          p->r = Wild_p;
+          p->r = &Wild_p_val;
           terr(p->loc,"struct tag used without arguments in pattern");
           return;
         case &DatatypeRes(tud,tuf): 
@@ -66,14 +66,14 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
         case &VarRes(_): break; // shadows an outer definition, but that's fine
         }
       } 
-    } catch { case Dict::Absent: break; } // a new variable
+    } catch { case &Dict::Absent: break; } // a new variable
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case {.Loc_n = _}: 
     case {.Rel_n = NULL}:
       (*q)[0] = Loc_n;        
-      p->r = new Var_p(new_vardecl(q,VoidType,NULL),// type set later
-                       new_pat(Wild_p,NULL)); 
+      p->r = new Var_p(new_vardecl(q,&VoidType_val,NULL),// type set later
+                       new_pat(&Wild_p_val,NULL)); 
       return;
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
@@ -92,13 +92,13 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
         case &EnumRes(_,_):
         case &AnonEnumRes(_,_):
           terr(p->loc,"enum tag used with arguments in pattern");
-          p->r = Wild_p;
+          p->r = &Wild_p_val;
           return;
         case &VarRes(_): break;
       }
-    }} catch {case Dict::Absent: break;}
+    }} catch {case &Dict::Absent: break;}
     terr(p->loc, "%s is not a constructor in pattern",qvar2string(q));
-    p->r = Wild_p;
+    p->r = &Wild_p_val;
     return;
 
   case &Aggr_p(NULL, exist_ts, dps, dots):
@@ -125,7 +125,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       if(ad->impl==NULL) {
 	terr(p->loc, "can't destructure an abstract %s",
              (ad->kind == StructA) ? "struct" : "union");
-        p->r = Wild_p;
+        p->r = &Wild_p_val;
 	return;
       }
       int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
@@ -144,9 +144,9 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       }
       p->r = new Aggr_p(new AggrInfo(KnownAggr(adp), targs), *exist_ts, dps,
                         dots);
-    } catch { case Dict::Absent: 
+    } catch { case &Dict::Absent: 
       terr(p->loc, "Non-aggregate name has designator patterns"); 
-      p->r = Wild_p;
+      p->r = &Wild_p_val;
       break;
     }
     return;
@@ -154,7 +154,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     Tcexp::tcExp(te,NULL,e);
     if (!is_const_exp(te,e)) {
       terr(p->loc,"non-constant expression in case pattern");
-      p->r = Wild_p;
+      p->r = &Wild_p_val;
     }
     let $(i,known) = Evexp::eval_const_uint_exp(e);
     p->r = new Int_p(None,i);
@@ -206,7 +206,7 @@ static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
 }
 
 static pat_t wild_pat(seg_t loc) {
-  return new Pat { .loc = loc, .topt = NULL, .r = Wild_p };
+  return new Pat { .loc = loc, .topt = NULL, .r = &Wild_p_val };
 }
 
 static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
@@ -217,7 +217,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   // Figure out what t should be; assign to p->topt and return after switch
   switch (p->r) {
 
-  case Wild_p:       
+  case &Wild_p:       
     t = any_type(lookup_type_vars(te),topt);
     break;
   case &Var_p(vd,p2):
@@ -265,7 +265,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   case &Float_p(_):        t = num_type(topt, float_typ); break;
   case &Enum_p(ed,_):      t = num_type(topt, new EnumType(ed->name,ed)); break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
-  case Null_p:
+  case &Null_p:
     if(topt != NULL)
       switch(compress(*topt)) {
       case &PointerType(_): t = *topt; goto tcpat_end;
@@ -287,13 +287,15 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // FIX: In the DatatypeField for p2 case, we should really pass-through
     // the type instantiation information in topt!!!
 
-    type_t inner_typ  = VoidType;
+    type_t inner_typ  = &VoidType_val;
     let    inner_topt = NULL;
+    bool   elt_const = false;
     if(topt != NULL)
       switch(compress(*topt)) {
-      case &PointerType(PtrInfo(elt_typ,_,_)): 
+      case &PointerType(PtrInfo(elt_typ,elt_tq,_)): 
 	inner_typ  = elt_typ; 
 	inner_topt = &inner_typ;
+        elt_const = elt_tq.real_const;
 	break;
       default: break;
       }
@@ -302,26 +304,40 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(&trk,lookup_opt_type_vars(te));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
-    // if p2's type is a datatype field type, then we cast
-    // the type of p = &p2 to the appropriate datatype type, unless
-    // topt suggests we do otherwise.
-    if(inner_topt == NULL) 
-      switch (compress(p2->topt->v)) {
-      case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud,tuf)},targs}):
-	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),targs,new Opt(ptr_rgn)});
-	break;
-      default:
-	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
-				    PtrAtts(ptr_rgn, empty_conref(), 
-					    empty_conref(), empty_conref(),
-                                            NULL)));
-	break;
+    // if p2 is a datatype field pattern (e.g., datatype F.C), then unless 
+    // topt says otherwise, we make the type datatype F@.  We also change
+    // p2's type from a datatype field to a datatype so that the match
+    // compiler (below) knows how to treat it.
+    switch (compress(p2->topt->v)) {
+    case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud,tuf)},targs}):
+      // it's a datatype field pattern -- check topt to see if we're supposed
+      // to leave it as a datatype field pattern.
+      switch (compress(inner_typ)) {
+      case &DatatypeFieldType(...): 
+        goto DONT_PROMOTE; // don't promote to datatype
+      default: break;
       }
-    else 
-      t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
-				  PtrAtts(ptr_rgn, empty_conref(), 
-					  empty_conref(), empty_conref(),
+      // we're going to promote to the datatype instead of the field.
+      let new_type = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),
+                                                   targs});
+      // change the type of p2 to reflect this
+      p2->topt->v = new_type;
+      t = new PointerType(PtrInfo(new_type, 
+                                  (elt_const ? const_tqual(NULL) : 
+                                   empty_tqual(NULL)),
+                                  PtrAtts(ptr_rgn, empty_conref(),
+                                          bounds_one_conref, false_conref,
                                           NULL)));
+      break;
+    default:
+DONT_PROMOTE:
+      t = new PointerType(PtrInfo(p2->topt->v, 
+                                  (elt_const ? const_tqual(NULL) : 
+                                   empty_tqual(NULL)),
+                                  PtrAtts(ptr_rgn, empty_conref(), 
+                                          empty_conref(), empty_conref(),
+                                          NULL)));
+    }
     break;
 
   case &Tuple_p(*ps_p,dots):
@@ -494,27 +510,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       let env      = $(tenv_tvs,rgn);
       let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
       let all_typs = List::map(snd,inst);
-      // unless topt says otherwise, guess we want Datatype when no args 
-      if(tqts == NULL) {
-        opt_t<type_t> ropt = new Opt(new_evar(&rk,new Opt(tenv_tvs)));
-	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),all_typs,ropt});
-      } else
-	t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
-						all_typs});
-      if(topt != NULL && tqts == NULL)
-	switch(compress(*topt)) {
-	case &DatatypeFieldType(_): 
-	  t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
-						  all_typs});
-	  break;
-	case &DatatypeType(DatatypeInfo{_,targs,_}):
-	  // these unifies could make topt cause an error
-	  let a = all_typs;
-	  for (; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
-	    unify(a->hd,targs->hd);
-	  break;
-	default: break;
-	}
+      t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
+                                                  all_typs});
       if (dots) {
         // fill in wild patterns for the missing fields
         let lps = List::length(ps);
@@ -592,30 +589,18 @@ void check_pat_regions(tenv_t te, pat_t p) {
       }
     }
     switch (p->topt->v) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
-    case &DatatypeType(DatatypeInfo{_,_,&Opt(rt)}):
+    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): 
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: impos("check_pat_regions: bad pointer type");
     }
-  case &Datatype_p(_,_,ps,_): 
-    for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
-    switch (p->topt->v) {
-    case &DatatypeType(DatatypeInfo{_,_,NULL}):
-      return;
-    case &DatatypeType(DatatypeInfo{_,_,&Opt(rt)}):
-      check_rgn_accessible(te,p->loc,rt);
-      return;
-    case &DatatypeFieldType(_): return;
-    default: impos("check_pat_regions: bad datatype type");
-    }
   case &Aggr_p(_,_,dps,_): 
-    for(; dps != NULL; dps = dps->tl)
-      check_pat_regions(te,(*dps->hd)[1]);
+    for(; dps != NULL; dps = dps->tl) check_pat_regions(te,(*dps->hd)[1]);
     return;
+  case &Datatype_p(_,_,ps,_): 
+    fallthru(ps);
   case &Tuple_p(ps,_):
-    for(; ps != NULL; ps = ps->tl)
-      check_pat_regions(te,ps->hd);
+    for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
     return;
   default: return;
   }
@@ -671,9 +656,9 @@ static struct Con_s<`r::R> {
 typedef struct Con_s<`r> @`r con_t<`r>;
 static datatype Simple_pat<`r::R> { 
   Any; 
-  Con(con_t<`r>,list_t<datatype `r Simple_pat<`r>,`r>); 
+  Con(con_t<`r>,list_t<datatype Simple_pat<`r>@`r,`r>); 
 };
-typedef datatype `r Simple_pat<`r> simple_pat_t<`r>;
+typedef datatype Simple_pat<`r> @`r simple_pat_t<`r>;
 
 // used for creating sets of constructors
 static int compare_con(con_t c1, con_t c2) {
@@ -754,9 +739,9 @@ static simple_pat_t<`r> con_pat(region_t<`r> r, string_t<`H> con_name, int*`r sp
 static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   simple_pat_t<`r> s;
   switch (p->r) {
-  case Wild_p:          
-  case &TagInt_p(_,_):  s = Any; break;
-  case Null_p:          s = null_pat(r,p); break;
+  case &Wild_p:          
+  case &TagInt_p(_,_):  s = rnew(r) Any; break;
+  case &Null_p:          s = null_pat(r,p); break;
   case &Int_p(sn,i):    s = int_pat(r,i,p); break;
   case &Char_p(c):      s = char_pat(r,c,p); break;
   case &Float_p(f):     s = float_pat(r,f,p); break;
@@ -789,32 +774,17 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
       else 
 	s = ptr_pat(r,ss,p);
       break;
-    case &DatatypeType(DatatypeInfo{_,_,&Opt(_)}):
-      switch(pp->r) {
-      case &Datatype_p(tud,tuf,ps,_):
-	int*`r span;
-	if(tud->is_extensible)
-	  span = NULL;
-	else
-	  span = rnew(r) (List::length(tud->fields->v));
-	s = con_pat(r,*((*tuf->name)[1]),span,
-                    List::rmap_c(r,compile_pat,r,ps),p); 
-	break;
-      default: impos("non-datatype pattern has datatype type");
-      }
-      break;
-    default: impos("pointer pattern does not have pointer type");
+    default: impos("expecting pointertype for pattern!");
     }
     break;
-
   case &Datatype_p(tud,tuf,ps,_):
     int*`r span;
     switch(compress(p->topt->v)) {
     case &DatatypeType(_):     
       if(tud->is_extensible)
-	span = NULL;
+        span = NULL;
       else
-	span = rnew(r) (List::length(tud->fields->v)); 
+        span = rnew(r) (List::length(tud->fields->v)); 
       break;
     case &DatatypeFieldType(_): span = &one_opt; break;
     default: span = impos("void datatype pattern has bad type"); break;
@@ -822,10 +792,9 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
     s = con_pat(r,*((*tuf->name)[1]),span, List::rmap_c(r,compile_pat,r,ps),p);
     break;
     
-    // case &Datatype_p(_,_,ps,_): fallthru(ps); // ps != NULL
   case &Tuple_p(ps,_): 
     s = tuple_pat(r,List::rmap_c(r,compile_pat,r,ps),p); break;
-
+    
   case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_):
     // FIX: doesn't look like multiple designators are right
     // we do different things for structs and unions:
@@ -889,7 +858,7 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
   case &UnknownId_p(_):     
   case &UnknownCall_p(_,_,_): 
   case &Aggr_p(_,_,_,_):      
-  case &Exp_p(_): s = Any;
+  case &Exp_p(_): s = rnew(r) Any;
   }
   return s;
 }
@@ -907,10 +876,10 @@ typedef list_t<$(simple_pat_t<`r>,`rhs)@`r,`r> match_t<`rhs,`r>;
 // values v that are not of the form ci(v1,...,vm) (1 <= i <= n).
 // Note that Neg[] denotes any possible value.
 static datatype Term_desc<`r::R> {
-  Pos(con_t<`r>,list_t<datatype `r Term_desc<`r>,`r>);
+  Pos(con_t<`r>,list_t<datatype Term_desc<`r>@`r,`r>);
   Neg(Set::set_t<con_t<`r>,`r>);
 };
-typedef datatype `r Term_desc<`r> term_desc_t<`r>;
+typedef datatype Term_desc<`r> @`r term_desc_t<`r>;
 
 // Contexts represent a partial term-description matched thus far,
 // from the root node of the object in a left-to-right fashion.
@@ -927,10 +896,10 @@ static datatype Decision<`rhs,`r::R> {
   Failure(term_desc_t<`r>);
   Success(`rhs);
   IfEq(access_t<`r>, con_t<`r>, 
-       datatype `r Decision<`rhs,`r>, 
-       datatype `r Decision<`rhs,`r>);
+       datatype Decision<`rhs,`r>@`r, 
+       datatype Decision<`rhs,`r>@`r);
 };
-typedef datatype `r Decision<`rhs,`r> decision_t<`rhs,`r>;
+typedef datatype Decision<`rhs,`r> @`r decision_t<`rhs,`r>;
 
 // A work_stack records what tests we have to continue to do.  An
 // implicit invariant is that for each frame on the stack, the
@@ -940,8 +909,8 @@ typedef  $(list_t<simple_pat_t<`r>,`r>,
 	   list_t<term_desc_t<`r>,`r>)@`r work_stack_frame_t<`r>;
 typedef list_t<work_stack_frame_t<`r>,`r> work_stack_t<`r>;
 // Used during primitive match compilation
-static datatype Answer { Yes, No, Maybe };
-typedef datatype Answer answer_t;
+static enum Answer { Yes, No, Maybe };
+typedef enum Answer answer_t;
 
 // Add c to a set of negative constructors for a term description.
 // Assumes that td is a negative term description, that c is not
@@ -1106,7 +1075,8 @@ match(region_t<`r> r,simple_pat_t<`r> p, access_t<`r> obj, term_desc_t<`r> dsc,
       context_t<`r> ctx, work_stack_t<`r> work,
       `rhs right_hand_side, match_t<`rhs,`r> rules) {
   switch (p) {
-  case Any: return and_match(r,augment(r,ctx, dsc),work,right_hand_side,rules);
+  case &Any: 
+    return and_match(r,augment(r,ctx, dsc),work,right_hand_side,rules);
   case &Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
@@ -1171,12 +1141,14 @@ $(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match($(region_t<`r>,int @)@ env,
                    List(sp0,rnew(r) List(int_pat(r,*ctr,NULL),NULL)),NULL);
     *ctr = (*ctr) + 1;
   } else
-    sp = tuple_pat(r,rnew(r) List(sp0,rnew(r) List(Any,NULL)),NULL);
+    sp = tuple_pat(r,rnew(r) List(sp0,rnew(r) List(rnew(r) Any,NULL)),NULL);
   return rnew(r) $(sp, rhs);
 }
 
 // Turn a descriptor into an example for reporting an inexhaustive match
 datatype exn { Desc2string };
+datacon(exn,Desc2string);
+
 static string_t descs2string(region_t<`r> r, list_t<term_desc_t<`r>,`r>);
 static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
   switch (d) {
@@ -1187,7 +1159,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       return desc2string(r,ds->hd);
     }
     switch (p->r) {
-    case Wild_p: return "_";
+    case &Wild_p: return "_";
     case &Var_p(vd,_): return qvar2string(vd->name);
     case &Reference_p(vd,_): return aprintf("*%s",qvar2string(vd->name));
     case &TagInt_p(tv,vd): return aprintf("%s<`%s>",qvar2string(vd->name),
@@ -1209,14 +1181,14 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       return aprintf("%s{%s}",qvar2string(ad->name),descs2string(r,ds));
     case &Datatype_p(_, tuf, _, _): 
       return aprintf("%s",qvar2string(tuf->name));
-    case Null_p: return "NULL";
+    case &Null_p: return "NULL";
     case &Int_p(_,i): return aprintf("%d",i);
     case &Char_p(c): return aprintf("%d",c);
     case &Float_p(f): return f;
     case &Enum_p(_,ef): fallthru(ef);
     case &AnonEnum_p(_,ef): return qvar2string(ef->name);
     case &Exp_p(e): return exp2string(e);
-    default: throw Desc2string;
+    default: throw &Desc2string_val;
     }
   case &Neg(s):
     if (Set::is_empty(s)) return "_";
@@ -1224,7 +1196,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     let orig_pat = c->orig_pat;
     // we need to figure out what the type of the pattern is
     // orig_pat is NULL when we have an && clause on a pattern
-    if (orig_pat == NULL) throw Desc2string;
+    if (orig_pat == NULL) throw &Desc2string_val;
     switch (compress(orig_pat->topt->v)) {
     case &IntType(_,Char_sz): 
       // find a character not in the constructor set
@@ -1233,7 +1205,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
         if (!Set::member(s,c)) 
           return aprintf("%d",i);
       }
-      throw Desc2string;
+      throw &Desc2string_val;
     case &IntType(_,_):
       // find an integer not in the constructor set
       for (unsigned int i = 0; i < (0 - 1); i++) {
@@ -1241,7 +1213,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
         if (!Set::member(s,c)) 
           return aprintf("%d",i);
       }
-      throw Desc2string;
+      throw &Desc2string_val;
     case &PointerType(PtrInfo(_,_,patts)):
       let n = patts.nullable;
       bool is_nullable = conref_def(false,n);
@@ -1250,8 +1222,8 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
           return "NULL";
       }
       return "&_";
-    case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_,_}):
-      if (tud->is_extensible) throw Desc2string;
+    case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_}):
+      if (tud->is_extensible) throw &Desc2string_val;
       let fields = tud->fields->v;
       int span = List::length(fields);
       for (; fields; fields = fields->tl) {
@@ -1264,7 +1236,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
             return aprintf("&%s(...)",n);
         }
       }
-      throw Desc2string;
+      throw &Desc2string_val;
     case &AggrType(AggrInfo{{.KnownAggr = &ad},_}) && ad->kind == UnionA:
       let fields = ad->impl->fields;
       int span = List::length(fields);
@@ -1274,8 +1246,8 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
         if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, orig_pat)))
           return aprintf("%s{.%s = _}",union_name,n);
       }
-      throw Desc2string;
-    default: throw Desc2string;
+      throw &Desc2string_val;
+    default: throw &Desc2string_val;
     }
   }
 }
@@ -1299,7 +1271,7 @@ static void not_exhaust_err(region_t<`r> r, seg_t loc, term_desc_t<`r> desc) {
     let s = desc2string(r,desc);
     terr(loc,"patterns may not be exhaustive.\n\tmissing case for %s",s);
   } catch {
-  case Desc2string: 
+  case &Desc2string: 
     terr(loc,"patterns may not be exhaustive.");
     break;
   }
@@ -1338,7 +1310,7 @@ static void not_exhaust_warn(region_t<`r> r, $(seg_t, bool) @ pr, term_desc_t<`r
     let s = desc2string(r, desc);
     warn((*pr)[0],"pattern not exhaustive.\n\tmissing case for %s",s);
   } catch {
-  case Desc2string:
+  case &Desc2string:
     warn((*pr)[0],"pattern not exhaustive.");
     break;
   }

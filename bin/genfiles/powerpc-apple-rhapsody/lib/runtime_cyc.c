@@ -53,22 +53,22 @@ struct _DynRegionHandle {
 
 // FIX: makes alignment and pointer-size assumptions
 // FIX: what about -nocyc???
-char Cyc_Null_Exception_tag[] = "\0\0\0\0Cyc_Null_Exception";
+char Cyc_Null_Exception_tag[] = "Cyc_Null_Exception";
 struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception_tag };
 struct _xtunion_struct * Cyc_Null_Exception = &Cyc_Null_Exception_struct;
-char Cyc_Array_bounds_tag[] = "\0\0\0\0Cyc_Array_bounds";
+char Cyc_Array_bounds_tag[] = "Cyc_Array_bounds";
 struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds_tag };
 struct _xtunion_struct * Cyc_Array_bounds = &Cyc_Array_bounds_struct;
-char Cyc_Match_Exception_tag[] = "\0\0\0\0Cyc_Match_Exception";
+char Cyc_Match_Exception_tag[] = "Cyc_Match_Exception";
 struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception_tag };
 struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
-char Cyc_Bad_alloc_tag[] = "\0\0\0\0Cyc_Bad_alloc";
+char Cyc_Bad_alloc_tag[] = "Cyc_Bad_alloc";
 struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc_tag };
 struct _xtunion_struct * Cyc_Bad_alloc = &Cyc_Bad_alloc_struct;
-char Cyc_Core_Free_Region_tag[] = "\0\0\0\0Cyc_Core_Free_Region";
+char Cyc_Core_Free_Region_tag[] = "Cyc_Core_Free_Region";
 struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region_tag };
 struct _xtunion_struct * Cyc_Core_Free_Region = &Cyc_Core_Free_Region_struct;
-char Cyc_Core_Open_Region_tag[] = "\0\0\0\0Cyc_Core_Open_Region";
+char Cyc_Core_Open_Region_tag[] = "Cyc_Core_Open_Region";
 struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region_tag };
 struct _xtunion_struct * Cyc_Core_Open_Region = &Cyc_Core_Open_Region_struct;
 
@@ -457,10 +457,7 @@ int main(int argc, char **argv) {
   _push_handler(&top_handler);
   if (status) {
     char *exn_name;
-    if(_exn_thrown->tag == 0)
-      exn_name = (((char *)_exn_thrown)+4);
-    else
-      exn_name = _exn_thrown->tag + 4;
+    exn_name = _exn_thrown->tag;
     fprintf(stderr,"Uncaught exception %s\n",exn_name);
     return 1;
   }

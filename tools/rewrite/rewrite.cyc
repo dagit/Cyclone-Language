@@ -7,7 +7,8 @@
 using Core;
 using List;
 
-datatype exn { Eof };
+datatype exn { Eof(int) };
+datatype exn.Eof Eof_val = Eof(0);
 
 void read_filename(char ?buf) {
   int i = 0;
@@ -18,7 +19,7 @@ void read_filename(char ?buf) {
     c = fgetc(stdin);
   }
   buf[i] = 0;
-  if (c == EOF) throw Eof;
+  if (c == EOF) throw &Eof_val;
 }
 
 void read_num(int @j) {
@@ -31,7 +32,7 @@ void read_num(int @j) {
     i++;
     c = fgetc(stdin);
   }
-  if (c == EOF) throw Eof;
+  if (c == EOF) throw &Eof_val;
   *j = atoi(buf);
 }
 
@@ -39,7 +40,7 @@ void read_line(FILE @f) {
   int c = fgetc(f);
   while (c != '\n' && c != EOF) 
     c = fgetc(f);
-  if (c == EOF) throw Eof;
+  if (c == EOF) throw &Eof_val;
 }
 
 typedef struct Rewrite {
@@ -160,7 +161,7 @@ int main(int argc, const char ?`H? argv) {
                              (*f->hd)[1]);
     }
   } catch {
-  case Eof: break;
+  case &Eof(_): break;
   }
   printf("done parsing rewrites.\n");
   for (let xs = fs; xs != NULL; xs = xs->tl) {

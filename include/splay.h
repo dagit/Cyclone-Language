@@ -32,20 +32,21 @@ struct noderef<`a,`b,`r::R> {
   struct node<`a,`b,`r> @`r v;
 };
 
+typedef int dummy_t;
 extern datatype tree<`a,`b,`r::R> {
-  Leaf,
+  Leaf(dummy_t),
   Node(struct noderef<`a,`b,`r> @`r)
 };
 
 struct node<`a,`b,`r::R> {
   `a key;
   `b data;
-  datatype `r tree<`a,`b,`r> left;
-  datatype `r tree<`a,`b,`r> right;
+  datatype tree<`a,`b,`r> @`r left;
+  datatype tree<`a,`b,`r> @`r right;
 };
 
-extern bool rsplay(region_t<`r>, int f(`a,`a), `a, datatype `r tree<`a,`b,`r>);
-extern bool splay(int f(`a,`a), `a, datatype `H tree<`a,`b,`H>);
+extern bool rsplay(region_t<`r>, int f(`a,`a), `a, datatype tree<`a,`b,`r>@`r);
+extern bool splay(int f(`a,`a), `a, datatype tree<`a,`b,`H>@`H);
 
 }
 #endif

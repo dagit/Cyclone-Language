@@ -128,6 +128,7 @@ list_t<`b> map_c(`b f(`c,`a),`c env,list_t<`a> x) {
 
 // thrown when two lists don't have the same size 
 datatype exn {List_mismatch};
+datatype exn.List_mismatch List_mismatch_val = List_mismatch;
 
 // Given two lists of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new list.
@@ -137,7 +138,7 @@ list_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
   struct List @result, @prev;
 
   if (x == NULL && y == NULL) return NULL;
-  if (x == NULL || y == NULL) throw List_mismatch;
+  if (x == NULL || y == NULL) throw &List_mismatch_val;
 
   result = rnew(r3) List(f(x->hd,y->hd),NULL);
   prev = result;
@@ -152,7 +153,7 @@ list_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
   return(result);
 }
 
@@ -202,7 +203,7 @@ void app2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
@@ -211,7 +212,7 @@ void app2_c(`d f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
 // Same as iter, but generalized to a pair of lists.  Throws List_mismatch
@@ -222,7 +223,7 @@ void iter2(void f(`a,`b),list_t<`a> x,list_t<`b> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
   while (x != NULL && y != NULL) {
@@ -230,7 +231,7 @@ void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
 // Given a list [x1,x2,...,xn-1,xn], a function f, and an accumulator a,
@@ -484,6 +485,7 @@ list_t<`a> merge(int less_eq(`a,`a),list_t<`a,`H> a,list_t<`a,`H> b) {
 
 // thrown when nth doesn't have enough elements in the list. 
 datatype exn {Nth};
+datatype exn.Nth Nth_val = Nth;
 
 // Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
 // Throw Nth if the list doesn't have enough elements.  Notice that the
@@ -494,16 +496,16 @@ datatype exn {Nth};
     --i;
     x = x->tl;
   }
-  if (i < 0 || x == NULL) throw Nth;
+  if (i < 0 || x == NULL) throw &Nth_val;
   return(x->hd);
 }
 
 // Given [x0,x1,...,xi-1,xi,xi+1,...,xn], return [xi,xi+1,...,xn].  Raise
 // Nth if the list doesn't have enough elements.  
 list_t<`a,`r> nth_tail(list_t<`a,`r> x, int i) {
-  if (i < 0) throw Nth;
+  if (i < 0) throw &Nth_val;
   while (i != 0) {
-    if (x == NULL) throw Nth;
+    if (x == NULL) throw &Nth_val;
     x = x->tl;
     --i;
   }
@@ -539,7 +541,7 @@ list_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
   struct List<$(`a,`b)@`r4,`r3> @result, @prev, @temp;
   
   if (x == NULL && y == NULL) return NULL;
-  if (x == NULL || y == NULL) throw List_mismatch;
+  if (x == NULL || y == NULL) throw &List_mismatch_val;
 
   result = rnew(r3) List(rnew(r4) $(x->hd,y->hd),NULL);
   prev = result;
@@ -554,7 +556,7 @@ list_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
     x = x->tl;
     y = y->tl;
   }
-  if (x != NULL || y != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL) throw &List_mismatch_val;
   return(result);
 }
 
@@ -567,7 +569,7 @@ list_t<$(`a,`b,`c)@`r4,`r3> rzip3(region_t<`r3> r3, region_t<`r4> r4,
   struct List<$(`a,`b,`c)@`r4,`r3> @result, @prev, @temp;
   
   if (x == NULL && y == NULL && z == NULL) return NULL;
-  if (x == NULL || y == NULL || z == NULL) throw List_mismatch;
+  if (x == NULL || y == NULL || z == NULL) throw &List_mismatch_val;
 
   result = rnew(r3) List(rnew(r4) $(x->hd,y->hd,z->hd),NULL);
   prev = result;
@@ -584,7 +586,7 @@ list_t<$(`a,`b,`c)@`r4,`r3> rzip3(region_t<`r3> r3, region_t<`r4> r4,
     y = y->tl;
     z = z->tl;
   }
-  if (x != NULL || y != NULL ||z != NULL) throw List_mismatch;
+  if (x != NULL || y != NULL ||z != NULL) throw &List_mismatch_val;
   return(result);
 }
 
@@ -682,7 +684,7 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
     if (l->hd[0][0] == x) return(l->hd[0][1]);
     l = l->tl;
   }
-  throw Core::Not_found;
+  throw &Core::Not_found_val;
 }
 
 `b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
@@ -690,7 +692,7 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
     if (cmp((*l->hd)[0],x) == 0) return (*l->hd)[1];
     l = l->tl;
   }
-  throw Core::Not_found;
+  throw &Core::Not_found_val;
 }
 
 // Given a list [x1,x2,...xn] and a key y, removes the first occurence
@@ -712,7 +714,7 @@ list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x) {
     prev = iter;
     iter = iter->tl;
   }
-  throw Core::Not_found;
+  throw &Core::Not_found_val;
 }
 
 static int ptrequal(`a x, `a y) {

@@ -133,7 +133,7 @@ static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
   vfprintf(stderr,fmt,ap);
   fprintf(stderr,"\n");
   fflush(stderr);
-  throw Toc_Unimplemented;
+  throw new Toc_Unimplemented;
 }
 static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2), noreturn))
@@ -141,7 +141,7 @@ static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
   vfprintf(stderr,fmt,ap);
   fprintf(stderr,"\n");
   fflush(stderr);
-  throw Toc_Impossible;
+  throw new Toc_Impossible;
 }
 datatype exn {Match_error};
 
@@ -170,8 +170,8 @@ stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
   static string_t              str##_str = #str;\
   static $(nmspace_t, var_t)   str##_pr  = $(Nmspace{.Loc_n=0},&str##_str);\
-  static datatype Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
-  static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,EmptyAnnot};\
+  static datatype Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,&Unresolved_b_val);\
+  static struct Exp            str##_ev  = Exp{NULL,&str##_re,NULL,&EmptyAnnot_val};\
   static exp_t                 str##_e   = &str##_ev
 
 
@@ -250,7 +250,7 @@ MAKE_VAR(_swap_dyneither);
 static datatype Type.AggrType dyneither_ptr_typ_v =
     AggrType(AggrInfo(AggrInfoU{.UnknownAggr = $(StructA,&_dyneither_ptr_pr,NULL)},NULL));
                                              
-static datatype Type dyneither_ptr_typ = &dyneither_ptr_typ_v;
+static datatype Type @ dyneither_ptr_typ = &dyneither_ptr_typ_v;
 
 static tqual_t mt_tq = Tqual(false,false,false,false,NULL);
 
@@ -369,7 +369,7 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
     default: throw new Impossible("impossible IntType (not char, short or int)");
     }
     break;
-  case FloatType: 
+  case &FloatType: 
     function = fS->ffloat;
     break;
   case &DoubleType(longBool): 
@@ -509,23 +509,14 @@ static var_t fresh_label() {
 // These two functions should never be used for xdatatypes. Should memoize?
 // Note the former used to use static const int variables, but couldn't
 // at top-level.
-static exp_t datatype_tag(datatypedecl_t td, qvar_t name, bool carries_value) {
+static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
   int ans = 0;
   let fs  = td->fields->v;
   while(qvar_cmp(name,fs->hd->name)!=0) {
-    if((carries_value && fs->hd->typs != NULL)
-       || (!carries_value && fs->hd->typs == NULL))
-      ++ans;
+    ++ans;
     fs = fs->tl;
   }
   return uint_exp(ans,DL);    
-}
-static int num_void_tags(datatypedecl_t td) {
-  int ans = 0;
-  for(let fs = td->fields->v; fs != NULL; fs = fs->tl)
-    if(fs->hd->typs == NULL)
-      ++ans;
-  return ans;    
 }
 
 ///////////////////////////////////////////////////////////////
@@ -582,7 +573,7 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
 static type_t char_star_typ() {
   static type_t* cs = NULL;
   if (cs == NULL) {
-    cs = new star_typ(char_typ,HeapRgn,mt_tq,false_conref);
+    cs = new star_typ(char_typ,&HeapRgn_val,mt_tq,false_conref);
   }
   return *cs;
 }
@@ -603,35 +594,27 @@ static type_t dyn_rgn_typ() {
 
 static type_t typ_to_c(type_t t) {
   switch (t) {
-  case VoidType: return t;
+  case &VoidType: return t;
   case &Evar(_,NULL,_,_): return sint_typ; // pick something widely useful
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
   case &VarType(tv): 
-    if (tvar_kind(tv) == AnyKind) return VoidType;
+    if (tvar_kind(tv,BoxKind) == AnyKind) return &VoidType_val;
     else return void_star_typ(); // map `a to void *
-  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_,_}): 
-    return void_star_typ();
-  case &DatatypeType(_): toc_impos("unresolved DatatypeType");
+  case &DatatypeType(_):
+    return &VoidType_val;
   case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
-    // for datatype fields that carry no arguments, it's an unsigned int
-    // for xdatatype fields that carry no argument, it's a char *.
-    // for fields that carry arguments, it's a struct _Field_struct;
-    if (tuf->typs == NULL) 
-      if(tud->is_extensible) 
-        return char_star_typ();
-      else return uint_typ;
-    else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
+    return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &DatatypeFieldType(_): toc_impos("unresolved DatatypeFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
-    switch (conref_def((bounds_t)DynEither_b,bnds)) {
-    case DynEither_b: return dyneither_ptr_typ;
-    default: return star_typ(t2,HeapRgn,tq,false_conref);
+    switch (conref_def((bounds_t)&DynEither_b_val,bnds)) {
+    case &DynEither_b: return dyneither_ptr_typ;
+    default: return star_typ(t2,&HeapRgn_val,tq,false_conref);
     }
   case &IntType(_,_): 
-  case FloatType:     
+  case &FloatType:     
   case &DoubleType(_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}): 
     return array_typ(typ_to_c_array(t2),tq,e,false_conref,ztl);
@@ -643,8 +626,8 @@ static type_t typ_to_c(type_t t) {
     let new_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
-      case Noreturn_att: 
-      case Const_att   : 
+      case &Noreturn_att: 
+      case &Const_att: 
       case &Format_att(_,_,_): continue;
       case &Initializes_att(_): continue; // correct: a Cyclone addition
       default: new_atts = new List(atts->hd,new_atts); break;
@@ -652,7 +635,7 @@ static type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(dyneither_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
+      let t =typ_to_c(dyneither_typ(cyc_vararg->type,&HeapRgn_val,mt_tq,false_conref));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -690,9 +673,9 @@ static type_t typ_to_c(type_t t) {
   case &TagType(_): return uint_typ; // must be unsigned!
   case &RgnHandleType(t): return rgn_typ();
   case &DynRgnType(_,_): return dyn_rgn_typ();
-  case HeapRgn:
+  case &HeapRgn:
     toc_impos("Toc::typ_to_c: type translation passed the heap region");
-  case UniqueRgn:
+  case &UniqueRgn:
     toc_impos("Toc::typ_to_c: type translation passed the unique region");
   case &AccessEff(_):
   case &JoinEff(_):
@@ -706,7 +689,7 @@ static type_t typ_to_c(type_t t) {
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq,_,_,_}): 
-    return cast_it(star_typ(t2,HeapRgn,tq,false_conref),e);
+    return cast_it(star_typ(t2,&HeapRgn_val,tq,false_conref),e);
   default: return cast_it(t,e);
   }
 }
@@ -715,12 +698,12 @@ static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
 // (does not look at instantiations)
 static bool atomic_typ(type_t t) {
   switch (compress(t)) {
-  case VoidType:       return true;
+  case &VoidType:       return true;
   case &VarType(_):    return false;
   case &IntType(_,_):  
   case &EnumType(_,_): 
   case &AnonEnumType(_): 
-  case FloatType:      
+  case &FloatType:      
   case &DoubleType(_): 
   case &FnType(_):     
   case &TagType(_): return true;
@@ -764,7 +747,7 @@ static bool is_void_star(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{t2,_,_}):
     switch (compress(t2)) {
-    case VoidType: return true;
+    case &VoidType: return true;
     default:       return false;
     }
   default: return false;
@@ -1033,10 +1016,10 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   switch(e->annot) {
   case &CfFlowInfo::UnknownZ(_): return is_nullable(e->topt->v);
   case &CfFlowInfo::NotZero(_):  return false;
-  case CfFlowInfo::IsZero: 
+  case &CfFlowInfo::IsZero: 
     Tcutil::terr(e->loc,"dereference of NULL pointer"); 
     return false;
-  case EmptyAnnot:
+  case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy
     // Tcutil::warn(e->loc,"unreachable dereference");
     return false;
@@ -1051,11 +1034,11 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
   switch (e->annot) {
   case &CfFlowInfo::UnknownZ(r): return r;
   case &CfFlowInfo::NotZero(r):  return r;
-  case CfFlowInfo::IsZero: 
+  case &CfFlowInfo::IsZero: 
     Tcutil::terr(e->loc,"dereference of NULL pointer"); 
     return NULL;
   case &CfFlowInfo::HasTagCmps(_):
-  case EmptyAnnot: return NULL;
+  case &EmptyAnnot: return NULL;
   default: toc_impos("get_relns");
   }
 }
@@ -1066,7 +1049,7 @@ static bool check_const_array(unsigned i, type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
     switch (conref_def(bounds_one,b)) {
-    case DynEither_b: return false;
+    case &DynEither_b: return false;
     case &Upper_b(e):
       let $(j,known) = Evexp::eval_const_uint_exp(e);
       return known && i <= j;
@@ -1657,7 +1640,7 @@ static exp_t generate_zero(type_t t) {
     res = const_exp(Int_c(sn,0),DL); break;
   case &IntType(sn,LongLong_sz) : 
     res = const_exp(LongLong_c(sn,0),DL); break;
-  case FloatType       : fallthru;
+  case &FloatType   : fallthru;
   case &DoubleType(_)  : res = const_exp(Float_c("0.0"),DL); break;
   default: 
     toc_impos("found non-zero type %s in generate_zero",typ2string(t));
@@ -1682,7 +1665,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   //     *x.curr = z; })
   // Note that this is generated and *then* translated to ensure the
   // proper constraints.  
-  type_t fat_ptr_type = dyneither_typ(elt_type, HeapRgn, mt_tq, true_conref);
+  type_t fat_ptr_type = dyneither_typ(elt_type, &HeapRgn_val, mt_tq, true_conref);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
   let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
@@ -1891,7 +1874,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Const_e(_): break;
   case &Var_e(qv,b): 
     try e->r = lookup_varmap(nv,qv)->r;
-    catch { case Dict::Absent:
+    catch { case &Dict::Absent:
        toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
     }
     break;
@@ -1912,7 +1895,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = e2->r;  break;
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
 	switch(conref_def(bounds_one,bound)) {
-        case DynEither_b: // retrieve (last_plus_one - curr) via runtime call
+        case &DynEither_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_dyneither_size_e,
                               list(es->hd, 
                                    sizeoftyp_exp(typ_to_c(elt_typ),DL)));
@@ -1946,7 +1929,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch (compress(old_typs->hd)) {
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt,_))):
         switch (conref_def(bounds_one,b)) {
-        case DynEither_b:
+        case &DynEither_b:
           exp_t e1 = es->hd;
           exp_t e2 = es->tl->hd;
           e->r = fncall_exp_r(_dyneither_ptr_plus_e,
@@ -1969,7 +1952,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // only translation is for ? pointers.
       // if e2 is not a tagged array, do just like plus of negation,
       // else result type is unsigned int, so subtract curr fields
-      type_t elt_typ = VoidType;
+      type_t elt_typ = &VoidType_val;
       if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
@@ -2014,8 +1997,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     // 
     // Similarly, we need to worry about the case where e2 is a
     // tagged union projection.  
-    type_t ptr_type = VoidType;
-    type_t elt_type = VoidType;
+    type_t ptr_type = &VoidType_val;
+    type_t elt_type = &VoidType_val;
     bool is_dyneither = false;
     string_t incr_str = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
@@ -2023,7 +2006,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
       toc_impos("in-place inc/dec on zero-term");
     }
-    type_t tunion_member_type = VoidType;
+    type_t tunion_member_type = &VoidType_val;
     int f_tag = 0;
     if (is_tagged_union_project(e2,&f_tag,&tunion_member_type,true)) {
       let one = signed_int_exp(1,DL);
@@ -2046,7 +2029,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e2);
     // only t ? or zero-terminated types are translated funny, 
     // note that e2 is an lvalue!
-    type_t elt_typ = VoidType;
+    type_t elt_typ = &VoidType_val;
     if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
       _ fn_e;
       int change = 1;
@@ -2080,7 +2063,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         default: throw new Impossible("impossible IntType (not char, short or int)");
         }
         break;
-      case FloatType: 
+      case &FloatType: 
         fn_e = (incr == PostInc) ? 
           _zero_arr_inplace_plus_post_float_e : _zero_arr_inplace_plus_float_e;
         break; 
@@ -2104,7 +2087,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       
       e->r = fncall_exp_r(fn_e, list(e2,signed_int_exp(1,DL)));
-    } else if(elt_typ == VoidType && !is_lvalue(e2)) {
+    } else if(elt_typ == &VoidType_val && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
       e->r = e2->r;
     }
@@ -2130,7 +2113,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t  e1_old_typ = e1->topt->v;
     type_t  e2_old_typ = e2->topt->v;
     int f_tag = 0; // bogus unless e1_tagged_proj
-    type_t tagged_member_struct_type = VoidType; // bogus unless e1_tagged_proj
+    type_t tagged_member_struct_type = &VoidType_val; // bogus unless e1_tagged_proj
     if (is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true)) {
       exp_to_c(nv,e1); 
       exp_to_c(nv,e2);
@@ -2138,8 +2121,8 @@ static void exp_to_c(env_t nv, exp_t e) {
                                    tagged_member_struct_type);
       return;
     }
-    type_t ptr_type = VoidType;
-    type_t elt_type = VoidType;
+    type_t ptr_type = &VoidType_val;
+    type_t elt_type = &VoidType_val;
     bool is_dyneither = false;
     if (is_zero_ptr_deref(e1,&ptr_type,&is_dyneither,&elt_type)) {
       zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, 
@@ -2154,7 +2137,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
     if(popt != NULL) {
-      type_t elt_typ = VoidType;
+      type_t elt_typ = &VoidType_val;
       if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
         _ change;
         switch(popt->v) {
@@ -2256,8 +2239,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       // make the declarations and prepend them
       if(vai->inject) {
 	datatypedecl_t tud;
-	switch(compress(vai->type)) {
-	case &DatatypeType(DatatypeInfo({.KnownDatatype=&x},_,_)): tud = x; break;
+	switch(compress(pointer_elt_type(vai->type))) {
+	case &DatatypeType(DatatypeInfo({.KnownDatatype=&x},_)): tud = x; break;
 	default: toc_impos("toc: unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
@@ -2290,7 +2273,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                      arg,DL),
                          s,DL);
             s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
-                                     datatype_tag(tud,qv,true),DL),
+                                     datatype_tag(tud,qv),DL),
                          s,DL);
             s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
                              s,DL);
@@ -2405,7 +2388,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         // arrays (since the true length isn't known.)  Of course,
         // this obligates a run-time check.
 	break;
-      case $(&Upper_b(e2), DynEither_b):
+      case $(&Upper_b(e2), &DynEither_b):
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
         // sanity checking
@@ -2460,7 +2443,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
         }
 	break;
-      case $(DynEither_b, &Upper_b(e2)):
+      case $(&DynEither_b, &Upper_b(e2)):
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
 	if(is_toplevel(nv))
@@ -2492,7 +2475,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       // If p1 is zero-terminated and p2 is not, then p2 had better
       // be const or else we have to decrement its size by 1.
-      case $(DynEither_b, DynEither_b):
+      case $(&DynEither_b, &DynEither_b):
 DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (is_toplevel(nv))
@@ -2507,7 +2490,7 @@ DynCast:
       break;
     case $(&PointerType(p1), &IntType(_,_)):
       switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
-      case DynEither_b: // cast t? to int -- cast curr field to int
+      case &DynEither_b: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp); break;
       default: break;
       }
@@ -2590,7 +2573,7 @@ DynCast:
       bool is_dyneither_ptr = false;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
-        is_dyneither_ptr = (conref_def(bounds_one,b) == DynEither_b);
+        is_dyneither_ptr = (conref_def(bounds_one,b) == &DynEither_b_val);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
       }
@@ -2683,7 +2666,7 @@ DynCast:
 	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_,_)}),
 	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_,_)})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
-	  case $(DynEither_b,&Upper_b(arr_sz)):
+	  case $(&DynEither_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
 	    inner_mexp->r = sizeoftyp_exp_r(elt_typ);
 	    done = true;
@@ -2771,7 +2754,7 @@ DynCast:
             terr(e->loc,"cannot determine dereference is in bounds");
         }
 	break;
-      case DynEither_b:
+      case &DynEither_b:
 	// do it as e1[0], could share all the 0's but who cares
 	let ind_e = uint_exp(0,DL);
 	ind_e->topt = new Opt(uint_typ);
@@ -2828,7 +2811,7 @@ DynCast:
                                           uint_exp(0,DL)),DL));
       }
       break;
-    case DynEither_b:
+    case &DynEither_b:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
       type_t ta1 = typ_to_c_array(ta);
       e1->r = cast_it_r(cstar_typ(ta1,tq),
@@ -2910,7 +2893,7 @@ DynCast:
 	  e2->r = fncall_exp_r(_check_known_subscript_notnull_e,
                                list(esz,copy_exp(e2)));
 	break;
-      case DynEither_b:
+      case &DynEither_b:
 	type_t ta1 = typ_to_c_array(ta);
         if (in_bnds) {
           // there's no need for a null-check here either because
@@ -3058,12 +3041,6 @@ DynCast:
     }
     break;
   
-  case &Datatype_e(NULL,tud,tuf):
-    qvar_t qv = tuf->name;
-    // non-value-carrying constructor
-    exp_t tag_exp = tud->is_extensible ? var_exp(qv,DL) : datatype_tag(tud,qv,false);
-    e->r = tag_exp->r;
-    break;
   case &Datatype_e(es,tud,tuf):
     type_t datatype_ctype;
     exp_t tag_exp;
@@ -3072,7 +3049,7 @@ DynCast:
     exp_t member_exp;
     datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
     tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) : 
-      datatype_tag(tud,tuf->name,true);
+      datatype_tag(tud,tuf->name);
     member_exp = xexp;
     let tqts = tuf->typs;
     // we have to do this differently for the toplevel
@@ -3090,7 +3067,7 @@ DynCast:
       dles = new List(new $(NULL,tag_exp),imp_rev(dles));
       e->r = unresolvedmem_exp_r(NULL,dles);
     } else {
-      // value-carrying constructor
+      // Not at top-level:
       // ({ struct F x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
       // Due to GCC bug we can't just use a struct expression
       let rev_assign =
@@ -3272,20 +3249,19 @@ static stmt_t if_neq_stmt(exp_t e1,exp_t e2,stmt_t fail_stmt) {
 static $(env_t<`rgn>,list_t<$(qvar_t,type_t)@`rgn,`rgn>,stmt_t)
 xlate_pat(env_t<`rgn> nv, 
           region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
-	  stmt_t* tag_fail_stmt, stmt_t fail_stmt, 
+	  stmt_t fail_stmt, 
           list_t<$(qvar_t,type_t)@`rgn,`rgn> decls) {
   stmt_t s; // the test statement
   switch (p->r) {
   case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2): 
     // in essence, x = r; but achieved through the varmap
     return xlate_pat(add_varmap(rgn,nv,x,r),
-                     rgn, t, r, path, p2, tag_fail_stmt, 
-                     fail_stmt, decls);
+                     rgn, t, r, path, p2, fail_stmt, decls);
   case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
     // in essence, x = r; but achieved through the varmap
     nv = add_varmap(rgn,nv,x,r);
     fallthru;
-  case Wild_p: s = skip_stmt_dl(); break; // potentially wasteful
+  case &Wild_p: s = skip_stmt_dl(); break; // potentially wasteful
   case &Reference_p(vd,p2):
     // v = path
     let v = temp_var();
@@ -3295,10 +3271,10 @@ xlate_pat(env_t<`rgn> nv,
     s     = assign_stmt(var_exp(v,DL),
 			cast_it(cstar_typ(typ_to_c(t),mt_tq),
                                 push_address_exp(path)),DL);
-    let result = xlate_pat(nv,rgn,t,r,path,p2,tag_fail_stmt,fail_stmt,decls);
+    let result = xlate_pat(nv,rgn,t,r,path,p2,fail_stmt,decls);
     result[2] = seq_stmt(s,result[2],DL);
     return result;
-  case Null_p:       s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
+  case &Null_p:   s=if_neq_stmt(r,signed_int_exp(0,DL),fail_stmt); break;
   case &Int_p(sn,i): s=if_neq_stmt(r,int_exp(sn,i,DL),    fail_stmt); break;
   case &Char_p(c):   s=if_neq_stmt(r,char_exp(c,DL),      fail_stmt); break;
   case &Float_p(f):  s=if_neq_stmt(r,float_exp(f,DL),     fail_stmt); break;
@@ -3310,80 +3286,55 @@ xlate_pat(env_t<`rgn> nv,
     s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
     break;
 
-  case &Datatype_p(tud,tuf,NULL,_):
-    // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
-    // Note: This should be correct for datatype and xdatatype!
-    exp_t cmp_exp;
-    if(tud->is_extensible)
-      cmp_exp = var_exp(tuf->name,DL);
-    else {
-      cmp_exp = datatype_tag(tud,tuf->name,false);
-      r = cast_it(sint_typ,r);
-    }
-    s = if_neq_stmt(r, cmp_exp, fail_stmt);
-    break;
-
-  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL:
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
     // when ps is p1,...,pn:
-    //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
+    //   struct C* temp = (struct C*)r;
+    //   if (temp->tag == qv_tag)
     //      <similar to tuple and struct patterns>
     //   else goto fail_lab
-    // (no max tag check on xdatatypes)
     // FIX: When type is DatatypeField, can avoid all checks
-    // It's unfortunate that we have to always check that r > max_tag.
-    // If we had the decision tree information, we could avoid doing so.
     s = skip_stmt_dl();
-    int    cnt      = 1;
+    let temp        = temp_var();
     qvar_t tufstrct = collapse_qvar_tag(tuf->name,"_struct");
-    exp_t  rcast    = cast_it(cstar_typ(strctq(tufstrct),mt_tq),r);
+    let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
+    int    cnt      = 1;
+    exp_t  rcast    = cast_it(field_ptr_typ,r);
     let tuf_tqts = tuf->typs;
     for(; ps != NULL; ps = ps->tl, tuf_tqts = tuf_tqts->tl, ++cnt) {
       let p2  = ps->hd;
-      if(p2->r == Wild_p)
+      if(p2->r == &Wild_p_val)
 	continue;
       let tuf_typ = (*tuf_tqts->hd)[1];
       let v   = temp_var();
       let t2  = p2->topt->v;
       let t2c = typ_to_c(t2);
-      let arrow_exp = aggrarrow_exp(rcast, fieldname(cnt), DL);
+      let arrow_exp = aggrarrow_exp(var_exp(temp,DL), fieldname(cnt), DL);
       if(is_void_star_or_tvar(typ_to_c(tuf_typ)))
 	arrow_exp = cast_it(t2c, arrow_exp);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL), arrow_exp,
-			     p2,&fail_stmt,fail_stmt,decls);
+			     p2,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s3 = result[2];
       let s1 = assign_stmt(var_exp(v,DL), arrow_exp, DL);
       s = seq_stmt(s, seq_stmt(s1,s3,DL), DL);
     }
-    exp_t test_exp;
-    if(tud->is_extensible) {
-      exp_t e2 = cast_it(cstar_typ(void_star_typ(),mt_tq), r);
-      exp_t e1 = deref_exp(e2,DL);
-      exp_t e  = var_exp(tuf->name,DL);
-      test_exp = neq_exp(e1,e,DL);
-      s = seq_stmt(ifthenelse_stmt(test_exp, fail_stmt, skip_stmt_dl(), DL),
-                   s, DL);
-    } else {
-      exp_t e3 = cast_it(cstar_typ(sint_typ,mt_tq), r);
-      exp_t e1 = deref_exp(e3,DL);
-      exp_t e  = datatype_tag(tud,tuf->name,true);
-      s = seq_stmt(ifthenelse_stmt(neq_exp(e1,e,DL),fail_stmt,skip_stmt_dl(),
-                                   DL), s, DL);
-      if (tag_fail_stmt != NULL) {
-        int max_tag = num_void_tags(tud);
-        if (max_tag != 0) {
-          exp_t max_tag_exp = uint_exp(max_tag,DL);
-          exp_t e5 = lte_exp(r, cast_it(void_star_typ(),max_tag_exp), DL);
-          s = seq_stmt(ifthenelse_stmt(e5,*tag_fail_stmt,skip_stmt_dl(),DL),
-                       s,DL);
-        }
-      }
+    exp_t temp_tag = aggrarrow_exp(var_exp(temp,DL), tag_sp, DL);
+    exp_t tag_exp = 
+      tud->is_extensible ? var_exp(tuf->name,DL) : datatype_tag(tud,tuf->name);
+    exp_t test_exp = neq_exp(temp_tag, tag_exp, DL);
+    s = ifthenelse_stmt(test_exp,fail_stmt,s,DL);
+    if (is_nullable(p->topt->v)) {
+      // must check for null first -- note that the type-checker
+      // prevents fat or zero-terminated pointers from showing up here.
+      s = ifthenelse_stmt(eq_exp(var_exp(temp,DL),uint_exp(0,DL),DL),
+                          fail_stmt, s, DL);
     }
+    s = declare_stmt(temp,field_ptr_typ,rcast,s,DL);
     break;
 
-  case &Datatype_p(_,_,ps,_): fallthru(ps); // okay for xdatatype too
+  case &Datatype_p(_,_,ps,_): fallthru(ps);
   case &Tuple_p(ps,_):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
@@ -3395,14 +3346,14 @@ xlate_pat(env_t<`rgn> nv,
     int cnt = 1;
     for(; ps != NULL; ps = ps->tl, ++cnt) {
       let p2  = ps->hd;
-      if(p2->r == Wild_p)
+      if(p2->r == &Wild_p_val)
 	continue;
       let v   = temp_var();
       let t2  = p2->topt->v;
       decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
                              aggrmember_exp(path,fieldname(cnt),DL),
-			     p2,&fail_stmt,fail_stmt,decls);
+			     p2,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
@@ -3432,8 +3383,7 @@ xlate_pat(env_t<`rgn> nv,
       let memexp = aggrmember_exp(aggrmember_exp(r,f,DL),val_sp,DL);
       memexp = cast_it(t2c, memexp);
       pexp = cast_it(t2c,pexp);
-      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),pexp,pat,&fail_stmt,
-                             fail_stmt,decls);
+      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),pexp,pat,fail_stmt,decls);
       nv = result[0];
       decls = result[1];
       let s2 = result[2];
@@ -3448,20 +3398,19 @@ xlate_pat(env_t<`rgn> nv,
       for (; dlps != NULL; dlps = dlps->tl) {
         let tup = dlps->hd;
         let p2  = (*tup)[1];
-        if(p2->r == Wild_p)
+        if(p2->r == &Wild_p_val)
           continue;
         _ f;
         switch ((*tup)[0]->hd) {
         case &FieldName(f2): f=f2; break;
-        default: throw Match_error; // FIX:  assumes one field name designator
+        default: throw new Match_error; // FIX:  assumes one field name designator
         }
         let v   = temp_var();
         let t2  = p2->topt->v;
         let t2c = typ_to_c(t2);
         decls = rnew(rgn) List(rnew(rgn) $(v,t2c),decls);
         let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
-                               aggrmember_exp(path,f,DL),p2,
-                               &fail_stmt,fail_stmt,decls);
+                               aggrmember_exp(path,f,DL),p2,fail_stmt,decls);
         nv = result[0];
         decls = result[1];
         let memexp = aggrmember_exp(r,f,DL);
@@ -3480,7 +3429,7 @@ xlate_pat(env_t<`rgn> nv,
     let t2 = p2->topt->v;
     decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
     let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),deref_exp(path,DL),p2,
-			   &fail_stmt,fail_stmt,decls);
+			   fail_stmt,decls);
     nv = result[0];
     decls = result[1];
     let s2 = result[2];
@@ -3539,33 +3488,6 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
   return rnew(r) $(fresh_label(),fresh_label(),sc);
 }
 
-static bool is_mixed_datatype(type_t t) {
-  switch (compress(t)) {
-  case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},...}):
-    bool seen_novalue = false;
-    bool seen_value = false;
-    for (let fs = tud->fields->v; fs; fs = fs->tl) {
-      if (fs->hd->typs == NULL)
-        seen_value = true;
-      else 
-        seen_novalue = true;
-      if (seen_value && seen_novalue) return true;
-    }
-    break;
-  default: break;
-  }
-  return false;
-}
-
-static bool no_tag_test(pat_t p) {
-  switch (p->r) {
-  case &Var_p(_,p): return no_tag_test(p);
-  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL:
-    return false;
-  default: return true;
-  }
-}
-
 static void xlate_switch(env_t nv, stmt_t whole_s, 
 			 exp_t e, list_t<switch_clause_t> scs) {
   exp_to_c(nv,e);
@@ -3610,8 +3532,6 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     list_t<stmt_t/*,`rgn*/>                test_stmts = NULL;
     list_t<env_t/*,`rgn*/>                 nvs        = NULL;
     list_t<$(qvar_t,type_t)@/*`rgn,`rgn*/> decls      = NULL;
-    bool is_datatype = is_mixed_datatype(t);
-    bool needs_tag_test = is_datatype;
     // generate the tests for each case, continuing to the case's
     // label on success and to the next test on false.
     // do tests first so as to get vars for fallthrus
@@ -3619,28 +3539,9 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     for (let lscs2 = lscs; lscs2 != NULL; lscs2 = lscs2->tl) {
       switch_clause_t sc = (*lscs2->hd)[2];
       var_t fail_lab = (lscs2->tl == NULL) ? end_l : (*lscs2->tl->hd)[0];
-      stmt_t */*`rgn*/ tag_fail_stmt = NULL;
-      // we're going to have to check if r <= max_tag.  On failure,
-      // we jump to the next pattern that might satisfy this, skipping
-      // over the tests that also require r <= max_tag.  We also record
-      // that we've already done this test so that the subsequent tests
-      // can be avoided.  
-      if (needs_tag_test && !no_tag_test(sc->pattern)) {
-        for (let xs = lscs2->tl; xs; xs = xs->tl) 
-          if (no_tag_test((*xs->hd)[2]->pattern)) {
-            tag_fail_stmt = rnew(rgn) (goto_stmt((*xs->hd)[0],DL));
-            needs_tag_test = false;
-            break;
-          }
-        if (tag_fail_stmt == NULL) 
-          tag_fail_stmt = rnew(rgn) (goto_stmt(fail_lab,DL));
-      }
       let $(nv2,decls2,test_stmt) = xlate_pat(nv,rgn,t,r,path,sc->pattern,
-                                              tag_fail_stmt,
 					      goto_stmt(fail_lab,DL),
                                               decls);
-      if (is_datatype && no_tag_test(sc->pattern))
-        needs_tag_test = true;
       if(sc->where_clause!=NULL) {
 	let e = (exp_t)sc->where_clause;
 	exp_to_c(nv2,e); // nv2 b/c pattern vars are in scope
@@ -3710,7 +3611,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
   // written to be self-tail recursive
   while (true) {
     switch (s->r) {
-    case Skip_s:
+    case &Skip_s:
       return;
     case &Exp_s(e):
       exp_to_c(nv, e);
@@ -3808,7 +3709,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e
         switch (p->r) {
-        case &Var_p(vd, &Pat{.r = Wild_p, ...}):
+        case &Var_p(vd, &Pat{.r = &Wild_p, ...}):
 	  qvar_t old_name = vd->name;
 	  qvar_t new_name = temp_var();
 	  vd->name = new_name;
@@ -3965,7 +3866,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_t  e_exp = var_exp(e_var,DL);
       exp_t  was_thrown_exp = var_exp(was_thrown_var,DL);
       type_t h_typ = strct(_handler_cons_sp);
-      type_t e_typ = typ_to_c(exn_typ);
+      type_t e_typ = typ_to_c(exn_typ());
       type_t was_thrown_typ = typ_to_c(sint_typ);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
@@ -3981,11 +3882,11 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // add a default case which re-throws the exception
         let x    = temp_var();
         let xexp = var_exp(x,DL);
-        let x_vd = new_vardecl(x,exn_typ,NULL);
-        xexp->topt = new Opt(exn_typ);
-        let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=Wild_p,.topt = new Opt(exn_typ), .loc = DL}), .topt=new Opt(exn_typ), .loc=DL};
+        let x_vd = new_vardecl(x,exn_typ(),NULL);
+        xexp->topt = new Opt(exn_typ());
+        let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=&Wild_p_val,.topt = new Opt(exn_typ()), .loc = DL}), .topt=new Opt(exn_typ()), .loc=DL};
         let te = throw_exp(xexp,DL);
-        te->topt = new Opt(VoidType);
+        te->topt = new Opt(&VoidType_val);
         let rs = exp_stmt(te,DL);
         let default_case =
           new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(x_vd,NULL)),
@@ -4023,7 +3924,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       return;
     case &ResetRegion_s(e):
       if (no_regions) {
-        s->r = Skip_s;
+        s->r = &Skip_s_val;
       } else {
         exp_to_c(nv,e);
         s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
@@ -4058,7 +3959,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
     }
     if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
       let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-      let t2 = typ_to_c(dyneither_typ(t,HeapRgn,tq,false_conref));// region irrelevant
+      let t2 = typ_to_c(dyneither_typ(t,&HeapRgn_val,tq,false_conref));// region irrelevant
       let x2 = new $((nmspace_t)Loc_n,n->v);
       f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
       nv = add_varmap(frgn,nv,x2,var_exp(x2,DL));
@@ -4193,26 +4094,24 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
   
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     datatypefield_t f = fields->hd;
-    if (f->typs != NULL) {
-      // compute the fields for the struct, adding in a tag field
-      let fs = NULL;
-      int i  = 1;
-      for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
-	let fname = fieldname(i);
-	let f = new Aggrfield(fname,(*ts->hd)[0],
-			      typ_to_c_array((*ts->hd)[1]),NULL,NULL);
-	fs = new List(f,fs);
-      }
-      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
-                    List::imp_rev(fs));
-      let ad = 
-        new Aggrdecl{.kind = StructA, .sc = Public,
-                     .name = collapse_qvar_tag(f->name,"_struct"),
-                     .tvs = NULL, 
-                     .impl = new AggrdeclImpl(NULL,NULL,fs,false),
-                     .attributes = NULL};
-      result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
+    // compute the fields for the struct, adding in a tag field
+    let fs = NULL;
+    int i  = 1;
+    for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
+      let fname = fieldname(i);
+      let f = new Aggrfield(fname,(*ts->hd)[0],
+                            typ_to_c_array((*ts->hd)[1]),NULL,NULL);
+      fs = new List(f,fs);
     }
+    fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
+                  List::imp_rev(fs));
+    let ad = 
+      new Aggrdecl{.kind = StructA, .sc = Public,
+                   .name = collapse_qvar_tag(f->name,"_struct"),
+                   .tvs = NULL, 
+                   .impl = new AggrdeclImpl(NULL,NULL,fs,false),
+                   .attributes = NULL};
+    result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
   }
 }
 
@@ -4220,13 +4119,11 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
 // For a declaration extending an existing xdatatype, e.g.,
 //   "@extensible datatype foo {Bar,Baz(t1,t2)}"
 // we generate
-//   char Bar[4] = "\0\0\0\0Bar";
+//   char Bar[] = "Bar";
 //   struct Bar_struct { char *tag; };
-//   char Baz[4] = "\0\0\0\0Baz";
+//   char Baz[] = "Baz";
 //   struct Baz_struct { char *tag; t1 f1; t2 f2; };
 // When the xdatatype is extern, then we don't do initializers for the tags.
-// The 0s are a crazy trick for letting void variants not have to be boxed
-// (value variants can still follow the pointer and then their check fails)
 //
 // Thus "Baz(e1,e2)" maps to
 // ({struct _Baz_struct *t =
@@ -4244,55 +4141,43 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
     for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
       datatypefield_t f  = fs->hd;
       stringptr_t fn = (*f->name)[1];
-      let sz_exp  = uint_exp(numelts(*fn)+4,DL);
+      let sz_exp  = uint_exp(numelts(*fn),DL);
       let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
       // FIX: making bad alignment and pointer-size assumptions!
       switch (Dict::lookup_opt(*xdatatypes_so_far,f->name)) {
       case NULL:
         exp_opt_t initopt = NULL;
         if (f->sc != Extern) {
-          // JGMFIX: bug -- the printf functions fail miserably when we use
-          // a 0 constants here because it thinks the 0 should be cast to a
-          // NULL string.
-          char zero = '\0';
-          initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
+          initopt = string_exp(*fn,DL);
         }
         let tag_decl = new_vardecl(f->name, tag_typ, initopt);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
         *xdatatypes_so_far = 
           Dict::insert(*xdatatypes_so_far, f->name, f->sc != Extern);
-        if(f->typs != NULL) {
-          list_t<aggrfield_t> fields = NULL;
-          int i = 1;
-          for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
-            let field_n = new ((string_t)aprintf("f%d",i));
-            let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-                                     typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
-            fields = new List(newf,fields);
-          }
-          fields = new List(new Aggrfield(tag_sp,mt_tq,
-                                          cstar_typ(char_typ,mt_tq),NULL,NULL),
-                            List::imp_rev(fields));
-          let strct_decl =
-            new Aggrdecl{.kind = StructA, .sc = Public,
-                         .name = collapse_qvar_tag(f->name,"_struct"),
-                         .tvs  = NULL, 
-                         .impl = new AggrdeclImpl(NULL,NULL,fields,false),
-                         .attributes = NULL};
-          result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
-                                  result_decls);
+        list_t<aggrfield_t> fields = NULL;
+        int i = 1;
+        for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
+          let field_n = new ((string_t)aprintf("f%d",i));
+          let newf = new Aggrfield(field_n,(*tqts->hd)[0],
+                                   typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
+          fields = new List(newf,fields);
         }
+        fields = new List(new Aggrfield(tag_sp,mt_tq,
+                                        cstar_typ(char_typ,mt_tq),NULL,NULL),
+                          List::imp_rev(fields));
+        let strct_decl =
+          new Aggrdecl{.kind = StructA, .sc = Public,
+                       .name = collapse_qvar_tag(f->name,"_struct"),
+                       .tvs  = NULL, 
+                       .impl = new AggrdeclImpl(NULL,NULL,fields,false),
+                       .attributes = NULL};
+        result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
+                                result_decls);
         break;
-        
       case &false:
         if (f->sc != Extern) {
-          // JGMFIX: bug -- the printf functions fail miserably when we use
-          // a 0 constants here because it thinks the 0 should be cast to a
-          // NULL string.
-          char zero = '\0';
-          let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
-                                   DL);
+          let initopt = string_exp(*fn,DL);
           let tag_decl = new_vardecl(f->name, tag_typ, initopt);
           tag_decl->sc = f->sc;
           result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
@@ -4373,7 +4258,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
     let nv = share_env(prgn,nv);
     let $(nv,vars,test_stmt) =
       xlate_pat(nv, prgn, t, var_exp(x,DL), var_exp(x,DL), p, 
-		&fail, throw_match_stmt(),NULL);
+		throw_match_stmt(),NULL);
     stmt_to_c(nv,s);
     s = declare_stmt(x,typ_to_c(t),e,seq_stmt(test_stmt,s,DL),DL);
     for (; vars != NULL; vars = vars->tl) {
@@ -4481,8 +4366,8 @@ static void decltypes_to_c(decl_t d) {
   case &Alias_d(...):
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
-  case Porton_d:
-  case Portoff_d: 
+  case &Porton_d:
+  case &Portoff_d: 
     break;
   }
 }
@@ -4505,7 +4390,7 @@ static void stmttypes_to_c(stmt_t s) {
     break;
   case &Decl_s(d,s): decltypes_to_c(d); stmttypes_to_c(s); break;
   case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e); break;
-  case Skip_s: 
+  case &Skip_s: 
   case &Break_s(_):
   case &Continue_s(_):
   case &Goto_s(_,_): break;
@@ -4585,13 +4470,13 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       else {
         switch (td->kind->v) {
         case BoxKind: td->defn = new Opt(void_star_typ()); break;
-        default: td->defn = new Opt(VoidType); break;
+        default: td->defn = new Opt(&VoidType_val); break;
         }
       }
       result_decls = new List(d,result_decls);
       break;
-    case Porton_d:
-    case Portoff_d:
+    case &Porton_d:
+    case &Portoff_d:
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);

@@ -66,7 +66,7 @@ int main(int argc, string_t ? argv) {
       fprintf(stderr,"File \"%s\", line %d, character %d: %s.\n",
 	      source_name,line,col,msg);
       break;
-    case Output::Table_overflow:
+    case &Output::Table_overflow(_):
       fprintf(stderr,"File \"%s\":\ntransition table overflow, automaton is too big\n",
 	      source_name);
       break;

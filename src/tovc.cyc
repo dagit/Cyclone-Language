@@ -196,7 +196,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
   // with a lot less here, but may as well get it right the first time. :-)
   while(true)
     switch (s->r) {
-    case Skip_s:         
+    case &Skip_s:         
     case &Break_s(_):    
     case &Continue_s(_): return;
       // FIX: reject if goto is to a different function (a pain to detect)
@@ -280,7 +280,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   
   let iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
-  let vd = new Vardecl(Public,exn_name,empty_tqual(NULL),VoidType,
+  let vd = new Vardecl(Public,exn_name,empty_tqual(NULL),&VoidType_val,
 		       NULL,NULL,NULL,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
@@ -363,7 +363,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
 
 static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
   switch (s->r) {
-  case Skip_s: return true_exp(DL);
+  case &Skip_s: return true_exp(DL);
   case &Exp_s(e): 
     apply_varmap(env.varmap,e);
     return e;
@@ -421,7 +421,7 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
     default: throw new Impossible("bad local decl in Tovc::stmt_to_exp");
     }
   default: 
-    return stmt_to_fun(env,s,VoidType);
+    return stmt_to_fun(env,s,&VoidType_val);
   }
 }
 
@@ -491,7 +491,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
   while(true) {
     env.encloser = s;
     switch (s->r) {
-    case Skip_s:         
+    case &Skip_s:         
     case &Break_s(_):    
     case &Continue_s(_): 
     case &Goto_s(_,_):   return;
@@ -633,8 +633,8 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2):     fallthru(ds2);
     case &ExternCinclude_d(ds2,_):
-    case Porton_d:
-    case Portoff_d:
+    case &Porton_d:
+    case &Portoff_d:
       throw new Impossible("nested translation unit after translation to C");
     }
   }

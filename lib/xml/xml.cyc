@@ -17,7 +17,7 @@
    330, Boston, MA 02111-1307 USA. */
 
 #define _XML_CYC
-#include "xml.h"
+#include <xml/xml.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>

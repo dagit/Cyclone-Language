@@ -17,16 +17,19 @@ using Syntax;
 
 namespace Lexgen;
 
+datatype Automata_trans.No_remember No_remember_val = No_remember(0);
+datatype Automata_move.Backtrack Backtrack_val = Backtrack(0);
 // Deep abstract for regular expressions
 static datatype Regexp {
-  Empty;
+  Empty(int); // unused
   Chars(int);
   Action(int);
-  Seq(datatype Regexp, datatype Regexp);
-  Alt(datatype Regexp, datatype Regexp);
-  Star(datatype Regexp);
+  Seq(datatype Regexp@, datatype Regexp@);
+  Alt(datatype Regexp@, datatype Regexp@);
+  Star(datatype Regexp@);
 };
-typedef datatype Regexp regexp_t;
+typedef datatype Regexp @regexp_t;
+datatype Regexp.Empty Empty_val = Empty(0);
 
 static struct Lexer_entry {
   string_t                   name;
@@ -44,7 +47,7 @@ static int                      actions_count = 0;
 
 static regexp_t encode_regexp(regular_expression_t r) {
   switch (r) {
-  case Epsilon:            return Empty;
+  case &Epsilon(_):            return &Empty_val;
   case &Characters(cl): 
     chars = new List(cl,chars); return new Chars(chars_count++);
   case &Sequence(r1,r2):    
@@ -57,7 +60,7 @@ static regexp_t encode_regexp(regular_expression_t r) {
 }
 
 static regexp_t encode_casedef(list_t<acase_t> casedef) {
-  regexp_t ans = Empty;
+  regexp_t ans = &Empty_val;
   for(; casedef != NULL; casedef = casedef->tl) {
     let &$(expr,act) = casedef->hd;
     actions = new List(new $(actions_count, act), actions);
@@ -93,7 +96,7 @@ $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
 // generate an NFA from a regular expression (dragon book, chapter 3)
 
 static datatype transition { OnChars(int); ToAction(int); };
-typedef datatype transition transition_t;
+typedef datatype transition @transition_t;
 
 static int transition_cmp(transition_t t1, transition_t t2) {
   switch ($(t1,t2)) {
@@ -106,7 +109,7 @@ static int transition_cmp(transition_t t1, transition_t t2) {
 
 static bool nullable(regexp_t r) {
   switch (r) {
-  case Empty:      return true;
+  case &Empty(_):      return true;
   case &Chars(_):   return false;
   case &Action(_):  return false;
   case &Seq(r1,r2): return nullable(r1) && nullable(r2);
@@ -117,7 +120,7 @@ static bool nullable(regexp_t r) {
 
 static set_t<transition_t> firstpos(regexp_t r) {
   switch (r) {
-  case Empty:       return Set::empty(transition_cmp);
+  case &Empty(_):       return Set::empty(transition_cmp);
   case &Chars(pos):  return Set::insert(Set::empty(transition_cmp),new OnChars(pos));
   case &Action(act): return Set::insert(Set::empty(transition_cmp),new ToAction(act));
   case &Seq(r1,r2):  if(nullable(r1)) 
@@ -131,7 +134,7 @@ static set_t<transition_t> firstpos(regexp_t r) {
 
 static set_t<transition_t> lastpos(regexp_t r) {
   switch (r) {
-  case Empty:       return Set::empty(transition_cmp);
+  case &Empty(_):       return Set::empty(transition_cmp);
   case &Chars(pos):  return Set::insert(Set::empty(transition_cmp),new OnChars(pos));
   case &Action(act): return Set::insert(Set::empty(transition_cmp),new ToAction(act));
   case &Seq(r1,r2):  if(nullable(r2)) 
@@ -212,7 +215,7 @@ static void reset_state_mem() {
 static int get_state(set_t<transition_t,`H> st) {
   try return Dict::lookup(*state_map, st);
   catch {
-  case Dict::Absent:
+  case &Dict::Absent:
     *state_map = Dict::insert(*state_map, st, next_state_num);
     todo         = new List(new $(st, next_state_num), todo);
     return next_state_num++; // post-increment!
@@ -221,7 +224,7 @@ static int get_state(set_t<transition_t,`H> st) {
 
 static automata_move_t goto_state(set_t<transition_t,`H> st) {
   if(Set::is_empty(st))
-    return Backtrack;
+    return &Backtrack_val;
   else
     return new Goto(get_state(st));
 }
@@ -230,7 +233,7 @@ static automata_move_t ?transition_from(list_t<int>         ?chars,
 					set_t<transition_t,`H> ?follow,
 					list_t<int>         pos_set) {
   set_t<transition_t> ?tr    = new {for i < 257 : Set::empty(transition_cmp)};
-  automata_move_t   ?shift = new {for i < 257 : (automata_move_t)Backtrack};
+  automata_move_t   ?shift = new {for i < 257 : (automata_move_t)&Backtrack_val};
   for(; pos_set != NULL; pos_set = pos_set->tl) {
     int pos = pos_set->hd;
     for(list_t<int> cs_pos = chars[pos]; cs_pos != NULL; cs_pos = cs_pos->tl) {
@@ -249,7 +252,7 @@ static automata_t translate_state(list_t<int>         ?chars,
   switch (split_trans_set(state)) {
   case &$(n,NULL): return new Perform(n);
   case &$(n,ps):   return new Shift((n == NO_ACTION ? 
-                                     ((automata_trans_t)No_remember) : 
+                                     ((automata_trans_t)&No_remember_val) : 
                                      (new Remember(n))),
                                     transition_from(chars, follow, ps));
   }

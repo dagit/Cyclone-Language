@@ -28,6 +28,7 @@ datatype exn { SysError(int) };
 datatype exn { Failure(string_t) };
 datatype exn { Impossible(string_t) };
 datatype exn { Not_found };
+datatype exn.Not_found Not_found_val = Not_found;
 datatype exn { Unreachable(string_t) };
 struct Opt<`a> { `a v; };
 opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a> o) {

@@ -47,7 +47,7 @@ extern datatype Resolved {
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
 };
-typedef datatype `r Resolved resolved_t<`r>;
+typedef datatype Resolved @`r resolved_t<`r>;
 
 // Global environments -- what's declared in a global scope 
 // Warning: ordinaries should really be abstract so we can ensure that any
@@ -78,7 +78,10 @@ extern datatype Jumpee {
   FnEnd_j;
   Stmt_j(stmt_t);
 };
-typedef datatype `r Jumpee jumpee_t<`r>;
+extern_datacon(Jumpee,NotLoop_j);
+extern_datacon(Jumpee,CaseEnd_j);
+extern_datacon(Jumpee,FnEnd_j);
+typedef datatype Jumpee @`r jumpee_t<`r>;
 
 // Type environments -- `g is the region for global information
 // and `l is the region for local information

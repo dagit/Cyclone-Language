@@ -30,17 +30,14 @@ using List {
 using Lexing {
 namespace Parse {
 extern list_t<decl_t> parse_file(FILE @f);
-  //extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern bool no_register;
 }
-extern datatype Struct_or_union;
-typedef datatype Struct_or_union struct_or_union_t;
-extern datatype Blockitem;
-typedef datatype Blockitem blockitem_t;
 extern datatype Type_specifier;
-typedef datatype Type_specifier type_specifier_t;
-extern datatype Storage_class;
-typedef datatype Storage_class storage_class_t;
+typedef datatype Type_specifier @type_specifier_t;
+extern enum Storage_class {
+ Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
+};
+typedef enum Storage_class storage_class_t;
 extern struct Declaration_spec;
 typedef struct Declaration_spec @decl_spec_t;
 extern struct Declarator;

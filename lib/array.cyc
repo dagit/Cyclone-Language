@@ -245,13 +245,14 @@ void imp_map_c(`a f(`b,`a),`b env,`a ?`r x) {
 
 // thrown when two arrays don't have the same size 
 datatype exn {Array_mismatch};
+static datatype exn.Array_mismatch Array_mismatch_val = Array_mismatch;
 
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
 `c ?map2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
   return new {for i < sx : f(x[i],y[i])};
 }
 
@@ -287,13 +288,13 @@ void iter_c(void f(`b,`a),`b env,`a ?`r x) {
 // if the lengths of the arrays aren't the same.  
 void app2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 } 
 
@@ -301,13 +302,13 @@ void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 // if the lengths of the arrays aren't the same.  
 void iter2(void f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 }
 
@@ -407,7 +408,7 @@ bool exists_c(bool pred(`a,`b),`a env,`b ?`r x) {
 // Throws Array_mismatch if the lengths are not the same.
 $(`a,`b)? zip(`a ?`r1 x,`b ?`r2 y) {
   int sx = numelts(x);
-  if (sx != numelts(y)) throw Array_mismatch;
+  if (sx != numelts(y)) throw &Array_mismatch_val;
 
   return new {for i < sx : $(x[i],y[i]) };
 }

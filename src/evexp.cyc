@@ -370,9 +370,9 @@ bool lte_const_exp(exp_t e1, exp_t e2) {
 // Note that an AggrType better be checked so we can get the aggrdecl
 bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
-  case VoidType: return false;
+  case &VoidType: return false;
   case &VarType(tv):
-    switch (tvar_kind(tv)) {
+    switch (tvar_kind(tv,BoxKind)) {
     case BoxKind: return true;
     default:      return false;
     }
@@ -394,7 +394,7 @@ bool okay_szofarg(type_t t) {
 
   case &TagType(_):
   case &IntType(_,_): 
-  case FloatType:    
+  case &FloatType:    
   case &DoubleType(_): return true;
   case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
     return (e != NULL); 
@@ -417,8 +417,8 @@ bool okay_szofarg(type_t t) {
     return true;
   case &EnumType(_,_):
   case &AnonEnumType(_): return true;
-  case HeapRgn: 
-  case UniqueRgn: 
+  case &HeapRgn: 
+  case &UniqueRgn: 
   case &JoinEff(_):
   case &AccessEff(_):
   case &ValueofType(_):

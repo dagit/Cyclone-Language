@@ -728,33 +728,34 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char*
-string_to_Cstring(struct _dyneither_ptr);struct _dyneither_ptr Cstring_to_string(
-char*);struct Cyc_passwd{struct _dyneither_ptr pw_name;struct _dyneither_ptr
-pw_passwd;unsigned int pw_uid;unsigned int pw_gid;struct _dyneither_ptr pw_gecos;
-struct _dyneither_ptr pw_dir;struct _dyneither_ptr pw_shell;};struct Cyc_passwd*Cyc_getpwnam(
-struct _dyneither_ptr name);struct Cyc_passwd*Cyc_getpwuid(unsigned int uid);struct
-Cyc_Cpwd_Cpasswd{char*pw_name;char*pw_passwd;unsigned int pw_uid;unsigned int
-pw_gid;char*pw_gecos;char*pw_dir;char*pw_shell;};struct Cyc_Cpwd_Cpasswd*getpwnam(
-char*const name);struct Cyc_Cpwd_Cpasswd*getpwuid(unsigned int uid);struct Cyc_passwd*
-Cyc_getpwnam(struct _dyneither_ptr name){struct Cyc_Cpwd_Cpasswd*src=getpwnam(
-string_to_Cstring(name));struct Cyc_passwd*_tmp0=(unsigned int)src?({struct Cyc_passwd*
-_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(struct _dyneither_ptr)
-Cstring_to_string(src->pw_name);_tmp1->pw_passwd=(struct _dyneither_ptr)
-Cstring_to_string(src->pw_passwd);_tmp1->pw_uid=src->pw_uid;_tmp1->pw_gid=src->pw_gid;
-_tmp1->pw_gecos=(struct _dyneither_ptr)Cstring_to_string(src->pw_gecos);_tmp1->pw_dir=(
-struct _dyneither_ptr)Cstring_to_string(src->pw_dir);_tmp1->pw_shell=(struct
-_dyneither_ptr)Cstring_to_string(src->pw_shell);_tmp1;}): 0;return _tmp0;}struct
-Cyc_passwd*Cyc_getpwuid(unsigned int uid){struct Cyc_Cpwd_Cpasswd*src=getpwuid(uid);
-struct Cyc_passwd*_tmp2=(unsigned int)src?({struct Cyc_passwd*_tmp3=_cycalloc(
-sizeof(*_tmp3));_tmp3->pw_name=(struct _dyneither_ptr)Cstring_to_string(src->pw_name);
-_tmp3->pw_passwd=(struct _dyneither_ptr)Cstring_to_string(src->pw_passwd);_tmp3->pw_uid=
-src->pw_uid;_tmp3->pw_gid=src->pw_gid;_tmp3->pw_gecos=(struct _dyneither_ptr)
-Cstring_to_string(src->pw_gecos);_tmp3->pw_dir=(struct _dyneither_ptr)
-Cstring_to_string(src->pw_dir);_tmp3->pw_shell=(struct _dyneither_ptr)
-Cstring_to_string(src->pw_shell);_tmp3;}): 0;return _tmp2;}
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};char*string_to_Cstring(struct _dyneither_ptr);struct _dyneither_ptr
+Cstring_to_string(char*);struct Cyc_passwd{struct _dyneither_ptr pw_name;struct
+_dyneither_ptr pw_passwd;unsigned int pw_uid;unsigned int pw_gid;struct
+_dyneither_ptr pw_gecos;struct _dyneither_ptr pw_dir;struct _dyneither_ptr pw_shell;}
+;struct Cyc_passwd*Cyc_getpwnam(struct _dyneither_ptr name);struct Cyc_passwd*Cyc_getpwuid(
+unsigned int uid);struct Cyc_Cpwd_Cpasswd{char*pw_name;char*pw_passwd;unsigned int
+pw_uid;unsigned int pw_gid;char*pw_gecos;char*pw_dir;char*pw_shell;};struct Cyc_Cpwd_Cpasswd*
+getpwnam(char*const name);struct Cyc_Cpwd_Cpasswd*getpwuid(unsigned int uid);struct
+Cyc_passwd*Cyc_getpwnam(struct _dyneither_ptr name){struct Cyc_Cpwd_Cpasswd*src=
+getpwnam(string_to_Cstring(name));struct Cyc_passwd*_tmp0=(unsigned int)src?({
+struct Cyc_passwd*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(struct
+_dyneither_ptr)Cstring_to_string(src->pw_name);_tmp1->pw_passwd=(struct
+_dyneither_ptr)Cstring_to_string(src->pw_passwd);_tmp1->pw_uid=src->pw_uid;_tmp1->pw_gid=
+src->pw_gid;_tmp1->pw_gecos=(struct _dyneither_ptr)Cstring_to_string(src->pw_gecos);
+_tmp1->pw_dir=(struct _dyneither_ptr)Cstring_to_string(src->pw_dir);_tmp1->pw_shell=(
+struct _dyneither_ptr)Cstring_to_string(src->pw_shell);_tmp1;}): 0;return _tmp0;}
+struct Cyc_passwd*Cyc_getpwuid(unsigned int uid){struct Cyc_Cpwd_Cpasswd*src=
+getpwuid(uid);struct Cyc_passwd*_tmp2=(unsigned int)src?({struct Cyc_passwd*_tmp3=
+_cycalloc(sizeof(*_tmp3));_tmp3->pw_name=(struct _dyneither_ptr)Cstring_to_string(
+src->pw_name);_tmp3->pw_passwd=(struct _dyneither_ptr)Cstring_to_string(src->pw_passwd);
+_tmp3->pw_uid=src->pw_uid;_tmp3->pw_gid=src->pw_gid;_tmp3->pw_gecos=(struct
+_dyneither_ptr)Cstring_to_string(src->pw_gecos);_tmp3->pw_dir=(struct
+_dyneither_ptr)Cstring_to_string(src->pw_dir);_tmp3->pw_shell=(struct
+_dyneither_ptr)Cstring_to_string(src->pw_shell);_tmp3;}): 0;return _tmp2;}

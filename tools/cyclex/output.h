@@ -18,7 +18,7 @@ extern void output_lexdef(string_t sourcename,
 			  List::list_t<Lexgen::automata_entry_t> entry_points,
 			  Syntax::location_t    trailer);
 
-extern datatype exn { extern Table_overflow };
+extern datatype exn { extern Table_overflow(int) };
 
 }
 #endif

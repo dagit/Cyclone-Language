@@ -78,7 +78,7 @@ static spec_t<`r1> lookup(speclist_t<`r1,`r2> l, string_t x) {
       return (*l->hd)[3];
     l = l->tl;
   }
-  throw Not_found;
+  throw new Not_found;
 }
 
 namespace Justify {
@@ -178,7 +178,7 @@ void usage(speclist_t<`r1,`r2> speclist,
 int current = 0;
 static string_t ?args = NULL;
 
-static void stop(int prog_pos, datatype error e,
+static void stop(int prog_pos, datatype error @e,
 		 speclist_t<`r1,`r2> speclist,
                  string_t errmsg) {
   string_t progname = prog_pos < numelts(args) ? args[prog_pos] : "(?)";
@@ -219,7 +219,7 @@ void parse(speclist_t<`r1,`r2> speclist,
       spec_t action;
       try action = lookup(speclist, s);
       catch {
-      case Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
+      case &Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
       }
       try
 	switch (action) {

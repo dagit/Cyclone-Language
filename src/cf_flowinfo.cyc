@@ -39,6 +39,9 @@ namespace CfFlowInfo;
 #define ANAL_RGN(ae,x) region x;
 #endif
 
+datacon(Absyn::AbsynAnnot,IsZero);
+datacon(KillRgn,UniqueRgn_k);
+
 absLval_t<`r> PlaceL(place_t<`r,`r> x) {
   return AbsLVal{.PlaceL = x};
 }
@@ -55,9 +58,12 @@ int place_cmp(place_t p1, place_t p2);
 int root_cmp(root_t r1, root_t r2);
 flow_env_t<`r> new_flow_env(region_t<`r> r) {
   static datatype Raw_exp.Const_e dummy_rawexp = Const_e(Cnst{.Null_c = 0});
-  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
+  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,&EmptyAnnot_val);
   return rnew(r) 
     FlowEnv { .r = r,
+              .zero = rnew(r) Zero,
+              .notzeroall = rnew (r) NotZeroAll,
+              .notzerothis = rnew (r) NotZeroThis,
               .unknown_none = rnew(r) UnknownR(NoneIL),
               .unknown_this = rnew(r) UnknownR(ThisIL),
               .unknown_all  = rnew(r) UnknownR(AllIL),
@@ -66,7 +72,7 @@ flow_env_t<`r> new_flow_env(region_t<`r> r) {
               .esc_all = rnew(r) Esc(AllIL),
               .mt_flowdict = Dict::rempty(r,root_cmp),
               .mt_place_set = Dict::rempty(r,place_cmp),
-              .dummy_place = rnew(r) Place(rnew(r) MallocPt(&dummy_exp,VoidType),NULL)
+              .dummy_place = rnew(r) Place(rnew(r) MallocPt(&dummy_exp,&VoidType_val),NULL)
             };
 }
 
@@ -332,16 +338,16 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     switch(leafval) {
     case &UnknownR(AllIL):
     case &Esc(AllIL):
-    case Zero:
-    case NotZeroAll: 
+    case &Zero:
+    case &NotZeroAll: 
       return rnew(fenv->r) TagCmps(rlist(fenv->r, rnew(fenv->r) TagCmp(Eq,t)));
     default: return leafval;
     }
     case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) 
       && !conref_def(false,nbl):
 	switch(leafval) {
-	case &UnknownR(ThisIL): return NotZeroThis;
-	case &UnknownR(AllIL): return NotZeroAll;
+	case &UnknownR(ThisIL): return fenv->notzerothis;
+	case &UnknownR(AllIL): return fenv->notzeroall;
 	default: break;
 	}
     break;
@@ -463,7 +469,7 @@ static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
     update_place_set(all_changed,place,NULL);
     absRval_t oldval, newval;
     try oldval = lookup_place(d,place); 
-    catch { case Dict::Absent: continue; }
+    catch { case &Dict::Absent: continue; }
     switch(initlevel(fenv,d,oldval)) {
     case AllIL:  newval = fenv->esc_all;  break;
     case ThisIL: newval = fenv->esc_this; break;
@@ -493,9 +499,9 @@ static initlevel_t initlevel_approx(absRval_t r) {
   switch(r) {
   case &UnknownR(il): return il;
   case &Esc(il):      return il;
-  case Zero:
-  case NotZeroAll:    return AllIL;
-  case NotZeroThis:   return ThisIL;
+  case &Zero:
+  case &NotZeroAll:    return AllIL;
+  case &NotZeroThis:   return ThisIL;
     // KLUDGE: Maybe r is actually uninitialized, but then whatever test
     //  gave it TagCmps would fail.  In fact, that could only happen for
     //  a tag_t<`a> place because ints are always considered initialized
@@ -732,8 +738,8 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(&AddressOf(p), _): add_place(env->pile,p); break;
   case $(_, &AddressOf(p)): add_place(env->pile,p); break;
 
-  case $(NotZeroAll,  NotZeroThis):
-  case $(NotZeroThis, NotZeroAll): return NotZeroThis;
+  case $(&NotZeroAll,  &NotZeroThis):
+  case $(&NotZeroThis, &NotZeroAll): return env->fenv->notzerothis;
 
   case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     aggrdict_t new_d = 
@@ -836,7 +842,7 @@ static void remove_f(List::list_t<place_t<`r,`r2>> @l,place_t<`r,`r2> place) {
     *l = List::delete_cmp(place_cmp,*l,place);
     DEBUG_PRINT("  --deleted elem\n");
   } catch {
-  case Core::Not_found:
+  case &Core::Not_found:
     break; // no sweat if it's not there
   }
 }
@@ -1067,9 +1073,10 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
     for (int i = 0; i < numelts(d1); i++) 
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
     return true;
-  case $(_, NotZeroThis): return r1==NotZeroAll;
-  case $(_, Zero): 
-  case $(_, NotZeroAll): return false;
+  case $(&NotZeroAll, &NotZeroThis): return true;
+  case $(_, &NotZeroThis): return false;
+  case $(_, &Zero): 
+  case $(_, &NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
   case $(&TagCmps(l1),&TagCmps(l2)): return tag_cmps_lessthan_approx(l1,l2);
@@ -1385,9 +1392,9 @@ void print_dict_set(dict_set_t<`a> p, void (@pr)(`a)) {
 
 void print_absrval(absRval_t rval) {
   switch (rval) {
-  case Zero: fprintf(stderr,"Zero"); break;
-  case NotZeroAll: fprintf(stderr,"NotZeroAll"); break;
-  case NotZeroThis: fprintf(stderr,"NotZeroThis"); break;
+  case &Zero: fprintf(stderr,"Zero"); break;
+  case &NotZeroAll: fprintf(stderr,"NotZeroAll"); break;
+  case &NotZeroThis: fprintf(stderr,"NotZeroThis"); break;
   case &UnknownR(il): fprintf(stderr,"Unknown("); print_initlevel(il);
     fprintf(stderr,")"); break;
   case &Esc(il): fprintf(stderr,"Esc("); print_initlevel(il);
@@ -1444,23 +1451,23 @@ void print_flow(flow_t f) {
 // that we can allocate stuff in the region.  
 bool contains_region(killrgn_t rgn, type_t t) {
   switch (Tcutil::compress(t)) {
-  case VoidType: // these cases can't contain rgn
+  case &VoidType: // these cases can't contain rgn
   case &IntType(_,_):    
-  case FloatType:        
+  case &FloatType:        
   case &DoubleType(_):   
   case &EnumType(_,_):   
   case &AnonEnumType(_): 
   case &TagType(_):      
-  case HeapRgn:
+  case &HeapRgn:
   case &Evar(_,_,_,_): return false; // because of compress above
-  case UniqueRgn:
+  case &UniqueRgn:
     switch (rgn) {
-    case UniqueRgn_k: return true;
+    case &UniqueRgn_k: return true;
     default: return false;
     }
   case &VarType(tv): 
     switch (rgn) {
-    case UniqueRgn_k: return false;
+    case &UniqueRgn_k: return false;
     case &Region_k(rgn): return tvar_cmp(tv,rgn) == 0;
     }
     // for parameterized types, we just look to see if rgn shows up 
@@ -1471,9 +1478,7 @@ bool contains_region(killrgn_t rgn, type_t t) {
     // Note also that we don't descend into the definitions of datatypes,
     // structs, typedefs, etc. because they must be closed w.r.t. all regions
     // except the heap.  
-  case &DatatypeType(DatatypeInfo{_,targs,r}):
-    if (r && contains_region(rgn,r->v)) return true;
-    fallthru(targs);
+  case &DatatypeType(DatatypeInfo{_,targs}): fallthru(targs);
   case &TypedefType(_,targs,_,_):    fallthru(targs);
   case &AggrType(AggrInfo{_,targs}): fallthru(targs);
   case &DatatypeFieldType(DatatypeFieldInfo{_,targs}): fallthru(targs);
@@ -1531,13 +1536,13 @@ kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
   switch (Tcutil::compress(rgn)) {
   case &VarType(tv): 
     datatype KillRgn.Region_k v = Region_k(tv);
-    datatype _ KillRgn v2 = &v;
+    datatype KillRgn @v2 = &v;
     $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,v2);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
     
-  case UniqueRgn: 
-    $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,UniqueRgn_k);
+  case &UniqueRgn: 
+    $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,&UniqueRgn_k_val);
     Dict::iter_c(kill_root,&env,fd);
     return env[1];
 
@@ -1626,14 +1631,15 @@ unique_place_t<`r,`r> unique_place_of(region_t<`r> r, exp_t e) {
   return unique_place_of_rec(r,e,NULL,NULL);
 }
 
-static void consume_f($(place_set_t<`r> @,
+ static void consume_f($(flow_env_t<`r>,
+                        place_set_t<`r> @,
 			flowdict_t<`r>, 
 			Position::seg_t) @env, 
 		      place_t<`r,`r> place) {
-  let &$(consume, fd, loc) = env;
+  let &$(fenv, consume, fd, loc) = env;
   /* if we know that the place to consume is NULL, don't bother to consume it */
-  absRval_t<`r> rval = Zero;
-  if (Dict::lookup_bool(fd,place->root,&rval) && rval == Zero)
+  absRval_t<`r> rval = fenv->zero;
+  if (Dict::lookup_bool(fd,place->root,&rval) && rval == fenv->zero)
     return;
   DEBUG_PRINT("  adding ");
   DEBUG_PRINT_F(print_place,place);
@@ -1647,13 +1653,13 @@ static void consume_f($(place_set_t<`r> @,
 
 // for each place in the may consume list, add it to the consume list;
 //   if it's already there, then this is a conflict
-flow_t<`r> consume_unique_rvals(Position::seg_t loc, flow_t<`r> f) {
+flow_t<`r> consume_unique_rvals(flow_env_t<`r> fenv, Position::seg_t loc, flow_t<`r> f) {
   switch(f) {
   case {.BottomFL = _}: return f;
   case {.ReachableFL = $(fd,relns,cinfo)}:
     if (cinfo.may_consume == NULL) return f;
     let x = cinfo.consumed;
-    let env = $(&x,fd,loc);
+    let env = $(fenv,&x,fd,loc);
     List::iter_c(consume_f,&env,cinfo.may_consume);
     return ReachableFL(fd,relns,ConsumeInfo(x,NULL));
   }

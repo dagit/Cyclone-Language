@@ -127,12 +127,12 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
         // GCC doesn't allow variables to be packed
         // case Packed_att:     continue;
       case &Section_att(_):
-      case Nocommon_att:   
-      case Shared_att:     
-      case Unused_att:     
-      case Weak_att:       
-      case Dllimport_att:  
-      case Dllexport_att: continue;
+      case &Nocommon_att:   
+      case &Shared_att:     
+      case &Unused_att:     
+      case &Weak_att:       
+      case &Dllimport_att:  
+      case &Dllexport_att: continue;
       default:
         terr(loc,"bad attribute %s for variable %s",
              attribute2string(atts->hd), qvar2string(vd->name));
@@ -162,17 +162,17 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       switch (atts->hd) {
       // these attributes should be in the function's type
       case &Regparm_att(_):
-      case Stdcall_att:   
-      case Cdecl_att:     
-      case Fastcall_att: 
-      case Noreturn_att: 
+      case &Stdcall_att:   
+      case &Cdecl_att:     
+      case &Fastcall_att: 
+      case &Noreturn_att: 
       case &Format_att(_,_,_):
       case &Initializes_att(_):
-      case Pure_att:
-      case Const_att: impos("tcVardecl: fn type atts in function var decl");
+      case &Pure_att:
+      case &Const_att: impos("tcVardecl: fn type atts in function var decl");
       // C doesn't allow these attributes on functions
       case &Aligned_att(_):
-      case Packed_att:
+      case &Packed_att:
         terr(loc,"bad attribute %s in function declaration",
 	     attribute2string(atts->hd));
         break;
@@ -187,7 +187,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     case &VarRes(b0):
       let b1 = new Global_b(vd);
       let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-      if (b == Unresolved_b) return; // error in merging
+      if (b == &Unresolved_b_val) return; // error in merging
       if (b == b0 && (*ans)[1]) return; // no need to reinsert the entry
       // otherwise make the update if the variable is exported
       if (exports == NULL || export_member(vd->name,*exports)) 
@@ -205,7 +205,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       warn(loc,"variable declaration shadows previous enum tag");
       break;
     }
-  } catch { case Dict::Absent: break; }
+  } catch { case &Dict::Absent: break; }
   if (exports == NULL || export_member(vd->name,*exports)) 
     ge->ordinaries = Dict::insert(ge->ordinaries, v,
                                   new $(new VarRes(new Global_b(vd)), false));
@@ -250,7 +250,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   // check that packed and aligned don't show up in the attributes
   for (_ atts = fd->attributes; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
-    case Packed_att:
+    case &Packed_att:
     case &Aligned_att(_): 
       terr(loc,"bad attribute %s for function",attribute2string(atts->hd));
       break;
@@ -264,7 +264,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     case &VarRes(b0):
       let b1 = new Funname_b(fd);
       let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-      if (b == Unresolved_b) break; // error in merging
+      if (b == &Unresolved_b_val) break; // error in merging
       if (b == b0 && (*ans)[1]) break; // no need to reinsert the entry
       // otherwise make the update if the function is exported
       if (exports == NULL || export_member(fd->name,*exports))
@@ -282,7 +282,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
       warn(loc,"function declaration shadows previous enum tag");
       break;
     }
-  } catch { case Dict::Absent:
+  } catch { case &Dict::Absent:
     if (exports == NULL || export_member(fd->name,*exports))
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
                                     new $(new VarRes(new Funname_b(fd)), false));
@@ -313,7 +313,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   if (is_main(fd->name)) {
     // result type should be int
     switch (compress(fd->ret_type)) {
-    case VoidType: warn(loc,"main declared with return type void"); break;
+    case &VoidType: warn(loc,"main declared with return type void"); break;
     case &IntType(_,B4): break;
     default: 
       terr(loc,"main declared with return type %s instead of int or void",
@@ -444,6 +444,21 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
   }
 }
 
+static void rule_out_memkind(seg_t loc, var_t n, list_t<tvar_t> tvs) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
+    switch (compress_kb(tvs2->hd->kind)) {
+    case &Unknown_kb(*f):      fallthru(f);
+    case &Less_kb(*f,MemKind):
+      *f = new Opt(kind_to_bound(BoxKind)); continue;
+    case &Less_kb(*f,k): 
+      *f = new Opt(kind_to_bound(k)); continue;
+    case &Eq_kb(MemKind):
+      terr(loc,"type %s attempts to abstract type variable %s of kind M", 
+           *n, *tvs2->hd->name); continue;
+    default: continue;
+    }
+}
+
 void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   let v = (*ad->name)[1];
 #ifdef DEBUG
@@ -453,7 +468,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   // allow only packed and aligned attributes
   for (_ atts = ad->attributes; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
-    case Packed_att: 
+    case &Packed_att: 
     case &Aligned_att(_): continue;
     default: 
       terr(loc,"bad attribute %s in  %s definition",
@@ -461,19 +476,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
       break;
     }
   
-  // disallow MemKinds and set unconstrained kinds to BoxKind
   let tvs = ad->tvs;
-  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
-    switch (compress_kb(tvs2->hd->kind)) {
-    case &Unknown_kb(*f):      fallthru(f);
-    case &Less_kb(*f,MemKind): fallthru(f);
-    case &Less_kb(*f,AnyKind):
-      *f = new Opt(kind_to_bound(BoxKind)); continue;
-    case &Eq_kb(MemKind):
-      terr(loc,"type %s attempts to abstract type variable %s of kind M", 
-           *v, *tvs2->hd->name); continue;
-    default: continue;
-    }
 
   // reject explicitly qualified name
   switch ((*ad->name)[0]) {
@@ -497,6 +500,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   switch ($(ad->impl, Dict::lookup_opt(ge->aggrdecls, v))) {
   case $(NULL, NULL):
     // insert ad in the environment
+    rule_out_memkind(loc,v,tvs);
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, new ad);
     break;
   case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), NULL):
@@ -511,22 +515,13 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
     // disallow MemKinds and set unconstrained kinds to BoxKind
-    for (_ tvs2 = exist_vars; tvs2 != NULL; tvs2 = tvs2->tl) {
-      switch (compress_kb(tvs2->hd->kind)) {
-      case &Unknown_kb(*f):      fallthru(f);
-      case &Less_kb(*f,MemKind): fallthru(f);
-      case &Less_kb(*f,AnyKind):
-        *f = new Opt(kind_to_bound(BoxKind)); continue;
-      case &Eq_kb(MemKind):
-        terr(loc,"type %s attempts to abstract type variable %s of kind M", 
-             *v, *tvs2->hd->name); continue;
-      default: continue;
-      }
-    }
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
     tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
+
+    rule_out_memkind(loc, v, tvs);
+    rule_out_memkind(loc, v, exist_vars);
 
     if(ad->kind == UnionA && !tagged)
       // warn when fields of unions are not bits-only -- these can
@@ -542,9 +537,10 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
       terr(loc,"cannot reuse struct names for unions and vice-versa");
+
     let ad0 = *adp;
     // for the sake of recursive fields, make name abstract in body
-    *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs, 
+    *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs,
 			NULL, ad->attributes);
 
     // reject ill-formed type
@@ -555,12 +551,16 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
     tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
-    
+
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
   case $(NULL, &adp):
     // try to merge the declarations
     let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
+    
+    rule_out_memkind(loc, v, tvs);
+    if (ad->impl != NULL) 
+      rule_out_memkind(loc, v, ad->impl->exist_vars);
     
     if (ad2 == NULL)
       return; // error in redeclaration
@@ -574,6 +574,33 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   ge->ordinaries = Dict::insert(ge->ordinaries,  v,
 				  new $(new AggrRes(ad), true));
 }
+
+static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
+    switch (compress_kb(tvs2->hd->kind)) {
+    case &Unknown_kb(*f): 
+      fallthru(f);
+    case &Less_kb(*f,MemKind): 
+      *f = new Opt(kind_to_bound(BoxKind)); break;
+    case &Less_kb(*f,AnyKind): 
+      *f = new Opt(kind_to_bound(AnyKind)); break;
+    case &Less_kb(*f,TopRgnKind):
+      *f = new Opt(kind_to_bound(RgnKind)); break;
+    case &Eq_kb(TopRgnKind):
+      terr(loc,"type %s attempts to abstract type "
+           "variable %s of kind TR",*v,*tvs2->hd->name); break;
+    case &Less_kb(*f,UniqueRgnKind): fallthru;
+    case &Eq_kb(UniqueRgnKind):
+      terr(loc,"type %s attempts to abstract type "
+           "variable %s of kind UR",*v,*tvs2->hd->name); break;
+    case &Eq_kb(MemKind):
+      terr(loc,"type %s attempts to abstract type "
+           "variable %s of kind M",*v,*tvs2->hd->name); break;
+    default: break;
+    }
+  }
+}
+
 
 static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge, 
                                             seg_t loc,
@@ -666,27 +693,6 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
 #endif
   list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
-  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    switch (compress_kb(tvs2->hd->kind)) {
-    case &Unknown_kb(*f): fallthru(f);
-    case &Less_kb(*f,MemKind): fallthru(f);
-    case &Less_kb(*f,AnyKind): 
-      *f = new Opt(kind_to_bound(BoxKind)); break;
-    case &Less_kb(*f,TopRgnKind):
-      *f = new Opt(kind_to_bound(RgnKind)); break;
-    case &Eq_kb(TopRgnKind):
-      terr(loc,"%s %s attempts to abstract type "
-           "variable %s of kind TR",obj,*v,*tvs2->hd->name); break;
-    case &Less_kb(*f,UniquepRgnKind): fallthru;
-    case &Eq_kb(UniqueRgnKind):
-      terr(loc,"%s %s attempts to abstract type "
-           "variable %s of kind UR",obj,*v,*tvs2->hd->name); break;
-    case &Eq_kb(MemKind):
-      terr(loc,"%s %s attempts to abstract type "
-           "variable %s of kind M",obj,*v,*tvs2->hd->name); break;
-    default: break;
-    }
-  }
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
   // give the bound type variables identities
@@ -707,14 +713,14 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     // current namespace.  But oh well...
     try {
       tud_opt = lookup_xdatatypedecl(temp,te,loc,tud->name);
-      if (tud_opt == NULL && !tud->is_extensible) throw Dict::Absent;
+      if (tud_opt == NULL && !tud->is_extensible) throw new Dict::Absent;
       if (tud_opt != NULL) {
         tud->name = (*(*tud_opt))->name;
       } else {
         (*tud->name)[0] = Abs_n(te->ns); 
       }
     } catch {
-    case Dict::Absent:
+    case &Dict::Absent:
       switch ((*tud->name)[0]) {
       case {.Rel_n = NULL}: (*tud->name)[0] = Abs_n(te->ns); break;
       case {.Abs_n = _}: fallthru;
@@ -733,6 +739,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     switch ($(tud->fields, tud_opt)) {
     case $(NULL, NULL):
       // insert tud in the environment
+      rule_out_mem_and_unique(loc,v,tvs);
       ge->datatypedecls = Dict::insert(ge->datatypedecls, v, new tud);
       break;
     case $(&Opt(*fs), NULL):
@@ -743,7 +750,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
    
       // check the fields (and sort them if this is a @extensible datatype)
       *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
-
+      rule_out_mem_and_unique(loc,v,tvs);
       *tudp = tud; //insert tud in the environment
       break;
     case $(&Opt(*fs), &tudp):
@@ -760,11 +767,13 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
       *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,
                              tud->name,*fs,tvs,tud);
 
+
       *tudp = tud0; // restore previous declaration and go update the environment
       fallthru(tudp);
     case $(NULL, &tudp):
       // try to merge the declarations
       let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
+      rule_out_mem_and_unique(loc,v,tvs);
       if (tud2 == NULL)
         return; // error in redeclaration
       else {
@@ -827,7 +836,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     let ed2 = Tcdecl::merge_enumdecl(*edp, ed, loc, tc_msg);
     if (ed2 == NULL) return;
     *edp = (enumdecl_t) ed2; // if there's no error, make the update
-  } catch { case Dict::Absent:
+  } catch { case &Dict::Absent:
     let edp = new ed;
     ge->enumdecls = Dict::insert(ge->enumdecls, v, edp);
     break;
@@ -972,10 +981,10 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
         ed->sc = ExternC;
       tcEnumdecl(te,ge,loc,ed);
       break;
-    case Porton_d:
+    case &Porton_d:
       warn(d->loc,"spurious __cyclone_port_on__");
       break;
-    case Portoff_d:
+    case &Portoff_d:
       break;
     case &Namespace_d(v,ds2):
       // DAN: This case is much more imperative than it used to be.
