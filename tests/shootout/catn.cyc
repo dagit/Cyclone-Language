@@ -1,3 +1,4 @@
+#include <core.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,7 +14,7 @@ int main(int argc, char ?argv[])
   int filesz = ftell(f);
   fseek(f,0,SEEK_SET);
 
-  char ?buf = malloc(filesz+1);
+  char ?buf = calloc(filesz+1,sizeof(char));
   int ret = fread(buf,1,filesz,f);
   if (ret != filesz) {
     fprintf(stderr,"failed to read whole file\n");

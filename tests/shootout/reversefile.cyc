@@ -8,13 +8,13 @@
 #include <unistd.h>
 #include "timer.h"
 
-#define MAXREAD 4096
+#define MAXREAD 16
 
 char ?strrealloc(char ?buf, unsigned sz) {
   char ?res = calloc(sz,sizeof(char));
   unsigned i = buf.size;
   for (unsigned j = 0; j < i; j++)
-    res[i] = buf[i];
+    res[j] = buf[j];
   return res;
 }
 
@@ -29,7 +29,7 @@ int main(int argc, char ??argv) {
 	    len += nread;
 	    if (MAXREAD > (size - len)) {
               size <<= 1;
-              if (0 == (buf = strrealloc(buf, size + 1))) {
+              if (0 == (buf = strrealloc(buf, size + 2))) {
                   fprintf(stderr, "realloc failed\n");
                   exit(1);
               }

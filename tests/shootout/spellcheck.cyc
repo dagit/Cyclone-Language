@@ -15,7 +15,7 @@ char ?strrealloc(char ?buf, unsigned sz) {
   char ?res = calloc(sz,sizeof(char));
   unsigned i = buf.size;
   for (unsigned j = 0; j < i; j++)
-    res[i] = buf[i];
+    res[j] = buf[j];
   return res;
 }
 
