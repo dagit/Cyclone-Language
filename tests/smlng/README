@@ -1,13 +1,87 @@
-Our entry consists of shell-script that drives a couple of executable
-files, smlng and validate.  The former file performs the optimizations
-while the latter file makes sure that the output is legal input.
-The shellscript makes sure we don't exhaust our time limit and that
-our output file is both correct and at least as small as the input.
 
-The shellscript assumes some packages are available, including bash,
-awk, du, and cat.  It looks as if the RPMS for these packages are
-installed at INRIA, but we must assume that the PATH is set up properly
-to make them available.  We did not have any RedHat 7.1 machines to test
-on, so we are hoping RedHat 6.2 executables will still work.
+Bare minimum to run our program: The runme is a shell script that
+assumes some packages are available, including bash, awk, du, and cat.
+It looks as if the RPMS for these packages are installed at INRIA, but
+we must assume that the PATH is set up properly to make them
+available.  We did not have any RedHat 7.1 machines to test on, so we
+are hoping RedHat 6.2 executables will still work.  If there is a
+problem with the executable, we can provide input suitable for gcc.
 
-It was fun to work on!
+Description of our program: Our submission (not including the tiny
+shell script) was developed entirely in Cyclone, a safe programming
+language at the C level of abstraction.  We guarantee that there are
+no other Cyclone submissions in the contest because a majority of the
+people in the world who know Cyclone were on our team.  Was the
+language a good match for the problem?  Well, we certainly exploited
+the combination of low-level features (bitfields, unions), mutability
+(updating the main data structure in place), and modern conveniences
+(garbage collection, pattern-matching), but we were going to code in
+Cyclone no matter what the problem was, so it's hard to say.
+
+Our submission is rather paranoid.  The purpose of the shell script is
+to detect if our real program errs, and if so, to return the input.
+The script runs our optimizer and then checks the output with a
+validator.  This validator was extremely useful during devlopment.  So
+long as the script and the validator are bug free, there really should
+be no way for us to be eliminated.  
+
+We were also concerned about stack overflow (if the 5MB of input
+consist of completely nested tags), so we are actually gving you TWO
+SUBMISSIONS.  One assumes there is sufficient room to make a recursive
+function call (with a reasonable size activation record) for each
+nested tag in the input.  The other is careful not to make more than a
+safe number of recursive calls (10000).  By using auxiliary
+work-stacks and other techniques, it is still able to do the
+optimizations, but it is clumsier and we'd rather not use it.  (We had
+trouble getting a consisting and useful answer from getrlimit on the
+Linux machines we had available.)
+
+Our optimizations are fairly straightforward.  We eliminate whitespace
+during parsing.  We then alternate between a bottom-up optimizer and a
+top-down optimizer until a fixed point is reached.  top-down optimizer
+eliminates tags that are redundant because of the surrounding context
+(eg. <U> under 3 or other <U>'s, <EM> inside <S>.)  The bottom-up
+optimizer removes tags that are redundant because there is no text
+that is affected (eg. <4><5>x</5</4>).  The bottom-up optimizer also
+takes two adjacent tags (eg. <4>a</4><4>b</4>) and wraps them
+(eg. <4><4>a</4><4>b</4>).  The next top-down pass will eliminate the
+inner tags for a net win.
+
+The next pass tries to move the beginning and end of sequences outside
+of number and color tags.  Example:
+   <4><5>a</5>b</4> ===> <5>a</5><4>b</4> This enables more up and
+down optimizations, so we have an outer loop that does up/down
+followed by this pass.
+
+Another pass not conveniently handled by any of the other ones tries
+to eliminate <U> tags using bottom-up information.  Example:
+   <U>x</U><U>y</U> ===> <U>xy</U> 
+Here we cannot use the trick described above to set things up for the
+top-down optimizer, so we handle it as a separate pass.
+
+We spend almost all of our time optimizing text regions that are
+decorated with only size tags or with only color tags.  In such a
+region we use a dynamic programming algorithm to produce the minimum
+number of tags for the region.  In one sentence, we compute for each
+text interval in the region and each color (resp. size) the number of
+tags necessary for the region if the context is that color
+(resp. size).  Doing this is computationally infeasible for large
+intervals, so we start with intervals of size 20, and keep doing it
+for larger intervals (in increments of 10), until we estimate that we
+don't have time to continue.  We finish early if there are no
+intervals larger than our current "window size".
+
+Of course, there are many things we did not have time to implement.
+Here are two examples that come to mind:
+(1) Using <PL> to optimize.  
+Eg. <B><I><S>a</S></I></B>x<B><I><S>a</S></I></B>
+  ===>
+    <B><I><S>a<PL>x</PL>a</S></I></B>
+(2) Being more aggressive about using the dynamic-programming code.
+For example, we will not use it for:
+   <1>a</1><2><B>b<B></2><1>c</1>
+because of the <B> tag, even though the interval that the <B> tag
+contains is all one size.
+
+This was a great problem.  And we're still chuckling about the SML/NG
+name.
