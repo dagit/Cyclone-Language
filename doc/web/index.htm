@@ -16,10 +16,44 @@
 
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
 <h1 align="center">Cyclone Language and Implementation Documentation</h1>
-<p align="center"><b>Version 1.0, Last updated 19 April 2001</b></p>
-<p align="center">&nbsp;</p>
-<p align="left">Cyclone is a safe programming language at the C level of
-abstraction.&nbsp; </p>
+<p align="center"><b>Version 1.0, Last updated May 2001</b></p>
+<p>
+Cyclone is a programming language that has been designed with two
+goals in mind:
+</p>
+<ol>
+  <li><b>Safety</b> --- ideally, there should be no way to write a
+    Cyclone program that crashes (i.e., has a core dump, segmentation
+    fault or bus error, blue screen of death, and so on).  Safety also
+    rules out things like buffer overflows and format string attacks
+    (which can lead to crashes).  To achieve safety, Cyclone uses a
+    combination of static type checking, extended static checking,
+    dynamic checking, and specially prepared libraries.</li>
+
+  <li><b>Support as much of C as possible</b> --- Cyclone should share as much
+    with C as possible, including syntax, static semantics, data
+    representations, calling conventions, and dynamic semantics.&nbsp; 
+    This rule should only be violated when in direct conflict with the 
+    first goal of supporting safety.</li>
+</ol>
+
+<p>
+The intended user of Cyclone is someone who is either (a) writing
+systems code, or (b) needs to port C code to a safe environment.&nbsp;
+Though languages such as Java, ML, or Scheme are safe, they do not
+give the control over data representations, memory management, calling
+conventions, etc., that C does.&nbsp; Hence, they are often unsuitable
+for building systems where performance and control matter.&nbsp; For
+instance, no one suggests building a run-time system in these
+languages.  Furthermore, today's implementations of these languages
+make it relatively difficult to interface with legacy code written in
+C, or to incrementally move program units from C to the safe
+setting.&nbsp; The goals of Cyclone are aimed at making it easier to
+build systems software without sacrificing safety or
+control.&nbsp;&nbsp;
+</p>
+
+<p align="left">&nbsp;</p>
 <p align="left">&nbsp;</p>
 <p align="center">&nbsp;</p>
 <p align="left">&nbsp;

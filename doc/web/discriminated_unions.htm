@@ -302,6 +302,8 @@ data structures in unforeseen ways.&nbsp; For example:</p>
 Banana; Grape; Pizza(list_t&lt;xtunion Food&gt;) };</font></p>
 <p align="left" style="line-height: 0"><font face="Courier New">xtunion Food {
 Candy; Broccoli };</font></p>
+<p align="left" style="line-height: 0">After these declarations, <font face="Courier New">Pizza(new
+List(Broccoli, null))</font> is a well-typed expression.</p>
 <p align="left">If multiple declarations include the same variants, the variants
 must have the same declaration (the number of values, types for the values, and
 the same existential type variables).</p>
