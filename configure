@@ -73,10 +73,10 @@ done
 
 # now figure out the architecture
 cd config
-ARCH=`./config.guess`
+ARCH=blcygwinah
+#`./config.guess`
 
 # see if we have #defines for this architecture
-DEF_ARCH=i686-unknown-linux
 if [ ! -f "arch/${ARCH}" ] || [ ! -f "arch/${ARCH}.undef" ]; then
   echo "This architecture is currently unsupported.  Set it up (y/n)?"
   read resp
@@ -95,6 +95,12 @@ if [ ! -f "arch/${ARCH}" ] || [ ! -f "arch/${ARCH}.undef" ]; then
       echo "Warning: genfiles directory for ${ARCH} exists"
     else
       mkdir ${CYCDIR}/bin/genfiles/${ARCH}
+      case "${ARCH}" in
+      *cygwin*)
+        DEF_ARCH=i686-unknown-cygwin1.3.2;;
+      *)
+        DEF_ARCH=i686-unknown-linux
+      esac
       echo "Using the genfiles from ${DEF_ARCH}" 
       cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
       find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS -exec rm -rf {} \;
