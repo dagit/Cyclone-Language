@@ -85,9 +85,7 @@ unsigned bounds_checks_eliminated = 0;
 // it's a pain to pass this list around everywhere
 static list_t<decl_t> result_decls = NULL;
 // for gensymming, etc.
-struct TocState {
-  <`d::R>
-  dynregion_t<`d> dyn;
+struct TocState<`d> {
   // tuple types seen so far and the struct they map to
   list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
   // (non-tagged) aggregates seen so far, their declaration, and C type
@@ -104,7 +102,6 @@ struct TocState {
   // generated labels -- get re-used across functions
   Xarray::xarray_t<var_t,`d>                    temp_labels;
 };
-static struct TocState *toc_state = NULL;
 
 int qvar_tag_cmp($(qvar_t,qvar_t)@ x, $(qvar_t,qvar_t)@ y) {
   let $(qx,sx) = *x;
@@ -114,17 +111,62 @@ int qvar_tag_cmp($(qvar_t,qvar_t)@ x, $(qvar_t,qvar_t)@ y) {
   return qvar_cmp(sx,sy);
 }
 
-type_t aggrdecl_type(qvar_t q, type_t type_maker(qvar_t)) {
-  let TocState{<`d> .dyn = dyn, .aggrs_so_far = aggs, ...} = *toc_state;
-  region d = open(dyn); {
-    $(aggrdecl_t,type_t)@`d*`d v = Dict::lookup_opt(*aggs,q);
-    if (v == NULL) {
-      return type_maker(q);
-    } else {
-      let &$(_,t) = *v;
-      return t;
-    }
+// create a fresh TocStaet given the region and an unused argument.
+static struct TocState<`d>@`d empty_toc_state(region_t<`d> d, int unused) {
+  return rnew(d) 
+    TocState{.tuple_types = rnew(d) NULL,
+             .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+             .abs_struct_types = rnew(d) NULL,
+             .datatypes_so_far = rnew(d) Set::rempty(d,qvar_cmp),
+             .xdatatypes_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+             .qvar_tags = rnew(d) Dict::rempty(d,qvar_tag_cmp),
+             .temp_labels = Xarray::rcreate_empty(d)
+            };
+}
+
+struct TocStateWrap {
+  <`d::R>
+  Core::rcregion_key_t<`d> dyn;
+  struct TocState<`d>@`d state;
+};
+typedef struct TocStateWrap*`U toc_state_t;
+static toc_state_t toc_state = NULL;
+
+// a generic function for using the toc state:  we pass in an
+// argument arg and function f and end up passing f the current
+// toc_state component after opening the toc_state's wrapped
+// dynamic region.  
+static `res use_toc_state(`a arg,
+                          `res f<`d,`r>(region_t<`d>, 
+                                        $(struct TocState<`d>@`d,`a)@`r)) {
+  toc_state_t ts = NULL;
+  ts :=: toc_state;
+  let TocStateWrap{<`dyn> dyn, s} = *ts;
+  let dyn2 = alias_refptr(dyn);
+  *ts = TocStateWrap{dyn,s};
+  ts :=: toc_state;
+  let env = $(s, arg);
+  let res = open_region(dyn2, &env, f);
+  free_rckey(dyn2); // should be equivalent to drop_refptr
+  return res;
+}
+
+static type_t aggrdecl_type_body<`r2,`d,`r>(region_t<`d> d, 
+                                 $(struct TocState<`d>@`d, 
+                                   $(qvar_t q,type_t (@`H)(qvar_t))@`r2)@`r env) {
+  let $(s, &$(q, type_maker)) = *env;
+  $(aggrdecl_t,type_t)@`d*`d v = Dict::lookup_opt(*s->aggrs_so_far,q);
+  if (v == NULL) {
+    return type_maker(q);
+  } else {
+    let &$(_,t) = *v;
+    return t;
   }
+}
+
+type_t aggrdecl_type(qvar_t q, type_t (@`H type_maker)(qvar_t)) {
+  _ env = $(q, type_maker);
+  return use_toc_state(&env, (aggrdecl_type_body@<`aggrdecl_type>)<>);
 }
 
 static int tuple_type_counter = 0;
@@ -494,15 +536,19 @@ static string_t collapse_qvar(string_t s, qvar_t x) {
 // like N1::N2::....::Nn::f_M1_M2_..._Mm_d_struct.  
 // FIX: this could conflict with a user-defined struct which
 // can cause errors at C-compile time. 
-static qvar_t collapse_qvars(qvar_t fieldname,qvar_t dtname) {
-  let TocState{.dyn = dyn, .qvar_tags = qvs, ...} = *toc_state;
+static qvar_t collapse_qvars_body<`r2,`d,`r>(region_t<`d> d, 
+                                             $(struct TocState<`d>@`d,
+                                               $(qvar_t,qvar_t)@`r2)@`r env) {
   static string_t bogus_string = "*bogus*";
   static $(nmspace_t,var_t) bogus_qvar = $(Nmspace{.Loc_n = 0},&bogus_string);
   static $(qvar_t,qvar_t) pair = $(&bogus_qvar,&bogus_qvar);
-  pair = $(fieldname,dtname);
-  region d = open(dyn); {
-    let qptr = Dict::lookup_opt(*qvs,&pair);
-    if (qptr != NULL) return *qptr;
+
+  let $(&TocState{.qvar_tags = qvs,...}, pair) = *env;
+  let $(fieldname,dtname) = *pair;
+  try {
+    return Dict::lookup_other(*qvs,qvar_tag_cmp,pair);
+  } catch {
+  case &Dict::Absent:
     let new_pair = new $(fieldname,dtname);
     let &$(nmspace,&fieldvar) = fieldname;
     string_t newvar = collapse_qvar(fieldvar,dtname);
@@ -512,43 +558,52 @@ static qvar_t collapse_qvars(qvar_t fieldname,qvar_t dtname) {
   }
 }
 
+static qvar_t collapse_qvars(qvar_t fieldname,qvar_t dtname) {
+  _ env = $(fieldname, dtname);
+  return use_toc_state(&env, (collapse_qvars_body@<`collapse_qvars>)<>);
+}
+
 static type_t typ_to_c(type_t t); // forward declarations
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.
-static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
-  let TocState{.dyn = dyn, .tuple_types = tuple_types, ...} = *toc_state;
-  region d = open(dyn); {
-    // look for the same tuple-type already declared
-    for (let tts = *tuple_types; tts != NULL; tts = tts->tl) {
-      let &$(x,ts) = tts->hd;
-      let tqs = tqs0;
-      for (; tqs != NULL && ts != NULL; tqs = tqs->tl, ts = ts->tl)
-        if (!unify((*tqs->hd)[1],ts->hd))
-          break;
-      if(tqs == NULL && ts == NULL)
-        return x;
-    }
-    // haven't seen this one before, add a declaration
-    stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
-    type_t x = strct(xname);
-    list_t<type_t> ts = List::rmap(d,snd_tqt,tqs0);
-    let fs = NULL;
-    list_t<type_t> ts2 = ts;
-    for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
-      fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL,NULL),fs);
-    fs = List::imp_rev(fs);
-    let sd = new Aggrdecl{.kind=StructA, .sc = Public,
-                          .name = new $(Rel_n(NULL),xname), .tvs = NULL,
-                          .impl = new AggrdeclImpl{.exist_vars = NULL,
-                                                   .rgn_po = NULL,
-                                                   .fields = fs,
-                                                   .tagged=false},
-                          .attributes = NULL};
-    result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
-    *tuple_types  = rnew(d) List(rnew(d) $(x,ts),*tuple_types);
-    return x;
+static type_t add_tuple_type_body<`r2,`r3,`d,`r>(region_t<`d> d, 
+                                                 $(struct TocState<`d>@`d, 
+                                                   list_t<$(tqual_t,type_t)@`r2,`r3> tqs0)@`r env) {
+  let $(&TocState{.tuple_types = tuple_types, ...},tqs0) = *env;
+  // look for the same tuple-type already declared
+  for (let tts = *tuple_types; tts != NULL; tts = tts->tl) {
+    let &$(x,ts) = tts->hd;
+    let tqs = tqs0;
+    for (; tqs != NULL && ts != NULL; tqs = tqs->tl, ts = ts->tl)
+      if (!unify((*tqs->hd)[1],ts->hd))
+        break;
+    if(tqs == NULL && ts == NULL)
+      return x;
   }
+  // haven't seen this one before, add a declaration
+  stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
+  type_t x = strct(xname);
+  list_t<type_t> ts = List::rmap(d,snd_tqt,tqs0);
+  let fs = NULL;
+  list_t<type_t> ts2 = ts;
+  for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
+    fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL,NULL),fs);
+  fs = List::imp_rev(fs);
+  let sd = new Aggrdecl{.kind=StructA, .sc = Public,
+                        .name = new $(Rel_n(NULL),xname), .tvs = NULL,
+                        .impl = new AggrdeclImpl{.exist_vars = NULL,
+                                                 .rgn_po = NULL,
+                                                 .fields = fs,
+                                                 .tagged=false},
+                        .attributes = NULL};
+  result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
+  *tuple_types  = rnew(d) List(rnew(d) $(x,ts),*tuple_types);
+  return x;
+}
+
+static type_t add_tuple_type(list_t<$(tqual_t,type_t)@`r,`r2> tqs0) {
+  return use_toc_state(tqs0, (add_tuple_type_body@<`r,`r2>)<>);
 }
 
 // similar to the above, except that we're working with an instantiated
@@ -556,86 +611,94 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
 // struct fields and in addition, we have to worry about the instantiation.
 // It's very important that we share as many instantiations as possible
 // to get the translation right.  
+static type_t add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
+                                                  $(struct TocState<`d>@`d s,
+                                                    $(qvar_t struct_name,
+                                                      list_t<tvar_t,`H> type_vars,
+                                                      list_t<type_t,`H> type_args,
+                                                      list_t<aggrfield_t,`r2> fields)@`r3)@`r env) {
+  // first, filter out the type_vars and type_args that are not of
+  // type or integer kind.
+  let $(&TocState{.abs_struct_types = abs_struct_types, ...},
+        &$(struct_name, type_vars, type_args, fields)) = *env;
+  //fprintf(stderr,"adding struct %s\n",typ2string(new AggrType(AggrInfo{AggrInfoU{.UnknownAggr = $(StructA,struct_name,NULL)},type_args})));
+                                      
+  // look for the same instantiation of abstract-struct-type already declared
+  for (let tts = *abs_struct_types; tts != NULL; tts = tts->tl) {
+    let &$(x,ts2,t) = tts->hd;
+    //fprintf(stderr,"  comparing against struct %s\n",typ2string(new AggrType(AggrInfo{AggrInfoU{.UnknownAggr = $(StructA,x,NULL)},ts2})));
+    if (qvar_cmp(x,struct_name) == 0 &&
+        List::length(type_args) == List::length(ts2)) {
+      bool okay = true;
+      for (let ts = type_args; ts != NULL; ts=ts->tl, ts2=ts2->tl) {
+        let t = ts->hd;
+        let t2 = ts2->hd;
+        //fprintf(stderr,"    comparing args %s and %s -- ",typ2string(t),typ2string(t2));
+        switch (typ_kind(t)) {
+        case &Kind{.kind = EffKind, _}: 
+        case &Kind{.kind = RgnKind, _}: 
+          // Effects and Regions won't show up in the toc types.
+          //fprintf(stderr,"effect or region -- skipping\n");
+          continue;
+        default:
+          // Check if they're the same before translating them to C
+          if (unify(t,t2) || unify(typ_to_c(t),typ_to_c(t2))) {
+            //fprintf(stderr," succeeded\n");
+            continue;
+          }
+          //fprintf(stderr," failed\n");
+          okay = false; 
+          break;
+        }
+        break;
+      }
+      if (okay) {
+        //fprintf(stderr,"found pre-existing type\n");
+        return t;
+      }
+    }
+  }
+  //fprintf(stderr,"didn't find pre-existing type\n");
+  // haven't seen this one before, add a declaration
+  // we're calling it a "tuple" so we don't have to worry about name
+  // clashes.
+  stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
+  type_t x = strct(xname);
+  let fs = NULL;
+  // go ahead and add this to the struct types
+  *abs_struct_types  = rnew(d) List{rnew(d) $(struct_name,type_args,x),
+                                    *abs_struct_types};
+  // copy the fields over
+  region r;
+  let inst = List::rzip(r,r,type_vars,type_args);
+  for (; fields != NULL; fields = fields->tl) {
+    let f = fields->hd;
+    type_t t = f->type;
+    t = typ_to_c(rsubstitute(r,inst,t));
+    // still could be abstract and end up void -- if so, drop it.
+    if (unify(t,&VoidType_val)) break;
+    fs = new List(new Aggrfield{f->name,mt_tq,t,
+                                f->width,f->attributes,NULL},fs);
+  }
+  fs = List::imp_rev(fs);
+  let sd = new Aggrdecl{.kind=StructA, .sc = Public,
+                        .name = new $(Rel_n(NULL),xname), .tvs = NULL,
+                        .impl = new AggrdeclImpl{.exist_vars = NULL,
+                                                 .rgn_po = NULL,
+                                                 .fields = fs,
+                                                 .tagged=false},
+                        .attributes = NULL};
+  result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
+  return x;
+}
+
 static type_t add_struct_type(qvar_t struct_name,
                               list_t<tvar_t,`H> type_vars,
                               list_t<type_t,`H> type_args,
-                              list_t<aggrfield_t> fields) {
-  // first, filter out the type_vars and type_args that are not of
-  // type or integer kind.
-  let TocState{.dyn = dyn, .abs_struct_types = abs_struct_types, ...} = *toc_state;
-  //fprintf(stderr,"adding struct %s\n",typ2string(new AggrType(AggrInfo{AggrInfoU{.UnknownAggr = $(StructA,struct_name,NULL)},type_args})));
-                                      
-  region d = open(dyn); {
-    // look for the same instantiation of abstract-struct-type already declared
-    for (let tts = *abs_struct_types; tts != NULL; tts = tts->tl) {
-      let &$(x,ts2,t) = tts->hd;
-      //fprintf(stderr,"  comparing against struct %s\n",typ2string(new AggrType(AggrInfo{AggrInfoU{.UnknownAggr = $(StructA,x,NULL)},ts2})));
-      if (qvar_cmp(x,struct_name) == 0 &&
-          List::length(type_args) == List::length(ts2)) {
-        bool okay = true;
-        for (let ts = type_args; ts != NULL; ts=ts->tl, ts2=ts2->tl) {
-          let t = ts->hd;
-          let t2 = ts2->hd;
-          //fprintf(stderr,"    comparing args %s and %s -- ",typ2string(t),typ2string(t2));
-          switch (typ_kind(t)) {
-          case &Kind{.kind = EffKind, _}: 
-          case &Kind{.kind = RgnKind, _}: 
-            // Effects and Regions won't show up in the toc types.
-            //fprintf(stderr,"effect or region -- skipping\n");
-            continue;
-          default:
-            // Check if they're the same before translating them to C
-            if (unify(t,t2) || unify(typ_to_c(t),typ_to_c(t2))) {
-              //fprintf(stderr," succeeded\n");
-              continue;
-            }
-            //fprintf(stderr," failed\n");
-            okay = false; 
-            break;
-          }
-          break;
-        }
-        if (okay) {
-          //fprintf(stderr,"found pre-existing type\n");
-          return t;
-        }
-      }
-    }
-    //fprintf(stderr,"didn't find pre-existing type\n");
-    // haven't seen this one before, add a declaration
-    // we're calling it a "tuple" so we don't have to worry about name
-    // clashes.
-    stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
-    type_t x = strct(xname);
-    let fs = NULL;
-    // go ahead and add this to the struct types
-    *abs_struct_types  = rnew(d) List{rnew(d) $(struct_name,type_args,x),
-                                      *abs_struct_types};
-    // copy the fields over
-    region r;
-    let inst = List::rzip(r,r,type_vars,type_args);
-    for (; fields != NULL; fields = fields->tl) {
-      let f = fields->hd;
-      type_t t = f->type;
-      t = typ_to_c(rsubstitute(r,inst,t));
-      // still could be abstract and end up void -- if so, drop it.
-      if (unify(t,&VoidType_val)) break;
-      fs = new List(new Aggrfield{f->name,mt_tq,t,
-                                  f->width,f->attributes,NULL},fs);
-    }
-    fs = List::imp_rev(fs);
-    let sd = new Aggrdecl{.kind=StructA, .sc = Public,
-                          .name = new $(Rel_n(NULL),xname), .tvs = NULL,
-                          .impl = new AggrdeclImpl{.exist_vars = NULL,
-                                                   .rgn_po = NULL,
-                                                   .fields = fs,
-                                                   .tagged=false},
-                          .attributes = NULL};
-    result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
-    return x;
-  }
+                              list_t<aggrfield_t,`r> fields) {
+  _ env = $(struct_name, type_vars, type_args, fields);
+  return use_toc_state(&env, (add_struct_type_body@<`r,`add_struct_type>)<>);
 }
-
 
 
 // generate a temporary variable
@@ -648,17 +711,19 @@ qvar_t temp_var() {
 
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
-static var_t fresh_label() {
-  let TocState{.dyn = dyn, .temp_labels = temp_labels, ...} = *toc_state;
-  region d = open(dyn); {
-    let i = fresh_label_counter++;
-    if (i < Xarray::length(temp_labels))
+static var_t fresh_label_body<`d,`r>(region_t<`d> d, $(struct TocState<`d>@`d,int)@`r env) {
+  let $(&TocState{.temp_labels = temp_labels, ...},_) = *env;
+  let i = fresh_label_counter++;
+  if (i < Xarray::length(temp_labels))
     return Xarray::get(temp_labels,i);
-    var_t res = new (string_t)aprintf("_LL%X",i);
-    if (Xarray::add_ind(temp_labels,res) != i)
-      toc_impos("fresh_label: add_ind returned bad index...");
-    return res;
-  }
+  var_t res = new (string_t)aprintf("_LL%X",i);
+  if (Xarray::add_ind(temp_labels,res) != i)
+    toc_impos("fresh_label: add_ind returned bad index...");
+  return res;
+}
+
+static var_t fresh_label() {
+  return use_toc_state(0, fresh_label_body<>);
 }
 
 // These two functions should never be used for xdatatypes. Should memoize?
@@ -1181,7 +1246,7 @@ static bool in_sizeof(env_t<`r> e) {
 }
 
 static env_t<`r> set_lhs_exp(region_t<`r> r, exp_opt_t exp,
-			     env_t<`r> e : {`r2} > `r) {
+                             env_t<`r2> e : {`r2} > `r) {
   let &Env{b,c,f,v,t,lhs,{vexp,_},sz,_} = e;
   return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,lhs,{vexp,exp},sz,r};
 }
@@ -4566,94 +4631,102 @@ static scope_t scope_to_c(scope_t s) {
 //   ...
 //   struct _union_Foo_mn { int tag; Tn val; };
 //   union Foo { struct _union_Foo_m1 m1; ... struct _union_Foo_mn mn; };
-static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
+
+static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d, 
+                              $(struct TocState<`d>@`d, 
+                                $(aggrdecl_t ad, bool add_to_decls)@`r2)@`r env) {
+  let $(s, &$(ad, add_to_decls)) = *env;
   let n = ad->name;
-  let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
-  region d = open(dyn); {
-    bool seen_defn_before;
-    let dopt = Dict::lookup_opt(*aggrs_so_far, n);
-    if (dopt == NULL) {
+  let TocState{.aggrs_so_far = aggrs_so_far, ...} = *s;
+  bool seen_defn_before;
+  let dopt = Dict::lookup_opt(*aggrs_so_far, n);
+  if (dopt == NULL) {
+    seen_defn_before = false;
+    $(aggrdecl_t,type_t)@ v;
+    if (ad->kind == StructA)
+      v = rnew(d) $(ad,strctq(n));
+    else
+      v = rnew(d) $(ad,unionq_typ(n));
+    *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
+  } else {
+    let &$(ad2,t) = *dopt;
+    if (ad2->impl == NULL) {
+      *aggrs_so_far = Dict::insert(*aggrs_so_far,n,rnew(d) $(ad,t));
       seen_defn_before = false;
-      $(aggrdecl_t,type_t)@ v;
-      if (ad->kind == StructA)
-        v = rnew(d) $(ad,strctq(n));
-      else
-        v = rnew(d) $(ad,unionq_typ(n));
-      *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
-    } else {
-      let &$(ad2,t) = *dopt;
-      if (ad2->impl == NULL) {
-        *aggrs_so_far = Dict::insert(*aggrs_so_far,n,rnew(d) $(ad,t));
-        seen_defn_before = false;
-      } else
+    } else
       seen_defn_before = true;
-    }
-    aggrdecl_t new_ad = new Aggrdecl {.kind = ad->kind,
-                                      .sc = Public,
-                                      .name = ad->name,
-                                      .tvs = NULL,
-                                      .impl = NULL,
-                                      .attributes = ad->attributes};
-    if(ad->impl != NULL && !seen_defn_before) {
-      new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
-                                        .rgn_po = NULL,
-                                        .fields = NULL,
-                                        .tagged = false };
-      list_t<aggrfield_t> new_fields = NULL;
-      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
-        // JGM: I'm trying to get rid of warnings when we assign "const"
-        // locations...
-        let old_field = fields->hd;
-        let old_type = old_field->type;
-        if (kind_leq(&ak,typ_kind(old_type)) && 
-	    ((ad->kind == StructA && fields->tl == NULL) ||
-	     ad->kind == UnionA)) {
-          // skip over the last member if it's abstract but not an
-          // array or an implemented aggregate; for arrays, we
-          // just pretend like the array size is zero.  (Note: can't
-          // just leave it non-existent because this results in
-          // incomplete types!)
-          switch (compress(old_type)) {
-          case &ArrayType(ArrayInfo{et,tq,_,zt,ztl}):
-            old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
-            break;
-          default: 
-	    if (abstract_aggr(old_type)) break;
-	    else if (ad->kind == StructA) continue;
-	    else unimp("union with non-array fields of kind TA");
-          }
-        }
-        let new_field = new Aggrfield{.name = old_field->name,
-                                      .tq = mt_tq,
-                                      .type = typ_to_c(old_type),
-                                      .width = old_field->width,
-                                      .attributes = old_field->attributes,
-                                      .requires_clause = NULL};
-        // If this is a tagged union, rewrite the member type from T
-        // to struct _union_Foo_f {int tag; T value;} where Foo is the name
-        // of the union, and f is the name of the member.
-        if (ad->impl->tagged) {
-          let T = new_field->type;
-          let f = new_field->name;
-          string_t s = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
-          var_t str = new s;
-          let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL,NULL);
-          let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL);
-          let fs = list(tag_field,value_field);
-          let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
-                                 .name = new $(Loc_n,str), .tvs = NULL,
-                                 .impl = new AggrdeclImpl(NULL,NULL,fs,false),
-                                 .attributes = NULL};
-          result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
-          new_field->type = strct(str);
-        }
-        new_fields = new List(new_field,new_fields);
-      }
-      new_ad->impl->fields = List::imp_rev(new_fields);
-    }
-    if (add_to_decls)
-      result_decls = new List(new Decl(new Aggr_d(new_ad),DL),result_decls);
   }
+  aggrdecl_t new_ad = new Aggrdecl {.kind = ad->kind,
+                                    .sc = Public,
+                                    .name = ad->name,
+                                    .tvs = NULL,
+                                    .impl = NULL,
+                                    .attributes = ad->attributes};
+  if(ad->impl != NULL && !seen_defn_before) {
+    new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
+                                      .rgn_po = NULL,
+                                      .fields = NULL,
+                                      .tagged = false };
+    list_t<aggrfield_t> new_fields = NULL;
+    for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
+      // JGM: I'm trying to get rid of warnings when we assign "const"
+      // locations...
+      let old_field = fields->hd;
+      let old_type = old_field->type;
+      if (kind_leq(&ak,typ_kind(old_type)) && 
+          ((ad->kind == StructA && fields->tl == NULL) ||
+           ad->kind == UnionA)) {
+        // skip over the last member if it's abstract but not an
+        // array or an implemented aggregate; for arrays, we
+        // just pretend like the array size is zero.  (Note: can't
+        // just leave it non-existent because this results in
+        // incomplete types!)
+        switch (compress(old_type)) {
+        case &ArrayType(ArrayInfo{et,tq,_,zt,ztl}):
+          old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
+          break;
+        default: 
+          if (abstract_aggr(old_type)) break;
+          else if (ad->kind == StructA) continue;
+          else unimp("union with non-array fields of kind TA");
+        }
+      }
+      let new_field = new Aggrfield{.name = old_field->name,
+                                    .tq = mt_tq,
+                                    .type = typ_to_c(old_type),
+                                    .width = old_field->width,
+                                    .attributes = old_field->attributes,
+                                    .requires_clause = NULL};
+      // If this is a tagged union, rewrite the member type from T
+      // to struct _union_Foo_f {int tag; T value;} where Foo is the name
+      // of the union, and f is the name of the member.
+      if (ad->impl->tagged) {
+        let T = new_field->type;
+        let f = new_field->name;
+        string_t s = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
+        var_t str = new s;
+        let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL,NULL);
+        let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL);
+        let fs = list(tag_field,value_field);
+        let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
+                               .name = new $(Loc_n,str), .tvs = NULL,
+                               .impl = new AggrdeclImpl(NULL,NULL,fs,false),
+                               .attributes = NULL};
+        result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
+        new_field->type = strct(str);
+      }
+      new_fields = new List(new_field,new_fields);
+    }
+    new_ad->impl->fields = List::imp_rev(new_fields);
+  }
+  if (add_to_decls)
+    result_decls = new List(new Decl(new Aggr_d(new_ad),DL),result_decls);
+  return 0;
+}
+
+static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
+  _ p = $(ad, add_to_decls);
+  use_toc_state(&p, (aggrdecl_to_c_body@<`aggrdecl_to_c>)<>);
 }
 
 // datatype declarations -- tricky
@@ -4680,14 +4753,14 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
 //     of what we've seen so far.  And we make the globals static so that
 //     extern and what not is only a link-checker thing.  Unfortunately,
 //     the static trick doesn't work for xdatatype, which uses the addresses.
-static void datatypedecl_to_c(datatypedecl_t tud) {
-  let TocState{.dyn = dyn, .datatypes_so_far = datatypes_so_far, ...} = *toc_state;
-  region d = open(dyn); {
-    let n = tud->name;
-    if(tud->fields == NULL || Set::member(*datatypes_so_far, n))
-      return;
-    *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
-  }
+static int datatypedecl_to_c_body<`d,`r>(region_t<`d> d, 
+                                         $(struct TocState<`d>@`d, 
+                                           datatypedecl_t tud)@`r env) {
+  let $(&TocState{.datatypes_so_far = datatypes_so_far, ...},tud) = *env;
+  let n = tud->name;
+  if(tud->fields == NULL || Set::member(*datatypes_so_far, n))
+    return 0;
+  *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     datatypefield_t f = fields->hd;
     // compute the fields for the struct, adding in a tag field
@@ -4709,8 +4782,12 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
                    .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
   }
+  return 0;
 }
 
+static void datatypedecl_to_c(datatypedecl_t tud) {
+  use_toc_state(tud, datatypedecl_to_c_body<>);
+}
 // @extensible datatype declarations -- similar to datatype declarations
 // For a declaration extending an existing xdatatype, e.g.,
 //   "@extensible datatype foo {Bar,Baz(t1,t2)}"
@@ -4727,64 +4804,70 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
 //   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
 //true if already seen & initialized, false if seen but non initialized (extern)
-
-static void xdatatypedecl_to_c(datatypedecl_t xd) {
+static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
+                                          $(struct TocState<`d>@`d,
+                                            datatypedecl_t xd)@`r env) {
+  let $(s,xd) = *env;
   if(xd->fields == NULL)
-    return;
-  let TocState{.dyn = dyn, .xdatatypes_so_far = xdatatypes_so_far, ...} = *toc_state;
-  region d = open(dyn); {
-    let n = xd->name;
-    for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
-      datatypefield_t f  = fs->hd;
-      stringptr_t fn = (*f->name)[1];
-      let sz_exp  = uint_exp(numelts(*fn),DL);
-      let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,DL);
-      // FIX: making bad alignment and pointer-size assumptions!
-      switch (Dict::lookup_opt(*xdatatypes_so_far,f->name)) {
-      case NULL:
-        exp_opt_t initopt = NULL;
-        if (f->sc != Extern) {
-          initopt = string_exp(*fn,DL);
-        }
+    return 0;
+  let TocState{.xdatatypes_so_far = xdatatypes_so_far, ...} = *s;
+  let n = xd->name;
+  for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
+    datatypefield_t f  = fs->hd;
+    stringptr_t fn = (*f->name)[1];
+    let sz_exp  = uint_exp(numelts(*fn),DL);
+    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,DL);
+    // FIX: making bad alignment and pointer-size assumptions!
+    switch (Dict::lookup_opt(*xdatatypes_so_far,f->name)) {
+    case NULL:
+      exp_opt_t initopt = NULL;
+      if (f->sc != Extern) {
+        initopt = string_exp(*fn,DL);
+      }
+      let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+      tag_decl->sc = f->sc;
+      result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+      *xdatatypes_so_far =
+        Dict::insert(*xdatatypes_so_far, f->name, f->sc != Extern);
+      list_t<aggrfield_t> fields = NULL;
+      int i = 1;
+      for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
+        let field_n = new ((string_t)aprintf("f%d",i));
+        let newf = new Aggrfield(field_n,(*tqts->hd)[0],
+                                 typ_to_c((*tqts->hd)[1]),NULL,NULL,NULL);
+        fields = new List(newf,fields);
+      }
+      fields = new List(new Aggrfield(tag_sp,mt_tq,
+                                      cstar_typ(char_typ,mt_tq),NULL,NULL,NULL),
+                        List::imp_rev(fields));
+      let strct_decl =
+        new Aggrdecl{.kind = StructA, .sc = Public,
+                     .name = collapse_qvars(f->name,xd->name),
+                     .tvs  = NULL,
+                     .impl = new AggrdeclImpl(NULL,NULL,fields,false),
+                     .attributes = NULL};
+      result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
+                              result_decls);
+      break;
+    case &false:
+      if (f->sc != Extern) {
+        let initopt = string_exp(*fn,DL);
         let tag_decl = new_vardecl(f->name, tag_typ, initopt);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-        *xdatatypes_so_far =
-          Dict::insert(*xdatatypes_so_far, f->name, f->sc != Extern);
-        list_t<aggrfield_t> fields = NULL;
-        int i = 1;
-        for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
-          let field_n = new ((string_t)aprintf("f%d",i));
-          let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-                                   typ_to_c((*tqts->hd)[1]),NULL,NULL,NULL);
-          fields = new List(newf,fields);
-        }
-        fields = new List(new Aggrfield(tag_sp,mt_tq,
-                                        cstar_typ(char_typ,mt_tq),NULL,NULL,NULL),
-                          List::imp_rev(fields));
-        let strct_decl =
-          new Aggrdecl{.kind = StructA, .sc = Public,
-                       .name = collapse_qvars(f->name,xd->name),
-                       .tvs  = NULL,
-                       .impl = new AggrdeclImpl(NULL,NULL,fields,false),
-                       .attributes = NULL};
-        result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
-                                result_decls);
-        break;
-      case &false:
-        if (f->sc != Extern) {
-          let initopt = string_exp(*fn,DL);
-          let tag_decl = new_vardecl(f->name, tag_typ, initopt);
-          tag_decl->sc = f->sc;
-          result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-          *xdatatypes_so_far = Dict::insert(*xdatatypes_so_far, f->name, true);
-        }
-        break;
-      default: break;
+        *xdatatypes_so_far = Dict::insert(*xdatatypes_so_far, f->name, true);
       }
+      break;
+    default: break;
     }
   }
+  return 0;
 }
+
+static void xdatatypedecl_to_c(datatypedecl_t xd) {
+  use_toc_state(xd, xdatatypedecl_to_c_body<>);
+}
+
 
 static void enumdecl_to_c(enumdecl_t ed) {
   ed->sc = Public; // gcc warns if we have Extern or Static on an enum
@@ -5083,19 +5166,9 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 
 // initialize all globals
 static void init() {
-  let NewRegion{dyn} = new_dynregion();
-  region d = open(dyn); {
-    toc_state =
-      new TocState{ .dyn = dyn,
-                    .tuple_types = rnew(d) NULL,
-                    .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
-                    .abs_struct_types = rnew(d) NULL,
-                    .datatypes_so_far = rnew(d) Set::rempty(d,qvar_cmp),
-                    .xdatatypes_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
-                    .qvar_tags = rnew(d) Dict::rempty(d,qvar_tag_cmp),
-                    .temp_labels = Xarray::rcreate_empty(d)
-      };
-  }
+  let NewDynamicRegion{dyn} = new_rckey();
+  let ts = open_region(dyn, 0, empty_toc_state);
+  toc_state = unew TocStateWrap{dyn, ts};
   result_decls = NULL;
   tuple_type_counter = 0;
   temp_var_counter = 0;
@@ -5147,6 +5220,13 @@ static void init() {
   };
 }
 
+// reclaim space used by extensible array for the labels
+static int destroy_labels(region_t<`d> d, struct TocState<`d>@`d ts) {
+  let TocState{.temp_labels = tls, ...} = *ts;
+  Xarray::reuse(tls);
+  return 0;
+}
+
 // The entry point:  translate the list of Cyclone declarations to
 // a list of C declarations.
 list_t<decl_t> toc(list_t<decl_t> ds) {
@@ -5158,11 +5238,12 @@ list_t<decl_t> toc(list_t<decl_t> ds) {
             bounds_checks_eliminated, total_bounds_checks);
 #endif
     // free the state
-    let TocState{.dyn = dyn,.temp_labels = tls, ...} = *toc_state;
-    { region d = open(dyn);
-      Xarray::reuse(tls);
-    }
-    Core::free_dynregion(dyn);
+    toc_state_t ts = NULL;
+    ts :=: toc_state;
+    let TocStateWrap{dyn, s} = *ts;
+    open_region(dyn, s, destroy_labels);
+    Core::free_rckey(dyn);
+    Core::ufree(ts);
   }
   return imp_rev(result_decls);
 }

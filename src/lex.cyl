@@ -75,18 +75,17 @@ static int ?  kw_nums  = NULL;
   //static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
 struct DynTrie {
   <`d::R> 
-  dynregion_t<`d,`H> dyn;
+  uregion_key_t<`d>  dyn;
   trie_t<`d>         t;
 };
-typedef struct DynTrie *dyn_trie_t;
+typedef struct DynTrie *`U dyn_trie_t;
 struct DynTrieSymbols {
   <`d::R> 
-  dynregion_t<`d,`H> dyn;
+  uregion_key_t<`d>  dyn;
   trie_t<`d>         t;  //int field is symbol index, 0 for not there
   Xarray::xarray_t<stringptr_t,`d> symbols;
 };
-typedef struct DynTrieSymbols *dyn_trie_symbols_t;
-typedef struct DynSymbols *dyn_symbols_t;
+typedef struct DynTrieSymbols *`U dyn_trie_symbols_t;
 static dyn_trie_symbols_t ids_trie  = NULL;
 static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 
@@ -249,19 +248,30 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
   return t;
 }
 
-static int str_index(string_t buff, int offset, int len) {
-  let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
-  region d = open(dyn); {
-    let t = trie_lookup(d, t, buff, offset, len);
-    // build string if necessary and return
-    if(t->shared_str == 0) {
-      let newstr = new_string(len+1);
-      zstrncpy((char ? @nozeroterm)newstr,buff+offset,len);
-      int ans = Xarray::add_ind(symbols, new ((string_t)newstr));
-      t->shared_str = ans;
-    }
-    return t->shared_str;
+static int str_index_body(region_t<`d> d, 
+                          $(trie_t<`d>, Xarray::xarray_t<stringptr_t<`H>,`d>,
+                            string_t buff, int offset, int len)@ env) {
+  let $(tree,symbols,buff,offset,len) = *env;
+  let t = trie_lookup(d, tree, buff, offset, len);
+  // build string if necessary and return
+  if(t->shared_str == 0) {
+    let newstr = new_string(len+1);
+    zstrncpy((char ? @nozeroterm)newstr,buff+offset,len);
+    int ans = Xarray::add_ind(symbols, new ((string_t)newstr));
+    t->shared_str = ans;
   }
+  return t->shared_str;
+}
+
+static int str_index(string_t buff, int offset, int len) {
+  dyn_trie_symbols_t idt = NULL;
+  idt :=: ids_trie;
+  let DynTrieSymbols{dyn,t,symbols} = *idt;
+  let env = $(t,symbols,buff,offset,len);
+  let res = open_region(dyn, &env, str_index_body);
+  *idt = DynTrieSymbols{dyn,t,symbols};
+  idt :=: ids_trie;
+  return res;
 }
 
 static int str_index_lbuf(Lexbuf<`a> lbuf) {
@@ -270,21 +280,41 @@ static int str_index_lbuf(Lexbuf<`a> lbuf) {
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
 }
 
+static int insert_typedef_body(region_t<`d> h, $(trie_t<`d>, string_t s)@ arg)
+{
+  let $(t,s) = *arg;
+  let t_node = trie_lookup(h, t, s, 0, numelts(s)-1);
+  t_node->shared_str = true;
+  return 0;
+}
+
+
 static void insert_typedef(stringptr_t sptr) {
   let s = *sptr;
-  let DynTrie{<`d> dyn, t} = *typedefs_trie;
-  region d = open(dyn); {
-    let t = trie_lookup(d, t, s, 0, numelts(s)-1);
-    t->shared_str = true;
-  }
+  dyn_trie_t tdefs = NULL;
+  tdefs :=: typedefs_trie;
+  let DynTrie{<`d> dyn, t} = *tdefs;
+  let env = $(t,s);
+  open_region(dyn, &env, insert_typedef_body);
+  *tdefs = DynTrie{dyn,t};
+  tdefs :=: typedefs_trie;
   return;
 }
 
+static stringptr_t get_symbol_body(region_t<`d> dyn, $(trie_t<`d>,Xarray::xarray_t<stringptr_t<`H,`H>,`d>,int)@ env) {
+  let $(t,symbols,symbol_num) = *env;
+  return Xarray::get(symbols, symbol_num);
+}
+
 static stringptr_t get_symbol(int symbol_num) {
-  let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
-  region d = open(dyn); {
-    return Xarray::get(symbols, symbol_num);
-  }
+  dyn_trie_symbols_t idt = NULL;
+  idt :=: ids_trie;
+  let DynTrieSymbols{dyn,t,symbols} = *idt;
+  let env = $(t,symbols,symbol_num);
+  let res = open_region(dyn, &env, get_symbol_body);
+  *idt = DynTrieSymbols{dyn,t,symbols};
+  idt :=: ids_trie;
+  return res;
 }
 
 // ************************ INTEGER CONSTANTS ************************
@@ -410,14 +440,20 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
   return NULL; 
 }
 
+static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
+  return rnew(d) Trie(Zero(),false);
+}
+
 static void recompute_typedefs() {
   // Drop the old trie on the floor.
-  let DynTrie{dyn,t} = *typedefs_trie;
-  Core::free_dynregion(dyn);
-  let NewRegion{<`d2> dyn2} = new_dynregion();
-  region d2 = open(dyn2); {
-    typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero(),false)};
-  }
+  dyn_trie_t tdefs = NULL;
+  tdefs :=: typedefs_trie;
+  let DynTrie{dyn,t} = *tdefs;
+  Core::free_ukey(dyn);
+  let NewDynamicRegion{<`d2> dyn2} = new_ukey();
+  trie_t<`d2> t2 = open_region(dyn2, 0, empty_trie);
+  *tdefs = DynTrie{dyn2, t2};
+  typedefs_trie :=: tdefs;
   
  //For each enclosing scope, get the visible namespaces and add all the typedefs
   for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
@@ -441,29 +477,40 @@ static bool is_typedef_in_namespace(List_t<var_t,`H> ns, var_t v) {
     return false;
   }
 }
+
+static bool is_typedef_body(region_t<`d> d, 
+                            $(List::list_t<var_t,`H>, trie_t<`d>, 
+                              string_t<`H>)@ env) {
+  let $(ns, t, s) = *env;
+  int len = numelts(s) - 1;
+  for(int i = 0; i < len; ++i)
+    switch (t->children) {
+    case {.Zero = _}: return false;
+    case {.One = $(one_ch, one_trie)} && one_ch != s[i]: return false;
+    case {.One = $(_,      one_trie)}: t = one_trie; break;
+    case {.Many = arr}:
+      let next = arr[trie_char(s[i])];
+      if(next == NULL)
+        return false;
+      t = next;
+      break;
+    }
+  return t->shared_str;
+}
 static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   if (ns != NULL)
     return is_typedef_in_namespace((List_t<var_t,`H>)ns,v);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
   let s   = *v;
-  int    len = numelts(s) - 1;
-  let DynTrie{dyn,t} = *typedefs_trie;
-  region d = open(dyn); {
-    for(int i = 0; i < len; ++i)
-    switch (t->children) {
-      case {.Zero = _}: return false;
-      case {.One = $(one_ch, one_trie)} && one_ch != s[i]: return false;
-      case {.One = $(_,      one_trie)}: t = one_trie; break;
-      case {.Many = arr}:
-        let next = arr[trie_char(s[i])];
-        if(next == NULL)
-          return false;
-        t = next;
-        break;
-    }
-    return t->shared_str;
-  }
+  dyn_trie_t tdefs = NULL;
+  tdefs :=: typedefs_trie;
+  let DynTrie{dyn,t} = *tdefs;
+  let env = $(ns, t, s);
+  let res = open_region(dyn, &env, is_typedef_body);
+  *tdefs = DynTrie{dyn,t};
+  tdefs :=: typedefs_trie;
+  return res;
 }
 
 void enter_namespace(var_t s) {
@@ -1163,31 +1210,39 @@ void pos_init() {
   pos_info = NULL;
 }
 
+static Xarray::xarray_t<stringptr_t,`d> empty_xarray(region_t<`d> id_rgn, int dummy) {
+  Xarray::xarray_t<stringptr_t,`d> symbols = 
+    Xarray::rcreate(id_rgn,101,new ((string_t)""));
+  // don't use first entry b/c 0 means "not a symbol"
+  Xarray::add(symbols, &bogus_string);
+  return symbols;
+} 
+
 void lex_init(bool include_cyclone_keywords) {
   // free any dynamic regions allocated first
   if (ids_trie != NULL) {
-    let DynTrieSymbols{dyn,...} = *ids_trie;
-    Core::free_dynregion(dyn);
+    dyn_trie_symbols_t idt = NULL;
+    idt :=: ids_trie;
+    let DynTrieSymbols{dyn,...} = *idt;
+    Core::free_ukey(dyn);
+    Core::ufree(idt);
   }
   if (typedefs_trie != NULL) {
-    let DynTrie{dyn,...} = *typedefs_trie;
-    Core::free_dynregion(dyn);
+    dyn_trie_t tdefs = NULL;
+    tdefs :=: typedefs_trie;
+    let DynTrie{dyn,...} = *tdefs;
+    Core::free_ukey(dyn);
+    Core::ufree(tdefs);
   }
   // Now allocate dynamic regions for the tries
-  let NewRegion{id_dyn} = new_dynregion();
-  region id_rgn = open(id_dyn); {
-    Xarray::xarray_t<stringptr_t> symbols = 
-      Xarray::rcreate(id_rgn,101,new ((string_t)""));
-    // don't use first entry b/c 0 means "not a symbol"
-    Xarray::add(symbols, &bogus_string);
-    ids_trie = new DynTrieSymbols{id_dyn, rnew(id_rgn) Trie(Zero(),false),
-                                  symbols};
-  }
-  let NewRegion{typedefs_dyn} = new_dynregion();
-  region typedefs_rgn = open(typedefs_dyn); {
-    typedefs_trie = new DynTrie{typedefs_dyn, 
-                                rnew(typedefs_rgn) Trie(Zero(),false)};
-  }
+  let NewDynamicRegion{id_dyn} = new_ukey();
+  let ts = open_region(id_dyn, 0, empty_trie);
+  let xa = open_region(id_dyn, 0, empty_xarray);
+  ids_trie = unew DynTrieSymbols{id_dyn, ts, xa};
+
+  let NewDynamicRegion{typedefs_dyn} = new_ukey();
+  trie_t t = open_region(typedefs_dyn, 0, empty_trie);
+  typedefs_trie = unew DynTrie{typedefs_dyn, t};
   num_kws       = num_keywords(include_cyclone_keywords);
   kw_nums       = new {for i < num_kws : 0};
   unsigned i = 0;

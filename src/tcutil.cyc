@@ -70,6 +70,12 @@ void explain_failure() {
     fprintf(stderr, "  %s\n",failure_reason);
     return;
   }
+  // for effects, we need to tell the pretty printer to print them out
+  if (strcmp("(function effects do not match)", failure_reason) == 0) {
+    let p = Absynpp::tc_params_r;
+    p.print_all_effects = true;
+    Absynpp::set_params(&p);
+  }
   string_t s1 = typ2string(t1_failure);
   string_t s2 = typ2string(t2_failure);
   int pos = 2;
@@ -1206,6 +1212,8 @@ static bool evar_in_effect(type_t evar, type_t e) {
 bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
   // if e2 is of the form JoinEff(ev::rest) where ev is an effect evar,
   // then we can instantiate ev to JoinEff(ev'::e1) where ev' is fresh
+  //fprintf(stderr,"checking subset_effect(%s,%s)\n",
+  //        typ2string(e1),typ2string(e2));
   switch (compress(e1)) {
   case &JoinEff(es):
     for (; es != NULL; es = es->tl)
@@ -1219,8 +1227,8 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
     // best to just pin the region to HeapRgn or try to unify it with
     // some region already in the effect e2.  We used to try the latter, then
     // the former.  Now we just pick the former.
-    return (region_in_effect(false,r,e2)
-	    || (may_constrain_evars && unify(r,&HeapRgn_val)));
+    return (region_in_effect(may_constrain_evars,r,e2)
+	    || (may_constrain_evars && unify(r,&HeapRgn_val))); 
   case &VarType(v): return variable_in_effect(may_constrain_evars,v,e2);
   case &RgnsEff(t):
     switch (rgns_of(t)) {
@@ -1233,15 +1241,16 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
     case e: return subset_effect(may_constrain_evars,e,e2);
     }
   case &Evar(_,*p,_,s):
-    if (!evar_in_effect(e1,e2))
+    if (!evar_in_effect(e1,e2)) {
       // We can set the evar to be any subset of e2.
-      // We set it to e2 basically.
-      //      if (may_constrain_evars) {
-	*p = empty_effect;
-	//	occurs(e1,heap_region,s->v,e2);
-	//        *p = new Opt(e2);
-    //      }
-    return true;
+      // Right now, we set it to the empty effect which may
+      // not be the best solution...
+      *p = empty_effect;
+      // Another option would be to set it to e2.
+      // *p = (type_opt_t)e2;
+      return true;
+    } else
+      return false;
   default: impos("subset_effect: bad effect: %s",typ2string(e1));
   }
 }
@@ -1574,7 +1583,7 @@ void unify_it(type_t t1, type_t t2) {
     t1_failure = t1;
     t2_failure = t2;
     if(bad_effect) {
-      failure_reason = "(function type effects do not unify)";
+      failure_reason = "(function effects do not match)";
       break;
     }
     if (!same_atts(atts2,atts1)) {

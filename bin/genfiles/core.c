@@ -62,6 +62,12 @@ struct _DynRegionFrame {
   struct _DynRegionHandle *x;
 };
 
+// A dynamic region is just a region handle.  We have the
+// wrapper struct for type abstraction reasons.
+struct Cyc_Core_DynamicRegion {
+  struct _RegionHandle h;
+};
+
 extern struct _RegionHandle _new_region(const char *);
 extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
@@ -818,19 +824,25 @@ extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char C
 # 160
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 162
-extern struct _RegionHandle*Cyc_Core_unique_region;
-# 192
-struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*file,int lineno);
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
 # 197
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
+# 203
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
+# 208
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
+# 260 "core.h"
+struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*file,int lineno);
+# 265
 struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 256 "core.h"
+# 327 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 261
+# 332
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 268
+# 339
 return 0;
 return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
 # 31 "core.cyc"

@@ -61,6 +61,12 @@ struct _DynRegionFrame {
   struct _DynRegionHandle *x;
 };
 
+// A dynamic region is just a region handle.  We have the
+// wrapper struct for type abstraction reasons.
+struct Cyc_Core_DynamicRegion {
+  struct _RegionHandle h;
+};
+
 extern struct _RegionHandle _new_region(const char *);
 extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);

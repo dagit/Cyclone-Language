@@ -638,6 +638,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         *rgn_ptr = curr_bl; // side effect
         type_t rgn_typ;
         if (open_opt != NULL) {
+          Tcutil::warn(s0->loc, "dynamic regions using open are deprecated -- use keys instead");
           exp_t open_exp = (exp_t)open_opt;
           let tenv_tvs = lookup_type_vars(te);
           rgn_typ = new_evar(&rko,new Opt(tenv_tvs));

@@ -164,7 +164,7 @@ extern region_t<`U> unique_region;
   // FIX: unique_region also defined in absyn.cyc; should really unify
   //   the two definitions!
 #define unew rnew (Core::unique_region)
-#define umalloc rmalloc (Core::unique_region)
+#define umalloc(arg) rmalloc (Core::unique_region,arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
 extern void ufree(`a::TA ?`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
@@ -174,12 +174,12 @@ extern region_t<`RC> refcnt_region;
       region. Data allocated in this region contains an additional
       reference count for managing aliases. */
 #define rcnew rnew (Core::refcnt_region)
-#define rcmalloc rmalloc (Core::refcnt_region)
+#define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
 extern int refptr_count(`a::TA ?`RC ptr) __attribute__((noconsume(1)));
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
-extern `a ?`RC alias_refptr(`a::TA ?`RC ptr) __attribute__((noconsume(1)));
+extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{}) __attribute__((noconsume(1)));
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
 extern void drop_refptr(`a::TA ?`RC ptr) __attribute__((noliveunique(1)));
@@ -189,6 +189,74 @@ extern void drop_refptr(`a::TA ?`RC ptr) __attribute__((noliveunique(1)));
       meaning that those pointers will have to get GC'ed if [p] ends
       up being freed. */
 
+struct DynamicRegion<`r::R>;
+  /** [struct DynamicRegion<`r>] is an abstract type for the dynamic region 
+      named [`r].  Dynamic regions can be created and destroyed at will,
+      but access to them must be done through the open_region function. */
+
+typedef struct DynamicRegion<`r1>@`r2 region_key_t<`r1,`r2>;
+  /** A [region_key_t<`r1,`r2>] is a pointer (in [`r2]) to a 
+      [DynamicRegion<`r1>].  Keys are used as capabilities for accessing a 
+      dynamic region.  You have to present a key to the open procedure to 
+      access the region. */
+
+typedef region_key_t<`r,`U> uregion_key_t<`r>;
+  /** A [uregion_key_t<`r>] is a unique pointer to a [DynamicRegion<`r>].  You
+      can't make copies of the key, but if you call [free_ukey], then
+      you are assured that the region [`r] is reclaimed. */
+
+typedef region_key_t<`r,`RC> rcregion_key_t<`r>;
+  /** A [rcregion_key_t<`r>] is a reference-counted pointer to a 
+      [DynamicRegion<`r>].  You can make copies of the key
+      using [alias_refptr] which increments the reference count.
+      You can call [free_rckey] to destroy the key, which will
+      decrement the reference count.  If the count reaches zero,
+      then the region will be reclaimed. */
+
+struct NewDynamicRegion<`r2> {
+  <`r>
+  region_key_t<`r,`r2> key;
+};
+  /** A [struct NewDynamicRegion<`r2>] is used to return a new
+      dynamic region [`r].  The struct hides the name of the
+      region and must be opened, guaranteeing that the type-level
+      name is unique. */
+
+extern struct NewDynamicRegion<`U> new_ukey();
+  /** [new_ukey()] creates a fresh dynamic region [`r] and returns
+      a unique key for that region. */
+
+extern struct NewDynamicRegion<`RC> new_rckey();
+  /** [new_rckey()] creates a fresh dynamic region [`r] and returns
+      a reference-counted key for that region. */
+
+extern void free_ukey(uregion_key_t<`r> k; {});
+  /** [free_ukey(k)] takes a unique key for the region [`r] and
+      deallocates the region [`r] and destroys the key [k]. */
+
+extern void free_rckey(rcregion_key_t<`r> k; {});
+  /** [free_rckey(k)] takes a reference-counted key for the region [`r],
+      decrements the reference count and destroyes the key [k].  If the
+      reference count becomes zero, then all keys have been destroyed
+      and the region [`r] is deallocated. */
+
+extern `result open_region(region_key_t<`r,`r2::TR> key,
+                           `arg arg,
+                           `result body(region_t<`r> h, 
+                                        `arg arg;{`r,`r2}+`eff);
+                           {`r2}+`eff) __attribute__((noconsume(1)));
+  /** [open_region(k,arg,body)] extracts a region handle [h] for
+      the region [`r] which the [k] provides access to.  The handle
+      and value [arg] are passed to the function pointer [body]
+      and the result is returned.  Note that [k] can be either a
+      [ukey_t] or an [rckey_t].  The caller does not need to have
+      static access to region [`r] when calling [open_region] but
+      that capability is allowed within [body].  In essence, the
+      key [k] provides dynamic evidence that [`r] is still live. */
+
+/* ------------------------------------------------------------------ */
+/* The following functions that manipulate dynregion's are deprecated */
+/* ------------------------------------------------------------------ */
 extern struct NewRegion<`r2> _rnew_dynregion(region_t<`r2>,
 					     const char @ file,
 					     int lineno);
@@ -219,6 +287,9 @@ extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
   /** A call to [try_free_dynregion(d)] attempts to free the storage associated
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then it returns 0, and otherwise returns 1 upon success. */
+/* ----------------------------------------------------------------- */
+/* The previous functions that manipulate dynregion's are deprecated */
+/* ----------------------------------------------------------------- */
 
   extern `a?`r mkfat(`a @{valueof(`n)}`r::TR arr, Core::sizeof_t<`a> s, tag_t<`n> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a

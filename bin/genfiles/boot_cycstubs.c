@@ -62,6 +62,12 @@ struct _DynRegionFrame {
   struct _DynRegionHandle *x;
 };
 
+// A dynamic region is just a region handle.  We have the
+// wrapper struct for type abstraction reasons.
+struct Cyc_Core_DynamicRegion {
+  struct _RegionHandle h;
+};
+
 extern struct _RegionHandle _new_region(const char *);
 extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
@@ -823,15 +829,21 @@ typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 93
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 162 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 256 "core.h"
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
+# 197
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
+# 203
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
+# 208
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
+# 327 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 261
+# 332
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 268
+# 339
 return 0;
 return dyn.curr;};}
 # 28 "boot_cycstubs.cyc"

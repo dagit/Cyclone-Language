@@ -62,6 +62,12 @@ struct _DynRegionFrame {
   struct _DynRegionHandle *x;
 };
 
+// A dynamic region is just a region handle.  We have the
+// wrapper struct for type abstraction reasons.
+struct Cyc_Core_DynamicRegion {
+  struct _RegionHandle h;
+};
+
 extern struct _RegionHandle _new_region(const char *);
 extern void * _region_malloc(struct _RegionHandle *, unsigned);
 extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
@@ -796,17 +802,23 @@ struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);e
 # 160
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 162
-extern struct _RegionHandle*Cyc_Core_unique_region;extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 247 "core.h"
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
+# 197
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
+# 203
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
+# 208
+typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
+# 318 "core.h"
 struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned long);
-# 256
+# 327
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 261
+# 332
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 268
+# 339
 return 0;
 return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 39 "list.h"

@@ -429,6 +429,7 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
               (unsigned int)ptr.base);
     }
 #endif
+    // FIX: shouldn't this be inside the ifdef?
     GC_register_finalizer_no_order(ptr.base,NULL,NULL,NULL,NULL);
     GC_free(ptr.base);
     ptr.base = ptr.curr = ptr.last_plus_one = NULL; // not really necessary...
@@ -923,6 +924,73 @@ void _reset_region(struct _RegionHandle *r) {
 #endif
 }
 
+
+// New interface for dynamic regions
+// Note that struct Cyc_Core_DynamicRegion is defined in cyc_include.h
+
+// We use this struct when returning a newly created dynamic region.
+// The wrapper is needed because the Cyclone interface uses an existential.
+struct Cyc_Core_NewDynamicRegion {
+  struct Cyc_Core_DynamicRegion *key;
+};
+
+// Create a new dynamic region and return a unique pointer for the key.
+struct Cyc_Core_NewDynamicRegion Cyc_Core_new_ukey() {
+  struct Cyc_Core_NewDynamicRegion res;
+  res.key = GC_malloc(sizeof(struct Cyc_Core_DynamicRegion));
+  if (!res.key)
+    _throw_badalloc();
+  res.key->h = _new_region("dynamic_unique");
+  return res;
+}
+// Destroy a dynamic region, given the unique key to it.
+void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
+  _free_region(&k->h);
+  GC_free(k);
+}
+
+// Create a new dynamic region and return a reference-counted pointer 
+// for the key.
+struct Cyc_Core_NewDynamicRegion Cyc_Core_new_rckey() {
+  struct Cyc_Core_NewDynamicRegion res;
+  int *krc = GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion));
+  //fprintf(stderr,"creating rckey.  Initial address is %x\n",krc);fflush(stderr);
+  if (!krc)
+    _throw_badalloc();
+  *krc = 1;
+  res.key = (struct Cyc_Core_DynamicRegion *)(krc + 1);
+  //fprintf(stderr,"results key address is %x\n",res.key);fflush(stderr);
+  res.key->h = _new_region("dynamic_refcnt");
+  return res;
+}
+// Drop a reference for a dynamic region, possibly freeing it.
+void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
+  //fprintf(stderr,"freeing rckey %x\n",k);
+  int *p = ((int *)k) - 1;
+  //fprintf(stderr,"count is address %x, value %d\n",p,*p);
+  unsigned c = (*p) - 1;
+  if (c >= *p) {
+    fprintf(stderr,"internal error: free rckey bad count");
+    exit(1);
+  }
+  *p = c;
+  if (c == 0) {
+    //fprintf(stderr,"count at zero, freeing region\n");
+    _free_region(&k->h);
+    //fprintf(stderr,"freeing ref-counted pointer\n");
+    GC_free(p);
+  }
+}
+
+// Open a key (unique or reference-counted), extract the handle
+// for the dynamic region, and pass it along with env to the
+// body function pointer, returning the result.
+void *Cyc_Core_open_region(struct Cyc_Core_DynamicRegion *k,
+                           void *env,
+                           void *body(struct _RegionHandle *h,
+                                      void *env)) {
+  return body(&k->h,env);
+}
 
 #ifdef CYC_REGION_PROFILE
 
