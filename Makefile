@@ -33,7 +33,7 @@ cyclone:
 	$(MAKE) install -C bin/genfiles
 
 tools:
-	$(MAKE) install -C tools/cycbison
+	$(MAKE) install -C tools/bison
 	$(MAKE) install -C tools/cyclex
 #	$(MAKE) install -C tools/cycocamllex
 .PHONY: tools
