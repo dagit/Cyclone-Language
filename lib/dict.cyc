@@ -428,9 +428,9 @@ dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
     int ind = 0;
     while(ind != -1) {
       let &T(_,l,r,$(k,v)) = queue[ind--];
-      if(ind + 2 >= queue.size)
-        queue = rnew(temp) {for i < queue.size*2 : 
-                            i < queue.size ? queue[i] : (Tree_t<`a,`b,`r>)d2.t};
+      if(ind + 2 >= numelts(queue))
+        queue = rnew(temp) {for i < numelts(queue)*2 : 
+                            i < numelts(queue) ? queue[i] : (Tree_t<`a,`b,`r>)d2.t};
       if(l != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)l;
       if(r != NULL) queue[++ind] = (Tree_t<`a,`b,`r>)r;
       if(Dict::member(d1,k))
@@ -606,8 +606,8 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
 dict_t<`a,`b> unmarshal(region_t<`r> rgn,
 			`c @`H env,
 			int (@`H cmp)(`a,`a),
-			`a (read_key<`a,`c>)(`c @`H, FILE @`r2),
-			`b (read_val<`b,`c>)(`c @`H, FILE @`r2),
+			`a (read_key<`a,`c::A>)(`c @`H, FILE @`r2),
+			`b (read_val<`b,`c::A>)(`c @`H, FILE @`r2),
 			FILE @`r2 fp)
 {
   dict_t<`a,`b,`H> dict = empty(cmp);

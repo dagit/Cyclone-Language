@@ -32,7 +32,7 @@ using Array;
 #define allocstr(s) ((stringptr_t) (new (string_t)s))
 
 void test_begin(string_t t) {
-  int x = 12-t.size;
+  int x = 12-numelts(t);
   if (x<0) x=1;
   mstring_t padding = new { for i < x : 0 };
   for (unsigned i = 0; i < x-1; i++) padding[i] = ' ';
@@ -73,8 +73,8 @@ int test_list_cmp(int cmp(`a,`a),list_t<`a> x,list_t<`a> y) {
 }
 
 int array_cmp(int cmp(`a,`a),`a ?x,`a ?y) {
-  int sx = x.size;
-  int sy = y.size;
+  int sx = numelts(x);
+  int sy = numelts(y);
   if (sx > sy) return 1;
   if (sx < sy) return -1;
   int c;
@@ -241,11 +241,11 @@ void list_test() {
 void array_test() {
   // could definitely use more tests
   test_begin("Array");
-  unsigned int ?-x = new { for i < 6 : 2*i }; // Note, not int ?x
-  unsigned int ?-xp = x+3;
+  unsigned int ?x = new { for i < 6 : 2*i }; // Note, not int ?x
+  unsigned int ?xp = x+3;
   okfail(Core::arr_prevsize(xp,sizeof(*xp)) == 3);
-  unsigned char ?-c = new { for i < 8 : '\0' };
-  unsigned char ?-cp = c + 7;
+  unsigned char ?c = new { for i < 8 : '\0' };
+  unsigned char ?cp = c + 7;
   okfail(Core::arr_prevsize(cp,sizeof(*cp)) == 7);
   for (int i=0; i<6; i++)
     okfail(x[i]==2*i);
@@ -273,7 +273,7 @@ void array_test() {
   Array::imp_map(add2,z4);
   okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,NULL)));
   $(int,int) ?z5 = new {for i < 10 : $((int)(i),(int)(i)) };
-  okfail(10==z5.size);
+  okfail(10==numelts(z5));
   $(int ?,int ?) pair = Array::split(z5);
   okfail(0==array_cmp(int_cmp,pair[0],pair[1]));
   test_end();
@@ -797,8 +797,8 @@ void arg_test(string_t<`H> ?`H args) {
   // NOTE, TO TEST IT GIVE IT SOME ARGS!
   test_begin("Arg");
 
-  if (args.size<=0) fail();
-  else if (args.size==1) ok();
+  if (numelts(args)<=0) fail();
+  else if (numelts(args)==1) ok();
   else {
     arg_t u = new $("-u",false,"",(spec_t)(new Unit_spec(u_foo)),"unit");
     let s_foo = new false;

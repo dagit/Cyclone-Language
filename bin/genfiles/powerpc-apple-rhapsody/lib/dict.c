@@ -25,11 +25,6 @@ extern int setjmp(jmp_buf);
 #endif
 
 /* Tagged arrays */
-struct _dynforward_ptr {
-  unsigned char *curr;
-  unsigned char *last_plus_one;
-};
-
 struct _dyneither_ptr {
   unsigned char *curr; 
   unsigned char *base; 
@@ -476,23 +471,9 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   return _cus_ans;
 }
-static _INLINE unsigned char *
-_check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
-  struct _dynforward_ptr _cus_arr = (arr);
-  unsigned _cus_elt_sz = (elt_sz);
-  unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  return _cus_ans;
-}
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  _cus_ans; })
-#define _check_dynforward_subscript(arr,elt_sz,index) ({ \
-  struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
@@ -511,18 +492,6 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
     _throw_arraybounds();
   return _cus_ans;
 }
-static _INLINE unsigned char *
-_check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
-  struct _dynforward_ptr _cus_arr = (arr);
-  unsigned _cus_elt_sz = (elt_sz);
-  unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
-    _throw_arraybounds();
-  return _cus_ans;
-}
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -531,16 +500,6 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.base) _throw_null(); \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
-    _throw_arraybounds(); \
-  _cus_ans; })
-#define _check_dynforward_subscript(arr,elt_sz,index) ({ \
-  struct _dynforward_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -554,23 +513,11 @@ _tag_dyneither(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts);
   return _tag_arr_ans;
 }
-static _INLINE struct _dynforward_ptr
-_tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
-  struct _dynforward_ptr _tag_arr_ans;
-  _tag_arr_ans.curr = (void*)(tcurr);
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.curr + (elt_sz) * (num_elts);
-  return _tag_arr_ans;
-}
 #else
 #define _tag_dyneither(tcurr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _tag_arr_ans; \
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
-  _tag_arr_ans; })
-#define _tag_dynforward(tcurr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr _tag_arr_ans; \
-  _tag_arr_ans.curr = (void*)(tcurr); \
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.curr + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 #endif
 
@@ -584,15 +531,6 @@ _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
   _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
-static _INLINE struct _dynforward_ptr *
-_init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
-                    void *arr, unsigned elt_sz, unsigned num_elts) {
-  struct _dynforward_ptr *_itarr_ptr = (arr_ptr);
-  void* _itarr = (arr);
-  _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
-  return _itarr_ptr;
-}
 #else
 #define _init_dyneither_ptr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr *_itarr_ptr = (arr_ptr); \
@@ -600,16 +538,9 @@ _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
-#define _init_dynforward_ptr(arr_ptr,arr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr *_itarr_ptr = (arr_ptr); \
-  void* _itarr = (arr); \
-  _itarr_ptr->curr = _itarr; \
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
-  _itarr_ptr; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _untag_dynforward_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #ifdef _INLINE_FUNCTIONS
@@ -622,26 +553,11 @@ _untag_dyneither_ptr(struct _dyneither_ptr arr,
     _throw_arraybounds();
   return _curr;
 }
-static _INLINE unsigned char *
-_untag_dynforward_ptr(struct _dynforward_ptr arr, 
-                      unsigned elt_sz,unsigned num_elts) {
-  struct _dynforward_ptr _arr = (arr);
-  unsigned char *_curr = _arr.curr;
-  if (_curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
-    _throw_arraybounds();
-  return _curr;
-}
 #else
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
-    _throw_arraybounds(); \
-  _curr; })
-#define _untag_dynforward_ptr(arr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr _arr = (arr); \
-  unsigned char *_curr = _arr.curr; \
-  if (_curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -657,14 +573,6 @@ _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
           _get_arr_size_curr >= _get_arr_size_last) ? 0 :
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
 }
-static _INLINE unsigned
-_get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
-  struct _dynforward_ptr _get_arr_size_temp = (arr);
-  unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
-  unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one;
-  return (_get_arr_size_curr >= _get_arr_size_last) ? 0 :
-    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
-}
 #else
 #define _get_dyneither_size(arr,elt_sz) \
   ({struct _dyneither_ptr _get_arr_size_temp = (arr); \
@@ -672,12 +580,6 @@ _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
     unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
     (_get_arr_size_curr < _get_arr_size_temp.base || \
      _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
-    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
-#define _get_dynforward_size(arr,elt_sz) \
-  ({struct _dynforward_ptr _get_arr_size_temp = (arr); \
-    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
-    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
-    (_get_arr_size_curr >= _get_arr_size_last) ? 0 : \
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
 #endif
 
@@ -688,32 +590,10 @@ _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
   _ans.curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-/* Here we have to worry about wrapping around, so if we go past the
- * end, we set the end to 0. */
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
-  struct _dynforward_ptr _ans = (arr);
-  unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - 
-                             ((unsigned)_ans.curr)) / elt_sz;
-  if (change < 0 || ((unsigned)change) > _dfpp_elts)
-    _ans.last_plus_one = 0;
-  _ans.curr += ((int)(elt_sz))*(change);
-  return _ans;
-}
 #else
 #define _dyneither_ptr_plus(arr,elt_sz,change) ({ \
   struct _dyneither_ptr _ans = (arr); \
   _ans.curr += ((int)(elt_sz))*(change); \
-  _ans; })
-#define _dynforward_ptr_plus(arr,elt_sz,change) ({ \
-  struct _dynforward_ptr _ans = (arr); \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - \
-                            ((unsigned)_ans.curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _ans.last_plus_one = 0; \
-  _ans.curr += ((int)(_dfpp_elt_sz))*(_dfpp_change); \
   _ans; })
 #endif
 
@@ -725,31 +605,10 @@ _dyneither_ptr_inplace_plus(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return *_arr_ptr;
 }
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
-                             int change) {
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr);
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - 
-                             ((unsigned)_arr_ptr->curr)) / elt_sz;
-  if (change < 0 || ((unsigned)change) > _dfpp_elts) 
-    _arr_ptr->last_plus_one = 0;
-  _arr_ptr->curr += ((int)(elt_sz))*(change);
-  return *_arr_ptr;
-}
 #else
 #define _dyneither_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
   struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
-  *_arr_ptr; })
-#define _dynforward_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr); \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - \
-                            ((unsigned)_arr_ptr->curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _arr_ptr->last_plus_one = 0; \
-  _arr_ptr->curr += ((int)(_dfpp_elt_sz))*(_dfpp_change); \
   *_arr_ptr; })
 #endif
 
@@ -761,32 +620,10 @@ _dyneither_ptr_inplace_plus_post(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,int change) {
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr);
-  struct _dynforward_ptr _ans = *_arr_ptr;
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - 
-                            ((unsigned)_arr_ptr->curr)) / elt_sz; 
-  if (change < 0 || ((unsigned)change) > _dfpp_elts) 
-    _arr_ptr->last_plus_one = 0; 
-  _arr_ptr->curr += ((int)(elt_sz))*(change);
-  return _ans;
-}
 #else
 #define _dyneither_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
   struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
   struct _dyneither_ptr _ans = *_arr_ptr; \
-  _arr_ptr->curr += ((int)(elt_sz))*(change); \
-  _ans; })
-#define _dynforward_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr); \
-  struct _dynforward_ptr _ans = *_arr_ptr; \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - \
-                            ((unsigned)_arr_ptr->curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _arr_ptr->last_plus_one = 0; \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 #endif
@@ -801,49 +638,6 @@ _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
   x.last_plus_one -= sz * numelts; 
   return x; 
 }
-static struct 
-_dynforward_ptr _dynforward_ptr_decrease_size(struct _dynforward_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
-  if (x.last_plus_one != 0)
-    x.last_plus_one -= sz * numelts; 
-  return x; 
-}
-
-/* Convert between the two forms of dynamic pointers */
-#ifdef _INLINE_FUNCTIONS 
-static struct _dynforward_ptr
-_dyneither_to_dynforward(struct _dyneither_ptr p) {
-  struct _dynforward_ptr res;
-  res.curr = p.curr;
-  res.last_plus_one = (p.base == 0) ? 0 : p.last_plus_one;
-  return res;
-}
-static struct _dyneither_ptr
-_dynforward_to_dyneither(struct _dynforward_ptr p) {
-  struct _dyneither_ptr res;
-  res.base = res.curr = p.curr;
-  res.last_plus_one = p.last_plus_one;
-  if (p.last_plus_one == 0) 
-    res.base = 0;
-  return res;
-}
-#else 
-#define _dyneither_to_dynforward(_dnfptr) ({ \
-  struct _dyneither_ptr _dnfp = (_dnfptr); \
-  struct _dynforward_ptr _dnfpres; \
-  _dnfpres.curr = _dnfp.curr; \
-  _dnfpres.last_plus_one = (_dnfp.base == 0) ? 0 : _dnfp.last_plus_one; \
-  _dnfpres; })
-#define _dynforward_to_dyneither(_dfnptr) ({ \
-  struct _dynforward_ptr _dfnp = (_dfnptr); \
-  struct _dyneither_ptr _dfnres; \
-  _dfnres.base = _dfnres.curr = _dfnp.curr; \
-  _dfnres.last_plus_one = _dfnp.last_plus_one; \
-  if (_dfnp.last_plus_one == 0) \
-    _dfnres.base = 0; \
-  _dfnres; })
-#endif 
 
 /* Allocation */
 extern void* GC_malloc(int);
@@ -904,18 +698,12 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
 
-/* the next three routines swap [x] and [y]; not thread safe! */
+/* the next two routines swap [x] and [y]; not thread safe! */
 static _INLINE void _swap_word(void *x, void *y) {
   unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
   tmp = *lx;
   *lx = *ly;
   *ly = tmp;
-}
-static _INLINE void _swap_dynforward(struct _dynforward_ptr *x, 
-				    struct _dynforward_ptr *y) {
-  struct _dynforward_ptr tmp = *x;
-  *x = *y;
-  *y = tmp;
 }
 static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
 				   struct _dyneither_ptr *y) {
@@ -925,26 +713,26 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
 void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
-Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;extern char Cyc_Core_Open_Region[
-16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
+struct _RegionHandle*Cyc_Core_heap_region;extern char Cyc_Core_Open_Region[16];
+extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*
 tl;};int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[
 18];extern char Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,
 void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc___cycFILE;
 struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
+_dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
 int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
 Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
 unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
 int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
 int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
+_dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
 int Cyc_getw(struct Cyc___cycFILE*);extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
-18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_Dict_T;
+18];struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Dict_T;
 struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*
 t;};extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];struct Cyc_Dict_Dict
 Cyc_Dict_empty(int(*cmp)(void*,void*));struct Cyc_Dict_Dict Cyc_Dict_rempty(struct
@@ -999,8 +787,8 @@ _RegionHandle*rgn,struct Cyc_Dict_Dict d);void*Cyc_Dict_marshal(struct
 _RegionHandle*rgn,void*env,void*(*write_key)(void*,struct Cyc___cycFILE*,void*),
 void*(*write_val)(void*,struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*fp,
 struct Cyc_Dict_Dict dict);struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct
-_RegionHandle*rgn,void**env,int(*cmp)(void*,void*),void*(*read_key)(void**,
-struct Cyc___cycFILE*),void*(*read_val)(void**,struct Cyc___cycFILE*),struct Cyc___cycFILE*
+_RegionHandle*rgn,void*env,int(*cmp)(void*,void*),void*(*read_key)(void*,struct
+Cyc___cycFILE*),void*(*read_val)(void*,struct Cyc___cycFILE*),struct Cyc___cycFILE*
 fp);char Cyc_Dict_Absent[11]="\000\000\000\000Absent\000";char Cyc_Dict_Present[12]="\000\000\000\000Present\000";
 struct Cyc_Dict_T{void*color;struct Cyc_Dict_T*left;struct Cyc_Dict_T*right;struct
 _tuple0 key_val;};struct Cyc_Dict_Dict;struct Cyc_Dict_Dict Cyc_Dict_rempty(struct
@@ -1338,34 +1126,34 @@ return d1;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(void*,void*,void
 void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);static void _tmp15A(
 struct Cyc_Dict_Dict*d2,unsigned int*_tmp159,unsigned int*_tmp158,struct Cyc_Dict_T***
 _tmp157){for(*_tmp159=0;*_tmp159 < *_tmp158;(*_tmp159)++){(*_tmp157)[*_tmp159]=(
-struct Cyc_Dict_T*)(*d2).t;}}static void _tmp160(struct _dynforward_ptr*queue,struct
+struct Cyc_Dict_T*)(*d2).t;}}static void _tmp160(struct _dyneither_ptr*queue,struct
 Cyc_Dict_Dict*d2,unsigned int*_tmp15F,unsigned int*_tmp15E,struct Cyc_Dict_T***
 _tmp15C){for(*_tmp15F=0;*_tmp15F < *_tmp15E;(*_tmp15F)++){(*_tmp15C)[*_tmp15F]=*
-_tmp15F < _get_dynforward_size(*queue,sizeof(struct Cyc_Dict_T*))?*((struct Cyc_Dict_T**)
-_check_dynforward_subscript(*queue,sizeof(struct Cyc_Dict_T*),(int)*_tmp15F)):(
+_tmp15F < _get_dyneither_size(*queue,sizeof(struct Cyc_Dict_T*))?*((struct Cyc_Dict_T**)
+_check_dyneither_subscript(*queue,sizeof(struct Cyc_Dict_T*),(int)*_tmp15F)):(
 struct Cyc_Dict_T*)(*d2).t;}}struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(
 void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2){
 if((int)d1.t == (int)d2.t  || d2.t == 0)return d2;{struct Cyc_Dict_T*_tmpE1=0;{struct
 _RegionHandle _tmpE2=_new_region("temp");struct _RegionHandle*temp=& _tmpE2;
 _push_region(temp);{unsigned int _tmp159;unsigned int _tmp158;struct Cyc_Dict_T**
-_tmp157;unsigned int _tmp156;struct _dynforward_ptr queue=_tag_dynforward(((_tmp156=(
+_tmp157;unsigned int _tmp156;struct _dyneither_ptr queue=_tag_dyneither(((_tmp156=(
 unsigned int)16,((_tmp157=(struct Cyc_Dict_T**)_region_malloc(temp,_check_times(
 sizeof(struct Cyc_Dict_T*),_tmp156)),((((_tmp158=_tmp156,_tmp15A(& d2,& _tmp159,&
 _tmp158,& _tmp157))),_tmp157)))))),sizeof(struct Cyc_Dict_T*),(unsigned int)16);
 int ind=0;while(ind != - 1){struct Cyc_Dict_T _tmpE4;struct Cyc_Dict_T*_tmpE5;struct
 Cyc_Dict_T*_tmpE6;struct _tuple0 _tmpE7;void*_tmpE8;void*_tmpE9;struct Cyc_Dict_T*
-_tmpE3=*((struct Cyc_Dict_T**)_check_dynforward_subscript(queue,sizeof(struct Cyc_Dict_T*),
+_tmpE3=*((struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(struct Cyc_Dict_T*),
 ind --));_tmpE4=*_tmpE3;_tmpE5=_tmpE4.left;_tmpE6=_tmpE4.right;_tmpE7=_tmpE4.key_val;
-_tmpE8=_tmpE7.f1;_tmpE9=_tmpE7.f2;if(ind + 2 >= _get_dynforward_size(queue,sizeof(
+_tmpE8=_tmpE7.f1;_tmpE9=_tmpE7.f2;if(ind + 2 >= _get_dyneither_size(queue,sizeof(
 struct Cyc_Dict_T*))){unsigned int _tmp15F;unsigned int _tmp15E;struct
-_dynforward_ptr _tmp15D;struct Cyc_Dict_T**_tmp15C;unsigned int _tmp15B;queue=((
-_tmp15B=_get_dynforward_size(queue,sizeof(struct Cyc_Dict_T*))* 2,((_tmp15C=(
+_dyneither_ptr _tmp15D;struct Cyc_Dict_T**_tmp15C;unsigned int _tmp15B;queue=((
+_tmp15B=_get_dyneither_size(queue,sizeof(struct Cyc_Dict_T*))* 2,((_tmp15C=(
 struct Cyc_Dict_T**)_region_malloc(temp,_check_times(sizeof(struct Cyc_Dict_T*),
-_tmp15B)),((_tmp15D=_tag_dynforward(_tmp15C,sizeof(struct Cyc_Dict_T*),_tmp15B),((((
+_tmp15B)),((_tmp15D=_tag_dyneither(_tmp15C,sizeof(struct Cyc_Dict_T*),_tmp15B),((((
 _tmp15E=_tmp15B,_tmp160(& queue,& d2,& _tmp15F,& _tmp15E,& _tmp15C))),_tmp15D))))))));}
-if(_tmpE5 != 0)*((struct Cyc_Dict_T**)_check_dynforward_subscript(queue,sizeof(
+if(_tmpE5 != 0)*((struct Cyc_Dict_T**)_check_dyneither_subscript(queue,sizeof(
 struct Cyc_Dict_T*),++ ind))=(struct Cyc_Dict_T*)_tmpE5;if(_tmpE6 != 0)*((struct Cyc_Dict_T**)
-_check_dynforward_subscript(queue,sizeof(struct Cyc_Dict_T*),++ ind))=(struct Cyc_Dict_T*)
+_check_dyneither_subscript(queue,sizeof(struct Cyc_Dict_T*),++ ind))=(struct Cyc_Dict_T*)
 _tmpE6;if(Cyc_Dict_member(d1,_tmpE8)){struct _tuple0 _tmp161;_tmpE1=Cyc_Dict_ins(
 d2.r,d2.rel,((_tmp161.f1=_tmpE8,((_tmp161.f2=f(env,_tmpE8,Cyc_Dict_lookup(d1,
 _tmpE8),_tmpE9),_tmp161)))),_tmpE1);}}};_pop_region(temp);}{struct Cyc_Dict_Dict
@@ -1451,57 +1239,56 @@ int(*f)(struct _tuple9*,void*,void*),struct _tuple9*f_env,struct Cyc_Dict_Dict d
 Cyc_Dict_rfilter_c)(d.r,Cyc_Dict_delete_f,& _tmp10A,d);}}struct Cyc_Dict_Dict Cyc_Dict_delete(
 struct Cyc_Dict_Dict d,void*x);struct Cyc_Dict_Dict Cyc_Dict_delete(struct Cyc_Dict_Dict
 d,void*x){return Cyc_Dict_rdelete(Cyc_Core_heap_region,d,x);}struct _tuple10{
-struct _dynforward_ptr f1;int f2;};int Cyc_Dict_iter_f(struct _tuple10*stk,struct
+struct _dyneither_ptr f1;int f2;};int Cyc_Dict_iter_f(struct _tuple10*stk,struct
 _tuple0*dest);int Cyc_Dict_iter_f(struct _tuple10*stk,struct _tuple0*dest){struct
-_tuple10 _tmp10D;struct _dynforward_ptr _tmp10E;int _tmp10F;int*_tmp110;struct
+_tuple10 _tmp10D;struct _dyneither_ptr _tmp10E;int _tmp10F;int*_tmp110;struct
 _tuple10*_tmp10C=stk;_tmp10D=*_tmp10C;_tmp10E=_tmp10D.f1;_tmp10F=_tmp10D.f2;
 _tmp110=(int*)&(*_tmp10C).f2;{int _tmp111=*_tmp110;if(_tmp111 == - 1)return 0;{
-struct Cyc_Dict_T*_tmp112=*((struct Cyc_Dict_T**)_check_dynforward_subscript(
+struct Cyc_Dict_T*_tmp112=*((struct Cyc_Dict_T**)_check_dyneither_subscript(
 _tmp10E,sizeof(struct Cyc_Dict_T*),_tmp111));*dest=((struct Cyc_Dict_T*)
 _check_null(_tmp112))->key_val;-- _tmp111;if((unsigned int)_tmp112->left)*((
-struct Cyc_Dict_T**)_check_dynforward_subscript(_tmp10E,sizeof(struct Cyc_Dict_T*),
+struct Cyc_Dict_T**)_check_dyneither_subscript(_tmp10E,sizeof(struct Cyc_Dict_T*),
 ++ _tmp111))=_tmp112->left;if((unsigned int)_tmp112->right)*((struct Cyc_Dict_T**)
-_check_dynforward_subscript(_tmp10E,sizeof(struct Cyc_Dict_T*),++ _tmp111))=
-_tmp112->right;*_tmp110=_tmp111;return 1;}}}struct Cyc_Iter_Iter Cyc_Dict_make_iter(
-struct _RegionHandle*rgn,struct Cyc_Dict_Dict d);static void _tmp16F(unsigned int*
-_tmp16E,unsigned int*_tmp16D,struct Cyc_Dict_T***_tmp16B,struct Cyc_Dict_T**
-_tmp113){for(*_tmp16E=0;*_tmp16E < *_tmp16D;(*_tmp16E)++){(*_tmp16B)[*_tmp16E]=*
-_tmp113;}}struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct
-Cyc_Dict_Dict d){int half_max_size=1;struct Cyc_Dict_T*_tmp113=d.t;while(_tmp113 != 
-0){_tmp113=_tmp113->left;++ half_max_size;}_tmp113=d.t;{unsigned int _tmp16E;
-unsigned int _tmp16D;struct _dynforward_ptr _tmp16C;struct Cyc_Dict_T**_tmp16B;
-unsigned int _tmp16A;struct _dynforward_ptr _tmp114=(_tmp16A=(unsigned int)(2 * 
-half_max_size),((_tmp16B=(struct Cyc_Dict_T**)_region_malloc(rgn,_check_times(
-sizeof(struct Cyc_Dict_T*),_tmp16A)),((_tmp16C=_tag_dynforward(_tmp16B,sizeof(
-struct Cyc_Dict_T*),_tmp16A),((((_tmp16D=_tmp16A,_tmp16F(& _tmp16E,& _tmp16D,&
-_tmp16B,& _tmp113))),_tmp16C)))))));struct _tuple10*_tmp172;struct Cyc_Iter_Iter
-_tmp171;return(_tmp171.env=(void*)((_tmp172=_region_malloc(rgn,sizeof(*_tmp172)),((
-_tmp172->f1=_tmp114,((_tmp172->f2=(unsigned int)_tmp113?0: - 1,_tmp172)))))),((
-_tmp171.next=(int(*)(void*env,void*dest))Cyc_Dict_iter_f,_tmp171)));}}void*Cyc_Dict_marshal(
-struct _RegionHandle*rgn,void*env,void*(*write_key)(void*,struct Cyc___cycFILE*,
-void*),void*(*write_val)(void*,struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*
-fp,struct Cyc_Dict_Dict dict);void*Cyc_Dict_marshal(struct _RegionHandle*rgn,void*
-env,void*(*write_key)(void*,struct Cyc___cycFILE*,void*),void*(*write_val)(void*,
-struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*fp,struct Cyc_Dict_Dict dict){
-struct Cyc_List_List*dict_list=Cyc_Dict_rto_list(rgn,dict);int len=((int(*)(struct
-Cyc_List_List*x))Cyc_List_length)(dict_list);{struct Cyc_Core_Failure_struct
-_tmp178;const char*_tmp177;struct Cyc_Core_Failure_struct*_tmp176;(int)_throw((
-void*)((_tmp176=_cycalloc(sizeof(*_tmp176)),((_tmp176[0]=((_tmp178.tag=Cyc_Core_Failure,((
-_tmp178.f1=((_tmp177="Dict::marshal: Write failure",_tag_dynforward(_tmp177,
-sizeof(char),_get_zero_arr_size_char(_tmp177,29)))),_tmp178)))),_tmp176)))));}
-while(dict_list != 0){env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))
+_check_dyneither_subscript(_tmp10E,sizeof(struct Cyc_Dict_T*),++ _tmp111))=_tmp112->right;*
+_tmp110=_tmp111;return 1;}}}struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct
+_RegionHandle*rgn,struct Cyc_Dict_Dict d);static void _tmp16F(unsigned int*_tmp16E,
+unsigned int*_tmp16D,struct Cyc_Dict_T***_tmp16B,struct Cyc_Dict_T**_tmp113){for(*
+_tmp16E=0;*_tmp16E < *_tmp16D;(*_tmp16E)++){(*_tmp16B)[*_tmp16E]=*_tmp113;}}
+struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict
+d){int half_max_size=1;struct Cyc_Dict_T*_tmp113=d.t;while(_tmp113 != 0){_tmp113=
+_tmp113->left;++ half_max_size;}_tmp113=d.t;{unsigned int _tmp16E;unsigned int
+_tmp16D;struct _dyneither_ptr _tmp16C;struct Cyc_Dict_T**_tmp16B;unsigned int
+_tmp16A;struct _dyneither_ptr _tmp114=(_tmp16A=(unsigned int)(2 * half_max_size),((
+_tmp16B=(struct Cyc_Dict_T**)_region_malloc(rgn,_check_times(sizeof(struct Cyc_Dict_T*),
+_tmp16A)),((_tmp16C=_tag_dyneither(_tmp16B,sizeof(struct Cyc_Dict_T*),_tmp16A),((((
+_tmp16D=_tmp16A,_tmp16F(& _tmp16E,& _tmp16D,& _tmp16B,& _tmp113))),_tmp16C)))))));
+struct _tuple10*_tmp172;struct Cyc_Iter_Iter _tmp171;return(_tmp171.env=(void*)((
+_tmp172=_region_malloc(rgn,sizeof(*_tmp172)),((_tmp172->f1=_tmp114,((_tmp172->f2=(
+unsigned int)_tmp113?0: - 1,_tmp172)))))),((_tmp171.next=(int(*)(void*env,void*
+dest))Cyc_Dict_iter_f,_tmp171)));}}void*Cyc_Dict_marshal(struct _RegionHandle*rgn,
+void*env,void*(*write_key)(void*,struct Cyc___cycFILE*,void*),void*(*write_val)(
+void*,struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*fp,struct Cyc_Dict_Dict dict);
+void*Cyc_Dict_marshal(struct _RegionHandle*rgn,void*env,void*(*write_key)(void*,
+struct Cyc___cycFILE*,void*),void*(*write_val)(void*,struct Cyc___cycFILE*,void*),
+struct Cyc___cycFILE*fp,struct Cyc_Dict_Dict dict){struct Cyc_List_List*dict_list=
+Cyc_Dict_rto_list(rgn,dict);int len=((int(*)(struct Cyc_List_List*x))Cyc_List_length)(
+dict_list);{struct Cyc_Core_Failure_struct _tmp178;const char*_tmp177;struct Cyc_Core_Failure_struct*
+_tmp176;(int)_throw((void*)((_tmp176=_cycalloc(sizeof(*_tmp176)),((_tmp176[0]=((
+_tmp178.tag=Cyc_Core_Failure,((_tmp178.f1=((_tmp177="Dict::marshal: Write failure",
+_tag_dyneither(_tmp177,sizeof(char),29))),_tmp178)))),_tmp176)))));}while(
+dict_list != 0){env=((void*(*)(void*,struct Cyc___cycFILE*,struct _tuple0*))
 write_key)(env,fp,(struct _tuple0*)dict_list->hd);env=((void*(*)(void*,struct Cyc___cycFILE*,
 struct _tuple0*))write_val)(env,fp,(struct _tuple0*)dict_list->hd);dict_list=
 dict_list->tl;}return env;}struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct
-_RegionHandle*rgn,void**env,int(*cmp)(void*,void*),void*(*read_key)(void**,
-struct Cyc___cycFILE*),void*(*read_val)(void**,struct Cyc___cycFILE*),struct Cyc___cycFILE*
-fp);struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct _RegionHandle*rgn,void**env,int(*
-cmp)(void*,void*),void*(*read_key)(void**,struct Cyc___cycFILE*),void*(*read_val)(
-void**,struct Cyc___cycFILE*),struct Cyc___cycFILE*fp){struct Cyc_Dict_Dict dict=Cyc_Dict_empty(
+_RegionHandle*rgn,void*env,int(*cmp)(void*,void*),void*(*read_key)(void*,struct
+Cyc___cycFILE*),void*(*read_val)(void*,struct Cyc___cycFILE*),struct Cyc___cycFILE*
+fp);struct Cyc_Dict_Dict Cyc_Dict_unmarshal(struct _RegionHandle*rgn,void*env,int(*
+cmp)(void*,void*),void*(*read_key)(void*,struct Cyc___cycFILE*),void*(*read_val)(
+void*,struct Cyc___cycFILE*),struct Cyc___cycFILE*fp){struct Cyc_Dict_Dict dict=Cyc_Dict_empty(
 cmp);int len=Cyc_getw(fp);if(len == - 1){struct Cyc_Core_Failure_struct _tmp17E;const
 char*_tmp17D;struct Cyc_Core_Failure_struct*_tmp17C;(int)_throw((void*)((_tmp17C=
 _cycalloc(sizeof(*_tmp17C)),((_tmp17C[0]=((_tmp17E.tag=Cyc_Core_Failure,((
-_tmp17E.f1=((_tmp17D="Dict::unmarshal: list length is -1",_tag_dynforward(
-_tmp17D,sizeof(char),_get_zero_arr_size_char(_tmp17D,35)))),_tmp17E)))),_tmp17C)))));}{
-int i=0;for(0;i < len;++ i){void*key=read_key(env,fp);void*val=read_val(env,fp);
-dict=Cyc_Dict_insert(dict,key,val);}}return dict;}
+_tmp17E.f1=((_tmp17D="Dict::unmarshal: list length is -1",_tag_dyneither(_tmp17D,
+sizeof(char),35))),_tmp17E)))),_tmp17C)))));}{int i=0;for(0;i < len;++ i){void*key=
+read_key(env,fp);void*val=read_val(env,fp);dict=Cyc_Dict_insert(dict,key,val);}}
+return dict;}

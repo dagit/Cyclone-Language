@@ -32,7 +32,7 @@ void doit(string_t file) {
 
 int main(int argc, string_t ? argv) {
   argv++; // skip the name of the executable
-  for (int n = argv.size; n > 0; n--,argv++)
+  for (int n = numelts(argv); n > 0; n--,argv++)
     doit(*argv);
   return 0;
 }

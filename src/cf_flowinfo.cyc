@@ -219,7 +219,7 @@ aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
   aggrdict_t<`r> d = rnew(fenv->r) { for i < sz: fenv->unknown_all };
   for(int i = 0; i < sz; i++, fs = fs->tl) {
     let &Aggrfield(n,_,t2,_,_) = fs->hd;
-    if((*n).size != 1) 
+    if(numelts(*n) != 1) 
       d[i] = i_typ_to_absrval(fenv, false, t2,leafval);
   }
   return d;
@@ -328,7 +328,7 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   switch(r) {
   case &AddressOf(p): add_place(pile, p); return;
   case &Aggregate(d): 
-    for (int i = 0; i < d.size; i++) 
+    for (int i = 0; i < numelts(d); i++) 
       add_places(pile, d[i]);
     return;
   default: return;
@@ -342,7 +342,7 @@ static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
                                         absRval_t<`r> old_val) {
   switch(old_val) {
   case &Aggregate(d): 
-    aggrdict_t d2 = rnew(r) { for i < d.size : 
+    aggrdict_t d2 = rnew(r) { for i < numelts(d) : 
                               insert_place_inner(r,new_val,d[i]) };
     return rnew(r) Aggregate(d2);
   default: return new_val;
@@ -355,7 +355,7 @@ static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
                                        int n, absRval_t<`r> rval) {
   let old_rval = d[n];
   if (old_rval == rval) return d;
-  aggrdict_t res = rnew(r) {for i < d.size : d[i]};
+  aggrdict_t res = rnew(r) {for i < numelts(d) : d[i]};
   res[n] = rval;
   return res;
 }
@@ -440,7 +440,7 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   if(acc == NoneIL) return NoneIL;
   switch(r) {
   case &Aggregate(d): 
-    let sz = d.size;
+    let sz = numelts(d);
     this_ans = AllIL;
     for (int i = 0; i < sz; i++) 
       this_ans = initlevel_rec(env,d[i],this_ans);
@@ -486,7 +486,7 @@ static bool is_rval_unescaped(absRval_t rval) {
   switch(rval) {
   case &Esc(_):       return false;
   case &Aggregate(d): 
-    unsigned sz = d.size;
+    unsigned sz = numelts(d);
     for (int i = 0; i < sz; i++) 
       if (!is_rval_unescaped(d[i])) return false;
     return true;
@@ -526,18 +526,18 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
     return env->fenv->esc_all;
   case $(&Aggregate(d1), &Aggregate(d2)):
     aggrdict_t new_d = 
-      rnew(env->fenv->r) {for i < d1.size : assign_place_inner(env,d1[i],d2[i]) };
+      rnew(env->fenv->r) {for i < numelts(d1) : assign_place_inner(env,d1[i],d2[i]) };
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d1[i]) {
         change = true; break;
       }
     if (!change)
       return oldval;
     change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d2[i]) {
         change = true; break;
       }
@@ -657,19 +657,19 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
 
   case $(&Aggregate(d1), &Aggregate(d2)):
     aggrdict_t new_d = 
-      rnew(rgn) {for i < d1.size : join_absRval(env,0,d1[i],d2[i]) };
+      rnew(rgn) {for i < numelts(d1) : join_absRval(env,0,d1[i],d2[i]) };
 
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d1[i]) {
         change = true; break;
       }
     if (!change)
       return r1;
     change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d2[i]) {
         change = true; break;
       }
@@ -710,9 +710,9 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
   switch ($(r1,r2)) {
   case $(EqualConst(c1),EqualConst(c2)): return c1 == c2;
   case $(LessVar(v1),   LessVar(v2)):    return v1 == v2;
-  case $(LessSize(v1),  LessSize(v2)):   return v1 == v2;
+  case $(LessNumelts(v1),  LessNumelts(v2)):   return v1 == v2;
   case $(LessConst(c1), LessConst(c2)):  return c1 == c2;
-  case $(LessEqSize(v1),LessEqSize(v2)): return v1 == v2;
+  case $(LessEqNumelts(v1),LessEqNumelts(v2)): return v1 == v2;
   default: return false;
   }
 }
@@ -875,19 +875,19 @@ static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1,
   case $(&Aggregate(d1),&Aggregate(d2)):
     aggrdict_t new_d = 
       rnew(env->joinenv.fenv->r) 
-        {for i < d1.size : after_absRval_d(env,i,d1[i],d2[i]) };
+        {for i < numelts(d1) : after_absRval_d(env,i,d1[i],d2[i]) };
                                                          
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d1[i]) {
         change = true; break;
       }
     if (!change)
       return r1;
     change = false;
-    for (int i = 0; i < d1.size; i++)
+    for (int i = 0; i < numelts(d1); i++)
       if (new_d[i] != d2[i]) {
         change = true; break;
       }
@@ -978,7 +978,7 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
   case $(_,&AddressOf(_)): return false;
   case $(&Aggregate(d1), &Aggregate(d2)):
     if (d1 == d2) return true;
-    for (int i = 0; i < d1.size; i++) 
+    for (int i = 0; i < numelts(d1); i++) 
       if (!absRval_lessthan_approx(0,d1[i],d2[i])) return false;
     return true;
   case $(_, NotZeroThis): return r1==NotZeroAll;
@@ -1066,8 +1066,8 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
     if (r->vd == v) { found = true; break; }
     switch (r->rop) {
     case LessVar(v2):   fallthru(v2);
-    case LessSize(v2):  fallthru(v2);
-    case LessEqSize(v2): if(v==v2) found = true; break;
+    case LessNumelts(v2):  fallthru(v2);
+    case LessEqNumelts(v2): if(v==v2) found = true; break;
     default: break;
     }
   }
@@ -1079,8 +1079,8 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
     if (r->vd != v) {
       switch (r->rop) {
       case LessVar(v2):   fallthru(v2);
-      case LessSize(v2):  fallthru(v2);
-      case LessEqSize(v2): if (v == v2) continue; break;
+      case LessNumelts(v2):  fallthru(v2);
+      case LessEqNumelts(v2): if (v == v2) continue; break;
       default: break;
       }
       new_rs = rnew(rgn) List(r,new_rs);
@@ -1137,7 +1137,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
   // we need to kill it.
   r = reln_kill_var(rgn, r, v);
   // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t)) 
-  // then we can add n <= v.size.  Note that we can't easily
+  // then we can add n <= numelts(v).  Note that we can't easily
   // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
   // because e1 or e2 could modify n.  
   switch (e->r) {
@@ -1150,7 +1150,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
     case &Var_e(_,&Param_b(n)): fallthru(n);
     case &Var_e(_,&Global_b(n)): 
       if (n->escapes) return r;
-      return rnew(rgn) List(rnew(rgn) Reln{n,LessEqSize(v)},r);
+      return rnew(rgn) List(rnew(rgn) Reln{n,LessEqNumelts(v)},r);
     default: return r;
     }
   default: break;
@@ -1161,7 +1161,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
   default: 
     return r;
   }
-  // ignore if e isn't y.size or a constant
+  // ignore if e isn't numelts(y) or a constant
   
  loop:
   switch (e->r) {
@@ -1170,7 +1170,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
     return rnew(rgn) List(rnew(rgn) Reln(v,EqualConst(i)),r);
   case &Primop_e(Mod, &List(_,&List(e2,_))):
     // FIX: is this safe?  what if e modifies v2?
-    // when we have x = e % v2.size, add x < v2.size
+    // when we have x = e % numelts(v2), add x < numelts(v2)
     switch (e2->r) {
     case &Primop_e(Size, &List(e3,_)):
       switch (e3->r) {
@@ -1179,7 +1179,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
       case &Var_e(_,&Param_b(v2)):  fallthru(v2);
       case &Var_e(_,&Pat_b(v2)):
         if (v2->escapes) return r;
-        return rnew(rgn) List(rnew(rgn) Reln(v,LessSize(v2)),r);
+        return rnew(rgn) List(rnew(rgn) Reln(v,LessNumelts(v2)),r);
       default: break;
       }
       break;
@@ -1193,7 +1193,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t 
     case &Var_e(_,&Param_b(v2)):  fallthru(v2);
     case &Var_e(_,&Pat_b(v2)):
       if (v2->escapes) return r;
-      return rnew(rgn) List(rnew(rgn) Reln(v,LessEqSize(v2)),r);
+      return rnew(rgn) List(rnew(rgn) Reln(v,LessEqNumelts(v2)),r);
     default: break;
     }
     break;
@@ -1221,9 +1221,9 @@ static void print_reln(reln_t r) {
   switch (r->rop) {
   case EqualConst(c): fprintf(stderr,"==%d",c); break;
   case LessVar(vd):   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
-  case LessSize(vd):  fprintf(stderr,"<%s.size",qvar2string(vd->name)); break;
+  case LessNumelts(vd):  fprintf(stderr,"<numelts(%s)",qvar2string(vd->name)); break;
   case LessConst(c):  fprintf(stderr,"<%d",c); break;
-  case LessEqSize(vd): fprintf(stderr,"<=%s.size",qvar2string(vd->name));break;
+  case LessEqNumelts(vd): fprintf(stderr,"<=numelts(%s)",qvar2string(vd->name));break;
   }
 }
 void print_relns(relns_t r) {
@@ -1301,9 +1301,9 @@ void print_absrval(absRval_t rval) {
   case &TagCmps(_): fprintf(stderr,"TagCmps(?)"); break;
   case &Aggregate(d): 
     fprintf(stderr,"Aggregate{"); 
-    for (int i = 0; i < d.size; i++) {
+    for (int i = 0; i < numelts(d); i++) {
       print_absrval(d[i]);
-      if (i+1 < d.size) fprintf(stderr,",");
+      if (i+1 < numelts(d)) fprintf(stderr,",");
     }
     fprintf(stderr,"}");
     break;
@@ -1353,9 +1353,7 @@ bool contains_region(killrgn_t rgn, type_t t) {
   case &DoubleType(_):   
   case &EnumType(_,_):   
   case &AnonEnumType(_): 
-  case &SizeofType(_):   
   case &TagType(_):      
-  case &TypeInt(_):      
   case HeapRgn:
   case &Evar(_,_,_,_): return false; // because of compress above
   case UniqueRgn:
@@ -1403,6 +1401,7 @@ bool contains_region(killrgn_t rgn, type_t t) {
   // careful: we don't want to kill any region handles to the region in
   // question.
   case &RgnHandleType(t2): return false;
+  case &ValueofType(_): return false;
   }
 }
 
@@ -1577,9 +1576,7 @@ bool is_unique_pointer(type_t t) {
   case &DoubleType(_):   
   case &EnumType(_,_):   
   case &AnonEnumType(_): 
-  case &SizeofType(_):   
   case &TagType(_):      
-  case &TypeInt(_):      
   case HeapRgn:
   case UniqueRgn:
   case &VarType(tv): 

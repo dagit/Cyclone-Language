@@ -29,7 +29,7 @@ namespace Fn;
 // unifier...or my ability to figure out what effects to put
 // on things.
 
-struct Function<`arg,`res,`bd::R> { <`env> : regions(`env) > `bd
+struct Function<`arg,`res,`bd::R> { <`env::B> : regions(`env) > `bd
   `res (@`bd f)(`env,`arg);
   `env env;
 };

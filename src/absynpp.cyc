@@ -284,7 +284,7 @@ string_t char_escape(char c) {
 }
 
 static bool special(string_t s){
-  int sz = s.size-1;
+  int sz = numelts(s)-1;
   for (int i = 0; i<sz; i++) {
     char c = s[i];
     if (c<=' ' || c>='~' || c=='\042' || c=='\\')
@@ -296,7 +296,7 @@ static bool special(string_t s){
 string_t string_escape(string_t<`H> s) {
   if (!special(s)) return s;
 
-  int n = s.size - 1;
+  int n = numelts(s) - 1;
   // Check for the expected NUL terminator of a string constant
   if (n>0 && s[n]=='\000') n--;
   // determine length
@@ -603,17 +603,12 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     doc_t ptr;
     switch(conref_def(bounds_one,bd)) {
-    case DynForward_b: ptr = question(); break;
-    case DynEither_b: ptr = cat(question(),text("-")); break;
+    case DynEither_b: ptr = question(); break;
     case &Upper_b(e):
       ptr = text(conref_def(true,nullable) ? "*" : "@");
       let $(val,known) = Evexp::eval_const_uint_exp(e);
       if(!known || val != 1)
 	ptr = cat(ptr,lb(),exp2doc(e),rb());
-      break;
-    case &AbsUpper_b(t): 
-      ptr = text(conref_def(true,nullable) ? "*" : "@");
-      ptr = cat(ptr,lb(),typ2doc(t),rb());
       break;
     }
     if (print_zeroterm) {
@@ -797,8 +792,8 @@ doc_t ntyp2doc(type_t t) {
     s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb()); break;
   case &EnumType(n,_):
     s = cat(text("enum "),qvar2doc(n)); break;
-  case &SizeofType(t):
-    s = cat(text("sizeof_t<"),typ2doc(t),text(">")); break;
+  case &ValueofType(e):
+    s = cat(text("valueof_t("),exp2doc(e),text(")")); break;
   case &TypedefType(n,ts,kopt,_):
     // NB: we could print out the expanded typedef by following the topt
     // pointer (when non-NULL).
@@ -812,8 +807,6 @@ doc_t ntyp2doc(type_t t) {
   case &DynRgnType(t1,t2):
     s = cat(text("dynregion_t<"),rgn2doc(t1),text(","),rgn2doc(t2),
             text(">")); break;
-  case &TypeInt(t):
-    s = text(aprintf("`%d",t)); break;
   case &TagType(t):
     s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
   case UniqueRgn:
@@ -986,7 +979,7 @@ int exp_prec(exp_t e) {
     case Bitlshift:      return  90;
     case Bitlrshift:     return  80; // unlike C (see grammar)
     case Bitarshift:     return  80; // doesn't actually exist (see grammar)
-    case Size:           return 140; // foo.size (same as struct member)
+    case Numelts:           return 140; // numelts(foo)
     }
   case &AssignOp_e(_,_,_):      return  20;
   case &Increment_e(_,_):       return 130;
@@ -1004,6 +997,7 @@ int exp_prec(exp_t e) {
   case &Address_e(_):           
   case &Sizeoftyp_e(_):         
   case &Sizeofexp_e(_):         
+  case &Valueof_e(_):
   case &Offsetof_e(_,_):        
   case &Gentyp_e(_,_):          
   case &Deref_e(_):             return 130;
@@ -1109,6 +1103,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Sizeoftyp_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
+  case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
   case &Offsetof_e(t,&StructField(n)): 
     s = cat(text("offsetof("), typ2doc(t), text(","), textptr(n), text(")"));
     break;
@@ -1257,13 +1252,11 @@ doc_t cnst2doc(cnst_t c) {
 
 doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
   doc_t ps = prim2doc(p);
-  if (p == (primop_t)Size) {
+  if (p == (primop_t)Numelts) {
     if (es == NULL || es->tl != NULL)
-      throw new Failure(aprintf("Absynpp::primapp2doc Size: %s with bad args",
+      throw new Failure(aprintf("Absynpp::primapp2doc Numelts: %s with bad args",
                                 string_of_doc(ps,72)));
-    let d = exp2doc_prec(inprec,es->hd);
-    return cat(d,text(".size"));
-
+    return cat(text("numelts("),exp2doc(es->hd),text(")"));
   } else {
     list_t<doc_t> ds = List::map_c(exp2doc_prec,inprec,es);
     if (ds == NULL)
@@ -1300,7 +1293,7 @@ string_t prim2str(primop_t p) {
   case Bitlshift: return "<<";
   case Bitlrshift: return ">>";
   case Bitarshift: return ">>>";
-  case Size: return "size";
+  case Numelts: return "numelts";
   }
 }
 

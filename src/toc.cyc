@@ -184,25 +184,12 @@ MAKE_VAR(_npop_handler);
 MAKE_VAR(_check_null); 
 MAKE_VAR(_check_known_subscript_null);
 MAKE_VAR(_check_known_subscript_notnull);
-// MAKE_VAR(_check_unknown_subscript);
-MAKE_VAR(_check_dynforward_subscript);
 MAKE_VAR(_check_dyneither_subscript);
-// MAKE_VAR(_tagged_arr);
-MAKE_VAR(_dynforward_ptr);
 MAKE_VAR(_dyneither_ptr);
-// MAKE_VAR(_tag_arr);
-MAKE_VAR(_tag_dynforward);
 MAKE_VAR(_tag_dyneither);
-// MAKE_VAR(_init_tag_arr);
-MAKE_VAR(_init_dynforward_ptr);
 MAKE_VAR(_init_dyneither_ptr);
-// MAKE_VAR(_untag_arr);
-MAKE_VAR(_untag_dynforward_ptr);
 MAKE_VAR(_untag_dyneither_ptr);
-// MAKE_VAR(_get_arr_size);
-MAKE_VAR(_get_dynforward_size);
 MAKE_VAR(_get_dyneither_size);
-
 MAKE_VAR(_get_zero_arr_size); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_get_zero_arr_size_char);
 MAKE_VAR(_get_zero_arr_size_short);
@@ -211,8 +198,6 @@ MAKE_VAR(_get_zero_arr_size_float);
 MAKE_VAR(_get_zero_arr_size_double);
 MAKE_VAR(_get_zero_arr_size_longdouble);
 MAKE_VAR(_get_zero_arr_size_voidstar);
-// MAKE_VAR(_tagged_arr_plus);
-MAKE_VAR(_dynforward_ptr_plus);
 MAKE_VAR(_dyneither_ptr_plus);
 MAKE_VAR(_zero_arr_plus);     // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_plus_char);
@@ -222,8 +207,6 @@ MAKE_VAR(_zero_arr_plus_float);
 MAKE_VAR(_zero_arr_plus_double);
 MAKE_VAR(_zero_arr_plus_longdouble);
 MAKE_VAR(_zero_arr_plus_voidstar);
-// MAKE_VAR(_tagged_arr_inplace_plus);
-MAKE_VAR(_dynforward_ptr_inplace_plus);
 MAKE_VAR(_dyneither_ptr_inplace_plus);
 MAKE_VAR(_zero_arr_inplace_plus); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_inplace_plus_char);
@@ -233,11 +216,7 @@ MAKE_VAR(_zero_arr_inplace_plus_float);
 MAKE_VAR(_zero_arr_inplace_plus_double);
 MAKE_VAR(_zero_arr_inplace_plus_longdouble);
 MAKE_VAR(_zero_arr_inplace_plus_voidstar);
-// MAKE_VAR(_tagged_arr_inplace_plus_post);
-MAKE_VAR(_dynforward_ptr_inplace_plus_post);
 MAKE_VAR(_dyneither_ptr_inplace_plus_post);
-MAKE_VAR(_dynforward_to_dyneither);
-MAKE_VAR(_dyneither_to_dynforward);
 MAKE_VAR(_zero_arr_inplace_plus_post); // NOT SURE WHETHER WE NEED BOTH?
 MAKE_VAR(_zero_arr_inplace_plus_post_char);
 MAKE_VAR(_zero_arr_inplace_plus_post_short);
@@ -261,20 +240,12 @@ MAKE_VAR(_push_dynregion);
 MAKE_VAR(_pop_dynregion);
 MAKE_VAR(_reset_region);
 MAKE_VAR(_throw_arraybounds);
-// MAKE_VAR(_tagged_ptr_decrease_size);
-MAKE_VAR(_dynforward_ptr_decrease_size);
 MAKE_VAR(_dyneither_ptr_decrease_size);
 MAKE_VAR(_swap_word);
-MAKE_VAR(_swap_dynforward);
 MAKE_VAR(_swap_dyneither);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
-
-static tunion Type.AggrType dynforward_ptr_typ_v =
-AggrType(AggrInfo(UnknownAggr(StructA,&_dynforward_ptr_pr),
-                  NULL));
-static tunion Type dynforward_ptr_typ = &dynforward_ptr_typ_v;
 
 static tunion Type.AggrType dyneither_ptr_typ_v =
                            AggrType(AggrInfo(UnknownAggr(StructA,
@@ -657,13 +628,11 @@ static type_t typ_to_c(type_t t) {
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
-    // t2? maps to struct dynforward_ptr.
-    // t2?+- maps to struct dyneither_ptr.
+    // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
     case No_constr:
-    case Eq_constr(DynForward_b): return dynforward_ptr_typ;
     case Eq_constr(DynEither_b): return dyneither_ptr_typ;
     default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
@@ -689,7 +658,7 @@ static type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(dynforward_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
+      let t =typ_to_c(dyneither_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -718,12 +687,9 @@ static type_t typ_to_c(type_t t) {
       else return t;
     // just drop the type arguments and translate the nested types
     else return new TypedefType(tdn,NULL,td,new typ_to_c_array(*topt));
-  case &SizeofType(_):
   case &TagType(_): return uint_typ; // must be unsigned!
   case &RgnHandleType(t): return rgn_typ();
   case &DynRgnType(_,_): return dyn_rgn_typ();
-  case &TypeInt(_): 
-    toc_impos("Toc::typ_to_c: type translation passed a type integer");
   case HeapRgn:
     toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case UniqueRgn:
@@ -732,6 +698,8 @@ static type_t typ_to_c(type_t t) {
   case &JoinEff(_):
   case &RgnsEff(_):
     toc_impos("Toc::typ_to_c: type translation passed an effect");
+  case &ValueofType(_):
+    toc_impos("Toc::typ_to_c: type translation passed a valueof_t");
   }
 }
 
@@ -755,8 +723,7 @@ static bool atomic_typ(type_t t) {
   case FloatType:      
   case &DoubleType(_): 
   case &FnType(_):     
-  case &TagType(_):
-  case &SizeofType(_): return true;
+  case &TagType(_): return true;
   case &ArrayType(ArrayInfo{t,_,_,_,_}): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
@@ -871,9 +838,8 @@ static exp_t newthrow_exp(exp_t e) {
   return fncall_exp(_throw_e, new List(e,NULL), DL);
 }
 
-// t*{sz} -> t? or t?+- at top-level
-static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e, 
-                                   bool forward_only) {
+// t*{sz} -> t? at top-level
+static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
   // Note e must be either (a) a string or else (b) a [possibly cast] 
   // identifier that is an array.
   // For case a, we generate
@@ -901,13 +867,9 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e,
     xplussz = cast_it(void_star_typ(),add_exp(e,sz,DL));
   }
   exp_t urm_exp;
-  if (!forward_only)
-    urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
-                                          new $(NULL,xexp),
-                                          new $(NULL,xplussz)),DL);
-  else 
-    urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
-                                          new $(NULL,xplussz)),DL);
+  urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
+                                        new $(NULL,xexp),
+                                        new $(NULL,xplussz)),DL);
   return urm_exp;
 }
 
@@ -1076,12 +1038,10 @@ static bool check_const_array(unsigned i, type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
     switch (conref_def(bounds_one,b)) {
-    case DynForward_b: return false;
     case DynEither_b: return false;
     case &Upper_b(e):
       let $(j,known) = Evexp::eval_const_uint_exp(e);
       return known && i <= j;
-    case &AbsUpper_b(_): unimp("check_const_array: AbsUpper_b");
     }
   case &ArrayType(ArrayInfo{_,_,e,_,_}):
     if (e == NULL) return false;
@@ -1091,22 +1051,22 @@ static bool check_const_array(unsigned i, type_t t) {
   }
 }
 
-// see if y is <= v.size
+// see if y is <= numelts(v)
 static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v, 
                                vardecl_t y) {
   for (; relns != NULL; relns = relns->tl) {
     let r = relns->hd;
     if (r->vd != y) continue;
     switch (r->rop) {
-    case CfFlowInfo::LessSize(z) : fallthru(z);
-    case CfFlowInfo::LessEqSize(z): if (z == v) return true; else break; 
+    case CfFlowInfo::LessNumelts(z) : fallthru(z);
+    case CfFlowInfo::LessEqNumelts(z): if (z == v) return true; else break; 
     default: continue;
     }
   }
   return false;
 }
 
-// see if e is <= v.size
+// see if e is <= numelts(v)
 static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
   switch (e->r) {
   case &Var_e(_,&Pat_b(y)): fallthru(y);
@@ -1114,10 +1074,10 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
   case &Var_e(_,&Global_b(y)): fallthru(y);
   case &Var_e(_,&Param_b(y)):
     if (y->escapes) return false;
-    // see if y <= v.size
+    // see if y <= numelts(v)
     if (check_leq_size_var(relns,v,y)) return true;
     break;
-  case &Primop_e(Size,&List(e2,_)):
+  case &Primop_e(Numelts,&List(e2,_)):
     // see if e2 is v
     switch (e2->r) {
     case &Var_e(_,&Pat_b(y)): fallthru(y);
@@ -1133,7 +1093,7 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
   return false;
 }
 
-// return true if we can prove from relns that i < a.size
+// return true if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
 static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
@@ -1159,7 +1119,7 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
       return check_const_array(i+1,x->type);
     case &Primop_e(Mod,&List(e1,&List(e2,_))):
       // we have x[e1 % e2]
-      // if e2 is x.size or z such that z <= x.size then it's okay
+      // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
       return check_leq_size(relns, x, e2);
     case &Var_e(_,&Pat_b(y)):    fallthru(y);
     case &Var_e(_,&Local_b(y)):  fallthru(y);
@@ -1172,16 +1132,16 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
         let r = rs->hd;
         if (r->vd == y) {
           switch (r->rop) {
-            // y < x.size
-          case CfFlowInfo::LessSize(z): if (x == z) return true; else break;
+            // y < numelts(x)
+          case CfFlowInfo::LessNumelts(z): if (x == z) return true; else break;
           case CfFlowInfo::LessVar(z):
-            // y < z -- try to find z == x.size or z <= x.size
+            // y < z -- try to find z == numelts(x) or z <= numelts(x)
             for (let rs = relns; rs != NULL; rs = rs->tl) {
               let r = rs->hd;
               if (r->vd == z) 
                 switch (r->rop) {
-                case CfFlowInfo::LessEqSize(w): fallthru(w);
-                case CfFlowInfo::LessSize(w):
+                case CfFlowInfo::LessEqNumelts(w): fallthru(w);
+                case CfFlowInfo::LessNumelts(w):
                   if (x == w) return true; 
 		  break;
                 case CfFlowInfo::EqualConst(c): 
@@ -1194,7 +1154,7 @@ static bool check_bounds(CfFlowInfo::relns_t relns, exp_t a, exp_t i) {
             }
             break;
           case CfFlowInfo::LessConst(c):
-            // y < c -- see if c <= x.size 
+            // y < c -- see if c <= numelts(x)
             return check_const_array(c,x->type);
           default: break;
           }
@@ -1619,23 +1579,17 @@ static exp_t generate_zero(type_t t) {
 static void zero_ptr_assign_to_c(env_t nv, exp_t e, 
                                  exp_t e1, opt_t<primop_t> popt, exp_t e2,
                                  type_t ptr_type, 
-                                 bool is_dynforward, 
                                  bool is_dyneither,
                                  type_t elt_type) {
   // To simplify the translation, we always use a fat pointer and generate:
   //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb; 
   //     elt_type y = *x; // check here that x is not null and in bounds
   //     elt_type z = y op e2;
-  //     if (x.size == 1 && y == zero && z != zero) _throw_arraybounds();
+  //     if (numelts(x) == 1 && y == zero && z != zero) _throw_arraybounds();
   //     *x.curr = z; })
   // Note that this is generated and *then* translated to ensure the
   // proper constraints.  
-  bool is_fat = (is_dynforward || is_dyneither);
-  type_t fat_ptr_type;
-  if (is_dynforward)
-    fat_ptr_type = dynforward_typ(elt_type, HeapRgn, mt_tq, true_conref);
-  else 
-    fat_ptr_type = dyneither_typ(elt_type, HeapRgn, mt_tq, true_conref);
+  type_t fat_ptr_type = dyneither_typ(elt_type, HeapRgn, mt_tq, true_conref);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
   let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
@@ -1643,23 +1597,19 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   exp_t xinit;
   switch (e1->r) {
   case &Deref_e(ea):
-    if (!is_fat) {
+    if (!is_dyneither) {
       ea = cast_it(fat_ptr_type,ea); 
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); xinit = ea; break;
   case &Subscript_e(ea,eb):
-    if (!is_fat) {
+    if (!is_dyneither) {
       ea = cast_it(fat_ptr_type,ea); 
       ea->topt = new Opt(fat_ptr_type);
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
-    if (is_dynforward)
-      xinit = fncall_exp(_dynforward_ptr_plus_e,
-                         list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
-    else 
-      xinit = fncall_exp(_dyneither_ptr_plus_e,
-                         list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
+    xinit = fncall_exp(_dyneither_ptr_plus_e,
+                       list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
     break;
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
@@ -1702,17 +1652,13 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
     comp2_exp->topt = new Opt(sint_typ);
     exp_to_c(nv,comp2_exp);
-    // build x.size == 1 directly (no translation)
+    // build numelts(x) == 1 directly (no translation)
     let xsizeargs = list(varb_exp(x,x_bnd,DL),
                          sizeoftyp_exp(typ_to_c(elt_type),DL));
     let oneexp = uint_exp(1,DL);
     exp_t xsize;
-    if (is_dynforward)
-      xsize = prim2_exp(Eq,fncall_exp(_get_dynforward_size_e,xsizeargs,DL),
-                        oneexp,DL);
-    else 
-      xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
-                        oneexp,DL);
+    xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
+                      oneexp,DL);
     // start assembling the statement
     let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
     let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
@@ -1736,22 +1682,19 @@ static void exp_to_c(env_t nv, exp_t e) {
   type_t old_typ = e->topt->v;
   switch (r) {
   case &Const_e(Null_c):
-    // NULL translate to 0 unless a tagged array, then {0,0,0} (if either)
-    // and {0,0} (if forward-only), via runtime call unless at top-level
+    // NULL translate to 0 unless a tagged array, then {0,0,0}, via runtime 
+    // call unless at top-level
     // note: we don't need the element type b/c the length is 0 (so we lie)
     // note: should share all these uint_exp(0,DL) things
     let zero = uint_exp(0,DL);
-    bool forward_only = false;
-    if(is_tagged_pointer_typ(old_typ,&forward_only)) {
+    if(is_tagged_pointer_typ(old_typ)) {
       if(is_toplevel(nv))
-	e->r = make_toplevel_dyn_arr(old_typ, zero, zero, forward_only)->r;
-      else if (forward_only)
-	e->r = fncall_exp_r(_tag_dynforward_e, list(zero,zero,zero));
+	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
       else 
 	e->r = fncall_exp_r(_tag_dyneither_e, list(zero,zero,zero));
-    }
-    else
+    } else {
       e->r = (raw_exp_t)(&zero_exp);
+    }
     break;
   case &Const_e(_): break;
   case &Var_e(qv,b): 
@@ -1767,20 +1710,17 @@ static void exp_to_c(env_t nv, exp_t e) {
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     switch (p) {
-    case Size:
+    case Numelts:
       exp_t arg = es->hd;
       switch (compress(arg->topt->v)) {
       case &ArrayType(ArrayInfo{_,_,e2,_,_}): 
         // FIX: copy the expression e2 here.
+        if (!Evexp::c_can_eval((exp_t)e2))
+          terr(e->loc,"can't calculate numelts");
         e->r = e2->r;  break;
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
 	switch(conref_def(bounds_one,bound)) {
-	case DynForward_b: // retrieve (last_plus_one - curr) via runtime call
-	  e->r = fncall_exp_r(_get_dynforward_size_e,
-                              list(es->hd, 
-                                   sizeoftyp_exp(typ_to_c(elt_typ),DL)));
-	  break;
-        case DynEither_b: // same as above
+        case DynEither_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_dyneither_size_e,
                               list(es->hd, 
                                    sizeoftyp_exp(typ_to_c(elt_typ),DL)));
@@ -1792,13 +1732,14 @@ static void exp_to_c(env_t nv, exp_t e) {
                                            es->hd);
             e->r = fncall_exp_r(function_e,list(es->hd,e2));
           } else if (conref_def(false,nbl)) {
+            if (!Evexp::c_can_eval(e2))
+              terr(e->loc,"can't calculate numelts");
             // careful! when this is a nullable pointer, the size might be 0
             e->r = conditional_exp_r(arg,e2,uint_exp(0,DL));
           } else {
             e->r = e2->r; break; // compile-time evaluation
           }
 	  break;
-	case &AbsUpper_b(_): unimp("toc: size of AbsUpper_b");
 	}
 	break;
       default: 
@@ -1807,18 +1748,12 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Plus:
-      // only translation is for ? or ?+- pointers or zero-terminated arrays
+      // only translation is for ? pointers or zero-terminated arrays
       //   _dynxxx_ptr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
       switch (compress(old_typs->hd)) {
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt,_))):
         switch (conref_def(bounds_one,b)) {
-        case DynForward_b:
-          exp_t e1 = es->hd;
-          exp_t e2 = es->tl->hd;
-          e->r = fncall_exp_r(_dynforward_ptr_plus_e,
-                              list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2));
-          break;
         case DynEither_b:
           exp_t e1 = es->hd;
           exp_t e2 = es->tl->hd;
@@ -1832,7 +1767,6 @@ static void exp_to_c(env_t nv, exp_t e) {
             e->r = fncall_exp(getFunction(&_zero_arr_plus_functionSet,e1),list(e1,esz,e2),DL)->r;
           }
           break;
-	case &AbsUpper_b(_): unimp("toc: plus on AbsUpper_b");
         }
         break;
       default:
@@ -1840,23 +1774,19 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Minus:
-      // only translation is for ? or ?- pointers.
+      // only translation is for ? pointers.
       // if e2 is not a tagged array, do just like plus of negation,
       // else result type is unsigned int, so subtract curr fields
       type_t elt_typ = VoidType;
-      bool forward_only = false;
-      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ,&forward_only)) {
+      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
-        bool forward_only = false;
-	if(is_tagged_pointer_typ(old_typs->tl->hd,&forward_only)) {
+	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
 	  e1->r = aggrmember_exp_r(new_exp(e1->r,DL),curr_sp);
 	  e2->r = aggrmember_exp_r(new_exp(e2->r,DL),curr_sp);
 	  e->r  = divide_exp(copy_exp(e),
 			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
 	} else {
-          if (forward_only)
-            terr(e->loc, "subtraction not allowed on forward-only ? pointer");
 	  e->r = fncall_exp_r(_dyneither_ptr_plus_e,
                               list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                    prim1_exp(Minus,e2,DL)));
@@ -1874,10 +1804,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t e2 = es->tl->hd;
       type_t t1 = old_typs->hd;
       type_t t2 = old_typs->tl->hd;
-      bool forward_only = false;
-      if (is_tagged_pointer_typ(t1,&forward_only))
+      if (is_tagged_pointer_typ(t1))
 	e1->r = aggrmember_exp_r(new_exp(e1->r,DL),curr_sp);
-      if (is_tagged_pointer_typ(t2,&forward_only))
+      if (is_tagged_pointer_typ(t2))
 	e2->r = aggrmember_exp_r(new_exp(e2->r,DL),curr_sp);
       break;
     default: break; //skip
@@ -1892,12 +1821,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     // To combat this, I'm simply disallowing it.  
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
-    bool is_dynforward = false;
     bool is_dyneither = false;
     string_t incr_str = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
-    if (is_zero_ptr_deref(e2,&ptr_type,&is_dynforward,&is_dyneither,
-                          &elt_type)) {
+    if (is_zero_ptr_deref(e2,&ptr_type,&is_dyneither,&elt_type)) {
       Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
       toc_impos("in-place inc on zero-term");
     }
@@ -1905,21 +1832,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     // only t ? or zero-terminated types are translated funny, 
     // note that e2 is an lvalue!
     type_t elt_typ = VoidType;
-    bool forward_only = false;
-    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ,&forward_only)) {
+    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
       _ fn_e;
       int change = 1;
-      if (forward_only) {
-        if (incr == PostDec || incr == PreDec)
-          Tcutil::terr(e->loc,"decrement not allowed on forward ? pointer");
-        fn_e = (incr == PostInc) ? _dynforward_ptr_inplace_plus_post_e
-          : _dynforward_ptr_inplace_plus_e;
-      } else {
-        fn_e = (incr==PostInc || incr==PostDec) ? 
-          _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
-        if (incr == PreDec || incr == PostDec) 
-          change = -1;
-      }
+      fn_e = (incr==PostInc || incr==PostDec) ? 
+        _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
+      if (incr == PreDec || incr == PostDec) 
+        change = -1;
       e->r = fncall_exp_r(fn_e, list(address_exp(e2,DL),
                                      sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                      signed_int_exp(change,DL)));
@@ -1989,11 +1908,9 @@ static void exp_to_c(env_t nv, exp_t e) {
     // the last element or (0 op= e2) is 0.
     type_t ptr_type = VoidType;
     type_t elt_type = VoidType;
-    bool is_dynforward = false;
     bool is_dyneither = false;
-    if (is_zero_ptr_deref(e1,&ptr_type,&is_dynforward,&is_dyneither,
-                          &elt_type)) {
-      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, is_dynforward, 
+    if (is_zero_ptr_deref(e1,&ptr_type,&is_dyneither,&elt_type)) {
+      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, 
                            is_dyneither, elt_type);
       return;
     } 
@@ -2008,21 +1925,17 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool done = false;
     if(popt != NULL) {
       type_t elt_typ = VoidType;
-      bool forward_only = false;
-      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ,&forward_only)) {
+      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
         _ change;
         switch(popt->v) {
         case Plus:  change = e2; break;
         case Minus: 
-          if (forward_only)
-            Tcutil::terr(e->loc,"subtraction not allowed on forward ? pointers");
           change = prim1_exp(Minus,e2,DL); break;
         default:    toc_impos("bad t ? pointer arithmetic");
         }
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
-        let fn_e = forward_only ? _dynforward_ptr_inplace_plus_e :
-          _dyneither_ptr_inplace_plus_e;
+        let fn_e = _dyneither_ptr_inplace_plus_e;
         e->r = fncall_exp_r(fn_e,list(address_exp(e1,DL),
                                       sizeoftyp_exp(typ_to_c(elt_typ),DL),
                                       change));
@@ -2082,7 +1995,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     //    t argv[num_varargs] = {&v0, ..., &vn};
     // else
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
-    // e1(es[0], ..., es[n-num_varargs], tag_dynforward(argv, sizeof(t), num_varargs));
+    // e1(es[0], ..., es[n-num_varargs], tag_dyneither(argv, sizeof(t), num_varargs));
     region r {
       qvar_t argv = temp_var();
       exp_t argvexp = var_exp(argv,DL);
@@ -2100,7 +2013,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,es->hd);
 	new_args = new List(es->hd, new_args);
       }
-      new_args = new List(fncall_exp(_tag_dynforward_e,
+      new_args = new List(fncall_exp(_tag_dyneither_e,
 				     list(argvexp, 
 					  sizeoftyp_exp(cva_type,DL), 
 					  num_varargs_exp), DL),
@@ -2235,10 +2148,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       let b2 = conref_def(bounds_one,p2.ptr_atts.bounds);
       let zt1 = conref_def(false,p1.ptr_atts.zero_term);
       let zt2 = conref_def(false,p2.ptr_atts.zero_term);
-      bool p1_forward_only = false;
-      bool p2_forward_only = false;
       switch($(b1,b2)) {
       case $(&Upper_b(b1), &Upper_b(b2)):
+        if ((!Evexp::c_can_eval(b1) || !Evexp::c_can_eval(b2)) && 
+            !Evexp::same_const_exp(b1,b2))
+          terr(e->loc,"can't validate cast due to potential size differences");
 	if(n1 && !n2) {
 	  if(is_toplevel(nv))
 	    unimp("can't do NULL-check conversion at top-level");
@@ -2261,10 +2175,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         // arrays (since the true length isn't known.)  Of course,
         // this obligates a run-time check.
 	break;
-      case $(&Upper_b(e2), DynForward_b): 
-        p2_forward_only = true;
-        fallthru(e2);
       case $(&Upper_b(e2), DynEither_b):
+        if (!Evexp::c_can_eval(e2))
+          terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
         // sanity checking
         if (coercion == NonNull_to_Null)
             impos("conversion mis-classified as null-check: %s",exp2string(e));
@@ -2275,9 +2188,9 @@ static void exp_to_c(env_t nv, exp_t e) {
             // one from the size so that no one can write the last location.
             e2 = prim2_exp(Minus,e2,uint_exp(1,DL),DL);
           }
-	  e->r = make_toplevel_dyn_arr(old_t2,e2,e1,p2_forward_only)->r;
+	  e->r = make_toplevel_dyn_arr(old_t2,e2,e1)->r;
 	} else {
-          let tag_e = p2_forward_only ? _tag_dynforward_e : _tag_dyneither_e;
+          let tag_e = _tag_dyneither_e;
 	  // cast from t*{n} or t@{n} to t? or t?+-
           if (zt1) {
             // if p1 is zero-terminated then calculate the size dynamically:
@@ -2286,10 +2199,18 @@ static void exp_to_c(env_t nv, exp_t e) {
             //   })
             let x = temp_var();
             let x_exp = var_exp(x,DL);
-            let arg3 = fncall_exp(getFunctionRemovePointer(
-                                     &_get_zero_arr_size_functionSet,e1),
-                                  list(x_exp,e2),DL);
-
+            exp_t arg3;
+            // if what we're casting is a string constant or an array
+            // variable, we can avoid computing the "size" at run-time.
+            switch (e1->r) {
+            case &Const_e(String_c(_)):
+              arg3 = e2; break;
+            default:
+              arg3 = fncall_exp(getFunctionRemovePointer(
+                                 &_get_zero_arr_size_functionSet,e1),
+                                list(x_exp,e2),DL);
+              break;
+            }
             if (!zt2 && !p2.elt_tq.real_const) {
               // If p2 is not zero-terminated and not const, then we subtract
               // one from the size so that no one can write the last location.
@@ -2309,10 +2230,9 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
         }
 	break;
-      case $(DynForward_b, &Upper_b(e2)):
-        p1_forward_only = true;
-        fallthru(e2);
       case $(DynEither_b, &Upper_b(e2)):
+        if (!Evexp::c_can_eval(e2))
+          terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
 	if(is_toplevel(nv))
 	  unimp("can't coerce t? to t* or t@ at the top-level");
         // When we have t?ZEROTERM and are casting to 
@@ -2330,8 +2250,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// cast from t ? to t* or t@ -- run-time check: 
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
-        let untag_e = p1_forward_only ? _untag_dynforward_ptr_e : 
-          _untag_dyneither_ptr_e;
+        let untag_e = _untag_dyneither_ptr_e;
 	let ptr_exp = fncall_exp(untag_e,
 				 list(e1,
                                       sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
@@ -2343,70 +2262,21 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       // If p1 is zero-terminated and p2 is not, then p2 had better
       // be const or else we have to decrement its size by 1.
-      case $(DynForward_b, DynForward_b):
-        p1_forward_only = true; 
-        p2_forward_only = true;
-        goto DynCast;
-      case $(DynForward_b, DynEither_b):
-        p1_forward_only = true;
-        goto DynCast;
-      case $(DynEither_b, DynForward_b):
-        p2_forward_only = true;
-        goto DynCast;
       case $(DynEither_b, DynEither_b):
 DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (is_toplevel(nv))
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
-          let td_e = p1_forward_only ? _dynforward_ptr_decrease_size_e :
-            _dyneither_ptr_decrease_size_e;
+          let td_e = _dyneither_ptr_decrease_size_e;
           e->r = fncall_exp_r(td_e,
                               list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
                                    uint_exp(1,DL)));
-          if (p1_forward_only != p2_forward_only) 
-            if (p1_forward_only)
-              e->r = fncall_exp_r(_dynforward_to_dyneither_e,
-                                  list(copy_exp(e)));
-            else 
-              e->r = fncall_exp_r(_dyneither_to_dynforward_e,
-                                  list(copy_exp(e)));
-          
-        } else if (p1_forward_only != p2_forward_only) {
-          if (is_toplevel(nv))
-            unimp("can't coerce between ? and ?+- at toplevel");
-          if (p1_forward_only)
-            e->r = fncall_exp_r(_dynforward_to_dyneither_e,list(e1));
-          else 
-            e->r = fncall_exp_r(_dyneither_to_dynforward_e,list(e1));
-        }
+        } 
 	break;
-      case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
-	if(n1 && !n2) {
-	  if(is_toplevel(nv))
-	    unimp("can't do NULL-check conversion at top-level");
-	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
-	  // flow analysis may not set annotation correctly here!
-          // sanity checking:
-          if (coercion != NonNull_to_Null) 
-            impos("null-check conversion mis-classified: %s",exp2string(e));
-          bool do_null_check = need_null_check(e1);
-          if (do_null_check) {
-            if (!user_inserted) 
-              Tcutil::warn(e->loc,"inserted null check due to implicit "
-                           "cast from * to @ type");
-            e->r = cast_it_r(*t,fncall_exp(_check_null_e,
-                                           new List(e1,NULL),DL));
-          }
-	}
-	break;
-      case $(&AbsUpper_b(_),_):
-	unimp("%s: toc, cast from AbsUpper_b",Position::string_of_segment(e1->loc));
-      case $(_,&AbsUpper_b(_)): break; // type-checker must have said okay
       }
       break;
     case $(&PointerType(p1), &IntType(_,_)):
       switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
-      case DynForward_b: // cast t? to int -- cast curr field to int
       case DynEither_b: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp); break;
       default: break;
@@ -2487,11 +2357,9 @@ DynCast:
       //    unsigned int x ;
       //    for (x = 0; x < max; x++) a[x] = e2;
       //    b; })
-      bool is_dynforward_ptr = false;
       bool is_dyneither_ptr = false;
       switch (compress(old_typ)) {
       case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
-        is_dynforward_ptr = (conref_def(bounds_one,b) == DynForward_b);
         is_dyneither_ptr = (conref_def(bounds_one,b) == DynEither_b);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
@@ -2528,10 +2396,10 @@ DynCast:
         }
         exp_t ainit = cast_it(ptr_typ,ai);
         decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
-        if (is_dynforward_ptr || is_dyneither_ptr) {
+        if (is_dyneither_ptr) {
           let b = temp_var();
           let t = typ_to_c(old_typ);
-          let tag = is_dynforward_ptr ? _tag_dynforward_e : _tag_dyneither_e;
+          let tag = _tag_dyneither_e;
           let binit = 
 	    fncall_exp(tag,
 		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL), 
@@ -2579,22 +2447,17 @@ DynCast:
       // (they're structs), so we special-case it right here
       // I HAVE NO IDEA IF I'M CATCHING ENOUGH CASES.
       bool done = false;
-      bool forward_only = false;
       switch(e1->r) {
       case &Cast_e(t2,e2,_,_):
 	switch($(compress(t2),compress(e2->topt->v))) {
 	case $(&PointerType(PtrInfo{arr_typ,_,PtrAtts(_,_,bc,_,_)}),
 	       &PointerType(PtrInfo{_,_,PtrAtts(_,_,be,_,_)})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
-	  case $(DynForward_b,&Upper_b(arr_sz)):
-            forward_only = true;
-            fallthru(arr_sz);
 	  case $(DynEither_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
 	    inner_mexp->r = sizeoftyp_exp_r(elt_typ);
 	    done = true;
-            let _init_f = forward_only ? 
-              _init_dynforward_ptr_e : _init_dyneither_ptr_e;
+            let _init_f = _init_dyneither_ptr_e;
 	    e->r = fncall_exp_r(_init_f,
                                 list(mexp, e2,
                                      sizeoftyp_exp(typ_to_c(arr_typ),DL),
@@ -2653,7 +2516,7 @@ DynCast:
     switch (e1_typ) {
     case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt,_)}):
       switch (conref_def(bounds_one,b)) {
-      case &Upper_b(_):
+      case &Upper_b(nelts):
 	bool do_null_check = need_null_check(e1);
 	exp_to_c(nv,e1);
         if (do_null_check) {
@@ -2668,8 +2531,16 @@ DynCast:
         // too, because we guarantee that there's something to read here,
         // even if it's just a 0.  Note that writes are handled specially
         // by the AssignOp_e case.  
+        if (!conref_def(false,zt)) {
+          let $(i,b) = Evexp::eval_const_uint_exp(nelts);
+          // FIX:  should really do like below for the -> case
+          // and check at run-time.  We'd still have to rule out
+          // those bounds for which C cannot evaluate them (e.g.,
+          // due to valueof.)
+          if (!b || i <= 0)
+            terr(e->loc,"cannot determine dereference is in bounds");
+        }
 	break;
-      case DynForward_b:
       case DynEither_b:
 	// do it as e1[0], could share all the 0's but who cares
 	let ind_e = uint_exp(0,DL);
@@ -2677,7 +2548,6 @@ DynCast:
 	e->r = subscript_exp_r(e1, ind_e);
 	exp_to_c(nv,e);
 	break;
-      case &AbsUpper_b(_): unimp("exp_to_c: deref w/ AbsUpper_b");
       }
       break;
     default: toc_impos("exp_to_c: Deref: non-pointer");
@@ -2693,7 +2563,6 @@ DynCast:
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
-    bool forward_only = false;
     let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)} = get_ptr_type(e1typ);
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
@@ -2712,6 +2581,8 @@ DynCast:
                                                     new List(e1,NULL),DL)),f);
 	}
       } else {
+        if (!Evexp::c_can_eval(esz))
+          terr(e->loc,"cannot determine pointer dereference in bounds");
 	// very strang case: they may have used sizeof or offsetof to make
 	// a zero-size array.  Yeah, that'll happen never.
 	e->r = aggrarrow_exp_r(cast_it(typ_to_c(e1->topt->v),
@@ -2720,12 +2591,9 @@ DynCast:
                          DL)), f);
       }
       break;
-    case DynForward_b:
-      forward_only = true; fallthru;
     case DynEither_b:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
-      let _check_f = forward_only ? 
-        _check_dynforward_subscript_e : _check_dyneither_subscript_e;
+      let _check_f = _check_dyneither_subscript_e;
       type_t ta1 = typ_to_c_array(ta);
       e1->r = cast_it_r(cstar_typ(ta1,tq),
                         fncall_exp(_check_f,
@@ -2734,7 +2602,6 @@ DynCast:
                                         uint_exp(0,DL)),
                                    DL));
       break;
-    case &AbsUpper_b(_): unimp("exp_to_c: AggrArrow w/ AbsUpper_b");
     }
     if(is_poly)
       e->r = array_to_ptr_cast(typ_to_c(e->topt->v),new_exp(e->r,DL),DL)->r;
@@ -2758,7 +2625,6 @@ DynCast:
       let relns = get_relns(e1);
       bool in_bnds = false;
       switch (conref_def(bounds_one,b)) {
-      case &AbsUpper_b(_): break;
       default:
 	in_bnds = check_bounds(relns,e1,e2);
 	if(warn_bounds_checks && !in_bnds) 
@@ -2770,7 +2636,6 @@ DynCast:
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       total_bounds_checks++;
-      bool forward_only = false;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
         bool possibly_null = conref_def(false,bcr);
@@ -2781,11 +2646,15 @@ DynCast:
         // check if zero terminated
         else if (conref_def(false,zt)) {
           // *((ta2)_zero_arr_plus(e1, esz, e2)
+          if (!Evexp::c_can_eval(esz))
+            terr(e->loc,"cannot determine subscript is in bounds");
           exp_t function_e = getFunction(&_zero_arr_plus_functionSet,e1);
           e->r = deref_exp_r(cast_it(ta2,
                                      fncall_exp(function_e,
                                                 list(e1,esz,e2),DL)));
         } else if(possibly_null) {
+          if (!Evexp::c_can_eval(esz))
+            terr(e->loc,"cannot determine subscript is in bounds");
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
 	  // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)
@@ -2799,9 +2668,6 @@ DynCast:
 	  e2->r = fncall_exp_r(_check_known_subscript_notnull_e,
                                list(esz,copy_exp(e2)));
 	break;
-      case DynForward_b:
-        forward_only = true;
-        fallthru;
       case DynEither_b:
 	type_t ta1 = typ_to_c_array(ta);
         if (in_bnds) {
@@ -2812,28 +2678,12 @@ DynCast:
                                          aggrmember_exp(e1,curr_sp,DL)),e2);
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
-          let _check_f = forward_only ? 
-            _check_dynforward_subscript_e : _check_dyneither_subscript_e;
+          let _check_f = _check_dyneither_subscript_e;
           e->r = deref_exp_r(cast_it(cstar_typ(ta1,tq),
                                      fncall_exp(_check_f,
                                                 list(e1,sizeoftyp_exp(ta1,DL),
                                                      e2),DL)));
         }
-	break;
-      case &AbsUpper_b(t): 
-	// FIX: does not yet compute transitive closure
-	switch(e2->annot) {
-	case &CfFlowInfo::HasTagCmps(cl):
-	  for(; cl != NULL; cl = cl->tl)
-	    if(cl->hd->cmp == Lt && typecmp(cl->hd->bd,t)==0) {
-	      in_bnds = true;
-	      break;
-	    }
-	  break;
-	default: break;
-	}
-	if(!in_bnds)
-	  Tcutil::terr(e->loc,"cannot determine that subscript is in bounds");
 	break;
       }
       break;
@@ -3031,8 +2881,7 @@ DynCast:
         } else {
           pexp = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), var_exp(x,DL));
         }
-        // FIX: should support callocing a ?+- pointer
-        rexp = fncall_exp(_tag_dynforward_e, 
+        rexp = fncall_exp(_tag_dyneither_e, 
                           list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
                                var_exp(x,DL)), DL);
       } else {
@@ -3044,8 +2893,7 @@ DynCast:
         } else { 
           pexp = malloc_exp(*topt, var_exp(x,DL));
         }
-        // FIX: should support mallocing a ?+- pointer
-        rexp = fncall_exp(_tag_dynforward_e, list(var_exp(p,DL),uint_exp(1,DL),
+        rexp = fncall_exp(_tag_dyneither_e, list(var_exp(p,DL),uint_exp(1,DL),
                                                   var_exp(x,DL)), DL);
       }
       let s = declare_stmt(x, uint_typ, xexp,
@@ -3070,19 +2918,15 @@ DynCast:
     // different for the two kinds of fat pointers.  Assumes that we are
     // not swapping zero-terminated array elements so that we can avoid
     // adding dynamic checks.
-    bool is_dynforward_ptr = false;
     bool is_dyneither_ptr = false;
     type_t e1_old_typ = e1->topt->v;
     type_t e2_old_typ = e2->topt->v;
-    if (!is_pointer_or_boxed(e1_old_typ,&is_dynforward_ptr,
-			     &is_dyneither_ptr))
+    if (!is_pointer_or_boxed(e1_old_typ,&is_dyneither_ptr))
       toc_impos("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
 
     // figure out which swap primitive to use
     exp_t swap_fn;
-    if (is_dynforward_ptr)
-      swap_fn = _swap_dynforward_e;
-    else if (is_dyneither_ptr)
+    if (is_dyneither_ptr)
       swap_fn = _swap_dyneither_e;
     else
       swap_fn = _swap_word_e;
@@ -3113,6 +2957,7 @@ DynCast:
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
   case &CompoundLit_e(_,_):   unimp("compoundlit");
+  case &Valueof_e(_): toc_impos("valueof(-)");
   }
 }
 
@@ -3931,7 +3776,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
     }
     if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
       let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-      let t2 = typ_to_c(dynforward_typ(t,HeapRgn,tq,false_conref));// region irrelevant
+      let t2 = typ_to_c(dyneither_typ(t,HeapRgn,tq,false_conref));// region irrelevant
       let x2 = new $((nmspace_t)Loc_n,n->v);
       f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
       nv = add_varmap(frgn,nv,x2,var_exp(x2,DL));
@@ -4115,7 +3960,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
       tunionfield_t f  = fs->hd;
       stringptr_t fn = (*f->name)[1];
-      let sz_exp  = uint_exp((*fn).size+4,DL);
+      let sz_exp  = uint_exp(numelts(*fn)+4,DL);
       let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
       // FIX: making bad alignment and pointer-size assumptions!
       switch (Dict::lookup_opt(*xtunions_so_far,f->name)) {
@@ -4188,8 +4033,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   type_t old_typ = vd->type;
   vd->type = typ_to_c_array(old_typ);
   // Fat pointers can't be declared with "register" scope
-  bool forward_only = false;
-  if (vd->sc == Register && is_tagged_pointer_typ(old_typ,&forward_only)) 
+  if (vd->sc == Register && is_tagged_pointer_typ(old_typ)) 
     vd->sc = Public;
   stmt_to_c(body_nv,s);
   if(vd->initializer != NULL) {
@@ -4319,6 +4163,7 @@ static void exptypes_to_c(exp_t e) {
   case &Tuple_e(_):         fallthru;
   case &Instantiate_e(_,_): fallthru;
   case &New_e(_,_):         fallthru;
+  case &Valueof_e(_):       fallthru;
   case &Gentyp_e(_,_):      
     Tcutil::terr(e->loc,"Cyclone expression within C code");
     break;
@@ -4504,38 +4349,18 @@ static void init() {
     &_check_null_str, 
     &_check_known_subscript_null_str,
     &_check_known_subscript_notnull_str,
-    // &_check_unknown_subscript_str,
-    &_check_dynforward_subscript_str,
     &_check_dyneither_subscript_str,
-    // &_tagged_arr_str,
-    &_dynforward_ptr_str,
     &_dyneither_ptr_str,
-    // &_tag_arr_str,
-    &_tag_dynforward_str,
     &_tag_dyneither_str,
-    // &_init_tag_arr_str,
-    &_init_dynforward_ptr_str,
     &_init_dyneither_ptr_str,
-    // &_untag_arr_str,
-    &_untag_dynforward_ptr_str,
     &_untag_dyneither_ptr_str,
-    // &_get_arr_size_str,
-    &_get_dynforward_size_str,
     &_get_dyneither_size_str,
     &_get_zero_arr_size_str, // NOT SURE WHETHER WE NEED BOTH?
-    // &_tagged_arr_plus_str,
-    &_dynforward_ptr_plus_str,
     &_dyneither_ptr_plus_str,
     &_zero_arr_plus_str,     // NOT SURE WHETHER WE NEED BOTH?
-    // &_tagged_arr_inplace_plus_str,
-    &_dynforward_ptr_inplace_plus_str,
     &_dyneither_ptr_inplace_plus_str,
     &_zero_arr_inplace_plus_str, // NOT SURE WHETHER WE NEED BOTH?
-    // &_tagged_arr_inplace_plus_post_str,
-    &_dynforward_ptr_inplace_plus_post_str,
     &_dyneither_ptr_inplace_plus_post_str,
-    &_dynforward_to_dyneither_str,
-    &_dyneither_to_dynforward_str,
     &_zero_arr_inplace_plus_post_str, // NOT SURE WHETHER WE NEED BOTH?
     &_cycalloc_str,
     &_cyccalloc_str,
@@ -4552,8 +4377,6 @@ static void init() {
     &_pop_dynregion_str,
     &_reset_region_str,
     &_throw_arraybounds_str,
-    // &_tagged_ptr_decrease_size_str,
-    &_dynforward_ptr_decrease_size_str,
     &_dyneither_ptr_decrease_size_str
   };
 }

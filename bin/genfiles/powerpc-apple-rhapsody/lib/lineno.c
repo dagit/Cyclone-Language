@@ -25,11 +25,6 @@ extern int setjmp(jmp_buf);
 #endif
 
 /* Tagged arrays */
-struct _dynforward_ptr {
-  unsigned char *curr;
-  unsigned char *last_plus_one;
-};
-
 struct _dyneither_ptr {
   unsigned char *curr; 
   unsigned char *base; 
@@ -476,23 +471,9 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   return _cus_ans;
 }
-static _INLINE unsigned char *
-_check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
-  struct _dynforward_ptr _cus_arr = (arr);
-  unsigned _cus_elt_sz = (elt_sz);
-  unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
-  return _cus_ans;
-}
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  _cus_ans; })
-#define _check_dynforward_subscript(arr,elt_sz,index) ({ \
-  struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
@@ -511,18 +492,6 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
     _throw_arraybounds();
   return _cus_ans;
 }
-static _INLINE unsigned char *
-_check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
-  struct _dynforward_ptr _cus_arr = (arr);
-  unsigned _cus_elt_sz = (elt_sz);
-  unsigned _cus_index = (index);
-  unsigned char *_cus_curr = _cus_arr.curr;
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
-  if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
-    _throw_arraybounds();
-  return _cus_ans;
-}
 #else
 #define _check_dyneither_subscript(arr,elt_sz,index) ({ \
   struct _dyneither_ptr _cus_arr = (arr); \
@@ -531,16 +500,6 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.base) _throw_null(); \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
-    _throw_arraybounds(); \
-  _cus_ans; })
-#define _check_dynforward_subscript(arr,elt_sz,index) ({ \
-  struct _dynforward_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_curr = _cus_arr.curr; \
-  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
-  if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -554,23 +513,11 @@ _tag_dyneither(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts);
   return _tag_arr_ans;
 }
-static _INLINE struct _dynforward_ptr
-_tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
-  struct _dynforward_ptr _tag_arr_ans;
-  _tag_arr_ans.curr = (void*)(tcurr);
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.curr + (elt_sz) * (num_elts);
-  return _tag_arr_ans;
-}
 #else
 #define _tag_dyneither(tcurr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _tag_arr_ans; \
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts); \
-  _tag_arr_ans; })
-#define _tag_dynforward(tcurr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr _tag_arr_ans; \
-  _tag_arr_ans.curr = (void*)(tcurr); \
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.curr + (elt_sz) * (num_elts); \
   _tag_arr_ans; })
 #endif
 
@@ -584,15 +531,6 @@ _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
   _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
-static _INLINE struct _dynforward_ptr *
-_init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
-                    void *arr, unsigned elt_sz, unsigned num_elts) {
-  struct _dynforward_ptr *_itarr_ptr = (arr_ptr);
-  void* _itarr = (arr);
-  _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
-  return _itarr_ptr;
-}
 #else
 #define _init_dyneither_ptr(arr_ptr,arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr *_itarr_ptr = (arr_ptr); \
@@ -600,16 +538,9 @@ _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
   _itarr_ptr->base = _itarr_ptr->curr = _itarr; \
   _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
   _itarr_ptr; })
-#define _init_dynforward_ptr(arr_ptr,arr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr *_itarr_ptr = (arr_ptr); \
-  void* _itarr = (arr); \
-  _itarr_ptr->curr = _itarr; \
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts); \
-  _itarr_ptr; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _untag_dynforward_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #ifdef _INLINE_FUNCTIONS
@@ -622,26 +553,11 @@ _untag_dyneither_ptr(struct _dyneither_ptr arr,
     _throw_arraybounds();
   return _curr;
 }
-static _INLINE unsigned char *
-_untag_dynforward_ptr(struct _dynforward_ptr arr, 
-                      unsigned elt_sz,unsigned num_elts) {
-  struct _dynforward_ptr _arr = (arr);
-  unsigned char *_curr = _arr.curr;
-  if (_curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
-    _throw_arraybounds();
-  return _curr;
-}
 #else
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
   if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
-    _throw_arraybounds(); \
-  _curr; })
-#define _untag_dynforward_ptr(arr,elt_sz,num_elts) ({ \
-  struct _dynforward_ptr _arr = (arr); \
-  unsigned char *_curr = _arr.curr; \
-  if (_curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -657,14 +573,6 @@ _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
           _get_arr_size_curr >= _get_arr_size_last) ? 0 :
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
 }
-static _INLINE unsigned
-_get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
-  struct _dynforward_ptr _get_arr_size_temp = (arr);
-  unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
-  unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one;
-  return (_get_arr_size_curr >= _get_arr_size_last) ? 0 :
-    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
-}
 #else
 #define _get_dyneither_size(arr,elt_sz) \
   ({struct _dyneither_ptr _get_arr_size_temp = (arr); \
@@ -672,12 +580,6 @@ _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
     unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
     (_get_arr_size_curr < _get_arr_size_temp.base || \
      _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
-    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
-#define _get_dynforward_size(arr,elt_sz) \
-  ({struct _dynforward_ptr _get_arr_size_temp = (arr); \
-    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
-    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
-    (_get_arr_size_curr >= _get_arr_size_last) ? 0 : \
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
 #endif
 
@@ -688,32 +590,10 @@ _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
   _ans.curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-/* Here we have to worry about wrapping around, so if we go past the
- * end, we set the end to 0. */
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
-  struct _dynforward_ptr _ans = (arr);
-  unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - 
-                             ((unsigned)_ans.curr)) / elt_sz;
-  if (change < 0 || ((unsigned)change) > _dfpp_elts)
-    _ans.last_plus_one = 0;
-  _ans.curr += ((int)(elt_sz))*(change);
-  return _ans;
-}
 #else
 #define _dyneither_ptr_plus(arr,elt_sz,change) ({ \
   struct _dyneither_ptr _ans = (arr); \
   _ans.curr += ((int)(elt_sz))*(change); \
-  _ans; })
-#define _dynforward_ptr_plus(arr,elt_sz,change) ({ \
-  struct _dynforward_ptr _ans = (arr); \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - \
-                            ((unsigned)_ans.curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _ans.last_plus_one = 0; \
-  _ans.curr += ((int)(_dfpp_elt_sz))*(_dfpp_change); \
   _ans; })
 #endif
 
@@ -725,31 +605,10 @@ _dyneither_ptr_inplace_plus(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return *_arr_ptr;
 }
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
-                             int change) {
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr);
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - 
-                             ((unsigned)_arr_ptr->curr)) / elt_sz;
-  if (change < 0 || ((unsigned)change) > _dfpp_elts) 
-    _arr_ptr->last_plus_one = 0;
-  _arr_ptr->curr += ((int)(elt_sz))*(change);
-  return *_arr_ptr;
-}
 #else
 #define _dyneither_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
   struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
-  *_arr_ptr; })
-#define _dynforward_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr); \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - \
-                            ((unsigned)_arr_ptr->curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _arr_ptr->last_plus_one = 0; \
-  _arr_ptr->curr += ((int)(_dfpp_elt_sz))*(_dfpp_change); \
   *_arr_ptr; })
 #endif
 
@@ -761,32 +620,10 @@ _dyneither_ptr_inplace_plus_post(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-static _INLINE struct _dynforward_ptr
-_dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,int change) {
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr);
-  struct _dynforward_ptr _ans = *_arr_ptr;
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - 
-                            ((unsigned)_arr_ptr->curr)) / elt_sz; 
-  if (change < 0 || ((unsigned)change) > _dfpp_elts) 
-    _arr_ptr->last_plus_one = 0; 
-  _arr_ptr->curr += ((int)(elt_sz))*(change);
-  return _ans;
-}
 #else
 #define _dyneither_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
   struct _dyneither_ptr * _arr_ptr = (arr_ptr); \
   struct _dyneither_ptr _ans = *_arr_ptr; \
-  _arr_ptr->curr += ((int)(elt_sz))*(change); \
-  _ans; })
-#define _dynforward_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
-  struct _dynforward_ptr * _arr_ptr = (arr_ptr); \
-  struct _dynforward_ptr _ans = *_arr_ptr; \
-  unsigned _dfpp_elt_sz = (elt_sz); \
-  int _dfpp_change = (change); \
-  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - \
-                            ((unsigned)_arr_ptr->curr)) / _dfpp_elt_sz; \
-  if (_dfpp_change < 0 || ((unsigned)_dfpp_change) > _dfpp_elts) \
-    _arr_ptr->last_plus_one = 0; \
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 #endif
@@ -801,49 +638,6 @@ _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
   x.last_plus_one -= sz * numelts; 
   return x; 
 }
-static struct 
-_dynforward_ptr _dynforward_ptr_decrease_size(struct _dynforward_ptr x,
-                                            unsigned int sz,
-                                            unsigned int numelts) {
-  if (x.last_plus_one != 0)
-    x.last_plus_one -= sz * numelts; 
-  return x; 
-}
-
-/* Convert between the two forms of dynamic pointers */
-#ifdef _INLINE_FUNCTIONS 
-static struct _dynforward_ptr
-_dyneither_to_dynforward(struct _dyneither_ptr p) {
-  struct _dynforward_ptr res;
-  res.curr = p.curr;
-  res.last_plus_one = (p.base == 0) ? 0 : p.last_plus_one;
-  return res;
-}
-static struct _dyneither_ptr
-_dynforward_to_dyneither(struct _dynforward_ptr p) {
-  struct _dyneither_ptr res;
-  res.base = res.curr = p.curr;
-  res.last_plus_one = p.last_plus_one;
-  if (p.last_plus_one == 0) 
-    res.base = 0;
-  return res;
-}
-#else 
-#define _dyneither_to_dynforward(_dnfptr) ({ \
-  struct _dyneither_ptr _dnfp = (_dnfptr); \
-  struct _dynforward_ptr _dnfpres; \
-  _dnfpres.curr = _dnfp.curr; \
-  _dnfpres.last_plus_one = (_dnfp.base == 0) ? 0 : _dnfp.last_plus_one; \
-  _dnfpres; })
-#define _dynforward_to_dyneither(_dfnptr) ({ \
-  struct _dynforward_ptr _dfnp = (_dfnptr); \
-  struct _dyneither_ptr _dfnres; \
-  _dfnres.base = _dfnres.curr = _dfnp.curr; \
-  _dfnres.last_plus_one = _dfnp.last_plus_one; \
-  if (_dfnp.last_plus_one == 0) \
-    _dfnres.base = 0; \
-  _dfnres; })
-#endif 
 
 /* Allocation */
 extern void* GC_malloc(int);
@@ -904,18 +698,12 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
 
-/* the next three routines swap [x] and [y]; not thread safe! */
+/* the next two routines swap [x] and [y]; not thread safe! */
 static _INLINE void _swap_word(void *x, void *y) {
   unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
   tmp = *lx;
   *lx = *ly;
   *ly = tmp;
-}
-static _INLINE void _swap_dynforward(struct _dynforward_ptr *x, 
-				    struct _dynforward_ptr *y) {
-  struct _dynforward_ptr tmp = *x;
-  *x = *y;
-  *y = tmp;
 }
 static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
 				   struct _dyneither_ptr *y) {
@@ -924,44 +712,44 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};struct _dynforward_ptr Cyc_Core_new_string(unsigned int);int Cyc_Core_intcmp(
+void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);int Cyc_Core_intcmp(
 int,int);extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
-Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
-16];struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
-int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
-};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
-Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
-int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
-int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
-};struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
-tag;struct _dynforward_ptr f1;};int Cyc_sscanf(struct _dynforward_ptr,struct
-_dynforward_ptr,struct _dynforward_ptr);extern char Cyc_FileCloseError[19];extern
-char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct _dynforward_ptr,
-struct _dynforward_ptr);void Cyc_file_close(struct Cyc___cycFILE*);extern char Cyc_Lexing_Error[
-10];struct Cyc_Lexing_Error_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_Lexing_lexbuf{
-void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct
-_dynforward_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int
-lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
-int(*read_fun)(struct _dynforward_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
-struct _dynforward_ptr lex_base;struct _dynforward_ptr lex_backtrk;struct
-_dynforward_ptr lex_default;struct _dynforward_ptr lex_trans;struct _dynforward_ptr
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _dyneither_ptr f1;};extern
+char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc___cycFILE;
+struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
+_dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
+int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
+Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
+unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
+int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
+_dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
+int Cyc_sscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);
+extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
+char*tag;struct _dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct
+_dyneither_ptr,struct _dyneither_ptr);void Cyc_file_close(struct Cyc___cycFILE*);
+extern char Cyc_Lexing_Error[10];struct Cyc_Lexing_Error_struct{char*tag;struct
+_dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
+void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int
+lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;
+int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(
+struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
+struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct
+_dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr
 lex_check;};struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*);
-struct _dynforward_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);int Cyc_Lexing_lexeme_end(
+struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);int Cyc_Lexing_lexeme_end(
 struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 extern char Cyc_List_List_mismatch[18];struct Cyc_List_List*Cyc_List_merge_sort(int(*
 cmp)(void*,void*),struct Cyc_List_List*x);extern char Cyc_List_Nth[8];unsigned long
-Cyc_strlen(struct _dynforward_ptr s);struct _dynforward_ptr Cyc_strdup(struct
-_dynforward_ptr src);struct _dynforward_ptr Cyc_substring(struct _dynforward_ptr,int
-ofs,unsigned long n);struct Cyc_Lineno_Pos{struct _dynforward_ptr logical_file;
-struct _dynforward_ptr line;int line_no;int col;};struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(
-struct _dynforward_ptr,int);void Cyc_Lineno_poss_of_abss(struct _dynforward_ptr
+Cyc_strlen(struct _dyneither_ptr s);struct _dyneither_ptr Cyc_strdup(struct
+_dyneither_ptr src);struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,
+unsigned long n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct
+_dyneither_ptr line;int line_no;int col;};struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(
+struct _dyneither_ptr,int);void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr
 filename,struct Cyc_List_List*places);const int Cyc_Lineno_lex_base[8]=(const int[8]){
 0,1,- 2,2,5,- 3,- 1,6};const int Cyc_Lineno_lex_backtrk[8]=(const int[8]){- 1,- 1,- 1,1,-
 1,- 1,- 1,0};const int Cyc_Lineno_lex_default[8]=(const int[8]){1,1,0,- 1,4,0,0,- 1};
@@ -991,50 +779,48 @@ state)];if(base < 0)return(- base)- 1;backtrk=Cyc_Lineno_lex_backtrk[
 _check_known_subscript_notnull(8,state)];if(backtrk >= 0){lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}if(lbuf->lex_curr_pos >= lbuf->lex_buffer_len){if(
 !lbuf->lex_eof_reached)return(- state)- 1;else{c=256;}}else{c=(int)*((char*)
-_check_dynforward_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
+_check_dyneither_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
 if(c == - 1)c=256;}if(Cyc_Lineno_lex_check[_check_known_subscript_notnull(263,base
 + c)]== state)state=Cyc_Lineno_lex_trans[_check_known_subscript_notnull(263,base
 + c)];else{state=Cyc_Lineno_lex_default[_check_known_subscript_notnull(8,state)];}
 if(state < 0){lbuf->lex_curr_pos=lbuf->lex_last_pos;if(lbuf->lex_last_action == - 1){
 struct Cyc_Lexing_Error_struct _tmp26;const char*_tmp25;struct Cyc_Lexing_Error_struct*
 _tmp24;(int)_throw((void*)((_tmp24=_cycalloc(sizeof(*_tmp24)),((_tmp24[0]=((
-_tmp26.tag=Cyc_Lexing_Error,((_tmp26.f1=((_tmp25="empty token",_tag_dynforward(
-_tmp25,sizeof(char),_get_zero_arr_size_char(_tmp25,12)))),_tmp26)))),_tmp24)))));}
-else{return lbuf->lex_last_action;}}else{if(c == 256)lbuf->lex_eof_reached=0;}}}
-void*Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate);void*Cyc_Lineno_token_rec(
-struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){lexstate=Cyc_Lineno_lex_engine(
-lexstate,lexbuf);switch(lexstate){case 0: _LL0: return(void*)1;case 1: _LL1: return(
-void*)0;case 2: _LL2: return(void*)2;default: _LL3:(lexbuf->refill_buff)(lexbuf);
-return Cyc_Lineno_token_rec(lexbuf,lexstate);}{struct Cyc_Lexing_Error_struct
-_tmp2C;const char*_tmp2B;struct Cyc_Lexing_Error_struct*_tmp2A;(int)_throw((void*)((
-_tmp2A=_cycalloc(sizeof(*_tmp2A)),((_tmp2A[0]=((_tmp2C.tag=Cyc_Lexing_Error,((
-_tmp2C.f1=((_tmp2B="some action didn't return!",_tag_dynforward(_tmp2B,sizeof(
-char),_get_zero_arr_size_char(_tmp2B,27)))),_tmp2C)))),_tmp2A)))));}}void*Cyc_Lineno_token(
+_tmp26.tag=Cyc_Lexing_Error,((_tmp26.f1=((_tmp25="empty token",_tag_dyneither(
+_tmp25,sizeof(char),12))),_tmp26)))),_tmp24)))));}else{return lbuf->lex_last_action;}}
+else{if(c == 256)lbuf->lex_eof_reached=0;}}}void*Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*
+lexbuf,int lexstate);void*Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int
+lexstate){lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);switch(lexstate){case 0:
+_LL0: return(void*)1;case 1: _LL1: return(void*)0;case 2: _LL2: return(void*)2;default:
+_LL3:(lexbuf->refill_buff)(lexbuf);return Cyc_Lineno_token_rec(lexbuf,lexstate);}{
+struct Cyc_Lexing_Error_struct _tmp2C;const char*_tmp2B;struct Cyc_Lexing_Error_struct*
+_tmp2A;(int)_throw((void*)((_tmp2A=_cycalloc(sizeof(*_tmp2A)),((_tmp2A[0]=((
+_tmp2C.tag=Cyc_Lexing_Error,((_tmp2C.f1=((_tmp2B="some action didn't return!",
+_tag_dyneither(_tmp2B,sizeof(char),27))),_tmp2C)))),_tmp2A)))));}}void*Cyc_Lineno_token(
 struct Cyc_Lexing_lexbuf*lexbuf);void*Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*
 lexbuf){return Cyc_Lineno_token_rec(lexbuf,0);}struct Cyc_Lineno_Pos;struct _tuple0{
-struct _dynforward_ptr f1;int f2;};static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(
-struct _dynforward_ptr line);static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(
-struct _dynforward_ptr line){struct _handler_cons _tmp6;_push_handler(& _tmp6);{int
+struct _dyneither_ptr f1;int f2;};static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(
+struct _dyneither_ptr line);static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(
+struct _dyneither_ptr line){struct _handler_cons _tmp6;_push_handler(& _tmp6);{int
 _tmp8=0;if(setjmp(_tmp6.handler))_tmp8=1;if(!_tmp8){{int i=0;while(i < 
-_get_dynforward_size(line,sizeof(char)) && (*((char*)_check_dynforward_subscript(
-line,sizeof(char),i))< '0'  || *((char*)_check_dynforward_subscript(line,sizeof(
-char),i))> '9')){++ i;}{int j=i;while((j < _get_dynforward_size(line,sizeof(char))
- && *((char*)_check_dynforward_subscript(line,sizeof(char),j))>= '0') && *((char*)
-_check_dynforward_subscript(line,sizeof(char),j))<= '9'){++ j;}if(i == 
-_get_dynforward_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmp9=0;
-_npop_handler(0);return _tmp9;}{int number=0;{const char*_tmp30;void*_tmp2F[1];
-struct Cyc_IntPtr_sa_struct _tmp2E;if(((_tmp2E.tag=2,((_tmp2E.f1=& number,((_tmp2F[
-0]=& _tmp2E,Cyc_sscanf((struct _dynforward_ptr)Cyc_substring((struct
-_dynforward_ptr)line,i,(unsigned long)(j - i)),((_tmp30="%d",_tag_dynforward(
-_tmp30,sizeof(char),_get_zero_arr_size_char(_tmp30,3)))),_tag_dynforward(_tmp2F,
-sizeof(void*),1))))))))!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);return
-_tmpD;}}while(j < _get_dynforward_size(line,sizeof(char)) && *((char*)
-_check_dynforward_subscript(line,sizeof(char),j))!= '"'){++ j;}{int k=++ j;while(k < 
-_get_dynforward_size(line,sizeof(char)) && *((char*)_check_dynforward_subscript(
-line,sizeof(char),k))!= '"'){++ k;}if(j == _get_dynforward_size(line,sizeof(char))
- || k == _get_dynforward_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
-_npop_handler(0);return _tmpE;}{struct _dynforward_ptr fname=Cyc_substring((struct
-_dynforward_ptr)line,j,(unsigned long)(k - j));struct _tuple0*_tmp33;struct Cyc_Core_Opt*
+_get_dyneither_size(line,sizeof(char)) && (*((char*)_check_dyneither_subscript(
+line,sizeof(char),i))< '0'  || *((char*)_check_dyneither_subscript(line,sizeof(
+char),i))> '9')){++ i;}{int j=i;while((j < _get_dyneither_size(line,sizeof(char))
+ && *((char*)_check_dyneither_subscript(line,sizeof(char),j))>= '0') && *((char*)
+_check_dyneither_subscript(line,sizeof(char),j))<= '9'){++ j;}if(i == 
+_get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmp9=0;_npop_handler(
+0);return _tmp9;}{int number=0;{const char*_tmp30;void*_tmp2F[1];struct Cyc_IntPtr_sa_struct
+_tmp2E;if(((_tmp2E.tag=2,((_tmp2E.f1=& number,((_tmp2F[0]=& _tmp2E,Cyc_sscanf((
+struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(
+j - i)),((_tmp30="%d",_tag_dyneither(_tmp30,sizeof(char),3))),_tag_dyneither(
+_tmp2F,sizeof(void*),1))))))))!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);
+return _tmpD;}}while(j < _get_dyneither_size(line,sizeof(char)) && *((char*)
+_check_dyneither_subscript(line,sizeof(char),j))!= '"'){++ j;}{int k=++ j;while(k < 
+_get_dyneither_size(line,sizeof(char)) && *((char*)_check_dyneither_subscript(
+line,sizeof(char),k))!= '"'){++ k;}if(j == _get_dyneither_size(line,sizeof(char))
+ || k == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
+_npop_handler(0);return _tmpE;}{struct _dyneither_ptr fname=Cyc_substring((struct
+_dyneither_ptr)line,j,(unsigned long)(k - j));struct _tuple0*_tmp33;struct Cyc_Core_Opt*
 _tmp32;struct Cyc_Core_Opt*_tmp11=(_tmp32=_cycalloc(sizeof(*_tmp32)),((_tmp32->v=((
 _tmp33=_cycalloc(sizeof(*_tmp33)),((_tmp33->f1=fname,((_tmp33->f2=number,_tmp33)))))),
 _tmp32)));_npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(
@@ -1042,36 +828,36 @@ void*)_exn_thrown;void*_tmp13=_tmp7;_LL6:;_LL7: return 0;_LL8:;_LL9:(void)_throw
 _tmp13);_LL5:;}}}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};int Cyc_Lineno_place_cmp(
 struct _tuple1*place1,struct _tuple1*place2);int Cyc_Lineno_place_cmp(struct _tuple1*
 place1,struct _tuple1*place2){return Cyc_Core_intcmp((*place1).f1,(*place2).f1);}
-void Cyc_Lineno_poss_of_abss(struct _dynforward_ptr filename,struct Cyc_List_List*
-places);void Cyc_Lineno_poss_of_abss(struct _dynforward_ptr filename,struct Cyc_List_List*
+void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr filename,struct Cyc_List_List*
+places);void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr filename,struct Cyc_List_List*
 places){places=((struct Cyc_List_List*(*)(int(*cmp)(struct _tuple1*,struct _tuple1*),
 struct Cyc_List_List*x))Cyc_List_merge_sort)(Cyc_Lineno_place_cmp,places);{const
 char*_tmp34;struct Cyc___cycFILE*f=Cyc_file_open(filename,((_tmp34="r",
-_tag_dynforward(_tmp34,sizeof(char),_get_zero_arr_size_char(_tmp34,2)))));{
-struct _handler_cons _tmp14;_push_handler(& _tmp14);{int _tmp16=0;if(setjmp(_tmp14.handler))
-_tmp16=1;if(!_tmp16){{struct Cyc_Lexing_lexbuf*lbuf=Cyc_Lexing_from_file(f);
-struct _dynforward_ptr _tmp17=filename;int _tmp18=1;struct _dynforward_ptr this_line;
-int eol;void*next;while(places != 0){while(1){next=((void*(*)(struct Cyc_Lexing_lexbuf*
+_tag_dyneither(_tmp34,sizeof(char),2))));{struct _handler_cons _tmp14;
+_push_handler(& _tmp14);{int _tmp16=0;if(setjmp(_tmp14.handler))_tmp16=1;if(!
+_tmp16){{struct Cyc_Lexing_lexbuf*lbuf=Cyc_Lexing_from_file(f);struct
+_dyneither_ptr _tmp17=filename;int _tmp18=1;struct _dyneither_ptr this_line;int eol;
+void*next;while(places != 0){while(1){next=((void*(*)(struct Cyc_Lexing_lexbuf*
 lexbuf))Cyc_Lineno_token)(lbuf);eol=((int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end)(
-lbuf);this_line=((struct _dynforward_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(
+lbuf);this_line=((struct _dyneither_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(
 lbuf);if(next == (void*)2  || eol > (*((struct _tuple1*)places->hd)).f1)break;if(
 next == (void*)0)++ _tmp18;else{struct Cyc_Core_Opt*fno=Cyc_Lineno_parse_linedef(
-this_line);if(fno == 0)++ _tmp18;else{_tmp17=(struct _dynforward_ptr)(*((struct
+this_line);if(fno == 0)++ _tmp18;else{_tmp17=(struct _dyneither_ptr)(*((struct
 _tuple0*)fno->v)).f1;_tmp18=(*((struct _tuple0*)fno->v)).f2;}}}while(places != 0
  && (next == (void*)2  || eol > (*((struct _tuple1*)places->hd)).f1)){struct Cyc_Lineno_Pos*
 _tmp19=(*((struct _tuple1*)places->hd)).f2;_tmp19->logical_file=(struct
-_dynforward_ptr)Cyc_strdup((struct _dynforward_ptr)_tmp17);_tmp19->line=this_line;
-_tmp19->line_no=_tmp18;_tmp19->col=(int)(Cyc_strlen((struct _dynforward_ptr)
+_dyneither_ptr)Cyc_strdup((struct _dyneither_ptr)_tmp17);_tmp19->line=this_line;
+_tmp19->line_no=_tmp18;_tmp19->col=(int)(Cyc_strlen((struct _dyneither_ptr)
 this_line)- (eol - (*((struct _tuple1*)places->hd)).f1));if(_tmp19->col < 0)_tmp19->col=
 0;places=places->tl;}++ _tmp18;}};_pop_handler();}else{void*_tmp15=(void*)
 _exn_thrown;void*_tmp1B=_tmp15;_LLB:;_LLC: Cyc_file_close(f);(int)_throw(_tmp1B);
 _LLD:;_LLE:(void)_throw(_tmp1B);_LLA:;}}}Cyc_file_close(f);return;}}struct Cyc_Lineno_Pos*
-Cyc_Lineno_pos_of_abs(struct _dynforward_ptr filename,int abs);struct Cyc_Lineno_Pos*
-Cyc_Lineno_pos_of_abs(struct _dynforward_ptr filename,int abs){const char*_tmp37;
+Cyc_Lineno_pos_of_abs(struct _dyneither_ptr filename,int abs);struct Cyc_Lineno_Pos*
+Cyc_Lineno_pos_of_abs(struct _dyneither_ptr filename,int abs){const char*_tmp37;
 struct Cyc_Lineno_Pos*_tmp36;struct Cyc_Lineno_Pos*ans=(_tmp36=_cycalloc(sizeof(*
-_tmp36)),((_tmp36->logical_file=((_tmp37="",_tag_dynforward(_tmp37,sizeof(char),
-_get_zero_arr_size_char(_tmp37,1)))),((_tmp36->line=Cyc_Core_new_string(0),((
-_tmp36->line_no=0,((_tmp36->col=0,_tmp36)))))))));{struct _tuple1*_tmp3A;struct
-Cyc_List_List*_tmp39;Cyc_Lineno_poss_of_abss(filename,((_tmp39=_cycalloc(sizeof(*
-_tmp39)),((_tmp39->hd=((_tmp3A=_cycalloc(sizeof(*_tmp3A)),((_tmp3A->f1=abs,((
-_tmp3A->f2=ans,_tmp3A)))))),((_tmp39->tl=0,_tmp39)))))));}return ans;}
+_tmp36)),((_tmp36->logical_file=((_tmp37="",_tag_dyneither(_tmp37,sizeof(char),1))),((
+_tmp36->line=Cyc_Core_new_string(0),((_tmp36->line_no=0,((_tmp36->col=0,_tmp36)))))))));{
+struct _tuple1*_tmp3A;struct Cyc_List_List*_tmp39;Cyc_Lineno_poss_of_abss(filename,((
+_tmp39=_cycalloc(sizeof(*_tmp39)),((_tmp39->hd=((_tmp3A=_cycalloc(sizeof(*_tmp3A)),((
+_tmp3A->f1=abs,((_tmp3A->f2=ans,_tmp3A)))))),((_tmp39->tl=0,_tmp39)))))));}
+return ans;}

@@ -82,6 +82,8 @@ struct NewRegion<`r2::R> {
 
 /* The rest of these are implemented in Cyclone, in core.cyc. */
 namespace Core {
+  /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
+typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
 extern struct Opt<`a> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
 typedef struct Opt<`a> *`r opt_t<`a,`r>;
@@ -158,7 +160,7 @@ extern region_t<`U> unique_region;
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
 
-extern void ufree(`a::A ?-`U ptr);
+extern void ufree(`a::A ?`U ptr);
   /** [ufree] frees a unique pointer. */
 
   /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
@@ -191,7 +193,7 @@ extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
 //  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
 extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
-extern "C" unsigned int arr_prevsize(`a::A ?-,sizeof_t<`a>);
+extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
   /** [array_prevsize(p,sz)] returns the buffer space available preceding
       the pointer [p] in the dynamic array [p] points into.  [sz] is the
       size of the elements in the array returned by [sizeof]. */

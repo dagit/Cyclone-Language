@@ -905,7 +905,7 @@ buildRepXTunion(qvar_t xname, tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t
   let tagriexps = List::zip(tags,riexps);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,tagriexps);
   // build the type of elements of Tunion array
-  type_t name_type = dynforward_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
+  type_t name_type = dyneither_typ(char_typ,HeapRgn,Tqual{.print_const=true,.q_volatile=false,.q_restrict=0,.real_const=true,.loc=NULL},true_conref);
   type_t tuple_type = tuple_typ(list(name_type,
 				     tunion_typ(typerep_name(&typestruct_str))));
   let &$(tupledecls,arrexp) = array_decls(tuple_type,tuplelist,loc);
@@ -1011,9 +1011,8 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 			 address_exp(unknownid_exp(varname,loc),loc),
 			 list(base_info),NULL);
       break;
-    case DynForward_b: // FIX!!!
     case DynEither_b:
-      // a ?+- pointer
+      // a ? pointer
       // tunion Typestruct.FatPtr(`base_info->exp`);
       let varname = toplevel_name(new_gen_id("rep"));
 
@@ -1034,8 +1033,6 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 			 address_exp(unknownid_exp(varname,loc),loc),
 			 list(base_info),NULL);
       break;
-    case &AbsUpper_b(_): 
-      Tcutil::impos("tcgenregp: no support for abstract array bounds");
     }
     break;
   case &ArrayType(ArrayInfo{arrtype,tq,e,zt,_}):
@@ -1329,12 +1326,10 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
     //    default:
     //      Tcutil::impos("gen() expression not yet supported");
     //      throw Tcutil::TypeErr; // redundant, as impos will do this
-  case &SizeofType(_):
-    Tcutil::impos("gen() for sizeof_t<-> not yet supported");
-  case &TypeInt(_):
-    Tcutil::impos("gen() for `i not yet supported");
   case &TagType(_):
     Tcutil::impos("gen() for tag_t<-> not yet supported");
+  case &ValueofType(_):
+    Tcutil::impos("gen() for valueof_t<-> not yet supported");
   }
   //printf("Done %s\n",typ2string(type));
   return new $(dict,lookup(dict,type));

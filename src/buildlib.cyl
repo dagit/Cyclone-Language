@@ -832,6 +832,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (topt != NULL) scan_type(*topt);
       scan_exp(e);
       return;
+    case &Valueof_e(t1): fallthru(t1);
     case &Sizeoftyp_e(t1):
       scan_type(t1);
       return;
@@ -989,14 +990,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &RgnsEff(_):
       fprintf(stderr,"Error: unexpected RgnsEff\n");
       exit(1); return;
-    case &SizeofType(_):
-      fprintf(stderr,"Error: unexpected sizeof_t\n");
-      exit(1); return;
-    case &TypeInt(_):
-      fprintf(stderr,"Error: unexpected type integer\n");
-      exit(1); return;
     case &TagType(_):
       fprintf(stderr,"Error: unexpected tag_t\n");
+      exit(1); return;
+    case &ValueofType(_):
+      fprintf(stderr,"Error: unexpected valueof_t\n");
       exit(1); return;
     }
   }
@@ -1228,15 +1226,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let choppedname = Filename::chop_extension(basename);
     let cppinfile = (const char @)(strconcat(choppedname, ".iA"));
     let macrosfile = (const char @)
-      ((dirname.size == 0)?
+      ((numelts(dirname) == 0)?
       (aprintf("%s.iB", choppedname)):
       (Filename::concat(dirname, aprintf("%s.iB", choppedname))));
     let declsfile = (const char @)
-      ((dirname.size == 0)?
+      ((numelts(dirname) == 0)?
       (aprintf("%s.iC", choppedname)):
       (Filename::concat(dirname, aprintf("%s.iC", choppedname))));
     let filtereddeclsfile = (const char @)
-      ((dirname.size == 0)?
+      ((numelts(dirname) == 0)?
       (aprintf("%s.iD", choppedname)):
       (Filename::concat(dirname, aprintf("%s.iD", choppedname))));
 
@@ -1418,7 +1416,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       out_file = (FILE @)maybe;
     } else out_file = stdout;
     mstring_t ifdefmacro = aprintf("_%s_",filename);
-    for (let j = 0; j < ifdefmacro.size; j++) {
+    for (let j = 0; j < numelts(ifdefmacro); j++) {
       if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
         ifdefmacro[j] = '_';
       else if (ifdefmacro[j] != '_' && ifdefmacro[j] != '/')
@@ -1608,7 +1606,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     /* Cd into dir, where the header files will be built.  Remember
        the current dir so we can cd back after we're done. */
     char ? buf = new {for i<1024: '\0'};
-    let cwd = getcwd(buf,buf.size);
+    let cwd = getcwd(buf,numelts(buf));
     if (mode != GATHERSCRIPT) {
       if (chdir(dir)) {
         fprintf(stderr,"Error: can't change directory to %s\n",dir);
@@ -1646,7 +1644,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     /* Cd into dir, where the header files will be built.  Remember
        the current dir so we can cd back after we're done. */
     char ? buf = new {for i<1024: '\0'};
-    let cwd = getcwd(buf,buf.size);
+    let cwd = getcwd(buf,numelts(buf));
     if (chdir(dir)) {
       fprintf(stderr,"Error: can't change directory to %s\n",dir);
       return 1;

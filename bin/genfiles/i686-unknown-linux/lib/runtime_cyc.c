@@ -228,44 +228,45 @@ int _throw_badalloc() {
   throw(Cyc_Bad_alloc);
 }
 
-struct _dynforward_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
-  struct _dynforward_ptr str;
+struct _dyneither_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
+  struct _dyneither_ptr str;
   if (s == NULL) {
-    str.curr = str.last_plus_one = NULL;
+    str.base = str.curr = str.last_plus_one = NULL;
   } else {
     int slen = strlen(s)+1;
     if (len == -1)
       len = slen;
     else if (len > slen)
       _throw_arraybounds(); /* FIX: pick better exception */
-    str.curr = s;
+    str.base = str.curr = s;
     str.last_plus_one = s + len;
   }
   return str;
 }
 
 // trusted---the length field is not verified to be correct
-struct _dynforward_ptr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
-  struct _dynforward_ptr str;
+struct _dyneither_ptr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
+  struct _dyneither_ptr str;
   if (s == NULL) {
-    str.curr = str.last_plus_one = NULL;
+    str.base = str.curr = str.last_plus_one = NULL;
   } else {
-    str.curr = s;
+    str.base = str.curr = s;
     str.last_plus_one = s + len;
   }
   return str;
 }
 
-struct _dynforward_ptr Cstring_to_string(Cstring s) {
-  struct _dynforward_ptr str;
+struct _dyneither_ptr Cstring_to_string(Cstring s) {
+  struct _dyneither_ptr str;
   if (s == NULL) {
-    str.curr = str.last_plus_one = NULL;
+    str.base = str.curr = str.last_plus_one = NULL;
   }
   else {
     int sz = strlen(s)+1;
     str.curr = (char *)_cycalloc_atomic(sz);
     if (str.curr == NULL) 
       _throw_badalloc();
+    str.base = str.curr;
     str.last_plus_one = str.curr + sz;
 
     // Copy the string in case the C code frees it or mangles it
@@ -276,7 +277,7 @@ struct _dynforward_ptr Cstring_to_string(Cstring s) {
   return str;
 }
 
-Cstring string_to_Cstring(struct _dynforward_ptr s) {
+Cstring string_to_Cstring(struct _dyneither_ptr s) {
   int i;
   char *contents = s.curr;
   size_t sz = s.last_plus_one - s.curr;
@@ -284,7 +285,7 @@ Cstring string_to_Cstring(struct _dynforward_ptr s) {
 
   if (s.curr == NULL) return NULL;
 
-  if (s.curr >= s.last_plus_one)
+  if (s.curr >= s.last_plus_one || s.curr < s.base)
     throw(Cyc_Null_Exception); // FIX: this should be a bounds error
   // check that there's a '\0' somewhere in the string -- if not,
   // throw an exception.
@@ -410,8 +411,9 @@ bool Cyc_set_default_region_page_size(size_t s) {
 
 // argc is redundant
 struct _tagged_argv { 
-  struct _dynforward_ptr *curr;
-  struct _dynforward_ptr *last_plus_one;
+  struct _dyneither_ptr *base;
+  struct _dyneither_ptr *curr;
+  struct _dyneither_ptr *last_plus_one;
 };
 
 // some debugging routines
@@ -443,7 +445,7 @@ extern struct Cyc___cycFILE {
   FILE *file;
 } *Cyc_stdin, *Cyc_stdout, *Cyc_stderr;
 
-extern int Cyc_main(int argc, struct _dynforward_ptr argv);
+extern int Cyc_main(int argc, struct _dyneither_ptr argv);
 
 int main(int argc, char **argv) {
   // install outermost exception handler
@@ -470,17 +472,20 @@ int main(int argc, char **argv) {
   // NULL to the end of the argv so that people can step through argv
   // until they hit NULL.  
   {struct _tagged_argv args;
-  struct _dynforward_ptr args_p;
+  struct _dyneither_ptr args_p;
   int i, result;
   args.curr = 
-    (struct _dynforward_ptr *)GC_malloc((argc+1)*sizeof(struct _dynforward_ptr));
+    (struct _dyneither_ptr *)GC_malloc((argc+1)*sizeof(struct _dyneither_ptr));
+  args.base = args.curr;
   args.last_plus_one = args.curr + argc + 1;
   for(i = 0; i < argc; ++i)
     args.curr[i] = Cstring_to_string(argv[i]);
   // plug in final NULL
+  args.curr[argc].base = 0;
   args.curr[argc].curr = 0;
   args.curr[argc].last_plus_one = 0;
   args_p.curr = (unsigned char *)args.curr;
+  args_p.base = args_p.curr;
   args_p.last_plus_one = (unsigned char *)args.last_plus_one;
   result = Cyc_main(argc, args_p);
 #ifdef CYC_REGION_PROFILE

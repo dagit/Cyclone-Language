@@ -158,8 +158,9 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
 }
 
 // The main routine -- side-effects the expression e, overwriting its
-// r field with the resulting constant (only if there's no error or sizeof)
-
+// r field with the resulting constant (only if there's no error or sizeof
+// or valueof.)  The allow_valueof flag determines whether or not we
+// allow valueof.
 static $(cnst_t,bool) eval_const_exp(exp_t e) {
   $(cnst_t,bool) ans;
   switch (e->r) {
@@ -206,6 +207,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     }
     terr(e->loc,"bad static expression (too many args to primop)");
     return $(Int_c(Signed,0), true);
+  case &Valueof_e(_): 
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_): ans = $(Int_c(Signed,0), false); break;
@@ -225,7 +227,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       case $(&TagType(it),Int_c(sn2,x)): 
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
-	unify(it, new TypeInt(x));
+	unify(it, new ValueofType(const_exp(ans[0],NULL)));
 	ans[0] = Int_c(Unsigned,x);
 	break;
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
@@ -242,6 +244,29 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   return ans;
 }
 
+bool c_can_eval(exp_t e) {
+  switch (e->r) {
+  case &AnonEnum_e(...): 
+  case &Enum_e(...):
+  case &Sizeoftyp_e(_): 
+  case &Sizeofexp_e(_): 
+  case &Offsetof_e(_,_):
+  case &Const_e(_): return true;
+  case &Conditional_e(e1,e2,e3):
+    return c_can_eval(e1) && c_can_eval(e2) && c_can_eval(e3);
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2):
+    return c_can_eval(e1) && c_can_eval(e2);
+  case &Primop_e(p,es):
+    for (; es != NULL; es = es->tl)
+      if (!c_can_eval(es->hd)) return false;
+    return true;
+  case &Valueof_e(_): return false;
+  case &Cast_e(_,e,_,_): return c_can_eval(e);
+  default: return false;
+  }
+}
+
 static int const_exp_case_number(exp_t e) {
   switch(e->r) {
   case &Const_e(_): return 1;
@@ -253,6 +278,7 @@ static int const_exp_case_number(exp_t e) {
   case &Cast_e(_,_,_,_): return 6;
   case &And_e(_,_): return 7;
   case &Or_e(_,_): return 8;
+  case &Valueof_e(_): return 9;
     // note: AnonEnum_e and Enum_e should be impossible b/c already replaced
   default: terr(e->loc,"bad static expression %s", exp2string(e)); return 0;
   }
@@ -317,6 +343,9 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     let c1 = typecmp(t1,t2);
     if(c1 != 0) return c1;
     return const_exp_cmp(e1a,e2a);
+  case $(&Valueof_e(t1), &Valueof_e(t2)):
+    if (Tcutil::unify(t1,t2)) return 0;
+    return typecmp(t1,t2);
   default: impos("Evexp::const_exp_cmp, unexpected case");
   }
 }
@@ -357,7 +386,6 @@ bool okay_szofarg(type_t t) {
     // okay? (used to require constrained bound)
   case &PointerType(_): return true;
 
-  case &SizeofType(_):
   case &TagType(_):
   case &IntType(_,_): 
   case FloatType:    
@@ -383,11 +411,11 @@ bool okay_szofarg(type_t t) {
     return true;
   case &EnumType(_,_):
   case &AnonEnumType(_): return true;
-  case &TypeInt(_):
   case HeapRgn: 
   case UniqueRgn: 
   case &JoinEff(_):
   case &AccessEff(_):
+  case &ValueofType(_):
   case &RgnsEff(_):   return false;
   case &TypedefType(_,_,td,_): 
     // Is this right, considering abstract typedefs??

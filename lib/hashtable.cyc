@@ -53,7 +53,7 @@ table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a),
 
 void insert(table_t<`a,`b> t, `a key, `b val) {
   list_t<$(`a,`b)@> ?tab   = t->tab;
-  int             bucket = (*t->hash)(key) % tab.size;
+  int             bucket = (*t->hash)(key) % numelts(tab);
   tab[bucket] = rnew(t->r) List(rnew(t->r) $(key,val),tab[bucket]);
   if (length(tab[bucket]) > t->max_len) 
     resize(t);
@@ -62,13 +62,13 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
 `b lookup(table_t<`a,`b> t, `a key) {
   // throws Not_found
   list_t<$(`a,`b)@> ?tab   = t->tab;
-  list_t<$(`a,`b)@> l      = tab[(*t->hash)(key) % tab.size];
+  list_t<$(`a,`b)@> l      = tab[(*t->hash)(key) % numelts(tab)];
   return assoc_cmp(t->cmp, l, key);
 }
 
 `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key) {
   let tab = t->tab;
-  let l = tab[(*t->hash)(key) % tab.size];
+  let l = tab[(*t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
   for (; l != NULL; l = l->tl) {
     let &$(k,*v) = l->hd;
@@ -79,7 +79,7 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
 
 bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
   let tab = t->tab;
-  let l = tab[(*t->hash)(key) % tab.size];
+  let l = tab[(*t->hash)(key) % numelts(tab)];
   let cmp = t->cmp;
   for (; l != NULL; l = l->tl) {
     let $(k,v) = *l->hd;
@@ -97,7 +97,7 @@ void remove(table_t<`a,`b> t, `a key) {
   // UNTESTED!
   list_t<$(`a,`b)@> ?tab      = t->tab;
   int         (@cmp)(`a,`a)   = t->cmp;
-  int              bucket   = (*t->hash)(key) % tab.size;
+  int              bucket   = (*t->hash)(key) % numelts(tab);
   list_t<$(`a,`b)@> l         = tab[bucket];
   if(l == NULL)
     return;
@@ -117,7 +117,7 @@ void remove(table_t<`a,`b> t, `a key) {
 int hash_string(string_t s) {
   // could be made faster by explicit loop unrolling
   int ans   = 0;
-  int sz    = s.size;
+  int sz    = numelts(s);
   int shift = 0;
   for (int i=0; i < sz; ++i) {
     ans = ans ^ (s[i] << shift);
@@ -140,13 +140,13 @@ void insert_bucket(region_t<`r> r,
   insert_bucket(r,tab,hash,elems->tl); // preserve the original order
   `a  key  = elems->hd[0][0];
   `b  val  = elems->hd[0][1];
-  int nidx = (*hash)(key) % tab.size;
+  int nidx = (*hash)(key) % numelts(tab);
   tab[nidx] = rnew(r) List(rnew(r) $(key,val),tab[nidx]);
 }
 
 void resize(table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = odata.size;
+  int             osize    = numelts(odata);
   int             nsize    = 2 * osize + 1;
   list_t<$(`a,`b)@> mt = NULL;
   list_t<$(`a,`b)@> ? ndata  = rnew(t->r) {for i < nsize : mt};
@@ -159,7 +159,7 @@ void resize(table_t<`a,`b> t) {
 // Iterating over a hashtable
 void iter(void f(`a,`b), table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = odata.size;
+  int             osize    = numelts(odata);
   for (int i = 0; i<osize; i++) 
     for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
       f(iter->hd[0][0],iter->hd[0][1]);
@@ -168,7 +168,7 @@ void iter(void f(`a,`b), table_t<`a,`b> t) {
 void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env)
 {
   list_t<$(`a,`b)@> ?odata   = t->tab;
-  int             osize    = odata.size;
+  int             osize    = numelts(odata);
   for (int i = 0; i<osize; i++) 
     for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) 
       f(iter->hd[0][0],iter->hd[0][1],env);
@@ -178,7 +178,7 @@ void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env)
 void print_table_map(table_t<`a,`b> t, 
                      void prn_key(`a), void prn_val(`b)){
   list_t<$(`a,`b)@> ?odata = t->tab;
-  int osize = odata.size;
+  int osize = numelts(odata);
   for (int i = 0; i<osize; i++) {
     printf("%d: ",i);
     for(list_t<$(`a,`b)@> iter = odata[i]; iter != NULL; iter = iter->tl) {

@@ -981,7 +981,7 @@ static type_t main_type() {
     new $(NULL,empty_tqual(NULL),sint_typ);
   $(opt_t<var_t>,tqual_t,type_t)@ arg2 = 
     new $(NULL,empty_tqual(NULL),
-          dynforward_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
+          dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
                                 empty_tqual(NULL), empty_conref()));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,.ret_typ = sint_typ,
                               .args = list(arg1,arg2), .c_varargs = false,
@@ -1133,7 +1133,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     default: 
       new_rgn = heap_ct(); break; 
     }
-    let orig_fat = (conref_val(b) == DynForward_b);
+    let orig_fat = (conref_val(b) == DynEither_b);
     bool orig_zt;
     switch (zt->v) {
     case No_constr: orig_zt = is_char(env,et); break;
@@ -1485,6 +1485,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Tunion_e(_,_,_): impos("Tunion_e");
   case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");
   case &StmtExp_e(s): impos("StmtExp_e");
+  case &Valueof_e(_): impos("Valueof_e");
   }
 }
 

@@ -36,9 +36,9 @@ namespace Typerep;
 $(int,typestruct_t<`r>) tuple_tl(typestruct_t<`r> typ) {
   switch(typ) {
   case &Tuple(sz,l):
-    if(l.size < 2) fallthru;
+    if(numelts(l) < 2) fallthru;
     int pos1 = (*l[1])[0];
-    let m = new {for i < l.size-1: new $((*l[i+1])[0] - pos1, (*l[i+1])[1])};
+    let m = new {for i < numelts(l)-1: new $((*l[i+1])[0] - pos1, (*l[i+1])[1])};
     return $(pos1,new Tuple(sz-pos1,m));
   default: throw new Core::Failure("tuple_tl: expected tuple of size >= 2");
   }
@@ -54,7 +54,7 @@ get_unionbranch(unsigned int tag,
 		$(unsigned int,string_t<`H>,tunion `r Typestruct)@ ? l)
 {
   //fprintf(stderr,"looking for tag %d\n",tag);
-  for (int i = 0; i < l.size; i++) {
+  for (int i = 0; i < numelts(l); i++) {
     let $(btag,_,typ) = *(l[i]);
     //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
@@ -68,7 +68,7 @@ get_tagname(unsigned int tag,
 		$(unsigned int,string_t<`H>)@ ? l)
 {
   //fprintf(stderr,"looking for tag %d\n",tag);
-  for (int i = 0; i < l.size; i++) {
+  for (int i = 0; i < numelts(l); i++) {
     let $(btag,nm) = *(l[i]);
     //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
@@ -82,7 +82,7 @@ get_tagname2(unsigned int tag,
 		$(unsigned int,string_t<`H>,typestruct_t<`r>)@ ? l)
 {
   //fprintf(stderr,"looking for tag %d\n",tag);
-  for (int i = 0; i < l.size; i++) {
+  for (int i = 0; i < numelts(l); i++) {
     let $(btag,nm,_) = *(l[i]);
     //fprintf(stderr,"  checking tag %d\n",btag);
     if (btag == tag)
@@ -101,7 +101,7 @@ get_xtunionbranch(string_t<`H> tag,
 		$(string_t<`H>,tunion `r Typestruct)@ ? l)
 {
   //fprintf(stderr,"looking for tag %s (%x)\n",tag,(int)tag);
-  for (int i = 0; i < l.size; i++) {
+  for (int i = 0; i < numelts(l); i++) {
     let $(btag,typ) = *(l[i]);
     //fprintf(stderr,"  checking tag %s (%x)\n",btag,(int)btag);
     if (strcmp(btag,tag) == 0)
@@ -179,11 +179,11 @@ print_typestruct(typestruct_t rep)
 
   case &Struct(name,sz,l):
     printf("Struct(%s,%d,[",anon_or_name(name),sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,nm,typ) = *(l[i]);
       printf ("$(%d,%s,",ofs,nm);
       print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+      printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }
     printf(" ]");
     break;
@@ -191,76 +191,76 @@ print_typestruct(typestruct_t rep)
 
   case &Tuple(sz,l):
     printf("Tuple(%d,[",sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       printf ("$(%d,",ofs);
       print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+      printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }
     printf(" ]");
     break;
 
   case &TUnionField(tname,fname,sz,l):
     printf("TUnionField(%s,%s,%d,[",tname,fname,sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       printf ("$(%d,",ofs);
       print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+      printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }
     printf(" ]");
     break;
 
   case &TUnion(name,t,l):
     printf("TUnion(%s,[",name);
-    for(int i = 0; i < t.size; i++) {
+    for(int i = 0; i < numelts(t); i++) {
       let $(tag,nm) = *(t[i]);
-      printf("$(%d,%s)%c",tag,nm,(i != (t.size-1) ? ',' : ' '));
+      printf("$(%d,%s)%c",tag,nm,(i != (numelts(t)-1) ? ',' : ' '));
     }
     printf("],[");
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(tag,nm,typ) = *(l[i]);
       printf ("$(%d,%s,",tag,nm);
       print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+      printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }    
     printf("] )");
     break;
     
   case &XTUnion(name,l):
     printf("XTUnion(%s,",name);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(tag,typ) = *(l[i]);
       printf ("$(%s,",tag+4);
       print_typestruct(typ);
-      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+      printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }    
     printf(" )");
     break;
  case &Union(name,szb,l):
    printf("Union(%s,%d,",anon_or_name(name),szb);
-   for (int i = 0; i < l.size; i++) {
+   for (int i = 0; i < numelts(l); i++) {
      let $(nm,ts) = *(l[i]);
      printf("$(%s,",nm);
      print_typestruct(ts);
-     printf (")%c", (i != (l.size-1) ? ',' : ' '));
+     printf (")%c", (i != (numelts(l)-1) ? ',' : ' '));
     }   
    printf(")");
    break;
   case &Enum(name,szb,l): 
     printf("Enum(%s,%d,",anon_or_name(name),szb);
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(val,tag) = (*l[i]);
-      printf("$(%d,%s)%c",val,tag,(i != (l.size-1) ? ',' : ' '));
+      printf("$(%d,%s)%c",val,tag,(i != (numelts(l)-1) ? ',' : ' '));
     }
     printf(")");
     break;
 
    /* case &Forall(names,ts):
    printf("Forall([");
-   for(int i = 0; i < names.size; i++) {
+   for(int i = 0; i < numelts(names); i++) {
      printf(*names[i]);
-     printf ("%c", (i != (names.size-1) ? ',' : ' '));
+     printf ("%c", (i != (numelts(names)-1) ? ',' : ' '));
    }
    printf("],");
    print_typestruct(*ts);
@@ -270,9 +270,9 @@ print_typestruct(typestruct_t rep)
    printf("App(");
    print_typestruct(ts);
    printf(",[");
-   for(int i = 0; i < params.size; i++) {
+   for(int i = 0; i < numelts(params); i++) {
      print_typestruct(params[i]);
-     printf ("%c", (i != (params.size-1) ? ',' : ' '));
+     printf ("%c", (i != (numelts(params)-1) ? ',' : ' '));
    }
    printf("])");
    break;*/
@@ -316,7 +316,7 @@ xmlize_typestruct(typestruct_t rep)
 
   case &Struct(name,sz,l):
     printf("<Struct name=\"%s\" sz=\"%d\">",anon_or_name(name),sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,nm,typ) = *(l[i]);
       printf ("<Component ofs=\"%d\" nm=\"%s\">",ofs,nm);
       xmlize_typestruct(typ);
@@ -327,7 +327,7 @@ xmlize_typestruct(typestruct_t rep)
 
   case &Tuple(sz,l):
     printf("<Tuple sz=\"%d\">",sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       printf ("<Component ofs=\"%d\">",ofs);
       xmlize_typestruct(typ);
@@ -338,7 +338,7 @@ xmlize_typestruct(typestruct_t rep)
   
   case &TUnionField(tname,fname,sz,l):
     printf("<TUnionField tname=\"%s\" fname=\"%s\" sz=\"%d\">",tname,fname,sz);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       printf ("<Component ofs=\"%d\">",ofs);
       xmlize_typestruct(typ);
@@ -349,11 +349,11 @@ xmlize_typestruct(typestruct_t rep)
   
   case &TUnion(name,t,l):
     printf("<TUnion name=\"%s\">",name);
-    for (int i = 0; i < t.size; i++) {
+    for (int i = 0; i < numelts(t); i++) {
       let $(tag,nm) = *(t[i]);
       printf("<Tag tag=\"%d\" nm=\"%s\"/>",tag,nm);
     }
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(tag,nm,typ) = *(l[i]);
       printf ("<Tag tag=\"%d\" nm=\"%s\">",tag,nm);
       xmlize_typestruct(typ);
@@ -363,7 +363,7 @@ xmlize_typestruct(typestruct_t rep)
     break;
   case &XTUnion(name,l):
     printf("<XTUnion name=\"%s\">",name);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(tag,typ) = *(l[i]);
       printf ("<Tag tag=\"%s\">",tag+4);
       xmlize_typestruct(typ);
@@ -373,7 +373,7 @@ xmlize_typestruct(typestruct_t rep)
     break;
  case &Union(name,szb,l):
    printf("<Union name=\"%s\" sz=\"%d\">",anon_or_name(name),szb);
-   for (int i = 0; i < l.size; i++) {
+   for (int i = 0; i < numelts(l); i++) {
      let $(nm,ts) = *(l[i]);
       printf ("<Case nm=\"%s\">",nm);
       xmlize_typestruct(ts);
@@ -383,7 +383,7 @@ xmlize_typestruct(typestruct_t rep)
    break;
   case &Enum(name,szb,l): 
     printf("<Enum name=\"%s\" szb=\"%d\">",anon_or_name(name),szb);
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(val,tag) = (*l[i]);
       printf("<Val val=\"%d\">%s</Val>",val,tag);
     }
@@ -392,7 +392,7 @@ xmlize_typestruct(typestruct_t rep)
 
    /* case &Forall(names,ts):
       printf("<Forall vars=\"");
-      for(int i = 0; i < names.size; i++) {
+      for(int i = 0; i < numelts(names); i++) {
       if(i != 0) printf(", ");
       printf(*names[i]);
       }
@@ -403,7 +403,7 @@ xmlize_typestruct(typestruct_t rep)
    case &App(ts,params):
    printf("<App>");
    xmlize_typestruct(ts);
-   for(int i = 0; i < params.size; i++) {
+   for(int i = 0; i < numelts(params); i++) {
      if(i != 0) printf(", ");
      xmlize_typestruct(params[i]);
      }
@@ -429,43 +429,43 @@ normalize_env(dict_t<name_t,typestruct_t<`H>,`H> env,
   case &FatPtr(ts2):
     return new FatPtr(normalize_env(env,ts2));
   case &Tuple(sz, fields):
-    let newfields = new {for i < fields.size: NULL};
-    for(int i = 0; i < fields.size; i++) {
+    let newfields = new {for i < numelts(fields): NULL};
+    for(int i = 0; i < numelts(fields); i++) {
       let &$(x,tsi) = fields[i];
       newfields[i] = new $(x,normalize_env(env,tsi));
     }
-    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    let newfields2 = new {for i < numelts(fields): (_@)newfields[i]};
     
     return new Tuple(sz,(_?)newfields2);
 
   case &TUnion(fields):
-    let newfields = new {for i < fields.size: NULL};
-    for(int i = 0; i < fields.size; i++) {
+    let newfields = new {for i < numelts(fields): NULL};
+    for(int i = 0; i < numelts(fields); i++) {
       let &$(x,tsi) = fields[i];
       newfields[i] = new $(x,normalize_env(env,tsi));
     }
-    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    let newfields2 = new {for i < numelts(fields): (_@)newfields[i]};
     
     return new TUnion((_?)newfields2);
 
 
   case &XTUnion(fields):
-    let newfields = new {for i < fields.size: NULL};
-    for(int i = 0; i < fields.size; i++) {
+    let newfields = new {for i < numelts(fields): NULL};
+    for(int i = 0; i < numelts(fields); i++) {
       let &$(x,tsi) = fields[i];
       newfields[i] = new $(x,normalize_env(env,tsi));
     }
-    let newfields2 = new {for i < fields.size: (_@)newfields[i]};
+    let newfields2 = new {for i < numelts(fields): (_@)newfields[i]};
     
     return new XTUnion((_?)newfields2);
 
 
   case &Union(tss):
-    let newfields = new{for i < tss.size:NULL};
-    for(int i = 0; i < tss.size; i++) {
+    let newfields = new{for i < numelts(tss):NULL};
+    for(int i = 0; i < numelts(tss); i++) {
       newfields[i] = new normalize_env(env,*tss[i]);
     }
-    let newfields2 = new {for i < tss.size: (_@)newfields[i]};
+    let newfields2 = new {for i < numelts(tss): (_@)newfields[i]};
     
     return new Union((_?)newfields2);
 
@@ -474,9 +474,9 @@ normalize_env(dict_t<name_t,typestruct_t<`H>,`H> env,
   case &App(ts2, tss):
     switch(normalize_env(env,ts2)) { // Slow!
     case &Forall(names,ts3) :
-      if(tss.size != names.size) 
+      if(numelts(tss) != numelts(names)) 
 	throw new Core::Failure("app appiled wrong number of arguments");
-      for(int i = 0; i < tss.size; i++) {
+      for(int i = 0; i < numelts(tss); i++) {
 	env=Dict::insert(env,names[i],tss[i]);
       }
       return normalize_env(env,*ts3);
@@ -596,11 +596,11 @@ $(addr_set_t,int) genreic_cmp_base(typestruct_t rep,
   case &Tuple(_,l):
     printf("$( ");
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = print_type_base(typ, env, (`a@)unsafe_cast(x_ofs));
-      if (i != (l.size-1))
+      if (i != (numelts(l)-1))
 	printf(", ");
     }
     printf(" )");
@@ -663,9 +663,9 @@ $(addr_set_t,int) genreic_cmp_base(typestruct_t rep,
   case &Union(l):
     printf("[[");
     // Print out each case; safe because no pointers
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       print_type_base(*l[i],env,val);
-      if(i < l.size-1) printf(" | ");
+      if(i < numelts(l)-1) printf(" | ");
     }
     printf("]]");
     break;

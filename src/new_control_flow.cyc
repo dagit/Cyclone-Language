@@ -599,12 +599,12 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
             let r = rs->hd;
             if (r->vd == i)
               switch (r->rop) {
-              case LessSize(v) && v == x: return relns;
+              case LessNumelts(v) && v == x: return relns;
               default: continue;
               }
           }
           if (!found) 
-            return rnew(rgn) List(rnew(rgn) Reln(i,LessSize(x)),relns);
+            return rnew(rgn) List(rnew(rgn) Reln(i,LessNumelts(x)),relns);
         }
         return relns;
       default: return relns;
@@ -1311,6 +1311,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         }
       case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
         // translation to C reports "can't prove in bounds" errors
+        /*
         switch(compress_conref(b)->v) {
         case Eq_constr(&AbsUpper_b(_)):
           switch(rvals->tl->hd) {
@@ -1322,6 +1323,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
           break;
         default: break;
         }
+        */
         let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
         switch (f3) {
         case BottomFL: return $(f3,r);
@@ -1423,7 +1425,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
         case &Var_e(_,&Param_b(v2)) && !v2->escapes:
           // size is always unsigned
-          new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessSize(v2)),relns);
+          new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessNumelts(v2)),relns);
           break;
         default: break;
         }
@@ -1503,6 +1505,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &UnknownCall_e(_,_):    
   case &UnresolvedMem_e(_,_):  
   case &CompoundLit_e(_,_):    
+  case &Valueof_e(_):
     throw new Core::Impossible("anal_Rexp, unexpected exp form");
   }
 }
@@ -1618,6 +1621,7 @@ static $(flow_t<`r>,absLval_t<`r>)
         default: break;
         }
         // translation to C reports "can't prove in bounds" errors
+        /*
         switch(compress_conref(b)->v) {
         case Eq_constr(&AbsUpper_b(_)):
           switch(rvals->tl->hd) {
@@ -1629,6 +1633,7 @@ static $(flow_t<`r>,absLval_t<`r>)
           break;
         default: break;
         }
+        */
         let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,flds);
         switch (f3) {
         case BottomFL: return $(f3,r);
@@ -1825,7 +1830,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             case &Var_e(_,&Param_b(v2))  && !v2->escapes:
               // size is always unsigned
               let r = env->fenv->r;
-              let relns_true = rnew(r) List(rnew(r) Reln(v1,LessSize(v2)),relns);
+              let relns_true = rnew(r) List(rnew(r) Reln(v1,LessNumelts(v2)),relns);
               return $(ReachableFL(d,relns_true,cinfo), ff);
             default: return $(ft,ff);
             }
@@ -1859,7 +1864,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             case &Var_e(_,&Param_b(v2))  && !v2->escapes:
               // size is always unsigned
               let fenv = env->fenv;
-              let relns_true = rnew(fenv->r) List(rnew(fenv->r) Reln(v1,LessEqSize(v2)),relns);
+              let relns_true = rnew(fenv->r) List(rnew(fenv->r) Reln(v1,LessEqNumelts(v2)),relns);
               return $(ReachableFL(d,relns_true,cinfo), ff);
             default: return $(ft,ff);
             }

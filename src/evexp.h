@@ -23,8 +23,13 @@
 
 namespace Evexp {
   // returns false if e is constant but contains a sizeof or offsetof
-  // if it's not constant, an error is reported and $(0,true) returned
+  // or valueof.  If it's not constant, an error is reported and $(0,true) 
+  // returned.
 extern $(unsigned int,bool) eval_const_uint_exp(Absyn::exp_t e);
+
+  // returns false if e is not a constant expression that can be evaluated
+  // by C (i.e., includes valueof(..)) in it.
+extern bool c_can_eval(Absyn::exp_t e);
 
   // returns true iff we are sure the two es are the same (or lessthan) constant
   // an error is reported if either is not a constant expression

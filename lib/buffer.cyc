@@ -68,7 +68,7 @@ void clear (T b) {
 void reset (T b) {
   b->position = 0;
   b->buffer = b->initial_buffer;
-  b->length = (b->buffer).size - 1;
+  b->length = numelts(b->buffer) - 1;
   return;
 }
 
@@ -98,7 +98,7 @@ void add_char(T b, char c) {
 // Note: like substring, this does not check for
 // NUL terminators within the specified substring
 void add_substring(T b, string_t s, int offset, int len) {
-  if (offset < 0 || len < 0 || offset + len > s.size)
+  if (offset < 0 || len < 0 || offset + len > numelts(s))
     throw new Invalid_argument("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);

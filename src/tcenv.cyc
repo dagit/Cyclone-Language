@@ -99,6 +99,7 @@ struct Tenv<`g::R,`l::R> {
   list_t<var_t>    ns;  // current namespace
   Dict::dict_t<list_t<var_t,`H>,genv_t<`g>,`g> ae; // absolute identifiers
   struct Fenv<`l> *`l le; // local environment
+  bool allow_valueof;   // controls whether we allow valueof(T) in an expr
 };
 // Region notes:  we leave ns heap-allocated because this gets
 // plugged into all of the variables in the AST.  Similarly, the
@@ -241,7 +242,7 @@ tenv_t<`r,`r> tc_init(region_t<`r> r) {
   
   Dict::dict_t<list_t<var_t,`H>,genv_t<`r>,`r> ae = 
     Dict::insert(Dict::rempty(r,varlist_cmp), NULL, ge);
-  return rnew(r) Tenv(NULL,ae,NULL);
+  return rnew(r) Tenv(NULL,ae,NULL,false);
 }
 
 // Lookup a namespace relative to the current namespace
@@ -493,11 +494,11 @@ static fenv_t<`r> get_fenv(tenv_t<`g,`r> te, const char ?err_msg) {
 
 static tenv_t<`g,`l> put_fenv(region_t<`l> l, tenv_t<`g,`l2> te, fenv_t<`l> fe) {
   if (te->le == NULL) env_err("put_fenv");
-  return rnew(l) Tenv(te->ns, te->ae, fe);
+  return rnew(l) Tenv(te->ns, te->ae, fe, te->allow_valueof);
 }
 
 static tenv_t<`g,`l> put_emptyfenv(region_t<`l> l,tenv_t<`g,`l2> te) {
-  return rnew(l) Tenv(te->ns, te->ae, NULL);
+  return rnew(l) Tenv(te->ns, te->ae, NULL, te->allow_valueof);
 }
 
 static fenv_t<`l> copy_fenv_old_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
@@ -828,6 +829,15 @@ stmt_t get_encloser(tenv_t te) {
   let &Fenv{<`f,`c> .encloser = encloser, ...} = get_fenv(te,"get_encloser");
   return encloser;
 }
+
+tenv_t<`g,`r2> allow_valueof(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
+  if (te->le == NULL)
+    return rnew(r2) Tenv(te->ns, te->ae, NULL, true);
+  let Fenv{<`f,`c> s,t,r,l,e,ce,cp,cr,i} = *te->le;
+  let fe = rnew(r2) Fenv{s,t,r,(bindings_t<`r2>)l,e,ce,cp,cr,i};
+  return rnew(r2) Tenv(te->ns, te->ae, fe, true);
+}
+
 tenv_t<`g,`r> set_encloser(region_t<`r> r, tenv_t<`g,`r2> te, stmt_t s : 
                            {`r2} > `r) {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
@@ -1050,7 +1060,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
   if (fd->cyc_varargs != NULL) {
     let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
-      let typ = dynforward_typ(t, param_rgn, tq, false_conref);
+      let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
                            .tq = empty_tqual(NULL),
@@ -1120,7 +1130,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   if (fd->cyc_varargs != NULL) {
     let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
     if (nopt != NULL) {
-      let typ = dynforward_typ(t, param_rgn, tq, false_conref);
+      let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
                            .tq = empty_tqual(NULL),

@@ -35,7 +35,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "machine.h"
 #include "new.h"
 
-extern char   ?-?-tags;		/* reader.c */
+extern char   ??tags;		/* reader.c */
 extern int      verboseflag;	/* getargs.c */
 static int      statisticsflag;	/* XXXXXXX */
 
@@ -44,8 +44,8 @@ static int      statisticsflag;	/* XXXXXXX */
 #define FALSE	(0)
 #endif
 //typedef int bool;
-typedef unsigned ?-BSet;
-typedef short  ?-rule;
+typedef unsigned ?BSet;
+typedef short  ?rule;
 
 
 /*
@@ -422,7 +422,7 @@ reduce_grammar_tables ()
 
       int    i, n;
 /*      short  j; JF unused */
-      short ?-nontermmap;
+      short ?nontermmap;
       rule   r;
 
       /*
@@ -431,7 +431,7 @@ reduce_grammar_tables ()
        * eliminated.
        */
 
-      nontermmap = ((_ ?-)NEW2(nvars, short)) - ntokens;
+      nontermmap = ((_ ?)NEW2(nvars, short)) - ntokens;
       for (i = ntokens; i < nsyms; i++)
 	nontermmap[i] = -1;
 

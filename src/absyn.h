@@ -217,10 +217,8 @@ namespace Absyn {
 
   // used to distinguish ? pointers from *{c} or @{c} pointers
   EXTERN_ABSYN tunion Bounds {
-    DynForward_b;   // t?
     DynEither_b;    // t?+-
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
-    AbsUpper_b(type_t); // abstract bound -- type has IntKind
   };
 
   EXTERN_ABSYN struct PtrLoc {
@@ -354,13 +352,12 @@ namespace Absyn {
     AnonAggrType(aggr_kind_t,list_t<aggrfield_t>); // MemKind
     EnumType(typedef_name_t,struct Enumdecl *); // MemKind
     AnonEnumType(list_t<enumfield_t>); // MemKind
-    SizeofType(type_t); // AnyKind -> BoxKind
     RgnHandleType(type_t);   // a handle for allocating in a region.  BoxKind
     DynRgnType(type_t,type_t); // RgnKing * RgnKind -> BoxKind
     // An abbreviation -- the type_t* contains the definition iff any
     TypedefType(typedef_name_t,list_t<type_t>,struct Typedefdecl *,type_t*);
+    ValueofType(exp_t);      // IntKind -- exp must be a type-level expression
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
-    TypeInt(int);            // `i, i a const int.  IntKind
     HeapRgn;                 // The heap region.  RgnKind 
     UniqueRgn;               // The unique region.  UniqueRgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
@@ -439,7 +436,7 @@ namespace Absyn {
   EXTERN_ABSYN tunion Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
-    Size
+    Numelts
   };
 
   // ++x, x++, --x, x-- respectively
@@ -543,6 +540,10 @@ namespace Absyn {
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
     StmtExp_e(stmt_t); // ({s;e})
+    Valueof_e(type_t); // the type must have IntKind.  Valueof_e can only
+    // be used within types, and is typically used within a valueof_t so
+    // that we can move between the type and expression levels
+    // (e.g., valueof_t<valueof(`i)*42 + 36>).
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -804,7 +805,6 @@ namespace Absyn {
   extern conref_t<bool> true_conref;
   extern conref_t<bool> false_conref;
   extern conref_t<bounds_t> bounds_one_conref;
-  extern conref_t<bounds_t> bounds_dynforward_conref;
   extern conref_t<bounds_t> bounds_dyneither_conref;
 
   extern kindbound_t compress_kb(kindbound_t);
@@ -858,9 +858,6 @@ namespace Absyn {
   // t*`H
   extern type_t cstar_typ(type_t t, tqual_t tq); 
   // t?`r
-  extern type_t dynforward_typ(type_t t, type_t rgn, tqual_t tq, 
-                               conref_t<bool> zero_term);
-  // t?+-`r
   extern type_t dyneither_typ(type_t t, type_t rgn, tqual_t tq, 
                               conref_t<bool> zero_term);
   // void*
@@ -936,6 +933,7 @@ namespace Absyn {
   extern exp_t null_pointer_exn_exp(seg_t);
   extern exp_t match_exn_exp(seg_t);
   extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
+  extern exp_t valueof_exp(type_t, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);

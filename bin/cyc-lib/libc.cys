@@ -675,8 +675,8 @@ cycstub {
   static xtunion exn.Failure __fcntl_failure =
     Failure("fcntl: too many args");
   int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
-    if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);
-    else if (argv.size != 1) throw &__fcntl_failure;
+    if (numelts(argv) == 0) return Cfcntl::fcntl(fd, cmd);
+    else if (numelts(argv) != 1) throw &__fcntl_failure;
     else switch (argv[0]) {
     case &Long(arg): return Cfcntl::fcntl_with_arg(fd, cmd, arg);
     case &Flock(lock): return Cfcntl::fcntl_with_lock(fd, cmd, lock);
@@ -686,7 +686,7 @@ cycstub {
   int open(const char * s, int i, ... mode_t ms) {
     /* Note: if open is called with more than 3 arguments, the
        additional args are simply ignored. */
-    if (ms.size >= 1)
+    if (numelts(ms) >= 1)
       return Cfcntl::open_with_mode(s,i,ms[0]);
     else
       return Cfcntl::open_without_mode(s,i);
@@ -1991,7 +1991,7 @@ cycstub poll {
     catch {
     case Array_bounds: throw &__poll_failure_2;
     }
-    int len = a.size;
+    int len = numelts(a);
     return Cpoll::poll((struct pollfd @{0})a,
                        (b<(nfds_t)len)?b:(nfds_t)len,
                        c);
@@ -2266,7 +2266,7 @@ cycstub signal {
   static xtunion exn.Failure __signal_failure =
     Failure("signal called with the wrong number of arguments");
   sigarg_t signal(int a, ... inject sigarg_t b) {
-    if (b.size != 1)
+    if (numelts(b) != 1)
       throw &__signal_failure;
     switch (b[0]) {
     case &__SIG_BUILTIN(SIG_DFL): return Csignal::signal_SIG_DFL(a);
@@ -2595,7 +2595,7 @@ cycstub fgets {
     if (!s) throw &__fgets_failure_1;
     char *NOZEROTERM`r result;
     char *NOZEROTERM buffer = (char *NOZEROTERM)s;
-    unsigned int len = s.size;
+    unsigned int len = numelts(s);
     if (len < n) throw &__fgets_failure_2; 
     // n = (len < n) ? len : n;
     result = Cstdio::fgets(buffer, n, f->file);
@@ -2682,7 +2682,7 @@ cycstub fread {
   static xtunion exn.Failure __fread_failure =
     Failure("fread: buffer insufficient");
   size_t fread(char ?NOZEROTERM ptr, size_t size, size_t nmemb, FILE @f) {
-    if (size * nmemb > ptr.size) throw &__fread_failure;
+    if (size * nmemb > numelts(ptr)) throw &__fread_failure;
     return Cstdio::fread((char *NOZEROTERM)ptr, size, nmemb, f->file);
   }
 }
@@ -2831,7 +2831,7 @@ cycstub fwrite {
   size_t fwrite(const char ?NOZEROTERM`r ptr, size_t size, size_t nmemb, FILE @f) {
     if (!ptr) { throw &__fwrite_failure_1; } 
     else {
-      if (size * nmemb > ptr.size) throw &__fwrite_failure_2;
+      if (size * nmemb > numelts(ptr)) throw &__fwrite_failure_2;
       return Cstdio::fwrite((const char @NOZEROTERM)ptr, size, nmemb, f->file);
     }
   }
@@ -3014,7 +3014,7 @@ cycstub setvbuf {
     Failure("setvbuf: buffer insufficient");
   int setvbuf(FILE @f, char ?NOZEROTERM`H buf, int type, size_t size) {
     if (!buf) throw &__setvbuf_failure_1;
-    if (buf.size < size) throw &__setvbuf_failure_2;
+    if (numelts(buf) < size) throw &__setvbuf_failure_2;
     return Cstdio::setvbuf(f->file,(char *NOZEROTERM`H)buf,type,size);
   }
 }
@@ -3206,12 +3206,12 @@ cstub {
     return sf->file;
   }
   int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
-                                 struct _dynforward_ptr dest,
+                                 struct _dyneither_ptr dest,
                                  int dest_offset, int max_count) {
     unsigned char *new_curr = dest.curr + dest_offset;
     size_t sz = dest.last_plus_one - new_curr;
     FILE *fd = _sfile_to_file(sf);
-    if (new_curr < dest.curr || new_curr >= dest.last_plus_one)
+    if (new_curr < dest.base || new_curr >= dest.last_plus_one)
       throw(Cyc_Null_Exception);
     if(dest_offset + max_count > sz) {
       fprintf(stderr,"Attempt to read off end of string.\n");
@@ -3220,12 +3220,12 @@ cstub {
     return fread(new_curr, 1, max_count, fd);
   }
   int Cyc_file_string_write(struct Cyc___cycFILE *sf, 
-                                  struct _dynforward_ptr src,
+                                  struct _dyneither_ptr src,
                                   int src_offset, int max_count) {
     size_t sz = src.last_plus_one - src.curr;
     unsigned char *new_curr = src.curr + src_offset;
     FILE *fd = _sfile_to_file(sf);
-    if (new_curr < src.curr || new_curr >= src.last_plus_one)
+    if (new_curr < src.base || new_curr >= src.last_plus_one)
       throw(Cyc_Null_Exception);
     if(src_offset + max_count > sz) {
       fprintf(stderr,"Attempt to write off end of string.\n");
@@ -3243,7 +3243,7 @@ cycstub {
   FILE @file_open(const char ?fname, const char ?mode) {
     FILE *f = fopen((const char @)fname, (const char @)mode);
     if (f == NULL) {
-      const char ? fn = new {for i < fname.size : fname[i]};
+      const char ? fn = new {for i < numelts(fname) : fname[i]};
       throw new FileOpenError(fn);
     }
     return (FILE @)f; // FIX: get rid of cast?
@@ -3408,7 +3408,7 @@ hstub putenv {
   extern "C" int putenv(const char @);
 }
 hstub {
-  extern void qsort(`a::A ?, size_t, sizeof_t<`a>,
+  extern void qsort(`a::A ?, size_t, tag_t<valueof_t(sizeof(`a))>,
                     int (@)(const `a @, const `a @));
 }
 cycstub {
@@ -3420,10 +3420,10 @@ cycstub {
     Failure("qsort called with NULL");
   static xtunion exn.Failure __qsort_failure_2 =
     Failure("qsort called with insufficient array size");
-  void qsort(`a::A ? tab, size_t nmemb, sizeof_t<`a> szmemb, 
+  void qsort(`a::A ? tab, size_t nmemb, tag_t<valueof_t(sizeof(`a))> szmemb, 
              int (@compar)(const `a @, const `a @)) {
     if (!tab) throw &__qsort_failure_1;
-    if (tab.size < nmemb) throw &__qsort_failure_2;
+    if (numelts(tab) < nmemb) throw &__qsort_failure_2;
     Cstdlib::qsort((_@)tab,nmemb,szmemb,compar);
   }
 }
@@ -3942,7 +3942,7 @@ cycstub accept {
     extern "C" int accept_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int accept(int fd, ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::accept_in(fd,x,y);
@@ -3963,7 +3963,7 @@ cycstub bind {
     extern "C" int bind_in(int, const struct sockaddr_in @, socklen_t);
   }
   int bind(int fd, ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::bind_in(fd,x,y);
@@ -3984,7 +3984,7 @@ cycstub connect {
     extern "C" int connect_in(int, const struct sockaddr_in @, socklen_t);
   }
   int connect(int fd, ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::connect_in(fd,x,y);
@@ -4005,7 +4005,7 @@ cycstub getpeername {
     extern "C" int getpeername_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int getpeername(int fd, ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::getpeername_in(fd,x,y);
@@ -4026,7 +4026,7 @@ cycstub getsockname {
     extern "C" int getsockname_in(int, const struct sockaddr_in @, socklen_t @);
   }
   int getsockname(int fd, ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::getsockname_in(fd,x,y);
@@ -4048,7 +4048,7 @@ cycstub getsockopt {
     extern "C" int getsockopt_timeval(int, int, int, struct timeval @, socklen_t @);
   }
   int getsockopt(int fd, int level, int optname, ... inject SO ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SO_int(x),&SO_socklenptr(y)):
       return Csocket::getsockopt_int(fd,level,optname,x,y);
@@ -4089,9 +4089,9 @@ cycstub recv {
   }
 }
 cstub recv {
-  ssize_t recv_wrapped(int a, struct _dynforward_ptr b, size_t c, int d) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+  ssize_t recv_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recv(a,p,c,d);
   }
@@ -4107,7 +4107,7 @@ cycstub recvfrom {
   }
   ssize_t recvfrom(int fd, char ?NOZEROTERM buf, size_t n, int flags, 
 		   ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
       return Csocket::recvfrom_in(fd,buf,n,flags,x,y);
@@ -4116,10 +4116,10 @@ cycstub recvfrom {
   }
 }
 cstub recvfrom {
-  ssize_t recvfrom_in(int a, struct _dynforward_ptr b, size_t c, int d,
+  ssize_t recvfrom_in(int a, struct _dyneither_ptr b, size_t c, int d,
                       const struct sockaddr_in *e, socklen_t *f) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
   }
@@ -4136,9 +4136,9 @@ cycstub send {
   }
 }
 cstub send {
-  ssize_t send_wrapped(int a, struct _dynforward_ptr b, size_t c, int d) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+  ssize_t send_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return send(a,p,c,d);
   }
@@ -4154,7 +4154,7 @@ cycstub sendto {
   }
   ssize_t sendto(int fd, const char ?NOZEROTERM buf, size_t n, int flags,
                  ... inject SA ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SA_sockaddr_in(x),&SA_socklen(y)):
       return Csocket::sendto_in(fd,buf,n,flags,x,y);
@@ -4163,10 +4163,10 @@ cycstub sendto {
   }
 }
 cstub sendto {
-  ssize_t sendto_in(int a, struct _dynforward_ptr b, size_t c, int d,
+  ssize_t sendto_in(int a, struct _dyneither_ptr b, size_t c, int d,
                     const struct sockaddr_in *e, socklen_t f) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return sendto(a,p,c,d,(struct sockaddr *)e,f);
   }
@@ -4180,7 +4180,7 @@ cycstub setsockopt {
     extern "C" int setsockopt_timeval(int, int, int, const struct timeval @, socklen_t);
   }
   int setsockopt(int fd, int level, int optname, ... inject SO ap) {
-    if (ap.size != 2) throw SocketError;
+    if (numelts(ap) != 2) throw SocketError;
     switch ($(ap[0],ap[1])) {
     case $(&SO_int(x),&SO_socklen(y)):
       return Csocket::setsockopt_int(fd,level,optname,x,y);
@@ -4748,7 +4748,7 @@ cycstub strftime {
     Failure("fgets: buffer insufficient");
   size_t strftime(char ?s, size_t maxsize, const char ?fmt,
                   const struct tm @t) {
-    if (maxsize > s.size) throw &__strftime_failure; 
+    if (maxsize > numelts(s)) throw &__strftime_failure; 
     return Ctime::strftime(s,maxsize,fmt,t);
   }
 }
@@ -5143,13 +5143,13 @@ hstub execl {
 cycstub execl {
   // This is untested; I'd be surprised if it actually works
   //  int execl(const char ? path, const char ? arg0, ... const char ? argv) {
-  //    if (argv[argv.size - 1] != NULL)
+  //    if (argv[numelts(argv) - 1] != NULL)
   //      throw new Failure("execl: arg list must be NULL-terminated");
   //
-  //    // We allocate 1+argv.size because we need to prepend arg0
-  //    char * ?newargs = new {for i < 1 + argv.size : NULL};
+  //    // We allocate 1+numelts(argv) because we need to prepend arg0
+  //    char * ?newargs = new {for i < 1 + numelts(argv) : NULL};
   //    newargs[0] = string_to_char *(arg0);
-  //    for (int i = 0; i < argv.size; i++)
+  //    for (int i = 0; i < numelts(argv); i++)
   //      newargs[i+1] = string_to_char *(argv[i]);
   //    return Cunistd::execv(string_to_char *(path), (char **) newargs);
   //  }
@@ -5165,13 +5165,13 @@ cycstub execlp {
   static xtunion exn.Failure __execlp_failure =
     Failure("execlp arg list not NULL-terminated");
   int execlp(const char @ path, const char @`r arg0, ... const char *`r argv) {
-    if (argv[argv.size - 1] != NULL) throw &__execlp_failure;
-    // We allocate 1+argv.size because we need to prepend arg0
+    if (argv[numelts(argv) - 1] != NULL) throw &__execlp_failure;
+    // We allocate 1+numelts(argv) because we need to prepend arg0
     // FIX: can region-allocate ...
     const char *`r @ZEROTERM newargs = 
-      new {for i < argv.size : (const char *`r)NULL};
+      new {for i < numelts(argv) : (const char *`r)NULL};
     newargs[0] = arg0;
-    for (int i = 0; i < argv.size-1; i++)
+    for (int i = 0; i < numelts(argv)-1; i++)
       newargs[i+1] = argv[i];
     return execvp(path, newargs);
   }
@@ -5199,15 +5199,15 @@ cycstub execve {
 //    static xtunion exn.Failure __execve_failure =
 //      Failure("execve: arg list must be NULL-terminated");
 //    int execve(const char ? filename, char ? const ?argv, char ? const ?envp) {
-//      if (argv[argv.size - 1] != NULL)
+//      if (argv[numelts(argv) - 1] != NULL)
 //        throw &__execve_failure;
 
-//      char * ?newargs = new {for i < argv.size : NULL};
-//      for (int i = 0; i < argv.size; i++)
+//      char * ?newargs = new {for i < numelts(argv) : NULL};
+//      for (int i = 0; i < numelts(argv); i++)
 //        newargs[i] = string_to_char *(argv[i]);
 
-//      char * ?newenvp = new {for i < envp.size : NULL};
-//      for (int i = 0; i < envp.size; i++)
+//      char * ?newenvp = new {for i < numelts(envp) : NULL};
+//      for (int i = 0; i < numelts(envp); i++)
 //        newenvp[i] = string_to_char *(envp[i]);
 
 //      return Cunistd::execve(string_to_char *(filename),
@@ -5253,7 +5253,7 @@ cycstub getcwd {
   static xtunion exn.Failure __getcwd_failure =
     Failure("getcwd: invalid buf argument");
   char ?`r getcwd(char ?`r buf, size_t size) {
-    if (buf.size < size) throw &__getcwd_failure;
+    if (numelts(buf) < size) throw &__getcwd_failure;
     let response = Cunistd::getcwd((char *)buf, size);
     return response ? buf : NULL;
   }
@@ -5284,11 +5284,11 @@ cycstub gethostname {
   static xtunion exn.Failure __gethostname_failure_1 =
     Failure("gethostname: called with NULL buf");
   static xtunion exn.Failure __gethostname_failure_2 =
-    Failure("gethostname: called with count > buf.size");
+    Failure("gethostname: called with count > numelts(buf)");
   int gethostname(char ?NOZEROTERM buf, size_t count) {
     if (!buf) throw &__gethostname_failure_1;
     else {
-      if (count > buf.size) throw &__gethostname_failure_2;
+      if (count > numelts(buf)) throw &__gethostname_failure_2;
       return Cunistd::gethostname((char @NOZEROTERM)buf, count);
     }
   }
@@ -5376,9 +5376,9 @@ cycstub read {
     extern "C" ssize_t read(int fd, char *NOZEROTERM buf, size_t count);
   }
   static xtunion exn.Failure __read_failure =
-    Failure("read: called with count > buf.size");
+    Failure("read: called with count > numelts(buf)");
   ssize_t read(int fd, char ?NOZEROTERM buf, size_t count) {
-    if (count > buf.size) throw &__read_failure;
+    if (count > numelts(buf)) throw &__read_failure;
     return Cunistd::read(fd, (char *NOZEROTERM)buf, count);
   }
 }
@@ -5469,9 +5469,9 @@ cycstub write {
     extern "C" ssize_t write(int fd, const char @NOZEROTERM buf, size_t count);
   }
   static xtunion exn.Failure __write_failure =
-    Failure("write: called with count > buf.size");
+    Failure("write: called with count > numelts(buf)");
   ssize_t write(int fd, const char ?NOZEROTERM buf, size_t count) {
-    if (count > buf.size) throw &__write_failure;
+    if (count > numelts(buf)) throw &__write_failure;
     return Cunistd::write(fd, (const char @NOZEROTERM)buf, count);
   }
 }

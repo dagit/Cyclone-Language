@@ -117,7 +117,7 @@ i_t final() {
 		       function_typ(NULL, NULL, sint_typ,
 				    new List(new $(NULL, empty_tqual(NULL), uint_typ),
 					     new List(new $(NULL, empty_tqual(NULL),
-							    dynforward_typ(dynforward_typ(char_typ,
+							    dyneither_typ(dyneither_typ(char_typ,
 										  HeapRgn,
 										  empty_tqual(NULL),false_conref),
 								       HeapRgn,

@@ -92,7 +92,7 @@ typedef
       short number;
       short accessing_symbol;
       short nitems;
-      short ?-items;
+      short ?items;
     }
   core;
 
@@ -104,7 +104,7 @@ typedef
       struct shifts_tag *next;
       short number;
       short nshifts;
-      short ?-shifts;
+      short ?shifts;
     }
   shifts;
 
@@ -114,7 +114,7 @@ typedef
   struct errs_tag
     {
       short nerrs;
-      short ?-errs;
+      short ?errs;
     }
   errs;
 
@@ -126,7 +126,7 @@ typedef
       struct reductions_tag *next;
       short number;
       short nreds;
-      short ?-rules;
+      short ?rules;
     }
   reductions;
 

@@ -79,15 +79,15 @@ extern int nsyms;
 extern int ntokens;
 extern int nvars;
 
-extern short ?-ritem;
-extern short ?-rlhs;
-extern short ?-rrhs;
-extern short ?-rprec;
-extern short ?-rprecsym;
-extern short ?-sprec;
-extern short ?-rassoc;
-extern short ?-sassoc;
-extern short ?-rline;		/* Source line number of each rule */
+extern short ?ritem;
+extern short ?rlhs;
+extern short ?rrhs;
+extern short ?rprec;
+extern short ?rprecsym;
+extern short ?sprec;
+extern short ?rassoc;
+extern short ?sassoc;
+extern short ?rline;		/* Source line number of each rule */
 
 extern int start_symbol;
 
@@ -106,7 +106,7 @@ the two kinds of token numbers are the same.
 (It is noted in reader.c that "Nowadays translations is always set to 1...")
 */
 
-extern short ?-token_translations;
+extern short ?token_translations;
 extern int translations;
 extern int max_user_token_number;
 

@@ -93,7 +93,7 @@ static inline bool table_member(addr_table_t table, unsigned int m) {
 
 static addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
   let $(vec,n) = tbl;
-  if(vec.size == n) {
+  if(numelts(vec) == n) {
     vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
   }
   vec[n] = i;
@@ -226,7 +226,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
   case &Struct(nm,szb,l):
     unsigned int x = unsafe_cast(val);
     list_t<content_t> children = NULL;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, fnm,typ) = *(l[i]);
       int x_ofs = x+ofs;
       let $(env2,child) = to_xml_base(typ,env,unsafe_cast(x_ofs));
@@ -241,7 +241,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
   case &Tuple(_,l):
     unsigned int x = unsafe_cast(val);
     list_t<content_t> children = NULL;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x+ofs;
       let $(env2,child) = to_xml_base(typ,env,unsafe_cast(x_ofs));
@@ -256,7 +256,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
   case &TUnionField(tname,fname,_,l):
     int x = unsafe_cast(val); 
     list_t<content_t> children = NULL;
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       let $(env2,child) = to_xml_base(typ, env, unsafe_cast(x_ofs));
@@ -352,7 +352,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
 
   case &Union(nm,_,l):
     list_t<content_t> children=NULL;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(fnm,ts) = *(l[i]);
       let $(env,child) = to_xml_base(ts,env,val);
       child = new Element(new StartEnd("Field",list(string_att("fnm",fnm)),
@@ -500,7 +500,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
   case $(&Struct(_,_,l),&Element(&StartEnd(_,_,children))): 
     unsigned int x = unsafe_cast(result);
     let child = children;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, _,typ) = *(l[i]);
       int x_ofs = x+ofs;
       let $(contents, _) = getElemData(child->hd,"Field");
@@ -513,7 +513,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
   case $(&Tuple(_,l),&Element(&StartEnd(_,_,children))): 
     unsigned int x = unsafe_cast(result);
     let child = children;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = from_xml_base(typ,env,child->hd,unsafe_cast(x_ofs));
@@ -525,7 +525,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
   case $(&TUnionField(_,_,_,l),&Element(&StartEnd(_,atts,children))):
     unsigned int x = unsafe_cast(result);
     let child = children;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = from_xml_base(typ,env,child->hd,unsafe_cast(x_ofs));
@@ -570,9 +570,9 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     if(hasAttribute(atts,"id")) {
       string_t xtname = getStringAttribute(atts,"tag");
       // JGM: this no longer works unless we make s NOZEROTERM
-      // char? s = new {for i < xtname.size+4: i < 4?0:xtname[i-4]};
-      char? s = new {for i < xtname.size+4 : 0};
-      for (unsigned i = 4; i < xtname.size+4; i++) {
+      // char? s = new {for i < numelts(xtname)+4: i < 4?0:xtname[i-4]};
+      char? s = new {for i < numelts(xtname)+4 : 0};
+      for (unsigned i = 4; i < numelts(xtname)+4; i++) {
         s[i] = xtname[i-4];
       }
       int mem = getIntAttribute(atts,"id");
@@ -611,7 +611,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
   case $(&Union(_,_,l),&Element(&StartEnd(_,_,children))): 
     unsigned int x = unsafe_cast(result);
     let child = children;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(_,typ) = *(l[i]);
       let $(contents, _) = getElemData(child->hd,"Field");
       env = from_xml_base(typ,env,contents->hd,unsafe_cast(x));

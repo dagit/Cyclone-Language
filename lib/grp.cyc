@@ -60,5 +60,5 @@ int initgroups(string_t user, gid_t group) {
 }
 
 int setgroups(const gid_t? groups) {
-  return Cgrp::setgroups(groups.size,(const gid_t*)groups);
+  return Cgrp::setgroups(numelts(groups),(const gid_t*)groups);
 }

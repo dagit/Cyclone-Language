@@ -125,12 +125,12 @@
     return sf->file;
   }
   int Cyc_file_string_read(struct Cyc___cycFILE *sf, 
-                                 struct _dynforward_ptr dest,
+                                 struct _dyneither_ptr dest,
                                  int dest_offset, int max_count) {
     unsigned char *new_curr = dest.curr + dest_offset;
     size_t sz = dest.last_plus_one - new_curr;
     FILE *fd = _sfile_to_file(sf);
-    if (new_curr < dest.curr || new_curr >= dest.last_plus_one)
+    if (new_curr < dest.base || new_curr >= dest.last_plus_one)
       throw(Cyc_Null_Exception);
     if(dest_offset + max_count > sz) {
       fprintf(stderr,"Attempt to read off end of string.\n");
@@ -139,12 +139,12 @@
     return fread(new_curr, 1, max_count, fd);
   }
   int Cyc_file_string_write(struct Cyc___cycFILE *sf, 
-                                  struct _dynforward_ptr src,
+                                  struct _dyneither_ptr src,
                                   int src_offset, int max_count) {
     size_t sz = src.last_plus_one - src.curr;
     unsigned char *new_curr = src.curr + src_offset;
     FILE *fd = _sfile_to_file(sf);
-    if (new_curr < src.curr || new_curr >= src.last_plus_one)
+    if (new_curr < src.base || new_curr >= src.last_plus_one)
       throw(Cyc_Null_Exception);
     if(src_offset + max_count > sz) {
       fprintf(stderr,"Attempt to write off end of string.\n");
@@ -216,32 +216,32 @@
     return getsockopt(a,b,c,d,e);
   }
 
-  ssize_t recv_wrapped(int a, struct _dynforward_ptr b, size_t c, int d) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+  ssize_t recv_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recv(a,p,c,d);
   }
 
-  ssize_t recvfrom_in(int a, struct _dynforward_ptr b, size_t c, int d,
+  ssize_t recvfrom_in(int a, struct _dyneither_ptr b, size_t c, int d,
                       const struct sockaddr_in *e, socklen_t *f) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
   }
 
-  ssize_t send_wrapped(int a, struct _dynforward_ptr b, size_t c, int d) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+  ssize_t send_wrapped(int a, struct _dyneither_ptr b, size_t c, int d) {
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return send(a,p,c,d);
   }
 
-  ssize_t sendto_in(int a, struct _dynforward_ptr b, size_t c, int d,
+  ssize_t sendto_in(int a, struct _dyneither_ptr b, size_t c, int d,
                     const struct sockaddr_in *e, socklen_t f) {
-    char *p = _check_dynforward_subscript(b,1,0);
-    unsigned n = _get_dynforward_size(b,1);  
+    char *p = _check_dyneither_subscript(b,1,0);
+    unsigned n = _get_dyneither_size(b,1);  
     if (n<c) _throw_arraybounds();
     return sendto(a,p,c,d,(struct sockaddr *)e,f);
   }

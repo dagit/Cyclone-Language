@@ -27,7 +27,7 @@ static int most_frequent_elt(int ?v) {
     Hashtable::create(17, intcmp, identity);
   int max_freq  = 0;
   int most_freq = 0;
-  for(int i=0; i < v.size; ++i) {
+  for(int i=0; i < numelts(v); ++i) {
     int   e = v[i];
     int @ r;
     try r = Hashtable::lookup(frequencies, e);
@@ -52,7 +52,7 @@ static int most_frequent_elt(int ?v) {
 
 static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
   list_t<$(int,int)@> ans = NULL;
-  for(int i=v.size-1; i >= 0; --i) {
+  for(int i=numelts(v)-1; i >= 0; --i) {
     int e = v[i];
     if(e != def)
       ans = new List(new $(i,e), ans);
@@ -68,7 +68,7 @@ static int last_used = 0;
 static void grow_transitions() {
   int ?old_trans = trans;
   int ?old_check = check;
-  int n = old_trans.size;
+  int n = numelts(old_trans);
   trans = new {for i < 2*n : i < last_used ? old_trans[i] : 0};
   check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
 }
@@ -87,7 +87,7 @@ static int try_pack(list_t<$(int,int)@> nondef, list_t<$(int,int)@> rem, int b) 
 }
 
 static int pack_from(list_t<$(int,int)@> nondef, int b) {
-  while(b+257 > trans.size)
+  while(b+257 > numelts(trans))
     grow_transitions();
   return try_pack(nondef, nondef, b);
 }
@@ -117,7 +117,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
 lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
   trans = new {for i < 1024 : 0};
   check = new {for i < 1024 : -1};
-  int n = state_v.size;
+  int n = numelts(state_v);
   int ?base     = new {for i < n : 0};
   int ?backtrk  = new {for i < n : -1};
   int ?defaultX = new {for i < n : 0};

@@ -129,6 +129,9 @@ ARCHDIR=bin/genfiles/$(UPDATEARCH)
 # We use the -r flag to eliminate built-in make rules.  This is needed
 #   because of a circular dependence that arises when bootstrapping as with
 #   make cyclone_src BUILDDIR=build/boot1 CYCC=`pwd`/build/boot/cyclone
+ifdef DEBUGBUILD
+LIBSRC_FLAGS += DEBUGBUILD=X
+endif
 ifdef PROFILE
 LIBSRC_FLAGS += PROFILE=X
 endif

@@ -178,7 +178,7 @@ static char sccsid[] = "%W% (Berkeley) %G%";
  * This code is large and complicated...
  */
 
-int __cvt_double(double number, int prec, int flags, int @ signp, int fmtch, char ?- `r startp, char ?- `r endp);
+int __cvt_double(double number, int prec, int flags, int @ signp, int fmtch, char ? `r startp, char ? `r endp);
 
 /* 11-bit exponent (VAX G floating point) is 308 decimal digits */
 #define MAXEXP          308
@@ -217,7 +217,7 @@ static int _IO_sputn(int (@ioputc)(int,`a), `a ioputc_env, const char ? s,
                      int howmany) {
   int i = 0;
   while (i < howmany) {
-    if (s.size == 0 || ioputc(*s,ioputc_env) == EOF) return i;
+    if (numelts(s) == 0 || ioputc(*s,ioputc_env) == EOF) return i;
     s++;
     i++;
   }
@@ -229,7 +229,7 @@ static int _IO_nzsputn(int (@ioputc)(int,`a), `a ioputc_env,
   int i = 0;
   while (i < howmany) {
     char c;
-    if (s.size == 0 || (c = *s) == 0 || ioputc(c,ioputc_env) == EOF) return i;
+    if (numelts(s) == 0 || (c = *s) == 0 || ioputc(c,ioputc_env) == EOF) return i;
     s++;
     i++;
   }
@@ -251,7 +251,7 @@ static int _IO_padn(int (@ioputc)(int,`a), `a ioputc_env, char c, int howmany)
 
 /* like strchr but works only up to max characters */
 static const char ?`r my_memchr(const char ?`r s, char c, int n) {
-  int sz = s.size;
+  int sz = numelts(s);
   n = (n < sz) ? n : sz;
   for (; n != 0; n--, s++) {
     if (*s == c) return s;
@@ -260,7 +260,7 @@ static const char ?`r my_memchr(const char ?`r s, char c, int n) {
 }
 
 static const char ?NOZEROTERM`r my_nzmemchr(const char?NOZEROTERM`r s, char c, int n) {
-  int sz = s.size;
+  int sz = numelts(s);
   n = (n < sz) ? n : sz;
   for (; n != 0; n--, s++) {
     if (*s == c) return s;
@@ -269,7 +269,7 @@ static const char ?NOZEROTERM`r my_nzmemchr(const char?NOZEROTERM`r s, char c, i
 }
 
 static const size_t my_strlen(const char ?NOZEROTERM s) {
-  unsigned sz = s.size;
+  unsigned sz = numelts(s);
   unsigned i = 0;
   while (i < sz && s[i] != 0) i++;
   return i;
@@ -287,7 +287,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */
         /* cp is a handy char pointer (short term usage) for a local buffer */
-	char ?- cp = NULL;	
+	char ? cp = NULL;	
         /* cp2 is a handy char pointer (short term usage) for the case when
          * the argument is a string -- that lives in a different region. */
 	const char ? cp2 = NULL;
@@ -353,7 +353,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 		//for (fmark = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
 		//	/* void */;
                 fmark = fmt;
-                unsigned fmt_sz = fmt.size;
+                unsigned fmt_sz = numelts(fmt);
                 for (n = 0; n < fmt_sz && (ch = fmt[n])!='\0' && ch!='%'; n++)
                   /* void */;
                 fmt = fmt+n;
@@ -487,7 +487,7 @@ reswitch:	which_cp = 0;
 			*cp = '\0';
 			size = __cvt_double(_double, prec, flags, &softsign,
 					    ch, cp, 
-                                            (char ?-)buf + (sizeof(buf)-1));
+                                            (char ?)buf + (sizeof(buf)-1));
 			if (softsign)
 				sign = '-';
 			if (*cp == '\0')
@@ -567,7 +567,7 @@ number:			if ((dprec = prec) >= 0)
 			 * explicit precision of zero is no characters.''
 			 *	-- ANSI X3J11
 			 */
-			cp = ((char ?-)buf) + BUF;
+			cp = ((char ?)buf) + BUF;
 			if (_ulong != 0 || prec != 0) {
 			        const char ? xdigs; /* digits for [xX] conversion */
 				/*
@@ -612,7 +612,7 @@ number:			if ((dprec = prec) >= 0)
                                         */
 				}
 			}
-			size = ((char ?-)buf) + BUF - cp;
+			size = ((char ?)buf) + BUF - cp;
 		skipsize:
 			break;
 		default:	/* "%?" prints ?, unless ? is NUL */
@@ -706,9 +706,9 @@ error:
 	/* NOTREACHED */
 }
 
-static char ?-`r exponent(char ?-`r p, int exp, int fmtch)
+static char ?`r exponent(char ?`r p, int exp, int fmtch)
 {
-	register char ?- t;
+	register char ? t;
 	char expbuffer[MAXEXP+1]ZEROTERM = {for i < MAXEXP : '0'};
         char ?expbuf = expbuffer;
 	*p++ = (char)fmtch;
@@ -733,8 +733,8 @@ static char ?-`r exponent(char ?-`r p, int exp, int fmtch)
 	return (p);
 }
 
-static char ?-`r sround(double fract, int * exp,
-			char ?- `r start, char ?- `r end,
+static char ?`r sround(double fract, int * exp,
+			char ? `r start, char ? `r end,
 			char ch, int @ signp)
 {
 	double tmp = 0.0;
@@ -776,9 +776,9 @@ static char ?-`r sround(double fract, int * exp,
 }
 
 int __cvt_double(double number, int prec, int flags, int @ signp,
-		 int fmtch, char ?- `r startp, char ?- `r endp)
+		 int fmtch, char ? `r startp, char ? `r endp)
 {
-	register char ?- p, ?- t;
+	register char ? p, ? t;
 	register double fract;
 	int dotrim = 0, expcnt, gformat = 0;
 	double integer = 0.0, tmp = 0.0;
@@ -999,7 +999,7 @@ static int putc_string(int c, $(char ?NOZEROTERM @,size_t @)@ sptr_n) {
   let &$(sptr,nptr) = sptr_n;
   char ?NOZEROTERM s = *sptr;
   size_t n = *nptr;
-  if ((s.size == 0) || (n == 0)) return EOF;
+  if ((numelts(s) == 0) || (n == 0)) return EOF;
   *s = (char)c;
   *sptr = s+1;
   *nptr = n-1;
@@ -1028,13 +1028,13 @@ int snprintf(char ?NOZEROTERM s, size_t n, const char ? fmt, ... inject parg_t a
 int vsprintf(char ?NOZEROTERM s, const char ? fmt, parg_t ? ap) 
   __attribute__((format(printf,2,0)))
 {
-  return vsnprintf(s,s.size,fmt,ap);
+  return vsnprintf(s,numelts(s),fmt,ap);
 }
 
 int sprintf(char ?NOZEROTERM s, const char ? fmt, ... inject parg_t ap) 
   __attribute__((format(printf,2,3)))
 {
-  return vsnprintf(s, s.size, fmt, ap);
+  return vsnprintf(s, numelts(s), fmt, ap);
 }
 
 static int putc_void(int c, int dummy) {

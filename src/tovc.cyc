@@ -111,7 +111,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
       continue;
     }
     // Don't box if it's a global (defined in cyc_include.h, inserted by toc)
-    for (int i = 0; i < Toc::globals.size; i++)
+    for (int i = 0; i < numelts(Toc::globals); i++)
       if (strptrcmp(v,Toc::globals[i])==0)
 	return;
     // now determine if it's free or bound

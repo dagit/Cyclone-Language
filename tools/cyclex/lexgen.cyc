@@ -258,7 +258,7 @@ static automata_t translate_state(list_t<int>         ?chars,
 $(list_t<automata_entry_t>,automata_t?)@ 
 make_dfa(Syntax::lexer_definition_t lexdef) {
   let &$(chars, entry_list) = encode_lexdef(lexdef);
-  set_t<transition_t> ?follow = followpos(chars.size, entry_list);
+  set_t<transition_t> ?follow = followpos(numelts(chars), entry_list);
   reset_state_mem();
   list_t<automata_entry_t> initial_states = NULL;
   for(; entry_list != NULL; entry_list = entry_list->tl) {

@@ -67,7 +67,7 @@ xarray_t<`a> singleton(int len, `a a) {
 }
 
 void add(xarray_t<`a> xarr, `a a) {
-  if (xarr->num_elmts == (xarr->elmts).size) {
+  if (xarr->num_elmts == numelts(xarr->elmts)) {
     if (xarr->num_elmts == 0)
       xarr->elmts = rnew(xarr->r) {for i < 10 : a};
     else {
@@ -97,11 +97,11 @@ int add_ind(xarray_t<`a> xarr, `a a) {
 }
 
 xarray_t<`a,`r> rfrom_array(region_t<`r> r, `a ?arr) {
-  if (arr.size == 0)
+  if (numelts(arr) == 0)
     return rcreate_empty(r);
   xarray_t<`a> ans = rnew(r) Xarray{.r=r,
-                                    .elmts=rnew(r) {for i<arr.size : arr[i]},
-                                    .num_elmts=arr.size};
+                                    .elmts=rnew(r) {for i<numelts(arr) : arr[i]},
+                                    .num_elmts=numelts(arr)};
   return ans;
 }
 
@@ -111,10 +111,10 @@ xarray_t<`a> from_array(`a ?arr) {
 
 // append is functional -- it creates a new xarray every time
 xarray_t<`a,`r> rappend(region_t<`r> r,xarray_t<`a> xarr1, xarray_t<`a> xarr2){
-  int newsz = (xarr1->elmts).size + (xarr2->elmts).size;
+  int newsz = numelts(xarr1->elmts) + numelts(xarr2->elmts);
   if(newsz == 0)
     return rcreate_empty(r);
-  `a init = (xarr1->elmts).size == 0 ? xarr2->elmts[0] : xarr1->elmts[0];
+  `a init = numelts(xarr1->elmts) == 0 ? xarr2->elmts[0] : xarr1->elmts[0];
   xarray_t<`a> ans = rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < newsz : init},
                                    .num_elmts=0};
   for(int i=0; i < xarr1->num_elmts; ++i)
@@ -153,7 +153,7 @@ xarray_t<`b,`r> rmap(region_t<`r> r, `b f(`a), xarray_t<`a> xarr) {
 
   xarray_t<`b> ans =
     rnew(r) Xarray{.r=r,
-                   .elmts=rnew(r) {for i< (xarr->elmts).size : f(xarr->elmts[0])},
+                   .elmts=rnew(r) {for i< numelts(xarr->elmts) : f(xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(xarr->elmts[i]);
@@ -168,7 +168,7 @@ xarray_t<`b,`r> rmap_c(region_t<`r> r, `b f(`c,`a), `c env, xarray_t<`a> xarr) {
   if(xarr->num_elmts==0) return rcreate_empty(r);
 
   xarray_t<`b> ans =
-    rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < (xarr->elmts).size : f(env,xarr->elmts[0])},
+    rnew(r) Xarray{.r=r,.elmts=rnew(r) {for i < numelts(xarr->elmts) : f(env,xarr->elmts[0])},
                   .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(env, xarr->elmts[i]);

@@ -375,7 +375,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
           switch (vd->initializer->r) {
             case &Const_e(String_c(s)):
-            t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
+            t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
             break;
             case &Comprehension_e(_,e,_,_):
             // FIX: copy e here!  
@@ -412,11 +412,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             let varstr = *x;
             let tstr = typ2string(t);
             let estr = typ2string(initializer->topt->v);
-            if (varstr.size + tstr.size + estr.size + 50 < 80)
+            if (numelts(varstr) + numelts(tstr) + numelts(estr) + 50 < 80)
               terr(d->loc, "%s declared with type %s but initialized "
                    "with type %s.",varstr, tstr, estr);                   
-            else if (varstr.size + tstr.size + 25 < 80 &&
-                     estr.size + 25 < 80)
+            else if (numelts(varstr) + numelts(tstr) + 25 < 80 &&
+                     numelts(estr) + 25 < 80)
               terr(d->loc, "%s declared with type %s\n but initialized "
                    "with type %s.",varstr, tstr, estr);
             else 

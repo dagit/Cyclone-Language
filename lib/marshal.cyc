@@ -97,7 +97,7 @@ static inline bool table_member(addr_table_t table, addr_t m) {
 
 static addr_table_t table_insert(addr_table_t tbl, addr_t i) {
   let $(vec,n) = tbl;
-  if(vec.size == n) {
+  if(numelts(vec) == n) {
     vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
   }
   vec[n] = i;
@@ -203,12 +203,12 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     if(name == NULL) fprintf(fp,"{ ");
     else fprintf(fp,"%s{ ",*name);
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,nm,typ) = *(l[i]);
       fprintf(fp,"%s=",nm);
       int x_ofs = x + ofs;
       env = fprint_type_base(typ, env, fp,unsafe_cast(x_ofs));
-      if (i != (l.size-1))
+      if (i != (numelts(l)-1))
 	fprintf(fp,", ");
     }
     fprintf(fp," }");
@@ -217,11 +217,11 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
   case &Tuple(_,l):
     fprintf(fp,"$( ");
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
-      if (i != (l.size-1))
+      if (i != (numelts(l)-1))
 	fprintf(fp,", ");
     }
     fprintf(fp," )");
@@ -232,11 +232,11 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     fprintf(fp,"%s.%s(",tname,fname);
     int x = unsafe_cast(val); 
     // skip tag value by starting at 1:
-    for (int i = 1; i < l.size; i++) {
+    for (int i = 1; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = fprint_type_base(typ, env, fp,unsafe_cast@<_,`a@>(x_ofs));
-      if (i != (l.size-1))
+      if (i != (numelts(l)-1))
 	fprintf(fp,", ");
     }
     fprintf(fp," )");
@@ -307,11 +307,11 @@ fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val)
     if(name == NULL) fprintf(fp,"{");
     else fprintf(fp,"%s{",*name);
     // Print out each case; safe because no pointers
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(nm,ts) = *(l[i]);
       fprintf(fp,"%s=",nm);
       fprint_type_base(ts,env,fp,val);
-      if(i < l.size-1) fprintf(fp," | ");
+      if(i < numelts(l)-1) fprintf(fp," | ");
     }
     fprintf(fp,"}");
     break;
@@ -497,7 +497,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
 
   case &Struct(_,_,l):  //ignore name
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
@@ -506,7 +506,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
 
   case &Tuple(_,l):
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
@@ -515,7 +515,7 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
 
   case &TUnionField(_,_,_,l):
     int x = unsafe_cast(val); 
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       env = write_type_base(typ, env, fp, unsafe_cast@<_,`a@>(x_ofs));
@@ -698,7 +698,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
 
   case &Struct(_,_,l): // ignore name
     addr_t x = unsafe_cast(result);
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, _,typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
@@ -707,7 +707,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
 
   case &Tuple(_,l):
     addr_t x = unsafe_cast(result);
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
@@ -716,7 +716,7 @@ addr_table_t rread_type_base(region_t<`r> r,typestruct_t rep, addr_table_t env, 
 
   case &TUnionField(_,_,_,l):
     addr_t x = unsafe_cast(result);
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = rread_type_base(r,typ,env,fp,unsafe_cast@<_,`a@>(x_ofs));
@@ -923,7 +923,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
   case &Struct(_,_,l):
     int x = unsafe_cast(val);
     int y = unsafe_cast(result);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
@@ -934,7 +934,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
   case &Tuple(_,l):
     int x = unsafe_cast(val);
     int y = unsafe_cast(result);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
@@ -945,7 +945,7 @@ addr_map_t rcopy_type_base(region_t<`r> r,typestruct_t rep, addr_map_t env, `a::
   case &TUnionField(_,_,_,l):
     int x = unsafe_cast(val);
     int y = unsafe_cast(result);
-    for (int i = 0; i < l.size; i++) {
+    for (int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
       int y_ofs = y + ofs;
@@ -1222,7 +1222,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
     int x0 = unsafe_cast(x);
     int y0 = unsafe_cast(y);
     order_t ord = Eq_ord;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;
@@ -1236,7 +1236,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
     int x0 = unsafe_cast(x);
     int y0 = unsafe_cast(y);
     order_t ord = Eq_ord;
-    for(int i = 0; i < l.size; i++) {
+    for(int i = 0; i < numelts(l); i++) {
       let $(ofs,_,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;
@@ -1251,7 +1251,7 @@ leq_eq_type(typestruct_t rep, eq_dict_t env, `a::A@ x, `a@ y) {
     int y0 = unsafe_cast(y);
     // tags must be equal since both x and y have same tunionfield type
     order_t ord = Eq_ord;
-    for(int i = 1; i < l.size; i++) {
+    for(int i = 1; i < numelts(l); i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x0+ofs;
       int y_ofs = y0+ofs;

@@ -55,7 +55,7 @@ list_t<`a,`r> tl(List_t<`a,`r> x) {
 // out of e1,e2,...,en.
 list_t<`a,`r> rlist(region_t<`r> r, ... `a argv) {
   list_t result = NULL;
-  for (int i = argv.size - 1; i >= 0; i--) 
+  for (int i = numelts(argv) - 1; i >= 0; i--) 
     result = rnew(r) List{argv[i],result};
   return result;
 }
@@ -64,7 +64,7 @@ list_t<`a,`r> rlist(region_t<`r> r, ... `a argv) {
 // to forward varargs yet.
 list_t<`a> list(... `a argv) {
   list_t result = NULL;
-  for (int i = argv.size - 1; i >= 0; i--) 
+  for (int i = numelts(argv) - 1; i >= 0; i--) 
     result = new List{argv[i],result};
   return result;
 }
@@ -768,7 +768,7 @@ Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
 // makes a new list with ith element arr[i]
 list_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ? arr) {
   list_t<`a,`r2> ans = NULL;
-  for (int i = arr.size-1; i >= 0; --i)
+  for (int i = numelts(arr)-1; i >= 0; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
 }

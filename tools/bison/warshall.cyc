@@ -25,18 +25,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* given n by n matrix of bits R, modify its contents
    to be the transive closure of what was given.  */
 
-void TC(unsigned ?-R, int n)
+void TC(unsigned ?R, int n)
 {
   register int rowsize;
   register unsigned mask;
-  register unsigned ?-rowj;
-  register unsigned ?-rp;
-  register unsigned ?-rend;
-  register unsigned ?-ccol;
+  register unsigned ?rowj;
+  register unsigned ?rp;
+  register unsigned ?rend;
+  register unsigned ?ccol;
 
-  unsigned ?-relend;
-  unsigned ?-cword;
-  unsigned ?-rowi;
+  unsigned ?relend;
+  unsigned ?cword;
+  unsigned ?rowi;
 
   rowsize = WORDSIZE(n) * sizeof(unsigned);
   //cyclone doesn't allow casting between different pointers
@@ -61,7 +61,7 @@ void TC(unsigned ?-R, int n)
               /*
 	      rend = (unsigned *) ((char *) rowj + rowsize);
               */
-              rend = rowj + rowsize/sizeof(unsigned);
+              rend = rowj + rowsize/(int)sizeof(unsigned);
 
 	      while (rowj < rend)
 		*rowj++ |= *rp++;
@@ -98,12 +98,12 @@ void TC(unsigned ?-R, int n)
    and then set all the bits on the diagonal of R.  */
 
 
-void RTC(unsigned ?-R, int n)
+void RTC(unsigned ?R, int n)
 {
   register int rowsize;
   register unsigned mask;
-  register unsigned ?-rp;
-  register unsigned ?-relend;
+  register unsigned ?rp;
+  register unsigned ?relend;
 
   TC(R, n);
 

@@ -54,23 +54,23 @@ Frees itemset, ruleset and internal data.
 #include "new.h"
 #include "gram.h"
 
-extern short ?-?-derives;
-extern char ?-?-tags;
+extern short ??derives;
+extern char ??tags;
 
 void set_fderives();
 void set_firsts();
 
-extern void RTC(unsigned ?-, int);
+extern void RTC(unsigned ?, int);
 int print_firsts();
 int print_fderives();
 int print_closure(int);
-short ?-itemset;
-short ?-itemsetend;
+short ?itemset;
+short ?itemsetend;
 static unsigned ?ruleset;
 
 /* internal data.  See comments before set_fderives and set_firsts.  */
-static unsigned ?-fderives;
-static unsigned ?-firsts;
+static unsigned ?fderives;
+static unsigned ?firsts;
 
 /* number of words required to hold a bit for each rule */
 static int rulesetsize;
@@ -100,17 +100,17 @@ initialize_closure(int n)
 void
 set_fderives()
 {
-  register unsigned ?-rrow;
-  register unsigned ?-vrow;
+  register unsigned ?rrow;
+  register unsigned ?vrow;
   register int j;
   register unsigned cword;
-  register short ?-rp;
+  register short ?rp;
   register int b;
 
   int ruleno;
   int i;
 
-  fderives = ((_ ?-)NEW2(nvars * rulesetsize, unsigned)) - ntokens * rulesetsize;
+  fderives = ((_ ?)NEW2(nvars * rulesetsize, unsigned)) - ntokens * rulesetsize;
 
   set_firsts();
 
@@ -160,10 +160,10 @@ set_fderives()
 void
 set_firsts()
 {
-  register unsigned ?-row;
+  register unsigned ?row;
 /*   register int done; JF unused */
   register int symbol;
-  register short ?-sp;
+  register short ?sp;
   register int rowsize;
 
   int i;
@@ -198,16 +198,16 @@ set_firsts()
 
 
 void
-closure(short ?- corex, int n)
+closure(short ? corex, int n)
 {
   register int ruleno;
   register unsigned word;
-  register short ?-csp;
-  register unsigned ?-dsp;
-  register unsigned ?-rsp;
+  register short ?csp;
+  register unsigned ?dsp;
+  register unsigned ?rsp;
 
-  short ?-csend;
-  unsigned ?-rsend;
+  short ?csend;
+  unsigned ?rsend;
   int symbol;
   int itemno;
 
@@ -298,7 +298,7 @@ int
 print_closure(n)
 int n;
 {
-  register short ?-isp;
+  register short ?isp;
 
   printf("\n\nn = %d\n\n", n);
   for (isp = itemset; isp < itemsetend; isp++)
@@ -313,7 +313,7 @@ print_firsts()
 {
   register int i;
   register int j;
-  register unsigned ?- rowp;
+  register unsigned ? rowp;
 
   printf("\n\n\nFIRSTS\n\n");
 
@@ -337,7 +337,7 @@ print_fderives()
 {
   register int i;
   register int j;
-  register unsigned ?-rp;
+  register unsigned ?rp;
 
   printf("\n\n\nFDERIVES\n");
 

@@ -184,7 +184,7 @@ static type_t array2ptr(type_t t, bool argposn) {
     return starb_typ(t1,
                      argposn ? new_evar(&Tcutil::rk, NULL) : HeapRgn,
                      tq,
-                     eopt == NULL ? DynForward_b : new Upper_b((exp_t)eopt),
+                     eopt == NULL ? DynEither_b : new Upper_b((exp_t)eopt),
                      zeroterm);
   default: return t;
   }
@@ -876,9 +876,9 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
-%token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
+%token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw DYNREGION_T
-%token ALIAS
+%token ALIAS NUMELTS VALUEOF VALUEOF_T
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -890,7 +890,7 @@ using Parse;
 %token IDENTIFIER INTEGER_CONSTANT STRING
 %token CHARACTER_CONSTANT FLOATING_CONSTANT
 // Cyc: type variables, qualified identifers and typedef names
-%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME TYPE_INTEGER
+%token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
 // specify tagged union constructors for types of semantic values that 
@@ -903,7 +903,7 @@ using Parse;
   QualId_tok(qvar_t);
 }
 /* types for productions */
-%type <$(sign_t,int)> INTEGER_CONSTANT TYPE_INTEGER
+%type <$(sign_t,int)> INTEGER_CONSTANT
 %type <char> CHARACTER_CONSTANT
 %type <string_t> FLOATING_CONSTANT namespace_action
 %type <string_t> IDENTIFIER TYPEDEF_NAME TYPE_VAR STRING field_name
@@ -1247,16 +1247,16 @@ attribute:
   };
     let s = $1;
     // drop the surrounding __ in s, if it's there
-    if(s.size > 4 && s[0]=='_' && s[1]=='_'
-       && s[s.size-2]=='_' && s[s.size-3]=='_')
-      s = substring(s,2,s.size-5);
+    if(numelts(s) > 4 && s[0]=='_' && s[1]=='_'
+       && s[numelts(s)-2]=='_' && s[numelts(s)-3]=='_')
+      s = substring(s,2,numelts(s)-5);
     int i=0;
-    for(; i < att_map.size; ++i)
+    for(; i < numelts(att_map); ++i)
       if(strcmp(s,att_map[i][0]) == 0) {
 	$$=^$(att_map[i][1]);
 	break;
       }
-    if(i == att_map.size) {
+    if(i == numelts(att_map)) {
       err("unrecognized attribute",LOC(@1,@1));
       $$ = ^$(Cdecl_att);
     }
@@ -1374,15 +1374,12 @@ type_specifier_notypedef:
   }
 | DYNREGION_T '<' any_type_name ',' any_type_name right_angle
   { $$=^$(type_spec(new DynRgnType($3,$5), LOC(@1,@6))); }
-| SIZEOF_T '<' any_type_name right_angle
-    { $$=^$(type_spec(new SizeofType($3),LOC(@1,@4))); }
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 | TAG_T 
-{ $$=^$(type_spec(new TagType(new_evar(&Tcutil::ik, NULL)),LOC(@1,@1))); }
-| TYPE_INTEGER
-    { let $(_,n) = $1; 
-      $$=^$(type_spec(new TypeInt(n),LOC(@1,@1))); }
+  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::ik, NULL)),LOC(@1,@1))); }
+| VALUEOF_T '(' expression ')'
+  { $$=^$(type_spec(new ValueofType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */
@@ -1760,17 +1757,12 @@ pointer_null_and_bound:
   }
 | '?' 
   { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
-    $$=^$(new $(loc, true_conref,  bounds_dynforward_conref));  
-  }
-| '?' '-' 
-  { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
     $$=^$(new $(loc, true_conref,  bounds_dyneither_conref));  
   }
 
 pointer_bound:
 /* empty */ { $$=^$(bounds_one_conref); }
 | '{' assignment_expression '}' { $$=^$(new_conref(new Upper_b($2))); }
-| '{' any_type_name         '}' { $$=^$(new_conref(new AbsUpper_b($2))); }
 
 zeroterm_qual_opt:
 /* empty */     { $$ = ^$(empty_conref()); }
@@ -1833,13 +1825,21 @@ optional_rgn_order:
 
 rgn_order:
   atomic_effect '>' TYPE_VAR
-{ $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,new Less_kb(NULL,TopRgnKind))),
-		   NULL)); }
+  { // FIX: if we replace the following with:
+    // $$ = ^$(new List(new $(new JoinEff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
+    // then we get a core-dump.  I think it must be the gcc bug...
+    let kb = new Less_kb(NULL,TopRgnKind);
+    let id = $3;
+    let t = id2type(id,kb);
+    $$ = ^$(new List(new $(new JoinEff($1),t), NULL));
+  }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
-{ $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,new Less_kb(NULL,TopRgnKind))),
-		   $5)); }
+  { 
+    let kb = new Less_kb(NULL,TopRgnKind);
+    let id = $3;
+    let t = id2type(id,kb);
+    $$ = ^$(new List(new $(new JoinEff($1),t),$5)); 
+  }
 ;
 
 optional_inject:
@@ -2697,7 +2697,7 @@ unary_expression:
    { let loc = LOC(@1,@5);
      let tvs = List::map_c(typ2tvar,loc,$2);
      $$=^$(gentyp_exp(tvs, (*$4)[2], LOC(@1,@5))); }
-/* Cyc: malloc, rmalloc */
+/* Cyc: malloc, rmalloc, numelts, swap, etc. */
 | MALLOC '(' expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
                    LOC(@1,@4))); }
@@ -2715,6 +2715,11 @@ unary_expression:
                    LOC(@1,@11))); }
 | SWAP '(' assignment_expression ',' expression ')'
    { $$=^$(new_exp(new Swap_e($3,$5), LOC(@1,@6))); }
+| NUMELTS '(' expression ')'
+   { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
+| VALUEOF '(' type_name ')'
+   { let $(_,_,t) = *$3;
+     $$=^$(valueof_exp(t, LOC(@1,@4))); }
 ;
 
 unary_operator:

@@ -65,7 +65,7 @@ void explain_failure() {
                         typ2string(t2_failure));
   int pos = 2;
   fprintf(stderr,"  %s",s1);
-  pos += s1.size;
+  pos += numelts(s1);
   if (pos + 5 >= 80) {
     fprintf(stderr,"\n\t");
     pos = 8;
@@ -75,12 +75,12 @@ void explain_failure() {
   }
   fprintf(stderr,"and ");
   pos += 4;
-  if (pos + s2.size >= 80) {
+  if (pos + numelts(s2) >= 80) {
     fprintf(stderr,"\n\t");
     pos = 8;
   }
   fprintf(stderr,"%s ",s2);
-  pos += s2.size+1;
+  pos += numelts(s2)+1;
   if (pos + 17 >= 80) {
     fprintf(stderr,"\n\t");
     pos = 8;
@@ -273,9 +273,10 @@ type_t copy_type(type_t t) {
   case &AnonAggrType(k,fs): return new AnonAggrType(k,List::map(copy_field,fs));
   case &EnumType(tdn,fs): return new EnumType(tdn,fs);
   case &AnonEnumType(fs): return new AnonEnumType(List::map(copy_enumfield,fs));
-  case &SizeofType(t): return new SizeofType(copy_type(t));
-  case &TypeInt(n): return new TypeInt(n);
   case &TagType(t): return new TagType(copy_type(t));
+  case &ValueofType(e): 
+    // FIX: we should copy e
+    return new ValueofType(e);
   case &RgnHandleType(t): return new RgnHandleType(copy_type(t));
   case &DynRgnType(t1,t2): return new DynRgnType(copy_type(t1),copy_type(t2));
   case &TypedefType(tdn,ts,td,_):
@@ -365,15 +366,12 @@ kind_t typ_kind(type_t t) {
     if (ed->fields == NULL) return AnyKind; else return MemKind;
   case &PointerType(pinfo):
     switch (compress_conref(pinfo.ptr_atts.bounds)->v) {
-    case No_constr: // be conservative, in case later constrained with DynForward_b or DynEither_b
-    case Eq_constr(DynForward_b): return MemKind;
+    case No_constr: // be conservative, in case later constrained with DynEither_b
     case Eq_constr(DynEither_b): return MemKind;
-    case Eq_constr(&Upper_b(_)): 
-    case Eq_constr(&AbsUpper_b(_)): return BoxKind;
+    case Eq_constr(&Upper_b(_)): return BoxKind;
     case Forward_constr(_): impos("typ_kind: forward constr in ptr bounds");
     }
-  case &SizeofType(_): return BoxKind;
-  case &TypeInt(_): return IntKind;
+  case &ValueofType(_): return IntKind;
   case &TagType(_): return BoxKind;
   // Arrays are always of memkind
   case &ArrayType(_): 
@@ -436,10 +434,6 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   case &PointerType(pinfo): 
     occurs(evar,r,env,pinfo.elt_typ); 
     occurs(evar,r,env,pinfo.ptr_atts.rgn); 
-    switch(compress_conref(pinfo.ptr_atts.bounds)->v) {
-    case Eq_constr(&AbsUpper_b(s)): occurs(evar,r,env,s); break;
-    default: break;
-    }
     break;
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): occurs(evar,r,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
@@ -470,11 +464,11 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
       occurs(evar, r, env, fs->hd->type);
     break;
   case &TagType(t0): fallthru(t0);
-  case &SizeofType(t0): fallthru(t0);
   case &AccessEff(t0): fallthru(t0);
   case &RgnHandleType(t0): fallthru(t0);
   case &RgnsEff(t0): occurs(evar,r,env,t0); break;
   case &JoinEff(ts): occurslist(evar,r,env,ts); break;
+    // FIX: should check within expression of ValueofType(e)
   default: break;
   }
 }
@@ -552,38 +546,20 @@ static bool unify_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
 
 static int boundscmp(bounds_t b1, bounds_t b2) {
   switch ($(b1,b2)) {
-  case $(DynForward_b,DynForward_b): return 0;
-  case $(DynForward_b,_): return -1;
-  case $(_,DynForward_b): return 1;
   case $(DynEither_b,DynEither_b): return 0;
   case $(DynEither_b,_): return -1;
   case $(_,DynEither_b): return 1;
   case $(&Upper_b(e1),&Upper_b(e2)): 
     return Evexp::const_exp_cmp(e1,e2);
-  case $(&Upper_b(_),&AbsUpper_b(_)): return -1;
-  case $(&AbsUpper_b(_),&Upper_b(_)): return 1;
-  case $(&AbsUpper_b(t1), &AbsUpper_b(t2)): 
-    return typecmp(t1,t2);
   }
 }
 
 static int unify_it_bounds(bounds_t b1, bounds_t b2) {
   switch ($(b1,b2)) {
-  case $(DynForward_b,DynForward_b): return 0;
-  case $(DynForward_b,_): return -1;
-  case $(_,DynForward_b): return 1;
   case $(DynEither_b,DynEither_b): return 0;
   case $(DynEither_b,_): return -1;
   case $(_,DynEither_b): return 1;
   case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
-  case $(&Upper_b(eb),&AbsUpper_b(tb)): fallthru(tb,eb);
-  case $(&AbsUpper_b(tb),&Upper_b(eb)): 
-    let $(bnd,ci) = Evexp::eval_const_uint_exp(eb);
-    if(!ci) return 1;
-    fallthru(tb,new TypeInt(bnd));
-  case $(&AbsUpper_b(t1), &AbsUpper_b(t2)): 
-    unify_it(t1,t2);
-    return 0;
   }
 }
 
@@ -650,8 +626,6 @@ static type_t rgns_of_field(aggrfield_t af) {
   return rgns_of(af->type);
 }
 
-static tunion Type.TypeInt tizero = TypeInt(0);
-
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (tvar_kind(tv)) {
@@ -659,7 +633,7 @@ static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   case UniqueRgnKind: t = UniqueRgn;      break;
   case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
-  case IntKind: t = &tizero;      break; 
+  case IntKind: t = new ValueofType(uint_exp(0,NULL)); break; 
   default:      t = sint_typ;     break; // lives in every kind
   }
   return new $(tv,t);
@@ -676,7 +650,7 @@ static type_t rgns_of(type_t t) {
   case &DoubleType(_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
-  case &TypeInt(_):
+  case &ValueofType(_):
   case &IntType(_,_): return empty_effect;
   case &Evar(_,_,_,_):
   case &VarType(_): 
@@ -712,7 +686,6 @@ static type_t rgns_of(type_t t) {
     return normalize_effect(new JoinEff(map(rgns_of,ts)));
   case &AnonAggrType(_,fs): 
     return normalize_effect(new JoinEff(map(rgns_of_field,fs)));
-  case &SizeofType(t): return rgns_of(t);
   case &TagType(_): return empty_effect;
   case &FnType(FnInfo{tvs,eff,rt,args,_,cyc_varargs,rpo,_}):
     // NOTE:  we define RgnsEff(t) in this case to be the regions in the
@@ -1208,7 +1181,6 @@ void unify_it(type_t t1, type_t t2) {
     unify_it_conrefs(unify_it_bounds,b1,b2,"(different pointer bounds)");
     // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress_conref(b1)->v) {
-    case Eq_constr(DynForward_b): return;
     case Eq_constr(DynEither_b): return;
     default: break;
     }
@@ -1227,13 +1199,14 @@ void unify_it(type_t t1, type_t t2) {
     if (b2 == b1) return;
    break;
 
-  case $(&SizeofType(t1), &SizeofType(t2)): unify_it(t1,t2); return;
-
-  case $(&TypeInt(n),&TypeInt(m)): if(n==m) return;
-    failure_reason = "(different type integers)";
-    break;
-
   case $(&TagType(t1),&TagType(t2)): unify_it(t1,t2); return;
+
+  case $(&ValueofType(e1), &ValueofType(e2)):
+    if (!Evexp::same_const_exp(e1,e2)) {
+      failure_reason = "(cannot prove expressions are the same)";
+      break;
+    }
+    return;
 
   case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}), 
          &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2,_})):
@@ -1496,10 +1469,9 @@ static int type_case_number(type_t t) {
   case &AccessEff(_): return 22;
   case &JoinEff(_): return 23;
   case &RgnsEff(_): return 24;
-  case &SizeofType(_): return 25;
-  case &TypeInt(_): return 26;
-  case &TagType(_): return 27;
-  case &DynRgnType(_,_): return 28;
+  case &TagType(_): return 26;
+  case &DynRgnType(_,_): return 27;
+  case &ValueofType(_): return 28;
   }
 }
 // the real work of comparison
@@ -1570,7 +1542,6 @@ int typecmp(type_t t1, type_t t2) {
     let zc = conrefs_cmp(intcmp,zt1,zt2);
     if (zc != 0) return zc;
     switch (compress_conref(b1)->v) {
-    case Eq_constr(DynForward_b): return 0;
     case Eq_constr(DynEither_b): return 0;
     default: break;
     }
@@ -1619,9 +1590,9 @@ int typecmp(type_t t1, type_t t2) {
     let c = typecmp(rt1a,rt2a);
     if (c != 0) return c;
     else return typecmp(rt1b,rt2b);
-  case $(&SizeofType(s1),&SizeofType(s2)): return typecmp(s1,s2);
   case $(&TagType(s1),&TagType(s2)): return typecmp(s1,s2);
-  case $(&TypeInt(n),&TypeInt(m)): return intcmp(n,m);
+  case $(&ValueofType(e1), &ValueofType(e2)):
+    return Evexp::const_exp_cmp(e1,e2);
   case $(&JoinEff(_), _): 
   case $(_, &JoinEff(_)): 
   case $(&AccessEff(_), _): 
@@ -1652,8 +1623,6 @@ bool will_lose_precision(type_t t1, type_t t2) {
   case $(&DoubleType(b1), &DoubleType(b2)): return (!b2 && b1);
   case $(&DoubleType(_),  FloatType):       
   case $(&DoubleType(_),  &IntType(_,_)):   
-  case $(&DoubleType(_),  &SizeofType(_)):   
-  case $(FloatType,       &SizeofType(_)):
   case $(&DoubleType(_),  &TagType(_)):   
   case $(FloatType,       &TagType(_)):
   case $(FloatType,       &IntType(_,_)):  return true;
@@ -1669,12 +1638,11 @@ bool will_lose_precision(type_t t1, type_t t2) {
   case $(&IntType(_,Long_sz), &IntType(_,Short_sz)):  
   case $(&IntType(_,Int_sz), &IntType(_,Short_sz)):  
   case $(&TagType(_), &IntType(_,Short_sz)):  
-  case $(&SizeofType(_), &IntType(_,Short_sz)):  
   case $(&IntType(_,Long_sz), &IntType(_,Char_sz)):  
   case $(&IntType(_,Int_sz), &IntType(_,Char_sz)):  
   case $(&IntType(_,Short_sz), &IntType(_,Char_sz)): 
-  case $(&TagType(_), &IntType(_,Char_sz)): 
-  case $(&SizeofType(_), &IntType(_,Char_sz)): return true;
+  case $(&TagType(_), &IntType(_,Char_sz)): return true;
+
   default: return false;
   }
 }
@@ -1722,7 +1690,6 @@ bool coerce_to_bool(tenv_t te, exp_t e) {
 bool is_integral_type(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
-  case &SizeofType(_):
   case &TagType(_):
   case &EnumType(_,_): 
   case &AnonEnumType(_): return true;
@@ -1781,15 +1748,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 		compress_conref(pinfo_b.ptr_atts.bounds)->v)) {
       case $(Eq_constr(b1), Eq_constr(b2)):
 	switch ($(b1,b2)) {
-	case $(&Upper_b(_), DynForward_b): // okay regardless of nullable
 	case $(&Upper_b(_), DynEither_b): // okay regardless of nullable
-        case $(DynEither_b, DynEither_b):
-        case $(DynForward_b, DynEither_b):  // okay
-	case $(DynForward_b, DynForward_b): okay = true;  break;
-        case $(DynEither_b, DynForward_b): 
-          // we want to issue a warning here, so don't make it silently
-          // castable.
-          okay = false; break;
+        case $(DynEither_b, DynEither_b): okay = true; break;
 	case $(&Upper_b(e1),&Upper_b(e2)):
 	  okay = okay && Evexp::lte_const_exp(e2,e1);
 	  // no need to warn for zero-terminated arrays -- they can get back
@@ -1798,7 +1758,6 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  if (!conref_def(false,pinfo_b.ptr_atts.zero_term))
 	    warn(loc, "implicit cast to shorter array");
 	  break;
-	case $(DynForward_b, &Upper_b(e2)): fallthru(e2);
 	case $(DynEither_b, &Upper_b(e2)):
 	  // when zero-terminated can silently cast from ? to *{1}/@{1}
 	  if (conref_def(false,pinfo_a.ptr_atts.zero_term)
@@ -1806,26 +1765,6 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	    break;
 	  okay = false;
 	  break;
-
-	  // for AbsUpper_b, we allow only known-to-be-less-than things
-	  // else we disallow everything (no flow-sensitive inequalities here)
-	case $(&AbsUpper_b(t1), &AbsUpper_b(t2)):
-	  if(!unify(t1,t2))
-	    switch ($(compress(t1),compress(t2))) {
-	    case $(&TypeInt(n1), &TypeInt(n2)): if(n1 < n2) okay = false; break;
-	    default: okay = false; break;
-	    }
-	  break;
-	case $(&Upper_b(e1), &AbsUpper_b(t2)):
-	  let $(i,known) = Evexp::eval_const_uint_exp(e1);
-	  if(!known) { okay = false; break; }
-	  switch (compress(t2)) {
-	  case &TypeInt(n2): if(i < n2) okay = false; break;
-	  default: okay = false; break;
-	  }
-	  break;
-	case $(&AbsUpper_b(_),_):
-	case $(_,&AbsUpper_b(_)): okay = false; break;
 	}
 	break;
       case $(No_constr, _): okay = false; break;
@@ -1916,9 +1855,6 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     default: break;
     }
     return false;
-    // FIX: we're assuming sizeof(int) = sizeof(long)
-  case $(&SizeofType(_),&IntType(_,Int_sz)):
-  case $(&SizeofType(_),&IntType(_,Long_sz)): return true;
   case $(&TagType(_),&IntType(_,_)): return false;
 
   default: return unify(t1,t2);
@@ -1934,12 +1870,9 @@ bool is_pointer_type(type_t t) {
 
 // return true if t is a pointer type and/or has boxed kind.  Also return
 // dynamic pointer description, if a pointer
-bool is_pointer_or_boxed(type_t t,
-			 bool @is_dynforward_ptr,
-			 bool @is_dyneither_ptr) {
+bool is_pointer_or_boxed(type_t t, bool @is_dyneither_ptr) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,_,_)}):
-    *is_dynforward_ptr = (conref_def(bounds_one,b) == DynForward_b);
     *is_dyneither_ptr = (conref_def(bounds_one,b) == DynEither_b);
     return true;
   default:
@@ -2193,7 +2126,6 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {
       switch ($(conref_val(b_a),conref_val(b_b))) {
-      case $(&Upper_b(_), DynForward_b): break;
       case $(&Upper_b(_), DynEither_b): break;
       case $(&Upper_b(e1), &Upper_b(e2)): 
 	if(!Evexp::lte_const_exp(e2,e1))
@@ -2364,11 +2296,6 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  break;
 	  // jcheney: allow casts among abstract bounds if the bounds unify
 	  // e.g. `a@{`i} <-> `a*{`i}
-	case $(&AbsUpper_b(t1),&AbsUpper_b(t2)):
-	  bounds_ok = unify(t1,t2);
-	  break;
-	case $(&AbsUpper_b(_),_):
-	case $(_,&AbsUpper_b(_)): bounds_ok = false; break;
 	default: bounds_ok = true; break;
 	}
       if (conref_def(false,null_a) && !conref_def(false,null_b))
@@ -2428,8 +2355,7 @@ bool is_integral(exp_t e) {
   case &IntType(_,_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
-  case &TagType(_):
-  case &SizeofType(_): return true;
+  case &TagType(_): return true;
   case &Evar(_,_,_,_): return unify(e->topt->v,sint_typ);
   default: return false;
   }
@@ -2594,6 +2520,83 @@ static list_t<type_t,`r2> substs(region_t<`r> rgn,
 				  list_t<$(tvar_t,type_t)@`r,`r> inst, 
 				  list_t<type_t,`r2> ts);
 
+// used to copy an expression during substitution
+static exp_t copye(exp_t old, raw_exp_t r) {
+  // FIX? should we be substituting through the topt?
+  return new Exp{old->topt, r, old->loc, old->annot};
+}
+
+// substitute the type instantiation inst throughout the expression e.
+// assumes e is a type-level-expression (e.g., a "constant" expression.)
+static exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, 
+                      exp_t e) {
+  switch (e->r) {
+  case &Const_e(_):
+  case &Enum_e(_,_,_):
+  case &AnonEnum_e(_,_,_):
+  case &Var_e(...): return e;
+
+  case &Primop_e(p,es):
+    if (List::length(es) == 1) {
+      let e1 = es->hd;
+      let new_e1 = rsubsexp(r,inst,e1);
+      if (new_e1 == e1) return e;
+      return copye(e, new Primop_e(p,list(new_e1)));
+    } else if (List::length(es) == 2) {
+      let e1 = es->hd;
+      let e2 = es->tl->hd;
+      let new_e1 = rsubsexp(r,inst,e1);
+      let new_e2 = rsubsexp(r,inst,e2);
+      if (new_e1 == e1 && new_e2 == e2) return e;
+      return copye(e, new Primop_e(p,list(new_e1,new_e2)));
+    } else return impos("primop does not have 1 or 2 args!");
+  case &Conditional_e(e1,e2,e3):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_e2 = rsubsexp(r,inst,e2);
+    let new_e3 = rsubsexp(r,inst,e3);
+    if (new_e1 == e1 && new_e2 == e2 && new_e3 == e3) return e;
+    return copye(e, new Conditional_e(new_e1,new_e2,new_e3));
+  case &And_e(e1,e2):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_e2 = rsubsexp(r,inst,e2);
+    if (new_e1 == e1 && new_e2 == e2) return e;
+    return copye(e, new And_e(new_e1,new_e2));
+  case &Or_e(e1,e2):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_e2 = rsubsexp(r,inst,e2);
+    if (new_e1 == e1 && new_e2 == e2) return e;
+    return copye(e, new Or_e(new_e1,new_e2));
+  case &SeqExp_e(e1,e2):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_e2 = rsubsexp(r,inst,e2);
+    if (new_e1 == e1 && new_e2 == e2) return e;
+    return copye(e, new SeqExp_e(new_e1,new_e2));
+  case &Cast_e(t,e1,b,c):
+    let new_e1 = rsubsexp(r,inst,e1);
+    let new_t = rsubstitute(r,inst,t);
+    if (new_e1 == e1 && new_t == t) return e;
+    return copye(e, new Cast_e(new_t,new_e1,b,c));
+  case &Sizeoftyp_e(t):
+    let new_t = rsubstitute(r,inst,t);
+    if (new_t == t) return e;
+    return copye(e, new Sizeoftyp_e(new_t));
+  case &Sizeofexp_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new Sizeofexp_e(new_e1));
+  case &Offsetof_e(t,f):
+    let new_t = rsubstitute(r,inst,t);
+    if (new_t == t) return e;
+    return copye(e, new Offsetof_e(new_t,f));
+  case &Valueof_e(t):
+    let new_t = rsubstitute(r,inst,t);
+    if (new_t == t) return e;
+    return copye(e, new Valueof_e(new_t));
+  default: 
+    return impos("non-type-level-expression in Tcutil::rsubsexp");
+  }
+}
+
 type_t rsubstitute(region_t<`r> rgn, 
 		   list_t<$(tvar_t,type_t)@`r,`r> inst, 
 		   type_t t) {
@@ -2630,10 +2633,10 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_r  = rsubstitute(rgn,inst,r);
     let new_b  = b;
     switch(compress_conref(b)->v) {
-    case Eq_constr(&AbsUpper_b(tb)): 
-      let new_tb = rsubstitute(rgn,inst,tb);
-      if(tb != new_tb)
-	new_b = new_conref(new AbsUpper_b(new_tb));
+    case Eq_constr(&Upper_b(e)): 
+      let new_e = rsubsexp(rgn,inst,e);
+      if (new_e != e)
+	new_b = new_conref(new Upper_b(new_e));
       break;
     default: break;
     }
@@ -2702,13 +2705,12 @@ type_t rsubstitute(region_t<`r> rgn,
     let new_rt1 = rsubstitute(rgn,inst,rt1);
     let new_rt2 = rsubstitute(rgn,inst,rt2);
     return (new_rt1 == rt1 && new_rt2 == rt2) ? t : new DynRgnType(new_rt1,new_rt2);
-  case &SizeofType(t2):
-    let new_t2 = rsubstitute(rgn,inst,t2);
-    return new_t2 == t2 ? t : new SizeofType(new_t2);
   case &TagType(t2):
     let new_t2 = rsubstitute(rgn,inst,t2);
     return new_t2 == t2 ? t : new TagType(new_t2);
-  case &TypeInt(_):
+  case &ValueofType(e):
+    let new_e = rsubsexp(rgn,inst,e);
+    return new_e == e ? t : new ValueofType(new_e);
   case &EnumType(_,_): 
   case &AnonEnumType(_):
   case VoidType:       
@@ -2765,7 +2767,8 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
 // most constrained kind as the kind of the variable, and in fact
 // physically share the kinds so that further constraints on it are
 // propagated.  Also ensures that the tvars share the same identity.
-static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs, 
+static list_t<tvar_t> add_free_tvar(seg_t loc, 
+                                    list_t<tvar_t,`H> tvs, 
                                     tvar_t tv)
 {
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
@@ -2775,7 +2778,7 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
       if (!constrain_kinds(k1,k2))
         terr(loc,"type variable %s is used with inconsistent kinds %s and %s",
              *tv->name, kindbound2string(k1), kindbound2string(k2));
-      if (tv->identity == -1)
+      if (tv->identity == -1) 
         tv->identity = tvs2->hd->identity;
       else if (tv->identity != tvs2->hd->identity)
         impos("same type variable has different identity!");
@@ -3004,6 +3007,11 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
 //   then we move to the more constrained kind.  This is why we propagate
 //   around the set of 
 // * add default effects for function types 
+
+// forward declaration
+static cvtenv_t<`r>
+i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv);
+
 static cvtenv_t<`r> 
 i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv, 
                    kind_t expected_kind, type_t t, 
@@ -3246,25 +3254,36 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // check the bound
     switch (compress_conref(b)->v) {
     case No_constr:
-    case Eq_constr(DynForward_b): break;
     case Eq_constr(DynEither_b): break;
     case Eq_constr(&Upper_b(e)): // must be a constant expression
-      Tcexp::tcExp(te,NULL,e);
+      region temp {
+        let te2 = allow_valueof(temp,te);
+        Tcexp::tcExp(te2,NULL,e);
+      }
+      cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
       if (!coerce_uint_typ(te,e))
         terr(loc,"pointer bounds expression is not an unsigned int");
       let $(sz,known) = Evexp::eval_const_uint_exp(e); 
       if (is_zero_terminated && (!known || sz < 1))
         terr(loc,"zero-terminated pointer cannot point to empty sequence");
       break;
-    case Eq_constr(&AbsUpper_b(tb)):
-      cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,tb,true); break;
     case Forward_constr(_): impos("forward constraint");
     }
     break;
   case &TagType(t1):
     cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1,true); break;
-  case &SizeofType(t1):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,true); break;
+  case &ValueofType(e):
+    // FIX:  when we have something like:
+    // int foo<`i::I>(int *{valueof(`i)}`H x);
+    // then the explicitly bound `i doesn't work out.
+    region temp {
+      let te2 = allow_valueof(temp,te);
+      Tcexp::tcExp(te2,NULL,e);
+    }
+    if (!coerce_uint_typ(te,e))
+      terr(loc,"valueof_t requires an int expression");
+    cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
+    break;
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
@@ -3436,8 +3455,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           switch (compress(t)) {
           case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,zt,_))):
             // FIX:  zero-termination?
-            switch ($(compress(et), conref_def((bounds_t)DynForward_b,b))) {
-            case $(&IntType(None,Char_sz), DynForward_b): break;
+            switch ($(compress(et), conref_def((bounds_t)DynEither_b,b))) {
+            case $(&IntType(None,Char_sz), DynEither_b): break;
             default: terr(loc,"format descriptor is not a char ? type"); break;
             }
             break;
@@ -3672,7 +3691,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
     }
     break;
-  case &TypeInt(_):
   case UniqueRgn:
   case HeapRgn: break;
   case &RgnHandleType(t2):
@@ -3709,6 +3727,53 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     }
     terr(loc,"type %s has kind %s but as used here needs kind %s",
 	 typ2string(t), kind2string(typ_kind(t)), kind2string(expected_kind));
+  }
+  return cvtenv;
+}
+
+// This is called *after* type-checking the expression to see that
+// it's of type int, under the assumption that every valueof(T) in e is
+// well-formed and T is of kind Int.  We must now make sure that these
+// assumptions are true and extract the free type variables occurring
+// within T.  
+static cvtenv_t<`r>
+i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
+  switch (e->r) {
+  case &Const_e(_):
+  case &Enum_e(_,_,_):
+  case &AnonEnum_e(_,_,_):
+  case &Var_e(...): break;
+  case &Primop_e(_,es):
+    for (; es != NULL; es = es->tl)
+      cvtenv = i_check_valid_type_level_exp(es->hd,te,cvtenv);
+    break;
+  case &Conditional_e(e1,e2,e3):
+    cvtenv = i_check_valid_type_level_exp(e1,te,cvtenv);
+    cvtenv = i_check_valid_type_level_exp(e2,te,cvtenv);
+    cvtenv = i_check_valid_type_level_exp(e3,te,cvtenv);
+    break;
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2):  fallthru(e1,e2);
+  case &SeqExp_e(e1,e2): 
+    cvtenv = i_check_valid_type_level_exp(e1,te,cvtenv);
+    cvtenv = i_check_valid_type_level_exp(e2,te,cvtenv);
+    break;
+  case &Cast_e(t,e1,_,_):
+    cvtenv = i_check_valid_type_level_exp(e1,te,cvtenv);
+    cvtenv = i_check_valid_type(e->loc,te,cvtenv,AnyKind,t,true);
+    break;
+  case &Offsetof_e(t,_): fallthru(t);
+  case &Sizeoftyp_e(t):
+    cvtenv = i_check_valid_type(e->loc,te,cvtenv,AnyKind,t,true);
+    break;
+  case &Valueof_e(t):    
+    cvtenv = i_check_valid_type(e->loc,te,cvtenv,IntKind,t,true);
+    break;
+  case &Sizeofexp_e(e):
+    cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
+    break;
+  default: 
+    impos("non-type-level-expression in Tcutil::i_check_valid_type_level_exp");
   }
   return cvtenv;
 }
@@ -3781,13 +3846,12 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     }
 
     // resolve the kinds of type variables.  If there's a kind that must
-    // be less than Mem or Any, make it boxed.  If there's a TopRgnKind
+    // be less than Mem, make it boxed.  If there's a TopRgnKind
     // type variable, make it RgnKind
     for (_ x = free_tvars; x != NULL; x = x->tl)
       switch (compress_kb(x->hd->kind)) {
       case &Unknown_kb(*f):      fallthru(f);
-      case &Less_kb(*f,MemKind): fallthru(f);
-      case &Less_kb(*f,AnyKind): *f = kind_to_bound_opt(BoxKind); break;
+      case &Less_kb(*f,MemKind):  *f = kind_to_bound_opt(BoxKind); break;
       case &Less_kb(*f,TopRgnKind): *f = kind_to_bound_opt(RgnKind); break;
       case &Less_kb(*f,k):       *f = kind_to_bound_opt(k);       break;
       case &Eq_kb(MemKind):
@@ -4009,23 +4073,16 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
   return imp_rev(ans);
 }
 
-bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest, 
-                               bool @forward_only) {
-  *forward_only = false;
+bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,_,_))):
     let b = compress_conref(b);
     switch (compress_conref(b)->v) {
-    case Eq_constr(DynForward_b): 
-      *forward_only = true; 
-      *elt_typ_dest = elt_typ; 
-      return true;
     case Eq_constr(DynEither_b): 
       *elt_typ_dest = elt_typ; 
       return true;
     case No_constr: 
-      b->v = Eq_constr(DynForward_b); 
-      *forward_only = true;
+      b->v = Eq_constr(DynEither_b); 
       *elt_typ_dest = elt_typ; 
       return true;
     default: return false;
@@ -4046,24 +4103,22 @@ bool is_zero_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
 // return true if t is a zero-terminated pointer or array type and set the
 // elt_type and ptr_type as appropriate.
 bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
-		      bool @is_dynforward, bool @is_dyneither, 
-		      type_t @elt_type) {
+		      bool @is_dyneither, type_t @elt_type) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
     if (conref_def(false,zt)) {
       *ptr_type = t;
       *elt_type = elt;
       switch (conref_def(bounds_one,bnds)) {
-      case DynForward_b: *is_dyneither = false; *is_dynforward = true; break;
-      case DynEither_b: *is_dynforward = false; *is_dyneither = true; break;
-      default: *is_dynforward = *is_dyneither = false; break;
+      case DynEither_b: *is_dyneither = true; break;
+      default: *is_dyneither = false; break;
       }
       return true;
     } else return false;
   case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
     if (conref_def(false,zt)) {
       *elt_type = elt;
-      *is_dynforward = *is_dyneither = false;
+      *is_dyneither = false;
       *ptr_type = 
 	new PointerType(PtrInfo(elt,tq, 
 				PtrAtts(HeapRgn,false_conref,
@@ -4077,31 +4132,25 @@ bool is_zero_ptr_type(type_t t, type_t @ptr_type,
 
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
-// to true.
+// Finally, if the pointer is fat, set is_dyneither to true.
 bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
-		       bool @is_dynforward,
-		       bool @is_dyneither,
-		       type_t @elt_type) {
+		       bool @is_dyneither, type_t @elt_type) {
   switch (e1->r) {
   case &Cast_e(_,_,_,_):
     impos("we have a cast in a lhs:  %s",exp2string(e1));
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
-    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-			    elt_type);
+    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dyneither,elt_type);
   case &AggrArrow_e(e1a,_): fallthru(e1a);
   case &AggrMember_e(e1a,_):
     // sanity check
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-                         elt_type))
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dyneither,elt_type))
       impos("found zero pointer aggregate member assignment: %s",
 	    exp2string(e1));
     return false;
   case &Instantiate_e(e1a,_): fallthru(e1a);
   case &NoInstantiate_e(e1a):
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-                         elt_type))
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dyneither,elt_type))
       impos("found zero pointer instantiate/noinstantiate: %s",
 	    exp2string(e1));
     return false;
@@ -4111,9 +4160,9 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
   }
 }
 
-bool is_tagged_pointer_typ(type_t t, bool @is_forward_only) {
+bool is_tagged_pointer_typ(type_t t) {
   type_t ignore = VoidType;
-  return is_tagged_pointer_typ_elt(t, &ignore, is_forward_only);
+  return is_tagged_pointer_typ_elt(t, &ignore);
 }
 
 /***************************************************/
@@ -4490,22 +4539,17 @@ type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
   }
 }
 
-// give an error when we can statically tell that the array bounds arent'
+// give an error when we can statically tell that the array bounds aren't
 // large enough -- if the bounds are unconstrained, set them to i+1.
 void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
   switch (b->v) {
   case Eq_constr(DynEither_b): return; // always checked dynamically
-  case Eq_constr(DynForward_b): 
-    if (i < 0) 
-      terr(loc, "dereference is out of bounds");
-    return; // otherwise checked dynamically
   case Eq_constr(&Upper_b(e)):
     let $(j,known) = Evexp::eval_const_uint_exp(e);
     if(known && j <= i)
       terr(loc, "dereference is out of bounds: %d <= %d", j, i);
     return;
-  case Eq_constr(&AbsUpper_b(_)): return; // control-flows problem
   case No_constr:
     // constrain the bounds to be i+1
     b->v = Eq_constr((bounds_t)(new Upper_b(uint_exp(i+1,NULL))));
@@ -4641,8 +4685,7 @@ bool supports_default(type_t t) {
   case &DoubleType(_): return true;
 
   case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
-    switch (conref_def((bounds_t)DynForward_b,bounds)) {
-    case DynForward_b: return true;
+    switch (conref_def((bounds_t)DynEither_b,bounds)) {
     case DynEither_b: return true;
     default:
       return conref_def(true,nullable);
@@ -4692,7 +4735,6 @@ bool admits_zero(type_t t) {
       // for now, we're not allowing fat pointers to be in zero-terminated
       // arrays.  They cause way too many problems in the translation and
       // are of dubious use (I hope.)
-    case Eq_constr(DynForward_b): return false; 
     case Eq_constr(DynEither_b): return false; 
     case Eq_constr(_):
       switch (compress_conref(nullable)->v) {

@@ -235,7 +235,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
                                             NULL)));
         break;
       case &TagType(t1): 
-	let t2 = new TypeInt(i);
+	let t2 = new ValueofType(uint_exp(i,NULL));
 	if(!unify(t1,t2)) {
 	  terr(loc, "expecting %s but found %s",typ2string(t1),typ2string(t2));
 	  explain_failure();
@@ -248,7 +248,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     }
     break;
   case String_c(s):
-    int len = s.size; // includes the trailing 0 character
+    int len = numelts(s); // includes the trailing 0 character
     exp_t elen = const_exp(Int_c(Unsigned, len), loc);
     elen->topt = new Opt(uint_typ);
     // The default is to treat a string as if it's statically heap 
@@ -377,19 +377,18 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     if (!is_integral(e))
       terr(loc,"expecting integral type but found %s",typ2string(t));
     return e->topt->v;
-  case Size:
+  case Numelts:
     switch (t) {
     case &ArrayType(_): break;
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))): 
       switch(compress_conref(b)->v) {
-      case Eq_constr(DynForward_b):
       case Eq_constr(DynEither_b):
       case Eq_constr(&Upper_b(_)): break;
-      default: terr(loc,"can't apply size to pointer/array of abstract length");
+      default: terr(loc,"can't apply numelts to pointer/array of abstract length");
       }
       break;
     default:
-      terr(loc,"size requires pointer or array type, not %s",typ2string(t));
+      terr(loc,"numelts requires pointer or array type, not %s",typ2string(t));
     }
     return uint_typ;
   default: impos("Non-unary primop");
@@ -426,9 +425,6 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
     switch (b->v) {
-    case Eq_constr(DynForward_b): 
-      // FIX: warn if e2 is negative
-      return t1;
     case Eq_constr(DynEither_b): return t1;
     case Eq_constr(&Upper_b(ub)):
       // if we have a zero-terminated array, warn that this could
@@ -440,18 +436,14 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       //   int buf[10] = {...};
       //   *((buf + 11) - 10)
       // This should not generate an exception.  So the best we can do
-      // is coerce e1 to a ?- type.
+      // is coerce e1 to a ? type.
       let new_t1 = new PointerType(PtrInfo(et,tq,
 					   PtrAtts(r,true_conref,
 						   bounds_dyneither_conref,zt,
                                                    NULL)));
       unchecked_cast(te, e1, new_t1, Other_coercion);
       return new_t1;
-    case Eq_constr(&AbsUpper_b(_)):
-      terr(e1->loc, "pointer arithmetic not allowed on pointers with "
-	   "abstract bounds");
-      return t1;
-    default: b->v = Eq_constr(DynForward_b); return t1;
+    default: b->v = Eq_constr(DynEither_b); return t1;
     }
   default: return tcArithBinop(te, e1, e2, is_numeric);
   }
@@ -462,10 +454,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
   type_t t1_elt = VoidType;
-  bool forward_only1 = false;
-  bool forward_only2 = false;
-  if (is_tagged_pointer_typ_elt(t1,&t1_elt,&forward_only1)) {
-    if (is_tagged_pointer_typ(t2,&forward_only2)) {
+  if (is_tagged_pointer_typ_elt(t1,&t1_elt)) {
+    if (is_tagged_pointer_typ(t2)) {
       if (!unify(t1, t2)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
@@ -474,8 +464,6 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       return sint_typ;
     } else {
-      if (forward_only1)
-        terr(e1->loc,"can't subtract from forward-only ? pointer");
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t1))
@@ -669,15 +657,12 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e)) {
     type_t telt = VoidType;
-    bool forward_only = false;
-    if (is_tagged_pointer_typ_elt(t,&telt,&forward_only) || 
+    if (is_tagged_pointer_typ_elt(t,&telt) || 
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),MemKind))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t))
         terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
-      if (forward_only && (i == PreDec || i == PostDec))
-        terr(e->loc,"can't subtract from forward-only ? pointer");
     } else 
       terr(e->loc,"expecting arithmetic or ? type but found %s",typ2string(t));
   }
@@ -1136,14 +1121,23 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
 
  // sizeof t
 static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
+  if (te->allow_valueof) {
+    // we're inside a type-level expression which means that
+    // we shouldn't check the type yet -- it will be done later.
+    return uint_typ;
+  }
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
          typ2string(t));
   if (topt != NULL)
     switch (compress(*topt)) {
-      // only return sizeof_t<t> when requested from context
-    case &SizeofType(_): return new SizeofType(t);
+    case tagtyp as &TagType(tt):
+      // see if tt unifies with ValueofType(Sizeof_e(t))
+      let e = sizeoftyp_exp(t,NULL);
+      let tt2 = new ValueofType(e);
+      if (unify(tt,tt2)) return tagtyp;
+      break;
     default: break;
     }
   return uint_typ; 
@@ -1266,7 +1260,8 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     return finfo->type;
   case &ArrayType(_)   && (strcmp(*f,"size") == 0):
   case &PointerType(_) && (strcmp(*f,"size") == 0):
-    outer_e->r = new Primop_e(Size,new List(e,NULL));
+    warn(e->loc,"deprecated `.size' used here -- change to numelts(%s)",exp2string(e));
+    outer_e->r = new Primop_e(Numelts,new List(e,NULL));
     return uint_typ;
   default:
     if (strcmp(*f,"size") == 0)
@@ -1367,7 +1362,6 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
             }
           }
           break;
-        case Eq_constr(DynForward_b): emit_warning = false; break;
         case Eq_constr(DynEither_b): emit_warning = false; break;
         default: break;
         }
@@ -1755,7 +1749,6 @@ static bool zeroable_type(type_t t) {
       return true;
     }
   case &EnumType(_,_): return true; // FIX: explicit tags?
-  case &SizeofType(_): return true;
   case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
   case &AnonAggrType(_,fs): 
     for (; fs != NULL; fs = fs->tl) 
@@ -1766,7 +1759,7 @@ static bool zeroable_type(type_t t) {
   case &DynRgnType(_,_): return false;
   case &RgnHandleType(_): return false;
 
-  case &TypeInt(_):
+  case &ValueofType(_):
   case HeapRgn:
   case UniqueRgn:
   case &AccessEff(_):
@@ -1897,7 +1890,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     default: break;
     }
-  if (!one_elt) ptr_maker = dynforward_typ;
+  if (!one_elt) ptr_maker = dyneither_typ;
   return ptr_maker(elt_type,rgn,empty_tqual(NULL),zero_term);
 }
 
@@ -1917,8 +1910,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   }
   // check to see that the type is word-sized or a pointer
   bool ign_1 = false;
-  bool ign_2 = false;
-  if (!is_pointer_or_boxed(t1,&ign_1,&ign_2))
+  if (!is_pointer_or_boxed(t1,&ign_1))
     terr(loc,"Swap not allowed for non-pointer or non-word-sized types.");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
@@ -1928,10 +1920,10 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,e2->loc,topt,"swap non-lvalue");
   // Make sure we aren't swapping elements of a zero-terminated array
   type_t t_ign1 = VoidType, t_ign2 = VoidType;
-  bool b_ign1 = false, b_ign2 = false;
-  if (is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&b_ign2,&t_ign2))
+  bool b_ign1 = false;
+  if (is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&t_ign2))
     return expr_err(te,e1->loc,topt,"swap value in zeroterm array");
-  if (is_zero_ptr_deref(e2,&t_ign1,&b_ign1,&b_ign2,&t_ign2))
+  if (is_zero_ptr_deref(e2,&t_ign1,&b_ign1,&t_ign2))
     return expr_err(te,e2->loc,topt,"swap value in zeroterm array");
   // Make sure the elements are writable
   check_writable(te, e1);
@@ -1999,12 +1991,12 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       exp_t bnd = (exp_t)bndopt;
       bounds_t b;
       switch(compress(bnd->topt->v)) {
-      case &TagType(t): b = new AbsUpper_b(t); break;
+        // case &TagType(t): b = new AbsUpper_b(t); break;
       default:
 	if(is_const_exp(te,bnd))
 	  b = new Upper_b(bnd);
 	else
-	  b = DynForward_b;
+	  b = DynEither_b;
       }
       type_t res_typ = 
         new PointerType(PtrInfo(et_arr,tq_arr,
@@ -2065,7 +2057,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
     let topt2 = atb_typ(char_typ, rgn, const_tqual(NULL), 
-                        DynForward_b, true_conref);
+                        DynEither_b, true_conref);
     let t = tcExp(te,&topt2,e1);
     return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)), 
                    false_conref);
@@ -2111,7 +2103,7 @@ type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   switch (t) {
   case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
     let $(_,rgn) = addressof_props(te,e);
-    let b = (e2 == NULL) ? (bounds_t)DynForward_b : new Upper_b((exp_t)e2);
+    let b = (e2 == NULL) ? (bounds_t)DynEither_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b,zt);
     e->topt->v = t;
     return t;
@@ -2143,7 +2135,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
     switch (t) {
     case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
       let $(_,rgn) = addressof_props(te,e);
-      bounds_t b = (e2 == NULL) ? (bounds_t)DynForward_b : 
+      bounds_t b = (e2 == NULL) ? (bounds_t)DynEither_b : 
         new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b,zt);
       unchecked_cast(te,e,t,Other_coercion);
@@ -2321,6 +2313,17 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
   case &Swap_e(e1,e2):
     t = tcSwap(te,loc,topt,e1,e2); break;
+  case &Valueof_e(t2):
+    if (!te->allow_valueof) 
+      terr(e->loc,"valueof(-) can only occur within types");
+    // we do *not* check t2 here -- valueof(T) can only occur within
+    // a type, so we've called tcExp from within i_check_valid_type
+    // (either because of a bound expression on a pointer, or a 
+    // valueof_t(exp) type.)  These routines run through the expression
+    // again and check that the type is well-formed (and extract free
+    // type variables and so forth.)
+    t = sint_typ;
+    break;
   }
   e->topt = new Opt(t);
 }

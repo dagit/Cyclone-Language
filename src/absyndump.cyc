@@ -489,12 +489,11 @@ void dumpntyp(type_t t) {
   case &EnumType(n,_):    dump("enum "); dumpqvar(n); return;
   case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
-  case &SizeofType(t): dump("sizeof_t<"); dumpntyp(t); dump(">"); return;
+  case &ValueofType(e): dump("valueof_t("); dumpexp(e); dump(")"); return;
   case &RgnHandleType(rgn): 
     dump("region_t<"); dumprgn(rgn); dump(">"); return;
   case &DynRgnType(r1,r2): dump("dynregion_t<"); dumprgn(r1);
     dump(","); dumprgn(r2); dump(">"); return;
-  case &TypeInt(i): dump(aprintf("`%d",i)); return;
   case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
   case UniqueRgn: dump("`U"); break;
   case HeapRgn: 
@@ -591,9 +590,10 @@ void dumpexp_prec(int inprec, exp_t e) {
     let pstr = Absynpp::prim2str(p);
     switch (List::length(es)) {
     case 1:
-      if (p == (primop_t)Size) {
-        dumpexp_prec(myprec,es->hd);
-        dump(".size");
+      if (p == (primop_t)Numelts) {
+        dump("numelts(");
+        dumpexp(es->hd);
+        dump(")");
       } else {
         dump(pstr);
         dumpexp_prec(myprec,es->hd);
@@ -671,6 +671,9 @@ void dumpexp_prec(int inprec, exp_t e) {
 
   case &Sizeofexp_e(e1):
     dump("sizeof("); dumpexp(e1); dump_char(')'); break;
+
+  case &Valueof_e(t):
+    dump("valueof("); dumptyp(t); dump_char(')'); break;
 
   case &Offsetof_e(t,&StructField(n)):
     dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);
@@ -1256,15 +1259,11 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
     switch(conref_def(bounds_one,bd)) {
-    case DynForward_b: dump_char('?'); break;
-    case DynEither_b: dump_char('?'); dump_char('-'); break;
+    case DynEither_b: dump_char('?'); break;
     case &Upper_b(e):
       dump_char(conref_def(true,nullable) ? '*' : '@');
       dump_upperbound(e);
       break;
-    case &AbsUpper_b(t): 
-      dump_char(conref_def(true,nullable) ? '*' : '@');
-      dump_char('{'); dumptyp(t); dump_char('}');
     }
     if(conref_def(false,zt)) dump("ZEROTERM");
     switch(Tcutil::compress(rgn)) {

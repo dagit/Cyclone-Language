@@ -69,7 +69,7 @@ void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
   int sp_ofs;           /* stack and stack pointer        */
   int i, j, limit_ofs;         /* scan and limit pointers        */
 
-  if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
+  if (base_ofs < 0 || base_ofs + len > numelts(arr) || len < 0)
     throw new Core::Invalid_argument("Array::qsort");
 
   limit_ofs = base_ofs + len;
@@ -140,9 +140,9 @@ void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
 #define PUT(a) to[dest++] = from[a++]
 
 
-void msort(cmpfn_t<`a,`H,`H> less_eq, `a ?`H arr, int len) {
+void msort(cmpfn_t<`a::B,`H,`H> less_eq, `a ?`H arr, int len) {
 
-  if (len > arr.size || len < 0)
+  if (len > numelts(arr) || len < 0)
     throw new Core::Invalid_argument("Array::msort");
 
   `a ?`H from = new {for i < len : arr[0]}; // fill with `a junk
@@ -216,30 +216,30 @@ list_t<`a> to_list(`a ?`r x) {
 
 // return a fresh copy of the array (same as map of the identity) 
 `a ?copy(`a::B ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   return new {for i < sx : x[i]};
 }
 
 // Apply a function to each element in an array, returning a new array. 
 `b ?map(`b f(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   return new {for i < sx : f(x[i])};
 }
 // Apply a function to each element in an array, returning a new array. 
 // This uses an additional argument to simulate function closures.
 `b ?map_c(`b f(`c,`a),`c env,`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   return new {for i < sx : f(env,x[i])};
 }
 
 // Apply a function to each element in an array, writing the results
 // back into the array.
 void imp_map(`a f(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i<sx; i++) x[i]=f(x[i]);
 }
 void imp_map_c(`a f(`b,`a),`b env,`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i<sx; i++) x[i]=f(env,x[i]);
 }
 
@@ -250,8 +250,8 @@ xtunion exn {Array_mismatch};
 // to each pair of elements (in order) and collect the results in a new array.
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
 `c ?map2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
   return new {for i < sx : f(x[i],y[i])};
 }
 
@@ -261,11 +261,11 @@ xtunion exn {Array_mismatch};
 // save the result.  Similar to Ocaml's List.iter but doesn't require
 // void type for the result of the function.
 void app(`b f(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i < sx; i++) f(x[i]);
 }
 void app_c(`c f(`a,`b),`a env,`b ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i < sx; i++) f(env,x[i]);
 }
 
@@ -273,41 +273,41 @@ void app_c(`c f(`a,`b),`a env,`b ?`r x) {
 // functions are no longer needed because we treat "void" as a boxed
 // type.  
 void iter(void f(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i < sx; i++) f(x[i]);
 }
 
 // same as app_c but with void functions
 void iter_c(void f(`b,`a),`b env,`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for (int i = 0; i < sx; i++) f(env,x[i]);
 }
 
 // Same as app, but generalized to a pair of arrays.  Throws Array_mismatch
 // if the lengths of the arrays aren't the same.  
 void app2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 } 
 
 // Same as iter, but generalized to a pair of arrays.  Throws Array_mismatch
 // if the lengths of the arrays aren't the same.  
 void iter2(void f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 }
 
@@ -317,7 +317,7 @@ void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 // a, return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function
 // is first applied to the left-most element of the array.
 `a fold_left(`a f(`a,`b),`a accum,`b ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     accum = f(accum,x[i]);
   }
@@ -325,7 +325,7 @@ void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 }
 
 `a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,`b ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     accum = f(env,accum,x[i]);
   }
@@ -336,13 +336,13 @@ void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 // a, return f(x1,f(x2,...,f(xn-1,f(xn,a))...)).  Notice that the function
 // is first applied to the right-most element of the list. 
 `b fold_right(`b f(`a,`b),`a ?`r x,`b accum) {
-  for(int i=x.size-1; i >= 0; i--) {
+  for(int i=numelts(x)-1; i >= 0; i--) {
     accum = f(x[i],accum);
   }
   return accum;
 }
 `b fold_right_c(`b f(`c,`a,`b),`c env,`a ?`r x,`b accum) {
-  for(int i=x.size-1; i>=0; i--) {
+  for(int i=numelts(x)-1; i>=0; i--) {
     accum = f(env,x[i],accum);
   }
   return accum;
@@ -350,7 +350,7 @@ void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 
 // Return a copy of an array in reverse.
 `a? rev_copy(`a::B ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   int n = sx - 1;
   return new {for i < sx : x[n-i]};
 }
@@ -359,7 +359,7 @@ void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 void imp_rev(`a::B ?`r x) {
   `a temp;
   int i = 0;
-  int j = x.size-1;
+  int j = numelts(x)-1;
   while (i < j) {
     temp = x[i];
     x[i] = x[j];
@@ -372,14 +372,14 @@ void imp_rev(`a::B ?`r x) {
 // Given a predicate on 'a values, determine whether every element in an
 // array satisfies the predicate.
 bool forall(bool pred(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     if (! pred(x[i])) return false;
   }
   return true;
 }
 bool forall_c(bool pred(`a,`b),`a env,`b ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     if (! pred(env,x[i])) return false;
   }
@@ -389,14 +389,14 @@ bool forall_c(bool pred(`a,`b),`a env,`b ?`r x) {
 // Given a predicate on 'a values, determine whether there exists an element
 // in the array that satisfies the predicate.
 bool exists(bool pred(`a),`a ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     if (pred(x[i])) return true;
   }
   return false;
 }
 bool exists_c(bool pred(`a,`b),`a env,`b ?`r x) {
-  int sx = x.size;
+  int sx = numelts(x);
   for(int i=0; i < sx; i++) {
     if (pred(env,x[i])) return true;
   }
@@ -406,15 +406,15 @@ bool exists_c(bool pred(`a,`b),`a env,`b ?`r x) {
 // Given [|x1,...,xn|] and [|y1,...,yn|], return [|(x1,y1),...,(xn,yn)|].  
 // Throws Array_mismatch if the lengths are not the same.
 $(`a,`b)? zip(`a ?`r1 x,`b ?`r2 y) {
-  int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  int sx = numelts(x);
+  if (sx != numelts(y)) throw Array_mismatch;
 
   return new {for i < sx : $(x[i],y[i]) };
 }
 
 // Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 
 $(`a?,`b?) split($(`a,`b) ?`r1 x) {
-  int sx = x.size;
+  int sx = numelts(x);
   return $(new {for i < sx : (x[i])[0]},
            new {for i < sx : (x[i])[1]});
 }
@@ -423,7 +423,7 @@ $(`a?,`b?) split($(`a,`b) ?`r1 x) {
 // Given an array [|x1,...,xn|] and x, determine if x is in the array.
 // Uses physical equality for comparison.
 bool memq(`a ?`r l, `a x) {
-  int s = l.size;
+  int s = numelts(l);
   for(int i = 0; i < s; i++) {
     if (l[i] == x) return true;
   }
@@ -431,7 +431,7 @@ bool memq(`a ?`r l, `a x) {
 }
 
 bool mem(int compare(`a,`a), `a ?`r l, `a x) {
-  int s = l.size;
+  int s = numelts(l);
   for(int i = 0; i < s; i++) {
     if (0==compare(l[i],x)) return true;
   }
@@ -442,7 +442,7 @@ bool mem(int compare(`a,`a), `a ?`r l, `a x) {
 // target array.  The last parameter is an int option of the number of 
 // elements to take, or NULL for "take until the end of the array".
 `a? extract(`a::B ?`r1 x,int start,int *`r2 n_opt) {
-  int sx = x.size;
+  int sx = numelts(x);
   int n = (n_opt == NULL ? sx - start : *n_opt);
 
   if (start < 0 || n <= 0 || start + (n_opt == NULL ? 0 : n) > sx)

@@ -87,6 +87,7 @@ extern struct Tenv<`g::R,`l::R> {
   // absolute environment
   Dict::dict_t<list_t<var_t>,genv_t<`g>,`g> ae; 
   struct Fenv<`l> *`l le; // local environment
+  bool allow_valueof;   // controls whether we allow valueof(T) in an expr
 };
 typedef struct Tenv<`g,`l> @`l tenv_t<`g,`l>; 
 
@@ -106,6 +107,7 @@ extern tuniondecl_t@*`r  lookup_xtuniondecl(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
+extern tenv_t<`g,`r2> allow_valueof(region_t<`r2>,tenv_t<`g,`r>: {`r} > `r2);
 extern type_t  return_typ(tenv_t);
 
 extern tenv_t<`g,`r> copy_tenv(region_t<`r>,tenv_t<`g,`r2> : {`r2} > `r);

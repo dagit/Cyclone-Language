@@ -149,7 +149,7 @@ int lineno;
 symbol_list *grammar;
 int start_flag;
 bucket *startval;
-char ?-?-tags;//an array of strings
+char ??tags;//an array of strings
 int ?user_toknums;//an array of integers
 
 /* Nonzero if components of semantic values are used, implying
@@ -2143,7 +2143,7 @@ record_rule_line ()
 				 rline_allocated * sizeof (short));
       */
       rline = new {for _temp_<rline_allocated*sizeof(short):
-                  (_temp_<rline.size)?rline[_temp_]:0u};
+                  (_temp_<numelts(rline))?rline[_temp_]:0u};
     }
   rline[nrules] = (short)lineno;
 }
@@ -2211,7 +2211,7 @@ packsymbols()
 
   /* int lossage = 0; JF set but not used */
 
-  tags = NEW2P(nsyms + 1, char ?-);
+  tags = NEW2P(nsyms + 1, char ?);
   tags[0] =strdup("$");
   user_toknums = NEW2(nsyms + 1, int);
   user_toknums[0] = 0;
@@ -2402,12 +2402,12 @@ packgram()
 
   bucket *ruleprec;
 
-  ritem = (_ ?-)(NEW2(nitems + 1, short));
-  rlhs = (_ ?-)(NEW2(nrules, short)) - 1;
-  rrhs = (_ ?-)(NEW2(nrules, short)) - 1;
-  rprec = (_ ?-)(NEW2(nrules, short)) - 1;
-  rprecsym = (_ ?-)(NEW2(nrules, short)) - 1;
-  rassoc = (_ ?-)(NEW2(nrules, short)) - 1;
+  ritem = (_ ?)(NEW2(nitems + 1, short));
+  rlhs = (_ ?)(NEW2(nrules, short)) - 1;
+  rrhs = (_ ?)(NEW2(nrules, short)) - 1;
+  rprec = (_ ?)(NEW2(nrules, short)) - 1;
+  rprecsym = (_ ?)(NEW2(nrules, short)) - 1;
+  rassoc = (_ ?)(NEW2(nrules, short)) - 1;
 
   itemno = 0;
   ruleno = 1;

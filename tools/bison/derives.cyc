@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "types.h"
 #include "gram.h"
 
-short ?-?-derives;
+short ??derives;
 void print_derives(); 
 
 void
@@ -37,13 +37,13 @@ set_derives()
 {
   register int i;
   register int lhs;
-  register shorts ?-p;
+  register shorts ?p;
   register shorts *p1;
-  register short ?-q;
-  register shorts *?-dset;
-  register shorts ?-delts;
+  register short ?q;
+  register shorts *?dset;
+  register shorts ?delts;
 
-  dset = ((_ ?-)NEW2P(nvars, shorts *)) - ntokens;
+  dset = ((_ ?)NEW2P(nvars, shorts *)) - ntokens;
   
   delts = new{for _temp_<nrules+1:shorts_tag{NULL, 0u}};
   
@@ -61,7 +61,7 @@ set_derives()
 	}
     }
   
-  derives = ((_ ?-)NEW2P(nvars, short ?-)) - ntokens;
+  derives = ((_ ?)NEW2P(nvars, short ?)) - ntokens;
   q = NEW2(nvars + nrules, short);
 
   for (i = ntokens; i < nsyms; i++)
@@ -99,13 +99,13 @@ free_derives()
 
 
 #ifdef	DEBUG
-extern char ?-?-tags;
+extern char ??tags;
 
 void
 print_derives()
 {
   register int i;
-  register short ?-sp;
+  register short ?sp;
 
   //  extern char **tags;
 

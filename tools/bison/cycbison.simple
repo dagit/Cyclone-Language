@@ -431,7 +431,7 @@ yyerrlab:   /* here on detecting error */
 	  count = 0;
 	  /* Start X at -yyn if nec to avoid negative indexes in yycheck.  */
 	  for (x = (yyn < 0 ? -yyn : 0);
-	       x < (yytname.size / sizeof(char *)); x++)
+	       x < (numelts(yytname) / sizeof(char *)); x++)
 	    if (yycheck[x + yyn] == x)
 	      sze += strlen(yytname[x]) + 15, count++;
 	  msg = rnew(yyregion) {for i < sze + 15 : '\000'};
@@ -441,7 +441,7 @@ yyerrlab:   /* here on detecting error */
 	    {
 	      count = 0;
 	      for (x = (yyn < 0 ? -yyn : 0);
-		   x < (yytname.size / sizeof(char *)); x++)
+		   x < (numelts(yytname) / sizeof(char *)); x++)
 		if (yycheck[x + yyn] == x)
 		  { /* JGM: NB -- casts are needed here.  Sigh. */
 		    strcat(msg, count == 0 ? 

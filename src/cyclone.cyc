@@ -463,7 +463,7 @@ string_t<`H> ?`H split_specs(const char ?cmdline) {
   l = List::imp_rev(l);
   l = new List(new "",l); // For the command, since we'll pass it to Arg::parse
   let ptrarray = List::to_array(l);
-  let result = new { for k < ptrarray.size : *(ptrarray[k]) };
+  let result = new { for k < numelts(ptrarray) : *(ptrarray[k]) };
   return result;
 }
 
@@ -1198,17 +1198,17 @@ int main(int argc, string_t<`H> ?`H argv) {
                "Activate the link-checker"),
          rnew(r)$("-pp",false,"",
                rnew(r)Set_spec(&pp_r),
-               "Pretty print"),
+               "Pretty print the C code that Cyclone generates"),
          rnew(r)$("-up",false,"",
                rnew(r)Clear_spec(&pp_r),
-               "Ugly print"),
+               "Ugly print the C code that Cyclone generates (default)"),
          rnew(r)$("-elim-statement-expressions",false,"",
                rnew(r)Set_spec(&elim_se_r),
                "Avoid statement expressions in C output"
                " (implies --inline-checks)"),
          rnew(r)$("-un-gcc",false,"",
                rnew(r)Unit_spec(set_tovc),
-               "Avoid gcc extensions in C output"),
+               "Avoid gcc extensions in C output (except for attributes)"),
          rnew(r) $("-c-comp",false," <compiler>",
                rnew(r)String_spec(set_c_compiler),
                "Produce C output for the given compiler"),

@@ -55,17 +55,17 @@ struct Pos {
 static opt_t<$(mstring_t,int)@> parse_linedef(mstring_t line) {
   try {
     int i = 0;
-    while (i < line.size && (line[i] < '0' || line[i] > '9')) ++i;
+    while (i < numelts(line) && (line[i] < '0' || line[i] > '9')) ++i;
     int j = i;
-    while (j < line.size && line[j] >= '0' && line[j] <= '9') ++j;
-    if (i == line.size) return NULL; // if there's no number
+    while (j < numelts(line) && line[j] >= '0' && line[j] <= '9') ++j;
+    if (i == numelts(line)) return NULL; // if there's no number
     int number = 0;
     if (sscanf(substring(line,i,j-i),"%d",&number) != 1)
       return NULL;
-    while (j < line.size && line[j] != '"') ++j;
+    while (j < numelts(line) && line[j] != '"') ++j;
     int k = ++j;
-    while (k < line.size && line[k] != '"') ++k;
-    if (j == line.size || k == line.size) return NULL; // if there's no name
+    while (k < numelts(line) && line[k] != '"') ++k;
+    if (j == numelts(line) || k == numelts(line)) return NULL; // if there's no name
     mstring_t fname = substring(line,j,k-j);
     return new Opt(new $(fname,number));
   } catch {

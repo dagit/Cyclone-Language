@@ -79,8 +79,7 @@ extern bool is_numeric(exp_t);
 extern bool is_function_type(type_t t);
 extern bool is_pointer_type(type_t t);
 extern bool is_zero(exp_t e);
-extern bool is_pointer_or_boxed(type_t t,bool @is_dynforward_ptr,
-				bool @is_dyneither_ptr);
+extern bool is_pointer_or_boxed(type_t t,bool @is_dyneither_ptr);
 
 // useful kinds
 extern struct Core::Opt<kind_t> rk;
@@ -191,27 +190,23 @@ resolve_struct_designators(region_t<`r>rgn, seg_t loc,
 			   list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
 			   list_t<aggrfield_t> fields);
 // returns true if this is a t ? -- side effect unconstrained bounds
-extern bool is_tagged_pointer_typ(type_t, bool @is_forward_only);
+extern bool is_tagged_pointer_typ(type_t);
 // like above, but puts element type in elt_typ_dest when returning true.
-extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest,
-                                      bool @is_forward_only);
+extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
 // like above but checks to see if the pointer is zero-terminated
 extern bool is_zero_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
 
 // like above but also works for arrays and returns dynamic pointer
 //   stats
 extern bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
-			     bool @is_dynforward, bool @is_dyneither, 
-			     type_t @elt_type);
+			     bool @is_dyneither, type_t @elt_type);
 
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
-// to true.
+// Finally, if the pointer is fat, set is_dyneither.
 extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
-			      bool @is_dynforward,
-			      bool @is_dyneither,
-			      type_t @elt_type);
+			      bool @is_dyneither, type_t @elt_type);
+			      
 
 // returns true if this a non-aliasable pointer, e.g. *`U, *`r::TR, etc.
 extern bool is_noalias_pointer(type_t t);

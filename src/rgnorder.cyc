@@ -97,6 +97,7 @@ static type_t filter_effect(type_t eff, kind_t k) {
 rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po, 
                                      type_t eff, type_t rgn,
 				     Position::seg_t loc) {
+  eff = normalize_effect(eff);
   let ans = rnew(r) *po;
   // first check that this is a valid constraint
   if (!valid_constraint(eff,rgn)) {

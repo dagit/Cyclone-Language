@@ -25,16 +25,16 @@ int nsyms;
 int ntokens;
 int nvars;
 
-short ?-ritem;
-short ?-rlhs;
-short ?-rrhs;
-short ?-rprec;
-short ?-rprecsym;
-short ?-sprec;
-short ?-rassoc;
-short ?-sassoc;
-short ?-token_translations;
-short ?-rline;
+short ?ritem;
+short ?rlhs;
+short ?rrhs;
+short ?rprec;
+short ?rprecsym;
+short ?sprec;
+short ?rassoc;
+short ?sassoc;
+short ?token_translations;
+short ?rline;
 
 int start_symbol;
 

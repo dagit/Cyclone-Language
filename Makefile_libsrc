@@ -34,6 +34,9 @@ export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
 # various flags to set
+ifdef DEBUGBUILD
+override CYCFLAGS += -pp -g
+endif
 ifdef PROFILE
 override CYCFLAGS += -pg
 endif

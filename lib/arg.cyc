@@ -91,7 +91,7 @@ static string_t<`r> break_line(Buffer::T b, int howmuch, string_t<`r> s) {
   if (s == NULL) return NULL;
   if (howmuch<0) howmuch = 0;
   let len = strlen(s);
-  assert(len <= s.size);
+  assert(len <= numelts(s));
   if (howmuch>len) {
     Buffer::add_string(b,s);
     return NULL;
@@ -181,7 +181,7 @@ static string_t ?args = NULL;
 static void stop(int prog_pos, tunion error e,
 		 speclist_t<`r1,`r2> speclist,
                  string_t errmsg) {
-  string_t progname = prog_pos < args.size ? args[prog_pos] : "(?)";
+  string_t progname = prog_pos < numelts(args) ? args[prog_pos] : "(?)";
   switch (e) {
   case &Unknown(s):
      if (strcmp(s,"-help")!=0)
@@ -199,7 +199,7 @@ static void stop(int prog_pos, tunion error e,
      break;
   }
   usage(speclist, errmsg);
-  current = args.size; // skip everything else
+  current = numelts(args); // skip everything else
 }
 
 void parse(speclist_t<`r1,`r2> speclist,
@@ -209,13 +209,13 @@ void parse(speclist_t<`r1,`r2> speclist,
   args = orig_args;
 
   int initpos = current;
-  unsigned int l = args.size;
+  unsigned int l = numelts(args);
   // ignore any NULL that occurs at the end
   if (args[l-1] == NULL) l = l-1;
   ++current;
   while (current < l) {
     string_t s = args[current];
-    if (s != NULL && s.size >= 1 && s[0] == '-') {
+    if (s != NULL && numelts(s) >= 1 && s[0] == '-') {
       spec_t action;
       try action = lookup(speclist, s);
       catch {

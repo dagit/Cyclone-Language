@@ -335,7 +335,7 @@ static doc_t concat(doc_t d1, doc_t d2) {
 }    
 doc_t cat(... doc_t l) {
   let d = nil_doc();
-  for (int i = l.size - 1; i >= 0; i--) {
+  for (int i = numelts(l) - 1; i >= 0; i--) {
     d = concat(l[i],d);
   }
   return d;
@@ -391,7 +391,7 @@ doc_t cats(list_t<doc_t,`H> doclist) {
 static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
   list_t<out_t> os = NULL;
   doc_t ?docs = *docs_ptr;
-  int sz = docs.size;
+  int sz = numelts(docs);
   for (int i=0; i < sz; ++i) {
     doc_t d = docs[i];
     out_t o = apply(d->f,st);
@@ -410,7 +410,7 @@ static out_t cats_arr_f(doc_t ?`H @docs_ptr, ppstate_t st) {
 }
 
 doc_t cats_arr(doc_t ?`H docs) {
-  int sz = docs.size;
+  int sz = numelts(docs);
   if(sz==0)
     throw new Failure("cats_arr -- size zero array");
   doc_t d = docs[0];

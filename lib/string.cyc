@@ -39,7 +39,7 @@ extern "C" Cstring strerror(int errnum);
 ///////////////////////// LENGTH
 size_t strlen(buffer_t s) {
   size_t i;
-  unsigned int sz = s.size;
+  unsigned int sz = numelts(s);
   for (i = 0; i < sz; i++) {
     if (s[i] == '\000')
       return i;
@@ -54,10 +54,10 @@ int strcmp(buffer_t s1, buffer_t s2) {
   if (s1 == s2)
     return 0;
   int i = 0;
-  unsigned int sz1 = s1.size;
-  unsigned int sz2 = s2.size;
+  unsigned int sz1 = numelts(s1);
+  unsigned int sz2 = numelts(s2);
   unsigned int minsz = (sz1 < sz2) ? sz1 : sz2;
-  assert(minsz <= s1.size && minsz <= s2.size);
+  assert(minsz <= numelts(s1) && minsz <= numelts(s2));
   while (i < minsz) {
     char c1 = s1[i];
     char c2 = s2[i];
@@ -93,7 +93,7 @@ static inline int ncmp(buffer_t s1, size_t len1, buffer_t s2, size_t len2,
   size_t min_len = (len1 > len2) ? len2 : len1;
   size_t bound = (min_len > n) ? n : min_len;
 
-  assert(bound <= s1.size && bound <= s2.size);
+  assert(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     int retc;
@@ -120,12 +120,12 @@ int strncmp(buffer_t s1, buffer_t s2, size_t n) {
 int zstrcmp(buffer_t a, buffer_t b) {
   if(a == b)
     return 0;
-  size_t as = a.size;
-  size_t bs = b.size;
+  size_t as = numelts(a);
+  size_t bs = numelts(b);
   size_t min_length = (as < bs) ? as : bs;
   int i  = -1;
 
-  assert(min_length <= a.size && min_length <= b.size);
+  assert(min_length <= numelts(a) && min_length <= numelts(b));
 
   while (++i, i < min_length) {
     int diff = (int)(a[i]) - (int)(b[i]);
@@ -138,12 +138,12 @@ int zstrcmp(buffer_t a, buffer_t b) {
 int zstrncmp(buffer_t s1, buffer_t s2,size_t n) {
   if (n <= 0) return 0;
 
-  size_t s1size = s1.size;
-  size_t s2size = s2.size;
+  size_t s1size = numelts(s1);
+  size_t s2size = numelts(s2);
   size_t min_size = (s1size > s2size) ? s2size : s1size;
   size_t bound = (min_size > n) ? n : min_size;
 
-  assert(bound <= s1.size && bound <= s2.size);
+  assert(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     if (s1[i] < s2[i])
@@ -174,12 +174,12 @@ static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,buffer_t src) {
   int i;
   size_t dsize, slen, dlen;
 
-  dsize = dest.size;
+  dsize = numelts(dest);
   dlen = strlen(dest);
   slen = strlen(src);
   
   if ((slen + dlen) <= dsize) {
-    assert(slen <= src.size);
+    assert(slen <= numelts(src));
     for (i = 0; i<slen; i++) {
       dest[i+dlen] = src[i];
     }
@@ -203,9 +203,9 @@ mstring_t<`r> rstrconcat(region_t<`r> r, buffer_t a, buffer_t b) {
   let blen = strlen(b);
   mstring_t<`r> ans = rnew_string(r,alen+blen+1);
   int i, j;
-  assert(alen <= ans.size && alen <= a.size);
+  assert(alen <= numelts(ans) && alen <= numelts(a));
   for (i=0; i < alen; ++i) ans[i]   = a[i];
-  assert(blen <= b.size);
+  assert(blen <= numelts(b));
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
   return ans;
 }
@@ -296,7 +296,7 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, buffer_t separator) {
 // Destructively copy at most n characters from src into dest
 mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
   int i;
-  assert(n <= src.size && n <= dest.size);
+  assert(n <= numelts(src) && n <= numelts(dest));
   for (i=0; i<n; i++) {
     let srcChar = src[i];
     if (srcChar == '\000') break;
@@ -310,7 +310,7 @@ mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
 
 // Strncpy that does not pay attention to zero chars
 mbuffer_t<`r> zstrncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
-  assert(n <= dest.size && n <= src.size);
+  assert(n <= numelts(dest) && n <= numelts(src));
   int i;
   for (i=0; i<n; i++) 
     dest[i] = src[i];
@@ -318,8 +318,8 @@ mbuffer_t<`r> zstrncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
 }
 // Non-allocating string copy: first arg is returned
 mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
-  unsigned ssz = src.size;
-  unsigned dsz = dest.size;
+  unsigned ssz = numelts(src);
+  unsigned dsz = numelts(dest);
   if (ssz <= dsz) {
     unsigned i;
     for (i=0; i<ssz; i++) {
@@ -331,7 +331,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
     // it may be that strlen(src) <= dsz
     size_t len = strlen(src);
     strncpy((char ?NOZEROTERM)dest,src,len);
-    if (len < dest.size)
+    if (len < numelts(dest))
       dest[len] = '\000';
   }
   return dest;
@@ -364,7 +364,7 @@ mstring_t<`r> rexpand(region_t<`r> r,buffer_t s, size_t sz) {
 
   strncpy((char ?NOZEROTERM)temp,s,slen);
 
-  if (slen != s.size)
+  if (slen != numelts(s))
     temp[slen] = '\000';
 
   return temp;
@@ -376,7 +376,7 @@ mstring_t expand(buffer_t s, size_t sz) {
 
 mstring_t<`r> rrealloc_str(region_t<`r> r, mstring_t<`r> str, size_t sz)
 {
-  size_t maxsizeP = str.size;
+  size_t maxsizeP = numelts(str);
 
   if (maxsizeP == 0) {
     maxsizeP = (30>sz)?30:sz;	/* arbitrary */
@@ -402,11 +402,11 @@ mstring_t realloc_str(mstring_t<`H> str, size_t sz) {
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
 mstring_t<`r> rsubstring(region_t<`r> r,buffer_t s, 
                          int start, size_t amt) {
-  //if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
+  //if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(numelts(s)))
   //  throw new Invalid_argument("substring");
   mstring_t ans = rnew_string(r,amt+1);
   s = s+start;
-  assert(amt < ans.size && amt <= s.size);
+  assert(amt < numelts(ans) && amt <= numelts(s));
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[i];
   ans[amt] = '\000';
@@ -420,17 +420,17 @@ mstring_t substring(buffer_t s, int start, size_t amt) {
 // replace last with second at end of first
 // raise Invalid_argument if second is not end of first.
 mstring_t<`r> rreplace_suffix (region_t<`r> r,buffer_t src, buffer_t curr_suffix, buffer_t new_suffix) {
-  size_t m = src.size;
-  size_t n = curr_suffix.size;
+  size_t m = numelts(src);
+  size_t n = numelts(curr_suffix);
   string_t err = "replace_suffix";
   if (m < n) 
     throw new Invalid_argument(err);
   for (size_t i = 1; i <= n; ++i)
     if (src[m-i] != curr_suffix[n-i])
       throw new Invalid_argument(err);
-  mstring_t ans = rnew_string(r,m-n+new_suffix.size+1);
+  mstring_t ans = rnew_string(r,m-n+numelts(new_suffix)+1);
   strncpy((char ?NOZEROTERM)ans,src,m-n);
-  strncpy((char ?NOZEROTERM)(ans+(m-n)),new_suffix,new_suffix.size);
+  strncpy((char ?NOZEROTERM)(ans+(m-n)),new_suffix,numelts(new_suffix));
   return ans;
 }
 
@@ -442,8 +442,8 @@ mstring_t replace_suffix (buffer_t src, buffer_t curr_suffix, buffer_t new_suffi
 // Search for any character of accept in s.
 // Return a ? pointer to the first such character, or NULL if none.
 string_t<`r> strpbrk(string_t<`r> s, buffer_t accept) {
-  int len = s.size;
-  unsigned asize = accept.size;
+  int len = numelts(s);
+  unsigned asize = numelts(accept);
   char c;
   unsigned i;
   for (i = 0; i < len && (c=s[i])!=0; i++) {
@@ -455,8 +455,8 @@ string_t<`r> strpbrk(string_t<`r> s, buffer_t accept) {
 }
 
 mstring_t<`r> mstrpbrk(mstring_t<`r> s, buffer_t accept) {
-  int len = s.size;
-  unsigned asize = accept.size;
+  int len = numelts(s);
+  unsigned asize = numelts(accept);
   char c;
   unsigned i;
   for (i = 0; i < len && (c=s[i])!=0; i++) {
@@ -470,7 +470,7 @@ mstring_t<`r> mstrpbrk(mstring_t<`r> s, buffer_t accept) {
 // Return a pointer to the first occurrence of c in s, 
 // or NULL if none.
 mstring_t<`r> mstrchr(mstring_t<`r> s, char c) {
-  int len = s.size;
+  int len = numelts(s);
   char c2;
   unsigned i;
 
@@ -481,7 +481,7 @@ mstring_t<`r> mstrchr(mstring_t<`r> s, char c) {
 }
 
 string_t<`r> strchr(string_t<`r> s, char c) {
-  int len = s.size;
+  int len = numelts(s);
   char c2;
   unsigned i;
 
@@ -496,7 +496,7 @@ string_t<`r> strchr(string_t<`r> s, char c) {
 string_t<`r> strrchr(string_t<`r> s0, char c) {
   int len = strlen(s0);
   int i = len - 1;
-  const char ?- s = s0;
+  const char ? s = s0;
   s += i;
 
   for (; i>=0; i--, s--) {
@@ -509,7 +509,7 @@ string_t<`r> strrchr(string_t<`r> s0, char c) {
 mstring_t<`r> mstrrchr(mstring_t<`r> s0, char c) {
   int len = strlen(s0);
   int i = len - 1;
-  char ?- s = s0;
+  char ? s = s0;
   s += i;
 
   for (; i>=0; i--, s--) {
@@ -554,9 +554,9 @@ mstring_t<`r> mstrstr(mstring_t<`r> haystack, string_t needle) {
 // of s if none.
 size_t strspn(string_t s, string_t accept) {
   size_t len = strlen(s);
-  unsigned asize = accept.size;
+  unsigned asize = numelts(accept);
 
-  assert(len <= s.size);
+  assert(len <= numelts(s));
   for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<asize; j++)
@@ -574,9 +574,9 @@ size_t strspn(string_t s, string_t accept) {
 // of s if none.
 size_t strcspn(string_t s, string_t accept) {
   size_t len = strlen(s);
-  unsigned asize = accept.size;
+  unsigned asize = numelts(accept);
 
-  assert(len <= s.size);
+  assert(len <= numelts(s));
   for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<asize; j++)
@@ -606,7 +606,7 @@ mstring_t<`H> strtok (mstring_t<`H> s, string_t delim)
 
   /* Scan leading delimiters.  */
   size_t inc = strspn (s, delim);
-  if ((inc >= s.size) || *(s + inc) == '\0')
+  if ((inc >= numelts(s)) || *(s + inc) == '\0')
     {
       olds = NULL;
       return NULL;
@@ -657,7 +657,7 @@ static inline int casecmp(buffer_t s1, size_t len1,
 {
   size_t min_length = (len1 < len2) ? len1 : len2;
 
-  assert(min_length <= s1.size && min_length <= s2.size);
+  assert(min_length <= numelts(s1) && min_length <= numelts(s2));
 
   int i = -1;
   while (++i, i < min_length) {
@@ -684,7 +684,7 @@ static inline int caseless_ncmp(buffer_t s1, size_t len1,buffer_t s2,
   size_t min_len = (len1 > len2) ? len2 : len1;
   size_t bound = (min_len > n) ? n : min_len;
 
-  assert(bound <= s1.size && bound <= s2.size);
+  assert(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     int retc;
@@ -722,27 +722,27 @@ char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
 }
 
 `a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
-  if (d == NULL || d.size < n || s == NULL || s.size < n)
+  if (d == NULL || numelts(d) < n || s == NULL || numelts(s) < n)
     throw new Invalid_argument("memcpy");
   Cstr::memcpy((`a *)d, (const `a *)s, n*sz);
   return d;
 }
 
 `a::A?`r _memmove(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {
-  if (d == NULL || d.size < n || s == NULL || s.size < n)
+  if (d == NULL || numelts(d) < n || s == NULL || numelts(s) < n)
     throw new Invalid_argument("memove");
   Cstr::memmove((`a *)d, (const `a *)s, n*sz);
   return d;
 }
 
 int memcmp(const char ?NOZEROTERM s1, const char ?NOZEROTERM s2, size_t n) {
-  if (s1 == NULL || s2 == NULL || s1.size >= n || s2.size >= n)
+  if (s1 == NULL || s2 == NULL || numelts(s1) >= n || numelts(s2) >= n)
     throw new Invalid_argument("memcmp");
   return Cstr::memcmp((const void *)s1, (const void *)s2, n);
 }
 
 const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
-  unsigned int sz = s.size;
+  unsigned int sz = numelts(s);
   if (s == NULL || n > sz)
     throw new Invalid_argument("memchr");
   let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
@@ -754,7 +754,7 @@ const char?NOZEROTERM `r memchr(const char ?NOZEROTERM `r s, char c, size_t n) {
 }
 
 char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
-  unsigned int sz = s.size;
+  unsigned int sz = numelts(s);
   if (s == NULL || n > sz)
     throw new Invalid_argument("mmemchr");
   let p = Cstr::memchr((const char *NOZEROTERM)s, c, n);
@@ -766,20 +766,20 @@ char?NOZEROTERM`r mmemchr(char ?NOZEROTERM`r s, char c, size_t n) {
 }
 
 char ?NOZEROTERM`r memset(char ?NOZEROTERM`r s, char c, size_t n) {
-  if (s == NULL || n > s.size)
+  if (s == NULL || n > numelts(s))
     throw new Invalid_argument("memset");
   Cstr::memset((void *)((char *NOZEROTERM)s), c, n);
   return s;
 }
  
 void bzero(char?NOZEROTERM s, size_t n) {
-  if(s == NULL || s.size < n)
+  if(s == NULL || numelts(s) < n)
     throw new Invalid_argument("bzero");
   Cstr::bzero((_*NOZEROTERM)s,n);
 }
 
 void _bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {
-  if(src == NULL || src.size < n || dst == NULL || dst.size < n)
+  if(src == NULL || numelts(src) < n || dst == NULL || numelts(dst) < n)
     throw new Invalid_argument("bcopy");
   Cstr::bcopy((const `a*)src,(_*)dst,n*sz);
 }

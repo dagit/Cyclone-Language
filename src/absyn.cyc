@@ -132,7 +132,6 @@ conref_t<`a> empty_conref()   { return new Conref{.v = No_constr};}
 MAKE_EQ_CONSTR(true_conref,bool,true);
 MAKE_EQ_CONSTR(false_conref,bool,false);
 MAKE_EQ_CONSTR(bounds_one_conref,bounds_t,&one_bt);
-MAKE_EQ_CONSTR(bounds_dynforward_conref,bounds_t,DynForward_b);
 MAKE_EQ_CONSTR(bounds_dyneither_conref,bounds_t,DynEither_b);
 #undef MAKE_EQ_CONSTR
 
@@ -303,10 +302,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static type_t* string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,empty_tqual(NULL),DynForward_b,true_conref);
+    return starb_typ(char_typ,rgn,empty_tqual(NULL),DynEither_b,true_conref);
   if (string_t_opt == NULL) {
     type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(NULL),
-                         DynForward_b,true_conref);
+                         DynEither_b,true_conref);
     string_t_opt = new t;
   }
   return *string_t_opt;
@@ -314,10 +313,10 @@ type_t string_typ(type_t rgn) {
 static type_t* const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,const_tqual(NULL),DynForward_b,true_conref);
+    return starb_typ(char_typ,rgn,const_tqual(NULL),DynEither_b,true_conref);
   if (const_string_t_opt == NULL) {
     type_t t = starb_typ(char_typ,HeapRgn,const_tqual(NULL),
-                         DynForward_b,true_conref);
+                         DynEither_b,true_conref);
     const_string_t_opt = new t;
   }
   return *const_string_t_opt;
@@ -360,13 +359,6 @@ type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = false_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = zeroterm, 
-                                          .ptrloc=NULL}});
-}
-type_t dynforward_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm){
-  return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
-				  PtrAtts{.rgn = r, .nullable = true_conref, 
-					  .bounds = bounds_dynforward_conref,
 					  .zero_term = zeroterm, 
                                           .ptrloc=NULL}});
 }
@@ -557,6 +549,10 @@ exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
 exp_t match_exn_exp(seg_t loc) { 
   return var_exp(Match_Exception_name, loc); 
+}
+
+exp_t valueof_exp(type_t t, seg_t loc) {
+  return new_exp(new Valueof_e(t), loc);
 }
 
 exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
@@ -834,7 +830,7 @@ static string_t f0 = "f0";
 static stringptr_t field_names_v[1] = {&f0};
 static stringptr_t ?field_names = field_names_v;
 stringptr_t fieldname(int i) {
-  unsigned int fsz = field_names.size;
+  unsigned int fsz = numelts(field_names);
   if (i >= fsz)
     field_names = 
       new {for j < i+1 : 

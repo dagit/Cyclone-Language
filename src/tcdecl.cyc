@@ -48,7 +48,7 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
   if (msg1 == NULL)
     throw Incompatible;
   string_t fmt2 = strconcat("%s ", fmt);
-  parg_t? ap2 = new {for i < ap.size+1 : 
+  parg_t? ap2 = new {for i < numelts(ap)+1 : 
 		     i==0 ? new String_pa((string_t<`r>)(*msg1)) : ap[i-1]};
   Position::post_error(Position::mk_err_elab(loc,
 					     vrprintf(heap_region,fmt2,ap2)));

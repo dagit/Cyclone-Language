@@ -85,7 +85,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
       case &Const_e(String_c(s)):
-      t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
+      t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
       break;
       case &Comprehension_e(_,e,_,_):
       // FIX: need to copy e here!
@@ -297,7 +297,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   //      to undo that assumption)
   region fnrgn {
     let fenv = new_fenv(fnrgn,loc,fd);
-    let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv};
+    let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false};
     // check the body, then get rid of local environment
     Tcstmt::tcStmt(te,fd->body,false);
     // we've delayed checking some capabilities and constraints so that inference
@@ -339,17 +339,17 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
-        if (!unify(t2,dynforward_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+        if (!unify(t2,dyneither_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                      new_evar(new Opt(RgnKind),tvs),
                                      empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,dynforward_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                                tvs)),
                                      new_evar(new Opt(RgnKind),tvs),
                                      empty_tqual(NULL),empty_conref())) &&
-            !unify(t2,dynforward_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
+            !unify(t2,dyneither_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                      new_evar(new Opt(RgnKind),tvs),
                                      const_tqual(NULL),empty_conref())) &&
-            !unify(t2,dynforward_typ(const_string_typ(new_evar(new Opt(RgnKind),
+            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                                tvs)),
                                      new_evar(new Opt(RgnKind),tvs),
                                      const_tqual(NULL),empty_conref()))) {
@@ -510,6 +510,19 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
+    // disallow MemKinds and set unconstrained kinds to BoxKind
+    for (_ tvs2 = exist_vars; tvs2 != NULL; tvs2 = tvs2->tl) {
+      switch (compress_kb(tvs2->hd->kind)) {
+      case &Unknown_kb(*f):      fallthru(f);
+      case &Less_kb(*f,MemKind): fallthru(f);
+      case &Less_kb(*f,AnyKind):
+        *f = new Opt(kind_to_bound(BoxKind)); continue;
+      case &Eq_kb(MemKind):
+        terr(loc,"type %s attempts to abstract type variable %s of kind M", 
+             *v, *tvs2->hd->name); continue;
+      default: continue;
+      }
+    }
     
     tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
 
