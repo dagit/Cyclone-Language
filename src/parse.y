@@ -823,7 +823,7 @@ static exp_t pat2exp(pat_t p) {
   case &Int_p(s,i): return int_exp(s,i,p->loc);
   case &Char_p(c): return char_exp(c,p->loc);
   case &Float_p(s): return float_exp(s,p->loc);
-  case &UnknownCall_p(x,ps): 
+  case &UnknownCall_p(x,ps,false): 
     exp_t e1 = new_exp(new UnknownId_e(x),p->loc);
     list_t<exp_t> es = List::map(pat2exp,ps);
     return unknowncall_exp(e1,es,p->loc);
@@ -951,9 +951,11 @@ using Parse;
 %type <pat_t> and_pattern equality_pattern relational_pattern shift_pattern
 %type <pat_t> additive_pattern multiplicative_pattern cast_pattern
 %type <pat_t> unary_pattern postfix_pattern primary_pattern
-%type <list_t<pat_t>> tuple_pattern_list
+%type <$(list_t<pat_t>,bool)@> tuple_pattern_list
+%type <list_t<pat_t>> tuple_pattern_list0
 %type <$(list_t<designator_t>,pat_t)@> field_pattern
-%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list
+%type <list_t<$(list_t<designator_t>,pat_t)@>> field_pattern_list0
+%type <$(list_t<$(list_t<designator_t>,pat_t)@>,bool)@> field_pattern_list
 %type <fndecl_t> function_definition function_definition2
 %type <list_t<decl_t>> declaration declaration_list
 %type <list_t<decl_t>> prog translation_unit external_declaration
@@ -2149,6 +2151,15 @@ selection_statement:
  * statement; it must be a list of switch_clauses */
 | SWITCH '(' expression ')' '{' switch_clauses '}'
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
+/* Cyc: allow an identifier without the parens */
+| SWITCH qual_opt_identifier '{' switch_clauses '}'
+    { let e = new_exp(new UnknownId_e($2),LOC(@2,@2)); 
+      $$=^$(switch_stmt(e,$4,LOC(@1,@5))); }
+/* Cyc: allow tuples without the parens */
+| SWITCH '$' '(' argument_expression_list ')' '{' switch_clauses '}'
+    { let e = tuple_exp($4,LOC(@2,@5));
+      $$=^$(switch_stmt(e,$7,LOC(@1,@8))); 
+    }
 //| SWITCH error
 //    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | TRY statement CATCH '{' switch_clauses '}'
@@ -2409,13 +2420,18 @@ pattern:
 | qual_opt_identifier
     { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
 | '$' '(' tuple_pattern_list ')'
-    {$$=^$(new_pat(new Tuple_p(List::imp_rev($3)),LOC(@1,@4)));}
+    { let $(ps, dots) = *($3);
+      $$=^$(new_pat(new Tuple_p(ps,dots),LOC(@1,@4)));
+    }
 | qual_opt_identifier '(' tuple_pattern_list ')'
-  { $$=^$(new_pat(new UnknownCall_p($1,List::imp_rev($3)),LOC(@1,@4))); }
+    { let $(ps, dots) = *($3);
+      $$=^$(new_pat(new UnknownCall_p($1,ps,dots),LOC(@1,@4)));
+    }
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
-   { let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+   {  let $(fps, dots) = *($4); 
+      let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
-			       exist_ts, List::imp_rev($4)),LOC(@1,@5)));
+			       exist_ts,fps,dots),LOC(@1,@5)));
    }
 | '&' pattern
     { $$=^$(new_pat(new Pointer_p($2),LOC(@1,@2))); }
@@ -2440,9 +2456,15 @@ pattern:
 ;
 
 tuple_pattern_list:
+  tuple_pattern_list0 { $$=^$(new $(List::rev($1), false)); }
+| tuple_pattern_list0 ',' ELLIPSIS { $$=^$(new $(List::rev($1), true)); }
+| ELLIPSIS { $$=^$(new $(NULL, true)); }
+;
+
+tuple_pattern_list0:
   pattern
     {$$=^$(new List($1,NULL));}
-| tuple_pattern_list ',' pattern
+| tuple_pattern_list0 ',' pattern
     {$$=^$(new List($3,$1));}
 ;
 
@@ -2453,9 +2475,15 @@ field_pattern:
     {$$=^$(new $($1,$2));}
 
 field_pattern_list:
+  field_pattern_list0 { $$=^$(new $(List::rev($1), false)); }
+| field_pattern_list0 ',' ELLIPSIS { $$=^$(new $(List::rev($1), true)); }
+| ELLIPSIS { $$=^$(new $(NULL, true)); }
+;
+
+field_pattern_list0:
   field_pattern
     { $$=^$(new List($1,NULL));}
-| field_pattern_list ',' field_pattern
+| field_pattern_list0 ',' field_pattern
     {$$=^$(new List($3,$1)); }
 ;
 

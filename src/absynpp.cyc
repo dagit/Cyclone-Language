@@ -1472,8 +1472,9 @@ doc_t pat2doc(pat_t p) {
   case &TagInt_p(tv,vd):
     s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
     break;
-  case &Tuple_p(ts):
-    s = cat(dollar(), text("("), ppseq(pat2doc,",",ts), text(")"));
+  case &Tuple_p(ts,dots):
+    s = cat(dollar(), text("("), ppseq(pat2doc,",",ts), 
+            dots ? text(", ...)") : text(")"));
     break;
   case &Pointer_p(p2):
     s = cat(text("&"),pat2doc(p2));
@@ -1484,20 +1485,23 @@ doc_t pat2doc(pat_t p) {
   case &UnknownId_p(q):
     s = qvar2doc(q);
     break;
-  case &UnknownCall_p(q,ps):
-    s = cat(qvar2doc(q), group("(",")",",",List::map(pat2doc,ps)));
+  case &UnknownCall_p(q,ps,dots):
+    string_t term = dots ? ", ...)" : ")";
+    s = cat(qvar2doc(q), group("(",term,",",List::map(pat2doc,ps)));
     break;
-  case &Aggr_p(AggrInfo(info,_),exists,dps):
+  case &Aggr_p(AggrInfo(info,_),exists,dps,dots):
+    string_t term = dots ? ", ...}" : "}";
     let $(_,n) = aggr_kinded_name(info);
     s = cat(qvar2doc(n), lb(),
 	    egroup("[","]",",",List::map(textptr,List::map(get_name,exists))),
-	    group_braces(",",List::map(dp2doc,dps)));
+	    group("",term,",",List::map(dp2doc,dps)));
     break;
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef):     s = qvar2doc(ef->name);  break;
-  case &Tunion_p(_,tuf,NULL): s = qvar2doc(tuf->name); break;
-  case &Tunion_p(_,tuf,ps):
-    s = cat(qvar2doc(tuf->name), egroup("(",")",",",List::map(pat2doc,ps)));
+  case &Tunion_p(_,tuf,NULL,_): s = qvar2doc(tuf->name); break;
+  case &Tunion_p(_,tuf,ps,dots):
+    string_t term = dots ? ", ...)" : ")";
+    s = cat(qvar2doc(tuf->name), egroup("(",term,",",List::map(pat2doc,ps)));
     break;
   case &Exp_p(e):
     s = exp2doc(e); break;

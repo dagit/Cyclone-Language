@@ -879,22 +879,28 @@ void dumppat(pat_t p) {
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case &Float_p(x):      dump(x);            break;
   case &Var_p(vd):       dumpqvar(vd->name); break;
-  case &Tuple_p(ts):     group(dumppat,ts,"$(",")",","); break;
+  case &Tuple_p(ts,dots):     
+    string_t term = dots ? ", ...)" : ")";
+    group(dumppat,ts,"$(",term,","); break;
   case &Pointer_p(p2):   dump("&"); dumppat(p2); break;
   case &Reference_p(vd): dump("*"); dumpqvar(vd->name); break;
   case &TagInt_p(tv,vd): 
     dumpqvar(vd->name); dump_char('<'); dumptvar(tv); dump_char('>'); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
-  case &UnknownCall_p(q,ps): dumpqvar(q); group(dumppat,ps,"(",")",","); break;
-  case &Aggr_p(AggrInfo(info,_),exists,dps):
+  case &UnknownCall_p(q,ps,dots): 
+    string_t term = dots ? ", ...)" : ")";
+    dumpqvar(q); group(dumppat,ps,"(",term,","); break;
+  case &Aggr_p(AggrInfo(info,_),exists,dps,dots):
     let $(_,n) = aggr_kinded_name(info);
+    string_t term = dots ? ", ...)" : ")";
     dumpqvar(n); dump_char('{');
     egroup(dumptvar,exists,"[","]",",");
-    group(dumpdp,dps,"","}",",");
+    group(dumpdp,dps,"",term,",");
     break;
-  case &Tunion_p(_,tuf,ps):
+  case &Tunion_p(_,tuf,ps,dots):
+    string_t term = dots ? ", ...)" : ")";
     dumpqvar(tuf->name); 
-    if (ps != NULL) group(dumppat,ps,"(",")",",");
+    if (ps != NULL) group(dumppat,ps,"(",term,",");
     break;
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef): dumpqvar(ef->name); break;

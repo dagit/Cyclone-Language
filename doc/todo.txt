@@ -185,8 +185,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 * we should start on the porting tool -- use region inference to
   figure out the "right" interface for code.
 
-* multi-level initializers, e.g., {{0,1},{2,3}}
-
 * better constant expressions (no doubles? no longs?)
 
 * compound literals, more designators for arrays literals, better 

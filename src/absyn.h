@@ -581,10 +581,11 @@ namespace Absyn {
     Var_p(vardecl_t); // x. only name field is right until tcPat is called
     Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
     TagInt_p(tvar_t,vardecl_t);// i<`i> (unpack an int)
-    Tuple_p(list_t<pat_t>); // $(p1,...,pn)
+    Tuple_p(list_t<pat_t>, bool dot_dot_dot); // $(p1,...,pn)
     Pointer_p(pat_t); // &p
-    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>);
-    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>);
+    Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>,
+           bool dot_dot_dot);
+    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>, bool dot_dot_dot);
     Null_p; // NULL
     Int_p(sign_t,int); // 3
     Char_p(char);      // 'a'
@@ -592,7 +593,7 @@ namespace Absyn {
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // resolved by tcpat
-    UnknownCall_p(qvar_t,list_t<pat_t>); // resolved by tcpat
+    UnknownCall_p(qvar_t,list_t<pat_t>, bool dot_dot_dot); // resolved by tcpat
     Exp_p(exp_t);        // evaluated and resolved by tcpat
   };
   // patterns with auxiliary information

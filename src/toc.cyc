@@ -2651,7 +2651,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
     break;
 
-  case &Tunion_p(tud,tuf,NULL):
+  case &Tunion_p(tud,tuf,NULL,_):
     // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
     // Note: This should be correct for tunion and xtunion!
     exp_t cmp_exp;
@@ -2664,7 +2664,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     s = if_neq_stmt(r, cmp_exp, fail_stmt);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps),_,_}) && ps != NULL:
+  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL:
     // when ps is p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
@@ -2717,8 +2717,8 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
 		 s, DL);
     break;
 
-  case &Tunion_p(_,_,ps): fallthru(ps); // okay for xtunion too
-  case &Tuple_p(ps):
+  case &Tunion_p(_,_,ps,_): fallthru(ps); // okay for xtunion too
+  case &Tuple_p(ps,_):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
     // L1:v2 = r->f2; if (matches(v2,p2)) goto L2 else goto fail_lab;
@@ -2745,7 +2745,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
     }
     break;
-  case &Aggr_p(AggrInfo(info,_),_,dlps):
+  case &Aggr_p(AggrInfo(info,_),_,dlps,_):
     let ad = get_known_aggrdecl(info);
     // similar to translation of tuple pattern
     s = skip_stmt_dl();
@@ -2797,7 +2797,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
       s = s3;
     break;
   case &UnknownId_p(_):     toc_impos("unknownid pat");
-  case &UnknownCall_p(_,_): toc_impos("unknowncall pat");
+  case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
   case &Exp_p(_):           toc_impos("exp pat");
   }
   return $(nv,decls,s);
