@@ -158,6 +158,8 @@ int braces_to_match = 0;
 int parens_to_match = 0;
 
 int numdef = 0;
+
+static list_t<stringptr_t> cppargs = NULL;
 }
 
 let newline = ('\n' | '\r' | "\r\n")
@@ -1238,6 +1240,65 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   /* Exception for handling error cases of process_file */
   datatype exn { NO_SUPPORT(string_t) };
 
+  /* Is a character special to /bin/sh (except for single quote)? */
+  static bool is_other_special(char c) {
+    switch (c) {
+    case '\\':
+    case '"': 
+    case ';': 
+    case '&': 
+    case '(': 
+    case ')': 
+    case '|': 
+    case '^': 
+    case '<': 
+    case '>': 
+    // JGM: I'm commenting this out because we shouldn't be quoting
+    // arguments like -idirafter.
+    // case ' ': 
+    case '\n': 
+    case '\t': return true;
+    default: return false;
+    }
+  }
+  /* Escape any characters special to /bin/sh */
+  static string_t sh_escape_string(string_t<`H> s) {
+    let len = strlen(s);
+
+    /* Count the number of single quotes and other special chars in s */
+    let single_quotes = 0;
+    let other_special = 0;
+    for (int i = 0; i < len; i++) {
+      let c = s[i];
+      if (c == '\'') single_quotes++;
+      else if (is_other_special(c)) other_special++;
+    }
+
+    /* No special chars to escape */
+    if (single_quotes == 0 && other_special == 0)
+      return s;
+
+    /* No single quotes, we can just single quote s */
+    if (single_quotes == 0)
+      return strconcat_l(list(new "'",new (string_t)s, new "'"));
+
+    /* We'll quote all special chars by prefixing with a backslash */
+    let len2 = len + single_quotes + other_special;
+    mstring_t s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
+    let i = 0;
+    let j = 0;
+    for (; i < len; i++) {
+      let c = s[i];
+      if (c == '\'' || is_other_special(c))
+        s2[j++] = '\\';
+      s2[j++] = c;
+    }
+    return s2;
+  }
+  static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
+    return new sh_escape_string(*sp);
+  }
+
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
   int process_file(const char @ filename,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
@@ -1314,13 +1375,17 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         fprintf(out_file,"#include <%s>\n",filename);
         fclose(out_file);
         let GCC = Cstring_to_string(Ccomp);
-        char @cmd = (char @)aprintf("%s -E -dM -o %s -x c %s",
-				    GCC,macrosfile,cppinfile);
+        let cppargs_string =
+          str_sepstr(new List(new (string_t)"",
+                              List::map(sh_escape_stringptr,rev(cppargs))),
+                     " ");
+        char @cmd = (char @)aprintf("%s -E -dM -o %s -x c %s %s",
+				    GCC,macrosfile,cppargs_string,cppinfile);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = (char @)aprintf("%s -E -o %s -x c %s",
-				GCC,declsfile,cppinfile);
+          cmd = (char @)aprintf("%s -E -o %s -x c %s %s",
+				GCC,declsfile,cppargs_string,cppinfile);
           system(cmd); // if err, no declsfile created, and we'll handle later
         }
         remove(cppinfile);
@@ -1729,6 +1794,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   static void set_FINISH() {
     mode = FINISH;
   }
+  static void add_cpparg(string_t<`H> s) {
+    cppargs = new List(new s,cppargs);
+  }
   static bool badparse = false;
   static void unsupported_option(string_t<`H> s) {
     fprintf(stderr,"Unsupported option %s\n", s);
@@ -1761,12 +1829,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  " on the standard output, for use by the Cyclone"
                  " compiler special file cyc_setjmp.h.  Cannot be"
                  " used with -gather, -gatherscript, or specfiles."),
-           new $("-",true,"",
-                 /* FIX: this is a crude way to see if there is an
-                    invalid option on the command line, and halt if so.
-                    We ought to change Arg::parse to make this
-                    cleaner. */
-                 new Flag_spec(unsupported_option),
+           new $("-",true,"", /* pass all other - flags to cpp */
+                 new Flag_spec(add_cpparg),
                  "")
            );
     Arg::parse(options, add_spec_file, "Options:", argv);
