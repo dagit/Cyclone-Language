@@ -176,9 +176,9 @@ namespace Absyn {
     seg_t loc; // only present when porting C code
   };
 
-  EXTERN_ABSYN enum Size_of { 
-    Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz
-  };
+  EXTERN_ABSYN enum Size_of { Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz };
+  EXTERN_ABSYN enum Sign     { Signed, Unsigned, None }; // for integral types
+  EXTERN_ABSYN enum AggrKind { StructA, UnionA };
                                   
   // Used to classify kinds: Aliasable <= Unique <= Top
   EXTERN_ABSYN enum AliasQual { 
@@ -186,7 +186,6 @@ namespace Absyn {
     Unique,    // for types that cannot be aliased
     Top        // either one
   };
-
   EXTERN_ABSYN enum KindQual { 
     // BoxKind <= MemKind <= AnyKind
     AnyKind, // kind of all types, including abstract structs
@@ -198,20 +197,10 @@ namespace Absyn {
     BoolKind, // booleans at the specification level: true or false
     PtrBndKind   // fat or thin(e) used for pointers
   };
-
   EXTERN_ABSYN struct Kind {
-    enum KindQual kind;
+    enum KindQual  kind;
     enum AliasQual aliasqual;
   };
-
-#define AK(k) new Kind(k,Aliasable)
-#define UK(k) new Kind(k,Unique)
-#define TK(k) new Kind(k,Top)
-
-  // signed or unsigned qualifiers on integral types
-  EXTERN_ABSYN enum Sign { Signed, Unsigned, None };
-
-  EXTERN_ABSYN enum AggrKind { StructA, UnionA };
 
   // kind bounds are used on tvar's to infer their kinds
   //   Eq_kb(k):  the tvar has kind k
@@ -227,8 +216,8 @@ namespace Absyn {
 
   // type variables
   EXTERN_ABSYN struct Tvar {
-    tvarname_t name;       // the user-level name of the type variable
-    int        identity;   // for alpha-conversion -- unique -- -1 is error
+    tvarname_t  name;       // the user-level name of the type variable
+    int         identity;   // for alpha-conversion -- unique -- -1 is error
     kindbound_t kind;
   };
 
@@ -239,12 +228,11 @@ namespace Absyn {
   };
 
   EXTERN_ABSYN struct PtrAtts {
-    rgntype_t          rgn;       // region of value to which pointer points
-    booltype_t         nullable;  // type admits NULL
-    ptrbound_t         bounds;    // legal bounds for pointer indexing
-    booltype_t         zero_term; // true => zero terminated array
-    ptrloc_t           ptrloc;    // location information -- only present
-                                  // when porting C code
+    rgntype_t  rgn;       // region of value to which pointer points
+    booltype_t nullable;  // type admits NULL
+    ptrbound_t bounds;    // legal bounds for pointer indexing
+    booltype_t zero_term; // true => zero terminated array
+    ptrloc_t   ptrloc;    // location info -- only present when porting C code
   };
 
   // information about a pointer type
@@ -257,9 +245,9 @@ namespace Absyn {
   // information about vararg functions
   EXTERN_ABSYN struct VarargInfo {
     var_opt_t name;
-    tqual_t tq;
-    type_t  type;
-    bool    inject;
+    tqual_t   tq;
+    type_t    type;
+    bool      inject;
   };
 
   // information for functions

@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <string.h>
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
 #include "tcexp.h"
@@ -216,7 +217,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
             terr(loc,"%s%s\n\t%s\n%s\n\t%s",s0,s1,s2,s3,s4);
           else 
             terr(loc,"%s%s%s%s%s",s0,s1,s2,s3,s4);
-          explain_failure();
+          Unify::explain_failure();
         }
         // reject non-constant initializers
         if (!Tcutil::is_const_exp(e))
@@ -381,17 +382,17 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
-        if (!unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
+        if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      empty_tqual(0),any_bool(&te))) &&
-            !unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      empty_tqual(0),any_bool(&te))) &&
-            !unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
+            !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      const_tqual(0),any_bool(&te))) &&
-            !unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      const_tqual(0),any_bool(&te)))) {

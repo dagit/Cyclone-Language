@@ -40,6 +40,7 @@
 #include <xarray.h>
 #include "warn.h"
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
 #include "insert_checks.h"
@@ -520,7 +521,7 @@ static type_t add_tuple_type_body(region_t<`d> d,
     let &$(x,ts) = tts->hd;
     let tqs = tqs0;
     for (; tqs != NULL && ts != NULL; tqs = tqs->tl, ts = ts->tl)
-      if (!unify((*tqs->hd)[1],ts->hd))
+      if (!Unify::unify((*tqs->hd)[1],ts->hd))
         break;
     if(tqs == NULL && ts == NULL)
       return x;
@@ -602,7 +603,7 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
         case &Kind{.kind = RgnKind, _}: continue;
         default:
           // Check if they're the same before translating them to C
-          if (unify(t,t2) || unify(typ_to_c(t),typ_to_c(t2)))
+          if (Unify::unify(t,t2) || Unify::unify(typ_to_c(t),typ_to_c(t2)))
             continue;
           okay = false; 
           break;
@@ -640,7 +641,7 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
     t = typ_to_c(rsubstitute(r,inst,t));
     // still could be abstract and end up void -- if so, make it
     // a zero-sized array of void*'s and force it to be aligned.
-    if (unify(t,void_type)) {
+    if (Unify::unify(t,void_type)) {
       t = new ArrayType(ArrayInfo(void_star_type(), empty_tqual(DL),
                                   uint_exp(0,DL), false_type, DL));
     }
@@ -2164,7 +2165,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	did_inserted_checks = true;
 	if(do_null_check(e))
 	  e->r = cast_it_r(*t,fncall_exp_dl(_check_null_e,e1));
-	else if (unify(old_t2_c,new_typ_c))
+	else if (Unify::unify(old_t2_c,new_typ_c))
 	  e->r = e1->r;
         // FIX: the type-checker doesn't currently allow the case
         // where b1 > b2, but this can be allowed for zero-terminated
@@ -2277,7 +2278,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     default: 
-      if (unify(old_t2_c,new_typ_c))
+      if (Unify::unify(old_t2_c,new_typ_c))
         e->r = e1->r;
       break;
     }
@@ -2681,7 +2682,7 @@ static void exp_to_c(env_t nv, exp_t e) {
               let fieldexp_typ = typ_to_c((type_t)fieldexp->topt);
               exp_to_c(nv,fieldexp);
               // must cast when the types don't match up 
-              if (!unify(fieldtyp, fieldexp_typ)) 
+              if (!Unify::unify(fieldtyp, fieldexp_typ)) 
                 // unless they are both arithmetic types -- C can handle this.
                 if (!is_arithmetic_type(fieldtyp) ||
                     !is_arithmetic_type(fieldexp_typ))

@@ -20,6 +20,7 @@
 #define _TCUTIL_H_
 
 #include "tcenv.h"
+#include "relations-ap.h"
 
 namespace Tcutil {
 using List;
@@ -171,7 +172,6 @@ extern struct Core::Opt<kind_t> umko;
 
 Core::opt_t<kind_t> kind_to_opt(kind_t k);
 kindbound_t kind_to_bound(kind_t k);
-bool unify_kindbound(kindbound_t, kindbound_t);
 
 $(tvar_t,kindbound_t) swap_kind(type_t, kindbound_t);
   // for temporary kind refinement
@@ -182,11 +182,6 @@ bool zero_to_null(tenv_t, type_t, exp_t);
 
 type_t max_arithmetic_type(type_t, type_t);
 
-// explain_failure() explains why unify failed and at what particular types.
-// Output goes to stderr.
-void explain_failure();
-
-bool unify(type_t, type_t);
   // linear order on types (needed for dictionary indexing)
 int typecmp(type_t, type_t);
 int aggrfield_cmp(aggrfield_t, aggrfield_t); // used in toc.cyc
@@ -326,6 +321,13 @@ type_t any_bounds(tenv_t*);
 		    Relations::reln_t);
   Core::opt_t<kindbound_t> kind_to_bound_opt(kind_t k);
   int fast_tvar_cmp(tvar_t,tvar_t);
-  
+
+  // This stuff is used only by unify and tcutil
+  // fairly semantic equivalence
+  bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
+  bool check_logical_implication(Relations::relns_t<`H>, 
+				 Relations::relns_t<`H>);
+  int tycon_cmp(tycon_t,tycon_t);
+  int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r, `a*`r);
 }
 #endif

@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <dict.h>
 #include <string.h>
+#include "unify.h"
 #include "tcutil.h"
 #include "absynpp.h"
 #include "tcdecl.h"
@@ -87,7 +88,7 @@ $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
 
 static bool check_type(type_t t0, type_t t1) {
   // FIX: we should not use unification for this
-  return unify(t0, t1);
+  return Unify::unify(t0, t1);
 }
 
 // FIX?: Why do we not use Evexp for this?
@@ -116,7 +117,7 @@ static bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
   let x0 = tvs0;
   let x1 = tvs1;
   for (; x0 != NULL; x0 = x0->tl, x1=x1->tl) {
-    unify_kindbound(x0->hd->kind,x1->hd->kind);
+    Unify::unify_kindbound(x0->hd->kind,x1->hd->kind);
     let c0 = force_kb(x0->hd->kind);
     let c1 = force_kb(x1->hd->kind);
     if (c0 == c1) continue;
@@ -225,7 +226,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
       if(! check_type(t0, subst_t1)) {
 	merr(loc, msg, "type %s : type mismatch on field %s: %s != %s", 
 	     v, *fn0, typ2string(t0), typ2string(subst_t1));
-        explain_failure();
+        Unify::explain_failure();
 	res = false;
       }
     }
@@ -303,7 +304,7 @@ merge_datatypefield(datatypefield_t f0, datatypefield_t f1,
     if (! check_type((*typs0->hd)[1], subst_t1)) {
       merr(loc, msg, "%s %s, field %s: parameter type mismatch %s != %s",
 	   t, v, name, typ2string((*typs0->hd)[1]), typ2string(subst_t1));
-      explain_failure();
+      Unify::explain_failure();
       res = false;
     }
   }
@@ -568,7 +569,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
     else
       merr(loc, msg, "%s %s was declared %s instead of %s",
            t, v, s2, s1);
-    explain_failure();
+    Unify::explain_failure();
     res = false;
   }
 

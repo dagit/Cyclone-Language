@@ -57,6 +57,7 @@
    and join_eq_flow on the loop edges.  For now, I'm not using
    this stuff, so it's all commented out.
 */
+#include "unify.h"
 #include "tcutil.h"
 #include "cf_flowinfo.h"
 #include <assert.h>
@@ -104,7 +105,7 @@ static int cmp_node(node_t n1, node_t n2) {
   case $({.NNumelts = x},_): return -1;
   case $(_,{.NNumelts = y}): return 1;
   case $({.NType = x},{.NType = y}): 
-    if (Tcutil::unify(x,y)) return 0;
+    if (Unify::unify(x,y)) return 0;
     return Tcutil::typecmp(x,y);
   case $({.NType = _},_): return -1;
   case $(_,{.NType = _}): return 1;

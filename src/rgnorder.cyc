@@ -24,6 +24,7 @@
 #include <dict.h>
 #include "rgnorder.h"
 #include "warn.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "absynpp.h"
 using List;
@@ -116,7 +117,7 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
     ans->d = d;
     return ans;
   case &Evar(...):
-    unify(rgn,heap_rgn_type);
+    Unify::unify(rgn,heap_rgn_type);
     fallthru;
   case &AppType(&HeapCon,_):
     ans->these_outlive_heap = join_eff(list(eff,po->these_outlive_heap));
@@ -395,15 +396,15 @@ static void pin_effect(type_t eff, type_t bd) {
     return;
   case &AppType(&RgnsCon,&List(t,_)):
     switch(compress(t)) {
-    case &Evar(...): unify(t,uint_type); return;
+    case &Evar(...): Unify::unify(t,uint_type); return;
     default: return;
     }
   case &AppType(&AccessCon,&List(r,_)):
     switch(compress(r)) {
-    case &Evar(...): unify(r,bd); return;
+    case &Evar(...): Unify::unify(r,bd); return;
     default: return;
     }
-  case &Evar(...): unify(eff,empty_effect); return; // going away 
+  case &Evar(...): Unify::unify(eff,empty_effect); return; // going away 
   default: return;
   }
 }
@@ -426,7 +427,7 @@ bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
     switch(compress(bd)) {
     case &Evar(...): 
       if(do_pin) 
-	unify(bd,default_bound); 
+	Unify::unify(bd,default_bound); 
       break;
     default: break;
     }

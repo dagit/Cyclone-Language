@@ -29,6 +29,7 @@
 
 #include <string.h>
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
 #include "tcstmt.h"
@@ -249,7 +250,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         // type.
         return array_type(string_elt_typ, tq, elen, any_bool(&te), 0);
       case &PointerType(_):
-        if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+        if (!Unify::unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = t;
           unchecked_cast(te, e, *topt, Other_coercion);
           t = *topt;
@@ -257,7 +258,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
           // maybe it's going in a different region
           t = atb_type(string_elt_typ,new_evar(&rko,lookup_opt_type_vars(te)),
                       const_tqual(0), elen_bound, true_type);
-          if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+          if (!Unify::unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
             e->topt = t;
             unchecked_cast(te, e, *topt, Other_coercion);
             t = *topt;
@@ -369,7 +370,7 @@ void check_format_args(tenv_t te, exp_t fmt,
       if (!coerce_arg(te,e,t,&alias_coercion)) {
         terr(e->loc,"descriptor has type %s but argument has type %s",
              typ2string(t), typ2string((type_t)e->topt));
-        explain_failure();
+        Unify::explain_failure();
       }
       if (alias_coercion)
 	*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
@@ -430,8 +431,8 @@ static type_t arith_convert(tenv_t te, exp_t e1, exp_t e2) {
   let t1 = (type_t) e1->topt;
   let t2 = (type_t) e2->topt;
   let new_t = max_arithmetic_type(t1, t2);
-  if (!unify(t1, new_t)) unchecked_cast(te, e1, new_t, No_coercion);
-  if (!unify(t2, new_t)) unchecked_cast(te, e2, new_t, No_coercion);
+  if (!Unify::unify(t1, new_t)) unchecked_cast(te, e1, new_t, No_coercion);
+  if (!Unify::unify(t2, new_t)) unchecked_cast(te, e2, new_t, No_coercion);
   return new_t;
 }
 
@@ -495,19 +496,18 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2_elt = void_type;
   if (is_fat_pointer_type_elt(t1,&t1_elt)) {
     if (is_fat_pointer_type_elt(t2,&t2_elt)) {
-      if (!unify(t1_elt, t2_elt)) {
+      if (!Unify::unify(t1_elt, t2_elt)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
              typ2string(t1),typ2string(t2));
-        explain_failure();
+        Unify::explain_failure();
       }
       return sint_type;
     } else if (is_pointer_type(t2)) {
-      if (!unify(t1_elt, pointer_elt_type(t2))) {
+      if (!Unify::unify(t1_elt, pointer_elt_type(t2))) {
 	terr(e1->loc,"pointer arithmetic on values of "
-             "different types (%s != %s)",
-             typ2string(t1),typ2string(t2));
-        explain_failure();
+             "different types (%s != %s)", typ2string(t1),typ2string(t2));
+        Unify::explain_failure();
       }
       // t2 is thin, coerce t1 to thin and return int
       warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
@@ -523,15 +523,15 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       if (!coerce_sint_type(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
-        explain_failure();
+        Unify::explain_failure();
       }
       return t1;
     }
   }
 
   if (is_pointer_type(t1)) { // t1 must be thin
-    if (is_pointer_type(t2) && unify(pointer_elt_type(t1),
-                                     pointer_elt_type(t2))) {
+    if (is_pointer_type(t2) && Unify::unify(pointer_elt_type(t1),
+					    pointer_elt_type(t2))) {
       if (is_fat_pointer_type(t2)) { 
         warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
         unchecked_cast(te, e2, star_type(pointer_elt_type(t2),
@@ -564,8 +564,8 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   }
   // okay if same types and boxed
   else if ((type_kind(t1)->kind == BoxKind) ||
-	   (unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
-    if (unify(t1,t2))
+	   (Unify::unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
+    if (Unify::unify(t1,t2))
       return sint_type;
     // okay if t1 can be silently cast to t2 or vice versa
     else if (silent_castable(te,loc,t2,t1)) {
@@ -585,14 +585,14 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     switch ($(compress(t1), compress(t2))) {
     case $(&PointerType(PtrInfo{t1a,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_})):
-      if (unify(t1a,t2a)) return sint_type; break;
+      if (Unify::unify(t1a,t2a)) return sint_type; break;
     case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)):
       return sint_type;
     default: break;
     }
     terr(loc,"comparison not allowed between %s and %s",
          typ2string(t1),typ2string(t2));
-    explain_failure();
+    Unify::explain_failure();
     return wildtyp(lookup_opt_type_vars(te));
   }
 }
@@ -603,7 +603,7 @@ static type_t tcEqPrimop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     return sint_type;
   terr(loc,"comparison not allowed between %s and %s",
        typ2string((type_t)e1->topt),typ2string((type_t)e2->topt));
-  explain_failure();
+  Unify::explain_failure();
   return wildtyp(lookup_opt_type_vars(te));
 }
 
@@ -833,7 +833,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   if (!coerce_list(te,t,&l2)) {
     terr(loc,"conditional clause types do not match: %s != %s",
 	 typ2string((type_t)e2->topt),typ2string((type_t)e3->topt));
-    explain_failure();
+    Unify::explain_failure();
   }
   return t;
 }
@@ -885,23 +885,23 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
-      unify(t1,t2); // needed to get right error message
-      explain_failure();
+      Unify::unify(t1,t2); // needed to get right error message
+      Unify::explain_failure();
       return result;
     }
   } else {
     let p        = po->v;
     let e1copy   = copy_exp(e1);
     let t_result = tcBinPrimop(te,loc,NULL,p,e1copy,e2);
-    if (!unify(t_result, t1) && is_arithmetic_type(t_result) && is_arithmetic_type(t1))
+    if (!Unify::unify(t_result, t1) && is_arithmetic_type(t_result) && is_arithmetic_type(t1))
       t_result = t1;
-    else if (!(unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
+    else if (!(Unify::unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
       let result =
         expr_err(te,loc,topt, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),
 		      typ2string(t2));
-      unify(t_result,t1); // needed to get right error message
-      explain_failure();
+      Unify::unify(t_result,t1); // needed to get right error message
+      Unify::explain_failure();
       return result;
     }
     return t_result;
@@ -936,9 +936,8 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = substitute(inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (unify(t1,t2)) {
+    if (Unify::unify(t1,t2))
       return fields->hd;
-    }
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != NULL; fields = fields->tl) {
@@ -990,7 +989,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	  terr(e->loc,"function should have been instantiated prior to use -- probably a compiler bug");
       // unify the result type with the expected type to get better
       // information while type-checking the arguments.
-      if (topt != NULL) unify(res_typ,*topt);
+      if (topt != NULL) Unify::unify(res_typ,*topt);
       // check that each argument has the right type or can be coerced to it
       while ((es != NULL) && (args_info != NULL)) {
 	// apply alias coercions if present
@@ -1007,8 +1006,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	    terr(e1->loc,aprintf("%s\n\t%s\n%s\n\t%s.",s0,s1,s2,s3));
 	  else 
 	    terr(e1->loc,aprintf("%s%s%s%s.",s0,s1,s2,s3));
-	  unify((type_t)e1->topt,t2);
-	  explain_failure();
+	  Unify::unify((type_t)e1->topt,t2);
+	  Unify::explain_failure();
 	}
 	// note alias inferences
 	if (alias_coercion)
@@ -1079,7 +1078,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      if (!coerce_arg(te,e1,vt,&alias_coercion)) {
 		terr(loc,"vararg requires type %s but argument has type %s",
 		     typ2string(vt),typ2string((type_t)e1->topt));
-		explain_failure();
+		Unify::explain_failure();
 	      }
 	      if (alias_coercion)
 		*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
@@ -1105,7 +1104,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      // and instead get away with subtyping since it's more
 	      // flexible.  So, we're going to constraint the region
 	      // of the pointer to the datatype to be the current block's region
-              unify(pointer_region(vt),curr_rgn(te));
+              Unify::unify(pointer_region(vt),curr_rgn(te));
 
 	      let inst = List::zip(td->tvs,targs);
 	      for (; es != NULL; es = es->tl) {
@@ -1222,10 +1221,10 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
       *c = No_coercion;
     } else {
       // extra unify needed to get the right reason for the failure
-      unify(t2,t);
+      Unify::unify(t2,t);
       let result = expr_err(te,loc,&t,"cannot cast %s to %s",
                             typ2string(t2), typ2string(t));
-      explain_failure();
+      Unify::explain_failure();
       return result;
     }
   }
@@ -1339,7 +1338,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
       // see if tt unifies with ValueofType(Sizeof_e(t))
       let e = sizeoftype_exp(t,0);
       let tt2 = new ValueofType(e);
-      if (unify(tt,tt2)) return tagtyp;
+      if (Unify::unify(tt,tt2)) return tagtyp;
       break;
     default: break;
     }
@@ -1460,7 +1459,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     let zt = any_bool(&te);
     let atts = PtrAtts(rt,any_bool(&te),b,zt,NULL);
     let new_t = new PointerType(PtrInfo{t2,empty_tqual(0),atts});
-    unify(t,new_t);
+    Unify::unify(t,new_t);
     fallthru(t2,rt,b,zt);
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_rgn_accessible(te,loc,rt);
@@ -1509,7 +1508,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     if(ad->impl->exist_vars != NULL) {
       // this will force the result to not have a type containing any of the
       // existentially bound variables.
-      if (!unify(t2,wildtyp(lookup_opt_type_vars(te))))
+      if (!Unify::unify(t2,wildtyp(lookup_opt_type_vars(te))))
         return expr_err(te,loc,topt,"must use pattern-matching to access field %s\n\tdue to existential type variables.",*f);
     }
     return t2;
@@ -1569,7 +1568,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
           finfo->requires_clause == NULL)
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       if(ad->impl->exist_vars != NULL) {
-        if (!unify(t3,wildtyp(lookup_opt_type_vars(te))))
+        if (!Unify::unify(t3,wildtyp(lookup_opt_type_vars(te))))
 	return expr_err(te,loc,topt,
                         "must use pattern-matching to access field %s\n\t"
 			"due to extistential types",*f);
@@ -1884,7 +1883,7 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
     }
   // make sure the expected topt unifies with the declared one
   check_type(loc,te,lookup_type_vars(te),&tmk,true,true,t);
-  if (topt2 != NULL) unify(*topt2,t);
+  if (topt2 != NULL) Unify::unify(*topt2,t);
   // the bound must be a constant expression at top-level
   if (te->le == NULL) {
     if (!is_const_exp(bound))
@@ -1970,7 +1969,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
       if (*adptr2 == *adptr) {
 	for (let ats = all_typs; ats != NULL && all_typs2 != NULL;
 	     ats = ats->tl, all_typs2=all_typs2->tl) {
-	  unify(ats->hd,all_typs2->hd);
+	  Unify::unify(ats->hd,all_typs2->hd);
 	}
 	res_typ = *topt;
 	break;
@@ -1989,7 +1988,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     // FIX: allow other kinds
     check_type(loc,te2,lookup_type_vars(te2),&ak,true,false,user_ex_ts->hd);
     check_no_qual(loc,user_ex_ts->hd);
-    unify(user_ex_ts->hd,ex_ts->hd);
+    Unify::unify(user_ex_ts->hd,ex_ts->hd);
     user_ex_ts = user_ex_ts->tl;
     ex_ts      = ex_ts->tl;
   }
@@ -2015,7 +2014,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
 	   *(field->name),((ad->kind == StructA) ? "struct" : "union"),
 	   qvar2string(*tn),typ2string(inst_fieldtyp),
 	   typ2string((type_t)field_exp->topt));
-      explain_failure();
+      Unify::explain_failure();
     }
     //       fprintf(stderr,"finished checking agg field %s\n",*(field->name));
   }
@@ -2047,7 +2046,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 	terr(field_exp->loc,"field %s of struct expects type %s != %s",
 	     *(field->name),typ2string(field->type),
 	     typ2string((type_t)field_exp->topt));
-	explain_failure();
+	Unify::explain_failure();
       }
     }
     break;
@@ -2067,7 +2066,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   // this instantiates the type variables if we have top-down type info
   if (topt != NULL) {
     switch (compress(*topt)) {
-    case &AppType(&DatatypeFieldCon(_),_): unify(*topt,res); break;
+    case &AppType(&DatatypeFieldCon(_),_): Unify::unify(*topt,res); break;
     default: break;
     }
   }
@@ -2083,7 +2082,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
            (e->topt == NULL) ? (string_t)"?" : typ2string((type_t)e->topt));
-      explain_failure();
+      Unify::explain_failure();
     }
   }
   if (es != NULL)
@@ -2104,7 +2103,7 @@ static bool check_malloc_type(bool allow_zero, seg_t loc,
   if (topt != NULL) {
     switch (compress(*topt)) {
     case &PointerType(PtrInfo(elt_typ,_,_)):
-      unify(elt_typ,t);
+      Unify::unify(elt_typ,t);
       if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return true;
       break;
     default: break;
@@ -2334,7 +2333,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   // Make sure the elements are writable
   check_writable(te, e1);
   check_writable(te, e2);
-  if (!unify(t1,t2)) {
+  if (!Unify::unify(t1,t2)) {
     let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
 			  typ2string(t1), typ2string(t2));
     return result;
@@ -2352,10 +2351,10 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
     case &Exp_s(e):
       // must check that e does not allow any type variables to escape
       let t = (type_t)e->topt;
-      if (!unify(t,wildtyp(lookup_opt_type_vars(te)))) {
+      if (!Unify::unify(t,wildtyp(lookup_opt_type_vars(te)))) {
         terr(loc,"statement expression returns type %s",
              typ2string(t));
-        explain_failure();
+        Unify::explain_failure();
       }
       return t;
     case &Seq_s(s1,s2): s = s2; continue;
@@ -2423,7 +2422,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       impos("tcNew: comprehension returned non-array type");
     res_typ = promote_array(res_typ,rgn,true);
     if (topt != NULL) {
-      if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(te, e, *topt, Other_coercion);
 	res_typ = *topt;
@@ -2455,7 +2454,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       // try unifying res_typ and topt -- if that fails, then see if we
       // can cast res_typ to topt, and insert the cast so that the code
       // generator knows what to do.
-      if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(te, e, *topt, Other_coercion);
 	res_typ = *topt;
@@ -2508,7 +2507,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 				      bounds_one(),
 				      false_type,NULL)));
     if (topt != NULL) {
-      if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(te,e,*topt,Other_coercion);
 	res_typ = *topt;

@@ -21,6 +21,7 @@
 
 #include <string.h>
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
 using Core;
@@ -256,7 +257,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       case $(&AppType(&TagCon,&List(it,_)),{.Int_c = $(sn2,x)}):
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
-	unify(it, new ValueofType(const_exp(ans[0],0)));
+	Unify::unify(it, new ValueofType(const_exp(ans[0],0)));
 	ans[0] = Int_c(Unsigned,x);
 	break;
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
@@ -320,7 +321,7 @@ static int const_exp_case_number(exp_t e) {
 static exp_t strip_cast(exp_t e) {
   switch (e->r) {
   case &Cast_e(t,e2,_,_):
-    if (unify(t,uint_type)) {
+    if (Unify::unify(t,uint_type)) {
       switch (e2->r) {
       case &Valueof_e(_): return e2;
       default: break;
@@ -412,7 +413,7 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     if(c1 != 0) return c1;
     return const_exp_cmp(e1a,e2a);
   case $(&Valueof_e(t1), &Valueof_e(t2)):
-    if (Tcutil::unify(t1,t2)) return 0;
+    if (Unify::unify(t1,t2)) return 0;
     return typecmp(t1,t2);
   default: impos("Evexp::const_exp_cmp, unexpected case");
   }

@@ -19,6 +19,7 @@
 
 #include "cifc.h"
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "toc.h"
 using Absyn;
@@ -60,7 +61,7 @@ static bool c_types_ok(type_t ctyp, type_t cyctyp) {
 //   printf("c_typ = %s, u_typ = %s\n",
 // 	 Absynpp::typ2string(c_typ),
 // 	 Absynpp::typ2string(u_typ));
-  return Tcutil::unify(c_typ,u_typ);
+  return Unify::unify(c_typ,u_typ);
 }
 
 // Merge two attribute lists into a freshly-allocated list.  

@@ -20,6 +20,7 @@
 #include <set.h>
 #include <string.h>
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
 #include "tcexp.h"
@@ -518,7 +519,7 @@ DONT_PROMOTE:
 	// must unify here or the type we gave pat won't ever get checked
 	// against the exp we're matching against.  Even if we succeed now,
 	// we could be constraining so as to catch an error later.
-	if (!unify((type_t)pat->topt,inst_fieldtyp))
+	if (!Unify::unify((type_t)pat->topt,inst_fieldtyp))
 	  terr(p->loc,"field %s of %s pattern expects type %s != %s",
 	       *field->name, aggr_str, typ2string(inst_fieldtyp), 
 	       typ2string((type_t)pat->topt));
@@ -564,7 +565,7 @@ DONT_PROMOTE:
       // must unify here or the type we gave pat won't ever get checked
       // against the exp we're matching against.  Even if we succeed now,
       // we could be constraining so as to catch an error later.
-      if (!unify((type_t)p2->topt,field_typ))
+      if (!Unify::unify((type_t)p2->topt,field_typ))
 	terr(p2->loc, "%s expects argument type %s, not %s",
 	     qvar2string(tuf->name), typ2string(field_typ),
 	     typ2string((type_t)p2->topt));

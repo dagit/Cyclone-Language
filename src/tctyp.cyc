@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <string.h>
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
 #include "tcexp.h"
@@ -136,22 +137,23 @@ static void check_free_evars(list_t<type_t> free_evars, type_t in_typ,
     }
     switch (type_kind(e)) {
     case &Kind(RgnKind,Unique):
-      if (!unify(e,unique_rgn_type))
+      if (!Unify::unify(e,unique_rgn_type))
 	impos("can't unify evar with unique region!");
       break;
     case &Kind(RgnKind,Aliasable): // unify with the heap
     case &Kind(RgnKind,Top):
-      if (!unify(e,heap_rgn_type)) impos("can't unify evar with heap!");
+      if (!Unify::unify(e,heap_rgn_type)) impos("can't unify evar with heap!");
       break;
     case &Kind(EffKind,_):
-      if (!unify(e,empty_effect)) impos("can't unify evar with {}!");
+      if (!Unify::unify(e,empty_effect)) impos("can't unify evar with {}!");
       break;
     case &Kind(BoolKind,_):
-      if (!unify(e,false_type)) impos("can't unify evar %s with @false!",
-                                      typ2string(e));
+      if (!Unify::unify(e,false_type)) impos("can't unify evar %s with @false!",
+					     typ2string(e));
       break;
     case &Kind(PtrBndKind,_):
-      if (!unify(e,bounds_one())) impos("can't unify evar with bounds_one!");
+      if (!Unify::unify(e,bounds_one())) 
+	impos("can't unify evar with bounds_one!");
       break;
     default:
       terr(loc,"hidden type variable %s isn't abstracted in type %s",
@@ -756,7 +758,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // we have [signed] char */@/? {n}.
     cvtenv = i_check_valid_type(loc,te,cvtenv,&boolk,zt,false,true);
     cvtenv = i_check_valid_type(loc,te,cvtenv,&boolk,nullable,false,true);
-    unify(zt, is_char_type(t1) ? true_type : false_type);
+    Unify::unify(zt, is_char_type(t1) ? true_type : false_type);
     is_zero_terminated = type2bool(false,zt);
     if (is_zero_terminated) {
       // check that t1 admits zero as an element
@@ -926,7 +928,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             case &AppType(&DatatypeCon(...),_):
               if (force_type2bool(false,zt))
                 terr(loc,"can't inject into a zeroterm pointer");
-              if (!unify(bounds_one(),bs)) 
+              if (!Unify::unify(bounds_one(),bs)) 
                 terr(loc,"can't inject into a fat pointer to datatype");
               break;
             default: terr(loc,"can't inject a non-datatype type"); break;

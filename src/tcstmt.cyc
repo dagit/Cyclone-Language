@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "absynpp.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
 #include "tcexp.h"
@@ -212,7 +213,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if (!coerce_arg(te,e,t,&bogus)) {
         terr(s0->loc, "returns value of type %s but requires %s",
              typ2string((type_t)e->topt), typ2string(t));
-        explain_failure();
+        Unify::explain_failure();
       }
       if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
 	terr(e->loc,UNIQUE_ERR_MSG);
@@ -266,7 +267,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
              typ2string((type_t)es->hd->topt), typ2string(ts->hd));
-        explain_failure();
+        Unify::explain_failure();
       }
       // JGM: no test case
       if (is_noalias_pointer_or_aggr(ts->hd) && !is_noalias_path(es->hd))
@@ -337,10 +338,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      if (!unify((type_t)p->topt,t)) { // allow silent_castable?
+      if (!Unify::unify((type_t)p->topt,t)) { // allow silent_castable?
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
 	     typ2string(t), typ2string((type_t)p->topt));
-	explain_failure();
+	Unify::explain_failure();
       }
       else
 	check_pat_regions(te,p,this_pattern.patvars);
@@ -400,10 +401,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = clear_fallthru(te);
 
       let p = scs->hd->pattern;
-      if (!unify((type_t)p->topt,exception_type)) { // allow silent_castable?
+      if (!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
 	     typ2string(exception_type), typ2string((type_t)p->topt));
-	explain_failure();
+	Unify::explain_failure();
       }
       else
 	check_pat_regions(te,p,this_pattern.patvars);
@@ -499,8 +500,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	  else 
 	    terr(d->loc, "%s declared with type \n%s\n but initialized "
 		 "with type \n%s.",varstr, tstr, estr);
-	  unify(t,(type_t)initializer->topt);
-	  explain_failure();
+	  Unify::unify(t,(type_t)initializer->topt);
+	  Unify::explain_failure();
 	}
       }
       tcStmt(te2,s,false);
@@ -537,12 +538,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //XXX: need to check that e is a unique path?
       let pat_res = tcPat(te,p,&pat_type,e);
       *vds = new Opt(pat_res.patvars);
-      if (!unify((type_t)p->topt,(type_t)e->topt)
+      if (!Unify::unify((type_t)p->topt,(type_t)e->topt)
 	  && !coerce_assign(te,e,(type_t)p->topt)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
 	     typ2string((type_t)p->topt),typ2string((type_t)e->topt));
-	unify((type_t)p->topt,(type_t)e->topt);
-	explain_failure();
+	Unify::unify((type_t)p->topt,(type_t)e->topt);
+	Unify::explain_failure();
       }
       else
 	check_pat_regions(te,p,pat_res.patvars);
@@ -585,12 +586,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 			       empty_tqual(0),false_type);
 	check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
-	if (!unify(exp_type,key_typ) && 
+	if (!Unify::unify(exp_type,key_typ) && 
 	    !coerce_assign(te,open_exp_opt,exp_type))
 	  terr(s0->loc,"expected %s but found %s",
 	       typ2string(exp_type), typ2string(key_typ));
-	if (!unify(outer_rgn,unique_rgn_type) && 
-	    !unify(outer_rgn,refcnt_rgn_type))
+	if (!Unify::unify(outer_rgn,unique_rgn_type) && 
+	    !Unify::unify(outer_rgn,refcnt_rgn_type))
 	  terr(s0->loc,"open is only allowed on unique or reference-counted keys");
 	*t = rgn_handle_type(rgn_typ);
 	te2 = add_region(te2, rgn_typ, true);
@@ -600,7 +601,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te2 = add_region(te2, rgn_typ, false);
       }
       check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
-      if (!unify(*t,rgn_handle_type(rgn_typ)))
+      if (!Unify::unify(*t,rgn_handle_type(rgn_typ)))
 	impos("region stmt: type of region handle is wrong!");
       //        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
       tcStmt(te2,s,false);

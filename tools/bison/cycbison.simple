@@ -140,13 +140,6 @@ struct Yystacktype YYSTYPEVARS {
 #endif
 };
 
-/* DJG */
-static struct Yystacktype YYSTYPEVARS @{YYMAXRULELENGTH}`yyr
-yyget_yyyyvsp(struct Yystacktype YYSTYPEVARS ?`yyr yyvs, 
-	      int yyvsp_offset, int rulelen) {
-  return (_@{YYMAXRULELENGTH}`yyr)(yyvs + (yyvsp_offset - rulelen));
-}
-
 /* If type variables (e.g., regions) are used with YYSTYPE this
    will already be set.
 */
@@ -179,7 +172,7 @@ region yyregion; {
   struct Yystacktype ? yyvs = 
     rnew(yyregion) {for i < YYINITDEPTH : Yystacktype(yylval)}; 
 #endif
-  struct Yystacktype @{YYMAXRULELENGTH }yyyyvsp;
+  struct Yystacktype @{YYMAXRULELENGTH }yyyvsp;
 #define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
 
   int yystacksize = YYINITDEPTH;
@@ -359,9 +352,9 @@ yydefault:
 yyreduce:
 
   yylen = yyr2[yyn];
+  yyyvsp=(_@{YYMAXRULELENGTH})(yyvs + (yyvsp_offset + 1 - yylen));
   if (yylen > 0)
-    yyval = yyvs[yyvsp_offset+1-yylen].v; /* implement default value of the action */
-
+    yyval = yyyvsp[0].v; /* implement default value of the action */
 #if YYDEBUG != 0
   if (yydebug)
     {
@@ -375,8 +368,7 @@ yyreduce:
     }
 #endif
 $    /* the action file gets copied in place of this dollarsign */
- default:
-    break;
+ default: break;
   }
 
 #line 375 "cycbison.simple"

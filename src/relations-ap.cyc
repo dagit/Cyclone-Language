@@ -17,6 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 #include "relations-ap.h"
+#include "unify.h"
 #include "tcutil.h"
 #include "pratt-ap.h"
 #include "absynpp.h"
@@ -56,7 +57,7 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
   case $({.RConst = c1},   {.RConst = c2})   : return c1 == c2;
   case $({.RVar = x1},     {.RVar = x2}): return x1 == x2;
   case $({.RNumelts = x1}, {.RNumelts = x2}) : return x1 == x2;
-  case $({.RType = t1},    {.RType = t2}) : return Tcutil::unify(t1,t2);
+  case $({.RType = t1},    {.RType = t2}) : return Unify::unify(t1,t2);
   case $({.RParam = i},    {.RParam = j}): return i == j;
   case $({.RParamNumelts = i}, {.RParamNumelts = j}): return i == j;
   case $({.RReturn = _},   {.RReturn = _}): return true;
