@@ -69,7 +69,6 @@
 \hyperlink{faq:pointerarith}{How much pointer arithmetic can I do?}\\
 \hyperlink{faq:litstring}{What is the type of a literal string?}\\
 \hyperlink{faq:nullterminate}{Are strings null-terminated?}\\
-\hyperlink{faq:zero}{Why can't I assign 0 to a pointer?}\\
 \hyperlink{faq:malloc}{How do I use \texttt{malloc}?}\\
 \hyperlink{faq:free}{Can I call free?}\\
 \hyperlink{faq:gc}{Is there a garbage collector?}\\
@@ -744,12 +743,6 @@ that is, they carry bounds information.  In Cyclone a string ends when
 a null character is found, or when the bounds are exceeded.
 \end{faqa}
 
-\begin{faqa}{faq:zero}{Why can't I assign 0 to a pointer?}
-While it handles many cases seamlessly, the type-checker sometimes cannot
-infer that 0 should be interpreted as a \texttt{NULL} pointer.  This means
-that in some cases you have to assign \texttt{NULL} instead of 0.
-\end{faqa}
-
 \begin{faqa}{faq:malloc}{How do I use \texttt{malloc}?}
 \texttt{malloc} is a Cyclone primitive, not a library function.
 Currently it has an extremely restricted syntax: You must write
@@ -823,9 +816,9 @@ elsewhere.
 \end{faqa}
 
 \begin{faqa}{faq:realloc}{Can I use \texttt{salloc} or \texttt{realloc}?}
-No, neither of these functions are currently provided and it is not
-possible to write them in Cyclone.  Both features are hard to provide
-in a way that is guaranteed safe.
+Currently, we don't provide support for \texttt{salloc}.  For 
+\texttt{realloc}, we do provide support, but only on heap-allocated
+\texttt{char?} buffers.
 \end{faqa}
 
 \begin{faqa}{faq:nullcast}{Why do I have to cast from \texttt{*} to \texttt{@} if I've already tested for \texttt{NULL}?} 

@@ -33,7 +33,6 @@ To a first approximation, you can port a simple program
 from C to Cyclone by following these steps which are
 detailed below:
 \begin{itemize}
-\item \hyperlink{port:null}{Use NULL instead of 0.}
 \item \hyperlink{port:pointers}{Change pointer types to fat pointer types where necessary.}  
 \item \hyperlink{port:malloc}{Use comprehensions to heap-allocate arrays.}
 \item \hyperlink{port:unions}{Use tunions for unions with pointers.}
@@ -43,7 +42,7 @@ detailed below:
 \item \hyperlink{port:rgns}{Connect argument and result pointers with the same region.}
 \item \hyperlink{port:types}{Insert type information to direct the type-checker.}
 \item \hyperlink{port:const}{Copy ``const'' code or values to make it non-const.}  
-\item \hyperlink{port:free}{Get rid of calls to free, realloc, memset, memcpy, etc.}
+\item \hyperlink{port:free}{Get rid of calls to free, calloc, etc.}
 \item \hyperlink{port:poly}{Use polymorphism or tunions to get rid of void*.}  
 \item \hyperlink{port:vararg}{Rewrite the bodies of vararg functions.}
 \item \hyperlink{port:setjmp}{Use exceptions instead of setjmp.}
@@ -63,12 +62,6 @@ Then you can use \texttt{gdb}'s backtrace facility to see where
 the problem occurred.  Of course, you'll be debugging at the C
 level, so you'll want to use the \texttt{-save-c} and \texttt{-g}
 options when compiling your code.  
-
-\begin{porta}
-{port:null}{Use NULL instead of 0.}
-
-Use \texttt{NULL} instead of 0 for null-pointers.  
-\end{porta}
 
 \begin{porta}
 {port:pointers}{Change pointer types to fat pointer types where necessary.}  
@@ -333,17 +326,15 @@ code for \texttt{strtoul} and make a version that doesn't
 have const in the prototype.  
 \end{porta}
 
-\begin{porta}{port:free}{Get rid of calls to free, realloc, memset, memcpy, etc.}
+\begin{porta}{port:free}{Get rid of calls to free, calloc etc.}
 
 There are many standard functions that Cyclone can't support 
 and still maintain type-safety.  An obvious one is \texttt{free()}
 which releases memory.  Let the garbage collector free the object
 for you, or use region-allocation if you're scared of the collector.
-Other operations, such as \texttt{memset} and \texttt{memcpy} 
-are also not supported
-by Cyclone. You'll need to write code to manually copy one data
-structure to another.  Fortunately, this isn't so bad since Cyclone
-supports structure assignment.  
+Other operations, such as \texttt{memset}, \texttt{memcpy}, 
+and \texttt{realloc} are supported, but in a limited fashion in 
+order to preserve  type safety.  
 \end{porta}
 
 \begin{porta}{port:poly}{Use polymorphism or tunions to get rid of void*.}  
