@@ -73,6 +73,15 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
 tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(null);
 tunion Nmspace       rel_ns_null       = &rel_ns_null_value;
 
+bool is_qvar_qualified(qvar_t qv) {
+  switch((*qv)[0]) {
+  case &Rel_n(null):
+  case &Abs_n(null):
+  case Loc_n: return false;
+  default:    return true;
+  }
+}
+
 static int new_type_counter = 0;
 
 type_t new_evar(opt_t<kind_t> k, opt_t<list_t<tvar_t>> env) {

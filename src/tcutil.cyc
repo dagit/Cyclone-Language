@@ -224,7 +224,6 @@ type_t copy_type(type_t t) {
   case &AccessEff(t): return new AccessEff(copy_type(t));
   case &JoinEff(ts): return new JoinEff(copy_types(ts));
   }
-
 }
 
 // Our lattice looks like this:
@@ -2777,7 +2776,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     // where oh where does my variable live?
     switch(x) {
     case Unresolved_b: return bogus_ans;
-    case &Funname_b(_): return $(true, HeapRgn); 
+    case &Funname_b(_): return $(false, HeapRgn); 
     case &Global_b(vd): 
       switch (compress(e->topt->v)) {
 	// arrays cannot be modified

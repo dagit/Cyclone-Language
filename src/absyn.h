@@ -659,7 +659,8 @@ namespace Absyn {
 
   ///////////////////////// Namespaces ////////////////////////////
   extern tunion Nmspace.Rel_n rel_ns_null_value; // for sharing
-  extern tunion Nmspace       rel_ns_null; // for sharing
+  extern nmspace_t rel_ns_null; // for sharing
+  extern bool is_qvar_qualified(qvar_t);
 
   ///////////////////////// Qualifiers ////////////////////////////
   extern tqual_t const_tqual();

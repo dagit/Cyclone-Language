@@ -3910,7 +3910,7 @@ struct Cyc_Absyn_Pat_b_struct*) _temp3140)->f1; goto _LL3151;} else{ goto
 _LL3152;} _LL3152: if(( unsigned int) _temp3140 > 1u?*(( int*) _temp3140) == Cyc_Absyn_Param_b:
 0){ _LL3161: _temp3160=(( struct Cyc_Absyn_Param_b_struct*) _temp3140)->f1; goto
 _LL3153;} else{ goto _LL3141;} _LL3143: return bogus_ans; _LL3145: return({
-struct _tuple7 _temp3162; _temp3162.f1= 1; _temp3162.f2=( void*) Cyc_Absyn_HeapRgn;
+struct _tuple7 _temp3162; _temp3162.f1= 0; _temp3162.f2=( void*) Cyc_Absyn_HeapRgn;
 _temp3162;}); _LL3147: { void* _temp3163= Cyc_Tcutil_compress(( void*)(( struct
 Cyc_Core_Opt*) _check_null( e->topt))->v); _LL3165: if(( unsigned int) _temp3163
 > 4u?*(( int*) _temp3163) == Cyc_Absyn_ArrayType: 0){ goto _LL3166;} else{ goto

@@ -175,12 +175,8 @@ make_struct_field(seg_t loc,
   let &$(&$(qid,tq,t,tvs,atts),expopt) = field_info;
   if (tvs != null)
     err("bad type params in struct field",loc);
-  switch ((*qid)[0]) {
-  case &Rel_n(null): break;
-  case &Abs_n(null): break;
-  case Loc_n: break;
-  default: err("struct field cannot be qualified with a namespace",loc); break;
-  }
+  if(is_qvar_qualified(qid))
+    err("struct field cannot be qualified with a namespace",loc);
   return new Structfield{.name = (*qid)[1], .tq = tq, .type = t,
 			 .width = expopt, .attributes = atts};
 }
@@ -190,15 +186,9 @@ make_param(seg_t loc, $(opt_t<qvar_t>,tqual_t,type_t,list_t<tvar_t>)@ field){
   let &$(qv_opt,tq,t,tvs) = field;
   let idopt = null;
   if (qv_opt != null) {
+    if(is_qvar_qualified(qv_opt->v))
+      err("parameter cannot be qualified with a namespace",loc);
     idopt = new Opt((*qv_opt->v)[1]);
-    switch ((*qv_opt->v)[0]) {
-    case &Rel_n(null): break;
-    case &Abs_n(null): break;
-    case Loc_n: break;
-    default:
-      err("parameter cannot be qualified with a module name",loc);
-      break;
-    }
   }
   if (tvs != null)
     abort("parameter should have no type parameters",loc);
@@ -238,14 +228,8 @@ static void only_vardecl(list_t<stringptr_t> params,decl_t x) {
   case &Var_d(vd):
     if (vd->initializer != null)
       abort("initializers are not allowed in parameter declarations",x->loc);
-    switch ((*vd->name)[0]) {
-    case Loc_n: break;
-    case &Rel_n(null): break;
-    case &Abs_n(null): break;
-    default:
-      err("module names not allowed on parameter declarations",x->loc);
-      break;
-    }
+    if(is_qvar_qualified(vd->name))
+      err("namespaces not allowed on parameter declarations",x->loc);
     // for sanity-checking of old-style parameter declarations
     bool found = false;
     for(; params != null; params = params->tl)
@@ -282,16 +266,10 @@ static $(opt_t<var_t>,tqual_t,type_t)@
     return(abort(aprintf("missing type for parameter %s",*x),loc));
   switch (tdl->hd->r) {
   case &Var_d(vd):
-    switch ((*vd->name)[0]) {
-    case Loc_n: break;
-    case &Rel_n(null): break;
-    case &Abs_n(null): break;
-    default:
-      err("module name not allowed on parameter",loc);
-      break;
-    }
+    if(is_qvar_qualified(vd->name))
+      err("namespace not allowed on parameter",loc);
     if (zstrptrcmp((*vd->name)[1],x)==0)
-      return new $(new{Opt((*vd->name)[1])},vd->tq,vd->type);
+      return new $(new Opt((*vd->name)[1]), vd->tq, vd->type);
     else
       return get_param_type(new $(tdl->tl,loc),x);
   default:
@@ -328,6 +306,20 @@ static tvar_t typ2tvar(seg_t loc, type_t t) {
 }
 static type_t tvar2typ(tvar_t pr) {
   return new VarType(pr);
+}
+
+  // return false on failure -- a wrong explicit kind was already there
+static bool set_vartyp_kind(type_t t, kind_t k) {
+  switch(t) {
+  case &VarType(&Tvar(_,_,c)): 
+    c = compress_conref(c);
+    switch(c->v) {
+    case No_constr:      c->v = new Eq_constr(k); return true;
+    case &Eq_constr(k2): return k == k2;
+    default: throw new Core::Impossible("forward after compress_conref");
+    }
+  default: throw new Core::Impossible("set_vartyp_kind: not a VarType");
+  }
 }
 
 // Convert an old-style function into a new-style function
@@ -435,7 +427,7 @@ static $(var_t,tqual_t,type_t)@
   fnargspec_to_arg(seg_t loc,$(opt_t<var_t>,tqual_t,type_t)@ t) {
   if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
-    return new $(new{(string_t)"?"},(*t)[1],(*t)[2]);
+    return new $(new "?",(*t)[1],(*t)[2]);
   } else
     return new $((*t)[0]->v,(*t)[1],(*t)[2]);
 }
@@ -965,7 +957,6 @@ using Parse;
   Designator_tok(designator_t);
   DesignatorList_tok(list_t<designator_t>);
   TypeModifierList_tok(list_t<type_modifier_t>);
-  Rgn_tok(type_t);
   InitializerList_tok(list_t<$(list_t<designator_t>,exp_t)@>);
   FieldPattern_tok($(list_t<designator_t>,pat_t)@);
   FieldPatternList_tok(list_t<$(list_t<designator_t>,pat_t)@>);
@@ -1024,7 +1015,6 @@ using Parse;
 %type <StructFieldDeclList_tok> struct_declaration_list struct_declaration
 %type <StructFieldDeclListList_tok> struct_declaration_list0
 %type <TypeModifierList_tok> pointer
-%type <Rgn_tok> rgn_opt rgn
 %type <Declarator_tok> declarator direct_declarator
 %type <DeclaratorExpopt_tok> struct_declarator
 %type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
@@ -1043,7 +1033,7 @@ using Parse;
 %type <DesignatorList_tok> designation designator_list
 %type <Designator_tok> designator
 %type <Kind_tok> kind
-%type <Type_tok> any_type_name
+%type <Type_tok> any_type_name type_var rgn_opt rgn
 %type <AttributeList_tok> attributes_opt attributes attribute_list
 %type <Attribute_tok> attribute
 %type <Enumfield_tok> enum_field
@@ -1070,18 +1060,16 @@ translation_unit:
       Lex::leave_using();
     }
 | using_action '{' translation_unit unusing_action translation_unit
-    { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@4)),$5));
-    }
+    { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@4)),$5)); }
 /* NB: namespace_action calls Lex::enter_namespace */
 | namespace_action ';' translation_unit
     { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@3)),null));
       Lex::leave_namespace();
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit
-    { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5));
-    }
+    { $$=^$(new List(new Decl(new Namespace_d(new $1,$3),LOC(@1,@4)),$5)); }
 | EXTERN STRING '{' translation_unit '}' translation_unit
-    { if (String::strcmp($2,"C") != 0)
+    { if (strcmp($2,"C") != 0)
         err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
       $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@5)),$6));
     }
@@ -1089,9 +1077,8 @@ translation_unit:
 ;
 
 external_declaration:
-  function_definition
-  { $$=^$(new List(new_decl(new Fn_d($1),LOC(@1,@1)),null)); }
-| declaration         { $$=$!1; }
+  function_definition {$$=^$(new List(new_decl(new Fn_d($1),LOC(@1,@1)),null));}
+| declaration         {$$=$!1;}
 ;
 
 function_definition:
@@ -1136,7 +1123,7 @@ declaration:
     { $$=^$(make_declarations($1,null,LOC(@1,@1))); }
 | declaration_specifiers init_declarator_list ';'
     { $$=^$(make_declarations($1,$2,LOC(@1,@3))); }
-/* Cyc:  let declaration */
+/* Cyc: let declaration */
 | LET pattern '=' expression ';'
     { $$=^$(new List(let_decl($2,null,$4,LOC(@1,@5)),null)); }
 | LET identifier_list ';'
@@ -1318,10 +1305,7 @@ type_specifier:
 /* Cyc: added [x]tunions */
 | tunion_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
-| TYPE_VAR
-  { $$=^$(type_spec(id2type($1,empty_conref()), LOC(@1,@1))); }
-| TYPE_VAR COLON_COLON kind
-   { $$=^$(type_spec(id2type($1,new_conref($3)),LOC(@1,@3))); }
+| type_var { $$=^$(type_spec($1, LOC(@1,@1))); }
 | QUAL_TYPEDEF_NAME type_params_opt
     { $$=^$(type_spec(new TypedefType($1,$2,null),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
@@ -1492,10 +1476,9 @@ struct_declaration:
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
-      tqual_t tq = (*$1)[0];
-      let atts = (*$1)[2];
-      let t = speclist2typ((*$1)[1], LOC(@1,@1));
+      let &$(tq,tspecs,atts) = $1;
       let $(decls, widths) = List::split($2);
+      let t = speclist2typ(tspecs, LOC(@1,@1));
       let info = List::zip(apply_tmss(tq,t,decls,atts),widths);
       $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
     }
@@ -1503,17 +1486,13 @@ struct_declaration:
 
 specifier_qualifier_list:
   type_specifier attributes_opt
-    // FIX: casts needed
-    { $$=^$(new $(empty_tqual(),(list_t<type_specifier_t>)(new List($1,null)),
-                  $2)); }
+    { $$=^$(new $(empty_tqual(), new List($1,null), $2)); }
 | type_specifier attributes_opt specifier_qualifier_list
-    { $$=^$(new $((*$3)[0],(list_t<type_specifier_t>)(new List($1,(*$3)[1])),
-                  List::append($2,(*$3)[2]))); }
+    { $$=^$(new $((*$3)[0], new List($1,(*$3)[1]), append($2,(*$3)[2])));}
 | type_qualifier attributes_opt
     { $$=^$(new $($1,null,$2)); }
 | type_qualifier attributes_opt specifier_qualifier_list
-    { $$=^$(new $(combine_tqual($1,(*$3)[0]),(*$3)[1],
-                  List::append($2,(*$3)[2]))); }
+    { $$=^$(new $(combine_tqual($1,(*$3)[0]),(*$3)[1], append($2,(*$3)[2]))); }
 ;
 
 struct_declarator_list:
@@ -1532,8 +1511,7 @@ struct_declarator:
   declarator
     { $$=^$(new $($1,null)); }
 | ':' constant_expression
-    {
-      // HACK: give the field an empty name -- see elsewhere in the
+    { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
       $$=^$(new $((new Declarator(new $(rel_ns_null, new ""), null)),
                   new Opt($2)));
@@ -1650,8 +1628,9 @@ direct_declarator:
 /* CYC: region annotations allowed */
 pointer:
   pointer_char rgn_opt attributes_opt
-    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
-                     attopt_to_tms(LOC(@3,@3),$3,null))); }
+ { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
+		  attopt_to_tms(LOC(@3,@3),$3,null))); 
+ }
 | pointer_char rgn_opt attributes_opt type_qualifier_list
     { $$=^$(new List(new Pointer_mod($1,$2,$4),
                      attopt_to_tms(LOC(@3,@3),$3,null))); }
@@ -1675,18 +1654,18 @@ pointer_char:
 | '?' { $$=^$(TaggedArray_ps); }
 
 rgn_opt:
-    /* empty */ { $$ = ^$(HeapRgn); }
-| rgn { $$ = $!1; };
+  /* empty */ { $$ = ^$(HeapRgn); }
+| rgn { $$ = $!1; }
+;
 
 rgn:
-  TYPE_VAR
-  { $$ = ^$(id2type($1,new_conref(RgnKind))); }
-| TYPE_VAR COLON_COLON kind
-  { if ($3 != RgnKind) err("expecting region kind\n",LOC(@3,@3));
-    $$ = ^$(id2type($1,new_conref(RgnKind)));
+  type_var
+  { if(!set_vartyp_kind($1,RgnKind))
+      err("expecting region kind", LOC(@1,@1));
+    $$ = $!1; 
   }
 | '_' { $$ = ^$(new_evar(new Opt(RgnKind),null)); }
-
+;
 
 type_qualifier_list:
   type_qualifier
@@ -1702,24 +1681,28 @@ parameter_type_list:
     { $$=^$(new $(List::imp_rev($1),true,null,$4,$5)); }
 | ELLIPSIS rgn optional_inject parameter_declaration optional_effect
   optional_rgn_order
-{ let $(n,tq,t) = *($4);
+{ let &$(n,tq,t) = $4;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $2,.inject = $3};
   $$=^$(new $(null,false,v,$5,$6)); 
 }
 | parameter_list ',' ELLIPSIS rgn optional_inject parameter_declaration
   optional_effect optional_rgn_order
-{ let $(n,tq,t) = *($6);
+{ let &$(n,tq,t) = $6;
   let v = new VarargInfo {.name = n,.tq = tq,.type = t,.rgn = $4,.inject = $5};
   $$=^$(new $(List::imp_rev($1),false,v,$7,$8)); 
 }
 ;
 
 /* CYC:  new */
+type_var:
+  TYPE_VAR                  { $$ = ^$(id2type($1,empty_conref())); }
+| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,new_conref($3))); }
+
 optional_effect:
   /* empty */
   { $$=^$(null); }
 | ';' effect_set
-  { $$ = ^$(new Opt((type_t)(new JoinEff($2)))); }
+  { $$ = ^$(new Opt(new JoinEff($2))); }
 ;
 
 optional_rgn_order:
@@ -1757,26 +1740,25 @@ effect_set:
 atomic_effect:
   '{' '}'                   { $$=^$(null); }
 | '{' region_set '}'        { $$=$!2; }
-| TYPE_VAR
-  { $$=^$(new List(id2type($1,new_conref(EffKind)),null)); }
-| TYPE_VAR COLON_COLON kind
-  { if ($3 != (kind_t)EffKind) err("expecing effect kind (E)",LOC(@3,@3));
-    $$=^$(new List(id2type($1,new_conref(EffKind)),null));
+| type_var
+  { if(!set_vartyp_kind($1,EffKind))
+      err("expecting effect kind", LOC(@1,@1));
+    $$ = ^$(new List($1,null)); 
   }
 ;
 
 /* CYC:  new */
 region_set:
-  TYPE_VAR
-  { $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),null)); }
-| TYPE_VAR ',' region_set
-  { $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),$3)); }
-| TYPE_VAR COLON_COLON kind
-  { if ($3 != (kind_t)RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),null)); }
-| TYPE_VAR COLON_COLON kind ',' region_set
-  { if ($3 != (kind_t)RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),$5)); }
+  type_var
+  { if(!set_vartyp_kind($1,RgnKind))
+      err("expecting region kind", LOC(@1,@1));
+    $$=^$(new List(new AccessEff($1),null)); 
+  }
+| type_var ',' region_set
+  { if(!set_vartyp_kind($1,RgnKind))
+      err("expecting region kind", LOC(@1,@1));
+    $$=^$(new List(new AccessEff($1),$3)); 
+  }
 ;
 
 /* NB: returns list in reverse order */
@@ -1787,57 +1769,40 @@ parameter_list:
     { $$=^$(new List($3,$1)); }
 ;
 
-/* TODO: differs from grammar in K&R */
+/* FIX: differs from grammar in K&R */
 parameter_declaration:
   specifier_qualifier_list declarator
-   {  let t   = speclist2typ((*$1)[1], LOC(@1,@1));
-      let atts = (*$1)[2];
-      let tq  = (*$1)[0];
-      let tms = $2->tms;
-      let t_info = apply_tms(tq,t,atts,tms);
-      if (t_info[2] != null)
+    { let &$(tq,tspecs,atts) = $1; 
+      let &Declarator(qv,tms) = $2;
+      let t = speclist2typ(tspecs, LOC(@1,@1));
+      let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
+      if (tvs != null)
         err("parameter with bad type params",LOC(@2,@2));
-      let q = $2->id;
-      switch ((*q)[0]) {
-      case Loc_n: break;
-      case &Rel_n(null): break;
-      case &Abs_n(null): break;
-      default:
-        err("parameter cannot be qualified with a module name",LOC(@1,@1));
-        break;
-      }
-      let idopt = (opt_t<var_t>)(new Opt((*q)[1]));
-      if (t_info[3] != null)
+      if(is_qvar_qualified(qv))
+        err("parameter cannot be qualified with a namespace",LOC(@1,@1));
+      let idopt = (opt_t<var_t>)(new Opt((*qv)[1]));
+      if (atts2 != null)
         warn("extra attributes on parameter, ignoring",LOC(@1,@2));
-      if (t_info[2] != null)
-        warn("extra type variables on parameter, ignoring",LOC(@1,@2));
-      $$=^$(new $(idopt,t_info[0],t_info[1]));
+      $$=^$(new $(idopt,tq2,t2));
     }
 | specifier_qualifier_list
-    { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
-      let atts = (*$1)[2];
-      let tq = (*$1)[0];
+    { let &$(tq,tspecs,atts) = $1; 
+      let t = speclist2typ(tspecs, LOC(@1,@1));
       if (atts != null)
         warn("bad attributes on parameter, ignoring",LOC(@1,@1));
       $$=^$(new $(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
-      let atts = (*$1)[2];
-      let tq  = (*$1)[0];
+    { let &$(tq,tspecs,atts) = $1; 
+      let t = speclist2typ(tspecs, LOC(@1,@1));
       let tms = $2->tms;
-      let t_info = apply_tms(tq,t,atts,tms);
-      if (t_info[2] != null)
-        // Ex: int (@)<`a>
+      let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
+      if (tvs != null) // Ex: int (@)<`a>
         warn("bad type parameters on formal argument, ignoring",LOC(@1,@2));
-      if (t_info[3] != null)
+      if (atts2 != null)
         warn("bad attributes on parameter, ignoring",LOC(@1,@2));
-      $$=^$(new $(null,t_info[0],t_info[1]));
+      $$=^$(new $(null,tq2,t2));
     }
-/*
-| type_name
-    { $$=$!1; }
-*/
 ;
 
 identifier_list:
@@ -1871,11 +1836,9 @@ array_initializer:
     { let vd = new_vardecl(new $(Loc_n,new $3), uint_t,
                            uint_exp(0,LOC(@3,@3)));
       // make the index variable const
-      vd->tq = Tqual{.q_const = true, .q_volatile = false,
-		     .q_restrict = true};
+      vd->tq = Tqual{.q_const = true, .q_volatile = false, .q_restrict = true};
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7),LOC(@1,@8)));
     }
-
 ;
 
 /* NB: returns list in reverse order */
@@ -1914,7 +1877,7 @@ type_name:
       if (atts != null)
         warn("ignoring attributes in type",LOC(@1,@1));
       let tq = (*$1)[0];
-      $$=^$(new{$(null,tq,t)});
+      $$=^$(new $(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
     { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
@@ -1998,8 +1961,7 @@ direct_abstract_declarator:
                                             $1->tms)));
     }
 | direct_abstract_declarator attributes
-    {
-      $$=^$(new Abstractdeclarator(new List(new Attributes_mod(LOC(@2,@2),$2),
+    { $$=^$(new Abstractdeclarator(new List(new Attributes_mod(LOC(@2,@2),$2),
                                             $1->tms)));
     }
 ;
@@ -2024,7 +1986,7 @@ statement:
   }
 | REGION IDENTIFIER statement
   { if (zstrcmp($2,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@3,@3));
+      err("bad occurrence of heap region `H",LOC(@2,@2));
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), null,
 			 new_conref(RgnKind));
     type_t t = new VarType(tv);
@@ -2074,7 +2036,7 @@ selection_statement:
 | SWITCH '(' expression ')' '{' switch_clauses '}'
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
 | SWITCH STRING  '(' expression ')' '{' switchC_clauses '}'
-  { if(String::strcmp($2,"C") != 0)
+  { if(strcmp($2,"C") != 0)
      err("only switch \"C\" { ... } is allowed",LOC(@1,@8));
   $$=^$(new_stmt(new SwitchC_s($4,$7),LOC(@1,@8)));
   }
@@ -2095,7 +2057,7 @@ switch_clauses:
 | DEFAULT ':' block_item_list
     { $$=^$(new List(new Switch_clause(new_pat(Wild_p,LOC(@1,@1)),null,
                                        null,$3,LOC(@1,@3)),
-                  null));}
+		     null));}
 | CASE pattern ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,null,null,
                                        fallthru_stmt(null,LOC(@3,@3)),
@@ -2313,7 +2275,7 @@ conditional_expression:
 /* Cyc: throw expressions */
 | THROW conditional_expression
     { $$=^$(throw_exp($2,LOC(@1,@2))); }
-/* Cyc: expressions to build heap-allocated objects and arrays, throw */
+/* Cyc: expressions to build heap-allocated objects and arrays */
 | NEW array_initializer
     { $$=^$(New_exp(null,$2,LOC(@1,@3))); }
 | NEW logical_or_expression
@@ -2441,7 +2403,6 @@ unary_expression:
 | RMALLOC '(' assignment_expression ',' SIZEOF '(' specifier_qualifier_list ')' ')'
 { $$=^$(new_exp(new Malloc_e($3,speclist2typ((*$7)[1],LOC(@7,@7))),
                 LOC(@1,@9))); }
-
 ;
 
 unary_operator:
@@ -2464,14 +2425,8 @@ postfix_expression:
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
     { qvar_t q = $3;
-      switch ((*q)[0]) {
-      case Loc_n: break;
-      case &Rel_n(null): break;
-      case &Abs_n(null): break;
-      default:
+      if(is_qvar_qualified(q))
         err("struct field name is qualified",LOC(@3,@3));
-        break;
-      }
       $$=^$(structmember_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression PTR_OP IDENTIFIER
@@ -2479,14 +2434,8 @@ postfix_expression:
 // Hack to allow typedef names and field names to overlap
 | postfix_expression PTR_OP QUAL_TYPEDEF_NAME
     { qvar_t q = $3;
-      switch ((*q)[0]) {
-      case Loc_n: break;
-      case &Rel_n(null): break;
-      case &Abs_n(null): break;
-      default:
-        err("struct field is qualified with module name",LOC(@3,@3));
-        break;
-      }
+      if(is_qvar_qualified(q))
+        err("struct field name is qualified",LOC(@3,@3));
       $$=^$(structarrow_exp($1,(*q)[1],LOC(@1,@3)));
     }
 | postfix_expression INC_OP
@@ -2526,8 +2475,7 @@ primary_expression:
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }
 /* Cyc: structure expressions */
 | qual_opt_identifier '{' initializer_list '}'
-    { $$=^$(new_exp(new Struct_e($1,null,List::imp_rev($3),null),LOC(@1,@4)));
-    }
+    { $$=^$(new_exp(new Struct_e($1,null,List::imp_rev($3),null),LOC(@1,@4))); }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(stmt_exp($3,LOC(@1,@5))); }
