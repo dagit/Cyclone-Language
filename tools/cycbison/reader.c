@@ -1182,15 +1182,7 @@ int stack_offset;
 		       rule->sym->tag);
 		type_name = "BOGUS";
 	      }
-	      fprintf(fguard,"({let %s(yyinternal) = yyvsp[%d]; yyinternal;})",
-		      type_name, n - stack_offset);
-	      /*
-	      fprintf(fguard, "yyvsp[%d]", n - stack_offset);
-	      if (type_name)
-		fprintf(fguard, ".%s", type_name);
-	      if(!type_name && typed)
-		warnss("$%s of `%s' has no declared type", int_to_string(n), rule->sym->tag);
-	      */
+	      fprintf(fguard,"({_ yyinternal; switch(yyvsp[%d]) { case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name, n - stack_offset);
 	      continue;
 	    }
 	  else if (c == '(') {
@@ -1428,13 +1420,6 @@ int stack_offset;
 		   * explicitly (e.g., let Int(x) = $$; ).
 		   */
 		  fprintf(faction, "yyval");
-		  /*
-		  if (!type_name) type_name = get_type_name(0, rule);
-		  if (type_name)
-		    fprintf(faction, ".%s", type_name);
-		  if(!type_name && typed)	
-		    warns("$$ of `%s' has no declared type", rule->sym->tag);
-		    */
 		}
 	      else if (isdigit(c) || c == '!' || c == '-')
 		{
@@ -1481,14 +1466,17 @@ int stack_offset;
 		    else 
 		      fprintf(faction, "(yyvs[yyvsp_offset-%d])", -m);
 		  } else {
-		    fprintf(faction,"({let %s(yyinternal) = ", type_name);
+		    fprintf(faction,"({_ yyinternal; switch ");
 		    if (m==0)
 		      fprintf(faction, "(yyvs[yyvsp_offset])");
 		    else if (m > 0) 
 		      fprintf(faction, "(yyvs[yyvsp_offset+%d])", m);
 		    else 
 		      fprintf(faction, "(yyvs[yyvsp_offset-%d])", -m);
+		    fprintf(faction, "{case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name);
+		    /*
 		    fprintf(faction,"; yyinternal;})");
+		    */
 		  }
 		  continue;
 		}

@@ -29,7 +29,7 @@ LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
 all: $(OUT_PREFIX)$(CYCCOMP)
 
 $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
-	gcc -g -o $@ $^ ../bin/gc.a
+	gcc -O -o $@ $^ ../bin/gc.a
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc
