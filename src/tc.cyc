@@ -310,7 +310,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
-  te->le = new Opt(new Outermost(new_fenv(loc,fd)));
+  te->le = new Opt(new_fenv(loc,fd));
   // check the body, then get rid of local environment
   Tcstmt::tcStmt(te,fd->body,false);
   // we've delayed checking some capabilities and constraints so that inference

@@ -17,6 +17,7 @@ void read_filename(char ?buf) {
     i++;
     c = fgetc(stdin);
   }
+  buf[i] = 0;
   if (c == EOF) throw Eof;
 }
 

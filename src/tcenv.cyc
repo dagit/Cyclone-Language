@@ -98,7 +98,7 @@ xtunion exn {Env_error};
 struct Tenv {
   list_t<var_t>                      ns; // current namespace
   Dict::dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  opt_t<frames_t<fenv_t>>            le; // is NULL except in functions
+  opt_t<fenv_t>                      le; // is NULL except in functions
 };
 
 // Global environments -- what's declared in a global scope
@@ -426,48 +426,17 @@ genv_t empty_genv() {
 		  .availables  = NULL};
 }
 
-////////////////////////////// Frames Manipulation //////////////////////////
-
-`a get_visible(frames_t<`a> f) {
-  while(true)
-    switch (f) {
-    case &Outermost(x): return x;
-    case &Frame(x,_):   return x;
-    case &Hidden(x,y):  f = y; break;
-    }
-}
-
-frames_t<`a> put_visible(frames_t<`a> f, `a x) {
-  switch (f) {
-  case &Outermost(x2): return new Outermost(x);
-  case &Frame(x2,f2):  return new Frame(x,f2);
-  case &Hidden(x2,f2): return new Hidden(x2,put_visible(f2,x));
-  }
-}
-
-frames_t<`a> apply_to_visible(`a g(`a), frames_t<`a> f) {
-  return put_visible(f,g(get_visible(f)));
-}
-
-frames_t<`b> map_frames(`b g(`a), frames_t<`a> f) {
-  switch (f) {
-  case &Outermost(x): return new Outermost(g(x));
-  case &Frame(x,f2):  return new Frame(g(x),map_frames(g,f2));
-  case &Hidden(x,f2): return new Hidden(g(x),map_frames(g,f2));
-  }
-}
+//////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t get_fenv(tenv_t te) {
   if (te->le == NULL) env_err("get_fenv");
-  return get_visible(te->le->v);
+  return te->le->v;
 }
 
 static tenv_t put_fenv(tenv_t te, fenv_t fe) {
   if (te->le == NULL) env_err("put_fenv");
-  return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
+  return new Tenv(te->ns, te->ae, new Opt(fe));
 }
-
-//////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
   return new *f;

@@ -73,19 +73,11 @@ extern tunion Jumpee {
 };
 typedef tunion Jumpee jumpee_t;
 
-// Models the nesting of the RTCG constructs 
-extern tunion Frames<`a> {
-  Outermost(`a);
-  Frame(`a,tunion Frames<`a>);
-  Hidden(`a,tunion Frames<`a>);
-};
-typedef tunion Frames<`a> frames_t<`a>;
-
 // Type environments 
 extern struct Tenv {
   list_t<var_t>                ns; // current namespace
   dict_t<list_t<var_t>,genv_t> ae; // absolute environment
-  opt_t<frames_t<fenv_t>>      le; // local environment, == null except in functions
+  opt_t<fenv_t>                le; // local environment, == null except in functions
 };
 typedef struct Tenv @tenv_t; 
 
