@@ -742,37 +742,42 @@ sizeof(int))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr 
 unsigned int line))Cyc___assert_fail)(({const char*_tmp0="len <= src1.size && len <= src2.size";
 _tag_dynforward(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*
 _tmp1="bitvec.cyc";_tag_dynforward(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,
-11));}),71);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]| ((
-int*)src2.curr)[i];}}}void Cyc_Bitvec_intersect_two(struct _dynforward_ptr dest,
-struct _dynforward_ptr src1,struct _dynforward_ptr src2){unsigned int len=
-_get_dynforward_size(dest,sizeof(int));len <= _get_dynforward_size(src1,sizeof(
-int)) && len <= _get_dynforward_size(src2,sizeof(int))?0:((int(*)(struct
-_dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
-const char*_tmp2="len <= src1.size && len <= src2.size";_tag_dynforward(_tmp2,
-sizeof(char),_get_zero_arr_size(_tmp2,37));}),({const char*_tmp3="bitvec.cyc";
-_tag_dynforward(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),78);{int i=0;
-for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]& ((int*)src2.curr)[i];}}}
-void Cyc_Bitvec_diff_two(struct _dynforward_ptr dest,struct _dynforward_ptr src1,
-struct _dynforward_ptr src2){unsigned int len=_get_dynforward_size(dest,sizeof(int));
-len <= _get_dynforward_size(src1,sizeof(int)) && len <= _get_dynforward_size(src2,
+11));}),71);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
+_check_dynforward_subscript(src1,sizeof(int),i))| *((int*)
+_check_dynforward_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_intersect_two(
+struct _dynforward_ptr dest,struct _dynforward_ptr src1,struct _dynforward_ptr src2){
+unsigned int len=_get_dynforward_size(dest,sizeof(int));len <= 
+_get_dynforward_size(src1,sizeof(int)) && len <= _get_dynforward_size(src2,
+sizeof(int))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
+unsigned int line))Cyc___assert_fail)(({const char*_tmp2="len <= src1.size && len <= src2.size";
+_tag_dynforward(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,37));}),({const char*
+_tmp3="bitvec.cyc";_tag_dynforward(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,
+11));}),78);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
+_check_dynforward_subscript(src1,sizeof(int),i))& *((int*)
+_check_dynforward_subscript(src2,sizeof(int),i));}}}void Cyc_Bitvec_diff_two(
+struct _dynforward_ptr dest,struct _dynforward_ptr src1,struct _dynforward_ptr src2){
+unsigned int len=_get_dynforward_size(dest,sizeof(int));len <= 
+_get_dynforward_size(src1,sizeof(int)) && len <= _get_dynforward_size(src2,
 sizeof(int))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
 unsigned int line))Cyc___assert_fail)(({const char*_tmp4="len <= src1.size && len <= src2.size";
 _tag_dynforward(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,37));}),({const char*
 _tmp5="bitvec.cyc";_tag_dynforward(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,
-11));}),85);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=((int*)src1.curr)[i]& 
-~((int*)src2.curr)[i];}}}int Cyc_Bitvec_compare_two(struct _dynforward_ptr src1,
-struct _dynforward_ptr src2){unsigned int len=_get_dynforward_size(src1,sizeof(int));
-len <= _get_dynforward_size(src2,sizeof(int))?0:((int(*)(struct _dynforward_ptr
-assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
-char*_tmp6="len <= src2.size";_tag_dynforward(_tmp6,sizeof(char),
-_get_zero_arr_size(_tmp6,17));}),({const char*_tmp7="bitvec.cyc";_tag_dynforward(
-_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,11));}),92);{int i=0;for(0;i < len;++ i){
-if(((int*)src1.curr)[i]!= ((int*)src2.curr)[i])return 0;}}return 1;}struct
-_dynforward_ptr Cyc_Bitvec_new_empty(int sz){struct _dynforward_ptr ans=({
-unsigned int _tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)_cycalloc_atomic(
-_check_times(sizeof(int),_tmp8));struct _dynforward_ptr _tmpB=_tag_dynforward(
-_tmp9,sizeof(int),_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < _tmpA;
-i ++){_tmp9[i]=0;}}_tmpB;});return ans;}struct _dynforward_ptr Cyc_Bitvec_new_full(
+11));}),85);{int i=0;for(0;i < len;++ i){((int*)dest.curr)[i]=*((int*)
+_check_dynforward_subscript(src1,sizeof(int),i))& ~(*((int*)
+_check_dynforward_subscript(src2,sizeof(int),i)));}}}int Cyc_Bitvec_compare_two(
+struct _dynforward_ptr src1,struct _dynforward_ptr src2){unsigned int len=
+_get_dynforward_size(src1,sizeof(int));len <= _get_dynforward_size(src2,sizeof(
+int))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
+unsigned int line))Cyc___assert_fail)(({const char*_tmp6="len <= src2.size";
+_tag_dynforward(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,17));}),({const char*
+_tmp7="bitvec.cyc";_tag_dynforward(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,
+11));}),92);{int i=0;for(0;i < len;++ i){if(*((int*)_check_dynforward_subscript(
+src1,sizeof(int),i))!= *((int*)_check_dynforward_subscript(src2,sizeof(int),i)))
+return 0;}}return 1;}struct _dynforward_ptr Cyc_Bitvec_new_empty(int sz){struct
+_dynforward_ptr ans=({unsigned int _tmp8=(unsigned int)(sz / 32 + 1);int*_tmp9=(int*)
+_cycalloc_atomic(_check_times(sizeof(int),_tmp8));struct _dynforward_ptr _tmpB=
+_tag_dynforward(_tmp9,sizeof(int),_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;
+for(i=0;i < _tmpA;i ++){_tmp9[i]=0;}}_tmpB;});return ans;}struct _dynforward_ptr Cyc_Bitvec_new_full(
 int sz){struct _dynforward_ptr ans=({unsigned int _tmpC=(unsigned int)(sz / 32 + 1);
 int*_tmpD=(int*)_cycalloc_atomic(_check_times(sizeof(int),_tmpC));struct
 _dynforward_ptr _tmpF=_tag_dynforward(_tmpD,sizeof(int),_tmpC);{unsigned int _tmpE=

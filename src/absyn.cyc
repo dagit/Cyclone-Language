@@ -62,11 +62,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   int i = strptrcmp(tv1->name,tv2->name);
   if (i != 0) return i;
-  if (tv1->identity == tv2->identity) return 0;
-  if (tv1->identity != NULL && tv2->identity != NULL) 
-    return (*tv1->identity) - (*tv2->identity);
-  else if (tv1->identity == NULL) return -1;
-  else return 1;
+  return (tv1->identity) - (tv2->identity);
 }
   
 tunion Nmspace       rel_ns_null       = Rel_n(NULL);
@@ -167,7 +163,7 @@ kind_t force_kb(kindbound_t kb) {
   case &Eq_kb(k): return k;
   case &Unknown_kb(*f): fallthru(f,BoxKind);
   case &Less_kb(*f,k):
-    *f = new Opt(new Eq_kb(k)); 
+    *f = new Opt(Tcutil::kind_to_bound(k)); 
     return k;
   }
 }
@@ -197,10 +193,50 @@ type_t sshort_typ    = &sshort_tt;
 type_t sint_typ      = &sint_tt;
 type_t slong_typ     = &slong_tt;
 type_t slonglong_typ = &slonglong_tt;
+// no sign
+static tunion Type.IntType nshort_tt    = IntType(None,Short_sz);
+static tunion Type.IntType nint_tt      = IntType(None,Int_sz);
+static tunion Type.IntType nlong_tt     = IntType(None,Long_sz);
+static tunion Type.IntType nlonglong_tt = IntType(None,LongLong_sz);
+type_t nshort_typ    = &nshort_tt;
+type_t nint_typ      = &nint_tt;
+type_t nlong_typ     = &nlong_tt;
+type_t nlonglong_typ = &nlonglong_tt;
+
+type_t int_typ(sign_t sn, size_of_t sz) {
+  switch (sn) {
+  case Signed:
+    switch (sz) {
+    case Char_sz: return schar_typ;
+    case Short_sz: return sshort_typ;
+    case Int_sz: return sint_typ;
+    case Long_sz: return slong_typ;
+    case LongLong_sz: return slonglong_typ;
+    }
+  case Unsigned:
+    switch (sz) {
+    case Char_sz: return uchar_typ;
+    case Short_sz: return ushort_typ;
+    case Int_sz: return uint_typ;
+    case Long_sz: return ulong_typ;
+    case LongLong_sz: return ulonglong_typ;
+    }
+  case None:
+    switch (sz) {
+    case Char_sz: return char_typ;
+    case Short_sz: return nshort_typ;
+    case Int_sz: return nint_typ;
+    case Long_sz: return nlong_typ;
+    case LongLong_sz: return nlonglong_typ;
+    }
+  }
+}
 // float, double
 type_t float_typ  = FloatType;
 type_t double_typ(bool b) {
-  return new DoubleType(b);
+  static tunion Type.DoubleType dt = DoubleType(true);
+  static tunion Type.DoubleType df = DoubleType(false);
+  return b ? &dt : &df;
 }
 // exceptions
 static string_t exn_str = "exn";
@@ -812,6 +848,7 @@ bool is_union_type(type_t t) {
   }
 
 bool porting_c_code = false;
+bool no_regions = false;
   
 }
 

@@ -29,6 +29,7 @@
 #include "new_control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
+#include "toc.h" // for no_regions flag
 #include <stdio.h>
 
 #ifdef NO_PATHS
@@ -46,6 +47,7 @@ using Tcutil;
 using Tcenv;
 using Tcexp;
 using Tcpat;
+
 namespace Tcstmt;
 
 static void decorate_stmt(tenv_t te, stmt_t s) {
@@ -230,7 +232,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(Tcenv::new_named_block(r,s0->loc,add_label(te,l,s),
                                     new Tvar(new ((string_t)aprintf("`%s",*l)),
                                              new_tvar_id(),
-                                             new Eq_kb(RgnKind))),s,false); 
+                                             kind_to_bound(RgnKind))),s,false); 
     }
     return;
 
@@ -541,14 +543,17 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,*t);
       if (!unify(*t,new RgnHandleType(rgn_typ)))
         impos("region stmt: type of region handle is wrong!");
-      tcStmt(set_encloser(r,add_local_var(r,s->loc,enter_try(r,te2),vd),s0),s,
-             false);
+      // we don't push a handler when regions are turned off so we
+      // only want to enter_try when regions are on.
+      if (!no_regions) {
+        te2 = enter_try(r,te2);
+      }
+      tcStmt(set_encloser(r,add_local_var(r,s->loc,te2,vd),s0),s,false);
     }
     return;
   case &ResetRegion_s(e):
     // check that e is an intuitionistic region_t<`r> 
-    type_t rgn_type = new_evar(new Opt(RgnKind),
-                               new Opt(lookup_type_vars(te)));
+    type_t rgn_type = new_evar(&rk,lookup_opt_type_vars(te));
     type_t etype = new RgnHandleType(rgn_type);
     if (!unify(tcExp(te,&etype,e),etype))
       terr(e->loc, "expecting region_t but found %s", typ2string(e->topt->v));

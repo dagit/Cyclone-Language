@@ -391,7 +391,7 @@ struct _RegionHandle _new_region(const char *);
 static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
-#define CYC_MIN_REGION_PAGE_SIZE 60
+#define CYC_MIN_REGION_PAGE_SIZE 480
 
 // controls the default page size for a region
 static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
@@ -541,41 +541,67 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
 
 // allocate s bytes within region r
 void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
-  void *result;
-  // allocate in the heap
-  if (r == NULL) {
+  char *result;
+  if (r != NULL) {
+    // round s up to the nearest MIN_ALIGNMENT value
+    s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+    // if no page yet, then fetch one
+    if (r->curr == 0) {
+      _get_first_region_page(r,s);
+      result = r->offset;
+    } else {
+      result = r->offset;
+      // else check for space on the current page
+      if (s > (r->last_plus_one - result)) {
+        grow_region(r,s);
+        result = r->offset;
+      }
+    }
+    r->offset = result + s;
+#ifdef CYC_REGION_PROFILE
+    r->curr->free_bytes = r->curr->free_bytes - s;
+    rgn_total_bytes += s;
+#endif
+    return (void *)result;
+  } else {
 #ifdef CYC_REGION_PROFILE
     heap_total_bytes += s;
 #endif
     result = GC_malloc(s);
     if(!result)
       _throw_badalloc;
-    return result;
+    return (void *)result;
   }
-  // round s up to the nearest MIN_ALIGNMENT value
-  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  // if no page yet, then fetch one
-  if (r->curr == 0) 
-    _get_first_region_page(r,s);
-  // else check for space on the current page
-  else if (s > (r->last_plus_one - r->offset)) 
-    grow_region(r,s);
-  result = (void *)r->offset;
-  r->offset = r->offset + s;
-#ifdef CYC_REGION_PROFILE
-  r->curr->free_bytes = r->curr->free_bytes - s;
-  rgn_total_bytes += s;
-#endif
-  return result;
 }
 
 // allocate s bytes within region r
 void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t) 
 {
   unsigned int s = n*t;
-  void *result;
+  char *result;
+  if (r != NULL) {
+    // round s up to the nearest MIN_ALIGNMENT value
+    s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+    // if no page yet, then fetch one
+    if (r->curr == 0) {
+      _get_first_region_page(r,s);
+      result = r->offset;
+    } else {
+      result = r->offset;
+      // else check for space on the current page
+      if (s > (r->last_plus_one - result)) {
+        grow_region(r,s);
+        result = r->offset;
+      }
+    }
+    r->offset = result + s;
+#ifdef CYC_REGION_PROFILE
+    r->curr->free_bytes = r->curr->free_bytes - s;
+    rgn_total_bytes += s;
+#endif
+    return (void *)result;
+  } else {
   // allocate in the heap
-  if (r == NULL) {
 #ifdef CYC_REGION_PROFILE
     heap_total_bytes += s;
 #endif
@@ -584,20 +610,6 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
       _throw_badalloc;
     return result;
   }
-  // round s up to the nearest MIN_ALIGNMENT value
-  s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
-  // if no page yet, then fetch one
-  if (r->curr == 0)
-    _get_first_region_page(r,s);
-  else if (s > (r->last_plus_one - r->offset))
-    grow_region(r,s);
-  result = (void *)r->offset;
-  r->offset = r->offset + s;
-#ifdef CYC_REGION_PROFILE
-  r->curr->free_bytes = r->curr->free_bytes - s;
-  rgn_total_bytes += s;
-#endif
-  return result;
 }
 
 /* Open a dynamic region -- throws an exception when the handle

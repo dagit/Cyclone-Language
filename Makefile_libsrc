@@ -33,6 +33,20 @@ export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 #   directory, and the -B. ensures we use that one.
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
+# various flags to set
+ifdef PROFILE
+override CYCFLAGS += -pg
+endif
+ifdef ALLOC_PROFILE
+override CYCFLAGS += -pa
+endif
+ifdef NOGC
+override CYCFLAGS += -nogc
+endif
+ifdef NOREGIONS
+override CYCFLAGS += -noregions
+endif
+
 # cross compilation -- will be changed to use -b shortly
 ifneq ($(UPDATEARCH),$(ARCH))
 override CYCFLAGS += -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(UPDATEARCH))'
@@ -70,14 +84,27 @@ endif
 # current directory, and the second -B makes sure we pick up the gc.a
 # of the current $(CYCDIR), and we avoid the libcyc.a and gc.a of any
 # version of Cyclone currently installed in the usual place.
-# Why don't these use $(CYCFLAGS) -- because that has -save-c which is
+# We don't these use $(CYCFLAGS) -- because that has -save-c which is
 #   irrelevant and the -B flags used there are to find cyc_include.h,
 #   not the .a files.
+ifdef PROFILE
+OTHER_CYCFLAGS += -pg
+endif
+ifdef ALLOC_PROFILE
+OTHER_CYCFLAGS += -pa
+endif
+ifdef NOGC
+OTHER_CYCFLAGS += -nogc
+endif
+ifdef NOREGIONS
+OTHER_CYCFLAGS += -noregions
+endif
+
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(OTHER_CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(OTHER_CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \

@@ -211,7 +211,7 @@ namespace Absyn {
   // type variables
   EXTERN_ABSYN struct Tvar {
     tvarname_t name;       // the user-level name of the type variable
-    int       *identity;   // for alpha-conversion -- unique
+    int        identity;   // for alpha-conversion -- unique -- -1 is error
     kindbound_t kind;
   };
 
@@ -815,6 +815,7 @@ namespace Absyn {
   extern type_t new_evar(opt_t<kind_t,`H> k,opt_t<list_t<tvar_t,`H>,`H> tenv);
   // any memory type whose free type variables are drawn from the given list
   extern type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H>);
+  extern type_t int_typ(sign_t,size_of_t);
   // unsigned types
   extern type_t char_typ, uchar_typ, ushort_typ, uint_typ, ulong_typ, ulonglong_typ;
   // signed types
@@ -1026,6 +1027,8 @@ namespace Absyn {
 
   // used to control whether we're compiling or porting c code
   extern bool porting_c_code;
+  // used to control whether we generate region-allocating code or not
+  extern bool no_regions;
   }
 
 #endif

@@ -88,26 +88,14 @@ bool member(dict_t<`a,`b,`r> d, `a key) {
   throw Absent;
 }
 
-Core::opt_t<`b> lookup_opt(dict_t<`a,`b,`r> d, `a key) {
+`b*`r lookup_opt(dict_t<`a,`b,`r> d, `a key) {
   let rel = d.rel;
   let t   = d.t;
   while(t != NULL) {
     let i = rel(key,t->key_val[0]);
     if(i < 0) t = t->left;
     else if (i > 0) t = t->right;
-    else return new Core::Opt(t->key_val[1]);
-  }
-  return NULL;
-}
-
-`b*`r rlookup_opt(region_t<`r> r, dict_t<`a,`b,`r2> d, `a key) {
-  let rel = d.rel;
-  let t   = d.t;
-  while(t != NULL) {
-    let i = rel(key,t->key_val[0]);
-    if(i < 0) t = t->left;
-    else if (i > 0) t = t->right;
-    else return rnew(r) (t->key_val[1]);
+    else return &t->key_val[1];
   }
   return NULL;
 }

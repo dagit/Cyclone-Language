@@ -398,9 +398,9 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
       if (td->defn != NULL)
         warn(loc,"type variable %s is not used in typedef definition",
              *tvs->hd->name);
-      *f = new Opt(new Eq_kb(BoxKind)); break;
+      *f = new Opt(kind_to_bound(BoxKind)); break;
     case &Less_kb(*f,k):
-      *f = new Opt(new Eq_kb(k)); break;
+      *f = new Opt(kind_to_bound(k)); break;
     default: continue;
     }
   
@@ -468,7 +468,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     case &Unknown_kb(*f):      fallthru(f);
     case &Less_kb(*f,MemKind): fallthru(f);
     case &Less_kb(*f,AnyKind):
-      *f = new Opt(new Eq_kb(BoxKind)); continue;
+      *f = new Opt(kind_to_bound(BoxKind)); continue;
     case &Eq_kb(MemKind):
       terr(loc,"type %s attempts to abstract type variable %s of kind M", 
            *v, *tvs2->hd->name); continue;
@@ -523,7 +523,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 
     *adp = ad; //insert ad in the environment
     break;
-  case $(&AggrdeclImpl(exist_vars,rgn_po,fs), &Opt(adp)):
+  case $(&AggrdeclImpl(exist_vars,rgn_po,fs), &adp):
     // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
       terr(loc,"cannot reuse struct names for unions and vice-versa");
@@ -541,7 +541,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
-  case $(NULL, &Opt(adp)):
+  case $(NULL, &adp):
     // try to merge the declarations
     let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
     
@@ -647,7 +647,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     case &Unknown_kb(*f): fallthru(f);
     case &Less_kb(*f,MemKind): fallthru(f);
     case &Less_kb(*f,AnyKind): 
-      *f = new Opt(new Eq_kb(BoxKind)); break;
+      *f = new Opt(kind_to_bound(BoxKind)); break;
     case &Eq_kb(MemKind):
       terr(loc,"%s %s attempts to abstract type "
            "variable %s of kind M",obj,*v,*tvs2->hd->name); break;
@@ -663,7 +663,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   // set ge_decl to the namespace where the declaration 'lives'
   // (for xtunions it may be different from ge)
   region temp {
-    opt_t<tuniondecl_t@,`temp> tud_opt;
+    tuniondecl_t@*`temp tud_opt;
     if(tud->is_xtunion) {
       try tud_opt = lookup_xtuniondecl(temp,te,loc,tud->name);
       catch {
@@ -673,7 +673,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
         return;
       }
       if (tud_opt != NULL) {
-        tud->name = (*(tud_opt->v))->name;
+        tud->name = (*(*tud_opt))->name;
       } else {
         (*tud->name)[0] = Abs_n(te->ns); 
       }
@@ -686,7 +686,8 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
              qvar2string(tud->name)); // FIX
         return;
       }
-      tud_opt = Dict::lookup_opt(ge->tuniondecls, v);
+      let tdopt = Dict::lookup_opt(ge->tuniondecls, v);
+      tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
     }
     
     // check the fields and update the environment
@@ -707,7 +708,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
 
       *tudp = tud; //insert tud in the environment
       break;
-    case $(&Opt(*fs), &Opt(tudp)):
+    case $(&Opt(*fs), &tudp):
       let tud0 = *tudp;
       // for the sake of recursive fields, make name abstract in body
       *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion,
@@ -718,7 +719,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
 
       *tudp = tud0; // restore previous declaration and go update the environment
       fallthru(tudp);
-    case $(NULL, &Opt(tudp)):
+    case $(NULL, &tudp):
       // try to merge the declarations
       let tud2 = Tcdecl::merge_tuniondecl(*tudp, tud, loc, tc_msg);
       if (tud2 == NULL)

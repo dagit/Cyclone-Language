@@ -102,7 +102,7 @@ extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
 extern tuniondecl_t@     lookup_tuniondecl(tenv_t,seg_t,qvar_t);
-extern opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r>,tenv_t,seg_t,qvar_t);
+extern tuniondecl_t@*`r  lookup_xtuniondecl(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
@@ -113,6 +113,7 @@ extern tenv_t<`g,`r> add_local_var(region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t :
 extern tenv_t<`g,`r> add_pat_var  (region_t<`r>,seg_t,tenv_t<`g,`r2>,vardecl_t : {`r2} > `r);
 
 extern list_t<tvar_t> lookup_type_vars(tenv_t<`r>);
+extern opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te);
 extern tenv_t<`g,`r> add_type_vars(region_t<`r>,seg_t,tenv_t<`g,`r2>,list_t<tvar_t> : {`r2} > `r);
 
 extern tenv_t<`g,`r> set_in_loop(region_t<`r>,tenv_t<`g,`r2> te, stmt_t continue_dest : {`r2}>`r);

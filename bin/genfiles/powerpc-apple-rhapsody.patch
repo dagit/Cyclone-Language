@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/lib/arg.c
-*** i686-unknown-linux/lib/arg.c	Fri Jul 19 20:19:45 2002
---- powerpc-apple-rhapsody/lib/arg.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/arg.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/arg.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -76,7 +76,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
   const char*_tmp3="len <= s.size";_tag_dynforward(_tmp3,sizeof(char),
 ***************
-*** 769,775 ****
+*** 770,776 ****
   char _tmp6=*((char*)_check_dynforward_subscript(_tmp5,sizeof(char),0));char _tmp7=
   i == 0?'\n':' ';if(_get_dynforward_size(_tmp5,sizeof(char))== 1  && (_tmp6 == '\000'
    && _tmp7 != '\000'))_throw_arraybounds();*((char*)_tmp5.curr)=_tmp7;});}}{
@@ -84,7 +84,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   itemsep;if(Cyc_strlen((struct _dynforward_ptr)desc)> 0){if(_tmp8 + 1 > indent)
   itemsep=indentstr;else{struct _dynforward_ptr temp=({unsigned int _tmpC=(indent - 
   _tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
---- 767,773 ----
+--- 768,774 ----
   char _tmp6=*((char*)_check_dynforward_subscript(_tmp5,sizeof(char),0));char _tmp7=
   i == 0?'\n':' ';if(_get_dynforward_size(_tmp5,sizeof(char))== 1  && (_tmp6 == '\000'
    && _tmp7 != '\000'))_throw_arraybounds();*((char*)_tmp5.curr)=_tmp7;});}}{
@@ -93,8 +93,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   itemsep=indentstr;else{struct _dynforward_ptr temp=({unsigned int _tmpC=(indent - 
   _tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody/lib/assert.c
-*** i686-unknown-linux/lib/assert.c	Fri Jul 19 20:19:45 2002
---- powerpc-apple-rhapsody/lib/assert.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/assert.c	Fri Jul 19 20:19:46 2002
+--- powerpc-apple-rhapsody/lib/assert.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 690,716 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -151,8 +151,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody
   _tag_dynforward(_tmp0,sizeof(void*),3));}}}});Cyc_fflush((struct Cyc___cycFILE*)
   Cyc_stderr);exit(- 1);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody/lib/bitvec.c
-*** i686-unknown-linux/lib/bitvec.c	Fri Jul 19 20:19:45 2002
---- powerpc-apple-rhapsody/lib/bitvec.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/bitvec.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 691,716 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
@@ -207,8 +207,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody
   struct _dynforward_ptr);struct _dynforward_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict
   d,int(*f)(void*),int sz,struct Cyc_List_List*);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody/lib/buffer.c
-*** i686-unknown-linux/lib/buffer.c	Fri Jul 19 20:19:45 2002
---- powerpc-apple-rhapsody/lib/buffer.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/buffer.c	Fri Jul 19 20:19:46 2002
+--- powerpc-apple-rhapsody/lib/buffer.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 691,718 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -296,8 +296,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody
   struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _dynforward_ptr)bs->buffer,
   0,(int)bs->position);return;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody/lib/cstubs.c
-*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 13:54:35 2002
---- powerpc-apple-rhapsody/lib/cstubs.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 13:54:36 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 108,121 ****
       *Cyc_stdout = &Cyc_stdout_v,
@@ -317,7 +317,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody
 --- 108,113 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rhapsody/lib/cstubs.c.orig
 *** i686-unknown-linux/lib/cstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cstubs.c.orig	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c.orig	Mon Jul 22 11:13:52 2002
 ***************
 *** 0 ****
 --- 1,249 ----
@@ -571,8 +571,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rha
 +     return setsockopt(a,b,c,d,e);
 +   }
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Fri Jul 19 20:19:45 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/cycstubs.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 690,696 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -1027,7 +1027,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   ungetc(x,f->file);}int getw(struct Cyc_Cstdio___abstractFILE*);int Cyc_getw(struct
   Cyc___cycFILE*f){return getw(f->file);}int putw(int,struct Cyc_Cstdio___abstractFILE*);
 ***************
-*** 952,1241 ****
+*** 952,1242 ****
   struct Cyc___cycFILE*Cyc_file_open(struct _dynforward_ptr fname,struct
   _dynforward_ptr mode){struct Cyc___cycFILE*f=Cyc_fopen((const char*)
   _untag_dynforward_ptr(fname,sizeof(char),1),(const char*)_untag_dynforward_ptr(
@@ -1035,18 +1035,19 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! _get_dynforward_size(fname,sizeof(char));char*_tmp3B=(char*)_cycalloc_atomic(
 ! _check_times(sizeof(char),_tmp3A + 1));struct _dynforward_ptr _tmp3D=
 ! _tag_dynforward(_tmp3B,sizeof(char),_tmp3A + 1);{unsigned int _tmp3C=_tmp3A;
-! unsigned int i;for(i=0;i < _tmp3C;i ++){_tmp3B[i]=((const char*)fname.curr)[(int)i];}
-! _tmp3B[_tmp3C]=(char)0;}_tmp3D;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*
-! _tmp38=_cycalloc(sizeof(*_tmp38));_tmp38[0]=({struct Cyc_FileOpenError_struct
-! _tmp39;_tmp39.tag=Cyc_FileOpenError;_tmp39.f1=fn;_tmp39;});_tmp38;}));}return(
-  struct Cyc___cycFILE*)f;}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(
-  f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-  typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-! struct _dynforward_ptr);void Cyc_qsort(struct _dynforward_ptr,unsigned int,
-  unsigned int,int(*)(const void*,const void*));void Cyc_free(struct _dynforward_ptr
-! ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(const void*,const void*));
-! static char _tmp3F[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
-! Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp3F,_tmp3F + 23}};static char _tmp41[42]="qsort called with insufficient array size";
+! unsigned int i;for(i=0;i < _tmp3C;i ++){_tmp3B[i]=*((const char*)
+! _check_dynforward_subscript(fname,sizeof(char),(int)i));}_tmp3B[_tmp3C]=(char)0;}
+! _tmp3D;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp38=_cycalloc(
+! sizeof(*_tmp38));_tmp38[0]=({struct Cyc_FileOpenError_struct _tmp39;_tmp39.tag=Cyc_FileOpenError;
+! _tmp39.f1=fn;_tmp39;});_tmp38;}));}return(struct Cyc___cycFILE*)f;}void Cyc_file_close(
+  struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+  typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
+  void*abort();void exit(int);void Cyc_free(struct _dynforward_ptr);void Cyc_qsort(
+! struct _dynforward_ptr,unsigned int,unsigned int,int(*)(const void*,const void*));
+! void Cyc_free(struct _dynforward_ptr ptr){;}void qsort(void*,unsigned int,
+! unsigned int,int(*)(const void*,const void*));static char _tmp3F[23]="qsort called with NULL";
+  static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
+! _tmp3F,_tmp3F + 23}};static char _tmp41[42]="qsort called with insufficient array size";
   static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
 ! _tmp41,_tmp41 + 42}};void Cyc_qsort(struct _dynforward_ptr tab,unsigned int nmemb,
   unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(
@@ -1318,7 +1319,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   count > _get_dynforward_size(buf,sizeof(char)))(int)_throw((void*)& Cyc___write_failure);
   return write(fd,(const char*)_untag_dynforward_ptr(buf,sizeof(char),1),count);}
   struct Cyc_utimbuf{long actime;long modtime;};
---- 894,1160 ----
+--- 894,1161 ----
   struct Cyc___cycFILE*Cyc_file_open(struct _dynforward_ptr fname,struct
   _dynforward_ptr mode){struct Cyc___cycFILE*f=Cyc_fopen((const char*)
   _untag_dynforward_ptr(fname,sizeof(char),1),(const char*)_untag_dynforward_ptr(
@@ -1326,18 +1327,19 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
 ! _get_dynforward_size(fname,sizeof(char));char*_tmp32=(char*)_cycalloc_atomic(
 ! _check_times(sizeof(char),_tmp31 + 1));struct _dynforward_ptr _tmp34=
 ! _tag_dynforward(_tmp32,sizeof(char),_tmp31 + 1);{unsigned int _tmp33=_tmp31;
-! unsigned int i;for(i=0;i < _tmp33;i ++){_tmp32[i]=((const char*)fname.curr)[(int)i];}
-! _tmp32[_tmp33]=(char)0;}_tmp34;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*
-! _tmp2F=_cycalloc(sizeof(*_tmp2F));_tmp2F[0]=({struct Cyc_FileOpenError_struct
-! _tmp30;_tmp30.tag=Cyc_FileOpenError;_tmp30.f1=fn;_tmp30;});_tmp2F;}));}return(
-  struct Cyc___cycFILE*)f;}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(
-  f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-  typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-! struct _dynforward_ptr);void Cyc_qsort(struct _dynforward_ptr,unsigned long,
-  unsigned int,int(*)(const void*,const void*));void Cyc_free(struct _dynforward_ptr
-! ptr){;}void qsort(void*,unsigned long,unsigned long,int(*)(const void*,const void*));
-! static char _tmp36[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
-! Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp36,_tmp36 + 23}};static char _tmp38[42]="qsort called with insufficient array size";
+! unsigned int i;for(i=0;i < _tmp33;i ++){_tmp32[i]=*((const char*)
+! _check_dynforward_subscript(fname,sizeof(char),(int)i));}_tmp32[_tmp33]=(char)0;}
+! _tmp34;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp2F=_cycalloc(
+! sizeof(*_tmp2F));_tmp2F[0]=({struct Cyc_FileOpenError_struct _tmp30;_tmp30.tag=Cyc_FileOpenError;
+! _tmp30.f1=fn;_tmp30;});_tmp2F;}));}return(struct Cyc___cycFILE*)f;}void Cyc_file_close(
+  struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+  typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
+  void*abort();void exit(int);void Cyc_free(struct _dynforward_ptr);void Cyc_qsort(
+! struct _dynforward_ptr,unsigned long,unsigned int,int(*)(const void*,const void*));
+! void Cyc_free(struct _dynforward_ptr ptr){;}void qsort(void*,unsigned long,
+! unsigned long,int(*)(const void*,const void*));static char _tmp36[23]="qsort called with NULL";
+  static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
+! _tmp36,_tmp36 + 23}};static char _tmp38[42]="qsort called with insufficient array size";
   static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
 ! _tmp38,_tmp38 + 42}};void Cyc_qsort(struct _dynforward_ptr tab,unsigned long nmemb,
   unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(
@@ -1588,7 +1590,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   struct Cyc_utimbuf{long actime;long modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-rhapsody/lib/cycstubs.c.orig
 *** i686-unknown-linux/lib/cycstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Mon Jul 22 11:13:52 2002
 ***************
 *** 0 ****
 --- 1,981 ----
@@ -2575,7 +2577,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-r
 + int actime;int modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rhapsody/lib/cycstubs.c.rej
 *** i686-unknown-linux/lib/cycstubs.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Mon Jul 22 11:13:52 2002
 ***************
 *** 0 ****
 --- 1,528 ----
@@ -3108,10 +3110,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rh
 +   return write(fd,(const char*)_untag_arr(buf,sizeof(char),1),count);}struct Cyc_utimbuf{
 +   int actime;int modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/lib/dict.c
-*** i686-unknown-linux/lib/dict.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/dict.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/dict.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/dict.c	Mon Jul 22 11:13:56 2002
 ***************
-*** 692,767 ****
+*** 692,766 ****
   16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*
   tl;};int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[
   18];extern char Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,
@@ -3141,9 +3143,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
 ! Cyc_Dict_Dict d,struct Cyc_List_List*l);struct Cyc_Dict_Dict Cyc_Dict_singleton(int(*
 ! cmp)(void*,void*),void*k,void*v);struct Cyc_Dict_Dict Cyc_Dict_rsingleton(struct
 ! _RegionHandle*,int(*cmp)(void*,void*),void*k,void*v);void*Cyc_Dict_lookup(struct
-! Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict
-! d,void*k);void**Cyc_Dict_rlookup_opt(struct _RegionHandle*,struct Cyc_Dict_Dict d,
-! void*k);int Cyc_Dict_lookup_bool(struct Cyc_Dict_Dict d,void*k,void**ans);void*Cyc_Dict_fold(
+! Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
+! int Cyc_Dict_lookup_bool(struct Cyc_Dict_Dict d,void*k,void**ans);void*Cyc_Dict_fold(
 ! void*(*f)(void*,void*,void*),struct Cyc_Dict_Dict d,void*accum);void*Cyc_Dict_fold_c(
 ! void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict_Dict d,void*accum);
 ! void Cyc_Dict_app(void*(*f)(void*,void*),struct Cyc_Dict_Dict d);void Cyc_Dict_app_c(
@@ -3188,7 +3189,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   struct Cyc___cycFILE*),void*(*read_val)(void**,struct Cyc___cycFILE*),struct Cyc___cycFILE*
   fp);char Cyc_Dict_Absent[11]="\000\000\000\000Absent\000";char Cyc_Dict_Present[12]="\000\000\000\000Present\000";
   struct Cyc_Dict_T{void*color;struct Cyc_Dict_T*left;struct Cyc_Dict_T*right;struct
---- 692,765 ----
+--- 692,764 ----
   16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*
   tl;};int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[
   18];extern char Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,
@@ -3215,15 +3216,14 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
 ! struct Cyc_Dict_Dict Cyc_Dict_inserts(struct Cyc_Dict_Dict d,struct Cyc_List_List*l);
 ! struct Cyc_Dict_Dict Cyc_Dict_singleton(int(*cmp)(void*,void*),void*k,void*v);
 ! struct Cyc_Dict_Dict Cyc_Dict_rsingleton(struct _RegionHandle*,int(*cmp)(void*,void*),
-! void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*
-! Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);void**Cyc_Dict_rlookup_opt(
-! struct _RegionHandle*,struct Cyc_Dict_Dict d,void*k);int Cyc_Dict_lookup_bool(struct
-! Cyc_Dict_Dict d,void*k,void**ans);void*Cyc_Dict_fold(void*(*f)(void*,void*,void*),
-! struct Cyc_Dict_Dict d,void*accum);void*Cyc_Dict_fold_c(void*(*f)(void*,void*,void*,
-! void*),void*env,struct Cyc_Dict_Dict d,void*accum);void Cyc_Dict_app(void*(*f)(void*,
-! void*),struct Cyc_Dict_Dict d);void Cyc_Dict_app_c(void*(*f)(void*,void*,void*),
-! void*env,struct Cyc_Dict_Dict d);void Cyc_Dict_iter(void(*f)(void*,void*),struct Cyc_Dict_Dict
-! d);void Cyc_Dict_iter_c(void(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
+! void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(
+! struct Cyc_Dict_Dict d,void*k);int Cyc_Dict_lookup_bool(struct Cyc_Dict_Dict d,void*k,
+! void**ans);void*Cyc_Dict_fold(void*(*f)(void*,void*,void*),struct Cyc_Dict_Dict d,
+! void*accum);void*Cyc_Dict_fold_c(void*(*f)(void*,void*,void*,void*),void*env,
+! struct Cyc_Dict_Dict d,void*accum);void Cyc_Dict_app(void*(*f)(void*,void*),struct
+! Cyc_Dict_Dict d);void Cyc_Dict_app_c(void*(*f)(void*,void*,void*),void*env,struct
+! Cyc_Dict_Dict d);void Cyc_Dict_iter(void(*f)(void*,void*),struct Cyc_Dict_Dict d);
+! void Cyc_Dict_iter_c(void(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
 ! void Cyc_Dict_iter2(void(*f)(void*,void*),struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict
 ! d2);void Cyc_Dict_iter2_c(void(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict
 ! d1,struct Cyc_Dict_Dict d2);void*Cyc_Dict_fold2_c(void*(*f)(void*,void*,void*,void*,
@@ -3265,7 +3265,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   struct Cyc_Dict_T{void*color;struct Cyc_Dict_T*left;struct Cyc_Dict_T*right;struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 682,781 ****
     *x = *y;
@@ -3400,7 +3400,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! _tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapsody/lib/filename.c
 *** i686-unknown-linux/lib/filename.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/filename.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/filename.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 698,704 ****
   struct _dynforward_ptr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
@@ -3447,7 +3447,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapso
   i))!= '/'){-- i;}return Cyc_substring((struct _dynforward_ptr)filename,i + 1,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 690,698 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3545,7 +3545,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   _check_dynforward_subscript(p,sizeof(struct Cyc_option),0))->name)){pfound=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/lib/grp.c
 *** i686-unknown-linux/lib/grp.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/grp.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/grp.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 698,704 ****
   groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
@@ -3564,8 +3564,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/li
   name));return(unsigned int)src?({struct Cyc_group*_tmp0=_cycalloc(sizeof(*_tmp0));
   _tmp0->gr_name=(struct _dynforward_ptr)Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhapsody/lib/hashtable.c
-*** i686-unknown-linux/lib/hashtable.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/hashtable.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/hashtable.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/hashtable.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 704,715 ****
   void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*t);void
@@ -3592,7 +3592,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhaps
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody/lib/lexing.c
 *** i686-unknown-linux/lib/lexing.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/lexing.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/lexing.c	Mon Jul 22 11:13:52 2002
 ***************
 *** 690,698 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3680,8 +3680,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody
   char _tmp5='\000';if(_get_dynforward_size(_tmp3,sizeof(char))== 1  && (_tmp4 == '\000'
    && _tmp5 != '\000'))_throw_arraybounds();*((char*)_tmp3.curr)=_tmp5;});return s;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody/lib/lineno.c
-*** i686-unknown-linux/lib/lineno.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/lineno.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/lineno.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/lineno.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 690,698 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3727,42 +3727,42 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody
   filename,struct Cyc_List_List*places);const int Cyc_Lineno_lex_base[8]=(const int[8]){
   0,1,- 2,2,5,- 3,- 1,6};const int Cyc_Lineno_lex_backtrk[8]=(const int[8]){- 1,- 1,- 1,1,-
 ***************
-*** 779,785 ****
+*** 781,787 ****
   struct Cyc_Core_Opt*_tmp9=0;_npop_handler(0);return _tmp9;}{int number=0;if(({
   struct Cyc_IntPtr_sa_struct _tmpC;_tmpC.tag=2;_tmpC.f1=& number;{void*_tmpA[1]={&
   _tmpC};Cyc_sscanf((struct _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)
 ! line,i,(unsigned int)(j - i)),({const char*_tmpB="%d";_tag_dynforward(_tmpB,
   sizeof(char),_get_zero_arr_size(_tmpB,3));}),_tag_dynforward(_tmpA,sizeof(void*),
   1));}})!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);return _tmpD;}while(j < 
-  _get_dynforward_size(line,sizeof(char)) && ((char*)line.curr)[j]!= '"'){++ j;}{
---- 777,783 ----
+  _get_dynforward_size(line,sizeof(char)) && *((char*)_check_dynforward_subscript(
+--- 779,785 ----
   struct Cyc_Core_Opt*_tmp9=0;_npop_handler(0);return _tmp9;}{int number=0;if(({
   struct Cyc_IntPtr_sa_struct _tmpC;_tmpC.tag=2;_tmpC.f1=& number;{void*_tmpA[1]={&
   _tmpC};Cyc_sscanf((struct _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)
 ! line,i,(unsigned long)(j - i)),({const char*_tmpB="%d";_tag_dynforward(_tmpB,
   sizeof(char),_get_zero_arr_size(_tmpB,3));}),_tag_dynforward(_tmpA,sizeof(void*),
   1));}})!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);return _tmpD;}while(j < 
-  _get_dynforward_size(line,sizeof(char)) && ((char*)line.curr)[j]!= '"'){++ j;}{
+  _get_dynforward_size(line,sizeof(char)) && *((char*)_check_dynforward_subscript(
 ***************
-*** 787,793 ****
-  k]!= '"'){++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == 
-  _get_dynforward_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
-  _npop_handler(0);return _tmpE;}{struct _dynforward_ptr fname=Cyc_substring((struct
-! _dynforward_ptr)line,j,(unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct
-  Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=
-  _cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
-  _npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)
---- 785,791 ----
-  k]!= '"'){++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == 
-  _get_dynforward_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
-  _npop_handler(0);return _tmpE;}{struct _dynforward_ptr fname=Cyc_substring((struct
-! _dynforward_ptr)line,j,(unsigned long)(k - j));struct Cyc_Core_Opt*_tmp11=({struct
-  Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=
-  _cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
-  _npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)
+*** 790,796 ****
+  ++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == _get_dynforward_size(
+  line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;_npop_handler(0);return _tmpE;}{
+  struct _dynforward_ptr fname=Cyc_substring((struct _dynforward_ptr)line,j,(
+! unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct Cyc_Core_Opt*_tmpF=
+  _cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=_cycalloc(sizeof(*
+  _tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});_npop_handler(0);
+  return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)_exn_thrown;void*
+--- 788,794 ----
+  ++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == _get_dynforward_size(
+  line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;_npop_handler(0);return _tmpE;}{
+  struct _dynforward_ptr fname=Cyc_substring((struct _dynforward_ptr)line,j,(
+! unsigned long)(k - j));struct Cyc_Core_Opt*_tmp11=({struct Cyc_Core_Opt*_tmpF=
+  _cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=_cycalloc(sizeof(*
+  _tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});_npop_handler(0);
+  return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)_exn_thrown;void*
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/marshal.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/marshal.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/marshal.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 714,732 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -3804,7 +3804,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapsody/lib/position.c
 *** i686-unknown-linux/lib/position.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/position.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/position.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 692,704 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
@@ -3930,7 +3930,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapso
   sizeof(*_tmp49));_tmp49->f1=({struct Cyc_String_pa_struct _tmp4F;_tmp4F.tag=0;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib/pp.c
 *** i686-unknown-linux/lib/pp.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/pp.c	Sun Jul 21 21:51:16 2002
+--- powerpc-apple-rhapsody/lib/pp.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 691,699 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3968,8 +3968,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib
   _dynforward_ptr*);struct _dynforward_ptr Cyc_str_sepstr(struct Cyc_List_List*,
   struct _dynforward_ptr);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody/lib/printf.c
-*** i686-unknown-linux/lib/printf.c	Fri Jul 19 20:19:46 2002
---- powerpc-apple-rhapsody/lib/printf.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/printf.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/printf.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 690,702 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -4124,8 +4124,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody
   struct _dynforward_ptr ap){return Cyc_vsnprintf(s,_get_dynforward_size(s,sizeof(
   char)),fmt,ap);}int Cyc_sprintf(struct _dynforward_ptr s,struct _dynforward_ptr fmt,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/lib/rope.c
-*** i686-unknown-linux/lib/rope.c	Fri Jul 19 20:19:47 2002
---- powerpc-apple-rhapsody/lib/rope.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/rope.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/rope.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 698,706 ****
   struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct _dynforward_ptr);struct Cyc_Rope_Rope_node*
@@ -4149,24 +4149,24 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/l
   Cyc_Rope_from_string(struct _dynforward_ptr s){return({struct Cyc_Rope_Rope_node*
 ***************
 *** 739,745 ****
-  unsigned int i,struct Cyc_Rope_Rope_node*r){void*_tmp14=(void*)r->v;struct
-  _dynforward_ptr _tmp15;struct _dynforward_ptr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)
-  goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)_tmp14)->f1;_LL7: {
-! unsigned int _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);Cyc_strncpy(
-  _dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(int)i),
-  sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((
-  int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;
+  unsigned int Cyc_Rope_flatten_it(struct _dynforward_ptr s,unsigned int i,struct Cyc_Rope_Rope_node*
+  r){void*_tmp14=(void*)r->v;struct _dynforward_ptr _tmp15;struct _dynforward_ptr
+  _tmp16;_LL6: if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)
+! _tmp14)->f1;_LL7: {unsigned int _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);
+  Cyc_strncpy(_dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(
+  int)i),sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}
+  _LL8: if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)
 --- 739,745 ----
-  unsigned int i,struct Cyc_Rope_Rope_node*r){void*_tmp14=(void*)r->v;struct
-  _dynforward_ptr _tmp15;struct _dynforward_ptr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)
-  goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)_tmp14)->f1;_LL7: {
-! unsigned long _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);Cyc_strncpy(
-  _dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(int)i),
-  sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((
-  int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;
+  unsigned int Cyc_Rope_flatten_it(struct _dynforward_ptr s,unsigned int i,struct Cyc_Rope_Rope_node*
+  r){void*_tmp14=(void*)r->v;struct _dynforward_ptr _tmp15;struct _dynforward_ptr
+  _tmp16;_LL6: if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)
+! _tmp14)->f1;_LL7: {unsigned long _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);
+  Cyc_strncpy(_dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(
+  int)i),sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}
+  _LL8: if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/lib/scanf.c
-*** i686-unknown-linux/lib/scanf.c	Fri Jul 19 20:19:47 2002
---- powerpc-apple-rhapsody/lib/scanf.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/scanf.c	Fri Jul 19 20:19:48 2002
+--- powerpc-apple-rhapsody/lib/scanf.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 693,701 ****
   16];int isspace(int);int isupper(int);typedef struct{int quot;int rem;}Cyc_div_t;
@@ -4205,8 +4205,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/
   struct _dynforward_ptr f1;};static struct _dyneither_ptr Cyc___sccl(char*tab,struct
   _dyneither_ptr fmt);static short*Cyc_va_arg_short_ptr(void*a){void*_tmp0=a;short*
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody/lib/string.c
-*** i686-unknown-linux/lib/string.c	Fri Jul 19 20:19:47 2002
---- powerpc-apple-rhapsody/lib/string.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/string.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/string.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 692,710 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -4304,7 +4304,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   struct _dynforward_ptr);struct _dynforward_ptr Cyc_rreplace_suffix(struct
   _RegionHandle*r,struct _dynforward_ptr src,struct _dynforward_ptr curr_suffix,struct
 ***************
-*** 744,763 ****
+*** 744,765 ****
   Cyc_strstr(struct _dynforward_ptr haystack,struct _dynforward_ptr needle);struct
   _dynforward_ptr Cyc_strpbrk(struct _dynforward_ptr s,struct _dynforward_ptr accept);
   struct _dynforward_ptr Cyc_mstrpbrk(struct _dynforward_ptr s,struct _dynforward_ptr
@@ -4318,14 +4318,16 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! s1,struct _dynforward_ptr s2,unsigned int len);void*Cyc___assert_fail(struct
   _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);char*
 ! strerror(int errnum);unsigned int Cyc_strlen(struct _dynforward_ptr s){unsigned int i;
-! unsigned int sz=_get_dynforward_size(s,sizeof(char));for(i=0;i < sz;i ++){if(((
-! const char*)s.curr)[(int)i]== '\000')return i;}return i;}int Cyc_strcmp(struct
-! _dynforward_ptr s1,struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{int i=0;
-! unsigned int sz1=_get_dynforward_size(s1,sizeof(char));unsigned int sz2=
-  _get_dynforward_size(s2,sizeof(char));unsigned int minsz=sz1 < sz2?sz1: sz2;minsz <= 
-  _get_dynforward_size(s1,sizeof(char)) && minsz <= _get_dynforward_size(s2,sizeof(
-  char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
---- 744,763 ----
+! unsigned int sz=_get_dynforward_size(s,sizeof(char));for(i=0;i < sz;i ++){if(*((
+! const char*)_check_dynforward_subscript(s,sizeof(char),(int)i))== '\000')return i;}
+! return i;}int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2){if(s1.curr
+! == s2.curr)return 0;{int i=0;unsigned int sz1=_get_dynforward_size(s1,sizeof(char));
+! unsigned int sz2=_get_dynforward_size(s2,sizeof(char));unsigned int minsz=sz1 < sz2?
+! sz1: sz2;minsz <= _get_dynforward_size(s1,sizeof(char)) && minsz <= 
+  _get_dynforward_size(s2,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,
+  struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= s1.size && minsz <= s2.size";
+  _tag_dynforward(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*
+--- 744,765 ----
   Cyc_strstr(struct _dynforward_ptr haystack,struct _dynforward_ptr needle);struct
   _dynforward_ptr Cyc_strpbrk(struct _dynforward_ptr s,struct _dynforward_ptr accept);
   struct _dynforward_ptr Cyc_mstrpbrk(struct _dynforward_ptr s,struct _dynforward_ptr
@@ -4340,14 +4342,16 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);char*
 ! strerror(int errnum);unsigned long Cyc_strlen(struct _dynforward_ptr s){
 ! unsigned long i;unsigned int sz=_get_dynforward_size(s,sizeof(char));for(i=0;i < sz;
-! i ++){if(((const char*)s.curr)[(int)i]== '\000')return i;}return i;}int Cyc_strcmp(
-! struct _dynforward_ptr s1,struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{
-! int i=0;unsigned int sz1=_get_dynforward_size(s1,sizeof(char));unsigned int sz2=
-  _get_dynforward_size(s2,sizeof(char));unsigned int minsz=sz1 < sz2?sz1: sz2;minsz <= 
-  _get_dynforward_size(s1,sizeof(char)) && minsz <= _get_dynforward_size(s2,sizeof(
-  char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
+! i ++){if(*((const char*)_check_dynforward_subscript(s,sizeof(char),(int)i))== '\000')
+! return i;}return i;}int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2){
+! if(s1.curr == s2.curr)return 0;{int i=0;unsigned int sz1=_get_dynforward_size(s1,
+! sizeof(char));unsigned int sz2=_get_dynforward_size(s2,sizeof(char));unsigned int
+! minsz=sz1 < sz2?sz1: sz2;minsz <= _get_dynforward_size(s1,sizeof(char)) && minsz <= 
+  _get_dynforward_size(s2,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,
+  struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= s1.size && minsz <= s2.size";
+  _tag_dynforward(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,37));}),({const char*
 ***************
-*** 772,780 ****
+*** 773,781 ****
   _check_dynforward_subscript(s1,sizeof(char),i))== '\000')return 0;else{return 1;}}}}
   int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2){return Cyc_strcmp((
   struct _dynforward_ptr)*s1,(struct _dynforward_ptr)*s2);}inline static int Cyc_ncmp(
@@ -4357,7 +4361,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   char)) && bound <= _get_dynforward_size(s2,sizeof(char))?0:((int(*)(struct
   _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
   const char*_tmp2="bound <= s1.size && bound <= s2.size";_tag_dynforward(_tmp2,
---- 772,780 ----
+--- 773,781 ----
   _check_dynforward_subscript(s1,sizeof(char),i))== '\000')return 0;else{return 1;}}}}
   int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2){return Cyc_strcmp((
   struct _dynforward_ptr)*s1,(struct _dynforward_ptr)*s2);}inline static int Cyc_ncmp(
@@ -4368,11 +4372,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
   const char*_tmp2="bound <= s1.size && bound <= s2.size";_tag_dynforward(_tmp2,
 ***************
-*** 782,792 ****
-  _tag_dynforward(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),96);{int i=0;
-  for(0;i < bound;i ++){int retc;if((retc=((const char*)s1.curr)[i]- ((const char*)s2.curr)[
-  i])!= 0)return retc;}}if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;}}
-! int Cyc_strncmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int n){
+*** 784,794 ****
+  for(0;i < bound;i ++){int retc;if((retc=*((const char*)_check_dynforward_subscript(
+  s1,sizeof(char),i))- *((const char*)_check_dynforward_subscript(s2,sizeof(char),i)))
+  != 0)return retc;}}if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;}}int
+! Cyc_strncmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int n){
 ! unsigned int len1=Cyc_strlen(s1);unsigned int len2=Cyc_strlen(s2);return Cyc_ncmp(
   s1,len1,s2,len2,n);}int Cyc_zstrcmp(struct _dynforward_ptr a,struct _dynforward_ptr b){
 ! if(a.curr == b.curr)return 0;{unsigned int as=_get_dynforward_size(a,sizeof(char));
@@ -4380,11 +4384,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   bs?as: bs;int i=- 1;min_length <= _get_dynforward_size(a,sizeof(char)) && min_length
   <= _get_dynforward_size(b,sizeof(char))?0:((int(*)(struct _dynforward_ptr
   assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
---- 782,792 ----
-  _tag_dynforward(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,11));}),96);{int i=0;
-  for(0;i < bound;i ++){int retc;if((retc=((const char*)s1.curr)[i]- ((const char*)s2.curr)[
-  i])!= 0)return retc;}}if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;}}
-! int Cyc_strncmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned long n){
+--- 784,794 ----
+  for(0;i < bound;i ++){int retc;if((retc=*((const char*)_check_dynforward_subscript(
+  s1,sizeof(char),i))- *((const char*)_check_dynforward_subscript(s2,sizeof(char),i)))
+  != 0)return retc;}}if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;}}int
+! Cyc_strncmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned long n){
 ! unsigned long len1=Cyc_strlen(s1);unsigned long len2=Cyc_strlen(s2);return Cyc_ncmp(
   s1,len1,s2,len2,n);}int Cyc_zstrcmp(struct _dynforward_ptr a,struct _dynforward_ptr b){
 ! if(a.curr == b.curr)return 0;{unsigned long as=_get_dynforward_size(a,sizeof(char));
@@ -4393,22 +4397,24 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   <= _get_dynforward_size(b,sizeof(char))?0:((int(*)(struct _dynforward_ptr
   assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
 ***************
-*** 795,873 ****
-  _tag_dynforward(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,11));}),128);while((
-  ++ i,i < min_length)){int diff=(int)((const char*)a.curr)[i]- (int)((const char*)b.curr)[
-  i];if(diff != 0)return diff;}return(int)as - (int)bs;}}int Cyc_zstrncmp(struct
+*** 798,825 ****
+  ++ i,i < min_length)){int diff=(int)*((const char*)_check_dynforward_subscript(a,
+  sizeof(char),i))- (int)*((const char*)_check_dynforward_subscript(b,sizeof(char),
+  i));if(diff != 0)return diff;}return(int)as - (int)bs;}}int Cyc_zstrncmp(struct
 ! _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int n){if(n <= 0)return 0;{
 ! unsigned int s1size=_get_dynforward_size(s1,sizeof(char));unsigned int s2size=
 ! _get_dynforward_size(s2,sizeof(char));unsigned int min_size=s1size > s2size?s2size:
 ! s1size;unsigned int bound=min_size > n?n: min_size;bound <= _get_dynforward_size(s1,
 ! sizeof(char)) && bound <= _get_dynforward_size(s2,sizeof(char))?0:((int(*)(struct
-  _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
+! _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
 ! const char*_tmp6="bound <= s1.size && bound <= s2.size";_tag_dynforward(_tmp6,
 ! sizeof(char),_get_zero_arr_size(_tmp6,37));}),({const char*_tmp7="string.cyc";
 ! _tag_dynforward(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,11));}),146);{int i=0;
-! for(0;i < bound;i ++){if(((const char*)s1.curr)[i]< ((const char*)s2.curr)[i])return
-! - 1;else{if(((const char*)s2.curr)[i]< ((const char*)s1.curr)[i])return 1;}}}if(
-! min_size <= bound)return 0;if(s1size < s2size)return - 1;else{return 1;}}}int Cyc_zstrptrcmp(
+! for(0;i < bound;i ++){if(*((const char*)_check_dynforward_subscript(s1,sizeof(char),
+! i))< *((const char*)_check_dynforward_subscript(s2,sizeof(char),i)))return - 1;
+! else{if(*((const char*)_check_dynforward_subscript(s2,sizeof(char),i))< *((const
+! char*)_check_dynforward_subscript(s1,sizeof(char),i)))return 1;}}}if(min_size <= 
+! bound)return 0;if(s1size < s2size)return - 1;else{return 1;}}}int Cyc_zstrptrcmp(
 ! struct _dynforward_ptr*a,struct _dynforward_ptr*b){if((int)a == (int)b)return 0;
 ! return Cyc_zstrcmp((struct _dynforward_ptr)*a,(struct _dynforward_ptr)*b);}inline
 ! static struct _dynforward_ptr Cyc_int_strcato(struct _dynforward_ptr dest,struct
@@ -4417,66 +4423,13 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! _dynforward_ptr)dest);slen=Cyc_strlen(src);if(slen + dlen <= dsize){slen <= 
 ! _get_dynforward_size(src,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,
 ! struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp8="slen <= src.size";
-! _tag_dynforward(_tmp8,sizeof(char),_get_zero_arr_size(_tmp8,17));}),({const char*
-! _tmp9="string.cyc";_tag_dynforward(_tmp9,sizeof(char),_get_zero_arr_size(_tmp9,
-! 11));}),182);for(i=0;i < slen;i ++){({struct _dynforward_ptr _tmpA=
-! _dynforward_ptr_plus(dest,sizeof(char),(int)(i + dlen));char _tmpB=*((char*)
-! _check_dynforward_subscript(_tmpA,sizeof(char),0));char _tmpC=((const char*)src.curr)[
-! i];if(_get_dynforward_size(_tmpA,sizeof(char))== 1  && (_tmpB == '\000'  && _tmpC != '\000'))
-! _throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});}if(i != dsize)({struct
-! _dynforward_ptr _tmpD=_dynforward_ptr_plus(dest,sizeof(char),(int)(i + dlen));char
-! _tmpE=*((char*)_check_dynforward_subscript(_tmpD,sizeof(char),0));char _tmpF='\000';
-! if(_get_dynforward_size(_tmpD,sizeof(char))== 1  && (_tmpE == '\000'  && _tmpF != '\000'))
-! _throw_arraybounds();*((char*)_tmpD.curr)=_tmpF;});}else{(int)_throw((void*)({
-! struct Cyc_Core_Invalid_argument_struct*_tmp10=_cycalloc(sizeof(*_tmp10));_tmp10[
-! 0]=({struct Cyc_Core_Invalid_argument_struct _tmp11;_tmp11.tag=Cyc_Core_Invalid_argument;
-! _tmp11.f1=({const char*_tmp12="strcat";_tag_dynforward(_tmp12,sizeof(char),
-! _get_zero_arr_size(_tmp12,7));});_tmp11;});_tmp10;}));}return dest;}struct
-! _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,struct _dynforward_ptr src){
-! return Cyc_int_strcato(dest,src);}struct _dynforward_ptr Cyc_rstrconcat(struct
-! _RegionHandle*r,struct _dynforward_ptr a,struct _dynforward_ptr b){unsigned int
-! _tmp13=Cyc_strlen(a);unsigned int _tmp14=Cyc_strlen(b);struct _dynforward_ptr ans=
-! Cyc_Core_rnew_string(r,(_tmp13 + _tmp14)+ 1);int i;int j;_tmp13 <= 
-! _get_dynforward_size(ans,sizeof(char)) && _tmp13 <= _get_dynforward_size(a,
-! sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr
-! file,unsigned int line))Cyc___assert_fail)(({const char*_tmp15="alen <= ans.size && alen <= a.size";
-! _tag_dynforward(_tmp15,sizeof(char),_get_zero_arr_size(_tmp15,35));}),({const
-! char*_tmp16="string.cyc";_tag_dynforward(_tmp16,sizeof(char),_get_zero_arr_size(
-! _tmp16,11));}),206);for(i=0;i < _tmp13;++ i){({struct _dynforward_ptr _tmp17=
-! _dynforward_ptr_plus(ans,sizeof(char),i);char _tmp18=*((char*)
-! _check_dynforward_subscript(_tmp17,sizeof(char),0));char _tmp19=((const char*)a.curr)[
-! i];if(_get_dynforward_size(_tmp17,sizeof(char))== 1  && (_tmp18 == '\000'  && 
-! _tmp19 != '\000'))_throw_arraybounds();*((char*)_tmp17.curr)=_tmp19;});}_tmp14 <= 
-! _get_dynforward_size(b,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,
-  struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*
-! _tmp1A="blen <= b.size";_tag_dynforward(_tmp1A,sizeof(char),_get_zero_arr_size(
-! _tmp1A,15));}),({const char*_tmp1B="string.cyc";_tag_dynforward(_tmp1B,sizeof(
-! char),_get_zero_arr_size(_tmp1B,11));}),208);for(j=0;j < _tmp14;++ j){({struct
-! _dynforward_ptr _tmp1C=_dynforward_ptr_plus(ans,sizeof(char),i + j);char _tmp1D=*((
-! char*)_check_dynforward_subscript(_tmp1C,sizeof(char),0));char _tmp1E=((const char*)
-! b.curr)[j];if(_get_dynforward_size(_tmp1C,sizeof(char))== 1  && (_tmp1D == '\000'
-!  && _tmp1E != '\000'))_throw_arraybounds();*((char*)_tmp1C.curr)=_tmp1E;});}
-! return ans;}struct _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr a,struct
-! _dynforward_ptr b){return Cyc_rstrconcat(Cyc_Core_heap_region,a,b);}struct
-! _dynforward_ptr Cyc_rstrconcat_l(struct _RegionHandle*r,struct Cyc_List_List*strs){
-! unsigned int len;unsigned int total_len=0;struct _dynforward_ptr ans;{struct
-  _RegionHandle _tmp1F=_new_region("temp");struct _RegionHandle*temp=& _tmp1F;
-  _push_region(temp);{struct Cyc_List_List*lens=({struct Cyc_List_List*_tmp22=
-! _region_malloc(temp,sizeof(*_tmp22));_tmp22->hd=(void*)((unsigned int)0);_tmp22->tl=
-  0;_tmp22;});struct Cyc_List_List*end=lens;{struct Cyc_List_List*p=strs;for(0;p != 0;
-  p=p->tl){len=Cyc_strlen((struct _dynforward_ptr)*((struct _dynforward_ptr*)p->hd));
-  total_len +=len;((struct Cyc_List_List*)_check_null(end))->tl=({struct Cyc_List_List*
-  _tmp20=_region_malloc(temp,sizeof(*_tmp20));_tmp20->hd=(void*)len;_tmp20->tl=0;
-  _tmp20;});end=((struct Cyc_List_List*)_check_null(end))->tl;}}lens=lens->tl;ans=
-! Cyc_Core_rnew_string(r,total_len + 1);{unsigned int i=0;while(strs != 0){struct
-! _dynforward_ptr _tmp21=*((struct _dynforward_ptr*)strs->hd);len=(unsigned int)((
-  struct Cyc_List_List*)_check_null(lens))->hd;Cyc_strncpy(
-  _dynforward_ptr_decrease_size(_dynforward_ptr_plus(ans,sizeof(char),(int)i),
-  sizeof(char),1),(struct _dynforward_ptr)_tmp21,len);i +=len;strs=strs->tl;lens=
---- 795,873 ----
-  _tag_dynforward(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,11));}),128);while((
-  ++ i,i < min_length)){int diff=(int)((const char*)a.curr)[i]- (int)((const char*)b.curr)[
-  i];if(diff != 0)return diff;}return(int)as - (int)bs;}}int Cyc_zstrncmp(struct
+  _tag_dynforward(_tmp8,sizeof(char),_get_zero_arr_size(_tmp8,17));}),({const char*
+  _tmp9="string.cyc";_tag_dynforward(_tmp9,sizeof(char),_get_zero_arr_size(_tmp9,
+  11));}),182);for(i=0;i < slen;i ++){({struct _dynforward_ptr _tmpA=
+--- 798,826 ----
+  ++ i,i < min_length)){int diff=(int)*((const char*)_check_dynforward_subscript(a,
+  sizeof(char),i))- (int)*((const char*)_check_dynforward_subscript(b,sizeof(char),
+  i));if(diff != 0)return diff;}return(int)as - (int)bs;}}int Cyc_zstrncmp(struct
 ! _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned long n){if(n <= 0)return 0;{
 ! unsigned long s1size=_get_dynforward_size(s1,sizeof(char));unsigned long s2size=
 ! _get_dynforward_size(s2,sizeof(char));unsigned long min_size=s1size > s2size?
@@ -4486,75 +4439,83 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! unsigned int line))Cyc___assert_fail)(({const char*_tmp6="bound <= s1.size && bound <= s2.size";
 ! _tag_dynforward(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,37));}),({const char*
 ! _tmp7="string.cyc";_tag_dynforward(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,
-! 11));}),146);{int i=0;for(0;i < bound;i ++){if(((const char*)s1.curr)[i]< ((const
-! char*)s2.curr)[i])return - 1;else{if(((const char*)s2.curr)[i]< ((const char*)s1.curr)[
-! i])return 1;}}}if(min_size <= bound)return 0;if(s1size < s2size)return - 1;else{return
-! 1;}}}int Cyc_zstrptrcmp(struct _dynforward_ptr*a,struct _dynforward_ptr*b){if((int)
-! a == (int)b)return 0;return Cyc_zstrcmp((struct _dynforward_ptr)*a,(struct
-! _dynforward_ptr)*b);}inline static struct _dynforward_ptr Cyc_int_strcato(struct
-! _dynforward_ptr dest,struct _dynforward_ptr src){int i;unsigned long dsize;
-! unsigned long slen;unsigned long dlen;dsize=_get_dynforward_size(dest,sizeof(char));
-! dlen=Cyc_strlen((struct _dynforward_ptr)dest);slen=Cyc_strlen(src);if(slen + dlen
-! <= dsize){slen <= _get_dynforward_size(src,sizeof(char))?0:((int(*)(struct
-  _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
-! const char*_tmp8="slen <= src.size";_tag_dynforward(_tmp8,sizeof(char),
-! _get_zero_arr_size(_tmp8,17));}),({const char*_tmp9="string.cyc";_tag_dynforward(
-! _tmp9,sizeof(char),_get_zero_arr_size(_tmp9,11));}),182);for(i=0;i < slen;i ++){({
-! struct _dynforward_ptr _tmpA=_dynforward_ptr_plus(dest,sizeof(char),(int)(i + dlen));
-! char _tmpB=*((char*)_check_dynforward_subscript(_tmpA,sizeof(char),0));char _tmpC=((
-! const char*)src.curr)[i];if(_get_dynforward_size(_tmpA,sizeof(char))== 1  && (
-! _tmpB == '\000'  && _tmpC != '\000'))_throw_arraybounds();*((char*)_tmpA.curr)=
-! _tmpC;});}if(i != dsize)({struct _dynforward_ptr _tmpD=_dynforward_ptr_plus(dest,
-! sizeof(char),(int)(i + dlen));char _tmpE=*((char*)_check_dynforward_subscript(
-! _tmpD,sizeof(char),0));char _tmpF='\000';if(_get_dynforward_size(_tmpD,sizeof(
-! char))== 1  && (_tmpE == '\000'  && _tmpF != '\000'))_throw_arraybounds();*((char*)
-! _tmpD.curr)=_tmpF;});}else{(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-! _tmp10=_cycalloc(sizeof(*_tmp10));_tmp10[0]=({struct Cyc_Core_Invalid_argument_struct
-! _tmp11;_tmp11.tag=Cyc_Core_Invalid_argument;_tmp11.f1=({const char*_tmp12="strcat";
-! _tag_dynforward(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,7));});_tmp11;});
-! _tmp10;}));}return dest;}struct _dynforward_ptr Cyc_strcat(struct _dynforward_ptr
-! dest,struct _dynforward_ptr src){return Cyc_int_strcato(dest,src);}struct
-! _dynforward_ptr Cyc_rstrconcat(struct _RegionHandle*r,struct _dynforward_ptr a,
-! struct _dynforward_ptr b){unsigned long _tmp13=Cyc_strlen(a);unsigned long _tmp14=
-! Cyc_strlen(b);struct _dynforward_ptr ans=Cyc_Core_rnew_string(r,(_tmp13 + _tmp14)+ 
-! 1);int i;int j;_tmp13 <= _get_dynforward_size(ans,sizeof(char)) && _tmp13 <= 
-! _get_dynforward_size(a,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,
-  struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*
-! _tmp15="alen <= ans.size && alen <= a.size";_tag_dynforward(_tmp15,sizeof(char),
-! _get_zero_arr_size(_tmp15,35));}),({const char*_tmp16="string.cyc";
-! _tag_dynforward(_tmp16,sizeof(char),_get_zero_arr_size(_tmp16,11));}),206);for(i=
-! 0;i < _tmp13;++ i){({struct _dynforward_ptr _tmp17=_dynforward_ptr_plus(ans,sizeof(
-! char),i);char _tmp18=*((char*)_check_dynforward_subscript(_tmp17,sizeof(char),0));
-! char _tmp19=((const char*)a.curr)[i];if(_get_dynforward_size(_tmp17,sizeof(char))
-! == 1  && (_tmp18 == '\000'  && _tmp19 != '\000'))_throw_arraybounds();*((char*)
-! _tmp17.curr)=_tmp19;});}_tmp14 <= _get_dynforward_size(b,sizeof(char))?0:((int(*)(
-! struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
-! const char*_tmp1A="blen <= b.size";_tag_dynforward(_tmp1A,sizeof(char),
-! _get_zero_arr_size(_tmp1A,15));}),({const char*_tmp1B="string.cyc";
-! _tag_dynforward(_tmp1B,sizeof(char),_get_zero_arr_size(_tmp1B,11));}),208);for(j=
-! 0;j < _tmp14;++ j){({struct _dynforward_ptr _tmp1C=_dynforward_ptr_plus(ans,sizeof(
-! char),i + j);char _tmp1D=*((char*)_check_dynforward_subscript(_tmp1C,sizeof(char),
-! 0));char _tmp1E=((const char*)b.curr)[j];if(_get_dynforward_size(_tmp1C,sizeof(
-! char))== 1  && (_tmp1D == '\000'  && _tmp1E != '\000'))_throw_arraybounds();*((char*)
-! _tmp1C.curr)=_tmp1E;});}return ans;}struct _dynforward_ptr Cyc_strconcat(struct
-! _dynforward_ptr a,struct _dynforward_ptr b){return Cyc_rstrconcat(Cyc_Core_heap_region,
-! a,b);}struct _dynforward_ptr Cyc_rstrconcat_l(struct _RegionHandle*r,struct Cyc_List_List*
-! strs){unsigned long len;unsigned long total_len=0;struct _dynforward_ptr ans;{struct
-  _RegionHandle _tmp1F=_new_region("temp");struct _RegionHandle*temp=& _tmp1F;
-  _push_region(temp);{struct Cyc_List_List*lens=({struct Cyc_List_List*_tmp22=
-! _region_malloc(temp,sizeof(*_tmp22));_tmp22->hd=(void*)((unsigned long)0);_tmp22->tl=
-  0;_tmp22;});struct Cyc_List_List*end=lens;{struct Cyc_List_List*p=strs;for(0;p != 0;
-  p=p->tl){len=Cyc_strlen((struct _dynforward_ptr)*((struct _dynforward_ptr*)p->hd));
-  total_len +=len;((struct Cyc_List_List*)_check_null(end))->tl=({struct Cyc_List_List*
-  _tmp20=_region_malloc(temp,sizeof(*_tmp20));_tmp20->hd=(void*)len;_tmp20->tl=0;
-  _tmp20;});end=((struct Cyc_List_List*)_check_null(end))->tl;}}lens=lens->tl;ans=
-! Cyc_Core_rnew_string(r,total_len + 1);{unsigned long i=0;while(strs != 0){struct
-! _dynforward_ptr _tmp21=*((struct _dynforward_ptr*)strs->hd);len=(unsigned long)((
-  struct Cyc_List_List*)_check_null(lens))->hd;Cyc_strncpy(
+! 11));}),146);{int i=0;for(0;i < bound;i ++){if(*((const char*)
+! _check_dynforward_subscript(s1,sizeof(char),i))< *((const char*)
+! _check_dynforward_subscript(s2,sizeof(char),i)))return - 1;else{if(*((const char*)
+! _check_dynforward_subscript(s2,sizeof(char),i))< *((const char*)
+! _check_dynforward_subscript(s1,sizeof(char),i)))return 1;}}}if(min_size <= bound)
+! return 0;if(s1size < s2size)return - 1;else{return 1;}}}int Cyc_zstrptrcmp(struct
+! _dynforward_ptr*a,struct _dynforward_ptr*b){if((int)a == (int)b)return 0;return Cyc_zstrcmp((
+! struct _dynforward_ptr)*a,(struct _dynforward_ptr)*b);}inline static struct
+! _dynforward_ptr Cyc_int_strcato(struct _dynforward_ptr dest,struct _dynforward_ptr
+! src){int i;unsigned long dsize;unsigned long slen;unsigned long dlen;dsize=
+! _get_dynforward_size(dest,sizeof(char));dlen=Cyc_strlen((struct _dynforward_ptr)
+! dest);slen=Cyc_strlen(src);if(slen + dlen <= dsize){slen <= _get_dynforward_size(
+! src,sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,struct
+! _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp8="slen <= src.size";
+  _tag_dynforward(_tmp8,sizeof(char),_get_zero_arr_size(_tmp8,17));}),({const char*
+  _tmp9="string.cyc";_tag_dynforward(_tmp9,sizeof(char),_get_zero_arr_size(_tmp9,
+  11));}),182);for(i=0;i < slen;i ++){({struct _dynforward_ptr _tmpA=
+***************
+*** 838,845 ****
+  _get_zero_arr_size(_tmp12,7));});_tmp11;});_tmp10;}));}return dest;}struct
+  _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,struct _dynforward_ptr src){
+  return Cyc_int_strcato(dest,src);}struct _dynforward_ptr Cyc_rstrconcat(struct
+! _RegionHandle*r,struct _dynforward_ptr a,struct _dynforward_ptr b){unsigned int
+! _tmp13=Cyc_strlen(a);unsigned int _tmp14=Cyc_strlen(b);struct _dynforward_ptr ans=
+  Cyc_Core_rnew_string(r,(_tmp13 + _tmp14)+ 1);int i;int j;_tmp13 <= 
+  _get_dynforward_size(ans,sizeof(char)) && _tmp13 <= _get_dynforward_size(a,
+  sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr
+--- 839,846 ----
+  _get_zero_arr_size(_tmp12,7));});_tmp11;});_tmp10;}));}return dest;}struct
+  _dynforward_ptr Cyc_strcat(struct _dynforward_ptr dest,struct _dynforward_ptr src){
+  return Cyc_int_strcato(dest,src);}struct _dynforward_ptr Cyc_rstrconcat(struct
+! _RegionHandle*r,struct _dynforward_ptr a,struct _dynforward_ptr b){unsigned long
+! _tmp13=Cyc_strlen(a);unsigned long _tmp14=Cyc_strlen(b);struct _dynforward_ptr ans=
+  Cyc_Core_rnew_string(r,(_tmp13 + _tmp14)+ 1);int i;int j;_tmp13 <= 
+  _get_dynforward_size(ans,sizeof(char)) && _tmp13 <= _get_dynforward_size(a,
+  sizeof(char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr
+***************
+*** 863,880 ****
+  _throw_arraybounds();*((char*)_tmp1C.curr)=_tmp1E;});}return ans;}struct
+  _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr a,struct _dynforward_ptr b){
+  return Cyc_rstrconcat(Cyc_Core_heap_region,a,b);}struct _dynforward_ptr Cyc_rstrconcat_l(
+! struct _RegionHandle*r,struct Cyc_List_List*strs){unsigned int len;unsigned int
+  total_len=0;struct _dynforward_ptr ans;{struct _RegionHandle _tmp1F=_new_region("temp");
+  struct _RegionHandle*temp=& _tmp1F;_push_region(temp);{struct Cyc_List_List*lens=({
+  struct Cyc_List_List*_tmp22=_region_malloc(temp,sizeof(*_tmp22));_tmp22->hd=(void*)((
+! unsigned int)0);_tmp22->tl=0;_tmp22;});struct Cyc_List_List*end=lens;{struct Cyc_List_List*
+  p=strs;for(0;p != 0;p=p->tl){len=Cyc_strlen((struct _dynforward_ptr)*((struct
+  _dynforward_ptr*)p->hd));total_len +=len;((struct Cyc_List_List*)_check_null(end))->tl=({
+  struct Cyc_List_List*_tmp20=_region_malloc(temp,sizeof(*_tmp20));_tmp20->hd=(void*)
+  len;_tmp20->tl=0;_tmp20;});end=((struct Cyc_List_List*)_check_null(end))->tl;}}
+! lens=lens->tl;ans=Cyc_Core_rnew_string(r,total_len + 1);{unsigned int i=0;while(
+  strs != 0){struct _dynforward_ptr _tmp21=*((struct _dynforward_ptr*)strs->hd);len=(
+! unsigned int)((struct Cyc_List_List*)_check_null(lens))->hd;Cyc_strncpy(
   _dynforward_ptr_decrease_size(_dynforward_ptr_plus(ans,sizeof(char),(int)i),
   sizeof(char),1),(struct _dynforward_ptr)_tmp21,len);i +=len;strs=strs->tl;lens=
+  lens->tl;}}};_pop_region(temp);}return ans;}struct _dynforward_ptr Cyc_strconcat_l(
+--- 864,881 ----
+  _throw_arraybounds();*((char*)_tmp1C.curr)=_tmp1E;});}return ans;}struct
+  _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr a,struct _dynforward_ptr b){
+  return Cyc_rstrconcat(Cyc_Core_heap_region,a,b);}struct _dynforward_ptr Cyc_rstrconcat_l(
+! struct _RegionHandle*r,struct Cyc_List_List*strs){unsigned long len;unsigned long
+  total_len=0;struct _dynforward_ptr ans;{struct _RegionHandle _tmp1F=_new_region("temp");
+  struct _RegionHandle*temp=& _tmp1F;_push_region(temp);{struct Cyc_List_List*lens=({
+  struct Cyc_List_List*_tmp22=_region_malloc(temp,sizeof(*_tmp22));_tmp22->hd=(void*)((
+! unsigned long)0);_tmp22->tl=0;_tmp22;});struct Cyc_List_List*end=lens;{struct Cyc_List_List*
+  p=strs;for(0;p != 0;p=p->tl){len=Cyc_strlen((struct _dynforward_ptr)*((struct
+  _dynforward_ptr*)p->hd));total_len +=len;((struct Cyc_List_List*)_check_null(end))->tl=({
+  struct Cyc_List_List*_tmp20=_region_malloc(temp,sizeof(*_tmp20));_tmp20->hd=(void*)
+  len;_tmp20->tl=0;_tmp20;});end=((struct Cyc_List_List*)_check_null(end))->tl;}}
+! lens=lens->tl;ans=Cyc_Core_rnew_string(r,total_len + 1);{unsigned long i=0;while(
+  strs != 0){struct _dynforward_ptr _tmp21=*((struct _dynforward_ptr*)strs->hd);len=(
+! unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;Cyc_strncpy(
+  _dynforward_ptr_decrease_size(_dynforward_ptr_plus(ans,sizeof(char),(int)i),
+  sizeof(char),1),(struct _dynforward_ptr)_tmp21,len);i +=len;strs=strs->tl;lens=
+  lens->tl;}}};_pop_region(temp);}return ans;}struct _dynforward_ptr Cyc_strconcat_l(
 ***************
-*** 879,907 ****
+*** 885,913 ****
   _dynforward_ptr*)strs->hd));{struct Cyc_List_List*_tmp23=strs;struct _RegionHandle
   _tmp24=_new_region("temp");struct _RegionHandle*temp=& _tmp24;_push_region(temp);{
   struct Cyc_List_List*lens=({struct Cyc_List_List*_tmp28=_region_malloc(temp,
@@ -4584,7 +4545,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
    && n <= _get_dynforward_size(dest,sizeof(char))?0:((int(*)(struct _dynforward_ptr
   assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
   char*_tmp29="n <= src.size && n <= dest.size";_tag_dynforward(_tmp29,sizeof(char),
---- 879,907 ----
+--- 886,914 ----
   _dynforward_ptr*)strs->hd));{struct Cyc_List_List*_tmp23=strs;struct _RegionHandle
   _tmp24=_new_region("temp");struct _RegionHandle*temp=& _tmp24;_push_region(temp);{
   struct Cyc_List_List*lens=({struct Cyc_List_List*_tmp28=_region_malloc(temp,
@@ -4615,43 +4576,52 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
   char*_tmp29="n <= src.size && n <= dest.size";_tag_dynforward(_tmp29,sizeof(char),
 ***************
-*** 910,916 ****
-  0;i < n;i ++){char _tmp2B=((const char*)src.curr)[i];if(_tmp2B == '\000')break;((char*)
-  dest.curr)[i]=_tmp2B;}for(0;i < n;i ++){((char*)dest.curr)[i]='\000';}return dest;}
-  struct _dynforward_ptr Cyc_zstrncpy(struct _dynforward_ptr dest,struct
-! _dynforward_ptr src,unsigned int n){n <= _get_dynforward_size(dest,sizeof(char))
-   && n <= _get_dynforward_size(src,sizeof(char))?0:((int(*)(struct _dynforward_ptr
-  assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
-  char*_tmp2C="n <= dest.size && n <= src.size";_tag_dynforward(_tmp2C,sizeof(char),
---- 910,916 ----
-  0;i < n;i ++){char _tmp2B=((const char*)src.curr)[i];if(_tmp2B == '\000')break;((char*)
-  dest.curr)[i]=_tmp2B;}for(0;i < n;i ++){((char*)dest.curr)[i]='\000';}return dest;}
-  struct _dynforward_ptr Cyc_zstrncpy(struct _dynforward_ptr dest,struct
-! _dynforward_ptr src,unsigned long n){n <= _get_dynforward_size(dest,sizeof(char))
-   && n <= _get_dynforward_size(src,sizeof(char))?0:((int(*)(struct _dynforward_ptr
-  assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({const
-  char*_tmp2C="n <= dest.size && n <= src.size";_tag_dynforward(_tmp2C,sizeof(char),
+*** 916,922 ****
+  0;i < n;i ++){char _tmp2B=*((const char*)_check_dynforward_subscript(src,sizeof(char),
+  i));if(_tmp2B == '\000')break;((char*)dest.curr)[i]=_tmp2B;}for(0;i < n;i ++){((
+  char*)dest.curr)[i]='\000';}return dest;}struct _dynforward_ptr Cyc_zstrncpy(struct
+! _dynforward_ptr dest,struct _dynforward_ptr src,unsigned int n){n <= 
+  _get_dynforward_size(dest,sizeof(char)) && n <= _get_dynforward_size(src,sizeof(
+  char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
+  unsigned int line))Cyc___assert_fail)(({const char*_tmp2C="n <= dest.size && n <= src.size";
+--- 917,923 ----
+  0;i < n;i ++){char _tmp2B=*((const char*)_check_dynforward_subscript(src,sizeof(char),
+  i));if(_tmp2B == '\000')break;((char*)dest.curr)[i]=_tmp2B;}for(0;i < n;i ++){((
+  char*)dest.curr)[i]='\000';}return dest;}struct _dynforward_ptr Cyc_zstrncpy(struct
+! _dynforward_ptr dest,struct _dynforward_ptr src,unsigned long n){n <= 
+  _get_dynforward_size(dest,sizeof(char)) && n <= _get_dynforward_size(src,sizeof(
+  char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
+  unsigned int line))Cyc___assert_fail)(({const char*_tmp2C="n <= dest.size && n <= src.size";
 ***************
-*** 925,953 ****
-  _check_dynforward_subscript(_tmp2F,sizeof(char),0));char _tmp31=_tmp2E;if(
-  _get_dynforward_size(_tmp2F,sizeof(char))== 1  && (_tmp30 == '\000'  && _tmp31 != '\000'))
-  _throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});if(_tmp2E == '\000')break;}}
-! else{unsigned int len=Cyc_strlen(src);Cyc_strncpy(_dynforward_ptr_decrease_size(
-  dest,sizeof(char),1),src,len);if(len < _get_dynforward_size(dest,sizeof(char)))({
-  struct _dynforward_ptr _tmp32=_dynforward_ptr_plus(dest,sizeof(char),(int)len);
-  char _tmp33=*((char*)_check_dynforward_subscript(_tmp32,sizeof(char),0));char
-  _tmp34='\000';if(_get_dynforward_size(_tmp32,sizeof(char))== 1  && (_tmp33 == '\000'
-   && _tmp34 != '\000'))_throw_arraybounds();*((char*)_tmp32.curr)=_tmp34;});}
-  return dest;}struct _dynforward_ptr Cyc_rstrdup(struct _RegionHandle*r,struct
-! _dynforward_ptr src){unsigned int len;struct _dynforward_ptr temp;len=Cyc_strlen(src);
-! temp=Cyc_Core_rnew_string(r,len + 1);Cyc_strncpy(_dynforward_ptr_decrease_size(
-! temp,sizeof(char),1),src,len);return temp;}struct _dynforward_ptr Cyc_strdup(struct
-! _dynforward_ptr src){return Cyc_rstrdup(Cyc_Core_heap_region,src);}struct
-! _dynforward_ptr Cyc_rexpand(struct _RegionHandle*r,struct _dynforward_ptr s,
-! unsigned int sz){struct _dynforward_ptr temp;unsigned int slen;slen=Cyc_strlen(s);sz=
-! sz > slen?sz: slen;temp=Cyc_Core_rnew_string(r,sz);Cyc_strncpy(
-  _dynforward_ptr_decrease_size(temp,sizeof(char),1),s,slen);if(slen != 
-  _get_dynforward_size(s,sizeof(char)))({struct _dynforward_ptr _tmp35=
+*** 932,938 ****
+  int)i);char _tmp30=*((char*)_check_dynforward_subscript(_tmp2F,sizeof(char),0));
+  char _tmp31=_tmp2E;if(_get_dynforward_size(_tmp2F,sizeof(char))== 1  && (_tmp30 == '\000'
+   && _tmp31 != '\000'))_throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});if(
+! _tmp2E == '\000')break;}}else{unsigned int len=Cyc_strlen(src);Cyc_strncpy(
+  _dynforward_ptr_decrease_size(dest,sizeof(char),1),src,len);if(len < 
+  _get_dynforward_size(dest,sizeof(char)))({struct _dynforward_ptr _tmp32=
+  _dynforward_ptr_plus(dest,sizeof(char),(int)len);char _tmp33=*((char*)
+--- 933,939 ----
+  int)i);char _tmp30=*((char*)_check_dynforward_subscript(_tmp2F,sizeof(char),0));
+  char _tmp31=_tmp2E;if(_get_dynforward_size(_tmp2F,sizeof(char))== 1  && (_tmp30 == '\000'
+   && _tmp31 != '\000'))_throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});if(
+! _tmp2E == '\000')break;}}else{unsigned long len=Cyc_strlen(src);Cyc_strncpy(
+  _dynforward_ptr_decrease_size(dest,sizeof(char),1),src,len);if(len < 
+  _get_dynforward_size(dest,sizeof(char)))({struct _dynforward_ptr _tmp32=
+  _dynforward_ptr_plus(dest,sizeof(char),(int)len);char _tmp33=*((char*)
+***************
+*** 940,960 ****
+  _get_dynforward_size(_tmp32,sizeof(char))== 1  && (_tmp33 == '\000'  && _tmp34 != '\000'))
+  _throw_arraybounds();*((char*)_tmp32.curr)=_tmp34;});}return dest;}struct
+  _dynforward_ptr Cyc_rstrdup(struct _RegionHandle*r,struct _dynforward_ptr src){
+! unsigned int len;struct _dynforward_ptr temp;len=Cyc_strlen(src);temp=Cyc_Core_rnew_string(
+  r,len + 1);Cyc_strncpy(_dynforward_ptr_decrease_size(temp,sizeof(char),1),src,len);
+  return temp;}struct _dynforward_ptr Cyc_strdup(struct _dynforward_ptr src){return Cyc_rstrdup(
+  Cyc_Core_heap_region,src);}struct _dynforward_ptr Cyc_rexpand(struct _RegionHandle*
+! r,struct _dynforward_ptr s,unsigned int sz){struct _dynforward_ptr temp;unsigned int
+! slen;slen=Cyc_strlen(s);sz=sz > slen?sz: slen;temp=Cyc_Core_rnew_string(r,sz);Cyc_strncpy(
+! _dynforward_ptr_decrease_size(temp,sizeof(char),1),s,slen);if(slen != 
+! _get_dynforward_size(s,sizeof(char)))({struct _dynforward_ptr _tmp35=
   _dynforward_ptr_plus(temp,sizeof(char),(int)slen);char _tmp36=*((char*)
   _check_dynforward_subscript(_tmp35,sizeof(char),0));char _tmp37='\000';if(
   _get_dynforward_size(_tmp35,sizeof(char))== 1  && (_tmp36 == '\000'  && _tmp37 != '\000'))
@@ -4662,26 +4632,18 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _get_dynforward_size(str,sizeof(char));if(maxsizeP == 0){maxsizeP=30 > sz?30: sz;
   str=Cyc_Core_rnew_string(r,maxsizeP);({struct _dynforward_ptr _tmp38=
   _dynforward_ptr_plus(str,sizeof(char),0);char _tmp39=*((char*)
---- 925,953 ----
-  _check_dynforward_subscript(_tmp2F,sizeof(char),0));char _tmp31=_tmp2E;if(
-  _get_dynforward_size(_tmp2F,sizeof(char))== 1  && (_tmp30 == '\000'  && _tmp31 != '\000'))
-  _throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});if(_tmp2E == '\000')break;}}
-! else{unsigned long len=Cyc_strlen(src);Cyc_strncpy(_dynforward_ptr_decrease_size(
-  dest,sizeof(char),1),src,len);if(len < _get_dynforward_size(dest,sizeof(char)))({
-  struct _dynforward_ptr _tmp32=_dynforward_ptr_plus(dest,sizeof(char),(int)len);
-  char _tmp33=*((char*)_check_dynforward_subscript(_tmp32,sizeof(char),0));char
-  _tmp34='\000';if(_get_dynforward_size(_tmp32,sizeof(char))== 1  && (_tmp33 == '\000'
-   && _tmp34 != '\000'))_throw_arraybounds();*((char*)_tmp32.curr)=_tmp34;});}
-  return dest;}struct _dynforward_ptr Cyc_rstrdup(struct _RegionHandle*r,struct
-! _dynforward_ptr src){unsigned long len;struct _dynforward_ptr temp;len=Cyc_strlen(
-! src);temp=Cyc_Core_rnew_string(r,len + 1);Cyc_strncpy(
-! _dynforward_ptr_decrease_size(temp,sizeof(char),1),src,len);return temp;}struct
-! _dynforward_ptr Cyc_strdup(struct _dynforward_ptr src){return Cyc_rstrdup(Cyc_Core_heap_region,
-! src);}struct _dynforward_ptr Cyc_rexpand(struct _RegionHandle*r,struct
-! _dynforward_ptr s,unsigned long sz){struct _dynforward_ptr temp;unsigned long slen;
-! slen=Cyc_strlen(s);sz=sz > slen?sz: slen;temp=Cyc_Core_rnew_string(r,sz);Cyc_strncpy(
-  _dynforward_ptr_decrease_size(temp,sizeof(char),1),s,slen);if(slen != 
-  _get_dynforward_size(s,sizeof(char)))({struct _dynforward_ptr _tmp35=
+--- 941,961 ----
+  _get_dynforward_size(_tmp32,sizeof(char))== 1  && (_tmp33 == '\000'  && _tmp34 != '\000'))
+  _throw_arraybounds();*((char*)_tmp32.curr)=_tmp34;});}return dest;}struct
+  _dynforward_ptr Cyc_rstrdup(struct _RegionHandle*r,struct _dynforward_ptr src){
+! unsigned long len;struct _dynforward_ptr temp;len=Cyc_strlen(src);temp=Cyc_Core_rnew_string(
+  r,len + 1);Cyc_strncpy(_dynforward_ptr_decrease_size(temp,sizeof(char),1),src,len);
+  return temp;}struct _dynforward_ptr Cyc_strdup(struct _dynforward_ptr src){return Cyc_rstrdup(
+  Cyc_Core_heap_region,src);}struct _dynforward_ptr Cyc_rexpand(struct _RegionHandle*
+! r,struct _dynforward_ptr s,unsigned long sz){struct _dynforward_ptr temp;
+! unsigned long slen;slen=Cyc_strlen(s);sz=sz > slen?sz: slen;temp=Cyc_Core_rnew_string(
+! r,sz);Cyc_strncpy(_dynforward_ptr_decrease_size(temp,sizeof(char),1),s,slen);if(
+! slen != _get_dynforward_size(s,sizeof(char)))({struct _dynforward_ptr _tmp35=
   _dynforward_ptr_plus(temp,sizeof(char),(int)slen);char _tmp36=*((char*)
   _check_dynforward_subscript(_tmp35,sizeof(char),0));char _tmp37='\000';if(
   _get_dynforward_size(_tmp35,sizeof(char))== 1  && (_tmp36 == '\000'  && _tmp37 != '\000'))
@@ -4693,7 +4655,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   str=Cyc_Core_rnew_string(r,maxsizeP);({struct _dynforward_ptr _tmp38=
   _dynforward_ptr_plus(str,sizeof(char),0);char _tmp39=*((char*)
 ***************
-*** 956,971 ****
+*** 963,978 ****
   _throw_arraybounds();*((char*)_tmp38.curr)=_tmp3A;});}else{if(sz > maxsizeP){
   maxsizeP=maxsizeP * 2 > (sz * 5)/ 4?maxsizeP * 2:(sz * 5)/ 4;str=Cyc_rexpand(r,(
   struct _dynforward_ptr)str,maxsizeP);}}return str;}struct _dynforward_ptr Cyc_realloc_str(
@@ -4708,9 +4670,9 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tag_dynforward(_tmp3C,sizeof(char),_get_zero_arr_size(_tmp3C,11));}),409);{
 ! unsigned int i=0;for(0;i < amt;++ i){({struct _dynforward_ptr _tmp3D=
   _dynforward_ptr_plus(ans,sizeof(char),(int)i);char _tmp3E=*((char*)
-  _check_dynforward_subscript(_tmp3D,sizeof(char),0));char _tmp3F=((const char*)s.curr)[(
-  int)i];if(_get_dynforward_size(_tmp3D,sizeof(char))== 1  && (_tmp3E == '\000'  && 
---- 956,971 ----
+  _check_dynforward_subscript(_tmp3D,sizeof(char),0));char _tmp3F=*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),(int)i));if(_get_dynforward_size(
+--- 964,979 ----
   _throw_arraybounds();*((char*)_tmp38.curr)=_tmp3A;});}else{if(sz > maxsizeP){
   maxsizeP=maxsizeP * 2 > (sz * 5)/ 4?maxsizeP * 2:(sz * 5)/ 4;str=Cyc_rexpand(r,(
   struct _dynforward_ptr)str,maxsizeP);}}return str;}struct _dynforward_ptr Cyc_realloc_str(
@@ -4725,11 +4687,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tag_dynforward(_tmp3C,sizeof(char),_get_zero_arr_size(_tmp3C,11));}),409);{
 ! unsigned long i=0;for(0;i < amt;++ i){({struct _dynforward_ptr _tmp3D=
   _dynforward_ptr_plus(ans,sizeof(char),(int)i);char _tmp3E=*((char*)
-  _check_dynforward_subscript(_tmp3D,sizeof(char),0));char _tmp3F=((const char*)s.curr)[(
-  int)i];if(_get_dynforward_size(_tmp3D,sizeof(char))== 1  && (_tmp3E == '\000'  && 
+  _check_dynforward_subscript(_tmp3D,sizeof(char),0));char _tmp3F=*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),(int)i));if(_get_dynforward_size(
 ***************
-*** 974,993 ****
-  char*)_check_dynforward_subscript(_tmp40,sizeof(char),0));char _tmp42='\000';if(
+*** 982,1001 ****
+  _check_dynforward_subscript(_tmp40,sizeof(char),0));char _tmp42='\000';if(
   _get_dynforward_size(_tmp40,sizeof(char))== 1  && (_tmp41 == '\000'  && _tmp42 != '\000'))
   _throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});return ans;}struct
 ! _dynforward_ptr Cyc_substring(struct _dynforward_ptr s,int start,unsigned int amt){
@@ -4749,8 +4711,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tmp46.f1=err;_tmp46;});_tmp45;}));}}{struct _dynforward_ptr ans=Cyc_Core_rnew_string(
   r,((m - n)+ _get_dynforward_size(new_suffix,sizeof(char)))+ 1);Cyc_strncpy(
   _dynforward_ptr_decrease_size(ans,sizeof(char),1),src,m - n);Cyc_strncpy(
---- 974,993 ----
-  char*)_check_dynforward_subscript(_tmp40,sizeof(char),0));char _tmp42='\000';if(
+--- 983,1002 ----
+  _check_dynforward_subscript(_tmp40,sizeof(char),0));char _tmp42='\000';if(
   _get_dynforward_size(_tmp40,sizeof(char))== 1  && (_tmp41 == '\000'  && _tmp42 != '\000'))
   _throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});return ans;}struct
 ! _dynforward_ptr Cyc_substring(struct _dynforward_ptr s,int start,unsigned long amt){
@@ -4771,7 +4733,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   r,((m - n)+ _get_dynforward_size(new_suffix,sizeof(char)))+ 1);Cyc_strncpy(
   _dynforward_ptr_decrease_size(ans,sizeof(char),1),src,m - n);Cyc_strncpy(
 ***************
-*** 1039,1045 ****
+*** 1050,1056 ****
   _dynforward_ptr)_tag_dynforward(0,0,0)).curr;start=Cyc_strchr(
   _dynforward_ptr_plus(start,sizeof(char),1),*((const char*)
   _check_dynforward_subscript(needle,sizeof(char),0)))){if(Cyc_strncmp((struct
@@ -4779,7 +4741,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   return start;}}return(struct _dynforward_ptr)_tag_dynforward(0,0,0);}}struct
   _dynforward_ptr Cyc_mstrstr(struct _dynforward_ptr haystack,struct _dynforward_ptr
   needle){if(!((unsigned int)haystack.curr) || !((unsigned int)needle.curr))(int)
---- 1039,1045 ----
+--- 1051,1057 ----
   _dynforward_ptr)_tag_dynforward(0,0,0)).curr;start=Cyc_strchr(
   _dynforward_ptr_plus(start,sizeof(char),1),*((const char*)
   _check_dynforward_subscript(needle,sizeof(char),0)))){if(Cyc_strncmp((struct
@@ -4788,7 +4750,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _dynforward_ptr Cyc_mstrstr(struct _dynforward_ptr haystack,struct _dynforward_ptr
   needle){if(!((unsigned int)haystack.curr) || !((unsigned int)needle.curr))(int)
 ***************
-*** 1053,1083 ****
+*** 1064,1096 ****
   _check_dynforward_subscript(needle,sizeof(char),0)))).curr != (_tag_dynforward(0,
   0,0)).curr;start=Cyc_mstrchr(_dynforward_ptr_plus(start,sizeof(char),1),*((const
   char*)_check_dynforward_subscript(needle,sizeof(char),0)))){if(Cyc_strncmp((
@@ -4801,26 +4763,28 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! char*_tmp4E="len <= s.size";_tag_dynforward(_tmp4E,sizeof(char),
   _get_zero_arr_size(_tmp4E,14));}),({const char*_tmp4F="string.cyc";
   _tag_dynforward(_tmp4F,sizeof(char),_get_zero_arr_size(_tmp4F,11));}),559);{
-! unsigned int i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j ++){if(((const char*)s.curr)[(
-  int)i]== ((const char*)accept.curr)[j])break;}if(j == asize)return i;}}return len;}
-! unsigned int Cyc_strcspn(struct _dynforward_ptr s,struct _dynforward_ptr accept){
-! unsigned int len=Cyc_strlen((struct _dynforward_ptr)s);unsigned int asize=
+! unsigned int i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j ++){if(*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),(int)i))== *((const char*)
+  _check_dynforward_subscript(accept,sizeof(char),j)))break;}if(j == asize)return i;}}
+! return len;}unsigned int Cyc_strcspn(struct _dynforward_ptr s,struct _dynforward_ptr
+! accept){unsigned int len=Cyc_strlen((struct _dynforward_ptr)s);unsigned int asize=
   _get_dynforward_size(accept,sizeof(char));len <= _get_dynforward_size(s,sizeof(
   char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
   unsigned int line))Cyc___assert_fail)(({const char*_tmp50="len <= s.size";
   _tag_dynforward(_tmp50,sizeof(char),_get_zero_arr_size(_tmp50,14));}),({const
   char*_tmp51="string.cyc";_tag_dynforward(_tmp51,sizeof(char),_get_zero_arr_size(
 ! _tmp51,11));}),579);{unsigned int i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j ++){
-! if(((const char*)s.curr)[(int)i]!= ((const char*)accept.curr)[j])break;}if(j == 
-  asize)return i;}}return len;}struct _dynforward_ptr Cyc_strtok(struct _dynforward_ptr
-  s,struct _dynforward_ptr delim){static struct _dynforward_ptr olds={(void*)0,(void*)(
-  0 + 0)};struct _dynforward_ptr token;if(s.curr == (_tag_dynforward(0,0,0)).curr){if(
+! if(*((const char*)_check_dynforward_subscript(s,sizeof(char),(int)i))!= *((const
+! char*)_check_dynforward_subscript(accept,sizeof(char),j)))break;}if(j == asize)
+! return i;}}return len;}struct _dynforward_ptr Cyc_strtok(struct _dynforward_ptr s,
+! struct _dynforward_ptr delim){static struct _dynforward_ptr olds={(void*)0,(void*)(0 + 
+! 0)};struct _dynforward_ptr token;if(s.curr == (_tag_dynforward(0,0,0)).curr){if(
   olds.curr == (_tag_dynforward(0,0,0)).curr)return _tag_dynforward(0,0,0);s=olds;}{
 ! unsigned int inc=Cyc_strspn((struct _dynforward_ptr)s,delim);if(inc >= 
   _get_dynforward_size(s,sizeof(char)) || *((char*)_check_dynforward_subscript(
   _dynforward_ptr_plus(s,sizeof(char),(int)inc),sizeof(char),0))== '\000'){olds=
   _tag_dynforward(0,0,0);return _tag_dynforward(0,0,0);}else{
---- 1053,1083 ----
+--- 1065,1097 ----
   _check_dynforward_subscript(needle,sizeof(char),0)))).curr != (_tag_dynforward(0,
   0,0)).curr;start=Cyc_mstrchr(_dynforward_ptr_plus(start,sizeof(char),1),*((const
   char*)_check_dynforward_subscript(needle,sizeof(char),0)))){if(Cyc_strncmp((
@@ -4833,27 +4797,29 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! const char*_tmp4E="len <= s.size";_tag_dynforward(_tmp4E,sizeof(char),
   _get_zero_arr_size(_tmp4E,14));}),({const char*_tmp4F="string.cyc";
   _tag_dynforward(_tmp4F,sizeof(char),_get_zero_arr_size(_tmp4F,11));}),559);{
-! unsigned long i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j ++){if(((const char*)s.curr)[(
-  int)i]== ((const char*)accept.curr)[j])break;}if(j == asize)return i;}}return len;}
-! unsigned long Cyc_strcspn(struct _dynforward_ptr s,struct _dynforward_ptr accept){
-! unsigned long len=Cyc_strlen((struct _dynforward_ptr)s);unsigned int asize=
+! unsigned long i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j ++){if(*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),(int)i))== *((const char*)
+  _check_dynforward_subscript(accept,sizeof(char),j)))break;}if(j == asize)return i;}}
+! return len;}unsigned long Cyc_strcspn(struct _dynforward_ptr s,struct _dynforward_ptr
+! accept){unsigned long len=Cyc_strlen((struct _dynforward_ptr)s);unsigned int asize=
   _get_dynforward_size(accept,sizeof(char));len <= _get_dynforward_size(s,sizeof(
   char))?0:((int(*)(struct _dynforward_ptr assertion,struct _dynforward_ptr file,
   unsigned int line))Cyc___assert_fail)(({const char*_tmp50="len <= s.size";
   _tag_dynforward(_tmp50,sizeof(char),_get_zero_arr_size(_tmp50,14));}),({const
   char*_tmp51="string.cyc";_tag_dynforward(_tmp51,sizeof(char),_get_zero_arr_size(
 ! _tmp51,11));}),579);{unsigned long i=0;for(0;i < len;i ++){int j;for(j=0;j < asize;j
-! ++){if(((const char*)s.curr)[(int)i]!= ((const char*)accept.curr)[j])break;}if(j == 
-  asize)return i;}}return len;}struct _dynforward_ptr Cyc_strtok(struct _dynforward_ptr
-  s,struct _dynforward_ptr delim){static struct _dynforward_ptr olds={(void*)0,(void*)(
-  0 + 0)};struct _dynforward_ptr token;if(s.curr == (_tag_dynforward(0,0,0)).curr){if(
+! ++){if(*((const char*)_check_dynforward_subscript(s,sizeof(char),(int)i))!= *((
+! const char*)_check_dynforward_subscript(accept,sizeof(char),j)))break;}if(j == 
+! asize)return i;}}return len;}struct _dynforward_ptr Cyc_strtok(struct _dynforward_ptr
+! s,struct _dynforward_ptr delim){static struct _dynforward_ptr olds={(void*)0,(void*)(
+! 0 + 0)};struct _dynforward_ptr token;if(s.curr == (_tag_dynforward(0,0,0)).curr){if(
   olds.curr == (_tag_dynforward(0,0,0)).curr)return _tag_dynforward(0,0,0);s=olds;}{
 ! unsigned long inc=Cyc_strspn((struct _dynforward_ptr)s,delim);if(inc >= 
   _get_dynforward_size(s,sizeof(char)) || *((char*)_check_dynforward_subscript(
   _dynforward_ptr_plus(s,sizeof(char),(int)inc),sizeof(char),0))== '\000'){olds=
   _tag_dynforward(0,0,0);return _tag_dynforward(0,0,0);}else{
 ***************
-*** 1095,1109 ****
+*** 1108,1122 ****
   return result;}struct Cyc_List_List*Cyc_explode(struct _dynforward_ptr s){return Cyc_rexplode(
   Cyc_Core_heap_region,s);}struct _dynforward_ptr Cyc_implode(struct Cyc_List_List*
   chars){struct _dynforward_ptr s=Cyc_Core_new_string((unsigned int)(((int(*)(struct
@@ -4869,7 +4835,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line))Cyc___assert_fail)(({
   const char*_tmp59="min_length <= s1.size && min_length <= s2.size";
   _tag_dynforward(_tmp59,sizeof(char),_get_zero_arr_size(_tmp59,47));}),({const
---- 1095,1109 ----
+--- 1109,1123 ----
   return result;}struct Cyc_List_List*Cyc_explode(struct _dynforward_ptr s){return Cyc_rexplode(
   Cyc_Core_heap_region,s);}struct _dynforward_ptr Cyc_implode(struct Cyc_List_List*
   chars){struct _dynforward_ptr s=Cyc_Core_new_string((unsigned int)(((int(*)(struct
@@ -4886,11 +4852,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   const char*_tmp59="min_length <= s1.size && min_length <= s2.size";
   _tag_dynforward(_tmp59,sizeof(char),_get_zero_arr_size(_tmp59,47));}),({const
 ***************
-*** 1111,1140 ****
-  _tmp5A,11));}),660);{int i=- 1;while((++ i,i < min_length)){int diff=toupper((int)((
-  const char*)s1.curr)[i])- toupper((int)((const char*)s2.curr)[i]);if(diff != 0)
-  return diff;}return(int)len1 - (int)len2;}}int Cyc_strcasecmp(struct _dynforward_ptr
-! s1,struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{unsigned int len1=Cyc_strlen(
+*** 1125,1155 ****
+  const char*)_check_dynforward_subscript(s1,sizeof(char),i)))- toupper((int)*((
+  const char*)_check_dynforward_subscript(s2,sizeof(char),i)));if(diff != 0)return
+  diff;}return(int)len1 - (int)len2;}}int Cyc_strcasecmp(struct _dynforward_ptr s1,
+! struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{unsigned int len1=Cyc_strlen(
 ! s1);unsigned int len2=Cyc_strlen(s2);return Cyc_casecmp(s1,len1,s2,len2);}}inline
 ! static int Cyc_caseless_ncmp(struct _dynforward_ptr s1,unsigned int len1,struct
 ! _dynforward_ptr s2,unsigned int len2,unsigned int n){if(n <= 0)return 0;{unsigned int
@@ -4900,8 +4866,9 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! unsigned int line))Cyc___assert_fail)(({const char*_tmp5B="bound <= s1.size && bound <= s2.size";
 ! _tag_dynforward(_tmp5B,sizeof(char),_get_zero_arr_size(_tmp5B,37));}),({const
 ! char*_tmp5C="string.cyc";_tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(
-! _tmp5C,11));}),687);{int i=0;for(0;i < bound;i ++){int retc;if((retc=toupper((int)((
-! const char*)s1.curr)[i])- toupper((int)((const char*)s2.curr)[i]))!= 0)return retc;}}
+! _tmp5C,11));}),687);{int i=0;for(0;i < bound;i ++){int retc;if((retc=toupper((int)*((
+! const char*)_check_dynforward_subscript(s1,sizeof(char),i)))- toupper((int)*((
+! const char*)_check_dynforward_subscript(s2,sizeof(char),i))))!= 0)return retc;}}
 ! if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;}}int Cyc_strncasecmp(
 ! struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int n){unsigned int len1=
 ! Cyc_strlen(s1);unsigned int len2=Cyc_strlen(s2);return Cyc_caseless_ncmp(s1,len1,
@@ -4917,11 +4884,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   0,0)).curr  || _get_dynforward_size(d,sizeof(void))< n) || s.curr == ((struct
   _dynforward_ptr)_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(s,sizeof(
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp5E=
---- 1111,1141 ----
-  _tmp5A,11));}),660);{int i=- 1;while((++ i,i < min_length)){int diff=toupper((int)((
-  const char*)s1.curr)[i])- toupper((int)((const char*)s2.curr)[i]);if(diff != 0)
-  return diff;}return(int)len1 - (int)len2;}}int Cyc_strcasecmp(struct _dynforward_ptr
-! s1,struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{unsigned long len1=Cyc_strlen(
+--- 1126,1157 ----
+  const char*)_check_dynforward_subscript(s1,sizeof(char),i)))- toupper((int)*((
+  const char*)_check_dynforward_subscript(s2,sizeof(char),i)));if(diff != 0)return
+  diff;}return(int)len1 - (int)len2;}}int Cyc_strcasecmp(struct _dynforward_ptr s1,
+! struct _dynforward_ptr s2){if(s1.curr == s2.curr)return 0;{unsigned long len1=Cyc_strlen(
 ! s1);unsigned long len2=Cyc_strlen(s2);return Cyc_casecmp(s1,len1,s2,len2);}}inline
 ! static int Cyc_caseless_ncmp(struct _dynforward_ptr s1,unsigned long len1,struct
 ! _dynforward_ptr s2,unsigned long len2,unsigned long n){if(n <= 0)return 0;{
@@ -4932,11 +4899,12 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
 ! _tmp5B="bound <= s1.size && bound <= s2.size";_tag_dynforward(_tmp5B,sizeof(char),
 ! _get_zero_arr_size(_tmp5B,37));}),({const char*_tmp5C="string.cyc";
 ! _tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(_tmp5C,11));}),687);{int i=
-! 0;for(0;i < bound;i ++){int retc;if((retc=toupper((int)((const char*)s1.curr)[i])- 
-! toupper((int)((const char*)s2.curr)[i]))!= 0)return retc;}}if(len1 < n  || len2 < n)
-! return(int)len1 - (int)len2;return 0;}}int Cyc_strncasecmp(struct _dynforward_ptr s1,
-! struct _dynforward_ptr s2,unsigned long n){unsigned long len1=Cyc_strlen(s1);
-! unsigned long len2=Cyc_strlen(s2);return Cyc_caseless_ncmp(s1,len1,s2,len2,n);}
+! 0;for(0;i < bound;i ++){int retc;if((retc=toupper((int)*((const char*)
+! _check_dynforward_subscript(s1,sizeof(char),i)))- toupper((int)*((const char*)
+! _check_dynforward_subscript(s2,sizeof(char),i))))!= 0)return retc;}}if(len1 < n
+!  || len2 < n)return(int)len1 - (int)len2;return 0;}}int Cyc_strncasecmp(struct
+! _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned long n){unsigned long len1=Cyc_strlen(
+! s1);unsigned long len2=Cyc_strlen(s2);return Cyc_caseless_ncmp(s1,len1,s2,len2,n);}
 ! void*memcpy(void*,const void*,unsigned long n);void*memmove(void*,const void*,
 ! unsigned long n);int memcmp(const void*,const void*,unsigned long n);char*memchr(
 ! const char*,char c,unsigned long n);void*memset(void*,int c,unsigned long n);void
@@ -4950,7 +4918,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _dynforward_ptr)_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(s,sizeof(
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp5E=
 ***************
-*** 1144,1150 ****
+*** 1159,1165 ****
   _tmp5E;}));memcpy((void*)_check_null(_untag_dynforward_ptr(d,sizeof(void),1)),(
   const void*)_check_null(_untag_dynforward_ptr(s,sizeof(void),1)),n * sz);return d;}
   struct _dynforward_ptr Cyc__memmove(struct _dynforward_ptr d,struct _dynforward_ptr s,
@@ -4958,7 +4926,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _get_dynforward_size(d,sizeof(void))< n) || s.curr == ((struct _dynforward_ptr)
   _tag_dynforward(0,0,0)).curr) || _get_dynforward_size(s,sizeof(void))< n)(int)
   _throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp61=_cycalloc(sizeof(*
---- 1145,1151 ----
+--- 1161,1167 ----
   _tmp5E;}));memcpy((void*)_check_null(_untag_dynforward_ptr(d,sizeof(void),1)),(
   const void*)_check_null(_untag_dynforward_ptr(s,sizeof(void),1)),n * sz);return d;}
   struct _dynforward_ptr Cyc__memmove(struct _dynforward_ptr d,struct _dynforward_ptr s,
@@ -4967,7 +4935,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tag_dynforward(0,0,0)).curr) || _get_dynforward_size(s,sizeof(void))< n)(int)
   _throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp61=_cycalloc(sizeof(*
 ***************
-*** 1153,1160 ****
+*** 1168,1175 ****
   _get_zero_arr_size(_tmp63,7));});_tmp62;});_tmp61;}));memmove((void*)_check_null(
   _untag_dynforward_ptr(d,sizeof(void),1)),(const void*)_check_null(
   _untag_dynforward_ptr(s,sizeof(void),1)),n * sz);return d;}int Cyc_memcmp(struct
@@ -4976,7 +4944,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _dynforward_ptr)_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(s1,sizeof(
   char))>= n) || _get_dynforward_size(s2,sizeof(char))>= n)(int)_throw((void*)({
   struct Cyc_Core_Invalid_argument_struct*_tmp64=_cycalloc(sizeof(*_tmp64));_tmp64[
---- 1154,1161 ----
+--- 1170,1177 ----
   _get_zero_arr_size(_tmp63,7));});_tmp62;});_tmp61;}));memmove((void*)_check_null(
   _untag_dynforward_ptr(d,sizeof(void),1)),(const void*)_check_null(
   _untag_dynforward_ptr(s,sizeof(void),1)),n * sz);return d;}int Cyc_memcmp(struct
@@ -4986,7 +4954,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   char))>= n) || _get_dynforward_size(s2,sizeof(char))>= n)(int)_throw((void*)({
   struct Cyc_Core_Invalid_argument_struct*_tmp64=_cycalloc(sizeof(*_tmp64));_tmp64[
 ***************
-*** 1163,1169 ****
+*** 1178,1184 ****
   _get_zero_arr_size(_tmp66,7));});_tmp65;});_tmp64;}));return memcmp((const void*)
   _check_null(_untag_dynforward_ptr(s1,sizeof(char),1)),(const void*)_check_null(
   _untag_dynforward_ptr(s2,sizeof(char),1)),n);}struct _dynforward_ptr Cyc_memchr(
@@ -4994,7 +4962,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   s,sizeof(char));if(s.curr == ((struct _dynforward_ptr)_tag_dynforward(0,0,0)).curr
    || n > sz)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp67=
   _cycalloc(sizeof(*_tmp67));_tmp67[0]=({struct Cyc_Core_Invalid_argument_struct
---- 1164,1170 ----
+--- 1180,1186 ----
   _get_zero_arr_size(_tmp66,7));});_tmp65;});_tmp64;}));return memcmp((const void*)
   _check_null(_untag_dynforward_ptr(s1,sizeof(char),1)),(const void*)_check_null(
   _untag_dynforward_ptr(s2,sizeof(char),1)),n);}struct _dynforward_ptr Cyc_memchr(
@@ -5003,7 +4971,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
    || n > sz)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp67=
   _cycalloc(sizeof(*_tmp67));_tmp67[0]=({struct Cyc_Core_Invalid_argument_struct
 ***************
-*** 1175,1181 ****
+*** 1190,1196 ****
   _untag_dynforward_ptr(s,sizeof(char),1)));unsigned int _tmp6C=(unsigned int)((
   const char*)_tmp6A);unsigned int _tmp6D=_tmp6C - _tmp6B;return _dynforward_ptr_plus(
   s,sizeof(char),(int)_tmp6D);}}}struct _dynforward_ptr Cyc_mmemchr(struct
@@ -5011,7 +4979,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   sizeof(char));if(s.curr == (_tag_dynforward(0,0,0)).curr  || n > sz)(int)_throw((
   void*)({struct Cyc_Core_Invalid_argument_struct*_tmp6E=_cycalloc(sizeof(*_tmp6E));
   _tmp6E[0]=({struct Cyc_Core_Invalid_argument_struct _tmp6F;_tmp6F.tag=Cyc_Core_Invalid_argument;
---- 1176,1182 ----
+--- 1192,1198 ----
   _untag_dynforward_ptr(s,sizeof(char),1)));unsigned int _tmp6C=(unsigned int)((
   const char*)_tmp6A);unsigned int _tmp6D=_tmp6C - _tmp6B;return _dynforward_ptr_plus(
   s,sizeof(char),(int)_tmp6D);}}}struct _dynforward_ptr Cyc_mmemchr(struct
@@ -5020,7 +4988,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   void*)({struct Cyc_Core_Invalid_argument_struct*_tmp6E=_cycalloc(sizeof(*_tmp6E));
   _tmp6E[0]=({struct Cyc_Core_Invalid_argument_struct _tmp6F;_tmp6F.tag=Cyc_Core_Invalid_argument;
 ***************
-*** 1186,1206 ****
+*** 1201,1221 ****
   _check_null(_untag_dynforward_ptr(s,sizeof(char),1)));unsigned int _tmp73=(
   unsigned int)_tmp71;unsigned int _tmp74=_tmp73 - _tmp72;return _dynforward_ptr_plus(
   s,sizeof(char),(int)_tmp74);}}}struct _dynforward_ptr Cyc_memset(struct
@@ -5042,7 +5010,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tag_dynforward(0,0,0)).curr  || _get_dynforward_size(src,sizeof(void))< n) || 
   dst.curr == (_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(dst,sizeof(
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp7B=
---- 1187,1207 ----
+--- 1203,1223 ----
   _check_null(_untag_dynforward_ptr(s,sizeof(char),1)));unsigned int _tmp73=(
   unsigned int)_tmp71;unsigned int _tmp74=_tmp73 - _tmp72;return _dynforward_ptr_plus(
   s,sizeof(char),(int)_tmp74);}}}struct _dynforward_ptr Cyc_memset(struct
@@ -5065,8 +5033,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   dst.curr == (_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(dst,sizeof(
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp7B=
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/lib/tmp.c
-*** i686-unknown-linux/lib/tmp.c	Fri Jul 19 20:19:47 2002
---- powerpc-apple-rhapsody/lib/tmp.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/tmp.c	Fri Jul 19 20:19:48 2002
+--- powerpc-apple-rhapsody/lib/tmp.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 689,715 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5123,8 +5091,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/li
   _get_zero_arr_size(_tmp0,1));})):({char*_tmp1=name;_tag_dynforward(_tmp1,sizeof(
   char),_get_zero_arr_size(_tmp1,1));});}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsody/lib/typerep.c
-*** i686-unknown-linux/lib/typerep.c	Fri Jul 19 20:19:47 2002
---- powerpc-apple-rhapsody/lib/typerep.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/lib/typerep.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/lib/typerep.c	Mon Jul 22 11:13:58 2002
 ***************
 *** 708,718 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -5149,8 +5117,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsod
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/src/absyn.c
-*** i686-unknown-linux/src/absyn.c	Sun Jul 21 15:03:13 2002
---- powerpc-apple-rhapsody/src/absyn.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/absyn.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/absyn.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 1075,1089 ****
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
@@ -5183,8 +5151,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhapsody/src/absyndump.c
-*** i686-unknown-linux/src/absyndump.c	Sun Jul 21 15:03:13 2002
---- powerpc-apple-rhapsody/src/absyndump.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/absyndump.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/absyndump.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 689,697 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5222,8 +5190,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhaps
   struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[9];
   struct Cyc_Position_Segment;struct Cyc_Position_Error{struct _dynforward_ptr source;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsody/src/absynpp.c
-*** i686-unknown-linux/src/absynpp.c	Sun Jul 21 15:03:13 2002
---- powerpc-apple-rhapsody/src/absynpp.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/absynpp.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/absynpp.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 690,698 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5261,8 +5229,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsod
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_str_sepstr(
   struct Cyc_List_List*,struct _dynforward_ptr);struct _tuple4{unsigned int f1;int f2;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/buildlib.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 691,712 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -5948,8 +5916,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tmp17A;_tmp17A.tag=0;_tmp17A.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
   d);{void*_tmp178[1]={& _tmp17A};Cyc_fprintf(Cyc_stderr,({const char*_tmp179="Error: could not create directory %s\n";
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rhapsody/src/cf_flowinfo.c
-*** i686-unknown-linux/src/cf_flowinfo.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/cf_flowinfo.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/cf_flowinfo.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/cf_flowinfo.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 705,713 ****
   void*x);int Cyc_List_list_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l1,
@@ -5970,8 +5938,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
   int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody/src/cycdoc.c
-*** i686-unknown-linux/src/cycdoc.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/cycdoc.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/cycdoc.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/src/cycdoc.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 692,704 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6088,10 +6056,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tmp2D=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct
   _dynforward_ptr _tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/cyclone.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/cyclone.c	Mon Jul 22 11:12:54 2002
+--- powerpc-apple-rhapsody/src/cyclone.c	Mon Jul 22 11:13:56 2002
 ***************
-*** 706,743 ****
+*** 707,744 ****
   _dynforward_ptr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*f1)(int);};struct
   Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct _dynforward_ptr);};void Cyc_Arg_parse(
   struct Cyc_List_List*specs,void(*anonfun)(struct _dynforward_ptr),struct
@@ -6130,7 +6098,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   char c);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
   struct Cyc_Iter_Iter,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,
   void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
---- 706,740 ----
+--- 707,741 ----
   _dynforward_ptr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*f1)(int);};struct
   Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct _dynforward_ptr);};void Cyc_Arg_parse(
   struct Cyc_List_List*specs,void(*anonfun)(struct _dynforward_ptr),struct
@@ -6167,7 +6135,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct Cyc_Iter_Iter,void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,
   void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
 ***************
-*** 1150,1156 ****
+*** 1151,1157 ****
   void*_tmpE[1]={& _tmp10};Cyc_printf(({const char*_tmpF="Standard include directory: %s\n";
   _tag_dynforward(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,32));}),
   _tag_dynforward(_tmpE,sizeof(void*),1));}});exit(0);}static int Cyc_is_cyclone_sourcefile(
@@ -6175,7 +6143,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   if(_tmp11 <= 4)return 0;else{return Cyc_strcmp((struct _dynforward_ptr)
   _dynforward_ptr_plus(s,sizeof(char),(int)(_tmp11 - 4)),({const char*_tmp12=".cyc";
   _tag_dynforward(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,5));}))== 0;}}
---- 1147,1153 ----
+--- 1148,1154 ----
   void*_tmpE[1]={& _tmp10};Cyc_printf(({const char*_tmpF="Standard include directory: %s\n";
   _tag_dynforward(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,32));}),
   _tag_dynforward(_tmpE,sizeof(void*),1));}});exit(0);}static int Cyc_is_cyclone_sourcefile(
@@ -6184,7 +6152,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _dynforward_ptr_plus(s,sizeof(char),(int)(_tmp11 - 4)),({const char*_tmp12=".cyc";
   _tag_dynforward(_tmp12,sizeof(char),_get_zero_arr_size(_tmp12,5));}))== 0;}}
 ***************
-*** 1159,1165 ****
+*** 1160,1166 ****
   _tmp13));_tmp13->hd=({struct _dynforward_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));
   _tmp14[0]=s;_tmp14;});_tmp13->tl=Cyc_ccargs;_tmp13;});}static struct Cyc_List_List*
   Cyc_cyclone_exec_path=0;static void Cyc_add_cyclone_exec_path(struct
@@ -6192,7 +6160,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp15 <= 2)return;{struct _dynforward_ptr _tmp16=(struct _dynforward_ptr)Cyc_substring((
   struct _dynforward_ptr)s,2,_tmp15 - 2);Cyc_cyclone_exec_path=({struct Cyc_List_List*
   _tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->hd=({struct _dynforward_ptr*_tmp18=
---- 1156,1162 ----
+--- 1157,1163 ----
   _tmp13));_tmp13->hd=({struct _dynforward_ptr*_tmp14=_cycalloc(sizeof(*_tmp14));
   _tmp14[0]=s;_tmp14;});_tmp13->tl=Cyc_ccargs;_tmp13;});}static struct Cyc_List_List*
   Cyc_cyclone_exec_path=0;static void Cyc_add_cyclone_exec_path(struct
@@ -6201,7 +6169,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr)s,2,_tmp15 - 2);Cyc_cyclone_exec_path=({struct Cyc_List_List*
   _tmp17=_cycalloc(sizeof(*_tmp17));_tmp17->hd=({struct _dynforward_ptr*_tmp18=
 ***************
-*** 1321,1328 ****
+*** 1322,1329 ****
   struct Cyc___cycFILE*_tmp6E=Cyc_try_file_open(Cyc_cyc_include,({const char*_tmp74="r";
   _tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size(_tmp74,2));}),({const char*
   _tmp75="internal compiler file";_tag_dynforward(_tmp75,sizeof(char),
@@ -6210,7 +6178,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   for(i=0;i < _tmp73;i ++){buf[i]='\000';}}while(n_read == 1024){n_read=Cyc_fread(
   _tag_dynforward(buf,sizeof(char),1024),1,1024,(struct Cyc___cycFILE*)_tmp6E);if(
   n_read != 1024  && !Cyc_feof((struct Cyc___cycFILE*)_tmp6E)){Cyc_compile_failure=1;({
---- 1318,1325 ----
+--- 1319,1326 ----
   struct Cyc___cycFILE*_tmp6E=Cyc_try_file_open(Cyc_cyc_include,({const char*_tmp74="r";
   _tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size(_tmp74,2));}),({const char*
   _tmp75="internal compiler file";_tag_dynforward(_tmp75,sizeof(char),
@@ -6220,7 +6188,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tag_dynforward(buf,sizeof(char),1024),1,1024,(struct Cyc___cycFILE*)_tmp6E);if(
   n_read != 1024  && !Cyc_feof((struct Cyc___cycFILE*)_tmp6E)){Cyc_compile_failure=1;({
 ***************
-*** 1342,1348 ****
+*** 1343,1349 ****
   _check_null(Cyc_cfiles))->tl){Cyc_remove_file(*((struct _dynforward_ptr*)((struct
   Cyc_List_List*)_check_null(Cyc_cfiles))->hd));}}static struct Cyc_List_List*Cyc_split_by_char(
   struct _dynforward_ptr s,char c){if(s.curr == ((struct _dynforward_ptr)
@@ -6228,7 +6196,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp77=Cyc_strlen((struct _dynforward_ptr)s);while(_tmp77 > 0){struct
   _dynforward_ptr _tmp78=Cyc_strchr(s,c);if(_tmp78.curr == ((struct _dynforward_ptr)
   _tag_dynforward(0,0,0)).curr){_tmp76=({struct Cyc_List_List*_tmp79=_cycalloc(
---- 1339,1345 ----
+--- 1340,1346 ----
   _check_null(Cyc_cfiles))->tl){Cyc_remove_file(*((struct _dynforward_ptr*)((struct
   Cyc_List_List*)_check_null(Cyc_cfiles))->hd));}}static struct Cyc_List_List*Cyc_split_by_char(
   struct _dynforward_ptr s,char c){if(s.curr == ((struct _dynforward_ptr)
@@ -6237,7 +6205,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _dynforward_ptr _tmp78=Cyc_strchr(s,c);if(_tmp78.curr == ((struct _dynforward_ptr)
   _tag_dynforward(0,0,0)).curr){_tmp76=({struct Cyc_List_List*_tmp79=_cycalloc(
 ***************
-*** 1350,1356 ****
+*** 1351,1357 ****
   _tmp7A));_tmp7A[0]=s;_tmp7A;});_tmp79->tl=_tmp76;_tmp79;});break;}else{_tmp76=({
   struct Cyc_List_List*_tmp7B=_cycalloc(sizeof(*_tmp7B));_tmp7B->hd=({struct
   _dynforward_ptr*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C[0]=(struct
@@ -6245,7 +6213,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(char)));_tmp7C;});_tmp7B->tl=
   _tmp76;_tmp7B;});_tmp77 -=(((struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(
   char);s=_dynforward_ptr_plus(_tmp78,sizeof(char),1);}}return((struct Cyc_List_List*(*)(
---- 1347,1353 ----
+--- 1348,1354 ----
   _tmp7A));_tmp7A[0]=s;_tmp7A;});_tmp79->tl=_tmp76;_tmp79;});break;}else{_tmp76=({
   struct Cyc_List_List*_tmp7B=_cycalloc(sizeof(*_tmp7B));_tmp7B->hd=({struct
   _dynforward_ptr*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C[0]=(struct
@@ -6254,7 +6222,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp76;_tmp7B;});_tmp77 -=(((struct _dynforward_ptr)_tmp78).curr - s.curr)/ sizeof(
   char);s=_dynforward_ptr_plus(_tmp78,sizeof(char),1);}}return((struct Cyc_List_List*(*)(
 ***************
-*** 1417,1423 ****
+*** 1418,1424 ****
   _LL1D;case '|': _LL1D: goto _LL1E;case '^': _LL1E: goto _LL1F;case '<': _LL1F: goto _LL20;
   case '>': _LL20: goto _LL21;case ' ': _LL21: goto _LL22;case '\n': _LL22: goto _LL23;case '\t':
   _LL23: return 1;default: _LL24: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -6262,7 +6230,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   int _tmp9B=0;int _tmp9C=0;{int i=0;for(0;i < _tmp9A;i ++){char _tmp9D=*((const char*)
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp9D == '\'')_tmp9B ++;else{
   if(Cyc_is_other_special(_tmp9D))_tmp9C ++;}}}if(_tmp9B == 0  && _tmp9C == 0)return s;
---- 1414,1420 ----
+--- 1415,1421 ----
   _LL1D;case '|': _LL1D: goto _LL1E;case '^': _LL1E: goto _LL1F;case '<': _LL1F: goto _LL20;
   case '>': _LL20: goto _LL21;case ' ': _LL21: goto _LL22;case '\n': _LL22: goto _LL23;case '\t':
   _LL23: return 1;default: _LL24: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
@@ -6271,7 +6239,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _check_dynforward_subscript(s,sizeof(char),i));if(_tmp9D == '\'')_tmp9B ++;else{
   if(Cyc_is_other_special(_tmp9D))_tmp9C ++;}}}if(_tmp9B == 0  && _tmp9C == 0)return s;
 ***************
-*** 1427,1433 ****
+*** 1428,1434 ****
   _cycalloc(sizeof(*_tmpA0));_tmpA0[0]=(struct _dynforward_ptr)s;_tmpA0;});_tmp9E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -6279,7 +6247,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp9B)+ _tmp9C;struct _dynforward_ptr s2=({unsigned int _tmpAC=_tmpA2 + 1;char*
   _tmpAD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpAC + 1));struct
   _dynforward_ptr _tmpAF=_tag_dynforward(_tmpAD,sizeof(char),_tmpAC + 1);{
---- 1424,1430 ----
+--- 1425,1431 ----
   _cycalloc(sizeof(*_tmpA0));_tmpA0[0]=(struct _dynforward_ptr)s;_tmpA0;});_tmp9E[0]=
   _init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
   struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
@@ -6288,8 +6256,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmpAD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpAC + 1));struct
   _dynforward_ptr _tmpAF=_tag_dynforward(_tmpAD,sizeof(char),_tmpAC + 1);{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/src/evexp.c
-*** i686-unknown-linux/src/evexp.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/evexp.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/evexp.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/evexp.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 694,708 ****
   logical_file;struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[
@@ -6321,8 +6289,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhapsody/src/formatstr.c
-*** i686-unknown-linux/src/formatstr.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/formatstr.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/formatstr.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/formatstr.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 691,716 ****
   _dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
@@ -6377,157 +6345,153 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
   struct _tuple0{union Cyc_Absyn_Nmspace_union f1;struct _dynforward_ptr*f2;};struct
 ***************
-*** 957,969 ****
-  Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(struct _dynforward_ptr s,
-  int i);struct _tuple4{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*
+*** 956,962 ****
+  struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dynforward_ptr,struct Cyc_Position_Segment*);
+  struct _tuple4{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*
   f3;struct Cyc_List_List*f4;char f5;int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
-! struct _dynforward_ptr s,int i){unsigned int _tmp0=Cyc_strlen((struct _dynforward_ptr)
-! s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=0;char c=' ';for(0;i < 
-! _tmp0;i ++){c=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
-! switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ': _LL2: goto _LL3;case
-! '#': _LL3: goto _LL4;case '0': _LL4: _tmp1=({struct Cyc_List_List*_tmp2=_cycalloc(
-! sizeof(*_tmp2));_tmp2->hd=(void*)((int)c);_tmp2->tl=_tmp1;_tmp2;});continue;
-! default: _LL5: break;}break;}if(i >= _tmp0)return 0;_tmp1=((struct Cyc_List_List*(*)(
-  struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp1);{struct Cyc_List_List*_tmp3=0;c=*((
-  const char*)_check_dynforward_subscript(s,sizeof(char),i));if(c == '*'){_tmp3=({
-  struct Cyc_List_List*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->hd=(void*)((int)c);
---- 955,967 ----
-  Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(struct _dynforward_ptr s,
-  int i);struct _tuple4{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*
+! struct _RegionHandle*r,struct _dynforward_ptr s,int i){unsigned int _tmp0=Cyc_strlen((
+  struct _dynforward_ptr)s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=
+  0;char c=' ';for(0;i < _tmp0;i ++){c=*((const char*)_check_dynforward_subscript(s,
+  sizeof(char),i));switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ':
+--- 954,960 ----
+  struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dynforward_ptr,struct Cyc_Position_Segment*);
+  struct _tuple4{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*
   f3;struct Cyc_List_List*f4;char f5;int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
-! struct _dynforward_ptr s,int i){unsigned long _tmp0=Cyc_strlen((struct
-! _dynforward_ptr)s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=0;
-! char c=' ';for(0;i < _tmp0;i ++){c=*((const char*)_check_dynforward_subscript(s,
-! sizeof(char),i));switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ':
-! _LL2: goto _LL3;case '#': _LL3: goto _LL4;case '0': _LL4: _tmp1=({struct Cyc_List_List*
-! _tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->hd=(void*)((int)c);_tmp2->tl=_tmp1;_tmp2;});
-! continue;default: _LL5: break;}break;}if(i >= _tmp0)return 0;_tmp1=((struct Cyc_List_List*(*)(
-  struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp1);{struct Cyc_List_List*_tmp3=0;c=*((
-  const char*)_check_dynforward_subscript(s,sizeof(char),i));if(c == '*'){_tmp3=({
-  struct Cyc_List_List*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->hd=(void*)((int)c);
+! struct _RegionHandle*r,struct _dynforward_ptr s,int i){unsigned long _tmp0=Cyc_strlen((
+  struct _dynforward_ptr)s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=
+  0;char c=' ';for(0;i < _tmp0;i ++){c=*((const char*)_check_dynforward_subscript(s,
+  sizeof(char),i));switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ':
 ***************
-*** 1006,1046 ****
-  struct _tuple4*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->f1=_tmp1;_tmp11->f2=
+*** 1007,1013 ****
   _tmp3;_tmp11->f3=_tmp6;_tmp11->f4=_tmpA;_tmp11->f5=c;_tmp11->f6=i + 1;_tmp11;});
-  _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct Cyc_Tcenv_Tenv*
-! te,struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned int _tmp12=Cyc_strlen((
-! struct _dynforward_ptr)s);struct Cyc_List_List*_tmp13=0;int i;for(i=0;i < _tmp12;i ++){
-! if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{
-! struct Cyc_Core_Opt*_tmp14=Cyc_Formatstr_parse_conversionspecification(s,i + 1);
-! if(_tmp14 == 0){({void*_tmp15[0]={};Cyc_Tcutil_terr(loc,({const char*_tmp16="bad format string";
-! _tag_dynforward(_tmp16,sizeof(char),_get_zero_arr_size(_tmp16,18));}),
-! _tag_dynforward(_tmp15,sizeof(void*),0));});return 0;}{struct _tuple4 _tmp18;struct
-! Cyc_List_List*_tmp19;struct Cyc_List_List*_tmp1A;struct Cyc_List_List*_tmp1B;
-! struct Cyc_List_List*_tmp1C;char _tmp1D;int _tmp1E;struct _tuple4*_tmp17=(struct
-! _tuple4*)_tmp14->v;_tmp18=*_tmp17;_tmp19=_tmp18.f1;_tmp1A=_tmp18.f2;_tmp1B=
-! _tmp18.f3;_tmp1C=_tmp18.f4;_tmp1D=_tmp18.f5;_tmp1E=_tmp18.f6;i=_tmp1E - 1;{struct
-! Cyc_List_List*_tmp1F=_tmp1C;struct Cyc_List_List _tmp20;int _tmp21;struct Cyc_List_List*
-! _tmp22;_LL25: if(_tmp1F == 0)goto _LL27;_tmp20=*_tmp1F;_tmp21=(int)_tmp20.hd;_tmp22=
-! _tmp20.tl;if(_tmp22 != 0)goto _LL27;if(!((_tmp21 == 'j'  || _tmp21 == 'z') || _tmp21
-! == 't'))goto _LL27;_LL26:({struct Cyc_Int_pa_struct _tmp25;_tmp25.tag=1;_tmp25.f1=(
-! unsigned long)_tmp21;{void*_tmp23[1]={& _tmp25};Cyc_Tcutil_terr(loc,({const char*
-! _tmp24="length modifier '%c' is not supported";_tag_dynforward(_tmp24,sizeof(
-! char),_get_zero_arr_size(_tmp24,38));}),_tag_dynforward(_tmp23,sizeof(void*),1));}});
-! return 0;_LL27:;_LL28: goto _LL24;_LL24:;}{struct Cyc_List_List*_tmp26=_tmp1A;struct
-! Cyc_List_List _tmp27;int _tmp28;struct Cyc_List_List*_tmp29;_LL2A: if(_tmp26 == 0)
-! goto _LL2C;_tmp27=*_tmp26;_tmp28=(int)_tmp27.hd;_tmp29=_tmp27.tl;if(_tmp29 != 0)
-! goto _LL2C;if(!(_tmp28 == '*'))goto _LL2C;_LL2B: _tmp13=({struct Cyc_List_List*_tmp2A=
-! _cycalloc(sizeof(*_tmp2A));_tmp2A->hd=(void*)Cyc_Absyn_sint_typ;_tmp2A->tl=
-! _tmp13;_tmp2A;});goto _LL29;_LL2C:;_LL2D: goto _LL29;_LL29:;}{struct Cyc_List_List*
-! _tmp2B=_tmp1B;struct Cyc_List_List _tmp2C;int _tmp2D;struct Cyc_List_List*_tmp2E;
-! struct Cyc_List_List _tmp2F;int _tmp30;struct Cyc_List_List*_tmp31;_LL2F: if(_tmp2B == 
-! 0)goto _LL31;_tmp2C=*_tmp2B;_tmp2D=(int)_tmp2C.hd;_tmp2E=_tmp2C.tl;if(_tmp2E == 0)
-! goto _LL31;_tmp2F=*_tmp2E;_tmp30=(int)_tmp2F.hd;_tmp31=_tmp2F.tl;if(_tmp31 != 0)
-! goto _LL31;if(!(_tmp2D == '.'  && _tmp30 == '*'))goto _LL31;_LL30: _tmp13=({struct Cyc_List_List*
-! _tmp32=_cycalloc(sizeof(*_tmp32));_tmp32->hd=(void*)Cyc_Absyn_sint_typ;_tmp32->tl=
-! _tmp13;_tmp32;});goto _LL2E;_LL31:;_LL32: goto _LL2E;_LL2E:;}{void*t;switch(_tmp1D){
-! case 'd': _LL33: goto _LL34;case 'i': _LL34:{struct Cyc_List_List*f=_tmp19;for(0;f != 0;
-! f=f->tl){if((int)f->hd == '#'){({struct Cyc_Int_pa_struct _tmp35;_tmp35.tag=1;
-! _tmp35.f1=(unsigned long)((int)_tmp1D);{void*_tmp33[1]={& _tmp35};Cyc_Tcutil_terr(
-! loc,({const char*_tmp34="flag '#' is not valid with %%%c";_tag_dynforward(_tmp34,
-  sizeof(char),_get_zero_arr_size(_tmp34,32));}),_tag_dynforward(_tmp33,sizeof(
-  void*),1));}});return 0;}}}{struct Cyc_List_List*_tmp36=_tmp1C;struct Cyc_List_List
-  _tmp37;int _tmp38;struct Cyc_List_List*_tmp39;struct Cyc_List_List _tmp3A;int _tmp3B;
---- 1004,1045 ----
-  struct _tuple4*_tmp11=_cycalloc(sizeof(*_tmp11));_tmp11->f1=_tmp1;_tmp11->f2=
+  _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct
+  _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,struct _dynforward_ptr s,struct Cyc_Position_Segment*
+! loc){unsigned int _tmp12=Cyc_strlen((struct _dynforward_ptr)s);struct Cyc_List_List*
+  _tmp13=0;int i;struct _RegionHandle _tmp14=_new_region("temp");struct _RegionHandle*
+  temp=& _tmp14;_push_region(temp);for(i=0;i < _tmp12;i ++){if(*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{struct Cyc_Core_Opt*
+--- 1005,1011 ----
   _tmp3;_tmp11->f3=_tmp6;_tmp11->f4=_tmpA;_tmp11->f5=c;_tmp11->f6=i + 1;_tmp11;});
-  _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct Cyc_Tcenv_Tenv*
-! te,struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned long _tmp12=
-! Cyc_strlen((struct _dynforward_ptr)s);struct Cyc_List_List*_tmp13=0;int i;for(i=0;i
-! < _tmp12;i ++){if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')
-! continue;{struct Cyc_Core_Opt*_tmp14=Cyc_Formatstr_parse_conversionspecification(
-! s,i + 1);if(_tmp14 == 0){({void*_tmp15[0]={};Cyc_Tcutil_terr(loc,({const char*
-! _tmp16="bad format string";_tag_dynforward(_tmp16,sizeof(char),
-! _get_zero_arr_size(_tmp16,18));}),_tag_dynforward(_tmp15,sizeof(void*),0));});
-! return 0;}{struct _tuple4 _tmp18;struct Cyc_List_List*_tmp19;struct Cyc_List_List*
-! _tmp1A;struct Cyc_List_List*_tmp1B;struct Cyc_List_List*_tmp1C;char _tmp1D;int
-! _tmp1E;struct _tuple4*_tmp17=(struct _tuple4*)_tmp14->v;_tmp18=*_tmp17;_tmp19=
-! _tmp18.f1;_tmp1A=_tmp18.f2;_tmp1B=_tmp18.f3;_tmp1C=_tmp18.f4;_tmp1D=_tmp18.f5;
-! _tmp1E=_tmp18.f6;i=_tmp1E - 1;{struct Cyc_List_List*_tmp1F=_tmp1C;struct Cyc_List_List
-! _tmp20;int _tmp21;struct Cyc_List_List*_tmp22;_LL25: if(_tmp1F == 0)goto _LL27;_tmp20=*
-! _tmp1F;_tmp21=(int)_tmp20.hd;_tmp22=_tmp20.tl;if(_tmp22 != 0)goto _LL27;if(!((
-! _tmp21 == 'j'  || _tmp21 == 'z') || _tmp21 == 't'))goto _LL27;_LL26:({struct Cyc_Int_pa_struct
-! _tmp25;_tmp25.tag=1;_tmp25.f1=(unsigned long)_tmp21;{void*_tmp23[1]={& _tmp25};
-! Cyc_Tcutil_terr(loc,({const char*_tmp24="length modifier '%c' is not supported";
-! _tag_dynforward(_tmp24,sizeof(char),_get_zero_arr_size(_tmp24,38));}),
-! _tag_dynforward(_tmp23,sizeof(void*),1));}});return 0;_LL27:;_LL28: goto _LL24;
-! _LL24:;}{struct Cyc_List_List*_tmp26=_tmp1A;struct Cyc_List_List _tmp27;int _tmp28;
-! struct Cyc_List_List*_tmp29;_LL2A: if(_tmp26 == 0)goto _LL2C;_tmp27=*_tmp26;_tmp28=(
-! int)_tmp27.hd;_tmp29=_tmp27.tl;if(_tmp29 != 0)goto _LL2C;if(!(_tmp28 == '*'))goto
-! _LL2C;_LL2B: _tmp13=({struct Cyc_List_List*_tmp2A=_cycalloc(sizeof(*_tmp2A));
-! _tmp2A->hd=(void*)Cyc_Absyn_sint_typ;_tmp2A->tl=_tmp13;_tmp2A;});goto _LL29;_LL2C:;
-! _LL2D: goto _LL29;_LL29:;}{struct Cyc_List_List*_tmp2B=_tmp1B;struct Cyc_List_List
-! _tmp2C;int _tmp2D;struct Cyc_List_List*_tmp2E;struct Cyc_List_List _tmp2F;int _tmp30;
-! struct Cyc_List_List*_tmp31;_LL2F: if(_tmp2B == 0)goto _LL31;_tmp2C=*_tmp2B;_tmp2D=(
-! int)_tmp2C.hd;_tmp2E=_tmp2C.tl;if(_tmp2E == 0)goto _LL31;_tmp2F=*_tmp2E;_tmp30=(
-! int)_tmp2F.hd;_tmp31=_tmp2F.tl;if(_tmp31 != 0)goto _LL31;if(!(_tmp2D == '.'  && 
-! _tmp30 == '*'))goto _LL31;_LL30: _tmp13=({struct Cyc_List_List*_tmp32=_cycalloc(
-! sizeof(*_tmp32));_tmp32->hd=(void*)Cyc_Absyn_sint_typ;_tmp32->tl=_tmp13;_tmp32;});
-! goto _LL2E;_LL31:;_LL32: goto _LL2E;_LL2E:;}{void*t;switch(_tmp1D){case 'd': _LL33:
-! goto _LL34;case 'i': _LL34:{struct Cyc_List_List*f=_tmp19;for(0;f != 0;f=f->tl){if((
-! int)f->hd == '#'){({struct Cyc_Int_pa_struct _tmp35;_tmp35.tag=1;_tmp35.f1=(
-! unsigned long)((int)_tmp1D);{void*_tmp33[1]={& _tmp35};Cyc_Tcutil_terr(loc,({
-! const char*_tmp34="flag '#' is not valid with %%%c";_tag_dynforward(_tmp34,
-  sizeof(char),_get_zero_arr_size(_tmp34,32));}),_tag_dynforward(_tmp33,sizeof(
-  void*),1));}});return 0;}}}{struct Cyc_List_List*_tmp36=_tmp1C;struct Cyc_List_List
-  _tmp37;int _tmp38;struct Cyc_List_List*_tmp39;struct Cyc_List_List _tmp3A;int _tmp3B;
+  _tmp10;});}}}}}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct
+  _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,struct _dynforward_ptr s,struct Cyc_Position_Segment*
+! loc){unsigned long _tmp12=Cyc_strlen((struct _dynforward_ptr)s);struct Cyc_List_List*
+  _tmp13=0;int i;struct _RegionHandle _tmp14=_new_region("temp");struct _RegionHandle*
+  temp=& _tmp14;_push_region(temp);for(i=0;i < _tmp12;i ++){if(*((const char*)
+  _check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{struct Cyc_Core_Opt*
 ***************
-*** 1182,1188 ****
-  _tag_dynforward(_tmp9A,sizeof(void*),1));}});return 0;}break;default: _LL6E: return
-  0;}}}}}return Cyc_List_imp_rev(_tmp13);}struct _tuple5{int f1;struct Cyc_List_List*
-  f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(
-! struct _dynforward_ptr s,int i){unsigned int _tmp9D=Cyc_strlen((struct
-  _dynforward_ptr)s);if(i < 0  || i >= _tmp9D)return 0;{int _tmp9E=0;char _tmp9F=*((
-  const char*)_check_dynforward_subscript(s,sizeof(char),i));if(_tmp9F == '*'){
-  _tmp9E=1;i ++;if(i >= _tmp9D)return 0;}{struct Cyc_List_List*_tmpA0=0;for(0;i < 
---- 1181,1187 ----
-  _tag_dynforward(_tmp9A,sizeof(void*),1));}});return 0;}break;default: _LL6E: return
-  0;}}}}}return Cyc_List_imp_rev(_tmp13);}struct _tuple5{int f1;struct Cyc_List_List*
-  f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_inputformat(
-! struct _dynforward_ptr s,int i){unsigned long _tmp9D=Cyc_strlen((struct
-  _dynforward_ptr)s);if(i < 0  || i >= _tmp9D)return 0;{int _tmp9E=0;char _tmp9F=*((
-  const char*)_check_dynforward_subscript(s,sizeof(char),i));if(_tmp9F == '*'){
-  _tmp9E=1;i ++;if(i >= _tmp9D)return 0;}{struct Cyc_List_List*_tmpA0=0;for(0;i < 
-***************
-*** 1217,1223 ****
-  _tuple5*_tmpA9=_cycalloc(sizeof(*_tmpA9));_tmpA9->f1=_tmp9E;_tmpA9->f2=_tmpA0;
-  _tmpA9->f3=_tmpA2;_tmpA9->f4=_tmp9F;_tmpA9->f5=i + 1;_tmpA9;});_tmpA8;});}}}}
-  struct Cyc_List_List*Cyc_Formatstr_get_scanf_typs(struct Cyc_Tcenv_Tenv*te,struct
-! _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned int _tmpAA=Cyc_strlen((
-  struct _dynforward_ptr)s);struct Cyc_List_List*_tmpAB=0;int i;for(i=0;i < _tmpAA;i ++){
-  if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{
-  struct Cyc_Core_Opt*_tmpAC=Cyc_Formatstr_parse_inputformat(s,i + 1);if(_tmpAC == 0){({
---- 1216,1222 ----
-  _tuple5*_tmpA9=_cycalloc(sizeof(*_tmpA9));_tmpA9->f1=_tmp9E;_tmpA9->f2=_tmpA0;
-  _tmpA9->f3=_tmpA2;_tmpA9->f4=_tmp9F;_tmpA9->f5=i + 1;_tmpA9;});_tmpA8;});}}}}
-  struct Cyc_List_List*Cyc_Formatstr_get_scanf_typs(struct Cyc_Tcenv_Tenv*te,struct
-! _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned long _tmpAA=Cyc_strlen((
-  struct _dynforward_ptr)s);struct Cyc_List_List*_tmpAB=0;int i;for(i=0;i < _tmpAA;i ++){
-  if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{
-  struct Cyc_Core_Opt*_tmpAC=Cyc_Formatstr_parse_inputformat(s,i + 1);if(_tmpAC == 0){({
+*** 1201,1254 ****
+  _tmp13);_npop_handler(0);return _tmpB2;};_pop_region(temp);}struct _tuple5{int f1;
+  struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*
+  Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,struct _dynforward_ptr s,int
+! i){unsigned int _tmpB3=Cyc_strlen((struct _dynforward_ptr)s);if(i < 0  || i >= _tmpB3)
+! return 0;{int _tmpB4=0;char _tmpB5=*((const char*)_check_dynforward_subscript(s,
+! sizeof(char),i));if(_tmpB5 == '*'){_tmpB4=1;i ++;if(i >= _tmpB3)return 0;}{struct Cyc_List_List*
+! _tmpB6=0;for(0;i < _tmpB3;i ++){_tmpB5=*((const char*)_check_dynforward_subscript(s,
+! sizeof(char),i));if(isdigit((int)_tmpB5))_tmpB6=({struct Cyc_List_List*_tmpB7=
+! _region_malloc(r,sizeof(*_tmpB7));_tmpB7->hd=(void*)((int)_tmpB5);_tmpB7->tl=
+! _tmpB6;_tmpB7;});else{break;}}if(i >= _tmpB3)return 0;_tmpB6=((struct Cyc_List_List*(*)(
+! struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmpB6);{struct Cyc_List_List*_tmpB8=0;
+! _tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));switch(
+! _tmpB5){case 'h': _LL70: _tmpB8=({struct Cyc_List_List*_tmpB9=_region_malloc(r,
+! sizeof(*_tmpB9));_tmpB9->hd=(void*)((int)_tmpB5);_tmpB9->tl=_tmpB8;_tmpB9;});i ++;
+! if(i >= _tmpB3)return 0;_tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(
+! char),i));if(_tmpB5 == 'h'){_tmpB8=({struct Cyc_List_List*_tmpBA=_region_malloc(r,
+! sizeof(*_tmpBA));_tmpBA->hd=(void*)((int)_tmpB5);_tmpBA->tl=_tmpB8;_tmpBA;});i ++;}
+! break;case 'l': _LL71: _tmpB8=({struct Cyc_List_List*_tmpBB=_region_malloc(r,sizeof(*
+! _tmpBB));_tmpBB->hd=(void*)((int)_tmpB5);_tmpBB->tl=_tmpB8;_tmpBB;});i ++;if(i >= 
+! _tmpB3)return 0;_tmpB5=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
+! if(_tmpB5 == 'l'){_tmpB8=({struct Cyc_List_List*_tmpBC=_region_malloc(r,sizeof(*
+! _tmpBC));_tmpBC->hd=(void*)((int)_tmpB5);_tmpBC->tl=_tmpB8;_tmpBC;});i ++;}break;
+! case 'j': _LL72: goto _LL73;case 'z': _LL73: goto _LL74;case 't': _LL74: goto _LL75;case 'L':
+! _LL75: _tmpB8=({struct Cyc_List_List*_tmpBD=_region_malloc(r,sizeof(*_tmpBD));
+! _tmpBD->hd=(void*)((int)_tmpB5);_tmpBD->tl=_tmpB8;_tmpBD;});i ++;break;default:
+! _LL76: break;}if(i >= _tmpB3)return 0;_tmpB8=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+! x))Cyc_List_imp_rev)(_tmpB8);_tmpB5=*((const char*)_check_dynforward_subscript(s,
+! sizeof(char),i));switch(_tmpB5){case 'd': _LL78: goto _LL79;case 'i': _LL79: goto _LL7A;
+! case 'o': _LL7A: goto _LL7B;case 'u': _LL7B: goto _LL7C;case 'x': _LL7C: goto _LL7D;case 'X':
+! _LL7D: goto _LL7E;case 'f': _LL7E: goto _LL7F;case 'F': _LL7F: goto _LL80;case 'e': _LL80:
+! goto _LL81;case 'E': _LL81: goto _LL82;case 'g': _LL82: goto _LL83;case 'G': _LL83: goto
+! _LL84;case 'a': _LL84: goto _LL85;case 'A': _LL85: goto _LL86;case 'c': _LL86: goto _LL87;
+! case 's': _LL87: goto _LL88;case 'p': _LL88: goto _LL89;case 'n': _LL89: goto _LL8A;case '%':
+! _LL8A: break;default: _LL8B: return 0;}return({struct Cyc_Core_Opt*_tmpBE=
+! _region_malloc(r,sizeof(*_tmpBE));_tmpBE->v=({struct _tuple5*_tmpBF=
+! _region_malloc(r,sizeof(*_tmpBF));_tmpBF->f1=_tmpB4;_tmpBF->f2=_tmpB6;_tmpBF->f3=
+! _tmpB8;_tmpBF->f4=_tmpB5;_tmpBF->f5=i + 1;_tmpBF;});_tmpBE;});}}}}struct Cyc_List_List*
+! Cyc_Formatstr_get_scanf_typs(struct _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,
+! struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned int _tmpC0=Cyc_strlen((
+! struct _dynforward_ptr)s);struct Cyc_List_List*_tmpC1=0;int i;{struct _RegionHandle
+! _tmpC2=_new_region("temp");struct _RegionHandle*temp=& _tmpC2;_push_region(temp);
+! for(i=0;i < _tmpC0;i ++){if(*((const char*)_check_dynforward_subscript(s,sizeof(
+! char),i))!= '%')continue;{struct Cyc_Core_Opt*_tmpC3=Cyc_Formatstr_parse_inputformat(
+! temp,s,i + 1);if(_tmpC3 == 0){({void*_tmpC4[0]={};Cyc_Tcutil_terr(loc,({const char*
+! _tmpC5="bad format string";_tag_dynforward(_tmpC5,sizeof(char),
+! _get_zero_arr_size(_tmpC5,18));}),_tag_dynforward(_tmpC4,sizeof(void*),0));});{
+! struct Cyc_List_List*_tmpC6=0;_npop_handler(0);return _tmpC6;}}{struct _tuple5
+! _tmpC8;int _tmpC9;struct Cyc_List_List*_tmpCA;struct Cyc_List_List*_tmpCB;char
+! _tmpCC;int _tmpCD;struct _tuple5*_tmpC7=(struct _tuple5*)_tmpC3->v;_tmpC8=*_tmpC7;
+! _tmpC9=_tmpC8.f1;_tmpCA=_tmpC8.f2;_tmpCB=_tmpC8.f3;_tmpCC=_tmpC8.f4;_tmpCD=
+! _tmpC8.f5;i=_tmpCD - 1;{struct Cyc_List_List*_tmpCE=_tmpCB;struct Cyc_List_List
+  _tmpCF;int _tmpD0;struct Cyc_List_List*_tmpD1;_LL8E: if(_tmpCE == 0)goto _LL90;_tmpCF=*
+  _tmpCE;_tmpD0=(int)_tmpCF.hd;_tmpD1=_tmpCF.tl;if(_tmpD1 != 0)goto _LL90;if(!((
+  _tmpD0 == 'j'  || _tmpD0 == 'z') || _tmpD0 == 't'))goto _LL90;_LL8F:({struct Cyc_Int_pa_struct
+--- 1199,1252 ----
+  _tmp13);_npop_handler(0);return _tmpB2;};_pop_region(temp);}struct _tuple5{int f1;
+  struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*
+  Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,struct _dynforward_ptr s,int
+! i){unsigned long _tmpB3=Cyc_strlen((struct _dynforward_ptr)s);if(i < 0  || i >= 
+! _tmpB3)return 0;{int _tmpB4=0;char _tmpB5=*((const char*)_check_dynforward_subscript(
+! s,sizeof(char),i));if(_tmpB5 == '*'){_tmpB4=1;i ++;if(i >= _tmpB3)return 0;}{struct
+! Cyc_List_List*_tmpB6=0;for(0;i < _tmpB3;i ++){_tmpB5=*((const char*)
+! _check_dynforward_subscript(s,sizeof(char),i));if(isdigit((int)_tmpB5))_tmpB6=({
+! struct Cyc_List_List*_tmpB7=_region_malloc(r,sizeof(*_tmpB7));_tmpB7->hd=(void*)((
+! int)_tmpB5);_tmpB7->tl=_tmpB6;_tmpB7;});else{break;}}if(i >= _tmpB3)return 0;
+! _tmpB6=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmpB6);{
+! struct Cyc_List_List*_tmpB8=0;_tmpB5=*((const char*)_check_dynforward_subscript(s,
+! sizeof(char),i));switch(_tmpB5){case 'h': _LL70: _tmpB8=({struct Cyc_List_List*
+! _tmpB9=_region_malloc(r,sizeof(*_tmpB9));_tmpB9->hd=(void*)((int)_tmpB5);_tmpB9->tl=
+! _tmpB8;_tmpB9;});i ++;if(i >= _tmpB3)return 0;_tmpB5=*((const char*)
+! _check_dynforward_subscript(s,sizeof(char),i));if(_tmpB5 == 'h'){_tmpB8=({struct
+! Cyc_List_List*_tmpBA=_region_malloc(r,sizeof(*_tmpBA));_tmpBA->hd=(void*)((int)
+! _tmpB5);_tmpBA->tl=_tmpB8;_tmpBA;});i ++;}break;case 'l': _LL71: _tmpB8=({struct Cyc_List_List*
+! _tmpBB=_region_malloc(r,sizeof(*_tmpBB));_tmpBB->hd=(void*)((int)_tmpB5);_tmpBB->tl=
+! _tmpB8;_tmpBB;});i ++;if(i >= _tmpB3)return 0;_tmpB5=*((const char*)
+! _check_dynforward_subscript(s,sizeof(char),i));if(_tmpB5 == 'l'){_tmpB8=({struct
+! Cyc_List_List*_tmpBC=_region_malloc(r,sizeof(*_tmpBC));_tmpBC->hd=(void*)((int)
+! _tmpB5);_tmpBC->tl=_tmpB8;_tmpBC;});i ++;}break;case 'j': _LL72: goto _LL73;case 'z':
+! _LL73: goto _LL74;case 't': _LL74: goto _LL75;case 'L': _LL75: _tmpB8=({struct Cyc_List_List*
+! _tmpBD=_region_malloc(r,sizeof(*_tmpBD));_tmpBD->hd=(void*)((int)_tmpB5);_tmpBD->tl=
+! _tmpB8;_tmpBD;});i ++;break;default: _LL76: break;}if(i >= _tmpB3)return 0;_tmpB8=((
+! struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmpB8);_tmpB5=*((
+! const char*)_check_dynforward_subscript(s,sizeof(char),i));switch(_tmpB5){case 'd':
+! _LL78: goto _LL79;case 'i': _LL79: goto _LL7A;case 'o': _LL7A: goto _LL7B;case 'u': _LL7B:
+! goto _LL7C;case 'x': _LL7C: goto _LL7D;case 'X': _LL7D: goto _LL7E;case 'f': _LL7E: goto
+! _LL7F;case 'F': _LL7F: goto _LL80;case 'e': _LL80: goto _LL81;case 'E': _LL81: goto _LL82;
+! case 'g': _LL82: goto _LL83;case 'G': _LL83: goto _LL84;case 'a': _LL84: goto _LL85;case 'A':
+! _LL85: goto _LL86;case 'c': _LL86: goto _LL87;case 's': _LL87: goto _LL88;case 'p': _LL88:
+! goto _LL89;case 'n': _LL89: goto _LL8A;case '%': _LL8A: break;default: _LL8B: return 0;}
+! return({struct Cyc_Core_Opt*_tmpBE=_region_malloc(r,sizeof(*_tmpBE));_tmpBE->v=({
+! struct _tuple5*_tmpBF=_region_malloc(r,sizeof(*_tmpBF));_tmpBF->f1=_tmpB4;_tmpBF->f2=
+! _tmpB6;_tmpBF->f3=_tmpB8;_tmpBF->f4=_tmpB5;_tmpBF->f5=i + 1;_tmpBF;});_tmpBE;});}}}}
+! struct Cyc_List_List*Cyc_Formatstr_get_scanf_typs(struct _RegionHandle*r,struct Cyc_Tcenv_Tenv*
+! te,struct _dynforward_ptr s,struct Cyc_Position_Segment*loc){unsigned long _tmpC0=
+! Cyc_strlen((struct _dynforward_ptr)s);struct Cyc_List_List*_tmpC1=0;int i;{struct
+! _RegionHandle _tmpC2=_new_region("temp");struct _RegionHandle*temp=& _tmpC2;
+! _push_region(temp);for(i=0;i < _tmpC0;i ++){if(*((const char*)
+! _check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{struct Cyc_Core_Opt*
+! _tmpC3=Cyc_Formatstr_parse_inputformat(temp,s,i + 1);if(_tmpC3 == 0){({void*_tmpC4[
+! 0]={};Cyc_Tcutil_terr(loc,({const char*_tmpC5="bad format string";_tag_dynforward(
+! _tmpC5,sizeof(char),_get_zero_arr_size(_tmpC5,18));}),_tag_dynforward(_tmpC4,
+! sizeof(void*),0));});{struct Cyc_List_List*_tmpC6=0;_npop_handler(0);return _tmpC6;}}{
+! struct _tuple5 _tmpC8;int _tmpC9;struct Cyc_List_List*_tmpCA;struct Cyc_List_List*
+! _tmpCB;char _tmpCC;int _tmpCD;struct _tuple5*_tmpC7=(struct _tuple5*)_tmpC3->v;
+! _tmpC8=*_tmpC7;_tmpC9=_tmpC8.f1;_tmpCA=_tmpC8.f2;_tmpCB=_tmpC8.f3;_tmpCC=_tmpC8.f4;
+! _tmpCD=_tmpC8.f5;i=_tmpCD - 1;{struct Cyc_List_List*_tmpCE=_tmpCB;struct Cyc_List_List
+  _tmpCF;int _tmpD0;struct Cyc_List_List*_tmpD1;_LL8E: if(_tmpCE == 0)goto _LL90;_tmpCF=*
+  _tmpCE;_tmpD0=(int)_tmpCF.hd;_tmpD1=_tmpCF.tl;if(_tmpD1 != 0)goto _LL90;if(!((
+  _tmpD0 == 'j'  || _tmpD0 == 'z') || _tmpD0 == 't'))goto _LL90;_LL8F:({struct Cyc_Int_pa_struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhapsody/src/interface.c
-*** i686-unknown-linux/src/interface.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/interface.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/interface.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/interface.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 690,698 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6548,8 +6512,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhaps
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/src/lex.c
-*** i686-unknown-linux/src/lex.c	Sun Jul 21 15:03:13 2002
---- powerpc-apple-rhapsody/src/lex.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/lex.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/lex.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 691,705 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -6642,8 +6606,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   struct Cyc_List_List*current_namespace;struct Cyc_List_List*imported_namespaces;};
   struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict decls;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-apple-rhapsody/src/new_control_flow.c
-*** i686-unknown-linux/src/new_control_flow.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/new_control_flow.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/new_control_flow.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/new_control_flow.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 702,714 ****
   struct Cyc_List_List*a,struct Cyc_List_List*b);extern char Cyc_List_Nth[8];void*Cyc_List_nth(
@@ -6672,8 +6636,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-appl
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
   int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhapsody/src/parse_tab.c
-*** i686-unknown-linux/src/parse_tab.c	Sun Jul 21 21:48:14 2002
---- powerpc-apple-rhapsody/src/parse_tab.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/parse_tab.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/parse_tab.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 689,701 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6733,7 +6697,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
 ! union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;}
 ! ;struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{
 ! int tag;struct Cyc_Core_Opt*f1;void*f2;};struct Cyc_Absyn_Tvar{struct
-! _dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
+! _dynforward_ptr*name;int identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
 ! tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;};
 ! struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
   rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
@@ -6770,15 +6734,15 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
 ! No_constr;};struct Cyc_Absyn_Conref{union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{
 ! int tag;void*f1;};struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;
 ! };struct Cyc_Absyn_Less_kb_struct{int tag;struct Cyc_Core_Opt*f1;void*f2;};struct
-! Cyc_Absyn_Tvar{struct _dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{
+! Cyc_Absyn_Tvar{struct _dynforward_ptr*name;int identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{
 ! int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;
 ! };struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
   rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
   struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
   zero_term;struct Cyc_Absyn_PtrLoc*ptrloc;};struct Cyc_Absyn_PtrInfo{void*elt_typ;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/src/port.c
-*** i686-unknown-linux/src/port.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/port.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/port.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/port.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 910,919 ****
   Cyc_Position_Segment*);struct Cyc_Absyn_Conref*Cyc_Absyn_empty_conref();void*Cyc_Absyn_conref_val(
@@ -6801,8 +6765,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/s
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapsody/src/rgnorder.c
-*** i686-unknown-linux/src/rgnorder.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/rgnorder.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/rgnorder.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/rgnorder.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -6823,10 +6787,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapso
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src/tc.c
-*** i686-unknown-linux/src/tc.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tc.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tc.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tc.c	Mon Jul 22 11:13:56 2002
 ***************
-*** 914,958 ****
+*** 914,982 ****
   Cyc_Absyn_array_typ(void*elt_type,struct Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*
   num_elts,struct Cyc_Absyn_Conref*zero_term,struct Cyc_Position_Segment*ztloc);
   struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
@@ -6861,18 +6825,42 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
 ! t;};extern char Cyc_Dict_Present[12];extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(
 ! struct Cyc_Dict_Dict d);int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict
 ! Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);void*Cyc_Dict_lookup(struct
-! Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict
-! d,void*k);struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct _RegionHandle*,void*(*f)(void*,
-! void*),void*env,struct Cyc_Dict_Dict d);struct _tuple3{void*f1;void*f2;};struct
-! _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct
-! _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict
-! Cyc_Dict_rfilter_c(struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,
-! struct Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*
-! rgn,struct Cyc_Dict_Dict d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(
-  struct _RegionHandle*,struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,
-  struct Cyc_Absyn_Tvar*fst_rgn,struct Cyc_Position_Segment*);struct Cyc_RgnOrder_RgnPO*
-  Cyc_RgnOrder_add_outlives_constraint(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*
---- 914,956 ----
+! Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
+! struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct _RegionHandle*,void*(*f)(void*,void*),
+! void*env,struct Cyc_Dict_Dict d);struct _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(
+! struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple3*Cyc_Dict_rchoose(
+! struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_rfilter_c(
+! struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
+! struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict
+! d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(
+! struct _RegionHandle*,struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,
+! struct Cyc_Absyn_Tvar*fst_rgn,struct Cyc_Position_Segment*);struct Cyc_RgnOrder_RgnPO*
+! Cyc_RgnOrder_add_outlives_constraint(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*
+! po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct
+! _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int resetable,
+! int opened);int Cyc_RgnOrder_is_region_resetable(struct Cyc_RgnOrder_RgnPO*po,
+! struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(struct Cyc_RgnOrder_RgnPO*
+! po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(struct Cyc_RgnOrder_RgnPO*
+! po,struct Cyc_List_List*constraints,void*default_bound,int do_pin);int Cyc_RgnOrder_eff_outlives_eff(
+! struct Cyc_RgnOrder_RgnPO*po,void*eff1,void*eff2);void Cyc_RgnOrder_print_region_po(
+! struct Cyc_RgnOrder_RgnPO*po);struct Cyc_Tcenv_CList{void*hd;struct Cyc_Tcenv_CList*
+! tl;};struct Cyc_Tcenv_VarRes_struct{int tag;void*f1;};struct Cyc_Tcenv_AggrRes_struct{
+! int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Tcenv_TunionRes_struct{int tag;
+! struct Cyc_Absyn_Tuniondecl*f1;struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Tcenv_EnumRes_struct{
+! int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_struct{
+! int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_Genv{struct
+! _RegionHandle*grgn;struct Cyc_Set_Set*namespaces;struct Cyc_Dict_Dict aggrdecls;
+! struct Cyc_Dict_Dict tuniondecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict
+! typedefs;struct Cyc_Dict_Dict ordinaries;struct Cyc_List_List*availables;};struct
+! Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Stmt_j_struct{int tag;struct Cyc_Absyn_Stmt*f1;};
+! struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*
+! le;};struct Cyc_Tcenv_Genv*Cyc_Tcenv_empty_genv(struct _RegionHandle*);struct Cyc_Tcenv_Fenv*
+! Cyc_Tcenv_new_fenv(struct _RegionHandle*,struct Cyc_Position_Segment*,struct Cyc_Absyn_Fndecl*);
+! struct Cyc_List_List*Cyc_Tcenv_resolve_namespace(struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,
+  struct _dynforward_ptr*,struct Cyc_List_List*);struct Cyc_Absyn_Tuniondecl***Cyc_Tcenv_lookup_xtuniondecl(
+  struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct
+  _tuple0*);int Cyc_Tcenv_all_labels_resolved(struct Cyc_Tcenv_Tenv*);void Cyc_Tcenv_check_delayed_effects(
+--- 914,980 ----
   Cyc_Absyn_array_typ(void*elt_type,struct Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*
   num_elts,struct Cyc_Absyn_Conref*zero_term,struct Cyc_Position_Segment*ztloc);
   struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
@@ -6904,21 +6892,45 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
 ! void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[12];
 ! extern char Cyc_Dict_Absent[11];int Cyc_Dict_is_empty(struct Cyc_Dict_Dict d);int Cyc_Dict_member(
 ! struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict
-! d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*
-! Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict Cyc_Dict_rmap_c(
-! struct _RegionHandle*,void*(*f)(void*,void*),void*env,struct Cyc_Dict_Dict d);
-! struct _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(struct
-! _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple3*Cyc_Dict_rchoose(struct
-! _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_rfilter_c(
-! struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
-! struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict
-! d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(
-  struct _RegionHandle*,struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,
-  struct Cyc_Absyn_Tvar*fst_rgn,struct Cyc_Position_Segment*);struct Cyc_RgnOrder_RgnPO*
-  Cyc_RgnOrder_add_outlives_constraint(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*
+! d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(
+! struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct
+! _RegionHandle*,void*(*f)(void*,void*),void*env,struct Cyc_Dict_Dict d);struct
+! _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*r,
+! struct Cyc_Dict_Dict d);struct _tuple3*Cyc_Dict_rchoose(struct _RegionHandle*,struct
+! Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_rfilter_c(struct _RegionHandle*,int(*
+! f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(
+! struct _RegionHandle*rgn,struct Cyc_Dict_Dict d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*
+! Cyc_RgnOrder_initial_fn_po(struct _RegionHandle*,struct Cyc_List_List*tvs,struct
+! Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,struct Cyc_Position_Segment*);
+! struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct
+! _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);struct Cyc_RgnOrder_RgnPO*
+! Cyc_RgnOrder_add_youngest(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,
+! struct Cyc_Absyn_Tvar*rgn,int resetable,int opened);int Cyc_RgnOrder_is_region_resetable(
+! struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
+! struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
+! struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
+! int do_pin);int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*po,void*
+! eff1,void*eff2);void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);
+! struct Cyc_Tcenv_CList{void*hd;struct Cyc_Tcenv_CList*tl;};struct Cyc_Tcenv_VarRes_struct{
+! int tag;void*f1;};struct Cyc_Tcenv_AggrRes_struct{int tag;struct Cyc_Absyn_Aggrdecl*
+! f1;};struct Cyc_Tcenv_TunionRes_struct{int tag;struct Cyc_Absyn_Tuniondecl*f1;
+! struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Tcenv_EnumRes_struct{int tag;struct Cyc_Absyn_Enumdecl*
+! f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_struct{int tag;void*
+! f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_Genv{struct _RegionHandle*grgn;
+! struct Cyc_Set_Set*namespaces;struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict
+! tuniondecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict
+! ordinaries;struct Cyc_List_List*availables;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Stmt_j_struct{
+! int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;
+! struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*le;};struct Cyc_Tcenv_Genv*Cyc_Tcenv_empty_genv(
+! struct _RegionHandle*);struct Cyc_Tcenv_Fenv*Cyc_Tcenv_new_fenv(struct
+! _RegionHandle*,struct Cyc_Position_Segment*,struct Cyc_Absyn_Fndecl*);struct Cyc_List_List*
+! Cyc_Tcenv_resolve_namespace(struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,
+  struct _dynforward_ptr*,struct Cyc_List_List*);struct Cyc_Absyn_Tuniondecl***Cyc_Tcenv_lookup_xtuniondecl(
+  struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct
+  _tuple0*);int Cyc_Tcenv_all_labels_resolved(struct Cyc_Tcenv_Tenv*);void Cyc_Tcenv_check_delayed_effects(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody/src/tcdecl.c
-*** i686-unknown-linux/src/tcdecl.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcdecl.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcdecl.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcdecl.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -6939,8 +6951,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/src/tcenv.c
-*** i686-unknown-linux/src/tcenv.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcenv.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcenv.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcenv.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 689,697 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6961,8 +6973,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/src/tcexp.c
-*** i686-unknown-linux/src/tcexp.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcexp.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcexp.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcexp.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 937,948 ****
   Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _dynforward_ptr*);struct Cyc_Absyn_Aggrfield*
@@ -6989,8 +7001,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/
   int tag;unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct
   _dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapsody/src/tcgenrep.c
-*** i686-unknown-linux/src/tcgenrep.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcgenrep.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcgenrep.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcgenrep.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 706,715 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_tabulate(int n,void*(*f)(int));
@@ -7052,8 +7064,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
   Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/src/tcpat.c
-*** i686-unknown-linux/src/tcpat.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcpat.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcpat.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcpat.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 705,713 ****
   x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
@@ -7074,35 +7086,30 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody/src/tcstmt.c
-*** i686-unknown-linux/src/tcstmt.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcstmt.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcstmt.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcstmt.c	Mon Jul 22 11:13:54 2002
 ***************
-*** 910,921 ****
-  ztloc);struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
+*** 911,919 ****
   struct Cyc_Absyn_Stmt*Cyc_Absyn_new_stmt(void*s,struct Cyc_Position_Segment*loc);
   struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
-! _dynforward_ptr Cyc_Absyn_attribute2string(void*);typedef struct{int __count;union{
-! unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long
-! __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
+  _dynforward_ptr Cyc_Absyn_attribute2string(void*);extern int Cyc_Absyn_no_regions;
+! typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
+! typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t
+! Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+  int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
+  };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+--- 911,917 ----
+  struct Cyc_Absyn_Stmt*Cyc_Absyn_new_stmt(void*s,struct Cyc_Position_Segment*loc);
+  struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
+  _dynforward_ptr Cyc_Absyn_attribute2string(void*);extern int Cyc_Absyn_no_regions;
 ! struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
-! int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
-! };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+  int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
+  };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
-  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
---- 910,918 ----
-  ztloc);struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
-  struct Cyc_Absyn_Stmt*Cyc_Absyn_new_stmt(void*s,struct Cyc_Position_Segment*loc);
-  struct Cyc_Absyn_Stmt*Cyc_Absyn_skip_stmt(struct Cyc_Position_Segment*loc);struct
-! _dynforward_ptr Cyc_Absyn_attribute2string(void*);struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
-! struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
-! int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-  int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-  int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
-  struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody/src/tcutil.c
-*** i686-unknown-linux/src/tcutil.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tcutil.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tcutil.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tcutil.c	Mon Jul 22 11:13:54 2002
 ***************
 *** 690,702 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -7131,25 +7138,25 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   struct _dynforward_ptr);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct
   Cyc___cycFILE*,struct _dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{
 ***************
-*** 1009,1015 ****
-  struct _tuple2*);struct Cyc_Absyn_Typedefdecl*Cyc_Tcenv_lookup_typedefdecl(struct
+*** 1010,1016 ****
   Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct _tuple2*);struct Cyc_List_List*
-  Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);int Cyc_Tcenv_region_outlives(
-! struct Cyc_Tcenv_Tenv*,void*r1,void*r2);unsigned int Cyc_strlen(struct
-  _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);
-  int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct
-  _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
---- 1007,1013 ----
-  struct _tuple2*);struct Cyc_Absyn_Typedefdecl*Cyc_Tcenv_lookup_typedefdecl(struct
+  Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(
+  struct Cyc_Tcenv_Tenv*te);int Cyc_Tcenv_region_outlives(struct Cyc_Tcenv_Tenv*,void*
+! r1,void*r2);unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+  _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_strptrcmp(struct
+  _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
+  struct _dynforward_ptr,struct _dynforward_ptr);struct _tuple7{unsigned int f1;int f2;
+--- 1008,1014 ----
   Cyc_Tcenv_Tenv*,struct Cyc_Position_Segment*,struct _tuple2*);struct Cyc_List_List*
-  Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);int Cyc_Tcenv_region_outlives(
-! struct Cyc_Tcenv_Tenv*,void*r1,void*r2);unsigned long Cyc_strlen(struct
-  _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);
-  int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct
-  _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
+  Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(
+  struct Cyc_Tcenv_Tenv*te);int Cyc_Tcenv_region_outlives(struct Cyc_Tcenv_Tenv*,void*
+! r1,void*r2);unsigned long Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+  _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_strptrcmp(struct
+  _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
+  struct _dynforward_ptr,struct _dynforward_ptr);struct _tuple7{unsigned int f1;int f2;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/src/toc.c
-*** i686-unknown-linux/src/toc.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/toc.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/toc.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/toc.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 690,701 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -7176,8 +7183,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/sr
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/src/tovc.c
-*** i686-unknown-linux/src/tovc.c	Sun Jul 21 15:03:14 2002
---- powerpc-apple-rhapsody/src/tovc.c	Sun Jul 21 21:51:16 2002
+*** i686-unknown-linux/src/tovc.c	Mon Jul 22 11:12:52 2002
+--- powerpc-apple-rhapsody/src/tovc.c	Mon Jul 22 11:13:56 2002
 ***************
 *** 696,710 ****
   Cyc_List_List*x);struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);

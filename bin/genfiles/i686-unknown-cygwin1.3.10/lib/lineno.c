@@ -770,29 +770,32 @@ _tmp3;}));}void*Cyc_Lineno_token(struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_Lin
 lexbuf,0);}struct Cyc_Lineno_Pos;struct _tuple0{struct _dynforward_ptr f1;int f2;};
 static struct Cyc_Core_Opt*Cyc_Lineno_parse_linedef(struct _dynforward_ptr line){
 struct _handler_cons _tmp6;_push_handler(& _tmp6);{int _tmp8=0;if(setjmp(_tmp6.handler))
-_tmp8=1;if(!_tmp8){{int i=0;while(i < _get_dynforward_size(line,sizeof(char)) && (((
-char*)line.curr)[i]< '0'  || ((char*)line.curr)[i]> '9')){++ i;}{int j=i;while((j < 
-_get_dynforward_size(line,sizeof(char)) && ((char*)line.curr)[j]>= '0') && ((
-char*)line.curr)[j]<= '9'){++ j;}if(i == _get_dynforward_size(line,sizeof(char))){
+_tmp8=1;if(!_tmp8){{int i=0;while(i < _get_dynforward_size(line,sizeof(char)) && (*((
+char*)_check_dynforward_subscript(line,sizeof(char),i))< '0'  || *((char*)
+_check_dynforward_subscript(line,sizeof(char),i))> '9')){++ i;}{int j=i;while((j < 
+_get_dynforward_size(line,sizeof(char)) && *((char*)_check_dynforward_subscript(
+line,sizeof(char),j))>= '0') && *((char*)_check_dynforward_subscript(line,
+sizeof(char),j))<= '9'){++ j;}if(i == _get_dynforward_size(line,sizeof(char))){
 struct Cyc_Core_Opt*_tmp9=0;_npop_handler(0);return _tmp9;}{int number=0;if(({
 struct Cyc_IntPtr_sa_struct _tmpC;_tmpC.tag=2;_tmpC.f1=& number;{void*_tmpA[1]={&
 _tmpC};Cyc_sscanf((struct _dynforward_ptr)Cyc_substring((struct _dynforward_ptr)
 line,i,(unsigned int)(j - i)),({const char*_tmpB="%d";_tag_dynforward(_tmpB,
 sizeof(char),_get_zero_arr_size(_tmpB,3));}),_tag_dynforward(_tmpA,sizeof(void*),
 1));}})!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);return _tmpD;}while(j < 
-_get_dynforward_size(line,sizeof(char)) && ((char*)line.curr)[j]!= '"'){++ j;}{
-int k=++ j;while(k < _get_dynforward_size(line,sizeof(char)) && ((char*)line.curr)[
-k]!= '"'){++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == 
-_get_dynforward_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
-_npop_handler(0);return _tmpE;}{struct _dynforward_ptr fname=Cyc_substring((struct
-_dynforward_ptr)line,j,(unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct
-Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=
-_cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
-_npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)
-_exn_thrown;void*_tmp13=_tmp7;_LL6:;_LL7: return 0;_LL8:;_LL9:(void)_throw(_tmp13);
-_LL5:;}}}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};int Cyc_Lineno_place_cmp(
-struct _tuple1*place1,struct _tuple1*place2){return Cyc_Core_intcmp((*place1).f1,(*
-place2).f1);}void Cyc_Lineno_poss_of_abss(struct _dynforward_ptr filename,struct Cyc_List_List*
+_get_dynforward_size(line,sizeof(char)) && *((char*)_check_dynforward_subscript(
+line,sizeof(char),j))!= '"'){++ j;}{int k=++ j;while(k < _get_dynforward_size(line,
+sizeof(char)) && *((char*)_check_dynforward_subscript(line,sizeof(char),k))!= '"'){
+++ k;}if(j == _get_dynforward_size(line,sizeof(char)) || k == _get_dynforward_size(
+line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;_npop_handler(0);return _tmpE;}{
+struct _dynforward_ptr fname=Cyc_substring((struct _dynforward_ptr)line,j,(
+unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct Cyc_Core_Opt*_tmpF=
+_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=_cycalloc(sizeof(*
+_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});_npop_handler(0);
+return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)_exn_thrown;void*
+_tmp13=_tmp7;_LL6:;_LL7: return 0;_LL8:;_LL9:(void)_throw(_tmp13);_LL5:;}}}struct
+_tuple1{int f1;struct Cyc_Lineno_Pos*f2;};int Cyc_Lineno_place_cmp(struct _tuple1*
+place1,struct _tuple1*place2){return Cyc_Core_intcmp((*place1).f1,(*place2).f1);}
+void Cyc_Lineno_poss_of_abss(struct _dynforward_ptr filename,struct Cyc_List_List*
 places){places=((struct Cyc_List_List*(*)(int(*cmp)(struct _tuple1*,struct _tuple1*),
 struct Cyc_List_List*x))Cyc_List_merge_sort)(Cyc_Lineno_place_cmp,places);{struct
 Cyc___cycFILE*f=Cyc_file_open(filename,({const char*_tmp1C="r";_tag_dynforward(

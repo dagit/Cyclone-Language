@@ -817,12 +817,12 @@ unsigned long _ulong;int dprec;int dpad;int fieldsz;int size=0;char buf[349];{
 unsigned int _tmp49=348;unsigned int i;for(i=0;i < _tmp49;i ++){buf[i]='\000';}buf[
 _tmp49]=(char)0;}{char ox[2]={'\000','\000'};enum Cyc_BASE base;fmt=fmt0;ret=0;
 for(0;1;0){fmark=fmt;{unsigned int fmt_sz=_get_dynforward_size(fmt,sizeof(char));
-for(n=0;(n < fmt_sz  && (ch=(int)((const char*)fmt.curr)[n])!= '\000') && ch != '%';
-n ++){;}fmt=_dynforward_ptr_plus(fmt,sizeof(char),n);if((n=(fmt.curr - fmark.curr)
-/ sizeof(char))!= 0){do{if(Cyc__IO_sputn(ioputc,ioputc_env,(struct
-_dynforward_ptr)fmark,n)!= n)goto error;}while(0);ret +=n;}if(ch == '\000')goto done;
-_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),1);flags=0;dprec=0;fpprec=0;
-width=0;prec=- 1;sign='\000';rflag: ch=(int)*((const char*)
+for(n=0;(n < fmt_sz  && (ch=(int)*((const char*)_check_dynforward_subscript(fmt,
+sizeof(char),n)))!= '\000') && ch != '%';n ++){;}fmt=_dynforward_ptr_plus(fmt,
+sizeof(char),n);if((n=(fmt.curr - fmark.curr)/ sizeof(char))!= 0){do{if(Cyc__IO_sputn(
+ioputc,ioputc_env,(struct _dynforward_ptr)fmark,n)!= n)goto error;}while(0);ret +=n;}
+if(ch == '\000')goto done;_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),1);
+flags=0;dprec=0;fpprec=0;width=0;prec=- 1;sign='\000';rflag: ch=(int)*((const char*)
 _check_dynforward_subscript(_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),
 1),sizeof(char),0));reswitch: which_cp=0;switch(ch){case ' ': _LL37: if(!((int)sign))
 sign=' ';goto rflag;case '#': _LL38: flags |=8;goto rflag;case '*': _LL39: width=Cyc_va_arg_int(

@@ -846,7 +846,7 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_struct_decl(cenv_t env,
                                                           typedef_name_t n){
   let popt = Dict::lookup_opt(env->gcenv->struct_dict,n);
   if (popt) 
-    return popt->v;
+    return *popt;
   else {
     let ad = new Aggrdecl{.kind = StructA, .sc = Public, .name = n,
                           .tvs = NULL, .impl = NULL, .attributes = NULL};
@@ -862,7 +862,7 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_union_decl(cenv_t env,
                                                         typedef_name_t n) {
   let popt = Dict::lookup_opt(env->gcenv->union_dict,n);
   if (popt) 
-    return popt->v;
+    return *popt;
   else {
     let ad = new Aggrdecl{.kind = UnionA, .sc = Public, .name = n,
                           .tvs = NULL, .impl = NULL, .attributes = NULL};

@@ -449,9 +449,12 @@ static flow_t<`r> if_tagcmp(analenv_t<`r> env, flow_t<`r> flow, exp_t e1,
   }
 }
 
+static xtunion AbsynAnnot.NotZero mt_notzero_v = NotZero(NULL);
+static xtunion AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
+
 // Note: correct for e1 an array b/c r won't be AddressOf??
 // FIX: Important place to memoize type_to_absrval calls (b/c StructArrow
-//      calls this.)
+//      calls this.)  
 static $(flow_t<`r>,absRval_t<`r>) 
   anal_derefR(analenv_t<`r> env, flow_t<`r> inflow,
               flow_t<`r> f, exp_t e, absRval_t<`r> r) {
@@ -466,20 +469,73 @@ static $(flow_t<`r>,absRval_t<`r>)
 	switch(r) {
 	case NotZeroAll: 
 	case NotZeroThis: 
-	  e->annot = new NotZero(copy_relns(Core::heap_region,relns)); 
+          switch (e->annot) {
+          case &NotZero(relns2): 
+            if (!same_relns(relns,relns2)) fallthru;
+            break;
+          default:
+            // if e isn't a subscript, we don't need the relns
+            switch (e->r) {
+            case &Subscript_e(_,_):
+              e->annot = new NotZero(copy_relns(Core::heap_region,relns)); 
+              break;
+            default:
+              e->annot = &mt_notzero_v;
+              break;
+            }
+            break;
+          }
 	  break;
 	case &AddressOf(p): 
-	  e->annot = new NotZero(copy_relns(Core::heap_region,relns)); 
+          switch (e->annot) {
+          case &NotZero(relns2):
+            if (!same_relns(relns,relns2)) fallthru;
+            break;
+          default:
+            // if e isn't a subscript, we don't need th relns
+            switch (e->r) {
+            case &Subscript_e(_,_):
+              e->annot = new NotZero(copy_relns(Core::heap_region,relns)); 
+              break;
+            default:
+              e->annot = &mt_notzero_v;
+              break;
+            }
+            break;
+          }
 	  return $(f,lookup_place(outdict,p));
 	case Zero: 
 	  e->annot = IsZero;
 	  return $(BottomFL,typ_to_absrval(env->fenv,elttype,
                                            env->fenv->unknown_all));
 	case &UnknownR(il): f = notzero(env,inflow,f,e,il); fallthru;
-	default: e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+	default: 
+          switch (e->r) {
+          case &Subscript_e(_,_):
+            e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+            break;
+          default:
+            e->annot = &mt_unknownz_v;
+            break;
+          }
+          break;
 	}
       else
-	e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
+        switch (e->annot) {
+        case &UnknownZ(relns2):
+          if (!same_relns(relns,relns2)) fallthru;
+          break;
+        default:
+          switch (e->r) {
+          case &Subscript_e(_,_):
+            e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
+            break;
+          default:
+            e->annot = &mt_unknownz_v;
+            break;
+          }
+          break;
+        }
       switch(initlevel(outdict,r)) {
       case NoneIL:
 	Tcutil::terr(e->loc,"dereference of possibly uninitialized pointer");

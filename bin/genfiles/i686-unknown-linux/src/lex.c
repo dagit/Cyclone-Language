@@ -753,7 +753,7 @@ Forward_constr;struct Cyc_Absyn_No_constr_struct No_constr;};struct Cyc_Absyn_Co
 union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;}
 ;struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{
 int tag;struct Cyc_Core_Opt*f1;void*f2;};struct Cyc_Absyn_Tvar{struct
-_dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
+_dynforward_ptr*name;int identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
 tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;};
 struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
 rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
@@ -1689,7 +1689,8 @@ _dynforward_ptr _tmpF3=_tag_dynforward(_tmpF1,sizeof(int),_tmpF0);{unsigned int
 _tmpF2=_tmpF0;unsigned int i;for(i=0;i < _tmpF2;i ++){_tmpF1[i]=0;}}_tmpF3;});{
 unsigned int i=0;unsigned int rwsze=70;{unsigned int j=0;for(0;j < rwsze;j ++){if(
 include_cyclone_keywords  || (Cyc_Lex_rw_array[(int)j]).f3){struct _dynforward_ptr
-_tmpF4=(Cyc_Lex_rw_array[(int)j]).f1;Cyc_Lex_str_index(_tmpF4,0,(int)Cyc_strlen((
-struct _dynforward_ptr)_tmpF4));*((int*)_check_dynforward_subscript(Cyc_Lex_kw_nums,
-sizeof(int),(int)i))=(int)(Cyc_Lex_rw_array[(int)j]).f2;i ++;}}}Cyc_Lex_typedef_init();
-Cyc_Lex_comment_depth=0;}}}}
+_tmpF4=(Cyc_Lex_rw_array[_check_known_subscript_notnull(70,(int)j)]).f1;Cyc_Lex_str_index(
+_tmpF4,0,(int)Cyc_strlen((struct _dynforward_ptr)_tmpF4));*((int*)
+_check_dynforward_subscript(Cyc_Lex_kw_nums,sizeof(int),(int)i))=(int)(Cyc_Lex_rw_array[
+_check_known_subscript_notnull(70,(int)j)]).f2;i ++;}}}Cyc_Lex_typedef_init();Cyc_Lex_comment_depth=
+0;}}}}

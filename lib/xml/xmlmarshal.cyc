@@ -73,7 +73,7 @@ static int index_lookup(addr_index_t index, unsigned int val) {
   let $(dict,n) = index;
   let indopt = Dict::lookup_opt(dict,val);
   if(indopt != NULL) {
-    return indopt->v;
+    return *indopt;
   }
   else return n;
 }

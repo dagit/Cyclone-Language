@@ -751,10 +751,11 @@ _tmp4,sizeof(char),_get_zero_arr_size(_tmp4,8));}),94);if(howmuch > _tmp2){Cyc_B
 b,s);return(struct _dynforward_ptr)_tag_dynforward(0,0,0);}{int i;for(i=howmuch - 1;
 i >= 0  && !isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),
 i)));i --){;}if(i < 0)for(i=howmuch?howmuch - 1: 0;(i < _tmp2  && (int)((const char*)s.curr)[
-i]) && !isspace((int)((const char*)s.curr)[i]);i ++){;}Cyc_Buffer_add_substring(b,
-s,0,i);{struct _dynforward_ptr whatsleft=(struct _dynforward_ptr)_tag_dynforward(0,
-0,0);for(0;(i < _tmp2  && (int)((const char*)s.curr)[i]) && isspace((int)((const
-char*)s.curr)[i]);i ++){;}if(i < _tmp2  && (int)((const char*)s.curr)[i])whatsleft=
+i]) && !isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),i)));
+i ++){;}Cyc_Buffer_add_substring(b,s,0,i);{struct _dynforward_ptr whatsleft=(struct
+_dynforward_ptr)_tag_dynforward(0,0,0);for(0;(i < _tmp2  && (int)((const char*)s.curr)[
+i]) && isspace((int)*((const char*)_check_dynforward_subscript(s,sizeof(char),i)));
+i ++){;}if(i < _tmp2  && (int)((const char*)s.curr)[i])whatsleft=
 _dynforward_ptr_plus(s,sizeof(char),i);return whatsleft;}}}}void Cyc_Arg_Justify_justify_b(
 struct Cyc_Buffer_t*b,int indent,int margin,struct _dynforward_ptr item,struct
 _dynforward_ptr desc){if(item.curr != ((struct _dynforward_ptr)_tag_dynforward(0,0,

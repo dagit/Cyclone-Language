@@ -154,7 +154,7 @@ opt_t<set_t<var_t>> empty_var_set = NULL;
 // fast type-variable comparison -- can only be used when a tvar has
 // an identity.
 static int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
-  return (*tv1->identity - *tv2->identity);
+  return (tv1->identity - tv2->identity);
 }
 
 // compress out any evars or typedefs
@@ -194,14 +194,14 @@ static conref_t<`a> copy_conref(conref_t<`a> c) {
 }
 static kindbound_t copy_kindbound(kindbound_t kb) {
   switch (compress_kb(kb)) {
-  case &Eq_kb(k): return new Eq_kb(k);
   case &Unknown_kb(_): return new Unknown_kb(NULL);
   case &Less_kb(_,k): return new Less_kb(NULL,k);
+  default: return kb;
   }
 }
 static tvar_t copy_tvar(tvar_t tv) {
   // NB: loses sharing of identity here
-  return new Tvar(tv->name,NULL,copy_kindbound(tv->kind));
+  return new Tvar(tv->name,-1,copy_kindbound(tv->kind));
 }
 static $(opt_t<var_t>,tqual_t,type_t)@ 
   copy_arg($(opt_t<var_t,`H>,tqual_t,type_t) @arg) {
@@ -240,9 +240,9 @@ type_t copy_type(type_t t) {
     let bs2 = copy_conref(bs);
     let zt2 = copy_conref(zt);
     return new PointerType(PtrInfo(elt2,tq2,PtrAtts(rgn2,nbl2,bs2,zt2,loc)));
-  case &IntType(sn,sz): return new IntType(sn,sz); // copy necessary???
-  case FloatType: return t;
-  case &DoubleType(b): return new DoubleType(b); // copy necessarry???
+  case &IntType(_,_): 
+  case FloatType: 
+  case &DoubleType(_): return t;
   case &ArrayType(ArrayInfo{et,tq,eopt,zt,ztl}): 
     // FIX: should really copy eopt???
     return new ArrayType(ArrayInfo{copy_type(et),tq,eopt,copy_conref(zt),ztl});
@@ -771,8 +771,6 @@ type_t normalize_effect(type_t e) {
   }
 }
 
-static struct Opt<kind_t> ek = {EffKind};
-
 // Create a dummy type that includes the effect:  void (@`H)(;eff)
 static type_t dummy_fntype(type_t eff) {
   let fntype = new FnType(FnInfo{.tvars=NULL,.effect=new Opt(eff),
@@ -1116,8 +1114,8 @@ void unify_it(type_t t1, type_t t2) {
     let x2 = tv2->name;
     let x1 = tv1->name;
     // identities should be resolved
-    let id2 = *tv2->identity;
-    let id1 = *tv1->identity; 
+    let id2 = tv2->identity;
+    let id1 = tv1->identity; 
     let k2 = tvar_kind(tv2);
     let k1 = tvar_kind(tv1);
     // kinds should already be resolved.  
@@ -1519,7 +1517,7 @@ int typecmp(type_t t1, type_t t2) {
     
   case $(&VarType(tv2),&VarType(tv1)):
     // identities should be resolved
-    return intcmp(*tv1->identity,*tv2->identity);
+    return intcmp(tv1->identity,tv2->identity);
 
   case $(&AggrType(AggrInfo(info1,ts1)),&AggrType(AggrInfo(info2,ts2))):
     // shouldn't have union and struct w/ same name, so ignore the kinds
@@ -1963,16 +1961,68 @@ struct Opt<kind_t> rk = {RgnKind};
 struct Opt<kind_t> ak = {AnyKind};
 struct Opt<kind_t> bk = {BoxKind};
 struct Opt<kind_t> mk = {MemKind};
+struct Opt<kind_t> ik = {IntKind};
+struct Opt<kind_t> ek = {EffKind};
+
+opt_t<kind_t> kind_to_opt(kind_t k) {
+  switch (k) {
+  case AnyKind: return &ak;
+  case MemKind: return &mk;
+  case BoxKind: return &bk;
+  case RgnKind: return &rk;
+  case UniqueRgnKind: return &urk;
+  case TopRgnKind: return &trk;
+  case EffKind: return &ek;
+  case IntKind: return &ik;
+  }
+}
+
+static kindbound_t@ kind_to_b(kind_t k) {
+  static tunion KindBound.Eq_kb ab_v = Eq_kb(AnyKind);
+  static tunion KindBound.Eq_kb mb_v = Eq_kb(MemKind);
+  static tunion KindBound.Eq_kb bb_v = Eq_kb(BoxKind);
+  static tunion KindBound.Eq_kb rb_v = Eq_kb(RgnKind);
+  static tunion KindBound.Eq_kb ub_v = Eq_kb(UniqueRgnKind);
+  static tunion KindBound.Eq_kb tb_v = Eq_kb(TopRgnKind);
+  static tunion KindBound.Eq_kb eb_v = Eq_kb(EffKind);
+  static tunion KindBound.Eq_kb ib_v = Eq_kb(IntKind);
+  static kindbound_t ab = &ab_v;
+  static kindbound_t mb = &mb_v;
+  static kindbound_t bb = &bb_v;
+  static kindbound_t rb = &rb_v;
+  static kindbound_t ub = &ub_v;
+  static kindbound_t tb = &tb_v;
+  static kindbound_t eb = &eb_v;
+  static kindbound_t ib = &ib_v;
+  
+  switch (k) {
+  case AnyKind: return &ab;
+  case MemKind: return &mb;
+  case BoxKind: return &bb;
+  case RgnKind: return &rb;
+  case UniqueRgnKind: return &ub;
+  case TopRgnKind: return &tb;
+  case EffKind: return &eb;
+  case IntKind: return &ib;
+  }
+}
+
+kindbound_t kind_to_bound(kind_t k) {
+  return *kind_to_b(k);
+}
+opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
+  return (opt_t<kindbound_t>)(kind_to_b(k));
+}
 
 // if e1 is zero, and t2 a pointer type, changes e1 to NULL and
 // returns true if t2 is a nullable pointer type
 bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
   if (is_pointer_type(t2) && is_zero(e1)) {
     e1->r = new Const_e(Null_c);
-    let tenv_tvs = lookup_type_vars(te);
-    let t1 = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+    let tenv_tvs = lookup_opt_type_vars(te);
+    let t1 = new PointerType(PtrInfo(new_evar(&ak,tenv_tvs), 
 				     empty_tqual(NULL),
-				     PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
+				     PtrAtts(new_evar(&trk,tenv_tvs), 
 					     true_conref, 
 					     empty_conref(), 
 					     empty_conref(),NULL)));
@@ -2464,15 +2514,15 @@ static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
 
 // generating fresh tvars and tvar identities
 static int tvar_id_counter = 0;
-int *new_tvar_id() {
-  return new (tvar_id_counter++);
+int new_tvar_id() {
+  return tvar_id_counter++;
 }
 
 static int tvar_counter = 0;
 tvar_t new_tvar(kindbound_t k) {
   int i = tvar_counter++;
   string_t s = aprintf("#%d",i);
-  return new Tvar(new{s},NULL,k);
+  return new Tvar(new{s},-1,k);
 }
 
 bool is_temp_tvar(tvar_t t) {
@@ -2696,15 +2746,15 @@ extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
 
 // Generate an appropriate evar for an instantiation of a type var
 $(tvar_t,type_t)@ make_inst_var(list_t<tvar_t,`H> s, tvar_t tv) {
-  kind_t k = tvar_kind(tv);
-  return new $(tv, new_evar(new Opt(k),new Opt(s)));
+  let k = kind_to_opt(tvar_kind(tv));
+  return new $(tv, new_evar(k,new Opt(s)));
 }
 
 $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
                                     tvar_t tv) {
   let &$(s,rgn) = env;
-  kind_t k = tvar_kind(tv);
-  return rnew(rgn) $(tv, new_evar(new Opt(k),new Opt(s)));
+  let k = kind_to_opt(tvar_kind(tv));
+  return rnew(rgn) $(tv, new_evar(k,new Opt(s)));
 }
 
 // Adds tv to the list of tvars unless it's already present.  If it's
@@ -2722,9 +2772,9 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
       if (!constrain_kinds(k1,k2))
         terr(loc,"type variable %s is used with inconsistent kinds %s and %s",
              *tv->name, kindbound2string(k1), kindbound2string(k2));
-      if (tv->identity == NULL)
+      if (tv->identity == -1)
         tv->identity = tvs2->hd->identity;
-      else if (*tv->identity != *tvs2->hd->identity)
+      else if (tv->identity != tvs2->hd->identity)
         impos("same type variable has different identity!");
       return tvs;
     }
@@ -2737,14 +2787,14 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
 // the tvar if it's not already present.  
 static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
   // sanity
-  if (tv->identity == NULL)
+  if (tv->identity == -1)
     impos("fast_add_free_tvar: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     // sanity
     let tv2 = tvs2->hd;
-    if (tv2->identity == NULL)
+    if (tv2->identity == -1)
       impos("fast_add_free_tvar: bad identity in tvs2");
-    if (*tv2->identity == *tv->identity) {
+    if (tv2->identity == tv->identity) {
       return tvs;
     }
   }
@@ -2759,14 +2809,14 @@ fast_add_free_tvar_bool(region_t<`r> r,
                         list_t<$(tvar_t,bool)@`r,`r> tvs, tvar_t tv, bool b) {
                    
   // sanity
-  if (tv->identity == NULL)
+  if (tv->identity == -1)
     impos("fast_add_free_tvar_bool: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     // sanity
     let &$(tv2,*b2) = tvs2->hd;
-    if (tv2->identity == NULL)
+    if (tv2->identity == -1)
       impos("fast_add_free_tvar_bool: bad identity in tvs2");
-    if (*tv2->identity == *tv->identity) {
+    if (tv2->identity == tv->identity) {
       *b2 = (*b2 || b);
       return tvs;
     }
@@ -2777,7 +2827,7 @@ fast_add_free_tvar_bool(region_t<`r> r,
 // will shadow other variables
 static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
   // sanity
-  if (tv->identity == NULL) 
+  if (tv->identity == -1) 
     impos("bound tvar id for %s is NULL", tvar2string(tv));
   return new List(tv,tvs);
 }
@@ -2815,7 +2865,7 @@ static list_t<tvar_t,`r> remove_bound_tvars(region_t<`r> rgn,
   for (; tvs != NULL; tvs = tvs->tl) {
     bool present = false;
     for (_ b = btvs; b != NULL; b = b->tl) {
-      if (*tvs->hd->identity == *b->hd->identity) {
+      if (tvs->hd->identity == b->hd->identity) {
         present = true;
         break;
       }
@@ -2836,7 +2886,7 @@ remove_bound_tvars_bool(region_t<`r> r,
     let $(tv,b) = *tvs->hd;
     bool present = false;
     for (_ b = btvs; b != NULL; b = b->tl) {
-      if (*tv->identity == *b->hd->identity) {
+      if (tv->identity == b->hd->identity) {
         present = true;
         break;
       }
@@ -2955,16 +3005,19 @@ static cvtenv_t<`r>
 i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv, 
                    kind_t expected_kind, type_t t, 
                    bool put_in_effect) {
+  static struct Opt<type_t> urgn = Opt(UniqueRgn);
+  static struct Opt<type_t> hrgn = Opt(HeapRgn);
+
   switch (compress(t)) {
   case VoidType: break;
   case &Evar(*k,*ref,_,_): 
-    if (*k == NULL) *k = new Opt(expected_kind); 
+    if (*k == NULL) *k = kind_to_opt(expected_kind); 
     if (cvtenv.fn_result && cvtenv.generalize_evars &&
 	is_region_kind(expected_kind)) {
       if (expected_kind == UniqueRgnKind)
-	*ref = new Opt(UniqueRgn);
+	*ref = &urgn;
       else // generalize TopRgnKind evars to be the heap in return values
-	*ref = new Opt(HeapRgn);
+	*ref = &hrgn;
     } else if (cvtenv.generalize_evars) {
       let v = new_tvar(new Less_kb(NULL,expected_kind));
       *ref = new Opt(new VarType(v));
@@ -3072,7 +3125,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         terr(loc,"flat tunion has region %s",typ2string((*rgn_opt)->v));
       // if this isn't a flat tunion, then insert a region variable
       if (!tud->is_flat && !*rgn_opt) 
-        *rgn_opt = new Opt(new_evar(new Opt(RgnKind),NULL));
+        *rgn_opt = new Opt(new_evar(&rk,NULL));
       // check the region is well-formed
       if (*rgn_opt) {
         let rgn = (*rgn_opt)->v;
@@ -3430,13 +3483,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           case &Less_kb(*f,TopRgnKind):
             fallthru(f,RgnKind); // MWH: is this premature?
           case &Less_kb(*f,r) && ((r==RgnKind) || (r==UniqueRgnKind)):
-            *f = new Opt(new Eq_kb(r)); fallthru(r);
+            *f = kind_to_bound_opt(r); fallthru(r);
           case &Eq_kb(r) && ((r==RgnKind) || (r==UniqueRgnKind)):
             effect = new List(new AccessEff(new VarType(tv)),effect); break;
           case &Less_kb(_,IntKind):
           case &Eq_kb(IntKind): break;
           case &Less_kb(*f,EffKind):
-            *f = new Opt(new Eq_kb(EffKind)); fallthru;
+            *f = kind_to_bound_opt(EffKind); fallthru;
           case &Eq_kb(EffKind):
             effect = new List(new VarType(tv),effect); break;
           case &Unknown_kb(*f):
@@ -3474,9 +3527,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
                  *bs->hd->name);
             fallthru(f);
           case &Less_kb(*f,MemKind): fallthru(f);
-          case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
-          case &Less_kb(*f,TopRgnKind): *f = new Opt(new Eq_kb(RgnKind)); break;
-          case &Less_kb(*f,k):       *f = new Opt(new Eq_kb(k));       break;
+          case &Less_kb(*f,AnyKind): *f = kind_to_bound_opt(BoxKind); break;
+          case &Less_kb(*f,TopRgnKind): *f = kind_to_bound_opt(RgnKind); break;
+          case &Less_kb(*f,k):       *f = kind_to_bound_opt(k); break;
           case &Eq_kb(MemKind):
             terr(loc,"functions can't abstract M types"); break;
           case &Eq_kb(TopRgnKind):
@@ -3590,31 +3643,33 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     tdn[0] = td->name[0];
     list_t<tvar_t> tvs = td->tvs;
     list_t<type_t> ts = targs;
-    list_t<$(tvar_t,type_t)@> inst = NULL;
-    // check type arguments
-    for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
-      kind_t k = tvar_kind(tvs->hd);
-      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
-      inst = new List(new $(tvs->hd,ts->hd),inst);
-    }
-    if (ts != NULL)
-      terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
-    if (tvs != NULL) {
-      list_t<type_t> hidden_ts = NULL;
-      // too few parameters -- plug them in for the user using evars
-      for (; tvs != NULL; tvs = tvs->tl) {
+    region temp {
+      list_t<$(tvar_t,type_t)@`temp,`temp> inst = NULL;
+      // check type arguments
+      for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
         kind_t k = tvar_kind(tvs->hd);
-        type_t e = new_evar(NULL,NULL);
-        hidden_ts = new List(e,hidden_ts);
-        cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
-        inst = new List(new $(tvs->hd,e),inst);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
+        inst = rnew(temp) List(rnew(temp) $(tvs->hd,ts->hd),inst);
       }
-      // add the hidden type arguments back in so error messages are decent
-      *targs_ref = List::imp_append(targs,List::imp_rev(hidden_ts));
-    }
-    if (td->defn != NULL) {
-      type_t new_typ = substitute(inst,td->defn->v);
-      *toptp = new new_typ;
+      if (ts != NULL)
+        terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
+      if (tvs != NULL) {
+        list_t<type_t> hidden_ts = NULL;
+        // too few parameters -- plug them in for the user using evars
+        for (; tvs != NULL; tvs = tvs->tl) {
+          kind_t k = tvar_kind(tvs->hd);
+          type_t e = new_evar(NULL,NULL);
+          hidden_ts = new List(e,hidden_ts);
+          cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
+          inst = new List(new $(tvs->hd,e),inst);
+        }
+        // add the hidden type arguments back in so error messages are decent
+        *targs_ref = List::imp_append(targs,List::imp_rev(hidden_ts));
+      }
+      if (td->defn != NULL) {
+        type_t new_typ = rsubstitute(temp,inst,td->defn->v);
+        *toptp = new new_typ;
+      }
     }
     break;
   case &TypeInt(_):
@@ -3731,9 +3786,9 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
       switch (compress_kb(x->hd->kind)) {
       case &Unknown_kb(*f):      fallthru(f);
       case &Less_kb(*f,MemKind): fallthru(f);
-      case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
-      case &Less_kb(*f,TopRgnKind): *f = new Opt(new Eq_kb(RgnKind)); break;
-      case &Less_kb(*f,k):       *f = new Opt(new Eq_kb(k));       break;
+      case &Less_kb(*f,AnyKind): *f = kind_to_bound_opt(BoxKind); break;
+      case &Less_kb(*f,TopRgnKind): *f = kind_to_bound_opt(RgnKind); break;
+      case &Less_kb(*f,k):       *f = kind_to_bound_opt(k);       break;
       case &Eq_kb(MemKind):
         terr(loc,"type variable %s cannot have kind M",tvar2string(x->hd));
         break;
@@ -3850,7 +3905,7 @@ void check_type(seg_t loc, tenv_t te,
 }
 
 void add_tvar_identity(tvar_t tv) {
-  if (tv->identity == NULL) 
+  if (tv->identity == -1) 
     tv->identity = new_tvar_id();
 }
 

@@ -426,13 +426,13 @@ update_info(dict_t<type_t,repinfo_t,`H> dict,
   let info = lookup_opt(dict,type);
   if(info != NULL ) { // if so, update it with new information
     //printf("Updated ri for %s(%s)\n",typ2string(type),exp2string(exp));
-    if(info->v->decls != NULL) {
+    if((*info)->decls != NULL) {
       print_typerep_dict(dict);
       Tcutil::impos("Updating non-forward declaration");
     }
-    info->v->decls = decls;
-    info->v->exp = exp;
-    info->v->dependencies = dependencies;
+    (*info)->decls = decls;
+    (*info)->exp = exp;
+    (*info)->dependencies = dependencies;
     // emitted should be and remain 0
     return dict;
   }
@@ -936,17 +936,17 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
   //  printf("Type %s (%x)\n", typ2string(type),type);
 
 
-  Core::opt_t<repinfo_t> info = lookup_opt(dict,type);
+  repinfo_t* info = lookup_opt(dict,type);
 
   if (info != NULL) {
-    if(info->v->is_extern) {
+    if((*info)->is_extern) {
       //printf("removing externdecl for %s\n",typ2string(type));
       
       dict = Dict::delete(dict,type);
     }
     else {
       //printf("Done %s\n",typ2string(type));
-      let ret = new $(dict,info->v);
+      let ret = new $(dict,*info);
       return ret;
     }
   }

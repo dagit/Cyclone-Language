@@ -734,19 +734,19 @@ _tmp11)->f1;_LL2: return(unsigned int)Cyc_strlen((struct _dynforward_ptr)_tmp12)
 _LL3: if(*((int*)_tmp11)!= 1)goto _LL0;_tmp13=((struct Cyc_Rope_Array_rope_struct*)
 _tmp11)->f1;_LL4: {unsigned int total=0;unsigned int sz=_get_dynforward_size(
 _tmp13,sizeof(struct Cyc_Rope_Rope_node*));{unsigned int i=0;for(0;i < sz;i ++){
-total +=Cyc_Rope_length(((struct Cyc_Rope_Rope_node**)_tmp13.curr)[(int)i]);}}
-return total;}_LL0:;}static unsigned int Cyc_Rope_flatten_it(struct _dynforward_ptr s,
-unsigned int i,struct Cyc_Rope_Rope_node*r){void*_tmp14=(void*)r->v;struct
-_dynforward_ptr _tmp15;struct _dynforward_ptr _tmp16;_LL6: if(*((int*)_tmp14)!= 0)
-goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)_tmp14)->f1;_LL7: {
-unsigned int _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);Cyc_strncpy(
-_dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(int)i),
-sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((
-int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;
-_LL9: {unsigned int _tmp18=_get_dynforward_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{
-int j=0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,*((struct Cyc_Rope_Rope_node**)
-_check_dynforward_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),j)));}}
-return i;}_LL5:;}struct _dynforward_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*
+total +=Cyc_Rope_length(*((struct Cyc_Rope_Rope_node**)_check_dynforward_subscript(
+_tmp13,sizeof(struct Cyc_Rope_Rope_node*),(int)i)));}}return total;}_LL0:;}static
+unsigned int Cyc_Rope_flatten_it(struct _dynforward_ptr s,unsigned int i,struct Cyc_Rope_Rope_node*
+r){void*_tmp14=(void*)r->v;struct _dynforward_ptr _tmp15;struct _dynforward_ptr
+_tmp16;_LL6: if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)
+_tmp14)->f1;_LL7: {unsigned int _tmp17=Cyc_strlen((struct _dynforward_ptr)_tmp15);
+Cyc_strncpy(_dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(
+int)i),sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}
+_LL8: if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)
+_tmp14)->f1;_LL9: {unsigned int _tmp18=_get_dynforward_size(_tmp16,sizeof(struct
+Cyc_Rope_Rope_node*));{int j=0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,*((
+struct Cyc_Rope_Rope_node**)_check_dynforward_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),
+j)));}}return i;}_LL5:;}struct _dynforward_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*
 r){struct _dynforward_ptr s=Cyc_Core_new_string(Cyc_Rope_length(r)+ 1);Cyc_Rope_flatten_it(
 s,0,r);(void*)(r->v=(void*)((void*)({struct Cyc_Rope_String_rope_struct*_tmp19=
 _cycalloc(sizeof(*_tmp19));_tmp19[0]=({struct Cyc_Rope_String_rope_struct _tmp1A;

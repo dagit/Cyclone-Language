@@ -108,16 +108,12 @@ extern dict_t<`a,`b,`r> rsingleton(region_t<`r>,
     [r]. */
 
 extern `b lookup(dict_t<`a,`b> d,`a k);
-/** [lookup(d,k)] returns the value associated with key [k] in [d], or
-    throws [Absent] if [k] is not mapped to any value. */
-extern Core::opt_t<`b> lookup_opt(dict_t<`a,`b> d,`a k);
+/** [lookup(d,k)] returns a pointer to the value associated with 
+    key [k] in [d], or throws [Absent] if [k] is not mapped to any value. */
+extern `b*`r lookup_opt(dict_t<`a,`b,`r> d,`a k);
 /** [lookup_opt(d,k)] returns [NULL] if [k] is not mapped to any value
     in [d], and returns a non-NULL, heap-allocated option containing
     the value [k] is mapped to in [d] otherwise. */
-extern `b*`r rlookup_opt(region_t<`r>,dict_t<`a,`b> d,`a k);
-/** [rlookup_opt(r,d,k)] is like [lookup_opt(d,k)] except that any
-    option returned will be allocated in the region with handle
-    [r]. */
 extern bool lookup_bool(dict_t<`a,`b> d, `a k, `b @ans);
 /** If [d] maps [k] to a value, then [lookup_bool(d,k,ans)] assigns
     that value to [*ans] and returns true; otherwise, it returns

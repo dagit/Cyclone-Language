@@ -188,7 +188,7 @@ typedef struct Bindings<`r> *`r const bindings_t<`r>;
 abstract struct Fenv<`r::R> {
   <`f::R,`c::R> : {`f} > `r, {`c} > `r
   struct SharedFenv<`f> @`f shared;
-  list_t<tvar_t> type_vars; //type variables that can occur free
+  list_t<tvar_t>      type_vars; //type variables that can occur free
   rgn_po_t<`f>        region_order; // partial order on region variables 
   bindings_t<`r>      locals;
   stmt_t              encloser;  // nearest stmt with a binder or a try
@@ -415,12 +415,12 @@ static tuniondecl_t @ lookup_xtuniondecl_f(genv_t ge,var_t v) {
 }
 
 // DAN: some functionality from tcXTuniondecl has moved to here.
-opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
+tuniondecl_t@*`r lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Rel_n(NULL):
     // unqualified name, okay to fail -- that just means we have a new xtunion
-    try return rnew(r) Opt(scoped_lookup(te, loc, lookup_xtuniondecl_f, v));
+    try return rnew(r) scoped_lookup(te, loc, lookup_xtuniondecl_f, v);
     catch { case Dict::Absent: return NULL; }
   case Loc_n: // impossible case
     terr(loc,"lookup_xtuniondecl: impossible");
@@ -438,10 +438,10 @@ opt_t<tuniondecl_t@,`r> lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,q
       throw Dict::Absent;
     }
     let tds = ge->tuniondecls;
-    return rnew(r) Opt(Dict::lookup(tds,v));
+    return rnew(r) Dict::lookup(tds,v);
   case Abs_n(y):
     let tds = Dict::lookup(te->ae,y)->tuniondecls;
-    return rnew(r) Opt(Dict::lookup(tds,v));
+    return rnew(r) Dict::lookup(tds,v);
   }
 }
 
@@ -535,6 +535,10 @@ list_t<tvar_t> lookup_type_vars(tenv_t te) {
   if(te->le == NULL) return NULL;
   let Fenv{<`f,`c> .type_vars = ts,...} = *le;
   return ts;
+}
+
+opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
+  return new Opt(lookup_type_vars(te));
 }
 
 tenv_t<`g,`r> add_type_vars(region_t<`r> r, seg_t loc,tenv_t<`g,`r2> te,
@@ -680,21 +684,19 @@ void process_break(tenv_t te, stmt_t s, stmt_opt_t @sopt) {
 }
 void process_goto(tenv_t te, stmt_t s, var_t l, stmt_opt_t @sopt) {
   let &Fenv{<`f,`c> .shared = shared, ...} = get_fenv(te,"process_goto");
-  region temp {
-    stmt_t*`temp sopt2 = Dict::rlookup_opt(temp,shared->seen_labels,l);
-    if(sopt2 == NULL) {
-      let needed = shared->needed_labels;
-      list_t<stmt_t,`H>*`temp slopt = Dict::rlookup_opt(temp,needed,l);
-      if(slopt == NULL)
-        slopt = rnew(temp) NULL;
-      region_t<`f> frgn = shared->frgn;
-      list_t<stmt_t,`H> new_needed = new List(s,*slopt);
-      shared->needed_labels = Dict::insert(needed,l,new_needed);
-    } else {
-      stmt_t s = *sopt2;
-      s->non_local_preds = new List(s, s->non_local_preds);
-      *sopt = s;
-    }
+  stmt_t* sopt2 = Dict::lookup_opt(shared->seen_labels,l);
+  if(sopt2 == NULL) {
+    let needed = shared->needed_labels;
+    list_t<stmt_t,`H>* slopt = Dict::lookup_opt(needed,l);
+    region_t<`f> frgn = shared->frgn;
+    if(slopt == NULL)
+      slopt = rnew(frgn) NULL;
+    list_t<stmt_t,`H> new_needed = new List(s,*slopt);
+    shared->needed_labels = Dict::insert(needed,l,new_needed);
+  } else {
+    stmt_t s = *sopt2;
+    s->non_local_preds = new List(s, s->non_local_preds);
+    *sopt = s;
   }
 }
 
@@ -798,20 +800,18 @@ tenv_t<`g,`r> set_next(region_t<`r> r, tenv_t<`g,`r2> te, jumpee_t<`r> j
 tenv_t<`g,`r> add_label(tenv_t<`g,`r> te, var_t v, stmt_t s) {
   let &Fenv{<`f,`c> .shared = shared, ...} = get_fenv(te,"add_label");
   Dict::dict_t<var_t,list_t<stmt_t,`H>,`f> needed = shared->needed_labels;
-  region temp {
-    list_t<stmt_t,`H>*`temp sl_opt = Dict::rlookup_opt(temp, needed, v);
-    region_t<`f> frgn = shared->frgn;
-    if(sl_opt != NULL) {
-      shared->needed_labels = Dict::rdelete(frgn, needed, v);
-      // backpatching
-      let sl = *sl_opt;
-      s->non_local_preds = sl;
-      for(; sl != NULL; sl = sl->tl)
-        switch (sl->hd->r) {
-        case &Goto_s(_,*so): *so = s; break;
-        default: env_err("Tcenv: add_label backpatching of non-goto"); break;
-        }
-    }
+  list_t<stmt_t,`H>* sl_opt = Dict::lookup_opt(needed, v);
+  region_t<`f> frgn = shared->frgn;
+  if(sl_opt != NULL) {
+    shared->needed_labels = Dict::rdelete(frgn, needed, v);
+    // backpatching
+    let sl = *sl_opt;
+    s->non_local_preds = sl;
+    for(; sl != NULL; sl = sl->tl)
+      switch (sl->hd->r) {
+      case &Goto_s(_,*so): *so = s; break;
+      default: env_err("Tcenv: add_label backpatching of non-goto"); break;
+      }
   }
   if(Dict::member(shared->seen_labels, v))
     Tcutil::terr(s->loc, "Repeated label: %s", *v);
@@ -868,7 +868,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   fenv_t fe = copy_fenv_old_ctrl(r,get_fenv(te,"new_block"));
   type_t block_typ = new VarType(block_rgn);
   type_vars = new List(block_rgn, type_vars);
-  Tcutil::check_unique_tvars(loc,type_vars);
+  Tcutil::check_unique_tvars(loc, type_vars);
   region_order = add_youngest(shared->frgn, region_order, block_rgn, false, false);
   capability = new JoinEff(new List(new AccessEff(block_typ), new List(capability,NULL)));
   curr_rgn = block_typ;
@@ -878,9 +878,11 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   return put_fenv(r,te,fe);
 }
 
+static tunion KindBound.Eq_kb rgn_kb = Eq_kb(RgnKind);
+
 tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te 
                         : {`r2} > `r) {
-  tvar_t t = new_tvar(new Eq_kb(RgnKind));
+  tvar_t t = new_tvar(&rgn_kb);
   add_tvar_identity(t);
   return new_named_block(r, loc, te, t);
 }
@@ -1023,14 +1025,14 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
   bindings_t<`r> locals = NULL;
   tvar_t rgn0 = 
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
-             new_tvar_id(),
-             new Eq_kb(RgnKind));
+             new_tvar_id(), &rgn_kb);
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
   // make sure that region ordering constraints do not include the
   //   unique region
   let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,fd->effect->v,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
+  opt_t<type_t> param_rgn_opt = new Opt(param_rgn);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
     let vd = new{Vardecl{.sc = Public, 
@@ -1038,7 +1040,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = NULL, 
-                         .rgn = new Opt(param_rgn), 
+                         .rgn = param_rgn_opt,
                          .attributes = NULL, .escapes = false}};
     vds = new{List(vd, vds)};
     locals = rnew(r) Bindings{(*args->hd)[0], new Param_b(vd), locals};
@@ -1052,7 +1054,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
                            .tq = empty_tqual(NULL),
                            .type = typ,
                            .initializer = NULL,
-                           .rgn = new Opt(param_rgn),
+                           .rgn = param_rgn_opt,
                            .attributes = NULL, .escapes = false}};
       vds = new List(vd,vds);
       locals = rnew(r) Bindings{nopt->v, new Param_b(vd), locals};
@@ -1088,8 +1090,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let locals = (bindings_t<`r>)old_locals;
   tvar_t rgn0 = 
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
-             new_tvar_id(),
-             new Eq_kb(RgnKind));
+             new_tvar_id(), &rgn_kb);
   // add in all of the region vars
   for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
     if (tvar_kind(tvars->hd) == RgnKind)
@@ -1101,6 +1102,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
+  opt_t<type_t> param_rgn_opt = new Opt(param_rgn);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
     let vd = new{Vardecl{.sc = Public, 
@@ -1108,7 +1110,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = NULL, 
-                         .rgn = new Opt(param_rgn), 
+                         .rgn = param_rgn_opt,
                          .attributes = NULL, .escapes = false}};
     vds = new{List(vd, vds)};
     locals = rnew(r) Bindings{(*args->hd)[0], new Param_b(vd), locals};
@@ -1122,7 +1124,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
                            .tq = empty_tqual(NULL),
                            .type = typ,
                            .initializer = NULL,
-                           .rgn = new Opt(param_rgn),
+                           .rgn = param_rgn_opt,
                            .attributes = NULL, .escapes = false}};
       vds = new List(vd,vds);
       locals = rnew(r) Bindings{nopt->v, new Param_b(vd), locals};

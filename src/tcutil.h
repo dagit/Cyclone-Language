@@ -89,6 +89,10 @@ extern struct Core::Opt<kind_t> urk;
 extern struct Core::Opt<kind_t> ak;
 extern struct Core::Opt<kind_t> bk;
 extern struct Core::Opt<kind_t> mk;
+extern struct Core::Opt<kind_t> ek;
+extern struct Core::Opt<kind_t> ik;
+extern Core::opt_t<kind_t> kind_to_opt(kind_t k);
+extern kindbound_t kind_to_bound(kind_t k);
 
 // if t is a pointer type and e is 0, changes e to null and checks
 // that t is nullable pointer type by unifying e's type with t.
@@ -119,8 +123,8 @@ extern type_t fndecl2typ(fndecl_t);
 // generate an appropriate evar for a type variable -- used in
 // instantiation.  The list of tvars is used to constrain the evar.
 extern $(tvar_t,type_t)@   make_inst_var(list_t<tvar_t,`H>,tvar_t);
-extern $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,
-					   tvar_t);
+extern $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,tvar_t);
+					   
 
 // checks that a width given on a struct or union member is consistent
 // with the type definition for the member.
@@ -236,7 +240,7 @@ extern type_t normalize_effect(type_t e);
 // Gensym a new type variable with kind bounded by k
 extern tvar_t new_tvar(kindbound_t k);
 // Get an identity for a type variable
-extern int *new_tvar_id();
+extern int new_tvar_id();
 // Add an identity to a type variable if it doesn't already have one
 extern void add_tvar_identity(tvar_t);
 extern void add_tvar_identities(list_t<tvar_t,`r>);

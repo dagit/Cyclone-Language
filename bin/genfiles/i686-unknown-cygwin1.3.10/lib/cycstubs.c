@@ -902,18 +902,19 @@ mode,sizeof(char),1));if(f == 0){struct _dynforward_ptr fn=({unsigned int _tmp33
 _get_dynforward_size(fname,sizeof(char));char*_tmp34=(char*)_cycalloc_atomic(
 _check_times(sizeof(char),_tmp33 + 1));struct _dynforward_ptr _tmp36=
 _tag_dynforward(_tmp34,sizeof(char),_tmp33 + 1);{unsigned int _tmp35=_tmp33;
-unsigned int i;for(i=0;i < _tmp35;i ++){_tmp34[i]=((const char*)fname.curr)[(int)i];}
-_tmp34[_tmp35]=(char)0;}_tmp36;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*
-_tmp31=_cycalloc(sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct
-_tmp32;_tmp32.tag=Cyc_FileOpenError;_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(
-struct Cyc___cycFILE*)f;}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(
-f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-struct _dynforward_ptr);void Cyc_qsort(struct _dynforward_ptr,unsigned int,
-unsigned int,int(*)(const void*,const void*));void Cyc_free(struct _dynforward_ptr
-ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(const void*,const void*));
-static char _tmp38[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
-Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
+unsigned int i;for(i=0;i < _tmp35;i ++){_tmp34[i]=*((const char*)
+_check_dynforward_subscript(fname,sizeof(char),(int)i));}_tmp34[_tmp35]=(char)0;}
+_tmp36;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp31=_cycalloc(
+sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct _tmp32;_tmp32.tag=Cyc_FileOpenError;
+_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)f;}void Cyc_file_close(
+struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;
+void*abort();void exit(int);void Cyc_free(struct _dynforward_ptr);void Cyc_qsort(
+struct _dynforward_ptr,unsigned int,unsigned int,int(*)(const void*,const void*));
+void Cyc_free(struct _dynforward_ptr ptr){;}void qsort(void*,unsigned int,
+unsigned int,int(*)(const void*,const void*));static char _tmp38[23]="qsort called with NULL";
+static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
+_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
 static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
 _tmp3A,_tmp3A + 42}};void Cyc_qsort(struct _dynforward_ptr tab,unsigned int nmemb,
 unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(

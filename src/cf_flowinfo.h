@@ -204,6 +204,7 @@ extern relns_t<`r> reln_assign_exp(region_t<`r>, relns_t<`r>, Absyn::exp_t, Absy
 extern relns_t<`r> reln_kill_var(region_t<`r>,relns_t<`r>, Absyn::vardecl_t);
 extern relns_t<`r> reln_kill_exp(region_t<`r>,relns_t<`r>, Absyn::exp_t);
 extern relns_t<`r2> copy_relns(region_t<`r2>, relns_t<`r>);
+extern bool same_relns(relns_t, relns_t);
 extern void print_relns(relns_t);
 
   // all of the following throw EscNotInit as appropriate
@@ -246,6 +247,6 @@ extern flow_t<`r> drop_unique_rvals(Position::seg_t loc,flow_t<`r> f);
 
 extern $(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r>,flow_t<`r> f, bool clear);
 extern flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c);
-  extern string_t place_err_string(place_t place);
+extern string_t place_err_string(place_t place);
 }
 #endif

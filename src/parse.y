@@ -182,7 +182,7 @@ static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
   case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm,ztl}):
     return starb_typ(t1,
-                     argposn ? new_evar(new Opt(RgnKind), NULL) : HeapRgn,
+                     argposn ? new_evar(&Tcutil::rk, NULL) : HeapRgn,
                      tq,
                      eopt == NULL ? DynForward_b : new Upper_b((exp_t)eopt),
                      zeroterm);
@@ -225,17 +225,17 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
   else if (zstrcmp(s,"`U") == 0)
     return UniqueRgn;
   else
-    return new VarType(new Tvar(new s,NULL,k));
+    return new VarType(new Tvar(new s,-1,k));
 }
 
 static tvar_t copy_tvar(tvar_t t) {
   kindbound_t k;
   switch (compress_kb(t->kind)) {
-  case &Eq_kb(knd):     k = new Eq_kb(knd);        break;
   case &Unknown_kb(_):  k = new Unknown_kb(NULL);  break;
   case &Less_kb(_,knd): k = new Less_kb(NULL,knd); break;
+  case kb: k = kb; break;
   }
-  return new Tvar{.name=t->name, .identity = NULL, .kind = k};
+  return new Tvar{.name=t->name, .identity = -1, .kind = k};
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -258,7 +258,7 @@ static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
   case &VarType(&Tvar(_,_,*cptr)): 
     switch(compress_kb(*cptr)) {
     case &Unknown_kb(_): 
-      if (!leq) *cptr = new Eq_kb(k); 
+      if (!leq) *cptr = Tcutil::kind_to_bound(k);
       else *cptr = new Less_kb(NULL,k);
       return;
     default: return;
@@ -510,13 +510,13 @@ static $(type_t,opt_t<decl_t>)
   if (!seen_type) {
     if(!seen_sign && !seen_size) 
       Tcutil::warn(last_loc,"missing type within specifier");
-    t = new IntType(sgn, sz);
+    t = int_typ(sgn,sz);
   } else {
     if(seen_sign)
       switch (t) {
       case &IntType(sgn2,sz2): 
         if (sgn2 != sgn)
-          t = new IntType(sgn,sz2); 
+          t = int_typ(sgn,sz2);
         break;
       default: err("sign specification on non-integral type",last_loc); break;
       }
@@ -524,10 +524,10 @@ static $(type_t,opt_t<decl_t>)
       switch (t) {
       case &IntType(sgn2,sz2): 
         if (sz2 != sz)
-          t = new IntType(sgn2,sz); 
+          t = int_typ(sgn2,sz);
         break;
         // hack -- if we've seen "long" then sz will be B8
-      case &DoubleType(_): t = new DoubleType(true); break;
+      case &DoubleType(_): t = double_typ(true); break;
       default: err("size qualifier on non-integral type",last_loc); break;
       }
   }
@@ -658,7 +658,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   switch (typ) {
   case &Evar(kopt,_,_,_): 
     type = NULL;
-    if (kopt == NULL) kind = new Opt(BoxKind);
+    if (kopt == NULL) kind = &Tcutil::bk;
     else kind = kopt;
     break;
   default: kind = NULL; type = new Opt(typ); break;
@@ -1346,7 +1346,7 @@ type_specifier_notypedef:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
 | '_' COLON_COLON kind 
-  { $$=^$(type_spec(new_evar(new Opt($3),NULL),LOC(@1,@3))); }
+  { $$=^$(type_spec(new_evar(Tcutil::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | CHAR      { $$=^$(type_spec(char_typ,LOC(@1,@1))); }
 | SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_typ,LOC(@1,@1))); }
@@ -1369,7 +1369,7 @@ type_specifier_notypedef:
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 | DYNREGION_T '<' any_type_name right_angle
-  { let t2 = new_evar(new Opt(RgnKind), NULL);
+  { let t2 = new_evar(&Tcutil::rk, NULL);
     $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
   }
 | DYNREGION_T '<' any_type_name ',' any_type_name right_angle
@@ -1379,7 +1379,7 @@ type_specifier_notypedef:
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 | TAG_T 
-{ $$=^$(type_spec(new TagType(new_evar(new Opt(IntKind), NULL)),LOC(@1,@1))); }
+{ $$=^$(type_spec(new TagType(new_evar(&Tcutil::ik, NULL)),LOC(@1,@1))); }
 | TYPE_INTEGER
     { let $(_,n) = $1; 
       $$=^$(type_spec(new TypeInt(n),LOC(@1,@1))); }
@@ -1782,14 +1782,14 @@ zeroterm_qual_opt:
 opt_rgn_opt:
 /* empty */ { $$ = ^$(NULL); }
 | type_var  { set_vartyp_kind($1,RgnKind,true); $$ = ^$(new Opt($1)); }
-| '_'       { $$ = ^$(new Opt(new_evar(new Opt(RgnKind),NULL))); }
+| '_'       { $$ = ^$(new Opt(new_evar(&Tcutil::rk,NULL))); }
 ;
 
 /* Always returns a type (possibly an evar) */
 rgn_opt:
-/* empty */ { $$ = ^$(new_evar(new Opt(TopRgnKind),NULL)); }
+/* empty */ { $$ = ^$(new_evar(&Tcutil::trk,NULL)); }
 | type_var  { set_vartyp_kind($1,TopRgnKind,true); $$ = $!1; }
-| '_'       { $$ = ^$(new_evar(new Opt(TopRgnKind),NULL)); }
+| '_'       { $$ = ^$(new_evar(&Tcutil::trk,NULL)); }
 ;
 
 tqual_list:
@@ -1819,7 +1819,7 @@ parameter_type_list:
 /* CYC:  new */
 type_var:
   TYPE_VAR                  { $$ = ^$(id2type($1,new Unknown_kb(NULL))); }
-| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,new Eq_kb($3))); }
+| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,Tcutil::kind_to_bound($3))); }
 
 optional_effect:
   /* empty */    { $$=^$(NULL); }
@@ -1834,10 +1834,10 @@ optional_rgn_order:
 rgn_order:
   atomic_effect '>' TYPE_VAR
 { $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,new Eq_kb(RgnKind))),NULL)); }
+			 id2type($3,Tcutil::kind_to_bound(RgnKind))),NULL)); }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
 { $$ = ^$(new List(new $(new JoinEff($1),
-			 id2type($3,new Eq_kb(RgnKind))),$5)); }
+			 id2type($3,Tcutil::kind_to_bound(RgnKind))),$5)); }
 ;
 
 optional_inject:
@@ -2085,7 +2085,7 @@ statement:
 | REGION '<' TYPE_VAR '>' IDENTIFIER statement
   { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
       err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
-    tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
+    tvar_t tv = new Tvar(new $3,-1,Tcutil::kind_to_bound(RgnKind));
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
                                                new RgnHandleType(t),NULL),
@@ -2095,8 +2095,8 @@ statement:
 | REGION IDENTIFIER open_exp_opt statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@2,@2));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), NULL,
-			 new Eq_kb(RgnKind));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
+			 Tcutil::kind_to_bound(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $2),
                                                new RgnHandleType(t),NULL),
@@ -2108,7 +2108,7 @@ statement:
       err("expecting [resetable]",LOC(@3,@3));
     if (zstrcmp($6,"`H") == 0 || zstrcmp($6,"`U"))
       err(aprintf("bad occurrence of heap region %s",$6),LOC(@6,@6));
-    tvar_t tv = new Tvar(new $6,NULL,new Eq_kb(RgnKind));
+    tvar_t tv = new Tvar(new $6,-1,Tcutil::kind_to_bound(RgnKind));
     type_t t  = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $8),
                                                new RgnHandleType(t),NULL),
@@ -2120,8 +2120,8 @@ statement:
       err("expecting `resetable'",LOC(@3,@3));
     if (zstrcmp($5,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@5,@5));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), NULL,
-			 new Eq_kb(RgnKind));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), -1,
+			 Tcutil::kind_to_bound(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
                                                new RgnHandleType(t),NULL),
@@ -2135,7 +2135,7 @@ statement:
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression IDENTIFIER statement
   { if (zstrcmp($8,"in") != 0)
       err("expecting `in'",LOC(@8,@8));
-    tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
+    tvar_t tv = new Tvar(new $3,-1,new Eq_kb(RgnKind));
     $$=^$(new_stmt(new Alias_s($7,tv,
 			       new_vardecl(new $(Loc_n, new $5),
 					   VoidType,NULL),$9),LOC(@1,@9)));
@@ -2496,13 +2496,13 @@ pattern:
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
-   { let tag = id2type($3,new Eq_kb(IntKind));
+   { let tag = id2type($3,Tcutil::kind_to_bound(IntKind));
      $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(tag),NULL)),
 		   LOC(@1,@4))); }
 | IDENTIFIER '<' '_' '>' 
-   { let tv = Tcutil::new_tvar(new Eq_kb(IntKind));
+   { let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(IntKind));
      $$=^$(new_pat(new TagInt_p(tv,
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(new VarType(tv)),NULL)),

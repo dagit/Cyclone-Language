@@ -52,9 +52,9 @@ extern tunion Spec {
                                     // function with each remaining argument
 };
 
-typedef tunion Spec spec_t;
+typedef tunion `r Spec spec_t<`r>;
 
-typedef List::list_t<$(string_t,bool,string_t,spec_t,string_t)@`r1,`r2>
+typedef List::list_t<$(string_t,bool,string_t,spec_t<`r1>,string_t)@`r1,`r2>
 speclist_t<`r1,`r2>;
 
 extern void usage(speclist_t<`r1,`r2>,string_t);

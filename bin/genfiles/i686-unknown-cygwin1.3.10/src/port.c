@@ -717,7 +717,7 @@ Forward_constr;struct Cyc_Absyn_No_constr_struct No_constr;};struct Cyc_Absyn_Co
 union Cyc_Absyn_Constraint_union v;};struct Cyc_Absyn_Eq_kb_struct{int tag;void*f1;}
 ;struct Cyc_Absyn_Unknown_kb_struct{int tag;struct Cyc_Core_Opt*f1;};struct Cyc_Absyn_Less_kb_struct{
 int tag;struct Cyc_Core_Opt*f1;void*f2;};struct Cyc_Absyn_Tvar{struct
-_dynforward_ptr*name;int*identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
+_dynforward_ptr*name;int identity;void*kind;};struct Cyc_Absyn_Upper_b_struct{int
 tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AbsUpper_b_struct{int tag;void*f1;};
 struct Cyc_Absyn_PtrLoc{struct Cyc_Position_Segment*ptr_loc;struct Cyc_Position_Segment*
 rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
@@ -938,8 +938,8 @@ int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*t;};extern char 
 12];extern char Cyc_Dict_Absent[11];struct Cyc_Dict_Dict Cyc_Dict_empty(int(*cmp)(
 void*,void*));int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict
 Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);void*Cyc_Dict_lookup(struct
-Cyc_Dict_Dict d,void*k);struct Cyc_Core_Opt*Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict
-d,void*k);struct _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(struct
+Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
+struct _tuple3{void*f1;void*f2;};struct _tuple3*Cyc_Dict_rchoose(struct
 _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple3*Cyc_Dict_rchoose(struct
 _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_RgnOrder_RgnPO;struct Cyc_RgnOrder_RgnPO*
 Cyc_RgnOrder_initial_fn_po(struct _RegionHandle*,struct Cyc_List_List*tvs,struct
@@ -1628,35 +1628,33 @@ _npop_handler(0);return _tmp1AB;}};_pop_handler();}else{void*_tmp1A7=(void*)
 _exn_thrown;void*_tmp1AD=_tmp1A7;_LL13A: if(_tmp1AD != Cyc_Dict_Absent)goto _LL13C;
 _LL13B: return Cyc_Port_var();_LL13C:;_LL13D:(void)_throw(_tmp1AD);_LL139:;}}}
 static struct _tuple4*Cyc_Port_lookup_struct_decl(struct Cyc_Port_Cenv*env,struct
-_tuple0*n){struct Cyc_Core_Opt*_tmp1AE=((struct Cyc_Core_Opt*(*)(struct Cyc_Dict_Dict
-d,struct _tuple0*k))Cyc_Dict_lookup_opt)((env->gcenv)->struct_dict,n);if((
-unsigned int)_tmp1AE)return(struct _tuple4*)_tmp1AE->v;else{struct Cyc_Absyn_Aggrdecl*
-_tmp1AF=({struct Cyc_Absyn_Aggrdecl*_tmp1B1=_cycalloc(sizeof(*_tmp1B1));_tmp1B1->kind=(
-void*)((void*)0);_tmp1B1->sc=(void*)((void*)2);_tmp1B1->name=n;_tmp1B1->tvs=0;
-_tmp1B1->impl=0;_tmp1B1->attributes=0;_tmp1B1;});struct _tuple4*p=({struct _tuple4*
-_tmp1B0=_cycalloc(sizeof(*_tmp1B0));_tmp1B0->f1=_tmp1AF;_tmp1B0->f2=0;_tmp1B0;});(
-env->gcenv)->struct_dict=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,struct
-_tuple0*k,struct _tuple4*v))Cyc_Dict_insert)((env->gcenv)->struct_dict,n,p);
-return p;}}static struct _tuple4*Cyc_Port_lookup_union_decl(struct Cyc_Port_Cenv*env,
-struct _tuple0*n){struct Cyc_Core_Opt*_tmp1B2=((struct Cyc_Core_Opt*(*)(struct Cyc_Dict_Dict
-d,struct _tuple0*k))Cyc_Dict_lookup_opt)((env->gcenv)->union_dict,n);if((
-unsigned int)_tmp1B2)return(struct _tuple4*)_tmp1B2->v;else{struct Cyc_Absyn_Aggrdecl*
-_tmp1B3=({struct Cyc_Absyn_Aggrdecl*_tmp1B5=_cycalloc(sizeof(*_tmp1B5));_tmp1B5->kind=(
-void*)((void*)1);_tmp1B5->sc=(void*)((void*)2);_tmp1B5->name=n;_tmp1B5->tvs=0;
-_tmp1B5->impl=0;_tmp1B5->attributes=0;_tmp1B5;});struct _tuple4*p=({struct _tuple4*
-_tmp1B4=_cycalloc(sizeof(*_tmp1B4));_tmp1B4->f1=_tmp1B3;_tmp1B4->f2=0;_tmp1B4;});(
-env->gcenv)->union_dict=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,struct
-_tuple0*k,struct _tuple4*v))Cyc_Dict_insert)((env->gcenv)->union_dict,n,p);return
-p;}}struct _tuple6{void*f1;struct _tuple3*f2;};static struct _tuple3 Cyc_Port_lookup_var(
-struct Cyc_Port_Cenv*env,struct _tuple0*x){struct _handler_cons _tmp1B6;
-_push_handler(& _tmp1B6);{int _tmp1B8=0;if(setjmp(_tmp1B6.handler))_tmp1B8=1;if(!
-_tmp1B8){{struct _tuple3*_tmp1BA;struct _tuple6 _tmp1B9=*((struct _tuple6*(*)(struct
-Cyc_Dict_Dict d,struct _tuple0*k))Cyc_Dict_lookup)(env->var_dict,x);_tmp1BA=
-_tmp1B9.f2;{struct _tuple3 _tmp1BB=*_tmp1BA;_npop_handler(0);return _tmp1BB;}};
-_pop_handler();}else{void*_tmp1B7=(void*)_exn_thrown;void*_tmp1BD=_tmp1B7;_LL13F:
-if(_tmp1BD != Cyc_Dict_Absent)goto _LL141;_LL140: return({struct _tuple3 _tmp1BE;
-_tmp1BE.f1=Cyc_Port_var();_tmp1BE.f2=Cyc_Port_var();_tmp1BE;});_LL141:;_LL142:(
-void)_throw(_tmp1BD);_LL13E:;}}}static struct _tuple6*Cyc_Port_lookup_full_var(
+_tuple0*n){struct _tuple4**_tmp1AE=((struct _tuple4**(*)(struct Cyc_Dict_Dict d,
+struct _tuple0*k))Cyc_Dict_lookup_opt)((env->gcenv)->struct_dict,n);if((
+unsigned int)_tmp1AE)return*_tmp1AE;else{struct Cyc_Absyn_Aggrdecl*_tmp1AF=({
+struct Cyc_Absyn_Aggrdecl*_tmp1B1=_cycalloc(sizeof(*_tmp1B1));_tmp1B1->kind=(void*)((
+void*)0);_tmp1B1->sc=(void*)((void*)2);_tmp1B1->name=n;_tmp1B1->tvs=0;_tmp1B1->impl=
+0;_tmp1B1->attributes=0;_tmp1B1;});struct _tuple4*p=({struct _tuple4*_tmp1B0=
+_cycalloc(sizeof(*_tmp1B0));_tmp1B0->f1=_tmp1AF;_tmp1B0->f2=0;_tmp1B0;});(env->gcenv)->struct_dict=((
+struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,struct _tuple0*k,struct _tuple4*v))Cyc_Dict_insert)((
+env->gcenv)->struct_dict,n,p);return p;}}static struct _tuple4*Cyc_Port_lookup_union_decl(
+struct Cyc_Port_Cenv*env,struct _tuple0*n){struct _tuple4**_tmp1B2=((struct _tuple4**(*)(
+struct Cyc_Dict_Dict d,struct _tuple0*k))Cyc_Dict_lookup_opt)((env->gcenv)->union_dict,
+n);if((unsigned int)_tmp1B2)return*_tmp1B2;else{struct Cyc_Absyn_Aggrdecl*_tmp1B3=({
+struct Cyc_Absyn_Aggrdecl*_tmp1B5=_cycalloc(sizeof(*_tmp1B5));_tmp1B5->kind=(void*)((
+void*)1);_tmp1B5->sc=(void*)((void*)2);_tmp1B5->name=n;_tmp1B5->tvs=0;_tmp1B5->impl=
+0;_tmp1B5->attributes=0;_tmp1B5;});struct _tuple4*p=({struct _tuple4*_tmp1B4=
+_cycalloc(sizeof(*_tmp1B4));_tmp1B4->f1=_tmp1B3;_tmp1B4->f2=0;_tmp1B4;});(env->gcenv)->union_dict=((
+struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,struct _tuple0*k,struct _tuple4*v))Cyc_Dict_insert)((
+env->gcenv)->union_dict,n,p);return p;}}struct _tuple6{void*f1;struct _tuple3*f2;};
+static struct _tuple3 Cyc_Port_lookup_var(struct Cyc_Port_Cenv*env,struct _tuple0*x){
+struct _handler_cons _tmp1B6;_push_handler(& _tmp1B6);{int _tmp1B8=0;if(setjmp(
+_tmp1B6.handler))_tmp1B8=1;if(!_tmp1B8){{struct _tuple3*_tmp1BA;struct _tuple6
+_tmp1B9=*((struct _tuple6*(*)(struct Cyc_Dict_Dict d,struct _tuple0*k))Cyc_Dict_lookup)(
+env->var_dict,x);_tmp1BA=_tmp1B9.f2;{struct _tuple3 _tmp1BB=*_tmp1BA;_npop_handler(
+0);return _tmp1BB;}};_pop_handler();}else{void*_tmp1B7=(void*)_exn_thrown;void*
+_tmp1BD=_tmp1B7;_LL13F: if(_tmp1BD != Cyc_Dict_Absent)goto _LL141;_LL140: return({
+struct _tuple3 _tmp1BE;_tmp1BE.f1=Cyc_Port_var();_tmp1BE.f2=Cyc_Port_var();_tmp1BE;});
+_LL141:;_LL142:(void)_throw(_tmp1BD);_LL13E:;}}}static struct _tuple6*Cyc_Port_lookup_full_var(
 struct Cyc_Port_Cenv*env,struct _tuple0*x){return((struct _tuple6*(*)(struct Cyc_Dict_Dict
 d,struct _tuple0*k))Cyc_Dict_lookup)(env->var_dict,x);}static int Cyc_Port_declared_var(
 struct Cyc_Port_Cenv*env,struct _tuple0*x){return((int(*)(struct Cyc_Dict_Dict d,

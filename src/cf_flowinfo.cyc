@@ -1104,6 +1104,16 @@ relns_t<`r2> copy_relns(region_t<`r2> r2, relns_t<`r> relns) {
   return List::rmap_c(r2,copy_reln,r2,relns);
 }
 
+bool same_relns(relns_t r1, relns_t r2) {
+  for (; r1 != NULL && r2 != NULL; r1 = r1->tl, r2 = r2->tl) {
+    let x1 = r1->hd;
+    let x2 = r2->hd;
+    if (x1->vd != x2->vd || !same_relop(x1->rop,x2->rop)) return false;
+  }
+  if (r1 != NULL || r2 != NULL) return false;
+  else return true;
+}
+
 relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t e) {
   //fprintf(stderr,"assigning %s to %s: \n", Absynpp::qvar2string(v->name),
   //        Absynpp::exp2string(e));

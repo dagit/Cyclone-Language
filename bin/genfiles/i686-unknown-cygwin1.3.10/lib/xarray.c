@@ -784,10 +784,11 @@ sizeof(*_tmp1F));_tmp1F->r=r;_tmp1F->elmts=({unsigned int _tmp20=
 _get_dynforward_size(arr,sizeof(void*));void**_tmp21=(void**)_region_malloc(r,
 _check_times(sizeof(void*),_tmp20));struct _dynforward_ptr _tmp23=_tag_dynforward(
 _tmp21,sizeof(void*),_tmp20);{unsigned int _tmp22=_tmp20;unsigned int i;for(i=0;i < 
-_tmp22;i ++){_tmp21[i]=((void**)arr.curr)[(int)i];}}_tmp23;});_tmp1F->num_elmts=(
-int)_get_dynforward_size(arr,sizeof(void*));_tmp1F;});return ans;}}struct Cyc_Xarray_Xarray*
-Cyc_Xarray_from_array(struct _dynforward_ptr arr){return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,
-arr);}struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
+_tmp22;i ++){_tmp21[i]=*((void**)_check_dynforward_subscript(arr,sizeof(void*),(
+int)i));}}_tmp23;});_tmp1F->num_elmts=(int)_get_dynforward_size(arr,sizeof(void*));
+_tmp1F;});return ans;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_from_array(struct
+_dynforward_ptr arr){return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,arr);}
+struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
 xarr1,struct Cyc_Xarray_Xarray*xarr2){int newsz=(int)(_get_dynforward_size(xarr1->elmts,
 sizeof(void*))+ _get_dynforward_size(xarr2->elmts,sizeof(void*)));if(newsz == 0)
 return Cyc_Xarray_rcreate_empty(r);{void*init=_get_dynforward_size(xarr1->elmts,

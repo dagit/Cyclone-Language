@@ -261,12 +261,12 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       case &PointerType(_): t = *topt; goto tcpat_end;
       default: break;
       }
-    let tenv_tvs = lookup_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),
+    let tenv_tvs = lookup_opt_type_vars(te);
+    t = new PointerType(PtrInfo(new_evar(&ak,tenv_tvs),
                                 empty_tqual(NULL),
 				// MWH: don't allow switching on
 				//   unique pointers for now
-				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)),
+				PtrAtts(new_evar(&rk,tenv_tvs),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
                                         
@@ -291,7 +291,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     // MWH: don't allow switching on unique pointers for now
-    type_t ptr_rgn = new_evar(&rk,new Opt(lookup_type_vars(te)));
+    type_t ptr_rgn = new_evar(&rk,lookup_opt_type_vars(te));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
     // if p2's type is a tunion field type, then we cast
     // the type of p = &p2 to the appropriate tunion type, unless
@@ -359,7 +359,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     let dps = *dps_p;
     if(ad->impl==NULL) {
       terr(p->loc,"can't destructure an abstract struct");
-      t = wildtyp(new Opt(lookup_type_vars(te)));
+      t = wildtyp(lookup_opt_type_vars(te));
       break;
     }
     // don't allow reference patterns for existentials -- see Dan's ESOP paper
@@ -548,7 +548,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   case &UnknownId_p(_):         
   case &Exp_p(_):
   case &UnknownCall_p(_,_,_): 
-    t = wildtyp(new Opt(lookup_type_vars(te))); break;
+    t = wildtyp(lookup_opt_type_vars(te)); break;
   }
  tcpat_end:
   p->topt = new Opt(t);

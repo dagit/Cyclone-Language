@@ -46,11 +46,11 @@
 #include <set.h>
 #include <dict.h>
 #include <position.h>
+#include <xarray.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
-#include "formatstr.h"
 #include "cf_flowinfo.h"
 #include "toc.h"
 using Core;
@@ -60,6 +60,9 @@ using Position;
 using Absyn;
 using Absynpp;
 using Tcutil;
+
+// in Cyclone.cyc:  controls whether or not we expand typedefs
+extern bool noexpand_r;
 
 namespace Toc;
 
@@ -83,14 +86,39 @@ struct TocState {
   dynregion_t<`d> dyn;
   // tuple types seen so far and the struct they map to
   list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
-  // aggregates seen so far and their declaration
-  Dict::dict_t<qvar_t,aggrdecl_t,`d> @`d       aggrs_so_far;
+  // aggregates seen so far, their declaration, and C type
+  Dict::dict_t<qvar_t,$(aggrdecl_t,type_t)@`d,`d> @`d aggrs_so_far;
   // tunions seen so far
   Set::set_t<qvar_t,`d> @`d                    tunions_so_far;
   // xtunions seen so far -- bool is false if seen but not initialized (extern)
   Dict::dict_t<qvar_t,bool,`d> @`d             xtunions_so_far;
+  // generated identifiers from other identifiers (e.g., Foo_struct)
+  Dict::dict_t<$(qvar_t,string_t)@`d,qvar_t,`d>@`d qvar_tags;
+  // generated labels -- get re-used across functions
+  Xarray::xarray_t<var_t,`d>                    temp_labels;
 };
 static struct TocState *toc_state = NULL;
+
+int qvar_tag_cmp($(qvar_t,string_t)@ x, $(qvar_t,string_t)@ y) {
+  let $(qx,sx) = *x;
+  let $(qy,sy) = *y;
+  int i = qvar_cmp(qx,qy);
+  if (i != 0) return i;
+  return strcmp(sx,sy);
+}
+
+type_t aggrdecl_type(qvar_t q, type_t type_maker(qvar_t)) {
+  let TocState{<`d> .dyn = dyn, .aggrs_so_far = aggs, ...} = *toc_state;
+  region d = open(dyn) {
+    $(aggrdecl_t,type_t)@`d*`d v = Dict::lookup_opt(*aggs,q);
+    if (v == NULL) {
+      return type_maker(q);
+    } else {
+      let &$(_,t) = *v;
+      return t;
+    }
+  }
+}
 
 static int tuple_type_counter = 0;
 static int temp_var_counter = 0;
@@ -314,9 +342,20 @@ static bool is_nullable(type_t t) {
 
 // FIX: Share the results to save compile-time space and time.
 //      Alternately, put struct names for tunion variants in the environment.
-static qvar_t collapse_qvar_tag(qvar_t x,string_t tag) {
-  return new $((*x)[0], 
-               new (string_t)strconcat(*((*x)[1]),tag));
+static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
+  let TocState{.dyn = dyn, .qvar_tags = qvs, ...} = *toc_state;
+  static string_t bogus_string = "*bogus*";
+  static $(nmspace_t,var_t) bogus_qvar = $(Loc_n,&bogus_string);
+  static $(qvar_t,string_t) pair = $(&bogus_qvar,"");
+  pair = $(x,tag);
+  region d = open(dyn) {
+    let qptr = Dict::lookup_opt(*qvs,&pair);
+    if (qptr != NULL) return *qptr;
+    let new_pair = new $(x,tag);
+    qvar_t res = new $((*x)[0], new (string_t)strconcat(*((*x)[1]),tag));
+    *qvs = Dict::insert(*qvs,new_pair,res);
+    return res;
+  }
 }
 
 // used to generate struct definitions for tuple types
@@ -358,13 +397,24 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
 qvar_t temp_var() {
-  return new $(Loc_n,new (string_t)aprintf("_tmp%X",temp_var_counter++));
+  let i = temp_var_counter++;
+  qvar_t res = new $(Loc_n,new (string_t)aprintf("_tmp%X",i));
+  return res;
 }
 
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
 static var_t fresh_label() {
-  return new (string_t)aprintf("_LL%X",fresh_label_counter++);
+  let TocState{.dyn = dyn, .temp_labels = temp_labels, ...} = *toc_state;
+  region d = open(dyn) {
+    let i = fresh_label_counter++;
+    if (i < Xarray::length(temp_labels))
+    return Xarray::get(temp_labels,i);
+    var_t res = new (string_t)aprintf("_LL%X",i);
+    if (Xarray::add_ind(temp_labels,res) != i)
+      toc_impos("fresh_label: add_ind returned bad index...");
+    return res;
+  }
 }
 
 // These two functions should never be used for xtunions. Should memoize?
@@ -441,6 +491,28 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
   return;
 }
 
+static type_t char_star_typ() {
+  static type_t* cs = NULL;
+  if (cs == NULL) {
+    cs = new star_typ(char_typ,HeapRgn,mt_tq,false_conref);
+  }
+  return *cs;
+}
+static type_t rgn_typ() {
+  static type_t* r = NULL;
+  if (r == NULL) {
+    r = new cstar_typ(strct(_RegionHandle_sp),mt_tq);
+  }
+  return *r;
+}
+static type_t dyn_rgn_typ() {
+  static type_t* r = NULL;
+  if (r == NULL) {
+    r = new cstar_typ(strct(_DynRegionHandle_sp),mt_tq);
+  }
+  return *r;
+}
+
 static type_t typ_to_c(type_t t) {
   switch (t) {
   case VoidType: return t;
@@ -463,7 +535,7 @@ static type_t typ_to_c(type_t t) {
       return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     if (tuf->typs == NULL) 
       if(tud->is_xtunion) 
-        return star_typ(char_typ,HeapRgn,mt_tq,false_conref);
+        return char_star_typ();
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
@@ -518,22 +590,21 @@ static type_t typ_to_c(type_t t) {
   case &AggrType(AggrInfo(info,ts)):
     let ad = get_known_aggrdecl(info);
     if(ad->kind==UnionA)
-      return unionq_typ(ad->name);
-    return strctq(ad->name);
+      return aggrdecl_type(ad->name,unionq_typ);
+    else return aggrdecl_type(ad->name,strctq);
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
-    if (topt == NULL) 
-      return new TypedefType(tdn,NULL,td,NULL);
+    if (topt == NULL || noexpand_r) 
+      if (ts != NULL) 
+        return new TypedefType(tdn,NULL,td,NULL);
+      else return t;
     // just drop the type arguments and translate the nested types
     else return new TypedefType(tdn,NULL,td,new typ_to_c_array(*topt));
   case &SizeofType(_):
   case &TagType(_): return uint_typ; // must be unsigned!
-  case &RgnHandleType(t):
-    return cstar_typ(strct(_RegionHandle_sp),mt_tq); // could be shared
-  case &DynRgnType(_,_):
-    // could be shared
-    return cstar_typ(strct(_DynRegionHandle_sp),mt_tq);
+  case &RgnHandleType(t): return rgn_typ();
+  case &DynRgnType(_,_): return dyn_rgn_typ();
   case &TypeInt(_): 
     toc_impos("Toc::typ_to_c: type translation passed a type integer");
   case HeapRgn:
@@ -1044,7 +1115,7 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
   if (pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeofexp_exp(deref_exp(var_exp(x,DL),DL),DL);
-    if (rgnopt == NULL)
+    if (rgnopt == NULL || no_regions)
       eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
     else {
       exp_t r = (exp_t)rgnopt;
@@ -1249,7 +1320,8 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
   let s    = exp_stmt(xexp,DL);
 
   let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
-
+  let aggr_typ = aggrdecl_type(tdn,strctq);
+  
   bool is_atomic = true;
   aggrdecl_t ad;
   switch(compress(struct_type)) {
@@ -1258,7 +1330,6 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
     break;
   default: toc_impos("init_struct: bad struct type");
   }
-
   region r {
     for(let es = List::rrev(r,dles); es != NULL; es = es->tl) {
       let &$(ds,e) = es->hd;
@@ -1313,7 +1384,7 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
         default: toc_impos("array designator in struct");
         }
     }
-    return make_struct(nv, x, strctq(tdn), s, pointer, rgnopt, is_atomic);
+    return make_struct(nv, x, aggr_typ, s, pointer, rgnopt, is_atomic);
   }
 }
 
@@ -2219,7 +2290,7 @@ DynCast:
       let e2 = times_exp(sizeoftyp_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
       exp_t e1;
-      if (rgnopt == NULL) {
+      if (rgnopt == NULL || no_regions) {
         e1 = malloc_exp(old_elt_typ,e2);
       } else {
         exp_t r = (exp_t)rgnopt;
@@ -2266,7 +2337,7 @@ DynCast:
         list_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
           rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
         exp_t ai;
-        if (rgnopt == NULL)
+        if (rgnopt == NULL || no_regions)
           ai = malloc_exp(old_elt_typ,
 			  fncall_exp(_check_times_e,
 				     list(sizeoftyp_exp(elt_typ,DL),
@@ -2320,7 +2391,7 @@ DynCast:
       let xexp = var_exp(x,DL);
       exp_t mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
       exp_t inner_mexp = mexp;
-      if (rgnopt == NULL) 
+      if (rgnopt == NULL || no_regions) 
         mexp = malloc_exp(old_elt_typ,mexp);
       else {
         exp_t r = (exp_t)rgnopt;
@@ -2776,7 +2847,7 @@ DynCast:
       exp_t pexp, xexp, rexp;
       if (is_calloc) {
         xexp = num_elts;
-        if (rgnopt != NULL) {
+        if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
           pexp = rcalloc_exp(rgn, sizeoftyp_exp(t_c,DL), var_exp(x,DL));
@@ -2789,7 +2860,7 @@ DynCast:
                                var_exp(x,DL)), DL);
       } else {
         xexp = times_exp(sizeoftyp_exp(t_c,DL),num_elts,DL);
-        if (rgnopt != NULL) {
+        if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
           pexp = rmalloc_exp(rgn, var_exp(x,DL));
@@ -2805,7 +2876,7 @@ DynCast:
                                         exp_stmt(rexp,DL),DL),DL);
       e->r = stmt_exp_r(s);
     } else {
-      if (rgnopt != NULL) {
+      if (rgnopt != NULL && !no_regions) {
         exp_t rgn = (exp_t)rgnopt;
         exp_to_c(nv,rgn);
         e->r = rmalloc_exp(rgn, sizeoftyp_exp(t_c,DL))->r;
@@ -3604,7 +3675,10 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       region temp {
         stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
       }
-      if (open_exp_opt == NULL) {
+      if (no_regions) {
+        s->r = declare_stmt(x_var, rh_struct_ptr_typ, 
+                            uint_exp(0,DL), body, DL)->r;
+      } else if (open_exp_opt == NULL) {
         s->r = 
 	  declare_stmt(rh_var,rh_struct_typ, 
 		       fncall_exp(_new_region_e,
@@ -3630,8 +3704,12 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       }
       return;
     case &ResetRegion_s(e):
-      exp_to_c(nv,e);
-      s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
+      if (no_regions) {
+        s->r = Skip_s;
+      } else {
+        exp_to_c(nv,e);
+        s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
+      }
       return;
     case &Alias_s(e,tv,vd,s1):
       // Handle this like a variable declaration 
@@ -3705,18 +3783,22 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
   let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
   region d = open(dyn) {
     bool seen_defn_before;
-    region temp {
-      let dopt = Dict::rlookup_opt(temp,*aggrs_so_far, n);
-      if (dopt == NULL) {
+    let dopt = Dict::lookup_opt(*aggrs_so_far, n);
+    if (dopt == NULL) {
+      seen_defn_before = false;
+      $(aggrdecl_t,type_t)@ v;
+      if (ad->kind == StructA)
+        v = rnew(d) $(ad,strctq(ad->name));
+      else 
+        v = rnew(d) $(ad,unionq_typ(ad->name));
+      *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
+    } else {
+      let &$(ad2,t) = *dopt;
+      if (ad2->impl == NULL) {
+        *aggrs_so_far = Dict::insert(*aggrs_so_far,n,rnew(d) $(ad,t));
         seen_defn_before = false;
-        *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
-      } else {
-        if ((*dopt)->impl == NULL) {
-          *aggrs_so_far = Dict::insert(*aggrs_so_far,n,ad);
-          seen_defn_before = false;
-        } else
-          seen_defn_before = true;
-      }
+      } else
+      seen_defn_before = true;
     }
     ad->sc   = Public; // gcc warns if we have Extern or Static here
     ad->tvs  = NULL;
@@ -3852,68 +3934,66 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     return;
   let TocState{.dyn = dyn, .xtunions_so_far = xtunions_so_far, ...} = *toc_state;
   region d = open(dyn) {
-    region temp { 
-      let n = xd->name;
-      for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
-        tunionfield_t f  = fs->hd;
-        stringptr_t fn = (*f->name)[1];
-        let sz_exp  = uint_exp((*fn).size+4,DL);
-        let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
-        // FIX: making bad alignment and pointer-size assumptions!
-        switch (Dict::rlookup_opt(temp,*xtunions_so_far,f->name)) {
-        case NULL:
-          exp_opt_t initopt = NULL;
-          if (f->sc != Extern) {
-            // JGMFIX: bug -- the printf functions fail miserably when we use
-            // a 0 constants here because it thinks the 0 should be cast to a
-            // NULL string.
-            char zero = '\0';
-            initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
+    let n = xd->name;
+    for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
+      tunionfield_t f  = fs->hd;
+      stringptr_t fn = (*f->name)[1];
+      let sz_exp  = uint_exp((*fn).size+4,DL);
+      let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
+      // FIX: making bad alignment and pointer-size assumptions!
+      switch (Dict::lookup_opt(*xtunions_so_far,f->name)) {
+      case NULL:
+        exp_opt_t initopt = NULL;
+        if (f->sc != Extern) {
+          // JGMFIX: bug -- the printf functions fail miserably when we use
+          // a 0 constants here because it thinks the 0 should be cast to a
+          // NULL string.
+          char zero = '\0';
+          initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
+        }
+        let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+        tag_decl->sc = f->sc;
+        result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+        *xtunions_so_far = 
+          Dict::insert(*xtunions_so_far, f->name, f->sc != Extern);
+        if(f->typs != NULL) {
+          list_t<aggrfield_t> fields = NULL;
+          int i = 1;
+          for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
+            let field_n = new ((string_t)aprintf("f%d",i));
+            let newf = new Aggrfield(field_n,(*tqts->hd)[0],
+                                     typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
+            fields = new List(newf,fields);
           }
+          fields = new List(new Aggrfield(tag_sp,mt_tq,
+                                          cstar_typ(char_typ,mt_tq),NULL,NULL),
+                            List::imp_rev(fields));
+          let strct_decl =
+            new Aggrdecl{.kind = StructA, .sc = Public,
+                         .name = collapse_qvar_tag(f->name,"_struct"),
+                         .tvs  = NULL, 
+                         .impl = new AggrdeclImpl(NULL,NULL,fields),
+                         .attributes = NULL};
+          result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
+                                  result_decls);
+        }
+        break;
+        
+      case &false:
+        if (f->sc != Extern) {
+          // JGMFIX: bug -- the printf functions fail miserably when we use
+          // a 0 constants here because it thinks the 0 should be cast to a
+          // NULL string.
+          char zero = '\0';
+          let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
+                                   DL);
           let tag_decl = new_vardecl(f->name, tag_typ, initopt);
           tag_decl->sc = f->sc;
           result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-          *xtunions_so_far = 
-            Dict::insert(*xtunions_so_far, f->name, f->sc != Extern);
-          if(f->typs != NULL) {
-            list_t<aggrfield_t> fields = NULL;
-            int i = 1;
-            for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
-              let field_n = new ((string_t)aprintf("f%d",i));
-              let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-                                       typ_to_c_array((*tqts->hd)[1]),NULL,NULL);
-              fields = new List(newf,fields);
-            }
-            fields = new List(new Aggrfield(tag_sp,mt_tq,
-                                            cstar_typ(char_typ,mt_tq),NULL,NULL),
-                              List::imp_rev(fields));
-            let strct_decl =
-              new Aggrdecl{.kind = StructA, .sc = Public,
-                           .name = collapse_qvar_tag(f->name,"_struct"),
-                           .tvs  = NULL, 
-                           .impl = new AggrdeclImpl(NULL,NULL,fields),
-                           .attributes = NULL};
-            result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
-                                    result_decls);
-          }
-          break;
-
-        case &false:
-          if (f->sc != Extern) {
-            // JGMFIX: bug -- the printf functions fail miserably when we use
-            // a 0 constants here because it thinks the 0 should be cast to a
-            // NULL string.
-            char zero = '\0';
-            let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
-                                     DL);
-            let tag_decl = new_vardecl(f->name, tag_typ, initopt);
-            tag_decl->sc = f->sc;
-            result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-            *xtunions_so_far = Dict::insert(*xtunions_so_far, f->name, true);
-          }
-          break;
-        default: break;
+          *xtunions_so_far = Dict::insert(*xtunions_so_far, f->name, true);
         }
+        break;
+      default: break;
       }
     }
   }
@@ -4226,7 +4306,10 @@ static void init() {
                     .tuple_types = rnew(d) NULL,
                     .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
                     .tunions_so_far = rnew(d) Set::rempty(d,qvar_cmp),
-                    .xtunions_so_far = rnew(d) Dict::rempty(d,qvar_cmp) };
+                    .xtunions_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+                    .qvar_tags = rnew(d) Dict::rempty(d,qvar_tag_cmp),
+                    .temp_labels = Xarray::rcreate_empty(d)
+      };
   }
   result_decls = NULL;
   tuple_type_counter = 0;
