@@ -1256,10 +1256,14 @@ external_declaration:
 | error               {$$=^$(NULL);}
 ;
 
+optional_comma:
+ ';'
+| ;
+
 function_definition:
-  declarator compound_statement
+  declarator compound_statement optional_comma
     { $$=^$(make_function(yyr,NULL,$1,NULL,$2,LOC(@1,@2))); }
-| declaration_specifiers declarator compound_statement
+| declaration_specifiers declarator compound_statement optional_comma
     { let d = $1;
       $$=^$(make_function(yyr,&d,$2,NULL,$3,LOC(@1,@3))); }
 /* 2 shift-reduce conflicts come up because of the next two rules and
@@ -1272,9 +1276,9 @@ function_definition:
    attributes beginning declarations are needed; so we ignore the issue
    for now.
 */
-| declarator declaration_list compound_statement
+| declarator declaration_list compound_statement optional_comma
     { $$=^$(make_function(yyr,NULL,$1,$2,$3,LOC(@1,@3))); }
-| declaration_specifiers declarator declaration_list compound_statement
+| declaration_specifiers declarator declaration_list compound_statement optional_comma
     { let d = $1;
       $$=^$(make_function(yyr,&d,$2,$3,$4,LOC(@1,@4))); }
 ;
