@@ -152,7 +152,7 @@ int yyparse(YYPARSE_PARAM_ARG)
 
 #if YYDEBUG != 0
   if (yydebug) 
-    fprintf(cyc_stderr,"Starting parse\n");
+    fprintf(stderr,"Starting parse\n");
 #endif
 
   yystate = 0;
@@ -208,7 +208,7 @@ yynewstate:
     
 #if YYDEBUG != 0
   if (yydebug) {
-    fprintf(cyc_stderr,"Entering state %d\n",yystate);
+    fprintf(stderr,"Entering state %d\n",yystate);
   }
 #endif
 
@@ -237,7 +237,7 @@ yybackup:
     {
 #if YYDEBUG != 0
       if (yydebug)
-	fprintf(cyc_stderr,"Reading a token: ");
+	fprintf(stderr,"Reading a token: ");
 #endif
       yychar = yylex();
     }
@@ -249,7 +249,7 @@ yybackup:
       yychar = YYEOF;		/* Don't call YYLEX any more */
 #if YYDEBUG != 0
       if (yydebug)
-	fprintf(cyc_stderr,"Now at end of input.\n");
+	fprintf(stderr,"Now at end of input.\n");
 #endif
     }
   else
@@ -259,14 +259,14 @@ yybackup:
 #if YYDEBUG != 0
       if (yydebug)
 	{
-	  fprintf(cyc_stderr,"Next token is %d (%s",yychar,yytname[yychar1]);
+	  fprintf(stderr,"Next token is %d (%s",yychar,yytname[yychar1]);
 	  /* Give the individual parser a way to print the precise meaning
 	     of a token, for further debugging info.  */
 
 #ifdef YYPRINT
 	  YYPRINT (yychar, yylval);
 #endif
-	  fprintf(cyc_stderr,")\n");
+	  fprintf(stderr,")\n");
 	}
 #endif
     }
@@ -296,7 +296,7 @@ yybackup:
 
 #if YYDEBUG != 0
   if (yydebug)
-    fprintf(cyc_stderr,"Shifting token %d (%s), ",yychar,yytname[yychar1]);
+    fprintf(stderr,"Shifting token %d (%s), ",yychar,yytname[yychar1]);
 #endif
 
   /* Discard the token being shifted unless it is eof.  */
@@ -334,11 +334,11 @@ yyreduce:
     {
       int i;
 
-      fprintf(cyc_stderr,"Reducing via rule %d (line %d), ",yyn,yyrline[yyn]);
+      fprintf(stderr,"Reducing via rule %d (line %d), ",yyn,yyrline[yyn]);
       /* Print the symbols being reduced, and their result.  */
       for (i = yyprhs[yyn]; yyrhs[i] > 0; i++)
-	fprintf(cyc_stderr,"%s ",yytname[yyrhs[i]]);
-      fprintf(cyc_stderr," -> %s\n",yytname[yyr1[yyn]]);
+	fprintf(stderr,"%s ",yytname[yyrhs[i]]);
+      fprintf(stderr," -> %s\n",yytname[yyr1[yyn]]);
     }
 #endif
 
@@ -357,10 +357,10 @@ $    /* the action file gets copied in place of this dollarsign */
   if (yydebug)
     {
       int ssp1 = -1;
-      fprintf(cyc_stderr,"state stack now");
+      fprintf(stderr,"state stack now");
       while (ssp1 != yyssp_offset)
-	fprintf(cyc_stderr," %d",yyss[++ssp1]);
-      fprintf(cyc_stderr,"\n");
+	fprintf(stderr," %d",yyss[++ssp1]);
+      fprintf(stderr,"\n");
     }
 #endif
 
@@ -458,7 +458,7 @@ yyerrlab1:   /* here on error raised explicitly by an action */
 
 #if YYDEBUG != 0
       if (yydebug) 
-	fprintf(cyc_stderr,"Discarding token %d (%s).\n",
+	fprintf(stderr,"Discarding token %d (%s).\n",
 		yychar,yytname[yychar1]);
 #endif
 
@@ -495,10 +495,10 @@ yyerrpop:   /* pop the current state because it cannot handle the error token */
   if (yydebug)
     {
       short ssp1_offset = -1;
-      fprintf(cyc_stderr,"Error: state stack now");
+      fprintf(stderr,"Error: state stack now");
       while (ssp1_offset != yyssp_offset)
-	fprintf(cyc_stderr," %d",yyss[++ssp1_offset]);
-      fprintf(cyc_stderr,"\n");
+	fprintf(stderr," %d",yyss[++ssp1_offset]);
+      fprintf(stderr,"\n");
     }
 #endif
   // falthru to yyerrhandle
@@ -524,7 +524,7 @@ yyerrhandle:
 
 #if YYDEBUG != 0
   if (yydebug)
-    fprintf(cyc_stderr,"Shifting error token, ");
+    fprintf(stderr,"Shifting error token, ");
 #endif
 
   yyvs[++yyvsp_offset] = yylval;

@@ -704,6 +704,11 @@ int main(int argc, string_t ? argv) {
       }
     }
   } catch {
+  case &Core::Failure(s):
+    printf ("Exception Core::Failure %s\n", s);
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
   case &Core::Impossible(s):
     printf ("Exception Core::Impossible %s\n", s);
     compile_failure = true;

@@ -1508,6 +1508,7 @@ specifier_qualifier_list:
 | type_qualifier attributes_opt specifier_qualifier_list
     { $$=^$(new $(combine_tqual($1,(*$3)[0]),(*$3)[1],
                   List::append($2,(*$3)[2]))); }
+;
 
 struct_declarator_list:
   struct_declarator_list0 { $$=^$(List::imp_rev($1)); }
@@ -1633,6 +1634,12 @@ direct_declarator:
     $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
                                          $1->tms)));
   }
+/* These two cases help to improve error messages */
+| qual_opt_identifier qual_opt_identifier
+{ err("identifier has not been declared as a typedef",LOC(@1,@1));
+  $$=^$(new Declarator($2,null)); }   
+| error 
+  { $$=^$(new Declarator(exn_name,null)); }
 ;
 
 /* CYC: region annotations allowed */
