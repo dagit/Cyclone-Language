@@ -4,8 +4,7 @@
 // error in the corresponding state.  If you want the error message
 // to be state and token-specific, then follow the beginning of
 // your comment's * with a $.
-
-int x y;  /*$ missing comma in declaration */
+typedef T t; /*$ undeclared type or missing comma */
 
 x y;      /*$ type has not been declared */
 

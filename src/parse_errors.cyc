@@ -35,7 +35,11 @@ void yyerror(string_t<`H> s, int state, int token) {
     } else if (msg_table[i].state == state)
       s = msg_table[i].msg;
   }
-  Warn::err(yylloc.first_line,s);
+  let ts = token2string(token);
+  if (ts != NULL)
+    Warn::err(yylloc.first_line,"%s (found %s instead)",s,token2string(token));
+  else 
+    Warn::err(yylloc.first_line,"%s ",s);
 } 
 
 

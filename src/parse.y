@@ -73,6 +73,8 @@ namespace Lex {
   extern void leave_using();
   extern void enter_extern_c();
   extern void leave_extern_c();
+  extern qvar_t token_qvar;
+  extern string_t token_string;
 }
 
 // State that we thread through the lexer and parser.
@@ -3175,6 +3177,20 @@ void yyprint(int i, union YYSTYPE<`yy> v) {
   case {.Stmt_tok = s}:   fprintf(stderr,"%s",Absynpp::stmt2string(s)); break;
   default: fprintf(stderr,"?"); break;
   }
+}
+
+string_t token2string(int token) {
+  if (token <= 0) {
+    return "end-of-file";
+  }
+  if (token == IDENTIFIER)
+    return Lex::token_string;
+  else if (token == QUAL_IDENTIFIER)
+    return Absynpp::qvar2string(Lex::token_qvar);
+  int z = YYTRANSLATE(token);
+  if ((unsigned)z < numelts(yytname))
+    return yytname[z];
+  else return NULL;
 }
 
 namespace Parse{

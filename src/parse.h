@@ -79,6 +79,7 @@ namespace Parse {
   };
   typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
   typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
+  extern string_t token2string(int token);
 
 #include "parse_tab.h"
 }}}}

@@ -2000,6 +2000,11 @@ hstub {
 ;
 
 netinet/tcp.h:
+cpp {
+#ifdef __CYGWIN__
+#include <sys/types.h>
+#endif
+}
 include {
 TCP_NODELAY
 }

@@ -110,8 +110,8 @@ static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 					      &bogus_string);
 
 static char                 token_char   = '\000';
-static string_t             token_string = "";
-static qvar_t               token_qvar   = &token_id_pair;
+string_t                    token_string = "";
+qvar_t                      token_qvar   = &token_id_pair;
 static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
