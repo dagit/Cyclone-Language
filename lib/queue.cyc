@@ -48,6 +48,10 @@ queue_t<`a::TB> create() {
   return new Queue(NULL,NULL,0);
 }
 
+queue_t<`a::TB,`r> rcreate(region_t<`r> r) {
+  return rnew (r) Queue(NULL,NULL,0);
+}
+
 // insert an element into the rear of the queue (side effect)
 void radd(region_t<`r> r, queue_t<`a::TB,`r> q,`a x) {
   list_t cell = rnew(r) List(x,NULL);
@@ -147,9 +151,39 @@ void remove(queue_t<`a,`r> q,`a v) {
   }
 }
 
-list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, queue_t<`a> q){
-  return List::rfilter_c(r,f,env,q->front);
+`a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
+		  bool (@f)<`r2::R>(`b,`a *`r2), `b env) {
+
+  region g;
+  queue_t<`a *,`g> saveq = rcreate(g);
+  `a *x = NULL;
+  bool ok = false;
+
+  // look for a matching queue element
+  if (is_empty(q))
+    return NULL;
+
+  do {
+    x = ptr_take(q);
+    { alias <`f> y = (_ *`f)x;
+      if (f(env,y)) ok = true; 
+    }
+    rpush(g,saveq,x);
+    if (ok) break;
+  } while (!is_empty(q));
+
+  if (ok)
+    x = ptr_take(saveq);
+  else
+    x = NULL;
+
+  // put back any elements that didn't match
+  while (!is_empty(saveq))
+    rpush(r,q,ptr_take(saveq));
+  // return the result
+  return x;
 }
+
 
 // return the number of elements in the queue
 int length(queue_t<`a::TB> q) {

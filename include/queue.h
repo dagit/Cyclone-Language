@@ -59,13 +59,6 @@ extern datatype exn { extern Empty };
 extern `a take(queue_t<`a>);
   /** [take(q)] removes the element from the front on [q] and returns
       it; if [q] is empty, exception [Empty] is thrown. */
-extern `a noalias_take(queue_t<`a::TB> q, `a null_elem);
-  /** [noalias_take(q)] is as take, above, but works when the queue
-      contains potentially-unique elements; the caller needs to supply
-      a 'null' element to swap with the element in the first spot in
-      the queue. */
-extern `a *`U ptr_take(queue_t<`a::TA *`U> q);
-  /** [ptr_take(q)] is a wrapper for [noalias_take(q,NULL)]. */
 
 extern `a peek(queue_t<`a>);
   /** [peek(q)] returns the element at the front of [q], without
@@ -82,17 +75,29 @@ extern void remove(queue_t<`a>,`a);
 extern int length(queue_t<`a::TB>);
   /** [length(q)] returns the number of elements in [q]. */
 
-extern List::list_t<`a,`r> rfilter_c(region_t<`r>, bool f(`b,`a), `b env, queue_t<`a> q);
-  /** [rfilter_c(r,f,e,q)] is a version of the List function rfilter_c
-      that operates on the elements of the queue, starting from the front
-      and moving to the back. **/
-
 extern void iter(void f(`a), queue_t<`a>);
   /** [iter(f,q)] applies [f] to each element of [q], from first to
       last.  Note that [f] must return [void]. */
 extern void app(`b f(`a), queue_t<`a>);
   /** [app(f,q)] applies [f] to each element of [q], from first to
       last.  Note that [f] must return a value of kind [M]. */
+
+  /*** The following procedures are specialized to work with
+       no-aliasable and/or unique pointers. */
+
+extern `a *`U take_match(region_t<`r> r, queue_t<`a::TA *`U,`r> q,
+			 bool (@f)<`r2::R>(`b,`a *`r2), `b env);
+  /** [take_match(r,q,f,c)] looks through the queue (starting from the
+      front) and returns the element [x] for which [f(x,c)] returns
+      true. */
+
+extern `a noalias_take(queue_t<`a::TB> q, `a null_elem);
+  /** [noalias_take(q)] is as take, above, but works when the queue
+      contains potentially-unique elements; the caller needs to supply
+      a 'null' element to swap with the element in the first spot in
+      the queue. */
+extern `a *`U ptr_take(queue_t<`a::TA *`U> q);
+  /** [ptr_take(q)] is a wrapper for [noalias_take(q,NULL)]. */
 
 }
 
