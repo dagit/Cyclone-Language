@@ -46,12 +46,8 @@ namespace ControlFlow;
 typedef Set<vardecl> flow_info_t;
 
 static struct Tqual     bogus_tqual     = Tqual(false,false,false);
-#ifdef OLD_STRING_REP
-static $(list<var>,var) bogus_qvar      = $(null,(string)"");
-#else
 static string           empty_string    = "";
 static $(list<var>,var) bogus_qvar      = $(null,&empty_string);
-#endif
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
 						  0, 0);

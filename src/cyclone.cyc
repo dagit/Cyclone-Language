@@ -73,6 +73,8 @@ bool compile_failure = false; // for exit code (helps Makefile)
 
 void compile_file(string filename) {
 
+  Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+
   string basename = Filename::chop_extension(filename);
 
   if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
@@ -128,7 +130,6 @@ void compile_file(string filename) {
     compile_failure = true; break;
   }
   file_close(f);
-    
   if (compile_failure || Position::error_p()) {
     compile_failure=true;
     Stdio::remove(preprocfile);
@@ -265,7 +266,6 @@ int main() {
 	     "does not add implicit namespace Cyc"),
           null)))))))))))));
 
-  Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");
 
   return compile_failure ? 1 : 0;

@@ -533,7 +533,7 @@ static synth tcAssignOp<`r>(tenv te, segment loc, typ *`r topt,
   // FIX: Not right b/c of funcions vs. function pointers???
   // As per K&R, don't promote any array types to pointer types in the lhs
   tcExpNoPromote(te,null,e1); 
-  tcExp(te,null,e2);
+  tcExp(te,&e1->topt->v,e2);
   typ t1 = e1->topt->v;
   typ t2 = e2->topt->v;
   // Check to see that the type is not an array type
@@ -673,7 +673,7 @@ static synth tcAddress<`r>(tenv te, segment loc, typ *`r topt, exp e) {
     case PointerType(PtrInfo{elttype,_,_,tq,_}): 
       // FIX:  this allocation is needed because *elttype doesn't compile
       // correctly.
-      topt2 = (typ *)&$(elttype);
+      topt2 = new {elttype};
       tq2 = tq;
       break;
     default: break;

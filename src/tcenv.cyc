@@ -158,13 +158,16 @@ struct Fenv {
 
 tenv tc_init() {
   // Initialize globals
-  empty_var_set    = &Opt(Set::empty(String::zstrptrcmp));
+  empty_var_set = &Opt(Set::empty(String::zstrptrcmp));
 
   // Set up initial environment so that xenum exn is defined
-  genv_t ge     = empty_genv();
-  _      top_ns = null;
-  ge->xenumdecls = Dict::insert(ge->xenumdecls, (*exn_name)[1], 
-				(xenumdecl @)&$(exn_xed));
+  // Note: Absyn::exn_xed must be fresh for each file b/c fields gets mutated!!
+  // In turn, we need to reset exn_typ!!
+  genv_t ge      = empty_genv();
+  _      top_ns  = null;
+  exn_xed = new {Xenumdecl(Extern, exn_name, null)};
+  exn_typ = XenumType(exn_name, &exn_xed);
+  ge->xenumdecls = Dict::insert(ge->xenumdecls, (*exn_name)[1], &exn_xed);
   _ ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return &Tenv(top_ns,ae,null);
 }

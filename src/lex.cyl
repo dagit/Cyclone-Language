@@ -1,5 +1,6 @@
 {
 // WARNING: Because we now intern identifiers, you better never mutate them!!!
+// Also, lex_init must be called for each source file!!!
 
 #include "core.h"
 #include "stdio.h"
@@ -22,12 +23,54 @@ using String;
 using Position;
 
 void yyerror(string s) { 
-  post_error
-    (mk_err_parse
-     (segment_of_abs(yylloc.first_line,yylloc.last_line), s));
+  post_error(mk_err_parse(segment_of_abs(yylloc.first_line,
+					 yylloc.last_line), 
+			  s));
 } 
 
 namespace Lex {
+
+// Should probably put this trie thing in the library
+static struct Trie;
+typedef struct Trie * trie_t;
+typedef trie_t @{75} trie_child_v_t; // enough room for Cyclone ids and `
+typedef trie_child_v_t * trie_child_t;
+static struct Trie {
+  trie_child_t  children;   // null means none
+  int           shared_str; // meaning depends on which trie -- see below
+};
+
+/////////////////////////////// Globals /////////////////////////////
+
+// These must be (re-)initialized in lex_init.
+static int    num_kws  = 0;
+static int ?  kw_nums  = null;
+static struct Xarray::xarray<stringptr> * symbols  = null;
+static trie_t ids_trie      = null;//int field is symbol index, -1 for not there
+static trie_t typedefs_trie = null;//int field true iff path is a typedef
+
+static int comment_depth = 0;
+
+// These needn't be set by lex_init -- they're set while finding a token.
+static $(sign,int)      token_int_pair = $(Signed,0);
+static string           bogus_string   = "*bogus*";
+static $(list<var>,var) token_id_pair  = $(null,&bogus_string);
+
+static char             token_char     = '\000';
+static string           token_string   = "";
+static $(sign,int)@     token_int      = &token_int_pair;
+static qvar             token_qvar     = &token_id_pair;
+
+static int runaway_start = 0;
+
+static void err<`a>(string msg,Lexbuf<`a> lb) {
+  segment s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
+  post_error(mk_err_lex (s,msg));
+}
+static void runaway_err<`a>(string msg,Lexbuf<`a> lb) {
+  segment s = segment_of_abs(runaway_start,lexeme_start(lb));
+  post_error(mk_err_lex (s,msg));
+}
 
 /************************** RESERVED WORDS **************************/
 
@@ -89,22 +132,7 @@ static $(string,short) rw_array[] = {
   $("xprintf", XPRINTF)
 };
 
-// Should probably put this trie thing in the library
-static struct Trie;
-typedef struct Trie * trie_t;
-typedef trie_t @{75} trie_child_v_t; // enough room for Cyclone ids and `
-typedef trie_child_v_t * trie_child_t;
-static struct Trie {
-  trie_child_t  children;   // null means none
-  int           shared_str; // index into symbols -- -1 means not there
-};
-
-static struct Trie                     ids_trie_v = Trie(null,-1);
-static trie_t                          ids_trie   = &ids_trie_v;
-static struct Xarray::xarray<stringptr> * symbols = null;
-static int                             num_kws    = 0;
-static int                             ?kw_nums   = null;
-
+///////////////////////// Trie manipulation ///////////////////////
 static int str_index(string buff, int offset, int len) {
   int    i    = offset;
   int    last = offset + len - 1;
@@ -121,7 +149,7 @@ static int str_index(string buff, int offset, int len) {
 	++i;
 	ch = ((int)buff[i]) - 48; // see width of trie above
       }
-      let newstr = new_string(len+1);
+      _ newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
       int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
 				new {newstr});
@@ -136,7 +164,7 @@ static int str_index(string buff, int offset, int len) {
   }
   // build string if necessary and return
   if(t->shared_str == -1) {
-    let newstr = new_string(len+1);
+    _ newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
     int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
 			      new {newstr});
@@ -151,11 +179,6 @@ static int str_index_lbuf<`a>(Lexbuf<`a> lbuf) {
 		   lbuf->lex_start_pos,
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
 }
-
-
-// For this one, co-domain is boolean, true means a typedef, false means not
-static struct Trie typedefs_trie_v = Trie(null,false);
-static trie_t      typedefs_trie   = &typedefs_trie_v;
 
 static void insert_typedef(stringptr sptr) {
   string s = *sptr;
@@ -183,31 +206,9 @@ static void insert_typedef(stringptr sptr) {
   return;
 }
 
-
 static stringptr get_symbol(int symbol_num) {
   return Xarray::get((Xarray::Xarray<stringptr>)symbols, symbol_num);
 }
-
-static $(sign,int)      token_int_pair = $(Signed,0);
-static string bogus_string = "*bogus*";
-static $(list<var>,var) token_id_pair  = $(null,&bogus_string);
-
-static char         token_char   = '\000';
-static string       token_string = "";
-static $(sign,int)@ token_int    = &token_int_pair;
-static qvar         token_qvar   = &token_id_pair;
-
-static void err<`a>(string msg,Lexbuf<`a> lb) {
-  segment s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
-  post_error(mk_err_lex (s,msg));
-}
-int runaway_start = 0;
-static void runaway_err<`a>(string msg,Lexbuf<`a> lb) {
-  segment s = segment_of_abs(runaway_start,lexeme_start(lb));
-  post_error(mk_err_lex (s,msg));
-}
-
-static int comment_depth = 0;
 
 /************************ INTEGER CONSTANTS ************************/
 
@@ -327,7 +328,7 @@ static void typedef_init() {
   _ init_decls  = Dict::insert(Dict::empty(varlist_cmp),
 			       null,
 			       &Ldecls{.typedefs=Set::empty(zstrptrcmp),
-				       .namespaces=Set::empty(zstrptrcmp)});
+			      	       .namespaces=Set::empty(zstrptrcmp)});
   lstate = &Opt(&Lstate{.lstack=init_lstack,
                         .decls=init_decls});
 }
@@ -380,12 +381,12 @@ static bool is_typedef_in_namespace(List<var> ns, var v) {
     return false;
   }
 }
-static bool is_typedef(qvar q) {
-  if ((*q)[0] != null)
-    return is_typedef_in_namespace((List<stringptr>)(*q)[0],(*q)[1]);
+static bool is_typedef(List::list<var> ns, var v) {
+  if (ns != null)
+    return is_typedef_in_namespace((List<stringptr>)ns,v);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
-  string s   = *((*q)[1]);
+  string s   = *v;
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i = 0; i < len; ++i)
@@ -448,8 +449,6 @@ void leave_using() {
   recompute_typedefs();
 }
 
-// Make faster -- put in dictionary like now, but also must add to the current
-// trie.
 void register_typedef(qvar q) {
   // FIX: we assume that q is not in fact qualified
   _ current = lstate->v->lstack->hd->current_namespace;
@@ -464,12 +463,6 @@ void register_typedef(qvar q) {
   insert_typedef((*q)[1]);
 }
 
-// This kludge isn't necessary to avoid allocation once we have stack pointers.
-static string empty_string = "";
-static stringptr empty_sp = &empty_string;
-static $(List::list<var>,var) kludge_qvar_v = $(null,&empty_string);
-static qvar kludge_qvar = &kludge_qvar_v;
-
 static short process_id<`a>(Lexbuf<`a> lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
@@ -478,10 +471,9 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
     return (short)kw_nums[symbol_num]; // cast should be unnecessary
 
   stringptr s = get_symbol(symbol_num);
-  (*kludge_qvar)[1] = s;
 
   // maybe it's a typedef
-  if (is_typedef(kludge_qvar)) {
+  if (is_typedef(null,s)) {
     token_qvar = &$(null,s);
     return QUAL_TYPEDEF_NAME;
   }
@@ -514,7 +506,7 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
   var       v  = rev_vs->hd;
   list<var> vs = List::imp_rev(rev_vs->tl);
   token_qvar = &$(vs,v);
-  if (is_typedef(token_qvar))
+  if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   else 
     return QUAL_IDENTIFIER;
@@ -733,15 +725,18 @@ and comment = parse
 {
 
 void lex_init() {
-  symbols = Xarray::create(101,empty_sp);
-  num_kws = rw_array.size;
-  kw_nums = new {for i < num_kws : 0};
+  ids_trie      = new {Trie(null,-1)};
+  typedefs_trie = new {Trie(null,false)};
+  symbols       = Xarray::create(101,new{""});
+  num_kws       = rw_array.size;
+  kw_nums       = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {
-    let str = rw_array[i][0];
+    _ str = rw_array[i][0];
     str_index(str, 0, String::strlen(str));
     kw_nums[i] = rw_array[i][1];
   }
   typedef_init();
+  comment_depth = 0;
 }
 
 }

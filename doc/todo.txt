@@ -14,9 +14,6 @@ Todo now:
 * nested functions (closures -- with RTCG approach to get calling convention
   right.)
 
-* get rid of boxed primitive types -- we don't use them and you can
-  always roll your own, so we should nuke them.  
-
 * need explicit kind syntax and someway to explicitly name a stack
   region.
 
@@ -174,14 +171,6 @@ Some things Dan has noticed:
 
 * should allow function prototypes with storage class specifiers other
   than extern (avoid gcc warnings about static following extern)
-
-* getting gcc warning about pointer from integer in, for eg,
-  {.hd=0,.tl=null} because from the designator "hd" we have no idea
-  that we should cast to (void *) to avoid the warning. (Oddly,
-  mapping `a to int would get rid of this problem and probably
-  wouldn't cause other problems.)
-
-* do something about all the warnings when compiling the parser
 
 Todo later:
 

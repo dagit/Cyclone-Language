@@ -736,6 +736,7 @@ void dumptqtd<`a>(struct Tqual * tq, typ t, void f(`a), `a a) {
 }
 
 void dumpdecllist2file(list<decl> tdl, FILE @f) {
+  pos = 0;
   dump_file = f;
   for(; tdl != null; tdl = tdl->tl)
     dumpdecl(tdl->hd);

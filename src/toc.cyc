@@ -231,13 +231,8 @@ static list<decl> temp_topdecls = null;
 ///////////////////////////////////////////////////////////////
 //         Convert a Cyclone type to a C type                //
 ///////////////////////////////////////////////////////////////
-#ifdef OLD_STRING_REP
-static $(List::list<var>,var) longlong_v = 
-  $(null,(string)"_LongLong");
-#else
 static string long_long_string = "_LongLong";
 static $(List::list<var>,var) longlong_v = $(null,&long_long_string);
-#endif
 static typ longlong_typ = TypedefType(&longlong_v,null,null);
 
 static typ typ_to_c(typ t); // forward declaration
@@ -439,26 +434,16 @@ static bool is_poly_project(exp e) {
 }
 
 // possible pointer malloc
-#ifdef OLD_STRING_REP
-static $(list<var>,var) gc_malloc_var = $(null,(string)"GC_malloc");
-#else
 static string gc_malloc_string = "GC_malloc";
 static $(list<var>,var) gc_malloc_var = $(null,&gc_malloc_string);
-#endif
 
 static exp malloc_ptr(exp s) {
   return fncall_exp(var_exp(&gc_malloc_var,DL),&cons(s,null),DL);
 }
 
 // no pointers possible malloc
-#ifdef OLD_STRING_REP
-static $(list<var>,var) gc_malloc_atomic_var = 
-  $(null,(string)"GC_malloc_atomic");
-#else
 static string gc_malloc_atomic_string = "GC_malloc_atomic";
-static $(list<var>,var) gc_malloc_atomic_var = 
-  $(null,&gc_malloc_atomic_string);
-#endif
+static $(list<var>,var) gc_malloc_atomic_var = $(null,&gc_malloc_atomic_string);
 
 static exp malloc_atomic(exp s) {
   return fncall_exp(var_exp(&gc_malloc_atomic_var,DL),&cons(s,null),DL);
@@ -515,12 +500,8 @@ static list<conv> conversion(typ t1, typ t2) {
   }
 }
 
-#ifdef OLD_STRING_REP
-static $(list<var>,var) _throw_var = $(null,(string)"_throw");
-#else
 static string _throw_string = "_throw";
 static $(list<var>,var) _throw_var = $(null,&_throw_string);
-#endif
 
 // throw an exception -- this is turned into a function call
 static exp newthrow_exp(exp e) {
@@ -2608,8 +2589,8 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
       stringptr fn      = (*f->name)[1];
-      _      sz_exp  = uint_exp((*fn).size,DL);
-      _      tag_typ = ArrayType(uchar_t,empty_tqual(),sz_exp);
+      _         sz_exp  = uint_exp((*fn).size,DL);
+      _         tag_typ = ArrayType(uchar_t,empty_tqual(),sz_exp);
       exp_opt initopt = null;
       if (xd->sc != Extern)
 	initopt = string_exp(false,*fn,DL);
@@ -2784,6 +2765,9 @@ static void init() {
   temp_var_counter = 0;
   fresh_label_counter = 0;
   temp_topdecls = null;
+  structs_so_far = null;
+  enums_so_far = null;
+  xenums_so_far = null;
 }
 
 // The entry point:  translate the list of Cyclone declarations to
