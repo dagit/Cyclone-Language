@@ -1894,7 +1894,7 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
                                      new_conref(true),
                                      empty_tqual(), empty_conref()));
     e1->topt->v = t1;
-    return unify(t1,t2);
+    return (coerce_arg(te, e1, t2));
   }
   return false;
 }

@@ -3076,7 +3076,7 @@ _temp2419; _temp2424;})); _temp2423.nullable=(( struct Cyc_Absyn_Conref*(*)( int
 x)) Cyc_Absyn_new_conref)( 1); _temp2423.tq= Cyc_Absyn_empty_tqual(); _temp2423.bounds=
 Cyc_Absyn_empty_conref(); _temp2423;}); _temp2422;}); _temp2421;});( void*)(((
 struct Cyc_Core_Opt*) _check_null( e1->topt))->v=( void*)(( void*) _temp2420));
-return Cyc_Tcutil_unify(( void*) _temp2420, t2);}} return 0;} int Cyc_Tcutil_coerce_arg(
+return Cyc_Tcutil_coerce_arg( te, e1, t2);}} return 0;} int Cyc_Tcutil_coerce_arg(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Absyn_Exp* e, void* t2){ void* t1= Cyc_Tcutil_compress((
 void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v); if( Cyc_Tcutil_unify(
 t1, t2)){ return 1;} if( Cyc_Tcutil_is_arithmetic_type( t1)? Cyc_Tcutil_is_arithmetic_type(
