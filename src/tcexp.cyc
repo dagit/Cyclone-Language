@@ -600,7 +600,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
   let l2 = new List(e2,l1);
   if (!coerce_list(te,t,l2))
     terr(loc,xprintf("conditional clause types do not match: %s != %s",
-			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
+		     typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return t;
 }
 
@@ -838,8 +838,11 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
     if (finfo == null)
       return expr_err(te,loc,xprintf("struct %s has no %s field",
 				     qvar2string((qvar_t)tdnopt), *f));
-    let inst = List::zip(sd->tvs,ts);
-    let t2   = substitute(inst,finfo->type);
+    _ t2;
+    region rgn {
+      let inst = List::rzip(rgn,rgn,sd->tvs,ts);
+      t2 = rsubstitute(rgn,inst,finfo->type);
+    }
     return t2;
   case &UnionType(tdnopt,ts,&ud):
     if (tdnopt == null)
@@ -882,8 +885,11 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, fiel
       if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
 				       qvar2string((qvar_t)tdnopt),*f));
-      let inst = List::zip(sd->tvs,ts);
-      let t3   = substitute(inst,finfo->type);
+      _ t3;
+      region rgn {
+        let inst = List::rzip(rgn,rgn,sd->tvs,ts);
+        t3 = rsubstitute(rgn,inst,finfo->type);
+      }
       check_rgn_accessible(te,loc,rt);
       return t3;
     case &UnionType(tdnopt,ts,&ud):
@@ -1107,8 +1113,9 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     if (sd->name != null)
       *tn = sd->name->v;
   }
+  region rgn {
   // calculate the instantiation and final type
-  let inst    = List::map(make_inst_var,sd->tvs);
+  let inst    = List::rmap_c(rgn,r_make_inst_var,rgn,sd->tvs);
   let typs    = List::map(snd,inst);
   let res_typ = new StructType(*tn,typs,new sd);
   // this will instantiate the struct if we have type information in topt
@@ -1119,7 +1126,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     resolve_struct_designators(loc,args,sd);
   for(; fields != null; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
-    let inst_fieldtyp = substitute(inst,field->type);
+    let inst_fieldtyp = rsubstitute(rgn,inst,field->type);
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
     if (!coerce_arg(te,field_exp,inst_fieldtyp))
       terr(field_exp->loc,
@@ -1128,6 +1135,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
 		   typ2string(field_exp->topt->v)));
   }
   return res_typ;
+  }
 }
 
 // f(es)   where f is a tunion and is ef->name
@@ -1138,11 +1146,12 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
                     list_t<exp_t> es,
                     tuniondecl_t ed,
                     tunionfield_t ef) {
-  let all_inst   = List::map(make_inst_var,ed->tvs);
-  let exist_inst = List::map(make_inst_var,ef->tvs);
+  region rgn {
+  let all_inst   = List::rmap_c(rgn,r_make_inst_var,rgn,ed->tvs);
+  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,ef->tvs);
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
-  let inst       = List::append(all_inst,exist_inst);
+  let inst       = List::rappend(rgn,all_inst,exist_inst);
   *all_ref   = new Opt(all_typs);
   *exist_ref = new Opt(exist_typs);
   type_t res = new TunionFieldType(TunionFieldInfo{ed->name->v,all_typs,ef->name,
@@ -1170,7 +1179,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
   list_t<$(tqual_t,type_t)@> ts = ef->typs;
   for(; es != null && ts != null; es = es->tl, ts = ts->tl) {
     exp_t e = es->hd;
-    type_t t = substitute(inst,(*ts->hd)[1]);
+    type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
     if (!coerce_arg(te,e,t))
       terr(e->loc,
@@ -1189,22 +1198,24 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
                     xprintf("too few arguments for tunion constructor %s",
                             qvar2string(ef->name)));
   return res;
+  }
 }
 
 // f(es)   where f is an xtunion and is ef->name
 static type_t tcXTunion(tenv_t te, seg_t loc, type_t *`r topt,
-                     opt_t<list_t<type_t>> @exist_ref,
-                     list_t<exp_t> es,
-                     xtuniondecl_t xd,
-                     tunionfield_t ef) {
-  let exist_inst = List::map(make_inst_var,ef->tvs);
+			opt_t<list_t<type_t>> @exist_ref,
+			list_t<exp_t> es,
+			xtuniondecl_t xd,
+			tunionfield_t ef) {
+  region rgn {
+  let exist_inst = List::rmap_c(rgn,r_make_inst_var,rgn,ef->tvs);
   let exist_typs = List::map(snd,exist_inst);
   let res = new XTunionFieldType(XTunionFieldInfo{xd->name,ef->name,xd,ef});
   let ts = ef->typs;
   *exist_ref = new Opt(exist_typs);
   while (es != null && ts != null) {
-    exp_t e = es->hd;
-    type_t t = substitute(exist_inst,(*ts->hd)[1]);
+    exp_t  e = es->hd;
+    type_t t = rsubstitute(rgn,exist_inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
     es = es->tl;
     ts = ts->tl;
@@ -1221,6 +1232,7 @@ static type_t tcXTunion(tenv_t te, seg_t loc, type_t *`r topt,
     terr(es->hd->loc,xprintf("too few arguments for xtunion constructor %s",
                              qvar2string(ef->name)));
   return res;
+  }
 }
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt, 
                        type_t t) {
@@ -1461,25 +1473,27 @@ static type_t tcExpNoPromote(tenv_t te, type_t *`r topt, exp_t e) {
     e->topt = e2->topt;
     break;
   default:
-    // implicitly instantiate the expression if it has a polymorphic type
     // first, typecheck without instantiating
     tcExpNoInst(te,topt,e);
     e->topt->v = pointer_expand(compress(e->topt->v));
+    // implicitly instantiate the expression if it has a polymorphic type
     switch (compress(e->topt->v)) {
     case &PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
       case &FnType(FnInfo{tvs,eff,rtyp,args,varargs,atts}):
-	if (tvs != null) {   // then, instantiate if necessary
-	  list_t<$(tvar_t,type_t)@> inst = List::map(make_inst_var,tvs);
-	  list_t<type_t>          ts   = List::map(snd,inst);
-	  type_t ftyp = substitute(inst,
-                                new FnType(FnInfo{null,eff,rtyp,args,
-                                                  varargs,atts}));
-	  type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b});
-	  exp_t inner   = copy_exp(e);
-	  e->r        = new Instantiate_e(inner,ts);
-	  e->topt     = new Opt(new_typ);
-	}
+	if (tvs != null)    // then, instantiate if necessary
+	  region rgn {
+	   glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
+	     List::rmap_c(rgn,r_make_inst_var,rgn,tvs);
+	   list_t<type_t> ts = List::map(snd,inst);
+	   type_t ftyp = rsubstitute(rgn, inst,
+				     new FnType(FnInfo{null,eff,rtyp,args,
+						       varargs,atts}));
+	   type_t new_typ = new PointerType(PtrInfo{ftyp,rt,x,tq,b});
+	   exp_t  inner   = copy_exp(e);
+	   e->r    = new Instantiate_e(inner,ts);
+	   e->topt = new Opt(new_typ);
+	  }
 	break;
       default: break;
       }

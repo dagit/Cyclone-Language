@@ -682,20 +682,26 @@ void unify_it(type_t t1, type_t t2) {
 
   case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,vararg2,atts2}), 
          &FnType(FnInfo{tvs1,eff1,rt1,args1,vararg1,atts1})):
-    list_t<$(tvar_t,type_t)@> inst = null;
+    bool done = false;
+    region rgn {
+    glist_t<$(tvar_t,type_t)@`rgn,`rgn> inst = null;
     while (tvs1 != null) {
       if (tvs2 == null) break;
-      inst = new List(new $(tvs2->hd,new VarType(tvs1->hd)),inst);
+      inst = rnew(rgn) List(rnew(rgn) $(tvs2->hd,new VarType(tvs1->hd)),inst);
       tvs1 = tvs1->tl;
       tvs2 = tvs2->tl;
     }
     if (tvs2 != null) break;
     if (inst != null) {
       unify_it(new FnType(FnInfo{null,eff1,rt1,args1,vararg1,atts1}),
-	       substitute(inst,new FnType(FnInfo{null,eff2,rt2,args2,vararg2,
-                                                   atts2})));
-      return;
+	       rsubstitute(rgn, inst,
+			   new FnType(FnInfo{null,eff2,rt2,args2,vararg2,
+					       atts2})));
+      done = true;
     } 
+    }
+    if(done) // can do in region once run-time is fixed.
+      return;
     unify_it(rt1,rt2);
     for (; args1!=null && args2!=null; args1 = args1->tl, args2 = args2->tl) {
       unify_tqual((*args1->hd)[1],(*args2->hd)[1]);
@@ -1219,7 +1225,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
 void unchecked_cast(tenv_t te, exp_t e, type_t t) {
   if (!unify(e->topt->v,t)) {
-    _ inner = copy_exp(e);
+    let inner = copy_exp(e);
     e->r    = new Cast_e(t,inner);
     e->topt = new Opt(t);
   }
@@ -1417,91 +1423,98 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   default: impos("check_fndecl_valid_type: not a FnType"); return;
   };
   // check for repeated paramater names (not allowed in C and makes no sense)
-  check_unique_vars(map(fst3,fd->args), loc, 
-		    "function declaration has repeated parameter");
+  region r {
+    check_unique_vars(rmap(r,fst3,fd->args), loc, 
+		      "function declaration has repeated parameter");
+  }
   // cache the type on the declaration so we don't have to recompute it
   fd->cached_typ = new Opt(t);
 }
 
-static $($(opt_t<var_t>,tqual_t)@,type_t)@ substitute_f1($(opt_t<var_t>,tqual_t,type_t)@ y) {
-  return new $(new $((*y)[0],(*y)[1]),(*y)[2]);
+static $($(opt_t<var_t>,tqual_t)@`r,type_t)@`r
+substitute_f1(region_t<`r> rgn, $(opt_t<var_t>,tqual_t,type_t) @`r2 y) {
+  return rnew(rgn) $(rnew(rgn) $((*y)[0],(*y)[1]),(*y)[2]);
 }
-static $(opt_t<var_t>,tqual_t,type_t)@ substitute_f2($($(opt_t<var_t>,tqual_t)@,type_t)@ w) {
+static $(opt_t<var_t>,tqual_t,type_t)@ 
+substitute_f2($($(opt_t<var_t>,tqual_t)@`r2,type_t)@`r1 w) {
   let $(p,t) = *w;
   let $(vopt,tq) = *p;
   return new $(vopt,tq,t);
 }
-// More ways to avoid allocation during substitution:
-//   * optimize the FnType case
-//   * avoid split and zip in Tuple
-static list_t<type_t> substs(list_t<$(tvar_t,type_t)@> inst, list_t<type_t> ts);
-type_t substitute(list_t<$(tvar_t,type_t)@> inst, type_t t) {
+
+static glist_t<type_t,`r2> substs(region_t<`r> rgn,
+				  glist_t<$(tvar_t,type_t)@`r,`r> inst, 
+				  glist_t<type_t,`r2> ts);
+type_t rsubstitute(region_t<`r> rgn, 
+		   glist_t<$(tvar_t,type_t)@`r,`r> inst, 
+		   type_t t) {
   switch (compress(t)) {
   case &VarType(v):
     // a tvar lookup, not a var lookup!
     try return List::assoc_cmp(tvar_cmp,inst,v);
     catch {case &Not_found: return t;}
   case &StructType(no,ts,sd):   
-    let new_ts = substs(inst,ts);
+    let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new StructType(no,new_ts,sd);
   case &UnionType(no,ts,ud):
-    let new_ts = substs(inst, ts);
+    let new_ts = substs(rgn,inst, ts);
     return new_ts == ts ? t : new UnionType(no,new_ts,ud);
   case &TunionType(TunionInfo{n,ts,r,tud}):     
-    let new_ts = substs(inst,ts);
-    let new_r = substitute(inst,r);
+    let new_ts = substs(rgn,inst,ts);
+    let new_r  = rsubstitute(rgn,inst,r);
     return (new_ts == ts && new_r == r) ? t : 
       new TunionType(TunionInfo{n,new_ts,new_r,tud});
   case &XTunionType(XTunionInfo{n,r,tud}):     
-    let new_r = substitute(inst,r);
+    let new_r = rsubstitute(rgn,inst,r);
     return (new_r == r) ? t : new XTunionType(XTunionInfo{n,new_r,tud});
   case &TunionFieldType(TunionFieldInfo{n,ts,f,tud,tufd}):
-    let new_ts = substs(inst,ts);
+    let new_ts = substs(rgn,inst,ts);
     return (new_ts == ts) ? t : 
       new TunionFieldType(TunionFieldInfo{n,new_ts,f,tud,tufd});
   case &XTunionFieldType(_): return t;
   case &TypedefType(n,ts,topt): 
-    let new_ts = substs(inst,ts);
+    let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new TypedefType(n,new_ts,topt);
   case &ArrayType(t1,tq,e):     
-    let new_t1 = substitute(inst,t1);
+    let new_t1 = rsubstitute(rgn,inst,t1);
     return new_t1 == t1 ? t : new ArrayType(new_t1,tq,e);
   case &PointerType(PtrInfo{t1,r,n,tq,b}): 
-    let new_t1 = substitute(inst,t1);
-    let new_r  = substitute(inst,r);
+    let new_t1 = rsubstitute(rgn,inst,t1);
+    let new_r  = rsubstitute(rgn,inst,r);
     if(new_t1 == t1 && new_r == r)
       return t;
     return new PointerType(PtrInfo(new_t1,new_r,n,tq,b));
   case &FnType(FnInfo{vs,eff,rtyp,args,varargs,atts}):
     for (let p = vs; p != null; p = p->tl)
-      inst = new List(new $(p->hd,new VarType(p->hd)),inst);
-    let $(qs,ts) = List::split(List::map(substitute_f1, args));
-    let ts2      = substs(inst,ts);
-    let args2    = List::map(substitute_f2, List::zip(qs,ts2));
+      inst = rnew(rgn) List(rnew(rgn) $(p->hd,new VarType(p->hd)),inst);
+    let $(qs,ts) = List::rsplit(rgn,rgn, 
+				List::rmap_c(rgn,substitute_f1,rgn,args));
+    let ts2      = substs(rgn,inst,ts);
+    let args2    = List::map(substitute_f2, List::rzip(rgn,rgn,qs,ts2));
     opt_t<type_t> eff2;
     if(eff == null)
       eff2 = null;
     else {
-      let new_eff = substitute(inst,eff->v);
+      let new_eff = rsubstitute(rgn,inst,eff->v);
       if(new_eff == eff->v)
 	eff2 = eff;
       else
-	eff2 = new{Opt(new_eff)};
+	eff2 = new Opt(new_eff);
     }
     return 
-      new FnType(FnInfo{vs,eff2,substitute(inst,rtyp),args2,varargs,atts});
+      new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,varargs,atts});
   case &TupleType(tqts):
-    let $(tqs,ts) = List::split(tqts);
-    let ts2       = substs(inst,ts);
+    let $(tqs,ts) = List::rsplit(rgn,rgn,tqts);
+    let ts2       = substs(rgn,inst,ts);
     if(ts2 == ts)
       return t;
     let tqts2     = List::zip(tqs,ts2);
     return new TupleType(tqts2);
   case &Evar(_,r,_):
-    if (r != null) return substitute(inst,r->v);
+    if (r != null) return rsubstitute(rgn,inst,r->v);
     else return t;
   case &RgnHandleType(rt): 
-    let new_rt = substitute(inst,rt);
+    let new_rt = rsubstitute(rgn,inst,rt);
     return new_rt == rt ? t : new RgnHandleType(new_rt);
   case &EnumType(_,_):  return t;
   case VoidType:        return t;
@@ -1510,24 +1523,30 @@ type_t substitute(list_t<$(tvar_t,type_t)@> inst, type_t t) {
   case DoubleType:      return t;
   case HeapRgn:         return t;
   case &AccessEff(r): 
-    let new_r = substitute(inst,r);
+    let new_r = rsubstitute(rgn,inst,r);
     return new_r == r ? t : new AccessEff(new_r);
   case &JoinEff(es):  
-    let new_es = substs(inst,es);
+    let new_es = substs(rgn,inst,es);
     return new_es == es ? t : new JoinEff(new_es);
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
-static list_t<type_t> substs(list_t<$(tvar_t,type_t)@> inst, list_t<type_t> ts) {
+static glist_t<type_t,`r2> substs(region_t<`r> rgn,
+				  glist_t<$(tvar_t,type_t)@`r,`r> inst, 
+				  glist_t<type_t,`r2> ts) {
   if(ts == null)
     return null;
   let old_hd = ts->hd;
   let old_tl = ts->tl;
-  let new_hd = substitute(inst, old_hd);
-  let new_tl = substs(inst, old_tl);
+  let new_hd = rsubstitute(rgn, inst, old_hd);
+  let new_tl = substs(rgn, inst, old_tl);
   if(old_hd == new_hd && old_tl == new_tl)
     return ts;
-  return new{List(new_hd,new_tl)};
+  return new List(new_hd,new_tl);
+}
+
+extern type_t substitute(list_t<$(tvar_t,type_t)@> inst, type_t t) {
+  return rsubstitute(heap_region, inst, t);
 }
 
 exp_t default_initializer(tenv_t te, type_t t, seg_t loc) {
@@ -1562,6 +1581,10 @@ $(tvar_t,type_t)@ make_inst_var(tvar_t tv) {
   kind_t k = conref_val(tv->kind);
   return new $(tv, new_evar(k));
 }
+$(tvar_t,type_t)@`r r_make_inst_var(region_t<`r> rgn, tvar_t tv) {
+  kind_t k = conref_val(tv->kind);
+  return rnew(rgn) $(tv, new_evar(k));
+}
 
 
 // Checks that a type is well-formed and lives in kind expected_kind.  
@@ -1586,8 +1609,7 @@ $(tvar_t,type_t)@ make_inst_var(tvar_t tv) {
 //   consists of e and any free effect or region variables within
 //   the function type.  
 list_t<tvar_t> check_valid_type(seg_t loc, tenv_t te, list_t<tvar_t> free_vars, 
-                              kind_t expected_kind, type_t t)
-{
+				kind_t expected_kind, type_t t) {
   switch (compress(t)) {
   case VoidType: break;
   case &Evar(_,_,_): break;
@@ -2036,8 +2058,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
 // are compatible with a list of bound type variables.  
 void check_type(seg_t loc, tenv_t te, list_t<tvar_t> bound_tvars, 
                 kind_t expected_kind, type_t t) {
-  list_t<tvar_t> free_tvars = 
-    check_valid_type(loc, te, null, expected_kind, t);
+  list_t<tvar_t> free_tvars = check_valid_type(loc, te, null, expected_kind, t);
   for (_ fs = free_tvars; fs != null; fs = fs->tl) {
     tvar_t ftv = fs->hd;
     let ftvn = ftv->name;
@@ -2065,7 +2086,7 @@ void check_type(seg_t loc, tenv_t te, list_t<tvar_t> bound_tvars,
 
 // Note: we expect lists to be very short.  Otherwise, a hashtable would
 // be a better choice.
-static void check_unique_unsorted(int (@cmp)(`a,`a), list_t<`a> vs,
+static void check_unique_unsorted(int (@cmp)(`a,`a), glist_t<`a,`r> vs,
 				  seg_t loc, 
 				  string a2string(`a), string msg) {
   for(; vs != null; vs = vs->tl)
@@ -2078,7 +2099,7 @@ static string strptr2string(string @s) {
   return *s;
 }
 
-void check_unique_vars(list_t<var_t> vs, seg_t loc, string msg) {
+void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string msg) {
   check_unique_unsorted(String::zstrptrcmp,vs,loc,strptr2string,msg);
 }
 
@@ -2346,18 +2367,22 @@ bool bits_only(type_t t) {
     if (sdp == null) return false;
     let sd = *sdp;
     if (sd->fields == null) return false;
-    let inst = List::zip(sd->tvs,ts);
-    for (_ fs = sd->fields->v; fs != null; fs = fs->tl)
-      if (!bits_only(substitute(inst,fs->hd->type))) return false;
-    return true;
+    region rgn {
+      let inst = List::rzip(rgn,rgn,sd->tvs,ts);
+      for (_ fs = sd->fields->v; fs != null; fs = fs->tl)
+	if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
+      return true;
+    }
   case &UnionType(_,ts,udp):
     if (udp == null) return false;
     let ud = *udp;
     if (ud->fields == null) return false;
-    let inst = List::zip(ud->tvs,ts);
-    for (_ fs = ud->fields->v; fs != null; fs = fs->tl)
-      if (!bits_only(substitute(inst,fs->hd->type))) return false;
-    return true;
+    region rgn {
+      let inst = List::rzip(rgn,rgn,ud->tvs,ts);
+      for (_ fs = ud->fields->v; fs != null; fs = fs->tl)
+	if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
+      return true;
+    }
   default: return false;
   }
 }

@@ -2628,8 +2628,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           switch (init->r) {
           case &Comprehension_e(vd2,e1,e2):
             vd->initializer = null;
-            s1 = init_comprehension(nv, var_exp(c_name, DL), vd2, e1, e2,
-                                    new_stmt(s1->r,DL), false);
+            s1->r = init_comprehension(nv, var_exp(c_name, DL), vd2, e1, e2,
+				      new_stmt(s1->r,DL), false)->r;
             break;
           default:
             exp_to_c(nv, init);

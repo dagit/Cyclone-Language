@@ -35,10 +35,8 @@ fn<`arg,`res,`e1> fp2fn(`res f(`arg;`e1)) {
 
 // apply closure f to argument x
 `res apply(fn<`arg,`res,`eff> f, `arg x; `eff) {
-  switch (f) {
-  case &Fun<`env>(code,env):
-    return code(env,x);
-  }
+  let &Fun<`env>(code,env) = f;
+  return code(env,x);
 }
 
 // heh, heh, heh:  try explaining this to your Mom...

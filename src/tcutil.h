@@ -52,6 +52,8 @@ extern type_t max_arithmetic_type(type_t, type_t);
 
 extern bool unify(type_t, type_t);
 extern type_t substitute(list_t<$(tvar_t,type_t)@>, type_t);
+  // could also have a version with two regions, but doesn't seem useful
+extern type_t rsubstitute(region_t<`r>,glist_t<$(tvar_t,type_t)@`r,`r>,type_t);
 
 // true when e1 is a sub-effect of e2 -- might cause side effects
 // to constrain evars...
@@ -65,7 +67,8 @@ extern type_t fndecl2typ(fndecl_t);
 
 extern exp_t default_initializer(tenv_t,type_t,seg_t);
 
-extern $(tvar_t,type_t)@ make_inst_var(tvar_t);
+extern $(tvar_t,type_t)@   make_inst_var(tvar_t);
+extern $(tvar_t,type_t)@`r r_make_inst_var(region_t<`r>,tvar_t);
 
 // prints a warning when an expression contains an assignment
 extern void check_contains_assign(exp_t);
@@ -103,7 +106,7 @@ extern void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
 // the side effect of constraining the kinds of the bound type variables.
 extern void check_type(seg_t, tenv_t, list_t<tvar_t> bound_tvars, kind_t k,type_t);
 
-extern void check_unique_vars(list_t<var_t> vs, seg_t loc, string err_msg);
+extern void check_unique_vars(glist_t<var_t,`r> vs, seg_t loc, string err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar_t>);
 
 // Check that bounds are not zero -- constrain to 1 if necessary

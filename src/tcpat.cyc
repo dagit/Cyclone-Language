@@ -32,9 +32,6 @@ using Stdio;
 // and a list of the bound value variables, their types, and any
 // qualifiers (e.g., const).
 /////////////////////////////////////////////////////////////////////////
-static $(list_t<designator_t>,pat_t)@ null_designator(pat_t p) {
-  return new $(null,p);
-}
 static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
@@ -57,10 +54,10 @@ static void set_vd(vardecl_t vd, list_t<vardecl_t>@`r v_result_ptr, type_t t){
   vd->shadow = 0; // FIX?
   *v_result_ptr = new List(vd,*v_result_ptr);
 }
-$(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
-					   pat_t  p,
-					   type_t *`r1 topt,
-					   type_t *`r2 region_opt) {
+$(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
+					      pat_t  p,
+					      type_t *`r1 topt,
+					      type_t *`r2 region_opt) {
   type_t t;
   list_t<tvar_t>    tv_result = null;
   list_t<vardecl_t> v_result  = null;
@@ -114,7 +111,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(RgnKind);
-    let $(sub_tvs,sub_vs) = tcPat(te,p2,inner_topt,&ptr_rgn);
+    let $(sub_tvs,sub_vs) = tcPatRec(te,p2,inner_topt,&ptr_rgn);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
     // if p2's type is a tunion field or xtunion field type, then we cast
@@ -152,7 +149,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
 	inner_topt = &(*topt_ts->hd)[1];
 	topt_ts    = topt_ts->tl;
       }
-      let $(sub_tvs,sub_vs) = tcPat(te,ps->hd,inner_topt,region_opt);
+      let $(sub_tvs,sub_vs) = tcPatRec(te,ps->hd,inner_topt,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
       pat_ts = new List(new $(empty_tqual(),ps->hd->topt->v),pat_ts);
@@ -166,7 +163,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       throw impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
     for (_ dps0 = dps; dps0 != null; dps0 = dps0->tl) {
-      let $(sub_tvs,sub_vs) = tcPat(te,(*dps0->hd)[1],null,region_opt);
+      let $(sub_tvs,sub_vs) = tcPatRec(te,(*dps0->hd)[1],null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
     }
@@ -231,7 +228,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       let p2 = ps->hd;
       // Note:  we don't pass in ptr_rgn here because for value-carrying
       // constructors, the pointer's region is passed down as region_opt.
-      let $(sub_tvs,sub_vs) = tcPat(te2,p2,null,region_opt);
+      let $(sub_tvs,sub_vs) = tcPatRec(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
       let field_typ = substitute(all_inst,(*tqts->hd)[1]);
@@ -263,10 +260,10 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
     // the Pointer pattern does the upcast from the field to the xtunion type.
     t = new XTunionFieldType(XTunionFieldInfo{xed->name,ef->name,xed,ef});
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
-      _ p2 = ps->hd;
+      let p2 = ps->hd;
       // Note:  we don't pass in ptr_rgn here because for value-carrying
       // constructors, the pointer's region is passed down as region_opt.
-      let $(sub_tvs,sub_vs) = tcPat(te2,p2,null,region_opt);
+      let $(sub_tvs,sub_vs) = tcPatRec(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
       _ field_typ = (*tqts->hd)[1];
@@ -296,13 +293,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       goto tcpat_end;
     case &TunionRes(tud,tuf):
       p->r = new Tunion_p(tuf->name,null,null,null,tud,tuf);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     case &XTunionRes(xtud,xtuf):
       p->r = new XTunion_p(xtuf->name,null,null,xtud,xtuf);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     case &EnumRes(ed,ef):
       p->r = new Enum_p(ef->name,ed,ef);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     case &VarRes(_): // shadows an outer definition, but that's fine
       break;
     } catch { case &Dict::Absent: break; } // a new variable
@@ -312,7 +309,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
     case &Rel_n(null):
       (*q)[0] = Loc_n;        
       p->r = new Var_p(new_vardecl(q,VoidType,null));
-      return tcPat(te,p,topt,region_opt);//sets the vardecl's fields correctly
+      return tcPatRec(te,p,topt,region_opt);//sets vardecl's fields correctly
     default:
       terr(p->loc,"qualified variable in pattern");
       t = wildtyp();
@@ -322,15 +319,17 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
   case &UnknownCall_p(q,tvs,ps):
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
-      let x = List::map(null_designator, ps);
-      p->r = new Struct_p(sd,null,tvs,x);
-      return tcPat(te,p,topt,region_opt);
+      let new_ps = null;
+      for(; ps != null; ps = ps->tl)
+	new_ps = new List(new $(null,ps->hd), new_ps);
+      p->r = new Struct_p(sd,null,tvs,List::imp_rev(new_ps));
+      return tcPatRec(te,p,topt,region_opt);
     case &TunionRes(tud,tuf):
       p->r = new Tunion_p(tuf->name,null,tvs,ps,tud,tuf);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     case &XTunionRes(xtud,xtuf):
       p->r = new XTunion_p(xtuf->name,tvs,ps,xtud,xtuf);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     case &EnumRes(_,_):
       terr(p->loc,
            xprintf("bad enum constructor %s in pattern",qvar2string(q)));
@@ -347,7 +346,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &StructRes(sd):
       p->r = new Struct_p(sd,null,tvs,dps);
-      return tcPat(te,p,topt,region_opt);
+      return tcPatRec(te,p,topt,region_opt);
     default: break;
     } catch {case &Dict::Absent: break; }
     terr(p->loc, xprintf("%s is not a struct name, but pattern has designators",
@@ -358,9 +357,20 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
 
  tcpat_end:
   p->topt = new Opt(t);
-  check_unique_vars(List::map(get_name, v_result), p->loc,
-		    "pattern contains a repeated variable");
   return $(tv_result,v_result);
+}
+
+$(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
+					   pat_t  p,
+					   type_t *`r1 topt,
+					   type_t *`r2 region_opt) {
+  let ans = tcPatRec(te,p,topt,region_opt);
+  // caller will check tvar uniqueness when adding to environment
+  region r {
+    check_unique_vars(List::rmap(r, get_name, ans[1]), p->loc,
+		      "pattern contains a repeated variable");
+  }
+  return ans;
 }
 
 void check_pat_regions(tenv_t te, pat_t p) {

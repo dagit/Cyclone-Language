@@ -3795,47 +3795,48 @@ Cyc_Absyn_Vardecl*)(( struct Cyc_Absyn_Comprehension_e_struct*) _temp2423)->f1;
 goto _LL2432; _LL2432: _temp2431=( struct Cyc_Absyn_Exp*)(( struct Cyc_Absyn_Comprehension_e_struct*)
 _temp2423)->f2; goto _LL2430; _LL2430: _temp2429=( struct Cyc_Absyn_Exp*)((
 struct Cyc_Absyn_Comprehension_e_struct*) _temp2423)->f3; goto _LL2426;} else{
-goto _LL2427;} _LL2427: goto _LL2428; _LL2426: _temp2410->initializer= 0;
-_temp2334= Cyc_Toc_init_comprehension( nv, Cyc_Absyn_var_exp( c_name, 0),
-_temp2433, _temp2431, _temp2429, Cyc_Absyn_new_stmt(( void*) _temp2334->r, 0), 0);
-goto _LL2424; _LL2428: Cyc_Toc_exp_to_c( nv, init); goto _LL2424; _LL2424:;}
-goto _LL2393;}} _LL2399:(( void(*)( struct _tagged_string)) Cyc_Tcutil_impos)((
-struct _tagged_string)({ char* _temp2438=( char*)"bad nested declaration within function";
-struct _tagged_string _temp2439; _temp2439.curr= _temp2438; _temp2439.base=
-_temp2438; _temp2439.last_plus_one= _temp2438 + 39; _temp2439;})); goto _LL2393;
-_LL2393:;} return; _LL2269:(( void(*)( struct _tagged_string s)) Cyc_Toc_unimp)((
-struct _tagged_string)({ char* _temp2440=( char*)"cut"; struct _tagged_string
-_temp2441; _temp2441.curr= _temp2440; _temp2441.base= _temp2440; _temp2441.last_plus_one=
-_temp2440 + 4; _temp2441;})); return; _LL2271:(( void(*)( struct _tagged_string
-s)) Cyc_Toc_unimp)(( struct _tagged_string)({ char* _temp2442=( char*)"splice";
-struct _tagged_string _temp2443; _temp2443.curr= _temp2442; _temp2443.base=
-_temp2442; _temp2443.last_plus_one= _temp2442 + 7; _temp2443;})); return;
-_LL2273: s= _temp2342; continue; _LL2275: Cyc_Toc_stmt_to_c( Cyc_Toc_loop_env(
-nv), _temp2352); Cyc_Toc_exp_to_c( nv, _temp2350); return; _LL2277: { struct
-_tuple1* h_var= Cyc_Toc_temp_var(); struct _tuple1* e_var= Cyc_Toc_temp_var();
-struct Cyc_Absyn_Exp* h_exp= Cyc_Absyn_var_exp( h_var, 0); struct Cyc_Absyn_Exp*
-e_exp= Cyc_Absyn_var_exp( e_var, 0); void* h_typ= Cyc_Absyn_strct( Cyc_Toc__handler_cons_sp);
-void* e_typ= Cyc_Toc_typ_to_c( Cyc_Absyn_exn_typ); struct Cyc_Absyn_Exp*
-pushhandler_exp= Cyc_Absyn_var_exp(({ struct _tuple1* _temp2459=( struct _tuple1*)
-GC_malloc( sizeof( struct _tuple1)); _temp2459->f1= Cyc_Toc_abs_ns; _temp2459->f2=
-Cyc_Toc__push_handler_sp; _temp2459;}), 0); struct Cyc_Absyn_Exp* setjmp_exp=
-Cyc_Absyn_var_exp(({ struct _tuple1* _temp2458=( struct _tuple1*) GC_malloc(
-sizeof( struct _tuple1)); _temp2458->f1= Cyc_Toc_abs_ns; _temp2458->f2= Cyc_Toc_setjmp_sp;
-_temp2458;}), 0); struct Cyc_Absyn_Exp* pophandler_exp= Cyc_Absyn_var_exp(({
-struct _tuple1* _temp2457=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
-_temp2457->f1= Cyc_Toc_abs_ns; _temp2457->f2= Cyc_Toc__pop_handler_sp; _temp2457;}),
-0); e_exp->topt=({ struct Cyc_Core_Opt* _temp2444=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2444->v=( void*) e_typ; _temp2444;});
-nv= Cyc_Toc_add_varmap( nv, e_var, e_exp); Cyc_Toc_stmt_to_c( nv, _temp2356);{
-struct Cyc_Absyn_Stmt* tryandpop_stmt= Cyc_Absyn_seq_stmt( _temp2356, Cyc_Absyn_exp_stmt(
-Cyc_Absyn_fncall_exp( pophandler_exp, 0, 0), 0), 0); struct _tuple1* x= Cyc_Toc_temp_var();
-struct Cyc_Absyn_Exp* xexp= Cyc_Absyn_var_exp( x, 0); struct Cyc_Absyn_Vardecl*
-x_vd= Cyc_Absyn_new_vardecl( x, Cyc_Absyn_exn_typ, 0); xexp->topt=({ struct Cyc_Core_Opt*
-_temp2445=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp2445->v=( void*) Cyc_Absyn_exn_typ; _temp2445;});{ struct Cyc_Absyn_Pat* p=({
-struct Cyc_Absyn_Pat* _temp2453=( struct Cyc_Absyn_Pat*) GC_malloc( sizeof(
-struct Cyc_Absyn_Pat)); _temp2453->r=( void*)(( void*)({ struct Cyc_Absyn_Var_p_struct*
-_temp2455=( struct Cyc_Absyn_Var_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Var_p_struct));
+goto _LL2427;} _LL2427: goto _LL2428; _LL2426: _temp2410->initializer= 0;( void*)(
+_temp2334->r=( void*)(( void*)( Cyc_Toc_init_comprehension( nv, Cyc_Absyn_var_exp(
+c_name, 0), _temp2433, _temp2431, _temp2429, Cyc_Absyn_new_stmt(( void*)
+_temp2334->r, 0), 0))->r)); goto _LL2424; _LL2428: Cyc_Toc_exp_to_c( nv, init);
+goto _LL2424; _LL2424:;} goto _LL2393;}} _LL2399:(( void(*)( struct
+_tagged_string)) Cyc_Tcutil_impos)(( struct _tagged_string)({ char* _temp2438=(
+char*)"bad nested declaration within function"; struct _tagged_string _temp2439;
+_temp2439.curr= _temp2438; _temp2439.base= _temp2438; _temp2439.last_plus_one=
+_temp2438 + 39; _temp2439;})); goto _LL2393; _LL2393:;} return; _LL2269:(( void(*)(
+struct _tagged_string s)) Cyc_Toc_unimp)(( struct _tagged_string)({ char*
+_temp2440=( char*)"cut"; struct _tagged_string _temp2441; _temp2441.curr=
+_temp2440; _temp2441.base= _temp2440; _temp2441.last_plus_one= _temp2440 + 4;
+_temp2441;})); return; _LL2271:(( void(*)( struct _tagged_string s)) Cyc_Toc_unimp)((
+struct _tagged_string)({ char* _temp2442=( char*)"splice"; struct _tagged_string
+_temp2443; _temp2443.curr= _temp2442; _temp2443.base= _temp2442; _temp2443.last_plus_one=
+_temp2442 + 7; _temp2443;})); return; _LL2273: s= _temp2342; continue; _LL2275:
+Cyc_Toc_stmt_to_c( Cyc_Toc_loop_env( nv), _temp2352); Cyc_Toc_exp_to_c( nv,
+_temp2350); return; _LL2277: { struct _tuple1* h_var= Cyc_Toc_temp_var(); struct
+_tuple1* e_var= Cyc_Toc_temp_var(); struct Cyc_Absyn_Exp* h_exp= Cyc_Absyn_var_exp(
+h_var, 0); struct Cyc_Absyn_Exp* e_exp= Cyc_Absyn_var_exp( e_var, 0); void*
+h_typ= Cyc_Absyn_strct( Cyc_Toc__handler_cons_sp); void* e_typ= Cyc_Toc_typ_to_c(
+Cyc_Absyn_exn_typ); struct Cyc_Absyn_Exp* pushhandler_exp= Cyc_Absyn_var_exp(({
+struct _tuple1* _temp2459=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
+_temp2459->f1= Cyc_Toc_abs_ns; _temp2459->f2= Cyc_Toc__push_handler_sp;
+_temp2459;}), 0); struct Cyc_Absyn_Exp* setjmp_exp= Cyc_Absyn_var_exp(({ struct
+_tuple1* _temp2458=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
+_temp2458->f1= Cyc_Toc_abs_ns; _temp2458->f2= Cyc_Toc_setjmp_sp; _temp2458;}), 0);
+struct Cyc_Absyn_Exp* pophandler_exp= Cyc_Absyn_var_exp(({ struct _tuple1*
+_temp2457=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2457->f1=
+Cyc_Toc_abs_ns; _temp2457->f2= Cyc_Toc__pop_handler_sp; _temp2457;}), 0); e_exp->topt=({
+struct Cyc_Core_Opt* _temp2444=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2444->v=( void*) e_typ; _temp2444;}); nv= Cyc_Toc_add_varmap(
+nv, e_var, e_exp); Cyc_Toc_stmt_to_c( nv, _temp2356);{ struct Cyc_Absyn_Stmt*
+tryandpop_stmt= Cyc_Absyn_seq_stmt( _temp2356, Cyc_Absyn_exp_stmt( Cyc_Absyn_fncall_exp(
+pophandler_exp, 0, 0), 0), 0); struct _tuple1* x= Cyc_Toc_temp_var(); struct Cyc_Absyn_Exp*
+xexp= Cyc_Absyn_var_exp( x, 0); struct Cyc_Absyn_Vardecl* x_vd= Cyc_Absyn_new_vardecl(
+x, Cyc_Absyn_exn_typ, 0); xexp->topt=({ struct Cyc_Core_Opt* _temp2445=( struct
+Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2445->v=( void*)
+Cyc_Absyn_exn_typ; _temp2445;});{ struct Cyc_Absyn_Pat* p=({ struct Cyc_Absyn_Pat*
+_temp2453=( struct Cyc_Absyn_Pat*) GC_malloc( sizeof( struct Cyc_Absyn_Pat));
+_temp2453->r=( void*)(( void*)({ struct Cyc_Absyn_Var_p_struct* _temp2455=(
+struct Cyc_Absyn_Var_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Var_p_struct));
 _temp2455[ 0]=({ struct Cyc_Absyn_Var_p_struct _temp2456; _temp2456.tag= Cyc_Absyn_Var_p_tag;
 _temp2456.f1= x_vd; _temp2456;}); _temp2455;})); _temp2453->topt=({ struct Cyc_Core_Opt*
 _temp2454=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
