@@ -18,15 +18,7 @@ doc/web
 tests/boa-0.94.8.3
 tests/compress
 tests/tpop
-tests/smlng/000-example.txt
-tests/smlng/001-null.txt
-tests/smlng/002-almost-empty.txt
-tests/smlng/003-third-step.txt
-tests/smlng/004-random.txt
-tests/smlng/005-icfp2000.txt
-tests/smlng/006-exhaustive.txt
-tests/smlng/example.txt
-tests/smlng/example3.txt
+tests/smlng
 tests/misc
 tests/benchmarks
 doc/cyclone.gif

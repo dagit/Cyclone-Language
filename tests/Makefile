@@ -86,6 +86,6 @@ clean:
 #	$(MAKE) clean -C compress/cacm
 #	$(MAKE) clean -C compress/ppm
 	$(MAKE) clean -C shootout
-	$(MAKE) clean -C smlng
+#	$(MAKE) clean -C smlng
 #	$(MAKE) clean -C tpop
 #	$(MAKE) clean -C misc

@@ -21,33 +21,24 @@ online-manual: main-screen.html gen-libdoc.tex
 	cp *.html online-manual
 	(cd online-manual; hacha main-screen.html)
 
-main-screen.html: gen-libdoc.tex
-	hevea main-screen
-	hevea main-screen
+%.html: %.tex gen-libdoc.tex
+	hevea $<
+	hevea $<
 
-main-screen.ps: gen-libdoc.tex
-	latex '\nonstopmode\input' main-screen
-	makeindex main-screen
-	latex '\nonstopmode\input' main-screen
-	latex '\nonstopmode\input' main-screen
+%.pdf: %.tex gen-libdoc.tex
+	pdflatex '\nonstopmode\input' $<
+	makeindex $<
+	pdflatex '\nonstopmode\input' $<
+	pdflatex '\nonstopmode\input' $<
 
-main-screen.pdf: gen-libdoc.tex
-	pdflatex '\nonstopmode\input' main-screen
-	makeindex main-screen
-	pdflatex '\nonstopmode\input' main-screen
-	pdflatex '\nonstopmode\input' main-screen
+%.dvi: %.tex gen-libdoc.tex
+	latex '\nonstopmode\input' $<
+	makeindex $<
+	latex '\nonstopmode\input' $<
+	latex '\nonstopmode\input' $<
 
-main-letter.pdf: gen-libdoc.tex
-	pdflatex '\nonstopmode\input' main-letter
-	makeindex main-letter
-	pdflatex '\nonstopmode\input' main-letter
-	pdflatex '\nonstopmode\input' main-letter
-
-main-a4.pdf: gen-libdoc.tex
-	pdflatex '\nonstopmode\input' main-a4
-	makeindex main-a4
-	pdflatex '\nonstopmode\input' main-a4
-	pdflatex '\nonstopmode\input' main-a4
+%.ps: %.dvi
+	dvips -o $@ $<
 
 gen-libdoc.tex: \
   ../include/array.h \
@@ -70,9 +61,9 @@ gen-libdoc.tex: \
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
-	$(RM) *.pdf *.toc *.out *~
+	$(RM) *.pdf *.ps *.toc *.out *~
 	$(RM) main-screen.html
 	$(RM) gen-libdoc.tex
 	$(RM) -r online-manual
 
-.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf online-manual
+#.PHONY: main-screen.html main-screen.pdf main-letter.pdf main-a4.pdf online-manual

@@ -314,7 +314,7 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/aprof  clean
 	$(MAKE) -C bin/genfiles clean
 	$(MAKE) -C tests        clean
-	$(MAKE) -C doc          clean
+#	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
 	$(RM) -r bin/lib
 	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
