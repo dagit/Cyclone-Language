@@ -14,6 +14,7 @@ static const ctxt_t init_flat_context = {false,false,false,false,false,0,DONT_KN
 unsigned int num_texts(doc_t d) {
   switch (d) {
   case &Text(s): return 1;
+  case &Spc(s): return 1;
   case &Seq(ds):
     unsigned int s = 0;
     for (; ds != null; ds=ds->tl)
@@ -88,6 +89,10 @@ static void flat_arr(ctxt_t ctxt, doc_t d, $(ctxt_t,doc_t) ?a,
                      unsigned int @`r pos) {
   switch (d) {
   case &Text(i): 
+    a[*pos] = $(ctxt,d);
+    *pos = *pos + 1;
+    break;
+  case &Spc(i): 
     a[*pos] = $(ctxt,d);
     *pos = *pos + 1;
     break;

@@ -45,6 +45,7 @@ static doc_t get_text(context_t ctxt, buf_t b, FILE @f) {
   int c;
   bool in_tt = ctxt.TT;
   unsigned int start = Buffer::position(b);
+  bool only_space = true;
   while (true) {
     c = GETC(f);
     switch (c) {
@@ -53,11 +54,13 @@ static doc_t get_text(context_t ctxt, buf_t b, FILE @f) {
       if(start == Buffer::position(b))
 	return Mt;
       Buffer::add_char(b, '\0');
+      if (only_space) return new Spc(start);
       return new Text(start);
     case EOF: /* eof */
       if(start == Buffer::position(b))
 	return Mt;
       Buffer::add_char(b, '\0');
+      if (only_space) return new Spc(start);
       return new Text(start);
     case 0x20:
     case 0x0D:
@@ -86,6 +89,7 @@ static doc_t get_text(context_t ctxt, buf_t b, FILE @f) {
     default:
       Buffer::add_char(b,(char)c);
       was_space = false;
+      only_space = false;
       break;
     }
   }

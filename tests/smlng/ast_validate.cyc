@@ -56,6 +56,18 @@ void next_char(buf_t b, out_state_t<`r> s) {
 	--s->stack_top;
 	continue;
       }
+    case &Spc(pos): 
+      let sz = Buffer::size(b,pos);
+      let k = Buffer::get_char(b,pos);
+      if(i < sz && k != '\0') { // may change as string rep changes!
+	s->ctxt = c;
+	s->this_char = k;
+	elt->i = i+1;
+	return;
+      } else {
+	--s->stack_top;
+	continue;
+      }
     case &Seq(ds):
       if(i < ds.size) {
 	if(s->stack_top == s->doc_stack.size-1) 

@@ -44,6 +44,7 @@ typedef tunion Document doc_t;
 extern tunion Document {
   Seq(List::list_t<doc_t>); // bound because we split arrays in place
   Text(unsigned int);
+  Spc(unsigned int);
   Tagged(tag_t,doc_t);
   Mt;
 };

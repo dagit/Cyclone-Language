@@ -32,6 +32,7 @@ extern tunion Document;
 tunion Document {
   Seq(List::list_t<doc_t>); // list must NEVER BE SHARED
   Text(unsigned int);
+  Spc(unsigned int);
   Tagged(tag_t,doc_t);
   Mt;
 };
@@ -50,6 +51,7 @@ bool is_white(char c) {
 doc_t copy_doc(doc_t d) {
   switch(d) {
   case &Text(i): return new Text(i);
+  case &Spc(i): return new Spc(i);
   case &Seq(ds): return new Seq(List::copy(ds));
   case &Tagged(t,d): return new Tagged(t,d);
   case Mt: return Mt;
@@ -60,6 +62,7 @@ void dump(buf_t b, doc_t d) {
   switch (d) {
   case &Seq(ds): for (; ds != null; ds=ds->tl) dump(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
+  case &Spc(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
     try {
       fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
@@ -81,6 +84,7 @@ int doc_size(buf_t b,doc_t d) {
       sum += doc_size(b,ds->hd); 
     break;
   case &Text(i): sum += Buffer::size(b,i); break;
+  case &Spc(i): sum += Buffer::size(b,i); break;
   case &Tagged(tag,d):
     sum += start_tags[tag].size;
     sum += doc_size(b,d);
@@ -99,6 +103,7 @@ unsigned int num_texts(doc_t d) {
       sum += num_texts(ds->hd); 
     break;
   case &Text(s): ++sum; break;
+  case &Spc(s): ++sum; break;
   case &Tagged(tag,d):
     sum += num_texts(d);
     break;
@@ -154,6 +159,7 @@ doc_t remove_Mt(doc_t d){
     if (ds->tl==null) return ds->hd;//size 1
     return new Seq(ds);
   case &Text(_): return d;
+  case &Spc(_): return d;
   case &Tagged(tag,*d2):
     let d3 = remove_Mt(*d2);
     if (d3 == Mt) return Mt;
@@ -170,6 +176,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       ds->hd = down_opt(ctxt,ds->hd);
     return d;
   case &Text(_): return d;
+  case &Spc(_): return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
@@ -277,6 +284,9 @@ struct Q flattenit(doc_t d) {
       q = qappend(q,flattenit(ds->hd));
     return q;
   case &Text(i): 
+    let x = new List::List(d,null);
+    return Q{x,x};
+  case &Spc(i): 
     let x = new List::List(d,null);
     return Q{x,x};
   case &Tagged(tag,d):

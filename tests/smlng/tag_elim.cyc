@@ -140,6 +140,12 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
     synth.s.sizes  = ~0;
     synth.s.colors = ~0;
     return $(doc,synth);
+  case &Spc(_): 
+    synth_t synth;
+    synth.i = 0;
+    synth.s.sizes  = ~0;
+    synth.s.colors = ~0;
+    return $(doc,synth);
   case &Tagged(tag,*dp):
     let d = *dp;
     let $(d2, synth) = up_opt(d);
@@ -217,6 +223,7 @@ $(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
     }
     return $(*dsp, prev);
   case &Text(_): fallthru;
+  case &Spc(_): fallthru;
   case &Tagged(_,_): fallthru;
   case Mt: return $(null,null);
   }
@@ -249,6 +256,7 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
     switch(*d2) {
     case Mt: fallthru;
     case &Text(_): return $(d,ShuffleSynth(is_color,is_size));
+    case &Spc(_): return $(d,ShuffleSynth(is_color,is_size));
     case &Tagged(_,_):
       let pr = up_shuffle(*d2);
       *d2 = pr[0];
@@ -320,6 +328,8 @@ $(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
   case Mt: fallthru;
   case &Text(_): 
     return $(d,ShuffleSynth(0,0));
+  case &Spc(_): 
+    return $(d,ShuffleSynth(0,0));
 
       // these cases really only get called at the very top of a file,
       // but could help on short examples
@@ -349,6 +359,9 @@ doc_t nuke_under(doc_t doc, int ulevel) {
   case &Text(_): 
     fprintf(stderr,"!!!");
     throw new Impossible("nuke_under reached a Text");
+  case &Spc(_): 
+    fprintf(stderr,"!!!");
+    throw new Impossible("nuke_under reached a Text");
   case &Tagged(tag,*dp):
     if(tag == PL_tag)
       return doc;
@@ -370,6 +383,7 @@ doc_t nuke_under(doc_t doc, int ulevel) {
 $(doc_t,under_synth_t) under_elim(doc_t doc) {
   switch(doc) {
   case &Text(_): return $(doc,UnderSynth(0,false));
+  case &Spc(_): return $(doc,UnderSynth(0,false));
   case &Tagged(tag,*dp):
     let $(d,synth) = under_elim(*dp);
     *dp = d;
