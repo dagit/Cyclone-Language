@@ -1563,8 +1563,6 @@ copy_action(symbol_list *rule, int stack_offset)
   if (semantic_parser) stack_offset = 0;
 
   fprintf((FILE @)faction, "\ncase %d:\n", nrules);
-  if (!nolinesflag)
-    fprintf((FILE @)faction, "#line %d \"%s\"\n", lineno, infile);
   putc('{', (FILE @)faction);
 
   /* JGM: we declare two pointers (one for values, and one for
@@ -1583,6 +1581,8 @@ copy_action(symbol_list *rule, int stack_offset)
             "YYLTYPE @{%d} yyyylsp = (_ @{%d})(yyls+(yylsp_offset - %d));\n"
             "#endif\n",stack_offset,stack_offset,stack_offset - 1);
   }
+  if (!nolinesflag)
+    fprintf((FILE @)faction, "#line %d \"%s\"\n", lineno, infile);
 
   count = 1;
   c = getc((FILE @)finput);
