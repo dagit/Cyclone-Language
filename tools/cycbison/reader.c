@@ -1473,7 +1473,7 @@ int stack_offset;
 		      fprintf(faction, "(yyvs[yyvsp_offset+%d])", m);
 		    else 
 		      fprintf(faction, "(yyvs[yyvsp_offset-%d])", -m);
-		    fprintf(faction, "{case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name);
+		    fprintf(faction, "{case %s(yyinternal2): yyinternal = yyinternal2; break; default: throw Core::Failure(\"%s\"); } yyinternal;})", type_name, type_name);
 		    /*
 		    fprintf(faction,"; yyinternal;})");
 		    */
