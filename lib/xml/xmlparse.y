@@ -161,7 +161,7 @@ slashcls:
 
 %%
 
-void yyerror(string_t s) { return; } 
+void yyerror(string_t s,int state,int token) { return; } 
 
 namespace XmlParse{
   list_t<content_t<`rr>,`rr> rparse_file(region_t<`rr> rr,FILE @`H f) {

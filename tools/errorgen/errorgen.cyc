@@ -1,0 +1,110 @@
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+using Core;
+
+// #define DEBUG
+
+// usage:  errorgen [-c <compiler>] [<filename>]
+//   If <filename> is not present, reads from stdin
+//   If -c <compiler> is not present, defaults to cyclone
+//
+// Reads in a file containing fragments of Cyclone code with
+// syntax errors, separated by /* comments */.  For each fragment,
+// runs the compiler to and prints out the state and token
+// numbers for the given syntax error.  It then puts the 
+// trailing comment in a string.  This all gets emitted to
+// stdout.  
+
+static void error(const char ? fmt, ... inject parg_t args) 
+  __attribute__((format(printf,1,2),noreturn)) {
+  vfprintf(stderr, fmt, args);
+  fprintf(stderr,"\n");
+  exit(1);
+}
+
+int main(int argc, const char ?`H ? argv) {
+  const char ?`H compiler = "cyclone";
+  FILE @inf = stdin;
+  argv++;
+  if (*argv != NULL && strcmp(*argv,"-c") == 0) {
+    argv++;
+    if (numelts(argv) < 1) error("missing compiler argument");
+    compiler = *argv;
+    argv++;
+  }
+  if (*argv != NULL) {
+    let infile = *argv;
+#ifdef DEBUG
+    fprintf(stderr,"opening file %s\n",infile);
+#endif
+    FILE *i = fopen(infile, "r");
+    if (i == NULL) error("cannot find input file %s",infile);
+    inf = i;
+  }
+  const char ?tmpname = aprintf("%s.cyc",tmpnam(NULL));
+  const char ?tmpname2 = aprintf("%s.output",tmpname);
+  // each iteration copies a fragment to the tmp file, runs
+  // the compiler on it, pipes the output to tmpname2, reads
+  // the output to get the state and token, and then prints
+  // the state, token, and comment associated with the fragment
+  // to stdout.
+  while (true) {
+    FILE *tmp = fopen(tmpname, "w");
+    if (tmp == NULL) error("cannot open file %s",tmpname);
+    int c = fgetc(inf);
+    // skip white space
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') c = fgetc(inf);
+    // check for no useful input
+    if (c == EOF) { fclose(inf); fclose(tmp); exit(0); }
+    // copy the input to the tmp file up until we see "/* "
+    while (true) {
+      if (c != '/') {
+        fputc(c,tmp);
+        c = fgetc(inf);
+      } else if (c == EOF) error("unexpected end-of-file");
+      else {
+        c = fgetc(inf);
+        if (c == '*') break;
+        fputc('/',tmp);
+      }
+    }
+    fclose(tmp);
+    let command = aprintf("%s -c --parsestate -stopafter-parse %s > %s",
+                          compiler,tmpname,tmpname2);
+#ifdef DEBUG
+    fprintf(stderr,command);
+#endif
+    // run the compiler on the tmp file to generate an error, and record
+    // the output into tmpname2
+    int j = system(command);
+    // read in the output from the compiler which should be of the form
+    // parse error: state [%d], token [%d]
+    char buf[100]@zeroterm; 
+    tmp = fopen(tmpname2,"r");
+    if (tmp == NULL) error("unable to open %s!",tmpname2);
+    int state, token;
+    int i = fscanf(tmp, "parse error: state [%d], token [%d]\n", &state, &token);
+    if (i != 2) error("misread compiler output with fscanf = %d",i);
+    fclose(tmp);
+    // print out the state and token, then copy the comment from the
+    // input file as the message.
+    printf("{.state = %d, .token = %d, .msg = \"",state,token);
+    c = fgetc(inf);
+    // skip white space
+    while (c == ' ' || c == '\t' || c == '\n' || c == '\r') c = fgetc(inf);
+    // copy the comment from the input to stdout 
+    while (true) {
+      if (c != '*') {
+        fputc(c,stdout);
+        c = fgetc(inf);
+      } else if (c == EOF) error("unexpected end-of-file\n");
+      else {
+        c = fgetc(inf);
+        if (c == '/') break;
+        fputc('*',stdout);
+      }
+    }
+    printf("\"},\n");
+  } // continue with the next fragment
+}

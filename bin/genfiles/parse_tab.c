@@ -2830,7 +2830,7 @@ static short Cyc_yycheck[6933]={0,365,113,433,367,0,156,284,285,174,287,370,173,
 # 45 "cycbison.simple"
 struct Cyc_Yystack_overflow_exn_struct Cyc_Yystack_overflow_val={Cyc_Yystack_overflow,0};
 # 72 "cycbison.simple"
-void Cyc_yyerror(struct _dyneither_ptr);
+void Cyc_yyerror(struct _dyneither_ptr,int state,int token);
 # 82 "cycbison.simple"
 int Cyc_yylex(struct Cyc_Lexing_lexbuf*,union Cyc_YYSTYPE*yylval_ptr,struct Cyc_Yyltype*yylloc);struct _tuple27{unsigned int f1;struct _tuple0*f2;int f3;};struct _tuple28{struct _dyneither_ptr f1;void*f2;};static char _tmp4FE[8]="stdcall";static char _tmp4FF[6]="cdecl";static char _tmp500[9]="fastcall";static char _tmp501[9]="noreturn";static char _tmp502[6]="const";static char _tmp503[8]="aligned";static char _tmp504[7]="packed";static char _tmp505[7]="shared";static char _tmp506[7]="unused";static char _tmp507[5]="weak";static char _tmp508[10]="dllimport";static char _tmp509[10]="dllexport";static char _tmp50A[23]="no_instrument_function";static char _tmp50B[12]="constructor";static char _tmp50C[11]="destructor";static char _tmp50D[22]="no_check_memory_usage";static char _tmp50E[5]="pure";struct _tuple29{void*f1;void*f2;};struct _tuple30{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*f2;};int Cyc_yyparse(struct _RegionHandle*yyr,struct Cyc_Lexing_lexbuf*yylex_buf);static void _tmp9EF(union Cyc_YYSTYPE*yylval,unsigned int*_tmp9EE,unsigned int*_tmp9ED,union Cyc_YYSTYPE**_tmp9EC){for(*_tmp9EE=0;*_tmp9EE < *_tmp9ED;(*_tmp9EE)++){(*_tmp9EC)[*_tmp9EE]=(union Cyc_YYSTYPE)*yylval;}}static void _tmp9F4(unsigned int*_tmp9F3,unsigned int*_tmp9F2,struct Cyc_Yyltype**_tmp9F1){for(*_tmp9F3=0;*_tmp9F3 < *_tmp9F2;(*_tmp9F3)++){(*_tmp9F1)[*_tmp9F3]=(struct Cyc_Yyltype)
 # 164 "cycbison.simple"
@@ -2890,7 +2890,7 @@ yynewstate:
 if(yyssp_offset >= yystacksize - 1){
 # 208
 if(yystacksize >= 10000){
-{const char*_tmp9F5;Cyc_yyerror(((_tmp9F5="parser stack overflow",_tag_dyneither(_tmp9F5,sizeof(char),22))));}
+{const char*_tmp9F5;Cyc_yyerror(((_tmp9F5="parser stack overflow",_tag_dyneither(_tmp9F5,sizeof(char),22))),yystate,yychar);}
 (int)_throw((void*)& Cyc_Yystack_overflow_val);}
 # 212
 yystacksize *=2;
@@ -7118,9 +7118,9 @@ Cyc_strcat(msg,(struct _dyneither_ptr)Cyc_yytname[_check_known_subscript_notnull
 {const char*_tmpF14;Cyc_strcat(msg,((_tmpF14="'",_tag_dyneither(_tmpF14,sizeof(char),2))));}
 ++ count;}}}
 # 461
-Cyc_yyerror((struct _dyneither_ptr)msg);}else{
+Cyc_yyerror((struct _dyneither_ptr)msg,yystate,yychar);}else{
 # 465
-const char*_tmpF15;Cyc_yyerror(((_tmpF15="parse error",_tag_dyneither(_tmpF15,sizeof(char),12))));}}
+const char*_tmpF15;Cyc_yyerror(((_tmpF15="parse error",_tag_dyneither(_tmpF15,sizeof(char),12))),yystate,yychar);}}
 # 467
 goto yyerrlab1;
 # 469

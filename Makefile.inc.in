@@ -94,6 +94,7 @@ CYCLONE_H:=arg.h\
 
 CYCLONE_SRCS:=absyn\
          parse_tab\
+         parse_errors\
          lex\
          absynpp\
 	 absyndump\
@@ -118,6 +119,7 @@ CYCLONE_SRCS:=absyn\
 	 cyclone
 
 CYCDOC_SRCS:=cycdoc\
+        parse_errors\
 	lex\
 	parse_tab\
 	absyn\
@@ -138,6 +140,7 @@ CYCDOC_SRCS:=cycdoc\
 	absynpp
 
 BUILDLIB_SRCS:=buildlib\
+        parse_errors\
 	lex\
 	parse_tab\
 	tcutil\

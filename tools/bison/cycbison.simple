@@ -70,7 +70,7 @@ while (0)
 #define YYERRCODE	256
 
 
-extern void yyerror(string_t);
+extern void yyerror(const char ?,int state,int token);
 
 /* The user can define YYLEX_PARAM_ARG for the prototype to yylex 
  * and YYLEX_ARG for the actual argument to yylex -- typically
@@ -207,7 +207,7 @@ yynewstate:
   if (yyssp_offset >= (yystacksize-1)) { 
     // grow the stacks
     if (yystacksize >= YYMAXDEPTH) {
-      yyerror("parser stack overflow");
+      yyerror("parser stack overflow",yystate,yychar);
       throw &Yystack_overflow_val;
     }
     yystacksize *= 2;
@@ -462,11 +462,11 @@ yyerrlab:   /* here on detecting error */
 		    count++;
 		  }
 	    }
-	  yyerror(msg);
+	  yyerror(msg,yystate,yychar);
 	}
-      else
+      else 
 #endif /* YYERROR_VERBOSE */
-	yyerror("parse error");
+	yyerror("parse error",yystate,yychar);
     }
   goto yyerrlab1;
 

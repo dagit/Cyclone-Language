@@ -1,0 +1,4 @@
+int x y;  /* missing comma in declaration */
+x y;      /* type has not been declared */
+int f[;   /* missing ']' */
+

@@ -41,6 +41,9 @@
 namespace Port {
   extern void port(List::list_t<Absyn::decl_t>);
 }
+namespace ParseErrors {
+  extern bool print_state_and_token;
+}
 namespace Lex {
   extern bool compile_for_boot_r;
   extern void pos_init();
@@ -1368,7 +1371,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                    "Set the interface file to be <file>."),
           rnew(r) $("--manyerrors",false, "",
                     rnew(r)Unit_spec(set_many_errors),
-                    "don't stop after only a few errors.")
+                    "don't stop after only a few errors."),
+          rnew(r) $("--parsestate",false, "",
+                    rnew(r)Set_spec(&ParseErrors::print_state_and_token),
+                    "print the parse state and token on a syntax error")
          );
 
   string_t optstring = "Options:";

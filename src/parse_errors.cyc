@@ -1,0 +1,40 @@
+#include <core.h>
+#include <cycboot.h>
+#include <position.h>
+#include "parse.h"
+
+namespace ParseErrors {
+  // when set, we just print out the state and token for a parse
+  // error and then exit immediately.  Used for generating the
+  // message table.
+  bool print_state_and_token = false;
+
+  struct ParseState { int state; int token; const char ?msg; };
+
+  static struct ParseState msg_table[] = { 
+
+#include "parse_errors_gen.h"
+
+  };
+}
+using Position;
+using ParseErrors;
+
+void yyerror(string_t<`H> s, int state, int token) { 
+  if (ParseErrors::print_state_and_token) {
+    printf("parse error: state [%d], token [%d]\n",state,token);
+    exit(1);
+  }
+  // search through the msg_table to try and find a matching state & token
+  for (unsigned i = 0; i < numelts(msg_table); i++) {
+    if (msg_table[i].state == state && 
+        msg_table[i].token == token) {
+      s = msg_table[i].msg;
+      break;
+    }
+  }
+  post_error(mk_err_parse(yylloc.first_line,s));
+} 
+
+
+
