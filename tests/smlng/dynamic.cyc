@@ -9,7 +9,7 @@ using Stdio;
 using List;
 
 #define MAX_INT 0x7fffffff
-#define INPUT_SIZE 4 // make bigger when not testing! (but not too big :-( )
+#define INPUT_SIZE 20 // make bigger when not testing! (but not too big :-( )
 #define NUM_SIZES 11
 
 // should probably pass in the context size / color, but I don't know it
@@ -22,9 +22,9 @@ using List;
 // for simplicity, we flatten the whole thing and then compute 
 // INPUT_SIZE at a time.
 
-// int is cost -- can recompute how to achieve it after we're done
+// first int is cost, second is where to split to get that cost
 // space is wasteful (array is triangular), but that's okay
-int size_table[INPUT_SIZE][INPUT_SIZE][NUM_SIZES];
+$(int,int) size_table[INPUT_SIZE][INPUT_SIZE][NUM_SIZES];
 #define S(i,j,s) size_table[i][j][s]
 
 void flatten_size(doc_t doc, $(doc_t,int) ?@`r doc_arr, int @`r curr_pos) {
@@ -50,40 +50,53 @@ void flatten_size(doc_t doc, $(doc_t,int) ?@`r doc_arr, int @`r curr_pos) {
 // TO DO: Decide where the size/recomoputation trade-offs are
 
 doc_t unflatten_size($(doc_t,int) ? doc_arr, int left, int right, int outer_sz){
-  //  fprintf(stderr,"|%d %d ", left, right);
+  //  fprintf(stderr,"^%d %d ^", left,right);
   if(left == right) {
+    //    fprintf(stderr,"\n|%d %d %d %d|", outer_sz, left, right, doc_arr[left][1]);
     doc_t ans = doc_arr[left][0];
     if(doc_arr[left][1] == outer_sz)
       return ans;
     else
       return new Tagged(doc_arr[left][1],ans);
   }
-  int min_cost = MAX_INT;
-  int sz = 0;
-  // our caller just computed this (except for outermost) WASTED WORK
+  int split_point = S(left,right,outer_sz)[1];
+  int left_sz   = 0;
+  int left_cost = MAX_INT;
   for(int s=0; s < NUM_SIZES; ++s) {
-    int cost = S(left,right,s);
-    if(cost < min_cost) {
-      min_cost = cost;
-      sz = s;
+    int this_cost = S(left,split_point,s)[0];
+    if(this_cost != MAX_INT && s != outer_sz)
+      ++this_cost;
+    if(this_cost < left_cost) {
+      left_cost = this_cost;
+      left_sz   = s;
     }
   }
-  //  fprintf(stderr,"%d %d %d|", min_cost, sz, outer_sz);
-  for(int i=left; i < right; ++i)
-    for(int s1=0; s1 < NUM_SIZES; ++s1)
-      for(int s2=0; s2 < NUM_SIZES; ++s2)
-	if(S(left,i,s1) + S(i+1,right,s2) == min_cost) {
-	  doc_t ans = new Seq(list(unflatten_size(doc_arr,left,i,    sz),
-				   unflatten_size(doc_arr,i+1, right,sz)));
-	  if(sz != outer_sz)
-	    ans = new Tagged(sz,ans);
-	  return ans;
-	}
-  fprintf(stderr,"XXXXXXXXXXXXXXXX");
-  throw new Core::Impossible("unflatten_size failed recomputation");
+  if(left_cost == MAX_INT)
+    left_sz = NUM_SIZES-1;
+  int right_sz   = 0;
+  int right_cost = MAX_INT;
+  for(int s=0; s < NUM_SIZES; ++s) {
+    int this_cost = S(split_point+1,right,s)[0];
+    if(this_cost != MAX_INT && s != outer_sz)
+      ++this_cost;
+    if(this_cost < right_cost) {
+      right_cost = this_cost;
+      right_sz   = s;
+    }
+  }
+  if(right_cost == MAX_INT)
+    right_sz = NUM_SIZES-1;
+  //  fprintf(stderr,"\n|%d %d %d %d %d %d|", 
+  //  outer_sz, left_sz, right_sz, left, split_point, right);
+  doc_t left_doc = unflatten_size(doc_arr,left,split_point,left_sz);
+  if(left_sz != outer_sz)
+    left_doc = new Tagged(left_sz,left_doc);
+  doc_t right_doc = unflatten_size(doc_arr,split_point+1,right,right_sz);
+  if(right_sz != outer_sz)
+    right_doc = new Tagged(right_sz,right_doc);
+  return new Seq(new List(left_doc, new List(right_doc, null)));
 }
 
-// FIX: solve the last problem (where INPUT_SIZE is too big)!!!!
 // FIX: do something quick when we're out of time
 doc_t dynamic_size(doc_t doc) {
   list_t<doc_t> ans = null;
@@ -93,50 +106,61 @@ doc_t dynamic_size(doc_t doc) {
   int arr_size = curr_pos;
   //  fprintf(stderr,"!%d!",arr_size);
   curr_pos = 0;
-  for(; curr_pos + INPUT_SIZE <= arr_size; curr_pos += INPUT_SIZE) {
-    //  fprintf(stderr,"\n====");
-    // need to check time in here!
-    for (int i = 0; i < INPUT_SIZE; i++)
+  for(; curr_pos < arr_size; curr_pos += INPUT_SIZE) {
+    //    fprintf(stderr,"!%d %d!",curr_pos,arr_size);
+    int input_size = 
+      (curr_pos + INPUT_SIZE < arr_size) ? INPUT_SIZE : arr_size - curr_pos;
+
+    // need to check time in here!!!
+    for (int i = 0; i < input_size; i++)
       for (int s = 0; s < NUM_SIZES; s++) {
 	int this_sz = doc_arr[curr_pos+i][1];
-	S(i,i,s) = (this_sz == s)?0:((this_sz==NUM_SIZES-1)?MAX_INT:1);
-	//fprintf(stderr,"\n#(%d,%d,%d) = %d#", i,i,s,S(i,i,s));
+	S(i,i,s) = $((this_sz == s)?0:((this_sz==NUM_SIZES-1)?MAX_INT:1),0);
+	//	fprintf(stderr,"\n#(%d,%d,%d,%d) = %d#", i,i,s,S(i,i,s)[0],S(i,i,s)[1]);
       }
-    for (int d = 1; d < INPUT_SIZE; d++)
+    for (int d = 1; d < input_size; d++)
       for (int s = 0; s < NUM_SIZES; s++)
-	for (int i = 0; i+d < INPUT_SIZE; i++) {
+	for (int i = 0; i+d < input_size; i++) {
 	  int j = i+d;
-	  int m = MAX_INT;
+	  int min_cost = MAX_INT;
+	  int min_ind  = i;
 	  for (int k = i; k < j; k++)
 	    for (int s1 = 0; s1 < NUM_SIZES; s1++)
-	      for (int s2 = 0; s2 < NUM_SIZES; s2++) {
+	      for (int s2 = 0; s2 < NUM_SIZES; s2++) 
 		if ((s1!=NUM_SIZES-1 && s2!=NUM_SIZES-1) || s==NUM_SIZES-1) {
-		  int left  = S(i,  k,s1);
-		  int right = S(k+1,j,s2);
+		  int left  = S(i,  k,s1)[0];
+		  int right = S(k+1,j,s2)[0];
 		  int m_new;
 		  if(left || right == MAX_INT)
 		    m_new = MAX_INT;
 		  else
 		    m_new = left + ((s1==s)?0:1) + right + ((s2==s)?0:1);
-		  if (m_new<m) 
-		    m = m_new;
-		}
-	      }
-	  //fprintf(stderr,"\n#(%d,%d,%d) = %d#", i,j,s,m);
-	  S(i,j,s) = m;
+		  if (m_new < min_cost) {
+		    min_cost = m_new;
+		    min_ind   = k;
+		  }
+		}		
+	  //	  fprintf(stderr,"\n#(%d,%d,%d,%d) = %d#", i,j,s,min_ind,min_cost);
+	  S(i,j,s) = $(min_cost,min_ind);
 	}
-    ans = new List(unflatten_size(doc_arr+curr_pos, 
-				  0, INPUT_SIZE-1, NUM_SIZES-1),
-		   ans);
-  }
-  // do something smarter about leftovers, but for now:
-  fprintf(stderr,"A%d %dA", curr_pos,arr_size);
-  for(int i = curr_pos; i < arr_size; ++i) {
-    int sz = doc_arr[i][1];
-    if(sz == NUM_SIZES-1)
-      ans = new List(doc_arr[i][0], ans);
-    else
-      ans = new List(new Tagged(doc_arr[i][1]+Zero,doc_arr[i][0]), ans);
+    // copied from unflatten_size -- should share
+    int left_sz   = 0;
+    int left_cost = MAX_INT;
+    for(int s=0; s < NUM_SIZES; ++s) {
+      int this_cost = S(0,input_size-1,s)[0];
+      if(this_cost != MAX_INT && s != NUM_SIZES-1)
+	++this_cost;
+      if(this_cost < left_cost) {
+	left_cost = this_cost;
+	left_sz   = s;
+      }
+    }
+    if(left_cost == MAX_INT)
+      left_sz = NUM_SIZES-1;
+    doc_t next = unflatten_size(doc_arr+curr_pos, 0, input_size-1, left_sz);
+    if(left_sz != NUM_SIZES-1)
+      next = new Tagged(left_sz,next);
+    ans = new List(next, ans);
   }
   return new Seq(imp_rev(ans));
 }
