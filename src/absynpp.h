@@ -28,7 +28,7 @@ extern string pat2string(pat p);
 
   // These are only exposed so Abysndump can use them:
   extern int exp_prec(exp);
-  extern string char_escape(Char);
+  extern string char_escape(char);
   extern string string_escape(string);
   extern string prim2str(primop p);
   extern bool is_declaration(stmt s);

@@ -189,7 +189,7 @@ string strcato(string dest,string src,int srcOfs) {
 string strconcat(string a, string b) {
   let alen = strlen(a);
   let blen = strlen(b);
-  string ans = new_string(alen+blen+1);
+  string ans = new_string(alen+blen);
   int i, j;
   for (i=0; i < alen; ++i) ans[i]   = a[i];
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
@@ -204,7 +204,7 @@ string strconcat_l(list<string> strs) {
     total_len += strlen(p->hd);
     p = p->tl;
   }  
-  string ans = new_string(total_len+1);
+  string ans = new_string(total_len);
   size_t i = 0;
   while (strs != null) {
     string next    = strs->hd;
@@ -231,7 +231,7 @@ string str_sepstr(list<string> strs, string separator) {
   }
   size_t seplen = strlen(separator);
   total_len += (list_len - 1)*seplen;
-  string ans = new_string(total_len+1);
+  string ans = new_string(total_len);
   size_t i = 0;
   while (strs->tl != null) {
     string next    = strs->hd;
@@ -325,7 +325,7 @@ string strdup(string src) {
   string temp;
 
   len = strlen(src);
-  temp = new_string(len+1);
+  temp = new_string(len);
   strncpy(temp,0,src,0,len);
   return temp;
 }
@@ -366,6 +366,8 @@ string realloc_str(string str, size_t sz)
 
 ///////////////////////// TRANSFORMATIONS
 // Return a substring of a string, by allocation.
+// FIX: This adds an extra null character at the end of the string.
+// I'd like to remove it but it causes a bug in the lexer on bootstrapping.
 string substring(string s, int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
     throw InvalidArg("String::substring");
@@ -465,13 +467,13 @@ int strspn(string s, int ofs, string accept) {
 ////////////////////////// CONVERSIONS
 list<Char> explode(string s) {
   list<Char> result = null;
-  for (int i = s.size - 1; i >= 0; i--)
+  for (int i = strlen(s) - 1; i >= 0; i--)
     result = &cons((Char)s[i],result);
   return result;
 }
 
 string implode(list<Char> chars) {
-  string s = new_string(List::length(chars)+1);
+  string s = new_string(List::length(chars));
   size_t i = 0;
   while (chars != null) {
     s[i++] = chars->hd;

@@ -58,6 +58,14 @@ diff: cyclone_src
 	diff bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
 	diff bin/genfiles/lib/precore_c.h  lib/precore_c.h
 
+# This target compares the C files in bin/genfiles to those in src
+# Lack of difference means running the update would have no real effect.
+cmp: cyclone_src
+	for i in $(C_SRCS); do (cmp bin/genfiles/src/$$i src/$$i) done
+	for i in $(C_LIBS); do (cmp bin/genfiles/lib/$$i lib/$$i) done
+	cmp bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
+	cmp bin/genfiles/lib/precore_c.h  lib/precore_c.h
+
 # This target updates what is in bin/genfiles.  It would be "dangerous"
 # to invoke this target with "make -k" if we did not have version control.
 # I intend to put a "warning" waiting for user response in (and remind

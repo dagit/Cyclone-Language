@@ -53,30 +53,36 @@ bool expand_typedefs = false;
 // re-writing them all in Toc).
 bool qvar_to_Cids = false;
 
-/* // I'm having trouble linking in the Buffer stuff
-string escape(string s) {
-  _ sz = s.size;
-  _ b = Buffer::create(sz+10);
-  for (int i = 0; i<sz; i++) {
-    switch (s[i]) {
-    case '\n': Buffer::add_string(b,"\\n");
-    case '\t': Buffer::add_string(b,"\\t");
-    case '\b': Buffer::add_string(b,"\\b");
-    case '\r': Buffer::add_string(b,"\\r");
-    case '\007': Buffer::add_string(b,"\\a");
-    case '\012': Buffer::add_string(b,"\\f");
-    case '\011': Buffer::add_string(b,"\\v");
-    case '\034': Buffer::add_string(b,"\\\"");
-    default:
-      // TODO: We ought to check for other binary characters here
-      Buffer::add_char(b,s[i]);
+string char_escape(char c) {
+  switch (c) {
+  case '\a': return("\\a");
+  case '\b': return("\\b");
+  case '\f': return("\\f");
+  case '\n': return("\\n");
+  case '\r': return("\\r");
+  case '\t': return("\\t");
+  case '\v': return("\\v");
+  case '\\': return("\\\\");
+  case '\"': return("\"");
+  case '\'': return("\\'");
+  default:
+    if (c>=' ' && c<='~') {
+      let t = new_string(1);
+      t[0] = c;
+      return t;
+    } else {
+      let t = new_string(4);
+      int j = 0;
+      t[j++] = '\\';
+      t[j++] = (char)('0'+((c>>6)&7));
+      t[j++] = (char)('0'+((c>>3)&7));
+      t[j++] = (char)('0'+(c&7));
+      return t;
     }
   }
-  return Buffer::contents(b);
 }
-*/
 
-bool special(string s){
+static bool special(string s){
   int sz = s.size-1;
   for (int i = 0; i<sz; i++) {
     char c = s[i];
@@ -86,41 +92,55 @@ bool special(string s){
   return false;
 }
 
-string escape(bool in_string,Char c) {
-  switch ((char)c) {
-  case '\a': return("\\a");
-  case '\b': return("\\b");
-  case '\f': return("\\f");
-  case '\n': return("\\n");
-  case '\r': return("\\r");
-  case '\t': return("\\t");
-  case '\v': return("\\v");
-  case '\\': return("\\\\");
-  case '\"':
-    // Double quote is escaped in a string but not in a char 
-    if (in_string) return("\\\"");
-    else return("\"");
-  case '\'':
-    // Single quote is escaped in a char but not in a string
-    if (in_string) return("\'");
-    else return("\\'");
-  default:
-    if (c>=' ' && c<='~') return(xprintf("%c",c));
-    else return(xprintf("\\x%x",c));
-  }
-}
-
-string char_escape(Char c) {
-  return escape(false,c);
-}
-
 string string_escape(string s) {
-  if (special(s))
-    // Inefficient but I'm having trouble linking in the buffer stuff
-    return String::strconcat_l(List::map_c(escape, true,
-					   String::explode(s)));
-  else 
-    return s;
+  if (!special(s)) return s;
+
+  int n = s.size - 1;
+  // Check for the expected null terminator of a string constant
+  if (n>0 && s[n]=='\000') n--;
+  // determine length
+  int len = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a': fallthru;
+    case '\b': fallthru;
+    case '\f': fallthru;
+    case '\n': fallthru;
+    case '\r': fallthru;
+    case '\t': fallthru;
+    case '\v': fallthru;
+    case '\\': fallthru;
+    case '\"': len += 2; break;
+    case c:
+      if (c>=' ' && c<='~') len++;
+      else len += 4;
+      break;
+    }
+  // build the escaped string
+  string t = new_string(len);
+  int j = 0;
+  for (int i=0; i<=n; i++)
+    switch (s[i]) {
+    case '\a': t[j++] = '\\'; t[j++] = 'a'; break;
+    case '\b': t[j++] = '\\'; t[j++] = 'b'; break;
+    case '\f': t[j++] = '\\'; t[j++] = 'f'; break;
+    case '\n': t[j++] = '\\'; t[j++] = 'n'; break;
+    case '\r': t[j++] = '\\'; t[j++] = 'r'; break;
+    case '\t': t[j++] = '\\'; t[j++] = 't'; break;
+    case '\v': t[j++] = '\\'; t[j++] = 'v'; break;
+    case '\\': t[j++] = '\\'; t[j++] = '\\'; break;
+    case '"' : t[j++] = '\\'; t[j++] = '"'; break;
+    case c:
+      if (c>=' ' && c<='~') t[j++] = c;
+      else {
+        t[j++] = '\\';
+        t[j++] = (char)('0'+((c>>6)&7));
+        t[j++] = (char)('0'+((c>>3)&7));
+        t[j++] = (char)('0'+(c&7));
+      }
+      break;
+    }
+  return t;
 }
 
 Doc tqual2doc(tqual tq) {
