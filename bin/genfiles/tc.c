@@ -1924,9 +1924,10 @@ _tuple12*v))Cyc_Dict_insert)(ge->ordinaries,(*_tmp21D->name).f2,(struct _tuple12
 _tmp3D2=_cycalloc(sizeof(*_tmp3D2)),((_tmp3D2->f1=(void*)((_tmp3D4=_cycalloc(
 sizeof(*_tmp3D4)),((_tmp3D4[0]=((_tmp3D3.tag=3,((_tmp3D3.f1=ed,((_tmp3D3.f2=
 _tmp21D,_tmp3D3)))))),_tmp3D4)))),((_tmp3D2->f2=1,_tmp3D2)))))));}}}static int Cyc_Tc_okay_externC(
-struct Cyc_Position_Segment*loc,enum Cyc_Absyn_Scope sc);static int Cyc_Tc_okay_externC(
-struct Cyc_Position_Segment*loc,enum Cyc_Absyn_Scope sc){switch(sc){case Cyc_Absyn_Static:
-_LLFA:{const char*_tmp3D7;void*_tmp3D6;(_tmp3D6=0,Cyc_Tcutil_warn(loc,((_tmp3D7="static declaration nested within extern \"C\"",
+struct Cyc_Position_Segment*loc,enum Cyc_Absyn_Scope sc,int in_include);static int
+Cyc_Tc_okay_externC(struct Cyc_Position_Segment*loc,enum Cyc_Absyn_Scope sc,int
+in_include){switch(sc){case Cyc_Absyn_Static: _LLFA: if(!in_include){const char*
+_tmp3D7;void*_tmp3D6;(_tmp3D6=0,Cyc_Tcutil_warn(loc,((_tmp3D7="static declaration nested within extern \"C\"",
 _tag_dyneither(_tmp3D7,sizeof(char),44))),_tag_dyneither(_tmp3D6,sizeof(void*),0)));}
 return 0;case Cyc_Absyn_Abstract: _LLFB:{const char*_tmp3DA;void*_tmp3D9;(_tmp3D9=0,
 Cyc_Tcutil_warn(loc,((_tmp3DA="abstract declaration nested within extern \"C\"",
@@ -1981,33 +1982,35 @@ _tmp3E9=0,Cyc_Tcutil_terr(loc,((_tmp3EA="top level alias declarations are not im
 _tag_dyneither(_tmp3EA,sizeof(char),49))),_tag_dyneither(_tmp3E9,sizeof(void*),0)));}
 goto _LL108;_LL111: {struct Cyc_Absyn_Var_d_struct*_tmp23A=(struct Cyc_Absyn_Var_d_struct*)
 _tmp235;if(_tmp23A->tag != 0)goto _LL113;else{_tmp23B=_tmp23A->f1;}}_LL112: if(
-in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp23B->sc))_tmp23B->sc=Cyc_Absyn_ExternC;
-Cyc_Tc_tcVardecl(te,ge,loc,_tmp23B,check_var_init,in_externCinclude,exports);
-goto _LL108;_LL113: {struct Cyc_Absyn_Fn_d_struct*_tmp23C=(struct Cyc_Absyn_Fn_d_struct*)
-_tmp235;if(_tmp23C->tag != 1)goto _LL115;else{_tmp23D=_tmp23C->f1;}}_LL114: if(
-in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp23D->sc))_tmp23D->sc=Cyc_Absyn_ExternC;
-Cyc_Tc_tcFndecl(te,ge,loc,_tmp23D,in_externCinclude,exports);goto _LL108;_LL115: {
-struct Cyc_Absyn_Typedef_d_struct*_tmp23E=(struct Cyc_Absyn_Typedef_d_struct*)
-_tmp235;if(_tmp23E->tag != 9)goto _LL117;else{_tmp23F=_tmp23E->f1;}}_LL116: Cyc_Tc_tcTypedefdecl(
-te,ge,loc,_tmp23F);goto _LL108;_LL117: {struct Cyc_Absyn_Aggr_d_struct*_tmp240=(
-struct Cyc_Absyn_Aggr_d_struct*)_tmp235;if(_tmp240->tag != 6)goto _LL119;else{
-_tmp241=_tmp240->f1;}}_LL118: if(in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp241->sc))
-_tmp241->sc=Cyc_Absyn_ExternC;Cyc_Tc_tcAggrdecl(te,ge,loc,_tmp241);goto _LL108;
-_LL119: {struct Cyc_Absyn_Datatype_d_struct*_tmp242=(struct Cyc_Absyn_Datatype_d_struct*)
+in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp23B->sc,in_externCinclude))_tmp23B->sc=
+Cyc_Absyn_ExternC;Cyc_Tc_tcVardecl(te,ge,loc,_tmp23B,check_var_init,
+in_externCinclude,exports);goto _LL108;_LL113: {struct Cyc_Absyn_Fn_d_struct*
+_tmp23C=(struct Cyc_Absyn_Fn_d_struct*)_tmp235;if(_tmp23C->tag != 1)goto _LL115;
+else{_tmp23D=_tmp23C->f1;}}_LL114: if(in_externC  && Cyc_Tc_okay_externC(d->loc,
+_tmp23D->sc,in_externCinclude))_tmp23D->sc=Cyc_Absyn_ExternC;Cyc_Tc_tcFndecl(te,
+ge,loc,_tmp23D,in_externCinclude,exports);goto _LL108;_LL115: {struct Cyc_Absyn_Typedef_d_struct*
+_tmp23E=(struct Cyc_Absyn_Typedef_d_struct*)_tmp235;if(_tmp23E->tag != 9)goto
+_LL117;else{_tmp23F=_tmp23E->f1;}}_LL116: Cyc_Tc_tcTypedefdecl(te,ge,loc,_tmp23F);
+goto _LL108;_LL117: {struct Cyc_Absyn_Aggr_d_struct*_tmp240=(struct Cyc_Absyn_Aggr_d_struct*)
+_tmp235;if(_tmp240->tag != 6)goto _LL119;else{_tmp241=_tmp240->f1;}}_LL118: if(
+in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp241->sc,in_externCinclude))_tmp241->sc=
+Cyc_Absyn_ExternC;Cyc_Tc_tcAggrdecl(te,ge,loc,_tmp241);goto _LL108;_LL119: {
+struct Cyc_Absyn_Datatype_d_struct*_tmp242=(struct Cyc_Absyn_Datatype_d_struct*)
 _tmp235;if(_tmp242->tag != 7)goto _LL11B;else{_tmp243=_tmp242->f1;}}_LL11A: if(
-in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp243->sc))_tmp243->sc=Cyc_Absyn_ExternC;
-Cyc_Tc_tcDatatypedecl(te,ge,loc,_tmp243);goto _LL108;_LL11B: {struct Cyc_Absyn_Enum_d_struct*
-_tmp244=(struct Cyc_Absyn_Enum_d_struct*)_tmp235;if(_tmp244->tag != 8)goto _LL11D;
-else{_tmp245=_tmp244->f1;}}_LL11C: if(in_externC  && Cyc_Tc_okay_externC(d->loc,
-_tmp245->sc))_tmp245->sc=Cyc_Absyn_ExternC;Cyc_Tc_tcEnumdecl(te,ge,loc,_tmp245);
-goto _LL108;_LL11D: {struct Cyc_Absyn_Porton_d_struct*_tmp246=(struct Cyc_Absyn_Porton_d_struct*)
-_tmp235;if(_tmp246->tag != 14)goto _LL11F;}_LL11E:{const char*_tmp3ED;void*_tmp3EC;(
-_tmp3EC=0,Cyc_Tcutil_warn(d->loc,((_tmp3ED="spurious __cyclone_port_on__",
-_tag_dyneither(_tmp3ED,sizeof(char),29))),_tag_dyneither(_tmp3EC,sizeof(void*),0)));}
-goto _LL108;_LL11F: {struct Cyc_Absyn_Portoff_d_struct*_tmp247=(struct Cyc_Absyn_Portoff_d_struct*)
-_tmp235;if(_tmp247->tag != 15)goto _LL121;}_LL120: goto _LL108;_LL121: {struct Cyc_Absyn_Namespace_d_struct*
-_tmp248=(struct Cyc_Absyn_Namespace_d_struct*)_tmp235;if(_tmp248->tag != 10)goto
-_LL123;else{_tmp249=_tmp248->f1;_tmp24A=_tmp248->f2;}}_LL122: {struct Cyc_List_List*
+in_externC  && Cyc_Tc_okay_externC(d->loc,_tmp243->sc,in_externCinclude))_tmp243->sc=
+Cyc_Absyn_ExternC;Cyc_Tc_tcDatatypedecl(te,ge,loc,_tmp243);goto _LL108;_LL11B: {
+struct Cyc_Absyn_Enum_d_struct*_tmp244=(struct Cyc_Absyn_Enum_d_struct*)_tmp235;
+if(_tmp244->tag != 8)goto _LL11D;else{_tmp245=_tmp244->f1;}}_LL11C: if(in_externC
+ && Cyc_Tc_okay_externC(d->loc,_tmp245->sc,in_externCinclude))_tmp245->sc=Cyc_Absyn_ExternC;
+Cyc_Tc_tcEnumdecl(te,ge,loc,_tmp245);goto _LL108;_LL11D: {struct Cyc_Absyn_Porton_d_struct*
+_tmp246=(struct Cyc_Absyn_Porton_d_struct*)_tmp235;if(_tmp246->tag != 14)goto
+_LL11F;}_LL11E:{const char*_tmp3ED;void*_tmp3EC;(_tmp3EC=0,Cyc_Tcutil_warn(d->loc,((
+_tmp3ED="spurious __cyclone_port_on__",_tag_dyneither(_tmp3ED,sizeof(char),29))),
+_tag_dyneither(_tmp3EC,sizeof(void*),0)));}goto _LL108;_LL11F: {struct Cyc_Absyn_Portoff_d_struct*
+_tmp247=(struct Cyc_Absyn_Portoff_d_struct*)_tmp235;if(_tmp247->tag != 15)goto
+_LL121;}_LL120: goto _LL108;_LL121: {struct Cyc_Absyn_Namespace_d_struct*_tmp248=(
+struct Cyc_Absyn_Namespace_d_struct*)_tmp235;if(_tmp248->tag != 10)goto _LL123;
+else{_tmp249=_tmp248->f1;_tmp24A=_tmp248->f2;}}_LL122: {struct Cyc_List_List*
 _tmp25E=te->ns;struct Cyc_List_List*_tmp3EE;struct Cyc_List_List*_tmp25F=((struct
 Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_append)(
 _tmp25E,((_tmp3EE=_cycalloc(sizeof(*_tmp3EE)),((_tmp3EE->hd=_tmp249,((_tmp3EE->tl=

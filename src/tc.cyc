@@ -874,10 +874,11 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     }
 }
 
-static bool okay_externC(seg_t loc, scope_t sc) {
+static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
   switch (sc) {
   case Static:
-    warn(loc,"static declaration nested within extern \"C\"");
+    if(!in_include)
+      warn(loc,"static declaration nested within extern \"C\"");
     return false;
   case Abstract:
     warn(loc,"abstract declaration nested within extern \"C\"");
@@ -937,12 +938,12 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       terr(loc,"top level alias declarations are not implemented");
       break;
     case &Var_d(vd):
-      if (in_externC && okay_externC(d->loc,vd->sc))
+      if (in_externC && okay_externC(d->loc,vd->sc,in_externCinclude))
 	vd->sc = ExternC;
       tcVardecl(te,ge,loc,vd,check_var_init,in_externCinclude,exports);
       break;
     case &Fn_d(fd):
-      if (in_externC && okay_externC(d->loc,fd->sc))
+      if (in_externC && okay_externC(d->loc,fd->sc,in_externCinclude))
 	fd->sc = ExternC;
       tcFndecl(te,ge,loc,fd,in_externCinclude,exports);
       break;
@@ -950,17 +951,17 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       tcTypedefdecl(te,ge,loc,td);
       break;
     case &Aggr_d(ad):
-      if (in_externC && okay_externC(d->loc,ad->sc))
+      if (in_externC &&  okay_externC(d->loc,ad->sc,in_externCinclude))
 	ad->sc = ExternC;
       tcAggrdecl(te,ge,loc,ad);
       break;
     case &Datatype_d(tud):
-      if (in_externC && okay_externC(d->loc,tud->sc))
+      if (in_externC && okay_externC(d->loc,tud->sc,in_externCinclude))
 	tud->sc = ExternC;
       tcDatatypedecl(te,ge,loc,tud);
       break;
     case &Enum_d(ed):
-      if (in_externC && okay_externC(d->loc,ed->sc))
+      if (in_externC && okay_externC(d->loc,ed->sc,in_externCinclude))
         ed->sc = ExternC;
       tcEnumdecl(te,ge,loc,ed);
       break;
