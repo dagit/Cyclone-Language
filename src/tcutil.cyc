@@ -1384,31 +1384,6 @@ void check_unique_tvars(segment loc, list<tvar> tvs) {
   check_unique_unsorted(tvar_cmp,tvs,loc,"duplicate type variable");
 }
 
-// remove the field name f from a list of fields -- return the field
-// and the mutated list.
-xenum exn {MissingField};
-
-$($(field_name,tqual,typ)@,list<$(field_name,tqual,typ)@>)@
-remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
-  if (fs == null) 
-    throw MissingField;
-  if (String::zstrcmp(f,fs->hd[0]) == 0)
-    return (&$(fs->hd,fs->tl));
-  _ orig = fs;
-  _ prev = fs;
-  fs = fs->tl;
-  while (fs != null) {
-    if (String::zstrcmp(f,fs->hd[0]) == 0) {
-      prev->tl = fs->tl;
-      return(&$(fs->hd,orig));
-    } else {
-      prev = fs;
-      fs = fs->tl;
-    }
-  }
-  throw MissingField;
-}
-
 // take a list of $(list<designator>,`a) things corresponding to a struct.
 // ensure the struct is not abstract.
 //  * check that each list<designator> has exactly one element which is a 
