@@ -140,6 +140,15 @@ ARCHDIR:=bin/genfiles/$(TARGET)
 UPDATEARCH:=$(TARGET)
 endif
 update: 
+	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
+	  cd bin/genfiles; echo "UPDATING REFERENCE ARCH $(UPDATEARCH)";\
+	  for arch in $(ALL_ARCHS); do\
+	    echo "EXTRACTING $$arch"; ./extract_patch $(PATCH_ARCH) $$arch;\
+	  done; cd ../..;\
+	elif [ -f "$(ARCHDIR).patch" ]; then\
+	  cd bin/genfiles; echo "EXTRACTING $(UPDATEARCH)";\
+	  ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
+	fi
 	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
 	@for i in $(C_LIBS); do (cmp -s $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i || (echo UPDATING $(LIBDIR)/$$i; cp $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i)) done
 	@cmp -s $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c || (echo UPDATING $(LIBDIR)/nogc.c; cp $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c)
@@ -150,31 +159,52 @@ ifndef TARGET
 	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
 endif
+	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
+	  for arch in $(ALL_ARCHS); do\
+	    if [ -f "bin/genfiles/$$arch.patch" ]; then\
+	      echo "PATCHIFYING $$arch";\
+	      $(MAKE) -s -C bin/genfiles $$arch.patch && \
+	      $(RM) -rf bin/genfiles/$$arch;\
+	    fi;\
+	  done;\
+	elif [ -f "$(ARCHDIR).patch" ]; then\
+	  echo "PATCHIFYING $(UPDATEARCH)";\
+	  $(MAKE) -s -C bin/genfiles $(UPDATEARCH).patch && \
+	  $(RM) -rf $(ARCHDIR);\
+	fi
 
 # This will compile (C files) and update for all supported architectures
 #   and then compile and install for all supported architectures
-#   We need to extract all directories from their patches before doing
-#   this; then we can restore them.
+#   We update the PATCH_ARCH first, so that the other updates
+#   will create patches relative to the updated reference architecture.
+# FIX: this will cause patched directories to be extracted twice; that
+#   is, they will be extracted (and re-patchified) when we update the
+#   reference architecture and then extracted and patchified again
+#   when we update the patched directory itself.  Need to properly
+#   communicate between update_all_archs and update for this to
+#   work properly.
 update_all_archs: 
-	cd bin/genfiles; for arch in $(ALL_ARCHS); do\
-	   ./extract_patch $(PATCH_ARCH) $$arch;\
-	done; cd ../..;
-	for arch in $(ALL_ARCHS); do\
-	  if [ "$$arch" != "$(ARCH)" ]; then\
-	    if [ ! -d "$$arch" ]; then mkdir $$arch; fi;\
-            $(MAKE) -C lib TARGET=$$arch $$arch;\
-	    $(MAKE) -C src TARGET=$$arch $$arch;\
-	    $(MAKE) update TARGET=$$arch;\
-	  else\
-	    $(MAKE) cyclone_src;\
-	    $(MAKE) update;\
+	@if [ "$(PATCH_ARCH)" != "$(ARCH)" ]; then\
+	  if [ ! -d "$(PATCH_ARCH)" ]; then mkdir $(PATCH_ARCH); fi;\
+          $(MAKE) -C lib TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\
+	  $(MAKE) -C src TARGET=$(PATCH_ARCH) $(PATCH_ARCH);\
+	  $(MAKE) update TARGET=$(PATCH_ARCH);\
+	else\
+	  $(MAKE) cyclone_src;\
+	  $(MAKE) update;\
+	fi;
+	@for arch in $(ALL_ARCHS); do\
+	  if [ "$$arch" != "$(PATCH_ARCH)" ]; then\
+	    if [ "$$arch" != "$(ARCH)" ]; then\
+	      if [ ! -d "$$arch" ]; then mkdir $$arch; fi;\
+              $(MAKE) -C lib TARGET=$$arch $$arch;\
+	      $(MAKE) -C src TARGET=$$arch $$arch;\
+	      $(MAKE) update TARGET=$$arch;\
+	    else\
+	      $(MAKE) cyclone_src;\
+	      $(MAKE) update;\
+	    fi;\
 	  fi;\
-	done
-	cd bin/genfiles; for arch in $(ALL_ARCHS); do\
-	   if [ -f "$$arch.patch" ]; then\
-	     $(MAKE) $$arch.patch && \
-	     $(RM) -rf $$arch;\
-	   fi;\
 	done
 
 # affected by CYCC and OUT_PREFIX

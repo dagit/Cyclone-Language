@@ -1,7 +1,5 @@
 include ../../Makefile.inc
 
-# FIX: removing install_path.c and install_path.o every time isn't right.
-
 # I don't why these need to be repeated here, but they do
 CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
 CYC_BIN_PATH=$(CYCDIR)/bin
@@ -10,8 +8,8 @@ CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
 
 # general targets
 
-install: install_lib install_comp
-
+install: $(ARCH) install_lib install_comp
+	if [ -f "$(ARCH).patch" ]; then $(RM) -rf $(ARCH); fi
 install_lib: $(ARCH)/lib/$(CYCLIB) $(ARCH)/lib/nogc.a
 	cp $^ $(CYC_LIB_PATH)
 install_a: $(ARCH)/lib/libcyc_a.a
@@ -21,6 +19,8 @@ install_comp: $(ARCH)/src/cyclone$(EXE)
 
 # architecture-specific targets
 
+$(ARCH):
+	extract_patch $(PATH_ARCH) $(ARCH)
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
 	ar rcs $@ $^
