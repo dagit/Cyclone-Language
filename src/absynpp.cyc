@@ -1670,8 +1670,17 @@ bool exists_temp_tvar_in_effect(type_t t) {
    function parameters where gcc does not like them. */
 bool is_anon_structtype(type_t t) {
   switch (t) {
-  case &StructType(NULL,_,_): return true; // FIX: is this even possible??
-  case &AnonStructType(_): return true;
+  case &StructType(NULL,_,_):
+    /* FIX: is this case even possible now that we have AnonStructType ?? */
+    return true;
+  case &AnonStructType(_):
+    return true;
+  case &TypedefType(_,_,NULL):
+    return false;
+  case &TypedefType(_,_,x):
+    /* This won't loop if the types come from a .cyc file,
+       because typedefs in Cyclone (or C) can't be recursive */
+    return is_anon_structtype(x->v);
   default: return false;
   }
 }
