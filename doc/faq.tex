@@ -1,0 +1,902 @@
+\section{Frequently Asked Questions}
+
+\paragraph{What does \texttt{\$({\it type}$_1$,{\it type}$_2$)} mean?
+What does \texttt{\$({\it exp}$_1$, {\it exp}$_2$)} mean?}
+
+Cyclone has \emph{tuples}, which are anonymous structs with fields
+numbered 0, 1, 2, \ldots.  For example, \texttt{\$(int,string_t)} is a
+pair of an \texttt{int} and a \texttt{string_t}.  An example value of
+this type is \texttt{\$(4,"cyclone")}.  To extract a field from a
+tuple, you use array-like notation: you write \texttt{x[0]}, not
+\texttt{x.0}.
+
+\paragraph{What does \texttt{int @} mean?}
+
+In Cyclone \texttt{@} is a pointer that is guaranteed not to be
+\texttt{null}.  The Cyclone compiler guarantees through static or
+dynamic checks.  For example,
+\begin{verbatim}
+  int *x = null;
+\end{verbatim}
+will typecheck, but
+\begin{verbatim}
+  int @x = null;
+\end{verbatim}
+will not.
+
+\paragraph{What does \texttt{int *\lb 37\rb} mean?}
+
+This is the type of pointers to a sequence of at least 37 integers.
+The extra length information is used by Cyclone to prevent buffer
+overflows.  For example, Cyclone will compile
+\texttt{x[\textup{\textit{expr}}]} into code that will evaluate
+\textit{expr}, and check that the result is less than 37 before
+accessing the element.  Note that \texttt{int *} is just shorthand for
+\verb|int *{1}|.  Currently, the expression in the braces must be a
+compile-time constant.
+
+\paragraph{What does \texttt{int *`r} mean?}
+
+This is the type of a pointer to an \texttt{int} in region
+\texttt{`r}.  A region is just a group of objects with the same
+lifetime---all objects in a region are freed at once.  Cyclone uses
+this region information to prevent dereferencing a pointer into a
+previously freed region.  Regions can have a ``nested'' structure, for
+example, if the region for a function parameter is a variable, then
+the function may assume that the parameter points into a region whose
+lifetime includes the lifetime of the function.
+
+\paragraph{What does \texttt{`H} mean?}
+
+This is Cyclone heap region: objects in this region cannot be
+explicitly freed, only garbage collected.  Effectively, this means
+that pointers into the heap region can always be safely dereferenced;
+conceptually, objects in the heap last ``forever,'' since they are
+always available if needed; garbage collection is like an optimization
+that frees objects after they are no longer needed.  Note that
+\texttt{int *} is just shorthand for \texttt{int *`H}.
+
+\paragraph{What does \texttt{int @\lb 37\rb `r} mean?}
+
+A pointer can come with all or none of the nullity, bound, and region
+annotation.  This type is the type of non-\texttt{null} pointers to
+at least 37 consecutive integers in region \texttt{`r}.  When the
+bound is omitted it default to 1, and when the region is omitted
+it defaults to \texttt{`H}.
+
+\paragraph{What does \texttt{int ?} mean?}
+
+The \texttt{?} a special kind of pointer that carries along bounds
+information.  It is a ``questionable'' pointer: it might be null or
+pointing out of bounds.  An \texttt{int ?} is a pointer to an integer,
+along with some information that allows Cyclone to check whether the
+pointer is in bounds at run-time.  These are the only kinds of
+pointers that you can use for pointer arithmetic in Cyclone.
+
+\paragraph{What does \texttt{`a} mean?}
+
+\texttt{`a} is a \emph{type variable}.  Type variables are typically
+used in polymorphic functions.  For example, if a function takes a
+parameter of type \texttt{`a}, then the function can be called with a
+value of \emph{any} suitable type.  If there are two arguments of type
+\texttt{`a}, then any call will have to give values of the same type
+for those parameters.  And if the function returns a type \texttt{`a},
+then it must return a result of the same type as the the argument.
+Syntactically, a type variable is any identifier beginning with
+\texttt{`} (backquote).
+
+\paragraph{What is a ``suitable'' type for a type variable?}
+
+The last question said that a type variable can stand for a
+``suitable'' type.  Unfortunately, not all types are ``suitable.''
+Briefly, the ``suitable'' types are those that fit into a general
+purpose machine register, typically including \texttt{int}, pointers,
+\texttt{tunion} types, and \texttt{xtunion} types.  Non-suitable types
+include \texttt{float}, \texttt{struct} types (which can be of
+arbitrary size), tuples, and questionable pointers.
+Technically, the suitable types are the types of ``box kind,''
+described below.
+
+\paragraph{How do I cast from \texttt{void *}?}
+
+You can't do this in Cyclone.  A \texttt{void *} in C really does not
+point to \texttt{void}, it points to a value of some type.  However,
+when you cast from a \texttt{void *} in C, there is no guarantee that
+the pointer actually points to a value of the expected type.  This can
+lead to crashes, so Cyclone doesn't permit it.  Cyclone's
+polymorphism and tagged unions can often be used in places where C
+needs to use \texttt{void *}, and they are safe.
+
+\paragraph{What does _ (underscore) mean in types?}
+
+Underscore is a ``wild card'' type.  It stands for some type that the
+programmer doesn't want to bother writing out; the compiler is
+expected to fill in the type for the programmer.  Sometimes, the
+compiler isn't smart enough to figure out the type (you will get an
+error message if so), but usually there is enough contextual
+information for the compiler to succeed.  For example, if you write
+\begin{verbatim}
+  _ x = new Pair(3,4);
+\end{verbatim}
+the compiler can easily infer that the wild card stands for
+\texttt{struct Pair @}.  In fact, if \texttt{x} is later assigned
+\texttt{null}, the compiler will infer that \texttt{x} has type
+\texttt{struct Pair *} instead.
+
+Note, \texttt{_} is not allowed as part of top-level declarations.
+
+\paragraph{In particular, what does \texttt{int *_} mean?}
+
+Here the wild card ranges over the region of the pointer.  This use of
+the wild card is important in making the region system easier to use.
+For example, in Cyclone you cannot write the following local declarations:
+\begin{verbatim}
+  int x;
+  int *y = &x;
+\end{verbatim}
+This is because local declarations live on the stack, and \texttt{int
+  *} is short for \texttt{int *`H}, the type of pointers to integers
+in the heap region.  Here \texttt{y} points to an integer on the
+stack, so the second declaration doesn't type check.  To get it to
+type check, you can put in the name of the local stack region, but it
+is simpler to use the wild card:
+\begin{verbatim}
+  int *_ y = &x;
+\end{verbatim}
+Of course, you could have also used
+\begin{verbatim}
+  _ y = &x;
+\end{verbatim}
+or
+\begin{verbatim}
+  let y = &x;
+\end{verbatim}
+but you might want to write down the additional type information for
+documentation.
+
+\paragraph{What do \texttt{`a::B}, \texttt{`a::M}, \texttt{`a::A},
+  \texttt{`a::R}, and \texttt{`a::E} mean?}
+
+Types are divided into different groups, which we call kinds.  There
+are five different kinds: B (for Box), M (for Memory), A (for Any), R
+(for Region), and E (for Effect).  The notation
+\texttt{typevar}\texttt{::}\textit{kind} says that a type variable
+belongs to a kind.  A type variable can only be instantiated by types
+that belong to its kind.
+
+Box types include \texttt{int}, pointers (except for questionable
+pointers) tagged unions, and extensible tagged unions.
+Memory types include all box types, tuples, \texttt{tunion} and
+\texttt{xtunion} variants, and non-abstract structs.
+Any types include all types that don't have kind Region or Effect.
+Region types are regions, i.e., the heap and stack regions.
+Effect types are sets of regions (these are explained elsewhere).
+
+\paragraph{What does it mean when type variables don't have explicit
+  kinds?}
+
+Every type variable has a kind, but usually the programmer doesn't
+have to write it down.  In function prototypes, the compiler will
+infer the most permissive kind.  For example,
+\begin{verbatim}
+  void f(`a *`b x, `c * y, `a z);
+\end{verbatim}
+is shorthand for
+\begin{verbatim}
+void f(`a::B *`b::R x, `c::M * y, `a::B z)
+\end{verbatim}
+In type definitions, no inference is performed: an omitted kind is
+shorthand for \texttt{::B}.  For example,
+\begin{verbatim}
+struct S<`a,`r::R> { `a *`r x; };
+\end{verbatim}
+is shorthand for
+\begin{verbatim}
+struct S<`a::B,`r::R> { `a *`r x;};
+\end{verbatim}
+but
+\begin{verbatim}
+struct S<`a,`r>{`a *`r x;};
+\end{verbatim}
+is not.
+
+\paragraph{What does \texttt{struct List<`a,`r::R>} mean?}
+
+\texttt{struct List} takes a type of box kind and a region and
+produces a type.  For example, \texttt{struct List<int, `H>} is a
+type, and \texttt{struct List<struct List<int,`H>@, `H>} is a type.
+\texttt{struct List<`a,`r::R>} is a list whose elements all have type
+\texttt{`a} and live in region \texttt{`r}.
+
+\paragraph{What are \texttt{tunion} and \texttt{xtunion}?}
+
+These are Cyclone's tagged union and extensible tagged union types.
+In C, when a value has \texttt{union} type, you know that in fact it
+has one of the types of the union's fields, but there is no guarantee
+which one.  This can lead to crashes in C\@.  Cyclone's tagged unions
+are like C unions with some additional information that lets the
+Cyclone compiler determine what type the underlying value actually
+has, thus helping to ensure safety.
+
+\paragraph{How do I make a struct with function-pointer fields?}
+
+Follow this arcane format:
+\begin{verbatim}
+  struct S<`e1::E, `e2::E> {
+    void f1(int,int; `e1);
+    int f2(; `e2);
+  };
+  typedef S<{},{}> s_t;
+\end{verbatim}
+You will find more explanation where we discuss memory management.
+
+\paragraph{What is \texttt{abstract}?}
+
+\texttt{abstract} is a storage-class specifier, like \texttt{static}
+or \texttt{extern}.  When attached to a top-level type declaration, it
+means that other files can use the type but cannot look at the
+internals of the type (e.g., other files cannot access the fields of
+an abstract struct).  Otherwise, abstract has the same meaning as the
+\texttt{auto} (default) storage class.  Hence \texttt{abstract} is a
+way to state within a Cyclone file that a type's representation cannot
+be exported.
+
+\paragraph{What are the Cyclone keywords?}
+
+In addition to the C keywords, the following have special meaning and
+cannot be used as identifiers: \texttt{abstract}, \texttt{catch},
+\texttt{codegen}, \texttt{cut}, \texttt{fallthru}, \texttt{fill},
+\texttt{fprintf}, \texttt{fscanf}, \texttt{let}, \texttt{malloc},
+\texttt{namespace}, \texttt{new}, \texttt{null}, \texttt{printf},
+\texttt{rmalloc}, \texttt{rnew}, \texttt{sscanf}, \texttt{splice},
+\texttt{throw}, \texttt{try}, \texttt{tunion}, \texttt{using},
+\texttt{xprintf}, \texttt{xscanf}, \texttt{xtunion}.  As in gcc,
+\texttt{__attribute__} is reserved as well.
+
+\paragraph{What are \texttt{namespace} and \texttt{using}?}
+
+These constructs provide a convenient way to help avoid name clashes.
+namespace X prepends X:: to the declarations in its body (rest of file
+in case of namespace X;) and using X makes the identifiers prepended
+with X:: available without having to write the X::.  A longer
+explanation and list of common pitfalls is here.
+
+\paragraph{What is \texttt{fallthru}?}
+
+In Cyclone, you cannot implicitly fall through from one switch case to
+the next (a common source of bugs in C).  Instead, you must explicitly
+fall through with a \texttt{fallthru} statement.  So, to port C code,
+place \texttt{fallthru;} at the end of each case that implicitly falls
+through; note that \texttt{fallthru} may not appear in the last case
+of a \texttt{switch}.
+
+\texttt{fallthru} is useful for more than just catching bugs.  For
+instance, it can appear anywhere in a case; its meaning is to
+immediately goto the next case.  Second, when the next case of the
+\texttt{switch} has pattern variables, a \texttt{fallthru} can (and
+must) be used to specify expressions that will be bound to those
+variables in the next case.  Hence \texttt{fallthru} is more powerful
+(but more verbose) than ``or patterns'' in ML\@.
+
+\paragraph{What is \texttt{new}?}
+
+\texttt{new} \textit{expr} allocates space in the heap region,
+initializes it with the result of evaluating \texttt{expr}, and
+returns a pointer to the space.  It is roughly equivalent to
+\begin{alltt}
+ \textit{type} @temp = malloc(sizeof(\textit{type}));
+ *temp = \textit{expr};
+\end{alltt}
+where \texttt{type} is the type of \textit{expr}.  You can also write
+\begin{alltt}
+  new \lb for i < \textit{expr}\(\sb{1}\) : \textit{expr}\(\sb{2}\) \rb
+\end{alltt}
+to heap-allocate an array of size \textit{expr}$_1$ with the
+\texttt{i}$^{\rm th}$ element initialized to \textit{expr}$_2$ (which
+may mention \texttt{i}).
+
+\paragraph{How do I use tuples?}
+
+A tuple type is written
+\texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$)}.
+A value of the type is constructed by
+\texttt{\$(\textit{expr}$_1$, \ldots, \textit{expr}$_n$)}.
+where \textit{expr}$_i$ has type \textit{type}$_i$.  
+If \textit{expr} has type
+\texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$)},
+you can extract the component \texttt{i} using
+\textit{expr}\texttt{[i]}.
+The expression in the brackets must be a compile-time constant.  In
+short, tuples are like anonymous structs where you use
+\textit{expr}\texttt{[i]} to extract fields instead of
+\textit{expr}\texttt{.i}.
+There is no analogue of the \texttt{->} syntax that can be used with
+pointers of structs; if 
+\textit{expr} has type
+\texttt{\$(\textit{type}$_1$, \ldots, \textit{type}$_n$) *},
+you can extract component \texttt{i} by \texttt{(*\textit{expr})[i]}.
+
+\paragraph{What is \texttt{\{for i < {\it expr}$_1$ : {\it expr}$_2$\}}?}
+
+This is an array initializer.  It can appear where array
+initializers appear in C, and it can appear as the argument to
+\texttt{new}.
+i
+is an identifier.  e1 is an unsigned int indicating the size of the
+array.  e2 is evaluated e1 times, with i having values 0, 1, ..., e1-1
+and the result initializes the ith element of the array.  The form new
+{for i < e1 : e2} allocates space for a new array and initializes it
+as just described.  This form is the only way to create arrays whose
+size depends on run-time information.  When {for i < e1: e2} is not an
+argument to new, e1 must be constant and e2 may not mention i.  This
+restriction includes all uses at top-level (for global variables).
+
+\paragraph{How do I throw and catch exceptions?}
+
+A new exception is declared as in 
+\begin{verbatim}
+  xtunion exn { MyExn };
+\end{verbatim}
+The exception can be thrown with the statement
+\begin{verbatim}
+  throw MyExn;
+\end{verbatim}
+You can catch the expression with a \texttt{try}/\texttt{catch}
+statement:
+\begin{alltt}
+  try {\it statement}\(\sb{1}\) catch \lb case MyExn: {\it statement}\(\sb{2}\) \rb
+\end{alltt}
+If {\it statement}$_1$ throws an \texttt{MyExn} and no inner
+\texttt{catch} handles it, control transfers to 
+{\it statement}$_2$.
+
+The \texttt{catch} body can have any number of \texttt{case} clauses.
+If none match, the exception is re-thrown.
+
+Exceptions can carry values with them.  For example, here's how to
+declare an exception that carries an integer:
+\begin{verbatim}
+  xtunion exn { MyIntExn(int) };
+\end{verbatim}
+Values of such exceptions must be heap-allocated.  For example, you
+can create and throw a \texttt{MyIntExn} exception with
+\begin{verbatim}
+  throw new MyIntExn(42);
+\end{verbatim}
+To catch such an exception you must use an \texttt{\&}-pattern:
+\begin{alltt}
+  try {\it statement}\(\sb{1}\)
+  catch \lb
+    case &MyIntExn(x): {\it statement}\(\sb{2}\)
+  \rb
+\end{alltt}
+When the exception is caught, the integer value is bound to \texttt{x}.
+
+The \texttt{exn} type is just a pre-defined \texttt{xtunion} type.
+Therefore, all the standard rules for extending, creating objects, and
+destructing objects of an xtunion type apply.
+
+\paragraph{How efficient is exception handling?}
+
+Entering a \texttt{try} block is implemented using \texttt{setjmp}.
+Creating an \texttt{xtunion} requires a heap allocation.  Throwing an
+exception is implemented with \texttt{longjmp}.  Pattern-matching an
+\texttt{xtunion} against each case variant in the catch clause is a
+pointer-comparsion.  In short, exception handling is fairly
+lightweight.
+
+\paragraph{What does \texttt{let} mean?}
+
+In Cyclone, \texttt{let} is used to declare variables.  For example,
+\begin{verbatim}
+  let x,y,z;
+\end{verbatim}
+declares the three variables \texttt{x}, \texttt{y}, and \texttt{z}.
+The types of the variables do not need to be filled in by the
+programmer, they are filled in by the compiler's type inference
+algorithm.  The \texttt{let} declaration above is equivalent to
+\begin{verbatim}
+  _ x;
+  _ y;
+  _ z;
+\end{verbatim}
+
+There is a second kind of \texttt{let} declaration, with form
+\begin{alltt}
+  let {\it pattern} = {\it expr};
+\end{alltt}
+It evaluates \textit{expr} and matches it against \texttt{pattern},
+initializing the pattern variables of \textit{pattern} with values
+drawn from \texttt{expr}.  For example,
+\begin{verbatim}
+  let x = 3;
+\end{verbatim}
+declares a new variable \texttt{x} and initializes it to 3, and
+\begin{verbatim}
+  let $(y,z) = $(3,4);
+\end{verbatim}
+declares new variables \texttt{y} and \texttt{z}, and initializes
+\texttt{y} to 3 and \texttt{z} to 4.
+
+\paragraph{What is a pattern and how do I use it?}
+
+Cyclone's patterns are a convenient way to destructure aggregate
+objects, such as structs and tuples.  They are also the only way to
+destructure tagged unions.  Patterns are used in Cyclone's
+\texttt{let} declarations, \texttt{switch} statements, and
+\texttt{try}/\texttt{catch} statements.
+
+\paragraph{What does _ mean in a pattern?}
+
+It is a wild card pattern, matching any value.  For example, if
+\texttt{f} is a function that returns a pair, then
+\begin{verbatim}
+  let $(_,y) = f(5); 
+\end{verbatim} %$ <-- this dollar comment fixes up font highlighting
+is a way to extract the second element of the pair and bind it to a
+new variable \texttt{y}.
+
+\paragraph{What does it mean when a function has an argument with type \texttt{`a}?}
+
+Any type that looks like \texttt{`} (backquote) followed (without
+whitespace) by an identifier is a type variable.  If a function
+parameter has a type variable for its type, it means the function can
+be called with any pointer or with an int.  However, if two parameters
+have the same type variable, they must be instantiated with the same
+type. If all occurrences of `a appear directly under pointers (eg. `a
+*), then an actual parameter can have any type, but the restrictions
+about using the same type still apply.  In general, Cyclone has
+parametric polymorphism as a safe alternative to casts and void *.
+
+\paragraph{Do functions with type variables get duplicated like C++
+  template functions?  Is there run-time overhead for using type
+  variables?}
+
+No and no.  Each Cyclone function gives rise to one function in the
+output, and types are not present at run-time.  When a function is
+called, it does not need to know the types with which the caller is
+instantiating the type variables, so no instantiation actually
+occurs---the types are not present at run-time.  We do not have to
+duplicate the code because we either know the size of the type or the
+size does not matter.  This is why we don't allow type variables of
+memory kind as parameters---doing so would require code duplication or
+run-time types.
+
+\paragraph{Can I use varargs?}
+
+Yes, Cyclone has a way of supporting variable-argument functions.  It
+is not quite the same as C's, but it is safe.
+
+\paragraph{Why can't I declare types within functions?}
+
+We just haven't implemented this support yet.  For now, you need to
+hoist type declarations and typedefs to the top-level.
+
+\paragraph{What casts are allowed?}
+
+Cyclone doesn't support all of the casts that C does, because
+incorrect casts can lead to crashes.  Instead, Cyclone supports a safe
+subset of C's casts.  Here are some examples.
+
+All of C's numeric casts, conversions, and promotions are unchanged.
+
+You can always cast between
+\textit{type}\texttt{@}\lb\textit{const}\rb,
+\textit{type}\texttt{*}\lb\textit{const}\rb, and
+\textit{type}\texttt{?}.
+A cast from 
+\textit{type}\texttt{?}
+to one of the other types includes a run-time check that the pointer
+points to a sequence of at least \textit{const} objects.
+A cast to
+\textit{type}\texttt{@}\lb\textit{const}\rb
+from one of the
+other types includes a run-time check that the pointer is not
+\texttt{null}.
+No other casts between these type have run-time checks.
+A failed run-time check throws \texttt{Null_Exception}.
+A pointer into the heap can be cast to a pointer into another region.
+A pointer to a \texttt{struct} or \texttt{tuple} can be
+cast to a pointer to another \texttt{struct} or \texttt{tuple}
+provided the ``target type'' 
+is \emph{narrower} (it has fewer fields after ``flattening out'' nested
+\texttt{structs} and \texttt{tuples}) and each (flattened out) field
+of the target type could be the target of a cast from the
+corresponding field of the source type.
+A pointer can be cast to \texttt{int}.
+The type
+\textit{type}\texttt{*}\lb\textit{const}$_1$\rb
+can be cast to
+\textit{type}\texttt{*}\lb\textit{const}$_2$\rb
+provided
+$\textit{const}_2 < \textit{const}_1$, and similarly for
+\textit{type}\texttt{@}\lb\textit{const}$_1$\rb
+and
+\textit{type}\texttt{@}\lb\textit{const}$_2$\rb.
+
+An object of type \texttt{tunion T.A} can be cast to \texttt{tunion T}
+if \texttt{A} does not carry values.  An object of type tunion
+\texttt{T.A@} can be cast to \texttt{tunion T} if \texttt{A} does
+carry values.  The current implementation isn't quite as lenient as it
+should be.  For example, it rejects a cast from \texttt{int *\lb 4\rb} to
+\texttt{\$(int,int)*\lb 2\rb}, but this cast is safe.
+
+\paragraph{Why can't I implicitly fall-through to the next
+  \texttt{switch} case?} 
+
+We wanted to add an explicit \texttt{fallthru} construct in
+conjunction with pattern matching, and we decided to enforce use of
+\texttt{fallthru} in all cases because this is a constant source of
+bugs in C code.
+
+\paragraph{Do I have to initialize global variables?}
+
+Yes, you currently must provide explicit initializers for global
+variables so that the compiler is can be sure that uninitialized
+memory is not read.  In the future, we expect to provide some support
+for initializing globals in constructor functions.  Two techniques
+help with initializing global arrays.  First, if an array element
+could be 0 or null, the compiler will insert 0 for any elements you do
+not specify.  For example, you can write
+\begin{verbatim}
+  int x[37] = {};
+\end{verbatim}
+to declare a global array \texttt{x} initialized with 37 elements, all 0.
+Second, you can use
+the comprehension form
+\begin{alltt}
+  int x[37] = \lb for i < \textit{expr}\(\sb{1}\) : \texttt{expr}\(\sb{2}\) \rb
+\end{alltt}
+provided that 
+\textit{expr}$_1$ and
+\textit{expr}$_2$ and
+constant expressions.
+Currently, \textit{expr}$_2$ may not use the variable \texttt{i}, but
+in the future it will be able to.  Note that it is not possible to
+have a global variable of an abstract type because it is impossible to
+know any constant expression of that type.
+
+\paragraph{Are there threads?}
+
+Cyclone does not yet have a threads library and some of the libraries
+are not re-entrant.  However, it should be fine to call Cyclone code
+from multiple C threads (provided the garbage collector is correctly
+configured).  In the future, we will support threads directly as well
+as static analysis for preventing data races.
+
+\paragraph{Can I use \texttt{setjmp} and \texttt{longjmp}?}
+
+No.  However, Cyclone has exceptions, which can be used for non-local
+control flow.  The problem with \texttt{setjmp} and \texttt{longjmp}
+is that safety demands we prohibit a \texttt{longjmp} to a place no
+longer on the stack.  A future release may have more support for
+non-local control flow.
+
+\paragraph{What types are allowed for union members?}
+
+Currently, \texttt{union} members cannot contain pointers.  You can
+have numeric types (including bit fields and enumerations), structs
+and tuples of allowable union-member types, and other unions.
+
+\paragraph{Why can't I do anything with values of type \texttt{void *}?}
+
+Because we cannot know the size of an object pointed to by a pointer
+of type void *, we prohibit derefencing the pointer or casting it to a
+different pointer type.  To write code that works for all pointer
+types, use type variables and polymorphism.  Tagged unions can also
+substitute in some cases where \texttt{void *} is used in C\@.
+
+\paragraph{What is xprintf?}
+
+The \texttt{xprintf} function prints just like \texttt{printf}, but
+the output is placed in a new string allocated on the heap.
+
+\paragraph{Is there sscanf?}
+
+Not yet. 
+
+\paragraph{How do I access command-line arguments?}
+
+The type of \texttt{main} should be
+\begin{verbatim}
+  int main(int argc, char ?? argv);
+\end{verbatim}
+As in C, \texttt{argc} is the number of command-line arguments and
+\texttt{argv[i]} is a string with the \texttt{i}$^{\rm th}$ argument.
+Unlike C, \texttt{argv} and each element of \texttt{argv} carry bounds
+information.  Note that \texttt{argc} is redundant---it is always
+equal to \texttt{argv.size}.
+
+\paragraph{Why can't I pass a stack pointer to certain functions?}
+
+If the type of a function parameter is a pointer without an explicit
+region, the default requires the region to be the heap region,
+\texttt{`H}.  If a parameter can be a stack pointer, just add a region
+variable to indicate this.  For example, instead of
+\begin{verbatim}
+  int f(int *x);
+\end{verbatim}
+declare
+\begin{verbatim}
+  int f(int *`r x);
+\end{verbatim}
+
+\paragraph{Why do I get an incomprehensible error when I assign a
+  local's address to a pointer variable?}
+
+If you've declared the type of the variable to be
+\textit{type}\texttt{*}, then you can only assign heap pointers to it.
+Locals are in the stack, not the heap, so you cannot assign a pointer
+to a local into your heap pointer.  The easiest solution is to declare
+the pointer variable to have type \textit{type}\texttt{*_}, or type
+\texttt{_}, or use \texttt{let} to declare the variable.
+
+\paragraph{How much pointer arithmetic can I do?}
+
+On ``questionable'' pointers (pointers with type
+\textit{type}\texttt{?}), you can add or subtract an int (including
+via increment/decrement), as in C\@.  It is okay for the result to be
+outside the bounds of the object pointed to; it is a run-time error to
+dereference outside of the bounds.  (The compiler inserts bounds
+information and a run-time check; an exception is thrown if the check
+fails.)  Currently, we do not support pointer arithmetic on the other
+pointer types.  As in C, you can subtract two pointers of the same
+type; the type of the result is \texttt{unsigned int}.
+
+\paragraph{What is the type of a literal string?}
+
+The type of the string constant \texttt{"foo"} is \texttt{char @\lb
+  4\rb} (remember the trailing '\\0').  However, there are implicit
+casts from \texttt{char @\lb 4\rb} to \texttt{char @\lb 2\rb},
+\texttt{char *\lb 4\rb}, and \texttt{char ?}, so you shouldn't have to
+think too much about this.
+
+\paragraph{Are strings null terminated?}
+
+Cyclone follows C's lead on this.  String literals lie \texttt{"foo"}
+are null-terminated.  Many of the library functions consider a null
+character to mark the end of a string.  And library functions that
+return strings often ensure that they are null terminated.  However,
+there is no guarantee that a string is null terminated.  For one
+thing, as in C, the terminating null may be overwritten by any
+character.  In C this can be exploited to cause buffer overflows.  To
+avoid this in Cyclone, strings generally have type \texttt{char ?},
+that is, they carry bounds information.  In Cyclone a string ends when
+a null character is found, or when the bounds are exceeded.
+
+\paragraph{Why can't I assign 0 to a pointer?}
+
+We currently distinguish the keyword \texttt{null} from 0, so you have
+to assign \texttt{null} instead of 0.  We hope to be more flexible in
+the future.
+
+\paragraph{How do I use \texttt{malloc}?}
+
+\texttt{malloc} is a Cyclone primitive, not a library function.
+Currently it has an extremely restricted syntax: You must write
+\texttt{malloc(sizeof(\textit{type}))}.  The result has type
+\textit{type}\texttt{@}, so usually there is no need to explicitly
+cast the result (but doing so is harmless).  Usually the construct
+\texttt{new} \textit{expr} is more convenient than malloc followed by
+initialization, but \texttt{malloc} can be useful for certain idioms
+and when porting C code.
+
+Notice that you cannot (yet) use \texttt{malloc} to allocate space for
+arrays (as in the common idiom, \texttt{malloc(n*sizeof({\it type}))}.
+Also, the type-checker uses a conservative analysis to ensure that the
+fields of the allocated space are written before they are used.
+
+\paragraph{Can I call free?}
+
+No, individual memory objects may not be freed.  In future versions,
+we may support freeing objects for which you can prove that there are
+no other pointers to the object.  Until then, you must rely on a
+garbage collector to reclaim heap objects or use regions (similar to
+``arenas'' or ``zones'') for managing collections of objects.
+
+For porting code, you may want to define
+\begin{verbatim}
+  void free(`a a) {}
+\end{verbatim}
+
+\paragraph{Is there a garbage collector?}
+
+Yes, we use the Boehm-Demers-Weiser conservative collector.  If you
+don't want to use the garbage collector (e.g., because you know that
+your program does little or no heap allocation), you can use the
+\texttt{-nogc} flag when linking your executable.  This will make the
+executable smaller.
+
+If you link against additional C code, that code must obey the usual
+rules for conservative garbage collection: no wild pointers and no
+calling \texttt{malloc} behind the collector's back.  Instead, you
+should call \texttt{GC_malloc}.  See the collector's documentation for
+more information.
+
+Note that if you allocate all objects on the stack, garbage collection
+will never occur.  If you allocate all objects on the stack or in
+regions, it is very unlikely collection will occur and nothing will
+actually get collected.
+
+\paragraph{How can I make a stack-allocated array?}
+
+As in C, you declare a local variable with an array type.  Also as in
+C, all uses of the variable, except as an argument to \texttt{sizeof}
+and \texttt{\&}, are promoted to a pointer.  If your declaration is
+\begin{verbatim}
+int x[256];
+\end{verbatim}
+then uses of \texttt{x} have type \texttt{int @`L\lb 256\rb} where
+\texttt{L} is the name of the block in which \texttt{x} is declared.
+(Most blocks are unnamed and the compiler just makes up a name.)
+
+Stack-allocated arrays must be initialized when they are declared
+(unlike other local variables).  Use an array-initializer, as in
+\begin{verbatim}
+  int y[] = { 0, 1, 2, 3 };
+  int z[] = { for i < 256 : i };
+\end{verbatim}
+
+To pass (a pointer to) the array to another function, the function
+must have a type indicating it can accept stack pointers, as explained
+elsewhere.
+
+\paragraph{Can I use \texttt{salloc} or \texttt{realloc}?}
+
+No, neither of these functions are currently provided and it is not
+possible to write them in Cyclone.  Both features are hard to provide
+in a way that is guaranteed safe.
+
+\paragraph{Why do I have to cast from \texttt{*} to \texttt{@} if I've
+  already tested for \texttt{null}?} 
+
+Our compiler is not as smart as you are.  It does not realize that you
+have tested for \texttt{null}, and it insists on a check (the cast)
+just to be sure.  You can leave the cast implicit, but the compiler
+will emit a warning.  In the future, we may define a flow-analysis to
+omit spurious warning.  Because of aliasing and undefined evaluation
+order, a sound analysis is non-trivial.
+
+\paragraph{Why can't a function parameter or struct field have type
+  \texttt{`a::M}?} 
+
+Type variables of memory kind can be instantiated with types of any
+size.  There is no straightforward way to compile a function with an
+argument of arbitrary size.  The obvious way to write such a function
+is to manipulate a pointer to the arbitrary size value instead.  So
+your parameter should have type \texttt{`a::M*} or \texttt{`a::M@}.
+
+\paragraph{Can I see how Cyclone compiles the code?}
+
+The easiest way to do this is to pass the flags \texttt{-save-c} and
+\texttt{-pp} to the compiler.  This instructs the compiler to save the
+C code that it builds and passes to GCC, and print it out using the
+pretty-printer.  You will have to work to make some sense out of the C
+code, though.  It will likely contain many \texttt{extern}
+declarations (because the code has already gone through the
+preprocessor) and generated type definitions (because of tuples,
+tagged unions, and questionable pointers).  Pattern-matching code gets
+translated to a mess of temporary variables and \texttt{goto}
+statements.  Array-bounds checks and \texttt{null} checks can clutter
+array-intensive and pointer-intensive code.  And all \texttt{typedef}s
+are expanded away before printing the output.
+
+\paragraph{Can I use \texttt{gdb} on the output}?
+
+You can try, but doing more than getting a stack trace requires some
+sophistication.  First, you have to know how Cyclone translates
+top-level identifiers to C identifiers (it prepends Cyc_ and separates
+namespaces by _ instead of ::) so you can set breakpoints at
+functions.  Second, it can be hard to print values because many
+Cyclone types get translated to void *.  Third, we do not yet have
+source correlation, so if you step through code, you're stepping
+through C code, not Cyclone code.
+
+Two more hints: First, on some architectures, the first memory
+allocation appears to seg fault in \texttt{GC_findlimit}.  This is
+correct and documented garbage-collector behavior (it handles the
+signal but \texttt{gdb} doesn't know that); simply continue execution.
+Second, a common use of \texttt{gdb} is to find the location of an
+uncaught exception.  To do this, set a breakpoint at \texttt{throw} (a
+function in the Cyclone runtime).
+
+\paragraph{Can I use \texttt{gprof} on the output}?
+
+Yes, just use the \texttt{-pg} flag.  You should also rebuild the
+Cyclone libraries and the garbage collector with the \texttt{-pg}
+flag.  The results of \texttt{gprof} make sense because a Cyclone
+function is compiled to a C function.
+
+Notes for Cygwin users: First, the versions of \texttt{libgmon.a} we
+have downloaded from cygnus are wrong (every call gets counted as a
+self-call).  We have modified libgmon.a to fix this bug, so download
+our version and put it in your cygwin/lib directory.  Second, timing
+information should be ignored because \texttt{gprof} is only sampling
+100 or 1000 times a second (because it is launching threads instead of
+using native Windows profiling).  Neither of these problems are
+Cyclone-specific.
+
+\paragraph{Is there an Emacs mode for Cyclone?}
+
+Sort of.  In the \texttt{doc/} directory of the distribution you will
+find a \texttt{font-lock.el} file and elisp code (in
+\texttt{cyclone_dot_emacs.el}) suitable for inclusion in your
+\texttt{.emacs} file.  However, these files change C++ mode and use it
+for Cyclone rather than creating a new Cyclone mode.  Of course, we
+intend to make our own mode rather than destroy C++-mode's ability to
+be good for C++.  Note that we have not changed the C++ indentation
+rules at all; our elisp code is useful only for syntax highlighting.
+
+\paragraph{Does Cyclone have something to do with runtime code generation?}
+
+Cyclone has its roots in Popcorn, a language which was safe but not as
+compatible with C\@.  An offshoot of Popcorn added safe runtime code
+generation, and was called Cyclone.  The current Cyclone language is a
+merger of the two, refocused on safety and C compatibility.
+Currently, the language does not have support for runtime code
+generation, but we have reserved the keywords \texttt{codegen},
+\texttt{splice}, \texttt{cut}, and \texttt{fill} in case we get a
+chance to add it.
+
+\paragraph{What platforms are supported?}
+
+You need a platform that has gcc 2.9, GNU make, ar, sed, and the
+ability to build the Boehm-Demers-Weiser garbage collector.
+Furthermore, the size of \texttt{int} and all C pointers must be the
+same.  We have built Cyclone on cygwin (Windows 98, NT, 2K), Linux
+(insert distributions here), Solaris, and OpenBSD.
+
+\paragraph{Why aren't there more libraries?}
+
+We are eager to have a wider code base, but we are compiler writers
+with limited resources.  Let us know of useful code you write.
+
+\paragraph{Why doesn't \texttt{List::imp_rev(l)} change \texttt{l} to
+  its reverse?} 
+
+The library function \texttt{List::imp_rev} mutates its argument by
+reversing the \texttt{tl} fields.  It returns a pointer to the new
+first (old last) cell, but \texttt{l} still points to the old first
+(new last) cell.
+
+\paragraph{Can I inline functions?}
+
+Functions can be declared inline as ISO C99.  You can get additional
+inlining by compiling the Cyclone output with the \texttt{-O2} flag.
+Whether a function is inlined or not has no effect on Cyclone
+type-checking.
+
+\paragraph{If Cyclone is safe, why does my program crash?}
+
+There are certain classes of errors that Cyclone does not attempt to
+prevent.  Two examples are stack overflow and various numeric traps,
+such as division-by-zero.  It is also possible to run out of memory.
+Other crashes could be due to compiler bugs or linking against buggy C
+code (or linking incorrectly against C code).
+
+Note that when using \texttt{gdb}, it may appear there is a seg fault
+in GC_findlimit().  This behavior is correct; simply continue
+execution.
+
+\paragraph{What are compile-time constants?}
+
+Compile-time constants are \texttt{null},
+\texttt{sizeof(\textit{type})}, integer and character constants, and
+arithmetic operations over compile-time constants.  Constructs
+requiring compile-time constants are: tuple-subscript (e.g.,
+\texttt{x[3]} for tuple \texttt{x}), case argument when the
+\texttt{switch} argument has a numeric type (e.g., \texttt{case
+  3+4}:), sizes in array declarations (e.g., \texttt{int y[37]}, and
+sizes in pointer bounds (e.g., \texttt{int * x\lb 124\rb}).
+
+\paragraph{How can I get the size of an array?}
+
+If \textit{expr} is an array, then \texttt{{\it expr}.size} returns
+the array's size.  Note that for \texttt{?} types, the size is
+retrieved at runtime from the object.  For other array types,
+the size is determined at compile-time.
+
+  
+% Local Variables:
+% TeX-master: "main-screen"
+% End:

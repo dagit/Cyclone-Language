@@ -17,21 +17,20 @@ programmers the same control over data representations, memory
 management, and performance that C has.
 
 Cyclone's combination of performance, control, and safety make it a
-good language for writing systems and security software.  We also
-expect that the experience of writing such software in Cyclone will
-motivate new research into safe, low-level languages.  For instance,
-originally, all heap-allocated data in Cyclone was reclaimed via a
-conservative garbage collector.  Though the garbage collector ensures
-safety by preventing programs from accessing deallocated objects, it
-also kept Cyclone from being used in latency-critical or
-space-sensitive applications such as network protocols or device
-drivers.  To address this shortcoming, we have added a region-based
-memory management system based on the work of Tofte and Talpin.  The
-region-based memory manager allows you some real-time control over
-memory management and can significantly reduce space overheads when
-compared to a conventional garbage collector.  Furthermore, the region
-type system ensures the same safety properties as a collector: objects
-cannot be accessed outside of their lifetimes.
+good language for writing systems and security software.  Writing such
+software in Cyclone will, in turn, motivate new research into safe,
+low-level languages.  For instance, originally, all heap-allocated
+data in Cyclone was reclaimed via a conservative garbage collector.
+Though the garbage collector ensures safety by preventing programs
+from accessing deallocated objects, it also kept Cyclone from being
+used in latency-critical or space-sensitive applications such as
+network protocols or device drivers.  To address this shortcoming, we
+have added a region-based memory management system based on the work
+of Tofte and Talpin.  The region-based memory manager allows you some
+real-time control over memory management and can significantly reduce
+space overheads when compared to a conventional garbage collector.
+Furthermore, the region type system ensures the same safety properties
+as a collector: objects cannot be accessed outside of their lifetimes.
 
 You might wonder what is the difference between the Cyclone project
 and a few other projects, notably
@@ -109,5 +108,5 @@ are derived from our previous experience and work on the Popcorn
 safe-C language and the Typed Assembly Language project.
 
 % Local Variables:
-% TeX-master: "main"
+% TeX-master: "main-screen"
 % End:
