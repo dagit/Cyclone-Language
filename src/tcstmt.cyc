@@ -1,10 +1,7 @@
 /* Type checking for statements */
 
 #include "core.h"
-#include "string.h"
 #include "list.h"
-#include "dict.h"
-#include "set.h"
 #include "position.h"
 #include "absyn.h"
 #include "absynpp.h"
@@ -19,7 +16,6 @@ namespace Tcstmt;
 
 using Core;
 using List;
-using Set;
 using Position;
 using Absyn;
 using Absynpp;
@@ -28,155 +24,147 @@ using Tcenv;
 using Tcexp;
 using Tcpat;
 
-// can be deleted
-static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
-  return ssyn;
-}
-
 // used to type-check Let_d, switch clauses, and catch clauses
-static synth pattern_synth(segment loc, tenv te, list<tvar> tvs, 
-			   list<vardecl> x, stmt s, Opt_t<exp> where_opt) {
+static void pattern_synth(segment loc, tenv te, list<tvar> tvs, 
+			  list<vardecl> x, stmt s, Opt_t<exp> where_opt) {
   tenv te2 = add_type_vars(loc,te,tvs);
-  for(let x2=x; x2 != null; x2 = x2->tl)
+  for(_ x2 = x; x2 != null; x2 = x2->tl)
     te2 = add_pat_var(loc, te2, x2->hd);
-  if(where_opt != null) {
-    check_contains_assign(where_opt->v);
-    let esyn = tcExp(te2, &Opt(sint_t), where_opt->v);
-    if(!coerce_to_bool(te,where_opt->v))
-      terr(where_opt->v->loc,
-	   xprintf("where clause has type %s instead of integral or * type",
-		   typ2string(synth_typ(esyn))));
-    // could only have the "true" part of esyn propagated
-    te2 = layer_synth(te2,esyn);
-  }
+
+  if(where_opt != null)
+    tcTest(te2,where_opt->v,"switch clause guard");
+
   if(x != null)
     te2 = set_encloser(te2,s); // for substatements inside of s
-  synth body_synth = tcStmt(te2,s);
+  tcStmt(te2,s);
   // The encloser of s is not s, so reset it properly.
   if(x != null)
     ControlFlow::set_encloser(s,get_encloser(te));
-  return remove_local_vars(te,x,body_synth);
+
+  return;
 }
 
-synth tcStmt(tenv te, stmt s0) {
+void tcStmt(tenv te, stmt s0) {
 
   ControlFlow::set_encloser(s0, get_encloser(te));
 
   switch (s0->r) {
 
-  case Skip_s: return skip_synth(te);
+  case Skip_s: return;
 
-  case Exp_s(e): return tcExp(te,null,e);
+  case Exp_s(e): tcExp(te,null,e); return;
 
   case Seq_s(s1,s2):
-    let te2   = set_next(te,Stmt_j(s2));
-    let ssyn1 = tcStmt(te2,s1);
+    let te2 = set_next(te,Stmt_j(s2));
+    tcStmt(te2,s1);
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
-    bool still_working = true;
-    while (still_working) {
+    // (Of course, this depends on the parser's associativity.)
+    while (true)
       switch (s2->r) {
       case Seq_s(s3,s4):
 	ControlFlow::set_encloser(s2, get_encloser(te));
-	te2   = set_next(te,Stmt_j(s4));
-	ssyn1 = seq_synth(ssyn1,tcStmt(layer_synth(te2,ssyn1),s3));
-	s2    = s4;
+	te2 = set_next(te,Stmt_j(s4));
+	tcStmt(te2,s3);
+	s2  = s4;
 	continue;
-      default:
-        still_working = false; // get out of loop
-        break;
+      default: goto seq_end; // break out of loop
       }
-    }
-    return seq_synth(ssyn1,tcStmt(layer_synth(te,ssyn1),s2));
+  seq_end: 
+    tcStmt(te,s2);
+    return;
 
   case Return_s(eopt):
     typ t = return_typ(te);
     if (eopt == null) {
-      switch (t) {
-      case VoidType:
-        break; // skip
+      switch (compress(t)) {
+      case VoidType: break;
       default:
-        terr(s0->loc,xprintf("must return a value of type %s",typ2string(t)));
+	terr(s0->loc,xprintf("must return a value of type %s",typ2string(t)));
         break;
       }
     } else {
-      let e    = eopt->v;
-      let esyn = tcExp(te,&Opt(t),e);
+      let e = eopt->v;
+      tcExp(te,&Opt(t),e);
       if (!coerce_use(te,e,t))
 	terr(s0->loc, xprintf("returns value of type %s but requires %s",
-			      typ2string(synth_typ(esyn)), typ2string(t)));
+			      typ2string(e->topt->v), typ2string(t)));
       switch (compress(t)) {
-      case VoidType: terr(s0->loc,"attempt to return void expression"); break;
-      default: break; // skip
+      case VoidType: terr(s0->loc,"function returns void expression"); break;
+      default: break;
       }
     }
-    return empty_synth(te);
+    return;
 
   case IfThenElse_s(e,s1,s2):
-    check_contains_assign(e);
-    let esyn = tcExp(te,&Opt(sint_t),e);
-    if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of if statement has type %s instead of integral or * type",
-                          typ2string(synth_typ(esyn))));
-    let $(true_te,false_te) = bool_layer_synth(te,esyn);
-    let ssyn1 = tcStmt(true_te, s1);
-    let ssyn2 = tcStmt(false_te,s2);
-    return join_synth(seq_synth(esyn,ssyn1),seq_synth(esyn,ssyn2));
+    tcTest(te,e,"if statement"); // passing string causes allocation :-(
+    tcStmt(te,s1);
+    tcStmt(te,s2);
+    return;
 
   case While_s($(e,cont_s),s):
     ControlFlow::set_encloser(cont_s, get_encloser(te));
-    check_contains_assign(e);
-    let esyn = tcExp(te,&Opt(sint_t),e);
-    if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of while loop has type %s instead of integral or * type",
-                          typ2string(synth_typ(esyn))));
-    let $(true_te,_) = bool_layer_synth(te,esyn);
-    let ssyn = tcStmt(set_in_loop(true_te,cont_s),s);
-    return loop_synth(esyn,ssyn);
-
-  case Break_s(_):
-    if (process_break(te,s0))
-      return forward_jump_synth(te);
-    // error message reported by process_break for sake of specificty
-    return skip_synth(te);
-
-  case Continue_s(_):
-    if (process_continue(te,s0))
-      return forward_jump_synth(te);
-    terr(s0->loc,"continue outside of loop");
-    return empty_synth(te);
-
-  case Goto_s(_,_):
-    process_goto(te,s0);
-    return forward_jump_synth(te);
+    tcTest(te,e,"while loop");
+    tcStmt(set_in_loop(te,cont_s),s);
+    return;
 
   case For_s(e1,$(e2,guard_s),$(e3,cont_s),s): 
     ControlFlow::set_encloser(guard_s, get_encloser(te));
     ControlFlow::set_encloser(cont_s,  get_encloser(te));
-    let esyn1 = tcExp(te,null,e1);
-    te = layer_synth(te,esyn1);
-    check_contains_assign(e2);
-    let esyn2 = tcExp(te,&Opt(sint_t),e2);
-    if (!coerce_to_bool(te,e2))
-      terr(e2->loc,xprintf("test of for loop has type %s instead of integral "
-			   "or * type", typ2string(synth_typ(esyn2))));
-    let $(true_te,_) = bool_layer_synth(te,esyn2);
-    let te_body = set_in_loop(true_te,cont_s);
-    let ssyn    = tcStmt(te_body,s);
-    te_body = layer_synth(te_body,ssyn);
-    let ssyn3 = seq_synth(ssyn,tcExp(te_body,null,e3));
-    return seq_synth(esyn1,loop_synth(esyn2,ssyn3));
+    tcExp(te,null,e1);
+    tcTest(te,e2,"for loop");
+    _ te_body = set_in_loop(te,cont_s);
+    tcStmt(te_body,s);
+    tcExp(te_body,null,e3); // ??? what does a break/continue in e3 mean ???
+    return;
+
+  case Do_s(s,$(e,cont_s)):
+    ControlFlow::set_encloser(cont_s, get_encloser(te));
+    tcStmt(set_in_loop(te,cont_s),s);
+    tcTest(te,e,"do loop");
+    return;
+  
+    // In the next 4 cases, the function call assigns through sopt
+    // We leave the work to Tcenv b/c it has all the control information
+  case Break_s(*sopt):    process_break(te,s0,sopt);    return;
+  case Continue_s(*sopt): process_continue(te,s0,sopt); return;
+  case Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
+
+  case Fallthru_s(es,*sopt):
+    let trip_opt = process_fallthru(te,s0,sopt);
+    if(trip_opt == null) {
+      terr(s0->loc,"fallthru not in a non-last case");
+      return;
+    }
+    let &$(_,tvs,ts) = trip_opt;
+    list<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
+    ts = List::map_c(substitute,instantiation,ts);
+    for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
+      tcExp(te,null,es->hd);
+      if(!coerce_arg(te,es->hd,ts->hd))
+	terr(s0->loc, xprintf("fallthru argument has type %s "
+			      "but pattern variable has type %s",
+			      typ2string(es->hd->topt->v), typ2string(ts->hd)));
+    }
+    if(es != null)
+      terr(s0->loc, "too many arguments to explicit fallthru");
+    else if (ts != null)
+      terr(s0->loc, "too few arguments to explicit fallthru");
+    return;
+
+  // Note: ControlFlow requires we add the label with s, not s0 !!
+  //       (That way, we can use switch_clause bodies and stmtExp stmt's
+  //       as enclosers and get the right behavior!!!)
+  case Label_s(x,s): tcStmt(add_label(te,x,s),s); return;
 
   case Switch_s(e,scs0):
     let esyn = tcExp(te,null,e);
     let t    = synth_typ(esyn);
-    te = layer_synth(te,esyn);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // we inherit the fallthru from above (i.e. from an outer switch).
 
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    synth swsyn = (scs0 == null) ? esyn : empty_synth(te);
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
       let p       = scs->hd->pattern;
       let pat_typ = tcPat(te,p);
@@ -189,23 +177,20 @@ synth tcStmt(tenv te, stmt s0) {
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus.
-      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-			       scs->hd->where_clause);
-      // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
-      swsyn = join_synth(swsyn, ssyn);
-      te    = set_fallthru(te, pat_typ, scs->hd->body);
+      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+		    scs->hd->where_clause);
+      te = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_switch_exhaustive(s0->loc,scs0);
-    return seq_synth(esyn,switch_bottom(swsyn));
+    return;
 
   case TryCatch_s(s,scs0):
     // must set encloser b/c cannot goto into a handler.
-    let ssyn1 = tcStmt(set_encloser(te,s0),s);
+    tcStmt(set_encloser(te,s0),s);
 
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    synth swsyn = empty_synth(te);
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
       let p       = scs->hd->pattern;
       let pat_typ = tcPat(te,p);
@@ -218,60 +203,16 @@ synth tcStmt(tenv te, stmt s0) {
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus
-      let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-			       scs->hd->where_clause);
-      // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
-      swsyn = join_synth(swsyn, ssyn);
-      te    = set_fallthru(te, pat_typ, scs->hd->body);
+      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+		    scs->hd->where_clause);
+      te = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_catch_overlap(s0->loc,scs0);
-    return join_synth(ssyn1,switch_bottom(swsyn));
-
-/*
-  case TryHandle(s1,x,s2):
-    let ssyn1 = tcStmt(te,s1);
-    let ssyn2 = decl_synth(te,&cons(&$(x,ExnType),null),true,s2);
-    return join_synth(ssyn1,ssyn2,false);
-
-  case TryCatchFinally(q):
-    // to simplify our lives for now, we just translate this into a
-    // try/handle expression -- this means we can't deal with finally
-    // clauses yet.
-    if (q[3] != null) terr(s0->loc,"finally clauses not supported yet -- sorry.");
-    var exn_var = "_";
-    exp exn_var_exp = &Exp(null,Var_e(exn_var),null,s0->loc);
-    stmt sw = &Stmt(^r->ExnSwitch(&$(exn_var_exp,q[1],q[2])),s0->loc);
-    r rs = ^r->TryHandle(&$(q[0],exn_var,sw));
-    s0->r = rs;
-    return tcStmt(te,s0);
-
-  case With(q): return tcWith(te,s0->loc,s0,q);
-*/
-
-  case Fallthru_s(es,_):
-    let trip_opt = process_fallthru(te,s0);
-    if(trip_opt == null) {
-      terr(s0->loc,"fallthru not in a non-last case");
-      return skip_synth(te);
-    }
-    let &$(_,tvs,ts) = trip_opt;
-    list<$(var,typ)@> instantiation = List::map(make_inst_var,tvs);
-    ts = List::map_c(substitute,instantiation,ts);
-    for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
-      te = layer_synth(te, tcExp(te, null, es->hd));
-      if(!coerce_arg(te,es->hd,ts->hd))
-	terr(s0->loc, xprintf("fallthru argument has type %s "
-			      "but pattern variable has type %s",
-			      typ2string(es->hd->topt->v),
-			      typ2string(ts->hd)));
-    }
-    if(es != null)
-      terr(s0->loc, "too many arguments to explicit fallthru");
-    else if (ts != null)
-      terr(s0->loc, "too few arguments to explicit fallthru");
-    return fallthru_synth(te); 
+    return;
 
   case Decl_s(d,s):
+    string unimp_msg_part;
+
     switch (d->r) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,_) = vd;
@@ -279,116 +220,50 @@ synth tcStmt(tenv te, stmt s0) {
         terr(d->loc, "local variables cannot be qualified");
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);
       if (initializer != null) {
-        let esyn = tcExp(te,&Opt(t),initializer->v);
+        tcExp(te,&Opt(t),initializer->v);
         if (!coerce_assign(te,initializer->v,t))
-            terr(d->loc,
-                 xprintf("%s declared with type %s, initialized with type %s",
-                         x, typ2string(t), typ2string(synth_typ(esyn))));
+	  terr(d->loc,
+	       xprintf("%s declared with type %s, initialized with type %s",
+		       x, typ2string(t), typ2string(initializer->v->topt->v)));
       }
-      tenv  te2  = add_local_var(s->loc, te, vd);
-      synth ssyn = tcStmt(set_encloser(te2,s0),s);
-      return remove_local_vars(te,&cons(vd,null),ssyn);
+      tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s);
+      return;
 
     case Let_d(p,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
-      let esyn = tcExp(te,null,e);
+      tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p);
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.
       if (new_tvs != null)
-	terr(d->loc, "can't introduce type variables in let-clause");
+	terr(d->loc,"can't introduce type variables in let-clause");
       if (topt != null && !unify(p->topt->v,topt->v))
-        terr(d->loc, "type of pattern does not match declared type");
-      if (!unify(p->topt->v,synth_typ(esyn)))
-	terr(d->loc,
-	     xprintf("pattern type %s does not match definition type %s",
-		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
-      if(check_let_pat_exhaustive(p->loc,p))
-	*exhaust = true; // side effect
-      return pattern_synth(s0->loc, te, null, x, s, null);
+        terr(d->loc,"type of pattern does not match declared type");
+      if (!unify(p->topt->v,e->topt->v))
+	terr(d->loc,xprintf("pattern type %s does not match definition type %s",
+			    typ2string(p->topt->v),typ2string(e->topt->v)));
+      *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
+      pattern_synth(s0->loc, te, null, x, s, null);
+      return;
 
     case Namespace_d(n,tds):
-      terr(d->loc,"namespace is allowed at top level only");
-      return skip_synth(te);
-    case Using_d(q,tds):
-      // FIX: we should allow "using" in limited scope
-      terr(d->loc,"using is allowed at top level only");
-      return skip_synth(te);
-    case Fn_d(fd):
-      throw impos("tcStmt: nested function declarations are not implemented");
-    case Struct_d(sd):
-      throw impos("tcStmt: nested struct declarations are not implemented");
-    case Union_d:
-      throw impos("tcStmt: nested union declarations are not implemented");
-    case Enum_d(ed):
-      throw impos("tcStmt: nested enum declarations are not implemented");
-    case Xenum_d(xed):
-      throw impos("tcStmt: nested xenum declarations are not implemented");
-    case Typedef_d(tdd):
-      throw impos("tcStmt: nested typedef declarations are not implemented");
+      terr(d->loc,"namespace is allowed only at top level");
+      return;
+    case Using_d(q,tds): // FIX: we should allow "using" in limited scope
+      terr(d->loc,"using is allowed only at top level");
+      return;
+    case Fn_d(_):      unimp_msg_part = "function"; break;
+    case Struct_d(_):  unimp_msg_part = "struct";   break;
+    case Union_d:      unimp_msg_part = "union";    break;
+    case Enum_d(_):    unimp_msg_part = "enum";     break;
+    case Xenum_d(_):   unimp_msg_part = "xenum";    break;
+    case Typedef_d(_): unimp_msg_part = "typedef";  break;
     }
+    throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
+			unimp_msg_part));
 
-  case Label_s(x,s):
-    // FIX:  interaction with goto and unassigned variables
-    // Note: ControlFlow requires we add the label with s, not s0 !!
-    //       (That way, we can use switch_clause bodies and stmtExp stmt's
-    //       as enclosers and get the right behavior!!!
-    tcStmt(add_label(te,x,s),s);
-    return skip_synth(te);
-
-  case Cut_s(s):
-    // FIX: cut
-    throw impos("tcStmt: cut is not implemented");
-/*
-    switch (te->le) {
-    case Frame(p):
-      // be sure to prevent break/continue across cut
-      tcStmt(set_ok_break_continue(^tenv(te->ge,^frames->Hidden(p)),false),
-             s);
-      // very conservative in presence of Cyclone right now
-      // BUG: splice might assign to variables (see comments in poptypeexp)
-      return base_ssyn(te);
-    case Hidden(_):
-      terr(s0->loc,"cannot cut while codegen is in cut");
-      return jump_synth_g->v;
-    case Outermost(_):
-      terr(s0->loc,"cut can only be used within codegen");
-      return jump_synth_g->v;
-    }
-*/
-
-  case Splice_s(s):
-    // FIX: splice
-    throw impos("tcStmt: splice is not implemented");
-/*
-    switch (te->le) {
-    case Hidden(p):
-      // be sure to prevent break/continue across splice
-      tcStmt(set_ok_break_continue(^tenv(te->ge,^frames->Frame(p)),false),
-             s);
-      // very conservative in presence of Cyclone right now
-      // BUG: splice might assign to variables (see comments in poptypeexp)
-      return base_ssyn(te);
-    case Frame(_):
-      terr(s0->loc,"cannot splice while already in codegen");
-      return jump_synth_g->v;
-    case Outermost(_):
-      terr(s0->loc,"splice can only be used within cut");
-      return jump_synth_g->v;
-    }
-*/
-
-  case Do_s(s,$(e,cont_s)): // FIX for wiring
-    ControlFlow::set_encloser(cont_s, get_encloser(te));
-    let ssyn = tcStmt(set_in_loop(te,cont_s),s);
-    let te2  = layer_synth(te,ssyn);
-    check_contains_assign(e);
-    let esyn = tcExp(te2,&Opt(sint_t),e);
-    if (!coerce_to_bool(te,e))
-      terr(e->loc,xprintf("test of do loop has type %s instead of integral or * type",
-			  typ2string(synth_typ(esyn))));
-    return loop_synth(esyn,ssyn);
+  case Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
+  case Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX
   }
-
 }

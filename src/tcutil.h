@@ -51,20 +51,15 @@ extern bool arithmetic_promote(tenv, exp);
 extern bool comparison_promote(tenv, exp);
 extern typ max_arithmetic_type(typ, typ);
 
-/*
-extern void check_valid_lhs(tenv, exp);
-
-*/
-
 extern bool unify(typ, typ);
 
-extern typ substitute(list<$(var,typ)@>, typ);
+extern typ substitute(list<$(tvar,typ)@>, typ);
 
 extern typ fndecl2typ(fndecl);
 
 extern exp default_initializer(tenv,typ,segment);
 
-extern $(var,typ)@ make_inst_var(var);
+extern $(tvar,typ)@ make_inst_var(tvar);
 
 // prints a warning when an expression contains an assignment
 extern void check_contains_assign(exp);

@@ -152,11 +152,16 @@ Doc tqual2doc(tqual tq) {
   return egroup(""," "," ",List::map(text,l));
 }
 
-Doc kind2doc(kind k) {
+Doc kind2doc(kind_t k) {
   switch (k) {
-  case BoxKind: return text("b");
-  case RegKind: return text("r");
-  case MemKind: return text("m");
+  case MemUKind: return text("mu");
+  case RegUKind: return text("ru");
+  case BoxUKind: return text("bu");
+  case MemPKind: return text("mp");
+  case RegPKind: return text("rp");
+  case BoxPKind: return text("bp");
+  case RgnKind:  return text("rgn");
+  case UnresolvedKind: return text("U");
   }
 }
 
@@ -185,8 +190,9 @@ Doc tps2doc(list<typ> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
 }
 
-Doc tvars2doc(list<string> tvs) {
-  return egroup("<",">",",",List::map(text,tvs));
+// FIX: may want explicit kinds
+Doc tvars2doc(list<tvar> tvs) {
+  return egroup("<",">",",",List::map(text,List::map(fst,tvs)));
 }
 
 Doc arg2doc($(tqual,typ)@ t) {
@@ -231,11 +237,15 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat2(rest, tvars2doc(ts));
     // FIX?? What about tq2?
-  case Pointer_mod(true, HeapRgn,  tq2): return cat2(text("*"), rest);
-  case Pointer_mod(false,HeapRgn,  tq2): return cat2(text("@"), rest);
-  case Pointer_mod(true, VarRgn(r),tq2): return cat3(text("*"), text(r), rest);
-  case Pointer_mod(false,VarRgn(r),tq2): return cat3(text("@"), text(r), rest);
-  case Pointer_mod(_,_,_): throw Core::Impossible("dtms2doc: non-1 true");
+  case Pointer_mod(true, HeapRgnType,  tq2): 
+    return cat2(text("*"), rest);
+  case Pointer_mod(false,HeapRgnType,  tq2): 
+    return cat2(text("@"), rest);
+  case Pointer_mod(true, VarType(&$(r,_)),tq2): 
+    return cat3(text("*"), text(r), rest);
+  case Pointer_mod(false,VarType(&$(r,_)),tq2): 
+    return cat3(text("@"), text(r), rest);
+  case Pointer_mod(_,_,_): throw Core::Impossible("dtms2doc: bad PointerMod");
   }
 }
 
@@ -259,7 +269,7 @@ Doc ntyp2doc(typ t) {
                   text(xprintf("%d",i)),
                   text(")"));
     break;
-  case VarType(v): s = text(v); break;
+  case VarType(&$(v,k)): s=text(v); break;//FIX: sometimes need explicit kinds!
   case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),
@@ -315,8 +325,13 @@ Doc ntyp2doc(typ t) {
     // not going to be "normalized" (i.e., come out of to_tms).
     s = cat2(qvar2doc(n),tps2doc(ts));
     break;
-  case RgnHandleType(rgn):
+  case RgnHandleType(t):
+    // FIX! (note an explicit HeapRgnType will be needed)
     s = text("<<REGION HANDLE UNIMPLEMENTED>>");
+    break;
+  case HeapRgnType:
+    // FIX: May need explicit type in some places
+    s = nil_doc();
     break;
   case UnionType:
     s = text("union {/* unimplemented */}");
@@ -1016,27 +1031,27 @@ Doc pat2doc(pat p) {
     break;
   case UnknownCall_p(q,tvs,ps):
     s = cat3(qvar2doc(q),
-             egroup("<",">",",",List::map(text,tvs)),
+	     tvars2doc(tvs),
              group("(",")",",",List::map(pat2doc,ps)));
     break;
   case UnknownFields_p(q,tvs,dps):
     s = cat3(qvar2doc(q),
-             egroup("<",">",",",List::map(text,tvs)),
+	     tvars2doc(tvs),
              group("{","}",",",List::map(dp2doc,dps)));
     break;
   case Struct_p(sd,_,tvs,dps):
     s = cat3(sd->name==null?nil_doc():qvar2doc(sd->name->v),
-             egroup("<",">",",",List::map(text,tvs)),
+	     tvars2doc(tvs),
              group("{","}",",",List::map(dp2doc,dps)));
     break;
   case Enum_p(n,_,tvs,ps,_,_):
     s = cat3(qvar2doc(n),
-             egroup("<",">",",",List::map(text,tvs)),
+	     tvars2doc(tvs),
              egroup("(",")",",",List::map(pat2doc,ps)));
     break;
   case Xenum_p(n,tvs,ps,_,_):
     s = cat3(qvar2doc(n),
-             egroup("<",">",",",List::map(text,tvs)),
+	     tvars2doc(tvs),
              egroup("(",")",",",List::map(pat2doc,ps)));
     break;
   }
@@ -1209,7 +1224,7 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
     }
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
-  case PointerType(t2,rgn,nullable,tq2):
+  case PointerType(t2,rgntyp,nullable,tq2):
     let &$(tq3,t3,tml3) = to_tms(tq2,t2);
     bool nl = false;
     bool still_working = true;
@@ -1220,7 +1235,7 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
       case No_constr:         nl = false;    still_working = false; break;
       }
     }
-    type_modifier tm = Pointer_mod(nl,rgn,tq);
+    type_modifier tm = Pointer_mod(nl,rgntyp,tq);
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
 
   case FnType(typvars,t2,args,varargs):

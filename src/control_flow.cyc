@@ -42,27 +42,28 @@ using Tcutil;
 namespace ControlFlow;
 
 // The set of variables that may be unassigned.
-// (Could avoid allocation and pointer-chasing via a bitvector or
-//  hashing scheme.)
+// Note it is imperative that vardecls are shared -- we use pointer equality.
 typedef Set<vardecl> flow_info_t;
 
-// We assume -1 is never used as a unique_id_field (see absyn.cyc -- it's true)
 static struct Tqual     bogus_tqual     = Tqual(false,false,false);
 static $(list<var>,var) bogus_qvar      = $(null,(string)"");
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
-						  0, -1);
+						  0, 0);
 static vardecl bogus_vardecl = &bogus_vardecl_v;
-
-static int vardecl_cmp(vardecl vd1, vardecl vd2) {
-  return vd1->unique_id - vd2->unique_id;
-}
 
 static Opt_t<Set<vardecl>> empty_vardecl_set_opt = null;
 
+// Can't use Core::ptrcmp because Vardecl is a memory type
+static int vardecl_cmp(vardecl vd1, vardecl vd2) {
+  if(vd1 == vd2) return 0;
+  if(vd1 >  vd2) return 1;
+  return -1;
+}
+
 static flow_info_t empty_flow() {
   if(empty_vardecl_set_opt == null)
-    empty_vardecl_set_opt = &Opt(Set::empty(vardecl_cmp));
+    empty_vardecl_set_opt = (Opt_t<Set<vardecl>>)&Opt(Set::empty(vardecl_cmp));
   return empty_vardecl_set_opt->v;
 }
 // There's exactly a 50% chance I've named merge and meet correctly. :-)

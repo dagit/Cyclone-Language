@@ -36,88 +36,138 @@ void terr(segment loc, string s) {
 static list<Position::segment> warning_segs = null;
 static list<string>            warning_msgs = null;
 
+// we batch warnings because we have to parse the file to determine
+// line and column information.
 void warn(segment sg, string msg) {
   warning_segs = &cons(sg, warning_segs);
   warning_msgs = &cons(msg,warning_msgs);
 }
-
 void flush_warnings() {
-  if(warning_segs != null) {
-    fprintf(cyc_stderr,"***Warnings***\n");
-    list<string> seg_strs = strings_of_segments(warning_segs);
-    warning_segs = null;
-    warning_msgs = List::imp_rev(warning_msgs);
-    while(warning_msgs != null) {
-      fprintf(cyc_stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
-      fflush(cyc_stderr); // delete me
-      seg_strs     = seg_strs->tl;
-      warning_msgs = warning_msgs->tl;
-    }
-    fprintf(cyc_stderr,"**************\n");
-    fflush(cyc_stderr);
+  if(warning_segs == null)
+    return;
+  fprintf(cyc_stderr,"***Warnings***\n");
+  list<string> seg_strs = strings_of_segments(warning_segs);
+  warning_segs = null;
+  warning_msgs = List::imp_rev(warning_msgs);
+  while(warning_msgs != null) {
+    fprintf(cyc_stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
+    seg_strs     = seg_strs->tl;
+    warning_msgs = warning_msgs->tl;
   }
+  fprintf(cyc_stderr,"**************\n");
+  fflush(cyc_stderr);
 }
 
-// set by by Tcenv::tc_init, just to cut down on allocation and calls
-// to Set::empty.
+// set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.
 Opt_t<Set<var>> empty_var_set = null;
-
-//  void warn(segment sg, string msg) {
-//    fprintf(cyc_stderr,"%s: Warning: %s\n",Position::string_of_segment(sg),msg);
-//    fflush(cyc_stderr);
-//  }
 
 // compress out any evars or typedefs
 typ compress(typ t) {
   switch (t) {
+  case Evar(_,null,      _): 
+    return t;
   case Evar(_,*t2opt_ref,_): // TRICKY
-    if (*t2opt_ref == null) return t;
-    else {
-      typ t2 = compress((*t2opt_ref)->v);
-      *t2opt_ref = &Opt(t2);
-      return t2;
-    }
+    typ t2 = compress((*t2opt_ref)->v);
+    *t2opt_ref = &Opt(t2);
+    return t2;
+  case TypedefType(_,_,null): 
+    return t;
   case TypedefType(_,_,*topt_ref):
-    if (*topt_ref == null) return t;
-    else {
-      typ t2 = compress((*topt_ref)->v);
-      *topt_ref = &Opt(t2);
-      return t2;
-    }
+    typ t2 = compress((*topt_ref)->v);
+    *topt_ref = &Opt(t2);
+    return t2;
   default:
     return t;
   }
 }
 
-// return the "least" kind of a type, where Box <= Reg <= Mem
-static kind typ_kind(typ t) {
-  switch (compress(t)) {
-  case VoidType:           return MemKind;
-  case Evar(k,topt,_):     return k;
-  case VarType(_):         return BoxKind;
-  case EnumType(_,_,_):    return BoxKind;
-  case XenumType(_,_):     return BoxKind;
-  case PointerType(_,_,_,_): return BoxKind;
-  case IntType(_,sz,bx):   return (sz == B4 || bx == Boxed) ? BoxKind : RegKind;
-  case FloatType(bx):      return (bx == Boxed)             ? BoxKind : RegKind;
-  case DoubleType(bx):     return (bx == Boxed)             ? BoxKind : RegKind;
-  case ArrayType(_,_,ak):  return (ak == TaggedArray)       ? BoxKind : MemKind;
-  case FnType(_,_,_,_):    return MemKind;
-  case TupleType(_):       return MemKind;
-  case StructType(_,_,_):  return MemKind;
-  case TypedefType(_,_,topt): 
-    return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
-  case RgnHandleType(_):   return BoxKind;
-  case UnionType: return impos("union type");
+// FIX: It's much faster to do this as a straight table lookup
+//      instead of a procedural implementation of the lattice.
+//      But since this kind system is still experimental, I've just
+//      coded up the lattice quite literally:
+//                          Unresolved
+//                       /         |
+//                   MemU         Rgn
+//                    |   \
+//                   RegU  MemP   
+//                    |  \  |
+//                   BoxU  RegP
+//                       \  |
+//                         BoxP               
+static bool kind_leq(kind_t k1, kind_t k2) {
+  if(k1 == k2)
+    return true;
+  switch (k2) {
+  case UnresolvedKind: return true; // okay, so I snuck in 1 important fast-path
+  case BoxPKind: return false;
+  case RegPKind: return kind_leq(k1,BoxPKind);
+  case BoxUKind: return kind_leq(k1,BoxPKind);
+  case MemPKind: return kind_leq(k1,RegPKind);
+  case RegUKind: return kind_leq(k1,BoxUKind) || kind_leq(k1,RegPKind);
+  case MemUKind: return kind_leq(k1,RegUKind) || kind_leq(k1,MemPKind);
+  case RgnKind:  return false;
   }
 }
 
-// return true iff k1 <= k2, where Box <= Reg <= Mem
-static bool kind_leq(kind k1, kind k2) {
-  switch (k2) {
-  case MemKind: return true;
-  case RegKind: return (k1 == RegKind || k1 == BoxKind);
-  case BoxKind: return (k1 == BoxKind);
+// return the "least" kind of a type, according to the lattice above
+// FIX: The "enums, structs, and xenums are packable" rule
+//      is currently enforced stringently in Tc and should change some day.
+// FIX: I think the Evar case should be an error, but I'm not sure yet.
+extern bool is_packable(typ);
+static kind_t typ_kind(typ t) {
+  switch (compress(t)) {
+    // FIX: this isn't the least kind -- what if it got constrained to
+    // unpackable later?!?!?
+    // But unify_it calls this with an evar, so let it go for now.
+  case Evar(k,topt,_):    return k; 
+
+  case VarType(&$(_,k)):  return k;
+  case VoidType:          return MemPKind;
+  case IntType(_,sz,bx):  return (sz==B4 || bx==Boxed) ? BoxPKind : RegPKind;
+  case FloatType(bx):     return (bx==Boxed)           ? BoxPKind : RegPKind;
+  case DoubleType(bx):    return (bx==Boxed)           ? BoxPKind : RegPKind;
+  case FnType(_,_,_,_):   return MemPKind;
+  case RgnHandleType(_):  return BoxUKind; // the whole point on packability
+  case HeapRgnType:       return RgnKind;
+
+  case EnumType(_,_,_):   return BoxPKind; // see FIX above
+  case XenumType(_,_):    return BoxPKind; // see FIX above
+  case StructType(_,_,_): return MemPKind; // see FIX above
+
+  // For pointers, the rgntyp is irrelevant for packability because
+  // an existential bound variable cannot have RgnKind, so it can't be hidden
+  // FIX: That assumption will change if the ability to name ever doesn't
+  // imply the capability to access.
+  case PointerType(t,rgntyp,_,_): return is_packable(t) ? BoxPKind : BoxUKind;
+
+  // FIX: should tagged arrays be allowed to point at arrays not in the heap?
+  case ArrayType(t,_,TaggedArray): return is_packable(t) ? BoxPKind : BoxUKind;
+  case ArrayType(t,_,_):           return is_packable(t) ? MemPKind : MemUKind;
+  case TupleType(tqts):
+    for(; tqts != null; tqts = tqts->tl)
+      if(!is_packable(tqts->hd[1]))
+	return MemUKind;
+    return MemPKind;
+
+  case TypedefType(_,_,topt): 
+    return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
+  case UnionType: return impos("union type");
+  }
+}
+static bool is_packable(typ t) {
+  switch (compress(t)) {
+  case Evar(_,_,_): return false; // conservative -- will it be a pain?
+  default: 
+    switch(typ_kind(t)) {
+    case MemUKind: return false;
+    case RegUKind: return false;
+    case BoxUKind: return false;
+    case MemPKind: return true;
+    case RegPKind: return true;
+    case BoxPKind: return true;
+    case RgnKind:        throw Impossible("is_packable found RgnKind");
+    case UnresolvedKind: throw Impossible("is_packable found UnresolvedKind");
+    }
   }
 }
 
@@ -141,9 +191,8 @@ static void occurs(typ evar, typ t) {
     if (t == evar) throw Unify;
     else if (r != null) occurs(evar,r->v);
     break;
-  case EnumType(_,ts,_):      occurslist(evar,ts); break;
-  case PointerType(t2,_,_,_): occurs(evar,t2);     break;
-  case ArrayType(t2,_,_):     occurs(evar,t2);     break;
+  case PointerType(t2,rt,_,_): occurs(evar,t2); occurs(evar,rt); break;
+  case ArrayType(t2,_,_):      occurs(evar,t2);                  break;
   case FnType(tvs,rt,args,varargs): // FIX: OK to ignore binding of type vars?
     occurs(evar,rt);
     for(; args != null; args = args->tl)
@@ -153,8 +202,10 @@ static void occurs(typ evar, typ t) {
     for(; args != null; args = args->tl)
       occurs(evar,args->hd[1]);
     break;
+  case RgnHandleType(rt): occurs(evar,rt); break;
+  case TypedefType(_,ts,topt): fallthru(ts);
+  case EnumType(_,ts,_):       fallthru(ts);
   case StructType(_,ts,_):     occurslist(evar,ts); break;
-  case TypedefType(_,ts,topt): occurslist(evar,ts); break;
   default: break;
   }
 }
@@ -209,8 +260,7 @@ static void unify_it_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   if (x == y) return;
   switch (x->v) {
   case No_constr: x->v = Forward_constr(y); break;
-  case Forward_constr(_):
-    throw impos("unify_conref: forward after compress");
+  case Forward_constr(_): throw impos("unify_conref: forward after compress");
   case Eq_constr(xv):
     switch (y->v) {
     case No_constr: y->v = x->v; break;
@@ -228,15 +278,7 @@ static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   try {
     unify_it_conrefs(cmp,x,y);
     return true;
-  } catch {
-  case Unify: return false;
-  }
-}
-
-static int cmp_bool(bool x,bool y) {
-  if (x == y) return 0;
-  if (x == false) return -1;
-  return 1;
+  } catch { case Unify: return false; }
 }
 
 // the real work of unification
@@ -262,9 +304,7 @@ void unify_it(typ t1, typ t2) {
       return;
     } else {
       switch (t2) {
-      case Evar(_,*ref2_ref,_):
-	*ref2_ref = &Opt(t1);
-	return;
+      case Evar(_,*ref2_ref,_): *ref2_ref = &Opt(t1); return;
       default: throw Unify;
       }
     }
@@ -281,8 +321,10 @@ void unify_it(typ t1, typ t2) {
 
   case $(VoidType,VoidType): return;
 
-  case $(VarType(x),VarType(y)):
-    if(String::zstrcmp(x,y) == 0) return;
+  case $(VarType(&$(x2,k2)),VarType(&$(x1,k1))):
+    // kinds should already be resolved, otherwise we could "unify"
+    // UnresolvedKind with something else???
+    if(k2 == k1 && String::zstrcmp(x2,x1) == 0) return;
     break;
 
   case $(StructType(nopt2,ts2,sd2), StructType(nopt1,ts1,sd1)): 
@@ -295,27 +337,24 @@ void unify_it(typ t1, typ t2) {
     }
     break;
 
-  case $(EnumType(nopt2,ts2,ed2), EnumType(nopt1,ts1,ed1)):
-    // FIX: equivalent and more efficient to pointer-compare eds
-    if ((nopt1 != null && nopt2 != null
-	 && qvar_cmp(nopt1->v,nopt2->v) == 0) 
-	|| (nopt1 == null && nopt2 == null)) {
+  case $(EnumType(nopt2,ts2,edp2), EnumType(nopt1,ts1,edp1)):
+    if (*edp2 == *edp1) {
       unify_list(ts1,ts2);
       return;
     }
     break;
 
-  case $(XenumType(n2,xed2),XenumType(n1,xed1)):
-    // FIX: equivalent and more efficient to pointer-compare xeds
-    if(qvar_cmp(n1,n2)==0) return;
+  case $(XenumType(n2,xedp2),XenumType(n1,xedp1)):
+    if(*xedp2 == *xedp1)
+      return;
     break;
 
   case $(PointerType(t2a,rgn2,null2a,tqual2a),
 	 PointerType(t1a,rgn1,null1a,tqual1a)):
-	   // FIX: look at regions!
     unify_it(t1a,t2a);
+    unify_it(rgn2,rgn1); // the whole reason regions are "types"
     unify_tqual(tqual1a,tqual2a);
-    unify_it_conrefs(cmp_bool,null1a,null2a);
+    unify_it_conrefs(intcmp,null1a,null2a);
     return;
 
   case $(IntType(sn2,sz2,bx2), IntType(sn1,sz1,bx1)):
@@ -341,7 +380,7 @@ void unify_it(typ t1, typ t2) {
     break;
 
   case $(FnType(tvs2,rt2,args2,vararg2), FnType(tvs1,rt1,args1,vararg1)):
-    list<$(var,typ)@> inst = null;
+    list<$(tvar,typ)@> inst = null;
     while (tvs1 != null) {
       if (tvs2 == null) break;
       inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
@@ -371,6 +410,11 @@ void unify_it(typ t1, typ t2) {
     if (ts1 == null && ts2 == null) return;
     break;
 
+  case $(HeapRgnType, HeapRgnType): return;
+  case $(RgnHandleType(rt1),RgnHandleType(rt2)):
+    unify_it(rt1,rt2);
+    return;
+
   default: break;
   }
   throw Unify;
@@ -379,8 +423,8 @@ void unify_it(typ t1, typ t2) {
 static void unbox_exp(tenv te, exp e) {
   switch (compress(e->topt->v)) {
   case IntType(sn,sz,Boxed): unchecked_cast(te,e,IntType(sn,sz,Unboxed)); break;
-  case FloatType(Boxed):  unchecked_cast(te,e,float_t);  break;
-  case DoubleType(Boxed): unchecked_cast(te,e,double_t); break;
+  case FloatType(Boxed):     unchecked_cast(te,e,float_t);  break;
+  case DoubleType(Boxed):    unchecked_cast(te,e,double_t); break;
   default: break;
   }
 }
@@ -486,7 +530,7 @@ bool coerce_uint_typ(tenv te, exp e) {
   if (unify(e->topt->v,uint_t)) 
     return true;
   // try unboxing e
-  if (typ_kind(e->topt->v) == BoxKind) {
+  if (typ_kind(e->topt->v) == BoxPKind) {
     unbox_exp(te,e);
     if (unify(e->topt->v,uint_t)) 
       return true;
@@ -506,7 +550,7 @@ bool coerce_sint_typ(tenv te, exp e) {
   if (unify(e->topt->v,sint_t)) 
     return true;
   // try unboxing e
-  if (typ_kind(e->topt->v) == BoxKind) {
+  if (typ_kind(e->topt->v) == BoxPKind) {
     unbox_exp(te,e);
     if (unify(e->topt->v,sint_t)) 
       return true;
@@ -533,7 +577,7 @@ bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
     // can cast t@ to t* but not vice versa.  can cast a non-const pointer
     // to a const pointer.  
     bool okay = true;
-    if (!unify_conrefs(cmp_bool,null_a,null_b)) {
+    if (!unify_conrefs(intcmp,null_a,null_b)) {
       switch (compress_conref(null_a)->v) {
       case Eq_constr(b): okay = !b; break;
       default: throw impos("silent_castable: conref not eq");
@@ -564,7 +608,7 @@ bool coerce_arg(tenv te, exp e, typ t2) {
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try unboxing e
-  if (typ_kind(t1) == BoxKind && typ_kind(t2) == RegKind) {
+  if (typ_kind(t1) == BoxPKind && typ_kind(t2) == RegPKind) {
     unbox_exp(te,e);
     if (unify(t1,t2)) return true;
   }
@@ -617,11 +661,12 @@ static bool any_promote(tenv te, exp e) {
 // used in routines like function call or assignment where we may have
 // to promote an integral type, may have to unbox, etc.  
 // FIX: THIS IS NOT RIGHT.
+// FIX: account for unpackable kinds?
 bool coerce_use(tenv te, exp e, typ t2) {
-  typ  t1 = compress(e->topt->v);
-  kind k1 = typ_kind(t1);
-  kind k2 = typ_kind(t2);
-  if (k1 == BoxKind && k2 == RegKind)
+  typ    t1 = compress(e->topt->v);
+  kind_t k1 = typ_kind(t1);
+  kind_t k2 = typ_kind(t2);
+  if (k1 == BoxPKind && k2 == RegPKind)
     unbox_exp(te,e);
   if (unify(t1,t2)) 
     return true;
@@ -657,7 +702,7 @@ bool coerceable(typ t) {
 // alignment right.  This seems to be particularly weird on the
 // x86 -- I need to find precise documentation on it before we 
 // do this.
-static $(tqual,typ)@ flatten_typ_f(list<$(var,typ)@> inst,
+static $(tqual,typ)@ flatten_typ_f(list<$(tvar,typ)@> inst,
                                    $(field_name,tqual,typ)@ x) {
   return &$(x[1],substitute(inst,x[2]));
 }
@@ -688,15 +733,20 @@ static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-    // FIX: look at regions!
-  case $(PointerType(t_a,_,null_a,q_a), PointerType(t_b,_,null_b,q_b)):
+  case $(PointerType(t_a,rt_a,null_a,q_a), PointerType(t_b,rt_b,null_b,q_b)):
     // if t1 is const then t2 must be const
     if (q_a->q_const && !q_b->q_const) 
       return false;
     // if t1 is * then t2 must be *
-    if (!unify_conrefs(cmp_bool,null_a,null_b) 
+    if (!unify_conrefs(intcmp,null_a,null_b) 
 	&& conref_val(null_a) && !conref_val(null_b)) 
       return false;
+    // if rt_a is not the heap, then rt_b must be the same (can relax this
+    // later to a more general "outlives" relationship)
+    switch (rt_a) {
+    case HeapRgnType: break;
+    default: unify(rt_a,rt_b); break;
+    }
     return ptrsubtype(te, &cons(&$(t1,t2),assume), t_a, t_b);
   default: return false;
   }
@@ -733,13 +783,17 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     // can cast an enum to an int -- extracts the tag
     return (coerceable(t2));
     // FIX: look at regions!
-  case PointerType(t_a,_,null_a,q_a):
-    // can cast t* to t@ and vice versa.  can cast a non-cost pointer
-    // to a const pointer.  can cast a t pointer to a t[],t[1], or t[?]
+  case PointerType(t_a,rt_a,null_a,q_a):
+    // can cast t* to t@ and vice versa.  
+    // can cast a non-const pointer to a const pointer.  
+    // can cast a t heap pointer to a t[],t[1], or t[?]
+    // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
-    case PointerType(t_b,_,null_b,q_b):
+    case PointerType(t_b,rt_b,null_b,q_b):
       let assump = &cons(&$(t1,t2),null);
-      return (ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const));
+      let ptrsub =
+	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
+      return ptrsub && (rt_a == HeapRgnType || unify(rt_a,rt_b));
     case ArrayType(t_b,q_b,ak):
       let assump = &cons(&$(t1,t2),null);
       if (!(ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const)))
@@ -765,9 +819,9 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
     default: return false;
     }
   // can cast a numeric type or bool to any numeric type
-  case IntType(_,_,_): return coerceable(t2);
-  case FloatType(_) : return coerceable(t2);
-  case DoubleType(_): return coerceable(t2);
+  case IntType(_,_,_): fallthru;
+  case FloatType(_) :  fallthru;
+  case DoubleType(_):  return coerceable(t2);
   default: return false;
   }
 }
@@ -788,11 +842,9 @@ bool comparison_promote(tenv te, exp e) {
   switch (compress(e->topt->v)) {
   case IntType(sn,sz,b):
     switch (sz) {
-    case B1:  t = sint_t; break; // convert to unboxed, signed int
-    case B2:  t = sint_t; break; // convert to unboxed, signed int
-    case B4: // make unboxed
-      t = (sn == Unsigned) ? uint_t : sint_t;
-      break;
+    case B1: t = sint_t; break; // convert to unboxed, signed int
+    case B2: t = sint_t; break; // convert to unboxed, signed int
+    case B4: t = (sn == Unsigned) ? uint_t : sint_t; break; // make uboxed
     case B8:
       if (b == Boxed) {
 	warn(e->loc,"pointer comparison of Long Long");
@@ -800,16 +852,13 @@ bool comparison_promote(tenv te, exp e) {
       } else return true;
     }
     break;
-  case FloatType(b):
-    t = float_t; // make unboxed
-    break;
+  case FloatType(b): t = float_t; break; // make unboxed
   case DoubleType(b):
     if (b == Boxed) {
       warn(e->loc,"pointer comparison of Double");
       return false;
     } else return true;
-  default:
-    return false;
+  default: return false;
   }
   unchecked_cast(te,e,t);
   return true;
@@ -907,6 +956,7 @@ void check_contains_assign(exp e) {
   }
 }
 
+// Note: The kind inference in check_valid_type updates the kinds in the tyvars.
 void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
   check_unique_tvars(loc,fd->tvs);
   check_valid_type(loc,te,fd->tvs,fd->ret_type);
@@ -930,17 +980,19 @@ static $($(Opt_t<var>,tqual)@,typ)@ substitute_f1($(Opt_t<var>,tqual,typ)@ y) {
 static $(Opt_t<var>,tqual,typ)@ substitute_f2($($(Opt_t<var>,tqual)@,typ)@ w) {
   return &$(w[0][0],w[0][1],w[1]);
 }
-extern list<typ> substs(list<$(var,typ)@> inst, list<typ> ts);
-typ substitute(list<$(var,typ)@> inst, typ t) {
+extern list<typ> substs(list<$(tvar,typ)@> inst, list<typ> ts);
+typ substitute(list<$(tvar,typ)@> inst, typ t) {
   switch (compress(t)) {
   case VarType(v):
-    try return List::assoc_cmp(String::zstrcmp,inst,v);
+    // a tvar lookup, not a var lookup!
+    try return List::assoc_cmp(tvar_cmp,inst,v);
     catch {case Not_found: return t;}
   case StructType(no,ts,sd):   return StructType(no,substs(inst,ts),sd);
   case EnumType(no,ts,ed):     return EnumType(no,substs(inst,ts),ed);
   case TypedefType(n,ts,topt): return TypedefType(n,substs(inst,ts),topt);
   case ArrayType(t1,tq,eopt):  return ArrayType(substitute(inst,t1),tq,eopt);
-  case PointerType(t1,r,n,tq): return PointerType(substitute(inst,t1),r,n,tq);
+  case PointerType(t1,r,n,tq): 
+    return PointerType(substitute(inst,t1),substitute(inst,r),n,tq);
   case FnType(vs,rtyp,args,varargs):
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
@@ -961,14 +1013,13 @@ typ substitute(list<$(var,typ)@> inst, typ t) {
   case IntType(_,_,_): return t;
   case FloatType(_):   return t;
   case DoubleType(_):  return t;
-  case RgnHandleType(_): return t; 
-    // Note this substitution is not for region variables, we'll have
-    // to do that too!
+  case HeapRgnType:    return t;
+  case RgnHandleType(rt): return RgnHandleType(substitute(inst,rt)); 
 
   case UnionType:      return t;
   }
 }
-static list<typ> substs(list<$(var,typ)@> inst, list<typ> ts) {
+static list<typ> substs(list<$(tvar,typ)@> inst, list<typ> ts) {
   return List::map_c(substitute,inst,ts);
 }
 
@@ -976,25 +1027,19 @@ exp default_initializer(tenv te, typ t, segment loc) {
   exp e = new_exp(Const_e(Null_c),loc);
 
   switch (compress(t)) {
-  case PointerType(_,_,_,_):
+  case PointerType(_,_,_,_): break; // FIX: non-nullable is an error!
+  case IntType(sg,B1,Unboxed):
+    e->r = Const_e(Char_c(Signed,'\000'));
     break;
-  case IntType(sg,sz,bx):
-    if (bx == Boxed)
-      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
-    else if (sz == B1)
-      e->r = Const_e(Char_c(Signed,'\000'));
-    else {
-      e->r = Const_e(Int_c(sg,0));
-      if (sz != B4)
-        e = new_exp(Cast_e(t,e),loc);
-    }
+  case IntType(sg,sz,Unboxed):
+    e->r = Const_e(Int_c(sg,0));
+    if (sz != B4)
+      e = new_exp(Cast_e(t,e),loc);
     break;
-  case FloatType(bx):
-    if (bx == Boxed)
-      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
-    else e->r = Const_e(Float_c("0.0"));
+  case FloatType(Unboxed):
+    e->r = Const_e(Float_c("0.0"));
     break;
-  case DoubleType(bx):
+  case DoubleType(Unboxed):
     e->r = Cast_e(t,new_exp(Const_e(Float_c("0.0")), loc));
     break;
 /*
@@ -1066,8 +1111,6 @@ exp default_initializer(tenv te, typ t, segment loc) {
       }
     } else
       terr(loc,"Abstract types require initializers->");
-  case FnType(_): terr(loc,"function pointer declarations require initializer");
-  case ExnType:   terr(loc,"exception declarations require initializer");
 */
 
   default:
@@ -1078,8 +1121,8 @@ exp default_initializer(tenv te, typ t, segment loc) {
   return e;
 }
 
-$(var,typ)@ make_inst_var(var v) {
-  return &$(v, new_evar(BoxKind));
+$(tvar,typ)@ make_inst_var(tvar tv) {
+  return &$(tv, new_evar(UnresolvedKind));
 }
 
 // Check that the type is valid assuming that the free type variables
@@ -1088,19 +1131,77 @@ $(var,typ)@ make_inst_var(var v) {
 // * expand typedefs
 // * set pointers to declarations for StructType, EnumType, and XenumType
 // * change relative type names to absolute type names
-// Some acrobatics are necessary b/c of typedef.  Names are absolute when
-// declaration pointers are non-null.  We need to know the difference to do
-// the right lookup.  Why do we have to do a lookup when we already have
-// a declaration pointer?  Because we can have more information than when
-// the typedef's definition was last encountered.  
+// * set the kind field of type variables.  We do just a tad of trivial 
+//   inference: if the parse leaves the kind of a tyvar Unresolved, then
+//   it's RgnKind if it appears in a region position, a BoxPKind if it appears
+//   elsewhere, and a BoxPKind with a warning if it doesn't appear.
+// Note: check_valid_type should only be called with types that should not have
+//       RgnKind. Analogously, check_valid_rgn should only be called with types
+//       that should have RgnKind.
+// FIX: Right under a pointer, infer a type variable has kind MemPKind.
+//      (Add a mutually recursive check_valid_mem_type.  This isn't too useful
+//       until structdecls and enumdecls can have memkind type parameters.)
+void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
+  switch (compress(t)) {
+  case HeapRgnType: return;
+  case Evar(*k,null,i):
+    switch(*k) {
+    case UnresolvedKind: *k = RgnKind; return;
+    case RgnKind: return;
+    default: terr(loc,"This type should be a region."); return;
+    }
+  case VarType(pr):
+    let &$(tv,k) = pr;
+    for(; bound_vars != null; bound_vars = bound_vars->tl)
+      if(String::zstrcmp(bound_vars->hd[0],tv)==0) {
+	let bk = bound_vars->hd[1];
+	if((bk != RgnKind && bk != UnresolvedKind)
+	   || (k != RgnKind && k != UnresolvedKind)) {
+	  terr(loc, "Type variable used as region");
+	  return;
+	}
+	pr[1] = bound_vars->hd[1] = RgnKind;
+      }
+    terr(loc,xprintf("unbound type variable %s",tv));
+    return;
+    
+  default: terr(loc,"This type should be a region."); return;
+  }
+}
 void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   switch (compress(t)) {
-  case VoidType:       break;
-  case Evar(k,topt,i): break;
-  case VarType(tv):
-    if (!List::mem(String::zstrcmp,bound_vars,tv)) 
-      terr(loc,xprintf("unbound type variable %s",tv));
+  case VoidType: break;
+  case Evar(RgnKind,topt,i): fallthru;
+  case HeapRgnType: 
+    terr(loc,"This type should not be a region.");
+    return;
+  case Evar(*k,topt,i):
+    if(*k==UnresolvedKind)
+      *k = MemUKind;
     break;
+  case VarType(pr):
+    let &$(tv,k) = pr;
+    for(; bound_vars != null; bound_vars = bound_vars->tl)
+      if(String::zstrcmp(bound_vars->hd[0],tv)==0)
+	switch ($(bound_vars->hd[1],k)) {
+	case $(_,RgnKind): fallthru;
+	case $(RgnKind,_): terr(loc,"Region variable used as type"); return;
+	case $(UnresolvedKind,BoxPKind): fallthru;
+	case $(UnresolvedKind,UnresolvedKind):
+	  pr[1] = bound_vars->hd[1] = BoxPKind;
+	  return;
+	case $(UnresolvedKind,_):
+	  terr(loc,"Wrong kind for type variable");
+	  return;
+	case $(bk,_):
+	  if(k==UnresolvedKind || bk==k)
+	    pr[1] = bk;
+	  else
+	    terr(loc,"Wrong kind for type variable");
+	  return;
+	}
+    terr(loc,xprintf("unbound type variable %s",tv));
+    return;
   case EnumType(tdnopt,targs,*edp):
     if (tdnopt == null) {
       terr(loc,"missing enum name");
@@ -1123,14 +1224,14 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     if (lvs != largs)
       terr(loc,xprintf("enum %s expects %d type arguments, not %d",
 		       qvar2string(tdn),lvs,largs));
-    // check that each of the type arguments is well-formed and a box type
+    // check that each of the type arguments is well-formed packable box type
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;
       check_valid_type(loc,te,bound_vars,t1);
-      if (typ_kind(t1) != BoxKind) 
-	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
+      if (typ_kind(t1) != BoxPKind) 
+	terr(loc,xprintf("type %s is not a packable boxed type",
+			 typ2string(t1)));
     }
-    // maybe we know more about the fields than we did 
     break;
   case XenumType(tdn,*xedp):
     if(*xedp == null) {
@@ -1150,16 +1251,13 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     // Make relative name absolute (or replace absolute name with itself)
     tdn[0] = xed->name[0];
     break;
-  case PointerType(t1,rgn,nullable,tq):
+  case PointerType(t1,rgn_typ,nullable,tq):
     // FIX: check that tqual is valid?
     check_valid_type(loc,te,bound_vars,t1);
-    switch (rgn) {
-    case HeapRgn:   break;
-    case VarRgn(r): 
-      if (!List::mem(String::zstrcmp,bound_vars,r)) 
-	terr(loc,xprintf("unbound region variable %s",r));
-      break;
-    }
+    check_valid_rgn(loc,te,bound_vars,rgn_typ);
+    break;
+  case RgnHandleType(rgn_typ):
+    check_valid_rgn(loc,te,bound_vars,rgn_typ);
     break;
   case IntType(_,_,_): break; // skip
   case FloatType(_):   break; // skip
@@ -1185,12 +1283,18 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
       // FIX: should check that variables are unique and that tquals are okay
       check_valid_type(loc,te,new_bound_vars,args->hd[2]);
     }
+    // if any kinds are still unresolved, warn and make them BoxPKind
+    for(; btvs != null; btvs = btvs->tl)
+      if(btvs->hd[1] == UnresolvedKind) {
+	warn(loc,xprintf("Type variable %s unused, assuming boxed",
+			 btvs->hd[0]));
+	btvs->hd[1] = BoxPKind;
+      }
     break;
   case TupleType(tq_ts):
     // FIX: check the tquals
-    for (; tq_ts != null; tq_ts = tq_ts->tl) {
+    for (; tq_ts != null; tq_ts = tq_ts->tl)
       check_valid_type(loc,te,bound_vars,tq_ts->hd[1]);
-    }
     break;
   case StructType(tdnopt,targs,*sdp):
     if (tdnopt == null) {
@@ -1214,12 +1318,13 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     if (lvs != largs) 
       terr(loc,xprintf("struct %s expects %d type arguments but was given %d",
 		       qvar2string(tdn),lvs,largs));
-    // check that each of the type arguments is well-formed and a box type
+    // check that each of the type arguments is a well-formed packable box type
     for (; targs != null; targs = targs->tl) {
       typ t1 = targs->hd;
       check_valid_type(loc,te,bound_vars,t1);
-      if (typ_kind(t1) != BoxKind)
-	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
+      if (typ_kind(t1) != BoxPKind)
+	terr(loc,xprintf("type %s is not a packable boxed type",
+			 typ2string(t1)));
     }
     break;
   case TypedefType(tdn,targs,*toptp):
@@ -1233,12 +1338,14 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     // Make relative name absolute (or replace absolute name with itself)
     tdn[0] = td->name[0];
     
+    // FIX: allow typedefs over other kinds???
     for (list<typ> ts = targs; ts != null; ts = ts->tl) {
       check_valid_type(loc,te,bound_vars,ts->hd);
-      if (typ_kind(ts->hd) != BoxKind)
-	terr(loc,xprintf("type %s is not a boxed type",typ2string(ts->hd)));
+      if (typ_kind(ts->hd) != BoxPKind)
+	terr(loc,xprintf("type %s is not a packable boxed type",
+			 typ2string(ts->hd)));
     }
-    list<$(var,typ)@> inst;
+    list<$(tvar,typ)@> inst;
     try inst = List::zip(td->tvs,targs);
     catch { case List::List_mismatch:
       terr(loc,xprintf("typedef %s expects a different number of arguments",
@@ -1248,11 +1355,6 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     typ new_typ = substitute(inst,td->defn);
     *toptp = &Opt(new_typ);
     break;
-  case RgnHandleType(HeapRgn): break;
-  case RgnHandleType(VarRgn(r)): 
-    // FIX: need to know what region vars are bound (just in tenv?)
-    terr(loc,"region handles unsupported");
-    break;
   case UnionType:
     terr(loc,"union type unsupported");
     break;
@@ -1261,15 +1363,20 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
 
 // Note: we expect lists to be very short.  Otherwise, a hashtable would
 // be a better choice.
-void check_unique_vars(list<var> vs, segment loc, string msg) {
+static void check_unique_unsorted<`a>(int (@cmp)(`a,`a), list<`a> vs,
+				      segment loc, string msg) {
   for(; vs != null; vs = vs->tl)
     for(let vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
-      if(String::zstrcmp(vs->hd, vs2->hd)== 0)
+      if(cmp(vs->hd, vs2->hd)== 0)
 	terr(loc, msg);
 }
 
+void check_unique_vars(list<var> vs, segment loc, string msg) {
+  check_unique_unsorted(String::zstrcmp,vs,loc,msg);
+}
+
 void check_unique_tvars(segment loc, list<tvar> tvs) {
-  check_unique_vars(tvs, loc, "duplicate type variable");
+  check_unique_unsorted(tvar_cmp,tvs,loc,"duplicate type variable");
 }
 
 // remove the field name f from a list of fields -- return the field

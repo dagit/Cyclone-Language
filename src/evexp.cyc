@@ -124,8 +124,14 @@ cnst eval_const_exp(exp e) {
 unsigned int szof(typ t, segment loc) {
   switch (Tcutil::compress(t)) {
   case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
-  case VarType(_):        return 4u;
-  case Evar(BoxKind,_,_): return 4u; // Possible?
+  case VarType(&$(_,BoxPKind)): return 4u;
+  case VarType(&$(_,BoxUKind)): return 4u;
+  case VarType(&$(_,RgnKind)):
+    terr(loc,"cannot apply sizeof to a region"); return 0u;
+  case VarType(&$(_,_)): 
+    terr(loc,"cannot apply sizeof to unknown type"); return 0u;
+  case Evar(BoxPKind,_,_): return 4u; // Possible?
+  case Evar(BoxUKind,_,_): return 4u; // Possible?
   case Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
   case EnumType(_,_,_):  return 4u;
   case XenumType(_,_):   return 4u;
@@ -164,6 +170,7 @@ unsigned int szof(typ t, segment loc) {
     for(let fs = sd->fields->v; fs != null; fs = fs->tl)
       s += szof(fs->hd[2],loc);
     return s;
+  case HeapRgnType: terr(loc, "cannot apply sizoef to a region"); return 0u;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
   case UnionType:          return Tcutil::impos("szof uniontype");
   }

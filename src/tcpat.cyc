@@ -11,7 +11,6 @@
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tcexp.h"
-#include "tcstmt.h"
 #include "tcpat.h"
 
 namespace Tcpat;
@@ -25,7 +24,6 @@ using Absynpp;
 using Tcutil;
 using Tcenv;
 using Tcexp;
-using Tcstmt;
 
 /////////////////////////////////////////////////////////////////////////
 // type-check a pattern and return a list of the bound type variables,
@@ -49,8 +47,8 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     t = wildtyp();
     break;
   case Null_p:
-    // as usual, HeapRgn is best answer for null
-    t = PointerType(wildtyp(), HeapRgn, new_conref(true), empty_tqual());
+    // as usual, the heap is the best answer for null
+    t = PointerType(wildtyp(), HeapRgnType, new_conref(true), empty_tqual());
     break;
   case Int_p(s,i):
     // FIX: take i into account?
@@ -64,14 +62,14 @@ $(list<tvar>, list<vardecl>)@ tcPat(tenv te,pat p) {
     let &$(sub_tvs,sub_vs) = tcPat(te,p2);
     tv_result = List::append(tv_result, sub_tvs);
     v_result  = List::append(v_result,  sub_vs);
-    t = PointerType(p2->topt->v, HeapRgn, empty_conref(), empty_tqual());
+    t = PointerType(p2->topt->v, HeapRgnType, empty_conref(), empty_tqual());
     break;
   case Reference_p(vd):
     warn(p->loc,"* pattern used, may be unsafe");
     t = wildtyp();
     // FIX: Uh-oh, this value isn't necessarily in the heap, must
     //      pass in a parameter to tell us!!!
-    vd->type = PointerType(t,HeapRgn,new_conref(false),empty_tqual());
+    vd->type = PointerType(t,HeapRgnType,new_conref(false),empty_tqual());
     vd->tq   = empty_tqual();
     v_result = &cons(vd,v_result);
     break;

@@ -11,7 +11,7 @@
 
 // The routines declared in precore.h are actually written in C,
 // but clients don't need to know that.  They are defined in
-// cyc_helpers.c
+// cyc_runtime.c
 
 #include "precore.h"
 
@@ -49,6 +49,8 @@ extern `a identity<`a>(`a);
 
 extern int intcmp(int,int);
 extern int charcmp(char,char);
+// fairly useless until we can give `a a memory kind
+extern int ptrcmp<`a>(`a @, `a @); 
 
 extern xenum exn { InvalidArg(string) };
 extern xenum exn { Failure(string) };

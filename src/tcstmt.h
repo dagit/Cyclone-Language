@@ -6,10 +6,7 @@
 
 namespace Tcstmt {
 
-using Absyn;
-using Tcenv;
-
-extern synth tcStmt(tenv,stmt);
+extern void tcStmt(Tcenv::tenv,Absyn::stmt);
 
 }
 

@@ -32,9 +32,9 @@ namespace Absyn {
   using Core;
   using List;
   using Position;
-  typedef string tvar;
   typedef string field_name;
   typedef string var;
+  typedef string tvarname;
   typedef $(List::list<var>,var)@ qvar;
   typedef qvar typedef_name;
   
@@ -48,7 +48,6 @@ namespace Absyn {
   extern enum Box;
   extern struct Conref<`a>;
   extern enum Constraint<`a>;
-  extern enum Rgn;
   extern enum Typ;
   extern enum Funcparams;
   extern enum Type_modifier;
@@ -77,23 +76,23 @@ namespace Absyn {
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
-  typedef enum Size_of size_of;
-  typedef enum Kind kind;
+  typedef enum Size_of size_of_t;
+  typedef enum Kind kind_t;
+  typedef $(tvarname,kind_t)@ tvar; // resolved kind via in-place mutation
   typedef enum Array_kind array_kind;
   typedef enum Sign sign;
   typedef enum Box boxed;
   typedef struct Conref<`a> @conref<`a>;
-  typedef enum Constraint<`a> constraint<`a>;
-  typedef enum Rgn rgn_t;
+  typedef enum Constraint<`a> constraint_t<`a>;
   typedef enum Typ typ;
-  typedef enum Funcparams funcparams;
+  typedef enum Funcparams funcparams_t;
   typedef enum Type_modifier type_modifier;
   typedef enum Cnst cnst;
   typedef enum Primop primop;
-  typedef enum Incrementor incrementor;
-  typedef enum Raw_exp raw_exp;
+  typedef enum Incrementor incrementor_t;
+  typedef enum Raw_exp raw_exp_t;
   typedef struct Exp @exp;
-  typedef enum Raw_stmt raw_stmt;
+  typedef enum Raw_stmt raw_stmt_t;
   typedef struct Stmt @stmt;
   typedef enum Raw_pat raw_pat;
   typedef struct Pat @pat;
@@ -116,52 +115,67 @@ namespace Absyn {
     bool q_const; bool q_volatile; bool q_restrict; 
   };
   EXTERN_DEFINITION enum Size_of { B1, B2, B4, B8 };
-  // FIX: Add BoxPackableKind and MemPackableKind and a way to express the
-  //      former in the concrete syntax.  (Without tyvars of MemKind,
-  //      the latter may be recomputable -- just see if all the constituents
-  //      are packable.)
-  //      (So note that BoxKind and Memkind imply unpackable.)
-  // Note we don't have RgnKind because we disambiguate the meaning of type
-  // variables and store region variables separately in the type environment.
-  EXTERN_DEFINITION enum Kind { BoxKind, RegKind, MemKind };
+  // Note: RgnKind is incomparable to any other kind.
+  // Note: Perhaps unpackable should be the default since existentials are
+  //       rare??
+  // FIX: There is no way to create tyvars of unpackable kinds in the 
+  //      concrete syntax.
+  // FIX: There is no concrete syntax for abstract types take a type of
+  //      some kind other than BoxPKind (which should remain the default).
+  // FIX: There's no reason data types couldn't be packable polymorphic,
+  //      but it's not at all clear what sane syntax would look like.
+  //      Until then, you won't be able to create a list of region handles.
+  // FIX: Is there any reason to distinguish Reg and Mem so long as we're
+  //      translating to C which allows mem assignment and param passing?
+  EXTERN_DEFINITION enum Kind { 
+    MemUKind,
+    RegUKind,
+    BoxUKind,
+    MemPKind,
+    RegPKind,
+    BoxPKind,
+    RgnKind,
+    UnresolvedKind
+  };
   EXTERN_DEFINITION enum Array_kind { 
     UntaggedArray, TaggedArray, FixedArray(exp) 
   };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
-  EXTERN_DEFINITION enum Box  { Boxed, Unboxed };
-  EXTERN_DEFINITION struct Conref<`a> { constraint<`a> v; };
+  EXTERN_DEFINITION enum Box  { Boxed,  Unboxed };
+  EXTERN_DEFINITION struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
     Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
   };
-  // Note: In block f, `f becomes a tvar, so block names must not conflict
-  //       with tyvars.  Another approach is to add a third variant to Rgn
-  //       for these induced region variables.
-  // Note: We probably want an EvarRgn and compress and substitution, ...
-  EXTERN_DEFINITION enum Rgn { HeapRgn, VarRgn(tvar) };
 
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
   // are all set by check_valid_type which most of the compiler assumes
   // has been called.  Doing so avoids the need for some code to have and use
   // a type-name environment just like variable-binding fields avoid the need
   // for some code to have a variable environment.
+  // Note: Having HeapRgnType and VarType's of RgnKind is a sort of kludge 
+  //       so we can use one unification, substitution, etc. 
+  //       Certain typ fields must have RgnKind and
+  //       another must not have RgnKind.  Wouldn't refinement types be nice?
   // FIX: Change a lot of the abstract-syntaxes options to nullable pointers.
   //      For example, the last field of TypedefType
+  // FIX: May want to make this raw_typ and store the kinds with the types.
   EXTERN_DEFINITION enum Typ {
     VoidType;
-    Evar(kind,Opt_t<typ>,int);
-    VarType(tvar);
-    EnumType(Opt_t<typedef_name>,list<typ>,struct Enumdecl @*);
-    XenumType(typedef_name,struct Xenumdecl @*);
-    PointerType(typ,rgn_t,conref<bool>,tqual);
-    IntType(sign,size_of,boxed);
+    Evar(kind_t,Opt_t<typ>,int);
+    VarType(tvar); // kind induced by tvar
+    EnumType(Opt_t<typedef_name>,list<typ>,enumdecl *);
+    XenumType(typedef_name,xenumdecl *);
+    PointerType(typ/* mem kind */,typ/* RgnKind */,conref<bool>,tqual);
+    IntType(sign,size_of_t,boxed);
     FloatType(boxed);
     DoubleType(boxed);
     ArrayType(typ,tqual,array_kind);
     FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
     TupleType(list<$(tqual,typ)@>);
-    StructType(Opt_t<typedef_name>,list<typ>,struct Structdecl @*);
+    StructType(Opt_t<typedef_name>,list<typ>,structdecl *);
     TypedefType(typedef_name,list<typ>,Opt_t<typ>);
-    RgnHandleType(rgn_t); // a singleton type, for deep allocation
+    HeapRgnType; // has RgnKind
+    RgnHandleType(typ);//singleton for deep alloc, has BoxUKind, typ has RgnKind
     UnionType;
   };
 
@@ -174,8 +188,8 @@ namespace Absyn {
     Carray_mod; 
     Array_mod; 
     ConstArray_mod(exp);
-    Pointer_mod(bool,rgn_t,tqual); // default rgn_t is HeapRgn
-    Function_mod(funcparams);
+    Pointer_mod(bool,typ,tqual); // typ has RgnKind, default is RgnType(HeapRgn)
+    Function_mod(funcparams_t);
     TypeParams_mod(list<tvar>,segment);
   };
 
@@ -203,7 +217,7 @@ namespace Absyn {
     UnknownId_e(qvar);
     Primop_e(primop,list<exp>);
     AssignOp_e(exp,Opt_t<primop>,exp);
-    Increment_e(exp,incrementor);
+    Increment_e(exp,incrementor_t);
     Conditional_e(exp,exp,exp);
     SeqExp_e(exp,exp);
     UnknownCall_e(exp,list<exp>);
@@ -223,7 +237,7 @@ namespace Absyn {
     Array_e(list<$(list<designator>,exp)@>);
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
     Struct_e(typedef_name,Opt_t<list<typ>>,list<$(list<designator>,exp)@>,
-	     Opt_t<structdecl>);
+	     struct Structdecl *);
     Enum_e(qvar,Opt_t<list<typ>>,Opt_t<list<typ>>,list<exp>,
 	   enumdecl,enumfield);
     Xenum_e(qvar,Opt_t<list<typ>>,list<exp>,xenumdecl,enumfield);
@@ -235,7 +249,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Exp {
     Opt_t<typ> topt;
-    raw_exp    r;
+    raw_exp_t  r;
     segment    loc;
   };
 
@@ -264,7 +278,7 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Stmt {
-    raw_stmt     r;
+    raw_stmt_t   r;
     segment      loc;
     list<stmt>   non_local_preds; // set by type-checking
     stmt_annot_t annot;
@@ -320,7 +334,7 @@ namespace Absyn {
     typ        type;
     Opt_t<exp> initializer; // ignored for pattern variables
     int        shadow; // FIX: NOT USED PROPERLY RIGHT NOW!!!
-    int        unique_id;
+    int        block;  // FIX: not used yet and may not be int
   };
 
   EXTERN_DEFINITION struct Fndecl {
@@ -364,7 +378,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Typedefdecl {
     typedef_name name;
-    list<var>    tvs;
+    list<tvar>   tvs;
     typ          defn;
   };
 
@@ -396,7 +410,8 @@ namespace Absyn {
   // compare variables 
   extern int qvar_cmp(qvar, qvar);
   extern int varlist_cmp(list<var>, list<var>);
-  
+  extern int tvar_cmp(tvar, tvar); // WARNING: ignores the kinds
+
   ///////////////////////// Constructors ////////////////////////////
   extern tqual combine_tqual(tqual x,tqual y);
   extern tqual empty_tqual();
@@ -407,7 +422,7 @@ namespace Absyn {
 
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind 
-  extern typ new_evar(kind);
+  extern typ new_evar(kind_t);
   extern typ wildtyp();
   // unboxed, unsigned types
   extern typ uchar_t, ushort_t, uint_t, ulong_t;
@@ -420,7 +435,7 @@ namespace Absyn {
   // boxed, signed types
   extern typ sChar_t, sShort_t, sInt_t, sLong_t;
   // boxed float, double
-  extern typ Float_t, Double_t;
+  extern typ Float_typ, Double_typ;
   // exception name and type
   extern $(list<var>,var) @ exn_name;
   extern xenumdecl exn_xed;
@@ -438,7 +453,7 @@ namespace Absyn {
   extern typ strctq(qvar name);
 
   /////////////////////////////// Expressions ////////////////////////
-  extern exp new_exp(raw_exp, segment);
+  extern exp new_exp(raw_exp_t, segment);
   extern exp copy_exp(exp);
   extern exp const_exp(cnst, segment);
   extern exp null_exp(segment);
@@ -478,7 +493,7 @@ namespace Absyn {
   extern exp fncall_exp(exp, list<exp>, segment);
   extern exp throw_exp(exp, segment);
   extern exp noinstantiate_exp(exp, segment);
-  extern exp instantiate(exp, list<typ>, segment);
+  extern exp instantiate_exp(exp, Opt_t<list<typ>>, segment);
   extern exp cast_exp(typ, exp, segment);
   extern exp address_exp(exp, segment);
   extern exp sizeof_exp(typ t, segment);
@@ -493,7 +508,7 @@ namespace Absyn {
   extern exp unresolvedmem_exp(Opt_t<typedef_name>,
 			       list<$(list<designator>,exp)@>,segment);
   /////////////////////////// Statements ///////////////////////////////
-  extern stmt new_stmt(raw_stmt s, segment loc);
+  extern stmt new_stmt(raw_stmt_t s, segment loc);
   extern stmt skip_stmt(segment loc);
   extern stmt exp_stmt(exp e,segment loc);
   extern stmt seq_stmt(stmt s1, stmt s2, segment loc);
@@ -524,10 +539,10 @@ namespace Absyn {
   extern decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc);
   extern vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init);
   extern vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init);
-  extern decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+  extern decl struct_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
 			  Opt_t<list<$(field_name,tqual,typ)@>> fs,
 			  segment loc);
-  extern decl enum_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+  extern decl enum_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
 			Opt_t<list<enumfield>> fs,segment loc);
   extern decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,
 			 segment loc);

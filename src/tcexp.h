@@ -20,6 +20,7 @@ using Tcutil;
 using Evexp;
 
 extern synth tcExp(tenv, Opt_t<typ>, exp);
+extern void tcTest(tenv te,exp e,string msg_part);
 extern bool is_const_exp(tenv, exp);
 extern Opt_t<$(list<Char>, list<Char>, list<Char>, list<Char>, char, int)@>
        parse_conversionspecification(string s, int i);

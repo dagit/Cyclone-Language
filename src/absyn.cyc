@@ -29,17 +29,22 @@ int qvar_cmp(qvar q1, qvar q2) {
   if (i != 0) return i;
   else return zstrcmp(q1[1],q2[1]);
 }
+// WARNING: Ignores the kinds.
+int tvar_cmp(tvar tv1, tvar tv2) {
+  return String::zstrcmp(tv1[0],tv2[0]);
+}
+
 static int new_type_counter = 0;
 
-typ new_evar(kind k) {
+typ new_evar(kind_t k) {
   return Evar(k,null,new_type_counter++);
 }
 typ wildtyp() {
-  return new_evar(MemKind);
+  return new_evar(UnresolvedKind); // may need to restrict to MemUKind ???
 }
 
 tqual combine_tqual(tqual x,tqual y) {
-  return &Tqual(x->q_const || y->q_const,
+  return &Tqual(x->q_const    || y->q_const,
 		x->q_volatile || y->q_volatile,
 		x->q_restrict || y->q_restrict);
 }
@@ -58,15 +63,12 @@ bool is_format_prim(primop p) {
   }
 }
 
-// Various constructors
-
 //////////////////////////// Constraints /////////////////////////
 conref<`a> new_conref<`a>(`a x) {
   return &Conref{.v = Eq_constr(x)};
 }
 conref<`a> empty_conref<`a>() {
-  constraint<`a> c = No_constr;
-  return &Conref{.v = c};
+  return &Conref{.v = No_constr};
 }
 
 //////////////////////////// Types ///////////////////////////////
@@ -94,8 +96,8 @@ typ sShort_t = IntType(Signed,B2,Boxed);
 typ sInt_t   = IntType(Signed,B4,Boxed);
 typ sLong_t  = IntType(Signed,B8,Boxed);
 // boxed float, double
-typ Float_t  = FloatType(Boxed);
-typ Double_t = DoubleType(Boxed);
+typ Float_typ  = FloatType(Boxed);
+typ Double_typ = DoubleType(Boxed);
 // exceptions
 static $(list<var>,var) exn_name_v = $(null,(string)"exn");
 $(list<var>,var) @      exn_name   = &exn_name_v;
@@ -123,7 +125,7 @@ typ file_typ() {
 					       null, null);
     typ          file_struct_typ = StructType(&Opt(file_t_name),null,&$(sd));
     file_t_opt = &Opt(PointerType(file_struct_typ,
-				  HeapRgn,
+				  HeapRgnType,
 				  new_conref(false),
 				  empty_tqual()));
   }
@@ -131,19 +133,18 @@ typ file_typ() {
 }
 // pointers
 
-// FIX: add versions that take rgn_t arguments ?
+// FIX: add versions that take region arguments
 typ nullableptr_typ(typ t, tqual tq) {
-  return PointerType(t,HeapRgn,new_conref(true),tq);
+  return PointerType(t,HeapRgnType,new_conref(true),tq);
 }
 typ nonnullableptr_typ(typ t, tqual tq) {
-  return PointerType(t,HeapRgn,new_conref(false),tq);
+  return PointerType(t,HeapRgnType,new_conref(false),tq);
 }
 
 static Opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
-  if (void_star_t_opt == null) {
+  if (void_star_t_opt == null)
     void_star_t_opt = &Opt(nullableptr_typ(VoidType, empty_tqual()));
-  }
   return void_star_t_opt->v;
 }
 
@@ -159,7 +160,7 @@ typ strctq(qvar name) {
 }
 
 ///////////////////////// Expressions //////////////////////////////
-exp new_exp(raw_exp r, segment loc) {
+exp new_exp(raw_exp_t r, segment loc) {
   return &Exp{.topt=null, .r=r, .loc=loc};
 }
 exp copy_exp(exp e) {
@@ -173,11 +174,11 @@ exp int_exp(sign s,int i,segment seg) {
 exp signed_int_exp(int i,    segment loc) {return int_exp(Signed,i,loc);}
 exp uint_exp(unsigned int i, segment loc) {return int_exp(Unsigned,i,loc);}
 exp bool_exp(bool b, segment loc) { return signed_int_exp(b ? 1 : 0, loc); }
-exp true_exp(segment loc) { return bool_exp(true, loc); }
+exp true_exp(segment loc)  { return bool_exp(true, loc); }
 exp false_exp(segment loc) { return bool_exp(false, loc); }
-exp char_exp(char c, segment loc)    { return const_exp(Char_c(Unsigned,c),loc);}
-exp float_exp(string f, segment loc) { return const_exp(Float_c(f),loc);}
-exp string_exp(string s, segment loc){ return const_exp(String_c(s),loc);}
+exp char_exp(char c, segment loc)    {return const_exp(Char_c(Unsigned,c),loc);}
+exp float_exp(string f, segment loc) {return const_exp(Float_c(f),loc);}
+exp string_exp(string s, segment loc){return const_exp(String_c(s),loc);}
 
 exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,Unresolved_b), loc); }
 exp varb_exp(qvar q, binding_t b, segment loc) {
@@ -195,7 +196,7 @@ exp prim1_exp(primop p, exp e, segment loc) {
 exp prim2_exp(primop p, exp e1, exp e2, segment loc) {
   return primop_exp(p, &cons(e1,&cons(e2,null)), loc);
 }
-exp times_exp(exp e1, exp e2, segment loc){return prim2_exp(Times, e1, e2, loc);}
+exp times_exp(exp e1,exp e2,segment loc){return prim2_exp(Times, e1, e2, loc);}
 exp eq_exp(exp e1,  exp e2, segment loc) {return prim2_exp(Eq,  e1, e2, loc);}
 exp neq_exp(exp e1, exp e2, segment loc) {return prim2_exp(Neq, e1, e2, loc);}
 exp gt_exp(exp e1,  exp e2, segment loc) {return prim2_exp(Gt,  e1, e2, loc);}
@@ -264,9 +265,8 @@ exp null_pointer_exn_exp(segment loc) {
 }
 exp array_exp(list<exp> es, segment loc) {
   let dles = null;
-  for (; es != null; es = es->tl) {
+  for (; es != null; es = es->tl)
     dles = &cons(&$(null,es->hd),dles);
-  }
   dles = List::imp_rev(dles);
   return new_exp(Array_e(dles),loc);
 }
@@ -275,7 +275,7 @@ exp unresolvedmem_exp(Opt_t<typedef_name> n,
   return new_exp(UnresolvedMem_e(n,dles),loc);
 }
 ///////////////////////// Statements ///////////////////////////////
-stmt new_stmt(raw_stmt s, segment loc) { 
+stmt new_stmt(raw_stmt_t s, segment loc) { 
   return &Stmt{.r=s, .loc=loc, .non_local_preds=null, .annot=EmptyAnnot }; }
 stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
@@ -295,7 +295,7 @@ stmt while_stmt(exp e,stmt s,segment loc) {
 }
 stmt break_stmt   (segment loc) { return new_stmt(Break_s(null), loc); }
 stmt continue_stmt(segment loc) { return new_stmt(Continue_s(null), loc); }
-stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
+stmt for_stmt(exp e1,exp e2,exp e3,stmt s,segment loc) {
   return new_stmt(For_s(e1,$(e2,skip_stmt(e3->loc)),$(e3,skip_stmt(e3->loc)),s),
 		  loc);
 }
@@ -343,22 +343,19 @@ decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
   return new_decl(Let_d(p,t_opt,e,false),loc);
 }
-static int unique_vd_field = 1;
 vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-		  .type=t, .initializer=init, .shadow=0,
-		  .unique_id = unique_vd_field++};
+		  .type=t, .initializer=init, .shadow=0, .block=0};
 }
 vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-	          .type=t, .initializer=init, .shadow=0,
-                  .unique_id = unique_vd_field++};
+	          .type=t, .initializer=init, .shadow=0, .block=0};
 }
-decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+decl struct_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
 		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
   return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs}),loc);
 }
-decl enum_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+decl enum_decl(scope s,Opt_t<typedef_name> n,list<tvar> ts,
 	       Opt_t<list<enumfield>> fs,segment loc) {
   return new_decl(Enum_d(&Enumdecl {.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
 }
@@ -433,5 +430,3 @@ $(field_name,tqual,typ) * lookup_struct_field(structdecl sd, var v) {
   }
   return null;
 }
-
-

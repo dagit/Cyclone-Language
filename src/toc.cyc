@@ -225,8 +225,8 @@ static typ typ_to_c(typ t) {
 		       &Opt(nullableptr_typ(strct("_xenum_struct"),
 					    empty_tqual())));
   case PointerType(t2,_,b,tq):
-    // we map t@ to t*
-    return PointerType(typ_to_c(t2),HeapRgn,new_conref(true),tq);
+    // we map t@ to t*, region is irrelevant
+    return PointerType(typ_to_c(t2),HeapRgnType,new_conref(true),tq);
   // We assume that these are suitably defined already in an appropriate
   // include file -- especially the boxed versions and the bools.
   case IntType(sn,B8,Boxed): return longlong_typ;
@@ -265,9 +265,11 @@ static typ typ_to_c(typ t) {
     if (topt == null) return toc_impos("Toc::typ_to_c: unresolved TypedefType");
     // just drop the type arguments and translate the nested types
     return TypedefType(collapse_qvar(tdn),null, &Opt(typ_to_c_array(topt->v)));
-  case RgnHandleType(r):
-    // FIX?
+  case RgnHandleType(t):
+    // presumablyt the runtime will cast this as necessary
     return void_star_typ();
+  case HeapRgnType:
+    return toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case UnionType:
     return toc_impos("uniontype");
   }
@@ -470,7 +472,7 @@ static exp box_float_conv(bool toplevel, exp e) {
   stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
 		    exp_stmt(var_exp(x,DL),DL),DL);
   s = declare_stmt(y,nullableptr_typ(float_t,empty_tqual()),&Opt(init_y),s,DL);
-  return stmt_exp(declare_stmt(x,Float_t,null,s,DL),DL);
+  return stmt_exp(declare_stmt(x,Float_typ,null,s,DL),DL);
 }
 
 // Float -> float
@@ -484,11 +486,11 @@ static exp unbox_float_conv(bool toplevel, exp e) {
   //    x; })
   qvar x = temp_var();
   qvar y = temp_var();
-  exp init_y = cast_exp(nullableptr_typ(Float_t,empty_tqual()),
+  exp init_y = cast_exp(nullableptr_typ(Float_typ,empty_tqual()),
 			address_exp(var_exp(x,DL),DL),DL);
   stmt s = seq_stmt(assign_stmt(deref_exp(var_exp(y,DL),DL),e,DL),
 		    exp_stmt(var_exp(x,DL),DL),DL);
-  s = declare_stmt(y,nullableptr_typ(Float_t,empty_tqual()),&Opt(init_y),s,DL);
+  s=declare_stmt(y,nullableptr_typ(Float_typ,empty_tqual()),&Opt(init_y),s,DL);
   return stmt_exp(declare_stmt(x,float_t,null,s,DL),DL);
 }
 
@@ -507,12 +509,12 @@ static exp box_double_conv(bool toplevel, exp e) {
     //    x->v = e; x; })
     //
     qvar x = temp_var();
-    exp init = cast_exp(Double_t,
+    exp init = cast_exp(Double_typ,
 			malloc_atomic(sizeof_exp(strct("_boxed_double_struct"),
 						 DL)),DL);
     stmt s = seq_stmt(assign_stmt(structarrow_exp(var_exp(x,DL),"v",DL),e,DL),
 		      exp_stmt(var_exp(x,DL),DL),DL);
-    return stmt_exp(declare_stmt(x,Double_t,&Opt(init),s,DL),DL);
+    return stmt_exp(declare_stmt(x,Double_typ,&Opt(init),s,DL),DL);
   }
 }
 
@@ -522,7 +524,7 @@ static exp unbox_double_conv(bool toplevel, exp e) {
   if (toplevel)
     unimp("can't unbox top-level Double");
   // ((Double)e)->v
-  return structarrow_exp(cast_exp(Double_t,e,DL),"v",DL);
+  return structarrow_exp(cast_exp(Double_typ,e,DL),"v",DL);
 }
 
 // throw an exception -- this is turned into a function call
@@ -1503,7 +1505,7 @@ static void exp_to_c(env nv, exp e) {
     }
     e->r = stmt_exp(s,DL)->r;
     break;
-  case Struct_e(tdn,ots,dles,sdopt):
+  case Struct_e(tdn,ots,dles,_):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)

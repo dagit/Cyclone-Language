@@ -123,19 +123,27 @@ void dumpscope(scope sc) {
   }
 }
 
-void dumpkind(kind k) {
-  switch(k) {
-  case BoxKind: dump("b"); return;
-  case RegKind: dump("r"); return;
-  case MemKind: dump("m"); return;
+void dumpkind(kind_t k) {
+  switch (k) {
+  case MemUKind: dump("mu"); return;
+  case RegUKind: dump("ru"); return;
+  case BoxUKind: dump("bu"); return;
+  case MemPKind: dump("mp"); return;
+  case RegPKind: dump("rp"); return;
+  case BoxPKind: dump("bp"); return;
+  case RgnKind:  dump("rgn"); return;
+  case UnresolvedKind: dump("U"); return;
   }
 }
 
 void dumptps(list<typ> ts) {
   egroup(dumptyp,ts,"<",">",",");
 }
-void dumptvars(list<string> tvs) {
-  egroup(dump_str,tvs,"<",">",",");
+void dumptvar(tvar tv) {
+  dump_str(tv[0]); // FIX: may want explicit kind
+}
+void dumptvars(list<tvar> tvs) {
+  egroup(dumptvar,tvs,"<",">",",");
 }
 
 void dumparg($(tqual,typ)@ pr) {
@@ -157,11 +165,11 @@ bool next_is_pointer(list<type_modifier> tms) {
 void dumpntyp(typ t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case ArrayType(_,_,_):   return;
-  case FnType(_,_,_,_):    return;
+  case ArrayType(_,_,_):     return;
+  case FnType(_,_,_,_):      return;
   case PointerType(_,_,_,_): return;
-  case VoidType:       dump("void"); return;
-  case VarType(v):     dump(v); return;
+  case VoidType:         dump("void"); return;
+  case VarType(&$(v,k)): dump(v); return; // FIX: may want explicit kinds
   case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
   case Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
   case EnumType(null,ts,_):    dump("enum");               dumptps(ts); return;
@@ -191,7 +199,8 @@ void dumpntyp(typ t) {
   case StructType(null,ts,_):   dump("struct");             dumptps(ts); return;
   case StructType(&Opt(n),ts,_):dump("struct");dumpqvar(n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case RgnHandleType(rgn): dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;
+  case RgnHandleType(rgn): dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX
+  case HeapRgnType: return; // FIX: may want explicit rgn some times
   case UnionType: dump("union {/* unimplemented */}"); return;
   }
 }
@@ -667,14 +676,15 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case Pointer_mod(true,  HeapRgn,  tq2): 
+  case Pointer_mod(true,  HeapRgnType,  tq2): 
     dump("*"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(false, HeapRgn,  tq2): 
+  case Pointer_mod(false, HeapRgnType,  tq2): 
     dump("@"); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(true,  VarRgn(r), tq2):  
+  case Pointer_mod(true,  VarType(&$(r,k)), tq2):  
     dump("*"); dump(r); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(false, VarRgn(r), tq2): 
+  case Pointer_mod(false, VarType(&$(r,k)), tq2): 
     dump("@"); dump(r); dumptms(tms->tl,f,a); return;
+  case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
   default: 
     bool next_is_pointer = false;

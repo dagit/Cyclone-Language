@@ -66,39 +66,54 @@ extern struct Tenv {
 };
 typedef struct Tenv @tenv;
 
+extern tenv tc_init();
+extern genv empty_genv();
+
+extern tenv enter_ns(tenv, var);
+
+extern list<var>         resolve_namespace(tenv,segment,list<var>);
+extern resolved_t        lookup_ordinary(tenv,segment,qvar);
+extern structdecl@       lookup_structdecl(tenv,segment,qvar);
+extern enumdecl@         lookup_enumdecl(tenv,segment,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv,segment,qvar);
+extern typedefdecl       lookup_typedefdecl(tenv,segment,qvar);
+extern structdecl@       lookup_structdecl_abs(tenv,segment,qvar);
+extern enumdecl@         lookup_enumdecl_abs(tenv,segment,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv,segment,qvar);
+
+extern fenv new_fenv(fndecl);
+
+extern typ  return_typ(tenv);
+
+extern tenv add_local_var(segment,tenv,vardecl);
+extern tenv add_pat_var  (segment,tenv,vardecl);
+
+extern list<tvar> lookup_type_vars(tenv);
+extern tenv       add_type_vars(segment,tenv,list<tvar>);
+
 extern tenv set_in_loop(tenv te, stmt continue_dest);
 extern tenv set_in_switch(tenv);
-extern bool process_continue(tenv,stmt);
-extern bool process_break(tenv,stmt);
-extern void process_goto(tenv,stmt);
-extern $(stmt, list<tvar>,list<typ>)* process_fallthru(tenv, stmt);
-
 extern tenv set_fallthru(tenv te, 
 			 $(list<tvar>,list<vardecl>) * pat_typ,
 			 stmt body);
 extern tenv clear_fallthru(tenv);
 extern tenv set_next(tenv, jumpee_t);
 
-extern tenv enter_ns(tenv, var);
-extern genv genv_concat(genv, genv);
+// The next 4 all assign through their last arg
+extern void process_continue(tenv,stmt,Opt_t<stmt>*);
+extern void process_break   (tenv,stmt,Opt_t<stmt>*);
+extern void process_goto(tenv,stmt,var,Opt_t<stmt>*);
+extern $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv,stmt,Opt_t<stmt>*);
 
-// lookup functions 
-extern list<var>   resolve_namespace(tenv,segment,list<var>);
-extern genv        lookup_namespace(tenv,segment,list<var>);
-extern resolved_t  lookup_ordinary(tenv,segment,qvar);
-extern structdecl@       lookup_structdecl(tenv,segment,qvar);
-extern enumdecl@         lookup_enumdecl(tenv,segment,qvar);
-extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv,segment,qvar);
-extern structdecl@       lookup_structdecl_abs(tenv,segment,qvar);
-extern enumdecl@         lookup_enumdecl_abs(tenv,segment,qvar);
-extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv,segment,qvar);
-extern typedefdecl lookup_typedefdecl(tenv,segment,qvar);
-extern list<tvar>  lookup_type_vars(tenv);
+extern stmt get_encloser(tenv);
+extern tenv set_encloser(tenv,stmt);
 
-extern tenv add_local_var(segment,tenv,vardecl);
-extern tenv add_pat_var  (segment,tenv,vardecl);
+extern tenv add_label(tenv, var, stmt);
+extern bool all_labels_resolved(tenv);
 
-extern tenv add_type_vars(segment,tenv,list<tvar>);
+extern tenv new_block(tenv);
+extern int  curr_block(tenv);
+extern typ  block_to_typ(tenv,int);
 
 // what we synthesize when type-checking a statement or expression:
 // This should be abstract, but I'm saving an allocation and a level of
@@ -144,26 +159,9 @@ extern synth switch_bottom(synth s);
 // after a loop, the synth is the join of the "false" part of the
 // test expression, and the forward_jump part of the statement
 extern synth loop_synth(synth e, synth s);
-// an explicit fallthru -- similar to skip but ctrl indicates explicit fallthru
-extern synth fallthru_synth(tenv te);
-// add the set v to both edges of the synth
-extern synth add_var_synth(Set<var> v, synth s);
-// remove v from the fall-through edge of the synth (if any)
-extern synth initialize_var_synth(synth s, var v);
 // set of variables unassigned on fallthru edge
 extern Set<var> maybe_unassigned(synth);
 // set of variables unassigned on "true"/"false" branches respectively
 extern $(Set<var>,Set<var>) maybe_unassigned_bool(synth);
-
-extern stmt     get_encloser(tenv);
-extern tenv     set_encloser(tenv,stmt);
-extern tenv     add_label(tenv, var, stmt);
-extern bool     all_labels_resolved(tenv);
-extern typ      return_typ(tenv);
-
-extern tenv tc_init();
-extern genv empty_genv();
-extern fenv new_fenv(fndecl);
-
 }
 #endif
