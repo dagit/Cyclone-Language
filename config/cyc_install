@@ -19,8 +19,9 @@ fi
 
 # inst_record_name target_dir
 #   calculates the install record's name based on some criteria
+#   (assumes the directory is an absolute path)
 function inst_record_name {
-  mark=`basename $1`
+  mark=`echo $1 | sed -e 's/\//-/g'`
   echo ".inst_${mark}"
 }
 
