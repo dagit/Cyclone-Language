@@ -23,8 +23,6 @@
 #define _TYPEREP_H_
 
 #include <core.h>
-using Core;
-
 // A cute hack to avoid defining the abstract syntax twice.
 #ifdef TYPEREP_CYC
 #define EXTERN_TYPEREP
@@ -35,6 +33,8 @@ using Core;
 #define gen(t) __gen(t)
 
 namespace Typerep {
+using Core;
+
 typedef unsigned int var_t;
 
 EXTERN_TYPEREP tunion Typestruct {
@@ -73,6 +73,11 @@ EXTERN_TYPEREP tunion Typestruct {
   **/
   TUnion(string_t<`H>,$(unsigned int,string_t<`H>)@?,
 			$(unsigned int, string_t<`H>,tunion Typestruct)@?);
+  /** [TUnionField(tname,fname,ts)] is a tunionfield type [tname.fname] where
+      [ts] is a Tuple describing the tunionfield data.  (the same tuple as
+      in the tunion or xtunion typestruct. 
+  **/
+  TUnionField(string_t<`H>,string_t<`H>,unsigned int, $(unsigned int,tunion Typestruct)@?);
   /** [name, XTUnion(fields)] is an xtunion type [name], where each element of
       the array [fields] is a pair [(tag,ts)] of a tag value [tag]
       and a Typestruct [ts] representing the type of the tagged data.
@@ -80,13 +85,18 @@ EXTERN_TYPEREP tunion Typestruct {
       we can just check the xtunion pointer to see if it's tag-only).
   **/
   XTUnion(string_t<`H>,$(string_t<`H>, tunion Typestruct)@?);
-  /** [Union(name,fields)] is a union type [*name] ([name == NULL] if 
-      anonymous), where each element of
+  /** [Union(name,szb,fields)] is a union type [*name] ([name == NULL] if 
+      anonymous), of byte size [szb], where each element of
       the array [fields] is a pair [(name,ts)] where [name] is the 
       union field name and ts is a Typestruct represnting the data
       for a possible case of the union.
   **/
-  Union(string_t<`H>*,$(string_t<`H>,tunion Typestruct)@?);
+  Union(string_t<`H>*,int,$(string_t<`H>,tunion Typestruct)@?);
+  /** [Enum(name,szb,l)] is an enum of [szb] size whose value-tag bindings 
+      are the entries [(value,tag)] of [l].  [name] is an optional name 
+      for the enum.
+   **/
+  Enum(string_t<`H>*,int,$(unsigned int,string_t)@?);
   /** [Forall(vars, ts)] is a polymorphic type wrapper.
       The string array [vars] lists the variables bound by this forall in [ts].
   **/
@@ -98,6 +108,7 @@ EXTERN_TYPEREP tunion Typestruct {
       in the arrays; [ts_param[i]] binds to [vars[i]] (and the arrays must 
       have the same length)
    **/
+  
   //  App(tunion Typestruct, tunion Typestruct?);
 };
   

@@ -64,7 +64,7 @@ genrep_write$(EXE):  genrep_write.o muttrep.o
 genrep_read$(EXE):  genrep_read.o muttrep.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-genrep_test$(EXE):  genrep_test.o muttrep.o
+genrep_test$(EXE):  genrep_test.o muttrep.o 
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)

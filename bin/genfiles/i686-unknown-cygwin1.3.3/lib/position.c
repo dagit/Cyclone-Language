@@ -303,10 +303,12 @@ f1;struct _tagged_arr f2;void*f3;};struct Cyc_Typerep_Struct_struct{int tag;stru
 _tagged_arr*f1;unsigned int f2;struct _tagged_arr f3;};struct _tuple1{unsigned int f1;
 void*f2;};struct Cyc_Typerep_Tuple_struct{int tag;unsigned int f1;struct _tagged_arr
 f2;};struct _tuple2{unsigned int f1;struct _tagged_arr f2;};struct Cyc_Typerep_TUnion_struct{
-int tag;struct _tagged_arr f1;struct _tagged_arr f2;struct _tagged_arr f3;};struct
-_tuple3{struct _tagged_arr f1;void*f2;};struct Cyc_Typerep_XTUnion_struct{int tag;
-struct _tagged_arr f1;struct _tagged_arr f2;};struct Cyc_Typerep_Union_struct{int tag;
-struct _tagged_arr*f1;struct _tagged_arr f2;};unsigned int Cyc_Typerep_size_type(
+int tag;struct _tagged_arr f1;struct _tagged_arr f2;struct _tagged_arr f3;};struct Cyc_Typerep_TUnionField_struct{
+int tag;struct _tagged_arr f1;struct _tagged_arr f2;unsigned int f3;struct _tagged_arr
+f4;};struct _tuple3{struct _tagged_arr f1;void*f2;};struct Cyc_Typerep_XTUnion_struct{
+int tag;struct _tagged_arr f1;struct _tagged_arr f2;};struct Cyc_Typerep_Union_struct{
+int tag;struct _tagged_arr*f1;int f2;struct _tagged_arr f3;};struct Cyc_Typerep_Enum_struct{
+int tag;struct _tagged_arr*f1;int f2;struct _tagged_arr f3;};unsigned int Cyc_Typerep_size_type(
 void*rep);extern struct Cyc_Typerep_Struct_struct Cyc_struct_Position_Segment_rep;
 unsigned char Cyc_Position_Exit[9]="\000\000\000\000Exit";static unsigned char
 _tmp0[1]="";static struct _tagged_arr Cyc_Position_source={_tmp0,_tmp0,_tmp0 + 1};

@@ -185,7 +185,7 @@ extern tunion Terrier;
 extern union Beagle;
 
 }
-  extern tunion Typestruct.Tuple struct_Dog_Mutt_rep;
+  extern tunion Typestruct.Struct struct_Dog_Mutt_rep;
   extern tunion Typestruct.TUnion tunion_Dog_Terrier_rep;
   extern tunion Typestruct.Union union_Dog_Beagle_rep;
 

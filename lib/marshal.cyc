@@ -50,28 +50,28 @@ static int uint_cmp(unsigned int a, unsigned int b) {
   else return -1;
 }
 
-addr_set_t empty_addr_set () {
+static addr_set_t empty_addr_set () {
   return Set::insert(Set::empty(uint_cmp),0);
 }
 
 // returns whether elt is a member, inserts if it's not
-$(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
+static $(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
   return new $(Set::member(set,val), Set::insert(set,val));
 }
 
-inline bool index_member(addr_index_t idx, unsigned int m) {
+static inline bool index_member(addr_index_t idx, unsigned int m) {
   let $(_,n) = idx;
   return (m < n);
 }
 
-addr_index_t empty_addr_index() {
+static addr_index_t empty_addr_index() {
   return $(Dict::insert(Dict::empty(uint_cmp),0,0),1);
 }
 
 
 
 
-int index_lookup(addr_index_t index, unsigned int val) {
+static int index_lookup(addr_index_t index, unsigned int val) {
   let $(dict,n) = index;
   let indopt = Dict::lookup_opt(dict,val);
   if(indopt != NULL) {
@@ -80,20 +80,20 @@ int index_lookup(addr_index_t index, unsigned int val) {
   else return n;
 }
 
-addr_index_t index_insert(addr_index_t index, unsigned int val) {
+static addr_index_t index_insert(addr_index_t index, unsigned int val) {
   let $(dict,n) = index;
   return $(Dict::insert(dict,val,n),n+1);
 }
 
-addr_table_t empty_addr_table() {
+static addr_table_t empty_addr_table() {
   return $(new {for i < 1: 0},1);
 }
-inline bool table_member(addr_table_t table, unsigned int m) {
+static inline bool table_member(addr_table_t table, unsigned int m) {
   let $(_,n) = table;
   return (m < n);
 }
 
-addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
+static addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
   let $(vec,n) = tbl;
   if(vec.size == n) {
     vec = new {for j < 2*n: (j < n) ? vec[j] : 0};
@@ -102,13 +102,13 @@ addr_table_t table_insert(addr_table_t tbl, unsigned int i) {
   return $(vec,n+1);
 }
 
-unsigned int table_lookup(addr_table_t tbl, int i) {
+static unsigned int table_lookup(addr_table_t tbl, int i) {
   return tbl[0][i];
 }
 
-void print_ref(unsigned int ref) {
-  if(ref==0) printf("NULL");
-  else printf("(#%x)",ref);
+static void fprint_ref(FILE@ fp,unsigned int ref) {
+  if(ref==0) fprintf(fp,"NULL");
+  else fprintf(fp,"(#%x)",ref);
 }
 /*-------------------------------------------------------------------------*/
 /* Invariant: val points to a value of the type that rep represents      
@@ -118,26 +118,26 @@ void print_ref(unsigned int ref) {
  * we look it up to make sure that it's not a repeat
  */
 addr_set_t
-print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val) 
+fprint_type_base(typestruct_t rep, addr_set_t env, FILE@ fp,`a::A @ val) 
 {
   switch (rep) {
   case &Int(sn,sz):
     switch (sz) {
     case 8:
       char @x = unsafe_cast(val);
-      if(isprint(*x)) printf("'%c'",*x);
-      else printf("'\\%d'",*x);
+      if(isprint(*x)) fprintf(fp,"'%c'",*x);
+      else fprintf(fp,"'\\%d'",*x);
       break;
     case 16:
       short @x = unsafe_cast(val);
-      printf(sn?"%d":"%u",*x);
+      fprintf(fp,sn?"%d":"%u",*x);
       break;
     case 32:
       int @x = unsafe_cast(val);
-      printf(sn?"%d":"%u",*x);
+      fprintf(fp,sn?"%d":"%u",*x);
       break;
     default:
-      fprintf(stderr,"print_type_base: illegal int size %d bits\n", sz);
+      fprintf(stderr,"fprint_type_base: illegal int size %d bits\n", sz);
       exit(1);
     }
     break;
@@ -159,21 +159,21 @@ print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val)
     let &$(mem,env2) = member_insert(env,y);
     env = env2;
     if(!mem) {
-      printf("{(@%x) ",y);
+      fprintf(fp,"{(@%x) ",y);
       if (y != 0) {
 	int typ_szb = size_type(typ);
 	for (int i = 0; i<sz; i++) {
-	  env = print_type_base(typ,env, (`a@)unsafe_cast(y));
+	  env = fprint_type_base(typ,env, fp,(`a@)unsafe_cast(y));
 	  if (i != (sz-1))
-	    printf(", ");
+	    fprintf(fp,", ");
 	  y += typ_szb;
 	}
       }
       else printf ("NULL");
-      printf(" }");
+      fprintf(fp," }");
     }
     else {
-      print_ref(y);
+      fprint_ref(fp,y);
     }
     break;
 
@@ -184,80 +184,94 @@ print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val)
     let &$(mem,env2) = member_insert(env,base);
     env = env2;
     if(!mem) {
-      printf("[(@%x) ",base);
+      fprintf(fp,"[(@%x) ",base);
       for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
-	env = print_type_base(typ, env, (`a@)unsafe_cast(i));
+	env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(i));
 	if ((i+typ_szb) < last_plus_one)
-	  printf(", ");
+	  fprintf(fp,", ");
       }
-      printf(" ]");
+      fprintf(fp," ]");
     }
     else {
-      print_ref(base);
+      fprint_ref(fp,base);
     }
     break;
 
   case &Struct(name,_,l):
-    if(name == NULL) printf("{ ");
-    else printf("%s{ ",*name);
+    if(name == NULL) fprintf(fp,"{ ");
+    else fprintf(fp,"%s{ ",*name);
     int x = unsafe_cast(val); 
     for (int i = 0; i < l.size; i++) {
       let $(ofs,nm,typ) = *(l[i]);
-      printf("%s=",nm);
+      fprintf(fp,"%s=",nm);
       int x_ofs = x + ofs;
-      env = print_type_base(typ, env, (`a@)unsafe_cast(x_ofs));
+      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
       if (i != (l.size-1))
-	printf(", ");
+	fprintf(fp,", ");
     }
-    printf(" }");
+    fprintf(fp," }");
     break;
 
   case &Tuple(_,l):
-    printf("$( ");
+    fprintf(fp,"$( ");
     int x = unsafe_cast(val); 
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      env = print_type_base(typ, env, (`a@)unsafe_cast(x_ofs));
+      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
       if (i != (l.size-1))
-	printf(", ");
+	fprintf(fp,", ");
     }
-    printf(" )");
+    fprintf(fp," )");
     break;
-
+  
+  case &TUnionField(tname,fname,_,l):
+    fprintf(fp,"%s.%s(",tname,fname);
+    int x = unsafe_cast(val); 
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x + ofs;
+      env = fprint_type_base(typ, env, fp,(`a@)unsafe_cast(x_ofs));
+      if (i != (l.size-1))
+	fprintf(fp,", ");
+    }
+    fprintf(fp," )");
+    break;
+  
   case &TUnion(name,t,l):
     /* get the tag */
     unsigned int@ tagp = unsafe_cast(val);
     if (*tagp < 1024) {
-      printf("%s",get_tagname(*tagp,t));
+      fprintf(fp,"%s",get_tagname(*tagp,t));
     }
     else {
       let &$(mem,env2) = member_insert(env,*tagp);
       env = env2;
       if(!mem) {
-	printf("(@%x)",*tagp);
+	fprintf(fp,"(@%x)",*tagp);
 	unsigned int @x = unsafe_cast(*tagp);
 	unsigned int tag = *x;
 	/* figure out which variant it is */
 	let $(off,typ) = get_unionbranch(tag,l);
 	`a@ xoff = unsafe_cast(*tagp+off);
-	printf("&%s[",get_tagname2(tag,l));
-	env = print_type_base(typ, env, xoff);
-	printf("]");
+	fprintf(fp,"&%s[",get_tagname2(tag,l));
+	env = fprint_type_base(typ, env, fp,xoff);
+	fprintf(fp,"]");
       }
       else {
-	print_ref(*tagp);
+	fprint_ref(fp,*tagp);
       }
     }
     break;
 
+  
   case &XTUnion(name,l):
     // val is a pointer to a xtunion, hich is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
     unsigned int@ xtunionp = unsafe_cast(val);
     let &$(mem,env2) = member_insert(env,*xtunionp);
     env = env2;
     if(!mem) {
-      printf("(@%x)",*xtunionp);
+      fprintf(fp,"(@%x)",*xtunionp);
       // get the pointer to the name string "\0\0\0\0Name"
       unsigned int* xtstructp = unsafe_cast(*xtunionp);
       if(*xtstructp != 0) {
@@ -265,56 +279,66 @@ print_type_base(typestruct_t rep, addr_set_t env, `a::A @ val)
 	/* XXX do we really want to copy this, or just mess
 	   with the underlying string? */
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
-	printf("&%s[( ",xtname);
+	fprintf(fp,"&%s[( ",xtname);
 	/* figure out which variant it is */
 	let $(off,typ) = get_xtunionbranch(xtname,l);
 	`a@ xoff = unsafe_cast(*xtunionp+off);
-	env = print_type_base(typ, env, xoff);
-	printf(" )]");
+	env = fprint_type_base(typ, env, fp,xoff);
+	fprintf(fp," )]");
       }
       else {
 	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
 	/* XXX do we really want to copy this, or just mess
 	   with the underlying string? */
 	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
-	printf("%s",xtname);
+	fprintf(fp,"%s",xtname);
       }
     }
     else {
-      print_ref(*xtunionp);
+      fprint_ref(fp,*xtunionp);
     }
     break;
 
-  case &Union(name,l):
-    if(name == NULL) printf("{");
-    else printf("%s{",*name);
+  case &Union(name,_,l):
+    if(name == NULL) fprintf(fp,"{");
+    else fprintf(fp,"%s{",*name);
     // Print out each case; safe because no pointers
     for(int i = 0; i < l.size; i++) {
       let $(nm,ts) = *(l[i]);
-      printf("%s=",nm);
-      print_type_base(ts,env,val);
-      if(i < l.size-1) printf(" | ");
+      fprintf(fp,"%s=",nm);
+      fprint_type_base(ts,env,fp,val);
+      if(i < l.size-1) fprintf(fp," | ");
     }
-    printf("}");
+    fprintf(fp,"}");
     break;
-    
+  case &Enum(_,szb,l): // assume szb=sizeof(int) FIX
+    /* get the tag */
+    unsigned int@ tagp = unsafe_cast(val);
+    fprintf(fp,"%s",get_tagname(*tagp,l));
+    break;
 
-    //default: throw new Core::Failure("Unhandled case in print_type_base");
+    //default: throw new Core::Failure("Unhandled case in fprint_type_base");
   }
   return env;
 }
 
 #include "errno.h"
 
-void print_type(typestruct_t ts, `a::A@ val) {
+void fprint_type(typestruct_t ts, FILE@ fp, `a::A@ val) {
   try{
-  print_type_base(ts,empty_addr_set(),val);
+  fprint_type_base(ts,empty_addr_set(),fp,val);
   } catch {
   case &Core::Failure(s):
     fprintf(stderr,"Core::Failure(%s)\n",s);
     throw new Core::Failure(s);
   }
 }
+
+void print_type(typestruct_t ts, `a::A@ val) {
+  fprint_type(ts, stdout, val);
+}
+
+
 
 // FIX: getw returns -1==EOF both when EOF is reached and when the next wird is a -1.  Write put/get{8,16,32} functions using fread, fwrite.  Redo using those.
 
@@ -479,6 +503,15 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
     }
     break;
 
+  case &TUnionField(_,_,_,l):
+    int x = unsafe_cast(val); 
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x + ofs;
+      env = write_type_base(typ, env, fp, (`a@)unsafe_cast(x_ofs));
+    }
+    break;
+
   case &TUnion(_,t,l):
     /* get the tag */
     unsigned int@ tagp = unsafe_cast(val);
@@ -534,14 +567,15 @@ write_type_base(typestruct_t rep, addr_index_t env, FILE@ fp, `a::A @ val)
 
 
     // messy...better to just do a flat write somehow
-  case &Union(_,_): 
-    int sz = size_type(rep);
+  case &Union(_,szb,_): 
     // Claim: impossible that env actually changes here.
-    env = write_type_base(new Tuple(sz,new {for i < sz: new $(i,new Int(false,8))}), env, fp, val);
+    env = write_type_base(new Tuple(szb,new {for i < szb: new $(i,new Int(false,8))}), env, fp, val);
     break;
     
-
+  case &Enum(_,szb,_):
+    env = write_type_base(new Int(false,szb<<3), env, fp, val);
     //default: throw new Core::Failure("Unhandled case in write_type_base");
+    
   }
   return env;
 }
@@ -667,7 +701,16 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
       env = read_type_base(typ,env,fp,(`a@)unsafe_cast(x_ofs));
-   } 
+    } 
+    break;
+
+  case &TUnionField(_,_,_,l):
+    unsigned int x = unsafe_cast(result);
+    for(int i = 0; i < l.size; i++) {
+      let $(ofs, typ) = *(l[i]);
+      int x_ofs = x+ofs;
+      env = read_type_base(typ,env,fp,(`a@)unsafe_cast(x_ofs));
+    } 
     break;
 
   case &TUnion(_,t,l): 
@@ -743,12 +786,12 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
       *x = table_lookup(env,mem);
     }
     break;
-  case &Union(_,_): 
-    int sz = size_type(rep);
+  case &Union(_,szb,_): 
     // Claim: impossible that env actually changes here.
-    env = read_type_base(new Tuple(sz,new {for i < sz: new $(i,new Int(0,8))}), env, fp, result);
+    env = read_type_base(new Tuple(szb,new {for i < szb: new $(i,new Int(0,8))}), env, fp, result);
     break;
-    
+  case &Enum(_,szb,_): // just write out the int
+    env = read_type_base(new Int(false,szb<<3), env, fp, result);
     //default: throw new Core::Failure("Unhandled case in read_type_base");
   }
   return env;
@@ -769,154 +812,3 @@ addr_table_t read_type_base(typestruct_t rep, addr_table_t env, FILE@ fp, `a::A@
 }
 
 
-
-#if 0
-void
-xmlize_ptr_type(typestruct_t typ,
-	       unsigned int val)
-{
-  switch (typ) {
-  /* All FLAT types go through unchanged */
-  case &Int(_):
-  case Float:
-  case Double:
-  case &FatPtr(_):
-  case &Tuple(_,_):
-    int @ptr = unsafe_cast(val);
-//      printf("FLAT type ->%x ",val);
-//      print_typestruct(typ);
-    xmlize_type(typ, ptr); 
-    return;
-  
-  /* All POINTER types need an additional dereference */
-  case &ThinPtr(_,_):
-  case &TUnion(_):
-    int @@ptr = unsafe_cast(val);
-//      printf("PTR type ->%x ",val);
-//      print_typestruct(typ);
-    xmlize_type(typ, *ptr);
-    
-    return;
-  case &Union(_):
-    throw new Core::Failure("Cannot xmlize Unions");
-  default: throw new Core::Failure("Unhandled case in xmlize_ptr_type");
-
-  }
-}
-
-// Emits an XML form of a value with given typerep'd type
-
-
-
-void 
-xmlize_type(typestruct_t rep, `a @ val) 
-{
-
-  switch (rep) {
-
-  /* FLAT type; assume we have a pointer to it */
-  case &Int(sz):
-    switch (sz) {
-    case 8:
-      char @x = unsafe_cast(val);
-      printf("<int size=\"8\">%c</int>",*x);
-      break;
-    case 16:
-      short @x = unsafe_cast(val);
-      printf("<int size=\"16\">%d</int>",*x);
-      break;
-    case 32:
-      int @x = unsafe_cast(val);
-      printf("<int size=\"32\">%d</int>",*x);
-      break;
-    default:
-      fprintf(stderr,"xmlize_type: illegal int size %d bits\n", sz);
-      exit(1);
-    }
-    break;
-
-  /* FLAT type; assume we have a pointer to it */
-  case Float:
-    float @x = unsafe_cast(val);
-    printf ("<float>%f</float>",*x);
-    break;
-
-  /* FLAT type; assume we have a pointer to it */
-  case Double:
-    double @x = unsafe_cast(val);
-    printf ("<double>%f</double>",*x);
-    break;
-
-  /* POINTER type */
-  case &ThinPtr(sz,typ):
-    printf("<thinptr sz=\"%d\">",sz);
-    int x = unsafe_cast(val); /* x is a pointer to the buffer */
-    if (x != 0) {
-      int typ_szb = size_type(typ);
-      for (int i = 0; i<sz; i++) {
-	xmlize_ptr_type(typ,x);
-	x += typ_szb;
-      }
-    }
-    else printf("<null/>");
-    printf("</thinptr>");
-    break;
-
-  /* FLAT type; assume we have a pointer to it */
-  case &FatPtr(typ): 
-    /* x is a pointer to the three-tuple for the array */
-    $(unsigned int, unsigned int, unsigned int) @`H x = unsafe_cast(val);
-    unsigned int typ_szb = size_type(typ);
-    unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
-    unsigned int sz = (last_plus_one - base) / typ_szb;
-    unsigned int index = (curr - base) / typ_szb;
-    printf("<fatptr index=\"%d\" sz=\"%d\">",index,sz); 
-    for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
-      xmlize_ptr_type(typ, i);
-
-    }
-    printf("</fatptr>");
-    break;
-
-  /* FLAT type; assume we have a pointer to it */
-  case &Tuple(_,l):
-    printf("<tuple>");
-    int x = unsafe_cast(val); /* x is a pointer to the buffer */
-//      printf("%x -> Tuple\n",x);
-    for (int i = 0; i < l.size; i++) {
-      let $(ofs,typ) = *(l[i]);
-      int x_ofs = x + ofs;
-//        printf ("ofs = %d, x_ofs = %x, typ =",ofs,x_ofs);
-//        print_typestruct(typ);
-//        printf("\n");
-      xmlize_ptr_type(typ, /* env, */ x_ofs);
-    }
-    printf("</tuple>");
-    break;
-
-  /* POINTER type */
-  case &TUnion(l):
-    /* get the tag */
-    unsigned int tag = unsafe_cast(val);
-    if (tag < 1024) {
-      printf("<tunion tag=\"%d\"/>",tag);
-    }
-    else {
-      unsigned int @x = unsafe_cast(val);
-      tag = *x;
-      /* figure out which variant it is */
-      let $(off,typ) = get_unionbranch(tag,l);
-      printf("<tunion tag=\"%d\">", 1024+tag); // better idea?  
-      xmlize_type(typ, /* env, */ val);
-      printf("</tunion>");
-
-    }
-    break;
-  case &Union(_):
-    throw new Core::Failure("Cannot xmlize Unions");
-  default: throw new Core::Failure("Unhandled case in xmlize_type");
-  }
-  
-}
- 
-#endif

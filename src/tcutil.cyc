@@ -2633,7 +2633,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     break;
   case &EnumType(n,*edp):
-    if (*edp == NULL)
+    if (*edp == NULL || (*edp)->fields == NULL)
       try {
         enumdecl_t @ed = lookup_enumdecl(te,loc,n);
         *edp = *ed;

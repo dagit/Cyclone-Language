@@ -15,9 +15,17 @@ using Position;
 #define SHARING
 #define CYCLE
 //#define READ
+//#define XML
 #define PRINT
 //#define PRINTTYPE
 //#define WRITE
+#ifdef XML
+#include <xml/xmldump.h>
+#include <xml/xmlmarshal.h>
+using XmlMarshal;
+#endif
+
+
 typedef union Bar {
   int x;
   double y;
@@ -188,7 +196,7 @@ extern tunion Terrier;
 extern union Beagle;
 
 }
-  extern tunion Typestruct.Tuple struct_Dog_Mutt_rep;
+  extern tunion Typestruct.Struct struct_Dog_Mutt_rep;
   extern tunion Typestruct.TUnion tunion_Dog_Terrier_rep;
   extern tunion Typestruct.Union union_Dog_Beagle_rep;
 
@@ -262,6 +270,16 @@ void do_read(tunion Typestruct rep, `a::A@ val) {
   print_type(rep,val2);
   printf("\n\n");
 }
+
+#ifdef XML 
+void do_xml(tunion Typestruct rep, `a::A@ val) {
+  Xml::content_t c = to_xml(rep,val);
+  XmlDump::dumpContent(stdout,c);
+  printf("\n");
+  `a@ i2 = from_xml(rep,c);
+  do_print(rep,i2);
+}
+#endif
 void do_all(tunion Typestruct rep, `a::A@ val) {
 #ifdef PRINTTYPE
   do_printtype(rep);
@@ -275,8 +293,10 @@ void do_all(tunion Typestruct rep, `a::A@ val) {
 #ifdef READ
   do_read(rep,val);
 #endif
+#ifdef XML
+  do_xml(rep,val);
+#endif
 }
-
 
 
 void main() {
@@ -285,6 +305,7 @@ void main() {
 #ifdef TEST
   int i = 0xffffffff;
   do_all(int_rep,&i);
+  
 
   float j = 1.2345678;
   do_all(float_rep,&j);

@@ -124,16 +124,12 @@ size_type(typestruct_t rep)
   case &FatPtr(_): return sizeof(void ?);
   case &Struct(_,szb,_): return szb;
   case &Tuple(szb,_): return szb;
+  case &TUnionField(_,_,szb,_): return szb;
   case &TUnion(_,_,_): return sizeof(void *);
   case &XTUnion(_,_): return sizeof(void *);
-  case &Union(_,nmtss): 
-    int max = 0;
-    for(int i = 0; i < nmtss.size; i++) {
-      let &$(nm,ts) = nmtss[i];
-      let sz = size_type(ts);
-      max = (max < sz)? sz : max;
-    }
-    return max;
+  case &Union(_,szb,_): return szb;
+  case &Enum(_,szb,l): return szb; //(??)
+
     //case &Var(_): return sizeof(void*); // everything of mem kind has same size as void*
     //case &Forall(_,rep): return size_type(*rep);
     //case &App(rep,_): return size_type(rep);
@@ -204,6 +200,17 @@ print_typestruct(typestruct_t rep)
     printf(" ]");
     break;
 
+  case &TUnionField(tname,fname,sz,l):
+    printf("TUnionField(%s,%s,%d,[",tname,fname,sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      printf ("$(%d,",ofs);
+      print_typestruct(typ);
+      printf (")%c", (i != (l.size-1) ? ',' : ' '));
+    }
+    printf(" ]");
+    break;
+
   case &TUnion(name,t,l):
     printf("TUnion(%s,[",name);
     for(int i = 0; i < t.size; i++) {
@@ -219,7 +226,7 @@ print_typestruct(typestruct_t rep)
     }    
     printf("] )");
     break;
-
+    
   case &XTUnion(name,l):
     printf("XTUnion(%s,",name);
     for (int i = 0; i < l.size; i++) {
@@ -230,8 +237,8 @@ print_typestruct(typestruct_t rep)
     }    
     printf(" )");
     break;
- case &Union(name,l):
-   printf("Union(%s,",anon_or_name(name));
+ case &Union(name,szb,l):
+   printf("Union(%s,%d,",anon_or_name(name),szb);
    for (int i = 0; i < l.size; i++) {
      let $(nm,ts) = *(l[i]);
      printf("$(%s,",nm);
@@ -240,6 +247,15 @@ print_typestruct(typestruct_t rep)
     }   
    printf(")");
    break;
+  case &Enum(name,szb,l): 
+    printf("Enum(%s,%d,",anon_or_name(name),szb);
+    for(int i = 0; i < l.size; i++) {
+      let $(val,tag) = (*l[i]);
+      printf("$(%d,%s)%c",val,tag,(i != (l.size-1) ? ',' : ' '));
+    }
+    printf(")");
+    break;
+
    /* case &Forall(names,ts):
    printf("Forall([");
    for(int i = 0; i < names.size; i++) {
@@ -306,7 +322,7 @@ xmlize_typestruct(typestruct_t rep)
       xmlize_typestruct(typ);
       printf ("</Component>");
     }
-    printf("</Tuple>");
+    printf("</Struct>");
     break;
 
   case &Tuple(sz,l):
@@ -318,6 +334,17 @@ xmlize_typestruct(typestruct_t rep)
       printf ("</Component>");
     }
     printf("</Tuple>");
+    break;
+  
+  case &TUnionField(tname,fname,sz,l):
+    printf("<TUnionField tname=\"%s\" fname=\"%s\" sz=\"%d\">",tname,fname,sz);
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      printf ("<Component ofs=\"%d\">",ofs);
+      xmlize_typestruct(typ);
+      printf ("</Component>");
+    }
+    printf("</TUnionField>");
     break;
   
   case &TUnion(name,t,l):
@@ -344,8 +371,8 @@ xmlize_typestruct(typestruct_t rep)
     }    
     printf("</XTunion>");
     break;
- case &Union(name,l):
-   printf("<Union name=\"%s\">",anon_or_name(name));
+ case &Union(name,szb,l):
+   printf("<Union name=\"%s\" sz=\"%d\">",anon_or_name(name),szb);
    for (int i = 0; i < l.size; i++) {
      let $(nm,ts) = *(l[i]);
       printf ("<Case nm=\"%s\">",nm);
@@ -354,6 +381,14 @@ xmlize_typestruct(typestruct_t rep)
     }   
    printf("</Union>");
    break;
+  case &Enum(name,szb,l): 
+    printf("<Enum name=\"%s\" szb=\"%d\">",anon_or_name(name),szb);
+    for(int i = 0; i < l.size; i++) {
+      let $(val,tag) = (*l[i]);
+      printf("<Val val=\"%d\">%s</Val>",val,tag);
+    }
+    printf("</Enum>");
+    break;
 
    /* case &Forall(names,ts):
       printf("<Forall vars=\"");

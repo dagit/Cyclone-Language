@@ -3313,38 +3313,39 @@ _cycalloc(sizeof(*_tmp5F6));_tmp5F6->f1=(void*)({struct Cyc_Tcenv_AnonEnumRes_st
 _tmp5F7=_cycalloc(sizeof(*_tmp5F7));_tmp5F7[0]=({struct Cyc_Tcenv_AnonEnumRes_struct
 _tmp5F8;_tmp5F8.tag=4;_tmp5F8.f1=(void*)t;_tmp5F8.f2=_tmp5EE;_tmp5F8;});_tmp5F7;});
 _tmp5F6->f2=1;_tmp5F6;}));}}};_pop_region(uprev_rgn);}goto _LL750;}_LL75A: if(*
-_tmp5AD == 0){struct _handler_cons _tmp5F9;_push_handler(& _tmp5F9);{int _tmp5FB=0;
-if(setjmp(_tmp5F9.handler)){_tmp5FB=1;}if(! _tmp5FB){{struct Cyc_Absyn_Enumdecl**
-ed=Cyc_Tcenv_lookup_enumdecl(te,loc,_tmp5AE);*_tmp5AD=(struct Cyc_Absyn_Enumdecl*)*
-ed;};_pop_handler();}else{void*_tmp5FA=(void*)_exn_thrown;void*_tmp5FD=_tmp5FA;
-_LL7B3: if(_tmp5FD == Cyc_Dict_Absent){goto _LL7B4;}else{goto _LL7B5;}_LL7B5: goto
-_LL7B6;_LL7B4: {struct Cyc_Tcenv_Genv*_tmp5FE=((struct Cyc_Tcenv_Genv*(*)(struct
-Cyc_Dict_Dict*d,struct Cyc_List_List*k))Cyc_Dict_lookup)(te->ae,te->ns);struct Cyc_Absyn_Enumdecl*
-_tmp5FF=({struct Cyc_Absyn_Enumdecl*_tmp600=_cycalloc(sizeof(*_tmp600));_tmp600->sc=(
-void*)((void*)3);_tmp600->name=_tmp5AE;_tmp600->fields=0;_tmp600;});Cyc_Tc_tcEnumdecl(
-te,_tmp5FE,loc,_tmp5FF);{struct Cyc_Absyn_Enumdecl**ed=Cyc_Tcenv_lookup_enumdecl(
-te,loc,_tmp5AE);*_tmp5AD=(struct Cyc_Absyn_Enumdecl*)*ed;goto _LL7B2;}}_LL7B6:(
-void)_throw(_tmp5FD);_LL7B2:;}}}{struct Cyc_Absyn_Enumdecl*ed=(struct Cyc_Absyn_Enumdecl*)
-_check_null(*_tmp5AD);*_tmp5AE=(ed->name)[_check_known_subscript_notnull(1,0)];
-goto _LL750;}_LL75C: {struct Cyc_List_List*_tmp601=*_tmp5B2;{void*_tmp602=*_tmp5B4;
-struct Cyc_Absyn_UnknownTunionInfo _tmp603;int _tmp604;struct _tuple1*_tmp605;struct
-Cyc_Absyn_Tuniondecl**_tmp606;struct Cyc_Absyn_Tuniondecl*_tmp607;_LL7B8: if(*((
-int*)_tmp602)== 0){_LL7BC: _tmp603=((struct Cyc_Absyn_UnknownTunion_struct*)
-_tmp602)->f1;_LL7BE: _tmp605=_tmp603.name;goto _LL7BD;_LL7BD: _tmp604=_tmp603.is_xtunion;
-goto _LL7B9;}else{goto _LL7BA;}_LL7BA: if(*((int*)_tmp602)== 1){_LL7BF: _tmp606=((
-struct Cyc_Absyn_KnownTunion_struct*)_tmp602)->f1;_tmp607=*_tmp606;goto _LL7BB;}
-else{goto _LL7B7;}_LL7B9: {struct Cyc_Absyn_Tuniondecl**tudp;{struct _handler_cons
-_tmp608;_push_handler(& _tmp608);{int _tmp60A=0;if(setjmp(_tmp608.handler)){
-_tmp60A=1;}if(! _tmp60A){tudp=Cyc_Tcenv_lookup_tuniondecl(te,loc,_tmp605);;
-_pop_handler();}else{void*_tmp609=(void*)_exn_thrown;void*_tmp60C=_tmp609;_LL7C1:
-if(_tmp60C == Cyc_Dict_Absent){goto _LL7C2;}else{goto _LL7C3;}_LL7C3: goto _LL7C4;
-_LL7C2: {struct Cyc_Tcenv_Genv*_tmp60D=((struct Cyc_Tcenv_Genv*(*)(struct Cyc_Dict_Dict*
-d,struct Cyc_List_List*k))Cyc_Dict_lookup)(te->ae,te->ns);struct Cyc_Absyn_Tuniondecl*
-_tmp60E=({struct Cyc_Absyn_Tuniondecl*_tmp612=_cycalloc(sizeof(*_tmp612));_tmp612->sc=(
-void*)((void*)3);_tmp612->name=_tmp605;_tmp612->tvs=0;_tmp612->fields=0;_tmp612->is_xtunion=
-_tmp604;_tmp612;});Cyc_Tc_tcTuniondecl(te,_tmp60D,loc,_tmp60E);tudp=Cyc_Tcenv_lookup_tuniondecl(
-te,loc,_tmp605);if(_tmp601 != 0){({struct Cyc_Std_String_pa_struct _tmp611;_tmp611.tag=
-0;_tmp611.f1=(struct _tagged_arr)Cyc_Absynpp_qvar2string(_tmp605);{struct Cyc_Std_String_pa_struct
+_tmp5AD == 0? 1:((struct Cyc_Absyn_Enumdecl*)_check_null(*_tmp5AD))->fields == 0){
+struct _handler_cons _tmp5F9;_push_handler(& _tmp5F9);{int _tmp5FB=0;if(setjmp(
+_tmp5F9.handler)){_tmp5FB=1;}if(! _tmp5FB){{struct Cyc_Absyn_Enumdecl**ed=Cyc_Tcenv_lookup_enumdecl(
+te,loc,_tmp5AE);*_tmp5AD=(struct Cyc_Absyn_Enumdecl*)*ed;};_pop_handler();}else{
+void*_tmp5FA=(void*)_exn_thrown;void*_tmp5FD=_tmp5FA;_LL7B3: if(_tmp5FD == Cyc_Dict_Absent){
+goto _LL7B4;}else{goto _LL7B5;}_LL7B5: goto _LL7B6;_LL7B4: {struct Cyc_Tcenv_Genv*
+_tmp5FE=((struct Cyc_Tcenv_Genv*(*)(struct Cyc_Dict_Dict*d,struct Cyc_List_List*k))
+Cyc_Dict_lookup)(te->ae,te->ns);struct Cyc_Absyn_Enumdecl*_tmp5FF=({struct Cyc_Absyn_Enumdecl*
+_tmp600=_cycalloc(sizeof(*_tmp600));_tmp600->sc=(void*)((void*)3);_tmp600->name=
+_tmp5AE;_tmp600->fields=0;_tmp600;});Cyc_Tc_tcEnumdecl(te,_tmp5FE,loc,_tmp5FF);{
+struct Cyc_Absyn_Enumdecl**ed=Cyc_Tcenv_lookup_enumdecl(te,loc,_tmp5AE);*_tmp5AD=(
+struct Cyc_Absyn_Enumdecl*)*ed;goto _LL7B2;}}_LL7B6:(void)_throw(_tmp5FD);_LL7B2:;}}}{
+struct Cyc_Absyn_Enumdecl*ed=(struct Cyc_Absyn_Enumdecl*)_check_null(*_tmp5AD);*
+_tmp5AE=(ed->name)[_check_known_subscript_notnull(1,0)];goto _LL750;}_LL75C: {
+struct Cyc_List_List*_tmp601=*_tmp5B2;{void*_tmp602=*_tmp5B4;struct Cyc_Absyn_UnknownTunionInfo
+_tmp603;int _tmp604;struct _tuple1*_tmp605;struct Cyc_Absyn_Tuniondecl**_tmp606;
+struct Cyc_Absyn_Tuniondecl*_tmp607;_LL7B8: if(*((int*)_tmp602)== 0){_LL7BC:
+_tmp603=((struct Cyc_Absyn_UnknownTunion_struct*)_tmp602)->f1;_LL7BE: _tmp605=
+_tmp603.name;goto _LL7BD;_LL7BD: _tmp604=_tmp603.is_xtunion;goto _LL7B9;}else{goto
+_LL7BA;}_LL7BA: if(*((int*)_tmp602)== 1){_LL7BF: _tmp606=((struct Cyc_Absyn_KnownTunion_struct*)
+_tmp602)->f1;_tmp607=*_tmp606;goto _LL7BB;}else{goto _LL7B7;}_LL7B9: {struct Cyc_Absyn_Tuniondecl**
+tudp;{struct _handler_cons _tmp608;_push_handler(& _tmp608);{int _tmp60A=0;if(setjmp(
+_tmp608.handler)){_tmp60A=1;}if(! _tmp60A){tudp=Cyc_Tcenv_lookup_tuniondecl(te,
+loc,_tmp605);;_pop_handler();}else{void*_tmp609=(void*)_exn_thrown;void*_tmp60C=
+_tmp609;_LL7C1: if(_tmp60C == Cyc_Dict_Absent){goto _LL7C2;}else{goto _LL7C3;}_LL7C3:
+goto _LL7C4;_LL7C2: {struct Cyc_Tcenv_Genv*_tmp60D=((struct Cyc_Tcenv_Genv*(*)(
+struct Cyc_Dict_Dict*d,struct Cyc_List_List*k))Cyc_Dict_lookup)(te->ae,te->ns);
+struct Cyc_Absyn_Tuniondecl*_tmp60E=({struct Cyc_Absyn_Tuniondecl*_tmp612=
+_cycalloc(sizeof(*_tmp612));_tmp612->sc=(void*)((void*)3);_tmp612->name=_tmp605;
+_tmp612->tvs=0;_tmp612->fields=0;_tmp612->is_xtunion=_tmp604;_tmp612;});Cyc_Tc_tcTuniondecl(
+te,_tmp60D,loc,_tmp60E);tudp=Cyc_Tcenv_lookup_tuniondecl(te,loc,_tmp605);if(
+_tmp601 != 0){({struct Cyc_Std_String_pa_struct _tmp611;_tmp611.tag=0;_tmp611.f1=(
+struct _tagged_arr)Cyc_Absynpp_qvar2string(_tmp605);{struct Cyc_Std_String_pa_struct
 _tmp610;_tmp610.tag=0;_tmp610.f1=(struct _tagged_arr)(_tmp604? _tag_arr("xtunion",
 sizeof(unsigned char),8): _tag_arr("tunion",sizeof(unsigned char),7));{void*
 _tmp60F[2]={& _tmp610,& _tmp611};Cyc_Tcutil_terr(loc,_tag_arr("please declare parameterized %s %s before using",
