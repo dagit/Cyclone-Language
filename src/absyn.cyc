@@ -24,6 +24,10 @@
 #include <cycboot.h>
 #include "tcutil.h"
 #include "cyclone.h"
+
+namespace Absynpp {
+  extern string_t exp2string(Absyn::exp_t e);
+}
 using Core;
 using List;
 using Position;
@@ -991,12 +995,12 @@ string_t attribute2string(attribute_t a) {
   case &Fastcall_att: return "fastcall";
   case &Noreturn_att: return "noreturn";
   case &Const_att: return "const";
-  case &Aligned_att(i): 
-    if (i == -1) return "aligned";
+  case &Aligned_att(e): 
+    if (e == NULL) return "aligned";
     else /* return aprintf("aligned(%d)",i);*/
       switch(c_compiler){
-      case Gcc_c: return aprintf("aligned(%d)",i);
-      case Vc_c:  return aprintf("align(%d)",i);
+      case Gcc_c: return aprintf("aligned(%s)",Absynpp::exp2string(e));
+      case Vc_c:  return aprintf("align(%s)",Absynpp::exp2string(e));
       }
   case &Packed_att: return "packed";
   case &Section_att(s): return aprintf("section(\"%s\")",s);

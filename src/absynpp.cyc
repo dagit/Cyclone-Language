@@ -1311,6 +1311,23 @@ doc_t exps2doc_prec(int inprec, list_t<exp_t> es) {
   return group("","",",",List::map_c(exp2doc_prec,inprec,es));
 }
 
+string_t longlong2string(unsigned long long i) {
+  char ? x = new { for i < 28 : 'z'};
+  x[27] = '\0';
+  x[26] = 'L';
+  x[25] = 'L';
+  x[24] = 'U';
+  x[23] = '0';
+  int index = 23;
+  while (i != 0) {
+    char c = (char)('0' + (i % 10));
+    x[index] = c;
+    i = i / 10;
+    index--;
+  }
+  return x+index+1;
+}
+
 // FIX: take care of sign for Char_c and Short_c
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
@@ -1321,7 +1338,8 @@ doc_t cnst2doc(cnst_t c) {
   case {.Int_c = $(Signed,i)}:   return text(aprintf("%d",i));
   case {.Int_c = $(Unsigned,i)}: return text(aprintf("%u",(unsigned)i));
   case {.LongLong_c = $(sg,i)}:
-    return text("<<FIX LONG LONG CONSTANT>>"); // FIX
+    // FIX -- take account of sign!
+    return text(longlong2string(i));
   case {.Float_c = $(x,_)}:  return text(x);
   case {.Null_c = _}:      return text("NULL");
   case {.String_c = s}:
@@ -2217,3 +2235,4 @@ string_t typ2cstring(type_t t) {
 string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
 string_t scope2string(scope_t sc){return string_of_doc(scope2doc(sc),PP_WIDTH);}
+string_t cnst2string(cnst_t c) {return string_of_doc(cnst2doc(c),PP_WIDTH);}

@@ -276,9 +276,14 @@ extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
       the pointer [p] in the dynamic array [p] points into.  [sz] is the
       size of the elements in the array returned by [sizeof]. */
 
+  // JGM: I have to define this using a typedef here because
+  // valueof(-) is not considered a Cyclone keyword.
+typedef `a::A*{valueof(`i)}`r __cyclone_internal_array_t<`a,`i,`r>;
+typedef tag_t<`i> __cyclone_internal_singleton<`i>;
+
 extern "C include" {
-  static inline `a::A*{valueof(`i)}`r
-  arrcast(`a ?`r dyn, tag_t<`i> bd, Core::sizeof_t<`a> sz) {
+  static inline __cyclone_internal_array_t<`a,`i,`r>
+  arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, Core::sizeof_t<`a> sz) {
     // check that the multiplication cannot overflow
     // FIX: could be more lenient here!
     // (currently allows up to 1M-1 elements each of size up to 4K-1)

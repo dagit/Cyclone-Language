@@ -76,6 +76,8 @@ namespace Lex {
   extern void leave_namespace();
   extern void enter_using(qvar_t);
   extern void leave_using();
+  extern void enter_extern_c();
+  extern void leave_extern_c();
 }
 
 // State that we thread through the lexer and parser.
@@ -1016,6 +1018,42 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
   return &Tcutil::bk;
 }
 
+// extract an integer from an expression
+static int exp2int(seg_t loc, exp_t e) {
+  switch (e->r) {
+  case &Const_e({.Int_c = $(_,i)}): return i;
+  default: 
+    err("expecting integer constant", loc);
+    return 0;
+  }
+}
+
+// extract a string from an expression
+static string_t exp2string(seg_t loc, exp_t e) {
+  switch (e->r) {
+  case &Const_e({.String_c = s}): return s;
+  default: 
+    err("expecting string constant", loc);
+    return 0;
+  }
+}
+
+// extract an unsigned integer from a cnst_t
+static unsigned int cnst2uint(seg_t loc, cnst_t x) {
+  switch (x) {
+  case {.Int_c = $(_,i)}: return i;
+  case {.Char_c = $(_,c)}: return (unsigned int)c;
+  case {.LongLong_c = $(_,x)}:
+    unsigned long long y = x;
+    if (y > 0xffffffff) 
+      err("integer constant too large", loc);
+    return (unsigned int)x;
+  default:
+    err(aprintf("expected integer constant but found %s",Absynpp::cnst2string(x)), loc);
+    return 0;
+  }
+}
+
 // convert a pattern back into an expression 
 static exp_t pat2exp(pat_t p) {
   switch (p->r) {
@@ -1079,7 +1117,7 @@ using Parse;
 // specify tagged union constructors for types of semantic values that 
 // the lexer must produce.  The other constructors are generated implicitly.
 %union <`yy::R> {
-  Int_tok($(sign_t,int));
+  Int_tok(cnst_t);
   Char_tok(char);
   String_tok(string_t<`H>);
   Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H>);
@@ -1089,7 +1127,7 @@ using Parse;
   Stmt_tok(stmt_t);
 }
 /* types for productions */
-%type <$(sign_t,int)> INTEGER_CONSTANT
+%type <cnst_t> INTEGER_CONSTANT
 %type <char> CHARACTER_CONSTANT
 %type <string_t<`H>> FLOATING_CONSTANT namespace_action
 %type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR
@@ -1145,7 +1183,7 @@ using Parse;
 %type <$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy> struct_declarator
 %type <list_t<$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy,`yy>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t<`yy>> abstract_declarator direct_abstract_declarator
-%type <bool> optional_inject resetable_qual_opt qual_datatype
+%type <bool> optional_inject resetable_qual_opt qual_datatype extern_c_action
 %type <scope_t> datatypefield_scope
 %type <datatypefield_t> datatypefield
 %type <list_t<datatypefield_t,`H>> datatypefield_list
@@ -1227,28 +1265,43 @@ translation_unit:
       }
       $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
     }
-| EXTERN STRING '{' translation_unit '}' translation_unit
-    { let two = $2;
-      if (strcmp(two,"C") == 0) {
-        $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@4)),$6));
-      } else {
-        if (strcmp(two,"C include") != 0) {
-          err("expecting \"C\" or \"C include\"",LOC(@1,@2));
-        }
-        $$=^$(new List(new Decl(new ExternCinclude_d($4,NULL),LOC(@1,@5)),$6));
-      }
+| extern_c_action '{' translation_unit end_extern_c translation_unit
+    { let is_c_include = $1;
+      if (!is_c_include)
+        $$=^$(new List(new Decl(new ExternC_d($3),LOC(@1,@4)),$5));
+      else 
+        $$=^$(new List(new Decl(new ExternCinclude_d($3,NULL),LOC(@1,@4)),$5));
     }
-| EXTERN STRING '{' translation_unit '}' export_list translation_unit
-    { if (strcmp($2,"C include") != 0) 
+| extern_c_action '{' translation_unit end_extern_c export_list translation_unit
+   { if (!$1)
         err("expecting \"C include\"",LOC(@1,@2));
-       list_t<$(seg_t,qvar_t,bool)@> exs = $6;
-      $$=^$(new List(new Decl(new ExternCinclude_d($4,exs),LOC(@1,@6)),$7));
+     list_t<$(seg_t,qvar_t,bool)@> exs = $5;
+     $$=^$(new List(new Decl(new ExternCinclude_d($3,exs),LOC(@1,@5)),$6));
     }
 | PORTON ';' translation_unit
   { $$=^$(new List(new Decl(&Porton_d_val,SLOC(@1)),$3)); }
 | PORTOFF ';' translation_unit
   { $$=^$(new List(new Decl(&Portoff_d_val,SLOC(@1)),$3)); }
 | /* empty */ { $$=^$(NULL); }
+;
+
+extern_c_action:
+  EXTERN STRING 
+{ let two = $2;
+  Lex::enter_extern_c();
+  if (strcmp(two,"C") == 0) 
+    $$ = ^$(false);
+  else if (strcmp(two,"C include") == 0)
+    $$ = ^$(true);
+  else {
+    err("expecting \"C\" or \"C include\"", LOC(@1,@2));
+    $$ = ^$(true);
+  }
+}
+;
+
+end_extern_c:
+  '}'  { Lex::leave_extern_c(); }
 ;
 
 export_list: 
@@ -1488,7 +1541,7 @@ attribute_list:
 
 attribute:
   IDENTIFIER
-  { static datatype Attribute.Aligned_att att_aligned = Aligned_att(-1);
+  { static datatype Attribute.Aligned_att att_aligned = Aligned_att(NULL);
   static $(string_t,datatype Attribute @) att_map[] = {
     $("stdcall", &Stdcall_att_val),
     $("cdecl", &Cdecl_att_val),
@@ -1525,64 +1578,43 @@ attribute:
     }
   }
 | CONST { $$=^$(&Const_att_val); }
-| IDENTIFIER '(' INTEGER_CONSTANT ')'
+| IDENTIFIER '(' assignment_expression ')'
   { let s = $1;
-    let $(_,n) = $3;
+    let e = $3;
     attribute_t a;
-    if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
-      if (n < 0 || n > 3) 
-	err("regparm requires value between 0 and 3", SLOC(@3));
-      a = new Regparm_att(n);
-    } else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
-      if (n < 0) err("aligned requires positive power of two", SLOC(@3));
-      unsigned int j = (unsigned int)n;
-      for (; (j & 1) == 0; j = j >> 1)
-	;
-      j = j >> 1;
-      if (j != 0) err("aligned requires positive power of two",SLOC(@3));
-      a = new Aligned_att(n);
-    } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) {
-      a = new Initializes_att(n);
-    } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
-      a = new Noliveunique_att(n);
-    } else if(zstrcmp(s,"noconsume")==0 || zstrcmp(s,"__noconsume__")==0){
-      a = new Noconsume_att(n);
-    } else {
-      err("unrecognized attribute",SLOC(@1));
-      a = &Cdecl_att_val;
-    }
-    $$=^$(a);
-  }
-| IDENTIFIER '(' STRING ')'
-  { let s = $1;
-    let str = $3;
-    attribute_t a;
-    if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
+    if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
+      a = new Aligned_att(e);
+    } else if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0) {
+      string_t str = exp2string(SLOC(@3),e);
       a = new Section_att(str);
-    else {
-      err("unrecognized attribute",SLOC(@1));
-      a = &Cdecl_att_val;
-    }
-    $$=^$(a);
-  }
-| IDENTIFIER '(' IDENTIFIER ')'
-  { let s = $1;
-    let str = $3;
-    attribute_t a;
-    // showed up in FreeBSD
-    if (zstrcmp(s,"__mode__") == 0)
+    } else if (zstrcmp(s,"__mode__") == 0) {
+      string_t str = exp2string(SLOC(@3),e);
       a = new Mode_att(str);
+    }
     else {
-      err("unrecognized attribute",SLOC(@1));
-      a = &Cdecl_att_val;
+      int n = exp2int(SLOC(@3),e);
+      if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
+        if (n < 0 || n > 3) 
+          err("regparm requires value between 0 and 3", SLOC(@3));
+        a = new Regparm_att(n);
+      } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) {
+        a = new Initializes_att(n);
+      } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
+        a = new Noliveunique_att(n);
+      } else if(zstrcmp(s,"noconsume")==0 || zstrcmp(s,"__noconsume__")==0) {
+        a = new Noconsume_att(n);
+      } else {
+        err("unrecognized attribute",SLOC(@1));
+        a = &Cdecl_att_val;
+      }
     }
     $$=^$(a);
   }
 | IDENTIFIER '(' IDENTIFIER ',' INTEGER_CONSTANT ',' INTEGER_CONSTANT ')'
   { let s = $1; 
     let t = $3;
-    let $(_,n) = $5;
-    let $(_,m) = $7;
+    let n = cnst2uint(SLOC(@5),$5);
+    let m = cnst2uint(SLOC(@7),$7);
     attribute_t a = &Cdecl_att_val;
     if (zstrcmp(s,"format") == 0 || zstrcmp(s,"__format__") == 0)
       if (zstrcmp(t,"printf") == 0)
@@ -3075,12 +3107,12 @@ field_expression:
     { $$=^$(new List::List(new StructField(new $1),NULL)); }
 /* not checking sign here...*/
 | INTEGER_CONSTANT
-    { $$ = ^$(new List(new TupleIndex($1[1]),NULL)); }
+    { $$ = ^$(new List(new TupleIndex(cnst2uint(SLOC(@1),$1)),NULL)); }
 | field_expression '.' field_name
     { $$ = ^$(new List(new StructField(new $3),$1)); }
 /* not checking sign here...*/
 | field_expression '.' INTEGER_CONSTANT
-    { $$ = ^$(new List(new TupleIndex($3[1]),$1)); }
+    { $$ = ^$(new List(new TupleIndex(cnst2uint(SLOC(@3),$3)),$1)); }
 ;
 
 primary_expression:
@@ -3128,9 +3160,9 @@ argument_expression_list0:
 /* NB: We've had to move enumeration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
-  INTEGER_CONSTANT   { let p = $1; $$=^$(int_exp(p[0],p[1],SLOC(@1))); }
-| CHARACTER_CONSTANT { $$=^$(char_exp($1,              SLOC(@1))); }
-| WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1,             SLOC(@1))); }
+  INTEGER_CONSTANT   { $$=^$(const_exp($1, SLOC(@1))); }
+| CHARACTER_CONSTANT { $$=^$(char_exp($1, SLOC(@1))); }
+| WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1, SLOC(@1))); }
 | FLOATING_CONSTANT  {
      let f = $1;
      int l = strlen(f);
@@ -3172,7 +3204,7 @@ right_angle:
 
 void yyprint(int i, union YYSTYPE<`yy> v) {
   switch (v) {
-  case {.Int_tok = $(_,i2)}:  fprintf(stderr,"%d",i2);    break;
+  case {.Int_tok = c}: fprintf(stderr,"%s",Absynpp::cnst2string(c)); break;
   case {.Char_tok = c}:       fprintf(stderr,"%c",c);     break;
   case {.String_tok = s}:     fprintf(stderr,"\"%s\"",s); break;
   case {.QualId_tok = &$(p,v2)}:

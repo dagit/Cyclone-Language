@@ -679,7 +679,7 @@ static type_t add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
     // if the original type was abstract, then we must force the field
     // to be aligned.
     if (fields->tl == NULL && kind_leq(&ak,typ_kind(t))) {
-      atts = new List(new Aligned_att(-1),atts);
+      atts = new List(new Aligned_att(NULL),atts);
     }
     t = typ_to_c(rsubstitute(r,inst,t));
     // still could be abstract and end up void -- if so, make it
@@ -1785,7 +1785,7 @@ aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
       let old_atts = old_field->attributes;
       let old_type = old_field->type;
       if (!is_array_type(old_type), kind_leq(&ak,typ_kind(old_type)))
-        old_atts = new List(new Aligned_att(-1),old_atts);
+        old_atts = new List(new Aligned_att(NULL),old_atts);
       let new_field = new Aggrfield{.name= old_field->name,
 				    .tq = mt_tq,
 				    .type = new_field_type,
@@ -4701,7 +4701,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
           old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
           break;
         default: 
-          old_atts = new List(new Aligned_att(-1),old_atts);
+          old_atts = new List(new Aligned_att(NULL),old_atts);
           old_type = new ArrayType(ArrayInfo(void_star_typ(),
                                              empty_tqual(DL),
                                              uint_exp(0,DL),

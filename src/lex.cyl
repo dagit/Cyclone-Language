@@ -46,6 +46,23 @@ namespace Lex {
 
 bool compile_for_boot_r = false;
 
+// state for recording whether or not we're parsing C code
+static bool in_extern_c = false;
+static list_t<bool,`U> prev_extern_c = NULL;
+void enter_extern_c() {
+  list_t<bool,`U> x = NULL;
+  x :=: prev_extern_c;
+  prev_extern_c = unew List(in_extern_c,x);
+  in_extern_c = true;
+}
+void leave_extern_c() {
+  list_t<bool,`U> x = NULL;
+  x :=: prev_extern_c;
+  in_extern_c = x->hd;
+  prev_extern_c = x->tl;
+  ufree(x);
+}
+
 struct Trie<`r::R>;
 typedef struct Trie<`r> *`r trie_t<`r>;
 @tagged union TrieChildren<`r::R> {
@@ -69,7 +86,8 @@ struct Trie<`r::R> {
 
 // These must be (re-)initialized in lex_init.
 static int    num_kws  = 0;
-static int ?  kw_nums  = NULL;
+struct KeyWordInfo { int token_index; bool is_c_keyword; };
+static struct KeyWordInfo ?  kw_nums  = NULL;
   //static struct Xarray::Xarray<stringptr_t> * symbols  = NULL;
 struct DynTrie {
   <`d::R> 
@@ -90,7 +108,7 @@ static dyn_trie_t typedefs_trie = NULL;//int field true iff path is a typedef
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static $(sign_t,int)        token_int = $(Signed,0);
+static cnst_t               token_int = Cnst{.Int_c = $(Signed,0)};
 static string_t             bogus_string   = "*bogus*";
 static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 					      &bogus_string);
@@ -111,6 +129,15 @@ static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = runaway_start;
   post_error(mk_err_lex(s,msg));
 }
+static char cnst2char(cnst_t cnst,Lexbuf<`a> lb) {
+  switch (cnst) {
+  case {.Int_c = $(_,i)}: return (char)i;
+  case {.LongLong_c = $(_,i)}: return (char)i;
+  case {.Char_c = $(_,c)}: return c;
+  default: err("couldn't convert constant to char!",lb);
+    return (char)0;
+  }
+}
 
 // ************************** RESERVED WORDS **************************
 // the bool is true when the keyword is a C keyword as opposed to a
@@ -126,6 +153,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("catch", CATCH,true),
   $("char", CHAR, true),
   $("const", CONST, true),
+  $("__const__", CONST, true),
   $("continue", CONTINUE, true),
   $("datatype", DATATYPE, false),
   $("default", DEFAULT, true),
@@ -327,25 +355,59 @@ static int int_of_char(char c) {
 }
 
  
-// FIX: We should really have 8-bytes to store a long literal!!!
-//      That is, we and the previous version totally ignore the L!!!
-static $(sign_t, int) intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
-  unsigned int n    = 0;
+static cnst_t intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
+  sign_t sn = None;
+  start += lbuf->lex_start_pos;
+  mstring_t    buff = lbuf->lex_buffer + start;
   int          end2 = lbuf->lex_curr_pos - end;
-  mstring_t    buff = lbuf->lex_buffer;
-  int          i    = start + lbuf->lex_start_pos;
-  for(int i = start + lbuf->lex_start_pos; i < end2; ++i) {
-    char c = buff[i];
-    switch (c) {
-        // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
-    case 'u': fallthru;
-    case 'U': return $(Unsigned,(signed int)n); 
-    case 'l': break;
-    case 'L': break;
-    default: n = n*base + (unsigned int)int_of_char(c); break;
+  int          len  = end2 - start;
+  size_of_t    size = Int_sz;
+  bool         declared_size = false;
+  cnst_t       res;
+  if (len >= 1 && (buff[len - 1] == 'l' || buff[len - 1] == 'L')) {
+    // size is at least long (default), but could be long long
+    len -= 1;
+    declared_size = true;
+    if (len >= 1 && (buff[len - 1] == 'l' || buff[len - 1] == 'L')) {
+      len -= 1;
+      size = LongLong_sz;
     }
   }
-  return $(Signed, (signed int)n);
+  if (len >= 1 && (buff[len - 1] == 'u' || buff[len - 1] == 'U')) {
+    len -= 1;
+    sn = Unsigned;
+  }
+  if (sn == Unsigned) {
+    unsigned long long int n = 0;
+    for (int i = 0; i < len; i++)
+      n = n*base + (unsigned long long int)int_of_char(buff[i]);
+    if (n > ((unsigned long long int)0xffffffff)) {
+      if (declared_size && size == Int_sz) 
+        err("integer constant too large",lbuf);
+      size = LongLong_sz;
+    }
+    if (size == Int_sz) {
+      res = Cnst{.Int_c = $(sn,(unsigned int)n)};
+    } else {
+      res = Cnst{.LongLong_c = $(sn,n)};
+    }
+  } else {
+    long long int n = 0;
+    for (int i = 0; i < len; i++)
+      n = n*base + (long long int)int_of_char(buff[i]);
+    long long unsigned x = ((unsigned long long)n >> 32);
+    if (x != 0xffffffff && x != 0x00000000) {
+      if (declared_size && size == Int_sz)
+        err("integer constant too large",lbuf);
+      size = LongLong_sz;
+    }
+    if (size == Int_sz) {
+      res = Cnst{.Int_c = $(sn,(int)n)};
+    } else {
+      res = Cnst{.LongLong_c = $(sn,n)};
+    }
+  }
+  return res;
 }
 
 // ************************* STRING CONSTANTS *************************
@@ -592,17 +654,11 @@ static short process_id(Lexbuf<`a> lbuf) {
 
   // maybe it's a keyword
   if(symbol_num <= num_kws) {
-    short res = (short)kw_nums[symbol_num-1]; 
-    switch (res) {
-    case ZEROTERM_QUAL: 
-      Tcutil::warn(yylloc.first_line,
-                   "deprecated ZEROTERM, use @zeroterm"); break;
-    case NOZEROTERM_QUAL: 
-      Tcutil::warn(yylloc.first_line,
-                   "deprecated NOZEROTERM, use @nozeroterm"); break;
-    default: break;
+    // check to see if we're parsing C or Cyclone
+    if (!in_extern_c || kw_nums[symbol_num-1].is_c_keyword) {
+      short res = (short)kw_nums[symbol_num-1].token_index; 
+      return res;
     }
-    return (short)kw_nums[symbol_num-1]; 
   }
 
   let s = get_symbol(symbol_num);
@@ -843,19 +899,23 @@ rule token = parse
 /* Cyclone qualifiers (e.g., @zeroterm, @tagged, etc.) */
 | '@' { return cyc_qual(lexbuf); }
 /* Integer constants */
-| '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+| '0'['x''X']['0'-'9''a'-'f''A'-'F']+(((['u''U'])?(['l''L'])?(['l''L'])?)|
+                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
       { token_int = intconst(lexbuf,2,0,16);
         return INTEGER_CONSTANT; }
-| '0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+| '0'['0'-'7']*(((['u''U'])?(['l''L'])?(['l''L'])?)|
+                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
       { token_int = intconst(lexbuf,0,0,8);
         return INTEGER_CONSTANT; }
-| '0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+| '0'['0'-'9']+(((['u''U'])?(['l''L'])?(['l''L'])?)|
+                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
       /* This is really an error case according to OSI C --
          the leading 0 indicates this should be in octal. */
       /* FIX: print a warning message? */
       { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
-| ['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+| ['1'-'9']['0'-'9']*(((['u''U'])?(['l''L'])?(['l''L'])?)|
+                                      ((['l''L'])?(['l''L'])?(['u''U'])?))
       { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
 /* Floating-point constants */
@@ -942,12 +1002,12 @@ rule token = parse
 | "'\\?'"   { token_char = '?';  return CHARACTER_CONSTANT; }
 /* octal character escapes */
 | "'\\" ['0'-'7']['0'-'7']?['0'-'7']? "'"
-            { token_char = (char)(intconst(lexbuf,2,1,8))[1];
+            { token_char = cnst2char(intconst(lexbuf,2,1,8),lexbuf);
               return CHARACTER_CONSTANT;
             }
 /* hex character escapes */
 | "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
-            { token_char = (char)(intconst(lexbuf,3,1,16))[1];
+            { token_char = cnst2char(intconst(lexbuf,3,1,16),lexbuf);
               return CHARACTER_CONSTANT;
             }
 | "'" [^ '\\' '\'' '\n'] "'"
@@ -1057,12 +1117,12 @@ and strng = parse
   | "\\?"           { store_string_char('?');  return 1; }
   /* octal character escapes */
   | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-                    { store_string_char((char)(intconst(lexbuf,1,0,8))[1]);
+                    { store_string_char(cnst2char(intconst(lexbuf,1,0,8),lexbuf));
                       return 1;
                     }
   /* hex character escapes FIX? any length okay? */
   | "\\x" ['0'-'9''A'-'F''a'-'f']+
-                    { store_string_char((char)(intconst(lexbuf,2,0,16))[1]);
+                    { store_string_char(cnst2char(intconst(lexbuf,2,0,16),lexbuf));
                       return 1;
                     }
   | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
@@ -1166,6 +1226,16 @@ and snarf_asm = parse
     token_asm[1] = get_stored_string();
     return ASM; 
   }
+| [' ' '\t' '\v' '\f' '\n' '\r']+ "__volatile__" 
+  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
+  { token_asm[0] = true;
+    paren_depth = 1;
+    string_pos = 0;
+    runaway_start = lexeme_start(lexbuf);
+    while (snarf_asm_body(lexbuf)) /* skip */ ;
+    token_asm[1] = get_stored_string();
+    return ASM; 
+  }
 
 and snarf_asm_body = parse
    "\"" { store_string_char('"'); 
@@ -1210,6 +1280,15 @@ static Xarray::xarray_t<stringptr_t,`d> empty_xarray(region_t<`d> id_rgn, int du
 } 
 
 void lex_init(bool include_cyclone_keywords) {
+  // reset the in_extern_c stuff
+  in_extern_c = false;
+  list_t<bool,`U> x = NULL;
+  prev_extern_c :=: x;
+  while (x != NULL) {
+    list_t<bool,`U> t = x->tl;
+    ufree(x);
+    x = t;
+  }
   // free any dynamic regions allocated first
   if (ids_trie != NULL) {
     dyn_trie_symbols_t idt = NULL;
@@ -1235,14 +1314,14 @@ void lex_init(bool include_cyclone_keywords) {
   trie_t t = open_region(typedefs_dyn, 0, empty_trie);
   typedefs_trie = unew DynTrie{typedefs_dyn, t};
   num_kws       = num_keywords(include_cyclone_keywords);
-  kw_nums       = new {for i < num_kws : 0};
+  kw_nums       = new {for i < num_kws : KeyWordInfo{0,0}};
   unsigned i = 0;
   unsigned rwsze = numelts(rw_array);
   for (unsigned j = 0; j < rwsze; j++) {
     if (include_cyclone_keywords || rw_array[j][2]) {
       let str = rw_array[j][0];
       str_index(str, 0, strlen(str));
-      kw_nums[i] = rw_array[j][1];
+      kw_nums[i] = KeyWordInfo{rw_array[j][1],rw_array[j][2]};
       i++;
     }
   }

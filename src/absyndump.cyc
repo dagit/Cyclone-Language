@@ -659,7 +659,8 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
   case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e({.LongLong_c = $(sg,i)}):
-    dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
+    // FIX -- take sign into account
+    dump(Absynpp::longlong2string(i)); break;
   case &Const_e({.Float_c = $(x,_)}): dump(x); break;
   case &Const_e({.Null_c = _}): dump("NULL"); break;
   case &Const_e({.String_c = s}):

@@ -470,7 +470,7 @@ namespace Absyn {
     Fastcall_att;
     Noreturn_att;     
     Const_att;
-    Aligned_att(int);
+    Aligned_att(exp_opt_t);
     Packed_att;
     Section_att(string_t);
     Nocommon_att;

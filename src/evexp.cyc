@@ -55,6 +55,12 @@ $(unsigned int,bool) eval_const_uint_exp(exp_t e) {
     return $(0,false);
   switch (promote_const(cn)) {
   case {.Int_c = $(_,i)}: return $((unsigned int)i,true);
+  case {.LongLong_c = $(_,x)}:
+    // FIX!!!!!!!!!!
+    long long unsigned y = (unsigned long long)x >> 32;
+    if (y != 0xffffffff && y != 0x00000000)
+      return $(0,false);
+    else return $((unsigned int)x,true);
   default:          terr(e->loc,"expecting unsigned int"); return $(0,true);
   }
 }

@@ -189,7 +189,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   }
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
-    if(initializer != NULL)
+    if(initializer != NULL && !in_cinclude)
       terr(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
     // we skip over function types -- these are function prototypes.
@@ -214,7 +214,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       }
 
     if(initializer == NULL || in_cinclude) {
-      if (check_var_init && !supports_default(t))
+      if (check_var_init && !in_cinclude && !supports_default(t))
         terr(loc,"initializer required for variable %s of type %s",
              qvar2string(vd->name), typ2string(t));
     } else {
