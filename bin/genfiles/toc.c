@@ -44,7 +44,7 @@ struct _RegionHandle {
 #endif 
   char               *offset;
   char               *last_plus_one;
-  struct _DynRegionHandle *sub_regions;
+  struct _DynRegionHandle *sub_regions; //not used
   struct _pool *released_ptrs;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
@@ -53,19 +53,48 @@ struct _RegionHandle {
   unsigned wasted_bytes;
 #endif
 };
-struct _DynRegionFrame {
+struct _DynRegionFrame { //not used
   struct _RuntimeStack s;
   struct _DynRegionHandle *x;
 };
+
+/* Reaps */
+struct _ReapPage
+#ifdef CYC_REGION_PROFILE
+{ unsigned total_bytes;
+  unsigned free_bytes;
+  void *bget_page;
+  struct _ReapPage *next;
+}
+#endif
+; 
+struct bget_region_key;
+struct _ReapHandle {
+  struct _RuntimeStack s;
+  struct _ReapPage *curr;
+#if(defined(__linux__) && defined(__KERNEL__))
+  struct _RegionPage *vpage;
+#endif 
+  struct _pool *released_ptrs;
+  struct bget_region_key *bkey;
+  unsigned int id;
+#ifdef CYC_REGION_PROFILE
+  const char         *name;
+#endif
+};
+
 // A dynamic region is just a region handle.  The wrapper struct is for type
 // abstraction.
 struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
+struct Cyc_Core_DynamicReap {
+  struct _ReapHandle h;
+};
+
 /* Alias qualifier stuff */
 typedef unsigned char _AliasQualHandle_t;
-
 
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
@@ -74,8 +103,16 @@ void* _region_vmalloc(struct _RegionHandle*, unsigned);
 void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
 void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
 void _free_region(struct _RegionHandle*);
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
-void _pop_dynregion();
+
+struct _ReapHandle _new_reap(const char*);
+void* _reap_malloc(struct _ReapHandle*, _AliasQualHandle_t, unsigned);
+void* _reap_calloc(struct _ReapHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
+void * _reap_aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
+void * _reap_aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
+void _free_reap(struct _ReapHandle*);
+
+struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);//not used
+void _pop_dynregion(); //not used
 
 /* Exceptions */
 struct _handler_cons {
@@ -87,6 +124,8 @@ void _push_region(struct _RegionHandle*);
 void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
+
+void _push_reap(struct _ReapHandle*);
 
 #ifndef _throw
 void* _throw_null_fn(const char*,unsigned);
@@ -307,6 +346,46 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
   return _region_malloc(r,aq,orig_s); 
 }
 
+//doesn't make sense to fast_reap_malloc
+// static inline void*_fast_reap_malloc(struct _ReapHandle*r, _AliasQualHandle_t aq, unsigned orig_s) {  
+//   if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
+// #ifdef CYC_NOALIGN
+//     unsigned s =  orig_s;
+// #else
+//     unsigned s =  (orig_s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT -1)); 
+// #endif
+//     char *result; 
+//     result = r->offset; 
+//     if (s <= (r->last_plus_one - result)) {
+//       r->offset = result + s; 
+// #ifdef CYC_REGION_PROFILE
+//     r->curr->free_bytes = r->curr->free_bytes - s;
+//     rgn_total_bytes += s;
+// #endif
+//       return result;
+//     }
+//   } 
+//   return _region_malloc(r,aq,orig_s); 
+// }
+
+//migration to reaps
+#ifndef RUNTIME_CYC
+#define _new_region(n) _new_reap(n)
+#define _free_region(r) _free_reap(r)
+#define _region_malloc(rh,aq,n) _reap_malloc(rh,aq,n)
+#define _region_calloc(rh,aq,n,t) _reap_calloc(rh,aq,n,t)
+#define _push_region(rh) _push_reap(rh)
+#define _aqual_malloc(aq,s) _reap_aqual_malloc(aq, s)
+#define _aqual_calloc(aq,s,i) _reap_aqual_calloc(aq, s, i)
+#define _RegionHandle _ReapHandle
+#define Cyc_Core_NewDynamicRegion Cyc_Core_NewDynamicReap
+#define Cyc_Core__new_ukey(f,fn,l) Cyc_Core__reap_new_ukey(f, fn, l)
+#define Cyc_Core__new_rckey(f,fn,l) Cyc_Core__reap_new_rckey(f, fn, l)
+#define Cyc_Core_free_ukey(k) Cyc_Core_reap_free_ukey(k)
+#define Cyc_Core_free_rckey(k) Cyc_Core_reap_free_rckey(k)
+#define Cyc_Core_open_region Cyc_Core_reap_open_region
+#endif 
+
 #ifdef CYC_REGION_PROFILE
 /* see macros below for usage. defined in runtime_memory.c */
 void* _profile_GC_malloc(int,const char*,const char*,int);
@@ -340,11 +419,11 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 extern unsigned Cyc_Core_unique_qual;
 # 190 "core.h"
 void Cyc_Core_ufree(void*);
-# 205 "core.h"
+# 206 "core.h"
 struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 270
+# 272
 struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char*,const char*,int);
-# 288 "core.h"
+# 290 "core.h"
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 extern struct Cyc_List_List*Cyc_List_list(struct _fat_ptr);

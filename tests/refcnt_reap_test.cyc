@@ -1,0 +1,98 @@
+#include <core.h>
+#include <stdio.h>
+#include "cyctest.h"
+
+CT_SUITE_BEGIN(RefcntReap)
+
+void begin() { }
+void end() { }
+
+using Core;
+
+int @@aqual(`q) `r my_alloc(aqual_t<`q> aqh, region_t<`r> r :  RESTRICTED >= `q) {
+  return rnew (r, aqh) -1;
+//   return rcnew 1; // no good
+//   return unew 1; // no good
+}
+
+int my_deref(int *`r::R x) { return *x; }
+
+struct foo<`q::Q, `r::R> {
+  int *@aqual(`q) `r x;
+  int *@aqual(`q) `r y;
+};
+
+void refcnt_test() {
+  /* basic usage */
+  region<`r> r;
+  int *p1 = rnew(r, refcnt_qual) 3;
+  CT_ASSERT(*p1 == 3);
+  CT_ASSERT(refptr_count(p1) == 1);
+  let p2 = alias_refptr(p1);
+
+  CT_ASSERT(*p1 == 3);
+  CT_ASSERT(refptr_count(p1) == 2);
+  CT_ASSERT(*p2 == 3);
+  CT_ASSERT(refptr_count(p2) == 2);
+  
+  rdrop_refptr(r,p1);
+  CT_ASSERT(*p2 == 3);
+  CT_ASSERT(refptr_count(p2) == 1);
+
+  rdrop_refptr(r,p2); // p2 now consumed
+
+  /* consuming stuff */
+  int * p = rnew(r, refcnt_qual) 3;
+  let q = p;
+//   let n = *p; // no good
+
+  /* alias subtyping */
+  int *@aqual(ALIASABLE) `r x = rnew(r, refcnt_qual) 3;
+
+  /* polymorphism */
+  int *@aqual(REFCNT) `r y = my_alloc(refcnt_qual, r);
+
+  /* aliasing */
+  int z;
+  { 
+    let alias <`s>int *`s y2 = y;
+    z = my_deref(y2);
+  }
+  // implicit aliasing
+  z = my_deref(y);
+  CT_ASSERT(refptr_count(y) == 1);
+  CT_ASSERT(z == -1);
+  rdrop_refptr(r,y);
+
+  /* swap and paths */
+  struct foo @f = rnew(r, refcnt_qual) foo(rnew(r, refcnt_qual) 1, 
+					   rnew(r, refcnt_qual) 2);
+  q :=: f->x;
+  CT_ASSERT(refptr_count(q) == 1);
+  CT_ASSERT(*q == 1);
+
+  let p3 = NULL;
+  f->x :=: p3;
+  CT_ASSERT(refptr_count(p3) == 1);
+  CT_ASSERT(*p3 == 3);
+
+  rdrop_refptr(r,p3);
+  rdrop_refptr(r,q);
+//   drop_refptr(f->y); // no good
+  q = NULL;
+  q :=: f->y;
+
+  CT_ASSERT(refptr_count(q) == 1);
+  CT_ASSERT(*q == 2);
+
+  rdrop_refptr(r,q);
+  rdrop_refptr(r,f);
+}
+
+CT_SUITE_INIT
+CT_ADD_TEST(refcnt_test)
+CT_SUITE_END
+
+CT_MAIN_BEGIN(print_level)
+CT_SUITE_REGISTER(RefcntReap);
+CT_MAIN_END(print_level)

@@ -26,7 +26,8 @@
 #endif
 
 #include "runtime_internal.h"
-
+#include "bget.h"
+#define _throw_bad_reapalloc() (_throw_bad_reapalloc_fn(__FILE__,__LINE__))
 #ifndef CYC_REGION_PROFILE
 // defined in cyc_include.h when profiling turned on
 struct _RegionPage {
@@ -38,6 +39,29 @@ struct _RegionPage {
   char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
 };
 #endif
+
+struct _ReapPage
+{ 
+#ifdef CYC_REGION_PROFILE
+  unsigned direct_flag;
+  unsigned total_bytes;
+  unsigned free_bytes;
+#endif
+  void *bget_page;
+  struct _ReapPage *next;
+}
+; 
+
+/* struct _ReapHandle { */
+/*   struct _RuntimeStack s; */
+/*   struct _ReapPage *curr; */
+/* #if(defined(__linux__) && defined(__KERNEL__)) */
+/*   struct _RegionPage *vpage; */
+/* #endif */
+/*   struct _pool *released_ptrs; */
+/*   struct bget_region_key *bkey; */
+/*   unsigned int id; */
+/* }; */
 
 // defined in cyc_include.h when profiling turned on
 #ifdef CYC_REGION_PROFILE
@@ -159,6 +183,17 @@ void _push_region(struct _RegionHandle * r) {
 #endif
   _push_frame((struct _RuntimeStack *)r);
 }
+void _free_reap(struct _ReapHandle *r);
+void _push_reap(struct _ReapHandle * r) {
+  //errprintf("pushing region %x\n",(unsigned int)r);  
+  r->s.tag = LIFO_REGION;
+#ifdef CYC_REGION_PROFILE
+  r->s.cleanup = _profile_free_region_cleanup;
+#else
+  r->s.cleanup = (void (*)(struct _RuntimeStack *))_free_reap;
+#endif
+  _push_frame((struct _RuntimeStack *)r);
+}
 
 void _pop_region() {
   if (_top_frame() == NULL || _top_frame()->tag != LIFO_REGION) {
@@ -232,6 +267,12 @@ void Cyc_Core_ufree(unsigned char *ptr) {
   }
 }
 
+void Cyc_Core_rufree(struct _ReapHandle *r, unsigned char *ptr) {
+  if(ptr == NULL || r == NULL)
+    return;
+  brel(r->bkey, ptr); //add something to bget to update page stats
+}
+
 /////// REFERENCE-COUNTED REGION //////////
 
 /* XXX need to make this 2 words in advance, for double-word alignment? */
@@ -290,6 +331,22 @@ static void drop_refptr_base(unsigned char *ptr) {
 void Cyc_Core_drop_refptr(struct _fat_ptr ptr) {
   drop_refptr_base(ptr.base);
 }
+
+static void rdrop_refptr_base(struct _ReapHandle *r, unsigned char *ptr) {
+  int *cnt = get_refcnt(ptr);
+  if (cnt != NULL) {
+    *cnt = *cnt - 1;
+    if (*cnt == 0) { // no more references //add something to bget to update page usage stats
+      brel(r->bkey, (void*)(ptr - sizeof(int)));
+    }
+  }
+}
+void Cyc_Core_rdrop_refptr(struct _ReapHandle *r, struct _fat_ptr ptr) {
+  if(r == NULL)
+    return;
+  rdrop_refptr_base(r, ptr.base);  
+}
+
 
 /////// AUTORELEASE POOLS //////////
 
@@ -486,6 +543,7 @@ void * _region_malloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned i
     return (void *)result;
   } 
 }
+
 //no alias qualifiers for vmalloc
 #if (defined(__linux__) && defined(__KERNEL__))
 void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
@@ -505,11 +563,10 @@ void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
 #endif
 
 // allocate s bytes within region r
-void * _region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int n, unsigned int t) 
-{
+void * _region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned int n, unsigned int t) {
   unsigned int s = n*t;
   char *result;
-  if(r == CYC_CORE_HEAP_REGION) { //no reaps for now
+  if(r == CYC_CORE_HEAP_REGION) { 
     if(aq == CYC_CORE_REFCNT_AQUAL) {
       // allocate in the heap + 1 word for the refcount
       result = _bounded_GC_calloc(n*t+sizeof(int),1,__FILE__, __LINE__);
@@ -566,10 +623,126 @@ void * _region_calloc(struct _RegionHandle *r, _AliasQualHandle_t aq, unsigned i
 }
 
 void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s) {
-  return _region_malloc(CYC_CORE_HEAP_REGION, aq, s);
+   return _region_malloc(CYC_CORE_HEAP_REGION, aq, s);
 }
 void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t) {
   return _region_calloc(CYC_CORE_HEAP_REGION, aq, n, t);
+}
+
+static void* _acquire_reap_page(bget_rgn_key_t key, bufsize s) {
+  unsigned int next_size = s+sizeof(struct _ReapPage);
+  struct _ReapHandle *r = (struct _ReapHandle *)key->priv;
+  if(r->curr == NULL) //no assert :(
+    _throw_bad_reapalloc();
+  void *p =_bounded_GC_calloc(next_size,1, __FILE__, __LINE__);
+  if(!p)
+    _throw_badalloc();
+  //chain the new page onto this regions list of free pages
+  struct _ReapPage *tmp = r->curr;
+  r->curr = (struct _ReapPage*)p;
+  r->curr->bget_page = (p + sizeof(struct _ReapPage));
+#ifdef CYC_REGION_PROFILE
+  r->curr->total_bytes = s;
+  r->curr->free_bytes = 0;
+  r->curr->direct_flag = 1;
+#endif
+  r->curr->next = tmp;
+  return r->curr->bget_page;
+}
+
+// allocate s bytes within region r
+void * _reap_malloc(struct _ReapHandle *r, _AliasQualHandle_t aq, unsigned int s) {
+  void *result=NULL;
+  if(r == CYC_CORE_HEAP_REGION) {
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      // need to add a word for the reference count.  We use a word to
+      // keep the resulting memory word-aligned.  Then bump the pointer.
+      // FIX: probably need to keep it double-word aligned!
+      result = _bounded_GC_malloc(s+sizeof(int),__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+      *(int *)result = 1;
+#ifdef CYC_REGION_PROFILE
+      refcnt_total_bytes += GC_size(result);
+#endif
+      result += sizeof(int);
+      /*     errprintf("alloc refptr=%x\n",result); */
+      return (void *)result;
+    }
+    else {
+      result = _bounded_GC_malloc(s,__FILE__, __LINE__);
+      if(!result)
+	_throw_badalloc();
+#ifdef CYC_REGION_PROFILE
+      {
+	unsigned int actual_size = GC_size(result); 
+	if (r == CYC_CORE_HEAP_REGION)
+	  heap_total_bytes += actual_size;
+	else
+	  unique_total_bytes += actual_size;
+      }
+#endif
+      return (void *)result;
+    }
+  }
+  else {
+    if(r->curr == NULL) { //first request ... initialize pool
+      //grab a page, and hold onto a ref. We need to free it later
+      void *p =_bounded_GC_calloc(default_region_page_size+sizeof(struct _ReapPage),1, __FILE__, __LINE__);
+      if(!p)
+	_throw_badalloc();
+      r->curr = (struct _ReapPage*)p;
+      r->curr->bget_page = (p + sizeof(struct _ReapPage));
+#ifdef CYC_REGION_PROFILE
+      r->curr->total_bytes = default_region_page_size;
+      r->curr->free_bytes = default_region_page_size;
+      r->curr->direct_flag = 0;
+#endif
+      r->curr->next = NULL;
+      //pass the page to bget
+      r->bkey = bget_init_region(r->curr->bget_page, default_region_page_size);
+      if(!r->bkey) 
+	_throw_bad_reapalloc();
+      r->bkey->priv = r;
+      // direct allocation for large buffers is a pain ... revisit
+      // no direct allocation means there is no need for a release function
+      // no compaction, default size for acquisition request is page_size+
+      bectl(r->bkey, NULL, _acquire_reap_page, NULL, default_region_page_size);
+    }
+    if(aq == CYC_CORE_REFCNT_AQUAL) {
+      result = bgetz(r->bkey, (bufsize)(s + sizeof(int)));
+      if(!result)
+	_throw_bad_reapalloc();
+      *((int*)result) = 1;
+      result += sizeof(int);
+#ifdef CYC_REGION_PROFILE
+      r->curr->free_bytes -= (s + sizeof(int));
+#endif
+      return (void*)result;
+    }
+    else {
+      if(s == 0)
+	return result;
+      result = bgetz(r->bkey, (bufsize)s);
+      if(!result)
+	_throw_bad_reapalloc();
+#ifdef CYC_REGION_PROFILE
+      r->curr->free_bytes -= s;
+#endif
+      return (void*)result;
+    }
+  }
+}
+// allocate s bytes within region r
+void * _reap_calloc(struct _ReapHandle *r, _AliasQualHandle_t aq, unsigned int n, unsigned int t) {
+  return _reap_malloc(r, aq, (n*t));
+}
+
+void * _reap_aqual_malloc(_AliasQualHandle_t aq, unsigned int s) {
+   return _reap_malloc(CYC_CORE_HEAP_REGION, aq, s);
+}
+void * _reap_aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t) {
+  return _reap_calloc(CYC_CORE_HEAP_REGION, aq, n, t);
 }
 
 // allocate a new page and return a region handle for a new region.
@@ -598,6 +771,26 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   r.curr = 0;
   r.offset = 0;
   r.last_plus_one = 0;
+  r.released_ptrs = NULL;
+  //r.offset = ((char *)p) + sizeof(struct _RegionPage);
+  //r.last_plus_one = r.offset + default_region_page_size;
+  return r;
+}
+
+struct _ReapHandle _new_reap(const char *rgn_name) {
+  struct _ReapHandle r; //don't handle dynamic reaps here yet
+#ifdef CYC_REGION_PROFILE
+  static unsigned int counter = 0;
+  r.name = rgn_name;
+  r.id = ++counter;
+#endif
+  r.curr = NULL;
+  r.bkey = NULL; //lazy allocation of region pages
+#if(defined(__linux__) && defined(__KERNEL__))
+  r.vpage = NULL;
+#endif   
+  r.s.tag = LIFO_REGION;
+  r.s.next = NULL;
   r.released_ptrs = NULL;
   //r.offset = ((char *)p) + sizeof(struct _RegionPage);
   //r.last_plus_one = r.offset + default_region_page_size;
@@ -652,18 +845,130 @@ void _free_region(struct _RegionHandle *r) {
   r->last_plus_one = 0;
 }
 
+
+void _free_reap(struct _ReapHandle *r) {
+  if(r && r->curr) {
+    //notify bget 
+    bget_drop_region(r->bkey);
+    //free pages
+    do {
+      struct _ReapPage *next = r->curr->next;
+      GC_free(r->curr);
+      r->curr = next;
+    }while(r->curr);
+    /* free autorelease pool */
+    struct _pool *pl = r->released_ptrs;
+    while (pl) {
+      int i;
+      for (i = 0; i < pl->count; i++)
+	drop_refptr_base(pl->pointers[i]);
+      {struct _pool *next = pl->next;
+      GC_free(pl);
+      pl = next;}
+    }
+    r->curr = 0;
+  }
+}
+
 // Dynamic Regions
 // Note that struct Cyc_Core_DynamicRegion is defined in cyc_include.h.
 
 // We use this struct when returning a newly created dynamic region.
 // The wrapper is needed because the Cyclone interface uses an existential.
+
 struct Cyc_Core_NewDynamicRegion {
   struct Cyc_Core_DynamicRegion *key;
 };
-/* struct Cyc_Core_RealNewDynamicRegion { */
-/*   struct Cyc_Core_DynamicRegion *key; */
-/* }; */
 
+/* struct Cyc_Core_DynamicReap { */
+/*   struct _ReapHandle h; */
+/* }; */
+struct Cyc_Core_NewDynamicReap {
+  struct Cyc_Core_DynamicReap *key;
+};
+
+// Create a new dynamic region and return a unique pointer for the key.
+struct Cyc_Core_NewDynamicReap Cyc_Core__reap_new_ukey(const char *file,
+							 const char *func,
+							 int lineno) {
+  struct Cyc_Core_NewDynamicReap res;
+  res.key = _bounded_GC_malloc(sizeof(struct Cyc_Core_DynamicReap),__FILE__,
+			       __LINE__);
+  if (!res.key)
+    _throw_badalloc();
+#ifdef CYC_REGION_PROFILE
+  res.key->h = _profile_new_region("dynamic_unique",file,func,lineno);
+#else
+  res.key->h =_new_reap("dynamic_unique");
+#endif
+  return res;
+}
+
+// XXX change to use refcount routines above
+// Create a new dynamic region and return a reference-counted pointer 
+// for the key.
+struct Cyc_Core_NewDynamicReap Cyc_Core__reap_new_rckey(const char *file,
+						     const char *func,
+						     int lineno) {
+  struct Cyc_Core_NewDynamicReap res;
+  int *krc = _bounded_GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicReap),
+				__FILE__, __LINE__);
+  //errprintf("creating rckey.  Initial address is %x\n",krc);fflush(stderr);
+  if (!krc)
+    _throw_badalloc();
+  *krc = 1;
+  res.key = (struct Cyc_Core_DynamicReap *)(krc + 1);
+  //errprintf("results key address is %x\n",res.key);fflush(stderr);
+#ifdef CYC_REGION_PROFILE
+  res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno);
+#else
+  res.key->h =  _new_reap("dynamic_refcnt");
+#endif
+  return res;
+}
+
+// Destroy a dynamic region, given the unique key to it.
+void Cyc_Core_reap_free_ukey(struct Cyc_Core_DynamicReap *k) {
+#ifdef CYC_REGION_PROFILE
+  _profile_free_region(&k->h,NULL,NULL,0);
+#else
+  _free_reap((struct _ReapHandle*)&k->h);
+#endif
+  GC_free(k);
+}
+// Drop a reference for a dynamic region, possibly freeing it.
+void Cyc_Core_reap_free_rckey(struct Cyc_Core_DynamicReap *k) {
+  //errprintf("freeing rckey %x\n",k);
+  int *p = ((int *)k) - 1;
+  //errprintf("count is address %x, value %d\n",p,*p);
+  unsigned c = (*p) - 1;
+  if (c >= *p) {
+    errquit("internal error: free rckey bad count");
+  }
+  *p = c;
+  if (c == 0) {
+    //errprintf("count at zero, freeing region\n");
+#ifdef CYC_REGION_PROFILE
+    _profile_free_region(&k->h,NULL,NULL,0);
+#else
+    _free_reap((struct _ReapHandle*)&k->h);
+#endif
+    //errprintf("freeing ref-counted pointer\n");
+    GC_free(p);
+  }
+}
+
+// Open a key (unique or reference-counted), extract the handle
+// for the dynamic region, and pass it along with env to the
+// body function pointer, returning the result.
+void *Cyc_Core_reap_open_region(struct Cyc_Core_DynamicReap *k,
+				void *env,
+				void *body(struct _ReapHandle *h, 
+					   void *env)) {
+  return body(&k->h,env);
+}
+
+//DYNAMIC REGIONS
 // Create a new dynamic region and return a unique pointer for the key.
 struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
 						    const char *func,
@@ -676,27 +981,11 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
 #ifdef CYC_REGION_PROFILE
   res.key->h = _profile_new_region("dynamic_unique",file,func,lineno);
 #else
-  res.key->h = _new_region("dynamic_unique");
+  res.key->h =_new_region("dynamic_unique");
 #endif
   return res;
 }
 
-/* struct Cyc_Core_RealNewDynamicRegion Cyc_Core__real_new_ukey(const char *file, */
-/* 							 const char *func, */
-/* 							 int lineno) { */
-/*   struct Cyc_Core_RealNewDynamicRegion res; */
-/*   res.key = _bounded_GC_malloc(sizeof(struct Cyc_Core_DynamicRegion),__FILE__, */
-/* 			       __LINE__); */
-/*   if (!res.key) */
-/*     _throw_badalloc(); */
-/* #ifdef CYC_REGION_PROFILE */
-/*   res.key->h = _profile_new_region("dynamic_unique",file,func,lineno); */
-/* #else */
-/*   res.key->h = _new_region("dynamic_unique"); */
-/* #endif */
-/*   return res; */
-  
-/* } */
 // XXX change to use refcount routines above
 // Create a new dynamic region and return a reference-counted pointer 
 // for the key.
@@ -715,30 +1004,10 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char *file,
 #ifdef CYC_REGION_PROFILE
   res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno);
 #else
-  res.key->h = _new_region("dynamic_refcnt");
+  res.key->h =  _new_region("dynamic_refcnt");
 #endif
   return res;
 }
-
-/* struct Cyc_Core_RealNewDynamicRegion Cyc_Core__real_new_rckey(const char *file, */
-/* 						     const char *func, */
-/* 						     int lineno) { */
-/*   struct Cyc_Core_RealNewDynamicRegion res; */
-/*   int *krc = _bounded_GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion), */
-/* 				__FILE__, __LINE__); */
-/*   //errprintf("creating rckey.  Initial address is %x\n",krc);fflush(stderr); */
-/*   if (!krc) */
-/*     _throw_badalloc(); */
-/*   *krc = 1; */
-/*   res.key = (struct Cyc_Core_DynamicRegion *)(krc + 1); */
-/*   //errprintf("results key address is %x\n",res.key);fflush(stderr); */
-/* #ifdef CYC_REGION_PROFILE */
-/*   res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno); */
-/* #else */
-/*   res.key->h = _new_region("dynamic_refcnt"); */
-/* #endif */
-/*   return res; */
-/* } */
 
 // Destroy a dynamic region, given the unique key to it.
 void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
@@ -749,9 +1018,6 @@ void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
 #endif
   GC_free(k);
 }
-/* void Cyc_Core_real_free_ukey(struct Cyc_Core_DynamicRegion *k) { */
-/*   Cyc_Core_free_ukey(k); */
-/* } */
 // Drop a reference for a dynamic region, possibly freeing it.
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
   //errprintf("freeing rckey %x\n",k);
@@ -773,27 +1039,16 @@ void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
     GC_free(p);
   }
 }
-/* void Cyc_Core_real_free_rckey(struct Cyc_Core_DynamicRegion *k) { */
-/*   return Cyc_Core_free_rckey(k); */
-/* } */
 
 // Open a key (unique or reference-counted), extract the handle
 // for the dynamic region, and pass it along with env to the
 // body function pointer, returning the result.
 void *Cyc_Core_open_region(struct Cyc_Core_DynamicRegion *k,
                            void *env,
-                           void *body(struct _RegionHandle *h,
+                           void *body(struct _RegionHandle *h, 
                                       void *env)) {
   return body(&k->h,env);
 }
-
-/* void *Cyc_Core_real_open_region(struct Cyc_Core_DynamicRegion *k, */
-/* 				void *env, */
-/* 				void *body(struct _RegionHandle *h, */
-/* 					   void *env)) { */
-/*   return body(&k->h,env); */
-/* } */
-
 
 #ifdef CYC_REGION_PROFILE
 

@@ -187,8 +187,9 @@ extern region_t<`H> heap_region;
   //#define umalloc(arg) rmalloc (Core::unique_region, arg)
 #define umalloc(arg) qmalloc (Core::heap_region, Core::unique_qual,  arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
-void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
+ void ufree(`a::TA *@aqual(UNIQUE) `H ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
+ void rufree(region_t<`r> h, `a::TA *@aqual(UNIQUE) `r ptr) __attribute__((noliveunique(2)));
 
   //extern region_t<`RC> refcnt_region;
   /** [refcnt_region] is the region handle of the reference-counted
@@ -199,18 +200,19 @@ void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
 #define rcnew qnew (Core::refcnt_qual)
 #define rcmalloc(arg) qmalloc (Core::heap_region,Core::refcnt_qual,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
- int refptr_count(`a::TA ?`RC ptr);
+ int refptr_count(`a::TA ?@aqual(REFCNT) `r ptr);
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
- `a ?`RC alias_refptr(`a::TA ?`RC ptr;{});
+ `a ?@aqual(REFCNT) `r alias_refptr(`a::TA ?@aqual(REFCNT) `r ptr;{});
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
- void drop_refptr(`a::TA ?`RC ptr;{}) __attribute__((noliveunique(1)));
+ void drop_refptr(`a::TA ?@aqual(REFCNT) `H ptr;{}) __attribute__((noliveunique(1)));
   /** [drop_refptr(p)] decrements the reference count on [p] by 1.  If
       the reference count goes to 0, it frees p.  This will not
       recursively decrement reference counts to embedded pointers,
       meaning that those pointers will have to get GC'ed if [p] ends
       up being freed. */
+ void rdrop_refptr(region_t<`r> h, `a::TA ?@aqual(REFCNT) `r ptr;{}) __attribute__((noliveunique(2)));
 
  `a::TA ? @autoreleased `r autorelease_handle(region_t<`r> h, `a::TA ?`RC ptr)  __attribute__((noliveunique(2)));
   /** [autorelease(h,p)] attaches the given reference-counted pointer

@@ -33,6 +33,9 @@ struct Cyc_Match_Exception_exn_struct * Cyc_Match_Exception_val = &Cyc_Match_Exc
 char Cyc_Bad_alloc[] = "Cyc_Bad_alloc";
 struct Cyc_Bad_alloc_exn_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
 struct Cyc_Bad_alloc_exn_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
+char Cyc_Bad_reap_alloc[] = "Cyc_Bad_reap_alloc";
+struct Cyc_Bad_alloc_exn_struct Cyc_Bad_reap_alloc_struct = { Cyc_Bad_reap_alloc };
+struct Cyc_Bad_alloc_exn_struct * Cyc_Bad_reap_alloc_val = &Cyc_Bad_reap_alloc_struct;
 
 // The exception that was thrown
 #ifdef HAVE_THREADS
@@ -210,6 +213,9 @@ void* _throw_arraybounds_fn(const char *filename, unsigned lineno) {
 }
 void* _throw_badalloc_fn(const char *filename, unsigned lineno) {
   return _throw_fn(Cyc_Bad_alloc_val,filename,lineno);
+}
+void* _throw_bad_reapalloc_fn(const char *filename, unsigned lineno) {
+  return _throw_fn(Cyc_Bad_reap_alloc_val,filename,lineno);
 }
 void* _throw_match_fn(const char *filename, unsigned lineno) {
   return _throw_fn(Cyc_Match_Exception_val,filename,lineno);
