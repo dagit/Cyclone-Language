@@ -674,11 +674,20 @@ static type_t add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
   for (; fields != NULL; fields = fields->tl) {
     let f = fields->hd;
     type_t t = f->type;
+    attributes_t atts = f->attributes;
+    // if the original type was abstract, then we must force the field
+    // to be aligned.
+    if (fields->tl == NULL && kind_leq(&ak,typ_kind(t))) {
+      atts = new List(new Aligned_att(-1),atts);
+    }
     t = typ_to_c(rsubstitute(r,inst,t));
-    // still could be abstract and end up void -- if so, drop it.
-    if (unify(t,&VoidType_val)) break;
-    fs = new List(new Aggrfield{f->name,mt_tq,t,
-                                f->width,f->attributes,NULL},fs);
+    // still could be abstract and end up void -- if so, make it
+    // a zero-sized array of void*'s and force it to be aligned.
+    if (unify(t,&VoidType_val)) {
+      t = new ArrayType(ArrayInfo(void_star_typ(), empty_tqual(DL),
+                                  uint_exp(0,DL), new_conref(false), DL));
+    }
+    fs = new List(new Aggrfield{f->name,mt_tq,t,f->width,atts,NULL},fs);
   }
   fs = List::imp_rev(fs);
   let sd = new Aggrdecl{.kind=StructA, .sc = Public,
@@ -4641,30 +4650,38 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
       // locations...
       let old_field = fields->hd;
       let old_type = old_field->type;
+      let old_atts = old_field->attributes;
       if (kind_leq(&ak,typ_kind(old_type)) && 
           ((ad->kind == StructA && fields->tl == NULL) ||
            ad->kind == UnionA)) {
-        // skip over the last member if it's abstract but not an
-        // array or an implemented aggregate; for arrays, we
-        // just pretend like the array size is zero.  (Note: can't
-        // just leave it non-existent because this results in
-        // incomplete types!)
+        // HACK ALERT:
+        // If the last member is abstract we have to do more work:
+        //  * if it's an array, we make it an array of size 0
+        //  * otherwise as a HACK, we make it an array of void*'s of size 0,
+        //    but add the __attribute__((aligned)) to force the thing
+        //    to live on a suitable boundary.  This means that any
+        //    instantiation has to also be aligned, but it gives us a
+        //    way to portably get at the field.
         switch (compress(old_type)) {
         case &ArrayType(ArrayInfo{et,tq,_,zt,ztl}):
+          // Note: type checker forces et to be non-abstract
           old_type = new ArrayType(ArrayInfo(et,tq,uint_exp(0,DL),zt,ztl));
           break;
         default: 
-          if (abstract_aggr(old_type)) break;
-          else if (ad->kind == StructA) continue;
-          else unimp("union with non-array fields of kind TA");
+          old_atts = new List(new Aligned_att(-1),old_atts);
+          old_type = new ArrayType(ArrayInfo(void_star_typ(),
+                                             empty_tqual(DL),
+                                             uint_exp(0,DL),
+                                             new_conref(false),DL));
         }
       }
       let new_field = new Aggrfield{.name = old_field->name,
                                     .tq = mt_tq,
                                     .type = typ_to_c(old_type),
                                     .width = old_field->width,
-                                    .attributes = old_field->attributes,
+                                    .attributes = old_atts,
                                     .requires_clause = NULL};
+
       // If this is a tagged union, rewrite the member type from T
       // to struct _union_Foo_f {int tag; T value;} where Foo is the name
       // of the union, and f is the name of the member.
