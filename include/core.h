@@ -148,6 +148,9 @@ extern region_t<`U> unique_region;
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
 
+extern void ufree(`a::A ?-`U ptr);
+  /** [ufree] frees a unique pointer. */
+
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring<`H> string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns NULL

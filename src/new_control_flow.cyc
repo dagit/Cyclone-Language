@@ -123,8 +123,18 @@ static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
 // lists in the env and find the right one for the dest (by following
 // enclosers somehow), but again, it is a really strange thing.
 static void update_tryflow(analenv_t env, flow_t new_flow) {
-  if(env->in_try)
+  if(env->in_try) {
+    DEBUG_PRINT("update_tryflow: before flow:\n");
+    DEBUG_PRINT_F(print_flow,env->tryflow);
+    DEBUG_PRINT("\n");
+    DEBUG_PRINT("update_tryflow: new flow:\n");
+    DEBUG_PRINT_F(print_flow,new_flow);
+    DEBUG_PRINT("\n");
     env->tryflow = join_flow(env->all_changed, new_flow, env->tryflow, true);
+    DEBUG_PRINT("update_tryflow: joined flow:\n");
+    DEBUG_PRINT_F(print_flow,env->tryflow);
+    DEBUG_PRINT("\n");
+  }    
 }
 
 // Sound KLUDGE: same explanation as for update_tryflow above
@@ -134,28 +144,54 @@ static void update_flow(analenv_t env, stmt_t s, flow_t flow) {
   let annot    = get_stmt_annot(s);
   let new_flow = join_flow(env->all_changed, flow, annot->flow, true);
   if(!flow_lessthan_approx(new_flow, annot->flow)) {
-    //fprintf(stderr,"iterate_again: %s",Absynpp::stmt2string(s));
-    DEBUG_PRINT("update_flow: flow changed\nannot->flow=\n");
+    DEBUG_PRINT("update_flow for |%s|: flow changed\nannot->flow=\n",
+		Absynpp::stmt2string(s));
     DEBUG_PRINT_F(print_flow,annot->flow);
     DEBUG_PRINT("\njoined flow (> annot_flow):\n");
     DEBUG_PRINT_F(print_flow,new_flow);
     DEBUG_PRINT("\n");
     annot->flow = new_flow;
-    if(annot->visited == env->iteration_num)
+    DEBUG_PRINT("update_flow: annot->visited=%d, iteration_num=%d\n",
+		annot->visited, env->iteration_num);
+    if(annot->visited == env->iteration_num) {
+      DEBUG_PRINT("update_flow: will iterate again\n");
       env->iterate_again = true;
+    }
   }
 }
 
-static flow_t add_vars(flow_t inflow,list_t<vardecl_t> vds,absRval_t leafval) {
+static flow_t add_vars(flow_t inflow,list_t<vardecl_t> vds,absRval_t leafval,Position::seg_t loc) {
   switch(inflow) {
   case BottomFL: return BottomFL;
   case &ReachableFL(d,relns,cinfo): 
     for(; vds != NULL; vds = vds->tl) {
       let root = new VarRoot(vds->hd);
       d = Dict::insert(d,root,typ_to_absrval(vds->hd->type,leafval));
+//        if (contains_region(UniqueRgn_k,vds->hd->type))
+//  	update_place_set(unique_places, new Place(root,NULL), loc);
     }
     return new ReachableFL(d,relns,cinfo);
   }
+}
+
+// not in use currently; planning to use to observe when unique variables
+// are not getting freed so we can signal a warning
+static void remove_vars(flow_t outflow, place_set_t *out_unique_places,
+			place_set_t old_unique_places) {
+  // for all variables in out_unique_places not in c, print a warning
+  let $(ConsumeInfo(c,_),_) = save_consume_info(outflow,false);
+  region r {
+    let iter = Dict::make_iter(r,*out_unique_places);
+    let elem = *Dict::rchoose(r,*out_unique_places);
+    while(Iter::next(iter,&elem)) {
+      let p = elem[0];
+      if (!Dict::member(c,p))
+	Tcutil::terr(elem[1],"Failed to consume unique variable %s",
+		     place_err_string(p));
+    }
+  }
+  // restore the variable info
+  *out_unique_places = old_unique_places;
 }
 
 // when using an r-value, we also consume any variables on the consume list.
@@ -190,12 +226,8 @@ static $(flow_t,list_t<absRval_t>) anal_unordered_Rexps(analenv_t env,
   flow_t outflow;
   list_t<absRval_t> rvals;
   let $(saved_cinfo, inflow) = save_consume_info(inflow,true);
-#define SANITY
-#ifdef SANITY
-  // for checking if I got the invariants right:
-  consume_t sanity_consume = { mt_place_set(), NULL };
-  bool init_sanity = false;
-#endif
+  consume_t outflow_consume = { mt_place_set(), NULL };
+  bool init_consume = false;
   do { // unnecessarily recomputes rvals each time
     this_all_changed = mt_place_set();
     // need to reset consume stuff on each iteration
@@ -226,34 +258,36 @@ static $(flow_t,list_t<absRval_t>) anal_unordered_Rexps(analenv_t env,
       this_all_changed = union_place_set(this_all_changed, *env->all_changed,
 					 false);
     }
+    // save/restore the consume information to terminate
+    let $(c,_) = save_consume_info(outflow, false);
+    if (init_consume) {
 #ifdef SANITY
-    // sanity check that multiple iters does not change the makeup of
-    //   the consume lists
-    switch (outflow) {
-    case BottomFL: break;
-    case &ReachableFL(_,_,c):
-      if (init_sanity) {
-	if (!consume_approx(c, sanity_consume)) {
-	  DEBUG_PRINT("sanity consumed: ");
-	  DEBUG_PRINT_F(print_place_set,sanity_consume.consumed);
-	  DEBUG_PRINT("\ncurrent consumed: ");
-	  DEBUG_PRINT_F(print_place_set,c.consumed);
-	  DEBUG_PRINT("\nsanity may_consume: ");
-	  DEBUG_PRINT_F(print_place_list,sanity_consume.may_consume);
-	  DEBUG_PRINT("\ncurrent may_consume: ");
-	  DEBUG_PRINT_F(print_place_list,c.may_consume);
-	  DEBUG_PRINT("\n");
-	  Tcutil::impos("anal_unordered_exps failed to preserve consumed info");
-	}
+      if (consume_approx(c, outflow_consume)) {
+	DEBUG_PRINT("sanity consumed: ");
+	DEBUG_PRINT_F(print_place_set,outflow_consume.consumed);
+	DEBUG_PRINT("\ncurrent consumed: ");
+	DEBUG_PRINT_F(print_place_set,c.consumed);
+	DEBUG_PRINT("\nsanity may_consume: ");
+	DEBUG_PRINT_F(print_place_list,outflow_consume.may_consume);
+	DEBUG_PRINT("\ncurrent may_consume: ");
+	DEBUG_PRINT_F(print_place_list,c.may_consume);
+	DEBUG_PRINT("\n");
+	Tcutil::impos("anal_unordered_exps failed to preserve consumed info");
       }
-      sanity_consume = c;
-      init_sanity = true;
-    }
 #endif
+      old_inflow = restore_consume_info(inflow, outflow_consume);
+    }
+    else
+      old_inflow = inflow;
+    init_consume = true;
+    outflow_consume = c;
     // need to check for less than after the join b/c of the approximation
     // else may not terminate.
-    old_inflow = inflow;
     inflow = join_flow(outer_all_changed,inflow,outflow,true);
+//      DEBUG_PRINT("anal_unordered: old_inflow=\n");
+//      DEBUG_PRINT_F(print_flow,old_inflow);
+//      DEBUG_PRINT("anal_unordered: joined flow=\n");
+//      DEBUG_PRINT_F(print_flow,inflow);
   } while(!flow_lessthan_approx(inflow,old_inflow));
   if(outer_all_changed == NULL)
     env->all_changed = NULL;
@@ -546,6 +580,20 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 		    Absynpp::exp2string(l));
 	cinfo.may_consume = List::merge(place_cmp,new List::List(p,NULL),
 					cinfo.may_consume);
+	// see if we are clobbering an unconsumed unique pointer;
+	// signal warning if so
+	if (!Dict::member(cinfo.consumed,p)) {
+	  let &Place(root,_) = p;
+	  switch (root) {
+	  case &VarRoot(vd):
+	    let s = Absynpp::qvar2string(vd->name);
+	    Tcutil::warn(l->loc,"may clobber unique pointer %s", s);
+	    break;
+	  default:
+	    Tcutil::impos("warning locations not for VarRoots");
+	  }
+	}
+
 	// if we are not in a unordered expression context, we can
 	// remove the root, if present, from consumed set.  We check
 	// the error context to ensure we terminate (otherwise we will
@@ -558,7 +606,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 			Absynpp::exp2string(l));
 	  cinfo.consumed = c;
 	}
-      }      
+      }
       f = new ReachableFL(outdict,relns,cinfo);
       break;
     default: break;
@@ -569,11 +617,9 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
     let outer_all_changed = env->all_changed;
     let $(outer_cinfo,inflow) = save_consume_info(inflow,true);
-#ifdef SANITY
-    // sanity checking
-    consume_t sanity_consume = { mt_place_set(), NULL };
-    bool init_sanity = false;
-#endif
+    consume_t empty_consume = { mt_place_set(), NULL };
+    consume_t outflow_consume = empty_consume;
+    bool init_consume = false;
     while(true) { // local iteration
       env->all_changed  = new mt_place_set();
       let $(left_out, lval) = anal_Lexp(env,inflow,e1);
@@ -585,6 +631,33 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 			       left_changed, right_changed);
       // FIX: need to kill any variables assigned in e1 or e2?
       let new_inflow = join_flow(outer_all_changed,inflow,outflow,true);
+
+      // restore consume information to old inflow if necessary
+      let $(c,_) = save_consume_info(new_inflow,false);
+      if (init_consume) {
+#ifdef SANITY
+	if (consume_approx(c, outflow_consume)) {
+	  DEBUG_PRINT("sanity consumed: ");
+	  DEBUG_PRINT_F(print_place_set,outflow_consume.consumed);
+	  DEBUG_PRINT("\ncurrent consumed: ");
+	  DEBUG_PRINT_F(print_place_set,c.consumed);
+	  DEBUG_PRINT("\nsanity may_consume: ");
+	  DEBUG_PRINT_F(print_place_list,outflow_consume.may_consume);
+	  DEBUG_PRINT("\ncurrent may_consume: ");
+	  DEBUG_PRINT_F(print_place_list,c.may_consume);
+	  DEBUG_PRINT("\n");
+	  Tcutil::impos("assignOp_e failed to preserve consume info");
+	}
+#endif
+	inflow = restore_consume_info(inflow, outflow_consume);
+      }
+      outflow_consume = c;
+      init_consume = true;
+//        DEBUG_PRINT("assignOp: old_inflow=\n");
+//        DEBUG_PRINT_F(print_flow,inflow);
+//        DEBUG_PRINT("assignOp: joined flow=\n");
+//        DEBUG_PRINT_F(print_flow,new_inflow);
+      // see if we've reached a fixpoint
       if(flow_lessthan_approx(new_inflow,inflow)) {
 	if(outer_all_changed == NULL)
 	  env->all_changed = NULL;
@@ -610,6 +683,19 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 			  Absynpp::exp2string(e1));
 	      cinfo.may_consume = List::merge(place_cmp,new List::List(p,NULL),
 					      cinfo.may_consume);
+	      // see if we are clobbering an unconsumed unique pointer;
+	      // signal warning if so
+	      if (!Dict::member(cinfo.consumed,p)) {
+		let &Place(root,_) = p;
+		switch (root) {
+		case &VarRoot(vd):
+		  let s = Absynpp::qvar2string(vd->name);
+		  Tcutil::warn(e1->loc,"may clobber unique pointer %s", s);
+		  break;
+		default:
+		  Tcutil::impos("warning locations not for VarRoots");
+		}
+	      }
 	      // if we are not in a unordered expression context, we can
 	      //   remove the root, if present, from consumed set.  We
 	      //   check the error context to ensure we terminate
@@ -636,33 +722,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  }
 	}
       }
-      // refine the flow
-      inflow = new_inflow;
-#ifdef SANITY
-      switch (inflow) {
-      case BottomFL: break;
-      case &ReachableFL(d,r,c):
-	if (init_sanity) {
-	  if (!consume_approx(c, sanity_consume)) {
-	    DEBUG_PRINT("sanity consumed: ");
-	    DEBUG_PRINT_F(print_place_set,sanity_consume.consumed);
-	    DEBUG_PRINT("\ncurrent consumed: ");
-	    DEBUG_PRINT_F(print_place_set,c.consumed);
-	    DEBUG_PRINT("\nsanity may_consume: ");
-	    DEBUG_PRINT_F(print_place_list,sanity_consume.may_consume);
-	    DEBUG_PRINT("\ncurrent may_consume: ");
-	    DEBUG_PRINT_F(print_place_list,c.may_consume);
-	    DEBUG_PRINT("\n");
-	    Tcutil::impos("assignOp_e failed to preserve consume info");
-	  }
-	}
-	sanity_consume = c;
-	init_sanity = true;
-	break;
-      }
-#endif
-      // reset the consume lists
-      inflow = restore_consume_info(inflow,outer_cinfo);
+      // iterate again; need to go back to empty consume info
+      inflow = restore_consume_info(new_inflow,empty_consume);
       DEBUG_PRINT("inflow changed; recalculating\n");
     }
 
@@ -976,7 +1037,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       case NotZeroAll:
       case &AddressOf(_): // e2 executed at least once
 	let l = List(vd,NULL);
-	f1 = add_vars(f1,&l,unknown_all);
+	f1 = add_vars(f1,&l,unknown_all,e->loc);
 
 	let $(f2,r2) = anal_Rexp(env,f1,e2);
 	f2 = consume_unique_rvals(e2->loc,f2); // consume rhexp
@@ -993,7 +1054,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       default: // e2 executed any number of times, including 0
 	while(true) {
 	  let l = List(vd,NULL);
-	  f1 = add_vars(f1,&l,unknown_all);
+	  f1 = add_vars(f1,&l,unknown_all,e->loc);
 	  let $(f2,r2) = anal_Rexp(env,f1,e2);
 	  f2 = consume_unique_rvals(e2->loc,f2); // consume rh exp
 	  switch(f2) {
@@ -1418,8 +1479,8 @@ static void check_init_params(seg_t loc, analenv_t env, flow_t flow) {
 // For now, PATTERN VARS ARE INITIALIZED
 static flow_t anal_scs(analenv_t env,flow_t inflow,list_t<switch_clause_t> scs){
   for(; scs != NULL; scs = scs->tl) {
-    let &Switch_clause(_,vds_opt,where_opt,body,_) = scs->hd;
-    flow_t clause_inflow = add_vars(inflow,vds_opt->v,unknown_all); 
+    let &Switch_clause(_,vds_opt,where_opt,body,loc) = scs->hd;
+    flow_t clause_inflow = add_vars(inflow,vds_opt->v,unknown_all,loc); 
     flow_t clause_outflow;
     if(where_opt != NULL) {
       let $(true_flow,false_flow) = 
@@ -1534,7 +1595,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
       f = use_Rval(env,es->hd->loc,f,rvals->hd);
     f = consume_unique_rvals(s->loc,f); // consume fallthru exps
     // The gunk is because the next case's binding vars are still in scope!
-    f = add_vars(f,destclause->pat_vars->v,unknown_all);
+    f = add_vars(f,destclause->pat_vars->v,unknown_all,s->loc);
     update_flow(env, (stmt_t)(destclause->body), f);
     return BottomFL;
 
@@ -1556,7 +1617,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
       }
     } 
     // now just update the dest's flow
-    DEBUG_PRINT("in Rexp:Goto; updating flow\n");
+    DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);
     return BottomFL;
 
@@ -1576,6 +1637,8 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
     env->tryflow = inflow;
     flow_t s1_outflow = anal_stmt(env,inflow,s1);
     flow_t scs_inflow = env->tryflow;
+    DEBUG_PRINT("inflow for catch clauses:\n");
+    DEBUG_PRINT_F(print_flow,scs_inflow);
     env->in_try  = old_in_try;
     env->tryflow = old_tryflow;
     // sound KLUDGE (see update_tryflow)
@@ -1595,7 +1658,7 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
 
   case &Region_s(tv,vd,resetable,s):
     let vds = List(vd,NULL);
-    inflow = add_vars(inflow,&vds,unknown_all);
+    inflow = add_vars(inflow,&vds,unknown_all,s->loc);
     outflow = anal_stmt(env,inflow,s);
     break;
 
@@ -1638,7 +1701,7 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     
   case &Var_d(vd):
     let vds = List(vd,NULL);
-    inflow = add_vars(inflow,&vds,unknown_none);
+    inflow = add_vars(inflow,&vds,unknown_none,decl->loc);
     let e = vd->initializer;
     if(e==NULL)
       return inflow;
@@ -1662,16 +1725,16 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     let $(f,r) = anal_Rexp(env,inflow,e);
     f = consume_unique_rvals(e->loc,f); // consume rhs of let exp
     f = use_Rval(env,e->loc,f,r);
-    return add_vars(f,vds,unknown_all);
+    return add_vars(f,vds,unknown_all,decl->loc);
 
     // MWH: do I need to do anything here?
-  case &Letv_d(vds): return add_vars(inflow,vds,unknown_none);
+  case &Letv_d(vds): return add_vars(inflow,vds,unknown_none,decl->loc);
 
   case &Fn_d(fd):
     check_nested_fun(inflow,fd);
     let t = fd->cached_typ->v;
     let vd = (vardecl_t)fd->fn_vardecl;
-    return add_vars(inflow,new List(vd,NULL),unknown_all);
+    return add_vars(inflow,new List(vd,NULL),unknown_all,decl->loc);
 
   default: throw new Core::Impossible("anal_decl: unexpected decl variant");
   }
@@ -1718,7 +1781,7 @@ static void check_nested_fun(flow_t inflow, fndecl_t fd) {
   //fprintf(stderr,"checking %s of type %s\n",*(*fd->name)[1],
   //        Absynpp::typ2string(Tcutil::fndecl2typ(fd)));
   let loc = fd->body->loc;
-  inflow = add_vars(inflow, fd->param_vardecls->v, unknown_all);
+  inflow = add_vars(inflow, fd->param_vardecls->v, unknown_all, loc);
   let param_roots = NULL; // only for "initializes"
   switch(inflow) {
   case BottomFL: Tcutil::impos("check_fun");

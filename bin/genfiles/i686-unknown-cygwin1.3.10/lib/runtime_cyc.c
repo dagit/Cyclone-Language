@@ -327,6 +327,20 @@ static int heap_total_atomic_bytes = 0;
 struct _RegionHandle *Cyc_Core_heap_region = NULL;
 struct _RegionHandle *Cyc_Core_unique_region = NULL;
 
+// for freeing unique pointers; might want to make this "free"
+// eventually (but currently this is set to a no-op in libc.cys).
+// Note that this is not recursive; it assumes that programmer
+// has freed nested pointers (otherwise will be grabbed by the GC).
+void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
+  if (ptr.base == NULL) {
+    fprintf(stderr,"internal error: Cyc_ufree");
+    exit(1);
+  } else {
+    GC_free(ptr.base);
+    ptr.base = ptr.curr = ptr.last_plus_one = NULL;
+  }
+}
+
 // defined below so profiling macros work
 struct _RegionHandle _new_region(const char *);
 //  struct _RegionHandle _new_region();

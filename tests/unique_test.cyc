@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <list.h>
 
-extern void one(int *`U x);
-extern void two(int *`U x, int *`U y);
-extern void three(int *`U x, int *`U y, int *`U z);
-extern int rand();
-extern void g(int,int);
+//  extern int rand();
+//  extern void g(int,int);
+int rand() { return 7; }
+void g(int x, int y) {}
 
 void f() {
   int *`U x = unew 3;
@@ -70,7 +69,7 @@ int *`U h(int b) {
   g(*x,*x);
   i = *x;
   i = x[0];
-  i = x[x[0]];
+  i = x[(x[0],0)];
 
   y = unew 3; // consumed = { z }
 
@@ -92,6 +91,7 @@ int *`U h(int b) {
   if (b) {
     z = unew 7; // consumed = { y }
     b = rand();
+    b = 0;
     goto retry; 
   }
   // @join: consumed = { y, z }
@@ -129,5 +129,14 @@ int *`U h(int b) {
     y = unew 5; // consumed = { x, z }
   // @join: consumed = { x, z }
 
+  Core::ufree(y);
+
+  y = unew 7;
   return y;
+}
+
+int main() {
+  int *`U v = h(1);
+  Core::ufree(v);
+  return 0;
 }

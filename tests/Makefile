@@ -79,11 +79,11 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram test_getopt typeref typerep_test test_regions)\
+	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram test_getopt typeref typerep_test test_regions unique_test)\
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) hello cyctest foo histogram merge_sort test_getopt
 	$(RM) test_regions genrep_write genrep_read genrep_test rep
-	$(RM) typerep_test
+	$(RM) typerep_test unique_test
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm

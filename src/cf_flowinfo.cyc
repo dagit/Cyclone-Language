@@ -68,23 +68,26 @@ bool update_place_set(place_set_t *set, place_t<`H,`H> place,
   return false;
 }
 
+// creates a string to identify the given place in error messages
+string_t place_err_string(place_t place) {
+  let &Place(root,_) = place;
+  switch (root) {
+  case &VarRoot(vd): return Absynpp::qvar2string(vd->name);
+  default: Tcutil::impos("error locations not for VarRoots");
+  }  
+}
+
 static void unique_err(place_t place,
 		       string_t err_msg1, string_t err_msg2,
 		       Position::seg_t consumed_loc,
 		       Position::seg_t loc) {  
-  let &Place(root,_) = place;
-  switch (root) {
-  case &VarRoot(vd):
-    if (!Position::segment_equals(consumed_loc,loc)) {
-      let s = Position::string_of_segment(consumed_loc);
-      Tcutil::terr(loc,err_msg1,Absynpp::qvar2string(vd->name), s);
-    }
-    else
-      Tcutil::terr(loc,err_msg2,Absynpp::qvar2string(vd->name));
-    break;
-  default:
-    Tcutil::impos("error locations not for VarRoots");
+  let pstr = place_err_string(place);
+  if (!Position::segment_equals(consumed_loc,loc)) {
+    let s = Position::string_of_segment(consumed_loc);
+    Tcutil::terr(loc,err_msg1,pstr,s);
   }
+  else
+    Tcutil::terr(loc,err_msg2,pstr);
 }
 
 // checks for conflicts when merging consumed sets
@@ -878,23 +881,23 @@ static bool relns_approx(relns_t r2s, relns_t r1s) {
 }
 
 bool consume_approx(consume_t c1, consume_t c2) {
-  // first check that c2 is a sublist of c1; assumes they are sorted
+  // first check that c1 is a sublist of c2; assumes they are sorted
   if (c1.may_consume != c2.may_consume) {
-    let l2 = c2.may_consume;
     let l1 = c1.may_consume;
-    for (; l1 != NULL && l2 != NULL; l1 = l1->tl) {
+    let l2 = c2.may_consume;
+    for (; l2 != NULL && l1 != NULL; l2 = l2->tl) {
       if ((unsigned int)l1 == (unsigned int)l2)
 	goto compare_consumed_set;
       let i = place_cmp(l1->hd,l2->hd);
       if (i == 0) // if equal, move l2's pointer to the next element
-	l2 = l2->tl;
+	l1 = l1->tl;
     }
-    if (l2 != NULL) // didn't find them all
+    if (l1 != NULL) // didn't find them all
       return false;
   }
  compare_consumed_set:
-  // now check that c1 is a superset of c2
-  return place_set_subset(c2.consumed, c1.consumed);
+  // now check that c1 is a subset of c2
+  return place_set_subset(c1.consumed, c2.consumed);
 }
 
 // WARNING: We assume anything not in the intersection is IRRELEVANT.
@@ -1380,3 +1383,51 @@ flow_t restore_consume_info(flow_t f, consume_t c) {
     return new ReachableFL(d,r,c);
   }
 }
+
+#ifdef NOTDEF
+// returns true when t is a unique pointer (regardless of what it points to)
+bool is_unique_pointer(type_t t) {
+  switch (Tcutil::compress(t)) {
+  case VoidType:
+  case &IntType(_,_):    
+  case FloatType:        
+  case &DoubleType(_):   
+  case &EnumType(_,_):   
+  case &AnonEnumType(_): 
+  case &SizeofType(_):   
+  case &TagType(_):      
+  case &TypeInt(_):      
+  case HeapRgn:
+  case UniqueRgn:
+  case &VarType(tv): 
+  case &Evar(_,_,_,_): return false; // because of compress above
+    // for parameterized types, we really need to substitute and descend
+    // to figure out whether the outermost pointer is unique.
+  case &TunionType(TunionInfo{_,targs,r}): 
+    if (contains_region(rgn,r)) return true;
+    fallthru(targs);
+  case &TypedefType(_,targs,_,_):    fallthru(targs);
+  case &AggrType(AggrInfo{_,targs}): fallthru(targs);
+  case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
+  case &JoinEff(targs): 
+    return List::exists_c(contains_region,rgn,targs);
+  case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):
+    return contains_region(rgn,r) || contains_region(rgn,t2);
+  case &FnType(_): return false;
+  case &TupleType(tqs):
+    for (; tqs != NULL; tqs = tqs->tl)
+      if (contains_region(rgn,(*tqs->hd)[1])) return true;
+    return false;
+  case &AnonAggrType(_,fds):
+    for (; fds != NULL; fds = fds->tl) 
+      if (contains_region(rgn,fds->hd->type)) return true;
+    return false;
+  case &ArrayType(ArrayInfo{t2,_,_,_,_}): fallthru(t2);
+  case &AccessEff(t2):     fallthru(t2);
+  case &RgnsEff(t2):       return contains_region(rgn,t2);
+  // careful: we don't want to kill any region handles to the region in
+  // question.
+  case &RgnHandleType(t2): return false;
+  }
+}
+#endif

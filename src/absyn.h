@@ -177,7 +177,7 @@ namespace Absyn {
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
     BoxKind, // excludes types whose values dont go in general-purpose registers
-    RgnKind, // regions
+    RgnKind, // intuitionistic regions
     EffKind, // effects
     IntKind  // constant ints
   };

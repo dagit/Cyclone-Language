@@ -220,5 +220,6 @@ extern flow_t drop_unique_rvals(Position::seg_t loc,flow_t f);
 
 extern $(consume_t,flow_t) save_consume_info(flow_t f, bool clear);
 extern flow_t restore_consume_info(flow_t f, consume_t c);
+extern string_t place_err_string(place_t place);
 }
 #endif
