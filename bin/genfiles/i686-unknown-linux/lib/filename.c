@@ -179,7 +179,7 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
 }
 static inline 
 unsigned _get_arr_size(struct _tagged_arr arr, unsigned elt_sz) {
-  return (arr.last_plus_one - arr.curr) / elt_sz;
+  return (arr.curr<arr.base || arr.curr>=arr.last_plus_one) ? 0 : ((arr.last_plus_one - arr.curr) / elt_sz);
 }
 static inline
 struct _tagged_arr _tagged_arr_plus(struct _tagged_arr arr, unsigned elt_sz,
