@@ -2582,7 +2582,7 @@ bool subtype(tenv_t te,
 
     //fprintf(stderr,"subtype: got here on %s and %s\n",typ2string(t1), typ2string(t2));
     // now check that t_a is a pointer sub-type of t_b
-    return (deep_subtype && ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b)) || (unify(t1,t2)) || isomorphic(t1,t2);
+    return (deep_subtype && ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b)) || (unify(t_a,t_b)) || isomorphic(t_a,t_b);
 
   case $(&DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(dd1,df)},ts1}), &DatatypeType(DatatypeInfo{{.KnownDatatype = &dd2}, ts2})):
     // we're casting a datatype field to a datatype which is okay
