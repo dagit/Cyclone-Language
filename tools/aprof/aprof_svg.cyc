@@ -451,7 +451,7 @@ static int curve_cmp(curve_t x, curve_t y) {
   else return 1;
 }
 
-static const char ?colors[] =
+static const char ?default_colors[] =
 //  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
   {
     "rgb(148,208,84)",
@@ -462,6 +462,8 @@ static const char ?colors[] =
     "rgb(0,56,0)",
     "rgb(0,0,208)"
   };
+
+const char ??colors = default_colors;
 
 static const char ?color(unsigned int i) {
   if (i < numelts(colors)) return colors[i];
@@ -487,6 +489,10 @@ static void output_legend(list_t<$(const char ?,const char ?)@> items) {
   }
 }
 
+const char ?curve_stroke = "black";
+const char ?gc_fill = "black";
+const char ?gc_opacity = "0.3";
+
 static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t ?? yv) {
 
   printf("<g transform='translate(0,%f) scale(%.12f,%.12f)'>\n",
@@ -501,7 +507,7 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
     printf("%d,%d ",x,yv[0][x]);
   }
   printf("%d,0 0,0 ",xres-1); // bottom border is x axis
-  printf("' stroke='none' fill='%s' opacity='0.7'/>\n",color(0));
+  printf("' stroke='%s' fill='%s' opacity='0.7'/>\n",curve_stroke,color(0));
 
   // ... then the other curves, going up
   for (int i=1; i < num_curves; i++) {
@@ -515,7 +521,7 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
       printf("%d,%d ",x,yv[i-1][x]);
     }
     printf("0,%d ",yv[i][0]);
-    printf("' stroke='none' fill='%s' opacity='0.7'/>\n",color(i));
+    printf("' stroke='%s' fill='%s' opacity='0.7'/>\n",curve_stroke,color(i));
   }
 
   /* the garbage collections */
@@ -523,8 +529,8 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
   for (let l = gc_list; l != NULL; l = l->tl) {
     let &$(x1,x2) = l->hd;
     printf("<rect x='%d' y='0' width='%d' height='%d'"
-           " fill='black' stroke='none' opacity='0.3'/>\n",
-           x1,x2-x1,max_y);
+           " fill='%s' stroke='none' opacity='%s'/>\n",
+           x1,x2-x1,max_y,gc_fill,gc_opacity);
   }
 
   printf("<!-- marks -->\n");

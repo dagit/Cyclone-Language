@@ -44,6 +44,21 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "  -q     quiet output\n"
           "  -cd X  use X as a clock divisor\n"
           "  -ev    use allocation events instead of clocks\n"
+          "  -omit [reserved|refcnt|other|heap|unique]\n"
+          "         omit a region from the -svg graph\n"
+          "  -color <c>\n"
+          "         use <c> as a color in -svg instead of the defaults\n"
+          "         Examples: black, rgb(148,208,84)\n"
+          "         You must specify enough colors\n"
+          "  -curve_stroke <s>\n"
+          "         use <s> as the curve stroke in -svg\n"
+          "         Examples: none (default), black\n"
+          "  -gc_fill <c>\n"
+          "         use <c> as the color of the gc bars in -svg\n"
+          "         Examples: black (default), rgb(148,208,84)\n"
+          "  -gc_opacity <o>\n"
+          "         use <o> as the opacity of the gc bars in -svg\n"
+          "         Default is 0.3\n"
           "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
           argv0,
           dyn_threshhold);
@@ -61,6 +76,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   bool do_sizes = false;
   unsigned int clockdivisor_override = 0;
   string_t<`H> file;
+  List::list_t<stringptr_t> user_colors = NULL;
 
   int argn = 1;
   while ( argn < argc && argv[argn][0] == '-' )  {
@@ -79,6 +95,18 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-omit" ) == 0 && argn+1 < argc ) {
       omits = new List::List(&argv[++argn],omits);
+    }
+    else if ( strcmp( argv[argn], "-color" ) == 0 && argn+1 < argc ) {
+      user_colors = new List::List(&argv[++argn],user_colors);
+    }
+    else if ( strcmp( argv[argn], "-curve_stroke" ) == 0 && argn+1 < argc ) {
+      curve_stroke = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-gc_fill" ) == 0 && argn+1 < argc ) {
+      gc_fill = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-gc_opacity" ) == 0 && argn+1 < argc ) {
+      gc_opacity = argv[++argn];
     }
     else if ( strcmp( argv[argn], "-svg" ) == 0 ) {
       do_svg = true;
@@ -128,6 +156,12 @@ int main(int argc, string_t<`H> ?`H argv) {
   if (clockdivisor_override)
     // since != 0 we won't divide by 0 later
     clockdivisor = clockdivisor_override;
+
+  if (user_colors != NULL) {
+    int n = List::length(user_colors);
+    colors = new { for i < n : *List::nth(user_colors,n-i-1) };
+  }
+
 
   int ret;
   if (do_graph)

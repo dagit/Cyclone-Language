@@ -175,4 +175,11 @@ namespace Aprof {
 
 }
 
+// Colors etc. to use on the graph
+extern const char ??colors;
+extern const char ?curve_stroke;
+extern const char ?gc_fill;
+extern const char ?gc_opacity;
+
+
 #endif
