@@ -244,7 +244,7 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
       }
     }
     // type-check the initializer
-    _ t2 = synth_typ(Tcexp::tcExpInitializer(te,&t,e));
+    _ t2 = Tcexp::tcExpInitializer(te,&t,e);
     if (!coerce_assign(te,e,t)) 
       terr(loc,
 	   xprintf("%s is declared with type %s but initialized with type %s",

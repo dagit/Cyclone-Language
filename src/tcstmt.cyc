@@ -26,14 +26,14 @@ using Tcexp;
 using Tcpat;
 
 // used to type-check Let_d, switch clauses, and catch clauses
-static void pattern_synth(segment loc, tenv te, list<tvar> tvs, 
+static void pattern_synth(segment loc, tenv te, list<tvar> tvs,
 			  list<vardecl> vs, stmt s, exp_opt where_opt,
 			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
   if(new_block && vs != null)
     te2 = Tcenv::new_block(te2);
-  _ block = Tcenv::curr_block(te2);
-  for(_ vs2 = vs; vs2 != null; vs2 = vs2->tl) {
+  let block = Tcenv::curr_block(te2);
+  for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
     vs2->hd->block = block;
   }
@@ -50,7 +50,7 @@ static void pattern_synth(segment loc, tenv te, list<tvar> tvs,
 }
 
 // new_block is a kludge because we he abstract syntax doesn't group the
-// local declarations in a block, but the region rules do.  (That is, 
+// local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
 // of a function are in the same region as the parameters.
 // Case variables are in new regions, but let variables follow the adjacency
@@ -68,7 +68,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
   case Exp_s(e): tcExp(te,null,e); return;
 
   case Seq_s(s1,s2):
-    _ te2 = set_next(te,Stmt_j(s2));
+    let te2 = set_next(te,Stmt_j(s2));
     tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
@@ -82,7 +82,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 	continue;
       default: goto seq_end; // break out of loop
       }
-  seq_end: 
+  seq_end:
     tcStmt(te,s2,true);
     return;
 
@@ -120,7 +120,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     tcStmt(set_in_loop(te,cont_s),s,true);
     return;
 
-  case For_s(e1,$(e2,guard_s),$(e3,cont_s),s): 
+  case For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
     ControlFlow::set_encloser(guard_s, get_encloser(te));
     ControlFlow::set_encloser(cont_s,  get_encloser(te));
     tcExp(te,null,e1);
@@ -135,7 +135,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     tcStmt(set_in_loop(te,cont_s),s,true);
     tcTest(te,e,"do loop");
     return;
-  
+
     // In the next 4 cases, the function call assigns through sopt
     // We leave the work to Tcenv b/c it has all the control information
   case Break_s(*sopt):    process_break(te,s0,sopt);    return;
@@ -143,7 +143,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
   case Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
 
   case Fallthru_s(es,*sopt):
-    _ trip_opt = process_fallthru(te,s0,sopt);
+    let trip_opt = process_fallthru(te,s0,sopt);
     if(trip_opt == null) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
@@ -172,30 +172,30 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 
   case Switch_s(e,scs0):
     tcExp(te,null,e);
-    _ t = e->topt->v;
+    let t = e->topt->v;
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
     te = set_in_switch(te);
     te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
-      _ p       = scs->hd->pattern;
-      _ pat_typ = tcPat(te,p,null); // FIX: can pass region if e is an lvalue
+      let p       = scs->hd->pattern;
+      let pat_typ = tcPat(te,p,null); // FIX: can pass region if e is an lvalue
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
 				  typ2string(t), typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      _ pvs = null;
-      for(_ y=x; y!=null; y=y->tl) 
+      let pvs = null;
+      for(let y=x; y!=null; y=y->tl)
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus.
-      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
       te = set_fallthru(te, pat_typ, scs->hd->body);
-    } 
+    }
     check_switch_exhaustive(s0->loc,scs0);
     return;
 
@@ -206,24 +206,24 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
-      _ p       = scs->hd->pattern;
-      _ pat_typ = tcPat(te,p,null);
+    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+      let p       = scs->hd->pattern;
+      let pat_typ = tcPat(te,p,null);
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      _ pvs = null;
-      for(_ y=x; y!=null; y=y->tl) 
+      let pvs = null;
+      for(_ y=x; y!=null; y=y->tl)
 	pvs = &cons(y->hd->name, pvs);
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus
-      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
+      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
       te = set_fallthru(te, pat_typ, scs->hd->body);
-    } 
+    }
     check_catch_overlap(s0->loc,scs0);
     return;
 
@@ -236,7 +236,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     switch (d->r) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
-      _ curr_bl = Tcenv::curr_block(te);
+      let curr_bl = Tcenv::curr_block(te);
       *block_ptr = curr_bl; // side effect
       if (nsl != null)
         terr(d->loc, "local variables cannot be qualified");
@@ -263,15 +263,15 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
         if (!coerce_assign(te,(exp)initializer,t))
 	  terr(d->loc,
 	       xprintf("%s declared with type %s, initialized with type %s",
-		       *x, typ2string(t), 
+		       *x, typ2string(t),
 		       typ2string(initializer->topt->v)));
       }
       tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
       return;
 
     case Let_d(p,*topt_ref,e,*exhaust):
-      _ topt = *topt_ref;
-      // FIX:  should we use tcExpInitializer?  
+      let topt = *topt_ref;
+      // FIX:  should we use tcExpInitializer?
       tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
