@@ -270,7 +270,18 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,*rgn_ptr,atts) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
-      *rgn_ptr = new Opt(curr_bl); // side effect
+      bool is_local;
+      switch (sc) {
+      case Static: fallthru;
+      case Extern: fallthru;
+      case ExternC: is_local = false; break;
+      case Abstract: 
+        terr(d->loc,"bad abstract scope for local variable"); 
+        fallthru;
+      case Public: is_local = true; break;
+      }
+        
+      *rgn_ptr = is_local ? new Opt(curr_bl) : new Opt(HeapRgn); // side effect
       switch (nsl) {
       case Loc_n: break;
       case &Rel_n(null):
@@ -302,9 +313,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // type safety demands static variables are closed (like globals)
       // (the error message may be confusing b/c it *looks* like tyvars
       //  are in scope)
-      let bound_vars = (sc == Static) ? null : lookup_type_vars(te);
+      let bound_vars = (!is_local) ? null : lookup_type_vars(te);
       check_type(s0->loc,te,bound_vars,MemKind,t);
       let te2 = add_local_var(s->loc,te,vd);
+      if (sc == Extern || sc == ExternC)
+        terr(d->loc,"local extern declarations not yet supported");
+      if (sc == Static && !supports_default(t) && initializer == null)
+        terr(d->loc,"static local declaration requires an initializer");
       if (initializer != null) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
         if (!coerce_assign(te2,(exp_t)initializer,t))

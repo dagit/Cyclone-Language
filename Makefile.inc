@@ -36,6 +36,8 @@ CYCLONE_LIBS:=arg\
          errno\
          filename\
          fn\
+         getopt\
+         getopt1\
          hashtable\
          id\
          lexing\

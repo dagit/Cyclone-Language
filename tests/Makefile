@@ -26,11 +26,13 @@ all: $(CYCC) $(LIB) \
   $(OUT_PREFIX)hello$(EXE) \
   $(OUT_PREFIX)test_regions$(EXE) \
   $(OUT_PREFIX)histogram$(EXE) \
-  $(OUT_PREFIX)finger$(EXE)
+  $(OUT_PREFIX)finger$(EXE) \
+  $(OUT_PREFIX)test_getopt$(EXE) \
 	./$(OUT_PREFIX)test_regions
 	./$(OUT_PREFIX)cyctest
 	./$(OUT_PREFIX)foo < foo_input
 	./$(OUT_PREFIX)histogram histogram.txt
+	./$(OUT_PREFIX)test_getopt -abc123
 
 $(OUT_PREFIX)hello$(EXE): $(OUT_PREFIX)hello.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
@@ -63,15 +65,18 @@ $(OUT_PREFIX)histogram$(EXE): $(OUT_PREFIX)histogram.o
 $(OUT_PREFIX)finger$(EXE): $(OUT_PREFIX)finger.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
+$(OUT_PREFIX)test_getopt$(EXE): $(OUT_PREFIX)test_getopt.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc
 	$(CYCC) $(CYC_FLAGS) -c $< 
 
 clean_prefix:
-	rm -f $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o *.exe)
+	rm -f $(addprefix $(OUT_PREFIX), hello hello.o cyctest cyctest.o cyctest.c foo foo_tab.* foo.o foo.c histogram histogram.o histogram.c merge_sort merge_sort.o test_getopt.o test_getopt *.exe)
 
 clean:
-	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c
+	rm -f *hello.o *hello.c *bytes.o *bytes.c *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c *histogram.o *histogram.c *finger.o *finger.c *test_getopt.c *test_getopt.o
 	rm -f *test_regions.o *test_regions.c
 	rm -f hello cyctest foo histogram merge_sort
 	rm -f *~ *.exe *.output *.stackdump
