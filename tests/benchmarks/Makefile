@@ -1,7 +1,5 @@
 include ../../Makefile.inc
 
-CYCC := ../../bin/$(CYCCOMP)
-
 PROGS := fib hanoi shuffle nsieve tfftdp
 
 CYCFLAGS := -lm
@@ -14,7 +12,13 @@ endif
 endif
 endif
 
-CYCFLAGS := $(CYCFLAGS) -O3
+CYC_BIN_PATH := $(CYCDIR)/bin
+CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
+CYC_INC_PATH := $(CYCDIR)/include
+LC_FLAG=
+CYCC := $(CYC_BIN_PATH)/$(CYCCOMP)
+
+CYC_FLAGS+= $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -O3
 CFLAGS   := $(CFLAGS)   -O3
 
 #########################################################
@@ -41,11 +45,11 @@ clean:
 	$(CC) $(CFLAGS) -Wall -o $@ $<
 
 %$(EXE): %.cyc $(CYCC)
-	$(CYCC) $(CYCFLAGS) -o $@ $<
+	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
-#JGM: for some reason, I needed this...
-fib$(EXE) : fib.cyc $(CYCC)
-	$(CYCC) $(CYCFLAGS) -o $@ $<
+##JGM: for some reason, I needed this...
+#fib$(EXE) : fib.cyc $(CYCC)
+#	$(CYCC) $(CYCFLAGS) -o $@ $<
 
 #I tried this to get the labels to work automatically...
 #
