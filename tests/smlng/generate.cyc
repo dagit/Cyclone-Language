@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <list.h>
 #include <time.h>
+#include <string.h>
 using Stdio;
 
 #define TAGB	0
@@ -347,13 +348,33 @@ void random_generate3() {
   }
 }
 
+/* Nest */
+void random_generate4() {
+  let n = len; // Need to keep because len is side-effected
+  for (int i = 0; i < n; i++) generate_tag();
+  printf("Z");
+  for (int i = 0; i < n; i++) generate_end_tag();
+}
+
 /**********************************************************************/
 
 int main(int argc, char ??argv) {
   let algorithm = 0;
 
-  if (argc > 3) {
-    fprintf(stderr,"Usage: %s [-alg] [len]\n",argv[0]);
+  if (argc > 3 || (argc > 1 && String::strcmp(argv[1],"-help")==0)) {
+    fprintf(stderr,
+            "Usage: %s args\n",argv[0]);
+    fprintf(stderr,
+            "where args can be:\n"
+            " n       string w/len n by alg 0\n"
+            " -0 n    string w/len n by alg 0\n"
+            " -1 n    string w/n printables by alg 1\n"
+            " -2 n    string w/n printables, flat colors\n"
+            " -3 n    string w/n printables, flat sizes\n"
+            " -4 n    string nested to n, one printable, len ~ 7n\n"
+            " -help   print usage\n"
+            "(n is always optional, default is 100000)\n"
+            );
     exit(1);
   }
 
@@ -382,8 +403,10 @@ int main(int argc, char ??argv) {
     random_generate1();
   else if (algorithm == 2)
     random_generate2();
-  else
+  else if (algorithm == 3)
     random_generate3();
+  else
+    random_generate4();
 
   return 0;
 }
