@@ -493,6 +493,22 @@ char ?`r1 strrchr(char ?`r1 s, char c) {
   return null;
 }
 
+// Return a pointer to the beginning of the substring needle within
+// haystack, or NULL if the substring is not found.
+const char ?`r strstr(const char ?`r haystack, const char ?`r2 needle) {
+  if (!haystack || !needle) throw new InvalidArg("String::strstr");
+  if (*needle == '\0') return haystack;
+
+  int len = int_strleno(needle, 0, "String::strstr");
+  for (const char ?`r start = haystack;
+       (start = strchr(start, *needle)) != NULL;
+       start = strchr(start+1, *needle))
+    if (strncmp(start, needle, len) == 0)
+      return start;
+
+  return NULL;
+}
+
 // Search s for an occurrence of a character not in accept.
 // Return the offset to the first such character, or the length
 // of s if none.

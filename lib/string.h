@@ -98,6 +98,7 @@ extern char ?`r rreplace_suffix (region_t<`r> r,const char ? src,
 ////////////////////////// SEARCHING
 extern const char ?`r strchr(const char ?`r s, char c);
 extern char ?`r strrchr(char ?`r s, char c);
+extern const char ?`r strstr(const char ?`r haystack, const char ?`r2 needle);
 extern char ?`r strpbrk(char ?`r s, const char ? accept);
 extern size_t strspn(const char ? s, const char ? accept);
 

@@ -31,7 +31,6 @@ extern "C" {
 
 #ifndef _REENT_ONLY
 #define errno (*__errno())
-extern int @__errno(void);
 #endif
 extern __attribute__((dllimport)) int _sys_nerr;
 

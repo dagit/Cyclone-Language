@@ -98,6 +98,7 @@ CYCLONE_H:=arg.h\
         list.h\
         netdb.h\
         netinet/in.h\
+	netinet/tcp.h\
         position.h\
         pp.h\
 	pwd.h\
