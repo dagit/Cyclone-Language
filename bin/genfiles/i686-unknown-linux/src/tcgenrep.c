@@ -532,9 +532,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -552,9 +553,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1720,7 +1722,7 @@ _tmpE9;});_tmpE8;});_tmpE7.targs=_tmpCA;_tmpE7.rgn=_tmpCB;_tmpE7;});_tmpE6;});
 _tmpE5;});struct Cyc_Position_Segment*_tmpE4=Cyc_Position_segment_of_abs(0,0);
 return(void*)_tmpE3;}}}_LL15:;_LL16: return type;_LL10:;}struct _dynforward_ptr Cyc_Tcgenrep_make_type_cstring(
 void*t){struct _dynforward_ptr s=Cyc_strdup((struct _dynforward_ptr)Cyc_Absynpp_typ2cstring(
-t));{int i=0;for(0;i < Cyc_strlen((struct _dynforward_ptr)s);i ++){if(*((char*)
+t));{int i=0;for(0;i < Cyc_strlen((struct _dynforward_ptr)s);++ i){if(*((char*)
 _check_dynforward_subscript(s,sizeof(char),i))== ' ')({struct _dynforward_ptr
 _tmpEB=_dynforward_ptr_plus(s,sizeof(char),i);char _tmpEC=*((char*)
 _check_dynforward_subscript(_tmpEB,sizeof(char),0));char _tmpED='_';if(
@@ -2327,7 +2329,7 @@ _check_null(_tmp241->impl))->fields)){int _tmp246=((int(*)(int(*f)(int,struct Cy
 int accum,struct Cyc_List_List*x))Cyc_List_fold_left)(Cyc_Tcgenrep_add_bitfield_sizes,
 0,((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp241->impl))->fields);int
 _tmp247=_tmp246 / 8 + (_tmp246 % 8 == 0?0: 1);struct Cyc_List_List*chars=0;{int i=0;
-for(0;i < _tmp247;i ++){chars=({struct Cyc_List_List*_tmp248=_cycalloc(sizeof(*
+for(0;i < _tmp247;++ i){chars=({struct Cyc_List_List*_tmp248=_cycalloc(sizeof(*
 _tmp248));_tmp248->hd=({struct _tuple10*_tmp249=_cycalloc(sizeof(*_tmp249));
 _tmp249->f1=Cyc_Tcgenrep_tq_none;_tmp249->f2=Cyc_Absyn_char_typ;_tmp249;});
 _tmp248->tl=chars;_tmp248;});}}{void*base_type=(void*)({struct Cyc_Absyn_TupleType_struct*

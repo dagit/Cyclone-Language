@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1362,12 +1364,12 @@ static void Cyc_dump_middle();static void Cyc_dump_middle(){puts((const char*)"\
 static void Cyc_dump_end();static void Cyc_dump_end(){puts((const char*)"%%HEVEA \\begin{latexonly}\n\\end{list}\\smallskip\n%%HEVEA \\end{latexonly}\n%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}");}
 static void Cyc_pr_comment(struct Cyc___cycFILE*outf,struct _dynforward_ptr s);static
 void Cyc_pr_comment(struct Cyc___cycFILE*outf,struct _dynforward_ptr s){int depth=0;
-int len=(int)Cyc_strlen((struct _dynforward_ptr)s);int i=0;for(0;i < len;i ++){char c=*((
+int len=(int)Cyc_strlen((struct _dynforward_ptr)s);int i=0;for(0;i < len;++ i){char c=*((
 const char*)_check_dynforward_subscript(s,sizeof(char),i));if(c != '['){Cyc_fputc((
-int)c,outf);continue;}Cyc_fputs((const char*)"\\texttt{",outf);i ++;depth ++;for(0;
-i < len;i ++){char c=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
-if(c == ']'){depth --;if(depth == 0){Cyc_fputc((int)'}',outf);break;}}else{if(c == '[')
-depth ++;}Cyc_fputc((int)c,outf);}}}static int Cyc_width=50;static void Cyc_set_width(
+int)c,outf);continue;}Cyc_fputs((const char*)"\\texttt{",outf);++ i;++ depth;for(0;
+i < len;++ i){char c=*((const char*)_check_dynforward_subscript(s,sizeof(char),i));
+if(c == ']'){-- depth;if(depth == 0){Cyc_fputc((int)'}',outf);break;}}else{if(c == '[')
+++ depth;}Cyc_fputc((int)c,outf);}}}static int Cyc_width=50;static void Cyc_set_width(
 int w);static void Cyc_set_width(int w){Cyc_width=w;}static struct Cyc_List_List*Cyc_cycdoc_files=
 0;static void Cyc_add_other(struct _dynforward_ptr s);static void Cyc_add_other(struct
 _dynforward_ptr s){struct _dynforward_ptr*_tmpA8;struct Cyc_List_List*_tmpA7;Cyc_cycdoc_files=((
@@ -1400,9 +1402,9 @@ _dynforward_ptr s);static void _tmpBB(unsigned int*_tmpBA,unsigned int*_tmpB9,ch
 _tmpB7){for(*_tmpBA=0;*_tmpBA < *_tmpB9;(*_tmpBA)++){(*_tmpB7)[*_tmpBA]='\000';}}
 static struct _dynforward_ptr Cyc_sh_escape_string(struct _dynforward_ptr s){
 unsigned long _tmp1A=Cyc_strlen((struct _dynforward_ptr)s);int _tmp1B=0;int _tmp1C=0;{
-int i=0;for(0;i < _tmp1A;i ++){char _tmp1D=*((const char*)_check_dynforward_subscript(
-s,sizeof(char),i));if(_tmp1D == '\'')_tmp1B ++;else{if(Cyc_is_other_special(_tmp1D))
-_tmp1C ++;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;if(_tmp1B == 0){struct
+int i=0;for(0;i < _tmp1A;++ i){char _tmp1D=*((const char*)_check_dynforward_subscript(
+s,sizeof(char),i));if(_tmp1D == '\'')++ _tmp1B;else{if(Cyc_is_other_special(_tmp1D))
+++ _tmp1C;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;if(_tmp1B == 0){struct
 _dynforward_ptr*_tmpB5;struct _dynforward_ptr*_tmpB4[3];return(struct
 _dynforward_ptr)Cyc_strconcat_l(((_tmpB4[2]=_init_dynforward_ptr(_cycalloc(
 sizeof(struct _dynforward_ptr)),"'",sizeof(char),2),((_tmpB4[1]=((_tmpB5=
@@ -1415,7 +1417,7 @@ _dynforward_ptr _tmpB8;char*_tmpB7;unsigned int _tmpB6;struct _dynforward_ptr s2
 _tmpB6=_tmp22 + 1,((_tmpB7=(char*)_cycalloc_atomic(_check_times(sizeof(char),
 _tmpB6 + 1)),((_tmpB8=_tag_dynforward(_tmpB7,sizeof(char),_tmpB6 + 1),((((_tmpB9=
 _tmpB6,((_tmpBB(& _tmpBA,& _tmpB9,& _tmpB7),_tmpB7[_tmpB9]=(char)0)))),_tmpB8)))))));
-int _tmp23=0;int _tmp24=0;for(0;_tmp23 < _tmp1A;_tmp23 ++){char _tmp25=*((const char*)
+int _tmp23=0;int _tmp24=0;for(0;_tmp23 < _tmp1A;++ _tmp23){char _tmp25=*((const char*)
 _check_dynforward_subscript(s,sizeof(char),_tmp23));if(_tmp25 == '\''  || Cyc_is_other_special(
 _tmp25)){char _tmpBE;char _tmpBD;struct _dynforward_ptr _tmpBC;(_tmpBC=
 _dynforward_ptr_plus(s2,sizeof(char),_tmp24 ++),((_tmpBD=*((char*)

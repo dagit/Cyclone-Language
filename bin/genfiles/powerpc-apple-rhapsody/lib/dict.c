@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1501,5 +1503,5 @@ char*_tmp17D;struct Cyc_Core_Failure_struct*_tmp17C;(int)_throw((void*)((_tmp17C
 _cycalloc(sizeof(*_tmp17C)),((_tmp17C[0]=((_tmp17E.tag=Cyc_Core_Failure,((
 _tmp17E.f1=((_tmp17D="Dict::unmarshal: list length is -1",_tag_dynforward(
 _tmp17D,sizeof(char),_get_zero_arr_size_char(_tmp17D,35)))),_tmp17E)))),_tmp17C)))));}{
-int i=0;for(0;i < len;i ++){void*key=read_key(env,fp);void*val=read_val(env,fp);
+int i=0;for(0;i < len;++ i){void*key=read_key(env,fp);void*val=read_val(env,fp);
 dict=Cyc_Dict_insert(dict,key,val);}}return dict;}

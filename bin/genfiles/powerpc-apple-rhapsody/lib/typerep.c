@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -996,7 +998,7 @@ _tmp178,sizeof(char),_get_zero_arr_size_char(_tmp178,38)))),_tmp179)))),_tmp177)
 _LL0:;}struct _tuple4 Cyc_Typerep_get_unionbranch(unsigned int tag,struct
 _dynforward_ptr l);struct _tuple4 Cyc_Typerep_get_unionbranch(unsigned int tag,
 struct _dynforward_ptr l){{int i=0;for(0;i < _get_dynforward_size(l,sizeof(struct
-_tuple0*));i ++){unsigned int _tmp10;void*_tmp11;struct _tuple0 _tmpF=*(*((struct
+_tuple0*));++ i){unsigned int _tmp10;void*_tmp11;struct _tuple0 _tmpF=*(*((struct
 _tuple0**)_check_dynforward_subscript(l,sizeof(struct _tuple0*),i)));_tmp10=_tmpF.f1;
 _tmp11=_tmpF.f3;if(_tmp10 == tag)return Cyc_Typerep_tuple_tl(_tmp11);}}{struct Cyc_Core_Failure_struct
 _tmp17F;const char*_tmp17E;struct Cyc_Core_Failure_struct*_tmp17D;(int)_throw((
@@ -1006,7 +1008,7 @@ sizeof(char),_get_zero_arr_size_char(_tmp17E,29)))),_tmp17F)))),_tmp17D)))));}}
 struct _dynforward_ptr Cyc_Typerep_get_tagname(unsigned int tag,struct
 _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname(unsigned int tag,
 struct _dynforward_ptr l){{int i=0;for(0;i < _get_dynforward_size(l,sizeof(struct
-_tuple2*));i ++){unsigned int _tmp16;struct _dynforward_ptr _tmp17;struct _tuple2
+_tuple2*));++ i){unsigned int _tmp16;struct _dynforward_ptr _tmp17;struct _tuple2
 _tmp15=*(*((struct _tuple2**)_check_dynforward_subscript(l,sizeof(struct _tuple2*),
 i)));_tmp16=_tmp15.f1;_tmp17=_tmp15.f2;if(_tmp16 == tag)return _tmp17;}}{struct Cyc_Core_Failure_struct
 _tmp185;const char*_tmp184;struct Cyc_Core_Failure_struct*_tmp183;(int)_throw((
@@ -1016,7 +1018,7 @@ sizeof(char),_get_zero_arr_size_char(_tmp184,30)))),_tmp185)))),_tmp183)))));}}
 struct _dynforward_ptr Cyc_Typerep_get_tagname2(unsigned int tag,struct
 _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(unsigned int tag,
 struct _dynforward_ptr l){{int i=0;for(0;i < _get_dynforward_size(l,sizeof(struct
-_tuple0*));i ++){unsigned int _tmp1C;struct _dynforward_ptr _tmp1D;struct _tuple0
+_tuple0*));++ i){unsigned int _tmp1C;struct _dynforward_ptr _tmp1D;struct _tuple0
 _tmp1B=*(*((struct _tuple0**)_check_dynforward_subscript(l,sizeof(struct _tuple0*),
 i)));_tmp1C=_tmp1B.f1;_tmp1D=_tmp1B.f2;if(_tmp1C == tag)return _tmp1D;}}{struct Cyc_Core_Failure_struct
 _tmp18B;const char*_tmp18A;struct Cyc_Core_Failure_struct*_tmp189;(int)_throw((
@@ -1026,7 +1028,7 @@ sizeof(char),_get_zero_arr_size_char(_tmp18A,30)))),_tmp18B)))),_tmp189)))));}}
 struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct _dynforward_ptr tag,struct
 _dynforward_ptr l);struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct
 _dynforward_ptr tag,struct _dynforward_ptr l){{int i=0;for(0;i < _get_dynforward_size(
-l,sizeof(struct _tuple3*));i ++){struct _dynforward_ptr _tmp22;void*_tmp23;struct
+l,sizeof(struct _tuple3*));++ i){struct _dynforward_ptr _tmp22;void*_tmp23;struct
 _tuple3 _tmp21=*(*((struct _tuple3**)_check_dynforward_subscript(l,sizeof(struct
 _tuple3*),i)));_tmp22=_tmp21.f1;_tmp23=_tmp21.f2;if(Cyc_strcmp((struct
 _dynforward_ptr)_tmp22,(struct _dynforward_ptr)tag)== 0)return Cyc_Typerep_tuple_tl(
@@ -1112,7 +1114,7 @@ _tmp1B1.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Typerep_anon_or_
 _tmp37)),((_tmp1B2[0]=& _tmp1B1,((_tmp1B2[1]=& _tmp1B0,Cyc_printf(((_tmp1B3="Struct(%s,%d,[",
 _tag_dynforward(_tmp1B3,sizeof(char),_get_zero_arr_size_char(_tmp1B3,15)))),
 _tag_dynforward(_tmp1B2,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmp39,sizeof(struct _tuple0*));i ++){unsigned int _tmp63;
+_get_dynforward_size(_tmp39,sizeof(struct _tuple0*));++ i){unsigned int _tmp63;
 struct _dynforward_ptr _tmp64;void*_tmp65;struct _tuple0 _tmp62=*(*((struct _tuple0**)
 _check_dynforward_subscript(_tmp39,sizeof(struct _tuple0*),i)));_tmp63=_tmp62.f1;
 _tmp64=_tmp62.f2;_tmp65=_tmp62.f3;{const char*_tmp1B8;void*_tmp1B7[2];struct Cyc_Int_pa_struct
@@ -1134,7 +1136,7 @@ _tmp31)->f2;_LL2C:{const char*_tmp1C3;void*_tmp1C2[1];struct Cyc_Int_pa_struct
 _tmp1C1;(_tmp1C1.tag=1,((_tmp1C1.f1=(unsigned long)((int)_tmp3A),((_tmp1C2[0]=&
 _tmp1C1,Cyc_printf(((_tmp1C3="Tuple(%d,[",_tag_dynforward(_tmp1C3,sizeof(char),
 _get_zero_arr_size_char(_tmp1C3,11)))),_tag_dynforward(_tmp1C2,sizeof(void*),1)))))));}{
-int i=0;for(0;i < _get_dynforward_size(_tmp3B,sizeof(struct _tuple1*));i ++){
+int i=0;for(0;i < _get_dynforward_size(_tmp3B,sizeof(struct _tuple1*));++ i){
 unsigned int _tmp73;void*_tmp74;struct _tuple1 _tmp72=*(*((struct _tuple1**)
 _check_dynforward_subscript(_tmp3B,sizeof(struct _tuple1*),i)));_tmp73=_tmp72.f1;
 _tmp74=_tmp72.f2;{const char*_tmp1C7;void*_tmp1C6[1];struct Cyc_Int_pa_struct
@@ -1160,7 +1162,7 @@ _tmp1D1.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)_tmp3D),((_tmp1D2.ta
 0]=& _tmp1D2,((_tmp1D3[1]=& _tmp1D1,((_tmp1D3[2]=& _tmp1D0,Cyc_printf(((_tmp1D4="TUnionField(%s,%s,%d,[",
 _tag_dynforward(_tmp1D4,sizeof(char),_get_zero_arr_size_char(_tmp1D4,23)))),
 _tag_dynforward(_tmp1D3,sizeof(void*),3)))))))))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmp3F,sizeof(struct _tuple1*));i ++){unsigned int _tmp83;void*
+_get_dynforward_size(_tmp3F,sizeof(struct _tuple1*));++ i){unsigned int _tmp83;void*
 _tmp84;struct _tuple1 _tmp82=*(*((struct _tuple1**)_check_dynforward_subscript(
 _tmp3F,sizeof(struct _tuple1*),i)));_tmp83=_tmp82.f1;_tmp84=_tmp82.f2;{const char*
 _tmp1D8;void*_tmp1D7[1];struct Cyc_Int_pa_struct _tmp1D6;(_tmp1D6.tag=1,((_tmp1D6.f1=(
@@ -1181,7 +1183,7 @@ char*_tmp1E3;void*_tmp1E2[1];struct Cyc_String_pa_struct _tmp1E1;(_tmp1E1.tag=0,
 _tmp1E1.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)_tmp40),((_tmp1E2[0]=&
 _tmp1E1,Cyc_printf(((_tmp1E3="TUnion(%s,[",_tag_dynforward(_tmp1E3,sizeof(char),
 _get_zero_arr_size_char(_tmp1E3,12)))),_tag_dynforward(_tmp1E2,sizeof(void*),1)))))));}{
-int i=0;for(0;i < _get_dynforward_size(_tmp41,sizeof(struct _tuple2*));i ++){
+int i=0;for(0;i < _get_dynforward_size(_tmp41,sizeof(struct _tuple2*));++ i){
 unsigned int _tmp91;struct _dynforward_ptr _tmp92;struct _tuple2 _tmp90=*(*((struct
 _tuple2**)_check_dynforward_subscript(_tmp41,sizeof(struct _tuple2*),i)));_tmp91=
 _tmp90.f1;_tmp92=_tmp90.f2;{const char*_tmp1E9;void*_tmp1E8[3];struct Cyc_Int_pa_struct
@@ -1195,7 +1197,7 @@ sizeof(char),_get_zero_arr_size_char(_tmp1E9,11)))),_tag_dynforward(_tmp1E8,
 sizeof(void*),3)))))))))))))))))));}}}{const char*_tmp1EC;void*_tmp1EB;(_tmp1EB=0,
 Cyc_printf(((_tmp1EC="],[",_tag_dynforward(_tmp1EC,sizeof(char),
 _get_zero_arr_size_char(_tmp1EC,4)))),_tag_dynforward(_tmp1EB,sizeof(void*),0)));}{
-int i=0;for(0;i < _get_dynforward_size(_tmp42,sizeof(struct _tuple0*));i ++){
+int i=0;for(0;i < _get_dynforward_size(_tmp42,sizeof(struct _tuple0*));++ i){
 unsigned int _tmp9B;struct _dynforward_ptr _tmp9C;void*_tmp9D;struct _tuple0 _tmp9A=*(*((
 struct _tuple0**)_check_dynforward_subscript(_tmp42,sizeof(struct _tuple0*),i)));
 _tmp9B=_tmp9A.f1;_tmp9C=_tmp9A.f2;_tmp9D=_tmp9A.f3;{const char*_tmp1F1;void*
@@ -1218,7 +1220,7 @@ char*_tmp1FC;void*_tmp1FB[1];struct Cyc_String_pa_struct _tmp1FA;(_tmp1FA.tag=0,
 _tmp1FA.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)_tmp43),((_tmp1FB[0]=&
 _tmp1FA,Cyc_printf(((_tmp1FC="XTUnion(%s,",_tag_dynforward(_tmp1FC,sizeof(char),
 _get_zero_arr_size_char(_tmp1FC,12)))),_tag_dynforward(_tmp1FB,sizeof(void*),1)))))));}{
-int i=0;for(0;i < _get_dynforward_size(_tmp44,sizeof(struct _tuple3*));i ++){struct
+int i=0;for(0;i < _get_dynforward_size(_tmp44,sizeof(struct _tuple3*));++ i){struct
 _dynforward_ptr _tmpAB;void*_tmpAC;struct _tuple3 _tmpAA=*(*((struct _tuple3**)
 _check_dynforward_subscript(_tmp44,sizeof(struct _tuple3*),i)));_tmpAB=_tmpAA.f1;
 _tmpAC=_tmpAA.f2;{const char*_tmp200;void*_tmp1FF[1];struct Cyc_String_pa_struct
@@ -1243,7 +1245,7 @@ _dynforward_ptr)((struct _dynforward_ptr)Cyc_Typerep_anon_or_name(_tmp45)),((
 _tmp20B[0]=& _tmp20A,((_tmp20B[1]=& _tmp209,Cyc_printf(((_tmp20C="Union(%s,%d,",
 _tag_dynforward(_tmp20C,sizeof(char),_get_zero_arr_size_char(_tmp20C,13)))),
 _tag_dynforward(_tmp20B,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmp47,sizeof(struct _tuple3*));i ++){struct _dynforward_ptr
+_get_dynforward_size(_tmp47,sizeof(struct _tuple3*));++ i){struct _dynforward_ptr
 _tmpBA;void*_tmpBB;struct _tuple3 _tmpB9=*(*((struct _tuple3**)
 _check_dynforward_subscript(_tmp47,sizeof(struct _tuple3*),i)));_tmpBA=_tmpB9.f1;
 _tmpBB=_tmpB9.f2;{const char*_tmp210;void*_tmp20F[1];struct Cyc_String_pa_struct
@@ -1267,7 +1269,7 @@ _tmp21A.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Typerep_anon_or_
 _tmp48)),((_tmp21B[0]=& _tmp21A,((_tmp21B[1]=& _tmp219,Cyc_printf(((_tmp21C="Enum(%s,%d,",
 _tag_dynforward(_tmp21C,sizeof(char),_get_zero_arr_size_char(_tmp21C,12)))),
 _tag_dynforward(_tmp21B,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmp4A,sizeof(struct _tuple2*));i ++){unsigned int _tmpC9;
+_get_dynforward_size(_tmp4A,sizeof(struct _tuple2*));++ i){unsigned int _tmpC9;
 struct _dynforward_ptr _tmpCA;struct _tuple2 _tmpC8=*(*((struct _tuple2**)
 _check_dynforward_subscript(_tmp4A,sizeof(struct _tuple2*),i)));_tmpC9=_tmpC8.f1;
 _tmpCA=_tmpC8.f2;{const char*_tmp222;void*_tmp221[3];struct Cyc_Int_pa_struct
@@ -1330,7 +1332,7 @@ struct _dynforward_ptr)Cyc_Typerep_anon_or_name(_tmpD8)),((_tmp241[0]=& _tmp240,
 _tmp241[1]=& _tmp23F,Cyc_printf(((_tmp242="<Struct name=\"%s\" sz=\"%d\">",
 _tag_dynforward(_tmp242,sizeof(char),_get_zero_arr_size_char(_tmp242,27)))),
 _tag_dynforward(_tmp241,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpDA,sizeof(struct _tuple0*));i ++){unsigned int _tmp102;
+_get_dynforward_size(_tmpDA,sizeof(struct _tuple0*));++ i){unsigned int _tmp102;
 struct _dynforward_ptr _tmp103;void*_tmp104;struct _tuple0 _tmp101=*(*((struct
 _tuple0**)_check_dynforward_subscript(_tmpDA,sizeof(struct _tuple0*),i)));_tmp102=
 _tmp101.f1;_tmp103=_tmp101.f2;_tmp104=_tmp101.f3;{const char*_tmp247;void*_tmp246[
@@ -1351,8 +1353,8 @@ _tmpD2)->f2;_LL45:{const char*_tmp251;void*_tmp250[1];struct Cyc_Int_pa_struct
 _tmp24F;(_tmp24F.tag=1,((_tmp24F.f1=(unsigned long)((int)_tmpDB),((_tmp250[0]=&
 _tmp24F,Cyc_printf(((_tmp251="<Tuple sz=\"%d\">",_tag_dynforward(_tmp251,sizeof(
 char),_get_zero_arr_size_char(_tmp251,16)))),_tag_dynforward(_tmp250,sizeof(void*),
-1)))))));}{int i=0;for(0;i < _get_dynforward_size(_tmpDC,sizeof(struct _tuple1*));i
-++){unsigned int _tmp111;void*_tmp112;struct _tuple1 _tmp110=*(*((struct _tuple1**)
+1)))))));}{int i=0;for(0;i < _get_dynforward_size(_tmpDC,sizeof(struct _tuple1*));
+++ i){unsigned int _tmp111;void*_tmp112;struct _tuple1 _tmp110=*(*((struct _tuple1**)
 _check_dynforward_subscript(_tmpDC,sizeof(struct _tuple1*),i)));_tmp111=_tmp110.f1;
 _tmp112=_tmp110.f2;{const char*_tmp255;void*_tmp254[1];struct Cyc_Int_pa_struct
 _tmp253;(_tmp253.tag=1,((_tmp253.f1=(unsigned long)((int)_tmp111),((_tmp254[0]=&
@@ -1376,7 +1378,7 @@ struct _dynforward_ptr)_tmpDD),((_tmp260[0]=& _tmp25F,((_tmp260[1]=& _tmp25E,((
 _tmp260[2]=& _tmp25D,Cyc_printf(((_tmp261="<TUnionField tname=\"%s\" fname=\"%s\" sz=\"%d\">",
 _tag_dynforward(_tmp261,sizeof(char),_get_zero_arr_size_char(_tmp261,44)))),
 _tag_dynforward(_tmp260,sizeof(void*),3)))))))))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpE0,sizeof(struct _tuple1*));i ++){unsigned int _tmp120;
+_get_dynforward_size(_tmpE0,sizeof(struct _tuple1*));++ i){unsigned int _tmp120;
 void*_tmp121;struct _tuple1 _tmp11F=*(*((struct _tuple1**)
 _check_dynforward_subscript(_tmpE0,sizeof(struct _tuple1*),i)));_tmp120=_tmp11F.f1;
 _tmp121=_tmp11F.f2;{const char*_tmp265;void*_tmp264[1];struct Cyc_Int_pa_struct
@@ -1397,7 +1399,7 @@ _tmp26D.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)_tmpE1),((_tmp26E[0]
 _tmp26D,Cyc_printf(((_tmp26F="<TUnion name=\"%s\">",_tag_dynforward(_tmp26F,
 sizeof(char),_get_zero_arr_size_char(_tmp26F,19)))),_tag_dynforward(_tmp26E,
 sizeof(void*),1)))))));}{int i=0;for(0;i < _get_dynforward_size(_tmpE2,sizeof(
-struct _tuple2*));i ++){unsigned int _tmp12D;struct _dynforward_ptr _tmp12E;struct
+struct _tuple2*));++ i){unsigned int _tmp12D;struct _dynforward_ptr _tmp12E;struct
 _tuple2 _tmp12C=*(*((struct _tuple2**)_check_dynforward_subscript(_tmpE2,sizeof(
 struct _tuple2*),i)));_tmp12D=_tmp12C.f1;_tmp12E=_tmp12C.f2;{const char*_tmp274;
 void*_tmp273[2];struct Cyc_Int_pa_struct _tmp272;struct Cyc_String_pa_struct _tmp271;(
@@ -1406,7 +1408,7 @@ _tmp12E),((_tmp272.tag=1,((_tmp272.f1=(unsigned long)((int)_tmp12D),((_tmp273[0]
 _tmp272,((_tmp273[1]=& _tmp271,Cyc_printf(((_tmp274="<Tag tag=\"%d\" nm=\"%s\"/>",
 _tag_dynforward(_tmp274,sizeof(char),_get_zero_arr_size_char(_tmp274,24)))),
 _tag_dynforward(_tmp273,sizeof(void*),2)))))))))))));}}}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpE3,sizeof(struct _tuple0*));i ++){unsigned int _tmp134;
+_get_dynforward_size(_tmpE3,sizeof(struct _tuple0*));++ i){unsigned int _tmp134;
 struct _dynforward_ptr _tmp135;void*_tmp136;struct _tuple0 _tmp133=*(*((struct
 _tuple0**)_check_dynforward_subscript(_tmpE3,sizeof(struct _tuple0*),i)));_tmp134=
 _tmp133.f1;_tmp135=_tmp133.f2;_tmp136=_tmp133.f3;{const char*_tmp279;void*_tmp278[
@@ -1428,7 +1430,7 @@ _tmp281;(_tmp281.tag=0,((_tmp281.f1=(struct _dynforward_ptr)((struct
 _dynforward_ptr)_tmpE4),((_tmp282[0]=& _tmp281,Cyc_printf(((_tmp283="<XTUnion name=\"%s\">",
 _tag_dynforward(_tmp283,sizeof(char),_get_zero_arr_size_char(_tmp283,20)))),
 _tag_dynforward(_tmp282,sizeof(void*),1)))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpE5,sizeof(struct _tuple3*));i ++){struct _dynforward_ptr
+_get_dynforward_size(_tmpE5,sizeof(struct _tuple3*));++ i){struct _dynforward_ptr
 _tmp143;void*_tmp144;struct _tuple3 _tmp142=*(*((struct _tuple3**)
 _check_dynforward_subscript(_tmpE5,sizeof(struct _tuple3*),i)));_tmp143=_tmp142.f1;
 _tmp144=_tmp142.f2;{const char*_tmp287;void*_tmp286[1];struct Cyc_String_pa_struct
@@ -1451,7 +1453,7 @@ _dynforward_ptr)((struct _dynforward_ptr)Cyc_Typerep_anon_or_name(_tmpE6)),((
 _tmp291[0]=& _tmp290,((_tmp291[1]=& _tmp28F,Cyc_printf(((_tmp292="<Union name=\"%s\" sz=\"%d\">",
 _tag_dynforward(_tmp292,sizeof(char),_get_zero_arr_size_char(_tmp292,26)))),
 _tag_dynforward(_tmp291,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpE8,sizeof(struct _tuple3*));i ++){struct _dynforward_ptr
+_get_dynforward_size(_tmpE8,sizeof(struct _tuple3*));++ i){struct _dynforward_ptr
 _tmp151;void*_tmp152;struct _tuple3 _tmp150=*(*((struct _tuple3**)
 _check_dynforward_subscript(_tmpE8,sizeof(struct _tuple3*),i)));_tmp151=_tmp150.f1;
 _tmp152=_tmp150.f2;{const char*_tmp296;void*_tmp295[1];struct Cyc_String_pa_struct
@@ -1473,7 +1475,7 @@ _tmp29F.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Typerep_anon_or_
 _tmpE9)),((_tmp2A0[0]=& _tmp29F,((_tmp2A0[1]=& _tmp29E,Cyc_printf(((_tmp2A1="<Enum name=\"%s\" szb=\"%d\">",
 _tag_dynforward(_tmp2A1,sizeof(char),_get_zero_arr_size_char(_tmp2A1,26)))),
 _tag_dynforward(_tmp2A0,sizeof(void*),2)))))))))))));}{int i=0;for(0;i < 
-_get_dynforward_size(_tmpEB,sizeof(struct _tuple2*));i ++){unsigned int _tmp15F;
+_get_dynforward_size(_tmpEB,sizeof(struct _tuple2*));++ i){unsigned int _tmp15F;
 struct _dynforward_ptr _tmp160;struct _tuple2 _tmp15E=*(*((struct _tuple2**)
 _check_dynforward_subscript(_tmpEB,sizeof(struct _tuple2*),i)));_tmp15F=_tmp15E.f1;
 _tmp160=_tmp15E.f2;{const char*_tmp2A6;void*_tmp2A5[2];struct Cyc_Int_pa_struct

@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -4182,13 +4184,13 @@ _tmp5CD.tag=0;_tmp5CD.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Ab
 e));{void*_tmp5CB[1]={& _tmp5CD};Cyc_Tcutil_warn(e->loc,({const char*_tmp5CC="bounds check necessary for %s";
 _tag_dynforward(_tmp5CC,sizeof(char),_get_zero_arr_size_char(_tmp5CC,30));}),
 _tag_dynforward(_tmp5CB,sizeof(void*),1));}});_LL31B:;}Cyc_Toc_exp_to_c(nv,
-_tmp421);Cyc_Toc_exp_to_c(nv,_tmp422);Cyc_Toc_total_bounds_checks ++;{int
+_tmp421);Cyc_Toc_exp_to_c(nv,_tmp422);++ Cyc_Toc_total_bounds_checks;{int
 forward_only=0;{void*_tmp5CE=Cyc_Absyn_conref_def(Cyc_Absyn_bounds_one,_tmp5C2);
 struct Cyc_Absyn_Exp*_tmp5CF;void*_tmp5D0;_LL321: if(_tmp5CE <= (void*)2)goto _LL323;
 if(*((int*)_tmp5CE)!= 0)goto _LL323;_tmp5CF=((struct Cyc_Absyn_Upper_b_struct*)
 _tmp5CE)->f1;_LL322: {int possibly_null=((int(*)(int,struct Cyc_Absyn_Conref*x))
 Cyc_Absyn_conref_def)(0,_tmp5C1);void*ta1=Cyc_Toc_typ_to_c(_tmp5BD);void*ta2=Cyc_Absyn_cstar_typ(
-ta1,_tmp5BE);if(in_bnds)Cyc_Toc_bounds_checks_eliminated ++;else{if(((int(*)(int,
+ta1,_tmp5BE);if(in_bnds)++ Cyc_Toc_bounds_checks_eliminated;else{if(((int(*)(int,
 struct Cyc_Absyn_Conref*x))Cyc_Absyn_conref_def)(0,_tmp5C3)){struct Cyc_Absyn_Exp*
 function_e=Cyc_Toc_getFunction(& Cyc_Toc__zero_arr_plus_functionSet,_tmp421);(
 void*)(e->r=(void*)Cyc_Toc_deref_exp_r(Cyc_Toc_cast_it(ta2,Cyc_Absyn_fncall_exp(
@@ -4209,7 +4211,7 @@ _tmp5CF;((struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(
 _tag_dynforward(_tmp5D5,sizeof(struct Cyc_Absyn_Exp*),2));})));}}}goto _LL320;}
 _LL323: if((int)_tmp5CE != 0)goto _LL325;_LL324: forward_only=1;goto _LL326;_LL325:
 if((int)_tmp5CE != 1)goto _LL327;_LL326: {void*ta1=Cyc_Toc_typ_to_c_array(_tmp5BD);
-if(in_bnds){Cyc_Toc_bounds_checks_eliminated ++;(void*)(e->r=(void*)Cyc_Toc_subscript_exp_r(
+if(in_bnds){++ Cyc_Toc_bounds_checks_eliminated;(void*)(e->r=(void*)Cyc_Toc_subscript_exp_r(
 Cyc_Toc_cast_it(Cyc_Absyn_cstar_typ(ta1,_tmp5BE),Cyc_Absyn_aggrmember_exp(
 _tmp421,Cyc_Toc_curr_sp,0)),_tmp422));}else{struct Cyc_Absyn_Exp*_tmp5D6=
 forward_only?Cyc_Toc__check_dynforward_subscript_e: Cyc_Toc__check_dyneither_subscript_e;(
@@ -4259,8 +4261,8 @@ void*)((struct Cyc_Core_Opt*)_check_null(_tmp427->topt))->v);Cyc_Toc_exp_to_c(nv
 _tmp427);{struct Cyc_List_List*es=0;if(!Cyc_Toc_is_zero(_tmp427)){if(!_tmp5E8)({
 void*_tmp5EA=0;Cyc_Tcutil_terr(_tmp426->loc,({const char*_tmp5EB="cannot determine value of constant";
 _tag_dynforward(_tmp5EB,sizeof(char),_get_zero_arr_size_char(_tmp5EB,35));}),
-_tag_dynforward(_tmp5EA,sizeof(void*),0));});{unsigned int i=0;for(0;i < _tmp5E7;i
-++){es=({struct Cyc_List_List*_tmp5EC=_cycalloc(sizeof(*_tmp5EC));_tmp5EC->hd=({
+_tag_dynforward(_tmp5EA,sizeof(void*),0));});{unsigned int i=0;for(0;i < _tmp5E7;
+++ i){es=({struct Cyc_List_List*_tmp5EC=_cycalloc(sizeof(*_tmp5EC));_tmp5EC->hd=({
 struct _tuple8*_tmp5ED=_cycalloc(sizeof(*_tmp5ED));_tmp5ED->f1=0;_tmp5ED->f2=
 _tmp427;_tmp5ED;});_tmp5EC->tl=es;_tmp5EC;});}}if(_tmp428){struct Cyc_Absyn_Exp*
 _tmp5EE=Cyc_Toc_cast_it(_tmp5E9,Cyc_Absyn_uint_exp(0,0));es=((struct Cyc_List_List*(*)(

@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1794,7 +1796,7 @@ _tmpE4=Cyc_Position_segment_of_abs(0,0);return(void*)_tmpE3;}}}_LL15:;_LL16:
 return type;_LL10:;}struct _dynforward_ptr Cyc_Tcgenrep_make_type_cstring(void*t);
 struct _dynforward_ptr Cyc_Tcgenrep_make_type_cstring(void*t){struct
 _dynforward_ptr s=Cyc_strdup((struct _dynforward_ptr)Cyc_Absynpp_typ2cstring(t));{
-int i=0;for(0;i < Cyc_strlen((struct _dynforward_ptr)s);i ++){if(*((char*)
+int i=0;for(0;i < Cyc_strlen((struct _dynforward_ptr)s);++ i){if(*((char*)
 _check_dynforward_subscript(s,sizeof(char),i))== ' '){char _tmp381;char _tmp380;
 struct _dynforward_ptr _tmp37F;(_tmp37F=_dynforward_ptr_plus(s,sizeof(char),i),((
 _tmp380=*((char*)_check_dynforward_subscript(_tmp37F,sizeof(char),0)),((_tmp381='_',((
@@ -2430,7 +2432,7 @@ _check_null(_tmp241->impl))->fields)){int _tmp246=((int(*)(int(*f)(int,struct Cy
 int accum,struct Cyc_List_List*x))Cyc_List_fold_left)(Cyc_Tcgenrep_add_bitfield_sizes,
 0,((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp241->impl))->fields);int
 _tmp247=_tmp246 / 8 + (_tmp246 % 8 == 0?0: 1);struct Cyc_List_List*chars=0;{int i=0;
-for(0;i < _tmp247;i ++){struct _tuple10*_tmp3FC;struct Cyc_List_List*_tmp3FB;chars=((
+for(0;i < _tmp247;++ i){struct _tuple10*_tmp3FC;struct Cyc_List_List*_tmp3FB;chars=((
 _tmp3FB=_cycalloc(sizeof(*_tmp3FB)),((_tmp3FB->hd=((_tmp3FC=_cycalloc(sizeof(*
 _tmp3FC)),((_tmp3FC->f1=Cyc_Tcgenrep_tq_none,((_tmp3FC->f2=Cyc_Absyn_char_typ,
 _tmp3FC)))))),((_tmp3FB->tl=chars,_tmp3FB))))));}}{struct Cyc_Absyn_TupleType_struct

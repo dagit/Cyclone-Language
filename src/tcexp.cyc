@@ -1945,9 +1945,13 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 }
 
 // ({ s })
+bool in_stmt_exp = false;
+
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
   region r {
+    bool old_stmt_exp_state = in_stmt_exp;
     Tcstmt::tcStmt(set_encloser(r,te,s),s,true);
+    in_stmt_exp = old_stmt_exp_state;
   }
   // The encloser of s is not s, so reset it properly.
   NewControlFlow::set_encloser(s,get_encloser(te));

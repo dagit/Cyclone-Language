@@ -532,9 +532,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -552,9 +553,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1008,7 +1010,7 @@ const char**)args)== - 1)perror((const char*)"execlp failed during backtrace");e
 1);}}else{if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);
 close(fromchild[1]);return 1;}}close(tochild[0]);close(fromchild[1]);{int infd=
 fromchild[0];int outfd=tochild[1];int n=Cyc_Execinfo_backtrace(_tag_dynforward(bt,
-sizeof(int),20),(int)20);{int c=0;for(0;c < n;c ++){char buf[100];int len=({struct Cyc_Int_pa_struct
+sizeof(int),20),(int)20);{int c=0;for(0;c < n;++ c){char buf[100];int len=({struct Cyc_Int_pa_struct
 _tmpC;_tmpC.tag=1;_tmpC.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
 void*_tmpA[1]={& _tmpC};Cyc_sprintf(_tag_dynforward(buf,sizeof(char),100),({const
 char*_tmpB="%#x\n";_tag_dynforward(_tmpB,sizeof(char),_get_zero_arr_size_char(
@@ -1016,11 +1018,11 @@ _tmpB,5));}),_tag_dynforward(_tmpA,sizeof(void*),1));}});Cyc_write(outfd,
 _tag_dynforward(buf,sizeof(char),100),(unsigned int)len);}}({void*_tmpD=0;Cyc_printf(({
 const char*_tmpE="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
 _tag_dynforward(_tmpE,sizeof(char),_get_zero_arr_size_char(_tmpE,94));}),
-_tag_dynforward(_tmpD,sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int unknown=1;
+_tag_dynforward(_tmpD,sizeof(void*),0));});{int c=0;for(0;c < n;++ c){int unknown=1;
 char d;int ret;int pos=0;({void*_tmpF=0;Cyc_printf(({const char*_tmp10="  ";
 _tag_dynforward(_tmp10,sizeof(char),_get_zero_arr_size_char(_tmp10,3));}),
 _tag_dynforward(_tmpF,sizeof(void*),0));});do{ret=Cyc_read(infd,_tag_dynforward(&
-d,sizeof(char),1),1);if(d == '\n')break;if(d != '?')unknown=0;pos ++;putchar((int)d);}while(
+d,sizeof(char),1),1);if(d == '\n')break;if(d != '?')unknown=0;++ pos;putchar((int)d);}while(
 1);if(unknown){char buf[100];int len=({struct Cyc_Int_pa_struct _tmp16;_tmp16.tag=1;
 _tmp16.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp14[1]={&
 _tmp16};Cyc_sprintf(_tag_dynforward(buf,sizeof(char),100),({const char*_tmp15="(%#x)";

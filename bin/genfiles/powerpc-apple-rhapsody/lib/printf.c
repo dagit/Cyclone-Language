@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1037,20 +1039,20 @@ Cyc__IO_sputn(int(*ioputc)(int,void*),void*ioputc_env,struct _dynforward_ptr s,i
 howmany);static int Cyc__IO_sputn(int(*ioputc)(int,void*),void*ioputc_env,struct
 _dynforward_ptr s,int howmany){int i=0;while(i < howmany){if(_get_dynforward_size(s,
 sizeof(char))== 0  || ioputc((int)*((const char*)_check_dynforward_subscript(s,
-sizeof(char),0)),ioputc_env)== - 1)return i;_dynforward_ptr_inplace_plus_post(& s,
-sizeof(char),1);i ++;}return i;}static int Cyc__IO_nzsputn(int(*ioputc)(int,void*),
+sizeof(char),0)),ioputc_env)== - 1)return i;_dynforward_ptr_inplace_plus(& s,
+sizeof(char),1);++ i;}return i;}static int Cyc__IO_nzsputn(int(*ioputc)(int,void*),
 void*ioputc_env,struct _dynforward_ptr s,int howmany);static int Cyc__IO_nzsputn(int(*
 ioputc)(int,void*),void*ioputc_env,struct _dynforward_ptr s,int howmany){int i=0;
 while(i < howmany){char c;if((_get_dynforward_size(s,sizeof(char))== 0  || (c=*((
 const char*)_check_dynforward_subscript(s,sizeof(char),0)))== 0) || ioputc((int)c,
-ioputc_env)== - 1)return i;_dynforward_ptr_inplace_plus_post(& s,sizeof(char),1);i
-++;}return i;}static int Cyc__IO_padn(int(*ioputc)(int,void*),void*ioputc_env,char c,
-int howmany);static int Cyc__IO_padn(int(*ioputc)(int,void*),void*ioputc_env,char c,
-int howmany){int i=0;while(i < howmany){if(ioputc((int)c,ioputc_env)== - 1)return i;i
-++;}return i;}static struct _dynforward_ptr Cyc_my_memchr(struct _dynforward_ptr s,
-char c,int n);static struct _dynforward_ptr Cyc_my_memchr(struct _dynforward_ptr s,char
-c,int n){int sz=(int)_get_dynforward_size(s,sizeof(char));n=n < sz?n: sz;for(0;n != 0;(
-n --,_dynforward_ptr_inplace_plus_post(& s,sizeof(char),1))){if(*((const char*)
+ioputc_env)== - 1)return i;_dynforward_ptr_inplace_plus(& s,sizeof(char),1);++ i;}
+return i;}static int Cyc__IO_padn(int(*ioputc)(int,void*),void*ioputc_env,char c,int
+howmany);static int Cyc__IO_padn(int(*ioputc)(int,void*),void*ioputc_env,char c,int
+howmany){int i=0;while(i < howmany){if(ioputc((int)c,ioputc_env)== - 1)return i;++ i;}
+return i;}static struct _dynforward_ptr Cyc_my_memchr(struct _dynforward_ptr s,char c,
+int n);static struct _dynforward_ptr Cyc_my_memchr(struct _dynforward_ptr s,char c,int n){
+int sz=(int)_get_dynforward_size(s,sizeof(char));n=n < sz?n: sz;for(0;n != 0;(n --,
+_dynforward_ptr_inplace_plus_post(& s,sizeof(char),1))){if(*((const char*)
 _check_dynforward_subscript(s,sizeof(char),0))== c)return s;}return(struct
 _dynforward_ptr)_tag_dynforward(0,0,0);}static struct _dynforward_ptr Cyc_my_nzmemchr(
 struct _dynforward_ptr s,char c,int n);static struct _dynforward_ptr Cyc_my_nzmemchr(
@@ -1060,7 +1062,7 @@ n=n < sz?n: sz;for(0;n != 0;(n --,_dynforward_ptr_inplace_plus_post(& s,sizeof(c
 return(struct _dynforward_ptr)_tag_dynforward(0,0,0);}static unsigned long Cyc_my_strlen(
 struct _dynforward_ptr s);static unsigned long Cyc_my_strlen(struct _dynforward_ptr s){
 unsigned int sz=_get_dynforward_size(s,sizeof(char));unsigned int i=0;while(i < sz
- && ((const char*)s.curr)[(int)i]!= 0){i ++;}return i;}int Cyc__IO_vfprintf(int(*
+ && ((const char*)s.curr)[(int)i]!= 0){++ i;}return i;}int Cyc__IO_vfprintf(int(*
 ioputc)(int,void*),void*ioputc_env,struct _dynforward_ptr fmt0,struct
 _dynforward_ptr ap);int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,
 struct _dynforward_ptr fmt0,struct _dynforward_ptr ap){struct _dynforward_ptr fmt;
@@ -1074,46 +1076,45 @@ unsigned int _tmp49=348;unsigned int i;for(i=0;i < _tmp49;i ++){buf[i]='\000';}b
 _tmp49]=(char)0;}{char ox[2]={'\000','\000'};enum Cyc_BASE base;fmt=fmt0;ret=0;
 for(0;1;0){fmark=fmt;{unsigned int fmt_sz=_get_dynforward_size(fmt,sizeof(char));
 for(n=0;(n < fmt_sz  && (ch=(int)*((const char*)_check_dynforward_subscript(fmt,
-sizeof(char),n)))!= '\000') && ch != '%';n ++){;}fmt=_dynforward_ptr_plus(fmt,
+sizeof(char),n)))!= '\000') && ch != '%';++ n){;}fmt=_dynforward_ptr_plus(fmt,
 sizeof(char),n);if((n=(fmt.curr - fmark.curr)/ sizeof(char))!= 0){do{if(Cyc__IO_sputn(
 ioputc,ioputc_env,(struct _dynforward_ptr)fmark,n)!= n)goto error;}while(0);ret +=n;}
-if(ch == '\000')goto done;_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),1);
-flags=0;dprec=0;fpprec=0;width=0;prec=- 1;sign='\000';rflag: ch=(int)*((const char*)
+if(ch == '\000')goto done;_dynforward_ptr_inplace_plus(& fmt,sizeof(char),1);flags=
+0;dprec=0;fpprec=0;width=0;prec=- 1;sign='\000';rflag: ch=(int)*((const char*)
 _check_dynforward_subscript(_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),
 1),sizeof(char),0));reswitch: which_cp=0;switch(ch){case ' ': _LL37: if(!((int)sign))
 sign=' ';goto rflag;case '#': _LL38: flags |=8;goto rflag;case '*': _LL39: width=Cyc_va_arg_int(
-ap);_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);if(width >= 0)goto
-rflag;width=- width;goto _LL3A;case '-': _LL3A: flags |=16;flags &=~ 32;goto rflag;case '+':
+ap);_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);if(width >= 0)goto rflag;
+width=- width;goto _LL3A;case '-': _LL3A: flags |=16;flags &=~ 32;goto rflag;case '+':
 _LL3B: sign='+';goto rflag;case '.': _LL3C: if((ch=(int)*((const char*)
 _check_dynforward_subscript(_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),
-1),sizeof(char),0)))== '*'){n=Cyc_va_arg_int(ap);
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);prec=n < 0?- 1: n;goto rflag;}
-n=0;while((unsigned int)(ch - '0')<= 9){n=10 * n + (ch - '0');ch=(int)*((const char*)
-_check_dynforward_subscript(_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),
-1),sizeof(char),0));}prec=n < 0?- 1: n;goto reswitch;case '0': _LL3D: if(!(flags & 16))
-flags |=32;goto rflag;case '1': _LL3E: goto _LL3F;case '2': _LL3F: goto _LL40;case '3':
-_LL40: goto _LL41;case '4': _LL41: goto _LL42;case '5': _LL42: goto _LL43;case '6': _LL43:
-goto _LL44;case '7': _LL44: goto _LL45;case '8': _LL45: goto _LL46;case '9': _LL46: n=0;do{n=
-10 * n + (ch - '0');ch=(int)*((const char*)_check_dynforward_subscript(
-_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));}while((
-unsigned int)(ch - '0')<= 9);width=n;goto reswitch;case 'L': _LL47: flags |=2;goto
-rflag;case 'h': _LL48: flags |=4;goto rflag;case 'l': _LL49: flags |=1;goto rflag;case 'c':
-_LL4A:{char*_tmpD2;cp=((_tmpD2=buf,_tag_dyneither(_tmpD2,sizeof(char),
-_get_zero_arr_size_char(_tmpD2,349))));}{char _tmpD5;char _tmpD4;struct
-_dyneither_ptr _tmpD3;(_tmpD3=cp,((_tmpD4=*((char*)_check_dyneither_subscript(
-_tmpD3,sizeof(char),0)),((_tmpD5=(char)Cyc_va_arg_int(ap),((_get_dyneither_size(
-_tmpD3,sizeof(char))== 1  && (_tmpD4 == '\000'  && _tmpD5 != '\000')?
-_throw_arraybounds(): 1,*((char*)_tmpD3.curr)=_tmpD5)))))));}
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);size=1;sign='\000';break;
-case 'D': _LL4B: flags |=1;goto _LL4C;case 'd': _LL4C: goto _LL4D;case 'i': _LL4D: _ulong=(
+1),sizeof(char),0)))== '*'){n=Cyc_va_arg_int(ap);_dynforward_ptr_inplace_plus(&
+ap,sizeof(void*),1);prec=n < 0?- 1: n;goto rflag;}n=0;while((unsigned int)(ch - '0')
+<= 9){n=10 * n + (ch - '0');ch=(int)*((const char*)_check_dynforward_subscript(
+_dynforward_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));}prec=n < 
+0?- 1: n;goto reswitch;case '0': _LL3D: if(!(flags & 16))flags |=32;goto rflag;case '1':
+_LL3E: goto _LL3F;case '2': _LL3F: goto _LL40;case '3': _LL40: goto _LL41;case '4': _LL41:
+goto _LL42;case '5': _LL42: goto _LL43;case '6': _LL43: goto _LL44;case '7': _LL44: goto
+_LL45;case '8': _LL45: goto _LL46;case '9': _LL46: n=0;do{n=10 * n + (ch - '0');ch=(int)*((
+const char*)_check_dynforward_subscript(_dynforward_ptr_inplace_plus_post(& fmt,
+sizeof(char),1),sizeof(char),0));}while((unsigned int)(ch - '0')<= 9);width=n;
+goto reswitch;case 'L': _LL47: flags |=2;goto rflag;case 'h': _LL48: flags |=4;goto rflag;
+case 'l': _LL49: flags |=1;goto rflag;case 'c': _LL4A:{char*_tmpD2;cp=((_tmpD2=buf,
+_tag_dyneither(_tmpD2,sizeof(char),_get_zero_arr_size_char(_tmpD2,349))));}{char
+_tmpD5;char _tmpD4;struct _dyneither_ptr _tmpD3;(_tmpD3=cp,((_tmpD4=*((char*)
+_check_dyneither_subscript(_tmpD3,sizeof(char),0)),((_tmpD5=(char)Cyc_va_arg_int(
+ap),((_get_dyneither_size(_tmpD3,sizeof(char))== 1  && (_tmpD4 == '\000'  && _tmpD5
+!= '\000')?_throw_arraybounds(): 1,*((char*)_tmpD3.curr)=_tmpD5)))))));}
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);size=1;sign='\000';break;case 'D':
+_LL4B: flags |=1;goto _LL4C;case 'd': _LL4C: goto _LL4D;case 'i': _LL4D: _ulong=(
 unsigned long)(flags & 1?Cyc_va_arg_long(ap):(flags & 4?(long)((short)Cyc_va_arg_int(
-ap)):(long)Cyc_va_arg_int(ap)));_dynforward_ptr_inplace_plus_post(& ap,sizeof(
-void*),1);if((long)_ulong < 0){_ulong=- _ulong;sign='-';}base=Cyc_DEC;goto number;
-case 'e': _LL4E: goto _LL4F;case 'E': _LL4F: goto _LL50;case 'f': _LL50: goto _LL51;case 'F':
-_LL51: goto _LL52;case 'g': _LL52: goto _LL53;case 'G': _LL53: _double=Cyc_va_arg_double(
-ap);_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);if(prec > 39){if(ch != 'g'
- && ch != 'G'  || flags & 8)fpprec=prec - 39;prec=39;}else{if(prec == - 1)prec=6;}{
-char*_tmpD6;cp=((_tmpD6=buf,_tag_dyneither(_tmpD6,sizeof(char),
+ap)):(long)Cyc_va_arg_int(ap)));_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);
+if((long)_ulong < 0){_ulong=- _ulong;sign='-';}base=Cyc_DEC;goto number;case 'e':
+_LL4E: goto _LL4F;case 'E': _LL4F: goto _LL50;case 'f': _LL50: goto _LL51;case 'F': _LL51:
+goto _LL52;case 'g': _LL52: goto _LL53;case 'G': _LL53: _double=Cyc_va_arg_double(ap);
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);if(prec > 39){if(ch != 'g'  && ch
+!= 'G'  || flags & 8)fpprec=prec - 39;prec=39;}else{if(prec == - 1)prec=6;}{char*
+_tmpD6;cp=((_tmpD6=buf,_tag_dyneither(_tmpD6,sizeof(char),
 _get_zero_arr_size_char(_tmpD6,349))));}{char _tmpD9;char _tmpD8;struct
 _dyneither_ptr _tmpD7;(_tmpD7=cp,((_tmpD8=*((char*)_check_dyneither_subscript(
 _tmpD7,sizeof(char),0)),((_tmpD9='\000',((_get_dyneither_size(_tmpD7,sizeof(char))
@@ -1122,31 +1123,31 @@ _tmpD7.curr)=_tmpD9)))))));}{char*_tmpDA;size=Cyc___cvt_double(_double,prec,
 flags,& softsign,ch,cp,_dyneither_ptr_plus(((_tmpDA=buf,_tag_dyneither(_tmpDA,
 sizeof(char),_get_zero_arr_size_char(_tmpDA,349)))),sizeof(char),(int)(sizeof(
 buf)- 1)));}if(softsign)sign='-';if(*((char*)_check_dyneither_subscript(cp,
-sizeof(char),0))== '\000')_dyneither_ptr_inplace_plus_post(& cp,sizeof(char),1);
-break;case 'n': _LL54: if(flags & 1)*Cyc_va_arg_int_ptr(ap)=(unsigned long)ret;else{
-if(flags & 4)*Cyc_va_arg_short_ptr(ap)=(short)ret;else{*Cyc_va_arg_int_ptr(ap)=(
-unsigned long)ret;}}_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);
-continue;case 'O': _LL55: flags |=1;goto _LL56;case 'o': _LL56: _ulong=flags & 1?Cyc_va_arg_ulong(
+sizeof(char),0))== '\000')_dyneither_ptr_inplace_plus(& cp,sizeof(char),1);break;
+case 'n': _LL54: if(flags & 1)*Cyc_va_arg_int_ptr(ap)=(unsigned long)ret;else{if(
+flags & 4)*Cyc_va_arg_short_ptr(ap)=(short)ret;else{*Cyc_va_arg_int_ptr(ap)=(
+unsigned long)ret;}}_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);continue;
+case 'O': _LL55: flags |=1;goto _LL56;case 'o': _LL56: _ulong=flags & 1?Cyc_va_arg_ulong(
 ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)):(unsigned long)
-Cyc_va_arg_uint(ap));_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);base=
-Cyc_OCT;goto nosign;case 'p': _LL57: _ulong=(unsigned long)Cyc_va_arg_long(ap);
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);base=Cyc_HEX;flags |=64;ch=(
-int)'x';goto nosign;case 's': _LL58: {struct _dynforward_ptr b=Cyc_va_arg_string(ap);
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);which_cp=3;cp3=b;if(prec
->= 0){struct _dynforward_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != ((
-struct _dynforward_ptr)_tag_dynforward(0,0,0)).curr){size=(p.curr - cp3.curr)/ 
-sizeof(char);if(size > prec)size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(
-cp3);}sign='\000';break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=
-flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
-ap)):(unsigned long)Cyc_va_arg_uint(ap));_dynforward_ptr_inplace_plus_post(& ap,
+Cyc_va_arg_uint(ap));_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_OCT;
+goto nosign;case 'p': _LL57: _ulong=(unsigned long)Cyc_va_arg_long(ap);
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;flags |=64;ch=(int)'x';
+goto nosign;case 's': _LL58: {struct _dynforward_ptr b=Cyc_va_arg_string(ap);
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);which_cp=3;cp3=b;if(prec >= 0){
+struct _dynforward_ptr p=Cyc_my_nzmemchr(cp3,'\000',prec);if(p.curr != ((struct
+_dynforward_ptr)_tag_dynforward(0,0,0)).curr){size=(p.curr - cp3.curr)/ sizeof(
+char);if(size > prec)size=prec;}else{size=prec;}}else{size=(int)Cyc_my_strlen(cp3);}
+sign='\000';break;}case 'U': _LL59: flags |=1;goto _LL5A;case 'u': _LL5A: _ulong=flags & 
+1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(
+ap)):(unsigned long)Cyc_va_arg_uint(ap));_dynforward_ptr_inplace_plus(& ap,
 sizeof(void*),1);base=Cyc_DEC;goto nosign;case 'X': _LL5B: goto _LL5C;case 'x': _LL5C:
 _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)
 Cyc_va_arg_int(ap)):(unsigned long)Cyc_va_arg_uint(ap));
-_dynforward_ptr_inplace_plus_post(& ap,sizeof(void*),1);base=Cyc_HEX;if(flags & 8
- && _ulong != 0)flags |=64;nosign: sign='\000';number: if((dprec=prec)>= 0)flags &=~
-32;{char*_tmpDB;cp=_dyneither_ptr_plus(((_tmpDB=buf,_tag_dyneither(_tmpDB,
-sizeof(char),_get_zero_arr_size_char(_tmpDB,349)))),sizeof(char),(308 + 39)+ 1);}
-if(_ulong != 0  || prec != 0){struct _dynforward_ptr xdigs;switch(base){case Cyc_OCT:
+_dynforward_ptr_inplace_plus(& ap,sizeof(void*),1);base=Cyc_HEX;if(flags & 8  && 
+_ulong != 0)flags |=64;nosign: sign='\000';number: if((dprec=prec)>= 0)flags &=~ 32;{
+char*_tmpDB;cp=_dyneither_ptr_plus(((_tmpDB=buf,_tag_dyneither(_tmpDB,sizeof(
+char),_get_zero_arr_size_char(_tmpDB,349)))),sizeof(char),(308 + 39)+ 1);}if(
+_ulong != 0  || prec != 0){struct _dynforward_ptr xdigs;switch(base){case Cyc_OCT:
 _LL5E: do{{char _tmpDE;char _tmpDD;struct _dyneither_ptr _tmpDC;(_tmpDC=
 _dyneither_ptr_inplace_plus(& cp,sizeof(char),-1),((_tmpDD=*((char*)
 _check_dyneither_subscript(_tmpDC,sizeof(char),0)),((_tmpDE=(char)((_ulong & 7)+ '0'),((
@@ -1186,8 +1187,8 @@ _tmpF1;char _tmpF0;struct _dyneither_ptr _tmpEF;(_tmpEF=cp,((_tmpF0=*((char*)
 _check_dyneither_subscript(_tmpEF,sizeof(char),0)),((_tmpF1=(char)ch,((
 _get_dyneither_size(_tmpEF,sizeof(char))== 1  && (_tmpF0 == '\000'  && _tmpF1 != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmpEF.curr)=_tmpF1)))))));}size=1;sign='\000';
-break;}fieldsz=size + fpprec;dpad=dprec - size;if(dpad < 0)dpad=0;if((int)sign)
-fieldsz ++;else{if(flags & 64)fieldsz +=2;}fieldsz +=dpad;if((flags & (16 | 32))== 0){
+break;}fieldsz=size + fpprec;dpad=dprec - size;if(dpad < 0)dpad=0;if((int)sign)++
+fieldsz;else{if(flags & 64)fieldsz +=2;}fieldsz +=dpad;if((flags & (16 | 32))== 0){
 if(Cyc__IO_padn(ioputc,ioputc_env,' ',width - fieldsz)< width - fieldsz)goto error;}
 if((int)sign){{char _tmpF6;char _tmpF5;struct _dyneither_ptr _tmpF4;char*_tmpF3;(
 _tmpF4=_dyneither_ptr_plus(((_tmpF3=sign_string,_tag_dyneither(_tmpF3,sizeof(

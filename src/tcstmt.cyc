@@ -50,6 +50,20 @@ using Tcpat;
 
 namespace Tcstmt;
 
+// we're trying to simplify the situation where we have x++
+// and want to rewrite it to ++x.  This can be done in any
+// context where we don't care about the value of x++.  This is
+// important for pointer ops because x++ is fairly expensive.
+static void simplify_unused_result_exp(exp_t e) {
+  switch (e->r) {
+  case &Increment_e(e1,PostInc):
+    e->r = new Increment_e(e1,PreInc); break;
+  case &Increment_e(e1,PostDec):
+    e->r = new Increment_e(e1,PreDec); break;
+  default: break;
+  }
+}
+  
 static void decorate_stmt(tenv_t te, stmt_t s) {
   NewControlFlow::set_encloser(s, get_encloser(te));
   s->try_depth = get_try_depth(te);
@@ -105,7 +119,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case Skip_s: return;
 
-  case &Exp_s(e): tcExp(te,NULL,e); return;
+  case &Exp_s(e): 
+    tcExp(te,NULL,e); 
+    if (!Tcexp::in_stmt_exp)
+      simplify_unused_result_exp(e);
+    return;
 
   case &Seq_s(s1,s2):
     region r {
@@ -145,17 +163,17 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
       if (!coerce_arg(te,e,t)) {
-	terr(s0->loc, "returns value of type %s but requires %s",
+        terr(s0->loc, "returns value of type %s but requires %s",
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
       if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-	terr(e->loc,UNIQUE_ERR_MSG);
+        terr(e->loc,UNIQUE_ERR_MSG);
     }
     return;
 
   case &IfThenElse_s(e,s1,s2):
-    tcTest(te,e,"if statement"); // passing string causes allocation :-(
+    tcTest(te,e,"if statement"); 
     tcStmt(te,s1,true);
     tcStmt(te,s2,true);
     return;
@@ -177,6 +195,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let te = set_in_loop(r,te,cont_s);
       tcStmt(te,s,true);
       tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
+      simplify_unused_result_exp(e3);
     }
     return;
 

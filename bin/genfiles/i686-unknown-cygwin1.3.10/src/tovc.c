@@ -516,9 +516,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
   unsigned _cus_index = (index);
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
+  unsigned char *_cus_curr = _cus_arr.curr;
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index;
   if (!_cus_arr.last_plus_one) _throw_null();
-  if (_cus_ans >= _cus_arr.last_plus_one)
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one)
     _throw_arraybounds();
   return _cus_ans;
 }
@@ -536,9 +537,10 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
   struct _dynforward_ptr _cus_arr = (arr); \
   unsigned _cus_elt_sz = (elt_sz); \
   unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_curr = _cus_arr.curr; \
+  unsigned char *_cus_ans = _cus_curr + _cus_elt_sz * _cus_index; \
   if (!_cus_arr.last_plus_one) _throw_null(); \
-  if (_cus_ans >= _cus_arr.last_plus_one) \
+  if (_cus_ans < _cus_curr || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
 #endif
@@ -1241,7 +1243,7 @@ _tmp2=*_tmp1;_tmp3=_tmp2.f1;if((((*((struct Cyc_Absyn_Var_e_struct*)_tmp0)->f1).
 _dynforward_ptr*k))Cyc_Dict_member)(env.varmap,_tmp4)){(void*)(e->r=(void*)((
 void*)(((struct Cyc_Absyn_Exp*(*)(struct Cyc_Dict_Dict d,struct _dynforward_ptr*k))
 Cyc_Dict_lookup)(env.varmap,_tmp4))->r));continue;}{int i=0;for(0;i < 
-_get_dynforward_size(Cyc_Toc_globals,sizeof(struct _dynforward_ptr*));i ++){if(Cyc_strptrcmp(
+_get_dynforward_size(Cyc_Toc_globals,sizeof(struct _dynforward_ptr*));++ i){if(Cyc_strptrcmp(
 _tmp4,*((struct _dynforward_ptr**)_check_dynforward_subscript(Cyc_Toc_globals,
 sizeof(struct _dynforward_ptr*),i)))== 0)return;}}for(0;env.boundvars != 0;env.boundvars=(
 env.boundvars)->tl){if(Cyc_strptrcmp(_tmp4,(*((struct Cyc_Absyn_Vardecl*)(env.boundvars)->hd)->name).f2)
