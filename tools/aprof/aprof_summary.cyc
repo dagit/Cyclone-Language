@@ -301,6 +301,13 @@ int generate_summary(string_t<`H> file) {
   insert(tab,new "unique",true);
   insert(env->loctab,new "unique",tab);
 
+  /* create tables for the refcnt region */
+  table = create(101, strptrcmp, hash_stringptr);
+  insert(env->regiontable, new "refcnt", table);
+  tab = create(101, strptrcmp, hash_stringptr);
+  insert(tab,new "refcnt",true);
+  insert(env->loctab,new "refcnt",tab);
+
   // process the file
   fn_t clos = make_fn(proc_event,env);
   int ret = proc_file(file,clos);

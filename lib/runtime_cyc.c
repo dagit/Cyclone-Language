@@ -1064,7 +1064,7 @@ set_finalizer(GC_PTR addr) {
 
 void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
                               const char *file, const char *func, int lineno) {
-  void *addr;
+  char *addr;
   addr = _region_malloc(r,s);
   _profile_check_gc();
   if (alloc_log != NULL) {
@@ -1077,7 +1077,7 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
       set_finalizer((GC_PTR)addr);
     }
     else if (r == Cyc_Core_refcnt_region)
-      s = GC_size(addr-1); // back up to before the refcnt
+      s = GC_size(addr-sizeof(int)); // back up to before the refcnt
     fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
             clock(),
             file,func,lineno,
@@ -1089,13 +1089,13 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
 	    region_get_total_bytes(r),
             (unsigned int)addr);
   }
-  return addr;
+  return (void *)addr;
 }
 
 void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
                               unsigned int t2,
                               const char *file, const char *func, int lineno) {
-  void *addr;
+  char *addr;
   unsigned s = t1 * t2;
   addr = _region_calloc(r,t1,t2);
   _profile_check_gc();
@@ -1109,7 +1109,7 @@ void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
       set_finalizer((GC_PTR)addr);
     }
     else if (r == Cyc_Core_refcnt_region)
-      s = GC_size(addr-1); // back up to before the refcnt
+      s = GC_size(addr-sizeof(int)); // back up to before the refcnt
     fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
             clock(),
             file,func,lineno,
@@ -1121,7 +1121,7 @@ void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
 	    region_get_total_bytes(r),
             (unsigned int)addr);
   }
-  return addr;
+  return (void *)addr;
 }
 
 void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {

@@ -1167,7 +1167,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
         }
 	else {
 	  outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-	  if (List::memq(noconsume_params,i))
+	  if (List::memq(noconsume_params,i) && 
+	      Tcutil::is_noalias_pointer((type_t)es->hd->topt,false))
 	    outflow = restore_noconsume_arg(env,outflow,es->hd,es->hd->loc);
 	}
       }
@@ -2673,10 +2674,11 @@ static void check_nested_fun(flow_env_t<`r> fenv,
 	break;
       case &Noconsume_att(i):
         let vd = List::nth(fd->param_vardecls->v,i-1);
-        let t  = Tcutil::compress(vd->type);
-        let root = rnew(frgn) VarRoot(vd);
-	let rp = rnew(frgn) Place(root,NULL);
-	noconsume_roots = rnew(frgn) List(rp,noconsume_roots);
+        if (Tcutil::is_noalias_pointer(vd->type,false)) {
+	  let root = rnew(frgn) VarRoot(vd);
+	  let rp = rnew(frgn) Place(root,NULL);
+	  noconsume_roots = rnew(frgn) List(rp,noconsume_roots);
+	}
 	break;
       default: break;
       }

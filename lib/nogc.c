@@ -16,8 +16,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-#include <stdlib.h>
-
 #ifdef CYC_REGION_PROFILE
 #undef GC_malloc
 #undef GC_malloc_atomic
@@ -25,35 +23,40 @@
 #undef GC_size
 #endif
 
-/* A hack to implement GC_size: remember the last allocation size and
-   just return it.  Obviously it won't work unless GC_size is called
-   immediately after allocation. */
-static size_t last_alloc_size = 0;
+/* This is the Doug Lea allocator, rather than the platform malloc.  
+   At the moment, only allow this for Linux, though in principle it
+   should work in general. */
+#ifdef __linux__
+#include "malloc.c"
+
+#define malloc_sizeb(p,n) mUSABLe(p)
+#define calloc cALLOc
+#define malloc mALLOc
+#define realloc rEALLOc
+#define free fREe
+
 size_t GC_size(void *x) {
-  return last_alloc_size;
+  return mUSABLe(x);
 }
 
-void GC_free(void *x) {
-  free(x);
+size_t GC_get_heap_size() {
+  return mALLINFo().arena;
 }
 
-void *GC_malloc(int x) {
-  last_alloc_size = x;
-  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
-  // is because I had to define GC_calloc in runtime_cyc.c
-  return (void*)calloc(sizeof(char),x);
+size_t GC_get_free_bytes() {
+  return mALLINFo().fordblks;
 }
 
-void *GC_malloc_atomic(int x) {
-  last_alloc_size = x;
-  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
-  // is because I had to define GC_calloc in runtime_cyc.c
-  return (void*)calloc(sizeof(char),x);
-}
+#else
 
-unsigned int GC_gc_no = 0;
-int GC_dont_expand = 0;
-int GC_use_entire_heap = 0;
+static size_t last_alloc_bytes = 0;
+
+#define malloc_sizeb(p,n) (last_alloc_bytes = n)
+
+/* hack: assumes this is called immediately after an allocation */
+size_t GC_size(void *x) {
+  return last_alloc_bytes;
+}
 
 size_t GC_get_heap_size() {
   return 0;
@@ -63,16 +66,48 @@ size_t GC_get_free_bytes() {
   return 0;
 }
 
+#endif
+
+/* total number of bytes allocated */
+static size_t total_bytes_allocd = 0;
+
+void *GC_malloc(int x) {
+  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
+  // is because I had to define GC_calloc in runtime_cyc.c
+  void *p = (void*)calloc(sizeof(char),x);
+  total_bytes_allocd += malloc_sizeb(p,x);
+  return p;
+}
+
+void *GC_malloc_atomic(int x) {
+  // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
+  // is because I had to define GC_calloc in runtime_cyc.c
+  void *p = (void*)calloc(sizeof(char),x);
+  total_bytes_allocd += malloc_sizeb(p,x);
+  return p;
+}
+
+void *GC_realloc(void *x, size_t n) {
+  size_t sz = malloc_sizeb(x,0);
+  void *p = (void *)realloc(x,n);
+  total_bytes_allocd = total_bytes_allocd + (malloc_sizeb(p,n)-sz);
+  return p;
+}
+
+void GC_free(void *x) {
+  free(x);
+}
+
+unsigned int GC_gc_no = 0;
+int GC_dont_expand = 0;
+int GC_use_entire_heap = 0;
+
 size_t GC_get_total_bytes() {
-  return 0;
+  return total_bytes_allocd;
 }
 
 void GC_set_max_heap_size(unsigned int sz) {
   return;
-}
-
-void *GC_realloc(void *x, size_t n) {
-  return (void *)realloc(x,n);
 }
 
 /* These type/macro defns are taken from gc/include/gc.h and must

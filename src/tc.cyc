@@ -118,8 +118,6 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	  fnTypeAttsOverlap(loc,i,noconsume_params,init_params);
 	  fnTypeAttsOverlap(loc,i,noconsume_params,nolive_unique_params);
 	  let &$(_,_,t) = List::nth(args,i-1);
-	  if (!is_noalias_pointer(t,false))
-	    terr(loc,"noconsume attribute allowed only on unique pointers");
           // XXX other restrictions?  E.g. not on arrays or fat pointers?
 	  noconsume_params[0] = rnew(temp) List(i,noconsume_params[0]); 
 	  break;

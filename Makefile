@@ -251,21 +251,21 @@ bin/lib/libcyc_nocheck.a: \
 	  bin/lib/cyc-lib/$(ARCH)/include/cycstubs_nocheck.$(O)
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
 bin/lib/cyc-lib/$(ARCH)/nogc.a: \
   bin/genfiles/nogc.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc_a.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
 bin/lib/cyc-lib/$(ARCH)/nogc_a.a: \
   bin/genfiles/nogc_a.$(O)
 	-$(RM) $@
 	ar rc $@ $<
 	$(RANLIB) $@
 
-bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H)
+bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: $(CYC_INCLUDE_H) bin/genfiles/malloc.c
 bin/lib/cyc-lib/$(ARCH)/nogc_pg.a: \
   bin/genfiles/nogc_pg.$(O)
 	-$(RM) $@
@@ -428,7 +428,7 @@ UNUPDATEDIR=unupdate
 BUILDDIR_UPDATE_FILES=$(UPDATE_SRCS) $(C_BOOT_LIBS) precore_c.h boot_cycstubs.c
 
 # The update files that go from "lib" to GENDIR.
-LIB_UPDATE_FILES=boot_cstubs.c nogc.c $(C_RUNTIME)
+LIB_UPDATE_FILES=boot_cstubs.c nogc.c malloc.c $(C_RUNTIME)
 
 # The update files that go from "lib" to "bin/cyc-lib".
 CYC_LIB_UPDATE_FILES=cyc_include.h libc.cys
