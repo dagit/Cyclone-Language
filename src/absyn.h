@@ -298,8 +298,8 @@ namespace Absyn {
     struct UnknownDatatypeInfo UnknownDatatype; // don't know definition yet
     datatypedecl_t @KnownDatatype;              // known definition
   };
-  extern datatype_info_t UnknownDatatype(struct UnknownDatatypeInfo);
-  extern datatype_info_t KnownDatatype(datatypedecl_t@`H);              
+  datatype_info_t UnknownDatatype(struct UnknownDatatypeInfo);
+  datatype_info_t KnownDatatype(datatypedecl_t@`H);              
 
   // information for datatype Foo.Bar
   EXTERN_ABSYN struct UnknownDatatypeFieldInfo {
@@ -311,17 +311,15 @@ namespace Absyn {
     struct UnknownDatatypeFieldInfo UnknownDatatypefield;
     $(datatypedecl_t, datatypefield_t) KnownDatatypefield;
   };
-  extern datatype_field_info_t
-    UnknownDatatypefield(struct UnknownDatatypeFieldInfo);
-  extern datatype_field_info_t
-    KnownDatatypefield(datatypedecl_t, datatypefield_t);
+  datatype_field_info_t UnknownDatatypefield(struct UnknownDatatypeFieldInfo);
+  datatype_field_info_t KnownDatatypefield(datatypedecl_t, datatypefield_t);
 
   EXTERN_ABSYN @tagged union AggrInfo {
     $(aggr_kind_t,typedef_name_t,opt_t<bool> tagged) UnknownAggr;
     aggrdecl_t@ KnownAggr;
   };  
-  extern aggr_info_t UnknownAggr(aggr_kind_t,typedef_name_t,opt_t<bool,`H>);
-  extern aggr_info_t KnownAggr(aggrdecl_t@`H);
+  aggr_info_t UnknownAggr(aggr_kind_t,typedef_name_t,opt_t<bool,`H>);
+  aggr_info_t KnownAggr(aggrdecl_t@`H);
 
   EXTERN_ABSYN struct ArrayInfo {
     type_t     elt_type;       // element type
@@ -502,14 +500,14 @@ namespace Absyn {
     string_t Wstring_c;
   };
   // constructors for constants
-  extern cnst_t Char_c(sign_t,char);
-  extern cnst_t Wchar_c(string_t<`H>);
-  extern cnst_t Short_c(sign_t,short);
-  extern cnst_t Int_c(sign_t,int);
-  extern cnst_t LongLong_c(sign_t,long long);
-  extern cnst_t Float_c(string_t<`H>,int);
-  extern cnst_t String_c(string_t<`H>);
-  extern cnst_t Wstring_c(string_t<`H>);
+  cnst_t Char_c(sign_t,char);
+  cnst_t Wchar_c(string_t<`H>);
+  cnst_t Short_c(sign_t,short);
+  cnst_t Int_c(sign_t,int);
+  cnst_t LongLong_c(sign_t,long long);
+  cnst_t Float_c(string_t<`H>,int);
+  cnst_t String_c(string_t<`H>);
+  cnst_t Wstring_c(string_t<`H>);
 
   // Primitive operations
   EXTERN_ABSYN enum Primop {
@@ -885,42 +883,42 @@ namespace Absyn {
   ///////////////////////////////////////////////////////////////////
 
   // compare variables 
-  extern int qvar_cmp(qvar_t, qvar_t);
-  extern int varlist_cmp(list_t<var_t>, list_t<var_t>);
-  extern int tvar_cmp(tvar_t, tvar_t); // WARNING: ignores the kinds
+  int qvar_cmp(qvar_t, qvar_t);
+  int varlist_cmp(list_t<var_t>, list_t<var_t>);
+  int tvar_cmp(tvar_t,tvar_t); // WARNING: ignores the kinds
 
   ///////////////////////// Namespaces ////////////////////////////
-  extern bool is_qvar_qualified(qvar_t);
+  bool is_qvar_qualified(qvar_t);
 
   ///////////////////////// Qualifiers ////////////////////////////
-  extern tqual_t const_tqual(seg_t);
-  extern tqual_t empty_tqual(seg_t);
-  extern tqual_t combine_tqual(tqual_t x,tqual_t y);
-  extern bool equal_tqual(tqual_t tq1, tqual_t tq2);
+  tqual_t const_tqual(seg_t);
+  tqual_t empty_tqual(seg_t);
+  tqual_t combine_tqual(tqual_t,tqual_t);
+  bool equal_tqual(tqual_t,tqual_t);
 
   ////////////////////////// Kind bounds //////////////////////////
-  extern kindbound_t compress_kb(kindbound_t);
-  extern kind_t force_kb(kindbound_t kb);
+  kindbound_t compress_kb(kindbound_t);
+  kind_t force_kb(kindbound_t);
   ////////////////////////////// Types //////////////////////////////
   // converts a type of kind BoolKind to true or false.  If the type
   // is not yet constrained, then leaves it unconstrained and returns
   // def as the result.
-  extern bool type2bool(bool def, type_t);
+  bool type2bool(bool def, type_t);
 
-  extern type_t app_type(tycon_t, ...type_t);
+  type_t app_type(tycon_t, ...type_t);
   // return a fresh type variable of the given kind that can be unified
   // only with types whose free type variables are drawn from tenv.
-  extern type_t new_evar(opt_t<kind_t,`H> k,opt_t<list_t<tvar_t,`H>,`H> tenv);
+  type_t new_evar(opt_t<kind_t,`H> k,opt_t<list_t<tvar_t,`H>,`H> tenv);
   // any memory type whose free type variables are drawn from the given list
-  extern type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H>);
-  extern type_t int_type(sign_t,size_of_t);
+  type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H>);
+  type_t int_type(sign_t,size_of_t);
   // unsigned types
   extern type_t char_type, uchar_type, ushort_type, uint_type, ulong_type, ulonglong_type;
   // signed types
   extern type_t schar_type, sshort_type, sint_type, slong_type, slonglong_type;
   // float, double, long double, wchar_t
   extern type_t float_type, double_type, long_double_type, wchar_type();
-  extern type_t gen_float_type(unsigned i);
+  type_t gen_float_type(unsigned i);
   // regions
   extern rgntype_t heap_rgn_type, unique_rgn_type, refcnt_rgn_type;
   // empty effect
@@ -929,197 +927,187 @@ namespace Absyn {
   extern booltype_t true_type, false_type;
   // misc constructors
   extern type_t void_type,
-                var_type(tvar_t),
-                tag_type(type_t),
-                rgn_handle_type(rgntype_t),
-                valueof_type(exp_t),
-                typeof_type(exp_t),
-                access_eff(rgntype_t),
-                join_eff(list_t<type_t,`H>),
-                regionsof_eff(type_t),
-                enum_type(typedef_name_t n, struct Enumdecl *`H d),
-                anon_enum_type(list_t<enumfield_t,`H>),
-                builtin_type(string_t<`H> s, kind_t k),
-                typedef_type(typedef_name_t,list_t<type_t,`H>,struct Typedefdecl*`H ,type_opt_t);
+    var_type(tvar_t),
+    tag_type(type_t),
+    rgn_handle_type(rgntype_t),
+    valueof_type(exp_t),
+    typeof_type(exp_t),
+    access_eff(rgntype_t),
+    join_eff(list_t<type_t,`H>),
+    regionsof_eff(type_t),
+    enum_type(typedef_name_t n, struct Enumdecl *`H d),
+    anon_enum_type(list_t<enumfield_t,`H>),
+    builtin_type(string_t<`H> s, kind_t k),
+    typedef_type(typedef_name_t,list_t<type_t,`H>,struct Typedefdecl*`H ,type_opt_t);
 
   // exception name and type
   extern qvar_t exn_name;
-  extern datatypedecl_t exn_tud();
-  extern type_t exn_type();
+  datatypedecl_t exn_tud();
+  type_t exn_type();
   // datatype PrintArg and datatype ScanfArg types
-  extern qvar_t datatype_print_arg_qvar();
-  extern qvar_t datatype_scanf_arg_qvar();
+  qvar_t datatype_print_arg_qvar();
+  qvar_t datatype_scanf_arg_qvar();
   // string (char ?)
-  extern type_t string_type(type_t rgn);
-  extern type_t const_string_type(type_t rgn);
+  type_t string_type(type_t rgn);
+  type_t const_string_type(type_t rgn);
   // pointer bounds
   extern ptrbound_t fat_bound_type;
-  extern ptrbound_t thin_bounds_type(type_t);
-  extern ptrbound_t thin_bounds_exp(exp_t);
-  extern ptrbound_t thin_bounds_int(unsigned int);
-  extern ptrbound_t bounds_one(); // thin_bounds_int(1) (good for sharing)
+  ptrbound_t thin_bounds_type(type_t);
+  ptrbound_t thin_bounds_exp(exp_t);
+  ptrbound_t thin_bounds_int(unsigned int);
+  ptrbound_t bounds_one(); // thin_bounds_int(1) (good for sharing)
   // pointer types
-  extern type_t pointer_type(struct PtrInfo);
+  type_t pointer_type(struct PtrInfo);
   // t *{e}`r
-  extern type_t starb_type(type_t t, rgntype_t rgn, tqual_t tq, 
-                           ptrbound_t bounds, booltype_t zero_term);
+  type_t starb_type(type_t t, rgntype_t rgn, tqual_t,
+		    ptrbound_t, booltype_t zero_term);
   // t @{e}`r
-  extern type_t atb_type(type_t t, type_t rgn, tqual_t tq, ptrbound_t b,
+  type_t atb_type(type_t t, type_t rgn, tqual_t tq, ptrbound_t b,
                          booltype_t zero_term);
-  // t *`r
-  extern type_t star_type(type_t t, type_t rgn, tqual_t tq, 
-                          booltype_t zero_term);// bounds = Upper(1)
-  // t @`r
-  extern type_t at_type(type_t t, type_t rgn, tqual_t tq,
-                        booltype_t zero_term);  // bounds = Upper(1)
+  // t *`r (bounds = Upper(1)
+  type_t star_type(type_t t, type_t rgn, tqual_t, booltype_t zero_term);
+  // t @`r (bounds = Upper(1)
+  type_t at_type(type_t t, type_t rgn, tqual_t, booltype_t zero_term);
   // t*`H
-  extern type_t cstar_type(type_t t, tqual_t tq); 
+  type_t cstar_type(type_t, tqual_t); 
   // t?`r
-  extern type_t fatptr_type(type_t t, type_t rgn, tqual_t tq, booltype_t zeroterm);
+  type_t fatptr_type(type_t t, type_t rgn, tqual_t, booltype_t zeroterm);
   // structs
-  extern type_t strct(var_t  name);
-  extern type_t strctq(qvar_t name);
-  extern type_t unionq_type(qvar_t name);
+  type_t strct(var_t  name);
+  type_t strctq(qvar_t name);
+  type_t unionq_type(qvar_t name);
   // unions
-  extern type_t union_type(var_t name);
+  type_t union_type(var_t name);
   // arrays
-  extern type_t array_type(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
-                           booltype_t zero_term, seg_t ztloc);
+  type_t array_type(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
+		    booltype_t zero_term, seg_t ztloc);
   // datatypes, datatype fields, and aggregates
-  extern type_t datatype_type(datatype_info_t, types_t args);
-  extern type_t datatype_field_type(datatype_field_info_t,types_t args);
-  extern type_t aggr_type(aggr_info_t, types_t args);
+  type_t datatype_type(datatype_info_t, types_t args);
+  type_t datatype_field_type(datatype_field_info_t,types_t args);
+  type_t aggr_type(aggr_info_t, types_t args);
 
   /////////////////////////////// Expressions ////////////////////////
-  extern exp_t new_exp(raw_exp_t, seg_t);
-  extern exp_t New_exp(exp_opt_t rgn_handle, exp_t, seg_t); // New_e
-  extern exp_t copy_exp(exp_t);
-  extern exp_t const_exp(cnst_t, seg_t);
-  extern exp_t null_exp(seg_t);
-  extern exp_t bool_exp(bool, seg_t);
-  extern exp_t true_exp(seg_t);
-  extern exp_t false_exp(seg_t);
-  extern exp_t int_exp(sign_t,int,seg_t);
-  extern exp_t signed_int_exp(int, seg_t);
-  extern exp_t uint_exp(unsigned int, seg_t);
-  extern exp_t char_exp(char c, seg_t);
-  extern exp_t wchar_exp(string_t<`H> s, seg_t);
-  extern exp_t float_exp(string_t<`H> f, int i, seg_t);
-  extern exp_t string_exp(string_t<`H> s, seg_t);
-  extern exp_t wstring_exp(string_t<`H> s, seg_t);
-  extern exp_t var_exp(qvar_t, seg_t);
-  extern exp_t varb_exp(binding_t, seg_t);
-  extern exp_t unknownid_exp(qvar_t, seg_t);
-  extern exp_t pragma_exp(string_t<`H> s,seg_t loc);
-  extern exp_t primop_exp(primop_t, list_t<exp_t,`H> es, seg_t);
-  extern exp_t prim1_exp(primop_t, exp_t, seg_t);
-  extern exp_t prim2_exp(primop_t, exp_t, exp_t, seg_t);
-  extern exp_t swap_exp(exp_t, exp_t, seg_t);
-  extern exp_t add_exp(exp_t, exp_t, seg_t);
-  extern exp_t times_exp(exp_t, exp_t, seg_t);
-  extern exp_t divide_exp(exp_t, exp_t, seg_t);
-  extern exp_t eq_exp(exp_t, exp_t, seg_t);
-  extern exp_t neq_exp(exp_t, exp_t, seg_t);
-  extern exp_t gt_exp(exp_t, exp_t, seg_t);
-  extern exp_t lt_exp(exp_t, exp_t, seg_t);
-  extern exp_t gte_exp(exp_t, exp_t, seg_t);
-  extern exp_t lte_exp(exp_t, exp_t, seg_t);
-  extern exp_t assignop_exp(exp_t, opt_t<primop_t,`H>, exp_t, seg_t);
-  extern exp_t assign_exp(exp_t, exp_t, seg_t);
-  extern exp_t increment_exp(exp_t, incrementor_t, seg_t);
-  extern exp_t conditional_exp(exp_t, exp_t, exp_t, seg_t);
-  extern exp_t and_exp(exp_t, exp_t, seg_t); // &&
-  extern exp_t or_exp(exp_t, exp_t, seg_t);  // ||
-  extern exp_t seq_exp(exp_t, exp_t, seg_t);
-  extern exp_t unknowncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
-  extern exp_t fncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
-  extern exp_t throw_exp(exp_t, seg_t);
-  extern exp_t rethrow_exp(exp_t, seg_t);
-  extern exp_t noinstantiate_exp(exp_t, seg_t);
-  extern exp_t instantiate_exp(exp_t, list_t<type_t,`H>, seg_t);
-  extern exp_t cast_exp(type_t, exp_t, bool user_cast, coercion_t, seg_t);
-  extern exp_t address_exp(exp_t, seg_t);
-  extern exp_t sizeoftype_exp(type_t t, seg_t);
-  extern exp_t sizeofexp_exp(exp_t e, seg_t);
-  extern exp_t offsetof_exp(type_t, list_t<offsetof_field_t,`H>, seg_t);
-  extern exp_t deref_exp(exp_t, seg_t);
-  extern exp_t aggrmember_exp(exp_t, field_name_t, seg_t);
-  extern exp_t aggrarrow_exp(exp_t, field_name_t, seg_t);
-  extern exp_t subscript_exp(exp_t, exp_t, seg_t);
-  extern exp_t tuple_exp(list_t<exp_t,`H>, seg_t);
-  extern exp_t stmt_exp(stmt_t, seg_t);
-  extern exp_t null_pointer_exn_exp(seg_t);
-  extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
-  extern exp_t valueof_exp(type_t, seg_t);
-  extern exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
-  extern exp_t extension_exp(exp_t, seg_t);
-  extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
+  exp_t new_exp(raw_exp_t, seg_t);
+  exp_t New_exp(exp_opt_t rgn_handle, exp_t, seg_t); // New_e
+  exp_t copy_exp(exp_t);
+  exp_t const_exp(cnst_t, seg_t);
+  exp_t null_exp(seg_t);
+  exp_t bool_exp(bool, seg_t);
+  exp_t true_exp(seg_t);
+  exp_t false_exp(seg_t);
+  exp_t int_exp(sign_t,int,seg_t);
+  exp_t signed_int_exp(int, seg_t);
+  exp_t uint_exp(unsigned int, seg_t);
+  exp_t char_exp(char, seg_t);
+  exp_t wchar_exp(string_t<`H>, seg_t);
+  exp_t float_exp(string_t<`H>, int, seg_t);
+  exp_t string_exp(string_t<`H>, seg_t);
+  exp_t wstring_exp(string_t<`H>, seg_t);
+  exp_t var_exp(qvar_t, seg_t);
+  exp_t varb_exp(binding_t, seg_t);
+  exp_t unknownid_exp(qvar_t, seg_t);
+  exp_t pragma_exp(string_t<`H>,seg_t);
+  exp_t primop_exp(primop_t, list_t<exp_t,`H>, seg_t);
+  exp_t prim1_exp(primop_t, exp_t, seg_t);
+  exp_t prim2_exp(primop_t, exp_t, exp_t, seg_t);
+  exp_t swap_exp(exp_t, exp_t, seg_t);
+  exp_t add_exp(exp_t, exp_t, seg_t);
+  exp_t times_exp(exp_t, exp_t, seg_t);
+  exp_t divide_exp(exp_t, exp_t, seg_t);
+  exp_t eq_exp(exp_t, exp_t, seg_t);
+  exp_t neq_exp(exp_t, exp_t, seg_t);
+  exp_t gt_exp(exp_t, exp_t, seg_t);
+  exp_t lt_exp(exp_t, exp_t, seg_t);
+  exp_t gte_exp(exp_t, exp_t, seg_t);
+  exp_t lte_exp(exp_t, exp_t, seg_t);
+  exp_t assignop_exp(exp_t, opt_t<primop_t,`H>, exp_t, seg_t);
+  exp_t assign_exp(exp_t, exp_t, seg_t);
+  exp_t increment_exp(exp_t, incrementor_t, seg_t);
+  exp_t conditional_exp(exp_t, exp_t, exp_t, seg_t);
+  exp_t and_exp(exp_t, exp_t, seg_t); // &&
+  exp_t or_exp(exp_t, exp_t, seg_t);  // ||
+  exp_t seq_exp(exp_t, exp_t, seg_t);
+  exp_t unknowncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
+  exp_t fncall_exp(exp_t, list_t<exp_t,`H>, seg_t);
+  exp_t throw_exp(exp_t, seg_t);
+  exp_t rethrow_exp(exp_t, seg_t);
+  exp_t noinstantiate_exp(exp_t, seg_t);
+  exp_t instantiate_exp(exp_t, list_t<type_t,`H>, seg_t);
+  exp_t cast_exp(type_t, exp_t, bool user_cast, coercion_t, seg_t);
+  exp_t address_exp(exp_t, seg_t);
+  exp_t sizeoftype_exp(type_t t, seg_t);
+  exp_t sizeofexp_exp(exp_t e, seg_t);
+  exp_t offsetof_exp(type_t, list_t<offsetof_field_t,`H>, seg_t);
+  exp_t deref_exp(exp_t, seg_t);
+  exp_t aggrmember_exp(exp_t, field_name_t, seg_t);
+  exp_t aggrarrow_exp(exp_t, field_name_t, seg_t);
+  exp_t subscript_exp(exp_t, exp_t, seg_t);
+  exp_t tuple_exp(list_t<exp_t,`H>, seg_t);
+  exp_t stmt_exp(stmt_t, seg_t);
+  exp_t null_pointer_exn_exp(seg_t);
+  exp_t array_exp(list_t<exp_t,`H>, seg_t);
+  exp_t valueof_exp(type_t, seg_t);
+  exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
+  exp_t extension_exp(exp_t, seg_t);
+  exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);
-  extern qvar_t uniquergn_qvar();
-  extern exp_t uniquergn_exp(); // refers to the unique region in Core::
+  qvar_t uniquergn_qvar();
+  exp_t uniquergn_exp(); // refers to the unique region in Core::
   /////////////////////////// Statements ///////////////////////////////
-  stmt_t new_stmt(raw_stmt_t s, seg_t loc);
-  stmt_t skip_stmt(seg_t loc);
-  stmt_t exp_stmt(exp_t e, seg_t loc);
-  stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc);
-  stmt_t seq_stmts(list_t<stmt_t>, seg_t loc);
-  stmt_t return_stmt(exp_opt_t e,seg_t loc);
-  stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc);
-  stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc);
-  stmt_t break_stmt(seg_t loc);
-  stmt_t continue_stmt(seg_t loc);
-  stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s, seg_t loc);
-  stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H>, seg_t loc);
-  stmt_t fallthru_stmt(list_t<exp_t,`H> el, seg_t loc);
-  stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc); 
-  stmt_t declare_stmt(qvar_t,type_t,exp_opt_t init,stmt_t,seg_t loc);
-  stmt_t cut_stmt(stmt_t s, seg_t loc);
-  stmt_t splice_stmt(stmt_t s, seg_t loc);
-  stmt_t label_stmt(var_t v, stmt_t s, seg_t loc);
-  stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc);
-  stmt_t goto_stmt(var_t lab, seg_t loc);
-  stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc);
+  stmt_t new_stmt(raw_stmt_t,seg_t);
+  stmt_t skip_stmt(seg_t);
+  stmt_t exp_stmt(exp_t,seg_t);
+  stmt_t seq_stmt(stmt_t,stmt_t,seg_t);
+  stmt_t seq_stmts(list_t<stmt_t>,seg_t);
+  stmt_t return_stmt(exp_opt_t,seg_t);
+  stmt_t ifthenelse_stmt(exp_t,stmt_t,stmt_t,seg_t);
+  stmt_t while_stmt(exp_t,stmt_t,seg_t);
+  stmt_t break_stmt(seg_t);
+  stmt_t continue_stmt(seg_t);
+  stmt_t for_stmt(exp_t,exp_t,exp_t,stmt_t,seg_t);
+  stmt_t switch_stmt(exp_t, list_t<switch_clause_t,`H>, seg_t);
+  stmt_t fallthru_stmt(list_t<exp_t,`H>, seg_t);
+  stmt_t decl_stmt(decl_t, stmt_t, seg_t); 
+  stmt_t declare_stmt(qvar_t,type_t,exp_opt_t init,stmt_t,seg_t);
+  stmt_t label_stmt(var_t,stmt_t,seg_t);
+  stmt_t do_stmt(stmt_t,exp_t,seg_t);
+  stmt_t goto_stmt(var_t,seg_t);
+  stmt_t assign_stmt(exp_t,exp_t,seg_t);
   stmt_t trycatch_stmt(stmt_t,list_t<switch_clause_t,`H>,seg_t);
 
   /////////////////////////// Patterns //////////////////////////////
-  pat_t new_pat(raw_pat_t p, seg_t s);
+  pat_t new_pat(raw_pat_t,seg_t);
   pat_t exp_pat(exp_t);
 
   ////////////////////////// Declarations ///////////////////////////
-  decl_t new_decl(raw_decl_t r, seg_t loc);
-  decl_t let_decl(pat_t p, exp_t e, seg_t loc);
-  decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
+  decl_t new_decl(raw_decl_t,seg_t);
+  decl_t let_decl(pat_t,exp_t,seg_t);
+  decl_t letv_decl(list_t<vardecl_t,`H>, seg_t);
   decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
   decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
-  vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init);
+  vardecl_t new_vardecl(seg_t varloc, qvar_t, type_t, exp_opt_t init);
   vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
-				     list_t<$(type_t,type_t)@`H,`H> po,
-				     list_t<aggrfield_t,`H> fs,
-				     bool tagged);
-  decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
-		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-		   attributes_t atts, seg_t loc);
-  type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
-			 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-                                attributes_t atts, seg_t loc);
-  decl_t struct_decl(scope_t s, typedef_name_t n,
-		     list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-		     attributes_t atts, seg_t loc);
-  decl_t union_decl(scope_t s,typedef_name_t n,
-		    list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
-		    attributes_t atts, seg_t loc);
-  decl_t datatype_decl(scope_t s, typedef_name_t n, 
-		       list_t<tvar_t,`H> ts,
+				      list_t<$(type_t,type_t)@`H,`H> po,
+				      list_t<aggrfield_t,`H> fs,
+				      bool tagged);
+  decl_t aggr_decl(aggr_kind_t, scope_t, typedef_name_t,
+		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H,
+		   attributes_t, seg_t);
+  type_decl_t aggr_tdecl(aggr_kind_t, scope_t, typedef_name_t,
+			 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H,
+			 attributes_t, seg_t);
+  decl_t struct_decl(scope_t, typedef_name_t, list_t<tvar_t,`H> ts, 
+		     struct AggrdeclImpl *`H, attributes_t, seg_t);
+  decl_t union_decl(scope_t, typedef_name_t, list_t<tvar_t,`H> ts, 
+		    struct AggrdeclImpl *`H, attributes_t, seg_t);
+  decl_t datatype_decl(scope_t, typedef_name_t, list_t<tvar_t,`H> ts,
 		       opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-		       bool is_extensible, 
-		       seg_t loc);
-  type_decl_t datatype_tdecl(scope_t s, typedef_name_t n, 
-			     list_t<tvar_t,`H> ts,
+		       bool is_extensible, seg_t);
+  type_decl_t datatype_tdecl(scope_t, typedef_name_t, list_t<tvar_t,`H> ts,
 			     opt_t<list_t<datatypefield_t,`H>,`H> fs, 
-			     bool is_extensible, 
-			     seg_t loc);
+			     bool is_extensible, seg_t);
 
   type_t function_type(list_t<tvar_t,`H> tvs,type_opt_t eff_typ,
 		       tqual_t ret_tqual,
@@ -1127,7 +1115,7 @@ namespace Absyn {
 		       list_t<$(var_opt_t,tqual_t,type_t)@`H,`H> args,
 		       bool c_varargs, vararg_info_t *`H cyc_varargs,
 		       list_t<$(type_t,type_t)@`H,`H> rgn_po,
-		       attributes_t atts, 
+		       attributes_t, 
 		       exp_opt_t requires_clause,
 		       exp_opt_t ensures_clause);
   // turn t f(t1,...,tn) into t (@f)(t1,...,tn) -- when fresh_evar is
@@ -1138,38 +1126,38 @@ namespace Absyn {
   bool is_lvalue(exp_t);
 
   // find a field by name from a list of fields
-  extern struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);
+  struct Aggrfield *lookup_field(list_t<aggrfield_t>,var_t);
   // find a struct or union field by name from a declaration
-  extern struct Aggrfield *lookup_decl_field(aggrdecl_t,var_t);
+  struct Aggrfield *lookup_decl_field(aggrdecl_t,var_t);
   // find a tuple field form a list of qualifiers and types
-  extern $(tqual_t,type_t)*lookup_tuple_field(list_t<$(tqual_t,type_t)@`H>,int);
+  $(tqual_t,type_t)*lookup_tuple_field(list_t<$(tqual_t,type_t)@`H>,int);
   // find a decl by name within a list of decls.  Return NULL if not found.
-  extern struct Decl *lookup_decl(list_t<decl_t> decls, stringptr_t<`H> name);
+  struct Decl *lookup_decl(list_t<decl_t> decls, stringptr_t<`H> name);
   // get the name of decl; return NULL if has no name
-  extern string_t<`H> *decl_name(decl_t decl);
+  string_t<`H> *decl_name(decl_t decl);
   // turn an attribute into a string
-  extern string_t attribute2string(attribute_t);
+  string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
-  extern bool fntype_att(attribute_t);
+  bool fntype_att(attribute_t);
   // returns true when a1 is equal to a2
-  extern bool equal_att(attribute_t a1, attribute_t a2);
+  bool equal_att(attribute_t, attribute_t);
   // like strcmp but for attributes
-  extern int attribute_cmp(attribute_t att1, attribute_t att2);
+  int attribute_cmp(attribute_t,attribute_t);
   // int to field-name caching used by control-flow and toc
-  extern field_name_t fieldname(int);
+  field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type
-  extern $(aggr_kind_t,qvar_t) aggr_kinded_name(aggr_info_t);
+  $(aggr_kind_t,qvar_t) aggr_kinded_name(aggr_info_t);
   // given a checked type, get the decl
-  extern aggrdecl_t get_known_aggrdecl(aggr_info_t);
+  aggrdecl_t get_known_aggrdecl(aggr_info_t);
   // ditto except rule out @tagged unions and @require unions
-  extern bool is_nontagged_nonrequire_union_type(type_t);
+  bool is_nontagged_nonrequire_union_type(type_t);
   // a union (anonymous or otherwise) that has requires clauses on the fields
-  extern bool is_require_union_type(type_t);
+  bool is_require_union_type(type_t);
 
-  extern qvar_t binding2qvar(binding_t);
+  qvar_t binding2qvar(binding_t);
 
   // call Warn::impos if list is not length 1 or holds an ArrayElement
-  extern var_t designatorlist_to_fieldname(list_t<designator_t>);
+  var_t designatorlist_to_fieldname(list_t<designator_t>);
 
   // used to control whether we're compiling or porting c code
   extern bool porting_c_code;

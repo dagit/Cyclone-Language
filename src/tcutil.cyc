@@ -293,8 +293,6 @@ bool is_noreturn_fn_type(type_t t) {
 datatype exn {Unify};
 datacon(exn,Unify);
 
-static void unify_it(type_t t1, type_t t2);
-
 // flag to control whether or not we print a warning when implicitly casting
 // a pointer from one region into another due to outlives constraints.
 bool warn_region_coerce = false;
@@ -836,6 +834,8 @@ kind_t type_kind(type_t t) {
 bool kind_eq(kind_t k1, kind_t k2) {
   return k1 == k2 || (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
 }
+
+static void unify_it(type_t t1, type_t t2);
 
 // unify types t1 and t2, returning true iff the unification succeeds
 bool unify(type_t t1, type_t t2) {
@@ -2664,8 +2664,7 @@ static bool sub_attributes(attributes_t a1, attributes_t a2) {
     switch (t->hd) {
     case &Pure_att: // can safely omit these in a2
     case &Noreturn_att:
-    case &Initializes_att(_):
-      continue;
+    case &Initializes_att(_): continue;
     default:
       if (!List::exists_c(equal_att, t->hd, a2)) return false;
     }
@@ -3366,14 +3365,6 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
   return rnew(rgn) $(tv, new_evar(k,new Opt(s)));
 }
 
-// will shadow other variables
-static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
-  // sanity
-  if (tv->identity == -1)
-    impos("bound tvar id for %s is NULL", tvar2string(tv));
-  return new List(tv,tvs);
-}
-
 void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
                     exp_opt_t width, stringptr_t fn) {
   if (width != NULL) {
@@ -3534,12 +3525,11 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
   } else {
     // make sure we used exactly one of the fields
     bool found = false;
-    for (; fields != NULL; fields = fields->tl) {
+    for (; fields != NULL; fields = fields->tl)
       if ((*fields->hd)[1]) {
         if (found) terr(loc,"only one member of a union is allowed");
         found = true;
       }
-    }
     if (!found) terr(loc,"missing member for union");
   }
 
@@ -4068,24 +4058,20 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
     if (eopt == NULL)
       b = fat_bound_type;
     else {
-      exp_t bnd = (exp_t)eopt;
       if (convert_tag) {
-	if (bnd->topt == NULL)
+	if (eopt->topt == NULL)
 	  impos("cannot convert tag without type!");
-	switch(compress((type_t)bnd->topt)) {
+	switch(compress((type_t)eopt->topt)) {
 	case &AppType(&TagCon,&List{t,_}):
 	  //b = thin_bounds_exp(cast_exp(uint_type,valueof_exp(t,0),false,No_coercion,0));
           b = thin_bounds_exp(valueof_exp(t,0));
 	  break;
 	default:
-	  if(is_const_exp(bnd))
-	    b = thin_bounds_exp(bnd);
-	  else
-	    b = fat_bound_type;
+	  b = is_const_exp(eopt) ? thin_bounds_exp(eopt) : fat_bound_type;
 	}
       }
       else
-	b = thin_bounds_exp(bnd);
+	b = thin_bounds_exp(eopt);
     }
     return atb_type(et,rgn,tq,b,zt);
   default: return t;
