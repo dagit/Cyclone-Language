@@ -114,7 +114,7 @@ aprof:
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 diff: cyclone_src
-	for i in $(C_SRCS); do (diff bin/genfiles/$(ARCH)/src/$$i src/$$i) done
+	for i in $(UPDATE__SRCS); do (diff bin/genfiles/$(ARCH)/src/$$i src/$$i) done
 	for i in $(C_LIBS); do (diff bin/genfiles/$(ARCH)/lib/$$i lib/$$i) done
 	for i in $(CYCLONE_H); do (diff include/$$i lib/$$i) done
 	diff bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
@@ -126,7 +126,7 @@ diff: cyclone_src
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 cmp: 
-	@for i in $(C_SRCS); do (cmp -s bin/genfiles/$(ARCH)/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
+	@for i in $(UPDATE_SRCS); do (cmp -s bin/genfiles/$(ARCH)/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
 	@for i in $(C_LIBS); do (cmp -s bin/genfiles/$(ARCH)/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@for i in $(CYCLONE_H); do (cmp -s include/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
 	@cmp -s bin/genfiles/$(ARCH)/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$(C_RUNTIME) CHANGED
@@ -159,7 +159,7 @@ update:
 	  cd bin/genfiles; ./extract_patch $(PATCH_ARCH) $(UPDATEARCH);\
 	  cd ../..;\
 	fi
-	@for i in $(C_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
+	@for i in $(UPDATE_SRCS); do (cmp -s $(SRCDIR)/$$i $(ARCHDIR)/src/$$i || (echo UPDATING $(SRCDIR)/$$i; cp $(SRCDIR)/$$i $(ARCHDIR)/src/$$i)) done
 	@for i in $(C_LIBS); do (cmp -s $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i || (echo UPDATING $(LIBDIR)/$$i; cp $(LIBDIR)/$$i $(ARCHDIR)/lib/$$i)) done
 	@cmp -s $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c || (echo UPDATING $(LIBDIR)/nogc.c; cp $(LIBDIR)/nogc.c $(ARCHDIR)/lib/nogc.c)
 	@cmp -s $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME) || (echo UPDATING $(LIBDIR)/$(C_RUNTIME); cp $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))

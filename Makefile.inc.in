@@ -204,11 +204,13 @@ CYCLIB:=libcyc.$(A)
 CYCCOMP:=cyclone$(EXE)
 
 #jcheney: added cycdoc so that it gets included in update file list
-C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc)
+C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
-O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS) cycdoc)
+O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
+
+UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc)
 
 PATCH_ARCH=i686-unknown-linux
 DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.3
