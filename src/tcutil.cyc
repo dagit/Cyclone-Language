@@ -4161,6 +4161,56 @@ bool is_noalias_pointer_or_aggr(type_t t) {
     return false;
   case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
     impos("got unknown aggr in is_noalias_aggr");
+  case &TunionType(TunionInfo(tinfo,ts,r)):
+    switch (tinfo) {
+    case UnknownTunion(UnknownTunionInfo(nm,isxt,isfl)):
+      impos("got unknown tunion in is_noalias_aggr");
+    case KnownTunion(&&Tuniondecl(_,_,tvs,flds,_,flat)):
+      // is non-aliased iff
+      // * it's flat and has a field with a unique pointer
+      // * it's not flat and lives in a no-alias region
+      if (!flat) {
+	if (r == NULL)
+	  impos("got tunion with no region");
+	return is_noalias_region(r->v);
+      }
+      else {
+	if (flds == NULL)
+	  impos("got tunion with no fields");
+	else {
+	  region rgn {
+	    let inst = List::rzip(rgn,rgn,tvs,ts);
+	    let fs = flds->v; // assume not-NULL
+	    while (fs != NULL) {
+	      let typs = fs->hd->typs;
+	      while (typs != NULL) {
+		t = rsubstitute(rgn,inst,(*typs->hd)[1]);
+		if (is_noalias_pointer_or_aggr(t)) return true;
+		typs = typs->tl;
+	      }
+	      fs = fs->tl;
+	    }
+	  }
+	  return false;
+	}
+      }
+    }
+  case &TunionFieldType(TunionFieldInfo(tinfo,ts)):
+    switch (tinfo) {
+    case UnknownTunionfield(_):
+      impos("got unknown tunion field in is_noalias_aggr");
+    case KnownTunionfield(td,fld):
+      region rgn {
+	let inst = List::rzip(rgn,rgn,td->tvs,ts);
+	let typs = fld->typs;
+	while (typs != NULL) {
+	  t = rsubstitute(rgn,inst,(*typs->hd)[1]);
+	  if (is_noalias_pointer_or_aggr(t)) return true;
+	  typs = typs->tl;
+	}
+      }
+      return false;
+    }
   default: return false;
   }
 }
@@ -4199,8 +4249,6 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &CompoundLit_e(_,_):
   case &Comprehension_e(_,_,_,_):
   case &Array_e(_):
-  case &Tunion_e(_,_,_):
-    // never allow unique tunions (for now)
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_):
   case &Swap_e(_,_):
@@ -4209,6 +4257,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
     // accessing anything via a global is never a unique path
   case &Primop_e(_,_): return false;
 
+  case &Tunion_e(_,_,_):
   case &Tuple_e(_):  
   case &Struct_e(_,_,_,_):
   case &AnonStruct_e(_,_):
@@ -4303,14 +4352,10 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &CompoundLit_e(_,_):
   case &Comprehension_e(_,_,_,_):
   case &Array_e(_):
-  case &Tunion_e(_,_,_):
-    // never allow unique tunions (for now)
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_):
-  case &Swap_e(_,_):
-    // has void type
-  case &Var_e(_,&Global_b(_)): 
-    // accessing anything via a global is never a unique path
+  case &Swap_e(_,_): // has void type
+  case &Var_e(_,&Global_b(_)): // via a global is never a unique path
 
   // Pointer paths are not allowed yet ...
   case &AggrArrow_e(_,_): 
@@ -4340,16 +4385,21 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
       }
     default: Tcutil::impos("is_noalias_path_aux: subscript on non-pointer/tuple");
     }
+  case &Tunion_e(_,_,_):
+  case &Tuple_e(_):  
   case &Struct_e(_,_,_,_):
   case &AnonStruct_e(_,_):
-  case &Tuple_e(_):  
   case &Const_e(_):
   case &Malloc_e(_):
   case &New_e(_,_):
   case &Var_e(_,&Local_b(_)):
   case &Var_e(_,&Pat_b(_)):
   case &Var_e(_,&Param_b(_)):
-    return ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v);
+    let res = ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v);
+//     fprintf(stderr,"is_noalias_path checking |%s|, typ=|%s|, res=%s\n",
+// 	    Absynpp::exp2string(e), Absynpp::typ2string(e->topt->v),
+// 	    res ? "true" : "false");
+    return res;
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
   case &AssignOp_e(e1,_,_):

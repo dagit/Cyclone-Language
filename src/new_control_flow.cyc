@@ -634,7 +634,10 @@ static flow_t<`r> may_consume_exp(analenv_t<`r> env,
     case $(PlaceL(place),ReachableFL(outdict,relns,cinfo)): 
       let c = may_consume_place(env,cinfo,place,e->topt->v,NULL);
       return ReachableFL(outdict,relns,c);
-    default: return inflow;
+    default: 
+      fprintf(stderr,"Oops---no location for noalias_path |%s|\n",
+	      Absynpp::exp2string(e));
+      return inflow;
     }
   }
   return inflow;
@@ -778,7 +781,34 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
       return noalias_ptrs_aux(env,p,ts);
     }
   case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
-    Tcutil::impos("got unknown aggr in is_noalias_aggr");
+    Tcutil::impos("got unknown aggr in noalias_ptrs_rec");
+  case &TunionType(_):
+    // For tunions, we consider the entire tunion to be a place,
+    // rather than considering the individual fields.  Tunions
+    // are consumed when they are switch'ed and when they
+    // copied (as is normal).
+    if (Tcutil::is_noalias_pointer_or_aggr(t)) 
+      return rnew (env->r) List(p,NULL);
+    else
+      return NULL;
+  case &TunionFieldType(TunionFieldInfo(tinfo,inst_ts)):
+    switch (tinfo) {
+    case UnknownTunionfield(_):
+      Tcutil::impos("got unknown tunion field in noalias_ptrs_rec");
+    case KnownTunionfield(td,fld):
+      let ts = NULL;
+      region rgn {
+	let inst = List::rzip(rgn,rgn,td->tvs,inst_ts);
+	let typs = fld->typs;
+	while (typs != NULL) {
+	  ts = rnew (env->r) List(Tcutil::rsubstitute(rgn,inst,(*typs->hd)[1]),
+				  ts);
+	  typs = typs->tl;
+	}
+      }
+      ts = imp_rev(ts);
+      return noalias_ptrs_aux(env,p,ts);
+    }
   default: return NULL;
   }
 }
@@ -1179,7 +1209,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,field):
     let $(f,r) = anal_Rexp(env,inflow,e1);
-    f = readthrough_unique_rvals(e->loc, f);
+    // we can drop these here because this has to be a unique path
+    f = drop_unique_rvals(e->loc, f);
     f = may_consume_exp(env,f,e);
     // FIX: what to do about tunions and unique sub-elements?
     if(is_union_type(e1->topt->v))
@@ -1864,6 +1895,8 @@ static void check_init_params(seg_t loc, analenv_t<`r> env, flow_t<`r> flow) {
 }
 
 // For now, PATTERN VARS ARE INITIALIZED
+// FIX: should keep track of which pattern vars are actually consumed
+//   so that we don't entirely consume the value being switched on
 static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
                            list_t<switch_clause_t> scs){
   let fenv = env->fenv;
@@ -1872,10 +1905,12 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
     flow_t clause_inflow = add_vars(fenv,inflow,vds_opt->v,fenv->unknown_all,loc); 
     flow_t clause_outflow;
     if(where_opt != NULL) {
-      let $(true_flow,false_flow) = 
-	anal_test(env,clause_inflow,(exp_t)where_opt);
-      inflow = false_flow; // affects remaining clauses
-      clause_outflow = anal_stmt(env,true_flow,body);
+      exp_t wexp = (exp_t)where_opt;
+      let $(ft,ff) = anal_test(env,clause_inflow,wexp);
+      ft = readthrough_unique_rvals(wexp->loc,ft); // read wexp,true-flow
+      ff = readthrough_unique_rvals(wexp->loc,ff); // read wexp,false-flow
+      inflow = ff; // affects remaining clauses
+      clause_outflow = anal_stmt(env,ft,body);
     } else {
       clause_outflow = anal_stmt(env,clause_inflow,body);
     }

@@ -572,6 +572,11 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
+      // make sure no no-alias fields in non-flat tunion
+      if (!tudres->is_flat && is_noalias_pointer_or_aggr((*typs->hd)[1]))
+	terr(f->loc, 
+	     "noalias pointers in non-flat tunions are not allowed (%s)",
+	     qvar2string(f->name)); //FIX ?      
       (*typs->hd)[0].real_const = 
         extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
                                    (*typs->hd)[1]);
@@ -648,6 +653,17 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     case &Less_kb(*f,MemKind): fallthru(f);
     case &Less_kb(*f,AnyKind): 
       *f = new Opt(kind_to_bound(BoxKind)); break;
+    case &Less_kb(*f,TopRgnKind):
+      *f = new Opt(kind_to_bound(RgnKind)); break;
+    case &Eq_kb(TopRgnKind):
+      if (!tud->is_flat)
+	terr(loc,"%s %s attempts to abstract type "
+	     "variable %s of kind TR",obj,*v,*tvs2->hd->name); break;
+    case &Less_kb(*f,UniquepRgnKind): fallthru;
+    case &Eq_kb(UniqueRgnKind):
+      if (!tud->is_flat)
+	terr(loc,"%s %s attempts to abstract type "
+	     "variable %s of kind UR",obj,*v,*tvs2->hd->name); break;
     case &Eq_kb(MemKind):
       terr(loc,"%s %s attempts to abstract type "
            "variable %s of kind M",obj,*v,*tvs2->hd->name); break;

@@ -1222,8 +1222,8 @@ _tmp6F=Cyc_Tcenv_set_in_switch(r,te);_tmp6F=Cyc_Tcenv_clear_fallthru(r,_tmp6F);{
 struct Cyc_List_List*scs=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_rev)(
 _tmp30);for(0;scs != 0;scs=scs->tl){struct Cyc_Absyn_Pat*_tmp70=((struct Cyc_Absyn_Switch_clause*)
 scs->hd)->pattern;struct Cyc_Tcpat_TcPatResult _tmp71=Cyc_Tcpat_tcPat(_tmp6F,
-_tmp70,(void**)& _tmp6B);struct Cyc_List_List*_tmp72=_tmp71.tvars_and_bounds_opt == 
-0?0:(*_tmp71.tvars_and_bounds_opt).f1;if(!Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)
+_tmp70,& _tmp6B);struct Cyc_List_List*_tmp72=_tmp71.tvars_and_bounds_opt == 0?0:(*
+_tmp71.tvars_and_bounds_opt).f1;if(!Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)
 _check_null(_tmp70->topt))->v,_tmp6B)){({struct Cyc_String_pa_struct _tmp76;_tmp76.tag=
 0;_tmp76.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((
 void*)((struct Cyc_Core_Opt*)_check_null(_tmp70->topt))->v));{struct Cyc_String_pa_struct
@@ -1255,7 +1255,7 @@ _tmp7C=Cyc_Tcenv_clear_fallthru(r2,_tmp7C);{struct Cyc_List_List*_tmp7D=((struct
 Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_rev)(_tmp32);for(0;_tmp7D != 0;
 _tmp7D=_tmp7D->tl){struct Cyc_Absyn_Pat*_tmp7E=((struct Cyc_Absyn_Switch_clause*)
 _tmp7D->hd)->pattern;struct Cyc_Tcpat_TcPatResult _tmp7F=Cyc_Tcpat_tcPat(_tmp7C,
-_tmp7E,(void**)& Cyc_Absyn_exn_typ);struct Cyc_List_List*_tmp80=_tmp7F.tvars_and_bounds_opt
+_tmp7E,& Cyc_Absyn_exn_typ);struct Cyc_List_List*_tmp80=_tmp7F.tvars_and_bounds_opt
 == 0?0:(*_tmp7F.tvars_and_bounds_opt).f1;if(!Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)
 _check_null(_tmp7E->topt))->v,Cyc_Absyn_exn_typ))({struct Cyc_String_pa_struct
 _tmp83;_tmp83.tag=0;_tmp83.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((
@@ -1384,7 +1384,7 @@ struct Cyc_Absyn_Let_d_struct*)_tmp87)->f1;_tmp8A=((struct Cyc_Absyn_Let_d_struc
 _tmp87)->f2;_tmp8B=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Let_d_struct*)_tmp87)->f2;
 _tmp8C=((struct Cyc_Absyn_Let_d_struct*)_tmp87)->f3;_LL30: Cyc_Tcexp_tcExpInitializer(
 _tmp86,0,_tmp8C);{struct Cyc_Tcpat_TcPatResult _tmpD4=Cyc_Tcpat_tcPat(_tmp86,
-_tmp89,(void**)((void**)((void*)&((struct Cyc_Core_Opt*)_check_null(_tmp8C->topt))->v)));*
+_tmp89,(void**)((void*)&((struct Cyc_Core_Opt*)_check_null(_tmp8C->topt))->v));*
 _tmp8B=({struct Cyc_Core_Opt*_tmpD5=_cycalloc(sizeof(*_tmpD5));_tmpD5->v=_tmpD4.patvars;
 _tmpD5;});if(!Cyc_Tcutil_unify((void*)((struct Cyc_Core_Opt*)_check_null(_tmp89->topt))->v,(
 void*)((struct Cyc_Core_Opt*)_check_null(_tmp8C->topt))->v) && !Cyc_Tcutil_coerce_assign(

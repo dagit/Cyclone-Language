@@ -843,6 +843,8 @@ bool is_union_type(type_t t) {
 }
 bool is_aggr_type(type_t t) {
   switch(Tcutil::compress(t)) {
+  case &TunionType(_):
+  case &TunionFieldType(_):
   case &TupleType(_):
   case &AggrType(_):
   case &AnonAggrType(_,_): return true;

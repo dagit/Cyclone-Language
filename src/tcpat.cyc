@@ -224,6 +224,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       terr(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
     }
+    else if (is_noalias_pointer(t))
+      impos("* pattern cannot take the address of an alias-free path");
     set_vd(vd, &res.patvars, 
 	   new PointerType(PtrInfo(t,empty_tqual(NULL),
 				   PtrAtts(*rgn_opt,false_conref,
@@ -290,8 +292,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    // MWH: don't allow switching on unique pointers for now
-    type_t ptr_rgn = new_evar(&rk,lookup_opt_type_vars(te));
+    type_t ptr_rgn = new_evar(&trk,lookup_opt_type_vars(te));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
     // if p2's type is a tunion field type, then we cast
     // the type of p = &p2 to the appropriate tunion type, unless
@@ -556,7 +557,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   return res;
 }
 
-tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t * topt) {
+tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt) {
   let ans = tcPatRec(te,p,topt,NULL);
   // caller will check tvar uniqueness when adding to environment
   region r {
@@ -570,6 +571,17 @@ void check_pat_regions(tenv_t te, pat_t p) {
   switch(p->r) {
   case &Pointer_p(p2):
     check_pat_regions(te,p2);
+    // not allowed to dereference pointer to a unique type
+    if (is_noalias_pointer_or_aggr(p2->topt->v)) {
+      terr(p->loc,"Pattern dereferences to a non-aliased pointer; use swap");
+      return;
+    }
+    // FIX: need to fold alias tracking via patterns into
+    // flow analysis to remove this check
+    if (is_noalias_pointer_or_aggr(p->topt->v)) {
+      terr(p->loc,"Pattern dereferences a non-aliased pointer; use swap");
+      return;
+    }
     switch (p->topt->v) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
     case &TunionType(TunionInfo{_,_,&Opt(rt)}):
