@@ -17,8 +17,9 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 #include "callgraph.h"
-#include <set.h>
 #include "absynpp.h"
+#include <set.h>
+#include <hashtable.h>
 
 // code for constructing a callgraph -- more properly, we construct a
 // callgraph_t that for each (defined) function f, maps f to the set
@@ -29,8 +30,14 @@
 // definition (in case f was defined earlier using a prototype.)
 namespace Callgraph;
 using Absyn;
+using Graph;
 using List;
 
+typedef Set::set_t<fndecl_t> fndecl_set_t;
+
+// We need to map free qvar's to their fndecls.  The binding phase
+// should really do this, but it may map to a later vardecl instead
+// of the fndecl.
 typedef Hashtable::table_t<qvar_t,fndecl_t> fndefns_t;
 
 // these next few functions take the mapping from qvars to function
@@ -154,28 +161,37 @@ static fndecl_set_t cg_stmt(fndefns_t fds, stmt_t stmt, fndecl_set_t s) {
 
 static int fndecl_cmp(fndecl_t fd1, fndecl_t fd2) {return (int)fd1 - (int)fd2;}
 
-static void cg_topdecls(fndefns_t fds, callgraph_t cg, list_t<decl_t> ds) {
+static callgraph_t cg_topdecls(fndefns_t fds, callgraph_t cg, list_t<decl_t> ds) {
   let mt = Set::empty(fndecl_cmp);
   for (let ds = ds; ds != NULL; ds = ds->tl) {
     switch (ds->hd->r) {
-    case &Fn_d(fd): Hashtable::insert(cg,fd,cg_stmt(fds,fd->body,mt)); break;
+    case &Fn_d(fd): 
+      cg = Graph::add_edges(cg, fd, cg_stmt(fds,fd->body,mt)); 
+      break;
     case &Using_d(_,ds): fallthru(ds);
-    case &Namespace_d(_,ds): cg_topdecls(fds,cg,ds); break;
+    case &Namespace_d(_,ds): cg = cg_topdecls(fds,cg,ds); break;
     default: break;
     }
   }
+  return cg;
 }
 
 // build the map from qvars to fndecls.
-static void enter_fndecls(fndefns_t fds, list_t<decl_t> ds) {
+static callgraph_t enter_fndecls(fndefns_t fds, callgraph_t cg, 
+                                 list_t<decl_t> ds) {
   for (let ds = ds; ds != NULL; ds = ds->tl) {
     switch (ds->hd->r) {
-    case &Fn_d(f): Hashtable::insert(fds,f->name,f); break;
+    case &Fn_d(f): 
+      Hashtable::insert(fds,f->name,f); 
+      cg = Graph::add_node(cg,f);
+      break;
     case &Using_d(_,ds): fallthru(ds);
-    case &Namespace_d(_,ds): enter_fndecls(fds,ds); break;
+    case &Namespace_d(_,ds): 
+      cg = enter_fndecls(fds,cg,ds); break;
     default: break;
     }
   }
+  return cg;
 }
 
 static int hash_qvar(qvar_t q) { return Hashtable::hash_string(*((*q)[1])); }
@@ -184,151 +200,17 @@ static int hash_fndecl(fndecl_t fd) { return (int)fd; }
 callgraph_t compute_callgraph(list_t<decl_t> ds) {
   // build a map from qvars to function declarations
   fndefns_t fd = Hashtable::create(51, qvar_cmp, hash_qvar);
-  enter_fndecls(fd, ds);
-  callgraph_t cg = Hashtable::create(51, fndecl_cmp, hash_fndecl);
-  cg_topdecls(fd,cg,ds);
+  callgraph_t cg = Graph::empty(fndecl_cmp);
+  cg = enter_fndecls(fd, cg, ds);
+  // compute the callgraph
+  cg = cg_topdecls(fd,cg,ds);
   return cg;
 }
 
-static void print_fndecl(fndecl_t fd) {
-  fprintf(stderr,"%s ",Absynpp::qvar2string(fd->name));
+static void print_fndecl(FILE @f, fndecl_t fd) {
+  fprintf(f,"%s ",Absynpp::qvar2string(fd->name));
 }
 
-static void print_fn(fndecl_t fd, fndecl_set_t s) {
-  fprintf(stderr,"%s -> {",Absynpp::qvar2string(fd->name));
-  Set::iter(print_fndecl, s);
-  fprintf(stderr,"}\n");
-}
-
-void print_callgraph(callgraph_t cg) { 
-  fprintf(stderr,"Callgraph:\n");
-  fprintf(stderr,"----------\n");
-  Hashtable::iter(print_fn, cg); 
-}
-
-struct FnInfo {
-  fndecl_t f;
-  list_t<fndecl_t> children;
-  unsigned int dfsnum;
-  unsigned int low;
-  bool visited;
-  bool finished;
-};
-
-typedef struct FnInfo @fninfo_t;
-typedef Hashtable::table_t<fndecl_t,fninfo_t> fninfo_table_t;
-
-static void add_member(list_t<`a,`H>@ p, `a x) { *p = new List{x,*p}; }
-
-static list_t<`a> set_to_list(Set::set_t<`a> s) {
-  list_t<`a> res = NULL;
-  Set::iter_c(add_member,&res,s);
-  return res;
-}
-
-void insert_info(fndecl_t fd, fndecl_set_t s, fninfo_table_t t) {
-  Hashtable::insert(t,fd,new FnInfo{.f = fd, .children = set_to_list(s),
-                                    .dfsnum = 0, .low = 0,
-                                    .visited = false, .finished = false});
-}
-
-#ifdef DEBUG
-static void print_fninfo(fninfo_t f) {
-  printf("dfsnum=%d, low=%d, visited=%d, finished=%d, children=[",f->dfsnum,
-         f->low,f->visited,f->finished);
-  for (let c = f->children; c != NULL; c = c->tl)
-    print_fndecl(c->hd);
-  printf("]\n");
-}
-#endif
-
-fninfo_table_t build_fninfo(callgraph_t cg) {
-  fninfo_table_t t = Hashtable::create(51, fndecl_cmp, hash_fndecl);
-  Hashtable::iter_c(insert_info,cg,t);
-#ifdef DEBUG
-  printf("TABLE:\n");
-  printf("------\n");
-  Hashtable::print_table_map(t, print_fndecl, print_fninfo);
-  printf("------\n");
-#endif
-  return t;
-}
-
-typedef struct Env {
-  fninfo_table_t fninfo;
-  unsigned int N;
-  list_t<fninfo_t> L;
-  list_t<fndecl_set_t> result;
-} env_t;
-
-unsigned int min(unsigned int i, unsigned int j) {
-  return (i < j) ? i : j;
-}
-
-void visit(env_t @env, fndecl_t f, fninfo_t finfo) {
-#ifdef DEBUG
-  fprintf(stderr,"visiting %s (%x) info (%x)\n",Absynpp::qvar2string(f->name), f,finfo);
-#endif
-  env->L = new List{finfo,env->L};
-  finfo->visited = true;
-  finfo->dfsnum = finfo->low = env->N;
-  env->N = env->N + 1;
-  for (let children=finfo->children; children!=NULL; children=children->tl) {
-    let g = children->hd;
-    try {
-      let ginfo = Hashtable::lookup(env->fninfo, g);
-#ifdef DEBUG
-      fprintf(stderr,"  child %s (%x) info (%x): fin = %d, visited = %d\n",
-              Absynpp::qvar2string(g->name), g, ginfo,
-              ginfo->finished, ginfo->visited);
-#endif
-      if (ginfo->finished) continue;
-      if (ginfo->visited) {
-        finfo->low = min(finfo->low, ginfo->dfsnum);
-      } else {
-        visit(env,g,ginfo);
-        finfo->low = min(finfo->low, ginfo->low);
-      }
-    } catch { case &Core::Not_found:  break; }
-  }
-  if (finfo->low == finfo->dfsnum) {
-    fninfo_t v;
-    fndecl_set_t peers = Set::empty(fndecl_cmp);
-    do {
-      v = env->L->hd;
-      peers = Set::insert(peers,v->f);
-      env->L = env->L->tl;
-      v->finished = true;
-    } while (v != finfo);
-    env->result = new List{peers,env->result};
-  }
-}
-
-static void visit_fndecls(fndecl_t f, fninfo_t finfo, env_t @env) {
-  if (!finfo->finished && !finfo->visited)
-    visit(env,f,finfo);
-}
-
-static void add_component($(components_t,fndecl_set_t)@ env, fndecl_t f) {
-  let &$(t,s) = env;
-  Hashtable::insert(t,f,s);
-}
-
-components_t strongly_connected_components(callgraph_t cg) {
-  fninfo_table_t finfo = build_fninfo(cg);
-  env_t env = Env{.fninfo = finfo, .N = 0, .L = NULL, .result = NULL};
-  Hashtable::iter_c(visit_fndecls,finfo,&env);
-  components_t t = Hashtable::create(51, fndecl_cmp, hash_fndecl);
-  for (let cs = env.result; cs != NULL; cs = cs->tl) {
-    let s = cs->hd;
-    let env = $(t,s);
-    Set::iter_c(add_component,&env,s);
-  }
-  return t;
-}
-
-void print_components(components_t cs) {
-  fprintf(stderr,"Components:\n");
-  fprintf(stderr,"----------\n");
-  Hashtable::iter(print_fn, cs);
+void print_callgraph(FILE @f, callgraph_t cg) { 
+  Graph::print(f, cg, print_fndecl);
 }

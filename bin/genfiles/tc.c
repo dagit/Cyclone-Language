@@ -635,13 +635,14 @@ enum Cyc_Relations_Relation{Cyc_Relations_Req  = 0U,Cyc_Relations_Rneq  = 1U,Cyc
 # 84
 struct Cyc_List_List*Cyc_Relations_exp2relns(struct _RegionHandle*r,struct Cyc_Absyn_Exp*e);
 # 129
-int Cyc_Relations_consistent_relations(struct Cyc_List_List*rlns);struct Cyc_Hashtable_Table;
-# 31 "callgraph.h"
-struct Cyc_Hashtable_Table*Cyc_Callgraph_compute_callgraph(struct Cyc_List_List*);
-struct Cyc_Hashtable_Table*Cyc_Callgraph_strongly_connected_components(struct Cyc_Hashtable_Table*);
-# 34
-void Cyc_Callgraph_print_callgraph(struct Cyc_Hashtable_Table*);
-void Cyc_Callgraph_print_components(struct Cyc_Hashtable_Table*);static char _tmp0[1U]="";
+int Cyc_Relations_consistent_relations(struct Cyc_List_List*rlns);
+# 46 "graph.h"
+void Cyc_Graph_print(struct Cyc___cycFILE*f,struct Cyc_Dict_Dict g,void(*nodeprint)(struct Cyc___cycFILE*,void*));
+# 92
+struct Cyc_Dict_Dict Cyc_Graph_scc(struct Cyc_Dict_Dict g);
+# 30 "callgraph.h"
+struct Cyc_Dict_Dict Cyc_Callgraph_compute_callgraph(struct Cyc_List_List*);
+void Cyc_Callgraph_print_callgraph(struct Cyc___cycFILE*,struct Cyc_Dict_Dict);static char _tmp0[1U]="";
 # 38 "tc.cyc"
 static struct _dyneither_ptr Cyc_Tc_tc_msg_c={_tmp0,_tmp0,_tmp0 + 1U};
 static struct _dyneither_ptr*Cyc_Tc_tc_msg=& Cyc_Tc_tc_msg_c;
@@ -1473,39 +1474,37 @@ goto _LL0;}}_LL0:;}}
 # 1013
 void Cyc_Tc_tc(struct Cyc_Tcenv_Tenv*te,int check_var_init,struct Cyc_List_List*ds){
 Cyc_Absynpp_set_params(& Cyc_Absynpp_tc_params_r);{
-struct Cyc_Hashtable_Table*_tmp1CA=Cyc_Callgraph_compute_callgraph(ds);
-# 1017
-struct Cyc_Hashtable_Table*_tmp1CB=Cyc_Callgraph_strongly_connected_components(_tmp1CA);
-# 1019
+struct Cyc_Dict_Dict _tmp1CA=Cyc_Callgraph_compute_callgraph(ds);
+struct Cyc_Dict_Dict _tmp1CB=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict g))Cyc_Graph_scc)(_tmp1CA);
 Cyc_Tc_tc_decls(te,ds,0,check_var_init,0);};}struct Cyc_Tc_TreeshakeEnv{int in_cinclude;struct Cyc_Dict_Dict ordinaries;};
-# 1037 "tc.cyc"
+# 1035 "tc.cyc"
 static int Cyc_Tc_vardecl_needed(struct Cyc_Tc_TreeshakeEnv*env,struct Cyc_Absyn_Decl*d);
-# 1039
+# 1037
 static struct Cyc_List_List*Cyc_Tc_treeshake_f(struct Cyc_Tc_TreeshakeEnv*env,struct Cyc_List_List*ds){
 return((struct Cyc_List_List*(*)(int(*f)(struct Cyc_Tc_TreeshakeEnv*,struct Cyc_Absyn_Decl*),struct Cyc_Tc_TreeshakeEnv*env,struct Cyc_List_List*x))Cyc_List_filter_c)(Cyc_Tc_vardecl_needed,env,ds);}
-# 1043
+# 1041
 static int Cyc_Tc_vardecl_needed(struct Cyc_Tc_TreeshakeEnv*env,struct Cyc_Absyn_Decl*d){
 void*_tmp1CC=d->r;void*_tmp1CD=_tmp1CC;struct Cyc_List_List**_tmp1D2;struct Cyc_List_List**_tmp1D1;struct Cyc_List_List**_tmp1D0;struct Cyc_List_List**_tmp1CF;struct Cyc_Absyn_Vardecl*_tmp1CE;switch(*((int*)_tmp1CD)){case 0U: _LL1: _tmp1CE=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_tmp1CD)->f1;_LL2:
-# 1048
+# 1046
  if((env->in_cinclude  || (int)_tmp1CE->sc != (int)Cyc_Absyn_Extern  && (int)_tmp1CE->sc != (int)Cyc_Absyn_ExternC) || !
 Cyc_Absyn_qvar_cmp(_tmp1CE->name,Cyc_Absyn_uniquergn_qvar))
-# 1051
+# 1049
 return 1;
-# 1053
+# 1051
 return(*((struct _tuple13*(*)(struct Cyc_Dict_Dict d,struct _tuple0*k))Cyc_Dict_lookup)(env->ordinaries,_tmp1CE->name)).f2;case 11U: _LL3: _tmp1CF=(struct Cyc_List_List**)&((struct Cyc_Absyn_ExternC_d_Absyn_Raw_decl_struct*)_tmp1CD)->f1;_LL4:
  _tmp1D0=_tmp1CF;goto _LL6;case 10U: _LL5: _tmp1D0=(struct Cyc_List_List**)&((struct Cyc_Absyn_Using_d_Absyn_Raw_decl_struct*)_tmp1CD)->f2;_LL6:
  _tmp1D1=_tmp1D0;goto _LL8;case 9U: _LL7: _tmp1D1=(struct Cyc_List_List**)&((struct Cyc_Absyn_Namespace_d_Absyn_Raw_decl_struct*)_tmp1CD)->f2;_LL8:
-# 1057
+# 1055
 ({struct Cyc_List_List*_tmp314=Cyc_Tc_treeshake_f(env,*_tmp1D1);*_tmp1D1=_tmp314;});
 return 1;case 12U: _LL9: _tmp1D2=(struct Cyc_List_List**)&((struct Cyc_Absyn_ExternCinclude_d_Absyn_Raw_decl_struct*)_tmp1CD)->f1;_LLA: {
-# 1060
+# 1058
 int in_cinclude=env->in_cinclude;
 env->in_cinclude=1;
 ({struct Cyc_List_List*_tmp315=Cyc_Tc_treeshake_f(env,*_tmp1D2);*_tmp1D2=_tmp315;});
 env->in_cinclude=in_cinclude;
 return 1;}default: _LLB: _LLC:
  return 1;}_LL0:;}
-# 1069
+# 1067
 struct Cyc_List_List*Cyc_Tc_treeshake(struct Cyc_Tcenv_Tenv*te,struct Cyc_List_List*ds){
 struct Cyc_Tc_TreeshakeEnv _tmp1D3=({struct Cyc_Tc_TreeshakeEnv _tmp211;_tmp211.in_cinclude=0,_tmp211.ordinaries=(te->ae)->ordinaries;_tmp211;});
 return Cyc_Tc_treeshake_f(& _tmp1D3,ds);}

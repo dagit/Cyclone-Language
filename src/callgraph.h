@@ -20,19 +20,15 @@
 #define _CALLGRAPH_H
 
 #include "absyn.h"
-#include <hashtable.h>
-#include <set.h>
+#include <graph.h>
 
 namespace Callgraph {
-  typedef Set::set_t<Absyn::fndecl_t> fndecl_set_t;
-  typedef Hashtable::table_t<Absyn::fndecl_t,fndecl_set_t> callgraph_t;
-  typedef Hashtable::table_t<Absyn::fndecl_t,fndecl_set_t> components_t;
-
+  typedef Graph::graph_t<Absyn::fndecl_t> callgraph_t;
+  // Computes the call graph of the functions in a list of declarations.
+  // We'll have an edge from f to g if g occurs anywhere in f (not just
+  // a function call.)  
   callgraph_t compute_callgraph(List::list_t<Absyn::decl_t>);
-  components_t strongly_connected_components(callgraph_t);
-
-  void print_callgraph(callgraph_t);
-  void print_components(components_t);
+  void print_callgraph(FILE @, callgraph_t);
 }
 
 #endif
