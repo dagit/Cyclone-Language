@@ -240,7 +240,7 @@ static var_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
 qvar_t temp_var() {
-  return new $(Loc_n,new (string_t)aprintf("_temp%d",temp_var_counter++));
+  return new $(Loc_n,new (string_t)aprintf("_tmp%X",temp_var_counter++));
 }
 
 // generate a fresh label
@@ -859,11 +859,13 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeoftyp_exp(struct_typ,DL);
     if (rgnopt == NULL)
-      eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
+      //eo = cast_exp(t, is_atomic ? malloc_atomic(se) : malloc_ptr(se), DL);
+      eo = is_atomic ? malloc_atomic(se) : malloc_ptr(se);
     else {
       exp_t r = (exp_t)rgnopt;
       exp_to_c(nv, r);
-      eo = cast_exp(t, rmalloc_exp(r,se), DL);
+      // eo = cast_exp(t, rmalloc_exp(r,se), DL);
+      eo = rmalloc_exp(r,se);
     }
   } else {
     t  = struct_typ;
@@ -1094,10 +1096,11 @@ static exp_t init_struct(env_t nv, type_t struct_type,
             s = init_anon_struct(nv, lval, st, dles, s);
             break;
           default:
+	    bool was_ptr_type = is_pointer_type(e->topt->v);
             exp_to_c(nv,e);
-            // cast to void* if necessary
-            if (is_poly_field(struct_type,f))
-              e = cast_exp(void_star_typ(),e,DL);
+            // cast to void* if necessary (still does it more than needed)
+	    if (is_poly_field(struct_type,f) && !was_ptr_type)
+	      e = cast_exp(void_star_typ(),e,DL);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
             break;
@@ -1503,7 +1506,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       kind_t k = typ_kind(ts->hd);
       if(k != EffKind && k != RgnKind) {
 	switch(compress(ts->hd)) {
-	case &VarType(_):    continue;
+	case &VarType(_):    
 	case &TunionType(_): continue;
 	default: 
 	  e->r = array_to_ptr_cast(typ_to_c(e->topt->v),e1,DL)->r;
@@ -1631,8 +1634,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         exp_to_c(nv,r);
         e1 = rmalloc_exp(r,e2);
       }
-      let e0 = cast_exp(ptr_typ,e1,DL);
-      e->r = stmt_exp(declare_stmt(x,ptr_typ,e0,s,DL),DL)->r;
+      //      let e0 = cast_exp(ptr_typ,e1,DL);
+      e->r = stmt_exp(declare_stmt(x,ptr_typ,e1,s,DL),DL)->r;
       break;
 
     case &Comprehension_e(vd,e1,e2):
@@ -1721,7 +1724,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         exp_to_c(nv,r);
         mexp = rmalloc_exp(r,mexp);
       }
-      mexp = cast_exp(cstar_typ(elt_typ,mt_tq),mexp,DL);
+      //      mexp = cast_exp(cstar_typ(elt_typ,mt_tq),mexp,DL);
       // For tagged arrays, I have gotten burned by the GCC BUG 
       // (they're structs), so we special-case it right here
       // I HAVE NO IDEA IF I'M CATCHING ENOUGH CASES.
@@ -2213,8 +2216,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     let v = temp_var();
     decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c(t),mt_tq)),decls);
     nv    = add_varmap(nv,vd->name,var_exp(v,DL));
-    // cast is necessary to avoid a C warning when pointing to a polymorphic
-    // field
+    // cast is needed to avoid a C warning when pointing to a polymorphic field
     s     = seq_stmt(assign_stmt(var_exp(v,DL),
 				 cast_exp(cstar_typ(typ_to_c(t),mt_tq),
 					  address_exp(path,DL),DL),DL),

@@ -252,44 +252,37 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
-fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern unsigned char Cyc_Core_Invalid_argument[
-21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_passwd{ struct _tagged_arr
-pw_name; struct _tagged_arr pw_passwd; unsigned short pw_uid; unsigned short
-pw_gid; struct _tagged_arr pw_gecos; struct _tagged_arr pw_dir; struct
-_tagged_arr pw_shell; } ; extern struct Cyc_Std_passwd* Cyc_Std_getpwnam( struct
-_tagged_arr name); extern struct Cyc_Std_passwd* Cyc_Std_getpwuid(
-unsigned short uid); struct Cyc_Cpwd_Cpasswd{ unsigned char* pw_name;
-unsigned char* pw_passwd; unsigned short pw_uid; unsigned short pw_gid;
-unsigned char* pw_gecos; unsigned char* pw_dir; unsigned char* pw_shell; } ;
-extern struct Cyc_Cpwd_Cpasswd* getpwnam( unsigned char* name); extern struct
-Cyc_Cpwd_Cpasswd* getpwuid( unsigned short uid); extern void free( void*);
-struct Cyc_Std_passwd* Cyc_Std_getpwnam( struct _tagged_arr name){ struct Cyc_Cpwd_Cpasswd*
-src= getpwnam( string_to_Cstring( name)); struct Cyc_Std_passwd* _temp0=(
-unsigned int) src?({ struct Cyc_Std_passwd* _temp1=( struct Cyc_Std_passwd*)
-_cycalloc( sizeof( struct Cyc_Std_passwd)); _temp1->pw_name=( struct _tagged_arr)
-Cstring_to_string( src->pw_name); _temp1->pw_passwd=( struct _tagged_arr)
-Cstring_to_string( src->pw_passwd); _temp1->pw_uid= src->pw_uid; _temp1->pw_gid=
-src->pw_gid; _temp1->pw_gecos=( struct _tagged_arr) Cstring_to_string( src->pw_gecos);
-_temp1->pw_dir=( struct _tagged_arr) Cstring_to_string( src->pw_dir); _temp1->pw_shell=(
-struct _tagged_arr) Cstring_to_string( src->pw_shell); _temp1;}): 0; return
-_temp0;} struct Cyc_Std_passwd* Cyc_Std_getpwuid( unsigned short uid){ struct
-Cyc_Cpwd_Cpasswd* src= getpwuid( uid); struct Cyc_Std_passwd* _temp2=(
-unsigned int) src?({ struct Cyc_Std_passwd* _temp3=( struct Cyc_Std_passwd*)
-_cycalloc( sizeof( struct Cyc_Std_passwd)); _temp3->pw_name=( struct _tagged_arr)
-Cstring_to_string( src->pw_name); _temp3->pw_passwd=( struct _tagged_arr)
-Cstring_to_string( src->pw_passwd); _temp3->pw_uid= src->pw_uid; _temp3->pw_gid=
-src->pw_gid; _temp3->pw_gecos=( struct _tagged_arr) Cstring_to_string( src->pw_gecos);
-_temp3->pw_dir=( struct _tagged_arr) Cstring_to_string( src->pw_dir); _temp3->pw_shell=(
-struct _tagged_arr) Cstring_to_string( src->pw_shell); _temp3;}): 0; return
-_temp2;}
+ struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
+unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
+struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
+unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
+extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char*string_to_Cstring(
+struct _tagged_arr);extern struct _tagged_arr Cstring_to_string(unsigned char*);
+struct Cyc_Std_passwd{struct _tagged_arr pw_name;struct _tagged_arr pw_passwd;
+unsigned short pw_uid;unsigned short pw_gid;struct _tagged_arr pw_gecos;struct
+_tagged_arr pw_dir;struct _tagged_arr pw_shell;};extern struct Cyc_Std_passwd*Cyc_Std_getpwnam(
+struct _tagged_arr name);extern struct Cyc_Std_passwd*Cyc_Std_getpwuid(
+unsigned short uid);struct Cyc_Cpwd_Cpasswd{unsigned char*pw_name;unsigned char*
+pw_passwd;unsigned short pw_uid;unsigned short pw_gid;unsigned char*pw_gecos;
+unsigned char*pw_dir;unsigned char*pw_shell;};extern struct Cyc_Cpwd_Cpasswd*
+getpwnam(unsigned char*name);extern struct Cyc_Cpwd_Cpasswd*getpwuid(
+unsigned short uid);extern void free(void*);struct Cyc_Std_passwd*Cyc_Std_getpwnam(
+struct _tagged_arr name){struct Cyc_Cpwd_Cpasswd*src=getpwnam(string_to_Cstring(
+name));struct Cyc_Std_passwd*_tmp0=(unsigned int)src?({struct Cyc_Std_passwd*_tmp1=
+_cycalloc(sizeof(struct Cyc_Std_passwd));_tmp1->pw_name=(struct _tagged_arr)
+Cstring_to_string(src->pw_name);_tmp1->pw_passwd=(struct _tagged_arr)
+Cstring_to_string(src->pw_passwd);_tmp1->pw_uid=src->pw_uid;_tmp1->pw_gid=src->pw_gid;
+_tmp1->pw_gecos=(struct _tagged_arr)Cstring_to_string(src->pw_gecos);_tmp1->pw_dir=(
+struct _tagged_arr)Cstring_to_string(src->pw_dir);_tmp1->pw_shell=(struct
+_tagged_arr)Cstring_to_string(src->pw_shell);_tmp1;}): 0;return _tmp0;}struct Cyc_Std_passwd*
+Cyc_Std_getpwuid(unsigned short uid){struct Cyc_Cpwd_Cpasswd*src=getpwuid(uid);
+struct Cyc_Std_passwd*_tmp2=(unsigned int)src?({struct Cyc_Std_passwd*_tmp3=
+_cycalloc(sizeof(struct Cyc_Std_passwd));_tmp3->pw_name=(struct _tagged_arr)
+Cstring_to_string(src->pw_name);_tmp3->pw_passwd=(struct _tagged_arr)
+Cstring_to_string(src->pw_passwd);_tmp3->pw_uid=src->pw_uid;_tmp3->pw_gid=src->pw_gid;
+_tmp3->pw_gecos=(struct _tagged_arr)Cstring_to_string(src->pw_gecos);_tmp3->pw_dir=(
+struct _tagged_arr)Cstring_to_string(src->pw_dir);_tmp3->pw_shell=(struct
+_tagged_arr)Cstring_to_string(src->pw_shell);_tmp3;}): 0;return _tmp2;}

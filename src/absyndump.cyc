@@ -66,7 +66,7 @@ void set_params(struct Absynpp::Params @ `r fs) {
   //print_externC_stmts = fs->print_externC_stmts;
   //print_full_evars = fs->print_full_evars;
 
-  // since absyndump use absynpp, we have to set the parameters of absynpp too !!!
+  // since absyndump uses absynpp, we must set the parameters of absynpp too !!!
   Absynpp::set_params(fs);
 }
 
@@ -94,25 +94,39 @@ FILE @@ dump_file = &stdout;
 void ignore(`a x) { return; }
 
 static unsigned int pos = 0;
+static char prev_char = 'x';
+
+bool need_space_before() {
+  switch(prev_char) {
+  case '{':
+  case '}':
+  case '(':
+  case ')':
+  case '[':
+  case ']':
+  case ';':
+  case ',':
+  case '=':
+  case ' ':
+  case '\n':
+  case '*': return false;
+  default: return true;
+  }
+}
 
 void dump(dump_string_t s) {
   int sz = s.size;
   if(!s[sz-1])
     --sz;
-  pos += sz+1;
+  pos += sz;
   if (pos > 80) {
     pos = sz;
     fputc('\n',*dump_file);
-  } else
+  } else if(need_space_before())
     fputc(' ',*dump_file);
   file_string_write(*dump_file, s, 0, sz);
-}
-
-void dumploc(Position::seg_t loc) {
-  if(loc == NULL) return;
-  if(!generate_line_directives) return;
-  let s = Position::get_line_directive(loc);
-  dump(s);
+  if(sz >= 1)
+    prev_char = s[sz-1];
 }
 
 void dump_nospace(dump_string_t s) {
@@ -121,10 +135,20 @@ void dump_nospace(dump_string_t s) {
     --sz;
   pos += sz;
   file_string_write(*dump_file, s, 0, sz);
+  if(sz >= 1)
+    prev_char = s[sz-1];
 }
 void dump_char(int c) { // no space
   ++pos;
   fputc(c,*dump_file);
+  prev_char = (char)c;
+}
+
+void dumploc(Position::seg_t loc) {
+  if(loc == NULL) return;
+  if(!generate_line_directives) return;
+  let s = Position::get_line_directive(loc);
+  dump(s);
 }
 
 // this needs to take a boxed type b/c it's used to instantiate `a
@@ -513,7 +537,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e(&Int_c(Signed,i)):
     dump(aprintf("%d",i)); break;
   case &Const_e(&Int_c(Unsigned,i)):
-    dump(aprintf("%d",i)); dump_nospace("u"); break;
+    dump(aprintf("%u",(unsigned)i)); break;
   case &Const_e(&LongLong_c(sg,i)):
     dump("<<FIX LONG LONG CONSTANT>>"); break; // FIX
   case &Const_e(&Float_c(x)):    dump(x);      break;
@@ -768,7 +792,7 @@ void dumpstmt(stmt_t s) {
     }
     break;
   case &While_s($(e,_),s1):
-    dumploc(s->loc); dump("while("); dumpexp(e); dump_nospace(") {");
+    dumploc(s->loc); dump("while("); dumpexp(e); dump_nospace("){");
     dumpstmt(s1);
     dump_char('}');
     break;
