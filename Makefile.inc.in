@@ -210,4 +210,4 @@ O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
 PATCH_ARCH=i686-unknown-linux
-DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.2
+DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.3
