@@ -2179,7 +2179,7 @@ The value of this variable is used when Font Lock mode is turned on."
     "deque" "vector" "bit_vector"
     "set" "multiset"
     "map" "multimap"
-    "hash\\(_\\(m\\(ap\\|ulti\\(map\\|set\\)\\)\\|set\\)\\)?"
+;    "hash\\(_\\(m\\(ap\\|ulti\\(map\\|set\\)\\)\\|set\\)\\)?"
     "stack" "queue" "priority_queue"
     "iterator" "const_iterator" "reverse_iterator" "const_reverse_iterator"
     "reference" "const_reference")
@@ -2426,7 +2426,9 @@ See also `c++-font-lock-extra-types'.")
 	(eval-when-compile
 	  (regexp-opt
 	   '("break" "continue" "do" "else" "for" "if" "return" "switch"
-	     "while" "asm" "catch" "delete" "new" "sizeof" "this" "throw" "try"
+	     "while" "asm" "catch" 
+	     ;;"delete" 
+	     "new" "sizeof" "this" "throw" "try"
 	     ;; Branko Cibej <branko.cibej@hermes.si> says this is new.
 	     "export"
 	     ;; Mark Mitchell <mmitchell@usa.net> says these are new.
@@ -2446,7 +2448,8 @@ See also `c++-font-lock-extra-types'.")
        (c++-type-specs
 	(eval-when-compile
 	  (regexp-opt
-	   '("class" "public" "private" "protected" "typename"
+	   '("xenum"
+	     "class" "public" "private" "protected" "typename"
 	     "struct" "union" "enum" "namespace" "using"
 	     ;; Eric Hopper <hopper@omnifarious.mn.org> says these are new.
 	     "static_cast" "dynamic_cast" "const_cast" "reinterpret_cast") t)))
@@ -2506,7 +2509,7 @@ See also `c++-font-lock-extra-types'.")
     '("\\<\\(case\\|goto\\)\\>\\(\\([^&:\n]\\|::\\|&[^&]\\)+\\)\\(:\\|&&\\)"
       (1 font-lock-keyword-face)
       (2 font-lock-constant-face)
-      ("[^A-Za-z0-9_]\\([a-z][A-Za-z0-9_]*\\)"
+      ("[^A-Za-z0-9_.]\\([a-z][A-Za-z0-9_]*\\)"
 					;\\([^({A-Za-z0-9_:]\\|\\(:[^:]\\)\\)" 
        (cond (t (goto-char (match-end 1)) (match-end 2)))
        nil
