@@ -86,6 +86,10 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
           "         use <s> as the y axis caption\n"
           "  -y-caption-gap <w>\n"
           "         place the x caption <w> units to the left of the y axis\n"
+          "  -font-family <f>\n"
+          "         use <f> as the font-family, e.g., Arial, Verdana\n"
+          "  -font-size <s>\n"
+          "         use <s> as the font-size in points\n"
           "  -d X   show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
           argv0,
           dyn_threshhold);
@@ -158,6 +162,12 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-y-caption-gap" ) == 0 && argn+1 < argc ) {
       y_caption_gap = strtod(strdup(argv[++argn]),NULL);
+    }
+    else if ( strcmp( argv[argn], "-font-family" ) == 0 && argn+1 < argc ) {
+      font_family = argv[++argn];
+    }
+    else if ( strcmp( argv[argn], "-font-size" ) == 0 && argn+1 < argc ) {
+      font_size = argv[++argn];
     }
     else if ( strcmp( argv[argn], "-svg" ) == 0 ) {
       do_svg = true;

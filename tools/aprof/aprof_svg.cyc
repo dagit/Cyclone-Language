@@ -42,9 +42,27 @@ double x_caption_gap = 50.0;
 double y_caption_gap = 50.0;
 const char ?x_caption;
 const char ?y_caption;
+const char ?font_family = NULL;
+const char ?font_size = NULL;
 bool black_and_white = false;
 bool gc_caps = false;
 bool sort_changes = false;
+
+char ?text_properties() {
+  static int first_time = 1;
+  static char ?ans = NULL;
+  if (first_time) {
+    first_time = 0;
+    ans = aprintf("%s%s%s%s%s%s",
+                  font_family?" font-family='":"",
+                  font_family,
+                  font_family?"'":"",
+                  font_size?" font-size='":"",
+                  font_size,
+                  font_size?"'":"");
+  }
+  return ans;
+}
 
 static const char ?default_colors[] =
 //  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
@@ -549,9 +567,10 @@ static void output_legend(list_t<$(const char ?,const char ?)@> items) {
            (0.75*SEPARATION),
            (0.75*SEPARATION),
            (*l->hd)[1]);
-    printf("<text x='%f' y='%f' fill='black' text-anchor='start'>%s</text>\n",
+    printf("<text x='%f' y='%f' fill='black' text-anchor='start'%s>%s</text>\n",
            SEPARATION+5,
            i*SEPARATION+(0.5*SEPARATION),
+           text_properties(),
            (*l->hd)[0]);
   }
 }
@@ -643,8 +662,9 @@ static void output_curves(int xres, int num_curves, unsigned int max_y, coord_t 
     printf("<line x1='-3' y1='%d' x2='0' y2='%d'"
            " stroke='black' stroke-linecap='round'/>\n",
            100-y,100-y);
-    printf("<text x='-8' y='%d' fill='black' text-anchor='end'>%d</text>\n",
+    printf("<text x='-8' y='%d' fill='black' text-anchor='end'%s>%d</text>\n",
            100-y,
+           text_properties(),
            y);
   }
   // x axis tick marks
@@ -823,12 +843,13 @@ int generate_svg(string_t<`H> file) {
   printf("<path d='M-5,0 0,0 0,%f %f,%f %f,%f' fill='none'"
          " stroke='black' stroke-width='0.2'/>\n",
          HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
-  printf("<text x='-10' y='3' text-anchor='end'>%s</text>\n",
+  printf("<text x='-10' y='3' text-anchor='end'%s>%s</text>\n",
+         text_properties(),
          print_bytes(max_y));
   const char ?CE = " clocks";
   if (use_events) CE = " events";
-  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH, HEIGHT+18, print_units(max_time,CE));
+  printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
+         WIDTH, HEIGHT+18, text_properties(), print_units(max_time,CE));
 
   printf("<!-- x axis caption -->\n");
   if (!x_caption)
@@ -841,14 +862,14 @@ int generate_svg(string_t<`H> file) {
     else
       x_caption =
         aprintf("Data footprint %s*%s", print_bytes(data_footprint),CE);
-  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
+  printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
+         WIDTH/2,HEIGHT+x_caption_gap, text_properties(), x_caption);
 
   printf("<!-- y axis caption -->\n");
   if (y_caption) {
     printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
            -y_caption_gap,HEIGHT/2);
-    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("<text x='0' y='0' text-anchor='middle'%s>%s</text>\n", text_properties(), y_caption);
     printf("</g>\n");
   }
 
@@ -1272,14 +1293,14 @@ int generate_svg2(string_t<`H> file) {
   printf("<!-- x axis caption -->\n");
   if (!x_caption)
     x_caption = "Memory usage, time x address";
-  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
+  printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
+         WIDTH/2,HEIGHT+x_caption_gap,text_properties(),x_caption);
 
   printf("<!-- y axis caption -->\n");
   if (y_caption) {
     printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
            -y_caption_gap,HEIGHT/2);
-    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("<text x='0' y='0' text-anchor='middle'%s>%s</text>\n",text_properties(),y_caption);
     printf("</g>\n");
   }
 
@@ -1518,24 +1539,24 @@ int generate_svg3(string_t<`H> file) {
          "<path d='M 0,%f %f,%f %f,%f' fill='none'"
          " stroke='black' stroke-width='0.1'/>\n",
          HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
-  printf("<text x='-10' y='3' text-anchor='end'>%d objects</text>\n",
-         max_lcount);
+  printf("<text x='-10' y='3' text-anchor='end'%s>%d objects</text>\n",
+         text_properties(),max_lcount);
   const char ?CE = "clocks";
   if (use_events) CE = "events";
-  printf("<text x='%f' y='%f' text-anchor='middle'>%d %s</text>\n",
-         WIDTH, HEIGHT+18, max_lifetime, CE);
+  printf("<text x='%f' y='%f' text-anchor='middle'%s>%d %s</text>\n",
+         WIDTH, HEIGHT+18, text_properties(), max_lifetime, CE);
 
   printf("<!-- x axis caption -->\n");
   if (!x_caption)
     x_caption = "Number of objects with a given lifetime";
-  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2,HEIGHT+x_caption_gap,x_caption);
+  printf("<text x='%f' y='%f' text-anchor='middle'%s>%s</text>\n",
+         WIDTH/2,HEIGHT+x_caption_gap,text_properties(),x_caption);
 
   printf("<!-- y axis caption -->\n");
   if (y_caption) {
     printf("<g transform='translate(%f,%f) rotate(-90)'>\n",
            -y_caption_gap,HEIGHT/2);
-    printf("<text x='0' y='0' text-anchor='middle'>%s</text>\n",y_caption);
+    printf("<text x='0' y='0' text-anchor='middle'%s>%s</text>\n",text_properties(),y_caption);
     printf("</g>\n");
   }
 

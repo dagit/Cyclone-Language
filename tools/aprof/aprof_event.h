@@ -190,6 +190,8 @@ extern double x_caption_gap;
 extern double y_caption_gap;
 extern const char ?x_caption;
 extern const char ?y_caption;
+extern const char ?font_family;
+extern const char ?font_size;
 extern bool black_and_white;
 extern bool gc_caps;
 extern bool sort_changes;
