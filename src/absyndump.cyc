@@ -241,7 +241,7 @@ void dumpexp_prec(int inprec, exp e) {
   case Const_e(Char_c(sg,ch)): 
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case Const_e(Short_c(sg,s)):
-    dump(string_of_int(s)); dump_nospace("s"); break;
+    dump("(short)"); dump_nospace(string_of_int(s)); break;
   case Const_e(Int_c(Signed,i)): 
     dump(string_of_int(i)); break;
   case Const_e(Int_c(Unsigned,i)):

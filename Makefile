@@ -61,20 +61,22 @@ diff: cyclone_src
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 cmp: cyclone_src
-	for i in $(C_SRCS); do (cmp bin/genfiles/src/$$i src/$$i) done
-	for i in $(C_LIBS); do (cmp bin/genfiles/lib/$$i lib/$$i) done
-	cmp bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME)
-	cmp bin/genfiles/lib/precore_c.h  lib/precore_c.h
+	@for i in $(C_SRCS); do (cmp -s bin/genfiles/src/$$i src/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/$$i CHANGED) done
+	@for i in $(C_LIBS); do (cmp -s bin/genfiles/lib/$$i lib/$$i || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/$$i CHANGED) done
+	@cmp -s bin/genfiles/lib/$(C_RUNTIME) lib/$(C_RUNTIME) || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX $(C_RUNTIME) CHANGED
+	@cmp -s bin/genfiles/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX precore.h CHANGED
 
 # This target updates what is in bin/genfiles.  It would be "dangerous"
 # to invoke this target with "make -k" if we did not have version control.
 # I intend to put a "warning" waiting for user response in (and remind
 # to add files to Makefile.inc).
+# TJIM: modified to update only changed files.  This speeds up cvs commit
+# over a slow link.
 update: cyclone_src
-	for i in $(C_SRCS); do (cp src/$$i bin/genfiles/src/$$i) done
-	for i in $(C_LIBS); do (cp lib/$$i bin/genfiles/lib/$$i) done
-	cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME)
-	cp lib/precore_c.h  bin/genfiles/lib/precore_c.h  
+	for i in $(C_SRCS); do (cmp -s src/$$i bin/genfiles/src/$$i || cp src/$$i bin/genfiles/src/$$i) done
+	for i in $(C_LIBS); do (cmp -s lib/$$i bin/genfiles/lib/$$i || cp lib/$$i bin/genfiles/lib/$$i) done
+	cmp -s lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME) || cp lib/$(C_RUNTIME) bin/genfiles/lib/$(C_RUNTIME)
+	cmp -s lib/precore_c.h  bin/genfiles/lib/precore_c.h || cp lib/precore_c.h  bin/genfiles/lib/precore_c.h
 
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)

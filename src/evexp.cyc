@@ -174,6 +174,8 @@ cnst eval_const_unprimop(primop p,exp e) {
       exp_err(e->loc,"expecting arithmetic constant");
     return cn;
   case $(Minus,  Int_c(s,i)): return Int_c(Signed,-i);
+  case $(Minus,  Short_c(s,i)): return Short_c(Signed,-i);
+  case $(Minus,  Char_c(s,i)): return Char_c(Signed,-i);
   case $(Not,    Int_c(_,i)): return Int_c(Signed,i == 0 ? 1 : 0);
   case $(Not,    Null_c)    : return Int_c(Signed,1);
   case $(Bitnot, Int_c(s,i)): return Int_c(Unsigned,~i);

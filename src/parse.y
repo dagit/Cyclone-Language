@@ -2096,9 +2096,11 @@ unary_expression:
     { $$=^$(deref_exp($2,LOC(@1,@2))); }
 | '+' cast_expression
     { $$ = $!2; }
+/*
 | '-' cast_expression
     { $$ = ^$(prim2_exp(Minus,signed_int_exp(0,LOC(@1,@2)),
                         $2,LOC(@1,@2))); }
+*/
 | unary_operator cast_expression
     { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'
@@ -2123,6 +2125,8 @@ unary_operator:
     { $$=^$(Bitnot); }
 | '!'
     { $$=^$(Not); }
+| '-'
+    { $$=^$(Minus); }
 ;
 
 postfix_expression:
