@@ -34,43 +34,93 @@ using XmlParse;
 using Lexing;
   
 namespace XmlScan {
-string_t token_string = NULL;
-string_t token_pi = NULL;
+@tagged union lv<`r> {
+  string_t<`r> ATTVALUE1_LV;
+  string_t<`r> ATTVALUE2_LV;
+  string_t<`r> CDSECT_LV;
+  string_t<`r> CHARDATA_LV;
+  int          CLOSE_LV;
+  string_t<`r> COMMENT_LV;
+  int          ENDOFFILE_LV;
+  int          EQ_LV;
+  string_t<`r> NAME_LV;
+  string_t<`r> OPEN_LV;
+  string_t<`r> OPENSLASH_LV;
+  $(string_t<`r>,string_t<`r>) PI_LV;
+  string_t<`r> REFERENCE_LV;
+  int          SLASHCLOSE_LV;
+};
 // Forward declarations of lexing functions 
-extern int data(Lexbuf<`a>);
-extern int comment(Lexbuf<`a>);
-extern int pi(Lexbuf<`a>);
-extern int cdsect(Lexbuf<`a>);
-extern int attvalue1(Lexbuf<`a>);
-extern int attvalue2(Lexbuf<`a>);
-extern int intag(Lexbuf<`a>);
+extern union lv<`r> data(Lexbuf<`a>,region_t<`r>);
+extern string_t<`yy> comment(Lexbuf<`a>,region_t<`yy>);
+extern $(string_t<`yy>,string_t<`yy>) pi(Lexbuf<`a>,$(region_t<`yy>,string_t<`yy>));
+extern string_t<`yy> cdsect(Lexbuf<`a>,region_t<`yy>);
+extern string_t<`yy> attvalue1(Lexbuf<`a>,region_t<`yy>);
+extern string_t<`yy> attvalue2(Lexbuf<`a>,region_t<`yy>);
+extern union lv<`yy> intag(Lexbuf<`a>,region_t<`yy>);
 }
 
 // for parser -- must not be prefixed
 int yylex(YYLEX_PARAM_ARG) { 
-  int ans;
+  let aa;
+  int ans = 0;
   switch (getContext()) {
-  case Normal: ans = XmlScan::data(lbuf->v); break;
-  case InTag: ans = XmlScan::intag(lbuf->v); break;
+  case Normal: aa = XmlScan::data(lbuf->v,yyoutregion); break;
+  case InTag: aa = XmlScan::intag(lbuf->v,yyoutregion); break;
   }
-  switch (ans) {
-  case ATTVALUE1:
-  case ATTVALUE2:
-  case CDSECT:
-  case CHARDATA:
-  case COMMENT:
-  case NAME:
-  case OPEN:
-  case OPENSLASH:
-  case REFERENCE:
-    *yylval_ptr = YYSTYPE{.String_tok = XmlScan::token_string}; break;
-  case PI:
-    *yylval_ptr =
-      YYSTYPE{.Pi_tok = rnew(yyoutregion)
-                        $(XmlScan::token_pi,
-                          XmlScan::token_string)}; 
+  switch (aa) {
+  case {.ATTVALUE1_LV = s}:
+    ans = ATTVALUE1;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
     break;
-  default: break;
+  case {.ATTVALUE2_LV = s}:
+    ans = ATTVALUE2;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.CDSECT_LV = s}:
+    ans = CDSECT;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.CHARDATA_LV = s}:
+    ans = CHARDATA;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.COMMENT_LV = s}:
+    ans = COMMENT;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.NAME_LV = s}:
+    ans = NAME;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.OPEN_LV = s}:
+    ans = OPEN;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.OPENSLASH_LV = s}:
+    ans = OPENSLASH;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.REFERENCE_LV = s}:
+    ans = REFERENCE;
+    *yylval_ptr = YYSTYPE{.String_tok = s};
+    break;
+  case {.PI_LV = x}:
+    ans = PI;
+    *yylval_ptr = YYSTYPE{.Pi_tok = rnew(yyoutregion) x};
+    break;
+  case {.CLOSE_LV = _}:
+    ans = CLOSE;
+    break;
+  case {.SLASHCLOSE_LV = _}:
+    ans = SLASHCLOSE;
+    break;
+  case {.ENDOFFILE_LV = _}:
+    ans = ENDOFFILE;
+    break;
+  case {.EQ_LV = _}:
+    ans = EQ;
+    break;
   }
   return ans;
 } 
@@ -79,24 +129,46 @@ namespace XmlScan;
 
 void init() { setContext(Normal); }
 
-static string_t get(Lexbuf<`a> b) { return lexeme(b); }
-
-static list_t<stringptr_t> buffer = NULL;
-
-static void gobble(Lexbuf<`a> b) {
-  buffer = new List(new {get(b)},buffer);
+static string_t<`r> get(region_t<`r> r,Lexbuf<`a> b) {
+  return rlexeme(r,b);
+}
+//FIX: wastes a character or two...
+static string_t<`r> after(region_t<`r> r, int n, Lexbuf<`a> lexbuf) {
+  return get(r,lexbuf)+n;
 }
 
-static void purge() { buffer = NULL; }
+/* Build a growable buffer in the unique region. */
+// FIX: the buffer grows but never shrinks
+int buf_pos = 0;
+int buf_len = 0;
+char ?`U buf_buf = NULL;
 
-static string_t regurgitate() { return strconcat_l(List::rev(buffer)); }
-
-static string_t pi_cell = NULL;
-static void pi_set(string_t<`H> s) { pi_cell = s; }
-static string_t pi_get() { return pi_cell; }
-
-static string_t after(int n,Lexbuf<`a> lexbuf) {
-  return get(lexbuf)+n;
+static void gobble(Lexbuf<`a> lbuf) {
+  let howmuch = lbuf->lex_curr_pos - lbuf->lex_start_pos;
+  if (buf_pos+howmuch > buf_len) {
+    let newlen = (buf_len? buf_len*2: 17);
+    while (newlen <= buf_pos+howmuch) newlen *= 2;
+    char ?`U newbuf = calloc(newlen,sizeof(char));
+    for (int i = 0; i<buf_pos; i++)
+      newbuf[i] = buf_buf[i];
+    buf_len = newlen;
+    buf_buf :=: newbuf;
+    if (newbuf) ufree(newbuf);
+  }
+  char ?from = lbuf->lex_buffer + lbuf->lex_start_pos;
+  for (int i = 0; i < howmuch; i++,from++,buf_pos++)
+    buf_buf[buf_pos] = *from;
+}
+static void purge() {
+  buf_pos = 0;
+  if (buf_buf) buf_buf[0] = '\0';
+}
+static string_t<`r> regurgitate(region_t<`r> r) {
+  mstring_t<`r> x = rmalloc(r, (buf_pos+1) * sizeof(char));
+  for (int i = 0; i<buf_pos; i++)
+    x[i] = buf_buf[i];
+  x[buf_pos] = '\0';
+  return x;
 }
 
 void warning(string_t msg) {
@@ -111,103 +183,90 @@ let name = ['a'-'z' 'A'-'Z' '_' ':']
             ['a'-'z' 'A'-'Z' '0'-'9' '.' '-' '_' ':']*
 
 /* The normal lexer */
-rule data = parse
-  '<' name            { token_string = after(1,lexbuf);
-                        return OPEN; } 
-| "</" name           { token_string = after(2,lexbuf);
-                        return OPENSLASH; } 
-| "&#" ['0'-'9']+ ';' { token_string = get(lexbuf);
-                        return REFERENCE; }
-| '&' name ';'        { token_string = get(lexbuf);
-                        return REFERENCE; }
-| "<![CDATA["         { purge(); return cdsect(lexbuf); }
-| "<?" name           { pi_set(after(2,lexbuf)); purge();
-                        return pi(lexbuf); }
-| "<!--"              { purge(); return comment(lexbuf); }
-| eof                 { return ENDOFFILE; }
-| [^ '<' '&' ']' ]*   { token_string = get(lexbuf);
-                        return CHARDATA; }
+rule data "union lv<`yy>" "region_t<`yy>" "yyr" = parse
+  '<' name            { return lv{.OPEN_LV = (after(yyr,1,lexbuf))}; } 
+| "</" name           { return lv{.OPENSLASH_LV = (after(yyr,2,lexbuf))}; } 
+| "&#" ['0'-'9']+ ';' { return lv{.REFERENCE_LV = (get(yyr,lexbuf))}; }
+| '&' name ';'        { return lv{.REFERENCE_LV = (get(yyr,lexbuf))}; }
+| "<![CDATA["         { purge();
+                        return lv{.CDSECT_LV = (cdsect(lexbuf,yyr))}; }
+| "<?" name           { let name = after(yyr,2,lexbuf);
+                        purge();
+                        return lv{.PI_LV = (pi(lexbuf,$(yyr,name)))}; }
+| "<!--"              { purge(); return lv{.COMMENT_LV = (comment(lexbuf,yyr))}; }
+| eof                 { return lv{.ENDOFFILE_LV = 0}; }
+| [^ '<' '&' ']' ]*   { return lv{.CHARDATA_LV = (get(yyr,lexbuf))}; }
 
 /* Lexing states called from the normal state */
-and pi = parse
-  "?>"     { token_string = regurgitate();
-             token_pi = pi_get();
-             return PI; }
+and pi "$(string_t<`yy>,string_t<`yy>)" "$(region_t<`yy>,string_t<`yy>)" "x"= parse
+  "?>"     { let $(yyr,name) = x;
+             return $(name,regurgitate(yyr)); }
 | eof      { warning("PI ends in eof");
-             token_string = regurgitate();
-             token_pi = pi_get();
-             return PI; }
-| '?'      { gobble(lexbuf); return pi(lexbuf); }
-| [^ '?']+ { gobble(lexbuf); return pi(lexbuf); }
+             let $(yyr,name) = x;
+             return $(name,regurgitate(yyr)); }
+| '?'      { gobble(lexbuf); return pi(lexbuf,x); }
+| [^ '?']+ { gobble(lexbuf); return pi(lexbuf,x); }
 
-and cdsect = parse
-  "]]>"             { token_string = regurgitate();
-                      return CDSECT; }
+and cdsect "string_t<`yy>" "region_t<`yy>" "yyr" = parse
+  "]]>"             { return regurgitate(yyr); }
 | eof               { warning("CDATA ends in eof");
-                      token_string = regurgitate();
-                      return CDSECT; }
-| ']'               { gobble(lexbuf); return cdsect(lexbuf); }
+                      return regurgitate(yyr); }
+| ']'               { gobble(lexbuf); return cdsect(lexbuf,yyr); }
 | '<'               { warning("CDATA contains <");
-                      gobble(lexbuf); return cdsect(lexbuf); }
+                      gobble(lexbuf); return cdsect(lexbuf,yyr); }
 | '&'               { warning("CDATA contains &");
-                      gobble(lexbuf); return cdsect(lexbuf); }
-| [^ '<' '&' ']' ]+ { gobble(lexbuf); return cdsect(lexbuf); }
+                      gobble(lexbuf); return cdsect(lexbuf,yyr); }
+| [^ '<' '&' ']' ]+ { gobble(lexbuf); return cdsect(lexbuf,yyr); }
 
-and comment = parse   
-  "-->"    { token_string = regurgitate();
-             return COMMENT; }
+and comment "string_t<`yy>" "region_t<`yy>" "yyr" = parse   
+  "-->"    { return regurgitate(yyr); }
 | eof      { warning("comment ends in eof");
-             token_string = regurgitate();
-             return COMMENT; }
+             return regurgitate(yyr); }
 | "--"     { warning("comment contains --");
-             gobble(lexbuf); return comment(lexbuf); }
-| '-'      { gobble(lexbuf); return comment(lexbuf); }
-| [^ '-']+ { gobble(lexbuf); return comment(lexbuf); }
+             gobble(lexbuf); return comment(lexbuf,yyr); }
+| '-'      { gobble(lexbuf); return comment(lexbuf,yyr); }
+| [^ '-']+ { gobble(lexbuf); return comment(lexbuf,yyr); }
 
 /* Lexing inside of tags */
-and intag = parse
+and intag "union lv<`yy>" "region_t<`yy>" "yyr" = parse
   eof   { warning("tag ends in eof");
-          return ENDOFFILE; }
-| '\n'  { return intag(lexbuf); }
-| ws+   { return intag(lexbuf); }                
-| name  { token_string = get(lexbuf);
-          return NAME; }
-| '='   { return EQ; }
-| '\''  { purge(); return attvalue1(lexbuf); }
-| "\""  { purge(); return attvalue2(lexbuf); }
-| '>'   { return CLOSE; }   
-| "/>"  { return SLASHCLOSE; }
-| _     { warning(aprintf("illegal character '%s' in tag",get(lexbuf)));
-          return intag(lexbuf); }
+          return lv{.ENDOFFILE_LV = 0}; }
+| '\n'  { return intag(lexbuf,yyr); }
+| ws+   { return intag(lexbuf,yyr); }                
+| name  { return lv{.NAME_LV = get(yyr,lexbuf)}; }
+| '='   { return lv{.EQ_LV = 0}; }
+| '\''  { purge(); return lv{.ATTVALUE1_LV = attvalue1(lexbuf,yyr)}; }
+| "\""  { purge(); return lv{.ATTVALUE2_LV = attvalue2(lexbuf,yyr)}; }
+| '>'   { return lv{.CLOSE_LV = 0}; }   
+| "/>"  { return lv{.SLASHCLOSE_LV = 0}; }
+| _     { region t;
+          warning(rprintf(t,"illegal character '%s' in tag",get(t,lexbuf)));
+          return intag(lexbuf,yyr); }
 
 /* Other lexing states inside tags */
-and attvalue1 = parse
-  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue1(lexbuf); }
-| '&' name ';'         { gobble(lexbuf); return attvalue1(lexbuf);}
+and attvalue1 "string_t<`yy>" "region_t<`yy>" "yyr" = parse
+  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue1(lexbuf,yyr); }
+| '&' name ';'         { gobble(lexbuf); return attvalue1(lexbuf,yyr);}
 | '&'                  { warning("ill-formed reference in attribute");
-                         gobble(lexbuf); return attvalue1(lexbuf); }
+                         gobble(lexbuf); return attvalue1(lexbuf,yyr); }
 | '<'                  { warning("attribute contains <");
-                         gobble(lexbuf); return attvalue1(lexbuf); }
-| '\''                 { token_string = regurgitate();
-                         return ATTVALUE1; }
+                         gobble(lexbuf); return attvalue1(lexbuf,yyr); }
+| '\''                 { return regurgitate(yyr); }
 | eof                  { warning("attribute ends in eof");
-                         token_string = regurgitate();
-                         return ATTVALUE1; }
-| [^ '<' '&' '\'']+    { gobble(lexbuf); return attvalue1(lexbuf); }
+                         return regurgitate(yyr); }
+| [^ '<' '&' '\'']+    { gobble(lexbuf); return attvalue1(lexbuf,yyr); }
 
-and attvalue2 = parse
-  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue2(lexbuf); }
-| '&' name ';'         { gobble(lexbuf); return attvalue2(lexbuf); }
+and attvalue2 "string_t<`yy>" "region_t<`yy>" "yyr" = parse
+  "&#" ['0'-'9']+ ';'  { gobble(lexbuf); return attvalue2(lexbuf,yyr); }
+| '&' name ';'         { gobble(lexbuf); return attvalue2(lexbuf,yyr); }
 | '&'                  { warning("ill-formed reference in attribute");
-                         gobble(lexbuf); return attvalue2(lexbuf); }
+                         gobble(lexbuf); return attvalue2(lexbuf,yyr); }
 | '<'                  { warning("attribute contains <");
-                         gobble(lexbuf); return attvalue2(lexbuf); }
-| "\""                 { token_string = regurgitate();
-                         return ATTVALUE2; }
+                         gobble(lexbuf); return attvalue2(lexbuf,yyr); }
+| "\""                 { return regurgitate(yyr); }
 | eof                  { warning("attribute ends in eof");
-                         token_string = regurgitate();
-                         return ATTVALUE2; }
-| [^ '<' '&' '"']+     { gobble(lexbuf); return attvalue2(lexbuf); }
+                         return regurgitate(yyr); }
+| [^ '<' '&' '"']+     { gobble(lexbuf); return attvalue2(lexbuf,yyr); }
 
 {
 }

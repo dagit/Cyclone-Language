@@ -39,6 +39,7 @@ typedef datatype Automata @automata_t;
 LEXGEN_EXTERN_DEFINITION struct Automata_entry {
   string_t                           name;
   string_t                           type;
+  $(string_t,string_t)              *extra_arg;
   int                                initial_state;
   list_t<$(int,Syntax::location_t)@> actions;
 };

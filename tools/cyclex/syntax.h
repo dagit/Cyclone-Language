@@ -34,7 +34,7 @@ datatype Regular_expression.Epsilon Epsilon_val = Epsilon(0);
 #endif
 
 typedef $(regular_expression_t,location_t) @ acase_t;
-typedef $(string_t,string_t,list_t<acase_t>) @ entrypoint_t;
+typedef $(string_t,string_t,$(string_t,string_t)*,list_t<acase_t>) @ entrypoint_t;
 
 SYNTAX_EXTERN_DEFINITION struct Lexer_definition {
   location_t         header;

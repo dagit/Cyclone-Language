@@ -133,8 +133,15 @@ other_definitions:
      { $$=^$(new List($3,$1)); }
 | /* empty */ { $$=^$(NULL); }
 
-definition: TIDENT TEQUAL entry { $$=^$(new $($1,(string_t)NULL,$3)); }
-| TIDENT TSTRING TEQUAL entry { $$=^$(new $($1,$2,$4)); }
+definition: TIDENT TEQUAL entry {
+  $$=^$(new $($1,(string_t)NULL,NULL,$3));
+}
+| TIDENT TSTRING TEQUAL entry {
+  $$=^$(new $($1,$2,NULL,$4));
+}
+| TIDENT TSTRING TSTRING TSTRING TEQUAL entry {
+  $$=^$(new $($1,$2,new $($3,$4),$6));
+}
 
 entry:
   TPARSE acase rest_of_entry { $$=^$(new List($2,rev($3))); }

@@ -108,9 +108,16 @@ void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
 
 void output_entry(string_t sourcename, FILE @ ic, FILE @ oc, 
 		  Lexgen::automata_entry_t e) {
-  fprintf(oc, "%s %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n",
+  string_t extra_formal = "";
+  string_t extra_actual = "";
+  if (e->extra_arg != NULL) {
+    extra_actual = aprintf(", %s", (*e->extra_arg)[1]);
+    extra_formal = aprintf(", %s %s", (*e->extra_arg)[0], (*e->extra_arg)[1]);
+  }
+  fprintf(oc, "%s %s_rec(Lexbuf<`a> lexbuf, int lexstate%s) {\n",
 	  (e->type != NULL)?(buffer_t)e->type:(buffer_t)"int",
-	  e->name);
+ 	   e->name,
+           extra_formal);
   // save new state, then switch on it, so default case can use it.
   // (int switch can't get the value being switched on??)
   fprintf(oc, "  lexstate = lex_engine(lexstate,lexbuf);\n");
@@ -121,12 +128,16 @@ void output_entry(string_t sourcename, FILE @ ic, FILE @ oc,
     copy_chunk(sourcename, ic, oc, loc);
   }
   fprintf(oc,
-    " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n",
-	  e->name);
+          " default:\n"
+          "   lexbuf->refill_buff(lexbuf);\n"
+          "   return %s_rec(lexbuf, lexstate%s);\n",
+	  e->name,
+          extra_actual);
   fprintf(oc, "  }\n throw new Error(\"some action didn't return!\");\n}\n");
-  fprintf(oc, "%s %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
+  fprintf(oc, "%s %s(Lexbuf<`a> lexbuf%s) { return %s_rec(lexbuf,%d%s); }\n",
 	  (e->type != NULL)?(buffer_t)e->type:(buffer_t)"int",
-          e->name, e->name, e->initial_state);
+          e->name, extra_formal,
+          e->name, e->initial_state, extra_actual);
 }
 
 datatype exn { Table_overflow(int) };
