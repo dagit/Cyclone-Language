@@ -3425,7 +3425,7 @@ _tmpEEE,char**_tmpEEC){for(*_tmpEEF=0;*_tmpEEF < *_tmpEEE;(*_tmpEEF)++){(*_tmpEE
 _tmpEEF]='\000';}}int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf){struct
 _RegionHandle _tmp471=_new_region("yyregion");struct _RegionHandle*yyregion=&
 _tmp471;_push_region(yyregion);{int yystate;int yyn=0;int yyerrstatus;int yychar1=0;
-int yyssp_offset;short*yyss=(short*)_region_malloc(yyregion,sizeof(short)* 10000);
+int yyssp_offset;short*yyss=(short*)_region_calloc(yyregion,sizeof(short),10000);
 int yyvsp_offset;unsigned int _tmp9FA;unsigned int _tmp9F9;union Cyc_YYSTYPE*_tmp9F8;
 unsigned int _tmp9F7;union Cyc_YYSTYPE*yyvs=(union Cyc_YYSTYPE*)((_tmp9F7=10000,((
 _tmp9F8=(union Cyc_YYSTYPE*)_region_malloc(yyregion,_check_times(sizeof(union Cyc_YYSTYPE),

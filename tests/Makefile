@@ -17,6 +17,7 @@ all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt)
 	./cyctest
 	./foo < foo_input
 	./histogram histogram.txt
+	./flatlist
 	./test_getopt -abc123
 
 hello$(EXE): hello.o
@@ -48,6 +49,9 @@ test_getopt$(EXE): test_getopt.o
 
 pcredemo$(EXE): pcredemo.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lpcre
+
+flatlist$(EXE): flatlist.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc

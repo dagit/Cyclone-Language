@@ -88,6 +88,8 @@ struct TocState {
   list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
   // (non-tagged) aggregates seen so far, their declaration, and C type
   Dict::dict_t<qvar_t,$(aggrdecl_t,type_t)@`d,`d> @`d aggrs_so_far;
+  // instantiations of abstract structs generated as we go
+  list_t<$(qvar_t,list_t<type_t>,type_t)@`d,`d> @`d abs_struct_types;
   // datatypes seen so far
   Set::set_t<qvar_t,`d> @`d                    datatypes_so_far;
   // xdatatypes seen so far -- bool is false if seen but not initialized (extern)
@@ -447,6 +449,8 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
   }
 }
 
+static type_t typ_to_c(type_t t); // forward declarations
+
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.  
 static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
@@ -483,6 +487,64 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
     return x;
   }
 }
+
+// similar to the above, except that we're working with an instantiated
+// abstract struct.  The fieldnames are thus drawn from the actual
+// struct fields.
+static type_t add_struct_type(qvar_t struct_name,
+                              list_t<tvar_t,`H> type_vars,
+                              list_t<type_t,`H> type_args,
+                              list_t<aggrfield_t> fields) {
+  let TocState{.dyn = dyn, .abs_struct_types = abs_struct_types, ...} = *toc_state;
+  region d = open(dyn); {
+    // look for the same instantiation of abstract-struct-type already declared
+    for (let tts = *abs_struct_types; tts != NULL; tts = tts->tl) {
+      let &$(x,ts2,t) = tts->hd;
+      if (qvar_cmp(x,struct_name) == 0 && 
+          List::length(type_args) == List::length(ts2)) {
+        bool okay = true;
+        for (let ts = type_args; ts != NULL; ts=ts->tl, ts2=ts2->tl)
+          if (!unify(ts->hd,ts2->hd)) { okay = false; break; }
+        if (okay)
+          return t;
+      }
+    }
+    // haven't seen this one before, add a declaration
+    // we're calling it a "tuple" so we don't have to worry about name 
+    // clashes.
+    stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
+    type_t x = strct(xname);
+    let fs = NULL;
+    // go ahead and add this to the struct types
+    *abs_struct_types  = rnew(d) List{rnew(d) $(struct_name,type_args,x),
+                                      *abs_struct_types};
+    // copy the fields over
+    region r;
+    let inst = List::rzip(r,r,type_vars,type_args);
+    for (; fields != NULL; fields = fields->tl) {
+      let f = fields->hd;
+      type_t t = f->type;
+      t = typ_to_c(rsubstitute(r,inst,t));
+      // still could be abstract and end up void -- if so, drop it.
+      if (unify(t,&VoidType_val)) break;
+      t = typ_to_c(t);
+      fs = new List(new Aggrfield{f->name,mt_tq,t,
+                                  f->width,f->attributes},fs);
+    }
+    fs = List::imp_rev(fs);
+    let sd = new Aggrdecl{.kind=StructA, .sc = Public, 
+                          .name = new $(Rel_n(NULL),xname), .tvs = NULL, 
+                          .impl = new AggrdeclImpl{.exist_vars = NULL, 
+                                                   .rgn_po = NULL,
+                                                   .fields = fs, 
+                                                   .tagged=false},
+                          .attributes = NULL};
+    result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
+    return x;
+  }
+}
+                              
+                              
 
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
@@ -523,7 +585,6 @@ static exp_t datatype_tag(datatypedecl_t td, qvar_t name) {
 ///////////////////////////////////////////////////////////////
 //         Convert a Cyclone type to a C type                //
 ///////////////////////////////////////////////////////////////
-static type_t typ_to_c(type_t t); // forward declarations
 static void enumdecl_to_c(enumdecl_t ed); 
 static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_result_decls);
 static void datatypedecl_to_c(datatypedecl_t tud);
@@ -594,6 +655,21 @@ static type_t dyn_rgn_typ() {
   }
   return *r;
 }
+static bool is_boxed_tvar(type_t t) {
+  switch (compress(t)) {
+  case &VarType(tv): 
+    return kind_leq(typ_kind(t),&tbk);
+  default: return false;
+  }
+}
+static bool is_abs_tvar(type_t t) {
+  switch (compress(t)) {
+  case &VarType(tv): 
+    return kind_leq(&ak,typ_kind(t));
+  default: return false;
+  }
+}
+
 
 static type_t typ_to_c(type_t t) {
   switch (t) {
@@ -668,7 +744,20 @@ static type_t typ_to_c(type_t t) {
     let ad = get_known_aggrdecl(info);
     if(ad->kind==UnionA)
       return aggrdecl_type(ad->name,unionq_typ);
-    else return aggrdecl_type(ad->name,strctq);
+    let fs = (ad->impl == NULL) ? NULL : ad->impl->fields;
+    if (fs == NULL) return aggrdecl_type(ad->name,strctq);
+    for (; fs->tl != NULL; fs = fs->tl);
+    let last_type = fs->hd->type;
+    if (kind_leq(&ak,typ_kind(last_type))) {
+      // to avoid looping, make sure the instantiation of the last
+      // type is not still abstract.  If it is, we can just return
+      // the struct type.
+      region r;
+      let t = rsubstitute(r,rzip(r,r,ad->tvs,ts),last_type);
+      if (is_abs_tvar(t)) return aggrdecl_type(ad->name,strctq);
+      return add_struct_type(ad->name,ad->tvs,ts,ad->impl->fields);
+    }
+    return aggrdecl_type(ad->name,strctq);
   case &EnumType(tdn,_): return t;
   case &AnonEnumType(fs): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
@@ -776,15 +865,8 @@ static bool is_void_star(type_t t) {
   }
 }
 
-static bool is_tvar(type_t t) {
-  switch (compress(t)) {
-  case &VarType(...): return true;
-  default: return false;
-  }
-}
-
-static bool is_void_star_or_tvar(type_t t) {
-  return is_void_star(t) || is_tvar(t);
+static bool is_void_star_or_boxed_tvar(type_t t) {
+  return is_void_star(t) || is_boxed_tvar(t);
 }
 
 // returns true when field f of the struct/union t has type void*.
@@ -799,7 +881,7 @@ static bool is_poly_field(type_t t, field_name_t f) {
     let field = lookup_field(fs,f);
     if (field == NULL) 
       toc_impos("is_poly_field: bad field %s",*f);
-    return is_void_star_or_tvar(field->type);
+    return is_void_star_or_boxed_tvar(field->type);
   default: toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
@@ -1504,7 +1586,7 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
   let s    = exp_stmt(copy_exp(xexp),DL);
 
   let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
-  let aggr_typ = aggrdecl_type(tdn,strctq);
+  let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
   
   bool is_atomic = true;
   aggrdecl_t ad;
@@ -2348,7 +2430,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             let &Datatypefield{qv,tqts,_,_} = injectors->hd;
             type_t field_typ = typ_to_c((*tqts->hd)[1]);
             exp_to_c(nv,arg);
-            if (is_void_star_or_tvar(field_typ))
+            if (is_void_star_or_boxed_tvar(field_typ))
               arg = cast_it(field_typ,arg);
             // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
             //   but I doubt it would happen and it causes a lot of gunk. :-(
@@ -3086,7 +3168,7 @@ DynCast:
         let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star_or_tvar(fieldtyp))
+        if (is_void_star_or_boxed_tvar(fieldtyp))
           fieldexp->r = 
             cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
         // for tagged unions, must insert tag here
@@ -3107,7 +3189,7 @@ DynCast:
               let &$(field,fieldexp) = fields2->hd;
               let fieldtyp = field->type;
               exp_to_c(nv,fieldexp);
-              if (is_void_star_or_tvar(fieldtyp))
+              if (is_void_star_or_boxed_tvar(fieldtyp))
                 fieldexp->r = 
                   cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
               newdles = new List(new $(NULL,fieldexp), newdles);
@@ -3131,7 +3213,7 @@ DynCast:
         let &$(field,fieldexp) = fields->hd;
         let fieldtyp = field->type;
         exp_to_c(nv,fieldexp);
-        if (is_void_star_or_tvar(fieldtyp))
+        if (is_void_star_or_boxed_tvar(fieldtyp))
           fieldexp->r = cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
       }
       //for (let es = dles; es != NULL; es = es->tl)
@@ -3160,7 +3242,7 @@ DynCast:
 	exp_t cur_e = es->hd;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star_or_tvar(field_typ))
+	if (is_void_star_or_boxed_tvar(field_typ))
 	  cur_e = cast_it(field_typ,cur_e);
 	dles = new List(new $(NULL,cur_e),dles);
       }
@@ -3177,7 +3259,7 @@ DynCast:
 	exp_t cur_e = es->hd;
 	type_t field_typ = typ_to_c((*tqts->hd)[1]);
 	exp_to_c(nv,cur_e);
-	if (is_void_star_or_tvar(field_typ))
+	if (is_void_star_or_boxed_tvar(field_typ))
 	  cur_e = cast_it(field_typ,cur_e);
 	let a = assign_stmt(aggrmember_exp(member_exp,fieldname(i), DL),
 			    cur_e,DL);
@@ -3214,7 +3296,6 @@ DynCast:
                           list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
                                var_exp(x,DL)), DL);
       } else {
-        xexp = times_exp(sizeoftyp_exp(t_c,DL),num_elts,DL);
         if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
@@ -3225,22 +3306,27 @@ DynCast:
         rexp = fncall_exp(_tag_dyneither_e, list(var_exp(p,DL),uint_exp(1,DL),
                                                   var_exp(x,DL)), DL);
       }
-      let s = declare_stmt(x, uint_typ, xexp,
+      let s = declare_stmt(x, uint_typ, num_elts,
                            declare_stmt(p,cstar_typ(t_c,mt_tq),pexp,
                                         exp_stmt(rexp,DL),DL),DL);
       e->r = stmt_exp_r(s);
     } else {
-      let nelts = sizeoftyp_exp(t_c,DL);
-      switch (num_elts->r) {
-      case &Const_e({.Int_c = $(_,1)}): break;
-      default: nelts = times_exp(nelts,num_elts,DL); break;
-      }
-      if (rgnopt != NULL && !no_regions) {
-        exp_t rgn = (exp_t)rgnopt;
-        exp_to_c(nv,rgn);
-        e->r = rmalloc_exp(rgn, nelts)->r;
+      if (is_calloc) {
+        if (rgnopt != NULL && !no_regions) {
+          exp_t rgn = (exp_t)rgnopt;
+          exp_to_c(nv,rgn);
+          e->r = rcalloc_exp(rgn, sizeoftyp_exp(t_c,DL), num_elts)->r;
+        } else {
+          e->r = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), num_elts)->r;
+        }
       } else {
-        e->r = malloc_exp(*topt, nelts)->r;
+        if (rgnopt != NULL && !no_regions) {
+          exp_t rgn = (exp_t)rgnopt;
+          exp_to_c(nv,rgn);
+          e->r = rmalloc_exp(rgn, num_elts)->r;
+        } else {
+          e->r = malloc_exp(*topt, num_elts)->r;
+        }
       }
     }
     break;
@@ -3414,7 +3500,7 @@ xlate_pat(env_t<`rgn> nv,
       let t2  = p2->topt->v;
       let t2c = typ_to_c(t2);
       let arrow_exp = aggrarrow_exp(var_exp(temp,DL), fieldname(cnt), DL);
-      if(is_void_star_or_tvar(typ_to_c(tuf_typ)))
+      if(is_void_star_or_boxed_tvar(typ_to_c(tuf_typ)))
 	arrow_exp = cast_it(t2c, arrow_exp);
       decls = rnew(rgn) List(rnew (rgn) $(v,t2c),decls);
       let result = xlate_pat(nv,rgn,t2,var_exp(v,DL), arrow_exp,
@@ -3519,7 +3605,7 @@ xlate_pat(env_t<`rgn> nv,
         nv = result[0];
         decls = result[1];
         let memexp = aggrmember_exp(r,f,DL);
-        if(is_void_star_or_tvar(lookup_field(ad->impl->fields,f)->type))
+        if(is_void_star_or_boxed_tvar(lookup_field(ad->impl->fields,f)->type))
           memexp = cast_it(t2c, memexp);
         let s2 = result[2];
         let s3 = assign_stmt(var_exp(v,DL), memexp, DL);
@@ -4133,6 +4219,9 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
         // JGM: I'm trying to get rid of warnings when we assign "const"
         // locations...
         let old_field = fields->hd;
+        if (fields->tl == NULL && kind_leq(&ak,typ_kind(old_field->type)))
+          // must skip over the last member if it's abstract
+          continue;
         let new_field = new Aggrfield{.name = old_field->name,
                                       .tq = mt_tq,
                                       .type = typ_to_c_array(old_field->type),
@@ -4600,6 +4689,7 @@ static void init() {
       new TocState{ .dyn = dyn,
                     .tuple_types = rnew(d) NULL,
                     .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+                    .abs_struct_types = rnew(d) NULL,
                     .datatypes_so_far = rnew(d) Set::rempty(d,qvar_cmp),
                     .xdatatypes_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
                     .qvar_tags = rnew(d) Dict::rempty(d,qvar_tag_cmp),

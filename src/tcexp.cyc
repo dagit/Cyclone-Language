@@ -765,7 +765,9 @@ static void check_writable(tenv_t te, exp_t e) {
 static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
                           exp_t e, incrementor_t i) {
   // Don't promote any arrays to pointers, as per K&R
-  tcExpNoPromote(te,NULL,e);
+  TEMP_RGN(te, temp) {
+    tcExpNoPromote(enter_lhs(temp,te),NULL,e);
+  }
   if(!is_lvalue(e))
     return expr_err(te,loc,topt,"increment/decrement of non-lvalue");
   check_writable(te, e);
@@ -827,7 +829,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
   TEMP_RGN(te, r) {
-    tcExpNoPromote(enter_notreadctxt(r,te),NULL,e1);
+    tcExpNoPromote(enter_lhs(r,enter_notreadctxt(r,te)),NULL,e1);
   }
   tcExp(te,&e1->topt->v,e2);
   type_t t1 = e1->topt->v;
@@ -1236,7 +1238,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // We use clear_notreadctxt because the pointer might escape off
   // and later be read.
   TEMP_RGN(te, r) {
-    tcExpNoInst(clear_notreadctxt(r,te),topt2,e);
+    tcExpNoInst(enter_lhs(r,clear_notreadctxt(r,te)),topt2,e);
     // can't take the address of a unique path
     if (is_noalias_pointer_or_aggr(r,e->topt->v))
       terr(e->loc,"Cannot take the address of an alias-free path");
@@ -1380,7 +1382,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
  // *e
 static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
   TEMP_RGN(te_orig, r) { 
-    let te = clear_notreadctxt(r,te_orig);
+    let te = clear_lhs(r,clear_notreadctxt(r,te_orig));
     tcExp(te,NULL,e);
     type_t t = compress(e->topt->v);
     switch (t) {
@@ -1467,7 +1469,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
 			  exp_t e, field_name_t f, 
                           bool @is_tagged, bool @is_read) {
   TEMP_RGN(te, r) {
-    tcExp(clear_notreadctxt(r,te),NULL,e);
+    tcExp(clear_lhs(r,clear_notreadctxt(r,te)),NULL,e);
   }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
@@ -1486,6 +1488,10 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       TEMP_RGN(te, rgn) {
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);
 	t3 = rsubstitute(rgn,inst,finfo->type);
+      }
+      let t3_kind = typ_kind(t3);
+      if (kind_leq(&ak,t3_kind)) {
+        return expr_err(te,loc,topt,"cannot get member %s since its type is abstract",*f);
       }
       if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t3))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
@@ -1530,7 +1536,7 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
 static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt, 
 			  exp_t e1, exp_t e2) {
   TEMP_RGN(te_orig, r) {
-    let te = clear_notreadctxt(r,te_orig);
+    let te = clear_lhs(r,clear_notreadctxt(r,te_orig));
     tcExp(te,NULL,e1);
     tcExp(te,NULL,e2);
     type_t t1 = compress(e1->topt->v);
@@ -2018,6 +2024,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
   //     if T is bits-only or zero-able then:
   //       if n has type tag_t<N> and topt wants it, then result is T*{`n}
   //       otherwise, result is T? 
+  //   e : tag_t<valueof(sizeof(T))> -- result is T@ or T* depending upon topt
   //   otherwise it's char ?
   type_t elt_type; // the element type of the resulting pointer
   exp_t num_elts;  // the number of elements of the resulting pointer
@@ -2031,7 +2038,9 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     num_elts = *e;
     one_elt = false;
   } else {
-    switch ((*e)->r) {
+    raw_exp_t er = (*e)->r;
+  retry_sizeof:
+    switch (er) {
     case &Sizeoftyp_e(t2):  
       elt_type = t2;
       *t = new elt_type;
@@ -2060,14 +2069,32 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
       break;
     default:
     No_sizeof:
+      {
+      // see if e is a tag_t<valueof_t(sizeof(T))>
+      let real_e = *e;
+      switch (real_e->r) {
+      case &Cast_e(_,e,_,_): real_e = e; break;
+      default: break;
+      }
+      switch (compress(real_e->topt->v)) {
+      case &TagType(tagt):
+        switch (compress(tagt)) {
+        case &ValueofType(vexp):
+          er = vexp->r; goto retry_sizeof;
+        default: break;
+        }
+        break;
+      default: break;
+      }
       elt_type = char_typ;
       *t = new elt_type;
       num_elts = *e;
       one_elt = false;
+      }
       break;
     }
   }
-  *e = num_elts;
+  //*e = num_elts;
   *is_fat = !one_elt;
   // Don't yet support existential types (to do it, add to DatatypeFieldInfo
   // and here generate fresh evars).
@@ -2135,7 +2162,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   // a way that's similar to doing an AssignOp with some primop
   // (e.g., foo.x += 3).
   TEMP_RGN(te, r) {
-    let te2 = enter_notreadctxt(r,te);
+    let te2 = enter_lhs(r,enter_notreadctxt(r,te));
     tcExp(te2,NULL,e1);
     tcExp(te2,&e1->topt->v,e2);
   }

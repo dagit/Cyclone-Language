@@ -4,17 +4,23 @@
 
 int c = (int)' ';
 
+#define MAX_IDENT 80
+
 datatype exn {ParseError};
 datatype exn.ParseError parse_error = ParseError;
 
+// used to signal an error and abort the computation by throwing an exception
 void yyerror(string_t s) {
   printf("error: %s\n",s);
   throw &parse_error;
 }
 
+// returns a token number and sets yylval appropriately
 int yylex() {
   if (c == EOF) return -1;
-  while (c == ' ' || c == '\n' || c == '\t') c = fgetc(stdin);
+  // skip white space
+  while (c == ' ' || c == '\n' || c == '\t' || c == '\r') c = fgetc(stdin);
+  // look for a number
   if (c >= (int)'0' && c <= (int)'9') {
     int i = c - ((int)'0');
     c = fgetc(stdin);
@@ -24,6 +30,22 @@ int yylex() {
     }
     yylval = YYSTYPE{.Integer = i};
     return INT;
+  // look for an identifier
+  } else if ((c >= (int)'a' && c <= (int)'z') || 
+             (c >= (int)'A' && c <= (int)'Z')) {
+    char ?buffer = new {for i < MAX_IDENT : '\0'};
+    int buf_index = 0;
+    while ((c >= (int)'a' && c <= (int)'z') || 
+           (c >= (int)'A' && c <= (int)'Z') ||
+           (c >= (int)'0' && c <= (int)'9') || c == '_') {
+      buffer[buf_index] = (char)c;
+      c = fgetc(stdin);
+      buf_index++;
+      if (buf_index == MAX_IDENT) yyerror("identifier too long");
+    }
+    yylval = YYSTYPE{.Identifier = buffer};
+    return IDENTIFIER;
+  // return something else
   } else {
     int old_c = c;
     c = fgetc(stdin);
@@ -32,6 +54,7 @@ int yylex() {
 }
 
 int main() {
-  yyparse();
+  // keep looping until the parser quits
+  while (yyparse()) /* skip */;
   return 0;
 }

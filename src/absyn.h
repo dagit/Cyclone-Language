@@ -573,8 +573,7 @@ namespace Absyn {
     exp_opt_t  rgn;      // only here for rmalloc and rcalloc
     type_t    *elt_type; // when [r]malloc, set by type-checker.  when 
                          // [r]calloc, set by parser
-    exp_t      num_elts; // for [r]malloc: before tc, is the sizeof(t)*n.
-                         //                after tc, is just n.
+    exp_t      num_elts; // for [r]malloc: is the sizeof(t)*n.
                          // for [r]calloc: is just n.
     bool       fat_result; // true when result is a elt_type? -- set by tc
   };

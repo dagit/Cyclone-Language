@@ -401,7 +401,7 @@ bool okay_szofarg(type_t t) {
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;
   case &DynRgnType(_,_): return true;
-  case &AggrType(AggrInfo(info,_)):
+  case &AggrType(AggrInfo(info,ts)):
     _ ad;
     switch(info) {
     case {.UnknownAggr = _}: impos("szof on unchecked StructType");
@@ -409,6 +409,13 @@ bool okay_szofarg(type_t t) {
     }
     if(ad->impl == NULL)
       return false;
+    { 
+      region temp;
+      let inst = List::rzip(temp,temp,ad->tvs,ts);
+      for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl) 
+        if (!okay_szofarg(rsubstitute(temp,inst,fs->hd->type))) return false;
+      return true;
+    }
     fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     for(; fs != NULL; fs = fs->tl)

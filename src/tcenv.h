@@ -159,6 +159,12 @@ extern tenv_t<`g,`r> enter_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r
 extern tenv_t<`g,`r> clear_notreadctxt(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
 extern bool in_notreadctxt(tenv_t te);
 
+//used to track whether or not we're in a left-hand-side or right-hand-side
+//context.
+extern tenv_t<`g,`r> enter_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
+extern tenv_t<`g,`r> clear_lhs(region_t<`r>,tenv_t<`g,`r2> te : {`r2}>`r);
+extern bool in_lhs(tenv_t te);
+
 // The next 4 all assign through their last arg
 extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
 extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);

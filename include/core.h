@@ -88,7 +88,7 @@ struct NewRegion<`r2::R> {
 namespace Core {
 typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
   /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
-extern struct Opt<`a> { `a v; };
+extern struct Opt<`a::B> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
 typedef struct Opt<`a> *`r opt_t<`a,`r>;
   /** An [opt_t] is a pointer to a [struct Opt].  An [opt_t] can be

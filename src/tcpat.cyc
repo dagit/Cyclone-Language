@@ -223,6 +223,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
   case &Var_p(vd,p2):
     res = tcPatRec(te,p2,topt,rgn_opt);
     t = p2->topt->v;
+    if (!kind_leq(typ_kind(t),&tmk))
+      terr(p->loc, "pattern would point to an abstract member");
     set_vd(vd, &res.patvars, t);
     break;
   case &Reference_p(vd,p2):

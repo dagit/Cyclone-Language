@@ -418,7 +418,9 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
 
-static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
+static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, 
+                       aggr_kind_t str_or_union,
+                       list_t<tvar_t,`H> tvs,
 		       list_t<$(type_t,type_t)@> rpo, 
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
@@ -437,13 +439,19 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
       let &Aggrfield(fn,tq,t,width,atts) = fs->hd;
       
       if (List::mem(strptrcmp,prev_fields,fn))
-	terr(loc, "duplicate field %s", *fn);
+	terr(loc, "duplicate member %s", *fn);
       // add the field to previous fields only if it's not an empty name
       // (empty names arise for bitfield padding.)
       if (strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
-      check_type(loc,te,tvs,&tmk,false,t);
+      kind_t field_kind = &tmk;
+      // FIX:  we can get ill-founded cycles of the form
+      // struct Foo<`a::A> { struct Foo<`a> x; } here, and
+      // it can cut across multiple definitions...  
+      if (fs->tl == NULL && str_or_union == StructA) 
+        field_kind = &tak; // we allow abstract kind for the last field
+      check_type(loc,te,tvs,field_kind,false,t);
 
       fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -540,7 +548,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
-    tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, ge, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
     rule_out_memkind(loc, v, tvs, false);
     // we constrain existential variables to be Aliasable if
@@ -574,7 +582,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
       terr(loc,"@tagged qualifier is only allowed on union declarations");
-    tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
+    tcAggrImpl(te, ge, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);

@@ -528,8 +528,23 @@ kind_t typ_kind(type_t t) {
     // for structs or unions without definitions, we must be 
     // conservative and treat them as having AnyKind
   case &AggrType(AggrInfo({.UnknownAggr = _},_)): return &ak;
-  case &AggrType(AggrInfo({.KnownAggr = & &Aggrdecl(_,_,_,_,i,_)},_)):    
-    return (i==NULL ? &ak : &mk);
+  case &AggrType(AggrInfo({.KnownAggr = & &Aggrdecl(_,_,_,tvs,i,_)},ts)):    
+    if (i == NULL) return &ak;
+    // the kind of the aggregate depends upon the kind of its last field
+    let fields = i->fields;
+    if (fields == NULL) return &mk;
+    for (; fields->tl != NULL; fields = fields->tl);
+    let last_type = fields->hd->type;
+    kind_t k = typ_kind(last_type);
+    if (ts != NULL && (k == &ak || k == &tak)) {
+      // we have to substitute here
+      region temp;
+      let inst = List::rzip(temp,temp,tvs,ts);
+      last_type = rsubstitute(temp,List::rzip(temp,temp,tvs,ts),last_type);
+      k = typ_kind(last_type);
+    } 
+    if (k == &ak || k == &tak) return k;
+    return &mk;
   case &AnonAggrType(_,_): return &mk;
   case &PointerType(pinfo):
     switch (conref_def((bounds_t)&DynEither_b_val,pinfo.ptr_atts.bounds)) {
