@@ -18,12 +18,10 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 // Translation of Cyclone abstract syntax to C abstract syntax.
-// Assumes that the type-checker has been successfully run on the
-// Cyclone AST.  Uses lots of GCC-specific features (that should be in
-// C-9X) to simplify the translation -- in particular, we use struct
-// expressions "(struct foo){.f1=e1,.f2=e2,...,.fn=en}" and statement
-// expressions "({int temp = e; temp++})".  The latter is used for
-// declaring temps needed in the translation of expressions.
+// Assumes RemoveAggrs and Toseqc will be run subsequently (thoough
+// the latter should be optional if we knew the underlying C compiler
+// used left-to-right evaluation).  We use GCC-sepcific features (especially
+// statement-expressions as convenient).
 
 // The translation is mostly done in place in an imperative style
 // (i.e., we overwrite AST nodes) so it's fairly crucial that we don't
@@ -35,8 +33,8 @@
 
 // FIX: we could probably use "const" in lots of places where we're not.
 
-// Note: unresolvedmem_exp should only be used (1) to build arrays; or
-// (2) to build other things (structs etc.) at top level only; Tovc relies on this.
+// unresolvedmem_exp should only be used (1) to build arrays; or (2) to build
+// other things (structs etc.) at top level only; Tovc relies on this.
 
 #include <string.h>
 #include <dict.h>
@@ -446,7 +444,7 @@ static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
 
 ///////////////////////////// Various Utilities /////////////////////////////
 
-/*FIX: this is duplicated in tcutil; but the functions are slightly different */
+// FIX: this is duplicated in tcutil; but the functions are slightly different
 static bool is_zero(exp_t e) {
   switch (e->r) {
   case &Const_e({.Char_c = $(_,c)}): return c == '\0';
@@ -1579,14 +1577,14 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     if (!is_dyneither) {
       ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL);
       ea->topt = fat_ptr_type;
-      ea->annot = &InsertChecks::NullAndFatBound_val;
+      ea->annot = &InsertChecks::NoCheck_val;
     }
     exp_to_c(nv,ea); xinit = ea; break;
   case &Subscript_e(ea,eb):
     if (!is_dyneither) {
       ea = cast_exp(fat_ptr_type,ea,false,Other_coercion,DL);
       ea->topt = fat_ptr_type;
-      ea->annot = &InsertChecks::NullAndFatBound_val;
+      ea->annot = &InsertChecks::NoCheck_val;
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
     xinit = fncall_exp(_dyneither_ptr_plus_e,
@@ -1602,7 +1600,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     x_exp->topt = fat_ptr_type;
     let deref_x = deref_exp(x_exp,DL);
     deref_x->topt = elt_type;
-    deref_x->annot = &InsertChecks::NullAndFatBound_val;
+    deref_x->annot = &InsertChecks::NullAndFatBound_val; //check bound and NULL
     exp_to_c(nv,deref_x);
     let y = temp_var();                // build elt_type y = *x;
     let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
@@ -1611,8 +1609,9 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     if (popt != NULL) {
       let y_exp = varb_exp(y_bnd,DL);
       y_exp->topt = deref_x->topt;
-      z_init = prim2_exp(popt->v,y_exp,e2,DL);
+      z_init = prim2_exp(popt->v,y_exp,copy_exp(e2),DL);
       z_init->topt = y_exp->topt;
+      z_init->annot = &InsertChecks::NoCheck_val;
     }
     exp_to_c(nv,z_init);
     let z = temp_var();                // build z = y op e2;
@@ -1776,6 +1775,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   // cases where we think to do checks, set this bool as a sanity check
   bool did_inserted_checks = false;
   switch(e->annot) {
+  case &EmptyAnnot: // for Cyclone code generated in Toc that needs no checks
   case &InsertChecks::NoCheck: did_inserted_checks = true; break;
   default: break;
   }
@@ -1840,9 +1840,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
 	}
 	break;
-      default:
-	toc_impos("numelts primop applied to non-array %s",
-                  typ2string((type_t)arg->topt));
+      default: toc_impos("numelts primop applied to non-array %s",
+			 typ2string((type_t)arg->topt));
       }
       break;
     case Plus:
@@ -2029,11 +2028,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     if (is_zero_ptr_deref(e1,&ptr_type,&is_dyneither,&elt_type)) {
       zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type,
                            is_dyneither, elt_type);
-      return; // trust that previous call does any inserted checks
+      return; //trust that call to zero_ptr_assign_to_c does any inserted checks
     }
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
-    bool e1_poly    = is_poly_project(e1);
+    bool e1_poly = is_poly_project(e1);
     set_lhs(nv,true);
     exp_to_c(nv,e1);
     set_lhs(nv,false);
@@ -2046,8 +2045,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         _ change;
         switch(popt->v) {
         case Plus:  change = e2; break;
-        case Minus:
-          change = prim1_exp(Minus,e2,DL); break;
+        case Minus: change = prim1_exp(Minus,e2,DL); break;
         default:    toc_impos("bad t ? pointer arithmetic");
         }
         done = true;
@@ -2077,7 +2075,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // declarations of temps, bound checks, etc.  If so we look into e1,
       // find the lvalue, and put the assignment there.
       if (!is_lvalue(e1)) {
-        lvalue_assign(e1,NULL,assignop_lvalue,new{$(popt,e2)});
+        lvalue_assign(e1,NULL,assignop_lvalue,new $(popt,e2));
         e->r = e1->r;
       }
     }
@@ -2188,11 +2186,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
         } else {
 	  // if there are no var args, then set argv to the empty fat pointer
+	  // (thin pointer here, function-argument calls _tag_dyneither)
 	  // instead of an array of 0 elements to keep ansi c compilers happy
-	  // FIX: this does not look right -- array_args is not used!
-          let array_args = list(new $(NULL,uint_exp(0,DL)),
-				new $(NULL,uint_exp(0,DL)),
-				new $(NULL,uint_exp(0,DL)));
           s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
         }
       } else {
@@ -2206,7 +2201,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  }
 	  let init = array_exp(imp_rev(array_args),DL);
 	  s = declare_stmt(argv, arr_type, init, s,DL);
-	} else // FIX??
+	} else
           s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
       }
 
@@ -2934,9 +2929,9 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Valueof_e(_):         toc_impos("valueof(-)");
   case &Asm_e(...):           toc_impos("__asm__");
   }
-  /*  if(!did_inserted_checks)
+  if(!did_inserted_checks)
     Warn::impos_loc(e->loc,aprintf("Toc did not examine an inserted check: %s",
-    exp2string(e)));*/
+				   exp2string(e)));
 }
 
 ///////////////////////////////////////////////////////////////
@@ -3031,14 +3026,14 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
   case &Tcpat::WhereTest(e): 
     // FIX: we really shouldn't have e being null...
     if (e == NULL) return v; else return e;  
-  case &Tcpat::EqNull: return eq_exp(v, signed_int_exp(0,DL),DL);
+  case &Tcpat::EqNull:  return eq_exp(v, signed_int_exp(0,DL),DL);
   case &Tcpat::NeqNull: return neq_exp(v, signed_int_exp(0,DL),DL);
   case &Tcpat::EqEnum(ed, ef): 
     return eq_exp(v, new_exp(new Enum_e(ed, ef),DL), DL);
   case &Tcpat::EqAnonEnum(t, ef): 
     return eq_exp(v, new_exp(new AnonEnum_e(t, ef),DL), DL);
   case &Tcpat::EqFloat(s,i): return eq_exp(v, float_exp(s,i,DL), DL);
-  case &Tcpat::EqConst(i): return eq_exp(v, signed_int_exp(i,DL), DL);
+  case &Tcpat::EqConst(i):   return eq_exp(v, signed_int_exp(i,DL), DL);
   case &Tcpat::EqDatatypeTag(i,tud,tuf):
     // The compilation of the path has already done a dereference, so
     // get rid of any dereference in the path (peeking under casts.)
@@ -3082,7 +3077,6 @@ datatype TestKind {
 datatype TestKind.OtherTest OtherTest_val = OtherTest;
 datatype TestKind.DatatypeTagTest DatatypeTagTest_val = DatatypeTagTest;
 
-
 // returns the number of pattern tests that admit a switch, and whether
 // the pattern test is a datatype test, a tagged union test, a where-clause
 // test, or something else. If any pattern test does not support a switch, 
@@ -3125,15 +3119,11 @@ static $(int, datatype TestKind@)
 static pat_t compile_pat_test_as_case(Tcpat::pat_test_t p) {
   exp_t e;
   switch (p) {
-  case &Tcpat::EqEnum(ed,ef): 
-    e = new_exp(new Enum_e(ed, ef), DL); break;
-  case &Tcpat::EqAnonEnum(t, ef):
-    e = new_exp(new AnonEnum_e(t, ef), DL); break;
-  case &Tcpat::EqConst(i): fallthru(i);
+  case &Tcpat::EqEnum(ed,ef):     e = new_exp(new Enum_e(ed, ef),    DL); break;
+  case &Tcpat::EqAnonEnum(t, ef): e = new_exp(new AnonEnum_e(t, ef), DL); break;
+  case &Tcpat::EqConst(i):           fallthru(i);
   case &Tcpat::EqDatatypeTag(i,_,_): fallthru(i);
-  case &Tcpat::EqTaggedUnion(_,i):
-    e = uint_exp(i,DL);
-    break;
+  case &Tcpat::EqTaggedUnion(_,i):   e = uint_exp(i,DL); break;
   default: toc_impos("compile_pat_test_as_case!");
   }
   return new_pat(new Exp_p(e), DL);
@@ -3509,33 +3499,26 @@ static void stmt_to_c(env_t nv, stmt_t s) {
   // written to be self-tail recursive
   while (true) {
     switch (s->r) {
-    case &Skip_s:
-      return;
-    case &Exp_s(e):
-      exp_to_c(nv, e);
-      return;
+    case &Skip_s:   return;
+    case &Exp_s(e): exp_to_c(nv, e); return;
     case &Seq_s(s1,s2):
       stmt_to_c(nv,s1);
       s = s2;
       continue;
     case &Return_s(eopt):
-      type_opt_t topt = NULL;
       if (eopt != NULL) {
-	topt = typ_to_c((type_t)eopt->topt);
+	type_t t = typ_to_c((type_t)eopt->topt);
 	exp_to_c(nv,(exp_t)eopt);
-      }
-      // reset handler **after** evaluating expression
-      let npop = get_npop(s);
-      if (npop > 0)
-	if (topt != NULL) {
+	int npop = get_npop(s);
+	if(npop > 0) {
+	  // reset handler **after** evaluating expression
 	  let x = temp_var();
 	  let retn_stmt = return_stmt(var_exp(x,DL),DL);
-	  s->r = declare_stmt(x,(type_t)topt, eopt,
-			      seq_stmt(make_npop_handler(npop),
-				       retn_stmt,DL),DL)->r;
-	} else {
-	  do_npop_before(npop,s);
+	  do_npop_before(npop,retn_stmt);
+	  s->r = declare_stmt(x, t, eopt, retn_stmt, DL)->r;
 	}
+      } else
+	do_npop_before(get_npop(s),s);
       return;
     case &IfThenElse_s(e,s1,s2):
       exp_to_c(nv,e);
