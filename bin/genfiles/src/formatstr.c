@@ -19,21 +19,28 @@ unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
 Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
 unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
 struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; extern int
-isalnum( int __c); extern int isalpha( int __c); extern int iscntrl( int __c);
-extern int isdigit( int __c); extern int isgraph( int __c); extern int islower(
-int __c); extern int isprint( int __c); extern int ispunct( int __c); extern int
-isspace( int __c); extern int isupper( int __c); extern int isxdigit( int __c);
-extern int tolower( int __c); extern int toupper( int __c); extern int isascii(
-int __c); extern int toascii( int __c); extern int _tolower( int __c); extern
-int _toupper( int __c); struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_String_strlen(
-struct _tagged_arr s); extern struct _tagged_arr Cyc_String_implode( struct Cyc_List_List*
-c); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr
-line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[ 9u];
-struct Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static const
-int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{
-struct _tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
+isalnum( int __c)  __attribute__(( cdecl )) ; extern int isalpha( int __c)
+ __attribute__(( cdecl )) ; extern int iscntrl( int __c)  __attribute__(( cdecl
+)) ; extern int isdigit( int __c)  __attribute__(( cdecl )) ; extern int isgraph(
+int __c)  __attribute__(( cdecl )) ; extern int islower( int __c)
+ __attribute__(( cdecl )) ; extern int isprint( int __c)  __attribute__(( cdecl
+)) ; extern int ispunct( int __c)  __attribute__(( cdecl )) ; extern int isspace(
+int __c)  __attribute__(( cdecl )) ; extern int isupper( int __c)
+ __attribute__(( cdecl )) ; extern int isxdigit( int __c)  __attribute__(( cdecl
+)) ; extern int tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper(
+int __c)  __attribute__(( cdecl )) ; extern int isascii( int __c)
+ __attribute__(( cdecl )) ; extern int toascii( int __c)  __attribute__(( cdecl
+)) ; extern int _tolower( int __c)  __attribute__(( cdecl )) ; extern int
+_toupper( int __c)  __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern
+unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern int Cyc_String_strlen( struct _tagged_arr s); extern
+struct _tagged_arr Cyc_String_implode( struct Cyc_List_List* c); struct Cyc_Lineno_Pos{
+struct _tagged_arr logical_file; struct _tagged_arr line; int line_no; int col;
+} ; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
+static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
+static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
+_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
 _tagged_arr desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct
 _tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
 struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;

@@ -353,7 +353,7 @@ char ?`r rstrdup(region_t<`r> r, const char ?`r1 src) {
   char ?`r temp;
 
   len = strlen(src);
-  temp = rnew_string(r,len);
+  temp = rnew_string(r,len+1);
   strncpy(temp,src,len);
   return temp;
 }
