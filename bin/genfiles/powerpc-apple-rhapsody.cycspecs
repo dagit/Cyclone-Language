@@ -1,6 +1,3 @@
-*cyclone:
- -elim-statement-expressions
-
 *predefines:
 
 

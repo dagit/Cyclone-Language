@@ -734,9 +734,8 @@ char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{cha
 tag;struct _dyneither_ptr f1;};struct Cyc_rusage;enum Cyc_SigBuiltin{Cyc_SIG_DFL  = 
 0,Cyc_SIG_ERR  = 1,Cyc_SIG_IGN  = 2};struct Cyc___SIG_BUILTIN_struct{int tag;enum 
 Cyc_SigBuiltin f1;};struct Cyc___SIG_HANDLER_struct{int tag;void(*f1)(int);};int Cyc_Execinfo_backtrace(
-struct _dyneither_ptr array,int size);int Cyc_Execinfo_backtrace(struct
-_dyneither_ptr array,int size){{struct Cyc_Core_Failure_struct _tmp8;const char*_tmp7;
-struct Cyc_Core_Failure_struct*_tmp6;(int)_throw((void*)((_tmp6=_cycalloc(sizeof(*
-_tmp6)),((_tmp6[0]=((_tmp8.tag=Cyc_Core_Failure,((_tmp8.f1=((_tmp7="backtrace: unsupported except under Linux",
-_tag_dyneither(_tmp7,sizeof(char),42))),_tmp8)))),_tmp6)))));}return 0;}int Cyc_Execinfo_bt();
-int Cyc_Execinfo_bt(){return 1;}
+struct _dyneither_ptr array,int size){(int)_throw((void*)({struct Cyc_Core_Failure_struct*
+_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;
+_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=({const char*_tmp2="backtrace: unsupported except under Linux";
+_tag_dyneither(_tmp2,sizeof(char),42);});_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
+return 1;}
