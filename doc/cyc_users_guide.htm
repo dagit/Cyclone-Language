@@ -598,8 +598,8 @@ to catch an exception:</p>
     <b>try</b> {
       bar();
     } <b>catch</b> {
-    <b>case</b> NotFound(s):  <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
-    <b>case</b> Foo: <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
+    <b>case</b> NotFound(s):  <b>fprintf</b>(stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
+    <b>case</b> Foo: <b>fprintf</b>(stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
     }
     <b>printf</b>(&quot;<font color="#0000FF">no exception raised.\n</font>&quot;);
   }</pre>
@@ -835,23 +835,13 @@ type variables are those that can be treated uniformly.&nbsp; This ensures that
 we can use the same code for different types.&nbsp; The general rule is that
 values of the types that instantiate a type variable must fit into a machine
 word and must be passed in general-purpose (as opposed to floating-point)
-registers.&nbsp; Examples of such types include int, pointer, enum, xenum, and
-array types.&nbsp; Other types, including char, short, long long, float,
-double, struct, and tuple types violate this rule and thus cannot be passed to a
-function like swap in place of the type variables.&nbsp;&nbsp;</p>
-<p>In practice, this means that you tend to manipulate a lot of pointers in
-Cyclone code.&nbsp; To deal with the base types, Cyclone also provides
-&quot;boxed&quot; versions (Char, Short, Long Long, Float, Double) that
-can be used to instantiate polymorphic code.&nbsp; Boxed types such as 
-Char, and Short take up a full machine word in a struct, tuple or array.&nbsp;
-Thus, Char[10] consists of 10 words, whereas char[10] consists of 10
-bytes.&nbsp; Boxed types such as Long Long and Double that take up more than one
-machine word are allocated on the heap and referenced via pointer.&nbsp; This is
-similar to the Java boxed base types.&nbsp; Of course, you can cast to/from base
-types and their boxed versions.&nbsp; In general, you need not explicitly cast
-from the Boxed type to the unboxed type, but you may have to explicitly cast
-when going from the unboxed version to the boxed version.&nbsp; (This lets you
-know when allocation is happening.)</p>
+registers.&nbsp; Examples of such types include int, pointer, enum, and xenum
+types.&nbsp; Other types, including char, short, long long, float,
+double, struct, and tuple types violate this rule and thus values of
+these types cannot be passed to a
+function like swap in place of the type variables.
+In practice, this means that you tend to manipulate a lot of pointers in
+Cyclone code.&nbsp; </p>
 <p>The combination of parametric polymorphism and sub-typing means that you can
 cover a lot of C idioms where void* or unsafe casts were used without
 sacrificing type-safety.&nbsp; We use polymorphism a lot when coding in
@@ -1056,14 +1046,6 @@ are not yet supported)
   <font color=red>
   <i>type-var</i>
   <br>
-  <code>Char</code>
-  <code>Short</code>
-  <code>Int</code>
-  <code>Long</code>
-  <code>Float</code>
-  <code>Double</code>
-  &nbsp;&nbsp;&nbsp;<font color="#008000">// boxed types</font>
-   <br>
   <code>$</code> <code>(</code> <i>parameter-list</i> <code>)</code>
   &nbsp;&nbsp;&nbsp;<font color="#008000">// tuple types</font><br>
 </font>
@@ -1198,13 +1180,40 @@ are not yet supported)
 <br>
 <i>pointer</i>:<br>
 <ul>
-  <code>*</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i><br>
 <font color=red>
-  <code>@</code> <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i>
-  &nbsp;&nbsp;&nbsp;<font color="#008000">// non-null pointers</font>
+  <code>*</code>&nbsp; <i>range<sub>opt</sub></i> <i>region<sub>opt</sub></i> &nbsp;<i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i>
+</font><br>
+<font color=red>
+  <code>@</code>&nbsp; <i>range<sub>opt</sub></i> <i>region<sub>opt</sub></i> &nbsp;<i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// non-null pointers</font><br>
+<font color=red>
+  <code>?</code>&nbsp; <i>region<sub>opt</sub></i>&nbsp; <i>type-qualifier-list<sub>opt</sub></i> <i>pointer<sub>opt</sub></i>
+  &nbsp;&nbsp;&nbsp;<font color="#008000">// checked pointers</font>
 <br>
 </font>
+</font>
 </ul>
+<br>
+<font color=red>
+<i>range</i>:<br>
+<ul>
+<code>{</code> &nbsp; <i>constant-expression</i> &nbsp; <code>}</code> <br>
+</ul>
+</font>
+
+<br>
+<font color=red>
+<i>region</i>:<br>
+<ul>
+<code>_</code> 
+&nbsp;&nbsp;&nbsp;<font color=green>// wildcard region </font><br>
+<i>'H</i> 
+&nbsp;&nbsp;&nbsp;<font color=green>// heap region (default)</font><br>
+<i>type-var</i>
+&nbsp;&nbsp;&nbsp;<font color=green>// region variable</font><br>
+</ul>
+</font>
+
 <br>
 <i>type-qualifier-list</i>:<br>
 <ul>
@@ -1557,8 +1566,9 @@ see <code>switch-clauses</code>)
   &nbsp;&nbsp;&nbsp;<font color="#008000">// returns size of array</font>
   <br>
 <font color=red>
-  <code>raise</code> <i>unary-expression</i><br>
+  <code>throw</code> <i>unary-expression</i><br>
 </ul>
+</font>
 </font>
 <br>
 <i>unary-operator</i>: <font color=black>one of</font><br>
