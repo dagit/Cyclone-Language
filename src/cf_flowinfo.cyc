@@ -88,6 +88,10 @@ int place_cmp(place_t p1, place_t p2) {
 //       that too.
 path_info_t typ_to_unesc_none_pinfo(type_t t) {
   switch(Tcutil::compress(t)) {
+  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
+    if(tuf->typs == null)
+      return leaf_unesc_none;
+    fallthru(tuf->typs);
   case &TupleType(tqts):
     let d = Dict::empty(Core::intcmp);
     for(int i=0; tqts != null; tqts = tqts->tl, ++i) {

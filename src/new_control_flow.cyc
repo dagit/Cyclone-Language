@@ -124,25 +124,11 @@ void add_var_root(absenv_t env, vardecl_t vd) {
 					   new VarRoot(vd),
 					   typ_to_unesc_none_pinfo(vd->type));
 }
-// Note: This is not the one for tunion.  The type is the type of the object,
-//       not the pointer to the object.
+// Note: The type is the type of the object, not the pointer to the object.
 void add_malloc_root(absenv_t env, exp_t e, type_t t) {
   env.shared->all_roots = Dict::insert_new(env.shared->all_roots,
 					   new MallocPt(e),
 					   typ_to_unesc_none_pinfo(t));
-}
-// Note: for void variants (tqts == null), we have no paths and the abstraction
-//       function should just turn e into Unknown (there is no malloc)
-void add_tunion_root(absenv_t env, exp_t e, tunionfield_t ef) {
-  let &Tunionfield(_,_,tqts,_) = ef;
-  let d = Dict::empty(intcmp);
-  for(int i=0; tqts != null; tqts = tqts->tl, ++i) {
-    let &$(_,t2) = tqts->hd;
-    d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
-  }
-  env.shared->all_roots = Dict::insert_new(env.shared->all_roots,
-					   new MallocPt(e),
-					   new TuplePI(d));
 }
 
 absenv_t change_lhs(absenv_t src, list_t<absop_t> new_lhs) {
@@ -217,12 +203,6 @@ abssyn_t use_exp_unordered(absenv_t env, list_t<exp_t> es, list_t<absop_t> lhs) 
 		  make_assigns(env,mkUnknownOp()));
 }
 
-abssyn_t malloc_and_init(absenv_t env, exp_t e, absexp_t es_exp, absexp_t useexp){
-  let ansexp = mkGroupAE(OrderedG, mkMallocAE(e), 
-			 mkGroupAE(OrderedG, es_exp, useexp));
-  return mkSyn_tf(ansexp,null,make_assigns(env,mkAddressOp(mkMallocOp(e))));
-}
-
 abssyn_t descend_path(absenv_t env, exp_t path_e, exp_t inner_e) {
   env.access_path = new List(path_e,env.access_path); 
   let syn1 = abstract_exp(env,inner_e);
@@ -249,6 +229,47 @@ absop_t destruct_path(absenv_t env, absop_t absop) {
       throw new Impossible("abstract_exp: unexpected acces path element");
     }
   return absop;
+}
+
+// Used by the Malloc_e and New_e cases (caller adds malloc root)
+abssyn_t abstract_malloc(absenv_t env, exp_t outer_e,
+			 exp_opt_t rgn_exp, exp_opt_t init_exp) {
+  let malloc_op = mkMallocOp(outer_e);
+  let inner     = mkSkipAE();
+  let assigns   = mkSkipAE();
+  if(init_exp != null) {
+    let inner_env = change_lhs(env, new List(malloc_op,null));
+    inner_env.access_path = null;
+    let AbsSynOne(init_inner,init_assigns) = 
+      meet_absexp(abstract_exp(inner_env, (exp_t)init_exp));
+    inner   = init_inner;
+    assigns = init_assigns;
+  }
+  if(rgn_exp != null) {
+    let r_syn = abstract_exp(use_it_env(env), (exp_t)rgn_exp);
+    let AbsSynOne(r_inner,r_assigns) = meet_absexp(r_syn);
+    inner   = mkGroupAE(UnorderedG,    inner,   r_inner);
+    assigns = mkGroupAE(mkAnyOrderG(), assigns, r_assigns);
+  }
+  let ansexp = mkGroupAE(OrderedG, mkMallocAE(outer_e),
+			 mkGroupAE(OrderedG, inner, assigns));
+  let ans = mkSyn_tf(ansexp, null, make_assigns(env, mkAddressOp(malloc_op)));
+  // these are rather bizarre cases...
+  if(env.access_path != null)
+    switch(env.access_path->hd->r) {
+      // FIX: x[0] should be the same as *x, but not for arrays...
+    case &Deref_e(_): 
+      env.access_path = env.access_path->tl;
+      ans.lvalues = new List(destruct_path(env, malloc_op),null);
+      break;
+    case &StructArrow_e(e2,f):
+      env.access_path = new List(structmember_exp(e2,f,null),
+				 env.access_path->tl); 
+      ans.lvalues = new List(destruct_path(env, malloc_op),null);
+      break;
+    default: throw new Core::Impossible("bad malloc access path");
+    }
+  return ans;
 }
 
 abssyn_t abstract_exp(absenv_t env, exp_t e) {
@@ -290,33 +311,6 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // if path ends with &, we needn't return the lvalue, but it doesn't hurt
     // because the lvalues field should get ignored
     return mkSyn_tf(mkSkipAE(), new List(absop,null), make_assigns(env,absop));
-
-  // These are malloc points, which allow you to do funky stuff where
-  // tunion fields point to uninitialized data.  Of course, malloc is even
-  // more flexible, but we're not parsing that yet.
-  case &Tunion_e(_,_,es,_,ef):
-    assert(env.access_path == null);
-    if(es == null) 
-      return mkSyn_tf(mkSkipAE(), null, make_assigns(env, mkUnknownOp()));
-    add_tunion_root(env, e, ef);
-    let es_exp = mkSkipAE();
-    let useexp = mkSkipAE();
-    for(int i=0; es != null; es = es->tl, ++i) {
-      let elt_env = 
-	change_lhs(env, new List(mkMemberOp(mkMallocOp(e),
-                                            new TupleF(i)), null));
-      let syn = abstract_exp(elt_env, es->hd);
-      let AbsSynOne(inner,assigns) = meet_absexp(syn);
-      es_exp = mkGroupAE(UnorderedG,    inner,   es_exp);
-      useexp = mkGroupAE(mkAnyOrderG(), assigns, useexp);
-    }
-    return malloc_and_init(env, e, es_exp, useexp);
-
-  case &Malloc_e(eopt,t):
-    add_malloc_root(env, e, t);
-    // FIX: JGM: doesn't deal with eopt!
-    return mkSyn_tf(mkMallocAE(e), null, 
-		    make_assigns(env,mkAddressOp(mkMallocOp(e))));
 
     // The order here is subtle in order to get nested assignment right.
     // There is no result lhs needed b/c = associates to the right.
@@ -394,80 +388,16 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
 			       use_it_list());
     }
 
-  case &New_e(eopt,e1):
-    switch (e1->r) {
-      // For structs and tuples, we follow what happens with Address_e below.
-    case &Struct_e(_,_,_,_): fallthru;
-    case &Tuple_e(_):
-      let malloc_op = mkMallocOp(e);
-      add_malloc_root(env, e, e1->topt->v);
-      let inner_env = change_lhs(env, new List(malloc_op,null));
-      inner_env.access_path = null; 
-      let AbsSynOne(inner,assigns) = meet_absexp(abstract_exp(inner_env, e1));
-      // FIX: JGM: doesn't deal with eopt!!!
-      let ans = malloc_and_init(env, e, inner, assigns);
-      // this is rather bizarre case...
-      if(env.access_path != null)
-	switch(env.access_path->hd->r) {
-	case &Subscript_e(_,e2):  // x[0] same as *x
-	  assert(Evexp::eval_const_uint_exp(e2) == 0);
-	  fallthru;
-	case &Deref_e(_): 
-	  env.access_path = env.access_path->tl;
-	  ans.lvalues = new List(destruct_path(env, malloc_op),null);
-	  break;
-	case &StructArrow_e(e2,f):
-	  env.access_path = new List(structmember_exp(e2,f,null),
-				     env.access_path->tl); 
-	  ans.lvalues = new List(destruct_path(env, malloc_op),null);
-	  break;
-	default: throw new Core::Impossible("bad malloc access path");
-	}
-      return ans;
-    default:
-      if (eopt == null)
-        return use_exp_unordered(env, new List(e1,null), null);
-      else 
-        return use_exp_unordered(env, new List((exp_t)eopt,
-                                               new List(e1,null)), null);
-    }
   case &Address_e(e1):
+    bool is_malloc = false;
     //This might really be a malloc-and-initialize
-    //Note: This code is much like that for Tunion_e (they're mallocs)
-    //malloc cases deal with access path afterwards for dark corner *&$(1,2)
     switch(e1->r) {
-
     case &Struct_e(_,_,_,_): fallthru;
-    case &Tuple_e(_):
-      let malloc_op = mkMallocOp(e);
-      add_malloc_root(env, e, e1->topt->v);
-      let inner_env = change_lhs(env, new List(malloc_op,null));
-      inner_env.access_path = null; 
-      let AbsSynOne(inner,assigns) = meet_absexp(abstract_exp(inner_env, e1));
-      let ans = malloc_and_init(env, e, inner, assigns);
-
-      // this is rather bizarre case...
-      if(env.access_path != null)
-	switch(env.access_path->hd->r) {
-	case &Subscript_e(_,e2):  // x[0] same as *x
-	  assert(Evexp::eval_const_uint_exp(e2) == 0);
-	  fallthru;
-	case &Deref_e(_): 
-	  env.access_path = env.access_path->tl;
-	  ans.lvalues = new List(destruct_path(env, malloc_op),null);
-	  break;
-	case &StructArrow_e(e2,f):
-	  env.access_path = new List(structmember_exp(e2,f,null),
-				     env.access_path->tl); 
-	  ans.lvalues = new List(destruct_path(env, malloc_op),null);
-	  break;
-	default: throw new Core::Impossible("bad malloc access path");
-	}
-
-      return ans;
-
+    case &Tuple_e(_): is_malloc = true; break;
     default: break;
     }
+    if(is_malloc)
+      fallthru(null,e1);
 
     // it's actually an address-of
     switch(env.access_path) {
@@ -475,8 +405,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     case null: 
       env.access_path = new List(e,env.access_path); 
       break;
-
-      // extremely bizarre cases:
+      // bizarre cases:
     case &List(&Exp(_,&Subscript_e(_,e2),_),tl): // x[0] same as *x
       assert(Evexp::eval_const_uint_exp(e2) == 0);
       fallthru(tl);
@@ -487,6 +416,14 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     }
 
     return abstract_exp(env,e1);
+
+  case &New_e(eopt,e1):
+    add_malloc_root(env, e, e1->topt->v);
+    return abstract_malloc(env, e, eopt, e1);
+
+  case &Malloc_e(eopt,t):
+    add_malloc_root(env, e, t);
+    return abstract_malloc(env, e, eopt, null);
 
   case &Deref_e(e1):
     // only complication is cancelling out *& or * new.
@@ -539,6 +476,12 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
     // unordered x[0] = 1, x[1]=2.
     // Also need to look at access path b/c of y = $(1,2)[0].
     // Very similar to Struct_e
+  case &Tunion_e(_,_,es,_,_): 
+    assert(env.access_path == null);
+    if(es == null)
+      return mkSyn_tf(mkSkipAE(),use_it_list(),make_assigns(env,mkUnknownOp()));
+    fallthru(es);
+
   case &Tuple_e(es): 
     switch(env.access_path) {
     // common case
@@ -908,15 +851,9 @@ void cf_prepass(absenv_t env, stmt_t s) {
     cf_set_absexps(s,ael);
     return;
   case &Region_s(tv,vd,body):
-    // FIX: JGM -- I'm guessing here...
     add_var_root(env,vd);
-    // the region handle is implicitly initialized, so I'm treating
-    // it like a constant (see abstract_exp above).
-    let ae = abstract_exp_top(env,uint_exp(0,null));
-    cf_set_absexps(s, new List(ae, null));
     cf_prepass(env,body);
     return;
-    
   }
 }
 
@@ -1031,7 +968,7 @@ static void cf_analyze_switch_clauses(analenv_t env,
   }
 }
 
-flow_info_t cf_analyze_stmt(analenv_t env, Absyn::stmt_t s, flow_info_t in_flow) {
+flow_info_t cf_analyze_stmt(analenv_t env, stmt_t s, flow_info_t in_flow) {
 
   let annot = pre_stmt_check(in_flow,s);
   in_flow = annot->flow;
@@ -1184,6 +1121,7 @@ void cf_postpass(stmt_t s) {
 
 //////////////////////////// Top-level ////////////////////////////////
 void cf_check_fun(fndecl_t fd) {
+  //  fprintf(Stdio::stderr,"%s",*(*fd->name)[1]);
   absenv_t absenv = AbsEnv(new SharedAbsEnv(Dict::empty(local_root_cmp), null),
 			   null,
 			   null);

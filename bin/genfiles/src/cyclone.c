@@ -579,17 +579,18 @@ _pop_handler();} else{ void* _temp9= _temp6; _LL11: goto _LL12; _LL13: goto
 _LL14; _LL12: Cyc_compile_failure= 1;({ struct _tagged_string _temp15= msg_part;
 struct _tagged_string _temp16= filename; fprintf( Cyc_Stdio_stderr,"\nError: couldn't open %.*s %.*s\n",
 _temp15.last_plus_one - _temp15.curr, _temp15.curr, _temp16.last_plus_one -
-_temp16.curr, _temp16.curr);}); Cyc_Stdio_fflush( Cyc_Stdio_stderr); return 0;
-_LL14:( void) _throw( _temp9); _LL10:;}}} struct Cyc_List_List* Cyc_do_stage(
-struct _tagged_string stage_name, struct Cyc_List_List*(* f)( void*, struct Cyc_List_List*),
-void* env, struct Cyc_List_List* tds, struct _tagged_string preprocfile){ struct
-_tagged_string exn_string=( struct _tagged_string)({ char* _temp50=( char*)"";
-struct _tagged_string _temp51; _temp51.curr= _temp50; _temp51.base= _temp50;
-_temp51.last_plus_one= _temp50 + 1; _temp51;}); struct _tagged_string
-explain_string=( struct _tagged_string)({ char* _temp48=( char*)""; struct
-_tagged_string _temp49; _temp49.curr= _temp48; _temp49.base= _temp48; _temp49.last_plus_one=
-_temp48 + 1; _temp49;}); int other_exn= 0; void* ex=( void*)({ struct Cyc_Core_Impossible_struct*
-_temp44=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp16.curr, _temp16.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr); return 0; _LL14:( void) _throw( _temp9); _LL10:;}}} struct
+Cyc_List_List* Cyc_do_stage( struct _tagged_string stage_name, struct Cyc_List_List*(*
+f)( void*, struct Cyc_List_List*), void* env, struct Cyc_List_List* tds, struct
+_tagged_string preprocfile){ struct _tagged_string exn_string=( struct
+_tagged_string)({ char* _temp50=( char*)""; struct _tagged_string _temp51;
+_temp51.curr= _temp50; _temp51.base= _temp50; _temp51.last_plus_one= _temp50 + 1;
+_temp51;}); struct _tagged_string explain_string=( struct _tagged_string)({ char*
+_temp48=( char*)""; struct _tagged_string _temp49; _temp49.curr= _temp48;
+_temp49.base= _temp48; _temp49.last_plus_one= _temp48 + 1; _temp49;}); int
+other_exn= 0; void* ex=( void*)({ struct Cyc_Core_Impossible_struct* _temp44=(
+struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp44[ 0]=({ struct Cyc_Core_Impossible_struct _temp45; _temp45.tag= Cyc_Core_Impossible;
 _temp45.f1=( struct _tagged_string)({ char* _temp46=( char*)""; struct
 _tagged_string _temp47; _temp47.curr= _temp46; _temp47.base= _temp46; _temp47.last_plus_one=
@@ -619,15 +620,15 @@ stage_name; struct _tagged_string _temp42= explain_string; fprintf( Cyc_Stdio_st
 _temp40.last_plus_one - _temp40.curr, _temp40.curr, _temp41.last_plus_one -
 _temp41.curr, _temp41.curr, _temp42.last_plus_one - _temp42.curr, _temp42.curr);});}
 if( Cyc_compile_failure){ fprintf( Cyc_Stdio_stderr,"\nCOMPILATION FAILED!\n");
-Cyc_Stdio_fflush( Cyc_Stdio_stderr); Cyc_Stdio_remove( preprocfile); if(
-other_exn){( void) _throw( ex);} return ans;} if(* Cyc_v){({ struct
-_tagged_string _temp43= stage_name; fprintf( Cyc_Stdio_stderr,"%.*s completed.\n",
+Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr); Cyc_Stdio_remove(
+preprocfile); if( other_exn){( void) _throw( ex);} return ans;} if(* Cyc_v){({
+struct _tagged_string _temp43= stage_name; fprintf( Cyc_Stdio_stderr,"%.*s completed.\n",
 _temp43.last_plus_one - _temp43.curr, _temp43.curr);});} else{ if( !(* Cyc_q)){
-fprintf( Cyc_Stdio_stderr,".");}} Cyc_Stdio_fflush( Cyc_Stdio_stderr); return
-ans;} struct Cyc_List_List* Cyc_do_parse( struct Cyc_Stdio___sFILE* f, struct
-Cyc_List_List* ignore){ Cyc_Lex_lex_init(); return Cyc_Parse_parse_file( f);}
-struct Cyc_List_List* Cyc_do_typecheck( struct Cyc_Tcenv_Tenv* te, struct Cyc_List_List*
-tds){ Cyc_Absynpp_expand_typedefs= !(* Cyc_noexpand); Cyc_add_cyc_namespace_r=
+fprintf( Cyc_Stdio_stderr,".");}} Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr); return ans;} struct Cyc_List_List* Cyc_do_parse( struct Cyc_Stdio___sFILE*
+f, struct Cyc_List_List* ignore){ Cyc_Lex_lex_init(); return Cyc_Parse_parse_file(
+f);} struct Cyc_List_List* Cyc_do_typecheck( struct Cyc_Tcenv_Tenv* te, struct
+Cyc_List_List* tds){ Cyc_Absynpp_expand_typedefs= !(* Cyc_noexpand); Cyc_add_cyc_namespace_r=
 Cyc_add_cyc_namespace_r? Cyc_toc_r: 0; Cyc_Tc_tc( te, Cyc_add_cyc_namespace_r,
 tds); if( !(* Cyc_noshake)){ tds= Cyc_Tc_treeshake( te, tds);} return tds;}
 struct Cyc_List_List* Cyc_do_cfcheck( int ignore, struct Cyc_List_List* tds){
@@ -643,8 +644,8 @@ Cyc_Absynpp_decls_first=( Cyc_Absynpp_qvar_to_Cids=* Cyc_toc); Cyc_Absynpp_print
 Cyc_Absynpp_print_externC_stmts= !(* Cyc_tc)); if(* Cyc_toc){ fprintf( out_file,"#include \"cyc_include.h\"\n\n");
 Cyc_Absynpp_qvar_to_Cids= 1;} if(* Cyc_pp){ Cyc_Absynpp_decllist2file( tds,
 out_file);} else{ if(* Cyc_up){ Cyc_Absyndump_dumpdecllist2file( tds, out_file);}}
-Cyc_Stdio_fflush( out_file); return tds;} void Cyc_compile_file( struct
-_tagged_string filename){ struct _tagged_string basename= Cyc_Filename_chop_extension(
+Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) out_file); return tds;} void Cyc_compile_file(
+struct _tagged_string filename){ struct _tagged_string basename= Cyc_Filename_chop_extension(
 filename); struct _tagged_string preprocfile= Cyc_String_strconcat( basename,(
 struct _tagged_string)({ char* _temp109=( char*)".i"; struct _tagged_string
 _temp110; _temp110.curr= _temp109; _temp110.base= _temp109; _temp110.last_plus_one=

@@ -512,55 +512,55 @@ Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_unify_it( void* t1, void* t2);
 void Cyc_Tcutil_terr( struct Cyc_Position_Segment* loc, struct _tagged_string s){
 Cyc_Position_post_error( Cyc_Position_mk_err_elab( loc, s));} void* Cyc_Tcutil_impos(
 struct _tagged_string msg){({ struct _tagged_string _temp0= msg; fprintf( Cyc_Stdio_stderr,"Error: %.*s\n",
-_temp0.last_plus_one - _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush( Cyc_Stdio_stderr);(
-void) _throw(( void*) Cyc_Tcutil_TypeErr);} static struct _tagged_string Cyc_Tcutil_tvar2string(
-struct Cyc_Absyn_Tvar* tv){ return* tv->name;} void Cyc_Tcutil_print_tvars(
-struct Cyc_List_List* tvs){ for( 0; tvs != 0; tvs=({ struct Cyc_List_List*
-_temp1= tvs; if( _temp1 == 0){ _throw( Null_Exception);} _temp1->tl;})){({
-struct _tagged_string _temp4= Cyc_Tcutil_tvar2string(( struct Cyc_Absyn_Tvar*)({
-struct Cyc_List_List* _temp2= tvs; if( _temp2 == 0){ _throw( Null_Exception);}
-_temp2->hd;})); struct _tagged_string _temp5= Cyc_Absynpp_ckind2string((( struct
-Cyc_Absyn_Tvar*)({ struct Cyc_List_List* _temp3= tvs; if( _temp3 == 0){ _throw(
-Null_Exception);} _temp3->hd;}))->kind); fprintf( Cyc_Stdio_stderr,"%.*s::%.*s ",
+_temp0.last_plus_one - _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush(( struct
+Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Tcutil_TypeErr);}
+static struct _tagged_string Cyc_Tcutil_tvar2string( struct Cyc_Absyn_Tvar* tv){
+return* tv->name;} void Cyc_Tcutil_print_tvars( struct Cyc_List_List* tvs){ for(
+0; tvs != 0; tvs=({ struct Cyc_List_List* _temp1= tvs; if( _temp1 == 0){ _throw(
+Null_Exception);} _temp1->tl;})){({ struct _tagged_string _temp4= Cyc_Tcutil_tvar2string((
+struct Cyc_Absyn_Tvar*)({ struct Cyc_List_List* _temp2= tvs; if( _temp2 == 0){
+_throw( Null_Exception);} _temp2->hd;})); struct _tagged_string _temp5= Cyc_Absynpp_ckind2string(((
+struct Cyc_Absyn_Tvar*)({ struct Cyc_List_List* _temp3= tvs; if( _temp3 == 0){
+_throw( Null_Exception);} _temp3->hd;}))->kind); fprintf( Cyc_Stdio_stderr,"%.*s::%.*s ",
 _temp4.last_plus_one - _temp4.curr, _temp4.curr, _temp5.last_plus_one - _temp5.curr,
-_temp5.curr);});} fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Stdio_fflush( Cyc_Stdio_stderr);}
-static struct Cyc_List_List* Cyc_Tcutil_warning_segs= 0; static struct Cyc_List_List*
-Cyc_Tcutil_warning_msgs= 0; void Cyc_Tcutil_warn( struct Cyc_Position_Segment*
-sg, struct _tagged_string msg){ Cyc_Tcutil_warning_segs=({ struct Cyc_List_List*
-_temp6=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp6->hd=( void*) sg; _temp6->tl= Cyc_Tcutil_warning_segs; _temp6;}); Cyc_Tcutil_warning_msgs=({
-struct Cyc_List_List* _temp7=( struct Cyc_List_List*) GC_malloc( sizeof( struct
-Cyc_List_List)); _temp7->hd=( void*)(( struct _tagged_string*)({ struct
-_tagged_string* _temp8=( struct _tagged_string*) GC_malloc( sizeof( struct
-_tagged_string) * 1); _temp8[ 0]= msg; _temp8;})); _temp7->tl= Cyc_Tcutil_warning_msgs;
-_temp7;});} void Cyc_Tcutil_flush_warnings(){ if( Cyc_Tcutil_warning_segs == 0){
-return;} fprintf( Cyc_Stdio_stderr,"***Warnings***\n");{ struct Cyc_List_List*
-seg_strs= Cyc_Position_strings_of_segments( Cyc_Tcutil_warning_segs); Cyc_Tcutil_warning_segs=
-0; Cyc_Tcutil_warning_msgs=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x))
-Cyc_List_imp_rev)( Cyc_Tcutil_warning_msgs); while( Cyc_Tcutil_warning_msgs != 0) {({
-struct _tagged_string _temp11=*(( struct _tagged_string*)({ struct Cyc_List_List*
-_temp9= seg_strs; if( _temp9 == 0){ _throw( Null_Exception);} _temp9->hd;}));
-struct _tagged_string _temp12=*(( struct _tagged_string*)({ struct Cyc_List_List*
-_temp10= Cyc_Tcutil_warning_msgs; if( _temp10 == 0){ _throw( Null_Exception);}
-_temp10->hd;})); fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n", _temp11.last_plus_one
-- _temp11.curr, _temp11.curr, _temp12.last_plus_one - _temp12.curr, _temp12.curr);});
-seg_strs=({ struct Cyc_List_List* _temp13= seg_strs; if( _temp13 == 0){ _throw(
-Null_Exception);} _temp13->tl;}); Cyc_Tcutil_warning_msgs=({ struct Cyc_List_List*
-_temp14= Cyc_Tcutil_warning_msgs; if( _temp14 == 0){ _throw( Null_Exception);}
-_temp14->tl;});} fprintf( Cyc_Stdio_stderr,"**************\n"); Cyc_Stdio_fflush(
-Cyc_Stdio_stderr);}} struct Cyc_Core_Opt* Cyc_Tcutil_empty_var_set= 0; void* Cyc_Tcutil_compress(
-void* t){ void* _temp15= t; int _temp27; struct Cyc_Core_Opt* _temp29; void*
-_temp31; int _temp33; struct Cyc_Core_Opt* _temp35; struct Cyc_Core_Opt**
-_temp37; void* _temp38; struct Cyc_Core_Opt* _temp40; struct Cyc_List_List*
-_temp42; struct _tuple1* _temp44; struct Cyc_Core_Opt* _temp46; struct Cyc_Core_Opt**
-_temp48; struct Cyc_List_List* _temp49; struct _tuple1* _temp51; _LL17: if((
-unsigned int) _temp15 > 4u?*(( int*) _temp15) == Cyc_Absyn_Evar: 0){ _LL32:
-_temp31=( void*)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f1; goto _LL30;
-_LL30: _temp29=( struct Cyc_Core_Opt*)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f2;
-if( _temp29 == 0){ goto _LL28;} else{ goto _LL19;} _LL28: _temp27=( int)((
-struct Cyc_Absyn_Evar_struct*) _temp15)->f3; goto _LL18;} else{ goto _LL19;}
-_LL19: if(( unsigned int) _temp15 > 4u?*(( int*) _temp15) == Cyc_Absyn_Evar: 0){
-_LL39: _temp38=( void*)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f1; goto
+_temp5.curr);});} fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr);} static struct Cyc_List_List* Cyc_Tcutil_warning_segs= 0;
+static struct Cyc_List_List* Cyc_Tcutil_warning_msgs= 0; void Cyc_Tcutil_warn(
+struct Cyc_Position_Segment* sg, struct _tagged_string msg){ Cyc_Tcutil_warning_segs=({
+struct Cyc_List_List* _temp6=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp6->hd=( void*) sg; _temp6->tl= Cyc_Tcutil_warning_segs;
+_temp6;}); Cyc_Tcutil_warning_msgs=({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp7->hd=( void*)(( struct
+_tagged_string*)({ struct _tagged_string* _temp8=( struct _tagged_string*)
+GC_malloc( sizeof( struct _tagged_string) * 1); _temp8[ 0]= msg; _temp8;}));
+_temp7->tl= Cyc_Tcutil_warning_msgs; _temp7;});} void Cyc_Tcutil_flush_warnings(){
+if( Cyc_Tcutil_warning_segs == 0){ return;} fprintf( Cyc_Stdio_stderr,"***Warnings***\n");{
+struct Cyc_List_List* seg_strs= Cyc_Position_strings_of_segments( Cyc_Tcutil_warning_segs);
+Cyc_Tcutil_warning_segs= 0; Cyc_Tcutil_warning_msgs=(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_Tcutil_warning_msgs); while(
+Cyc_Tcutil_warning_msgs != 0) {({ struct _tagged_string _temp11=*(( struct
+_tagged_string*)({ struct Cyc_List_List* _temp9= seg_strs; if( _temp9 == 0){
+_throw( Null_Exception);} _temp9->hd;})); struct _tagged_string _temp12=*((
+struct _tagged_string*)({ struct Cyc_List_List* _temp10= Cyc_Tcutil_warning_msgs;
+if( _temp10 == 0){ _throw( Null_Exception);} _temp10->hd;})); fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
+_temp11.last_plus_one - _temp11.curr, _temp11.curr, _temp12.last_plus_one -
+_temp12.curr, _temp12.curr);}); seg_strs=({ struct Cyc_List_List* _temp13=
+seg_strs; if( _temp13 == 0){ _throw( Null_Exception);} _temp13->tl;}); Cyc_Tcutil_warning_msgs=({
+struct Cyc_List_List* _temp14= Cyc_Tcutil_warning_msgs; if( _temp14 == 0){
+_throw( Null_Exception);} _temp14->tl;});} fprintf( Cyc_Stdio_stderr,"**************\n");
+Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);}} struct Cyc_Core_Opt*
+Cyc_Tcutil_empty_var_set= 0; void* Cyc_Tcutil_compress( void* t){ void* _temp15=
+t; int _temp27; struct Cyc_Core_Opt* _temp29; void* _temp31; int _temp33; struct
+Cyc_Core_Opt* _temp35; struct Cyc_Core_Opt** _temp37; void* _temp38; struct Cyc_Core_Opt*
+_temp40; struct Cyc_List_List* _temp42; struct _tuple1* _temp44; struct Cyc_Core_Opt*
+_temp46; struct Cyc_Core_Opt** _temp48; struct Cyc_List_List* _temp49; struct
+_tuple1* _temp51; _LL17: if(( unsigned int) _temp15 > 4u?*(( int*) _temp15) ==
+Cyc_Absyn_Evar: 0){ _LL32: _temp31=( void*)(( struct Cyc_Absyn_Evar_struct*)
+_temp15)->f1; goto _LL30; _LL30: _temp29=( struct Cyc_Core_Opt*)(( struct Cyc_Absyn_Evar_struct*)
+_temp15)->f2; if( _temp29 == 0){ goto _LL28;} else{ goto _LL19;} _LL28: _temp27=(
+int)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f3; goto _LL18;} else{ goto
+_LL19;} _LL19: if(( unsigned int) _temp15 > 4u?*(( int*) _temp15) == Cyc_Absyn_Evar:
+0){ _LL39: _temp38=( void*)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f1; goto
 _LL36; _LL36: _temp35=( struct Cyc_Core_Opt*)(( struct Cyc_Absyn_Evar_struct*)
 _temp15)->f2; _temp37=&(( struct Cyc_Absyn_Evar_struct*) _temp15)->f2; goto
 _LL34; _LL34: _temp33=( int)(( struct Cyc_Absyn_Evar_struct*) _temp15)->f3; goto

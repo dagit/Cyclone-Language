@@ -40,7 +40,7 @@ cnst_t promote_const(cnst_t cn) {
   switch (cn) {
   case &Char_c(sn,c):  return new Int_c(sn,(int)c);
   case &Short_c(sn,s): return new Int_c(sn,(int)s); 
-  default:            return cn;
+  default:             return cn;
   }
 }
 

@@ -231,10 +231,10 @@ static int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){ return Cyc_Posit
 char Cyc_Position_Error[ 10u]="\000\000\000\000Error"; struct Cyc_Position_Error_struct{
 char* tag; struct Cyc_Position_Error* f1; } ; int Cyc_Position_print_context= 0;
 int Cyc_Position_first_error= 1; void Cyc_Position_post_error( struct Cyc_Position_Error*
-e){ Cyc_Position_error_b= 1; Cyc_Stdio_fflush( Cyc_Stdio_stdout); if( Cyc_Position_first_error){
-fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Position_first_error= 0;}({ struct
-_tagged_string _temp101= Cyc_Position_string_of_segment( e->seg); struct
-_tagged_string _temp102= e->desc; fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
+e){ Cyc_Position_error_b= 1; Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stdout);
+if( Cyc_Position_first_error){ fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Position_first_error=
+0;}({ struct _tagged_string _temp101= Cyc_Position_string_of_segment( e->seg);
+struct _tagged_string _temp102= e->desc; fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
 _temp101.last_plus_one - _temp101.curr, _temp101.curr, _temp102.last_plus_one -
 _temp102.curr, _temp102.curr);}); if( Cyc_Position_print_context){ struct
 _handler_cons _temp103; _push_handler(& _temp103);{ void* _temp104=( void*)
@@ -255,8 +255,8 @@ marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n", _temp111.last_plus_one
 - _temp111.curr, _temp111.curr, _temp112.last_plus_one - _temp112.curr, _temp112.curr);});};
 _pop_handler();} else{ void* _temp119= _temp104; _LL121: if( _temp119 == Cyc_Position_Nocontext){
 goto _LL122;} else{ goto _LL123;} _LL123: goto _LL124; _LL122: goto _LL120;
-_LL124:( void) _throw( _temp119); _LL120:;}}} Cyc_Stdio_fflush( Cyc_Stdio_stderr);}
-void Cyc_Position_reset_position( struct _tagged_string s){ Cyc_Position_source=
-s; Cyc_Position_error_b= 0;} void Cyc_Position_set_position_file( struct
-_tagged_string s){ Cyc_Position_source= s; Cyc_Position_error_b= 0;} struct
-_tagged_string Cyc_Position_get_position_file(){ return Cyc_Position_source;}
+_LL124:( void) _throw( _temp119); _LL120:;}}} Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr);} void Cyc_Position_reset_position( struct _tagged_string s){
+Cyc_Position_source= s; Cyc_Position_error_b= 0;} void Cyc_Position_set_position_file(
+struct _tagged_string s){ Cyc_Position_source= s; Cyc_Position_error_b= 0;}
+struct _tagged_string Cyc_Position_get_position_file(){ return Cyc_Position_source;}

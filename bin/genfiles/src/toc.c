@@ -520,37 +520,38 @@ void*)& Cyc_Toc_abs_ns_value; struct Cyc_Absyn_Tqual Cyc_Toc_mt_tq=( struct Cyc_
 char Cyc_Toc_Toc_Impossible[ 19u]="\000\000\000\000Toc_Impossible"; static void*
 Cyc_Toc_unimp( struct _tagged_string s){({ struct _tagged_string _temp1= s;
 fprintf( Cyc_Stdio_stderr,"%.*s\n", _temp1.last_plus_one - _temp1.curr, _temp1.curr);});
-Cyc_Stdio_fflush( Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Toc_Toc_Unimplemented);}
-static void* Cyc_Toc_toc_impos( struct _tagged_string s){({ struct
-_tagged_string _temp2= s; fprintf( Cyc_Stdio_stderr,"%.*s\n", _temp2.last_plus_one
-- _temp2.curr, _temp2.curr);}); Cyc_Stdio_fflush( Cyc_Stdio_stderr);( void)
-_throw(( void*) Cyc_Toc_Toc_Impossible);} char Cyc_Toc_Match_error[ 16u]="\000\000\000\000Match_error";
-static char _temp5[ 5u]="curr"; static struct _tagged_string Cyc_Toc_curr_string=(
-struct _tagged_string){ _temp5, _temp5, _temp5 + 5u}; static struct
-_tagged_string* Cyc_Toc_curr_sp=& Cyc_Toc_curr_string; static char _temp8[ 14u]="last_plus_one";
-static struct _tagged_string Cyc_Toc_last_plus_one_string=( struct
-_tagged_string){ _temp8, _temp8, _temp8 + 14u}; static struct _tagged_string*
-Cyc_Toc_last_plus_one_sp=& Cyc_Toc_last_plus_one_string; static char _temp11[ 5u]="base";
-static struct _tagged_string Cyc_Toc_base_string=( struct _tagged_string){
-_temp11, _temp11, _temp11 + 5u}; static struct _tagged_string* Cyc_Toc_base_sp=&
-Cyc_Toc_base_string; static char _temp14[ 15u]="_tagged_string"; static struct
-_tagged_string Cyc_Toc__tagged_string_string=( struct _tagged_string){ _temp14,
-_temp14, _temp14 + 15u}; static struct _tagged_string* Cyc_Toc__tagged_string_sp=&
-Cyc_Toc__tagged_string_string; static char _temp17[ 8u]="xtunion"; static struct
-_tagged_string Cyc_Toc_xtunion_string=( struct _tagged_string){ _temp17, _temp17,
-_temp17 + 8u}; static struct _tagged_string* Cyc_Toc_xtunion_sp=& Cyc_Toc_xtunion_string;
-static char _temp20[ 2u]="v"; static struct _tagged_string Cyc_Toc_v_string=(
-struct _tagged_string){ _temp20, _temp20, _temp20 + 2u}; static struct
-_tagged_string* Cyc_Toc_v_sp=& Cyc_Toc_v_string; static char _temp23[ 4u]="tag";
-static struct _tagged_string Cyc_Toc_tag_string=( struct _tagged_string){
-_temp23, _temp23, _temp23 + 4u}; static struct _tagged_string* Cyc_Toc_tag_sp=&
-Cyc_Toc_tag_string; static char _temp26[ 14u]="_handler_cons"; static struct
-_tagged_string Cyc_Toc__handler_cons_string=( struct _tagged_string){ _temp26,
-_temp26, _temp26 + 14u}; static struct _tagged_string* Cyc_Toc__handler_cons_sp=&
-Cyc_Toc__handler_cons_string; static char _temp29[ 7u]="setjmp"; static struct
-_tagged_string Cyc_Toc_setjmp_string=( struct _tagged_string){ _temp29, _temp29,
-_temp29 + 7u}; static struct _tagged_string* Cyc_Toc_setjmp_sp=& Cyc_Toc_setjmp_string;
-static char _temp32[ 14u]="_push_handler"; static struct _tagged_string Cyc_Toc__push_handler_string=(
+Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);( void) _throw((
+void*) Cyc_Toc_Toc_Unimplemented);} static void* Cyc_Toc_toc_impos( struct
+_tagged_string s){({ struct _tagged_string _temp2= s; fprintf( Cyc_Stdio_stderr,"%.*s\n",
+_temp2.last_plus_one - _temp2.curr, _temp2.curr);}); Cyc_Stdio_fflush(( struct
+Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Toc_Toc_Impossible);}
+char Cyc_Toc_Match_error[ 16u]="\000\000\000\000Match_error"; static char _temp5[
+5u]="curr"; static struct _tagged_string Cyc_Toc_curr_string=( struct
+_tagged_string){ _temp5, _temp5, _temp5 + 5u}; static struct _tagged_string* Cyc_Toc_curr_sp=&
+Cyc_Toc_curr_string; static char _temp8[ 14u]="last_plus_one"; static struct
+_tagged_string Cyc_Toc_last_plus_one_string=( struct _tagged_string){ _temp8,
+_temp8, _temp8 + 14u}; static struct _tagged_string* Cyc_Toc_last_plus_one_sp=&
+Cyc_Toc_last_plus_one_string; static char _temp11[ 5u]="base"; static struct
+_tagged_string Cyc_Toc_base_string=( struct _tagged_string){ _temp11, _temp11,
+_temp11 + 5u}; static struct _tagged_string* Cyc_Toc_base_sp=& Cyc_Toc_base_string;
+static char _temp14[ 15u]="_tagged_string"; static struct _tagged_string Cyc_Toc__tagged_string_string=(
+struct _tagged_string){ _temp14, _temp14, _temp14 + 15u}; static struct
+_tagged_string* Cyc_Toc__tagged_string_sp=& Cyc_Toc__tagged_string_string;
+static char _temp17[ 8u]="xtunion"; static struct _tagged_string Cyc_Toc_xtunion_string=(
+struct _tagged_string){ _temp17, _temp17, _temp17 + 8u}; static struct
+_tagged_string* Cyc_Toc_xtunion_sp=& Cyc_Toc_xtunion_string; static char _temp20[
+2u]="v"; static struct _tagged_string Cyc_Toc_v_string=( struct _tagged_string){
+_temp20, _temp20, _temp20 + 2u}; static struct _tagged_string* Cyc_Toc_v_sp=&
+Cyc_Toc_v_string; static char _temp23[ 4u]="tag"; static struct _tagged_string
+Cyc_Toc_tag_string=( struct _tagged_string){ _temp23, _temp23, _temp23 + 4u};
+static struct _tagged_string* Cyc_Toc_tag_sp=& Cyc_Toc_tag_string; static char
+_temp26[ 14u]="_handler_cons"; static struct _tagged_string Cyc_Toc__handler_cons_string=(
+struct _tagged_string){ _temp26, _temp26, _temp26 + 14u}; static struct
+_tagged_string* Cyc_Toc__handler_cons_sp=& Cyc_Toc__handler_cons_string; static
+char _temp29[ 7u]="setjmp"; static struct _tagged_string Cyc_Toc_setjmp_string=(
+struct _tagged_string){ _temp29, _temp29, _temp29 + 7u}; static struct
+_tagged_string* Cyc_Toc_setjmp_sp=& Cyc_Toc_setjmp_string; static char _temp32[
+14u]="_push_handler"; static struct _tagged_string Cyc_Toc__push_handler_string=(
 struct _tagged_string){ _temp32, _temp32, _temp32 + 14u}; static struct
 _tagged_string* Cyc_Toc__push_handler_sp=& Cyc_Toc__push_handler_string; static
 char _temp35[ 13u]="_pop_handler"; static struct _tagged_string Cyc_Toc__pop_handler_string=(

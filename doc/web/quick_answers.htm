@@ -385,6 +385,15 @@ subtract two pointers of the same type; the type of the result is unsigned int.
 However, there are implicit casts from char @{4} to char @{2}, char *{4}, and
 char ?, so it often &quot;feels like&quot; literal strings have whatever type
 you want them to have.</p>
+<p><b><a name="ptr_nullterm"></a>Are strings null-terminated?</b></p>
+<p>As in C, the convention is for strings to end with character '\0' and many of
+the library functions interpret a string to end when '\0' is encountered.&nbsp;
+However, the language does not enforce this convention, so memory safety
+requires that string-manipulation, including the libraries, does not rely on
+it.&nbsp; Hence Cyclone strings generally have type char ?, that is, they carry
+bounds information.&nbsp; See the String library to learn how particular
+functions interpret '\0' in the middle of a char ? and char ? objects without a
+'\0' character.</p>
 <p><b><a name="pointer_zero"></a>Why can't I assign 0 to a pointer?</b></p>
 <p>We currently distinguish the keyword null from 0, so you have to write int *
 x = null;, not int * x = 0;.&nbsp; We intend to be more flexible in the
@@ -437,21 +446,48 @@ information.&nbsp;&nbsp;</p>
 <p>Note that if you allocate all objects on the stack, garbage collection will
 never occur.&nbsp; If you allocate all objects on the stack or in regions, it is
 very unlikely collection will occur and nothing will actually get collected.</p>
+<p><b><a name="mem_locarr"></a>How can I make a stack-allocated array?</b></p>
+<p>As in C, you declare a local variable with an array type.&nbsp; Also as in C,
+all uses of the variable, except as an argument to sizeof, are promoted to a
+pointer.&nbsp; If the declaration looks like int x[256], then uses of x have
+type int @`L{256} where L is the name of the block in which x is declared.&nbsp;
+(Most blocks are unnamed and the compiler just makes up a name.)</p>
+<p>Stack-allocated arrays must be initialized when they are declared (unlike
+other local variables).&nbsp; You must use an array-initializer, either of the
+form {e1, e2, ..., en} or of the form <a href="#add_comprehension">{for i &lt;
+256: e}</a>.</p>
+<p>To pass (a pointer to) the array to another function, the function must have
+a type indicating it can accept stack pointers, as explained <a href="#ptr_stack">elsewhere</a>.</p>
 <p><b><a name="mem_salloc"></a>Can I use salloc? realloc?</b></p>
 <p>No, neither of these functions are currently provided and it is not possible
 to write them in Cyclone.&nbsp; Both features are really only useful for
 allocating an amount of space that depends on run-time values (such as for some
 arrays).&nbsp; Because Cyclone currently requires that such space be initialized
 when it is allocated, we cannot safely provide salloc or realloc.&nbsp;&nbsp;</p>
+<p><b><a name="error_null"></a>Why do I have to cast from &quot;foo *&quot; to &quot;foo
+      @&quot; if I've tested for null?</b></p>
+<p>Currently, the type-checker always inserts a run-time check for null when
+coercing a &quot;foo @&quot; to a &quot;foo *&quot;.&nbsp; It does not take
+tests into the code into account.&nbsp; You can leave the cast implicit, but the
+compiler will emit a warning.&nbsp; In the future, we may define a flow-analysis
+to omit spurious warning.&nbsp; Because of aliasing and undefined evaluation
+order, a sound analysis is non-trivial.</p>
+      <p align="left"><b><a name="error_memkind"></a>Why can't a function parameter or struct field have type
+      `a::M?</b><p>Type variables of &quot;memory kind&quot; can be instantiated
+with types of any size.&nbsp; There is no straightforward way to compile
+functions and types that work on values of any size.&nbsp; In fact, the obvious
+way is to instead manipulate pointers to the values.&nbsp; In Cyclone, you must
+do this level of indirection yourself, by making the parameters and fields have
+type `a::M * or `a::M @.</p>
 <p><b><a name="tools_pp"></a>Can I get a readable version of the output?</b></p>
 <p>Yes, with caveats.&nbsp; Pass Cyclone the flag -pp and the C output will be
 pretty-printed.&nbsp; (The default is to &quot;ugly print&quot; because
 pretty-printing is slower.)&nbsp; Several things still make the output a bit
-unpleasant: Files generally begin with many extern declarations (because
+unpleasant: Files generally have many extern declarations (because
 #include has been pre-processed away) and generated type definitions (because of
 tuples and &quot;? types&quot;).&nbsp; Pattern-matching code gets translated to
 a mess of temporary variables and goto statements.&nbsp;&nbsp; Array-bounds
-checks can clutter array-intensive code.&nbsp; All typedefs are expanded away
+checks and null-checks can clutter array-intensive and pointer-intensive code.&nbsp; All typedefs are expanded away
 before printing the output.</p>
 <p><b><a name="tools_gdb"></a>Can I use gdb on the output?</b></p>
 <p>Yes, but doing more than getting a stack trace on a seg fault requires some
