@@ -19,7 +19,7 @@
       "\\\<cut\\\>"
       "\\\<fill\\\>"
       "\\\<where\\\>"
-      '("\\\<null\\\>" . 'font-lock-constant-face)
+      '("\\\<null\\\>" (0 'font-lock-constant-face t t))
       ; color the pattern like a constant, except identifiers starting
       ; with lower-case are variables.
       '("\\(\\\<let\\\>\\)\\([^=\n]*\\)=" 
@@ -29,7 +29,8 @@
 	  (cond (t (goto-char (match-end 1)) (match-end 2)))
 	  nil
 	  (1 font-lock-variable-name-face t t)))
-      '("\\\<let\\\>" . 'font-lock-type-face)))
+      '("\\\<let\\\>" . 'font-lock-type-face))
+    t)
 
 (setq c++-font-lock-extra-types 
    '(; tyvars start with `
