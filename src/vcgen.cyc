@@ -89,6 +89,7 @@
 #include "assndef.h"
 #include "pratt_prover.h"
 #include "warn.h"
+#include "flags.h"
 #include <hashtable.h>
 #include <dict.h>
 #include <string.h> 
@@ -155,6 +156,9 @@ static assn_t widen(assn_t a) {
   return Set::fold(and,(Set::set_t<assn_t>)sopt,&true_assn);
 }
 
+// only widens when env->shared->widen_paths is true (defined below)
+static assn_t may_widen(env_t env, assn_t a);
+
 ////////// Updating an Assertion //////////////////
 static term_t fresh_nonescvar(env_t env, vardecl_t vd);
 
@@ -200,6 +204,8 @@ struct SharedEnv {
   // needed when the function has an ensures clause.
   term_opt_t  res_term;
   assn_t*     res_assn;
+  // true by default: controls whether we widen assertions at join points
+  bool        widen_paths;
 };
 
 typedef Dict::dict_t<vardecl_t,int> state_counter_t;
@@ -222,6 +228,10 @@ struct Env {
 
 static int hash_ptr(`a s) { return (int)s; }
 
+static assn_t may_widen(env_t env, assn_t a) {
+  return (env->shared->widen_paths) ? widen(a) : a;
+}
+
 static env_t 
 initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_t assn_info, assn_t *`H res_assn) {
   let succ_table = Hashtable::lookup(tables->succ_tables,fd);
@@ -231,7 +241,8 @@ initial_env(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd, assn_info_
                             .try_assn = NULL,
                             .exp_stmt = NULL,
                             .res_term = NULL,
-                            .res_assn = res_assn};
+                            .res_assn = res_assn,
+                            .widen_paths = !Flags::allpaths};
   let d = Dict::empty(Core::ptrcmp);
   return new Env { .shared = senv, .state_counter = d, .assn_info = assn_info};
 }
@@ -290,6 +301,7 @@ static assn_t loop_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t @* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
+    // No choice about widening here -- must ensure termination.
     ain = widen(or(ain,*aprev));
     *aprev = ain;
   } else {
@@ -304,7 +316,7 @@ static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t@* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
-    ain = widen(or(ain,*aprev));
+    ain = may_widen(env,or(ain,*aprev));
     *aprev = ain;
   } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
@@ -316,7 +328,8 @@ static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
 // exception handler.  
 static void update_try_assn(env_t env, assn_t a) {
   if (env->shared->try_assn == NULL) return;
-  *env->shared->try_assn = widen(or(*env->shared->try_assn,a));
+  a = may_widen(env,or(*env->shared->try_assn,a));
+  *env->shared->try_assn = a;
 }
 
 // update the return information for a function
@@ -515,7 +528,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     at = vcgen_stmt(env,s1,at);
     af = vcgen_stmt(env2,s2,af);
     merge_env(env,env2);
-    return widen(or(at,af));
+    return may_widen(env,or(at,af));
   case &Absyn::While_s($(e,dummy),s):
     // we're doing local iteration here -- we join with the
     // assertion on the dummy and widen each time around the loop since
@@ -562,7 +575,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     while (true) {
       ain = vcgen_stmt(env,s,ain);
       let $(at,af) = vcgen_test(env,e,ain);
-      ain = widen(or(*get_assn(env,dummy),ain));
+      ain = may_widen(env,or(*get_assn(env,dummy),ain));
       if (simple_implies(&ain,get_assn(env,dummy))) return af;
       loop_assn(env,dummy,ain);
     }
@@ -884,7 +897,24 @@ static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
 }
 
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
-  if (Tcutil::is_const_exp(e)) return $(cnst(e),ain);
+  if (Tcutil::is_const_exp(e)) {
+    // special case for pragmas
+    switch (e->r) {
+    case &Absyn::Pragma_e(s):
+      if (strcmp(s,"print_assn") == 0) {
+        let seg_str = Position::string_of_segment(e->loc);
+        fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(reduce(ain)));
+      }
+      if (strcmp(s,"all_paths") == 0) {
+        env->shared->widen_paths = false;
+      }
+      if (strcmp(s,"one_path") == 0) {
+        env->shared->widen_paths = true;
+      }
+      return $(zero(),ain);
+    default: return $(cnst(e),ain);
+    }
+  }
   switch (e->r) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
@@ -941,23 +971,23 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let v = fresh_var(e->topt);
       at = and(at,eq(v,t1));
       af = and(af,eq(v,t2));
-      return $(v,widen(or(at,af)));
+      return $(v,may_widen(env,or(at,af)));
     } else
-      return $(NULL,or(at,af));
+      return $(NULL,may_widen(env,or(at,af)));
   case &Absyn::And_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,at) = vcgen_rexp(env,e2,at);
     let v = fresh_var(e->topt);
     at = and(at,eq(v,t));
     af = and(af,eq(v,zero()));
-    return $(v,widen(or(at,af)));
+    return $(v,may_widen(env,or(at,af)));
   case &Absyn::Or_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,af) = vcgen_rexp(env,e2,af);
     let v = fresh_var(e->topt);
     at = and(at,eq(v,one()));
     af = and(af,eq(v,t));
-    return $(v,widen(or(at,af)));
+    return $(v,may_widen(env,or(at,af)));
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,a) = vcgen_rexp(env,e1,ain);
     return vcgen_rexp(env,e2,a);
@@ -1115,6 +1145,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let $(_,abody) = vcgen_rexp(env,e2,at);  // run body and add one
       abody = do_assign(env,abody,v,primop(Absyn::Plus,list(v,one())));
       if (simple_implies(&abody,&a)) { a = af; break; }
+      // no choice about widening here to ensure termination
       a = widen(or(abody,a));  // widen and possibly iterate
     }
     return $(NULL,a);
@@ -1144,9 +1175,15 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Asm_e(...): return $(NULL,ain);
   case &Absyn::Extension_e(e): return vcgen_rexp(env,e,ain);
   case &Absyn::Pragma_e(s): 
-    if (strcmp(s,"print_assn")) {
+    if (strcmp(s,"print_assn") == 0) {
       let seg_str = Position::string_of_segment(e->loc);
       fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(ain));
+    }
+    if (strcmp(s,"all_paths") == 0) {
+      env->shared->widen_paths = false;
+    }
+    if (strcmp(s,"one_path") == 0) {
+      env->shared->widen_paths = true;
     }
     return $(zero(),ain);
   case &Absyn::Assert_e(e1):

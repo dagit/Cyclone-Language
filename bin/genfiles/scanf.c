@@ -649,9 +649,9 @@ int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 ++ n;
 _IO_getc(fp);
-if(-- width == 0)
+if(-- width == (long long)0)
 break;
-if((c=_IO_peekc(fp))== -1){
+if((c=_IO_peekc(fp))== - 1){
 if(n == 0)
 goto eof_failure;
 ++ seen_eof;
@@ -670,7 +670,7 @@ _fat_ptr_inplace_plus(& p5,sizeof(char),1);
 _IO_getc(fp);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== -1){
+if((c=_IO_peekc(fp))== - 1){
 if((char*)p5.curr == (char*)p0.curr)
 goto eof_failure;
 ++ seen_eof;
@@ -712,7 +712,7 @@ if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
 _fat_ptr_inplace_plus(& p3,sizeof(char),1);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== - 1){
+if((c=_IO_peekc(fp))== -1){
 ++ seen_eof;
 break;}}
 # 542

@@ -464,11 +464,11 @@ void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Qvar_Warn_Warg_struct{int tag;struct _tuple0*f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_TypOpt_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Exp_Warn_Warg_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Warn_Stmt_Warn_Warg_struct{int tag;struct Cyc_Absyn_Stmt*f1;};struct Cyc_Warn_Aggrdecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Warn_Tvar_Warn_Warg_struct{int tag;struct Cyc_Absyn_Tvar*f1;};struct Cyc_Warn_KindBound_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Kind_Warn_Warg_struct{int tag;struct Cyc_Absyn_Kind*f1;};struct Cyc_Warn_Attribute_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
 # 71
 void*Cyc_Warn_impos2(struct _fat_ptr);
-# 73 "flags.h"
+# 78 "flags.h"
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 87 "flags.h"
+# 92 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_EvalOrder =12U,Cyc_Flags_CCompiler =13U,Cyc_Flags_AllPasses =14U};
-# 117
+# 122
 extern int Cyc_Flags_compile_for_boot;struct Cyc_Lex_Trie;struct _union_TrieChildren_Zero{int tag;int val;};struct _tuple26{int f1;struct Cyc_Lex_Trie*f2;};struct _union_TrieChildren_One{int tag;struct _tuple26 val;};struct _union_TrieChildren_Many{int tag;struct Cyc_Lex_Trie**val;};union Cyc_Lex_TrieChildren{struct _union_TrieChildren_Zero Zero;struct _union_TrieChildren_One One;struct _union_TrieChildren_Many Many;};
 # 50 "lex.cyl"
 union Cyc_Lex_TrieChildren Cyc_Lex_Zero (void){return({union Cyc_Lex_TrieChildren _tmp14E;(_tmp14E.Zero).tag=1U,(_tmp14E.Zero).val=0;_tmp14E;});}
@@ -543,12 +543,12 @@ unsigned len=(unsigned)(lexbuf->lex_curr_pos - (lexbuf->lex_start_pos + 1));
 {char _tmp60=*((const char*)_check_fat_subscript(b,sizeof(char),0));char _stmttmp0=_tmp60;char _tmp61=_stmttmp0;switch((int)_tmp61){case 116:
 # 233
  if(len == 6U &&({struct _fat_ptr _tmp175=b;Cyc_strncmp(_tmp175,({const char*_tmp62="tagged";_tag_fat(_tmp62,sizeof(char),7U);}),6U);})== 0)return 340;
-if(len == 4U &&({struct _fat_ptr _tmp176=b;Cyc_strncmp(_tmp176,({const char*_tmp63="thin";_tag_fat(_tmp63,sizeof(char),5U);}),4U);})== 0)return 331;
+if(len == (unsigned)4 &&({struct _fat_ptr _tmp176=b;Cyc_strncmp(_tmp176,({const char*_tmp63="thin";_tag_fat(_tmp63,sizeof(char),5U);}),4U);})== 0)return 331;
 goto _LL0;case 110:
 # 237
  if(len == 7U &&({struct _fat_ptr _tmp177=b;Cyc_strncmp(_tmp177,({const char*_tmp64="notnull";_tag_fat(_tmp64,sizeof(char),8U);}),7U);})== 0)return 333;
 if(len == 7U &&({struct _fat_ptr _tmp178=b;Cyc_strncmp(_tmp178,({const char*_tmp65="numelts";_tag_fat(_tmp65,sizeof(char),8U);}),7U);})== 0)return 330;
-if(len == 8U &&({struct _fat_ptr _tmp179=b;Cyc_strncmp(_tmp179,({const char*_tmp66="nullable";_tag_fat(_tmp66,sizeof(char),9U);}),8U);})== 0)return 334;
+if(len == (unsigned)8 &&({struct _fat_ptr _tmp179=b;Cyc_strncmp(_tmp179,({const char*_tmp66="nullable";_tag_fat(_tmp66,sizeof(char),9U);}),8U);})== 0)return 334;
 if(len == 10U &&({struct _fat_ptr _tmp17A=b;Cyc_strncmp(_tmp17A,({const char*_tmp67="nozeroterm";_tag_fat(_tmp67,sizeof(char),11U);}),10U);})== 0)return 338;
 goto _LL0;case 122:
 # 243
@@ -679,7 +679,7 @@ struct _fat_ptr*_tmpB0=((struct _fat_ptr*(*)(struct Cyc_Core_DynamicRegion*,stru
 return res;}}}
 # 395 "lex.cyl"
 static int Cyc_Lex_int_of_char(char c){
-if((int)'0' <= (int)c &&(int)c <= (int)'9')return(int)c - (int)'0';
+if((int)'0' <= (int)c &&(int)c <= 57)return(int)c - (int)'0';
 if(97 <= (int)c &&(int)c <= 102)return(10 + (int)c)- (int)'a';
 if(65 <= (int)c &&(int)c <= 70)return(10 + (int)c)- (int)'A';
 (int)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmpB4=_cycalloc(sizeof(*_tmpB4));_tmpB4->tag=Cyc_Core_Invalid_argument,({struct _fat_ptr _tmp195=({const char*_tmpB3="string to integer conversion";_tag_fat(_tmpB3,sizeof(char),29U);});_tmpB4->f1=_tmp195;});_tmpB4;}));}

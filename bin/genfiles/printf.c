@@ -595,7 +595,7 @@ prec=n < 0?- 1: n;
 goto rflag;}
 # 412
 n=0;
-while((unsigned)(ch - 48)<= 9U){
+while((unsigned)(ch - (int)'0')<= 9U){
 n=10 * n + (ch - (int)'0');
 ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}
 # 417
@@ -610,7 +610,7 @@ goto rflag;case 49:
  n=0;
 do{
 n=10 * n + (ch - (int)'0');
-ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - 48)<= 9U);
+ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - (int)'0')<= (unsigned)9);
 # 435
 width=n;
 goto reswitch;case 76:
@@ -751,7 +751,7 @@ goto _LL4F;default:
  cp=(struct _fat_ptr)Cyc_strdup(({const char*_tmp48="bug in vform: bad base";_tag_fat(_tmp48,sizeof(char),23U);}));
 goto skipsize;}_LL4F:;}
 # 609
-size=({unsigned char*_tmpD1=(_fat_ptr_plus(({char*_tmp49=buf;_tag_fat(_tmp49,sizeof(char),349U);}),sizeof(char),(308 + 39)+ 1)).curr;_tmpD1 - cp.curr;})/ sizeof(char);
+size=({unsigned char*_tmpD1=(_fat_ptr_plus(({char*_tmp49=buf;_tag_fat(_tmp49,sizeof(char),349U);}),sizeof(char),348)).curr;_tmpD1 - cp.curr;})/ sizeof(char);
 skipsize:
  goto _LL0;default:
 # 613

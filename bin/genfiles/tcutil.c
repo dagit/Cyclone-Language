@@ -582,9 +582,9 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 extern int Cyc_Flags_warn_alias_coerce;
 # 51
 extern int Cyc_Flags_warn_region_coerce;
-# 73
+# 78
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 87 "flags.h"
+# 92 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_EvalOrder =12U,Cyc_Flags_CCompiler =13U,Cyc_Flags_AllPasses =14U};struct _tuple13{unsigned f1;int f2;};
 # 28 "evexp.h"
 extern struct _tuple13 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
@@ -2904,7 +2904,7 @@ return Cyc_Tcutil_is_noalias_region(r,must_be_unique);}case 2: _tmp429=((struct 
 struct Cyc_Absyn_Kind*_tmp42A=Cyc_Kinds_tvar_kind(tv,& Cyc_Kinds_bk);struct Cyc_Absyn_Kind*_stmttmp6C=_tmp42A;struct Cyc_Absyn_Kind*_tmp42B=_stmttmp6C;enum Cyc_Absyn_AliasQual _tmp42D;enum Cyc_Absyn_KindQual _tmp42C;_tmp42C=_tmp42B->kind;_tmp42D=_tmp42B->aliasqual;{enum Cyc_Absyn_KindQual k=_tmp42C;enum Cyc_Absyn_AliasQual a=_tmp42D;
 enum Cyc_Absyn_KindQual _tmp42E=k;switch((int)_tmp42E){case Cyc_Absyn_BoxKind:
  goto _LLE;case Cyc_Absyn_AnyKind: _LLE: goto _LL10;case Cyc_Absyn_MemKind: _LL10:
- if((int)a == 1 ||(int)a == 2 && !must_be_unique){
+ if((int)a == (int)1U ||(int)a == (int)2U && !must_be_unique){
 void*_tmp42F=Cyc_Kinds_compress_kb(tv->kind);void*_stmttmp6D=_tmp42F;void*_tmp430=_stmttmp6D;enum Cyc_Absyn_KindQual _tmp432;void*_tmp431;if(*((int*)_tmp430)== 2){if(((struct Cyc_Absyn_Kind*)((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmp430)->f2)->aliasqual == Cyc_Absyn_Top){_tmp431=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmp430)->f1;_tmp432=(((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmp430)->f2)->kind;{struct Cyc_Core_Opt**x=(struct Cyc_Core_Opt**)_tmp431;enum Cyc_Absyn_KindQual k=_tmp432;
 # 2663
 ({struct Cyc_Core_Opt*_tmp674=({struct Cyc_Core_Opt*_tmp435=_cycalloc(sizeof(*_tmp435));({void*_tmp673=(void*)({struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*_tmp434=_cycalloc(sizeof(*_tmp434));_tmp434->tag=2,_tmp434->f1=0,({struct Cyc_Absyn_Kind*_tmp672=({struct Cyc_Absyn_Kind*_tmp433=_cycalloc(sizeof(*_tmp433));_tmp433->kind=k,_tmp433->aliasqual=Cyc_Absyn_Aliasable;_tmp433;});_tmp434->f2=_tmp672;});_tmp434;});_tmp435->v=_tmp673;});_tmp435;});*x=_tmp674;});

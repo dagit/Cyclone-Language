@@ -437,9 +437,9 @@ minsz <= _get_fat_size(s1,sizeof(char))&& minsz <= _get_fat_size(s2,sizeof(char)
 for(1;(unsigned)i < minsz;++ i){
 char c1=((const char*)s1.curr)[i];
 char c2=((const char*)s2.curr)[i];
-if((int)c1 == (int)'\000')
-return(int)c2 == 0?0: -1;
-if((int)c2 == 0)return 1;{
+if((int)c1 == 0)
+return(int)c2 == (int)'\000'?0: -1;
+if((int)c2 == (int)'\000')return 1;{
 int diff=(int)c1 - (int)c2;
 if(diff != 0)return diff;}}
 # 68

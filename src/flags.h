@@ -65,6 +65,11 @@ extern bool warn_all_null_deref;
   // C code
 extern bool noexpand_r;
 
+  // When set to true, causes vcgen to look at all paths in functions
+  // unless overriden by the __cyclone_pragma__(one_path).
+  // The default is false.
+extern bool allpaths;
+
   // true for producing output compatible with MSVC and not using
   // gcc extensions (outdated; surely does NOT work); corresponds
   // mostly to inserting the compiler pass defined in tovc.cyc.

@@ -199,10 +199,10 @@ static string_t a2string(assn_t a, int prec, int@ size) {
     switch (p) {
     case Eq: ps = "=="; break;
     case Neq: ps = "!="; break;
-    case SLt: ps = "S<"; break;
-    case SLte: ps = "S<="; break;
-    case ULt: ps = "U<"; break;
-    case ULte: ps = "U<="; break;
+    case SLt: ps = " S< "; break;
+    case SLte: ps = " S<= "; break;
+    case ULt: ps = " U< "; break;
+    case ULte: ps = " U<= "; break;
     default: Warn::impos("assn2string primop");
     }
     return aprintf("%s%s%s",term2string(t1),ps,term2string(t2));

@@ -516,9 +516,9 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 void*Cyc_Warn_impos_loc2(unsigned,struct _fat_ptr);
 # 43 "flags.h"
 extern int Cyc_Flags_tc_aggressive_warn;
-# 73
+# 78
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 87 "flags.h"
+# 92 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_EvalOrder =12U,Cyc_Flags_CCompiler =13U,Cyc_Flags_AllPasses =14U};struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 63 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
@@ -1746,7 +1746,7 @@ if(({unsigned _tmp746=(unsigned)((int(*)(struct Cyc_List_List*))Cyc_List_length)
 ({struct Cyc_Int_pa_PrintArg_struct _tmp287=({struct Cyc_Int_pa_PrintArg_struct _tmp569;_tmp569.tag=1,({
 unsigned long _tmp747=(unsigned long)((int(*)(struct Cyc_List_List*))Cyc_List_length)(tuf->typs);_tmp569.f1=_tmp747;});_tmp569;});struct Cyc_Int_pa_PrintArg_struct _tmp288=({struct Cyc_Int_pa_PrintArg_struct _tmp568;_tmp568.tag=1,_tmp568.f1=(unsigned long)((int)n);_tmp568;});void*_tmp285[2];_tmp285[0]=& _tmp287,_tmp285[1]=& _tmp288;({unsigned _tmp749=loc;struct _fat_ptr _tmp748=({const char*_tmp286="datatype field has too few components: %d < %d";_tag_fat(_tmp286,sizeof(char),47U);});Cyc_Tcutil_terr(_tmp749,_tmp748,_tag_fat(_tmp285,sizeof(void*),2));});});else{
 # 1303
-if(n != (unsigned)0)
+if(n != 0U)
 t=(*((struct _tuple17*(*)(struct Cyc_List_List*,int))Cyc_List_nth)(tuf->typs,(int)(n - (unsigned)1))).f2;else{
 if(l->tl != 0)
 ({void*_tmp289=0U;({unsigned _tmp74B=loc;struct _fat_ptr _tmp74A=({const char*_tmp28A="datatype field index 0 refers to the tag; cannot be indexed through";_tag_fat(_tmp28A,sizeof(char),68U);});Cyc_Tcutil_terr(_tmp74B,_tmp74A,_tag_fat(_tmp289,sizeof(void*),0));});});}}

@@ -1036,8 +1036,9 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       debug_msgs = false;
 #endif
     }
-    else
-      Warn::warn(e->loc,"unknown pragma %s",p);
+    // JGM: we now have pragmas used elsewhere...
+    //else
+    //Warn::warn(e->loc,"unknown pragma %s",p);
     return $(inflow,fenv->zero);
   
   case &Asm_e(...):   //can do better than this -- track assigments etc.

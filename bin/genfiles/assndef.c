@@ -592,10 +592,10 @@ struct _fat_ptr ps;
 {enum Cyc_AssnDef_Primreln _tmp3C=p;switch((int)_tmp3C){case Cyc_AssnDef_Eq:
  ps=({const char*_tmp3D="==";_tag_fat(_tmp3D,sizeof(char),3U);});goto _LLF;case Cyc_AssnDef_Neq:
  ps=({const char*_tmp3E="!=";_tag_fat(_tmp3E,sizeof(char),3U);});goto _LLF;case Cyc_AssnDef_SLt:
- ps=({const char*_tmp3F="S<";_tag_fat(_tmp3F,sizeof(char),3U);});goto _LLF;case Cyc_AssnDef_SLte:
- ps=({const char*_tmp40="S<=";_tag_fat(_tmp40,sizeof(char),4U);});goto _LLF;case Cyc_AssnDef_ULt:
- ps=({const char*_tmp41="U<";_tag_fat(_tmp41,sizeof(char),3U);});goto _LLF;case Cyc_AssnDef_ULte:
- ps=({const char*_tmp42="U<=";_tag_fat(_tmp42,sizeof(char),4U);});goto _LLF;default:
+ ps=({const char*_tmp3F=" S< ";_tag_fat(_tmp3F,sizeof(char),5U);});goto _LLF;case Cyc_AssnDef_SLte:
+ ps=({const char*_tmp40=" S<= ";_tag_fat(_tmp40,sizeof(char),6U);});goto _LLF;case Cyc_AssnDef_ULt:
+ ps=({const char*_tmp41=" U< ";_tag_fat(_tmp41,sizeof(char),5U);});goto _LLF;case Cyc_AssnDef_ULte:
+ ps=({const char*_tmp42=" U<= ";_tag_fat(_tmp42,sizeof(char),6U);});goto _LLF;default:
 ({void*_tmp43=0U;({struct _fat_ptr _tmp139=({const char*_tmp44="assn2string primop";_tag_fat(_tmp44,sizeof(char),19U);});((int(*)(struct _fat_ptr,struct _fat_ptr))Cyc_Warn_impos)(_tmp139,_tag_fat(_tmp43,sizeof(void*),0));});});}_LLF:;}
 # 208
 return(struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp47=({struct Cyc_String_pa_PrintArg_struct _tmp105;_tmp105.tag=0,({struct _fat_ptr _tmp13A=(struct _fat_ptr)((struct _fat_ptr)Cyc_AssnDef_term2string(t1));_tmp105.f1=_tmp13A;});_tmp105;});struct Cyc_String_pa_PrintArg_struct _tmp48=({struct Cyc_String_pa_PrintArg_struct _tmp104;_tmp104.tag=0,_tmp104.f1=(struct _fat_ptr)((struct _fat_ptr)ps);_tmp104;});struct Cyc_String_pa_PrintArg_struct _tmp49=({struct Cyc_String_pa_PrintArg_struct _tmp103;_tmp103.tag=0,({struct _fat_ptr _tmp13B=(struct _fat_ptr)((struct _fat_ptr)Cyc_AssnDef_term2string(t2));_tmp103.f1=_tmp13B;});_tmp103;});void*_tmp45[3];_tmp45[0]=& _tmp47,_tmp45[1]=& _tmp48,_tmp45[2]=& _tmp49;({struct _fat_ptr _tmp13C=({const char*_tmp46="%s%s%s";_tag_fat(_tmp46,sizeof(char),7U);});Cyc_aprintf(_tmp13C,_tag_fat(_tmp45,sizeof(void*),3));});});}}case 4: _tmp36=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp35)->f1;_tmp37=(void*)((struct Cyc_AssnDef_Or_AssnDef_Assn_struct*)_tmp35)->f2;{void*a1=_tmp36;void*a2=_tmp37;

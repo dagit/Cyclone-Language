@@ -38,6 +38,7 @@ bool warn_lose_unique = false;
 bool tc_aggressive_warn = false;
 enum Cyclone_Passes stop_after_pass = AllPasses;
 bool print_parser_state_and_token = false;
+bool allpaths = false;
 
 void set_all_warnings() {
   warn_bounds_checks = true;
