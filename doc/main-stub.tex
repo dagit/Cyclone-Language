@@ -16,6 +16,23 @@
 \definecolor{bluegray}{rgb}{.25,.25,.65}
 \definecolor{lightblue}{rgb}{.75,.81,1}
 \usepackage{palatino}
+\usepackage{underscore}
+%% tt versions of backslash, left brace, right brace
+\newcommand{\bs}{\texttt{\char`\\}}
+\newcommand{\lb}{\texttt{\char`\{}}
+\newcommand{\rb}{\texttt{\char`\}}}
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% IMPORTANT: \usepackage{hyperref} SHOULD BE THE LAST USEPACKAGE   %%%
+%%% (OR ELSE THINGS BREAK)                                           %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[colorlinks=true,linkcolor=bluegray,anchorcolor=bluegray,
 citecolor=bluegray,filecolor=bluegray,menucolor=bluegray,pagecolor=bluegray,
 urlcolor=bluegray]{hyperref}
@@ -36,13 +53,6 @@ urlcolor=bluegray]{hyperref}
 \pdfcatalog{/PageMode/FullScreen}
 \fi %pdf
 \fi %screen
-
-\usepackage{underscore}
-
-%% tt versions of backslash, left brace, right brace
-\newcommand{\bs}{\texttt{\char`\\}}
-\newcommand{\lb}{\texttt{\char`\{}}
-\newcommand{\rb}{\texttt{\char`\}}}
 
 %HEVEA \let\oldmeta=\@meta
 %HEVEA \renewcommand{\@meta}{\oldmeta \begin{rawhtml} <style type="text/css"> body {font-family: palatino, georgia, serif; margin-left: 7%; margin-right: 7%;} </style> \end{rawhtml}}
