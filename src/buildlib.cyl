@@ -1,33 +1,44 @@
 {
 /* Notes
 
-   sys/select.h (and therefore sys/time.h) pull in a use of
-   sizeof(type) in constant expressions, which we don't currently
-   allow in Cyclone.
+   Cygwin sys/select.h defines a struct and then a typedef with the
+   same name.  Our current scheme for halting repeated definitions
+   does not separate typedefs and structs, so the typedef ends up
+   undefined.  The current hack is to hand-define it in that special
+   case.
 
-   There is sys/time.h and time.h.  If both had cycstubs there would
-   be a conflict on time.cyc; by luck, only sys/time.h needs cycstubs.
+   The #include <setjmp.h> in precore_c.h pollutes the namespace.
+   Specifically, it defines some of the signal functions in Cygwin in
+   a way that conflicts with the definitions I make in Cyclone.
+   (precore_c.h is included in the output of the compiler for every
+   Cyclone file.)  Maybe we can use buildlib to extract just the
+   definitions we need from setjmp.h.
+
+   Some C headers use sizeof(type) in constant expressions, which we
+   don't currently allow in Cyclone.  The current hack is to
+   precalculate the sizes using gcc, and do a textual replace of the
+   sizeof expression with the actual size.
 
    Suppose foo() has void return type.  Then Cyclone complains if we
        return foo();
-     Maybe we shouldn't complain?
+   C doesn't complain, maybe we shouldn't.
 
    Some of the C libraries define types (typedef) as anonymous
-     structs.  When our pretty-printer expands them the result
-     is C code that gcc complains about.  We should never expand such a
-     typedef.  In the meantime -noexpandtypedefs works.  An example of
-     this is fpos_t in stdio.h.
+   structs.  When our pretty-printer expands them the result is C code
+   that gcc complains about.  We should never expand such a typedef.
+   In the meantime -noexpandtypedefs works.  An example of this is
+   fpos_t in stdio.h.
 
    We handle anonymous enums by giving them a fresh name.  It would be
-     better to extend Cyclone to handle them.  Right now it complains,
-     e.g., test.cyc(3:0-3:12): missing declarator
+   better to extend Cyclone to handle them.  Right now it complains,
+   e.g., test.cyc(3:0-3:12): missing declarator
 
    Cygwin stdio.h has an inline function.  Probably we don't have to
-     worry about inline functions because they are used in function macros,
-     and we're planning on hand-coding all the functions.
+   worry about inline functions because they are used in function
+   macros, and we're planning on hand-coding all the functions.
 
-   Cygwin netinet/in.h and arpa/tcp.h don't work because of asm
-     Also, __inline__ not on a function.
+   Cygwin netinet/in.h and arpa/tcp.h don't work because of asm.
+   Also, __inline__ not on a function.
 
    Consider a macro foo defined as follows:
      extern int __foo();
@@ -50,12 +61,6 @@
      namespace Std {extern struct __dirstream;}
    before including dirent.h, but maybe we should not print the
    warning in the first place ???
-
-   fenv.h produces some warnings from gcc when the test file is
-   compiled.  The type fenv_t is defined as an anonymous struct.  Our
-   compiler expands fenv_t to the anonymous struct at every use.  This
-   means there are anonymous structs appearing in parameter lists, and
-   gcc warns about this.
 
    Cyclone does not currently handle long double, which is needed
    in <math.h>.
@@ -93,11 +98,22 @@ FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
 
+int log(const char ?fmt, ... inject parg_t<`r2> ap) 
+  __attribute__((format(printf,1,2)))
+{
+  let x = vfprintf((FILE@)log_file,fmt,ap);
+  fflush((FILE@)log_file);
+  return x;
+}
+
 /* These will be filled in using gcc later */
 int sizeof_unsignedlongint = -1;
 int sizeof_unsignedshortint = -1;
+int sizeof_shortint = -1;
 int sizeof_int = -1;
+int sizeof_short = -1;
 int sizeof_fdmask = -1;
+int sizeof___fdmask = -1;
 int sizeof_uint32 = -1;
 int sizeof_sockaddr = -1;
 int sizeof_inport = -1;
@@ -121,6 +137,9 @@ extern int string(Lexbuf<`a>);
 FILE *slurp_out = NULL;
 extern int slurp(Lexbuf<`a>);
 extern int slurp_string(Lexbuf<`a>);
+extern int asm(Lexbuf<`a>);
+extern int asm_string(Lexbuf<`a>);
+extern int asm_comment(Lexbuf<`a>);
 int enum_hack = 0;
 
 typedef $(string_t,stringptr_t) *suck_line_t;
@@ -152,6 +171,7 @@ list_t<ifdefined_t> current_epilogue = NULL;
 list_t<stringptr_t> current_omit_symbols = NULL;
 struct Buffer::t *specbuf = NULL;
 int braces_to_match = 0;
+int parens_to_match = 0;
 
 int numdef = 0;
 }
@@ -359,8 +379,11 @@ and slurp = parse
 /* Currently Cyclone doesn't allow sizeofs as constant expressions.
    So we calculate the sizes in a previous phase and insert them
    here on a case-by-case basis. */
-| "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
+| "sizeof" ws* "(" ws* "fd_mask" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_fdmask);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof___fdmask);
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "__uint32_t" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_uint32);
@@ -371,11 +394,17 @@ and slurp = parse
 | "sizeof" ws* "(" ws* "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_int);
   return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "short" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_short);
+  return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "long" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedlongint);
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "short" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedshortint);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "short" ws+ "int" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_shortint);
   return slurp(lexbuf); }
 | "sizeof" ws* "(" ws* "struct" ws+ "sockaddr" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_sockaddr);
@@ -422,6 +451,11 @@ and slurp = parse
 { fputs("int",(FILE @)slurp_out); return slurp(lexbuf); }
 | "__restrict" /* Used in linux in libio.h; an undocumented gcc extension?? */
 { return slurp(lexbuf); }
+| "__asm__" ws* '(' /* Used in cygwin in /usr/include/asm files for inline functions */
+{ parens_to_match = 1;
+  if (asm(lexbuf)) return 1;
+  fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
+  return slurp(lexbuf); }
 | [^ '"']
 { fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return slurp(lexbuf); }
 
@@ -444,6 +478,61 @@ and slurp_string = parse
 { fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
 | _
 { fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+
+and asm =
+/* Expects to be entered just after a left paren, searches for the
+   matching right paren, deletes everything in between.
+   Parens in comments, strings, and character constants aren't counted.
+   parens_to_match should be set to 1 before calling asm. */
+parse
+  ')'
+{ if (parens_to_match == 1) return 0;
+  parens_to_match--;
+  return asm(lexbuf); }
+| '('
+{ parens_to_match++;
+  return asm(lexbuf); }
+| '"'
+{ asm_string(lexbuf);
+  return asm(lexbuf); }
+| "/*"
+{ asm_comment(lexbuf);
+  return asm(lexbuf); }
+| "//" [^'\n''\r']*
+{ return asm(lexbuf); }
+| eof
+{ return 0; }
+| [^')']
+{ return asm(lexbuf); }
+
+and asm_string = parse
+  "\""
+{ return 0; }
+| eof     /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| newline /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| "\\" newline
+{ return asm_string(lexbuf); }
+| "\\a"
+{ return asm_string(lexbuf); }
+| "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+{ return asm_string(lexbuf); }
+| "\\x" ['0'-'9''A'-'F''a'-'f']+
+{ return asm_string(lexbuf); }
+| [^ '"''\\''\n']
+{ return asm_string(lexbuf); }
+| _
+{ return asm_string(lexbuf); }
+
+and asm_comment = parse
+/* Assumes that comments can't be nested */
+  "*/"
+{ return 0; }
+| eof     /* Unclosed string, error: return 1 instead of 0 */
+{ return 1; }
+| _
+{ return asm_comment(lexbuf); }
 
 /**********************************************************************/
 /* Rules to suck in a #define line and return it, along with the name */
@@ -1133,7 +1222,7 @@ and block_comment = parse
       return 1;
     }
 
-    fprintf((FILE @)log_file,"\n%s:\n",filename);
+    log("\n%s:\n",filename);
 
     /* Calculate necessary file names.  For example:
        filename = sys/types.h
@@ -1190,7 +1279,7 @@ and block_comment = parse
       fprintf(stderr,"Warning: %s will not be supported on this platform\n",
               filename);
 
-      fprintf((FILE @)log_file,"Not supported on this platform\n");
+      log("Not supported on this platform\n");
       /* Return to original directory so that we're set up for
          the next file */
       if (chdir(cwd)) {
@@ -1231,7 +1320,7 @@ and block_comment = parse
       return 1;
     }
     if (slurp(l)) {
-      fprintf((FILE @)log_file,"Error: Unclosed string in %s\n",filename);
+      log("Error: Unclosed string in %s\n",filename);
       fprintf(stderr,"Error: Unclosed string in %s\n",filename);
       fclose(in_file);
       fclose((FILE @)slurp_out);
@@ -1379,7 +1468,7 @@ and block_comment = parse
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
           fputs(text,out_file);
         else
-          fprintf((FILE @)log_file,"%s is not supported on this platform\n",symbol);
+          log("%s is not supported on this platform\n",symbol);
       }
     }
 
@@ -1475,7 +1564,7 @@ and block_comment = parse
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
           fputs(text,out_file);
         else
-          fprintf((FILE @)log_file,"%s is not supported on this platform\n",symbol);
+          log("%s is not supported on this platform\n",symbol);
       }
     }
     fprintf(out_file,"}\n"); // close namespace Std
@@ -1544,6 +1633,7 @@ and block_comment = parse
     let getsizefile = fopen(getsizefilename,"w");
     if (!getsizefile) {
       fprintf(stderr,"Error: could not create %s\n",getsizefilename);
+      log("Warning: could not find the size of %s\n",type);
       return -1;
     }
     /* We have to jump through some hoops here because system is not
@@ -1566,18 +1656,19 @@ and block_comment = parse
                          getsizeexec,
                          getsizefilename);
     if (system(gcccmd) != 0) {
-      fprintf(stderr,"Error: can't run %s\n",getsizeexec);
+      fprintf(stderr,"Warning: could not find the size of %s; continuing anyway\n",type);
+      log("Warning: could not find the size of %s\n",type);
       return -1;
     }
     let z = system(getsizeexec);
-    fprintf((FILE@)log_file,"size of %s returned by system is %d\n",
-            type,z);
+    log("size of %s returned by system is %d\n",type,z);
     let f = fopen(getsizeout,"r");
     int w = -1;
-    if (fscanf((FILE@)f,"%d",&w) != 1)
+    if (fscanf((FILE@)f,"%d",&w) != 1) {
+      log("Warning: could not find the size of %s\n",type);
       return -1;
-    fprintf((FILE@)log_file,"size of %s read from file %s is %d\n",
-            type,getsizeout,w);
+    }
+    log("size of %s read from file %s is %d\n",type,getsizeout,w);
     fclose((FILE@)f);
     remove(getsizeout);
     remove(getsizefilename);
@@ -1630,11 +1721,14 @@ and block_comment = parse
 
     /* Find the sizes of various types, for use in constant expressions */
     sizeof_unsignedlongint = getsize(dir,"","unsigned long int");
-    sizeof_unsignedlongint = getsize(dir,"","unsigned short int");
+    sizeof_unsignedshortint = getsize(dir,"","unsigned short int");
+    sizeof_shortint = getsize(dir,"","short int");
     sizeof_int = getsize(dir,"","int");
-    sizeof_fdmask = getsize(dir,"#include <sys/select.h>","__fd_mask");
+    sizeof_short = getsize(dir,"","short");
+    sizeof_fdmask = getsize(dir,"#include <sys/select.h>","fd_mask");
+    sizeof___fdmask = getsize(dir,"#include <sys/select.h>","__fd_mask");
     sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
-    sizeof_sockaddr = getsize(dir,"#include <netinet/in.h>","struct sockaddr");
+    sizeof_sockaddr = getsize(dir,"#include <sys/socket.h>","struct sockaddr");
     sizeof_inport = getsize(dir,"#include <netinet/in.h>","in_port_t");
     sizeof_inaddr = getsize(dir,"#include <netinet/in.h>","struct in_addr");
             

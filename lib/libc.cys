@@ -15,6 +15,19 @@ INET6_ADDRSTRLEN
 uint32_t
 uint16_t
 }
+epilogue {
+  /* Cygwin does not define these types so we take a guess :-( */
+  /* FIX: make this specific to cygwin ?? */
+  #ifndef _uint32_t_def_
+  typedef unsigned long in_addr_t;
+  #endif
+  #ifndef _uint32_t_def_
+  typedef unsigned short uint16_t;
+  #endif
+  #ifndef _uint32_t_def_
+  typedef unsigned long uint32_t;
+  #endif
+}
 epilogue htonl {
   extern "C" uint32_t htonl(uint32_t);
 }
@@ -850,7 +863,6 @@ M_2_SQRTP
 M_SQRT2
 M_SQRT1_2
 MAXFLOAT
-HUGE_VAL
 HUGE_VALF
 HUGE_VALL
 INFINITY
@@ -869,6 +881,16 @@ MATH_ERRNO
 MATH_ERREXCEPT
 math_errhandling
 }
+epilogue {
+  /* I'd like to do
+     include { HUGE_VAL }
+     but under Cygwin this brings in 
+     extern const union __dmath  __attribute__((dllimport))__infinity[];
+     which does not have an array size.
+     Works fine in Linux, though.
+  */
+}
+
 epilogue acos {
   extern "C" double acos(double);
 }
@@ -1543,6 +1565,13 @@ POLLERR
 POLLHUP
 POLLNVAL
 }
+epilogue {
+  /* Cygwin does not define this type so we take a guess :-( */
+  /* FIX: make this specific to cygwin ?? */
+  #ifndef _nfds_t_def_
+  typedef unsigned int nfds_t;
+  #endif
+}
 epilogue poll {
   extern int poll (struct pollfd?, nfds_t, int);
 }
@@ -1674,16 +1703,28 @@ epilogue {
   #endif
 }
 epilogue sigaddset {
+  #ifndef __CYGWIN__
+  /* In Cygwin, the #include <setjmp.h> in precore_c.h pollutes
+     the namespace of the C output with a different declaration
+     for sigaddset, sigdelset, sigemptyset, sigfillset,
+     sigismember, and signal, so we have to disable them for now. */
   extern "C" int sigaddset(sigset_t@, int);  
+  #endif
 }
 epilogue sigdelset {
+  #ifndef __CYGWIN__
   extern "C" int sigdelset(sigset_t@, int);
+  #endif
 }
 epilogue sigemptyset {
+  #ifndef __CYGWIN__
   extern "C" int sigemptyset(sigset_t@);
+  #endif
 }
 epilogue sigfillset {
+  #ifndef __CYGWIN__
   extern "C" int sigfillset(sigset_t@);
+  #endif
 }
 epilogue sighold {
   extern "C" int sighold(int);
@@ -1695,7 +1736,9 @@ epilogue siginterrupt {
   extern "C" int siginterrupt(int,int);
 }
 epilogue sigismember {
+  #ifndef __CYGWIN__
   extern "C" int sigismember(sigset_t@, int);
+  #endif
 }
 epilogue sigpause {
   extern "C" int sigpause(int);
@@ -1708,9 +1751,9 @@ epilogue {
     SIG_DFL;
     SIG_ERR;
     SIG_IGN;
-#ifdef _SIG_HOLD_def_
+  #ifdef _SIG_HOLD_def_
     SIG_HOLD;  // Rare
-#endif
+  #endif
   };
   extern tunion SigArg {
     __SIG_BUILTIN(tunion SigBuiltin);
@@ -1730,9 +1773,9 @@ cycstub sigset {
     extern "C" sigarg_t sigset_SIG_DFL(int);
     extern "C" sigarg_t sigset_SIG_ERR(int);
     extern "C" sigarg_t sigset_SIG_IGN(int);
-#ifdef _SIG_HOLD_def_
+  #ifdef _SIG_HOLD_def_
     extern "C" sigarg_t sigset_SIG_HOLD(int);
-#endif
+  #endif
     extern "C" sigarg_t sigset_SIG_HANDLER(int, void (@`H)(int));
     // for the use of the C sigset stubs
     sigarg_t make_SIG_DFL() {
@@ -1744,11 +1787,11 @@ cycstub sigset {
     sigarg_t make_SIG_IGN() {
       return new __SIG_BUILTIN(SIG_ERR);
     }
-#ifdef _SIG_HOLD_def_
+  #ifdef _SIG_HOLD_def_
     sigarg_t make_SIG_HOLD() {
       return new __SIG_BUILTIN(SIG_HOLD);
     }
-#endif
+  #endif
     sigarg_t make_SIG_HANDLER(void f(int)) {
       return new __SIG_HANDLER(f);
     }
@@ -1759,10 +1802,10 @@ cycstub sigset {
       return Csignal::sigset_SIG_DFL(a);
     case &__SIG_BUILTIN(SIG_ERR):
       return Csignal::sigset_SIG_ERR(a);
-#ifdef _SIG_HOLD_def_
+  #ifdef _SIG_HOLD_def_
     case &__SIG_BUILTIN(SIG_HOLD):
       return Csignal::sigset_SIG_HOLD(a);
-#endif
+  #endif
     case &__SIG_BUILTIN(SIG_IGN):
       return Csignal::sigset_SIG_IGN(a);
     case &__SIG_HANDLER(f):
@@ -1786,10 +1829,10 @@ cstub {
       return Cyc_Std_Csignal_make_SIG_ERR();
     if (f == SIG_IGN)
       return Cyc_Std_Csignal_make_SIG_IGN();
-#ifdef SIG_HOLD
+  #ifdef SIG_HOLD
     if (f == SIG_HOLD)
       return Cyc_Std_Csignal_make_SIG_HOLD();
-#endif
+  #endif
       return Cyc_Std_Csignal_make_SIG_HANDLER(f);
   }
 }
@@ -1813,9 +1856,12 @@ cstub sigset {
   }
 }
 epilogue signal {
+  #ifndef __CYGWIN__
   extern sigarg_t signal(int, sigarg_t);
+  #endif
 }
 cycstub signal {
+  #ifndef __CYGWIN__
   namespace Csignal {
     extern "C" sigarg_t signal_SIG_DFL(int);
     extern "C" sigarg_t signal_SIG_ERR(int);
@@ -1839,22 +1885,25 @@ cycstub signal {
       return Csignal::signal(a,f);
     }
   }
+  #endif
 }
 cstub signal {
+  #ifndef __CYGWIN__
   Cyc_Std_sigarg_t signal_SIG_DFL(int a) {
     return sig_wrap(signal(a,SIG_DFL));
   }
   Cyc_Std_sigarg_t signal_SIG_ERR(int a) {
     return sig_wrap(signal(a,SIG_ERR));
   }
-#ifdef _SIG_HOLD_def_
+  #ifdef _SIG_HOLD_def_
   Cyc_Std_sigarg_t signal_SIG_HOLD(int a) {
     return sig_wrap(signal(a,SIG_HOLD));
   }
-#endif
+  #endif
   Cyc_Std_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
   }
+  #endif
 }
 epilogue {
   // If we do 
@@ -3174,6 +3223,15 @@ timespec
 fd_set
 FD_SETSIZE
 }
+epilogue {
+  /* FIX: Cygwin defines a struct _types_fd_set and then a typedef with the
+     same name.  Our current scheme for omitting repeated declarations does
+     not use separate namespaces for structs and typedefs, so the typedef
+     is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
+  #ifdef __types_fd_set_def_
+  typedef struct _types_fd_set _types_fd_set;
+  #endif
+}
 epilogue pselect {
   extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
                        const struct timespec *, const sigset_t *);
@@ -4248,6 +4306,13 @@ epilogue {
   #if defined(___useconds_t_def_) && !defined(_useconds_t_def_)
   #define _useconds_t_def_
   typedef __useconds_t useconds_t;
+  #endif
+}
+epilogue {
+  /* Cygwin does not define this type so we take a guess :-( */
+  /* FIX: make this specific to cygwin ?? */
+  #ifndef _useconds_t_def_
+  typedef unsigned int useconds_t;
   #endif
 }
 epilogue {
