@@ -1,11 +1,11 @@
-/* -*- mode: c -*-
- * matrix.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "timer.h"
 
 #define SIZE 30
 
@@ -49,10 +49,13 @@ int **mmult(int rows, int cols, int **m1, int **m2, int **m3) {
 
 int main(int argc, char *argv[]) {
     int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
-	
-    int **m1 = mkmatrix(SIZE, SIZE);
-    int **m2 = mkmatrix(SIZE, SIZE);
-    int **mm = mkmatrix(SIZE, SIZE);
+    int **m1;
+    int **m2;
+    int **mm;
+    START_TIME
+    m1 = mkmatrix(SIZE, SIZE);
+    m2 = mkmatrix(SIZE, SIZE);
+    mm = mkmatrix(SIZE, SIZE);
 
     for (i=0; i<n; i++) {
 	mm = mmult(SIZE, SIZE, m1, m2, mm);
@@ -62,5 +65,6 @@ int main(int argc, char *argv[]) {
     freematrix(SIZE, m1);
     freematrix(SIZE, m2);
     freematrix(SIZE, mm);
+    END_TIME
     return(0);
 }

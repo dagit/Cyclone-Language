@@ -1,5 +1,4 @@
-/* -*- mode: c -*-
- * spellcheck.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
@@ -8,16 +7,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "simple_hash.h"
+#include "timer.h"
 
 #define MAXLINELEN 128
 
 int main(int argc, char *argv[]) {
     int i, wordbufsize = 80;
     char line[MAXLINELEN];
-    char c, *cp, *wordbuf = (char *)malloc(wordbufsize + 1);
-    struct ht_ht *dict = ht_create(40000);
+    char c, *cp, *wordbuf;
+    struct ht_ht *dict;
     FILE *fh;
-    
+    START_TIME
+    wordbuf = (char *)malloc(wordbufsize + 1);
+    dict = ht_create(40000);
     if ((fh = fopen("words.txt", "r")) == NULL) {
 	perror("fopen");
 	exit(1);
@@ -64,5 +66,6 @@ int main(int argc, char *argv[]) {
     }
     free(wordbuf);
     ht_destroy(dict);
+    END_TIME
     return(0);
 }

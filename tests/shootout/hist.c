@@ -20,7 +20,15 @@
 #include <string.h>
 #include <math.h>
 
-#define USAGE() { fprintf(stderr,"usage : %s [-n num_bins | -f fraction_from_med] [-v]\n",argv[0]); exit(1); }
+void USAGE(char *name) 
+{ 
+  fprintf(stderr,"usage : %s [-n num_bins | -f fraction_from_med] [-v]\n",
+	  name); 
+  fprintf(stderr,"  By default, the output consists of\n");
+  fprintf(stderr,"  testname mean covariance median low-quartile hi-quartile scaled-semi-interquartile-range\n");
+  fprintf(stderr,"  Passing -v prints these results graphically as a histogram.\n");
+  exit(1); 
+}
 
 /* Datastructure used for histogram */
 struct bin {
@@ -282,11 +290,11 @@ int main(int argc, char *argv[])
 	  break;
 
         case '?':
-          USAGE()
+          USAGE(argv[0]);
 
         default:
           fprintf(stderr,"Unknown option %s\n",*arg);
-          USAGE()
+          USAGE(argv[0]);
      }
      arg++;
    }
@@ -330,8 +338,15 @@ int main(int argc, char *argv[])
     if (verbose)
       print_stats(heapname,min,bins,nbins,idx,var,mean,med,SIQR);
     else {
-      printf("%s mean=%lf (covar=%lf), med=%lf (SIQR=%lf)\n",
-	     heapname, mean, var, med, SIQR);
+      double stddev, lowquart, hiquart;
+      int qmed, qlow, qhi;
+      stddev = sqrt(var);
+      qlow = idx / 4;
+      qhi = 3 * idx / 4;
+      lowquart = points[qlow];
+      hiquart = points[qhi];
+      printf("%s %lf %lf %lf %lf %lf %lf\n",
+	     heapname, mean, stddev/mean, med, lowquart, hiquart, SIQR);
     }
   }
   fclose(infp);

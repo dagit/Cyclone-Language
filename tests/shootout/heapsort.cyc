@@ -1,19 +1,10 @@
-// Derived from:
-
 /*
  * http://www.bagley.org/~doug/shootout/
  */
 
-// Invoke with an integer command-line arg.
-
-// NOTE: the program will throw Null_exception because of an
-// out-of-bounds if invoked with no argument or argument=1.
-// This is better than the C version, which dumps core.
-
 #include <stdio.h>
 #include <stdlib.h>
-//#include <math.h>
-//using Math;
+#include "timer.h"
 
 #define IM 139968
 #define IA   3877
@@ -61,12 +52,17 @@ heapsort(int n, double ?ra) {
 int
 main(int argc, char ??argv) {
     int N = ((argc == 2) ? atoi(argv[1]) : 1);
-    double ?ary = new {for i < N+1 : gen_random(1)};
+    double ?ary;
+    START_TIME
+    /* create an array of N random doubles */
+    ary = new {for i < N+1 : gen_random(1)};
 
     heapsort(N, ary);
 
     printf("%.10g\n", ary[N]);
 
+    free(ary);
+    END_TIME
     return(0);
 }
 

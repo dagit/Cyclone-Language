@@ -1,5 +1,3 @@
-// Derived from:
-
 /*
  * http://www.bagley.org/~doug/shootout/
  */
@@ -8,12 +6,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "simple_hash_cyc.h"
+#include "timer.h"
 
-char buf[32];
 int main(int argc, char ??argv) {
     int i, c=0, n = ((argc == 2) ? atoi(argv[1]) : 1);
-	
-    struct ht_ht @ht = ht_create(n);
+    char buf[32];
+    struct ht_ht @ht;
+    START_TIME
+    ht = ht_create(n);
     
     for (i=1; i<=n; i++) {
 	sprintf(buf, "%x", i);
@@ -28,5 +28,6 @@ int main(int argc, char ??argv) {
     ht_destroy(ht);
 
     printf("%d\n", c);
+    END_TIME
     return(0);
 }

@@ -11,22 +11,22 @@
 #define STUFF "hello\n"
 
 int
-main(int argc, char *argv[]) {
+main(int argc, char ?argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int i, buflen = 32;
-    char *strbuf, *strend;
+    char ?strbuf, ?strend;
     int stufflen;
     START_TIME
-    strbuf = calloc(sizeof(char), buflen);
+    strbuf = new { for i < buflen : '\0' };
     strend = strbuf;
     stufflen = strlen(STUFF);
 
     if (!strbuf) { perror("calloc strbuf"); exit(1); }
     for (i=0; i<n; i++) {
 	if (((strbuf+buflen)-strend) < (stufflen+1)) {
-	    buflen = 2*buflen;
-	    strbuf = realloc(strbuf, buflen);
+	    strbuf = new { for i < 2*buflen : (i<buflen ? strbuf[i] : '\0') };
 	    if (!strbuf) { perror("realloc strbuf"); exit(1); }
+	    buflen = 2*buflen;
 	    strend = strbuf + strlen(strbuf);
 	}
 	/* much faster to strcat to strend than to strbuf */

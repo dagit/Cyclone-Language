@@ -1,5 +1,3 @@
-// Derived from:
-
 /*
  * http://www.bagley.org/~doug/shootout/
  *
@@ -14,14 +12,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "timer.h"
 
 int
 main(int argc, char ??argv) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
-    int i, k;
-	
-    int ?x = new {for i<n:0};
-    int ?y = new {for i<n:0};
+    int i, k, ?x, ?y;
+
+    START_TIME
+    x = new {for i<n:0};
+    y = new {for i<n:0};
 
     for (i = 0; i < n; i++) {
 	x[i] = i + 1;
@@ -34,5 +34,8 @@ main(int argc, char ??argv) {
 
     fprintf(stdout, "%d %d\n", y[0], y[n-1]);
 
+    free(x);
+    free(y);
+    END_TIME
     return(0);
 }

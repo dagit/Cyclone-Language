@@ -1,5 +1,4 @@
-/* -*- mode: c -*-
- * reversefile.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
@@ -7,12 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "timer.h"
 
 #define MAXREAD 4096
 
 int main(int argc, char *argv[]) {
     int nread, len = 0, size = (4 * MAXREAD);
-    char *cp, *offset, *buf = malloc(size + 1);
+    char *cp, *offset, *buf;
+    START_TIME
+    buf = malloc(size + 1);
 
     while (1) {
 	if ((nread = read(0, (buf + len), MAXREAD)) > 0) {
@@ -46,5 +48,6 @@ int main(int argc, char *argv[]) {
 	fputs(cp, stdout);
     }
     free(buf);
+    END_TIME
     return(0);
 }

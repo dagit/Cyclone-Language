@@ -1,22 +1,22 @@
-// Modified because simple_hash.h has moved to the current directory
-
-/* -*- mode: c -*-
- * hash2.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-//#include "../../Include/simple_hash.h"
 #include "simple_hash.h"
+#include "timer.h"
 
 int main(int argc, char *argv[]) {
     int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
     char buf[32];
-    struct ht_ht *ht1 = ht_create(10000);
-    struct ht_ht *ht2 = ht_create(10000);
+    struct ht_ht *ht1, *ht2;
     struct ht_node *node;
+
+    START_TIME
+    ht1 = ht_create(10000);
+    ht2 = ht_create(10000);
 
     for (i=0; i<=9999; ++i) {
 	sprintf(buf, "foo_%d", i);
@@ -37,5 +37,6 @@ int main(int argc, char *argv[]) {
 
     ht_destroy(ht1);
     ht_destroy(ht2);
+    END_TIME
     return(0);
 }

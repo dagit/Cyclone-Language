@@ -4,36 +4,33 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
-#include "simple_hash.h"
+#include "simple_hash_cyc.h"
 #include "timer.h"
 
-typedef int (*comparator)(const void *, const void *);
-
-int cmp_hash(struct ht_node **a, struct ht_node **b) {
+int cmp_hash(struct ht_node @`H@`H a, struct ht_node @`H@`H b) {
     int val = (*b)->val - (*a)->val;
     return((val == 0) ? strcmp((*b)->key, (*a)->key) : val);
 }
 
 int main() {
     int bufsize = 80;
-    char *buf;
+    char ?buf;
     char c;
     int i = 0;
-    struct ht_ht *ht;
-    struct ht_node **sort_array, **sort_tmp, *node;
+    struct ht_ht @ht;
+    struct ht_node @?sort_array, @?sort_tmp, *node;
     START_TIME
-    buf = (char *)malloc(bufsize + 1);
+    buf = new { for i < (bufsize + 1) : '\0' };
     ht = ht_create(75000);
 
     while ((c = getchar()) > 0) {
         if (isalpha(c)) {
             buf[i++] = tolower(c);
 	    if (i == bufsize) {
-		bufsize *= 2;
-		buf = realloc(buf, bufsize + 1);
+	      buf = new { for j < bufsize*2 : (j < bufsize ? buf[j] : '\0') };
+	      bufsize *= 2;
 	    } 
         } else {
 	    if (i > 0) {
@@ -46,12 +43,12 @@ int main() {
     free(buf);
 
     sort_array = sort_tmp =
-	malloc(sizeof(struct ht_node *) * ht_count(ht));
+      new { for i < ht_count(ht) : new ht_node(NULL,0,NULL) };
 
     for (node=ht_first(ht); (*sort_tmp++ = node) != 0; node=ht_next(ht)) ;
 
-    qsort(sort_array, ht_count(ht), sizeof(struct ht_node *),
-	  (comparator)cmp_hash);
+    qsort(sort_array, ht_count(ht), sizeof(struct ht_node @),
+	  cmp_hash);
 
     for (i=0; i<ht_count(ht); i++)
 	printf("%7d\t%s\n", ht_val(sort_array[i]), ht_key(sort_array[i])); 

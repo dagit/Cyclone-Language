@@ -4,7 +4,7 @@
 #         prog1 is the program to run (including its args)
 #         inputfile is the optional input file to redirect to stdin
 
-TIME=/usr/bin/time
+#TIME="/usr/bin/time --format=\"%e\""
 TMP=/tmp/test$$
 
 # Args
@@ -36,12 +36,13 @@ i=0
 rm -f $TMP
 while [ "$i" != "$N" ]; do
   if [ -n "$INPUTFILE" ]; then
-    $TIME --format="%e" $CMD 2>> $TMP 1> /dev/null <$INPUTFILE
+    $TIME $CMD 2>> $TMP 1> /dev/null <$INPUTFILE
   else
-    $TIME --format="%e" $CMD 2>> $TMP 1> /dev/null
+    $TIME $CMD 2>> $TMP 1> /dev/null
   fi
   i=`expr $i + 1`
 done
 cat $TMP | awk '{ printf("%s ",$1); }'
 echo
 rm -f $TMP
+

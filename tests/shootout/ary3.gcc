@@ -1,5 +1,4 @@
-/* -*- mode: c -*-
- * ary3.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  *
  * this program is modified from:
@@ -13,12 +12,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "timer.h"
 
 int
 main(int argc, char *argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int i, k, *x, *y;
-	
+
+    START_TIME
     x = (int *) calloc(n, sizeof(int));
     y = (int *) calloc(n, sizeof(int));
 
@@ -35,6 +36,6 @@ main(int argc, char *argv[]) {
 
     free(x);
     free(y);
-
+    END_TIME
     return(0);
 }

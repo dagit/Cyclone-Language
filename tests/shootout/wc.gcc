@@ -1,5 +1,4 @@
-/* -*- mode: c -*-
- * wc.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  *
  * this program is modified from:
@@ -13,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "timer.h"
 
 enum {
     OUT,			/* outside a word */
@@ -24,7 +24,7 @@ int
 main() {
     int i, c, nl, nw, nc, state, nread;
     char buf[4096];
-
+    START_TIME
     state = OUT;
     nl = nw = nc = 0;
     while ((nread = read(0, buf, sizeof(buf))) > 0) {
@@ -42,5 +42,6 @@ main() {
 	}
     }
     printf("%d %d %d\n", nl, nw, nc);
+    END_TIME
     return(0);
 }

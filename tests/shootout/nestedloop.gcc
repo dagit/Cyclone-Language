@@ -1,17 +1,17 @@
-/* -*- mode: c -*-
- * nestedloop.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "timer.h"
 
 int
 main(int argc, char *argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int a, b, c, d, e, f, x=0;
-	
+    START_TIME
     for (a=0; a<n; a++)
 	for (b=0; b<n; b++)
 	    for (c=0; c<n; c++)
@@ -21,5 +21,6 @@ main(int argc, char *argv[]) {
 			    x++;
 
     printf("%d\n", x);
+    END_TIME
     return(0);
 }

@@ -1,10 +1,10 @@
-/* -*- mode: c -*-
- * sumcol.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "timer.h"
 
 #define MAXLINELEN 128
 
@@ -12,11 +12,12 @@ int
 main() {
     int sum = 0;
     char line[MAXLINELEN];
-
+    START_TIME
     while (fgets(line, MAXLINELEN, stdin)) {
 	sum += atoi(line);
     }
     printf("%d\n", sum);
+    END_TIME
     return(0);
 }
 

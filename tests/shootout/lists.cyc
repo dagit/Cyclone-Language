@@ -1,5 +1,4 @@
-/* -*- mode: c -*-
- * lists.gcc
+/*
  * http://www.bagley.org/~doug/shootout/
  */
 
@@ -7,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "timer.h"
 
 #define SIZE 10000
 
@@ -102,7 +102,6 @@ DLL *list_sequence(int from, int to) {
     }
     size = to - from + 1;
     l = new {for i < size+1 : DLLs{0,NULL,NULL}};
-    //l = (DLL *)malloc((size+1) * sizeof(DLL));
     from--;
     for (i=0, j=1; i<size; ++i, ++j) {
 	l[i].next = &l[i+1];
@@ -119,7 +118,6 @@ DLL *list_sequence(int from, int to) {
 
 DLL *list_copy(DLL *x) {
     int i, j, size = list_length(x);
-    //DLL *xp, *l = (DLL *)malloc((size+1) * sizeof(DLL));
     DLL *xp, ?l = new {for i < size+1 : DLLs{0,NULL,NULL}};
     for (i=0, j=1, xp=x; i<size; i++, j++, xp=xp->next) {
 	l[i].next = &l[j];
@@ -212,9 +210,9 @@ int test_lists() {
 	exit(1);
     }
     len = list_length(li1);
-    //free(li1);
-    //free(li2);
-    //free(li3);
+    free(li1);
+    free(li2);
+    free(li3);
     // return the length of the list
     return(len);
 }
@@ -222,7 +220,9 @@ int test_lists() {
 int main(int argc, char ?argv[]) {
     int n = ((argc == 2) ? atoi(argv[1]) : 1);
     int result = 0;
+    START_TIME
     while(n--) result = test_lists();
     printf("%d\n", result);
+    END_TIME
     return 0;
 }

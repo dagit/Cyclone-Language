@@ -1,5 +1,3 @@
-// Derived from:
-
 /*
  * http://www.bagley.org/~doug/shootout/
  *
@@ -14,9 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "timer.h"
 
-//ANNOYING: must name enum
-enum x {
+enum {
     OUT,			/* outside a word */
     IN				/* inside a word */
 };
@@ -27,7 +25,7 @@ char buf[4096];
 int
 main() {
     int i, c, nl, nw, nc, state, nread;
-
+    START_TIME
     state = OUT;
     nl = nw = nc = 0;
     while ((nread = read(0, buf, sizeof(buf))) > 0) {
@@ -45,5 +43,6 @@ main() {
 	}
     }
     printf("%d %d %d\n", nl, nw, nc);
+    END_TIME
     return(0);
 }
