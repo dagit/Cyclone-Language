@@ -129,7 +129,7 @@ extern char Cyc_Bad_alloc[];
 #else
 #ifdef _INLINE_FUNCTIONS
 static _INLINE void *
-_check_null(void *ptr) {
+_check_null(const void *ptr) {
   void*_check_null_temp = (void*)(ptr);
   if (!_check_null_temp) _throw_null();
   return _check_null_temp;
@@ -349,11 +349,6 @@ _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
    Note that this expands to call _zero_arr_plus. */
-/*#define _zero_arr_inplace_plus(x,orig_i) ({ \
-  typedef _zap_tx = (*x); \
-  _zap_tx **_zap_x = &((_zap_tx*)x); \
-  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
-  */
 static _INLINE void 
 _zero_arr_inplace_plus_char(char **x, int orig_i) {
   *x = _zero_arr_plus_char(*x,1,orig_i);
@@ -383,59 +378,63 @@ _zero_arr_inplace_plus_voidstar(void ***x, int orig_i) {
   *x = _zero_arr_plus_voidstar(*x,1,orig_i);
 }
 
-/* Does in-place increment of a zero-terminated pointer (e.g., x++).
-   Note that this expands to call _zero_arr_plus. */
-/*#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
-  typedef _zap_tx = (*x); \
-  _zap_tx **_zap_x = &((_zap_tx*)x); \
-  _zap_tx *_zap_res = *_zap_x; \
-  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
-  _zap_res; })*/
-  
+/* Does in-place increment of a zero-terminated pointer (e.g., x++). */
 static _INLINE char *
-_zero_arr_inplace_plus_post_char(char **x, int orig_i){
+_zero_arr_inplace_plus_post_char_fn(char **x, int orig_i){
   char * _zap_res = *x;
   *x = _zero_arr_plus_char(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_char(x,i) \
+  _zero_arr_inplace_plus_post_char_fn((char **)(x),(i))
 static _INLINE short *
-_zero_arr_inplace_plus_post_short(short **x, int orig_i){
+_zero_arr_inplace_plus_post_short_fn(short **x, int orig_i){
   short * _zap_res = *x;
   *x = _zero_arr_plus_short(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_short(x,i) \
+  _zero_arr_inplace_plus_post_short_fn((short **)(x),(i))
 static _INLINE int *
-_zero_arr_inplace_plus_post_int(int **x, int orig_i){
+_zero_arr_inplace_plus_post_int_fn(int **x, int orig_i){
   int * _zap_res = *x;
   *x = _zero_arr_plus_int(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_int(x,i) \
+  _zero_arr_inplace_plus_post_int_fn((int **)(x),(i))
 static _INLINE float *
-_zero_arr_inplace_plus_post_float(float **x, int orig_i){
+_zero_arr_inplace_plus_post_float_fn(float **x, int orig_i){
   float * _zap_res = *x;
   *x = _zero_arr_plus_float(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_float(x,i) \
+  _zero_arr_inplace_plus_post_float_fn((float **)(x),(i))
 static _INLINE double *
-_zero_arr_inplace_plus_post_double(double **x, int orig_i){
+_zero_arr_inplace_plus_post_double_fn(double **x, int orig_i){
   double * _zap_res = *x;
   *x = _zero_arr_plus_double(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_double(x,i) \
+  _zero_arr_inplace_plus_post_double_fn((double **)(x),(i))
 static _INLINE long double *
-_zero_arr_inplace_plus_post_longdouble(long double **x, int orig_i){
+_zero_arr_inplace_plus_post_longdouble_fn(long double **x, int orig_i){
   long double * _zap_res = *x;
   *x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
   return _zap_res;
 }
+#define _zero_arr_inplace_plus_post_longdouble(x,i) \
+  _zero_arr_inplace_plus_post_longdouble_fn((long double **)(x),(i))
 static _INLINE void **
-_zero_arr_inplace_plus_post_voidstar(void ***x, int orig_i){
+_zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i){
   void ** _zap_res = *x;
   *x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
   return _zap_res;
 }
-
-
+#define _zero_arr_inplace_plus_post_voidstar(x,i) \
+  _zero_arr_inplace_plus_post_voidstar_fn((void***)(x),(i))
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
