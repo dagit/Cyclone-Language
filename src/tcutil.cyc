@@ -229,7 +229,9 @@ static $(tqual_t,type_t)@ copy_tqt($(tqual_t,type_t) @arg) {
   return new $(x,copy_type(t));
 }
 static aggrfield_t copy_field(aggrfield_t f) {
-  return new Aggrfield{f->name,f->tq,copy_type(f->type),f->width,f->attributes};
+  return new Aggrfield{f->name,f->tq,copy_type(f->type),f->width,f->attributes,
+                         // FIX: should do a copy of the requires clause!
+                         f->requires_clause};
 }
 static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
   let &$(r1,r2) = x;
@@ -664,10 +666,12 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
       }
     }
     break;
+    // FIX: shouldn't we check for occurrence within the bound?
   case &PointerType(pinfo):
     occurs(evar,r,env,pinfo.elt_typ);
     occurs(evar,r,env,pinfo.ptr_atts.rgn);
     break;
+    // FIX: shouldn't we check for occurrence within the bound?
   case &ArrayType(ArrayInfo{t2,_,_,_,_}): occurs(evar,r,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
     env = List::rappend(r,tvs,env);
@@ -693,6 +697,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   case &DatatypeFieldType(DatatypeFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): occurslist(evar,r,env,ts); break;
   case &AnonAggrType(_,fs):
+    // FIX: shouldn't we check for occurrence within the requires clauses?
     for (; fs != NULL; fs = fs->tl)
       occurs(evar, r, env, fs->hd->type);
     break;
@@ -1589,6 +1594,16 @@ void unify_it(type_t t1, type_t t2) {
         failure_reason = "(different bitfield widths on member)";
         throw &Unify_val;
       }
+      if ((f1->requires_clause != NULL && f2->requires_clause == NULL) ||
+          (f1->requires_clause == NULL && f2->requires_clause != NULL) ||
+          (f1->requires_clause == NULL && f2->requires_clause != NULL &&
+           !Evexp::same_const_exp((exp_t)f1->requires_clause,
+                                  (exp_t)f2->requires_clause))) {
+        t1_failure = t1;
+        t2_failure = t2;
+        failure_reason = "(different @requires clauses on member)";
+        throw &Unify_val;
+      }
     }
     if (fs1 == NULL && fs2 == NULL) return;
     t1_failure = t1;
@@ -1674,7 +1689,9 @@ static int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
   if(tc != 0) return tc;
   let ac = list_cmp(attribute_cmp,f1->attributes, f2->attributes);
   if(ac != 0) return ac;
-  return star_cmp(Evexp::const_exp_cmp,f1->width, f2->width);
+  ac = star_cmp(Evexp::const_exp_cmp,f1->width, f2->width);
+  if(ac != 0) return ac;
+  return star_cmp(Evexp::const_exp_cmp,f1->requires_clause, f2->requires_clause);
 }
 
 static int enumfield_cmp(enumfield_t e1, enumfield_t e2) {
@@ -3016,12 +3033,6 @@ substitute_f2($(var_opt_t,tqual_t,type_t)@`H orig_arg, type_t t) {
 static type_t field_type(aggrfield_t f) {
   return f->type;
 }
-static aggrfield_t zip_field_type(aggrfield_t f, type_t t) {
-  if (f->type == t) return f;
-  return new Aggrfield {.name = f->name, .tq = f->tq, .type = t,
-                        .width = f->width, .attributes = f->attributes};
-}
-
 static list_t<type_t,`r2> substs(region_t<`r> rgn,
                                  list_t<$(tvar_t,type_t)@`r,`r> inst,
                                  list_t<type_t,`r2> ts);
@@ -3034,8 +3045,7 @@ static exp_t copye(exp_t old, raw_exp_t r) {
 
 // substitute the type instantiation inst throughout the expression e.
 // assumes e is a type-level-expression (e.g., a "constant" expression.)
-static exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst,
-                      exp_t e) {
+exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
   switch (e->r) {
   case &Const_e(_):
   case &Enum_e(_,_,_):
@@ -3106,6 +3116,31 @@ static exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst,
   default:
     return impos("non-type-level-expression in Tcutil::rsubsexp");
   }
+}
+
+aggrfield_t subst_aggrfield(region_t<`r> r,
+                            list_t<$(tvar_t,type_t)@`r,`r> inst, aggrfield_t f)
+{
+  let t = f->type;
+  let req = f->requires_clause;
+  let new_t = rsubstitute(r,inst,t);
+  let new_req = (req == NULL) ? NULL : rsubsexp(r,inst,req);
+  if (t == new_t && req == new_req) return f;
+  else return new Aggrfield{.name = f->name, .tq = f->tq, .type = new_t,
+                            .width = f->width, .attributes = f->attributes,
+                            .requires_clause = new_req};
+}
+
+list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
+                                     list_t<$(tvar_t,type_t)@`r,`r> inst, 
+                                     list_t<aggrfield_t,`H> fs) {
+  if (fs == NULL) return NULL;
+  let f = fs->hd;
+  let t = fs->tl;
+  let new_f = subst_aggrfield(r,inst,f);
+  let new_t = subst_aggrfields(r,inst,t);
+  if (new_f == f && new_t == t) return fs;
+  return new List(f,fs);
 }
 
 list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
@@ -3212,12 +3247,9 @@ type_t rsubstitute(region_t<`r> rgn,
     let tqts2 = List::map2(map2_tq,tqts,List::imp_rev(ts2));
     return new TupleType(tqts2);
   case &AnonAggrType(k,fs):
-    let ts = List::rmap(rgn,field_type,fs);
-    let ts2 = substs(rgn,inst,ts);
-    if (ts2 == ts)
-      return t;
-    let fs2 = List::map2(zip_field_type,fs,ts2);
-    return new AnonAggrType(k,fs2);
+    let new_fs = subst_aggrfields(rgn,inst,fs);
+    if (fs == new_fs) return t;
+    return new AnonAggrType(k,new_fs);
   case &Evar(_,r,_,_):
     if (r != NULL) return rsubstitute(rgn,inst,(type_t)r);
     else return t;
@@ -4240,18 +4272,31 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     TEMP_RGN(te, aprev_rgn) {
       list_t<field_name_t/*,`aprev_rgn*/> prev_fields = NULL;
       for (; fs != NULL; fs = fs->tl) {
-        let &Aggrfield{fn,*tqp,t,width,atts} = fs->hd;
+        let &Aggrfield{fn,*tqp,t,width,atts,requires_clause} = fs->hd;
         if (List::mem(strptrcmp,prev_fields,fn))
           terr(loc,"duplicate field %s",*fn);
         if (strcmp(*fn,"") != 0)
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,t,true);
         tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
-	if(k==UnionA && !bits_only(t))
+	if(k==UnionA && !bits_only(t) && requires_clause == NULL)
           // FIX: bad error message when t is a zero-terminated type
 	  warn(loc,"union member %s is not `bits-only' so it can only be written and not read", *fn);
         check_bitfield(loc,te,t,width,fn);
         check_field_atts(loc,fn,atts);
+        if (requires_clause != NULL) {
+          // FIX: check that this requires clause does not overlap with others?
+          if(k!=UnionA)
+            terr(loc,"@requires clause is only allowed on union members");
+          TEMP_RGN(te, temp) {
+            let te2 = allow_valueof(temp,te);
+            Tcexp::tcExp(te2,NULL,requires_clause);
+          }
+          if (!is_integral(requires_clause))
+            terr(loc,"@requires clause has type %s instead of integral type", 
+                 typ2string((type_t)requires_clause->topt));
+          cvtenv = i_check_valid_type_level_exp(requires_clause,te,cvtenv);
+        }
       }
     }
     break;
@@ -5000,7 +5045,7 @@ static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
     let finfo = lookup_field(x,f);
     switch (finfo) {
     case NULL: Tcutil::impos("is_noalias_field: missing field");
-    case &Aggrfield(_,_,t,_,_):
+    case &Aggrfield(_,_,t,_,_,_):
       return is_noalias_pointer_or_aggr(r,t);
     }
     return false;
@@ -5458,3 +5503,19 @@ exp_opt_t get_type_bound(type_t t) {
   }
   return bound;
 }
+
+// If b is a non-escaping variable binding, return a non-null pointer to
+// the vardecl.  Mostly used by the relations code in the flow analysis.
+struct Vardecl *nonesc_vardecl(binding_t b) {
+  switch (b) {
+  case &Pat_b(x): fallthru(x);
+  case &Local_b(x): fallthru(x);
+  case &Param_b(x): fallthru(x);
+  case &Global_b(x): 
+    if (!x->escapes) return x;
+    break;
+  default: break;
+  }
+  return NULL;
+}
+

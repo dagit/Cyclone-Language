@@ -950,6 +950,8 @@ and cyc_qual = parse
     { lexbuf->lex_curr_pos -= strlen("notnullZ"); return '@'; }
 | "nullable"['A'-'Z''a'-'z''0'-'9''_'] 
     { lexbuf->lex_curr_pos -= strlen("nullableZ"); return '@'; }
+| "requires"['A'-'Z''a'-'z''0'-'9''_'] 
+    { lexbuf->lex_curr_pos -= strlen("requiresZ"); return '@'; }
 | "tagged" { return TAGGED_QUAL; }
 | "zeroterm" { return ZEROTERM_QUAL; }
 | "nozeroterm" { return NOZEROTERM_QUAL; }
@@ -961,6 +963,7 @@ and cyc_qual = parse
 | "fat" { return FAT_QUAL; }
 | "notnull" { return NOTNULL_QUAL; }
 | "nullable" { return NULLABLE_QUAL; }
+| "requires" { return REQUIRES_QUAL; }
 | _ { lexbuf->lex_curr_pos -= 1; return '@'; }
 
 and scan_charconst = parse

@@ -160,6 +160,17 @@ extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);
 extern list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r>,
 					      list_t<$(tvar_t,type_t)@`r,`r>,
 					      list_t<$(type_t,type_t)@`H,`H>);
+// substitute through an aggregate field
+extern aggrfield_t subst_aggrfield(region_t<`r> r,
+                                   list_t<$(tvar_t,type_t)@`r,`r>, 
+                                   aggrfield_t);
+// substitute through a list of aggregate fields
+extern list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
+                                            list_t<$(tvar_t,type_t)@`r,`r>, 
+                                            list_t<aggrfield_t,`H> fs);
+// substitute through an expression
+extern exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r>, exp_t);
+
 // true when e1 is a sub-effect of e2
 extern bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2);
 
@@ -345,5 +356,10 @@ extern void check_no_qual(seg_t loc, type_t t);
 
 // return the bound of an array or pointer type (if present)
 extern exp_opt_t get_type_bound(type_t t);
+
+// If b is a non-escaping variable binding, return a non-null pointer to
+// the vardecl.
+extern struct Vardecl *nonesc_vardecl(binding_t b);
+
 }
 #endif

@@ -31,6 +31,7 @@
 #include "tc.h"
 #include <cycboot.h>
 #include "tcdecl.h"
+#include "relations.h"
 
 using Core;
 using List;
@@ -477,9 +478,10 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
    }
 
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
+    list_t<Relations::relns_t<`uprev_rgn>,`uprev_rgn> prev_relations = NULL;
 
     for (let fs = fields; fs != NULL; fs = fs->tl) {
-      let &Aggrfield(fn,tq,t,width,atts) = fs->hd;
+      let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
       
       if (List::mem(strptrcmp,prev_fields,fn))
 	terr(loc, "duplicate member %s", *fn);
@@ -494,7 +496,6 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
       // it can cut across multiple definitions...  
       if (str_or_union == UnionA || 
 	  (fs->tl == NULL && str_or_union == StructA)) 
-//       if (fs->tl == NULL && str_or_union == StructA) 
         field_kind = &tak; // we allow abstract kind for the last field
       check_type(loc,te,tvs,field_kind,false,t);
 
@@ -503,6 +504,42 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
       // if width is non-NULL then t must be of integral type
       check_bitfield(loc, te, t, width, fn);
       // FIX : check for consistent tquals
+      if (requires_clause) {
+        if (str_or_union != UnionA)
+          terr(loc,"@requires clauses are only allowed on union members");
+        { region temp;
+          let te2 = allow_valueof(temp,te);
+          Tcexp::tcExp(te2,NULL,requires_clause);
+        }
+        if (!is_integral(requires_clause))
+          terr(requires_clause->loc,
+               "@requires clause has type %s instead of integral type",
+               typ2string((type_t)requires_clause->topt));
+        check_type(requires_clause->loc,te,tvs,&ik,false,new ValueofType(requires_clause));
+        // convert the requires expression to a CNF formula
+        let relns = Relations::exp2relns(uprev_rgn,requires_clause);
+
+        //fprintf(stderr,"relations for %s: ",*fn);
+        //Relations::print_relns(stderr,relns);
+        //fprintf(stderr,"\n");
+
+        // warn if the relations aren't consistent
+        if (!Relations::consistent_relations(relns))
+          terr(requires_clause->loc,"@requires clause may be unsatisfiable");
+
+        // run through all of the previous formulae and see if
+        // this one is consistent with those.  If so, there may
+        // be an overlap and we must reject.
+        for (let p = prev_relations; p != NULL; p = p->tl) {
+          if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
+            terr(requires_clause->loc,
+                 "@requires clause may overlap with previous clauses");
+        }
+        prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
+      } else /* no requires clause */ {
+        if (prev_relations != NULL)
+          terr(loc,"if one field has a @requires clause, they all must");
+      }
     }
   }
 }
@@ -600,7 +637,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
       // warn when fields of unions are not bits-only -- these can
       // only be written and not read.
       for (_ f = fs; f != NULL; f = f->tl)
-	if (!bits_only(f->hd->type))
+	if (!bits_only(f->hd->type) && f->hd->requires_clause == NULL)
 	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
 	       *f->hd->name,*v, typ2string(f->hd->type));
 

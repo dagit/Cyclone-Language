@@ -525,7 +525,8 @@ list_t<Absyn::decl_t>
 
   CYCALLOCPROFILE_mark(stage_name);
 
-  try ans = f(env,tds);
+  /*try*/ ans = f(env,tds);
+  /*
   catch {
   case &Core::Impossible(s):
     exn_string = "Exception Core::Impossible";
@@ -548,6 +549,7 @@ list_t<Absyn::decl_t>
     exn_string = "Uncaught exception";
     break;
     }
+*/
   if (Position::error_p())
     compile_failure = true;
   if (strcmp(exn_string,"") != 0) {

@@ -955,7 +955,7 @@ return 0;{
 unsigned long as=_get_dyneither_size(a,sizeof(char));
 unsigned long bs=_get_dyneither_size(b,sizeof(char));
 unsigned long min_length=as < bs?as: bs;
-int i=- 1;
+int i=-1;
 # 127
 {const char*_tmp84;const char*_tmp83;min_length <= _get_dyneither_size(a,sizeof(char)) && min_length <= _get_dyneither_size(b,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmp83="min_length <= numelts(a) && min_length <= numelts(b)",_tag_dyneither(_tmp83,sizeof(char),53))),((_tmp84="string.cyc",_tag_dyneither(_tmp84,sizeof(char),11))),127);}
 # 129
@@ -1395,7 +1395,7 @@ unsigned long min_length=len1 < len2?len1: len2;
 # 659
 {const char*_tmpDA;const char*_tmpD9;min_length <= _get_dyneither_size(s1,sizeof(char)) && min_length <= _get_dyneither_size(s2,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(((_tmpD9="min_length <= numelts(s1) && min_length <= numelts(s2)",_tag_dyneither(_tmpD9,sizeof(char),55))),((_tmpDA="string.cyc",_tag_dyneither(_tmpDA,sizeof(char),11))),659);}{
 # 661
-int i=- 1;
+int i=-1;
 while((++ i,i < min_length)){
 int diff=toupper((int)((const char*)s1.curr)[i])- toupper((int)((const char*)s2.curr)[i]);
 if(diff != 0)

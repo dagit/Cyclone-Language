@@ -24,6 +24,7 @@
 #include <dict.h>
 #include <position.h>
 #include "absyn.h"
+#include "relations.h"
 
 // Note: Okasaki's dictionaries may be the wrong thing here because
 //       we're doing a lot of intersections.  I don't know what's better,
@@ -67,39 +68,11 @@ EXTERN_CFFLOW enum InitLevel {
 typedef enum InitLevel initlevel_t;
 
 //////////////////////////////////////////////////////////////////////
-// primitive relations that we track for non-escaping, integral variables
-// to avoid array bounds checks
-
-// these are the operands for the primitive relations
-EXTERN_CFFLOW @tagged union RelnOp {
-  unsigned int     RConst;    // a constant
-  Absyn::vardecl_t RVar;      // a term-level variable
-  Absyn::vardecl_t RNumelts;  // numelts(x) 
-  Absyn::tvar_t    RTvar;     // `i::I 
-};
-typedef union RelnOp reln_op_t;
-// constructors for the operands
-extern reln_op_t 
-  RConst(unsigned int),
-  RVar(Absyn::vardecl_t),
-  RNumelts(Absyn::vardecl_t),
-  RTvar(Absyn::tvar_t);
-// the different relations -- note that Rlte and Rlt are *unsigned* comparisons
-EXTERN_CFFLOW enum Relation { Req, Rneq, Rlte, Rlt };
-typedef enum Relation relation_t;
-EXTERN_CFFLOW struct Reln {
-  reln_op_t        rop1;
-  relation_t       relation;
-  reln_op_t        rop2;
-};
-typedef struct Reln @`r reln_t<`r>;
-typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
-//////////////////////////////////////////////////////////////////////
 
 @extensible datatype Absyn::AbsynAnnot { 
   EXTERN_CFFLOW IsZero;
-  EXTERN_CFFLOW NotZero(relns_t<`H>);
-  EXTERN_CFFLOW UnknownZ(relns_t<`H>);
+  EXTERN_CFFLOW NotZero(Relations::relns_t<`H>);
+  EXTERN_CFFLOW UnknownZ(Relations::relns_t<`H>);
 };
 extern_datacon(Absyn::AbsynAnnot,IsZero);
 
@@ -160,11 +133,11 @@ extern place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, b
 // join takes the intersection of the dictionaries.
 EXTERN_CFFLOW @tagged union FlowInfo<`r::R> {
   int BottomFL; // int unused
-  $(flowdict_t<`r>,relns_t<`r>) ReachableFL;
+  $(flowdict_t<`r>,Relations::relns_t<`r>) ReachableFL;
 };
 typedef union FlowInfo<`r> flow_t<`r>;
 extern flow_t<`r> BottomFL();
-extern flow_t<`r> ReachableFL(flowdict_t<`r>,relns_t<`r>);
+extern flow_t<`r> ReachableFL(flowdict_t<`r>,Relations::relns_t<`r>);
 
 EXTERN_CFFLOW struct FlowEnv<`r::R> {
   region_t<`r>    r;
@@ -211,7 +184,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-// #define DEBUG_FLOW
+//#define DEBUG_FLOW
 #define SANITY
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
@@ -221,37 +194,8 @@ extern void print_flow(flow_t f);
 #define DEBUG_PRINT(arg...) {}
 #endif
 
-
-
-// If b is a non-escaping variable binding, return a non-null pointer to
-// the vardecl.
-extern struct Absyn::Vardecl *nonesc_vardecl(Absyn::binding_t b);
-// Convert an expression to a relation operand -- puts the result in p
-// and returns true if successful, returns false otherwise.  
-extern bool exp2relnop(Absyn::exp_t e, reln_op_t @p);
-// Add rop1 r rop2 to relns (avoids adding if already present)
-extern relns_t<`r> add_relation(region_t<`r> rgn, reln_op_t rop1, relation_t r,
-                         reln_op_t rop2, relns_t<`r> relns);
-// Update relations with x being overwritten by e
-extern relns_t<`r> reln_assign_var(region_t<`r>, relns_t<`r>, Absyn::vardecl_t, Absyn::exp_t);
-// Update relations with e1 being overwritten by e2
-extern relns_t<`r> reln_assign_exp(region_t<`r>, relns_t<`r>, Absyn::exp_t, Absyn::exp_t);
-// Update relations with x being overwritten by some unknown value
-extern relns_t<`r> reln_kill_var(region_t<`r>,relns_t<`r>, Absyn::vardecl_t);
-// Update relations with e being overwritten by some unknown value
-extern relns_t<`r> reln_kill_exp(region_t<`r>,relns_t<`r>, Absyn::exp_t);
-extern relns_t<`r2> copy_relns(region_t<`r2>, relns_t<`r>);
-extern bool same_relns(relns_t, relns_t);
-extern void print_relns(relns_t);
-// returns true if the relations are consistent -- typical use
-// is to check a relation you want to be true (e.g., i < numelts(x))
-// under the current set of relations R.  To do so, you add the
-// negation numelts(x) <= i and check to see if the resulting system
-// is inconsistent.  If not, then you know that the desired relation holds.
-extern bool consistent_relations(relns_t rlns);
-
-  // all of the following throw EscNotInit as appropriate
-  // the field list in the thrown place_t might be empty even if it shouldn't be
+// all of the following throw EscNotInit as appropriate
+// the field list in the thrown place_t might be empty even if it shouldn't be
 extern flowdict_t<`r> escape_deref(flow_env_t<`r> fenv,
                                    flowdict_t<`r> d, 
                                    place_set_t<`r> * all_changed,

@@ -64,11 +64,11 @@ namespace Pratt {
   // keep graphs abstract -- we're likely to want to change the rep.
   struct Graph;
   typedef struct Graph graph_t;
-  extern void print_graph(graph_t @);
+  extern void print_graph(graph_t *);
 
   // create an empty graph
   extern struct Graph @empty_graph();
-
+  extern graph_t@ copy_graph(graph_t@);
   // Add a constraint that i - j <= a.  Returns the new graph if it is
   // consistent, otherwise returns null.  
   // This is an *imperative* update, so the old graph is destroyed.

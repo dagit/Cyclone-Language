@@ -1568,7 +1568,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     }
     // if this is a non-tagged union and we are reading a pointer,
     // then need to be writing to this spot
-    if (ad->kind == UnionA && !ad->impl->tagged && !bits_only(t2) && !in_notreadctxt(te))
+    if (ad->kind == UnionA && !ad->impl->tagged && !bits_only(t2) && !in_notreadctxt(te) && finfo->requires_clause == NULL)
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     if(ad->impl->exist_vars != NULL) {
       // this will force the result to not have a type containing any of the
@@ -1583,7 +1583,8 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,topt,"type has no %s field",*f);
     // if this is a non-tagged union and we are reading a pointer,
     // then either we need to be writing to this spot
-    if (k == UnionA && !bits_only(finfo->type) && !in_notreadctxt(te))
+    if (k == UnionA && !bits_only(finfo->type) && !in_notreadctxt(te) &&
+        finfo->requires_clause == NULL)
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     return finfo->type;
   case &ArrayType(_)   && (strcmp(*f,"size") == 0):
@@ -1643,7 +1644,8 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       // if this is a non-tagged union and we are reading a pointer,
       // then either we need to be writing to this spot
       if (ad->kind == UnionA && 
-	  !ad->impl->tagged && !bits_only(t3) && !in_notreadctxt(te))
+	  !ad->impl->tagged && !bits_only(t3) && !in_notreadctxt(te) &&
+          finfo->requires_clause == NULL)
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       if(ad->impl->exist_vars != NULL) {
         if (!unify(t3,wildtyp(lookup_opt_type_vars(te))))

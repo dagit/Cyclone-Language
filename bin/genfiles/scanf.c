@@ -1012,7 +1012,7 @@ if(flags & 1)
 _dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 continue;case '\000': _LL47:
 # 376
- nassigned=- 1;
+ nassigned=-1;
 goto done;default: _LL48:
 # 380
  if(isupper(c))
@@ -1074,7 +1074,7 @@ nread +=sum;
 break;case 1: _LL4B:
 # 460
  if(width == 0)
-width=(long long)~ 0;
+width=(long long)4294967295;
 # 463
 if(flags & 8){
 n=0;{
@@ -1120,7 +1120,7 @@ nread +=n;
 break;case 2: _LL4C:
 # 510
  if(width == 0)
-width=(long long)~ 0;
+width=(long long)4294967295;
 if(flags & 8){
 n=0;{
 int c=_IO_peekc(fp);
@@ -1229,7 +1229,7 @@ _IO_ungetc((int)*((char*)_check_dyneither_subscript(p,sizeof(char),0)),fp);}
 # 658
 goto match_failure;}
 # 660
-c=(int)*((char*)_check_dyneither_subscript(p,sizeof(char),- 1));
+c=(int)*((char*)_check_dyneither_subscript(p,sizeof(char),-1));
 if(c == 'x'  || c == 'X'){
 _dyneither_ptr_inplace_plus(& p,sizeof(char),-1);
 _IO_ungetc(c,fp);}
@@ -1339,7 +1339,7 @@ eof_failure:
  ++ seen_eof;
 input_failure:
  if(nassigned == 0)
-nassigned=- 1;
+nassigned=-1;
 control_failure:
  match_failure:
  if((unsigned int)errp)

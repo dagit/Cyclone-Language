@@ -2127,15 +2127,23 @@ doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
 }
 
 doc_t aggrfield2doc(aggrfield_t f) {
+  doc_t requires_doc;
+  let req = f->requires_clause;
+  if (req)
+    requires_doc = cat(text("@requires "),exp2doc(req));
+  else 
+    requires_doc = nil_doc();
+
   switch(c_compiler){
   case Gcc_c:
+    // NB: can't have both where and width
     if (f->width != NULL)
       return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                  text(":"), exp2doc((exp_t)f->width),
                  atts2doc(f->attributes), text(";"));
     else
       return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-                 atts2doc(f->attributes), text(";"));
+                 atts2doc(f->attributes), requires_doc, text(";"));
   case Vc_c:
     if (f->width != NULL)
       return cat(atts2doc(f->attributes),
@@ -2143,7 +2151,8 @@ doc_t aggrfield2doc(aggrfield_t f) {
                  text(":"), exp2doc((exp_t)f->width),text(";"));
     else
       return cat(atts2doc(f->attributes),
-                 tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),text(";"));
+                 tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+                 requires_doc, text(";"));
 \
   }
 }

@@ -1059,15 +1059,42 @@ bool is_union_type(type_t t) {
   default: return false;
   }
 }
-bool is_nontagged_union_type(type_t t) {
+bool is_nontagged_nonrequire_union_type(type_t t) {
   switch(Tcutil::compress(t)) {
-  case &AnonAggrType(UnionA,_):     return true;
+  case &AnonAggrType(UnionA,fs):     
+    if (fs == NULL) return true;
+    return (fs->hd->requires_clause == NULL);
   case &AggrType(AggrInfo(info,_)): 
     switch (info) {
     case {.KnownAggr = &ad}: 
-      return (ad->kind == UnionA) && (ad->impl->tagged == false);
+      if (ad->kind != UnionA) return false;
+      let impl = ad->impl;
+      if (impl->tagged) return false;
+      let fields = impl->fields;
+      if (fields == NULL) return true;
+      return (fields->hd->requires_clause == NULL);
     case {.UnknownAggr = $(k,_,NULL)}: return k == UnionA;
     case {.UnknownAggr = $(k,_,&Opt(b))}: return k == UnionA && !b;
+    }
+  default: return false;
+  }
+}
+bool is_require_union_type(type_t t) {
+  switch(Tcutil::compress(t)) {
+  case &AnonAggrType(UnionA,fs):     
+    if (fs == NULL) return false;
+    return (fs->hd->requires_clause != NULL);
+  case &AggrType(AggrInfo(info,_)): 
+    switch (info) {
+    case {.KnownAggr = &ad}: 
+      if (ad->kind != UnionA) return false;
+      let impl = ad->impl;
+      if (impl->tagged) return false;
+      let fields = impl->fields;
+      if (fields == NULL) return false;
+      return (fields->hd->requires_clause != NULL);
+    case {.UnknownAggr = $(k,_,NULL)}: return false;
+    case {.UnknownAggr = $(k,_,&Opt(b))}: return false;
     }
   default: return false;
   }

@@ -25,6 +25,7 @@
 
 // TO DO: Exploit @ types to know NotZero!
 
+// FIX: this kludge is no longer valid due to @requires clauses!
 // KLUDGE: For unions, we just pretend its initialized.  Since you can
 // only read bits out, safety is not compromised.
 
@@ -44,6 +45,7 @@
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"
+#include "relations.h"
 #include "cf_flowinfo.h"
 #include "new_control_flow.h"
 #include "rgnorder.h"
@@ -54,6 +56,7 @@
 
 using List;
 using Absyn;
+using Relations;
 using CfFlowInfo;
 using Absynpp;
 namespace NewControlFlow;
@@ -249,6 +252,69 @@ static flow_t<`r> add_vars(flow_env_t<`r> fenv,
   }
 }
 
+static bool relns_ok(region_t<`r> r, relns_t<`r> assume, relns_t req) {
+  // check that each of the req relations is implied by assume
+  //fprintf(stderr,"true relations are: "); 
+  //Relations::print_relns(stderr,assume);
+  //fprintf(stderr,"\nwith relations to check: ");
+  //Relations::print_relns(stderr,req);
+  //fprintf(stderr,"\n");
+  for (; req; req=req->tl) {
+    let neg_rln = Relations::negate(r,req->hd);
+    if (Relations::consistent_relations(rnew(r) List(neg_rln,assume)))
+      return false;
+  }
+  return true;
+}
+
+static exp_t strip_cast(exp_t e) {
+  switch (e->r) {
+  case &Cast_e(_,e1,...): return e1;
+  default: return e;
+  }
+}
+
+static void check_requires(seg_t loc, region_t<`r> r, type_t t, field_name_t f, flow_t<`r> inflow)
+{
+  switch (inflow) {
+  case {.BottomFL = _}: return;
+  case {.ReachableFL = $(_,relns)}:
+    switch (Tcutil::compress(t)) {
+    case &AggrType(AggrInfo{ainfo,ts}):
+      let ad = get_known_aggrdecl(ainfo);
+      let field = lookup_decl_field(ad,f);
+      let req = field->requires_clause;
+      if (req != NULL) {
+        region temp;
+        let ireq = Tcutil::rsubsexp(temp,List::rzip(temp,temp,ad->tvs,ts),req);
+        //fprintf(stderr,"ireq = %s\n",exp2string(ireq));
+        if (!relns_ok(r,relns,Relations::exp2relns(temp,ireq))) {
+          Tcutil::terr(loc,"unable to prove %s, required to access %s",Absynpp::exp2string(strip_cast(ireq)),*f);
+          fprintf(stderr,"  [recorded facts on path: ");
+          Relations::print_relns(stderr,relns);
+          fprintf(stderr,"]\n");
+        }
+      }
+      break;
+    case &AnonAggrType(_,fs):
+      let field = lookup_field(fs,f);
+      let req = field->requires_clause;
+      if (req != NULL) {
+        region temp;
+        if (!relns_ok(r,relns,Relations::exp2relns(temp,req))) {
+          Tcutil::terr(loc,"unable to prove %s, required to access %s",Absynpp::exp2string(strip_cast(req)),*f);
+          fprintf(stderr,"  [recorded facts on path: ");
+          Relations::print_relns(stderr,relns);
+          fprintf(stderr,"]\n");
+        }
+      }
+      break;
+    default: break;
+    }
+    break;
+  }
+}
+
 static flow_t<`r> use_Rval(analenv_t<`r> env, seg_t loc, flow_t<`r> inflow, absRval_t<`r> r){
   switch(inflow) {
   case {.BottomFL = _}: return BottomFL();
@@ -303,48 +369,6 @@ static void check_nounique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r>
   default: return;
   }
 }
-
-// MWH: this code is a copy of the above, and apparently not used
-
-// static void check_unique(analenv_t<`r> env, seg_t loc, type_t t, absRval_t<`r> r) {
-//   switch $(Tcutil::compress(t),r) {
-//   case $(_,&UnknownR(NoneIL)): return;
-//   case $(_,&Zero): return;
-//   case $(_,&Consumed(...)): return;
-//   case $(&DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)),&Aggregate(_,ad)):
-//     if(tuf->typs == NULL)
-//       return;
-//     fallthru(tuf->typs,ad);
-//   case $(&TupleType(tqts),&Aggregate(_,ad)):
-//     unsigned sz = List::length(tqts);
-//     for (int i = 0; i < sz; i++) {
-//       check_nounique(env,loc,(*tqts->hd)[1],ad[i]);
-//     }
-//     return;
-//   case $(&AggrType(AggrInfo(info,targs)),&Aggregate(_,d)):
-//     // fix -- not right for unions?
-//     let ad = get_known_aggrdecl(info);
-//     if(ad->impl==NULL) return;
-//     let fs = ad->impl->fields;
-//     region temp;
-//     let inst = List::rzip(temp,temp,ad->tvs,targs);
-//     for (int i = 0; i < numelts(d); i++, fs = fs->tl) {
-//       type_t t = fs->hd->type;
-//       if (inst != NULL) t = Tcutil::rsubstitute(temp,inst,t);
-//       check_nounique(env,loc,t,d[i]);
-//     }
-//     return;
-//   case $(&AnonAggrType(k,fs),&Aggregate(_,d)):
-//     // fix -- not right for unions?
-//     for (int i = 0; i < numelts(d); i++, fs = fs->tl)
-//       check_nounique(env,loc,fs->hd->type,d[i]);
-//     return;
-//   case $(&PointerType(_),_) && Tcutil::is_noalias_pointer(t):
-//     Tcutil::warn(loc,"argument may still contain unique pointers");
-//     return;
-//   default: return;
-//   }
-// }
 
 static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t t, flow_t<`r> inflow, absRval_t<`r> r) {
   switch(inflow) {
@@ -638,7 +662,7 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
 
   switch (e1->r) {
   case &Var_e(_,b1):
-    let x = nonesc_vardecl(b1);
+    let x = Tcutil::nonesc_vardecl(b1);
     if (x != NULL) {
       reln_op_t n1 = RNumelts(x);
       if (e2_valid_op)
@@ -1213,11 +1237,16 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
     return anal_derefR(env,inflow,f,e1,r);
 
-    // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,field,...):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    if(is_nontagged_union_type((type_t)e1->topt))
+    let e1_type = (type_t)e1->topt;
+    if(is_nontagged_nonrequire_union_type(e1_type)) {
+      // we allow bits-only unions to be treated as initialized
       return $(f,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
+    } 
+    if (is_require_union_type(e1_type)) {
+      check_requires(e1->loc,fenv->r,e1_type,field,f);
+    }
     switch (r) {
     case &NamedLocation(_, &Aggregate(UnionRInfo(is_union,fnum),rdict)):
       fallthru(is_union,fnum,rdict);
@@ -1227,6 +1256,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	return $(f, typ_to_absrval(fenv,(type_t)e->topt,true,fenv->unknown_none));
       return $(f,rdict[field_no]);
     default:
+      fprintf(stderr,"the bad rexp is :");
+      print_absrval(r);
+      fprintf(stderr,"\n");
       throw new Core::Impossible(aprintf("anal_Rexp: AggrMember: %s",
                                          Absynpp::exp2string(e)));
     }
@@ -1235,7 +1267,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     // similar to above, but result is a non-zero integer unless the
     // field is already known
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    if(is_nontagged_union_type((type_t)e1->topt))
+    // FIX?!?  I think that this will always return unknown_all, no?
+    if(is_nontagged_nonrequire_union_type((type_t)e1->topt))
       return $(f,fenv->unknown_all);
     switch (r) {
     case &NamedLocation(_, &Aggregate(UnionRInfo(is_union,fnum),rdict)):
@@ -1263,8 +1296,13 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     DEBUG_PRINT_F(print_flow,f2);
     switch(Tcutil::compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
-      if(is_nontagged_union_type(t2))
+      if(is_nontagged_nonrequire_union_type(t2)) {
+        // allow a bits-only union to be treated as initialized
 	return $(f2,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
+      }
+      if (is_require_union_type(t2)) {
+        check_requires(e1->loc,fenv->r,t2,field,f1);
+      }
       switch (r2) {
       case &NamedLocation(_, &Aggregate(UnionRInfo(is_union,fnum),rdict)):
 	fallthru(is_union,fnum,rdict);
@@ -1359,11 +1397,13 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     }
     fallthru(des,StructA,fs);
   case &Aggregate_e(_,_,des,&Aggrdecl{.kind = kind, .impl = &AggrdeclImpl{.fields=fs,...},...}):
+    type_t exp_type = (type_t)e->topt;
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rmap(temp,Core::snd,des),true,true);
       aggrdict_t aggrdict =
-	aggrfields_to_aggrdict(fenv,fs,kind==UnionA,kind==UnionA ? fenv->unknown_none : fenv->unknown_all);
+	aggrfields_to_aggrdict(fenv,fs,kind==UnionA,fenv->unknown_all);
+
       int field_no = -1;
       for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
         for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
@@ -1377,9 +1417,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
             if (kind == UnionA) {
               let e = (*des->hd)[1];
               f = use_Rval(env,e->loc,f,rvals->hd);
+              // must check that the @requires clause is satisfied
+              check_requires(e->loc, fenv->r, exp_type, fld, f);
             }
           }
-      return $(f, rnew(env->r) Aggregate(UnionRInfo(kind == UnionA,field_no), aggrdict));
+      let res = rnew(env->r) Aggregate(UnionRInfo(kind == UnionA,field_no), aggrdict);
+      return $(f, res);
     }
   case &Aggregate_e(_,_,_,_):
     throw new Core::Impossible("anal_Rexp:missing aggrdeclimpl");
@@ -1560,8 +1603,10 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &AggrArrow_e(e1,f,...):
     switch(Tcutil::compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t2,_,_}):
-      if(!is_nontagged_union_type(t2))
+      if(!is_nontagged_nonrequire_union_type(t2)) {
+        check_requires(e1->loc,fenv->r,t2,f,inflow);
 	flds = rnew(env->r) List(get_field_index(t2,f),flds);
+      }
       break;
     default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
     }
@@ -1635,10 +1680,15 @@ static $(flow_t<`r>,absLval_t<`r>)
     }
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld,...):
-    if(is_nontagged_union_type((type_t)e1->topt))
+    let e1_type = (type_t)e1->topt;
+    if (is_require_union_type(e1_type)) {
+      check_requires(e1->loc,fenv->r,e1_type,fld,inflow);
+    }
+    if(is_nontagged_nonrequire_union_type(e1_type)) {
       return $(inflow,UnknownL());
+    }
     return anal_Lexp_rec(env,inflow,expand_unique,e1,
-                         rnew(env->r) List(get_field_index((type_t)e1->topt,fld),flds));
+                         rnew(env->r) List(get_field_index(e1_type,fld),flds));
 
   default: return $(BottomFL(), UnknownL()); // see comment before function
   }
@@ -1650,39 +1700,14 @@ anal_Lexp(analenv_t<`r> env, flow_t<`r> inflow, bool expand_unique, exp_t e) {
   return $(f,r);
 }
 
-// map relational primop to one of our limited forms of relations
-// (gets rid of > and >= in favor of < and <= to keep things simple.)
-static $(exp_t,relation_t,exp_t) primop2relation(exp_t e1,primop_t p,exp_t e2) 
-{
-  switch (p) {
-  case Eq: return $(e1,Req,e2);
-  case Neq: return $(e1,Rneq,e2);
-  case Lt: return $(e1,Rlt,e2);
-  case Lte: return $(e1,Rlte,e2);
-  case Gt: return $(e2,Rlt,e1);
-  case Gte: return $(e2,Rlte,e1);
-  default: throw new Core::Impossible("primop2relation");
-  }
-}
-
-// used to negate a relation (note -- must flip operands too)
-static relation_t flip_relation(relation_t r) {
-  switch (r) {
-  case Req: return Rneq;
-  case Rneq: return Req;
-  case Rlt: return Rlte;
-  case Rlte: return Rlt;
-  }
-}
-
 // this function does the hard work of refining the flow info
 // based on a conditional test that involves primitive oeprations
 // such as comparisons.  
 static $(flow_t<`r>,flow_t<`r>) 
 anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow, 
-                 primop_t p, list_t<exp_t> es) {
+                 primop_t p, list_t<exp_t,`H> es) {
   let fenv = env->fenv;
-  DEBUG_PRINT("anal_primop_test %s, inflow is ",exp2string(e));
+  DEBUG_PRINT("anal_primop_test %s, inflow is ",exp2string(primop_exp(p,es,0)));
   DEBUG_PRINT_F(print_flow,inflow);
   absRval_t r1,r2;
   flow_t f;
@@ -1692,7 +1717,7 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
     r2 = rvals->tl->hd;
     f = fl;
   }
-  DEBUG_PRINT("anal_primop_test %s, after rexps, flow is ",exp2string(e));
+  DEBUG_PRINT("anal_primop_test, after rexps, flow is ");
   DEBUG_PRINT_F(print_flow,f);
   switch(f) {
   case {.BottomFL = _}: return $(f,f);
@@ -1703,6 +1728,9 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
       Tcutil::terr(es->hd->loc,"expression may not be initialized");
     if(initlevel(env->fenv,d,r2)==NoneIL)
       Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+
+    let ft = f;
+    let ff = f;
 
     // zero-splitting, only for Eq and Neq with Zero and Unknown, so can
     // take precedence over any array-bounds splitting
@@ -1723,28 +1751,32 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
       case $(&UnknownR(il),&Zero): // f is correct for both args b/c unordered
         let $(f1,f2) = splitzero(env,f,f,e1,il,r1n);
         switch(p) {
-        case Eq:  return $(f2,f1);
-        case Neq: return $(f1,f2);
+        case Eq:  ft = f2; ff = f1; break;
+        case Neq: ft = f1; ff = f2; break;
         default: throw new Core::Impossible("anal_test, zero-split");
         }
+        break;
       case $(&Zero,&UnknownR(il)):
         let $(f1,f2) = splitzero(env,f,f,e2,il,r2n);
         switch(p) {
-        case Eq:  return $(f2,f1);
-        case Neq: return $(f1,f2);
+        case Eq:  ft = f2; ff = f1; break;
+        case Neq: ft = f1; ff = f2; break;
         default: throw new Core::Impossible("anal_test, zero-split");
         }
+        break;
       case $(&Zero,&Zero):
-        if (p == Eq) return $(f,BottomFL());
-        else return $(BottomFL(),f);
+        if (p == Eq) ff = BottomFL();
+        else ft = BottomFL(); 
+        break;
       case $(&Zero,&NotZeroAll): fallthru;
       case $(&Zero,&NotZeroThis): fallthru;
       case $(&Zero,&AddressOf(_)): fallthru;
       case $(&NotZeroAll,&Zero): fallthru;
       case $(&NotZeroThis,&Zero): fallthru;
       case $(&AddressOf(_),&Zero):
-        if (p == Neq) return $(f,BottomFL());
-        else return $(BottomFL(),f);
+        if (p == Neq) ff = BottomFL(); 
+        else ft = BottomFL(); 
+        break;
       default: break;
       }
     }
@@ -1758,13 +1790,13 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
     case $(_,&IntType(Unsigned,_)):
     case $(&TagType(_),_):
     case $(_,&TagType(_)): break;
-    default: return $(f,f);
+    default: return $(ft,ff);
     }
 
     // bypass any non-relational primop
     switch (p) {
     case Eq: case Neq: case Gt: case Gte: case Lt: case Lte: break;
-    default: return $(f,f);
+    default: return $(ft,ff);
     }
 
     let r = env->fenv->r;
@@ -1779,9 +1811,18 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
       // we flip the relation (== flips with !=, < flips with <=) and 
       // the arguments.  
       let relns_false = add_relation(r,n2,flip_relation(relation),n1,relns);
-      return $(ReachableFL(d,relns_true), ReachableFL(d,relns_false));
+      switch $(ft,ff) {
+      case $({.ReachableFL = $(dt,_)},{.ReachableFL = $(df,_)}):
+        return $(ReachableFL(dt,relns_true), ReachableFL(df,relns_false));
+      case $(_,{.ReachableFL = $(df,_)}):
+        return $(ft, ReachableFL(df,relns_false));
+      case $({.ReachableFL = $(dt,_)},_):
+        return $(ReachableFL(dt,relns_true), ff);
+      default:
+        return $(ft,ff);
+      }
     } else 
-      return $(f,f);
+      return $(ft,ff);
   }
 }
 

@@ -189,8 +189,8 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 
     // check each field under the map
     for(; f0s != NULL && f1s != NULL; f0s = f0s->tl, f1s = f1s->tl) {
-      let &Aggrfield(fn0,tq0,t0,width0,atts0) = f0s->hd;
-      let &Aggrfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
+      let &Aggrfield(fn0,tq0,t0,width0,atts0,req0) = f0s->hd;
+      let &Aggrfield(fn1,tq1,t1,width1,atts1,req1) = f1s->hd;
       // names, qualifiers, types, widths, and attributes all must agree
       if (strptrcmp(fn0, fn1) != 0) {
 	merr(loc, msg, "%s %s : field name mismatch %s != %s", "type",
@@ -212,6 +212,18 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 	  || (width0 != NULL && width1 == NULL)) {
 	merr(loc, msg, "%s %s : bitfield mismatch on field %s","type",v,*fn0);
 	res = false;
+      }
+      if (req0 != NULL && req1 != NULL) {
+        type_t subst_w1 = substitute(inst, new ValueofType(req1));
+        if (!check_type(new ValueofType(req0),subst_w1)) {
+          merr(loc, msg, "type %s : mismatch on @requires clauses: %s != %s",
+               v, exp2string(req0), exp2string(req1));
+          res = false;
+        }
+      } else if ((req0 == NULL && req1 != NULL) ||
+                 (req0 != NULL && req1 == NULL)) {
+        merr(loc, msg, "type %s : mismatch on @requires clauses",v);
+        res = false;
       }
 
       type_t subst_t1 = substitute(inst, t1);

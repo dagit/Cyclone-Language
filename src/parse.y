@@ -242,14 +242,16 @@ qvar_t gensym_enum() {
 static aggrfield_t
 make_aggr_field(seg_t loc,
 		$($(qvar_t,tqual_t,type_t,list_t<tvar_t>,
-		    list_t<attribute_t,`H>)@,exp_opt_t)@ field_info) {
-  let &$(&$(qid,tq,t,tvs,atts),expopt) = field_info;
+		    list_t<attribute_t,`H>)@,$(exp_opt_t,exp_opt_t)@)@ 
+                field_info) {
+  let &$(&$(qid,tq,t,tvs,atts),&$(widthopt,reqopt)) = field_info;
   if (tvs != NULL)
     err("bad type params in struct field",loc);
   if(is_qvar_qualified(qid))
     err("struct or union field cannot be qualified with a namespace",loc);
   return new Aggrfield{.name = (*qid)[1], .tq = tq, .type = t,
-		       .width = expopt, .attributes = atts};
+		       .width = widthopt, .attributes = atts,
+                       .requires_clause = reqopt};
 }
 
 static type_specifier_t empty_spec(seg_t loc) {
@@ -1052,7 +1054,7 @@ using Parse;
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
 %token ALIAS NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
-%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL
+%token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
 %token NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL EXTENSIBLE_QUAL RESETABLE_QUAL
 // double and triple-character tokens
@@ -1136,8 +1138,8 @@ using Parse;
 %type <list_t<list_t<aggrfield_t,`H>,`H>> struct_declaration_list0
 %type <list_t<type_modifier_t<`yy>,`yy>> pointer one_pointer
 %type <declarator_t<`yy>> declarator direct_declarator declarator_withtypedef direct_declarator_withtypedef
-%type <$(declarator_t<`yy>,exp_opt_t)> struct_declarator
-%type <declarator_list_t<`yy>> struct_declarator_list struct_declarator_list0
+%type <$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy> struct_declarator
+%type <list_t<$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy,`yy>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t<`yy>> abstract_declarator direct_abstract_declarator
 %type <bool> optional_inject resetable_qual_opt qual_datatype
 %type <scope_t> datatypefield_scope
@@ -1778,22 +1780,23 @@ init_declarator:
 struct_declaration:
   specifier_qualifier_list struct_declarator_list ';'
     {
-      /* when we collapse the specifier_qualifier_list and
-       * struct_declarator_list, we get a list of (1) optional id,
-       * (2) type, and (3) in addition any nested struct, union,
-       * or datatype declarations.  For now, we warn about the nested
-       * declarations.  We must check that each id is actually present
-       * and then convert this to a list of struct fields: (1) id,
-       * (2) tqual, (3) type. */
       region temp; {
         let $(tq,tspecs,atts) = $1;
         if (tq.loc == 0) tq.loc = SLOC(@1);
         declarators_t<`temp> decls = NULL;
-        list_t<exp_opt_t,`temp> widths = NULL;
-        decl_split(temp,$2,&decls,&widths);
+        list_t<$(exp_opt_t,exp_opt_t)@`temp,`temp> widths_and_reqs = NULL;
+        for (let x = $2; x != NULL; x = x->tl) {
+          let &$(d,wd,wh) = x->hd;
+          decls = rnew(temp) FlatList(decls,d);
+          widths_and_reqs = 
+            rnew(temp) List(rnew(temp) $(wd,wh),widths_and_reqs);
+        }
+        decls = flat_imp_rev(decls);
+        widths_and_reqs = imp_rev(widths_and_reqs);
         let t = speclist2typ(tspecs, SLOC(@1));
         let info = List::rzip(temp,temp,
-                              apply_tmss(temp,tq,t,decls,atts),widths);
+                              apply_tmss(temp,tq,t,decls,atts),
+                              widths_and_reqs);
         $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
       }
     }
@@ -1837,32 +1840,34 @@ notypedef_specifier_qualifier_list:
 ;
 
 struct_declarator_list:
-  struct_declarator_list0 { $$=^$(flat_imp_rev($1)); }
+  struct_declarator_list0 { $$=^$(List::imp_rev($1)); }
 ;
 
 /* NB: returns list in reverse order */
 struct_declarator_list0:
   struct_declarator
-    { $$=^$(rnew(yyr) FlatList(NULL,$1)); }
+    { $$=^$(rnew(yyr) List($1,NULL)); }
 | struct_declarator_list0 ',' struct_declarator
-    { $$=^$(rnew(yyr) FlatList($1,$3)); }
+    { $$=^$(rnew(yyr) List($3,$1)); }
 ;
 
 struct_declarator:
   declarator_withtypedef
-    { $$=^$($($1,NULL)); }
+    { $$=^$(rnew (yyr) $($1,NULL,NULL)); }
 | ':' constant_expression
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$($((Declarator(new $(Rel_n(NULL),new ""), NULL)),(exp_opt_t)$2));
+      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""), NULL)),(exp_opt_t)$2,NULL));
     }
 | /* empty */ 
     { // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$($((Declarator(new $(Rel_n(NULL),new ""), NULL)),NULL));
+      $$=^$(rnew (yyr) $((Declarator(new $(Rel_n(NULL),new ""), NULL)),NULL,NULL));
     }
 | declarator_withtypedef ':' constant_expression
-    { $$=^$($($1,(exp_opt_t)$3)); }
+    { $$=^$(rnew (yyr) $($1,(exp_opt_t)$3,NULL)); }
+| declarator_withtypedef REQUIRES_QUAL constant_expression
+    { $$=^$(rnew (yyr) $($1,NULL,(exp_opt_t)$3)); }
 ;
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases

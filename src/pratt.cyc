@@ -68,8 +68,8 @@
 #include "pratt.h"
 using Core;
 using List;
-using Absyn;
 namespace Pratt;
+// #define PRATT_DEBUG
 
 #define INFINITE NULL
 
@@ -77,14 +77,14 @@ namespace Pratt;
 // or the number of elements of a variable.
 @tagged union Node {
   int       NZero;  // int unused
-  vardecl_t NVar;
-  vardecl_t NNumelts;
-  tvar_t    NTvar;
+  Absyn::vardecl_t NVar;
+  Absyn::vardecl_t NNumelts;
+  Absyn::tvar_t    NTvar;
 };
 union Node zero_node = {.NZero = 0};
-node_t NVar(vardecl_t vd) { return Node{.NVar = vd}; }
-node_t NNumelts(vardecl_t vd) { return Node{.NNumelts = vd}; }
-node_t NTvar(tvar_t tv) { return Node{.NTvar = tv}; }
+node_t NVar(Absyn::vardecl_t vd) { return Node{.NVar = vd}; }
+node_t NNumelts(Absyn::vardecl_t vd) { return Node{.NNumelts = vd}; }
+node_t NTvar(Absyn::tvar_t tv) { return Node{.NTvar = tv}; }
 
 static int cmp_node(node_t n1, node_t n2) {
   switch $(n1,n2) {
@@ -97,7 +97,7 @@ static int cmp_node(node_t n1, node_t n2) {
   case $({.NNumelts = x},{.NNumelts = y}): return ((int)x - (int)y);
   case $({.NNumelts = x},_): return -1;
   case $(_,{.NNumelts = y}): return 1;
-  case $({.NTvar = x},{.NTvar = y})  : return tvar_cmp(x,y);
+  case $({.NTvar = x},{.NTvar = y})  : return Absyn::tvar_cmp(x,y);
   }
 }
 
@@ -134,6 +134,7 @@ graph_t@ empty_graph() {
   return new Graph{nodes,NULL};
 }
 
+
 static list_t<edge_t> copy_edges(list_t<edge_t> ds) {
   let res = NULL;
   for (; ds != NULL; ds = ds->tl) {
@@ -141,6 +142,11 @@ static list_t<edge_t> copy_edges(list_t<edge_t> ds) {
     res = new List(new Edge(e->x,e->y,e->value),res);
   }
   return imp_rev(res);
+}
+
+graph_t@ copy_graph(graph_t@ G) {
+  let &Graph{nodes,edges} = G;
+  return new Graph{nodes,copy_edges(edges)};
 }
 
 // lookup distance between x and y in G.  Returns INFINITE (== NULL)
@@ -169,7 +175,11 @@ static void set_distance(graph_t@ G, node_t x, node_t y, int d) {
   }
 }
 
-void print_graph(graph_t @G) {
+void print_graph(graph_t *G) {
+  if (G == NULL) {
+    fprintf(stderr,"<inconsistent>");
+    return;
+  }
   let Graph(nodes,ds) = *G;
   for(; ds != NULL; ds=ds->tl) {
     let e = ds->hd;
@@ -194,17 +204,28 @@ static void add_node(graph_t@G, node_t x) {
 // edge will result in a negative-weight cycle.)  
 graph_t*`r add_edge(graph_t @`r G, node_t i, node_t j, int a) 
 {
+#ifdef PRATT_DEBUG
+  fprintf(stderr,"adding edge %s - %s <= %d to graph ",node2string(i),node2string(j),a);
+  print_graph(G);
+  fprintf(stderr,"\n");
+#endif
   add_node(G,i);
   add_node(G,j);
   // lookup distance from i to j
   int *dist = lookup_distance(G,i,j);
   // if old distances is less than a, no change
   if (dist != NULL && *dist <= a) {
+#ifdef PRATT_DEBUG
+    fprintf(stderr,"old distance was smaller (%d)\n",*dist);
+#endif
     return G;
   }
   // check for a negative-weighted path which is an inconsistency
   dist = lookup_distance(G,j,i);
   if (dist != INFINITE && *dist + a < 0) {
+#ifdef PRATT_DEBUG
+    fprintf(stderr,"negative weight path!\n");
+#endif
     return NULL;
   }
   // update distances
@@ -219,10 +240,20 @@ graph_t*`r add_edge(graph_t @`r G, node_t i, node_t j, int a)
         let dist_kl = lookup_distance(G,k,l);
         // FIX -- worry about wraparound...
         let d = *dist_ki + a + *dist_jl;
-        if (dist_kl == INFINITE)
+#ifdef PRATT_DEBUG
+        fprintf(stderr,"  updating edge[%s,%s] by looking at path through %s:",node2string(k),node2string(l),node2string(i));
+#endif
+        if (dist_kl == INFINITE) {
+#ifdef PRATT_DEBUG
+          fprintf(stderr,"distance was infinite\n");
+#endif
           G->edges = new List(new Edge(k,l,d),G->edges);
-        else 
+        } else if (*dist_kl > d) {
+#ifdef PRATT_DEBUG
+          fprintf(stderr,"old dist %d, new %d\n",*dist_kl,d);
+#endif
           *dist_kl = d;
+        }
       }
     }
   }

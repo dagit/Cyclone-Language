@@ -101,6 +101,18 @@ namespace List {
                                list_t<`a> x,list_t<`b> y);
   /** [rmap2(r,f,x,y)] is like [map2(f,x,y)], except that the
       resulting list is allocated in the region with handle [r]. */
+  extern list_t<`d> map3(`d f(`a,`b,`c),
+                         list_t<`a> x,list_t<`b> y,list_t<`c> z);
+  /** If [x] has elements [x1] through [xn], [y] has elements [y1]
+      through [yn], and [z] has elements [z1] through [zn], then 
+      [map3(f,x,y,z)] returns a new heap-allocated list with elements 
+      [f(x1,y1,z1)] through [f(xn,yn,zn)].  If [x], [y], and
+      [z] don't have the same number of elements, [List_mismatch] is
+      thrown. */
+  extern list_t<`d,`r> rmap3(region_t<`r>,`d f(`a,`b,`c),
+                             list_t<`a> x,list_t<`b> y,list_t<`c> z);
+  /** [rmap3(r,f,x,y,z)] is like [map3(f,x,y,z)], except that the
+      resulting list is allocated in the region with handle [r]. */
 
   extern void app(`b f(`a),list_t<`a> x);
   /** [app(f,x)] applies [f] to each element of [x], discarding the

@@ -799,6 +799,7 @@ namespace Absyn {
     type_t         type;
     exp_opt_t      width;   // bit fields: (unsigned) int and int fields only
     attributes_t   attributes; // only valid ones are aligned(i) or packed
+    exp_opt_t      requires_clause; // only for union fields
   };
 
   EXTERN_ABSYN struct AggrdeclImpl {
@@ -1160,10 +1161,12 @@ namespace Absyn {
   extern $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU);
   // given a checked type, get the decl
   extern aggrdecl_t get_known_aggrdecl(union AggrInfoU info);
-  // is a type a union-type (tagged, anonymous or otherwise)
+  // is a type a union-type (dynamically tagged, anonymous, with @requires,etc.
   extern bool is_union_type(type_t);
-  // ditto except rule out tagged unions
-  extern bool is_nontagged_union_type(type_t);
+  // ditto except rule out @tagged unions and @require unions
+  extern bool is_nontagged_nonrequire_union_type(type_t);
+  // a union (anonymous or otherwise) that has requires clauses on the fields
+  extern bool is_require_union_type(type_t);
   // is a type an aggregate type (i.e. struct, tuple, etc.)
   extern bool is_aggr_type(type_t t);
 

@@ -51,6 +51,7 @@
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
+#include "relations.h"
 #include "cf_flowinfo.h"
 #include "toc.h"
 using Core;
@@ -535,7 +536,7 @@ static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
     let fs = NULL;
     list_t<type_t> ts2 = ts;
     for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
-      fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL),fs);
+      fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL,NULL),fs);
     fs = List::imp_rev(fs);
     let sd = new Aggrdecl{.kind=StructA, .sc = Public,
                           .name = new $(Rel_n(NULL),xname), .tvs = NULL,
@@ -620,7 +621,7 @@ static type_t add_struct_type(qvar_t struct_name,
       // still could be abstract and end up void -- if so, drop it.
       if (unify(t,&VoidType_val)) break;
       fs = new List(new Aggrfield{f->name,mt_tq,t,
-                                  f->width,f->attributes},fs);
+                                  f->width,f->attributes,NULL},fs);
     }
     fs = List::imp_rev(fs);
     let sd = new Aggrdecl{.kind=StructA, .sc = Public,
@@ -715,9 +716,10 @@ static type_t typ_to_c_array(type_t t) {
 static aggrfield_t aggrfield_to_c(aggrfield_t f) {
   // JGM: I'm making the qualifiers non-const here to allow initialization
   return new Aggrfield{.name=f->name,
-                          .tq=mt_tq, // .tq=f->tq,
-                          .type = typ_to_c(f->type),
-                       .width=f->width, .attributes=f->attributes};
+                       .tq=mt_tq, // .tq=f->tq,
+                       .type = typ_to_c(f->type),
+                       .width=f->width, .attributes=f->attributes,
+                       .requires_clause = NULL};
 }
 
 static void enumfields_to_c(list_t<enumfield_t> fs) {
@@ -1268,7 +1270,7 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   }
 }
 
-static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
+static Relations::relns_t get_relns(exp_t e) { // e must be pre-translation!
   switch (e->annot) {
   case &CfFlowInfo::UnknownZ(r): return r;
   case &CfFlowInfo::NotZero(r):  return r;
@@ -1283,23 +1285,23 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
 // return true if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
-static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t<`H> relns,
+static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
                          exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
           typ2string(a_typ),exp2string(i));
-  fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns);
+  fprintf(stderr,"relns: ["); Relations::print_relns(relns);
   fprintf(stderr,"]\n");
 #endif
   // if a has type T*{x} or T[x], then we can pretend like it's
   // a variable to get the rest of this code to work out.
-  CfFlowInfo::reln_op_t rop_i = CfFlowInfo::RConst(0); // dummy value
-  bool valid_rop_i = CfFlowInfo::exp2relnop(i,&rop_i);
+  Relations::reln_op_t rop_i = Relations::RConst(0); // dummy value
+  bool valid_rop_i = Relations::exp2relnop(i,&rop_i);
 
   vardecl_t x;
   switch (a->r) {
   case &Var_e(_,b):
-    let x1 = CfFlowInfo::nonesc_vardecl(b);
+    let x1 = Tcutil::nonesc_vardecl(b);
     if (x1 == NULL) fallthru;
     x = (vardecl_t)x1;
     break;
@@ -1318,27 +1320,28 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t<`H> relns,
     x->type = a_typ;
   }
   let xtype = a_typ;
-  CfFlowInfo::reln_op_t rop_a = CfFlowInfo::RNumelts(x);
+  Relations::reln_op_t rop_a = Relations::RNumelts(x);
 
   // if x's type is T*{e}, T@{e}, or T[e] then we want to 
   // add a constraint of the form e <= numelts(x)
   exp_opt_t bound = Tcutil::get_type_bound(xtype);
   if (bound != NULL) {
-    CfFlowInfo::reln_op_t rop_bound = CfFlowInfo::RConst(0); // bogus value
-    if (CfFlowInfo::exp2relnop(bound,&rop_bound))
-      relns = CfFlowInfo::add_relation(heap_region,rop_bound,
-                                       CfFlowInfo::Rlte,rop_a,relns);
+    Relations::reln_op_t rop_bound = Relations::RConst(0); // bogus value
+    if (Relations::exp2relnop(bound,&rop_bound))
+      relns = Relations::add_relation(heap_region,rop_bound,
+                                      Relations::Rlte,rop_a,relns);
   }
 
   // check to see if adding numelts(x) <= i to relns is inconsistent
   if (valid_rop_i) {
-    let rlns = CfFlowInfo::add_relation(heap_region,rop_a,
-                                        CfFlowInfo::Rlte,rop_i,relns);
+    let rlns = Relations::add_relation(heap_region,rop_a,
+                                       Relations::Rlte,rop_i,relns);
 #ifdef BCE_DEBUG
-    fprintf(stderr,"checking consistency of: "); CfFlowInfo::print_relns(rlns);
+    fprintf(stderr,"checking consistency of: "); 
+    Relations::print_relns(stderr,rlns);
     fprintf(stderr,"\n");
 #endif
-    if (!CfFlowInfo::consistent_relations(rlns)) return true;
+    if (!Relations::consistent_relations(rlns)) return true;
   }
 
 inner_loop:
@@ -1347,12 +1350,12 @@ inner_loop:
   case &Primop_e(Mod,&List(e1,&List(e2,_))):
     // we have x[e1 % e2]
     // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
-    CfFlowInfo::reln_op_t rop_z = CfFlowInfo::RConst(0); // dummy
-    if (CfFlowInfo::exp2relnop(e2,&rop_z)) {
+    Relations::reln_op_t rop_z = Relations::RConst(0); // dummy
+    if (Relations::exp2relnop(e2,&rop_z)) {
       // add numelts(x) < z and check to see if it's inconsistent
-      let rlns = CfFlowInfo::add_relation(heap_region,rop_a,
-                                          CfFlowInfo::Rlt,rop_z,relns);
-      return !CfFlowInfo::consistent_relations(rlns);
+      let rlns = Relations::add_relation(heap_region,rop_a,
+                                         Relations::Rlt,rop_z,relns);
+      return !Relations::consistent_relations(rlns);
     }
     break;
   default: break;
@@ -1681,7 +1684,7 @@ static bool init_variable_array(type_t @typ) {
 }
 
 aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
-			type_t new_field_type) {
+                            type_t new_field_type) {
   list_t<aggrfield_t> new_fields = NULL;
   list_t<aggrfield_t> fields;
   for (fields = ad->impl->fields; fields != NULL; 
@@ -1692,7 +1695,8 @@ aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
 				    .tq = mt_tq,
 				    .type = new_field_type,
 				    .width = old_field->width,
-				    .attributes = old_field->attributes};
+				    .attributes = old_field->attributes,
+                                    .requires_clause = NULL};
       new_fields = new List(new_field,new_fields);
     }
     else new_fields = new List(fields->hd,new_fields);
@@ -1781,7 +1785,8 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 					.type = rsubstitute(temp,inst,
 							    old_field->type),
 					.width = old_field->width,
-					.attributes = old_field->attributes};
+					.attributes = old_field->attributes,
+                                        .requires_clause = NULL};
 	  // if the last field is an array type that includes a valueof(`i),
 	  // make it a variable-length array instead (i.e. set bounds to 0)
 	  // and keep track of the index needed to get to the array
@@ -3409,7 +3414,7 @@ DynCast:
 #ifdef BCE_DEBUG
       fprintf(stderr,"subscript %s, array has type %s: relns:",exp2string(e),
               typ2string((type_t)e1->topt));
-      CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
+      Relations::print_relns(stderr,relns); fprintf(stderr,"\n");
 #endif
       bool in_bnds = in_sz;
       switch (conref_def(bounds_one,b)) {
@@ -4663,7 +4668,8 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
                                       .tq = mt_tq,
                                       .type = typ_to_c(old_type),
                                       .width = old_field->width,
-                                      .attributes = old_field->attributes};
+                                      .attributes = old_field->attributes,
+                                      .requires_clause = NULL};
         // If this is a tagged union, rewrite the member type from T
         // to struct _union_Foo_f {int tag; T value;} where Foo is the name
         // of the union, and f is the name of the member.
@@ -4672,8 +4678,8 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
           let f = new_field->name;
           string_t s = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
           var_t str = new s;
-          let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL);
-          let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL);
+          let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL,NULL);
+          let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL);
           let fs = list(tag_field,value_field);
           let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
                                  .name = new $(Loc_n,str), .tvs = NULL,
@@ -4731,10 +4737,10 @@ static void datatypedecl_to_c(datatypedecl_t tud) {
     for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
       let fname = fieldname(i);
       let f = new Aggrfield(fname,(*ts->hd)[0],
-                            typ_to_c((*ts->hd)[1]),NULL,NULL);
+                            typ_to_c((*ts->hd)[1]),NULL,NULL,NULL);
       fs = new List(f,fs);
     }
-    fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
+    fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL),
                   List::imp_rev(fs));
     let ad =
       new Aggrdecl{.kind = StructA, .sc = Public,
@@ -4791,11 +4797,11 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
         for (let tqts = f->typs; tqts != NULL; tqts = tqts->tl,i++) {
           let field_n = new ((string_t)aprintf("f%d",i));
           let newf = new Aggrfield(field_n,(*tqts->hd)[0],
-                                   typ_to_c((*tqts->hd)[1]),NULL,NULL);
+                                   typ_to_c((*tqts->hd)[1]),NULL,NULL,NULL);
           fields = new List(newf,fields);
         }
         fields = new List(new Aggrfield(tag_sp,mt_tq,
-                                        cstar_typ(char_typ,mt_tq),NULL,NULL),
+                                        cstar_typ(char_typ,mt_tq),NULL,NULL,NULL),
                           List::imp_rev(fields));
         let strct_decl =
           new Aggrdecl{.kind = StructA, .sc = Public,

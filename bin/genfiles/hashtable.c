@@ -809,7 +809,7 @@ typedef struct Cyc_List_List*Cyc_List_list_t;
 typedef struct Cyc_List_List*Cyc_List_List_t;
 # 61
 int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
-# 324
+# 336
 void*Cyc_List_assoc_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*l,void*x);struct Cyc_Hashtable_Table;
 # 35 "hashtable.h"
 typedef struct Cyc_Hashtable_Table*Cyc_Hashtable_table_t;

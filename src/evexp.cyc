@@ -160,11 +160,12 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
 
 // The main routine -- side-effects the expression e, overwriting its
 // r field with the resulting constant (only if there's no error or sizeof
-// or valueof.)  The allow_valueof flag determines whether or not we
-// allow valueof.
+// or valueof.)  
 static $(cnst_t,bool) eval_const_exp(exp_t e) {
   $(cnst_t,bool) ans;
   switch (e->r) {
+  // needed since we allow arrays!
+  case &Var_e(...): return $(Int_c(Signed,0), false); 
   case &Const_e(c): return $(c,true); // return eagerly to avoid allocation
   case &Conditional_e(e1,e2,e3):
     let $(bool1,known1) = eval_const_bool_exp(e1);

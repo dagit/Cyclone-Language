@@ -1087,7 +1087,7 @@ void dumpenumfields(list_t<enumfield_t> fields) {
 
 void dumpaggrfields(list_t<aggrfield_t> fields) {
   for(; fields != NULL; fields = fields->tl) {
-    let &Aggrfield{name,tq,type,width,atts} = fields->hd;
+    let &Aggrfield{name,tq,type,width,atts,req} = fields->hd;
 
     switch(c_compiler){
     case Gcc_c:
@@ -1099,7 +1099,10 @@ void dumpaggrfields(list_t<aggrfield_t> fields) {
       dumptqtd(tq,type,dump_str,name);
       break;
     }
-
+    if (req) {
+      dump("@requires ");
+      dumpexp(req);
+    }
     if (width != NULL) {
       dump_char(':');
       dumpexp((exp_t)width);

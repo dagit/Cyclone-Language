@@ -161,6 +161,37 @@ list_t<`c> map2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
   return rmap2(heap_region,f,x,y);
 }
 
+// same as rmap2 but with three lists.
+list_t<`d,`r3> rmap3(region_t<`r3> r3,`d f(`a,`b,`c),
+		     list_t<`a> x,list_t<`b> y,list_t<`c> z) {
+  struct List @result, @prev;
+
+  if (x == NULL && y == NULL && z == NULL) return NULL;
+  if (x == NULL || y == NULL || z == NULL) throw &List_mismatch_val;
+
+  result = rnew(r3) List(f(x->hd,y->hd,z->hd),NULL);
+  prev = result;
+
+  x = x->tl;
+  y = y->tl;
+  z = z->tl;
+
+  while (x != NULL && y != NULL && z != NULL) {
+    struct List @temp = rnew(r3) List(f(x->hd,y->hd,z->hd),NULL);
+    prev->tl = temp;
+    prev = temp;
+    x = x->tl;
+    y = y->tl;
+    z = z->tl;
+  }
+  if (x != NULL || y != NULL || z != NULL) throw &List_mismatch_val;
+  return(result);
+}
+// same as map2 but with three lists.
+list_t<`d> map3(`d f(`a,`b,`c),list_t<`a> x,list_t<`b> y,list_t<`c> z) {
+  return rmap3(heap_region,f,x,y,z);
+}
+
 // Apply some function to each element of the list, but don't bother to
 // save the result.  Similar to Ocaml's List.iter but doesn't require
 // void type for the result of the function.

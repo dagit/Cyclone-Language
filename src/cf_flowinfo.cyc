@@ -25,7 +25,6 @@
 #include "tcutil.h"
 #include "absynpp.h"
 #include "evexp.h"
-#include "pratt.h"
 
 #define CF_FLOWINFO_CYC
 #include "cf_flowinfo.h"
@@ -54,7 +53,7 @@ absLval_t<`r> UnknownL() {
   return AbsLVal{.UnknownL = 0};
 }
 flow_t<`r> BottomFL() { return FlowInfo{.BottomFL = 0}; }
-flow_t<`r> ReachableFL(flowdict_t<`r> fd,relns_t<`r> r) {
+flow_t<`r> ReachableFL(flowdict_t<`r> fd,Relations::relns_t<`r> r) {
   return FlowInfo{.ReachableFL = $(fd,r) };
 }
 
@@ -160,20 +159,6 @@ bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
 }
 
 //////////////////////////// Utilities ///////////////////////////////
-reln_op_t RConst(unsigned int i) {
-  return RelnOp{.RConst = i};
-}
-reln_op_t RVar(Absyn::vardecl_t v) {
-  return RelnOp{.RVar = v};
-}
-reln_op_t RNumelts(Absyn::vardecl_t v) {
-  return RelnOp{.RNumelts = v};
-}
-reln_op_t RTvar(Absyn::tvar_t tv) {
-  return RelnOp{.RTvar = tv};
-}
-
-
 int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
   int n = 0;
   for (; fs; fs = fs->tl) {
@@ -268,9 +253,10 @@ aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
   unsigned sz = List::length(fs);
   aggrdict_t<`r> d = rnew(fenv->r) { for i < sz: fenv->unknown_all };
   for(int i = 0; i < sz; i++, fs = fs->tl) {
-    let &Aggrfield(n,_,t2,_,_) = fs->hd;
-    if(numelts(*n) != 1)
+    let &Aggrfield(n,_,t2,_,_,_) = fs->hd;
+    if(numelts(*n) != 1) {
       d[i] = i_typ_to_absrval(fenv, false, no_init_bits_only, t2,leafval);
+    }
   }
   return d;
 }
@@ -282,7 +268,9 @@ static struct Aggrfield@`t
                    struct Aggrfield@ f) {
   let &$(t,inst) = env;
   let new_typ = Tcutil::rsubstitute(t,inst,f->type);
-  return rnew(t) Aggrfield{f->name,f->tq,new_typ,f->width,f->attributes};
+  let r = f->requires_clause;
+  let new_r = (r == NULL) ? NULL : Tcutil::rsubsexp(t,inst,r);
+  return rnew(t) Aggrfield{f->name,f->tq,new_typ,f->width,f->attributes,new_r};
 }
 
 // this is the same as aggrfields_to_aggrdict, except that it
@@ -323,7 +311,9 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
                                       bool allow_zeroterm,
 				      bool no_init_bits_only,
                                       type_t t, absRval_t<`r> leafval) {
-  bool is_tagged = false;
+
+  // we treat bits-only unions as always initialized
+  if (is_nontagged_nonrequire_union_type(t)) return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
   case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
@@ -342,8 +332,6 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     return rnew(fenv->r) Aggregate(UnionRInfo(false,-1),d);
   case &AggrType(AggrInfo(info,targs)):
     let ad = get_known_aggrdecl(info);
-    if (ad->kind == UnionA && !ad->impl->tagged) return fenv->unknown_all;
-    is_tagged = true;
     if(ad->impl==NULL)
       break;
     let fields = ad->impl->fields;
@@ -354,7 +342,6 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     DEBUG_PRINT("typ_to_absrval: type=%s, leaf_val=",
 		Absynpp::typ2string(t));
     DEBUG_PRINT_F(print_absrval,leafval);
-    if (k == UnionA && !is_tagged) return fenv->unknown_all;
     return rnew(fenv->r) Aggregate(UnionRInfo(k==UnionA,-1),aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things --
@@ -456,7 +443,7 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
     aggrdict_t d2 = rnew(fenv->r) { for i < numelts(d) : d[i] };
     unsigned sz = List::length(fs);
     for (int i = 0; i < sz; i++, fs = fs->tl) {
-      let &Aggrfield(n,_,t2,_,_) = fs->hd;
+      let &Aggrfield(n,_,t2,_,_,_) = fs->hd;
       if (numelts(*n) != 1)
         d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i]);
     }
@@ -1007,43 +994,6 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   }
 }
 
-static bool same_relop(reln_op_t r1,reln_op_t r2) {
-  switch ($(r1,r2)) {
-  case $({.RConst = c1},   {.RConst = c2})   : return c1 == c2;
-  case $({.RVar = x1},     {.RVar = x2}): return x1 == x2;
-  case $({.RNumelts = x1}, {.RNumelts = x2}) : return x1 == x2;
-  case $({.RTvar = tv1},   {.RTvar = tv2}) : 
-    return tvar_cmp(tv1,tv2) == 0;
-  default: return false;
-  }
-}
-
-static relns_t<`r> join_relns(region_t<`r> r, relns_t<`r> r1s, relns_t<`r> r2s){
-  if (r1s == r2s) return r1s;
-  //  fprintf(stderr,"join on ["); print_relns(r1s);
-  //  fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
-  list_t<reln_t> res = NULL;
-  bool diff = false;
-  for (let r1s = r1s; r1s != NULL; r1s = r1s->tl) {
-    let r1 = r1s->hd;
-    bool found = false;
-    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
-      let r2 = r2s->hd;
-      if (r1 == r2 || (same_relop(r1->rop1,r2->rop1) && 
-                       r1->relation == r2->relation &&
-                       same_relop(r1->rop2,r2->rop2))) {
-        res = rnew(r) List(r1,res);
-        found = true;
-        break;
-      }
-    }
-    if (!found) diff = true;
-  }
-  if (!diff) res = r1s;
-  //  fprintf(stderr,"result ["); print_relns(res); fprintf(stderr,"]\n");
-  return res;
-}
-
 flow_t<`r> join_flow(flow_env_t<`r> fenv,
                      place_set_t<`r>* all_changed, flow_t<`r> f1, flow_t<`r> f2){
   // if(f1 == f2) return f1;
@@ -1059,7 +1009,7 @@ flow_t<`r> join_flow(flow_env_t<`r> fenv,
     ANAL_RGN(fenv, rgn) {
       let env     = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
-      let r       = join_relns(fenv->r,r1,r2);
+      let r       = Relations::join_relns(fenv->r,r1,r2);
       return ReachableFL(escape_these(fenv, env.pile, all_changed, outdict),r);
     }
   }
@@ -1210,7 +1160,7 @@ flow_t<`r> after_flow(flow_env_t<`r> fenv,
 			  curr_place, &curr_place->fields,
 			  Neither);
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
-      let new_r = join_relns(fenv->r,r1,r2);
+      let new_r = Relations::join_relns(fenv->r,r1,r2);
       return ReachableFL(escape_these(fenv,env.joinenv.pile,all_changed,new_d),
                          new_r);
     }
@@ -1253,40 +1203,6 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r
 }
 
 
-relns_t<`r> add_relation(region_t<`r> rgn, reln_op_t rop1, relation_t relation,
-                                reln_op_t rop2, relns_t<`r> relns) {
-  // add the relation to the list unless it's already there -- could
-  // avoid anything that's implied (e.g., n1 == n2 implies n1 <= n2)
-  for (let rs = relns; rs != NULL; rs = rs->tl) {
-    let r = rs->hd;
-    if (same_relop(r->rop1,rop1) && r->relation == relation && 
-        same_relop(r->rop2,rop2)) return relns;
-  }
-  return rnew(rgn) List(rnew(rgn) Reln(rop1,relation,rop2),relns);
-}
-
-static bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
-  if (r1s == r2s) return true;
-  //fprintf(stderr,"approx on ["); print_relns(r1s);
-  //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]");
-  for (; r1s != NULL; r1s = r1s->tl) {
-    let r1 = r1s->hd;
-    bool found = false;
-    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
-      let r2 = r2s->hd;
-      if (r1 == r2 || (same_relop(r1->rop1,r2->rop1) && 
-                       r1->relation == r2->relation &&
-                       same_relop(r1->rop2,r2->rop2))) {
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-      return false;
-  }
-  return true;
-}
-
 // WARNING: We assume anything not in the intersection is IRRELEVANT.
 // WARNING: We might return false even when f1 < f2, but that's okay b/c
 //  that will just cause clients to take joins/afters and we always return true
@@ -1300,278 +1216,8 @@ bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2) {
   case $({.ReachableFL = $(d1,r1)},{.ReachableFL = $(d2,r2)}):
     if(d1.t == d2.t && r1 == r2) return true;
     return Dict::forall_intersect(absRval_lessthan_approx,d1,d2) &&
-      relns_approx(r1,r2);
+      Relations::relns_approx(r1,r2);
   }
-}
-
-static bool rop_contains_var(reln_op_t r, vardecl_t v) {
-  switch (r) {
-  case {.RVar = v2}:      return v == v2;
-  case {.RNumelts = v2}:  return v == v2;
-  case {.RTvar = _}:
-  case {.RConst = _}:     return false;
-  }
-}
-
-relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
-  relns_t p;
-  bool found = false;
-  for (p = rs; !found && p != NULL; p = p->tl) {
-    let r = p->hd;
-    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) {
-      found = true;
-      break;
-    }
-  }
-  if (!found) return rs;
-
-  let new_rs = NULL;
-  for (p = rs; p != NULL; p = p->tl) {
-    let r = p->hd;
-    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) continue;
-    new_rs = rnew(rgn) List(r,new_rs);
-  }
-  return new_rs;
-}
-
-struct Vardecl *nonesc_vardecl(binding_t b) {
-  switch (b) {
-  case &Pat_b(x): fallthru(x);
-  case &Local_b(x): fallthru(x);
-  case &Param_b(x): fallthru(x);
-  case &Global_b(x): 
-    if (!x->escapes) return x;
-    break;
-  default: break;
-  }
-  return NULL;
-}
-
-// Convert an expression to a relation operand -- puts the result in p
-// and returns true if successful, returns false otherwise.  Can we 
-// add other constants (e.g., NULL, characters, shorts, etc.?)
-bool exp2relnop(exp_t e, reln_op_t @p) {
-  // if the expression has a singleton type, then that's what we track
-  switch (Tcutil::compress((type_t)e->topt)) {
-  case &TagType(t):
-    switch (Tcutil::compress(t)) {
-    case &VarType(i): *p = RTvar(i); return true;
-    default: break;
-    }
-    break;
-  case &ValueofType(type_exp): 
-    e = type_exp; 
-    break;
-  default: break;
-  }
-  switch (e->r) {
-  case &Cast_e(_,e,...): return exp2relnop(e,p);
-  case &Var_e(_,b):
-    let v = nonesc_vardecl(b);
-    if (v != NULL) {
-      *p = RVar(v);
-      return true;
-    }
-    break;
-  case &Const_e({.Int_c = $(_,i)}):
-    *p = RConst(i);
-    return true;
-  case &Primop_e(Numelts,&List(&Exp{.r=&Var_e(_,b),...},_)):
-    let v = nonesc_vardecl(b);
-    if (v != NULL) {
-      *p = RNumelts(v);
-      return true;
-    }
-    break;
-  case &Valueof_e(&VarType(i)):
-    *p = RTvar(i);
-    return true;
-  default: break;
-  }
-  return false;
-}
-
-relns_t<`r> reln_kill_exp(region_t<`r> rgn, relns_t<`r> r, exp_t e) {
-  switch (e->r) {
-  case &Var_e(_,b):
-    let v = nonesc_vardecl(b);
-    if (v != NULL)
-      return reln_kill_var(rgn, r, v);
-    else return r;
-  default: return r;
-  }
-}
-
-reln_t<`r2> copy_reln(region_t<`r2> r2, reln_t r) {
-  return rnew(r2)(*r);
-}
-
-relns_t<`r2> copy_relns(region_t<`r2> r2, relns_t<`r> relns) {
-  return List::rmap_c(r2,copy_reln,r2,relns);
-}
-
-bool same_relns(relns_t r1, relns_t r2) {
-  for (; r1 != NULL && r2 != NULL; r1 = r1->tl, r2 = r2->tl) {
-    let x1 = r1->hd;
-    let x2 = r2->hd;
-    if (!same_relop(x1->rop1,x2->rop1)  || 
-        x1->relation != x2->relation || 
-        !same_relop(x1->rop2,x2->rop2)) return false;
-  }
-  if (r1 != NULL || r2 != NULL) return false;
-  else return true;
-}
-
-relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t e) {
-  //fprintf(stderr,"assigning %s to %s: \n", Absynpp::qvar2string(v->name),
-  //        Absynpp::exp2string(e));
-  // the relations only track non-escaping variables
-  if (v->escapes) return r;
-  // even if v isn't an integral type, it might be an array in which case
-  // we need to kill it.
-  r = reln_kill_var(rgn, r, v);
-  // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t))
-  // then we can add n <= numelts(v).  Note that we can't easily
-  // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
-  // because e1 or e2 could modify n.
-  switch (e->r) {
-  case &Malloc_e(MallocInfo{_,_,_,e2,true}):
-    {
-      malloc_loop:
-      switch (e2->r) {
-      case &Cast_e(_,e3,_,_): e2 = e3; goto malloc_loop;
-      case &Var_e(_,b): 
-        let vd = nonesc_vardecl(b);
-        if (vd != NULL) 
-          return add_relation(rgn,RVar(vd),Req,RNumelts(v),r);
-        else return r;
-      default: return r;
-      }
-    }
-  default: break;
-  }
-  // otherwise ignore any situations where we have a non-integral type
-  switch (Tcutil::compress(v->type)) {
-  case &IntType(_,_): break;
-  case &TagType(_): break;
-  default: return r;
-  }
-  // try to convert to a relnop
-  reln_op_t eop = RConst(0); // bogus value;
-  if (exp2relnop(e,&eop)) {
-    return add_relation(rgn,RVar(v),Req,eop,r);
-  }
-  return r;
-}
-
-relns_t<`r> reln_assign_exp(region_t<`r> rgn, relns_t<`r> r, exp_t e1, exp_t e2) {
-  switch (e1->r) {
-  case &Var_e(_,b):
-    let v = nonesc_vardecl(b);
-    if (v != NULL) 
-      return reln_assign_var(rgn, r, v, e2);
-    else return r;
-  default: return r;
-  }
-}
-
-// only works on non-constants
-static Pratt::node_t rop2node(reln_op_t r) {
-  switch (r) {
-  case {.RVar = x}: return Pratt::NVar(x);
-  case {.RNumelts = x}: return Pratt::NNumelts(x);
-  case {.RTvar = x}: return Pratt::NTvar(x);
-  default: Tcutil::impos("rop2node");
-  }
-}
-
-static string_t relation2string(relation_t r) {
-  switch (r) {
-  case Req: return "==";
-  case Rneq: return "!=";
-  case Rlt: return "<";
-  case Rlte: return "<=";
-  }
-}
-
-static string_t rop2string(reln_op_t r) {
-  switch (r) {
-  case {.RConst = c}: return aprintf("%d",c); 
-  case {.RVar = vd}: return aprintf("%s",qvar2string(vd->name));
-  case {.RTvar = tv}: return tvar2string(tv);
-  case {.RNumelts = vd}:  return aprintf("numelts(%s)",qvar2string(vd->name));
-  }
-}
-
-static string_t reln2string(reln_t r) {
-  return aprintf("%s %s %s",rop2string(r->rop1),relation2string(r->relation),
-                 rop2string(r->rop2));
-}
-
-void print_relns(relns_t r) {
-  for (; r != NULL; r = r->tl) {
-    fprintf(stderr,"%s",reln2string(r->hd));
-    if (r->tl != NULL) fprintf(stderr,",");
-  }
-}
-
-// returns true if the relations are consistent -- typical use
-// is to check a relation you want to be true (e.g., i < numelts(x))
-// under the current set of relations R.  To do so, you add the
-// negation numelts(x) <= i and check to see if the resulting system
-// is inconsistent.  If not, then you know that the desired relation holds.
-bool consistent_relations(relns_t rlns) {
-  Pratt::graph_t *G = Pratt::empty_graph();
-  for (; G && rlns != NULL; rlns = rlns->tl) {
-    //fprintf(stderr,"adding %s to graph ",reln2string(rlns->hd));
-    //Pratt::print_graph(G);
-    //fprintf(stderr,"\n");
-    switch (rlns->hd) {
-    case &Reln({.RConst = i},reln,{.RConst = j}):
-      switch (reln) {
-      case Req: if (i != j) return false; break;
-      case Rneq: if (i == j) return false; break;
-      case Rlt: if ((unsigned)i >= (unsigned)j) return false; break;
-      case Rlte: if ((unsigned)i > (unsigned)j) return false; break;
-      }
-      break;
-    // can't do much useful with neq...
-    case &Reln(_,Rneq,_): break;
-    case &Reln{rop,reln,{.RConst = i}}:
-      // x < i:  add  x - zero <= i-1
-      // x <= i: add  x - zero <= i
-      let n = rop2node(rop);
-      if (reln == Rlt) i = i - 1;
-      G = Pratt::add_edge(G, n, Pratt::zero_node, i); 
-      // x == i: also add zero - x <= -i
-      if (G && (reln == Req))
-        G = Pratt::add_edge(G, Pratt::zero_node, n, -i); 
-      break;
-    case &Reln{{.RConst = i},reln,rop}:
-      // i < x:  zero - x <= -i-1
-      // i <= x: zero - x <= -i
-      let n = rop2node(rop);
-      if (reln == Rlt) i = i + 1;
-      G = Pratt::add_edge(G, Pratt::zero_node, n, -i); 
-      // x == i: also add x - zero <= i
-      if (G && (reln == Req))
-        G = Pratt::add_edge(G, n, Pratt::zero_node, i); 
-      break;
-    case &Reln(rop1,reln,rop2):
-      // rop1 and rop2 must be either vars or numelts
-      let n1 = rop2node(rop1);
-      let n2 = rop2node(rop2);
-      int i = (reln == Rlt) ? -1 : 0;
-      // x < y: add x - y <= -1
-      // x <= y: add x - y <= 0
-      G = Pratt::add_edge(G, n1, n2, i); 
-      // x == y: also add y - x <= 0
-      if (G && (reln == Req))
-        G = Pratt::add_edge(G, n2, n1, i);
-      break;
-    }
-  }
-  if (G != NULL) return true; else return false;
 }
 
 void print_initlevel(initlevel_t il) {
@@ -1688,9 +1334,11 @@ void print_flowdict(flowdict_t d) {
 void print_flow(flow_t f) {
   switch (f) {
   case {.BottomFL = _}: fprintf(stderr,"  BottomFL\n"); break;
-  case {.ReachableFL = $(fd,_)}:
+  case {.ReachableFL = $(fd,rlns)}:
     fprintf(stderr,"  ReachableFL:\n");
     print_flowdict(fd);
+    fprintf(stderr,"\n  Relations: ");
+    Relations::print_relns(stderr,rlns);
     fprintf(stderr,"\n");
     break;
   }
@@ -1817,7 +1465,8 @@ kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
 }
 
 // "kill" all relations in the flow analysis that involve the given region
-static relns_t<`r> kill_relns_region(relns_t<`r> relns, type_t rgn) {
+static Relations::relns_t<`r> 
+kill_relns_region(Relations::relns_t<`r> relns, type_t rgn) {
   // FIX: too conservative
   return NULL;
 }

@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5)
+all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist requires md5)
 	./test_regions
 	./cyctest
 	./foo < foo_input
@@ -65,6 +65,9 @@ flatlist$(EXE): flatlist.o
 md5$(EXE): md5.o md5driver.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
+requires$(EXE): requires.o
+	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc
 	$(CYCC) $(CYCFLAGS) -c $< 
@@ -74,11 +77,11 @@ md5$(EXE): md5.o md5driver.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5)\
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 requires)\
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) hello cyctest foo histogram merge_sort test_getopt
 	$(RM) test_regions zeroterm structarray flatlist
-	$(RM) unique_test md5
+	$(RM) unique_test md5 requires
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm

@@ -1000,7 +1000,7 @@ flags=0;
 dprec=0;
 fpprec=0;
 width=0;
-prec=- 1;
+prec=-1;
 sign='\000';
 # 372
 rflag: ch=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));
