@@ -1347,7 +1347,7 @@ and block_comment = parse
     fclose(in_file);
 
     /* Get the type declarations out of the file */
-    cmd = aprintf("%s -E -o %s %s",
+    cmd = aprintf("%s -E -o %s -x c %s",
                   GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
       return 1;
@@ -1576,7 +1576,7 @@ and block_comment = parse
     }
 
     /* Print reachable macros */
-    cmd = aprintf("%s -E -dM -o %s %s",
+    cmd = aprintf("%s -E -dM -o %s -x c %s",
                   GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
       return 1;
