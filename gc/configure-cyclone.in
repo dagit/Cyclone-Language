@@ -22,7 +22,7 @@ AC_INIT(gc,6.2alpha4,Hans.Boehm@hp.com)
 AC_CONFIG_SRCDIR(gcj_mlc.c)
 AC_CANONICAL_TARGET 
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.6 $)
+AC_REVISION($Revision: 1.1 $)
 GC_SET_VERSION
 AM_INIT_AUTOMAKE
 
@@ -357,9 +357,13 @@ AC_DEFINE(NO_SIGNALS)
 AC_DEFINE(NO_EXECUTE_PERMISSION)
 AC_DEFINE(ALL_INTERIOR_POINTERS)
 
+dnl TJIM: for Cyclone
+AC_DEFINE(DONT_ADD_BYTE_AT_END)
+
+dnl TJIM: we don't need the Java stuff for Cyclone
 dnl By default, make the library as general as possible.
-AC_DEFINE(JAVA_FINALIZATION)
-AC_DEFINE(GC_GCJ_SUPPORT)
+dnl AC_DEFINE(JAVA_FINALIZATION)
+dnl AC_DEFINE(GC_GCJ_SUPPORT)
 AC_DEFINE(ATOMIC_UNCOLLECTABLE)
 
 dnl This is something of a hack.  When cross-compiling we turn off

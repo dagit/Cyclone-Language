@@ -66,7 +66,8 @@ AC_SET_MAKE
 AC_PROG_RANLIB
 
 # configure the garbage collector
-AC_CONFIG_SUBDIRS(gc)
+# don't use AC_CONFIG_SUBDIRS(gc) because it can't pass flags
+(cd gc; ./configure --enable-threads=no --enable-shared=no --enable-cplusplus=no)
 
 AC_CONFIG_FILES(Makefile.inc)
 AC_OUTPUT
