@@ -1,11 +1,49 @@
 Todo now:
 
+* Top of the list: figure out why compiling the compiler with the
+  latest gcc from cygwin on -g causes a seg fault, whereas compiling
+  with -O[2] does not.  (Note that this problem does not occur with at
+  least one earlier version of gcc.)
+
+* I'd like to re-code the type-checker so that it pushes information
+  down as well as up (more like the local type inference described by
+  Pierce.)  This will allow us to, for instance, avoid having to cast
+  string literals when we write:
+
+    list<string> x = &Cons{.hd="foo",.tl=null};
+
+* We need to fix & (and * patterns) so that they are sound.  I believe
+  now that Dan has the goto and fallthru stuff working correctly, this
+  is the only major unsoundness in the system.
+
+* We need to make sure floating point literals are working right.
+
+* We need to re-do the pattern match compilation -- we should take
+  advantage of the decision tree built during type-checking.
+
+* We should add unions in, and allow them when the different variants
+  don't contain pointers or abstract types.
+
+* We should add anonymous structs.
+
+* We should fix all of the FIX things in the code.
+
+* We should get the documentation in shape.
+
+* We should allow more deep casts (e.g., function pointers).
+
+* Maybe we should port bison to cyclone.
+
+* Maybe we should start on the porting tool.
+
+* More libraries
+
+* Remove synth stuff to clean up typechecker
+
 * ought to be able to treat the arguments to an enum constructor as a tuple
   in a pattern...
 
-* need to start putting user's guide together.
-
-* should port bison and lex
+* lots of places where we're not sure what to do with the type qualifiers
 
 * should hack the popcorn front-end to spit out cyclone (or a close
   approximation thereof.)
@@ -64,8 +102,6 @@ Todo now:
 * better implementation of unresolved mem
 
 * deal with inline?
-
-* lots of places where we're not sure what to do with the type qualifiers
 
 * are we treating void properly?
 
@@ -136,45 +172,3 @@ Todo later:
 * subtyping
 * better comprehensions/iterators
 * calling conventions for functions (C vs Cyclone)
-
------------------------------------------------------------------------------
-Things that have been done:
-
-I've merged exp_synth and stmt_synth, generalized it to support
-break/fallthru in switches.  This gets rid of the following todo
-items:
-
-  * check conformance of fallthru and break on switches
-
-  * fix the exp_synth on tcStmtExp to get definitely assigned vars right
-    (perhaps merge exp_synth and stmt_synth)
-
-* check that where clauses are well-formed in switches/catches
-
-* sizeof(?) -- need to really be able to check the size
-
-* UnresolvedMem -- now resolves (based on the type of the declarator)
-  to either an Array or a Struct expression.  Note that we still don't
-  deal with full designators properly.
-
-* printf, fprintf, xprintf
-
-* size (for arrays)
-
-* * in patterns to get the address of a value within a data structure
-  $(int,int) x = $(1,2);
-  let (*a,b) = x;  // a : int@, b : int
-  *a = 3;
-  printf("%d\n",x[0]);  // should print 3
-
-* change [?] arrays into boxed types -- this will simplify strings and
-  a bunch of other things and I don't see how we can really support
-  [?] as an unboxed type anyway.
-
-
-  typedef $(`a,`a) pair<`a>
-
-* existentials
-
-* string initializers at top level: string x = "hello"
-
