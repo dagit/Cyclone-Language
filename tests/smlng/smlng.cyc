@@ -205,6 +205,29 @@ doc_t down_opt(context_t ctxt, doc_t d) {
           }
           break;
         default:
+          if (ds->tl){
+            //find the last doc
+            let previous = ds;
+            let tail_docs = ds->tl;
+            while(tail_docs->tl){
+              previous = tail_docs;
+              tail_docs = tail_docs->tl;
+            }
+            switch(tail_docs->hd){
+            case &Tagged(tag_in_EM,*d3):
+              if (tag_in_EM==EM_tag){
+                is_change = true;
+                previous->tl = null;
+                let head_docs = down_opt(ctxt,new Tagged(EM_tag,new Seq(ds)));
+                let last_doc = down_opt(ctxt, *d3);
+                ds = new List::List(head_docs,new List::List(last_doc,null));
+                return new Seq(ds);
+              }
+              break;
+            default:
+              break;
+            }
+          }
           break;
         }
         break;
