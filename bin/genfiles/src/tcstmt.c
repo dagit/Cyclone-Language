@@ -923,11 +923,11 @@ Cyc_Tcstmt_tcStmt( Cyc_Tcenv_set_encloser( Cyc_Tcenv_add_local_var( _temp121->lo
 te, _temp267), s0), _temp121, 0); return;}} _LL248: { struct Cyc_Core_Opt* topt=*
 _temp276; Cyc_Tcexp_tcExpInitializer( te, 0, _temp272);* _temp276= _temp272->topt;{
 struct Cyc_List_List* _temp433; struct Cyc_List_List* _temp435; struct _tuple5
-_temp431= Cyc_Tcpat_tcPat( te, _temp280,( void**)(( void*)({ struct Cyc_Core_Opt*
-_temp430= _temp272->topt; if( _temp430 == 0){ _throw( Null_Exception);}&
-_temp430->v;})), 0); _LL436: _temp435= _temp431.f1; goto _LL434; _LL434:
-_temp433= _temp431.f2; goto _LL432; _LL432:* _temp279=({ struct Cyc_Core_Opt*
-_temp437=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp431= Cyc_Tcpat_tcPat( te, _temp280,( void**)(( void**)(( void*)({ struct
+Cyc_Core_Opt* _temp430= _temp272->topt; if( _temp430 == 0){ _throw(
+Null_Exception);}& _temp430->v;}))), 0); _LL436: _temp435= _temp431.f1; goto
+_LL434; _LL434: _temp433= _temp431.f2; goto _LL432; _LL432:* _temp279=({ struct
+Cyc_Core_Opt* _temp437=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
 _temp437->v=( void*) _temp433; _temp437;}); if( topt != 0? ! Cyc_Tcutil_unify((
 void*)({ struct Cyc_Core_Opt* _temp438= _temp280->topt; if( _temp438 == 0){
 _throw( Null_Exception);} _temp438->v;}),( void*)({ struct Cyc_Core_Opt*

@@ -106,23 +106,25 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
     <li>
       <p align="left"><a href="quick_answers.htm#add_fallthru">What does fallthru mean?</a></li>
     <li>
+      <p align="left"><a href="quick_answers.htm#add_new">What does new mean?</a></li>
+    <li>
       <p align="left"><a href="quick_answers.htm#add_tuples">How do I use
       tuples?</a></li>
     <li>
-      <p align="left">What is the {for i &lt; e1 : e2} construct?</li>
+      <p align="left"><a href="quick_answers.htm#add_comprehension">What is the {for i &lt; e1 : e2} construct?</a></li>
     <li>
-      <p align="left">How do I throw and catch exceptions?</li>
+      <p align="left"><a href="quick_answers.htm#add_exns">How do I throw and catch exceptions?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#add_exncost">How efficient is exception handling?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#add_let">What does let mean?</a></li>
     <li>
-      <p align="left">What is a pattern and how do I use it?</li>
+      <p align="left"><a href="quick_answers.htm#add_pats">What is a pattern and how do I use it?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#add_under">What does _
       (underscore) mean?</a></li>
     <li>
-      <p align="left">What are functions that take arguments of type `a?</li>
+      <p align="left"><a href="quick_answers.htm#add_alpha">What are functions that take arguments of type `a?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#add_nottemplates">Do functions with type variables get
       duplicated like C++
@@ -141,7 +143,7 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
     <li>
       <p align="left"><a href="quick_answers.htm#del_nestedtype">Why can't I declare types within functions?</a></li>
     <li>
-      <p align="left">What casts are allowed?</li>
+      <p align="left"><a href="quick_answers.htm#del_casts">What casts are allowed?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#del_fallthru">Why can't I implicitly fall-through to the next switch
       case?</a></li>
@@ -155,7 +157,7 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
     <li>
       <p align="left"><a href="quick_answers.htm#del_union">What types are allowed for union members?</a></li>
     <li>
-      <p align="left">Why can't I do anything with values of type void *?</li>
+      <p align="left"><a href="quick_answers.htm#del_voidstar">Why can't I do anything with values of type void *?</a></li>
   </ul>
 </blockquote>
 <ul>
@@ -165,14 +167,15 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
 <blockquote>
   <ul>
     <li>
-      <p align="left">How do I call printf, scanf, and company?</li>
+      <p align="left"><a href="quick_answers.htm#io_how">How do I call printf,
+      scanf, and company?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#io_xprintf">What is xprintf?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#io_printf_literal">Why doesn't
       printf(s) work?</a></li>
     <li>
-      <p align="left">Why isn't there sscanf?</li>
+      <p align="left"><a href="quick_answers.htm#io_sscanf">Is there sscanf?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#io_cmdline">How do I access command-line arguments?</a></li>
   </ul>
@@ -184,16 +187,16 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
 <blockquote>
   <ul>
     <li>
-      <p align="left">Why can't I pass a stack pointer to certain functions?</li>
+      <p align="left"><a href="quick_answers.htm#ptr_stack">Why can't I pass a stack pointer to certain functions?</a></li>
     <li>
-      <p align="left">Why do I get an incomprehensible error when I assign a
-      local's address to a pointer variable?</li>
+      <p align="left"><a href="quick_answers.htm#ptr_stack2">Why do I get an incomprehensible error when I assign a
+      local's address to a pointer variable?</a></li>
     <li>
-      <p align="left">How much pointer arithmetic can I do?</li>
+      <p align="left"><a href="quick_answers.htm#ptr_arith">How much pointer arithmetic can I do?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#pointer_stringlit">What is the type of a literal string?</a></li>
     <li>
-      <p align="left">Are strings null-terminated?</li>
+      <p align="left"><a href="quick_answers.htm#ptr_nullterm">Are strings null-terminated?</a></li>
     <li>
       <p align="left"><a href="quick_answers.htm#pointer_zero">Why can't I assign 0 to a pointer?</a></li>
   </ul>
@@ -216,7 +219,7 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
     <li>
       <p align="left">What are regions and how do I make them?</li>
     <li>
-      <p align="left">How can I make a stack-allocated array?</li>
+      <p align="left"><a href="quick_answers.htm#mem_locarr">How can I make a stack-allocated array?</a></li>
     <li>
       <p align="left">How can a function take stack pointers?</li>
     <li>
@@ -245,13 +248,16 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
       <p align="left">Why is an implicit cast from &quot;foo @&quot; to &quot;foo
       *&quot; a warning? </li>
     <li>
-      <p align="left">Why do I have to cast from &quot;foo *&quot; to &quot;foo
-      @&quot; if I've tested for null? </li>
+      <p align="left"><a href="quick_answers.htm#error_null">Why do I have to cast from &quot;foo *&quot; to &quot;foo
+      @&quot; if I've tested for null?</a> </li>
     <li>
-      <p align="left">Why can't a function parameter or struct field have type
-      `a::M?</li>
+      <p align="left"><a href="quick_answers.htm#error_memkind">Why can't a function parameter or struct field have type
+      `a::M?</a></li>
     <li>
       <p align="left">What do you mean no anonymous structs/unions?</li>
+    <li>
+      <p align="left">What do you mean &quot;ignored nested type
+      declarations&quot;?</li>
   </ul>
 </blockquote>
 <ul>
@@ -309,7 +315,7 @@ Messages</a>, <a href="#tools">Tools</a>, <a href="#meta">Meta-Level</a>, <a hre
 <blockquote>
   <ul>
     <li>
-      <p align="left">How do I write hello-world?</li>
+      <p align="left">How do I make hello-world?</li>
     <li>
       <p align="left"><a href="quick_answers.htm#other_imprev">How come
       List::imp_rev(l1) doesn't change l1 to its reverse?</a></li>

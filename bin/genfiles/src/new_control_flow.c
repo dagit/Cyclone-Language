@@ -1352,10 +1352,10 @@ Null_Exception);} _temp877->hd;}),( void*)({ struct Cyc_CfFlowInfo_StructF_struc
 _temp878=( struct Cyc_CfFlowInfo_StructF_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructF_struct));
 _temp878[ 0]=({ struct Cyc_CfFlowInfo_StructF_struct _temp879; _temp879.tag= Cyc_CfFlowInfo_StructF;
 _temp879.f1= _temp870; _temp879;}); _temp878;})); _temp876->tl= ith_lvals;
-_temp876;}); goto _LL863; _LL863:;}}}}{ void** ith_topt=( void*)({ struct Cyc_Core_Opt*
-_temp889=((*(( struct _tuple5*)({ struct Cyc_List_List* _temp888= _temp336; if(
-_temp888 == 0){ _throw( Null_Exception);} _temp888->hd;}))).f2)->topt; if(
-_temp889 == 0){ _throw( Null_Exception);}& _temp889->v;}); struct Cyc_NewControlFlow_AbsSyn
+_temp876;}); goto _LL863; _LL863:;}}}}{ void** ith_topt=( void**)(( void*)({
+struct Cyc_Core_Opt* _temp889=((*(( struct _tuple5*)({ struct Cyc_List_List*
+_temp888= _temp336; if( _temp888 == 0){ _throw( Null_Exception);} _temp888->hd;}))).f2)->topt;
+if( _temp889 == 0){ _throw( Null_Exception);}& _temp889->v;})); struct Cyc_NewControlFlow_AbsSyn
 ith_syn= Cyc_NewControlFlow_abstract_exp( Cyc_NewControlFlow_change_lhs( env,
 ith_lvals),(*(( struct _tuple5*)({ struct Cyc_List_List* _temp887= _temp336; if(
 _temp887 == 0){ _throw( Null_Exception);} _temp887->hd;}))).f2); void* _temp883;

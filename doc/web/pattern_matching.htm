@@ -47,7 +47,7 @@ let-declaration's initializer is evaluated only once.</p>
 they match.&nbsp; For example, given type</p>
 <p align="left"><font face="Courier New">struct Quad { struct Pair p1; struct
 Pair p2; };</font></p>
-<p align="left">then patterns for matching against an expression of type struct
+<p align="left">patterns for matching against an expression of type struct
 Quad could be any of the following (and many more because of constants and
 wildcards -- see below):</p>
 <ul>
@@ -303,7 +303,7 @@ C's switch statement.</p>
     discussed more below.</li>
   <li>
     <p align="left">The cases in a switch <u>must be exhaustive</u>; it is a
-    compile-time error if the compiler determine that it could be that no case
+    compile-time error if the compiler determines that it could be that no case
     matches.&nbsp; The rules for what the compiler determines are described
     below.</li>
   <li>
@@ -339,7 +339,7 @@ return i;</font></p>
 <p align="left" style="line-height: 0"><font face="Courier New">&nbsp; }</font></p>
 <p align="left" style="line-height: 0"><font face="Courier New">}</font></p>
 <p align="left">In Cyclone terms, the code tries to match against the constant
-0.&nbsp; If it does match (i is not 0), it tries to match against the pattern
+0.&nbsp; If it does not match (i is not 0), it tries to match against the pattern
 1.&nbsp; Everything matches against default; in fact, default is just alternate
 notation for &quot;case _&quot;, i.e. a case with a <a href="#wild_pat">wildcard
 pattern</a>.&nbsp; For performance reasons, switch statements that are legal C
@@ -408,9 +408,9 @@ and the value of this variable is used for the ensuring pattern matches.</p>
 If the next case has n bindings, then you must write <font face="Courier New">fallthru(e1,...,en)</font>
 where each ei is an expression with the appropriate type for the ith binding in
 the next case's pattern, reading from left to right.&nbsp; (By appropriate type,
-we mean the type of the switch expression that would be bound to the ith binding
+we mean the type of the expression that would be bound to the ith binding
 were the next case to match.)&nbsp; The effect is to evaluate e1 through en,
-bind them to the identifiers and then goto the body of the next case.&nbsp; <font face="Courier New">fallthru</font>
+bind them to the identifiers, and then goto the body of the next case.&nbsp; <font face="Courier New">fallthru</font>
 is not allowed in the last case of a switch, not even if there is an enclosing
 switch.</p>
 <p>We repeat that fallthru may appear anywhere in a case body, but it is usually
@@ -443,7 +443,7 @@ f(x+y) == 7 : return 2;</font></p>
 is 3, it calls the function f (which of course may do arbitrary things) with the
 sum of a and b.&nbsp; If the result is 7, then 2 is returned.&nbsp; In all other
 cases (x is not 3 or the call to f does not return 7), 3 is returned.</p>
-<p>Case guards make numeric constant patterns unnecessary (we can replace case
+<p>Case guards make constant patterns unnecessary (we can replace case
 3: with case x &amp;&amp; x==3:, for example), but constant patterns are better
 style and easier to use.</p>
 <p>Where clauses are not interpreted by the compiler when doing exhaustiveness
@@ -456,7 +456,7 @@ than explain the precise rules, we currently rely on your intuition.&nbsp; But
 there are two rules to guide your intuition:</p>
 <ul>
   <li>In terms of exhaustiveness checking, the compiler acts as if any case
-    guard </li>
+    guard might evaluate to false. </li>
   <li>In terms of exhaustiveness checking, numeric constants cannot make
     patterns exhaustive.&nbsp; Even if you list out all 256 characters, the
     compiler will act as though there is another possibility you have not

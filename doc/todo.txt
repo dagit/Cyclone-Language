@@ -34,6 +34,9 @@ function declarations are only allowed at top-level.
   void h() {}
   void (*i)() = h;
 
+* Translation of lvalues is still broken because we put in casts
+(and leave wrong casts) in places we shouldn't.
+
 * are we treating void properly?
 
 * Implementation of exceptions assumes sizeof(void *) == sizeof(int)

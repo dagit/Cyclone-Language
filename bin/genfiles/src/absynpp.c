@@ -499,10 +499,10 @@ Cyc_Absynpp_curr_namespace,({ struct Cyc_List_List* _temp0=( struct Cyc_List_Lis
 GC_malloc( sizeof( struct Cyc_List_List)); _temp0->hd=( void*) v; _temp0->tl= 0;
 _temp0;}));} static void Cyc_Absynpp_suppr_last( struct Cyc_List_List** l){ if(({
 struct Cyc_List_List* _temp1=* l; if( _temp1 == 0){ _throw( Null_Exception);}
-_temp1->tl;}) == 0){* l= 0;} else{(( void(*)( struct Cyc_List_List** l)) Cyc_Absynpp_suppr_last)(({
-struct Cyc_List_List* _temp2=* l; if( _temp2 == 0){ _throw( Null_Exception);}&
-_temp2->tl;}));}} static void Cyc_Absynpp_curr_namespace_drop(){(( void(*)(
-struct Cyc_List_List** l)) Cyc_Absynpp_suppr_last)(& Cyc_Absynpp_curr_namespace);}
+_temp1->tl;}) == 0){* l= 0;} else{(( void(*)( struct Cyc_List_List** l)) Cyc_Absynpp_suppr_last)((
+struct Cyc_List_List**)({ struct Cyc_List_List* _temp2=* l; if( _temp2 == 0){
+_throw( Null_Exception);}& _temp2->tl;}));}} static void Cyc_Absynpp_curr_namespace_drop(){((
+void(*)( struct Cyc_List_List** l)) Cyc_Absynpp_suppr_last)(& Cyc_Absynpp_curr_namespace);}
 struct _tagged_string Cyc_Absynpp_char_escape( char c){ switch( c){ case '\a':
 _LL3: return( struct _tagged_string)({ char* _temp5=( char*)"\\a"; struct
 _tagged_string _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=

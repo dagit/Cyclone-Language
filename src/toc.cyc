@@ -1290,7 +1290,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
 			  exp_t f(exp_t,`a), `a f_env){
   switch (e1->r) {
   case &StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
-  case &Cast_e(t,e):  lvalue_assign(e,fs,f,f_env);      break;
+  case &Cast_e(t,e):  lvalue_assign(e,fs,f,f_env); break;
   case &StructMember_e(e,fld):
     // Hack: strip off the struct member -- the base case adds it back in.
     e1->r = e->r;
@@ -1653,7 +1653,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e1);
       if(!is_lvalue(e1)) {
 	lvalue_assign(e1,null,address_lvalue,true);
-	e->r = e1->r;
+	// the wrong cast got pushed out, so as a kludge, just re-cast
+	e->r = cast_exp(typ_to_c(e->topt->v),e1,DL)->r;
       }
       break;
     }
@@ -2283,8 +2284,7 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
 	}
       }
       exp_t max_tag_exp = uint_exp(max_tag,DL);
-      exp_t e3 = cast_exp(cstar_typ(sint_t,mt_tq),
-			  r,DL);
+      exp_t e3 = cast_exp(cstar_typ(sint_t,mt_tq), r,DL);
       exp_t e1 = deref_exp(e3,DL);
       exp_t e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
       exp_t e  = var_exp(tuf->name,DL);

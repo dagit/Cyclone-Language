@@ -31,7 +31,7 @@ undesirable in Cyclone for at least two reasons:</p>
     storage (i.e. malloc).</li>
 </ul>
 <p align="left">Inspired by Java's rules for separate declaration and
-initialization of local variables, Cyclone has a well-defined sound system for
+initialization of local variables, Cyclone has a well-defined, sound system for
 checking that memory is written before it is used.&nbsp; The rules are more
 complicated than in Java because we support pointers to uninitialized memory, as
 is necessary for malloc.</p>
@@ -250,7 +250,7 @@ analysis says that they each point to an unknown place without saying that they
 point to the <i>same</i> unknown place.&nbsp;&nbsp;</p>
 <p style="line-height: 100%">For safety reasons, once a place is escaped, any
 assignment to it must be a value that is fully initialized, meaning everything
-reachable from the value is initialized.This phenomenon is why the first
+reachable from the value is initialized. This phenomenon is why the first
 function below is accepted but not the second (the list_t and glist_t typedefs
 are defined in the List library):</p>
 <p style="line-height: 100%"><font face="Courier New">list_t&lt;`a> copy(glist_t&lt;`a,`r> x) {<br>

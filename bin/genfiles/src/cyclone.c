@@ -905,60 +905,65 @@ _temp260.f1= Cyc_set_out_file_name; _temp260;}); _temp259;}); _temp256.f3=(
 struct _tagged_string)({ char* _temp257=( char*)"Output file name"; struct
 _tagged_string _temp258; _temp258.curr= _temp257; _temp258.base= _temp257;
 _temp258.last_plus_one= _temp257 + 17; _temp258;}); _temp256;})}; struct Cyc_List_List
-l1=({ struct Cyc_List_List _temp155; _temp155.hd=( void*)({ struct _tuple10*
-_temp156=( struct _tuple10*) specs; unsigned int _temp157= 0; if( _temp157 >= 15u){
-_throw( Null_Exception);}& _temp156[ _temp157];}); _temp155.tl= 0; _temp155;});
-struct Cyc_List_List l2=({ struct Cyc_List_List _temp152; _temp152.hd=( void*)({
-struct _tuple10* _temp153=( struct _tuple10*) specs; unsigned int _temp154= 1;
-if( _temp154 >= 15u){ _throw( Null_Exception);}& _temp153[ _temp154];});
-_temp152.tl=( struct Cyc_List_List*)& l1; _temp152;}); struct Cyc_List_List l3=({
-struct Cyc_List_List _temp149; _temp149.hd=( void*)({ struct _tuple10* _temp150=(
-struct _tuple10*) specs; unsigned int _temp151= 2; if( _temp151 >= 15u){ _throw(
-Null_Exception);}& _temp150[ _temp151];}); _temp149.tl=( struct Cyc_List_List*)&
+l1=({ struct Cyc_List_List _temp155; _temp155.hd=( void*)(( struct _tuple10*)({
+struct _tuple10* _temp156=( struct _tuple10*) specs; unsigned int _temp157= 0;
+if( _temp157 >= 15u){ _throw( Null_Exception);}& _temp156[ _temp157];}));
+_temp155.tl= 0; _temp155;}); struct Cyc_List_List l2=({ struct Cyc_List_List
+_temp152; _temp152.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp153=(
+struct _tuple10*) specs; unsigned int _temp154= 1; if( _temp154 >= 15u){ _throw(
+Null_Exception);}& _temp153[ _temp154];})); _temp152.tl=( struct Cyc_List_List*)&
+l1; _temp152;}); struct Cyc_List_List l3=({ struct Cyc_List_List _temp149;
+_temp149.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp150=( struct
+_tuple10*) specs; unsigned int _temp151= 2; if( _temp151 >= 15u){ _throw(
+Null_Exception);}& _temp150[ _temp151];})); _temp149.tl=( struct Cyc_List_List*)&
 l2; _temp149;}); struct Cyc_List_List l4=({ struct Cyc_List_List _temp146;
-_temp146.hd=( void*)({ struct _tuple10* _temp147=( struct _tuple10*) specs;
-unsigned int _temp148= 3; if( _temp148 >= 15u){ _throw( Null_Exception);}&
-_temp147[ _temp148];}); _temp146.tl=( struct Cyc_List_List*)& l3; _temp146;});
-struct Cyc_List_List l5=({ struct Cyc_List_List _temp143; _temp143.hd=( void*)({
-struct _tuple10* _temp144=( struct _tuple10*) specs; unsigned int _temp145= 4;
-if( _temp145 >= 15u){ _throw( Null_Exception);}& _temp144[ _temp145];});
-_temp143.tl=( struct Cyc_List_List*)& l4; _temp143;}); struct Cyc_List_List l6=({
-struct Cyc_List_List _temp140; _temp140.hd=( void*)({ struct _tuple10* _temp141=(
-struct _tuple10*) specs; unsigned int _temp142= 5; if( _temp142 >= 15u){ _throw(
-Null_Exception);}& _temp141[ _temp142];}); _temp140.tl=( struct Cyc_List_List*)&
+_temp146.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp147=( struct
+_tuple10*) specs; unsigned int _temp148= 3; if( _temp148 >= 15u){ _throw(
+Null_Exception);}& _temp147[ _temp148];})); _temp146.tl=( struct Cyc_List_List*)&
+l3; _temp146;}); struct Cyc_List_List l5=({ struct Cyc_List_List _temp143;
+_temp143.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp144=( struct
+_tuple10*) specs; unsigned int _temp145= 4; if( _temp145 >= 15u){ _throw(
+Null_Exception);}& _temp144[ _temp145];})); _temp143.tl=( struct Cyc_List_List*)&
+l4; _temp143;}); struct Cyc_List_List l6=({ struct Cyc_List_List _temp140;
+_temp140.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp141=( struct
+_tuple10*) specs; unsigned int _temp142= 5; if( _temp142 >= 15u){ _throw(
+Null_Exception);}& _temp141[ _temp142];})); _temp140.tl=( struct Cyc_List_List*)&
 l5; _temp140;}); struct Cyc_List_List l7=({ struct Cyc_List_List _temp137;
-_temp137.hd=( void*)({ struct _tuple10* _temp138=( struct _tuple10*) specs;
-unsigned int _temp139= 6; if( _temp139 >= 15u){ _throw( Null_Exception);}&
-_temp138[ _temp139];}); _temp137.tl=( struct Cyc_List_List*)& l6; _temp137;});
-struct Cyc_List_List l8=({ struct Cyc_List_List _temp134; _temp134.hd=( void*)({
-struct _tuple10* _temp135=( struct _tuple10*) specs; unsigned int _temp136= 7;
-if( _temp136 >= 15u){ _throw( Null_Exception);}& _temp135[ _temp136];});
-_temp134.tl=( struct Cyc_List_List*)& l7; _temp134;}); struct Cyc_List_List l9=({
-struct Cyc_List_List _temp131; _temp131.hd=( void*)({ struct _tuple10* _temp132=(
-struct _tuple10*) specs; unsigned int _temp133= 8; if( _temp133 >= 15u){ _throw(
-Null_Exception);}& _temp132[ _temp133];}); _temp131.tl=( struct Cyc_List_List*)&
+_temp137.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp138=( struct
+_tuple10*) specs; unsigned int _temp139= 6; if( _temp139 >= 15u){ _throw(
+Null_Exception);}& _temp138[ _temp139];})); _temp137.tl=( struct Cyc_List_List*)&
+l6; _temp137;}); struct Cyc_List_List l8=({ struct Cyc_List_List _temp134;
+_temp134.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp135=( struct
+_tuple10*) specs; unsigned int _temp136= 7; if( _temp136 >= 15u){ _throw(
+Null_Exception);}& _temp135[ _temp136];})); _temp134.tl=( struct Cyc_List_List*)&
+l7; _temp134;}); struct Cyc_List_List l9=({ struct Cyc_List_List _temp131;
+_temp131.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp132=( struct
+_tuple10*) specs; unsigned int _temp133= 8; if( _temp133 >= 15u){ _throw(
+Null_Exception);}& _temp132[ _temp133];})); _temp131.tl=( struct Cyc_List_List*)&
 l8; _temp131;}); struct Cyc_List_List l10=({ struct Cyc_List_List _temp128;
-_temp128.hd=( void*)({ struct _tuple10* _temp129=( struct _tuple10*) specs;
-unsigned int _temp130= 9; if( _temp130 >= 15u){ _throw( Null_Exception);}&
-_temp129[ _temp130];}); _temp128.tl=( struct Cyc_List_List*)& l9; _temp128;});
-struct Cyc_List_List l11=({ struct Cyc_List_List _temp125; _temp125.hd=( void*)({
-struct _tuple10* _temp126=( struct _tuple10*) specs; unsigned int _temp127= 10;
-if( _temp127 >= 15u){ _throw( Null_Exception);}& _temp126[ _temp127];});
-_temp125.tl=( struct Cyc_List_List*)& l10; _temp125;}); struct Cyc_List_List l12=({
-struct Cyc_List_List _temp122; _temp122.hd=( void*)({ struct _tuple10* _temp123=(
-struct _tuple10*) specs; unsigned int _temp124= 11; if( _temp124 >= 15u){ _throw(
-Null_Exception);}& _temp123[ _temp124];}); _temp122.tl=( struct Cyc_List_List*)&
+_temp128.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp129=( struct
+_tuple10*) specs; unsigned int _temp130= 9; if( _temp130 >= 15u){ _throw(
+Null_Exception);}& _temp129[ _temp130];})); _temp128.tl=( struct Cyc_List_List*)&
+l9; _temp128;}); struct Cyc_List_List l11=({ struct Cyc_List_List _temp125;
+_temp125.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp126=( struct
+_tuple10*) specs; unsigned int _temp127= 10; if( _temp127 >= 15u){ _throw(
+Null_Exception);}& _temp126[ _temp127];})); _temp125.tl=( struct Cyc_List_List*)&
+l10; _temp125;}); struct Cyc_List_List l12=({ struct Cyc_List_List _temp122;
+_temp122.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp123=( struct
+_tuple10*) specs; unsigned int _temp124= 11; if( _temp124 >= 15u){ _throw(
+Null_Exception);}& _temp123[ _temp124];})); _temp122.tl=( struct Cyc_List_List*)&
 l11; _temp122;}); struct Cyc_List_List l13=({ struct Cyc_List_List _temp119;
-_temp119.hd=( void*)({ struct _tuple10* _temp120=( struct _tuple10*) specs;
-unsigned int _temp121= 12; if( _temp121 >= 15u){ _throw( Null_Exception);}&
-_temp120[ _temp121];}); _temp119.tl=( struct Cyc_List_List*)& l12; _temp119;});
-struct Cyc_List_List l14=({ struct Cyc_List_List _temp116; _temp116.hd=( void*)({
-struct _tuple10* _temp117=( struct _tuple10*) specs; unsigned int _temp118= 13;
-if( _temp118 >= 15u){ _throw( Null_Exception);}& _temp117[ _temp118];});
-_temp116.tl=( struct Cyc_List_List*)& l13; _temp116;}); struct Cyc_List_List l15=({
-struct Cyc_List_List _temp113; _temp113.hd=( void*)({ struct _tuple10* _temp114=(
-struct _tuple10*) specs; unsigned int _temp115= 14; if( _temp115 >= 15u){ _throw(
-Null_Exception);}& _temp114[ _temp115];}); _temp113.tl=( struct Cyc_List_List*)&
+_temp119.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp120=( struct
+_tuple10*) specs; unsigned int _temp121= 12; if( _temp121 >= 15u){ _throw(
+Null_Exception);}& _temp120[ _temp121];})); _temp119.tl=( struct Cyc_List_List*)&
+l12; _temp119;}); struct Cyc_List_List l14=({ struct Cyc_List_List _temp116;
+_temp116.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp117=( struct
+_tuple10*) specs; unsigned int _temp118= 13; if( _temp118 >= 15u){ _throw(
+Null_Exception);}& _temp117[ _temp118];})); _temp116.tl=( struct Cyc_List_List*)&
+l13; _temp116;}); struct Cyc_List_List l15=({ struct Cyc_List_List _temp113;
+_temp113.hd=( void*)(( struct _tuple10*)({ struct _tuple10* _temp114=( struct
+_tuple10*) specs; unsigned int _temp115= 14; if( _temp115 >= 15u){ _throw(
+Null_Exception);}& _temp114[ _temp115];})); _temp113.tl=( struct Cyc_List_List*)&
 l14; _temp113;}); struct Cyc_List_List* options=& l15; Cyc_Arg_parse(( struct
 Cyc_List_List*) options, Cyc_compile_file,( struct _tagged_string)({ char*
 _temp111=( char*)"Options:"; struct _tagged_string _temp112; _temp112.curr=

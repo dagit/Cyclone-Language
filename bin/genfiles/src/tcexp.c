@@ -1406,8 +1406,8 @@ _temp824.last_plus_one - _temp824.curr, _temp824.curr, _temp825.last_plus_one -
 _temp825.curr, _temp825.curr);}));} return t;}} static void* Cyc_Tcexp_tcAssignOp(
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct
 Cyc_Absyn_Exp* e1, struct Cyc_Core_Opt* po, struct Cyc_Absyn_Exp* e2){ Cyc_Tcexp_tcExpNoPromote(
-te, 0, e1); Cyc_Tcexp_tcExp( te,( void**)(( void*)({ struct Cyc_Core_Opt*
-_temp828= e1->topt; if( _temp828 == 0){ _throw( Null_Exception);}& _temp828->v;})),
+te, 0, e1); Cyc_Tcexp_tcExp( te,( void**)(( void**)(( void*)({ struct Cyc_Core_Opt*
+_temp828= e1->topt; if( _temp828 == 0){ _throw( Null_Exception);}& _temp828->v;}))),
 e2);{ void* t1=( void*)({ struct Cyc_Core_Opt* _temp851= e1->topt; if( _temp851
 == 0){ _throw( Null_Exception);} _temp851->v;}); void* t2=( void*)({ struct Cyc_Core_Opt*
 _temp850= e2->topt; if( _temp850 == 0){ _throw( Null_Exception);} _temp850->v;});{
@@ -2006,8 +2006,8 @@ _LL1315: _temp1314=( struct Cyc_Absyn_Tqual)(( struct Cyc_Absyn_ArrayType_struct
 _temp1302)->f2; _temp1316=&(( struct Cyc_Absyn_ArrayType_struct*) _temp1302)->f2;
 goto _LL1313; _LL1313: _temp1312=( struct Cyc_Absyn_Exp*)(( struct Cyc_Absyn_ArrayType_struct*)
 _temp1302)->f3; goto _LL1307;} else{ goto _LL1308;} _LL1308: goto _LL1309;
-_LL1305: pinfo= _temp1310; topt2=( void**)(( void*)& pinfo.elt_typ); tqopt=(
-struct Cyc_Absyn_Tqual*)& pinfo.tq; goto _LL1303; _LL1307: topt2=( void**)
+_LL1305: pinfo= _temp1310; topt2=( void**)(( void**)(( void*)& pinfo.elt_typ));
+tqopt=( struct Cyc_Absyn_Tqual*)& pinfo.tq; goto _LL1303; _LL1307: topt2=( void**)
 _temp1319; tqopt=( struct Cyc_Absyn_Tqual*) _temp1316; goto _LL1303; _LL1309:
 goto _LL1303; _LL1303:;}{ void* t= Cyc_Tcexp_tcExp( te, topt2, body); return(
 void*)({ struct Cyc_Absyn_ArrayType_struct* _temp1320=( struct Cyc_Absyn_ArrayType_struct*)
@@ -2096,12 +2096,13 @@ _temp1377; struct _tuple8* _temp1372=( struct _tuple8*)({ struct Cyc_List_List*
 _temp1371= fields; if( _temp1371 == 0){ _throw( Null_Exception);} _temp1371->hd;});
 _temp1374=* _temp1372; _LL1378: _temp1377= _temp1374.f1; goto _LL1376; _LL1376:
 _temp1375= _temp1374.f2; goto _LL1373; _LL1373: Cyc_Tcexp_tcExpInitializer( te,(
-void**)(( void*)& _temp1377->type), _temp1375); if( ! Cyc_Tcutil_coerce_arg( te,
-_temp1375,( void*) _temp1377->type)){ Cyc_Tcutil_terr( _temp1375->loc,({ struct
-_tagged_string _temp1380=* _temp1377->name; struct _tagged_string _temp1381= Cyc_Absynpp_typ2string((
-void*) _temp1377->type); struct _tagged_string _temp1382= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp1379= _temp1375->topt; if( _temp1379 == 0){
-_throw( Null_Exception);} _temp1379->v;})); xprintf("field %.*s of struct expects type %.*s != %.*s",
+void**)(( void**)(( void*)& _temp1377->type)), _temp1375); if( ! Cyc_Tcutil_coerce_arg(
+te, _temp1375,( void*) _temp1377->type)){ Cyc_Tcutil_terr( _temp1375->loc,({
+struct _tagged_string _temp1380=* _temp1377->name; struct _tagged_string
+_temp1381= Cyc_Absynpp_typ2string(( void*) _temp1377->type); struct
+_tagged_string _temp1382= Cyc_Absynpp_typ2string(( void*)({ struct Cyc_Core_Opt*
+_temp1379= _temp1375->topt; if( _temp1379 == 0){ _throw( Null_Exception);}
+_temp1379->v;})); xprintf("field %.*s of struct expects type %.*s != %.*s",
 _temp1380.last_plus_one - _temp1380.curr, _temp1380.curr, _temp1381.last_plus_one
 - _temp1381.curr, _temp1381.curr, _temp1382.last_plus_one - _temp1382.curr,
 _temp1382.curr);}));}} goto _LL1363;} _LL1367:(( void(*)( struct _tagged_string))

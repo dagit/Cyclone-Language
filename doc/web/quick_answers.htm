@@ -145,7 +145,8 @@ within a Cyclone file that a type's representation cannot be exported.</p>
 <p><b><a name="add_keywords"></a>What are the Cyclone keywords?</b></p>
 <p>In addition to the C keywords, the following have special meaning and cannot
 be used as identifiers: abstract,&nbsp; catch, codegen, cut, fallthru, fill,
-fprintf, fscanf, let, malloc, namespace, new, null, printf, sscanf, splice,
+fprintf, fscanf, let, malloc, namespace, new, null, printf, rmalloc, rnew,
+sscanf, splice,
 throw, try, tunion, using, xprintf, xscanf, xtunion.&nbsp; As in gcc,
 __attribute__ is reserved.</p>
       <p align="left"><b><a name="add_namespace"></a>What are namespace and using?</b><p>These
@@ -157,13 +158,19 @@ pitfalls is <a href="namespaces.htm">here</a>.</p>
 <p><b><a name="add_fallthru"></a>What does fallthru mean?</b></p>
 <p>In Cyclone, you cannot implicitly fall-through from one switch case to the
 next.&nbsp; You can explicitly fall-through with the statement &quot;fallthru;&quot;.&nbsp;
-fallthru may not appear in the last case of a switch.&nbsp; So to port C code,
-place fallthru; at the end of each case that implicitly falls through.&nbsp;
+fallthru may not appear in the last case of a switch.&nbsp; So <b> to port C code,
+place fallthru; at the end of each case that implicitly falls through</b>.&nbsp;
 Fallthru is more powerful for two reasons.&nbsp; First, it can appear anywhere
 in a case; its meaning is to immediately goto the next case.&nbsp; Second, when
 the next case has pattern-matching variables, a fallthru must take expressions
 that are bound to the variables before the goto.&nbsp; Hence fallthru is more
 powerful (but more verbose) than &quot;or patterns&quot; in ML.</p>
+<p><b><a name="add_new"></a>What does new mean?</b></p>
+<p>new e, where e is an expression, allocates space on the heap, initializes it
+with the result of evaluating e, and returns a pointer to it.&nbsp; It is
+roughly equivalent to t @ temp = malloc(sizeof(t)); *temp = e; where t is the
+type of e.&nbsp; You can also write new {for i &lt; e1 : e2} to heap-allocate an
+array of size e1 with the ith element initialized to e2 (which may mention i).</p>
 <p><b><a name="add_tuples"></a>How do I use tuples?</b></p>
 <p>A tuple type is $(t1,...,tn) where the ti are types.&nbsp; A value of such a
 type is constructed via $(e1,...,en) where ei has type ti.&nbsp; Given an
@@ -173,6 +180,36 @@ constant</a>.&nbsp; In short, tuples are like anonymous structs where you use
 e[i] instead of e.f.&nbsp; There is no analogue of the -&gt; syntax, so given an
 expression p of type $(t1,...,tn) *, you must extract the ith component of the
 underlying tuple via (*e)[i].</p>
+      <p align="left"><b><a name="add_comprehension"></a>What is the {for i &lt; e1 : e2} construct?</b><p>This
+construct is an array initializer.&nbsp; It can appear where array initializers
+appear in C, and it can appear as the argument to new. i is an identifier.&nbsp;
+e1 is an unsigned int indicating the size of the array.&nbsp; e2 is evaluated e1
+times, with i having values 0, 1, ..., e1-1 and the result initializes the ith
+element of the array.&nbsp; The form new {for i &lt; e1 : e2} allocates space
+for a new array and initializes it as just described.&nbsp; <b>This form is the
+only way to create arrays whose size depends on run-time information.</b>&nbsp;
+When {for i &lt; e1: e2} is not an argument to new, e1 must be constant and e2
+may not mention i.&nbsp; This restriction includes all uses at top-level (for
+global variables).</p>
+<p><b><a name="add_exns"></a>How do I throw and catch exceptions?</b></p>
+<p>To declare a new exception variant, declare xtunion exn {MyExn };.&nbsp; To
+throw an exception, use the expression form throw e, for example throw MyExn.&nbsp;
+To catch an exception, use the try/catch statement, for example: try&nbsp;
+s1&nbsp; catch { case MyExn: s2 }.&nbsp; If execution of s1 throws MyExn (and no
+inner exception handler catches it), control transfers immediately to s2.</p>
+<p>A catch clause can have any number of case clauses.&nbsp; If none match, the
+exception is re-thrown.</p>
+<p>Exceptions can carry values with them.&nbsp; For example, to declare an
+exception that carries an int, write xtunion exn {MyIntExn(int) };.&nbsp; Values
+of such exceptions are heap-allocated, for example, throw new
+MyIntExn(42).&nbsp; Catching such exceptions must use &amp;, like this: try s1
+catch { case &amp;MyIntExn(x): s2 }.&nbsp; When this construct catches a
+MyIntExn, the int carried is bound to x (which can be any identifer) and x's
+scope is s2.</p>
+<p>To understand the strange syntax, realize that exn is just a pre-defined
+xtunion, an extensible <a href="discriminated_unions.htm">discriminated union</a>.&nbsp;
+Therefore, all the standard rules for extending, creating objects, and
+destructing objects of an xtunion type apply.</p>
 <p align="left"><b><a name="add_exncost"></a>How efficient is exception handling?</b><p align="left">Entering
 a try block is implemented with setjmp.&nbsp; Creating an xtunion (exception
 packets are xtunion's) requires a heap allocation.&nbsp; Throwing an exception
@@ -183,14 +220,27 @@ let declaration has the form let p = e; where p is a pattern and e is an
 expression.&nbsp; It can appear wherever declarations can appear within a
 function.&nbsp; If p is an identifier, the meaning is the same as t p = e; where
 t is the type of e.&nbsp; For less trivial pattern forms, see <a href="pattern_matching.htm">pattern
-matching</a>.<p align="left"><b><a name="add_under"></a>What does _ mean?</b><p align="left">As
+matching</a>.<p align="left"><b><a name="add_pats"></a>What is a pattern and how do I use it?</b><p align="left">Patterns
+allow a convenient way to destructure aggregate objects, such as structs and
+tuples.&nbsp; Patterns are the only way to destructure <a href="discriminated_unions.htm">discriminted
+unions</a>.&nbsp; Patterns are used in Cyclone's let-declarations and switch
+statements.&nbsp; See <a href="pattern_matching.htm">pattern matching</a>.<p align="left"><b><a name="add_under"></a>What does _ mean?</b><p align="left">As
 part of a type (or as a whole type), it means, &quot;determine what should go
 here and fill it in&quot;.&nbsp; Similarly, as an explicit region annotation it
 means, &quot;determine what region should go here and fill it in&quot;.&nbsp;
 Learn more in <a href="type_inference.htm">type inference</a>.&nbsp; As part of
 a pattern, it is a wild-card: Like an identifier, it matches any object.&nbsp;
 Unlike an identifier, it does not actually bind the matching object to
-anything.&nbsp; Learn more in <a href="pattern_matching.htm">pattern matching</a>.
+anything.&nbsp; Learn more in <a href="pattern_matching.htm">pattern matching</a>.<p align="left"><b><a name="add_alpha"></a>What are functions that take arguments of type `a?</b><p align="left">Types
+that are ` (backquote) followed (without whitespace) by an identifier are <i>type
+variables</i>.&nbsp; If a function parameter has a type variable for its type,
+it means the function can be called with any pointer or with an int.&nbsp;
+However, if two parameters have the same type variable, they must be
+instantiated with the <i>same type</i>. If all occurrences of `a appear directly
+under pointers (eg. `a *), then an actual parameter can have any type, but the
+restrictions about using the same type still apply.&nbsp; In general, Cyclone
+has <a href="polymorphism.htm">parametric polymorphism</a> as a safe alternative
+to casts and void *.
 <p align="left"><b><a name="add_nottemplates"></a>Do functions with type variables get
 duplicated like C++
       template functions?&nbsp; Is there run-time overhead for using type
@@ -204,11 +254,39 @@ the size does not matter.&nbsp; This is why we don't allow type variables of
 memory kind as parameters -- doing so would require code duplication or run-time
 types.</p>
 <p><b><a name="del_varargs"></a>Can I use varargs?</b></p>
-<p>No, but we intend to support varags in the future. printf, scanf, etc. take a
+<p>No, but we intend to support varags in the very near future. printf, scanf, etc. take a
 variable number of arguments, but these are built-in constructs.</p>
 <p><b><a name="del_nestedtype"></a>Why can't I declare types within functions?</b></p>
 <p>We just haven't implemented this support yet.&nbsp; For now, you need to
 hoist type declarations and typedefs to the top-level.</p>
+<p><b><a name="del_casts"></a>What casts are allowed?</b></p>
+<p>In general, we support only casts that do not allow you to misinterpret the
+contents of memory.&nbsp; Rather than giving the general rules, here are the
+most important specifics.</p>
+<ul>
+  <li>All of C's numeric casts, conversions, and promotions are unchanged.</li>
+  <li>For type t, you can cast among t @{c}, t *{c} and t ?.&nbsp; A cast from t
+    ? to one of the other types includes a run-time check that the t? object
+    points to at least c objects.&nbsp; A cast to t@{c} from one of the other
+    types includes a run-time check that the object is not null.&nbsp; No other
+    casts of these forms have run-time checks.&nbsp; A failed run-time check
+    throws Null_Exception.</li>
+  <li>A pointer into the heap can be cast to a pointer into another region.</li>
+  <li>A pointer to one struct/tuple can be cast to a pointer to another struct/tuple
+    provided the &quot;target type&quot; is narrower (fewer fields after
+    &quot;flattening out&quot; nested structs/tuples) and each (flattened out)
+    field of the target type could be the target of a cast from the
+    corresponding field of the source type.</li>
+  <li>A pointer can be cast to an int.</li>
+  <li>The type t*{c1} can be cast to t*{c2} if c2 &lt; c1 and similarly for
+    t@{c1} and t@{c2}.</li>
+  <li>An object of type tunion T.A can be cast to tunion T if A does not carry
+    values.&nbsp; An object of type tunion T.A@ can be cast to tunion T if A
+    does carry values.</li>
+</ul>
+<p>The current implementation isn't quite as lenient as it should be.&nbsp; For
+example, it rejects a cast from int *{4} to $(int,int)*{2}, but this cast is
+safe.</p>
 <p><b><a name="del_fallthru"></a>Why can't I implicitly fall-through to the next switch
       case?</b></p>
 <p>This &quot;feature&quot; of C is the one thing that doesn't impair memory
@@ -239,7 +317,26 @@ prohibit a longjmp to a place no longer on the stack.&nbsp; A future release may
 have more support for non-local control flow.</p>
       <p align="left"><b><a name="del_union"></a>What types are allowed for union members?</b><p>Currently,
 union members cannot contain pointers.&nbsp; You can have numeric types
-(including bit fields) and structs and tuples of allowable union-member types.</p>
+(including bit fields and enumerations), structs and tuples of allowable union-member
+types, and other unions.</p>
+<p><b><a name="del_voidstar"></a>Why can't I do anything with values of type void *?</b></p>
+<p>Because we cannot know the size of an object pointed to by a pointer of type
+void *, we prohibit derefencing the pointer or casting it to a different pointer
+type.&nbsp; To write code that works for all pointer types, use <a href="polymorphism.htm">type
+variables and polymorphism</a>.</p>
+<p><b><a name="io_how"></a>How do I call printf, scanf, and company?</b></p>
+<p>In Cyclone, printf, fprintf, scanf, and fscanf, work as they do in C except:</p>
+<ul>
+  <li>They are built-in primitives.&nbsp; You cannot use them as function
+    pointers.</li>
+  <li>The format-string argument must be a literal string.</li>
+  <li>The compiler checks that the arguments match the format-string
+    argument.&nbsp; A mismatch is a compile-time error.</li>
+  <li>The %s specifier is for arguments of type char ?.&nbsp; Because there is
+    an implicit coercion from char * to char ?, you usually won't notice.</li>
+  <li>The %s specifier currently does not permit variations (flags, width,
+    length, precision).</li>
+</ul>
       <p align="left"><b><a name="io_xprintf"></a>What is xprintf?</b><p align="left">xprintf
 is a primitive taking the same arguments as printf.&nbsp; Instead of writing the
 result to stdout, it returns a heap-allocated string containing what would have
@@ -252,12 +349,37 @@ first argument to printf (second to fprintf) must be a literal string (eg.
 that the remaining arguments have the right types and are in the right
 order.&nbsp; Hence you cannot say printf(s) where s is some array of characters.
 (Allowing such calls is unsafe because s may contain '%' characters.)
+      <p align="left"><b><a name="io_sscanf"></a>Is there sscanf?</b>
+      <p align="left">Not yet.
       <p align="left"><b><a name="io_cmdline"></a>How do I access command-line arguments?</b><p align="left">The
 type of main should be &quot;int main(int argc, char ?? argv)&quot;.&nbsp; (See
-&quot;what does int ? mean&quot;.)&nbsp; As in C, argc is the number of
+&quot;<a href="#types_size">what does int ? mean</a>&quot;.)&nbsp; As in C, argc is the number of
 command-line arguments and argv[i] is a string with the ith argument.&nbsp;
 Unlike C, argv and each element of argv carry bounds information.&nbsp; Note
-that argc is redundant -- it is always equal to argv.size.
+that argc is redundant -- it is always equal to argv.size.<p align="left"><b><a name="ptr_stack"></a>Why can't I pass a stack pointer to certain functions?</b><p align="left">Types
+of the form t* and t[128] refer to pointers in the heap, so formal parameters of
+these types indicate that actual parameters cannot be stack pointers.&nbsp;
+Parameters that can be stack pointers should use region-names to indicate
+this:&nbsp; In short, change the parameter type t[128] to t@`r {128} where `r is
+some identifier starting with a ` (backquote) that is distinct from the other
+type variables and region-names in the function prototype.&nbsp; See <a href="regions_and_effects.htm">Memory
+Management Via Regions</a> to learn what the `r stuff really means.<p align="left"><b><a name="ptr_stack2"></a>Why do I get an incomprehensible error when I assign a
+      local's address to a pointer variable?</b><p align="left">Types of the
+form t* are for pointers in the heap, so you cannot assign a stack pointer to a
+variable or formal parameter of type t*.&nbsp; If you want a local variable to
+hold a stack pointer, the easiest solution is to declare its type t*_ instead of
+t*.&nbsp; It can still only hold pointers into one local scope.&nbsp; (It can
+also hold heap pointers, but you will get a warning about an implicit
+cast.)&nbsp; For passing stack pointers to functions, see the previous
+question.&nbsp; See <a href="regions_and_effects.htm">Memory Management Via
+Regions</a> to learn what is really going on.<p align="left"><b><a name="ptr_arith"></a>How much pointer arithmetic can I do?</b><p align="left">On
+objects of type t?, you can add or subtract an int (including via
+increment/decrement), as in C.&nbsp; It is okay for the result to be outside the
+bounds of the object pointed to; it is a run-time error to <i>dereference</i>
+outside of the bounds.&nbsp; (The compiler inserts bounds information and a
+run-time check.&nbsp; An exception is thrown.)&nbsp; Currently, we do not
+support adding/subtracting ints to other pointer types.&nbsp; As in C, you can
+subtract two pointers of the same type; the type of the result is unsigned int.
 <p><b><a name="pointer_stringlit"></a>What is the type of a literal string?</b></p>
 <p>The type of &quot;foo&quot; is char @{4} (remember the trailing '\0').&nbsp;
 However, there are implicit casts from char @{4} to char @{2}, char *{4}, and

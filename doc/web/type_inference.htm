@@ -21,11 +21,11 @@ and more readable.&nbsp; For example,
 <p><font face="Courier New">_ x = malloc(sizeof(sometype_t));</font></p>
 <p>is a fine substitute for</p>
 <p><font face="Courier New">sometype_t @ x = malloc(sizeof(sometype_t));</font></p>
-<p>Of course, explicit types often make code more readable, so it is often
+<p>Of course, explicit types can make code more readable, so it is often
 better style not to use inference.</p>
 <p>Inference is even more useful because of Cyclone's advanced typing
 constructs.&nbsp; For example, it is much easier to write down _ than a type for
-a function pointer.&nbsp; Also, you can use it to omit explict regions, such as
+a function pointer.&nbsp; Also, you can use it to omit explicit regions, such as
 in the following:</p>
 <p style="line-height: 0"><font face="Courier New">void f() {</font></p>
 <p style="line-height: 0"><font face="Courier New">&nbsp; int x = 3;</font></p>
@@ -47,7 +47,34 @@ it should):</p>
   <li>As a part of an explicit type instantiation (eg. Foo&lt;_,_&gt;) where it
     is instantiating a region-name or effect-name.</li>
 </ul>
-<p>Note that _ can be used for part of a type.</p>
+<p>Note that _ can be used for part of a type.&nbsp; A silly example is $(_,int)
+= $(3,4);&nbsp; A more useful example is an explicit cast to a non-nullable
+pointer (to avoid a compiler warning).&nbsp; For example:</p>
+<p style="line-height: 0"><font face="Courier New">void f(some_big_type * x,
+some_big_type @ y) {</font></p>
+<p style="line-height: 0"><font face="Courier New">if(x != null) {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; y = (_ @) x;</font></p>
+<p style="line-height: 0"><font face="Courier New">}</font></p>
+<h3><b>Semantics</b></h3>
+<p>Except for the subtleties discussed below, using _ should not change the
+meaning of programs.&nbsp; However, it may cause a program not to type-check
+because the compiler no longer has the type information it needs at some point
+in the program.&nbsp; For example, the compiler rejects x-&gt;f if it does not
+know the type of x because the different struct types can have members named
+f.&nbsp;&nbsp;</p>
+<p>The compiler infers the types of expressions based on uses.&nbsp; For
+example, consider:</p>
+<p style="line-height: 0"><font face="Courier New">_ x = null;</font></p>
+<p style="line-height: 0"><font face="Courier New">x = g();</font></p>
+<p style="line-height: 0"><font face="Courier New">x-&gt;f;</font></p>
+<p>This code will type-check provided the return type of g is a pointer to a
+struct with a field named f.&nbsp; If the two statements were in the other
+order, the code would not type-check.&nbsp; Also, if g returned an int, the code
+would not type-check, even without the x-&gt;f expression, because the _ x =
+null constrains x to have a pointer type.</p>
+<p>However, the above discussion assumes that sequences of statements are
+type-checked in order.&nbsp; This is true, but <b>in general the type-checker's
+order is unspecified</b>.</p>
 <h3><b>Subtleties</b></h3>
 <p>In general, inference has subtle interactions with implicit casts (such as
 from t@ to t*) and constants that have multiple types (such as numeric
