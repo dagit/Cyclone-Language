@@ -124,6 +124,25 @@ function declarations are only allowed at top-level.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
+* SUPPORTING RE-ENTRANCY (so code works in the kernel):
+
+  - operations on fat pointers need to be atomic.
+  - operations on the heap region handle must be atomic
+    (there is no way for reentrant code to access other region handles, so
+    the heap handle could be treated specially; we could also generalize).
+  - the region/exception stack must be made "thread-local" (different
+    mechanisms are appropriate in different domains, i.e. POSIX threads
+    vs. user-level threads vs. the kernel).
+  - there is the issue with where clauses mentioned above
+
+* SUPPORTING CONCURRENCY/THREADS:
+
+  - do all of the stuff for re-entrancy, above.
+  - add synchronization primitives directly; i.e. locks.  Chances are we
+    have to do this for re-entrancy anyway.
+  - add the remaining thread primitives; i.e. port some/all of the POSIX
+    threads interface.
+
 * need to port more C libraries
 
 * should have some "intern C" or "unsafe_C" where we can escape
@@ -132,10 +151,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * need to be able to use inject on a single argument, not just on
   varargs.  This is important for args that are void * for example.
-
-* default array initializers within a function: e.g., int x[4];  Actually,
-  for bits-only things, we should only issue a warning if they're used
-  before being initialized.  
 
 * nested type declarations? nested exception declarations? nested using?
 
