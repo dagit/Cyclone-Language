@@ -25,7 +25,7 @@ test: xmlecho$(EXE)
 
 libxml.a: $(OBJS)
 	-rm -f $@
-	ar qcs $@ $^
+	ar rcs $@ $^
 
 csrc: $(CSRCS)
 

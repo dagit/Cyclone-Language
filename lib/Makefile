@@ -38,7 +38,7 @@ ifdef MS
 	lib /out:$@ $^
 else
 	-rm -f $@
-	ar qcs $@ $^
+	ar rcs $@ $^
 endif
 
 precore_c.h: precore.h $(CYCC)

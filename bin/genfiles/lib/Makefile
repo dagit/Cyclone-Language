@@ -11,7 +11,7 @@ all: $(CYCLIB)
 
 $(CYCLIB): $(O_LIBS) $(RUNTIME).o
 	-rm -f $@
-	ar qcs $@ $^
+	ar rcs $@ $^
 
 clean:
 	rm -f $(O_LIBS) $(RUNTIME).o $(CYCLIB) *~

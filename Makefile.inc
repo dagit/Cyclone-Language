@@ -1,17 +1,20 @@
 CC=gcc
 
-ifdef MS
+# Assume with Windows
+
 O := obj
 A := lib
 EXE := .exe
-else
-O := o
-A := a
-ifeq ($(OSTYPE),cygwin)
-  EXE := .exe
-else
-  EXE :=
-endif
+
+# If there's no sign of a Cygwin environment, it's unix
+ifndef MS
+  ifndef CYGWIN
+    ifneq ($(OSTYPE),cygwin)
+      O := o
+      A := a
+      EXE :=
+    endif
+  endif
 endif
 
 CYCLONE_LIBS:=arg\
