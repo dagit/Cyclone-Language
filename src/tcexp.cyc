@@ -2438,9 +2438,6 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcSizeof(te,loc,topt,t1); break;
   case &Offsetof_e(t1,n):
     t = tcOffsetof(te,loc,topt,t1,n); break;
-  case &Gentyp_e(_,_):
-    terr(loc, "gen() not in top-level initializer");
-    return;
   case &Deref_e(e1):
     t = tcDeref(te,loc,topt,e1); break;
   case &AggrMember_e(e1,f,*is_tagged,*is_read):

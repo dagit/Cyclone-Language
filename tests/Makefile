@@ -49,27 +49,6 @@ test_getopt$(EXE): test_getopt.o
 pcredemo$(EXE): pcredemo.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lpcre
 
-unsafe_cast.o: unsafe_cast.c
-	$(CC) -c $< -o $@
-
-typerep_test$(EXE): typerep_test.o 
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
-equiv.o: equiv.c
-	$(CC) -c $< -o $@
-
-reptest$(EXE):  reptest.o rep.o equiv.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
-genrep_write$(EXE):  genrep_write.o muttrep.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
-genrep_read$(EXE):  genrep_read.o muttrep.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
-genrep_test$(EXE):  genrep_test.o muttrep.o 
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS) -lxml
-
 # This takes care of non-machine-generated versions (the .cyc is already there)
 %.o : %.cyc
 	$(CYCC) $(CYCFLAGS) -c $< 
@@ -79,11 +58,11 @@ genrep_test$(EXE):  genrep_test.o muttrep.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], genrep_test genrep_read genrep_write hello bytes cyctest foo histogram test_getopt typeref typerep_test test_regions unique_test)\
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test)\
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) hello cyctest foo histogram merge_sort test_getopt
-	$(RM) test_regions genrep_write genrep_read genrep_test rep
-	$(RM) typerep_test unique_test
+	$(RM) test_regions
+	$(RM) unique_test
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks
 #	$(MAKE) clean -C compress/cacm
@@ -91,4 +70,3 @@ clean:
 	$(MAKE) clean -C shootout
 #	$(MAKE) clean -C smlng
 #	$(MAKE) clean -C tpop
-#	$(MAKE) clean -C misc

@@ -31,7 +31,7 @@
 #include "tc.h"
 #include <stdio.h>
 #include "tcdecl.h"
-#include "tcgenrep.h"
+
 using Core;
 using List;
 using Position;
@@ -897,9 +897,6 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
   list_t<decl_t,`H> last = NULL;
   
-  // FIX: Add dict to some environment so that typerep declarations get reused
-  Tcgenrep::typerep_dict_t dict = Tcgenrep::empty_typerep_dict();
-  
   for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
     decl_t d   = ds->hd;
     seg_t  loc = d->loc;
@@ -918,44 +915,6 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
 	vd->sc = ExternC;
-      if (vd->initializer != NULL) {
-	switch (vd->initializer->r) {
-	case &Gentyp_e(_,t):
-	  /* FIX: should pass in a dictionary and use that throughout
-	     typechecking to share generated declarations */
-	  let $(dict2,ds2,e) = Tcgenrep::tcGenrep(te,ge,loc,t,dict);
-	  dict = dict2;
-	  /* typecheck the generated declarations */
-	  tc_decls(te,ds2,in_externC,in_externCinclude,check_var_init,grgn,exports);
-	  /* replace the gentype expression with the generated one */
-	  vd->initializer = e;
-	  //printf("%s\n",decllist2string(List::list(d)));
-	  /* then typecheck the vardecl */
-	  tcVardecl(te,ge,loc,vd,check_var_init,in_externCinclude,exports);
-	  /* splice in the new declarations */
-	  /* this is tricky! */
-	  //	  printf("==============BEFORE=================\n%s\n====================BEFORE=====================\n",decllist2string(ds0));
-	  if(ds2 != NULL) {
-	    if (last != NULL) {
-	      imp_append(ds2,ds);
-	      last->tl = ds2;
-	    }
-	    else {
-	      struct List<decl_t,`H> tmp = List{.hd = ds->hd, .tl = ds->tl};
-	      ds->hd = ds2->hd;
-	      ds->tl = ds2->tl;
-	      ds2->hd = tmp.hd;
-	      ds2->tl = tmp.tl;
-	      imp_append(ds,ds2);
-	    }
-	  }
-	  /* continue the loop */
-	  //printf("==============AFTER=================\n%s\n====================AFTER=====================\n",decllist2string(ds0));
-	  continue;
-	default: break;
-	}
-      }
-      // catches the non gen() cases
       tcVardecl(te,ge,loc,vd,check_var_init,in_externCinclude,exports);
       break;
     case &Fn_d(fd):

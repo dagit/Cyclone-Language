@@ -856,12 +856,6 @@ void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
 
 #endif
 
-// jcheney: FIX temporary for testing marshaling
-/* Basically the id function, but has Cyclone type `a -> `b. */
-void *unsafe_cast(void *a) {
-  return a;
-}
-
 /******* for turning off gc warnings about blacklisted blocks *******/
 /* These type/macro defns are taken from gc/include/gc.h and must
    be kept in sync. */

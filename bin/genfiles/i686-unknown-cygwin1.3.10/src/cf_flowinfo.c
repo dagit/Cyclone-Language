@@ -921,11 +921,10 @@ int tag;void*f1;struct Cyc_Absyn_Exp*f2;int f3;enum Cyc_Absyn_Coercion f4;};stru
 Cyc_Absyn_Address_e_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_New_e_struct{
 int tag;struct Cyc_Absyn_Exp*f1;struct Cyc_Absyn_Exp*f2;};struct Cyc_Absyn_Sizeoftyp_e_struct{
 int tag;void*f1;};struct Cyc_Absyn_Sizeofexp_e_struct{int tag;struct Cyc_Absyn_Exp*
-f1;};struct Cyc_Absyn_Offsetof_e_struct{int tag;void*f1;void*f2;};struct Cyc_Absyn_Gentyp_e_struct{
-int tag;struct Cyc_List_List*f1;void*f2;};struct Cyc_Absyn_Deref_e_struct{int tag;
-struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AggrMember_e_struct{int tag;struct Cyc_Absyn_Exp*
-f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_AggrArrow_e_struct{int
-tag;struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_Subscript_e_struct{
+f1;};struct Cyc_Absyn_Offsetof_e_struct{int tag;void*f1;void*f2;};struct Cyc_Absyn_Deref_e_struct{
+int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AggrMember_e_struct{int tag;
+struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_AggrArrow_e_struct{
+int tag;struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_Subscript_e_struct{
 int tag;struct Cyc_Absyn_Exp*f1;struct Cyc_Absyn_Exp*f2;};struct Cyc_Absyn_Tuple_e_struct{
 int tag;struct Cyc_List_List*f1;};struct _tuple8{struct Cyc_Core_Opt*f1;struct Cyc_Absyn_Tqual
 f2;void*f3;};struct Cyc_Absyn_CompoundLit_e_struct{int tag;struct _tuple8*f1;struct
@@ -2227,7 +2226,7 @@ struct Cyc_List_List*Cyc_CfFlowInfo_reln_assign_var(struct _RegionHandle*rgn,
 struct Cyc_List_List*r,struct Cyc_Absyn_Vardecl*v,struct Cyc_Absyn_Exp*e){if(v->escapes)
 return r;r=Cyc_CfFlowInfo_reln_kill_var(rgn,r,v);{void*_tmp2E2=e->r;struct Cyc_Absyn_MallocInfo
 _tmp2E4;struct Cyc_Absyn_Exp*_tmp2E5;int _tmp2E6;_LL147: {struct Cyc_Absyn_Malloc_e_struct*
-_tmp2E3=(struct Cyc_Absyn_Malloc_e_struct*)_tmp2E2;if(_tmp2E3->tag != 35)goto
+_tmp2E3=(struct Cyc_Absyn_Malloc_e_struct*)_tmp2E2;if(_tmp2E3->tag != 34)goto
 _LL149;else{_tmp2E4=_tmp2E3->f1;_tmp2E5=_tmp2E4.num_elts;_tmp2E6=_tmp2E4.fat_result;
 if(_tmp2E6 != 1)goto _LL149;}}_LL148: malloc_loop: {void*_tmp2E7=_tmp2E5->r;struct
 Cyc_Absyn_Exp*_tmp2E9;void*_tmp2EB;struct Cyc_Absyn_Vardecl*_tmp2ED;void*_tmp2EF;
@@ -2683,7 +2682,7 @@ void*)({struct Cyc_Core_Impossible_struct*_tmp456=_cycalloc(sizeof(*_tmp456));
 _tmp456[0]=({struct Cyc_Core_Impossible_struct _tmp457;_tmp457.tag=Cyc_Core_Impossible;
 _tmp457.f1=({const char*_tmp458="non-unique path";_tag_dyneither(_tmp458,sizeof(
 char),16);});_tmp457;});_tmp456;}));_LL220: {struct Cyc_Absyn_AggrArrow_e_struct*
-_tmp447=(struct Cyc_Absyn_AggrArrow_e_struct*)_tmp430;if(_tmp447->tag != 24)goto
+_tmp447=(struct Cyc_Absyn_AggrArrow_e_struct*)_tmp430;if(_tmp447->tag != 23)goto
 _LL222;else{_tmp448=_tmp447->f1;_tmp449=_tmp447->f2;}}_LL221:{void*_tmp459=Cyc_Tcutil_compress((
 void*)((struct Cyc_Core_Opt*)_check_null(_tmp448->topt))->v);struct Cyc_Absyn_PtrInfo
 _tmp45B;void*_tmp45C;_LL22B: {struct Cyc_Absyn_PointerType_struct*_tmp45A=(struct
@@ -2696,11 +2695,11 @@ _tmp45E=_cycalloc(sizeof(*_tmp45E));_tmp45E[0]=({struct Cyc_Core_Impossible_stru
 _tmp45F;_tmp45F.tag=Cyc_Core_Impossible;_tmp45F.f1=({const char*_tmp460="anal_Rexp: AggrArrow ptr";
 _tag_dyneither(_tmp460,sizeof(char),25);});_tmp45F;});_tmp45E;}));_LL22A:;}
 _tmp44B=_tmp448;goto _LL223;_LL222: {struct Cyc_Absyn_Deref_e_struct*_tmp44A=(
-struct Cyc_Absyn_Deref_e_struct*)_tmp430;if(_tmp44A->tag != 22)goto _LL224;else{
+struct Cyc_Absyn_Deref_e_struct*)_tmp430;if(_tmp44A->tag != 21)goto _LL224;else{
 _tmp44B=_tmp44A->f1;}}_LL223: return Cyc_CfFlowInfo_unique_place_of_rec(r,_tmp44B,
 0,({struct Cyc_List_List*_tmp461=_region_malloc(r,sizeof(*_tmp461));_tmp461->hd=
 flds;_tmp461->tl=path;_tmp461;}));_LL224: {struct Cyc_Absyn_Subscript_e_struct*
-_tmp44C=(struct Cyc_Absyn_Subscript_e_struct*)_tmp430;if(_tmp44C->tag != 25)goto
+_tmp44C=(struct Cyc_Absyn_Subscript_e_struct*)_tmp430;if(_tmp44C->tag != 24)goto
 _LL226;else{_tmp44D=_tmp44C->f1;_tmp44E=_tmp44C->f2;}}_LL225: {void*_tmp462=Cyc_Tcutil_compress((
 void*)((struct Cyc_Core_Opt*)_check_null(_tmp44D->topt))->v);struct Cyc_Absyn_PtrInfo
 _tmp465;void*_tmp466;struct Cyc_Absyn_PtrAtts _tmp467;union Cyc_Absyn_Constraint*
@@ -2720,7 +2719,7 @@ _tmp46E));_tmp46E[0]=({struct Cyc_Core_Impossible_struct _tmp46F;_tmp46F.tag=Cyc
 _tmp46F.f1=({const char*_tmp470="unique place subscript -- bad type";
 _tag_dyneither(_tmp470,sizeof(char),35);});_tmp46F;});_tmp46E;}));_LL22F:;}
 _LL226: {struct Cyc_Absyn_AggrMember_e_struct*_tmp44F=(struct Cyc_Absyn_AggrMember_e_struct*)
-_tmp430;if(_tmp44F->tag != 23)goto _LL228;else{_tmp450=_tmp44F->f1;_tmp451=_tmp44F->f2;}}
+_tmp430;if(_tmp44F->tag != 22)goto _LL228;else{_tmp450=_tmp44F->f1;_tmp451=_tmp44F->f2;}}
 _LL227: if(Cyc_Absyn_is_union_type((void*)((struct Cyc_Core_Opt*)_check_null(
 _tmp450->topt))->v))(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
 _tmp471=_cycalloc(sizeof(*_tmp471));_tmp471[0]=({struct Cyc_Core_Impossible_struct

@@ -71,7 +71,6 @@
 #include "tc.h"
 #include <stdio.h>
 #include "tcdecl.h"
-#include "tcgenrep.h"
 #include <set.h>
 // cheat -- we know what positions are...
 namespace Position {
@@ -1485,7 +1484,6 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());
   case &Swap_e(e1,e2): impos("Swap_e");
-  case &Gentyp_e(_,_): impos("Gen");
   case &New_e(_,_): impos("New_e");
   case &Tuple_e(_): impos("Tuple_e");
   case &CompoundLit_e(_,_): impos("CompoundLit_e");

@@ -894,9 +894,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &New_e(_,_):
       fprintf(stderr,"Error: unexpected New_e\n");
       exit(1); return;
-    case &Gentyp_e(_,_):
-      fprintf(stderr,"Error: unexpected Gentyp_e\n");
-      exit(1); return;
     case &Tuple_e(_):
       fprintf(stderr,"Error: unexpected Tuple_e\n");
       exit(1); return;

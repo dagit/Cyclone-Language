@@ -140,7 +140,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("fallthru", FALLTHRU, false),
   $("float", FLOAT, true),
   $("for", FOR, true),
-  $("__gen", GEN, false),
   $("goto", GOTO, true),
   $("if", IF, true),
   $("inline", INLINE, true),

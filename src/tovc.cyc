@@ -178,7 +178,6 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 
   case &Sizeoftyp_e(_): 
   case &Offsetof_e(_,_):
-  case &Gentyp_e(_,_):  
   case &Enum_e(_,_,_):   return;
 
   case &UnresolvedMem_e(_,dles):
@@ -349,7 +348,6 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
 
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
-  case &Gentyp_e(_,_):  
   case &Enum_e(_,_,_): return;
 
   case &UnresolvedMem_e(_,dles):
@@ -462,7 +460,6 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
-  case &Gentyp_e(_,_):   
   case &Enum_e(_,_,_): return;
 
   case &UnresolvedMem_e(_,dles):

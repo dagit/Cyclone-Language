@@ -586,9 +586,6 @@ exp_t sizeofexp_exp(exp_t e, seg_t loc) {
 exp_t offsetof_exp(type_t t, offsetof_field_t of, seg_t loc) {
   return new_exp(new Offsetof_e(t,of), loc);
 }
-exp_t gentyp_exp(list_t<tvar_t,`H> tvs, type_t t, seg_t loc) { 
-  return new_exp(new Gentyp_e(tvs,t), loc); 
-}
 exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
 exp_t aggrmember_exp(exp_t e, field_name_t n, seg_t loc) {
   return new_exp(new AggrMember_e(e,n,false,false), loc); 

@@ -896,11 +896,10 @@ int tag;void*f1;struct Cyc_Absyn_Exp*f2;int f3;enum Cyc_Absyn_Coercion f4;};stru
 Cyc_Absyn_Address_e_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_New_e_struct{
 int tag;struct Cyc_Absyn_Exp*f1;struct Cyc_Absyn_Exp*f2;};struct Cyc_Absyn_Sizeoftyp_e_struct{
 int tag;void*f1;};struct Cyc_Absyn_Sizeofexp_e_struct{int tag;struct Cyc_Absyn_Exp*
-f1;};struct Cyc_Absyn_Offsetof_e_struct{int tag;void*f1;void*f2;};struct Cyc_Absyn_Gentyp_e_struct{
-int tag;struct Cyc_List_List*f1;void*f2;};struct Cyc_Absyn_Deref_e_struct{int tag;
-struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AggrMember_e_struct{int tag;struct Cyc_Absyn_Exp*
-f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_AggrArrow_e_struct{int
-tag;struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_Subscript_e_struct{
+f1;};struct Cyc_Absyn_Offsetof_e_struct{int tag;void*f1;void*f2;};struct Cyc_Absyn_Deref_e_struct{
+int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_AggrMember_e_struct{int tag;
+struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_AggrArrow_e_struct{
+int tag;struct Cyc_Absyn_Exp*f1;struct _dyneither_ptr*f2;int f3;int f4;};struct Cyc_Absyn_Subscript_e_struct{
 int tag;struct Cyc_Absyn_Exp*f1;struct Cyc_Absyn_Exp*f2;};struct Cyc_Absyn_Tuple_e_struct{
 int tag;struct Cyc_List_List*f1;};struct _tuple7{struct Cyc_Core_Opt*f1;struct Cyc_Absyn_Tqual
 f2;void*f3;};struct Cyc_Absyn_CompoundLit_e_struct{int tag;struct _tuple7*f1;struct
@@ -1451,12 +1450,12 @@ if((_tmpEE.String_c).tag != 7)goto _LL6D;_tmpEF=(struct _dyneither_ptr)(_tmpEE.S
 _LL6C: _tmpD2=(_tmpA9->type=Cyc_Absyn_array_typ(_tmpE7,_tmpE8,(struct Cyc_Absyn_Exp*)
 Cyc_Absyn_uint_exp(_get_dyneither_size(_tmpEF,sizeof(char)),0),_tmpEA,_tmpEB));
 goto _LL6A;_LL6D: {struct Cyc_Absyn_Comprehension_e_struct*_tmpF0=(struct Cyc_Absyn_Comprehension_e_struct*)
-_tmpEC;if(_tmpF0->tag != 29)goto _LL6F;else{_tmpF1=_tmpF0->f2;}}_LL6E: _tmpD2=(
+_tmpEC;if(_tmpF0->tag != 28)goto _LL6F;else{_tmpF1=_tmpF0->f2;}}_LL6E: _tmpD2=(
 _tmpA9->type=Cyc_Absyn_array_typ(_tmpE7,_tmpE8,(struct Cyc_Absyn_Exp*)_tmpF1,
 _tmpEA,_tmpEB));goto _LL6A;_LL6F: {struct Cyc_Absyn_UnresolvedMem_e_struct*_tmpF2=(
-struct Cyc_Absyn_UnresolvedMem_e_struct*)_tmpEC;if(_tmpF2->tag != 37)goto _LL71;
+struct Cyc_Absyn_UnresolvedMem_e_struct*)_tmpEC;if(_tmpF2->tag != 36)goto _LL71;
 else{_tmpF3=_tmpF2->f2;}}_LL70: _tmpF5=_tmpF3;goto _LL72;_LL71: {struct Cyc_Absyn_Array_e_struct*
-_tmpF4=(struct Cyc_Absyn_Array_e_struct*)_tmpEC;if(_tmpF4->tag != 28)goto _LL73;
+_tmpF4=(struct Cyc_Absyn_Array_e_struct*)_tmpEC;if(_tmpF4->tag != 27)goto _LL73;
 else{_tmpF5=_tmpF4->f1;}}_LL72: _tmpD2=(_tmpA9->type=Cyc_Absyn_array_typ(_tmpE7,
 _tmpE8,(struct Cyc_Absyn_Exp*)Cyc_Absyn_uint_exp((unsigned int)((int(*)(struct Cyc_List_List*
 x))Cyc_List_length)(_tmpF5),0),_tmpEA,_tmpEB));goto _LL6A;_LL73:;_LL74: goto _LL6A;

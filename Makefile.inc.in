@@ -44,7 +44,6 @@ CYCLONE_LIBS:=arg\
         lexing\
         lineno\
         list\
-	marshal\
         position\
         pp\
 	printf\
@@ -57,7 +56,6 @@ CYCLONE_LIBS:=arg\
         splay\
         string\
 	tmp\
-        typerep\
         xarray
 
 CYCLONE_H:=arg.h\
@@ -78,7 +76,6 @@ CYCLONE_H:=arg.h\
 	lexing.h\
 	lineno.h\
 	list.h\
-	marshal.h\
 	position.h\
 	positionrep.h\
 	pp.h\
@@ -92,7 +89,6 @@ CYCLONE_H:=arg.h\
 	strings.h\
 	sys/cioctl.h\
 	sys/ioctl.h\
-	typerep.h\
 	xarray.h
 
 CYCLONE_SRCS:=absyn\
@@ -106,7 +102,6 @@ CYCLONE_SRCS:=absyn\
          tcstmt\
          tcpat\
          tcexp\
-	 tcgenrep\
 	 formatstr\
          evexp\
          tc\
@@ -131,7 +126,6 @@ CYCDOC_SRCS:=cycdoc\
 	tcpat\
         tc\
 	tcdecl\
-	tcgenrep\
 	new_control_flow\
 	cf_flowinfo\
 	formatstr\
@@ -145,7 +139,6 @@ BUILDLIB_SRCS:=buildlib\
 	absynpp\
 	tc\
 	tcdecl\
-	tcgenrep\
 	tcexp\
 	tcstmt\
 	formatstr\
@@ -159,7 +152,7 @@ BUILDLIB_SRCS:=buildlib\
 
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB
-CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h xml/xmlmarshal.h
+CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h
 endif
 
 # Makefiles assume this is only one file, but they could be changed.

@@ -4321,7 +4321,6 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
   case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
-  case &Gentyp_e(_,_):
   case &CompoundLit_e(_,_):
   case &Comprehension_e(_,_,_,_):
   case &Array_e(_):
@@ -4635,7 +4634,6 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Sizeoftyp_e(_): 
   case &Sizeofexp_e(_): 
   case &Offsetof_e(_,_):
-  case &Gentyp_e(_,_):  
   case &Enum_e(_,_,_):  
   case &AnonEnum_e(_,_,_): return true;
   case &Var_e(qv,b):

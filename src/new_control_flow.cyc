@@ -906,7 +906,6 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): // FIX: ?? (first field guaranteed zero?) 
-  case &Gentyp_e(_,_):  // FIX: distinguish zero/non-zero enum tags
   case &AnonEnum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
   case &Enum_e(_,_,_): return $(inflow, fenv->unknown_all);
 

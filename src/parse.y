@@ -1017,7 +1017,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE XTUNION TUNION
 %token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
+%token NOZEROTERM_QUAL ZEROTERM_QUAL REGION_QUAL PORTON PORTOFF DYNREGION_T
 %token ALIAS NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
@@ -2584,7 +2584,7 @@ unary_pattern:
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
    { $$=^$(exp_pat(offsetof_exp((*$3)[2],
                                 new TupleIndex($5[1]), LOC(@1,@6)))); }
-// disallow GEN, malloc, rmalloc, and cmalloc -- not constant expressions
+// disallow malloc, rmalloc, and cmalloc -- not constant expressions
 ;
 
 postfix_pattern:
@@ -2866,11 +2866,6 @@ unary_expression:
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
    { $$=^$(offsetof_exp((*$3)[2],new TupleIndex($5[1]), LOC(@1,@6))); }
-/* Cyc: __gen for generic, type-based marshallers */
-| GEN type_params_opt '(' type_name ')'      
-   { let loc = LOC(@1,@5);
-     let tvs = List::map_c(typ2tvar,loc,$2);
-     $$=^$(gentyp_exp(tvs, (*$4)[2], LOC(@1,@5))); }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
 | MALLOC '(' expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
