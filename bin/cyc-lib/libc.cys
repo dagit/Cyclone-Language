@@ -1751,7 +1751,6 @@ NO_RECOVERY
 TRY_AGAIN
 socklen_t
 servent
-hostent
 protoent
 }
 epilogue {
@@ -1762,7 +1761,24 @@ epilogue {
   #endif
 }
 epilogue {
+  // FIX:  Need to put in by hand so that we can translate
+  // to struct in_addr, rather than the prescribed char *.
+  // We thus bake in the fact that addresses are 4 bytes long; 
+  // i.e. that the length is assumed to be 4.  If this is not
+  // the case, then we are in trouble.
+  struct hostent {
+    char *h_name;
+    char **h_aliases;
+#if defined(__CYGWIN32__) || defined(__CYGWIN__)
+      short h_addrtype;
+      short h_length; // always 4
+#else
+      int h_addrtype;
+      int h_length;   // always 4
+#endif
+    struct in_addr **h_addr_list;
 #define h_addr h_addr_list[0]
+  };
 }
 epilogue getservbyname {
   // FIX: might this be unsafe?  In particular, we might either end up

@@ -355,10 +355,10 @@ Cyc_Std_IPPORT_RJE  = 77,Cyc_Std_IPPORT_FINGER  = 79,Cyc_Std_IPPORT_TTYLINK  = 8
 Cyc_Std_IPPORT_SUPDUP  = 95,Cyc_Std_IPPORT_EXECSERVER  = 512,Cyc_Std_IPPORT_LOGINSERVER
  = 513,Cyc_Std_IPPORT_CMDSERVER  = 514,Cyc_Std_IPPORT_EFSSERVER  = 520,Cyc_Std_IPPORT_BIFFUDP
  = 512,Cyc_Std_IPPORT_WHOSERVER  = 513,Cyc_Std_IPPORT_ROUTESERVER  = 520,Cyc_Std_IPPORT_RESERVED
- = 1024,Cyc_Std_IPPORT_USERRESERVED  = 5000};struct Cyc_Std_hostent{const char*
-h_name;char**h_aliases;short h_addrtype;short h_length;char**h_addr_list;};struct
-Cyc_Std_servent{char*s_name;char**s_aliases;short s_port;char*s_proto;};struct Cyc_Std_protoent{
-char*p_name;char**p_aliases;short p_proto;};enum Cyc_Std___anonymous_enum_30__{
+ = 1024,Cyc_Std_IPPORT_USERRESERVED  = 5000};struct Cyc_Std_servent{char*s_name;
+char**s_aliases;short s_port;char*s_proto;};struct Cyc_Std_protoent{char*p_name;
+char**p_aliases;short p_proto;};struct Cyc_Std_hostent{char*h_name;char**h_aliases;
+short h_addrtype;short h_length;struct Cyc_Std_in_addr**h_addr_list;};enum Cyc_Std___anonymous_enum_30__{
 Cyc_Std_IPPROTO_IP  = 0,Cyc_Std_IPPROTO_ICMP  = 1,Cyc_Std_IPPROTO_IGMP  = 2,Cyc_Std_IPPROTO_IPIP
  = 4,Cyc_Std_IPPROTO_TCP  = 6,Cyc_Std_IPPROTO_EGP  = 8,Cyc_Std_IPPROTO_PUP  = 12,
 Cyc_Std_IPPROTO_UDP  = 17,Cyc_Std_IPPROTO_IDP  = 22,Cyc_Std_IPPROTO_RAW  = 255,Cyc_Std_IPPROTO_MAX
