@@ -77,6 +77,11 @@ extern graph_t<`a> tc(graph_t<`a> g);
       node [s] to a node [t] in [tc(g)] iff [s] can reach [t] by one
       or more edges in [g].  Note that [tc(g)] is not necessarily
       reflexive. */
+extern graph_t<`a> tkernel(graph_t<`a> g);
+  /** [tkernel(g)] returns the transitive kernel of graph [g]: the
+      nodes of [tkernel(g)] are the nodes of [g], and the edges
+      [tkernel(g)] are a minimal subset of the edges of [g] such that
+      [tc(tkernel(g))] is the same as [tc(g)]. */
 extern List::list_t<`a> tsort(graph_t<`a> g);
   /** [tsort(g)] returns a list of the source nodes of [g], in
       topological order.  That is, if [s] can reach [t] by one or more

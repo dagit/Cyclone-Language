@@ -191,6 +191,27 @@ graph_t<`a> tc_slow(graph_t<`a> g) {
   return result;
 }
 
+/* Compute the transitive kernel of a graph.  The transitive kernel is
+   a graph with the same nodes and with a subset of the edges, such
+   that the transitive closure of the kernel is the same as the
+   transitive closure of the original graph. */
+graph_t<`a> tkernel(graph_t<`a> g) {
+  let cmp = g.rel;
+  let closure = empty(cmp);
+  let result = empty(cmp);
+  for (let edges = Dict::to_list(g); edges; edges = edges->tl) {
+    let &$(source,targets) = edges->hd;
+    while (!Set::is_empty(targets)) {
+      let target = Set::choose(targets);
+      targets = Set::delete(targets,target);
+      if (is_edge(closure,source,target)) continue;
+      closure = add_edgeTc(closure,source,target);
+      result = add_edge(result,source,target);
+    }
+  }
+  return result;
+}
+
 /* A more efficient transitive closure algorithm, based on Esko
    Nuutila, "An efficient transitive closure algorithm for cyclic
    digraphs," Information Processing Letters 52 (1994) 207-213.
