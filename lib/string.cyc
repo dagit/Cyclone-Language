@@ -291,7 +291,7 @@ string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
 string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   // Range checking
   let destSz = size(dest);
-  let srcSz = size(src);
+  let srcSz  = size(src);
   if (destOfs < 0)
     throw InvalidArg("String::zstrncpy");
   if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))

@@ -13,21 +13,21 @@ namespace Absyn;
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the
 // second 
-static int strlist_cmp(list<string> ss1,list<string> ss2) 
+static int zstrlist_cmp(list<string> ss1,list<string> ss2) 
 {
   if (ss1 == null) return (ss2 == null) ? 0 : -1;
   if (ss2 == null) return 1;
-  int i = strcmp(ss1->hd,ss2->hd);
+  int i = zstrcmp(ss1->hd,ss2->hd);
   if (i != 0) return i;
-  else return strlist_cmp(ss1->tl,ss2->tl);
+  else return zstrlist_cmp(ss1->tl,ss2->tl);
 }
 int varlist_cmp(list<var> vs1, list<var> vs2) {
-  return strlist_cmp(vs1,vs2);
+  return zstrlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar q1, qvar q2) {
-  int i = strlist_cmp(q1[0],q2[0]);
+  int i = zstrlist_cmp(q1[0],q2[0]);
   if (i != 0) return i;
-  else return strcmp(q1[1],q2[1]);
+  else return zstrcmp(q1[1],q2[1]);
 }
 
 static int new_type_counter = 0;
@@ -444,7 +444,7 @@ $(tqual,typ) * lookup_struct_field(structdecl sd, var v) {
     return null;
   for(let fs = sd->fields->v; fs != null; fs = fs->tl) {
     let &$(name,tq,t) = fs->hd;
-    if (String::strcmp(name,v) == 0)
+    if (String::zstrcmp(name,v) == 0)
       return &$(tq,t);
   }
   return null;

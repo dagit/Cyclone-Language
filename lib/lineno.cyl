@@ -40,12 +40,12 @@ static Opt_t<$(string,int)@> parse_linedef(string line) {
     while (i < size(line) && (line[i] < '0' || line[i] > '9')) ++i;
     int j = i;
     while (j < size(line) && line[j] >= '0' && line[j] <= '9') ++j;
-    if (i == size(line)) return null; /* if there's no number*/
+    if (i == size(line)) return null; // if there's no number
     int number = int_of_string(substring(line,i,j-i));
     while (j < size(line) && line[j] != '"') ++j;
     int k = ++j;
     while (k < size(line) && line[k] != '"') ++k;
-    if (j == size(line) || k == size(line)) return null; /* if there's no name*/
+    if (j == size(line) || k == size(line)) return null; // if there's no name
     string fname = substring(line,j,k-j);
 
     return &Opt(&$(fname,number));

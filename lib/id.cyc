@@ -58,7 +58,7 @@ string id_to_source(Id x) { return(x->s); }
 
 int id_compare(Id x1,Id x2) {
   if (x1->i == x2->i)
-    return(String::strcmp(x1->s,x2->s));
+    return(String::zstrcmp(x1->s,x2->s));
   else if (x1->i < x2->i) return(-1);
   else return(1);
 }

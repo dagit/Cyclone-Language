@@ -33,7 +33,6 @@ CYCLONE_SRCS=absyn\
          tcpat\
          tcexp\
          evexp\
-	 tcwire\
          tc\
          toc\
          cyclone

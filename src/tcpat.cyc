@@ -337,7 +337,7 @@ static int compare_con(con_t c1, con_t c2) {
   switch (c1->name) {
   case Name_v(n1):
     switch (c2->name) {
-    case Name_v(n2): return String::strcmp(n1,n2);
+    case Name_v(n2): return String::zstrcmp(n1,n2);
     case Int_v(_):   return -1;
     }
   case Int_v(i1):
@@ -450,7 +450,7 @@ static simple_pat_t compile_pat(pat p) {
 	let &$(dl,p) = dlps0->hd;
 	switch (dl) {
 	case &cons{.hd=FieldName(f), .tl=null}: 
-	  if(String::strcmp(f,fields->hd[0]) == 0) {
+	  if(String::zstrcmp(f,fields->hd[0]) == 0) {
 	    ps = &cons(compile_pat(p),ps);
 	    found = true;
 	  }

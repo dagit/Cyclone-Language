@@ -281,7 +281,7 @@ void unify_it(typ t1, typ t2) {
   case $(VoidType,VoidType): return;
 
   case $(VarType(x),VarType(y)):
-    if(String::strcmp(x,y) == 0) return;
+    if(String::zstrcmp(x,y) == 0) return;
     break;
 
   case $(StructType(nopt2,ts2), StructType(nopt1,ts1)): 
@@ -636,7 +636,7 @@ static $(tqual,typ)@ flatten_typ_f(list<$(var,typ)@> inst,
 static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   t1 = compress(t1);
   switch (t1) {
-  case VoidType: return null;
+  case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts):
     let n = tdnopt->v;
@@ -684,10 +684,8 @@ static bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
   list<$(tqual,typ)@> tqs2 = flatten_typ(te,t2);
   for (; tqs2 != null; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
     if (tqs1 == null) return false;
-    tqual tq1 = tqs1->hd[0];
-    tqual tq2 = tqs2->hd[0];
-    typ t1a = tqs1->hd[1];
-    typ t2a = tqs2->hd[1];
+    let &$(tq1,t1a) = tqs1->hd;
+    let &$(tq2,t2a) = tqs2->hd;
     if (tq2->q_const && subtype(te,assume,t1a,t2a)) continue;
     else if (unify(t1a,t2a)) continue;
     else return false;
@@ -721,8 +719,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
       case FixedArray(e): return (eval_const_uint_exp(e) == 1);
       default: return true;
       }
-    default:
-      return false;
+    default: return false;
     }
   case ArrayType(t1a,tq1a,ak1a):
     switch (t2) {
@@ -754,8 +751,8 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
 void unchecked_cast(tenv te, exp e, typ t) {
   if (!unify(e->topt->v,t)) {
-    exp inner = copy_exp(e);
-    e->r = Cast_e(t,inner);
+    let inner = copy_exp(e);
+    e->r    = Cast_e(t,inner);
     e->topt = &Opt(t);
   }
 }
@@ -909,7 +906,7 @@ extern list<typ> substs(list<$(var,typ)@> inst, list<typ> ts);
 typ substitute(list<$(var,typ)@> inst, typ t) {
   switch (compress(t)) {
   case VarType(v):
-    try return List::assoc_cmp(String::strcmp,inst,v);
+    try return List::assoc_cmp(String::zstrcmp,inst,v);
     catch {case Not_found: return t;}
   case StructType(no,ts):      return StructType(no,substs(inst,ts));
   case EnumType(no,ts):        return EnumType(no,substs(inst,ts));
@@ -1067,7 +1064,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case VoidType:       break;
   case Evar(k,topt,i): break;
   case VarType(tv):
-    if (!List::mem(String::strcmp,bound_vars,tv)) 
+    if (!List::mem(String::zstrcmp,bound_vars,tv)) 
       terr(loc,xprintf("unbound type variable %s",tv));
     break;
   case EnumType(tdnopt,targs):
@@ -1221,8 +1218,8 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
 }
 
 Set<var> repeated_vars(list<var> vs) {
-  Set<var> seen     = Set::empty(String::strcmp);
-  Set<var> repeated = Set::empty(String::strcmp);
+  Set<var> seen     = Set::empty(String::zstrcmp);
+  Set<var> repeated = Set::empty(String::zstrcmp);
   for (; vs != null; vs = vs->tl) {
     if (Set::member(seen,vs->hd))
       repeated = Set::insert(repeated,vs->hd);      
@@ -1246,13 +1243,13 @@ $($(field_name,tqual,typ)@,list<$(field_name,tqual,typ)@>)@
 remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
   if (fs == null) 
     throw MissingField;
-  if (String::strcmp(f,fs->hd[0]) == 0)
+  if (String::zstrcmp(f,fs->hd[0]) == 0)
     return (&$(fs->hd,fs->tl));
   let orig = fs;
   let prev = fs;
   fs = fs->tl;
   while (fs != null) {
-    if (String::strcmp(f,fs->hd[0]) == 0) {
+    if (String::zstrcmp(f,fs->hd[0]) == 0) {
       prev->tl = fs->tl;
       return(&$(fs->hd,orig));
     } else {

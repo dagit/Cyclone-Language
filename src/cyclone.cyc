@@ -87,6 +87,7 @@ void compile_file(string filename) {
   tds = Parse::parse_file(f);
   fprintf(cyc_stderr,"Parsing completed\n");
   fflush(cyc_stderr);
+  // typecheck
   if (tds != null && *tc) try {
     Absynpp::expand_typedefs = ! *noexpand;
     Tc::tc(Tcenv::tc_init(),tds);
@@ -95,19 +96,18 @@ void compile_file(string filename) {
   } catch {
   case Tcutil::TypeErr: 
     fprintf(cyc_stderr,"Type error!\n");
-    fflush(cyc_stderr);
     compile_failure=true;
     break;
   case Dict::Absent:
     fprintf(cyc_stderr,"Dict::Absent occurred during type checking!\n");
-    fflush(cyc_stderr);
     compile_failure=true;
     break;
   }
-  if (*toc) {
-    tds = Toc::toc(tds); // translate to C
-  }
-  if (tds != null && *pp) {
+  // translate to C
+  if (*toc && !compile_failure)
+    tds = Toc::toc(tds); 
+  // print
+  if (tds != null && !compile_failure && *pp) {
     Absynpp::expand_typedefs = ! *noexpand;
     if (*toc) 
       printf("#include \"cyc_include.h\"\n\n");

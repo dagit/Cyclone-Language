@@ -228,7 +228,7 @@ static void only_vardecl(list<string> params,decl x) {
     // for sanity-checking of old-style parameter declarations
     bool found = false;
     for(; params != null; params = params->tl)
-      if(strcmp(vd->name[1], params->hd)==0) {
+      if(zstrcmp(vd->name[1], params->hd)==0) {
 	found = true;
 	//	break; // DEF ASSIGN BROKEN -- THINKS BREAKS SWITCH!
       }
@@ -260,7 +260,7 @@ static $(Opt_t<var>,tqual,typ)@ get_param_type($(list<decl>,segment)@ env,
   case Var_d(vd):
     if (vd->name[0] != null)
       err("module name not allowed on parameter",loc);
-    if (strcmp(vd->name[1],x)==0)
+    if (zstrcmp(vd->name[1],x)==0)
       // Fix: cast needed here
       return &$((Opt_t<var>)&Opt(vd->name[1]),vd->tq,vd->type);
     else return get_param_type(&$(tdl->tl,loc),x);

@@ -28,7 +28,7 @@ using Tcexp;
 using Tcpat;
 
 static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
-  Set<var> vs = Set::empty(String::strcmp);
+  Set<var> vs = Set::empty(String::zstrcmp);
   for (; x != null; x = x->tl)
     vs = Set::insert(vs,x->hd->name[1]);
   Set<var> shadowed = Set::intersect(get_unassigned(te),vs);

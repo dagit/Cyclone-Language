@@ -568,7 +568,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
   typ pstrt_typ = nullableptr_t(strt_typ,empty_tqual());
   if (toplevel) {
     // t a[sz] = e;
-    // struct tagged_arrayt = {sz, a};
+    // struct tagged_array b = {sz, a};
     // &b;
     typ     a_typ   = ArrayType(elt_typ,empty_tqual(),FixedArray(sz));
     vardecl vda     = static_vardecl(a,a_typ,&Opt(new_exp(e->r,DL)));
@@ -590,7 +590,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
     s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"contents",DL),
 			     var_exp(a,DL),DL),s,DL);
     s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"sz",DL),
-			     signed_int_exp(szvalue,DL),DL),s,DL);
+			     uint_exp(szvalue,DL),DL),s,DL);
     exp binit = cast_exp(pstrt_typ,malloc_exp(sizeof_exp(strt_typ,DL)),DL);
     s = declare_stmt(b,pstrt_typ,&Opt(binit),s,DL);
     s = declare_stmt(a,t,&Opt(cast_exp(t,e,DL)),s,DL);
@@ -2074,7 +2074,7 @@ static void stmt_to_c(env nv, stmt s) {
       let e_typ = typ_to_c(exn_t);
       e_exp->topt = &Opt(e_typ);
       nv = add_varmap(nv,e,e_exp);
-      qvar h = temp_var();
+      let h     = temp_var();
       let h_exp = var_exp(h,DL);
       let h_typ = nullableptr_t(strct("_handler_cons"),empty_tqual());
       let setjmp_exp      = var_exp(&$(null,(string)"setjmp"),DL);
@@ -2127,8 +2127,8 @@ static void fndecl_to_c(env nv, fndecl f) {
 #ifdef DEBUG
   warn(f->body->loc,xprintf("translating %s",qvar2string(f->name)));
 #endif DEBUG
-  f->name = collapse_qvar(f->name);
-  f->tvs = null;
+  f->name     = collapse_qvar(f->name);
+  f->tvs      = null;
   f->ret_type = typ_to_c(f->ret_type);
   for (let args=f->args; args != null; args = args->tl) {
     args->hd[2] = typ_to_c(args->hd[2]);
@@ -2142,7 +2142,7 @@ static void fndecl_to_c(env nv, fndecl f) {
 static scope scope_to_c(scope s) {
   switch (s) {
   case Abstract: return Public;
-  default: return s;
+  default:       return s;
   }
 }
 
@@ -2150,7 +2150,8 @@ static scope scope_to_c(scope s) {
 Opt_t<Dict::Dict<var,structdecl>> structs_so_far = null;
 static void structdecl_to_c(structdecl s) {
   let n = collapse_qvar(s->name->v);
-  if (structs_so_far == null) structs_so_far = &Opt(Dict::empty(String::strcmp));
+  if (structs_so_far == null) structs_so_far = 
+				&Opt(Dict::empty(String::zstrcmp));
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(structs_so_far->v, n[1]);
   if (dopt == null) {
@@ -2168,7 +2169,7 @@ static void structdecl_to_c(structdecl s) {
     // C does not like extern or static on struct declarations -- this avoids
     // a gcc warning
     (s->sc == Extern || s->sc == Static) ? Public : scope_to_c(s->sc);
-  s->tvs = null;
+  s->tvs  = null;
   s->name = &Opt(n);
   if (s->fields != null) {
     if (seen_defn_before) 
@@ -2217,7 +2218,8 @@ static void structdecl_to_c(structdecl s) {
 static Opt_t<Dict::Dict<var,enumdecl>> enums_so_far = null;
 static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
   let n = collapse_qvar(ed->name->v);
-  if (enums_so_far == null) enums_so_far = &Opt(Dict::empty(String::strcmp));
+  if (enums_so_far == null) 
+    enums_so_far = &Opt(Dict::empty(String::zstrcmp));
   bool seen_before;
   bool seen_defn_before;
   let dopt = Dict::lookup_opt(enums_so_far->v, n[1]);
@@ -2328,22 +2330,21 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
     res = &cons(new_decl(Typedef_d(td),DL),res);
   } else {
     if (xenums_so_far == null) 
-      xenums_so_far = &Opt(Dict::empty(String::strcmp));
+      xenums_so_far = &Opt(Dict::empty(String::zstrcmp));
     for (let fs = xd->fields; fs != null; fs = fs->tl) {
       enumfield f = fs->hd;
       if (f->tag != null) unimp("xenum:  can't deal with explicit tags");
-      string fn = collapse_qvar(f->name)[1];
-      let sz_exp = signed_int_exp(size(fn) + 1,DL);
-      let tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
+      string fn      = collapse_qvar(f->name)[1];
+      let    sz_exp  = uint_exp(size(fn),DL);
+      let    tag_typ = ArrayType(uchar_t,empty_tqual(),FixedArray(sz_exp));
       Opt_t<exp> initopt = null;
-      if (xd->sc != Extern) {
+      if (xd->sc != Extern) 
 	initopt = &Opt(string_exp(fn,DL));
-      }
       let tag_decl = &Vardecl{.sc = xd->sc, 
-                            .name = collapse_qvar_tag(f->name,"_tag"),
-                            .tq = empty_tqual(), .type = tag_typ,
-                            .initializer = initopt,
-                            .shadow = 0};
+			      .name = collapse_qvar_tag(f->name,"_tag"),
+			      .tq = empty_tqual(), .type = tag_typ,
+			      .initializer = initopt,
+			      .shadow = 0};
       res = &cons(new_decl(Var_d(tag_decl),DL),res);
 
       bool seen_before;
@@ -2394,8 +2395,8 @@ static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
   typ t = topt->v;
   exp_to_c(nv,e);
   qvar x = temp_var();
-  var succ_lab = fresh_label();
-  var fail_lab = exhaust ? succ_lab : fresh_label();
+  var  succ_lab = fresh_label();
+  var  fail_lab = exhaust ? succ_lab : fresh_label();
   let $(nv,vars,test_stmt) = 
     xlate_pat(nv, t, var_exp(x,DL),address_exp(var_exp(x,DL),DL),p,
 	      succ_lab, fail_lab, null);

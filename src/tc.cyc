@@ -60,7 +60,7 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
 			      string v) {
   segment loc = f1->loc;
   // must have same name
-  if (String::strcmp(f1->name[1],f2->name[1]) != 0)
+  if (String::zstrcmp(f1->name[1],f2->name[1]) != 0)
     terr(loc,xprintf("redeclaration of %s %s: field name mismatch %s != %s",
 		     t, v, f1->name[1], f2->name[1]));
   // must have same tag
@@ -284,7 +284,7 @@ static void tcStructdecl(tenv te, genv ge, segment loc, structdecl sd) {
     list<field_name> prev_fields = null;
     for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
       let f = fs->hd;
-      if (List::mem(String::strcmp,prev_fields,f[0]))
+      if (List::mem(String::zstrcmp,prev_fields,f[0]))
 	terr(loc,xprintf("duplicate field %s in struct",f[0]));
       prev_fields = &cons(f[0],prev_fields);
       check_valid_type(loc,te,tvs,f[2]);
@@ -327,7 +327,7 @@ static void tcStructdecl(tenv te, genv ge, segment loc, structdecl sd) {
       let f1 = f1s->hd;
       let f2 = f2s->hd;
       // names, qualifiers, and types all must agree
-      if (String::strcmp(f1[0],f2[0]) != 0)
+      if (String::zstrcmp(f1[0],f2[0]) != 0)
 	terr(loc,
 	     xprintf("redeclaration of struct %s: field name mismatch %s != %s",
 		     v, f1[0], f2[0]));
@@ -382,7 +382,7 @@ static void tcEnumdecl(tenv te, genv ge, segment loc, enumdecl ed) {
     list<field_name> prev_fields = null;
     for(let fs = ed->fields->v; fs != null; fs = fs->tl) {
       let f = fs->hd;
-      if (List::mem(String::strcmp,prev_fields,f->name[1])) 
+      if (List::mem(String::zstrcmp,prev_fields,f->name[1])) 
 	terr(f->loc,xprintf("duplicate field name %s",f->name[1]));
       prev_fields = &cons(f->name[1],prev_fields);
       if (f->tag != null) 

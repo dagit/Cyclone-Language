@@ -94,8 +94,8 @@ string string_of_doc(Doc d, int w) {
   return String::str_sepstr(list_of_alist(o->ppout),"");
 }
 
-/* Convert a Doc to a string and hyperlinks.
-   Takes a Doc and a width as arguments. */
+// Convert a Doc to a string and hyperlinks.
+// Takes a Doc and a width as arguments.
 $(string,list<$(int,int,int,string)@>) @string_and_links(Doc d, int w) {
   Out o = apply(d->f,&ppstate(0,0,1,w,w));
   return &$(String::str_sepstr(list_of_alist(o->ppout),""),
@@ -150,7 +150,7 @@ static Doc text_doc(string s) {
 Doc text(string s) {
   Table<string,Doc> t;
   if (str_hashtbl == null) {
-    t = Hashtable::create(101,strcmp,hash_string);
+    t = Hashtable::create(101,zstrcmp,hash_string);
     str_hashtbl = &Opt(t);
   } else {
     t = str_hashtbl->v;

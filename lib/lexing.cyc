@@ -52,7 +52,7 @@ struct lex_tables {
 static string aux_buffer = "";
 
 void lex_refill<`c> (Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
-  if (size(aux_buffer)==1) aux_buffer = new_string(AUX_SIZE+1);
+  if (size(aux_buffer)==0) aux_buffer = new_string(AUX_SIZE+2);
   int read =
     lexbuf->refill_state->read_fun(aux_buffer,
                                    size(aux_buffer),
@@ -62,7 +62,7 @@ void lex_refill<`c> (Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     int    oldlen = lexbuf->lex_buffer_len;
     int    newlen = oldlen*2;
 
-    string newbuf = new_string(newlen);
+    string newbuf = new_string(newlen+1);
     String::zstrncpy(newbuf, oldlen, lexbuf->lex_buffer, 0, oldlen);
     lexbuf->lex_buffer     = newbuf;
     lexbuf->lex_buffer_len = newlen;
@@ -87,7 +87,7 @@ from_function<`b>(int read_fun(string,int,`b),
                   `b read_fun_state) {
   return &lexbuf(lex_refill, // @ <`b>,
                  &function_lexbuf_state(read_fun, read_fun_state),
-		 new_string(BUFFER_SIZE),
+		 new_string(BUFFER_SIZE+1),
                  BUFFER_SIZE, -BUFFER_SIZE,
 		 BUFFER_SIZE, BUFFER_SIZE, BUFFER_SIZE,
                  0,
@@ -119,8 +119,8 @@ Lexbuf<Bool> from_string(string s) {
 }
 
 string lexeme<`a> (Lexbuf<`a> lbuf) {
-   int len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
-   string s = new_string(len);
+   int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
+   string s   = new_string(len);
    String::zstrncpy(s, 0, lbuf->lex_buffer, lbuf->lex_start_pos, len);
    if (len == 0) {
      fprintf(cyc_stderr,"Lexing::lexeme: 0 length!!\n");

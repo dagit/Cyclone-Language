@@ -156,7 +156,7 @@ static Opt_t<Set<var>>     empty_var_set    = null;
 
 tenv tc_init() {
   // Initialize globals
-  empty_var_set    = &Opt(Set::empty(String::strcmp));
+  empty_var_set    = &Opt(Set::empty(String::zstrcmp));
   empty_unassigned = &Opt(Always(empty_var_set->v));
 
   // Set up initial environment so that xenum exn is defined
@@ -321,11 +321,11 @@ typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
 
 genv empty_genv() { 
   return &Genv{.namespaces  = empty_var_set->v,
-               .structdecls = Dict::empty(String::strcmp),
-               .enumdecls   = Dict::empty(String::strcmp),
-               .xenumdecls  = Dict::empty(String::strcmp),
-               .typedefs    = Dict::empty(String::strcmp),
-               .ordinaries  = Dict::empty(String::strcmp),
+               .structdecls = Dict::empty(String::zstrcmp),
+               .enumdecls   = Dict::empty(String::zstrcmp),
+               .xenumdecls  = Dict::empty(String::zstrcmp),
+               .typedefs    = Dict::empty(String::zstrcmp),
+               .ordinaries  = Dict::empty(String::zstrcmp),
                .availables  = null};
 }
 
@@ -580,6 +580,8 @@ tenv add_label(tenv te, var v, stmt s) {
       default: env_err("Tcenv: add_label backpatching of non-goto"); break;
       }
   }
+  if(Dict::member(fe->shared->seen_labels, v))
+    Tcutil::terr(s->loc, xprintf("Repeated label: %s", v));
   fe->shared->seen_labels = Dict::insert(fe->shared->seen_labels, v, s);
   return te;
 }
@@ -603,19 +605,19 @@ tenv set_unassigned(tenv te, Set<var> un) {
 }
 
 fenv new_fenv(fndecl fd) {
-  let locals = Dict::empty(String::strcmp);
+  let locals = Dict::empty(String::zstrcmp);
   for(let args = fd->args; args != null; args = args->tl)
     locals = Dict::insert(locals, args->hd[0], Param_b(args->hd));
   return &Fenv{.shared        = &SharedFenv(fd->ret_type,
-					    Dict::empty(String::strcmp),
-					    Dict::empty(String::strcmp)),
+					    Dict::empty(String::zstrcmp),
+					    Dict::empty(String::zstrcmp)),
  	       .type_vars     = fd->tvs, // assumed unique
 	       .locals        = locals,  // assumed unique
 	       .ctrl_env      = &CtrlEnv(NotAllowed_j,
 					 NotAllowed_j,
 					 null,
 					 FnEnd_j),
-	       .uv            = Set::empty(String::strcmp)};
+	       .uv            = Set::empty(String::zstrcmp)};
 }
 
 ///////////////////////////// Synthesis (CHANGING SOON) //////////////////////
@@ -849,5 +851,3 @@ synth initialize_var_synth(synth s, var v) {
   return &Synth{.type = s->type, .control = s->control,
 		.norm_unas = Always(vs), .jump_unas = s->jump_unas};
 }
-
-

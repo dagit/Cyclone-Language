@@ -20,7 +20,7 @@ exn Match_Exception = &_Match_Exception_struct;
 
 struct _tagged_string *new_string(int sz) {
   struct _tagged_string *t;
-  char *c;
+  char *c = 0;
   int i;
 
   if (sz < 0) {
@@ -34,16 +34,17 @@ struct _tagged_string *new_string(int sz) {
     fprintf(stderr,"internal error: out of memory in new_string\n");
     exit(1);
   }
-  // Include extra space for trailing 0, used in xprintf below
-  c = (char *)GC_malloc(sz+1);
-  if (c == NULL) {
-    fprintf(stderr,"internal error: out of memory in new_string\n");
-    exit(1);
+  if(sz > 0) {
+    c = (char *)GC_malloc(sz);
+    if (c == NULL) {
+      fprintf(stderr,"internal error: out of memory in new_string\n");
+      exit(1);
+    }
+    i = 0;
+    // Zero the array -- not needed if we use the proper malloc...
+    for (; i <= sz; i++) c[i] = 0; 
   }
-  i = 0;
-  // Zero the array -- not needed if we use the proper malloc...
-  for (; i <= sz; i++) c[i] = 0; // NB we clobber the extra space too
-  t->sz = sz;
+  t->sz       = sz;
   t->contents = c;
   return t;
 }
@@ -71,9 +72,8 @@ struct _tagged_string *xprintf(char *fmt, ...) {
     fprintf(stderr,"internal error: encoding error in xprintf\n");
     exit(1);
   }
-  // Careful: we rely on new_string to return enough space for a
-  // trailing zero here
-  result = new_string(len1);
+  // Careful: we need space for a trailing zero
+  result = new_string(len1+1);
   va_start(argp,fmt);
   // JGM:  I'm changing this to sprintf for the moment because 
   // I don't have vsnprintf

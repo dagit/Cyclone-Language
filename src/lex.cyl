@@ -101,7 +101,7 @@ extern void typedef_init();
 void lex_init() {
   /* build reserved word dictionary */
   Hashtable::Table<string,Short> t = 
-     Hashtable::create(101, strcmp, Hashtable::hash_string);
+     Hashtable::create(101, zstrcmp, Hashtable::hash_string);
   rw = &Opt(t);
   for (int i=0; i < size(rw_array); ++i) 
     Hashtable::insert(t, rw_array[i][0], (Short)rw_array[i][1]);
@@ -272,8 +272,8 @@ static void typedef_init() {
   let init_lstack = &cons(init_lvis, null);
   let init_decls = Dict::insert(Dict::empty(varlist_cmp),
 				null,
-				&Ldecls{.typedefs=Set::empty(strcmp),
-					.namespaces=Set::empty(strcmp)});
+				&Ldecls{.typedefs=Set::empty(zstrcmp),
+					.namespaces=Set::empty(zstrcmp)});
   lstate = &Opt(&Lstate{.lstack=init_lstack,
                         .decls=init_decls});
 }
@@ -355,8 +355,8 @@ void enter_namespace(var s) {
 							s)});
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    new_ns,
-				    &Ldecls{.typedefs = Set::empty(strcmp),
-					    .namespaces = Set::empty(strcmp)});
+				    &Ldecls{.typedefs = Set::empty(zstrcmp),
+					    .namespaces = Set::empty(zstrcmp)});
 
   }
 }

@@ -152,7 +152,7 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
   case Bool_c(_)  : t = bool_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
-    int len = String::strlen(s)+1; // len to include a trailing 0 character
+    int len = String::strlen(s); // len to include a trailing 0 character
     let r   = Const_e(Int_c(Unsigned,len));
     exp e   = new_exp(r,loc);
     e->topt = &Opt(uint_t);
@@ -655,7 +655,7 @@ static bool lhs_const(tenv te, exp e) {
       let sd     = lookup_structdecl(te,e2->loc,nopt->v);
       let fields = sd->fields == null ? null : sd->fields->v;
       for(; fields != null; fields = fields->tl)
-	if (String::strcmp(fields->hd[0],f) == 0)
+	if (String::zstrcmp(fields->hd[0],f) == 0)
 	  return fields->hd[1]->q_const;
       terr(e2->loc,xprintf("bad field %s in struct %s",f,qvar2string(nopt->v)));
       return false;
