@@ -17,7 +17,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <string.h>
-#include "absynpp.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
@@ -25,11 +24,12 @@
 #include "tc.h"
 #include "cyclone.h"
 #include "relations-ap.h"
+#include "warn.h"
 #include "tctyp.h"
 using List;
 using Core;
+using Warn; // put Warn first so Absyn shadows
 using Absyn;
-using Absynpp;
 using Tcutil;
 using Tcenv;
 namespace Tctyp;
@@ -83,7 +83,7 @@ static free_evars_t<`r> add_free_evar(region_t<`r> r,
 // will shadow other variables
 static list_t<tvar_t> add_bound_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
   if (tv->identity == -1)
-    impos("bound tvar id for %s is NULL", tvar2string(tv));
+    impos2("bound tvar id for ",tv," is NULL");
   return new List(tv,tvs);
 }
 static list_t<tvar_t,`r> remove_bound_tvars(region_t<`r> rgn,
@@ -137,26 +137,25 @@ static void check_free_evars(list_t<type_t> free_evars, type_t in_typ,
     switch (type_kind(e)) {
     case &Kind(RgnKind,Unique):
       if (!Unify::unify(e,unique_rgn_type))
-	impos("can't unify evar with unique region!");
+	impos2("can't unify evar with unique region!");
       break;
     case &Kind(RgnKind,Aliasable): // unify with the heap
     case &Kind(RgnKind,Top):
-      if (!Unify::unify(e,heap_rgn_type)) impos("can't unify evar with heap!");
+      if (!Unify::unify(e,heap_rgn_type)) impos2("can't unify evar with heap!");
       break;
     case &Kind(EffKind,_):
-      if (!Unify::unify(e,empty_effect)) impos("can't unify evar with {}!");
+      if (!Unify::unify(e,empty_effect)) impos2("can't unify evar with {}!");
       break;
     case &Kind(BoolKind,_):
-      if (!Unify::unify(e,false_type)) impos("can't unify evar %s with @false!",
-					     typ2string(e));
+      if (!Unify::unify(e,false_type))
+	impos2("can't unify evar ",e," with @false!");
       break;
     case &Kind(PtrBndKind,_):
       if (!Unify::unify(e,bounds_one())) 
-	impos("can't unify evar with bounds_one!");
+	impos2("can't unify evar with bounds_one!");
       break;
     default:
-      terr(loc,"hidden type variable %s isn't abstracted in type %s",
-	   typ2string(e), typ2string(in_typ));
+      err2(loc,"hidden type variable ",e," isn't abstracted in type ",in_typ);
       break;
     }
   }
@@ -204,12 +203,12 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,
       kindbound_t k1 = tvs2->hd->kind;
       kindbound_t k2 = tv->kind;
       if (!constrain_kinds(k1,k2))
-        terr(loc,"type variable %s is used with inconsistent kinds %s and %s",
-             *tv->name, kindbound2string(k1), kindbound2string(k2));
+        err2(loc,"type variable ",tv," is used with inconsistent kinds ",
+	     k1," and ",k2);
       if (tv->identity == -1)
         tv->identity = tvs2->hd->identity;
       else if (tv->identity != tvs2->hd->identity)
-        impos("same type variable has different identity!");
+        impos2("same type variable has different identity!");
       return tvs;
     }
   }
@@ -221,11 +220,11 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,
 // the tvar if it's not already present.
 static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t,`H> tvs, tvar_t tv) {
   if (tv->identity == -1)
-    impos("fast_add_free_tvar: bad identity in tv");
+    impos2("fast_add_free_tvar: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     let tv2 = tvs2->hd;
     if (tv2->identity == -1)
-      impos("fast_add_free_tvar: bad identity in tvs2");
+      impos2("fast_add_free_tvar: bad identity in tvs2");
     if (tv2->identity == tv->identity)
       return tvs;
   }
@@ -239,11 +238,11 @@ static free_tvars_t<`r> fast_add_free_tvar_bool(region_t<`r> r,
 						free_tvars_t<`r> tvs, 
 						tvar_t tv, bool b) {
   if (tv->identity == -1)
-    impos("fast_add_free_tvar_bool: bad identity in tv");
+    impos2("fast_add_free_tvar_bool: bad identity in tv");
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     let &$(tv2,*b2) = tvs2->hd;
     if (tv2->identity == -1)
-      impos("fast_add_free_tvar_bool: bad identity in tvs2");
+      impos2("fast_add_free_tvar_bool: bad identity in tvs2");
     if (tv2->identity == tv->identity) {
       *b2 = (*b2 || b);
       return tvs;
@@ -297,13 +296,12 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind,
   }
 }
 
-static void check_field_atts(seg_t loc, stringptr_t fn, attributes_t atts) {
+static void check_field_atts(seg_t loc, stringptr_t<`H> fn, attributes_t atts) {
   for (; atts != NULL; atts = atts->tl)
     switch (atts->hd) {
     case &Packed_att: 
     case &Aligned_att(_): continue;
-    default: terr(loc,"bad attribute %s on member %s",
-		  attribute2string(atts->hd), *fn);
+    default: err2(loc,"bad attribute ",atts->hd," on member ",*fn);
     }
 }
 
@@ -313,18 +311,18 @@ static cvtenv_t<`r> i_check_valid_type_level_exp(exp_t, tenv_t, cvtenv_t<`r>);
 // check that a @requires/@ensures clause is well-formed and satisfiable
 static $(cvtenv_t<`r>,relns_t) 
   check_clause(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
-               string_t clause_name, exp_opt_t clause) {
+               string_t<`H> clause_name, exp_opt_t clause) {
   relns_t relns = NULL;
   if (clause != NULL) {
     Tcexp::tcExp(te,NULL,clause);
     if (!is_integral(clause))
-      terr(loc,"%s clause has type %s instead of integral type",
-           clause_name,typ2string((type_t)clause->topt));
+      err2(loc, clause_name," clause has type ",(type_t)clause->topt,
+	   " instead of integral type");
     cvtenv = i_check_valid_type_level_exp(clause,te,cvtenv);
     relns = Relations::exp2relns(heap_region,clause);
     if (!Relations::consistent_relations(relns))
-      terr(clause->loc,"%s clause '%s' may be unsatisfiable",
-           clause_name, exp2string(clause));
+      err2(clause->loc, 
+	   clause_name," clause '", clause, "' may be unsatisfiable");
   }
   return $(cvtenv,relns);
 }
@@ -375,16 +373,13 @@ i_check_valid_aggr(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       let ad = *adp;
       if (ad->kind != k) {
         if (ad->kind == StructA)
-          terr(loc,"expecting struct %s instead of union %s",
-               qvar2string(n),qvar2string(n));
+          err2(loc,"expecting struct ", n, "instead of union ", n);
         else
-          terr(loc,"expecting union %s instead of struct %s",
-               qvar2string(n),qvar2string(n));
+          err2(loc,"expecting union ", n, "instead of struct ", n);
       }
       if (tgd && tgd->v) {
         if (!ad->impl || !ad->impl->tagged)
-          terr(loc,"@tagged qualfiers don't agree on union %s",
-               qvar2string(n));
+          err2(loc,"@tagged qualfiers don't agree on union ", n);
       }
       // FIX: what to do about tgd?
       *info = KnownAggr(adp);
@@ -397,7 +392,7 @@ i_check_valid_aggr(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       *info = KnownAggr(adp);
       // give an error here if targs is non-empty:
       if (*targs != NULL) {
-        terr(loc,"declare parameterized type %s before using",qvar2string(n));
+        err2(loc,"declare parameterized type ", n, " before using");
         return cvtenv;
       }
       break;
@@ -424,7 +419,7 @@ i_check_valid_aggr(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       check_no_qual(loc,ts->hd);
     }
     if (ts != NULL)
-      terr(loc,"too many parameters for type %s", qvar2string(ad->name));
+      err2(loc,"too many parameters for ", ad);
     if (tvs != NULL) {
       // add in hidden type parameters
       list_t<type_t> hidden_ts = NULL;
@@ -466,8 +461,7 @@ i_check_valid_datatype(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       tudp = lookup_datatypedecl(te,loc,n);
       // give an error here if targs is non-empty
       if (targs != NULL) {
-        terr(loc,"declare parameterized datatype %s before using",
-             qvar2string(n));
+        err2(loc,"declare parameterized datatype ", n, " before using");
         return cvtenv;
       }
       break;
@@ -475,7 +469,7 @@ i_check_valid_datatype(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // JGM: I'm allowing someone to just write "datatype Foo" even
     // when the datatype is extensible.
     if(is_x && !(*tudp)->is_extensible)
-      terr(loc,"datatype %s was not declared @extensible",qvar2string(n));
+      err2(loc,"datatype ", n, " was not declared @extensible");
     *info = KnownDatatype(tudp);
     fallthru(*tudp);
   case {.KnownDatatype = &tud}:
@@ -498,8 +492,7 @@ i_check_valid_datatype(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       check_no_qual(loc,t);
     }
     if (targs != NULL)
-      terr(loc,"too many type arguments for datatype %s",
-           qvar2string(tud->name));
+      err2(loc,"too many type arguments for datatype ",tud->name);
     if (tvs != NULL) {
       // fill in missing type parameters
       list_t<type_t> hidden_ts = NULL;
@@ -532,7 +525,7 @@ i_check_valid_datatype_field(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // we wait to bind it for uniformity with structs, which are delayed
     // because of typedefs and their strange scope
     for(let fs = tud->fields->v; true; fs = fs->tl) {
-      if(fs == NULL) impos("Tcutil found a bad datatypefield");
+      if(fs == NULL) impos2("Tcutil found a bad datatypefield");
       if(qvar_cmp(fs->hd->name,fname)==0) {
         tuf = fs->hd;
         break;
@@ -560,11 +553,9 @@ i_check_valid_datatype_field(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       check_no_qual(loc,t);
     }
     if (targs != NULL)
-      terr(loc,"too many type arguments for datatype %s.%s",
-           qvar2string(tud->name),qvar2string(tuf->name));
+      err2(loc,"too many type arguments for datatype ",tud->name,".",tuf->name);
     if (tvs != NULL)
-      terr(loc,"too few type arguments for datatype %s.%s",
-           qvar2string(tud->name),qvar2string(tuf->name));
+      err2(loc,"too few type arguments for datatype ",tud->name,".",tuf->name);
     break;
   }
   return cvtenv;
@@ -583,7 +574,7 @@ i_check_valid_type_app(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &FalseCon: case &TrueCon: case &FatCon:
   case &BuiltinCon(...): 
     if (ts != NULL) 
-      impos("%s applied to argument(s)", typ2string(new AppType(c,ts)));
+      impos2(new AppType(c,ts)," applied to argument(s)");
     break;
   case &JoinCon: 
     for (; ts != NULL; ts = ts->tl)
@@ -591,11 +582,11 @@ i_check_valid_type_app(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     break;
   case &TagCon:
     if (length(ts) != 1) 
-      impos("tag_t applied to wrong number of arguments");
+      impos2("tag_t applied to wrong number of arguments");
     cvtenv = i_check_valid_type(loc,te,cvtenv,&ik,ts->hd,false,true); 
     break;
   case &EnumCon(n,*edp):
-    if (ts != NULL) impos("enum applied to argument(s)");
+    if (ts != NULL) impos2("enum applied to argument(s)");
     if (*edp == NULL || (*edp)->fields == NULL)
       try {
         enumdecl_t @ed = lookup_enumdecl(te,loc,n);
@@ -610,37 +601,37 @@ i_check_valid_type_app(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
     break;
   case &AnonEnumCon(fs):
-    if (ts != NULL) impos("enum applied to argument(s)");
+    if (ts != NULL) impos2("enum applied to argument(s)");
     // Note: this code is duplicated almost exactly in Tc::tcEnumdecl
     list_t<field_name_t> prev_fields = NULL;
     unsigned int tag_count = 0;
     for (; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
-        terr(f->loc,"duplicate enum field name %s",*((*f->name)[1]));
+        err2(f->loc,"duplicate enum field name ",f->name);
       else
         prev_fields = new List((*f->name)[1],prev_fields);
       if (f->tag == NULL)
         f->tag = uint_exp(tag_count, f->loc);
       else if (!is_const_exp((exp_t)f->tag))
-        terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
+        err2(loc,"enum field ",f->name,": expression is not constant");
       unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
       tag_count = t1+1;
     }
     break;
   case &RgnsCon:
-    if (length(ts) != 1) impos("regions has wrong number of arguments");
+    if (length(ts) != 1) impos2("regions has wrong number of arguments");
     cvtenv = i_check_valid_type(loc,te,cvtenv,&tak,ts->hd,true,true); break;
   case &RgnHandleCon:
-    if (length(ts) != 1) impos("region_t has wrong number of arguments");
+    if (length(ts) != 1) impos2("region_t has wrong number of arguments");
     cvtenv = i_check_valid_type(loc,te,cvtenv,&trk,ts->hd,true,true); 
     break;      
   case &ThinCon:
-    if (length(ts) != 1) impos("@thin has wrong number of arguments");
+    if (length(ts) != 1) impos2("@thin has wrong number of arguments");
     cvtenv = i_check_valid_type(loc,te,cvtenv,&ik,ts->hd,false,true);
     break;
   case &AccessCon:
-    if (length(ts) != 1) impos("access has wrong number of arguments");
+    if (length(ts) != 1) impos2("access has wrong number of arguments");
     cvtenv = i_check_valid_type(loc,te,cvtenv,&trk,ts->hd,true,true); break;
   case &AggrCon(*info):
     cvtenv = i_check_valid_aggr(loc,te,cvtenv,expected_kind,info,targsp,
@@ -664,9 +655,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
                    kind_t expected_kind, type_t t,
                    bool put_in_effect,
                    bool allow_abs_aggr) {
-
-  //   fprintf(stderr,"checking type %s with expected kind %s\n",
-  //	  Absynpp::typ2string(t), kind2string(expected_kind));
   switch (compress(t)) {
   case &AppType(c,*targsp):
     cvtenv = i_check_valid_type_app(loc,te,cvtenv,expected_kind,c,targsp,
@@ -758,8 +746,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     if (is_zero_terminated) {
       // check that t1 admits zero as an element
       if (!admits_zero(t1))
-        terr(loc,"cannot have a pointer to zero-terminated %s elements",
-             typ2string(t1));
+        err2(loc,"cannot have a pointer to zero-terminated ",t1," elements");
     }
     // check the bound -- unify with bounds one to force bound to zero
     cvtenv = i_check_valid_type(loc,te,cvtenv,&ptrbk,b,false,allow_abs_aggr);
@@ -767,7 +754,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     if (e != NULL) {
       let $(sz,known) = Evexp::eval_const_uint_exp(e);
       if (is_zero_terminated && (!known || sz < 1))
-        terr(loc,"zero-terminated pointer cannot point to empty sequence");
+        err2(loc,"zero-terminated pointer cannot point to empty sequence");
     }
     break;
   case &ValueofType(e):
@@ -776,7 +763,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // then the explicitly bound `i doesn't work out.
     Tcexp::tcExp(allow_valueof(te),NULL,e);
     if (!coerce_uint_type(e))
-      terr(loc,"valueof_t requires an int expression");
+      err2(loc,"valueof_t requires an int expression");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
     break;
   case &TypeofType(e):
@@ -796,8 +783,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     if (is_zero_terminated) {
       // check that t1 supports 0 as an element
       if (!admits_zero(t1))
-        terr(loc,"cannot have a zero-terminated array of %s elements",
-             typ2string(t1));
+        err2(loc,"cannot have a zero-terminated array of ",t1," elements");
     }
     // FIX: should memoize the size so that we don't have to worry about
     // evaluating it during unification
@@ -808,25 +794,21 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *eptr = e = uint_exp(1,0);
       } else {
         // warn that this array is essentially useless
-        warn(loc,"array bound defaults to 1 here");
+        warn2(loc,"array bound defaults to 1 here");
         *eptr = e = uint_exp(1,0);
       }
     }
     Tcexp::tcExp(allow_valueof(te),NULL,e);
     if (!coerce_uint_type(e))
-      terr(loc,"array bounds expression is not an unsigned int");
+      err2(loc,"array bounds expression is not an unsigned int");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
-    /*
-    if (!is_const_exp((exp_t)e))
-      terr(loc,"array bounds expression is not constant");
-    */
     let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e);
     // FIX: if we have an unknown size then it might not be zero-terminated!
     if (is_zero_terminated && known && sz < 1)
-      warn(loc,"zero terminated array cannot have zero elements");
+      warn2(loc,"zero terminated array cannot have zero elements");
     // FIX: if we have an unknown size then it might turn out to be zero!
     if (known && sz < 1 && Cyclone::tovc_r) {
-      warn(loc,"arrays with 0 elements are not supported except with gcc -- changing to 1.");
+      warn2(loc,"arrays with 0 elements are not supported except with gcc -- changing to 1.");
       *eptr = uint_exp(1,0);
     }
     break;
@@ -846,7 +828,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     int fmt_arg_start = -1;
     for (; atts != NULL; atts = atts->tl) {
       if (!fntype_att(atts->hd))
-	terr(loc,"bad function type attribute %s",attribute2string(atts->hd));
+	err2(loc,"bad function type attribute ",atts->hd);
       switch(atts->hd) {
       case &Stdcall_att:
 	if(!seen_stdcall)  { seen_stdcall=true;  ++num_convs;} break;
@@ -861,13 +843,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           fmt_desc_arg = i;
 	  fmt_arg_start = j;
         } else
-          terr(loc,"function can't have multiple format attributes");
+          err2(loc,"function can't have multiple format attributes");
         break;
       default: break;
       }
     }
     if(num_convs > 1)
-      terr(loc,"function can't have multiple calling conventions");
+      err2(loc,"function can't have multiple calling conventions");
 
     // bound type variables (we may add more) --
     // check unique, disallow MemKind, and add to cvtenv.kind_env.
@@ -877,8 +859,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
       switch (compress_kb(b->hd->kind)) {
       case &Eq_kb(&Kind(MemKind,_)):
-	terr(loc,"function attempts to abstract Mem type variable %s",
-	     *b->hd->name); break;
+	err2(loc,"function abstracts Mem type variable ", *b->hd->name); break;
       default: break;
       }
     }
@@ -911,7 +892,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
       // varargs
       if (cyc_vararg != NULL) {
-        if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
+        if (c_vararg) impos2("both c_vararg and cyc_vararg"); // sanity
         let VarargInfo{_,_,vt,vi} = *cyc_vararg;
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,vt,true,true);
         cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
@@ -922,14 +903,14 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             switch (compress(et)) {
             case &AppType(&DatatypeCon(...),_):
               if (force_type2bool(false,zt))
-                terr(loc,"can't inject into a zeroterm pointer");
+                err2(loc,"can't inject into a zeroterm pointer");
               if (!Unify::unify(bounds_one(),bs)) 
-                terr(loc,"can't inject into a fat pointer to datatype");
+                err2(loc,"can't inject into a fat pointer to datatype");
               break;
-            default: terr(loc,"can't inject a non-datatype type"); break;
+            default: err2(loc,"can't inject a non-datatype type"); break;
             }
             break;
-          default: terr(loc,"expecting a datatype pointer type"); break;
+          default: err2(loc,"expecting a datatype pointer type"); break;
           }
       }
 
@@ -941,7 +922,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             (cyc_vararg == NULL && !c_vararg && fmt_arg_start != 0) ||
             ((cyc_vararg != NULL || c_vararg) && 
              fmt_arg_start != num_args + 1)) // wrong??
-          terr(loc,"bad format descriptor");
+          err2(loc,"bad format descriptor");
         else {
           // check that fmt_desc_arg is a string in some region
           let $(_,_,t) = *List::nth(args, fmt_desc_arg - 1);
@@ -950,16 +931,16 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           case &PointerType(PtrInfo(et,_,PtrAtts(_,_,b,zt,_))):
             // FIX:  zero-termination?
             if (!is_char_type(et)) 
-              terr(loc,"format descriptor is not a string");
+              err2(loc,"format descriptor is not a string");
             else {
               let e = get_bounds_exp(bounds_one(),b);
               if (e == NULL && c_vararg)
-                terr(loc,"format descriptor is not a char * type"); 
+                err2(loc,"format descriptor is not a char * type"); 
               else if (e != NULL && !c_vararg)
-                terr(loc,"format descriptor is not a char ? type"); 
+                err2(loc,"format descriptor is not a char ? type"); 
             }
             break;
-          default: terr(loc,"format descriptor is not a string type"); break;
+          default: err2(loc,"format descriptor is not a string type"); break;
           }
           if (fmt_arg_start != 0 && !c_vararg) {
             // check the type of the varargs is either datatype PrintArg or
@@ -978,7 +959,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	     break;
 	   }
 	   if (problem)
-	     terr(loc,"format attribute and vararg types don't match");
+	     err2(loc,"format attribute and vararg types don't match");
           }
         }
       }
@@ -1064,8 +1045,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
           switch (compress_kb(bs->hd->kind)) {
           case &Unknown_kb(*f):
-            warn(loc,"Type variable %s unconstrained, assuming boxed",
-                 *bs->hd->name);
+	    warn2(loc,"Type variable ",bs->hd," unconstrained, assuming boxed");
 	    fallthru(f);
           case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
           case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
@@ -1081,7 +1061,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           case &Less_kb(*f,k):
 	    *f = kind_to_bound_opt(k); break;
           case &Eq_kb(&Kind(MemKind,_)):
-            terr(loc,"functions can't abstract M types"); break;
+            err2(loc,"functions can't abstract M types"); break;
           default: break;
           }
 	}
@@ -1115,7 +1095,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     for (; fs != NULL; fs = fs->tl) {
       let &Aggrfield{fn,*tqp,t,width,atts,requires_clause} = fs->hd;
       if (List::mem(strptrcmp,prev_fields,fn))
-	terr(loc,"duplicate field %s",*fn);
+	err2(loc,"duplicate field ",*fn);
       if (strcmp(*fn,"") != 0)
 	prev_fields = new List(fn,prev_fields);
       cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,t,true,false);
@@ -1125,11 +1105,11 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       if (requires_clause != NULL) {
 	// FIX: check that this requires clause does not overlap with others?
 	if(k!=UnionA)
-	  terr(loc,"@requires clause is only allowed on union members");
+	  err2(loc,"@requires clause is only allowed on union members");
 	Tcexp::tcExp(allow_valueof(te),NULL,requires_clause);
 	if (!is_integral(requires_clause))
-	  terr(loc,"@requires clause has type %s instead of integral type", 
-	       typ2string((type_t)requires_clause->topt));
+	  err2(loc,"@requires clause has type ",
+	       (type_t)requires_clause->topt, " instead of integral type");
 	cvtenv = i_check_valid_type_level_exp(requires_clause,te,cvtenv);
       }
     }
@@ -1141,7 +1121,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     typedefdecl_t td;
     try td = lookup_typedefdecl(te,loc,tdn);
     catch { case &Dict::Absent:
-      terr(loc,"unbound typedef name %s",qvar2string(tdn));
+      err2(loc,"unbound typedef name ",tdn);
       return cvtenv;
     }
     *tdopt = td;
@@ -1151,15 +1131,12 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // check type arguments
     for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
       kind_t k = tvar_inst_kind(tvs->hd, &tbk, expected_kind, td);
-      // 	fprintf(stderr,"inst-var for typedef: tvar_kind=%s, inst_kind=%s\n",
-// 		kind2string(tvar_kind(tvs->hd,&tbk)),
-// 		kind2string(k));
       cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true,allow_abs_aggr);
       check_no_qual(loc,ts->hd);
       inst = new List(new $(tvs->hd,ts->hd),inst);
     }
     if (ts != NULL)
-      terr(loc,"too many parameters for typedef %s",qvar2string(tdn));
+      err2(loc,"too many parameters for typedef ",tdn);
     if (tvs != NULL) {
       list_t<type_t> hidden_ts = NULL;
       // fill in missing type parameters
@@ -1182,8 +1159,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     break;
   }
   if (!kind_leq(type_kind(t), expected_kind)) {
-    terr(loc,"type %s has kind %s but as used here needs kind %s",
-	 typ2string(t), kind2string(type_kind(t)), kind2string(expected_kind));
+    err2(loc,"type ",t," has kind ",type_kind(t),
+	 " but as used here needs kind ",expected_kind);
   }
   return cvtenv;
 }
@@ -1234,7 +1211,7 @@ i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
     break;
   default:
-    impos("non-type-level-expression in Tcutil::i_check_valid_type_level_exp");
+    impos2("non-type-level-expression in Tctyp::i_check_valid_type_level_exp");
   }
   return cvtenv;
 }
@@ -1322,8 +1299,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     case &Less_kb(*f,k):
       *f = kind_to_bound_opt(k); break;
     case &Eq_kb(&Kind(MemKind,a)):
-      terr(loc,"type variable %s cannot have kind %s",
-	   tvar2string(x->hd), kind2string(new Kind(MemKind,a)));
+      err2(loc,"type variable ",x->hd," cannot have kind ",new Kind(MemKind,a));
       break;
     default: break;
     }
@@ -1341,7 +1317,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     default: break;
     }
     if (free_tvars != NULL)
-      terr(loc,"unbound type variable %s",*free_tvars->hd->name);
+      err2(loc,"unbound type variable ",free_tvars->hd);
     if (!is_function_type(t) || !te->in_tempest)
       check_free_evars(free_evars,t,loc);
   }
@@ -1363,7 +1339,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
     fd->i.ret_tqual.real_const = 
       extract_const_from_typedef(loc,i.ret_tqual.print_const,i.ret_type);
     break;
-  default: impos("check_fndecl_valid_type: not a FnType");
+  default: impos2("check_fndecl_valid_type: not a FnType");
   }
   check_unique_vars(map(fst_fdarg,fd->i.args), loc,
 		    "function declaration has repeated parameter");
@@ -1384,7 +1360,7 @@ void check_type(seg_t loc, tenv_t te, list_t<tvar_t,`H> bound_tvars,
 				      bound_tvars);
   let free_evars = map(fst,cvt.free_evars);
   for (_ fs = free_tvars; fs != NULL; fs = fs->tl)
-    terr(loc,"unbound type variable %s in type %s",*fs->hd->name,typ2string(t));
+    err2(loc,"unbound type variable ",fs->hd," in type ",t);
   if (!allow_evars)
     check_free_evars(free_evars,t,loc);
 }

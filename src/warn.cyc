@@ -32,9 +32,17 @@ static list_t<stringptr_t> warning_msgs = NULL;
 
 datatype Warg {
   String(string_t);
-  Exp(exp_t);
-  Typ(type_t);
   Qvar(qvar_t);
+  Typ(type_t);
+  Exp(exp_t);
+  Stmt(stmt_t);
+  Aggrdecl(aggrdecl_t);
+  Tvar(tvar_t);
+  KindBound(kindbound_t);
+  Kind(kind_t);
+  Attribute(attribute_t);
+  Vardecl(vardecl_t);
+  Int(int);
 };
 
 // we batch warnings because we have to parse the file to determine
@@ -103,17 +111,38 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
 
 static string_t args2string(warg_t ? args) {
   list_t<stringptr_t> lst = NULL;
-  for(int i=numelts(args)-1; i >= 0; --i) {
+  int curr_line_len = 0;
+  for(int i=0; i < numelts(args); ++i) {
     string_t s;
     switch(args[i]) {
     case &String(s2): s = s2; break;
     case &Exp(e):     s = exp2string(e); break;
     case &Typ(t):     s = typ2string(t); break;
     case &Qvar(qv):   s = qvar2string(qv); break;
+    case &Stmt(s2):   s = stmt2string(s2); break;
+    case &Aggrdecl(ad): s = strconcat((ad->kind==UnionA ? "union " : "struct "),
+				      qvar2string(ad->name));
+      break;
+    case &Tvar(tv):      s = *tv->name; break;
+    case &Kind(k):       s = kind2string(k); break;
+    case &KindBound(kb): s = kindbound2string(kb); break;
+    case &Attribute(a):  s = attribute2string(a); break;
+    case &Vardecl(vd):   s = qvar2string(vd->name); break;
+    case &Int(i):        s = aprintf("%d",i); break;
     }
-    lst = new List(new s,lst); 
+    int s_len = strlen(s);
+    if(s_len >= 80) {
+      lst = append(list(new "\n", new s, new "\n"), lst);
+      curr_line_len = 0;
+    } else if (curr_line_len + s_len >= 80) {
+      lst = append(list(new "\n", new s), lst);
+      curr_line_len = s_len;
+    } else {
+      lst = new List(new s,lst); 
+      curr_line_len += s_len;
+    }
   }
-  return strconcat_l(lst);
+  return strconcat_l(imp_rev(lst));
 }
 void verr2(seg_t loc, warg_t ? args) {
   Position::post_error(Position::mk_err(loc,args2string(args)));
@@ -128,4 +157,28 @@ void vwarn2(seg_t loc, warg_t ? args) {
 }
 void warn2(seg_t loc, ... inject warg_t args) {
   vwarn2(loc,args);
+}
+`a vimpos2(warg_t ? args) __attribute__((noreturn)) {
+  let msg = args2string(args);
+  if (!Position::error_p()) {
+    fprintf(stderr,"Compiler Error: %s\n",msg);
+    fflush(stderr);
+  }
+  throw new Core::Impossible(msg);  
+}
+`a impos2(... inject warg_t args) __attribute__((noreturn)) {
+  vimpos2(args);
+}
+`a vimpos_loc2(Position::seg_t loc,warg_t ? args) __attribute__((noreturn)) {
+  let msg = args2string(args);
+  if (!Position::error_p()) {
+    fprintf(stderr,"Compiler Error: \n");
+    fprintf(stderr,"%s",msg);
+    fflush(stderr);
+  }
+  throw new Core::Impossible(msg);  
+}
+`a impos_loc2(Position::seg_t loc,... inject warg_t args) 
+  __attribute__((noreturn)) {
+  vimpos_loc2(loc,args);
 }

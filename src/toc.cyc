@@ -39,7 +39,6 @@
 #include <dict.h>
 #include <xarray.h>
 #include "warn.h"
-#include "absynpp.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "evexp.h"
@@ -48,9 +47,7 @@
 #include "tcpat.h"
 using Core;
 using List;
-using Set;
 using Absyn;
-using Absynpp;
 using Tcutil;
 
 // Note: expansion of typedefs is done in Absynpp::to_tms, but here we
@@ -70,13 +67,17 @@ namespace Toc;
   Dest(exp_t);
 };
 
-static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,1,2), noreturn)) {
-  Warn::vimpos(strconcat("Toc (unimplemented): ",fmt), ap);
+static `a unimp(string_t<`H> str) __attribute__((noreturn)) {
+  Warn::impos2(str);
 }
-static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
+static `a toc_impos(string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn)) {
   Warn::vimpos(strconcat("Toc: ",fmt), ap);
+}
+static `a toc_impos2(...inject Warn::warg_t ap) __attribute__((noreturn)) {
+  Warn::warg_t   toc  = new Warn::String("Toc: ");
+  Warn::warg_t ? args = new {for i < (numelts(ap)+1) : (i==0 ? toc : ap[i-1])};
+  Warn::vimpos2(args);
 }
 
 stringptr_t ?globals = NULL;
@@ -412,13 +413,14 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
   case &AppType(&FloatCon(1),_):        return fS->fdouble;
   case &AppType(&FloatCon(_),_):        return fS->flongdouble;
   case &PointerType(_):                 return fS->fvoidstar;
-  default: toc_impos("expression type %s (not int, float, double, or pointer)",typ2string(t));
+  default: 
+    toc_impos2("expression type ", t, " (not int, float, double, or pointer)");
   }
 }
 static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
   switch (compress((type_t)arr->topt)) {
   case &PointerType(PtrInfo{.elt_type = et,...}): return getFunctionType(fS,et);
-  default: toc_impos("impossible type (not pointer)");
+  default: toc_impos2("impossible type (not pointer)");
   }
 }
 
@@ -682,7 +684,7 @@ static var_t fresh_label_body<`d,`r>(region_t<`d> d, $(struct TocState<`d>@`d,in
     return Xarray::get(temp_labels,i);
   var_t res = new (string_t)aprintf("_LL%X",i);
   if (Xarray::add_ind(temp_labels,res) != i)
-    toc_impos("fresh_label: add_ind returned bad index...");
+    toc_impos2("fresh_label: add_ind returned bad index...");
   return res;
 }
 static var_t fresh_label() {
@@ -789,7 +791,7 @@ type_t typ_to_c(type_t t) {
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(tud,tuf)}),_):
     return strctq(collapse_qvars(tuf->name,tud->name));
   case &AppType(&DatatypeFieldCon(_),_): 
-    toc_impos("unresolved DatatypeFieldType");
+    toc_impos2("unresolved DatatypeFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct fat_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
@@ -855,9 +857,7 @@ type_t typ_to_c(type_t t) {
     if (ad->expected_mem_kind) {
       // check that it turned out to be a mem!
       if (ad->impl == NULL) 
-        warn(0, "%s %s was never defined.",
-	     (ad->kind==UnionA) ? "union" : "struct",
-	     qvar2string(ad->name));
+        Warn::warn2(0, ad, " was never defined.");
     }
     // Have to watch out for flaky gcc ...
     if(ad->kind==UnionA)
@@ -867,9 +867,8 @@ type_t typ_to_c(type_t t) {
     for (; fs->tl != NULL; fs = fs->tl);
     let last_type = fs->hd->type;
     if (kind_leq(&ak,type_kind(last_type))) {
-      if (ad->expected_mem_kind) {
-        warn(0, "struct %s ended up being abstract.", qvar2string(ad->name));
-      }                     
+      if (ad->expected_mem_kind)
+        Warn::warn2(0, ad, " ended up being abstract.");
       // To avoid looping, make sure the instantiation of the last
       // type is not still abstract.  If it is, we can just return
       // the struct type.
@@ -958,7 +957,7 @@ static bool atomic_type(type_t t) {
       for (let tqs = tuf->typs; tqs != NULL; tqs = tqs->tl)
         if (!atomic_type((*tqs->hd)[1])) return false;
       return true;
-    default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
+    default: toc_impos2("atomic_typ: bad type ",t);
     }
   case &FnType(_): return true;
   case &ArrayType(ArrayInfo{t,...}): return atomic_type(t);
@@ -978,7 +977,7 @@ static bool atomic_type(type_t t) {
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
   case &PointerType(_): return false;
-  default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
+  default: toc_impos2("atomic_typ:  bad type ",t);
   }
 }
 
@@ -988,14 +987,14 @@ static bool is_poly_field(type_t t, field_name_t f) {
   case &AppType(&AggrCon(info),_):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL)
-      toc_impos("is_poly_field: type missing fields");
+      toc_impos2("is_poly_field: type missing fields");
     fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     let field = lookup_field(fs,f);
     if (field == NULL)
-      toc_impos("is_poly_field: bad field %s",*f);
+      toc_impos2("is_poly_field: bad field ",*f);
     return is_void_star_or_boxed_tvar(field->type);
-  default: toc_impos("is_poly_field: bad type %s",typ2string(t));
+  default: toc_impos2("is_poly_field: bad type ",t);
   }
 }
 
@@ -1011,7 +1010,7 @@ static bool is_poly_project(exp_t e) {
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{t,_,_}): 
       return is_poly_field(t,f) && !is_void_star_or_boxed_tvar((type_t)e->topt);
-    default: toc_impos("is_poly_project: bad type %s",typ2string((type_t)e1->topt));
+    default: toc_impos2("is_poly_project: bad type ",(type_t)e1->topt);
     }
   default: return false;
   }
@@ -1188,7 +1187,7 @@ static bool do_null_check(exp_t e) {
   case &InsertChecks::NullAndThinBound(_): return true;
   case &InsertChecks::FatBound:
   case &InsertChecks::ThinBound(_): return false;
-  default: Warn::impos_loc(e->loc,"Toc: do_null_check");
+  default: Warn::impos_loc2(e->loc,"Toc: do_null_check");
   }
 }
 // shared by exp_to_c cases for Subscript_e, AggrArrow_e, and Deref_e
@@ -1231,7 +1230,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
         // numelts(x).  In turn, this implies that numelts(x) >= 0 which
         // implies x is not NULL.  (See insert_checks.)  
         if (index != NULL)
-          toc_impos("subscript of ? with no bounds check but need null check");
+          toc_impos2("subscript of ? with no bounds check but need null check");
       }
       // ((t *)_check_null(e))
       ptr->r=cast_it_r(new_typ,fncall_exp_dl(_check_null_e,new_exp(ptr->r,0)));
@@ -1284,16 +1283,16 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 	}
       }
       break;
-    default: impos("FIX: ptr_use_to_c, bad annotation");
+    default: Warn::impos2("FIX: ptr_use_to_c, bad annotation");
     }
     set_lhs(nv,old_lhs);
     return ans;
-  default: impos("ptr_use_to_c: non-pointer-type");
+  default: Warn::impos2("ptr_use_to_c: non-pointer-type");
   }
 }
 
 static type_t get_cyc_type(exp_t e) {
-  if (e->topt == NULL) toc_impos("Missing type in primop ");
+  if (e->topt == NULL) toc_impos2("Missing type in primop ");
   return (type_t)e->topt;
 }
 static $(tqual_t, type_t)@ tup_to_c(exp_t e) {
@@ -1374,7 +1373,7 @@ static exp_opt_t get_varsizeexp(exp_t e) {
       }
     }
   }
-  toc_impos("get_varsizeexp: did not find last struct field");
+  toc_impos2("get_varsizeexp: did not find last struct field");
 }
 
 static int get_member_offset(aggrdecl_t ad, field_name_t f) {
@@ -1384,7 +1383,7 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
     if (strcmp(*field->name,*f) == 0) return i;
     ++i;
   }
-  toc_impos(aprintf("get_member_offset %s failed",*f));
+  toc_impos2("get_member_offset ", *f, " failed");
 }
 
 // functions for passing to lvalue_assign (see below)
@@ -1437,7 +1436,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
     // we assume free vars of e2 are not captured by d
   case &Decl_s(d,s2): lvalue_assign_stmt(s2,fs,f,f_env); break;
   case &Seq_s(_,s2):  lvalue_assign_stmt(s2,fs,f,f_env); break;
-  default: toc_impos("lvalue_assign_stmt: %s",stmt2string(s));
+  default: toc_impos2("lvalue_assign_stmt: ",s);
   }
 }
 
@@ -1460,7 +1459,7 @@ static exp_t push_address_exp(exp_t e) {
     return e;
   default:
     if (is_lvalue(e)) return address_exp(e,DL);
-    toc_impos("can't take & of exp %s",exp2string(e));
+    toc_impos2("can't take & of exp ",e);
   }
 }
 static void push_address_stmt(stmt_t s) {
@@ -1468,7 +1467,7 @@ static void push_address_stmt(stmt_t s) {
   case &Seq_s(_,s2): fallthru(s2);
   case &Decl_s(_,s2): push_address_stmt(s2); break;
   case &Exp_s(*e): *e = push_address_exp(*e); break;
-  default: toc_impos("can't take & of stmt %s",stmt2string(s));
+  default: toc_impos2("can't take & of stmt ",s);
   }
 }
 
@@ -1511,7 +1510,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     xinit = fncall_exp_dl(_fat_ptr_plus_e,
 			  ea,sizeoftype_exp(typ_to_c(elt_type),DL),eb);
     break;
-  default: toc_impos("found bad lhs for zero-terminated pointer assignment");
+  default: toc_impos2("found bad lhs for zero-terminated pointer assignment");
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
   TOC_RGN(nv, rgn2) {
@@ -1594,8 +1593,8 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
   aggrdecl_t ad;
   switch (compress(aggrtype)) {
   case &AppType(&AggrCon(info),_): ad = get_known_aggrdecl(info); break;
-  default: impos(aprintf("expecting union but found %s in check_tagged_union",
-                         typ2string(aggrtype)));
+  default: Warn::impos2("expecting union but found ", aggrtype, 
+			" in check_tagged_union");
   }
   let $(temp,temp_exp) = temp_var_and_exp();
   let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
@@ -1643,7 +1642,7 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
                                     type_t @ tagged_member_type,
                                     bool clear_read) {
   switch (e->r) {
-  case &Cast_e(_,e1,_,_): toc_impos("cast on lhs!");
+  case &Cast_e(_,e1,_,_): toc_impos2("cast on lhs!");
   case &AggrMember_e(e1,f,_,*is_read):
     return is_tagged_union_project_impl((type_t)e1->topt,f,f_tag,
 					tagged_member_type,clear_read,is_read);
@@ -1691,7 +1690,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
 
 static void exp_to_c(env_t nv, exp_t e) {
   if(e->topt == NULL)
-    Warn::impos_loc(e->loc,"exp_to_c: no type for %s",exp2string(e));
+    Warn::impos_loc2(e->loc,"exp_to_c: no type for ",e);
   type_t old_typ = (type_t)e->topt;
   // cases where we think to do checks, set this bool as a sanity check
   bool did_inserted_checks = false;
@@ -1755,8 +1754,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
 	}
 	break;
-      default: toc_impos("numelts primop applied to non-pointer %s",
-			 typ2string((type_t)arg->topt));
+      default: toc_impos2("numelts primop applied to non-pointer ",
+			  ((type_t)arg->topt));
       }
       break;
     case Plus:
@@ -1836,8 +1835,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     string_t incr_str    = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
     if (is_zero_ptr_deref(e2,&ignore_typ,&ignore_bool,&ignore_typ))
-      Warn::impos_loc(e->loc,"in-place %s is not supported when dereferencing "
-		      "a zero-terminated pointer", incr_str);
+      Warn::impos_loc2(e->loc,"in-place ", incr_str, " is not supported when ",
+		       "dereferencing a zero-terminated pointer");
     if (is_tagged_union_project(e2,&ignore_int,&ignore_typ,true)) {
       exp_t    one = signed_int_exp(1,DL);
       primop_t op;
@@ -1845,8 +1844,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch (incr) {
       case PreInc: op = Plus;  break;
       case PreDec: op = Minus; break;
-      default: Warn::impos_loc(e->loc,"in-place post%s is not supported on "
-			       "@tagged union members", incr_str);
+      default: Warn::impos_loc2(e->loc,"in-place post", incr_str, 
+				" is not supported on @tagged union members");
       }
       e->r = new AssignOp_e(e2,new Opt(op),one);
       exp_to_c(nv,e);
@@ -1955,7 +1954,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         switch(popt->v) {
         case Plus:  change = e2; break;
         case Minus: change = prim1_exp(Minus,e2,DL); break;
-        default:    toc_impos("bad t ? pointer arithmetic");
+        default:    toc_impos2("bad t ? pointer arithmetic");
         }
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
@@ -1971,7 +1970,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           done = true;
           e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),e1,e2);
           break;
-        default: toc_impos("bad zero-terminated pointer arithmetic");
+        default: toc_impos2("bad zero-terminated pointer arithmetic");
         }
       }
     }
@@ -2056,7 +2055,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	datatypedecl_t tud;
 	switch(compress(pointer_elt_type(vai->type))) {
 	case &AppType(&DatatypeCon({.KnownDatatype=&x}),_): tud = x; break;
-	default: toc_impos("toc: unknown datatype in vararg with inject");
+	default: toc_impos2("unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
 
@@ -2372,7 +2371,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	case &AppType(&AggrCon(info),_):
 	  let ad = get_known_aggrdecl(info);
 	  if(ad->impl==NULL)
-	    toc_impos("struct fields must be known");
+	    toc_impos2("struct fields must be known");
 	  fallthru(ad->impl->fields);
 	case &AnonAggrType(_,fields):
 	  let nth_field = List::nth(fields,n);
@@ -2391,7 +2390,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	    l->hd = new StructField(fieldname(n));
 	  }
 	  break;
-	default: toc_impos("impossible type for offsetof tuple index");
+	default: toc_impos2("impossible type for offsetof tuple index");
 	}
 	break;
       }
@@ -2414,7 +2413,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t ta;
     switch(compress(e1typ)) {
     case &PointerType(p): ta = p.elt_type; break;
-    default: toc_impos("get_ptr_typ: not a pointer!");
+    default: toc_impos2("get_ptr_typ: not a pointer!");
     }
     did_inserted_checks = true;
     ptr_use_to_c(nv,e1,e->annot,NULL);
@@ -2436,7 +2435,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv, e2);
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known)
-	impos("unknown tuple subscript in translation to C");
+	Warn::impos2("unknown tuple subscript in translation to C");
       e->r = aggrmember_exp_r(e1,fieldname(i+1));
       break;
     default:
@@ -2462,7 +2461,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	e->r    = new Aggregate_e(sd->name,NULL,imp_rev(dles),sd);
 	e->topt = strct_typ;
 	break;
-      default: toc_impos("tuple type not an aggregate");
+      default: toc_impos2("tuple type not an aggregate");
       }
       break;
     } else {
@@ -2534,7 +2533,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	e->r    = new Aggregate_e(sd->name,NULL,dles,sd);
 	e->topt = strct_typ;
 	break;
-      default: toc_impos("anonStruct type not an aggregate");
+      default: toc_impos2("anonStruct type not an aggregate");
       }
     } else
       e->r = unresolvedmem_exp_r(NULL,dles);
@@ -2544,11 +2543,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     // now relegate rewriting to RemoveAggrs, but we still may need to 
     // generate struct definitions and other nasty stuff
     if(sd==NULL || sd->impl==NULL)
-      toc_impos("exp_to_c, Aggregate_e: missing aggrdecl pointer or fields");
+      toc_impos2("exp_to_c, Aggregate_e: missing aggrdecl pointer or fields");
     let new_typ = typ_to_c(old_typ);
     switch(compress(new_typ)) { // typ_to_c may change the struct name!
     case &AppType(&AggrCon(info),_): *tdn = aggr_kinded_name(info)[1]; break;
-    default: toc_impos("exp_to_c, Aggregate_e: bad type translation");
+    default: toc_impos2("exp_to_c, Aggregate_e: bad type translation");
     }
     // to handle struct kludges for the last field of the type
     // definition, we grab the last field
@@ -2646,7 +2645,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  }
 	}
 	break;
-      default: toc_impos("exp_to_c, Aggregate_e: bad struct type");
+      default: toc_impos2("exp_to_c, Aggregate_e: bad struct type");
       }
     } else {
       // At top-level must create an initializer.  For MSVC, sort fields
@@ -2784,7 +2783,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t e1_old_typ = (type_t)e1->topt;
     type_t e2_old_typ = (type_t)e2->topt;
     if (!is_boxed(e1_old_typ) && !is_pointer_type(e1_old_typ))
-      toc_impos("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
+      toc_impos2("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
 
     // create the Cyclone expression for the swap.  Need to deep copy the
     // expressions since the translation to C is by side-effect, and the rhs
@@ -2817,18 +2816,17 @@ static void exp_to_c(env_t nv, exp_t e) {
       let e1_f_tag = member_exp(e1_f,tag_sp,DL);
       e->r = eq_exp(e1_f_tag,f_tag,DL)->r;
       break;
-    default: toc_impos("non-aggregate type in tagcheck");
+    default: toc_impos2("non-aggregate type in tagcheck");
     }
     break;
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
-  case &Asm_e(...): break;//<-- no transformation needed          toc_impos("__asm__");
-  case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem");
-  case &CompoundLit_e(_,_):   toc_impos("compoundlit");
-  case &Valueof_e(_):         toc_impos("valueof(-)");
+  case &UnresolvedMem_e(_,_): toc_impos2("UnresolvedMem");
+  case &CompoundLit_e(_,_):   toc_impos2("compoundlit");
+  case &Valueof_e(_):         toc_impos2("valueof(-)");
+  case &Asm_e(...): break;//<-- no transformation needed toc_impos2("__asm__"); 
   }
   if(!did_inserted_checks)
-    Warn::impos_loc(e->loc,aprintf("Toc did not examine an inserted check: %s",
-				   exp2string(e)));
+    Warn::impos_loc2(e->loc,"Toc did not examine an inserted check: ", e);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -3006,7 +3004,7 @@ static pat_t compile_pat_test_as_case(Tcpat::pat_test_t p) {
   case &EqConst(i):           fallthru(i);
   case &EqDatatypeTag(i,_,_): fallthru(i);
   case &EqTaggedUnion(_,i):   e = uint_exp(i,DL); break;
-  default: toc_impos("compile_pat_test_as_case!");
+  default: toc_impos2("compile_pat_test_as_case!");
   }
   return new_pat(new Exp_p(e), DL);
 }
@@ -3098,7 +3096,7 @@ extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       s = seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,member_exp(path,f,DL),p2));
     }
     return s;
-  case &Aggr_p(NULL,...): toc_impos("unresolved aggregate pattern!");
+  case &Aggr_p(NULL,...): toc_impos2("unresolved aggregate pattern!");
   case &Aggr_p(&info,_,dlps,_):
     // similar to translation of tuple pattern, but must account for designators.
     let ad = get_known_aggrdecl(info);
@@ -3130,9 +3128,9 @@ extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
   case &Pointer_p(p2): 
     return extract_pattern_vars(rgn,nv,decls,deref_exp(path,DL),p2);
 
-  case &UnknownId_p(_):       toc_impos("unknownid pat");
-  case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
-  case &Exp_p(_):             toc_impos("exp pat");
+  case &UnknownId_p(_):       toc_impos2("unknownid pat");
+  case &UnknownCall_p(_,_,_): toc_impos2("unknowncall pat");
+  case &Exp_p(_):             toc_impos2("exp pat");
   }
 }
 
@@ -3248,7 +3246,7 @@ compile_decision_tree(region_t<`rgn> rgn,
         return res;
       }
     }
-    toc_impos("couldn't find rhs!");
+    toc_impos2("couldn't find rhs!");
   case &Tcpat::SwitchDec(symbolic_path, switches, other_decision):
     // start by compiling the default
     stmt_t res = compile_decision_tree(rgn,nv,decls,bodies,other_decision,lscs,v);
@@ -3335,8 +3333,8 @@ compile_decision_tree(region_t<`rgn> rgn,
               return r;
             }
           }
-          toc_impos("couldn't find rhs!");
-        default: toc_impos("bad where clause in match compiler");
+          toc_impos2("couldn't find rhs!");
+        default: toc_impos2("bad where clause in match compiler");
         }
       default:
         // generate a sequence of nested ifs
@@ -3520,7 +3518,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &Fallthru_s(es,dest_clause):
       let &Env{.fallthru_info = fi,...} = nv;
       if(fi == NULL)
-	toc_impos("fallthru in unexpected place");
+	toc_impos2("fallthru in unexpected place");
       let FallthruInfo{l,vs} = *fi;
       stmt_t s2 = goto_stmt(l, DL);
       // reset handler (after the es evaluation)
@@ -3569,7 +3567,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // the result.
         let rvds = List::rev(vds);
         if (rvds == NULL)
-          impos("empty Letv_d");
+          Warn::impos2("empty Letv_d");
         d->r = new Var_d(rvds->hd);
         rvds = rvds->tl;
         for (; rvds != NULL; rvds = rvds->tl) {
@@ -3607,8 +3605,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	  // body;
 	  // _pop_region(x);
           s->r = declare_stmt(rh_var,rh_struct_typ,
-			      fncall_exp_dl(_new_region_e,
-					    string_exp(qvar2string(x_var),DL)),
+		   fncall_exp_dl(_new_region_e, string_exp(*(*x_var)[1],DL)),
                  declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
 		 seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
                  seq_stmt(body, 
@@ -3616,7 +3613,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 			  DL),DL),DL),DL),DL)->r;
         } 
         return;
-      default: impos("bad nested declaration within function");
+      default: Warn::impos2("bad nested declaration within function");
       }
       return;
     case &TryCatch_s(body,scs,dec_tree):
@@ -3991,7 +3988,7 @@ static void local_decl_to_c(env_t nv,vardecl_t vd,stmt_t s) {
     case &ArrayType(ArrayInfo{et,_,num_elts_opt,zt,_}):
       if (force_type2bool(false,zt)) {
         if (num_elts_opt == NULL)
-          toc_impos("can't initialize zero-terminated array -- size unknown");
+          toc_impos2("can't initialize zero-terminated array -- size unknown");
         exp_t num_elts = (exp_t)num_elts_opt;
         let lhs = subscript_exp(var_exp(vd->name,DL),
                                 add_exp(num_elts,signed_int_exp(-1,DL),DL),
@@ -4062,7 +4059,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
       let &$(env,_,st) = mybodies->hd;
       if (st == succ_stmt) { senv = env; goto FOUND_ENV; }
     }
-    toc_impos("letdecl_to_c: couldn't find env!");
+    toc_impos2("letdecl_to_c: couldn't find env!");
   FOUND_ENV:
     // translate the body of the let under the env we get out of match
     // compilation.
@@ -4215,7 +4212,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
 			    bool cinclude) {
   for (; ds != NULL; ds = ds->tl) {
     if (!is_toplevel(nv))
-      impos("decls_to_c: not at toplevel!");
+      Warn::impos2("decls_to_c: not at toplevel!");
     fresh_label_counter = 0; // DJG: why not?
     decl_t d = ds->hd;
     switch (d->r) {
@@ -4246,8 +4243,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
       result_decls = new List(d,result_decls);
       break;
     case &Let_d(...):
-    case &Letv_d(_):     toc_impos("letdecl at toplevel");
-    case &Region_d(...): toc_impos("region decl at toplevel");
+    case &Letv_d(_):     toc_impos2("letdecl at toplevel");
+    case &Region_d(...): toc_impos2("region decl at toplevel");
     case &Aggr_d(sd): aggrdecl_to_c(sd); break;
     case &Datatype_d(tud): 
       tud->is_extensible ? xdatatypedecl_to_c(tud) : datatypedecl_to_c(tud);
@@ -4273,7 +4270,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
 	  switch(ed->r) {
 	  case &Enum_d(ed): 
 	    td->defn = new AppType(new EnumCon(ed->name,ed),NULL); break;
-	  default: impos("Toc: enumdecl to name");
+	  default: Warn::impos2("Toc: enumdecl to name");
 	  }
 	}
       } else {

@@ -538,7 +538,7 @@ if(({int _tmp33=(int)*((unsigned char*)_check_fat_subscript(rem,sizeof(unsigned 
 int borrow;
 0 <= k && k <= k + m?0:({struct _fat_ptr _tmp35=({const char*_tmp5="0 <= k && k <= k+m";_tag_fat(_tmp5,sizeof(char),19U);});((int(*)(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line))Cyc___assert_fail)(_tmp35,({const char*_tmp6="xp.cyc";_tag_fat(_tmp6,sizeof(char),7U);}),157U);});
 borrow=({int _tmp38=m + 1;struct _fat_ptr _tmp37=_fat_ptr_plus(rem,sizeof(unsigned char),k);struct _fat_ptr _tmp36=_fat_ptr_plus(rem,sizeof(unsigned char),k);Cyc_XP_sub(_tmp38,_tmp37,_tmp36,dq,0);});
-borrow == 0?0:({struct _fat_ptr _tmp39=({const char*_tmp7="borrow == 0";_tag_fat(_tmp7,sizeof(char),12U);});((int(*)(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line))Cyc___assert_fail)(_tmp39,({const char*_tmp8="xp.cyc";_tag_fat(_tmp8,sizeof(char),7U);}),159U);});};}
+borrow == 0?0:({struct _fat_ptr _tmp39=({const char*_tmp7="borrow == 0";_tag_fat(_tmp7,sizeof(char),12U);});((int(*)(struct _fat_ptr assertion,struct _fat_ptr file,unsigned line))Cyc___assert_fail)(_tmp39,({const char*_tmp8="xp.cyc";_tag_fat(_tmp8,sizeof(char),7U);}),159U);});}}
 # 162
 ((struct _fat_ptr(*)(struct _fat_ptr d,struct _fat_ptr s,unsigned long,unsigned))Cyc__memcpy)(r,(struct _fat_ptr)rem,(unsigned)m / sizeof(*((unsigned char*)rem.curr))+ (unsigned)((unsigned)m % sizeof(*((unsigned char*)rem.curr))== (unsigned)0?0: 1),sizeof(*((unsigned char*)rem.curr)));{
 # 164
@@ -546,7 +546,7 @@ int i;
 for(i=(n - m)+ 1;i < nx;++ i){
 *((unsigned char*)_check_fat_subscript(q,sizeof(unsigned char),i))='\000';}
 for(i=m;i < my;++ i){
-*((unsigned char*)_check_fat_subscript(r,sizeof(unsigned char),i))='\000';}};}}
+*((unsigned char*)_check_fat_subscript(r,sizeof(unsigned char),i))='\000';}}}}
 # 171
 return 1;}
 # 173

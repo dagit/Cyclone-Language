@@ -1636,10 +1636,8 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
         break;
       }
     }
-    //fprintf(stderr,"1: okay = %d\n",okay);
     // can only move from non-const to const or stay same
     okay = okay && (!pinfo_a.elt_tq.real_const || pinfo_b.elt_tq.real_const);
-    //fprintf(stderr,"2: okay = %d\n",okay);
     // first region must outlive the second
     if (!unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
       if (RgnOrder::rgn_outlives_rgn(po,pinfo_a.ptr_atts.rgn,
@@ -1650,7 +1648,6 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
                typ2string(pinfo_b.ptr_atts.rgn));
       } else okay = false;
     }
-    //fprintf(stderr,"3: okay = %d\n",okay);
     // must preserve zero-termination or second pointer must be const
     okay = okay && (unify(pinfo_a.ptr_atts.zero_term,
                           pinfo_b.ptr_atts.zero_term)
@@ -1665,12 +1662,9 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
     let deep_subtype =
       unify(bounds_one(), pinfo_b.ptr_atts.bounds) &&
       (!force_type2bool(false,pinfo_b.ptr_atts.zero_term));
-    //fprintf(stderr,"3.5: deep_subtype = %d, ak = %d\n",deep_subtype,
-    //        kind_leq(&ak,type_kind(pinfo_b.elt_type)));
 
     okay = okay && (unify(pinfo_a.elt_type,pinfo_b.elt_type) ||
                     (deep_subtype && (pinfo_b.elt_tq.real_const || kind_leq(&ak,type_kind(pinfo_b.elt_type))) && ptrsubtype(po,NULL,pinfo_a.elt_type,pinfo_b.elt_type)));
-    // fprintf(stderr,"4: okay = %d\n",okay);
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),

@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <string.h>
+#include "warn.h"
 #include "absynpp.h"
 #include "evexp.h"
 #include "relations-ap.h"
@@ -28,7 +29,6 @@ using List;
 using Absyn;
 using Tcutil;
 namespace Unify;
-typedef Relations::relns_t<`r> relns_t<`r>;
 
 datatype exn {Unify};
 datacon(exn,Unify);
@@ -90,9 +90,8 @@ void explain_failure() {
   fprintf(stderr,"are not compatible. ");
   pos += 17;
   if (failure_reason != NULL) {
-    if (pos+strlen(failure_reason) >= 80) {
+    if (pos+strlen(failure_reason) >= 80)
       fprintf(stderr,"\n\t");
-    };
     fprintf(stderr,"%s",failure_reason);
   }
   fprintf(stderr,"\n");
@@ -101,7 +100,8 @@ void explain_failure() {
 
 // e1 and e2 represent requires/ensures clauses and we're to check
 // logical equivalence.
-static bool check_logical_equivalence(relns_t<`H> r1, relns_t<`H> r2) {
+static bool check_logical_equivalence(Relations::relns_t<`H> r1, 
+				      Relations::relns_t<`H> r2) {
   if (r1 == r2) return true;
   return Relations::check_logical_implication(r1,r2) && 
          Relations::check_logical_implication(r2,r1);
@@ -110,24 +110,18 @@ static bool check_logical_equivalence(relns_t<`H> r1, relns_t<`H> r2) {
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
   switch $(compress_kb(kb1), compress_kb(kb2)) {
   case $(&Eq_kb(k1), &Eq_kb(k2)): return k1 == k2;
-  case $(&Less_kb(*x,k2), &Eq_kb(k1)):
-    if (kind_leq(k1,k2)) {
-      *x = new Opt(kb2);
+  case $(&Less_kb(...), &Eq_kb(_)): return unify_kindbound(kb2,kb1);
+  case $(&Less_kb(*y,k1), &Less_kb(*x,k2)):
+    if (kind_leq(k2,k1)) {
+      *y = new Opt(kb2);
       return true;
-    } else return false;
-  case $(&Eq_kb(k1), &Less_kb(*x,k2)):
-    if (kind_leq(k1,k2)) {
-      *x = new Opt(kb1);
-      return true;
-    } else return false;
-  case $(&Less_kb(*x,k1), &Less_kb(*y,k2)):
-    if (kind_leq(k1,k2)) {
-      *y = new Opt(kb1);
-      return true;
-    } else if (kind_leq(k2,k1)) {
-      *x = new Opt(kb2);
-      return true;
-    } else return false;
+    }
+    fallthru(k1,x,k2);
+  case $(&Eq_kb(k1), &Less_kb(*x,k2)): 
+    if (!kind_leq(k1,k2)) 
+      return false;
+    *x = new Opt(kb1);
+    return true;
   case $(&Unknown_kb(*x), y): fallthru(y,x);
   case $(y, &Unknown_kb(*x)):
     *x = new Opt(y);
@@ -147,21 +141,20 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   case &Evar(_,rg,_,*sopt):
     if (t == evar) 
       fail_because("(occurs check)");
-    else if (rg != NULL) occurs(evar,r,env,rg);
-    else {
-      // check to see if sopt is a subset of env
-      bool problem = false;
-      for (_ s = (*sopt)->v; s != NULL && !problem; s = s->tl)
-        if (!List::mem(fast_tvar_cmp,env,s->hd))
-          problem = true; 
-      // for sopt to be a subset of env
-      if (problem) {
-        let result = NULL;
-        for (_ s = (*sopt)->v; s != NULL; s = s->tl)
-          if (List::mem(fast_tvar_cmp,env,s->hd))
-            result = new List(s->hd,result);
-        *sopt = new Opt(result);
-      }
+    if (rg != NULL)
+      Warn::impos2("occurs check: constrained Evar in compressed type");
+    // check to see if sopt is a subset of env
+    bool problem = false;
+    for (_ s = (*sopt)->v; s != NULL && !problem; s = s->tl)
+      if (!List::mem(fast_tvar_cmp,env,s->hd))
+	problem = true; 
+    // for sopt to be a subset of env
+    if (problem) {
+      let result = NULL;
+      for (_ s = (*sopt)->v; s != NULL; s = s->tl)
+	if (List::mem(fast_tvar_cmp,env,s->hd))
+	  result = new List(s->hd,result);
+      *sopt = new Opt(result);
     }
     break;
   case &PointerType(pinfo):
@@ -179,7 +172,8 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   // FIX: shouldn't we check for occurrence within requires and ensures clauses?
   case &FnType(FnInfo{tvs,eff,rt_tq,rt,args,_,cyc_varargs,rgn_po,...}):
     env = List::rappend(r,tvs,env);
-    if (eff != NULL) occurs(evar,r,env,eff);
+    if (eff != NULL) 
+      occurs(evar,r,env,eff);
     occurs(evar,r,env,rt);
     for(; args != NULL; args = args->tl)
       occurs(evar,r,env,(*args->hd)[2]);
@@ -232,9 +226,9 @@ static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
 // unify two type qualifiers -- throws Unify unless they are the same
 static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
   if (tq1.print_const && !tq1.real_const)
-    impos("tq1 real_const not set.");
+    Warn::impos2("tq1 real_const not set.");
   if (tq2.print_const && !tq2.real_const)
-    impos("tq2 real_const not set.");
+    Warn::impos2("tq2 real_const not set.");
 
   if ((tq1.real_const != tq2.real_const)
       || (tq1.q_volatile != tq2.q_volatile)

@@ -17,33 +17,19 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include <dict.h>
 #include <string.h>
-#include "absynpp.h" // debugging
 #include "warn.h"
 #include "tcutil.h"
 #include "toc.h"
 #include "toseqc.h"
-
 using Core;
 using List;
 using Absyn;
 namespace Toseqc;
 
-#define DL 0
-
-enum SideEffect { Const, NoEffect, ExnEffect, AnyEffect };
 // NoEffect refers to pure expressions, ExnEffect refers to functions that
 // could throw exceptions but are otherwise pure; AnyEffect is everything else.
-
-// static string_t eff_to_string(enum SideEffect e) {
-//   switch (e) {
-//   case Const: return "Const";
-//   case NoEffect: return "NoEffect";
-//   case ExnEffect: return "ExnEffect";
-//   default: return "AnyEffect";
-//   }
-// }
+static enum SideEffect { Const, NoEffect, ExnEffect, AnyEffect };
 
 static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2){
   switch ($(e1,e2)) {
@@ -56,7 +42,7 @@ static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2){
   case $(NoEffect,_): 
   case $(_,NoEffect): return NoEffect;
   case $(Const,Const): return Const;
-  default: Warn::impos("join_side_effect");
+  default: Warn::impos2("join_side_effect");
   }
 }
 
@@ -80,39 +66,36 @@ static string_t exn_effect_funs[] = {
   "_untag_fat_ptr",
   "_region_malloc"
 };
-static enum SideEffect fun_effect(string_t fn) {
-  for (int i = 0; i<numelts(pure_funs); i++)
-    if (!strcmp(pure_funs[i],fn)) 
-      return NoEffect;
-  for (int i = 0; i<numelts(exn_effect_funs); i++)
-    if (!strcmp(exn_effect_funs[i],fn)) 
-      return ExnEffect;
-  return AnyEffect;
+static enum SideEffect fun_effect(qvar_t qv) {
+  switch(qv) {
+  case &$({.Loc_n=_},fn):
+    for (int i = 0; i<numelts(pure_funs); i++)
+      if (!strcmp(pure_funs[i],*fn)) 
+	return NoEffect;
+    for (int i = 0; i<numelts(exn_effect_funs); i++)
+      if (!strcmp(exn_effect_funs[i],*fn)) 
+	return ExnEffect;
+    return AnyEffect;
+  default: return AnyEffect;
+  }
 }
 
 static enum SideEffect exp_effect(exp_t e);
 static enum SideEffect stmt_effect(stmt_t s);
 static enum SideEffect exps_effect(list_t<exp_t> es) {
   enum SideEffect res = Const;
-//   static int level = 0;
-//   printf("==>exps_effect %d\n",level++);
   for (_ x = es; x != NULL; x=x->tl) {
     let eres = exp_effect(x->hd);
     res = join_side_effect(eres,res);
-//     printf("Effect |%s| = %s, join=%s\n",Absynpp::exp2string(x->hd),
-// 	   eff_to_string(eres),eff_to_string(res));
-    if (res == AnyEffect) {
-//       printf("<==exps_effect %d\n",--level);
+    if (res == AnyEffect)
       return res;
-    }
   }
-//   printf("<==exps_effect %d\n",--level);
   return res;
 }
 
 // FIX: could use is_const_exp in Tcutil to better effect?
 static enum SideEffect exp_effect(exp_t e) {
-  string_t bad_form = "";
+  string_t bad_form;
   switch (e->r) {
   case &Const_e(_):
   case &Sizeofexp_e(_): // DJG: exp is irrelevant
@@ -127,28 +110,24 @@ static enum SideEffect exp_effect(exp_t e) {
 
   case &FnCall_e(e,...):
     switch (e->r) {
-    case &Var_e(&Funname_b(d)): return fun_effect(Absynpp::qvar2string(d->name));
-    case &Var_e(&Global_b(vd)): return fun_effect(Absynpp::qvar2string(vd->name));
-    case &Var_e(&Unresolved_b(v)): return fun_effect(Absynpp::qvar2string(v));
-    default:
-      return AnyEffect;
+    case &Var_e(&Funname_b(d)): return fun_effect(d->name);
+    case &Var_e(&Global_b(vd)): return fun_effect(vd->name);
+    case &Var_e(&Unresolved_b(v)): return fun_effect(v);
+    default: return AnyEffect;
     }
     
   case &UnresolvedMem_e(_,dles):
     let $(_,es) = List::split(dles);
     fallthru(es);
 
-  case &Primop_e(_, es):
-    return exps_effect(es);
+  case &Primop_e(_, es): return exps_effect(es);
 
-  case &Conditional_e(e1,e2,e3):
-    return exps_effect(list(e1,e2,e3));
+  case &Conditional_e(e1,e2,e3): return exps_effect(list(e1,e2,e3));
 
   case &Subscript_e(e1,e2):   fallthru(e1,e2);
   case &And_e(e1,e2):         fallthru(e1,e2);
   case &Or_e(e1,e2):          fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):
-    return exps_effect(list(e1,e2));
+  case &SeqExp_e(e1,e2): return exps_effect(list(e1,e2));
 
   case &Extension_e(e1):      fallthru(e1);
   case &NoInstantiate_e(e1):  fallthru(e1);
@@ -158,8 +137,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Deref_e(e1):          fallthru(e1);
   case &AggrMember_e(e1,...): fallthru(e1); 
   case &AggrArrow_e(e1,...):  fallthru(e1);
-  case &Increment_e(e1,_):
-    return exp_effect(e1);
+  case &Increment_e(e1,_): return exp_effect(e1);
 
   case &StmtExp_e(s): return stmt_effect(s);
 
@@ -179,8 +157,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
-  Warn::impos("bad exp form %s (exp=|%s|) after xlation to C",
-	      bad_form, Absynpp::exp2string(e));
+  Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
 static enum SideEffect stmt_effect(stmt_t s) {
   enum SideEffect res = Const;
@@ -205,7 +182,7 @@ static enum SideEffect stmt_effect(stmt_t s) {
     case &Do_s(...):
     case &Decl_s(...):
     case &Switch_s(...): return AnyEffect;
-    default: Warn::impos("bad stmt after xlation to C");
+    default: Warn::impos2("bad stmt after xlation to C");
     }
   }
 }
@@ -275,9 +252,6 @@ static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
     e2->topt = e1->topt;
 
     type_t t = (e2->topt == NULL) ? new TypeofType(e2) : Toc::typ_to_c((type_t)e2->topt);
-//     printf("linearizing |%s|(%x) (|%s| ===> |%s|)\n",Absynpp::exp2string(e2),e2,
-// 	   e2->topt == NULL ? "NONE" : Absynpp::typ2string(e2->topt),
-// 	   Absynpp::typ2string(t));
     stmt = declare_stmt(v,t,e2,stmt,e->loc);
 
     // Update the expression to be the variable
@@ -289,14 +263,11 @@ static stmt_opt_t exps_to_seqc(exp_t e, list_t<exp_t> es) {
     e->r = stmt_exp(stmt,e->loc)->r;
     return laststmt;
   }
-  else return NULL;
-  
-//   printf("final expression: |%s|\n",Absynpp::exp2string(e));
-//   fflush(stdout);    
+  return NULL;
 }
 
 static void exp_to_seqc(exp_t e) {
-  string_t bad_form = "";
+  string_t bad_form;
   switch (e->r) {
   case &Const_e(_):
   case &Var_e(_): return;
@@ -361,8 +332,7 @@ static void exp_to_seqc(exp_t e) {
   case &Tagcheck_e(...): bad_form = "Tagcheck_e"; break;
   case &Valueof_e(...): bad_form = "Valueof_e"; break;
   }
-  Warn::impos("bad exp form %s (exp=|%s|) after xlation to C",
-	      bad_form, Absynpp::exp2string(e));
+  Warn::impos2("bad exp form ",bad_form," (exp=|",e,"|) after xlation to C");
 }
 
 static void stmt_to_seqc(stmt_t s) {
@@ -450,13 +420,13 @@ static void stmt_to_seqc(stmt_t s) {
 		  s->r = s3->r;
 		  break;
 		default:
-		  Warn::impos("exps_to_seqc updated to non-stmt-exp |%s|", 
-			      Absynpp::exp2string((exp_t)vd->initializer));
+		  Warn::impos2("exps_to_seqc updated to non-stmt-exp |",
+			       (exp_t)vd->initializer,"|");
 		}
 		break;
 	      default:
-		Warn::impos("exps_to_seqc returned non-exp-stmt |%s|", 
-			    Absynpp::stmt2string(laststmt));
+		Warn::impos2("exps_to_seqc returned non-exp-stmt |",
+			     laststmt,"|");
 	      }
 	      break;
 	  default:
@@ -470,17 +440,15 @@ static void stmt_to_seqc(stmt_t s) {
       default: break;
       }
       fallthru;
-    default: Warn::impos("bad stmt after xlation to C");
+    default: Warn::impos2("bad stmt after xlation to C");
     }
   }
 }
 
 list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
   let old_ds = ds;
-//   Toc::init(true);
-  for (; old_ds != NULL; old_ds = old_ds->tl) {
-    let next_d = old_ds->hd;
-    switch (next_d->r) {
+  for (; old_ds != NULL; old_ds = old_ds->tl)
+    switch (old_ds->hd->r) {
     case &Fn_d(fd): stmt_to_seqc(fd->body); break;
     case &Var_d(_):         
     case &Let_d(...): 
@@ -497,8 +465,7 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
     case &Porton_d:
     case &Portoff_d: 
     case &Tempeston_d:
-    case &Tempestoff_d: Warn::impos("unexpected toplevel decl in toseqc");
+    case &Tempestoff_d: Warn::impos2("unexpected toplevel decl in toseqc");
     }
-  }
   return ds;
 }

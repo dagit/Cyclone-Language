@@ -20,6 +20,7 @@
 #include <set.h>
 #include <string.h>
 #include "absynpp.h"
+#include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
@@ -49,7 +50,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     // DJG: this case remains because binding does not have topt
     //      I think it's primarily used for tagged unions (not datatypes)
     if (topt == NULL) 
-      terr(p->loc, "cannot determine pattern type");
+      Warn::err2(p->loc, "cannot determine pattern type");
     type_t t = compress(*topt);
     switch (t) {
     case &AppType(&AggrCon(ainfo),_):
@@ -57,7 +58,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       resolve_pat(te, topt, p); 
       break;
     default:
-      terr(p->loc,"pattern expects aggregate type instead of %s",typ2string(t));
+      Warn::err2(p->loc,"pattern expects aggregate type instead of ",t);
       break;
     }
     return;
@@ -65,14 +66,13 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   case &Aggr_p(&{.KnownAggr= adp}, *exist_ts, dps, dots):
     let ad = *adp;
     if(ad->impl==NULL) {
-      terr(p->loc, "can't destructure an abstract %s",
-	   (ad->kind == StructA) ? "struct" : "union");
+      Warn::err2(p->loc, "can't destructure an abstract",ad);
       p->r = &Wild_p_val;
       return;
     }
     int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
     if(more_exists < 0) {
-      terr(p->loc, "too many existentially bound type variables in pattern");
+      Warn::err2(p->loc, "too many existential type variables in pattern");
       let ts = exist_ts;
       for (int n = length(ad->impl->exist_vars); n != 0; n--)
 	ts = &(*ts)->tl;
@@ -88,16 +88,16 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   case &Exp_p(e):
     Tcexp::tcExp(te,NULL,e);
     if (!is_const_exp(e)) {
-      terr(p->loc,"non-constant expression in case pattern");
+      Warn::err2(p->loc,"non-constant expression in case pattern");
       p->r = &Wild_p_val;
     }
     let $(i,known) = Evexp::eval_const_uint_exp(e);
     p->r = new Int_p(None,i);
     return;
 
-  case &UnknownId_p(...):   impos("resolve_pat UnknownId_p");
-  case &UnknownCall_p(...): impos("resolve_pat UnknownCall_p");
-  case &Aggr_p(...):        impos("resolve_pat unknownAggr");
+  case &UnknownId_p(...):   Warn::impos2("resolve_pat UnknownId_p");
+  case &UnknownCall_p(...): Warn::impos2("resolve_pat UnknownCall_p");
+  case &Aggr_p(...):        Warn::impos2("resolve_pat unknownAggr");
 
   default: return;
   }
@@ -186,7 +186,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // warn if the variable is "true" or "false"
     let &$(_,&v) = vd->name;
     if (strcmp(v,"true") == 0 || strcmp(v,"false") == 0)
-      warn(p->loc,"you probably do not want to use %s as a local variable",v);
+      Warn::warn2(p->loc,"you probably do not want to use ",v,
+		  " as a local variable");
     res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
     // We allow arrays as long as the rgn_pat is defined, since
@@ -194,11 +195,11 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     switch (compress(t)) {
     case &ArrayType(_):
       if (rgn_pat == NULL || !allow_ref_pat)
-        terr(p->loc,"array reference would point into unknown/unallowed region");
+        Warn::err2(p->loc,"array reference would point into unknown/unallowed region");
       break;
     default:
       if (!kind_leq(type_kind(t),&tmk))
-        terr(p->loc, "pattern would point to an abstract member");
+        Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
     set_vd(new vd, access_exp, &res.patvars, pat_promote_array(te,t,rgn_pat));
@@ -217,11 +218,11 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     switch (compress(t)) {
     case &ArrayType(_):
       if (rgn_pat == NULL || !allow_ref_pat)
-        terr(p->loc, "array reference would point into unknown/unallowed region");
+        Warn::err2(p->loc, "array reference would point into unknown/unallowed region");
       break;
     default:
       if (!kind_leq(type_kind(t),&tmk))
-        terr(p->loc, "pattern would point to an abstract member");
+        Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
     set_vd(new vd, access_exp, &res.patvars, vd->type);
@@ -231,12 +232,12 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     res = tcPatRec(te,p2,topt,rgn_pat,allow_ref_pat,access_exp);
     t = (type_t)p2->topt;
     if(!allow_ref_pat || rgn_pat == NULL) {
-      terr(p->loc, "* pattern would point into an unknown/unallowed region");
+      Warn::err2(p->loc, "* pattern would point into an unknown/unallowed region");
       break;
     }
     else {
       if (is_noalias_pointer_or_aggr(t))
-	terr(p->loc, "* pattern cannot take the address of an alias-free path");
+	Warn::err2(p->loc, "* pattern cannot take the address of an alias-free path");
     }
     exp_opt_t new_access_exp = NULL;
     let tvs = lookup_type_vars(te);
@@ -367,7 +368,7 @@ DONT_PROMOTE:
             *ps_p = List::imp_append(ps,wild_ps);
             ps = *ps_p;
           } else if (List::length(ps) == List::length(tqts))
-            warn(p->loc,"unnecessary ... in tuple pattern");
+            Warn::warn(p->loc,"unnecessary ... in tuple pattern");
           // otherwise we'll get an error later on.
         }
         break;
@@ -375,7 +376,7 @@ DONT_PROMOTE:
       default: break;
       }
     else if (dots)
-      terr(p->loc,"cannot determine missing fields for ... in tuple pattern");
+      Warn::err2(p->loc,"cannot determine missing fields for ... in tuple pattern");
     for(int i = 0; ps != NULL; ps=ps->tl, i++) {
       let inner_topt = NULL;
       if(topt_ts != NULL) {
@@ -398,9 +399,8 @@ DONT_PROMOTE:
 
   case &Aggr_p(&{.KnownAggr = &ad},exist_ts,*dps_p,dots):
     let dps = *dps_p;
-    string_t aggr_str = (ad->kind == StructA) ? "struct" : "union";
     if(ad->impl==NULL) {
-      terr(p->loc,"can't destructure an abstract %s",aggr_str);
+      Warn::err2(p->loc,"can't destructure abstract ",ad);
       t = wildtyp(lookup_opt_type_vars(te));
       break;
     }
@@ -431,7 +431,8 @@ DONT_PROMOTE:
 	switch(kb2) {
 	case &Less_kb(_,k): fallthru(k);
 	case &Eq_kb(k): k2 = k; break;
-	default: impos("unconstrained existential type variable in aggregate");
+	default: 
+	  Warn::impos2("unconstrained existential type variable in aggregate");
 	}
 	switch (kb1) {
 	  // ensure that kind of quantified var <:: kind of pattern var
@@ -442,12 +443,9 @@ DONT_PROMOTE:
 	case &Less_kb(*f,k): fallthru(f);
 	case &Unknown_kb(*f): *f = new Opt(kb2); break;
 	}
-	if(error) {
-	  terr(p->loc,"type variable %s has kind %s "
-	              "but must have at least kind %s",
-	       *tv->name,
-	       kindbound2string(kb1),kind2string(k2));
-	}
+	if(error)
+	  Warn::err2(p->loc,"type variable ",tv," has kind ",kb1,
+		     " but must have at least kind ",k2);
 	type_t vartype = new VarType(tv);
 	var_tvs = rnew(rgn) List((type_t)(vartype),var_tvs);
 	// if unpacking a region var, must add it to the po
@@ -457,7 +455,7 @@ DONT_PROMOTE:
 	    outlives_constraints =
 	      new List(new $(empty_effect,vartype),outlives_constraints);
 	  else
-	    impos("opened existential had unique or top region kind");
+	    Warn::impos2("opened existential had unique or top region kind");
 	}
       }
 
@@ -493,7 +491,7 @@ DONT_PROMOTE:
       //*tsp = all_typs;
       t = aggr_type(KnownAggr(new ad),all_typs);
       if (dots && ad->kind == UnionA) 
-	warn(p->loc,"`...' pattern not allowed in union pattern");
+	Warn::warn(p->loc,"`...' pattern not allowed in union pattern");
       else if (dots) {
 	// fill in wild patterns for the missing fields
 	let ldps = List::length(dps);
@@ -505,7 +503,7 @@ DONT_PROMOTE:
 	  *dps_p = List::imp_append(dps,wild_dps);
 	  dps = *dps_p;
 	} else if (ldps == lfields)
-	  warn(p->loc,"unnecessary ... in struct pattern");
+	  Warn::warn(p->loc,"unnecessary ... in struct pattern");
       }
       list_t<$(aggrfield_t,pat_t)@`rgn,`rgn> fields =
 	resolve_aggregate_designators(rgn,p->loc,dps,ad->kind,ad->impl->fields);
@@ -522,9 +520,9 @@ DONT_PROMOTE:
 	// against the exp we're matching against.  Even if we succeed now,
 	// we could be constraining so as to catch an error later.
 	if (!Unify::unify((type_t)pat->topt,inst_fieldtyp))
-	  terr(p->loc,"field %s of %s pattern expects type %s != %s",
-	       *field->name, aggr_str, typ2string(inst_fieldtyp), 
-	       typ2string((type_t)pat->topt));
+	  Warn::err2(p->loc,"field ",*field->name," of ",ad,
+		     " pattern expects type ",inst_fieldtyp," != ",
+		     (type_t)pat->topt);
 	if (new_access_exp) new_access_exp->topt = pat->topt;
       }
     }
@@ -550,8 +548,7 @@ DONT_PROMOTE:
 	*ps_p = List::imp_append(ps,wild_ps);
 	ps = *ps_p;
       } else if (lps == ltqts)
-	warn(p->loc,"unnecessary ... in datatype field %s",
-	     qvar2string(tud->name));
+	Warn::warn2(p->loc,"unnecessary ... in datatype field ",tud->name);
     }
     for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
       let p2 = ps->hd;
@@ -568,16 +565,13 @@ DONT_PROMOTE:
       // against the exp we're matching against.  Even if we succeed now,
       // we could be constraining so as to catch an error later.
       if (!Unify::unify((type_t)p2->topt,field_typ))
-	terr(p2->loc, "%s expects argument type %s, not %s",
-	     qvar2string(tuf->name), typ2string(field_typ),
-	     typ2string((type_t)p2->topt));
+	Warn::err2(p2->loc, tuf->name," expects argument type ",field_typ,
+		   " not ",(type_t)p2->topt);
     }
     if (ps != NULL)
-      terr(p->loc,"too many arguments for datatype constructor %s",
-	   qvar2string(tuf->name));
+      Warn::err2(p->loc,"too many arguments for datatype constructor ",tuf->name);
     if (tqts != NULL)
-      terr(p->loc,"too few arguments for datatype constructor %s",
-	   qvar2string(tuf->name));
+      Warn::err2(p->loc,"too few arguments for datatype constructor ",tuf->name);
     break;
 
   case &Aggr_p(NULL,...):
@@ -659,11 +653,10 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
 //     unchecked_cast(initializer,new_type,Other_coercion);
     switch $(compress(old_type),compress(new_type)) {
     case $(&PointerType(pold), &PointerType(pnew)): break;
-    default: terr(loc,"alias requires pointer type"); break;
+    default: Warn::err2(loc,"alias requires pointer type"); break;
     }
   } else {
-    terr(loc,"cannot alias value of type %s to type %s",
-         typ2string(old_type), typ2string(new_type));
+    Warn::err2(loc,"cannot alias value of type ",old_type," to type ",new_type);
   }
 }
 
@@ -680,7 +673,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       check_rgn_accessible(te,p->loc,rt);
       check_pat_regions_rec(te,p2,is_noalias_region(rt,false),patvars);
       return;
-    default: impos("check_pat_regions: bad pointer type");
+    default: Warn::impos2("check_pat_regions: bad pointer type");
     }
   case &Aggr_p(ai,exist_ts,dps,_): 
     for (; dps != NULL; dps = dps->tl)
@@ -703,10 +696,10 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 	switch (((exp_t)eopt)->r) {
 	case &Address_e(e):
 	  if (is_noalias_pointer_or_aggr((type_t)e->topt))
-	    terr(p->loc,"reference pattern not allowed on alias-free pointers");
+	    Warn::err2(p->loc,"reference pattern not allowed on alias-free pointers");
 	  break;
 	default:
-	  impos("check_pat_regions: bad reference access expression");
+	  Warn::impos2("check_pat_regions: bad reference access expression");
 	}
 	break;
       }
@@ -717,7 +710,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
     switch (p->topt) {
     case &ArrayType(_):
       if (did_noalias_deref) {
-	terr(p->loc,"pattern to array would create alias of no-alias pointer");
+	Warn::err2(p->loc,"pattern to array would create alias of no-alias pointer");
 	return;
       }
       break;
@@ -732,7 +725,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
       // case we disallow the alias, since we must know the path
       if (vdopt != NULL && *vdopt == vd) {
 	if (eopt == NULL)
-	  terr(p->loc,"cannot alias pattern expression in datatype");
+	  Warn::err2(p->loc,"cannot alias pattern expression in datatype");
 	else {
 	  tenv_t te2 = add_type_vars(p->loc,te,list(tv));
 	  te2 = add_region(te2, new VarType(tv), false);
@@ -766,16 +759,14 @@ void check_pat_regions(tenv_t te, pat_t p,
     let &$(vdopt,eopt) = x->hd;
     if (eopt != NULL) {
       let e = (exp_t)eopt;
-// 	fprintf(stderr,"checking exp=|%s|:%s\n",
-// 		exp2string(e), typ2string((type_t)e->topt));
       if (is_noalias_pointer_or_aggr((type_t)e->topt) && !is_noalias_path(e))
 	// FIX: need better location information
-	terr(p->loc,"pattern %s dereferences a alias-free pointer from a "
-	     "non-unique path",
-	     vdopt != NULL ? (const char ? @nozeroterm)
-	     aprintf("for variable %s",
-		     qvar2string((*vdopt)->name)) 
-	     : "");
+	if(vdopt == NULL)
+	  Warn::err2(p->loc,"pattern dereferences an alias-free-pointer ",
+		     "from a non-unique path");
+	else
+	  Warn::err2(p->loc,"pattern for variable ",(*vdopt)->name,
+	     "dereferences an alias-free-pointer from a non-unique path");
     }
   }
 }
@@ -910,7 +901,7 @@ static int get_member_offset(aggrdecl_t ad, field_name_t f) {
     if (strcmp(*field->name,*f) == 0) return i;
     ++i;
   }
-  impos(aprintf("get_member_offset %s failed",*f));
+  Warn::impos2("get_member_offset ",*f," failed");
 }
 
 static pat_test_t get_pat_test(union PatOrWhere pw) {
@@ -934,7 +925,7 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
         break;
       default: break;
       }
-      impos("non-null pointer type or non-pointer type in pointer pattern");
+      Warn::impos2("non-null pointer type or non-pointer type in pointer pattern");
     case &Datatype_p(ddecl, df, _, _):
       if (ddecl->is_extensible) 
         return new EqExtensibleDatatype(ddecl, df);
@@ -947,12 +938,12 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
         field_name_t f;
         switch (designators->hd) {
         case &FieldName(fn): f = fn; break;
-        default: impos("no field name in tagged union pattern");
+        default: Warn::impos2("no field name in tagged union pattern");
         }
         return new EqTaggedUnion(f,get_member_offset(ad,f));
       } else 
-        impos("non-tagged aggregate in pattern test");
-    default: impos("non-test pattern in pattern test");
+        Warn::impos2("non-tagged aggregate in pattern test");
+    default: Warn::impos2("non-test pattern in pattern test");
     }
   }
 }  
@@ -1034,7 +1025,7 @@ static simple_pat_t compile_pat(pat_t p) {
       else 
 	s = ptr_pat(ss,p);
       break;
-    default: impos("expecting pointertype for pattern!");
+    default: Warn::impos2("expecting pointertype for pattern!");
     }
     break;
   case &Datatype_p(tud,tuf,ps,_):
@@ -1047,7 +1038,7 @@ static simple_pat_t compile_pat(pat_t p) {
         span = new (List::length(tud->fields->v)); 
       break;
     case &AppType(&DatatypeFieldCon(_),_): span = &one_opt; break;
-    default: span = impos("void datatype pattern has bad type"); break;
+    default: Warn::impos2("void datatype pattern has bad type");
     }
     s = con_pat(*((*tuf->name)[1]),span, List::map(compile_pat,ps),p);
     break;
@@ -1072,23 +1063,23 @@ static simple_pat_t compile_pat(pat_t p) {
               found = true;
             }
             break;
-          default: impos("bad designator(s)"); 
+          default: Warn::impos2("bad designator(s)"); 
           }
         }
         if(!found)
-          impos("bad designator");
+          Warn::impos2("bad designator");
       }
       s = tuple_pat(List::imp_rev(ps),pw(p));
     } else {
       // ad->kind == UnionA-- want to treat this like a datatype
       if (!ad->impl->tagged) 
-        terr(p->loc,"patterns on untagged unions not yet supported.");
+        Warn::err2(p->loc,"patterns on untagged unions not yet supported.");
       int * span = new List::length(ad->impl->fields);
       switch (dlps) {
       case &List{.hd=&$(&List{.hd=&FieldName(f),.tl=NULL},p2),.tl=NULL}:
         s = con_pat(*f,span,new List{compile_pat(p2),NULL},p);
         break;
-      default: impos("bad union pattern");
+      default: Warn::impos2("bad union pattern");
       }
     }
     break;
@@ -1108,7 +1099,7 @@ static simple_pat_t compile_pat(pat_t p) {
     list_t<enumfield_t,`H> fields;
     switch (compress(tenum)) {
     case &AppType(&AnonEnumCon(fs),_): fields = fs; break;
-    default: impos("bad type in AnonEnum_p");
+    default: Warn::impos2("bad type in AnonEnum_p");
     };
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
@@ -1300,7 +1291,7 @@ static term_desc_t add_neg(term_desc_t td, con_t c) {
       impos("add_neg called when |cs U {c}| >= span(c)");
     */
     return new Neg(Set::insert(cs,c));
-  case &Pos(_,_): impos("add_neg called when td is Positive");
+  case &Pos(_,_): Warn::impos2("add_neg called when td is Positive");
   }
 }
 
@@ -1342,7 +1333,7 @@ static context_t augment(context_t ctxt, term_desc_t dsc) {
 // into a positive descriptor Pos(c,[d1,d2,...,dn-1,dn]).
 static context_t norm_context(context_t ctxt) {
   switch (ctxt) {
-  case NULL: impos("norm_context: empty context");
+  case NULL: Warn::impos2("norm_context: empty context");
   case &List{.hd=&$(c,args), .tl=rest}: 
     return augment(rest, new Pos(c, List::rev(args)));
   }
@@ -1358,7 +1349,7 @@ static term_desc_t build_desc(context_t ctxt,
   switch ($(ctxt,work)) {
   case $(NULL,NULL): return dsc;
   case $(NULL,_):    
-  case $(_,   NULL): impos("build_desc: ctxt and work don't match");
+  case $(_,   NULL): Warn::impos2("build_desc: ctxt and work don't match");
   case $(&List{.hd=&$(c,args), .tl=rest}, &List{.hd=&$(_,_,dargs), .tl=work2}):
     let td = new Pos(c, List::append(List::rev(args), new List(dsc,dargs)));
     return build_desc(rest, td, work2);
@@ -1397,7 +1388,7 @@ static decision_t and_match(context_t ctx,
     return and_match(norm_context(ctx), workr, right_hand_side, rules);
   case &List{.hd = &$(pats,objs,dscs), .tl = workr }:
     if (pats == NULL || objs == NULL || dscs == NULL)
-      impos("tcpat:and_match: malformed work frame");    
+      Warn::impos2("tcpat:and_match: malformed work frame");    
     let &List(pat1,patr) = (_@)pats;
     let &List(obj1,objr) = (_@)objs;
     let &List(dsc1,dscr) = (_@)dscs;
@@ -1429,7 +1420,7 @@ static access_t get_access(union PatOrWhere pw, int i) {
     switch (p->r) {
     case &Pointer_p(...): 
       if (i != 0) 
-        impos(aprintf("get_access on pointer pattern with offset %d\n",i));
+        Warn::impos("get_access on pointer pattern with offset %d\n",i);
       return &Deref_val;
     case &Tuple_p(...): return new TupleField(i);
     case &Datatype_p(tud,tuf,...): return new DatatypeField(tud,tuf,i);
@@ -1439,14 +1430,14 @@ static access_t get_access(union PatOrWhere pw, int i) {
         switch ((*dlps->hd)[0]) {
         case &List{&FieldName(f),NULL}:
           return new AggrField(ad->impl->tagged,f);
-        default: impos(aprintf("get_access on bad aggr pattern: %s",pat2string(p)));
+        default: Warn::impos("get_access on bad aggr pattern: %s",pat2string(p));
         }
       }
       let fields = ad->impl->fields;
       let orig_i = i;
       for (; i != 0; i--) fields = fields->tl;
       return new AggrField(ad->impl->tagged,fields->hd->name);
-    default: impos(aprintf("get_access on bad pattern: %s",pat2string(p)));
+    default: Warn::impos("get_access on bad pattern: %s",pat2string(p));
     }
   }
 }
@@ -1666,10 +1657,10 @@ static string_t descs2string(list_t<term_desc_t> ds) {
 static void not_exhaust_err(seg_t loc, term_desc_t desc) {
   try {
     let s = desc2string(desc);
-    terr(loc,"patterns may not be exhaustive.\n\tmissing case for %s",s);
+    Warn::err2(loc,"patterns may not be exhaustive.\n\tmissing case for ",s);
   } catch {
   case &Desc2string: 
-    terr(loc,"patterns may not be exhaustive.");
+    Warn::err2(loc,"patterns may not be exhaustive.");
     break;
   }
 }
@@ -1695,7 +1686,7 @@ void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs,
   for (; match_rules != NULL; match_rules = match_rules->tl) {
     let &$(_,&Rhs{b,loc2,_}) = match_rules->hd;
     if (!b) {
-      terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)"); 
+      Warn::err2(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)"); 
       //print_dec_tree(dec_tree, print_swrhs, 0);
       break; // only give one error
     }
@@ -1710,10 +1701,10 @@ static void not_exhaust_warn($(seg_t, bool) @ pr, term_desc_t desc) {
   (*pr)[1] = false;
   try {
     let s = desc2string(desc);
-    warn((*pr)[0],"pattern not exhaustive.\n\tmissing case for %s",s);
+    Warn::warn2((*pr)[0],"pattern not exhaustive.\n\tmissing case for ",s);
   } catch {
   case &Desc2string:
-    warn((*pr)[0],"pattern not exhaustive.");
+    Warn::warn2((*pr)[0],"pattern not exhaustive.");
     break;
   }
 }
@@ -1742,7 +1733,7 @@ static $(simple_pat_t, rhs_t)@ get_match2(switch_clause_t swc) {
   // must rule out where clauses since we do not compile the patterns
   // properly otherwise (see below).
   if (swc->where_clause != NULL) {
-    terr(swc->where_clause->loc,"&&-clauses not supported in exception handlers.");
+    Warn::err2(swc->where_clause->loc,"&&-clauses not supported in exception handlers.");
   }
   rhs_t rhs = new Rhs{false,swc->pattern->loc,swc->body};
   return new $(sp0, rhs);
@@ -1765,7 +1756,7 @@ void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs,
     if (match_rules->tl == NULL) break;
     let &$(_,&Rhs{b,loc2,_}) = match_rules->hd;
     if (!b) {
-      terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)");
+      Warn::err2(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)");
       break; // only give one error
     }
   }

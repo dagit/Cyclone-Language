@@ -18,6 +18,7 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include <string.h>
 #include "absynpp.h"
+#include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
@@ -59,7 +60,7 @@ static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
 
 static bool fnTypeAttsRangeOK(seg_t loc,int i,int nargs,attribute_t att) {
   if(i < 1 || i > nargs) {
-    terr(loc,"%s has an out-of-range index",attribute2string(att));
+    Warn::err2(loc,att," has an out-of-range index");
     return false;
   }
   return true;
@@ -68,8 +69,8 @@ static void fnTypeAttsOverlap(seg_t loc, int i,
 			      $(list_t<int>,string_t) lst1,
 			      $(list_t<int>,string_t) lst2) {
   if(List::memq(lst2[0],i))
-    terr(loc, "incompatible %s() and %s() attributes on parameter %d",
-	 lst1[1], lst2[1], i);
+    Warn::err(loc, "incompatible %s() and %s() attributes on parameter %d",
+	      lst1[1], lst2[1], i);
 }
 static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
   $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
@@ -89,14 +90,14 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	switch(Tcutil::compress(t)) {
 	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
 	  if(force_type2bool(false,nullable))
-	    terr(loc,"%s non-null pointers",s);
+	    Warn::err2(loc,s," non-null pointers");
 	  if(!is_bound_one(bd))
-	    terr(loc,"%s pointers of size 1",s);
+	    Warn::err2(loc,s," pointers of size 1");
 	  if(force_type2bool(false,zt))
-	    terr(loc,"%s pointers to non-zero-terminated arrays",s);
+	    Warn::err2(loc,s," pointers to non-zero-terminated arrays");
 	  break;
 	default:
-	  terr(loc,"%s pointers",s);
+	  Warn::err2(loc,s," pointers");
 	}
 	init_params[0] = new List(i,init_params[0]); 
 	break;
@@ -106,7 +107,7 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
 	if (!is_noalias_pointer(t,false))
-	  terr(loc,"noliveunique attribute allowed only on unique pointers");
+	  Warn::err2(loc,"noliveunique allowed only on unique pointers");
 	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
 	break;
       case &Consume_att(i):
@@ -115,14 +116,14 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	// NB. noliveunique and consume can overlap
 	let &$(_,_,t) = List::nth(args,i-1);
 	if (!is_noalias_pointer(t,false))
-	  terr(loc,"consume attribute allowed only on unique pointers");
+	  Warn::err2(loc,"consume allowed only on unique pointers");
 	consume_params[0] = new List(i,consume_params[0]); 
 	break;
       default: break;
       }
     }
     break;
-  default: impos("fnTypeAttsOK: not a function type");
+  default: Warn::impos2("fnTypeAttsOK: not a function type");
   }
 }
 
@@ -173,7 +174,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
     if(initializer != NULL && !in_cinclude)
-      terr(loc,"extern declaration should not have initializer");
+      Warn::err2(loc,"extern declaration should not have initializer");
   } else if (!is_function_type(t)) {
     // we skip over function types -- these are function prototypes.
     // otherwise, we compute default initializer, if necessary
@@ -191,15 +192,13 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       case &Dllimport_att:  
       case &Dllexport_att: continue;
       default:
-        terr(loc,"bad attribute %s for variable %s",
-             attribute2string(atts->hd), qvar2string(vd->name));
+        Warn::err2(loc,"bad attribute ",atts->hd," for variable ",vd);
         break;
       }
 
     if(initializer == NULL || in_cinclude) {
       if (check_var_init && !in_cinclude && !zeroable_type(t))
-        terr(loc,"initializer required for variable %s of type %s",
-             qvar2string(vd->name), typ2string(t));
+        Warn::err2(loc,"initializer required for variable ",vd," of type ",t);
     } else {
       let e = (exp_t)initializer;
       // type-check the initializer
@@ -547,7 +546,7 @@ static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs,
       *f = new Opt(kind_to_bound(k)); continue;
     case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type %s attempts to abstract type variable %s of kind %s", 
-           *((*n)[1]), *tvs2->hd->name, Absynpp::kind2string(new Kind(MemKind,a)));
+           *((*n)[1]), *tvs2->hd->name, kind2string(new Kind(MemKind,a)));
       continue;
     default: continue;
     }
@@ -685,7 +684,7 @@ static void rule_out_mem_and_unique(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
     case &Eq_kb(&Kind(MemKind,a)):
       terr(loc,"type %s attempts to abstract type "
            "variable %s of kind %s",*((*q)[1]),*tvs2->hd->name,
-	   Absynpp::kind2string(new Kind(MemKind,a))); break;
+	   kind2string(new Kind(MemKind,a))); break;
     default: break;
     }
   }
@@ -1040,13 +1039,10 @@ static bool is_extern(vardecl_t vd) {
 static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   switch(d->r) {
   case &Var_d(vd):
-    //fprintf(stderr,"looking at var %s: ",qvar2string(vd->name));
     // get rid of externs that are never referenced
     if (env->in_cinclude || !is_extern(vd) ||
-	!qvar_cmp(vd->name,uniquergn_qvar())) {
-      //fprintf(stderr,"needed--!extern or in_cinclude or unique_rgn\n");
+	!qvar_cmp(vd->name,uniquergn_qvar()))
       return true;
-    }
     return (*Dict::lookup(env->ordinaries,vd->name))[1];
   case &ExternC_d(*ds2p): fallthru(ds2p);
   case &Using_d(_,*ds2p): fallthru(ds2p);

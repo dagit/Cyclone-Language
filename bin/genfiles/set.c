@@ -529,7 +529,7 @@ nodes=x2;else{
 curr->tl=x2;}
 ({int _tmp28=Cyc_List_length(x2);cardinality +=_tmp28;});}}
 # 212
-return({struct Cyc_Set_Set*_tmp12=_cycalloc(sizeof(*_tmp12));_tmp12->cmp=comp,_tmp12->cardinality=cardinality,_tmp12->nodes=nodes;_tmp12;});};}
+return({struct Cyc_Set_Set*_tmp12=_cycalloc(sizeof(*_tmp12));_tmp12->cmp=comp,_tmp12->cardinality=cardinality,_tmp12->nodes=nodes;_tmp12;});}}
 # 218
 static struct Cyc_List_List*Cyc_Set_delete_b(int(*cmp)(void*,void*),struct Cyc_List_List*n,void*elt){
 if(cmp(((struct Cyc_List_List*)_check_null(n))->hd,elt)== 0)return n->tl;{
@@ -543,7 +543,7 @@ prev=prev->tl;
 n=n->tl;}
 # 229
 ({struct Cyc_List_List*_tmp2A=((struct Cyc_List_List*)_check_null(n))->tl;((struct Cyc_List_List*)_check_null(prev))->tl=_tmp2A;});
-return result;};}
+return result;}}
 # 234
 struct Cyc_Set_Set*Cyc_Set_delete(struct Cyc_Set_Set*s,void*elt){
 if(Cyc_Set_member(s,elt))
@@ -562,7 +562,7 @@ n=n->tl;}
 # 254
 ({struct Cyc_List_List*_tmp2C=((struct Cyc_List_List*)_check_null(n))->tl;((struct Cyc_List_List*)_check_null(prev))->tl=_tmp2C;});
 *ret=n->hd;
-return res;};}
+return res;}}
 # 260
 void*Cyc_Set_imp_delete(struct Cyc_Set_Set*s,void*elt){
 void*ret=elt;
@@ -628,7 +628,7 @@ x1=x1->tl;else{
 # 331
 x2=x2->tl;}}}
 # 334
-return({struct Cyc_Set_Set*_tmp18=_cycalloc(sizeof(*_tmp18));_tmp18->cmp=comp,_tmp18->cardinality=card,_tmp18->nodes=result;_tmp18;});};}
+return({struct Cyc_Set_Set*_tmp18=_cycalloc(sizeof(*_tmp18));_tmp18->cmp=comp,_tmp18->cardinality=card,_tmp18->nodes=result;_tmp18;});}}
 # 337
 struct Cyc_Set_Set*Cyc_Set_from_list(int(*comp)(void*,void*),struct Cyc_List_List*x){
 struct Cyc_List_List*z=Cyc_List_merge_sort(comp,x);
@@ -653,7 +653,7 @@ x1=x1->tl;
 x2=x2->tl;}else{
 if(i > 0)
 x2=x2->tl;else{
-return 0;}}};}
+return 0;}}}}
 # 363
 return 1;}
 # 366
@@ -689,7 +689,7 @@ if(diff != 0)return diff;
 x1=x1->tl;
 x2=x2->tl;}
 # 400
-return 0;};}
+return 0;}}
 # 403
 int Cyc_Set_equals(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2){
 return Cyc_Set_setcmp(s1,s2)== 0;}char Cyc_Set_Absent[7U]="Absent";

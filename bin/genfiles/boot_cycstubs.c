@@ -409,9 +409,9 @@ return fgetc(f->file);}
 struct __abstractFILE*fopen(const char*,const char*);
 # 81
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
-struct __abstractFILE*_tmp0=fopen(name,type);
+struct __abstractFILE*_tmp0=fopen(name,type);struct __abstractFILE*cf=_tmp0;
 # 84
-return(unsigned)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=_tmp0;_tmp1;}): 0;}
+return(unsigned)cf?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=cf;_tmp1;}): 0;}
 # 88
 int fputc(int,struct __abstractFILE*);
 # 90
@@ -486,8 +486,8 @@ static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure
 # 187
 struct _fat_ptr Cyc_getcwd(struct _fat_ptr buf,unsigned long size){
 if(_get_fat_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{
-char*_tmp9=getcwd((char*)_untag_fat_ptr(buf,sizeof(char),1U),size);
-return(unsigned)_tmp9?buf: _tag_fat(0,0,0);};}
+char*_tmp9=getcwd((char*)_untag_fat_ptr(buf,sizeof(char),1U),size);char*response=_tmp9;
+return(unsigned)response?buf: _tag_fat(0,0,0);}}
 # 194
 int Cyc_Execinfo_bt(){
 return 1;}

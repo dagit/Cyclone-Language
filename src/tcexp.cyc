@@ -16,18 +16,14 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 /* TODO:
    compound literals
    generalized array and struct designators
    JGMFIX: lousy error messages...
-   EXPLAIN DELTA -- need to explain the difference in rich types
-   other instances of typ2string should (outside of EXPLAIN DELTA)
-     should be pretty-printed in a more user-friendly manner (i.e.,
-     leave off effects, regions, etc. unless they're relevant.)
  */
 
 #include <string.h>
+#include "warn.h"
 #include "absynpp.h"
 #include "unify.h"
 #include "tcutil.h"
@@ -46,27 +42,29 @@ using Tcenv;
 using Tcutil;
 namespace Tcexp;
 
-static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
-                       ... inject parg_t ap)
-  __attribute__((format(printf,4,5)))
-{
-  terr(loc,vrprintf(heap_region,msg,ap));
+static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, 
+		       ... inject Warn::warg_t ap) {
+  Warn::verr2(loc,ap);
   if (topt == NULL)
     return wildtyp(lookup_opt_type_vars(te));
-  else
-    return *topt;
+  return *topt;
+}
+static void err_and_explain(seg_t loc,... inject Warn::warg_t ap) {
+  Warn::verr2(loc,ap);
+  Unify::explain_failure();
+}
+void unique_consume_err(seg_t loc) {
+#ifdef NO_PATHS
+  Warn::err2(loc,"Cannot consume paths; do swap instead");
+#else
+  Warn::err2(loc,"Cannot consume non-unique paths; do swap instead");
+#endif
 }
 
-#ifdef NO_PATHS
-#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"
-#else
-#define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
-#endif
-
 static
-void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
+void resolve_unresolved_mem(seg_t loc, type_t * topt, exp_t e,
 			    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des){
-  // NOTE: must always bang e->r or caller will loop!
+  // NOTE: must always set e->r or caller will loop!
   if (topt == NULL) {
     // guess it is an array
     e->r = new Array_e(des);
@@ -76,11 +74,11 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   switch (compress(t)) {
   case &AppType(&AggrCon(info),_):
     switch(info) {
-    case {.UnknownAggr = _}: impos("struct type not properly set");
+    case {.UnknownAggr = _}: Warn::impos_loc2(loc,"struct type improperly set");
     case {.KnownAggr = &ad}: e->r = new Aggregate_e(ad->name,NULL,des,ad);
     }
     break;
-  case &ArrayType(ArrayInfo{at,aq,_,_,_}): e->r = new Array_e(des); break;
+  case &ArrayType(ArrayInfo{at,aq,...}): e->r = new Array_e(des); break;
   case &AnonAggrType(_,_):  e->r = new AnonStruct_e(t,des); break;
   default:                  e->r = new Array_e(des);        break;//do something
   }
@@ -88,9 +86,9 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 
 //////////////////////// Actual Type-checking //////////////////////////////
 
-// forward reference just b/c of how things are organized at the moment
-static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e);
-static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e);
+// forward reference just b/c of how things are organized
+static void tcExpNoInst(tenv_t, type_t *, exp_t);
+static type_t tcExpNoPromote(tenv_t, type_t *, exp_t);
 
 // Type check a list of expressions
 static void tcExpList(tenv_t te, list_t<exp_t> es) {
@@ -102,19 +100,20 @@ static void tcExpList(tenv_t te, list_t<exp_t> es) {
 static void check_contains_assign(exp_t e) {
   switch (e->r) {
   case &AssignOp_e(_,NULL,_): 
-    if (Tc::aggressive_warn) warn(e->loc,"assignment in test");
+    if (Tc::aggressive_warn) 
+      Warn::warn2(e->loc,"assignment in test");
     break;
   default: break;
   }
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
-void tcTest(tenv_t te, exp_t e, string_t msg_part) {
+void tcTest(tenv_t te, exp_t e, string_t<`H> msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_type,e);
   if (!coerce_to_bool(e))
-    terr(e->loc,"test of %s has type %s instead of integral or pointer type",
-         msg_part, typ2string((type_t)e->topt));
+    Warn::err2(e->loc,"test of ",msg_part," has type ",(type_t)e->topt, 
+	       " instead of integral or pointer type");
 }
 
 /* FIX: how to interpret a multibyte character string is
@@ -131,101 +130,77 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
       ---------     ----------
       L"a" L"b" --> "a\" L\"b"
 */
-// from install_path.c
-extern "C" {
-  extern int Sizeof_wchar_t;
-}
 static int wchar_numelts(string_t s) {
   return 1;
 }
 
 // constants
 static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
-  type_t t;
   type_t string_elt_typ = char_type;
   int string_numelts = 0;
   switch (*c) {
-  case {.Char_c = $(Signed,_)}:   t = schar_type; break;
-  case {.Char_c = $(Unsigned,_)}: t = uchar_type; break;
-  case {.Char_c = $(_,_)}:        t = char_type;  break;
-  case {.Wchar_c = _}:            t = wchar_type();  break;
-  case {.Short_c = $(sn,_)}:
-    t = (sn == Unsigned) ? ushort_type : sshort_type; break;
-  case {.LongLong_c = $(sn,_)}:
-    t = (sn == Unsigned) ? ulonglong_type  : slonglong_type;  break;
+  case {.Char_c     = $(Signed,_)}:   return schar_type;
+  case {.Char_c     = $(Unsigned,_)}: return uchar_type;
+  case {.Char_c     = _}:             return char_type;
+  case {.Wchar_c    = _}:             return wchar_type(); // signendness?
+  case {.Short_c    = $(Unsigned,_)}: return ushort_type;
+  case {.Short_c    = _}:             return sshort_type;
+  case {.LongLong_c = $(Unsigned,_)}: return ulonglong_type;
+  case {.LongLong_c = _}:             return slonglong_type;
   case {.Float_c = $(_,i)} : 
-    if (topt == NULL) t = gen_float_type(i);
-    else {
-      // If *topt calls for a shorter float, we assume it's ok to
-      // truncate without warning, as with ints below
-      switch (compress(*topt)) {
-      case &AppType(&FloatCon(i),_): t = gen_float_type(i); break;
-      default:
-	// presumably an error to be caught elsewhere ...
-        t = gen_float_type(i);
-        break;
-      }
+    // If *topt calls for a shorter float, we assume it's ok to
+    // truncate without warning, as with ints below
+    if (topt == NULL) 
+      return gen_float_type(i);
+    switch (compress(*topt)) {
+    case &AppType(&FloatCon(i),_): return gen_float_type(i);
+    default: return gen_float_type(i); // presumably an error caught elsewhere
     }
-    break;
   case {.Int_c = $(csn,i)}:
+    // If *topt calls for a shorter int, we assume it's ok to
+    //  truncate without warning.
+    // The typical case is in an array initializer, e.g., short x[1] = { 255 };
     if (topt == NULL)
-      t = (csn == Unsigned) ? uint_type : sint_type;
-    else
-        // If *topt calls for a shorter int, we assume it's ok to
-        // truncate without warning.
-        // The typical case is in an array initializer, e.g.,
-        // short x[1] = { 255 };
-      switch (compress(*topt)) {
-      case &AppType(&IntCon(sn,Char_sz),_):
-        switch(sn) {
-	case Unsigned: t = uchar_type; break;
-	case Signed: t = schar_type; break;
-	default: t = char_type; break;
-	}
-        *c = Char_c(sn,(char)(i)); // i gets truncated here
-        break;
-      case &AppType(&IntCon(sn,Short_sz),_):
-	t = (sn == Unsigned) ? ushort_type : sshort_type;
-        *c = Short_c(sn,(short)(i)); // i gets truncated here
-        break;
-      case &AppType(&IntCon(sn,Int_sz),_):
-        t = (sn == Unsigned) ? uint_type : sint_type;
-        // we must update the sign on the constant so that we pretty-print
-        // things correctly later on.
-        *c = Int_c(sn,i);  
-        break;
-      case &AppType(&IntCon(sn,Long_sz),_):
-        t = (sn == Unsigned) ? uint_type : sint_type;
-        // we must update the sign on the constant so that we pretty-print
-        // things correctly later on.
-        *c = Int_c(sn,i);  
-        break;
-      case &PointerType(PtrInfo(et,etq,PtrAtts(rgn,nbl,bnd,zt,_))) && (i == 0):
-        // we're treating 0 as if it's NULL
-        static datatype Raw_exp.Const_e nullc = Const_e(Cnst{.Null_c =0});
-        e->r = &nullc;
-        if (force_type2bool(true,nbl)) return *topt;
-        terr(e->loc,"Used NULL when expecting a non-NULL value of type %s",
-             typ2string(*topt));
-        let tenv_tvs = lookup_type_vars(te);
-        t = new PointerType(PtrInfo(et,etq,
-                                    PtrAtts(rgn,true_type,bnd,zt,NULL)));
-        break;
-      case &AppType(&TagCon,&List{t1,_}):
-	let t2 = new ValueofType(uint_exp(i,0));
-        /*
-	if(!unify(t1,t2)) {
-	  terr(loc, "expecting %s but found %s",typ2string(t1),typ2string(t2));
-	  explain_failure();
-	}
-        */
-	t = tag_type(t2);
-	break;
-      default: // topt isn't int; presumably an error to be caught elsewhere
-        t = (csn == Unsigned) ? uint_type : sint_type;
-        break;
+      return (csn == Unsigned) ? uint_type : sint_type;
+    switch (compress(*topt)) {
+    case &AppType(&IntCon(sn,Char_sz),_):
+      *c = Char_c(sn,(char)i); // truncate i
+      return tcConst(te,loc,NULL,c,e);
+    case &AppType(&IntCon(sn,Short_sz),_):
+      *c = Short_c(sn,(short)i); // truncate i
+      return tcConst(te,loc,NULL,c,e);
+    case &AppType(&IntCon(sn,Int_sz),_): fallthru(sn);
+    case &AppType(&IntCon(sn,Long_sz),_):
+      // we must update the sign on the constant so that we pretty-print
+      // things correctly later on.
+      *c = Int_c(sn,i);  
+      return tcConst(te,loc,NULL,c,e); // topt must be NULL or we will loop
+    case &PointerType(_) && (i == 0):
+      // we're treating 0 as if it's NULL
+      static datatype Raw_exp.Const_e nullc = Const_e(Cnst{.Null_c =0});
+      e->r = &nullc;
+      *c = Cnst{.Null_c = 0};
+      return tcConst(te,loc,topt,c,e);
+    case &AppType(&TagCon,&List{t1,_}):
+      return tag_type(new ValueofType(uint_exp(i,0)));
+    default:
+      return (csn == Unsigned) ? uint_type : sint_type; //error caught elsewhere
     }
-    break;
+  case {.Null_c = _}:
+    if (topt != NULL)
+      switch (compress(*topt)) {
+      case &PointerType(PtrInfo{.ptr_atts = PtrAtts{.nullable = nbl,...},...}):
+        if (!force_type2bool(true,nbl)) 
+	  Warn::err2(e->loc,"Used NULL when expecting a value of type ",*topt);
+        return *topt; // in error case, should avoid cascaded errors?
+      default: break;
+      }
+    let tenv_tvs = lookup_type_vars(te);
+    return new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)),
+				   empty_tqual(0),
+				   PtrAtts(new_evar(&trko,new Opt(tenv_tvs)),
+					   true_type,any_bounds(tenv_tvs),
+					   any_bool(tenv_tvs), NULL)));
   case {.String_c = s}:
     string_numelts = numelts(s); // includes the trailing 0 character, hence > 0
     fallthru(s);
@@ -239,76 +214,37 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     // The default is to treat a string as if it's statically heap
     // allocated and return a pointer to that string.  However, if the
     // string is used as an initializer, then we should return an array type.
-    let elen_bound = thin_bounds_exp(elen);
-    t = atb_type(string_elt_typ,heap_rgn_type,const_tqual(0),
-                elen_bound,true_type);
-    if (topt != NULL) {
-      switch (compress(*topt)) {
-      case &ArrayType(ArrayInfo{_,tq,_,_,_}):
-        // as an array initializer, a string literal can be either
-        // treated as zero-terminated or not, hence the unconstrained
-        // type.
-        return array_type(string_elt_typ, tq, elen, 
-			  any_bool(lookup_type_vars(te)), 0);
-      case &PointerType(_):
-        if (!Unify::unify(*topt,t) 
-	    && silent_castable(curr_rgnpo(te),loc,t,*topt)) {
-          e->topt = t;
-          unchecked_cast(e, *topt, Other_coercion);
-          t = *topt;
-        } else {
-          // maybe it's going in a different region
-          t = atb_type(string_elt_typ,new_evar(&rko,lookup_opt_type_vars(te)),
-                      const_tqual(0), elen_bound, true_type);
-          if (!Unify::unify(*topt,t) 
-	      && silent_castable(curr_rgnpo(te),loc,t,*topt)) {
-            e->topt = t;
-            unchecked_cast(e, *topt, Other_coercion);
-            t = *topt;
-          }
-        }
-        break;
-      default: break;
-      }
+    let t = atb_type(string_elt_typ,heap_rgn_type,const_tqual(0),
+		     thin_bounds_exp(elen),true_type);
+    if(topt == NULL)
+      return t;
+    switch (compress(*topt)) {
+    case &ArrayType(ArrayInfo{_,tq,...}):
+      // as an array initializer, a string literal can be either
+      // treated as zero-terminated or not, hence the unconstrained type.
+      return array_type(string_elt_typ, tq, elen,
+			any_bool(lookup_type_vars(te)), 0);
+    case &PointerType(_):
+      // maybe it's going in a different region, but region subtyping
+      // should take care of that
+      if (!Unify::unify(*topt,t) &&silent_castable(curr_rgnpo(te),loc,t,*topt)){
+	e->topt = t;
+	unchecked_cast(e, *topt, Other_coercion);
+	return *topt;
+      } 
+      return t;
+    default: return t;
     }
-    return t;
-  case {.Null_c = _}:
-    if (topt != NULL) {
-      switch (compress(*topt)) {
-      case &PointerType(PtrInfo(et,etq,PtrAtts(rgn,nbl,bnd,zt,_))):
-        // check that t is nullable
-        if (force_type2bool(true,nbl)) return *topt;
-        terr(e->loc,"Used NULL when expecting a non-NULL value of type %s",
-             typ2string(*topt));
-        return new PointerType(PtrInfo{et,etq,PtrAtts{rgn,true_type,
-                                                        bnd,zt,NULL}});
-      default: break;
-      }
-    }
-    let tenv_tvs = lookup_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)),
-                                empty_tqual(0),
-				PtrAtts(new_evar(&trko,new Opt(tenv_tvs)),
-					true_type,any_bounds(tenv_tvs),
-                                        any_bool(tenv_tvs), NULL)));
-
-    break;
   }
-  return t;
 }
-
-// forward declaration
-static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
-                         list_t<exp_t> es, datatypedecl_t tud,
-                         datatypefield_t tuf);
 
 // variables
 static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   switch(*b) {
-  case &Unresolved_b(q): impos("unresolved binding in tcVar");
+  case &Unresolved_b(q): Warn::impos_loc2(loc,"unresolved binding in tcVar");
   case &Global_b(vd):  
-  // FIX DJG: temporary measure to make tree-shaking sound
-  //      (now that we have binding, tree-shaking should be redone)
+    // FIX DJG: temporary measure to make tree-shaking sound
+    //      (now that we have binding, tree-shaking should be redone)
     lookup_ordinary_global(te,loc,vd->name,true);
     return vd->type;
   case &Funname_b(fd): 
@@ -322,14 +258,11 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
   case &Param_b(vd):
-    if (te->allow_valueof) {
+    if (te->allow_valueof)
       switch (compress(vd->type)) {
-      case &AppType(&TagCon,&List{i,_}):
-        e->r = new Valueof_e(i);
-        break;
+      case &AppType(&TagCon,&List{i,_}): e->r = new Valueof_e(i); break;
       default: break;
       }
-    }
     return vd->type;
   }
 }
@@ -345,7 +278,7 @@ void check_format_args(tenv_t te, exp_t fmt,
   list_t<type_t> desc_types;
   switch (fmt->r) {
   case &Const_e({.String_c = s}): fallthru(s);
-  case &Cast_e(_,&Exp(_,&Const_e({.String_c = s}),_,_),_,_):
+  case &Cast_e(_,&Exp(_,&Const_e({.String_c = s}),...),...):
     desc_types = type_getter(te,s,isCproto,fmt->loc); break;
   default:
     // without a string literal argument, we can't check the args against
@@ -356,7 +289,7 @@ void check_format_args(tenv_t te, exp_t fmt,
         tcExp(te,NULL,args->hd);
 	if (is_noalias_pointer_or_aggr((type_t)args->hd->topt) &&
 	    !is_noalias_path(args->hd))
-	  terr(args->hd->loc, UNIQUE_ERR_MSG);
+	  unique_consume_err(args->hd->loc);
       }
     }
     return;
@@ -370,16 +303,14 @@ void check_format_args(tenv_t te, exp_t fmt,
       type_t t = desc_types->hd;
       exp_t  e = args->hd;
       tcExp(te,&t,e);
-      if (!coerce_arg(curr_rgnpo(te),e,t,&alias_coercion)) {
-        terr(e->loc,"descriptor has type %s but argument has type %s",
-             typ2string(t), typ2string((type_t)e->topt));
-        Unify::explain_failure();
-      }
+      if (!coerce_arg(curr_rgnpo(te),e,t,&alias_coercion))
+	err_and_explain(e->loc,"descriptor has type ",t,
+			" but argument has type ",(type_t)e->topt);
       if (alias_coercion)
 	*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
       if (is_noalias_pointer_or_aggr(t) 
 	  && !is_noalias_path(e))
-	terr(args->hd->loc,UNIQUE_ERR_MSG);
+	unique_consume_err(args->hd->loc);
     }
     // check arity
     if (desc_types != NULL)
@@ -399,32 +330,28 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   case Plus:
   case Minus:
     if (!is_numeric(e))
-      terr(loc,"expecting numeric type but found %s",typ2string(t));
+      Warn::err2(loc,"expecting numeric type but found ",t);
     return (type_t)e->topt;
   case Not:
     check_contains_assign(e);
     if (!coerce_to_bool(e))
-      terr(loc,"expecting integral or * type but found %s",typ2string(t));
+      Warn::err2(loc,"expecting integral or * type but found ",t);
     return sint_type;
   case Bitnot:
     if (!is_integral(e))
-      terr(loc,"expecting integral type but found %s",typ2string(t));
+      Warn::err2(loc,"expecting integral type but found ",t);
     return (type_t)e->topt;
   case Numelts: // DJG: array-type impossible because of promote_array
     switch (t) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       let eopt = get_bounds_exp(fat_bound_type,b);
-      if (eopt != NULL) {
-        let e = (exp_t)eopt;
-        if (!Evexp::c_can_eval(e) && !allow_valueof)
-          terr(loc,"cannot apply numelts to a pointer with abstract bounds");
-      }
+      if (eopt != NULL && !Evexp::c_can_eval(eopt) && !allow_valueof)
+	Warn::err2(loc,"cannot use numelts on a pointer with abstract bounds");
       break;
-    default:
-      terr(loc,"numelts requires pointer type, not %s",typ2string(t));
+    default: Warn::err2(loc,"numelts requires pointer type, not ",t);
     }
     return uint_type;
-  default: impos("Non-unary primop");
+  default: Warn::impos_loc2(loc,"Non-unary primop");
   }
 }
 
@@ -433,24 +360,22 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
 static type_t arith_convert(tenv_t te, exp_t e1, exp_t e2) {
   let t1 = (type_t) e1->topt;
   let t2 = (type_t) e2->topt;
-  let new_t = max_arithmetic_type(t1, t2);
-  if (!Unify::unify(t1, new_t)) unchecked_cast(e1, new_t, No_coercion);
-  if (!Unify::unify(t2, new_t)) unchecked_cast(e2, new_t, No_coercion);
-  return new_t;
+  let new_typ = max_arithmetic_type(t1, t2);
+  if (!Unify::unify(t1, new_typ)) unchecked_cast(e1, new_typ, No_coercion);
+  if (!Unify::unify(t2, new_typ)) unchecked_cast(e2, new_typ, No_coercion);
+  return new_typ;
 }
 
 // Note: checker must return false for any non-arithmetic type.
 static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
 			   bool checker(exp_t)) {
   // JGMFIX: lousy error messages...
-  if (!checker(e1)) {
-    terr(e1->loc,"type %s cannot be used here",typ2string((type_t)e1->topt));
-    return wildtyp(lookup_opt_type_vars(te));
-  }
-  if (!checker(e2)) {
-    terr(e2->loc,"type %s cannot be used here",typ2string((type_t)e2->topt));
-    return wildtyp(lookup_opt_type_vars(te));
-  }
+  if (!checker(e1)) 
+    return expr_err(te,e1->loc,NULL,
+		    "type ",(type_t)e1->topt," cannot be used here");
+  if (!checker(e2)) 
+    return expr_err(te,e2->loc,NULL,
+		    "type ",(type_t)e2->topt," cannot be used here");
   return arith_convert(te, e1, e2);
 }
 // Plus needs to support a pointer and an int
@@ -460,18 +385,18 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   switch (t1) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
     if (!kind_leq(type_kind(et),&tmk))
-      terr(e1->loc,"can't perform arithmetic on abstract pointer type");
+      Warn::err2(e1->loc,"can't do arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,false))
-      terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
+      Warn::err2(e1->loc,"can't do arithmetic on non-aliasing pointer type");
     if (!coerce_sint_type(e2))
-      terr(e2->loc,"expecting int but found %s",typ2string(t2));
+      Warn::err2(e2->loc,"expecting int but found ",t2);
     let eopt = get_bounds_exp(fat_bound_type,b);
-    if (eopt == NULL) return t1;
-    let ub = (exp_t)eopt;
+    if (eopt == NULL) 
+      return t1;
     // if we have a zero-terminated array, warn that this could
     // be expensive, since coercing to a fat pointer involves a loop.
     if (force_type2bool(false,zt)) {
-      let $(i,known) = Evexp::eval_const_uint_exp(ub);
+      let $(i,known) = Evexp::eval_const_uint_exp(eopt);
       if (known && i == 1)
         warn(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
     }
@@ -481,10 +406,9 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     //   *((buf + 11) - 10)
     // This should not generate an exception.  So the best we can do
     // is coerce e1 to a ? type.
-    let new_t1 = new PointerType(PtrInfo(et,tq,
-                                         PtrAtts(r,true_type,
-                                                 fat_bound_type,zt,
-                                                 NULL)));
+    let new_t1 = new PointerType(PtrInfo(et,tq, PtrAtts(r,true_type,
+							fat_bound_type,zt,
+							NULL)));
     unchecked_cast(e1, new_t1, Other_coercion);
     return new_t1;
   default: return tcArithBinop(te, e1, e2, is_numeric);
@@ -499,37 +423,29 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2_elt = void_type;
   if (is_fat_pointer_type_elt(t1,&t1_elt)) {
     if (is_fat_pointer_type_elt(t2,&t2_elt)) {
-      if (!Unify::unify(t1_elt, t2_elt)) {
-	terr(e1->loc,"pointer arithmetic on values of "
-             "different types (%s != %s)",
-             typ2string(t1),typ2string(t2));
-        Unify::explain_failure();
-      }
+      if (!Unify::unify(t1_elt, t2_elt))
+	err_and_explain(e1->loc,"pointer arithmetic on values of different ",
+			"types (",t1," != ",t2,")");
       return sint_type;
-    } else if (is_pointer_type(t2)) {
-      if (!Unify::unify(t1_elt, pointer_elt_type(t2))) {
-	terr(e1->loc,"pointer arithmetic on values of "
-             "different types (%s != %s)", typ2string(t1),typ2string(t2));
-        Unify::explain_failure();
-      }
+    } 
+    if (is_pointer_type(t2)) {
+      if (!Unify::unify(t1_elt, pointer_elt_type(t2)))
+	err_and_explain(e1->loc,"pointer arithmetic on values of different ",
+			"types(",t1," != ",t2,")");
       // t2 is thin, coerce t1 to thin and return int
       warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
       unchecked_cast(e1, star_type(t1_elt,pointer_region(t1),
 				   empty_tqual(0), false_type), 
                      Other_coercion);
       return sint_type;
-    } else {
-      if (!kind_leq(type_kind(t1_elt),&tmk))
-        terr(e1->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_noalias_pointer(t1,false))
-        terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
-      if (!coerce_sint_type(e2)) {
-	terr(e2->loc,"expecting either %s or int but found %s",
-             typ2string(t1),typ2string(t2));
-        Unify::explain_failure();
-      }
-      return t1;
-    }
+    } 
+    if (!kind_leq(type_kind(t1_elt),&tmk))
+      terr(e1->loc,"can't perform arithmetic on abstract pointer type");
+    if (is_noalias_pointer(t1,false))
+      terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
+    if (!coerce_sint_type(e2))
+      err_and_explain(e2->loc,"expecting either ",t1," or int but found ",t2);
+    return t1;
   }
 
   if (is_pointer_type(t1)) { // t1 must be thin
@@ -556,7 +472,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   return tcArithBinop(te, e1, e2, is_numeric);
 }
 
-static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
+static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
   if (is_numeric(e1) && is_numeric(e2)) {
@@ -591,19 +507,8 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     return sint_type;
   default: break;
   }
-  terr(loc,"comparison not allowed between %s and %s",
-       typ2string(t1),typ2string(t2));
-  Unify::explain_failure(); // FIX? not right if we did not call unify
-  return wildtyp(lookup_opt_type_vars(te));
-}
-
-static type_t tcEqPrimop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
-  // first see if normal comparison rules apply
-  if (tcAnyBinop(te,loc,e1,e2) == sint_type)
-    return sint_type;
-  terr(loc,"comparison not allowed between %s and %s",
-       typ2string((type_t)e1->topt),typ2string((type_t)e2->topt));
-  Unify::explain_failure();
+  // FIX? not right if we did not call unify
+  err_and_explain(loc,"comparison not allowed between ",t1," and ",t2);
   return wildtyp(lookup_opt_type_vars(te));
 }
 
@@ -628,14 +533,14 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
   case Eq:
-  case Neq: return tcEqPrimop(te, loc, e1, e2);
+  case Neq: // DJG: these used to be special but I don't know why
 
   case Gt:
   case Lt:
   case Gte:
-  case Lte: return tcAnyBinop(te,loc,e1,e2);
+  case Lte: return tcCmpBinop(te,loc,e1,e2);
 
-  default: impos("bad binary primop");
+  default: Warn::impos2("bad binary primop");
   }
 }
 
@@ -651,7 +556,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
     let e = es->hd;
     let t = tcExp(te,topt,e);
     if (!is_numeric(e))
-      terr(e->loc,"expecting numeric type but found %s",typ2string(t));
+      Warn::err2(e->loc,"expecting numeric type but found ",t);
     return t;
   }
   tcExpList(te,es);
@@ -672,8 +577,8 @@ static bool check_writable_aggr(seg_t loc, type_t t) {
     if (ad->impl == NULL) {
       terr(loc, "attempt to write an abstract aggregate");
       return false;
-    } else 
-      fallthru(ad->impl->fields);
+    } 
+    fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
@@ -829,11 +734,9 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
     t = new_evar(&tmko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
-  if (!coerce_list(curr_rgnpo(te),t,&l2)) {
-    terr(loc,"conditional clause types do not match: %s != %s",
-	 typ2string((type_t)e2->topt),typ2string((type_t)e3->topt));
-    Unify::explain_failure();
-  }
+  if (!coerce_list(curr_rgnpo(te),t,&l2))
+    err_and_explain(loc,"conditional clause types do not match: ",
+		    (type_t)e2->topt," != ", (type_t)e3->topt);
   return t;
 }
 
@@ -872,7 +775,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   }
   // check to see that the type is not an abstract type
   if (!kind_leq(type_kind(t1),&tmk))
-    terr(loc,"type is abstract (can't determine size).");
+    terr(loc,"type is abstract (can't determine size)");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
   if (!is_lvalue(e1))
@@ -880,10 +783,9 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   check_writable(te, e1);
   if (po == NULL) {
     if (is_noalias_pointer_or_aggr(t2) && !is_noalias_path(e2))
-      terr(e2->loc,UNIQUE_ERR_MSG);
+      unique_consume_err(e2->loc);
     if (!coerce_assign(curr_rgnpo(te),e2,t1)) {
-      let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
-                            typ2string(t1), typ2string(t2));
+      let result = expr_err(te,loc,topt,"type mismatch: ",t1," != ",t2);
       Unify::unify(t1,t2); // needed to get right error message
       Unify::explain_failure();
       return result;
@@ -896,9 +798,8 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
       t_result = t1;
     else if (!(Unify::unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
       let result =
-        expr_err(te,loc,topt, "Cannot use this operator in an assignment when "
-		      "the arguments have types %s and %s",typ2string(t1),
-		      typ2string(t2));
+        expr_err(te,loc,topt,"Cannot use this operator in an assignment when ",
+		 "the arguments have types ",t1," and ",t2);
       Unify::unify(t_result,t1); // needed to get right error message
       Unify::explain_failure();
       return result;
@@ -923,9 +824,11 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = (type_t)e->topt;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case &AppType(&FloatCon(0),_): unchecked_cast(e,double_type,No_coercion);t1 = double_type; break;
+  case &AppType(&FloatCon(0),_): 
+    unchecked_cast(e,double_type,No_coercion); t1 = double_type; break;
   case &AppType(&IntCon(_,Char_sz),_):
-  case &AppType(&IntCon(_,Short_sz),_): unchecked_cast(e,sint_type,No_coercion);t1 = sint_type; break;
+  case &AppType(&IntCon(_,Short_sz),_): 
+    unchecked_cast(e,sint_type,No_coercion); t1 = sint_type; break;
   default: break;
   }
   // try to find an exact match first
@@ -947,12 +850,10 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     // I hate doing this because it has side-effects, but oh well...
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
-    if (coerce_arg(curr_rgnpo(te),e,t2,&bogus)) {
+    if (coerce_arg(curr_rgnpo(te),e,t2,&bogus))
       return fields->hd;
-    }
   }
-  terr(e->loc,"can't find a field in %s to inject a value of type %s",
-       typ2string(tu), typ2string(t1));
+  Warn::err2(e->loc,"can't find a field in ",tu," to inject a value of type ",t1);
   return NULL;
 }
 
@@ -1012,7 +913,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	if (alias_coercion)
 	  *alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
 	if (is_noalias_pointer_or_aggr(t2) && !is_noalias_path(e1))
-	  terr(e1->loc,UNIQUE_ERR_MSG);
+	  unique_consume_err(e1->loc);
 	es = es->tl;
 	args_info = args_info->tl;
 	arg_cnt++;
@@ -1074,16 +975,14 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      exp_t e1 = es->hd;
 	      vci->num_varargs++;
 	      tcExp(te, &vt, e1);
-	      if (!coerce_arg(curr_rgnpo(te),e1,vt,&alias_coercion)) {
-		terr(loc,"vararg requires type %s but argument has type %s",
-		     typ2string(vt),typ2string((type_t)e1->topt));
-		Unify::explain_failure();
-	      }
+	      if (!coerce_arg(curr_rgnpo(te),e1,vt,&alias_coercion))
+		err_and_explain(loc,"vararg requires type ",vt,
+				" but argument has type ", (type_t)e1->topt);
 	      if (alias_coercion)
 		*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
 	      if (is_noalias_pointer_or_aggr(vt) &&
 		  !is_noalias_path(e1))
-		terr(e1->loc,UNIQUE_ERR_MSG);
+		unique_consume_err(e1->loc);
 	    }
 	  } else {
 	    // this is trickier, we have to match up the type of the
@@ -1114,7 +1013,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		  tcExp(te,NULL,e1);
 		  if (is_noalias_pointer_or_aggr((type_t)e1->topt) &&
 		      !is_noalias_path(e1))
-		    terr(e1->loc,UNIQUE_ERR_MSG);
+		    unique_consume_err(e1->loc);
 		}
 		let f = tcInjection(te,e1,pointer_elt_type(vt),inst,fields);
 		if (f != NULL)
@@ -1140,9 +1039,11 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	Tcenv::check_effect_accessible(te, loc, (type_t)eff);
       }
       return res_typ;
-    default: return expr_err(te,loc,topt,"expected pointer to function but found %s",typ2string(t));
+    default: 
+      return expr_err(te,loc,topt,"expected pointer to function but found ",t);
     }
-  default: return expr_err(te,loc,topt,"expected pointer to function but found %s",typ2string(t));
+  default: 
+    return expr_err(te,loc,topt,"expected pointer to function but found ",t);
   }
 }
 // throw e1
@@ -1151,9 +1052,9 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
   if (!coerce_arg(curr_rgnpo(te),e,exception_type,&bogus))
-    terr(loc,"expected %s but found %s",typ2string(exception_type),
-         typ2string((type_t)e->topt));
-  if (topt != NULL) return *topt;
+    Warn::err2(loc,"expected ",exception_type," but found ",(type_t)e->topt);
+  if (topt != NULL) 
+    return *topt;
   return wildtyp(lookup_opt_type_vars(te));
 }
 
@@ -1177,7 +1078,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
       if(ts != NULL)
-	return expr_err(te,loc,topt,"too many type variables in instantiation");
+       return expr_err(te,loc,topt,"too many type variables in instantiation");
       // Check that the function's partial-order on region lifetimes
       // is compatible with the current region partial order. 
       // May be delayed. Don't do if more instantiation remains.
@@ -1197,8 +1098,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
     break;
   default: break;
   }
-  return expr_err(te,loc,topt,"expecting polymorphic type but found %s",
-                  typ2string(t1));
+  return expr_err(te,loc,topt,"expecting polymorphic type but found ",t1);
 }
 
 // (t)e
@@ -1207,7 +1107,6 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   check_type(loc,te,lookup_type_vars(te),
 	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
   check_no_qual(loc,t);
-  //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
   type_t t2 = (type_t)e->topt;
   if (silent_castable(curr_rgnpo(te),loc,t2,t)) {
@@ -1221,8 +1120,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
     } else {
       // extra unify needed to get the right reason for the failure
       Unify::unify(t2,t);
-      let result = expr_err(te,loc,&t,"cannot cast %s to %s",
-                            typ2string(t2), typ2string(t));
+      let result = expr_err(te,loc,&t,"cannot cast ",t2," to ",t);
       Unify::explain_failure();
       return result;
     }
@@ -1408,29 +1306,29 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 	fallthru((*adp)->impl->fields);
       case &AnonAggrType(_,fields):
 	if(List::length(fields) <= n)
-	  Tcutil::terr(loc,"struct/union has too few components: %d <= %d",
-		       List::length(fields),n);
+	  terr(loc,"struct/union has too few components: %d <= %d",
+	       List::length(fields),n);
 	else
 	  t = List::nth(fields,n)->type;
 	bad_type = false;
 	break;
       case &TupleType(l):
 	if(List::length(l) <= n)
-	  Tcutil::terr(loc,"tuple has too few components: %d <= %d",
-		       List::length(l),n);
+	  terr(loc,"tuple has too few components: %d <= %d",
+	       List::length(l),n);
 	else
 	  t = (*List::nth(l,n))[1];
 	bad_type = false;
 	break;
       case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
 	if(List::length(tuf->typs) < n)
-	  Tcutil::terr(loc,"datatype field has too few components: %d < %d",
-		       List::length(tuf->typs),n);
+	  terr(loc,"datatype field has too few components: %d < %d",
+	       List::length(tuf->typs),n);
 	else {
 	  if (n != 0)
 	    t = (*List::nth(tuf->typs,n-1))[1];
 	  else if (l->tl != NULL)
-	    Tcutil::terr(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
+	    terr(loc,"datatype field index 0 refers to the tag; cannot be indexed through");
 	}
 	bad_type = false;
 	break;
@@ -1475,7 +1373,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     }
     return t2;
   default:
-    return expr_err(te,loc,topt,"expecting *, @, or ? type but found %s",typ2string(t));
+    return expr_err(te,loc,topt,"expecting *, @, or ? type but found ",t);
   }
 }
 
@@ -1491,39 +1389,36 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &AppType(&AggrCon({.KnownAggr = &ad}),ts):
     let finfo = lookup_decl_field(ad,f);
     if (finfo == NULL)
-      return expr_err(te,loc,topt,"%s has no %s member",
-                      qvar2string(ad->name), *f);
+      return expr_err(te,loc,topt,ad," has no ",*f," member");
     // must do after previous check else could dereference NULL
     if (ad->impl->tagged) *is_tagged = true;
     type_t t2 = finfo->type;
-    if (ts != NULL) {
-      let inst = List::zip(ad->tvs,ts);
-      t2 = substitute(inst,finfo->type);
-    }
+    if (ts != NULL)
+      t2 = substitute(List::zip(ad->tvs,ts),finfo->type);
     // if this is a non-tagged union and we are reading a pointer,
     // then need to be writing to this spot
     if (ad->kind == UnionA && !ad->impl->tagged && !is_bits_only_type(t2) && !in_notreadctxt(te) && finfo->requires_clause == NULL)
-        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+        return expr_err(te,loc,topt,"cannot read union member ",*f,
+			" since it is not `bits-only'");
     if(ad->impl->exist_vars != NULL) {
       // this will force the result to not have a type containing any of the
       // existentially bound variables.
       if (!Unify::unify(t2,wildtyp(lookup_opt_type_vars(te))))
-        return expr_err(te,loc,topt,"must use pattern-matching to access field %s\n\tdue to existential type variables.",*f);
+        return expr_err(te,loc,topt,"must use pattern-matching to access field ",*f,"\n\tdue to existential type variables.");
     }
     return t2;
   case &AnonAggrType(k,fs):
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
-      return expr_err(te,loc,topt,"type has no %s member",*f);
+      return expr_err(te,loc,topt,"type has no ",*f," member");
     // if this is a non-tagged union and we are reading a pointer,
     // then either we need to be writing to this spot
     if (k == UnionA && !is_bits_only_type(finfo->type) && !in_notreadctxt(te) &&
         finfo->requires_clause == NULL)
-        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+      return expr_err(te,loc,topt,"cannot read union member ",*f," since it is not `bits-only'");
     return finfo->type;
-  default:
-    return expr_err(te,loc,topt,"expecting struct or union, found %s",
-                    typ2string((type_t)e->topt));
+  default: return expr_err(te,loc,topt,"expecting struct or union, found ",
+			   (type_t)e->topt);
   }
 }
 
@@ -1541,8 +1436,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
     case &AppType(&AggrCon({.KnownAggr = &ad}),ts):
       let finfo = lookup_decl_field(ad,f);
       if (finfo == NULL)
-	return expr_err(te,loc,topt,"type %s has no %s member",
-			qvar2string(ad->name), *f);
+	return expr_err(te,loc,topt,"type ",ad," has no ",*f," member");
       // must do after previous check else could dereference NULL
       if (ad->impl->tagged) *is_tagged = true;
       type_t t3 = finfo->type;
@@ -1556,8 +1450,8 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       if (kind_leq(&ak,t3_kind) && !abstract_val_ok(te)) {
         switch (compress(t3)) {
         case &ArrayType(_): break;
-        default:
-          return expr_err(te,loc,topt,"cannot get member %s since its type is abstract",*f);
+        default: return expr_err(te,loc,topt,"cannot get member ",*f,
+				 " since its type is abstract");
         }
       }
       // if this is a non-tagged union and we are reading a pointer,
@@ -1565,30 +1459,32 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       if (ad->kind == UnionA && 
 	  !ad->impl->tagged && !is_bits_only_type(t3) && !in_notreadctxt(te) &&
           finfo->requires_clause == NULL)
-        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+        return expr_err(te,loc,topt,"cannot read union member ",*f,
+			" since it is not `bits-only'");
       if(ad->impl->exist_vars != NULL) {
         if (!Unify::unify(t3,wildtyp(lookup_opt_type_vars(te))))
 	return expr_err(te,loc,topt,
-                        "must use pattern-matching to access field %s\n\t"
-			"due to extistential types",*f);
+			"must use pattern-matching to access field ",*f,
+			"\n\tdue to extistential types");
       }
       return t3;
     case &AnonAggrType(k,fs):
       let finfo = lookup_field(fs,f);
       if (finfo == NULL)
-	return expr_err(te,loc,topt,"type has no %s field",*f);
+	return expr_err(te,loc,topt,"type has no ",*f," field");
       // if this is a non-tagged union and we are reading a pointer,
       // then either we need to be writing to this spot
       if (k == UnionA && !is_bits_only_type(finfo->type) && !in_notreadctxt(te))
-        return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
+        return expr_err(te,loc,topt,"cannot read union member ",*f,
+			" since it is not `bits-only'");
       return finfo->type;
     default: break;
     }
     break;
   default: break;
   }
-  return expr_err(te,loc,topt,"expecting struct or union pointer, found %s",
-		  typ2string((type_t)e->topt));
+  return expr_err(te,loc,topt,"expecting struct or union pointer, found ",
+		  (type_t)e->topt);
 }
 
 // e1[e2]
@@ -1597,12 +1493,12 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
   let $(i,known) = Evexp::eval_const_uint_exp(index);
   if(!known)
     return expr_err(te,loc,NULL,
-                    "tuple projection cannot use sizeof or offsetof");
+		    "tuple projection cannot use sizeof or offsetof");
   try
     return (*List::nth(ts,i))[1];
   catch { case &Nth:
-    return expr_err(te,loc,NULL,"index is %d but tuple has only %d fields",
-                    i, List::length(ts));
+    return expr_err(te,loc,NULL,"index is ",i," but tuple has only ",
+		    List::length(ts), " fields");
   }
 }
  // FIX: look at topt
@@ -1614,8 +1510,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
   if (!coerce_sint_type(e2))
-    return expr_err(te,e2->loc,topt,"expecting int subscript, found %s",
-		    typ2string(t2));
+    return expr_err(te,e2->loc,topt,"expecting int subscript, found ",t2);
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
   switch (t1) {
@@ -1660,7 +1555,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
       terr(e1->loc,"can't subscript an abstract pointer");
     return t;
   case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
-  default: return expr_err(te,loc,topt,"subscript applied to %s",typ2string(t1));
+  default: return expr_err(te,loc,topt,"subscript applied to ",t1);
   }
 }
 
@@ -1706,7 +1601,7 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, exp_t orig_exp,
   check_type(loc,te,lookup_type_vars(te),
 	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
   orig_exp->r = new UnresolvedMem_e(NULL,des);
-  resolve_unresolved_mem(te,loc,&t,orig_exp,des);
+  resolve_unresolved_mem(loc,&t,orig_exp,des);
   tcExpNoInst(te,topt,orig_exp);
   return (type_t)orig_exp->topt;
 }
@@ -1822,7 +1717,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     type_t t = tcExp(te,topt2,body);
     // must ensure unique pointers aren't copied out of non-unique paths
     if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(body))
-      terr(body->loc, UNIQUE_ERR_MSG);
+      unique_consume_err(body->loc);
     if (te->le == NULL) {
       // the bound and the body must both be constant expressions at top-level
       if (!is_const_exp(bound))
@@ -1839,7 +1734,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     }
     if (is_noalias_pointer_or_aggr((type_t)body->topt) &&
 	!is_noalias_path(body))
-      terr(body->loc, UNIQUE_ERR_MSG);
+      unique_consume_err(body->loc);
     // FIX:  bound may not be a constant here...
     let res = array_type(t,(tqopt == NULL) ? empty_tqual(0) : *tqopt, bound,
                         (ztopt == NULL) ? false_type : *ztopt, 0);
@@ -1858,8 +1753,6 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
     if (new_status(te) == InNewAggr) {
       let b = cast_exp(uint_type,valueof_exp(t,0),false,No_coercion,0);
       b->topt = bound->topt;
-//       printf("updating array bound from %s to %s\n",
-// 	     exp2string(bound),exp2string(b));
       bound = b;
     }
     break;
@@ -2013,17 +1906,10 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let inst_fieldtyp = substitute(inst,field->type);
     tcExpInitializer(clear_abstract_val_ok(te2),
 		     &inst_fieldtyp, field_exp);   
-    //       fprintf(stderr,"checking agg field %s, exp=%s, typ=%s\n",*(field->name),
-    // 	      Absynpp::exp2string(field_exp),
-// 	      Absynpp::typ2string(field_exp->topt));
-    if (!coerce_arg(curr_rgnpo(te2),field_exp,inst_fieldtyp,&bogus)) {
-      terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
-	   *(field->name),((ad->kind == StructA) ? "struct" : "union"),
-	   qvar2string(*tn),typ2string(inst_fieldtyp),
-	   typ2string((type_t)field_exp->topt));
-      Unify::explain_failure();
-    }
-    //       fprintf(stderr,"finished checking agg field %s\n",*(field->name));
+    if (!coerce_arg(curr_rgnpo(te2),field_exp,inst_fieldtyp,&bogus))
+      err_and_explain(field_exp->loc,"field ",*(field->name)," of ",ad,
+		      " expects type ",inst_fieldtyp, " != ", 
+		      (type_t)field_exp->topt);
   }
   let rpo_inst = NULL;
   for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
@@ -2049,12 +1935,10 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       let &$(field,field_exp) = fields->hd;
       tcExpInitializer(clear_abstract_val_ok(te),
 		       &field->type, field_exp);
-      if (!coerce_arg(curr_rgnpo(te),field_exp,field->type,&bogus)) {
-	terr(field_exp->loc,"field %s of struct expects type %s != %s",
-	     *(field->name),typ2string(field->type),
-	     typ2string((type_t)field_exp->topt));
-	Unify::explain_failure();
-      }
+      if (!coerce_arg(curr_rgnpo(te),field_exp,field->type,&bogus))
+	err_and_explain(field_exp->loc,"field ",*field->name,
+			" of struct expects type ",field->type," != ",
+			(type_t)field_exp->topt);
     }
     break;
   default: impos("tcAnonStruct: wrong type");
@@ -2071,12 +1955,12 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   let all_typs = List::map(snd,inst);
   type_t res   = datatype_field_type(KnownDatatypefield(tud,tuf),all_typs);
   // this instantiates the type variables if we have top-down type info
-  if (topt != NULL) {
+  if (topt != NULL) 
     switch (compress(*topt)) {
     case &AppType(&DatatypeFieldCon(_),_): Unify::unify(*topt,res); break;
     default: break;
     }
-  }
+
   list_t<$(tqual_t,type_t)@> ts = tuf->typs;
   for(; es != NULL && ts != NULL; es = es->tl, ts = ts->tl) {
     bool bogus = false;
@@ -2094,33 +1978,27 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   }
   if (es != NULL)
     return expr_err(te,es->hd->loc,topt,
-                    "too many arguments for datatype constructor %s",
-                    qvar2string(tuf->name));
+		    "too many arguments for datatype constructor ",tuf->name);
   if (ts != NULL)
-    return expr_err(te,loc,topt,"too few arguments for datatype constructor %s",
-                    qvar2string(tuf->name));
+    return expr_err(te,loc,topt,
+		    "too few arguments for datatype constructor ",tuf->name);
   return res;
 }
 
 // returns true when okay, false otherwise
 static bool check_malloc_type(bool allow_zero, seg_t loc,
                               type_t * topt, type_t t) {
-  if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return true;
+  if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) 
+    return true;
   // try unifying t with the topt info to get better results
-  if (topt != NULL) {
-    switch (compress(*topt)) {
-    case &PointerType(PtrInfo(elt_typ,_,_)):
-      Unify::unify(elt_typ,t);
-      if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return true;
-      break;
-    default: break;
-    }
+  if(topt == NULL)
+    return false;
+  switch (compress(*topt)) {
+  case &PointerType(PtrInfo(elt_typ,...)):
+    Unify::unify(elt_typ,t);
+    return check_malloc_type(allow_zero,loc,NULL,t);
+  default: return false;
   }
-  return false;
-  /*
-  terr(loc,"%s cannot be used with type %s\n\t(type needs initialization)",
-       allow_zero ? ((string_t)"calloc") : (string_t)"malloc", typ2string(t));
-  */
 }
 
 static type_t mallocRgn(type_t rgn) {
@@ -2243,8 +2121,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
       switch (compress((type_t)real_e->topt)) {
       case &AppType(&TagCon,&List{tagt,_}):
         switch (compress(tagt)) {
-        case &ValueofType(vexp):
-          er = vexp->r; goto retry_sizeof;
+        case &ValueofType(vexp): er = vexp->r; goto retry_sizeof;
         default: break;
         }
         break;
@@ -2340,11 +2217,8 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   // Make sure the elements are writable
   check_writable(te, e1);
   check_writable(te, e2);
-  if (!Unify::unify(t1,t2)) {
-    let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
-			  typ2string(t1), typ2string(t2));
-    return result;
-  }
+  if (!Unify::unify(t1,t2))
+    return expr_err(te,loc,topt,"type mismatch: ",t1," != ",t2);
   return void_type;
 }
 
@@ -2358,17 +2232,13 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
     case &Exp_s(e):
       // must check that e does not allow any type variables to escape
       let t = (type_t)e->topt;
-      if (!Unify::unify(t,wildtyp(lookup_opt_type_vars(te)))) {
-        terr(loc,"statement expression returns type %s",
-             typ2string(t));
-        Unify::explain_failure();
-      }
+      if (!Unify::unify(t,wildtyp(lookup_opt_type_vars(te))))
+	err_and_explain(loc,"statement expression returns type ",t);
       return t;
-    case &Seq_s(s1,s2): s = s2; continue;
-    case &Decl_s(d,s1): s = s1; continue;
-    default:
-      return expr_err(te,loc,topt,
-                      "statement expression must end with expression");
+    case &Seq_s(_,s2):  s = s2; continue;
+    case &Decl_s(_,s1): s = s1; continue;
+    default: return expr_err(te,loc,topt, 
+			     "statement expression must end with expression");
     }
 }
 
@@ -2379,7 +2249,7 @@ static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_nam
     if (ad->kind == UnionA && ad->impl != NULL && ad->impl->tagged) break;
     fallthru;
   default:
-    terr(loc,"expecting @tagged union but found %s",typ2string(t));
+    Warn::err2(loc,"expecting @tagged union but found ",t);
     break;
   }
   return uint_type;
@@ -2408,10 +2278,9 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	   typ2string(handle_type));
       break;
     }
-  }
-  // if the type passed down constrains the region in any way
-  // switched to the constrained one.
-  else if (topt != NULL) {
+  } else if (topt != NULL) {
+    // if the type passed down constrains the region in any way
+    // switched to the constrained one.
     type_t optrgn = void_type;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
@@ -2509,19 +2378,17 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t telt = tcExp(te,topt2,e1);
     // must prevent copy of unique pointer
     if (is_noalias_pointer_or_aggr(telt) && !is_noalias_path(e1))
-      terr(e1->loc, UNIQUE_ERR_MSG);
+      unique_consume_err(e1->loc);
     type_t res_typ =
       new PointerType(PtrInfo(telt,empty_tqual(0),
 			      PtrAtts(rgn,any_bool(lookup_type_vars(te)),
 				      bounds_one(),
 				      false_type,NULL)));
-    if (topt != NULL) {
-      if (!Unify::unify(*topt,res_typ) 
-	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
+    if (topt != NULL && !Unify::unify(*topt,res_typ) &&
+	silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(e,*topt,Other_coercion);
 	res_typ = *topt;
-      }
     }
     return res_typ;
   }
@@ -2543,13 +2410,8 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   // expression initializers are copied, and therefore consumed,
   // so check for uniqueness
-  if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e)) {
-    //fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
-    //        topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
-    //        Absynpp::typ2string(e->topt->v),
-    //        Absynpp::exp2string(e));
-    terr(e->loc,UNIQUE_ERR_MSG);
-  }
+  if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
+    unique_consume_err(e->loc);
   switch (e->r) {
   case &Array_e(_):
   case &Comprehension_e(...):
@@ -2640,8 +2502,8 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
       while (arg_exps != NULL) {
 	while (arg_cnt != arg_exps->hd) {
 	  if (es == NULL)
-	    impos(aprintf("bad count %d/%d for alias coercion!",
-			  arg_cnt, arg_exps->hd));
+	    Warn::impos2("bad count ",arg_cnt,"/",arg_exps->hd,
+			 " for alias coercion!");
 	  arg_cnt++;
 	  es = es->tl;
 	  es2 = es2->tl;
@@ -2658,18 +2520,15 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
     break;
   default: impos("not a function call!");
   }
-  // wrap function call with alias statements introducing
-  // fresh type vars
+  // wrap function call with alias statements introducing fresh type vars
   while (decls != NULL) {
     let d = decls->hd;
     fn_exp = stmt_exp(decl_stmt(d,exp_stmt(fn_exp,e->loc),e->loc),e->loc);
     decls = decls->tl;
   }
-  // update the current expression to be the newly created one
-  //   and re-typecheck
+  // update the current expression to be the newly created one and re-typecheck
   e->topt = NULL;
   e->r = fn_exp->r;
-  //fprintf(stderr,"New expression is:\n\t%s\n",exp2string(e));
 }
 
  // Type-check the expression -- don't do any implicit instantiation.
@@ -2690,7 +2549,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
 
   case &UnresolvedMem_e(nopt,des):
     // resolve as an array or struct and then re-type-check the expression
-    resolve_unresolved_mem(te,loc,topt,e,des);
+    resolve_unresolved_mem(loc,topt,e,des);
     tcExpNoInst(te,topt,e);
     return;
 
@@ -2773,7 +2632,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     type_t *elt_topt = NULL;
     tqual_t *elt_tqopt = NULL;
     bool zero_term = false;
-    if (topt != NULL) {
+    if (topt != NULL)
       switch (compress(*topt)) {
       case &ArrayType(ArrayInfo{*et,*etq,_,zt,_}):
         elt_topt = et;
@@ -2782,7 +2641,6 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
         break;
       default: break;
       }
-    }
     t = tcArray(te,loc,elt_topt,elt_tqopt,zero_term,des); break;
   case &StmtExp_e(s):
     t = tcStmtExp(te,loc,topt,s); break;

@@ -75,7 +75,7 @@ int elim_array_initializers = 1; // a flag
 
 // have varmaps because hoisted decls should be renamed to avoid conflicts.
 
-struct BoxingEnv<`r::R,`r2::R> {
+static struct BoxingEnv<`r,`r2> {
   region_t<`r> rgn;
   list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
   Dict::dict_t<var_t,exp_t,`r> varmap; 
@@ -84,7 +84,7 @@ struct BoxingEnv<`r::R,`r2::R> {
 };
 typedef struct BoxingEnv<`r,`r2> boxingenv_t<`r,`r2>; // not boxed
 
-struct ToExpEnv<`r::R> {
+struct ToExpEnv<`r> {
   region_t<`r> rgn;
   list_t<vardecl_t,`r> all_locals; // for getting type info for freevars
   Dict::dict_t<var_t,exp_t,`r> varmap; 
@@ -97,7 +97,7 @@ typedef struct ToExpEnv<`r> toexpenv_t<`r>; // not boxed
 { let __ei = box_free_vars_exp(env,e);		\
   if (__ei != NULL) e = __ei; }
 
-static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
+static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
   while(true)
   switch (e->r) {
   case &Var_e(b):
@@ -253,7 +253,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   }
 }
 
-static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
+static void box_free_vars_stmt(boxingenv_t env, stmt_t s) {
   // replaces all free local occurrences of x with *x.  Returns free vars.
   // Note that for handling the translation of comprehensions we could get away
   // with a lot less here, but may as well get it right the first time. :-)
@@ -342,10 +342,10 @@ static int stmt_to_fun_cmp(vardecl_t x, vardecl_t y) {
   return qvar_cmp(x->name,y->name);
 }
 
-static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
+static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
   // vardecl types have not been boxed (yet)
   // free_vars must only be locals b/c ingoring namespaces!
-  Set::set_t<vardecl_t,`r> freevars = Set::rempty(env.rgn,stmt_to_fun_cmp);
+  Set::set_t<vardecl_t> freevars = Set::rempty(env.rgn,stmt_to_fun_cmp);
   let boxenv = BoxingEnv(env.rgn,env.all_locals,env.varmap,NULL,&freevars);
   box_free_vars_stmt(boxenv,s);
   list_t<$(var_opt_t,tqual_t,type_t)@> params = NULL;
@@ -383,7 +383,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
 
-static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
+static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
   switch (e->r) {
   case &Var_e(b):
     switch(binding2qvar(b)) {
@@ -437,7 +437,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   }
 }
 
-static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
+static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
   switch (s->r) {
   case &Skip_s: return true_exp(DL);
   case &Exp_s(e): 

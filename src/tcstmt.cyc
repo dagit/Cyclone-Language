@@ -17,7 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include "absynpp.h"
+#include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
@@ -26,17 +26,9 @@
 #include "new_control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
-
-#ifdef NO_PATHS
-#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"
-#else
-#define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
-#endif
-
 using Core;
 using List;
 using Absyn;
-using Absynpp;
 using Tcutil;
 using Tcenv;
 using Tctyp;
@@ -118,8 +110,8 @@ static bool noassign_exp(exp_t e) {
     fallthru(eopt,e);
   case &New_e(eopt,e):
     if (!noassign_exp(e)) return false;
-    if (eopt != NULL) return noassign_exp((exp_t)eopt);
-    else return true;
+    if (eopt != NULL) return noassign_exp(eopt);
+    return true;
 
   case &Primop_e(_,es)    : fallthru(es);
   case &Datatype_e(es,...): fallthru(es);
@@ -130,10 +122,9 @@ static bool noassign_exp(exp_t e) {
   case &AnonStruct_e(_,dles)   : fallthru(dles);
   case &Array_e(dles)          : fallthru(dles);
   case &CompoundLit_e(_,dles)  :
-    for (; dles != NULL; dles = dles->tl) {
-      let &$(_,e) = dles->hd;
-      if (!noassign_exp(e)) return false;
-    }
+    for (; dles != NULL; dles = dles->tl)
+      if (!noassign_exp((*dles->hd)[1])) 
+	return false;
     return true;
   }
 }
@@ -201,9 +192,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     if (eopt == NULL) {
       if (!is_void_type(t)) {
         if (is_any_float_type(t) || is_any_int_type(t))
-          warn(s0->loc,"should return a value of type %s",typ2string(t)); 
+          Warn::warn2(s0->loc,"should return a value of type ",t);
         else
-          terr(s0->loc,"must return a value of type %s",typ2string(t)); 
+          Warn::err2(s0->loc,"must return a value of type ",t);
       }
     } else {
       // don't introduce alias expressions here; would be useless
@@ -211,12 +202,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       exp_t e = eopt;
       tcExp(te,&t,e);
       if (!coerce_arg(curr_rgnpo(te),e,t,&bogus)) {
-        terr(s0->loc, "returns value of type %s but requires %s",
-             typ2string((type_t)e->topt), typ2string(t));
+        Warn::err2(s0->loc, "returns value of type ",(type_t)e->topt,
+	           "but requires ",t);
         Unify::explain_failure();
       }
       if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-	terr(e->loc,UNIQUE_ERR_MSG);
+	unique_consume_err(e->loc);
     }
     return;
 
@@ -264,14 +255,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       bool bogus = false;
       tcExp(te,NULL,es->hd);
       if(!coerce_arg(curr_rgnpo(te),es->hd,ts->hd,&bogus)) {
-	terr(s0->loc, "fallthru argument has type %s "
-             "but pattern variable has type %s",
-             typ2string((type_t)es->hd->topt), typ2string(ts->hd));
+	Warn::err2(s0->loc, "fallthru argument has type ",(type_t)es->hd->topt,
+		   "but pattern variable has type ",ts->hd);
         Unify::explain_failure();
       }
       // JGM: no test case
       if (is_noalias_pointer_or_aggr(ts->hd) && !is_noalias_path(es->hd))
-	terr(es->hd->loc,UNIQUE_ERR_MSG);
+	unique_consume_err(es->hd->loc);
     }
     if (es != NULL)
       terr(s0->loc, "too many arguments in explicit fallthru");
@@ -309,7 +299,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let t = tcExp(te,NULL,e);
 
     if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-      terr(e->loc,UNIQUE_ERR_MSG);
+      unique_consume_err(e->loc);
     // DJG: I finally got tired of checking cases in reverse order.  It is
     //      a bit more convoluted to go in order...
     // Fallthru is not allowed in the last case, even if in a nested switch
@@ -339,8 +329,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,t)) { // allow silent_castable?
-	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
-	     typ2string(t), typ2string((type_t)p->topt));
+	Warn::err2(scs->hd->loc, "switch on type ",t," but case expects type ",
+		   (type_t)p->topt);
 	Unify::explain_failure();
       }
       else
@@ -402,8 +392,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
-	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
-	     typ2string(exception_type), typ2string((type_t)p->topt));
+	Warn::err2(scs->hd->loc, "switch on type ",exception_type, 
+		   " but case expects type ",(type_t)p->topt);
 	Unify::explain_failure();
       }
       else
@@ -487,19 +477,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	if(!is_local && !is_const_exp((exp_t)initializer))
 	  terr(d->loc, "initializer for static variable needs to be a constant expression");
 	if (!coerce_assign(curr_rgnpo(te2),(exp_t)initializer,t)) {
-	  let varstr = *x;
-	  let tstr = typ2string(t);
-	  let estr = typ2string((type_t)initializer->topt);
-	  if (numelts(varstr) + numelts(tstr) + numelts(estr) + 50 < 80)
-	    terr(d->loc, "%s was declared with type %s but initialized "
-		 "with type %s.",varstr, tstr, estr);                   
-	  else if (numelts(varstr) + numelts(tstr) + 25 < 80 &&
-		   numelts(estr) + 25 < 80)
-	    terr(d->loc, "%s was declared with type %s\n but initialized "
-		 "with type %s.",varstr, tstr, estr);
-	  else 
-	    terr(d->loc, "%s declared with type \n%s\n but initialized "
-		 "with type \n%s.",varstr, tstr, estr);
+	  Warn::err2(d->loc,*x," was declared with type ",t,
+		     " but initialized with type ",(type_t)initializer->topt);
 	  Unify::unify(t,(type_t)initializer->topt);
 	  Unify::explain_failure();
 	}
@@ -540,8 +519,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       *vds = new Opt(pat_res.patvars);
       if (!Unify::unify((type_t)p->topt,(type_t)e->topt)
 	  && !coerce_assign(curr_rgnpo(te),e,(type_t)p->topt)) {
-	terr(d->loc,"pattern type %s does not match definition type %s",
-	     typ2string((type_t)p->topt),typ2string((type_t)e->topt));
+	Warn::err2(d->loc,"pattern type ",(type_t)p->topt,
+		   " does not match definition type ",(type_t)e->topt);
 	Unify::unify((type_t)p->topt,(type_t)e->topt);
 	Unify::explain_failure();
       }
@@ -588,8 +567,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
 	if (!Unify::unify(exp_type,key_typ) && 
 	    !coerce_assign(curr_rgnpo(te),open_exp_opt,exp_type))
-	  terr(s0->loc,"expected %s but found %s",
-	       typ2string(exp_type), typ2string(key_typ));
+	  Warn::err2(s0->loc,"expected ",exp_type," but found ",key_typ);
 	if (!Unify::unify(outer_rgn,unique_rgn_type) && 
 	    !Unify::unify(outer_rgn,refcnt_rgn_type))
 	  terr(s0->loc,"open is only allowed on unique or reference-counted keys");
@@ -616,8 +594,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       for (_ atts = fd->i.attributes; atts; atts = atts->tl)
 	switch (atts->hd) {
 	case &Packed_att: case &Aligned_att(_):
-	  terr(d->loc,"bad attribute %s for function",
-	       attribute2string(atts->hd));
+	  Warn::err2(d->loc,"bad attribute ",atts->hd," for function");
 	  break;
 	default: break;
 	}

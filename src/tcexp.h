@@ -21,13 +21,11 @@
 
 #include "tcenv.h"
 
-namespace Tcexp{
-using Absyn;
-using Tcenv;
+namespace Tcexp {
 
-extern type_t tcExp(tenv_t, type_t*, exp_t);
-extern type_t tcExpInitializer(tenv_t, type_t*, exp_t);
-extern void tcTest(tenv_t te, exp_t e, string_t msg_part);
-
+Absyn::type_t tcExp(Tcenv::tenv_t, Absyn::type_t*, Absyn::exp_t);
+Absyn::type_t tcExpInitializer(Tcenv::tenv_t, Absyn::type_t*, Absyn::exp_t);
+void tcTest(Tcenv::tenv_t, Absyn::exp_t, string_t<`H> msg_part);
+void unique_consume_err(Position::seg_t);
 }
 #endif
