@@ -169,12 +169,14 @@ clean_src:
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 
-# OUT_PREFIX affects these targets
+# affected by OUT_PREFIX
 clean_src_prefix:
 	$(MAKE) clean_prefix -C src 
 	$(MAKE) clean_prefix -C lib 
 
-# Clean-up: using OUT_PREFIX for other targets is a wasteful kludge.
+# To do: using OUT_PREFIX for other targets is a wasteful kludge.
+# To do: cross-compiler cleaning doesn't remove copies of no_gc.c and 
+#        runtime_cyc.c.
 clean_nogc:
 	$(MAKE) clean -C tools/bison
 	$(MAKE) clean -C tools/cyclex
@@ -182,8 +184,8 @@ clean_nogc:
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 	@for arch in $(ALL_ARCHS); do\
-	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/src/;\
-	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/lib/;\
+	    $(MAKE) clean_prefix -C src OUT_PREFIX=../$$arch/;\
+	    $(MAKE) clean_prefix -C lib OUT_PREFIX=../$$arch/;\
 	done
 	$(RM) bin/cyc-lib/libcyc.a bin/cyc-lib/libcyc_a.a
 	$(MAKE) clean -C bin/genfiles

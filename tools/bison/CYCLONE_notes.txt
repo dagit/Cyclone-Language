@@ -1,10 +1,5 @@
 Using cycbison:
 
-* I've only tested this in the simplest of configurations.  Many things
-(like location stuff) has not been tested and is most likely broken.  
-In particular, the PURE support (re-entrant) is not done, and nor has
-the bison.hairy parse engine been ported.
-
 * Here's a sample grammar for reverse-polish notation.  Note that we
 more or less follow exactly the same conventions as in the C version.
 You translate it to cyclone code with:
@@ -17,32 +12,29 @@ contains all of the tables as well as the parse engine.  It's invoked
 by calling yyparse() which in turn calls yylex() expecting that yylex()
 produces an integer token and a semantic value in yylval.
 
-The type of yylval is specified with the %xenum declaration.  This is
-required for us (but optional for C-bison.)  The syntax for the xenum
-declaration does not mention the type -- it becomes YYSTYPE.  
+The type of yylval is specified with the %union declaration.  This is
+required for us (but optional for C-bison.)  The syntax for the
+declaration does not mention the type -- it becomes YYSTYPE.
 
 One declares tokens using the %token <id> notation as in bison.
 
 One declares the type of tokens (terminals) and non-terminals
 using %type <field> t1 t2 ... tn where <field> is a field of
-the %xenum type, and t1,t2,...,tn are [non-]terminals.  
+the %union type, and t1,t2,...,tn are [non-]terminals.  
 
 The grammar rules work just as in bison/yacc.  The biggest difference
 is within the actions of the grammar rules.  In particular, $$ refers
 to yylval.  Because it's declared to be of type YYSTYPE, anything
 that goes into $$ should have this type.  If you use it as an r-value,
-then you probably need to switch on it or use the enum projection
-(e.g., $$.foo).  
+then you probably need to switch on it.
 
 $1 $2 and so forth continue to refer to the semantic elements of the rule.
-They are translated as (yysv[yysvp_offset-i]).<field> where <field> is
-associated with that particular terminal/non-terminal in a %type declaration.
-That is, a reference to $1 will implicitly "downcast" to the "type"
-of the [non-]terminal.  
+They are translated so as to implicitly "downcast" to the "type" of
+the [non-]terminal.
 
-Some new syntax is ^$.  This is essentially translated to ^YYSTYPE.<field>
-where <field> is the field name of the union associated with $$ (i.e.,
-the rule's left-hand-side.)
+Some new syntax is ^$(e).  This is essentially translated to new
+field(e) where field is the field name of the union associated with $$
+(i.e., the rule's left-hand-side.)
 
 So for instance, in the grammar below, for the "+" case, we have as the
 action:
