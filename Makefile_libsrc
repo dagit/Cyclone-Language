@@ -13,7 +13,7 @@ include $(CYCDIR)/Makefile.inc
 VPATH=$(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)
 export CYCFLAGS
 
-# For bootstrapping, may want to override these with somehting appropriate
+# For bootstrapping, may want to override these with something appropriate
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
 CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
@@ -23,6 +23,10 @@ LIBR:=$(CYCLIB)
 
 CYCINC_H:=$(LIB_PATH)/include/cyc_include.h
 
+# Note the -B means we compile with the cyc_include.h from
+#   $(LIB_PATH)/include instead of a cyc_include.h from somewhere
+#   else (e.g., $(CYCDIR)/bin/cyc-lib/include or one from a previous
+#   installation of cyclone on the same machine).
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B$(LIB_PATH) -save-c
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
@@ -39,16 +43,22 @@ ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+
 endif
 
-# Why do these want two -B arguments???
-# Why don't these use $(CYCFLAGS)
+# Why do these want two -B arguments -- because the first one makes sure
+#  that we pick up the libcyc.a of the current directory and the second
+#  makes sure we pick up the gc.a of the current $(CYCDIR), and we avoid
+#  the libcyc.a and gc.a of any version of Cyclone currently installed
+#  in the usual place.
+# Why don't these use $(CYCFLAGS) -- because that has -save-c which is
+#  irrelevant and does not have a needed -B
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) -v -B$(LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) -v -B$(LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/Makefile.inc
 	@(echo "char *Carch = \"$(ARCH)\";"; \

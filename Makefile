@@ -26,7 +26,7 @@ $(error "Must have ARCH variable defined -- perhaps forgot to run ./configure")
 endif
 
 CYC_BIN_PATH := $(CYCDIR)/bin
-CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib/
+CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
 CYC_INC_PATH := $(CYCDIR)/lib
 
 build: $(CYC_LIB_PATH)/gc.a cyclone tools aprof libs 
@@ -51,7 +51,7 @@ nocheck:
 .PHONY: tools cyclone aprof libs nocheck
 
 $(CYC_LIB_PATH)/gc.a:
-	$(MAKE) -C gc CC=$(CC) gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 	ln gc/gc.a $@
 
 #This klduge replaces the PLATFORM_INCLUDE kludge -- we hope buildlib comes soon
