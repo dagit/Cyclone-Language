@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-char net_rcsid[] = "$Id: finger.cyc,v 1.2 2001-06-22 14:40:44 jgm Exp $";
+char net_rcsid[] = "$Id: finger.cyc,v 1.3 2001-06-22 15:08:08 mharris Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -75,7 +75,7 @@ int main(int argc, char ?argv[]) {
   }
 
   host = strrchr(argv[1], '@');
-  if (!host) { 
+  if (!host) {
     fprintf(stderr, "%s: no host given\n", argv[0]);
     exit(1);
   }
