@@ -1,0 +1,171 @@
+/* This is the parser.  It reads each character, and does something with it based on the
+   current parsing context.  It will do some compression while it reads stuff in. */
+
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+using Core;
+using Stdio;
+using String;
+#include "smlng.h"
+
+/* The information part of a tag */
+string_t tag[] = {
+  "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+  "B", "EM", "I", "PL", "S", "TT", "U", "r", "g",
+  "b", "c", "m", "y", "k", "w"
+};
+
+/* buffers for parsing */
+
+#define DEF_BUFSIZE 1024
+typedef struct Buf { 
+  char ?buf;
+  int idx;
+} buf_t;
+
+buf_t @ alloc_buf() {
+  char ?buf = new { for i < DEF_BUFSIZE: 0 };
+  return new Buf{buf,0};
+}
+
+buf_t @expand_buf(buf_t @b) {
+  int newsz = b->buf.size * 2;
+  char ?buf = new { for i < newsz: 0 };
+  strcpy(buf,b->buf);
+  return new Buf{buf,b->idx};
+}
+
+void input_buf_char(buf_t @@b, char c) {
+  if ((*b)->idx == (*b)->buf.size)
+    *b = expand_buf(*b);
+  (*b)->buf[(*b)->idx] = c;
+  (*b)->idx++;
+}
+
+/* parser */
+
+xtunion exn { Parse_error; End_of_file };
+#define die(s) throw Parse_error
+
+char nextchar(FILE @f) {
+  int c = fgetc(f);
+  if (c == EOF)
+    throw End_of_file;
+  else
+    return (char)c;
+} 
+
+/* assumes the first '<' has been read.  Reads the tag and the trailing '>' and
+   returns the enum tag_t value with an int, where 0 = start tag, and 1 = end tag.
+   Will fail if the tag text does not match a real tag.
+*/
+$(tag_t,int) gettag(FILE @f) {
+  char c1,c2;
+  tag_t t;
+  int end_tag = 0;
+
+  /* look for / */
+  c1 = nextchar(f);
+  if (c1 == '/')
+    end_tag = 1;
+  else
+    ungetc(c1,f);
+
+  /* figure out which tag */
+  c1 = nextchar(f);
+  switch (c1) {
+  case '0': t = Zero; break;
+  case '1': t = One; break;
+  case '2': t = Two; break;
+  case '3': t = Three; break;
+  case '4': t = Four; break;
+  case '5': t = Five; break;
+  case '6': t = Six; break;
+  case '7': t = Seven; break;
+  case '8': t = Eight; break;
+  case '9': t = Nine; break;
+  case 'B': t = B_tag; break;
+  case 'I': t = I_tag; break;
+  case 'S': t = S_tag; break;
+  case 'U': t = U_tag; break;
+  case 'r': t = r_tag; break;
+  case 'g': t = g_tag; break;
+  case 'b': t = b_tag; break;
+  case 'c': t = c_tag; break;
+  case 'm': t = m_tag; break;
+  case 'y': t = y_tag; break;
+  case 'k': t = k_tag; break;
+  case 'w': t = w_tag; break;
+  case 'E': 
+    if (nextchar(f) != 'M')
+      die("invalid 2-char tag");
+    t = EM_tag;
+    break;
+  case 'P':
+    if (nextchar(f) != 'L')
+      die("invalid 2-char tag");
+    t = PL_tag;
+    break;
+  case 'T':
+    if (nextchar(f) != 'T')
+      die("invalid 2-char tag");
+    t = TT_tag;
+    break;
+  default:
+    die("invalid 2-char tag");
+  }
+  
+  /* kill trailing '>' */
+  if (nextchar(f) != '>') die("no trailing > on tag");
+  return $(t,end_tag);
+}
+
+/* keep going until you hit a tag and then return the text you've got so far.
+   XXX should be able to region-ify this */
+doc_t get_text(FILE @f) {
+  char c;
+  buf_t @b = alloc_buf();
+  while (1) {
+    c = nextchar(f);
+    switch (c) {
+    case '<': /* tag */
+      ungetc(c,f);
+      input_buf_char(&b,'\0');
+      return new Text(b->buf);
+    default:
+      input_buf_char(&b,c);
+    }
+  }
+}
+
+extern doc_t get_doc(FILE @);
+
+/* assumes the opening tag has already been read */
+doc_t get_tag_doc(FILE @f, tag_t t) {
+  doc_t d = get_doc(f);
+  let $(t2,e) = gettag(f);
+  if (e) /* ending tag */
+    return new Tagged(t,d);
+  else /* starting tag for nested doc; while chomp matching tag */ {
+    doc_t d2 = get_tag_doc(f,t2);
+    return new Seq(new {d,d2});
+  }
+}
+
+doc_t get_doc(FILE @f) {
+  char c;
+
+  c = nextchar(f);
+  switch (c) {
+  case '<': /* tag */
+    let $(t,e) = gettag(f);
+    if (!e) {
+      return get_tag_doc(f,t);
+    }
+    else
+      die("found illegal end tag");
+  default: 
+    return get_text(f);
+  }
+}    
