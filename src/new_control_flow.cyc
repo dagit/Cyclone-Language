@@ -397,16 +397,22 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     //print_relns(relns); fprintf(stderr,"\n");
   }
   switch(e->r) {
+    // treat this similar to a dereference in that there's a null-check
+    // and afterwards, we know the value is not null.
+  case &Cast_e(_,e1,_,NonNull_to_Null):
+    let $(f1,r1) = anal_Rexp(env,inflow,e1);
+    let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
+    return $(f2,r1);
     // C doesn't allow "memory-kind casts", which is good because then
     // we'd have to translate the dictionary domains and that's a pain.
     // In essence, we're assuming the result absRval_t is not Aggregate.
-  case &Cast_e(_,e1):        fallthru(e1);
+  case &Cast_e(_,e1,_,_):    fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Rexp(env,inflow,e1);
 
   case &Const_e(Null_c):
-  case &Const_e(&Int_c(Signed,0)): return $(inflow, Zero);
-  case &Const_e(&Int_c(Signed,_)): 
+  case &Const_e(&Int_c(_,0)): return $(inflow, Zero);
+  case &Const_e(&Int_c(_,_)): 
   case &Var_e(_,&Funname_b(_)):    return $(inflow, NotZeroAll);
 
   case &Tunion_e(NULL,_,_): // FIX: distinguish zero/non-zero
@@ -731,7 +737,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       relns_t new_relns = relns;
     comp_loop:
       switch(e1->r) {
-      case &Cast_e(_,e2): e1 = e2; goto comp_loop;
+      case &Cast_e(_,e2,_,_): e1 = e2; goto comp_loop;
       case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
       case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
       case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
@@ -877,7 +883,7 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     //print_relns(relns); fprintf(stderr,"\n");
   }
   switch(e->r) {
-  case &Cast_e(_,e1):        fallthru(e1);
+  case &Cast_e(_,e1,_,_):      fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Lexp_rec(env,inflow,e1,flds);
 
@@ -991,6 +997,17 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
 	  case Neq: return $(f1,f2);
 	  default: throw new Core::Impossible("anal_test, zero-split");
 	  }
+        case $(Zero,Zero):
+          if (p == Eq) return $(f,BottomFL);
+          else return $(BottomFL,f);
+        case $(Zero,NotZeroAll): fallthru;
+        case $(Zero,NotZeroThis): fallthru;
+        case $(Zero,&AddressOf(_)): fallthru;
+        case $(NotZeroAll,Zero): fallthru;
+        case $(NotZeroThis,Zero): fallthru;
+        case $(&AddressOf(_),Zero): 
+          if (p == Neq) return $(f,BottomFL);
+          else return $(BottomFL,f);
 	default: break;
 	}
 

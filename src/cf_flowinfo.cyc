@@ -143,8 +143,12 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
       case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
       default: return leafval;
       }
+    case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_}}) 
+      && !conref_def(false,nbl):
+        return NotZeroAll;
     default: break;
     }
+  
   return Tcutil::bits_only(t) ? unknown_all : leafval;
 }
 
@@ -787,7 +791,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
   case &Malloc_e(MallocInfo{_,_,_,e2,true}):
     malloc_loop:
     switch (e2->r) {
-    case &Cast_e(_,e3): e2 = e3; goto malloc_loop;
+    case &Cast_e(_,e3,_,_): e2 = e3; goto malloc_loop;
     case &Var_e(_,&Pat_b(n)): fallthru(n);
     case &Var_e(_,&Local_b(n)): fallthru(n);
     case &Var_e(_,&Param_b(n)): fallthru(n);
@@ -808,7 +812,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
   
  loop:
   switch (e->r) {
-  case &Cast_e(_,e1): e = e1; goto loop;
+  case &Cast_e(_,e1,_,_): e = e1; goto loop;
   case &Const_e(&Int_c(_,i)): 
     return new List(new Reln(v,new EqualConst(i)),r);
   case &Primop_e(Mod, &List(_,&List(e2,_))):

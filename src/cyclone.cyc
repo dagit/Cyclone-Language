@@ -72,6 +72,7 @@ static bool generate_line_directives_r = false;
 static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
+static bool print_all_effects_r = false;
 
 
 static string_t *output_file = NULL;
@@ -402,6 +403,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   params_r.print_full_evars = print_full_evars_r;
   params_r.print_all_tvars = print_all_tvars_r;
   params_r.print_all_kinds = print_all_kinds_r;
+  params_r.print_all_effects = print_all_effects_r;
 
   //  fprintf(out_file, "#include \"cyc_include.h\"\n\n");
   /* Copy cyc_include.h to out_file. */
@@ -984,6 +986,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-printfullevars",false,"",
                new Set_spec(&print_full_evars_r),
                "Print full information for evars (type debugging)"),
+         new $("-printalleffects",false,"",
+               new Set_spec(&print_all_effects_r),
+               "Print effects for functions (type debugging)"),
          new $("-CI",false," <file>",
                new String_spec(set_cyc_include),
                "Set cyc_include.h to be <file>"),

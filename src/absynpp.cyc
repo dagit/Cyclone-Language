@@ -90,6 +90,9 @@ static bool print_all_tvars;
 // Flag controlling whether to print all kinds
 static bool print_all_kinds;
 
+// Flag controlling whether to print effects on functions
+static bool print_all_effects;
+
 // Flag controlling whether to print the Using statements
 static bool print_using_stmts;
 
@@ -123,6 +126,7 @@ struct Params {
   bool rewrite_temp_tvars :1;
   bool print_all_tvars :1;
   bool print_all_kinds :1;
+  bool print_all_effects :1;
   bool print_using_stmts :1;
   bool print_externC_stmts :1;
   bool print_full_evars :1;
@@ -141,6 +145,7 @@ void set_params(struct Params @ fs) {
   rewrite_temp_tvars = fs->rewrite_temp_tvars;
   print_all_tvars = fs->print_all_tvars;
   print_all_kinds = fs->print_all_kinds;
+  print_all_effects = fs->print_all_effects;
   print_using_stmts = fs->print_using_stmts;
   print_externC_stmts = fs->print_externC_stmts;
   print_full_evars = fs->print_full_evars;
@@ -160,6 +165,7 @@ struct Params cyc_params_r =
     .rewrite_temp_tvars = true,
     .print_all_tvars = false,
     .print_all_kinds = false,
+    .print_all_effects = false,
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
@@ -179,6 +185,7 @@ struct Params cyci_params_r =
     .rewrite_temp_tvars = true,
     .print_all_tvars = false,
     .print_all_kinds = false,
+    .print_all_effects = true,
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
@@ -198,6 +205,7 @@ struct Params c_params_r =
     .rewrite_temp_tvars = false,
     .print_all_tvars = false,
     .print_all_kinds = false,
+    .print_all_effects = false,
     .print_using_stmts = false,
     .print_externC_stmts = false,
     .print_full_evars = false,
@@ -217,6 +225,7 @@ struct Params tc_params_r =
     .rewrite_temp_tvars = false,
     .print_all_tvars = false,
     .print_all_kinds = false,
+    .print_all_effects = false,
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
@@ -810,7 +819,7 @@ doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,bool c_varargs,
     arg_docs = List::append(arg_docs,new List(varargs_doc,NULL));
   }
   let arg_doc = group("","",",",arg_docs);
-  if (effopt != NULL) 
+  if (effopt != NULL && print_all_effects) 
     arg_doc = cat(arg_doc,text(";"),eff2doc(effopt->v));
   if (rgn_po != NULL) 
     arg_doc = cat(arg_doc,text(":"),rgnpo2doc(rgn_po));
@@ -946,7 +955,7 @@ int exp_prec(exp_t e) {
   case &Throw_e(_):             return 130;
   case &NoInstantiate_e(e2):    return exp_prec(e2);
   case &Instantiate_e(e2,_):    return exp_prec(e2);
-  case &Cast_e(_,_):            return 120;
+  case &Cast_e(_,_,_,_):        return 120;
   case &New_e(_,_):             return 15; // ???
   case &Address_e(_):           
   case &Sizeoftyp_e(_):         
@@ -1046,7 +1055,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Instantiate_e(e1,_):
     s = exp2doc_prec(inprec,e1);
     break;
-  case &Cast_e(t,e1):
+  case &Cast_e(t,e1,_,_):
     s = cat(text("("),
             typ2doc(t),
             text(")"),

@@ -539,7 +539,11 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = new List(string_typ(new_evar(&rk,tvs)),typs);
+      // we use a mbuffer_t here because this matches more things.
+      type_t ptr = tagged_typ(char_typ, 
+                              new_evar(&rk,new Opt(lookup_type_vars(te))),
+                              empty_tqual(), false_conref);
+      typs = new List(ptr,typs);
       break;
     case '[':
     case 'p':

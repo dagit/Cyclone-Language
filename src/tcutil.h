@@ -60,7 +60,7 @@ extern type_t fd_type(fndecl_t fd);
 extern kind_t tvar_kind(tvar_t t);
 extern kind_t typ_kind(type_t t);
 extern type_t compress(type_t t);
-extern void unchecked_cast(tenv_t, exp_t, type_t);
+extern void unchecked_cast(tenv_t, exp_t, type_t, coercion_t);
 extern bool coerce_arg(tenv_t, exp_t, type_t); 
 extern bool coerce_assign(tenv_t, exp_t, type_t);
 extern bool coerce_to_bool(tenv_t, exp_t);
@@ -72,7 +72,7 @@ extern bool coerceable(type_t); // true if numeric or character
 // true when expressions of type t1 can be implicitly cast to t2
 extern bool silent_castable(tenv_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
-extern bool castable(tenv_t,seg_t,type_t,type_t);
+extern coercion_t castable(tenv_t,seg_t,type_t,type_t);
 
 extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);

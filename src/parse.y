@@ -2320,7 +2320,7 @@ cast_expression:
   unary_expression
     { $$=$!1; }
 | '(' type_name ')' cast_expression
-    { $$=^$(cast_exp((*$2)[2],$4,LOC(@1,@4))); }
+    { $$=^$(cast_exp((*$2)[2],$4,true,Unknown_coercion,LOC(@1,@4))); }
 ;
 
 unary_expression:

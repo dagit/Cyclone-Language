@@ -619,7 +619,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): dumpexp_prec(inprec,e1); break;
 
-  case &Cast_e(t,e1):
+  case &Cast_e(t,e1,_,_):
     dump_char('('); dumptyp(t); dump_char(')'); dumpexp_prec(myprec,e1);
     break;
 

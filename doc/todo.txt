@@ -13,11 +13,6 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
-* For zero-terminated arrays, we do not require an initializer even
-though we should.  Also, we allow zero-terminated arrays of size 0
-though there are parts of the system that rely upon them having at
-least one element.  
-
 * C code from void f() { let x = NULL; } doesn't compile b/c we
 underconstrain the constant NULL and the unused type of x differently.
 
@@ -141,8 +136,7 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   - add the remaining thread primitives; i.e. port some/all of the POSIX
     threads interface.
 
-* argv should be zero-terminated.  We should make it have type
-  char*?ZEROTERM or something like that.
+* argv should really have the type char* argv[argc].
 
 * need to port more C libraries
 
@@ -190,18 +184,13 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 * remove cyc_include.h's dependency on setjmp.h, since that really
   pollutes the namespace
 
-* sscanf should support %s when a field width is provided
-
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
-* better type error messages:  keep track of the location where a type
-  comes from and merge this information during unification.  Also,
-  pretty-print types better (e.g., hide the effects when possible,
-  strip off qualifiers in a Using context, try to preserve typedefs,
-  etc.)  
+* better type error messages:  it would be good to drop region information
+  when it's not germaine to the error.  
 
 * dependent types for arrays (and lots more?)
 
@@ -255,3 +244,7 @@ MISCELLANEOUS
 * better implementation of unresolved mem
 
 * translation to C with -noexpandtypedefs hasn't been tested in forever.
+
+* perhaps there should be an option to get a NULL check for * types
+  when doing -> ?  That is, why do we give one for *e but not e->f?
+

@@ -143,6 +143,7 @@ namespace Absyn {
   typedef tunion OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
   typedef struct ForArrayInfo forarray_info_t;
+  typedef tunion Coercion coercion_t;
 
   // scopes for declarations 
   EXTERN_ABSYN tunion Scope { 
@@ -432,6 +433,18 @@ namespace Absyn {
     TupleIndex(unsigned int);
   };
 
+  // Casts are labelled with whether or not they involve a coercion
+  // of some sort.  This is used in the flow analysis to get rid of
+  // spurious warnings and null checks.
+  EXTERN_ABSYN tunion Coercion {
+    Unknown_coercion, // initially, we don't know what kind of coercion
+    No_coercion,      // a cast that C supports
+    NonNull_to_Null,  // t@{n+m} -> t*{n}
+      // FIX: should enumerate all other coercions so that we can
+      // make sure the type-checker and code-generator are in sync.
+    Other_coercion    // all of the other coercions (see toc.cyc)
+  };
+
   // information for malloc:
   //  it's important to note that when is_calloc is false (i.e., we have
   //  a malloc or rmalloc) then we can be in one of two states depending
@@ -467,7 +480,8 @@ namespace Absyn {
     Throw_e(exp_t); // throw
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn
-    Cast_e(type_t,exp_t); // (t)e
+    // (t)e.  bool indicates whether user inserted cast
+    Cast_e(type_t,exp_t,bool,coercion_t); 
     Address_e(exp_t); // &e
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t); // sizeof(t)
@@ -880,7 +894,7 @@ namespace Absyn {
   extern exp_t throw_exp(exp_t, seg_t);
   extern exp_t noinstantiate_exp(exp_t, seg_t);
   extern exp_t instantiate_exp(exp_t, list_t<type_t,`H>, seg_t);
-  extern exp_t cast_exp(type_t, exp_t, seg_t);
+  extern exp_t cast_exp(type_t, exp_t, bool user_cast, coercion_t, seg_t);
   extern exp_t address_exp(exp_t, seg_t);
   extern exp_t sizeoftyp_exp(type_t t, seg_t);
   extern exp_t sizeofexp_exp(exp_t e, seg_t);

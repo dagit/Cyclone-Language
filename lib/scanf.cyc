@@ -154,9 +154,10 @@ static int @`r va_arg_int_ptr(sarg_t<`r,`r2> a) {
   }
 }  
 
-static char ?`r va_arg_string_ptr(sarg_t<`r,`r2> a) {
+static char ?NOZEROTERM `r va_arg_string_ptr(sarg_t<`r,`r2> a) {
   switch (a) {
-  case &StringPtr_sa(p): return p;
+  case &StringPtr_sa(p): return (char ?NOZEROTERM`r)p;
+  case &CharPtr_sa(p): return p;
   default: throw new Invalid_argument("scan expects char pointer");
   }
 }  

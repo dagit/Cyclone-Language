@@ -343,7 +343,7 @@ static exp_t make_offsetof_exp($(type_t,seg_t)@ typeloc,int index) {
 
 
 static exp_t get_and_cast_ri_exp(seg_t loc, repinfo_t info) {
-  return cast_exp(tunion_typ(typerep_name(&typestruct_str)),(exp_t)info->exp,loc);
+  return cast_exp(tunion_typ(typerep_name(&typestruct_str)),(exp_t)info->exp,true,Unknown_coercion,loc);
 }
 
 static $(var_t,exp_t)@ gen_id_for_exp(exp_t e) {

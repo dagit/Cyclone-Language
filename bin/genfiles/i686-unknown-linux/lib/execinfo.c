@@ -501,15 +501,14 @@ const char*)"addr2line",_tag_arr(_tmp3,sizeof(const char*),4));});return 1;}else
 if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
 fromchild[1]);return 1;}}{struct Cyc___cycFILE*w=({struct Cyc___cycFILE*f=Cyc_fdopen(
 tochild[1],(const char*)"w");if(!((unsigned int)f))return 1;(struct Cyc___cycFILE*)
-_check_null(f);});struct Cyc___cycFILE*r=({struct Cyc___cycFILE*f=Cyc_fdopen(
-fromchild[0],(const char*)"r");if(!((unsigned int)f)){Cyc_fclose(w);return 1;}(
-struct Cyc___cycFILE*)_check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,
-sizeof(int),20),(int)20);{int c=0;for(0;c < n;c ++){({struct Cyc_Int_pa_struct _tmp9;
-_tmp9.tag=1;_tmp9.f1=(unsigned int)bt[_check_known_subscript_notnull(20,c)];{
-void*_tmp7[1]={& _tmp9};Cyc_fprintf(w,({const char*_tmp8="%#x\n";_tag_arr(_tmp8,
-sizeof(char),_get_zero_arr_size(_tmp8,5));}),_tag_arr(_tmp7,sizeof(void*),1));}});}}
-Cyc_fflush((struct Cyc___cycFILE*)w);({void*_tmpA[0]={};Cyc_printf(({const char*
-_tmpB="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
+f;});struct Cyc___cycFILE*r=({struct Cyc___cycFILE*f=Cyc_fdopen(fromchild[0],(
+const char*)"r");if(!((unsigned int)f)){Cyc_fclose(w);return 1;}(struct Cyc___cycFILE*)
+f;});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)20);{int c=0;
+for(0;c < n;c ++){({struct Cyc_Int_pa_struct _tmp9;_tmp9.tag=1;_tmp9.f1=(
+unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp7[1]={& _tmp9};
+Cyc_fprintf(w,({const char*_tmp8="%#x\n";_tag_arr(_tmp8,sizeof(char),
+_get_zero_arr_size(_tmp8,5));}),_tag_arr(_tmp7,sizeof(void*),1));}});}}Cyc_fflush((
+struct Cyc___cycFILE*)w);({void*_tmpA[0]={};Cyc_printf(({const char*_tmpB="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
 _tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,94));}),_tag_arr(_tmpA,
 sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int d;int pos=0;({void*_tmpC[0]={};
 Cyc_printf(({const char*_tmpD="  ";_tag_arr(_tmpD,sizeof(char),_get_zero_arr_size(

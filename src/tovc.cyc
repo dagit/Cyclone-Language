@@ -146,7 +146,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 
   case &NoInstantiate_e(e1):    fallthru(e1);
   case &Instantiate_e(e1,_):    fallthru(e1);
-  case &Cast_e(_,e1):           fallthru(e1);
+  case &Cast_e(_,e1,_,_):       fallthru(e1);
   case &Address_e(e1):          fallthru(e1);
   case &Sizeofexp_e(e1):        fallthru(e1);
   case &Deref_e(e1):            fallthru(e1);
@@ -306,7 +306,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
 
   case &NoInstantiate_e(e1):  fallthru(e1);
   case &Instantiate_e(e1,_):  fallthru(e1);
-  case &Cast_e(_,e1):         fallthru(e1);
+  case &Cast_e(_,e1,_,_):     fallthru(e1);
   case &Address_e(e1):        fallthru(e1);
   case &Sizeofexp_e(e1):      fallthru(e1);
   case &Deref_e(e1):          fallthru(e1);
@@ -404,7 +404,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
 
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): fallthru(e1);
-  case &Cast_e(_,e1):        fallthru(e1);
+  case &Cast_e(_,e1,_,_):    fallthru(e1);
   case &Address_e(e1):       fallthru(e1);
   case &Sizeofexp_e(e1):     fallthru(e1);
   case &Deref_e(e1):         fallthru(e1);

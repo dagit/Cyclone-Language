@@ -40,6 +40,7 @@ extern struct Params {
   bool rewrite_temp_tvars :1;
   bool print_all_tvars :1;
   bool print_all_kinds :1;
+  bool print_all_effects :1;
   bool print_using_stmts :1;
   bool print_externC_stmts :1;
   bool print_full_evars :1;

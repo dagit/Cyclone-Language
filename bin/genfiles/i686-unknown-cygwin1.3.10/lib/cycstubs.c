@@ -467,9 +467,9 @@ opendir(const char*);static char _tmp1[32]="opendir called with NULL string";sta
 struct Cyc_Core_Failure_struct Cyc___opendir_failure={Cyc_Core_Failure,{_tmp1,
 _tmp1,_tmp1 + 32}};struct Cyc___cycDIR*Cyc_opendir(const char*f){struct Cyc_Cdirent___abstractDIR*
 _tmp2=opendir(f);return(unsigned int)_tmp2?({struct Cyc___cycDIR*_tmp3=_cycalloc(
-sizeof(*_tmp3));_tmp3->dir=(struct Cyc_Cdirent___abstractDIR*)_check_null(_tmp2);
-_tmp3;}): 0;}struct Cyc_dirent*readdir(struct Cyc_Cdirent___abstractDIR*);struct Cyc_dirent*
-Cyc_readdir(struct Cyc___cycDIR*d){return readdir(d->dir);}void rewinddir(struct Cyc_Cdirent___abstractDIR*
+sizeof(*_tmp3));_tmp3->dir=(struct Cyc_Cdirent___abstractDIR*)_tmp2;_tmp3;}): 0;}
+struct Cyc_dirent*readdir(struct Cyc_Cdirent___abstractDIR*);struct Cyc_dirent*Cyc_readdir(
+struct Cyc___cycDIR*d){return readdir(d->dir);}void rewinddir(struct Cyc_Cdirent___abstractDIR*
 d);void Cyc_rewinddir(struct Cyc___cycDIR*d){return rewinddir(d->dir);}void seekdir(
 struct Cyc_Cdirent___abstractDIR*d,int);void Cyc_seekdir(struct Cyc___cycDIR*d,int x){
 return seekdir(d->dir,x);}int telldir(struct Cyc_Cdirent___abstractDIR*d);int Cyc_telldir(
@@ -568,15 +568,15 @@ Cyc_file_open(struct _tagged_arr,struct _tagged_arr);void Cyc_file_close(struct 
 struct Cyc_Cstdio___abstractFILE;struct Cyc___cycFILE{struct Cyc_Cstdio___abstractFILE*
 file;};struct Cyc___cycFILE*Cyc_fromCfile(struct Cyc_Cstdio___abstractFILE*cf){
 return(unsigned int)cf?({struct Cyc___cycFILE*_tmp1A=_cycalloc(sizeof(*_tmp1A));
-_tmp1A->file=(struct Cyc_Cstdio___abstractFILE*)_check_null(cf);_tmp1A;}): 0;}void
-clearerr(struct Cyc_Cstdio___abstractFILE*);void Cyc_clearerr(struct Cyc___cycFILE*
-f){return clearerr(f->file);}int fclose(struct Cyc_Cstdio___abstractFILE*);int Cyc_fclose(
+_tmp1A->file=(struct Cyc_Cstdio___abstractFILE*)cf;_tmp1A;}): 0;}void clearerr(
+struct Cyc_Cstdio___abstractFILE*);void Cyc_clearerr(struct Cyc___cycFILE*f){return
+clearerr(f->file);}int fclose(struct Cyc_Cstdio___abstractFILE*);int Cyc_fclose(
 struct Cyc___cycFILE*f){return fclose(f->file);}struct Cyc_Cstdio___abstractFILE*
 fdopen(int,const char*);struct Cyc___cycFILE*Cyc_fdopen(int i,const char*s){struct
 Cyc_Cstdio___abstractFILE*_tmp1B=fdopen(i,s);return(unsigned int)_tmp1B?({struct
 Cyc___cycFILE*_tmp1C=_cycalloc(sizeof(*_tmp1C));_tmp1C->file=(struct Cyc_Cstdio___abstractFILE*)
-_check_null(_tmp1B);_tmp1C;}): 0;}int feof(struct Cyc_Cstdio___abstractFILE*);int
-Cyc_feof(struct Cyc___cycFILE*f){return feof(f->file);}int ferror(struct Cyc_Cstdio___abstractFILE*);
+_tmp1B;_tmp1C;}): 0;}int feof(struct Cyc_Cstdio___abstractFILE*);int Cyc_feof(struct
+Cyc___cycFILE*f){return feof(f->file);}int ferror(struct Cyc_Cstdio___abstractFILE*);
 int Cyc_ferror(struct Cyc___cycFILE*f){return ferror(f->file);}int fflush(struct Cyc_Cstdio___abstractFILE*);
 int Cyc_fflush(struct Cyc___cycFILE*f){if((unsigned int)f)return fflush((struct Cyc_Cstdio___abstractFILE*)
 f->file);else{return fflush(0);}}int fgetc(struct Cyc_Cstdio___abstractFILE*);int
@@ -595,88 +595,87 @@ int fileno(struct Cyc_Cstdio___abstractFILE*);int Cyc_fileno(struct Cyc___cycFIL
 return fileno(f->file);}struct Cyc_Cstdio___abstractFILE*fopen(const char*,const
 char*);struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){struct Cyc_Cstdio___abstractFILE*
 _tmp21=fopen(name,type);return(unsigned int)_tmp21?({struct Cyc___cycFILE*_tmp22=
-_cycalloc(sizeof(*_tmp22));_tmp22->file=(struct Cyc_Cstdio___abstractFILE*)
-_check_null(_tmp21);_tmp22;}): 0;}int fputc(int,struct Cyc_Cstdio___abstractFILE*);
-int Cyc_fputc(int x,struct Cyc___cycFILE*f){return fputc(x,f->file);}int fputs(const
-char*,struct Cyc_Cstdio___abstractFILE*);int Cyc_fputs(const char*x,struct Cyc___cycFILE*
-f){return fputs(x,f->file);}unsigned int fread(char*,unsigned int,unsigned int,
-struct Cyc_Cstdio___abstractFILE*);static char _tmp24[27]="fread: buffer insufficient";
-static struct Cyc_Core_Failure_struct Cyc___fread_failure={Cyc_Core_Failure,{_tmp24,
-_tmp24,_tmp24 + 27}};unsigned int Cyc_fread(struct _tagged_arr ptr,unsigned int size,
-unsigned int nmemb,struct Cyc___cycFILE*f){if(size * nmemb > _get_arr_size(ptr,
-sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);return fread((char*)
-_check_null(_untag_arr(ptr,sizeof(char),1)),size,nmemb,f->file);}struct Cyc_Cstdio___abstractFILE*
-freopen(const char*,const char*,struct Cyc_Cstdio___abstractFILE*);struct Cyc___cycFILE*
-Cyc_freopen(const char*filename,const char*modes,struct Cyc___cycFILE*f){struct Cyc_Cstdio___abstractFILE*
-_tmp25=freopen(filename,modes,f->file);return(unsigned int)_tmp25?(struct Cyc___cycFILE*)({
-struct Cyc___cycFILE*_tmp26=_cycalloc(sizeof(*_tmp26));_tmp26->file=(struct Cyc_Cstdio___abstractFILE*)
-_check_null(_tmp25);_tmp26;}): 0;}int fseek(struct Cyc_Cstdio___abstractFILE*,int,
-int);int Cyc_fseek(struct Cyc___cycFILE*a,int b,int c){return fseek(a->file,b,c);}int
-fsetpos(struct Cyc_Cstdio___abstractFILE*,const int*);int Cyc_fsetpos(struct Cyc___cycFILE*
-f,const int*b){return fsetpos(f->file,b);}int ftell(struct Cyc_Cstdio___abstractFILE*);
-int Cyc_ftell(struct Cyc___cycFILE*f){return ftell(f->file);}unsigned int fwrite(
-const char*,unsigned int,unsigned int,struct Cyc_Cstdio___abstractFILE*);static
-char _tmp28[31]="fwrite called with NULL string";static struct Cyc_Core_Failure_struct
-Cyc___fwrite_failure_1={Cyc_Core_Failure,{_tmp28,_tmp28,_tmp28 + 31}};static char
-_tmp2A[28]="fwrite: buffer insufficient";static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_2={
-Cyc_Core_Failure,{_tmp2A,_tmp2A,_tmp2A + 28}};unsigned int Cyc_fwrite(struct
-_tagged_arr ptr,unsigned int size,unsigned int nmemb,struct Cyc___cycFILE*f){if(!((
-unsigned int)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{if(size * 
-nmemb > _get_arr_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);
-return fwrite((const char*)_untag_arr(ptr,sizeof(char),1),size,nmemb,f->file);}}
-int getc(struct Cyc_Cstdio___abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){
-return getc(f->file);}int getchar();int Cyc_getchar(){return getchar();}int pclose(
-struct Cyc_Cstdio___abstractFILE*);int Cyc_pclose(struct Cyc___cycFILE*f){return
-pclose(f->file);}struct Cyc_Cstdio___abstractFILE*popen(const char*,const char*);
-struct Cyc___cycFILE*Cyc_popen(const char*name,const char*type){struct Cyc_Cstdio___abstractFILE*
-_tmp2B=popen(name,type);return(unsigned int)_tmp2B?({struct Cyc___cycFILE*_tmp2C=
-_cycalloc(sizeof(*_tmp2C));_tmp2C->file=(struct Cyc_Cstdio___abstractFILE*)
-_check_null(_tmp2B);_tmp2C;}): 0;}int putc(int,struct Cyc_Cstdio___abstractFILE*);
-int Cyc_putc(int x,struct Cyc___cycFILE*f){return putc(x,f->file);}void rewind(struct
-Cyc_Cstdio___abstractFILE*);void Cyc_rewind(struct Cyc___cycFILE*f){return rewind(f->file);}
-int setvbuf(struct Cyc_Cstdio___abstractFILE*,char*,int,unsigned int);static char
-_tmp2E[24]="setvbuf: buffer is NULL";static struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_1={
-Cyc_Core_Failure,{_tmp2E,_tmp2E,_tmp2E + 24}};static char _tmp30[29]="setvbuf: buffer insufficient";
-static struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_2={Cyc_Core_Failure,{
-_tmp30,_tmp30,_tmp30 + 29}};int Cyc_setvbuf(struct Cyc___cycFILE*f,struct
-_tagged_arr buf,int type,unsigned int size){if(!((unsigned int)buf.curr))(int)
-_throw((void*)& Cyc___setvbuf_failure_1);if(_get_arr_size(buf,sizeof(char))< size)(
-int)_throw((void*)& Cyc___setvbuf_failure_2);return setvbuf(f->file,(char*)
-_check_null(_untag_arr(buf,sizeof(char),1)),type,size);}void Cyc_setbuf(struct Cyc___cycFILE*
-f,struct _tagged_arr buf){Cyc_setvbuf(f,buf,(unsigned int)buf.curr?0: 2,1024);
-return;}int ungetc(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_ungetc(int x,
-struct Cyc___cycFILE*f){return ungetc(x,f->file);}int getw(struct Cyc_Cstdio___abstractFILE*);
-int Cyc_getw(struct Cyc___cycFILE*f){return getw(f->file);}int putw(int,struct Cyc_Cstdio___abstractFILE*);
-int Cyc_putw(int x,struct Cyc___cycFILE*f){return putw(x,f->file);}char Cyc_FileCloseError[
-19]="\000\000\000\000FileCloseError\000";char Cyc_FileOpenError[18]="\000\000\000\000FileOpenError\000";
-struct Cyc___cycFILE*Cyc_file_open(struct _tagged_arr fname,struct _tagged_arr mode){
-struct Cyc___cycFILE*f=Cyc_fopen((const char*)_untag_arr(fname,sizeof(char),1),(
-const char*)_untag_arr(mode,sizeof(char),1));if(f == 0){struct _tagged_arr fn=({
-unsigned int _tmp33=_get_arr_size(fname,sizeof(char));char*_tmp34=(char*)
-_cycalloc_atomic(_check_times(sizeof(char),_tmp33 + 1));struct _tagged_arr _tmp36=
-_tag_arr(_tmp34,sizeof(char),_tmp33 + 1);{unsigned int _tmp35=_tmp33;unsigned int i;
-for(i=0;i < _tmp35;i ++){_tmp34[i]=((const char*)fname.curr)[(int)i];}_tmp34[_tmp35]=(
-char)0;}_tmp36;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp31=
-_cycalloc(sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct _tmp32;
-_tmp32.tag=Cyc_FileOpenError;_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)
-_check_null(f);}void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(
-int)_throw((void*)Cyc_FileCloseError);}typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{int quot;int rem;}Cyc_ldiv_t;void*abort();void exit(int);void Cyc_free(
-struct _tagged_arr);void Cyc_qsort(struct _tagged_arr,unsigned int,unsigned int,int(*)(
-const void*,const void*));void Cyc_free(struct _tagged_arr ptr){;}void qsort(void*,
-unsigned int,unsigned int,int(*)(const void*,const void*));static char _tmp38[23]="qsort called with NULL";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_1={Cyc_Core_Failure,{
-_tmp38,_tmp38,_tmp38 + 23}};static char _tmp3A[42]="qsort called with insufficient array size";
-static struct Cyc_Core_Failure_struct Cyc___qsort_failure_2={Cyc_Core_Failure,{
-_tmp3A,_tmp3A,_tmp3A + 42}};void Cyc_qsort(struct _tagged_arr tab,unsigned int nmemb,
-unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)tab.curr))(
-int)_throw((void*)& Cyc___qsort_failure_1);if(_get_arr_size(tab,sizeof(void))< 
-nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);qsort((void*)_untag_arr(tab,
-sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}struct _tagged_arr Cyc_mmap(
-struct _tagged_arr,unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(
-struct _tagged_arr start,unsigned int length);char*__stub_mmap(char*start,
-unsigned int length,int prot,int flags,int fd,int offset);int munmap(const char*start,
-unsigned int length);static char _tmp3C[42]="mmap called with illegal start/prot/flags";
+_cycalloc(sizeof(*_tmp22));_tmp22->file=(struct Cyc_Cstdio___abstractFILE*)_tmp21;
+_tmp22;}): 0;}int fputc(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_fputc(int x,
+struct Cyc___cycFILE*f){return fputc(x,f->file);}int fputs(const char*,struct Cyc_Cstdio___abstractFILE*);
+int Cyc_fputs(const char*x,struct Cyc___cycFILE*f){return fputs(x,f->file);}
+unsigned int fread(char*,unsigned int,unsigned int,struct Cyc_Cstdio___abstractFILE*);
+static char _tmp24[27]="fread: buffer insufficient";static struct Cyc_Core_Failure_struct
+Cyc___fread_failure={Cyc_Core_Failure,{_tmp24,_tmp24,_tmp24 + 27}};unsigned int
+Cyc_fread(struct _tagged_arr ptr,unsigned int size,unsigned int nmemb,struct Cyc___cycFILE*
+f){if(size * nmemb > _get_arr_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
+return fread((char*)_check_null(_untag_arr(ptr,sizeof(char),1)),size,nmemb,f->file);}
+struct Cyc_Cstdio___abstractFILE*freopen(const char*,const char*,struct Cyc_Cstdio___abstractFILE*);
+struct Cyc___cycFILE*Cyc_freopen(const char*filename,const char*modes,struct Cyc___cycFILE*
+f){struct Cyc_Cstdio___abstractFILE*_tmp25=freopen(filename,modes,f->file);return(
+unsigned int)_tmp25?(struct Cyc___cycFILE*)({struct Cyc___cycFILE*_tmp26=_cycalloc(
+sizeof(*_tmp26));_tmp26->file=(struct Cyc_Cstdio___abstractFILE*)_tmp25;_tmp26;}):
+0;}int fseek(struct Cyc_Cstdio___abstractFILE*,int,int);int Cyc_fseek(struct Cyc___cycFILE*
+a,int b,int c){return fseek(a->file,b,c);}int fsetpos(struct Cyc_Cstdio___abstractFILE*,
+const int*);int Cyc_fsetpos(struct Cyc___cycFILE*f,const int*b){return fsetpos(f->file,
+b);}int ftell(struct Cyc_Cstdio___abstractFILE*);int Cyc_ftell(struct Cyc___cycFILE*
+f){return ftell(f->file);}unsigned int fwrite(const char*,unsigned int,unsigned int,
+struct Cyc_Cstdio___abstractFILE*);static char _tmp28[31]="fwrite called with NULL string";
+static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{
+_tmp28,_tmp28,_tmp28 + 31}};static char _tmp2A[28]="fwrite: buffer insufficient";
+static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{
+_tmp2A,_tmp2A,_tmp2A + 28}};unsigned int Cyc_fwrite(struct _tagged_arr ptr,
+unsigned int size,unsigned int nmemb,struct Cyc___cycFILE*f){if(!((unsigned int)ptr.curr))(
+int)_throw((void*)& Cyc___fwrite_failure_1);else{if(size * nmemb > _get_arr_size(
+ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);return fwrite((
+const char*)_untag_arr(ptr,sizeof(char),1),size,nmemb,f->file);}}int getc(struct
+Cyc_Cstdio___abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){return getc(f->file);}
+int getchar();int Cyc_getchar(){return getchar();}int pclose(struct Cyc_Cstdio___abstractFILE*);
+int Cyc_pclose(struct Cyc___cycFILE*f){return pclose(f->file);}struct Cyc_Cstdio___abstractFILE*
+popen(const char*,const char*);struct Cyc___cycFILE*Cyc_popen(const char*name,const
+char*type){struct Cyc_Cstdio___abstractFILE*_tmp2B=popen(name,type);return(
+unsigned int)_tmp2B?({struct Cyc___cycFILE*_tmp2C=_cycalloc(sizeof(*_tmp2C));
+_tmp2C->file=(struct Cyc_Cstdio___abstractFILE*)_tmp2B;_tmp2C;}): 0;}int putc(int,
+struct Cyc_Cstdio___abstractFILE*);int Cyc_putc(int x,struct Cyc___cycFILE*f){return
+putc(x,f->file);}void rewind(struct Cyc_Cstdio___abstractFILE*);void Cyc_rewind(
+struct Cyc___cycFILE*f){return rewind(f->file);}int setvbuf(struct Cyc_Cstdio___abstractFILE*,
+char*,int,unsigned int);static char _tmp2E[24]="setvbuf: buffer is NULL";static
+struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_1={Cyc_Core_Failure,{_tmp2E,
+_tmp2E,_tmp2E + 24}};static char _tmp30[29]="setvbuf: buffer insufficient";static
+struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_2={Cyc_Core_Failure,{_tmp30,
+_tmp30,_tmp30 + 29}};int Cyc_setvbuf(struct Cyc___cycFILE*f,struct _tagged_arr buf,
+int type,unsigned int size){if(!((unsigned int)buf.curr))(int)_throw((void*)& Cyc___setvbuf_failure_1);
+if(_get_arr_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___setvbuf_failure_2);
+return setvbuf(f->file,(char*)_check_null(_untag_arr(buf,sizeof(char),1)),type,
+size);}void Cyc_setbuf(struct Cyc___cycFILE*f,struct _tagged_arr buf){Cyc_setvbuf(f,
+buf,(unsigned int)buf.curr?0: 2,1024);return;}int ungetc(int,struct Cyc_Cstdio___abstractFILE*);
+int Cyc_ungetc(int x,struct Cyc___cycFILE*f){return ungetc(x,f->file);}int getw(
+struct Cyc_Cstdio___abstractFILE*);int Cyc_getw(struct Cyc___cycFILE*f){return getw(
+f->file);}int putw(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_putw(int x,struct
+Cyc___cycFILE*f){return putw(x,f->file);}char Cyc_FileCloseError[19]="\000\000\000\000FileCloseError\000";
+char Cyc_FileOpenError[18]="\000\000\000\000FileOpenError\000";struct Cyc___cycFILE*
+Cyc_file_open(struct _tagged_arr fname,struct _tagged_arr mode){struct Cyc___cycFILE*
+f=Cyc_fopen((const char*)_untag_arr(fname,sizeof(char),1),(const char*)_untag_arr(
+mode,sizeof(char),1));if(f == 0){struct _tagged_arr fn=({unsigned int _tmp33=
+_get_arr_size(fname,sizeof(char));char*_tmp34=(char*)_cycalloc_atomic(
+_check_times(sizeof(char),_tmp33 + 1));struct _tagged_arr _tmp36=_tag_arr(_tmp34,
+sizeof(char),_tmp33 + 1);{unsigned int _tmp35=_tmp33;unsigned int i;for(i=0;i < 
+_tmp35;i ++){_tmp34[i]=((const char*)fname.curr)[(int)i];}_tmp34[_tmp35]=(char)0;}
+_tmp36;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*_tmp31=_cycalloc(
+sizeof(*_tmp31));_tmp31[0]=({struct Cyc_FileOpenError_struct _tmp32;_tmp32.tag=Cyc_FileOpenError;
+_tmp32.f1=fn;_tmp32;});_tmp31;}));}return(struct Cyc___cycFILE*)f;}void Cyc_file_close(
+struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)Cyc_FileCloseError);}
+typedef struct{int quot;int rem;}Cyc_div_t;typedef struct{int quot;int rem;}Cyc_ldiv_t;
+void*abort();void exit(int);void Cyc_free(struct _tagged_arr);void Cyc_qsort(struct
+_tagged_arr,unsigned int,unsigned int,int(*)(const void*,const void*));void Cyc_free(
+struct _tagged_arr ptr){;}void qsort(void*,unsigned int,unsigned int,int(*)(const
+void*,const void*));static char _tmp38[23]="qsort called with NULL";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_1={Cyc_Core_Failure,{_tmp38,_tmp38,_tmp38 + 23}};static char
+_tmp3A[42]="qsort called with insufficient array size";static struct Cyc_Core_Failure_struct
+Cyc___qsort_failure_2={Cyc_Core_Failure,{_tmp3A,_tmp3A,_tmp3A + 42}};void Cyc_qsort(
+struct _tagged_arr tab,unsigned int nmemb,unsigned int szmemb,int(*compar)(const void*,
+const void*)){if(!((unsigned int)tab.curr))(int)_throw((void*)& Cyc___qsort_failure_1);
+if(_get_arr_size(tab,sizeof(void))< nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);
+qsort((void*)_untag_arr(tab,sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}
+struct _tagged_arr Cyc_mmap(struct _tagged_arr,unsigned int length,int prot,int flags,
+int fd,int offset);int Cyc_munmap(struct _tagged_arr start,unsigned int length);char*
+__stub_mmap(char*start,unsigned int length,int prot,int flags,int fd,int offset);int
+munmap(const char*start,unsigned int length);static char _tmp3C[42]="mmap called with illegal start/prot/flags";
 static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp3C,
 _tmp3C,_tmp3C + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,
 unsigned int length,int prot,int flags,int fd,int offset){if((ignored.curr == (

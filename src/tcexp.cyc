@@ -50,12 +50,15 @@ using Tcutil;
 
 namespace Tcexp;
 
-static type_t expr_err(tenv_t te,seg_t loc,string_t msg,
+static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
                        ... inject parg_t ap) 
-  __attribute__((format(printf,3,4)))
+  __attribute__((format(printf,4,5)))
 {
   terr(loc,vrprintf(heap_region,msg,ap));
-  return wildtyp(new Opt(lookup_type_vars(te)));
+  if (topt == NULL)
+    return wildtyp(new Opt(lookup_type_vars(te)));
+  else 
+    return *topt;
 }
 
 //////////////////// Resolving References the Parser Cannot /////////////////
@@ -245,7 +248,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
-          unchecked_cast(te, e, *topt);
+          unchecked_cast(te, e, *topt, Other_coercion);
           t = *topt;
         } else {
           // maybe it's going in a different region
@@ -254,7 +257,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
                       new Upper_b(elen), true_conref);
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
             e->topt = new Opt(t);
-            unchecked_cast(te, e, *topt);
+            unchecked_cast(te, e, *topt, Other_coercion);
             t = *topt;
           }
         }
@@ -279,7 +282,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
   case Unresolved_b:
-    return expr_err(te,loc,"undeclared identifier: %s",qvar2string(q));
+    return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
   case &Global_b(vd):  *q = *vd->name; return vd->type;
   case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
@@ -295,7 +298,7 @@ void check_format_args(tenv_t te, exp_t fmt, opt_t<list_t<exp_t>> opt_args,
   list_t<type_t> desc_types;
   switch (fmt->r) {
   case &Const_e(&String_c(s)): fallthru(s);
-  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_)):
+  case &Cast_e(_,&Exp(_,&Const_e(&String_c(s)),_,_),_,_):
     desc_types = type_getter(te,s,fmt->loc); break;
   default: 
     // without a string literal argument, we can't check the args against
@@ -407,7 +410,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       let new_t1 = new PointerType(PtrInfo(et,tq,
 					   PtrAtts(r,true_conref,
 						   bounds_unknown_conref,zt)));
-      unchecked_cast(te, e1, new_t1);
+      unchecked_cast(te, e1, new_t1, Other_coercion);
       return new_t1;
     case &Eq_constr(&AbsUpper_b(_)):
       terr(e1->loc, "pointer arithmetic not allowed on pointers with "
@@ -446,9 +449,9 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   } 
   // if we have pointers at this point, cast them to ints 
   if (is_pointer_type(t1)) 
-    unchecked_cast(te, e1, sint_typ);
+    unchecked_cast(te, e1, sint_typ, Other_coercion);
   if (is_pointer_type(t2))
-    unchecked_cast(te, e2, sint_typ);
+    unchecked_cast(te, e2, sint_typ, Other_coercion);
   return tcArithBinop(te, e1, e2, is_numeric);
 }
 
@@ -465,10 +468,10 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     return sint_typ;
   // okay if t1 can be silently cast to t2 or vice versa 
   else if (silent_castable(te,loc,t2,t1)) {
-    unchecked_cast(te,e2,t1);
+    unchecked_cast(te,e2,t1, Other_coercion);
     return sint_typ;
   } else if (silent_castable(te,loc,t1,t2)) {
-    unchecked_cast(te,e1,t2);
+    unchecked_cast(te,e1,t2, Other_coercion);
     return sint_typ;
   } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
     return sint_typ;
@@ -532,10 +535,10 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
   tcExpList(te,es);
   type_t t;
   switch (List::length(es)) {
-  case 0:  return expr_err(te,loc,"primitive operator has 0 arguments");
+  case 0:  return expr_err(te,loc,topt,"primitive operator has 0 arguments");
   case 1:  t = tcUnPrimop(te,loc,topt,p,es->hd); break;
   case 2:  t = tcBinPrimop(te,loc,topt,p,es->hd,es->tl->hd); break;
-  default: return expr_err(te,loc,"primitive operator has > 2 arguments");
+  default: return expr_err(te,loc,topt,"primitive operator has > 2 arguments");
   }
   return t;
 }
@@ -618,7 +621,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   // Don't promote any arrays to pointers, as per K&R
   tcExpNoPromote(te,NULL,e);
   if(!is_lvalue(e))
-    return expr_err(te,loc,"increment/decrement of non-lvalue");
+    return expr_err(te,loc,topt,"increment/decrement of non-lvalue");
   check_writable(te, e);
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
@@ -674,11 +677,11 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
   if (!is_lvalue(e1))
-    return expr_err(te,loc,"assignment to non-lvalue");
+    return expr_err(te,loc,topt,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
     if (!coerce_assign(te,e2,t1)) {
-      let result = expr_err(te,loc,"type mismatch: %s != %s",
+      let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
       unify(t1,t2); // needed to get right error message
       explain_failure();
@@ -689,7 +692,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     let t_result = tcBinPrimop(te,loc,NULL,p,e1,e2);
     if (!(unify(t_result,t1) || coerceable(t_result) && coerceable(t1))) {
       let result = 
-        expr_err(te,loc, "Cannot use this operator in an assignment when "
+        expr_err(te,loc,topt, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),
 		      typ2string(t2));
       unify(t_result,t1); // needed to get right error message
@@ -720,9 +723,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = e->topt->v;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case FloatType: unchecked_cast(te,e,dbl_typ); t1 = dbl_typ; break;
+  case FloatType: unchecked_cast(te,e,dbl_typ,No_coercion);t1 = dbl_typ; break;
   case &IntType(_,B1): 
-  case &IntType(_,B2): unchecked_cast(te,e,sint_typ); t1 = sint_typ; break;
+  case &IntType(_,B2): unchecked_cast(te,e,sint_typ,No_coercion);t1 = sint_typ; break;
   default: break;
   }
   // try to find an exact match first
@@ -786,8 +789,9 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
 	tcExp(te, &t2, e1);
         if (!coerce_arg(te,e1,t2)) {
           terr(e1->loc,
-	       "actual argument has type \n%s\n but formal has type \n%s",
+	       "actual argument has type \n\t%s\n but formal has type \n\t%s.",
                typ2string(e1->topt->v),typ2string(t2));
+          unify(e1->topt->v,t2);
           explain_failure();
         }
         es = es->tl;
@@ -894,9 +898,9 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t * topt,exp_t e,
       // is compatible with the current region partial order. May be delayed.
       Tcenv::check_rgn_partial_order(te, loc, rgn_po);
       return res_typ;
-    default: return expr_err(te,loc,"expected pointer to function");
+    default: return expr_err(te,loc,topt,"expected pointer to function");
     }
-  default: return expr_err(te,loc,"expected pointer to function");
+  default: return expr_err(te,loc,topt,"expected pointer to function");
   }
 }
 
@@ -927,7 +931,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
       if(ts != NULL)
-	return expr_err(te,loc,"too many type variables in instantiation");
+	return expr_err(te,loc,topt,"too many type variables in instantiation");
       type_t new_fn_typ = 
         substitute(instantiation,
                    new FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,
@@ -938,23 +942,51 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
     break;
   default: break;
   }
-  return expr_err(te,loc,"expecting polymorphic type but found %s",
+  return expr_err(te,loc,topt,"expecting polymorphic type but found %s",
                   typ2string(t1));
 }
 
 // (t)e
-static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e) {
+static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
+                     coercion_t *c) {
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
   tcExp(te,NULL,e);
   type_t t2 = e->topt->v;
-  if (!silent_castable(te,loc,t2,t) && 
-      !castable(te,loc,t2,t) && !zero_to_null(te,t,e)) {
-    // extra unify needed to get the right reason for the failure
-    unify(t2,t);
-    let result = expr_err(te,loc,"cannot cast %s to %s",
-                          typ2string(t2), typ2string(t));
-    explain_failure();
-    return result;
+  if (silent_castable(te,loc,t2,t)) {
+    *c = No_coercion;
+  } else {
+    coercion_t crc = castable(te,loc,t2,t);
+    if (crc != Unknown_coercion) {
+      *c = crc;
+    } else if (zero_to_null(te,t,e)) {
+      *c = No_coercion;
+    } else {
+      // extra unify needed to get the right reason for the failure
+      unify(t2,t);
+      let result = expr_err(te,loc,&t,"cannot cast %s to %s",
+                            typ2string(t2), typ2string(t));
+      explain_failure();
+      return result;
+    }
+  }
+  // special case -- if e is a m/calloc of size more than 1 and t is a * type
+  // issue a warning -- this is a good sign that it's a legacy cast which will
+  // lose information.
+  switch ($(e->r, compress(t))) {
+  case $(&Malloc_e(MallocInfo{_,_,_,_,fat_result}),
+         &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,bds,zt}})):
+    // malloc must be fat and t must be a NOZEROTERM, *{1} type 
+    if (fat_result && !conref_def(false,zt) && conref_def(false,nbl)) {
+      switch (conref_def(bounds_one,bds)) {
+      case &Upper_b(e2):
+        if (Evexp::eval_const_uint_exp(e2)[0] == 1)
+          warn(loc,"cast from ? pointer to * pointer will lose size information");
+        break;
+      default: break;
+      }
+    }
+    break;
+  default: break;
   }
   return t;
 }
@@ -1116,7 +1148,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
       terr(loc,"can't dereference abstract pointer type");
     return t2;
   default: 
-    return expr_err(te,loc,"expecting * or @ type but found %s",typ2string(t));
+    return expr_err(te,loc,topt,"expecting * or @ type but found %s",typ2string(t));
   }
 }
 
@@ -1129,11 +1161,11 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
     let finfo = lookup_decl_field(ad,f);
     if (finfo == NULL)
-      return expr_err(te,loc,"type %s has no %s field",
+      return expr_err(te,loc,topt,"type %s has no %s field",
                       qvar2string(ad->name), *f);
     // must do after previous check else could dereference NULL
     if(ad->impl->exist_vars != NULL)
-      return expr_err(te,loc,"must use pattern-matching to access fields "
+      return expr_err(te,loc,topt,"must use pattern-matching to access fields "
 		      "of existential types");
     _ t2;
     region rgn {
@@ -1144,7 +1176,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
   case &AnonAggrType(_,fs):
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
-      return expr_err(te,loc,"type has no %s field",*f);
+      return expr_err(te,loc,topt,"type has no %s field",*f);
     return finfo->type;
   case &ArrayType(_)   && (strcmp(*f,"size") == 0):
   case &PointerType(_) && (strcmp(*f,"size") == 0):
@@ -1152,10 +1184,11 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     return uint_typ;
   default:
     if (strcmp(*f,"size") == 0)
-      return expr_err(te,loc,"expecting struct, union, or array, found %s",
+      return expr_err(te,loc,topt,
+                      "expecting struct, union, or array, found %s",
                       typ2string(e->topt->v));
     else
-      return expr_err(te,loc,"expecting struct or union, found %s",
+      return expr_err(te,loc,topt,"expecting struct or union, found %s",
 		      typ2string(e->topt->v));
   }
 }
@@ -1171,11 +1204,12 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
     case &AggrType(AggrInfo(&KnownAggr(&ad),ts)):
       let finfo = lookup_decl_field(ad,f);
       if (finfo == NULL)
-	return expr_err(te,loc,"type %s has no %s field",
+	return expr_err(te,loc,topt,"type %s has no %s field",
 			qvar2string(ad->name), *f);
       // must do after previous check else could dereference NULL
       if(ad->impl->exist_vars != NULL)
-	return expr_err(te,loc,"must use pattern-matching to access fields "
+	return expr_err(te,loc,topt,
+                        "must use pattern-matching to access fields "
 			"of existential types");
       _ t3;
       region rgn {
@@ -1186,14 +1220,14 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
     case &AnonAggrType(_,fs):
       let finfo = lookup_field(fs,f);
       if (finfo == NULL)
-	return expr_err(te,loc,"type has no %s field",*f);
+	return expr_err(te,loc,topt,"type has no %s field",*f);
       return finfo->type;
     default: break;
     }
     break;
   default: break;
   }
-  return expr_err(te,loc,"expecting struct pointer, found %s", 
+  return expr_err(te,loc,topt,"expecting struct pointer, found %s", 
 		  typ2string(e->topt->v));
 }
 
@@ -1202,11 +1236,12 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
 			   list_t<$(tqual_t,type_t)@> ts, exp_t index) {
   let $(i,known) = Evexp::eval_const_uint_exp(index);
   if(!known)
-    return expr_err(te,loc,"tuple projection cannot use sizeof or offsetof");
+    return expr_err(te,loc,NULL,
+                    "tuple projection cannot use sizeof or offsetof");
   try
     return (*List::nth(ts,i))[1];
   catch { case Nth:
-    return expr_err(te,loc,"index is %d but tuple has only %d fields",
+    return expr_err(te,loc,NULL,"index is %d but tuple has only %d fields",
                     i, List::length(ts));
   }
 }
@@ -1218,7 +1253,7 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt,
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
   if (!coerce_sint_typ(te,e2))
-    return expr_err(te,e2->loc,"expecting int subscript, found %s",
+    return expr_err(te,e2->loc,topt,"expecting int subscript, found %s",
                     typ2string(t2));
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
@@ -1261,7 +1296,7 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t * topt,
       terr(e1->loc,"can't subscript an abstract pointer");
     return t;
   case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
-  default: return expr_err(te,loc,"subscript applied to %s",typ2string(t1));
+  default: return expr_err(te,loc,topt,"subscript applied to %s",typ2string(t1));
   }
 }
 
@@ -1298,7 +1333,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t * topt,
                              $(opt_t<stringptr_t>,tqual_t,type_t)@ t,
                              list_t<$(list_t<designator_t>,exp_t)@> des) {
-  return expr_err(te,loc,"tcCompoundLit");
+  return expr_err(te,loc,topt,"tcCompoundLit");
 }
 
  ///////////////////// Array ({e1,...,en}) /////////////////////////
@@ -1555,7 +1590,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
         e->topt = new Opt(res);
         res = new TunionType(TunionInfo{new KnownTunion(new tud),
 					all_typs,r});
-        unchecked_cast(te, e, res);
+        unchecked_cast(te, e, res, No_coercion);
         return res;
       }
       break;
@@ -1576,11 +1611,11 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
     }
   }
   if (es != NULL)
-    return expr_err(te,es->hd->loc,
+    return expr_err(te,es->hd->loc,topt,
                     "too many arguments for tunion constructor %s",
                     qvar2string(tuf->name));
   if (ts != NULL)
-    return expr_err(te,loc,"too few arguments for tunion constructor %s",
+    return expr_err(te,loc,topt,"too few arguments for tunion constructor %s",
                     qvar2string(tuf->name));
   return res;
   }
@@ -1768,17 +1803,18 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
     case &Seq_s(s1,s2): s = s2; continue;
     case &Decl_s(d,s1): s = s1; continue;
     default:
-      return expr_err(te,loc,"statement expression must end with expression");
+      return expr_err(te,loc,topt,
+                      "statement expression must end with expression");
     }
 }
 
  // codegen(fd)
 static type_t tcCodegen(tenv_t te, seg_t loc, type_t * topt, fndecl_t fd) {
-  return expr_err(te,loc,"tcCodegen");
+  return expr_err(te,loc,topt,"tcCodegen");
 }
  // fill(e)
 static type_t tcFill(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
-  return expr_err(te,loc,"tcFill");
+  return expr_err(te,loc,topt,"tcFill");
 }
 
 // new e
@@ -1824,7 +1860,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       if (topt != NULL) {
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
           e->topt = new Opt(res_typ);
-          unchecked_cast(te, e, *topt);
+          unchecked_cast(te, e, *topt, Other_coercion);
           res_typ = *topt;
         }
       }
@@ -1863,7 +1899,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
         // generator knows what to do.
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
           e->topt = new Opt(res_typ);
-          unchecked_cast(te, e, *topt);
+          unchecked_cast(te, e, *topt, Other_coercion);
           res_typ = *topt;
         }
       }
@@ -1905,7 +1941,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     if (topt != NULL) {
       if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
         e->topt = new Opt(res_typ);
-        unchecked_cast(te,e,*topt);
+        unchecked_cast(te,e,*topt,Other_coercion);
         res_typ = *topt;
       }
     }
@@ -1944,7 +1980,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
       let $(_,rgn) = addressof_props(te,e);
       bounds_t b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b,zt);
-      unchecked_cast(te,e,t);
+      unchecked_cast(te,e,t,Other_coercion);
       return t;
     default:
       return t;
@@ -2052,8 +2088,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcThrow(te,loc,topt,e1); break;
   case &Instantiate_e(e2,ts):
     t = tcInstantiate(te,loc,topt,e2,ts); break;
-  case &Cast_e(t1,e1):
-    t = tcCast(te,loc,topt,t1,e1); break;
+  case &Cast_e(t1,e1,_,*c):
+    t = tcCast(te,loc,topt,t1,e1,c); break;
   case &Address_e(e1):
     t = tcAddress(te,loc,e,topt,e1); break;
   case &New_e(rgn_handle,e1):

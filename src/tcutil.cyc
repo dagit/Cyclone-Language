@@ -45,7 +45,9 @@ extern void unify_it(type_t t1, type_t t2);
 
 // Variables set to indicate where a failure occurs
 type_t t1_failure = VoidType;
+bool tq1_const = false; // optional qualifier for t1_failure 
 type_t t2_failure = VoidType;
+bool tq2_const = false; // optional qualifier for t2_failure
 // why the unification failed
 const char ? failure_reason = NULL;
 // print out an explanation about where and why a type error
@@ -54,18 +56,29 @@ const char ? failure_reason = NULL;
 void explain_failure() {
   if(Position::num_errors >= Position::max_errors) return;
   fflush(stderr);
-  string_t s1 = typ2string(t1_failure);
-  string_t s2 = typ2string(t2_failure);
-  int pos = 8;
-  fprintf(stderr,"\t%s and ",s1);
-  pos += s1.size+5;
-  if (pos >= 80) {
+  string_t s1 = aprintf("%s%s",tq1_const ? "const " : "", 
+                        typ2string(t1_failure));
+  string_t s2 = aprintf("%s%s",tq2_const ? "const " : "", 
+                        typ2string(t2_failure));
+  int pos = 2;
+  fprintf(stderr,"  %s",s1);
+  pos += s1.size;
+  if (pos + 5 >= 80) {
+    fprintf(stderr,"\n\t");
+    pos = 8;
+  } else {
+    fprintf(stderr," ");
+    pos++;
+  }
+  fprintf(stderr,"and ");
+  pos += 4;
+  if (pos + s2.size >= 80) {
     fprintf(stderr,"\n\t");
     pos = 8;
   }
   fprintf(stderr,"%s ",s2);
   pos += s2.size+1;
-  if (pos >= 80) {
+  if (pos + 17 >= 80) {
     fprintf(stderr,"\n\t");
     pos = 8;
   }
@@ -456,13 +469,20 @@ static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
 }
 
 // unify two type qualifiers -- throws Unify unless they are the same
-static void unify_tqual(tqual_t tq1, tqual_t tq2) {
+static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
   if ((tq1.q_const != tq2.q_const)    
       || (tq1.q_volatile != tq2.q_volatile) 
       || (tq1.q_restrict != tq2.q_restrict)) {
+    t1_failure = t1;
+    t2_failure = t2;
+    tq1_const = tq1.q_const;
+    tq2_const = tq2.q_const;
     failure_reason = "(qualifiers don't match)";
     throw Unify;
   }
+  // clear these flags for error reporting purposes
+  tq1_const = false;
+  tq2_const = false;
 }
 
 bool equal_tqual(tqual_t tq1, tqual_t tq2) {
@@ -1113,14 +1133,14 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different tunion field types)";
     break;
 
-    case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2))),
-	   &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2))),
+         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1)))):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     t1_failure = t1;
     t2_failure = t2;
     unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
-    unify_tqual(tqual1a,tqual2a);
+    unify_tqual(tqual1a,t1a,tqual2a,t2a);
     unify_it_conrefs(boundscmp,b1,b2,"(different pointer bounds)");
     // Don't force the nullable's to be the same when the bounds are ?.
     switch (compress_conref(b1)->v) {
@@ -1150,8 +1170,10 @@ void unify_it(type_t t1, type_t t2) {
 
   case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1}), 
          &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2})):
-    unify_tqual(tq1a,tq2a);
     unify_it(t1a,t2a);
+    unify_tqual(tq1a,t1a,tq2a,t2a);
+    t1_failure = t1;
+    t2_failure = t2;
     unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     if (e1 == e2) return;
     if (e1 == NULL || e2 == NULL) break;
@@ -1199,8 +1221,10 @@ void unify_it(type_t t1, type_t t2) {
       return;
     unify_it(rt1,rt2);
     for (; args1!=NULL && args2!=NULL; args1 = args1->tl, args2 = args2->tl) {
-      unify_tqual((*args1->hd)[1],(*args2->hd)[1]);
-      unify_it((*args1->hd)[2],(*args2->hd)[2]);
+      let $(_,tqa,ta) = *args1->hd;
+      let $(_,tqb,tb) = *args2->hd;
+      unify_it(ta,tb);
+      unify_tqual(tqa,ta,tqb,tb);
     }
     t1_failure = t1; 
     t2_failure = t2;
@@ -1222,8 +1246,8 @@ void unify_it(type_t t1, type_t t2) {
       failure_reason = "(only one function type takes varargs)";
       break;
     case $(&VarargInfo{n1,tq1,tp1,i1}, &VarargInfo{n2,tq2,tp2,i2}):
-      unify_tqual(tq1,tq2);
       unify_it(tp1,tp2);
+      unify_tqual(tq1,tp1,tq2,tp2);
       if (i1 != i2) { 
         bad_cyc_vararg = true;
         failure_reason = "(only one function type injects varargs)";
@@ -1258,8 +1282,10 @@ void unify_it(type_t t1, type_t t2) {
 
   case $(&TupleType(ts2), &TupleType(ts1)):
     for (; ts1 != NULL && ts2 != NULL; ts1 = ts1->tl, ts2 = ts2->tl) {
-      unify_tqual((*ts1->hd)[0],(*ts2->hd)[0]);
-      unify_it((*ts1->hd)[1],(*ts2->hd)[1]);
+      let $(tqa,ta) = *ts1->hd;
+      let $(tqb,tb) = *ts2->hd;
+      unify_it(ta,tb);
+      unify_tqual(tqa,ta,tqb,tb);
     }
     if (ts1 == NULL && ts2 == NULL) return;
     t1_failure = t1; 
@@ -1276,8 +1302,8 @@ void unify_it(type_t t1, type_t t2) {
         failure_reason = "(different member names)";
         throw Unify;
       }
-      unify_tqual(f1->tq, f2->tq);
       unify_it(f1->type, f2->type);
+      unify_tqual(f1->tq, f1->type, f2->tq, f2->type);
       if (!same_atts(f1->attributes,f2->attributes)) {
         t1_failure = t1; 
         t2_failure = t2;
@@ -1592,7 +1618,7 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
 bool coerce_to_bool(tenv_t te, exp_t e) {
   if (!coerce_sint_typ(te,e))
     switch (compress(e->topt->v)) {
-    case &PointerType(_): unchecked_cast(te,e,uint_typ); break;
+    case &PointerType(_): unchecked_cast(te,e,uint_typ,Other_coercion); break;
     default: return false;
     }
   return true;
@@ -1617,7 +1643,7 @@ bool coerce_uint_typ(tenv_t te, exp_t e) {
   if (is_integral_type(e->topt->v)) {
     if (will_lose_precision(e->topt->v,uint_typ))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,uint_typ);
+    unchecked_cast(te,e,uint_typ,No_coercion);
     return true;
   }
   return false;
@@ -1631,7 +1657,7 @@ bool coerce_sint_typ(tenv_t te, exp_t e) {
   if (is_integral_type(e->topt->v)) {
     if (will_lose_precision(e->topt->v,sint_typ))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,sint_typ);
+    unchecked_cast(te,e,sint_typ,No_coercion);
     return true;
   }
   return false;
@@ -1796,7 +1822,7 @@ bool is_zero(exp_t e) {
   case &Const_e(&Char_c(_,0)): 
   case &Const_e(&Short_c(_,0)): 
   case &Const_e(&LongLong_c(_,0)): return true;
-  case &Cast_e(t,e2): return is_zero(e2) && admits_zero(t);
+  case &Cast_e(t,e2,_,_): return is_zero(e2) && admits_zero(t);
   default: return false;
   }
 }
@@ -1824,9 +1850,19 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
   return false;
 }
 
+string_t coercion2string(coercion_t c) {
+  switch (c) {
+  case Unknown_coercion: return "unknown";
+  case No_coercion: return "no coercion";
+  case NonNull_to_Null: return "null check";
+  case Other_coercion: return "other coercion";
+  }
+}
+
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   type_t t1 = compress(e->topt->v);
+  coercion_t c;
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try arithmetic conversions
@@ -1835,16 +1871,18 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
     if (will_lose_precision(t1,t2))
       warn(e->loc,"integral size mismatch; %s -> %s conversion supplied", 
 	   typ2string(t1), typ2string(t2));
-    unchecked_cast(te,e,t2);
+    unchecked_cast(te,e,t2,No_coercion);
     return true;
   } else if (silent_castable(te,e->loc,t1,t2)) {
-    unchecked_cast(te,e,t2);
+    unchecked_cast(te,e,t2,Other_coercion);
     return true;
   } else if (zero_to_null(te,t2,e)) { 
     return true;
-  } else if (castable(te,e->loc,t1,t2)) {
-    unchecked_cast(te,e,t2);
-    warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
+  } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
+    unchecked_cast(te,e,t2,c);
+    // we warn for null-checks in the flow analysis now
+    if (c != NonNull_to_Null)
+      warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
     return true;
   } else return false;
 }
@@ -1895,8 +1933,32 @@ static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
   case &AnonAggrType(StructA,fs):
     // FIX: recursively flatten here (if alignment allows??)
     return List::map_c(flatten_typ_f,NULL,fs);
+  case &FnType(fi):
+    // NOTE: we consider function types to be qualified with "const" here
+    // because you can't get a function value, only a pointer to a function
+    // so there's no way to update the value.  This is crucial to achieve
+    // subtyping on functions.
+    return new List(new $(const_tqual(),t1),NULL);
   default: return new List(new $(empty_tqual(),t1),NULL);
   }
+}
+
+// Returns true when attribute list a1 can be safely cast to a2
+static bool sub_attributes(attributes_t a1, attributes_t a2) {
+  for (attributes_t t = a1; t != NULL; t = t->tl) {
+    switch (t->hd) {
+    case Pure_att: // can safely omit these in a2
+    case Noreturn_att: 
+    case &Initializes_att(_):
+      continue;
+    default:
+      if (!List::exists_c(equal_att, t->hd, a2)) return false;
+    }
+  }
+  for (; a2 != NULL; a2 = a2->tl) {
+    if (!List::exists_c(equal_att, a2->hd, a1)) return false;
+  }
+  return true;
 }
 
 // FIX: the plan is, once we have a context that lets us assume t1 <= t2
@@ -1945,6 +2007,58 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
       }
     }
     return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
+  case $(&FnType(f1), &FnType(f2)):
+
+    if (f1.tvars != NULL || f2.tvars != NULL) {
+      let tvs1 = f1.tvars;
+      let tvs2 = f2.tvars;
+      if (List::length(tvs1) != List::length(tvs2)) return false;
+      region r {
+        list_t<$(tvar_t,type_t)@`r,`r> inst = NULL;
+        while (tvs1 != NULL) {
+          if (tvar_kind(tvs1->hd) != tvar_kind(tvs2->hd)) return false;
+          inst = rnew(r) List(rnew(r) $(tvs2->hd, new VarType(tvs1->hd)),inst);
+          tvs1 = tvs1->tl;
+          tvs2 = tvs2->tl;
+        }
+        if (inst != NULL) { 
+          f1.tvars = NULL;
+          f2.tvars = NULL;
+          return subtype(te,assume,new FnType(f1),new FnType(f2));
+        }
+      }
+    }
+    // covariant subtyping on results
+    if (!subtype(te,assume,f1.ret_typ,f2.ret_typ)) return false;
+    let args1 = f1.args;
+    let args2 = f2.args;
+    // argument lengths must match?  Perhaps C allows one to call
+    // a function with extra arguments?  I don't think so...
+    if (List::length(args1) != List::length(args2)) return false;
+    // contravariant subtyping on arguments
+    for (; args1 != NULL; args1 = args1->tl, args2 = args2->tl) {
+      let $(_,tq1,t1) = *args1->hd;
+      let $(_,tq2,t2) = *args2->hd;
+      if ((tq2.q_const && !tq1.q_const) || !subtype(te,assume,t2,t1))
+          return false;
+    }
+    // deal with varargs
+    if (f1.c_varargs != f2.c_varargs) return false;
+    if (f1.cyc_varargs != NULL && f2.cyc_varargs != NULL) {
+      let v1 = *f1.cyc_varargs;
+      let v2 = *f2.cyc_varargs;
+      if ((v2.tq.q_const && !v1.tq.q_const) || !subtype(te,assume,v2.type,
+                                                        v1.type)) 
+        return false;
+    } else if (f1.cyc_varargs != NULL || f2.cyc_varargs != NULL) return false;
+    // deal with effect
+    if (!subset_effect(true,f1.effect->v,f2.effect->v)) return false;
+    // deal with region partial order
+    if (!sub_rgnpo(f1.rgn_po,f2.rgn_po)) return false;
+    // deal with attributes that can be dropped
+    if (!sub_attributes(f1.attributes,f2.attributes)) return false;
+    // otherwise okay
+    return true;
   default: return false;
   }
 }
@@ -1986,17 +2100,17 @@ static bool is_char_type(type_t t) {
 
 // Can t1 be cast to t2?  Assumes that the types are well-formed.
 // FIX: add function types...
-bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
+coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   if(unify(t1,t2))
-    return true;
+    return No_coercion;
   t1 = compress(t1);
   t2 = compress(t2);
   if(t2==VoidType)
-    return true;
+    return No_coercion;
   switch (t2) {
   // we can cast t1 to an int if t1 is a boxed type.
   case &IntType(_,B4):
-    if (typ_kind(t1) == BoxKind) return true;
+    if (typ_kind(t1) == BoxKind) return No_coercion;
     break;
   default: break;
   }
@@ -2010,6 +2124,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     switch (t2) {
     case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b))):
+      coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
       let ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
@@ -2033,12 +2148,16 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	case $(_,&AbsUpper_b(_)): bounds_ok = false; break;
 	default: bounds_ok = true; break;
 	}
+      if (conref_def(false,null_a) && !conref_def(false,null_b))
+        coercion = NonNull_to_Null;
 
-      return bounds_ok && zeroterm_ok && (ptrsub || bitcase) && 
-        (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b));
+      if (bounds_ok && zeroterm_ok && (ptrsub || bitcase) && 
+          (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b)))
+        return coercion;
+      else return Unknown_coercion;
     default: break;
     }
-    return false;
+    return Unknown_coercion;
   case &ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}):
     switch (t2) {
     case &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2}):
@@ -2046,10 +2165,12 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       okay=
         (e1 != NULL && e2 != NULL && unify_conrefs(intcmp,zt1,zt2) &&
 	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1));
-      return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
-    default: return false;
+      return 
+        (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const)) ? 
+        Other_coercion : Unknown_coercion;
+    default: return Unknown_coercion;
     }
-    return false;
+    return Unknown_coercion;
   // can cast a numeric type or bool to any numeric type
   case &EnumType(_,ed1): 
     // can also cast an enum to a shorter enum
@@ -2057,23 +2178,23 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     case &EnumType(_,ed2):
       if(ed1->fields != NULL && ed2->fields != NULL
 	 && length(ed1->fields->v) >= length(ed2->fields->v))
-	return true;
+	return No_coercion;
       break;
     default: break;
     }
     fallthru;
   case &IntType(_,_): 
   case FloatType :  
-  case &DoubleType(_): return coerceable(t2);
-  default: return false;
+  case &DoubleType(_): return coerceable(t2) ? No_coercion : Unknown_coercion;
+  default: return Unknown_coercion;
   }
 }
 
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
-void unchecked_cast(tenv_t te, exp_t e, type_t t) {
+void unchecked_cast(tenv_t te, exp_t e, type_t t, coercion_t c) {
   if (!unify(e->topt->v,t)) {
     let inner = copy_exp(e);
-    e->r    = new Cast_e(t,inner);
+    e->r    = new Cast_e(t,inner,false,c);
     e->topt = new Opt(t);
   }
 }
@@ -3698,8 +3819,10 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &NoInstantiate_e(e2): fallthru(e2);
   case &Instantiate_e(e2,_):
     return cnst_exp(te,var_okay,e2);
-  case &Cast_e(t,e2):
-    // FIX:  We cannot allow casts w/ run-time effect b/c C will complain!
+  case &Cast_e(t,e2,_,No_coercion):
+    return cnst_exp(te,var_okay,e2);
+  case &Cast_e(t,e2,_,_):
+    // Fix: We cannot allow casts w/ run-time effect b/c C will complain!
     return cnst_exp(te,var_okay,e2);
   case &Address_e(e2): 
     return cnst_exp(te,true,e2);
