@@ -1814,10 +1814,10 @@ bool exists_temp_tvar_in_effect(type_t t) {
 // expand a typedef of an anonymous function even if expand_typedefs
 // is true, because we end up with anonymous structs in, e.g.,
 // function parameters where gcc does not like them.
-// FIX?: what about AnonEnumType
 bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
+  case &AnonEnumType(_): return true;
   case &TypedefType(_,_,_,&x):
     // This won't loop if the types come from a .cyc file,
     // because typedefs in Cyclone (or C) can't be recursive

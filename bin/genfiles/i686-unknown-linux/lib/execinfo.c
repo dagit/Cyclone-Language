@@ -467,10 +467,11 @@ char*tag;struct _tagged_arr f1;};struct Cyc_timeval{int tv_sec;int tv_usec;};str
 Cyc_rusage{struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;int ru_maxrss;int
 ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int
 ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;
-int ru_nivcsw;};int waitpid(int,int*,int);typedef struct{unsigned int __val[1024 / (8
-* sizeof(unsigned int))];}Cyc___sigset_t;typedef Cyc___sigset_t Cyc_sigset_t;enum 
-Cyc___anonymous_enum_181__{Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE  = 1,Cyc_SIGEV_THREAD
- = 2};int kill(int,int);struct Cyc___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc___SIG_HANDLER_struct{
+int ru_nivcsw;};typedef enum {Cyc_P_ALL  = 0,Cyc_P_PID  = 1,Cyc_P_PGID  = 2 }Cyc_idtype_t;
+int waitpid(int,int*,int);typedef struct{unsigned int __val[1024 / (8 * sizeof(
+unsigned int))];}Cyc___sigset_t;typedef Cyc___sigset_t Cyc_sigset_t;enum Cyc___anonymous_enum_181__{
+Cyc_SIGEV_SIGNAL  = 0,Cyc_SIGEV_NONE  = 1,Cyc_SIGEV_THREAD  = 2};int kill(int,int);
+struct Cyc___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc___SIG_HANDLER_struct{
 int tag;void(*f1)(int);};enum Cyc___anonymous_enum_366__{Cyc__PC_LINK_MAX  = 0,Cyc__PC_MAX_CANON
  = 1,Cyc__PC_MAX_INPUT  = 2,Cyc__PC_NAME_MAX  = 3,Cyc__PC_PATH_MAX  = 4,Cyc__PC_PIPE_BUF
  = 5,Cyc__PC_CHOWN_RESTRICTED  = 6,Cyc__PC_NO_TRUNC  = 7,Cyc__PC_VDISABLE  = 8,Cyc__PC_SYNC_IO

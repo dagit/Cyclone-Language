@@ -908,12 +908,13 @@ b){return gettimeofday(a,0);}struct Cyc_timeb{int time;unsigned short millitm;sh
 timezone;short dstflag;};struct Cyc_tms{int tms_utime;int tms_stime;int tms_cutime;
 int tms_cstime;};struct Cyc_sockaddr_un{unsigned short sun_family;char sun_path[108];
 };struct Cyc_utsname{char sysname[65];char nodename[65];char release[65];char version[
-65];char machine[65];char __domainname[65];};struct Cyc_tm{int tm_sec;int tm_min;int
-tm_hour;int tm_mday;int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;int
-tm_gmtoff;const char*tm_zone;};struct Cyc_itimerspec{struct Cyc_timespec it_interval;
-struct Cyc_timespec it_value;};unsigned int Cyc_strftime(struct _tagged_arr,
-unsigned int,struct _tagged_arr,const struct Cyc_tm*);unsigned int strftime(char*,
-unsigned int,const char*,const struct Cyc_tm*);static char _tmp8B[27]="fgets: buffer insufficient";
+65];char machine[65];char __domainname[65];};typedef enum {Cyc_P_ALL  = 0,Cyc_P_PID
+ = 1,Cyc_P_PGID  = 2 }Cyc_idtype_t;struct Cyc_tm{int tm_sec;int tm_min;int tm_hour;int
+tm_mday;int tm_mon;int tm_year;int tm_wday;int tm_yday;int tm_isdst;int tm_gmtoff;
+const char*tm_zone;};struct Cyc_itimerspec{struct Cyc_timespec it_interval;struct Cyc_timespec
+it_value;};unsigned int Cyc_strftime(struct _tagged_arr,unsigned int,struct
+_tagged_arr,const struct Cyc_tm*);unsigned int strftime(char*,unsigned int,const
+char*,const struct Cyc_tm*);static char _tmp8B[27]="fgets: buffer insufficient";
 static struct Cyc_Core_Failure_struct Cyc___strftime_failure={Cyc_Core_Failure,{
 _tmp8B,_tmp8B,_tmp8B + 27}};unsigned int Cyc_strftime(struct _tagged_arr s,
 unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_tm*t){if(maxsize > 
