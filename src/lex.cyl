@@ -502,7 +502,7 @@ int yylex() {
  case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
  case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int); break;
  case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char); break;
- case FLOATING_CONSTANT : yylval = Float_tok(Lex::token_string); break;
+ case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
  case STRING            : yylval = String_tok(Lex::token_string); break;
  default: break;
  }

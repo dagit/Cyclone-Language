@@ -16,8 +16,6 @@ Todo now:
   now that Dan has the goto and fallthru stuff working correctly, this
   is the only major unsoundness in the system.
 
-* We need to make sure floating point literals are working right.
-
 * We need to re-do the pattern match compilation -- we should take
   advantage of the decision tree built during type-checking.
 
@@ -62,8 +60,6 @@ Todo now:
   null which we're not checking for when we allocate...)
 
 * multi-dimensional arrays?
-
-* parser/lexer is having trouble with floating point constants
 
 * default array initializers, at top level and local, e.g., int x[4];
 

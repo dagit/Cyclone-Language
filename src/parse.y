@@ -848,7 +848,6 @@ using Parse;
   Bool_tok(bool);
   String_tok(string);
   StringOpt_tok(Opt_t<string>);
-  Float_tok(string);
   Type_tok(typ);
   TypeList_tok(list<typ>);
   Exp_tok(exp);
@@ -2271,7 +2270,6 @@ void yyprint(int i, xenum YYSTYPE v) {
   case String_tok(s):          fprintf(cyc_stderr,"\"%s\"",s); break;
   case StringOpt_tok(null):    fprintf(cyc_stderr,"null");     break;
   case StringOpt_tok(&Opt(s)): fprintf(cyc_stderr,"\"%s\"",s); break;
-  case Float_tok(f):           fprintf(cyc_stderr,"%s",f);     break;
   case QualId_tok(&$(prefix,v2)):
     for (; prefix != null; prefix = prefix->tl)
       fprintf(cyc_stderr,"%s::",prefix->hd);
