@@ -23,7 +23,7 @@ CYC_FLAGS= $(LC_FLAG) -save-c -pp -O2
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
-  smlng$(EXE) generate$(EXE) validate$(EXE) decorate$(EXE)
+  smlng$(EXE) generate$(EXE) validate$(EXE) decorate$(EXE) stack$(EXE)
 
 GCC_LIBS = ../../bin/cyc-lib/libcyc.a ../../bin/cyc-lib/gc.a
 
@@ -43,6 +43,9 @@ validate$(EXE): validate.o
 decorate.o: scanner contexts.h
 
 decorate$(EXE): decorate.o
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
+
+stack$(EXE): stack.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 # This takes care of non-machine-generated versions (the .cyc is already there)

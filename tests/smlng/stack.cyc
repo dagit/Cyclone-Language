@@ -1,0 +1,77 @@
+/* Try to find the address of the end of the stack */
+
+#include <stdio.h>
+using Stdio;
+
+#include <sys/resource.h>
+using Resource;
+
+unsigned int stacklimit_predict() {
+  unsigned int stack_now;
+  stack_now = (unsigned int)&stack_now;
+  struct rlimit @x = new rlimit(0,0);
+  if (getrlimit(RLIMIT_STACK,x) != 0) {
+    printf("Error: getrlimit failed\n");
+    return 0; // predict we can go to the floor
+  }
+  unsigned int prediction =
+    /* The magic formula, hopefully just shy of the limit */
+    stack_now - x->rlim_cur + 10000;
+  if (x->rlim_cur == 0xffffffff) // unlimited
+    prediction = 0;
+  return prediction;
+}
+
+unsigned int start_printing_here = 0;
+
+void stack_smasher() {
+  unsigned int stack_location;
+  stack_location = (unsigned int)&stack_location;
+  if (stack_location <= start_printing_here) {
+    printf("0x%x\n",stack_location);
+    fflush(stdout);
+  }
+  stack_smasher();
+}
+
+int main() {
+  unsigned int stack_now;
+  unsigned int stack_next;
+  stack_now = (unsigned int)&stack_now;
+  stack_next = (unsigned int)&stack_next;
+  printf("The stack starts at 0x%x\n",stack_now);
+  printf("The next loc is     0x%x\n",stack_next);
+  if (stack_now < stack_next)
+    printf("The stack is growing UP\n");
+  else printf("The stack is growing DOWN\n");
+  struct rlimit @x = new rlimit(0,0);
+  if (getrlimit(RLIMIT_STACK,x) != 0) {
+    printf("Error: getrlimit failed\n"); exit(1);
+  }
+  printf("Current stack limit is 0x%x\n",x->rlim_cur);
+  printf("    Max stack limit is 0x%x\n",x->rlim_max);
+
+//   printf("Let's try to max out the stack...\n");
+//   x->rlim_cur = x->rlim_max;
+//   if (setrlimit(RLIMIT_STACK,x) != 0) {
+//     printf("Error: setrlimit failed\n"); exit(1);
+//   }
+//   x->rlim_cur = x->rlim_max = 0; // Just to be sure...
+//   if (getrlimit(RLIMIT_STACK,x) != 0) {
+//     printf("Error: getrlimit failed\n"); exit(1);
+//   }
+//   printf("Current stack limit is 0x%x\n",x->rlim_cur);
+//   printf("    Max stack limit is 0x%x\n",x->rlim_max);
+//   if (x->rlim_cur == x->rlim_max)
+//     printf("We did it!\n");
+//   else printf("That didn't work!\n");
+
+  printf("Let's see if we have an accurate idea of where overflow "
+         "will occur.\n");
+  unsigned int prediction = stacklimit_predict();
+  printf("Assuming the stack grows DOWN I predict overflow "
+         "around 0x%x.\n",prediction);
+  start_printing_here = prediction;
+  stack_smasher();
+  return 0;
+}
