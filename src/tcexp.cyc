@@ -384,8 +384,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_,rel))):
     if (!Kinds::kind_leq(type_kind(et),&Kinds::tmk))
       Warn::err2(e1->loc,"can't do arithmetic on abstract pointer type");
-    if (is_noalias_pointer(t1,false))
-      Warn::err2(e1->loc,"can't do arithmetic on non-aliasing pointer type");
+    if (is_noalias_pointer(t1,true))
+      Warn::err2(e1->loc,"can't do arithmetic on unique pointer");
     if (!coerce_sint_type(e2))
       Warn::err2(e2->loc,"expecting int but found ",t2);
     let eopt = get_bounds_exp(fat_bound_type,b);
@@ -445,8 +445,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
     } 
     if (!Kinds::kind_leq(type_kind(t1_elt),&Kinds::tmk))
       Warn::err2(e1->loc,"can't perform arithmetic on abstract pointer type");
-    if (is_noalias_pointer(t1,false))
-      Warn::err2(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
+    if (is_noalias_pointer(t1,true))
+      Warn::err2(e1->loc,"can't perform arithmetic on unique pointer");
     if (!coerce_sint_type(e2))
       err_and_explain(e2->loc,"expecting ",t1," or int but found ",t2);
     return t1;
@@ -714,8 +714,8 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
         (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!Kinds::kind_leq(type_kind(telt),&Kinds::tmk))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
-      if (is_noalias_pointer(t,false))
-        terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
+      if (is_noalias_pointer(t,true))
+        terr(e->loc,"can't perform arithmetic on unique pointer");
     } else
       Warn::err2(e->loc,"expecting arithmetic or ? type but found ",t);
   }

@@ -178,6 +178,7 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
+#define _check_fat_at_base(arr) (arr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
   struct _fat_ptr _cus_arr = (arr); \
@@ -193,6 +194,10 @@ void* _zero_arr_inplace_plus_post_other_fn(unsigned,void**,int,const char*,unsig
       _curr != (unsigned char*)0) \
     _throw_arraybounds(); \
   _curr; })
+#define _check_fat_at_base(arr) ({ \
+  struct _fat_ptr _arr = (arr); \
+  if (_arr.base != _arr.curr) _throw_arraybounds(); \
+  _arr; })
 #endif
 
 #define _tag_fat(tcurr,elt_sz,num_elts) ({ \

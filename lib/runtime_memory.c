@@ -233,10 +233,10 @@ static int *get_refcnt(unsigned char *ptr) {
   }
 }
 
-// Assumes no pointer arithmetic on reference-counted pointers, so
-// that this is always pointing to the base of the pointer.
-int Cyc_Core_refptr_count(unsigned char *ptr) {
-  int *cnt = get_refcnt(ptr);
+// We allow pointer arithmetic on fat refcount pointers, so look
+// for the count using the base pointer
+int Cyc_Core_refptr_count(struct _fat_ptr ptr) {
+  int *cnt = get_refcnt(ptr.base);
   if (cnt != NULL) return *cnt;
   else return 0;
 }
@@ -251,7 +251,8 @@ struct _fat_ptr Cyc_Core_alias_refptr(struct _fat_ptr ptr) {
   return ptr;
 }
 
-void Cyc_Core_drop_refptr(unsigned char *ptr) {
+
+static void drop_refptr_base(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) {
     //     errprintf("refptr=%x, cnt=%x, *cnt=%d\n",ptr,cnt,*cnt);
@@ -274,6 +275,9 @@ void Cyc_Core_drop_refptr(unsigned char *ptr) {
       GC_free(ptr - sizeof(int));
     }
   }
+}
+void Cyc_Core_drop_refptr(struct _fat_ptr ptr) {
+  drop_refptr_base(ptr.base);
 }
 
 /////// AUTORELEASE POOLS //////////
@@ -602,7 +606,7 @@ void _free_region(struct _RegionHandle *r) {
   while (pl) {
     int i;
     for (i = 0; i < pl->count; i++)
-      Cyc_Core_drop_refptr(pl->pointers[i]);
+      drop_refptr_base(pl->pointers[i]);
     {struct _pool *next = pl->next;
     GC_free(pl);
     pl = next;}

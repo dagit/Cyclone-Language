@@ -216,6 +216,7 @@ MAKE_VAR(_check_fat_subscript);
 MAKE_VAR(_fat_ptr);
 MAKE_VAR(_tag_fat);
 MAKE_VAR(_untag_fat_ptr);
+MAKE_VAR(_check_fat_at_base);
 MAKE_VAR(_get_fat_size);
 MAKE_VAR(_fat_ptr_decrease_size);
 MAKE_VAR(_get_zero_arr_size_char);
@@ -2136,14 +2137,21 @@ static void exp_to_c(env_t nv, exp_t e) {
         let new_e2 = (exp_t)b2;
         if (zt1 && !zt2)
           new_e2 = add_exp(b2,uint_exp(1,DL),DL);
+	let ptr_exp = e1;
+        
+        // ?`RC to *`RC requires current to be at base, else arraybounds
+        if (is_noalias_region(p1.ptr_atts.rgn,false)  // p1 is unique or refcounted...
+            && !is_noalias_region(p1.ptr_atts.rgn,true)) // ...and not unique (so, refcounted)
+          ptr_exp = fncall_exp_dl(_check_fat_at_base_e, ptr_exp);
+        
 	// FIX: allow bounds check to be elided
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: _check_null(_untag_arr(e1, sizeof(t), new_e2))
-	let ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
-				    e1,
-				    sizeoftype_exp(typ_to_c(p1.elt_type),DL),
-				    new_e2);
+        ptr_exp = fncall_exp_dl(_untag_fat_ptr_e,
+                                ptr_exp,
+                                sizeoftype_exp(typ_to_c(p1.elt_type),DL),
+                                new_e2);
 	did_inserted_checks = true;
 	if(do_null_check(e)) // DJG: redundant unless bound is 0?
 	  ptr_exp->r = fncall_exp_r(_check_null_e, copy_exp(ptr_exp));
@@ -4235,6 +4243,7 @@ void init() {
     &_check_fat_subscript_str,
     &_tag_fat_str,
     &_untag_fat_ptr_str,
+    &_check_fat_at_base_str,
     &_get_fat_size_str,
     &_get_zero_arr_size_char_str, 
     &_get_zero_arr_size_other_str, 
