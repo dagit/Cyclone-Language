@@ -1931,8 +1931,55 @@ int typecmp(type_t t1, type_t t2) {
     }
     return star_cmp(Evexp::const_exp_cmp,e1,e2);
 
-  case $(&FnType(_), &FnType(_)):
-    impos("typecmp: function types not handled");
+  case $(&FnType(f1), &FnType(f2)):
+    if (unify(t1,t2)) return 0;
+    int r = typecmp(f1.ret_typ,f2.ret_typ);
+    if (r != 0) return r;
+    r = tqual_cmp(f1.ret_tqual,f2.ret_tqual);
+    if (r != 0) return r;
+    let args1 = f1.args;
+    let args2 = f2.args;
+    for (; args1 != NULL && args2 != NULL; args1=args1->tl,args2=args2->tl) {
+      let $(_,tq1,t1) = *args1->hd;
+      let $(_,tq2,t2) = *args2->hd;
+      r = tqual_cmp(tq1,tq2);
+      if (r != 0) return r;
+      r = typecmp(t1,t2);
+      if (r != 0) return r;
+    }
+    if (args1 != NULL) return 1;
+    if (args2 != NULL) return -1;
+    if (f1.c_varargs && !f2.c_varargs) return 1;
+    if (!f1.c_varargs && f2.c_varargs) return -1;
+    if (f1.cyc_varargs != NULL & f2.cyc_varargs == NULL) return 1;
+    if (f1.cyc_varargs == NULL & f2.cyc_varargs != NULL) return -1;
+    if (f1.cyc_varargs != NULL & f2.cyc_varargs != NULL) {
+      r = tqual_cmp(f1.cyc_varargs->tq,f2.cyc_varargs->tq);
+      if (r != 0) return r;
+      r = typecmp(f1.cyc_varargs->type,f2.cyc_varargs->type);
+      if (r != 0) return r;
+      if (f1.cyc_varargs->inject && !f2.cyc_varargs->inject) return 1;
+      if (!f1.cyc_varargs->inject && f2.cyc_varargs->inject) return -1;
+    }
+    r = star_cmp(typecmp,f1.effect,f2.effect);
+    if (r != 0) return r;
+    let rpo1 = f1.rgn_po;
+    let rpo2 = f2.rgn_po;
+    for (; rpo1 != NULL && rpo2 != NULL; rpo1=rpo1->tl, rpo2=rpo2->tl) {
+      let $(t1a,t1b) = *rpo1->hd;
+      let $(t2a,t2b) = *rpo2->hd;
+      r = typecmp(t1a,t2a); if (r != 0) return r;
+      r = typecmp(t1b,t2b); if (r != 0) return r;
+    }
+    if (rpo1 != NULL) return 1;
+    if (rpo2 != NULL) return -1;
+    r = star_cmp(Evexp::const_exp_cmp,f1.requires_clause,f2.requires_clause);
+    if (r != 0) return r;
+    r = star_cmp(Evexp::const_exp_cmp,f1.ensures_clause,f2.ensures_clause);
+    if (r != 0) return r;
+    // we did unify above, so if the types are actually equal, we
+    // should never have gotten here...
+    impos("typecmp: function type comparison should never get here!");
 
   case $(&TupleType(ts2), &TupleType(ts1)):
     return list_cmp(tqual_type_cmp,ts1,ts2);
@@ -1959,7 +2006,11 @@ int typecmp(type_t t1, type_t t2) {
   case $(&AccessEff(_), _):
   case $(&RgnsEff(_), _):
   case $(_, &RgnsEff(_)):
-  case $(_, &AccessEff(_)): impos("typecmp: effects not handled");
+  case $(_, &AccessEff(_)): 
+    // we punt here and try unification, followed by pointer tests
+    if (unify(t1,t2)) return 0;
+    if ((int)t1 < (int)t2) return -1;
+    return 1;
   default: impos("Unmatched case in typecmp");
   }
 }

@@ -364,7 +364,8 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
 	return c2;
     }
     return 0; // list lengths must be the same -- it's the same primop
-  case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  return typecmp(t1,t2);
+  case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  
+    return typecmp(t1,t2);
   case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)):
     let e2atopt = e2a->topt;
     if(e2atopt == NULL)
