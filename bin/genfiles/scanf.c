@@ -54,6 +54,9 @@ struct _RegionHandle {
   struct _DynRegionHandle *sub_regions;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
+#else
+  unsigned used_bytes;
+  unsigned wasted_bytes;
 #endif
 };
 
@@ -815,25 +818,25 @@ unsigned long strtoul(char*,char**,int);
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
 # 83
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 152 "core.h"
+# 170 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
-# 187
+# 205
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
-# 193
+# 211
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
-# 198
+# 216
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 281 "core.h"
+# 299 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
 typedef unsigned int Cyc_Core___cyclone_internal_singleton;
-# 285
+# 303
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 290
+# 308
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 297
+# 315
 return 0;
 return dyn.curr;};}
 # 80 "scanf.cyc"

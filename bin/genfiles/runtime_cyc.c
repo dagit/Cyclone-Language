@@ -60,10 +60,10 @@ struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
 extern unsigned int GC_gc_no;
+#endif
 extern size_t GC_get_heap_size();
 extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
-#endif
 
 static int region_get_heap_size(struct _RegionHandle *r);
 static int region_get_free_bytes(struct _RegionHandle *r);
@@ -541,6 +541,9 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
   }
+#else
+  r->used_bytes += next_size;
+  r->wasted_bytes += r->last_plus_one - r->offset;
 #endif
   r->curr = p;
   r->offset = ((char *)p) + sizeof(struct _RegionPage);
@@ -554,6 +557,8 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
     default_region_page_size < s ? s : default_region_page_size;
   p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
                                       page_size,1);
+  if (p == NULL) 
+    _throw_badalloc();
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = GC_size(p);
   p->free_bytes = page_size;
@@ -565,12 +570,14 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
   }
 #endif
-  if (p == NULL) 
-    _throw_badalloc();
   p->next = NULL;
   r->curr = p;
   r->offset = ((char *)p) + sizeof(struct _RegionPage);
   r->last_plus_one = r->offset + page_size;
+#ifndef CYC_REGION_PROFILE
+  r->used_bytes = page_size;
+  r->wasted_bytes = 0;
+#endif
 }
 
 // allocate s bytes within region r
@@ -703,6 +710,9 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   //p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
   //p->free_bytes = default_region_page_size;
   r.name = rgn_name;
+#else
+  r.used_bytes = 0;
+  r.wasted_bytes = 0;
 #endif
   r.s.tag = 1;
   r.s.next = NULL;
@@ -1064,7 +1074,57 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
   return result;
 }
 
+#else
+
+static int region_get_heap_size(struct _RegionHandle *r) {
+  if (r != Cyc_Core_heap_region &&
+      r != Cyc_Core_unique_region &&
+      r != Cyc_Core_refcnt_region) {
+    unsigned used_bytes = r->used_bytes;
+    return used_bytes;
+  }
+  else
+    return GC_get_heap_size();
+}
+
+static int region_get_free_bytes(struct _RegionHandle *r) {
+  if (r != Cyc_Core_heap_region &&
+      r != Cyc_Core_unique_region &&
+      r != Cyc_Core_refcnt_region) {
+    struct _RegionPage *p = r->curr;
+    unsigned free_bytes = r->last_plus_one - r->offset;
+    return free_bytes;
+  }
+  else
+    return GC_get_free_bytes();
+}
+
+static int region_get_total_bytes(struct _RegionHandle *r) {
+  if (r != Cyc_Core_heap_region &&
+      r != Cyc_Core_unique_region &&
+      r != Cyc_Core_refcnt_region) {
+    struct _RegionPage *p = r->curr;
+    unsigned used_bytes = r->used_bytes;
+    unsigned wasted_bytes = r->wasted_bytes;
+    unsigned free_bytes = r->last_plus_one - r->offset;
+    return (used_bytes - wasted_bytes - free_bytes);
+  }
+  else {
+    return GC_get_total_bytes();
+  }
+}
+
 #endif
+
+int region_used_bytes(struct _RegionHandle *r) {
+  return region_get_heap_size(r);
+}
+int region_free_bytes(struct _RegionHandle *r) {
+  return region_get_free_bytes(r);
+}
+int region_alloc_bytes(struct _RegionHandle *r) {
+  return region_get_total_bytes(r);
+}
 
 // Called from gc/alloc.c for allocation profiling.  Must be
 // defined even if CYC_REGION_PROFILE is not.

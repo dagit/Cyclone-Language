@@ -147,8 +147,26 @@ extern datatype exn  { extern Not_found };
       found. */
 extern datatype exn.Not_found Not_found_val;
 extern datatype exn  { extern Unreachable(string_t) };
+
+extern "C" int region_used_bytes(region_t<`r>);
+  /** [region_used_bytes] returns the number of bytes
+      currently allocated for region pages for Cyclone objects;
+      i.e., does not account for overhead of region page
+      data structures. */
+extern "C" int region_free_bytes(region_t<`r>);
+  /** [region_free_bytes] returns the number of bytes
+      currently free in the current region page. */
+extern "C" int region_alloc_bytes(region_t<`r>);
+  /** [region_alloc_bytes] returns the number of bytes
+      of allocated Cyclone objects in the region. */
+
+  /** Note: used_bytes - alloc_bytes - free_bytes 
+      yields the "wasted" bytes: space in non-current region
+      pages that won't be used for new Cyclone objects. */
+
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
+
 extern region_t<`U> unique_region;
   /** [unique_region] is the region handle of the unique pointer region. */
   // FIX: unique_region also defined in absyn.cyc; should really unify
