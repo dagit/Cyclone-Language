@@ -128,13 +128,13 @@ ARCHDIR=bin/genfiles/$(UPDATEARCH)
 DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
 
 cyclone_src:
-	-mkdir $(BUILDDIR) >& /dev/null
+	-mkdir $(BUILDDIR)
 	$(DO_LIBSRC) all
 lib_src:
-	-mkdir $(BUILDDIR) >& /dev/null
+	-mkdir $(BUILDDIR)
 	$(DO_LIBSRC) libs
 cfiles:
-	-mkdir $(BUILDDIR) >& /dev/null
+	-mkdir $(BUILDDIR)
 	$(DO_LIBSRC) cfiles
 
 # Note: Tried doing this stuff with target-specific variables instead
@@ -212,15 +212,15 @@ ifeq ($(UPDATEARCH),$(ARCH))
 	@for i in $(CYCLONE_H);\
            do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING lib/$$i;\
-                   cp lib/$$i include/$$i)) done
+                   mv lib/$$i include/$$i)) done
 	@test ! -e lib/cyc_include.h\
                || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
                || (echo UPDATING cyc-lib/cyc_include.h;\
-                 cp lib/cyc_include.h bin/cyc-lib/cyc_include.h)
+                 mv lib/cyc_include.h bin/cyc-lib/cyc_include.h)
 	@test ! -e lib/libc.cys\
                || cmp -s lib/libc.cys bin/cyc-lib/libc.cys\
                || (echo UPDATING cyc-lib/libc.cys;\
-                 cp lib/libc.cys bin/cyc-lib/libc.cys)
+                 mv lib/libc.cys bin/cyc-lib/libc.cys)
 endif
 	 @if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	   for arch in $(ALL_ARCHS); do\

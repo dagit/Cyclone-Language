@@ -541,25 +541,25 @@ const char*)_untag_arr(ptr,sizeof(char),1),size,nmemb,f->file);}}int getc(struct
 Cyc_Cstdio___abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){return getc(f->file);}
 int getchar();int Cyc_getchar(){return getchar();}int getc_unlocked(struct Cyc_Cstdio___abstractFILE*);
 int Cyc_getc_unlocked(struct Cyc___cycFILE*f){return getc_unlocked(f->file);}int
-getchar_unlocked();int Cyc_getchar_unlocked(){return getchar_unlocked();}int pclose(
-struct Cyc_Cstdio___abstractFILE*);int Cyc_pclose(struct Cyc___cycFILE*f){return
-pclose(f->file);}struct Cyc_Cstdio___abstractFILE*popen(const char*,const char*);
-struct Cyc___cycFILE*Cyc_popen(const char*name,const char*type){struct Cyc_Cstdio___abstractFILE*
-_tmp32=popen(name,type);return(unsigned int)_tmp32?({struct Cyc___cycFILE*_tmp33=
-_cycalloc(sizeof(*_tmp33));_tmp33->file=(struct Cyc_Cstdio___abstractFILE*)
-_check_null(_tmp32);_tmp33;}): 0;}int putc(int,struct Cyc_Cstdio___abstractFILE*);
-int Cyc_putc(int x,struct Cyc___cycFILE*f){return putc(x,f->file);}int putc_unlocked(
-int,struct Cyc_Cstdio___abstractFILE*);int Cyc_putc_unlocked(int x,struct Cyc___cycFILE*
-f){return putc_unlocked(x,f->file);}void rewind(struct Cyc_Cstdio___abstractFILE*);
-void Cyc_rewind(struct Cyc___cycFILE*f){return rewind(f->file);}int setvbuf(struct
-Cyc_Cstdio___abstractFILE*,char*,int,unsigned int);static char _tmp35[24]="setvbuf: buffer is NULL";
-static struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_1={Cyc_Core_Failure,{
-_tmp35,_tmp35,_tmp35 + 24}};static char _tmp37[29]="setvbuf: buffer insufficient";
-static struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_2={Cyc_Core_Failure,{
-_tmp37,_tmp37,_tmp37 + 29}};int Cyc_setvbuf(struct Cyc___cycFILE*f,struct
-_tagged_arr buf,int type,unsigned int size){if(!((unsigned int)buf.curr))(int)
-_throw((void*)& Cyc___setvbuf_failure_1);if(_get_arr_size(buf,sizeof(char))< size)(
-int)_throw((void*)& Cyc___setvbuf_failure_2);return setvbuf(f->file,(char*)
+__CYCLONE_GETCHAR_UNLOCKED();int Cyc_getchar_unlocked(){return
+__CYCLONE_GETCHAR_UNLOCKED();}int pclose(struct Cyc_Cstdio___abstractFILE*);int Cyc_pclose(
+struct Cyc___cycFILE*f){return pclose(f->file);}struct Cyc_Cstdio___abstractFILE*
+popen(const char*,const char*);struct Cyc___cycFILE*Cyc_popen(const char*name,const
+char*type){struct Cyc_Cstdio___abstractFILE*_tmp32=popen(name,type);return(
+unsigned int)_tmp32?({struct Cyc___cycFILE*_tmp33=_cycalloc(sizeof(*_tmp33));
+_tmp33->file=(struct Cyc_Cstdio___abstractFILE*)_check_null(_tmp32);_tmp33;}): 0;}
+int putc(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_putc(int x,struct Cyc___cycFILE*
+f){return putc(x,f->file);}int putc_unlocked(int,struct Cyc_Cstdio___abstractFILE*);
+int Cyc_putc_unlocked(int x,struct Cyc___cycFILE*f){return putc_unlocked(x,f->file);}
+void rewind(struct Cyc_Cstdio___abstractFILE*);void Cyc_rewind(struct Cyc___cycFILE*
+f){return rewind(f->file);}int setvbuf(struct Cyc_Cstdio___abstractFILE*,char*,int,
+unsigned int);static char _tmp35[24]="setvbuf: buffer is NULL";static struct Cyc_Core_Failure_struct
+Cyc___setvbuf_failure_1={Cyc_Core_Failure,{_tmp35,_tmp35,_tmp35 + 24}};static char
+_tmp37[29]="setvbuf: buffer insufficient";static struct Cyc_Core_Failure_struct Cyc___setvbuf_failure_2={
+Cyc_Core_Failure,{_tmp37,_tmp37,_tmp37 + 29}};int Cyc_setvbuf(struct Cyc___cycFILE*
+f,struct _tagged_arr buf,int type,unsigned int size){if(!((unsigned int)buf.curr))(
+int)_throw((void*)& Cyc___setvbuf_failure_1);if(_get_arr_size(buf,sizeof(char))< 
+size)(int)_throw((void*)& Cyc___setvbuf_failure_2);return setvbuf(f->file,(char*)
 _check_null(_untag_arr(buf,sizeof(char),1)),type,size);}void Cyc_setbuf(struct Cyc___cycFILE*
 f,struct _tagged_arr buf){Cyc_setvbuf(f,buf,(unsigned int)buf.curr?0: 2,8192);
 return;}int ungetc(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_ungetc(int x,

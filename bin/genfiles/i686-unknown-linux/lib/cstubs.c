@@ -99,6 +99,12 @@
     *Cyc_stdout = &Cyc_stdout_v,
     *Cyc_stderr = &Cyc_stderr_v;
 
+  // In OpenBSD getchar_unlocked is a macro and not a function, so we
+  // do this for now.
+  int __CYCLONE_GETCHAR_UNLOCKED(void) {
+    return getchar_unlocked();
+  }
+
   FILE *_sfile_to_file(struct Cyc___cycFILE *sf) {
     if(!sf) {
       fprintf(stderr,"Attempt to access null file descriptor.\n");
