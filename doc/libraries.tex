@@ -6,6 +6,50 @@
 \definecolor{cycdochighlight}{rgb}{1,1,1}
 \fi
 
+\subsection{C Libraries}
+Cyclone provides partial support for the following C library headers:
+\begin{quote}\ttfamily
+  <arpa/inet.h>
+  <assert.h>
+  <ctype.h>
+  <dirent.h>
+  <errno.h>
+  <fcntl.h>
+  <getopt.h>
+  <grp.h>
+  <math.h>
+  <netdb.h>
+  <netinet/in.h>
+  <netinet/tcp.h>
+  <pwd.h>
+  <signal.h>
+  <stddef.h>
+  <stdio.h>
+  <stdlib.h>
+  <string.h>
+  <strings.h>
+  <sys/mman.h>
+  <sys/resource.h>
+  <sys/select.h>
+  <sys/socket.h>
+  <sys/stat.h>
+  <sys/time.h>
+  <sys/types.h>
+  <sys/wait.h>
+  <time.h>
+  <unistd.h>
+\end{quote}
+
+For each supported C library header \texttt{<XXX.h>}, we also provide
+a header \texttt{<cXXX.h>}, which has the same declarations as
+\texttt{<XXX.h>}, except that they are all contained in namespace Std.
+For example, \texttt{<cstdio.h>} declares \texttt{Std::printf}.  Each
+file \texttt{<XXX.h>} is equivalent to
+\begin{verbatim}
+    #include <cXXX.h>
+    using Std;
+\end{verbatim}
+
 \input{gen-libdoc}
 
 %HEVEA \newcommand{\parbox}[3][x]{#3}
