@@ -353,197 +353,200 @@ and string = parse
 /* parser.  E.g., eliminate/modify unsupported attributes, other      */
 /* unsavory hacks.                                                    */
 /**********************************************************************/
-and slurp = parse
- "\""
-{ fputc('"',(FILE @)slurp_out);
-  if (slurp_string(lexbuf)) return 1; else return slurp(lexbuf);}
-| eof
+and slurp = parse /* returns 1 if more to do, 0 if all done */
+  eof
 { return 0; }
+| "\""
+{ fputc('"',(FILE @)slurp_out);
+  while (slurp_string(lexbuf)) /* skip */;
+  return 1;
+}
 /* Currently Cyclone doesn't allow sizeofs as constant expressions.
    So we calculate the sizes in a previous phase and insert them
    here on a case-by-case basis. */
 | "sizeof" ws* "(" ws* "fd_mask" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_fdmask);
   log("Warning: sizeof(fd_mask) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof___fdmask);
   log("Warning: sizeof(__fd_mask) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "__uint32_t" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_uint32);
   log("Warning: sizeof(__uint32_t) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "in_port_t" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_inport);
   log("Warning: sizeof(__in_port_t) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_int);
   log("Warning: sizeof(int) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "short" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_short);
   log("Warning: sizeof(__short) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "long" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedlongint);
   log("Warning: sizeof(unsigned long int) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "unsigned" ws+ "short" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_unsignedshortint);
   log("Warning: sizeof(unsigned short int) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "short" ws+ "int" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_shortint);
   log("Warning: sizeof(short int) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "struct" ws+ "sockaddr" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_sockaddr);
   log("Warning: sizeof(struct sockaddr) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "sizeof" ws* "(" ws* "struct" ws+ "in_addr" ws* ")"
 { fprintf((FILE @)slurp_out," %d ",sizeof_inaddr);
   log("Warning: sizeof(struct inaddr) inlined\n");
-  return slurp(lexbuf); }
+  return 1; }
 | " malloc "
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
 { fputs(" __IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of malloc sidestepped\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "*malloc "
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
 { fputs("*__IGNORE_FOR_CYCLONE_MALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of malloc sidestepped\n");
-  return slurp(lexbuf); }
+  return 1; }
 | " calloc "
 /* calloc is a Cyclone keyword so our parser can't handle a calloc
    declaration. */
 { fputs(" __IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of calloc sidestepped\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "*calloc "
 /* calloc is a Cyclone keyword so our parser can't handle a calloc
    declaration. */
 { fputs("*__IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of calloc sidestepped\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "*region" /* Used in OS X in mach/vm_map.h, conflicts with our keyword */
 { fputs("__region",(FILE @)slurp_out);
   log("Warning: use of region sidestepped\n");
-  return slurp(lexbuf); }
+  return 1; }
 | "__extension__" /* Used in cygwin in sys/reent.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__attribute__ ((__mode__ (__SI__)))" /* Used in linux in _G_config.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__attribute__ ((__mode__ (__QI__)))" /* Used in linux in sys/types.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__attribute__ ((__mode__ (__DI__)))" /* Used in linux in sys/types.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__inline__" /* Used in cygwin in stdio.h */
-{ fputs("inline",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("inline",(FILE @)slurp_out); return 1; }
 | "__inline" /* Used in OS X */
-{ fputs("inline",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("inline",(FILE @)slurp_out); return 1; }
 | "__const__"
-{ fputs("const",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("const",(FILE @)slurp_out); return 1; }
 | "__const" /* Used in cygwin in unistd.h; an undocumented gcc extension?? */
-{ fputs("const",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("const",(FILE @)slurp_out); return 1; }
 | "__builtin_va_list"
 /* Used in linux in /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stdarg.h;
    an undocumented gcc extension?  This is a HACK -- shouldn't matter since
    we don't use va_list */
-{ fputs("int",(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputs("int",(FILE @)slurp_out); return 1; }
 | "__restrict" /* Used in linux in libio.h; an undocumented gcc extension?? */
-{ return slurp(lexbuf); }
+{ return 1; }
 | "__asm__" ws* '(' /* Used in cygwin in /usr/include/asm files for inline functions */
 { parens_to_match = 1;
-  if (asm(lexbuf)) return 1;
+  while (asm(lexbuf)) /* skip */;
   fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
   log("Warning: replacing use of __asm__ with 0\n");
-  return slurp(lexbuf); }
+  return 1; }
 | [^ '"']
-{ fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return slurp(lexbuf); }
+{ fputc(lexeme_char(lexbuf,0),(FILE @)slurp_out); return 1; }
 
-and slurp_string = parse
-  "\""
+and slurp_string = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ return 0; }
+| "\""
 { fputc('"',(FILE @)slurp_out); return 0; }
-| eof     /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
-| newline /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
+| newline
+{ log("Warning: unclosed string\n");
+  fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | "\\" newline
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | "\\a"
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | "\\x" ['0'-'9''A'-'F''a'-'f']+
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | [^ '"''\\''\n']
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 | _
-{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return slurp_string(lexbuf); }
+{ fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 
 and asm =
 /* Expects to be entered just after a left paren, searches for the
    matching right paren, deletes everything in between.
    Parens in comments, strings, and character constants aren't counted.
    parens_to_match should be set to 1 before calling asm. */
+ /* returns 1 if more to do, 0 if all done */
 parse
-  ')'
+  eof
+{ return 0; }
+| ')'
 { if (parens_to_match == 1) return 0;
   parens_to_match--;
-  return asm(lexbuf); }
+  return 1; }
 | '('
 { parens_to_match++;
-  return asm(lexbuf); }
+  return 1; }
 | '"'
-{ asm_string(lexbuf);
-  return asm(lexbuf); }
+{ while (asm_string(lexbuf)) /* skip */;
+  return 1; }
 | "/*"
-{ asm_comment(lexbuf);
-  return asm(lexbuf); }
+{ while (asm_comment(lexbuf)) /* skip */;
+  return 1; }
 | "//" [^'\n''\r']*
-{ return asm(lexbuf); }
-| eof
-{ return 0; }
+{ return 1; }
 | [^')']
-{ return asm(lexbuf); }
+{ return 1; }
 
-and asm_string = parse
-  "\""
+and asm_string = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ log("Warning: unclosed string\n"); return 0; }
+| "\""
 { return 0; }
-| eof     /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
-| newline /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
+| newline
+{ log("Warning: unclosed string\n"); return 1; }
 | "\\" newline
-{ return asm_string(lexbuf); }
+{ return 1; }
 | "\\a"
-{ return asm_string(lexbuf); }
+{ return 1; }
 | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-{ return asm_string(lexbuf); }
+{ return 1; }
 | "\\x" ['0'-'9''A'-'F''a'-'f']+
-{ return asm_string(lexbuf); }
+{ return 1; }
 | [^ '"''\\''\n']
-{ return asm_string(lexbuf); }
-| _
-{ return asm_string(lexbuf); }
-
-and asm_comment = parse
-/* Assumes that comments can't be nested */
-  "*/"
-{ return 0; }
-| eof     /* Unclosed string, error: return 1 instead of 0 */
 { return 1; }
 | _
-{ return asm_comment(lexbuf); }
+{ return 1; }
+
+and asm_comment = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ log("Warning: unclosed comment\n"); return 0; }
+| "*/"      /* Assumes that comments can't be nested */
+{ return 0; }
+| _
+{ return 1; }
 
 /**********************************************************************/
 /* Rules to suck in a #define line and return it, along with the name */
@@ -584,7 +587,7 @@ and spec "spec_t" = parse
   current_cycstubs = NULL;
   current_prologue = NULL;
   current_epilogue = NULL;
-  if (commands(lexbuf)) return NULL;
+  while (commands(lexbuf)) /* skip */;
   current_prologue = imp_rev(current_prologue);
   current_epilogue = imp_rev(current_epilogue);
   current_cstubs = imp_rev(current_cstubs);
@@ -609,25 +612,29 @@ and spec "spec_t" = parse
           lexeme_char(lexbuf,0));
   return NULL; }
 
-and commands = parse
-  "include" ws+ '{'
+and commands = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ return 0; }
+| ';'
+{ return 0; }
+| "include" ws+ '{'
 { snarfed_symbols = NULL;
-  if (snarfsymbols(lexbuf)) return 1;
+  while (snarfsymbols(lexbuf)) /* skip */;
   current_symbols = append(snarfed_symbols,current_symbols);
-  return commands(lexbuf); }
+  return 1; }
 | "omitvariables" ws+ '{'
 { snarfed_symbols = NULL;
-  if (snarfsymbols(lexbuf)) return 1;
+  while (snarfsymbols(lexbuf)) /* skip */;
   current_omit_symbols = append(snarfed_symbols,current_omit_symbols);
-  return commands(lexbuf); }
+  return 1; }
 | "prologue" ws+ '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)NULL,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_prologue = new List(x,current_prologue);
-  return commands(lexbuf); }
+  return 1; }
 | "prologue" ws+ idchar+ ws+ '{'
 { let s = lexeme(lexbuf);
   s += strlen("prologue");
@@ -637,19 +644,19 @@ and commands = parse
   let symbol = substring(s,0,t-s);
   braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_prologue = new List(x,current_prologue);
-  return commands(lexbuf); }
+  return 1; }
 | "epilogue" ws+ '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)NULL,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_epilogue = new List(x,current_epilogue);
-  return commands(lexbuf); }
+  return 1; }
 | "epilogue" ws+ idchar+ ws+ '{'
 { let s = lexeme(lexbuf);
   s += strlen("epilogue");
@@ -659,19 +666,19 @@ and commands = parse
   let symbol = substring(s,0,t-s);
   braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_epilogue = new List(x,current_epilogue);
-  return commands(lexbuf); }
+  return 1; }
 | "cstub" ws+ '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)NULL,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cstubs = new List(x,current_cstubs);
-  return commands(lexbuf); }
+  return 1; }
 | "cstub" ws+ idchar+ ws+ '{'
 { let s = lexeme(lexbuf);
   s += strlen("cstub");
@@ -681,19 +688,19 @@ and commands = parse
   let symbol = substring(s,0,t-s);
   braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cstubs = new List(x,current_cstubs);
-  return commands(lexbuf); }
+  return 1; }
 | "cycstub" ws+ '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)NULL,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cycstubs = new List(x,current_cycstubs);
-  return commands(lexbuf); }
+  return 1; }
 | "cycstub" ws+ idchar+ ws+ '{'
 { let s = lexeme(lexbuf);
   s += strlen("cycstub");
@@ -703,121 +710,120 @@ and commands = parse
   let symbol = substring(s,0,t-s);
   braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cycstubs = new List(x,current_cycstubs);
-  return commands(lexbuf); }
+  return 1; }
 | "cpp" ws* '{'
 { braces_to_match = 1;
   specbuf = Buffer::create(255);
-  if (block(lexbuf)) return 1;
+  while (block(lexbuf)) /* skip */;
   stringptr_t x = new (string_t)Buffer::contents((Buffer::T)specbuf);
   current_cpp = new List(x,current_cpp);
-  return commands(lexbuf); }
+  return 1; }
 | "//" [^'\n''\r']*
-{ return commands(lexbuf); }
+{ return 1; }
 | ws+
-{ return commands(lexbuf); }
-| eof
-{ return 0; }
-| ';'
-{ return 0; }
+{ return 1; }
 | _
 { fprintf(stderr,
           "Error in .cys file: expected command, found '%c' instead\n",
           lexeme_char(lexbuf,0));
-  return 1; }
+  return 0; }
 
 and snarfsymbols =
 /* Expects to be entered just after a left brace, searches for the
    a sequence of symbols and the matching right brace, stores the
    symbols in snarfed_symbols. */
+/* returns 1 if more to do, 0 if all done */
 parse
   idchar+
 { snarfed_symbols = new List(new (string_t)lexeme(lexbuf),snarfed_symbols);
-  return snarfsymbols(lexbuf); }
+  return 1; }
 | ws+
-{ return snarfsymbols(lexbuf); }
+{ return 1; }
 | '}'
 { return 0; }
 | eof
 { fprintf(stderr,
           "Error in .cys file: unexpected end-of-file\n");
-  return 1; }
+  return 0; }
 | _
 { fprintf(stderr,
           "Error in .cys file: expected symbol, found '%c' instead\n",
           lexeme_char(lexbuf,0));
-  return 1; }
+  return 0; }
 
 and block =
 /* Expects to be entered just after a left brace, searches for the
    matching right brace, appends everything in between to specbuf.
    Braces in comments, strings, and character constants aren't counted.
    braces_to_match should be set to 1 before calling block. */
+/* returns 1 if more to do, 0 if all done */
 parse
-  '}'
+  eof
+{ log("Warning: unclosed brace\n"); return 0; }
+| '}'
 { if (braces_to_match == 1) return 0;
   braces_to_match--;
   Buffer::add_char((Buffer::T)specbuf,'}');
-  return block(lexbuf); }
+  return 1; }
 | '{'
 { braces_to_match++;
   Buffer::add_char((Buffer::T)specbuf,'{');
-  return block(lexbuf); }
+  return 1; }
 | '"'
 { Buffer::add_char((Buffer::T)specbuf,'"');
-  block_string(lexbuf);
-  return block(lexbuf); }
+  while (block_string(lexbuf)) /* skip */;
+  return 1; }
 | "/*"
 { Buffer::add_string((Buffer::T)specbuf,"/*");
-  block_comment(lexbuf);
-  return block(lexbuf); }
+  while (block_comment(lexbuf)) /* skip */;
+  return 1; }
 | "//" [^'\n''\r']*
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block(lexbuf); }
-| eof
-{ return 0; }
+  return 1; }
 | [^'}']
 { Buffer::add_char((Buffer::T)specbuf,lexeme_char(lexbuf,0));
-  return block(lexbuf); }
+  return 1; }
 
-and block_string = parse
-  "\""
+and block_string = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ log("Warning: unclosed string\n"); return 0; }
+| "\""
 { Buffer::add_char((Buffer::T)specbuf,'"'); return 0; }
-| eof     /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
-| newline /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
+| newline
+{ log("Warning: unclosed string\n");
+  Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
+  return 1; }
 | "\\" newline
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 | "\\a"
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 | "\\x" ['0'-'9''A'-'F''a'-'f']+
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 | [^ '"''\\''\n']
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 | _
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_string(lexbuf); }
+  return 1; }
 
-and block_comment = parse
-/* Assumes that comments can't be nested */
-  "*/"
+and block_comment = parse /* returns 1 if more to do, 0 if all done */
+  eof
+{ log("Warning: unclosed comment\n"); return 0; }
+| "*/"      /* Assumes that comments can't be nested */
 { Buffer::add_string((Buffer::T)specbuf,"*/"); return 0; }
-| eof     /* Unclosed string, error: return 1 instead of 0 */
-{ return 1; }
 | _
 { Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
-  return block_comment(lexbuf); }
+  return 1; }
 
 {
 
@@ -1334,16 +1340,7 @@ and block_comment = parse
     if (!slurp_out) {
       return 1;
     }
-    if (slurp(l)) {
-      log("Error: Unclosed string in %s\n",filename);
-      fprintf(stderr,"Error: Unclosed string in %s\n",filename);
-      fclose(in_file);
-      fclose((FILE @)slurp_out);
-      remove(cppinfile);
-      remove(preprocfile);
-      remove(filteredfile);
-      return 1;
-    }
+    while (slurp(l)) /* skip */;
     fclose(in_file);
     fclose((FILE @)slurp_out);
 
