@@ -562,7 +562,7 @@ namespace Absyn {
   EXTERN_ABSYN enum Coercion {
     Unknown_coercion, // initially, we don't know what kind of coercion
     No_coercion,      // a cast that C supports
-    NonNull_to_Null,  // t@{n+m} -> t*{n}
+    Null_to_NonNull,  // t*{n+m} -> t@{n}
       // FIX: should enumerate all other coercions so that we can
       // make sure the type-checker and code-generator are in sync.
     Other_coercion    // all of the other coercions (see toc.cyc)

@@ -323,11 +323,11 @@ struct _RegionHandle *Cyc_Core_refcnt_region = CYC_CORE_REFCNT_REGION;
 // eventually (but currently this is set to a no-op in libc.cys).
 // Note that this is not recursive; it assumes that programmer
 // has freed nested pointers (otherwise will be grabbed by the GC).
-void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
-  if (ptr.base == NULL) return; // eventually make not-null type
+void Cyc_Core_ufree(unsigned char *ptr) {
+  if (ptr == NULL) return;
   else {
 #ifdef CYC_REGION_PROFILE
-    unsigned int sz = GC_size(ptr.base);
+    unsigned int sz = GC_size(ptr);
     unique_freed_bytes += sz;
     // output special "alloc" event here, where we have a negative size
     if (alloc_log != NULL) {
@@ -337,43 +337,47 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
 	      region_get_heap_size(CYC_CORE_UNIQUE_REGION), 
 	      region_get_free_bytes(CYC_CORE_UNIQUE_REGION),
 	      region_get_total_bytes(CYC_CORE_UNIQUE_REGION),
-              (unsigned int)ptr.base);
+              (unsigned int)ptr);
     }
     // FIX:  JGM -- I moved this before the endif -- it was after,
     // but I'm pretty sure we don't need this unless we're profiling.
-    GC_register_finalizer_no_order(ptr.base,NULL,NULL,NULL,NULL);
+    GC_register_finalizer_no_order(ptr,NULL,NULL,NULL,NULL);
 #endif
-    GC_free(ptr.base);
-    ptr.base = ptr.curr = ptr.last_plus_one = NULL; // not really necessary...
+    GC_free(ptr);
   }
 }
 
 /////// REFERENCE-COUNTED REGION //////////
 
-static int *get_refcnt(struct _dyneither_ptr ptr) {
-  if (ptr.base == NULL) return NULL;
+/* XXX need to make this 2 words in advance, for double-word alignment? */
+static int *get_refcnt(unsigned char *ptr) {
+  if (ptr == NULL) return NULL;
   else {
-    int *res = (int *)(ptr.base - sizeof(int));
+    int *res = (int *)(ptr - sizeof(int));
 /*     fprintf(stderr,"getting count, refptr=%x, cnt=%x\n",ptr.base,res); */
     return res;
   }
 }
 
-int Cyc_Core_refptr_count(struct _dyneither_ptr ptr) {
+// Assumes no pointer arithmetic on reference-counted pointers, so
+// that this is always pointing to the base of the pointer.
+int Cyc_Core_refptr_count(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) return *cnt;
   else return 0;
 }
 
+// Need to use a fat pointer here, so that we preserve the bounds
+// information when aliasing.
 struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr) {
-  int *cnt = get_refcnt(ptr);
+  int *cnt = get_refcnt(ptr.base);
   if (cnt != NULL) *cnt = *cnt + 1;
 /*   fprintf(stderr,"refptr=%x, cnt=%x, updated *cnt=%d\n",ptr.base,cnt, */
 /* 	  cnt != NULL ? *cnt : 0); */
   return ptr;
 }
 
-void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
+void Cyc_Core_drop_refptr(unsigned char *ptr) {
   int *cnt = get_refcnt(ptr);
   if (cnt != NULL) {
 /*     fprintf(stderr,"refptr=%x, cnt=%x, *cnt=%d\n",ptr.base,cnt,*cnt); */
@@ -381,7 +385,7 @@ void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
     if (*cnt == 0) { // no more references
 /*       fprintf(stderr,"freeing refptr=%x\n",ptr.base); */
 #ifdef CYC_REGION_PROFILE
-      unsigned int sz = GC_size(ptr.base - sizeof(int));
+      unsigned int sz = GC_size(ptr - sizeof(int));
       refcnt_freed_bytes += sz;
       if (alloc_log != NULL) {
 	fprintf(alloc_log,"%u @\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
@@ -390,11 +394,10 @@ void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
 		region_get_heap_size(CYC_CORE_REFCNT_REGION), 
 		region_get_free_bytes(CYC_CORE_REFCNT_REGION),
 		region_get_total_bytes(CYC_CORE_REFCNT_REGION),
-                (unsigned int)ptr.base);
+                (unsigned int)ptr);
       }
 #endif
-      GC_free(ptr.base - sizeof(int));
-      ptr.base = ptr.curr = ptr.last_plus_one = NULL; // not necessary...
+      GC_free(ptr - sizeof(int));
     }
   }
 }
@@ -779,6 +782,7 @@ struct Cyc_Core_NewDynamicRegion {
   struct Cyc_Core_DynamicRegion *key;
 };
 
+// XXX need to include in profiling stuff ...
 // Create a new dynamic region and return a unique pointer for the key.
 struct Cyc_Core_NewDynamicRegion Cyc_Core_new_ukey() {
   struct Cyc_Core_NewDynamicRegion res;
@@ -794,6 +798,7 @@ void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
   GC_free(k);
 }
 
+// XXX change to use refcount routines above
 // Create a new dynamic region and return a reference-counted pointer 
 // for the key.
 struct Cyc_Core_NewDynamicRegion Cyc_Core_new_rckey() {

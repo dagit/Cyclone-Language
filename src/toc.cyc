@@ -2949,7 +2949,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
 	  // flow analysis may not set annotation correctly here!
           // sanity checking:
-          if (coercion != NonNull_to_Null)
+          if (coercion != Null_to_NonNull)
             impos("null-check conversion mis-classified: %s",exp2string(e));
           bool do_null_check = need_null_check(e1);
           if (do_null_check) {
@@ -2977,7 +2977,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
         // sanity checking
-        if (coercion == NonNull_to_Null)
+        if (coercion == Null_to_NonNull)
             impos("conversion mis-classified as null-check: %s",exp2string(e));
 	if(is_toplevel(nv)) {
 	  // can't use a function at top-level and don't want macros
@@ -3055,7 +3055,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 				 list(e1,
                                       sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
 				      new_e2), DL);
-	if(n2)
+	if(!n2)
 	  ptr_exp->r = fncall_exp_r(_check_null_e,
                                     new List(copy_exp(ptr_exp), NULL));
 	e->r = cast_it_r(*t, ptr_exp);

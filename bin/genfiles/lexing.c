@@ -582,7 +582,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
                         const char *filename, unsigned lineno) {
   struct _dyneither_ptr _arr = (arr);
   unsigned char *_curr = _arr.curr;
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&
+      _curr != (unsigned char *)0)
     _throw_arraybounds_fn(filename,lineno);
   return _curr;
 }
@@ -592,7 +593,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
+      _curr != (unsigned char *)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif

@@ -582,7 +582,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
                         const char *filename, unsigned lineno) {
   struct _dyneither_ptr _arr = (arr);
   unsigned char *_curr = _arr.curr;
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&
+      _curr != (unsigned char *)0)
     _throw_arraybounds_fn(filename,lineno);
   return _curr;
 }
@@ -592,7 +593,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
+      _curr != (unsigned char *)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -816,7 +818,7 @@ extern struct _RegionHandle*Cyc_Core_heap_region;
 # 170
 extern struct _RegionHandle*Cyc_Core_unique_region;
 # 177
-void Cyc_Core_ufree(struct _dyneither_ptr ptr);struct Cyc_Core_DynamicRegion;
+void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;
 # 205
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
 # 211
@@ -940,7 +942,7 @@ struct _dyneither_ptr newarr=({unsigned int _tmp17=(unsigned int)(xarr->num_elmt
 {int i=1;for(0;i < xarr->num_elmts;++ i){
 *((void**)_check_dyneither_subscript(newarr,sizeof(void*),i))=*((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),i));}}
 ({struct _dyneither_ptr _tmp15=xarr->elmts;struct _dyneither_ptr _tmp16=newarr;xarr->elmts=_tmp16;newarr=_tmp15;});
-Cyc_Core_ufree(newarr);}}
+Cyc_Core_ufree((void**)_untag_dyneither_ptr(newarr,sizeof(void*),1));}}
 # 81
 *((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),xarr->num_elmts ++))=a;}
 # 84
@@ -1030,7 +1032,7 @@ void Cyc_Xarray_reuse(struct Cyc_Xarray_Xarray*xarr){
 struct _dyneither_ptr newarr=_tag_dyneither(0,0,0);
 ({struct _dyneither_ptr _tmp34=newarr;struct _dyneither_ptr _tmp35=xarr->elmts;newarr=_tmp35;xarr->elmts=_tmp34;});
 xarr->num_elmts=0;
-Cyc_Core_ufree(newarr);}
+Cyc_Core_ufree((void**)_untag_dyneither_ptr(newarr,sizeof(void*),1));}
 # 189
 void Cyc_Xarray_delete(struct Cyc_Xarray_Xarray*xarr,int num){
 if(num > Cyc_Xarray_length(xarr))

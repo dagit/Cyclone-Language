@@ -174,7 +174,7 @@ extern region_t<`U> unique_region;
 #define unew rnew (Core::unique_region)
 #define umalloc(arg) rmalloc (Core::unique_region,arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
-extern void ufree(`a::TA ?`U ptr) __attribute__((noliveunique(1)));
+extern void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
 
 extern region_t<`RC> refcnt_region;
@@ -184,13 +184,13 @@ extern region_t<`RC> refcnt_region;
 #define rcnew rnew (Core::refcnt_region)
 #define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
-extern int refptr_count(`a::TA ?`RC ptr) __attribute__((noconsume(1)));
+extern int refptr_count(`a::TA *`RC ptr) __attribute__((noconsume(1)));
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
 extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{}) __attribute__((noconsume(1)));
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
-extern void drop_refptr(`a::TA ?`RC ptr) __attribute__((noliveunique(1)));
+extern void drop_refptr(`a::TA *`RC ptr) __attribute__((noliveunique(1)));
   /** [drop_refptr(p)] decrements the reference count on [p] by 1.  If
       the reference count goes to 0, it frees p.  This will not
       recursively decrement reference counts to embedded pointers,

@@ -1064,7 +1064,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   switch(e->r) {
     // treat this similar to a dereference in that there's a null-check
     // and afterwards, we know the value is not null.
-  case &Cast_e(_,e1,_,NonNull_to_Null):
+  case &Cast_e(_,e1,_,Null_to_NonNull):
     let $(f1,r1) = anal_Rexp(env,copy_ctxt,inflow,e1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     return $(f2,r1);

@@ -2167,7 +2167,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     if (!unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
       if (region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
         if (warn_region_coerce)
-          warn(loc, "implicit cast form region %s to region %s", 
+          warn(loc, "implicit cast from region %s to region %s", 
                typ2string(pinfo_a.ptr_atts.rgn),
                typ2string(pinfo_b.ptr_atts.rgn));
       } else okay = false;
@@ -2449,7 +2449,7 @@ string_t coercion2string(coercion_t c) {
   switch (c) {
   case Unknown_coercion: return "unknown";
   case No_coercion: return "no coercion";
-  case NonNull_to_Null: return "null check";
+  case Null_to_NonNull: return "null check";
   case Other_coercion: return "other coercion";
   }
 }
@@ -2559,7 +2559,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
       //fprintf(stderr,"found them to be castable: %s\n",coercion2string(c));
       // if C supports the conversion, then we don't need the cast.
       if (c != No_coercion) unchecked_cast(te,e,t2,c);
-      if (c != NonNull_to_Null)
+      if (c != Null_to_NonNull)
 	warn(e->loc,"implicit cast from %s to %s",
 	     typ2string(t1),typ2string(t2));
       return true;
@@ -2901,6 +2901,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   }
   switch (t1) {
   case &PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt_a,_))):
+    
     // can cast t* to t@ and vice versa.
     // can cast a non-const pointer to a const pointer.
     // can cast a pointer in region r1 to a pointer in region r2 as
@@ -2954,8 +2955,10 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	  // e.g. `a@{`i} <-> `a*{`i}
 	default: bounds_ok = true; break;
 	}
-      if (conref_def(false,null_a) && !conref_def(false,null_b))
-        coercion = NonNull_to_Null;
+      bool t1_nullable = conref_def(false,null_a);
+      bool t2_nullable = conref_def(false,null_b);
+      if (t1_nullable && !t2_nullable)
+        coercion = Null_to_NonNull;
 
         //fprintf(stderr,"bounds_ok = %d, zeroterm_ok = %d, ptrsub = %d, bitcase = %d\n",bounds_ok,zeroterm_ok,ptrsub,bitcase);
 

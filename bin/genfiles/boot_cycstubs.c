@@ -582,7 +582,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
                         const char *filename, unsigned lineno) {
   struct _dyneither_ptr _arr = (arr);
   unsigned char *_curr = _arr.curr;
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&
+      _curr != (unsigned char *)0)
     _throw_arraybounds_fn(filename,lineno);
   return _curr;
 }
@@ -592,7 +593,8 @@ _untag_dyneither_ptr_fn(struct _dyneither_ptr arr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ({ \
   struct _dyneither_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
-  if (_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one)\
+  if ((_curr < _arr.base || _curr + (elt_sz) * (num_elts) > _arr.last_plus_one) &&\
+      _curr != (unsigned char *)0) \
     _throw_arraybounds(); \
   _curr; })
 #endif
@@ -925,7 +927,7 @@ static struct Cyc_Core_Failure_exn_struct Cyc___fread_failure={Cyc_Core_Failure,
 # 106
 unsigned long Cyc_fread(struct _dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
 if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
-return fread((char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,nmemb,f->file);}
+return fread((char*)_untag_dyneither_ptr(ptr,sizeof(char),1),size,nmemb,f->file);}
 # 112
 unsigned long fwrite(const char*,unsigned long,unsigned long,struct  __abstractFILE*);static char _tmp5[31]="fwrite called with NULL string";
 # 114
@@ -937,7 +939,7 @@ unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long size,unsigned l
 if(!((unsigned int)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
 # 121
 if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);
-return fwrite((const char*)_untag_dyneither_ptr(ptr,sizeof(char),1),size,nmemb,f->file);}}
+return fwrite((const char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,nmemb,f->file);}}
 # 127
 int getc(struct  __abstractFILE*);
 # 129
@@ -965,7 +967,7 @@ int Cyc_putw(int x,struct Cyc___cycFILE*f){
 return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";char Cyc_FileOpenError[14]="FileOpenError";
 # 166
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
-struct Cyc___cycFILE*f=Cyc_fopen((const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)_untag_dyneither_ptr(mode,sizeof(char),1));
+struct Cyc___cycFILE*f=Cyc_fopen((const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1)),(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1)));
 if(f == 0){
 struct _dyneither_ptr fn=({unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));char*_tmpB=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpA + 1));struct _dyneither_ptr _tmpD=_tag_dyneither(_tmpB,sizeof(char),_tmpA + 1);{unsigned int _tmpC=_tmpA;unsigned int i;for(i=0;i < _tmpC;i ++){_tmpB[i]=(char)((const char*)fname.curr)[(int)i];}_tmpB[_tmpC]=(char)0;}_tmpD;});
 (int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8[0]=({struct Cyc_FileOpenError_exn_struct _tmp9;_tmp9.tag=Cyc_FileOpenError;_tmp9.f1=fn;_tmp9;});_tmp8;}));}
@@ -982,7 +984,7 @@ static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure
 # 187
 struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size){
 if(_get_dyneither_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{
-char*_tmp11= getcwd((char*)_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);
+char*_tmp11= getcwd((char*)_untag_dyneither_ptr(buf,sizeof(char),1),size);
 return(unsigned int)_tmp11?buf: _tag_dyneither(0,0,0);};}
 # 194
 int Cyc_Execinfo_bt(){
