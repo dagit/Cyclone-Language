@@ -2092,15 +2092,17 @@ e3,({ struct Cyc_Core_Opt* _temp1277=( struct Cyc_Core_Opt*) GC_malloc( sizeof(
 struct Cyc_Core_Opt)); _temp1277->v=( void*)(( void*) Cyc_Absyn_Plus); _temp1277;}),
 e2, 0); s= Cyc_Absyn_seq_stmt( Cyc_Absyn_exp_stmt( e4, 0), s, 0); s= Cyc_Absyn_declare_stmt(
 temp, temp_typ,( struct Cyc_Absyn_Exp*) e1, s, 0);( void*)( e->r=( void*)(( void*)(
-Cyc_Absyn_stmt_exp( s, 0))->r));} goto _LL1215; _LL1229: if( Cyc_Tcutil_is_tagged_pointer_typ(
-old_typ)){ struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*) _temp1035->hd;
-struct Cyc_Absyn_Exp* e2=( struct Cyc_Absyn_Exp*)( _temp1035->tl)->hd; void*
-old_typ_e2=( void*)( old_typs->tl)->hd; if( Cyc_Tcutil_is_tagged_pointer_typ(
-old_typ_e2)){( void*)( e2->r=( void*)(( void*)( Cyc_Absyn_structmember_exp( Cyc_Absyn_new_exp((
-void*) e2->r, 0), Cyc_Toc_curr_sp, 0))->r));}{ struct _tuple1* temp= Cyc_Toc_temp_var();
-void* temp_typ= Cyc_Toc_typ_to_c( old_typ); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_exp_stmt(
-Cyc_Absyn_var_exp( temp, 0), 0); struct Cyc_Absyn_Exp* e3= Cyc_Absyn_structmember_exp(
-Cyc_Absyn_var_exp( temp, 0), Cyc_Toc_curr_sp, 0); struct Cyc_Absyn_Exp* e4= Cyc_Absyn_assignop_exp(
+Cyc_Absyn_stmt_exp( s, 0))->r));} goto _LL1215; _LL1229: if( Cyc_Tcutil_is_tagged_pointer_typ((
+void*) old_typs->hd)){ struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)
+_temp1035->hd; struct Cyc_Absyn_Exp* e2=( struct Cyc_Absyn_Exp*)( _temp1035->tl)->hd;
+void* old_typ_e2=( void*)( old_typs->tl)->hd; if( Cyc_Tcutil_is_tagged_pointer_typ(
+old_typ_e2)){( void*)( e1->r=( void*)(( void*)( Cyc_Absyn_structmember_exp( Cyc_Absyn_new_exp((
+void*) e1->r, 0), Cyc_Toc_curr_sp, 0))->r));( void*)( e2->r=( void*)(( void*)(
+Cyc_Absyn_structmember_exp( Cyc_Absyn_new_exp(( void*) e2->r, 0), Cyc_Toc_curr_sp,
+0))->r));} else{ struct _tuple1* temp= Cyc_Toc_temp_var(); void* temp_typ= Cyc_Toc_typ_to_c((
+void*) old_typs->hd); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_exp_stmt( Cyc_Absyn_var_exp(
+temp, 0), 0); struct Cyc_Absyn_Exp* e3= Cyc_Absyn_structmember_exp( Cyc_Absyn_var_exp(
+temp, 0), Cyc_Toc_curr_sp, 0); struct Cyc_Absyn_Exp* e4= Cyc_Absyn_assignop_exp(
 e3,({ struct Cyc_Core_Opt* _temp1278=( struct Cyc_Core_Opt*) GC_malloc( sizeof(
 struct Cyc_Core_Opt)); _temp1278->v=( void*)(( void*) Cyc_Absyn_Minus);
 _temp1278;}), e2, 0); s= Cyc_Absyn_seq_stmt( Cyc_Absyn_exp_stmt( e4, 0), s, 0);

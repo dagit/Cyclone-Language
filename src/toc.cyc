@@ -1236,23 +1236,29 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Minus:
-      if (is_tagged_pointer_typ(old_typ)) {
-	exp_t e1 = es->hd;
-	exp_t e2 = es->tl->hd;
+      if (is_tagged_pointer_typ(old_typs->hd)) {
+        exp_t e1 = es->hd;
+        exp_t e2 = es->tl->hd;
 	type_t old_typ_e2 = old_typs->tl->hd; // cyclone type of e2
-	// if it's a tagged array -- get out the curr field
-	if (is_tagged_pointer_typ(old_typ_e2))
+        // if they're both pointers, then just generate
+        // e1.curr - e2.curr because the result is supposed to be an
+        // unsigned int (really size_t).
+	if (is_tagged_pointer_typ(old_typ_e2)) {
+          e1->r = structmember_exp(new_exp(e1->r,DL),curr_sp,DL)->r;
 	  e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+        } else {
+        // if e1 is a pointer but e2 is not, then generate:
 	// ({ struct tagged_ptr temp = e1;
 	//    temp.curr -= e2; temp; })  
 	let temp = temp_var();
-	let temp_typ = typ_to_c(old_typ);
+	let temp_typ = typ_to_c(old_typs->hd);
 	let s = exp_stmt(var_exp(temp,DL),DL);
 	let e3 = structmember_exp(var_exp(temp,DL),curr_sp,DL);
 	let e4 = assignop_exp(e3,new Opt(Minus),e2,DL);
 	s = seq_stmt(exp_stmt(e4,DL),s,DL);
 	s = declare_stmt(temp,temp_typ,e1,s,DL);
 	e->r = stmt_exp(s,DL)->r;
+        }
       }
       break;
     case Eq : fallthru;
