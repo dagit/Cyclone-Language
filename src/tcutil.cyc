@@ -5549,18 +5549,24 @@ type_t promote_array(type_t t, type_t rgn)
   switch(compress(t))
   { 
   case &ArrayType(ArrayInfo(et,tq,eopt,zt,ztl)):
-    exp_t bnd = (exp_t)eopt;
     bounds_t b;
-    if (bnd->topt == NULL) impos("promote_array");
-    switch(compress((type_t)bnd->topt)) {
-    case &TagType(t):
-      b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
-      break;
-    default:
-      if(is_const_exp(bnd))
-        b = new Upper_b(bnd);
-      else
-        b = &DynEither_b_val;
+    if (eopt == NULL || eopt->topt == NULL)
+    {
+      b = &DynEither_b_val;
+    }
+    else
+    {
+      exp_t bnd = (exp_t)eopt;
+      switch(compress((type_t)bnd->topt)) {
+      case &TagType(t):
+	b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
+	break;
+      default:
+	if(is_const_exp(bnd))
+	  b = new Upper_b(bnd);
+	else
+	  b = &DynEither_b_val;
+      }
     }
     return atb_typ(et,rgn,tq,
 		   b,

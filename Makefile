@@ -8,6 +8,8 @@
 #   4. make
 # It is strongly advised that you precede step 3 with the boostrap-checking
 # facilities provided by overriding CYCC, BUILDDIR, INC_PATH, and LIB_PATH.
+# Also, if you want to test if the updated compiler still builds correctly,
+# precede step 4 by "make clean".
 
 # To use a new version of the compiler without nuking the C files used to
 # bootstrap:
