@@ -456,7 +456,9 @@ extern char *sprintf();               /* Sun includes don't define sprintf */
 #endif
 
 #include <assert.h>
+#ifndef __ARMEL__                     /* Not on my version of arm (w/newlib) */
 #include <memory.h>
+#endif
 
 #ifdef BufDump			      /* BufDump implies DumpData */
 #ifndef DumpData
