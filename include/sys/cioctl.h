@@ -32,6 +32,7 @@ namespace Std {
 
 #ifdef __CYGWIN__
 #define FIONBIO 0x8004667e /* To be compatible with termiost version */
+#define FIONREAD 0x4004667f
 #endif
 
 extern "C" int ioctl(int fd, int cmd, int @arg);
