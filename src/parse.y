@@ -1652,9 +1652,9 @@ pointer:
 ;
 
 pointer_char:
-  '*' { $$=^$(new Nullable_ps(signed_int_exp(1,LOC(@1,@1))));  }
+  '*' { $$=^$(new Nullable_ps(exp_unsigned_one)); }
 /* CYC: pointers that cannot be null */
-| '@' { $$=^$(new NonNullable_ps(signed_int_exp(1,LOC(@1,@1)))); }
+| '@' { $$=^$(new NonNullable_ps(exp_unsigned_one)); }
 /* possibly null, with array bound given by the expresion */
 | '*' '{' assignment_expression '}' {$$=^$(new Nullable_ps($3));}
 /* not null, with array bound given by the expresion */

@@ -235,7 +235,7 @@ static type_t add_tagged_ptr_type(type_t t,tqual_t tq) {
   // non-const version of a ? type to a const version.  So we
   // translate them all to non-const.
   // Handle char[?] specially, its C implementation is in cyc_include.h
-  switch (t) {
+  switch (compress(t)) {
   case &IntType(Unsigned,B1): return tagged_string_type();
   default: break; //skip
   }

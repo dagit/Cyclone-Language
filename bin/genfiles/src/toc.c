@@ -759,13 +759,13 @@ static struct Cyc_List_List* Cyc_Toc_tagged_ptr_types= 0; static int Cyc_Toc_tag
 if( Cyc_Toc_tagged_string_type_v ==( void*) Cyc_Absyn_VoidType){ Cyc_Toc_tagged_string_type_v=
 Cyc_Absyn_strct( Cyc_Toc__tagged_string_sp);} return Cyc_Toc_tagged_string_type_v;}
 struct _tuple6{ struct _tagged_string* f1; void* f2; } ; static void* Cyc_Toc_add_tagged_ptr_type(
-void* t, struct Cyc_Absyn_Tqual tq){{ void* _temp230= t; void* _temp236; void*
-_temp238; _LL232: if(( unsigned int) _temp230 > 4u?*(( int*) _temp230) == Cyc_Absyn_IntType:
-0){ _LL239: _temp238=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp230)->f1;
-if( _temp238 ==( void*) Cyc_Absyn_Unsigned){ goto _LL237;} else{ goto _LL234;}
-_LL237: _temp236=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp230)->f2; if(
-_temp236 ==( void*) Cyc_Absyn_B1){ goto _LL233;} else{ goto _LL234;}} else{ goto
-_LL234;} _LL234: goto _LL235; _LL233: return Cyc_Toc_tagged_string_type();
+void* t, struct Cyc_Absyn_Tqual tq){{ void* _temp230= Cyc_Tcutil_compress( t);
+void* _temp236; void* _temp238; _LL232: if(( unsigned int) _temp230 > 4u?*(( int*)
+_temp230) == Cyc_Absyn_IntType: 0){ _LL239: _temp238=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp230)->f1; if( _temp238 ==( void*) Cyc_Absyn_Unsigned){ goto _LL237;} else{
+goto _LL234;} _LL237: _temp236=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp230)->f2; if( _temp236 ==( void*) Cyc_Absyn_B1){ goto _LL233;} else{ goto
+_LL234;}} else{ goto _LL234;} _LL234: goto _LL235; _LL233: return Cyc_Toc_tagged_string_type();
 _LL235: goto _LL231; _LL231:;}{ struct Cyc_List_List* tts= Cyc_Toc_tagged_ptr_types;
 for( 0; tts != 0; tts=(( struct Cyc_List_List*) _check_null( tts))->tl){ struct
 _tuple6 _temp242; void* _temp243; struct _tagged_string* _temp245; struct

@@ -238,8 +238,8 @@ _temp24; _temp25.base= _temp24; _temp25.last_plus_one= _temp24 + 15; _temp25;}))
 struct _tagged_string Cyc_String_rstrconcat( struct _RegionHandle* r, struct
 _tagged_string a, struct _tagged_string b){ unsigned int _temp26= Cyc_String_strlen(
 a); goto _LL27; _LL27: { unsigned int _temp28= Cyc_String_strlen( b); goto _LL29;
-_LL29: { struct _tagged_string ans= Cyc_Core_rnew_string( r,( int)( _temp26 +
-_temp28)); int i; int j; for( i= 0; i < _temp26; ++ i){*(( unsigned char*(*)(
+_LL29: { struct _tagged_string ans= Cyc_Core_rnew_string( r,( int)(( _temp26 +
+_temp28) + 1)); int i; int j; for( i= 0; i < _temp26; ++ i){*(( unsigned char*(*)(
 struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(
 ans, sizeof( unsigned char), i)=*(( const unsigned char*(*)( struct
 _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)( a,

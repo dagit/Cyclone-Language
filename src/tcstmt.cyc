@@ -318,8 +318,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let te2 = add_local_var(s->loc,te,vd);
       if (sc == Extern || sc == ExternC)
         terr(d->loc,"local extern declarations not yet supported");
-      if (sc == Static && !supports_default(t) && initializer == null)
-        terr(d->loc,"static local declaration requires an initializer");
+      //      if (sc == Static && !supports_default(t) && initializer == null)
+      //        terr(d->loc,"static local declaration requires an initializer");
       if (initializer != null) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
         if (!coerce_assign(te2,(exp_t)initializer,t))

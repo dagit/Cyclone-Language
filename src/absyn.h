@@ -670,6 +670,7 @@ namespace Absyn {
   // FILE
   extern type_t file_typ();
   // pointers
+  extern exp_t exp_unsigned_one; // good for sharing
   extern tunion Bounds bounds_one; // Upper(1) (good for sharing)
   extern type_t starb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);
   extern type_t atb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);

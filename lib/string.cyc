@@ -192,7 +192,7 @@ char ?`r1 strcat(char ?`r1 dest,const char ?`r2 src) {
 char ?`r rstrconcat(region_t<`r> r, const char ?`r1 a, const char ?`r2 b) {
   let alen = strlen(a);
   let blen = strlen(b);
-  char ?`r ans = rnew_string(r,alen+blen);
+  char ?`r ans = rnew_string(r,alen+blen+1);
   int i, j;
   for (i=0; i < alen; ++i) ans[i]   = a[i];
   for (j=0; j < blen; ++j) ans[i+j] = b[j];

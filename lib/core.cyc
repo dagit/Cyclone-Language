@@ -7,10 +7,6 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-namespace String {
-extern mstring_t strconcat(string_t,string_t);
-}
-
 // The rest is all Cyclone
 namespace Core;
 

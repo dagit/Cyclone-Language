@@ -210,11 +210,12 @@ type_t const_string_typ(type_t rgn) {
 }
 // pointers
 
-// a static &Upper_b(&Exp(null,&Const_e(&Int_c(Signed,1)),null))
-static tunion Cnst.Int_c      one_intc  = Int_c(Signed,1);
+// a static &Upper_b(&Exp(null,&Const_e(&Int_c(Unsigned,1)),null))
+static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
 static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
-static struct Exp             one_be    = {null,&one_b_raw,null};
-static tunion Bounds.Upper_b  one_bt    = Upper_b(&one_be);
+struct Exp exp_unsigned_one_v = {null,&one_b_raw,null};
+exp_t exp_unsigned_one = &exp_unsigned_one_v;
+static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 tunion Bounds bounds_one = &one_bt;
 
 type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
