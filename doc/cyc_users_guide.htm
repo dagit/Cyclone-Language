@@ -311,7 +311,7 @@ program:</p>
     string args[?] = std_args();  
    
     <i><font color="#FF0000">// if there was no argument to the program, raise an error.</font></i>
-    <b>if</b> (<b>size</b>(args) &lt;= 1) 
+    <b>if</b> (args.size &lt;= 1) 
       <b>throw</b> Failure(&quot;<font color="#0000FF">missing name!</font>&quot;);
     <b>else</b>
       <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,args[1]);
@@ -1298,7 +1298,7 @@ see <code>switch-clauses</code>)
   <font color=green>(empty)</font><br>
   <code>default</code> <code>:</code> <i>block-item-list</i><br>
   <code>case</code> <i>pattern</i> <code>:</code> <i>block-item-list<sub>opt</sub></i> <i>switch-clauses</i><br>
-  <code>case</code> <i>pattern</i> <code>where</code> <i>expression</i> <code>:</code> <i>block-item-list<sub>opt</sub></i> <i>switch-clauses</i><br>
+  <code>case</code> <i>pattern</i> &nbsp; <code>&&</code> &nbsp; <i>expression</i> <code>:</code> <i>block-item-list<sub>opt</sub></i> <i>switch-clauses</i><br>
 </font>
 </ul>
 <br>
@@ -1491,7 +1491,7 @@ see <code>switch-clauses</code>)
   <i>unary-operator</i> <i>cast-expression</i><br>
   <code>sizeof</code> <i>unary-expression</i><br>
   <code>sizeof</code> <code>(</code> <i>type-name</i> <code>)<br>
-  <font color="#FF0000">size ( <i>expression </i>)</font></code>
+  <font color="#FF0000"><code><i>expression</i> . size</code>
   &nbsp;&nbsp;&nbsp;<font color="#008000">// returns size of array</font>
   <br>
 <font color=red>
