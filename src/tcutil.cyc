@@ -176,11 +176,10 @@ bool is_fat_ptr(type_t t) {
 bool is_fat_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,_,_))):
-    if (unify(b,fat_bound_type)) {
-      *elt_type_dest = elt_type;
-      return true;
-    }
-    return false;
+    if (!unify(b,fat_bound_type)) 
+      return false;
+    *elt_type_dest = elt_type;
+    return true;
   default: return false;
   }
 }
@@ -397,7 +396,7 @@ type_t copy_type(type_t t) {
 static designator_t copy_designator(bool preserve_types, designator_t d) {
   switch (d) {
   case &ArrayElement(e): return new ArrayElement(deep_copy_exp(preserve_types,e));
-  case &FieldName(v): return d;
+  case &FieldName(_): return d;
   }
 }
 static $(list_t<designator_t>,exp_t)@
@@ -565,21 +564,20 @@ static kind_t field_kind(type_t field_type,
   if (ts != NULL && (k == &ak || k == &tak)) {
     // we have to substitute here, because the last type might be
     // instantiated with a ground type.
-    region temp;
+    region r;
     let inst = NULL;
     // filter out type vars that aren't abstract or int in in the instantiation
     for (; tvs != NULL; tvs=tvs->tl, ts=ts->tl) {
       let tv = tvs->hd;
       let t = ts->hd;
-      switch (tvar_kind(tv,&bk)) {
-      case &{.kind = IntKind, ...}:
-      case &{.kind = AnyKind, ...}:
-	inst = rnew(temp) List(rnew(temp) $(tv,t), inst); break;
+      switch (tvar_kind(tv,&bk)->kind) {
+      case IntKind:
+      case AnyKind: inst = rnew(r) List(rnew(r) $(tv,t), inst); break;
       default: break;
       }
     }
     if (inst != NULL) {
-      field_type = rsubstitute(temp,imp_rev(inst),field_type);
+      field_type = rsubstitute(r,imp_rev(inst),field_type);
       k = type_kind(field_type);
     }
   }
@@ -622,7 +620,7 @@ kind_t type_kind(type_t t) {
       // for structs or unions without definitions, we must be
       // conservative and treat them as having AnyKind
     case &AggrCon({.UnknownAggr = _}): return &ak;
- case &AggrCon({.KnownAggr= & &Aggrdecl(strOrU,_,_,tvs,i,_,expected_mem_kind)}):
+    case &AggrCon({.KnownAggr= & &Aggrdecl(strOrU,_,_,tvs,i,_,expected_mem_kind)}):
       if (i == NULL) 
 	return expected_mem_kind ? &mk : &ak;
       let fields = i->fields;
@@ -715,9 +713,7 @@ static type_t rgns_of(type_t t) {
   switch (compress(t)) {
   case &AppType(_,NULL): return empty_effect;
   case &AppType(&JoinCon,_): return t;
-  case &AppType(_,ts):
-    list_t<type_t> new_ts = map(rgns_of,ts);
-    return normalize_effect(join_eff(new_ts));
+  case &AppType(_,ts): return normalize_effect(join_eff(map(rgns_of,ts)));
   case &Evar(...):
   case &VarType(_):
     switch (type_kind(t)) {
@@ -748,7 +744,7 @@ static type_t rgns_of(type_t t) {
     for (; tqts != NULL; tqts = tqts->tl)
       ts = new List((*tqts->hd)[1],ts);
     fallthru(ts);
-  case &TypedefType(_,ts,_,_):
+  case &TypedefType(_,ts,_,_): // Note: just for abstract typedefs
     return normalize_effect(join_eff(map(rgns_of,ts)));
   case &TypeDeclType(...): Warn::impos2("typedecl in rgns_of");
   case &ValueofType(_): 
@@ -778,17 +774,15 @@ type_t normalize_effect(type_t e) {
     }
     if (!redo_join) return e;
     list_t<type_t> effects = NULL;
-    for (_ effs = *es; effs != NULL; effs = effs->tl) {
+    for (_ effs = *es; effs != NULL; effs = effs->tl)
       switch (compress(effs->hd)) {
       case &AppType(&JoinCon,nested_effs):
-        effects = List::revappend(nested_effs,effects);
-        break;
+        effects = List::revappend(nested_effs,effects); break;
       case &AppType(&AccessCon,&List{&AppType(&HeapCon,_),NULL}):
       case &AppType(&AccessCon,&List{&AppType(&RefCntCon,_),NULL}):
       case &AppType(&AccessCon,&List{&AppType(&UniqueCon,_),NULL}): break;
       case e: effects = new List(e,effects); break;
       }
-    }
     *es = List::imp_rev(effects);
     return e;
   case &AppType(&RgnsCon,&List{t,_}): // special cases to avoid allocation
@@ -1016,16 +1010,15 @@ bool subset_effect(bool may_constrain_evars, type_t e1, type_t e2) {
     case e: return subset_effect(may_constrain_evars,e,e2);
     }
   case &Evar(_,*p,_,s):
-    if (!evar_in_effect(e1,e2)) {
-      // We can set the evar to be any subset of e2.
-      // Right now, we set it to the empty effect which may
-      // not be the best solution...
-      *p = empty_effect;
-      // Another option would be to set it to e2.
-      // *p = (type_opt_t)e2;
-      return true;
-    } else
+    if (evar_in_effect(e1,e2)) 
       return false;
+    // We can set the evar to be any subset of e2.
+    // Right now, we set it to the empty effect which may
+    // not be the best solution...
+    *p = empty_effect;
+    // Another option would be to set it to e2.
+    // *p = (type_opt_t)e2;
+    return true;
   default: Warn::impos2("subset_effect: bad effect: ",e1);
   }
 }
@@ -2053,11 +2046,10 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     if (!sub_rgnpo(f1.rgn_po,f2.rgn_po)) return false;
     // deal with attributes that can be dropped
     if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return false;
-    // deal with requires clause
+    // deal with requires and ensures clauses
     if (!Relations::check_logical_implication(f2.requires_relns,
 					      f1.requires_relns)) 
       return false;
-    // deal with ensures clause
     if (!Relations::check_logical_implication(f1.ensures_relns,
 					      f2.ensures_relns))
       return false;
@@ -2425,11 +2417,9 @@ static list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
   if (fs == NULL) return NULL;
   let f = fs->hd;
   let t = fs->tl;
-  let new_f = subst_aggrfield(r,inst,f);
+  let new_f   = subst_aggrfield(r,inst,f);
   let new_typ = subst_aggrfields(r,inst,t);
-  if (new_f == f && new_typ == t) 
-    return fs;
-  return new List(new_f,new_typ);
+  return (new_f == f && new_typ == t) ? fs : new List(new_f,new_typ);
 }
 
 list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
@@ -2438,9 +2428,7 @@ list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
   let $(rpo1a,rpo1b) = List::rsplit(rgn,rgn,rgn_po);
   let rpo2a = substs(rgn,inst,rpo1a);
   let rpo2b = substs(rgn,inst,rpo1b);
-  if (rpo2a == rpo1a && rpo2b == rpo1b)
-    return rgn_po;
-  return List::zip(rpo2a,rpo2b);
+  return (rpo2a == rpo1a && rpo2b == rpo1b) ? rgn_po : List::zip(rpo2a,rpo2b);
 }
 
 // FIX!! hack to avoid substituting in function types during current
@@ -2492,8 +2480,7 @@ type_t rsubstitute(region_t<`r> rgn,
     else {
       let VarargInfo{n,tq,t,i} = *cyc_varargs;
       let t2 = rsubstitute(rgn,inst,t);
-      if (t2 == t) cyc_varargs2 = cyc_varargs;
-      else cyc_varargs2 = new VarargInfo{n,tq,t2,i};
+      cyc_varargs2 = (t2 == t) ? cyc_varargs : new VarargInfo{n,tq,t2,i};
     }
     list_t<$(type_t,type_t)@> rgn_po2 = rsubst_rgnpo(rgn,inst,rgn_po);
     exp_opt_t req2 = rsubs_exp_opt(rgn,inst,req);
@@ -2530,7 +2517,7 @@ type_t rsubstitute(region_t<`r> rgn,
     return (new_e==e) ? t : new TypeofType(new_e);
   case &TypeDeclType(...): 
     if (skip_fntypes) return t;
-    else Warn::impos2("found typedecltype in rsubs");
+    Warn::impos2("found typedecltype in rsubs");
   }
 }
 // This is just a map beefed up to avoid unnecessary allocation.
@@ -2554,9 +2541,9 @@ type_t substitute(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
 
 type_t substitute_nofun(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
   skip_fntypes = true;
-  let new_t = substitute(inst,t);
+  let new_typ = substitute(inst,t);
   skip_fntypes = false;
-  return new_t;
+  return new_typ;
 }
 
 // Generate an appropriate evar for an instantiation of a type var
@@ -2576,7 +2563,7 @@ void check_bitfield(seg_t loc, type_t field_type,
 		    exp_opt_t width, stringptr_t<`H> fn) {
   if (width != NULL) {
     unsigned int w = 0;
-    if (!is_const_exp(width))
+    if (!is_const_exp(width)) 
       Warn::err2(loc,"bitfield ",*fn," does not have constant width");
     else {
       let $(i,known) = Evexp::eval_const_uint_exp(width);
@@ -2774,14 +2761,13 @@ bool is_noalias_region(type_t r, bool must_be_unique) {
 //   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_):
   case &VarType(tv):
     let &Kind(k,a) = tvar_kind(tv,&rk);
-    if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique))) {
+    if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)))
       switch (compress_kb(tv->kind)) {
       case &Less_kb(*x,&Kind(RgnKind,Top)):
         *x = new Opt(new Less_kb(NULL,&rk));
         return false;
       default: return true;
       }
-    }
     return false;
   default: return false;
   }
@@ -2797,14 +2783,13 @@ bool is_noalias_pointer(type_t t, bool must_be_unique) {
     let &Kind(k,a) = tvar_kind(tv,&bk);
     switch (k) {
     case BoxKind: case AnyKind: case MemKind:
-      if (a == Unique || (a == Top && !must_be_unique)) {
+      if (a == Unique || (a == Top && !must_be_unique))
 	switch (compress_kb(tv->kind)) {
 	case &Less_kb(*x,&Kind(k,Top)):
 	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
 	  return false;
 	default: return true;
 	}
-      }
       return false;
     default: return false;
     }
@@ -3182,8 +3167,8 @@ struct Vardecl *nonesc_vardecl(binding_t b) {
 // removes NULL members; reverses the list
 list_t<`a> filter_nulls(list_t<`a*> l) {
   let res = NULL;
-  for (_ x = l; x != NULL; x=x->tl)
-    if (x->hd != NULL) res = new List(*x->hd,res);
+  for (; l != NULL; l=l->tl)
+    if (l->hd != NULL) res = new List(*l->hd,res);
   return res;
 }
 

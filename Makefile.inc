@@ -136,6 +136,8 @@ CYCLONE_SRCS:=absyn\
          jump_analysis\
          cf_flowinfo\
          new_control_flow\
+         assndef\
+         pratt_prover\
          vcgen\
 	 insert_checks\
          toc\
@@ -176,6 +178,8 @@ CYCDOC_SRCS:=cycdoc\
         pratt-ap\
         jump_analysis\
 	new_control_flow\
+        assndef\
+        pratt_prover\
         vcgen\
 	insert_checks\
 	cf_flowinfo\
@@ -212,6 +216,8 @@ BUILDLIB_SRCS:=buildlib\
         pratt-ap\
         jump_analysis\
 	new_control_flow\
+	assndef\
+        pratt_prover\
         vcgen\
 	insert_checks\
 	cf_flowinfo\

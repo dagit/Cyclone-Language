@@ -47,9 +47,7 @@ namespace Tcexp;
 static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, 
 		       ... inject Warn::warg_t ap) {
   Warn::verr2(loc,ap);
-  if (topt == NULL)
-    return wildtyp(lookup_opt_type_vars(te));
-  return *topt;
+  return (topt != NULL) ? *topt : wildtyp(lookup_opt_type_vars(te));
 }
 static void err_and_explain(seg_t loc,... inject Warn::warg_t ap) {
   Warn::verr2(loc,ap);
@@ -65,7 +63,7 @@ void check_consume(seg_t loc, type_t t, exp_t e) {
 #endif
 }
 
-static ptr_info_t fresh_pointer_type(tenv_t te) {
+ptr_info_t fresh_pointer_type(tenv_t te) {
   let tenv_tvs = lookup_type_vars(te);
   let t2  = new_evar(&tako,new Opt(tenv_tvs));
   let rt  = new_evar(&trko,new Opt(tenv_tvs));
@@ -650,8 +648,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &AggrMember_e(e1,f,...):
     switch (compress((type_t)e1->topt)) {
     case &AppType(&AggrCon({.KnownAggr = adp}),_):
-      struct Aggrfield *sf =
-        (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
+      struct Aggrfield *sf = (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
       if (sf == NULL || !sf->tq.real_const) return;
       break;
     case &AnonAggrType(_,fs):
@@ -2188,14 +2185,13 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     if (!is_array_type(res_typ))
       Warn::impos2("tcNew: comprehension returned non-array type");
     res_typ = promote_array(res_typ,rgn,true);
-    if (topt != NULL) {
+    if (topt != NULL)
       if (!Unify::unify(*topt,res_typ) 
 	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
 	e->topt = res_typ;
 	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
       }
-    }
     return res_typ;
   case &UnresolvedMem_e(nopt,des):
     e1->r = new Array_e(des);
@@ -2203,7 +2199,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   case &Array_e(des):
     type_t *elt_typ_opt = NULL;
     bool zero_term = false;
-    if (topt != NULL) {
+    if (topt != NULL)
       switch (compress(*topt)) {
       case &PointerType(PtrInfo(*elt_typ,_,PtrAtts(_,_,_,zt,_))):
 	// tcArray only needs the element type, so the bound is bogus
@@ -2212,13 +2208,12 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	break;
       default: break;
       }
-    }
     type_t res_typ = tcArray(te,e1->loc,elt_typ_opt,NULL,zero_term,des);
     e1->topt = res_typ;
     if (!is_array_type(res_typ))
       Warn::impos2("tcExpNoPromote on Array_e returned non-array type");
     res_typ = promote_array(res_typ,rgn,false);
-    if (topt != NULL) {
+    if (topt != NULL)
       // try unifying res_typ and topt -- if that fails, then see if we
       // can cast res_typ to topt, and insert the cast so that the code
       // generator knows what to do.
@@ -2228,7 +2223,6 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
       }
-    }
     return res_typ;
   case &Const_e({.String_c = _}):
     // here I'm going to guess that the user wants a char *@ instead of

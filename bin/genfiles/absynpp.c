@@ -496,7 +496,7 @@ extern struct Cyc_PP_Doc*Cyc_PP_egroup(struct _fat_ptr start,struct _fat_ptr sto
 # 52 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;
 # 60
-struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*d);
+struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*);
 # 62
 struct _fat_ptr Cyc_Absynpp_longlong2string(unsigned long long);
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
@@ -508,15 +508,15 @@ struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 # 71
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
 # 78
-int Cyc_Absynpp_is_anon_aggrtype(void*t);
+int Cyc_Absynpp_is_anon_aggrtype(void*);
 extern struct _fat_ptr Cyc_Absynpp_cyc_string;
 extern struct _fat_ptr*Cyc_Absynpp_cyc_stringptr;
 int Cyc_Absynpp_exp_prec(struct Cyc_Absyn_Exp*);
 struct _fat_ptr Cyc_Absynpp_char_escape(char);
 struct _fat_ptr Cyc_Absynpp_string_escape(struct _fat_ptr);
-struct _fat_ptr Cyc_Absynpp_prim2str(enum Cyc_Absyn_Primop p);
-int Cyc_Absynpp_is_declaration(struct Cyc_Absyn_Stmt*s);struct _tuple13{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;};
-struct _tuple13 Cyc_Absynpp_to_tms(struct _RegionHandle*,struct Cyc_Absyn_Tqual tq,void*t);struct _tuple14{int f1;struct Cyc_List_List*f2;};
+struct _fat_ptr Cyc_Absynpp_prim2str(enum Cyc_Absyn_Primop);
+int Cyc_Absynpp_is_declaration(struct Cyc_Absyn_Stmt*);struct _tuple13{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;};
+struct _tuple13 Cyc_Absynpp_to_tms(struct _RegionHandle*,struct Cyc_Absyn_Tqual,void*);struct _tuple14{int f1;struct Cyc_List_List*f2;};
 # 95 "absynpp.h"
 struct _tuple14 Cyc_Absynpp_shadows(struct Cyc_Absyn_Decl*d,struct Cyc_List_List*varsinblock);struct _tuple15{struct Cyc_List_List*f1;struct Cyc_Absyn_Pat*f2;};
 # 35 "absynpp.cyc"

@@ -29,7 +29,6 @@
 #include "absynpp.h"
 using List;
 using Absyn;
-using Tcutil;
 using Absynpp;
 namespace RgnOrder;
 
@@ -65,10 +64,9 @@ struct RgnPO {
 // makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
 // also allows regions(`a) to outlive only regions having R kind
 static bool valid_constraint(type_t eff, type_t rgn) {
-  let &Kind(k,a) = type_kind(rgn);
+  let &Kind(k,a) = Tcutil::type_kind(rgn);
   if (k != RgnKind)
-    Warn::impos("bad region type |%s| passed to add_outlives_constraint",
-		Absynpp::typ2string(rgn));
+    Warn::impos2("bad region type |",rgn,"| passed to add_outlives_constraint");
   switch (compress(eff)) {
   case &AppType(&JoinCon,es):
     for (; es != NULL; es = es->tl) 
@@ -80,16 +78,13 @@ static bool valid_constraint(type_t eff, type_t rgn) {
   case &AppType(&RgnsCon,&List{t,_}): 
     // Only let regions(`a) outlive things that are aliasable or
     //   have the same alias qualifier
-    let &Kind(tk,ta) = type_kind(t);
+    let &Kind(tk,ta) = Tcutil::type_kind(t);
     return (a == Aliasable) || ta == a;
   case &AppType(&AccessCon,&List{r,_}): 
-//     fprintf(stderr,"checking %s > %s; are the kinds reversed?\n",
-// 	    Absynpp::typ2string(rgn), Absynpp::typ2string(r));
-    let &Kind(rk,ra) = type_kind(r);
+    let &Kind(rk,ra) = Tcutil::type_kind(r);
     return (k == RgnKind) && ((a == Aliasable) || (ra == a));
-  default:
-    Warn::impos("bad effect |%s| passed to add_outlives_constraint",
-		Absynpp::typ2string(eff));
+  default: 
+    Warn::impos2("bad effect |",eff,"| passed to add_outlives_constraint");
   }
 }
 
@@ -98,22 +93,20 @@ static bool valid_constraint(type_t eff, type_t rgn) {
 // Note: assumes not resettable and all regions of RgnKind
 rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
 				 Position::seg_t loc) {
-  eff = normalize_effect(eff);
+  eff = Tcutil::normalize_effect(eff);
   let ans = new *po;
   // first check that this is a valid constraint
   if (!valid_constraint(eff,rgn)) {
-    terr(loc,"Invalid region ordering constraint; kind mismatch");
+    Warn::err2(loc,"Invalid region ordering constraint; kind mismatch");
     return ans;
   }
   // now add it to the PO
   switch(compress(rgn)) {
   case &VarType(tv):
     let d = po->d;
-    if(Dict::member(d,tv)) {
-      let old = Dict::lookup(d,tv);
-      d = Dict::insert(d,tv,join_eff(list(eff,old)));
-    } else
-      d = Dict::insert(d,tv,eff);
+    let new_eff = 
+      Dict::member(d,tv) ? join_eff(list(eff,Dict::lookup(d,tv))) : eff;
+    d = Dict::insert(d,tv,new_eff);
     ans->d = d;
     return ans;
   case &Evar(...):
@@ -160,26 +153,18 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   let d = Dict::empty(tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
-    if (tvar_kind(tvs2->hd,&bk)->kind == RgnKind) {
-//       fprintf(stderr,"  Adding tvar %s to dict\n",
-// 	      Absynpp::typ2string(var_type(tvs2->hd)));
+    if (Tcutil::tvar_kind(tvs2->hd,&Tcutil::bk)->kind == RgnKind)
       d = Dict::insert(d,tvs2->hd,empty_effect);
-    }
 
   if (!valid_constraint(effect,var_type(fst_rgn))) {
-//     fprintf(stderr,"filtering effect\n");
-    terr(loc,"Invalid region ordering constraint; kind mismatch");
+    Warn::err2(loc,"Invalid region ordering constraint; kind mismatch");
     return new RgnPO(d,empty_effect,empty_effect,fst_rgn,empty_effect);
   }
-//   fprintf(stderr,"  Relating %s <= effect %s\n",
-// 	  Absynpp::typ2string(var_type(fst_rgn)),
-// 	  Absynpp::typ2string(effect));	  
   d = Dict::insert(d, fst_rgn, effect);
   // add in the explicit partial order -- no longer detects cycles
   let ans = new RgnPO(d,empty_effect,empty_effect,fst_rgn,empty_effect);
   for(; po != NULL; po = po->tl)
     ans = add_outlives_constraint(ans, (*po->hd)[0], (*po->hd)[1], loc);
-//   print_region_po(ans);
   return ans;
 }
 
@@ -206,7 +191,7 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
 
 // is regions(`rgns_of_var) in eff?
 static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {
-  switch(normalize_effect(compress(eff))) {
+  switch(Tcutil::normalize_effect(compress(eff))) {
   case &AppType(&RgnsCon,&List(t,_)): 
     switch(compress(t)) {
     case &VarType(tv): return tvar_cmp(tv,rgns_of_var)==0;
@@ -244,30 +229,25 @@ static void add_to_search(struct OutlivesEnv @ env, type_t eff) {
   }
 }
 
-static struct OutlivesEnv<`r> 
+static struct OutlivesEnv<`r>
 initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let ans = OutlivesEnv(listrgn,NULL,NULL);
   type_t r = compress(rgn);
-  let &Kind(k,a) = type_kind(r);
-  if (k == RgnKind) {
-    switch (a) {
-      // FIX: currently doesn't deal with refcnt region
-    case Aliasable:
-      add_to_search(&ans,po->these_outlive_unique);
-      add_to_search(&ans,po->these_outlive_heap);
-      break;
-    case Unique:
-      add_to_search(&ans,po->these_outlive_unique); break;
-    case Top: default:
-      // can't say anything about what top-level regions outlive
-      // a top-kinded region variable, because we just don't know
-      // how this variable was created/is being used.
-      break;
-    }
-  }
-  else
+  let &Kind(k,a) = Tcutil::type_kind(r);
+  if(k != RgnKind)
     Warn::impos("RgnOrder: rgn not of correct kind");
-
+  switch (a) {
+    // FIX: currently doesn't deal with refcnt region
+  case Aliasable:
+    add_to_search(&ans,po->these_outlive_unique);
+    add_to_search(&ans,po->these_outlive_heap);
+    break;
+  case Unique: add_to_search(&ans,po->these_outlive_unique); break;
+    // can't say anything about what top-level regions outlive
+    // a top-kinded region variable, because we just don't know
+    // how this variable was created/is being used.
+  case Top: default: break;
+  }
   switch(r) {
   case &VarType(tv): 
     ans.seen = rnew(listrgn) List(tv,ans.seen);
@@ -280,14 +260,14 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
 // does [po] prove that [eff] outlives [rgn]?
 // evar treatment: return false and do not constrain
 static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
-  region listrgn; { 
+  region listrgn;
   switch(compress(eff)) {
   case &AppType(&AccessCon,&List(vt,_)):
     // does `vt outlive `rgn ?
     switch(compress(vt)) {
     case &AppType(&UniqueCon,_):
       // The unique region outlives all regions with R and UR kind
-      let &Kind(k,a) = type_kind(compress(rgn));
+      let &Kind(k,a) = Tcutil::type_kind(compress(rgn));
       return (k == RgnKind) && (a != Top);
     case &AppType(&RefCntCon,_): 
       // The refcnt region outlives all regions the heap does, plus itself
@@ -296,7 +276,7 @@ static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
       fallthru;
     case &AppType(&HeapCon,_):
       // The heap outlives all regions with R kind
-      let &Kind(k,a) = type_kind(compress(rgn));
+      let &Kind(k,a) = Tcutil::type_kind(compress(rgn));
       return (k == RgnKind) && (a == Aliasable);
     case &VarType(tv):
       if(po==NULL)
@@ -340,15 +320,14 @@ static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
       // check that for each variable `r in todo, whether regions(`tv)
       // outlives it.
       let env = initial_env(listrgn,po,rgn);
-      let &Kind(k,a) = type_kind(rgn);
+      let &Kind(k,a) = Tcutil::type_kind(rgn);
       // FIX: deal with RefCnt region
       if (k == RgnKind)
 	if (a == Aliasable) {
 	  if(contains_rgnseff(tv,po->these_outlive_heap) ||
 	     contains_rgnseff(tv,po->these_outlive_unique))
 	    return true;
-	}
-	else if (a == Unique) {
+	} else if (a == Unique) {
 	  if(contains_rgnseff(tv,po->these_outlive_unique))
 	    return true;
 	}
@@ -356,25 +335,24 @@ static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-	if(Dict::member(po->d,next)) {
-	  let next_eff = Dict::lookup(po->d,next);
-	  if(contains_rgnseff(tv,next_eff))
-	    return true;
-	  add_to_search(&env,next_eff);
-	} else Warn::impos("RgnOrder: type variable not in dict");
+	if(!Dict::member(po->d,next)) 
+	  Warn::impos("RgnOrder: type variable not in dict");
+	let next_eff = Dict::lookup(po->d,next);
+	if(contains_rgnseff(tv,next_eff))
+	  return true;
+	add_to_search(&env,next_eff);
       }
       return false;
     default: return false;
     }
   default: return false; // see comment above about evars
   }
-  }
 }
 
 // does [po] prove that all regions in [eff] outlive [rgn]?
 // evar treatment: return false and do not constrain
 bool effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
-  eff = normalize_effect(eff);
+  eff = Tcutil::normalize_effect(eff);
   switch(compress(eff)) {
   case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
@@ -386,7 +364,7 @@ bool effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
 }
 
 static void pin_effect(type_t eff, type_t bd) {
-  eff = normalize_effect(eff);
+  eff = Tcutil::normalize_effect(eff);
   switch(compress(eff)) {
   case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
@@ -415,7 +393,7 @@ bool rgn_outlives_rgn(rgn_po_opt_t po, type_t rgn1, type_t rgn2) {
 
 static bool eff_outlives_atomic_eff(rgn_po_opt_t po, type_t eff1, type_t eff2) {
   // assumes eff1 is compressed and normalized
-  eff2 = compress(normalize_effect(eff2));
+  eff2 = compress(Tcutil::normalize_effect(eff2));
   switch(eff2) {
   case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
@@ -438,7 +416,7 @@ static bool eff_outlives_atomic_eff(rgn_po_opt_t po, type_t eff1, type_t eff2) {
 }
 
 bool eff_outlives_eff(rgn_po_opt_t po, type_t eff1, type_t eff2) {
-  eff1 = compress(normalize_effect(eff1));
+  eff1 = compress(Tcutil::normalize_effect(eff1));
   switch(eff1) {
   case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)

@@ -26,7 +26,6 @@
 using Core;
 using List;
 using Absyn;
-using Tcutil;
 using Absynpp;
 
 namespace Tcdecl;
@@ -211,7 +210,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 	res = false;
       }
       if (req0 != NULL && req1 != NULL) {
-        type_t subst_w1 = substitute(inst, new ValueofType(req1));
+        type_t subst_w1 = Tcutil::substitute(inst, new ValueofType(req1));
         if (!check_type(new ValueofType(req0),subst_w1)) {
           merr(loc, msg, "type %s : mismatch on @requires clauses: %s != %s",
                v, exp2string(req0), exp2string(req1));
@@ -223,7 +222,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
         res = false;
       }
 
-      type_t subst_t1 = substitute(inst, t1);
+      type_t subst_t1 = Tcutil::substitute(inst, t1);
       if(! check_type(t0, subst_t1)) {
 	merr(loc, msg, "type %s : type mismatch on field %s: %s != %s", 
 	     v, *fn0, typ2string(t0), typ2string(subst_t1));
@@ -300,7 +299,7 @@ merge_datatypefield(datatypefield_t f0, datatypefield_t f1,
       merr(loc, msg, "%s %s, field %s: parameter qualifier", t, v, name);
       res = false;
     }
-    type_t subst_t1 = substitute(inst, (*typs1->hd)[1]);
+    type_t subst_t1 = Tcutil::substitute(inst, (*typs1->hd)[1]);
     // and be the same type
     if (! check_type((*typs0->hd)[1], subst_t1)) {
       merr(loc, msg, "%s %s, field %s: parameter type mismatch %s != %s",
@@ -322,7 +321,7 @@ static $(tqual_t,type_t)@
 substitute_datatypefield_f2(list_t<$(tvar_t,type_t)@`H,`H> inst,
 			  $(tqual_t,type_t)@ x) {
   let &$(tq, t) = x;
-  return new $(tq, substitute(inst, t));
+  return new $(tq, Tcutil::substitute(inst, t));
 }
 
 // given d0->tvs and d1->tvs, given the maping inst1 = build_tvs_map(d0->tvs, d1->tvs),
@@ -628,7 +627,7 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
 
   // check types
   if (d0->defn != NULL && d1->defn != NULL) {
-    type_t subst_defn1 = substitute(inst, (type_t)d1->defn);
+    type_t subst_defn1 = Tcutil::substitute(inst, (type_t)d1->defn);
     if(! check_type((type_t)d0->defn, subst_defn1)) {
       merr(loc,msg,"typedef %s does not refer to the same type: %s != %s",
            v, typ2string(subst_defn1), typ2string((type_t)d0->defn));

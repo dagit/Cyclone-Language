@@ -23,7 +23,7 @@
 
 namespace RemoveAggrs {
 
-extern List::list_t<Absyn::decl_t> remove_aggrs(List::list_t<Absyn::decl_t,`H> decls);
+List::list_t<Absyn::decl_t> remove_aggrs(List::list_t<Absyn::decl_t,`H>);
 
 }
 #endif

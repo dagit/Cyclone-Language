@@ -469,11 +469,11 @@ extern struct _fat_ptr Cyc_PP_string_of_doc(struct Cyc_PP_Doc*d,int w);struct Cy
 # 52 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;
 # 54
-void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs);
+void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*);
 # 56
 extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
 # 60
-struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*d);
+struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*);
 # 29 "cycdoc.cyl"
 extern void Cyc_Lex_lex_init(int use_cyclone_keywords);struct Cyc_Position_Segment{int start;int end;};struct Cyc_MatchDecl_Comment_struct{int tag;struct _fat_ptr f1;};struct Cyc_Standalone_Comment_struct{int tag;struct _fat_ptr f1;};struct _tuple12{int f1;void*f2;};
 # 44

@@ -112,7 +112,8 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       dles = List::imp_rev(dles);
       e->r = new Array_e(dles);
       return remove_aggrs_exp(env, e);
-    } else break;
+    } 
+    break;
   case &Const_e(_):
   case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
@@ -133,9 +134,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
 
   case &Aggregate_e(tdn,_,dles,sdopt):
     did_assign = true;
-    bool do_stmt_exp = true;
-    if(env.ctxt == AggrField || env.ctxt == NewDest)
-      do_stmt_exp = false;
+    bool do_stmt_exp = (env.ctxt != AggrField && env.ctxt != NewDest);
     exp_t dest;
     qvar_t * v;
     if(do_stmt_exp) {
@@ -241,7 +240,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     did_assign = true;
     res = WasArray;
     switch(env.ctxt) {
-    case Other: Warn::impos("remove-aggrs: no-init-comp in bad position");
+    case Other: Warn::impos2("remove-aggrs: no-init-comp in bad position");
     default: break;
     }
     // we execute the bound just for the effect (extremely pathological)
@@ -289,13 +288,10 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &AggrMember_e(e1,...): fallthru(e1); 
   case &AggrArrow_e(e1,...):  fallthru(e1);
   case &Sizeofexp_e(e1):      fallthru(e1); // could allow arrays but we do not
-  case &Increment_e(e1,_): 
-    noarray_remove_aggrs_exp(other_env,e1); 
-    break;
+  case &Increment_e(e1,_):    noarray_remove_aggrs_exp(other_env,e1); break;
 
-  case &StmtExp_e(s): // we do not bother threading through a dest
-    remove_aggrs_stmt(s);
-    break;
+    // we do not bother threading through a dest
+  case &StmtExp_e(s): remove_aggrs_stmt(s); break;
     
   default: Warn::impos2("bad exp after translation to C: ",e);
   }
@@ -320,7 +316,7 @@ static void remove_aggrs_stmt(stmt_t s) {
   case &Return_s(eopt):
     if (eopt == NULL)
       return;
-    fallthru((exp_t)eopt);
+    fallthru(eopt);
   case &Exp_s(e): remove_aggrs_exp(other_env,e); return;
   case &Seq_s(s1,s2): 
     remove_aggrs_stmt(s1); 
@@ -355,7 +351,7 @@ static void remove_aggrs_stmt(stmt_t s) {
     case &Var_d(vd):
       if(vd->sc == Static) {
 	massage_toplevel_aggr(vd->initializer);
-	break;
+	return;
       }
       // NOTE: It is probably okay not to compile away array-initializers
       // in most cases, but a comprehension inside an array would not
@@ -373,11 +369,10 @@ static void remove_aggrs_stmt(stmt_t s) {
 	  vd->initializer = NULL;
 	}
       }
-      break;
-    case &Fn_d(fd): remove_aggrs_stmt(fd->body); break;
+      return;
+    case &Fn_d(fd): remove_aggrs_stmt(fd->body); return;
     default: Warn::impos("bad local declaration after xlation to C");
     }
-    return;
   default: Warn::impos("bad stmt after xlation to C");
   }
 }
@@ -386,26 +381,25 @@ list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
   for(let ds2 = ds; ds2 != NULL; ds2 = ds2->tl)
     switch(ds2->hd->r) {
     case &Fn_d(fd):  
-      if(fd->orig_scope == ExternC) //ignore extern C bodies
-	break;
-      remove_aggrs_stmt(fd->body); break;
+      if(fd->orig_scope != ExternC) //ignore extern C bodies
+	remove_aggrs_stmt(fd->body); 
+      break;
     case &Var_d(vd): massage_toplevel_aggr(vd->initializer); break;
-    case &Aggr_d(ad): 
+    case &Aggr_d(_): 
     case &Enum_d(_): // assuming no aggregates in tag-expressions
     case &Typedef_d(_): break;
     case &Region_d(...):
     case &Datatype_d(...):
     case &Let_d(...): 
     case &Letv_d(...):  Warn::impos("Cyclone decl after xlation to C");
-    case &Namespace_d(_,ds2): fallthru(ds2);
-    case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2):     fallthru(ds2);
-    case &ExternCinclude_d(ds2,...):
+    case &Namespace_d(...):
+    case &Using_d(...):    
+    case &ExternC_d(...):  
+    case &ExternCinclude_d(...):
     case &Porton_d:
     case &Portoff_d: 
     case &Tempeston_d:
-    case &Tempestoff_d:
-      Warn::impos("nested translation unit after xlation to C");
+    case &Tempestoff_d: Warn::impos("translation unit after xlation to C");
     }
   return ds;
 }

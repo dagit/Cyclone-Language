@@ -34,12 +34,11 @@ namespace Absyn;
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the second 
 static int strlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
-  for (; ss1 != NULL; ss1 = ss1->tl) {
-    if (ss2 == NULL) return 1;
+  for (; ss1 != NULL && ss2 != NULL; ss1 = ss1->tl, ss2 = ss2->tl) {
     int i = strptrcmp(ss1->hd,ss2->hd);
     if (i != 0) return i;
-    ss2 = ss2->tl;
   }
+  if (ss1 != NULL) return 1;
   if (ss2 != NULL) return -1;
   return 0;
 }
@@ -71,8 +70,7 @@ int hash_qvar(qvar_t q) { return Hashtable::hash_string(*((*q)[1])); }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   int i = strptrcmp(tv1->name,tv2->name);
-  if (i != 0) return i;
-  return (tv1->identity) - (tv2->identity);
+  return (i != 0) ? i : (tv1->identity) - (tv2->identity);
 }
   
 nmspace_t Loc_n = Nmspace{.Loc_n = 0};
@@ -287,12 +285,9 @@ type_t thin_bounds_int(unsigned int i) {
 }
 type_t bounds_one() {
   static type_opt_t bone = NULL;
-  let b = bone;
-  if (b == NULL) {
-    b = thin_bounds_int(1);
-    bone = b;
-  }
-  return (type_t)b;
+  if (bone == NULL) 
+    bone = thin_bounds_int(1);
+  return (type_t)bone;
 }
 
 // wide characters
@@ -377,7 +372,6 @@ qvar_t uniquergn_qvar() {
 }
 exp_t uniquergn_exp() {
   let t = rgn_handle_type(unique_rgn_type);
-  // FIX: this won't share with the original Core unique_region definition!
   return new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, .r = 
                     new Var_e(new Global_b(new Vardecl(Extern, 
                                                        uniquergn_qvar(),

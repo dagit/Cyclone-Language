@@ -174,7 +174,7 @@ static void print_version() {
 static bool is_cyclone_sourcefile(string_t s) {
   let len = strlen(s);
   if (len <= 4) return false;
-  else return (strcmp(s+(len-4),".cyc") == 0);
+  return (strcmp(s+(len-4),".cyc") == 0);
 }
 
 // Ideally we would simply pass library args as ccargs, preserving
@@ -190,10 +190,7 @@ static bool is_cyclone_sourcefile(string_t s) {
 static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
   if (strcmp(s,"-lxml") == 0)
-    if (!pa_r)
-      add_ccarg(s);
-    else
-      add_ccarg("-lxml_a");
+    add_ccarg(pa_r ? "-lxml_a" : s);
   else if (strncmp(s,"-lcyc",5) == 0)
     add_ccarg(s);
   else {
@@ -368,8 +365,8 @@ static void noassume_gcc_flag() {
 }
 
 static void remove_file(string_t<`H> s) {
-  if (save_temps_r) return;
-  remove((const char @)s);
+  if (!save_temps_r)
+    remove((const char @)s);
 }
 
 ////********************************************************************
@@ -642,9 +639,8 @@ static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
 static list_t<const char ?`H@`H>
 add_subdir(list_t<const char ?`H@`H> dirs, const char ?subdir) {
   let l = NULL;
-  for (; dirs != NULL; dirs = dirs->tl) {
+  for (; dirs != NULL; dirs = dirs->tl)
     l = new List(new (const char ?)Filename::concat(*dirs->hd,subdir),l);
-  }
   l = List::imp_rev(l);
   return l;
 }
@@ -744,25 +740,19 @@ static void process_file(string_t<`H> filename) {
   // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
   let stdinc_dirs = add_subdir(Specsfile::cyclone_exec_path,Specsfile::target_arch);
   stdinc_dirs = add_subdir(stdinc_dirs,"include");
-  if (strlen(def_inc_path) > 0) {
+  if (strlen(def_inc_path) > 0)
     stdinc_dirs = new List(new def_inc_path, stdinc_dirs);
-  }
   let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
-  if (cyclone_include_path != NULL) {
-    stdinc_dirs = List::append(split_by_char(cyclone_include_path,':'),
-                               stdinc_dirs);
-  }
+  if (cyclone_include_path != NULL)
+    stdinc_dirs = append(split_by_char(cyclone_include_path,':'), stdinc_dirs);
   string_t stdinc_string =
     str_sepstr(new List(new (string_t)"",
                         List::map(sh_escape_stringptr,stdinc_dirs)),
                " -I");
   string_t ofile_string;
-  if (Flags::stop_after_pass <= Flags::Cpp) {
-    if (output_file != NULL)
-      ofile_string = aprintf(" > %s", *output_file);
-    else // output to standard out
-      ofile_string = "";
-  } else 
+  if (Flags::stop_after_pass <= Flags::Cpp)
+    ofile_string = (output_file==NULL) ? "" : aprintf(" > %s", *output_file);
+  else 
     ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
 
   string_t fixup_string;

@@ -436,7 +436,7 @@ struct _tuple11 Cyc_Absyn_aggr_kinded_name(union Cyc_Absyn_AggrInfo);
 # 1161
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 54 "absynpp.h"
-void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs);
+void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*);
 # 62
 struct _fat_ptr Cyc_Absynpp_longlong2string(unsigned long long);
 # 65
@@ -447,9 +447,9 @@ extern struct _fat_ptr*Cyc_Absynpp_cyc_stringptr;
 int Cyc_Absynpp_exp_prec(struct Cyc_Absyn_Exp*);
 struct _fat_ptr Cyc_Absynpp_char_escape(char);
 struct _fat_ptr Cyc_Absynpp_string_escape(struct _fat_ptr);
-struct _fat_ptr Cyc_Absynpp_prim2str(enum Cyc_Absyn_Primop p);
-int Cyc_Absynpp_is_declaration(struct Cyc_Absyn_Stmt*s);struct _tuple12{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;};
-struct _tuple12 Cyc_Absynpp_to_tms(struct _RegionHandle*,struct Cyc_Absyn_Tqual tq,void*t);struct _tuple13{int f1;struct Cyc_List_List*f2;};
+struct _fat_ptr Cyc_Absynpp_prim2str(enum Cyc_Absyn_Primop);
+int Cyc_Absynpp_is_declaration(struct Cyc_Absyn_Stmt*);struct _tuple12{struct Cyc_Absyn_Tqual f1;void*f2;struct Cyc_List_List*f3;};
+struct _tuple12 Cyc_Absynpp_to_tms(struct _RegionHandle*,struct Cyc_Absyn_Tqual,void*);struct _tuple13{int f1;struct Cyc_List_List*f2;};
 # 95 "absynpp.h"
 struct _tuple13 Cyc_Absynpp_shadows(struct Cyc_Absyn_Decl*d,struct Cyc_List_List*varsinblock);struct _tuple14{unsigned f1;int f2;};
 # 28 "evexp.h"

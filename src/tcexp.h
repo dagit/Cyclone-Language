@@ -27,5 +27,8 @@ Absyn::type_t tcExp(Tcenv::tenv_t, Absyn::type_t*, Absyn::exp_t);
 Absyn::type_t tcExpInitializer(Tcenv::tenv_t, Absyn::type_t*, Absyn::exp_t);
 void tcTest(Tcenv::tenv_t, Absyn::exp_t, string_t<`H> msg_part);
 void check_consume(Position::seg_t,Absyn::type_t,Absyn::exp_t);
+
+  // for tcpat:
+  Absyn::ptr_info_t fresh_pointer_type(Tcenv::tenv_t);
 }
 #endif

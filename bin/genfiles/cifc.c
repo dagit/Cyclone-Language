@@ -433,7 +433,7 @@ struct _fat_ptr Cyc_Absynpp_get_type_kind(void*t);struct Cyc_Absynpp_Params{int 
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 # 71
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
-struct _fat_ptr Cyc_Absynpp_decllist2string(struct Cyc_List_List*tdl);
+struct _fat_ptr Cyc_Absynpp_decllist2string(struct Cyc_List_List*);
 # 76
 struct _fat_ptr Cyc_Absynpp_tvar2string(struct Cyc_Absyn_Tvar*);
 # 29 "unify.h"

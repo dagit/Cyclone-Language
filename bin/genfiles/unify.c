@@ -420,7 +420,7 @@ void*Cyc_Absyn_bounds_one (void);struct Cyc_Warn_String_Warn_Warg_struct{int tag
 # 71 "warn.h"
 void*Cyc_Warn_impos2(struct _fat_ptr);struct Cyc_PP_Ppstate;struct Cyc_PP_Out;struct Cyc_PP_Doc;struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 54 "absynpp.h"
-void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs);
+void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*);
 # 56
 extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
 # 63
