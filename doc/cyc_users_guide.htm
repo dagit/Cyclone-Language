@@ -155,7 +155,7 @@ guarantee.  However, the approach taken by Safe-C is quite different
 than Cyclone:  Programs continue to be written in C, but extra indirection
 and dynamic checks are inserted to ensure that abstractions are
 respected.  For example, pointers in Safe-C are actually rather
-complex data structures, and derefencing a pointer is an expensive
+complex data structures, and rdereferencing a pointer is an expensive
 operation as a number of checks must be done to ensure that the
 pointer is still valid.  In order to avoid some of these overheads,
 the Wisconsin folks apply sophisticated, automatic analyses.  
@@ -197,7 +197,7 @@ Cyclone currently only runs on 32-bit machines, and has only been tested on
 Win32 and Linux platforms.&nbsp; Other platforms might or might not work.&nbsp;
 There are definitely 32-bit dependencies, so the system will not work on a
 64-bit machine without major surgery.&nbsp; To install and use Cyclone, you'll
-need to use the Gnu utitlities, including GCC (the Gnu C compiler) and
+need to use the Gnu utilities, including GCC (the Gnu C compiler) and
 Gnu-Make.&nbsp; For Win32, you should first install the latest version of the 
 <a href="http://cygwin.com/">Cygwin</a>
 utilities to do the build, and make sure that the Cygwin bin directory is on
@@ -267,7 +267,7 @@ file foo.o, one would write:</p>
   gcc -c foo.c</pre>
 <p>The &quot;tc&quot; flag tells Cyclone to type-check the code, the &quot;toc&quot;
 flag tells it to translate the code to C, and the &quot;pp&quot; flag says to
-pretty print the resulting C code to standad out.&nbsp; In the example above,
+pretty print the resulting C code to standard out.&nbsp; In the example above,
 this would type-check foo.cyc, translate it to C, and then print the output to
 foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o</p>
 <p>Note that Cyclone runs the C pre-processor on the file before actually
@@ -392,11 +392,11 @@ features.&nbsp;&nbsp;</p>
 C-9X</a> standard include.&nbsp; A quick summary of the ones that Cyclone
 currently includes are as follows:</p>
 <ul>
-  <li>Expressions can include statements of the form <font face="Courier New">({<i>stmt;</i>
-    <i>exp</i>})</font></li>
-  <li>Struct expressions:&nbsp; If you've declared <font face="Courier New">struct
-    point{int x; int y;};</font> then you can write <font face="Courier New">point{.x=<i>exp,
-    </i>.y=<i>exp</i>}</font> as a <font face="Courier New">struct point</font>
+  <li>Expressions can include statements of the form <code>({<i>stmt;</i>
+    <i>exp</i>})</code></li>
+  <li>Struct expressions:&nbsp; If you've declared <code>struct
+    point{int x; int y;};</code> then you can write <code>point{.x=<i>exp,
+    </i>.y=<i>exp</i>}</code> as a <code>struct point</code>
     expression.&nbsp;&nbsp;</li>
   <li>The implicit &quot;int&quot; for the return type of a function is removed</li>
   <li>// comments as in Java or C++</li>
@@ -405,25 +405,24 @@ currently includes are as follows:</p>
   <li>The boolean type is built in</li>
   <li>Declarations can appear in any statement position.&nbsp; It is not
     necessary to wrap braces around the declaration of a local variable.</li>
-  <li>For-statements can include a declaration. For instance:&nbsp; <font face="courier new"><b>for</b>(int
-    x=0; x &lt; n; x++) { ... }</font></li>
+  <li>For-statements can include a declaration. For instance:&nbsp; <code><b>for</b>(int
+    x=0; x &lt; n; x++) { ... }</code></li>
 </ul>
 <p>We expect to follow the C-9X standard fairly closely.&nbsp;&nbsp;</p>
 <hr>
 <h4><a name="Namespaces">Namespaces</a>:&nbsp;&nbsp;</h4>
 <p>As in C++, namespaces are used to avoid name clashes in code.&nbsp; For
 example:&nbsp;</p>
-<pre><font face="Courier New"><b>    </b></font><font face="Courier New"><b>namespace</b> Foo { 
+<pre><code><b>    namespace</b> Foo { 
       int x = 0; 
       int f() { <b>return</b> x; }<i> 
-    </i>}</font></pre>
-<p>declares an integer named <font face="Courier New">Foo::x</font> and a
-function named <font face="Courier New">Foo::f</font>.&nbsp; Note that within
-the namespace, you don't need to use the qualified name.&nbsp; For instance, <font face="courier new">Foo::f
-</font>refers to <font face="courier new">Foo::x</font> as simply <font face="courier new">x</font>.&nbsp;
-We could also simply write &quot;<font face="Courier New"><b>namespace</b> Foo;</font>&quot;
+    </i>}</code></pre>
+<p>declares an integer named <code>Foo::x</code> and a
+function named <code>Foo::f</code>.&nbsp; Note that within
+the namespace, you don't need to use the qualified name.&nbsp; For instance, <code>Foo::f</code>refers to <code>Foo::x</code> as simply <code>x</code>.&nbsp;
+We could also simply write &quot;<code><b>namespace</b> Foo;</code>&quot;
 (note the trailing semi-colon) and leave out the enclosing braces.&nbsp; Every
-declaration following this namespace declaration would be placed in the <font face="courier new">Foo</font>
+declaration following this namespace declaration would be placed in the <code>Foo</code>
 namespace.&nbsp;&nbsp;</p>
 <p>As noted before, you can refer to elements of a namespace using the
 &quot;::&quot; notation.&nbsp; Alternatively, you can open up a namespace with a
@@ -435,9 +434,9 @@ For example, we could follow the above code with:</p>
       }
       int h() { <b>return</b> Foo::f(); }
     }</pre>
-<p>Here, we opened the <font face="courier new">Foo</font> namespace within the
-definition of <font face="courier new">Bar::g</font>.&nbsp; One can also write
-&quot;<b><font face="courier new">using</font></b><font face="courier new"> Foo;</font>&quot;
+<p>Here, we opened the <code>Foo</code> namespace within the
+definition of <code>Bar::g</code>.&nbsp; One can also write
+&quot;<code><b>using Foo;</b></code>&quot;
 to open a namespace for the remaining definitions in the current block.</p>
 <p>Namespaces can nest as in C++.&nbsp;&nbsp;</p>
 <p>Currently, namespaces are only supported at the top-level and you can't
@@ -488,8 +487,8 @@ pointer, but this induces a run-time check.&nbsp; If the pointer is null, then
 the (NullPointer???) exception is raised.</p>
 <hr>
 <h4><a name="Exceptions">Exceptions</a>:</h4>
-<p>Cyclone provides exceptions, <font face="courier new">throw</font>, and<font face="courier new">
-try</font>/<font face="courier new">catch</font> statements similar to
+<p>Cyclone provides exceptions, <code>throw</code>, and <code>
+try</code>/<code>catch</code> statements similar to
 Java.&nbsp; (We'll probably add support for finally clauses at some
 point.)&nbsp; This avoids the error-prone and type-unsafe approach in C of
 returning a value (e.g., -1) to indicate an error.&nbsp; Exception values are a special case of
@@ -1318,7 +1317,7 @@ see <code>switch-clauses</code>)
   <code>return</code> <i>expression</i> <code>;</code><br>
   <code>
 <font color=red>
-  fallthr</font></code></font><code><font color="red">u ;</font></code>
+  fallthru ;</font></code>
 <font color=blue>
 <br>
 </font>
