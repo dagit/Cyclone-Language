@@ -280,7 +280,7 @@ static $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
 
 // ************************* STRING CONSTANTS *************************
 
-char string_buffer_v[] = {'x','x','x','x','x','x','x','x','x','x',0};
+char string_buffer_v[]ZEROTERM = {'x','x','x','x','x','x','x','x','x','x',0};
 mstring_t string_buffer = (mstring_t)string_buffer_v;
 int    string_pos    = 0;
 void store_string_char(char c) {

@@ -53,7 +53,7 @@ static Syntax::location_t      token_action = &dummy_loc;
 static int brace_depth   = 0;
 static int comment_depth = 0;
 
-static char string_buff_v[38];
+static char string_buff_v[38]ZEROTERM;
 static mstring_t string_buff  = (mstring_t)string_buff_v;
 static int    string_index = 0;
 

@@ -205,9 +205,9 @@ _IO_vfscanf (_IO_getc, _IO_ungetc, _IO_peekc, fp, fmt0, ap, errp)
         bool use_strtoul = false; /* flag controlling whether to use strtol
                                    * (false) or strtoul (true) */
 	/* conversion function (strtol/strtoul) */
-	char ccltab[256]NOZEROTERM;
+	char ccltab[256];
         /* character class table for %[...] */
-	char buf[BUF+1] = {for i < BUF: '0'};
+	char buf[BUF+1]ZEROTERM = {for i < BUF: '0'};
         /* buffer for numeric conversions */
 	int seen_eof = 0;
 

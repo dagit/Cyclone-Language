@@ -1175,7 +1175,7 @@ parse_expect_decl()
 {
   register int c;
   register int count;
-  char buffer[20] = {for i<20:0};
+  char buffer[21]ZEROTERM = {for i<20:0};
 
   c = getc((FILE @)finput);
   while (c == ' ' || c == '\t')

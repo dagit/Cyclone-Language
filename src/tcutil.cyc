@@ -2775,8 +2775,11 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     bool is_zero_terminated;
     switch (compress_conref(zt)->v) {
     case No_constr:
-      // if zero_term is unconstrained, then set it to false unless
-      // we have [signed] char [n]{n}.
+      // if zero_term is unconstrained, then set it to false.
+      unify_conrefs(intcmp,zt,false_conref);
+      is_zero_terminated = false;
+      /* This old code set it to true if we had char for the elt type
+       * but this causes too many headaches, so I'm disabling it.
       switch (compress(t1)) {
       case &IntType(_,B1): 
         unify_conrefs(intcmp,zt,true_conref);
@@ -2787,6 +2790,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         is_zero_terminated = false;
         break;
       }
+      */
       break;
     case &Eq_constr(true):
       // check that t1 supports 0 as an element
@@ -2811,9 +2815,6 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         terr(loc,"array bounds expression is not an unsigned int");
       let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e); 
       // FIX: if we have an unknown size then it might not be zero-terminated!
-      // FIX: I'm making this a warning because there are situations where
-      // we need to declare zero-sized arrays within structs for now.  The
-      // long-term solution is to make these not be zero-terminated...
       if (is_zero_terminated && known && sz < 1)
         warn(loc,"zero terminated array cannot have zero elements");
     }
@@ -3599,7 +3600,7 @@ bool bits_only(type_t t) {
     // for initialization purposes
     // FIX: for now, I'm allowing this because otherwise we can't
     // operate with buildlib properly.
-    return /*(!conref_def(false,zero_term)) && */ bits_only(t);
+    return /*(!conref_def(false,zero_term)) &&*/ bits_only(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;

@@ -231,7 +231,7 @@ static struct InitlevelEnv {
   flowdict_t d;
   list_t<place_t> seen;
 };
-static char dummy_str_v[1] = "";
+static char dummy_str_v[1]ZEROTERM = "";
 static const char ? dummy_str = dummy_str_v;
 static initlevel_t initlevel_approx(absRval_t r) {
   switch(r) {

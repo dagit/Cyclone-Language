@@ -29,7 +29,7 @@ using Core;
 using Hashtable;
 
 
-char buf[80];
+char buf[81]ZEROTERM;
 
 List::list_t<$(stringptr_t<`H,`H>,
 	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,

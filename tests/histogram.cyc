@@ -16,7 +16,7 @@ using Core;
 using Hashtable;
 
 
-char buf[80];
+char buf[81]ZEROTERM;
 
 void print_results(stringptr_t pos, $(int,int) @totals) {
   let &$(byte_count, call_count) = totals;

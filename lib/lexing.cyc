@@ -76,7 +76,7 @@ struct lex_tables {
   int ?lex_check;
 };
 
-static char aux_buffer_v[1] = {'\0'};
+static char aux_buffer_v[1]ZEROTERM = {'\0'};
 static char ?aux_buffer = aux_buffer_v;
 
 void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
