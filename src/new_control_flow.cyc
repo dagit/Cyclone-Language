@@ -609,12 +609,24 @@ static $(flow_t<`r>,absRval_t<`r>)
   case {.BottomFL = _}:
     DEBUG_PRINT("leaving AssignOp_e\n");
     return $(BottomFL(),rval);
-  case {.ReachableFL = $(outdict,relns)}:
+  case {.ReachableFL = $(indict,relns)}:
     switch(lval) {
     case {.PlaceL = p}: 
-      outdict = assign_place(fenv,loc,outdict,env->all_changed,p,rval);
+      let outdict = assign_place(fenv,loc,indict,env->all_changed,p,rval);
       relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
+      if (warn_lose_unique && 
+          Tcutil::is_noalias_pointer_or_aggr(env->fenv->r,lexp->topt->v)) {
+        // check to see if we're over-writing a unique pointer
+        switch (lookup_place(indict,p)) {
+        case &UnknownR(NoneIL):
+        case &Consumed(...):
+        case &Zero: break;
+        default:
+          Tcutil::warn(lexp->loc,"assignment may overwrite unique pointer(s)");
+          break;
+        }
+      }
       DEBUG_PRINT("in AssignOp_e; calling update_tryflow\n");
       update_tryflow(env, outflow);
       DEBUG_PRINT("leaving AssignOp_e\n");
