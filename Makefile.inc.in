@@ -180,4 +180,4 @@ C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)
 
 PATCH_ARCH=i686-unknown-linux
-DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.10
+DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.10 powerpc-apple-rhapsody
