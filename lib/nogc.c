@@ -24,9 +24,25 @@
 #endif
 
 /* This is the Doug Lea allocator, rather than the platform malloc.  
-   At the moment, only allow this for Linux, though in principle it
+   At the moment, only allow this for Linux & Apple, though in principle it
    should work in general. */
-#ifdef __linux__
+#if (defined(__linux__) || defined(__APPLE__))
+
+#ifdef CYC_REGION_PROFILE
+#include <unistd.h>
+/* Override sbrk in the allocator so that it prints profiling info */
+extern void CYCALLOCPROFILE_GC_add_to_heap(void*,unsigned int);
+CYCALLOCPROFILE_sbrk(int incr) {
+  void *before = sbrk(0);
+  void *ret = sbrk(incr);
+  // FIX: doesn't handle deallocation (incr < 0)
+  if ((int)ret >= 0 && incr > 0)
+    CYCALLOCPROFILE_GC_add_to_heap(before,incr);
+  return ret;
+}
+#define MORECORE CYCALLOCPROFILE_sbrk
+#endif
+
 #include "malloc.c"
 
 #define malloc_sizeb(p,n) mUSABLe(p)
