@@ -2,12 +2,13 @@ include ../../Makefile.inc
 
 CYCC := ../../bin/$(CYCCOMP)
 
-PROGS := fib hanoi shuffle nsieve
+PROGS := fib hanoi shuffle nsieve tfftdp
 
-#CYCFLAGS := -O3
-#CFLAGS   := -O3
-CYCFLAGS := 
-CFLAGS   := 
+CYCFLAGS := -lm
+CFLAGS   := -lm
+
+#CYCFLAGS := $(CYCFLAGS) -O3
+#CFLAGS   := $(CFLAGS)   -O3
 
 #########################################################
 
@@ -71,3 +72,8 @@ run-nsieve:
 	time ./nsieve      0 > /dev/null
 	@echo
 
+run-tfftdp:
+	@echo Double-precision FFT
+	time ./tfftdp-orig > /dev/null
+	time ./tfftdp      > /dev/null
+	@echo
