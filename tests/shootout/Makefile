@@ -11,7 +11,7 @@ CYC_FLAGS = -O3 -DTIMING
 # hello matrix moments nestedloop random reversefile sieve sumcol wc
 BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
 hello matrix nestedloop random reversefile sieve sumcol wc lists \
-spellcheck
+spellcheck strcat
 
 EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
 GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))

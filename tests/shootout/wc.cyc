@@ -1,48 +1,53 @@
 /*
  * http://www.bagley.org/~doug/shootout/
- *
- * this program is modified from:
- *   http://cm.bell-labs.com/cm/cs/who/bwk/interps/pap.html
- * Timing Trials, or, the Trials of Timing: Experiments with Scripting
- * and User-Interface Languages</a> by Brian W. Kernighan and
- * Christopher J. Van Wyk.
- *
+ * Author: Waldemar Hebisch (hebisch@math.uni.wroc.pl)
+ * Optimizations: Michael Herf (mike@herfconsulting.com)
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include "timer.h"
 
-enum {
-    OUT,			/* outside a word */
-    IN				/* inside a word */
-};
+#define CHAR int
+#define BSIZ 4096
 
+unsigned long ws[256];
+char buff[BSIZ];
 
-char buf[4096];
+int main() {
 
-int
-main() {
-    int i, c, nl, nw, nc, state, nread;
+    int w_cnt=0,l_cnt=0,b_cnt=0,cnt;
+    unsigned long was_sp = 1;
+    unsigned char ?pp, ?pe;
     START_TIME
-    state = OUT;
-    nl = nw = nc = 0;
-    while ((nread = read(0, buf, sizeof(buf))) > 0) {
-	nc += nread;
-	for (i=0; i<nread; i++) {
-	    c = buf[i];
-	    if (c == '\n')
-		++nl;
-	    if (c == ' ' || c == '\n' || c == '\t')
-		state = OUT;
-	    else if (state == OUT) {
-		state = IN;
-		++nw;
-	    }
+    /* Fill tables */
+    for (cnt = 0; cnt < 256; cnt++) ws[cnt] = 0;
+
+    /* also: ws['\r']=ws['\v']=ws['\f']= */
+    ws[' ']=ws['\t']=ws['\n']=1;
+    ws['\n']=65536 + 1;
+
+    /* Main loop */
+    while((cnt=read(0,buff,BSIZ))) {
+        unsigned long tcnt = 0;
+
+	b_cnt += cnt;
+	pe = buff + cnt;
+	pp = buff;
+
+	while(pp < pe) {
+	    tcnt += ws[*pp] ^ was_sp;
+	    was_sp = ws[*pp] & 0xFFFF;
+	    pp ++;
 	}
+	w_cnt += tcnt  & 0xFFFF;
+	l_cnt += tcnt >> 16;
     }
-    printf("%d %d %d\n", nl, nw, nc);
+
+    w_cnt += (ws[ buff[b_cnt&(BSIZ-1)-1] ]^1)&1;
+    w_cnt>>=1;
+
+    printf("%d %d %d\n", l_cnt, w_cnt, b_cnt);
     END_TIME
-    return(0);
+    return 0;
 }
