@@ -1,0 +1,31 @@
+#!/bin/sh
+# This is a script used for cross-compiling.  It sets up the preprocessor
+# environment for the desired architecture, after unsetting the one for
+# the existing one, before calling the real cpp.
+#
+# usage: cyccpp this_arch_defines target_arch_defines
+#
+# Each argument is a preprocessor file with a series of #define definitions
+# in it.  The desired architecture's file is used as is, while the 
+# source architecture file is converted so that each #define becomes
+# a #undef.
+
+CPP="gcc -x c -E -U__GNUC__ -nostdinc"
+
+if [ $# -lt 3 ]; then
+  echo usage: $0 this_arch_defines target_arch_defines
+  exit 1
+else
+
+SOURCE=$1
+TARGET=$2
+shift
+shift
+
+# turn the source arch file into undefs
+UNDEF_STR=`awk '{ printf("-U%s ",$2); }' < $SOURCE`
+
+# call CPP
+$CPP $UNDEF_STR -include $TARGET $*
+fi
+

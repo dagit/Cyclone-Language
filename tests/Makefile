@@ -1,25 +1,33 @@
 
-# Note: this tests the compiler and library in ../src and ../lib,
-# not the compiler in ../bin
-
 # Note: We're not doing anything with t.cyc t2.cyc t3.cyc t4.cyc 
 #       testcases.cyc and toplev.cyc.  Should we be?
 
 include ../Makefile.inc
 
+# Choose which variables you want depending on the compiler you need
+# for the compiler in src
+# CYC_BIN_PATH := $(CYCDIR)/src
+# CYC_LIB_PATH := $(CYCDIR)/lib
+# CYC_INC_PATH := $(CYCDIR)/lib
+
+# for the compiler in bin
+CYC_BIN_PATH := $(CYCDIR)/bin
+CYC_LIB_PATH := $(CYCDIR)/bin/cyc-lib
+CYC_INC_PATH := $(CYCDIR)/include
+
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC=../bin/$(CYCCOMP)
+CYCC=$(CYC_BIN_PATH)/$(CYCCOMP)
 
-CYCBISON=../bin/cycbison$(EXE)
+CYCBISON=$(CYC_BIN_PATH)/cycbison$(EXE)
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -I../lib -B../lib -g
+CYC_FLAGS= $(LC_FLAG) -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g
 
-LIB=../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
+LIB=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(CYCC) $(LIB) \
   $(OUT_PREFIX)cyctest$(EXE) \

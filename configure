@@ -1,0 +1,48 @@
+#!/bin/sh
+# Architecture-specific configuration.
+
+# get the root directory of the source tree
+CYCDIR=`pwd`
+
+# now figure out the architecture
+cd config
+ARCH=`./config.guess`
+
+# set if we have #defines for this architecture
+DEF_ARCH=i686-unknown-linux
+if [ ! -f "arch/${ARCH}" ]; then
+  echo "This architecture is currently unsupported.  Set it up (y/n)?"
+  read resp
+  if [ "$resp" = "y" ]; then
+    echo | gcc -E -dM - > arch/$ARCH
+    echo "#define $ARCH" >> arch/$ARCH
+    if [ $? != 0 ]; then
+      echo "error creating arch #defines file"
+      exit 1
+    fi
+    if [ -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
+      echo "Warning: genfiles directory for ${ARCH} exists"
+    else
+      mkdir ${CYCDIR}/bin/genfiles/${ARCH}
+      echo "Using the genfiles from ${DEF_ARCH}" 
+      cp -r ${CYCDIR}/bin/genfiles/${DEF_ARCH}/* ${CYCDIR}/bin/genfiles/${ARCH}
+      find ${CYCDIR}/bin/genfiles/${ARCH} -name CVS -exec rm -rf {} \;
+    fi
+  else
+    echo "aborting."
+    exit 1
+  fi
+fi
+
+# write the config Makefile
+cd ..
+(cat <<EOF
+# architecture specific defines
+CYCDIR=${CYCDIR}
+ARCH=${ARCH}
+
+EOF
+cat Makefile.inc.in) > Makefile.inc
+
+# combine it with Makefile.inc.in
+# cat config/Makefile Makefile.inc.in > Makefile.inc

@@ -1,20 +1,28 @@
+include ../Makefile.inc
 
-# We assume the library exists -- it's your responsibility to
-# make that directory if it's not.  (The Makefile in the parent
-# directory does this.)
+ifndef ARCH
+$(error "Must have ARCH variable defined to properly compile")
+else
+ifndef TARGET
+TARGET := $(ARCH)
+endif
+endif
 
-CYCDIR := ..
+# CYC_BIN_PATH := $(CYCDIR)/src
+# CYC_LIB_PATH := $(CYCDIR)/lib
+# CYC_INC_PATH := $(CYCDIR)/lib
 
-include $(CYCDIR)/Makefile.inc
+CYC_BIN_PATH := $(CYCDIR)/bin
+CYC_LIB_PATH := $(CYCDIR)/lib
+CYC_INC_PATH := $(CYCDIR)/lib
 
 # Override this variables to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC := $(CYCDIR)/bin/$(CYCCOMP)
+CYCC := $(CYC_BIN_PATH)/$(CYCCOMP)
+CYCLEX := $(CYC_BIN_PATH)/cyclex$(EXE)
+CYCBISON := $(CYC_BIN_PATH)/cycbison$(EXE)
 
-CYCLEX := $(CYCDIR)/bin/cyclex$(EXE)
-CYCBISON := $(CYCDIR)/bin/cycbison$(EXE)
-
-CYCINC_H := $(CYCDIR)/lib/include/cyc_include.h
+CYCINC_H := $(CYC_LIB_PATH)/include/cyc_include.h
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
@@ -34,11 +42,14 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
-#CYC_FLAGS := -g -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
-#CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+# for cross-compiling
+CPP_FLAG := -use-cpp '$(CYCDIR)/bin/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
 
-LIBR:=$(CYCDIR)/lib/$(OUT_PREFIX)$(CYCLIB)
+CYC_FLAGS := -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG) $(CPP_FLAG)
+#CYC_FLAGS := -g -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+#CYC_FLAGS := -I$(CYC_INC_PATH) -I. -B$(CYC_LIB_PATH) -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+
+LIBR:=$(CYC_LIB_PATH)/$(OUT_PREFIX)$(CYCLIB)
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
@@ -49,12 +60,15 @@ all: $(OUT_PREFIX)$(CYCCOMP)
 # we get the $(OUT_PREFIX) version instead of $(CYCDIR)/lib/cyclib.a
 $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR)
 ifdef MS
-	cl /Fe$@ $(CYCDIR)/lib/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
+	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
 else
-	$(CYCC) $(LC_FLAG) -B$(CYCDIR)/lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(LC_FLAG) -B$(CYC_LIB_PATH) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ $(CYCDIR)/bin/cyc-lib/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ $(CYCDIR)/bin/cyc-lib/gc_pg.a -pg $(LDFLAGS)
 endif
+
+src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
+
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $<
@@ -71,7 +85,7 @@ parse_tab.h: parse.y $(CYCBISON)
 	$(CYCBISON) -d $< -o parse_tab.cyc
 
 # This takes care of non-machine-generated versions (the .cyc is already there)
-$(OUT_PREFIX)%.o: %.cyc $(CYCC) $(CYCINC_H)
+$(OUT_PREFIX)%.o $(OUT_PREFIX)%.c: %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 ifdef MS
@@ -94,12 +108,12 @@ clean:
 # We don't use $(CYCC) here because this would create a circular
 # dependency when OUT_PREFIX and CYCC are overridden on the command line
 $(OUT_PREFIX)%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $< > $@
 
 # We need this as well as the above to handle $(OUT_PREFIX)lex.d,
 # which depends on $(OUT_PREFIX)lex.cyc, not lex.cyc
 %.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYCDIR)/lib $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $< > $@
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)

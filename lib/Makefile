@@ -1,15 +1,25 @@
+include ../Makefile.inc
 
-CYCDIR := ..
+ifndef ARCH
+$(error "Must have ARCH variable defined to properly compile")
+else
+ifndef TARGET
+TARGET := $(ARCH)
+endif
+endif
 
-include $(CYCDIR)/Makefile.inc
+# use the installed compiler
+CYC_BIN_PATH := $(CYCDIR)/bin
+
+# but use the .h's in this directory
+CYC_LIB_PATH := $(CYCDIR)/lib
+CYC_INC_PATH := $(CYCDIR)/lib
 
 # Override this variable to use a bootstrapped compiler (you may want
 # an absolute path)
-CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
-
-CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
-
-CYCINC_H := $(CYCDIR)/lib/include/cyc_include.h
+CYCC:=$(CYC_BIN_PATH)/$(CYCCOMP)
+CYCLEX:=$(CYC_BIN_PATH)/cyclex$(EXE)
+CYCINC_H := $(CYC_LIB_PATH)/include/cyc_include.h
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX:=
@@ -34,11 +44,16 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
-#CYC_FLAGS := -I. -B. -g -pp -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
-#CYC_FLAGS := -I. -B. -pg -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
+# for cross-compiling
+CPP_FLAG := -use-cpp '$(CYCDIR)/bin/cyccpp $(CYCDIR)/config/arch/$(ARCH) $(CYCDIR)/config/arch/$(TARGET)'
+
+CYC_FLAGS := -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG) $(CPP_FLAG)
+#CYC_FLAGS := -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -g -pp -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
+#CYC_FLAGS := -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -pg -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
+
+src: $(addprefix $(OUT_PREFIX), $(C_SRCS))
 
 $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).$(O))
 ifdef MS
@@ -61,7 +76,8 @@ precore_c.h: precore.h $(CYCC)
 	rm -f precore.cyc
 
 xml/libxml.a: 
-	$(MAKE) -C xml CYCC=$(CYCDIR)/$(CYCC)
+	$(MAKE) -C xml TARGET=$(TARGET)
+#	$(MAKE) -C xml CYCC=$(CYCDIR)/$(CYCC)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lineno.o : $(OUT_PREFIX)lineno.cyc $(CYCC) $(CYCINC_H)
@@ -72,6 +88,9 @@ $(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX)
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.o : %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
+
+$(OUT_PREFIX)%.c: %.cyc $(CYCC) $(CYCINC_H)
+	$(CYCC) $(CYC_FLAGS) -save-c -toc -c -o $@ $<
 
 ifdef MS
 %.obj: %.c

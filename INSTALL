@@ -1,0 +1,76 @@
+OVERVIEW
+
+To build Cyclone, you follow the standard procedure:
+
+./configure
+make
+
+Eventually, we'll include a "make install" part of this that will
+stick it in your system directories.
+
+We also support cross compilation, as described below.  This is need
+to port to new architectures (or at least makes it simpler).
+
+DETAILS
+
+1) ./configure
+
+This is a script that sets up the platform-dependent parts of the
+installation.  It alters the Makefile.inc file to include two
+variables, your architecture is stored in ARCH, and the directory
+that the cyclone source tree is stored in is called CYCDIR.
+
+If your architecture is not currently supported, the configure script
+will ask if you'd like to create the files necessary to support it.
+This will result in creating a file in config/arch for your 
+architecture, and will create a directory in bin/genfiles/.  The C
+files in this directory will be populated from an existing architecture,
+so they will have to be changed if they don't readily compile.  This
+can be done by cross-compiling on a supported architecture by using the 
+file created by configure in the config/arch directory (see below).
+
+2) make
+
+This compiles from the C files in genfiles/$(ARCH) where $(ARCH) is
+your architecture (as determined by config).  If you are trying to
+port your architecture, these files came from an existing
+architecture, so they may not work.  If not, you can cross-compile
+by setting the TARGET makefile variable.  Here's the process:
+
+a) On the architecture you want to support (but isn't currently
+supported), type ./configure.  This will create the appropriate
+config/arch/ARCH file (where ARCH is the name of your architecture,
+as determined by configure), and create the directory bin/genfiles/ARCH.
+
+b) Copy the entire cyclone tree to a supported architecture, after you've
+created the new file and directory.  Alternatively, just copy the new
+file and directory there in an existing source tree.
+
+c) Configure the the source tree on the supported architecture (this
+is not necessary if you just copied the new file and directory, instead
+of the entire tree), by doing ./configure again.  This will set up
+your Makefile.inc file properly.
+
+d) Build Cyclone for the unsupported architecture by doing
+
+make cyclone_src TARGET=ARCH
+
+(where ARCH is the unsupported architecture; this is also the name
+of the new file created in config/arch).  This will build the .c
+files in src/ and lib/ for the new architecture, using the information
+in the architecture-specific file for ARCH.  All we care about are the
+generated C files, so if the executables fail to link, don't worry.
+
+e) Install the .c files for the new architecture by doing
+
+make update TARGET=ARCH
+
+This will copy all of the relevant files for the new architecture.
+
+f) copy the source back to the new architecture.  Reconfigure it
+by doing ./configure, and then try building it again by doing make.
+If cross-compilation worked, it should now build correctly.  Then
+please send us the ARCH directory in bin/genfiles, and the ARCH
+file in config/arch.  We can then incorporate these into our
+normal distribution tree.
+
