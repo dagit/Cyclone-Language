@@ -5,30 +5,20 @@ For the release:
 * Java-doc-like thing for the libraries incorporated into documentation.
   (TJ).
 
-* Rework documentation to be up to date. (JGM)
-
-* Web-page:
-  * graphic (Mike)
-  * get ADM to set up www.cs.cornell.edu/cyclone (JGM)
-  * introductory page and links (JGM)
-
-* Licensing (TJ)
-  * libraries
-  * tests (in particular, James Cheney's code and the Shootout code)
-  * INRIA and ocamllex
-
 * Install script and target directory structure (Matthew & Mike)
-  * script to build release tar files or whatever
-  * target directory structure -- follow GNU here
-  * uninstall
   * RPM's and precompiled setups for linux and Win32
-  * automatically get version number into things
 
 * as many bug fixes as possible (see below)
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
-* make command line arguments more like gcc:  version? what happens
+* new { for i < x : ' ' }
+  causes core dump for negative x.  (Not surprising -- x is treated as
+  unsigned so that's a really big number and likely, malloc is returning
+  null which we're not checking for when we allocate...)  Let's check
+  for it and throw an exception Bad_alloc if malloc returns NULL.
+
+* make command line arguments more like gcc: what happens
   when no files are given?  what happens when we have the wrong extension?
   (need flags to say how to treat it, ie. as cyc file, as .o file, as .c
   file, etc.)
@@ -36,10 +26,6 @@ BUG FIXES and UNSOUNDNESSES:
 * name mangling needs to be dealt with
 
 * minimize initializing
-
-* need two versions of the .h files for the standard C library --
-  one which uses the namespace automatically, and one that doesn't.
-  Note that this requires fixing the using Foo; using Foo; bug.
 
 * FIX all of the FIX things.
 
@@ -172,11 +158,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 * we should start on the porting tool -- use region inference to
   figure out the "right" interface for code.
 
-* new { for i < x : ' ' }
-  causes core dump for negative x.  (Not surprising -- x is treated as
-  unsigned so that's a really big number and likely, malloc is returning
-  null which we're not checking for when we allocate...)
-
 * multi-level initializers, e.g., {{0,1},{2,3}}
 
 * better constant expressions (no doubles? no longs?)
@@ -209,6 +190,8 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 * nested functions (closures -- with RTCG approach to get calling convention
   right.)
 
+* regular expressions
+
 * better comprehensions/iterators
 
 * We should allow more deep casts (e.g., function pointers) and have
@@ -237,8 +220,6 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
   compile (or run?) time.  That would allow us to abstract over
   Mem types.
 
-* Cyclone ought to say something when called with no arguments, as gcc does.
-
 THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
 * Try to avoid using so many lists in the abstract syntax --
@@ -256,5 +237,3 @@ MISCELLANEOUS
 * better implementation of unresolved mem
 
 * translation to C with -noexpandtypedefs hasn't been tested in forever.
-
-* The FAQ in doc/web/ has two instances of "What does new mean?"
