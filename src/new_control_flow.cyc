@@ -26,20 +26,9 @@
 // KLUDGE: For unions, we just pretend its initialized.  Since you can
 // only read bits out, safety is not compromised.
 
-// The previous pass (type-checking) sets up:
-// * decorating each stmt with CFAnnot
-
-#include <core.h>
-#include <list.h>
-#include <set.h>
-#include <dict.h>
-#include <string.h>
-#include <hashtable.h>
-#include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"
 #include "relations.h"
-#include "cf_flowinfo.h"
 #include "new_control_flow.h"
 #include "rgnorder.h"
 #include "tcpat.h"

@@ -17,14 +17,8 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include <core.h>
-#include <list.h>
 #include <string.h>
-#include <position.h>
-#include <cycboot.h>
-#include "absyn.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "formatstr.h"
 using Core;
 using List;
@@ -32,7 +26,6 @@ using Position;
 using Absyn;
 using Tcutil;
 using Tcenv;
-
 namespace Formatstr;
 
 // Parse a conversion specification starting at index i in string s.
@@ -176,7 +169,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
   let len = strlen(s);
   let typs = NULL;
   int i;
-  region temp; {
+  { region temp; 
     for (i=0; i<len; i++) {
       if (s[i] != '%') continue;
       let cs = parse_conversionspecification(temp,s,i+1);
@@ -463,7 +456,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
   let len = strlen(s);
   let typs = NULL;
   int i;
-  region temp; {
+  { region temp; 
   for (i=0; i<len; i++) {
     if (s[i] != '%') continue;
     let x = parse_inputformat(temp,s,i+1);

@@ -57,14 +57,10 @@
    and join_eq_flow on the loop edges.  For now, I'm not using
    this stuff, so it's all commented out.
 */
-#include <core.h>
-#include <list.h>
-#include "absyn.h"
 #include "tcutil.h"
 #include "cf_flowinfo.h"
 #include <assert.h>
 #include "absynpp.h"
-#include <cycboot.h>
 #include "pratt.h"
 using Core;
 using List;

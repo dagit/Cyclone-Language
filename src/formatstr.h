@@ -21,10 +21,6 @@
 #ifndef _FORMATSTR_H_
 #define _FORMATSTR_H_
 
-#include <core.h>
-#include <list.h>
-#include <position.h>
-#include "absyn.h"
 #include "tcenv.h"
 
 namespace Formatstr {

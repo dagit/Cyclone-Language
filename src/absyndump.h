@@ -16,17 +16,12 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #ifndef _ABSYNDUMP_H_
 #define _ABSYNDUMP_H_
 
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
 #include "absyn.h"
 
 // not re-entrant.
-
 namespace Absyndump {
 extern void set_params(struct Absynpp::Params @ `r fs);
 extern void dumpdecllist2file(List::list_t<Absyn::decl_t> tdl, FILE @`H f);

@@ -42,7 +42,6 @@
    well enough for now, since we have a relatively small number
    of variables and constraints.
 */
-#include <list.h>
 #include "absyn.h"
 namespace Pratt {
   using Absyn;

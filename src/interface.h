@@ -21,10 +21,6 @@
 #ifndef _INTERFACE_H_
 #define _INTERFACE_H_
 
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
-#include "absyn.h"
 #include "tcenv.h"
 
 namespace Interface {

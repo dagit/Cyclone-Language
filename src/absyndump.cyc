@@ -21,11 +21,7 @@
 // module for non-C code gives you fairly worthless stuff.  (And it hasn't
 // been tested.) 
 
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
 #include <string.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "evexp.h"
 #include "tcutil.h"

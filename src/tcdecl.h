@@ -16,14 +16,9 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
-
 #ifndef _TCDECL_H_
 #define _TCDECL_H_
 
-#include <cycboot.h>
-#include <position.h>
-#include <list.h>
 #include "absyn.h"
 
 namespace Tcdecl {

@@ -21,7 +21,6 @@
 #ifndef _TOC_H_
 #define _TOC_H_
 
-#include <list.h>
 #include <hashtable.h>
 #include "absyn.h"
 

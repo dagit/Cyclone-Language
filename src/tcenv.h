@@ -19,9 +19,6 @@
 #ifndef _TCENV_H_
 #define _TCENV_H_
 
-#include <core.h>
-#include <list.h>
-#include <set.h>
 #include <dict.h>
 #include "absyn.h"
 #include "rgnorder.h"
@@ -29,7 +26,6 @@
 namespace Tcenv {
 using Core;
 using List;
-using Set;
 using Dict;
 using Absyn;
 using Position;

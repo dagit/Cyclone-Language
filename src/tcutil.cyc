@@ -17,13 +17,7 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include <core.h>
-#include <cycboot.h>
-#include "absyn.h"
 #include "absynpp.h"
-#include <set.h>
-#include <position.h>
-#include "tcenv.h"
 #include <string.h>
 #include "warn.h"
 #include "evexp.h"
@@ -40,7 +34,6 @@ using Position;
 using Absyn;
 using Absynpp;
 using Tcenv;
-using Cyclone;
 
 namespace Tcutil;
 
@@ -118,7 +111,6 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,2,3))) {
   Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt,ap)));
 }
-
 `a impos(string_t fmt, ... inject parg_t ap)
   __attribute__((format(printf,1,2), noreturn))
 {
@@ -126,6 +118,10 @@ void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
   fprintf(stderr,"Compiler Error (Tcutil::impos): %s\n",msg);
   fflush(stderr);
   throw new Impossible(msg);
+}
+void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3))) {
+  Warn::vwarn(sg, fmt, ap);
 }
 
 datatype exn { AbortTypeCheckingFunction };
@@ -139,11 +135,6 @@ void print_tvars(list_t<tvar_t> tvs) {
     fprintf(stderr,"%s::%s ",
 	    tvar2string(tvs->hd),kindbound2string(tvs->hd->kind));
   fprintf(stderr,"\n"); fflush(stderr);
-}
-
-void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3))) {
-  Warn::vwarn(sg, fmt, ap);
 }
 
 // set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.
@@ -4243,7 +4234,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     if (is_zero_terminated && known && sz < 1)
       warn(loc,"zero terminated array cannot have zero elements");
     // FIX: if we have an unknown size then it might turn out to be zero!
-    if (known && sz < 1 && tovc_r) {
+    if (known && sz < 1 && Cyclone::tovc_r) {
       warn(loc,"arrays with 0 elements are not supported except with gcc -- changing to 1.");
       *eptr = uint_exp(1,0);
     }

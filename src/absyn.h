@@ -61,7 +61,6 @@
 #define EXTERN_ABSYN extern
 #endif
 
-#include <core.h>
 #include <list.h>
 #include <position.h>
 

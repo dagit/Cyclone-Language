@@ -19,7 +19,6 @@
 #ifndef _JUMP_ANALYSIS_H_
 #define _JUMP_ANALYSIS_H_
 
-#include <list.h>
 #include <hashtable.h>
 #include "absyn.h"
 

@@ -38,15 +38,9 @@
 // Note: unresolvedmem_exp should only be used (1) to build arrays; or
 // (2) to build other things (structs etc.) at top level only; Tovc relies on this.
 
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
 #include <string.h>
-#include <set.h>
 #include <dict.h>
-#include <position.h>
 #include <xarray.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"

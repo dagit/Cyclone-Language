@@ -59,23 +59,17 @@
         };
  */
 
-#include <core.h>
 #include <lexing.h>
 #include <set.h>
 #include <string.h>
-#include <list.h>
 #include <hashtable.h>
 #include <filename.h>
-#include <position.h>
 #include <arg.h>
 #include <buffer.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "parse.h"
-#include "tcenv.h"
 #include "tc.h"
 #include "binding.h"
-#include <cycboot.h>
 
 namespace Lex {
   extern void lex_init(bool use_cyclone_keywords);

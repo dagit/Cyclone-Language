@@ -21,18 +21,14 @@
 // WARNING: Because we now intern identifiers, you better never mutate them!
 // WARNING: lex_init must be called for each source file!
 
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
 #include <lexing.h>
 #include <set.h>
 #include <string.h>
 #include <xarray.h>
 #include "parse.h"
-#include <position.h>
 #include <dict.h>
 #include "tcutil.h"
-
+#include "binding.h"
 using Core;
 using List;
 using Lexing;
@@ -229,6 +225,10 @@ static int num_keywords(bool include_cyclone_keywords) {
 }
 
 ///////////////////////// Trie manipulation ///////////////////////
+static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
+  return rnew(d) Trie(Zero(),false);
+}
+
 static int trie_char(int c) {
   // get the legal chars into a narrow range starting at 0
   if(c >= 95) return c - 59;
@@ -445,66 +445,25 @@ mstring_t get_stored_string() {
 } 
 
 // ******************* NAMESPACE, USING, AND TYPEDEF  *******************
+// FIX: As has been the case for years, any available typedef trumps
+//      a non-typedef, including typedefs in outer namespaces!!!
+// FIX: We also have never had good error locations for unbound namespaces.
+// FIX: If it were not for the tries, Binding would not have to leak so much
+//      about the representation of NSCtxt.
 
 static struct Ldecls {
-  // records typedefs and namespaces declared in a scope
   Set::set_t<var_t> typedefs;
-  Set::set_t<var_t> namespaces;
 };
 typedef struct Ldecls @ ldecls_t;
 
-static struct Lvis {  // the King lives!
-  // records the namespaces whose declarations are visible in a scope
-  list_t<var_t>         current_namespace;
-  list_t<list_t<var_t>> imported_namespaces;
-};
-typedef struct Lvis @lvis_t;
+static opt_t<Binding::nsctxt_t<ldecls_t>> lstate = NULL;
 
-static struct Lstate {
-  // lstack is the current nested scope structure,
-  // decls is the global declaration mapping
-  List_t<lvis_t>                     lstack; 
-  Dict::dict_t<list_t<var_t>,ldecls_t> decls;
-};
-typedef struct Lstate @lstate_t;
-
-static opt_t<lstate_t> lstate = NULL;
+static ldecls_t mk_empty_ldecls(bool ignore) {
+  return new Ldecls(Set::empty(zstrptrcmp));
+}
 
 static void typedef_init() {
-  let init_lvis   = new Lvis{.current_namespace=NULL,
-                             .imported_namespaces=NULL};
-  let init_lstack = new List(init_lvis, NULL);
-  Dict::dict_t<list_t<var_t,`H>,ldecls_t> init_decls = 
-    Dict::insert(Dict::empty(varlist_cmp),
-                 NULL,
-                 new Ldecls{.typedefs=Set::empty(zstrptrcmp),
-                               .namespaces=Set::empty(zstrptrcmp)});
-  lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
-}
-
-static list_t<var_t> get_absolute_namespace(List_t<var_t,`H> ns) {
-  // ns is a relative namespace, we return the absolute namespace
-  var_t n = ns->hd;
-  // For each enclosing scope...
-  for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
-    lvis_t lv = ls->hd; // ... see what namespaces are visible
-    // ... and look in each such visible namespace
-    list_t<list_t<var_t>> x = new List(lv->current_namespace,
-                                       lv->imported_namespaces);
-    for (; x != NULL; x = x->tl) {
-      ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
-      // ... for namespace n
-      if (Set::member(ld->namespaces,n))
-        // OK, we know ns refers to x.hd+ns
-        return List::append(x->hd,ns);
-    }
-  }
-  yyerror(aprintf("undeclared namespace %s",str_sepstr(ns,"::")),-1,-1);
-  return NULL; 
-}
-
-static trie_t<`d> empty_trie(region_t<`d> d, int dummy) {
-  return rnew(d) Trie(Zero(),false);
+  lstate = new Opt(Binding::mt_nsctxt(true, mk_empty_ldecls));
 }
 
 static void recompute_typedefs() {
@@ -517,28 +476,24 @@ static void recompute_typedefs() {
   trie_t<`d2> t2 = open_region(dyn2, 0, empty_trie);
   *tdefs = DynTrie{dyn2, t2};
   typedefs_trie :=: tdefs;
-  
- //For each enclosing scope, get the visible namespaces and add all the typedefs
-  for (list_t<lvis_t> ls = lstate->v->lstack; ls != NULL; ls = ls->tl) {
-    lvis_t lv = ls->hd; 
-    list_t<list_t<var_t>> x = new List(lv->current_namespace, 
-                                       lv->imported_namespaces);
-    for (; x != NULL; x = x->tl) {
-      ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
-      Set::iter(insert_typedef,ld->typedefs);
+
+  // accumulative, so no need to co curr_ns first
+  for(let as = lstate->v->availables; as != NULL; as = as->tl)
+    switch(as->hd) {
+    case &Binding::Using(ns): fallthru(ns);
+    case &Binding::Namespace(ns):
+      let ts = Dict::lookup(lstate->v->ns_data, ns);
+      Set::iter(insert_typedef,ts->typedefs);
+      break;
     }
-  }
 }
 
 // This can stay the slow way because most identifiers are not qualified.
+// FIX: get a proper location!
 static bool is_typedef_in_namespace(List_t<var_t,`H> ns, var_t v) {
-  list_t<var_t> ans = get_absolute_namespace(ns);
-  try {
-    ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
-    return Set::member(ld->typedefs,v);
-  } catch { case &Dict::Absent:
-    return false;
-  }
+  Binding::namespace_name_t ans = Binding::resolve_rel_ns(0, lstate->v, ns);
+  let ts = Dict::lookup(lstate->v->ns_data,ans);
+  return Set::member(ts->typedefs,v);
 }
 
 static bool is_typedef_body(region_t<`d> d, 
@@ -577,79 +532,33 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
 }
 
 void enter_namespace(var_t s) {
-  list_t<var_t> ns = lstate->v->lstack->hd->current_namespace;
-  list_t<var_t> new_ns = List::append(ns,new List(s,NULL));
-  // Push the new namespace on the stack
-  lstate->v->lstack =
-    new List(new Lvis{.current_namespace = new_ns,.imported_namespaces = NULL},
-             lstate->v->lstack);
-  // If this is the first time the new namespace has been encountered,
-  // make sure it is bound in the old namespace, and add an empty
-  // environment for the new namespace
-  ldecls_t ld = Dict::lookup(lstate->v->decls,ns);
-  if (!Set::member(ld->namespaces,s)) {
-    lstate->v->decls = Dict::insert(lstate->v->decls,
-				    ns,
-				    new Ldecls{.typedefs = ld->typedefs,
-                                               .namespaces = 
-                                               Set::insert(ld->namespaces, 
-                                                           s)});
-    lstate->v->decls = Dict::insert(lstate->v->decls,
-				    new_ns,
-				    new Ldecls{.typedefs= 
-                                               Set::empty(zstrptrcmp),
-                                               .namespaces= 
-                                               Set::empty(zstrptrcmp)
-				    });
-
-  }
+  Binding::enter_ns(lstate->v, s, true, mk_empty_ldecls);
+  let ts = Dict::lookup(lstate->v->ns_data, lstate->v->curr_ns);
   // some more typedefs may be visible
   // recompute_typedefs(); // too slow! (does repeated work)
-  Set::iter(insert_typedef,Dict::lookup(lstate->v->decls,new_ns)->typedefs);
+  Set::iter(insert_typedef,ts->typedefs);
 }
 void leave_namespace() {
-  // we never leave the outermost namespace, so the cast is okay
-  lstate->v->lstack = (List_t<lvis_t>)lstate->v->lstack->tl;
+  Binding::leave_ns(lstate->v);
   recompute_typedefs();
 }
 void enter_using(qvar_t q) {
-  _ ns;
-  switch ((*q)[0]) {
-  case {.Loc_n = _}:
-    ns = (List_t<stringptr_t>)(new List((*q)[1],NULL));
-    break;
-  case {.Rel_n = y}: fallthru(y);
-  case {.C_n = y}: fallthru(y);
-  case {.Abs_n = y}:
-    ns = (List_t<stringptr_t>)List::append(y,new List((*q)[1],NULL));
-    break;
-  }
-
-  let ans      = get_absolute_namespace(ns);
-  let imported = lstate->v->lstack->hd->imported_namespaces;
-
-  lstate->v->lstack->hd->imported_namespaces = new List(ans,imported);
-  
+  let ns = Binding::enter_using(0, lstate->v, q); // FIX: get a proper location!
+  let ts = Dict::lookup(lstate->v->ns_data, ns);
   // some more typedefs may be visible
   // recompute_typedefs(); // too slow! (does repeated work)
-  Set::iter(insert_typedef,Dict::lookup(lstate->v->decls,ans)->typedefs);
+  Set::iter(insert_typedef,ts->typedefs);
 }
 void leave_using() {
-  let imported = lstate->v->lstack->hd->imported_namespaces;
-  lstate->v->lstack->hd->imported_namespaces = imported->tl;
-
+  Binding::leave_using(lstate->v);
   // some typedefs may no longer be visible
   recompute_typedefs();
 }
 
 void register_typedef(qvar_t q) {
-  // FIX: we assume that q is not in fact qualified
-  let current = lstate->v->lstack->hd->current_namespace;
-  let ds      = lstate->v->decls;
-  let ld      = Dict::lookup(ds,current);
-  let new_ld  = new Ldecls{.typedefs   = Set::insert(ld->typedefs,(*q)[1]),
-                           .namespaces = ld->namespaces};
-  lstate->v->decls = Dict::insert(ds,current,new_ld);
+  // FIX: we assume that q is not in fact qualified (always have)
+  let ts = Dict::lookup(lstate->v->ns_data, lstate->v->curr_ns);
+  ts->typedefs = Set::insert(ts->typedefs, (*q)[1]);
 
   // FIX: We're really assuming it's unqualified here -- else need to
   //      decide if the namespace-list is a visible one

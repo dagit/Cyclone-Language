@@ -20,7 +20,6 @@
 #ifndef _TCSTMT_H_
 #define _TCSTMT_H_
 
-#include "absyn.h"
 #include "tcenv.h"
 
 namespace Tcstmt {

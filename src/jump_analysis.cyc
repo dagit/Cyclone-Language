@@ -33,11 +33,8 @@
    (4) check that jumps are to well-defined destinations
 */
 
-#include <list.h>
 #include <string.h>
-#include <hashtable.h>
-#include "absyn.h"
-#include "tcutil.h"
+#include "warn.h"
 #include "tcpat.h"
 #include "jump_analysis.h"
 using Absyn;
@@ -159,10 +156,8 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
       anal_exp(env,(*dles->hd)[1]);
     break;
 
-  case &UnresolvedMem_e(...): 
-    throw new Core::Impossible("jump_anaysis found UnresolvedMem_e");
-  case &Asm_e(...): 
-    throw new Core::Impossible("jump_analysis found Asm_e");
+  case &UnresolvedMem_e(...): Warn::impos("jump_anaysis found UnresolvedMem_e");
+  case &Asm_e(...): Warn::impos("jump_analysis found Asm_e");
   }
 }
 static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
@@ -250,7 +245,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
   case &Label_s(lab,s1): 
     try { 
       Hashtable::lookup(env.fenv->labels,lab);
-      Tcutil::terr(s->loc,"repated label");
+      Warn::err(s->loc,"repated label");
     } catch { case &Core::Not_found: break; }
     Hashtable::insert(env.fenv->labels,lab,s);
     anal_stmt(env,s1);
@@ -343,11 +338,11 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 		 .enclosers=src_enclose}= Hashtable::lookup(stmt_info,src_stmt);
       switch (dest) {
       case &NotLoop_j: 
-	Tcutil::terr(src_stmt->loc,"jump has no target"); 
+	Warn::err(src_stmt->loc,"jump has no target"); 
 	break;
       case &CaseEnd_j: 
-	Tcutil::terr(src_stmt->loc,
-		     "break causes outer switch to implicitly fallthru"); 
+	Warn::err(src_stmt->loc,
+		  "break causes outer switch to implicitly fallthru"); 
 	break;
       case &FnEnd_j: 
 	Hashtable::insert(succ_table,src_stmt,NULL);
@@ -361,7 +356,7 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	try dest_stmt = Hashtable::lookup(fenv->labels, lab);
 	catch { 
 	case &Core::Not_found: 
-	  Tcutil::terr(src_stmt->loc, "label %s undefined", *lab); 
+	  Warn::err(src_stmt->loc, "label %s undefined", *lab); 
 	  goto L;
 	}
 	let &SaveEnv{.enclosers=dest_enclose,...} =
@@ -372,8 +367,8 @@ static void anal_fd(jump_anal_res_t tables, fndecl_t fd) {
 	    if(src_enclose->hd == dest_scope)
 	      break;
 	  if(src_enclose==NULL) {
-	    Tcutil::terr(src_stmt->loc, 
-			 "goto enters local scope or exception handler");
+	    Warn::err(src_stmt->loc, 
+		      "goto enters local scope or exception handler");
 	    break;
 	  }
 	}

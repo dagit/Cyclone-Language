@@ -18,11 +18,8 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #include "tcdecl.h"
 
-#include <core.h>
-#include <list.h>
 #include <dict.h>
 #include <string.h>
-#include <cycboot.h>
 #include "tcutil.h"
 #include "absynpp.h"
 

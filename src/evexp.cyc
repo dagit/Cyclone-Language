@@ -19,16 +19,10 @@
 
 // FIX: Add appropriate support for float, double, and long long
 
-#include <core.h>
-#include <list.h>
-#include <position.h>
-#include <cycboot.h>
 #include <string.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
-
 using Core;
 using Absyn;
 using List;
@@ -425,7 +419,7 @@ bool lte_const_exp(exp_t e1, exp_t e2) {
 // called by tcSizeof (which ignores result)
 // Note that an AggrType better be checked so we can get the aggrdecl
 bool okay_szofarg(type_t t) {
-  switch (Tcutil::compress(t)) {
+  switch (compress(t)) {
   case &VoidType: return false;
   case &VarType(tv):
     switch (tvar_kind(tv,&bk)->kind) {

@@ -53,13 +53,8 @@ extern @tagged union YYSTYPE<`yy::R>;
 extern void yyprint(int i, union YYSTYPE<`yy> v);
 #endif
 
-#include <core.h>
-#include <cycboot.h>
 #include <lexing.h>
-#include <list.h>
 #include <string.h>
-#include <position.h>
-#include "absyn.h"
 #include "tcutil.h"
 #include "absynpp.h"
 using Core;

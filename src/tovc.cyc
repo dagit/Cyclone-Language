@@ -60,12 +60,8 @@
 //       b/c they can mention types not defined at the top.  And that means
 //       the translation could fail with local type declarations, which we
 //       don't have yet.
-#include <core.h>
-#include <list.h>
 #include <dict.h>
 #include <string.h>
-#include <cycboot.h>
-#include "absyn.h"
 #include "absynpp.h" // For debugging
 #include "tcutil.h"
 #include "toc.h"

@@ -20,7 +20,7 @@
 #ifndef TOVC_H
 #define TOVC_H
 
-#include <list.h>
+#include "absyn.h"
 
 namespace Tovc {
 

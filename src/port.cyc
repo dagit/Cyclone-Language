@@ -57,22 +57,14 @@
  * trying to simplify the constraints eagerly.
 */
 
-#include <core.h>
 #include <string.h>
-#include <list.h>
-#include <position.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "tcexp.h"
 #include "tcstmt.h"
 #include "evexp.h"
 #include "tc.h"
-#include <cycboot.h>
 #include "tcdecl.h"
-#include <set.h>
-
 using Core;
 using List;
 using Position;
@@ -80,7 +72,6 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
-
 namespace Port;
 //#define PORT_DEBUG 1
 

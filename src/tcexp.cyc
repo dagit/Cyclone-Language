@@ -27,12 +27,8 @@
      leave off effects, regions, etc. unless they're relevant.)
  */
 
-#include "absyn.h"
 #include <string.h>
-#include <cycboot.h>
-#include <position.h>
 #include "absynpp.h"
-#include "tcenv.h"
 #include "tcutil.h"
 #include "evexp.h"
 #include "tcstmt.h"

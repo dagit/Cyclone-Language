@@ -21,7 +21,6 @@
 #define ABSYN_CYC 
 #include "absyn.h"
 #include <string.h>
-#include <cycboot.h>
 #include "tcutil.h"
 #include "cyclone.h"
 

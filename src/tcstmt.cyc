@@ -17,19 +17,13 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-#include <core.h>
-#include <list.h>
-#include <position.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "tcexp.h"
 #include "tcpat.h"
 #include "new_control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
-#include <cycboot.h>
 
 #ifdef NO_PATHS
 #define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"

@@ -20,9 +20,6 @@
 #ifndef _RGNORDER_H_
 #define _RGNORDER_H_
 
-#include <core.h>
-#include <list.h>
-#include <position.h>
 #include "absyn.h"
 
 namespace RgnOrder {

@@ -29,9 +29,9 @@
 #include <string.h>
 #include <dict.h>
 #include <set.h>
-#include "absyn.h"
 #include "absynpp.h"
 #include "warn.h"
+#include "binding.h"
 using List;
 using Absyn;
 using Warn;
@@ -46,18 +46,15 @@ bool warn_override = false;
 
 //////////////// Namespace Resolution ///////////////
 //After years of repeating logic in the lexer and type-checker, we share it here
-typedef list_t<var_t> namespace_name_t;
 datatype NSDirective {
   Namespace(namespace_name_t); // absolute
   Using(namespace_name_t); // absolute
 };
-typedef datatype NSDirective @ nsdirective_t;
-abstract struct NSCtxt<`a> {
+struct NSCtxt<`a> {
   namespace_name_t            curr_ns;    // current namespace (absolute)
   list_t<nsdirective_t>       availables; // current using/namespace stack
   dict_t<namespace_name_t,`a> ns_data;    // maps absolute names to info
 };
-typedef struct NSCtxt<`a> @ nsctxt_t<`a>;
 
 nsctxt_t<`a> mt_nsctxt(`b env, `a mkdata(`b)) {
   let data = mkdata(env);
@@ -69,7 +66,7 @@ nsctxt_t<`a> mt_nsctxt(`b env, `a mkdata(`b)) {
   switch (abs_ns) {
   case {.C_n  =vs}: fallthru(vs);
   case {.Abs_n=vs}: return Dict::lookup(ctxt->ns_data, vs);
-  default: throw new Core::Impossible("Binding:get_ns_data: relative ns");
+  default: impos("Binding:get_ns_data: relative ns");
   }
 }
 
@@ -118,7 +115,7 @@ namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
 	break;
       }
     throw new BindingError;
-  case {.Rel_n = ns}: // ns not NULL
+  case {.Rel_n = ns}: // ns not NULL.  FIX: look for multiple matches?!?
     try {
       let abs_ns = resolve_rel_ns(loc,ctxt,ns);
       return lookup(Dict::lookup(ctxt->ns_data,abs_ns),v);
@@ -127,7 +124,7 @@ namespace_name_t resolve_rel_ns(seg_t loc, nsctxt_t<`a> ctxt,
   case {.Abs_n = ns}: 
     try return lookup(Dict::lookup(ctxt->ns_data,ns),v);
     catch { case &Dict::Absent: throw new BindingError; }
-  case {.Loc_n = _}:  throw new Core::Impossible("lookup local in global");
+  case {.Loc_n = _}:  impos("lookup local in global");
   }
 }
 
@@ -139,19 +136,19 @@ void enter_ns(nsctxt_t<`a> ctxt, var_t subname, `b env, `a mkdata(`b)) {
   ctxt->curr_ns = ns2;
   ctxt->availables = new List(new Namespace(ns2), ctxt->availables);
 }
-void leave_ns(nsctxt_t<`a> ctxt) {
+void leave_ns(nsctxt_t ctxt) {
   if(ctxt->availables == NULL)
-    throw new Core::Impossible("leaving topmost namespace");
+    impos("leaving topmost namespace");
   switch(ctxt->availables->hd) {
   case &Namespace(_): 
     ctxt->availables = ctxt->availables->tl;
     ctxt->curr_ns = List::rev(List::rev(ctxt->curr_ns)->tl);
     break;
   case &Using(_):
-    throw new Core::Impossible("leaving using as namespace");
+    impos("leaving using as namespace");
   }
 }
-void enter_using(seg_t loc, nsctxt_t<`a> ctxt, qvar_t usename) {
+namespace_name_t enter_using(seg_t loc, nsctxt_t ctxt, qvar_t usename) {
   let &$(nsl,v) = usename;
   let ns;
   switch(nsl) {
@@ -163,17 +160,18 @@ void enter_using(seg_t loc, nsctxt_t<`a> ctxt, qvar_t usename) {
   case {.Abs_n = vs}:
     ns = List::append(vs,new List(v,NULL));
     break;
-  case {.Loc_n = _ }: throw new Core::Impossible("enter_using, Loc_n");
-  case {.C_n   = _ }: throw new Core::Impossible("enter_using, C_n");
+  case {.Loc_n = _ }: impos("enter_using, Loc_n");
+  case {.C_n   = _ }: impos("enter_using, C_n");
   }
   ctxt->availables = new List(new Using(ns), ctxt->availables);
+  return ns;
 }
-void leave_using(nsctxt_t<`a> ctxt) { 
+void leave_using(nsctxt_t ctxt) { 
   if(ctxt->availables == NULL)
-    throw new Core::Impossible("leaving topmost namespace as a using");
+    impos("leaving topmost namespace as a using");
   switch(ctxt->availables->hd) {
   case &Using(_): ctxt->availables = ctxt->availables->tl; break;
-  case &Namespace(_): throw new Core::Impossible("leaving namespace as using");
+  case &Namespace(_): impos("leaving namespace as using");
   }
 }
 
@@ -1116,7 +1114,7 @@ void resolve_decl(env_t env, decl_t d) {
 	  err(f->loc,"qualified datatype field declaratations are not allowed");
 	  return;
 	case {.Abs_n = _}: break;
-	default: throw new Core::Impossible("datatype field Loc_n or C_n");
+	default: impos("datatype field Loc_n or C_n");
 	}
 	let ns_data = get_ns_data(env->ns,(*f->name)[0]);
 	ns_data->ordinaries = Dict::insert(ns_data->ordinaries,

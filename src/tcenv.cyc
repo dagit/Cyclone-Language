@@ -36,29 +36,20 @@
    with the same names) so their bindings don't belong in our
    environments.
 */
-#include <core.h>
-#include <cycboot.h>
-#include <list.h>
-#include <dict.h>
-#include <set.h>
-#include <dict.h>
-#include <slowdict.h>
-#include <position.h>
 #include <string.h>
 #include "absynpp.h"
-#include "absyn.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "rgnorder.h"
 using Core;
 using List;
-using Set;
-using Position;
 using Absyn;
 using Tcutil;
 using Absynpp;
 using RgnOrder;
 namespace Tcenv;
+
+typedef Set::set_t<`a> set_t<`a>;
+typedef Position::seg_t seg_t;
 
 datatype exn {Env_error};
 datacon(exn,Env_error);

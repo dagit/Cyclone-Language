@@ -18,8 +18,6 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 #ifndef RELATIONS_H
 #define RELATIONS_H
-#include <cycboot.h>
-#include <list.h>
 #include "absyn.h"
 
 namespace Relations {

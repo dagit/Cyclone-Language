@@ -21,15 +21,10 @@
 //       of regions or type variables in scope.  That should be okay and is
 //       pretty simple.  But we should be careful.
 
-#include <cycboot.h>
-#include <list.h>
 #include <dict.h>
-#include "absyn.h"
 #include "rgnorder.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "absynpp.h"
-
 using List;
 using Absyn;
 using Tcutil;

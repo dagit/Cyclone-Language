@@ -18,21 +18,17 @@
    Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <arg.h>
-#include <cycboot.h>
 #include <string.h>
 #include <filename.h>
 #include "parse.h"
-#include "absyn.h"
 #include "absynpp.h"
 #include "absyndump.h"
 #include "binding.h"
 #include "tcutil.h"
-#include "tcenv.h"
 #include "tc.h"
 #include "toc.h"
 #include "tovc.h"
 #include "new_control_flow.h"
-#include "jump_analysis.h"
 #include "interface.h"
 #include "warn.h"
 #include "cyclone.h"
