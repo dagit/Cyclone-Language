@@ -233,7 +233,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       case &Cdecl_att:     
       case &Fastcall_att: 
       case &Noreturn_att: 
-      case &Format_att(_,_,_):
+      case &Format_att(...):
       case &Initializes_att(_):
       case &Pure_att:
       case &Always_inline_att:

@@ -1283,7 +1283,7 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
     //fprintf(stderr,"annotation is notzero\n");
     return false;
   case &CfFlowInfo::IsZero:
-    Tcutil::terr(e->loc,"dereference of NULL pointer");
+    Tcutil::terr(e->loc,"NULL pointer check will definitely fail");
     return false;
   case &EmptyAnnot:
     // warning is unfounded under sizeof as in memcpy

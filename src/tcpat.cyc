@@ -54,8 +54,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       resolve_pat(te, topt, p); 
       break;
     default:
-      terr(p->loc, "pattern expects aggregate type instead of %s",
-           typ2string(t));
+      terr(p->loc,"pattern expects aggregate type instead of %s",typ2string(t));
       break;
     }
     return;
@@ -285,8 +284,6 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
 				PtrAtts(new_evar(&trko,tenv_tvs),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
-                                        
-                                        
     break;
 
   case &Pointer_p(p2):
@@ -678,7 +675,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
   switch(p->r) {
   case &Pointer_p(p2):
     switch ((type_t)p->topt) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): 
+    case &PointerType(PtrInfo(_,_,PtrAtts(rt,...))): 
       check_rgn_accessible(te,p->loc,rt);
       check_pat_regions_rec(te,p2,is_noalias_region(rt,false),patvars);
       return;

@@ -60,8 +60,8 @@ struct Tenv {
   list_t<var_t>  ns; // current namespace
   genv_t         ae; // absolute identifiers -- now 5 big dicts
   struct Fenv *  le; // local environment
-  bool allow_valueof;     // controls whether we allow valueof(T) in an expr
-  bool in_extern_c_include;
+  bool allow_valueof : 1;     // controls whether we allow valueof(T) in an expr
+  bool in_extern_c_include : 1;
 };
 
 // Global environments -- what's declared in a global scope
@@ -75,8 +75,7 @@ struct Genv {
   Dict::dict_t<qvar_t,$(binding_t,bool)@> ordinaries;
 };
 
-typedef $(switch_clause_t, list_t<tvar_t>, list_t<type_t,`r>) const *`r
-ftclause_t<`r>;
+typedef $(switch_clause_t, list_t<tvar_t>, list_t<type_t>) const * ftclause_t;
 
 // This part is shared throughout type-checking of a function.
 // Hence mutations are seen by all subsequent type-checking, which is easier
@@ -147,14 +146,12 @@ static fenv_t get_fenv(tenv_t te, const char ?err_msg) {
   if (le == NULL) env_err(err_msg);
   return (fenv_t)le;
 }
-
 static tenv_t put_fenv(tenv_t te, fenv_t fe) {
   if (te->le == NULL) env_err("put_fenv"); // DJG: unnecessary but okay
   let ans = new *te;
   ans->le = fe;
   return ans;
 }
-
 static tenv_t put_emptyfenv(tenv_t te) {
   let ans = new *te;
   ans->le = NULL;
@@ -178,18 +175,10 @@ opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
 tenv_t add_type_vars(seg_t loc,tenv_t te, list_t<tvar_t> tvs) {
   let fe = new *get_fenv(te,"add_type_vars");
   add_tvar_identities(tvs);
-  let new_tvs = List::append(tvs,fe->type_vars);
+  let new_tvs = append(tvs,fe->type_vars);
   check_unique_tvars(loc,new_tvs); // DJG: wasteful, old were unique
   fe->type_vars = new_tvs;
   return put_fenv(te,fe);
-}
-
-tenv_t copy_tenv(tenv_t te) {
-  let le = te->le;
-  if (le == NULL)
-    return put_emptyfenv(te);
-  else
-    return put_fenv(te,new *le);
 }
 
 tenv_t set_new_status(enum NewStatus status, tenv_t te){
@@ -288,7 +277,7 @@ tenv_t set_fallthru(tenv_t te, list_t<tvar_t,`H> new_tvs, list_t<vardecl_t> vds,
   list_t<type_t> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
     ft_typ = new List(vds->hd->type,ft_typ);
-  let new_ctrl_env = new $(clause,new_tvs,List::imp_rev(ft_typ));
+  let new_ctrl_env = new $(clause,new_tvs,imp_rev(ft_typ));
   let new_fe = new *get_fenv(te,"set_fallthru");
   new_fe->ctrl_env = new_ctrl_env;
   return put_fenv(te,new_fe);
@@ -383,11 +372,11 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
   let bds = NULL;
   if (r1 != &HeapRgn_val && r1 != &UniqueRgn_val && r1 != &RefCntRgn_val) {
     type_t eff1 = new AccessEff(r1);
-    bds = new List::List(new $(eff1,r2),bds);
+    bds = new List(new $(eff1,r2),bds);
   }
   if (r2 != &HeapRgn_val && r2 != &UniqueRgn_val && r2 != &RefCntRgn_val) {
     type_t eff2 = new AccessEff(r2);
-    bds = new List::List(new $(eff2,r1),bds);
+    bds = new List(new $(eff2,r1),bds);
   }
   return new_outlives_constraints(te,bds,loc);
 }
@@ -549,7 +538,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
   rgn_po = add_youngest(rgn_po, rgn0, false);
   for(let po2 = fd->rgn_po; po2 != NULL; po2=po2->tl)
     rgn_po = add_outlives_constraint(rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
-  let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
+  let tvs = new List(rgn0,append(fd->tvs,type_vars));
   check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl)

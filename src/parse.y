@@ -1987,12 +1987,6 @@ direct_declarator:
   { $$=^$(Declarator($1.id, $1.varloc, rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),
                                          $1.tms)));
   }
-/* These two cases help to improve error messages */
-//| qual_opt_identifier qual_opt_identifier
-//{ err("identifier has not been declared as a typedef",SLOC(@1));
-//  $$=^$(Declarator($2,NULL)); }   
-/* | error 
-   { $$=^$(Declarator(exn_name,NULL)); } */
 ;
 
 // same as direct_declarator but allows typedef names to occur as the variable
@@ -2047,12 +2041,6 @@ direct_declarator_withtypedef:
   { let one=$1;
     $$=^$(Declarator(one.id, one.varloc, rnew(yyr) List(rnew(yyr) Attributes_mod(SLOC(@2),$2),one.tms)));
   }
-/* These two cases help to improve error messages */
-//| qual_opt_identifier qual_opt_identifier
-//{ err("identifier has not been declared as a typedef",SLOC(@1));
-//  $$=^$(Declarator($2,NULL)); }   
-/* | error 
-   { $$=^$(Declarator(exn_name,NULL)); } */
 ;
 
 /* CYC: region annotations allowed, as is zero-termination qualifier */

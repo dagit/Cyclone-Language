@@ -960,10 +960,6 @@ namespace Absyn {
   // exception name and type
   extern qvar_t exn_name;
   extern datatypedecl_t exn_tud;
-  extern qvar_t null_pointer_exn_name;
-  extern qvar_t match_exn_name;
-  extern datatypefield_t null_pointer_exn_tuf;
-  extern datatypefield_t match_exn_tuf;
   extern type_t exn_typ();
   // datatype PrintArg and datatype ScanfArg types
   extern qvar_t datatype_print_arg_qvar;
@@ -971,8 +967,6 @@ namespace Absyn {
   // string (char ?)
   extern type_t string_typ(type_t rgn);
   extern type_t const_string_typ(type_t rgn);
-  // FILE
-  extern type_t file_typ();
   // pointers
   extern exp_t exp_unsigned_one; // good for sharing
   extern bounds_t bounds_one; // Upper_b(1) (good for sharing)
@@ -1171,14 +1165,10 @@ namespace Absyn {
   extern $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU);
   // given a checked type, get the decl
   extern aggrdecl_t get_known_aggrdecl(union AggrInfoU info);
-  // is a type a union-type (dynamically tagged, anonymous, with @requires,etc.
-  extern bool is_union_type(type_t);
   // ditto except rule out @tagged unions and @require unions
   extern bool is_nontagged_nonrequire_union_type(type_t);
   // a union (anonymous or otherwise) that has requires clauses on the fields
   extern bool is_require_union_type(type_t);
-  // is a type an aggregate type (i.e. struct, tuple, etc.)
-  extern bool is_aggr_type(type_t t);
 
   extern qvar_t binding2qvar(binding_t);
 

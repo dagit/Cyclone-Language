@@ -52,7 +52,7 @@ static void simplify_unused_result_exp(exp_t e) {
   default: break;
   }
 }
-  
+
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
 			  stmt_t s, exp_opt_t where_opt, bool new_block) {
@@ -68,12 +68,10 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   if(new_block)
     te2 = Tcenv::new_block(loc,te2);
   let ropt = Tcenv::curr_rgn(te2);
-  for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl) {
-    if (vs2->hd != NULL) {
-      //	te2 = add_pat_var(r,loc, te2, *vs2->hd);
+  for(let vs2 = vs; vs2 != NULL; vs2 = vs2->tl)
+    if (vs2->hd != NULL)
       (*vs2->hd)->rgn = ropt;
-    }
-  }
+
   if(where_opt != NULL)
     tcTest(te2,(exp_t)where_opt,"switch clause guard");
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??
@@ -231,56 +229,65 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Switch_s(*exp,scs0,*dtp):
-    // if e is not a variable expression, add an assignment and 
-    // recurse.  This is needed for interpreting patterns cleanly in
-    // the flow analysis
+    // if e is not a variable expression, add an assignment and recurse.
+    // This is needed for interpreting patterns cleanly in the flow analysis
     let e = *exp;
     if (!is_var_exp(e)) {
       let vd = new_vardecl(0,stmt_temp_var(), new_evar(NULL,NULL), NULL);
       let s1 = new_stmt(s0->r,s0->loc);
-      let d = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),
-			       e->loc),
-		       e, s0->loc);
+      let d  = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),
+				e->loc),
+			e, s0->loc);
       let s2 = decl_stmt(d,s1,s0->loc);
-//       let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
       s0->r = s2->r;
       *exp = varb_exp(new Local_b(vd),e->loc);
       tcStmt(te,s0,new_block);
       return;
     }
 
-    tcExp(te,NULL,e);
-    let t = (type_t)e->topt;
-    // type-check the cases in reverse order, a fallthru therefore transfers
-    // control to the case most recently type-checked. For the last case,
-    // fallthru is not allowed.
+    let t = tcExp(te,NULL,e);
+
     if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
       terr(e->loc,UNIQUE_ERR_MSG);
-    let te = clear_fallthru(te);
-    for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
+    // DJG: I finally got tired of checking cases in reverse order.  It is
+    //      a bit more convoluted to go in order...
+    // Fallthru is not allowed in the last case, even if in a nested switch
+    tcpat_result_t   this_pattern;
+    tcpat_result_t * next_pattern = NULL; // NULL in last case
+    bool first_case = true;
+    for(let scs = scs0; scs != NULL; scs = scs->tl) {
+      if(first_case) {
+	first_case = false;
+	this_pattern = tcPat(te,scs->hd->pattern,&t,e);
+      } else
+	this_pattern = *next_pattern;
+
+      if(scs->tl != NULL) {
+	next_pattern = new tcPat(te,scs->tl->hd->pattern,&t,e);
+	if(next_pattern->tvars_and_bounds_opt != NULL
+	   && (*next_pattern->tvars_and_bounds_opt)[1] != NULL)
+	  te = clear_fallthru(te);
+	else {
+	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
+	  let new_tvs = next_pattern->tvars_and_bounds_opt==NULL ? NULL 
+	                 : map(fst,(*next_pattern->tvars_and_bounds_opt)[0]);
+	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
+	}
+      } else
+	te = clear_fallthru(te);
+
       let p = scs->hd->pattern;
-      let pat_res = tcPat(te,p,&t,e);
-      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-	: map(fst,(*pat_res.tvars_and_bounds_opt)[0]);
       if (!unify((type_t)p->topt,t)) { // allow silent_castable?
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
 	     typ2string(t), typ2string((type_t)p->topt));
 	explain_failure();
       }
       else
-	check_pat_regions(te,p,pat_res.patvars);
-      scs->hd->pat_vars = new Opt(pat_res.patvars);
-      // type-checking the body will type-check any explicit fallthrus.
-      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
+	check_pat_regions(te,p,this_pattern.patvars);
+
+      scs->hd->pat_vars = new Opt(this_pattern.patvars);
+      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
 		    scs->hd->where_clause, true);
-      if(pat_res.tvars_and_bounds_opt != NULL
-	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
-	te = clear_fallthru(te);
-      else {
-	let vs = filter_nulls(List::split(pat_res.patvars)[0]);
-	vs = List::imp_rev(vs);
-	te = set_fallthru(te, new_tvs, vs, scs->hd);
-      }
     }
     check_switch_exhaustive(s0->loc,te,scs0,dtp);
     return;
@@ -303,40 +310,54 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
     *scs0 = List::append(*scs0,list(def_clause));
     
-    // similar to Switch_s -- check the patterns in reverse order:
-    let te = clear_fallthru(te);
-    for (let scs = List::rev(*scs0); scs != NULL; scs = scs->tl) {
-      te = copy_tenv(te);
-      let p = scs->hd->pattern;
-      let exception_type = exn_typ();
-      let pat_res = tcPat(te,p,&exception_type,NULL);
-      // MWH: should I be including the fresh regions for alias in fallthrus?
-      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
-	: map(fst,(*pat_res.tvars_and_bounds_opt)[0]);
-      if (!unify((type_t)p->topt,exception_type))
-	terr(scs->hd->loc, "expected datatype exn@ but found %s",
-	     typ2string((type_t)p->topt));
-      else
-	check_pat_regions(te,p,pat_res.patvars);
-      scs->hd->pat_vars = new Opt(pat_res.patvars);
-      // type-checking the body will type-check any explicit fallthrus
-      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
-		    scs->hd->where_clause, true);
-      if(pat_res.tvars_and_bounds_opt != NULL
-	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
+    // similar to Switch_s
+    // DJG: I finally got tired of checking cases in reverse order.  It is
+    //      a bit more convoluted to go in order...
+    // Fallthru is not allowed in the last case, even if in a nested switch
+    let exception_type = exn_typ();
+    tcpat_result_t   this_pattern;
+    tcpat_result_t * next_pattern = NULL; // NULL in last case
+    bool first_case = true;
+    for(let scs = *scs0; scs != NULL; scs = scs->tl) {
+      if(first_case) {
+	first_case = false;
+	this_pattern = tcPat(te,scs->hd->pattern,&exception_type,NULL);
+      } else
+	this_pattern = *next_pattern;
+      
+      if(scs->tl != NULL) {
+	next_pattern = new tcPat(te,scs->tl->hd->pattern,&exception_type,NULL);
+	if(next_pattern->tvars_and_bounds_opt != NULL
+	   && (*next_pattern->tvars_and_bounds_opt)[1] != NULL)
+	  te = clear_fallthru(te);
+	else {
+	  let vs = imp_rev(filter_nulls(List::split(next_pattern->patvars)[0]));
+	  let new_tvs = next_pattern->tvars_and_bounds_opt==NULL ? NULL 
+	                 : map(fst,(*next_pattern->tvars_and_bounds_opt)[0]);
+	  te = set_fallthru(te, new_tvs, vs, scs->tl->hd);
+	}
+      } else
 	te = clear_fallthru(te);
-      else {
-	let vs = filter_nulls(List::split(pat_res.patvars)[0]);
-	vs = List::imp_rev(vs);
-	te = set_fallthru(te, new_tvs, vs, scs->hd);
+
+      let p = scs->hd->pattern;
+      if (!unify((type_t)p->topt,exception_type)) { // allow silent_castable?
+	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
+	     typ2string(exception_type), typ2string((type_t)p->topt));
+	explain_failure();
       }
+      else
+	check_pat_regions(te,p,this_pattern.patvars);
+
+      scs->hd->pat_vars = new Opt(this_pattern.patvars);
+      pattern_synth(scs->hd->loc, te, this_pattern, scs->hd->body, 
+		    scs->hd->where_clause, true);
     }
     check_catch_overlap(s0->loc,te,*scs0,dtp);
     return;
 
   case &Decl_s(d,s):
     string_t unimp_msg_part;
-    let te = new_block ? Tcenv::new_block(s0->loc,te) : copy_tenv(te);
+    let te = new_block ? Tcenv::new_block(s0->loc,te) : te;
     switch (d->r) {
     case &Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),_,tq,t,initializer,*rgn_ptr,atts,_) = vd;
@@ -396,7 +417,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       vd->tq.real_const = extract_const_from_typedef(s0->loc,
 						     vd->tq.print_const,t);
       let te2 = te;
-      //        let te2 = add_local_var(decl_rgn,s->loc,te,vd);
       if (sc == Extern || sc == ExternC)
 	terr(d->loc,"extern declarations are not yet supported within functions");
       if (initializer != NULL) {
@@ -477,7 +497,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	let &Vardecl(_,&$(nsl,_),_,_,t,_,*rgn_ptr,_,_) = vd;
 	*rgn_ptr = curr_bl; // side effect
 	check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
-	//          te2 = add_local_var(decl_rgn,s->loc,te2,vd);
       }
       tcStmt(te2,s,false);
       return;

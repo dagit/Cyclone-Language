@@ -215,7 +215,7 @@ static void rename_decl(decl_t d) {
 
 // returns the decl from the list having the given name
 static decl_t named_decl(list_t<decl_t> decls, stringptr_t<`H> decl_name) {
-  let name;
+  _* name;
   for (; decls != NULL; decls = decls->tl) {
     switch (decls->hd->r) {
     case &Aggr_d(x):
@@ -1694,6 +1694,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (mode != FINISH) //JGM:remove(declsfile);
       ;
 
+
     maybe = fopen(filtereddeclsfile,"r");
     if (!maybe) return 1;
     in_file = (FILE@)maybe;
@@ -1809,7 +1810,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     for (let d = reachable_decls; d != NULL; d = d->tl) {
       let decl = d->hd;
       let anon_enum = false;
-      let name;
+      _* name;
       switch (decl->r) {
       case &Var_d(x):
         let &$(_,v) = x->name;
@@ -1832,17 +1833,17 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(_,v) = x->name;
         name = v;
         break;
-      case &Region_d(...):
-     case &Porton_d:
+      case &Region_d(...): 
+      case &Porton_d:
       case &Portoff_d:
       case &Let_d(...):
       case &Datatype_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):
       case &Using_d(_,_):
-      case &ExternC_d(_):
+      case &ExternC_d(_): 
       case &ExternCinclude_d(_,_):
-        name = NULL;
+	name = NULL;
         break;
       }
       if (!name && !anon_enum) continue;

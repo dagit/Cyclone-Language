@@ -36,8 +36,8 @@ struct TcPatResult {
   list_t<$(vardecl_t *,exp_opt_t)@> patvars;
   // patvars is a list of pattern variables and expressions, with
   // the following meaning: for each list element $(v,e):
-  // 1) if v is not null, and e is not null, then is the
-  //    expression that corresponds to v in the matched expressoin
+  // 1) if v is not null, and e is not null, then e is the
+  //    expression that corresponds to v in the matched expression
   // 2) if v is not null, and e is null, then v has no corresponding
   //    expression, and should be assumed initialized
   // 3) if v is null, then e is not null, and indicates an expression

@@ -1768,10 +1768,8 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   if (!vd->tq.real_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment as an unsigned int only if te->le is not NULL
-  tenv_t te2 = copy_tenv(te);
-  if (te2->le != NULL) 
-    te2 = Tcenv::new_block(loc,te2);
-  let te = te2;
+  if (te->le != NULL) 
+    te = Tcenv::new_block(loc,te);
   let topt2 = NULL;
   let tqopt = NULL;
   let ztopt = NULL;
@@ -2517,8 +2515,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   case &Const_e({.String_c = _}): return t;
   default:
     t = compress(t);
-    if (is_array(t))
-    {
+    if (is_array(t)) {
       t = promote_array(t,addressof_props(te,e)[1],false);
       unchecked_cast(te,e,t,Other_coercion);
     }

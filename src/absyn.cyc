@@ -213,7 +213,6 @@ kindbound_t compress_kb(kindbound_t k) {
     return *k2;
   }
 }
-
 kind_t force_kb(kindbound_t kb) {
   switch (compress_kb(kb)) {
   case &Eq_kb(k): return k;
@@ -485,26 +484,6 @@ type_t dyneither_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
 type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
                  conref_t<bool> zero_term, seg_t ztloc) {
   return new ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term,ztloc});
-}
-
-// FILE
-
-// Maybe someday we'll allow FILE objects to live somewhere other than
-// in the heap (by making the runtime interface more flexible).  
-// If so, we'll need a rgn_t argument.
-type_t file_typ() {
-  static type_t* file_t_opt = NULL;
-  static string_t sf_str = "__sFILE";
-  static stringptr_t sf = &sf_str;
-
-  if(file_t_opt == NULL) {
-    typedef_name_t file_t_name = new $(Abs_n(NULL,false), sf);
-    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL,false);
-    type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
-    file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(0),
-                            false_conref);
-  }
-  return *file_t_opt;
 }
 
 type_t void_star_typ() {
@@ -1067,13 +1046,6 @@ aggrdecl_t get_known_aggrdecl(union AggrInfoU info) {
   case {.KnownAggr = &ad}: return ad;
   }
 }
-bool is_union_type(type_t t) {
-  switch(Tcutil::compress(t)) {
-  case &AnonAggrType(UnionA,_):     return true;
-  case &AggrType(AggrInfo(info,_)): return aggr_kinded_name(info)[0]==UnionA;
-  default: return false;
-  }
-}
 bool is_nontagged_nonrequire_union_type(type_t t) {
   switch(Tcutil::compress(t)) {
   case &AnonAggrType(UnionA,fs):     
@@ -1114,17 +1086,8 @@ bool is_require_union_type(type_t t) {
   default: return false;
   }
 }
-bool is_aggr_type(type_t t) {
-  switch(Tcutil::compress(t)) {
-  case &DatatypeType(_):
-  case &DatatypeFieldType(_):
-  case &TupleType(_):
-  case &AggrType(_):
-  case &AnonAggrType(_,_): return true;
-  default: return false;
-  }
-}
   
+
 qvar_t binding2qvar(binding_t b) {
   switch (b) {
   case &Unresolved_b(qv): return qv;

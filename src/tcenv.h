@@ -56,8 +56,8 @@ extern struct Tenv {
   list_t<var_t> ns; // current namespace
   genv_t        ae; // absolute environment
   struct Fenv * le; // local environment
-  bool allow_valueof;   // controls whether we allow valueof(T) in an expr
-  bool in_extern_c_include;
+  bool allow_valueof : 1;   // controls whether we allow valueof(T) in an expr
+  bool in_extern_c_include : 1;
 };
 typedef struct Tenv@ tenv_t; 
 
@@ -89,9 +89,7 @@ extern bool abstract_val_ok(tenv_t);
 extern tenv_t enter_abstract_val_ok(tenv_t);
 extern tenv_t clear_abstract_val_ok(tenv_t);
 
-extern type_t  return_typ(tenv_t);
-
-extern tenv_t copy_tenv(tenv_t);
+extern type_t return_typ(tenv_t);
 
 extern list_t<tvar_t> lookup_type_vars(tenv_t);
 extern opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t);
