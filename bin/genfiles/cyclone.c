@@ -1119,48 +1119,7 @@ struct Cyc_List_List*Cyc_Tc_treeshake(struct Cyc_Tcenv_Tenv*te,struct Cyc_List_L
 struct Cyc_List_List*Cyc_Toc_toc(struct Cyc_List_List*ds);
 # 27 "tovc.h"
 extern int Cyc_Tovc_elim_array_initializers;
-struct Cyc_List_List*Cyc_Tovc_tovc(struct Cyc_List_List*decls);
-# 9 "stdio.h"
-typedef long Cyc___off_t;
-# 13
-typedef long Cyc_off_t;
-# 17
-typedef unsigned int Cyc_wint_t;
-# 21
-typedef struct {int __count;union {unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;
-# 27
-typedef struct {long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;
-# 32
-typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;
-# 93 "stdio.h"
-extern struct Cyc___cycFILE*Cyc_stdout;
-# 95
-extern struct Cyc___cycFILE*Cyc_stderr;struct  __abstractFILE;
-# 122 "stdio.h"
-struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,struct _dyneither_ptr);
-# 131
-int Cyc_fclose(struct Cyc___cycFILE*);
-# 136
-int Cyc_feof(struct Cyc___cycFILE*);
-# 140
-int Cyc_fflush(struct Cyc___cycFILE*);
-# 142
-int Cyc_fgetc(struct Cyc___cycFILE*);
-# 154
-struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);
-# 156
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);
-# 164
-unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
-# 204
-unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
-# 229
-int Cyc_printf(struct _dyneither_ptr,struct _dyneither_ptr);
-# 245
-int remove(const char*);
-# 342 "stdio.h"
-struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr,struct _dyneither_ptr);
-void Cyc_file_close(struct Cyc___cycFILE*);struct _union_RelnOp_RConst{int tag;unsigned int val;};struct _union_RelnOp_RVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RTvar{int tag;struct Cyc_Absyn_Tvar*val;};union Cyc_Relations_RelnOp{struct _union_RelnOp_RConst RConst;struct _union_RelnOp_RVar RVar;struct _union_RelnOp_RNumelts RNumelts;struct _union_RelnOp_RTvar RTvar;};
+struct Cyc_List_List*Cyc_Tovc_tovc(struct Cyc_List_List*decls);struct _union_RelnOp_RConst{int tag;unsigned int val;};struct _union_RelnOp_RVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RTvar{int tag;struct Cyc_Absyn_Tvar*val;};union Cyc_Relations_RelnOp{struct _union_RelnOp_RConst RConst;struct _union_RelnOp_RVar RVar;struct _union_RelnOp_RNumelts RNumelts;struct _union_RelnOp_RTvar RTvar;};
 # 37 "relations.h"
 typedef union Cyc_Relations_RelnOp Cyc_Relations_reln_op_t;
 # 45
