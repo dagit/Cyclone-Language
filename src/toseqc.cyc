@@ -64,6 +64,7 @@ static string_t exn_effect_funs[] = {
   "_check_known_subscript_null",
   "_check_known_subscript_notnull",
   "_check_fat_subscript",
+  "_check_fat_at_base",
   "_untag_fat_ptr",
   "_region_malloc"
 };
