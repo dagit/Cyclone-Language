@@ -103,7 +103,8 @@ void explain_failure() {
 // logical equivalence.
 static bool check_logical_equivalence(relns_t<`H> r1, relns_t<`H> r2) {
   if (r1 == r2) return true;
-  return check_logical_implication(r1,r2) && check_logical_implication(r2,r1);
+  return Relations::check_logical_implication(r1,r2) && 
+         Relations::check_logical_implication(r2,r1);
 }
 
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {

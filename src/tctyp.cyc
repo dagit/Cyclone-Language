@@ -780,7 +780,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
     Tcexp::tcExp(allow_valueof(te),NULL,e);
-    if (!coerce_uint_type(te,e))
+    if (!coerce_uint_type(e))
       terr(loc,"valueof_t requires an int expression");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
     break;
@@ -817,8 +817,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *eptr = e = uint_exp(1,0);
       }
     }
-    Tcexp::tcExp(allow_valueof(te),NULL,(exp_t)e);
-    if (!coerce_uint_type(te,(exp_t)e))
+    Tcexp::tcExp(allow_valueof(te),NULL,e);
+    if (!coerce_uint_type(e))
       terr(loc,"array bounds expression is not an unsigned int");
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
     /*
@@ -1125,7 +1125,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	prev_fields = new List(fn,prev_fields);
       cvtenv = i_check_valid_type(loc,te,cvtenv,&tmk,t,true,false);
       tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
-      check_bitfield(loc,te,t,width,fn);
+      check_bitfield(loc,t,width,fn);
       check_field_atts(loc,fn,atts);
       if (requires_clause != NULL) {
 	// FIX: check that this requires clause does not overlap with others?

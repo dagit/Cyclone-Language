@@ -112,7 +112,7 @@ static void check_contains_assign(exp_t e) {
 void tcTest(tenv_t te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_type,e);
-  if (!coerce_to_bool(te,e))
+  if (!coerce_to_bool(e))
     terr(e->loc,"test of %s has type %s instead of integral or pointer type",
          msg_part, typ2string((type_t)e->topt));
 }
@@ -248,19 +248,22 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         // as an array initializer, a string literal can be either
         // treated as zero-terminated or not, hence the unconstrained
         // type.
-        return array_type(string_elt_typ, tq, elen, any_bool(&te), 0);
+        return array_type(string_elt_typ, tq, elen, 
+			  any_bool(lookup_type_vars(te)), 0);
       case &PointerType(_):
-        if (!Unify::unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+        if (!Unify::unify(*topt,t) 
+	    && silent_castable(curr_rgnpo(te),loc,t,*topt)) {
           e->topt = t;
-          unchecked_cast(te, e, *topt, Other_coercion);
+          unchecked_cast(e, *topt, Other_coercion);
           t = *topt;
         } else {
           // maybe it's going in a different region
           t = atb_type(string_elt_typ,new_evar(&rko,lookup_opt_type_vars(te)),
                       const_tqual(0), elen_bound, true_type);
-          if (!Unify::unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
+          if (!Unify::unify(*topt,t) 
+	      && silent_castable(curr_rgnpo(te),loc,t,*topt)) {
             e->topt = t;
-            unchecked_cast(te, e, *topt, Other_coercion);
+            unchecked_cast(e, *topt, Other_coercion);
             t = *topt;
           }
         }
@@ -286,8 +289,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)),
                                 empty_tqual(0),
 				PtrAtts(new_evar(&trko,new Opt(tenv_tvs)),
-					true_type,any_bounds(&te),
-                                        any_bool(&te), NULL)));
+					true_type,any_bounds(tenv_tvs),
+                                        any_bool(tenv_tvs), NULL)));
 
     break;
   }
@@ -367,7 +370,7 @@ void check_format_args(tenv_t te, exp_t fmt,
       type_t t = desc_types->hd;
       exp_t  e = args->hd;
       tcExp(te,&t,e);
-      if (!coerce_arg(te,e,t,&alias_coercion)) {
+      if (!coerce_arg(curr_rgnpo(te),e,t,&alias_coercion)) {
         terr(e->loc,"descriptor has type %s but argument has type %s",
              typ2string(t), typ2string((type_t)e->topt));
         Unify::explain_failure();
@@ -400,7 +403,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
     return (type_t)e->topt;
   case Not:
     check_contains_assign(e);
-    if (!coerce_to_bool(te,e))
+    if (!coerce_to_bool(e))
       terr(loc,"expecting integral or * type but found %s",typ2string(t));
     return sint_type;
   case Bitnot:
@@ -431,8 +434,8 @@ static type_t arith_convert(tenv_t te, exp_t e1, exp_t e2) {
   let t1 = (type_t) e1->topt;
   let t2 = (type_t) e2->topt;
   let new_t = max_arithmetic_type(t1, t2);
-  if (!Unify::unify(t1, new_t)) unchecked_cast(te, e1, new_t, No_coercion);
-  if (!Unify::unify(t2, new_t)) unchecked_cast(te, e2, new_t, No_coercion);
+  if (!Unify::unify(t1, new_t)) unchecked_cast(e1, new_t, No_coercion);
+  if (!Unify::unify(t2, new_t)) unchecked_cast(e2, new_t, No_coercion);
   return new_t;
 }
 
@@ -460,7 +463,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,false))
       terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
-    if (!coerce_sint_type(te, e2))
+    if (!coerce_sint_type(e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     let eopt = get_bounds_exp(fat_bound_type,b);
     if (eopt == NULL) return t1;
@@ -482,7 +485,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
                                          PtrAtts(r,true_type,
                                                  fat_bound_type,zt,
                                                  NULL)));
-    unchecked_cast(te, e1, new_t1, Other_coercion);
+    unchecked_cast(e1, new_t1, Other_coercion);
     return new_t1;
   default: return tcArithBinop(te, e1, e2, is_numeric);
   }
@@ -511,8 +514,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       // t2 is thin, coerce t1 to thin and return int
       warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
-      unchecked_cast(te, e1, star_type(t1_elt,pointer_region(t1),
-                                      empty_tqual(0), false_type), 
+      unchecked_cast(e1, star_type(t1_elt,pointer_region(t1),
+				   empty_tqual(0), false_type), 
                      Other_coercion);
       return sint_type;
     } else {
@@ -520,7 +523,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t1,false))
         terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
-      if (!coerce_sint_type(te, e2)) {
+      if (!coerce_sint_type(e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
         Unify::explain_failure();
@@ -534,67 +537,64 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
 					    pointer_elt_type(t2))) {
       if (is_fat_pointer_type(t2)) { 
         warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
-        unchecked_cast(te, e2, star_type(pointer_elt_type(t2),
-                                        pointer_region(t2),
-                                        empty_tqual(0), false_type), 
+        unchecked_cast(e2, star_type(pointer_elt_type(t2),
+				     pointer_region(t2),
+				     empty_tqual(0), false_type), 
                        Other_coercion);
       }
       warn(e1->loc,"thin pointer subtraction!");
       return sint_type;
     }
     warn(e1->loc,"coercing thin pointer to integer to support subtraction");
-    unchecked_cast(te, e1, sint_type, Other_coercion);
+    unchecked_cast(e1, sint_type, Other_coercion);
   }
   if (is_pointer_type(t2)) {
     warn(e1->loc,"coercing pointer to integer to support subtraction");
-    unchecked_cast(te, e2, sint_type, Other_coercion);
+    unchecked_cast(e2, sint_type, Other_coercion);
   }
                              
   return tcArithBinop(te, e1, e2, is_numeric);
 }
 
 static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
-  bool e1_is_num = is_numeric(e1);
-  bool e2_is_num = is_numeric(e2);
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
-  if (e1_is_num && e2_is_num) {
+  if (is_numeric(e1) && is_numeric(e2)) {
     arith_convert(te, e1, e2);
     return sint_type;
   }
   // okay if same types and boxed
-  else if ((type_kind(t1)->kind == BoxKind) ||
-	   (Unify::unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
+  if ((type_kind(t1)->kind == BoxKind) ||
+      (Unify::unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
     if (Unify::unify(t1,t2))
       return sint_type;
     // okay if t1 can be silently cast to t2 or vice versa
-    else if (silent_castable(te,loc,t2,t1)) {
-      unchecked_cast(te,e2,t1, Other_coercion);
+    if (silent_castable(curr_rgnpo(te),loc,t2,t1)) {
+      unchecked_cast(e2,t1, Other_coercion);
       return sint_type;
-    } else if (silent_castable(te,loc,t1,t2)) {
-      unchecked_cast(te,e1,t2, Other_coercion);
+    } 
+    if (silent_castable(curr_rgnpo(te),loc,t1,t2)) {
+      unchecked_cast(e1,t2, Other_coercion);
       return sint_type;
-    } else if (zero_to_null(te,t2,e1) || zero_to_null(te,t1,e2))
+    } 
+    if (zero_to_null(t2,e1) || zero_to_null(t1,e2))
       return sint_type;
-    else goto pointer_cmp;
   }
   // support comparisons on pointers (which can be MemKind) and
   //   region handles
-  else {
-  pointer_cmp:
-    switch ($(compress(t1), compress(t2))) {
-    case $(&PointerType(PtrInfo{t1a,_,_}),
-	   &PointerType(PtrInfo{t2a,_,_})):
-      if (Unify::unify(t1a,t2a)) return sint_type; break;
-    case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)):
-      return sint_type;
-    default: break;
-    }
-    terr(loc,"comparison not allowed between %s and %s",
-         typ2string(t1),typ2string(t2));
-    Unify::explain_failure();
-    return wildtyp(lookup_opt_type_vars(te));
+  switch ($(compress(t1), compress(t2))) {
+  case $(&PointerType(PtrInfo{t1a,_,_}),&PointerType(PtrInfo{t2a,_,_})):
+    if (Unify::unify(t1a,t2a)) 
+      return sint_type; 
+    break;
+  case $(&AppType(&RgnHandleCon,_),&AppType(&RgnHandleCon,_)):
+    return sint_type;
+  default: break;
   }
+  terr(loc,"comparison not allowed between %s and %s",
+       typ2string(t1),typ2string(t2));
+  Unify::explain_failure(); // FIX? not right if we did not call unify
+  return wildtyp(lookup_opt_type_vars(te));
 }
 
 static type_t tcEqPrimop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
@@ -623,8 +623,7 @@ static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t * topt,
   case Bitor:
   case Bitxor:
   case Bitlshift:
-  case Bitlrshift:
-  case Bitarshift: return tcArithBinop(te,e1,e2,is_integral);
+  case Bitlrshift: return tcArithBinop(te,e1,e2,is_integral);
 
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
@@ -830,7 +829,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
     t = new_evar(&tmko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
-  if (!coerce_list(te,t,&l2)) {
+  if (!coerce_list(curr_rgnpo(te),t,&l2)) {
     terr(loc,"conditional clause types do not match: %s != %s",
 	 typ2string((type_t)e2->topt),typ2string((type_t)e3->topt));
     Unify::explain_failure();
@@ -882,7 +881,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   if (po == NULL) {
     if (is_noalias_pointer_or_aggr(t2) && !is_noalias_path(e2))
       terr(e2->loc,UNIQUE_ERR_MSG);
-    if (!coerce_assign(te,e2,t1)) {
+    if (!coerce_assign(curr_rgnpo(te),e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
       Unify::unify(t1,t2); // needed to get right error message
@@ -924,9 +923,9 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = (type_t)e->topt;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case &AppType(&FloatCon(0),_): unchecked_cast(te,e,double_type,No_coercion);t1 = double_type; break;
+  case &AppType(&FloatCon(0),_): unchecked_cast(e,double_type,No_coercion);t1 = double_type; break;
   case &AppType(&IntCon(_,Char_sz),_):
-  case &AppType(&IntCon(_,Short_sz),_): unchecked_cast(te,e,sint_type,No_coercion);t1 = sint_type; break;
+  case &AppType(&IntCon(_,Short_sz),_): unchecked_cast(e,sint_type,No_coercion);t1 = sint_type; break;
   default: break;
   }
   // try to find an exact match first
@@ -948,7 +947,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     // I hate doing this because it has side-effects, but oh well...
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
-    if (coerce_arg(te,e,t2,&bogus)) {
+    if (coerce_arg(curr_rgnpo(te),e,t2,&bogus)) {
       return fields->hd;
     }
   }
@@ -997,7 +996,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	exp_t e1 = es->hd;
 	type_t t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
-	if (!coerce_arg(te,e1,t2,&alias_coercion)) {
+	if (!coerce_arg(curr_rgnpo(te),e1,t2,&alias_coercion)) {
 	  string_t s0 = "actual argument has type ";
 	  string_t s1 = typ2string((type_t)e1->topt);
 	  string_t s2 = " but formal has type ";
@@ -1075,7 +1074,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      exp_t e1 = es->hd;
 	      vci->num_varargs++;
 	      tcExp(te, &vt, e1);
-	      if (!coerce_arg(te,e1,vt,&alias_coercion)) {
+	      if (!coerce_arg(curr_rgnpo(te),e1,vt,&alias_coercion)) {
 		terr(loc,"vararg requires type %s but argument has type %s",
 		     typ2string(vt),typ2string((type_t)e1->topt));
 		Unify::explain_failure();
@@ -1151,7 +1150,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   bool bogus = false;
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
-  if (!coerce_arg(te,e,exception_type,&bogus))
+  if (!coerce_arg(curr_rgnpo(te),e,exception_type,&bogus))
     terr(loc,"expected %s but found %s",typ2string(exception_type),
          typ2string((type_t)e->topt));
   if (topt != NULL) return *topt;
@@ -1211,13 +1210,13 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
   type_t t2 = (type_t)e->topt;
-  if (silent_castable(te,loc,t2,t)) {
+  if (silent_castable(curr_rgnpo(te),loc,t2,t)) {
     *c = No_coercion;
   } else {
-    coercion_t crc = castable(te,loc,t2,t);
+    coercion_t crc = castable(curr_rgnpo(te),loc,t2,t);
     if (crc != Unknown_coercion) {
       *c = crc;
-    } else if (zero_to_null(te,t,e)) {
+    } else if (zero_to_null(t,e)) {
       *c = No_coercion;
     } else {
       // extra unify needed to get the right reason for the failure
@@ -1303,7 +1302,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
   }
 
   // we've got an address-of
-  let $(is_const,rgn) = addressof_props(te,e);
+  let $(is_const,rgn) = addressof_props(e);
   // JGM: don't see how this can happen given the earlier tests but oh well...
   if (is_noalias_region(rgn,false))
     terr(e->loc,"using & would manufacture an alias to an alias-free pointer");
@@ -1455,11 +1454,11 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
     let tenv_tvs = lookup_type_vars(te);
     let t2 = new_evar(&ako,new Opt(tenv_tvs));
     let rt = new_evar(&trko,new Opt(tenv_tvs));
-    let b = any_bounds(&te);
-    let zt = any_bool(&te);
-    let atts = PtrAtts(rt,any_bool(&te),b,zt,NULL);
-    let new_t = new PointerType(PtrInfo{t2,empty_tqual(0),atts});
-    Unify::unify(t,new_t);
+    let b = any_bounds(tenv_tvs);
+    let zt = any_bool(tenv_tvs);
+    let atts = PtrAtts(rt,any_bool(tenv_tvs),b,zt,NULL);
+    let new_typ = new PointerType(PtrInfo{t2,empty_tqual(0),atts});
+    Unify::unify(t,new_typ);
     fallthru(t2,rt,b,zt);
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_rgn_accessible(te,loc,rt);
@@ -1614,7 +1613,7 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
   tcExp(clear_abstract_val_ok(te),NULL,e2);
   type_t t1 = compress((type_t)e1->topt);
   type_t t2 = compress((type_t)e2->topt);
-  if (!coerce_sint_type(te,e2))
+  if (!coerce_sint_type(e2))
     return expr_err(te,e2->loc,topt,"expecting int subscript, found %s",
 		    typ2string(t2));
   // the subscript could be on a tuple or a pointer -- any arrays
@@ -1682,7 +1681,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(clear_abstract_val_ok(te),&topt2,es->hd);
 	// try to coerce the argument to the result type
-	coerce_arg(te,es->hd,(*ts->hd)[1],&bogus);
+	coerce_arg(curr_rgnpo(te),es->hd,(*ts->hd)[1],&bogus);
 	fields = new List(new $((*ts->hd)[0], (type_t)es->hd->topt), fields);
       }
       done = true;
@@ -1743,7 +1742,7 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   for (_ es2 = es; es2 != NULL; es2 = es2->tl)
     tcExpInitializer(te,elt_topt,es2->hd);
   
-  if (!coerce_list(te,res,es))
+  if (!coerce_list(curr_rgnpo(te),res,es))
     // JGMFIX: lousy error messages...
     terr(es->hd->loc,"elements of array do not all have the same type (%s)",
 	 typ2string(res));
@@ -1790,7 +1789,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     }
     break;
   default:
-    if (!coerce_uint_type(te,bound))
+    if (!coerce_uint_type(bound))
       terr(bound->loc,"expecting unsigned int, found %s",
 	   typ2string((type_t)bound->topt));
   }
@@ -1865,7 +1864,7 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
     }
     break;
   default:
-    if (!coerce_uint_type(te,bound))
+    if (!coerce_uint_type(bound))
       terr(bound->loc,"expecting unsigned int, found %s",
 	   typ2string((type_t)bound->topt));
   }
@@ -2017,7 +2016,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     //       fprintf(stderr,"checking agg field %s, exp=%s, typ=%s\n",*(field->name),
     // 	      Absynpp::exp2string(field_exp),
 // 	      Absynpp::typ2string(field_exp->topt));
-    if (!coerce_arg(te2,field_exp,inst_fieldtyp,&bogus)) {
+    if (!coerce_arg(curr_rgnpo(te2),field_exp,inst_fieldtyp,&bogus)) {
       terr(field_exp->loc,"field %s of %s %s expects type %s != %s",
 	   *(field->name),((ad->kind == StructA) ? "struct" : "union"),
 	   qvar2string(*tn),typ2string(inst_fieldtyp),
@@ -2050,7 +2049,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       let &$(field,field_exp) = fields->hd;
       tcExpInitializer(clear_abstract_val_ok(te),
 		       &field->type, field_exp);
-      if (!coerce_arg(te,field_exp,field->type,&bogus)) {
+      if (!coerce_arg(curr_rgnpo(te),field_exp,field->type,&bogus)) {
 	terr(field_exp->loc,"field %s of struct expects type %s != %s",
 	     *(field->name),typ2string(field->type),
 	     typ2string((type_t)field_exp->topt));
@@ -2085,7 +2084,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
     type_t t = (*ts->hd)[1];
     if (inst != NULL) t = substitute(inst,t);
     tcExpInitializer(te, &t, e);
-    if (!coerce_arg(te,e,t,&bogus)) {
+    if (!coerce_arg(curr_rgnpo(te),e,t,&bogus)) {
       terr(e->loc,"datatype constructor %s expects argument of type %s "
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
@@ -2430,9 +2429,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       impos("tcNew: comprehension returned non-array type");
     res_typ = promote_array(res_typ,rgn,true);
     if (topt != NULL) {
-      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) 
+	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
 	e->topt = res_typ;
-	unchecked_cast(te, e, *topt, Other_coercion);
+	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
       }
     }
@@ -2462,9 +2462,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       // try unifying res_typ and topt -- if that fails, then see if we
       // can cast res_typ to topt, and insert the cast so that the code
       // generator knows what to do.
-      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) 
+	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
 	e->topt = res_typ;
-	unchecked_cast(te, e, *topt, Other_coercion);
+	unchecked_cast(e, *topt, Other_coercion);
 	res_typ = *topt;
       }
     }
@@ -2511,13 +2512,14 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       terr(e1->loc, UNIQUE_ERR_MSG);
     type_t res_typ =
       new PointerType(PtrInfo(telt,empty_tqual(0),
-			      PtrAtts(rgn,any_bool(&te),
+			      PtrAtts(rgn,any_bool(lookup_type_vars(te)),
 				      bounds_one(),
 				      false_type,NULL)));
     if (topt != NULL) {
-      if (!Unify::unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
+      if (!Unify::unify(*topt,res_typ) 
+	  && silent_castable(curr_rgnpo(te),loc,res_typ,*topt)) {
 	e->topt = res_typ;
-	unchecked_cast(te,e,*topt,Other_coercion);
+	unchecked_cast(e,*topt,Other_coercion);
 	res_typ = *topt;
       }
     }
@@ -2530,7 +2532,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = compress(tcExpNoPromote(te, topt, e));
   if (is_array_type(t))
-    e->topt = t = promote_array(t,addressof_props(te,e)[1],false);
+    e->topt = t = promote_array(t,addressof_props(e)[1],false);
   return t;
 }
 
@@ -2557,8 +2559,8 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   default:
     t = compress(t);
     if (is_array_type(t)) {
-      t = promote_array(t,addressof_props(te,e)[1],false);
-      unchecked_cast(te,e,t,Other_coercion);
+      t = promote_array(t,addressof_props(e)[1],false);
+      unchecked_cast(e,t,Other_coercion);
     }
     return t;
   }

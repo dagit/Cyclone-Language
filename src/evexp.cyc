@@ -162,7 +162,6 @@ static $(cnst_t,bool) eval_const_binprimop(primop_t p,exp_t e1,exp_t e2) {
   case $(Bitxor,       _): u3 = u1 ^  u2; use_u3 = true; break;
   case $(Bitlshift,    _): u3 = u1 << u2; use_u3 = true; break;
   case $(Bitlrshift,   _): u3 = u1 >> u2; use_u3 = true; break;
-  case $(Bitarshift,   _): terr(e1->loc, ">>> NOT IMPLEMENTED"); fallthru;
   default: terr(e1->loc, "bad constant expression"); return $(cn1,true);
   }
   if(use_i3) return $(Int_c(Signed,   i3),       true);

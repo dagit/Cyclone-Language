@@ -61,19 +61,19 @@ struct Reln {
 // map relational primop to one of our limited forms of relations
 // (gets rid of > and >= in favor of < and <= to keep things simple.)
 // assumes primop is one of ==,!=,<,<=,>,>=
-extern $(Absyn::exp_t,relation_t,Absyn::exp_t) 
+$(Absyn::exp_t,relation_t,Absyn::exp_t) 
   primop2relation(Absyn::exp_t e1,Absyn::primop_t p,Absyn::exp_t e2);
 
 // used to negate a relation (note -- must flip operands too)
-extern relation_t flip_relation(relation_t r);
+relation_t flip_relation(relation_t r);
 
-extern reln_t<`r> negate(region_t<`r>, reln_t);
+reln_t<`r> negate(region_t<`r>, reln_t);
 // Try to convert an expression to a relation operand -- puts the result in p
 // and returns true if successful, returns false otherwise.  
 // Right now, this succeeds if e has a tag type, evaluates at compile-time
 // to a constant, is a non-escaping variable, is the numelts of a non-escaping
 // variable, or is a valueof_e(`i).
-extern bool exp2relnop(Absyn::exp_t e, reln_op_t @p);
+bool exp2relnop(Absyn::exp_t e, reln_op_t @p);
 
 // tries to convert an expression e to a conjunction of relations
 // Right now, e must be of the form:
@@ -81,12 +81,12 @@ extern bool exp2relnop(Absyn::exp_t e, reln_op_t @p);
 //       !(Rop R Rop)
 // R ::= == | != | <= | < | >= | >
 // Rop -- see exp2relnop above.
-extern relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e);
+relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e);
 
 // Add rop1 r rop2 to relns (avoids adding if already present)
-extern relns_t<`r> add_relation(region_t<`r> rgn, 
-                                reln_op_t rop1, relation_t r,
-                                reln_op_t rop2, relns_t<`r> relns);
+relns_t<`r> add_relation(region_t<`r> rgn, 
+			 reln_op_t rop1, relation_t r,
+			 reln_op_t rop2, relns_t<`r> relns);
 
 // Duplicate all relations in [relns] that mention an rop for [e_old],
 // replacing its rop in the duplicated version with the rop for
@@ -127,5 +127,7 @@ extern string_t relns2string(relns_t r);
 // negation numelts(x) <= i and check to see if the resulting system
 // is inconsistent.  If not, then you know that the desired relation holds.
 extern bool consistent_relations(relns_t rlns);
+
+bool check_logical_implication(relns_t<`H> r1, relns_t<`H> r2);
 }
 #endif

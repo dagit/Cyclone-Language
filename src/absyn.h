@@ -500,7 +500,7 @@ namespace Absyn {
   // Primitive operations
   EXTERN_ABSYN enum Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
-    Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
+    Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, 
     Numelts
   };
 

@@ -1030,7 +1030,6 @@ int exp_prec(exp_t e) {
     case Bitxor:         return  50;
     case Bitlshift:      return  90;
     case Bitlrshift:     return  80; // unlike C (see grammar)
-    case Bitarshift:     return  80; // doesn't actually exist (see grammar)
     case Numelts:        return 140; // numelts(foo)
     default:             return 140;
     }
@@ -1344,7 +1343,6 @@ string_t prim2str(primop_t p) {
   case Bitxor: return "^";
   case Bitlshift: return "<<";
   case Bitlrshift: return ">>";
-  case Bitarshift: return ">>>";
   case Numelts: return "numelts";
   default: return "?";
   }

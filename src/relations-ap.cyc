@@ -16,6 +16,7 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
+#include "warn.h"
 #include "relations-ap.h"
 #include "unify.h"
 #include "tcutil.h"
@@ -30,37 +31,23 @@
 using List;
 namespace Relations;
 
-reln_op_t RConst(unsigned int i) {
-  return RelnOp{.RConst = i};
-}
-reln_op_t RVar(Absyn::vardecl_t v) {
-  return RelnOp{.RVar = v};
-}
-reln_op_t RNumelts(Absyn::vardecl_t v) {
-  return RelnOp{.RNumelts = v};
-}
-reln_op_t RType(Absyn::type_t t) {
-  return RelnOp{.RType = Tcutil::compress(t)};
-}
-reln_op_t RParam(unsigned int i) {
-  return RelnOp{.RParam = i};
-}
-reln_op_t RParamNumelts(unsigned int i) {
-  return RelnOp{.RParamNumelts = i};
-}
-reln_op_t RReturn() {
-  return RelnOp{.RReturn = 0};
-}
+reln_op_t RConst(unsigned int i)        { return RelnOp{.RConst = i};   }
+reln_op_t RVar(Absyn::vardecl_t v)      { return RelnOp{.RVar = v};     }
+reln_op_t RNumelts(Absyn::vardecl_t v)  { return RelnOp{.RNumelts = v}; }
+reln_op_t RType(Absyn::type_t t) { return RelnOp{.RType = Tcutil::compress(t)};}
+reln_op_t RParam(unsigned int i) { return RelnOp{.RParam = i};}
+reln_op_t RParamNumelts(unsigned int i) { return RelnOp{.RParamNumelts = i}; }
+reln_op_t RReturn() { return RelnOp{.RReturn = 0}; }
 
 static bool same_relop(reln_op_t r1,reln_op_t r2) {
   switch ($(r1,r2)) {
-  case $({.RConst = c1},   {.RConst = c2})   : return c1 == c2;
-  case $({.RVar = x1},     {.RVar = x2}): return x1 == x2;
-  case $({.RNumelts = x1}, {.RNumelts = x2}) : return x1 == x2;
-  case $({.RType = t1},    {.RType = t2}) : return Unify::unify(t1,t2);
-  case $({.RParam = i},    {.RParam = j}): return i == j;
+  case $({.RConst   = c1},     {.RConst   = c2}):     return c1 == c2;
+  case $({.RVar     = x1},     {.RVar     = x2}):     return x1 == x2;
+  case $({.RNumelts = x1},     {.RNumelts = x2}):     return x1 == x2;
+  case $({.RType    = t1},     {.RType    = t2}):   return Unify::unify(t1,t2);
+  case $({.RParam   = i},      {.RParam   = j}):      return i == j;
   case $({.RParamNumelts = i}, {.RParamNumelts = j}): return i == j;
-  case $({.RReturn = _},   {.RReturn = _}): return true;
+  case $({.RReturn  = _},      {.RReturn = _}):       return true;
   default: return false;
   }
 }
@@ -84,7 +71,7 @@ relns_t<`r> duplicate_relation(region_t<`r> rgn,
   Relations::reln_op_t rop_new = Relations::RConst(0); // dummy value
   if (!exp2relnop(e_old,&rop_old)) return relns;
   if (!exp2relnop(e_new,&rop_new)) {
-    Tcutil::warn(e_new->loc,"Could not construct relation");
+    Warn::warn(e_new->loc,"Could not construct relation");
     return relns;
   }
   for (let rs = relns; rs != NULL; rs = rs->tl) {
@@ -349,13 +336,13 @@ relns_t<`r> reln_assign_exp(region_t<`r> rgn, relns_t<`r> r, Absyn::exp_t e1, Ab
 // only works on non-constants
 static Pratt::node_t rop2node(reln_op_t r) {
   switch (r) {
-  case {.RVar = x}: return Pratt::NVar(x);
-  case {.RNumelts = x}: return Pratt::NNumelts(x);
-  case {.RType = x}: return Pratt::NType(x);
-  case {.RParam = i}: return Pratt::NParam(i);
+  case {.RVar = x}:          return Pratt::NVar(x);
+  case {.RNumelts = x}:      return Pratt::NNumelts(x);
+  case {.RType = x}:         return Pratt::NType(x);
+  case {.RParam = i}:        return Pratt::NParam(i);
   case {.RParamNumelts = i}: return Pratt::NParamNumelts(i);
-  case {.RReturn = _}: return Pratt::NReturn();
-  default: Tcutil::impos("rop2node");
+  case {.RReturn = _}:       return Pratt::NReturn();
+  default: Warn::impos("rop2node");
   }
 }
 
@@ -555,6 +542,16 @@ bool consistent_relations(relns_t rlns) {
   return consist_relations(G,rlns);
 }
 
+// e1 and e2 represent requires/ensures clauses and we're to check
+// that e1 as a predicate implies e2.
+bool check_logical_implication(relns_t<`H> r1, relns_t<`H> r2) {
+  for (; r2 != NULL; r2 = r2->tl) {
+    let r = Relations::negate(Core::heap_region,r2->hd);
+    let relns = new List{r,r1};
+    if (Relations::consistent_relations(relns)) return false;
+  }
+  return true;
+}
 
 // map relational primop to one of our limited forms of relations
 // (gets rid of > and >= in favor of < and <= to keep things simple.)
@@ -568,16 +565,16 @@ $(Absyn::exp_t,relation_t,Absyn::exp_t) primop2relation(Absyn::exp_t e1,Absyn::p
   case Absyn::Lte: return $(e1,Rlte,e2);
   case Absyn::Gt: return $(e2,Rlt,e1);
   case Absyn::Gte: return $(e2,Rlte,e1);
-  default: Tcutil::impos("primop2relation");
+  default: Warn::impos("primop2relation");
   }
 }
 
 // used to negate a relation (note -- must flip operands too)
 relation_t flip_relation(relation_t r) {
   switch (r) {
-  case Req: return Rneq;
+  case Req:  return Rneq;
   case Rneq: return Req;
-  case Rlt: return Rlte;
+  case Rlt:  return Rlte;
   case Rlte: default: return Rlt;
   }
 }
@@ -638,8 +635,8 @@ relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
       // any inconsistent fact represents false
       else return rnew(r) List(rnew(r) Reln(RConst(0),Rlt,RConst(0)),NULL);
     }
-    Tcutil::terr(e->loc,"unable to convert `%s' to static relation",
-                 Absynpp::exp2string(e));
+    Warn::err(e->loc,"unable to convert `%s' to static relation",
+	      Absynpp::exp2string(e));
   }
   // return an inconsistent relation
   return rnew(r) List(rnew(r) Reln(RConst(0),Rlt,RConst(0)),NULL);

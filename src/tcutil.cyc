@@ -29,7 +29,6 @@ using Core;
 using List;
 using Absyn;
 using Absynpp;
-using Tcenv;
 using Unify;
 namespace Tcutil;
 
@@ -1123,17 +1122,6 @@ static bool sub_rgnpo(list_t<$(type_t,type_t)@> rpo1,
 
 typedef Relations::relns_t<`r> relns_t<`r>;
 
-// e1 and e2 represent requires/ensures clauses and we're to check
-// that e1 as a predicate implies e2.
-bool check_logical_implication(relns_t<`H> r1, relns_t<`H> r2) {
-  for (; r2 != NULL; r2 = r2->tl) {
-    let r = Relations::negate(heap_region,r2->hd);
-    let relns = new List{r,r1};
-    if (Relations::consistent_relations(relns)) return false;
-  }
-  return true;
-}
-
 // see if two region partial-orders are the same
 bool same_rgn_po(list_t<$(type_t,type_t)@> rpo1,
 		 list_t<$(type_t,type_t)@> rpo2) {
@@ -1473,7 +1461,7 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
 
 // coerce the list e so that each element has type t -- used in arrays and
 // conditionals
-bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
+bool coerce_list(RgnOrder::rgn_po_opt_t po, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
   opt_t<type_t> max_arith_type = NULL;
@@ -1490,7 +1478,7 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
       return false;
   // now coerce each expression to the type t as if by assignment
   for (list_t<exp_t> el = es; el != NULL; el = el->tl)
-    if (!coerce_assign(te,el->hd,t)) {
+    if (!coerce_assign(po,el->hd,t)) {
       terr(el->hd->loc,"type mismatch: expecting %s but found %s",
            typ2string(t),typ2string((type_t)el->hd->topt));
       return false;
@@ -1500,38 +1488,38 @@ bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
 
 // coerce e to have type "bool" (int) -- used in conditionals
 // Note: explicit cast is needed only for fat pointers, I think.
-bool coerce_to_bool(tenv_t te, exp_t e) {
-  if (!coerce_sint_type(te,e))
+bool coerce_to_bool(exp_t e) {
+  if (!coerce_sint_type(e))
     switch (compress((type_t)e->topt)) {
-    case &PointerType(_): unchecked_cast(te,e,uint_type,Other_coercion); break;
+    case &PointerType(_): unchecked_cast(e,uint_type,Other_coercion); break;
     default: return false;
     }
   return true;
 }
 
 // coerce e to have type unsigned int -- used in subscript
-bool coerce_uint_type(tenv_t te, exp_t e) {
+bool coerce_uint_type(exp_t e) {
   if (unify((type_t)e->topt,uint_type))
     return true;
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type((type_t)e->topt)) {
     if (will_lose_precision((type_t)e->topt,uint_type))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,uint_type,No_coercion);
+    unchecked_cast(e,uint_type,No_coercion);
     return true;
   }
   return false;
 }
 
 // coerce e to have type [signed] int -- used in coercions to "bool"
-bool coerce_sint_type(tenv_t te, exp_t e) {
+bool coerce_sint_type(exp_t e) {
   if (unify((type_t)e->topt,sint_type))
     return true;
   // try arithmetic conversions -- we only allow integral values
   if (is_integral_type((type_t)e->topt)) {
     if (will_lose_precision((type_t)e->topt,sint_type))
       warn(e->loc,"integral size mismatch; conversion supplied");
-    unchecked_cast(te,e,sint_type,No_coercion);
+    unchecked_cast(e,sint_type,No_coercion);
     return true;
   }
   return false;
@@ -1582,22 +1570,16 @@ exp_opt_t get_ptr_bounds_exp(ptrbound_t def, type_t t) {
 }
 
 // unconstrained boolean-kinded type node
-type_t any_bool(tenv_t *tep) {
-  if (tep != NULL)
-    return new_evar(&boolko,new Opt(lookup_type_vars(*tep)));
-  else
-    return new_evar(&boolko,new Opt(NULL));
+type_t any_bool(list_t<tvar_t,`H> tvs) {
+    return new_evar(&boolko,new Opt(tvs));
 }
 // unconstrained pointer bound type node
-type_t any_bounds(tenv_t *tep) {
-  if (tep != NULL)
-    return new_evar(&ptrbko,new Opt(lookup_type_vars(*tep)));
-  else
-    return new_evar(&ptrbko,new Opt(NULL));
+type_t any_bounds(list_t<tvar_t,`H> tvs) {
+  return new_evar(&ptrbko,new Opt(tvs));
 }
 
 // defined below
-static bool ptrsubtype(tenv_t te,
+static bool ptrsubtype(RgnOrder::rgn_po_opt_t po,
                        list_t<$(type_t,type_t)@`H,`H> assume,
                        type_t t1, type_t t2);
 
@@ -1605,7 +1587,7 @@ static bool ptrsubtype(tenv_t te,
 // This is not the same as sub-typing, because we have the opportunity
 // to do various coercions.  We only do coercions that don't have
 // a failure here.
-bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
+bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
@@ -1644,7 +1626,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     //fprintf(stderr,"2: okay = %d\n",okay);
     // first region must outlive the second
     if (!unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
-      if (region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
+      if (RgnOrder::rgn_outlives_rgn(po,pinfo_a.ptr_atts.rgn,
+				     pinfo_b.ptr_atts.rgn)) {
         if (warn_region_coerce)
           warn(loc, "implicit cast from region %s to region %s", 
                typ2string(pinfo_a.ptr_atts.rgn),
@@ -1670,7 +1653,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     //        kind_leq(&ak,type_kind(pinfo_b.elt_type)));
 
     okay = okay && (unify(pinfo_a.elt_type,pinfo_b.elt_type) ||
-                    (deep_subtype && (pinfo_b.elt_tq.real_const || kind_leq(&ak,type_kind(pinfo_b.elt_type))) && ptrsubtype(te,NULL,pinfo_a.elt_type,pinfo_b.elt_type)));
+                    (deep_subtype && (pinfo_b.elt_tq.real_const || kind_leq(&ak,type_kind(pinfo_b.elt_type))) && ptrsubtype(po,NULL,pinfo_a.elt_type,pinfo_b.elt_type)));
     // fprintf(stderr,"4: okay = %d\n",okay);
     return okay;
 
@@ -1838,25 +1821,18 @@ opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
 
 // if e1 is zero, and t2 a pointer type, changes e1 to NULL and
 // returns true if t2 is a nullable pointer type
-bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
-  if (is_pointer_type(t2) && is_zero(e1)) {
+bool zero_to_null(type_t t2, exp_t e1) {
+  if(!is_zero(e1))
+    return false;
+  switch(compress(t2)) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,nbl,...))):
+    if(!force_type2bool(true,nbl))
+      return false;
     e1->r = null_exp(0)->r;
-    let tenv_tvs = lookup_opt_type_vars(te);
-    let t1 = pointer_type(PtrInfo(new_evar(&ako,tenv_tvs),
-                                  empty_tqual(0),
-                                  PtrAtts(new_evar(&trko,tenv_tvs),
-                                          true_type,
-                                          new_evar(&ptrbko,tenv_tvs),
-                                          new_evar(&boolko,tenv_tvs),NULL)));
-    e1->topt = t1;
-    bool bogus = false;
-    bool retv = coerce_arg(te, e1, t2, &bogus);
-    if (bogus != false)
-      impos("zero_to_null resulted in an alias coercion on %s at %s\n",
-	    exp2string(e1), Position::string_of_segment(e1->loc));
-    return retv;
+    e1->topt = t2;
+    return true;
+  default: return false;
   }
-  return false;
 }
 
 bool warn_alias_coerce = false;
@@ -1924,55 +1900,57 @@ static bool can_insert_alias(exp_t e, type_t e_type,
 }
 
 // coerce e to have type t -- used in function call and explicit fallthru
-bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
+bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2, 
+		bool @alias_coercion) {
   type_t t1 = compress((type_t)e->topt);
   coercion_t c;
   bool do_alias_coercion = false;
   // see if types immediately match
-  if (unify(t1,t2)) return true;
+  if (unify(t1,t2)) 
+    return true;
   // try arithmetic conversions
   if (is_arithmetic_type(t2) && is_arithmetic_type(t1)) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       warn(e->loc,"integral size mismatch; %s -> %s conversion supplied",
 	   typ2string(t1), typ2string(t2));
-    unchecked_cast(te,e,t2,No_coercion);
+    unchecked_cast(e,t2,No_coercion);
     return true;
-  } else {
-    // check if we can do an alias coercion; if so, make sure it otherwise
-    // typechecks before performing the coercion (for better error reporting).
-    if (can_insert_alias(e,t1,t2,e->loc)) {
-      if (warn_alias_coerce)
-	warn(e->loc,"implicit alias coercion for %s:%s to %s",
-	     exp2string(e), typ2string(t1), typ2string(t2));
-      *alias_coercion = true;
-    }
-
-    if (silent_castable(te,e->loc,t1,t2)) {
-      unchecked_cast(te,e,t2,Other_coercion);
-      return true;
-    } else if (zero_to_null(te,t2,e)) {
-      return true;
-    } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
-      // if C supports the conversion, then we don't need the cast.
-      if (c != No_coercion) unchecked_cast(te,e,t2,c);
-      if (c != Null_to_NonNull)
-	warn(e->loc,"implicit cast from %s to %s",
-	     typ2string(t1),typ2string(t2));
-      return true;
-    }
-    else return false;
+  } 
+  // check if we can do an alias coercion; if so, make sure it otherwise
+  // typechecks before performing the coercion (for better error reporting).
+  if (can_insert_alias(e,t1,t2,e->loc)) {
+    if (warn_alias_coerce)
+      warn(e->loc,"implicit alias coercion for %s:%s to %s",
+	   exp2string(e), typ2string(t1), typ2string(t2));
+    *alias_coercion = true;
   }
+
+  if (silent_castable(po,e->loc,t1,t2)) {
+    unchecked_cast(e,t2,Other_coercion);
+    return true;
+  } 
+  if (zero_to_null(t2,e))
+    return true;
+  if ((c = castable(po,e->loc,t1,t2)) != Unknown_coercion) {
+    // if C supports the conversion, then we don't need the cast.
+    if (c != No_coercion) 
+      unchecked_cast(e,t2,c);
+    if (c != Null_to_NonNull)
+      warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
+    return true;
+  }
+  return false;
 }
 
 // coerce e to have type t -- used in assignment operations.  Neither
 // gcc nor VC++ issue warnings for losing precision here, but I think
 // it may be appropriate.
-bool coerce_assign(tenv_t te, exp_t e, type_t t) {
+bool coerce_assign(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t) {
   // even if we can coerce the assignment, we don't bother because
   // the scope will be too small.
   bool bogus = false;
-  return coerce_arg(te,e,t,&bogus);
+  return coerce_arg(po,e,t,&bogus);
 }
 
 // FIX:  all of the subtyping stuff needs to be re-examined in the light
@@ -1987,44 +1965,41 @@ bool coerce_assign(tenv_t te, exp_t e, type_t t) {
 // x86 -- I need to find precise documentation on it before we do this.
 static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r> r,
                                                     bool flatten,
-                                                    tenv_t te,
                                                     type_t t1);
 static list_t<$(tqual_t,type_t)@`r,`r>
   flatten_type_f($(list_t<$(tvar_t,type_t)@`r,`r>,
-                  region_t<`r>, tenv_t, bool)@ env,aggrfield_t x){
-  let $(inst,r,te,flatten) = *env;
-  //fprintf(stderr,"flattening field %s with real_const = %d and const = %d\n",*x->name,x->tq.real_const,x->tq.print_const);
+                  region_t<`r>, bool)@ env,aggrfield_t x){
+  let $(inst,r,flatten) = *env;
   let t = (inst == NULL) ? x->type : rsubstitute(r,inst,x->type);
-  let ts = flatten_type(r,flatten,te,t);
+  let ts = flatten_type(r,flatten,t);
   if (List::length(ts) == 1)
     return rnew(r) List{rnew(r) $(x->tq,t),NULL};
-  else return ts;
+  return ts;
 }
 static list_t<$(tqual_t,type_t)@`r,`r>
-  rcopy_tqt($(region_t<`r>,tenv_t,bool)@ env,$(tqual_t,type_t)@ x) {
-  let $(r,te,flatten) = *env;
+  rcopy_tqt($(region_t<`r>,bool)@ env,$(tqual_t,type_t)@ x) {
+  let $(r,flatten) = *env;
   let $(tq,t) = *x;
-  let ts = flatten_type(r,flatten,te,t);
+  let ts = flatten_type(r,flatten,t);
   if (List::length(ts) == 1)
     return rnew(r) List{rnew(r) $(tq,t),NULL};
-  else return ts;
+  return ts;
 }
 static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r> r,
                                                     bool flatten,
-                                                    tenv_t te,
                                                     type_t t1) {
   if (flatten) {
     t1 = compress(t1);
     switch (t1) {
     case &AppType(&VoidCon,_): return NULL;
     case &TupleType(tqs):
-      let env = $(r,te,flatten);
+      let env = $(r,flatten);
       // we can flatten only the first component recursively
       switch (tqs) {
       case NULL: return NULL;
       case &List{hd,tl}:
         let hd2 = rcopy_tqt(&env,hd);
-        env[2] = false;
+        env[1] = false;
         let tl2 = rmap_c(r,rcopy_tqt,&env,tqs);
         let temp = rnew(r) List{hd2,tl2};
         return rflatten(r,rnew (r) List{hd2,tl2});
@@ -2035,23 +2010,23 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_type(region_t<`r> r,
          || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL)
         return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
       let inst = List::rzip(r,r,ad->tvs,ts);
-      $(list_t<_,`r>,region_t<`r>,_,bool) env = $(inst,r,te,flatten);
+      $(list_t<_,`r>,region_t<`r>,bool) env = $(inst,r,flatten);
       switch (ad->impl->fields) {
       case NULL: return NULL;
       case &List{hd,tl}:
         let hd2 = flatten_type_f(&env,hd);
-        env[3] = false;
+        env[2] = false;
         let tl2 = List::rmap_c(r,flatten_type_f,&env,tl);
         let tts = rnew(r) List{hd2,tl2};
         return List::rflatten(r,tts);
       }
     case &AnonAggrType(StructA,fs):
-      $(list_t<_,`r>,region_t<`r>,_,bool) env = $(NULL,r,te,flatten);
+      $(list_t<_,`r>,region_t<`r>,bool) env = $(NULL,r,flatten);
       switch (fs) {
       case NULL: return NULL;
       case &List{hd,tl}:
         let hd2 = flatten_type_f(&env,hd);
-        env[3] = false;
+        env[2] = false;
         let tl2 = List::rmap_c(r,flatten_type_f,&env,tl);
         let tts = rnew(r) List{hd2,tl2};
         return rflatten(r,tts);
@@ -2090,8 +2065,7 @@ static bool isomorphic(type_t t1, type_t t2) {
 
 // FIX: the subtyping environment needs to take into account the
 // qualifiers on the pointers.
-bool subtype(tenv_t te,
-             list_t<$(type_t,type_t)@`H,`H> assume,
+bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
              type_t t1, type_t t2) {
   if (unify(t1,t2)) return true;
   for (_ a = assume; a != NULL; a = a->tl) 
@@ -2116,8 +2090,8 @@ bool subtype(tenv_t te,
         && !type2bool(false,zt_a) && type2bool(false,zt_b))
       return false;
     // rt_a must outlive rt_b
-    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b) && 
-        !subtype(te, assume, rt_a, rt_b)) 
+    if (!unify(rt_a,rt_b) && !RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b) && 
+        !subtype(po, assume, rt_a, rt_b)) 
       return false;
     // need to check that the bounds match up
     if (!unify(b_a,b_b)) {
@@ -2141,7 +2115,7 @@ bool subtype(tenv_t te,
 
     //fprintf(stderr,"subtype: got here on %s and %s\n",typ2string(t1), typ2string(t2));
     // now check that t_a is a pointer sub-type of t_b
-    return (deep_subtype && ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b)) || (unify(t_a,t_b)) || isomorphic(t_a,t_b);
+    return (deep_subtype && ptrsubtype(po, new List(new $(t1,t2),assume), t_a, t_b)) || (unify(t_a,t_b)) || isomorphic(t_a,t_b);
 
   case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield = $(dd1,df)}),ts1), 
          &AppType(&DatatypeCon({.KnownDatatype = &dd2}), ts2)):
@@ -2171,11 +2145,11 @@ bool subtype(tenv_t te,
       if (inst != NULL) {
 	f1.tvars = NULL;
 	f2.tvars = NULL;
-	return subtype(te,assume,new FnType(f1),new FnType(f2));
+	return subtype(po,assume,new FnType(f1),new FnType(f2));
       }
     }
     // covariant subtyping on results
-    if (!subtype(te,assume,f1.ret_type,f2.ret_type)) return false;
+    if (!subtype(po,assume,f1.ret_type,f2.ret_type)) return false;
     let args1 = f1.args;
     let args2 = f2.args;
     // argument lengths must match?  Perhaps C allows one to call
@@ -2186,7 +2160,7 @@ bool subtype(tenv_t te,
       let $(_,tq1,t1) = *args1->hd;
       let $(_,tq2,t2) = *args2->hd;
       // FIX: we need to take any qualifiers into account on typedefs
-      if ((tq2.real_const && !tq1.real_const) || !subtype(te,assume,t2,t1))
+      if ((tq2.real_const && !tq1.real_const) || !subtype(po,assume,t2,t1))
           return false;
     }
     // deal with varargs
@@ -2196,7 +2170,7 @@ bool subtype(tenv_t te,
       let v2 = *f2.cyc_varargs;
       // FIX: we need to take any qualifiers into account on typedefs
       if ((v2.tq.real_const && !v1.tq.real_const) ||
-          !subtype(te,assume,v2.type,v1.type))
+          !subtype(po,assume,v2.type,v1.type))
         return false;
     } else if (f1.cyc_varargs != NULL || f2.cyc_varargs != NULL) return false;
     // deal with effect
@@ -2206,10 +2180,12 @@ bool subtype(tenv_t te,
     // deal with attributes that can be dropped
     if (!sub_attributes(f1.attributes,f2.attributes)) return false;
     // deal with requires clause
-    if (!check_logical_implication(f2.requires_relns,f1.requires_relns)) 
+    if (!Relations::check_logical_implication(f2.requires_relns,
+					      f1.requires_relns)) 
       return false;
     // deal with ensures clause
-    if (!check_logical_implication(f1.ensures_relns,f2.ensures_relns))
+    if (!Relations::check_logical_implication(f1.ensures_relns,
+					      f2.ensures_relns))
       return false;
     // otherwise okay
     return true;
@@ -2217,38 +2193,30 @@ bool subtype(tenv_t te,
   }
 }
 
-
 // is t1* <= t2*?
 //   we flatten t1 and t2 into structurally equivalent tuple types
 //   (and thus ignore field names, associativity of nested tuples and
 //   structs, etc.) and then check that t1 is a width extension of t2
 //   and for each field, either (a) both t1 and t2 have qualifier "const"
 //   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
-static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
+static bool ptrsubtype(RgnOrder::rgn_po_opt_t po, 
+		       list_t<$(type_t,type_t)@`H,`H> assume, 
+		       type_t t1, type_t t2) {
   //fprintf(stderr,"ptrsubtype %s and %s\n",typ2string(t1),typ2string(t2));
-  list_t<$(tqual_t,type_t)@> tqs1 = flatten_type(heap_region,true,te,t1);
-  list_t<$(tqual_t,type_t)@> tqs2 = flatten_type(heap_region,true,te,t2);
+  list_t<$(tqual_t,type_t)@> tqs1 = flatten_type(heap_region,true,t1);
+  list_t<$(tqual_t,type_t)@> tqs2 = flatten_type(heap_region,true,t2);
   for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
     if (tqs1 == NULL) return false;
     let &$(tq1,t1a) = tqs1->hd;
     let &$(tq2,t2a) = tqs2->hd;
-    //fprintf(stderr,"tq1.real_const = %d, tq2.real_const = %d\n",tq1.real_const,tq2.real_const);
     if (tq1.real_const && !tq2.real_const) return false;
-    //fprintf(stderr,"ptrsubtype: qualifiers okay, looking at %s and %s\n",typ2string(t1a),typ2string(t2a));
     if ((tq2.real_const || kind_leq(&ak,type_kind(t2a)))
-	&& subtype(te,assume,t1a,t2a)) {
-      //fprintf(stderr,"ptrsubtype: t2 is const (or abstract) and %s <= %s\n",typ2string(t1a),typ2string(t2a));
+	&& subtype(po,assume,t1a,t2a))
       continue;
-    }
-    if (unify(t1a,t2a)) {
-      //fprintf(stderr,"ptrsubtype: %s unifies with %s\n",typ2string(t1a),typ2string(t2a));
+    if (unify(t1a,t2a))
       continue;
-    }
-    if (isomorphic(t1a,t2a)) {
-      //fprintf(stderr,"ptrsubtype: %s isomorphic to %s\n",typ2string(t1a),typ2string(t2a));
+    if (isomorphic(t1a,t2a))
       continue;
-    }
-    //fprintf(stderr,"not related!\n");
     return false;
   }
   return true;
@@ -2256,7 +2224,7 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
 
 // Can t1 be cast to t2?  Assumes that the types are well-formed.
 // FIX: add function types...
-coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
+coercion_t castable(RgnOrder::rgn_po_opt_t po, seg_t loc, type_t t1, type_t t2){
   if(unify(t1,t2))
     return No_coercion;
   t1 = compress(t1);
@@ -2282,12 +2250,9 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // can cast a zero-terminated pointer to a non-zero terminated pointer
     switch (t2) {
     case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b,_))):
-      //fprintf(stderr,"checking castable pointers, q_a.real_const = %d, q_b.real_const = %d\n",q_a.real_const, q_b.real_const);
-      //fprintf(stderr,"type_kind(%s) = %s, kind_leq = %d\n",typ2string(t_b),kind2string(type_kind(t_b)), kind_leq(&ak,type_kind(t_b)));
       coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
       let quals_okay = (q_b.real_const || !q_a.real_const);
-      //fprintf(stderr,"quals_okay = %d\n",quals_okay);
       // Can this get any more complicated?!??!?!?!?
       // First, we allow deep subtyping here if q_b is const or t_b is
       // abtract (makes it effectively const since you can't write to it
@@ -2302,9 +2267,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
         unify(b_b,bounds_one()) && (!force_type2bool(false,zt_b));
 
       let ptrsub = quals_okay &&
-        ((deep_castable && ptrsubtype(te,assump,t_a,t_b)) ||
+        ((deep_castable && ptrsubtype(po,assump,t_a,t_b)) ||
          unify(t_a,t_b) || isomorphic(t_a,t_b) || unify(t_b,void_type));
-      //fprintf(stderr,"ptrsub is %d\n",ptrsub);
       bool zeroterm_ok = unify(zt_a,zt_b) || !type2bool(false,zt_b);
       // FIX: we need to take any qualifiers into account on typedefs
       let bitcase = ptrsub ? false : (is_bits_only_type(t_a) && is_char_type(t_b)
@@ -2324,10 +2288,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       if (t1_nullable && !t2_nullable)
         coercion = Null_to_NonNull;
 
-        //fprintf(stderr,"bounds_ok = %d, zeroterm_ok = %d, ptrsub = %d, bitcase = %d\n",bounds_ok,zeroterm_ok,ptrsub,bitcase);
-
       if (bounds_ok && zeroterm_ok && (ptrsub || bitcase) &&
-          (unify(rt_a,rt_b) || region_outlives(te,rt_a,rt_b)))
+          (unify(rt_a,rt_b) || RgnOrder::rgn_outlives_rgn(po,rt_a,rt_b)))
         return coercion;
       else return Unknown_coercion;
     default: break;
@@ -2336,11 +2298,9 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   case &ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}):
     switch (t2) {
     case &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_}):
-      bool okay;
-      okay=
+      bool okay =
         (e1 != NULL && e2 != NULL && unify(zt1,zt2) &&
-	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1) &&
-         Evexp::lte_const_exp((exp_t)e1,(exp_t)e2));
+	 Evexp::lte_const_exp(e2,e1) && Evexp::lte_const_exp(e1,e2));
       return
         // FIX: we need to take any qualifiers into account on typedefs
         (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const)) ?
@@ -2367,7 +2327,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   case &AppType(&RgnHandleCon,&List(r1,_)):
     switch(t2) {
     case &AppType(&RgnHandleCon,&List(r2,_)):
-      if (region_outlives(te,r1,r2)) return No_coercion;
+      if (RgnOrder::rgn_outlives_rgn(po,r1,r2)) return No_coercion;
       break;
     default: break;
     }
@@ -2377,12 +2337,12 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 }
 
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
-void unchecked_cast(tenv_t te, exp_t e, type_t t, coercion_t c) {
-  if (!unify((type_t)e->topt,t)) {
-    let inner = copy_exp(e);
-    e->r    = new Cast_e(t,inner,false,c);
-    e->topt = t;
-  }
+void unchecked_cast(exp_t e, type_t t, coercion_t c) {
+  if (unify((type_t)e->topt,t))
+    return;
+  let inner = copy_exp(e);
+  e->r    = new Cast_e(t,inner,false,c);
+  e->topt = t;
 }
 
 // generating fresh tvars and tvar identities
@@ -2767,14 +2727,14 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
   return rnew(rgn) $(tv, new_evar(k,new Opt(s)));
 }
 
-void check_bitfield(seg_t loc, tenv_t te, type_t field_type,
-                    exp_opt_t width, stringptr_t fn) {
+void check_bitfield(seg_t loc, type_t field_type,
+		    exp_opt_t width, stringptr_t fn) {
   if (width != NULL) {
     unsigned int w = 0;
     if (!is_const_exp(width))
       terr(loc,"bitfield %s does not have constant width",*fn);
     else {
-      let $(i,known) = Evexp::eval_const_uint_exp((exp_t)width);
+      let $(i,known) = Evexp::eval_const_uint_exp(width);
       if(!known)
 	warn(loc,"cannot evaluate bitfield width at compile time");
       if ((int)i < 0)
@@ -3128,7 +3088,7 @@ bool is_noalias_path(exp_t e) {
 // Note: As explained below, if e1 is a FixedArray, then &e1[e2] is only
 //   legal if e1 is an lvalue.  This is not true in C, but I need it, at least
 //   for now, and I doubt anyone minds.
-$(bool,type_t) addressof_props(tenv_t te, exp_t e) {
+$(bool,type_t) addressof_props(exp_t e) {
   // in some situations, the pointer must actually be const
   $(bool,type_t) bogus_ans = $(false, heap_rgn_type);
   switch (e->r) {
@@ -3164,14 +3124,14 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     case &AnonAggrType(_,fs):
       let finfo = lookup_field(fs,f);
       if(finfo != NULL && finfo->width == NULL) {
-        let $(c,t) = addressof_props(te,e1);
+        let $(c,t) = addressof_props(e1);
 	return $(finfo->tq.real_const || c, t);
       }
       return bogus_ans;
     case &AppType(&AggrCon({.KnownAggr = &ad}),_):
       let finfo = lookup_decl_field(ad,f);
       if(finfo != NULL && finfo->width == NULL) {
-        let $(c,t) = addressof_props(te,e1);
+        let $(c,t) = addressof_props(e1);
 	return $(finfo->tq.real_const || c, t);
       }
       return bogus_ans;
@@ -3216,7 +3176,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 	return bogus_ans;
       let finfo = lookup_tuple_field(ts,i);
       if(finfo != NULL)
-	return $((*finfo)[0].real_const, addressof_props(te,e1)[1]);
+	return $((*finfo)[0].real_const, addressof_props(e1)[1]);
       return bogus_ans;
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,...))):
       return $(tq.real_const,r);
@@ -3225,7 +3185,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
       // (C doesn't need to know the region and we do!)
-      return $(tq.real_const, addressof_props(te,e1)[1]);
+      return $(tq.real_const, addressof_props(e1)[1]);
     default: return bogus_ans;
     }
   default:

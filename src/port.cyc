@@ -88,7 +88,9 @@ typedef list_t<edit_t> edits_t;
 int cmp_edit(edit_t e1, edit_t e2) {
   return (int)e1 - (int)e2;
 }
-
+static seg_t get_seg(edit_t e) {
+  return e->loc;
+}
 int cmp_seg_t(seg_t loc1, seg_t loc2){
   return (int)(loc1-loc2);
 }
@@ -1336,7 +1338,7 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
     }
   case Times: case Div: case Mod: case Eq: case Neq: case Lt: case Gt:
   case Lte: case Gte: case Bitand: case Bitor: case Bitxor: case Bitlshift:
-  case Bitlrshift: case Bitarshift:
+  case Bitlrshift:
     leq(arg1,arith_ct());
     leq(arg2s->hd,arith_ct());
     return arith_ct();
@@ -1344,7 +1346,7 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
   case Bitnot:
     leq(arg1,arith_ct());
     return arith_ct();
-  case Size: impos(".size primop");
+  default: impos("Port: unknown primop");
   }
 }
 
@@ -1988,10 +1990,6 @@ static edits_t gen_edits(list_t<decl_t> ds) {
     edits = edits->tl;
   }
   return edits;
-}
-
-static seg_t get_seg(edit_t e) {
-  return e->loc;
 }
 
 // given a list of declarations, emits a sorted list of edits

@@ -19,13 +19,12 @@
 #ifndef _TCUTIL_H_
 #define _TCUTIL_H_
 
-#include "tcenv.h"
 #include "relations-ap.h"
+#include "rgnorder.h"
 
 namespace Tcutil {
 using List;
 using Absyn;
-using Tcenv;
 
 ///////////////////  Warnings and Error messages ///////////////////////
 `a impos(string_t,...inject parg_t)__attribute__((format(printf,1,2),noreturn));
@@ -106,21 +105,23 @@ type_t fd_type(fndecl_t);
 kind_t tvar_kind(tvar_t,kind_t def);
 kind_t type_kind(type_t);
 type_t compress(type_t);
-void unchecked_cast(tenv_t, exp_t, type_t, coercion_t);
-bool coerce_arg(tenv_t, exp_t, type_t, bool@ alias_coercion); 
-bool coerce_assign(tenv_t, exp_t, type_t);
-bool coerce_to_bool(tenv_t, exp_t);
-bool coerce_list(tenv_t, type_t, list_t<exp_t>);
-bool coerce_uint_type(tenv_t, exp_t);
-bool coerce_sint_type(tenv_t, exp_t);
-bool coerce_use(tenv_t, exp_t, type_t);
+void unchecked_cast(exp_t, type_t, coercion_t);
+bool coerce_uint_type(exp_t);
+bool coerce_sint_type(exp_t);
+bool coerce_to_bool(exp_t);
+
+bool coerce_arg(RgnOrder::rgn_po_opt_t, exp_t, type_t, bool@ alias_coercion); 
+bool coerce_assign(RgnOrder::rgn_po_opt_t, exp_t, type_t);
+bool coerce_list(RgnOrder::rgn_po_opt_t, type_t, list_t<exp_t>);
 // true when expressions of type t1 can be implicitly cast to t2
-bool silent_castable(tenv_t,seg_t,type_t,type_t);
+bool silent_castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
-coercion_t castable(tenv_t,seg_t,type_t,type_t);
+coercion_t castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 // true when t1 is a subtype of t2 under the given list of subtype assumptions
-bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, 
+bool subtype(RgnOrder::rgn_po_opt_t, list_t<$(type_t,type_t)@`H,`H> assume, 
 	     type_t t1, type_t t2);
+// if t is a nullable pointer type and e is 0, changes e to null 
+bool zero_to_null(type_t, exp_t);
 
 // used to alias the given expression, assumed to have non-Aliasable type
 $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
@@ -129,7 +130,6 @@ extern bool warn_alias_coerce;
 // flag to control whether or not we print a warning when implicitly casting
 // a pointer from one region into another due to outlives constraints.
 extern bool warn_region_coerce;
-
 
 // useful kinds
 extern struct Kind rk; // shareable region kind
@@ -176,10 +176,6 @@ kindbound_t kind_to_bound(kind_t k);
 $(tvar_t,kindbound_t) swap_kind(type_t, kindbound_t);
   // for temporary kind refinement
 
-// if t is a pointer type and e is 0, changes e to null and checks
-// that t is nullable pointer type by unifying e's type with t.
-bool zero_to_null(tenv_t, type_t, exp_t);
-
 type_t max_arithmetic_type(type_t, type_t);
 
   // linear order on types (needed for dictionary indexing)
@@ -213,14 +209,10 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,tvar_t);
 
 // checks that a width given on a struct or union member is consistent
 // with the type definition for the member.
-void check_bitfield(seg_t loc, tenv_t te, type_t field_typ, 
-		    exp_opt_t width, stringptr_t fn);
+void check_bitfield(seg_t, type_t field_typ, exp_opt_t width, stringptr_t fn);
 
-void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t err_msg);
+void check_unique_vars(list_t<var_t,`r>, seg_t, string_t err_msg);
 void check_unique_tvars(seg_t,list_t<tvar_t>);
-
-// Sees if the unique region `U occurs in the type t
-//  extern void check_no_unique_region(seg_t loc, tenv_t te, type_t t);
 
 // Check that bounds are not zero -- constrain to 1 if necessary
 void check_nonzero_bound(seg_t, ptrbound_t);
@@ -246,22 +238,22 @@ bool is_noalias_pointer(type_t t, bool must_be_unique);
 // returns true if this expression only deferences non-aliasable pointers
 // and if the ultimate result is a noalias pointer or aggregate.  The
 // region is used for allocating temporary stuff.
-bool is_noalias_path(exp_t e);
+bool is_noalias_path(exp_t);
 
 // returns true if this expression is an aggregate that contains
 // non-aliasable pointers or is itself a non-aliasable pointer
 // The region is used for allocating temporary stuff
-bool is_noalias_pointer_or_aggr(type_t t);
+bool is_noalias_pointer_or_aggr(type_t);
 
 // Ensure e is an lvalue or function designator -- return whether
 // or not &e is const and what region e is in.
-$(bool,type_t) addressof_props(tenv_t, exp_t e);
+$(bool,type_t) addressof_props(exp_t);
 
 // Given an effect, express/mutate it to have only regions(`a), `r, and joins.
 type_t normalize_effect(type_t e);
 
 // Gensym a new type variable with kind bounded by k
-tvar_t new_tvar(kindbound_t k);
+tvar_t new_tvar(kindbound_t);
 // Get an identity for a type variable
 int new_tvar_id();
 // Add an identity to a type variable if it doesn't already have one
@@ -276,7 +268,7 @@ void rewrite_temp_tvar(tvar_t);
 bool same_atts(attributes_t, attributes_t);
 
 // returns true iff e is an expression that can be evaluated at compile time
-bool is_const_exp(exp_t e);
+bool is_const_exp(exp_t);
 
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
 type_t snd_tqt($(tqual_t,type_t)@);
@@ -311,9 +303,9 @@ bool zeroable_type(type_t);
 bool force_type2bool(bool desired, type_t);
 
 // unconstrained boolean-kinded type node
-type_t any_bool(tenv_t*);
+type_t any_bool(list_t<tvar_t,`H>);
 // unconstrained pointer bound type node
-type_t any_bounds(tenv_t*);
+type_t any_bounds(list_t<tvar_t,`H>);
 
   // This stuff is used only by tctyp -- still fleshing out these boundaries
   bool admits_zero(type_t);
@@ -325,8 +317,6 @@ type_t any_bounds(tenv_t*);
   // This stuff is used only by unify and tcutil
   // fairly semantic equivalence
   bool same_rgn_po(list_t<$(type_t,type_t)@>, list_t<$(type_t,type_t)@>);
-  bool check_logical_implication(Relations::relns_t<`H>, 
-				 Relations::relns_t<`H>);
   int tycon_cmp(tycon_t,tycon_t);
   int star_cmp(int (@cmp)(`a@`r,`a@`r),`a*`r, `a*`r);
 }

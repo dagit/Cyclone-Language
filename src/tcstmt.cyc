@@ -210,7 +210,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       bool bogus = false;
       exp_t e = eopt;
       tcExp(te,&t,e);
-      if (!coerce_arg(te,e,t,&bogus)) {
+      if (!coerce_arg(curr_rgnpo(te),e,t,&bogus)) {
         terr(s0->loc, "returns value of type %s but requires %s",
              typ2string((type_t)e->topt), typ2string(t));
         Unify::explain_failure();
@@ -263,7 +263,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // don't introduce alias expression here, would be useless
       bool bogus = false;
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(te,es->hd,ts->hd,&bogus)) {
+      if(!coerce_arg(curr_rgnpo(te),es->hd,ts->hd,&bogus)) {
 	terr(s0->loc, "fallthru argument has type %s "
              "but pattern variable has type %s",
              typ2string((type_t)es->hd->topt), typ2string(ts->hd));
@@ -486,7 +486,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// te is only used by is_const_exp for globals and function names
 	if(!is_local && !is_const_exp((exp_t)initializer))
 	  terr(d->loc, "initializer for static variable needs to be a constant expression");
-	if (!coerce_assign(te2,(exp_t)initializer,t)) {
+	if (!coerce_assign(curr_rgnpo(te2),(exp_t)initializer,t)) {
 	  let varstr = *x;
 	  let tstr = typ2string(t);
 	  let estr = typ2string((type_t)initializer->topt);
@@ -539,7 +539,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let pat_res = tcPat(te,p,&pat_type,e);
       *vds = new Opt(pat_res.patvars);
       if (!Unify::unify((type_t)p->topt,(type_t)e->topt)
-	  && !coerce_assign(te,e,(type_t)p->topt)) {
+	  && !coerce_assign(curr_rgnpo(te),e,(type_t)p->topt)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
 	     typ2string((type_t)p->topt),typ2string((type_t)e->topt));
 	Unify::unify((type_t)p->topt,(type_t)e->topt);
@@ -587,7 +587,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
 	if (!Unify::unify(exp_type,key_typ) && 
-	    !coerce_assign(te,open_exp_opt,exp_type))
+	    !coerce_assign(curr_rgnpo(te),open_exp_opt,exp_type))
 	  terr(s0->loc,"expected %s but found %s",
 	       typ2string(exp_type), typ2string(key_typ));
 	if (!Unify::unify(outer_rgn,unique_rgn_type) && 

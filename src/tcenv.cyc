@@ -36,8 +36,9 @@
 */
 #include <string.h>
 #include "absynpp.h"
-#include "tcutil.h"
 #include "rgnorder.h"
+#include "tcutil.h"
+#include "tcenv.h"
 using Core;
 using List;
 using Absyn;
@@ -386,14 +387,10 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
 
   // now update the outlives constraints
   let bds = NULL;
-  if (r1 != heap_rgn_type && r1 != unique_rgn_type && r1 != refcnt_rgn_type) {
-    type_t eff1 = access_eff(r1);
-    bds = new List(new $(eff1,r2),bds);
-  }
-  if (r2 != heap_rgn_type && r2 != unique_rgn_type && r2 != refcnt_rgn_type) {
-    type_t eff2 = access_eff(r2);
-    bds = new List(new $(eff2,r1),bds);
-  }
+  if (r1 != heap_rgn_type && r1 != unique_rgn_type && r1 != refcnt_rgn_type)
+    bds = new List(new $(access_eff(r1),r2),bds);
+  if (r2 != heap_rgn_type && r2 != unique_rgn_type && r2 != refcnt_rgn_type)
+    bds = new List(new $(access_eff(r2),r1),bds);
   return new_outlives_constraints(te,bds,loc);
 }
 
@@ -402,17 +399,21 @@ type_t curr_rgn(tenv_t te) {
   if (le == NULL) return heap_rgn_type;
   return le->curr_rgn;
 }
+rgn_po_opt_t curr_rgnpo(tenv_t te) {
+  let le = te->le;
+  if(le == NULL) return NULL;
+  return le->region_order;
+}
 
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible if it appears in the
 // capability or outlives something in the capability.
 void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   fenv_t fe = get_fenv(te,"check_rgn_accessible");
-  let &Fenv{.capability = capability, .region_order = ro, ...} = fe;
-  if (region_in_effect(false, rgn, capability) ||
-      region_in_effect(true, rgn, capability))
+  if (region_in_effect(false, rgn, fe->capability) ||
+      region_in_effect(true, rgn, fe->capability))
     return;
-  if(eff_outlives_eff(ro,access_eff(rgn),capability))
+  if(eff_outlives_eff(fe->region_order,access_eff(rgn),fe->capability))
     return;
   terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
 }
@@ -421,23 +422,7 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
 // the environment.  Assumes that rt_a <> rt_b.
 // Note: inefficient allocation here!
 bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
-  let le = te->le;
-  rt_a = compress(rt_a);
-  rt_b = compress(rt_b);
-  // When typechecking a toplevel declaration:
-  if(le==NULL)
-    switch (rt_a) {
-    case &AppType(&RefCntCon,_): return rt_b != unique_rgn_type;
-    case &AppType(&UniqueCon,_): return rt_b != refcnt_rgn_type;
-    case &AppType(&HeapCon,_):   return rt_b == heap_rgn_type;
-    default: return false;
-    }
-  // When typechecking a function body:
-  let res = effect_outlives(le->region_order,access_eff(rt_a),rt_b);
-//    fprintf(stderr,"region_outlives: %s outlves %s = %s\n",
-//  	  typ2string(rt_a),typ2string(rt_b),res ? "true" : "false");
-//    print_region_po(ro);
-  return res;
+  return rgn_outlives_rgn(curr_rgnpo(te),rt_a,rt_b);
 }
 
 // Check that a function call's effect is contained in the current capability.

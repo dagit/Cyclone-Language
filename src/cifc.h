@@ -22,18 +22,16 @@
 #include "absyn.h"
 
 namespace Cifc {
-  using Absyn;
-  using List;
+using Absyn;
+using List;
 
   /* Merges a C version of definition with a user-provided Cyclone
      version, but only if the Cyclone version is
      "representation-compatible" with the C one.  If so, the c_decl is
      changed in place. */
-  extern void merge_sys_user_decl(seg_t loc, bool is_buildlib,
-				  decl_t user_decl, decl_t c_decl);
+void merge_sys_user_decl(seg_t,bool is_buildlib,decl_t user_decl,decl_t c_decl);
 
-
-  extern void user_overrides(seg_t loc, list_t<decl_t> ds, list_t<decl_t> ovrs);
+void user_overrides(seg_t, list_t<decl_t> ds, list_t<decl_t> ovrs);
 }
 
 #endif /* _CIFC_H_ */

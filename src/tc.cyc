@@ -207,7 +207,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
       // is not a valid-toplevel one.
       try {
         let t2 = Tcexp::tcExpInitializer(te,&t,e);
-        if (!coerce_assign(te,e,t)) {
+        if (!coerce_assign(curr_rgnpo(te),e,t)) {
           let s0 = qvar2string(vd->name);
           let s1 = " declared with type ";
           let s2 = typ2string(t);
@@ -384,18 +384,18 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
         if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(0),any_bool(&te))) &&
+                                     empty_tqual(0),any_bool(tvs->v))) &&
             !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(0),any_bool(&te))) &&
+                                     empty_tqual(0),any_bool(tvs->v))) &&
             !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(0),any_bool(&te))) &&
+                                     const_tqual(0),any_bool(tvs->v))) &&
             !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(0),any_bool(&te)))) {
+                                     const_tqual(0),any_bool(tvs->v)))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
         }
@@ -487,7 +487,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
     // if width is non-NULL then t must be of integral type
-    check_bitfield(loc, te, t, width, fn);
+    check_bitfield(loc, t, width, fn);
     // FIX : check for consistent tquals
     if (requires_clause) {
       if (str_or_union != UnionA)

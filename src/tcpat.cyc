@@ -239,9 +239,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
 	terr(p->loc, "* pattern cannot take the address of an alias-free path");
     }
     exp_opt_t new_access_exp = NULL;
+    let tvs = lookup_type_vars(te);
     type_t t2 = new PointerType(PtrInfo(t,empty_tqual(0),
 					PtrAtts(rgn_pat,false_type,
-                                                any_bounds(&te),any_bool(&te),
+                                                any_bounds(tvs),any_bool(tvs),
 						NULL)));
     if (access_exp) {
       new_access_exp = address_exp(access_exp,DL);
@@ -280,12 +281,12 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       case &PointerType(_): t = *topt; goto tcpat_end;
       default: break;
       }
-    let tenv_tvs = lookup_opt_type_vars(te);
-    t = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
+    let tvs = lookup_type_vars(te);
+    t = new PointerType(PtrInfo(new_evar(&ako,new Opt(tvs)),
                                 empty_tqual(0),
-				PtrAtts(new_evar(&trko,tenv_tvs),
+				PtrAtts(new_evar(&trko,new Opt(tvs)),
 					true_type,
-					any_bounds(&te),any_bool(&te),NULL)));
+					any_bounds(tvs),any_bool(tvs),NULL)));
     break;
 
   case &Pointer_p(p2):
@@ -331,17 +332,18 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       t = new PointerType(PtrInfo(new_type, 
                                   (elt_const ? const_tqual(0) : 
                                    empty_tqual(0)),
-                                  PtrAtts(ptr_rgn, any_bool(&te),
+                                  PtrAtts(ptr_rgn, any_bool(lookup_type_vars(te)),
                                           bounds_one(), false_type,
                                           NULL)));
       break;
     default:
 DONT_PROMOTE:
+      let tvs = lookup_type_vars(te);
       t = new PointerType(PtrInfo((type_t)p2->topt, 
                                   (elt_const ? const_tqual(0) : 
                                    empty_tqual(0)),
-                                  PtrAtts(ptr_rgn, any_bool(&te),
-                                          any_bounds(&te), any_bool(&te),NULL)));
+                                  PtrAtts(ptr_rgn, any_bool(tvs),
+                                          any_bounds(tvs),any_bool(tvs),NULL)));
     }
     if (new_access_exp) new_access_exp->topt = p2->topt;
     break;
@@ -625,8 +627,8 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                                                pnew.ptr_atts.bounds, 
                                                pnew.ptr_atts.zero_term, 
                                                pold.ptr_atts.ptrloc}});
-    return (subtype(tenv, assump, ptry, new_type) && 
-            coerce_assign(tenv, initializer, ptry));
+    return (subtype(curr_rgnpo(tenv), assump, ptry, new_type) && 
+            coerce_assign(curr_rgnpo(tenv), initializer, ptry));
   default: return false;
   }
 }
@@ -638,7 +640,7 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
                                  tvar_t tv, type_t new_type, 
                                  exp_t initializer) {
   list_t<$(type_t,type_t)@> assump = new List{new $(unique_rgn_type,new VarType(tv)), NULL};
-  if (subtype(tenv, assump, old_type, new_type) 
+  if (subtype(curr_rgnpo(tenv), assump, old_type, new_type) 
       //JGM: the following line would be valid if we could somehow
       //get the coercion applied to the right expression instead of
       //this access expression that is passed in for initializer.
@@ -654,7 +656,7 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
     // Seems like we need to have unchecked_cast take a parameter
     // that includes whether or not to leave the region variables alone.
     // 
-//     unchecked_cast(tenv,initializer,new_type,Other_coercion);
+//     unchecked_cast(initializer,new_type,Other_coercion);
     switch $(compress(old_type),compress(new_type)) {
     case $(&PointerType(pold), &PointerType(pnew)): break;
     default: terr(loc,"alias requires pointer type"); break;

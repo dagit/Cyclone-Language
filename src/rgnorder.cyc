@@ -279,8 +279,8 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
 
 // does [po] prove that [eff] outlives [rgn]?
 // evar treatment: return false and do not constrain
-static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
-  region listrgn; { // FIX: make a small initial size
+static bool atomic_effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
+  region listrgn; { 
   switch(compress(eff)) {
   case &AppType(&AccessCon,&List(vt,_)):
     // does `vt outlive `rgn ?
@@ -299,6 +299,11 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       let &Kind(k,a) = type_kind(compress(rgn));
       return (k == RgnKind) && (a == Aliasable);
     case &VarType(tv):
+      if(po==NULL)
+	Warn::impos("RgnOrder: tvar without a partial-order");
+      // move region_outlives to here. Pass coerce* etc. a rgn_po_t *
+      // (a pain because that field is private to tcenv, so think more!)
+
       // To determine if tv outlives rgn, we generate the transitive
       // set of variables (env.todo) that outlive rgn.  If during this
       // process we discover tv is in this set, we return true; if we
@@ -310,23 +315,15 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-        //fprintf(stderr,"found %s\n",tvar2string(next));
-
-	if(tvar_cmp(next,tv)==0) {
-          //fprintf(stderr,"that's what we needed\n");
+	if(tvar_cmp(next,tv)==0)
 	  return true;
-        }
 
 	// didn't find it; add all variables that outlive this variable
 	// to the env.todo list, unless they appear in env.seen list
 	// (meaning we already tried them or will try them).
-	if(Dict::member(po->d,next)) {
-          //fprintf(stderr,"adding %s outlives: %s\n",tvar2string(next),
-          //        typ2string(Dict::lookup(po->d,next)));
-
+	if(Dict::member(po->d,next))
 	  add_to_search(&env,Dict::lookup(po->d,next));
-	} else 
-          // JGM:  just returning false here to avoid a cascading error
+	else // JGM:  just returning false here to avoid a cascading error
           return false;
 	  // impos(aprintf("RgnOrder: type variable %s not in dict",*tv->name));
       }
@@ -337,6 +334,8 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
     switch(compress(vt)) {
     // does regions(`tv) outlive `rgn?
     case &VarType(tv):
+      if(po==NULL)
+	Warn::impos("RgnOrder: tvar without a partial-order");
       // This is similar to the VarType case, above, except that we
       // check that for each variable `r in todo, whether regions(`tv)
       // outlives it.
@@ -374,7 +373,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 
 // does [po] prove that all regions in [eff] outlive [rgn]?
 // evar treatment: return false and do not constrain
-bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
+bool effect_outlives(rgn_po_opt_t po, type_t eff, type_t rgn) {
   eff = normalize_effect(eff);
   switch(compress(eff)) {
   case &AppType(&JoinCon,effs):
@@ -382,8 +381,7 @@ bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       if(!effect_outlives(po,effs->hd,rgn))
 	return false;
     return true;
-  default:
-    return atomic_effect_outlives(po,eff,rgn);
+  default: return atomic_effect_outlives(po,eff,rgn);
   }
 }
 
@@ -409,40 +407,13 @@ static void pin_effect(type_t eff, type_t bd) {
   }
 }
 
-// does po prove all the constraints
-// evar treatment: 
-//    evar on right of e > r -- constrain r to rgn
-//    evar in left  of e > r -- rgnkind: make r, anykind: make int
-// so call this last when doing a pack or call, and programmers will probably
-// want to use an explicit instantiation.  (A better thing to do for the 
-// evar on right is find the longest living region that satisfies the
-// constraints, but for now we do this simpler thing.)
-// Of course, this sucks without explicit type instantiation on structs, but
-// the topt in tcexp, lets struct Foo<`r> x = Foo(...) do what we want. Sigh.
-bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
-			   type_t default_bound, bool do_pin) {
-  // do all the bounds first so order doesn't matter
-  for(let cs=constraints; cs != NULL; cs = cs->tl) {
-    let &$(_,bd) = cs->hd;
-    switch(compress(bd)) {
-    case &Evar(...): 
-      if(do_pin) 
-	Unify::unify(bd,default_bound); 
-      break;
-    default: break;
-    }
-  }
-  for(let cs=constraints; cs != NULL; cs = cs->tl) {
-    let &$(eff,bd) = cs->hd;
-    if(do_pin)
-      pin_effect(eff,bd);
-    if(!effect_outlives(po,eff,bd))
-      return false;
-  }
-  return true;
+// FIX: reorganized -- this is where the real work should be
+//   (right now we have an unnecessary heap allocation)
+bool rgn_outlives_rgn(rgn_po_opt_t po, type_t rgn1, type_t rgn2) {
+  return effect_outlives(po, access_eff(rgn1), rgn2);
 }
 
-static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+static bool eff_outlives_atomic_eff(rgn_po_opt_t po, type_t eff1, type_t eff2) {
   // assumes eff1 is compressed and normalized
   eff2 = compress(normalize_effect(eff2));
   switch(eff2) {
@@ -466,7 +437,7 @@ static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
   }
 }
 
-bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+bool eff_outlives_eff(rgn_po_opt_t po, type_t eff1, type_t eff2) {
   eff1 = compress(normalize_effect(eff1));
   switch(eff1) {
   case &AppType(&JoinCon,effs):
@@ -476,6 +447,40 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
     return true;
   default: return eff_outlives_atomic_eff(po, eff1, eff2);
   }
+}
+
+// does po prove all the constraints
+// evar treatment: 
+//    evar on right of e > r -- constrain r to rgn
+//    evar in left  of e > r -- rgnkind: make r, anykind: make int
+// so call this last when doing a pack or call, and programmers will probably
+// want to use an explicit instantiation.  (A better thing to do for the 
+// evar on right is find the longest living region that satisfies the
+// constraints, but for now we do this simpler thing.)
+// Of course, this sucks without explicit type instantiation on structs, but
+// the topt in tcexp, lets struct Foo<`r> x = Foo(...) do what we want. Sigh.
+bool satisfies_constraints(rgn_po_opt_t po, 
+			   list_t<$(type_t,type_t)@> constraints,
+			   type_t default_bound, bool do_pin) {
+  // do all the bounds first so order doesn't matter
+  for(let cs=constraints; cs != NULL; cs = cs->tl) {
+    let &$(_,bd) = cs->hd;
+    switch(compress(bd)) {
+    case &Evar(...): 
+      if(do_pin) 
+	Unify::unify(bd,default_bound); 
+      break;
+    default: break;
+    }
+  }
+  for(let cs=constraints; cs != NULL; cs = cs->tl) {
+    let &$(eff,bd) = cs->hd;
+    if(do_pin)
+      pin_effect(eff,bd);
+    if(!effect_outlives(po,eff,bd))
+      return false;
+  }
+  return true;
 }
 
 // DEBUGGING
