@@ -350,7 +350,7 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
 // match compilation and partial evaluation", which appeared in
 // Dagstuhl Seminar on Partial Evaluation, LNCS, Springer-Verlag,
 // March 1996.  See
-// ftp://ftp->dina->kvl->dk/pub/Staff/Peter->Sestoft/papers/match->ps->gz
+// ftp://ftp.dina.kvl.dk/pub/Staff/Peter.Sestoft/papers/match.ps.gz
 
 // FIX:  we need short, long, and double patterns.  In addition, we
 // should really allow constant-expressions in patterns, and we should
@@ -372,7 +372,7 @@ $(list<tvar>, list<$(var,tqual,typ)@>)@ tcPat(tenv te,pat p) {
 // The arity is the number of arguments the constructor has, and the
 // span is the total number of constructors for the given type.
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
-// for bool is 2, for char is 255, and for integers, floats, and
+// for bool is 2, for char is 256, and for integers, floats, and
 // Xenums is infinite (i.e., null).
 enum Name_value { Name_v(string); Int_v(int); };
 typedef enum Name_value name_value;
@@ -415,7 +415,7 @@ static con null_ptr_con = &null_ptr_con0;
 static struct Con_s ptr_con0 = { Name_v("ptr"), 1, &one_opt };
 static con ptr_con = &ptr_con0;
 static con int_con(int i) { return &Con_s(Int_v(i), 0, null); }
-static con char_con(char c) { return &Con_s(Int_v((int)c),0,&Opt(255)); }
+static con char_con(char c) { return &Con_s(Int_v((int)c),0,&Opt(256)); }
 static con float_con(string f) { return &Con_s(Name_v(f), 0, null); }
 static con double_con(string d) { return &Con_s(Name_v(d), 0, null); }
 static con tuple_con(int i) { return &Con_s(Name_v("tuple"), i, &Opt(1)); }
@@ -554,7 +554,7 @@ typedef enum Term_desc term_desc;
 // from the root node of the object in a left-to-right fashion.
 #define context list<$(con,list<term_desc>)@>
 // A decision tree for compiling pattern-matches.  Failure denotes
-// that an xenum exn should be throwd.  Success triggers a right-hand-side.
+// that an exception should be thrown.  Success triggers a right-hand-side.
 // IfEq is a constructor test -- conceptually, the access path is a sequence
 // of projections applied to the root object to get at the field being
 // tested -- this will eventually have to change to have enough type

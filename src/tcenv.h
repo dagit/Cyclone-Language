@@ -59,7 +59,6 @@ extern struct Fenv {
   ok_ctrl               ok;
   Set<var>              uv; // maybe-unassigned variables
   typ                   return_typ;
-  Dict<var,typedefdecl> typedefs;
   list<tvar>            type_vars; // type variables that can occur free
 };
 typedef struct Fenv @fenv; 
@@ -87,11 +86,10 @@ extern bool is_ok_continue(tenv);
 extern bool is_ok_break(tenv);
 extern bool is_ok_fallthru(tenv);
 
-extern ok_ctrl default_ok_ctrl();
+extern ok_ctrl default_ok_ctrl;
  
 extern tenv enter_ns(tenv, var);
 extern genv genv_concat(genv, genv);
-extern genv genv_copy(genv);
 
 /* lookup functions */
 extern list<var>   resolve_namespace(tenv,segment,list<var>);

@@ -160,8 +160,9 @@ static void unify_tqual(tqual tq1, tqual tq2) {
 }
 
 bool equal_tqual(tqual tq1, tqual tq2) {
-  return ((tq1->q_const == tq2->q_const) && (tq1->q_volatile == tq2->q_volatile) &&
-	  (tq1->q_restrict == tq2->q_restrict));
+  return ((tq1->q_const == tq2->q_const) 
+	  && (tq1->q_volatile == tq2->q_volatile) 
+	  && (tq1->q_restrict == tq2->q_restrict));
 }
 
 /* compress a conref */
@@ -1123,9 +1124,7 @@ exp default_initializer(tenv te, typ t, segment loc) {
     break;
   case IntType(sg,sz,bx):
     if (bx == Boxed)
-      terr(loc,
-           xprintf("declaration of %s without initializer",
-                   typ2string(t)));
+      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
     else if (sz == B1)
       e->r = Const_e(Char_c(Signed,'\000'));
     else {
@@ -1136,21 +1135,17 @@ exp default_initializer(tenv te, typ t, segment loc) {
     break;
   case BoolType(bx):
     if (bx == Boxed)
-      terr(loc,
-           xprintf("declaration of %s without initializer",
-                   typ2string(t)));
+      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
     else e->r = Const_e(Bool_c(false));
     break;
   case FloatType(bx):
     if (bx == Boxed)
-      terr(loc,
-           xprintf("declaration of %s without initializer",
-                   typ2string(t)));
-    else e->r = Const_e(Float_c("0->0"));
+      terr(loc, xprintf("declaration of %s without initializer",typ2string(t)));
+    else e->r = Const_e(Float_c("0.0"));
     break;
   case DoubleType(bx):
     e->r =
-      Cast_e(t,&Exp(null, Const_e(Float_c("0->0")), loc));
+      Cast_e(t,&Exp(null, Const_e(Float_c("0.0")), loc));
     break;
 /*
   case ArrayType*(t,eopt):
@@ -1400,31 +1395,31 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
 }
 
 Set<var> repeated_vars(list<var> vs) {
-  Set<var> seen = Set::empty(String::strcmp);
+  Set<var> seen     = Set::empty(String::strcmp);
   Set<var> repeated = Set::empty(String::strcmp);
   for (; vs != null; vs = vs->tl) {
     if (Set::member(seen,vs->hd))
       repeated = Set::insert(repeated,vs->hd);      
-    else seen = Set::insert(seen,vs->hd);
+    else 
+      seen = Set::insert(seen,vs->hd);
   }
   return repeated;
 }
 
 void check_unique_tvars(segment loc, list<tvar> tvs) {
-  try {
-    tvar x = Set::choose(repeated_vars(tvs));
-    terr(loc,xprintf("duplicate type variable %s",x));
-  } catch {
-  case Set::Absent: break; // skip
-  }
+  let repeated = repeated_vars(tvs);
+  if(!Set::is_empty(repeated))
+    terr(loc,xprintf("duplicate type variable %s",Set::choose(repeated)));
 }
 
-/* remove the field name f from a list of fields -- return the field
-   and the mutated list. */
+// remove the field name f from a list of fields -- return the field
+// and the mutated list.
 xenum exn {MissingField};
+
 $($(field_name,tqual,typ)@,list<$(field_name,tqual,typ)@>)@
 remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
-  if (fs == null) throw MissingField;
+  if (fs == null) 
+    throw MissingField;
   if (String::strcmp(f,fs->hd[0]) == 0)
     return (&$(fs->hd,fs->tl));
   let orig = fs;

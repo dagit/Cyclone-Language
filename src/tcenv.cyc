@@ -119,21 +119,10 @@ tenv tc_init()
                        .name=&$(null,exn_v),
                        .fields=null};
   let ge = empty_genv();
+  let top_ns = null;
   ge->xenumdecls = Dict::insert(ge->xenumdecls, exn_v, xed);
-  let ae = Dict::insert(Dict::empty(varlist_cmp), null, ge);
-  return &Tenv(null,ae,null);
-}
-
-genv genv_copy(genv ge) {
-  return &Genv{
-    .namespaces=ge->namespaces,
-    .structdecls=ge->structdecls,
-    .enumdecls=ge->enumdecls,
-    .xenumdecls=ge->xenumdecls,
-    .typedefs=ge->typedefs,
-    .ordinaries=ge->ordinaries,
-    .availables=ge->availables
-  };
+  let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
+  return &Tenv(top_ns,ae,null);
 }
 
 struct Ok_ctrl {
@@ -143,20 +132,17 @@ struct Ok_ctrl {
   bool OK_fallthru;
 };
 
-static struct Ok_ctrl def_okay_ctrl =  {false,false,false,false};
-
-ok_ctrl default_ok_ctrl() {
-  return &def_okay_ctrl;
-}
+static struct Ok_ctrl def_ok_ctrl = {false,false,false,false};
+ok_ctrl default_ok_ctrl = &def_ok_ctrl;
 
 /* Local function environments */
 struct Fenv {
   list<var>             labels;
   Dict<var,var_info>    locals;
   ok_ctrl               ok;
-  Set<var>              uv; // maybe-unassigned variables
+    // maybe-unassigned variables -- going away from this pass soon
+  Set<var>              uv; 
   typ                   return_typ;
-  Dict<var,typedefdecl> typedefs;
   list<tvar>            type_vars; // type variables that can occur free
 };
 
@@ -168,11 +154,13 @@ enum Frames<`a> {
 };
 
 `a get_visible<`a>(frames<`a> f) {
-  switch (f) {
-  case Outermost(x): return x;
-  case Frame(x,_): return x;
-  case Hidden(x,y): return get_visible(y);
-  }
+  while(true)
+    switch (f) {
+    case Outermost(x): return x;
+    case Frame(x,_):   return x;
+    case Hidden(x,y):  f = y; break;
+    }
+  throw Unreachable("Tcenv::get_visible");
 }
 
 frames<`a> put_visible<`a>(frames<`a> f, `a x) {
@@ -190,10 +178,9 @@ frames<`a> apply_to_visible<`a>(`a g(`a), frames<`a> f) {
 frames<`b> map_frames<`a,`b>(`b g(`a), frames<`a> f) {
   switch (f) {
   case Outermost(x): return Outermost(g(x));
-  case Frame(x,f2): return Frame(g(x),map_frames(g,f2));
+  case Frame(x,f2):  return Frame(g(x),map_frames(g,f2));
   case Hidden(x,f2): return Hidden(g(x),map_frames(g,f2));
   }
-
 }
 
 fenv get_fenv(tenv te) {
@@ -225,9 +212,10 @@ struct Var_info {
 
 /* lookup functions */
 static list<var> outer_namespace(list<var> ns) {
-  if (ns == null)
-    // FIX: should give impossible error
-    return null;
+  if (ns == null) {
+    env_err("Tcenv::outer_namespace");
+    throw Impossible("Tcenv::outer_namespace");
+  }
   return List::rev(List::rev(ns)->tl);
 }
 
@@ -258,7 +246,7 @@ scoped_lookup<`a>(tenv te, segment loc, `a lookup(genv,var), var v) {
     // v is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
-  throw Dict::Absent(); // unreachable, added to avoid type error
+  throw Unreachable("Tcenv::scoped_lookup");
 }
 
 resolved lookup_ordinary_global_f(genv ge,var v) {
@@ -415,7 +403,6 @@ tenv add_local_var(segment loc,tenv te, var v, tqual tq, typ t, bool init) {
                    fe->ok,
                    uv,
                    fe->return_typ,
-                   fe->typedefs,
 		   fe->type_vars);
   return put_fenv(te,fe2);
 }
@@ -445,7 +432,6 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
 		   fe->ok,
 		   fe->uv,
 		   fe->return_typ,
-		   fe->typedefs,
 		   new_tvs);
   return put_fenv(te,fe2);
 }
@@ -455,7 +441,7 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
 // whether code "falls off" a function, implicitly falls through
 // in a switch branch, etc.  We also use this information to better
 // approximate the set of variables that have not yet been initialized.
-// The lattice condtains 3 bits of information represented as follows:
+// The lattice contains 3 bits of information represented as follows:
 struct Ctrl {
   bool implicit_fallthru;     // stmt/exp may fall-through
   bool explicit_fallthru;     // stmt does an explicit fallthru
@@ -699,7 +685,7 @@ tenv set_unassigned(tenv te, Set<var> un) {
   if (te->le == null) return te;
   fenv fe = get_fenv(te);
   fenv fe2 = &Fenv(fe->labels,fe->locals,fe->ok,un,
-                   fe->return_typ,fe->typedefs,fe->type_vars);
+                   fe->return_typ,fe->type_vars);
   return put_fenv(te,fe2);
 }
 
@@ -724,7 +710,7 @@ tenv set_in_loop(tenv te) {
   ok_ctrl c2 = &Ok_ctrl{.OK_continue=true,.OK_loop_break=true,
 			.OK_switch_break=false,.OK_fallthru=false};
   fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-                   fe->typedefs,fe->type_vars);
+		   fe->type_vars);
   return put_fenv(te,fe2);
 }
 tenv set_in_switch(tenv te) {
@@ -736,7 +722,7 @@ tenv set_in_switch(tenv te) {
 			.OK_switch_break=true,
 			.OK_fallthru=true};
   fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-                   fe->typedefs,fe->type_vars);
+                   fe->type_vars);
   return put_fenv(te,fe2);
 }
 tenv clear_fallthru(tenv te) {
@@ -750,7 +736,7 @@ tenv clear_fallthru(tenv te) {
 			  .OK_switch_break=c1->OK_switch_break,
 			  .OK_fallthru=false};
     fenv fe2 = &Fenv(fe->labels,fe->locals,c2,fe->uv,fe->return_typ,
-		     fe->typedefs,fe->type_vars);
+		     fe->type_vars);
     return put_fenv(te,fe2);
   } else
     return te;
@@ -759,7 +745,7 @@ tenv add_label(tenv te,var v) {
   if (te->le == null) env_err("Tcenv: unexpected add_label");
   fenv fe = get_fenv(te);
   fenv fe2 = &Fenv(&cons(v,fe->labels),fe->locals,fe->ok,
-                   fe->uv,fe->return_typ,fe->typedefs,fe->type_vars);
+                   fe->uv,fe->return_typ,fe->type_vars);
   return put_fenv(te,fe2);
 }
 typ return_typ(tenv te) {
@@ -767,7 +753,7 @@ typ return_typ(tenv te) {
   return get_fenv(te)->return_typ;
 }
 
-genv empty_genv() { // FIX: inefficient...
+genv empty_genv() { 
   return &Genv{.namespaces  = empty_var_set->v,
                .structdecls = Dict::empty(String::strcmp),
                .enumdecls   = Dict::empty(String::strcmp),

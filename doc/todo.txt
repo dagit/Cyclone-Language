@@ -27,8 +27,6 @@ Todo now:
 
 * parser/lexer is having trouble with floating point constants
 
-* use garbage collector (we are using malloc right now, not GCmalloc)
-
 * default array initializers, at top level and local, e.g., int x[4];
 
 * functions should not be allowed as fields of enums or tuples, e.g.,
@@ -115,6 +113,19 @@ Todo now:
   of arrays -- force the programmer to write int (*f(int (*x[4]))[5].
   However, there is still the question of whether to DISallow things
   like   void f(int x[4])   which in C involves a cast to a int *.
+
+Some things Dan has noticed:
+
+* should allow function prototypes with storage class specifiers other
+  than extern (avoid gcc warnings about static following extern)
+
+* getting gcc warning about pointer from integer in, for eg,
+  {.hd=0,.tl=null} because from the designator "hd" we have no idea
+  that we should cast to (void *) to avoid the warning. (Oddly,
+  mapping `a to int would get rid of this problem and probably
+  wouldn't cause other problems.)
+
+* do something about all the warnings when compiling the parser
 
 Todo later:
 

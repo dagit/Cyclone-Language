@@ -69,6 +69,7 @@ string std_args()[?] {
 xenum exn { Failure(string) };
 xenum exn { Impossible(string) };
 xenum exn { Not_found };
+xenum exn { Unreachable(string) };
 
 Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> o) {
   if (o==null)
@@ -165,7 +166,7 @@ string string_of_int_width(int n, int minWidth) {
   len = len > minWidth ? len : minWidth;
   string ans = new_string(len);
   for(i=len-1; n > 0; --i) { 
-    ans[i] = '0' + (n % 10);
+    ans[i] = (char)('0' + (n % 10));
     n /= 10;
   }
   for (; i>=0; --i)
@@ -186,7 +187,7 @@ string string_of_uint(unsigned int n) {
   do ++len; while ((m /= 10) > 0);
   string ans = new_string(len);
   for(int i=len-1; i>=0; --i) {
-    ans[i] = '0' + n % 10;
+    ans[i] = (char)('0' + n % 10);
     n /= 10;
   }
   return ans;

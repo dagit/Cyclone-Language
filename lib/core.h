@@ -52,6 +52,7 @@ extern xenum exn { InvalidArg(string) };
 extern xenum exn { Failure(string) };
 extern xenum exn { Impossible(string) };
 extern xenum exn { Not_found };
+extern xenum exn { Unreachable(string) };
 
 extern bool is_space(char);
 

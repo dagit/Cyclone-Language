@@ -200,7 +200,7 @@ static typ typ_to_c(typ t) {
     else return typ_to_c(topt->v);
   case VarType(_): 
     // type variables (`a) are mapped to void*
-    return nullableptr_t(void_t,empty_tqual());
+    return void_star_t();
   case EnumType(tdnopt,ts):
     if (tdnopt == null) unimp("anonymous enum");
     // enum foo is mapped to foo -- see enumdecl_to_c below
@@ -1310,7 +1310,7 @@ static void exp_to_c(env nv, exp e) {
     }
     break;
   case Tuple_e(es):
-    // $(e1,...,en) -> (struct _tuple_type_n){->f1=e1,...,->fn=en}
+    // $(e1,...,en) -> (struct _tuple_type_n){.f1=e1,...,.fn=en}
     // where _tuple_type_n is declared as an appropriate struct.
     let tqs = List::map(tup_to_c,es);
     let n = add_tuple_type(tqs);
@@ -1466,7 +1466,7 @@ static void exp_to_c(env nv, exp e) {
     e->r = stmt_exp(s,DL)->r;
     break;
   case Struct_e(tdn,ots,dles,sdopt): 
-    // (struct tdn){->f1=e1,...,->fn=en}
+    // (struct tdn){.f1=e1,...,.fn=en}
     let n = collapse_qvar(tdn);
     for (let es = dles; es != null; es = es->tl) {
       exp_to_c(nv,es->hd[1]);
@@ -1841,6 +1841,9 @@ static $(env,list<$(qvar,typ)@>,stmt)@
     // similar to Enums except that we cast the root to an _xenum_struct
     // and compare r->tag against qv (and then the nested patterns and so
     // forth.)  Lots of casting needed to get this to type-check.
+    // Dan fix: there's no such thing as a max tag when ps != null --
+    //          b/c of separate compilation, ps are always boxed.
+    //          Eliminates some gcc warnings.
     list<stmt> ss = null;
     int cnt = List::length(ps);
     var xfstrct = collapse_qvar_tag(xf->name,"_struct")[1];
@@ -1867,22 +1870,12 @@ static $(env,list<$(qvar,typ)@>,stmt)@
                                  var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),
                           goto_stmt(succ_lab,DL), goto_stmt(fail_lab,DL), DL);
     } else {
-      unsigned int max_tag = 0;
-      for (let fs = xd->fields; fs != null; fs = fs->tl) {
-	let f = fs->hd;
-	if (f->typs == null) {
-	  if (f->tag != null) toc_impos("can't deal with explicit tags yet");
-	  max_tag++;
-	}
-      }
-      exp max_tag_exp = uint_exp(max_tag,DL);
       exp e3 = cast_exp(nullableptr_t(strct("_xenum_struct"),empty_tqual()),
 			r,DL);
       exp e2 = deref_exp(e3,DL);
       exp e1 = structmember_exp(e2,"tag",DL);
       exp e = var_exp(collapse_qvar_tag(qv,"_tag"),DL);
-      exp e5 = gt_exp(r,cast_exp(void_star_t(),max_tag_exp,DL),DL);
-      s = ifthenelse_stmt(and_exp(e5,eq_exp(e1,e,DL),DL),
+      s = ifthenelse_stmt(eq_exp(e1,e,DL),
 			  seq_stmts(ss,DL), goto_stmt(fail_lab,DL), DL);
     }
     break;
@@ -2115,7 +2108,7 @@ static void stmt_to_c(env nv, stmt s) {
       //   _pop_handler();
       // } else switch (e) scs
       //
-      // [Auxillary functions are defined in cyc_helpers->c]
+      // [Auxillary functions are defined in cyc_runtime.c]
       qvar e = temp_var();
       let e_exp = var_exp(e,DL);
       // e_exp needs a typ because it'll go through exp_to_c;

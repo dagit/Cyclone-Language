@@ -244,10 +244,9 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   te->le = &Opt(Outermost(&Fenv{ // FIX: deal with varargs
                            .labels     = null,
 			   .locals     = Dict::empty(String::strcmp),
-			   .ok         = default_ok_ctrl(),
+			   .ok         = default_ok_ctrl,
 			   .uv         = Set::empty(String::strcmp),
 			   .return_typ = fd->ret_type,
-			   .typedefs   = Dict::empty(String::strcmp),
 			   .type_vars  = fd->tvs // FIX: check unique
                           }));
   for (let args = fd->args; args != null; args = args->tl) {

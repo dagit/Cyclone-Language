@@ -48,14 +48,12 @@ tqual combine_tqual(tqual x,tqual y) {
 tqual empty_tqual() { return &Tqual(false,false,false); }
 
 bool is_format_prim(primop p) {
-  bool ans;
   switch (p) {
-  case Printf: ans = true; break;
-  case Fprintf: ans = true; break;
-  case Xprintf: ans = true; break;
-  default: return false;
+  case Printf:  return true;
+  case Fprintf: return true;
+  case Xprintf: return true; 
+  default:      return false;
   }
-  return ans;
 }
 
 // Various constructors

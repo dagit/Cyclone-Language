@@ -16,11 +16,11 @@ namespace Absyn {
   using Core;
   using List;
   using Position;
+  typedef string tvar;
+  typedef string field_name;
   typedef string var;
   typedef $(List::list<var>,var)@ qvar;
   typedef qvar typedef_name;
-  typedef string tvar;
-  typedef string field_name;
   
   // forward declarations
   extern enum Scope;
@@ -89,7 +89,7 @@ namespace Absyn {
   typedef struct Decl @decl;
   typedef enum Designator designator;
   
-  EXTERN_DEFINITION enum Scope { Static, Public, Extern, Abstract };
+  EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern };
   EXTERN_DEFINITION struct Tqual { 
     bool q_const; bool q_volatile; bool q_restrict; 
   };
