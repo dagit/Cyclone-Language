@@ -59,6 +59,7 @@ namespace Position {
 
   //////// Error Reporting ///////////
   extern xtunion exn {extern Nocontext};
+  extern bool use_gcc_style_location;
   extern bool print_context;
   extern int num_errors;
   extern int max_errors;

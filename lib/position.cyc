@@ -27,6 +27,12 @@ namespace Position {
 using Core;
 using List;
 
+// When set to true, uses format:
+//   <filename>:<lineno>:<message>
+// and otherwise uses format
+//   <filename>:(<lineno>:<char>-<lineno>:<char>):<message>
+bool use_gcc_style_location = true;
+
 xtunion exn {Exit};
 
 /////////// Location tracking///////////
@@ -41,13 +47,19 @@ seg_t segment_join(seg_t s1, seg_t s2) {
   return new Segment(s1->start,s2->end); 
 }
 
+
 mstring_t string_of_loc(int loc) {
   Lineno::pos_t pos = Lineno::pos_of_abs(source,loc);
-  return aprintf("%s (%d:%d)",pos->logical_file,pos->line_no,pos->col);
+  if (use_gcc_style_location) 
+    return aprintf("%s:%d",pos->logical_file,pos->line_no);
+  else 
+    return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
 }
 
 static mstring_t string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
-  if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
+  if (use_gcc_style_location) 
+    return aprintf("%s:%d",pos_s->logical_file,pos_s->line_no);
+  else if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
     return aprintf("%s(%d:%d-%d:%d)", pos_s->logical_file,
 		   pos_s->line_no,pos_s->col,
 		   pos_e->line_no,pos_e->col);

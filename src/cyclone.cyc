@@ -979,7 +979,10 @@ int main(int argc, string_t<`H> ?`H argv) {
 	       "Warn when bounds checks can't be eliminated"),
 	 new $("-noregister", false, "",
 	       new Set_spec(&Parse::no_register),
-	       "Treat register storage class as public")
+	       "Treat register storage class as public"),
+         new $("-detailedlocation", false, "",
+               new Clear_spec(&Position::use_gcc_style_location),
+               "Try to give more detailed location information for errors")
          );
 
   Arg::parse(options, add_other, "Options:", argv);
