@@ -21,7 +21,7 @@ int yylex() {
       i = i*10 + (c - ((int)'0'));
       c = fgetc(stdin);
     }
-    yylval = new Integer(i);
+    yylval = Integer(i);
     return INT;
   } else {
     int old_c = c;
