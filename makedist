@@ -9,15 +9,40 @@
 # 2) tag the CVS repository with this version #
 # 3) tar the files into the directory cyclone-$version
 #
-# usage: makedist version_num
+# usage: makedist [version_num]
+
+TMP=/tmp/makedist$$
 
 if [ $# != 1 ]; then
-  echo "usage: $0 version_num"
-  exit 1
+  if [ $# != 0 ]; then
+    echo "usage: $0 [version_num]"
+    exit 1
+  else
+    if [ -f ".version" ]; then
+      version=`cat .version`
+      echo "Making distribution for version $version; OK? (y/n)"
+      read resp
+      if [ "$resp" != "y" ]; then
+        echo "aborting---please specify a version #"
+	exit 1
+      fi
+    else
+      echo "aborting---no .version file and no version specified"
+      exit 1
+    fi
+  fi
+else
+  version=$1
+  if [ -f ".version" ]; then
+    fileversion=`cat .version`
+    echo "override .version file's version $fileversion with arg $version? (y/n)"
+    read resp
+    if [ "$resp" != "y" ]; then
+      echo "aborting---omit version argument to use .version file"
+      exit 1
+    fi
+  fi
 fi
-
-version=$1
-TMP=/tmp/makedist$$
 
 # grepexpr 
 #   given the file .excludelist which has elements x y z ..., it echos
@@ -67,3 +92,8 @@ mv $filename.tar.gz cyclone
 if [ -f "$TMP" ]; then
   \rm -f $TMP
 fi
+
+# output the version #
+#
+cd cyclone
+echo $version > .version

@@ -37,6 +37,7 @@
 #include "tovc.h"
 #include "new_control_flow.h"
 #include "interface.h"
+#include "version.h" /* this should always be last in the includes */
 
 namespace Lex {
   extern void lex_init();
@@ -66,6 +67,7 @@ static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 
+
 static string_t *output_file = NULL;
 static void set_output_file(string_t<`H> s) {
   output_file = new s;
@@ -89,6 +91,15 @@ static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
 
+// Prints the version # and exits
+static void print_version() {
+  printf("The Cyclone compiler, version %s\n", version);
+  printf("Compiled for architecture: %s\n", Cstring_to_string(Carch));
+  printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
+  printf("Standard include directory: %s\n", Cstring_to_string(Cdef_inc_path));
+  exit(0);
+}
+  
 static bool is_cyclone_sourcefile(string_t s) {
   let len = strlen(s);
   if (len <= 4) return false;
@@ -645,7 +656,10 @@ int main(int argc, string_t<`H> ?`H argv) {
     list(new $("-v",false,"",
                new Set_spec(&v_r),
                "Print compilation stages verbosely"),
-         new $("-o",false," <file>",
+	 new $("--version",false,"",
+	       new Unit_spec(print_version),
+               "Print version number and exit"),
+	 new $("-o",false," <file>",
                new String_spec(set_output_file),
                "Set output file name"),
          new $("-D",true,"<name>[=<value>]",

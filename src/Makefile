@@ -67,6 +67,11 @@ install_path.c:
 	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
 
+cyclone.$(O): version.h
+version.h: ../.version
+	@(echo -n "static string_t version = \""; \
+	  echo `cat $<` "\";") > $@
+
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.o : $(OUT_PREFIX)lex.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -c $<
