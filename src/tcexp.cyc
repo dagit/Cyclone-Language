@@ -1089,6 +1089,10 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     if (finfo == NULL)
       return expr_err(te,loc,"type %s has no %s field",
                       qvar2string(ad->name), *f);
+    // must do after previous check else could dereference NULL
+    if(ad->exist_vars->v != NULL)
+      return expr_err(te,loc,"must use pattern-matching to access fields "
+		      "of existential types");
     _ t2;
     region rgn {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
@@ -1127,6 +1131,10 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       if (finfo == NULL)
 	return expr_err(te,loc,"type %s has no %s field",
 			qvar2string(ad->name), *f);
+      // must do after previous check else could dereference NULL
+      if(ad->exist_vars->v != NULL)
+	return expr_err(te,loc,"must use pattern-matching to access fields "
+			"of existential types");
       _ t3;
       region rgn {
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);

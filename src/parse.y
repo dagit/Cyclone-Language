@@ -1292,7 +1292,7 @@ struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
 /* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt '{'  exist_vars_opt struct_declaration_list '}'
+| struct_or_union struct_union_name type_params_opt '{' exist_vars_opt struct_declaration_list '}'
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
       $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts, new Opt(exist_ts), 
@@ -1469,11 +1469,9 @@ direct_declarator:
 | '(' declarator ')'
     { $$=$!2; }
 | direct_declarator '[' ']'
-    { $$=^$(new Declarator($1->id,new List(Carray_mod,$1->tms)));
-    }
+    { $$=^$(new Declarator($1->id,new List(Carray_mod,$1->tms)));}
 | direct_declarator '[' assignment_expression ']'
-    { $$=^$(new Declarator($1->id,new List(new ConstArray_mod($3),$1->tms)));
-    }
+    { $$=^$(new Declarator($1->id,new List(new ConstArray_mod($3),$1->tms)));}
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
@@ -1493,8 +1491,7 @@ direct_declarator:
       $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
     }
 | direct_declarator attributes
-  {
-    $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
+  { $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
                                          $1->tms)));
   }
 /* These two cases help to improve error messages */
@@ -1508,9 +1505,8 @@ direct_declarator:
 /* CYC: region annotations allowed */
 pointer:
   pointer_char rgn_opt attributes_opt
- { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
-		  attopt_to_tms(LOC(@3,@3),$3,NULL))); 
- }
+    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
+		     attopt_to_tms(LOC(@3,@3),$3,NULL))); }
 | pointer_char rgn_opt attributes_opt type_qualifier_list
     { $$=^$(new List(new Pointer_mod($1,$2,$4),
                      attopt_to_tms(LOC(@3,@3),$3,NULL))); }

@@ -863,10 +863,12 @@ void*)ad->kind);_tmpBD->sc=(void*)((void*)3);_tmpBD->name=ad->name;_tmpBD->tvs=
 _tmp8C;_tmpBD->exist_vars=0;_tmpBD->fields=0;_tmpBD->attributes=ad->attributes;
 _tmpBD;});_tmpBC;});ge->aggrdecls=((struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*
 d,struct _tagged_arr*k,struct Cyc_Absyn_Aggrdecl**v))Cyc_Dict_insert)(ge->aggrdecls,
-_tmp87,_tmpB7);Cyc_Tc_tcAggrFields(te,ge,loc,_tmpAB,_tmp8C);Cyc_Tcutil_check_unique_tvars(
-loc,(struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(ad->exist_vars))->v);
-Cyc_Tcutil_add_tvar_identities((struct Cyc_List_List*)((struct Cyc_Core_Opt*)
-_check_null(ad->exist_vars))->v);if((void*)ad->kind == (void*)1){struct Cyc_List_List*
+_tmp87,_tmpB7);Cyc_Tcutil_check_unique_tvars(loc,(struct Cyc_List_List*)((struct
+Cyc_Core_Opt*)_check_null(ad->exist_vars))->v);Cyc_Tcutil_add_tvar_identities((
+struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(ad->exist_vars))->v);Cyc_Tc_tcAggrFields(
+te,ge,loc,_tmpAB,((struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*
+y))Cyc_List_append)(_tmp8C,(struct Cyc_List_List*)((struct Cyc_Core_Opt*)
+_check_null(ad->exist_vars))->v));if((void*)ad->kind == (void*)1){struct Cyc_List_List*
 f=_tmpAB;for(0;f != 0;f=f->tl){if(! Cyc_Tcutil_bits_only((void*)((struct Cyc_Absyn_Aggrfield*)
 f->hd)->type)){({struct Cyc_Std_String_pa_struct _tmpBB;_tmpBB.tag=0;_tmpBB.f1=(
 struct _tagged_arr)Cyc_Absynpp_typ2string((void*)((struct Cyc_Absyn_Aggrfield*)f->hd)->type);{
@@ -881,11 +883,15 @@ sizeof(unsigned char),52),_tag_arr(_tmpBE,sizeof(void*),0));});}{struct Cyc_Absy
 _tmpBF=*_tmpAE;*_tmpAE=({struct Cyc_Absyn_Aggrdecl*_tmpC0=_cycalloc(sizeof(*
 _tmpC0));_tmpC0->kind=(void*)((void*)ad->kind);_tmpC0->sc=(void*)((void*)3);
 _tmpC0->name=ad->name;_tmpC0->tvs=_tmp8C;_tmpC0->exist_vars=0;_tmpC0->fields=0;
-_tmpC0->attributes=ad->attributes;_tmpC0;});Cyc_Tc_tcAggrFields(te,ge,loc,_tmpB1,
-_tmp8C);*_tmpAE=_tmpBF;_tmpB4=_tmpAE;goto _LLC0;}_LLC0: {struct Cyc_Absyn_Aggrdecl*
-_tmpC1=Cyc_Tcdecl_merge_aggrdecl(*_tmpB4,ad,loc,Cyc_Tc_tc_msg);if(_tmpC1 == 0){
-return;}else{*_tmpB4=(struct Cyc_Absyn_Aggrdecl*)_check_null(_tmpC1);ad=(struct
-Cyc_Absyn_Aggrdecl*)_check_null(_tmpC1);goto _LLB8;}}_LLB8:;}ge->ordinaries=((
+_tmpC0->attributes=ad->attributes;_tmpC0;});Cyc_Tcutil_check_unique_tvars(loc,(
+struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(ad->exist_vars))->v);Cyc_Tcutil_add_tvar_identities((
+struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(ad->exist_vars))->v);Cyc_Tc_tcAggrFields(
+te,ge,loc,_tmpB1,((struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*
+y))Cyc_List_append)(_tmp8C,(struct Cyc_List_List*)((struct Cyc_Core_Opt*)
+_check_null(ad->exist_vars))->v));*_tmpAE=_tmpBF;_tmpB4=_tmpAE;goto _LLC0;}_LLC0: {
+struct Cyc_Absyn_Aggrdecl*_tmpC1=Cyc_Tcdecl_merge_aggrdecl(*_tmpB4,ad,loc,Cyc_Tc_tc_msg);
+if(_tmpC1 == 0){return;}else{*_tmpB4=(struct Cyc_Absyn_Aggrdecl*)_check_null(
+_tmpC1);ad=(struct Cyc_Absyn_Aggrdecl*)_check_null(_tmpC1);goto _LLB8;}}_LLB8:;}ge->ordinaries=((
 struct Cyc_Dict_Dict*(*)(struct Cyc_Dict_Dict*d,struct _tagged_arr*k,struct _tuple4*
 v))Cyc_Dict_insert)(ge->ordinaries,_tmp87,({struct _tuple4*_tmpC2=_cycalloc(
 sizeof(*_tmpC2));_tmpC2->f1=(void*)({struct Cyc_Tcenv_AggrRes_struct*_tmpC3=

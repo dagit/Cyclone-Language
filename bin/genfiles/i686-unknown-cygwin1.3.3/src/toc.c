@@ -3063,10 +3063,10 @@ struct Cyc_Core_Opt*)_check_null(Cyc_Toc_aggrs_so_far))->v=(void*)((struct Cyc_D
 struct Cyc_Dict_Dict*d,struct _tagged_arr*k,struct Cyc_Absyn_Aggrdecl*v))Cyc_Dict_insert)((
 struct Cyc_Dict_Dict*)((struct Cyc_Core_Opt*)_check_null(Cyc_Toc_aggrs_so_far))->v,(*
 _tmp448).f2,ad));seen_defn_before=0;}else{seen_defn_before=1;}}(void*)(ad->sc=(
-void*)((void*)2));ad->tvs=0;if(ad->fields != 0){if(seen_defn_before){ad->fields=0;}
-else{struct Cyc_List_List*_tmp44B=(struct Cyc_List_List*)((struct Cyc_Core_Opt*)
-_check_null(ad->fields))->v;for(0;_tmp44B != 0;_tmp44B=_tmp44B->tl){(void*)(((
-struct Cyc_Absyn_Aggrfield*)_tmp44B->hd)->type=(void*)Cyc_Toc_typ_to_c_array((
+void*)((void*)2));ad->tvs=0;ad->exist_vars=0;if(ad->fields != 0){if(
+seen_defn_before){ad->fields=0;}else{struct Cyc_List_List*_tmp44B=(struct Cyc_List_List*)((
+struct Cyc_Core_Opt*)_check_null(ad->fields))->v;for(0;_tmp44B != 0;_tmp44B=
+_tmp44B->tl){(void*)(((struct Cyc_Absyn_Aggrfield*)_tmp44B->hd)->type=(void*)Cyc_Toc_typ_to_c_array((
 void*)((struct Cyc_Absyn_Aggrfield*)_tmp44B->hd)->type));}}}}}static struct Cyc_Core_Opt*
 Cyc_Toc_tunions_so_far=0;static void Cyc_Toc_tuniondecl_to_c(struct Cyc_Absyn_Tuniondecl*
 tud){if(Cyc_Toc_tunions_so_far == 0){Cyc_Toc_tunions_so_far=({struct Cyc_Core_Opt*

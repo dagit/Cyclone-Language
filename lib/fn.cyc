@@ -29,14 +29,14 @@ namespace Fn;
 // unifier...or my ability to figure out what effects to put
 // on things.
 
-tunion Function<`arg,`res,`e1::E> {
-  Fun<`env>(`res (@)(`env,`arg;`e1), `env)
-};
+struct Function<`arg,`res,`e1::E> { <`env>
+  `res (@f)(`env,`arg;`e1);
+  `env env;
+  };
 
 // make a closure out of a function pointer and environment
-fn_t<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x;`e2)
-{
-  return new Fun(f,x);
+fn_t<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x;`e2) {
+  return new Function(f,x);
 }
 
 static `res fp_apply(`res f(`arg;`e1), `arg x; `e1) {
@@ -45,12 +45,12 @@ static `res fp_apply(`res f(`arg;`e1), `arg x; `e1) {
 
 // convert a function pointer to a closure
 fn_t<`arg,`res,`e1> fp2fn(`res f(`arg;`e1)) {
-  return make_fn(fp_apply/*@<`arg,`res,`e1>*/, f);
+  return make_fn(fp_apply, f);
 }
 
 // apply closure f to argument x
 `res apply(fn_t<`arg,`res,`eff> f, `arg x; `eff) {
-  let &Fun<`env>(code,env) = f;
+  let &Function{<`env> code,env} = f;
   return code(env,x);
 }
 

@@ -2884,6 +2884,7 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 
   ad->sc   = Public; // gcc warns if we have Extern or Static here
   ad->tvs  = NULL;
+  ad->exist_vars = NULL;
   if (ad->fields != NULL)
     if (seen_defn_before)
       ad->fields = NULL;

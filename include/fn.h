@@ -35,11 +35,12 @@ namespace Fn {
        type, but you need them to have the same type; you can do this
        by hiding the environment from the type of the pair. */
 
-extern tunion Function<`arg,`res,`eff::E> {
-  Fun<`env>(`res (@)(`env,`arg;`eff), `env)
+extern struct Function<`arg,`res,`eff::E> { <`env>
+  `res (@f)(`env,`arg;`eff);
+  `env env;
 };
 
-typedef tunion Function<`arg,`res,`eff> fn_t<`arg,`res,`eff>;
+typedef struct Function<`arg,`res,`eff> @fn_t<`arg,`res,`eff>;
   /** A value of type [fn_t<`arg,`res,`eff>] is a function and its
       closure; [`arg] is the argument type of the function, [`res] is
       the result type, and [`eff] is the effect. */

@@ -412,13 +412,13 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
 				NULL, NULL, ad->attributes));
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
-    
-    tcAggrFields(te, ge, loc, fs, tvs);
 
     // reject ill-formed type
     check_unique_tvars(loc, ad->exist_vars->v);
     // give the bound type variables identities
     add_tvar_identities(ad->exist_vars->v);
+
+    tcAggrFields(te, ge, loc, fs, append(tvs,ad->exist_vars->v));
 
     if(ad->kind == UnionA)
           // must check that fields are bits-only
@@ -427,7 +427,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 	  terr(loc,"field %s of union %s has type %s which is not `bits-only'",
 	       *f->hd->name,*v, typ2string(f->hd->type));
 
-    *adp = ad; //insert sd in the environment
+    *adp = ad; //insert ad in the environment
     break;
   case $(&Opt(fs), &Opt(adp)):
     if(ad->kind != (*adp)->kind)
@@ -436,9 +436,14 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // for the sake of recursive fields, make name abstract in body
     *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs, 
 			NULL, NULL, ad->attributes);
-    
-    tcAggrFields(te, ge, loc, fs, tvs);
 
+    // reject ill-formed type
+    check_unique_tvars(loc, ad->exist_vars->v);
+    // give the bound type variables identities
+    add_tvar_identities(ad->exist_vars->v);
+
+    tcAggrFields(te, ge, loc, fs, append(tvs,ad->exist_vars->v));
+    
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);
   case $(NULL, &Opt(adp)):
