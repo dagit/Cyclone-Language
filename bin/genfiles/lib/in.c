@@ -21,4 +21,6 @@ int how); struct Cyc_Inet_in_addr{ unsigned int s_addr; } ; struct Cyc_Inet_sock
 unsigned short sin_family; unsigned short sin_port; struct Cyc_Inet_in_addr
 sin_addr; unsigned char sin_zero[ 8u]; } ; extern unsigned char Cyc_Inet_sockaddr_in[
 16u]; struct Cyc_Inet_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Inet_sockaddr_in
-f1; } ; unsigned char Cyc_Inet_sockaddr_in[ 16u]="\000\000\000\000sockaddr_in";
+f1; } ; extern unsigned int htonl( unsigned int); extern unsigned short htons(
+unsigned short); extern unsigned int ntohl( unsigned int); extern unsigned short
+ntohs( unsigned short); unsigned char Cyc_Inet_sockaddr_in[ 16u]="\000\000\000\000sockaddr_in";

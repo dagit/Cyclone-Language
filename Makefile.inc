@@ -43,6 +43,7 @@ CYCLONE_LIBS:=arg\
         fn\
         getopt\
         getopt1\
+	grp\
         hashtable\
         id\
         lexing\
@@ -87,6 +88,7 @@ CYCLONE_H:=arg.h\
         fn.h\
         getopt.h\
         getopt1.h\
+	grp.h\
         hashtable.h\
         id.h\
         lexing.h\
@@ -96,6 +98,7 @@ CYCLONE_H:=arg.h\
         netinet/in.h\
         position.h\
         pp.h\
+	pwd.h\
         queue.h\
         ref.h\
         rope.h\
@@ -121,9 +124,11 @@ CYCLONE_H:=arg.h\
 	sys/features.h\
 	sys/mman.h\
 	sys/reent.h\
+	sys/resource.h\
 	sys/signal.h\
 	sys/stat.h\
 	sys/types.h\
+	sys/wait.h\
 	unistd.h
 
 CYCLONE_SRCS:=absyn\

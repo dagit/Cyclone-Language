@@ -25,6 +25,7 @@ namespace Cnetdb {
   extern "C" {
     struct Cservent *getservbyname(const Cstring name, const Cstring proto);
     struct Chostent *gethostbyname(const Cstring name);
+    void herror(Cstring);
     struct Inet::in_addr *?pntlp_toCyc(struct Inet::in_addr *@);
   }
 #define s2c(x) (string_to_Cstring(x))
@@ -51,3 +52,5 @@ struct hostent *gethostbyname(string_t name) {
                            .h_addr_list = Cnetdb::pntlp_toCyc(src->h_addr_list)}
     : null;
 }
+
+void herror(const char ?`r s) { Cnetdb::herror(s2c(s)); }

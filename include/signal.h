@@ -64,6 +64,10 @@ namespace Signal {
 
   _sig_func_ptr signal(int sig, _sig_func_ptr func);
   extern "C" int raise(int sig);
+
+  extern void _SIG_DFL(int;{});
+  extern void _SIG_IGN(int;{});
+  extern void _SIG_ERR(int;{});
 }
 
 #endif

@@ -1,5 +1,6 @@
 #include <core.h>
 #include <stdio.h>
+#include <string.h> // for strcpy
 using Core;
 
 namespace Cstdio {
@@ -14,7 +15,6 @@ Cstring	tmpnam(Cstring);
 int	fclose(__sFILE @`r);
 int	fflush(__sFILE *`r);
 __sFILE *freopen(Cstring, Cstring, __sFILE @`r);
-void	setbuf(__sFILE @`r, Cstring);
 int	setvbuf(__sFILE @`r, Cstring, int, size_t);
 int	fgetc(__sFILE @`r);
 Cstring fgets(Cstring, int, __sFILE @`r);
@@ -67,6 +67,11 @@ FILE *tmpfile() {
   return cf ? new __sFILE(cf) : null;
 }
 
+char ?tmpnam(char ?s) {
+  char ?name = Cstring_to_string(Cstdio::tmpnam(null));
+  return s ? String::strcpy(s, name) : name;
+}
+
 int fclose(FILE @`r f) {
   int r = Cstdio::fclose((Cstdio::__sFILE @) f->file);
   if (r == 0) {
@@ -84,6 +89,26 @@ FILE *freopen(const char ?`r1 x, const char ?`r2 y, FILE @`r3 f) {
   Cstdio::__sFILE *cf = Cstdio::freopen(s2c(x), s2c(y),
                                         (Cstdio::__sFILE @) f->file);
   return cf ? new __sFILE(cf) : null;
+}
+
+void setbuf(FILE @`r1 f, char ?`r2 buf) {
+  setvbuf(f, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
+}
+
+void setbuffer(FILE @`r1 f, char ?`r2 buf, size_t size) {
+  setvbuf(f, buf, buf ? _IOFBF : _IONBF, size);
+}
+
+void setlinebuf(FILE @`r f) {
+  setvbuf(f, null, _IOLBF, 0);
+}
+
+int setvbuf(FILE @`r1 f, char ?`r2 buf, int mode, size_t size) {
+  if (buf.size < size)
+    throw new Failure("setvbuf: buffer insufficient");
+  return Cstdio::setvbuf((Cstdio::__sFILE @) f->file,
+                         underlying_Cstring(buf),
+                         mode, size);
 }
 
 int fgetc(FILE @`r f) { return Cstdio::fgetc((Cstdio::__sFILE @) f->file); }
@@ -118,6 +143,20 @@ int puts(const char ?`r s) { return Cstdio::puts(s2c(s)); }
 
 int ungetc(int i, FILE @`r f) {
   return Cstdio::ungetc(i,(Cstdio::__sFILE @) f->file);
+}
+
+size_t fread(char ?`r1 ptr, size_t size, size_t nmemb, FILE @`r2 f) {
+  if (size * nmemb > ptr.size)
+    throw new Failure("fread: buffer insufficient");
+  return Cstdio::fread(underlying_Cstring(ptr), size, nmemb,
+                       (Cstdio::__sFILE @) f->file);
+}
+
+size_t fwrite(const char ?`r1 ptr, size_t size, size_t nmemb, FILE @`r2 f) {
+  if (size * nmemb > ptr.size)
+    throw new Failure("fwrite: buffer insufficient");
+  return Cstdio::fwrite(underlying_Cstring(ptr), size, nmemb,
+                        (Cstdio::__sFILE @) f->file);
 }
 
 int fgetpos(FILE @`r1 f, fpos_t @`r2 x) {

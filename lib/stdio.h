@@ -77,12 +77,12 @@ typedef long fpos_t;
 extern int	remove(const char ?`r);
 extern int	rename(const char ?`r1, const char ?`r2);
 extern FILE *	tmpfile();
-// extern string	tmpnam(string);
+extern char ?	tmpnam(char ?);
 extern int	fclose(FILE @`r);
 extern int	fflush(FILE *`r);
 extern FILE *	freopen(const char ?`r1, const char ?`r2, FILE @`r3);
-//extern void	setbuf(FILE *, string);
-//extern int	setvbuf(FILE *, string, int, size_t);
+extern void	setbuf(FILE @`r1, char ?`r2);
+extern int	setvbuf(FILE @`r1, char ?`r2, int, size_t);
 extern int	fgetc(FILE @`r);
 extern char ?`r1 fgets(char ?`r1, int n, FILE @`r2);
 extern int	fputc(int, FILE @`r);
@@ -94,8 +94,8 @@ extern int	putc(int, FILE @`r);
   //extern int	putchar(int);
 extern int	puts(const char ?`r);
 extern int	ungetc(int, FILE @`r);
-  //extern size_t	fread(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
-  //extern size_t	fwrite(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
+extern size_t	fread(char ?`r1, size_t, size_t, FILE @`r2);
+extern size_t	fwrite(const char ?`r1, size_t, size_t, FILE @`r2);
 extern int	fgetpos(FILE @`r1, fpos_t @`r2);
 extern int	fseek(FILE @`r, long, int);
 extern int	fsetpos(FILE @`r1, fpos_t @`r2);
@@ -118,7 +118,7 @@ extern int	getw(FILE @`r);
   //extern FILE *   popen(string, string);
 extern int	putw(int, FILE @`r);
 extern void     setbuffer(FILE @`r1, char ?`r2, int);
-extern int	setlinebuf(FILE @`r);
+extern void	setlinebuf(FILE @`r);
 
 #define	getchar()	getc(stdin)
 #define	putchar(x)	putc(x, stdout)

@@ -14,6 +14,7 @@ namespace Cpwd {
   };
   extern "C" {
     struct Cpasswd *getpwnam(const Cstring name);
+    struct Cpasswd *getpwuid(uid_t uid);
   }
 #define s2c(x) (string_to_Cstring(x))
 #define c2s(x) (Cstring_to_string(x))
@@ -23,6 +24,18 @@ namespace Pwd;
 
 struct passwd *getpwnam(string_t name) {
   struct Cpwd::Cpasswd *src = Cpwd::getpwnam(s2c(name));
+  return src ? new passwd{.pw_name = c2s(src->pw_name),
+                             .pw_passwd = c2s(src->pw_passwd),
+                             .pw_uid = src->pw_uid,
+                             .pw_gid = src->pw_gid,
+                             .pw_gecos = c2s(src->pw_gecos),
+                             .pw_dir = c2s(src->pw_dir),
+                             .pw_shell = c2s(src->pw_shell)}
+    : null;
+}
+
+struct passwd *getpwuid(uid_t uid) {
+  struct Cpwd::Cpasswd *src = Cpwd::getpwuid(uid);
   return src ? new passwd{.pw_name = c2s(src->pw_name),
                              .pw_passwd = c2s(src->pw_passwd),
                              .pw_uid = src->pw_uid,

@@ -87,6 +87,13 @@ namespace Inet {
   extern xtunion Socket::sockaddr {
     extern sockaddr_in(struct sockaddr_in);
   };
+
+  extern "C" {
+    unsigned long htonl(unsigned long);
+    unsigned short htons(unsigned short);
+    unsigned long ntohl(unsigned long);
+    unsigned short ntohs(unsigned short);
+  }
 }
 
 #endif

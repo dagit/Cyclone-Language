@@ -24,16 +24,18 @@ int fd); extern int shutdown( int fd, int how); struct Cyc_Inet_in_addr{
 unsigned int s_addr; } ; struct Cyc_Inet_sockaddr_in{ unsigned short sin_family;
 unsigned short sin_port; struct Cyc_Inet_in_addr sin_addr; unsigned char
 sin_zero[ 8u]; } ; extern unsigned char Cyc_Inet_sockaddr_in[ 16u]; struct Cyc_Inet_sockaddr_in_struct{
-unsigned char* tag; struct Cyc_Inet_sockaddr_in f1; } ; extern int* __errno();
-extern int _sys_nerr  __attribute__(( dllimport )) ; extern int bind( int fd,
-const struct Cyc_Inet_sockaddr_in* addr, unsigned int len); extern int connect(
-int fd, const struct Cyc_Inet_sockaddr_in* addr, unsigned int len); extern int
-accept( int fd, struct Cyc_Inet_sockaddr_in* addr, unsigned int* len); extern
-struct Cyc_Inet_sockaddr_in* sockaddr_to_Csockaddr( void* addr); extern void*
-Csockaddr_to_sockaddr( const struct Cyc_Inet_sockaddr_in*, unsigned int); struct
-_tuple1{ struct Cyc_Inet_sockaddr_in* f1; unsigned int f2; } ; struct _tuple1
-Cyc_Csocket_sa2Csa( void* addr){ struct Cyc_Inet_sockaddr_in* ptr=
-sockaddr_to_Csockaddr( addr); void* _temp0= addr; struct Cyc_Inet_sockaddr_in
+unsigned char* tag; struct Cyc_Inet_sockaddr_in f1; } ; extern unsigned int
+htonl( unsigned int); extern unsigned short htons( unsigned short); extern
+unsigned int ntohl( unsigned int); extern unsigned short ntohs( unsigned short);
+extern int* __errno(); extern int _sys_nerr  __attribute__(( dllimport )) ;
+extern int bind( int fd, const struct Cyc_Inet_sockaddr_in* addr, unsigned int
+len); extern int connect( int fd, const struct Cyc_Inet_sockaddr_in* addr,
+unsigned int len); extern int accept( int fd, struct Cyc_Inet_sockaddr_in* addr,
+unsigned int* len); extern struct Cyc_Inet_sockaddr_in* sockaddr_to_Csockaddr(
+void* addr); extern void* Csockaddr_to_sockaddr( const struct Cyc_Inet_sockaddr_in*,
+unsigned int); struct _tuple1{ struct Cyc_Inet_sockaddr_in* f1; unsigned int f2;
+} ; struct _tuple1 Cyc_Csocket_sa2Csa( void* addr){ struct Cyc_Inet_sockaddr_in*
+ptr= sockaddr_to_Csockaddr( addr); void* _temp0= addr; struct Cyc_Inet_sockaddr_in
 _temp6; _LL2: if(*(( void**) _temp0) == Cyc_Inet_sockaddr_in){ _LL7: _temp6=((
 struct Cyc_Inet_sockaddr_in_struct*) _temp0)->f1; goto _LL3;} else{ goto _LL4;}
 _LL4: goto _LL5; _LL3: return({ struct _tuple1 _temp8; _temp8.f1= ptr; _temp8.f2=(

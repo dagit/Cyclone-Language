@@ -23,6 +23,7 @@ namespace NetDB {
 
   extern struct servent *getservbyname(string_t name, string_t proto);
   extern struct hostent *gethostbyname(string_t name);
+  extern void herror(const char ?`r);
 }
 
 #endif

@@ -1,0 +1,38 @@
+#include <core.h>
+#include <grp.h>
+using Core;
+
+namespace Cgrp {
+  static struct Cgroup {
+    Cstring gr_name;
+    Cstring gr_passwd;
+    gid_t gr_gid;
+    Cstring @gr_mem;
+  };
+  extern "C" {
+    struct Cgroup *getgrnam(const Cstring name);
+    struct Cgroup *getgrgid(gid_t gid);
+  }
+#define s2c(x) (string_to_Cstring(x))
+#define c2s(x) (Cstring_to_string(x))
+}
+
+namespace Grp;
+
+struct group *getgrnam(string_t name) {
+  struct Cgrp::Cgroup *src = Cgrp::getgrnam(s2c(name));
+  return src ? new group{.gr_name = c2s(src->gr_name),
+                             .gr_passwd = c2s(src->gr_passwd),
+                             .gr_gid = src->gr_gid,
+                             .gr_mem = ntCsl_to_ntsl(src->gr_mem)}
+    : null;
+}
+
+struct group *getgrgid(gid_t gid) {
+  struct Cgrp::Cgroup *src = Cgrp::getgrgid(gid);
+  return src ? new group{.gr_name = c2s(src->gr_name),
+                             .gr_passwd = c2s(src->gr_passwd),
+                             .gr_gid = src->gr_gid,
+                             .gr_mem = ntCsl_to_ntsl(src->gr_mem)}
+    : null;
+}

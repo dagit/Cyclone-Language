@@ -5,7 +5,7 @@
  */
 #ifndef _STDLIB_H_
 #include <config.h>
-#include <sys/reent.h>
+//#include <sys/reent.h> // __sFILE conflicts with the one in stdio.h
 
 namespace Stdlib {
 extern "C" {

@@ -16,11 +16,14 @@ struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Getopt_option{ struct
-_tagged_arr name; int has_arg; int* flag; int val; } ; extern int close( int);
-extern int getpid(); extern int getppid(); extern int fork(); extern int fchdir(
-int); extern int dup( int); extern int dup2( int, int); extern unsigned short
-getuid(); extern unsigned short geteuid(); extern unsigned short getgid();
-extern unsigned short getegid(); extern int select( int n, struct Cyc__types_fd_set*
+_tagged_arr name; int has_arg; int* flag; int val; } ; extern unsigned int alarm(
+unsigned int seconds); extern int close( int); extern int getpid(); extern int
+getppid(); extern int fork(); extern int fchdir( int); extern int dup( int);
+extern int dup2( int, int); extern unsigned short getuid(); extern int setuid(
+unsigned short uid); extern unsigned short geteuid(); extern int seteuid(
+unsigned short euid); extern unsigned short getgid(); extern int setgid(
+unsigned short gid); extern unsigned short getegid(); extern int setegid(
+unsigned short egid); extern int select( int n, struct Cyc__types_fd_set*
 readfds, struct Cyc__types_fd_set* writefds, struct Cyc__types_fd_set* exceptfds,
 struct Cyc_timeval* timeout); extern int pipe( int* filedes); extern int lseek(
 int filedes, int offset, int whence); int Cyc_Unistd_chdir( struct _tagged_arr);

@@ -114,8 +114,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
   the issue that our casts may include computation.  We should
   have a way to check to see if a cast doesn't do any computation.
 
-* Lots of headers currently define NULL in lots of incompatible ways.
-
 * get rid of null, replace with 0 (requires clever overloading)
 
 * add memcpy and memset somehow.
@@ -141,6 +139,12 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 * remove cyc_include.h's dependency on setjmp.h, since that really
   pollutes the namespace
+
+* "using foo; using foo;" shouldn't cause ambiguities
+
+* buf+n should have the same type as &buf[n]
+
+* sscanf should support %s when a field width is provided
 
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------

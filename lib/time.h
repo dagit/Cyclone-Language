@@ -24,12 +24,17 @@ namespace Time {
   };
 
   extern "C" time_t time(time_t *`r t);
-  extern mstring_t asctime(const struct tm *_tblock);
-  extern mstring_t ctime(const time_t *_time);
-  extern size_t strftime(string_t _s, size_t _maxsize, string_t _fmt, 
-                         const struct tm *_t);
-  extern mstring_t asctime_r(const struct tm *, mstring_t);
-  extern mstring_t ctime_r(const time_t *, mstring_t);
+  extern mstring_t asctime(const struct tm @`r timeptr);
+  extern mstring_t ctime(const time_t @`r timep);
+  extern "C" struct tm @gmtime(const time_t @`r timep);
+  extern "C" struct tm @localtime(const time_t @`r timep);
+  extern size_t strftime(string_t s, size_t maxsize, string_t fmt, 
+                         const struct tm @`r t);
+  extern mstring_t asctime_r(const struct tm @`r, mstring_t);
+  extern mstring_t ctime_r(const time_t @`r, mstring_t);
+
+  extern "C" long timezone;
+  extern "C" int daylight;
 }
 
 #endif
