@@ -781,10 +781,9 @@ Cyc_Dict_union_two_c(void*(*f)(void*,void*,void*,void*),void*env,struct Cyc_Dict
 d1,struct Cyc_Dict_Dict d2);struct Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(void*,
 void*,void*,void*),void*env,struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);int Cyc_Dict_forall_intersect(
 int(*f)(void*,void*,void*),struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);struct
-_tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,
-struct Cyc_Dict_Dict d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct
-Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,
-struct Cyc_Dict_Dict d);int Cyc_strptrcmp(struct _dyneither_ptr*s1,struct
+_tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,
+struct Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*
+rgn,struct Cyc_Dict_Dict d);int Cyc_strptrcmp(struct _dyneither_ptr*s1,struct
 _dyneither_ptr*s2);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct
 _dyneither_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[5];struct Cyc_Position_Exit_struct{
 char*tag;};struct Cyc_Position_Segment;int Cyc_Position_segment_equals(struct Cyc_Position_Segment*,
@@ -1300,7 +1299,7 @@ struct _handler_cons _tmp3B;_push_handler(& _tmp3B);{int _tmp3D=0;if(setjmp(_tmp
 _tmp3D=1;if(!_tmp3D){{struct _RegionHandle _tmp3E=_new_region("temp");struct
 _RegionHandle*temp=& _tmp3E;_push_region(temp);{struct Cyc_Iter_Iter iter=((struct
 Cyc_Iter_Iter(*)(struct _RegionHandle*rgn,struct Cyc_Dict_Dict d))Cyc_Dict_make_iter)(
-temp,s1);struct _tuple18 _tmp3F=*((struct _tuple18*(*)(struct _RegionHandle*r,struct
+temp,s1);struct _tuple18 _tmp3F=*((struct _tuple18*(*)(struct _RegionHandle*,struct
 Cyc_Dict_Dict d))Cyc_Dict_rchoose)(temp,s1);while(((int(*)(struct Cyc_Iter_Iter,
 struct _tuple18*))Cyc_Iter_next)(iter,& _tmp3F)){void*_tmp40=_tmp3F.f1;if(!((int(*)(
 struct Cyc_Dict_Dict d,void*k))Cyc_Dict_member)(s2,_tmp40)){int _tmp41=0;
@@ -2453,7 +2452,7 @@ _RegionHandle*r=& _tmp38C;_push_region(r);{struct _handler_cons _tmp38D;
 _push_handler(& _tmp38D);{int _tmp38F=0;if(setjmp(_tmp38D.handler))_tmp38F=1;if(!
 _tmp38F){{struct Cyc_Iter_Iter iter=((struct Cyc_Iter_Iter(*)(struct _RegionHandle*
 rgn,struct Cyc_Dict_Dict d))Cyc_Dict_make_iter)(r,p);struct _tuple18 _tmp390=*((
-struct _tuple18*(*)(struct _RegionHandle*r,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(
+struct _tuple18*(*)(struct _RegionHandle*,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(
 r,p);int first=1;({void*_tmp391=0;Cyc_fprintf(Cyc_stderr,({const char*_tmp392="{ ";
 _tag_dyneither(_tmp392,sizeof(char),3);}),_tag_dyneither(_tmp391,sizeof(void*),0));});
 while(((int(*)(struct Cyc_Iter_Iter,struct _tuple18*))Cyc_Iter_next)(iter,& _tmp390)){

@@ -738,10 +738,8 @@ struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_D
 struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;struct Cyc_Dict_T*
 t;};extern char Cyc_Dict_Present[8];struct Cyc_Dict_Present_struct{char*tag;};
 extern char Cyc_Dict_Absent[7];struct Cyc_Dict_Absent_struct{char*tag;};void*Cyc_Dict_lookup(
-struct Cyc_Dict_Dict d,void*k);struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
-struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple0*Cyc_Dict_rchoose(
-struct _RegionHandle*,struct Cyc_Dict_Dict d);struct _dyneither_ptr Cyc_Bitvec_new_empty(
-int);struct _dyneither_ptr Cyc_Bitvec_new_full(int);struct _dyneither_ptr Cyc_Bitvec_new_copy(
+struct Cyc_Dict_Dict d,void*k);struct _dyneither_ptr Cyc_Bitvec_new_empty(int);
+struct _dyneither_ptr Cyc_Bitvec_new_full(int);struct _dyneither_ptr Cyc_Bitvec_new_copy(
 struct _dyneither_ptr);struct _dyneither_ptr Cyc_Bitvec_from_list(struct Cyc_Dict_Dict
 d,int(*f)(void*),int sz,struct Cyc_List_List*);struct Cyc_List_List*Cyc_Bitvec_to_sorted_list(
 struct _dyneither_ptr bvec,int sz);void Cyc_Bitvec_print_bvec(struct _dyneither_ptr

@@ -21,7 +21,9 @@
 
 /*** \subsection{\texttt{<core.h>}} */
 /*** The file \texttt{<core.h>} defines some types and functions
-     outside of any namespace, and also defines a namespace Core. */
+     outside of any namespace, and also defines a namespace Core.
+
+*/
 
 /* These definitions are made outside of any namespace.  Most of them
    are implemented in C code (cyc_runtime.c).  To make sure that the
@@ -29,7 +31,7 @@
    definitions, for use in the C code.  See the Makefile to find out
    how. */
 
-/*** These declarations are made outside of any namespace. */
+/*** The following declarations are made outside of any namespace. */
 typedef char *`r Cstring<`r>;
 typedef char @`r CstringNN<`r>;
 typedef const char ?`r string_t<`r>;
@@ -46,9 +48,9 @@ typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
 /** [mstringptr_t] is the mutable version of [stringptr_t]. */
 
 typedef char * @nozeroterm `r Cbuffer_t<`r>;
-/** [buffer_t] is a non-zero-terminated C buffer */
+/** [Cbuffer_t] is a possibly-NULL, non-zero-terminated C buffer */
 typedef char @ @nozeroterm `r CbufferNN_t<`r>;
-/** [buffer_t] is a non-zero-terminated C buffer */
+/** [CbufferNN_t] is a non-NULL, non-zero-terminated C buffer */
 typedef const char ? @nozeroterm `r buffer_t<`r>;
 /** [buffer_t] is a non-zero-terminated dynamically sized buffer */
 typedef char ? @nozeroterm `r mbuffer_t<`r>;
@@ -67,13 +69,15 @@ typedef int bool;
 extern "C" void exit(int) __attribute__((noreturn)) ;
 extern "C" `a abort() __attribute__((noreturn));
 
-  /** The [NewRegion] struct is used to return a new dynamic region.  The
-      region is allocated as a sub-region of [r2]. */
+/*** The rest of the declarations are in namespace Core. */
+
 namespace Core {
 struct NewRegion<`r2::R> {
   <`r1::R>
   dynregion_t<`r1,`r2> dynregion;
 };
+  /** The [NewRegion] struct is used to return a new dynamic region.  The
+      region is allocated as a sub-region of [r2]. */
   // Note that this is here because it is used by the runtime
 }
 
@@ -82,8 +86,8 @@ struct NewRegion<`r2::R> {
 
 /* The rest of these are implemented in Cyclone, in core.cyc. */
 namespace Core {
-  /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
 typedef tag_t<valueof_t(sizeof(`a::A))> sizeof_t<`a>;
+  /** [sizeof_typ<T>] is the singleton type of [sizeof(T)].  */
 extern struct Opt<`a> { `a v; };
   /** A [struct Opt] is a cell with a single field, [v] (for value). */
 typedef struct Opt<`a> *`r::TR opt_t<`a,`r>;
@@ -144,14 +148,14 @@ extern datatype exn  { extern Failure(string_t) };
 extern datatype exn  { extern Impossible(string_t) };
   /** The [Impossible] exception is thrown when a supposedly
       impossible situation occurs (whether in a library or in your own
-      code).  For example, you might thrw [Impossible] if an assertion
+      code).  For example, you might throw [Impossible] if an assertion
       fails.  */
 extern datatype exn  { extern Not_found };
-extern datatype exn.Not_found Not_found_val;
   /** The [Not_found] exception is thrown by search functions to
       indicate failure.  For example, a function that looks up an
       entry in a table can throw [Not_found] if the entry is not
       found. */
+extern datatype exn.Not_found Not_found_val;
 extern datatype exn  { extern Unreachable(string_t) };
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
@@ -164,31 +168,31 @@ extern region_t<`U> unique_region;
 extern void ufree(`a::A ?`U ptr);
   /** [ufree] frees a unique pointer. */
 
+extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
   /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
       within [r2]. */
-extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
+extern struct NewRegion new_dynregion();
   /** A call to [new_dynregion()] returns a new dynamic region allocated
       in the heap. */
-extern struct NewRegion new_dynregion();
+extern datatype exn  { extern Open_Region };
   /** The [Open_Region] exception is thrown when one attempts to open 
       a dynamic region that is either already open or has been freed. */
-extern datatype exn  { extern Open_Region };
+extern datatype exn  { extern Free_Region };
   /** The [Free_Region] exception is thrown when one attempts to free
       a dynamic region that is either open or has already been freed. */
-extern datatype exn  { extern Free_Region };
+extern void free_dynregion(dynregion_t<`r1,`r2>);
   /** A call to [free_dynregion(d)] attempts to free the storage associated
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then the exception [Free_Region] is thrown. */
-extern void free_dynregion(dynregion_t<`r1,`r2>);
+extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
   /** A call to [try_free_dynregion(d)] attempts to free the storage associated
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then it returns 0, and otherwise returns 1 upon success. */
-extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
 
+  extern `a?`r mkfat(`a @{valueof(`n)}`r arr, Core::sizeof_t<`a> s, tag_t<`n> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */
-  extern `a?`r mkfat(`a @{valueof(`n)}`r arr, Core::sizeof_t<`a> s, tag_t<`n> n);
 
 
 // copies the string, making sure there's a zero at the end
@@ -201,7 +205,7 @@ extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
 //  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
 extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
 extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
-  /** [array_prevsize(p,sz)] returns the buffer space available preceding
+  /** [arr_prevsize(p,sz)] returns the buffer space available preceding
       the pointer [p] in the dynamic array [p] points into.  [sz] is the
       size of the elements in the array returned by [sizeof]. */
 }

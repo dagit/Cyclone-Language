@@ -744,7 +744,6 @@ char*tag;};struct Cyc_Dict_Dict Cyc_Dict_rempty(struct _RegionHandle*,int(*cmp)(
 void*,void*));int Cyc_Dict_member(struct Cyc_Dict_Dict d,void*k);struct Cyc_Dict_Dict
 Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);void*Cyc_Dict_lookup(struct
 Cyc_Dict_Dict d,void*k);struct _tuple0{void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(
-struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple0*Cyc_Dict_rchoose(
 struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Iter_Iter Cyc_Dict_make_iter(
 struct _RegionHandle*rgn,struct Cyc_Dict_Dict d);struct Cyc_Lineno_Pos{struct
 _dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};extern
@@ -1340,7 +1339,7 @@ f2;};void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po){struct
 _RegionHandle _tmpBF=_new_region("r");struct _RegionHandle*r=& _tmpBF;_push_region(
 r);{struct Cyc_Iter_Iter iter=((struct Cyc_Iter_Iter(*)(struct _RegionHandle*rgn,
 struct Cyc_Dict_Dict d))Cyc_Dict_make_iter)(r,po->d);struct _tuple10 _tmpC0=*((
-struct _tuple10*(*)(struct _RegionHandle*r,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(
+struct _tuple10*(*)(struct _RegionHandle*,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(
 r,po->d);({void*_tmpC1=0;Cyc_fprintf(Cyc_stderr,({const char*_tmpC2="region po:\n";
 _tag_dyneither(_tmpC2,sizeof(char),12);}),_tag_dyneither(_tmpC1,sizeof(void*),0));});
 while(((int(*)(struct Cyc_Iter_Iter,struct _tuple10*))Cyc_Iter_next)(iter,& _tmpC0)){({

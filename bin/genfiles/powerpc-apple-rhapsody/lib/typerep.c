@@ -758,119 +758,117 @@ void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter
 void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct
 _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8];struct Cyc_Dict_Present_struct{
 char*tag;};extern char Cyc_Dict_Absent[7];struct Cyc_Dict_Absent_struct{char*tag;};
-struct _tuple5{void*f1;void*f2;};struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*,struct Cyc_Dict_Dict d);int Cyc_strcmp(struct _dyneither_ptr s1,struct
-_dyneither_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ);static void _tmp192(
-int*pos1,struct _dyneither_ptr*_tmp3,unsigned int*_tmp191,unsigned int*_tmp190,
-struct _tuple1***_tmp18E){for(*_tmp191=0;*_tmp191 < *_tmp190;(*_tmp191)++){struct
-_tuple1*_tmp18C;(*_tmp18E)[*_tmp191]=((_tmp18C=_cycalloc(sizeof(*_tmp18C)),((
-_tmp18C->f1=(*(*((struct _tuple1**)_check_dyneither_subscript(*_tmp3,sizeof(
-struct _tuple1*),(int)(*_tmp191 + 1))))).f1 - *pos1,((_tmp18C->f2=(*(*((struct
-_tuple1**)_check_dyneither_subscript(*_tmp3,sizeof(struct _tuple1*),(int)(*
-_tmp191 + 1))))).f2,_tmp18C))))));}}struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){
-void*_tmp0=typ;unsigned int _tmp2;struct _dyneither_ptr _tmp3;_LL1: {struct Cyc_Typerep_Tuple_struct*
-_tmp1=(struct Cyc_Typerep_Tuple_struct*)_tmp0;if(_tmp1->tag != 6)goto _LL3;else{
-_tmp2=_tmp1->f1;_tmp3=_tmp1->f2;}}_LL2: if(_get_dyneither_size(_tmp3,sizeof(
-struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((struct _tuple1**)
-_check_dyneither_subscript(_tmp3,sizeof(struct _tuple1*),1)))).f1;unsigned int
-_tmp191;unsigned int _tmp190;struct _dyneither_ptr _tmp18F;struct _tuple1**_tmp18E;
-unsigned int _tmp18D;struct _dyneither_ptr _tmp4=(_tmp18D=_get_dyneither_size(_tmp3,
-sizeof(struct _tuple1*))- 1,((_tmp18E=(struct _tuple1**)_cycalloc(_check_times(
-sizeof(struct _tuple1*),_tmp18D)),((_tmp18F=_tag_dyneither(_tmp18E,sizeof(struct
-_tuple1*),_tmp18D),((((_tmp190=_tmp18D,_tmp192(& pos1,& _tmp3,& _tmp191,& _tmp190,&
-_tmp18E))),_tmp18F)))))));struct Cyc_Typerep_Tuple_struct*_tmp198;struct Cyc_Typerep_Tuple_struct
-_tmp197;struct _tuple4 _tmp196;return(_tmp196.f1=pos1,((_tmp196.f2=(void*)((
-_tmp198=_cycalloc(sizeof(*_tmp198)),((_tmp198[0]=((_tmp197.tag=6,((_tmp197.f1=
-_tmp2 - pos1,((_tmp197.f2=_tmp4,_tmp197)))))),_tmp198)))),_tmp196)));};_LL3:;_LL4: {
-struct Cyc_Core_Failure_struct _tmp19E;const char*_tmp19D;struct Cyc_Core_Failure_struct*
-_tmp19C;(int)_throw((void*)((_tmp19C=_cycalloc(sizeof(*_tmp19C)),((_tmp19C[0]=((
-_tmp19E.tag=Cyc_Core_Failure,((_tmp19E.f1=((_tmp19D="tuple_tl: expected tuple of size >= 2",
-_tag_dyneither(_tmp19D,sizeof(char),38))),_tmp19E)))),_tmp19C)))));}_LL0:;}
-struct _tuple4 Cyc_Typerep_get_unionbranch(unsigned int tag,struct _dyneither_ptr l);
-struct _tuple4 Cyc_Typerep_get_unionbranch(unsigned int tag,struct _dyneither_ptr l){{
-int i=0;for(0;i < _get_dyneither_size(l,sizeof(struct _tuple0*));++ i){unsigned int
-_tmp11;void*_tmp12;struct _tuple0 _tmp10=*((struct _tuple0**)l.curr)[i];_tmp11=
-_tmp10.f1;_tmp12=_tmp10.f3;if(_tmp11 == tag)return Cyc_Typerep_tuple_tl(_tmp12);}}{
-struct Cyc_Core_Failure_struct _tmp1A4;const char*_tmp1A3;struct Cyc_Core_Failure_struct*
-_tmp1A2;(int)_throw((void*)((_tmp1A2=_cycalloc(sizeof(*_tmp1A2)),((_tmp1A2[0]=((
-_tmp1A4.tag=Cyc_Core_Failure,((_tmp1A4.f1=((_tmp1A3="Could not find tag in TUnion",
-_tag_dyneither(_tmp1A3,sizeof(char),29))),_tmp1A4)))),_tmp1A2)))));};}struct
-_dyneither_ptr Cyc_Typerep_get_tagname(unsigned int tag,struct _dyneither_ptr l);
-struct _dyneither_ptr Cyc_Typerep_get_tagname(unsigned int tag,struct _dyneither_ptr
-l){{int i=0;for(0;i < _get_dyneither_size(l,sizeof(struct _tuple2*));++ i){
-unsigned int _tmp17;struct _dyneither_ptr _tmp18;struct _tuple2 _tmp16=*((struct
-_tuple2**)l.curr)[i];_tmp17=_tmp16.f1;_tmp18=_tmp16.f2;if(_tmp17 == tag)return
-_tmp18;}}{struct Cyc_Core_Failure_struct _tmp1AA;const char*_tmp1A9;struct Cyc_Core_Failure_struct*
-_tmp1A8;(int)_throw((void*)((_tmp1A8=_cycalloc(sizeof(*_tmp1A8)),((_tmp1A8[0]=((
-_tmp1AA.tag=Cyc_Core_Failure,((_tmp1AA.f1=((_tmp1A9="Could not find name in TUnion",
-_tag_dyneither(_tmp1A9,sizeof(char),30))),_tmp1AA)))),_tmp1A8)))));};}struct
-_dyneither_ptr Cyc_Typerep_get_tagname2(unsigned int tag,struct _dyneither_ptr l);
-struct _dyneither_ptr Cyc_Typerep_get_tagname2(unsigned int tag,struct
-_dyneither_ptr l){{int i=0;for(0;i < _get_dyneither_size(l,sizeof(struct _tuple0*));
-++ i){unsigned int _tmp1D;struct _dyneither_ptr _tmp1E;struct _tuple0 _tmp1C=*((struct
-_tuple0**)l.curr)[i];_tmp1D=_tmp1C.f1;_tmp1E=_tmp1C.f2;if(_tmp1D == tag)return
-_tmp1E;}}{struct Cyc_Core_Failure_struct _tmp1B0;const char*_tmp1AF;struct Cyc_Core_Failure_struct*
-_tmp1AE;(int)_throw((void*)((_tmp1AE=_cycalloc(sizeof(*_tmp1AE)),((_tmp1AE[0]=((
-_tmp1B0.tag=Cyc_Core_Failure,((_tmp1B0.f1=((_tmp1AF="Could not find name in TUnion",
-_tag_dyneither(_tmp1AF,sizeof(char),30))),_tmp1B0)))),_tmp1AE)))));};}struct
-_tuple4 Cyc_Typerep_get_xtunionbranch(struct _dyneither_ptr tag,struct
-_dyneither_ptr l);struct _tuple4 Cyc_Typerep_get_xtunionbranch(struct _dyneither_ptr
-tag,struct _dyneither_ptr l){{int i=0;for(0;i < _get_dyneither_size(l,sizeof(struct
-_tuple3*));++ i){struct _dyneither_ptr _tmp23;void*_tmp24;struct _tuple3 _tmp22=*((
-struct _tuple3**)l.curr)[i];_tmp23=_tmp22.f1;_tmp24=_tmp22.f2;if(Cyc_strcmp((
-struct _dyneither_ptr)_tmp23,(struct _dyneither_ptr)tag)== 0)return Cyc_Typerep_tuple_tl(
-_tmp24);}}{struct Cyc_Core_Failure_struct _tmp1B6;const char*_tmp1B5;struct Cyc_Core_Failure_struct*
-_tmp1B4;(int)_throw((void*)((_tmp1B4=_cycalloc(sizeof(*_tmp1B4)),((_tmp1B4[0]=((
-_tmp1B6.tag=Cyc_Core_Failure,((_tmp1B6.f1=((_tmp1B5="Could not find tag in XTUnion",
-_tag_dyneither(_tmp1B5,sizeof(char),30))),_tmp1B6)))),_tmp1B4)))));};}
-unsigned int Cyc_Typerep_size_type(void*rep);unsigned int Cyc_Typerep_size_type(
-void*rep){void*_tmp28=rep;int _tmp2A;unsigned int _tmp2B;unsigned int _tmp31;
-unsigned int _tmp33;unsigned int _tmp35;int _tmp39;int _tmp3B;struct _dyneither_ptr
-_tmp3C;_LL6: {struct Cyc_Typerep_Int_struct*_tmp29=(struct Cyc_Typerep_Int_struct*)
-_tmp28;if(_tmp29->tag != 0)goto _LL8;else{_tmp2A=_tmp29->f1;_tmp2B=_tmp29->f2;}}
-_LL7: return _tmp2B >> 3;_LL8: {struct Cyc_Typerep_Float_struct*_tmp2C=(struct Cyc_Typerep_Float_struct*)
-_tmp28;if(_tmp2C->tag != 1)goto _LLA;}_LL9: return sizeof(float);_LLA: {struct Cyc_Typerep_Double_struct*
-_tmp2D=(struct Cyc_Typerep_Double_struct*)_tmp28;if(_tmp2D->tag != 2)goto _LLC;}
-_LLB: return sizeof(double);_LLC: {struct Cyc_Typerep_ThinPtr_struct*_tmp2E=(struct
-Cyc_Typerep_ThinPtr_struct*)_tmp28;if(_tmp2E->tag != 3)goto _LLE;}_LLD: return
-sizeof(void*);_LLE: {struct Cyc_Typerep_FatPtr_struct*_tmp2F=(struct Cyc_Typerep_FatPtr_struct*)
-_tmp28;if(_tmp2F->tag != 4)goto _LL10;}_LLF: return sizeof(struct _dyneither_ptr);
-_LL10: {struct Cyc_Typerep_Struct_struct*_tmp30=(struct Cyc_Typerep_Struct_struct*)
-_tmp28;if(_tmp30->tag != 5)goto _LL12;else{_tmp31=_tmp30->f2;}}_LL11: return _tmp31;
-_LL12: {struct Cyc_Typerep_Tuple_struct*_tmp32=(struct Cyc_Typerep_Tuple_struct*)
-_tmp28;if(_tmp32->tag != 6)goto _LL14;else{_tmp33=_tmp32->f1;}}_LL13: return _tmp33;
-_LL14: {struct Cyc_Typerep_TUnionField_struct*_tmp34=(struct Cyc_Typerep_TUnionField_struct*)
-_tmp28;if(_tmp34->tag != 8)goto _LL16;else{_tmp35=_tmp34->f3;}}_LL15: return _tmp35;
-_LL16: {struct Cyc_Typerep_TUnion_struct*_tmp36=(struct Cyc_Typerep_TUnion_struct*)
-_tmp28;if(_tmp36->tag != 7)goto _LL18;}_LL17: return sizeof(void*);_LL18: {struct Cyc_Typerep_XTUnion_struct*
-_tmp37=(struct Cyc_Typerep_XTUnion_struct*)_tmp28;if(_tmp37->tag != 9)goto _LL1A;}
-_LL19: return sizeof(void*);_LL1A: {struct Cyc_Typerep_Union_struct*_tmp38=(struct
-Cyc_Typerep_Union_struct*)_tmp28;if(_tmp38->tag != 10)goto _LL1C;else{_tmp39=
-_tmp38->f2;}}_LL1B: return(unsigned int)_tmp39;_LL1C: {struct Cyc_Typerep_Enum_struct*
-_tmp3A=(struct Cyc_Typerep_Enum_struct*)_tmp28;if(_tmp3A->tag != 11)goto _LL5;else{
-_tmp3B=_tmp3A->f2;_tmp3C=_tmp3A->f3;}}_LL1D: return(unsigned int)_tmp3B;_LL5:;}
-struct _dyneither_ptr Cyc_Typerep_anon_or_name(struct _dyneither_ptr*name);struct
-_dyneither_ptr Cyc_Typerep_anon_or_name(struct _dyneither_ptr*name){const char*
-_tmp1B7;return name == 0?(_tmp1B7="(anon)",_tag_dyneither(_tmp1B7,sizeof(char),7)):*
-name;}void Cyc_Typerep_print_typestruct(void*rep);void Cyc_Typerep_print_typestruct(
-void*rep){void*_tmp3E=rep;int _tmp40;unsigned int _tmp41;unsigned int _tmp45;void*
-_tmp46;void*_tmp48;struct _dyneither_ptr*_tmp4A;unsigned int _tmp4B;struct
-_dyneither_ptr _tmp4C;unsigned int _tmp4E;struct _dyneither_ptr _tmp4F;struct
-_dyneither_ptr _tmp51;struct _dyneither_ptr _tmp52;unsigned int _tmp53;struct
-_dyneither_ptr _tmp54;struct _dyneither_ptr _tmp56;struct _dyneither_ptr _tmp57;
-struct _dyneither_ptr _tmp58;struct _dyneither_ptr _tmp5A;struct _dyneither_ptr _tmp5B;
-struct _dyneither_ptr*_tmp5D;int _tmp5E;struct _dyneither_ptr _tmp5F;struct
-_dyneither_ptr*_tmp61;int _tmp62;struct _dyneither_ptr _tmp63;_LL1F: {struct Cyc_Typerep_Int_struct*
-_tmp3F=(struct Cyc_Typerep_Int_struct*)_tmp3E;if(_tmp3F->tag != 0)goto _LL21;else{
-_tmp40=_tmp3F->f1;_tmp41=_tmp3F->f2;}}_LL20:{const char*_tmp1C0;const char*_tmp1BF;
-const char*_tmp1BE;void*_tmp1BD[2];struct Cyc_String_pa_struct _tmp1BC;struct Cyc_Int_pa_struct
+int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(
+void*typ);static void _tmp192(int*pos1,struct _dyneither_ptr*_tmp3,unsigned int*
+_tmp191,unsigned int*_tmp190,struct _tuple1***_tmp18E){for(*_tmp191=0;*_tmp191 < *
+_tmp190;(*_tmp191)++){struct _tuple1*_tmp18C;(*_tmp18E)[*_tmp191]=((_tmp18C=
+_cycalloc(sizeof(*_tmp18C)),((_tmp18C->f1=(*(*((struct _tuple1**)
+_check_dyneither_subscript(*_tmp3,sizeof(struct _tuple1*),(int)(*_tmp191 + 1))))).f1
+- *pos1,((_tmp18C->f2=(*(*((struct _tuple1**)_check_dyneither_subscript(*_tmp3,
+sizeof(struct _tuple1*),(int)(*_tmp191 + 1))))).f2,_tmp18C))))));}}struct _tuple4
+Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=typ;unsigned int _tmp2;struct
+_dyneither_ptr _tmp3;_LL1: {struct Cyc_Typerep_Tuple_struct*_tmp1=(struct Cyc_Typerep_Tuple_struct*)
+_tmp0;if(_tmp1->tag != 6)goto _LL3;else{_tmp2=_tmp1->f1;_tmp3=_tmp1->f2;}}_LL2: if(
+_get_dyneither_size(_tmp3,sizeof(struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((
+struct _tuple1**)_check_dyneither_subscript(_tmp3,sizeof(struct _tuple1*),1)))).f1;
+unsigned int _tmp191;unsigned int _tmp190;struct _dyneither_ptr _tmp18F;struct
+_tuple1**_tmp18E;unsigned int _tmp18D;struct _dyneither_ptr _tmp4=(_tmp18D=
+_get_dyneither_size(_tmp3,sizeof(struct _tuple1*))- 1,((_tmp18E=(struct _tuple1**)
+_cycalloc(_check_times(sizeof(struct _tuple1*),_tmp18D)),((_tmp18F=_tag_dyneither(
+_tmp18E,sizeof(struct _tuple1*),_tmp18D),((((_tmp190=_tmp18D,_tmp192(& pos1,& _tmp3,&
+_tmp191,& _tmp190,& _tmp18E))),_tmp18F)))))));struct Cyc_Typerep_Tuple_struct*
+_tmp198;struct Cyc_Typerep_Tuple_struct _tmp197;struct _tuple4 _tmp196;return(
+_tmp196.f1=pos1,((_tmp196.f2=(void*)((_tmp198=_cycalloc(sizeof(*_tmp198)),((
+_tmp198[0]=((_tmp197.tag=6,((_tmp197.f1=_tmp2 - pos1,((_tmp197.f2=_tmp4,_tmp197)))))),
+_tmp198)))),_tmp196)));};_LL3:;_LL4: {struct Cyc_Core_Failure_struct _tmp19E;const
+char*_tmp19D;struct Cyc_Core_Failure_struct*_tmp19C;(int)_throw((void*)((_tmp19C=
+_cycalloc(sizeof(*_tmp19C)),((_tmp19C[0]=((_tmp19E.tag=Cyc_Core_Failure,((
+_tmp19E.f1=((_tmp19D="tuple_tl: expected tuple of size >= 2",_tag_dyneither(
+_tmp19D,sizeof(char),38))),_tmp19E)))),_tmp19C)))));}_LL0:;}struct _tuple4 Cyc_Typerep_get_unionbranch(
+unsigned int tag,struct _dyneither_ptr l);struct _tuple4 Cyc_Typerep_get_unionbranch(
+unsigned int tag,struct _dyneither_ptr l){{int i=0;for(0;i < _get_dyneither_size(l,
+sizeof(struct _tuple0*));++ i){unsigned int _tmp11;void*_tmp12;struct _tuple0 _tmp10=*((
+struct _tuple0**)l.curr)[i];_tmp11=_tmp10.f1;_tmp12=_tmp10.f3;if(_tmp11 == tag)
+return Cyc_Typerep_tuple_tl(_tmp12);}}{struct Cyc_Core_Failure_struct _tmp1A4;const
+char*_tmp1A3;struct Cyc_Core_Failure_struct*_tmp1A2;(int)_throw((void*)((_tmp1A2=
+_cycalloc(sizeof(*_tmp1A2)),((_tmp1A2[0]=((_tmp1A4.tag=Cyc_Core_Failure,((
+_tmp1A4.f1=((_tmp1A3="Could not find tag in TUnion",_tag_dyneither(_tmp1A3,
+sizeof(char),29))),_tmp1A4)))),_tmp1A2)))));};}struct _dyneither_ptr Cyc_Typerep_get_tagname(
+unsigned int tag,struct _dyneither_ptr l);struct _dyneither_ptr Cyc_Typerep_get_tagname(
+unsigned int tag,struct _dyneither_ptr l){{int i=0;for(0;i < _get_dyneither_size(l,
+sizeof(struct _tuple2*));++ i){unsigned int _tmp17;struct _dyneither_ptr _tmp18;
+struct _tuple2 _tmp16=*((struct _tuple2**)l.curr)[i];_tmp17=_tmp16.f1;_tmp18=_tmp16.f2;
+if(_tmp17 == tag)return _tmp18;}}{struct Cyc_Core_Failure_struct _tmp1AA;const char*
+_tmp1A9;struct Cyc_Core_Failure_struct*_tmp1A8;(int)_throw((void*)((_tmp1A8=
+_cycalloc(sizeof(*_tmp1A8)),((_tmp1A8[0]=((_tmp1AA.tag=Cyc_Core_Failure,((
+_tmp1AA.f1=((_tmp1A9="Could not find name in TUnion",_tag_dyneither(_tmp1A9,
+sizeof(char),30))),_tmp1AA)))),_tmp1A8)))));};}struct _dyneither_ptr Cyc_Typerep_get_tagname2(
+unsigned int tag,struct _dyneither_ptr l);struct _dyneither_ptr Cyc_Typerep_get_tagname2(
+unsigned int tag,struct _dyneither_ptr l){{int i=0;for(0;i < _get_dyneither_size(l,
+sizeof(struct _tuple0*));++ i){unsigned int _tmp1D;struct _dyneither_ptr _tmp1E;
+struct _tuple0 _tmp1C=*((struct _tuple0**)l.curr)[i];_tmp1D=_tmp1C.f1;_tmp1E=_tmp1C.f2;
+if(_tmp1D == tag)return _tmp1E;}}{struct Cyc_Core_Failure_struct _tmp1B0;const char*
+_tmp1AF;struct Cyc_Core_Failure_struct*_tmp1AE;(int)_throw((void*)((_tmp1AE=
+_cycalloc(sizeof(*_tmp1AE)),((_tmp1AE[0]=((_tmp1B0.tag=Cyc_Core_Failure,((
+_tmp1B0.f1=((_tmp1AF="Could not find name in TUnion",_tag_dyneither(_tmp1AF,
+sizeof(char),30))),_tmp1B0)))),_tmp1AE)))));};}struct _tuple4 Cyc_Typerep_get_xtunionbranch(
+struct _dyneither_ptr tag,struct _dyneither_ptr l);struct _tuple4 Cyc_Typerep_get_xtunionbranch(
+struct _dyneither_ptr tag,struct _dyneither_ptr l){{int i=0;for(0;i < 
+_get_dyneither_size(l,sizeof(struct _tuple3*));++ i){struct _dyneither_ptr _tmp23;
+void*_tmp24;struct _tuple3 _tmp22=*((struct _tuple3**)l.curr)[i];_tmp23=_tmp22.f1;
+_tmp24=_tmp22.f2;if(Cyc_strcmp((struct _dyneither_ptr)_tmp23,(struct
+_dyneither_ptr)tag)== 0)return Cyc_Typerep_tuple_tl(_tmp24);}}{struct Cyc_Core_Failure_struct
+_tmp1B6;const char*_tmp1B5;struct Cyc_Core_Failure_struct*_tmp1B4;(int)_throw((
+void*)((_tmp1B4=_cycalloc(sizeof(*_tmp1B4)),((_tmp1B4[0]=((_tmp1B6.tag=Cyc_Core_Failure,((
+_tmp1B6.f1=((_tmp1B5="Could not find tag in XTUnion",_tag_dyneither(_tmp1B5,
+sizeof(char),30))),_tmp1B6)))),_tmp1B4)))));};}unsigned int Cyc_Typerep_size_type(
+void*rep);unsigned int Cyc_Typerep_size_type(void*rep){void*_tmp28=rep;int _tmp2A;
+unsigned int _tmp2B;unsigned int _tmp31;unsigned int _tmp33;unsigned int _tmp35;int
+_tmp39;int _tmp3B;struct _dyneither_ptr _tmp3C;_LL6: {struct Cyc_Typerep_Int_struct*
+_tmp29=(struct Cyc_Typerep_Int_struct*)_tmp28;if(_tmp29->tag != 0)goto _LL8;else{
+_tmp2A=_tmp29->f1;_tmp2B=_tmp29->f2;}}_LL7: return _tmp2B >> 3;_LL8: {struct Cyc_Typerep_Float_struct*
+_tmp2C=(struct Cyc_Typerep_Float_struct*)_tmp28;if(_tmp2C->tag != 1)goto _LLA;}_LL9:
+return sizeof(float);_LLA: {struct Cyc_Typerep_Double_struct*_tmp2D=(struct Cyc_Typerep_Double_struct*)
+_tmp28;if(_tmp2D->tag != 2)goto _LLC;}_LLB: return sizeof(double);_LLC: {struct Cyc_Typerep_ThinPtr_struct*
+_tmp2E=(struct Cyc_Typerep_ThinPtr_struct*)_tmp28;if(_tmp2E->tag != 3)goto _LLE;}
+_LLD: return sizeof(void*);_LLE: {struct Cyc_Typerep_FatPtr_struct*_tmp2F=(struct
+Cyc_Typerep_FatPtr_struct*)_tmp28;if(_tmp2F->tag != 4)goto _LL10;}_LLF: return
+sizeof(struct _dyneither_ptr);_LL10: {struct Cyc_Typerep_Struct_struct*_tmp30=(
+struct Cyc_Typerep_Struct_struct*)_tmp28;if(_tmp30->tag != 5)goto _LL12;else{_tmp31=
+_tmp30->f2;}}_LL11: return _tmp31;_LL12: {struct Cyc_Typerep_Tuple_struct*_tmp32=(
+struct Cyc_Typerep_Tuple_struct*)_tmp28;if(_tmp32->tag != 6)goto _LL14;else{_tmp33=
+_tmp32->f1;}}_LL13: return _tmp33;_LL14: {struct Cyc_Typerep_TUnionField_struct*
+_tmp34=(struct Cyc_Typerep_TUnionField_struct*)_tmp28;if(_tmp34->tag != 8)goto
+_LL16;else{_tmp35=_tmp34->f3;}}_LL15: return _tmp35;_LL16: {struct Cyc_Typerep_TUnion_struct*
+_tmp36=(struct Cyc_Typerep_TUnion_struct*)_tmp28;if(_tmp36->tag != 7)goto _LL18;}
+_LL17: return sizeof(void*);_LL18: {struct Cyc_Typerep_XTUnion_struct*_tmp37=(
+struct Cyc_Typerep_XTUnion_struct*)_tmp28;if(_tmp37->tag != 9)goto _LL1A;}_LL19:
+return sizeof(void*);_LL1A: {struct Cyc_Typerep_Union_struct*_tmp38=(struct Cyc_Typerep_Union_struct*)
+_tmp28;if(_tmp38->tag != 10)goto _LL1C;else{_tmp39=_tmp38->f2;}}_LL1B: return(
+unsigned int)_tmp39;_LL1C: {struct Cyc_Typerep_Enum_struct*_tmp3A=(struct Cyc_Typerep_Enum_struct*)
+_tmp28;if(_tmp3A->tag != 11)goto _LL5;else{_tmp3B=_tmp3A->f2;_tmp3C=_tmp3A->f3;}}
+_LL1D: return(unsigned int)_tmp3B;_LL5:;}struct _dyneither_ptr Cyc_Typerep_anon_or_name(
+struct _dyneither_ptr*name);struct _dyneither_ptr Cyc_Typerep_anon_or_name(struct
+_dyneither_ptr*name){const char*_tmp1B7;return name == 0?(_tmp1B7="(anon)",
+_tag_dyneither(_tmp1B7,sizeof(char),7)):*name;}void Cyc_Typerep_print_typestruct(
+void*rep);void Cyc_Typerep_print_typestruct(void*rep){void*_tmp3E=rep;int _tmp40;
+unsigned int _tmp41;unsigned int _tmp45;void*_tmp46;void*_tmp48;struct
+_dyneither_ptr*_tmp4A;unsigned int _tmp4B;struct _dyneither_ptr _tmp4C;unsigned int
+_tmp4E;struct _dyneither_ptr _tmp4F;struct _dyneither_ptr _tmp51;struct
+_dyneither_ptr _tmp52;unsigned int _tmp53;struct _dyneither_ptr _tmp54;struct
+_dyneither_ptr _tmp56;struct _dyneither_ptr _tmp57;struct _dyneither_ptr _tmp58;
+struct _dyneither_ptr _tmp5A;struct _dyneither_ptr _tmp5B;struct _dyneither_ptr*
+_tmp5D;int _tmp5E;struct _dyneither_ptr _tmp5F;struct _dyneither_ptr*_tmp61;int
+_tmp62;struct _dyneither_ptr _tmp63;_LL1F: {struct Cyc_Typerep_Int_struct*_tmp3F=(
+struct Cyc_Typerep_Int_struct*)_tmp3E;if(_tmp3F->tag != 0)goto _LL21;else{_tmp40=
+_tmp3F->f1;_tmp41=_tmp3F->f2;}}_LL20:{const char*_tmp1C0;void*_tmp1BF[2];const
+char*_tmp1BE;const char*_tmp1BD;struct Cyc_String_pa_struct _tmp1BC;struct Cyc_Int_pa_struct
 _tmp1BB;(_tmp1BB.tag=1,((_tmp1BB.f1=(unsigned long)((int)_tmp41),((_tmp1BC.tag=0,((
 _tmp1BC.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)(_tmp40?(struct
-_dyneither_ptr)((_tmp1BF="signed",_tag_dyneither(_tmp1BF,sizeof(char),7))):(
-struct _dyneither_ptr)((_tmp1C0="unsigned",_tag_dyneither(_tmp1C0,sizeof(char),9))))),((
-_tmp1BD[0]=& _tmp1BC,((_tmp1BD[1]=& _tmp1BB,Cyc_printf(((_tmp1BE="Int(%s,%d)",
-_tag_dyneither(_tmp1BE,sizeof(char),11))),_tag_dyneither(_tmp1BD,sizeof(void*),2)))))))))))));}
+_dyneither_ptr)((_tmp1BD="signed",_tag_dyneither(_tmp1BD,sizeof(char),7))):(
+struct _dyneither_ptr)((_tmp1BE="unsigned",_tag_dyneither(_tmp1BE,sizeof(char),9))))),((
+_tmp1BF[0]=& _tmp1BC,((_tmp1BF[1]=& _tmp1BB,Cyc_printf(((_tmp1C0="Int(%s,%d)",
+_tag_dyneither(_tmp1C0,sizeof(char),11))),_tag_dyneither(_tmp1BF,sizeof(void*),2)))))))))))));}
 goto _LL1E;_LL21: {struct Cyc_Typerep_Float_struct*_tmp42=(struct Cyc_Typerep_Float_struct*)
 _tmp3E;if(_tmp42->tag != 1)goto _LL23;}_LL22:{const char*_tmp1C3;void*_tmp1C2;(
 _tmp1C2=0,Cyc_printf(((_tmp1C3="Float",_tag_dyneither(_tmp1C3,sizeof(char),6))),

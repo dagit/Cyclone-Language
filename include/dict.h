@@ -70,7 +70,7 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int (@`H cmp)(`a,`a));
     allocated in the region with handle [r]. */
 
 extern dict_t<`a,`b,`r> rshare(region_t<`r>,dict_t<`a,`b,`r2> : {`r2} > `r);
-/** [rhare(r,d)] creates a virtual copy in region [`r] of the dictionary 
+/** [rshare(r,d)] creates a virtual copy in region [`r] of the dictionary 
     [d] that lives in region [`r2].  The internal data structures of the
     new dictionary share with the old one. */
 
@@ -186,7 +186,7 @@ extern dict_t<`a,`c,`r> rmap_c(region_t<`r>, `c f(`d,`b),`d env,
 extern dict_t<`a,`b,`r> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
                                    dict_t<`a,`b,`r> d1,
                                    dict_t<`a,`b,`r> d2);
-/** [union_two(f,env,d1,d2)] returns a new dictionary with a binding
+/** [union_two_c(f,env,d1,d2)] returns a new dictionary with a binding
     for every key in [d1] or [d2].  If a key appears in both [d1] and
     [d2], its value in the result is obtained by applying [f] to the
     two values, the key, and env.  Note that the resulting dictionary
@@ -220,12 +220,9 @@ extern bool forall_intersect(bool f(`a,`b,`b), dict_t<`a,`b> d1,
     is the value of [k] in [d1], and [v2] is the value of [k] in [d2];
     and it returns false otherwise.  */
 
-extern $(`a,`b)@`r rchoose(region_t<`r> r,dict_t<`a,`b> d);
-/** [choose(d)] returns a key/value pair from [d]; if [d] is empty,
-    [Absent] is thrown. */
 extern $(`a,`b)@`r rchoose(region_t<`r>,dict_t<`a,`b> d);
-/** [rchoose(r,d)] is like [choose(d)], except the resulting pair is
-    allocated in the region with handle [r]. */
+/** [rchoose(r,d)] returns a key/value pair from [d], allocating the pair in
+    region [r]; if [d] is empty, [Absent] is thrown. */
 
 extern list_t<$(`a,`b)@> to_list(dict_t<`a,`b> d);
 /** [to_list(d)] returns a list of the key/value pairs in [d],
@@ -283,8 +280,8 @@ extern Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
 					    dict_t<`a,`b,`r2> d
 					    : regions($(`a,`b)) > `bd,
                                               {`r1,`r2} > `bd);
-  /** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
-      is allocated in [rgn] where n is the number of elements in d*/
+/** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
+    is allocated in [rgn] where n is the number of elements in d*/
 
 extern `c marshal(region_t<`r> rgn,
 		  `c env,

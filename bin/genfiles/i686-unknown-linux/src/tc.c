@@ -1049,7 +1049,6 @@ Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*k,void*v);void*Cyc_Dict_lookup(struc
 Cyc_Dict_Dict d,void*k);void**Cyc_Dict_lookup_opt(struct Cyc_Dict_Dict d,void*k);
 struct Cyc_Dict_Dict Cyc_Dict_rmap_c(struct _RegionHandle*,void*(*f)(void*,void*),
 void*env,struct Cyc_Dict_Dict d);struct _tuple9{void*f1;void*f2;};struct _tuple9*Cyc_Dict_rchoose(
-struct _RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple9*Cyc_Dict_rchoose(
 struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict Cyc_Dict_rfilter_c(
 struct _RegionHandle*,int(*f)(void*,void*,void*),void*env,struct Cyc_Dict_Dict d);
 struct Cyc_Iter_Iter Cyc_Dict_make_iter(struct _RegionHandle*rgn,struct Cyc_Dict_Dict
@@ -2051,8 +2050,8 @@ struct Cyc_List_List*_tmp25D=Cyc_Tc_treeshake_f(& _tmp25C,ds);if(((int(*)(struct
 Cyc_Dict_Dict d))Cyc_Dict_is_empty)(_tmp25C.nsdict)){struct Cyc_List_List*_tmp25E=
 _tmp25D;_npop_handler(0);return _tmp25E;}{struct Cyc_Iter_Iter iter=((struct Cyc_Iter_Iter(*)(
 struct _RegionHandle*rgn,struct Cyc_Dict_Dict d))Cyc_Dict_make_iter)(Cyc_Core_heap_region,
-_tmp25C.nsdict);struct _tuple19 _tmp25F=*((struct _tuple19*(*)(struct _RegionHandle*
-r,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(rgn,_tmp25C.nsdict);while(((int(*)(
+_tmp25C.nsdict);struct _tuple19 _tmp25F=*((struct _tuple19*(*)(struct _RegionHandle*,
+struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(rgn,_tmp25C.nsdict);while(((int(*)(
 struct Cyc_Iter_Iter,struct _tuple19*))Cyc_Iter_next)(iter,& _tmp25F)){struct
 _tuple18*_tmp261;struct _tuple18 _tmp262;struct Cyc_Tcenv_Genv*_tmp263;struct Cyc_Set_Set*
 _tmp264;struct _tuple19 _tmp260=_tmp25F;_tmp261=_tmp260.f2;_tmp262=*_tmp261;

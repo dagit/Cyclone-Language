@@ -773,9 +773,8 @@ Cyc_Dict_Dict Cyc_Dict_intersect_c(void*(*f)(void*,void*,void*,void*),void*env,
 struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);int Cyc_Dict_forall_c(int(*f)(void*,
 void*,void*),void*env,struct Cyc_Dict_Dict d);int Cyc_Dict_forall_intersect(int(*f)(
 void*,void*,void*),struct Cyc_Dict_Dict d1,struct Cyc_Dict_Dict d2);struct _tuple0{
-void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*r,struct Cyc_Dict_Dict
-d);struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict d);
-struct Cyc_List_List*Cyc_Dict_to_list(struct Cyc_Dict_Dict d);struct Cyc_List_List*
+void*f1;void*f2;};struct _tuple0*Cyc_Dict_rchoose(struct _RegionHandle*,struct Cyc_Dict_Dict
+d);struct Cyc_List_List*Cyc_Dict_to_list(struct Cyc_Dict_Dict d);struct Cyc_List_List*
 Cyc_Dict_rto_list(struct _RegionHandle*,struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict
 Cyc_Dict_filter(int(*f)(void*,void*),struct Cyc_Dict_Dict d);struct Cyc_Dict_Dict
 Cyc_Dict_rfilter(struct _RegionHandle*,int(*f)(void*,void*),struct Cyc_Dict_Dict d);
@@ -862,11 +861,11 @@ _tmp1A=_tmp19.color;if(_tmp1A != Cyc_Dict_R)goto _LL3;_tmp1B=_tmp19.left;_tmp1C=
 _tmp19.right;_tmp1D=_tmp19.key_val;_tmp1E=_tmp16.right;_tmp1F=_tmp16.key_val;
 _tmp20=_tmp13.f3;_tmp21=_tmp13.f4;_LL2: {struct Cyc_Dict_T*_tmp130;struct Cyc_Dict_T*
 _tmp12F;struct Cyc_Dict_T*_tmp12E;return(_tmp12E=_region_malloc(r,sizeof(*_tmp12E)),((
-_tmp12E->color=Cyc_Dict_R,((_tmp12E->left=((_tmp130=_region_malloc(r,sizeof(*
-_tmp130)),((_tmp130->color=Cyc_Dict_B,((_tmp130->left=_tmp1B,((_tmp130->right=
-_tmp1C,((_tmp130->key_val=_tmp1D,_tmp130)))))))))),((_tmp12E->right=((_tmp12F=
-_region_malloc(r,sizeof(*_tmp12F)),((_tmp12F->color=Cyc_Dict_B,((_tmp12F->left=
-_tmp1E,((_tmp12F->right=_tmp20,((_tmp12F->key_val=_tmp21,_tmp12F)))))))))),((
+_tmp12E->color=Cyc_Dict_R,((_tmp12E->left=((_tmp12F=_region_malloc(r,sizeof(*
+_tmp12F)),((_tmp12F->color=Cyc_Dict_B,((_tmp12F->left=_tmp1B,((_tmp12F->right=
+_tmp1C,((_tmp12F->key_val=_tmp1D,_tmp12F)))))))))),((_tmp12E->right=((_tmp130=
+_region_malloc(r,sizeof(*_tmp130)),((_tmp130->color=Cyc_Dict_B,((_tmp130->left=
+_tmp1E,((_tmp130->right=_tmp20,((_tmp130->key_val=_tmp21,_tmp130)))))))))),((
 _tmp12E->key_val=_tmp1F,_tmp12E)))))))));}_LL3: _tmp22=_tmp13.f1;if(_tmp22 != Cyc_Dict_B)
 goto _LL5;_tmp23=_tmp13.f2;if(_tmp23 == 0)goto _LL5;_tmp24=*_tmp23;_tmp25=_tmp24.color;
 if(_tmp25 != Cyc_Dict_R)goto _LL5;_tmp26=_tmp24.left;_tmp27=_tmp24.right;if(_tmp27
@@ -874,11 +873,11 @@ if(_tmp25 != Cyc_Dict_R)goto _LL5;_tmp26=_tmp24.left;_tmp27=_tmp24.right;if(_tmp
 _tmp2A=_tmp28.left;_tmp2B=_tmp28.right;_tmp2C=_tmp28.key_val;_tmp2D=_tmp24.key_val;
 _tmp2E=_tmp13.f3;_tmp2F=_tmp13.f4;_LL4: {struct Cyc_Dict_T*_tmp135;struct Cyc_Dict_T*
 _tmp134;struct Cyc_Dict_T*_tmp133;return(_tmp133=_region_malloc(r,sizeof(*_tmp133)),((
-_tmp133->color=Cyc_Dict_R,((_tmp133->left=((_tmp135=_region_malloc(r,sizeof(*
-_tmp135)),((_tmp135->color=Cyc_Dict_B,((_tmp135->left=_tmp26,((_tmp135->right=
-_tmp2A,((_tmp135->key_val=_tmp2D,_tmp135)))))))))),((_tmp133->right=((_tmp134=
-_region_malloc(r,sizeof(*_tmp134)),((_tmp134->color=Cyc_Dict_B,((_tmp134->left=
-_tmp2B,((_tmp134->right=_tmp2E,((_tmp134->key_val=_tmp2F,_tmp134)))))))))),((
+_tmp133->color=Cyc_Dict_R,((_tmp133->left=((_tmp134=_region_malloc(r,sizeof(*
+_tmp134)),((_tmp134->color=Cyc_Dict_B,((_tmp134->left=_tmp26,((_tmp134->right=
+_tmp2A,((_tmp134->key_val=_tmp2D,_tmp134)))))))))),((_tmp133->right=((_tmp135=
+_region_malloc(r,sizeof(*_tmp135)),((_tmp135->color=Cyc_Dict_B,((_tmp135->left=
+_tmp2B,((_tmp135->right=_tmp2E,((_tmp135->key_val=_tmp2F,_tmp135)))))))))),((
 _tmp133->key_val=_tmp2C,_tmp133)))))))));}_LL5: _tmp30=_tmp13.f1;if(_tmp30 != Cyc_Dict_B)
 goto _LL7;_tmp31=_tmp13.f2;_tmp32=_tmp13.f3;if(_tmp32 == 0)goto _LL7;_tmp33=*_tmp32;
 _tmp34=_tmp33.color;if(_tmp34 != Cyc_Dict_R)goto _LL7;_tmp35=_tmp33.left;if(_tmp35
@@ -886,11 +885,11 @@ _tmp34=_tmp33.color;if(_tmp34 != Cyc_Dict_R)goto _LL7;_tmp35=_tmp33.left;if(_tmp
 _tmp38=_tmp36.left;_tmp39=_tmp36.right;_tmp3A=_tmp36.key_val;_tmp3B=_tmp33.right;
 _tmp3C=_tmp33.key_val;_tmp3D=_tmp13.f4;_LL6: {struct Cyc_Dict_T*_tmp13A;struct Cyc_Dict_T*
 _tmp139;struct Cyc_Dict_T*_tmp138;return(_tmp138=_region_malloc(r,sizeof(*_tmp138)),((
-_tmp138->color=Cyc_Dict_R,((_tmp138->left=((_tmp13A=_region_malloc(r,sizeof(*
-_tmp13A)),((_tmp13A->color=Cyc_Dict_B,((_tmp13A->left=_tmp31,((_tmp13A->right=
-_tmp38,((_tmp13A->key_val=_tmp3D,_tmp13A)))))))))),((_tmp138->right=((_tmp139=
-_region_malloc(r,sizeof(*_tmp139)),((_tmp139->color=Cyc_Dict_B,((_tmp139->left=
-_tmp39,((_tmp139->right=_tmp3B,((_tmp139->key_val=_tmp3C,_tmp139)))))))))),((
+_tmp138->color=Cyc_Dict_R,((_tmp138->left=((_tmp139=_region_malloc(r,sizeof(*
+_tmp139)),((_tmp139->color=Cyc_Dict_B,((_tmp139->left=_tmp31,((_tmp139->right=
+_tmp38,((_tmp139->key_val=_tmp3D,_tmp139)))))))))),((_tmp138->right=((_tmp13A=
+_region_malloc(r,sizeof(*_tmp13A)),((_tmp13A->color=Cyc_Dict_B,((_tmp13A->left=
+_tmp39,((_tmp13A->right=_tmp3B,((_tmp13A->key_val=_tmp3C,_tmp13A)))))))))),((
 _tmp138->key_val=_tmp3A,_tmp138)))))))));}_LL7: _tmp3E=_tmp13.f1;if(_tmp3E != Cyc_Dict_B)
 goto _LL9;_tmp3F=_tmp13.f2;_tmp40=_tmp13.f3;if(_tmp40 == 0)goto _LL9;_tmp41=*_tmp40;
 _tmp42=_tmp41.color;if(_tmp42 != Cyc_Dict_R)goto _LL9;_tmp43=_tmp41.left;_tmp44=
@@ -898,11 +897,11 @@ _tmp41.right;if(_tmp44 == 0)goto _LL9;_tmp45=*_tmp44;_tmp46=_tmp45.color;if(_tmp
 != Cyc_Dict_R)goto _LL9;_tmp47=_tmp45.left;_tmp48=_tmp45.right;_tmp49=_tmp45.key_val;
 _tmp4A=_tmp41.key_val;_tmp4B=_tmp13.f4;_LL8: {struct Cyc_Dict_T*_tmp13F;struct Cyc_Dict_T*
 _tmp13E;struct Cyc_Dict_T*_tmp13D;return(_tmp13D=_region_malloc(r,sizeof(*_tmp13D)),((
-_tmp13D->color=Cyc_Dict_R,((_tmp13D->left=((_tmp13F=_region_malloc(r,sizeof(*
-_tmp13F)),((_tmp13F->color=Cyc_Dict_B,((_tmp13F->left=_tmp3F,((_tmp13F->right=
-_tmp43,((_tmp13F->key_val=_tmp4B,_tmp13F)))))))))),((_tmp13D->right=((_tmp13E=
-_region_malloc(r,sizeof(*_tmp13E)),((_tmp13E->color=Cyc_Dict_B,((_tmp13E->left=
-_tmp47,((_tmp13E->right=_tmp48,((_tmp13E->key_val=_tmp49,_tmp13E)))))))))),((
+_tmp13D->color=Cyc_Dict_R,((_tmp13D->left=((_tmp13E=_region_malloc(r,sizeof(*
+_tmp13E)),((_tmp13E->color=Cyc_Dict_B,((_tmp13E->left=_tmp3F,((_tmp13E->right=
+_tmp43,((_tmp13E->key_val=_tmp4B,_tmp13E)))))))))),((_tmp13D->right=((_tmp13F=
+_region_malloc(r,sizeof(*_tmp13F)),((_tmp13F->color=Cyc_Dict_B,((_tmp13F->left=
+_tmp47,((_tmp13F->right=_tmp48,((_tmp13F->key_val=_tmp49,_tmp13F)))))))))),((
 _tmp13D->key_val=_tmp4A,_tmp13D)))))))));}_LL9: _tmp4C=_tmp13.f1;_tmp4D=_tmp13.f2;
 _tmp4E=_tmp13.f3;_tmp4F=_tmp13.f4;_LLA: {struct Cyc_Dict_T*_tmp140;return(_tmp140=
 _region_malloc(r,sizeof(*_tmp140)),((_tmp140->color=_tmp4C,((_tmp140->left=

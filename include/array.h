@@ -122,7 +122,7 @@ extern `a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,`b ? x);
       argument requires a closure as its first argument. */
 extern `b fold_right(`b f(`a,`b),`a ? x,`b accum);
   /** If [x] has elements [x1] through [xn], then
-      [fold_left(f,accum,x)] returns
+      [fold_right(f,accum,x)] returns
       [f(x1,f(x2,...,f(xn-1,f(xn,a))...))]. */
 extern `b fold_right_c(`b f(`c,`a,`b),`c env,`a ? x,`b accum);
   /** [fold_right_c] is a version of [fold_right] where the function

@@ -54,7 +54,7 @@ extern `b lookup(table_t<`a,`b> t, `a key);
       or throws [Not_found] if there is no value associated with [key]
       in [t]. */
 extern `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key);
-  /** [rlookup_opt(t,key)] returns a pointer to the value associated 
+  /** [lookup_opt(t,key)] returns a pointer to the value associated 
       with [key] in [t], or NULL if there is no value associated with [key].*/
 extern bool try_lookup(table_t<`a,`b> t, `a key, `b@data);
   /** [try_lookup(t,key,p)] tries to find the [key] in the table [t].

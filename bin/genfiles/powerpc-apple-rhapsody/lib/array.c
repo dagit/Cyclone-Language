@@ -1012,12 +1012,12 @@ _dyneither_ptr x){int sx=(int)_get_dyneither_size(x,sizeof(struct _tuple0));
 unsigned int _tmp81;void**_tmp80;struct _dyneither_ptr _tmp7F;unsigned int _tmp7E;
 unsigned int _tmp7D;unsigned int _tmp7C;void**_tmp7B;struct _dyneither_ptr _tmp7A;
 unsigned int _tmp79;unsigned int _tmp78;struct _tuple1 _tmp77;return(_tmp77.f1=((
-_tmp81=(unsigned int)sx,((_tmp80=(void**)_cycalloc(_check_times(sizeof(void*),
-_tmp81)),((_tmp7F=_tag_dyneither(_tmp80,sizeof(void*),_tmp81),((((_tmp7E=_tmp81,
-_tmp70(& x,& _tmp7D,& _tmp7E,& _tmp80))),_tmp7F)))))))),((_tmp77.f2=((_tmp7C=(
-unsigned int)sx,((_tmp7B=(void**)_cycalloc(_check_times(sizeof(void*),_tmp7C)),((
-_tmp7A=_tag_dyneither(_tmp7B,sizeof(void*),_tmp7C),((((_tmp79=_tmp7C,_tmp76(& x,&
-_tmp78,& _tmp79,& _tmp7B))),_tmp7A)))))))),_tmp77)));}int Cyc_Array_memq(struct
+_tmp7C=(unsigned int)sx,((_tmp7B=(void**)_cycalloc(_check_times(sizeof(void*),
+_tmp7C)),((_tmp7A=_tag_dyneither(_tmp7B,sizeof(void*),_tmp7C),((((_tmp79=_tmp7C,
+_tmp70(& x,& _tmp78,& _tmp79,& _tmp7B))),_tmp7A)))))))),((_tmp77.f2=((_tmp81=(
+unsigned int)sx,((_tmp80=(void**)_cycalloc(_check_times(sizeof(void*),_tmp81)),((
+_tmp7F=_tag_dyneither(_tmp80,sizeof(void*),_tmp81),((((_tmp7E=_tmp81,_tmp76(& x,&
+_tmp7D,& _tmp7E,& _tmp80))),_tmp7F)))))))),_tmp77)));}int Cyc_Array_memq(struct
 _dyneither_ptr l,void*x);int Cyc_Array_memq(struct _dyneither_ptr l,void*x){int s=(
 int)_get_dyneither_size(l,sizeof(void*));{int i=0;for(0;i < s;++ i){if(*((void**)
 _check_dyneither_subscript(l,sizeof(void*),i))== x)return 1;}}return 0;}int Cyc_Array_mem(

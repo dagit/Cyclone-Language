@@ -776,17 +776,14 @@ void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter
 void*);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct
 _RegionHandle*r;struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8];struct Cyc_Dict_Present_struct{
 char*tag;};extern char Cyc_Dict_Absent[7];struct Cyc_Dict_Absent_struct{char*tag;};
-struct _tuple5{void*f1;void*f2;};struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*r,struct Cyc_Dict_Dict d);struct _tuple5*Cyc_Dict_rchoose(struct
-_RegionHandle*,struct Cyc_Dict_Dict d);int Cyc_strcmp(struct _dyneither_ptr s1,struct
-_dyneither_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(void*typ){void*_tmp0=typ;
-unsigned int _tmp2;struct _dyneither_ptr _tmp3;_LL1: {struct Cyc_Typerep_Tuple_struct*
-_tmp1=(struct Cyc_Typerep_Tuple_struct*)_tmp0;if(_tmp1->tag != 6)goto _LL3;else{
-_tmp2=_tmp1->f1;_tmp3=_tmp1->f2;}}_LL2: if(_get_dyneither_size(_tmp3,sizeof(
-struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((struct _tuple1**)
-_check_dyneither_subscript(_tmp3,sizeof(struct _tuple1*),1)))).f1;struct
-_dyneither_ptr _tmp4=({unsigned int _tmp8=_get_dyneither_size(_tmp3,sizeof(struct
-_tuple1*))- 1;struct _tuple1**_tmp9=(struct _tuple1**)_cycalloc(_check_times(
+int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);struct _tuple4 Cyc_Typerep_tuple_tl(
+void*typ){void*_tmp0=typ;unsigned int _tmp2;struct _dyneither_ptr _tmp3;_LL1: {
+struct Cyc_Typerep_Tuple_struct*_tmp1=(struct Cyc_Typerep_Tuple_struct*)_tmp0;if(
+_tmp1->tag != 6)goto _LL3;else{_tmp2=_tmp1->f1;_tmp3=_tmp1->f2;}}_LL2: if(
+_get_dyneither_size(_tmp3,sizeof(struct _tuple1*))< 2)goto _LL4;{int pos1=(int)(*(*((
+struct _tuple1**)_check_dyneither_subscript(_tmp3,sizeof(struct _tuple1*),1)))).f1;
+struct _dyneither_ptr _tmp4=({unsigned int _tmp8=_get_dyneither_size(_tmp3,sizeof(
+struct _tuple1*))- 1;struct _tuple1**_tmp9=(struct _tuple1**)_cycalloc(_check_times(
 sizeof(struct _tuple1*),_tmp8));struct _dyneither_ptr _tmpC=_tag_dyneither(_tmp9,
 sizeof(struct _tuple1*),_tmp8);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < 
 _tmpA;i ++){_tmp9[i]=({struct _tuple1*_tmpB=_cycalloc(sizeof(*_tmpB));_tmpB->f1=(*(*((
