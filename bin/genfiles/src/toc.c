@@ -1042,7 +1042,8 @@ _temp460 + 8; _temp461;})));} _LL299: return Cyc_Absyn_strctq( Cyc_Toc_collapse_
 _temp383,( struct _tagged_string)({ char* _temp462=( char*)"_struct"; struct
 _tagged_string _temp463; _temp463.curr= _temp462; _temp463.base= _temp462;
 _temp463.last_plus_one= _temp462 + 8; _temp463;}))); _LL301: _temp397= Cyc_Toc_typ_to_c_array(
-_temp397);{ void* _temp464=( void*) _temp389->v; void* _temp470; _LL466: if((
+_temp397);{ void* _temp464=( void*)((( struct Cyc_Absyn_Conref*(*)( struct Cyc_Absyn_Conref*
+x)) Cyc_Absyn_compress_conref)( _temp389))->v; void* _temp470; _LL466: if((
 unsigned int) _temp464 > 1u?(( struct _tunion_struct*) _temp464)->tag == Cyc_Absyn_Eq_constr_tag:
 0){ _LL471: _temp470=( void*)(( struct Cyc_Absyn_Eq_constr_struct*) _temp464)->f1;
 if(( int) _temp470 == Cyc_Absyn_Unknown_b){ goto _LL467;} else{ goto _LL468;}}

@@ -134,5 +134,5 @@ In Cyclone, fgets returns true (==1) if there was an error, false (== 0 == NULL)
 
 Why don't we want it to be the other way around?
 
-
+JGM: should be fixed now.
 

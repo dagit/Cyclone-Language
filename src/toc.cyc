@@ -321,7 +321,7 @@ static type_t typ_to_c(type_t t) {
     // struct tagged_ptr_t2 { t2 *curr; t2 *base; t2 *last_plus_one; }
     // t2* and t2@ map to t2*.  Regions are irrelevant.
     t2 = typ_to_c_array(t2);
-    switch (bnds->v) {
+    switch (compress_conref(bnds)->v) {
     case &Eq_constr(Unknown_b):
       let n = add_tagged_ptr_type(t2,tq);
       return strct(n);

@@ -261,6 +261,24 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         terr(d->loc, "cannot declare a qualified local variable");
         break;
       }
+      // if it's an array or string, fill in the size on the type
+      switch (compress(t)) {
+      case &ArrayType(telt,tq,null) && vd->initializer != null:
+        switch (vd->initializer->r) {
+          case &Const_e(&String_c(s)):
+          t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,null));
+          break;
+          case &UnresolvedMem_e(_,es): fallthru(es);
+          case &Array_e(es):
+          t = vd->type = 
+            new ArrayType(telt,tq,uint_exp(List::length(es),null));
+          break;
+          default: break;
+        }
+        break;
+      default: break;
+      }
+
       check_type(s0->loc,te,lookup_type_vars(te),MemKind,t);
       if (initializer != null) {
 	// special case -- fill in the size for t[] arrays
