@@ -391,6 +391,8 @@ string_t kind2string(kind_t ka) {
     }
   case EffKind: return "E";
   case IntKind: return "I";
+  case BoolKind: return "BOOL";
+  case PtrBndKind: return "PTRBND";
   }
 }
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
@@ -604,12 +606,12 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   switch (tms->hd) {
   case &Carray_mod(zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat(rest,conref_def(false,zeroterm) ?
+    return cat(rest,type2bool(false,zeroterm) ?
                text("[]@zeroterm") : text("[]"));
   case &ConstArray_mod(e,zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat(rest, text("["), exp2doc(e),
-               conref_def(false,zeroterm) ? text("]@zeroterm") : text("]"));
+               type2bool(false,zeroterm) ? text("]@zeroterm") : text("]"));
   case &Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
@@ -642,23 +644,28 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
     doc_t ztd = mt;
     doc_t rgd = mt;
     doc_t tqd = tqual2doc(tq2);
-    switch(conref_def(bounds_one,bd)) {
-    case &DynEither_b: ptr = question(); break;
-    case &Upper_b(e):
-      ptr = text(conref_def(true,nullable) ? "*" : "@");
+    switch (Tcutil::compress(bd)) {
+    case &AppType(&FatCon,_): ptr = question(); break;
+    case &AppType(&ThinCon,&List{&ValueofType(e),_}): 
+      ptr = text(type2bool(true,nullable) ? "*" : "@");
       let $(val,known) = Evexp::eval_const_uint_exp(e);
       if(!known || val != 1)
 	ptr = cat(ptr,lb(),exp2doc(e),rb());
       break;
+    default:
+      ptr = text(type2bool(true,nullable) ? "*" : "@");
+      ptr = cat(ptr,lb(),typ2doc(bd),rb());
+      break;
+      
     }
     if (print_zeroterm) {
-      if (!is_char_ptr && conref_def(false,zt))
+      if (!is_char_ptr && type2bool(false,zt))
         ztd = text("@zeroterm");
-      else if (is_char_ptr && !conref_def(false,zt))
+      else if (is_char_ptr && !type2bool(false,zt))
 	ztd = text("@nozeroterm");
     }
     switch(compress(rgn)) {
-    case &HeapRgn: break;
+    case &AppType(&HeapCon,_): break;
     case &Evar(_,_,_,_) && print_for_cycdoc: break;
     default: rgd = rgn2doc(rgn);
     }
@@ -670,9 +677,9 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
 
 doc_t rgn2doc(type_t t) {
   switch (compress(t)) {
-  case &HeapRgn: return text("`H");
-  case &UniqueRgn: return text("`U");
-  case &RefCntRgn: return text("`RC");
+  case &AppType(&HeapCon,_): return text("`H");
+  case &AppType(&UniqueCon,_): return text("`U");
+  case &AppType(&RefCntCon,_): return text("`RC");
   default: return ntyp2doc(t);
     //default: return cat(text("@region("),ntyp2doc(t),text(")"));
   }
@@ -683,8 +690,8 @@ static void effects2docs(list_t<doc_t,`H> @ `r rgions,
 			 type_t t)
 {
   switch (compress(t)) {
-  case &AccessEff(r): *rgions = new List(rgn2doc(r), *rgions); break;
-  case &JoinEff(ts):
+  case &AppType(&AccessCon,&List{r,_}): *rgions = new List(rgn2doc(r), *rgions); break;
+  case &AppType(&JoinCon,ts):
     for (; ts != NULL; ts = ts->tl) {
       effects2docs(rgions, effects, ts->hd);
     }
@@ -722,7 +729,7 @@ doc_t ntyp2doc(type_t t) {
   case &FnType(_)       : return nil_doc();
   case &PointerType(_)  : return nil_doc();
     // The remaining cases are possible.
-  case &VoidType: s = text("void"); break;
+  case &AppType(&VoidCon,_): s = text("void"); break;
   case &Evar(k,topt,i,tvs):
     if (topt != NULL)
       // This is an error case, topt should be NULL in a normalized type
@@ -752,7 +759,7 @@ doc_t ntyp2doc(type_t t) {
       s = cat(s,text("::"),kindbound2doc(tv->kind));
     }
     break;
-  case &DatatypeType(DatatypeInfo(tu_info,ts)):
+  case &AppType(&DatatypeCon(tu_info),ts):
     switch(tu_info) {
     case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}:
       fallthru(n,is_x);
@@ -763,7 +770,7 @@ doc_t ntyp2doc(type_t t) {
       break;
     }
     break;
-  case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
+  case &AppType(&DatatypeFieldCon(tuf_info),ts):
     switch(tuf_info) {
     case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
       fallthru(tname,is_x,fname);
@@ -774,7 +781,7 @@ doc_t ntyp2doc(type_t t) {
       break;
     }
     break;
-  case &IntType(sn,sz):
+  case &AppType(&IntCon(sn,sz),_):
     string_t sns;
     string_t ts;
     switch (sn) {
@@ -803,7 +810,7 @@ doc_t ntyp2doc(type_t t) {
     }
     s = text(aprintf("%s%s",sns,ts));
     break;
-  case &FloatType(i):
+  case &AppType(&FloatCon(i),_):
     if (i==0)
       s = text("float");
     else if (i==1)
@@ -814,7 +821,7 @@ doc_t ntyp2doc(type_t t) {
   case &TupleType(ts):
     s = cat(dollar(),args2doc(ts));
     break;
-  case &AggrType(AggrInfo(info,ts)):
+  case &AppType(&AggrCon(info),ts):
     let $(k,n) = aggr_kinded_name(info);
     s = cat(aggr_kind2doc(k), qvar2doc(n), tps2doc(ts));
     break;
@@ -823,15 +830,15 @@ doc_t ntyp2doc(type_t t) {
             nest(2, aggrfields2doc(fs)),
             rb());
     break;
-  case &AnonEnumType(fs):
+  case &AppType(&AnonEnumCon(fs),_):
     s = cat(text("enum "),lb(),nest(2, enumfields2doc(fs)), rb()); break;
-  case &EnumType(n,_):
+  case &AppType(&EnumCon(n,_),_):
     s = cat(text("enum "),qvar2doc(n)); break;
   case &ValueofType(e):
     s = cat(text("valueof_t("),exp2doc(e),text(")")); break;
   case &TypeofType(e):
     s = cat(text("typeof("),exp2doc(e),text(")")); break;
-  case &BuiltinType(t,_):
+  case &AppType(&BuiltinCon(t,_),_):
     s = text(t); break;
   case &TypedefType(n,ts,kopt,_):
     // NB: we could print out the expanded typedef by following the topt
@@ -841,21 +848,18 @@ doc_t ntyp2doc(type_t t) {
     // not going to be "normalized" (i.e., come out of to_tms).
     s = cat(qvar2doc(n),tps2doc(ts));
     break;
-  case &RgnHandleType(t):
+  case &AppType(&RgnHandleCon,&List{t,_}):
     s = cat(text("region_t<"),rgn2doc(t),text(">")); break;
-  case &DynRgnType(t1,t2):
-    s = cat(text("dynregion_t<"),rgn2doc(t1),text(","),rgn2doc(t2),
-            text(">")); break;
-  case &TagType(t):
+  case &AppType(&TagCon,&List{t,_}):
     s = cat(text("tag_t<"),typ2doc(t),text(">")); break;
-  case &UniqueRgn:
-  case &HeapRgn:
-  case &RefCntRgn:
+  case &AppType(&UniqueCon,_):
+  case &AppType(&HeapCon,_):
+  case &AppType(&RefCntCon,_):
     s = rgn2doc(t); break;
-  case &RgnsEff(t):
+  case &AppType(&RgnsCon,&List(t,_)):
     s = cat(text("regions("),typ2doc(t),text(")")); break;
-  case &AccessEff(_):
-  case &JoinEff(_):
+  case &AppType(&AccessCon,_):
+  case &AppType(&JoinCon,_):
     s = eff2doc(t); break;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     s = aggrdecl2doc(ad); break;
@@ -863,6 +867,16 @@ doc_t ntyp2doc(type_t t) {
     s = enumdecl2doc(ed); break;
   case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
     s = datatypedecl2doc(dd); break;
+  case &AppType(&TrueCon,_):
+    s = text("@true"); break;
+  case &AppType(&FalseCon,_):
+    s = text("@false"); break;
+  case &AppType(&ThinCon,_):
+    s = text("@thin"); break;
+  case &AppType(&FatCon,_):
+    s = text("@fat"); break;
+  case &AppType(c,_):
+    s = text("*bad type application*"); break;
   }
   return s;
 }
@@ -1050,7 +1064,7 @@ int exp_prec(exp_t e) {
   case &Cast_e(...):        return 120;
   case &New_e(...):             return 15; // ???
   case &Address_e(_):
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):
   case &Valueof_e(_):
   case &Asm_e(...):
@@ -1154,7 +1168,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       s = cat(text("rnew("),exp2doc((exp_t)ropt),text(") "),
               exp2doc_prec(myprec,e1));
     break;
-  case &Sizeoftyp_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
+  case &Sizeoftype_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
   case &Extension_e(e):  s = cat(text("__extension__("),exp2doc(e),text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
@@ -1255,7 +1269,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     //       translation to C, which are function calls.
     if (is_calloc) {
       // topt should not be NULL for calloc's
-      exp_t st = sizeoftyp_exp(*topt,0);
+      exp_t st = sizeoftype_exp(*topt,0);
       if (rgnopt == NULL)
         s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
       else
@@ -1267,7 +1281,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       if (topt == NULL)
         new_e = e;
       else
-        new_e = times_exp(sizeoftyp_exp(*topt,0),e,0);
+        new_e = times_exp(sizeoftype_exp(*topt,0),e,0);
 
       if (rgnopt == NULL)
         s = cat(text("malloc("),exp2doc(new_e),text(")"));
@@ -1625,7 +1639,7 @@ doc_t pat2doc(pat_t p) {
     string_t term = dots ? ", ...)" : ")";
     s = cat(qvar2doc(q), group("(",term,",",List::map(pat2doc,ps)));
     break;
-  case &Aggr_p(&AggrInfo(info,_),exists,dps,dots):
+  case &Aggr_p(&info,exists,dps,dots):
     string_t term = dots ? ", ...}" : "}";
     let $(_,n) = aggr_kinded_name(info);
     s = cat(qvar2doc(n), lb(),
@@ -1990,9 +2004,9 @@ doc_t scope2doc(scope_t sc) {
 
 // needed to detect default effect
 bool exists_temp_tvar_in_effect(type_t t) {
-  switch (t) {
+  switch (Tcutil::compress(t)) {
   case &VarType(tv): return is_temp_tvar(tv);
-  case &JoinEff(l):  return exists(exists_temp_tvar_in_effect, l);
+  case &AppType(&JoinCon,l):  return exists(exists_temp_tvar_in_effect, l);
   default: return false;
   }
 }
@@ -2004,7 +2018,7 @@ bool exists_temp_tvar_in_effect(type_t t) {
 bool is_anon_aggrtype(type_t t) {
   switch (t) {
   case &AnonAggrType(_,_): return true;
-  case &AnonEnumType(_): return true;
+  case &AppType(&AnonEnumCon(_),_): return true;
   case &TypedefType(_,_,td,x) && x != NULL:
     // This won't loop if the types come from a .cyc file,
     // because typedefs in Cyclone (or C) can't be recursive
@@ -2142,7 +2156,7 @@ static bool is_char_ptr(type_t t) {
     switch (elt_typ) {
     case &Evar(_,t,_,_) && t != NULL: elt_typ = (type_t)t; goto L;
     case &TypedefType(_,_,_,t) && t != NULL: elt_typ = (type_t)t; goto L;
-    case &IntType(_,Char_sz): return true;
+    case &AppType(&IntCon(_,Char_sz),_): return true;
     default: return false;
     }
   default: return false;

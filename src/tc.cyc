@@ -84,11 +84,11 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 	string_t s = "initializes attribute allowed only on";
 	switch(Tcutil::compress(t)) {
 	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
-	  if(conref_val(nullable))
+	  if(force_type2bool(false,nullable))
 	    terr(loc,"%s non-null pointers",s);
 	  if(!is_bound_one(bd))
 	    terr(loc,"%s pointers of size 1",s);
-	  if(conref_def(false,zt))
+	  if(force_type2bool(false,zt))
 	    terr(loc,"%s pointers to non-zero-terminated arrays",s);
 	  break;
 	default:
@@ -134,19 +134,19 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
     case &Const_e({.String_c = s}):
-      t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),0),zt,ztl);
+      t = vd->type = array_type(telt,tq,uint_exp(numelts(s),0),zt,ztl);
       break;
     case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-      t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
+      t = vd->type = array_type(telt,tq,uint_exp(1,0),zt,ztl);
       break;
     case &Comprehension_e(_,e,_,_): fallthru(e);
     case &ComprehensionNoinit_e(e,_,_):
       // FIX: need to copy e here!
-      t = vd->type = array_typ(telt,tq,e,zt,ztl);
+      t = vd->type = array_type(telt,tq,e,zt,ztl);
       break;
     case &UnresolvedMem_e(_,es): fallthru(es);
     case &Array_e(es):
-      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),0),zt,ztl);
+      t = vd->type = array_type(telt,tq,uint_exp(List::length(es),0),zt,ztl);
       break;
     default: break;
     }
@@ -159,7 +159,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   vd->tq.real_const = extract_const_from_typedef(loc,vd->tq.print_const,t);
   // top-level arrays don't escape because they can't be assigned to, so
   // their sizes do not change over time. All other globals escape.
-  vd->escapes = !is_array(t);
+  vd->escapes = !is_array_type(t);
   // move any function type attributes into the function's type
   if (is_function_type(t)) {
     atts = transfer_fn_type_atts(t,atts);
@@ -289,7 +289,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
-  type_t t = fndecl2typ(fd);
+  type_t t = fndecl2type(fd);
   // move any function type attributes into the function's type
   fd->attributes = transfer_fn_type_atts(t,fd->attributes);
   fnTypeAttsOK(te, t, loc);
@@ -344,8 +344,9 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   if (is_main(q)) {
     // result type should be int
     switch (compress(fd->ret_type)) {
-    case &VoidType: warn(loc,"main declared with return type void"); break;
-    case &IntType(_,B4): break;
+    case &AppType(&VoidCon,_): warn(loc,"main declared with return type void"); break;
+    case &AppType(&IntCon(_,Int_sz),_): break;
+    case &AppType(&IntCon(_,Long_sz),_): break;
     default: 
       terr(loc,"main declared with return type %s instead of int or void",
 	   typ2string(fd->ret_type)); 
@@ -357,7 +358,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     if (args != NULL) {
       let &$(_,_,t1) = args->hd;
       switch (compress(t1)) {
-      case &IntType(_,B4): break;
+      case &AppType(&IntCon(_,Int_sz),_): break;
+      case &AppType(&IntCon(_,Long_sz),_): break;
       default:
         terr(loc,"main declared with first argument of type %s instead of int",
              typ2string(t1));
@@ -370,20 +372,20 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         if (args != NULL)
           terr(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
-        if (!unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
+        if (!unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(0),empty_conref())) &&
-            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
+                                     empty_tqual(0),any_bool(&te))) &&
+            !unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(0),empty_conref())) &&
-            !unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
+                                     empty_tqual(0),any_bool(&te))) &&
+            !unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(0),empty_conref())) &&
-            !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
+                                     const_tqual(0),any_bool(&te))) &&
+            !unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(0),empty_conref()))) {
+                                     const_tqual(0),any_bool(&te)))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
         }
@@ -602,7 +604,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
       // only be written and not read.
       for (_ f = fs; f != NULL; f = f->tl)
 	if (aggressive_warn &&
-            !bits_only(f->hd->type) && f->hd->requires_clause == NULL)
+            !is_bits_only_type(f->hd->type) && f->hd->requires_clause == NULL)
 	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
 	       *f->hd->name,*((*q)[1]), typ2string(f->hd->type));
 

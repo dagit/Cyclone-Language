@@ -689,7 +689,7 @@ if((long)_ulong < 0){
 _ulong=- _ulong;
 sign='-';}
 # 461
-base=Cyc_DEC;
+base=1U;
 goto number;case 101U: _LL2F: _LL30:
  goto _LL32;case 69U: _LL31: _LL32: goto _LL34;case 102U: _LL33: _LL34: goto _LL36;case 70U: _LL35: _LL36: goto _LL38;case 103U: _LL37: _LL38:
  goto _LL3A;case 71U: _LL39: _LL3A:
@@ -729,11 +729,11 @@ continue;case 79U: _LL3D: _LL3E:
 goto _LL40;case 111U: _LL3F: _LL40:
 # 505
 ({unsigned long _tmpD8=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_ulong=_tmpD8;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
-base=Cyc_OCT;
+base=0U;
 goto nosign;case 112U: _LL41: _LL42:
 # 517 "printf.cyc"
 ({unsigned long _tmpD9=(unsigned long)Cyc_va_arg_long(ap);_ulong=_tmpD9;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
-base=Cyc_HEX;
+base=2U;
 flags |=64;
 ch=(int)'x';
 goto nosign;case 115U: _LL43: _LL44: {
@@ -757,11 +757,11 @@ goto _LL0;}case 85U: _LL45: _LL46:
 goto _LL48;case 117U: _LL47: _LL48:
 # 541
 ({unsigned long _tmpDC=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_ulong=_tmpDC;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
-base=Cyc_DEC;
+base=1U;
 goto nosign;case 88U: _LL49: _LL4A:
  goto _LL4C;case 120U: _LL4B: _LL4C:
 ({unsigned long _tmpDD=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_ulong=_tmpDD;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
-base=Cyc_HEX;
+base=2U;
 # 548
 if(flags & 8  && _ulong != 0)
 flags |=64;

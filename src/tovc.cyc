@@ -238,7 +238,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     BOX_EXP_AND_UPDATE(env,*e1);
     return NULL;
 
-  case &Sizeoftyp_e(_): 
+  case &Sizeoftype_e(_): 
   case &Offsetof_e(_,_):
   case &Enum_e(...):   return NULL;
 
@@ -352,20 +352,20 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   
   Iter::iter_t<_,`stmt_to_fun> iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
-  let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),&VoidType_val,
+  let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),void_type,
 		       NULL,NULL,NULL,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch (vd->type) {
-    case &ArrayType(ArrayInfo{elt_typ,_,_,_,_}): 
+    case &ArrayType(ArrayInfo{elt_type,_,_,_,_}): 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(elt_typ,empty_tqual(0))),
+			      cstar_type(elt_type,empty_tqual(0))),
 			params);
       args = new List(var_exp(vd->name,DL), args); 
       break;
     default: 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(vd->type,empty_tqual(0))),
+			      cstar_type(vd->type,empty_tqual(0))),
 			params);
       args = new List(address_exp(var_exp(vd->name,DL),DL), args);
       break;
@@ -421,7 +421,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
     apply_varmap(varmap,e1);
     return;
 
-  case &Sizeoftyp_e(_):  
+  case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
   case &Enum_e(...): return;
 
@@ -500,7 +500,7 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
     default: throw new Impossible("bad local decl in Tovc::stmt_to_exp");
     }
   default: 
-    return stmt_to_fun(env,s,&VoidType_val);
+    return stmt_to_fun(env,s,void_type);
   }
 }
 
@@ -541,7 +541,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
     exp_to_vc(env, e1);
     return;
 
-  case &Sizeoftyp_e(_):  
+  case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
   case &AnonEnum_e(...):
   case &Enum_e(...): return;
@@ -691,7 +691,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       // First insert a declaration for the function before its definition.
       // This is in case a recursive call of the function is lifted out of
       // the function body & therefore out of scope of the name of the function.
-      fd->cached_typ = NULL; // This type might have regions and effects; the other
+      fd->cached_type = NULL; // This type might have regions and effects; the other
                              // parts of the fndecl have already had these cleared by toc,
                              // but not this field.  Since fndecl2typ uses the cached
                              // type if possible, we need to clear it.
@@ -713,7 +713,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                      fd->body);
           if (*gen_ds != NULL) {
             vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-                                        Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
+                                        Tcutil::fndecl2type(fd), NULL, NULL, fd->attributes, false};
             new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
             // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
             new_ds = append(*gen_ds,new_ds);

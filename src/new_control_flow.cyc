@@ -298,7 +298,7 @@ static void check_union_requires(seg_t loc, type_t t, field_name_t f, flow_t inf
   case {.BottomFL = _}: return;
   case {.ReachableFL = $(_,relns)}:
     switch (Tcutil::compress(t)) {
-    case &AggrType(AggrInfo{ainfo,ts}):
+    case &AppType(&AggrCon(ainfo),ts):
       let ad = get_known_aggrdecl(ainfo);
       let field = lookup_decl_field(ad,f);
       let req = field->requires_clause;
@@ -353,7 +353,7 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
   case $(_,&Zero): return;
   case $(_,&Consumed(...)): return;
   case $(_,&NamedLocation(_,r)): check_nounique(env,loc,t,r); return;
-  case $(&DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)),&Aggregate(_,ad)):
+  case $(&AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_),&Aggregate(_,ad)):
     if(tuf->typs == NULL)
       return;
     fallthru(tuf->typs,ad);
@@ -363,7 +363,7 @@ static void check_nounique(analenv_t env, seg_t loc, type_t t, absRval_t r) {
       check_nounique(env,loc,(*tqts->hd)[1],ad[i]);
     }
     return;
-  case $(&AggrType(AggrInfo(info,targs)),&Aggregate(_,d)):
+  case $(&AppType(&AggrCon(info),targs),&Aggregate(_,d)):
     // fix -- not right for unions?
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL) return;
@@ -1086,7 +1086,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_):
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Offsetof_e(_,_): // FIX: ?? (first field guaranteed zero?)
   case &AnonEnum_e(...): // FIX : distinguish tags that are/aren't 0
   case &Enum_e(...): return $(inflow, fenv->unknown_all);
@@ -1292,7 +1292,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       check_fn_requires(env, outflow, orig_es, requires, e->loc);
       // FIX: add in the @ensures information...
       // if the called function doesn't return, we get BottomFL out
-      if (Tcutil::is_noreturn((type_t)e1->topt))
+      if (Tcutil::is_noreturn_fn_type((type_t)e1->topt))
         return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
       else
         return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
@@ -1339,7 +1339,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     outflow = f;
     // Make sure if we are swapping into a zero-terminated array, that
     // element is known to be Zero
-    type_t t_ign1 = &VoidType_val, t_ign2 = &VoidType_val;
+    type_t t_ign1 = void_type, t_ign2 = void_type;
     bool b_ign1 = false;
     if (Tcutil::is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&t_ign2)) {
       switch (right_rval) {
@@ -2059,10 +2059,10 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
     // which is unsigned
     switch($(Tcutil::compress((type_t)e1->topt),
 	     Tcutil::compress((type_t)e2->topt))) {
-    case $(&IntType(Unsigned,_),_):
-    case $(_,&IntType(Unsigned,_)):
-    case $(&TagType(_),_):
-    case $(_,&TagType(_)): break;
+    case $(&AppType(&IntCon(Unsigned,_),_),_):
+    case $(_,&AppType(&IntCon(Unsigned,_),_)):
+    case $(&AppType(&TagCon,_),_):
+    case $(_,&AppType(&TagCon,_)): break;
     default: return $(ft,ff);
     }
 
@@ -2231,7 +2231,7 @@ static $(bool,absRval_opt_t) noconsume_place_ok(analenv_t env,
     DEBUG_PRINT("noconsume_place_ok: considering place ");
     DEBUG_PRINT_F(print_place,place);
     DEBUG_PRINT("\n");
-    let bogus_exp = exp_unsigned_one;
+    let bogus_exp = uint_exp(1,0);
     let bogus_bool = false;
     let bogus_int = 1;
     let curr_rval = lookup_place(d,place);
@@ -2687,15 +2687,12 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s,
     if(Hashtable::lookup(env->succ_table,s)==NULL) {
       switch (inflow) {
       case {.ReachableFL = _}:
-	switch (Tcutil::compress(env->return_type)) {
-	case &VoidType: break;
-	case &FloatType(_):
-	case &IntType(...):
-	  Warn::warn(s->loc,"break may cause function not to return a value");
-	  break;
-	default:
-	  aerr(s->loc,"break may cause function not to return a value");
-	  break;
+        if (!Tcutil::is_void_type(env->return_type)) {
+          if (Tcutil::is_any_float_type(env->return_type) || 
+              Tcutil::is_any_int_type(env->return_type))
+            Warn::warn(s->loc,"break may cause function not to return a value");
+          else
+            aerr(s->loc,"break may cause function not to return a value");
 	}
 	break;
       default: break;
@@ -2876,7 +2873,7 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
 
   case &Fn_d(fd):
     check_nested_fun(env->all_tables,fenv,inflow,fd);
-    type_t t = (type_t)fd->cached_typ;
+    type_t t = (type_t)fd->cached_type;
     let vd = (vardecl_t)fd->fn_vardecl;
     // JGM: hmmmm.  nested functions can effect local variables, so if we
     // call one of these, then we should set all of the local variables
@@ -2952,7 +2949,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
   // NOTE: for reasons Dan doesn't understand, the attributes, are not
   // on the fndecl, only on the type.
   _ atts;
-  switch(Tcutil::compress((type_t)fd->cached_typ)) {
+  switch(Tcutil::compress((type_t)fd->cached_type)) {
   case &FnType(FnInfo{.attributes = as,...}): atts = as; break;
   default: Tcutil::impos("check_fun: non-function type cached with fndecl_t");
   }
@@ -2994,7 +2991,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     }
   inflow = ReachableFL(d,relns);
 
-  bool      noreturn = Tcutil::is_noreturn(Tcutil::fndecl2typ(fd));
+  bool      noreturn = Tcutil::is_noreturn_fn_type(Tcutil::fndecl2type(fd));
   Hashtable::table_t<stmt_t,flow_t@> flow_table =
     Hashtable::create(33, Core::ptrcmp, hash_ptr);
   analenv_t env = 
@@ -3022,15 +3019,13 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     // this is the case when the function "falls off the end"
     if (noreturn)
       aerr(loc, "`noreturn' function might (implicitly) return");
-    else
-      switch (Tcutil::compress(fd->ret_type)) {
-      case &VoidType: break;
-      case &FloatType(_):
-      case &IntType(...):
-        Warn::warn(loc, "function may not return a value"); break;
-      default:
+    else if (!Tcutil::is_void_type(fd->ret_type)) {
+      if (Tcutil::is_any_float_type(fd->ret_type) ||
+          Tcutil::is_any_int_type(fd->ret_type))
+        Warn::warn(loc, "function may not return a value"); 
+      else
         aerr(loc, "function may not return a value"); break;
-      }
+    }
     break;
   }
 }

@@ -103,12 +103,12 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   switch(e->r) {
   case &Const_e(Cnst{.String_c = s}):
     // FIX! need to deal with Wstring's too!
-    if (env.ctxt == AggrField && Tcutil::is_array((type_t)e->topt)) {
+    if (env.ctxt == AggrField && Tcutil::is_array_type((type_t)e->topt)) {
       list_t<$(list_t<designator_t>,exp_t)@> dles = NULL;
       let n = numelts(s);
       for (unsigned i = 0; i < n; i++) {
         let c = char_exp(s[i],0);
-        c->topt = char_typ;
+        c->topt = char_type;
         dles = new List{new $(NULL,c), dles};
       }
       dles = List::imp_rev(dles);
@@ -116,7 +116,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       return remove_aggrs_exp(env, e);
     } else break;
   case &Const_e(_):
-  case &Sizeoftyp_e(_):  
+  case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
   case &AnonEnum_e(...):
   case &Enum_e(...): 
@@ -163,7 +163,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     for(dles=dles->tl; dles!=NULL; dles=dles->tl)
       init_e = seq_exp(init_e,(*dles->hd)[1],DL);
     if(do_stmt_exp) {
-      let f = sdopt && sdopt->kind==UnionA ? unionq_typ : strctq;
+      let f = sdopt && sdopt->kind==UnionA ? unionq_type : strctq;
       e->r = stmt_exp(declare_stmt(*v,f(tdn),NULL,
 				   seq_stmt(exp_stmt(init_e,DL),
 					    exp_stmt(dest,DL), DL),DL),DL)->r;
@@ -233,8 +233,8 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     }
     // Note the generated code for an initializer is a bit uglier than necessary
     noarray_remove_aggrs_exp(other_env,bd);
-    e->r = stmt_exp(seq_stmt(declare_stmt(max,uint_typ,bd,
-			     declare_stmt(i,uint_typ,NULL,s,DL),DL),
+    e->r = stmt_exp(seq_stmt(declare_stmt(max,uint_type,bd,
+			     declare_stmt(i,uint_type,NULL,s,DL),DL),
 			     exp_stmt(signed_int_exp(0,DL),DL),DL),DL)->r;
     e->topt = NULL;
     break;

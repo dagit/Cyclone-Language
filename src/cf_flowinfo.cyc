@@ -66,7 +66,7 @@ flow_env_t new_flow_env() {
               .esc_none = new Esc(NoneIL),
               .esc_all = new Esc(AllIL),
               .mt_flowdict = Dict::empty(root_cmp),
-              .dummy_place = new Place(new MallocPt(&dummy_exp,&VoidType_val),NULL)
+              .dummy_place = new Place(new MallocPt(&dummy_exp,void_type),NULL)
             };
 }
 
@@ -96,7 +96,7 @@ int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
 
 int get_field_index(type_t t, field_name_t f) {
   switch (Tcutil::compress(t)) {
-  case &AggrType(AggrInfo(info,_)):
+  case &AppType(&AggrCon(info),_):
     let fs = get_known_aggrdecl(info)->impl->fields;
     fallthru(fs);
   case &AnonAggrType(_,fs):
@@ -151,7 +151,7 @@ int place_cmp(place_t p1, place_t p2) {
 //       b/c they can't be instantiated with aggregates.
 // BUT that means fields instantiated with int still must be initialized.
 // Sorry, but it's a pain.
-// Also, not sure why enums aren't bits_only.
+// Also, not sure why enums aren't is_bits_only_type.
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here.
@@ -234,7 +234,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
   if (is_nontagged_nonrequire_union_type(t)) return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
-  case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
+  case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
     if(tuf->typs == NULL)
       return leafval;
     fallthru(tuf->typs);
@@ -246,7 +246,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
       tqts = tqts->tl;
     }
     return new Aggregate(UnionRInfo(false,-1),d);
-  case &AggrType(AggrInfo(info,targs)):
+  case &AppType(&AggrCon(info),targs):
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL)
       break;
@@ -265,14 +265,14 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
     return new Aggregate(UnionRInfo(k==UnionA,-1),
 			 aggrfields_to_aggrdict(fenv,fs,k==UnionA,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}):
-    if (conref_def(false,zeroterm))
+    if (Tcutil::force_type2bool(false,zeroterm))
       // special case for zero-terminated arrays of bits-only things --
       // here, we initialize them at translation by putting a 0 in at the end.
-      return (allow_zeroterm && !no_init_bits_only && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
+      return (allow_zeroterm && !no_init_bits_only && Tcutil::is_bits_only_type(et)) ? fenv->unknown_all : leafval;
     break;
-  case &TagType(t): return leafval;
+  case &AppType(&TagCon,&List{t,_}): return leafval;
   case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}): 
-    if (!conref_def(false,nbl))
+    if (!Tcutil::force_type2bool(false,nbl))
       switch(leafval) {
       case &UnknownR(AllIL): return fenv->notzeroall;
       default: break;
@@ -281,7 +281,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
   default: break;
   }
 
-  return (!no_init_bits_only && Tcutil::bits_only(t)) ? fenv->unknown_all : leafval;
+  return (!no_init_bits_only && Tcutil::is_bits_only_type(t)) ? fenv->unknown_all : leafval;
 }
 
 absRval_t typ_to_absrval(flow_env_t fenv, type_t t, bool no_init_bits_only, absRval_t leafval) {
@@ -358,7 +358,7 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
       tqts = tqts->tl;
     }
     return new Aggregate(b,d2);
-  case $(&AggrType(AggrInfo(info,_)),&Aggregate(b,d)):
+  case $(&AppType(&AggrCon(info),_),&Aggregate(b,d)):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL) return r;
     fallthru(ad->kind,ad->impl->fields,b,d);

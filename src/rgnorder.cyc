@@ -63,27 +63,27 @@ struct RgnPO {
 // makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
 // also allows regions(`a) to outlive only regions having R kind
 static bool valid_constraint(type_t eff, type_t rgn) {
-  let &Kind(k,a) = typ_kind(rgn);
+  let &Kind(k,a) = type_kind(rgn);
   if (k != RgnKind)
     impos("bad region type |%s| passed to add_outlives_constraint",
 	  Absynpp::typ2string(rgn));
   switch (compress(eff)) {
-  case &JoinEff(es):
+  case &AppType(&JoinCon,es):
     for (; es != NULL; es = es->tl) 
       if (!valid_constraint(es->hd, rgn)) return false;
     return true;
     // FIX: do I need to worry about how the effect might be instantiated?
   case &Evar(...):
   case &VarType(_): return true;
-  case &RgnsEff(t): 
+  case &AppType(&RgnsCon,&List{t,_}): 
     // Only let regions(`a) outlive things that are aliasable or
     //   have the same alias qualifier
-    let &Kind(tk,ta) = typ_kind(t);
+    let &Kind(tk,ta) = type_kind(t);
     return (a == Aliasable) || ta == a;
-  case &AccessEff(r): 
+  case &AppType(&AccessCon,&List{r,_}): 
 //     fprintf(stderr,"checking %s > %s; are the kinds reversed?\n",
 // 	    Absynpp::typ2string(rgn), Absynpp::typ2string(r));
-    let &Kind(rk,ra) = typ_kind(r);
+    let &Kind(rk,ra) = type_kind(r);
     return (k == RgnKind) && ((a == Aliasable) || (ra == a));
   default:
     impos("bad effect |%s| passed to add_outlives_constraint",
@@ -109,21 +109,21 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
     let d = po->d;
     if(Dict::member(d,tv)) {
       let old = Dict::lookup(d,tv);
-      d = Dict::insert(d,tv,new JoinEff(list(eff,old)));
+      d = Dict::insert(d,tv,join_eff(list(eff,old)));
     } else
       d = Dict::insert(d,tv,eff);
     ans->d = d;
     return ans;
   case &Evar(...):
-    unify(rgn,&HeapRgn_val);
+    unify(rgn,heap_rgn_type);
     fallthru;
-  case &HeapRgn:
-    ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
+  case &AppType(&HeapCon,_):
+    ans->these_outlive_heap = join_eff(list(eff,po->these_outlive_heap));
     return ans;
-  case &UniqueRgn:
-    ans->these_outlive_unique=new JoinEff(list(eff,po->these_outlive_unique));
+  case &AppType(&UniqueCon,_):
+    ans->these_outlive_unique=join_eff(list(eff,po->these_outlive_unique));
     return ans;
-  case &RefCntRgn:
+  case &AppType(&RefCntCon,_):
     impos("RgnOrder::add_outlives_constraint can't outlive RC for now");
   default: impos("RgnOrder::add_outlives_constraint passed a bad region");
   }
@@ -136,9 +136,9 @@ rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool opened) {
   let ans = new *po;
   if (opened) {
     ans->d = Dict::insert(po->d, rgn, empty_effect);
-    ans->opened_regions = new JoinEff(list(new AccessEff(new VarType(rgn)), ans->opened_regions));
+    ans->opened_regions = join_eff(list(access_eff(var_type(rgn)), ans->opened_regions));
   } else {
-    let eff = new JoinEff(list(new AccessEff(new VarType(po->youngest)), 
+    let eff = join_eff(list(access_eff(var_type(po->youngest)), 
                                ans->opened_regions));
     ans->d = Dict::insert(po->d, rgn, eff);
     ans->youngest = rgn;
@@ -160,17 +160,17 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     if (tvar_kind(tvs2->hd,&bk)->kind == RgnKind) {
 //       fprintf(stderr,"  Adding tvar %s to dict\n",
-// 	      Absynpp::typ2string(new VarType(tvs2->hd)));
+// 	      Absynpp::typ2string(var_type(tvs2->hd)));
       d = Dict::insert(d,tvs2->hd,empty_effect);
     }
 
-  if (!valid_constraint(effect,new VarType(fst_rgn))) {
+  if (!valid_constraint(effect,var_type(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
     terr(loc,"Invalid region ordering constraint; kind mismatch");
     return new RgnPO(d,empty_effect,empty_effect,fst_rgn,empty_effect);
   }
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
-// 	  Absynpp::typ2string(new VarType(fst_rgn)),
+// 	  Absynpp::typ2string(var_type(fst_rgn)),
 // 	  Absynpp::typ2string(effect));	  
   d = Dict::insert(d, fst_rgn, effect);
   // add in the explicit partial order -- no longer detects cycles
@@ -205,12 +205,12 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
 // is regions(`rgns_of_var) in eff?
 static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {
   switch(normalize_effect(compress(eff))) {
-  case &RgnsEff(t): 
+  case &AppType(&RgnsCon,&List(t,_)): 
     switch(compress(t)) {
     case &VarType(tv): return tvar_cmp(tv,rgns_of_var)==0;
     default: return false;
     }
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       if(contains_rgnseff(rgns_of_var,effs->hd))
 	return true;
@@ -227,14 +227,14 @@ static struct OutlivesEnv<`r::R> {
  
 static void add_to_search(struct OutlivesEnv @ env, type_t eff) {
   switch(compress(eff)) {
-  case &AccessEff(&VarType(tv)):
+  case &AppType(&AccessCon,&List(&VarType(tv),_)):
     for(let seen = env->seen; seen != NULL; seen = seen->tl)
       if(tvar_cmp(tv,seen->hd)==0)
 	return;
     env->seen = rnew (env->r) List(tv,env->seen);
     env->todo = rnew (env->r) List(tv,env->todo);
     return;
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       add_to_search(env,effs->hd);
     return;
@@ -246,7 +246,7 @@ static struct OutlivesEnv<`r>
 initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   let ans = OutlivesEnv(listrgn,NULL,NULL);
   type_t r = compress(rgn);
-  let &Kind(k,a) = typ_kind(r);
+  let &Kind(k,a) = type_kind(r);
   if (k == RgnKind) {
     switch (a) {
       // FIX: currently doesn't deal with refcnt region
@@ -280,21 +280,21 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
 static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   region listrgn; { // FIX: make a small initial size
   switch(compress(eff)) {
-  case &AccessEff(vt):
+  case &AppType(&AccessCon,&List(vt,_)):
     // does `vt outlive `rgn ?
     switch(compress(vt)) {
-    case &UniqueRgn:
+    case &AppType(&UniqueCon,_):
       // The unique region outlives all regions with R and UR kind
-      let &Kind(k,a) = typ_kind(compress(rgn));
+      let &Kind(k,a) = type_kind(compress(rgn));
       return (k == RgnKind) && (a != Top);
-    case &RefCntRgn: 
+    case &AppType(&RefCntCon,_): 
       // The refcnt region outlives all regions the heap does, plus itself
       // FIX: this won't work if rgn is `c, and `c outlives RefCntRgn
-      if (compress(rgn) == &RefCntRgn_val) return true;
+      if (compress(rgn) == refcnt_rgn_type) return true;
       fallthru;
-    case &HeapRgn:
+    case &AppType(&HeapCon,_):
       // The heap outlives all regions with R kind
-      let &Kind(k,a) = typ_kind(compress(rgn));
+      let &Kind(k,a) = type_kind(compress(rgn));
       return (k == RgnKind) && (a == Aliasable);
     case &VarType(tv):
       // To determine if tv outlives rgn, we generate the transitive
@@ -331,7 +331,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       return false;
     default: return false;
     }
-  case &RgnsEff(vt):
+  case &AppType(&RgnsCon,&List(vt,_)):
     switch(compress(vt)) {
     // does regions(`tv) outlive `rgn?
     case &VarType(tv):
@@ -339,7 +339,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       // check that for each variable `r in todo, whether regions(`tv)
       // outlives it.
       let env = initial_env(listrgn,po,rgn);
-      let &Kind(k,a) = typ_kind(rgn);
+      let &Kind(k,a) = type_kind(rgn);
       // FIX: deal with RefCnt region
       if (k == RgnKind)
 	if (a == Aliasable) {
@@ -375,7 +375,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   eff = normalize_effect(eff);
   switch(compress(eff)) {
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       if(!effect_outlives(po,effs->hd,rgn))
 	return false;
@@ -388,16 +388,16 @@ bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 static void pin_effect(type_t eff, type_t bd) {
   eff = normalize_effect(eff);
   switch(compress(eff)) {
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       pin_effect(effs->hd,bd);
     return;
-  case &RgnsEff(t):
+  case &AppType(&RgnsCon,&List(t,_)):
     switch(compress(t)) {
-    case &Evar(...): unify(t,uint_typ); return;
+    case &Evar(...): unify(t,uint_type); return;
     default: return;
     }
-  case &AccessEff(r):
+  case &AppType(&AccessCon,&List(r,_)):
     switch(compress(r)) {
     case &Evar(...): unify(r,bd); return;
     default: return;
@@ -444,30 +444,30 @@ static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
   // assumes eff1 is compressed and normalized
   eff2 = compress(normalize_effect(eff2));
   switch(eff2) {
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       if(eff_outlives_atomic_eff(po, eff1, effs->hd))
 	return true;
     return false;
-  case &AccessEff(vt): return effect_outlives(po, eff1, vt);
-  case &RgnsEff(vt1):
+  case &AppType(&AccessCon,&List(vt,_)): return effect_outlives(po, eff1, vt);
+  case &AppType(&RgnsCon,&List(vt1,_)):
     switch(eff1) {
-    case &RgnsEff(vt2):
+    case &AppType(&RgnsCon,&List(vt2,_)):
       switch ($(compress(vt1),compress(vt2))) {
       case $(&VarType(tv1),&VarType(tv2)): return tvar_cmp(tv1,tv2)==0;
       default: break;
       }
       fallthru;
-    default: return eff1==&HeapRgn_val;
+    default: return eff1==heap_rgn_type;
     }
-  default: return eff1==&HeapRgn_val;
+  default: return eff1==heap_rgn_type;
   }
 }
 
 bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
   eff1 = compress(normalize_effect(eff1));
   switch(eff1) {
-  case &JoinEff(effs):
+  case &AppType(&JoinCon,effs):
     for(; effs != NULL; effs = effs->tl)
       if(!eff_outlives_eff(po,effs->hd,eff2))
 	return false;

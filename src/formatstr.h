@@ -27,10 +27,10 @@ namespace Formatstr {
 
 // Returns the list of types corresponding to the specifiers in the string.
 // Does all consistency checking w.r.t. the conversion specifiers
-extern List::list_t<Absyn::type_t> get_format_typs(Tcenv::tenv_t, string_t, Position::seg_t);
+extern List::list_t<Absyn::type_t> get_format_types(Tcenv::tenv_t, string_t, Position::seg_t);
 
 // Same as above, but the rules and types are different for scanf
-extern List::list_t<Absyn::type_t> get_scanf_typs(Tcenv::tenv_t, string_t, Position::seg_t);
+extern List::list_t<Absyn::type_t> get_scanf_types(Tcenv::tenv_t, string_t, Position::seg_t);
 
 }
 

@@ -105,7 +105,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   case &StmtExp_e(s): anal_stmt(add_encloser(s,env),s); break;
 
   case &Const_e(...):
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):  // ignore the expression!
   case &Offsetof_e(...):
   case &Valueof_e(_):

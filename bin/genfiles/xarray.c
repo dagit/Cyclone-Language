@@ -517,7 +517,7 @@ return Cyc_Xarray_rsingleton(Cyc_Core_heap_region,len,a);}
 void Cyc_Xarray_add(struct Cyc_Xarray_Xarray*xarr,void*a){
 if(xarr->num_elmts == _get_dyneither_size(xarr->elmts,sizeof(void*))){
 if(xarr->num_elmts == 0)
-({struct _dyneither_ptr _tmp37=_tag_dyneither(({unsigned int _tmpD=(unsigned int)10;void**_tmpC=({struct _RegionHandle*_tmp36=Cyc_Core_unique_region;_region_malloc(_tmp36,_check_times(_tmpD,sizeof(void*)));});({{unsigned int _tmp29=10U;unsigned int i;for(i=0;i < _tmp29;++ i){_tmpC[i]=a;}}0;});_tmpC;}),sizeof(void*),10U);xarr->elmts=_tmp37;});else{
+({struct _dyneither_ptr _tmp37=_tag_dyneither(({unsigned int _tmpD=10U;void**_tmpC=({struct _RegionHandle*_tmp36=Cyc_Core_unique_region;_region_malloc(_tmp36,_check_times(_tmpD,sizeof(void*)));});({{unsigned int _tmp29=10U;unsigned int i;for(i=0;i < _tmp29;++ i){_tmpC[i]=a;}}0;});_tmpC;}),sizeof(void*),10U);xarr->elmts=_tmp37;});else{
 # 74
 struct _dyneither_ptr newarr=({unsigned int _tmp11=(unsigned int)(xarr->num_elmts * 2);void**_tmp10=({struct _RegionHandle*_tmp38=Cyc_Core_unique_region;_region_malloc(_tmp38,_check_times(_tmp11,sizeof(void*)));});({{unsigned int _tmp2A=(unsigned int)(xarr->num_elmts * 2);unsigned int i;for(i=0;i < _tmp2A;++ i){_tmp10[i]=*((void**)_check_dyneither_subscript(xarr->elmts,sizeof(void*),0));}}0;});_tag_dyneither(_tmp10,sizeof(void*),_tmp11);});
 {int i=1;for(0;i < xarr->num_elmts;++ i){

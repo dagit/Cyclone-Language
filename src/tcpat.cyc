@@ -49,7 +49,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
       terr(p->loc, "cannot determine pattern type");
     type_t t = compress(*topt);
     switch (t) {
-    case &AggrType(ainfo):
+    case &AppType(&AggrCon(ainfo),_):
       p->r = new Aggr_p(new ainfo, exist_ts, dps, dots);
       resolve_pat(te, topt, p); 
       break;
@@ -59,7 +59,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     }
     return;
     
-  case &Aggr_p(&AggrInfo({.KnownAggr= adp},targs), *exist_ts, dps, dots):
+  case &Aggr_p(&{.KnownAggr= adp}, *exist_ts, dps, dots):
     let ad = *adp;
     if(ad->impl==NULL) {
       terr(p->loc, "can't destructure an abstract %s",
@@ -112,12 +112,12 @@ static type_t num_type(type_t * topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
   // comparison between any two num types succeeds, this is fine (but kludgey)
   // FIX:? Allow *topt to be an Enum ?
-  if(topt != NULL && coerceable(*topt))
+  if(topt != NULL && is_arithmetic_type(*topt))
     return *topt;
   // now allow enum to be cast up too
   switch(compress(numt)) {
-  case &EnumType(...): fallthru;
-  case &AnonEnumType(...): if(topt != NULL) return *topt; break;
+  case &AppType(&EnumCon(...),_): fallthru;
+  case &AppType(&AnonEnumCon(...),_): if(topt != NULL) return *topt; break;
   default: break;
   }
   return numt;
@@ -153,7 +153,7 @@ static pat_t wild_pat(seg_t loc) {
 
 // Promote an array, using an evar for the region if necessary.
 static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
-  return is_array(t) ?
+  return is_array_type(t) ?
     promote_array(t, (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt,false) : t;
 }
 
@@ -194,7 +194,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         terr(p->loc,"array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!kind_leq(typ_kind(t),&tmk))
+      if (!kind_leq(type_kind(t),&tmk))
         terr(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -217,7 +217,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         terr(p->loc, "array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!kind_leq(typ_kind(t),&tmk))
+      if (!kind_leq(type_kind(t),&tmk))
         terr(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -237,8 +237,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     }
     exp_opt_t new_access_exp = NULL;
     type_t t2 = new PointerType(PtrInfo(t,empty_tqual(0),
-					PtrAtts(rgn_pat,false_conref,
-						empty_conref(),empty_conref(),
+					PtrAtts(rgn_pat,false_type,
+                                                any_bounds(&te),any_bool(&te),
 						NULL)));
     if (access_exp) {
       new_access_exp = address_exp(access_exp,DL);
@@ -259,16 +259,16 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
       new List(new $(tv,false),(*res.tvars_and_bounds_opt)[0]);
-    t = uint_typ; // this is what we match against
+    t = uint_type; // this is what we match against
     break;
 
-  case &Int_p(Unsigned,_): t = num_type(topt, uint_typ);  break;
+  case &Int_p(Unsigned,_): t = num_type(topt, uint_type);  break;
   case &Int_p(None,_):
-  case &Int_p(Signed,_):   t = num_type(topt, sint_typ);  break;
-  case &Char_p(_):         t = num_type(topt, char_typ);  break;
-  case &Float_p(_,i):      t = num_type(topt, float_typ(i)); break;
+  case &Int_p(Signed,_):   t = num_type(topt, sint_type);  break;
+  case &Char_p(_):         t = num_type(topt, char_type);  break;
+  case &Float_p(_,i):      t = num_type(topt, gen_float_type(i)); break;
   case &Enum_p(ed,_):      
-    t = num_type(topt, new EnumType(ed->name,ed)); 
+    t = num_type(topt, enum_type(ed->name,ed)); 
     break;
   case &AnonEnum_p(tenum,_): t = num_type(topt, tenum); break;
   case &Null_p:
@@ -281,14 +281,14 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     t = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
                                 empty_tqual(0),
 				PtrAtts(new_evar(&trko,tenv_tvs),
-					true_conref,
-					empty_conref(),empty_conref(),NULL)));
+					true_type,
+					any_bounds(&te),any_bool(&te),NULL)));
     break;
 
   case &Pointer_p(p2):
     // FIX: In the DatatypeField for p2 case, we should really pass-through
     // the type instantiation information in topt!!!
-    type_t inner_typ  = &VoidType_val;
+    type_t inner_typ  = void_type;
     let    inner_topt = NULL;
     bool   elt_const = false;
     if(topt != NULL)
@@ -313,24 +313,23 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     // p2's type from a datatype field to a datatype so that the match
     // compiler (below) knows how to treat it.
     switch (compress((type_t)p2->topt)) {
-    case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield = $(tud,tuf)},targs}):
+    case &AppType(&DatatypeFieldCon({.KnownDatatypefield = $(tud,tuf)}),targs):
       // it's a datatype field pattern -- check topt to see if we're supposed
       // to leave it as a datatype field pattern.
       switch (compress(inner_typ)) {
-      case &DatatypeFieldType(...): 
+      case &AppType(&DatatypeFieldCon(...),_): 
         goto DONT_PROMOTE; // don't promote to datatype
       default: break;
       }
       // we're going to promote to the datatype instead of the field.
-      type_t new_type = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),
-                                                      targs});
+      type_t new_type = datatype_type(KnownDatatype(new tud),targs);
       // change the type of p2 to reflect this
       p2->topt = new_type;
       t = new PointerType(PtrInfo(new_type, 
                                   (elt_const ? const_tqual(0) : 
                                    empty_tqual(0)),
-                                  PtrAtts(ptr_rgn, empty_conref(),
-                                          bounds_one_conref, false_conref,
+                                  PtrAtts(ptr_rgn, any_bool(&te),
+                                          bounds_one(), false_type,
                                           NULL)));
       break;
     default:
@@ -338,9 +337,8 @@ DONT_PROMOTE:
       t = new PointerType(PtrInfo((type_t)p2->topt, 
                                   (elt_const ? const_tqual(0) : 
                                    empty_tqual(0)),
-                                  PtrAtts(ptr_rgn, empty_conref(), 
-                                          empty_conref(), empty_conref(),
-                                          NULL)));
+                                  PtrAtts(ptr_rgn, any_bool(&te),
+                                          any_bounds(&te), any_bool(&te),NULL)));
     }
     if (new_access_exp) new_access_exp->topt = p2->topt;
     break;
@@ -393,7 +391,7 @@ DONT_PROMOTE:
     t = new TupleType(List::imp_rev(pat_ts));
     break;
 
-  case &Aggr_p(&AggrInfo({.KnownAggr = &ad},*tsp),exist_ts,*dps_p,dots):
+  case &Aggr_p(&{.KnownAggr = &ad},exist_ts,*dps_p,dots):
     let dps = *dps_p;
     string_t aggr_str = (ad->kind == StructA) ? "struct" : "union";
     if(ad->impl==NULL) {
@@ -409,7 +407,7 @@ DONT_PROMOTE:
       // we can allow a reference as long as the whole structure is abstract;
       // this is because there's no way to alter the structure and thus
       // violate the assumption of the open existential
-      if (topt == NULL || typ_kind(*topt) != &ak)
+      if (topt == NULL || type_kind(*topt) != &ak)
         allow_ref_pat = false;
     }
     { region rgn;
@@ -487,8 +485,8 @@ DONT_PROMOTE:
             append((*res.tvars_and_bounds_opt)[1],rpo_inst);
       }
 
-      *tsp = all_typs;
-      t = new AggrType(AggrInfo(KnownAggr(new ad),*tsp));
+      //*tsp = all_typs;
+      t = aggr_type(KnownAggr(new ad),all_typs);
       if (dots && ad->kind == UnionA) 
 	warn(p->loc,"`...' pattern not allowed in union pattern");
       else if (dots) {
@@ -535,8 +533,7 @@ DONT_PROMOTE:
     let env      = $(tenv_tvs,heap_region);
     let inst     = List::map_c(r_make_inst_var,&env,tud->tvs);
     let all_typs = List::map(snd,inst);
-    t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
-						all_typs});
+    t = datatype_field_type(KnownDatatypefield(tud,tuf),all_typs);
     if (dots) {
       // fill in wild patterns for the missing fields
       let lps = List::length(ps);
@@ -559,7 +556,7 @@ DONT_PROMOTE:
       // set just the expression here to indicate that the entire
       // datatype must be escaped/consumed
       if (access_exp)
-	set_vd(NULL, access_exp, &res.patvars, char_typ /* dummy */);
+	set_vd(NULL, access_exp, &res.patvars, char_type /* dummy */);
       res = combine_results(res,tcPatRec(te,p2,&field_typ,rgn_pat,
 					 allow_ref_pat,NULL));
       // must unify here or the type we gave pat won't ever get checked
@@ -579,7 +576,7 @@ DONT_PROMOTE:
     break;
 
   case &Aggr_p(NULL,...):
-  case &Aggr_p(&AggrInfo({.UnknownAggr = _},_),...):
+  case &Aggr_p(&{.UnknownAggr = _},...):
   case &UnknownId_p(_):         
   case &Exp_p(_):
   case &UnknownCall_p(...): 
@@ -619,7 +616,7 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
                              list_t<$(type_t,type_t)@`H,`H> assump) {
   switch $(compress(old_type),compress(new_type)) {
   case $(&PointerType(pold), &PointerType(pnew)):
-    let ptry = new PointerType(PtrInfo{pold.elt_typ, pnew.elt_tq, 
+    let ptry = new PointerType(PtrInfo{pold.elt_type, pnew.elt_tq, 
                                        PtrAtts{pold.ptr_atts.rgn, 
                                                pnew.ptr_atts.nullable, 
                                                pnew.ptr_atts.bounds, 
@@ -637,7 +634,7 @@ static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type,
 static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
                                  tvar_t tv, type_t new_type, 
                                  exp_t initializer) {
-  list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
+  list_t<$(type_t,type_t)@> assump = new List{new $(unique_rgn_type,new VarType(tv)), NULL};
   if (subtype(tenv, assump, old_type, new_type) 
       //JGM: the following line would be valid if we could somehow
       //get the coercion applied to the right expression instead of
@@ -927,7 +924,7 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
     case &Pointer_p(_): 
       switch (compress((type_t)p->topt)) {
       case &PointerType(PtrInfo{_,_,PtrAtts{.nullable = n,...}}):
-        if (conref_constr(false,n))
+        if (force_type2bool(false,n))
           return &NeqNull_val;
         break;
       default: break;
@@ -938,7 +935,7 @@ static pat_test_t get_pat_test(union PatOrWhere pw) {
         return new EqExtensibleDatatype(ddecl, df);
       else 
         return new EqDatatypeTag(datatype_tag_number(ddecl, df->name), ddecl, df);
-    case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+    case &Aggr_p(&info,_,dlps,_):
       let ad = get_known_aggrdecl(info);
       if (ad->impl->tagged) {
         let &$(designators,pat) = dlps->hd;
@@ -1025,24 +1022,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Pointer_p(pp):
     switch (compress((type_t)p->topt)) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
-      bool is_nullable = false;
-      bool still_working = true;
-      while (still_working) {
-	switch (n) {
-	case &Constraint{.Forward_constr = y}:
-	  *n = *y;
-	  continue;
-	case &Constraint{.No_constr = _}:
-          n->Eq_constr = false;
-          is_nullable   = false;
-          still_working = false;  // EXIT LOOP
-          break;
-	case &Constraint{.Eq_constr = x}:
-          is_nullable   = (bool)x;
-          still_working = false;  // EXIT LOOP
-          break;
-	}
-      }
+      bool is_nullable = force_type2bool(false,n);
       simple_pat_t ss = compile_pat(pp);
       if (is_nullable) 
 	s = null_ptr_pat(ss,p);
@@ -1055,13 +1035,13 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Datatype_p(tud,tuf,ps,_):
     int*`H span;
     switch(compress((type_t)p->topt)) {
-    case &DatatypeType(_):     
+    case &AppType(&DatatypeCon(_),_):     
       if(tud->is_extensible)
         span = NULL;
       else
         span = new (List::length(tud->fields->v)); 
       break;
-    case &DatatypeFieldType(_): span = &one_opt; break;
+    case &AppType(&DatatypeFieldCon(_),_): span = &one_opt; break;
     default: span = impos("void datatype pattern has bad type"); break;
     }
     s = con_pat(*((*tuf->name)[1]),span, List::map(compile_pat,ps),p);
@@ -1070,7 +1050,7 @@ static simple_pat_t compile_pat(pat_t p) {
   case &Tuple_p(ps,_): 
     s = tuple_pat(List::map(compile_pat,ps),pw(p)); break;
     
-  case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_):
+  case &Aggr_p(&{.KnownAggr = &ad},_,dlps,_):
     // FIX: doesn't look like multiple designators are right
     // we do different things for structs and unions:
     if (ad->kind == StructA) {
@@ -1112,7 +1092,7 @@ static simple_pat_t compile_pat(pat_t p) {
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
     switch (compress((type_t)p->topt)) {
-    case &IntType(...): 
+    case &AppType(&IntCon(...),_): 
       // When it's an integer, we have to pretend like there's an infinite
       // span...
       s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
@@ -1129,13 +1109,13 @@ static simple_pat_t compile_pat(pat_t p) {
     // the type of fields which was list_t<enumfield_t,#i>.  
     list_t<enumfield_t,`H> fields;
     switch (compress(tenum)) {
-    case &AnonEnumType(fs): fields = fs; break;
+    case &AppType(&AnonEnumCon(fs),_): fields = fs; break;
     default: impos("bad type in AnonEnum_p");
     };
     // FIX: two different enum constructors can have the same value so we
     // might not get a duplicate warning when we should.
     switch (compress((type_t)p->topt)) {
-    case &IntType(...): 
+    case &AppType(&IntCon(...),_):
       // When it's an integer, we have to pretend like there's an infinite
       // span to avoid errors for redundant patterns.
       s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
@@ -1462,7 +1442,7 @@ static access_t get_access(union PatOrWhere pw, int i) {
       return &Deref_val;
     case &Tuple_p(...): return new TupleField(i);
     case &Datatype_p(tud,tuf,...): return new DatatypeField(tud,tuf,i);
-    case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+    case &Aggr_p(&info,_,dlps,_):
       let ad = get_known_aggrdecl(info);
       if (ad->impl->tagged) {
         switch ((*dlps->hd)[0]) {
@@ -1592,7 +1572,7 @@ static string_t desc2string(term_desc_t d) {
     case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(ds));
     case &Pointer_p(_):
       return aprintf("&%s",descs2string(ds));
-    case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_): 
+    case &Aggr_p(&{.KnownAggr = &ad},_,dlps,_): 
       if (ad->kind == UnionA) {
         switch (dlps) {
         case &List{&$(&List{&FieldName(f),_},_),_}:
@@ -1624,7 +1604,7 @@ static string_t desc2string(term_desc_t d) {
     if (tagcheck(c->orig_pat.where_clause)) throw &Desc2string_val;
     let orig_pat = c->orig_pat.pattern;
     switch (compress((type_t)orig_pat->topt)) {
-    case &IntType(_,Char_sz): 
+    case &AppType(&IntCon(_,Char_sz),_): 
       // find a character not in the constructor set
       for (int i = 0; i < 256; i++) {
         let c = char_con((char)i,orig_pat);
@@ -1632,7 +1612,7 @@ static string_t desc2string(term_desc_t d) {
           return aprintf("%d",i);
       }
       throw &Desc2string_val;
-    case &IntType(_,_):
+    case &AppType(&IntCon(_,_),_):
       // find an integer not in the constructor set
       for (unsigned int i = 0; i < (0 - 1); i++) {
         let c = int_con((int)i,c->orig_pat);
@@ -1642,13 +1622,13 @@ static string_t desc2string(term_desc_t d) {
       throw &Desc2string_val;
     case &PointerType(PtrInfo(_,_,patts)):
       let n = patts.nullable;
-      bool is_nullable = conref_def(false,n);
+      bool is_nullable = force_type2bool(false,n);
       if (is_nullable) {
         if (!Set::member(s,null_con(orig_pat))) 
           return "NULL";
       }
       return "&_";
-    case &DatatypeType(DatatypeInfo{{.KnownDatatype = &tud},_}):
+    case &AppType(&DatatypeCon({.KnownDatatype = &tud}),_):
       if (tud->is_extensible) throw &Desc2string_val;
       let fields = tud->fields->v;
       int span = List::length(fields);
@@ -1663,7 +1643,7 @@ static string_t desc2string(term_desc_t d) {
         }
       }
       throw &Desc2string_val;
-    case &AggrType(AggrInfo{{.KnownAggr = &ad},_}) && ad->kind == UnionA:
+    case &AppType(&AggrCon({.KnownAggr = &ad}),_) && ad->kind == UnionA:
       let fields = ad->impl->fields;
       int span = List::length(fields);
       let &$(_,&union_name) = ad->name;

@@ -209,23 +209,23 @@ static type_t type_name_to_type($(var_opt_t,tqual_t,type_t)@ tqt,
   return t;
 }
 ////////////////// Collapsing pointer qualifiers ///////////////////////////
-static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
-         conref_t<bool> zeroterm,type_t rgn) 
-  collapse_pointer_quals(seg_t loc, conref_t<bool> nullable, 
-                         conref_t<bounds_t> bound, type_t rgn, 
+static $(booltype_t nullable,ptrbound_t bound,
+         booltype_t zeroterm,rgntype_t rgn) 
+  collapse_pointer_quals(seg_t loc, booltype_t nullable, 
+                         ptrbound_t bound, rgntype_t rgn, 
                          pointer_quals_t pqs) {
   // for now, the last qualifier wins and overrides previous ones
-  conref_t<bool> zeroterm = empty_conref();
+  booltype_t zeroterm = Tcutil::any_bool(NULL);
   for (; pqs != NULL; pqs = pqs->tl)
     switch (pqs->hd) {
-    case &Zeroterm_ptrqual:   zeroterm = true_conref;                break;
-    case &Nozeroterm_ptrqual: zeroterm = false_conref;               break;
-    case &Nullable_ptrqual:   nullable = true_conref;                break;
-    case &Notnull_ptrqual:    nullable = false_conref;               break;
-    case &Fat_ptrqual:           bound = bounds_dyneither_conref;    break;
-    case &Thin_ptrqual:          bound = bounds_one_conref;          break;
-    case &Numelts_ptrqual(e):    bound = new_conref(new Upper_b(e)); break;
-    case &Region_ptrqual(t):       rgn = t;                          break;
+    case &Zeroterm_ptrqual:   zeroterm = true_type;            break;
+    case &Nozeroterm_ptrqual: zeroterm = false_type;           break;
+    case &Nullable_ptrqual:   nullable = true_type;            break;
+    case &Notnull_ptrqual:    nullable = false_type;           break;
+    case &Fat_ptrqual:           bound = fat_bound_type;       break;
+    case &Thin_ptrqual:          bound = bounds_one();         break;
+    case &Numelts_ptrqual(e):    bound = thin_bounds_exp(e);   break;
+    case &Region_ptrqual(t):       rgn = t;                    break;
     }
   return $(nullable,bound,zeroterm,rgn);
 }
@@ -262,7 +262,7 @@ static type_specifier_t empty_spec(seg_t loc) {
                         .Long_spec = false,
                         .Long_Long_spec = false,
                         .Valid_type_spec = false,
-                        .Type_spec = sint_typ,
+                        .Type_spec = sint_type,
                         .loc = loc};
 }
 
@@ -296,8 +296,8 @@ static type_specifier_t long_spec(seg_t loc) {
 // convert any array types to pointer types
 static type_t array2ptr(type_t t, bool argposn) {
     // FIX: don't lose zero-term location
-  return Tcutil::is_array(t) ? 
-    Tcutil::promote_array(t, argposn ? new_evar(&Tcutil::rko, NULL) : &HeapRgn_val, false) : t;
+  return Tcutil::is_array_type(t) ? 
+    Tcutil::promote_array(t, argposn ? new_evar(&Tcutil::rko, NULL) : heap_rgn_type, false) : t;
 }
 
 // The next few functions are used when we have a function (or aggregate)
@@ -313,22 +313,22 @@ static list_t<$(var_t,type_t)@> get_arg_tags(list_t<$(var_opt_t,tqual_t,type_t) 
   let res = NULL;
   for (; x != NULL; x = x->tl) {
     switch (x->hd) {
-    case &$(v,_,&TagType(i)) && v != NULL: 
+    case &$(v,_,&AppType(&TagCon,&List{i,NULL})) && v != NULL: 
       switch (i) {
       case &Evar(_,*z,_,_):
         // using an evar here will mess things up since the evar will be
         // duplicated.  So, we pin the evar down to a type variable instead.
         stringptr_t nm = new ((string_t)aprintf("`%s",*((var_t)v)));
-        *z = new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::ik)});
+        *z = var_type(new Tvar{nm,-1,new Eq_kb(&Tcutil::ik)});
         break;
       default: break;
       }
       res = new List(new $((var_t)v,i),res); break;
       // while we're at it, give any anonymous regions_t's a name that
       // corresponds to the variable.
-    case &$(&v,_,&RgnHandleType(&Evar(_,*z,_,_))): 
+    case &$(&v,_,&AppType(&RgnHandleCon,&List{&Evar(_,*z,_,_),NULL})):
       stringptr_t nm = new ((string_t)aprintf("`%s",v));
-      *z = new VarType(new Tvar{nm,-1,new Eq_kb(&Tcutil::rk)});
+      *z = var_type(new Tvar{nm,-1,new Eq_kb(&Tcutil::rk)});
       break;
     default: break;
     }
@@ -341,7 +341,7 @@ static list_t<$(var_t,type_t)@> get_aggrfield_tags(list_t<aggrfield_t> x) {
   let res = NULL;
   for (; x != NULL; x = x->tl) {
     switch (x->hd->type) {
-    case &TagType(i):
+    case &AppType(&TagCon,&List{i,NULL}):
       res = new List(new $(x->hd->name,i), res); break;
     default: break;
     }
@@ -375,21 +375,23 @@ static type_t substitute_tags(list_t<$(var_t,type_t)@> tags, type_t t) {
     }
     let et2 = substitute_tags(tags,et);
     if (nelts != nelts2 || et != et2)
-      return new ArrayType(ArrayInfo{et2,tq,nelts2,zt,ztloc});
+      return array_type(et2,tq,nelts2,zt,ztloc);
     break;
   case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,pl}}):
     let et2 = substitute_tags(tags,et);
-    let b2 = b;
-    switch (*b) {
-    case {.Eq_constr = &Upper_b(e)}: 
-      e = substitute_tags_exp(tags,e);
-      b2 = new Constraint{.Eq_constr = new Upper_b(e)};
-      break;
-    default: break;
-    }
+    let b2 = substitute_tags(tags,b);
     if (et2 != et || b2 != b)
-      return new PointerType(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl}});
+      return pointer_type(PtrInfo{et2,tq,PtrAtts{r,n,b2,zt,pl}});
     break;
+  case &AppType(&ThinCon, &List{t,NULL}):
+    let t2 = substitute_tags(tags,t);
+    if (t != t2) return thin_bounds_type(t2);
+    break;
+  case &ValueofType(e):
+    let e2 = substitute_tags_exp(tags,e);
+    if (e2 != e) return valueof_type(e2);
+    break;
+
   default: 
     // FIX: should go into other types too
     break;
@@ -422,13 +424,13 @@ static bool is_typeparam(type_modifier_t tm) {
 // `H then return HeapRgn, otherwise, return a type variable.
 static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
-    return &HeapRgn_val;
+    return heap_rgn_type;
   else if (zstrcmp(s,"`U") == 0)
-    return &UniqueRgn_val;
+    return unique_rgn_type;
   else if (zstrcmp(s,"`RC") == 0)
-    return &RefCntRgn_val;
+    return refcnt_rgn_type;
   else
-    return new VarType(new Tvar(new s,-1,k));
+    return var_type(new Tvar(new s,-1,k));
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -583,7 +585,7 @@ static fndecl_t make_function(region_t<`yy> yy,
                             .c_varargs=c_varargs,
                             .cyc_varargs=cyc_varargs,
                             .rgn_po = rgn_po,
-                            .body=body,.cached_typ=NULL,
+                            .body=body,.cached_type=NULL,
                             .param_vardecls=NULL,
                             .fn_vardecl = NULL,
                             .attributes = append(attributes,out_atts),
@@ -645,7 +647,7 @@ static type_t
   bool      seen_type = ts.Valid_type_spec;
   bool      seen_sign = ts.Signed_spec || ts.Unsigned_spec;
   bool      seen_size = ts.Short_spec || ts.Long_spec || ts.Long_Long_spec;
-  type_t    t         = seen_type ? ts.Type_spec : &VoidType_val;
+  type_t    t         = seen_type ? ts.Type_spec : void_type;
   size_of_t sz        = Int_sz; 
   sign_t    sgn  = Signed;
 
@@ -664,24 +666,24 @@ static type_t
   if (!seen_type) {
     if(!seen_sign && !seen_size) 
       Warn::warn(loc,"missing type within specifier");
-    t = int_typ(sgn,sz);
+    t = int_type(sgn,sz);
   } else {
     if(seen_sign)
       switch (t) {
-      case &IntType(sgn2,sz2): 
+      case &AppType(&IntCon(sgn2,sz2),_):
         if (sgn2 != sgn)
-          t = int_typ(sgn,sz2);
+          t = int_type(sgn,sz2);
         break;
       default: Warn::err(loc,"sign specification on non-integral type"); break;
       }
     if(seen_size)
       switch (t) {
-      case &IntType(sgn2,sz2): 
+      case &AppType(&IntCon(sgn2,sz2),_):
         if (sz2 != sz)
-          t = int_typ(sgn2,sz);
+          t = int_type(sgn2,sz);
         break;
-        // hack -- if we've seen "long" then sz will be B8
-      case &FloatType(_): t = float_typ(2); break;
+        // hack -- if we've seen "long" then sz will be long_double_type
+      case &AppType(&FloatCon(_),_): t = long_double_type; break;
       default: Warn::err(loc,"size qualifier on non-integral type"); break;
       }
   }
@@ -713,10 +715,10 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   switch (tms->hd) {
   case &Carray_mod(zeroterm,ztloc):
     return apply_tms(empty_tqual(0),
-                     array_typ(t,tq,NULL,zeroterm,ztloc),atts,tms->tl);
+                     array_type(t,tq,NULL,zeroterm,ztloc),atts,tms->tl);
   case &ConstArray_mod(e,zeroterm,ztloc):
     return apply_tms(empty_tqual(0),
-                     array_typ(t,tq,e,zeroterm,ztloc),atts,tms->tl);
+                     array_type(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
     case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po,req,ens):
@@ -745,7 +747,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  && args2 != NULL      // not empty arg list
 	  && args2->tl == NULL   // not >1 arg
 	  && (*args2->hd)[0] == NULL // not f(void x)
-	  && (*args2->hd)[2] == &VoidType_val) {
+	  && (*args2->hd)[2] == void_type) {
 	args2 = NULL;
       }
       // pull out any tag_t variables and their associated tag_t types
@@ -769,9 +771,9 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // anyway.  TODO: maybe we should issue a warning.  But right
       // now we don't have a loc so the warning will be confusing.
       return apply_tms(empty_tqual(tq.loc),
-		       function_typ(typvars,eff,tq,t,args2,
-				    c_vararg,cyc_vararg,rgn_po,fn_atts,
-                                    req,ens),
+		       function_type(typvars,eff,tq,t,args2,
+                                     c_vararg,cyc_vararg,rgn_po,fn_atts,
+                                     req,ens),
 		       new_atts,
 		       tms->tl);
     case &NoTypes(_,loc):
@@ -790,7 +792,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
     parse_abort(loc, "type parameters must appear before function arguments "
                 "in declarator");
   case &Pointer_mod(ptratts,tq2):
-    return apply_tms(tq2,new PointerType(PtrInfo(t,tq,ptratts)),atts,tms->tl);
+    return apply_tms(tq2,pointer_type(PtrInfo(t,tq,ptratts)),atts,tms->tl);
   case &Attributes_mod(loc,atts2):
     // FIX: get this in line with GCC
     // attributes get attached to function types -- I doubt that this
@@ -902,24 +904,24 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
      if (atts != NULL) Warn::err(loc,"attributes on datatypes not supported");
      dd->sc = s;
      return new List(new_decl(new Datatype_d(dd),loc),NULL);
-   case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
+   case &AppType(&AggrCon({.UnknownAggr = $(k,n,_)}),ts):
      let ts2 = List::map_c(typ2tvar,loc,ts);
      let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,false);
      if (atts != NULL) Warn::err(loc,"bad attributes on type declaration");
      return new List(new_decl(new Aggr_d(ad),loc),NULL);
-   case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
+   case &AppType(&DatatypeCon({.KnownDatatype = tudp}),_):
      if(atts != NULL) Warn::err(loc,"bad attributes on datatype");
      return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
-   case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
+   case &AppType(&DatatypeCon({.UnknownDatatype = UnknownDatatypeInfo(n,isx)}),ts):
      let ts2 = List::map_c(typ2tvar,loc,ts);
      let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
      if (atts != NULL) Warn::err(loc,"bad attributes on datatype");
      return new List(tud,NULL);
-   case &EnumType(n,_):
+   case &AppType(&EnumCon(n,_),_):
      let ed = new Enumdecl{s,n,NULL};
      if (atts != NULL) Warn::err(loc,"bad attributes on enum");
      return new List(new Decl(new Enum_d(ed),loc),NULL);
-   case &AnonEnumType(fs):
+   case &AppType(&AnonEnumCon(fs),_):
      // someone's written:  enum {A,B,C}; which is a perfectly good
      // way to declare symbolic constants A, B, and C.
      let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
@@ -1109,8 +1111,8 @@ using Parse;
 %type <string_t<`H>> FLOATING_CONSTANT namespace_action
 %type <string_t<`H>> IDENTIFIER TYPEDEF_NAME TYPE_VAR
 %type <string_t<`H>> STRING WSTRING WCHARACTER_CONSTANT field_name
-%type <$(Position::seg_t,conref_t<bool>,conref_t<bounds_t>)@`H> pointer_null_and_bound
-%type <conref_t<bounds_t>> pointer_bound
+%type <$(Position::seg_t,booltype_t, ptrbound_t)@`H> pointer_null_and_bound
+%type <ptrbound_t> pointer_bound
 %type <list_t<offsetof_field_t,`H>> field_expression
 %type <exp_t> primary_expression postfix_expression unary_expression
 %type <exp_t> cast_expression constant multiplicative_expression
@@ -1169,8 +1171,8 @@ using Parse;
 %type <$(var_opt_t,tqual_t,type_t)@`H> parameter_declaration type_name
 %type <list_t<$(var_opt_t,tqual_t,type_t)@`H,`H>> parameter_list
 %type <$(list_t<$(var_opt_t,tqual_t,type_t)@`H,`H>, bool,vararg_info_t *`H,type_opt_t, list_t<$(type_t,type_t)@`H,`H>)@`H> parameter_type_list
-%type <list_t<type_t,`H>> type_name_list type_params_opt effect_set region_set
-%type <list_t<type_t,`H>> atomic_effect
+%type <types_t> type_name_list type_params_opt effect_set region_set
+%type <types_t> atomic_effect
 %type <list_t<designator_t,`H>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
@@ -1181,7 +1183,7 @@ using Parse;
 %type <list_t<enumfield_t,`H>> enum_declaration_list
 %type <type_opt_t> optional_effect 
 %type <list_t<$(type_t,type_t)@`H,`H>> optional_rgn_order rgn_order
-%type <conref_t<bool>> zeroterm_qual_opt
+%type <booltype_t> zeroterm_qual_opt
 %type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_values
 %type <pointer_qual_t<`yy>> pointer_qual
 %type <pointer_quals_t<`yy>> pointer_quals
@@ -1374,8 +1376,8 @@ declaration:
     if (zstrcmp(three,"`U") == 0)
       Warn::err(SLOC(@3),"bad occurrence of unique region");
     tvar_t tv = new Tvar(new three,-1,Tcutil::kind_to_bound(&Tcutil::rk));
-    type_t t  = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),new RgnHandleType(t),NULL);
+    type_t t  = var_type(tv);
+    vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@6)),NULL));
   }
 /* region h; */
@@ -1387,8 +1389,8 @@ declaration:
       Warn::err(SLOC(@2),"bad occurrence of unique region `U");
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",two), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
-    type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n,new two),new RgnHandleType(t),NULL);
+    type_t t = var_type(tv);
+    vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n,new two),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@4)),NULL));
   }
 /* region h = open(k); */
@@ -1399,8 +1401,8 @@ declaration:
     if (strcmp(four,"open") != 0) Warn::err(SLOC(@4),"expecting `open'");
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",two), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
-    type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new two),new RgnHandleType(t),NULL);
+    type_t t = var_type(tv);
+    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new two),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,six,LOC(@1,@8)),NULL));
   }
 ;
@@ -1607,26 +1609,26 @@ type_specifier:
   type_specifier_notypedef
     { $$ = $!1; }
 | qual_opt_typedef type_params_opt
-    { $$=^$(type_spec(new TypedefType($1,$2,NULL,NULL),LOC(@1,@2))); }
+    { $$=^$(type_spec(typedef_type($1,$2,NULL,NULL),LOC(@1,@2))); }
 ;
 
 type_specifier_notypedef:
-  VOID      { $$=^$(type_spec(&VoidType_val,SLOC(@1))); }
-| CHAR      { $$=^$(type_spec(char_typ,SLOC(@1))); }
+  VOID      { $$=^$(type_spec(void_type,SLOC(@1))); }
+| CHAR      { $$=^$(type_spec(char_type,SLOC(@1))); }
 | SHORT     { $$=^$(short_spec(SLOC(@1))); }
-| INT       { $$=^$(type_spec(sint_typ,SLOC(@1))); }
+| INT       { $$=^$(type_spec(sint_type,SLOC(@1))); }
 | LONG      { $$=^$(long_spec(SLOC(@1))); }
-| FLOAT     { $$=^$(type_spec(float_typ(0),SLOC(@1))); }
-| DOUBLE    { $$=^$(type_spec(float_typ(1),SLOC(@1))); }
+| FLOAT     { $$=^$(type_spec(float_type,SLOC(@1))); }
+| DOUBLE    { $$=^$(type_spec(double_type,SLOC(@1))); }
 | SIGNED    { $$=^$(signed_spec(SLOC(@1))); }
 | UNSIGNED  { $$=^$(unsigned_spec(SLOC(@1))); }
 | enum_specifier { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
 /* GCC extension */
 | TYPEOF '(' expression ')'
-   { $$=^$(type_spec(new TypeofType($3),LOC(@1,@4))); }
+   { $$=^$(type_spec(typeof_type($3),LOC(@1,@4))); }
 | BUILTIN_VA_LIST
-   { $$=^$(type_spec(new BuiltinType("__builtin_va_list",&Tcutil::bk),SLOC(@1))); }
+   { $$=^$(type_spec(builtin_type("__builtin_va_list",&Tcutil::bk),SLOC(@1))); }
 /* Cyc: added datatypes */
 | datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
@@ -1640,22 +1642,16 @@ type_specifier_notypedef:
                                                 SLOC(@3),List::imp_rev($3))),
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
-    { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
+    { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
 | REGION_T 
-    { $$=^$(type_spec(new RgnHandleType(new_evar(&Tcutil::rko, NULL)),
+    { $$=^$(type_spec(rgn_handle_type(new_evar(&Tcutil::rko, NULL)),
                       SLOC(@1))); }
-| DYNREGION_T '<' any_type_name right_angle
-  { let t2 = new_evar(&Tcutil::rko, NULL);
-    $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
-  }
-| DYNREGION_T '<' any_type_name ',' any_type_name right_angle
-  { $$=^$(type_spec(new DynRgnType($3,$5), LOC(@1,@6))); }
 | TAG_T '<' any_type_name right_angle
-    { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
+    { $$=^$(type_spec(tag_type($3),LOC(@1,@4))); }
 | TAG_T 
-  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::iko, NULL)),SLOC(@1))); }
+  { $$=^$(type_spec(tag_type(new_evar(&Tcutil::iko, NULL)),SLOC(@1))); }
 | VALUEOF_T '(' expression ')'
-  { $$=^$(type_spec(new ValueofType($3),LOC(@1,@4))); }
+  { $$=^$(type_spec(valueof_type($3),LOC(@1,@4))); }
 
 ;
 
@@ -1679,9 +1675,9 @@ enum_specifier:
     $$=^$(type_spec(new TypeDeclType(ed,NULL),LOC(@1,@5)));
   }
 | ENUM qual_opt_identifier
-  { $$=^$(type_spec(new EnumType($2,NULL),LOC(@1,@2))); }
+  { $$=^$(type_spec(enum_type($2,NULL),LOC(@1,@2))); }
 | ENUM '{' enum_declaration_list '}'
-  { $$=^$(type_spec(new AnonEnumType($3),LOC(@1,@4))); }
+  { $$=^$(type_spec(anon_enum_type($3),LOC(@1,@4))); }
 ;
 
 /* enum fields */
@@ -1726,13 +1722,11 @@ struct_or_union_specifier:
       $$ = ^$(type_spec(new TypeDeclType(td,NULL), LOC(@1,@8)));
     }
 | TAGGED_QUAL struct_or_union struct_union_name type_params_opt 
-    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($2,$3,new Opt(true)),$4)),
-		      LOC(@1,@4)));
+    { $$=^$(type_spec(aggr_type(UnknownAggr($2,$3,new Opt(true)),$4),
+                      LOC(@1,@4)));
     }
 | struct_or_union struct_union_name type_params_opt 
-    { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2,NULL),$3)),
-		      LOC(@1,@3)));
-    }
+    { $$=^$(type_spec(aggr_type(UnknownAggr($1,$2,NULL),$3),LOC(@1,@3))); }
 ;
 
 type_params_opt:
@@ -1900,13 +1894,11 @@ datatype_specifier:
     }
 | qual_datatype qual_opt_identifier type_params_opt 
     { let is_extensible = $1;
-      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($2,is_extensible)), $3)), LOC(@1,@3)));
+      $$=^$(type_spec(datatype_type(UnknownDatatype(UnknownDatatypeInfo($2,is_extensible)), $3), LOC(@1,@3)));
     }
 | qual_datatype qual_opt_identifier '.' qual_opt_identifier type_params_opt 
    {  let is_extensible = $1;
-      $$=^$(type_spec(new DatatypeFieldType(DatatypeFieldInfo(
-		  UnknownDatatypefield(UnknownDatatypeFieldInfo($2,$4,is_extensible)),$5)),
-		      LOC(@1,@5)));
+      $$=^$(type_spec(datatype_field_type(UnknownDatatypefield(UnknownDatatypeFieldInfo($2,$4,is_extensible)),$5),LOC(@1,@5)));
     }
 ;
 
@@ -2098,25 +2090,25 @@ pointer_null_and_bound:
   '*' pointer_bound 
    { // avoid putting location info on here when not porting C code
      seg_t loc = SLOC(@1);
-     $$=^$(new $(loc,true_conref, $2)); 
+     $$=^$(new $(loc,true_type, $2)); 
    }
 | '@' pointer_bound 
   {  seg_t loc = SLOC(@1);
-     $$=^$(new $(loc, false_conref, $2)); 
+     $$=^$(new $(loc, false_type, $2)); 
   }
 | '?' 
   { seg_t loc = SLOC(@1);
-    $$=^$(new $(loc, true_conref,  bounds_dyneither_conref));  
+    $$=^$(new $(loc, true_type,  fat_bound_type));  
   }
 
 pointer_bound:
-/* empty */ { $$=^$(bounds_one_conref); }
-| '{' assignment_expression '}' { $$=^$(new_conref(new Upper_b($2))); }
+/* empty */ { $$=^$(bounds_one()); }
+| '{' assignment_expression '}' { $$=^$(thin_bounds_exp($2)); }
 
 zeroterm_qual_opt:
-/* empty */       { $$ = ^$(empty_conref()); }
-| ZEROTERM_QUAL   { $$ = ^$(true_conref);    }
-| NOZEROTERM_QUAL { $$ = ^$(false_conref);   }
+/* empty */       { $$ = ^$(Tcutil::any_bool(NULL)); }
+| ZEROTERM_QUAL   { $$ = ^$(true_type);    }
+| NOZEROTERM_QUAL { $$ = ^$(false_type);   }
 ;
 
 /* Always returns a type (possibly an evar) */
@@ -2157,7 +2149,7 @@ type_var:
 
 optional_effect:
   /* empty */    { $$=^$(NULL); }
-| ';' effect_set { $$ = ^$(new JoinEff($2)); }
+| ';' effect_set { $$ = ^$(join_eff($2)); }
 ;
 
 optional_rgn_order:
@@ -2168,19 +2160,19 @@ optional_rgn_order:
 rgn_order:
   atomic_effect '>' TYPE_VAR
   { // FIX: if we replace the following with:
-    // $$ = ^$(new List(new $(new JoinEff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
+    // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
     let kb = new Less_kb(NULL,&Tcutil::trk);
     let id = $3;
     let t = id2type(id,kb);
-    $$ = ^$(new List(new $(new JoinEff($1),t), NULL));
+    $$ = ^$(new List(new $(join_eff($1),t), NULL));
   }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
   { 
     let kb = new Less_kb(NULL,&Tcutil::trk);
     let id = $3;
     let t = id2type(id,kb);
-    $$ = ^$(new List(new $(new JoinEff($1),t),$5)); 
+    $$ = ^$(new List(new $(join_eff($1),t),$5)); 
   }
 ;
 
@@ -2203,7 +2195,7 @@ atomic_effect:
   '{' '}'                   { $$=^$(NULL); }
 | '{' region_set '}'        { $$=$!2; }
 | REGIONS '(' any_type_name ')'
-  { $$=^$(new List(new RgnsEff($3), NULL)); }
+  { $$=^$(new List(regionsof_eff($3), NULL)); }
 | type_var
   { set_vartyp_kind($1,&Tcutil::ek,false);
     $$ = ^$(new List($1,NULL)); 
@@ -2225,9 +2217,9 @@ region_set:
 */
 region_set:
   type_name
-{ $$ = ^$(new List(new AccessEff(type_name_to_type($1,SLOC(@1))),NULL)); }
+{ $$ = ^$(new List(access_eff(type_name_to_type($1,SLOC(@1))),NULL)); }
 | type_name ',' region_set
-{ $$ = ^$(new List(new AccessEff(type_name_to_type($1,SLOC(@1))),$3)); }
+{ $$ = ^$(new List(access_eff(type_name_to_type($1,SLOC(@1))),$3)); }
 ;
 
 /* NB: returns list in reverse order */
@@ -2302,7 +2294,7 @@ array_initializer:
 | '{' initializer_list ',' '}'
     { $$=^$(new_exp(new UnresolvedMem_e(NULL,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { let vd = new_vardecl(SLOC(@3),new $(Loc_n,new $3), uint_typ,
+    { let vd = new_vardecl(SLOC(@3),new $(Loc_n,new $3), uint_type,
                            uint_exp(0,SLOC(@3)));
       // make the index variable const
       vd->tq.real_const = true;
@@ -2367,10 +2359,10 @@ type_name:
 
 any_type_name:
   type_name { $$ = ^$(type_name_to_type($1,SLOC(@1))); }
-| '{' '}' { $$ = ^$(new JoinEff(NULL)); }
-| '{' region_set '}' { $$ = ^$(new JoinEff($2)); }
-| REGIONS '(' any_type_name ')' { $$ = ^$(new RgnsEff($3)); }
-| any_type_name '+' atomic_effect { $$ = ^$(new JoinEff(new List($1,$3))); }
+| '{' '}' { $$ = ^$(join_eff(NULL)); }
+| '{' region_set '}' { $$ = ^$(join_eff($2)); }
+| REGIONS '(' any_type_name ')' { $$ = ^$(regionsof_eff($3)); }
+| any_type_name '+' atomic_effect { $$ = ^$(join_eff(new List($1,$3))); }
 ;
 
 /* Cyc: new */
@@ -2702,7 +2694,7 @@ unary_pattern:
   { $$=^$(exp_pat(prim1_exp($1,$2,LOC(@1,@2)))); } 
 | SIZEOF '(' type_name ')' 
   { let t = type_name_to_type($3,SLOC(@3)); 
-    $$=^$(exp_pat(sizeoftyp_exp(t,LOC(@1,@4)))); 
+    $$=^$(exp_pat(sizeoftype_exp(t,LOC(@1,@4)))); 
   }
 | SIZEOF unary_expression
   { $$=^$(exp_pat(sizeofexp_exp($2,LOC(@1,@2)))); }
@@ -2757,7 +2749,7 @@ pattern:
 | IDENTIFIER IDENTIFIER pattern
     { if (strcmp($2,"as") != 0) 
         Warn::err(SLOC(@2),"expecting `as'");
-      $$=^$(new_pat(new Var_p(new_vardecl(SLOC(@1),new $(Loc_n, new $1),&VoidType_val,NULL),
+      $$=^$(new_pat(new Var_p(new_vardecl(SLOC(@1),new $(Loc_n, new $1),void_type,NULL),
                               $3),SLOC(@1))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' type_name IDENTIFIER
@@ -2789,7 +2781,7 @@ pattern:
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($4); 
       let exist_ts = List::map_c(typ2tvar,SLOC(@3),$3);
-      $$=^$(new_pat(new Aggr_p(new AggrInfo(UnknownAggr(StructA,$1,NULL),NULL),
+      $$=^$(new_pat(new Aggr_p(new UnknownAggr(StructA,$1,NULL),
 			       exist_ts,fps,dots),LOC(@1,@5)));
    }
 | '{' type_params_opt field_pattern_list '}'
@@ -2803,27 +2795,27 @@ pattern:
     { $$=^$(new_pat(new Pointer_p(new_pat(new Pointer_p($2),LOC(@1,@2))),LOC(@1,@2))); }
 | '*' IDENTIFIER
     { $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1), new $(Loc_n, new $2),
-						&VoidType_val,NULL),
+						void_type,NULL),
                                     new_pat(&Wild_p_val,SLOC(@2))),
 		    LOC(@1,@2))); }
 | '*' IDENTIFIER IDENTIFIER pattern
     { if (strcmp($3,"as") != 0)
         Warn::err(SLOC(@3),"expecting `as'");
       $$=^$(new_pat(new Reference_p(new_vardecl(SLOC(@1),new $(Loc_n, new $2),
-						&VoidType_val,NULL),
+						void_type,NULL),
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
    { let tag = id2type($3,Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(typ2tvar(SLOC(@3),tag),
 				new_vardecl(SLOC(@1),new $(Loc_n,new $1),
-					    new TagType(tag),NULL)),
+					    tag_type(tag),NULL)),
 		   LOC(@1,@4))); }
 | IDENTIFIER '<' '_' '>' 
    { let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(&Tcutil::ik));
      $$=^$(new_pat(new TagInt_p(tv,
 				new_vardecl(SLOC(@1), new $(Loc_n,new $1),
-					    new TagType(new VarType(tv)),NULL)),
+					    tag_type(var_type(tv)),NULL)),
 		   LOC(@1,@4))); }
 ;
 
@@ -3007,7 +2999,7 @@ unary_expression:
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'       
   { let t = type_name_to_type($3,SLOC(@3));
-    $$=^$(sizeoftyp_exp(t,LOC(@1,@4))); 
+    $$=^$(sizeoftype_exp(t,LOC(@1,@4))); 
   }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' field_expression ')' 

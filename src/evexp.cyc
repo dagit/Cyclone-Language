@@ -229,7 +229,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     default: break;
     }
     fallthru;
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_): ans = $(Int_c(Signed,0), false); break;
   case &Cast_e(t,e2,_,_):
@@ -238,16 +238,20 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
     if(ans[1])
       switch ($(compress(t),ans[0])) {
       /* FIX: what about wide characters Wchar_c */
-      case $(&IntType(sn,sz),{.Char_c = $(sn2,x)}):  fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),{.Short_c = $(sn2,x)}): fallthru(sn,sz,sn2,x);
-      case $(&IntType(sn,sz),{.Int_c = $(sn2,x)}):
+      case $(&AppType(&IntCon(sn,sz),_),{.Char_c = $(sn2,x)}):  
+        fallthru(sn,sz,sn2,x);
+      case $(&AppType(&IntCon(sn,sz),_),{.Short_c = $(sn2,x)}): 
+        fallthru(sn,sz,sn2,x);
+      case $(&AppType(&IntCon(sn,sz),_),{.Int_c = $(sn2,x)}):
 	if(sn != sn2)
 	  ans[0] = Int_c(sn,x);
 	break;
       /* FIX: what about wide characters Wchar_c */
-      case $(&TagType(it),{.Char_c = $(sn2,x)}):  fallthru(it,sn2,x);
-      case $(&TagType(it),{.Short_c = $(sn2,x)}): fallthru(it,sn2,x);
-      case $(&TagType(it),{.Int_c = $(sn2,x)}):
+      case $(&AppType(&TagCon,&List{it,_}),{.Char_c = $(sn2,x)}):  
+        fallthru(it,sn2,x);
+      case $(&AppType(&TagCon,&List(it,_)),{.Short_c = $(sn2,x)}): 
+        fallthru(it,sn2,x);
+      case $(&AppType(&TagCon,&List(it,_)),{.Int_c = $(sn2,x)}):
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
 	unify(it, new ValueofType(const_exp(ans[0],0)));
@@ -264,31 +268,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
   }
   if(ans[1]) {
     raw_exp_t c;
-    let cnst = ans[0];
-    switch (cnst) {
-    case Cnst{.Int_c = $(Unsigned,0)}:
-      static datatype Raw_exp.Const_e uzero = 
-        Const_e(Cnst{.Int_c = $(Unsigned,0)});
-      c = &uzero;
-      break;
-    case Cnst{.Int_c = $(Unsigned,1)}:
-      static datatype Raw_exp.Const_e uone = 
-        Const_e(Cnst{.Int_c = $(Unsigned,1)});
-      c = &uone;
-      break;
-    case Cnst{.Int_c = $(Signed,0)}:
-      static datatype Raw_exp.Const_e szero = 
-        Const_e(Cnst{.Int_c = $(Signed,0)});
-      c = &szero;
-      break;
-    case Cnst{.Int_c = $(Signed,1)}:
-      static datatype Raw_exp.Const_e sone = 
-        Const_e(Cnst{.Int_c = $(Signed,1)});
-      c = &sone;
-      break;
-    default: c = new Const_e(cnst); break;
-    }
-    e->r = c;
+    let c = ans[0];
+    e->r = new Const_e(c); // memoize
   }
   return ans;
 }
@@ -297,7 +278,7 @@ bool c_can_eval(exp_t e) {
   switch (e->r) {
   case &AnonEnum_e(...):
   case &Enum_e(...):
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
   case &Const_e(_): return true;
@@ -321,7 +302,7 @@ static int const_exp_case_number(exp_t e) {
   case &Const_e(_): return 1;
   case &Conditional_e(_,_,_): return 2;
   case &Primop_e(_,_): return 3;
-  case &Sizeoftyp_e(_): // do these the same so equal types are equal
+  case &Sizeoftype_e(_): // do these the same so equal types are equal
   case &Sizeofexp_e(_): return 4;
   case &Offsetof_e(_,_): return 5;
   case &Cast_e(_,_,_,_): return 6;
@@ -364,14 +345,14 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
 	return c2;
     }
     return 0; // list lengths must be the same -- it's the same primop
-  case $(&Sizeoftyp_e(t1), &Sizeoftyp_e(t2)):  
+  case $(&Sizeoftype_e(t1), &Sizeoftype_e(t2)):  
     return typecmp(t1,t2);
-  case $(&Sizeoftyp_e(t1), &Sizeofexp_e(e2a)):
+  case $(&Sizeoftype_e(t1), &Sizeofexp_e(e2a)):
     let e2atopt = e2a->topt;
     if(e2atopt == NULL)
       terr(e2->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
     return typecmp(t1,(type_t)e2atopt);
-  case $(&Sizeofexp_e(e1a), &Sizeoftyp_e(t2)):
+  case $(&Sizeofexp_e(e1a), &Sizeoftype_e(t2)):
     let e1atopt = e1a->topt;
     if(e1atopt == NULL)
       terr(e1->loc, "cannot handle sizeof(exp) here -- use sizeof(type)");
@@ -430,7 +411,46 @@ bool lte_const_exp(exp_t e1, exp_t e2) {
 // Note that an AggrType better be checked so we can get the aggrdecl
 bool okay_szofarg(type_t t) {
   switch (compress(t)) {
-  case &VoidType: return false;
+  case &AppType(c,ts):
+    switch (c) {
+    case &DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}):
+      for (let tqs = tuf->typs; tqs != NULL; tqs = tqs->tl)
+        if(!okay_szofarg((*tqs->hd)[1]))
+          return false;
+      return true;
+    case &DatatypeFieldCon(...): return false;
+    case &TagCon:
+    case &IntCon(_,_):
+    case &FloatCon(_): 
+    case &BuiltinCon(...):
+    case &EnumCon(_,_):
+    case &RgnHandleCon: 
+    case &DatatypeCon(_): 
+    case &AnonEnumCon(_): return true;
+
+    case &VoidCon: 
+    case &HeapCon:
+    case &RefCntCon:
+    case &UniqueCon:
+    case &JoinCon:
+    case &AccessCon: 
+    case &TrueCon:
+    case &FalseCon:
+    case &ThinCon:
+    case &FatCon:
+    case &RgnsCon:   return false;
+    case &AggrCon({.UnknownAggr = _}):
+      impos("szof on unchecked StructType");
+    case &AggrCon({.KnownAggr = &ad}):
+      if(ad->impl == NULL) return false;
+      else {
+        region temp;
+        let inst = List::rzip(temp,temp,ad->tvs,ts);
+        for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+          if (!okay_szofarg(rsubstitute(temp,inst,fs->hd->type))) return false;
+        return true;
+      }
+    }
   case &VarType(tv):
     switch (tvar_kind(tv,&bk)->kind) {
     case BoxKind: return true;
@@ -438,61 +458,26 @@ bool okay_szofarg(type_t t) {
     }
   case &Evar(&Opt{&Kind(BoxKind,_)},_,_,_): return true; // Possible?
   case &Evar(_,_,_,_): return false;
-  case &DatatypeType(_): return true;
-  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(_,tuf)},_}):
-    fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if(!okay_szofarg((*tqs->hd)[1]))
 	return false;
     return true;
 
-  case &DatatypeFieldType(_): return false;
-
     // okay? (used to require constrained bound)
   case &PointerType(_): return true;
 
-  case &TagType(_):
-  case &IntType(_,_):
-  case &FloatType(_): return true;
   case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
     return (e != NULL);
-  case &BuiltinType(...): return true;
   case &FnType(_): return false;
-  case &RgnHandleType(_): return true;
-  case &DynRgnType(_,_): return true;
-  case &AggrType(AggrInfo(info,ts)):
-    _ ad;
-    switch(info) {
-    case {.UnknownAggr = _}: impos("szof on unchecked StructType");
-    case {.KnownAggr = &ad2}: ad = ad2;
-    }
-    if(ad->impl == NULL)
-      return false;
-    {
-      region temp;
-      let inst = List::rzip(temp,temp,ad->tvs,ts);
-      for (let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-        if (!okay_szofarg(rsubstitute(temp,inst,fs->hd->type))) return false;
-      return true;
-    }
-    fallthru(ad->impl->fields);
   case &AnonAggrType(_,fs):
     for(; fs != NULL; fs = fs->tl)
       if(!okay_szofarg(fs->hd->type))
 	return false;
     return true;
-  case &EnumType(_,_):
-  case &AnonEnumType(_): return true;
   case &TypeDeclType(...):
-  case &HeapRgn:
-  case &RefCntRgn:
-  case &UniqueRgn:
-  case &JoinEff(_):
-  case &AccessEff(_):
   case &ValueofType(_):
-  case &TypeofType(_):
-  case &RgnsEff(_):   return false;
+  case &TypeofType(_): return false;
   case &TypedefType(_,_,td,_):
     // Is this right, considering abstract typedefs??
     if (td == NULL || td->kind == NULL)

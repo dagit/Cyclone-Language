@@ -191,7 +191,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
  RETRY:
   if (e->topt != NULL) {
     switch (Tcutil::compress((Absyn::type_t)e->topt)) {
-    case &Absyn::TagType(t):
+    case &Absyn::AppType(&Absyn::TagCon,&List{t,_}):
       *p = RType(t); return true;
       break;
     case &Absyn::ValueofType(type_exp): 
@@ -302,11 +302,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, Absyn::vardecl_t v,
   default: break;
   }
   // otherwise ignore any situations where we have a non-integral type
-  switch (Tcutil::compress(v->type)) {
-  case &Absyn::IntType(_,_): break;
-  case &Absyn::TagType(_): break;
-  default: return r;
-  }
+  if (!Tcutil::is_integral_type(v->type)) return r;
   // try to convert to a relnop
   reln_op_t eop = RConst(0); // bogus value;
   if (exp2relnop(e,&eop)) {
@@ -398,13 +394,12 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
     case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
       // major subtlety!  the vardecl's type might have been translated
       // to C in which case the bound is not accurate...
-      if (b == Absyn::bounds_one_conref) break;
-      switch (Absyn::conref_def((Absyn::bounds_t)&Absyn::DynEither_b_val,b)) {
-      case &Absyn::Upper_b(e):
+      if (b == Absyn::bounds_one()) break;
+      let eopt = Tcutil::get_bounds_exp(Absyn::fat_bound_type,b);
+      if (eopt != NULL) {
+        let e = (Absyn::exp_t)eopt;
         reln_op_t rop2 = rop;
         if (exp2relnop(e,&rop2)) return rop2;
-        break;
-      default: break;
       }
       break;
     default: break;
@@ -580,7 +575,7 @@ relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
   case &Cast_e(t,e,...):
     // if t is an unsigned int or int we don't care
     switch(Tcutil::compress(t)) {
-    case &IntType(_,Int_sz): return exp2relns(r,e);
+    case &AppType(&IntCon(_,Int_sz),_): return exp2relns(r,e);
     default: break;
     }
     break;

@@ -526,7 +526,7 @@ void resolve_exp(env_t env, exp_t e) {
 
   case &Valueof_e(t): fallthru(t);
   case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftyp_e(t): resolve_type(e->loc,env,t); return; 
+  case &Sizeoftype_e(t): resolve_type(e->loc,env,t); return; 
 
   case &Array_e(dles): 
     for(; dles != NULL; dles = dles->tl)
@@ -600,7 +600,7 @@ list_t<vardecl_t> get_fun_vardecls(var_opt_t (@f)(`a), bool need_va_name,
 	err(loc,"missing name for vararg");
     } else {
       // HeapRegion is wrong -- changed by type-checker!
-      let typ = dyneither_typ(t, &HeapRgn_val, tq, false_conref);
+      let typ = fatptr_type(t, heap_rgn_type, tq, false_type);
       let vd = new_vardecl(0,new $((nmspace_t)Loc_n,(var_t)v), typ, NULL);
       vds = new List(vd,vds);
     }
@@ -644,7 +644,7 @@ void resolve_function_stuff(seg_t loc, env_t env, type_opt_t eff, type_t rettyp,
 // DO ME: see above
 void resolve_type(seg_t loc, env_t env, type_t t) { 
   switch(t) {
-  case &DatatypeType(DatatypeInfo(*info,targs)):
+  case &AppType(&DatatypeCon(*info),targs):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
     switch(*info) {
@@ -657,7 +657,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
         absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownDatatype=_}: return;
     }
-  case &DatatypeFieldType(DatatypeFieldInfo(*info,targs)):
+  case &AppType(&DatatypeFieldCon(*info),targs):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
     switch(*info) {
@@ -686,7 +686,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
     case {.KnownDatatypefield=_}: return;
     }
 
-  case &AggrType(AggrInfo(*info,targs)): 
+  case &AppType(&AggrCon(*info),targs): 
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
     switch(*info) {
@@ -704,7 +704,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
         absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownAggr=_}: return;
     }
-  case &EnumType(*qv,edo): 
+  case &AppType(&EnumCon(*qv,edo),_): 
     if(edo != NULL)
       return;
     try {
@@ -747,7 +747,7 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
   case &AnonAggrType(_,fs): 
     resolve_aggrfields(loc,env,fs);
     return;
-  case &AnonEnumType(fs): 
+  case &AppType(&AnonEnumCon(fs),_): 
     // FIX: absolutize names? create declarations? what scope? DO ME
     //  share code with Enum_d once we are sure what this means!
     for(; fs != NULL; fs = fs->tl) {
@@ -758,28 +758,19 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
     return; 
   case &Evar(_,to,_,_): if(to != NULL) resolve_type(loc,env,(type_t)to); return;
 
-  case &BuiltinType(...):
-  case &VoidType: 
-  case &IntType(...): 
-  case &FloatType(...):
-  case &HeapRgn:
-  case &UniqueRgn:
-  case &RefCntRgn: 
-  case &VarType(_): return;
+  case &VarType(_):
+  case &AppType(_,NULL): return;
+  case &AppType(c,ts):
+    for(; ts != NULL; ts = ts->tl)
+      resolve_type(loc,env,ts->hd);
+    return;
 
   case &PointerType(PtrInfo(t1,_,PtrAtts(t2,_,bds,_,_))):
     resolve_type(loc,env,t1);
     resolve_type(loc,env,t2);
-    while(1)
-      switch(bds) {
-      case &Constraint{.No_constr=_}: return;
-      case &Constraint{.Forward_constr=bds2}: bds = bds2; continue;
-      case &Constraint{.Eq_constr=b}:
-	switch(b) {
-	case &DynEither_b: return;
-	case &Upper_b(e): resolve_exp(env,e); return;
-	}
-      }
+    resolve_type(loc,env,bds);
+    return;
+
   case &TupleType(tqts):
     for(; tqts!=NULL; tqts=tqts->tl)
       resolve_type(loc,env,(*tqts->hd)[1]);
@@ -804,25 +795,12 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
       *env->local_vars = Dict::insert(*env->local_vars,(*vds1->hd->name)[1],
 				      new VarRes(new Param_b(vds1->hd)));
 
-    resolve_function_stuff(loc, env, i.effect, i.ret_typ, i.args,
+    resolve_function_stuff(loc, env, i.effect, i.ret_type, i.args,
 			   i.cyc_varargs, i.rgn_po,
 			   i.requires_clause, i.ensures_clause);
 
     env->local_vars = old_locals;
     return;
-
-  case &JoinEff(ts):
-    for(; ts != NULL; ts = ts->tl)
-      resolve_type(loc,env,ts->hd);
-    return;
-
-  case &TagType(t1): fallthru(t1);
-  case &AccessEff(t1): fallthru(t1);
-  case &RgnsEff(t1): fallthru(t1);
-  case &RgnHandleType(t1): resolve_type(loc,env,t1); return;
-
-  case &DynRgnType(t1,t2): 
-    resolve_type(loc,env,t1); resolve_type(loc,env,t2); return;
 
   case &ValueofType(e): fallthru(e);
   case &TypeofType(e): resolve_exp(env,e); return;
@@ -845,7 +823,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     case &AnonEnumRes(t,ef):
       p->r = new AnonEnum_p(t,ef); return;
     } catch { case &BindingError: break; } // a new variable
-    let vd = new_vardecl(0,qv,&VoidType_val,NULL); //type set later
+    let vd = new_vardecl(0,qv,void_type,NULL); //type set later
     resolve_and_add_vardecl(loc,env,vd);
     p->r = new Var_p(vd, new_pat(&Wild_p_val,0));
     return;
@@ -859,8 +837,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
       let new_ps = NULL;
       for(; ps != NULL; ps = ps->tl)
 	new_ps = new List(new $(NULL,ps->hd), new_ps);
-      p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),NULL),
-			NULL,imp_rev(new_ps),dots);
+      p->r = new Aggr_p(new KnownAggr(new ad),NULL,imp_rev(new_ps),dots);
       return;
     case &DatatypeRes(tud,tuf):
       p->r = new Datatype_p(tud,tuf,ps,dots); return;
@@ -871,13 +848,12 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     err(loc, "%s is not a constructor in pattern", Absynpp::qvar2string(qv));
     return;
 
-  case &Aggr_p(&AggrInfo({.UnknownAggr= $(_,n,_)},targs), exist_ts, dps, dots):
+  case &Aggr_p(&{.UnknownAggr= $(_,n,_)} , exist_ts, dps, dots):
     for(let dps2=dps; dps2 != NULL; dps2 = dps2->tl)
       resolve_pat(env,(*dps2->hd)[1]);
     try {
       let ad = resolve_lookup(loc,env->ns,n,lookup_aggrdecl);
-      p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),targs),
-			exist_ts, dps, dots);
+      p->r = new Aggr_p(new KnownAggr(new ad), exist_ts, dps, dots);
     } catch { case &BindingError: 
        err(loc, "non-aggregate name has designator patterns");
        return;
@@ -910,7 +886,7 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
   case &Aggr_p(NULL,_,dps,_): 
     // have to resolve during type-checking with topt because we have no qvar
     fallthru(dps);
-  case &Aggr_p(&AggrInfo({.KnownAggr = _},_),_,dps,_):
+  case &Aggr_p(&{.KnownAggr = _},_,dps,_):
     for(; dps != NULL; dps = dps->tl)
       resolve_pat(env,(*dps->hd)[1]);
     return;

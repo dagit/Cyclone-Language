@@ -115,7 +115,7 @@ static enum SideEffect exp_effect(exp_t e) {
   switch (e->r) {
   case &Const_e(_):
   case &Sizeofexp_e(_): // DJG: exp is irrelevant
-  case &Sizeoftyp_e(_):  
+  case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
   case &AnonEnum_e(...):
   case &Enum_e(...): return Const;
@@ -335,7 +335,7 @@ static void exp_to_seqc(exp_t e) {
     exp_to_seqc(e1);
     return;
 
-  case &Sizeoftyp_e(_):  
+  case &Sizeoftype_e(_):  
   case &Offsetof_e(_,_): 
   case &AnonEnum_e(...):
   case &Enum_e(...): return;

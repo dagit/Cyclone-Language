@@ -306,6 +306,8 @@ void dumpkind(kind_t ka) {
     }
   case EffKind: dump("E"); return;
   case IntKind: dump("I"); return;
+  case BoolKind: dump("BOOL"); return;
+  case PtrBndKind: dump("PTRBND"); return;
   }
 }
 
@@ -414,8 +416,8 @@ static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
   list_t<type_t> effects = NULL;
 
   switch (Tcutil::compress(t)) {
-  case &AccessEff(r): rgions = new List(r,rgions); break;
-  case &JoinEff(ts):
+  case &AppType(&AccessCon,&List(r,_)): rgions = new List(r,rgions); break;
+  case &AppType(&JoinCon,ts):
     for (; ts != NULL; ts = ts->tl) {
       let $(rs,es) = effects_split(ts->hd);
       rgions = List::imp_append(rs,rgions);
@@ -460,14 +462,14 @@ void dumpntyp(type_t t) {
   case &ArrayType(_): 
   case &FnType(_): 
   case &PointerType(_): return;
-  case &VoidType: dump("void"); return;
+  case &AppType(&VoidCon,_): dump("void"); return;
   case &VarType(tv): dumptvar(tv); return; // FIX: may want explicit kinds
   case &Evar(k,NULL,i,_): 
     dump("`E"); 
     if (k == NULL) dump("K"); else dumpkind(k->v); 
     dump(aprintf("%d",i)); return;
   case &Evar(k,t,i,_): dumpntyp((type_t)t); return; // shouldn't happen!
-  case &DatatypeType(DatatypeInfo(tu_info,ts)):
+  case &AppType(&DatatypeCon(tu_info),ts):
     switch(tu_info) {
     case {.UnknownDatatype = UnknownDatatypeInfo(n,is_x)}: fallthru(n,is_x);
     case {.KnownDatatype = & &Datatypedecl(_,n,_,_,is_x)}:
@@ -478,7 +480,7 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
-  case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
+  case &AppType(&DatatypeFieldCon(tuf_info),ts):
     switch(tuf_info) {
     case {.UnknownDatatypefield = UnknownDatatypeFieldInfo(tname,fname,is_x)}:
       fallthru(tname,is_x,fname);
@@ -493,30 +495,31 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
-  case &IntType(None,   Int_sz):
-  case &IntType(Signed, Int_sz): dump("int"); return;
-  case &IntType(None,   Long_sz):
-  case &IntType(Signed, Long_sz): dump("long"); return;
-  case &IntType(None,   Char_sz): dump("char"); return;
-  case &IntType(Signed, Char_sz): dump("signed char"); return;
-  case &IntType(Unsigned, Char_sz): dump("unsigned char"); return;
-  case &IntType(None,   Short_sz):
-  case &IntType(Signed, Short_sz): dump("short"); return;
-  case &IntType(Unsigned, Short_sz): dump("unsigned short"); return;
-  case &IntType(Unsigned, Int_sz): dump("unsigned int"); return;
-  case &IntType(Unsigned, Long_sz): dump("unsigned long"); return;
-  case &IntType(None, LongLong_sz):
-  case &IntType(Signed, LongLong_sz): 
+  case &AppType(&IntCon(None,   Int_sz),_):
+  case &AppType(&IntCon(Signed, Int_sz),_): dump("int"); return;
+  case &AppType(&IntCon(None,   Long_sz),_):
+  case &AppType(&IntCon(Signed, Long_sz),_): dump("long"); return;
+  case &AppType(&IntCon(None,   Char_sz),_): dump("char"); return;
+  case &AppType(&IntCon(Signed, Char_sz),_): dump("signed char"); return;
+  case &AppType(&IntCon(Unsigned, Char_sz),_): dump("unsigned char"); return;
+  case &AppType(&IntCon(None,   Short_sz),_):
+  case &AppType(&IntCon(Signed, Short_sz),_): dump("short"); return;
+  case &AppType(&IntCon(Unsigned, Short_sz),_): 
+    dump("unsigned short"); return;
+  case &AppType(&IntCon(Unsigned, Int_sz),_): dump("unsigned int"); return;
+  case &AppType(&IntCon(Unsigned, Long_sz),_): dump("unsigned long"); return;
+  case &AppType(&IntCon(None, LongLong_sz),_):
+  case &AppType(&IntCon(Signed, LongLong_sz),_): 
     switch(c_compiler){
     case Gcc_c: dump("long long"); return;
     case Vc_c: dump("__int64"); return;
     }
-  case &IntType(Unsigned, LongLong_sz): 
+  case &AppType(&IntCon(Unsigned, LongLong_sz),_): 
     switch(c_compiler){
     case Vc_c:  dump("unsigned __int64");return;
     case Gcc_c: dump("unsigned long long"); return;
     }
-  case &FloatType(i): 
+  case &AppType(&FloatCon(i),_): 
     if (i==0) 
       dump("float"); 
     else if (i==1) 
@@ -525,39 +528,49 @@ void dumpntyp(type_t t) {
       dump("long double"); 
     return;
   case &TupleType(ts): dump_char('$'); dumpargs(ts); return;
-  case &AggrType(AggrInfo(info,ts)):
+  case &AppType(&AggrCon(info),ts):
     let $(k,n) = aggr_kinded_name(info);
     dumpaggr_kind(k); dumpqvar(n); dumptps(ts); 
     return;
   case &AnonAggrType(k,fs):
     dumpaggr_kind(k); dump_char('{'); dumpaggrfields(fs); dump_char('}');return;
-  case &EnumType(n,_):    dump("enum "); dumpqvar(n); return;
-  case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
+  case &AppType(&EnumCon(n,_),_):    
+    dump("enum "); dumpqvar(n); return;
+  case &AppType(&AnonEnumCon(fs),_): 
+    dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
   case &ValueofType(e): dump("valueof_t("); dumpexp(e); dump(")"); return;
   case &TypeofType(e): dump("typeof("); dumpexp(e); dump(")"); return;
-  case &BuiltinType(t,_): dump(t); return;
-  case &RgnHandleType(rgn): 
+  case &AppType(&BuiltinCon(t,_),_): dump(t); return;
+  case &AppType(&RgnHandleCon,&List{rgn,_}): 
     dump("region_t<"); dumprgn(rgn); dump(">"); return;
-  case &DynRgnType(r1,r2): dump("dynregion_t<"); dumprgn(r1);
-    dump(","); dumprgn(r2); dump(">"); return;
-  case &TagType(t): dump("tag_t<"); dumpntyp(t); dump(">"); return;
-  case &UniqueRgn: dump("`U"); break;
-  case &RefCntRgn: dump("`RC"); break;
+  case &AppType(&TagCon,&List{t,_}): 
+    dump("tag_t<"); dumpntyp(t); dump(">"); return;
+  case &AppType(&UniqueCon,_): dump("`U"); break;
+  case &AppType(&RefCntCon,_): dump("`RC"); break;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     dump_aggrdecl(ad); return;
   case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
     dump_enumdecl(ed); return;
   case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
     dump_datatypedecl(dd); return;
-  case &HeapRgn: dump("`H"); break;
-  case &AccessEff(ts): dump("{"); dumptyp(ts); dump("}"); break;
-  case &RgnsEff(ts): dump("regions("); dumptyp(ts); dump(")"); break;
-  case &JoinEff(ts): 
+  case &AppType(&HeapCon,_): dump("`H"); break;
+  case &AppType(&AccessCon,&List{ts,_}): 
+    dump("{"); dumptyp(ts); dump("}"); break;
+  case &AppType(&RgnsCon,&List(ts,_)): 
+    dump("regions("); dumptyp(ts); dump(")"); break;
+  case &AppType(&JoinCon,ts): 
     for (; ts != NULL; ts = ts->tl) {
       dumptyp(ts->hd);
       if (ts->tl != NULL) dump("+");
     }
+    break;
+  case &AppType(&TrueCon,_): dump("@true"); break;
+  case &AppType(&FalseCon,_): dump("@false"); break;
+  case &AppType(&ThinCon,_): dump("@thin"); break;
+  case &AppType(&FatCon,_): dump("@fat"); break;
+  default:
+   throw new Failure("bad type constructor");
   }
 }
 
@@ -644,7 +657,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Const_e({.Short_c = $(sg,s)}):     dump(aprintf("%d",s)); break;
   case &Const_e({.Int_c = $(None,i)}):     fallthru(i);
   case &Const_e({.Int_c = $(Signed,i)}):   dump(aprintf("%d",i)); break;
-  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%uU",(unsigned)i)); break;
+  case &Const_e({.Int_c = $(Unsigned,i)}): dump(aprintf("%uU",i)); break;
   case &Const_e({.LongLong_c = $(sg,i)}):
     // FIX -- take sign into account
     dump(Absynpp::longlong2string(i)); break;
@@ -754,7 +767,7 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &New_e(ropt,e1):
     dump("new "); dumpexp_prec(myprec,e1); break;
 
-  case &Sizeoftyp_e(t):
+  case &Sizeoftype_e(t):
     dump("sizeof("); dumptyp(t); dump_char(')'); break;
 
   case &Sizeofexp_e(e1):
@@ -865,7 +878,7 @@ void dumpexp_prec(int inprec, exp_t e) {
       }
       dumpexp(e);
       dump(",");
-      dumpexp(sizeoftyp_exp(*topt,0));  
+      dumpexp(sizeoftype_exp(*topt,0));  
       dump(")");
     } else {
       if (ropt != NULL) {
@@ -879,7 +892,7 @@ void dumpexp_prec(int inprec, exp_t e) {
       }
       // see comments in absyn.h
       if (topt != NULL) 
-        dumpexp(times_exp(sizeoftyp_exp(*topt,0),e,0));
+        dumpexp(times_exp(sizeoftype_exp(*topt,0),e,0));
       else 
         dumpexp(e); 
       dump(")");
@@ -1055,7 +1068,7 @@ void dumppat(pat_t p) {
   case &UnknownCall_p(q,ps,dots): 
     string_t term = dots ? ", ...)" : ")";
     dumpqvar(q); group(dumppat,ps,"(",term,","); break;
-  case &Aggr_p(&AggrInfo(info,_),exists,dps,dots):
+  case &Aggr_p(&info,exists,dps,dots):
     let $(_,n) = aggr_kinded_name(info);
     string_t term = dots ? ", ...)" : ")";
     dumpqvar(n); dump_char('{');
@@ -1164,7 +1177,7 @@ static bool is_char_ptr(type_t t) {
     switch (elt_typ) {
     case &Evar(_,t,_,_) && t != NULL: elt_typ = (type_t)t; goto L;
     case &TypedefType(_,_,_,t) && t != NULL: elt_typ = (type_t)t; goto L;
-    case &IntType(_,Char_sz): return true;
+    case &AppType(&IntCon(_,Char_sz),_): return true;
     default: return false;
     }
   default: return false;
@@ -1414,19 +1427,21 @@ void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a) {
     // FIX: doesn't invert zeroterm default when elt type is char!! (never did)
     // FIX? What about attributes that we parse before tq2??
   case &Pointer_mod(PtrAtts(rgn,nullable,bd,zt,_),tq2):
-    switch(conref_def(bounds_one,bd)) {
-    case &DynEither_b: dump_char('?'); break;
-    case &Upper_b(e):
-      dump_char(conref_def(true,nullable) ? '*' : '@');
+    switch(Tcutil::compress(bd)) {
+    case &AppType(&FatCon,_): dump_char('?'); break;
+    case &AppType(&ThinCon,&List{&ValueofType(e),_}):
+      dump_char(type2bool(true,nullable) ? '*' : '@');
       dump_upperbound(e);
       break;
+    default:
+      dump_char(type2bool(true,nullable) ? '*' : '@');
     }
-    if(!qvar_to_Cids && !is_char_ptr && conref_def(false,zt)) dump("@zeroterm");
-    if(!qvar_to_Cids && is_char_ptr && !conref_def(false,zt)) dump("@nozeroterm");
+    if(!qvar_to_Cids && !is_char_ptr && type2bool(false,zt)) dump("@zeroterm");
+    if(!qvar_to_Cids && is_char_ptr && !type2bool(false,zt)) dump("@nozeroterm");
     switch(Tcutil::compress(rgn)) {
-    case &HeapRgn: if (!qvar_to_Cids) dump("`H"); break;
-    case &UniqueRgn: dump("`U"); break;
-    case &RefCntRgn: dump("`RC"); break;
+    case &AppType(&HeapCon,_): if (!qvar_to_Cids) dump("`H"); break;
+    case &AppType(&UniqueCon,_): dump("`U"); break;
+    case &AppType(&RefCntCon,_): dump("`RC"); break;
     case &VarType(tv): dumptvar(tv); break;
     case &Evar(_,NULL,_,_): dumpntyp(Tcutil::compress(rgn)); break;
     case &TypedefType(...): dump("@region("); dumptyp(rgn); dump(")"); break;
@@ -1451,11 +1466,11 @@ void dumptms(bool is_char_ptr, list_t<type_modifier_t> tms, void f(`a), `a a) {
     switch(tms->hd) {
     case &Carray_mod(zeroterm,_): 
       dump("[]"); 
-      if (conref_def(false,zeroterm)) dump("@zeroterm");
+      if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
     case &ConstArray_mod(e,zeroterm,_):
       dump_char('['); dumpexp(e); dump_char(']'); 
-      if (conref_def(false,zeroterm)) dump("@zeroterm");
+      if (type2bool(false,zeroterm)) dump("@zeroterm");
       break;
     case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens)):
       dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po,req,ens); break;

@@ -70,7 +70,7 @@ static bool noassign_exp(exp_t e) {
   case &Valueof_e(_)    :
   case &Const_e(_)      :
   case &Var_e(_)        :
-  case &Sizeoftyp_e(...): 
+  case &Sizeoftype_e(...): 
   case &Offsetof_e(...) : 
   case &Enum_e(...)     :
   case &AnonEnum_e(...) :
@@ -149,17 +149,6 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??
 }
 
-// add a region equality between r1 and r2 for the duration of checking
-// this statement
-static void tcStmtRefine(tenv_t te, stmt_t s0, type_t r1, type_t r2,
-			 bool new_block) {
-  $(tvar_t,kindbound_t) * tk = NULL;
-  let te2 = add_region_equality(te,r1,r2,&tk,s0->loc);
-  tcStmt(te2,s0,new_block);
-  if (tk != NULL)
-    (*tk)[0]->kind = (*tk)[1];
-}
-
 static int stmt_temp_var_counter = 0;
 static qvar_t stmt_temp_var() {
   let i = stmt_temp_var_counter++;
@@ -194,13 +183,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Return_s(eopt):
     type_t t = return_typ(te);
     if (eopt == NULL) {
-      switch (compress(t)) {
-      case &VoidType: break;
-      case &FloatType(...):
-      case &IntType(...):
-	warn(s0->loc,"should return a value of type %s",typ2string(t)); break;
-      default:
-	terr(s0->loc,"must return a value of type %s",typ2string(t)); break;
+      if (!is_void_type(t)) {
+        if (is_any_float_type(t) || is_any_int_type(t))
+          warn(s0->loc,"should return a value of type %s",typ2string(t)); 
+        else
+          terr(s0->loc,"must return a value of type %s",typ2string(t)); 
       }
     } else {
       // don't introduce alias expressions here; would be useless
@@ -218,23 +205,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &IfThenElse_s(e,s1,s2):
-    let TestEnv(eq,isT) = tcTest(te,e,"if statement"); 
-    switch (eq) {
-    case &$(r1,r2):
-      if (isT) {
-	tcStmtRefine(te,s1,r1,r2,true);
-	tcStmt(te,s2,true);
-      }
-      else {
-	tcStmt(te,s1,true);
-	tcStmtRefine(te,s2,r1,r2,true);
-      }
-      break;
-    default:
-      tcStmt(te,s1,true);
-      tcStmt(te,s2,true);
-      break;
-    }
+    tcTest(te,e,"if statement"); 
+    tcStmt(te,s1,true);
+    tcStmt(te,s2,true);
     return;
 
   case &While_s($(e,cont_s),s):
@@ -375,7 +348,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     
     // add a default case that re-throws the exception
     qvar_t def_v = new $(Loc_n,new "exn");
-    let vd = new_vardecl(0,def_v,&VoidType_val,0);
+    let vd = new_vardecl(0,def_v,void_type,0);
     let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
     let def_stmt = 
       exp_stmt(new_exp(new Throw_e(varb_exp(new Local_b(vd),0),true),0),0);
@@ -386,7 +359,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // DJG: I finally got tired of checking cases in reverse order.  It is
     //      a bit more convoluted to go in order...
     // Fallthru is not allowed in the last case, even if in a nested switch
-    let exception_type = exn_typ();
+    let exception_type = exn_type();
     tcpat_result_t   this_pattern;
     tcpat_result_t * next_pattern = NULL; // NULL in last case
     bool first_case = true;
@@ -448,7 +421,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case Public: is_local = true; break;
       }
       // side effect
-      *rgn_ptr = is_local ? curr_bl : &HeapRgn_val; 
+      *rgn_ptr = is_local ? curr_bl : heap_rgn_type;
       // if it's an array or string, fill in the size on the type
       switch (compress(t)) {
       case &FnType(_) && is_local: 
@@ -460,19 +433,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
 	switch (vd->initializer->r) {
 	  case &Const_e({.String_c = s}):
-	  t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),0),zt,ztl);
+	  t = vd->type = array_type(telt,tq,uint_exp(numelts(s),0),zt,ztl);
 	  break;
 	  case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-	  t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
+	  t = vd->type = array_type(telt,tq,uint_exp(1,0),zt,ztl);
 	  break;
 	  case &Comprehension_e(_,e,_,_): fallthru(e);
 	  case &ComprehensionNoinit_e(e,_,_):
 	  // FIX: copy e here!  
-	  t = vd->type = array_typ(telt,tq,e,zt,ztl); 
+	  t = vd->type = array_type(telt,tq,e,zt,ztl); 
 	  break;
 	  case &UnresolvedMem_e(_,es): fallthru(es);
 	  case &Array_e(es):
-	  t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),0),zt,ztl);
+	  t = vd->type = array_type(telt,tq,uint_exp(List::length(es),0),zt,ztl);
 	  break;
 	  default: break;
 	}
@@ -591,20 +564,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           let outer_rgn = new_evar(new Opt(&Tcutil::trk), NULL);
           rgn_typ = new_evar(new Opt(&Tcutil::rk),NULL);
           let dr_type = 
-            new AggrType(AggrInfo{UnknownAggr(StructA,drname,NULL),
-                                  list(rgn_typ)});
-          let exp_type = at_typ(dr_type, outer_rgn, 
-                                empty_tqual(0),false_conref);
+            aggr_type(UnknownAggr(StructA,drname,NULL),list(rgn_typ));
+          let exp_type = at_type(dr_type, outer_rgn, 
+                                empty_tqual(0),false_type);
           check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,false,exp_type);
           let key_typ = tcExp(te,&exp_type,open_exp_opt);
           if (!unify(exp_type,key_typ) && 
               !coerce_assign(te,open_exp_opt,exp_type))
             terr(s0->loc,"expected %s but found %s",
                  typ2string(exp_type), typ2string(key_typ));
-          if (!unify(outer_rgn,&UniqueRgn_val) && 
-              !unify(outer_rgn,&RefCntRgn_val))
+          if (!unify(outer_rgn,unique_rgn_type) && 
+              !unify(outer_rgn,refcnt_rgn_type))
             terr(s0->loc,"open is only allowed on unique or reference-counted keys");
-          *t = new RgnHandleType(rgn_typ);
+          *t = rgn_handle_type(rgn_typ);
           te2 = add_region(te2, rgn_typ, true);
         } else {
           rgn_typ = new VarType(tv);
@@ -612,7 +584,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te2 = add_region(te2, rgn_typ, false);
         }
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
-        if (!unify(*t,new RgnHandleType(rgn_typ)))
+        if (!unify(*t,rgn_handle_type(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
 	//        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);
         tcStmt(te2,s,false);
@@ -624,7 +596,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         if (fd->sc != Public)
           terr(d->loc,"bad storage class for inner function");
         check_fndecl_valid_type(d->loc,te,fd);
-        type_t t = fndecl2typ(fd);
+        type_t t = fndecl2type(fd);
         fd->attributes = transfer_fn_type_atts(t,fd->attributes);
         // check packed and aligned don't show up
         for (_ atts = fd->attributes; atts; atts = atts->tl)
@@ -636,8 +608,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           default: break;
           }
         vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
-                                    at_typ(t,curr_bl,empty_tqual(0), 
-                                           false_conref),
+                                    at_type(t,curr_bl,empty_tqual(0), 
+                                            false_type),
                                     NULL, curr_bl, NULL, false};
         fd->fn_vardecl = vd;
         fenv_t old_fenv = (fenv_t)te->le;

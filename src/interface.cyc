@@ -267,7 +267,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
   case &TupleType(lt):
     return check_public_type_list(ae, seen, obj, name, get_type1, lt);
 
-  case &AggrType(AggrInfo(info,targs)):
+  case &AppType(&AggrCon(info),targs):
     let ad = get_known_aggrdecl(info);
     if (ad->sc == Static) {
       static_err(obj, name, "type", ad->name);
@@ -276,7 +276,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
     return check_public_type_list(ae, seen, obj, name, identity, targs)
       && check_public_aggrdecl(ae, seen, ad);
 
-  case &EnumType(name, _):
+  case &AppType(&EnumCon(name, _),_):
     enumdecl_t ed;
     try ed = *Dict::lookup(ae->enumdecls, name);
     catch { case &Dict::Absent: 
@@ -289,7 +289,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &DatatypeType(DatatypeInfo({.KnownDatatype = &tud0},targs)):
+  case &AppType(&DatatypeCon({.KnownDatatype = &tud0}),targs):
     datatypedecl_t tud;
     try tud = *Dict::lookup(ae->datatypedecls, tud0->name);
     catch { case &Dict::Absent: 
@@ -303,7 +303,7 @@ static bool check_public_type(genv_t ae, seen_t seen, string_t obj, qvar_t name,
     return check_public_type_list(ae, seen, obj, name, identity, targs)
       && check_public_datatypedecl(ae, seen, tud);
 
-  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud0,tuf0)}, targs}):
+  case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(tud0,tuf0)}), targs):
     datatypedecl_t tud;
     try tud = *Dict::lookup(ae->datatypedecls, tud0->name);
     catch { case &Dict::Absent:
@@ -520,7 +520,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       .name = fd->name,
       .varloc = 0,
       .tq = empty_tqual(0),
-      .type = (type_t)fd->cached_typ,
+      .type = (type_t)fd->cached_type,
       .initializer = NULL,
       .rgn = NULL,
       .attributes = NULL,
@@ -622,7 +622,7 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &Fn_d(fd):
       if(fd->sc == Static) return accum;
       if(fd->sc == ExternC) return accum;
-      let vd = new_vardecl(0,fd->name, (type_t)fd->cached_typ, NULL);
+      let vd = new_vardecl(0,fd->name, (type_t)fd->cached_type, NULL);
       vd->sc = fd->sc;
       return new List(new_decl(new Var_d(vd),0), accum);
     case &Aggr_d(a):

@@ -1095,7 +1095,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Tagcheck_e(e,_):
       scan_exp(e,dep); return;
     case &Valueof_e(t1): fallthru(t1);
-    case &Sizeoftyp_e(t1):
+    case &Sizeoftype_e(t1):
       scan_type(t1,dep);
       return;
     case &AggrMember_e(e1,fn,...):
@@ -1183,14 +1183,31 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   extern void scan_decl(decl_t d, dep_t dep);
   void scan_type(type_t t, dep_t dep) {
     switch (t) {
-    case &VoidType:
-    case &IntType(_,_):
-    case &BuiltinType(...):
-    case &FloatType(_):
-      return;
+    case &AppType(c,ts):
+      switch (c) {
+      case &VoidCon:
+      case &IntCon(_,_):
+      case &BuiltinCon(...):
+      case &FloatCon(_):
+      case &AnonEnumCon(_):
+        return;
+      case &AggrCon(info):
+        let $(_,&$(_,v)) = aggr_kinded_name(info);
+        fallthru(v);
+      case &EnumCon(&$(_,v),_): add_target(v); return;
+      case &DatatypeCon(_):        case &DatatypeFieldCon(_):
+      case &RgnHandleCon:          case &HeapCon:
+      case &UniqueCon:             case &RefCntCon:
+      case &AccessCon:             case &JoinCon:
+      case &RgnsCon:               case &TagCon:
+      case &TrueCon:               case &FalseCon:
+      case &ThinCon:               case &FatCon:
+        fprintf(stderr,"Error: unexpected %s\n",Absynpp::typ2string(t));
+        exit(1); return;
+      }
 
     case &PointerType(x):
-      scan_type(x.elt_typ,dep);
+      scan_type(x.elt_type,dep);
       return;
     case &ArrayType(ArrayInfo{t,_,sz,zt,_}):
       scan_type(t,dep);
@@ -1200,7 +1217,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_exp(e, dep);
       return;
     case &FnType(x):
-      scan_type(x.ret_typ,dep);
+      scan_type(x.ret_type,dep);
       for (let a = x.args; a != NULL; a = a->tl) {
         let &$(_,_,argt) = a->hd;
         scan_type(argt,dep);
@@ -1214,13 +1231,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         scan_exp_opt(sfs->hd->width,dep);
       }
       return;
-    case &AnonEnumType(_):
-      return;
-    case &AggrType(AggrInfo(info,_)):
-      let $(_,&$(_,v)) = aggr_kinded_name(info);
-      fallthru(v);
-    case &EnumType(&$(_,v),_):
-      fallthru(v);
     case &TypedefType(&$(_,v),_,_,_):
       add_target(v);
       return;
@@ -1246,41 +1256,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &VarType(_):
       fprintf(stderr,"Error: unexpected VarType\n");
       exit(1); return;
-    case &DatatypeType(_):
-      fprintf(stderr,"Error: unexpected DatatypeType\n");
-      exit(1); return;
-    case &DatatypeFieldType(_):
-      fprintf(stderr,"Error: unexpected DatatypeFieldType\n");
-      exit(1); return;
     case &TupleType(_):
       fprintf(stderr,"Error: unexpected TupleType\n");
-      exit(1); return;
-    case &RgnHandleType(_):
-      fprintf(stderr,"Error: unexpected RgnHandleType\n");
-      exit(1); return;
-    case &DynRgnType(_,_):
-      fprintf(stderr,"Error: unexpected DynRgnType\n");
-      exit(1); return;
-    case &HeapRgn:
-      fprintf(stderr,"Error: unexpected HeapRgn\n");
-      exit(1); return;
-    case &UniqueRgn:
-      fprintf(stderr,"Error: unexpected UniqueRgn\n");
-      exit(1); return;
-    case &RefCntRgn:
-      fprintf(stderr,"Error: unexpected RefCntRgn\n");
-      exit(1); return;
-    case &AccessEff(_):
-      fprintf(stderr,"Error: unexpected AccessEff\n");
-      exit(1); return;
-    case &JoinEff(_):
-      fprintf(stderr,"Error: unexpected JoinEff\n");
-      exit(1); return;
-    case &RgnsEff(_):
-      fprintf(stderr,"Error: unexpected RgnsEff\n");
-      exit(1); return;
-    case &TagType(_):
-      fprintf(stderr,"Error: unexpected tag_t\n");
       exit(1); return;
     case &ValueofType(_):
       fprintf(stderr,"Error: unexpected valueof_t\n");

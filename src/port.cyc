@@ -832,7 +832,7 @@ static type_t lookup_typedef(cenv_t env, typedef_name_t n) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"can't find typedef %s\n",qvar2string(n));
 #endif
-    return sint_typ;
+    return sint_type;
   }
 }
 
@@ -1002,14 +1002,14 @@ static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt,
 // end up constraining the C code.
 static type_t main_type() {
   $(var_opt_t,tqual_t,type_t)@ arg1 =
-    new $(NULL,empty_tqual(0),sint_typ);
+    new $(NULL,empty_tqual(0),sint_type);
   $(var_opt_t,tqual_t,type_t)@ arg2 =
     new $(NULL,empty_tqual(0),
-          dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
-                                empty_tqual(0), empty_conref()));
+          fatptr_type(string_type(wildtyp(NULL)),wildtyp(NULL),
+                      empty_tqual(0), any_bool(NULL)));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,
                               .ret_tqual = empty_tqual(0),
-                              .ret_typ = sint_typ,
+                              .ret_type = sint_type,
                               .args = list(arg1,arg2), .c_varargs = false,
                               .cyc_varargs = NULL, .rgn_po = NULL,
                               .attributes = NULL, .requires_clause = NULL,
@@ -1126,7 +1126,7 @@ static bool is_char(cenv_t env, type_t t) {
   case &TypedefType(n,_,_,_):
     (*n)[0] = Loc_n;
     return is_char(env,lookup_typedef(env,n));
-  case &IntType(_,B1): return true;
+  case &AppType(&IntCon(_,Char_sz),_): return true;
   default: return false;
   }
 }
@@ -1137,7 +1137,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
   case &TypedefType(n,_,_,_):
     (*n)[0] = Loc_n;
     return lookup_typedef_ctype(env,n);
-  case &VoidType: return void_ct();
+  case &AppType(&VoidCon,_): return void_ct();
   case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,loc}}):
     let ptr_loc = loc ? loc->ptr_loc : 0;
     let rgn_loc = loc ? loc->rgn_loc : 0;
@@ -1149,7 +1149,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     ctype_t new_rgn;
     // Translate the region
     switch (r) {
-    case &HeapRgn:
+    case &AppType(&HeapCon,_):
       new_rgn = heap_ct(); break;
     case &VarType(&Tvar{name,_,_}):
       new_rgn = rgnvar_ct(name); break;
@@ -1166,11 +1166,11 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     default:
       new_rgn = heap_ct(); break;
     }
-    let orig_fat = (conref_val(b) == &DynEither_b_val);
+    let orig_fat = (get_bounds_exp(fat_bound_type,b) == NULL);
     bool orig_zt;
-    switch (*zt) {
-    case Constraint{.No_constr = _}: orig_zt = is_char(env,et); break;
-    default: orig_zt = conref_val(zt); break;
+    switch (Tcutil::compress(zt)) {
+    case &Evar(...): orig_zt = is_char(env,et); break;
+    default: orig_zt = force_type2bool(false,zt); break;
     }
     if (env->gcenv->porting) {
       let cqv = var();
@@ -1197,11 +1197,10 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       // zeroterm constraint.
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), zt_loc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
-      switch (*zt) {
-      case Constraint{.No_constr = _}:
-        break;
-      default:
-        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
+      switch (compress(zt)) {
+      case &Evar(...): break;
+      default: 
+        unify_ct(czv, force_type2bool(false,zt) ? zterm_ct() : nozterm_ct());
         break;
       }
       // Note that the type returned has unconstrained variables for
@@ -1215,15 +1214,15 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
                     orig_fat ? fat_ct() : thin_ct(), new_rgn,
                     orig_zt ? zterm_ct() : nozterm_ct());
     }
-  case &IntType(_,_):
-  case &FloatType(_): return arith_ct();
+  case &AppType(&IntCon(_,_),_):
+  case &AppType(&FloatCon(_),_): return arith_ct();
   case &ArrayType(ArrayInfo{et,tq,_,zt,ztloc}):
     // Similar to the pointer case.
     let cet = type_to_ctype(env,et);
     bool orig_zt;
-    switch (*zt) {
-    case Constraint{.No_constr = _}: orig_zt = false; break;
-    default: orig_zt = conref_val(zt); break;
+    switch (Tcutil::compress(zt)) {
+    case &Evar(...): orig_zt = false; break;
+    default: orig_zt = force_type2bool(false,zt); break;
     }
     if (env->gcenv->porting) {
       let cqv = var();
@@ -1237,11 +1236,10 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       let czv = var();
       register_zeroterm_cvars(env, czv, orig_zt ? zterm_ct() : nozterm_ct(), ztloc);
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
-      switch (*zt) {
-      case Constraint{.No_constr = _}:
-        break;
+      switch (Tcutil::compress(zt)) {
+      case &Evar(...): break;
       default:
-        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
+        unify_ct(czv, force_type2bool(false,zt) ? zterm_ct() : nozterm_ct());
         break;
       }
       return array_ct(cet,cqv,czv);
@@ -1258,7 +1256,7 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       cargs = new List{type_to_ctype(env_arg,t),cargs};
     }
     return fn_ct(crt,List::imp_rev(cargs));
-  case &AggrType(AggrInfo{ai,_}):
+  case &AppType(&AggrCon(ai),_):
     switch (ai) {
     case {.UnknownAggr = $(StructA,n,_)}:
       (*n)[0] = Loc_n;
@@ -1279,12 +1277,12 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
         return known_aggr_ct(p);
       }
     }
-  case &EnumType(_,_): return arith_ct();
-  case &AnonEnumType(fs):
+  case &AppType(&EnumCon(_,_),_): return arith_ct();
+  case &AppType(&AnonEnumCon(fs),_):
     // add in an enum declaration
     for (; fs; fs = fs->tl) {
       (*fs->hd->name)[0] = Loc_n;
-      env = add_var(env, fs->hd->name, sint_typ, const_ct(), arith_ct(),0);
+      env = add_var(env, fs->hd->name, sint_type, const_ct(), arith_ct(),0);
     }
     return arith_ct();
   default: return arith_ct();
@@ -1400,7 +1398,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
   case &Const_e({.Wchar_c = _}):
   case &Const_e({.Short_c = $(_,_)}):
   case &Const_e({.LongLong_c = $(_,_)}):
-  case &Sizeoftyp_e(_):
+  case &Sizeoftype_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
   case &Enum_e(...):
@@ -1607,12 +1605,12 @@ static ctype_t gen_initializer(cenv_t env, type_t t, exp_t e) {
         leq(te,v);
       }
       return array_ct(v,q,z);
-    case &AggrType(AggrInfo{{.UnknownAggr = $(StructA, n, _)},_}):
+    case &AppType(&AggrCon({.UnknownAggr = $(StructA, n, _)}),_):
       (*n)[0] = Loc_n;
       let $(ad,_) = *lookup_struct_decl(env,n);
       if (ad == NULL) impos("struct is not yet defined");
       fallthru(ad);
-    case &AggrType(AggrInfo{{.KnownAggr = &ad},_}):
+    case &AppType(&AggrCon({.KnownAggr = &ad}),_):
       let fields = ad->impl->fields;
       for (; dles != 0; dles = dles->tl) {
         let $(d,e) = *dles->hd;
@@ -1874,7 +1872,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     if (ed->fields)
       for(let fs = ed->fields->v; fs; fs = fs->tl) {
         (*fs->hd->name)[0] = Loc_n;
-        env = add_var(env, fs->hd->name, new EnumType(ed->name,ed),
+        env = add_var(env, fs->hd->name, enum_type(ed->name,ed),
                       const_ct(), arith_ct(),0);
       }
     return env;

@@ -295,10 +295,15 @@ MAKE_VAR(_fast_region_malloc);
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-static datatype Type.AggrType dyneither_ptr_typ_v =
-    AggrType(AggrInfo(AggrInfoU{.UnknownAggr = $(StructA,&_dyneither_ptr_pr,NULL)},NULL));
-
-static datatype Type @ dyneither_ptr_typ = &dyneither_ptr_typ_v;
+type_t dyneither_ptr_type() {
+  static type_opt_t dpt = NULL;
+  let t = dpt;
+  if (t == NULL) {
+    t = aggr_type(UnknownAggr(StructA,&_dyneither_ptr_pr,NULL),NULL);
+    dpt = t;
+  }
+  return (type_t)t;
+}
 
 static tqual_t mt_tq = Tqual(false,false,false,false,0);
 
@@ -330,8 +335,8 @@ static raw_exp_t subscript_exp_r(exp_t e1, exp_t e2) {
 static raw_exp_t stmt_exp_r(stmt_t s) {
   return new StmtExp_e(s);
 }
-static raw_exp_t sizeoftyp_exp_r(type_t t) {
-  return new Sizeoftyp_e(t);
+static raw_exp_t sizeoftype_exp_r(type_t t) {
+  return new Sizeoftype_e(t);
 }
 static raw_exp_t fncall_exp_r(exp_t e, list_t<exp_t,`H> es) {
   return new FnCall_e(e,es,NULL,true);
@@ -423,17 +428,17 @@ struct functionSet _zero_arr_inplace_plus_post_functionSet = {
 static exp_t getFunctionType(struct functionSet @fS, type_t t) {
   exp_t function;
   switch(compress(t)) {
-  case &IntType(_,sz):
+  case &AppType(&IntCon(_,sz),_):
     switch(sz) {
     case Char_sz:  function = fS->fchar;  break;
     case Short_sz: function = fS->fshort; break;
     case Int_sz:   function = fS->fint;   break;
-    default: toc_impos("impossible IntType (not char, short or int)");
+    default: toc_impos("impossible IntCon (not char, short or int)");
     }
     break;
-  case &FloatType(0): function = fS->ffloat;      break;
-  case &FloatType(1): function = fS->fdouble;     break;
-  case &FloatType(_): function = fS->flongdouble; break;
+  case &AppType(&FloatCon(0),_): function = fS->ffloat;      break;
+  case &AppType(&FloatCon(1),_): function = fS->fdouble;     break;
+  case &AppType(&FloatCon(_),_): function = fS->flongdouble; break;
   case &PointerType(_): function = fS->fvoidstar; break;
   default: toc_impos("impossible expression type %s (not int, float, double, or pointer)",typ2string(t));
   }
@@ -441,19 +446,12 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
 }
 static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
   switch (compress((type_t)arr->topt)) {
-  case &PointerType(PtrInfo{.elt_typ = et,...}): return getFunctionType(fS,et);
+  case &PointerType(PtrInfo{.elt_type = et,...}): return getFunctionType(fS,et);
   default: toc_impos("impossible type (not pointer)");
   }
 }
 
 ///////////////////////////// Various Utilities /////////////////////////////
-
-static bool is_array_type(type_t t) {
-  switch (compress(t)) {
-  case &ArrayType(_): return true;
-  default: return false;
-  }
-}
 
 /*FIX: this is duplicated in tcutil; but the functions are slightly different */
 static bool is_zero(exp_t e) {
@@ -572,7 +570,7 @@ static type_t add_tuple_type_body(region_t<`d> d,
     fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL,NULL),fs);
   fs = List::imp_rev(fs);
   let sd  = make_c_struct_defn(xname,fs);
-  let ans = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
+  let ans = aggr_type(KnownAggr(new sd),NULL);
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   *tuple_types = rnew(d) List(rnew(d) $(ans,ts),*tuple_types);
   return ans;
@@ -599,7 +597,7 @@ static type_t add_anon_aggr_type_body(region_t<`d> d,
   stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
   let sd = make_c_struct_defn(xname,fs);
   sd->kind = ak; // might be a union
-  let ans = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
+  let ans = aggr_type(KnownAggr(new sd),NULL);
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   *anon_aggr_types = rnew(d) List(rnew(d) $(ans,ak,fs),*anon_aggr_types);
   return ans;
@@ -634,7 +632,7 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
       for (let ts = type_args; ts != NULL; ts=ts->tl, ts2=ts2->tl) {
         let t = ts->hd;
         let t2 = ts2->hd;
-        switch (typ_kind(t)) {
+        switch (type_kind(t)) {
         case &Kind{.kind = EffKind, _}: 
         case &Kind{.kind = RgnKind, _}://Effects/regions won't appear in C types
           continue;
@@ -672,15 +670,15 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
     //DJG: FIX I think this is broken for an array with element-type
     //     of abstract mem kind
     if (fields->tl == NULL 
-	&& kind_leq(&ak,typ_kind(t))
+	&& kind_leq(&ak,type_kind(t))
 	&& !is_array_type(t))
       atts = new List(new Aligned_att(NULL),atts);
     t = typ_to_c(rsubstitute(r,inst,t));
     // still could be abstract and end up void -- if so, make it
     // a zero-sized array of void*'s and force it to be aligned.
-    if (unify(t,&VoidType_val)) {
-      t = new ArrayType(ArrayInfo(void_star_typ(), empty_tqual(DL),
-                                  uint_exp(0,DL), new_conref(false), DL));
+    if (unify(t,void_type)) {
+      t = new ArrayType(ArrayInfo(void_star_type(), empty_tqual(DL),
+                                  uint_exp(0,DL), false_type, DL));
     }
     fs = new List(new Aggrfield{f->name,mt_tq,t,f->width,atts,NULL},fs);
   }
@@ -764,7 +762,7 @@ static $(var_opt_t,tqual_t,type_t)@ arg_to_c($(var_opt_t,tqual_t,type_t)@ a) {
 static type_t typ_to_c_array(type_t t) {
   switch(compress(t)) {
   case &ArrayType(ArrayInfo{t2,tq,x,zt,ztl}): // FIX: do we handle tq correctly?
-    return cstar_typ(typ_to_c_array(t2),tq);
+    return cstar_type(typ_to_c_array(t2),tq);
   case &Evar(_,t2,_,_) && t2 != NULL: return typ_to_c_array((type_t)t2);
   default: return typ_to_c(t);
   }
@@ -784,32 +782,32 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
   return;
 }
 
-static type_t char_star_typ() {
+static type_t char_star_type() {
   static type_t* cs = NULL;
   if (cs == NULL)
-    cs = new star_typ(char_typ,&HeapRgn_val,mt_tq,false_conref);
+    cs = new star_type(char_type,heap_rgn_type,mt_tq,false_type);
   return *cs;
 }
-static type_t rgn_typ() {
+static type_t rgn_type() {
   static type_t* r = NULL;
   if (r == NULL)
-    r = new cstar_typ(strct(_RegionHandle_sp),mt_tq);
+    r = new cstar_type(strct(_RegionHandle_sp),mt_tq);
   return *r;
 }
-static type_t dyn_rgn_typ() {
+static type_t dyn_rgn_type() {
   static type_t* r = NULL;
   if (r == NULL)
-    r = new cstar_typ(strct(_DynRegionHandle_sp),mt_tq);
+    r = new cstar_type(strct(_DynRegionHandle_sp),mt_tq);
   return *r;
 }
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): return kind_leq(typ_kind(t),&tbk);
+  case &VarType(tv): return kind_leq(type_kind(t),&tbk);
   default: return false;
   }
 }
 static bool is_abstract_type(type_t t) {
-  switch (typ_kind(t)) {
+  switch (type_kind(t)) {
   case &Kind{.kind = AnyKind, ...}: return true;
   default: return false;
   }
@@ -817,36 +815,36 @@ static bool is_abstract_type(type_t t) {
 
 type_t typ_to_c(type_t t) {
   switch (t) {
-  case &VoidType: return t;
+  case &AppType(&VoidCon,_): return t;
   case &Evar(_,*t2,_,_): 
     if (*t2 == NULL) {
-      *t2 = sint_typ;
-      return sint_typ;
+      *t2 = sint_type;
+      return sint_type;
     }
     return typ_to_c((type_t)(*t2));
   case &VarType(tv):
     if (tvar_kind(tv,&bk)->kind == AnyKind) {
 //     fprintf(stderr,"Mapping type var %s to void; has AnyKind\n",*(tv->name));
-      return &VoidType_val;
+      return void_type;
     }
-    else return void_star_typ(); // map `a to void *
-  case &DatatypeType(_):
-    return &VoidType_val;
-  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
+    else return void_star_type(); // map `a to void *
+  case &AppType(&DatatypeCon(_),_): return void_type;
+  case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(tud,tuf)}),_):
     return strctq(collapse_qvars(tuf->name,tud->name));
-  case &DatatypeFieldType(_): toc_impos("unresolved DatatypeFieldType");
+  case &AppType(&DatatypeFieldCon(_),_): 
+    toc_impos("unresolved DatatypeFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c(t2);
-    switch (conref_def((bounds_t)&DynEither_b_val,bnds)) {
-    case &DynEither_b: return dyneither_ptr_typ;
-    default: return star_typ(t2,&HeapRgn_val,tq,false_conref);
-    }
-  case &IntType(_,_):
-  case &FloatType(_): return t;
+    if (get_bounds_exp(fat_bound_type,bnds) == NULL)
+      return dyneither_ptr_type();
+    else 
+      return star_type(t2,heap_rgn_type,tq,false_type);
+  case &AppType(&IntCon(_,_),_):
+  case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
-    return array_typ(typ_to_c(t2),tq,e,false_conref,ztl);
+    return array_type(typ_to_c(t2),tq,e,false_type,ztl);
   case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,_,_,_,_}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
@@ -866,7 +864,7 @@ type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t =typ_to_c(dyneither_typ(cyc_vararg->type,&HeapRgn_val,mt_tq,false_conref));
+      let t =typ_to_c(fatptr_type(cyc_vararg->type,heap_rgn_type,mt_tq,false_type));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -888,7 +886,7 @@ type_t typ_to_c(type_t t) {
     for(; fs!=NULL; fs=fs->tl) 
       fs2 = new List(aggrfield_to_c(fs->hd,typ_to_c(fs->hd->type)), fs2);
     return add_anon_aggr_type(k,imp_rev(fs2));
-  case &AggrType(AggrInfo(info,ts)):
+  case &AppType(&AggrCon(info),ts):
     // If we are in C code, the implementation may not be set here.
     switch (info) {
     case {.UnknownAggr = _}: return t;
@@ -906,12 +904,12 @@ type_t typ_to_c(type_t t) {
     // generated; want to adapt this for unions here.
     // Have to watch out for flaky gcc ...
     if(ad->kind==UnionA)
-      return aggrdecl_type(ad->name,unionq_typ);
+      return aggrdecl_type(ad->name,unionq_type);
     let fs = (ad->impl == NULL) ? NULL : ad->impl->fields;
     if (fs == NULL) return aggrdecl_type(ad->name,strctq);
     for (; fs->tl != NULL; fs = fs->tl);
     let last_type = fs->hd->type;
-    if (kind_leq(&ak,typ_kind(last_type))) {
+    if (kind_leq(&ak,type_kind(last_type))) {
       if (ad->expected_mem_kind) {
         warn(0, "struct %s ended up being abstract.", qvar2string(ad->name));
       }                     
@@ -925,8 +923,8 @@ type_t typ_to_c(type_t t) {
       return add_struct_type(ad->name,ad->tvs,ts,ad->impl->fields);
     }
     return aggrdecl_type(ad->name,strctq);
-  case &EnumType(tdn,_): return t;
-  case &AnonEnumType(fs): enumfields_to_c(fs); return t;
+  case &AppType(&EnumCon(tdn,_),_): return t;
+  case &AppType(&AnonEnumCon(fs),_): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
     // just drop the type arguments and translate the nested types
     // typedef expansion is done in Absynpp::to_tms.
@@ -936,17 +934,12 @@ type_t typ_to_c(type_t t) {
       else return t;
     } else 
       return new TypedefType(tdn,NULL,td,typ_to_c((type_t)topt));
-  case &TagType(_): return uint_typ; // must be unsigned!
-  case &RgnHandleType(_): return rgn_typ();
-  case &DynRgnType(_,_): return dyn_rgn_typ();
+  case &AppType(&TagCon,_): return uint_type; // must be unsigned!
+  case &AppType(&RgnHandleCon,_): return rgn_type();
+  case &AppType(&BuiltinCon(...),_): return t;
   // these types get translated when we instantiate aggregates with
   // abstract members -- we just translate them to void* to save pain.
-  case &HeapRgn:
-  case &UniqueRgn:
-  case &RefCntRgn:
-  case &AccessEff(_):
-  case &JoinEff(_):
-  case &RgnsEff(_): return void_star_typ();
+  case &AppType(_,_): return void_star_type();
     // FIX: when we instantiate a struct parameterized by `i::I with
     // valueof_t(42), then we want the 42 to get propagated to any arrays
     // that might occur within.  So, for now, we don't do any translation.
@@ -958,11 +951,10 @@ type_t typ_to_c(type_t t) {
     // type-declaration out of scope and put it to the top-level.
     if (e->topt != NULL) return typ_to_c((type_t)e->topt);
     else return t;
-  case &BuiltinType(...): return t;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     aggrdecl_to_c(ad,true);
     if (ad->kind==UnionA)
-      return aggrdecl_type(ad->name,unionq_typ);
+      return aggrdecl_type(ad->name,unionq_type);
     else return aggrdecl_type(ad->name,strctq);
   case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
     enumdecl_to_c(ed);
@@ -976,56 +968,59 @@ type_t typ_to_c(type_t t) {
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
   case &ArrayType(ArrayInfo{t2,tq,_,_,_}):
-    return cast_it(star_typ(t2,&HeapRgn_val,tq,false_conref),e);
+    return cast_it(star_type(t2,heap_rgn_type,tq,false_type),e);
   default: return cast_it(t,e);
   }
 }
 
 // returns true when the type contains no pointers. Is conservative
 // (does not look at instantiations)
-static bool atomic_typ(type_t t) {
+static bool atomic_type(type_t t) {
   switch (compress(t)) {
-  case &VoidType:      return true;
   case &VarType(_):    return false;
-  case &IntType(_,_):
-  case &EnumType(_,_):
-  case &AnonEnumType(_):
-  case &FloatType(_):
-  case &FnType(_):
-  case &TagType(_): return true;
-  case &ArrayType(ArrayInfo{t,...}): return atomic_typ(t);
+  case &AppType(c,ts):
+    switch (c) {
+    case &VoidCon: case &IntCon(_,_): case &FloatCon(_):
+    case &TagCon: case &EnumCon(...): case &AnonEnumCon(...):
+      return true;
+    case &DatatypeCon(_):
+    case &RgnHandleCon:
+    case &BuiltinCon(...):   return false;
+    case &AggrCon(info):
+      switch(info) {
+      case {.UnknownAggr = _}: return false; // see above!
+      default: break;
+      }
+      let ad = get_known_aggrdecl(info);
+      if(ad->impl == NULL)
+        return false;
+      for(let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+        if (!atomic_type(fs->hd->type)) return false;
+      return true;
+    case &DatatypeFieldCon({.KnownDatatypefield=$(tud,tuf)}):
+      for (let tqs = tuf->typs; tqs != NULL; tqs = tqs->tl)
+        if (!atomic_type((*tqs->hd)[1])) return false;
+      return true;
+    default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
+    }
+  case &FnType(_): return true;
+  case &ArrayType(ArrayInfo{t,...}): return atomic_type(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
     // NOTE: cannot call get_known_aggrdecl b/c we sometimes call this
     // post-translation (with unchecked C types)?? (We shouldn't)
-  case &AggrType(AggrInfo(info,_)):
-    switch(info) {
-    case {.UnknownAggr = _}: return false; // see above!
-    default: break;
-    }
-    let ad = get_known_aggrdecl(info);
-    if(ad->impl == NULL)
-      return false;
-    for(let fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-      if (!atomic_typ(fs->hd->type)) return false;
-    return true;
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
-      if (!atomic_typ(fs->hd->type)) return false;
+      if (!atomic_type(fs->hd->type)) return false;
     return true;
-  case &DatatypeFieldType(DatatypeFieldInfo{{.KnownDatatypefield=$(tud,tuf)},_}):
-    fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
-      if (!atomic_typ((*tqs->hd)[1])) return false;
+      if (!atomic_type((*tqs->hd)[1])) return false;
     return true;
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
-  case &DatatypeType(_):
-  case &PointerType(_):
-  case &DynRgnType(_,_):
-  case &RgnHandleType(_): return false;
+  case &PointerType(_): return false;
   default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
   }
 }
@@ -1033,10 +1028,7 @@ static bool atomic_typ(type_t t) {
 static bool is_void_star(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{t2,_,_}):
-    switch (compress(t2)) {
-    case &VoidType: return true;
-    default:        return false;
-    }
+    return is_void_type(t2);
   default: return false;
   }
 }
@@ -1052,7 +1044,7 @@ static bool is_pointer_or_boxed_tvar(type_t t) {
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
-  case &AggrType(AggrInfo(info,_)):
+  case &AppType(&AggrCon(info),_):
     let ad = get_known_aggrdecl(info);
     if (ad->impl == NULL)
       toc_impos("is_poly_field: type missing fields");
@@ -1094,7 +1086,7 @@ static exp_t malloc_atomic(exp_t s) {
 }
 // malloc something -- choose malloc routine according to the (Cyclone) type
 static exp_t malloc_exp(type_t t,exp_t s) {
-  if (atomic_typ(t))
+  if (atomic_type(t))
     return malloc_atomic(s);
   return malloc_ptr(s);
 }
@@ -1108,7 +1100,7 @@ static exp_t rmalloc_inline_exp(exp_t rgn, exp_t s) {
 }
 // calloc something
 static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
-  if (atomic_typ(elt_type))
+  if (atomic_type(elt_type))
     return fncall_exp(_cyccalloc_atomic_e, list(s,n), DL);
   else
     return fncall_exp(_cyccalloc_e, list(s,n), DL);
@@ -1148,15 +1140,15 @@ static exp_t make_toplevel_dyn_arr(type_t t, exp_t sz, exp_t e) {
   exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
-    type_t    vd_typ = array_typ(char_typ,mt_tq,sz,false_conref,DL);
+    type_t    vd_typ = array_type(char_type,mt_tq,sz,false_type,DL);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
     xplussz = add_exp(xexp,sz,DL);
   } else {
-    xexp = cast_it(void_star_typ(),e);
+    xexp = cast_it(void_star_type(),e);
     // Note: If e is NULL, element size of 0 is fine!
-    xplussz = cast_it(void_star_typ(),add_exp(e,sz,DL));
+    xplussz = cast_it(void_star_type(),add_exp(e,sz,DL));
   }
   return unresolvedmem_exp(NULL,list(new $(NULL,xexp),
 				     new $(NULL,xexp),
@@ -1296,8 +1288,8 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
     //fprintf(stderr,"annotation is unknown\n");
     switch (compress((type_t)e->topt)) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): 
-      //fprintf(stderr,"pointer type is %s\n",conref_def(false,n) ? "nullable" : "notnull");
-      return conref_def(false,n);
+      //fprintf(stderr,"pointer type is %s\n",force_type2bool(false,n) ? "nullable" : "notnull");
+      return force_type2bool(false,n);
     default: toc_impos("Toc::is_nullable");
   }
   case &CfFlowInfo::NotZero(_):  
@@ -1355,10 +1347,11 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
     static string_t bogus_string = "*bogus*";
     static $(nmspace_t,var_t) bogus_qvar =
       $(Nmspace{.Loc_n = 0},&bogus_string);
+    static datatype Type.TupleType tt = TupleType(NULL);
     static struct Vardecl bogus_vardecl =
       {.sc = Public, .name = &bogus_qvar,.varloc =0,
      .tq = Tqual{false,false,false,false,0},
-     .type = &VoidType_val, .initializer = NULL, .rgn = NULL,
+     .type = &tt, .initializer = NULL, .rgn = NULL,
      .attributes = NULL, .escapes = false};
 
     x = &bogus_vardecl;
@@ -1421,7 +1414,7 @@ inner_loop:
   return false;
 }
 
-static type_t get_cyc_typ(exp_t e) {
+static type_t get_cyc_type(exp_t e) {
   if (e->topt == NULL) toc_impos("Missing type in primop ");
   return (type_t)e->topt;
 }
@@ -1463,7 +1456,7 @@ static exp_opt_t get_varsizeexp(exp_t e) {
   default: return NULL; // if not a struct, then no struct hack possible
   }
   switch(compress((type_t)e->topt)) {
-  case &AggrType(AggrInfo({.KnownAggr = &ad},...)): 
+  case &AppType(&AggrCon({.KnownAggr = &ad}),_):
     if(ad->impl==NULL)
       return NULL;
     if(ad->kind == UnionA)
@@ -1487,7 +1480,7 @@ static exp_opt_t get_varsizeexp(exp_t e) {
       if(nested_ans != NULL)
 	return nested_ans;
       switch(compress(last_type_field->type)) {
-      case &ArrayType(ArrayInfo{.elt_type=elt_typ,.num_elts=type_bd,...}):
+      case &ArrayType(ArrayInfo{.elt_type=elt_type,.num_elts=type_bd,...}):
 	// key invariant: zero-length array means struct hack
 	if(type_bd == NULL || !is_zero(type_bd))
 	  return NULL;
@@ -1497,7 +1490,7 @@ static exp_opt_t get_varsizeexp(exp_t e) {
 	//      in a position where the flow analysis does not expect
 	return add_exp(fncall_exp(_check_times_e,
 				  list((exp_t)array_length_exp(e2),
-				       sizeoftyp_exp(elt_typ,DL)),DL),
+				       sizeoftype_exp(elt_type,DL)),DL),
 		       signed_int_exp(PAD_BYTES,DL),DL);
       default: return NULL;
       }
@@ -1578,7 +1571,7 @@ static exp_t push_address_exp(exp_t e) {
   switch (e->r) {
   case &Cast_e(*t,*e1,_,_):
     *e1 = push_address_exp(*e1);
-    *t = cstar_typ(*t,mt_tq);
+    *t = cstar_type(*t,mt_tq);
     return e;
   case &Deref_e(e1):
     return e1;
@@ -1616,18 +1609,26 @@ static exp_t generate_zero(type_t t) {
   exp_t res;
   switch (compress(t)) {
   case &PointerType(_) : res = null_exp(DL); break;
-  case &IntType(sn,Char_sz) : res = const_exp(Char_c(sn,0),DL); break;
-  case &IntType(sn,Short_sz) : res = const_exp(Short_c(sn,0),DL); break;
-  case &EnumType(_,_)  : fallthru;
-  case &AnonEnumType(_): fallthru(Unsigned);
-  case &IntType(sn,Int_sz) : fallthru(sn);
-  case &IntType(sn,Long_sz) :
-    res = const_exp(Int_c(sn,0),DL); break;
-  case &IntType(sn,LongLong_sz) :
-    res = const_exp(LongLong_c(sn,0),DL); break;
-  case &FloatType(0): res = const_exp(Float_c("0.0F",0),DL); break;
-  case &FloatType(1): res = const_exp(Float_c("0.0",1),DL); break;
-  case &FloatType(i): res = const_exp(Float_c("0.0L",i),DL); break;
+  case &AppType(c,_): 
+    switch (c) {
+    case &IntCon(sn,Char_sz): 
+      res = const_exp(Char_c(sn,0),DL); break;
+    case &IntCon(sn,Short_sz): 
+      res = const_exp(Short_c(sn,0),DL); break;
+    case &EnumCon(_,_)      : fallthru;
+    case &AnonEnumCon(_)    : fallthru(Unsigned);
+    case &IntCon(sn,Int_sz)  : fallthru(sn);
+    case &IntCon(sn,Long_sz):
+      res = const_exp(Int_c(sn,0),DL); break;
+    case &IntCon(sn,LongLong_sz):
+      res = const_exp(LongLong_c(sn,0),DL); break;
+    case &FloatCon(0): res = const_exp(Float_c("0.0F",0),DL); break;
+    case &FloatCon(1): res = const_exp(Float_c("0.0",1),DL); break;
+    case &FloatCon(i): res = const_exp(Float_c("0.0L",i),DL); break;
+    default: 
+      toc_impos("found non-zero type %s in generate_zero",typ2string(t));
+    }
+    break;
   default:
     toc_impos("found non-zero type %s in generate_zero",typ2string(t));
   }
@@ -1643,48 +1644,6 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                                  type_t ptr_type,
                                  bool is_dyneither,
                                  type_t elt_type) {
-  /* Sadly, this sleazy trick doesn't work.  The reason is that
-     we need to fail only when writing to the last element of
-     the array a non-zero value.  The code here faults whenever
-     you overwrite a non-zero value.
-
-  // we pull a very sleazy trick here and translate e1 as if it
-  // were a right-hand-side instead of lhs.  Then we get rid of
-  // the resulting deref if necessary in order to get a pointer
-  // that we can then dereference (to check for zero) and 
-  // ultimately update.
-  if (!is_dyneither) {
-    exp_to_c(nv,e1);
-    exp_to_c(nv,e2);
-    exp_t lhs;
-    switch (e1->r) {
-    case &Deref_e(e): lhs = e; break;
-    case &Subscript_e(a,b): lhs = add_exp(a,b,0); break;
-    default: 
-      impos("zero_ptr_assign_to_c: e1 = %s",Absynpp::exp2string(e1));
-    }
-    let c_elt_type = typ_to_c(elt_type);
-    let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
-    let lhs_var = temp_var();
-    let rhs_var = temp_var();
-    let temp = temp_var();
-    exp_t rhs_exp = e2;
-    stmt_t fail = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
-    exp_t result = assign_exp(deref_exp(var_exp(lhs_var,DL),DL),
-                              var_exp(rhs_var,DL),DL);
-    exp_t test1 = eq_exp(var_exp(temp,DL),int_exp(None,0,DL),DL);
-    exp_t test2 = neq_exp(var_exp(rhs_var,DL),int_exp(None,0,DL),DL);
-    exp_t test_exp = and_exp(test1,test2,DL);
-    if (popt != NULL) rhs_exp = prim2_exp(popt->v,var_exp(temp,DL),rhs_exp,DL);
-    let s = declare_stmt(lhs_var,cstar_typ(c_elt_type, mt_tq),lhs,
-            declare_stmt(temp,c_elt_type,deref_exp(var_exp(lhs_var,DL),DL),
-            declare_stmt(rhs_var,c_elt_type,rhs_exp,
-            seq_stmt(ifthenelse_stmt(test_exp,fail,skip_stmt(DL),DL),
-                     exp_stmt(result,DL),DL),DL),DL),DL);
-    e->r = stmt_exp(s,DL)->r;
-    return;
-  }
-  */
   // To simplify the translation, we always use a fat pointer and generate:
   //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb;
   //     elt_type y = *x; // check here that x is not null and in bounds
@@ -1693,10 +1652,10 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   //     *x.curr = z; })
   // Note that this is generated and *then* translated to ensure the
   // proper constraints.
-  type_t fat_ptr_type = dyneither_typ(elt_type, &HeapRgn_val, mt_tq, true_conref);
+  type_t fat_ptr_type = fatptr_type(elt_type, heap_rgn_type, mt_tq, true_type);
   let c_elt_type = typ_to_c(elt_type);
   let c_fat_ptr_type = typ_to_c(fat_ptr_type);
-  let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
+  let c_ptr_type = cstar_type(c_elt_type, mt_tq);
   let c_ptr_type_opt = new Opt(c_ptr_type);
   exp_t xinit;
   switch (e1->r) {
@@ -1713,7 +1672,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
     xinit = fncall_exp(_dyneither_ptr_plus_e,
-                       list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
+                       list(ea,sizeoftype_exp(typ_to_c(elt_type),DL),eb),DL);
     break;
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
@@ -1745,17 +1704,17 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     let y2_exp = varb_exp(y_bnd,DL); y2_exp->topt = deref_x->topt;
     let zero1_exp = generate_zero(elt_type);
     let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
-    comp1_exp->topt = sint_typ;
+    comp1_exp->topt = sint_type;
     exp_to_c(nv,comp1_exp);
     // build z != zero and translate
     let z_exp = varb_exp(z_bnd,DL); z_exp->topt = deref_x->topt;
     let zero2_exp = generate_zero(elt_type);
     let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
-    comp2_exp->topt = sint_typ;
+    comp2_exp->topt = sint_type;
     exp_to_c(nv,comp2_exp);
     // build numelts(x) == 1 directly (no translation)
     let xsizeargs = list(varb_exp(x_bnd,DL),
-                         sizeoftyp_exp(typ_to_c(elt_type),DL));
+                         sizeoftype_exp(typ_to_c(elt_type),DL));
     let oneexp = uint_exp(1,DL);
     exp_t xsize;
     xsize = prim2_exp(Eq,fncall_exp(_get_dyneither_size_e,xsizeargs,DL),
@@ -1793,7 +1752,7 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
                                     exp_t aggrproj(exp_t,field_name_t,seg_t)) {
   aggrdecl_t ad;
   switch (compress(aggrtype)) {
-  case &AggrType(AggrInfo(info,_)):
+  case &AppType(&AggrCon(info),_):
     ad = get_known_aggrdecl(info); break;
   default: impos(aprintf("expecting union but found %s in check_tagged_union",
                          typ2string(aggrtype)));
@@ -1807,7 +1766,7 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
     let temp_f_val = aggrarrow_exp(temp_exp,val_sp,DL);
     let sres = exp_stmt(address_exp(temp_f_val,DL),DL);
     let ifs = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
-    let e1_p_type = cstar_typ(e1_c_type,mt_tq);
+    let e1_p_type = cstar_type(e1_c_type,mt_tq);
     let e1_f = address_exp(aggrproj(e1,f,DL),DL);
     let s = declare_stmt(temp,e1_p_type,e1_f,seq_stmt(ifs,sres,DL),DL);
     return stmt_exp_r(s);
@@ -1826,7 +1785,7 @@ static bool is_tagged_union_project_impl(type_t t, field_name_t f,
 					 int @f_tag, type_t @ tagged_member_type,
 					 bool clear_read, bool *is_read) {
   switch (compress(t)) {
-  case &AggrType(AggrInfo(info,...)):
+  case &AppType(&AggrCon(info),_):
     let ad = get_known_aggrdecl(info);
     *f_tag = get_member_offset(ad,f);
     // FIX: we need to get unique names for these damned structs...
@@ -1851,7 +1810,7 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
 					tagged_member_type,clear_read,is_read);
   case &AggrArrow_e(e1,f,_,*is_read):
     switch (compress((type_t)e1->topt)) {
-    case &PointerType(PtrInfo{.elt_typ = et,...}):
+    case &PointerType(PtrInfo{.elt_type = et,...}):
       return is_tagged_union_project_impl(et,f,f_tag,
 					  tagged_member_type,clear_read,is_read);
     default: return false;
@@ -1886,7 +1845,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
     let test_exp = neq_exp(temp_tag,f_tag,DL);
     s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
   }
-  stmt_t s1 = declare_stmt(temp,cstar_typ(member_type,mt_tq),
+  stmt_t s1 = declare_stmt(temp,cstar_type(member_type,mt_tq),
                            push_address_exp(e1),
                            seq_stmt(s2,s3,DL),DL);
   return stmt_exp_r(s1);
@@ -1907,7 +1866,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // note: we don't need the element type b/c the length is 0 (so we lie)
     // note: should share all these uint_exp(0,DL) things
     let zero = signed_int_exp(0,DL);
-    if(is_tagged_pointer_typ(old_typ)) {
+    if(is_tagged_pointer_type(old_typ)) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
       else
@@ -1921,7 +1880,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Extension_e(e1): exp_to_c(nv,e1); break;
   case &Primop_e(p,es):
     // Save Cyclone types -- needed for pointer arith stuff
-    let old_typs = List::map(get_cyc_typ,es);
+    let old_types = List::map(get_cyc_type,es);
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     switch (p) {
@@ -1933,21 +1892,22 @@ static void exp_to_c(env_t nv, exp_t e) {
         if (!Evexp::c_can_eval((exp_t)e2))
           terr(e->loc,"can't calculate numelts");
         e->r = e2->r;  break;
-      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
-	switch(conref_def(bounds_one,bound)) {
-        case &DynEither_b: // retrieve (last_plus_one - curr) via runtime call
+      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,_))):
+        let eopt = get_bounds_exp(bounds_one(),bound);
+        if (eopt == NULL) {
+          // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_dyneither_size_e,
                               list(es->hd,
-                                   sizeoftyp_exp(typ_to_c(elt_typ),DL)));
-          break;
-	case &Upper_b(e2):
+                                   sizeoftype_exp(typ_to_c(elt_type),DL)));
+        } else {
+          let e2 = (exp_t)eopt;
           // when zero-terminated, we have to call "strlen"
-          if (conref_def(false,zt)) {
+          if (force_type2bool(false,zt)) {
             exp_t function_e =
 	      getFunctionRemovePointer(&_get_zero_arr_size_functionSet,
 				       es->hd);
             e->r = fncall_exp_r(function_e,list(es->hd,e2));
-          } else if (conref_def(false,nbl)) {
+          } else if (force_type2bool(false,nbl)) {
             if (!Evexp::c_can_eval(e2))
               terr(e->loc,"can't calculate numelts");
             // careful! when this is a nullable pointer, the size might be 0
@@ -1955,7 +1915,6 @@ static void exp_to_c(env_t nv, exp_t e) {
           } else {
             e->r = e2->r; break; // compile-time evaluation
           }
-	  break;
 	}
 	break;
       default:
@@ -1965,26 +1924,25 @@ static void exp_to_c(env_t nv, exp_t e) {
       break;
     case Plus:
       // only translation is for ? pointers or zero-terminated arrays
-      //   _dynxxx_ptr_plus(e1,sizeof(elt_typ),e2)
+      //   _dynxxx_ptr_plus(e1,sizeof(elt_type),e2)
       // FIX: allow arithmetic on t ? types at top-level!
       if(is_toplevel(nv))
 	unimp("can't do pointer arithmetic at top-level");
-      switch (compress(old_typs->hd)) {
-      case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,_,b,zt,_))):
-        switch (conref_def(bounds_one,b)) {
-        case &DynEither_b:
+      switch (compress(old_types->hd)) {
+      case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,zt,_))):
+        let eopt = get_bounds_exp(bounds_one(),b);
+        if (eopt == NULL) {
           exp_t e1 = es->hd;
           exp_t e2 = es->tl->hd;
           e->r = fncall_exp_r(_dyneither_ptr_plus_e,
-                              list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2));
-          break;
-        case &Upper_b(esz):
-          if (conref_def(false,zt)) {
+                              list(e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2));
+        } else {
+          let esz = (exp_t)eopt;
+          if (force_type2bool(false,zt)) {
             exp_t e1 = es->hd;
             exp_t e2 = es->tl->hd;
             e->r = fncall_exp(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),list(e1,esz,e2),DL)->r;
           }
-          break;
         }
         break;
       default: break;
@@ -1994,19 +1952,19 @@ static void exp_to_c(env_t nv, exp_t e) {
       // only translation is for ? pointers.
       // if e2 is not a tagged array, do just like plus of negation,
       // else result type is unsigned int, so subtract curr fields
-      type_t elt_typ = &VoidType_val;
-      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
+      type_t elt_type = void_type;
+      if(is_tagged_pointer_type_elt(old_types->hd,&elt_type)) {
 	exp_t e1 = es->hd;
 	exp_t e2 = es->tl->hd;
-	if(is_tagged_pointer_typ(old_typs->tl->hd)) {
+	if(is_tagged_pointer_type(old_types->tl->hd)) {
 	  e1->r = aggrmember_exp_r(new_exp(e1->r,DL),curr_sp);
 	  e2->r = aggrmember_exp_r(new_exp(e2->r,DL),curr_sp);
-	  e1->topt = e2->topt = cstar_typ(uchar_typ,mt_tq);
+	  e1->topt = e2->topt = cstar_type(uchar_type,mt_tq);
 	  e->r  = divide_exp(copy_exp(e),
-			     sizeoftyp_exp(typ_to_c(elt_typ),DL),DL)->r;
+			     sizeoftype_exp(typ_to_c(elt_type),DL),DL)->r;
 	} else {
 	  e->r = fncall_exp_r(_dyneither_ptr_plus_e,
-                              list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                              list(e1,sizeoftype_exp(typ_to_c(elt_type),DL),
                                    prim1_exp(Minus,e2,DL)));
 	}
       }
@@ -2020,16 +1978,16 @@ static void exp_to_c(env_t nv, exp_t e) {
       // need to extract .curr field of tagged arrays for comparisons
       exp_t e1 = es->hd;
       exp_t e2 = es->tl->hd;
-      type_t t1 = old_typs->hd;
-      type_t t2 = old_typs->tl->hd;
-      type_t elt_typ = &VoidType_val; // bogus until next call
-      if (is_tagged_pointer_typ_elt(t1,&elt_typ)) {
-	let t = cstar_typ(typ_to_c(elt_typ),mt_tq);
+      type_t t1 = old_types->hd;
+      type_t t2 = old_types->tl->hd;
+      type_t elt_type = void_type; // bogus until next call
+      if (is_tagged_pointer_type_elt(t1,&elt_type)) {
+	let t = cstar_type(typ_to_c(elt_type),mt_tq);
 	e1->r = cast_it_r(t,member_exp(new_exp(e1->r,DL),curr_sp,DL));
 	e1->topt = t;
       }
-      if (is_tagged_pointer_typ(t2)) {
-	let t = cstar_typ(typ_to_c(elt_typ),mt_tq);
+      if (is_tagged_pointer_type(t2)) {
+	let t = cstar_type(typ_to_c(elt_type),mt_tq);
 	e2->r = cast_it_r(t,member_exp(new_exp(e2->r,DL),curr_sp,DL));
 	e2->topt = t;
       }
@@ -2047,8 +2005,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     //
     // Similarly, we need to worry about the case where e2 is a
     // tagged union projection.
-    type_t ptr_type = &VoidType_val;
-    type_t elt_type = &VoidType_val;
+    type_t ptr_type = void_type;
+    type_t elt_type = void_type;
     bool is_dyneither = false;
     string_t incr_str = "increment";
     if (incr == PreDec || incr == PostDec) incr_str = "decrement";
@@ -2056,11 +2014,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
       toc_impos("in-place inc/dec on zero-term");
     }
-    type_t tunion_member_type = &VoidType_val;
+    type_t tunion_member_type = void_type;
     int f_tag = 0;
     if (is_tagged_union_project(e2,&f_tag,&tunion_member_type,true)) {
       let one = signed_int_exp(1,DL);
-      one->topt = sint_typ;
+      one->topt = sint_type;
       switch (incr) {
       case PreInc:
         e->r = new AssignOp_e(e2,new Opt(Plus),one);
@@ -2083,8 +2041,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     set_lhs(nv,false);
     // only t ? or zero-terminated types are translated funny,
     // note that e2 is an lvalue!
-    type_t elt_typ = &VoidType_val;
-    if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
+    type_t elt_typ = void_type;
+    if(is_tagged_pointer_type_elt(old_typ,&elt_typ)) {
       _ fn_e;
       int change = 1;
       fn_e = (incr==PostInc || incr==PostDec) ?
@@ -2092,9 +2050,9 @@ static void exp_to_c(env_t nv, exp_t e) {
       if (incr == PreDec || incr == PostDec)
         change = -1;
       e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
-                                     sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                                     sizeoftype_exp(typ_to_c(elt_typ),DL),
                                      signed_int_exp(change,DL)));
-    } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
+    } else if (is_zero_pointer_type_elt(old_typ,&elt_typ)) {
       // we treat ++x specially -- this becomes
       //   if (x != 0 && *x != 0) ++x; else _throw_arraybounds()
       // or even
@@ -2102,7 +2060,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       // if we can show x is not null.
       if (incr != PostInc) {
         let x = temp_var();
-        let t = cstar_typ(typ_to_c(old_typ),mt_tq);
+        let t = cstar_type(typ_to_c(old_typ),mt_tq);
         let xexp = push_address_exp(e2);
         let testexp = neq_exp(deref_exp(deref_exp(var_exp(x,DL),DL),DL),
                               int_exp(None,0,DL),DL);
@@ -2121,7 +2079,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
                                        signed_int_exp(1,DL)));
       }
-    } else if(elt_typ == &VoidType_val && !is_lvalue(e2)) {
+    } else if(elt_typ == void_type && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
       e->r = e2->r;
     }
@@ -2147,7 +2105,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t  e1_old_typ = (type_t)e1->topt;
     type_t  e2_old_typ = (type_t)e2->topt;
     int f_tag = 0; // bogus unless e1_tagged_proj
-    type_t tagged_member_struct_type = &VoidType_val; // bogus unless e1_tagged_proj
+    type_t tagged_member_struct_type = void_type; // bogus unless e1_tagged_proj
     if (is_tagged_union_project(e1,&f_tag,&tagged_member_struct_type,true)) {
       set_lhs(nv,true);
       exp_to_c(nv,e1);
@@ -2157,8 +2115,8 @@ static void exp_to_c(env_t nv, exp_t e) {
                                    tagged_member_struct_type);
       return;
     }
-    type_t ptr_type = &VoidType_val;
-    type_t elt_type = &VoidType_val;
+    type_t ptr_type = void_type;
+    type_t elt_type = void_type;
     bool is_dyneither = false;
     if (is_zero_ptr_deref(e1,&ptr_type,&is_dyneither,&elt_type)) {
       zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type,
@@ -2175,8 +2133,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
     if(popt != NULL) {
-      type_t elt_typ = &VoidType_val;
-      if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
+      type_t elt_typ = void_type;
+      if(is_tagged_pointer_type_elt(old_typ,&elt_typ)) {
         _ change;
         switch(popt->v) {
         case Plus:  change = e2; break;
@@ -2188,9 +2146,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         // FIX: Is e1 definitely still an lvalue? Probably not!!
         let fn_e = _dyneither_ptr_inplace_plus_e;
         e->r = fncall_exp_r(fn_e,list(push_address_exp(e1),
-                                      sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                                      sizeoftype_exp(typ_to_c(elt_typ),DL),
                                       change));
-      } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
+      } else if (is_zero_pointer_type_elt(old_typ,&elt_typ)) {
         // We're doing x += e where x is a zero-terminated pointer.
         // Make sure we don't run off the end.
         switch (popt->v) {
@@ -2205,7 +2163,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(!done) {
       // this cast is necessary to avoid gcc warnings
       if (e1_poly)
-        e2->r = cast_it_r(void_star_typ(), new_exp(e2->r,DL));
+        e2->r = cast_it_r(void_star_type(), new_exp(e2->r,DL));
       // The typechecker guarantees that e1 starts out as an lvalue, but
       // the translation might have to insert casts, NULL checks,
       // declarations of temps, bound checks, etc.  If so we look into e1,
@@ -2245,7 +2203,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t argvexp = var_exp(argv,DL);
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
       type_t cva_type = typ_to_c(vai->type);
-      type_t arr_type = array_typ(cva_type,mt_tq,num_varargs_exp,false_conref,
+      type_t arr_type = array_type(cva_type,mt_tq,num_varargs_exp,false_type,
                                   DL);
 
       int num_args     = List::length(es);
@@ -2259,7 +2217,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       new_args = new List(fncall_exp(_tag_dyneither_e,
 				     list(argvexp,
-					  sizeoftyp_exp(cva_type,DL),
+					  sizeoftype_exp(cva_type,DL),
 					  num_varargs_exp), DL),
 			  new_args);
       new_args = imp_rev(new_args);
@@ -2271,7 +2229,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(vai->inject) {
 	datatypedecl_t tud;
 	switch(compress(pointer_elt_type(vai->type))) {
-	case &DatatypeType(DatatypeInfo({.KnownDatatype=&x},_)): tud = x; break;
+	case &AppType(&DatatypeCon({.KnownDatatype=&x}),_): tud = x; break;
 	default: toc_impos("toc: unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
@@ -2313,7 +2271,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           let array_args = list(new $(NULL,uint_exp(0,DL)),
 				new $(NULL,uint_exp(0,DL)),
 				new $(NULL,uint_exp(0,DL)));
-          s = declare_stmt(argv,void_star_typ(),uint_exp(0,DL), s,DL);
+          s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
         }
       } else {
 	// now just make an Array_e and pass the buck to RemoveAggrs to
@@ -2327,7 +2285,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  let init = array_exp(imp_rev(array_args),DL);
 	  s = declare_stmt(argv, arr_type, init, s,DL);
 	} else // FIX??
-          s = declare_stmt(argv,void_star_typ(),uint_exp(0,DL), s,DL);
+          s = declare_stmt(argv,void_star_type(),uint_exp(0,DL), s,DL);
       }
 
       e->r = stmt_exp_r(s);
@@ -2351,11 +2309,11 @@ static void exp_to_c(env_t nv, exp_t e) {
     //  get warnings when the only use of the tyvar is as a parameter b/c
     //  it's just an implicit cast to void * (so long as inst type isn't int)
     for(; ts != NULL; ts = ts->tl) {
-      let k = typ_kind(ts->hd)->kind;
+      let k = type_kind(ts->hd)->kind;
       if(k != EffKind && k != RgnKind) {
 	switch(compress(ts->hd)) {
 	case &VarType(_):
-	case &DatatypeType(_): continue;
+	case &AppType(&DatatypeCon(_),_): continue;
 	default:
 	  e->r = array_to_ptr_cast(typ_to_c((type_t)e->topt),e1,DL)->r;
 	  break;
@@ -2374,14 +2332,16 @@ static void exp_to_c(env_t nv, exp_t e) {
     // a few Cyclone casts are translated into C effects other than casts:
     switch ($(compress(old_t2),compress(new_typ))) {
     case $(&PointerType(p1),&PointerType(p2)):
-      let n1 = conref_def(false,p1.ptr_atts.nullable);
-      let n2 = conref_def(false,p2.ptr_atts.nullable);
-      let b1 = conref_def(bounds_one,p1.ptr_atts.bounds);
-      let b2 = conref_def(bounds_one,p2.ptr_atts.bounds);
-      let zt1 = conref_def(false,p1.ptr_atts.zero_term);
-      let zt2 = conref_def(false,p2.ptr_atts.zero_term);
+      let n1 = force_type2bool(false,p1.ptr_atts.nullable);
+      let n2 = force_type2bool(false,p2.ptr_atts.nullable);
+      let b1 = get_bounds_exp(bounds_one(),p1.ptr_atts.bounds);
+      let b2 = get_bounds_exp(bounds_one(),p2.ptr_atts.bounds);
+      let zt1 = force_type2bool(false,p1.ptr_atts.zero_term);
+      let zt2 = force_type2bool(false,p2.ptr_atts.zero_term);
       switch($(b1,b2)) {
-      case $(&Upper_b(b1), &Upper_b(b2)):
+      case $(&_, &_):
+        let b1 = (exp_t)b1;
+        let b2 = (exp_t)b2;
         if ((!Evexp::c_can_eval(b1) || !Evexp::c_can_eval(b2)) &&
             !Evexp::same_const_exp(b1,b2))
           terr(e->loc,"can't validate cast due to potential size differences");
@@ -2415,7 +2375,8 @@ static void exp_to_c(env_t nv, exp_t e) {
         // arrays (since the true length isn't known.)  Of course,
         // this obligates a run-time check.
 	break;
-      case $(&Upper_b(e2), &DynEither_b):
+      case $(&_, NULL):
+        let e2 = (exp_t)b1;
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
         let $(i,valid) = Evexp::eval_const_uint_exp(e2);
@@ -2450,7 +2411,7 @@ static void exp_to_c(env_t nv, exp_t e) {
               arg3 = e2; break;
             case &Var_e(&Global_b(vd)): fallthru(vd);
             case &Var_e(&Local_b(vd)):
-              if (!Tcutil::is_array(vd->type)) fallthru;
+              if (!Tcutil::is_array_type(vd->type)) fallthru;
               arg3 = e2;
               break;
             default:
@@ -2461,7 +2422,7 @@ static void exp_to_c(env_t nv, exp_t e) {
               else 
                 arg3 = fncall_exp(getFunctionRemovePointer(
                                                            &_get_zero_arr_size_functionSet,e1),
-                                  list(cast_it(void_star_typ(),x_exp),e2),DL);
+                                  list(cast_it(void_star_type(),x_exp),e2),DL);
               break;
             }
             if (!zt2 && !p2.elt_tq.real_const) {
@@ -2469,7 +2430,7 @@ static void exp_to_c(env_t nv, exp_t e) {
               // one from the size so that no one can write the last location.
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
             }
-            let arg2 = sizeoftyp_exp(typ_to_c(p2.elt_typ),DL);
+            let arg2 = sizeoftype_exp(typ_to_c(p2.elt_type),DL);
             let tg_exp = fncall_exp(tag_e,list(x_exp,arg2,arg3),DL);
             let s = exp_stmt(tg_exp,DL);
             s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
@@ -2478,12 +2439,13 @@ static void exp_to_c(env_t nv, exp_t e) {
             // build the t ? struct
             e->r = fncall_exp_r(tag_e,
                                 list(e1,
-                                     sizeoftyp_exp(typ_to_c(p2.elt_typ),DL),
+                                     sizeoftype_exp(typ_to_c(p2.elt_type),DL),
                                      e2));
           }
         }
 	break;
-      case $(&DynEither_b, &Upper_b(e2)):
+      case $(NULL, &_):
+        let e2 = (exp_t)b2;
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
 	if(is_toplevel(nv))
@@ -2506,7 +2468,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         let untag_e = _untag_dyneither_ptr_e;
 	let ptr_exp = fncall_exp(untag_e,
 				 list(e1,
-                                      sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
+                                      sizeoftype_exp(typ_to_c(p1.elt_type),DL),
 				      new_e2), DL);
 	if(!n2)
 	  ptr_exp->r = fncall_exp_r(_check_null_e,
@@ -2515,22 +2477,22 @@ static void exp_to_c(env_t nv, exp_t e) {
 	break;
       // If p1 is zero-terminated and p2 is not, then p2 had better
       // be const or else we have to decrement its size by 1.
-      case $(&DynEither_b, &DynEither_b):
+      case $(NULL, NULL):
 DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (is_toplevel(nv))
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
           let td_e = _dyneither_ptr_decrease_size_e;
           e->r = fncall_exp_r(td_e,
-                              list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
+                              list(e1,sizeoftype_exp(typ_to_c(p1.elt_type),DL),
                                    uint_exp(1,DL)));
         }
 	break;
       }
       break;
-    case $(&PointerType(p1), &IntType(_,_)):
-      switch(conref_def(bounds_one,p1.ptr_atts.bounds)) {
-      case &DynEither_b: // cast t? to int -- cast curr field to int
+    case $(&PointerType(p1), &AppType(&IntCon(_,_),_)):
+      switch(get_bounds_exp(bounds_one(),p1.ptr_atts.bounds)) {
+      case NULL: // cast t? to int -- cast curr field to int
 	e1->r = aggrmember_exp_r(new_exp(e1->r,e1->loc),curr_sp);
 	e1->topt = new_typ_c;
 	break;
@@ -2552,7 +2514,7 @@ DynCast:
       lvalue_assign(e1,NULL,address_lvalue,true);
       // the wrong cast got pushed out, so as a kludge, just re-cast
       e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
-    } else if (kind_leq(&ak,typ_kind((type_t)e1->topt))) {
+    } else if (kind_leq(&ak,type_kind((type_t)e1->topt))) {
       // we could be taking the address of an abstract member, so
       // insert a cast here.
       e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
@@ -2585,7 +2547,7 @@ DynCast:
     exp_t      mexp;
     if(array_len)
       mexp = fncall_exp(_check_times_e,
-			list((exp_t)lenexp,sizeoftyp_exp(elt_typ,DL)),DL);
+			list((exp_t)lenexp,sizeoftype_exp(elt_typ,DL)),DL);
     else
       mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
     // deal with the struct hack (executing the bound twice and suffering
@@ -2605,17 +2567,17 @@ DynCast:
     if(is_dyneither_ptr(old_typ))
       answer = fncall_exp(_tag_dyneither_e,
 			  list(copy_exp(xexp),
-			       sizeoftyp_exp(elt_typ,DL),
+			       sizeoftype_exp(elt_typ,DL),
 			       (lenexp ? lenexp : uint_exp(1,DL))),DL);
     else
       answer = copy_exp(xexp);
     e->annot = new Dest(xexp); // RemoveAggrs puts in the assignments
-    let s = declare_stmt(x,cstar_typ(elt_typ,mt_tq),mexp,
+    let s = declare_stmt(x,cstar_type(elt_typ,mt_tq),mexp,
 			 seq_stmt(exp_stmt(copy_exp(e),DL),
 				  exp_stmt(answer,DL),DL),DL);
       
     if(array_len)
-      s = declare_stmt((qvar_t)lenvar,uint_typ,(exp_t)array_len,s,DL);
+      s = declare_stmt((qvar_t)lenvar,uint_type,(exp_t)array_len,s,DL);
     e->r = stmt_exp_r(s);
     if(vse != NULL) // in case of the struct hack, types do not line up
       e->r = cast_it_r(typ_to_c(old_typ),copy_exp(e));
@@ -2627,7 +2589,7 @@ DynCast:
     exp_to_c(nv,e1); 
     set_in_sizeof(nv,old_in_sizeof);
     break;
-  case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c(t));  break;
+  case &Sizeoftype_e(t):  e->r = new Sizeoftype_e(typ_to_c(t));  break;
   case &Offsetof_e(t,fs):
     let t2 = t;
     let l = fs;
@@ -2636,7 +2598,7 @@ DynCast:
       case &StructField(n): break;
       case &TupleIndex(n):
 	switch(compress(t2)) {
-	case &AggrType(AggrInfo(info,_)):
+	case &AppType(&AggrCon(info),_):
 	  let ad = get_known_aggrdecl(info);
 	  if(ad->impl==NULL)
 	    toc_impos("struct fields must be known");
@@ -2650,7 +2612,7 @@ DynCast:
 	  l->hd = new StructField(fieldname(n+1));
 	  t2 = (*List::nth(ts,n))[1];
 	  break;
-	case &DatatypeFieldType(DatatypeFieldInfo({.KnownDatatypefield=$(_,tuf)},_)):
+	case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(_,tuf)}),_):
 	  if(n == 0)
 	    l->hd = new StructField(tag_sp);
 	  else {
@@ -2672,8 +2634,9 @@ DynCast:
     let e1_typ = compress((type_t)e1->topt);
     switch (e1_typ) {
     case &PointerType(PtrInfo{t2,tq,PtrAtts(rgn,cr,b,zt,_)}):
-      switch (conref_def(bounds_one,b)) {
-      case &Upper_b(nelts):
+      switch (get_bounds_exp(bounds_one(),b)) {
+      case neltsopt as &_:
+        let nelts = (exp_t)neltsopt;
 	bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
 	exp_to_c(nv,e1);
         if (do_null_check) {
@@ -2688,7 +2651,7 @@ DynCast:
         // too, because we guarantee that there's something to read here,
         // even if it's just a 0.  Note that writes are handled specially
         // by the AssignOp_e case.
-        if (!in_sizeof(nv) && !conref_def(false,zt)) {
+        if (!in_sizeof(nv) && !force_type2bool(false,zt)) {
           let $(i,b) = Evexp::eval_const_uint_exp(nelts);
           // FIX:  should really do like below for the -> case
           // and check at run-time.  We'd still have to rule out
@@ -2698,10 +2661,10 @@ DynCast:
             terr(e->loc,"cannot determine dereference is in bounds");
         }
 	break;
-      case &DynEither_b:
+      case NULL:
 	// do it as e1[0], could share all the 0's but who cares
 	let ind_e = uint_exp(0,DL);
-	ind_e->topt = uint_typ;
+	ind_e->topt = uint_type;
 	e->r = subscript_exp_r(e1, ind_e);
 	exp_to_c(nv,e);
 	break;
@@ -2731,10 +2694,11 @@ DynCast:
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
     let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)} = get_ptr_type(e1typ);
-    switch (conref_def(bounds_one,b)) {
-    case &Upper_b(esz):
+    switch (get_bounds_exp(bounds_one(),b)) {
+    case eszopt as &_:
       // the type-checker should've ensured the size is at least 1
       // FIX: on unknown, dynamic bounds check!
+      let esz = (exp_t)eszopt;
       let $(j,known) = Evexp::eval_const_uint_exp(esz);
       if(known) {
 	if (j < 1)
@@ -2755,17 +2719,17 @@ DynCast:
 	e1->r = cast_it_r(typ_to_c(e1typ),
                           fncall_exp(_check_known_subscript_null_e,
                                      list(new_exp(e1->r,0),esz,
-                                          sizeoftyp_exp(ta,DL),
+                                          sizeoftype_exp(ta,DL),
                                           uint_exp(0,DL)),DL));
       }
       break;
-    case &DynEither_b:
+    case NULL:
       // ((ta1 *)_check_unknown_subscript(e1, sizeof(ta1), 0))->f
       type_t ta1 = typ_to_c(ta);
-      e1->r = cast_it_r(cstar_typ(ta1,tq),
+      e1->r = cast_it_r(cstar_type(ta1,tq),
                         fncall_exp(_check_dyneither_subscript_e,
                                    list(new_exp(e1->r,DL),
-                                        sizeoftyp_exp(ta1,DL),
+                                        sizeoftype_exp(ta1,DL),
                                         uint_exp(0,DL)),DL));
 
 
@@ -2803,7 +2767,7 @@ DynCast:
       Relations::print_relns(stderr,relns); fprintf(stderr,"\n");
 #endif
       bool in_bnds = in_sz;
-      switch (conref_def(bounds_one,b)) {
+      switch (get_bounds_exp(bounds_one(),b)) {
       default:
 	in_bnds = in_bnds || check_bounds(e1_typ,relns,e1,e2);
 	if(warn_bounds_checks && !in_bnds)
@@ -2815,11 +2779,12 @@ DynCast:
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       total_bounds_checks++;
-      switch (conref_def(bounds_one,b)) {
-      case &Upper_b(esz):
-        bool possibly_null = conref_def(false,bcr) && need_nullchk;
+      switch (get_bounds_exp(bounds_one(),b)) {
+      case eszopt as &_:
+        let esz = (exp_t)eszopt;
+        bool possibly_null = force_type2bool(false,bcr) && need_nullchk;
 	type_t ta1 = typ_to_c(ta);
-	type_t ta2 = cstar_typ(ta1, tq);
+	type_t ta2 = cstar_type(ta1, tq);
         let $(i,valid) = Evexp::eval_const_uint_exp(esz);
         if (in_bnds && !possibly_null)
 	  bounds_checks_eliminated++;
@@ -2831,7 +2796,7 @@ DynCast:
                                            list(copy_exp(e1)),DL));
         // for zero-terminated pointers with a bound of 1, we calculate
         // the bound dynamically.
-        } else if (valid && i == 1 && conref_def(false,zt)) {
+        } else if (valid && i == 1 && force_type2bool(false,zt)) {
           // *((ta2)_zero_arr_plus(e1, esz, e2)
           if (!Evexp::c_can_eval(esz))
             terr(e->loc,"cannot determine subscript is in bounds");
@@ -2848,7 +2813,7 @@ DynCast:
 	  e->r = deref_exp_r(cast_it(ta2,
                                      fncall_exp(_check_known_subscript_null_e,
                                                 list(e1,esz,
-                                                     sizeoftyp_exp(ta1,DL),
+                                                     sizeoftype_exp(ta1,DL),
                                                      e2),DL)));
 	} else {
           if (!Evexp::c_can_eval(esz))
@@ -2858,20 +2823,20 @@ DynCast:
                                list(esz,copy_exp(e2)));
         }
 	break;
-      case &DynEither_b:
+      case NULL:
 	type_t ta1 = typ_to_c(ta);
         if (in_bnds) {
           // there's no need for a null-check here either because
           // a NULL ? pointer has size 0
           bounds_checks_eliminated++;
-          e->r = subscript_exp_r(cast_it(cstar_typ(ta1,tq),
+          e->r = subscript_exp_r(cast_it(cstar_type(ta1,tq),
                                          member_exp(e1,curr_sp,DL)),e2);
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
           let _check_f = _check_dyneither_subscript_e;
-          e->r = deref_exp_r(cast_it(cstar_typ(ta1,tq),
+          e->r = deref_exp_r(cast_it(cstar_type(ta1,tq),
                                      fncall_exp(_check_f,
-                                                list(e1,sizeoftyp_exp(ta1,DL),
+                                                list(e1,sizeoftype_exp(ta1,DL),
                                                      e2),DL)));
         }
 	break;
@@ -2886,7 +2851,7 @@ DynCast:
       // convert to a struct and rely on RemoveAggrs
       let strct_typ = add_tuple_type(List::map(tup_to_c,es));
       switch(strct_typ) {
-      case &AggrType(AggrInfo(aggrinfo,NULL)): 
+      case &AppType(&AggrCon(aggrinfo),NULL): 
 	list_t<$(list_t<designator_t>,exp_t)@> dles = NULL;
 	aggrdecl_t sd = get_known_aggrdecl(aggrinfo);
 	for(int i=1; es != NULL; es = es->tl, ++i) {
@@ -2963,7 +2928,7 @@ DynCast:
     e->topt = strct_typ;
     if(!is_toplevel(nv)) {
       switch(compress(strct_typ)) {
-      case &AggrType(AggrInfo(aggrinfo,NULL)): 
+      case &AppType(&AggrCon(aggrinfo),NULL): 
 	aggrdecl_t sd = get_known_aggrdecl(aggrinfo);
 	e->r    = new Aggregate_e(sd->name,NULL,dles,sd);
 	e->topt = strct_typ;
@@ -2981,7 +2946,7 @@ DynCast:
       toc_impos("exp_to_c, Aggregate_e: missing aggrdecl pointer or fields");
     let new_typ = typ_to_c(old_typ);
     switch(compress(new_typ)) { // typ_to_c may change the struct name!
-    case &AggrType(AggrInfo(info,_)): *tdn = aggr_kinded_name(info)[1]; break;
+    case &AppType(&AggrCon(info),_): *tdn = aggr_kinded_name(info)[1]; break;
     default: toc_impos("exp_to_c, Aggregate_e: bad type translation");
     }
     // to handle struct kludges for the last field of the type
@@ -2997,7 +2962,7 @@ DynCast:
 					       sd->kind, sd->impl->fields);
     if(!is_toplevel(nv)) {
       switch(compress(old_typ)) {
-      case &AggrType(AggrInfo(_,param_ts)):
+      case &AppType(&AggrCon(_),param_ts):
 	// now translate the fields, with special cases noted as they occur
 	for(let fields2=fields; fields2!=NULL; fields2=fields2->tl) {
 	  let &$(aggrfield,fieldexp) = fields2->hd;
@@ -3056,7 +3021,7 @@ DynCast:
 		  if(fieldexp->topt==NULL)
 		    break;
 		  switch(compress((type_t)fieldexp->topt)) {
-		  case &AggrType(_): 
+		  case &AppType(&AggrCon(_),_): 
 		    new_f->type = (type_t)fieldexp->topt; break;
 		  default: break;
 		  }
@@ -3065,7 +3030,7 @@ DynCast:
 		//DJG: FIX I think this is broken for an array with element-type
 		//     of abstract mem kind
 		if(!is_array_type(old_f->type) &&
-		   kind_leq(&ak,typ_kind(old_f->type)))
+		   kind_leq(&ak,type_kind(old_f->type)))
 		  new_f->attributes = new List(new Aligned_att(NULL),
 					       new_f->attributes);
 	      }
@@ -3076,7 +3041,7 @@ DynCast:
 	    *tdn = sd->name;
 	    aggrdecl_to_c(sd,true); // to add the decl
 	    // see kludge above: must set topt in case we are an inner aggregate
-	    e->topt = new AggrType(AggrInfo(KnownAggr(new(aggrdecl_t)sd),NULL));
+	    e->topt = aggr_type(KnownAggr(new(aggrdecl_t)sd),NULL);
 	  }
 	}
 	break;
@@ -3097,7 +3062,7 @@ DynCast:
         if (is_void_star_or_boxed_tvar(fieldtyp) &&
             !is_void_star_or_boxed_tvar(fieldexp_type))
           fieldexp->r =
-            cast_it_r(void_star_typ(),new_exp(fieldexp->r,DL));
+            cast_it_r(void_star_type(),new_exp(fieldexp->r,DL));
         // for tagged unions, must insert tag here
         int i = get_member_offset(sd,field->name);
         exp_t field_tag_exp = signed_int_exp(i,0);
@@ -3185,12 +3150,12 @@ DynCast:
         if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
-          pexp = rcalloc_exp(rgn, sizeoftyp_exp(t_c,DL), var_exp(x,DL));
+          pexp = rcalloc_exp(rgn, sizeoftype_exp(t_c,DL), var_exp(x,DL));
         } else {
-          pexp = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), var_exp(x,DL));
+          pexp = calloc_exp(*topt,sizeoftype_exp(t_c,DL), var_exp(x,DL));
         }
         rexp = fncall_exp(_tag_dyneither_e,
-                          list(var_exp(p,DL),sizeoftyp_exp(t_c,DL),
+                          list(var_exp(p,DL),sizeoftype_exp(t_c,DL),
                                var_exp(x,DL)), DL);
       } else {
         if (rgnopt != NULL && !no_regions) {
@@ -3206,8 +3171,8 @@ DynCast:
         rexp = fncall_exp(_tag_dyneither_e, list(var_exp(p,DL),uint_exp(1,DL),
                                                   var_exp(x,DL)), DL);
       }
-      let s = declare_stmt(x, uint_typ, num_elts,
-                           declare_stmt(p,cstar_typ(t_c,mt_tq),pexp,
+      let s = declare_stmt(x, uint_type, num_elts,
+                           declare_stmt(p,cstar_type(t_c,mt_tq),pexp,
                                         exp_stmt(rexp,DL),DL),DL);
       e->r = stmt_exp_r(s);
     } else {
@@ -3215,9 +3180,9 @@ DynCast:
         if (rgnopt != NULL && !no_regions) {
           exp_t rgn = (exp_t)rgnopt;
           exp_to_c(nv,rgn);
-          e->r = rcalloc_exp(rgn, sizeoftyp_exp(t_c,DL), num_elts)->r;
+          e->r = rcalloc_exp(rgn, sizeoftype_exp(t_c,DL), num_elts)->r;
         } else {
-          e->r = calloc_exp(*topt,sizeoftyp_exp(t_c,DL), num_elts)->r;
+          e->r = calloc_exp(*topt,sizeoftype_exp(t_c,DL), num_elts)->r;
         }
       } else {
         if (rgnopt != NULL && !no_regions) {
@@ -3271,7 +3236,7 @@ DynCast:
     let e1_typ = compress((type_t)e1->topt);
     exp_to_c(nv,e1);
     switch (e1_typ) {
-    case &AggrType(AggrInfo({.KnownAggr = &ad}, _)):
+    case &AppType(&AggrCon({.KnownAggr = &ad}), _):
       let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
       let e1_f = member_exp(e1,f,DL);
       let e1_f_tag = member_exp(e1_f,tag_sp,DL);
@@ -3330,8 +3295,8 @@ static exp_t compile_path(Tcpat::path_t ps, exp_t v) {
       let t2 = compress(typ_to_c_array(t));
       switch (t2) {
         // avoid casts that C will not like.
-      case &VoidType: 
-      case &AggrType(...):
+      case &AppType(&VoidCon,_): 
+      case &AppType(&AggrCon(...),_):
       case &AnonAggrType(...): break;
       default:  v = cast_it(typ_to_c_array(t),v); break;
       }
@@ -3350,7 +3315,7 @@ static exp_t compile_path(Tcpat::path_t ps, exp_t v) {
         switch (ps->tl->hd->access) {
         case &Tcpat::DatatypeField(tud, tuf, i):
           ps = ps->tl;
-          v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)),mt_tq),v);
+          v = cast_it(cstar_type(strctq(collapse_qvars(tuf->name, tud->name)),mt_tq),v);
           v = aggrarrow_exp(v, fieldname(i+1), DL);
           continue;
         default: 
@@ -3398,9 +3363,9 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
     default: break;
     }
     // cast v to a pointer to the datatype field
-    v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
+    v = cast_it(cstar_type(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
     return eq_exp(aggrarrow_exp(v,tag_sp,DL), uint_exp(i,DL),DL);
-    //v = cast_it(cstar_typ(sint_typ,mt_tq),v); // FIX: share type
+    //v = cast_it(cstar_type(sint_type,mt_tq),v); // FIX: share type
     //return eq_exp(deref_exp(v,DL), signed_int_exp(i,DL),DL);
   case &Tcpat::EqTaggedUnion(f,i):
     v = member_exp(member_exp(v,f,DL),tag_sp,DL);
@@ -3414,9 +3379,9 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
     default: break;
     }
     // cast v to a pointer to the datatype field
-    v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
+    v = cast_it(cstar_type(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
     return eq_exp(aggrarrow_exp(v,tag_sp,DL), var_exp(tuf->name,DL), DL);
-    //v = cast_it(cstar_typ(cstar_typ(char_typ,mt_tq),mt_tq),v); // FIX: share type
+    //v = cast_it(cstar_type(cstar_type(char_type,mt_tq),mt_tq),v); // FIX: share type
     //return eq_exp(deref_exp(v,DL), var_exp(tuf->name,DL), DL);
   }
 }
@@ -3520,10 +3485,10 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
   case &Reference_p(vd,p2):
     // v = &path
     *decls = rnew(rgn) List(vd,*decls);
-    vd->type = cstar_typ(t,mt_tq); //DJG: apparently necessary -- bug in tcPat?
+    vd->type = cstar_type(t,mt_tq); //DJG: apparently necessary -- bug in tcPat?
     // cast is needed to avoid a C warning when pointing to a polymorphic field
     let s = assign_stmt(varb_exp(new Local_b(vd),DL),
-			cast_it(cstar_typ(typ_to_c_array(t),mt_tq),
+			cast_it(cstar_type(typ_to_c_array(t),mt_tq),
                                 push_address_exp(copy_exp(path))),DL);
     return seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,path,p2));
   // for these cases, no initialization.
@@ -3538,7 +3503,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
   case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
     if (ps == NULL) return NULL;
     qvar_t tufstrct = collapse_qvars(tuf->name,tud->name);
-    let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
+    let field_ptr_typ = cstar_type(strctq(tufstrct),mt_tq);
     path = cast_it(field_ptr_typ,path);
     int cnt      = 1;
     let tuf_tqts = tuf->typs;
@@ -3570,7 +3535,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
     }
     return s;
   case &Aggr_p(NULL,...): toc_impos("unresolved aggregate pattern!");
-  case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+  case &Aggr_p(&info,_,dlps,_):
     // similar to translation of tuple pattern, but must account for designators.
     let ad = get_known_aggrdecl(info);
     stmt_opt_t s = NULL;
@@ -3588,10 +3553,10 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       let ftype = lookup_field(ad->impl->fields,f)->type;
       if (is_void_star_or_boxed_tvar(ftype))
         memexp = cast_it(t2c, memexp);
-      else if (!is_array_type(ftype) && kind_leq(&ak,typ_kind(ftype))) {
+      else if (!is_array_type(ftype) && kind_leq(&ak,type_kind(ftype))) {
         // for abstract members, we have to convert to the right
         // pointer type...
-        memexp = deref_exp(cast_it(cstar_typ(t2c,mt_tq), 
+        memexp = deref_exp(cast_it(cstar_type(t2c,mt_tq), 
                                    address_exp(memexp,DL)),DL);
       }
       s = seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,memexp,p2));
@@ -3680,7 +3645,7 @@ static stmt_t compile_decision_tree(region_t<`rgn> rgn,
         case &Deref_e(e): p = e; break;
         default: break;
         }
-        p = deref_exp(cast_it(cstar_typ(sint_typ,mt_tq),p),DL); break;
+        p = deref_exp(cast_it(cstar_type(sint_type,mt_tq),p),DL); break;
       case &TaggedUnionTest(f): 
         // add an extra .tag for tagged unions
         p = member_exp(member_exp(p,f,DL),tag_sp,DL); break;
@@ -3989,7 +3954,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         let body = s1;
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
         type_t rh_struct_typ     = strct(_RegionHandle_sp);
-        type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
+        type_t rh_struct_ptr_typ = cstar_type(rh_struct_typ,mt_tq);
         qvar_t rh_var = temp_var();
         qvar_t x_var  = vd->name;
         exp_t  rh_exp = var_exp(rh_var,DL);
@@ -4054,8 +4019,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_t  e_exp = var_exp(e_var,DL);
       exp_t  was_thrown_exp = var_exp(was_thrown_var,DL);
       type_t h_typ = strct(_handler_cons_sp);
-      type_t e_typ = typ_to_c(exn_typ());
-      type_t was_thrown_typ = typ_to_c(sint_typ);
+      type_t e_typ = typ_to_c(exn_type());
+      type_t was_thrown_typ = typ_to_c(sint_type);
       // e_exp needs a typ because it'll go through exp_to_c;
       e_exp->topt = e_typ;
       TOC_RGN(nv, temp) {
@@ -4125,7 +4090,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
     fn_pop_table = new Hashtable::lookup(*gpop_tables,f);
     if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
       let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-      let t2 = typ_to_c(dyneither_typ(t,&HeapRgn_val,tq,false_conref));// region irrelevant
+      let t2 = typ_to_c(fatptr_type(t,heap_rgn_type,tq,false_type));// region irrelevant
       let x2 = new $((nmspace_t)Loc_n,(var_t)n);
       f->args = List::append(f->args,new List(new $((var_t)n,tq,t2),NULL));
       f->cyc_varargs = NULL;
@@ -4169,7 +4134,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
     if (ad->kind == StructA)
       v = rnew(d) $(ad,strctq(n));
     else
-      v = rnew(d) $(ad,unionq_typ(n));
+      v = rnew(d) $(ad,unionq_type(n));
     *aggrs_so_far = Dict::insert(*aggrs_so_far,n,v);
   } else {
     let &$(ad2,t) = *dopt;
@@ -4198,7 +4163,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
       let old_field = fields->hd;
       let old_type = old_field->type;
       let old_atts = old_field->attributes;
-      if (kind_leq(&ak,typ_kind(old_type)) && 
+      if (kind_leq(&ak,type_kind(old_type)) && 
           ((ad->kind == StructA && fields->tl == NULL) ||
            ad->kind == UnionA)) {
         // HACK ALERT:
@@ -4216,10 +4181,10 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
           break;
         default: 
           old_atts = new List(new Aligned_att(NULL),old_atts);
-          old_type = new ArrayType(ArrayInfo(void_star_typ(),
+          old_type = new ArrayType(ArrayInfo(void_star_type(),
                                              empty_tqual(DL),
                                              uint_exp(0,DL),
-                                             new_conref(false),DL));
+                                             false_type,DL));
         }
       }
       let new_field = new Aggrfield{.name = old_field->name,
@@ -4238,7 +4203,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
         string_t s = aprintf("_union_%s_%s",*((*ad->name)[1]),*f);
         var_t str = new s;
         let value_field = new Aggrfield(val_sp,mt_tq,T,NULL,NULL,NULL);
-        let tag_field = new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL);
+        let tag_field = new Aggrfield(tag_sp,mt_tq,sint_type,NULL,NULL,NULL);
         let fs = list(tag_field,value_field);
 	let ad2 = make_c_struct_defn(str,fs);
         result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
@@ -4301,7 +4266,7 @@ static int datatypedecl_to_c_body<`d,`r>(region_t<`d> d,
                             typ_to_c((*ts->hd)[1]),NULL,NULL,NULL);
       fs = new List(f,fs);
     }
-    fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL,NULL),
+    fs = new List(new Aggrfield(tag_sp,mt_tq,sint_type,NULL,NULL,NULL),
                   List::imp_rev(fs));
     let ad = make_c_struct_defn(new "", fs);
     ad->name = collapse_qvars(f->name,tud->name);
@@ -4341,7 +4306,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
     datatypefield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
     let sz_exp  = uint_exp(numelts(*fn),DL);
-    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,DL);
+    let tag_typ = array_type(char_type,mt_tq,sz_exp,false_type,DL);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(*xdatatypes_so_far,f->name)) {
     case NULL:
@@ -4363,7 +4328,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
         fields = new List(newf,fields);
       }
       fields = new List(new Aggrfield(tag_sp,mt_tq,
-                                      cstar_typ(char_typ,mt_tq),NULL,NULL,NULL),
+                                      cstar_type(char_type,mt_tq),NULL,NULL,NULL),
                         List::imp_rev(fields));
       let strct_decl = make_c_struct_defn(new "",fields);
       strct_decl->name = collapse_qvars(f->name,xd->name);
@@ -4398,7 +4363,7 @@ static void local_decl_to_c(env_t nv,vardecl_t vd,stmt_t s) {
   type_t old_typ = vd->type;
   vd->type = typ_to_c(old_typ);
   // Fat pointers can't be declared with "register" scope
-  if (vd->sc == Register && is_tagged_pointer_typ(old_typ))
+  if (vd->sc == Register && is_tagged_pointer_type(old_typ))
     vd->sc = Public;
   stmt_to_c(nv,s);
   if(vd->initializer != NULL) {
@@ -4417,7 +4382,7 @@ static void local_decl_to_c(env_t nv,vardecl_t vd,stmt_t s) {
     // must put in zero for zero-terminated arrays
     switch (compress(old_typ)) {
     case &ArrayType(ArrayInfo{et,_,num_elts_opt,zt,_}):
-      if (conref_def(false,zt)) {
+      if (force_type2bool(false,zt)) {
         if (num_elts_opt == NULL)
           toc_impos("can't initialize zero-terminated array -- size unknown");
         exp_t num_elts = (exp_t)num_elts_opt;
@@ -4547,7 +4512,7 @@ static void exptypes_to_c(exp_t e) {
     }
     break;
   case &Offsetof_e(*t,_): fallthru(t);
-  case &Sizeoftyp_e(*t):  *t = typ_to_c(*t); break;
+  case &Sizeoftype_e(*t):  *t = typ_to_c(*t); break;
   case &StmtExp_e(s): stmttypes_to_c(s); break;
   case &Malloc_e(*m):
     if (m->elt_type != NULL)
@@ -4705,8 +4670,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 	td->defn = typ_to_c((type_t)td->defn);
       else {
 	switch (td->kind->v->kind) {
-	case BoxKind: td->defn = void_star_typ(); break;
-	default: td->defn = &VoidType_val; break;
+	case BoxKind: td->defn = void_star_type(); break;
+	default: td->defn = void_type; break;
 	}
       }
       // for non-anonymous-aggregates, this is wasteful b/c the printer

@@ -312,7 +312,7 @@ tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
   default: break;
   }
   ans->region_order = region_order;
-  ans->capability   = new JoinEff(new List(new AccessEff(rgn),
+  ans->capability   = join_eff(new List(access_eff(rgn),
 					   new List(ans->capability,NULL)));
   return put_fenv(te,ans);
 }
@@ -323,7 +323,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   ans->type_vars = new List(block_rgn, ans->type_vars);
   check_unique_tvars(loc, ans->type_vars); // DJG: FIX -- very wasteful
   ans->region_order = add_youngest(ans->region_order, block_rgn, false);
-  ans->capability = new JoinEff(new List(new AccessEff(block_typ), 
+  ans->capability = join_eff(new List(access_eff(block_typ), 
 					 new List(ans->capability,NULL)));
   ans->curr_rgn = block_typ;
   return put_fenv(te,ans);
@@ -352,8 +352,8 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
   // we add outlives constraints and refine the kind of the type variable
   let r1 = compress(r1);
   let r2 = compress(r2);
-  let r1k = typ_kind(r1);
-  let r2k = typ_kind(r2);
+  let r1k = type_kind(r1);
+  let r2k = type_kind(r2);
 
   // first do kind refinement
   bool r1_le_r2 = kind_leq(r1k,r2k);
@@ -370,12 +370,12 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
 
   // now update the outlives constraints
   let bds = NULL;
-  if (r1 != &HeapRgn_val && r1 != &UniqueRgn_val && r1 != &RefCntRgn_val) {
-    type_t eff1 = new AccessEff(r1);
+  if (r1 != heap_rgn_type && r1 != unique_rgn_type && r1 != refcnt_rgn_type) {
+    type_t eff1 = access_eff(r1);
     bds = new List(new $(eff1,r2),bds);
   }
-  if (r2 != &HeapRgn_val && r2 != &UniqueRgn_val && r2 != &RefCntRgn_val) {
-    type_t eff2 = new AccessEff(r2);
+  if (r2 != heap_rgn_type && r2 != unique_rgn_type && r2 != refcnt_rgn_type) {
+    type_t eff2 = access_eff(r2);
     bds = new List(new $(eff2,r1),bds);
   }
   return new_outlives_constraints(te,bds,loc);
@@ -383,7 +383,7 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
 
 type_t curr_rgn(tenv_t te) {
   let le = te->le;
-  if (le == NULL) return &HeapRgn_val;
+  if (le == NULL) return heap_rgn_type;
   return le->curr_rgn;
 }
 
@@ -396,7 +396,7 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   if (region_in_effect(false, rgn, capability) ||
       region_in_effect(true, rgn, capability))
     return;
-  if(eff_outlives_eff(ro,new AccessEff(rgn),capability))
+  if(eff_outlives_eff(ro,access_eff(rgn),capability))
     return;
   terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
 }
@@ -411,13 +411,13 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
   // When typechecking a toplevel declaration:
   if(le==NULL)
     switch (rt_a) {
-    case &RefCntRgn: return rt_b != &UniqueRgn_val;
-    case &UniqueRgn: return rt_b != &RefCntRgn_val;
-    case &HeapRgn:   return rt_b == &HeapRgn_val;
+    case &AppType(&RefCntCon,_): return rt_b != unique_rgn_type;
+    case &AppType(&UniqueCon,_): return rt_b != refcnt_rgn_type;
+    case &AppType(&HeapCon,_):   return rt_b == heap_rgn_type;
     default: return false;
     }
   // When typechecking a function body:
-  let res = effect_outlives(le->region_order,new AccessEff(rt_a),rt_b);
+  let res = effect_outlives(le->region_order,access_eff(rt_a),rt_b);
 //    fprintf(stderr,"region_outlives: %s outlves %s = %s\n",
 //  	  typ2string(rt_a),typ2string(rt_b),res ? "true" : "false");
 //    print_region_po(ro);
@@ -461,12 +461,12 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
     // not sure this could ever fail
     for(; po != NULL; po=po->tl)
       if((!subset_effect(true, (*po->hd)[0], empty_effect))
-	 || !subset_effect(true, new AccessEff((*po->hd)[1]), empty_effect))
+	 || !subset_effect(true, access_eff((*po->hd)[1]), empty_effect))
 	terr(loc,"the required region ordering is not satisfied here");
     return;
   }
   let &Fenv{.region_order = ro, .shared = shared, ...} = (fenv_t)le;
-  if(!satisfies_constraints(ro,po,&HeapRgn_val,false))
+  if(!satisfies_constraints(ro,po,heap_rgn_type,false))
     shared->delayed_constraint_checks =
       new List(new $(ro,po,loc), shared->delayed_constraint_checks);
 }
@@ -476,7 +476,7 @@ void check_delayed_constraints(tenv_t te) {
     get_fenv(te,"check_delayed_constraints")->shared->delayed_constraint_checks;
   for(; checks != NULL; checks = checks->tl) {
     let &$(rgn_order,po,loc) = checks->hd;
-    if(!satisfies_constraints(rgn_order,po,&HeapRgn_val,true))
+    if(!satisfies_constraints(rgn_order,po,heap_rgn_type,true))
       terr(loc,"the required region ordering is not satisfied here");
   }
 }
@@ -504,7 +504,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = dyneither_typ(t, param_rgn, tq, false_conref);
+	vd->type = fatptr_type(t, param_rgn, tq, false_type);
 	break;
       }
     }
@@ -514,7 +514,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
-         .capability  = new JoinEff(new List(new AccessEff(param_rgn),
+         .capability  = join_eff(new List(access_eff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
@@ -549,7 +549,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
       let vd = vds->hd;
       if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
-	vd->type = dyneither_typ(t, param_rgn, tq, false_conref);
+	vd->type = fatptr_type(t, param_rgn, tq, false_type);
 	break;
       }
     }
@@ -559,7 +559,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
-         .capability  = new JoinEff(new List(new AccessEff(param_rgn),
+         .capability  = join_eff(new List(access_eff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
@@ -570,14 +570,14 @@ fenv_t bogus_fenv(type_t ret_type,
 		  list_t<$(var_opt_t,tqual_t,type_t)@> args) {
   tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb);
   let tvs = new List(rgn0,NULL);
-  let rgn_po = initial_fn_po(NULL,NULL,new JoinEff(NULL),rgn0,0);
+  let rgn_po = initial_fn_po(NULL,NULL,join_eff(NULL),rgn0,0);
   type_t param_rgn = new VarType(rgn0);
   return new
     Fenv{.shared = new_shared_fenv(ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
-         .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
+         .capability  = join_eff(new List(access_eff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };

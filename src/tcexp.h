@@ -27,13 +27,7 @@ using Tcenv;
 
 extern type_t tcExp(tenv_t, type_t*, exp_t);
 extern type_t tcExpInitializer(tenv_t, type_t*, exp_t);
-
-struct TestEnv {
-  $(type_t,type_t) * eq;
-  bool isTrue;
-};
-typedef struct TestEnv testenv_t;
-testenv_t tcTest(tenv_t te, exp_t e, string_t msg_part);
+extern void tcTest(tenv_t te, exp_t e, string_t msg_part);
 
 }
 #endif
