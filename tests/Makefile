@@ -12,7 +12,7 @@ CYCC=../build/boot/cyclone$(EXE)
 CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
 endif
 
-EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest unique_patterns dynregion scheme)
+EXES=$(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist require md5 streambufftest unique_patterns dynregion scheme refcnt_test)
 
 CYCTESTS=arg_suite.h				\
   array_suite.h					\
@@ -60,6 +60,7 @@ all: $(EXES) failtest
 	./unique_patterns
 	./dynregion
 	./scheme
+	./refcnt_test
 
 # tests things that should be type errors
 failtest:
@@ -129,7 +130,7 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 	$(CYCC) $(CYCFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff)
+	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test)
 	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
 	$(RM) $(EXES) fail1.tmp
 	$(RM) *~ *.exe *.output *.stackdump

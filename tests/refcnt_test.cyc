@@ -1,16 +1,18 @@
 #include <core.h>
 #include <stdio.h>
+#include "cyctest.h"
+
+CT_SUITE_BEGIN(Refcnt)
+
+void begin() { }
+void end() { }
 
 using Core;
 
 int @`r my_alloc(region_t<`r::TR> h) {
-  return rnew (h) 1;
+  return rnew (h) -1;
 //   return rcnew 1; // no good
 //   return unew 1; // no good
-}
-
-int @`r my_ralloc(region_t<`r::R> h) {
-  return new 1;
 }
 
 int my_deref(int *`r::R x) { return *x; }
@@ -20,16 +22,23 @@ struct foo<`r::TR> {
   int *`r y;
 };
 
-int main() {
+void refcnt_test() {
   /* basic usage */
   int *`RC p1 = rcnew 3;
-  printf("p1=%d (cnt=%d)\n",*p1,refptr_count(p1));
+  CT_ASSERT(*p1 == 3);
+  CT_ASSERT(refptr_count(p1) == 1);
   let p2 = alias_refptr(p1);
-  printf("p1=%d (cnt=%d), p2=%d (cnt=%d)\n",
-	 *p1,refptr_count(p1),*p2,refptr_count(p2));
+
+  CT_ASSERT(*p1 == 3);
+  CT_ASSERT(refptr_count(p1) == 2);
+  CT_ASSERT(*p2 == 3);
+  CT_ASSERT(refptr_count(p2) == 2);
+  
   drop_refptr(p1);
-  printf("p2=%d (cnt=%d)\n",*p2,refptr_count(p2));
-  drop_refptr(p2);
+  CT_ASSERT(*p2 == 3);
+  CT_ASSERT(refptr_count(p2) == 1);
+
+  drop_refptr(p2); // p2 now consumed
 
   /* consuming stuff */
   int *`RC p = rcnew 3;
@@ -47,25 +56,44 @@ int main() {
 
   /* aliasing */
   int z;
-  { alias <`r> y2 = (int *`r)y;
+  { let alias <`r>int *`r y2 = y;
     z = my_deref(y2);
   }
   // implicit aliasing
   z = my_deref(y);
+  CT_ASSERT(refptr_count(y) == 1);
+  CT_ASSERT(z == -1);
   drop_refptr(y);
 
   /* swap and paths */
   struct foo @f = rcnew foo(rcnew 1, rcnew 2);
   q :=: f->x;
+  CT_ASSERT(refptr_count(q) == 1);
+  CT_ASSERT(*q == 1);
+
   let p3 = NULL;
   f->x :=: p3;
+  CT_ASSERT(refptr_count(p3) == 1);
+  CT_ASSERT(*p3 == 3);
+
   drop_refptr(p3);
   drop_refptr(q);
 //   drop_refptr(f->y); // no good
   q = NULL;
   q :=: f->y;
+
+  CT_ASSERT(refptr_count(q) == 1);
+  CT_ASSERT(*q == 2);
+
   drop_refptr(q);
   drop_refptr(f);
+}
 
-  return 0;
+CT_SUITE_INIT
+CT_ADD_TEST(refcnt_test)
+CT_SUITE_END
+
+int main(int argc, char ??argv) {
+  CT_SUITE_REGISTER(Refcnt);
+  return CycTest::run(1);
 }
