@@ -2688,10 +2688,9 @@ bool subtype(tenv_t te,
              list_t<$(type_t,type_t)@`H,`H> assume,
              type_t t1, type_t t2) {
   if (unify(t1,t2)) return true;
-  for (_ a = assume; a != NULL; a = a->tl)
+  for (_ a = assume; a != NULL; a = a->tl) 
     if (unify(t1,(*a->hd)[0]) && unify(t2,(*a->hd)[1]))
       return true;
-
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
@@ -2712,7 +2711,7 @@ bool subtype(tenv_t te,
       return false;
     // rt_a must outlive rt_b
     if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b) && 
-        !subtype(te, assume, rt_a, rt_b))
+        !subtype(te, assume, rt_a, rt_b)) 
       return false;
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {

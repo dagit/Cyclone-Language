@@ -36,7 +36,12 @@ struct RgnPO {
   Dict::dict_t<tvar_t, type_t> d; // type has EffKind, tvar outlives it
   type_t these_outlive_heap; // EffKind
   type_t these_outlive_unique; // EffKind
-  tvar_t youngest; // fact: there always is one
+  tvar_t youngest; // fact: there always is one -- this is the youngest non-
+                   // opened region.
+  type_t opened_regions;  // this is the set of regions opened since the
+                          // youngest region was opened.  They outlive any 
+                          // subsequently declared non-opened regions, but
+                          // not any opened regions.
 };
 
 /* Can assign a (col) to a (row):
@@ -129,9 +134,15 @@ rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool opened) {
   if(!opened && Dict::member(po->d,rgn))
     impos("RgnOrder::add_youngest: repeated region");
   let ans = new *po;
-  let eff = new AccessEff(new VarType(po->youngest));
-  ans->d = Dict::insert(po->d, rgn, eff);
-  ans->youngest = rgn;
+  if (opened) {
+    ans->d = Dict::insert(po->d, rgn, empty_effect);
+    ans->opened_regions = new JoinEff(list(new AccessEff(new VarType(rgn)), ans->opened_regions));
+  } else {
+    let eff = new JoinEff(list(new AccessEff(new VarType(po->youngest)), 
+                               ans->opened_regions));
+    ans->d = Dict::insert(po->d, rgn, eff);
+    ans->youngest = rgn;
+  }
   return ans;
 }
 rgn_po_t add_unordered(rgn_po_t po, tvar_t rgn) {
@@ -156,14 +167,14 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
   if (!valid_constraint(effect,new VarType(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
     terr(loc,"Invalid region ordering constraint; kind mismatch");
-    return new RgnPO(d,empty_effect,empty_effect,fst_rgn);
+    return new RgnPO(d,empty_effect,empty_effect,fst_rgn,empty_effect);
   }
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
 // 	  Absynpp::typ2string(new VarType(fst_rgn)),
 // 	  Absynpp::typ2string(effect));	  
   d = Dict::insert(d, fst_rgn, effect);
   // add in the explicit partial order -- no longer detects cycles
-  let ans = new RgnPO(d,empty_effect,empty_effect,fst_rgn);
+  let ans = new RgnPO(d,empty_effect,empty_effect,fst_rgn,empty_effect);
   for(; po != NULL; po = po->tl)
     ans = add_outlives_constraint(ans, (*po->hd)[0], (*po->hd)[1], loc);
 //   print_region_po(ans);
