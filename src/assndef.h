@@ -66,7 +66,7 @@ namespace AssnDef{
   
   term_t var(vardecl_t vd);
 
-  bool is_commutative(Absyn::primop_t p);
+  //  bool is_commutative(Absyn::primop_t p);
   term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts);
   term_t cast(Absyn::type_t tp, term_t tm);
   term_t fresh_var();
@@ -89,24 +89,8 @@ namespace AssnDef{
     Kill(assn_t); // replace all escaping variables with fresh logic variables
   };
 
-  // inner loop for calculating the size of an assertion -- we
-  // take care to figure out the size as a dag and not a tree.
-  unsigned int 
-  assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev);
   
-  // counter used for reporting purposes
-  extern unsigned int max_assn_size;
 
-  // calculate the size of an assertion
-  unsigned int assn_size(assn_t a);
-
-  // calculate a string representation (and total tree node count) for an
-  // assertion.  the prec field (precedent) is used to avoid some parens.
-  string_t a2string(assn_t a, int prec, int@ size);
-  
-  extern int tree_size;
-  
-  // convert an assertion to a string.
   string_t assn2string(assn_t a);
 
   // assertion constants for true and false
@@ -121,14 +105,13 @@ namespace AssnDef{
   // that want to lookup.  That could happen if we had a different 
   // type for hashtable lookup (as we did with dictionaries.)
 
-  extern struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
-  *hash_cons_table;
+  void reset_hash_cons_table(void);
 
-  int assnhash(datatype Assn @a);
+  //  int assnhash(datatype Assn @a);
 
   // compare two assertions for structural equality -- does not assume
   // the components have been hash-consed, but probably could.
-  int assncmp(datatype Assn @a1, datatype Assn @a2);
+  //  int assncmp(datatype Assn @a1, datatype Assn @a2);
   assn_t kill(assn_t a);
   
   assn_t and(assn_t a1, assn_t a2);
@@ -142,11 +125,7 @@ namespace AssnDef{
   assn_t ult(term_opt_t, term_opt_t);
   assn_t ulte(term_opt_t, term_opt_t);
 
-  //#define sgte(t1,t2) (slte(t2,t1))
-  //#define ugte(t1,t2) (ulte(t2,t1))
-  //#define sgt(t1,t2) (slt(t2,t1))
-  //#define ugt(t1,t2) (ult(t2,t1))
-  
+    
   assn_t reduce(assn_t a);
   term_t subst_term(term_t t, vardecl_t x, term_t newx);
   assn_t not(assn_t a);

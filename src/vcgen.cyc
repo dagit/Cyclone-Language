@@ -409,7 +409,8 @@ static assn_t vcgen_stmt_debug(env_t env, stmt_t s, assn_t ain) {
   default:
     print_tabs();
     let str = assn2string(ain);
-    fprintf(stderr,"stmt %s pre(%d/%d)=%s\n",stmt2shortstring(s),assn_size(ain),tree_size,str);
+    //    fprintf(stderr,"stmt %s pre(%d/%d)=%s\n",stmt2shortstring(s),assn_size(ain),tree_size,str);
+    fprintf(stderr,"stmt %s =%s\n",stmt2shortstring(s),str);
     indent += 2;
     let aout = vcgen_stmt_nodebug(env,s,ain);
     indent -= 2;
@@ -1104,5 +1105,5 @@ void vcgen_fundecl(JumpAnalysis::jump_anal_res_t tables, Absyn::fndecl_t fd){
       Warn::err(ens->loc, "cannot prove the @ensures clause %s from %s",
 		assn2string(reduce(at)),assn2string(reduce(res_assn)));
   }
-  hash_cons_table = NULL; // collect table
+  reset_hash_cons_table(); // collect table
 }

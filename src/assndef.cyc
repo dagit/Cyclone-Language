@@ -306,6 +306,9 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
 struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
 *hash_cons_table = NULL;
 
+void reset_hash_cons_table(void){
+  hash_cons_table = NULL;
+};
 // lookup an assertion to see if it has delayed substitutions or
 // kills with in it.  
 bool is_reduced(assn_t a) {
