@@ -483,7 +483,15 @@ object_t<`r> plus(region_t<`r> r, object_t<`r>?`r p) {
   return rnew(r) Int_v(sum);
 }
 
-// * primop
+// - primop 
+object_t<`r> minus(region_t<`r> r, object_t<`r>?`r p) {
+  switch $(p[0],p[1]) {
+  case $(&Int_v(x),&Int_v(y)): return rnew(r) Int_v(x - y);
+  default: fail("expected number");
+  }
+}
+
+// * primop (muls all arguments)
 object_t<`r> times(region_t<`r> r, object_t<`r>?`r p) {
   int prod = 0;
   unsigned n = numelts(p);
