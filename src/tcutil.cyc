@@ -1562,7 +1562,7 @@ type_t fndecl2typ(fndecl_t fd) {
                                List::map(fndecl2typ_f, fd->args),
                                fd->c_varargs, fd->cyc_varargs, 
                                fd->rgn_po, fn_type_atts});
-  };
+  }
   return (fd->cached_typ->v);
 }
 

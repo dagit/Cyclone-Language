@@ -246,7 +246,7 @@ static Set::set_t<place_t> * empty_place_set_ptr = null;
 pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
 					   pinfo_dict_t<local_root_t> d) {
   if(empty_place_set_ptr == null)
-    empty_place_set_ptr = new{Set::empty(place_cmp)};
+    empty_place_set_ptr = new Set::empty(place_cmp);
 
   let places = *empty_place_set_ptr;
   pinfo_getplaces(&places, 0, pinfo);
@@ -258,7 +258,7 @@ pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
 path_info_t assign_unknown_dict(init_level_t level, path_info_t pinfo) {
   switch(pinfo) {
   case &LeafPI(&UnknownIS(Esc,_)): return mkLeafPI(Esc,   level);
-  case &LeafPI(_):                return mkLeafPI(Unesc, level);
+  case &LeafPI(_):                 return mkLeafPI(Unesc, level);
   case &TuplePI(d):  
     return new TuplePI(Dict::map_c(assign_unknown_dict, level, d));
   case &StructPI(d): 

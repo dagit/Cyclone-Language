@@ -217,8 +217,8 @@ namespace Absyn {
     vararg_info_t*                           cyc_varargs;
     // partial order on region parameters
     list_t<$(type_t,type_t)@>                rgn_po;
-    // function type attributes can include regparm(n), stdcall xor cdecl,
-    // noreturn, and const.
+    // function type attributes can include regparm(n), noreturn, const
+    // and at most one of cdecl, stdcall, and fastcall
     attributes_t                             attributes; 
   };
 

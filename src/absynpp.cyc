@@ -1129,10 +1129,6 @@ doc_t stmt2doc(stmt_t st) {
   case &Exp_s(e):
     s = cat(exp2doc(e),text(";")); break;
   case &Seq_s(s1,s2):
-    // FIX:  gcc only allows declarations to be used at the beginning
-    // of blocks, so we force some explicit blocks to be written below.
-    // It is verbose for Cyclone; maybe it should be controlled by a flag.
-    // => done
     if (decls_first) {
       if (is_declaration(s1))
 	s = cat(text("{ "),
@@ -1245,10 +1241,6 @@ doc_t stmt2doc(stmt_t st) {
             nest(2,stmt2doc(s1)));
     break;
   case &Label_s(x,s1):
-    // FIX:  gcc does not allow declarations to be used immediately after
-    // labels.  This next case forces an explicit block to be written.
-    // It is verbose for Cyclone; maybe it should be controlled by a flag.
-    // => all right !
     if (decls_first && is_declaration(s1)) {
       s = cat(textptr(x),
               text(": {"),

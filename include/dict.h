@@ -77,14 +77,18 @@ extern void app_c(`c f(`d,`a,`b),`d env,gdict_t<`a,`b,`r,`e> d);
 extern void iter(void f(`a,`b),gdict_t<`a,`b,`r,`e> d);
 extern void iter_c(void f(`c,`a,`b),`c env,gdict_t<`a,`b,`r,`e> d);
 
-// raises Absent if an element of d1 is not in d2
+// the next 3 all raise Absent if an element of d1 is not in d2
 extern void iter2(void (@f)(`b,`b),
 		  gdict_t<`a,`b,`r1,`e1> d1, 
 		  gdict_t<`a,`b,`r2,`e2> d2);
-
 extern void iter2_c(void (@f)(`c,`b,`b), `c env,
 		    gdict_t<`a,`b,`r1,`e1> d1, 
 		    gdict_t<`a,`b,`r2,`e2> d2);
+extern `c fold2_c(`c (@f)(`d,`a,`b1,`b2,`c), `d inner_env,
+		  gdict_t<`a,`b1,`r1,`e1> d1, 
+		  gdict_t<`a,`b2,`r2,`e2> d2,
+		  `c accum);
+
 
 // make a copy of a dictionary into a new region -- same as rmap'ing
 // the identity function -- useful to do something like a union into

@@ -1606,14 +1606,14 @@ _temp1019); Cyc_Absyndump_dumpscope( _temp1031);{ struct Cyc_List_List*
 _temp1085; void* _temp1087; struct Cyc_Absyn_Tqual _temp1089; struct _tuple4
 _temp1083= Cyc_Absynpp_to_tms( _temp1027, _temp1025); _LL1090: _temp1089=
 _temp1083.f1; goto _LL1088; _LL1088: _temp1087= _temp1083.f2; goto _LL1086;
-_LL1086: _temp1085= _temp1083.f3; goto _LL1084; _LL1084: Cyc_Absyndump_dumptq(
-_temp1089);{ void* call_conv=( void*) Cyc_Absyn_Unused_att;{ struct Cyc_List_List*
-tms2= _temp1085; for( 0; tms2 != 0; tms2=(( struct Cyc_List_List*) _check_null(
-tms2))->tl){ void* _temp1091=( void*)(( struct Cyc_List_List*) _check_null( tms2))->hd;
-struct Cyc_List_List* _temp1097; struct Cyc_Position_Segment* _temp1099; _LL1093:
-if(( unsigned int) _temp1091 > 1u?*(( int*) _temp1091) == Cyc_Absyn_Attributes_mod:
-0){ _LL1100: _temp1099=(( struct Cyc_Absyn_Attributes_mod_struct*) _temp1091)->f1;
-goto _LL1098; _LL1098: _temp1097=(( struct Cyc_Absyn_Attributes_mod_struct*)
+_LL1086: _temp1085= _temp1083.f3; goto _LL1084; _LL1084: { void* call_conv=(
+void*) Cyc_Absyn_Unused_att;{ struct Cyc_List_List* tms2= _temp1085; for( 0;
+tms2 != 0; tms2=(( struct Cyc_List_List*) _check_null( tms2))->tl){ void*
+_temp1091=( void*)(( struct Cyc_List_List*) _check_null( tms2))->hd; struct Cyc_List_List*
+_temp1097; struct Cyc_Position_Segment* _temp1099; _LL1093: if(( unsigned int)
+_temp1091 > 1u?*(( int*) _temp1091) == Cyc_Absyn_Attributes_mod: 0){ _LL1100:
+_temp1099=(( struct Cyc_Absyn_Attributes_mod_struct*) _temp1091)->f1; goto
+_LL1098; _LL1098: _temp1097=(( struct Cyc_Absyn_Attributes_mod_struct*)
 _temp1091)->f2; goto _LL1094;} else{ goto _LL1095;} _LL1095: goto _LL1096;
 _LL1094: for( 0; _temp1097 != 0; _temp1097=(( struct Cyc_List_List*) _check_null(
 _temp1097))->tl){ void* _temp1101=( void*)(( struct Cyc_List_List*) _check_null(

@@ -766,8 +766,8 @@ d, _temp402, _temp417);}}}}} return d;} static struct Cyc_Set_Set** Cyc_CfFlowIn
 0; struct Cyc_Dict_Dict* Cyc_CfFlowInfo_escape_pointsto( void* pinfo, struct Cyc_Dict_Dict*
 d){ if( Cyc_CfFlowInfo_empty_place_set_ptr == 0){ Cyc_CfFlowInfo_empty_place_set_ptr=({
 struct Cyc_Set_Set** _temp419=( struct Cyc_Set_Set**) GC_malloc( sizeof( struct
-Cyc_Set_Set*) * 1); _temp419[ 0]=(( struct Cyc_Set_Set*(*)( int(* comp)( struct
-Cyc_CfFlowInfo_Place*, struct Cyc_CfFlowInfo_Place*))) Cyc_Set_empty)( Cyc_CfFlowInfo_place_cmp);
+Cyc_Set_Set*)); _temp419[ 0]=(( struct Cyc_Set_Set*(*)( int(* comp)( struct Cyc_CfFlowInfo_Place*,
+struct Cyc_CfFlowInfo_Place*))) Cyc_Set_empty)( Cyc_CfFlowInfo_place_cmp);
 _temp419;});}{ struct Cyc_Set_Set* _temp420=*(( struct Cyc_Set_Set**)
 _check_null( Cyc_CfFlowInfo_empty_place_set_ptr)); goto _LL421; _LL421:(( void(*)(
 struct Cyc_Set_Set** places_ptr, int a, void* pinfo)) Cyc_CfFlowInfo_pinfo_getplaces)(&

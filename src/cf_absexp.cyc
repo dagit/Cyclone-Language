@@ -30,6 +30,7 @@
 
 #include <core.h>
 #include <list.h>
+#include <string.h>
 #include <dict.h>
 #include "tcutil.h"
 #include "absyn.h"
@@ -309,16 +310,16 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao);
 init_state_t eval_absop_l(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   switch(ao) {
   case &LocalOp(vd):   
-    return new MustPointTo(new {Place(new VarRoot(vd),null)});
+    return new MustPointTo(new Place(new VarRoot(vd),null));
   case &MallocOp(e,_): 
-    return new MustPointTo(new {Place(new MallocPt(e),null)});
+    return new MustPointTo(new Place(new MallocPt(e),null));
   case &MemberOp(ao2,n):
     let inner_state = eval_absop_l(pinfo_dict,ao2); 
     switch(inner_state) {
     case &UnknownIS(_,_): return inner_state;
     case &MustPointTo(&Place(root,field_list)): // too much allocation!!!
-      return new MustPointTo(new {Place(root, 
-				    append(field_list, new{List(n,null)}))});
+      return new MustPointTo(new Place(root, 
+				       append(field_list, new List(n,null))));
     }
   case &DerefOp(ao2): 
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
@@ -356,22 +357,36 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   }
 }
 
-// note: list is logically a set, but compare is a pain and a list just means
-//       repeated work.
-void assign_escape(List::list_t<path_info_t>@`r escaping_states,
-		   path_info_t old_pinfo, path_info_t new_pinfo) {
-  switch($(old_pinfo,new_pinfo)) {
-  case $(&LeafPI(&UnknownIS(Esc,_)), &LeafPI(_)):
-    *escaping_states = new{List(new_pinfo, *escaping_states)};
-    return;
-  case $(&LeafPI(_), &LeafPI(_)):
-    return;
+path_info_t assign_escape(List::list_t<path_info_t>@`r escaping_states,
+			  path_info_t old_pinfo, path_info_t new_pinfo);
+
+Dict::dict_t<`a,path_info_t> 
+assign_escape_f(List::list_t<path_info_t>@`r escaping_states, `a key,
+		path_info_t b1, path_info_t b2, 
+		Dict::dict_t<`a,path_info_t> accum) {
+  return Dict::insert(accum, key, assign_escape(escaping_states, b1, b2));
+}
+
+path_info_t assign_escape(List::list_t<path_info_t>@`r escaping_states,
+			  path_info_t old_pinfo, path_info_t new_pinfo) {
+  switch ($(old_pinfo,new_pinfo)) {
+  case $(&LeafPI(&MustPointTo(_)),     &LeafPI(&UnknownIS(_,level))): 
+    fallthru(level);
+  case $(&LeafPI(&UnknownIS(Unesc,_)), &LeafPI(&UnknownIS(_,level))):
+    return mkLeafPI(Unesc,level);
+  case $(&LeafPI(&MustPointTo(_)),     &LeafPI(_)):  fallthru;
+  case $(&LeafPI(&UnknownIS(Unesc,_)), &LeafPI(_)): // must point to something
+    return new_pinfo;
+  case $(&LeafPI(&UnknownIS(Esc,_)),   &LeafPI(_)):
+    *escaping_states = new List(new_pinfo, *escaping_states);
+    // may as well make All -- it will be an error if it's not
+    return mkLeafPI(Esc,AllIL);
   case $(&TuplePI(d1),  &TuplePI(d2)):
-    Dict::iter2_c(assign_escape, escaping_states, d1, d2);
-    return;
+    return new TuplePI(Dict::fold2_c(assign_escape_f, escaping_states, d1, d2,
+				     Dict::empty(Core::intcmp)));
   case $(&StructPI(d1), &StructPI(d2)):
-    Dict::iter2_c(assign_escape, escaping_states, d1, d2);
-    return;
+    return new StructPI(Dict::fold2_c(assign_escape_f, escaping_states, d1, d2,
+				      Dict::empty(String::zstrptrcmp)));
   default: throw new Core::Impossible("bad pinfos in assign_escape");
   }
 }
@@ -449,32 +464,29 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
       // WARNING: place better be in the dict (in scope)
       //   which is why we have kludges for Comprehension_e
       let old_pinfo = lookup_place(pinfo_dict, place);
-      let new_pinfo = eval_absop_r(pinfo_dict, aor);
-      switch($(old_pinfo,new_pinfo)) {
+      let r_pinfo   = eval_absop_r(pinfo_dict, aor);
+      switch($(old_pinfo,r_pinfo)) {
       case $(&TuplePI(_),  &LeafPI(&UnknownIS(_,level))): fallthru(level);
       case $(&StructPI(_), &LeafPI(&UnknownIS(_,level))):
-	new_pinfo  = assign_unknown_dict(level, old_pinfo);
-	pinfo_dict = insert_place(pinfo_dict, place, new_pinfo);
-	let ans = new InitsFL(pinfo_dict);
-	update_tryflow(env, ans);
-	return ans;
-      default: 
-	let escaping_pinfos = null;
-	assign_escape(&escaping_pinfos, old_pinfo, new_pinfo);
-	for(; escaping_pinfos != null; escaping_pinfos = escaping_pinfos->tl) {
-	  let esc_pinfo = escaping_pinfos->hd;
-	  if(!isAllInit(pinfo_dict, esc_pinfo)) {
-	    Tcutil::terr(loc,"uninitialized value assigned to ambiguous place");
-	    return BottomFL; // attempt to avoid cascaded messages
-	  }
-	  pinfo_dict = escape_pointsto(esc_pinfo, pinfo_dict);
+	r_pinfo  = assign_unknown_dict(level, old_pinfo);
+	break;
+      default: break;
+      }
+      let escaping_pinfos = null;
+      let new_pinfo = assign_escape(&escaping_pinfos, old_pinfo, r_pinfo);
+      for(; escaping_pinfos != null; escaping_pinfos = escaping_pinfos->tl) {
+	let esc_pinfo = escaping_pinfos->hd;
+	if(!isAllInit(pinfo_dict, esc_pinfo)) {
+	  Tcutil::terr(loc,"uninitialized value assigned to escaped place");
+	  return BottomFL; // attempt to avoid cascaded messages
 	}
-	pinfo_dict = insert_place(pinfo_dict, place, new_pinfo);
-	let ans = new InitsFL(pinfo_dict);
-	update_tryflow(env,ans);
-	return ans;
-      }	
-    }
+	pinfo_dict = escape_pointsto(esc_pinfo, pinfo_dict);
+      }
+      pinfo_dict = insert_place(pinfo_dict, place, new_pinfo);
+      let ans = new InitsFL(pinfo_dict);
+      update_tryflow(env,ans);
+      return ans;
+    }	
     fallthru(aor); // this should be correct for all Unknown variants (??)
 
   case &UseAE(ao): 

@@ -930,7 +930,6 @@ void dumpdecl(decl_t d) {
       dumpatts(atts);
       dumpscope(sc);
       let $(tq,t,tms) = Absynpp::to_tms(tq,type);
-      dumptq(tq);
       // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
       attribute_t call_conv = Unused_att;
       for(_ tms2 = tms; tms2 != null; tms2 = tms2->tl)

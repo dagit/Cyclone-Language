@@ -258,6 +258,22 @@ void iter2_c(void (@f)(`c,`b,`b), `c inner_env,
   iter_c(iter2_c_f, &env, d1);
 }
 
+static `c fold2_c_f($(`c (@f)(`d,`a,`b1,`b2,`c), 
+		       gdict_t<`a,`b2,`r2,`e2>, 
+		       `d)@`r env,
+		     `a a, `b1 b1, `c accum) {
+  let &$(f, d2, inner_env) = env;
+  return f(inner_env, a, b1, Dict::lookup(d2,a), accum);
+}
+
+`c fold2_c(`c (@f)(`d,`a,`b1,`b2,`c), `d inner_env,
+	   gdict_t<`a,`b1,`r1,`e1> d1, 
+	   gdict_t<`a,`b2,`r2,`e2> d2,
+	   `c accum) {
+  let env = $(f, d2, inner_env);
+  return fold_c(fold2_c_f, &env, d1, accum);
+}
+
 static tree<`a,`b,`r2> copy_tree(region_t<`r2> r2, tree<`a,`b,`r1> t) {
   if (t == null) return null;
   else {
