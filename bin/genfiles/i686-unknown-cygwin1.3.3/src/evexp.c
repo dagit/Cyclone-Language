@@ -283,10 +283,14 @@ int Cyc_Absyn_Signed= 0; static const int Cyc_Absyn_Unsigned= 1; struct Cyc_Absy
 void* v; } ; static const int Cyc_Absyn_Eq_constr= 0; struct Cyc_Absyn_Eq_constr_struct{
 int tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr= 1; struct Cyc_Absyn_Forward_constr_struct{
 int tag; struct Cyc_Absyn_Conref* f1; } ; static const int Cyc_Absyn_No_constr=
-0; struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; struct Cyc_Absyn_Conref*
-kind; } ; static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b=
-0; struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-struct Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
+0; static const int Cyc_Absyn_Eq_kb= 0; struct Cyc_Absyn_Eq_kb_struct{ int tag;
+void* f1; } ; static const int Cyc_Absyn_Unknown_kb= 1; struct Cyc_Absyn_Unknown_kb_struct{
+int tag; struct Cyc_Core_Opt* f1; } ; static const int Cyc_Absyn_Less_kb= 2;
+struct Cyc_Absyn_Less_kb_struct{ int tag; struct Cyc_Core_Opt* f1; void* f2; } ;
+struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; void* kind; } ;
+static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0;
+struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct
+Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
 nullable; struct Cyc_Absyn_Tqual tq; struct Cyc_Absyn_Conref* bounds; } ; struct
 Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt* name; struct Cyc_Absyn_Tqual tq; void*
 type; int inject; } ; struct Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars;
@@ -572,9 +576,8 @@ Cyc_Absyn_ArrayElement= 0; struct Cyc_Absyn_ArrayElement_struct{ int tag; struct
 Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName= 1; struct Cyc_Absyn_FieldName_struct{
 int tag; struct _tagged_arr* f1; } ; extern unsigned char Cyc_Absyn_EmptyAnnot[
 15u]; extern struct Cyc_Absyn_Conref* Cyc_Absyn_compress_conref( struct Cyc_Absyn_Conref*
-x); extern void* Cyc_Absyn_conref_val( struct Cyc_Absyn_Conref* x); struct Cyc_PP_Ppstate;
-struct Cyc_PP_Out; struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{ int
-expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
+x); struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{
+int expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
 int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
 print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
 print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
@@ -604,8 +607,9 @@ struct Cyc_List_List* ns; struct Cyc_Dict_Dict* ae; struct Cyc_Core_Opt* le; } ;
 extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void* Cyc_Tcutil_impos(
 struct _tagged_arr fmt, struct _tagged_arr ap); extern void Cyc_Tcutil_terr(
 struct Cyc_Position_Segment*, struct _tagged_arr fmt, struct _tagged_arr ap);
-extern void* Cyc_Tcutil_compress( void* t); extern unsigned int Cyc_Evexp_eval_const_uint_exp(
-struct Cyc_Absyn_Exp* e); extern int Cyc_Evexp_okay_szofarg( void* t); void* Cyc_Evexp_eval_const_exp(
+extern void* Cyc_Tcutil_tvar_kind( struct Cyc_Absyn_Tvar* t); extern void* Cyc_Tcutil_compress(
+void* t); extern unsigned int Cyc_Evexp_eval_const_uint_exp( struct Cyc_Absyn_Exp*
+e); extern int Cyc_Evexp_okay_szofarg( void* t); void* Cyc_Evexp_eval_const_exp(
 struct Cyc_Absyn_Exp* e); void* Cyc_Evexp_promote_const( void* cn){ void* _temp0=
 cn; unsigned char _temp8; void* _temp10; short _temp12; void* _temp14; _LL2: if((
 unsigned int) _temp0 >  1u?*(( int*) _temp0) ==  Cyc_Absyn_Char_c: 0){ _LL11:
@@ -699,8 +703,8 @@ unsigned int) _temp44 >  3u?*(( int*) _temp44) ==  Cyc_Absyn_AccessEff: 0){ goto
 _LL93;} else{ goto _LL94;} _LL94: if(( unsigned int) _temp44 >  3u?*(( int*)
 _temp44) ==  Cyc_Absyn_RgnsEff: 0){ goto _LL95;} else{ goto _LL96;} _LL96: if((
 unsigned int) _temp44 >  3u?*(( int*) _temp44) ==  Cyc_Absyn_TypedefType: 0){
-goto _LL97;} else{ goto _LL45;} _LL47: return 0; _LL49: { void* _temp131= Cyc_Absyn_conref_val(
-_temp98->kind); _LL133: if( _temp131 == ( void*) Cyc_Absyn_BoxKind){ goto _LL134;}
+goto _LL97;} else{ goto _LL45;} _LL47: return 0; _LL49: { void* _temp131= Cyc_Tcutil_tvar_kind(
+_temp98); _LL133: if( _temp131 == ( void*) Cyc_Absyn_BoxKind){ goto _LL134;}
 else{ goto _LL135;} _LL135: goto _LL136; _LL134: return 1; _LL136: return 0;
 _LL132:;} _LL51: return 1; _LL53: return 0; _LL55: return 1; _LL57: _temp111=
 _temp109->typs; goto _LL59; _LL59: for( 0; _temp111 !=  0; _temp111= _temp111->tl){

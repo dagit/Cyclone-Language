@@ -145,7 +145,27 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
   default: return y;
   }
 }
-    
+
+kindbound_t compress_kb(kindbound_t k) {
+  switch (k) {
+  case &Eq_kb(_): return k;
+  case &Unknown_kb(NULL): return k;
+  case &Less_kb(NULL,_): return k;
+  case &Unknown_kb(&Opt(*k2)): fallthru(k2);
+  case &Less_kb(&Opt(*k2),_): 
+    *k2 = compress_kb(*k2);
+    return *k2;
+  }
+}
+
+kind_t force_kb(kindbound_t kb) {
+  switch (compress_kb(kb)) {
+  case &Eq_kb(k): return k;
+  case &Unknown_kb(*f): fallthru(f,BoxKind);
+  case &Less_kb(*f,k):
+    *f = new Opt(new Eq_kb(k)); return k;
+  }
+}
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types

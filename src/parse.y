@@ -292,7 +292,7 @@ static bool is_typeparam(type_modifier_t tm) {
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.
-static type_t id2type(string_t<`H> s, conref_t<kind_t> k) {
+static type_t id2type(string_t<`H> s, kindbound_t k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else
@@ -300,10 +300,11 @@ static type_t id2type(string_t<`H> s, conref_t<kind_t> k) {
 }
 
 static tvar_t copy_tvar(tvar_t t) {
-  conref_t<kind_t> k;
-  switch (compress_conref(t->kind)->v) {
-  case &Eq_constr(v): k = new_conref(v); break;
-  default: k = empty_conref(); break;
+  kindbound_t k;
+  switch (compress_kb(t->kind)) {
+  case &Eq_kb(knd): k = new Eq_kb(knd); break;
+  case &Unknown_kb(_): k = new Unknown_kb(NULL); break;
+  case &Less_kb(_,knd): k = new Less_kb(NULL,knd); break;
   }
   return new Tvar{.name=t->name, .identity = NULL, .kind = k};
 }
@@ -322,18 +323,17 @@ static type_t tvar2typ(tvar_t pr) {
   return new VarType(pr);
 }
 
-  // return false on failure -- a wrong explicit kind was already there
-static bool set_vartyp_kind(type_t t, kind_t k) {
+// if tvar's kind is unconstrained, set it to k
+static void set_vartyp_kind(type_t t, kind_t k) {
   switch(Tcutil::compress(t)) {
-  case &VarType(&Tvar(_,_,c)): 
-    c = compress_conref(c);
-    switch(c->v) {
-    case No_constr:      c->v = new Eq_constr(k); return true;
-    case &Eq_constr(k2): return k == k2;
-    default: throw new Core::Impossible("forward after compress_conref");
+  case &VarType(&Tvar(_,_,*cptr)): 
+    let c = compress_kb(*cptr);
+    switch(c) {
+    case &Eq_kb(_): return;
+    case &Less_kb(_,_): return;
+    case &Unknown_kb(_): *cptr = new Eq_kb(k); return;
     }
-  default: return false;
-             // throw new Core::Impossible("set_vartyp_kind: not a VarType");
+  default: return;
   }
 }
 
@@ -1718,8 +1718,8 @@ parameter_type_list:
 
 /* CYC:  new */
 type_var:
-  TYPE_VAR                  { $$ = ^$(id2type($1,empty_conref())); }
-| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,new_conref($3))); }
+  TYPE_VAR                  { $$ = ^$(id2type($1,new Unknown_kb(NULL))); }
+| TYPE_VAR COLON_COLON kind { $$ = ^$(id2type($1,new Eq_kb($3))); }
 
 optional_effect:
   /* empty */
@@ -1737,11 +1737,11 @@ optional_rgn_order:
 
 rgn_order:
   TYPE_VAR '<' TYPE_VAR
-  { $$ = ^$(new List(new $(id2type($1,new_conref(RgnKind)),
-                           id2type($3,new_conref(RgnKind))),NULL)); }
+  { $$ = ^$(new List(new $(id2type($1,new Eq_kb(RgnKind)),
+                           id2type($3,new Eq_kb(RgnKind))),NULL)); }
 | TYPE_VAR '<' TYPE_VAR ',' rgn_order 
-  { $$ = ^$(new List(new $(id2type($1,new_conref(RgnKind)),
-                           id2type($3,new_conref(RgnKind))),$5)); }
+  { $$ = ^$(new List(new $(id2type($1,new Eq_kb(RgnKind)),
+                           id2type($3,new Eq_kb(RgnKind))),$5)); }
 ;
 
 optional_inject:
@@ -1774,13 +1774,11 @@ atomic_effect:
 /* CYC:  new */
 region_set:
   type_var
-  { if(!set_vartyp_kind($1,RgnKind))
-      err("expecting region kind", LOC(@1,@1));
+  { set_vartyp_kind($1,RgnKind);
     $$=^$(new List(new AccessEff($1),NULL)); 
   }
 | type_var ',' region_set
-  { if(!set_vartyp_kind($1,RgnKind))
-      err("expecting region kind", LOC(@1,@1));
+  { set_vartyp_kind($1,RgnKind);
     $$=^$(new List(new AccessEff($1),$3)); 
   }
 ;
@@ -2003,7 +2001,7 @@ statement:
 | REGION '<' TYPE_VAR '>' IDENTIFIER statement
   { if (zstrcmp($3,"`H") == 0)
       err("bad occurrence of heap region `H",LOC(@3,@3));
-    tvar_t tv = new Tvar(new $3,NULL,new_conref(RgnKind));
+    tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
                                                new RgnHandleType(t),NULL),$6),
@@ -2012,8 +2010,7 @@ statement:
 | REGION IDENTIFIER statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@2,@2));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), NULL,
-			 new_conref(RgnKind));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), NULL, new Eq_kb(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $2),
                                                new RgnHandleType(t),NULL),$3),

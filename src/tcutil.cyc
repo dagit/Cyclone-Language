@@ -104,7 +104,7 @@ static string_t tvar2string(tvar_t tv) {
 
 void print_tvars(list_t<tvar_t> tvs) {
   for (; tvs != NULL; tvs = tvs->tl) 
-    fprintf(stderr,"%s::%s ",tvar2string(tvs->hd),ckind2string(tvs->hd->kind));
+    fprintf(stderr,"%s::%s ",tvar2string(tvs->hd),kindbound2string(tvs->hd->kind));
   fprintf(stderr,"\n"); fflush(stderr);
 }
 
@@ -183,9 +183,16 @@ static conref_t<`a> copy_conref(conref_t<`a> c) {
   case &Forward_constr(cr): return copy_conref(cr);
   }
 }
+static kindbound_t copy_kindbound(kindbound_t kb) {
+  switch (compress_kb(kb)) {
+  case &Eq_kb(k): return new Eq_kb(k);
+  case &Unknown_kb(_): return new Unknown_kb(NULL);
+  case &Less_kb(_,k): return new Less_kb(NULL,k);
+  }
+}
 static tvar_t copy_tvar(tvar_t tv) {
   // NB: loses sharing of identity here
-  return new Tvar(tv->name,NULL,copy_conref(tv->kind));
+  return new Tvar(tv->name,NULL,copy_kindbound(tv->kind));
 }
 static $(opt_t<var_t>,tqual_t,type_t)@ 
   copy_arg($(opt_t<var_t,`H>,tqual_t,type_t) @arg) {
@@ -280,7 +287,7 @@ type_t copy_type(type_t t) {
 //          BoxType
 // Only used during unification -- we can constrain an Evar or VarType
 // as long as we move down in the lattice.
-static bool kind_leq(kind_t k1, kind_t k2) {
+bool kind_leq(kind_t k1, kind_t k2) {
   if (k1 == k2) return true;
   switch ($(k1,k2)) {
   case $(BoxKind, MemKind): 
@@ -291,7 +298,11 @@ static bool kind_leq(kind_t k1, kind_t k2) {
 }
 
 kind_t tvar_kind(tvar_t tv) {
-  return conref_val(tv->kind);
+  switch (compress_kb(tv->kind)) {
+  case &Eq_kb(k): return k;
+  case &Less_kb(_,k): return k;
+  default: return impos("kind not suitably constrained!");
+  }
 }
 
 // Return the "least" kind of a type, according to the lattice above
@@ -301,7 +312,7 @@ kind_t tvar_kind(tvar_t tv) {
 kind_t typ_kind(type_t t) {
   switch (compress(t)) {
   case &Evar(k,topt,_,_): return k->v; 
-  case &VarType(tv):      return conref_val(tv->kind);
+  case &VarType(tv):      return tvar_kind(tv);
   case VoidType:          return MemKind;
   case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
   case FloatType:         
@@ -541,7 +552,7 @@ static type_t rgns_of_field(structfield_t sf) {
 
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
-  switch (conref_val(tv->kind)) {
+  switch (tvar_kind(tv)) {
   case RgnKind: t = HeapRgn; break;
   case EffKind: t = empty_effect; break;
   default: t = sint_t; // lives in every kind
@@ -1064,8 +1075,8 @@ void unify_it(type_t t1, type_t t2) {
     // identities should be resolved
     let id2 = *tv2->identity;
     let id1 = *tv1->identity; 
-    let k2 = conref_val(tv2->kind);
-    let k1 = conref_val(tv1->kind);
+    let k2 = tvar_kind(tv2);
+    let k1 = tvar_kind(tv1);
     // kinds should already be resolved.  
     // FIX: shouldn't need the zstrptrcmp any more...
     if (id1 == id2 && zstrptrcmp(x2,x1) == 0) {
@@ -1200,7 +1211,15 @@ void unify_it(type_t t1, type_t t2) {
     while (tvs1 != NULL) {
       if (tvs2 == NULL) { 
         failure_reason = "(second function type has too few type variables)"; 
-        break;
+        throw Unify;
+      }
+      let k1 = tvar_kind(tvs1->hd);
+      let k2 = tvar_kind(tvs2->hd);
+      if (k1 != k2) {
+        failure_reason = aprintf("(type var %s has different kinds %s and %s)",
+                                 tvar2string(tvs1->hd), kind2string(k1),
+                                 kind2string(k2));
+        throw Unify;
       }
       inst = rnew(rgn) List(rnew(rgn) $(tvs2->hd,new VarType(tvs1->hd)),inst);
       tvs1 = tvs1->tl;
@@ -1350,7 +1369,7 @@ int opt_cmp(int cmp(`a,`a),opt_t<`a,`r> a1, opt_t<`a,`r> a2) {
   if(a1 != NULL && a2 == NULL) return 1;
   return cmp(a1->v,a2->v);
 }
-int star_cmp(int cmp(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
+int star_cmp<`a::A,`r::R>(int cmp(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
   if(a1 == a2) return 0;
   if(a1 == NULL && a2 != NULL) return -1;
   if(a1 != NULL && a2 == NULL) return 1;
@@ -2209,22 +2228,28 @@ void check_contains_assign(exp_t e) {
 /////////////////////////////////////////////////////////////////////
 
 // Given two kind constraint refs, merge them so that they will
-// point to the most constrained kind.  
-static bool constrain_kinds(conref_t<kind_t> c1, conref_t<kind_t> c2) {
-  c1 = compress_conref(c1);
-  c2 = compress_conref(c2);
-  if (c1 == c2) return true;
-  if (c1->v == No_constr) {
-    c1->v = new Forward_constr(c2); return true;
-  } else if (c2->v == No_constr) {
-    c2->v = new Forward_constr(c1); return true;
-  } else {
-    kind_t k1 = conref_val(c1);
-    kind_t k2 = conref_val(c2);
+// point to the most constrained kind -- if they're compatible
+// return true, otherwise return false.
+static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
+  c1 = compress_kb(c1);
+  c2 = compress_kb(c2);
+  switch ($(c1,c2)) {
+  case $(&Eq_kb(k1),&Eq_kb(k2)): return k1 == k2;
+  case $(_,&Unknown_kb(*f)): *f = new Opt(c1); return true;
+  case $(&Unknown_kb(*f),_): *f = new Opt(c2); return true;
+  case $(&Less_kb(*f,k1),&Eq_kb(k2)): 
+    if (kind_leq(k2,k1)) {
+      *f = new Opt(c2); return true;
+    } else return false;
+  case $(&Eq_kb(k1),&Less_kb(*f,k2)):
     if (kind_leq(k1,k2)) {
-      c2->v = new Forward_constr(c1); return true;
+      *f = new Opt(c1); return true;
+    } else return false;
+  case $(&Less_kb(*f1,k1),&Less_kb(*f2,k2)):
+    if (kind_leq(k1,k2)) {
+      *f2 = new Opt(c1); return true;
     } else if (kind_leq(k2,k1)) {
-      c1->v = new Forward_constr(c2); return true;
+      *f1 = new Opt(c2); return true;
     } else return false;
   }
 }
@@ -2236,10 +2261,10 @@ int *new_tvar_id() {
 }
 
 static int tvar_counter = 0;
-tvar_t new_tvar(kind_t k) {
+tvar_t new_tvar(kindbound_t k) {
   int i = tvar_counter++;
   string_t s = aprintf("#%d",i);
-  return new Tvar(new{s},NULL,new_conref(k));
+  return new Tvar(new{s},NULL,k);
 }
 
 bool is_temp_tvar(tvar_t t) {
@@ -2476,14 +2501,14 @@ exp_t default_initializer(tenv_t te, type_t t, seg_t loc) {
 
 // Generate an appropriate evar for an instantiation of a type var
 $(tvar_t,type_t)@ make_inst_var(list_t<tvar_t,`H> s, tvar_t tv) {
-  kind_t k = conref_val(tv->kind);
+  kind_t k = tvar_kind(tv);
   return new $(tv, new_evar(new Opt(k),new Opt(s)));
 }
 
 $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@`r2 env,
                                     tvar_t tv) {
   let &$(s,rgn) = env;
-  kind_t k = conref_val(tv->kind);
+  kind_t k = tvar_kind(tv);
   return rnew(rgn) $(tv, new_evar(new Opt(k),new Opt(s)));
 }
 
@@ -2497,11 +2522,11 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t,`H> tvs,
 {
   for (_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
     if (zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
-      conref_t<kind_t> k1 = tvs2->hd->kind;
-      conref_t<kind_t> k2 = tv->kind;
+      kindbound_t k1 = tvs2->hd->kind;
+      kindbound_t k2 = tv->kind;
       if (!constrain_kinds(k1,k2))
         terr(loc,"type variable %s is used with inconsistent kinds %s and %s",
-             *tv->name, ckind2string(k1), ckind2string(k2));
+             *tv->name, kindbound2string(k1), kindbound2string(k2));
       if (tv->identity == NULL)
         tv->identity = tvs2->hd->identity;
       else if (*tv->identity != *tvs2->hd->identity)
@@ -2658,12 +2683,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   switch (compress(t)) {
   case VoidType: break;
   case &Evar(*k,*ref,_,_): 
-    if (*k == NULL) *k = new Opt(expected_kind);
+    if (*k == NULL) *k = new Opt(expected_kind); 
     if (cvtenv.fn_result && cvtenv.generalize_evars && 
         expected_kind == RgnKind) {
       *ref = new Opt(HeapRgn);
     } else if (cvtenv.generalize_evars) {
-      let v = new_tvar(expected_kind);
+      let v = new_tvar(new Less_kb(NULL,expected_kind));
       *ref = new Opt(new VarType(v));
       fallthru(v);
     } else {
@@ -2671,9 +2696,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     break;
   case &VarType(v):
-    conref_t<kind_t> c = compress_conref(v->kind);
-    if (c->v == No_constr)
-      c->v = new Eq_constr(expected_kind);
+    switch (compress_kb(v->kind)) {
+    case &Unknown_kb(*f):
+      *f = new Opt(new Less_kb(NULL,expected_kind));
+      break;
+    default: break;
+    }
     // this constrains the kind of the variable according to other
     // occurrences of that variable and makes sure they share the same
     // tvar identity.
@@ -2762,7 +2790,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
-	kind_t k1 = conref_val(tvs->hd->kind);
+	kind_t k1 = tvar_kind(tvs->hd);
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != NULL)
@@ -2818,7 +2846,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
-	kind_t k1 = conref_val(tvs->hd->kind);
+	kind_t k1 = tvar_kind(tvs->hd);
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != NULL)
@@ -2903,13 +2931,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       terr(loc,"function can't have multiple calling conventions");
 
     check_unique_tvars(loc,*btvs);
-    // check that the function doesn't try to abstract a MemKind 
+    // check that the function doesn't try to abstract a MemKind,
     // and add the bound variable in to the kind_env of cvtenv
     for (_ b = *btvs; b != NULL; b = b->tl) {
       b->hd->identity = new_tvar_id();
       cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
-      switch (compress_conref(b->hd->kind)->v) {
-      case &Eq_constr(MemKind): 
+      switch (compress_kb(b->hd->kind)) {
+      case &Eq_kb(MemKind): 
         terr(loc,"function attempts to abstract Mem type variable %s",
              *b->hd->name); break;
       default: break;
@@ -3013,7 +3041,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // add in a slack variable for the effect 
       if (cvtenv.generalize_evars) {
 // JGM:  uncomment this to go back to the old style of defaults
-        // tvar_t e = new_tvar(EffKind);
+        // tvar_t e = new_tvar(new Eq_kb(EffKind));
         // new_cvtenv.free_vars = add_free_tvar(loc,new_cvtenv.free_vars,e);
         ;
       } else {
@@ -3027,12 +3055,18 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // type variables that actually occur in the function type 
       // as opposed to elsewhere.
       for (_ tvs = new_cvtenv.free_vars; tvs != NULL; tvs = tvs->tl) {
-        switch (compress_conref(tvs->hd->kind)->v) {
-        case &Eq_constr(RgnKind):
+        switch (compress_kb(tvs->hd->kind)) {
+        case &Less_kb(*f,RgnKind):
+          *f = new Opt(new Eq_kb(RgnKind)); fallthru;
+        case &Eq_kb(RgnKind):
           effect = new List(new AccessEff(new VarType(tvs->hd)),effect); 
           break;
-        case &Eq_constr(EffKind):
+        case &Less_kb(*f,EffKind):
+          *f = new Opt(new Eq_kb(EffKind)); fallthru;
+        case &Eq_kb(EffKind):
           effect = new List(new VarType(tvs->hd),effect); break;
+        case &Unknown_kb(*f):
+          *f = new Opt(new Less_kb(NULL,AnyKind)); fallthru;
         default:
           // What we're doing here is adding regions(`a) to the default
           // effect for every type variable `a.
@@ -3062,18 +3096,26 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       *eff = new Opt(new JoinEff(List::imp_rev(effect)));
     }
     // Warn if afterwards any kind is still unconstrained and set it to 
-    // BoxKind. In addition, drive any MemKind type variables to BoxKind 
+    // BoxKind. In addition, drive any MemKind or AnyKind bounded 
+    // type variables to BoxKind 
     // to ensure that we don't abstract a MemKind variable.
     if (*btvs != NULL) {
       for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
-        let c = compress_conref(bs->hd->kind);
-        switch (c->v) {
-        case No_constr:
+        switch (compress_kb(bs->hd->kind)) {
+        case &Unknown_kb(*f): 
           warn(loc,"Type variable %s unconstrained, assuming boxed",
                *bs->hd->name);
-          fallthru;
-        case &Eq_constr(MemKind):
-          c->v = new Eq_constr(BoxKind); break;
+          fallthru(f);
+        case &Less_kb(*f,MemKind): fallthru(f);
+        case &Less_kb(*f,AnyKind):
+          *f = new Opt(new Eq_kb(BoxKind));
+          break;
+        case &Less_kb(*f,k):
+          *f = new Opt(new Eq_kb(k));
+          break;
+        case &Eq_kb(MemKind):
+          terr(loc,"function's can't abstract M types");
+          break;
         default: break;
         }
       }
@@ -3178,7 +3220,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check that each of the type arguments is well-formed
     for (; targs != NULL; targs = targs->tl, tvs = tvs->tl) {
       type_t t1 = targs->hd;
-      kind_t k1 = conref_val(tvs->hd->kind);
+      kind_t k1 = tvar_kind(tvs->hd);
       cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
     }
     break;
@@ -3220,7 +3262,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check that each of the type arguments is well-formed
     for (; targs != NULL; targs = targs->tl, tvs = tvs->tl) {
       type_t t1 = targs->hd;
-      kind_t k1 = conref_val(tvs->hd->kind);
+      kind_t k1 = tvar_kind(tvs->hd);
       cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
     }
     break;
@@ -3240,7 +3282,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     list_t<$(tvar_t,type_t)@> inst = NULL;
     // check type arguments
     for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
-      kind_t k = conref_val(tvs->hd->kind);
+      kind_t k = tvar_kind(tvs->hd);
       cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd);
       inst = new List(new $(tvs->hd,ts->hd),inst);
     }
@@ -3250,7 +3292,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<type_t> hidden_ts = NULL;
       // too few parameters plug them in for the user using evars
       for (; tvs != NULL; tvs = tvs->tl) {
-        kind_t k = conref_val(tvs->hd->kind);
+        kind_t k = tvar_kind(tvs->hd);
         type_t e = new_evar(NULL,NULL);
         hidden_ts = new List(e,hidden_ts);
         cvtenv = i_check_valid_type(loc,te,cvtenv,k,e);
@@ -3332,12 +3374,19 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   let free_tvars = cvt.free_vars;
   let free_evars = cvt.free_evars;
 
-  // force type variables of unresolved or mem kinds to boxed kinds
+  // resolve the kinds of type variables.  If there's a kind that must
+  // be less than Mem or Any, make it boxed.  
   for (_ x = free_tvars; x != NULL; x = x->tl) {
-    conref_t<kind_t> c = compress_conref(x->hd->kind);
-    switch (c->v) {
-    case No_constr: 
-    case &Eq_constr(MemKind): c->v = new Eq_constr(BoxKind); break;
+    switch (compress_kb(x->hd->kind)) {
+    case &Unknown_kb(*f): fallthru(f);
+    case &Less_kb(*f,MemKind): fallthru(f);
+    case &Less_kb(*f,AnyKind):
+      *f = new Opt(new Eq_kb(BoxKind)); break;
+    case &Less_kb(*f,k):
+      *f = new Opt(new Eq_kb(k)); break;
+    case &Eq_kb(MemKind):
+      terr(loc,"type variable %s cannot have kind M",tvar2string(x->hd));
+      break;
     default: break;
     }
   }

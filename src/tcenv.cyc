@@ -845,7 +845,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
 }
 
 tenv_t new_block(seg_t loc, tenv_t te) {
-  tvar_t t = new_tvar(RgnKind);
+  tvar_t t = new_tvar(new Eq_kb(RgnKind));
   add_tvar_identity(t);
   return new_named_block(loc, te, t);
 }
@@ -918,7 +918,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 = 
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(),
-             new_conref(RgnKind));
+             new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
   let rgn_po = add_region_po(initial_region_po(loc,fd->tvs,fd->rgn_po),rgn0);

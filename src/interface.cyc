@@ -698,7 +698,7 @@ INCL_DECL(xtunionfield, "xtunionfield", ->field->name)
 #define INCL_DICT(OBJ, NAMEOBJ)\
   incl_dict(ie1->OBJ##decls, ie2->OBJ##decls, incl_##OBJ##decl, NAMEOBJ, msg)
 
-opt_t<Dict::dict_t<var_t, `a @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
+opt_t<Dict::dict_t<var_t, `a::A @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 						   Dict::dict_t<var_t, `a @`H,`H> dic2,
 						   Dict::dict_t<var_t, `a @`H,`H> excl,
 						   `a * (@merge_f)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
@@ -772,7 +772,7 @@ bool is_subinterface(i_t i1, i_t i2, $(string_t<`H>, string_t<`H>) * `r info) {
 /* --- functions for compatible union (and compatible substraction) --- */
 
 void compat_merge_dict_f($(bool,
-			   Dict::dict_t<var_t, `a @`H,`H>,
+			   Dict::dict_t<var_t, `a::A @`H,`H>,
 			   Dict::dict_t<var_t, `a @`H,`H>,
 			   Dict::dict_t<var_t, `a @`H,`H>,
 			   `a * (@)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
@@ -817,7 +817,7 @@ void compat_merge_dict_f($(bool,
   }
 }
 
-opt_t<Dict::dict_t<var_t, `a @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
+opt_t<Dict::dict_t<var_t, `a::A @>> compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 						   Dict::dict_t<var_t, `a @`H,`H> dic2,
 						   Dict::dict_t<var_t, `a @`H,`H> excl,
 						   `a * (@merge_f)(`a @`H, `a @`H, Position::seg_t, string_t<`H> *`H),
@@ -1094,7 +1094,7 @@ static stringptr_t us_p = &us;
 
 static $(tqual_t,type_t)@ rewrite_tunionfield_type($(tqual_t,type_t)@`H x) {
   return new $(empty_tqual(),
-	       new VarType(new Tvar(us_p, NULL, new_conref(BoxKind)))
+	       new VarType(new Tvar(us_p, NULL, new Eq_kb(BoxKind)))
 	       );
 }
 

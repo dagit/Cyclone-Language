@@ -98,6 +98,7 @@ namespace Absyn {
   typedef struct Tqual tqual_t; // not a pointer
   typedef tunion Size_of size_of_t;
   typedef tunion Kind kind_t;
+  typedef tunion KindBound kindbound_t;
   typedef struct Tvar @tvar_t; 
   typedef tunion Sign sign_t;
   typedef struct Conref<`a> @conref_t<`a>;
@@ -183,11 +184,23 @@ namespace Absyn {
     Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
   };
 
+  // kind bounds are used on tvar's to infer their kinds
+  //   Eq_kb(k):  the tvar has kind k
+  //   Unknown_kb(&Opt(kb)): follow the link to kb to determine bound
+  //   Less_kb(&Opt(kb1),k): same, but link should be less than k
+  //   Unknown_kb(NULL):  the tvar's kind is completely unconstrained
+  //   Less_kb(NULL,k): the tvar's kind is unknown but less than k
+  EXTERN_ABSYN tunion KindBound {
+    Eq_kb(kind_t);        
+    Unknown_kb(opt_t<kindbound_t>); 
+    Less_kb(opt_t<kindbound_t>, kind_t); 
+  };
+
   // type variables
   EXTERN_ABSYN struct Tvar {
     tvarname_t name;       // the user-level name of the type variable
     int       *identity;   // for alpha-conversion -- unique
-    conref_t<kind_t> kind; // the kind of the type variable
+    kindbound_t kind;
   };
 
   // used to distinguish ? pointers from *{c} or @{c} pointers
@@ -716,6 +729,8 @@ namespace Absyn {
   extern `a conref_val(conref_t<`a> x);
   extern `a conref_def(`a, conref_t<`a> x);
 
+  extern kindbound_t compress_kb(kindbound_t);
+  extern kind_t force_kb(kindbound_t kb);
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind that can be unified
   // only with types whose free type variables are drawn from tenv.

@@ -303,17 +303,18 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let var_tvs = NULL;
       for (_ t = tvs; t != NULL; t = t->tl) {
 	tvar_t tv = t->hd;
-	switch (compress_conref(tv->kind)->v) {
-	case &Eq_constr(BoxKind): break;
-	case &Eq_constr(k): 
+	switch (compress_kb(tv->kind)) {
+	case &Eq_kb(BoxKind): break;
+        case &Unknown_kb(*f): fallthru(f);
+        case &Less_kb(*f,MemKind): fallthru(f);
+        case &Less_kb(*f,AnyKind): 
+          *f = new Opt(new Eq_kb(BoxKind)); break;
+	case &Eq_kb(k): fallthru(k);
+        case &Less_kb(_,k): 
 	  terr(p->loc,"tunion member %s abstracts type "
                "variable %s of kind %s != B",
                qvar2string(tud->name),*tv->name,kind2string(k)); 
 	  break;
-	case No_constr: 
-	  tv->kind->v = new Eq_constr(BoxKind); 
-	  break;
-	case &Forward_constr(_):throw impos("forward after compress in conref");
 	}
 	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
       }

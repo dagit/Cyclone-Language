@@ -49,7 +49,7 @@ bool false_f(`a x) {  return false; }
 
 int intcmp(int a, int b)   { return a - b; }
 int charcmp(char a,char b) { return (int)a - (int)b; }
-int ptrcmp(`a::M @ `r a, `a @ `r b) {
+int ptrcmp(`a::A @ `r a, `a @ `r b) {
   if(a == b) return 0;
   if(a >  b) return 1;
   return -1;

@@ -223,10 +223,11 @@ void dumptvar(tvar_t tv) {
 }
 void dumpkindedtvar(tvar_t tv) {
   dump_str(tv->name);
-  switch (compress_conref(tv->kind)->v) {
-  case &Eq_constr(BoxKind): break;
-  case &Eq_constr(k): dump("::"); dumpkind(k); break;
-  default: dump("::?"); break;
+  switch (compress_kb(tv->kind)) {
+  case &Eq_kb(BoxKind): fallthru;
+  case &Less_kb(_,_): fallthru;
+  case &Unknown_kb(_): dump("::?"); break;
+  case &Eq_kb(k): dump("::"); dumpkind(k); break;
   }
 }
 void dumptvars(list_t<tvar_t> tvs) {

@@ -203,7 +203,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // a new named block here.
     tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
                                   new Tvar(new ((string_t)aprintf("`%s",*l)),new_tvar_id(),
-                                           new_conref(RgnKind))),s,false); 
+                                           new Eq_kb(RgnKind))),s,false); 
     return;
 
   case &Switch_s(e,scs0):

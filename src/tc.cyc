@@ -373,11 +373,12 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
 
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs = sd->tvs; tvs != NULL; tvs = tvs->tl) {
-    let c = compress_conref(tvs->hd->kind);
-    switch (c->v) {
-    case No_constr:
-      c->v = new Eq_constr((kind_t)BoxKind); continue;
-    case &Eq_constr(MemKind):
+    switch (compress_kb(tvs->hd->kind)) {
+    case &Unknown_kb(*f): fallthru(f);
+    case &Less_kb(*f,MemKind): fallthru(f);
+    case &Less_kb(*f,AnyKind):
+      *f = new Opt(new Eq_kb(BoxKind)); continue;
+    case &Eq_kb(MemKind):
       terr(loc,"%s %s attempts to abstract type variable %s of kind M", 
            obj, *v, *tvs->hd->name); continue;
     default: continue;
@@ -522,12 +523,14 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 
     for (_ tvs = f->tvs; tvs != NULL; tvs = tvs->tl) {
       let tv = tvs->hd;
-      let c = compress_conref(tv->kind);
-      switch (c->v) {
-      case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
-      case &Eq_constr(MemKind): 
+      switch (compress_kb(tv->kind)) {
+      case &Eq_kb(MemKind):
         terr(f->loc,"field %s abstracts type variable of kind M", 
              *(*f->name)[1]); break;
+      case &Unknown_kb(*f): fallthru(f);
+      case &Less_kb(*f,MemKind): fallthru(f);
+      case &Less_kb(*f,AnyKind): 
+        *f = new Opt(new Eq_kb(BoxKind)); break;
       default: break;
       }
     }
@@ -612,10 +615,12 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    conref_t<kind_t> c = compress_conref(tvs2->hd->kind);
-    switch (c->v) {
-    case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
-    case &Eq_constr(MemKind): 
+    switch (compress_kb(tvs2->hd->kind)) {
+    case &Unknown_kb(*f): fallthru(f);
+    case &Less_kb(*f,MemKind): fallthru(f);
+    case &Less_kb(*f,AnyKind): 
+      *f = new Opt(new Eq_kb(BoxKind)); break;
+    case &Eq_kb(MemKind):
       terr(loc,"%s %s attempts to abstract type "
            "variable %s of kind M",obj,*v,*tvs2->hd->name); break;
     default: break;

@@ -293,10 +293,14 @@ static const int Cyc_Absyn_Unsigned= 1; struct Cyc_Absyn_Conref{ void* v; } ;
 static const int Cyc_Absyn_Eq_constr= 0; struct Cyc_Absyn_Eq_constr_struct{ int
 tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr= 1; struct Cyc_Absyn_Forward_constr_struct{
 int tag; struct Cyc_Absyn_Conref* f1; } ; static const int Cyc_Absyn_No_constr=
-0; struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; struct Cyc_Absyn_Conref*
-kind; } ; static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b=
-0; struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-struct Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
+0; static const int Cyc_Absyn_Eq_kb= 0; struct Cyc_Absyn_Eq_kb_struct{ int tag;
+void* f1; } ; static const int Cyc_Absyn_Unknown_kb= 1; struct Cyc_Absyn_Unknown_kb_struct{
+int tag; struct Cyc_Core_Opt* f1; } ; static const int Cyc_Absyn_Less_kb= 2;
+struct Cyc_Absyn_Less_kb_struct{ int tag; struct Cyc_Core_Opt* f1; void* f2; } ;
+struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; void* kind; } ;
+static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0;
+struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct
+Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
 nullable; struct Cyc_Absyn_Tqual tq; struct Cyc_Absyn_Conref* bounds; } ; struct
 Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt* name; struct Cyc_Absyn_Tqual tq; void*
 type; int inject; } ; struct Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars;
@@ -582,10 +586,9 @@ Cyc_Absyn_ArrayElement= 0; struct Cyc_Absyn_ArrayElement_struct{ int tag; struct
 Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_FieldName= 1; struct Cyc_Absyn_FieldName_struct{
 int tag; struct _tagged_arr* f1; } ; extern unsigned char Cyc_Absyn_EmptyAnnot[
 15u]; extern int Cyc_Absyn_qvar_cmp( struct _tuple0*, struct _tuple0*); extern
-struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(); extern struct Cyc_Absyn_Conref*
-Cyc_Absyn_compress_conref( struct Cyc_Absyn_Conref* x); extern void* Cyc_Absyn_conref_val(
-struct Cyc_Absyn_Conref* x); extern struct _tagged_arr Cyc_Absyn_attribute2string(
-void*); extern unsigned char Cyc_Tcdecl_Incompatible[ 17u]; struct Cyc_Tcdecl_Xtunionfielddecl{
+struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(); extern void* Cyc_Absyn_force_kb(
+void* kb); extern struct _tagged_arr Cyc_Absyn_attribute2string( void*); extern
+unsigned char Cyc_Tcdecl_Incompatible[ 17u]; struct Cyc_Tcdecl_Xtunionfielddecl{
 struct Cyc_Absyn_Tuniondecl* base; struct Cyc_Absyn_Tunionfield* field; } ;
 extern void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct
 _tagged_arr* msg1, struct _tagged_arr fmt, struct _tagged_arr ap); struct
@@ -645,33 +648,33 @@ add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int rewrite_temp_tvars: 1;
 int print_all_tvars: 1; int print_all_kinds: 1; int print_using_stmts: 1; int
 print_externC_stmts: 1; int print_full_evars: 1; int use_curr_namespace: 1;
 struct Cyc_List_List* curr_namespace; } ; extern struct _tagged_arr Cyc_Absynpp_typ2string(
-void*); extern struct _tagged_arr Cyc_Absynpp_ckind2string( struct Cyc_Absyn_Conref*);
-extern struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); extern
-struct _tagged_arr Cyc_Absynpp_scope2string( void* sc); unsigned char Cyc_Tcdecl_Incompatible[
-17u]="\000\000\000\000Incompatible"; void Cyc_Tcdecl_merr( struct Cyc_Position_Segment*
-loc, struct _tagged_arr* msg1, struct _tagged_arr fmt, struct _tagged_arr ap){
-if( msg1 ==  0){( int) _throw(( void*) Cyc_Tcdecl_Incompatible);}{ struct
-_tagged_arr fmt2=( struct _tagged_arr) Cyc_Std_strconcat( _tag_arr("%s ",
-sizeof( unsigned char), 4u), fmt); struct _tagged_arr ap2=({ unsigned int _temp0=
-_get_arr_size( ap, sizeof( void*)) +  1; void** _temp1=( void**) _cycalloc(
-_check_times( sizeof( void*), _temp0)); struct _tagged_arr _temp5= _tag_arr(
-_temp1, sizeof( void*), _get_arr_size( ap, sizeof( void*)) +  1);{ unsigned int
-_temp2= _temp0; unsigned int i; for( i= 0; i <  _temp2; i ++){ _temp1[ i]= i == 
-0?( void*)({ struct Cyc_Std_String_pa_struct* _temp3=( struct Cyc_Std_String_pa_struct*)
-_cycalloc( sizeof( struct Cyc_Std_String_pa_struct)); _temp3[ 0]=({ struct Cyc_Std_String_pa_struct
-_temp4; _temp4.tag= Cyc_Std_String_pa; _temp4.f1=( struct _tagged_arr)* msg1;
-_temp4;}); _temp3;}):*(( void**) _check_unknown_subscript( ap, sizeof( void*),(
-int)( i -  1)));}}; _temp5;}); Cyc_Position_post_error( Cyc_Position_mk_err_elab(
-loc,( struct _tagged_arr) Cyc_Std_vrprintf( Cyc_Core_heap_region, fmt2, ap2)));}}
-static void Cyc_Tcdecl_merge_scope_err( void* s0, void* s1, struct _tagged_arr t,
-struct _tagged_arr v, struct Cyc_Position_Segment* loc, struct _tagged_arr* msg){({
-struct Cyc_Std_String_pa_struct _temp10; _temp10.tag= Cyc_Std_String_pa; _temp10.f1=(
-struct _tagged_arr) Cyc_Absynpp_scope2string( s0);{ struct Cyc_Std_String_pa_struct
-_temp9; _temp9.tag= Cyc_Std_String_pa; _temp9.f1=( struct _tagged_arr) Cyc_Absynpp_scope2string(
-s1);{ struct Cyc_Std_String_pa_struct _temp8; _temp8.tag= Cyc_Std_String_pa;
-_temp8.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp7;
-_temp7.tag= Cyc_Std_String_pa; _temp7.f1=( struct _tagged_arr) t;{ void* _temp6[
-4u]={& _temp7,& _temp8,& _temp9,& _temp10}; Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s is %s whereas expected scope is %s",
+void*); extern struct _tagged_arr Cyc_Absynpp_kind2string( void*); extern struct
+_tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); extern struct _tagged_arr
+Cyc_Absynpp_scope2string( void* sc); unsigned char Cyc_Tcdecl_Incompatible[ 17u]="\000\000\000\000Incompatible";
+void Cyc_Tcdecl_merr( struct Cyc_Position_Segment* loc, struct _tagged_arr* msg1,
+struct _tagged_arr fmt, struct _tagged_arr ap){ if( msg1 ==  0){( int) _throw((
+void*) Cyc_Tcdecl_Incompatible);}{ struct _tagged_arr fmt2=( struct _tagged_arr)
+Cyc_Std_strconcat( _tag_arr("%s ", sizeof( unsigned char), 4u), fmt); struct
+_tagged_arr ap2=({ unsigned int _temp0= _get_arr_size( ap, sizeof( void*)) +  1;
+void** _temp1=( void**) _cycalloc( _check_times( sizeof( void*), _temp0));
+struct _tagged_arr _temp5= _tag_arr( _temp1, sizeof( void*), _get_arr_size( ap,
+sizeof( void*)) +  1);{ unsigned int _temp2= _temp0; unsigned int i; for( i= 0;
+i <  _temp2; i ++){ _temp1[ i]= i ==  0?( void*)({ struct Cyc_Std_String_pa_struct*
+_temp3=( struct Cyc_Std_String_pa_struct*) _cycalloc( sizeof( struct Cyc_Std_String_pa_struct));
+_temp3[ 0]=({ struct Cyc_Std_String_pa_struct _temp4; _temp4.tag= Cyc_Std_String_pa;
+_temp4.f1=( struct _tagged_arr)* msg1; _temp4;}); _temp3;}):*(( void**)
+_check_unknown_subscript( ap, sizeof( void*),( int)( i -  1)));}}; _temp5;});
+Cyc_Position_post_error( Cyc_Position_mk_err_elab( loc,( struct _tagged_arr) Cyc_Std_vrprintf(
+Cyc_Core_heap_region, fmt2, ap2)));}} static void Cyc_Tcdecl_merge_scope_err(
+void* s0, void* s1, struct _tagged_arr t, struct _tagged_arr v, struct Cyc_Position_Segment*
+loc, struct _tagged_arr* msg){({ struct Cyc_Std_String_pa_struct _temp10;
+_temp10.tag= Cyc_Std_String_pa; _temp10.f1=( struct _tagged_arr) Cyc_Absynpp_scope2string(
+s0);{ struct Cyc_Std_String_pa_struct _temp9; _temp9.tag= Cyc_Std_String_pa;
+_temp9.f1=( struct _tagged_arr) Cyc_Absynpp_scope2string( s1);{ struct Cyc_Std_String_pa_struct
+_temp8; _temp8.tag= Cyc_Std_String_pa; _temp8.f1=( struct _tagged_arr) v;{
+struct Cyc_Std_String_pa_struct _temp7; _temp7.tag= Cyc_Std_String_pa; _temp7.f1=(
+struct _tagged_arr) t;{ void* _temp6[ 4u]={& _temp7,& _temp8,& _temp9,& _temp10};
+Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s is %s whereas expected scope is %s",
 sizeof( unsigned char), 41u), _tag_arr( _temp6, sizeof( void*), 4u));}}}}});}
 struct _tuple4{ void* f1; void* f2; } ; struct _tuple3 Cyc_Tcdecl_merge_scope(
 void* s0, void* s1, struct _tagged_arr t, struct _tagged_arr v, struct Cyc_Position_Segment*
@@ -724,23 +727,22 @@ Cyc_Std_String_pa; _temp72.f1=( struct _tagged_arr) t;{ void* _temp71[ 2u]={&
 _temp72,& _temp73}; Cyc_Tcdecl_merr( loc, msg, _tag_arr("%s %s has a different number of type parameters",
 sizeof( unsigned char), 48u), _tag_arr( _temp71, sizeof( void*), 2u));}}});
 return 0;}{ struct Cyc_List_List* _temp74= tvs0; struct Cyc_List_List* _temp75=
-tvs1; for( 0; _temp74 !=  0;( _temp74= _temp74->tl, _temp75= _temp75->tl)){
-struct Cyc_Absyn_Conref* _temp76= Cyc_Absyn_compress_conref((( struct Cyc_Absyn_Tvar*)
-_temp74->hd)->kind); struct Cyc_Absyn_Conref* _temp77= Cyc_Absyn_compress_conref(((
-struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*) _check_null( _temp75))->hd)->kind);
-if( Cyc_Absyn_conref_val( _temp76) !=  Cyc_Absyn_conref_val( _temp77)){({ struct
-Cyc_Std_String_pa_struct _temp83; _temp83.tag= Cyc_Std_String_pa; _temp83.f1=(
-struct _tagged_arr) Cyc_Absynpp_ckind2string( _temp77);{ struct Cyc_Std_String_pa_struct
+tvs1; for( 0; _temp74 !=  0;( _temp74= _temp74->tl, _temp75= _temp75->tl)){ void*
+_temp76= Cyc_Absyn_force_kb(( void*)(( struct Cyc_Absyn_Tvar*) _temp74->hd)->kind);
+void* _temp77= Cyc_Absyn_force_kb(( void*)(( struct Cyc_Absyn_Tvar*)(( struct
+Cyc_List_List*) _check_null( _temp75))->hd)->kind); if( _temp76 ==  _temp77){
+continue;}({ struct Cyc_Std_String_pa_struct _temp83; _temp83.tag= Cyc_Std_String_pa;
+_temp83.f1=( struct _tagged_arr) Cyc_Absynpp_kind2string( _temp77);{ struct Cyc_Std_String_pa_struct
 _temp82; _temp82.tag= Cyc_Std_String_pa; _temp82.f1=( struct _tagged_arr)*((
 struct Cyc_Absyn_Tvar*) _temp74->hd)->name;{ struct Cyc_Std_String_pa_struct
-_temp81; _temp81.tag= Cyc_Std_String_pa; _temp81.f1=( struct _tagged_arr) Cyc_Absynpp_ckind2string(
+_temp81; _temp81.tag= Cyc_Std_String_pa; _temp81.f1=( struct _tagged_arr) Cyc_Absynpp_kind2string(
 _temp76);{ struct Cyc_Std_String_pa_struct _temp80; _temp80.tag= Cyc_Std_String_pa;
 _temp80.f1=( struct _tagged_arr) v;{ struct Cyc_Std_String_pa_struct _temp79;
 _temp79.tag= Cyc_Std_String_pa; _temp79.f1=( struct _tagged_arr) t;{ void*
 _temp78[ 5u]={& _temp79,& _temp80,& _temp81,& _temp82,& _temp83}; Cyc_Tcdecl_merr(
 loc, msg, _tag_arr("%s %s has a different kind (%s) for type parameter %s (%s)",
 sizeof( unsigned char), 59u), _tag_arr( _temp78, sizeof( void*), 5u));}}}}}});
-return 0;}} return 1;}} static int Cyc_Tcdecl_check_atts( struct Cyc_List_List*
+return 0;} return 1;}} static int Cyc_Tcdecl_check_atts( struct Cyc_List_List*
 atts0, struct Cyc_List_List* atts1, struct _tagged_arr t, struct _tagged_arr v,
 struct Cyc_Position_Segment* loc, struct _tagged_arr* msg){ if( ! Cyc_Tcutil_same_atts(
 atts0, atts1)){({ struct Cyc_Std_String_pa_struct _temp86; _temp86.tag= Cyc_Std_String_pa;

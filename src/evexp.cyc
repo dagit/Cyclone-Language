@@ -71,7 +71,7 @@ bool okay_szofarg(type_t t) {
   switch (Tcutil::compress(t)) {
   case VoidType: return false;
   case &VarType(tv):
-    switch (conref_val(tv->kind)) {
+    switch (tvar_kind(tv)) {
     case BoxKind: return true;
     default:      return false;
     }

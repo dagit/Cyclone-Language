@@ -54,6 +54,9 @@ extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
 // they will share, otherwise they won't.
 extern type_t copy_type(type_t t);
 
+// returns true if kind k1 is a sub-kind of k2
+extern bool kind_leq(kind_t k1, kind_t k2);
+
 // returns the type of a function declaration
 extern type_t fd_type(fndecl_t fd); 
 extern kind_t tvar_kind(tvar_t t);
@@ -203,8 +206,8 @@ extern $(bool,type_t) addressof_props(tenv_t te, exp_t e);
 // variables respectively.
 extern $(list_t<tvar_t>, list_t<tvar_t>) split_effect(Core::opt_t<type_t> effect);
 
-// Gensym a new type variable of kind k
-extern tvar_t new_tvar(kind_t k);
+// Gensym a new type variable with kind bounded by k
+extern tvar_t new_tvar(kindbound_t k);
 // Get an identity for a type variable
 extern int *new_tvar_id();
 // Add an identity to a type variable if it doesn't already have one

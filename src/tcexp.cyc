@@ -383,6 +383,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2 = compress(e2->topt->v);
   switch (t1) {
   case &PointerType(PtrInfo{et,r,n,tq,b}):
+    if (!kind_leq(typ_kind(et),MemKind))
+      terr(e1->loc,"can't perform arithmetic on abstract pointer type");
     if (!coerce_sint_typ(te, e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
@@ -410,7 +412,9 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
 static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t1 = e1->topt->v;
   type_t t2 = e2->topt->v;
-  if (is_tagged_pointer_typ(t1)) {
+  type_t t1_elt = VoidType;
+  type_t t2_elt = VoidType;
+  if (is_tagged_pointer_typ_elt(t1,&t1_elt)) {
     if (is_tagged_pointer_typ(t2)) {
       if (!unify(t1, t2)) {
 	terr(e1->loc,"pointer arithmetic on values of "
@@ -420,6 +424,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       }
       return sint_t;
     } else {
+      if (!kind_leq(typ_kind(t1_elt),MemKind))
+        terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
@@ -613,9 +619,15 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
   check_writable(te, e);
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
-  if (!is_numeric(e) && !is_tagged_pointer_typ(t)) 
-    terr(e->loc,"expecting arithmetic or ? type but found %s",
-         typ2string(t));
+  if (!is_numeric(e)) {
+    type_t telt = VoidType;
+    if (is_tagged_pointer_typ_elt(t,&telt)) {
+      if (!kind_leq(typ_kind(telt),MemKind))
+        terr(e->loc,"can't perform arithmetic on abstract pointer type");
+    } else 
+      terr(e->loc,"expecting arithmetic or ? type but found %s",
+           typ2string(t));
+  }
   return t;
 }
 
@@ -650,6 +662,9 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
   case &ArrayType(_,_,_): terr(loc,"cannot assign to an array"); break;
   default: break;
   }
+  // check to see that the type is not an abstract type
+  if (!kind_leq(typ_kind(t1),MemKind))
+    terr(loc,"type is abstract (can't determine size).");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
   if (!is_lvalue(e1))
@@ -897,7 +912,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
       if (List::length(ts) != List::length(tvars))
 	return expr_err(te,loc,"type instantiation mismatch");
       for (; ts != NULL; ts = ts->tl, tvars = tvars->tl) {
-	kind_t k = conref_val(tvars->hd->kind);
+	kind_t k = tvar_kind(tvars->hd);
 	check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
@@ -1118,6 +1133,8 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   case &PointerType(PtrInfo{t2,rt,_,_,b}):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
+    if (!kind_leq(typ_kind(t2),MemKind))
+      terr(loc,"can't dereference abstract pointer type");
     return t2;
   default: 
     return expr_err(te,loc,"expecting * or @ type but found %s",typ2string(t));
@@ -1266,6 +1283,8 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt,
       check_nonzero_bound(loc,b);
     }
     check_rgn_accessible(te,loc,rt);
+    if (!kind_leq(typ_kind(t),MemKind))
+      terr(e1->loc,"can't subscript an abstract pointer");
     return t;
   case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
   default:

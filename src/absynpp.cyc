@@ -341,26 +341,28 @@ string_t kind2string(kind_t k) {
   }
 }
 
-string_t ckind2string(conref_t<kind_t> c) {
-  switch (compress_conref(c)->v) {
-  case &Eq_constr(k): return kind2string(k);
-  default: return "?";
+string_t kindbound2string(kindbound_t c) {
+  switch (compress_kb(c)) {
+  case &Eq_kb(k): return kind2string(k);
+  case &Unknown_kb(_): return "?";
+  case &Less_kb(_,k): return kind2string(k);
   }
 }
 
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
-doc_t ckind2doc(conref_t<kind_t> c) { return text(ckind2string(c)); }
+doc_t kindbound2doc(kindbound_t c) { return text(kindbound2string(c)); }
 
 doc_t tps2doc(list_t<type_t> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
 }
 
 doc_t ktvar2doc(tvar_t tv) {
-  switch (compress_conref(tv->kind)->v) {
-  case &Eq_constr(BoxKind): return textptr(tv->name);
-  case &Eq_constr(k):
+  switch (compress_kb(tv->kind)) {
+  case &Unknown_kb(_): fallthru;
+  case &Eq_kb(BoxKind): return textptr(tv->name);
+  case &Less_kb(_,k): fallthru(k);
+  case &Eq_kb(k): 
     return cat(textptr(tv->name), text("::"), kind2doc(k));
-  default: return cat(textptr(tv->name), text("/*::?*/")); //the type should already be known here
   }
 }
 
@@ -570,7 +572,7 @@ doc_t ntyp2doc(type_t t) {
   case &VarType(tv):
     s = textptr(tv->name);
     if (print_all_kinds) {
-      s = cat(s,text("::"),ckind2doc(tv->kind));
+      s = cat(s,text("::"),kindbound2doc(tv->kind));
     }
     //FIX: sometimes need explicit kinds!
     //Mathieu: only if we try to declare kinds inside functions arguments

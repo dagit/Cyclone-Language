@@ -275,9 +275,10 @@ void dumptvar(tvar_t tv) {
 }
 void dumpkindedtvar(tvar_t tv) {
   dump_alphastr(tv->name);
-  switch (compress_conref(tv->kind)->v) {
-  case &Eq_constr(BoxKind): break;
-  case &Eq_constr(k): dump_symbol("::"); dumpkind(k); break;
+  switch (compress_kb(tv->kind)) {
+  case &Eq_kb(BoxKind): break;
+  case &Less_kb(_,k): fallthru(k);
+  case &Eq_kb(k): dump_symbol("::"); dumpkind(k); break;
   default: dump_symbol("::?"); break;
   }
 }

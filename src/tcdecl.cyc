@@ -103,15 +103,13 @@ static inline bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
   let x0 = tvs0;
   let x1 = tvs1;
   for (; x0 != NULL; x0 = x0->tl, x1=x1->tl) {
-    let c0 = compress_conref(x0->hd->kind);
-    let c1 = compress_conref(x1->hd->kind);
-    // check that the kinds are the same
-    if (conref_val(c0) != conref_val(c1)) {
-      merr(loc, msg, 
-	   "%s %s has a different kind (%s) for type parameter %s (%s)",
-	   t, v, ckind2string(c0), *x0->hd->name, ckind2string(c1));
-      return false;
-    }
+    let c0 = force_kb(x0->hd->kind);
+    let c1 = force_kb(x1->hd->kind);
+    if (c0 == c1) continue;
+    merr(loc, msg, 
+         "%s %s has a different kind (%s) for type parameter %s (%s)",
+         t, v, kind2string(c0), *x0->hd->name, kind2string(c1));
+    return false;
   }
   return true;
 }
