@@ -6,10 +6,29 @@ epilogue {
 }
 ;
 
-complex.h:
-epilogue {
-  // Cyclone can't handle long double complex
-  // Not supported yet
+arpa/inet.h:
+include {
+in_port_t
+in_addr_t
+INET_ADDRSTRLEN
+INET6_ADDRSTRLEN
+uint32_t
+uint16_t
+}
+epilogue htonl {
+  extern "C" uint32_t htonl(uint32_t);
+}
+epilogue htons {
+  extern "C" uint16_t htons(uint16_t);
+}
+epilogue ntohl {
+  extern "C" uint32_t ntohl(uint32_t);
+}
+epilogue ntohs {
+  extern "C" uint16_t ntohs(uint16_t);
+}
+epilogue inet_addr {
+  extern in_addr_t inet_addr(const char ?);
 }
 ;
 
@@ -102,29 +121,67 @@ epilogue {
 
 dirent.h:
 include {
-DIR
 dirent
 ino_t
 NAME_MAX
 }
+epilogue {
+  // We define DIR as an abstract struct because it can contain
+  // pointers, e.g., in cygwin
+  extern struct __cycDIR;  
+  typedef struct __cycDIR DIR;
+}
+cycstub {
+  namespace Cdirent {
+    extern "C" struct __abstractDIR;
+    typedef struct __abstractDIR __cDIR;
+  }
+  abstract struct __cycDIR { // must match defn in c stub
+    Cdirent::__cDIR @dir;
+  };
+}
+cstub {
+  #include <dirent.h>
+  struct Cyc_Std___cycDIR { // must match defn in cyclone stub
+    DIR *dir;
+  };
+}
 epilogue closedir {
-  extern "C" int closedir(DIR @);
+  extern int closedir(DIR @);
+}
+cycstub closedir {
+  namespace Cdirent {
+    extern "C" int closedir(__cDIR @d);
+  }
+  int closedir(DIR @d) {
+    return Cdirent::closedir(d->dir);
+  }
 }
 epilogue opendir {
   extern DIR *opendir(const char ?);
 }
 cycstub opendir {
-  namespace StdDirent {
-    extern "C" DIR *opendir(Cstring);
+  namespace Cdirent {
+    extern "C" __cDIR *opendir(const Cstring);
   }
   DIR *opendir(const char ?f) {
     if (!f)
       throw new Failure("opendir called with NULL string");
-    return StdDirent::opendir(string_to_Cstring(f));
+    let cd = Cdirent::opendir(string_to_Cstring(f));
+    // FIX: get rid of heap allocation
+    return cd ? new __cycDIR((Cdirent::__cDIR @)cd) : NULL;
   }
 }
 epilogue readdir {
-  extern "C" struct dirent @readdir(DIR @);
+  extern struct dirent @readdir(DIR @);
+}
+cycstub readdir {
+  namespace Cdirent {
+    extern "C" struct dirent @readdir(__cDIR @);
+  }
+  struct dirent @readdir(DIR @d) {
+    return Cdirent::readdir(d->dir);
+  }
 }
 epilogue {
   // FIX: We don't handle this yet. The third arg is an array,
@@ -132,15 +189,38 @@ epilogue {
   //int readdir_r(DIR *, struct dirent *, struct dirent **);
 }
 epilogue rewinddir {
-  extern "C" void rewinddir(DIR @);
+  extern void rewinddir(DIR @);
+}
+cycstub rewinddir {
+  namespace Cdirent {
+    extern "C" void rewinddir(__cDIR @d);
+  }
+  void rewinddir(DIR @d) {
+    Cdirent::rewinddir(d->dir);
+  }
 }
 epilogue seekdir {
-  extern "C" void seekdir(DIR @, long);
+  extern void seekdir(DIR @, long);
+}
+cycstub seekdir {
+  namespace Cdirent {
+    extern "C" void seekdir(__cDIR @d, long);
+  }
+  void seekdir(DIR @d, long x) {
+    Cdirent::seekdir(d->dir,x);
+  }
 }
 epilogue telldir {
-  extern "C" long telldir(DIR @);
+  extern long telldir(DIR @);
 }
-;
+cycstub telldir {
+  namespace Cdirent {
+    extern "C" long telldir(__cDIR @d);
+  }
+  long telldir(DIR @d) {
+    return Cdirent::telldir(d->dir);
+  }
+};
 
 errno.h:
 include {
@@ -1367,6 +1447,74 @@ epilogue {
 }
 ;
 
+netinet/in.h:
+include {
+in_port_t
+in_addr_t
+sa_family_t
+uint8_t
+uint32_t
+in_addr
+sockaddr_in
+in6_addr
+sockaddr_in6
+in6addr_any
+IN6ADDR_ANY_INIT
+in6addr_loopback
+IN6ADDR_LOOPBACK_INIT
+ipv6_mreq
+IPPROTO_IP
+IPPROTO_IPV6
+IPPROTO_ICMP
+IPPROTO_RAW
+IPPROTO_TCP
+IPPROTO_UDP
+INADDR_ANY
+INADDR_BROADCAST
+INET_ADDRSTRLEN
+INET6_ADDRSTRLEN
+IPV6_JOIN_GROUP
+IPV6_LEAVE_GROUP
+IPV6_MULTICAST_HOPS
+IPV6_MULTICAST_IF
+IPV6_MULTICAST_LOOP
+IPV6_UNICAST_HOPS
+IPV6_V6ONLY
+IN6_IS_ADDR_UNSPECIFIED
+IN6_IS_ADDR_MULTICAST
+IN6_IS_ADDR_MC_NODELOCAL
+IN6_IS_ADDR_MC_LINKLOCAL
+IN6_IS_ADDR_MC_SITELOCAL
+IN6_IS_ADDR_MC_ORGLOCAL
+IN6_IS_ADDR_MC_GLOBAL
+}
+epilogue {
+  /* We'd like to do
+     include {
+     IN6_IS_ADDR_LINKLOCAL
+     IN6_IS_ADDR_LOOPBACK
+     IN6_IS_ADDR_SITELOCAL
+     IN6_IS_ADDR_V4COMPAT
+     IN6_IS_ADDR_V4MAPPED
+     }
+     but these bring in declarations for htonl and ntohl, which
+     conflict with the declarations below.
+  */
+}
+epilogue htonl {
+  extern "C" uint32_t htonl(uint32_t);
+}
+epilogue htons {
+  extern "C" uint16_t htons(uint16_t);
+}
+epilogue ntohl {
+  extern "C" uint32_t ntohl(uint32_t);
+}
+epilogue ntohs {
+  extern "C" uint16_t ntohs(uint16_t);
+}
+;
+
 netinet/tcp.h:
 include {
 TCP_NODELAY
@@ -1509,13 +1657,9 @@ SIGSTACKSZ
 ucontext_t
 mcontext_t
 SIG_HOLD
+sigset_t
 }
 epilogue {
-  // We'd like to
-  // include { sigset_t }
-  // but in Linux gives a use of sizeof as a constant expression
-  // which Cyclone doesn't handle yet
-
   // We'd like to
   // include { sigevent sigval stack_t sigstack siginfo_t }
   // but in Linux this pulls in structures that contain void *'s.
@@ -1530,20 +1674,16 @@ epilogue {
   #endif
 }
 epilogue sigaddset {
-  // We can't support this yet because of the sigset_t problem
-  //  extern "C" int sigaddset(sigset_t@, int);  
+  extern "C" int sigaddset(sigset_t@, int);  
 }
 epilogue sigdelset {
-  // We can't support this yet because of the sigset_t problem
-  //  extern "C" int sigdelset(sigset_t@, int);
+  extern "C" int sigdelset(sigset_t@, int);
 }
 epilogue sigemptyset {
-  // We can't support this yet because of the sigset_t problem
-  //  extern "C" int sigemptyset(sigset_t@);
+  extern "C" int sigemptyset(sigset_t@);
 }
 epilogue sigfillset {
-  // We can't support this yet because of the sigset_t problem
-  //  extern "C" int sigfillset(sigset_t@);
+  extern "C" int sigfillset(sigset_t@);
 }
 epilogue sighold {
   extern "C" int sighold(int);
@@ -1555,8 +1695,7 @@ epilogue siginterrupt {
   extern "C" int siginterrupt(int,int);
 }
 epilogue sigismember {
-  // We can't support this yet because of the sigset_t problem
-  //  extern "C" int sigismember(sigset_t@, int);
+  extern "C" int sigismember(sigset_t@, int);
 }
 epilogue sigpause {
   extern "C" int sigpause(int);
@@ -1568,10 +1707,10 @@ epilogue {
   extern tunion SigBuiltin {
     SIG_DFL;
     SIG_ERR;
+    SIG_IGN;
 #ifdef _SIG_HOLD_def_
     SIG_HOLD;  // Rare
 #endif
-    SIG_IGN;
   };
   extern tunion SigArg {
     __SIG_BUILTIN(tunion SigBuiltin);
@@ -1590,11 +1729,29 @@ cycstub sigset {
   namespace Csignal {
     extern "C" sigarg_t sigset_SIG_DFL(int);
     extern "C" sigarg_t sigset_SIG_ERR(int);
+    extern "C" sigarg_t sigset_SIG_IGN(int);
 #ifdef _SIG_HOLD_def_
     extern "C" sigarg_t sigset_SIG_HOLD(int);
 #endif
-    extern "C" sigarg_t sigset_SIG_IGN(int);
-    extern "C" sigarg_t sigset(int, void (@`H)(int));
+    extern "C" sigarg_t sigset_SIG_HANDLER(int, void (@`H)(int));
+    // for the use of the C sigset stubs
+    sigarg_t make_SIG_DFL() {
+      return new __SIG_BUILTIN(SIG_DFL);
+    }
+    sigarg_t make_SIG_ERR() {
+      return new __SIG_BUILTIN(SIG_ERR);
+    }
+    sigarg_t make_SIG_IGN() {
+      return new __SIG_BUILTIN(SIG_ERR);
+    }
+#ifdef _SIG_HOLD_def_
+    sigarg_t make_SIG_HOLD() {
+      return new __SIG_BUILTIN(SIG_HOLD);
+    }
+#endif
+    sigarg_t make_SIG_HANDLER(void f(int)) {
+      return new __SIG_HANDLER(f);
+    }
   }
   sigarg_t sigset(int a, sigarg_t b) {
     switch (b) {
@@ -1609,27 +1766,50 @@ cycstub sigset {
     case &__SIG_BUILTIN(SIG_IGN):
       return Csignal::sigset_SIG_IGN(a);
     case &__SIG_HANDLER(f):
-      return Csignal::sigset(a,f);
+      return Csignal::sigset_SIG_HANDLER(a,f);
     }
   }
 }
 cstub {
   #include <signal.h>
+
+  typedef void *Cyc_Std_sigarg_t;
+  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_DFL();
+  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_ERR();
+  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_IGN();
+  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HOLD();
+  extern Cyc_Std_sigarg_t Cyc_Std_Csignal_make_SIG_HANDLER(void (*)(int));
+  Cyc_Std_sigarg_t sig_wrap(void (*f)(int)) {
+    if (f == SIG_DFL)
+      return Cyc_Std_Csignal_make_SIG_DFL();
+    if (f == SIG_ERR)
+      return Cyc_Std_Csignal_make_SIG_ERR();
+    if (f == SIG_IGN)
+      return Cyc_Std_Csignal_make_SIG_IGN();
+#ifdef SIG_HOLD
+    if (f == SIG_HOLD)
+      return Cyc_Std_Csignal_make_SIG_HOLD();
+#endif
+      return Cyc_Std_Csignal_make_SIG_HANDLER(f);
+  }
 }
 cstub sigset {
-  sigarg_t sigset_SIG_DFL(int a) {
-    return sigset(a,SIG_DFL);
+  Cyc_Std_sigarg_t sigset_SIG_DFL(int a) {
+    return sig_wrap(sigset(a,SIG_DFL));
   }
-  sigarg_t sigset_SIG_ERR(int a) {
-    return sigset(a,SIG_ERR);
+  Cyc_Std_sigarg_t sigset_SIG_ERR(int a) {
+    return sig_wrap(sigset(a,SIG_ERR));
+  }
+  Cyc_Std_sigarg_t sigset_SIG_IGN(int a) {
+    return sig_wrap(sigset(a,SIG_IGN));
   }
 #ifdef _SIG_HOLD_def_
-  sigarg_t sigset_SIG_HOLD(int a) {
-    return sigset(a,SIG_HOLD);
+  Cyc_Std_sigarg_t sigset_SIG_HOLD(int a) {
+    return sig_wrap(sigset(a,SIG_HOLD));
   }
 #endif
-  sigarg_t sigset_SIG_IGN(int a) {
-    return sigset(a,SIG_IGN);
+  Cyc_Std_sigarg_t sigset_SIG_HANDLER(int a, void (*f)(int)) {
+    return sig_wrap(sigset(a,f));
   }
 }
 epilogue signal {
@@ -1661,19 +1841,19 @@ cycstub signal {
   }
 }
 cstub signal {
-  sigarg_t signal_SIG_DFL(int a) {
-    return signal(a,SIG_DFL);
+  Cyc_Std_sigarg_t signal_SIG_DFL(int a) {
+    return sig_wrap(signal(a,SIG_DFL));
   }
-  sigarg_t signal_SIG_ERR(int a) {
-    return signal(a,SIG_ERR);
+  Cyc_Std_sigarg_t signal_SIG_ERR(int a) {
+    return sig_wrap(signal(a,SIG_ERR));
   }
 #ifdef _SIG_HOLD_def_
-  sigarg_t signal_SIG_HOLD(int a) {
-    return signal(a,SIG_HOLD);
+  Cyc_Std_sigarg_t signal_SIG_HOLD(int a) {
+    return sig_wrap(signal(a,SIG_HOLD));
   }
 #endif
-  sigarg_t signal_SIG_IGN(int a) {
-    return signal(a,SIG_IGN);
+  Cyc_Std_sigarg_t signal_SIG_IGN(int a) {
+    return sig_wrap(signal(a,SIG_IGN));
   }
 }
 epilogue {
@@ -1810,8 +1990,8 @@ epilogue {
   // va_list is not defined because Cyclone has safe varargs.
 }
 epilogue {
-  extern struct __sFILE;  
-  typedef struct __sFILE FILE;
+  extern struct __cycFILE;  
+  typedef struct __cycFILE FILE;
   extern FILE @stdout;
   extern FILE @stdin;
   extern FILE @stderr;
@@ -1819,21 +1999,23 @@ epilogue {
 cycstub {
   // FIX: we should get rid of as many uses of string_to_Cstring as
   // possible, since it heap-allocates and copies.
+  #ifndef s2c
   #define s2c(x) (string_to_Cstring(x))
+  #endif
 }
 cycstub {
   namespace Cstdio {
     extern "C" struct __abstractFILE;
     typedef struct __abstractFILE __cFILE;
   }
-  abstract struct __sFILE { // must match defn in c stub
+  abstract struct __cycFILE { // must match defn in c stub
     Cstdio::__cFILE @file;
   };
 }
 cstub {
   #include <stdio.h>
-  // Define struct Std::__sFILE, and initialize stdin, stdout, stderr
-  struct Cyc_Std___sFILE { // must match defn in cyclone stub
+  // Define struct Std::__cycFILE, and initialize stdin, stdout, stderr
+  struct Cyc_Std___cycFILE { // must match defn in cyclone stub
     FILE *file;
   } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
     *Cyc_Std_stdin = &Cyc_Std_stdin_v,
@@ -1894,7 +2076,7 @@ cycstub fdopen {
   FILE *fdopen(int i, const char ?s) {
     let cf = Cstdio::fdopen(i,s2c(s));
     // FIX: get rid of the heap allocation
-    return cf ? new __sFILE((Cstdio::__cFILE @)cf) : NULL;
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
 epilogue feof {
@@ -2006,7 +2188,7 @@ cycstub fopen {
     if (!name || !type) throw new Failure("fopen called with NULL");
     let cf = Cstdio::fopen(s2c(name), s2c(type));
     // FIX: get rid of the heap allocation
-    return cf ? new __sFILE((Cstdio::__cFILE @)cf) : NULL;
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
 epilogue {
@@ -2065,7 +2247,7 @@ cycstub freopen {
     // Note, s2c might throw a bounds error
     let cf = Cstdio::freopen(s2c(filename),s2c(modes),f->file);
     // FIX: get rid of the heap allocation
-    return cf ? new __sFILE((Cstdio::__cFILE @)cf) : NULL;
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
 epilogue {
@@ -2262,7 +2444,7 @@ cycstub popen {
     if (!name || !type) throw new Failure("popen called with NULL");
     let cf = Cstdio::popen(s2c(name), s2c(type));
     // FIX: get rid of the heap allocation
-    return cf ? new __sFILE((Cstdio::__cFILE @)cf) : NULL;
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
 epilogue {
@@ -2417,20 +2599,34 @@ cycstub tmpfile {
   extern FILE *tmpfile(void) {
     let cf = Cstdio::tmpfile();
     // FIX: get rid of the heap allocation
-    return cf ? new __sFILE((Cstdio::__cFILE @)cf) : NULL;
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
   }
 }
 epilogue tmpnam {
   // Note, tmpnam is considered insecure because in between the call
   // of tmpnam and open, a file can be created with the supposedly
-  // fresh name.  So, we don't support it at this time.
+  // fresh name.
   // Note, we require the argument of tmpnam to be heap-allocated.
   // This is because if tmpnam is called with NULL, it is supposed
   // to return a pointer to a static (heap allocated) buffer, while if
   // tmpnam is called with a non-NULL argument, it returns that
   // argument.  So the only way to type tmpnam is to require the arg
   // to be heap allocated.
-  //  extern char ?`H tmpnam(char ?`H);
+  extern char ?`H tmpnam(char ?`H);
+}
+cycstub tmpnam {
+  extern char ?`r strcpy(char ?`r,const char ?); 
+  // Instead of putting this in the stub file, we should just
+  // have a separate file for it.  That way the linker can leave
+  // it out if it isn't used, preventing a warning about the
+  // security problem.
+  namespace Cstdio {
+    extern "C" Cstring tmpnam(Cstring);
+  }
+  char ?`H tmpnam(char ?`H s) {
+    char ?name = Cstring_to_string(Cstdio::tmpnam(NULL));
+    return s ? strcpy(s, name) : name;
+  }
 }
 epilogue ungetc {
   extern int ungetc(int, FILE @);
@@ -2555,7 +2751,9 @@ WTERMSIG
 cycstub {
   // FIX: we should get rid of as many uses of string_to_Cstring as
   // possible, since it heap-allocates and copies.
+  #ifndef s2c
   #define s2c(x) (string_to_Cstring(x))
+  #endif
 }
 epilogue {
   // malloc is a primitive in Cyclone so we don't need this declaration
@@ -2728,6 +2926,19 @@ cycstub putenv {
     return Cstdlib::putenv(s2c(s));
   }
 }
+prologue {
+  #include <array.h> // for Array::cmpfn_t in declaration of qsort
+}
+epilogue {
+  extern void qsort<`a,`r::R>(`a ?`r, size_t, size_t, Array::cmpfn_t<`a,`r,`r>);
+}
+cycstub {
+  #include <array.h>
+  void qsort<`a,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
+		       Array::cmpfn_t<`a,`r,`r> compfn) {
+    Array::qsort(compfn, tab, nmemb);
+  }
+}
 epilogue rand {
   extern "C" int rand(void);
 }
@@ -2835,10 +3046,16 @@ cycstub strtoul {
   }
 }
 epilogue system {
-  // FIX: we should instead use type
-  //  extern int system(const char ?);
-  // and have a stub
-  extern "C" int system(Cstring);
+  extern int system(const char ?);
+}
+cycstub system {
+  namespace Cstdlib {
+    extern "C" int system(Cstring);
+  }
+  int system(const char ?x) {
+    if (!x) throw new Failure("system called with NULL");
+    return Cstdlib::system(s2c(x));
+  }
 }
 epilogue unlockpt {
   extern "C" int unlockpt(int);
@@ -2944,6 +3161,69 @@ epilogue setrlimit {
 sys/sem.h:
 epilogue {
   // Semaphores -- not supported yet
+}
+;
+
+sys/select.h:
+include {
+time_t
+suseconds_t
+timeval
+sigset_t
+timespec
+fd_set
+FD_SETSIZE
+}
+epilogue pselect {
+  extern "C" int pselect(int, fd_set *, fd_set *, fd_set *,
+                       const struct timespec *, const sigset_t *);
+}
+epilogue select {
+  extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+}
+epilogue {
+  /* Posix says these can be macros or functions.  Typically they are
+     macros but in Linux at least they use asm, which we don't support
+     in Cyclone.  So, we make them functions. */
+  extern void FD_CLR(int, fd_set @);
+  extern int FD_ISSET(int, fd_set @);
+  extern void FD_SET(int, fd_set @);
+  extern void FD_ZERO(fd_set @);
+}
+cycstub {
+  namespace Csysselect {
+    extern "C" void __stub_FD_CLR(int, fd_set @);
+    extern "C" int __stub_FD_ISSET(int, fd_set @);
+    extern "C" void __stub_FD_SET(int, fd_set @);
+    extern "C" void __stub_FD_ZERO(fd_set @);
+  }
+  void FD_CLR(int a, fd_set @b) {
+    Csysselect::__stub_FD_CLR(a,b);
+  }
+  int FD_ISSET(int a, fd_set @b) {
+    return Csysselect::__stub_FD_ISSET(a,b);
+  }
+  void FD_SET(int a, fd_set @b) {
+    Csysselect::__stub_FD_SET(a,b);
+  }
+  void FD_ZERO(fd_set @a) {
+    Csysselect::__stub_FD_ZERO(a);
+  }
+}
+cstub {
+  #include <sys/select.h>
+  void __stub_FD_CLR(int a, fd_set *b) {
+    FD_CLR(a,b);
+  }
+  int __stub_FD_ISSET(int a, fd_set *b) {
+    return FD_ISSET(a,b);
+  }
+  void __stub_FD_SET(int a, fd_set *b) {
+    FD_SET(a,b);
+  }
+  void __stub_FD_ZERO(fd_set *a) {
+    FD_ZERO(a);
+  }
 }
 ;
 
@@ -3418,6 +3698,8 @@ ITIMER_REAL
 ITIMER_VIRTUAL
 ITIMER_PROF
 timezone
+fd_set
+FD_SETSIZE
 }
 epilogue getitimer {
   extern "C" int getitimer(int, struct itimerval @);
@@ -3436,22 +3718,13 @@ cycstub gettimeofday {
     return Csystime::gettimeofday(a,NULL);
   }
 }
-epilogue {
-  // We'd like to do the following but under Linux this brings in
-  // a use of sizeof as a constant expression, which Cyclone can't handle
-  // yet. 
-  // include {
-  // fd_set
-  // FD_SETSIZE
-  // }
-  // epilogue select {
-  //   extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
-  //   /* Stubs for these are defined by select.h */
-  //   extern void FD_CLR(int, fd_set @);
-  //   extern int FD_ISSET(int, fd_set @);
-  //   extern void FD_SET(int, fd_set @);
-  //   extern void FD_ZERO(fd_set @);
-  // }
+epilogue select {
+  extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+  /* Stubs for these are defined by sys/select.h */
+  extern void FD_CLR(int, fd_set @);
+  extern int FD_ISSET(int, fd_set @);
+  extern void FD_SET(int, fd_set @);
+  extern void FD_ZERO(fd_set @);
 }
 epilogue setitimer {
   extern "C" int setitimer(int, const struct itimerval @, struct itimerval *);
@@ -3630,13 +3903,6 @@ TOEXEC
 termios.h:
 epilogue {
   // Terminal I/O interface
-  // Not supported yet
-}
-;
-
-tgmath.h:
-epilogue {
-  // Type generic macros
   // Not supported yet
 }
 ;
@@ -4585,12 +4851,6 @@ utmpx.h:
 epilogue {
   // User accounting database definitions
   // Not supported yet
-}
-;
-
-wchar.h:
-epilogue {
-  // Wide characters are not supported yet in Cyclone
 }
 ;
 

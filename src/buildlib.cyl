@@ -93,6 +93,16 @@ FILE *log_file = NULL;
 FILE *cstubs_file = NULL;
 FILE *cycstubs_file = NULL;
 
+/* These will be filled in using gcc later */
+int sizeof_unsignedlongint = -1;
+int sizeof_unsignedshortint = -1;
+int sizeof_int = -1;
+int sizeof_fdmask = -1;
+int sizeof_uint32 = -1;
+int sizeof_sockaddr = -1;
+int sizeof_inport = -1;
+int sizeof_inaddr = -1;
+
 static string_t *current_source = NULL;
 static list_t<stringptr_t> current_args = NULL;
 static Set::set_t<stringptr_t> *current_targets = NULL;
@@ -346,6 +356,33 @@ and slurp = parse
   if (slurp_string(lexbuf)) return 1; else return slurp(lexbuf);}
 | eof
 { return 0; }
+/* Currently Cyclone doesn't allow sizeofs as constant expressions.
+   So we calculate the sizes in a previous phase and insert them
+   here on a case-by-case basis. */
+| "sizeof" ws* "(" ws* "__fd_mask" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_fdmask);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "__uint32_t" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_uint32);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "in_port_t" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_inport);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "int" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_int);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "unsigned" ws+ "long" ws+ "int" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_unsignedlongint);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "unsigned" ws+ "short" ws+ "int" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_unsignedshortint);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "struct" ws+ "sockaddr" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_sockaddr);
+  return slurp(lexbuf); }
+| "sizeof" ws* "(" ws* "struct" ws+ "in_addr" ws* ")"
+{ fprintf((FILE @)slurp_out," %d ",sizeof_inaddr);
+  return slurp(lexbuf); }
 | " malloc "
 /* malloc is a Cyclone keyword so our parser can't handle a malloc
    declaration. */
@@ -1194,7 +1231,8 @@ and block_comment = parse
       return 1;
     }
     if (slurp(l)) {
-      /* Unclosed string, error */
+      fprintf((FILE @)log_file,"Error: Unclosed string in %s\n",filename);
+      fprintf(stderr,"Error: Unclosed string in %s\n",filename);
       fclose(in_file);
       fclose((FILE @)slurp_out);
       remove(preprocfile);
@@ -1214,7 +1252,8 @@ and block_comment = parse
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(); // garbage collect those big tries
     fclose(in_file);
-    remove(filteredfile);
+    // TEMP
+    //    remove(filteredfile);
 
     for (let d = decls; d != NULL; d = d->tl) {
       let entry = scan_decl(d->hd);
@@ -1498,6 +1537,54 @@ and block_comment = parse
     return 0;
   }
 
+  int getsize(const char ?dir, const char ?includes, const char ?type) {
+    let getsizefilename = Filename::concat(dir,"getsize.c");
+    let getsizeexec = Filename::concat(dir,"getsize");
+    let getsizeout = Filename::concat(dir,"getsize.out");
+    let getsizefile = fopen(getsizefilename,"w");
+    if (!getsizefile) {
+      fprintf(stderr,"Error: could not create %s\n",getsizefilename);
+      return -1;
+    }
+    /* We have to jump through some hoops here because system is not
+       returning the value returned by main, like it's supposed to. */
+    fprintf((FILE@)getsizefile,
+            "%s\n"
+            "#include <stdio.h>\n"
+            "int main() {\n"
+            "  FILE *f = fopen(\"%s\",\"w\");\n"
+            "  fprintf(f,\"%%d\\n\",sizeof(%s));\n"
+            "  fclose(f);\n"
+            "  return (int)sizeof(%s);\n"
+            "}\n",
+            includes,
+            getsizeout,
+            type,
+            type);
+    fclose((FILE@)getsizefile);
+    let gcccmd = aprintf("gcc -o %s %s",
+                         getsizeexec,
+                         getsizefilename);
+    if (system(gcccmd) != 0) {
+      fprintf(stderr,"Error: can't run %s\n",getsizeexec);
+      return -1;
+    }
+    let z = system(getsizeexec);
+    fprintf((FILE@)log_file,"size of %s returned by system is %d\n",
+            type,z);
+    let f = fopen(getsizeout,"r");
+    int w = -1;
+    if (fscanf((FILE@)f,"%d",&w) != 1)
+      return -1;
+    fprintf((FILE@)log_file,"size of %s read from file %s is %d\n",
+            type,getsizeout,w);
+    fclose((FILE@)f);
+    remove(getsizeout);
+    remove(getsizefilename);
+    remove(getsizeexec);
+    return w;
+  }
+
   int main(int argc, char ??argv) {
     if (argc < 3) {
       fprintf(stderr,
@@ -1541,6 +1628,16 @@ and block_comment = parse
             "#include <core.h>\n"
             "using Core;\n\n");
 
+    /* Find the sizes of various types, for use in constant expressions */
+    sizeof_unsignedlongint = getsize(dir,"","unsigned long int");
+    sizeof_unsignedlongint = getsize(dir,"","unsigned short int");
+    sizeof_int = getsize(dir,"","int");
+    sizeof_fdmask = getsize(dir,"#include <sys/select.h>","__fd_mask");
+    sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
+    sizeof_sockaddr = getsize(dir,"#include <netinet/in.h>","struct sockaddr");
+    sizeof_inport = getsize(dir,"#include <netinet/in.h>","in_port_t");
+    sizeof_inaddr = getsize(dir,"#include <netinet/in.h>","struct in_addr");
+            
     for (int i = 2; i<argc; i++) {
       process_specfile(argv[i],dir);
     }

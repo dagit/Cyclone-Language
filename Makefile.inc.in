@@ -201,6 +201,24 @@ CYCDOC_SRCS:=cycdoc\
 	evexp\
 	absynpp
 
+BUILDLIB_SRCS:=buildlib\
+	lex\
+	parse_tab\
+	tcutil\
+	absynpp\
+	tc\
+	tcdecl\
+	tcgenrep\
+	tcexp\
+	tcstmt\
+	formatstr\
+	evexp\
+	tcenv\
+	tcpat\
+	new_control_flow\
+	cf_flowinfo\
+	absyn
+
 # Add XML library .h files to CYCLONE_H
 ifndef NO_XML_LIB
 CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h 
@@ -219,7 +237,7 @@ O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
-UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc)
+UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)
 
 PATCH_ARCH=i686-unknown-linux
 DEVEL_ARCHS := i686-unknown-linux i686-unknown-cygwin1.3.3

@@ -8,7 +8,8 @@ CYC_BIN_PATH=$(CYCDIR)/bin
 
 install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a)\
   $(CYC_BIN_PATH)/cyclone$(EXE)\
-  $(CYC_BIN_PATH)/cycdoc$(EXE)
+  $(CYC_BIN_PATH)/cycdoc$(EXE)\
+  $(CYC_BIN_PATH)/buildlib$(EXE)
 	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
 $(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
 	cp $< $@
@@ -17,6 +18,8 @@ $(CYC_LIB_PATH)/nogc.a: $(ARCH)/lib/nogc.a
 $(CYC_BIN_PATH)/cyclone$(EXE): $(ARCH)/src/cyclone$(EXE)
 	cp $< $@
 $(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
+	cp $< $@
+$(CYC_BIN_PATH)/buildlib$(EXE): $(ARCH)/src/buildlib$(EXE)
 	cp $< $@
 
 install_a: $(ARCH)/lib/libcyc_a.a
@@ -49,6 +52,9 @@ $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/install_path.c: ../../Makefile.inc

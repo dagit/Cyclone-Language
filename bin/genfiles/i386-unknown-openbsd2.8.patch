@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Nov  2 10:57:16 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Sun Nov  4 14:46:07 2001
+*** i686-unknown-linux/lib/execinfo.c	Fri Nov  2 19:26:51 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Sun Nov  4 21:02:01 2001
 ***************
 *** 230,259 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -148,8 +148,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Thu Nov  1 13:13:00 2001
---- i386-unknown-openbsd2.8/lib/stat.c	Sun Nov  4 14:46:07 2001
+*** i686-unknown-linux/lib/stat.c	Thu Nov  1 13:07:23 2001
+--- i386-unknown-openbsd2.8/lib/stat.c	Sun Nov  4 21:02:01 2001
 ***************
 *** 233,244 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -175,3 +175,163 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/
   struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
+diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd2.8/src/buildlib.c
+*** i686-unknown-linux/src/buildlib.c	Sun Nov  4 20:53:17 2001
+--- i386-unknown-openbsd2.8/src/buildlib.c	Sun Nov  4 21:02:02 2001
+***************
+*** 318,395 ****
+  tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
+  gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
+  extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
+! unsigned long long st_dev; unsigned short __pad1; unsigned int st_ino;
+! unsigned int st_mode; unsigned int st_nlink; unsigned int st_uid; unsigned int
+! st_gid; unsigned long long st_rdev; unsigned short __pad2; int st_size; int
+! st_blksize; int st_blocks; int st_atime; unsigned int __unused1; int st_mtime;
+! unsigned int __unused2; int st_ctime; unsigned int __unused3; unsigned int
+! __unused4; unsigned int __unused5; } ; extern int fstat( int fd, struct Cyc_Std_stat_t*
+! buf); extern unsigned int umask( unsigned int mask); extern int Cyc_Std_mkdir(
+! struct _tagged_arr pathname, unsigned int mode); extern int fchmod( int fd,
+! unsigned int mode); struct Cyc_Std_flock{ short l_type; int l_start; short
+! l_whence; int l_len; int l_pid; } ; static const int Cyc_Std_Flock= 0; struct
+! Cyc_Std_Flock_struct{ int tag; struct Cyc_Std_flock* f1; } ; static const int
+! Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag; int f1; } ; extern int Cyc_Std_open(
+! struct _tagged_arr, int, struct _tagged_arr); struct Cyc_Std_timeval{ int tv_sec;
+! int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; }
+! ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
+! __z); struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag;
+! int val; } ; extern unsigned int alarm( unsigned int seconds); extern int close(
+! int); extern void _exit( int); extern int getpid(); extern int getppid(); extern
+! int fork(); extern int fchdir( int); extern int fchown( int, unsigned int,
+! unsigned int); extern int fsync( int); extern int ftruncate( int, int); extern
+! int dup( int); extern int dup2( int, int); extern unsigned int getuid(); extern
+! int setuid( unsigned int uid); extern unsigned int geteuid(); extern int seteuid(
+! unsigned int euid); extern unsigned int getgid(); extern int setgid(
+! unsigned int gid); extern unsigned int getegid(); extern int setegid(
+! unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
+! int* filedes); extern int lseek( int filedes, int offset, int whence); extern
+! unsigned int sleep( unsigned int); extern int isatty( int); int Cyc_Std_access(
+! struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
+! struct _tagged_arr, unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd(
+! struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct
+! _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
+! struct _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int
+! Cyc_Std_execve( struct _tagged_arr filename, struct _tagged_arr argv, struct
+! _tagged_arr envp); int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr);
+! int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir(
+! struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
+! int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
+! struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
+! _tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
+! int Cyc_Std_chroot( struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass(
+! struct _tagged_arr prompt); extern int isalnum( int); extern int isalpha( int);
+! extern int isascii( int); extern int iscntrl( int); extern int isdigit( int);
+! extern int isgraph( int); extern int islower( int); extern int isprint( int);
+! extern int ispunct( int); extern int isspace( int); extern int isupper( int);
+! extern int isxdigit( int); extern int toascii( int); extern int tolower( int);
+! extern int toupper( int); extern int _tolower( int); extern int _toupper( int);
+! static const int Cyc_Absyn_Loc_n= 0; static const int Cyc_Absyn_Rel_n= 0; struct
+! Cyc_Absyn_Rel_n_struct{ int tag; struct Cyc_List_List* f1; } ; static const int
+! Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{ int tag; struct Cyc_List_List*
+! f1; } ; struct _tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Conref;
+! static const int Cyc_Absyn_Static= 0; static const int Cyc_Absyn_Abstract= 1;
+! static const int Cyc_Absyn_Public= 2; static const int Cyc_Absyn_Extern= 3;
+! static const int Cyc_Absyn_ExternC= 4; struct Cyc_Absyn_Tqual{ int q_const: 1;
+! int q_volatile: 1; int q_restrict: 1; } ; static const int Cyc_Absyn_B1= 0;
+! static const int Cyc_Absyn_B2= 1; static const int Cyc_Absyn_B4= 2; static const
+! int Cyc_Absyn_B8= 3; static const int Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind=
+! 1; static const int Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3;
+! static const int Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0;
+! static const int Cyc_Absyn_Unsigned= 1; struct Cyc_Absyn_Conref{ void* v; } ;
+! static const int Cyc_Absyn_Eq_constr= 0; struct Cyc_Absyn_Eq_constr_struct{ int
+! tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr= 1; struct Cyc_Absyn_Forward_constr_struct{
+! int tag; struct Cyc_Absyn_Conref* f1; } ; static const int Cyc_Absyn_No_constr=
+! 0; struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; struct Cyc_Absyn_Conref*
+! kind; } ; static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b=
+! 0; struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
+! struct Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
+! nullable; struct Cyc_Absyn_Tqual tq; struct Cyc_Absyn_Conref* bounds; } ; struct
+! Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt* name; struct Cyc_Absyn_Tqual tq; void*
+! type; int inject; } ; struct Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars;
+! struct Cyc_Core_Opt* effect; void* ret_typ; struct Cyc_List_List* args; int
+! c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs; struct Cyc_List_List*
+! rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
+  struct _tuple0* name; int is_xtunion; } ; static const int Cyc_Absyn_UnknownTunion=
+  0; struct Cyc_Absyn_UnknownTunion_struct{ int tag; struct Cyc_Absyn_UnknownTunionInfo
+  f1; } ; static const int Cyc_Absyn_KnownTunion= 1; struct Cyc_Absyn_KnownTunion_struct{
+--- 318,393 ----
+  tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
+  gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
+  extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
+! unsigned long long st_dev; unsigned int st_ino; unsigned int st_mode;
+! unsigned int st_nlink; unsigned int st_uid; unsigned int st_gid;
+! unsigned long long st_rdev; int st_size; unsigned int st_blksize; unsigned int
+! st_blocks; int st_atime; int st_mtime; int st_ctime; } ; extern int fstat( int
+! fd, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int mask);
+! extern int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode);
+! extern int fchmod( int fd, unsigned int mode); struct Cyc_Std_flock{ short
+! l_type; int l_start; short l_whence; int l_len; int l_pid; } ; static const int
+! Cyc_Std_Flock= 0; struct Cyc_Std_Flock_struct{ int tag; struct Cyc_Std_flock* f1;
+! } ; static const int Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag; int
+! f1; } ; extern int Cyc_Std_open( struct _tagged_arr, int, struct _tagged_arr);
+! struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{
+! int tz_minuteswest; int tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval*
+! __p, struct Cyc_Std_timezone* __z); struct Cyc_Std_option{ struct _tagged_arr
+! name; int has_arg; int* flag; int val; } ; extern unsigned int alarm(
+! unsigned int seconds); extern int close( int); extern void _exit( int); extern
+! int getpid(); extern int getppid(); extern int fork(); extern int fchdir( int);
+! extern int fchown( int, unsigned int, unsigned int); extern int fsync( int);
+! extern int ftruncate( int, int); extern int dup( int); extern int dup2( int, int);
+! extern unsigned int getuid(); extern int setuid( unsigned int uid); extern
+! unsigned int geteuid(); extern int seteuid( unsigned int euid); extern
+! unsigned int getgid(); extern int setgid( unsigned int gid); extern unsigned int
+! getegid(); extern int setegid( unsigned int egid); extern int nice( int); extern
+! int pause(); extern int pipe( int* filedes); extern int lseek( int filedes, int
+! offset, int whence); extern unsigned int sleep( unsigned int); extern int isatty(
+! int); int Cyc_Std_access( struct _tagged_arr, int); int Cyc_Std_chdir( struct
+! _tagged_arr); int Cyc_Std_chown( struct _tagged_arr, unsigned int, unsigned int);
+! struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size);
+! int Cyc_Std_execl( struct _tagged_arr path, struct _tagged_arr arg0, struct
+! _tagged_arr argv); int Cyc_Std_execlp( struct _tagged_arr file, struct
+! _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve( struct
+! _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp); int Cyc_Std_link(
+! struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int fd, struct
+! _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct _tagged_arr);
+! int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_truncate(
+! struct _tagged_arr, int); int Cyc_Std_write( int fd, struct _tagged_arr buf,
+! unsigned int count); int Cyc_Std_unlink( struct _tagged_arr pathname); int Cyc_Std_gethostname(
+! struct _tagged_arr, unsigned int); int Cyc_Std_chroot( struct _tagged_arr);
+! struct _tagged_arr Cyc_Std_getpass( struct _tagged_arr prompt); extern int
+! isalnum( int); extern int isalpha( int); extern int isascii( int); extern int
+! iscntrl( int); extern int isdigit( int); extern int isgraph( int); extern int
+! islower( int); extern int isprint( int); extern int ispunct( int); extern int
+! isspace( int); extern int isupper( int); extern int isxdigit( int); extern int
+! toascii( int); extern int tolower( int); extern int toupper( int); extern int
+! _tolower( int); extern int _toupper( int); static const int Cyc_Absyn_Loc_n= 0;
+! static const int Cyc_Absyn_Rel_n= 0; struct Cyc_Absyn_Rel_n_struct{ int tag;
+! struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{
+! int tag; struct Cyc_List_List* f1; } ; struct _tuple0{ void* f1; struct
+! _tagged_arr* f2; } ; struct Cyc_Absyn_Conref; static const int Cyc_Absyn_Static=
+! 0; static const int Cyc_Absyn_Abstract= 1; static const int Cyc_Absyn_Public= 2;
+! static const int Cyc_Absyn_Extern= 3; static const int Cyc_Absyn_ExternC= 4;
+! struct Cyc_Absyn_Tqual{ int q_const: 1; int q_volatile: 1; int q_restrict: 1; }
+! ; static const int Cyc_Absyn_B1= 0; static const int Cyc_Absyn_B2= 1; static
+! const int Cyc_Absyn_B4= 2; static const int Cyc_Absyn_B8= 3; static const int
+! Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind= 1; static const int
+! Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3; static const int
+! Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0; static const int Cyc_Absyn_Unsigned=
+! 1; struct Cyc_Absyn_Conref{ void* v; } ; static const int Cyc_Absyn_Eq_constr= 0;
+! struct Cyc_Absyn_Eq_constr_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr=
+! 1; struct Cyc_Absyn_Forward_constr_struct{ int tag; struct Cyc_Absyn_Conref* f1;
+! } ; static const int Cyc_Absyn_No_constr= 0; struct Cyc_Absyn_Tvar{ struct
+! _tagged_arr* name; int* identity; struct Cyc_Absyn_Conref* kind; } ; static
+! const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0; struct
+! Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_PtrInfo{
+! void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref* nullable; struct Cyc_Absyn_Tqual
+! tq; struct Cyc_Absyn_Conref* bounds; } ; struct Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt*
+! name; struct Cyc_Absyn_Tqual tq; void* type; int inject; } ; struct Cyc_Absyn_FnInfo{
+! struct Cyc_List_List* tvars; struct Cyc_Core_Opt* effect; void* ret_typ; struct
+! Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs;
+! struct Cyc_List_List* rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
+  struct _tuple0* name; int is_xtunion; } ; static const int Cyc_Absyn_UnknownTunion=
+  0; struct Cyc_Absyn_UnknownTunion_struct{ int tag; struct Cyc_Absyn_UnknownTunionInfo
+  f1; } ; static const int Cyc_Absyn_KnownTunion= 1; struct Cyc_Absyn_KnownTunion_struct{
