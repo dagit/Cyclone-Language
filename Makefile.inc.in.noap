@@ -38,6 +38,7 @@ CYCLONE_BOOT_LIBS:=arg\
         dict\
         filename\
         fn\
+        graph\
         hashtable\
 	iter\
         lexing\

@@ -74,6 +74,7 @@ gen-libdoc.tex: \
   ../include/dict.h \
   ../include/filename.h \
   ../include/fn.h \
+  ../include/graph.h \
   ../include/hashtable.h \
   ../include/iter.h \
   ../include/list.h \

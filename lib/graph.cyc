@@ -1,0 +1,437 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2004 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+#include <core.h>
+#include <string.h>
+#include <graph.h>
+
+using List;
+
+namespace Graph;
+
+graph_t<`a> empty(int (@`H cmp)(`a,`a)) {
+  return Dict::empty(cmp);
+}
+
+/********************************/
+/* Targets of a node in a graph */
+/********************************/
+Set::set_t<`a> get_targets(graph_t<`a> g, `a source) {
+  switch (Dict::lookup_opt(g,source)) {
+  case NULL:     return Set::empty(g.rel);
+  case &targets: return targets;
+  }
+}
+
+/*************************************************************/
+/* Add a node to the graph if it is not in the graph already */
+/* (Just ensures that it is in the domain of the dictionary) */
+/*************************************************************/
+graph_t<`a> add_node(graph_t<`a> g, `a source) {
+  if (Dict::member(g,source)) return g;
+  else return Dict::insert(g,source,Set::empty(g.rel));
+}
+
+/*********************************************/
+/* Add the edge (source,target) to the graph */
+/*********************************************/
+graph_t<`a> add_edge(graph_t<`a> g, `a source, `a target) {
+  let sourceTargets = get_targets(g,source);
+  return Dict::insert(g,source,Set::insert(sourceTargets,target));
+}
+
+/************************************************************/
+/* Add the edges { (source,t) | t in targets } to the graph */
+/************************************************************/
+graph_t<`a> add_edges(graph_t<`a> g, `a source, Set::set_t<`a,`H> targets) {
+  let sourceTargets = get_targets(g,source);
+  return Dict::insert(g,source,Set::union_two(sourceTargets,targets));
+}
+
+/**************************************************/
+/* Remove the edge (source,target) from the graph */
+/**************************************************/
+graph_t<`a> remove_edge(graph_t<`a> g, `a source, `a target) {
+  let sourceTargets = get_targets(g,source);
+  return Dict::insert(g,source,Set::delete(sourceTargets,target));
+}
+
+/*****************************************************************/
+/* Remove the edges { (source,t) | t in targets } from the graph */
+/*****************************************************************/
+graph_t<`a> remove_edges(graph_t<`a> g, `a source, Set::set_t<`a,`H> targets) {
+  let sourceTargets = get_targets(g,source);
+  return Dict::insert(g,source,Set::diff(sourceTargets,targets));
+}
+
+/**********************************************************************/
+/* Convert between an edge-list representation of graphs and our      */
+/* representation.                                                    */
+/**********************************************************************/
+static list_t<`a>
+to_list(Set::set_t<`a,`H> ts) {
+  let result = NULL;
+  while (!Set::is_empty(ts)) {
+    let z = Set::choose(ts);
+    ts = Set::delete(ts,z);
+    result = new List(z,result);
+  }
+  return result;
+}
+
+/****************************/
+/* Is an edge in the graph? */
+/****************************/
+int is_edge(graph_t<`a> g, `a source, `a target) {
+  switch (Dict::lookup_opt(g,source)) {
+  case NULL:
+    return 0;
+  case &sourceTargets:
+    return Set::member(sourceTargets, target);
+  }
+}
+
+/*****************/
+/* Print a graph */
+/*****************/
+void print(FILE @`r f, graph_t<`a> g, void (@nodeprint)(FILE @`r,`a)) {
+  let edges = Dict::to_list(g);
+  for (; edges; edges = edges->tl) {
+    let &$(s,ts) = edges->hd;
+    let tslist = to_list(ts);
+    if (tslist)
+      for (; tslist; tslist = tslist->tl) {
+        nodeprint(f,s);
+        fprintf(f," --> ");
+        nodeprint(f,tslist->hd);
+        fprintf(f,"\n");
+      }
+    else {
+        nodeprint(f,s);
+        fprintf(f," --> <no targets>\n");
+    }
+  }
+}
+
+/**********************************************************/
+/* Compute the transitive closure of a graph from scratch */
+/* Super slow, kept around for testing.                   */
+/**********************************************************/
+/*****************************************/
+/* Sources that target a node in a graph */
+/*****************************************/
+static list_t<`a> sourcesOf(graph_t<`a> g, `a node) {
+  let result = NULL;
+  // TODO: use an interator instead
+  for (let edges = Dict::to_list(g); edges; edges = edges->tl) {
+    let &$(s,ts) = edges->hd;
+    if (Set::member(ts,node)) result = new List(s,result);
+  }
+  return result;
+}
+/**********************************************************************/
+/* divideGraph graph source = (sourceTargets, graphWithoutSource)     */
+/*                                                                    */
+/* Return the targets of a source in a graph and the graph with the   */
+/* source substracted from the sources.  GraphWithoutSources may      */
+/* still contain source as a target.                                  */
+/**********************************************************************/
+static $(Set::set_t<`a>, graph_t<`a>)
+  divideGraph(graph_t<`a> g, `a source)
+{
+  switch (Dict::lookup_opt(g,source)) {
+  case NULL:           return $(Set::empty(g.rel),g);
+  case &sourceTargets: return $(sourceTargets,Dict::delete(g,source));
+  }
+}
+/******************************************************************/
+/* Add an edge to a transitively closed graph, and return the new */
+/* transitive closure.                                            */
+/******************************************************************/
+static graph_t<`a> add_edgeTc(graph_t<`a> g, `a source, `a target) {
+  let targetTargets = get_targets(g, target);
+  let $(sourceTargets,graphWithoutSource) = divideGraph(g, source);
+  let sourceSources = sourcesOf(graphWithoutSource, source);
+  let newSourceTargets = Set::insert(Set::union_two(sourceTargets, targetTargets),target);
+  let result = Dict::insert(graphWithoutSource,source,newSourceTargets);
+  for (let s = sourceSources; s; s = s->tl) {
+    result = add_edges(result,s->hd,newSourceTargets);
+  }
+  return result;
+}
+graph_t<`a> tc_slow(graph_t<`a> g) {
+  let result = empty(g.rel);
+  let edges = Dict::to_list(g);
+  for (; edges; edges = edges->tl) {
+    let &$(source,targets) = edges->hd;
+    let tslist = to_list(targets);
+    if (tslist)
+      for (let t = tslist; t; t = t->tl)
+        result = add_edgeTc(result,source,t->hd);
+    else result = add_node(result,source);
+  }
+  return result;
+}
+
+/* A more efficient transitive closure algorithm, based on Esko
+   Nuutila, "An efficient transitive closure algorithm for cyclic
+   digraphs," Information Processing Letters 52 (1994) 207-213.
+   However, we allow self-loops. */
+struct nodestate<`a> {
+  `a root;
+  int C;
+  int visitindex;
+};
+struct componentstate<`a> {
+  Set::set_t<int> Succ;
+  Set::set_t<`a> nodes;
+};
+struct tcstate<`a> {
+  Set::set_t<`a> visited;
+  int visitindex;
+  Dict::dict_t<`a,struct nodestate<`a> @> ns;
+  Dict::dict_t<int,struct componentstate<`a> @> cs;
+  int Cindex;
+  //  void (@pr)(`a);
+  List::list_t<`a> nstack;
+  List::list_t<int> cstack;
+};
+static void
+comp_tc(struct tcstate<`a> @ts,graph_t<`a> g,`a v) {
+  let cmp = g.rel;
+  ts->visited = Set::insert(ts->visited,v);
+  let nsv = new nodestate {.root=v, .C=0, .visitindex=ts->visitindex++};
+  ts->ns = Dict::insert(ts->ns,v,nsv);
+  ts->nstack = new List::List(v,ts->nstack);
+  let hsaved = List::length(ts->cstack); // FIX: inefficient
+  let targets = get_targets(g,v);
+  while (!Set::is_empty(targets)) {
+    let w = Set::choose(targets);
+    targets = Set::delete(targets,w);
+    if (cmp(v,w) == 0) continue; /* self-loop; rest of while would be nop */
+    let is_forward_edge;
+    let nsw;
+    if (Set::member(ts->visited,w)) {
+      nsw = Dict::lookup(ts->ns,w);
+      is_forward_edge = (nsw->visitindex < nsv->visitindex) ? 0 : 1;
+    }
+    else {
+      is_forward_edge = 0;
+      comp_tc(ts,g,w);
+      nsw = Dict::lookup(ts->ns,w);
+    }
+    let Cw = nsw->C;
+    if (Cw == 0) {
+      let nsrootv = Dict::lookup(ts->ns,nsv->root);
+      let nsrootw = Dict::lookup(ts->ns,nsw->root);
+      /* root(v) = MIN(root(v),root(w)) */
+      if (nsrootv->visitindex > nsrootw->visitindex) {
+        nsv->root = nsw->root;
+      }
+    }
+    else if (!is_forward_edge)
+      ts->cstack = new List::List(Cw,ts->cstack);
+  }
+  if (cmp(nsv->root,v) != 0) {
+    return;
+  }
+  let Cnew = ts->Cindex++;
+  let csCnew = new componentstate {.Succ=Set::empty(Core::intcmp),
+                                   .nodes=Set::empty(cmp)};
+  ts->cs = Dict::insert(ts->cs,Cnew,csCnew);
+  switch (ts->nstack) {
+  case NULL: break;
+  case &List(top,_):
+    if (cmp(top,v) != 0
+        || is_edge(g,v,v)) /* check for self-loop */ {
+      csCnew->Succ = Set::insert(csCnew->Succ,Cnew);
+    }
+    break;
+  }
+  for (let hnow = List::length(ts->cstack); hnow > hsaved; hnow--) {
+    let X = ts->cstack->hd;
+    ts->cstack = ts->cstack->tl;
+    if (!Set::member(csCnew->Succ,X)) {
+      let s = Set::insert(csCnew->Succ,X);
+      s = Set::union_two(s,Dict::lookup(ts->cs,X)->Succ);
+      csCnew->Succ = s;
+    }
+  }
+  while (ts->nstack) {
+    let w = ts->nstack->hd;
+    ts->nstack = ts->nstack->tl;
+    let nsw = Dict::lookup(ts->ns,w);
+    nsw->C = Cnew;
+    csCnew->nodes = Set::insert(csCnew->nodes,w);
+    if (cmp(w,v) == 0) break;
+  }
+}
+graph_t<`a> tc(graph_t<`a> g) {
+  let cmp = g.rel;
+  let ts =
+    new tcstate
+    { .visited=Set::empty(cmp),
+      .visitindex=1,
+      .ns=Dict::empty(cmp),
+      .cs=Dict::empty(Core::intcmp),
+      .Cindex=1,
+      .nstack=NULL,
+      .cstack=NULL };
+
+  for (let edges = Dict::to_list(g); edges; edges = edges->tl) {
+    let &$(source,targets) = edges->hd;
+    if (!Set::member(ts->visited,source)) comp_tc(ts,g,source);
+  }
+
+  let result = empty(cmp);
+  for (let C = 1; C < ts->Cindex; C++) {
+    let cs = Dict::lookup(ts->cs,C);
+    let targets = Set::empty(cmp);
+    let Succ = cs->Succ;
+    while (!Set::is_empty(Succ)) {
+      let C2 = Set::choose(Succ);
+      Succ = Set::delete(Succ,C2);
+      targets = Set::union_two(targets,
+                               Dict::lookup(ts->cs,C2)->nodes);
+    }
+    let nodes = cs->nodes;
+    while (!Set::is_empty(nodes)) {
+      let v = Set::choose(nodes);
+      nodes = Set::delete(nodes,v);
+      result = add_edges(result,v,targets);
+    }
+  }
+  return result;
+}
+
+/**********************************************************************/
+/* Compute the strongly connected components of a graph.              */
+/* Input: a graph with nodes N and edges E.                           */
+/* Output: a graph with nodes N and edges                             */
+/*   { (n1,n2) | n1 and n2 are in the same SCC of the input graph }   */
+/* We consider every node to be connected to itself, so every node    */
+/* is a member of a SCC.                                              */
+/* This is approximately algorith digraph of the Pennello and DeRemer */
+/* paper, "Efficient Computation of LALR(1) Look-Ahead Sets"          */
+/**********************************************************************/
+static void
+traverse(graph_t<`a> input, graph_t<`a> @output,
+         Dict::dict_t<`a,unsigned int> @N, List::list_t<`a> @S,
+         `a x, unsigned int k) {
+  *S = new List::List(x,*S);
+  *N = Dict::insert(*N,x,k);
+  for (let targets = get_targets(input,x); !Set::is_empty(targets); ) {
+    let y = Set::choose(targets);
+    targets = Set::delete(targets,y);
+    if (Dict::lookup(*N,y) == 0)
+      traverse(input,output,N,S,y,k+1);
+    let Ny = Dict::lookup(*N,y);
+    if (Ny < Dict::lookup(*N,x))
+      *N = Dict::insert(*N,x,Ny);
+  }
+  if (Dict::lookup(*N,x) == k) {
+    let cmp = (*output).rel;
+    let component = Set::empty(cmp);
+    for (let s = *S; s; s = s->tl) {
+      let top = s->hd;
+      component = Set::insert(component,top);
+      if (cmp(top,x) == 0) break;
+    }    
+    for (; *S; *S = (*S)->tl) {
+      let top = (*S)->hd;
+      *N = Dict::insert(*N,top,(unsigned int)-1);
+      *output = add_node(*output,top);
+      *output = add_edges(*output,top,component);
+      if (cmp(top,x) == 0) {
+        *S = (*S)->tl;
+        break;
+      }
+    }
+  }
+}
+graph_t<`a> scc(graph_t<`a> input) {
+  let cmp = input.rel;
+  let edges = Dict::to_list(input);
+  let output = empty(cmp);
+  let S = NULL;
+  Dict::dict_t<`a,unsigned int> N = Dict::empty(cmp);
+  for (let e = edges; e; e = e->tl) {
+    let &$(x,_) = e->hd;
+    N = Dict::insert(N,x,(unsigned int)0);
+  }
+  for (let e = edges; e; e = e->tl) {
+    let &$(x,_) = e->hd;
+    if (Dict::lookup(N,x) == 0)
+      traverse(input,&output,&N,&S,x,1);
+  }
+  return output;
+}
+
+/* Topological sort, based on the above SCC algorithm. */
+static void
+tsort0(graph_t<`a> input, List::list_t<`a> @output,
+       Dict::dict_t<`a,unsigned int> @N, List::list_t<`a> @S,
+       `a x, unsigned int k) {
+  *S = new List::List(x,*S);
+  *N = Dict::insert(*N,x,k);
+  for (let targets = get_targets(input,x); !Set::is_empty(targets); ) {
+    let y = Set::choose(targets);
+    targets = Set::delete(targets,y);
+    if (Dict::lookup(*N,y) == 0)
+      tsort0(input,output,N,S,y,k+1);
+    let Ny = Dict::lookup(*N,y);
+    if (Ny < Dict::lookup(*N,x))
+      *N = Dict::insert(*N,x,Ny);
+  }
+  if (Dict::lookup(*N,x) == k) {
+    let cmp = input.rel;
+    let component = Set::empty(cmp);
+    for (let s = *S; s; s = s->tl) {
+      let top = s->hd;
+      component = Set::insert(component,top);
+      if (cmp(top,x) == 0) break;
+    }    
+    for (; *S; *S = (*S)->tl) {
+      let top = (*S)->hd;
+      *N = Dict::insert(*N,top,(unsigned int)-1);
+      *output = new List::List(top,*output);
+      if (cmp(top,x) == 0) {
+        *S = (*S)->tl;
+        break;
+      }
+    }
+  }
+}
+List::list_t<`a> tsort(graph_t<`a> input) {
+  let cmp = input.rel;
+  let edges = Dict::to_list(input);
+  let output = NULL;
+  let S = NULL;
+  Dict::dict_t<`a,unsigned int> N = Dict::empty(cmp);
+  for (let e = edges; e; e = e->tl) {
+    let &$(x,_) = e->hd;
+    N = Dict::insert(N,x,(unsigned int)0);
+  }
+  for (let e = edges; e; e = e->tl) {
+    let &$(x,_) = e->hd;
+    if (Dict::lookup(N,x) == 0)
+      tsort0(input,&output,&N,&S,x,1);
+  }
+  output = List::imp_rev(output);
+  return output;
+}
