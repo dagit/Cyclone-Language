@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Tue Dec 11 11:43:15 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 265,382 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -167,7 +167,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/getopt.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/getopt.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -195,7 +195,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/l
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c sparc-sun-solaris2.7/lib/in.c
 *** i686-unknown-linux/lib/in.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/in.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/in.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -225,7 +225,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c sparc-sun-solaris2.7/lib/i
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c sparc-sun-solaris2.7/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/inet.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/inet.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -255,7 +255,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c sparc-sun-solaris2.7/lib
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c sparc-sun-solaris2.7/lib/marshal.c
 *** i686-unknown-linux/lib/marshal.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/marshal.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/marshal.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 539,547 ****
   _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp166[ 0]=({ struct Cyc_Core_Failure_struct
@@ -279,7 +279,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c sparc-sun-solaris2.7/
   _LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c sparc-sun-solaris2.7/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/netdb.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/netdb.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -309,7 +309,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c sparc-sun-solaris2.7/li
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c sparc-sun-solaris2.7/lib/socket.c
 *** i686-unknown-linux/lib/socket.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/socket.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/socket.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -339,7 +339,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c sparc-sun-solaris2.7/l
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c sparc-sun-solaris2.7/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/stat.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/stat.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -367,7 +367,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c sparc-sun-solaris2.7/lib
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c sparc-sun-solaris2.7/lib/time.c
 *** i686-unknown-linux/lib/time.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/time.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/time.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -409,7 +409,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c sparc-sun-solaris2.7/lib
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c sparc-sun-solaris2.7/lib/unistd.c
 *** i686-unknown-linux/lib/unistd.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/unistd.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/lib/unistd.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -498,7 +498,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c sparc-sun-solaris2.7/l
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.7/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Tue Dec 11 11:43:17 2001
---- sparc-sun-solaris2.7/src/buildlib.c	Tue Dec 11 13:57:56 2001
+--- sparc-sun-solaris2.7/src/buildlib.c	Tue Dec 11 16:24:37 2001
 ***************
 *** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
