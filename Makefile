@@ -68,16 +68,16 @@ ifeq ($(HAVE_PTHREAD),yes)
 $(BL)/cyc-lib/%/nogc_pthread.a: build/%/pthread/nogc.a
 	cp -p $< $@
 
-build/%/pthread/gc:
+gc_pthread:
 	cp -r gc $@
 	(cd $@; make clean; ./configure --enable-threads=pthreads --enable-shared=no --enable-cplusplus=no)
 
-.PRECIOUS: build/%/pthread/gc build/%/pthread/gc/.libs/libgc.a
+.PRECIOUS: gc_pthread gc_pthread/.libs/libgc.a
 
-build/%/pthread/gc/.libs/libgc.a: build/%/pthread/gc
+gc_pthread/.libs/libgc.a: gc_pthread
 	$(MAKE) -C $^ libgc.la CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-$(BL)/cyc-lib/%/gc_pthread.a: build/%/pthread/gc/.libs/libgc.a
+$(BL)/cyc-lib/%/gc_pthread.a: gc_pthread/.libs/libgc.a
 	cp -p $< $@
 endif
 
@@ -800,3 +800,6 @@ clean_nogc: clean_test clean_build
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
+ifeq ($(HAVE_PTHREAD),yes)
+	$(RM) -r gc_pthread
+endif
