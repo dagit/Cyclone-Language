@@ -1691,13 +1691,13 @@ loc, void** topt, void* t, struct Cyc_Absyn_Exp* e){ Cyc_Tcutil_check_type( loc,
 te, Cyc_Tcenv_lookup_type_vars( te),( void*) Cyc_Absyn_MemKind, 1, t); Cyc_Tcexp_tcExp(
 te, 0, e);{ void* t2=( void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v;
 if( ! Cyc_Tcutil_silent_castable( te, loc, t2, t)? ! Cyc_Tcutil_castable( te,
-loc, t2, t): 0){ void* _temp846=({ struct Cyc_Std_String_pa_struct _temp849;
-_temp849.tag= Cyc_Std_String_pa; _temp849.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
+loc, t2, t): 0){ Cyc_Tcutil_unify( t2, t);{ void* _temp846=({ struct Cyc_Std_String_pa_struct
+_temp849; _temp849.tag= Cyc_Std_String_pa; _temp849.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ struct Cyc_Std_String_pa_struct _temp848; _temp848.tag= Cyc_Std_String_pa;
 _temp848.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t2);{ void* _temp847[
 2u]={& _temp848,& _temp849}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("cannot cast %s to %s",
 sizeof( unsigned char), 21u), _tag_arr( _temp847, sizeof( void*), 2u));}}}); Cyc_Tcutil_explain_failure();
-return _temp846;} return t;}} static void* Cyc_Tcexp_tcAddress( struct Cyc_Tcenv_Tenv*
+return _temp846;}} return t;}} static void* Cyc_Tcexp_tcAddress( struct Cyc_Tcenv_Tenv*
 te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp* e){
 void** _temp850= 0; struct Cyc_Absyn_Tqual _temp851= Cyc_Absyn_empty_tqual();
 if( topt !=  0){ void* _temp852= Cyc_Tcutil_compress(*(( void**) _check_null(

@@ -910,6 +910,8 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
   tcExp(te,NULL,e);
   type_t t2 = e->topt->v;
   if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t)) {
+    // extra unify needed to get the right reason for the failure
+    unify(t2,t);
     let result = expr_err(te,loc,"cannot cast %s to %s",
                           typ2string(t2), typ2string(t));
     explain_failure();

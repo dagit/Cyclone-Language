@@ -29,6 +29,8 @@ BUG FIXES and UNSOUNDNESSES:
   where clauses, when we add threads, we will need to add default cases
   because a thread can change some mutable value that we're looking at
   during the pattern match.  
+  Alternatively, we could do like O'Caml and copy the values out
+  before doing any tests.
 
 * the unifier is a bit too eager about nailing down effects.  The problem
   is that when we do a function call, we need to ensure that the effect
@@ -86,8 +88,7 @@ function declarations are only allowed at top-level.
 * we need to do a bounds check on enum assignments.  Also, the pattern
   matcher assumes that there are no duplicate tags for enums.
 
-* subtyping is broken w.r.t. pointer bounds -- you can cast int@{1} to
-  int@{3}.  The whole sub-typing machinery needs to be re-examined to
+* The whole sub-typing machinery needs to be re-examined to
   make sure that it is sound.  In particular, alignment issues are
   a concern.
 
@@ -102,9 +103,6 @@ function declarations are only allowed at top-level.
 * src/Makefile produces $(OUTPUT_PREFIX)parse_tab.h, but parse.h is
   hardcoded to #include "parse_tab.h", so everything breaks when you
   use a prefix.
-
-* tunion Blah should be shorthand for tunion _ Blah (like pointer
-  types), not tunion `H Blah.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------

@@ -54,10 +54,31 @@ const char ? failure_reason = NULL;
 // low-level specific details.
 void explain_failure() {
   fflush(stderr);
-  fprintf(stderr,"\t%s and \n\t%s\n\t failed to unify.\n",
-          typ2string(t1_failure),typ2string(t2_failure));
-  if (failure_reason != NULL)
-    fprintf(stderr,"\t%s\n",failure_reason);
+  string_t s1 = typ2string(t1_failure);
+  string_t s2 = typ2string(t2_failure);
+  int pos = 8;
+  fprintf(stderr,"\t%s and ",s1);
+  pos += s1.size+5;
+  if (pos >= 80) {
+    fprintf(stderr,"\n\t");
+    pos = 8;
+  }
+  fprintf(stderr,"%s ",s2);
+  pos += s2.size+1;
+  if (pos >= 80) {
+    fprintf(stderr,"\n\t");
+    pos = 8;
+  }
+  fprintf(stderr,"failed to unify. ");
+  pos += 17;
+  if (failure_reason != NULL) {
+    if (pos >= 80) {
+      fprintf(stderr,"\n\t");
+      pos = 8;
+    };
+    fprintf(stderr,"%s",failure_reason);
+  }
+  fprintf(stderr,"\n");
   fflush(stderr);
 }
 

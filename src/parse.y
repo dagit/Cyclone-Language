@@ -1528,8 +1528,9 @@ tunion_specifier:
     }
 | tunion_or_xtunion qual_opt_identifier type_params_opt
     {
+      let rgn = new_evar(new Opt(RgnKind), NULL);
       $$=^$(type_spec(new TunionType(TunionInfo(new
-			UnknownTunion(UnknownTunionInfo($2,$1)), $3, HeapRgn)),
+			UnknownTunion(UnknownTunionInfo($2,$1)), $3, rgn)),
 		       LOC(@1,@3)));
     }
 | tunion_or_xtunion qual_opt_identifier '.' qual_opt_identifier type_params_opt
