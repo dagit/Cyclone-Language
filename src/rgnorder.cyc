@@ -44,7 +44,7 @@ struct RgnPO {
   tvar_t youngest_unresettable; // fact: there always is one
 };
 
-// Note: Evars aren't allowed
+// Note: Evars get constrained to HeapRgn!
 // Note: assumes not resettable
 rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn) {
   let ans = new *po;
@@ -58,6 +58,9 @@ rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn) {
       d = Dict::insert(d,tv,new RgnInfo(eff,false));
     ans->d = d;
     return ans;
+  case &Evar(_,_,_,_):
+    unify(rgn,HeapRgn);
+    fallthru;
   case HeapRgn: 
     ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
     return ans;

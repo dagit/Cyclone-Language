@@ -389,13 +389,7 @@ static void set_cyc_include(string_t<`H> f) {
 }
 
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
-  struct Absynpp::Params params_r;
-
-  if (tc_r) {
-    params_r = Absynpp::cyc_params_r;
-  } else {
-    params_r = Absynpp::c_params_r;
-  }
+  let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
   params_r.expand_typedefs = ! noexpand_r;
   params_r.to_VC = tovc_r;
   params_r.add_cyc_prefix = add_cyc_namespace_r;
@@ -405,19 +399,17 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   params_r.print_all_kinds = print_all_kinds_r;
   params_r.print_all_effects = print_all_effects_r;
 
-  //  fprintf(out_file, "#include \"cyc_include.h\"\n\n");
-  /* Copy cyc_include.h to out_file. */
-  /* FIX: would be better to use open, stat, and read but we don't
-     have all those functions in the library yet. */
+  // Copy cyc_include.h to out_file.
+  // FIX: would be better to use open, stat, and read but we don't
+  // have all those functions in the library yet.
   let cyc_include_f = try_file_open(cyc_include,"r","internal compiler file");
   if (cyc_include_f == NULL) return tds;
-  let cyc_include_fnotnull = (FILE@)cyc_include_f;
   size_t n_read = 1024;
   size_t n_written;
   char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
   while (n_read == 1024) {
-    n_read = fread(buf,1,1024,cyc_include_fnotnull);
-    if (n_read != 1024 && !(feof(cyc_include_fnotnull))) {
+    n_read = fread(buf,1,1024,cyc_include_f);
+    if (n_read != 1024 && !(feof(cyc_include_f))) {
       compile_failure = true;
       fprintf(stderr, "\nError: problem copying cyc_include.h\n");
       fflush(stderr);
@@ -431,7 +423,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
       return tds;
     }
   }
-  fclose(cyc_include_fnotnull);
+  fclose(cyc_include_f);
   
   if (pp_r) {
     Absynpp::set_params(&params_r);
@@ -453,7 +445,7 @@ static void remove_cfiles() {
       remove_file(*(cfiles->hd));
 }
 
-/* Take as input a string, return the list of substrings separated by colons */
+// Take as input a string, return the list of substrings separated by colons
 static list_t<stringptr_t> split_by_char(string_t<`H> s, char c) {
   if (s == NULL) return NULL;
   let result = NULL;
@@ -479,7 +471,7 @@ static bool file_exists(string_t file) {
   FILE *f = NULL;
   try f = file_open(file,"r"); catch {default: break;}
   if (f == NULL) return false;
-  else { fclose((FILE @)f); return true; }
+  else { fclose(f); return true; }
 }
 
 /* Prints out a list of string pointers */
@@ -705,7 +697,7 @@ static void process_file(string_t<`H> filename) {
     remove_file(preprocfile); // Can't flush warnings after removal
     throw x;
   }
-  file_close((FILE@)in_file);
+  file_close(in_file);
   if (compile_failure) {
     remove_file(preprocfile); // Can't flush warnings after removal
     return;
@@ -736,11 +728,10 @@ static void process_file(string_t<`H> filename) {
     }
     Position::reset_position(interfacefile);
     tds = do_stage("interface checking", do_interface,
-                   new $(te, inter_file, (FILE@) inter_objfile), tds);
-    if (inter_file != NULL) {
-      file_close((FILE @) inter_file);
-    }
-    file_close((FILE @) inter_objfile);
+                   new $(te, inter_file, (FILE @)inter_objfile), tds);
+    if (inter_file != NULL)
+      file_close(inter_file);
+    file_close(inter_objfile);
   }
 
   if (tc_r) goto PRINTC;
@@ -754,7 +745,7 @@ static void process_file(string_t<`H> filename) {
   if (!compile_failure)
     Tcutil::flush_warnings();
   remove_file(preprocfile);
-  if(compile_failure) return;
+  if (compile_failure) return;
   if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
   if (compile_failure) return;
 
@@ -784,7 +775,7 @@ static void process_file(string_t<`H> filename) {
     cfiles = new List(new ((string_t)cfile),cfiles);
     throw x;
   }
-  file_close((FILE @)out_file);
+  file_close(out_file);
   cfiles = new List(new ((string_t)cfile),cfiles); 
   }
 }
@@ -811,8 +802,8 @@ static interface_t read_cycio(string_t<`H> @ n) {
   }
   Position::reset_position(nf); /* in case of parsing problems */
   //printf("reading %s\n", nf);
-  let i = Interface::load((FILE@) f);
-  file_close((FILE@)f);
+  let i = Interface::load(f);
+  file_close(f);
   return i;
 }
 
@@ -1054,7 +1045,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   ccargs = rev(ccargs);
   let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
   libargs = rev(libargs);
-  let libargs_string = str_sepstr(new List(new ((string_t)""),
+  let libargs_string = str_sepstr(new List(new "",
 					   List::map(sh_escape_stringptr,libargs)), " ");
 
   let stdlib;
@@ -1128,11 +1119,11 @@ int main(int argc, string_t<`H> ?`H argv) {
 	  remove_cfiles();
 	  return 1;
 	}
-	Interface::save((interface_t) i, (FILE@)f);
-	file_close((FILE@)f);
+	Interface::save(i, f);
+	file_close(f);
       }
     } else {
-      if(!Interface::is_subinterface(Interface::empty(), (interface_t) i,
+      if(!Interface::is_subinterface(Interface::empty(), i,
 				     new $("empty interface", "global interface"))) {
 	fprintf(stderr,"Error: some objects are still undefined\n");
 	compile_failure = true;
@@ -1140,29 +1131,19 @@ int main(int argc, string_t<`H> ?`H argv) {
 	return 1;
       }
     }
-  } catch {
-  case &Core::Failure(s):
-    printf ("Exception Core::Failure %s\n", s);
-    compile_failure = true;
-    remove_cfiles();
-    return 1;
-  case &Core::Impossible(s):
-    printf ("Exception Core::Impossible %s\n", s);
-    compile_failure = true;
-    remove_cfiles();
-    return 1;
-  case Dict::Absent:
-    printf("Exception Dict::Absent\n");
-    compile_failure = true;
-    remove_cfiles();
-    return 1;
-  case &Invalid_argument(s):
-    printf ("Exception Core::Invalid_argument %s\n", s);
-    compile_failure = true;
-    remove_cfiles();
-    return 1;
-  case _:
-    printf ("Uncaught exception\n");
+  } catch { case e: 
+    switch(e) {
+    case &Core::Failure(s):
+      printf ("Exception Core::Failure %s\n", s); break;
+    case &Core::Impossible(s):
+      printf ("Exception Core::Impossible %s\n", s); break;
+    case Dict::Absent:
+      printf("Exception Dict::Absent\n"); break;
+    case &Core::Invalid_argument(s):
+      printf ("Exception Core::Invalid_argument %s\n", s); break;
+    case _:
+      printf ("Uncaught exception\n"); break;
+    }
     compile_failure = true;
     remove_cfiles();
     return 1;

@@ -359,6 +359,7 @@ static type_t typ_to_c(type_t t) {
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
+    case No_constr:
     case &Eq_constr(Unknown_b): return tagged_arr_typ;
     default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
