@@ -194,6 +194,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("rnew", RNEW, false),
   $("short", SHORT, true),
   $("signed", SIGNED, true),
+  $("__signed__", SIGNED, true),
   $("sizeof", SIZEOF, true),
   $("static", STATIC, true),
   $("struct", STRUCT, true),
@@ -205,11 +206,13 @@ static $(string_t,short,bool) rw_array[] = {
   $("typedef", TYPEDEF, true),
   $("union", UNION, true),
   $("unsigned", UNSIGNED, true),
+  $("__unsigned__", UNSIGNED, true),
   $("using", USING, false),
   $("valueof", VALUEOF, false),
   $("valueof_t", VALUEOF_T, false),
   $("void", VOID, true),
   $("volatile", VOLATILE, true),
+  $("__volatile__", VOLATILE, true),
   $("while", WHILE, true),
 };
 

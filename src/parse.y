@@ -2366,6 +2366,7 @@ initializer_list:
 
 designation:
   designator_list '=' { $$=^$(List::imp_rev($1)); }
+| field_name ':' { $$=^$(new List(new FieldName(new $1),NULL)); } 
 ;
 
 /* NB: returns list in reverse order */
