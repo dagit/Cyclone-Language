@@ -149,7 +149,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
-      if (is_noalias_pointer(t,false) && !is_noalias_path(e,false))
+      if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
 	terr(e->loc,UNIQUE_ERR_MSG);
     }
     return;
@@ -213,8 +213,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(es->hd->topt->v), typ2string(ts->hd));
         explain_failure();
       }
-      if (is_noalias_pointer(ts->hd,false) &&
-	  !is_noalias_path(es->hd,false))
+      if (is_noalias_pointer_or_aggr(ts->hd) &&
+	  !is_noalias_path(es->hd))
 	terr(es->hd->loc,UNIQUE_ERR_MSG);
     }
     if (es != NULL)
@@ -240,7 +240,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Switch_s(e,scs0):
     tcExp(te,NULL,e);
     let t = e->topt->v;
-    if (is_noalias_pointer(t,false) && !is_noalias_path(e,false))
+    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
       terr(e->loc,UNIQUE_ERR_MSG);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,

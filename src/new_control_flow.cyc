@@ -104,6 +104,9 @@ static flow_t<`r> anal_decl(analenv_t<`r>, flow_t<`r>, decl_t);
 static $(flow_t<`r>,absLval_t<`r>) anal_Lexp(analenv_t<`r>, flow_t<`r>, exp_t);//takes all exps!
 static $(flow_t<`r>,absRval_t<`r>) anal_Rexp(analenv_t<`r>, flow_t<`r>, exp_t);
 static $(flow_t<`r>,flow_t<`r>)    anal_test(analenv_t<`r>, flow_t<`r>, exp_t);
+static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
+						  place_t<`r,`r> p,
+						  type_t t);
 
 static cf_stmt_annot_t @ get_stmt_annot(stmt_t s) {
   switch(s->annot) {
@@ -587,6 +590,102 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
   }
 }
 
+// Given place [p] having type [t], if [p] is pointed to by a no-alias
+// pointer or is an aggregate containing no-alias pointers, we add all
+// of the relevant places to the may_consume list.  If the places argument
+// is non-NULL, we return the places by reference.  The caller will
+// invalidate these locations if necessary.  Note that a value can
+// appear on the may_consume list multiple times; this will only be an
+// error in the event the list is actually consumed.
+static consume_t<`r> may_consume_place(analenv_t<`r> env,
+				       consume_t<`r> cinfo,
+				       place_t<`r,`r> place, 
+				       type_t t,
+				       list_t<place_t<`r,`r>,`r> *ps) {
+  let fenv = env->fenv;
+  let places = noalias_ptrs_rec(env, place, t);
+  if (ps != NULL) *ps = places;
+  if (places == NULL) return cinfo;
+#ifdef DEBUG_FLOW
+  let x = places;
+  DEBUG_PRINT(" considering place ");
+  DEBUG_PRINT_F(print_place,place);
+  DEBUG_PRINT("\n");
+  while (x != NULL) {
+    DEBUG_PRINT(" adding ");
+    DEBUG_PRINT_F(print_place,x->hd);
+    DEBUG_PRINT("to may_consume\n");
+    x = x->tl;
+  }
+#endif
+  cinfo.may_consume = List::rmerge(fenv->r,place_cmp, places,
+				   cinfo.may_consume);
+  return cinfo;
+}
+
+// Calls may_consume_place for the expression [e].
+static flow_t<`r> may_consume_exp(analenv_t<`r> env,
+				  flow_t<`r> inflow,
+				  exp_t e) {
+  if (Tcutil::is_noalias_path(e)) {
+    let fenv = env->fenv;
+    let $(_,lval) = anal_Lexp(env,inflow,e);
+    switch ($(lval,inflow)) {
+    case $(PlaceL(place),ReachableFL(outdict,relns,cinfo)): 
+      let c = may_consume_place(env,cinfo,place,e->topt->v,NULL);
+      return ReachableFL(outdict,relns,c);
+    default: return inflow;
+    }
+  }
+  return inflow;
+}
+
+static consume_t<`r> consume_place(analenv_t<`r> env,
+				   place_t<`r,`r> p,
+				   consume_t<`r> cinfo,
+				   flowdict_t<`r> outdict,
+				   Position::seg_t loc) {
+  // see if we are clobbering an unconsumed unique pointer;
+  // signal warning if so
+  if (!Dict::member(cinfo.consumed,p)) {
+    let &Place(root,fs) = p;
+    // only signal a warning if the variable is not uninitialized
+    // and not NULL
+    absRval_t<`r> rval = Zero;
+    if (Dict::lookup_bool(outdict,root,&rval) &&
+	initlevel(outdict,rval)!=NoneIL && rval != Zero) {
+      switch (root) {
+      case &VarRoot(vd):
+	let s = Absynpp::qvar2string(vd->name);
+	if (fs == NULL)
+	  Tcutil::warn(loc,"may clobber unique pointer %s", s);
+	else
+	  Tcutil::warn(loc,"may clobber unique pointer contained in %s", s);
+	break;
+      default:
+	Tcutil::impos("warning locations not for VarRoots");
+      }
+    }
+  }
+    
+  // if we are not in a unordered expression context, we can
+  // remove the root, if present, from consumed set.  We check
+  // the error context to ensure we terminate (otherwise we will
+  // flip-flop in adding/removing a member from the flow on
+  // certain loop-based errors).
+  if (env->all_changed == NULL) {
+#ifdef DEBUG_FLOW
+    if (Dict::member(cinfo.consumed,p)) {
+      DEBUG_PRINT("  assign lhs; unconsumed ");
+      DEBUG_PRINT_F(print_place,p);
+      DEBUG_PRINT("\n");
+    }
+#endif
+    cinfo.consumed = Dict::rdelete(env->fenv->r,cinfo.consumed,p);
+  }
+  return cinfo;
+}
+
 // given an assignment [e] = e2 represented by place [p] in a
 // reachable flow with environment [env], dictionary [outdict], and
 // consume info [cinfo]: adjust the consume status of [p] and [e] in
@@ -596,49 +695,92 @@ static consume_t<`r> consume_assignment(analenv_t<`r> env,
 					consume_t<`r> cinfo,
 					flowdict_t<`r> outdict,
 					exp_t e) {
-  let fenv = env->fenv;
-  // add lhs to consume list if it's unique and is a unique path
-  if (Tcutil::is_noalias_pointer(e->topt->v,false) &&
-      Tcutil::is_noalias_path(e,false)) {
-    DEBUG_PRINT("  assign lhs; adding |%s| to may_consume\n",
-		Absynpp::exp2string(l));
-    cinfo.may_consume = List::rmerge(fenv->r,place_cmp,
-				     rnew(fenv->r) List::List(p,NULL),
-				     cinfo.may_consume);
-    // see if we are clobbering an unconsumed unique pointer;
-    // signal warning if so
-    if (!Dict::member(cinfo.consumed,p)) {
-      let &Place(root,_) = p;
-      // only signal a warning if the variable is not uninitialized
-      // and not NULL
-      absRval_t<`r> rval = Zero;
-      if (Dict::lookup_bool(outdict,root,&rval) &&
-	  initlevel(outdict,rval)!=NoneIL && rval != Zero) {
-	switch (root) {
-	case &VarRoot(vd):
-	  let s = Absynpp::qvar2string(vd->name);
-	  Tcutil::warn(e->loc,"may clobber unique pointer %s", s);
-	  break;
-	default:
-	  Tcutil::impos("warning locations not for VarRoots");
-	}
-      }
-    }
-    
-    // if we are not in a unordered expression context, we can
-    // remove the root, if present, from consumed set.  We check
-    // the error context to ensure we terminate (otherwise we will
-    // flip-flop in adding/removing a member from the flow on
-    // certain loop-based errors).
-    if (env->all_changed == NULL) {
-      let c = Dict::rdelete(fenv->r,cinfo.consumed,p);
-      if (cinfo.consumed.t != c.t)
-	DEBUG_PRINT("  assign lhs; unconsumed |%s|\n",
-		    Absynpp::exp2string(l));
-      cinfo.consumed = c;
+  if (Tcutil::is_noalias_path(e)) {
+    let fenv = env->fenv;
+    // add lhs to consume list if it's unique and is a unique path
+    let ps = NULL;
+    DEBUG_PRINT(" consuming assignment for place ");
+    DEBUG_PRINT_F(print_place,p);
+    DEBUG_PRINT("\n");
+    cinfo = may_consume_place(env, cinfo, p, e->topt->v, &ps);
+    while (ps != NULL) {
+      cinfo = consume_place(env,ps->hd,cinfo,outdict,e->loc);
+      ps = ps->tl;
     }
   }
   return cinfo;
+}
+
+// given an aggregate place [p], and a list of types [ts] for the fields
+// of [p], generate a list of places reachable from [p] that are
+// no-alias pointers.
+static list_t<place_t<`r,`r>,`r>
+noalias_ptrs_aux(analenv_t<`r> env, place_t<`r,`r> p, list_t<type_t> ts) {
+  list_t<place_t<`r,`r>,`r> l = NULL;
+  let &Place(root,fields) = p;
+  for (int fld = 0; ts != NULL; fld++, ts = ts->tl) {
+    let t = ts->hd;
+    if (Tcutil::is_noalias_pointer(t)) {
+      let flds = rappend (env->r, fields, rlist(env->r, fld));
+      l = rmerge (env->r, place_cmp,
+		  rnew(env->r) List(rnew (env->r) 
+				    Place(root,flds),NULL),l);
+    } else {
+      if (is_aggr_type(t)) {
+	let flds = rappend (env->r, fields, rlist(env->r, fld));
+	let p2 = rnew (env->r) Place(root,flds);
+	l = rmerge(env->r,place_cmp,l,noalias_ptrs_rec(env,p2,t));
+      }
+    }
+  }
+  return l;
+}
+
+// given an aggregate place [p] having type [t], generate a list of
+// places reachable from [p] that are no-alias pointers.
+// FIX: make tail-recursive
+static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
+						  place_t<`r,`r> p,
+						  type_t t) {
+  if (Tcutil::is_noalias_pointer(t)) 
+    return rnew (env->r) List(p,NULL);
+
+  switch (Tcutil::compress(t)) {
+  case &TupleType(qts):
+    let ts = NULL;
+    while (qts != NULL) {
+      ts = rnew(env->r) List((*qts->hd)[1],ts);
+      qts = qts->tl;
+    }
+    ts = imp_rev(ts);
+    return noalias_ptrs_aux(env,p,ts);
+  case &AnonAggrType(_,fs):
+    let ts = NULL;
+    while (fs != NULL) {
+      ts = rnew(env->r) List(fs->hd->type,ts);
+      fs = fs->tl;
+    }
+    ts = imp_rev(ts);
+    return noalias_ptrs_aux(env,p,ts);
+  case &AggrType(AggrInfo(KnownAggr(adp),inst_ts)):
+    if ((*adp)->impl == NULL) return NULL;
+    else {
+      let ts = NULL;
+      region rgn {
+	let inst = List::rzip(rgn,rgn,(*adp)->tvs,inst_ts);
+	let x = (*adp)->impl->fields;
+	while (x != NULL) {
+	  ts = rnew(env->r) List(Tcutil::rsubstitute(rgn,inst,x->hd->type),ts);
+	  x = x->tl;
+	}
+      }
+      ts = imp_rev(ts);
+      return noalias_ptrs_aux(env,p,ts);
+    }
+  case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
+    Tcutil::impos("got unknown aggr in is_noalias_aggr");
+  default: return NULL;
+  }
 }
 
 // Note: must deal with try-flow in all "base" cases!!!
@@ -694,21 +836,8 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)): 
-    // If this is a unique pointer, we add it to the may_consume list
-    // The caller will invalidate this location if necessary.  Note that
-    // a value can appear on the may_consume list multiple times; this
-    // will only be an error in the event the list is actually
-    // consumed.
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
-    if (Tcutil::is_noalias_pointer(vd->type,false)) {
-      DEBUG_PRINT("  adding to may_consume\n");
-      let root  = rnew(fenv->r) VarRoot(vd);
-      let place = rnew(fenv->r) Place(root,NULL);
-      cinfo.may_consume = List::rmerge(fenv->r,place_cmp,
-                                       rnew(fenv->r) List::List(place,NULL),
-                                       cinfo.may_consume);
-      inflow = ReachableFL(d,relns,cinfo);
-    }
+    inflow = may_consume_exp(env,inflow,e);
     return $(inflow, Dict::lookup(d, rnew(env->r) VarRoot(vd)));
 
     // Note: none of the primops cause things to escape or do a dereference!
@@ -1029,8 +1158,14 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       return $(ReachableFL(Dict::insert(d2,root,place_val),relns,c), rval);
     }
     
-  case &Address_e(e1): // FIX: support & as a malloc-and-initialize???
+  case &Address_e(e1): // FIX: support & as a malloc-and-initialize???    
+    // MWH: had to call anal_Rexp here to generate the consume info;
+    // to retain the Lexp-only semantics, I just copy the consume info
+    // into the inflow returned from anal_Lexp.
+    let $(f,_) = anal_Rexp(env,inflow,e1);
+    let $(c,_) = save_consume_info(env->fenv,f,false);
     let $(f,l) = anal_Lexp(env,inflow,e1);
+    f = restore_consume_info(f,c);
     switch(l) {
     case UnknownL:   return $(f, NotZeroAll);
     case PlaceL(p): return $(f, rnew(env->r) AddressOf(p));
@@ -1044,8 +1179,9 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,field):
     let $(f,r) = anal_Rexp(env,inflow,e1);
-    // MWH: don't consume unique pointer here, since this isn't a
-    //   pointer, I think ...
+    f = readthrough_unique_rvals(e->loc, f);
+    f = may_consume_exp(env,f,e);
+    // FIX: what to do about tunions and unique sub-elements?
     if(is_union_type(e1->topt->v))
       return $(f,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
     switch (r) {
@@ -1126,6 +1262,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       case &TupleType(tqts):
         switch(rvals->hd) {
         case &Aggregate(rdict): 
+	  f2 = may_consume_exp(env,f2,e);
           unsigned int i = Evexp::eval_const_uint_exp(e2)[0];
           return $(f2,rdict[i]);
         default: throw new Core::Impossible("anal_Rexp: Subscript");

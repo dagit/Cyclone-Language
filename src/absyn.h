@@ -1021,6 +1021,8 @@ namespace Absyn {
   extern aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info);
   // is a type a union-type (anonymous or otherwise)
   extern bool is_union_type(type_t);
+  // is a type an aggregate type (i.e. struct, tuple, etc.)
+  extern bool is_aggr_type(type_t t);
 
   // for testing typerep; temporary
   extern void print_decls(list_t<decl_t>);

@@ -151,8 +151,45 @@ int p(int b) {
 //    mylist_u_t l = e.tl;
 }
 
+// for testing aggregates
+
+struct foo {
+  int *`U x;
+  int *`U y;
+};
+
+void f2(int b) {
+  struct foo f = { unew 1, unew 2 };
+  struct foo g;
+  g = f; // this should consume f.0 and f.1
+//   Core::ufree(f.x); // not allowed
+  Core::ufree(g.x);
+  g.x = NULL;
+  struct foo @ h = new foo(unew 1, unew 2);
+  cycswap(g.x,h->x);
+  $(int *`U, int *`U) tup = $(g.x, g.y);
+  g.x = tup[0];
+  g.y = tup[1];
+}
+
+struct g { int *`U x; int *`U y; };
+struct f { int *`U x; struct g y; };
+
+void f3(int b) {
+  struct f z;
+  z.y.x = unew 1;
+  z.y.y = unew 2;
+  struct g zg = z.y;
+  Core::ufree(zg.x);
+  zg.x = NULL;
+  struct f @pf = new f(unew 1, g(NULL,unew 2));
+  cycswap(zg.x,(pf->y).x);
+  (pf->y).x = NULL;
+}
+
 int main() {
   int *`U v = h(1);
   Core::ufree(v);
   return 0;
 }
+

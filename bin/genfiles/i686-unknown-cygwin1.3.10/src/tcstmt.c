@@ -1004,28 +1004,28 @@ struct _tuple5{struct Cyc_Absyn_Tvar*f1;void*f2;};struct _tuple5*Cyc_Tcutil_make
 struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);void Cyc_Tcutil_check_fndecl_valid_type(
 struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);void
 Cyc_Tcutil_check_type(struct Cyc_Position_Segment*,struct Cyc_Tcenv_Tenv*,struct
-Cyc_List_List*bound_tvars,void*k,int allow_evars,void*);int Cyc_Tcutil_is_noalias_pointer(
-void*t,int must_be_unique);int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*e,
-int must_be_unique);int Cyc_Tcutil_new_tvar_id();int Cyc_Tcutil_is_const_exp(struct
-Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(
-void*t,struct Cyc_List_List*atts);void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,
-struct Cyc_Absyn_Exp*);void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*,void**,
-struct Cyc_Absyn_Exp*);void Cyc_Tcexp_tcTest(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*
-e,struct _dynforward_ptr msg_part);struct _tuple6{struct Cyc_List_List*f1;struct Cyc_List_List*
-f2;};struct Cyc_Tcpat_TcPatResult{struct _tuple6*tvars_and_bounds_opt;struct Cyc_List_List*
-patvars;};struct Cyc_Tcpat_TcPatResult Cyc_Tcpat_tcPat(struct Cyc_Tcenv_Tenv*te,
-struct Cyc_Absyn_Pat*p,void**topt);void Cyc_Tcpat_check_pat_regions(struct Cyc_Tcenv_Tenv*
-te,struct Cyc_Absyn_Pat*p);void Cyc_Tcpat_check_switch_exhaustive(struct Cyc_Position_Segment*,
-struct Cyc_List_List*);int Cyc_Tcpat_check_let_pat_exhaustive(struct Cyc_Position_Segment*,
-struct Cyc_Absyn_Pat*p);void Cyc_Tcpat_check_catch_overlap(struct Cyc_Position_Segment*,
-struct Cyc_List_List*);struct Cyc_CfFlowInfo_VarRoot_struct{int tag;struct Cyc_Absyn_Vardecl*
-f1;};struct Cyc_CfFlowInfo_MallocPt_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;
-};struct Cyc_CfFlowInfo_InitParam_struct{int tag;int f1;void*f2;};struct Cyc_CfFlowInfo_Place{
-void*root;struct Cyc_List_List*fields;};struct Cyc_CfFlowInfo_EqualConst_struct{
-int tag;unsigned int f1;};struct Cyc_CfFlowInfo_LessVar_struct{int tag;struct Cyc_Absyn_Vardecl*
-f1;};struct Cyc_CfFlowInfo_LessSize_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};
-struct Cyc_CfFlowInfo_LessConst_struct{int tag;unsigned int f1;};struct Cyc_CfFlowInfo_LessEqSize_struct{
-int tag;struct Cyc_Absyn_Vardecl*f1;};union Cyc_CfFlowInfo_RelnOp_union{struct Cyc_CfFlowInfo_EqualConst_struct
+Cyc_List_List*bound_tvars,void*k,int allow_evars,void*);int Cyc_Tcutil_is_noalias_path(
+struct Cyc_Absyn_Exp*e);int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*t);int Cyc_Tcutil_new_tvar_id();
+int Cyc_Tcutil_is_const_exp(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e);struct
+Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
+void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);void*Cyc_Tcexp_tcExpInitializer(
+struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);void Cyc_Tcexp_tcTest(struct
+Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Exp*e,struct _dynforward_ptr msg_part);struct
+_tuple6{struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct Cyc_Tcpat_TcPatResult{
+struct _tuple6*tvars_and_bounds_opt;struct Cyc_List_List*patvars;};struct Cyc_Tcpat_TcPatResult
+Cyc_Tcpat_tcPat(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Pat*p,void**topt);void
+Cyc_Tcpat_check_pat_regions(struct Cyc_Tcenv_Tenv*te,struct Cyc_Absyn_Pat*p);void
+Cyc_Tcpat_check_switch_exhaustive(struct Cyc_Position_Segment*,struct Cyc_List_List*);
+int Cyc_Tcpat_check_let_pat_exhaustive(struct Cyc_Position_Segment*,struct Cyc_Absyn_Pat*
+p);void Cyc_Tcpat_check_catch_overlap(struct Cyc_Position_Segment*,struct Cyc_List_List*);
+struct Cyc_CfFlowInfo_VarRoot_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct
+Cyc_CfFlowInfo_MallocPt_struct{int tag;struct Cyc_Absyn_Exp*f1;void*f2;};struct Cyc_CfFlowInfo_InitParam_struct{
+int tag;int f1;void*f2;};struct Cyc_CfFlowInfo_Place{void*root;struct Cyc_List_List*
+fields;};struct Cyc_CfFlowInfo_EqualConst_struct{int tag;unsigned int f1;};struct
+Cyc_CfFlowInfo_LessVar_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_CfFlowInfo_LessSize_struct{
+int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_CfFlowInfo_LessConst_struct{int tag;
+unsigned int f1;};struct Cyc_CfFlowInfo_LessEqSize_struct{int tag;struct Cyc_Absyn_Vardecl*
+f1;};union Cyc_CfFlowInfo_RelnOp_union{struct Cyc_CfFlowInfo_EqualConst_struct
 EqualConst;struct Cyc_CfFlowInfo_LessVar_struct LessVar;struct Cyc_CfFlowInfo_LessSize_struct
 LessSize;struct Cyc_CfFlowInfo_LessConst_struct LessConst;struct Cyc_CfFlowInfo_LessEqSize_struct
 LessEqSize;};struct Cyc_CfFlowInfo_Reln{struct Cyc_Absyn_Vardecl*vd;union Cyc_CfFlowInfo_RelnOp_union
@@ -1118,8 +1118,8 @@ void*)((struct Cyc_Core_Opt*)_check_null(e->topt))->v));{void*_tmp47[2]={& _tmp4
 _tmp4A};Cyc_Tcutil_terr(s0->loc,({const char*_tmp48="returns value of type %s but requires %s";
 _tag_dynforward(_tmp48,sizeof(char),_get_zero_arr_size(_tmp48,41));}),
 _tag_dynforward(_tmp47,sizeof(void*),2));}}});Cyc_Tcutil_explain_failure();}if(
-Cyc_Tcutil_is_noalias_pointer(t,0) && !Cyc_Tcutil_is_noalias_path(e,0))({void*
-_tmp4B[0]={};Cyc_Tcutil_terr(e->loc,({const char*_tmp4C="Cannot consume paths; do swap instead";
+Cyc_Tcutil_is_noalias_pointer_or_aggr(t) && !Cyc_Tcutil_is_noalias_path(e))({
+void*_tmp4B[0]={};Cyc_Tcutil_terr(e->loc,({const char*_tmp4C="Cannot consume paths; do swap instead";
 _tag_dynforward(_tmp4C,sizeof(char),_get_zero_arr_size(_tmp4C,38));}),
 _tag_dynforward(_tmp4B,sizeof(void*),0));});}return;}_LL9: if(_tmpB <= (void*)1)
 goto _LLB;if(*((int*)_tmpB)!= 3)goto _LLB;_tmp10=((struct Cyc_Absyn_IfThenElse_s_struct*)
@@ -1185,9 +1185,9 @@ _check_null(((struct Cyc_Absyn_Exp*)_tmp2A->hd)->topt))->v));{void*_tmp5B[2]={&
 _tmp5D,& _tmp5E};Cyc_Tcutil_terr(s0->loc,({const char*_tmp5C="fallthru argument has type %s but pattern variable has type %s";
 _tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(_tmp5C,63));}),
 _tag_dynforward(_tmp5B,sizeof(void*),2));}}});Cyc_Tcutil_explain_failure();}if(
-Cyc_Tcutil_is_noalias_pointer((void*)_tmp5A->hd,0) && !Cyc_Tcutil_is_noalias_path((
-struct Cyc_Absyn_Exp*)_tmp2A->hd,0))({void*_tmp5F[0]={};Cyc_Tcutil_terr(((struct
-Cyc_Absyn_Exp*)_tmp2A->hd)->loc,({const char*_tmp60="Cannot consume paths; do swap instead";
+Cyc_Tcutil_is_noalias_pointer_or_aggr((void*)_tmp5A->hd) && !Cyc_Tcutil_is_noalias_path((
+struct Cyc_Absyn_Exp*)_tmp2A->hd))({void*_tmp5F[0]={};Cyc_Tcutil_terr(((struct Cyc_Absyn_Exp*)
+_tmp2A->hd)->loc,({const char*_tmp60="Cannot consume paths; do swap instead";
 _tag_dynforward(_tmp60,sizeof(char),_get_zero_arr_size(_tmp60,38));}),
 _tag_dynforward(_tmp5F,sizeof(void*),0));});}if(_tmp2A != 0)({void*_tmp61[0]={};
 Cyc_Tcutil_terr(s0->loc,({const char*_tmp62="too many arguments to explicit fallthru";
@@ -1211,8 +1211,8 @@ void*)3);_tmp66;})),_tmp2E,0);;_pop_region(r);}return;_LL1B: if(_tmpB <= (void*)
 goto _LL1D;if(*((int*)_tmpB)!= 9)goto _LL1D;_tmp2F=((struct Cyc_Absyn_Switch_s_struct*)
 _tmpB)->f1;_tmp30=((struct Cyc_Absyn_Switch_s_struct*)_tmpB)->f2;_LL1C: Cyc_Tcexp_tcExp(
 te,0,_tmp2F);{void*_tmp6B=(void*)((struct Cyc_Core_Opt*)_check_null(_tmp2F->topt))->v;
-if(Cyc_Tcutil_is_noalias_pointer(_tmp6B,0) && !Cyc_Tcutil_is_noalias_path(_tmp2F,
-0))({void*_tmp6C[0]={};Cyc_Tcutil_terr(_tmp2F->loc,({const char*_tmp6D="Cannot consume paths; do swap instead";
+if(Cyc_Tcutil_is_noalias_pointer_or_aggr(_tmp6B) && !Cyc_Tcutil_is_noalias_path(
+_tmp2F))({void*_tmp6C[0]={};Cyc_Tcutil_terr(_tmp2F->loc,({const char*_tmp6D="Cannot consume paths; do swap instead";
 _tag_dynforward(_tmp6D,sizeof(char),_get_zero_arr_size(_tmp6D,38));}),
 _tag_dynforward(_tmp6C,sizeof(void*),0));});{struct _RegionHandle _tmp6E=
 _new_region("r");struct _RegionHandle*r=& _tmp6E;_push_region(r);{struct Cyc_Tcenv_Tenv*

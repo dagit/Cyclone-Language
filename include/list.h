@@ -42,6 +42,10 @@ namespace List {
       [list_t] rather than [struct List].  Note that a [list_t] can be
       empty (NULL) but a [struct List] cannot. */
 
+//   typedef struct List<`a,`r::TR> *`r trlist_t<`a,`r>;
+//   /** A [trlist_t] is the same as a list_t except that the list can
+//       reside in either a normal region or the unique region.  */
+
   typedef struct List<`a,`r> @`r List_t<`a,`r>;
   /** A [List_t] is a non-NULL pointer to a [struct List].  This is
       used much less often than [list_t], however it may be useful

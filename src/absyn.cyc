@@ -841,6 +841,14 @@ bool is_union_type(type_t t) {
   default: return false;
   }
 }
+bool is_aggr_type(type_t t) {
+  switch(Tcutil::compress(t)) {
+  case &TupleType(_):
+  case &AggrType(_):
+  case &AnonAggrType(_,_): return true;
+  default: return false;
+  }
+}
 
   void print_decls(list_t<decl_t> decls) {
     Marshal::print_type(decls_rep,&decls);

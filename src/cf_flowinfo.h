@@ -51,9 +51,11 @@ typedef tunion `r Root root_t<`r>;
 EXTERN_CFFLOW struct Place<`r::R> {
   root_t<`r> root; 
   List::list_t<int,`r> fields; 
-  // projections off the root -- these correspond
-  //to either tuple offsets or field names.  For field names, we use the order
-  //in the struct declaration to determine the index.
+  //the "path" of projections off the root -- these correspond to
+  //either tuple offsets or field names.  For field names, we use the
+  //order in the struct declaration to determine the index.  For
+  //example, x[0][1] would have fields 0 and 1 if x is a tuple, while
+  //x.tl.tl would have fields 1 and 1 if tl was the second field.
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
@@ -190,7 +192,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-  // #define DEBUG_FLOW
+// #define DEBUG_FLOW
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)

@@ -335,6 +335,8 @@ static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   }
 }
 
+// return the result of recursively updating (functionally) the leaves
+// of [old_val] to be [new_val].
 // WARNING: do not use this to clobber with an Esc unless that's the point!
 static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
                                         absRval_t<`r> old_val) {
@@ -347,6 +349,8 @@ static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
   }
 }
 
+// functionally update the entry in dictionary [d] at index [n] with
+// [rval]; return the same dictionary if [rval] is the same as the old value.
 static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d, 
                                        int n, absRval_t<`r> rval) {
   let old_rval = d[n];
@@ -356,6 +360,11 @@ static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d,
   return res;
 }
 
+// performs functional update of [old_val] with [new_val].  When
+// processing an aggregate, it will recursively iterate over the
+// fields [fs], functionally updating entries in the aggregate
+// dictionary [d] as it unwinds, avoiding changes if pointer equality
+// is maintained.
 static absRval_t<`r> insert_place_outer(region_t<`r> r,
                                         list_t<int> fs,
                                         absRval_t<`r> old_val, 
@@ -365,9 +374,9 @@ static absRval_t<`r> insert_place_outer(region_t<`r> r,
   switch($(fs,old_val)) {
   case $(&List(hd,tl),&Aggregate(d)):
     let new_child = insert_place_outer(r,tl,d[hd],new_val);
-    let new_child_agg = aggr_dict_insert(r, d, hd,new_child);
-    if (new_child_agg == d) return old_val;
-    else return rnew(r) Aggregate(new_child_agg);
+    let new_d = aggr_dict_insert(r, d, hd,new_child);
+    if (new_d == d) return old_val;
+    else return rnew(r) Aggregate(new_d);
   default: throw new Core::Impossible("bad insert place");
   }
 }
@@ -755,8 +764,12 @@ static consume_t<`r> or_consume(region_t<`r> r,
   DEBUG_PRINT("in or_consume:\n");
   DEBUG_PRINT("  c1.may_consume = ");
   DEBUG_PRINT_F(print_place_list,c1.may_consume);
+  DEBUG_PRINT("  c1.consume = ");
+  DEBUG_PRINT_F(print_place_set,c1.consumed);
   DEBUG_PRINT("  c2.may_consume = ");
   DEBUG_PRINT_F(print_place_list,c2.may_consume);
+  DEBUG_PRINT("  c2.consume = ");
+  DEBUG_PRINT_F(print_place_set,c2.consumed);
   // merge the may_consume lists
   List::list_t<place_t<`r>,`r> mc = c2.may_consume;
   region temp {
@@ -1231,7 +1244,7 @@ void print_initlevel(initlevel_t il) {
 void print_root(root_t root) {
   switch (root) {
   case &VarRoot(vd): 
-    fprintf(stderr,"Root(%s): ",Absynpp::qvar2string(vd->name)); break;
+    fprintf(stderr,"Root(%s)",Absynpp::qvar2string(vd->name)); break;
   case &MallocPt(e,t):
     fprintf(stderr,"MallocPt(%s,%s)",
 	    Absynpp::exp2string(e),Absynpp::typ2string(t)); break;
@@ -1242,7 +1255,12 @@ void print_root(root_t root) {
 
 void print_place(place_t p) {
   print_root(p->root);
-  if (p->fields != NULL) fprintf(stderr,"+(...)");
+  let x = p->fields;
+  while (x != NULL) {
+    fprintf(stderr,".%d",x->hd);
+    x = x->tl;
+  }
+  fprintf(stderr," ");
 }
 
 void print_place_set(place_set_t p) {
