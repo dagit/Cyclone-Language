@@ -1,0 +1,116 @@
+\section{Varargs}
+
+C functions that take a variable number of arguments (vararg
+functions) are syntactically convenient for the caller, but C makes it
+very difficult to ensure safety.  The callee has no fool-proof way to
+determine the number of arguments or even their types.  Also, there is
+no type information for the compiler to use at call-sites to reject
+bad calls.
+
+Cyclone provides three styles of vararg functions that provide
+different trade-offs for safety, efficiency, and convenience.
+
+First, you can call C vararg functions just as you would in C:
+\begin{verbatim}
+extern "C" void foo(int x, ...);
+void g() { 
+  foo(3, 7, "hi", 'x');
+}
+\end{verbatim}
+However, for the reasons described above, \texttt{foo} is almost
+surely unsafe.  All the Cyclone compiler will do is ensure that the
+vararg arguments at the call site have some legal Cyclone type.
+
+Actually, you can declare a Cyclone function to take C-style varargs,
+but Cyclone provides no way to access the vararg arguments for this
+style.  That is why the example refers to a C function.  (In the
+future, function subtyping could make this style less than completely
+silly for Cyclone functions.)
+
+The second style is for a variable number of arguments of one type:
+\begin{verbatim}
+void foo(int x, ...string_t args);
+void g() {
+  foo(17, "hi", "mom");
+}
+\end{verbatim}
+The syntax is a type and identifer after the ``\texttt{...}''.  (The
+identifier is optional in prototypes, as with other parameters.)  You
+can use any identifier; \texttt{args} is not special.  At the
+call-site, Cyclone will ensure that each vararg has the correct type,
+in this case \texttt{string_t}.
+
+Accessing the varargs is simpler than in C.  Continuing our example,
+\texttt{args} has type \texttt{string_t ? `foo} in the body of
+\texttt{foo}.  You retrieve the first argument (\texttt{"hi"}) with
+\texttt{args[0]}, the second argument (\texttt{"mom"}) with
+\texttt{args[1]}, and so on.  Of course, \texttt{args.size} tells you
+how many arguments there are.
+
+This style is implemented as follows: At the call-site, the compiler
+generates a stack-allocated array with the array elements.  It then
+passes a ``fat pointer'' to the callee with bounds indicating the
+number of elements in the array.  Compared to C-style varargs, this
+style is less efficient because there is a bounds-check and an extra
+level of indirection for each vararg access.  But we get safety and
+using vararg functions is just as convenient.
+
+A very useful example of this style is in the list library:
+\begin{verbatim}
+list_t<`a> list(... `a argv) {
+  list_t result = NULL;
+  for (int i = argv.size - 1; i >= 0; i--) 
+    result = new List{argv[i],result};
+  return result;
+}
+\end{verbatim}
+Callers can now write \texttt{list(1,2,3,4,5)} and get a list of 5
+elements.
+
+The third style addresses the problem that it's often desirable to
+have a function take a variable number of arguments of
+\emph{different} types.  For example, \texttt{printf} works this way.
+In Cyclone, we could use a \texttt{tunion} in conjunction with the
+second style.  The callee then uses an array subscript to access a
+vararg and a switch statement to determine its \texttt{tunion}
+variant.  But this would not be very convenient for the caller---it
+would have to explicitly ``wrap'' each vararg in the \texttt{tunion}
+type.  The third style makes this wrapping implicit.  For example, the
+type of printf in Cyclone is:
+
+\begin{verbatim}
+extern tunion PrintArg<`r::R> {
+  String_pa(const char ?`r);
+  Int_pa(unsigned long);
+  Double_pa(double);
+  ShortPtr_pa(short @`r);
+  IntPtr_pa(unsigned long @`r);
+};
+typedef tunion `r PrintArg<`r> parg_t<`r>;
+printf(const char ?`r fmt, ... inject parg_t<`r2>);
+\end{verbatim}
+
+The special syntax ``\texttt{inject}'' is the syntactic distinction
+for the third style.  The type must be a \texttt{tunion} type.  In the
+body of the vararg function, the array holding the vararg elements has
+this \texttt{tunion} type, with the function's region.  (That is, the
+wrappers are stack-allocated just as the vararg array is.)
+
+At the call-site, the compiler implicitly wraps each vararg by finding
+a \texttt{tunion} variant that has the expression's type and using
+it.  The exact rules for finding the variant are as follows:  Look in
+order for a variant that carries exactly the type of the expression.
+Use the first variant that matches.  If none, make a second pass and
+find the first variant that carries a type to which the expression can
+be coerced.  If none, it is a compile-time error.
+
+In practice, the \texttt{tunion} types used for this style of vararg
+tend to be quite specialized and used only for vararg purposes.
+
+Compared to the other styles, the third style is less efficient
+because the caller must wrap and the callee unwrap each argument.  But
+everything is allocated on the stack and call sites do everything
+implicitly.  A testament to the style's power is the library's
+implementation of printf and scanf entirely in Cyclone (except for the
+actual I/O system calls, of course).
+
