@@ -32,6 +32,15 @@ else
   CYCDIR=`pwd`
 fi
 
+# Decide on a built-in command to find commands.  In ksh this is
+#  command -v and in bash it is type -p.  The 'which' command is
+#  giving me trouble on solaris so I resort to this.
+if [ $BASH = "" ]; then # ksh
+  WHICH='command -v'
+else
+  WHICH='type -p'
+fi
+
 ###########################################################################
 # functions to find appropriate helper programs
 #
@@ -88,7 +97,7 @@ function get_cc {
     CC="cc -no-cpp-precomp"
   else
     for comp in gcc cc; do
-      CC=`type -p $comp 2> /dev/null`
+      CC=`$WHICH $comp 2> /dev/null`
       if [ -n "$CC" -a -x "$CC" ]; then
         CC=$comp
         break
