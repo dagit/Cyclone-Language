@@ -1489,7 +1489,7 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
                          typedef_name_t tdn) {
   let x    = temp_var();
   let xexp = var_exp(x,DL);
-  let s    = exp_stmt(xexp,DL);
+  let s    = exp_stmt(copy_exp(xexp),DL);
 
   let lval_f = pointer ? aggrarrow_exp : aggrmember_exp;
   let aggr_typ = aggrdecl_type(tdn,strctq);
@@ -2714,7 +2714,7 @@ DynCast:
       default: break;
       }
       if(!done) {
-	let s = exp_stmt(xexp,DL);
+	let s = exp_stmt(copy_exp(xexp),DL);
 	let e_index = signed_int_exp(0,DL);
 	exp_to_c(nv,e1);
 	s = seq_stmt(assign_stmt(subscript_exp(xexp,e_index,DL),
